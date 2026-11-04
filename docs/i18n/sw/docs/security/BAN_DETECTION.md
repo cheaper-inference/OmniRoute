@@ -58,8 +58,8 @@ haurejei kiotomatiki kamwe), ilhali mwendeshaji huondoa kidokezo cha uthibitisha
 Kuweka kirai hicho katika orodha ya marufuku pia kulifanya tawi la 403 la cloud-code linaloweza
 kurekebishwa katika `classifyProviderError` lisifikiwe kwa maneno haya, kwa sababu `accountDeactivated`
 hutathminiwa kwanza — kwa hivyo urejeshaji wa njia ya mradi ulioongezwa kwa Gemini Code Assist katika
-[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) na
-[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) usingeweza kamwe kutekelezwa.
+[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) na
+[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) usingeweza kamwe kutekelezwa.
 
 Majedwali matatu yaliyo karibu, lakini **tofauti**, ya ishara _si_ sehemu ya utambuzi wa maneno muhimu ya marufuku:
 

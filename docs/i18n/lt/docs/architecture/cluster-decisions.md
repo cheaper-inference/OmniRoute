@@ -6,7 +6,7 @@
 
 **Būsena:** pasiūlymas (laukiama @diegosouzapw peržiūros)
 **Data:** 2026-06-20
-**Nuorodos:** [#3932](https://github.com/diegosouzapw/OmniRoute/issues/3932), PR #4381
+**Nuorodos:** [#3932](https://github.com/cheaper-inference/OmniRoute/issues/3932), PR #4381
 
 ## Trumpai
 

@@ -469,7 +469,7 @@ codex debug models --bundled       # вывести каталог встрое�
 | Сеанс постоянно переключает учётные записи / непрерывность кэша промптов теряется между ходами | TTL привязки сеанса равен `0` (отключено)                                                       | `sessionAffinityTtlMs`   |
 | Соединение обрывается в процессе рассуждения без видимого клиенту уведомления                  | Сторожевой таймер простоя потока сработал после 10 минут без фрагментов от вышестоящего сервера | `STREAM_IDLE_TIMEOUT_MS` |
 
-Связанные обсуждения: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (обрывы длительных задач), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (почему привязка по умолчанию отключена). Отслеживание: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Связанные обсуждения: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (обрывы длительных задач), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (почему привязка по умолчанию отключена). Отслеживание: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. Привязка сеанса — закрепление одного диалога за одной учётной записью
 

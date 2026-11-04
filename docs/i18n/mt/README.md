@@ -45,9 +45,9 @@
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=social)](https://github.com/cheaper-inference/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/OmniRoute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 Ingħaqad mal-komunità
@@ -96,7 +96,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 [![Liċenzja: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Downloads ta' Docker](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Downloads ta' Electron](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![Downloads ta' Electron](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -521,7 +521,7 @@ L-**20** strateġija kollha — ħallat u qabbel f’kull pass tal-combo:
 OmniRoute huwa liċenzjat taħt MIT u miżmum b’mod miftuħ. Jekk jiffrankalek il-ħin jew il-flus, hawn kif tista’ tgħinu jibqa’ indipendenti — agħżel dak li jaqbillek. L-isponsorizzazzjoni qatt ma taffettwa l-prijorità tar-routing; tixtri viżibbiltà, mhux klassifikazzjoni.
 
 <table>
-  <tr><td nowrap>⭐ <b>Agħti stilla lir-repożitorju</b></td><td>Bla ħlas — tassew jgħin il-viżibbiltà</td><td><a href="https://github.com/diegosouzapw/OmniRoute">Agħti stilla lil OmniRoute</a></td></tr>
+  <tr><td nowrap>⭐ <b>Agħti stilla lir-repożitorju</b></td><td>Bla ħlas — tassew jgħin il-viżibbiltà</td><td><a href="https://github.com/cheaper-inference/OmniRoute">Agħti stilla lil OmniRoute</a></td></tr>
   <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>Ta’ darba jew kull xahar · ebda tariffa tal-pjattaforma</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
   <tr><td nowrap>☕ <b>Ko-fi</b></td><td>Donazzjoni ta’ darba u malajr, mingħajr reġistrazzjoni għad-donatur</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
   <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>Ġest żgħir u informali</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
@@ -558,7 +558,7 @@ Pix biex tikkopja u twaħħal:
 
 </details>
 
-🐛 Sibt bug jew għandek kummenti? Iftaħ [Diskussjoni](https://github.com/diegosouzapw/OmniRoute/discussions).
+🐛 Sibt bug jew għandek kummenti? Iftaħ [Diskussjoni](https://github.com/cheaper-inference/OmniRoute/discussions).
 
 <br/>
 
@@ -1254,7 +1254,7 @@ istess proċess fuq port wieħed, għalhekk bħalissa m’hemm l-ebda pakkett se
 
 Metriċi kanoniċi fl-2026-10-18: **1.976 vidjo uniku** · **20.220.289 darba magħrufa li ntwerew** (`v > 0`) · **1.210 kanali/profili għal kull netwerk**. Il-pannell mhux ipproċessat fih 1.976 ringiela (YouTube 1.352 = 740 twal + 612 Shorts · TikTok 334 · Instagram 290); ma baqa’ ebda duplikat wara n-normalizzazzjoni skont il-URL kanoniku, li żżomm l-ogħla għadd għal kull vidjo. Il-ġbir minn YouTube ilu ffriżat mill-2026-10-13 (il-kwota tal-API ntużat kollha mill-14 sat-18/10) u dak minn TikTok/Instagram ilu ffriżat mill-2026-09-02 (mingħajr krediti għall-ġbir); 76 vidjo għad m’għandhomx għadd ta’ kemm-il darba ntwerew.
 
-> 🎬 **Għamilt vidjo dwar OmniRoute?** Iftaħ [issue](https://github.com/diegosouzapw/OmniRoute/issues/new) jew [discussion](https://github.com/diegosouzapw/OmniRoute/discussions) bil-link — se nuruh hawnhekk.
+> 🎬 **Għamilt vidjo dwar OmniRoute?** Iftaħ [issue](https://github.com/cheaper-inference/OmniRoute/issues/new) jew [discussion](https://github.com/cheaper-inference/OmniRoute/discussions) bil-link — se nuruh hawnhekk.
 
 <br/>
 
@@ -1274,8 +1274,8 @@ Metriċi kanoniċi fl-2026-10-18: **1.976 vidjo uniku** · **20.220.289 darba ma
 | 🟢 **WhatsApp — 🇧🇷 Brażil**                 | [ingħaqad mal-grupp](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                         |
 | 🌍 **Sit web**                              | [omniroute.online](https://omniroute.online)                                                                                  |
 | 🌍 **🌍Komunità StHub OmniRoute (b’xejn)**  | [portal StHub](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                         |
-| 📦 **Kodiċi sors**                          | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                                |
-| 🐛 **Irrapporta bug**                       | [iftaħ issue](https://github.com/diegosouzapw/OmniRoute/issues) — ehmeż l-output ta’ `npm run system-info`                    |
+| 📦 **Kodiċi sors**                          | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                                      |
+| 🐛 **Irrapporta bug**                       | [iftaħ issue](https://github.com/cheaper-inference/OmniRoute/issues) — ehmeż l-output ta’ `npm run system-info`               |
 | 🤝 **Ikkontribwixxi**                       | [CONTRIBUTING.md](CONTRIBUTING.md) · [Mudell tal-Fergħat u tal-Ħruġ](docs/ops/BRANCHING_MODEL.md) · agħżel `good first issue` |
 | 💚 **Appoġġja l-proġett**                   | [Modi kif tappoġġja ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)                     |
 
@@ -1633,7 +1633,7 @@ Ringrazzjament mill-qalb lil dawk li jiffinanzjaw lil OmniRoute minn buthom stes
 
 </div>
 
-[![Kontributuri](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Kontributuri](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
 
 <sub>Awditjat fit-2026-11-02 fuq il-ponta attiva ta' <code>release/v3.8.53</code> <code>1c7135e0fb</code> (7,972 commit): <b>1,074 identità umani normalizzati ta' Git</b> — 759 jidhru bħala awturi tal-commit (inkluż il-mantenitur) u 315 jidhru biss f'headers espliċiti <code>Co-authored-by</code>. Iċ-ċensiment japplika <code>.mailmap</code>, iqabbel l-indirizzi tal-posta elettronika mingħajr ma jqis il-majuskoli u l-minuskoli, jgħaqqad l-indirizzi numeriċi u sempliċi ta' GitHub noreply biss meta jikkodifikaw l-istess handle, jeskludi 29 identità ta' bot/aġent/servizz/placeholder, u ma jgħaqqadx indirizzi ordinarji tal-posta elettronika sempliċement għax l-ismijiet murija tagħhom jaqblu. L-awditjar tal-2026-08-24 ippubblika 639; meta dan il-metodu jerġa' jitħaddem fuq il-bażi ta' dak l-awditjar <code>ac02c5b42f</code>, jagħti 619, għalhekk iż-żieda ġejja minn kontributuri ġodda, mhux minn metodu aktar laxk.</sub>
 
@@ -1662,11 +1662,11 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 ## 📊 Stilel
 
-<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="Grafika tal-Istorja tal-Istilel" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <img alt="Grafika tal-Istorja tal-Istilel" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
  </picture>
 </a>
 

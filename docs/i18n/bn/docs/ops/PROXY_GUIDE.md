@@ -259,7 +259,7 @@ curl -X POST http://localhost:20128/api/v1/management/proxies/bulk-assign \
 
 ## 1proxy বিনামূল্যের প্রক্সি মার্কেটপ্লেস
 
-> 🆕 **[@oyi77](https://github.com/oyi77) কর্তৃক অবদানকৃত** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (ইস্যু [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕 **[@oyi77](https://github.com/oyi77) কর্তৃক অবদানকৃত** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (ইস্যু [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
 
 বিশ্বজুড়ে **শত শত বিনামূল্যের, যাচাইকৃত প্রক্সিতে** প্রবেশাধিকার দিতে OmniRoute **[1proxy](https://1proxy-api.aitradepulse.com)** কমিউনিটি প্ল্যাটফর্মের সঙ্গে ইন্টিগ্রেট করে। যেসব ব্যবহারকারীর নিজস্ব প্রক্সি অবকাঠামো নেই, তাঁদের জন্য এটি আদর্শ।
 

@@ -9,7 +9,7 @@
 Ako otkrijete sigurnosnu ranjivost u OmniRouteu, prijavite je na odgovoran način:
 
 1. **NEMOJTE** otvarati javni GitHub problem
-2. Upotrijebite [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
+2. Upotrijebite [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
 3. Uključite: opis, korake za reprodukciju i mogući utjecaj
 
 ## Vremenski okvir odgovora
@@ -42,7 +42,7 @@ grani `stable/v3` (pogledajte [`ROADMAP.md`](ROADMAP.md) → „Faza 3 — v3.9.
   ovisno o tome što nastupi kasnije**. Konačni datum završetka bilježi se u napomenama uz izdanje 3.9.0 i u
   datoteci [`ROADMAP.md`](ROADMAP.md) kada se izdanje objavi.
 - **Prijava ranjivosti u LTS liniji:** upotrijebite isti kanal kao i za svaku drugu verziju —
-  privatno [GitHubovo sigurnosno upozorenje](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
+  privatno [GitHubovo sigurnosno upozorenje](https://github.com/cheaper-inference/OmniRoute/security/advisories/new),
   nikada javnu prijavu problema. Navedite koju ste verziju testirali (primjerice `3.9.2`); ispravke se primjenjuju na
   `stable/v3` i prenose unaprijed u v4.
 - **Sigurnosna polazna osnova pri objavi LTS-a:** izmjereno stanje skenera, dokazi o zaštiti ruta i

@@ -328,7 +328,7 @@ Ponašanje memorije u Dockeru:
 
 ### RAM tokom izvršavanja za agente za kodiranje
 
-Dockerova zadana vrijednost od 1 GiB predstavlja minimum za kontrolnu ploču i lagani razgovor, a ne veličinu za produkciju. Duga tijela zahtjeva `POST /v1/responses` (stotine poruka, deseci alata) zadržavaju više grafova u memoriji tokom kompresije. Dva preklapajuća zahtjeva veličine ~3 MiB / ~750k tokena uzrokovala su prekid V8 procesa pri **12 GiB** old-space memorije (`FATAL ERROR: Reached heap limit`) i također dostigla OOM ograničenje cgroupa od 16 GiB. Pogledajte [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Dockerova zadana vrijednost od 1 GiB predstavlja minimum za kontrolnu ploču i lagani razgovor, a ne veličinu za produkciju. Duga tijela zahtjeva `POST /v1/responses` (stotine poruka, deseci alata) zadržavaju više grafova u memoriji tokom kompresije. Dva preklapajuća zahtjeva veličine ~3 MiB / ~750k tokena uzrokovala su prekid V8 procesa pri **12 GiB** old-space memorije (`FATAL ERROR: Reached heap limit`) i također dostigla OOM ograničenje cgroupa od 16 GiB. Pogledajte [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Postavite **cgroup `--memory` iznad veličine heapa** — izvorni međuspremnici, SQLite i međurezultati kompresije nalaze se izvan V8.
 
@@ -703,7 +703,7 @@ spec:
 
 `preStop` sleep omogućava kube-u da ispusti krajnje tačke usluge prije SIGTERM a** novo** saobraćaj prestaje da utiče na proces odumiranja. U toku leta `/v1/responses` SSE se iscrpljuje do `SHUTDOWN_TIMEOUT_MS` (podrazumevano 30s) putem zakupa teške kategorije (#11015). Novi zahtjevi koji još uvijek stignu do procesa dobivaju `503` + `Retry-After: 5`. Ponovo kreiraj prazninu krajnje tačke dok zamena ne bude spremna ostaje težak prekid — to je SQLite topologija, a ne pogrešna konfiguracija sonde.
 
-Vanjski Postgres / multi-pisač HA je** ne** dokumentovani put zaliha. Ako vam je potreban HA, zadržite jednu repliku ili pokrenite topologiju koju je projekat testirao i dokumentovao zasebno. Postgres/MySQL rad živi u [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Dok se to ne isporuči, jedini podržani način množenja** veliki** `/v1/responses` kapacitet je N nezavisnih procesa (sljedeći odjeljak), a ne `replicas > 1` na jednom volumenu.
+Vanjski Postgres / multi-pisač HA je** ne** dokumentovani put zaliha. Ako vam je potreban HA, zadržite jednu repliku ili pokrenite topologiju koju je projekat testirao i dokumentovao zasebno. Postgres/MySQL rad živi u [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Dok se to ne isporuči, jedini podržani način množenja** veliki** `/v1/responses` kapacitet je N nezavisnih procesa (sljedeći odjeljak), a ne `replicas > 1` na jednom volumenu.
 
 ## Scale-out: N nezavisnih procesa
 
@@ -713,11 +713,11 @@ Kopije jednog Codex naloga ne smiju samostalno konzumirati njegov token za osvje
 
 Pasivna instanca ponovo čita vezu kada je potrebno osvježavanje i usvaja samo drugačiji, neistekli pristupni token. U suprotnom je osvježavanje onemogućeno bez isteka ili deaktiviranja veze ili računanja neuspjeha prekidača osvježavanja. Pravi kvarovi uzvodne autentifikacije i dalje koriste uobičajeno obračunavanje grešaka, eksponencijalno hlađenje i normalnu grešku klijenta; deaktivacija računa ostaje trajna. Sinhronizirajte vlasničke rotirane tokene prije isteka tokena pristupa (podrazumevano proaktivno osvježavanje je pet minuta) ili ponovo uvezite Codex auth datoteku. Pasivni uvozi pohranjuju isporučene tokene bez njihove validacije na krajnjoj točki tokena. Ručno dashboard/API osvježavanje vraća `409 refresh_disabled`; nove OAuth prijave su nepromijenjene. Vidi [referencu okoline](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Proces One Node je** jedna V8 hrpa** . Dva preklapajuća ~ 3 MiB / ~ 750k-token kodirajući agent `POST /v1/responses` (RTK + Caveman) prekidaju tu hrpu na ~ 12 Gi (`FATAL ERROR: Reached heap limit`) i mogu OOM cgrupu od 16 Gi. Vidi [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). To mjerenje je a** memorijski budžet** upozorenje, nije proizvod hard-max od dva istodobna duga `/v1/responses`. Prijem teškog chata je ograničen automatski izvedenim budžetom za unos bajtova (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) veličine istog V8/cgroup stropa — koji ga nadjačava (ili postavlja naslijeđeno `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ograničenje broja zahtjeva) na procesu već veličine ponovo uvodi prekid. Mali razgovori, `/healthz`, `/v1/models` i MCP su** ne** u toj kapi.
+Proces One Node je** jedna V8 hrpa** . Dva preklapajuća ~ 3 MiB / ~ 750k-token kodirajući agent `POST /v1/responses` (RTK + Caveman) prekidaju tu hrpu na ~ 12 Gi (`FATAL ERROR: Reached heap limit`) i mogu OOM cgrupu od 16 Gi. Vidi [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). To mjerenje je a** memorijski budžet** upozorenje, nije proizvod hard-max od dva istodobna duga `/v1/responses`. Prijem teškog chata je ograničen automatski izvedenim budžetom za unos bajtova (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) veličine istog V8/cgroup stropa — koji ga nadjačava (ili postavlja naslijeđeno `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ograničenje broja zahtjeva) na procesu već veličine ponovo uvodi prekid. Mali razgovori, `/healthz`, `/v1/models` i MCP su** ne** u toj kapi.
 
 ### Jedan proces: više od dva duga `/v1/responses`
 
-A** zdravo** proces (gomila ispod `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, default `0.75`)** svibanj** pokrenite više od dva istovremena duga `POST /v1/responses` kada budžet inflight bajtova za cijeli proces (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) još uvijek ima mjesta. Tijela na ili iznad `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (podrazumevano 256 KiB) uzimaju isti zakup teške kategorije kao i zahtjevi za teške strukture i koriste isti [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Desetine istovremenih dugih SSE klijenata (operaterima je često potrebno 40-50) je a** memorijski budžet** pitanje — veličina hrpe + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — nije tvrdo ograničenje proizvoda od “max 2”. Pritisnuta hrpa se i dalje raspršuje sa `503` koji se može ponoviti tako da se #7849 ne vraća.
+A** zdravo** proces (gomila ispod `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, default `0.75`)** svibanj** pokrenite više od dva istovremena duga `POST /v1/responses` kada budžet inflight bajtova za cijeli proces (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) još uvijek ima mjesta. Tijela na ili iznad `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (podrazumevano 256 KiB) uzimaju isti zakup teške kategorije kao i zahtjevi za teške strukture i koriste isti [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Desetine istovremenih dugih SSE klijenata (operaterima je često potrebno 40-50) je a** memorijski budžet** pitanje — veličina hrpe + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — nije tvrdo ograničenje proizvoda od “max 2”. Pritisnuta hrpa se i dalje raspršuje sa `503` koji se može ponoviti tako da se #7849 ne vraća.
 
 To** umnožiti hrpe** (nezavisni V8 stari prostori)** danas** :
 
@@ -760,7 +760,7 @@ volumes:
   omniroute-b-data:
 ```
 
-Gustoća u procesu (kompresija sa HTTP izolata) je [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Jedan logički klaster na zajedničkom trajnom stanju je [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+Gustoća u procesu (kompresija sa HTTP izolata) je [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Jedan logički klaster na zajedničkom trajnom stanju je [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
 ## Gemini regionalne greške unutar Dockera
 
@@ -801,7 +801,7 @@ bez autentifikacije; samo autentificirani zahtjev prema modelu testira podobnost
 
 ### Alternativa na nivou hosta: funkcionalan IPv6 i politika razrješivača
 
-Autor prijave [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) obnovio je
+Autor prijave [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) obnovio je
 pristup u svom okruženju omogućavanjem IPv6 podrške za kontejnere i promjenom glibc odabira
 adresa. Ovo tretirajte kao alternativu specifičnu za okruženje. Potvrdite ispravan rad IPv6-a
 na hostu, izlazno povezivanje/usmjeravanje kontejnera i pravila vatrozida prije prilagođavanja postavki razrješivača.

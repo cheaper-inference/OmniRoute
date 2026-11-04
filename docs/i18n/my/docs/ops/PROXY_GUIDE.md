@@ -259,7 +259,7 @@ Proxy registry သည် **host+port ဖြင့် upsert လုပ်ခြ�
 
 ## 1proxy အခမဲ့ Proxy စျေးကွက်
 
-> 🆕 **[@oyi77](https://github.com/oyi77) မှ ပါဝင်ပံ့ပိုးထားသည်** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Issue [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕 **[@oyi77](https://github.com/oyi77) မှ ပါဝင်ပံ့ပိုးထားသည်** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Issue [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
 
 OmniRoute သည် ကမ္ဘာတစ်ဝန်းမှ **အခမဲ့ဖြစ်ပြီး စစ်ဆေးအတည်ပြုထားသော proxy ရာပေါင်းများစွာ** ကို အသုံးပြုနိုင်ရန် **[1proxy](https://1proxy-api.aitradepulse.com)** ကွန်မြူနတီပလက်ဖောင်းနှင့် ပေါင်းစပ်ထားသည်။ ကိုယ်ပိုင် proxy အခြေခံအဆောက်အအုံမရှိသော အသုံးပြုသူများအတွက် အထူးသင့်လျော်သည်။
 

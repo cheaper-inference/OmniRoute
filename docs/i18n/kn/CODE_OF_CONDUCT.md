@@ -66,7 +66,7 @@
 ನಿಂದನಾತ್ಮಕ, ಕಿರುಕುಳ ನೀಡುವ ಅಥವಾ ಬೇರೆ ರೀತಿಯಲ್ಲಿ ಸ್ವೀಕಾರಾರ್ಹವಲ್ಲದ ನಡವಳಿಕೆಯ
 ಘಟನೆಗಳನ್ನು, ಕೆಳಗಿನ ವಿಳಾಸದಲ್ಲಿ ಖಾಸಗಿ ಭದ್ರತಾ ಸಲಹೆಯನ್ನು ತೆರೆಯುವ ಮೂಲಕ
 ಜಾರಿಗೊಳಿಸುವಿಕೆಯ ಜವಾಬ್ದಾರಿಯುಳ್ಳ ಸಮುದಾಯದ ನಾಯಕರಿಗೆ ವರದಿ ಮಾಡಬಹುದು:
-<https://github.com/diegosouzapw/OmniRoute/security/advisories/new>
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
 ಅಥವಾ ನಿರ್ವಹಕರಿಗೆ diegosouza.pw@outlook.com ಮೂಲಕ ಇಮೇಲ್ ಮಾಡಬಹುದು.
 ಭದ್ರತಾ-ಸಂವೇದನಾಶೀಲ ಘಟನೆಗಳಿಗಾಗಿ, [`SECURITY.md`](SECURITY.md) ನೋಡಿ.
 ಎಲ್ಲ ದೂರುಗಳನ್ನು ತ್ವರಿತವಾಗಿ ಮತ್ತು ನ್ಯಾಯಸಮ್ಮತವಾಗಿ ಪರಿಶೀಲಿಸಿ ತನಿಖೆ ನಡೆಸಲಾಗುತ್ತದೆ.

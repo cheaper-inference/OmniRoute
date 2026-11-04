@@ -45,9 +45,9 @@
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=social)](https://github.com/cheaper-inference/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/OmniRoute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 הצטרפו לקהילה
@@ -96,7 +96,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 ![רישיון: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![משיכות Docker](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![הורדות Electron](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![הורדות Electron](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -521,7 +521,7 @@ curl http://localhost:20128/v1/chat/completions \
 ל־OmniRoute רישיון MIT והוא מתוחזק באופן פתוח. אם הוא חוסך לכם זמן או כסף, כך תוכלו לסייע לו להישאר עצמאי — בחרו במה שמתאים לכם. חסות לעולם אינה משפיעה על עדיפות הניתוב; היא מקנה חשיפה, לא דירוג.
 
 <table>
-  <tr><td nowrap>⭐ <b>תנו כוכב למאגר</b></td><td>בחינם — באמת מסייע לחשיפה</td><td><a href="https://github.com/diegosouzapw/OmniRoute">תנו כוכב ל־OmniRoute</a></td></tr>
+  <tr><td nowrap>⭐ <b>תנו כוכב למאגר</b></td><td>בחינם — באמת מסייע לחשיפה</td><td><a href="https://github.com/cheaper-inference/OmniRoute">תנו כוכב ל־OmniRoute</a></td></tr>
   <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>חד־פעמי או חודשי · ללא עמלת פלטפורמה</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
   <tr><td nowrap>☕ <b>Ko-fi</b></td><td>טיפ חד־פעמי מהיר, ללא הרשמה מצד התורם</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
   <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>מחווה קטנה ולא רשמית</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
@@ -558,7 +558,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </details>
 
-🐛 מצאתם באג או שיש לכם משוב? פתחו [דיון](https://github.com/diegosouzapw/OmniRoute/discussions).
+🐛 מצאתם באג או שיש לכם משוב? פתחו [דיון](https://github.com/cheaper-inference/OmniRoute/discussions).
 
 <br/>
 
@@ -1250,7 +1250,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # גם CI=1 מדלג ע�
 
 מדדים קנוניים נכון ל־2026-10-18: **1.976 סרטונים ייחודיים** · **20.220.289 צפיות ידועות** (`v > 0`) · **1.210 ערוצים/פרופילים לפי רשת**. לוח הבקרה הגולמי מכיל 1.976 שורות (YouTube 1.352 = 740 סרטונים ארוכים + 612 Shorts · TikTok 334 · Instagram 290); לא נותרו כפילויות לאחר הנרמול לפי כתובת ה־URL הקנונית, ששומר את מספר הצפיות הגבוה ביותר לכל סרטון. איסוף הנתונים מ־YouTube מוקפא נכון ל־2026-10-13 (מכסת ה־API נוצלה במלואה בין 14 ל־18/10), ומ־TikTok/Instagram מאז 2026-09-02 (אין קרדיטים לאיסוף); ל־76 סרטונים עדיין אין ספירת צפיות.
 
-> 🎬 **יצרתם סרטון על OmniRoute?** פתחו [בעיה](https://github.com/diegosouzapw/OmniRoute/issues/new) או [דיון](https://github.com/diegosouzapw/OmniRoute/discussions) עם הקישור — ונציג אותו כאן.
+> 🎬 **יצרתם סרטון על OmniRoute?** פתחו [בעיה](https://github.com/cheaper-inference/OmniRoute/issues/new) או [דיון](https://github.com/cheaper-inference/OmniRoute/discussions) עם הקישור — ונציג אותו כאן.
 
 <br/>
 
@@ -1270,8 +1270,8 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # גם CI=1 מדלג ע�
 | 🟢 **WhatsApp — 🇧🇷 ברזיל**                | [הצטרפו לקבוצה](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                 |
 | 🌍 **אתר אינטרנט**                        | [omniroute.online](https://omniroute.online)                                                                     |
 | 🌍 **🌍קהילת StHub OmniRoute (בחינם)**    | [פורטל StHub](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)             |
-| 📦 **קוד מקור**                           | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                   |
-| 🐛 **דיווח על באג**                       | [פתחו דיווח](https://github.com/diegosouzapw/OmniRoute/issues) — צרפו את הפלט של `npm run system-info`           |
+| 📦 **קוד מקור**                           | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                         |
+| 🐛 **דיווח על באג**                       | [פתחו דיווח](https://github.com/cheaper-inference/OmniRoute/issues) — צרפו את הפלט של `npm run system-info`      |
 | 🤝 **תרומה**                              | [CONTRIBUTING.md](CONTRIBUTING.md) · [מודל הסתעפות והפצה](docs/ops/BRANCHING_MODEL.md) · בחרו `good first issue` |
 | 💚 **תמיכה בפרויקט**                      | [דרכים לתמיכה ↑](#-support-omniroute) · [נותני החסות ב-GitHub](https://github.com/sponsors/diegosouzapw)         |
 
@@ -1629,7 +1629,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # גם CI=1 מדלג ע�
 
 </div>
 
-[![Contributors](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
 
 <sub>נבדק בתאריך 2026-11-02 על קצה ה־<code>release/v3.8.53</code> החי <code>1c7135e0fb</code> (7,972 קומיטים): <b>1,074 זהויות Git אנושיות מנורמלות</b> — 759 מופיעות כמחברי קומיטים (כולל המתחזק) ו־315 מופיעות רק ב־trailers מפורשים של <code>Co-authored-by</code>. המפקד מחיל את <code>.mailmap</code>, משווה כתובות דוא״ל ללא תלות ברישיות, מאחד כתובות noreply מספריות ורגילות של GitHub רק כאשר הן מקודדות את אותו מזהה, אינו כולל 29 זהויות של בוטים/סוכנים/שירותים/מצייני מקום, ואינו מאחד כתובות דוא״ל רגילות רק משום ששמות התצוגה שלהן זהים. בביקורת מתאריך 2026-08-24 פורסמו 639; הרצה חוזרת של שיטה זו על בסיס הביקורת ההיא <code>ac02c5b42f</code> מחזירה 619, כך שהגידול נובע מתורמים חדשים ולא משיטה מקלה יותר.</sub>
 
@@ -1658,11 +1658,11 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 ## 📊 כוכבים
 
-<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="תרשים היסטוריית הכוכבים" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <img alt="תרשים היסטוריית הכוכבים" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
  </picture>
 </a>
 

@@ -199,7 +199,7 @@ omniroute setup-5dive --model failover-demo --auth-profile omniroute --agent wor
 إن توجيه الملف التعريفي إلى **combo** في OmniRoute بدلًا من نموذج واحد هو ما
 يوفّر للأسطول تبديل المزوّد عند الفشل: فعندما تعطلت نقطة النهاية الأساسية تمامًا
 في منتصف التفاعل أثناء التشغيل المسجّل في
-[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578)، أكمل الوكيل
+[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578)، أكمل الوكيل
 خطواته المتبقية باستخدام البديل دون أن يُظهر الانقطاع مطلقًا.
 
 ---

@@ -259,7 +259,7 @@ Ibi ìpamọ́ key_value àtijọ́ → proxy_registry + proxy_assignments
 
 ## Ọjà Aṣojú Ọ̀fẹ́ 1proxy
 
-> 🆕 **Ìfikún láti ọwọ́ [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Ọ̀ràn [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕 **Ìfikún láti ọwọ́ [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Ọ̀ràn [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
 
 OmniRoute ṣepọ̀ mọ́ pèpéle àwùjọ **[1proxy](https://1proxy-api.aitradepulse.com)** láti pèsè ààyè sí **ọ̀pọ̀ ọgọ́rùn-ún àwọn aṣojú ọ̀fẹ́ tí a ti fọwọ́sí** láti gbogbo àgbáyé. Èyí dára gan-an fún àwọn aṣàmúlò tí kò ní ohun amáyédẹrùn aṣojú tiwọn.
 

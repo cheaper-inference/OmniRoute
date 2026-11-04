@@ -125,7 +125,7 @@ voor een andere") wordt onvoorwaardelijk afgedwongen door systeem 1 en door syst
 
 ## 4. Langdurige `/v1/responses` in één proces (gezonde headroom)
 
-[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) heeft
+[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) heeft
 `tryAcquireHealthyHeadroom` toegevoegd, zodat een tweede structureel zware aanvraag wordt toegelaten
 wanneer de heap zich onder `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` bevindt. Het BYTE-pad
 dat wordt gebruikt door `admitChatRequest` (bodies ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

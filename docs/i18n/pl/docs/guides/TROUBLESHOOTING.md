@@ -257,7 +257,7 @@ jest planowane; do czasu jego wdrożenia problem może powtarzać się w nowych 
    [Convert]::ToBase64String($b)
    ```
    Wynik musi być zgodny z `latest.yml` → `sha512`. Jeśli nie jest, usuń plik i pobierz go
-   ponownie wyłącznie ze [strony wydań w serwisie GitHub](https://github.com/diegosouzapw/OmniRoute/releases).
+   ponownie wyłącznie ze [strony wydań w serwisie GitHub](https://github.com/cheaper-inference/OmniRoute/releases).
 2. **Przywróć + dodaj wyjątek** — przywróć z kwarantanny elementy usunięte podczas wycofywania
    instalacji i dodaj wyjątek dla `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Ustawienia
    → Zagrożenia i wykluczenia), a następnie zainstaluj ponownie.
@@ -852,7 +852,7 @@ Pełne informacje na temat `OMNIROUTE_READY_TIMEOUT_MS` znajdziesz w pliku
 
 ## Nadal masz problem?
 
-- **Zgłoszenia GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Zgłoszenia GitHub**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **Architektura**: Szczegóły wewnętrzne znajdziesz w pliku [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
 - **Dokumentacja API**: Wszystkie endpointy znajdziesz w pliku [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)
 - **Panel stanu**: Bieżący stan systemu sprawdzisz w sekcji **Panel → Stan**

@@ -221,7 +221,7 @@ Avast і AVG використовують евристичний алгорит�
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   Результат має збігатися з `latest.yml` → `sha512`. Якщо він не збігається, видаліть файл і повторно завантажте його лише зі [сторінки випусків GitHub](https://github.com/diegosouzapw/OmniRoute/releases).
+   Результат має збігатися з `latest.yml` → `sha512`. Якщо він не збігається, видаліть файл і повторно завантажте його лише зі [сторінки випусків GitHub](https://github.com/cheaper-inference/OmniRoute/releases).
 2. **Відновіть і додайте до винятків** — відновіть відкочені елементи з карантину та додайте виняток для `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Налаштування → Загрози та винятки), а потім перевстановіть програму.
 3. **Повідомте про хибне спрацювання** — <https://opentip.kaspersky.com/>. Надіслані користувачами повідомлення про хибні спрацювання справді пришвидшують додавання до списку дозволених програм.
 
@@ -812,7 +812,7 @@ omniroute serve --ready-timeout 180000
 
 ## Усе ще не працює?
 
-- **Проблеми на GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Проблеми на GitHub**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **Архітектура**: Внутрішню документацію див. у [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
 - **Довідник API**: Усі кінцеві точки див. у [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)
 - **Панель стану**: Перевірте **Панель керування → Стан**, щоб переглянути стан системи в реальному часі

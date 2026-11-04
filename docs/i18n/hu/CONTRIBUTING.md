@@ -33,7 +33,7 @@ Thank you for your interest in contributing! This guide covers everything you ne
 ### Klónozás és telepítés
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -442,4 +442,4 @@ Ezután használja a `/deploy-vps-*-cc` készségeket, amelyek az rsync segíts�
 - **API-referencia**: Lásd: [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
 - **Biztonsági dokumentáció**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
 - **Üzemeltetési dokumentáció**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Hibajegyek**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Hibajegyek**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

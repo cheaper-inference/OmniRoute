@@ -225,7 +225,7 @@ livenessProbe:
 
 **Do not** point kubelet **liveness** at `/api/monitoring/health`. That path does real DB/monitoring work and will false-positive under load.
 
-Related: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (probes while the event loop is busy), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (catalog pricing hog), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (compression token-count hog).
+Related: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (probes while the event loop is busy), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (catalog pricing hog), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (compression token-count hog).
 
 ### systemd watchdog (frozen event loop)
 

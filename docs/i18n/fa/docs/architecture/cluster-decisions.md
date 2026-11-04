@@ -6,7 +6,7 @@
 
 **وضعیت:** پیشنهاد (در انتظار بررسی @diegosouzapw)
 **تاریخ:** 2026-06-20
-**ارجاعات:** [#3932](https://github.com/diegosouzapw/OmniRoute/issues/3932)، PR #4381
+**ارجاعات:** [#3932](https://github.com/cheaper-inference/OmniRoute/issues/3932)، PR #4381
 
 ## خلاصه
 

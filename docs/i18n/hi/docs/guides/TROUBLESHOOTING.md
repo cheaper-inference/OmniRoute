@@ -253,7 +253,7 @@ Kaspersky का `PDM:` उपसर्ग दर्शाता है कि �
    [Convert]::ToBase64String($b)
    ```
    आउटपुट का `latest.yml` → `sha512` से मेल खाना अनिवार्य है। यदि मेल नहीं खाता, तो फ़ाइल मिटाएँ
-   और केवल [GitHub रिलीज़ पेज](https://github.com/diegosouzapw/OmniRoute/releases) से दोबारा डाउनलोड करें।
+   और केवल [GitHub रिलीज़ पेज](https://github.com/cheaper-inference/OmniRoute/releases) से दोबारा डाउनलोड करें।
 2. **पुनर्स्थापित करें + अपवाद जोड़ें** — वापस रोल की गई वस्तुओं को क्वारंटीन से पुनर्स्थापित करें
    और `%LOCALAPPDATA%\Programs\OmniRoute` के लिए एक अपवाद जोड़ें (Kaspersky → Settings → Threats and Exclusions),
    फिर दोबारा इंस्टॉल करें।
@@ -843,7 +843,7 @@ omniroute serve --ready-timeout 180000
 
 ## अभी भी अटके हुए हैं?
 
-- **GitHub Issues**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **GitHub Issues**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **आर्किटेक्चर**: आंतरिक विवरण के लिए [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) देखें
 - **API संदर्भ**: सभी एंडपॉइंट्स के लिए [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) देखें
 - **स्वास्थ्य डैशबोर्ड**: रियल-टाइम सिस्टम स्थिति के लिए **Dashboard → Health** देखें

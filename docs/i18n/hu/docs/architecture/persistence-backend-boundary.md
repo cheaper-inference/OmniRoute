@@ -5,7 +5,7 @@
 ---
 
 - **Állapot:** Javasolt — a futásidejű munka megkezdése előtt karbantartói jóváhagyást igényel
-- **Nyomon követési feladat:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
+- **Nyomon követési feladat:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
 - **Hatókör:** Kizárólag a perzisztencia-architektúra; ez a döntés nem ad hozzá és nem választ ki külső adatbázist
 
 ## Kontextus

@@ -56,7 +56,7 @@ aberta. Isso **não interrompe o desenvolvimento**:
 Verifique se há um congelamento aberto antes de presumir que a branch desejada pode receber merges:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 A mecânica de merge (rótulo `queue` do proprietário → Mergify) está documentada em

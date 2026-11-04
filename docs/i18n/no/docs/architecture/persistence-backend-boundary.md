@@ -5,7 +5,7 @@
 ---
 
 - **Status:** Foreslått — krever godkjenning fra en vedlikeholder før arbeid på kjøretidsmiljøet påbegynnes
-- **Sporingssak:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
+- **Sporingssak:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
 - **Omfang:** Kun persistensarkitektur; denne beslutningen legger ikke til eller velger en ekstern database
 
 ## Kontekst

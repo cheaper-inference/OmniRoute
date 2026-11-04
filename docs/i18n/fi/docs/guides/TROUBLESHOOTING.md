@@ -257,7 +257,7 @@ Koodin allekirjoitus on suunnitteilla; siihen asti ongelma voi toistua uusissa j
    [Convert]::ToBase64String($b)
    ```
    Tulosteen on vastattava arvoa `latest.yml` → `sha512`. Jos se ei vastaa, poista tiedosto
-   ja lataa se uudelleen ainoastaan [GitHubin julkaisusivulta](https://github.com/diegosouzapw/OmniRoute/releases).
+   ja lataa se uudelleen ainoastaan [GitHubin julkaisusivulta](https://github.com/cheaper-inference/OmniRoute/releases).
 2. **Palauta + lisää poikkeus** — palauta peruutetut kohteet karanteenista ja lisää
    `%LOCALAPPDATA%\Programs\OmniRoute` poikkeukseksi (Kaspersky → Settings → Threats and Exclusions)
    ja asenna sitten uudelleen.
@@ -853,7 +853,7 @@ Katso täydelliset tiedot muuttujasta `OMNIROUTE_READY_TIMEOUT_MS` tiedostosta
 
 ## Oletko yhä jumissa?
 
-- **GitHub-ongelmat**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **GitHub-ongelmat**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **Arkkitehtuuri**: Katso sisäiset tiedot tiedostosta [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
 - **API-viite**: Katso kaikki päätepisteet tiedostosta [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)
 - **Kunnonvalvontanäkymä**: Tarkista järjestelmän reaaliaikainen tila kohdasta **Dashboard → Health**

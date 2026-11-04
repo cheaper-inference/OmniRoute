@@ -30,7 +30,7 @@ koraci pokrivanja i poravnanja.
 ### Kloniranje i instalacija
 
 bash
-git klon https://github.com/diegosouzapw/OmniRoute.git
+git klon https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 instalacija npm-a
 ```
@@ -430,7 +430,7 @@ Zatim koristite vještine `/deploy-vps-*-cc` koje rsynciraju `dist/` s udaljenim
 - **API referenca**: Pogledajte [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
 - **Sigurnosna dokumentacija**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
 - **Operativna dokumentacija**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Problemi**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Problemi**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **ADR-ovi**: Pogledajte `docs/adr/` za zapise o arhitektonskim odlukama
 
 

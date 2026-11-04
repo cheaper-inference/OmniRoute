@@ -58,8 +58,8 @@ automaatset taastumist ei toimu), samas kui operaator saab kinnitamisviiba braus
 lahendada. Fraasi hoidmine blokeeringute loendis muutis selle sõnastuse puhul kättesaamatuks
 ka funktsiooni `classifyProviderError` taastatava cloud-code'i 403-haru, sest
 `accountDeactivated` hinnatakse esimesena — seega ei saanud Gemini Code Assisti jaoks
-pull request'ides [#868](https://github.com/diegosouzapw/OmniRoute/pull/868) ja
-[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) lisatud projektimarsruudi
+pull request'ides [#868](https://github.com/cheaper-inference/OmniRoute/pull/868) ja
+[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) lisatud projektimarsruudi
 taastamine kunagi käivituda.
 
 Kolm kõrvuti asuvat, **eraldi** signaalitabelit _ei kuulu_ blokeeritud märksõnade tuvastamise alla:

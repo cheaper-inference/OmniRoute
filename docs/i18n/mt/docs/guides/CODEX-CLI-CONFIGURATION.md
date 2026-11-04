@@ -478,7 +478,7 @@ codex debug models --bundled       # elenka l-katalgu ta’ mudelli inklużi bħ
 | Is-sessjoni tibqa’ taqleb il-kontijiet / il-kontinwità tal-cache tal-prompt tintilef bejn dawra u oħra | It-TTL tal-affinità tas-sessjoni huwa `0` (diżattivat)                             | `sessionAffinityTtlMs`   |
 | Il-konnessjoni tieqaf waqt ir-raġunament mingħajr prompt viżibbli għall-klijent                        | Il-watchdog tal-inattività tal-fluss attiva wara 10 minuti mingħajr chunk upstream | `STREAM_IDLE_TIMEOUT_MS` |
 
-Diskussjonijiet relatati: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (kompiti twal li jieqfu), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (għaliex l-affinità hija diżattivata b’mod predefinit). Traċċar: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Diskussjonijiet relatati: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (kompiti twal li jieqfu), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (għaliex l-affinità hija diżattivata b’mod predefinit). Traċċar: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. Affinità tas-sessjoni — orbot konverżazzjoni waħda ma’ kont wieħed
 

@@ -58,8 +58,8 @@ tidak pernah pulih secara automatik), manakala pengendali boleh menyelesaikan ge
 Mengekalkan frasa tersebut dalam senarai sekatan juga menyebabkan cabang 403 cloud-code yang boleh dipulihkan dalam
 `classifyProviderError` tidak dapat dicapai bagi ungkapan ini, kerana `accountDeactivated`
 dinilai terlebih dahulu — maka pemulihan laluan projek yang ditambahkan untuk Gemini Code Assist dalam
-[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) dan
-[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) tidak mungkin dapat dijalankan.
+[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) dan
+[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) tidak mungkin dapat dijalankan.
 
 Tiga jadual isyarat bersebelahan yang **berasingan** _bukan_ sebahagian daripada pengesanan kata kunci sekatan:
 

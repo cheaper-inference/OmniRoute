@@ -132,13 +132,13 @@ handleComboChat (ίδια μηχανή με τους αποθηκευμένου�
 Ένα combo του οποίου το `name` είναι πανομοιότυπο με ένα απλό model id (π.χ. ένα combo με όνομα
 `gpt-5.5`) είναι ένα **σκόπιμο, υποστηριζόμενο μοτίβο**, όχι σφάλμα: αποτελεί τον
 μηχανισμό για ανάκαμψη (fallback) παρόχου ανά model id, όπως τεκμηριώνεται στο
-[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Επειδή η
+[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940). Επειδή η
 επίλυση combo ελέγχεται πριν από την επίλυση απλού model id
 (`getComboForModel()` στο `src/sse/services/model.ts`), ένα αίτημα για το απλό
 id `gpt-5.5` δρομολογείται μέσω των στόχων του combo (π.χ.
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) αντί για απευθείας σε
 έναν μόνο πάροχο — αυτό επαναχρησιμοποιεί την προτεραιότητα combo-πριν-από-επανεγγραφή που δημιουργήθηκε για το
-[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) και ελέγχεται
+[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) και ελέγχεται
 με παλινδρομικά τεστ από τα `tests/unit/responses-combo-resolution-3227.test.ts` και
 `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
 
@@ -184,7 +184,7 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 - **Το `auto` δεν χρησιμοποιεί τα combo σας.** Το `auto`/`auto/*` δημιουργεί τη δική του δεξαμενή υποψηφίων χωρίς ρύθμιση και συμβουλεύεται αποθηκευμένα combo μόνο αν ένα combo έχει κυριολεκτικά το όνομα `auto` (δεν συνιστάται). Για να δρομολογήσετε μέσω ενός combo, αποστείλετε το ακριβές όνομά του — όχι `auto`.
 - **Το `openrouter/auto` είναι ένα πραγματικό επί πληρωμή προϊόν OpenRouter** («Auto Best Available»), όχι ένα ψευδώνυμο OmniRoute. Αποτελεί την ενιαία στατική καταχώριση μοντέλου του μητρώου OpenRouter (`open-sse/config/providers/registry/openrouter/index.ts`) και χρεώνεται ξεχωριστά. Χρησιμοποιήστε Ρυθμίσεις → Δρομολόγηση → Απόκρυψη επί πληρωμή μοντέλων για να το εξαιρέσετε από τις δεξαμενές `auto`.
 
-Δείτε τα [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) και [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) για την αρχική σύγχυση που τεκμηριώνει αυτό το κείμενο.
+Δείτε τα [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) και [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) για την αρχική σύγχυση που τεκμηριώνει αυτό το κείμενο.
 
 ## Πώς λειτουργεί (Αποθηκευμένοι Αυτόματοι Συνδυασμοί)
 

@@ -241,7 +241,7 @@ Next.js المستقل)، يكون هذا كافيًا لتشغيل الآلية
    [Convert]::ToBase64String($b)
    ```
    يجب أن يطابق الناتج `latest.yml` ← `sha512`. إذا لم يتطابق، فاحذف الملف وأعد تنزيله
-   فقط من [صفحة إصدارات GitHub](https://github.com/diegosouzapw/OmniRoute/releases).
+   فقط من [صفحة إصدارات GitHub](https://github.com/cheaper-inference/OmniRoute/releases).
 2. **الاستعادة + الاستثناء** — استعد العناصر التي جرى التراجع عنها من الحجر الصحي، وأضف
    استثناءً لـ `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky ← الإعدادات ← التهديدات
    والاستثناءات)، ثم أعد التثبيت.
@@ -834,7 +834,7 @@ omniroute serve --ready-timeout 180000
 
 ## أما زلت عالقًا؟
 
-- **مشكلات GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **مشكلات GitHub**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **البنية المعمارية**: راجع [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) للاطلاع على التفاصيل الداخلية
 - **مرجع API**: راجع [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) للاطلاع على جميع نقاط النهاية
 - **لوحة مراقبة الصحة**: تحقّق من **لوحة المعلومات → الصحة** للاطلاع على حالة النظام في الوقت الفعلي

@@ -172,7 +172,7 @@ Antigravity リクエストは、呼び出し元のテキストをバイト単�
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` を読み込み
 - `src/lib/oauth/providers/antigravity.ts` — 認証情報の受け渡し
-- 元のインシデント報告: Discussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- 元のインシデント報告: Discussion [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

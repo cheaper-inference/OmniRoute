@@ -432,7 +432,7 @@ implémentation en attente).
 ### Cliquet CodeQL : fréquence d’actualisation et déclenchement manuel
 
 `check:codeql-ratchet` lit **l’état du dépôt, actualisé selon une planification — et non pour chaque PR.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` indique
+`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` indique
 `state: configured`, `schedule: weekly` : il s’agit de l’analyse de configuration par défaut de GitHub,
 et non d’une analyse effectuée à chaque push. Conséquence : après la fusion d’une PR qui CORRIGE des
 alertes, le cliquet continue de lire l’ancien nombre, plus élevé, jusqu’à l’exécution de la prochaine

@@ -5,7 +5,7 @@
 ---
 
 - **ሁኔታ:** የቀረበ — የሩጫ ጊዜ ሥራ ከመጀመሩ በፊት የጠጋኝ አስተዳዳሪ ማጽደቅን ይፈልጋል
-- **የክትትል ጉዳይ:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
+- **የክትትል ጉዳይ:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
 - **ወሰን:** የዘላቂ ማከማቻ ንድፈ ሕንፃ ብቻ፤ ይህ ውሳኔ ውጫዊ የውሂብ ጎታን አይጨምርም ወይም አይመርጥም
 
 ## አውድ

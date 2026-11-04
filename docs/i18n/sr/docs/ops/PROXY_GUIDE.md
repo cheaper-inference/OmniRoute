@@ -260,7 +260,7 @@ Legacy key_value store → proxy_registry + proxy_assignments
 
 ## 1proxy тржиште бесплатних проксија
 
-> 🆕 **Допринос корисника [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (проблем [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕 **Допринос корисника [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (проблем [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
 
 OmniRoute се интегрише са платформом заједнице **[1proxy](https://1proxy-api.aitradepulse.com)** како би омогућио приступ **стотинама бесплатних, проверених проксија** из целог света. Ово је идеално за кориснике који немају сопствену прокси инфраструктуру.
 

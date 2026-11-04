@@ -325,7 +325,7 @@ Memóriakezelés Dockerben:
 
 ### Futásidejű RAM kódoló ügynökökhöz
 
-Az alapértelmezett 1 GiB-os Docker-beállítás csak a vezérlőpulthoz és könnyű csevegéshez elegendő minimum, nem éles környezethez való méret. A hosszú `POST /v1/responses` törzsek (több száz üzenet, több tucat eszköz) a tömörítés során több memóriabeli gráfot is megőriznek. Két, egymást időben átfedő, egyenként körülbelül 3 MiB-os / 750 ezer tokenes kérés **12 GiB-os** old-space mellett is a V8 leállását okozta (`FATAL ERROR: Reached heap limit`), és egy 16 GiB-os cgroup esetén is OOM-hibát idézett elő. Lásd: [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Az alapértelmezett 1 GiB-os Docker-beállítás csak a vezérlőpulthoz és könnyű csevegéshez elegendő minimum, nem éles környezethez való méret. A hosszú `POST /v1/responses` törzsek (több száz üzenet, több tucat eszköz) a tömörítés során több memóriabeli gráfot is megőriznek. Két, egymást időben átfedő, egyenként körülbelül 3 MiB-os / 750 ezer tokenes kérés **12 GiB-os** old-space mellett is a V8 leállását okozta (`FATAL ERROR: Reached heap limit`), és egy 16 GiB-os cgroup esetén is OOM-hibát idézett elő. Lásd: [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 A **cgroup `--memory` értékét a heapméret fölé méretezze** — a natív pufferek, az SQLite és a tömörítés köztes adatai a V8-on kívül helyezkednek el.
 
@@ -704,7 +704,7 @@ spec:
 
 `preStop` sleep lehetővé teszi, hogy a kube eldobja a szolgáltatás végpontjait SIGTERM előtt, így** új** a forgalom leáll, sújtja a haldokló folyamatot. Repülés közbeni `/v1/responses` SSE `SHUTDOWN_TIMEOUT_MS` (alapértelmezett 30 mp) lemerül nehézsúlyú belépőbérleti szerződések révén (#11015). Azok az új kérések, amelyek még mindig elérik a folyamatot `503` + `Retry-After: 5` fájlt kapják. Az Üres végpont-rés újra létrehozása, amíg a csere kész állapotba nem kerül, továbbra is súlyos kimaradást jelent – ez a SQLite topológia, nem pedig egy próba hiba.
 
-Külső Postgres / több író HA is** nem** dokumentált készletút. Ha HA van szüksége, tartson meg egyetlen replikát, vagy futtasson egy topológiát, amelyet a projekt külön tesztelt és dokumentált. A Postgres/MySQL mű a [#8075-](https://github.com/diegosouzapw/OmniRoute/issues/8075) ben lakik. Amíg ez kiszáll, az egyetlen támogatott módja a szaporításnak** nagy** `/v1/responses` kapacitás N független folyamat (következő rész), nem `replicas > 1` egy köteten.
+Külső Postgres / több író HA is** nem** dokumentált készletút. Ha HA van szüksége, tartson meg egyetlen replikát, vagy futtasson egy topológiát, amelyet a projekt külön tesztelt és dokumentált. A Postgres/MySQL mű a [#8075-](https://github.com/cheaper-inference/OmniRoute/issues/8075) ben lakik. Amíg ez kiszáll, az egyetlen támogatott módja a szaporításnak** nagy** `/v1/responses` kapacitás N független folyamat (következő rész), nem `replicas > 1` egy köteten.
 
 ## Kiméretezés: N független folyamat
 
@@ -714,11 +714,11 @@ Egy Codex fiók másolatai nem használhatják fel önállóan az egyszer haszn�
 
 A passzív példány újraolvassa a kapcsolatot, amikor frissítésre van szükség, és csak egy másik, le nem járt hozzáférési jogkivonatot vesz át. Ellenkező esetben a frissítés le van tiltva a kapcsolat lejárta vagy inaktiválása nélkül, illetve a frissítési megszakító hibáinak számítása nélkül. A valódi upstream hitelesítési hibák továbbra is normál hibaelszámolást, exponenciális lehűlést és normál ügyfélhibát használnak; a fiók deaktiválása végleges marad. Szinkronizálja a tulajdonos elforgatott tokenjeit, mielőtt a hozzáférési jogkivonatok lejárnának (az alapértelmezett proaktív frissítési idő öt perc), vagy importálja újra a Codex auth fájlt. A passzív importálások a szolgáltatott tokeneket anélkül tárolják, hogy a jogkivonat végpontján érvényesítenék őket. A kézi dashboard/API frissítés `409 refresh_disabled` értéket adja vissza; az új OAuth bejelentkezési adatok változatlanok. Lásd [a környezeti referenciát](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-A One Node folyamat az** egy V8-as kupac** . Két egymást átfedő ~ 3 MiB / ~ 750k-token kódoló ágens, `POST /v1/responses` (RTK + Caveman) megszakítja ezt a kupacot ~ 12 Gi (`FATAL ERROR: Reached heap limit`) mellett, és OOM tud egy 16 Gi-s ccsoportot. Lásd [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Ez a mérés a** memória-költségvetés** figyelmeztetés, nem egy termék hard-max két egyidejű hosszú `/v1/responses`. A nehézsúlyú csevegésbeengedést egy automatikusan származtatott feldolgozási bájt-költségkeret (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) korlátozza, amely ugyanabból V8/cgroup plafonból áll, a — felülbírálása (vagy az örökölt `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` kérésszám-korlát beállítása) egy már méretű folyamaton újra bevezeti a megszakítást. Kis csevegés, `/healthz`, `/v1/models` és MCP** nem** abban a sapkában.
+A One Node folyamat az** egy V8-as kupac** . Két egymást átfedő ~ 3 MiB / ~ 750k-token kódoló ágens, `POST /v1/responses` (RTK + Caveman) megszakítja ezt a kupacot ~ 12 Gi (`FATAL ERROR: Reached heap limit`) mellett, és OOM tud egy 16 Gi-s ccsoportot. Lásd [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Ez a mérés a** memória-költségvetés** figyelmeztetés, nem egy termék hard-max két egyidejű hosszú `/v1/responses`. A nehézsúlyú csevegésbeengedést egy automatikusan származtatott feldolgozási bájt-költségkeret (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) korlátozza, amely ugyanabból V8/cgroup plafonból áll, a — felülbírálása (vagy az örökölt `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` kérésszám-korlát beállítása) egy már méretű folyamaton újra bevezeti a megszakítást. Kis csevegés, `/healthz`, `/v1/models` és MCP** nem** abban a sapkában.
 
 ### Egy folyamat: több mint két hosszú `/v1/responses`
 
-A** egészséges** folyamat (halom `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` alatt, alapértelmezett `0.75`)** május** futtasson kettőnél több egyidejű hosszú `POST /v1/responses` ha a folyamatszintű bejárati bájt költségvetésben (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) még van hely. `OMNIROUTE_CHAT_LARGE_BODY_BYTES` nél (alapértelmezett 256 KiB) vagy annál nagyobb testek ugyanazt a nehézsúlyú bérletet veszik fel, mint a szerkezet-súlyos kérések, és ugyanazt a [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape-t (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) használják. Több tíz egyidejű hosszú SSE kliens (az operátoroknak gyakran 40-50-re van szükségük) a** memória-költségvetés** kérdés — méret kupac + primary/headroom slot + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — nem kemény „max 2” termékkorlát. Egy nyomás alatt álló kupac továbbra is lemerül az újrapróbálható `503` vel, így a #7849 nem tér vissza.
+A** egészséges** folyamat (halom `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` alatt, alapértelmezett `0.75`)** május** futtasson kettőnél több egyidejű hosszú `POST /v1/responses` ha a folyamatszintű bejárati bájt költségvetésben (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) még van hely. `OMNIROUTE_CHAT_LARGE_BODY_BYTES` nél (alapértelmezett 256 KiB) vagy annál nagyobb testek ugyanazt a nehézsúlyú bérletet veszik fel, mint a szerkezet-súlyos kérések, és ugyanazt a [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape-t (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) használják. Több tíz egyidejű hosszú SSE kliens (az operátoroknak gyakran 40-50-re van szükségük) a** memória-költségvetés** kérdés — méret kupac + primary/headroom slot + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — nem kemény „max 2” termékkorlát. Egy nyomás alatt álló kupac továbbra is lemerül az újrapróbálható `503` vel, így a #7849 nem tér vissza.
 
 To** halmokat szaporítani** (független V8-as régi terek)** ma** :
 
@@ -761,7 +761,7 @@ volumes:
   omniroute-b-data:
 ```
 
-A folyamat közbeni sűrűség (a HTTP izolátum tömörítése) [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). A megosztott tartós állapot egyik logikai fürtje a [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+A folyamat közbeni sűrűség (a HTTP izolátum tömörítése) [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). A megosztott tartós állapot egyik logikai fürtje a [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
 ## Gemini regionális hibák Dockerben
 
@@ -801,7 +801,7 @@ hibaválasz; a Gemini-jogosultságot csak a hitelesített modellkérés ellenőr
 
 ### Gazdagépszintű alternatíva: működő IPv6 és névfeloldási házirend
 
-A [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) bejelentője úgy állította helyre
+A [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) bejelentője úgy állította helyre
 a hozzáférést a saját környezetében, hogy engedélyezte a konténeres IPv6-ot, és módosította a glibc címválasztását.
 Ezt környezetspecifikus alternatívaként kezelje. A névfeloldási beállítások módosítása előtt ellenőrizze
 a működő gazdagépi IPv6-ot, a konténer kimenő kapcsolatát/útválasztását és a tűzfalszabályokat.

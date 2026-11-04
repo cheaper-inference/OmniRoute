@@ -59,8 +59,8 @@ fhíorúcháin a ghlanadh i mbrabhsálaí. Má choinnítear an frása sa liosta 
 an chraobh 403 in-aisghabhála de chuid cloud-code in `classifyProviderError` dosroichte
 don fhoclaíocht seo freisin, toisc go ndéantar `accountDeactivated` a mheas ar dtús — mar sin ní fhéadfadh
 an t-aisghabháil bealaigh tionscadail a cuireadh leis do Gemini Code Assist in
-[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) agus
-[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) rith choíche.
+[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) agus
+[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) rith choíche.
 
 Ní cuid de bhrath eochairfhocal toirmisc iad na trí thábla comharthaí chóngaracha, **ar leith** seo:
 

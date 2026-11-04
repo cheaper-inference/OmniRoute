@@ -5,7 +5,7 @@
 ---
 
 テンプレート: xquik #11370（release/v3.8.51 にマージ済み）。Posture: `fallbackOnly`。
-アップストリーム提案: issue diegosouzapw/OmniRoute#11637。
+アップストリーム提案: issue cheaper-inference/OmniRoute#11637。
 
 ## 1. サービスのグラウンドトゥルース（公式ドキュメント、クロスチェック済み）
 

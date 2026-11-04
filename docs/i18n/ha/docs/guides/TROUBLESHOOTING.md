@@ -240,7 +240,7 @@ shirin sanya hannu kan lambar; har sai an yi hakan, sabbin fitowa za su iya maim
    [Convert]::ToBase64String($b)
    ```
    Dole ne sakamakon ya yi daidai da `latest.yml` → `sha512`. Idan bai yi daidai ba, share
-   fayil ɗin sannan ka sake sauke shi kawai daga [shafin fitowar GitHub](https://github.com/diegosouzapw/OmniRoute/releases).
+   fayil ɗin sannan ka sake sauke shi kawai daga [shafin fitowar GitHub](https://github.com/cheaper-inference/OmniRoute/releases).
 2. **Dawo da su + cire su daga bincike** — dawo da abubuwan da aka mayar baya daga keɓewa,
    sannan ka ƙara cirewa daga bincike ga `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky →
    Settings → Threats and Exclusions), sannan ka sake shigarwa.
@@ -835,7 +835,7 @@ bayanai game da `OMNIROUTE_READY_TIMEOUT_MS`.
 
 ## Har Yanzu Ba Ka Iya Ci Gaba Ba?
 
-- **Matsalolin GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Matsalolin GitHub**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **Tsarin Gine-gine**: Duba [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) don bayanan ciki
 - **Manunin API**: Duba [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) don dukkan endpoints
 - **Dashboard na Lafiyar Tsarin**: Duba **Dashboard → Health** don matsayin tsarin na ainihin lokaci

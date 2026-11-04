@@ -20,7 +20,7 @@ Katalog sadrži **45 vještina agenata** (23 REST API + 21 CLI + 1 konfiguracijs
 - **Konični ID** (`omni-auth`, `cli-serve`, itd.)
 - Datoteku **SKILL.md** u `skills/{id}/SKILL.md` sa YAML zaglavljem (`name`, `description`) + bogatim markdown tijelom
 - **REST krajnje tačke** (API vještine) ili **CLI podkomande** (CLI vještine) izvedene iz OpenAPI specifikacije i CLI registra
-- **GitHub raw URL** za preuzimanje uživo: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- **GitHub raw URL** za preuzimanje uživo: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Direktno preuzimanje sa GitHub-a (nije potreban server)
 
 ```bash
-BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

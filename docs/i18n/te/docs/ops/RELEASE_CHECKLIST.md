@@ -453,7 +453,7 @@ CHANGELOG విభాగం మరియు దాని i18n ప్రతి�
 gh workflow run preview-artifact.yml -f pr_number=<N>   # లేదా `preview-artifact` లేబుల్ను జోడించండి
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # ప్రివ్యూను ఇన్స్టాల్ చేయండి
 ```
 

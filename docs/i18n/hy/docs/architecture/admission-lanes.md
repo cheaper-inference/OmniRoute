@@ -132,7 +132,7 @@ Combo-ն (առաջնահերթություն / շրջանաձև հերթափոխ
 
 ## 4. Մեկ պրոցեսով երկարատև `/v1/responses` (առողջ պահուստային հզորություն)
 
-[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437)-ում ավելացվել է
+[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437)-ում ավելացվել է
 `tryAcquireHealthyHeadroom`-ը, որպեսզի կառուցվածքային առումով ծանր երկրորդ հարցումն ընդունվի,
 երբ heap-ը ցածր է `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`-ից։ `admitChatRequest`-ի
 կողմից օգտագործվող BYTE ուղին (`OMNIROUTE_CHAT_LARGE_BODY_BYTES`-ից մեծ կամ հավասար մարմիններ,

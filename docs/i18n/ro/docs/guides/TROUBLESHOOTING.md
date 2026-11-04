@@ -250,7 +250,7 @@ până la implementarea ei, problema poate reapărea la versiunile noi.
    [Convert]::ToBase64String($b)
    ```
    Rezultatul trebuie să corespundă cu `latest.yml` → `sha512`. Dacă nu corespunde, ștergeți fișierul și
-   descărcați-l din nou numai de pe [pagina de versiuni GitHub](https://github.com/diegosouzapw/OmniRoute/releases).
+   descărcați-l din nou numai de pe [pagina de versiuni GitHub](https://github.com/cheaper-inference/OmniRoute/releases).
 2. **Restaurați + excludeți** — restaurați din carantină elementele eliminate prin revenire și adăugați o excludere
    pentru `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Setări → Amenințări și excluderi),
    apoi reinstalați.
@@ -846,7 +846,7 @@ complete despre `OMNIROUTE_READY_TIMEOUT_MS`.
 
 ## Încă sunteți blocat?
 
-- **Probleme GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Probleme GitHub**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **Arhitectură**: Consultați [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) pentru detalii interne
 - **Referință API**: Consultați [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) pentru toate endpoint-urile
 - **Panou de monitorizare a stării**: Verificați **Panou de control → Stare** pentru starea sistemului în timp real

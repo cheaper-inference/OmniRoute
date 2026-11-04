@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## עדכון אוטומטי
 
-משתמש `electron-updater` עם ספק GitHub (`diegosouzapw/OmniRoute`).
+משתמש `electron-updater` עם ספק GitHub (`cheaper-inference/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - אירועים שהועברו למעבד באמצעות `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (עם `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ npm run electron:build:win
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-מהדורות מתפרסמות ל- GitHub Releases (`diegosouzapw/OmniRoute`), וזה גם המקום שבו `electron-updater` בודק אם יש גרסאות חדשות.
+מהדורות מתפרסמות ל- GitHub Releases (`cheaper-inference/OmniRoute`), וזה גם המקום שבו `electron-updater` בודק אם יש גרסאות חדשות.
 
 ## פתרון בעיות
 

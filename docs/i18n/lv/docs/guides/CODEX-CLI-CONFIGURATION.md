@@ -479,7 +479,7 @@ Divi OmniRoute noklusējuma iestatījumi var nemanāmi traucēt vairākas stunda
 | Sesija turpina pārslēgt kontus / starp gājieniem tiek zaudēta uzvedņu kešatmiņas nepārtrauktība | Sesijas piesaistes TTL ir `0` (atspējots)                                         | `sessionAffinityTtlMs`   |
 | Savienojums pārtrūkst spriešanas laikā bez klientam parādītas uzvednes                          | Straumes dīkstāves uzraugs nostrādāja pēc 10 minūtēm bez augšupstraumes fragmenta | `STREAM_IDLE_TIMEOUT_MS` |
 
-Saistītās diskusijas: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (ilgstošu uzdevumu pārtrūkšana), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (kāpēc piesaiste pēc noklusējuma ir izslēgta). Izsekošana: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Saistītās diskusijas: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (ilgstošu uzdevumu pārtrūkšana), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (kāpēc piesaiste pēc noklusējuma ir izslēgta). Izsekošana: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. Sesijas piesaiste — piesaistiet vienu sarunu vienam kontam
 

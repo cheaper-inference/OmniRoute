@@ -454,7 +454,7 @@ PR अघि खोलिन्छन्। script ले npm dist-tags कह�
 gh workflow run preview-artifact.yml -f pr_number=<N>   # वा `preview-artifact` label थप्नुहोस्
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 

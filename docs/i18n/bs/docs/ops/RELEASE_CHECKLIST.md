@@ -454,7 +454,7 @@ provjerava upravo tu izgradnju (dio (a) zadatka #8084). Samo PR-ovi iz istog rep
 gh workflow run preview-artifact.yml -f pr_number=<N>   # ili dodaj oznaku `preview-artifact`
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # instalacija pregleda
 ```
 

@@ -18,7 +18,7 @@
 - **Канонічний ID** (`omni-auth`, `cli-serve` тощо)
 - Файл **SKILL.md** у `skills/{id}/SKILL.md` із YAML frontmatter (`name`, `description`) і детальним markdown-вмістом
 - **Кінцеві точки REST** (навички API) або **підкоманди CLI** (навички CLI), отримані зі специфікації OpenAPI та реєстру CLI
-- **Необроблену URL-адресу GitHub** для отримання актуальної версії: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- **Необроблену URL-адресу GitHub** для отримання актуальної версії: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Пряме отримання необробленого файлу з GitHub (сервер не потрібен)
 
 ```bash
-BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

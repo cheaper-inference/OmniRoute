@@ -333,7 +333,7 @@ Docker ichidagi xotira xatti-harakati:
 
 ### Coding agentlari uchun ish vaqtidagi RAM
 
-Docker uchun standart 1 GiB — ishlab chiqarish muhiti hajmi emas, balki boshqaruv paneli/yengil chat uchun minimal darajadir. Uzun `POST /v1/responses` tanalari (yuzlab xabarlar, o‘nlab vositalar) siqish vaqtida bir nechta xotira ichidagi grafiklarni saqlab turadi. Bir-biriga ustma-ust kelgan taxminan 3 MiB / 750 ming tokenli ikkita so‘rov **12 GiB** old-space hajmida V8 ishini to‘xtatgan (`FATAL ERROR: Reached heap limit`) va 16 GiB cgroup OOM holatiga ham olib kelgan. [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) ga qarang.
+Docker uchun standart 1 GiB — ishlab chiqarish muhiti hajmi emas, balki boshqaruv paneli/yengil chat uchun minimal darajadir. Uzun `POST /v1/responses` tanalari (yuzlab xabarlar, o‘nlab vositalar) siqish vaqtida bir nechta xotira ichidagi grafiklarni saqlab turadi. Bir-biriga ustma-ust kelgan taxminan 3 MiB / 750 ming tokenli ikkita so‘rov **12 GiB** old-space hajmida V8 ishini to‘xtatgan (`FATAL ERROR: Reached heap limit`) va 16 GiB cgroup OOM holatiga ham olib kelgan. [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849) ga qarang.
 
 **cgroup `--memory` hajmini heap hajmidan kattaroq qilib belgilang** — mahalliy buferlar, SQLite va siqishning oraliq ma’lumotlari V8 dan tashqarida joylashadi.
 
@@ -699,7 +699,7 @@ spec:
 
 `preStop` uyqusi kube xizmatining so'nggi nuqtalarini SIGTERM oldin tushirishga imkon beradi** yangi** trafik o'lish jarayoniga urishni to'xtatadi. Parvozdagi `/v1/responses` SSE og'ir vaznli kirish ijarasi (#11015) orqali `SHUTDOWN_TIMEOUT_MS` gacha (standart 30s) sarflanadi. Jarayonga yetib boradigan yangi so'rovlar `503` + `Retry-After: 5` oladi. O'zgartirish tayyor bo'lgunga qadar qayta yaratish bo'sh nuqta bo'shlig'i qiyin uzilish bo'lib qoladi - bu zond noto'g'ri konfiguratsiyasi emas, balki SQLite topologiyasi.
 
-Tashqi Postgres / ko'p yozuvchi HA hisoblanadi** emas** hujjatlashtirilgan zaxira yo'li. Agar sizga HA kerak bo'lsa, bitta nusxani saqlang yoki loyiha sinovdan o'tkazgan va alohida hujjatlashtirilgan topologiyani ishga tushiring. Postgres/MySQL ishi [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) da yashaydi. Bu kemalar qadar, ko'paytirishning yagona qo'llab-quvvatlanadigan usuli** katta** `/v1/responses` sig'imi N mustaqil jarayon (keyingi bo'lim), bir jilddagi `replicas > 1` emas.
+Tashqi Postgres / ko'p yozuvchi HA hisoblanadi** emas** hujjatlashtirilgan zaxira yo'li. Agar sizga HA kerak bo'lsa, bitta nusxani saqlang yoki loyiha sinovdan o'tkazgan va alohida hujjatlashtirilgan topologiyani ishga tushiring. Postgres/MySQL ishi [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) da yashaydi. Bu kemalar qadar, ko'paytirishning yagona qo'llab-quvvatlanadigan usuli** katta** `/v1/responses` sig'imi N mustaqil jarayon (keyingi bo'lim), bir jilddagi `replicas > 1` emas.
 
 ## Kengaytirish: N mustaqil jarayon
 
@@ -709,11 +709,11 @@ Bitta Codex hisobining nusxalari uning bir martalik yangilanish tokenini mustaqi
 
 Passiv misol yangilash kerak bo'lganda ulanishni qayta o'qiydi va faqat boshqa, muddati tugamagan kirish tokenini qabul qiladi. Aks holda, ulanish muddati tugamasdan yoki o'chirilmasdan yoki yangilash-to'xtatuvchining xatosini hisoblamasdan yangilash o'chiriladi. Haqiqiy yuqori oqim autentifikatsiya xatoliklari hali ham oddiy nosozlik hisobi, eksponensial sovutish va oddiy mijoz xatosidan foydalanadi; hisobni o'chirish doimiy bo'lib qoladi. Kirish tokenlari muddati tugashidan oldin egasining aylantirilgan tokenlarini sinxronlashtiring (standart proaktiv yangilash muddati besh daqiqa) yoki Codex auth faylini qayta import qiling. Passiv importlar taqdim etilgan tokenlarni tokenning oxirgi nuqtasida tasdiqlamasdan saqlaydi. Qo'lda dashboard/API yangilash `409 refresh_disabled` ni qaytaradi; yangi OAuth loginlari o'zgarmadi. [Atrof-muhit ma'lumotnomasiga](../reference/ENVIRONMENT.md#passive-codex-token-refresh) qarang.
 
-Bitta tugun jarayoni** bitta V8 to'plami** . Ikkita bir-biriga o'xshash ~ 3 MiB / ~ 750k-token kodlash agenti `POST /v1/responses` (RTK + Caveman) bu yig'ilishni ~ 12 Gi (`FATAL ERROR: Reached heap limit`) da bekor qiladi va 16 Gi cguruhni OOM qilishi mumkin. [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) ga qarang. Bu o'lchov a** xotira byudjeti** ogohlantirish emas, balki bir mahsulot qattiq-max ikki bir vaqtda uzoq `/v1/responses`. Og'ir vaznli chatga kirish o'sha V8/cgroup shiftidan — o'lchamiga ega bo'lgan avtomatik qabul qilingan bayt byudjeti (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) bilan bog'lanadi va uni yuqoriga qarab bekor qiladi (yoki eski `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` so'rovlar soni chegarasini o'rnatish), allaqachon o'lchamdagi jarayonda bekor qilishni qaytadan kiritadi. Kichik chatlar, `/healthz`, `/v1/models` va MCP** emas** o'sha qopqoqda.
+Bitta tugun jarayoni** bitta V8 to'plami** . Ikkita bir-biriga o'xshash ~ 3 MiB / ~ 750k-token kodlash agenti `POST /v1/responses` (RTK + Caveman) bu yig'ilishni ~ 12 Gi (`FATAL ERROR: Reached heap limit`) da bekor qiladi va 16 Gi cguruhni OOM qilishi mumkin. [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849) ga qarang. Bu o'lchov a** xotira byudjeti** ogohlantirish emas, balki bir mahsulot qattiq-max ikki bir vaqtda uzoq `/v1/responses`. Og'ir vaznli chatga kirish o'sha V8/cgroup shiftidan — o'lchamiga ega bo'lgan avtomatik qabul qilingan bayt byudjeti (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) bilan bog'lanadi va uni yuqoriga qarab bekor qiladi (yoki eski `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` so'rovlar soni chegarasini o'rnatish), allaqachon o'lchamdagi jarayonda bekor qilishni qaytadan kiritadi. Kichik chatlar, `/healthz`, `/v1/models` va MCP** emas** o'sha qopqoqda.
 
 ### Bitta jarayon: ikkitadan ortiq uzun `/v1/responses`
 
-A** sog'lom** jarayon ( `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` ostidagi yig'ma, standart `0.75`)** mumkin** jarayon boʻyicha parvoz-bayt byudjeti (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) hali ham joy boʻlsa, bir vaqtning oʻzida ikkitadan ortiq uzun `POST /v1/responses` ishga tushiring. `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (standart 256 KiB) yoki undan yuqori bo‘lgan jismlar tuzilmaviy talablar bilan bir xil og‘ir vaznli ijarani oladi va bir xil [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) dan foydalanadi. Bir vaqtning o'zida o'nlab uzoq SSE mijozlari (operatorlar ko'pincha 40-50 talab qiladi) - bu** xotira byudjeti** savol — hajmi to'p + primary/headroom uyalar + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — emas qattiq "max 2" mahsulot chegarasi. Bosim ostidagi to'p hali ham qayta urinib ko'riladigan `503` bilan to'kiladi, shuning uchun #7849 qaytmaydi.
+A** sog'lom** jarayon ( `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` ostidagi yig'ma, standart `0.75`)** mumkin** jarayon boʻyicha parvoz-bayt byudjeti (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) hali ham joy boʻlsa, bir vaqtning oʻzida ikkitadan ortiq uzun `POST /v1/responses` ishga tushiring. `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (standart 256 KiB) yoki undan yuqori bo‘lgan jismlar tuzilmaviy talablar bilan bir xil og‘ir vaznli ijarani oladi va bir xil [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) dan foydalanadi. Bir vaqtning o'zida o'nlab uzoq SSE mijozlari (operatorlar ko'pincha 40-50 talab qiladi) - bu** xotira byudjeti** savol — hajmi to'p + primary/headroom uyalar + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — emas qattiq "max 2" mahsulot chegarasi. Bosim ostidagi to'p hali ham qayta urinib ko'riladigan `503` bilan to'kiladi, shuning uchun #7849 qaytmaydi.
 
 Kimga** to'plamlarni ko'paytiring** (mustaqil V8 eski joylar)** bugun** :
 
@@ -756,7 +756,7 @@ volumes:
   omniroute-b-data:
 ```
 
-Jarayondagi zichlik ( HTTP izolyatsiyasini siqish) [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023) ni tashkil qiladi. Umumiy chidamli holatdagi bitta mantiqiy klaster [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) dir.
+Jarayondagi zichlik ( HTTP izolyatsiyasini siqish) [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023) ni tashkil qiladi. Umumiy chidamli holatdagi bitta mantiqiy klaster [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) dir.
 
 ## Docker ichidagi Gemini hududiy xatolari
 
@@ -801,7 +801,7 @@ model soʻrovi tekshiradi.
 
 ### Xost darajasidagi muqobil yechim: ishlaydigan IPv6 va rezolver siyosati
 
-[#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) muallifi oʻz muhitida
+[#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) muallifi oʻz muhitida
 konteyner IPv6’ini yoqish va glibc manzil tanlashini oʻzgartirish orqali kirishni
 tiklagan. Buni muayyan muhitga xos muqobil yechim sifatida koʻring. Rezolver
 afzalliklarini sozlashdan oldin xost IPv6’i ishlayotganini, konteynerning chiquvchi

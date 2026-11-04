@@ -325,7 +325,7 @@ process ያስኬዳል፣ እያንዳንዱም `OMNIROUTE_BUILD_MEMORY_MB`ን 
 
 ### ለcoding agents የሚያስፈልግ የRuntime RAM
 
-የ1 GiB Docker ነባሪ መጠን ለdashboard/ቀላል ውይይት ዝቅተኛው ገደብ እንጂ የproduction መጠን አይደለም። ረጅም `POST /v1/responses` ይዘቶች (በመቶዎች የሚቆጠሩ መልዕክቶች፣ በአስሮች የሚቆጠሩ መሣሪያዎች) በማመቅ ጊዜ በርካታ በማህደረ ትውስታ ውስጥ ያሉ graphsን እንደያዙ ይቆያሉ። ሁለት ተደራራቢ ~3 MiB / ~750k-token ጥያቄዎች በ**12 GiB** old-space ላይ V8ን እንዲቋረጥ (`FATAL ERROR: Reached heap limit`) አድርገዋል፣ እንዲሁም የ16 GiB cgroup OOM ገደብን ደርሰዋል። [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849)ን ይመልከቱ።
+የ1 GiB Docker ነባሪ መጠን ለdashboard/ቀላል ውይይት ዝቅተኛው ገደብ እንጂ የproduction መጠን አይደለም። ረጅም `POST /v1/responses` ይዘቶች (በመቶዎች የሚቆጠሩ መልዕክቶች፣ በአስሮች የሚቆጠሩ መሣሪያዎች) በማመቅ ጊዜ በርካታ በማህደረ ትውስታ ውስጥ ያሉ graphsን እንደያዙ ይቆያሉ። ሁለት ተደራራቢ ~3 MiB / ~750k-token ጥያቄዎች በ**12 GiB** old-space ላይ V8ን እንዲቋረጥ (`FATAL ERROR: Reached heap limit`) አድርገዋል፣ እንዲሁም የ16 GiB cgroup OOM ገደብን ደርሰዋል። [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849)ን ይመልከቱ።
 
 የ**cgroup `--memory`ን ከheap በላይ ያዘጋጁ** — native buffers፣ SQLite እና የማመቂያ መካከለኛ ውጤቶች ከV8 ውጭ ይቀመጣሉ።
 
@@ -684,7 +684,7 @@ spec:
 
 `preStop` እንቅልፍ kube እንዲጥል ያስችለዋል የአገልግሎት የመጨረሻ ነጥቦች ከ SIGTERM በፊት** አዲስ** ትራፊክ ወደ ሞት ሂደት መምታት ያቆማል። በበረራ ላይ `/v1/responses` SSE እስከ `SHUTDOWN_TIMEOUT_MS` (ነባሪ 30ዎች) በከባድ ክብደት ማስገቢያ የሊዝ ውል (#11015) ይፈሳል። አሁንም ወደ ሂደቱ የሚደርሱ አዳዲስ ጥያቄዎች `503` + `Retry-After: 5` ያገኛሉ። ተተኪው ዝግጁ እስኪሆን ድረስ ባዶ-መጨረሻ ነጥብ ክፍተቱን እንደገና ይፍጠሩ ከባድ መቋረጥ ነው - ይህ SQLite ቶፖሎጂ ነው እንጂ የመርማሪ ስህተት አይደለም።
 
-ውጫዊ Postgres / ባለብዙ ጸሃፊ HA ነው።** አይደለም** የተመዘገበ የአክሲዮን መንገድ። HA ከፈለጉ፣ ነጠላ ቅጂ ያስቀምጡ ወይም ፕሮጀክቱ የፈተነውን እና በተናጠል የመዘገበውን ቶፖሎጂ ያካሂዱ። የ Postgres/MySQL ስራ በ [# 8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) ውስጥ ይኖራል. እስከዚያ መርከቦች ድረስ፣ ብቸኛው የሚደገፍ መንገድ ማባዛት።** ትልቅ** `/v1/responses` አቅም N ገለልተኛ ሂደቶች ነው (ቀጣይ ክፍል)፣ በአንድ ጥራዝ ላይ `replicas > 1` አይደለም።
+ውጫዊ Postgres / ባለብዙ ጸሃፊ HA ነው።** አይደለም** የተመዘገበ የአክሲዮን መንገድ። HA ከፈለጉ፣ ነጠላ ቅጂ ያስቀምጡ ወይም ፕሮጀክቱ የፈተነውን እና በተናጠል የመዘገበውን ቶፖሎጂ ያካሂዱ። የ Postgres/MySQL ስራ በ [# 8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) ውስጥ ይኖራል. እስከዚያ መርከቦች ድረስ፣ ብቸኛው የሚደገፍ መንገድ ማባዛት።** ትልቅ** `/v1/responses` አቅም N ገለልተኛ ሂደቶች ነው (ቀጣይ ክፍል)፣ በአንድ ጥራዝ ላይ `replicas > 1` አይደለም።
 
 ## ልኬት-ውጭ: N ገለልተኛ ሂደቶች
 
@@ -694,11 +694,11 @@ spec:
 
 ተገብሮ ምሳሌው ማደስ ሲያስፈልግ ግንኙነቱን እንደገና ያነብባል እና የተለየ፣ ጊዜው ያላለፈበት የመዳረሻ ማስመሰያ ብቻ ይቀበላል። ያለበለዚያ ማደስ ግንኙነቱን ሳያልቅ ወይም ሳያቦዝን ወይም የማደስ ሰባሪ አለመሳካቱን ሳይቆጥር ተሰናክሏል። እውነተኛ ወደላይ የማረጋገጫ አለመሳካቶች አሁንም መደበኛ ውድቀት የሂሳብ, ገላጭ ማቀዝቀዣ እና መደበኛ ደንበኛ ስህተት; የመለያ መጥፋት በቋሚነት ይቆያል። የመዳረሻ ቶከኖች ከማብቃታቸው በፊት የባለቤቱን የተሽከረከሩ ቶከኖች ያመሳስሉ (ነባሪው ንቁ የማደስ መሪ አምስት ደቂቃ ነው) ወይም የ Codex auth ፋይልን እንደገና ያስመጡ። ተገብሮ ከውጭ የሚገቡ ቶከኖች በቶከን መጨረሻ ነጥብ ላይ ሳያረጋግጡ ያከማቻሉ። በእጅ dashboard/API አድስ `409 refresh_disabled` ይመልሳል; አዲስ OAuth መግቢያዎች አልተለወጡም። [የአካባቢ ማጣቀሻ](../reference/ENVIRONMENT.md#passive-codex-token-refresh) ይመልከቱ.
 
-አንድ የመስቀለኛ መንገድ ሂደት ነው።** አንድ V8 ክምር** . ሁለት ተደራራቢ ~ 3 MiB / ~ 750k-ቶከን ኮድ-ወኪል `POST /v1/responses` (RTK + Caveman) ያንን ክምር በ ~ 12 Gi (`FATAL ERROR: Reached heap limit`) አስወገደ እና OOM a 16 Gi ግሩፕ። [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) ይመልከቱ። ያ መለኪያ ሀ** ትውስታ-በጀት** ማስጠንቀቂያ፣ የሁለት ተከታታይ ረጅም `/v1/responses` ከባድ-ከፍተኛ ምርት አይደለም። የከባድ ክብደት ቻት መግቢያ በራስ በመነጨ የኢንጀስት ባይት ባጀት (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`፣ `src/shared/middleware/admissionBudget.ts`) መጠን ከዛው V8/cgroup ጣሪያ ወደላይ ከፍ — (ወይም የቅርስ `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ጥያቄ-ቆጠራ ካፕ በማዘጋጀት) ቀድሞውኑ መጠን ባለው ሂደት ውርጃውን እንደገና ያስተዋውቃል። ትናንሽ ቻቶች፣ `/healthz`፣ `/v1/models` እና MCP ናቸው።** አይደለም** በዚያ ቆብ ውስጥ.
+አንድ የመስቀለኛ መንገድ ሂደት ነው።** አንድ V8 ክምር** . ሁለት ተደራራቢ ~ 3 MiB / ~ 750k-ቶከን ኮድ-ወኪል `POST /v1/responses` (RTK + Caveman) ያንን ክምር በ ~ 12 Gi (`FATAL ERROR: Reached heap limit`) አስወገደ እና OOM a 16 Gi ግሩፕ። [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849) ይመልከቱ። ያ መለኪያ ሀ** ትውስታ-በጀት** ማስጠንቀቂያ፣ የሁለት ተከታታይ ረጅም `/v1/responses` ከባድ-ከፍተኛ ምርት አይደለም። የከባድ ክብደት ቻት መግቢያ በራስ በመነጨ የኢንጀስት ባይት ባጀት (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`፣ `src/shared/middleware/admissionBudget.ts`) መጠን ከዛው V8/cgroup ጣሪያ ወደላይ ከፍ — (ወይም የቅርስ `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ጥያቄ-ቆጠራ ካፕ በማዘጋጀት) ቀድሞውኑ መጠን ባለው ሂደት ውርጃውን እንደገና ያስተዋውቃል። ትናንሽ ቻቶች፣ `/healthz`፣ `/v1/models` እና MCP ናቸው።** አይደለም** በዚያ ቆብ ውስጥ.
 
 ### አንድ-ሂደት: ከሁለት በላይ ረጅም `/v1/responses`
 
-ሀ** ጤናማ** ሂደት (ከዝቃ በታች `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`፣ ነባሪ `0.75`)** ግንቦት** ሂደቱ-ሰፊ የበረራ-ባይት ባጀት (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) አሁንም ቦታ ሲኖረው ከሁለት በላይ በአንድ ጊዜ ረጅም `POST /v1/responses` ያሂዱ። በ `OMNIROUTE_CHAT_LARGE_BODY_BYTES` ላይ ያሉ ወይም ከዚያ በላይ የሆኑ አካላት (ነባሪ 256 KiB) ልክ እንደ መዋቅር-ከባድ ጥያቄዎች ተመሳሳይ የከባድ ሚዛን ሊዝ ይወስዳሉ እና ተመሳሳይ [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` ማምለጫ (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) ይጠቀማሉ። በአስርዎች የሚቆጠሩ በተመሳሳይ ረጅም SSE ደንበኞች (ኦፕሬተሮች ብዙውን ጊዜ ከ40-50 ያስፈልጋቸዋል) ሀ** ትውስታ-በጀት** ጥያቄ — መጠን ክምር + primary/headroom ቦታዎች + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ከባድ "ከፍተኛ 2" የምርት ገደብ አይደለም. #7849 ተመልሶ እንዳይመጣ ግፊት ያለው ክምር አሁንም በድጋሚ ሊሞከር በሚችል `503` ይፈስሳል።
+ሀ** ጤናማ** ሂደት (ከዝቃ በታች `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`፣ ነባሪ `0.75`)** ግንቦት** ሂደቱ-ሰፊ የበረራ-ባይት ባጀት (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) አሁንም ቦታ ሲኖረው ከሁለት በላይ በአንድ ጊዜ ረጅም `POST /v1/responses` ያሂዱ። በ `OMNIROUTE_CHAT_LARGE_BODY_BYTES` ላይ ያሉ ወይም ከዚያ በላይ የሆኑ አካላት (ነባሪ 256 KiB) ልክ እንደ መዋቅር-ከባድ ጥያቄዎች ተመሳሳይ የከባድ ሚዛን ሊዝ ይወስዳሉ እና ተመሳሳይ [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` ማምለጫ (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) ይጠቀማሉ። በአስርዎች የሚቆጠሩ በተመሳሳይ ረጅም SSE ደንበኞች (ኦፕሬተሮች ብዙውን ጊዜ ከ40-50 ያስፈልጋቸዋል) ሀ** ትውስታ-በጀት** ጥያቄ — መጠን ክምር + primary/headroom ቦታዎች + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ከባድ "ከፍተኛ 2" የምርት ገደብ አይደለም. #7849 ተመልሶ እንዳይመጣ ግፊት ያለው ክምር አሁንም በድጋሚ ሊሞከር በሚችል `503` ይፈስሳል።
 
 ለ** ክምርን ማባዛት** (ገለልተኛ V8 አሮጌ-ክፍተት)** ዛሬ** :
 
@@ -741,7 +741,7 @@ volumes:
   omniroute-b-data:
 ```
 
-በሂደት ላይ ያለ ጥግግት ( HTTP ማግለል መጨናነቅ) [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023) ነው። በጋራ የሚበረክት ሁኔታ ላይ አንድ ምክንያታዊ ዘለላ [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) ነው።
+በሂደት ላይ ያለ ጥግግት ( HTTP ማግለል መጨናነቅ) [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023) ነው። በጋራ የሚበረክት ሁኔታ ላይ አንድ ምክንያታዊ ዘለላ [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) ነው።
 
 ## በDocker ውስጥ የGemini ክልላዊ ስህተቶች
 
@@ -784,7 +784,7 @@ commands credentials ወይም IP addresses ሳያሳዩ address familiesን ያ
 
 ### የhost ደረጃ አማራጭ፦ የሚሰራ IPv6 እና resolver policy
 
-የ[#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) ሪፖርት አቅራቢ
+የ[#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) ሪፖርት አቅራቢ
 የcontainer IPv6ን በማንቃት እና የglibc address selectionን በመቀየር በenvironment-አቸው
 ውስጥ accessን መልሰዋል። ይህን ለተወሰነ environment ብቻ እንደሚሠራ አማራጭ ይቁጠሩት።
 የresolver preferencesን ከማስተካከልዎ በፊት የhost IPv6 በትክክል እንደሚሠራ፣

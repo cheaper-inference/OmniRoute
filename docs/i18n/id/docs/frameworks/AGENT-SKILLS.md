@@ -18,7 +18,7 @@ Katalog ini berisi **45 Agent Skills** (23 REST API + 21 CLI + 1 alur kerja konf
 - Sebuah **ID kanonis** (`omni-auth`, `cli-serve`, dll.)
 - Sebuah file **SKILL.md** di `skills/{id}/SKILL.md` dengan frontmatter YAML (`name`, `description`) + isi markdown yang kaya
 - **Endpoint REST** (skill API) atau **subperintah CLI** (skill CLI) yang diturunkan dari spesifikasi OpenAPI dan registri CLI
-- Sebuah **URL raw GitHub** untuk pengambilan langsung: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- Sebuah **URL raw GitHub** untuk pengambilan langsung: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Pengambilan langsung raw GitHub (tidak memerlukan server)
 
 ```bash
-BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

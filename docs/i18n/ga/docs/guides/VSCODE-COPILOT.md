@@ -115,7 +115,7 @@ npm start
 Gan leagan tógtha ina bhfuil leabú cumasaithe, diúltaíonn an leathanach é féin a chur i bhfráma; braitheann an eisínteacht é sin ó
 cheanntásca an fhreagra agus téann sí ar ais chuig an mbrabhsálaí seachtrach — ní bhristear aon rud, agus deir sí é sin uair amháin.
 Féach [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) agus saincheist
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
 
 ---
 

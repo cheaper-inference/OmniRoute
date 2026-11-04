@@ -93,7 +93,7 @@ flyctl version
 ### 4.1 複製程式碼並進入目錄
 
 ```powershell
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -297,7 +297,7 @@ Fly 會自動執行機器的滾動更新。
 
 ### 9.1 追蹤上游儲存庫更新同時保留 Fork 的 `fly.toml`
 
-如果目前儲存庫是 fork，且您想同步上游 `https://github.com/diegosouzapw/OmniRoute` 的更新，請遵循以下工作流程。
+如果目前儲存庫是 fork，且您想同步上游 `https://github.com/cheaper-inference/OmniRoute` 的更新，請遵循以下工作流程。
 
 首先，確認您的遠端倉庫：
 
@@ -313,7 +313,7 @@ git remote -v
 如果未配置 `upstream`，請新增：
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
 在與上游同步之前，請先擷取最新的提交和標籤：

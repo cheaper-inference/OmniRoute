@@ -123,8 +123,8 @@ OmniRoute විසින් Chathub WebSocket URL එක සඳහා HAR ප�
 
 ## යොමු
 
-- ගැටලුව: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- සාකච්ඡාව: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- ගැටලුව: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- සාකච්ඡාව: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - මූලාශ්රය: `src/shared/constants/providers/web-cookie.ts` (සපයන්නාගේ අර්ථදැක්වීම)
 - HAR ආයාතය: `src/shared/utils/m365HarImport.ts`
 - අක්තපත්ර ක්ෂේත්ර: `src/shared/providers/webSessionCredentials.ts`

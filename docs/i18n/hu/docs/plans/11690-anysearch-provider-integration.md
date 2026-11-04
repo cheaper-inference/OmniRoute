@@ -5,7 +5,7 @@
 ---
 
 Sablon: xquik #11370 (beolvasztva a release/v3.8.51 kiadásba). Működési mód: `fallbackOnly`.
-Upstream javaslat: diegosouzapw/OmniRoute#11637 probléma.
+Upstream javaslat: cheaper-inference/OmniRoute#11637 probléma.
 
 ## 1. A szolgáltatás tényleges működése (hivatalos dokumentáció, keresztellenőrizve)
 

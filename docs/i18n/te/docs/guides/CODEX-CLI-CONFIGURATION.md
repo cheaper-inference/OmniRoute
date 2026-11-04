@@ -479,7 +479,7 @@ codex debug models --bundled       # బండిల్ చేసిన మో�
 | సెషన్ ఖాతాలను మారుస్తూనే ఉంటుంది / టర్న్ల మధ్య ప్రాంప్ట్-క్యాష్ కొనసాగింపు పోతుంది | సెషన్ అఫినిటీ TTL `0`గా ఉంది (నిలిపివేయబడింది)                             | `sessionAffinityTtlMs`   |
 | క్లయింట్కు కనిపించే ప్రాంప్ట్ ఏదీ లేకుండానే రీజనింగ్ మధ్యలో కనెక్షన్ తెగిపోతుంది   | అప్స్ట్రీమ్ చంక్ లేకుండా 10 నిమిషాల తర్వాత స్ట్రీమ్ ఐడిల్ వాచ్డాగ్ అమలైంది | `STREAM_IDLE_TIMEOUT_MS` |
 
-సంబంధిత చర్చలు: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (దీర్ఘ టాస్క్లు మధ్యలో ఆగిపోవడం), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (అఫినిటీ డిఫాల్ట్గా ఎందుకు నిలిపివేయబడింది). ట్రాకింగ్: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+సంబంధిత చర్చలు: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (దీర్ఘ టాస్క్లు మధ్యలో ఆగిపోవడం), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (అఫినిటీ డిఫాల్ట్గా ఎందుకు నిలిపివేయబడింది). ట్రాకింగ్: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. సెషన్ అఫినిటీ — ఒక సంభాషణను ఒక ఖాతాకు పిన్ చేయండి
 

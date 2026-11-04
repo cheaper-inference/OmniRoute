@@ -480,7 +480,7 @@ To standardinnstillinger i OmniRoute kan i det stille sabotere Codex CLI-økter 
 | Økten fortsetter å bytte konto / kontinuiteten i ledetekstbufferen går tapt mellom turer | TTL for økttilhørighet er `0` (deaktivert)                                        | `sessionAffinityTtlMs`   |
 | Tilkoblingen brytes midt i resonneringen uten noen melding til klienten                  | Vakthunden for inaktiv strøm ble utløst etter 10 minutter uten oppstrømsdatablokk | `STREAM_IDLE_TIMEOUT_MS` |
 
-Relaterte diskusjoner: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (avbrudd i lange oppgaver), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (hvorfor tilhørighet er deaktivert som standard). Sporing: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Relaterte diskusjoner: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (avbrudd i lange oppgaver), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (hvorfor tilhørighet er deaktivert som standard). Sporing: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. Økttilhørighet — lås én samtale til én konto
 

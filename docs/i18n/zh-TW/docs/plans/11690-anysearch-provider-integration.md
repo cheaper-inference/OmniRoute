@@ -5,7 +5,7 @@
 ---
 
 範本：xquik #11370（已合併至 release/v3.8.51）。姿態：`fallbackOnly`。
-上游提案：議題 diegosouzapw/OmniRoute#11637。
+上游提案：議題 cheaper-inference/OmniRoute#11637。
 
 ## 1. 服務實際規格（官方文件，經交叉核對）
 

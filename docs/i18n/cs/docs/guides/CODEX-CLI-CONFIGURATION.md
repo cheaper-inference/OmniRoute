@@ -481,7 +481,7 @@ Dvě výchozí hodnoty OmniRoute mohou nenápadně narušit několikahodinové r
 | Relace neustále přepíná účty / mezi tahy se ztrácí kontinuita mezipaměti promptů | TTL afinity relace je `0` (vypnuto)                                    | `sessionAffinityTtlMs`   |
 | Připojení se přeruší během uvažování bez upozornění zobrazeného klientovi        | Hlídač nečinnosti streamu se spustil po 10 minutách bez upstream části | `STREAM_IDLE_TIMEOUT_MS` |
 
-Související diskuse: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (výpadky dlouhých úloh), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (proč je afinita ve výchozím nastavení vypnutá). Sledování: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Související diskuse: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (výpadky dlouhých úloh), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (proč je afinita ve výchozím nastavení vypnutá). Sledování: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. Afinita relace — připnutí jedné konverzace k jednomu účtu
 

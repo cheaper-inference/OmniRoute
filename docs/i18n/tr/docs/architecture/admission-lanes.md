@@ -93,7 +93,7 @@ etkinleştirildiğinde uygulanır.
 
 ## 4. Tek süreçte uzun `/v1/responses` (sağlıklı kapasite payı)
 
-[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437), heap kullanımı
+[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437), heap kullanımı
 `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` değerinin altındayken yapısal açıdan ağır ikinci bir isteğin
 kabul edilmesi için `tryAcquireHealthyHeadroom` işlevini ekledi. `admitChatRequest` tarafından kullanılan BYTE
 yolu (gövdeler ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

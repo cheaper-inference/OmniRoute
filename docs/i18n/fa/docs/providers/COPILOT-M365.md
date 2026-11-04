@@ -120,8 +120,8 @@ OmniRoute فایل HAR را برای یافتن URL مربوط به WebSocket‏
 
 ## منابع
 
-- مسئله: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- بحث: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- مسئله: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- بحث: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - منبع: `src/shared/constants/providers/web-cookie.ts` (تعریف ارائهدهنده)
 - وارد کردن HAR: `src/shared/utils/m365HarImport.ts`
 - فیلدهای اعتبارنامه: `src/shared/providers/webSessionCredentials.ts`

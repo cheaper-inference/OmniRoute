@@ -56,7 +56,7 @@ Wannan **ba ya dakatar da ci gaba**:
 Bincika ko akwai freeze da yake buɗe kafin ka ɗauka cewa ana iya haɗawa cikin reshen da kake so:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 An bayyana tsarin haɗawa (alamar `queue` ta mai shi → Mergify) a cikin

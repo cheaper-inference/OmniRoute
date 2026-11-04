@@ -122,8 +122,8 @@ tariflarda provayder sukut bo‘yicha yashirilgan bo‘lishi mumkin.
 
 ## Manbalar
 
-- Muammo: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Muhokama: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- Muammo: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Muhokama: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - Manba: `src/shared/constants/providers/web-cookie.ts` (provayder ta’rifi)
 - HAR importi: `src/shared/utils/m365HarImport.ts`
 - Hisobga kirish ma’lumotlari maydonlari: `src/shared/providers/webSessionCredentials.ts`

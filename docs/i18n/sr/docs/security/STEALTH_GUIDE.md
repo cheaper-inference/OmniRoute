@@ -176,7 +176,7 @@ Antigravity захтеви чувају текст позиваоца бајт �
 
 - `open-sse/executors/antigravity.ts` — чита `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — прослеђивање акредитива
-- Оригинална пријава инцидента: Дискусија [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Оригинална пријава инцидента: Дискусија [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

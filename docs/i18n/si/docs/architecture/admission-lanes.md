@@ -125,7 +125,7 @@ byte-මට්ටමේ මංතීරු මතකය අධික ලෙස �
 
 ## 4. එක්-process දිගු `/v1/responses` (සෞඛ්ය සම්පන්න-headroom)
 
-[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) මඟින්
+[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) මඟින්
 `tryAcquireHealthyHeadroom` එක් කරන ලද්දේ heap එක
 `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` ට වඩා පහළින් ඇති විට ව්යුහාත්මකව
 බර දෙවන request එකක් පිළිගැනීමටයි. `admitChatRequest` භාවිත කරන BYTE

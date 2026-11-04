@@ -234,7 +234,7 @@ hash suffix ပါသော package directory များအပါအဝင်)
    [Convert]::ToBase64String($b)
    ```
    Output သည် `latest.yml` → `sha512` နှင့် ကိုက်ညီရမည်။ မကိုက်ညီပါက ဖိုင်ကို ဖျက်ပြီး
-   [GitHub releases page](https://github.com/diegosouzapw/OmniRoute/releases) မှသာ ပြန်လည် download လုပ်ပါ။
+   [GitHub releases page](https://github.com/cheaper-inference/OmniRoute/releases) မှသာ ပြန်လည် download လုပ်ပါ။
 2. **ပြန်လည်ရယူပြီး exclude လုပ်ပါ** — roll back လုပ်ခံထားရသော item များကို quarantine မှ ပြန်လည်ရယူပြီး
    `%LOCALAPPDATA%\Programs\OmniRoute` အတွက် exclusion တစ်ခု ထည့်ပါ (Kaspersky → Settings → Threats and Exclusions)၊
    ထို့နောက် ပြန်လည် install လုပ်ပါ။
@@ -825,7 +825,7 @@ omniroute serve --ready-timeout 180000
 
 ## မဖြေရှင်းနိုင်သေးပါသလား?
 
-- **GitHub Issues**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **GitHub Issues**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **ဗိသုကာဖွဲ့စည်းပုံ**: အတွင်းပိုင်း အသေးစိတ်အချက်အလက်များအတွက် [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) ကို ကြည့်ပါ
 - **API ကိုးကားချက်**: endpoint အားလုံးအတွက် [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) ကို ကြည့်ပါ
 - **စနစ်ကျန်းမာရေး Dashboard**: အချိန်နှင့်တစ်ပြေးညီ စနစ်အခြေအနေကို ကြည့်ရှုရန် **Dashboard → Health** ကို စစ်ဆေးပါ

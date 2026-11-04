@@ -30,7 +30,7 @@ Thank you for your interest in contributing! This guide covers everything you ne
 ### Klonování a instalace
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -437,4 +437,4 @@ Poté použijte dovednosti `/deploy-vps-*-cc`, které pomocí rsync synchronizuj
 - **Referenční dokumentace API**: Viz [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
 - **Dokumentace zabezpečení**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
 - **Provozní dokumentace**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Hlášení problémů**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Hlášení problémů**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

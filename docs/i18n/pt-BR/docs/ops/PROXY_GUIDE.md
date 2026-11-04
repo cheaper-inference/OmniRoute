@@ -260,7 +260,7 @@ Isso ocorre uma única vez na primeira inicialização após a atualização. Us
 
 ## Marketplace de Proxies Gratuitos 1proxy
 
-> 🆕 **Contribuição de [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Issue [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕 **Contribuição de [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Issue [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
 
 O OmniRoute integra-se à plataforma da comunidade **[1proxy](https://1proxy-api.aitradepulse.com)** para fornecer acesso a **centenas de proxies gratuitos e validados** de todo o mundo. Isso é ideal para usuários que não possuem sua própria infraestrutura de proxies.
 

@@ -138,8 +138,8 @@ amefichwa kwa chaguomsingi katika baadhi ya viwango.
 
 ## Marejeleo
 
-- Tatizo: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Mjadala: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- Tatizo: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Mjadala: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - Chanzo: `src/shared/constants/providers/web-cookie.ts` (ufafanuzi wa mtoa huduma)
 - Uingizaji wa HAR: `src/shared/utils/m365HarImport.ts`
 - Sehemu za hati tambulishi: `src/shared/providers/webSessionCredentials.ts`

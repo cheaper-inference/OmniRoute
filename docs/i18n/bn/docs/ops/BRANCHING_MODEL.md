@@ -55,7 +55,7 @@ flowchart LR
 আপনার কাঙ্ক্ষিত ব্রাঞ্চটি মার্জযোগ্য ধরে নেওয়ার আগে কোনো খোলা ফ্রিজ আছে কি না পরীক্ষা করুন:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 মার্জের প্রক্রিয়া (মালিকের `queue` লেবেল → Mergify) সম্পর্কে

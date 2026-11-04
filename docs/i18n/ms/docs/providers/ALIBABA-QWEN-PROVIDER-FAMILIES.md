@@ -5,7 +5,7 @@
 ---
 
 Dokumen ini merekodkan keputusan pelaksanaan untuk
-[Isu #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854). Produk awam diwakili sebagai
+[Isu #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854). Produk awam diwakili sebagai
 empat keluarga penyedia. Rantau ialah data sambungan, bukan produk yang berasingan.
 
 ## Keputusan

@@ -260,7 +260,7 @@ K tomu dojde jednou při prvním spuštění po upgradu. Pro opětovné spuště
 
 ## 1proxy Tržiště bezplatných proxy serverů
 
-> 🆕 **Přispěl [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Problém [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕 **Přispěl [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Problém [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
 
 OmniRoute se integruje s komunitní platformou **[1proxy](https://1proxy-api.aitradepulse.com)** a poskytuje přístup ke **stovkám bezplatných, ověřených proxy serverů** z celého světa. To je ideální pro uživatele, kteří nemají vlastní proxy infrastrukturu.
 

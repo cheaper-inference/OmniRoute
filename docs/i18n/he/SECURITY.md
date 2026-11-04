@@ -9,7 +9,7 @@
 אם גיליתם פגיעות אבטחה ב-OmniRoute, אנא דווחו עליה באופן אחראי:
 
 1. **אל תפתחו** דיווח ציבורי ב-GitHub
-2. השתמשו ב-[GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
+2. השתמשו ב-[GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
 3. כללו: תיאור, שלבים לשחזור והשפעה אפשרית
 
 ## לוח זמנים לתגובה
@@ -42,7 +42,7 @@
   לפי המאוחר מביניהם**. תאריך הסיום שיתקבל מתועד בהערות המהדורה של 3.9.0 ובקובץ
   [`ROADMAP.md`](ROADMAP.md) בעת ההשקה.
 - **דיווח על פגיעות בקו ה-LTS:** דרך אותו ערוץ כמו בכל גרסה אחרת —
-  [דיווח אבטחה פרטי ב-GitHub](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
+  [דיווח אבטחה פרטי ב-GitHub](https://github.com/cheaper-inference/OmniRoute/security/advisories/new),
   ולעולם לא דיווח פומבי. ציינו איזו גרסה בדקתם (לדוגמה `3.9.2`); התיקונים נכנסים אל
   `stable/v3` ומועברים קדימה אל v4.
 - **בסיס האבטחה בעת השקת ה-LTS:** מצב הסורק שנמדד, הגנת הנתיבים

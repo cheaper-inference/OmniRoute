@@ -35,7 +35,7 @@ CI in koraki usklajevanja.
 ### Kloniranje in namestitev
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -441,4 +441,4 @@ Nato uporabite veščine `/deploy-vps-*-cc`, ki z rsync sinhronizirajo `dist/` z
 - **Referenca API-ja**: Glejte [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
 - **Varnostna dokumentacija**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
 - **Operativna dokumentacija**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Težave**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Težave**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

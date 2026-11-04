@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 കോഡ് ക്ലോൺ ചെയ്ത് ഡയറക്ടറിയിൽ പ്രവേശിക്കുക
 
 ```powershell
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly മെഷീനുകളിൽ സ്വയമേവ ഒരു റോളി�
 
 ### 9.1 നിങ്ങളുടെ ഫോർക്കിന്റെ `fly.toml` നിലനിർത്തിക്കൊണ്ട് അപ്സ്ട്രീം റിപ്പോസിറ്ററി അപ്ഡേറ്റുകൾ പിന്തുടരൽ
 
-നിലവിലെ റിപ്പോസിറ്ററി ഒരു ഫോർക്ക് ആണെങ്കിൽ, അപ്സ്ട്രീം `https://github.com/diegosouzapw/OmniRoute`-ൽ നിന്നുള്ള അപ്ഡേറ്റുകൾ സമന്വയിപ്പിക്കാൻ നിങ്ങൾ ആഗ്രഹിക്കുന്നുവെങ്കിൽ, താഴെയുള്ള പ്രവർത്തനക്രമം പിന്തുടരുക.
+നിലവിലെ റിപ്പോസിറ്ററി ഒരു ഫോർക്ക് ആണെങ്കിൽ, അപ്സ്ട്രീം `https://github.com/cheaper-inference/OmniRoute`-ൽ നിന്നുള്ള അപ്ഡേറ്റുകൾ സമന്വയിപ്പിക്കാൻ നിങ്ങൾ ആഗ്രഹിക്കുന്നുവെങ്കിൽ, താഴെയുള്ള പ്രവർത്തനക്രമം പിന്തുടരുക.
 
 ആദ്യം, നിങ്ങളുടെ റിമോട്ടുകൾ പരിശോധിക്കുക:
 
@@ -309,7 +309,7 @@ git remote -v
 `upstream` കോൺഫിഗർ ചെയ്തിട്ടില്ലെങ്കിൽ, അത് ചേർക്കുക:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
 അപ്സ്ട്രീമുമായി സമന്വയിപ്പിക്കുന്നതിന് മുമ്പ്, ഏറ്റവും പുതിയ കമ്മിറ്റുകളും ടാഗുകളും ലഭ്യമാക്കുക:

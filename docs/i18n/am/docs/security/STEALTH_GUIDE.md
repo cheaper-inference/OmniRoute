@@ -174,7 +174,7 @@ aider, continue.dev, copilot, avante, codecompanion
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS`ን ያነባል
 - `src/lib/oauth/providers/antigravity.ts` — የማረጋገጫ መረጃ ማገናኛ
-- የመጀመሪያው የክስተት ሪፖርት፦ ውይይት [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- የመጀመሪያው የክስተት ሪፖርት፦ ውይይት [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

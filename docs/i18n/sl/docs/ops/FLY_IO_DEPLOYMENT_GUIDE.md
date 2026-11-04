@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 Kloniranje kode in premik v imenik
 
 ```powershell
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly bo samodejno izvedel postopno posodobitev računalnikov.
 
 ### 9.1 Spremljanje posodobitev izvornega repozitorija ob ohranitvi datoteke `fly.toml` vaše razvejane kopije
 
-Če je trenutni repozitorij razvejana kopija in želite sinhronizirati posodobitve iz izvornega repozitorija `https://github.com/diegosouzapw/OmniRoute`, sledite spodnjemu postopku.
+Če je trenutni repozitorij razvejana kopija in želite sinhronizirati posodobitve iz izvornega repozitorija `https://github.com/cheaper-inference/OmniRoute`, sledite spodnjemu postopku.
 
 Najprej preverite oddaljene repozitorije:
 
@@ -309,7 +309,7 @@ Videti bi morali vsaj:
 Če `upstream` ni konfiguriran, ga dodajte:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
 Pred sinhronizacijo z izvornim repozitorijem pridobite najnovejše potrditve in oznake:

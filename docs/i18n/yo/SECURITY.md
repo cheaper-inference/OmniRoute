@@ -9,7 +9,7 @@
 Tí o bá ṣàwárí àìlera aabo kan nínú OmniRoute, jọ̀wọ́ jábọ̀ rẹ̀ lọ́nà tó bójú mu:
 
 1. **MÁ ṢE** ṣí ìṣòro GitHub kan síta fún gbogbo ènìyàn
-2. Lo [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
+2. Lo [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
 3. Fi àwọn wọ̀nyí sínú rẹ̀: àpèjúwe, àwọn ìgbésẹ̀ láti tún un ṣe, àti ipa tó lè ní
 
 ## Àkókò Ìdáhùn
@@ -42,7 +42,7 @@ Lẹ́yìn 3.8.59, ẹ̀yà tó kàn ni **3.9.0**, èyí tó ṣí ìlà atilẹ
   èyíkéyìí tó bá pẹ́ jù lọ**. A ó ṣe àkọsílẹ̀ ọjọ́ ìparí tó yọrí sí nínú àwọn àkọsílẹ̀ ìtújáde 3.9.0 àti nínú
   [`ROADMAP.md`](ROADMAP.md) nígbà tí ìtújáde náà bá ṣẹlẹ̀.
 - **Jíjabọ̀ àléébù ààbò kan nínú ìlà LTS:** lo ikanni kan náà bíi ti ẹ̀yà míì —
-  [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) aládàáni,
+  [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) aládàáni,
   kì í ṣe ọ̀ràn gbangba láé. Sọ ẹ̀yà tí o dánwò (fún àpẹẹrẹ `3.9.2`); a máa fi àwọn àtúnṣe sí
   `stable/v3`, a sì máa gbé wọn lọ síwájú sí v4.
 - **Ìpìlẹ̀ ààbò nígbà ìtújáde LTS:** ipò skánà tí a wọn, ẹ̀rí ààbò ipa-ọ̀nà àti

@@ -180,7 +180,7 @@ Scríobhann an dá fhoirm próifíl **fíordheimhnithe** amháin do 5dive, agus 
 
 Tugtar an eochair API do 5dive ar **stdin** (`--api-key=-`), mar sin ní bhíonn sí le feiceáil riamh in aschur `ps`.
 
-Tríd an bpróifíl a dhíriú ar **theaglaim** OmniRoute seachas ar shamhail aonair, faigheann an flít cúltaca soláthraí: nuair a thit an príomhchríochphointe go hiomlán i lár seala sa rith a taifeadadh ar [#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), chríochnaigh an gníomhaire na céimeanna a bhí fágtha aige ar an rogha chúltaca agus níor nocht sé an briseadh seirbhíse riamh.
+Tríd an bpróifíl a dhíriú ar **theaglaim** OmniRoute seachas ar shamhail aonair, faigheann an flít cúltaca soláthraí: nuair a thit an príomhchríochphointe go hiomlán i lár seala sa rith a taifeadadh ar [#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), chríochnaigh an gníomhaire na céimeanna a bhí fágtha aige ar an rogha chúltaca agus níor nocht sé an briseadh seirbhíse riamh.
 
 ---
 

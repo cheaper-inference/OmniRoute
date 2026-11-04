@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 Kodu Klonlama ve Dizine Girme
 
 ```powershell
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly, makinelerde otomatik olarak aşamalı bir güncelleme gerçekleştirir.
 
 ### 9.1 Fork'unuzun `fly.toml` Dosyasını Korurken Üst Depo Güncellemelerini Takip Etme
 
-Geçerli depo bir fork ise ve `https://github.com/diegosouzapw/OmniRoute` üst deposundaki güncellemeleri senkronize etmek istiyorsanız aşağıdaki iş akışını izleyin.
+Geçerli depo bir fork ise ve `https://github.com/cheaper-inference/OmniRoute` üst deposundaki güncellemeleri senkronize etmek istiyorsanız aşağıdaki iş akışını izleyin.
 
 Öncelikle uzak depolarınızı doğrulayın:
 
@@ -309,7 +309,7 @@ En azından şunları görmelisiniz:
 `upstream` yapılandırılmamışsa ekleyin:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
 Üst depoyla senkronize etmeden önce en son commit'leri ve etiketleri alın:

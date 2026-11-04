@@ -198,7 +198,7 @@ Môi trường quy trình được ghi lại khi ứng dụng khởi động, do
 
 ## Tự động cập nhật
 
-Sử dụng `electron-updater` với nhà cung cấp GitHub (`diegosouzapw/OmniRoute`).
+Sử dụng `electron-updater` với nhà cung cấp GitHub (`cheaper-inference/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Các sự kiện được chuyển tiếp tới trình kết xuất thông qua `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (với `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ ký AppImage là tùy chọn — đặt `LINUX_GPG_KEY` nếu ký.
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Các bản phát hành được xuất bản lên GitHub Releases (`diegosouzapw/OmniRoute`), đây cũng là nơi `electron-updater` kiểm tra các phiên bản mới.
+Các bản phát hành được xuất bản lên GitHub Releases (`cheaper-inference/OmniRoute`), đây cũng là nơi `electron-updater` kiểm tra các phiên bản mới.
 
 ## Khắc phục sự cố
 

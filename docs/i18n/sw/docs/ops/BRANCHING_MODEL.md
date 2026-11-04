@@ -56,7 +56,7 @@ hufunguliwa. Hilo **halisimamishi usanidi**:
 Kagua kama kuna usitishaji ulio wazi kabla ya kudhani kuwa tawi unalotaka linaweza kuunganishwa:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Taratibu za kuunganisha (lebo ya mmiliki ya `queue` → Mergify) zimefafanuliwa katika

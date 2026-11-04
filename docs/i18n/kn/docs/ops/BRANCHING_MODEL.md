@@ -56,7 +56,7 @@ flowchart LR
 ನೀವು ಬಯಸುವ ಶಾಖೆಯನ್ನು ವಿಲೀನಗೊಳಿಸಬಹುದು ಎಂದು ಊಹಿಸುವ ಮೊದಲು, ತೆರೆದಿರುವ ಸ್ಥಗಿತವಿದೆಯೇ ಎಂದು ಪರಿಶೀಲಿಸಿ:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 ವಿಲೀನ ಕಾರ್ಯವಿಧಾನಗಳನ್ನು (ಮಾಲೀಕರ `queue` ಲೇಬಲ್ → Mergify)

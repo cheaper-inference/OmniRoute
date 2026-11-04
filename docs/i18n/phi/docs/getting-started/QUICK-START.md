@@ -29,7 +29,7 @@ Ang `:latest` ang pinakamataas na **na-publish** na stable na SemVer. Hindi nito
 ### Opsyon C: Mula sa Source
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 npm run dev
@@ -165,4 +165,4 @@ Awtomatikong nilalaktawan ng OmniRoute ang mga provider na hindi gumana at sinus
 
 - **[Pag-troubleshoot](../guides/TROUBLESHOOTING.md)** — Mga karaniwang problema at solusyon
 - **[Discord](https://discord.gg/U47eFqAXCn)** — Suporta mula sa komunidad
-- **[GitHub Issues](https://github.com/diegosouzapw/OmniRoute/issues)** — Mag-ulat ng mga bug
+- **[GitHub Issues](https://github.com/cheaper-inference/OmniRoute/issues)** — Mag-ulat ng mga bug

@@ -170,7 +170,7 @@ aider, continue.dev, copilot, avante, codecompanion
 
 - `open-sse/executors/antigravity.ts` — អាន `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — ការតភ្ជាប់ credential
-- របាយការណ៍ហេតុការណ៍ដើម៖ ការពិភាក្សា [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- របាយការណ៍ហេតុការណ៍ដើម៖ ការពិភាក្សា [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

@@ -298,7 +298,7 @@ Docker 中的内存行为：
 
 ### 编码智能体的运行时 RAM
 
-Docker 默认的 1 GiB 仅是仪表板/轻量聊天场景的最低配置，并非生产环境配置。较长的 `POST /v1/responses` 请求体（数百条消息、数十个工具）在压缩期间会在内存中保留多个对象图。两个重叠的、每个约 3 MiB / 约 75 万 token 的请求，曾导致 V8 在 **12 GiB** 老生代空间下中止（`FATAL ERROR: Reached heap limit`），并且还触发过 16 GiB cgroup OOM。参见 [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849)。
+Docker 默认的 1 GiB 仅是仪表板/轻量聊天场景的最低配置，并非生产环境配置。较长的 `POST /v1/responses` 请求体（数百条消息、数十个工具）在压缩期间会在内存中保留多个对象图。两个重叠的、每个约 3 MiB / 约 75 万 token 的请求，曾导致 V8 在 **12 GiB** 老生代空间下中止（`FATAL ERROR: Reached heap limit`），并且还触发过 16 GiB cgroup OOM。参见 [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849)。
 
 请将 **cgroup `--memory` 设置为高于堆大小**——原生缓冲区、SQLite 和压缩过程中的中间数据都位于 V8 堆之外。
 
@@ -633,7 +633,7 @@ spec:
 
 `preStop` sleep 让 kube 在SIGTERM之前删除服务端点，所以**新的**交通停止撞击垂死的进程。飞行中的`/v1/responses` SSE通过重量级准入租约耗尽至`SHUTDOWN_TIMEOUT_MS` （默认 30 秒）（#11015）。仍然到达进程的新请求将获得`503` + `Retry-After: 5`。在更换就绪之前重新创建空端点间隙仍然是硬中断 - 这是SQLite拓扑，而不是探针配置错误。
 
-外部Postgres / 多写入者HA是**不是**记录的库存路径。如果您需要HA，请保留单个副本或运行项目已单独测试和记录的拓扑。 Postgres/MySQL作品位于[#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) 。在那之前，唯一受支持的繁殖方式**大的**`/v1/responses`容量是 N 个独立进程（下一节），而不是一个卷上的`replicas > 1` 。
+外部Postgres / 多写入者HA是**不是**记录的库存路径。如果您需要HA，请保留单个副本或运行项目已单独测试和记录的拓扑。 Postgres/MySQL作品位于[#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) 。在那之前，唯一受支持的繁殖方式**大的**`/v1/responses`容量是 N 个独立进程（下一节），而不是一个卷上的`replicas > 1` 。
 
 ## 横向扩展：N个独立进程
 
@@ -643,11 +643,11 @@ spec:
 
 当需要刷新时，被动实例会重新读取连接，并仅采用不同的、未过期的访问令牌。否则，刷新将被禁用，而不会过期或停用连接或计算刷新中断器故障。真正的上游身份验证失败仍然使用正常的失败计数、指数冷却和正常的客户端错误；帐户停用仍然是永久性的。在访问令牌过期之前同步所有者的轮换令牌（默认主动刷新提前时间为五分钟），或重新导入Codex身份验证文件。被动导入存储提供的令牌，而不在令牌端点验证它们。手动dashboard/API刷新返回`409 refresh_disabled`；新的OAuth登录没有变化。请参阅[环境参考](../reference/ENVIRONMENT.md#passive-codex-token-refresh)。
 
-一个节点进程是**一堆V8** 。两个重叠的~ 3 MiB / ~ 750k 令牌编码代理`POST /v1/responses` (RTK + Caveman) 在~ 12 Gi (`FATAL ERROR: Reached heap limit`) 处中止该堆，并且可以OOM一个 16 Gi cgroup。参见[#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) 。该测量是**内存预算**警告，不是两个并发长`/v1/responses`的乘积硬最大值。重量级聊天准入由自动生成的摄取字节预算（`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`、 `src/shared/middleware/admissionBudget.ts`）控制，该预算大小来自相同的V8/cgroup上限—在已经调整大小的进程上向上覆盖它（或设置旧的`OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT`请求计数上限），从而重新引入中止。小型聊天， `/healthz`、 `/v1/models`和MCP是**不是**在那顶帽子里。
+一个节点进程是**一堆V8** 。两个重叠的~ 3 MiB / ~ 750k 令牌编码代理`POST /v1/responses` (RTK + Caveman) 在~ 12 Gi (`FATAL ERROR: Reached heap limit`) 处中止该堆，并且可以OOM一个 16 Gi cgroup。参见[#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849) 。该测量是**内存预算**警告，不是两个并发长`/v1/responses`的乘积硬最大值。重量级聊天准入由自动生成的摄取字节预算（`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`、 `src/shared/middleware/admissionBudget.ts`）控制，该预算大小来自相同的V8/cgroup上限—在已经调整大小的进程上向上覆盖它（或设置旧的`OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT`请求计数上限），从而重新引入中止。小型聊天， `/healthz`、 `/v1/models`和MCP是**不是**在那顶帽子里。
 
 ### 1.单进程：两个以上的长`/v1/responses`
 
-一个**健康**进程（堆低于`OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`，默认`0.75`）**可能**当进程范围的飞行字节预算 (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) 仍有空间时，运行两个以上的并发长`POST /v1/responses` 。 `OMNIROUTE_CHAT_LARGE_BODY_BYTES`或以上的主体（默认 256 KiB）采用与结构重请求相同的重量级租约，并使用相同的[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom`转义（`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`）。数十个并发长SSE客户端（运营商通常需要 40-50 个）**内存预算**问题—大小堆+ primary/headroom插槽+ `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` —不是严格的“最大 2”乘积限制。受压堆仍然会因可重试的`503`而脱落，因此 #7849 不会返回。
+一个**健康**进程（堆低于`OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`，默认`0.75`）**可能**当进程范围的飞行字节预算 (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) 仍有空间时，运行两个以上的并发长`POST /v1/responses` 。 `OMNIROUTE_CHAT_LARGE_BODY_BYTES`或以上的主体（默认 256 KiB）采用与结构重请求相同的重量级租约，并使用相同的[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom`转义（`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`）。数十个并发长SSE客户端（运营商通常需要 40-50 个）**内存预算**问题—大小堆+ primary/headroom插槽+ `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` —不是严格的“最大 2”乘积限制。受压堆仍然会因可重试的`503`而脱落，因此 #7849 不会返回。
 
 到**乘法堆**（独立V8老空间）**今天**:
 
@@ -690,7 +690,7 @@ volumes:
   omniroute-b-data:
 ```
 
-进程内密度（ HTTP隔离压缩）为[#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023) 。共享持久状态上的一个逻辑集群是[#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) 。
+进程内密度（ HTTP隔离压缩）为[#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023) 。共享持久状态上的一个逻辑集群是[#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) 。
 
 ## Docker 内的 Gemini 区域错误
 
@@ -729,7 +729,7 @@ docker compose exec omniroute node -e 'require("node:dns").lookup("generativelan
 
 ### 主机级替代方案：可用的 IPv6 和解析器策略
 
-[#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) 的报告者通过
+[#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) 的报告者通过
 启用容器 IPv6 并更改 glibc 地址选择，在其环境中恢复了访问。
 应将其视为特定于环境的替代方案。调整解析器偏好设置之前，请确认主机 IPv6
 正常工作，并检查容器的出站连接/路由和防火墙规则。

@@ -173,7 +173,7 @@ Antigravity ଅନୁରୋଧଗୁଡ଼ିକ କଲର୍ର ଟେକ୍ସ
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` ପଢ଼େ
 - `src/lib/oauth/providers/antigravity.ts` — କ୍ରେଡେନ୍ସିଆଲ୍ ପ୍ଲମ୍ବିଂ
-- ମୂଳ ଘଟଣା ରିପୋର୍ଟ: ଆଲୋଚନା [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- ମୂଳ ଘଟଣା ରିପୋର୍ଟ: ଆଲୋଚନା [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

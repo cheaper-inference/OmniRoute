@@ -55,7 +55,7 @@ açılır. Bu, **geliştirmeyi durdurmaz**:
 İstediğiniz dalın birleştirilebilir olduğunu varsaymadan önce açık bir dondurma olup olmadığını kontrol edin:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Birleştirme mekanizmaları (sahibin eklediği `queue` etiketi → Mergify)

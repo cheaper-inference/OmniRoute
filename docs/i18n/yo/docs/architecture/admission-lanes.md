@@ -123,7 +123,7 @@ lòdì sí ọ̀nà ayálégbé ti **òbí**.
 
 ## 4. `/v1/responses` gígùn nínú process kan (ààyè-àfikún nígbà tí ó ní ìlera)
 
-[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) ṣàfikún
+[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) ṣàfikún
 `tryAcquireHealthyHeadroom` kí a lè gba request kejì tó ní ìgbékalẹ̀ tó wuwo wọlé
 nígbà tí heap bá wà ní ìsàlẹ̀ `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. Ipa-ọ̀nà BYTE
 tí `admitChatRequest` ń lò (bodies ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

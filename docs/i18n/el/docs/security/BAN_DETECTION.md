@@ -51,8 +51,8 @@ this service has been disabled in this account                  (Antigravity)
 Η διατήρηση της φράσης στη λίστα αποκλεισμών καθιστούσε επίσης απρόσιτο τον ανακτήσιμο κλάδο 403 του cloud-code στο
 `classifyProviderError` για αυτήν τη διατύπωση, επειδή το `accountDeactivated`
 αξιολογείται πρώτο — επομένως, η ανάκτηση δρομολόγησης έργου που προστέθηκε για το Gemini Code Assist στα
-[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) και
-[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) δεν μπορούσε ποτέ να εκτελεστεί.
+[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) και
+[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) δεν μπορούσε ποτέ να εκτελεστεί.
 
 Τρεις παρακείμενοι, **ξεχωριστοί** πίνακες σημάτων _δεν_ αποτελούν μέρος του εντοπισμού απαγορευμένων λέξεων-κλειδιών:
 

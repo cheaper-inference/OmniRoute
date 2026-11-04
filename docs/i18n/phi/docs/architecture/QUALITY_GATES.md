@@ -428,7 +428,7 @@ nakabinbin ang implementasyon).
 ### CodeQL ratchet: dalas ng pag-refresh at manual na pag-trigger
 
 Binabasa ng `check:codeql-ratchet` ang **estado ng repo, na nire-refresh ayon sa iskedyul — hindi sa bawat PR.**
-Iniuulat ng `gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` ang
+Iniuulat ng `gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` ang
 `state: configured`, `schedule: weekly`: ang default-setup scan ng GitHub, hindi isang pagsusuri sa bawat push.
 Bunga nito: pagkatapos ma-merge ang isang PR na NAG-AAYOS ng mga alert, patuloy na binabasa ng ratchet
 ang luma at mas mataas na bilang hanggang sa tumakbo ang susunod na nakaiskedyul na scan — kaya nag-uulat ito

@@ -260,7 +260,7 @@ curl -X POST http://localhost:20128/api/v1/management/proxies/bulk-assign \
 
 ## 1proxy անվճար պրոքսիների շուկա
 
-> 🆕 **Ներդրվել է [@oyi77](https://github.com/oyi77)-ի կողմից** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Խնդիր [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕 **Ներդրվել է [@oyi77](https://github.com/oyi77)-ի կողմից** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Խնդիր [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
 
 OmniRoute-ը ինտեգրվում է **[1proxy](https://1proxy-api.aitradepulse.com)** համայնքային հարթակի հետ՝ ամբողջ աշխարհից **հարյուրավոր անվճար, վավերացված պրոքսիների** հասանելիություն ապահովելու համար։ Սա կատարյալ լուծում է այն օգտատերերի համար, որոնք չունեն սեփական պրոքսի ենթակառուցվածք։
 

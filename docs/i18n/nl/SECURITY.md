@@ -9,7 +9,7 @@
 Als u een beveiligingskwetsbaarheid in OmniRoute ontdekt, meld deze dan op verantwoorde wijze:
 
 1. Open **GEEN** openbare GitHub-issue
-2. Gebruik [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
+2. Gebruik [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
 3. Vermeld: beschrijving, reproductiestappen en mogelijke impact
 
 ## Reactietijdlijn
@@ -42,7 +42,7 @@ Na 3.8.59 is de volgende versie **3.9.0**, waarmee de lijn voor langdurige onder
   afhankelijk van welke datum later valt**. De resulterende einddatum wordt bij de release vastgelegd in de releaseopmerkingen van 3.9.0 en in
   [`ROADMAP.md`](ROADMAP.md).
 - **Een kwetsbaarheid in de LTS-lijn melden:** via hetzelfde kanaal als voor elke andere versie —
-  een privé-[GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
+  een privé-[GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new),
   nooit een openbare issue. Vermeld welke versie u hebt getest (bijvoorbeeld `3.9.2`); oplossingen worden toegepast op
   `stable/v3` en voorwaarts geporteerd naar v4.
 - **Beveiligingsbasislijn bij de LTS-release:** de gemeten scannerstatus en het bewijs voor routebeveiliging en

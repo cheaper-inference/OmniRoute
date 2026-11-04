@@ -5,7 +5,7 @@
 ---
 
 Acest document consemnează decizia de implementare pentru
-[Problema #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854). Produsele publice sunt
+[Problema #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854). Produsele publice sunt
 reprezentate sub forma a patru familii de furnizori. Regiunea reprezintă date de conexiune, nu un produs separat.
 
 ## Decizie

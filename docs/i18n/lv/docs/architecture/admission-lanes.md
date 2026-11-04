@@ -124,7 +124,7 @@ neizraisa 503 citai sesijai”) bez nosacījumiem nodrošina 1. sistēma, bet 2.
 
 ## 4. Ilgstoši `/v1/responses` vienā procesā (veselīgas rezerves)
 
-[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) pievienoja
+[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) pievienoja
 `tryAcquireHealthyHeadroom`, lai tiktu pieņemts otrs strukturāli apjomīgs pieprasījums,
 kad kaudzes izmantojums ir zemāks par `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. BYTE
 ceļš, ko izmanto `admitChatRequest` (ķermeņiem ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

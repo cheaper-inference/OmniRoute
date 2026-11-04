@@ -29,7 +29,7 @@ docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
 ### Variant C: lähtekoodist
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 npm run dev
@@ -165,4 +165,4 @@ OmniRoute jätab tõrkunud teenusepakkujad automaatselt vahele ja proovib järgm
 
 - **[Tõrkeotsing](../guides/TROUBLESHOOTING.md)** — levinud probleemid ja lahendused
 - **[Discord](https://discord.gg/U47eFqAXCn)** — kogukonna tugi
-- **[GitHub Issues](https://github.com/diegosouzapw/OmniRoute/issues)** — teata vigadest
+- **[GitHub Issues](https://github.com/cheaper-inference/OmniRoute/issues)** — teata vigadest

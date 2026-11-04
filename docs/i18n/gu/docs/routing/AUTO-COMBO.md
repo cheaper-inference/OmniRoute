@@ -127,7 +127,7 @@ handleComboChat (પર્સિસ્ટેડ કોમ્બોઝ જેવ�
 
 ## વાસ્તવિક Model Id સાથે મેળ ખાતાં Combo નામો
 
-જે combo નું `name` કોઈ bare model id જેવું જ હોય (દા.ત. `gpt-5.5` નામનું combo), તે કોઈ bug નહીં પરંતુ **ઇરાદાપૂર્વકની, સમર્થિત પેટર્ન** છે: આ [#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940)માં દસ્તાવેજીકૃત, દરેક model id માટેના provider fallback ની કાર્યપદ્ધતિ છે. bare-model-id resolution પહેલાં combo resolution તપાસવામાં આવતું હોવાથી (`src/sse/services/model.ts`માં `getComboForModel()`), bare id `gpt-5.5` માટેની request સીધી એક provider પાસે જવાને બદલે combo ના targets (દા.ત. `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) મારફતે route થાય છે — આ [#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) માટે બનાવવામાં આવેલી combo-before-rewrite precedence નો ફરી ઉપયોગ કરે છે અને તેનું regression પરીક્ષણ `tests/unit/responses-combo-resolution-3227.test.ts` તથા `tests/unit/combo-name-codex-responses-rewrite.test.ts` દ્વારા કરવામાં આવે છે.
+જે combo નું `name` કોઈ bare model id જેવું જ હોય (દા.ત. `gpt-5.5` નામનું combo), તે કોઈ bug નહીં પરંતુ **ઇરાદાપૂર્વકની, સમર્થિત પેટર્ન** છે: આ [#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940)માં દસ્તાવેજીકૃત, દરેક model id માટેના provider fallback ની કાર્યપદ્ધતિ છે. bare-model-id resolution પહેલાં combo resolution તપાસવામાં આવતું હોવાથી (`src/sse/services/model.ts`માં `getComboForModel()`), bare id `gpt-5.5` માટેની request સીધી એક provider પાસે જવાને બદલે combo ના targets (દા.ત. `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) મારફતે route થાય છે — આ [#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) માટે બનાવવામાં આવેલી combo-before-rewrite precedence નો ફરી ઉપયોગ કરે છે અને તેનું regression પરીક્ષણ `tests/unit/responses-combo-resolution-3227.test.ts` તથા `tests/unit/combo-name-codex-responses-rewrite.test.ts` દ્વારા કરવામાં આવે છે.
 
 વાસ્તવિક model id ને shadow કરતું નામ ધરાવતું combo બનાવવું અથવા તેનું નામ બદલવું **ક્યારેય નકારવામાં આવતું નથી** — આમ કરવાથી આ દસ્તાવેજીકૃત workflow તૂટી જશે. તેના બદલે (#8530), જ્યારે (નવું) નામ કોઈ વાસ્તવિક model id સાથે અથડાય ત્યારે `POST /api/combos` અને `PUT /api/combos/[id]` response સાથે non-blocking `warning` field જોડે છે:
 
@@ -163,7 +163,7 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 - **`auto` તમારા combos નો ઉપયોગ કરતું નથી.** `auto`/`auto/*` પોતાનો zero-config candidate pool બનાવે છે અને માત્ર ત્યારે જ persisted combos તપાસે છે જ્યારે કોઈ combo નું નામ ખરેખર `auto` હોય (આ ભલામણપાત્ર નથી). Combo મારફતે route કરવા માટે તેનું ચોક્કસ નામ મોકલો — `auto` નહીં.
 - **`openrouter/auto` એક વાસ્તવિક, ચૂકવણીપાત્ર OpenRouter product** ("Auto Best Available") છે, OmniRoute alias નથી. તે OpenRouter registry (`open-sse/config/providers/registry/openrouter/index.ts`) ની એકમાત્ર static model entry છે અને તેનું billing અલગથી થાય છે. તેને `auto` pools માંથી બાકાત રાખવા માટે Settings → Routing → Hide paid models નો ઉપયોગ કરો.
 
-આ દસ્તાવેજીકરણ જેના વિશેની મૂળ ગેરસમજને સ્પષ્ટ કરે છે તે માટે [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) અને [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) જુઓ.
+આ દસ્તાવેજીકરણ જેના વિશેની મૂળ ગેરસમજને સ્પષ્ટ કરે છે તે માટે [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) અને [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) જુઓ.
 
 ## તે કેવી રીતે કાર્ય કરે છે (સંગ્રહિત ઑટો-કોમ્બોઝ)
 

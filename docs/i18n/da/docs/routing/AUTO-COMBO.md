@@ -129,7 +129,7 @@ Automatisk scoring vælger den bedste udbyder/model pr. anmodning
 
 ## Kombinationsnavne, der matcher et reelt model-id
 
-En kombination, hvis `name` er identisk med et model-id uden præfiks (f.eks. en kombination med navnet `gpt-5.5`), er et **tilsigtet og understøttet mønster**, ikke en fejl: Det er mekanismen til reserveudbydere pr. model-id, som er dokumenteret i [#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Da kombinationsopslag udføres før opslag af model-id'er uden præfiks (`getComboForModel()` i `src/sse/services/model.ts`), dirigeres en anmodning om id'et `gpt-5.5` uden præfiks gennem kombinationens destinationer (f.eks. `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) i stedet for direkte til en enkelt udbyder — dette genbruger prioriteten af kombinationer før omskrivning, som blev udviklet til [#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227), og regressionstestes af `tests/unit/responses-combo-resolution-3227.test.ts` og `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
+En kombination, hvis `name` er identisk med et model-id uden præfiks (f.eks. en kombination med navnet `gpt-5.5`), er et **tilsigtet og understøttet mønster**, ikke en fejl: Det er mekanismen til reserveudbydere pr. model-id, som er dokumenteret i [#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940). Da kombinationsopslag udføres før opslag af model-id'er uden præfiks (`getComboForModel()` i `src/sse/services/model.ts`), dirigeres en anmodning om id'et `gpt-5.5` uden præfiks gennem kombinationens destinationer (f.eks. `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) i stedet for direkte til en enkelt udbyder — dette genbruger prioriteten af kombinationer før omskrivning, som blev udviklet til [#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227), og regressionstestes af `tests/unit/responses-combo-resolution-3227.test.ts` og `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
 
 Oprettelse eller omdøbning af en kombination til et navn, der overskygger et reelt model-id, **afvises aldrig** — det ville ødelægge denne dokumenterede arbejdsgang. I stedet tilføjer `POST /api/combos` og `PUT /api/combos/[id]` (#8530) et ikke-blokerende `warning`-felt til svaret, når det (nye) navn kolliderer med et reelt model-id:
 
@@ -165,7 +165,7 @@ To almindelige faldgruber:
 - **`auto` bruger ikke dine kombinationer.** `auto`/`auto/*` opbygger sin egen kandidatpulje uden konfiguration og konsulterer kun gemte kombinationer, hvis en kombination bogstaveligt talt hedder `auto` (anbefales ikke). For at dirigere gennem en kombination skal du sende dens nøjagtige navn — ikke `auto`.
 - **`openrouter/auto` er et reelt, betalt OpenRouter-produkt** ("Auto Best Available"), ikke et OmniRoute-alias. Det er den eneste statiske modelpost i OpenRouter-registret (`open-sse/config/providers/registry/openrouter/index.ts`) og faktureres separat. Brug Indstillinger → Routing → Skjul betalte modeller for at udelukke det fra `auto`-puljer.
 
-Se [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) og [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) for den oprindelige forvirring, som dette dokumenterer.
+Se [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) og [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) for den oprindelige forvirring, som dette dokumenterer.
 
 ## Sådan fungerer det (lagrede Auto-Combos)
 

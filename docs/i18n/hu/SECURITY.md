@@ -9,7 +9,7 @@
 Ha biztonsági sérülékenységet fedez fel az OmniRoute-ban, kérjük, felelősségteljesen jelentse:
 
 1. **NE** nyisson nyilvános GitHub-hibajegyet
-2. Használja a [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) felületét
+2. Használja a [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) felületét
 3. Adja meg a következőket: leírás, reprodukálási lépések és lehetséges hatás
 
 ## Válaszadási ütemezés
@@ -42,7 +42,7 @@ A 3.8.59 után következő verzió a **3.9.0**, amely megnyitja a hosszú távú
   attól függően, hogy melyik a későbbi időpont**. Az így meghatározott záró dátumot a 3.9.0 kiadási megjegyzéseiben és a
   [`ROADMAP.md`](ROADMAP.md) fájlban rögzítjük a kiadáskor.
 - **Biztonsági rés jelentése az LTS-ágban:** ugyanazon a csatornán történik, mint bármely más verziónál —
-  privát [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) formájában,
+  privát [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) formájában,
   soha nem nyilvános hibajegyként. Adja meg, melyik verziót tesztelte (például `3.9.2`); a javítások a
   `stable/v3` ágra kerülnek, majd átvezetjük őket a v4-be.
 - **Biztonsági alapállapot az LTS kiadásakor:** a mérőeszközökkel rögzített állapotot, az útvonalvédelmi és

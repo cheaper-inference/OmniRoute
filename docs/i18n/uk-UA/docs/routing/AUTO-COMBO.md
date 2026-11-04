@@ -132,13 +132,13 @@ handleComboChat (той самий рушій, що й для збережени
 Комбінація, `name` якої ідентичне звичайному ідентифікатору моделі (наприклад, комбінація з назвою
 `gpt-5.5`), — це **навмисний і підтримуваний шаблон**, а не помилка: це
 механізм резервного перемикання між постачальниками для окремих ідентифікаторів моделей, описаний у
-[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Оскільки визначення
+[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940). Оскільки визначення
 комбінації виконується до визначення звичайного ідентифікатора моделі
 (`getComboForModel()` у `src/sse/services/model.ts`), запит зі звичайним
 ідентифікатором `gpt-5.5` спрямовується через цілі комбінації (наприклад,
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`), а не безпосередньо до
 одного постачальника — це повторно використовує пріоритет комбінації перед перезаписуванням, створений для
-[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227), і
+[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227), і
 перевіряється регресійними тестами `tests/unit/responses-combo-resolution-3227.test.ts` та
 `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
 
@@ -184,7 +184,7 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 - **`auto` не використовує ваші комбінації.** `auto`/`auto/*` формує власний пул кандидатів, що не потребує налаштування, і звертається до збережених комбінацій лише тоді, коли одна з них буквально має назву `auto` (не рекомендовано). Щоб спрямувати запит через комбінацію, надішліть її точну назву, а не `auto`.
 - **`openrouter/auto` — це реальний платний продукт OpenRouter** («Найкращий доступний автоматично»), а не псевдонім OmniRoute. Це єдиний статичний запис моделі в реєстрі OpenRouter (`open-sse/config/providers/registry/openrouter/index.ts`), і він оплачується окремо. Щоб виключити його з пулів `auto`, скористайтеся Налаштування → Маршрутизація → Приховати платні моделі.
 
-Див. [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) і [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111), де описано початкову плутанину, яку пояснює цей документ.
+Див. [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) і [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111), де описано початкову плутанину, яку пояснює цей документ.
 
 ## Як це працює (збережені автокомбінації)
 

@@ -18,7 +18,7 @@ Agent Skills는 외부 에이전트, MCP 클라이언트 및 A2A 오케스트레
 - **정식 ID**(`omni-auth`, `cli-serve` 등)
 - YAML 프런트매터(`name`, `description`)와 풍부한 마크다운 본문을 포함하는 `skills/{id}/SKILL.md`의 **SKILL.md** 파일
 - OpenAPI 명세 및 CLI 레지스트리에서 파생된 **REST 엔드포인트**(API 스킬) 또는 **CLI 하위 명령어**(CLI 스킬)
-- 실시간 가져오기를 위한 **GitHub 원시 URL**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- 실시간 가져오기를 위한 **GitHub 원시 URL**: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. GitHub 원시 파일 직접 가져오기(서버 불필요)
 
 ```bash
-BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

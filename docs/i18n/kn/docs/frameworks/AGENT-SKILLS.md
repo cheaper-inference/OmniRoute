@@ -18,7 +18,7 @@ Agent Skills ಎನ್ನುವುದು ಬಾಹ್ಯ ಏಜೆಂಟ್ಗ�
 - ಒಂದು **ಅಧಿಕೃತ ID** (`omni-auth`, `cli-serve`, ಇತ್ಯಾದಿ)
 - YAML frontmatter (`name`, `description`) + ಸಮೃದ್ಧ markdown ವಿಷಯವನ್ನು ಹೊಂದಿರುವ `skills/{id}/SKILL.md` ನಲ್ಲಿನ ಒಂದು **SKILL.md** ಫೈಲ್
 - OpenAPI ನಿರ್ದಿಷ್ಟತೆ ಮತ್ತು CLI ರಿಜಿಸ್ಟ್ರಿಯಿಂದ ಪಡೆಯಲಾದ **REST ಎಂಡ್ಪಾಯಿಂಟ್ಗಳು** (API ಕೌಶಲ್ಯಗಳು) ಅಥವಾ **CLI ಉಪಕಮಾಂಡ್ಗಳು** (CLI ಕೌಶಲ್ಯಗಳು)
-- ನೇರವಾಗಿ ಪಡೆದುಕೊಳ್ಳಲು ಒಂದು **GitHub raw URL**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- ನೇರವಾಗಿ ಪಡೆದುಕೊಳ್ಳಲು ಒಂದು **GitHub raw URL**: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. ನೇರ GitHub raw ಪಡೆಯುವಿಕೆ (ಸರ್ವರ್ ಅಗತ್ಯವಿಲ್ಲ)
 
 ```bash
-BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

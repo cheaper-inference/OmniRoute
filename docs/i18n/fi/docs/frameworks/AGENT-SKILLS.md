@@ -18,7 +18,7 @@ Luettelo sisältää **45 Agent Skilliä** (23 REST API + 21 CLI + 1 määrityst
 - **Kanoninen tunniste** (`omni-auth`, `cli-serve` jne.)
 - **SKILL.md**-tiedosto polussa `skills/{id}/SKILL.md`, joka sisältää YAML-alkumetadatan (`name`, `description`) ja monipuolisen markdown-rungon
 - OpenAPI-määrityksestä ja CLI-rekisteristä johdetut **REST-päätepisteet** (API-skillit) tai **CLI-alikomennot** (CLI-skillit)
-- **GitHubin raakasisällön URL-osoite** reaaliaikaista noutoa varten: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- **GitHubin raakasisällön URL-osoite** reaaliaikaista noutoa varten: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Suora haku GitHubin raw-sisällöstä (palvelinta ei tarvita)
 
 ```bash
-BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

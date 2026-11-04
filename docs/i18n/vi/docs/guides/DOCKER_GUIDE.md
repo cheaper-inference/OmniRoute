@@ -327,7 +327,7 @@ Hành vi bộ nhớ trong Docker:
 
 ### RAM khi chạy cho các tác nhân lập trình
 
-Mức mặc định 1 GiB của Docker chỉ là ngưỡng tối thiểu dành cho bảng điều khiển/trò chuyện nhẹ, không phải mức dùng cho môi trường production. Các phần thân `POST /v1/responses` dài (hàng trăm tin nhắn, hàng chục công cụ) giữ lại nhiều đồ thị trong bộ nhớ trong quá trình nén. Hai yêu cầu chồng lấn, mỗi yêu cầu khoảng ~3 MiB / ~750k token, đã khiến V8 dừng bất thường ở mức old-space **12 GiB** (`FATAL ERROR: Reached heap limit`) và cũng gặp lỗi OOM cgroup 16 GiB. Xem [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Mức mặc định 1 GiB của Docker chỉ là ngưỡng tối thiểu dành cho bảng điều khiển/trò chuyện nhẹ, không phải mức dùng cho môi trường production. Các phần thân `POST /v1/responses` dài (hàng trăm tin nhắn, hàng chục công cụ) giữ lại nhiều đồ thị trong bộ nhớ trong quá trình nén. Hai yêu cầu chồng lấn, mỗi yêu cầu khoảng ~3 MiB / ~750k token, đã khiến V8 dừng bất thường ở mức old-space **12 GiB** (`FATAL ERROR: Reached heap limit`) và cũng gặp lỗi OOM cgroup 16 GiB. Xem [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Hãy đặt kích thước **cgroup `--memory` cao hơn heap** — bộ đệm native, SQLite và dữ liệu trung gian trong quá trình nén nằm ngoài V8.
 
@@ -691,7 +691,7 @@ spec:
 
 `preStop` sleep cho phép kube bỏ điểm cuối dịch vụ trước SIGTERM vậy** mới** giao thông dừng lại quá trình chết. `/v1/responses` SSE trên chuyến bay được tiêu tốn tới `SHUTDOWN_TIMEOUT_MS` (mặc định là 30 giây) thông qua hợp đồng thuê nhập học hạng nặng (#11015). Các yêu cầu mới vẫn đạt được quy trình sẽ nhận được `503` + `Retry-After: 5`. Khoảng trống điểm cuối trống cho đến khi thay thế sẵn sàng vẫn bị ngừng hoạt động nghiêm trọng — đó là cấu trúc liên kết SQLite, không phải là cấu hình sai thăm dò.
 
-Postgres bên ngoài / HA nhiều người viết là** không** một đường dẫn chứng khoán được ghi lại. Nếu bạn cần HA, hãy giữ một bản sao duy nhất hoặc chạy cấu trúc liên kết mà dự án đã kiểm tra và ghi lại riêng biệt. Công việc Postgres/MySQL tồn tại ở [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Cho đến khi tàu được vận chuyển, cách duy nhất được hỗ trợ để nhân lên** lớn** dung lượng `/v1/responses` là N quy trình độc lập (phần tiếp theo), không phải `replicas > 1` trên một ổ đĩa.
+Postgres bên ngoài / HA nhiều người viết là** không** một đường dẫn chứng khoán được ghi lại. Nếu bạn cần HA, hãy giữ một bản sao duy nhất hoặc chạy cấu trúc liên kết mà dự án đã kiểm tra và ghi lại riêng biệt. Công việc Postgres/MySQL tồn tại ở [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Cho đến khi tàu được vận chuyển, cách duy nhất được hỗ trợ để nhân lên** lớn** dung lượng `/v1/responses` là N quy trình độc lập (phần tiếp theo), không phải `replicas > 1` trên một ổ đĩa.
 
 ## Mở rộng quy mô: N quy trình độc lập
 
@@ -701,11 +701,11 @@ Bản sao của một tài khoản Codex không được sử dụng độc lậ
 
 Phiên bản thụ động đọc lại kết nối khi cần làm mới và chỉ chấp nhận một mã thông báo truy cập khác, chưa hết hạn. Nếu không, việc làm mới sẽ bị vô hiệu hóa mà không hết hạn hoặc hủy kích hoạt kết nối hoặc tính lỗi ngắt làm mới. Lỗi xác thực ngược dòng thực sự vẫn sử dụng tính toán lỗi thông thường, thời gian hồi chiêu theo cấp số nhân và lỗi máy khách thông thường; việc vô hiệu hóa tài khoản vẫn còn vĩnh viễn. Đồng bộ hóa mã thông báo đã xoay vòng của chủ sở hữu trước khi mã thông báo truy cập hết hạn (thời gian làm mới chủ động mặc định là năm phút) hoặc nhập lại tệp xác thực Codex. Nhập thụ động lưu trữ mã thông báo được cung cấp mà không xác thực chúng tại điểm cuối mã thông báo. Làm mới dashboard/API thủ công trả về `409 refresh_disabled`; thông tin đăng nhập OAuth mới không thay đổi. Xem [tài liệu tham khảo môi trường](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Quá trình một nút là** một đống V8** . Hai ~ 3 MiB / ~ 750k-token mã hóa-agent `POST /v1/responses` (RTK + Caveman) chồng chéo hủy bỏ đống đó ở ~ 12 Gi (`FATAL ERROR: Reached heap limit`) và có thể OOM a 16 Gi cgroup. Xem [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Phép đo đó là một** ngân sách bộ nhớ** cảnh báo, không phải là sản phẩm hard-max của hai `/v1/responses` dài đồng thời. Quyền truy cập trò chuyện hạng nặng được kiểm soát bởi ngân sách byte nhập vào có nguồn gốc tự động (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) có kích thước từ cùng mức V8/cgroup trần — ghi đè lên trên (hoặc đặt giới hạn số lượng yêu cầu `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` cũ) trên một quy trình đã có kích thước sẵn sẽ giới thiệu lại việc hủy bỏ. Các cuộc trò chuyện nhỏ, `/healthz`, `/v1/models` và MCP là** không** trong chiếc mũ đó.
+Quá trình một nút là** một đống V8** . Hai ~ 3 MiB / ~ 750k-token mã hóa-agent `POST /v1/responses` (RTK + Caveman) chồng chéo hủy bỏ đống đó ở ~ 12 Gi (`FATAL ERROR: Reached heap limit`) và có thể OOM a 16 Gi cgroup. Xem [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Phép đo đó là một** ngân sách bộ nhớ** cảnh báo, không phải là sản phẩm hard-max của hai `/v1/responses` dài đồng thời. Quyền truy cập trò chuyện hạng nặng được kiểm soát bởi ngân sách byte nhập vào có nguồn gốc tự động (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) có kích thước từ cùng mức V8/cgroup trần — ghi đè lên trên (hoặc đặt giới hạn số lượng yêu cầu `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` cũ) trên một quy trình đã có kích thước sẵn sẽ giới thiệu lại việc hủy bỏ. Các cuộc trò chuyện nhỏ, `/healthz`, `/v1/models` và MCP là** không** trong chiếc mũ đó.
 
 ### Một quy trình: nhiều hơn hai `/v1/responses` dài
 
-MỘT** khỏe mạnh** quá trình (đống bên dưới `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, `0.75` mặc định )** có thể** chạy nhiều hơn hai `POST /v1/responses` dài đồng thời khi ngân sách byte trong toàn bộ quy trình (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) vẫn còn chỗ. Các phần bằng hoặc cao hơn `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (mặc định 256 KiB) nhận cùng mức thuê hạng nặng như các yêu cầu nặng về cấu trúc và sử dụng cùng một lối thoát [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Hàng chục máy khách SSE dài đồng thời (người vận hành thường cần 40–50) là một** ngân sách bộ nhớ** câu hỏi — size heap + primary/headroom slot + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — không phải là giới hạn sản phẩm cứng “tối đa 2”. Một đống bị nén vẫn bị loại bỏ với `503` có thể thử lại nên #7849 không quay trở lại.
+MỘT** khỏe mạnh** quá trình (đống bên dưới `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, `0.75` mặc định )** có thể** chạy nhiều hơn hai `POST /v1/responses` dài đồng thời khi ngân sách byte trong toàn bộ quy trình (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) vẫn còn chỗ. Các phần bằng hoặc cao hơn `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (mặc định 256 KiB) nhận cùng mức thuê hạng nặng như các yêu cầu nặng về cấu trúc và sử dụng cùng một lối thoát [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Hàng chục máy khách SSE dài đồng thời (người vận hành thường cần 40–50) là một** ngân sách bộ nhớ** câu hỏi — size heap + primary/headroom slot + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — không phải là giới hạn sản phẩm cứng “tối đa 2”. Một đống bị nén vẫn bị loại bỏ với `503` có thể thử lại nên #7849 không quay trở lại.
 
 ĐẾN** nhân đống** (không gian cũ V8 độc lập)** Hôm nay** :
 
@@ -748,7 +748,7 @@ volumes:
   omniroute-b-data:
 ```
 
-Mật độ trong quá trình (nén tách HTTP ) là [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Một cụm logic ở trạng thái bền được chia sẻ là [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+Mật độ trong quá trình (nén tách HTTP ) là [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Một cụm logic ở trạng thái bền được chia sẻ là [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
 ## Lỗi khu vực của Gemini bên trong Docker
 
@@ -789,7 +789,7 @@ chưa xác thực; chỉ yêu cầu model đã xác thực mới kiểm tra đư
 
 ### Phương án thay thế ở cấp máy chủ: IPv6 hoạt động và chính sách trình phân giải
 
-Người báo cáo [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) đã khôi phục
+Người báo cáo [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) đã khôi phục
 quyền truy cập trong môi trường của họ bằng cách bật IPv6 cho container và thay đổi cách
 glibc lựa chọn địa chỉ. Hãy xem đây là một phương án thay thế dành riêng cho từng môi trường. Xác nhận IPv6 trên máy chủ
 đang hoạt động, lưu lượng đi ra ngoài/định tuyến của container và các quy tắc tường lửa trước khi điều chỉnh tùy chọn của trình phân giải.

@@ -125,7 +125,7 @@ rajoittavat välityskustannuksia vuokralaista kohden. Ongelman #9654 kriteeri 1 
 
 ## 4. Yksi prosessi, pitkät `/v1/responses`-pyynnöt (healthy-headroom)
 
-[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) lisäsi
+[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) lisäsi
 `tryAcquireHealthyHeadroom`-toiminnon, jotta toinen rakenteellisesti raskas pyyntö hyväksytään,
 kun keon käyttöaste alittaa `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`-arvon. `admitChatRequest`-toiminnon
 käyttämä BYTE-polku (rungot ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

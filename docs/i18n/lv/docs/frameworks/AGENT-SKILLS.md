@@ -18,7 +18,7 @@ Katalogā ir **45 Agentu prasmes** (23 REST API + 21 CLI + 1 konfigurācijas dar
 - **Kanoniskais ID** (`omni-auth`, `cli-serve` utt.)
 - **SKILL.md** fails direktorijā `skills/{id}/SKILL.md` ar YAML priekšdaļu (`name`, `description`) + bagātīgi formatētu markdown pamatdaļu
 - **REST galapunkti** (API prasmēm) vai **CLI apakškomandas** (CLI prasmēm), kas iegūtas no OpenAPI specifikācijas un CLI reģistra
-- **GitHub neapstrādātā satura URL** tiešai ielādei: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- **GitHub neapstrādātā satura URL** tiešai ielādei: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Tieša neapstrādātā satura iegūšana no GitHub (serveris nav nepieciešams)
 
 ```bash
-BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

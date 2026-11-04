@@ -5,7 +5,7 @@
 ---
 
 Szablon: xquik #11370 (scalony w release/v3.8.51). Tryb: `fallbackOnly`.
-Propozycja nadrzędna: zgłoszenie diegosouzapw/OmniRoute#11637.
+Propozycja nadrzędna: zgłoszenie cheaper-inference/OmniRoute#11637.
 
 ## 1. Fakty dotyczące usługi (oficjalna dokumentacja, zweryfikowana krzyżowo)
 

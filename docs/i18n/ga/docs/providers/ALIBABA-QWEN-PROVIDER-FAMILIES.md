@@ -5,7 +5,7 @@
 ---
 
 Taifeadann an doiciméad seo an cinneadh cur chun feidhme maidir le
-[Heisiúint #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854). Léirítear na táirgí poiblí
+[Heisiúint #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854). Léirítear na táirgí poiblí
 mar cheithre theaghlach soláthraithe. Is sonraí ceangail é an réigiún, ní táirge ar leith.
 
 ## Cinneadh

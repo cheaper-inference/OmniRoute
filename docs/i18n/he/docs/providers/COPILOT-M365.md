@@ -129,8 +129,8 @@ OmniRoute סורק את ה-HAR כדי לאתר את כתובת ה-URL של Chath
 
 ## מקורות
 
-- סוגיה: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- דיון: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- סוגיה: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- דיון: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - מקור: `src/shared/constants/providers/web-cookie.ts` (הגדרת הספק)
 - ייבוא HAR: `src/shared/utils/m365HarImport.ts`
 - שדות פרטי האימות: `src/shared/providers/webSessionCredentials.ts`

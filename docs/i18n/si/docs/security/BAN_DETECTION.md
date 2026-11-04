@@ -58,8 +58,8 @@ Google Cloud Code / Antigravity එය `403 VALIDATION_REQUIRED` ලෙස ආ�
 සත්යාපන විමසුමක් නිෂ්කාශනය කරයි. මෙම වාක්ය ඛණ්ඩය තහනම් ලැයිස්තුවේ තබාගැනීමෙන්,
 මෙම වචන යෙදුම සඳහා `classifyProviderError` තුළ ඇති ප්රතිසාධනය කළ හැකි cloud-code
 403 ශාඛාවද ළඟා විය නොහැකි විය, මන්ද `accountDeactivated` පළමුව ඇගයෙන බැවිනි — ඒ නිසා
-Gemini Code Assist සඳහා [#868](https://github.com/diegosouzapw/OmniRoute/pull/868) සහ
-[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) තුළ එක් කළ ව්යාපෘති-මාර්ග
+Gemini Code Assist සඳහා [#868](https://github.com/cheaper-inference/OmniRoute/pull/868) සහ
+[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) තුළ එක් කළ ව්යාපෘති-මාර්ග
 ප්රතිසාධනය කිසිවිටෙක ක්රියාත්මක විය නොහැකි විය.
 
 යාබද, **වෙන වෙනම** ඇති සංඥා වගු තුනක් තහනම්-මූලපද අනාවරණයේ කොටසක් _නොවේ_:

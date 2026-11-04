@@ -139,8 +139,8 @@ OmniRoute сканирует HAR-файл на наличие URL-адреса W
 
 ## Ссылки
 
-- Проблема: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Обсуждение: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- Проблема: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Обсуждение: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - Исходный код: `src/shared/constants/providers/web-cookie.ts` (определение провайдера)
 - Импорт HAR: `src/shared/utils/m365HarImport.ts`
 - Поля учетных данных: `src/shared/providers/webSessionCredentials.ts`

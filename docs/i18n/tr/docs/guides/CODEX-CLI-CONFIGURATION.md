@@ -470,7 +470,7 @@ Etkileşimli bir oturum içinde:
 | Oturum sürekli hesap değiştiriyor / istem önbelleği sürekliliği turlar arasında kayboluyor | Oturum benzeşimi TTL değeri `0` (devre dışı)                                       | `sessionAffinityTtlMs`   |
 | İstemciye yönelik bir istem olmadan bağlantı akıl yürütme sırasında kesiliyor              | Üst akıştan 10 dakika boyunca parça gelmeyince akış boşta kalma gözcüsü tetiklendi | `STREAM_IDLE_TIMEOUT_MS` |
 
-İlgili tartışmalar: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (uzun görev kesintileri), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (benzeşimin neden varsayılan olarak kapalı olduğu). Takip: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+İlgili tartışmalar: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (uzun görev kesintileri), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (benzeşimin neden varsayılan olarak kapalı olduğu). Takip: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. Oturum benzeşimi — bir konuşmayı tek bir hesaba sabitleyin
 

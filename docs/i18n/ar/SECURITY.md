@@ -9,7 +9,7 @@
 إذا اكتشفت ثغرة أمنية في OmniRoute، فيُرجى الإبلاغ عنها بمسؤولية:
 
 1. **لا تفتح** مشكلة عامة على GitHub
-2. استخدم [إشعارات الأمان في GitHub](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
+2. استخدم [إشعارات الأمان في GitHub](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
 3. ضمّن: الوصف، وخطوات إعادة الإنتاج، والتأثير المحتمل
 
 ## الجدول الزمني للاستجابة
@@ -42,7 +42,7 @@
   أيهما أبعد**. يُسجَّل تاريخ الانتهاء الناتج في ملاحظات إصدار 3.9.0 وفي
   [`ROADMAP.md`](ROADMAP.md) عند حدوث الإصدار.
 - **الإبلاغ عن ثغرة أمنية في مسار LTS:** استخدم القناة نفسها المتبعة لأي إصدار آخر —
-  [إشعار أمان خاص على GitHub](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)،
+  [إشعار أمان خاص على GitHub](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)،
   وليس مشكلة عامة مطلقًا. اذكر الإصدار الذي اختبرته (على سبيل المثال `3.9.2`)؛ تُدمج الإصلاحات في
   `stable/v3` ثم تُنقل إلى v4.
 - **خط الأساس الأمني عند إصدار LTS:** تُسجَّل حالة أداة الفحص المقاسة، وأدلة حراسة المسارات

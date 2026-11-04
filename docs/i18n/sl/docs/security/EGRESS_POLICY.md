@@ -55,7 +55,7 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ## Zakaj obstaja
 
-Uvedeno v zahtevku za vključitev sprememb [#3777](https://github.com/diegosouzapw/OmniRoute/pull/3777). Glavni razlogi:
+Uvedeno v zahtevku za vključitev sprememb [#3777](https://github.com/cheaper-inference/OmniRoute/pull/3777). Glavni razlogi:
 
 | Težava                                              | Kaj direktiva odpravi                                                                                                                                                                                                                                                                                                                                                        |
 | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -34,7 +34,7 @@ qamrovi va muvofiqlashtirish bosqichlari bilan bogʻlangan.
 ### Klonlash va o‘rnatish
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -434,4 +434,4 @@ So‘ng `dist/` tarkibini masofaviy `app/` katalogiga rsync orqali sinxronlaydig
 - **API maʼlumotnomasi**: [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) fayliga qarang
 - **Xavfsizlik hujjatlari**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
 - **Operatsion hujjatlar**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Muammolar**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Muammolar**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

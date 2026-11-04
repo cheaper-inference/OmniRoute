@@ -35,7 +35,7 @@ i kroków uzgadniania.
 ### Klonowanie i instalacja
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -440,4 +440,4 @@ Następnie użyj umiejętności `/deploy-vps-*-cc`, które synchronizują katalo
 - **Dokumentacja API**: Zobacz [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
 - **Dokumentacja bezpieczeństwa**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
 - **Dokumentacja operacyjna**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Zgłoszenia**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Zgłoszenia**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

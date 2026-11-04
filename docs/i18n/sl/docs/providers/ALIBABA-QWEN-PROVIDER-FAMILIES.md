@@ -5,7 +5,7 @@
 ---
 
 Ta dokument beleži odločitev o implementaciji za
-[težavo #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854). Javni izdelki so
+[težavo #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854). Javni izdelki so
 predstavljeni kot štiri družine ponudnikov. Regija je podatek o povezavi in ne ločen izdelek.
 
 ## Odločitev

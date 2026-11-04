@@ -478,7 +478,7 @@ Chaguo-msingi mbili za OmniRoute zinaweza kuhujumu kimya kimya vipindi vya Codex
 | Kipindi kinaendelea kubadilisha akaunti / mwendelezo wa akiba ya kidokezo unapotea kati ya zamu | TTL ya uhusiano wa kipindi ni `0` (imelemazwa)                                                                 | `sessionAffinityTtlMs`   |
 | Muunganisho unakatika katikati ya uchanganuzi bila kidokezo kinachoonekana kwa mteja            | Kilinzi cha kutokuwa na shughuli cha mtiririko kiliwashwa baada ya dakika 10 bila kipande kutoka upande wa juu | `STREAM_IDLE_TIMEOUT_MS` |
 
-Majadiliano yanayohusiana: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (kukatika kwa majukumu marefu), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (kwa nini uhusiano umezimwa kwa chaguo-msingi). Ufuatiliaji: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Majadiliano yanayohusiana: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (kukatika kwa majukumu marefu), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (kwa nini uhusiano umezimwa kwa chaguo-msingi). Ufuatiliaji: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. Uhusiano wa kipindi — funganisha mazungumzo moja na akaunti moja
 

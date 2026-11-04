@@ -4,9 +4,9 @@
 
 ---
 
-> **स्थिति:** स्वीकृत · **सन्दर्भ:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
-> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **अनुबन्ध:** `domain/routing/routerBackends.ts`
-> (टाइप गरिएको रजिस्ट्री — कोड [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) सँग समावेश हुन्छ)
+> **स्थिति:** स्वीकृत · **सन्दर्भ:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
+> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **अनुबन्ध:** `domain/routing/routerBackends.ts`
+> (टाइप गरिएको रजिस्ट्री — कोड [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) सँग समावेश हुन्छ)
 
 यो ADR ले `ts` (नेटिभ), `bifrost`, `cliproxy`, `9router`, र
 VibeProxy-सङ्गत इन्जिनहरू एक-अर्कासँग कसरी सम्बन्धित छन् भन्ने कुरा निश्चित गर्छ, ताकि योगदानकर्ताहरूले
@@ -38,7 +38,7 @@ VibeProxy-सङ्गत इन्जिनहरू एक-अर्कास�
 
 ## रजिस्ट्री — सत्यको एकमात्र स्रोत
 
-`domain/routing/routerBackends.ts` अनुबन्ध ([#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) सँग
+`domain/routing/routerBackends.ts` अनुबन्ध ([#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) सँग
 कोड समावेश हुन्छ) ले प्रत्येक इन्जिनलाई त्यसको जीवनचक्र, क्षमताहरू, सेवा पहिचान, पूर्वनिर्धारित पोर्ट, स्वास्थ्य कन्फिगरेसन, र
 टेलिमेट्री समर्थनसहित एकपटक घोषणा गर्छ। उपभोक्ताहरूले प्रत्येक साइडकारका लागि
 विशेष अवस्था राख्नुको सट्टा `getRouterBackend(id)`,
@@ -54,7 +54,7 @@ VibeProxy-सङ्गत इन्जिनहरू एक-अर्कास�
 
 ¹ Bifrost लाई `/api/services/bifrost/` बाट स्थापना/सुरु गर्न मिल्ने `supervised` इम्बेडेड सेवामा
 प्रवर्द्धन गर्ने कार्य
-[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817) मा ट्र्याक गरिएको छ; यो मर्ज नहुँदासम्म,
+[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817) मा ट्र्याक गरिएको छ; यो मर्ज नहुँदासम्म,
 Bifrost `external`-मात्र रहन्छ (`BIFROST_BASE_URL` मार्फत मात्र पहुँचयोग्य)।
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -123,8 +123,8 @@ Bifrost `external`-मात्र रहन्छ (`BIFROST_BASE_URL` मार
 हाल चयन रिले स्तरमा **सबै-वा-केही-नभएको** हुन्छ — `release/v3.8.43` मा
 प्रत्येक प्रदायक वा प्रत्येक अनुरोधका लागि इन्जिन स्वाप छैन। प्रत्येक अनुरोधको गेट
 साइडकार-म्यानिफेस्ट कार्यद्वारा थपिँदै छ
-([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) म्यानिफेस्ट +
-[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) म्यानिफेस्ट +
+[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 जसले `auto` लाई म्यानिफेस्ट-योग्य प्रदायकहरू मात्र Bifrost मार्फत रुट गर्न दिन्छ।
 
 ## ड्यासबोर्ड एकीकरण

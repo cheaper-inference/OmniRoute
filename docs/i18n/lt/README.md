@@ -45,9 +45,9 @@
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=social)](https://github.com/cheaper-inference/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/OmniRoute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 Prisijunkite prie bendruomenės
@@ -96,7 +96,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![Electron Downloads](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -521,7 +521,7 @@ Visos **20** strategijų – derinkite jas kiekviename kombinacijos žingsnyje:
 „OmniRoute“ platinamas pagal MIT licenciją ir prižiūrimas atvirai. Jei jis padeda sutaupyti laiko ar pinigų, štai kaip galite padėti jam išlikti nepriklausomam — pasirinkite jums tinkamiausią būdą. Rėmimas niekada neturi įtakos maršruto parinkimo prioritetui; jis suteikia matomumą, o ne aukštesnę vietą reitinge.
 
 <table>
-  <tr><td nowrap>⭐ <b>Pažymėkite saugyklą žvaigždute</b></td><td>Nemokama — tai iš tiesų padeda didinti matomumą</td><td><a href="https://github.com/diegosouzapw/OmniRoute">Pažymėti „OmniRoute“ žvaigždute</a></td></tr>
+  <tr><td nowrap>⭐ <b>Pažymėkite saugyklą žvaigždute</b></td><td>Nemokama — tai iš tiesų padeda didinti matomumą</td><td><a href="https://github.com/cheaper-inference/OmniRoute">Pažymėti „OmniRoute“ žvaigždute</a></td></tr>
   <tr><td nowrap>🐙 <b>„GitHub Sponsors“</b></td><td>Vienkartinė arba mėnesinė parama · jokio platformos mokesčio</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
   <tr><td nowrap>☕ <b>„Ko-fi“</b></td><td>Greita vienkartinė parama, rėmėjui nereikia registruotis</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
   <tr><td nowrap>🧋 <b>„Buy Me a Coffee“</b></td><td>Nedidelis, neformalus paramos gestas</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
@@ -558,7 +558,7 @@ PIX kopijavimo ir įklijavimo kodas:
 
 </details>
 
-🐛 Radote klaidą ar turite atsiliepimų? Pradėkite [diskusiją](https://github.com/diegosouzapw/OmniRoute/discussions).
+🐛 Radote klaidą ar turite atsiliepimų? Pradėkite [diskusiją](https://github.com/cheaper-inference/OmniRoute/discussions).
 
 <br/>
 
@@ -1265,7 +1265,7 @@ procesas viename prievade, todėl šiuo metu nėra atskiro, tik CLI skirto paket
 
 Kanoninės metrikos 2026-10-18: **1.976 unikalūs vaizdo įrašai** · **20.220.289 žinomos peržiūros** (`v > 0`) · **1.210 kanalų / profilių visose platformose**. Neapdorotame skydelyje yra 1.976 eilutės (YouTube 1.352 = 740 ilgos trukmės vaizdo įrašų + 612 Shorts · TikTok 334 · Instagram 290); po normalizavimo pagal kanoninį URL, išsaugantį didžiausią kiekvieno vaizdo įrašo peržiūrų skaičių, neliko nė vieno dublikato. YouTube duomenų rinkimas sustabdytas ties 2026-10-13 (API kvota buvo išnaudota nuo 14 iki 18/10), o TikTok/Instagram — nuo 2026-09-02 (nebėra duomenų rinkimo kreditų); 76 vaizdo įrašai vis dar neturi peržiūrų skaičiaus.
 
-> 🎬 **Sukūrėte vaizdo įrašą apie OmniRoute?** Atidarykite [problemą](https://github.com/diegosouzapw/OmniRoute/issues/new) arba [diskusiją](https://github.com/diegosouzapw/OmniRoute/discussions) ir pridėkite nuorodą — pristatysime jį čia.
+> 🎬 **Sukūrėte vaizdo įrašą apie OmniRoute?** Atidarykite [problemą](https://github.com/cheaper-inference/OmniRoute/issues/new) arba [diskusiją](https://github.com/cheaper-inference/OmniRoute/discussions) ir pridėkite nuorodą — pristatysime jį čia.
 
 <br/>
 
@@ -1285,8 +1285,8 @@ Kanoninės metrikos 2026-10-18: **1.976 unikalūs vaizdo įrašai** · **20.220.
 | 🟢 **WhatsApp — 🇧🇷 Brazilija**                  | [prisijungti prie grupės](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                   |
 | 🌍 **Svetainė**                                 | [omniroute.online](https://omniroute.online)                                                                                 |
 | 🌍 **🌍StHub OmniRoute bendruomenė (nemokama)** | [StHub portalas](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                      |
-| 📦 **Šaltinio kodas**                           | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                               |
-| 🐛 **Pranešti apie klaidą**                     | [sukurti problemos įrašą](https://github.com/diegosouzapw/OmniRoute/issues) — pridėkite `npm run system-info` išvestį        |
+| 📦 **Šaltinio kodas**                           | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                                     |
+| 🐛 **Pranešti apie klaidą**                     | [sukurti problemos įrašą](https://github.com/cheaper-inference/OmniRoute/issues) — pridėkite `npm run system-info` išvestį   |
 | 🤝 **Prisidėti**                                | [CONTRIBUTING.md](CONTRIBUTING.md) · [Šakų ir leidimų modelis](docs/ops/BRANCHING_MODEL.md) · pasirinkite `good first issue` |
 | 💚 **Paremti projektą**                         | [Paramos būdai ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)                         |
 
@@ -1644,7 +1644,7 @@ Nuoširdžiai dėkojame žmonėms, kurie finansuoja „OmniRoute“ iš savo ki�
 
 </div>
 
-[![Contributors](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
 
 <sub>Audituota 2026-11-02 tiesioginės <code>release/v3.8.53</code> šakos viršūnėje <code>1c7135e0fb</code> (7 972 pakeitimai): <b>1 074 normalizuotos tikrų žmonių Git tapatybės</b> — 759 rodomi kaip pakeitimų autoriai (įskaitant prižiūrėtoją), o 315 nurodyti tik aiškiuose <code>Co-authored-by</code> prierašuose. Surašant naudotas <code>.mailmap</code>, el. pašto adresai lyginti neatsižvelgiant į raidžių registrą, skaitmeniniai ir įprasti GitHub noreply adresai sujungti tik tada, kai juose užkoduota ta pati paskyra, atmestos 29 botų, agentų, tarnybinės ir rezervinės tapatybės, o įprasti el. pašto adresai nesujungti vien dėl sutampančių rodomų vardų. 2026-08-24 audito metu paskelbti 639; pakartotinai pritaikius šį metodą to audito bazei <code>ac02c5b42f</code>, gaunami 619, todėl padidėjimą lėmė nauji bendraautoriai, o ne ne tokia griežta metodika.</sub>
 
@@ -1673,11 +1673,11 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 ## 📊 Žvaigždutės
 
-<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="Žvaigždučių istorijos diagrama" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <img alt="Žvaigždučių istorijos diagrama" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
  </picture>
 </a>
 

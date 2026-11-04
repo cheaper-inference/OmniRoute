@@ -115,7 +115,7 @@ npm start
 Nếu không có bản build đã bật tính năng nhúng, trang sẽ từ chối được đóng khung; extension phát hiện điều đó từ
 các header phản hồi và chuyển sang dùng trình duyệt bên ngoài — không có gì bị lỗi và extension sẽ thông báo một lần.
 Xem [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) và issue
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
 
 ---
 

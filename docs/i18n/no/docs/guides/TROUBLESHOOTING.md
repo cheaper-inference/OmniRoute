@@ -255,7 +255,7 @@ nye utgivelser.
    ```
    Utdataene må samsvare med `latest.yml` → `sha512`. Hvis de ikke samsvarer, sletter du
    filen og laster den ned på nytt kun fra
-   [GitHub-utgivelsessiden](https://github.com/diegosouzapw/OmniRoute/releases).
+   [GitHub-utgivelsessiden](https://github.com/cheaper-inference/OmniRoute/releases).
 2. **Gjenopprett + ekskluder** — gjenopprett elementene som ble rullet tilbake, fra karantenen,
    og legg til et unntak for `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Innstillinger →
    Trusler og unntak). Installer deretter på nytt.
@@ -851,7 +851,7 @@ informasjon om `OMNIROUTE_READY_TIMEOUT_MS`.
 
 ## Fremdeles fastlåst?
 
-- **GitHub-problemer**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **GitHub-problemer**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **Arkitektur**: Se [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) for interne detaljer
 - **API-referanse**: Se [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) for alle endepunkter
 - **Helseoversikt**: Sjekk **Kontrollpanel → Helse** for systemstatus i sanntid

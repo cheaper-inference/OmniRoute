@@ -251,7 +251,7 @@ allkirjastamine on kavandatud; kuni see teoks saab, võib probleem uute väljala
    [Convert]::ToBase64String($b)
    ```
    Väljund peab ühtima väärtusega `latest.yml` → `sha512`. Kui see ei ühti, kustutage fail ja
-   laadige see uuesti alla ainult [GitHubi väljalasete lehelt](https://github.com/diegosouzapw/OmniRoute/releases).
+   laadige see uuesti alla ainult [GitHubi väljalasete lehelt](https://github.com/cheaper-inference/OmniRoute/releases).
 2. **Taastage + välistage** — taastage tagasi pööratud üksused karantiinist ja lisage välistus
    kaustale `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Settings → Threats and Exclusions),
    seejärel installige rakendus uuesti.
@@ -842,7 +842,7 @@ Täielikku teavet `OMNIROUTE_READY_TIMEOUT_MS` kohta leiate failist [`docs/refer
 
 ## Kas probleem püsib?
 
-- **GitHubi probleemid**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **GitHubi probleemid**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **Arhitektuur**: sisemise ülesehituse üksikasju vaadake failist [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
 - **API viitedokumentatsioon**: kõigi lõpp-punktide kohta vaadake faili [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)
 - **Süsteemi seisundi töölaud**: reaalajas süsteemi oleku vaatamiseks avage **Dashboard → Health**

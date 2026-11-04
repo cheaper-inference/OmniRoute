@@ -30,7 +30,7 @@ Thank you for your interest in contributing! This guide covers everything you ne
 ### Kloning og installasjon
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -437,4 +437,4 @@ Bruk deretter `/deploy-vps-*-cc`-ferdighetene, som synkroniserer `dist/` til den
 - **API-referanse**: Se [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
 - **Sikkerhetsdokumentasjon**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
 - **Driftsdokumentasjon**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Problemer**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Problemer**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

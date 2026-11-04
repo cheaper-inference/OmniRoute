@@ -223,7 +223,7 @@ livenessProbe:
 
 **Não** aponte a sonda de **vivacidade** do kubelet para `/api/monitoring/health`. Esse caminho realiza trabalho real de banco de dados/monitoramento e produzirá falsos positivos sob carga.
 
-Relacionado: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (sondas enquanto o loop de eventos está ocupado), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (sobrecarga de preços do catálogo), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (sobrecarga da contagem de tokens de compressão).
+Relacionado: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (sondas enquanto o loop de eventos está ocupado), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (sobrecarga de preços do catálogo), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (sobrecarga da contagem de tokens de compressão).
 
 ### watchdog do systemd (loop de eventos congelado)
 

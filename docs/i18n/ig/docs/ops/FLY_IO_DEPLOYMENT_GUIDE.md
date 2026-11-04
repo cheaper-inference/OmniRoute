@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 Detuo Koodu ahụ ma Banye na Ndekọ ahụ
 
 ```powershell
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly ga-eme mmelite igwe n’usoro na-akpaghị aka.
 
 ### 9.1 Ịso Mmelite Ebe Nchekwa Upstream Ka Ị Na-echekwa `fly.toml` nke Fork Gị
 
-Ọ bụrụ na ebe nchekwa dị ugbu a bụ fork ma ịchọrọ imekọrịta mmelite sitere na upstream `https://github.com/diegosouzapw/OmniRoute`, soro usoro ọrụ dị n'okpuru.
+Ọ bụrụ na ebe nchekwa dị ugbu a bụ fork ma ịchọrọ imekọrịta mmelite sitere na upstream `https://github.com/cheaper-inference/OmniRoute`, soro usoro ọrụ dị n'okpuru.
 
 Nke mbụ, nyochaa remotes gị:
 
@@ -309,7 +309,7 @@ git remote -v
 Ọ bụrụ na ahazibeghị `upstream`, tinye ya:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
 Tupu imekọrịta na upstream, weta commits na tags kachasị ọhụrụ:

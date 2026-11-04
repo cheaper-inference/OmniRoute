@@ -115,7 +115,7 @@ handleComboChat（与持久化组合使用相同的引擎）
 
 ## 与真实模型 ID 匹配的组合名称
 
-`name` 与裸模型 ID 相同的组合（例如名为 `gpt-5.5` 的组合）是一种**有意设计且受支持的模式**，并非错误：这是 [#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940) 中记录的按模型 ID 进行提供者回退的机制。由于组合解析先于裸模型 ID 解析执行（`src/sse/services/model.ts` 中的 `getComboForModel()`），对裸 ID `gpt-5.5` 的请求会通过该组合的目标（例如 `acme-responses/gpt-5.5`、`backup-responses/gpt-5.5`）进行路由，而不是直接路由到单个提供者——这复用了为 [#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) 构建的“组合先于重写”优先级，并通过 `tests/unit/responses-combo-resolution-3227.test.ts` 和 `tests/unit/combo-name-codex-responses-rewrite.test.ts` 进行回归测试。
+`name` 与裸模型 ID 相同的组合（例如名为 `gpt-5.5` 的组合）是一种**有意设计且受支持的模式**，并非错误：这是 [#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940) 中记录的按模型 ID 进行提供者回退的机制。由于组合解析先于裸模型 ID 解析执行（`src/sse/services/model.ts` 中的 `getComboForModel()`），对裸 ID `gpt-5.5` 的请求会通过该组合的目标（例如 `acme-responses/gpt-5.5`、`backup-responses/gpt-5.5`）进行路由，而不是直接路由到单个提供者——这复用了为 [#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) 构建的“组合先于重写”优先级，并通过 `tests/unit/responses-combo-resolution-3227.test.ts` 和 `tests/unit/combo-name-codex-responses-rewrite.test.ts` 进行回归测试。
 
 创建组合或对组合重命名，使其名称遮蔽真实模型 ID 时，**绝不会被拒绝**——否则会破坏这一已有文档说明的工作流程。相反（#8530），当（新）名称与真实模型 ID 冲突时，`POST /api/combos` 和 `PUT /api/combos/[id]` 会在响应中附加一个非阻塞的 `warning` 字段：
 
@@ -151,7 +151,7 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 - **`auto` 不会使用你的组合。** `auto`/`auto/*` 会构建自己的零配置候选池，且仅当某个组合的名称恰好为 `auto` 时才会查询持久化组合（不建议这样做）。要通过组合进行路由，请发送其精确名称，而不是 `auto`。
 - **`openrouter/auto` 是真实的付费 OpenRouter 产品**（“自动选择最佳可用模型”），并非 OmniRoute 别名。它是 OpenRouter 注册表（`open-sse/config/providers/registry/openrouter/index.ts`）中的单个静态模型条目，并单独计费。使用“设置 → 路由 → 隐藏付费模型”可将其从 `auto` 候选池中排除。
 
-有关本文所记录的最初困惑，请参阅 [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) 和 [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111)。
+有关本文所记录的最初困惑，请参阅 [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) 和 [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111)。
 
 ## 工作原理（持久化自动组合）
 

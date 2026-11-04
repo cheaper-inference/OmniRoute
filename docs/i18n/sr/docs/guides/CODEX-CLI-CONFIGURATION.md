@@ -478,7 +478,7 @@ codex debug models --bundled       # приказује уграђени кат�
 | Сесија стално мења налоге / континуитет кеша упита се губи између интеракција | TTL афинитета сесије је `0` (онемогућен)                                           | `sessionAffinityTtlMs`   |
 | Веза се прекида усред закључивања без упита видљивог клијенту                 | Надзор неактивног тока се активирао након 10 минута без сегмента са узводне стране | `STREAM_IDLE_TIMEOUT_MS` |
 
-Повезане дискусије: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (прекиди дугих задатака), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (зашто је афинитет подразумевано искључен). Праћење: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Повезане дискусије: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (прекиди дугих задатака), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (зашто је афинитет подразумевано искључен). Праћење: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. Афинитет сесије — вежите један разговор за један налог
 

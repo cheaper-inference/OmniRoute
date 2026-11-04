@@ -337,10 +337,10 @@ depends="openssl"
 short_desc="Yleiskäyttöinen tekoäly-yhdyskäytävä älykkäällä reitityksellä useille LLM-palveluntarjoajille"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 # Luo tarkistussumma uudelleen jokaista julkaisua varten komennolla:
-#   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
+#   curl -L -o /tmp/omniroute.tar.gz "https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"

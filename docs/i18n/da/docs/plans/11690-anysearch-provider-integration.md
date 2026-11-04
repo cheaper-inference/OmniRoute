@@ -5,7 +5,7 @@
 ---
 
 Skabelon: xquik #11370 (flettet ind i release/v3.8.51). Indstilling: `fallbackOnly`.
-Upstream-forslag: issue diegosouzapw/OmniRoute#11637.
+Upstream-forslag: issue cheaper-inference/OmniRoute#11637.
 
 ## 1. Tjenestens faktiske forhold (officiel dokumentation, krydstjekket)
 

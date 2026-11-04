@@ -301,7 +301,7 @@ Docker でのメモリ動作：
 
 ### コーディングエージェント向けの実行時 RAM
 
-Docker のデフォルトである 1 GiB は、ダッシュボードや軽量チャット向けの最低ラインであり、本番環境向けの容量ではありません。長大な `POST /v1/responses` のボディ（数百件のメッセージ、数十個のツール）は、圧縮中に複数のインメモリグラフを保持します。約 3 MiB / 約 750k トークンのリクエストが 2 件重なると、old-space が **12 GiB** でも V8 が異常終了し（`FATAL ERROR: Reached heap limit`）、16 GiB の cgroup でも OOM が発生しています。[#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) を参照してください。
+Docker のデフォルトである 1 GiB は、ダッシュボードや軽量チャット向けの最低ラインであり、本番環境向けの容量ではありません。長大な `POST /v1/responses` のボディ（数百件のメッセージ、数十個のツール）は、圧縮中に複数のインメモリグラフを保持します。約 3 MiB / 約 750k トークンのリクエストが 2 件重なると、old-space が **12 GiB** でも V8 が異常終了し（`FATAL ERROR: Reached heap limit`）、16 GiB の cgroup でも OOM が発生しています。[#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849) を参照してください。
 
 **cgroup の `--memory` はヒープより大きく設定してください** — ネイティブバッファ、SQLite、および圧縮処理の中間データは V8 の外部に配置されます。
 
@@ -635,7 +635,7 @@ spec:
 
 `preStop` sleep により、kube はSIGTERMの前にサービス エンドポイントをドロップできるようになります。**新しい**死にかけているプロセスにトラフィックが到達しなくなります。実行中の`/v1/responses` SSEは、ヘビーウェイト アドミッション リース (#11015) を介して`SHUTDOWN_TIMEOUT_MS` (デフォルト 30 秒) まで排出されます。まだプロセスに到達する新しいリクエストは、 `503` + `Retry-After: 5`を取得します。交換の準備ができるまでの空のエンドポイントのギャップの再作成は、ハード停止のままです。これは、プローブの設定ミスではなく、 SQLiteトポロジです。
 
-外部Postgres /マルチライターHAは**ない**文書化されたストックパス。 HAが必要な場合は、単一のレプリカを保持するか、プロジェクトが個別にテストして文書化したトポロジを実行します。 Postgres/MySQL作品は[#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)にあります。それが出荷されるまで、サポートされている唯一の乗算方法**大きい**`/v1/responses`容量は、1 つのボリューム上の`replicas > 1`ではなく、N 個の独立したプロセス (次のセクション) です。
+外部Postgres /マルチライターHAは**ない**文書化されたストックパス。 HAが必要な場合は、単一のレプリカを保持するか、プロジェクトが個別にテストして文書化したトポロジを実行します。 Postgres/MySQL作品は[#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)にあります。それが出荷されるまで、サポートされている唯一の乗算方法**大きい**`/v1/responses`容量は、1 つのボリューム上の`replicas > 1`ではなく、N 個の独立したプロセス (次のセクション) です。
 
 ## スケールアウト: N 個の独立したプロセス
 
@@ -645,11 +645,11 @@ spec:
 
 パッシブ インスタンスは、更新が必要なときに接続を再読み込みし、期限切れになっていない別のアクセス トークンのみを採用します。それ以外の場合、接続の有効期限が切れたり非アクティブ化されたり、リフレッシュ ブレーカーの失敗がカウントされたりすることなく、リフレッシュは無効になります。実際のアップストリーム認証の失敗では、引き続き通常の失敗アカウンティング、指数関数的クールダウン、および通常のクライアント エラーが使用されます。アカウントの無効化は永久的なままです。アクセス トークンの有効期限が切れる前に、所有者のローテーションされたトークンを同期するか (デフォルトのプロアクティブな更新リードタイムは 5 分です)、 Codex認証ファイルを再インポートします。パッシブ インポートでは、提供されたトークンがトークン エンドポイントで検証されずに保存されます。手動dashboard/APIリフレッシュは`409 refresh_disabled`を返します。新しいOAuthログインは変更されません。[環境リファレンス を](../reference/ENVIRONMENT.md#passive-codex-token-refresh)参照してください。
 
-One Node process is **one V8 heap**. Two overlapping ~3 MiB / ~750k-token coding-agent `POST /v1/responses` (RTK + Caveman) abort that heap at ~12 Gi (`FATAL ERROR: Reached heap limit`) and can OOM a 16 Gi cgroup. See [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). That measurement is a **memory-budget** warning, not a product hard-max of two concurrent long `/v1/responses`. Heavyweight chat admission is gated by an auto-derived ingest byte budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) sized from that same V8/cgroup ceiling — overriding it upward (or setting the legacy `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` request-count cap) on an already-sized process reintroduces the abort. Small chats, `/healthz`, `/v1/models`, and MCP are **not** in that cap.
+One Node process is **one V8 heap**. Two overlapping ~3 MiB / ~750k-token coding-agent `POST /v1/responses` (RTK + Caveman) abort that heap at ~12 Gi (`FATAL ERROR: Reached heap limit`) and can OOM a 16 Gi cgroup. See [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). That measurement is a **memory-budget** warning, not a product hard-max of two concurrent long `/v1/responses`. Heavyweight chat admission is gated by an auto-derived ingest byte budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) sized from that same V8/cgroup ceiling — overriding it upward (or setting the legacy `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` request-count cap) on an already-sized process reintroduces the abort. Small chats, `/healthz`, `/v1/models`, and MCP are **not** in that cap.
 
 ### 1 プロセス: 2 つ以上の長い`/v1/responses`
 
-あ**健康**プロセス ( `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`の下のヒープ、デフォルト`0.75`)** 5月**プロセス全体のインフライトバイト バジェット (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) にまだ余裕がある場合は、2 つを超えるロング`POST /v1/responses`を同時に実行します。 `OMNIROUTE_CHAT_LARGE_BODY_BYTES`以上のボディ (デフォルトは 256 KiB) は、構造が重いリクエストと同じヘビーウェイト リースを取得し、同じ[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom`エスケープ (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) を使用します。数十の長いSSEクライアントを同時に実行する (オペレーターは通常 40 ～ 50 を必要とする)**メモリバジェット**質問—サイズ ヒープ+ primary/headroomスロット+ `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` —製品の厳密な「最大 2」制限ではありません。圧力をかけられたヒープは依然として再試行可能な`503`でシェッドされるため、#7849 は返されません。
+あ**健康**プロセス ( `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`の下のヒープ、デフォルト`0.75`)** 5月**プロセス全体のインフライトバイト バジェット (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) にまだ余裕がある場合は、2 つを超えるロング`POST /v1/responses`を同時に実行します。 `OMNIROUTE_CHAT_LARGE_BODY_BYTES`以上のボディ (デフォルトは 256 KiB) は、構造が重いリクエストと同じヘビーウェイト リースを取得し、同じ[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom`エスケープ (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) を使用します。数十の長いSSEクライアントを同時に実行する (オペレーターは通常 40 ～ 50 を必要とする)**メモリバジェット**質問—サイズ ヒープ+ primary/headroomスロット+ `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` —製品の厳密な「最大 2」制限ではありません。圧力をかけられたヒープは依然として再試行可能な`503`でシェッドされるため、#7849 は返されません。
 
 に**ヒープを乗算する**(独立した V8 オールドスペース)**今日**:
 
@@ -692,7 +692,7 @@ volumes:
   omniroute-b-data:
 ```
 
-インプロセス密度 ( HTTP分離株からの圧縮) は[#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023)です。共有永続状態の 1 つの論理クラスターは[#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)です。
+インプロセス密度 ( HTTP分離株からの圧縮) は[#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023)です。共有永続状態の 1 つの論理クラスターは[#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)です。
 
 ## Docker 内での Gemini の地域エラー
 
@@ -734,7 +734,7 @@ Gemini の利用可否を確認できるのは、認証済みのモデルリク�
 
 ### ホストレベルの代替手段: 動作する IPv6 とリゾルバーポリシー
 
-[#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) の報告者は、コンテナの IPv6 を有効にし、
+[#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) の報告者は、コンテナの IPv6 を有効にし、
 glibc のアドレス選択を変更することで、その環境でのアクセスを復旧しました。
 これは環境固有の代替手段として扱ってください。リゾルバーの優先設定を調整する前に、
 ホストの IPv6 が動作していること、コンテナの外向き通信とルーティング、およびファイアウォールルールを確認してください。

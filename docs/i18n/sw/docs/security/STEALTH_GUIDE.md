@@ -170,7 +170,7 @@ Sehemu zinazohusika:
 
 - `open-sse/executors/antigravity.ts` — husoma `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — upitishaji wa kitambulisho
-- Ripoti ya awali ya tukio: Mjadala [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Ripoti ya awali ya tukio: Mjadala [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

@@ -223,7 +223,7 @@ livenessProbe:
 
 **Nenastavujte** kontrolu **životnosti** kubeletu na `/api/monitoring/health`. Táto cesta vykonáva skutočné databázové/monitorovacie operácie a pri zaťažení bude hlásiť falošne pozitívne výsledky.
 
-Súvisiace: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (sondy pri zaneprázdnenej slučke udalostí), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (náročné spracovanie cien katalógu), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (náročné počítanie tokenov pri kompresii).
+Súvisiace: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (sondy pri zaneprázdnenej slučke udalostí), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (náročné spracovanie cien katalógu), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (náročné počítanie tokenov pri kompresii).
 
 ### Watchdog systemd (zamrznutá slučka udalostí)
 

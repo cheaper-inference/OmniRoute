@@ -222,7 +222,7 @@ livenessProbe:
 
 kubelet **liveness** ကို `/api/monitoring/health` သို့ **မညွှန်ပါနှင့်**။ ထို path သည် DB/monitoring လုပ်ငန်းများကို အမှန်တကယ်လုပ်ဆောင်ပြီး ဝန်များနေချိန်တွင် false-positive ဖြစ်လိမ့်မည်။
 
-ဆက်စပ်အကြောင်းအရာများ: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (event loop အလုပ်များနေစဉ် စမ်းသပ်ချက်များ)၊ [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (catalog pricing က အရင်းအမြစ်များကို အလွန်အကျွံသုံးစွဲခြင်း)၊ [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (compression token-count က အရင်းအမြစ်များကို အလွန်အကျွံသုံးစွဲခြင်း)။
+ဆက်စပ်အကြောင်းအရာများ: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (event loop အလုပ်များနေစဉ် စမ်းသပ်ချက်များ)၊ [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (catalog pricing က အရင်းအမြစ်များကို အလွန်အကျွံသုံးစွဲခြင်း)၊ [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (compression token-count က အရင်းအမြစ်များကို အလွန်အကျွံသုံးစွဲခြင်း)။
 
 ### systemd watchdog (ရပ်တန့်နေသော event loop)
 

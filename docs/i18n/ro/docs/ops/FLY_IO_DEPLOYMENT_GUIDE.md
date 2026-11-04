@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 Clonați codul și accesați directorul
 
 ```powershell
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly va efectua automat o actualizare graduală a mașinilor.
 
 ### 9.1 Urmărirea actualizărilor depozitului upstream, păstrând fișierul `fly.toml` al fork-ului
 
-Dacă depozitul actual este un fork și doriți să sincronizați actualizările din depozitul upstream `https://github.com/diegosouzapw/OmniRoute`, urmați fluxul de lucru de mai jos.
+Dacă depozitul actual este un fork și doriți să sincronizați actualizările din depozitul upstream `https://github.com/cheaper-inference/OmniRoute`, urmați fluxul de lucru de mai jos.
 
 Mai întâi, verificați depozitele remote:
 
@@ -309,7 +309,7 @@ Ar trebui să vedeți cel puțin:
 Dacă `upstream` nu este configurat, adăugați-l:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
 Înainte de sincronizarea cu upstream, preluați cele mai recente commituri și etichete:

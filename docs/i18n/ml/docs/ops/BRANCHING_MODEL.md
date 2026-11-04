@@ -54,7 +54,7 @@ flowchart LR
 നിങ്ങൾക്ക് വേണ്ട ബ്രാഞ്ച് മെർജ് ചെയ്യാനാകുമെന്ന് കരുതുന്നതിന് മുമ്പ് തുറന്ന ഫ്രീസ് ഉണ്ടോയെന്ന് പരിശോധിക്കുക:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 മെർജ് പ്രവർത്തനക്രമം (ഉടമയുടെ `queue` ലേബൽ → Mergify)

@@ -6,7 +6,7 @@
 
 **상태:** 제안 (현재 @diegosouzapw 검토 대기 중)
 **날짜:** 2026-06-20
-**참조:** [#3932](https://github.com/diegosouzapw/OmniRoute/issues/3932), PR #4381
+**참조:** [#3932](https://github.com/cheaper-inference/OmniRoute/issues/3932), PR #4381
 
 ## 요약
 

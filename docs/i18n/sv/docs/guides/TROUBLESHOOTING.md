@@ -256,7 +256,7 @@ Kodsignering är planerad; tills den är på plats kan problemet återkomma i ny
    [Convert]::ToBase64String($b)
    ```
    Utdata måste matcha `latest.yml` → `sha512`. Om de inte matchar ska du radera filen och
-   endast ladda ned den igen från [GitHubs utgivningssida](https://github.com/diegosouzapw/OmniRoute/releases).
+   endast ladda ned den igen från [GitHubs utgivningssida](https://github.com/cheaper-inference/OmniRoute/releases).
 2. **Återställ + undanta** — återställ de borttagna objekten från karantänen och lägg till
    ett undantag för `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Inställningar → Hot och
    undantag) och installera sedan om.
@@ -852,7 +852,7 @@ information om `OMNIROUTE_READY_TIMEOUT_MS`.
 
 ## Fortfarande fast?
 
-- **GitHub-ärenden**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **GitHub-ärenden**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **Arkitektur**: Se [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) för interna detaljer
 - **API-referens**: Se [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) för alla slutpunkter
 - **Hälsoöversikt**: Kontrollera **Kontrollpanel → Hälsa** för systemstatus i realtid

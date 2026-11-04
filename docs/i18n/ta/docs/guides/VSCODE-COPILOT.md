@@ -110,7 +110,7 @@ npm start
 
 உட்பொதித்தலை ஆதரிக்கும் build இல்லையெனில், page frame செய்யப்படுவதை மறுக்கும்; extension அதை response headers-இலிருந்து கண்டறிந்து வெளிப்புற browser-க்குத் தானாக மாறும் — எதுவும் செயலிழக்காது, மேலும் இது குறித்து ஒருமுறை தெரிவிக்கும்.
 [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) மற்றும் issue
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273) ஆகியவற்றைப் பார்க்கவும்.
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273) ஆகியவற்றைப் பார்க்கவும்.
 
 ---
 

@@ -46,7 +46,7 @@ Wannan Ƙa'idar Ɗabi'a tana aiki a duk wuraren al'umma, kuma tana aiki yayin da
 ## Aiwatar da Doka
 
 Ana iya kai rahoton aukuwar cin zarafi, musgunawa, ko wasu halayen da ba za a amince da su ba ga shugabannin al'umma masu alhakin aiwatar da doka ta hanyar buɗe shawarar tsaro ta sirri a
-<https://github.com/diegosouzapw/OmniRoute/security/advisories/new>
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
 ko ta aika wa mai kula imel a diegosouza.pw@outlook.com.
 Don abubuwan da suka shafi tsaro kai tsaye, duba [`SECURITY.md`](SECURITY.md).
 Za a duba kuma a binciki duk koke-koke cikin gaggawa da adalci.

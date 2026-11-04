@@ -35,7 +35,7 @@ UI/UX-ի, i18n-ի, CLI-ի, տվյալների բազայի և կառուցման
 ### Կլոնավորում և տեղադրում
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -433,4 +433,4 @@ VPS-ում տեղակայելու համար օգտագործեք `npm run build
 - **API տեղեկատու**: Տե՛ս [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
 - **Անվտանգության փաստաթղթեր**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
 - **Շահագործման փաստաթղթեր**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Խնդիրներ**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Խնդիրներ**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

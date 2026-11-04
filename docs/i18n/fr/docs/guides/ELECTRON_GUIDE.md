@@ -198,7 +198,7 @@ Réglé via `session.defaultSession.webRequest.onHeadersReceived`. Directives no
 
 ## Mise à jour automatique
 
-Utilise `electron-updater` avec le fournisseur GitHub (`diegosouzapw/OmniRoute`).
+Utilise `electron-updater` avec le fournisseur GitHub (`cheaper-inference/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Événements transmis au moteur de rendu via `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (avec `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Terrain d'artefacts à `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Les versions sont publiées dans GitHub Releases (`diegosouzapw/OmniRoute`), où `electron-updater` vérifie également les nouvelles versions.
+Les versions sont publiées dans GitHub Releases (`cheaper-inference/OmniRoute`), où `electron-updater` vérifie également les nouvelles versions.
 
 ## Dépannage
 

@@ -452,7 +452,7 @@ PR पूर्वी `[4.0.0]` CHANGELOG विभाग आणि त्या
 gh workflow run preview-artifact.yml -f pr_number=<N>   # किंवा `preview-artifact` लेबल जोडा
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # पूर्वावलोकन इंस्टॉल
 ```
 

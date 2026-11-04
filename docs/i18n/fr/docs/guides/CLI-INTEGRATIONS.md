@@ -199,7 +199,7 @@ la sortie de `ps`.
 Faire pointer le profil vers un **combo** OmniRoute plutôt que vers un seul modèle permet
 à la flotte de bénéficier du basculement du fournisseur : lorsque le point de terminaison principal est devenu totalement indisponible en cours de tour
 lors de l’exécution consignée dans
-[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), l’agent a terminé
+[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), l’agent a terminé
 les étapes restantes sur la solution de secours sans jamais signaler l’interruption.
 
 ---

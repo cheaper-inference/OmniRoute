@@ -169,7 +169,7 @@ Puncte relevante:
 
 - `open-sse/executors/antigravity.ts` — citește `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — gestionarea acreditărilor
-- Raportul inițial al incidentului: Discuția [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Raportul inițial al incidentului: Discuția [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

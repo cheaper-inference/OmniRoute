@@ -29,7 +29,7 @@ docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
 ### Možnost C: Ze zdrojového kódu
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 npm run dev
@@ -165,4 +165,4 @@ OmniRoute automaticky přeskočí nefunkční poskytovatele a vyzkouší další
 
 - **[Řešení problémů](../guides/TROUBLESHOOTING.md)** — Běžné potíže a jejich řešení
 - **[Discord](https://discord.gg/U47eFqAXCn)** — Komunitní podpora
-- **[Problémy na GitHubu](https://github.com/diegosouzapw/OmniRoute/issues)** — Nahlaste chyby
+- **[Problémy na GitHubu](https://github.com/cheaper-inference/OmniRoute/issues)** — Nahlaste chyby

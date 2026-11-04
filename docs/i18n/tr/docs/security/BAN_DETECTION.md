@@ -51,8 +51,8 @@ asla otomatik olarak kurtarılmaz), oysa operatör bir doğrulama istemini taray
 İfadenin yasaklama listesinde tutulması, `classifyProviderError` içindeki kurtarılabilir cloud-code 403 dalını da
 bu ifade için erişilemez hâle getiriyordu; çünkü önce `accountDeactivated`
 değerlendirilir — dolayısıyla Gemini Code Assist için
-[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) ve
-[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) kapsamında eklenen proje rotası kurtarma işlemi hiçbir zaman çalışamıyordu.
+[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) ve
+[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) kapsamında eklenen proje rotası kurtarma işlemi hiçbir zaman çalışamıyordu.
 
 Bitişik üç **ayrı** sinyal tablosu, yasaklı anahtar kelime algılamasının parçası _değildir_:
 

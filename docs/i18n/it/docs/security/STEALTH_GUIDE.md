@@ -173,7 +173,7 @@ Punti interessati:
 
 - `open-sse/executors/antigravity.ts` — legge `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — gestione delle credenziali
-- Segnalazione originale dell'incidente: Discussione [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Segnalazione originale dell'incidente: Discussione [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

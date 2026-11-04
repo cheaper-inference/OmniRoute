@@ -58,8 +58,8 @@ never auto-recovers), whereas the operator clears a verification prompt in a bro
 Keeping the phrase in the ban list also made the recoverable cloud-code 403 branch in
 `classifyProviderError` unreachable for this wording, because `accountDeactivated` is
 evaluated first — so the project-route recovery added for Gemini Code Assist in
-[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) and
-[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) could never run.
+[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) and
+[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) could never run.
 
 Three adjacent, **separate** signal tables are _not_ part of banned-keyword detection:
 

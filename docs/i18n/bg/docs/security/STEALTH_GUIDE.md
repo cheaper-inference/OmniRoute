@@ -170,7 +170,7 @@ aider, continue.dev, copilot, avante, codecompanion
 
 - `open-sse/executors/antigravity.ts` — прочита `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — обработка на идентификационните данни
-- Първоначален доклад за инцидента: Дискусия [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Първоначален доклад за инцидента: Дискусия [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

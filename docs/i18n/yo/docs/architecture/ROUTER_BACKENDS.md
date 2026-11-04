@@ -4,9 +4,9 @@
 
 ---
 
-> **Ìpò:** Ti gba · **Àyíká:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
-> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Àdéhùn:** `domain/routing/routerBackends.ts`
-> (ìforúkọsílẹ̀ oníirú — kóòdù yóò dé pẹ̀lú [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
+> **Ìpò:** Ti gba · **Àyíká:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
+> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Àdéhùn:** `domain/routing/routerBackends.ts`
+> (ìforúkọsílẹ̀ oníirú — kóòdù yóò dé pẹ̀lú [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
 
 ADR yìí ṣe ìtumọ̀ pàtó bí àwọn ẹ̀rọ `ts` (abinibi), `bifrost`, `cliproxy`, `9router`, àti
 àwọn ẹ̀rọ tó bá VibeProxy mu ṣe ní ìbáṣepọ̀ sí ara wọn, kí àwọn olùkópa lè dáwọ́
@@ -39,7 +39,7 @@ jẹ́ `external` nìkan.
 ## Ìforúkọsílẹ̀ — orísun òtítọ́ kan ṣoṣo
 
 Àdéhùn `domain/routing/routerBackends.ts` (kóòdù yóò dé pẹ̀lú
-[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) ń kéde ẹ̀rọ kọ̀ọ̀kan lẹ́ẹ̀kan ṣoṣo, pẹ̀lú
+[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) ń kéde ẹ̀rọ kọ̀ọ̀kan lẹ́ẹ̀kan ṣoṣo, pẹ̀lú
 ìyípo ìgbésí-ayé rẹ̀, agbára rẹ̀, ìdánimọ̀ iṣẹ́ rẹ̀, èbúté àìyípadà, àtòjọ ìlera, àti
 àtìlẹ́yìn telemetry. Àwọn olùlò ń wá àwọn ẹ̀rọ nípasẹ̀ `getRouterBackend(id)`,
 `listRouterBackends()`, àti `listRouterBackendsByCapability(cap)` dípò
@@ -55,7 +55,7 @@ jẹ́ `external` nìkan.
 
 ¹ Ìgbéga Bifrost sí iṣẹ́ `supervised` tí a fi sínú ètò (tí a lè fi sílẹ̀/bẹ̀rẹ̀
 láti `/api/services/bifrost/`) ni a ń tọpinpin nínú
-[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817); títí tí a ó fi dapọ̀ mọ́ ẹ̀ka àkọ́kọ́,
+[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817); títí tí a ó fi dapọ̀ mọ́ ẹ̀ka àkọ́kọ́,
 Bifrost jẹ́ `external` nìkan (a lè dé ọ̀dọ̀ rẹ̀ nípasẹ̀ `BIFROST_BASE_URL` nìkan).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -123,8 +123,8 @@ Ipa-ọ̀nà aṣojú relay `/api/v1/relay/chat/completions` nìkan ni ó ń yan
 Yíyan jẹ́ **gbogbo rẹ̀ tàbí kò sí ní ìpele relay lọ́wọ́lọ́wọ́** — kò sí ìyípadà engine
 fún provider kọ̀ọ̀kan tàbí fún ìbéèrè kọ̀ọ̀kan lórí `release/v3.8.43`. Iṣẹ́ sidecar-manifest ń fi
 ìdènà fún ìbéèrè kọ̀ọ̀kan kún un
-([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 èyí tí ó ń jẹ́ kí `auto` darí àwọn provider tí manifest fọwọ́ sí nìkan gba inú Bifrost.
 
 ## Ìsopọ̀ pẹ̀lú pátákó ìṣàkóso

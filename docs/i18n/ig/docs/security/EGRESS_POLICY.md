@@ -55,7 +55,7 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ## Ihe Mere O Ji Dị
 
-E webatara ya na PR [#3777](https://github.com/diegosouzapw/OmniRoute/pull/3777). Nsogbu ndị kpaliri ya:
+E webatara ya na PR [#3777](https://github.com/cheaper-inference/OmniRoute/pull/3777). Nsogbu ndị kpaliri ya:
 
 | Nsogbu                                        | Ihe ntụziaka ahụ na-edozi                                                                                                                                                                                                                                                                                                                             |
 | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

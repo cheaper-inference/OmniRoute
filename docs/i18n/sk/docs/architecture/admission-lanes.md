@@ -85,7 +85,7 @@ Pruhy na úrovni bajtov obmedzujú pamäťovo náročnú cestu parsovania/kompre
 
 ## 4. Dlhé `/v1/responses` v jednom procese (zdravá rezerva)
 
-[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) pridalo `tryAcquireHealthyHeadroom`, aby sa druhá štrukturálne náročná požiadavka prijala, keď je využitie haldy pod hodnotou `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. Cesta BYTE používaná funkciou `admitChatRequest` (telá ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`, predvolene 256 KiB, vrátane `POST /v1/responses`) používa **rovnakú** výnimku.
+[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) pridalo `tryAcquireHealthyHeadroom`, aby sa druhá štrukturálne náročná požiadavka prijala, keď je využitie haldy pod hodnotou `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. Cesta BYTE používaná funkciou `admitChatRequest` (telá ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`, predvolene 256 KiB, vrátane `POST /v1/responses`) používa **rovnakú** výnimku.
 
 Toto je podporovaný postup pre **jeden proces**, ktorý umožňuje viac než dve súbežné dlhé SSE požiadavky `/v1/responses`: zvýšte primárny limit a zdravú rezervu len do takej miery, akú povoľuje halda a celoprocesový rozpočet bajtov spracúvaných požiadaviek (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110). Desiatky dlhých SSE klientov (40–50) sú otázkou tohto pamäťového rozpočtu, nie pevného produktového limitu „max. 2“. Pri preťažení haldy sa požiadavky naďalej odmietajú opakovateľnou chybou `503`, aby sa problém #7849 nevrátil.
 

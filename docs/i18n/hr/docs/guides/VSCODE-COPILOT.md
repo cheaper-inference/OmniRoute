@@ -114,7 +114,7 @@ npm start
 Bez izgradnje koja podržava ugrađivanje stranica odbija prikazivanje u okviru, proširenje to otkriva iz
 zaglavlja odgovora i vraća se na vanjski preglednik — ništa se ne prekida, a o tome se prikazuje jednokratna obavijest.
 Pogledajte [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) i problem
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
 
 ---
 

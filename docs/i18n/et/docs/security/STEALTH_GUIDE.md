@@ -162,7 +162,7 @@ Puudutatud kohad:
 
 - `open-sse/executors/antigravity.ts` — loeb väärtust `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — mandaadi edastamine
-- Algne intsidendiaruanne: arutelu [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Algne intsidendiaruanne: arutelu [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

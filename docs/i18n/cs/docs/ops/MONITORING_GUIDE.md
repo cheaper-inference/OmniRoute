@@ -224,7 +224,7 @@ livenessProbe:
 
 **Nenastavujte** kontrolu **životnosti** kubeletu na `/api/monitoring/health`. Tato cesta skutečně pracuje s databází a monitorováním a při zatížení bude vracet falešně pozitivní výsledky.
 
-Související: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (sondy při vytížené událostní smyčce), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (výpočet cen katalogu zahlcující prostředky), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (počítání tokenů při kompresi zahlcující prostředky).
+Související: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (sondy při vytížené událostní smyčce), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (výpočet cen katalogu zahlcující prostředky), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (počítání tokenů při kompresi zahlcující prostředky).
 
 ### Watchdog systemd (zamrzlá událostní smyčka)
 

@@ -50,8 +50,8 @@ Google Cloud Code / Antigravity는 이를 `403 VALIDATION_REQUIRED`로 반환합
 또한 이 문구를 차단 목록에 유지하면 `accountDeactivated`가 먼저 평가되므로
 `classifyProviderError`의 복구 가능한 cloud-code 403 분기에 이 문구로는 도달할 수
 없었습니다. 따라서 Gemini Code Assist를 위해
-[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) 및
-[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452)에서 추가된 프로젝트 경로 복구가
+[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) 및
+[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452)에서 추가된 프로젝트 경로 복구가
 실행될 수 없었습니다.
 
 인접한 다음 세 개의 **별도** 신호 테이블은 차단 키워드 감지에 포함되지 _않습니다_.

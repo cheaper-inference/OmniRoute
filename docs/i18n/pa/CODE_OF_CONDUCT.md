@@ -63,7 +63,7 @@
 
 ਦੁਰਵਿਵਹਾਰ, ਪਰੇਸ਼ਾਨੀ ਜਾਂ ਹੋਰ ਕਿਸੇ ਅਸਵੀਕਾਰਯੋਗ ਵਿਹਾਰ ਦੀਆਂ ਘਟਨਾਵਾਂ ਦੀ
 ਰਿਪੋਰਟ ਲਾਗੂਕਰਨ ਲਈ ਜ਼ਿੰਮੇਵਾਰ ਭਾਈਚਾਰੇ ਦੇ ਆਗੂਆਂ ਨੂੰ
-<https://github.com/diegosouzapw/OmniRoute/security/advisories/new>
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
 'ਤੇ ਇੱਕ ਨਿੱਜੀ ਸੁਰੱਖਿਆ ਸਲਾਹ ਖੋਲ੍ਹ ਕੇ
 ਜਾਂ diegosouza.pw@outlook.com 'ਤੇ ਰੱਖ-ਰਖਾਅਕਰਤਾ ਨੂੰ ਈਮੇਲ ਕਰਕੇ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ।
 ਸੁਰੱਖਿਆ-ਸੰਵੇਦਨਸ਼ੀਲ ਘਟਨਾਵਾਂ ਲਈ, [`SECURITY.md`](SECURITY.md) ਵੇਖੋ।

@@ -9,7 +9,7 @@
 OmniRoute-இல் பாதுகாப்புப் பாதிப்பு ஒன்றை நீங்கள் கண்டறிந்தால், அதைப் பொறுப்புடன் புகாரளிக்கவும்:
 
 1. பொது GitHub issue ஒன்றைத் திறக்க **வேண்டாம்**
-2. [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)-ஐப் பயன்படுத்தவும்
+2. [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)-ஐப் பயன்படுத்தவும்
 3. பின்வருவனவற்றைச் சேர்க்கவும்: விளக்கம், மீளுருவாக்கப் படிகள் மற்றும் சாத்தியமான தாக்கம்
 
 ## பதிலளிப்பு காலவரிசை
@@ -42,7 +42,7 @@ OmniRoute-இல் பாதுகாப்புப் பாதிப்ப�
   தீவிரமான பின்னடைவுகளுக்கான திருத்தங்களையும் `stable/v3` பெறும்**. இதன் மூலம் நிர்ணயிக்கப்படும் முடிவுத் தேதி, வெளியீடு நிகழும்போது
   3.9.0 வெளியீட்டுக் குறிப்புகளிலும் [`ROADMAP.md`](ROADMAP.md)-இலும் பதிவுசெய்யப்படும்.
 - **LTS வரிசையில் உள்ள பாதுகாப்புப் பாதிப்பைப் புகாரளித்தல்:** மற்ற எந்தப் பதிப்பிற்கும் பயன்படுத்தப்படும் அதே சேனல்தான் —
-  தனிப்பட்ட [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)-ஐப் பயன்படுத்தவும்;
+  தனிப்பட்ட [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)-ஐப் பயன்படுத்தவும்;
   ஒருபோதும் பொது issue-ஐப் பயன்படுத்த வேண்டாம். நீங்கள் சோதித்த பதிப்பைக் குறிப்பிடவும் (எடுத்துக்காட்டாக `3.9.2`);
   திருத்தங்கள் `stable/v3`-இல் சேர்க்கப்பட்டு v4-க்கும் முன்னோக்கிக் கொண்டுசெல்லப்படும்.
 - **LTS வெளியீட்டின்போதான பாதுகாப்பு அடிப்படை:** அளவிடப்பட்ட ஸ்கேனர் நிலை, route-guard மற்றும்

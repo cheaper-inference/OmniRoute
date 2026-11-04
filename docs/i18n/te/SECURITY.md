@@ -9,7 +9,7 @@
 OmniRouteలో మీరు భద్రతా దుర్బలత్వాన్ని కనుగొంటే, దయచేసి బాధ్యతాయుతంగా నివేదించండి:
 
 1. పబ్లిక్ GitHub సమస్యను **తెరవవద్దు**
-2. [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)ను ఉపయోగించండి
+2. [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)ను ఉపయోగించండి
 3. వీటిని చేర్చండి: వివరణ, పునరుత్పత్తి దశలు మరియు సంభావ్య ప్రభావం
 
 ## ప్రతిస్పందన కాలక్రమం
@@ -42,7 +42,7 @@ OmniRouteలో మీరు భద్రతా దుర్బలత్వా�
   క్లిష్టమైన రిగ్రెషన్లకు** మద్దతు పొందుతుంది. విడుదల జరిగినప్పుడు, దాని ఫలితంగా నిర్ణయించబడిన ముగింపు తేదీ
   3.9.0 విడుదల గమనికల్లో మరియు [`ROADMAP.md`](ROADMAP.md)లో నమోదు చేయబడుతుంది.
 - **LTS లైన్లోని దుర్బలతను నివేదించడం:** ఇతర వెర్షన్లకు ఉపయోగించే ఛానెలే —
-  ప్రైవేట్ [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)ను ఉపయోగించండి,
+  ప్రైవేట్ [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)ను ఉపయోగించండి,
   పబ్లిక్ ఇష్యూను ఎప్పుడూ ఉపయోగించవద్దు. మీరు పరీక్షించిన వెర్షన్ను పేర్కొనండి (ఉదాహరణకు `3.9.2`);
   పరిష్కారాలు `stable/v3`లో చేరి, v4కు ఫార్వర్డ్-పోర్ట్ చేయబడతాయి.
 - **LTS విడుదల సమయంలో భద్రతా ప్రాథమిక స్థాయి:** కొలిచిన స్కానర్ స్థితి, రూట్-గార్డ్ మరియు

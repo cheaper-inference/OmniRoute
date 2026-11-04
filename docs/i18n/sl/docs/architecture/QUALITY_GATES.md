@@ -418,7 +418,7 @@ implementacija je v pripravi).
 ### Zaskočka CodeQL: pogostost osveževanja in ročni sprožilec
 
 `check:codeql-ratchet` bere **stanje repozitorija, ki se osvežuje po urniku — ne za vsak PR.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` poroča
+`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` poroča
 `state: configured`, `schedule: weekly`: gre za pregled s privzeto nastavitvijo GitHuba, ne za
 analizo ob vsakem potisku. Posledica: ko je PR, ki ODPRAVI opozorila, združen, zaskočka še naprej
 bere staro, višje število do naslednjega načrtovanega pregleda — zato poroča o poslabšanju

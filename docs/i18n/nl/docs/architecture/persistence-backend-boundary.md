@@ -5,7 +5,7 @@
 ---
 
 - **Status:** Voorgesteld — goedkeuring van een maintainer is vereist voordat het runtimewerk begint
-- **Tracking-issue:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
+- **Tracking-issue:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
 - **Reikwijdte:** Alleen persistentiearchitectuur; deze beslissing voegt geen externe database toe en selecteert er ook geen
 
 ## Context

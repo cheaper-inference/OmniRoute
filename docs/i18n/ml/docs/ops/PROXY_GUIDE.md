@@ -259,7 +259,7 @@ curl -X POST http://localhost:20128/api/v1/management/proxies/bulk-assign \
 
 ## 1proxy സൗജന്യ പ്രോക്സി മാർക്കറ്റ്പ്ലേസ്
 
-> 🆕 **[@oyi77](https://github.com/oyi77) സംഭാവന ചെയ്തത്** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Issue [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕 **[@oyi77](https://github.com/oyi77) സംഭാവന ചെയ്തത്** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Issue [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
 
 ലോകമെമ്പാടുമുള്ള **നൂറുകണക്കിന് സൗജന്യവും സാധൂകരിച്ചതുമായ പ്രോക്സികൾ** ലഭ്യമാക്കുന്നതിനായി OmniRoute, **[1proxy](https://1proxy-api.aitradepulse.com)** കമ്മ്യൂണിറ്റി പ്ലാറ്റ്ഫോമുമായി സംയോജിക്കുന്നു. സ്വന്തമായി പ്രോക്സി ഇൻഫ്രാസ്ട്രക്ചർ ഇല്ലാത്ത ഉപയോക്താക്കൾക്ക് ഇത് അനുയോജ്യമാണ്.
 

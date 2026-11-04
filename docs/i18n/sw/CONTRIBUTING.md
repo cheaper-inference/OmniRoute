@@ -30,7 +30,7 @@ Thank you for your interest in contributing! This guide covers everything you ne
 ### Ku-clone na Kusakinisha
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -429,4 +429,4 @@ Kisha tumia stadi za `/deploy-vps-*-cc` ambazo husawazisha `dist/` kupitia rsync
 - **Marejeleo ya API**: Tazama [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
 - **Nyaraka za usalama**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
 - **Nyaraka za uendeshaji**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Masuala**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Masuala**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

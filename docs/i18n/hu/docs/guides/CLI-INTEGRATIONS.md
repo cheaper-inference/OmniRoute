@@ -181,7 +181,7 @@ Mindkét forma egyetlen 5dive **hitelesítési profilt** ír, ezután pedig mind
 Az API-kulcs a **szabványos bemeneten** (`--api-key=-`) keresztül kerül átadásra a 5dive számára, így soha nem jelenik meg a `ps` kimenetében.
 
 Ha a profilt nem egyetlen modellre, hanem egy OmniRoute-**kombinációra** irányítod, a flotta szolgáltatói feladatátvételt kap: amikor az elsődleges végpont az
-[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578) problémában rögzített futás során egy művelet közepén teljesen elérhetetlenné vált, az ügynök a tartalék végponton fejezte be a hátralévő lépéseket, és a kiesés soha nem vált láthatóvá a felhasználó számára.
+[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578) problémában rögzített futás során egy művelet közepén teljesen elérhetetlenné vált, az ügynök a tartalék végponton fejezte be a hátralévő lépéseket, és a kiesés soha nem vált láthatóvá a felhasználó számára.
 
 ---
 

@@ -453,7 +453,7 @@ jivvalida eżattament dak il-build (parti (a) ta’ #8084). PRs tal-istess repo�
 gh workflow run preview-artifact.yml -f pr_number=<N>   # jew żid it-tikketta `preview-artifact`
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # installazzjoni tal-previżjoni
 ```
 

@@ -5,7 +5,7 @@
 ---
 
 Dokumen ini mencatat keputusan implementasi untuk
-[Issue #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854). Produk publik direpresentasikan
+[Issue #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854). Produk publik direpresentasikan
 sebagai empat keluarga penyedia. Wilayah merupakan data koneksi, bukan produk terpisah.
 
 ## Keputusan

@@ -45,9 +45,9 @@
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=social)](https://github.com/cheaper-inference/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/OmniRoute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 Bergabunglah dengan komunitas
@@ -96,7 +96,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 ![Lisensi: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Unduhan Docker](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Unduhan Electron](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![Unduhan Electron](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -521,7 +521,7 @@ Seluruh **20** strategi — padukan sesuai kebutuhan pada setiap langkah combo:
 OmniRoute berlisensi MIT dan dipelihara secara terbuka. Jika proyek ini menghemat waktu atau uang Anda, berikut cara untuk menjaganya tetap independen — pilih apa pun yang sesuai bagi Anda. Sponsor tidak pernah memengaruhi prioritas perutean; sponsor memberikan visibilitas, bukan peringkat.
 
 <table>
-  <tr><td nowrap>⭐ <b>Beri bintang pada repositori</b></td><td>Gratis — benar-benar membantu visibilitas</td><td><a href="https://github.com/diegosouzapw/OmniRoute">Beri bintang pada OmniRoute</a></td></tr>
+  <tr><td nowrap>⭐ <b>Beri bintang pada repositori</b></td><td>Gratis — benar-benar membantu visibilitas</td><td><a href="https://github.com/cheaper-inference/OmniRoute">Beri bintang pada OmniRoute</a></td></tr>
   <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>Sekali bayar atau bulanan · tanpa biaya platform</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
   <tr><td nowrap>☕ <b>Ko-fi</b></td><td>Tip sekali bayar dengan cepat, donatur tidak perlu mendaftar</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
   <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>Dukungan kecil dan informal</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
@@ -558,7 +558,7 @@ Pix salin-tempel:
 
 </details>
 
-🐛 Menemukan bug atau memiliki masukan? Buka [Diskusi](https://github.com/diegosouzapw/OmniRoute/discussions).
+🐛 Menemukan bug atau memiliki masukan? Buka [Diskusi](https://github.com/cheaper-inference/OmniRoute/discussions).
 
 <br/>
 
@@ -1254,7 +1254,7 @@ proses yang sama pada satu port, sehingga saat ini tidak ada paket khusus CLI ya
 
 Metrik kanonis pada 2026-10-18: **1.976 video unik** · **20.220.289 tayangan yang diketahui** (`v > 0`) · **1.210 kanal/profil berdasarkan platform**. Dasbor mentah berisi 1.976 baris (YouTube 1.352 = 740 video berdurasi panjang + 612 Shorts · TikTok 334 · Instagram 290); tidak ada duplikat yang tersisa setelah normalisasi berdasarkan URL kanonis, yang mempertahankan jumlah tayangan tertinggi per video. Pengumpulan data YouTube dibekukan pada 2026-10-13 (kuota API habis dari 14 hingga 18/10), sedangkan TikTok/Instagram sejak 2026-09-02 (tanpa kredit pengumpulan data); 76 video masih belum memiliki jumlah tayangan.
 
-> 🎬 **Membuat video tentang OmniRoute?** Buka [isu](https://github.com/diegosouzapw/OmniRoute/issues/new) atau [diskusi](https://github.com/diegosouzapw/OmniRoute/discussions) dengan menyertakan tautannya — kami akan menampilkannya di sini.
+> 🎬 **Membuat video tentang OmniRoute?** Buka [isu](https://github.com/cheaper-inference/OmniRoute/issues/new) atau [diskusi](https://github.com/cheaper-inference/OmniRoute/discussions) dengan menyertakan tautannya — kami akan menampilkannya di sini.
 
 <br/>
 
@@ -1274,8 +1274,8 @@ Metrik kanonis pada 2026-10-18: **1.976 video unik** · **20.220.289 tayangan ya
 | 🟢 **WhatsApp — 🇧🇷 Brasil**                 | [bergabung dengan grup](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                 |
 | 🌍 **Situs web**                            | [omniroute.online](https://omniroute.online)                                                                             |
 | 🌍 **🌍Komunitas StHub OmniRoute (gratis)** | [portal StHub](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                    |
-| 📦 **Kode sumber**                          | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                           |
-| 🐛 **Laporkan bug**                         | [buka isu](https://github.com/diegosouzapw/OmniRoute/issues) — lampirkan keluaran `npm run system-info`                  |
+| 📦 **Kode sumber**                          | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                                 |
+| 🐛 **Laporkan bug**                         | [buka isu](https://github.com/cheaper-inference/OmniRoute/issues) — lampirkan keluaran `npm run system-info`             |
 | 🤝 **Berkontribusi**                        | [CONTRIBUTING.md](CONTRIBUTING.md) · [Model Percabangan & Rilis](docs/ops/BRANCHING_MODEL.md) · pilih `good first issue` |
 | 💚 **Dukung proyek ini**                    | [Cara mendukung ↑](#-support-omniroute) · [Sponsor GitHub](https://github.com/sponsors/diegosouzapw)                     |
 
@@ -1633,7 +1633,7 @@ Terima kasih yang tulus kepada orang-orang yang mendanai OmniRoute dari kantong 
 
 </div>
 
-[![Kontributor](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Kontributor](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
 
 <sub>Diaudit pada 2026-11-02 di tip live <code>release/v3.8.53</code> <code>1c7135e0fb</code> (7.972 commit): <b>1.074 identitas Git manusia yang dinormalisasi</b> — 759 muncul sebagai penulis commit (termasuk pengelola) dan 315 hanya dalam trailer <code>Co-authored-by</code> eksplisit. Sensus ini menerapkan <code>.mailmap</code>, membandingkan alamat surel tanpa membedakan huruf besar-kecil, menggabungkan alamat noreply GitHub numerik dan biasa hanya jika keduanya mengodekan handle yang sama, mengecualikan 29 identitas bot/agen/layanan/pengganti, serta tidak menggabungkan alamat surel biasa hanya karena nama tampilannya sama. Audit 2026-08-24 menerbitkan angka 639; metode ini yang dijalankan ulang pada basis audit tersebut, <code>ac02c5b42f</code>, menghasilkan 619, sehingga peningkatan berasal dari kontributor baru, bukan dari metode yang lebih longgar.</sub>
 
@@ -1662,11 +1662,11 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 ## 📊 Bintang
 
-<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="Grafik Riwayat Bintang" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <img alt="Grafik Riwayat Bintang" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
  </picture>
 </a>
 

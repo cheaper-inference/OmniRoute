@@ -5,7 +5,7 @@
 ---
 
 - **Stádas:** Molta — teastaíonn faomhadh ó chothabhálaí sula gcuirtear tús le hobair ama rite
-- **Saincheist rianaithe:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
+- **Saincheist rianaithe:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
 - **Raon feidhme:** Ailtireacht bhuanseasmhachta amháin; ní chuireann an cinneadh seo bunachar sonraí seachtrach leis ná ní roghnaíonn sé ceann
 
 ## Comhthéacs

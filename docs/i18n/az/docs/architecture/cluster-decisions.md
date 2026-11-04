@@ -6,7 +6,7 @@
 
 **Status:** təklif (@diegosouzapw rəyini gözləyir)
 **Tarix:** 2026-06-20
-**İstinadlar:** [#3932](https://github.com/diegosouzapw/OmniRoute/issues/3932), PR #4381
+**İstinadlar:** [#3932](https://github.com/cheaper-inference/OmniRoute/issues/3932), PR #4381
 
 ## Qısa xülasə
 

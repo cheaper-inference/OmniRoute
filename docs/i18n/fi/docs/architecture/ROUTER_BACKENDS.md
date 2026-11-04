@@ -4,9 +4,9 @@
 
 ---
 
-> **Tila:** Hyväksytty · **Konteksti:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
-> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Sopimus:** `domain/routing/routerBackends.ts`
-> (tyypitetty rekisteri — koodi toimitetaan muutoksen [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) mukana)
+> **Tila:** Hyväksytty · **Konteksti:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
+> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Sopimus:** `domain/routing/routerBackends.ts`
+> (tyypitetty rekisteri — koodi toimitetaan muutoksen [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) mukana)
 
 Tämä ADR määrittää täsmällisesti, miten `ts` (natiivi), `bifrost`, `cliproxy`, `9router` ja
 VibeProxy-yhteensopivat moottorit liittyvät toisiinsa, jotta kehittäjät eivät enää
@@ -39,7 +39,7 @@ vain `external`.
 ## Rekisteri — ainoa totuuden lähde
 
 `domain/routing/routerBackends.ts`-sopimus (koodi toimitetaan muutoksen
-[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) mukana) määrittelee jokaisen moottorin kerran sekä sen
+[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) mukana) määrittelee jokaisen moottorin kerran sekä sen
 elinkaaren, ominaisuudet, palveluidentiteetin, oletusportin, kuntotarkistusmääritykset ja
 telemetriatuen. Käyttäjät hakevat moottoreita funktioilla `getRouterBackend(id)`,
 `listRouterBackends()` ja `listRouterBackendsByCapability(cap)` sen sijaan, että
@@ -55,7 +55,7 @@ jokainen rinnakkaispalvelu käsiteltäisiin erikoistapauksena.
 
 ¹ Bifrostin muuttamista `supervised`-tyyppiseksi upotetuksi palveluksi (asennettavissa ja käynnistettävissä
 polusta `/api/services/bifrost/`) seurataan muutoksessa
-[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817). Siihen asti, kunnes se yhdistetään,
+[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817). Siihen asti, kunnes se yhdistetään,
 Bifrost on vain `external` (saavutettavissa ainoastaan muuttujan `BIFROST_BASE_URL` kautta).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -127,8 +127,8 @@ taustajärjestelmän; pääasiallinen `/api/v1/chat/completions`-rajapinta ei ko
 Valinta on tällä hetkellä **kaikki tai ei mitään välitystasolla** — versiossa
 `release/v3.8.43` moottoria ei voi vaihtaa palveluntarjoaja- tai pyyntökohtaisesti.
 Pyyntökohtainen portti lisätään sivuprosessin manifestia koskevassa työssä
-([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifesti +
-[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifesti +
+[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 minkä ansiosta `auto` voi reitittää Bifrostin kautta vain manifestin perusteella
 kelvolliset palveluntarjoajat.
 

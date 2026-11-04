@@ -129,11 +129,11 @@ handleComboChat (ਉਹੀ ਇੰਜਣ ਜੋ ਸਥਾਈ combos ਲਈ ਵਰ
 ## ਅਸਲ ਮਾਡਲ Id ਨਾਲ ਮੇਲ ਖਾਂਦੇ ਕੰਬੋ ਨਾਮ
 
 ਅਜਿਹਾ ਕੰਬੋ ਜਿਸਦਾ `name` ਕਿਸੇ ਸਿੱਧੇ ਮਾਡਲ id ਦੇ ਬਿਲਕੁਲ ਸਮਾਨ ਹੋਵੇ (ਉਦਾਹਰਨ ਵਜੋਂ, `gpt-5.5` ਨਾਮ ਵਾਲਾ ਕੰਬੋ), ਇੱਕ **ਜਾਣਬੁੱਝ ਕੇ ਬਣਾਇਆ ਗਿਆ, ਸਮਰਥਿਤ ਪੈਟਰਨ** ਹੈ, ਕੋਈ ਬੱਗ ਨਹੀਂ: ਇਹ ਪ੍ਰਤੀ-ਮਾਡਲ-id ਪ੍ਰੋਵਾਈਡਰ ਫਾਲਬੈਕ ਲਈ ਉਹ ਵਿਧੀ ਹੈ ਜਿਸਦਾ ਦਸਤਾਵੇਜ਼ੀਕਰਨ
-[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940) ਵਿੱਚ ਕੀਤਾ ਗਿਆ ਹੈ। ਕਿਉਂਕਿ ਕੰਬੋ ਰੈਜ਼ੋਲਿਊਸ਼ਨ ਦੀ ਜਾਂਚ ਸਿੱਧੇ-ਮਾਡਲ-id ਰੈਜ਼ੋਲਿਊਸ਼ਨ ਤੋਂ ਪਹਿਲਾਂ ਕੀਤੀ ਜਾਂਦੀ ਹੈ
+[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940) ਵਿੱਚ ਕੀਤਾ ਗਿਆ ਹੈ। ਕਿਉਂਕਿ ਕੰਬੋ ਰੈਜ਼ੋਲਿਊਸ਼ਨ ਦੀ ਜਾਂਚ ਸਿੱਧੇ-ਮਾਡਲ-id ਰੈਜ਼ੋਲਿਊਸ਼ਨ ਤੋਂ ਪਹਿਲਾਂ ਕੀਤੀ ਜਾਂਦੀ ਹੈ
 (`src/sse/services/model.ts` ਵਿੱਚ `getComboForModel()`), ਇਸ ਲਈ ਸਿੱਧੀ
 id `gpt-5.5` ਲਈ ਬੇਨਤੀ ਨੂੰ ਸਿੱਧਾ ਕਿਸੇ ਇੱਕ ਪ੍ਰੋਵਾਈਡਰ ਕੋਲ ਭੇਜਣ ਦੀ ਬਜਾਏ ਕੰਬੋ ਦੇ ਟਾਰਗੇਟਾਂ (ਉਦਾਹਰਨ ਵਜੋਂ,
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) ਰਾਹੀਂ ਰੂਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ — ਇਹ
-[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) ਲਈ ਬਣਾਈ ਗਈ ਕੰਬੋ-ਪਹਿਲਾਂ-ਰੀਰਾਈਟ ਤਰਜੀਹ ਨੂੰ ਮੁੜ ਵਰਤਦਾ ਹੈ ਅਤੇ
+[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) ਲਈ ਬਣਾਈ ਗਈ ਕੰਬੋ-ਪਹਿਲਾਂ-ਰੀਰਾਈਟ ਤਰਜੀਹ ਨੂੰ ਮੁੜ ਵਰਤਦਾ ਹੈ ਅਤੇ
 `tests/unit/responses-combo-resolution-3227.test.ts` ਅਤੇ
 `tests/unit/combo-name-codex-responses-rewrite.test.ts` ਦੁਆਰਾ ਇਸਦੀ ਰਿਗ੍ਰੈਸ਼ਨ ਜਾਂਚ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।
 
@@ -175,7 +175,7 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 - **`auto` ਤੁਹਾਡੇ ਕੰਬੋ ਦੀ ਵਰਤੋਂ ਨਹੀਂ ਕਰਦਾ।** `auto`/`auto/*` ਆਪਣਾ ਜ਼ੀਰੋ-ਕਾਨਫਿਗ ਉਮੀਦਵਾਰ ਪੂਲ ਬਣਾਉਂਦਾ ਹੈ ਅਤੇ ਸਥਾਈ ਤੌਰ 'ਤੇ ਸੰਭਾਲੇ ਕੰਬੋ ਨਾਲ ਸਿਰਫ਼ ਉਦੋਂ ਸਲਾਹ ਕਰਦਾ ਹੈ, ਜੇ ਕਿਸੇ ਕੰਬੋ ਦਾ ਨਾਮ ਅੱਖਰਸ਼ `auto` ਹੋਵੇ (ਇਸਦੀ ਸਿਫ਼ਾਰਸ਼ ਨਹੀਂ ਕੀਤੀ ਜਾਂਦੀ)। ਕਿਸੇ ਕੰਬੋ ਰਾਹੀਂ ਰੂਟ ਕਰਨ ਲਈ, ਉਸਦਾ ਬਿਲਕੁਲ ਸਹੀ ਨਾਮ ਭੇਜੋ — `auto` ਨਹੀਂ।
 - **`openrouter/auto` ਇੱਕ ਅਸਲ ਭੁਗਤਾਨਯੋਗ OpenRouter ਉਤਪਾਦ** ("ਆਟੋ ਸਰਵੋਤਮ ਉਪਲਬਧ") ਹੈ, ਕੋਈ OmniRoute ਉਪਨਾਮ ਨਹੀਂ। ਇਹ OpenRouter ਰਜਿਸਟਰੀ (`open-sse/config/providers/registry/openrouter/index.ts`) ਦੀ ਇਕੱਲੀ ਸਥਿਰ ਮਾਡਲ ਐਂਟਰੀ ਹੈ ਅਤੇ ਇਸਦਾ ਬਿੱਲ ਵੱਖਰੇ ਤੌਰ 'ਤੇ ਲੱਗਦਾ ਹੈ। ਇਸਨੂੰ `auto` ਪੂਲਾਂ ਵਿੱਚੋਂ ਬਾਹਰ ਰੱਖਣ ਲਈ ਸੈਟਿੰਗਾਂ → ਰੂਟਿੰਗ → ਭੁਗਤਾਨਯੋਗ ਮਾਡਲ ਲੁਕਾਓ ਦੀ ਵਰਤੋਂ ਕਰੋ।
 
-ਇੱਥੇ ਦਸਤਾਵੇਜ਼ਬੱਧ ਮੂਲ ਉਲਝਣ ਲਈ [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) ਅਤੇ [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) ਵੇਖੋ।
+ਇੱਥੇ ਦਸਤਾਵੇਜ਼ਬੱਧ ਮੂਲ ਉਲਝਣ ਲਈ [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) ਅਤੇ [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) ਵੇਖੋ।
 
 ## ਇਹ ਕਿਵੇਂ ਕੰਮ ਕਰਦਾ ਹੈ (ਸਥਾਈ Auto-Combos)
 

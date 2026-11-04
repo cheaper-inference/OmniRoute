@@ -199,7 +199,7 @@ outputtet fra `ps`.
 Ved at rette profilen mod en OmniRoute-**kombination** frem for en enkelt model får
 flåden udbyder-failover: Da det primære slutpunkt gik helt ned midt i en omgang
 i den kørsel, der er dokumenteret i
-[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), færdiggjorde agenten
+[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), færdiggjorde agenten
 sine resterende trin på reserveløsningen uden nogensinde at vise afbrydelsen.
 
 ---

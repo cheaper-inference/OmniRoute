@@ -6,7 +6,7 @@
 
 **સ્થિતિ:** પ્રસ્તાવ (@diegosouzapwની સમીક્ષાની રાહ જોવાઈ રહી છે)
 **તારીખ:** 2026-06-20
-**સંદર્ભો:** [#3932](https://github.com/diegosouzapw/OmniRoute/issues/3932), PR #4381
+**સંદર્ભો:** [#3932](https://github.com/cheaper-inference/OmniRoute/issues/3932), PR #4381
 
 ## TL;DR
 

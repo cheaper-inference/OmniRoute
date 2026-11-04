@@ -115,7 +115,7 @@ npm start
 Uten en versjon som er bygd med støtte for innebygging, nekter siden å vises i en ramme. Utvidelsen
 oppdager dette fra responsheaderne og går tilbake til den eksterne nettleseren – ingenting slutter å
 virke, og den varsler om dette én gang. Se [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) og sak
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
 
 ---
 

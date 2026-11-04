@@ -35,7 +35,7 @@ UI/UX, i18n, CLI, មូលដ្ឋានទិន្នន័យ និង bui
 ### ក្លូន និងដំឡើង
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -439,4 +439,4 @@ docs/
 - **ឯកសារយោង API**៖ សូមមើល [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
 - **ឯកសារសុវត្ថិភាព**៖ [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
 - **ឯកសារប្រតិបត្តិការ**៖ [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **បញ្ហា**៖ [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **បញ្ហា**៖ [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

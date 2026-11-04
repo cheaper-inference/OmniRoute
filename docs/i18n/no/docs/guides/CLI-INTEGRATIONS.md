@@ -180,7 +180,7 @@ Begge formene skriver én 5dive-**autentiseringsprofil**, og hvert `claude`-sete
 
 API-nøkkelen sendes til 5dive via **stdin** (`--api-key=-`), slik at den aldri vises i utdataene fra `ps`.
 
-Ved å peke profilen mot en OmniRoute-**kombinasjon** i stedet for én enkelt modell får flåten failover mellom leverandører: Da det primære endepunktet gikk helt ned midt i en runde under kjøringen som er dokumentert i [#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), fullførte agenten de gjenværende trinnene via reserveløsningen uten noen gang å synliggjøre driftsavbruddet.
+Ved å peke profilen mot en OmniRoute-**kombinasjon** i stedet for én enkelt modell får flåten failover mellom leverandører: Da det primære endepunktet gikk helt ned midt i en runde under kjøringen som er dokumentert i [#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), fullførte agenten de gjenværende trinnene via reserveløsningen uten noen gang å synliggjøre driftsavbruddet.
 
 ---
 

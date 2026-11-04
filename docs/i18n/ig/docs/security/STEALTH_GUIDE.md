@@ -173,7 +173,7 @@ Ebe ndị metụtara ya:
 
 - `open-sse/executors/antigravity.ts` — na-agụ `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — njikọ kredenshial
-- Akụkọ mbụ banyere ihe merenụ: Mkparịta ụka [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Akụkọ mbụ banyere ihe merenụ: Mkparịta ụka [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

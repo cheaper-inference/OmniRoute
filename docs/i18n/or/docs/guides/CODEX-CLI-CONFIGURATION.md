@@ -478,7 +478,7 @@ codex debug models --bundled       # ବଣ୍ଡଲ୍ ହୋଇଥିବା �
 | ସେସନ୍ ବାରମ୍ବାର ଆକାଉଣ୍ଟ ପରିବର୍ତ୍ତନ କରୁଛି / ଟର୍ଣ୍ଣଗୁଡ଼ିକ ମଧ୍ୟରେ ପ୍ରମ୍ପ୍ଟ-କ୍ୟାଶ୍ ନିରନ୍ତରତା ହଜିଯାଉଛି | ସେସନ୍ ଆଫିନିଟି TTL ହେଉଛି `0` (ଅକ୍ଷମ)                                               | `sessionAffinityTtlMs`   |
 | କ୍ଲାଏଣ୍ଟକୁ କୌଣସି ପ୍ରମ୍ପ୍ଟ ନ ଦେଇ ତର୍କ-ପ୍ରକ୍ରିୟା ମଝିରେ କନେକ୍ସନ୍ ବନ୍ଦ ହୋଇଯାଏ                        | କୌଣସି ଅପ୍ଷ୍ଟ୍ରିମ୍ ଚଙ୍କ୍ ନ ଆସିବାର 10 ମିନିଟ୍ ପରେ ଷ୍ଟ୍ରିମ୍ ଆଇଡଲ୍ ୱାଚ୍ଡଗ୍ ସକ୍ରିୟ ହେଲା | `STREAM_IDLE_TIMEOUT_MS` |
 
-ସମ୍ପର୍କିତ ଆଲୋଚନାଗୁଡ଼ିକ: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (ଦୀର୍ଘ କାର୍ଯ୍ୟ ଡ୍ରପ୍), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (ଆଫିନିଟି ଡିଫଲ୍ଟ ଭାବେ କାହିଁକି ବନ୍ଦ)। ଟ୍ରାକିଂ: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287)।
+ସମ୍ପର୍କିତ ଆଲୋଚନାଗୁଡ଼ିକ: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (ଦୀର୍ଘ କାର୍ଯ୍ୟ ଡ୍ରପ୍), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (ଆଫିନିଟି ଡିଫଲ୍ଟ ଭାବେ କାହିଁକି ବନ୍ଦ)। ଟ୍ରାକିଂ: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287)।
 
 ### 1. ସେସନ୍ ଆଫିନିଟି — ଗୋଟିଏ ବାର୍ତ୍ତାଳାପକୁ ଗୋଟିଏ ଆକାଉଣ୍ଟରେ ପିନ୍ କରନ୍ତୁ
 

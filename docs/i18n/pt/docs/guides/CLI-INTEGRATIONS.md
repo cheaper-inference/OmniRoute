@@ -199,7 +199,7 @@ saída de `ps`.
 Apontar o perfil para uma **combinação** do OmniRoute, em vez de para um único modelo, é o que
 fornece à frota a ativação pós-falha entre fornecedores: quando o endpoint principal ficou totalmente indisponível a meio de uma interação
 na execução registada em
-[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), o agente concluiu
+[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), o agente concluiu
 os passos restantes no endpoint alternativo sem nunca expor a interrupção.
 
 ---

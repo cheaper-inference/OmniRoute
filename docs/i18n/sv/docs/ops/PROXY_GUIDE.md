@@ -260,7 +260,7 @@ Detta sker en gång vid den första uppstarten efter uppgraderingen. Använd `mi
 
 ## 1proxy – marknadsplats för kostnadsfria proxyservrar
 
-> 🆕 **Bidrag från [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (ärende [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕 **Bidrag från [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (ärende [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
 
 OmniRoute integreras med communityplattformen **[1proxy](https://1proxy-api.aitradepulse.com)** för att ge åtkomst till **hundratals kostnadsfria, validerade proxyservrar** från hela världen. Detta är perfekt för användare som inte har någon egen proxyinfrastruktur.
 

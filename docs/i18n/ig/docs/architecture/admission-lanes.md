@@ -126,7 +126,7 @@ mgbe niile, sistemụ 2 na-amanyekwa ya ozugbo agbanyere opt-in.
 
 ## 4. `/v1/responses` ogologo n'ime otu process (healthy-headroom)
 
-[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) gbakwụnyere
+[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) gbakwụnyere
 `tryAcquireHealthyHeadroom` ka e wee nabata arịrịọ nke abụọ nke dị arọ n'usoro
 mgbe heap dị n'okpuru `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. Ụzọ BYTE
 nke `admitChatRequest` na-eji (bodies ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

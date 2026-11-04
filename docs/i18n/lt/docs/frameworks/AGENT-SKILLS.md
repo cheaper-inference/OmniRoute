@@ -18,7 +18,7 @@ Kataloge yra **45 agentų įgūdžiai** (23 REST API + 21 CLI + 1 konfigūravimo
 - **Kanoninį ID** (`omni-auth`, `cli-serve` ir t. t.)
 - **SKILL.md** failą, esantį `skills/{id}/SKILL.md`, su YAML metaduomenimis (`name`, `description`) ir išsamiu markdown turiniu
 - **REST galinius taškus** (API įgūdžiai) arba **CLI subkomandas** (CLI įgūdžiai), gautus iš OpenAPI specifikacijos ir CLI registro
-- **GitHub neapdoroto turinio URL**, skirtą tiesioginiam gavimui: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- **GitHub neapdoroto turinio URL**, skirtą tiesioginiam gavimui: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Tiesioginis neapdoroto failo gavimas iš GitHub (serveris nereikalingas)
 
 ```bash
-BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

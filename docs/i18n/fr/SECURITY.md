@@ -9,7 +9,7 @@
 Si vous découvrez une vulnérabilité de sécurité dans OmniRoute, veuillez la signaler de manière responsable :
 
 1. **N’OUVREZ PAS** de ticket GitHub public
-2. Utilisez les [avis de sécurité GitHub](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
+2. Utilisez les [avis de sécurité GitHub](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
 3. Incluez : une description, les étapes de reproduction et l’impact potentiel
 
 ## Délai de réponse
@@ -42,7 +42,7 @@ Après la version 3.8.59, la prochaine version est **3.9.0**. Elle inaugure la b
   selon l’échéance la plus tardive**. La date de fin qui en résulte est consignée dans les notes de publication de la version 3.9.0 et dans
   [`ROADMAP.md`](ROADMAP.md) au moment de sa publication.
 - **Signaler une vulnérabilité dans la branche LTS :** utilisez le même canal que pour toute autre version —
-  un [avis de sécurité GitHub](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) privé,
+  un [avis de sécurité GitHub](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) privé,
   jamais un ticket public. Indiquez la version que vous avez testée (par exemple `3.9.2`) ; les correctifs sont intégrés à
   `stable/v3`, puis reportés en aval vers la v4.
 - **Référence de sécurité lors de la publication LTS :** l’état mesuré par l’analyseur, les preuves relatives à la protection des routes et

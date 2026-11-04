@@ -18,7 +18,7 @@ Katalogen inneholder **45 Agentferdigheter** (23 for REST-API + 21 for CLI + 1 k
 - En **kanonisk ID** (`omni-auth`, `cli-serve` osv.)
 - En **SKILL.md**-fil i `skills/{id}/SKILL.md` med YAML-frontmatter (`name`, `description`) + omfattende markdown-innhold
 - **REST-endepunkter** (API-ferdigheter) eller **CLI-underkommandoer** (CLI-ferdigheter) avledet fra OpenAPI-spesifikasjonen og CLI-registeret
-- En **rå GitHub-URL** for direkte henting: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- En **rå GitHub-URL** for direkte henting: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Direkte henting av rådata fra GitHub (ingen server kreves)
 
 ```bash
-BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

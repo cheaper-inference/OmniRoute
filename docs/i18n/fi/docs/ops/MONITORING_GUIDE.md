@@ -223,7 +223,7 @@ livenessProbe:
 
 **Älä** kohdista kubeletin **elossaolotarkistusta** polkuun `/api/monitoring/health`. Kyseinen polku tekee todellista tietokanta- ja valvontatyötä ja tuottaa kuormituksen aikana vääriä positiivisia tuloksia.
 
-Liittyvät: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (koettimet tapahtumasilmukan ollessa kiireinen), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (luettelohinnoittelun resurssisyöppö), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (pakkauksen token-laskennan resurssisyöppö).
+Liittyvät: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (koettimet tapahtumasilmukan ollessa kiireinen), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (luettelohinnoittelun resurssisyöppö), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (pakkauksen token-laskennan resurssisyöppö).
 
 ### systemd-vahtikoira (jäätynyt tapahtumasilmukka)
 

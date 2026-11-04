@@ -4,9 +4,9 @@
 
 ---
 
-> **สถานะ:** ยอมรับแล้ว · **บริบท:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
-> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **สัญญา:** `domain/routing/routerBackends.ts`
-> (รีจิสทรีแบบมีชนิดข้อมูล — โค้ดจะรวมเข้ามาพร้อมกับ [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
+> **สถานะ:** ยอมรับแล้ว · **บริบท:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
+> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **สัญญา:** `domain/routing/routerBackends.ts`
+> (รีจิสทรีแบบมีชนิดข้อมูล — โค้ดจะรวมเข้ามาพร้อมกับ [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
 
 ADR นี้กำหนดความสัมพันธ์ระหว่าง `ts` (เนทีฟ), `bifrost`, `cliproxy`, `9router` และ
 เอนจินที่เข้ากันได้กับ VibeProxy อย่างชัดเจน เพื่อไม่ให้ผู้มีส่วนร่วมสับสนระหว่าง
@@ -39,7 +39,7 @@ ADR นี้กำหนดความสัมพันธ์ระหว่�
 ## รีจิสทรี — แหล่งข้อมูลจริงเพียงแหล่งเดียว
 
 สัญญา `domain/routing/routerBackends.ts` (โค้ดจะรวมเข้ามาพร้อมกับ
-[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) ประกาศเอนจินแต่ละรายการเพียงครั้งเดียว พร้อมวงจรชีวิต
+[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) ประกาศเอนจินแต่ละรายการเพียงครั้งเดียว พร้อมวงจรชีวิต
 ความสามารถ อัตลักษณ์ของบริการ พอร์ตเริ่มต้น การกำหนดค่าการตรวจสอบสถานะ และ
 การรองรับเทเลเมทรี ผู้ใช้งานจะค้นหาเอนจินผ่าน `getRouterBackend(id)`,
 `listRouterBackends()` และ `listRouterBackendsByCapability(cap)` แทนการเขียน
@@ -55,7 +55,7 @@ ADR นี้กำหนดความสัมพันธ์ระหว่�
 
 ¹ การยกระดับ Bifrost ให้เป็นบริการแบบฝังตัวชนิด `supervised` (สามารถติดตั้ง/เริ่มทำงาน
 ได้จาก `/api/services/bifrost/`) ติดตามได้ใน
-[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817) โดยจนกว่าจะผสานการเปลี่ยนแปลงดังกล่าว
+[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817) โดยจนกว่าจะผสานการเปลี่ยนแปลงดังกล่าว
 Bifrost จะรองรับเฉพาะ `external` (เข้าถึงได้ผ่าน `BIFROST_BASE_URL` เท่านั้น)
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -123,8 +123,8 @@ private-LAN **ก่อนการยืนยันตัวตน** เนื
 ปัจจุบันการเลือกเป็นแบบ **ทั้งหมดหรือไม่ใช้เลยในระดับรีเลย์** — ไม่มีการสลับเอนจิน
 แยกตามผู้ให้บริการหรือแยกตามคำขอบน `release/v3.8.43` เกตแบบรายคำขอกำลังถูกเพิ่ม
 โดยงาน sidecar-manifest
-([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`)
+([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`)
 ซึ่งทำให้ `auto` กำหนดเส้นทางผ่าน Bifrost เฉพาะสำหรับผู้ให้บริการที่มีสิทธิ์ตาม manifest เท่านั้น
 
 ## การผสานรวมแดชบอร์ด

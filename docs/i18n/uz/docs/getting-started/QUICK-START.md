@@ -29,7 +29,7 @@ docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
 ### C variant: Manba kodidan
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 npm run dev
@@ -165,4 +165,4 @@ OmniRoute ishlamay qolgan provayderlarni avtomatik ravishda oʻtkazib yuboradi v
 
 - **[Nosozliklarni bartaraf etish](../guides/TROUBLESHOOTING.md)** — Keng tarqalgan muammolar va ularning yechimlari
 - **[Discord](https://discord.gg/U47eFqAXCn)** — Hamjamiyat yordami
-- **[GitHub Issues](https://github.com/diegosouzapw/OmniRoute/issues)** — Xatolar haqida xabar berish
+- **[GitHub Issues](https://github.com/cheaper-inference/OmniRoute/issues)** — Xatolar haqida xabar berish

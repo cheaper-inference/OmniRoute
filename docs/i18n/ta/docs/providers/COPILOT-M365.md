@@ -138,8 +138,8 @@ BizChat வழிப்படுத்தல் மற்றும் model அ�
 
 ## மேற்கோள்கள்
 
-- சிக்கல்: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- கலந்துரையாடல்: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- சிக்கல்: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- கலந்துரையாடல்: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - மூலம்: `src/shared/constants/providers/web-cookie.ts` (வழங்குநர் வரையறை)
 - HAR இறக்குமதி: `src/shared/utils/m365HarImport.ts`
 - நற்சான்றுப் புலங்கள்: `src/shared/providers/webSessionCredentials.ts`

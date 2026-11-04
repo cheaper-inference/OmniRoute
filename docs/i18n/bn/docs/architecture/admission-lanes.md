@@ -124,7 +124,7 @@ fan out করে। #9654 Wave 2 থেকে, **প্রতিটি fan-out 
 
 ## 4. এক-প্রসেসে দীর্ঘ `/v1/responses` (স্বাস্থ্যকর-হেডরুম)
 
-[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437)-এ
+[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437)-এ
 `tryAcquireHealthyHeadroom` যোগ করা হয়েছে, যাতে হিপ
 `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`-এর নিচে থাকলে কাঠামোগতভাবে ভারী
 দ্বিতীয় একটি অনুরোধ গ্রহণ করা হয়। `admitChatRequest` দ্বারা ব্যবহৃত BYTE

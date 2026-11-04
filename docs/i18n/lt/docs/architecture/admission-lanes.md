@@ -124,7 +124,7 @@ kitam“) besąlygiškai užtikrinamas 1 sistemos, o įjungus pasirenkamąją fu
 
 ## 4. Ilgos `/v1/responses` viename procese (pakankamas laisvų išteklių rezervas)
 
-[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) pridėjo
+[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) pridėjo
 `tryAcquireHealthyHeadroom`, kad būtų priimama antra struktūriškai sudėtinga užklausa,
 kai krūva nesiekia `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. BYTE
 kelias, kurį naudoja `admitChatRequest` (kūnai ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

@@ -106,7 +106,7 @@ npm start
 
 Embed කිරීම සඳහා සක්රීය කළ build එකක් නොමැතිව, පිටුව frame වීම ප්රතික්ෂේප කරයි. Extension එක response headers වෙතින් එය හඳුනාගෙන බාහිර browser එක භාවිත කිරීමට fallback වෙයි — කිසිවක් බිඳ වැටෙන්නේ නැති අතර, එය එක් වරක් ඒ බව ද දන්වයි.
 [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) සහ issue
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273) බලන්න.
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273) බලන්න.
 
 ---
 

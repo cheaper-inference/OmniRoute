@@ -4,9 +4,9 @@
 
 ---
 
-> **Ọnọdụ:** A nabatara · **Ọnọdụ gbara ya gburugburu:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
-> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Nkwekọrịta:** `domain/routing/routerBackends.ts`
-> (ndekọ nwere ụdị — koodu ga-abata na [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
+> **Ọnọdụ:** A nabatara · **Ọnọdụ gbara ya gburugburu:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
+> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Nkwekọrịta:** `domain/routing/routerBackends.ts`
+> (ndekọ nwere ụdị — koodu ga-abata na [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
 
 ADR a na-akọwapụta kpọmkwem otú injin `ts` (nke dị n'ime sistemụ), `bifrost`, `cliproxy`, `9router`, na injin ndị kwekọrọ na VibeProxy si metụta ibe ha, ka ndị na-enye onyinye kwụsị ịgwakọta ihe abụọ dị iche n'ihe owuwu ha. Ọ na-edekọ ndekọ nwere ụdị nke ọrụ router-backend-registry webatara dịka otu ebe eziokwu niile gbasara ụdị ahụ si apụta.
 
@@ -28,7 +28,7 @@ Mmejọ a ga-ezere: ile “ọrụ agbakwunyere n'ime sistemụ” na “backend
 ## Ndekọ ahụ — otu ebe eziokwu niile si apụta
 
 Nkwekọrịta `domain/routing/routerBackends.ts` (koodu ga-abata na
-[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) na-ekwupụta injin ọ bụla naanị otu ugboro, tinyere usoro ndụ ya, ike ya, njirimara ọrụ ya, port ndabara ya, nhazi ahụike ya, na nkwado telemetry ya. Ndị na-eji ya na-achọ injin site na `getRouterBackend(id)`, `listRouterBackends()`, na `listRouterBackendsByCapability(cap)` kama ide ọnọdụ pụrụ iche maka sidecar nke ọ bụla.
+[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) na-ekwupụta injin ọ bụla naanị otu ugboro, tinyere usoro ndụ ya, ike ya, njirimara ọrụ ya, port ndabara ya, nhazi ahụike ya, na nkwado telemetry ya. Ndị na-eji ya na-achọ injin site na `getRouterBackend(id)`, `listRouterBackends()`, na `listRouterBackendsByCapability(cap)` kama ide ọnọdụ pụrụ iche maka sidecar nke ọ bụla.
 
 | Backend     | Usoro ndụ    | Ọrụ (axis A) | Backend relay (axis B)        | Ahụike        | Port ndabara |
 | ----------- | ------------ | ------------ | ----------------------------- | ------------- | ------------ |
@@ -40,7 +40,7 @@ Nkwekọrịta `domain/routing/routerBackends.ts` (koodu ga-abata na
 
 ¹ A na-enyocha nkwalite Bifrost ka ọ bụrụ ọrụ `supervised` agbakwunyere n'ime sistemụ (nke enwere ike ịwụnye/ịmalite
 site na `/api/services/bifrost/`) na
-[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817); ruo mgbe e jikọtara ya,
+[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817); ruo mgbe e jikọtara ya,
 Bifrost bụ naanị `external` (a na-enweta ya naanị site na `BIFROST_BASE_URL`).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -107,8 +107,8 @@ dispatch; akụkụ isi `/api/v1/chat/completions` anaghị ele
 Nhọrọ ahụ bụ **ihe niile-ma-ọ-bụ-ọnweghị-ihe n'ogo relay ugbu a** — enweghị mgbanwe engine
 maka provider ọ bụla ma ọ bụ request ọ bụla na `release/v3.8.43`. Ọrụ sidecar-manifest
 na-agbakwunye ihe mgbochi maka request ọ bụla
-([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 nke na-eme ka `auto` ziga naanị provider ndị manifest kwadoro site na Bifrost.
 
 ## Njikọ dashboard

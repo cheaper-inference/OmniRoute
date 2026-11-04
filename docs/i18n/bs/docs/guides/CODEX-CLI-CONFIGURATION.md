@@ -467,7 +467,7 @@ Dvije OmniRoute zadane postavke mogu tiho sabotirati višesatne Codex CLI sesije
 | Sesija stalno mijenja račune / kontinuitet prompt-cache-a se gubi između poteza | TTL afiniteta sesije je `0` (onemogućeno)                                                   | `sessionAffinityTtlMs`   |
 | Konekcija se prekida usred rezonovanja bez prompta okrenutog klijentu           | Watchdog za neaktivnost streama se aktivirao nakon 10 minuta bez uzvodnog (upstream) dijela | `STREAM_IDLE_TIMEOUT_MS` |
 
-Povezane diskusije: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (prekidi dugih zadataka), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (zašto je afinitet po defaultu isključen). Praćenje: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Povezane diskusije: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (prekidi dugih zadataka), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (zašto je afinitet po defaultu isključen). Praćenje: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. Afinitet sesije — fiksirajte jedan razgovor za jedan račun
 

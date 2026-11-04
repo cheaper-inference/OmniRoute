@@ -7,7 +7,7 @@ lastUpdated: 2026-07-23
 # ADR: Podłączalna granica persystencji
 
 - **Status:** Zaproponowany — wymaga zatwierdzenia maintainerów przed rozpoczęciem prac runtime
-- **Tracking issue:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
+- **Tracking issue:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
 - **Zakres:** Wyłącznie architektura persystencji; ta decyzja nie dodaje ani nie wybiera zewnętrznej bazy danych
 
 ## Kontekst

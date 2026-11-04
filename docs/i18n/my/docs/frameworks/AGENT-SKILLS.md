@@ -18,7 +18,7 @@ Agent Skills များသည် ပြင်ပ agent များ၊ MCP cli
 - **တရားဝင် ID** တစ်ခု (`omni-auth`, `cli-serve` စသည်)
 - YAML frontmatter (`name`, `description`) နှင့် အကြောင်းအရာပြည့်စုံသော markdown body ပါဝင်သည့် `skills/{id}/SKILL.md` ရှိ **SKILL.md** ဖိုင်တစ်ခု
 - OpenAPI spec နှင့် CLI registry တို့မှ ရယူထားသော **REST endpoint များ** (API skill များ) သို့မဟုတ် **CLI subcommand များ** (CLI skill များ)
-- တိုက်ရိုက်ရယူနိုင်ရန် **GitHub raw URL** တစ်ခု- `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- တိုက်ရိုက်ရယူနိုင်ရန် **GitHub raw URL** တစ်ခု- `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. GitHub raw မှ တိုက်ရိုက်ရယူခြင်း (server မလိုအပ်ပါ)
 
 ```bash
-BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

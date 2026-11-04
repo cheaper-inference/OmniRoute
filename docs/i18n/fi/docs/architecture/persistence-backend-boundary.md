@@ -5,7 +5,7 @@
 ---
 
 - **Tila:** Ehdotettu — edellyttää ylläpitäjän hyväksyntää ennen ajonaikaisen toteutuksen aloittamista
-- **Seurantatehtävä:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
+- **Seurantatehtävä:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
 - **Laajuus:** Vain pysyvyysarkkitehtuuri; tällä päätöksellä ei lisätä eikä valita ulkoista tietokantaa
 
 ## Konteksti

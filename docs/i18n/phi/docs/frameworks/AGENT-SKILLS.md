@@ -18,7 +18,7 @@ Naglalaman ang catalog ng **45 Agent Skills** (23 REST API + 21 CLI + 1 workflow
 - Isang **canonical ID** (`omni-auth`, `cli-serve`, atbp.)
 - Isang **SKILL.md** file sa `skills/{id}/SKILL.md` na may YAML frontmatter (`name`, `description`) + detalyadong markdown body
 - Mga **REST endpoint** (mga API skill) o **CLI subcommand** (mga CLI skill) na nagmula sa OpenAPI spec at CLI registry
-- Isang **GitHub raw URL** para sa live fetch: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- Isang **GitHub raw URL** para sa live fetch: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Direktang GitHub raw fetch (hindi kailangan ng server)
 
 ```bash
-BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

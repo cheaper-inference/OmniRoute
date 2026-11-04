@@ -169,7 +169,7 @@ Wuraren da abin ya shafa:
 
 - `open-sse/executors/antigravity.ts` — yana karanta `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — sarrafa credentials
-- Rahoton farko na matsalar: Tattaunawa [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Rahoton farko na matsalar: Tattaunawa [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

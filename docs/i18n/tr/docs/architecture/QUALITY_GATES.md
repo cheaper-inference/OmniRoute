@@ -429,7 +429,7 @@ uygulama bekleniyor).
 ### CodeQL ratchet: yenileme sıklığı ve manuel tetikleme
 
 `check:codeql-ratchet`, **her PR için değil, bir zamanlamaya göre yenilenen depo durumunu okur.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup`, `state: configured`,
+`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup`, `state: configured`,
 `schedule: weekly` bildirir: bu, gönderim başına analiz değil, GitHub'ın varsayılan kurulum
 taramasıdır. Sonuç olarak: uyarıları DÜZELTEN bir PR birleştirildikten sonra ratchet, bir sonraki
 zamanlanmış tarama çalışana kadar eski ve daha yüksek sayıyı okumaya devam eder; dolayısıyla tarama

@@ -45,9 +45,9 @@
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=social)](https://github.com/cheaper-inference/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/OmniRoute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 Shiga al'umma
@@ -96,7 +96,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![Electron Downloads](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -521,7 +521,7 @@ Dukkan dabaru **20** — haɗa su yadda kake so a kowane mataki na haɗi:
 OmniRoute na da lasisin MIT kuma ana kula da shi a fili. Idan yana adana maka lokaci ko kuɗi, ga yadda za ka taimaka masa ya ci gaba da kasancewa mai zaman kansa — zaɓi duk abin da ya dace da kai. Tallafi ba ya taɓa shafar fifikon zaɓin hanya; yana sayen bayyanar suna ne, ba matsayi ba.
 
 <table>
-  <tr><td nowrap>⭐ <b>Yi wa ma'ajiyar tauraro</b></td><td>Kyauta — yana taimaka wa bayyanar suna da gaske</td><td><a href="https://github.com/diegosouzapw/OmniRoute">Yi wa OmniRoute tauraro</a></td></tr>
+  <tr><td nowrap>⭐ <b>Yi wa ma'ajiyar tauraro</b></td><td>Kyauta — yana taimaka wa bayyanar suna da gaske</td><td><a href="https://github.com/cheaper-inference/OmniRoute">Yi wa OmniRoute tauraro</a></td></tr>
   <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>Sau ɗaya ko kowane wata · babu kuɗin dandali</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
   <tr><td nowrap>☕ <b>Ko-fi</b></td><td>Kyautar kuɗi ta gaggawa sau ɗaya, mai bayarwa ba ya buƙatar yin rajista</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
   <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>Ƙaramin taimako na sada zumunta</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
@@ -558,7 +558,7 @@ Kwafi-da-manna na Pix:
 
 </details>
 
-🐛 Ka gano wata matsala ko kana da shawara? Buɗe [Tattaunawa](https://github.com/diegosouzapw/OmniRoute/discussions).
+🐛 Ka gano wata matsala ko kana da shawara? Buɗe [Tattaunawa](https://github.com/cheaper-inference/OmniRoute/discussions).
 
 <br/>
 
@@ -1253,7 +1253,7 @@ tsari guda a port guda, don haka babu wani package na CLI-kawai a halin yanzu.
 
 Ma'aunai na asali a 2026-10-18: **bidiyoyi na musamman 1.976** · **sanannun kallo 20.220.289** (`v > 0`) · **tashoshi/asusu 1.210 bisa kowace hanyar sadarwa**. Dashboard na asali yana ɗauke da layuka 1.976 (YouTube 1.352 = dogayen bidiyoyi 740 + Shorts 612 · TikTok 334 · Instagram 290); babu wani maimaitaccen bayani da ya rage bayan daidaitawa bisa URL na asali, wanda ke riƙe da mafi girman adadin kallo ga kowane bidiyo. An dakatar da tattara bayanan YouTube a 2026-10-13 (adadin amfani na API ya ƙare daga 14 zuwa 18/10), yayin da aka dakatar da na TikTok/Instagram tun 2026-09-02 (babu kuɗin tattara bayanai); har yanzu bidiyoyi 76 ba su da adadin kallo.
 
-> 🎬 **Ka yi bidiyo game da OmniRoute?** Buɗe [issue](https://github.com/diegosouzapw/OmniRoute/issues/new) ko [discussion](https://github.com/diegosouzapw/OmniRoute/discussions) tare da mahaɗin — za mu nuna shi a nan.
+> 🎬 **Ka yi bidiyo game da OmniRoute?** Buɗe [issue](https://github.com/cheaper-inference/OmniRoute/issues/new) ko [discussion](https://github.com/cheaper-inference/OmniRoute/discussions) tare da mahaɗin — za mu nuna shi a nan.
 
 <br/>
 
@@ -1273,8 +1273,8 @@ Ma'aunai na asali a 2026-10-18: **bidiyoyi na musamman 1.976** · **sanannun kal
 | 🟢 **WhatsApp — 🇧🇷 Brazil**                              | [shiga rukunin](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                            |
 | 🌍 **Yanar gizo**                                        | [omniroute.online](https://omniroute.online)                                                                                |
 | 🌍 **🌍Al’ummar StHub OmniRoute (kyauta)**               | [tashar StHub](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                       |
-| 📦 **Lambar tushe**                                      | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                              |
-| 🐛 **Kai rahoton matsala**                               | [buɗe batu](https://github.com/diegosouzapw/OmniRoute/issues) — haɗa sakamakon `npm run system-info`                        |
+| 📦 **Lambar tushe**                                      | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                                    |
+| 🐛 **Kai rahoton matsala**                               | [buɗe batu](https://github.com/cheaper-inference/OmniRoute/issues) — haɗa sakamakon `npm run system-info`                   |
 | 🤝 **Ba da gudummawa**                                   | [CONTRIBUTING.md](CONTRIBUTING.md) · [Tsarin Rassa da Fitar da Siga](docs/ops/BRANCHING_MODEL.md) · zaɓi `good first issue` |
 | 💚 **Tallafa wa aikin**                                  | [Hanyoyin tallafawa ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)                   |
 
@@ -1632,7 +1632,7 @@ Godiya ta musamman daga zuciya ga mutanen da ke ɗaukar nauyin OmniRoute daga al
 
 </div>
 
-[![Masu Ba da Gudummawa](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Masu Ba da Gudummawa](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
 
 <sub>An gudanar da bincike a 2026-11-02 kan sigar ƙarshe ta <code>release/v3.8.53</code> mai lambar <code>1c7135e0fb</code> (commit 7,972): <b>ainihin sunayen Git na mutane 1,074 da aka daidaita</b> — 759 sun bayyana a matsayin marubutan commit (ciki har da mai kula da aikin), yayin da 315 suka bayyana ne kawai a cikin ƙarin bayanan <code>Co-authored-by</code>. Ƙididdigar tana amfani da <code>.mailmap</code>, tana kwatanta adiresoshin imel ba tare da la’akari da manya ko ƙananan haruffa ba, tana haɗa adiresoshin GitHub noreply masu lamba da marasa lamba ne kawai idan suna wakiltar handle iri ɗaya, tana cire sunaye 29 na bots/agents/ayyukan sabis/sunaye na wucin gadi, kuma ba ta haɗa adiresoshin imel na yau da kullum kawai saboda sunayen da ake nunawa sun yi daidai ba. Binciken 2026-08-24 ya wallafa 639; sake gudanar da wannan hanya kan tushen binciken ɗin nan <code>ac02c5b42f</code> ya ba da 619, don haka ƙarin ya samo asali ne daga sababbin masu ba da gudummawa, ba daga sassauta hanyar lissafi ba.</sub>
 
@@ -1661,11 +1661,11 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 ## 📊 Taurari
 
-<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="Jadawalin Tarihin Taurari" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <img alt="Jadawalin Tarihin Taurari" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
  </picture>
 </a>
 

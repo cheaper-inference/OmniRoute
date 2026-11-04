@@ -132,13 +132,13 @@ Auto-scoring na-ahọrọ provider/model kacha mma maka arịrịọ ọ bụla
 Combo nke `name` ya bụ otu ihe kpọmkwem na model id nkịtị (dịka ọmụmaatụ, combo a kpọrọ
 `gpt-5.5`) bụ **usoro e bu n’obi ma na-akwado**, ọ bụghị ntụpọ: ọ bụ
 usoro eji eme ndabere provider maka model-id ọ bụla nke akọwara na
-[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Ebe ọ bụ na a na-ebu ụzọ elele
+[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940). Ebe ọ bụ na a na-ebu ụzọ elele
 mkpebi combo tupu mkpebi bare-model-id
 (`getComboForModel()` dị na `src/sse/services/model.ts`), a na-eziga arịrịọ maka id nkịtị
 `gpt-5.5` site na targets nke combo ahụ (dịka ọmụmaatụ
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) kama iziga ya ozugbo na
 otu provider — nke a na-eji ọzọ combo-before-rewrite precedence e wuru maka
-[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227), a na-ejikwa
+[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227), a na-ejikwa
 `tests/unit/responses-combo-resolution-3227.test.ts` na
 `tests/unit/combo-name-codex-responses-rewrite.test.ts` nwalee ya iji gbochie regression.
 
@@ -183,7 +183,7 @@ Nsogbu abụọ a na-ahụkarị:
 - **`auto` anaghị eji combos gị.** `auto`/`auto/*` na-ewu candidate pool nke ya na-achọghị nhazi ọ bụla, ọ na-elelekwa combos echekwara naanị ma ọ bụrụ na e nwere combo a kpọrọ `auto` kpọmkwem (anaghị atụ aro ya). Iji zipụ arịrịọ site na combo, ziga aha ya kpọmkwem — ọ bụghị `auto`.
 - **`openrouter/auto` bụ ezigbo ngwaahịa OpenRouter a na-akwụ ụgwọ maka ya** ("Auto Best Available"), ọ bụghị alias OmniRoute. Ọ bụ otu static model entry dị na registry OpenRouter (`open-sse/config/providers/registry/openrouter/index.ts`), a na-akwụkwa ụgwọ ya iche. Jiri Ntọala → Routing → Zoo models a na-akwụ ụgwọ iji wepụ ya na `auto` pools.
 
-Lee [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) na [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) maka mgbagwoju anya mbụ nke akwụkwọ a na-akọwa.
+Lee [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) na [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) maka mgbagwoju anya mbụ nke akwụkwọ a na-akọwa.
 
 ## Otu O Si Arụ Ọrụ (Auto-Combos Echekwara)
 

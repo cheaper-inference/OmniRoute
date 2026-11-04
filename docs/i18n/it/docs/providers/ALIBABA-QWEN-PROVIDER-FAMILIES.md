@@ -5,7 +5,7 @@
 ---
 
 Questo documento registra la decisione di implementazione relativa alla
-[Issue #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854). I prodotti pubblici sono
+[Issue #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854). I prodotti pubblici sono
 rappresentati come quattro famiglie di provider. La regione è un dato della connessione, non un prodotto separato.
 
 ## Decisione

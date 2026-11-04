@@ -412,7 +412,7 @@ git add quality-baseline.json
 ### CodeQL ରାଚେଟ୍: ରିଫ୍ରେଶ୍ ଅନ୍ତରାଳ ଏବଂ ମାନୁଆଲ୍ ଟ୍ରିଗର୍
 
 `check:codeql-ratchet` **ରିପୋ ଅବସ୍ଥା ପଢ଼େ, ଯାହା ଏକ ସୂଚୀ ଅନୁସାରେ ରିଫ୍ରେଶ୍ ହୁଏ — ପ୍ରତ୍ୟେକ PR ପାଇଁ ନୁହେଁ।**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` ରିପୋର୍ଟ କରେ
+`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` ରିପୋର୍ଟ କରେ
 `state: configured`, `schedule: weekly`: ଏହା GitHubର ଡିଫଲ୍ଟ-ସେଟଅପ୍ ସ୍କାନ୍, ପ୍ରତ୍ୟେକ ପୁସ୍ ପାଇଁ
 ବିଶ୍ଳେଷଣ ନୁହେଁ। ପରିଣାମ: ଆଲର୍ଟଗୁଡ଼ିକୁ ଠିକ୍ କରୁଥିବା ଏକ PR ମର୍ଜ ହେବା ପରେ, ପରବର୍ତ୍ତୀ ନିର୍ଦ୍ଧାରିତ
 ସ୍କାନ୍ ଚାଲିବା ପର୍ଯ୍ୟନ୍ତ ରାଚେଟ୍ ପୁରୁଣା, ଅଧିକ ସଂଖ୍ୟା ପଢ଼ିବା ଜାରି ରଖେ — ତେଣୁ ସ୍କାନ୍ ଅଦ୍ୟତନ ହେବା

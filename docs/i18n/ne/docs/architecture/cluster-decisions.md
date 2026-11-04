@@ -6,7 +6,7 @@
 
 **स्थिति:** प्रस्ताव ( @diegosouzapw को समीक्षाको प्रतीक्षामा)
 **मिति:** 2026-06-20
-**सन्दर्भहरू:** [#3932](https://github.com/diegosouzapw/OmniRoute/issues/3932), PR #4381
+**सन्दर्भहरू:** [#3932](https://github.com/cheaper-inference/OmniRoute/issues/3932), PR #4381
 
 ## सारांश
 

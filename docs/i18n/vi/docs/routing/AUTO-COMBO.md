@@ -134,13 +134,13 @@ Tính điểm tự động chọn nhà cung cấp/mô hình tốt nhất cho m�
 Một combo có `name` giống hệt một ID mô hình thuần túy (ví dụ: combo có tên
 `gpt-5.5`) là một **mẫu sử dụng có chủ đích và được hỗ trợ**, không phải lỗi: đây là
 cơ chế chuyển đổi dự phòng nhà cung cấp theo từng ID mô hình được ghi lại trong
-[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Vì việc phân giải
+[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940). Vì việc phân giải
 combo được kiểm tra trước khi phân giải ID mô hình thuần túy
 (`getComboForModel()` trong `src/sse/services/model.ts`), yêu cầu dành cho ID
 thuần túy `gpt-5.5` sẽ được định tuyến qua các đích của combo (ví dụ:
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) thay vì đi thẳng đến
 một nhà cung cấp duy nhất — cơ chế này tái sử dụng thứ tự ưu tiên combo-trước-khi-ghi-lại được xây dựng cho
-[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) và được
+[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) và được
 kiểm thử hồi quy bởi `tests/unit/responses-combo-resolution-3227.test.ts` và
 `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
 
@@ -186,7 +186,7 @@ Hai lỗi thường gặp:
 - **`auto` không sử dụng các combo của bạn.** `auto`/`auto/*` tự xây dựng nhóm ứng viên không cần cấu hình và chỉ tham chiếu các combo đã lưu nếu có một combo thực sự mang tên `auto` (không khuyến nghị). Để định tuyến qua một combo, hãy gửi chính xác tên của combo đó — không phải `auto`.
 - **`openrouter/auto` là một sản phẩm OpenRouter trả phí thực sự** ("Tự động chọn tùy chọn tốt nhất hiện có"), không phải bí danh OmniRoute. Đây là mục mô hình tĩnh duy nhất trong registry OpenRouter (`open-sse/config/providers/registry/openrouter/index.ts`) và được tính phí riêng. Sử dụng Settings → Routing → Hide paid models để loại trừ nó khỏi các nhóm `auto`.
 
-Xem [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) và [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) để biết sự nhầm lẫn ban đầu mà tài liệu này đề cập.
+Xem [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) và [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) để biết sự nhầm lẫn ban đầu mà tài liệu này đề cập.
 
 ## Cách thức hoạt động (Auto-Combo được lưu bền vững)
 

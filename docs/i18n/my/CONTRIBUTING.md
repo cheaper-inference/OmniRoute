@@ -34,7 +34,7 @@ UI/UX၊ i18n၊ CLI၊ database နှင့် build/deploy ပြောင်
 ### Clone လုပ်ခြင်းနှင့် ထည့်သွင်းခြင်း
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -439,4 +439,4 @@ VPS deploy များအတွက် `npm run build` အစား `npm run bui
 - **API ကိုးကားချက်**: [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) ကို ကြည့်ပါ
 - **လုံခြုံရေးဆိုင်ရာ စာရွက်စာတမ်းများ**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
 - **လုပ်ငန်းလည်ပတ်မှုဆိုင်ရာ စာရွက်စာတမ်းများ**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **ပြဿနာများ**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **ပြဿနာများ**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

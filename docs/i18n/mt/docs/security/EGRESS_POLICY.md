@@ -55,7 +55,7 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ## Għaliex Teżisti
 
-Ġiet introdotta fil-PR [#3777](https://github.com/diegosouzapw/OmniRoute/pull/3777). Il-problemi li wasslu għaliha:
+Ġiet introdotta fil-PR [#3777](https://github.com/cheaper-inference/OmniRoute/pull/3777). Il-problemi li wasslu għaliha:
 
 | Problema                                           | X'tirranġa d-direttiva                                                                                                                                                                                                                                                                                                                                                |
 | -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

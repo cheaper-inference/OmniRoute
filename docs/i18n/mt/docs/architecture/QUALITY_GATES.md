@@ -389,7 +389,7 @@ l-implimentazzjoni għadha pendenti).
 ### Ratchet ta’ CodeQL: frekwenza tal-aġġornament u attivazzjoni manwali
 
 `check:codeql-ratchet` jaqra **l-istat tar-repożitorju, aġġornat skont skeda — mhux għal kull PR.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` jirrapporta
+`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` jirrapporta
 `state: configured`, `schedule: weekly`: l-iskan tad-default setup ta’ GitHub, mhux analiżi
 għal kull push. Konsegwenza: wara li jingħaqad PR li JIRRANĠA l-allerti, ir-ratchet jibqa’
 jaqra l-għadd l-antik u ogħla sakemm jitħaddem l-iskan skedat li jmiss — għalhekk jirrapporta

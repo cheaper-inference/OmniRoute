@@ -193,7 +193,7 @@ L-awtentikazzjoni tal-API tingħata lill-5dive fuq **stdin** (`--api-key=-`), he
 output tal-`ps`.
 
 Il-profil imur lejn kombinazzjoni **OmniRoute** minflok mudell wieħed biss li jġib il-falliment tal-fornitur tal-flotta: meta l-punt ewlieni waqa' waqt karozza f'run irreġistrat fuq
-[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), l-aġent lesta il-passi li fadal fuq il-fallback u qatt ma ħareġ in-breakout.
+[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), l-aġent lesta il-passi li fadal fuq il-fallback u qatt ma ħareġ in-breakout.
 
 ---
 

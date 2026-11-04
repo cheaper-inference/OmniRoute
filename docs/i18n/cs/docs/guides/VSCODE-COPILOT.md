@@ -113,7 +113,7 @@ npm start
 Bez sestavení s povoleným vkládáním stránka odmítne zobrazení v rámci, rozšíření to zjistí z
 hlaviček odpovědi a přepne se na externí prohlížeč — nic se tím nenaruší a jednorázově vás o tom informuje.
 Viz [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) a problém
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
 
 ---
 

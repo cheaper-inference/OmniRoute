@@ -6,7 +6,7 @@
 
 **స్థితి:** ప్రతిపాదన (@diegosouzapw సమీక్ష కోసం వేచి ఉంది)
 **తేదీ:** 2026-06-20
-**సూచనలు:** [#3932](https://github.com/diegosouzapw/OmniRoute/issues/3932), PR #4381
+**సూచనలు:** [#3932](https://github.com/cheaper-inference/OmniRoute/issues/3932), PR #4381
 
 ## సంక్షిప్తంగా
 

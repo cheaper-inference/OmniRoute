@@ -45,9 +45,9 @@
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=social)](https://github.com/cheaper-inference/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/OmniRoute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 Csatlakozz a közösséghez
@@ -96,7 +96,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![Electron Downloads](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -521,7 +521,7 @@ Mind a **20** stratégia — szabadon kombinálhatók a kombó egyes lépéseibe
 Az OmniRoute MIT-licencű, és nyíltan karbantartott projekt. Ha időt vagy pénzt takarít meg Önnek, így segíthet megőrizni a függetlenségét — válassza az Önnek megfelelő lehetőséget. A szponzoráció soha nem befolyásolja az útválasztási prioritást; láthatóságot vásárol, nem jobb helyezést.
 
 <table>
-  <tr><td nowrap>⭐ <b>Adjon csillagot a tárolónak</b></td><td>Ingyenes — valóban növeli a láthatóságot</td><td><a href="https://github.com/diegosouzapw/OmniRoute">Adjon csillagot az OmniRoute-nak</a></td></tr>
+  <tr><td nowrap>⭐ <b>Adjon csillagot a tárolónak</b></td><td>Ingyenes — valóban növeli a láthatóságot</td><td><a href="https://github.com/cheaper-inference/OmniRoute">Adjon csillagot az OmniRoute-nak</a></td></tr>
   <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>Egyszeri vagy havi · nulla platformdíj</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
   <tr><td nowrap>☕ <b>Ko-fi</b></td><td>Gyors, egyszeri támogatás, a támogatónak nem kell regisztrálnia</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
   <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>Kis, kötetlen gesztus</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
@@ -558,7 +558,7 @@ Másolható és beilleszthető Pix-kód:
 
 </details>
 
-🐛 Hibát talált, vagy visszajelzése van? Nyisson egy [beszélgetést](https://github.com/diegosouzapw/OmniRoute/discussions).
+🐛 Hibát talált, vagy visszajelzése van? Nyisson egy [beszélgetést](https://github.com/cheaper-inference/OmniRoute/discussions).
 
 <br/>
 
@@ -1254,7 +1254,7 @@ folyamat szolgálja ki egyetlen porton, ezért jelenleg nincs külön, kizáról
 
 Kanonikus mérőszámok 2026-10-18-án: **1.976 egyedi videó** · **20.220.289 ismert megtekintés** (`v > 0`) · **1.210 csatorna/profil hálózatonként**. A nyers vezérlőpult 1.976 sort tartalmaz (YouTube 1.352 = 740 hosszú videó + 612 Shorts · TikTok 334 · Instagram 290); a kanonikus URL szerinti normalizálás után egyetlen duplikátum sem maradt, és videónként a legnagyobb számlálóérték maradt meg. A YouTube-adatgyűjtés 2026-10-13 óta szünetel (az API-kvóta 14. és 18/10. között kimerült), a TikTok/Instagram adatgyűjtése pedig 2026-09-02 óta (nincs adatgyűjtési kredit); 76 videóhoz továbbra sem tartozik megtekintésszám.
 
-> 🎬 **Készítettél videót az OmniRoute-ról?** Nyiss egy [hibajegyet](https://github.com/diegosouzapw/OmniRoute/issues/new) vagy egy [beszélgetést](https://github.com/diegosouzapw/OmniRoute/discussions) a hivatkozással — itt fogjuk kiemelni.
+> 🎬 **Készítettél videót az OmniRoute-ról?** Nyiss egy [hibajegyet](https://github.com/cheaper-inference/OmniRoute/issues/new) vagy egy [beszélgetést](https://github.com/cheaper-inference/OmniRoute/discussions) a hivatkozással — itt fogjuk kiemelni.
 
 <br/>
 
@@ -1274,8 +1274,8 @@ Kanonikus mérőszámok 2026-10-18-án: **1.976 egyedi videó** · **20.220.289 
 | 🟢 **WhatsApp — 🇧🇷 Brazília**                     | [csatlakozás a csoporthoz](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                                        |
 | 🌍 **Webhely**                                    | [omniroute.online](https://omniroute.online)                                                                                                       |
 | 🌍 **🌍StHub OmniRoute-közösség (ingyenes)**      | [StHub portál](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                                              |
-| 📦 **Forráskód**                                  | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                                                     |
-| 🐛 **Hiba jelentése**                             | [probléma megnyitása](https://github.com/diegosouzapw/OmniRoute/issues) — csatold az `npm run system-info` kimenetét                               |
+| 📦 **Forráskód**                                  | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                                                           |
+| 🐛 **Hiba jelentése**                             | [probléma megnyitása](https://github.com/cheaper-inference/OmniRoute/issues) — csatold az `npm run system-info` kimenetét                          |
 | 🤝 **Közreműködés**                               | [CONTRIBUTING.md](CONTRIBUTING.md) · [Elágazási és kiadási modell](docs/ops/BRANCHING_MODEL.md) · válassz egy `good first issue` címkéjű problémát |
 | 💚 **A projekt támogatása**                       | [Támogatási lehetőségek ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)                                      |
 
@@ -1633,7 +1633,7 @@ Szívből köszönjük azoknak, akik saját pénzükből finanszírozzák az Omn
 
 </div>
 
-[![Contributors](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
 
 <sub>Auditálva: 2026-11-02, az éles <code>release/v3.8.53</code> csúcson, <code>1c7135e0fb</code> (7 972 commit): <b>1 074 normalizált emberi Git-identitás</b> — 759 commit szerzőjeként jelenik meg (beleértve a karbantartót is), 315 pedig csak explicit <code>Co-authored-by</code> trailerekben szerepel. A számlálás alkalmazza a <code>.mailmap</code> fájlt, a kis- és nagybetűkre érzéketlenül hasonlítja össze az e-mail-címeket, a numerikus és a normál GitHub noreply-címeket csak akkor kapcsolja össze, ha ugyanazt a felhasználónevet kódolják, kizár 29 bot-, ügynök-, szolgáltatás- és helyőrző-identitást, továbbá nem von össze normál e-mail-címeket pusztán azért, mert a megjelenített nevük megegyezik. A 2026-08-24-i audit 639-et tett közzé; ugyanezt a módszert az audit alapjául szolgáló <code>ac02c5b42f</code> commiton újrafuttatva 619 adódik, így a növekedés új közreműködőktől származik, nem egy lazább módszerből.</sub>
 
@@ -1662,11 +1662,11 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 ## 📊 Csillagok
 
-<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="Csillagelőzmények diagramja" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <img alt="Csillagelőzmények diagramja" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
  </picture>
 </a>
 

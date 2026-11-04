@@ -18,7 +18,7 @@ Il-katalgu fih **45 Agent Skill** (23 REST API + 21 CLI + fluss tax-xogħol wie�
 - **ID kanoniku** (`omni-auth`, `cli-serve`, eċċ.)
 - Fajl **SKILL.md** f’`skills/{id}/SKILL.md` b’YAML frontmatter (`name`, `description`) + korp markdown dettaljat
 - **Endpoints REST** (skills tal-API) jew **sottokmandi CLI** (skills tas-CLI) derivati mill-ispeċifikazzjoni OpenAPI u mir-reġistru tas-CLI
-- **URL raw ta’ GitHub** għall-aċċess dirett: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- **URL raw ta’ GitHub** għall-aċċess dirett: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Ġbir dirett tad-data mhux ipproċessata minn GitHub (mingħajr il-ħtieġa ta’ server)
 
 ```bash
-BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

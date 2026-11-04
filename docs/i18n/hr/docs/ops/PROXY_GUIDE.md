@@ -260,7 +260,7 @@ To se događa jednom, pri prvom pokretanju nakon nadogradnje. Upotrijebite `migr
 
 ## Tržište besplatnih proxy poslužitelja 1proxy
 
-> 🆕 **Doprinos korisnika [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (problem [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕 **Doprinos korisnika [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (problem [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
 
 OmniRoute se integrira s platformom zajednice **[1proxy](https://1proxy-api.aitradepulse.com)** kako bi omogućio pristup **stotinama besplatnih, provjerenih proxy poslužitelja** iz cijelog svijeta. To je idealno za korisnike koji nemaju vlastitu proxy infrastrukturu.
 

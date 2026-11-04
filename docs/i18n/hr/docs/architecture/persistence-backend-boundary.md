@@ -5,7 +5,7 @@
 ---
 
 - **Status:** Predloženo — zahtijeva odobrenje održavatelja prije početka rada na runtimeu
-- **Problem za praćenje:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
+- **Problem za praćenje:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
 - **Opseg:** Isključivo arhitektura perzistencije; ova odluka ne dodaje niti odabire vanjsku bazu podataka
 
 ## Kontekst

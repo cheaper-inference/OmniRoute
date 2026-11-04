@@ -427,7 +427,7 @@ implementacija je na čekanju).
 ### CodeQL zapinjača: učestalost osvježavanja i ručno pokretanje
 
 `check:codeql-ratchet` čita **stanje repozitorija koje se osvježava prema rasporedu — ne za svaki PR.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` prijavljuje
+`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` prijavljuje
 `state: configured`, `schedule: weekly`: GitHubovo skeniranje prema zadanoj konfiguraciji, a ne analiza
 pri svakom slanju promjena. Posljedica: nakon spajanja PR-a koji ISPRAVLJA upozorenja, zapinjača nastavlja očitavati
 stari, veći broj sve dok se ne pokrene sljedeće zakazano skeniranje — stoga prijavljuje regresiju

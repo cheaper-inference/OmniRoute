@@ -56,7 +56,7 @@ flowchart LR
 Ελέγξτε αν υπάρχει ενεργό πάγωμα προτού θεωρήσετε ότι ο κλάδος που θέλετε μπορεί να δεχτεί συγχωνεύσεις:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Οι μηχανισμοί συγχώνευσης (ετικέτα `queue` από τον ιδιοκτήτη → Mergify) τεκμηριώνονται στο

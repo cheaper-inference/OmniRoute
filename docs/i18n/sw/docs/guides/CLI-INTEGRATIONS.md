@@ -180,7 +180,7 @@ Njia zote mbili huandika **wasifu wa uthibitishaji** mmoja wa 5dive, na kila naf
 
 Ufunguo wa API hupitishwa kwa 5dive kupitia **stdin** (`--api-key=-`), kwa hiyo hauonekani kamwe kwenye matokeo ya `ps`.
 
-Kuelekeza wasifu kwenye **combo** ya OmniRoute badala ya modeli moja ndiko kunakowezesha ubadilishaji wa mtoa huduma kwa kundi: endpoint ya msingi ilipoacha kufanya kazi kabisa katikati ya hatua kwenye utekelezaji uliorekodiwa katika [#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), wakala alikamilisha hatua zake zilizosalia kwa kutumia mbadala bila kuonyesha hitilafu hiyo.
+Kuelekeza wasifu kwenye **combo** ya OmniRoute badala ya modeli moja ndiko kunakowezesha ubadilishaji wa mtoa huduma kwa kundi: endpoint ya msingi ilipoacha kufanya kazi kabisa katikati ya hatua kwenye utekelezaji uliorekodiwa katika [#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), wakala alikamilisha hatua zake zilizosalia kwa kutumia mbadala bila kuonyesha hitilafu hiyo.
 
 ---
 

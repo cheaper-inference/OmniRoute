@@ -5,7 +5,7 @@
 ---
 
 - **Status:** Proposto — requer aprovação dos mantenedores antes do início do trabalho no runtime
-- **Issue de acompanhamento:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
+- **Issue de acompanhamento:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
 - **Escopo:** Somente a arquitetura de persistência; esta decisão não adiciona nem seleciona um banco de dados externo
 
 ## Contexto

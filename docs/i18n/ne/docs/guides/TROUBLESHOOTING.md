@@ -234,7 +234,7 @@ Avast र AVG ले धेरै HTTP अनुरोधजस्ता दे�
    [Convert]::ToBase64String($b)
    ```
    आउटपुट `latest.yml` → `sha512` सँग मिल्नैपर्छ। नमिलेमा फाइल मेटाउनुहोस् र
-   [GitHub releases page](https://github.com/diegosouzapw/OmniRoute/releases) बाट मात्र पुनः डाउनलोड गर्नुहोस्।
+   [GitHub releases page](https://github.com/cheaper-inference/OmniRoute/releases) बाट मात्र पुनः डाउनलोड गर्नुहोस्।
 2. **पुनर्स्थापना गर्नुहोस् + अपवादमा राख्नुहोस्** — रोल ब्याक गरिएका वस्तुहरूलाई क्वारेन्टिनबाट पुनर्स्थापना गर्नुहोस् र
    `%LOCALAPPDATA%\Programs\OmniRoute` लाई अपवादमा थप्नुहोस् (Kaspersky → Settings → Threats and Exclusions),
    त्यसपछि पुनः इन्स्टल गर्नुहोस्।
@@ -829,7 +829,7 @@ omniroute serve --ready-timeout 180000
 
 ## अझै अड्किनुभएको छ?
 
-- **GitHub समस्याहरू**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **GitHub समस्याहरू**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **आर्किटेक्चर**: आन्तरिक विवरणका लागि [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) हेर्नुहोस्
 - **API सन्दर्भ**: सबै एन्डपोइन्टहरूका लागि [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) हेर्नुहोस्
 - **स्वास्थ्य ड्यासबोर्ड**: प्रणालीको वास्तविक-समय स्थिति हेर्न **Dashboard → Health** जाँच गर्नुहोस्

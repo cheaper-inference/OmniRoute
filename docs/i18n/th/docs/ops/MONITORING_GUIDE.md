@@ -223,7 +223,7 @@ livenessProbe:
 
 **อย่า** กำหนดให้ **liveness** ของ kubelet ชี้ไปยัง `/api/monitoring/health` พาธดังกล่าวทำงานกับฐานข้อมูล/การตรวจสอบจริง และจะรายงานผลบวกเท็จภายใต้โหลด
 
-เรื่องที่เกี่ยวข้อง: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (โพรบขณะที่ event loop ไม่ว่าง), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (การคำนวณราคาแค็ตตาล็อกใช้ทรัพยากรมาก), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (การนับโทเค็นสำหรับการบีบอัดใช้ทรัพยากรมาก)
+เรื่องที่เกี่ยวข้อง: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (โพรบขณะที่ event loop ไม่ว่าง), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (การคำนวณราคาแค็ตตาล็อกใช้ทรัพยากรมาก), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (การนับโทเค็นสำหรับการบีบอัดใช้ทรัพยากรมาก)
 
 ### watchdog ของ systemd (event loop ค้าง)
 

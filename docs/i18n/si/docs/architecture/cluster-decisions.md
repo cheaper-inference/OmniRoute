@@ -6,7 +6,7 @@
 
 **තත්ත්වය:** යෝජනාවකි (@diegosouzapw සමාලෝචනය බලාපොරොත්තුවෙන්)
 **දිනය:** 2026-06-20
-**යොමු:** [#3932](https://github.com/diegosouzapw/OmniRoute/issues/3932), PR #4381
+**යොමු:** [#3932](https://github.com/cheaper-inference/OmniRoute/issues/3932), PR #4381
 
 ## TL;DR
 

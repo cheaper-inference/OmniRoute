@@ -150,7 +150,7 @@ Points d’intervention :
 
 - `open-sse/executors/antigravity.ts` — lit `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — gestion des identifiants
-- Rapport d’incident d’origine : discussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Rapport d’incident d’origine : discussion [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

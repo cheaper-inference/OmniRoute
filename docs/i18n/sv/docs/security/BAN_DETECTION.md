@@ -51,8 +51,8 @@ Skillnaden är viktig eftersom en terminal träff är `permanent: true` (1 års 
 Att behålla frasen i avstängningslistan gjorde också den återställningsbara cloud-code-grenen för 403 i
 `classifyProviderError` oåtkomlig för denna formulering, eftersom `accountDeactivated`
 utvärderas först — därför kunde projektvägsåterställningen som lades till för Gemini Code Assist i
-[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) och
-[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) aldrig köras.
+[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) och
+[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) aldrig köras.
 
 Tre intilliggande, **separata** signaltabeller ingår _inte_ i identifieringen av förbjudna nyckelord:
 

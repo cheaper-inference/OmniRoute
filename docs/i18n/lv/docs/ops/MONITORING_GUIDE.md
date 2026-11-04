@@ -225,7 +225,7 @@ livenessProbe:
 
 **Nenorādiet** kubelet **dzīvīguma** pārbaudei `/api/monitoring/health`. Šis ceļš veic reālu DB/pārraudzības darbu un slodzes apstākļos radīs kļūdaini pozitīvus rezultātus.
 
-Saistīts: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (pārbaudes, kamēr notikumu cikls ir aizņemts), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (kataloga cenu apstrādes radīta resursu pārslodze), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (saspiešanas marķieru skaitīšanas radīta resursu pārslodze).
+Saistīts: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (pārbaudes, kamēr notikumu cikls ir aizņemts), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (kataloga cenu apstrādes radīta resursu pārslodze), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (saspiešanas marķieru skaitīšanas radīta resursu pārslodze).
 
 ### systemd sargsuns (iesaldēts notikumu cikls)
 

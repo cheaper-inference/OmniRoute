@@ -199,7 +199,7 @@ saída do `ps`.
 Apontar o perfil para um **combo** do OmniRoute, em vez de um único modelo, é o que
 oferece à frota o failover de provedor: quando o endpoint primário ficou totalmente indisponível no meio de uma interação
 durante a execução registrada em
-[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), o agente concluiu
+[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), o agente concluiu
 as etapas restantes usando o fallback sem jamais expor a indisponibilidade.
 
 ---

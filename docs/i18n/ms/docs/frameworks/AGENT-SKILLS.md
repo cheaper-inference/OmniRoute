@@ -18,7 +18,7 @@ Katalog ini mengandungi **45 Agent Skills** (23 REST API + 21 CLI + 1 aliran ker
 - **ID kanonik** (`omni-auth`, `cli-serve`, dan sebagainya)
 - Fail **SKILL.md** dalam `skills/{id}/SKILL.md` dengan bahagian hadapan YAML (`name`, `description`) + kandungan markdown yang lengkap
 - **Titik akhir REST** (kemahiran API) atau **subperintah CLI** (kemahiran CLI) yang diterbitkan daripada spesifikasi OpenAPI dan daftar CLI
-- **URL mentah GitHub** untuk pengambilan langsung: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- **URL mentah GitHub** untuk pengambilan langsung: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Pengambilan mentah terus daripada GitHub (pelayan tidak diperlukan)
 
 ```bash
-BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

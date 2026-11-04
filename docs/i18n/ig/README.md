@@ -45,9 +45,9 @@
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=social)](https://github.com/cheaper-inference/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/OmniRoute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 Soro obodo
@@ -96,7 +96,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 [![Ikikere: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Nbudata Docker](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Nbudata Electron](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![Nbudata Electron](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -521,7 +521,7 @@ Usoro **20** niile — gwakọta ma dakọtara ha na nzọụkwụ combo ọ b�
 OmniRoute nwere ikikere MIT, a na-elekọtakwa ya n'ihu ọha. Ọ bụrụ na ọ na-azọpụta gị oge ma ọ bụ ego, lee otu ị ga-esi nyere ya aka ịnọgide na-enweghị onye na-achịkwa ya — họrọ nke dabara gị. Nkwado ego anaghị emetụta mkpa nhazi ụzọ; ọ na-azụta ọhụhụ, ọ bụghị ọkwa.
 
 <table>
-  <tr><td nowrap>⭐ <b>Tinye kpakpando na repo</b></td><td>Ọ bụ n'efu — ọ na-enyere ọhụhụ aka n'ezie</td><td><a href="https://github.com/diegosouzapw/OmniRoute">Tinye kpakpando na OmniRoute</a></td></tr>
+  <tr><td nowrap>⭐ <b>Tinye kpakpando na repo</b></td><td>Ọ bụ n'efu — ọ na-enyere ọhụhụ aka n'ezie</td><td><a href="https://github.com/cheaper-inference/OmniRoute">Tinye kpakpando na OmniRoute</a></td></tr>
   <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>Otu ugboro ma ọ bụ kwa ọnwa · enweghị ụgwọ ikpo okwu</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
   <tr><td nowrap>☕ <b>Ko-fi</b></td><td>Onyinye ngwa ngwa otu ugboro, onye na-enye onyinye ekwesịghị ịdebanye aha</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
   <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>Obere onyinye na-enweghị usoro siri ike</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
@@ -558,7 +558,7 @@ Detuo ma mado Pix:
 
 </details>
 
-🐛 Ị hụrụ ntụpọ ma ọ bụ nwee nzaghachi? Mepee [Mkparịta ụka](https://github.com/diegosouzapw/OmniRoute/discussions).
+🐛 Ị hụrụ ntụpọ ma ọ bụ nwee nzaghachi? Mepee [Mkparịta ụka](https://github.com/cheaper-inference/OmniRoute/discussions).
 
 <br/>
 
@@ -1251,7 +1251,7 @@ site n'otu port, ya mere enweghị package pụrụ iche nke bụ naanị CLI ug
 
 Metrik iwu na 2026-10-18: **vidiyo pụrụ iche 1.976** · **nlele amaara 20.220.289** (`v > 0`) · **ọwa/profaịlụ 1.210 n’otu netwọkụ**. Dashboard izizi nwere ahịrị 1.976 (YouTube 1.352 = vidiyo ogologo 740 + Shorts 612 · TikTok 334 · Instagram 290); ọ dịghị oyiri fọdụrụ mgbe emezichara ha site na URL iwu, nke na-edobe ọnụọgụ kachasị elu maka vidiyo ọ bụla. A kwụsịrị mkpokọta data YouTube na 2026-10-13 (oke ojiji API gwụrụ site na 14 ruo 18/10), ebe TikTok/Instagram kwụsịrị kemgbe 2026-09-02 (kredit mkpokọta data adịghị); vidiyo 76 ka enweghị ọnụọgụ nlele.
 
-> 🎬 **Ị mepụtara vidiyo gbasara OmniRoute?** Mepee [nsogbu](https://github.com/diegosouzapw/OmniRoute/issues/new) ma ọ bụ [mkparịta ụka](https://github.com/diegosouzapw/OmniRoute/discussions) tinyere njikọ ahụ — anyị ga-egosipụta ya ebe a.
+> 🎬 **Ị mepụtara vidiyo gbasara OmniRoute?** Mepee [nsogbu](https://github.com/cheaper-inference/OmniRoute/issues/new) ma ọ bụ [mkparịta ụka](https://github.com/cheaper-inference/OmniRoute/discussions) tinyere njikọ ahụ — anyị ga-egosipụta ya ebe a.
 
 <br/>
 
@@ -1271,8 +1271,8 @@ Metrik iwu na 2026-10-18: **vidiyo pụrụ iche 1.976** · **nlele amaara 20.22
 | 🟢 **WhatsApp — 🇧🇷 Brazil**                  | [sonye n'òtù ahụ](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                 |
 | 🌍 **Weebụsaịtị**                            | [omniroute.online](https://omniroute.online)                                                                       |
 | 🌍 **🌍Obodo StHub OmniRoute (n'efu)**       | [ọnụ ụzọ sthub](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)             |
-| 📦 **Koodu isi mmalite**                     | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                     |
-| 🐛 **Kọọ ntụpọ**                             | [mepee nsogbu](https://github.com/diegosouzapw/OmniRoute/issues) — tinye nsonaazụ `npm run system-info`            |
+| 📦 **Koodu isi mmalite**                     | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                           |
+| 🐛 **Kọọ ntụpọ**                             | [mepee nsogbu](https://github.com/cheaper-inference/OmniRoute/issues) — tinye nsonaazụ `npm run system-info`       |
 | 🤝 **Nye aka**                               | [CONTRIBUTING.md](CONTRIBUTING.md) · [Ụdị Alaka na Mbipụta](docs/ops/BRANCHING_MODEL.md) · họrọ `good first issue` |
 | 💚 **Kwado ọrụ a**                           | [Ụzọ e si akwado ↑](#-support-omniroute) · [Ndị Nkwado GitHub](https://github.com/sponsors/diegosouzapw)           |
 
@@ -1630,7 +1630,7 @@ Ekele sitere n’obi nye ndị ji ego si n’akpa ha akwado OmniRoute — onyiny
 
 </div>
 
-[![Contributors](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
 
 <sub>Enyochara ya na 2026-11-02 na ndụ <code>release/v3.8.53</code> tip <code>1c7135e0fb</code> (commit 7,972): <b>njirimara mmadụ Git ahaziri ahazi 1,074</b> — 759 pụtara dị ka ndị dere commit (gụnyere onye na-elekọta ya), ebe 315 pụtara naanị na trailers <code>Co-authored-by</code> doro anya. Ngụkọ a na-etinye <code>.mailmap</code> n'ọrụ, na-atụnyere adreesị e-mail n'agbanyeghị mkpụrụedemede ukwu ma ọ bụ nta, na-ejikọta adreesị GitHub noreply nwere ọnụọgụ na nke nkịtị naanị mgbe ha na-egosi handle otu, na-ewepụ njirimara bot/agent/service/placeholder 29, ma ọ naghị ejikọta adreesị e-mail nkịtị naanị n'ihi na aha ngosi ha dabara. Nnyocha nke 2026-08-24 bipụtara 639; ịmegharị usoro a na isi <code>ac02c5b42f</code> nke nyocha ahụ nyere 619, ya mere mmụba ahụ sitere n'aka ndị na-enye aka ọhụrụ, ọ bụghị n'ihi usoro dị mfe karị.</sub>
 
@@ -1659,11 +1659,11 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 ## 📊 Kpakpando
 
-<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="Chaatị Akụkọ Kpakpando" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <img alt="Chaatị Akụkọ Kpakpando" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
  </picture>
 </a>
 

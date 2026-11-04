@@ -139,8 +139,8 @@ access_token=<jwt>; chathubPath=<oid>@<tenant>
 
 ## Αναφορές
 
-- Ζήτημα: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Συζήτηση: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- Ζήτημα: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Συζήτηση: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - Πηγαίος κώδικας: `src/shared/constants/providers/web-cookie.ts` (ορισμός παρόχου)
 - Εισαγωγή HAR: `src/shared/utils/m365HarImport.ts`
 - Πεδία διαπιστευτηρίων: `src/shared/providers/webSessionCredentials.ts`

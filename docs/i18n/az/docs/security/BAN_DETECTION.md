@@ -60,8 +60,8 @@ heç vaxt avtomatik bərpa olunmur), halbuki operator doğrulama sorğusunu brau
 qaldırır. İfadənin bloklama siyahısında saxlanması həmçinin `classifyProviderError`
 daxilindəki bərpa edilə bilən cloud-code 403 qolunu bu mətn üçün əlçatmaz edirdi, çünki
 əvvəlcə `accountDeactivated` qiymətləndirilir — buna görə də Gemini Code Assist üçün
-[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) və
-[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) çərçivəsində əlavə edilmiş
+[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) və
+[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) çərçivəsində əlavə edilmiş
 layihə marşrutunun bərpası heç vaxt işləyə bilmirdi.
 
 Bir-birinə yaxın yerləşən üç **ayrı** siqnal cədvəli bloklanmış açar sözlərin aşkarlanmasının

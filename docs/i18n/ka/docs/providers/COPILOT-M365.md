@@ -124,8 +124,8 @@ OmniRoute HAR-ში ეძებს Chathub-ის WebSocket URL-ს, ამო
 
 ## მითითებები
 
-- პრობლემა: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- განხილვა: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- პრობლემა: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- განხილვა: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - წყარო: `src/shared/constants/providers/web-cookie.ts` (პროვაიდერის განსაზღვრება)
 - HAR-ის იმპორტი: `src/shared/utils/m365HarImport.ts`
 - ავტორიზაციის მონაცემების ველები: `src/shared/providers/webSessionCredentials.ts`

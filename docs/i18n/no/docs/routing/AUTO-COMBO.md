@@ -132,13 +132,13 @@ Automatisk poengsetting velger beste leverandør/modell per forespørsel
 En kombinasjon der `name` er identisk med en ren modell-ID (f.eks. en kombinasjon med navnet
 `gpt-5.5`), er et **tilsiktet og støttet mønster**, ikke en feil: Det er
 mekanismen for reservetilbydere per modell-ID som er dokumentert i
-[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Fordi kombinasjoner
+[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940). Fordi kombinasjoner
 slås opp før rene modell-ID-er
 (`getComboForModel()` i `src/sse/services/model.ts`), rutes en forespørsel om den rene
 ID-en `gpt-5.5` gjennom kombinasjonens mål (f.eks.
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) i stedet for direkte til
 én enkelt tilbyder — dette gjenbruker prioriteten der kombinasjonen behandles før omskriving, som ble laget for
-[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227), og er
+[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227), og er
 regresjonstestet av `tests/unit/responses-combo-resolution-3227.test.ts` og
 `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
 
@@ -184,7 +184,7 @@ To vanlige fallgruver:
 - **`auto` bruker ikke kombinasjonene dine.** `auto`/`auto/*` bygger sitt eget konfigurasjonsfrie utvalg av kandidater og bruker bare lagrede kombinasjoner hvis en kombinasjon bokstavelig talt heter `auto` (anbefales ikke). For å rute gjennom en kombinasjon må du sende det nøyaktige navnet — ikke `auto`.
 - **`openrouter/auto` er et reelt, betalt OpenRouter-produkt** («Auto Best Available»), ikke et OmniRoute-alias. Det er den eneste statiske modelloppføringen i OpenRouter-registeret (`open-sse/config/providers/registry/openrouter/index.ts`) og faktureres separat. Bruk Innstillinger → Ruting → Skjul betalte modeller for å utelate det fra `auto`-utvalg.
 
-Se [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) og [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) for den opprinnelige forvirringen som dette dokumenterer.
+Se [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) og [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) for den opprinnelige forvirringen som dette dokumenterer.
 
 ## Slik fungerer det (lagrede Auto-Combo-kombinasjoner)
 

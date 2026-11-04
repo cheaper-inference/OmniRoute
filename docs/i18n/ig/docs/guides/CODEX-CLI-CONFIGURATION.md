@@ -480,7 +480,7 @@ Ndabara OmniRoute abụọ nwere ike imebi session Codex CLI na-ewe ọtụtụ 
 | Session na-agbanwe account mgbe niile / a na-atụfu ịdịgide prompt-cache n'etiti turn | TTL nke session affinity bụ `0` (agbanyụrụ)                                  | `sessionAffinityTtlMs`   |
 | Njikọ na-anwụ n'etiti reasoning n'enweghị prompt a na-egosi client                   | Stream idle watchdog malitere mgbe nkeji 10 gachara n'enweghị chunk upstream | `STREAM_IDLE_TIMEOUT_MS` |
 
-Mkparịta ụka ndị metụtara ya: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (ọrụ ogologo na-akwụsị), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (ihe mere affinity ji bụrụ agbanyụrụ na ndabara). Nsuso: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Mkparịta ụka ndị metụtara ya: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (ọrụ ogologo na-akwụsị), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (ihe mere affinity ji bụrụ agbanyụrụ na ndabara). Nsuso: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. Session affinity — jikọta otu mkparịta ụka na otu account
 

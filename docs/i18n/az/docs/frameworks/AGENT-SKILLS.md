@@ -18,7 +18,7 @@ Kataloqda **45 Agent Skill** (23 REST API + 21 CLI + 1 konfiqurasiya iş axını
 - **Kanonik ID** (`omni-auth`, `cli-serve` və s.)
 - `skills/{id}/SKILL.md` daxilində YAML ön məlumatı (`name`, `description`) + zəngin markdown məzmunu olan **SKILL.md** faylı
 - OpenAPI spesifikasiyası və CLI reyestrindən əldə edilən **REST son nöqtələri** (API skill-ləri) və ya **CLI alt əmrləri** (CLI skill-ləri)
-- Canlı yükləmə üçün **GitHub xam URL-i**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- Canlı yükləmə üçün **GitHub xam URL-i**: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Birbaşa GitHub xam məzmununun əldə edilməsi (server tələb olunmur)
 
 ```bash
-BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

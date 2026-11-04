@@ -482,7 +482,7 @@ codex debug models --bundled       # вивести каталог вбудов�
 | Сеанс постійно перемикає облікові записи / безперервність кешу запитів між ходами втрачається | TTL прив’язки сеансу дорівнює `0` (вимкнено)                                                            | `sessionAffinityTtlMs`   |
 | З’єднання обривається під час міркування без запиту, видимого клієнту                         | Сторожовий таймер бездіяльності потоку спрацював після 10 хвилин без фрагмента від сервера вищого рівня | `STREAM_IDLE_TIMEOUT_MS` |
 
-Пов’язані обговорення: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (переривання тривалих завдань), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (чому прив’язку типово вимкнено). Відстеження: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Пов’язані обговорення: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (переривання тривалих завдань), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (чому прив’язку типово вимкнено). Відстеження: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. Прив’язка сеансу — закріплення однієї розмови за одним обліковим записом
 

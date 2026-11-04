@@ -5,7 +5,7 @@
 ---
 
 Tento dokument zaznamenáva rozhodnutie o implementácii pre
-[Issue #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854). Verejné produkty sú
+[Issue #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854). Verejné produkty sú
 reprezentované ako štyri rodiny poskytovateľov. Región je údaj pripojenia, nie samostatný produkt.
 
 ## Rozhodnutie

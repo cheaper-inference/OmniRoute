@@ -58,8 +58,8 @@ hindi kailanman awtomatikong nare-recover), samantalang maaaring alisin ng opera
 Dahil sa pagpapanatili ng parirala sa listahan ng pagbabawal, hindi rin maaabot ang mare-recover na cloud-code 403 branch sa
 `classifyProviderError` para sa pananalitang ito, dahil unang sinusuri ang `accountDeactivated` — kaya hindi kailanman
 maipapatupad ang project-route recovery na idinagdag para sa Gemini Code Assist sa
-[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) at
-[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452).
+[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) at
+[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452).
 
 Ang tatlong magkatabi ngunit **magkakahiwalay** na talahanayan ng signal ay _hindi_ bahagi ng pagtukoy sa mga ipinagbabawal na keyword:
 

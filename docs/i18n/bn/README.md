@@ -45,9 +45,9 @@
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=social)](https://github.com/cheaper-inference/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/OmniRoute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 কমিউনিটিতে যোগ দিন
@@ -96,7 +96,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 [![লাইসেন্স: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker ডাউনলোড](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron ডাউনলোড](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![Electron ডাউনলোড](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -521,7 +521,7 @@ curl http://localhost:20128/v1/chat/completions \
 OmniRoute MIT লাইসেন্সপ্রাপ্ত এবং উন্মুক্তভাবে রক্ষণাবেক্ষণ করা হয়। এটি যদি আপনার সময় বা অর্থ সাশ্রয় করে, তবে একে স্বাধীন রাখতে যেটি আপনার জন্য উপযুক্ত সেটি বেছে নিন। স্পনসরশিপ কখনোই রাউটিং অগ্রাধিকারকে প্রভাবিত করে না; এটি দৃশ্যমানতা দেয়, র্যাঙ্কিং নয়।
 
 <table>
-  <tr><td nowrap>⭐ <b>রেপোতে স্টার দিন</b></td><td>বিনামূল্যে — দৃশ্যমানতা বাড়াতে সত্যিই সাহায্য করে</td><td><a href="https://github.com/diegosouzapw/OmniRoute">OmniRoute-কে স্টার দিন</a></td></tr>
+  <tr><td nowrap>⭐ <b>রেপোতে স্টার দিন</b></td><td>বিনামূল্যে — দৃশ্যমানতা বাড়াতে সত্যিই সাহায্য করে</td><td><a href="https://github.com/cheaper-inference/OmniRoute">OmniRoute-কে স্টার দিন</a></td></tr>
   <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>এককালীন বা মাসিক · প্ল্যাটফর্ম ফি শূন্য</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
   <tr><td nowrap>☕ <b>Ko-fi</b></td><td>দ্রুত এককালীন অনুদান, দাতার সাইনআপের প্রয়োজন নেই</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
   <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>ছোট, অনানুষ্ঠানিক সহায়তা</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
@@ -558,7 +558,7 @@ Pix কপি-পেস্ট:
 
 </details>
 
-🐛 কোনো বাগ পেয়েছেন বা মতামত আছে? একটি [আলোচনা](https://github.com/diegosouzapw/OmniRoute/discussions) শুরু করুন।
+🐛 কোনো বাগ পেয়েছেন বা মতামত আছে? একটি [আলোচনা](https://github.com/cheaper-inference/OmniRoute/discussions) শুরু করুন।
 
 <br/>
 
@@ -1250,7 +1250,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-ও এটি এ
 
 2026-10-18 তারিখের ক্যানোনিক্যাল মেট্রিক্স: **1.976টি অনন্য ভিডিও** · **20.220.289টি জানা ভিউ** (`v > 0`) · **প্রতিটি নেটওয়ার্ক মিলিয়ে 1.210টি চ্যানেল/প্রোফাইল**। অপরিশোধিত ড্যাশবোর্ডে 1.976টি সারি রয়েছে (YouTube 1.352 = 740টি দীর্ঘ ভিডিও + 612টি Shorts · TikTok 334 · Instagram 290); ক্যানোনিক্যাল URL অনুযায়ী স্বাভাবিকীকরণের পর কোনো ডুপ্লিকেট অবশিষ্ট নেই, যেখানে প্রতিটি ভিডিওর সর্বোচ্চ গণনাটি রাখা হয়েছে। YouTube-এর ডেটা সংগ্রহ 2026-10-13 তারিখে স্থগিত করা হয়েছে (14 থেকে 18/10 পর্যন্ত API কোটা শেষ হয়ে যাওয়ায়), আর TikTok/Instagram-এর সংগ্রহ 2026-09-02 থেকে স্থগিত (ডেটা সংগ্রহের ক্রেডিট না থাকায়); 76টি ভিডিওর এখনও ভিউ সংখ্যা নেই।
 
-> 🎬 **OmniRoute সম্পর্কে একটি ভিডিও তৈরি করেছেন?** লিংকসহ একটি [ইস্যু](https://github.com/diegosouzapw/OmniRoute/issues/new) বা [আলোচনা](https://github.com/diegosouzapw/OmniRoute/discussions) খুলুন — আমরা এটি এখানে তুলে ধরব।
+> 🎬 **OmniRoute সম্পর্কে একটি ভিডিও তৈরি করেছেন?** লিংকসহ একটি [ইস্যু](https://github.com/cheaper-inference/OmniRoute/issues/new) বা [আলোচনা](https://github.com/cheaper-inference/OmniRoute/discussions) খুলুন — আমরা এটি এখানে তুলে ধরব।
 
 <br/>
 
@@ -1270,8 +1270,8 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-ও এটি এ
 | 🟢 **WhatsApp — 🇧🇷 ব্রাজিল**                       | [গ্রুপে যোগ দিন](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                             |
 | 🌍 **ওয়েবসাইট**                                   | [omniroute.online](https://omniroute.online)                                                                                  |
 | 🌍 **🌍StHub OmniRoute কমিউনিটি (বিনামূল্যে)**     | [StHub পোর্টাল](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                        |
-| 📦 **সোর্স কোড**                                   | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                                |
-| 🐛 **বাগ রিপোর্ট করুন**                            | [একটি ইস্যু খুলুন](https://github.com/diegosouzapw/OmniRoute/issues) — `npm run system-info`-এর আউটপুট সংযুক্ত করুন           |
+| 📦 **সোর্স কোড**                                   | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                                      |
+| 🐛 **বাগ রিপোর্ট করুন**                            | [একটি ইস্যু খুলুন](https://github.com/cheaper-inference/OmniRoute/issues) — `npm run system-info`-এর আউটপুট সংযুক্ত করুন      |
 | 🤝 **অবদান রাখুন**                                 | [CONTRIBUTING.md](CONTRIBUTING.md) · [ব্রাঞ্চিং ও রিলিজ মডেল](docs/ops/BRANCHING_MODEL.md) · একটি `good first issue` বেছে নিন |
 | 💚 **প্রকল্পটিকে সহায়তা করুন**                    | [সহায়তা করার উপায় ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)                     |
 
@@ -1629,7 +1629,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-ও এটি এ
 
 </div>
 
-[![Contributors](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
 
 <sub>২০২৬-১১-০২ তারিখে লাইভ <code>release/v3.8.53</code> টিপ <code>1c7135e0fb</code>-এ (৭,৯৭২টি কমিট) অডিট করা হয়েছে: <b>১,০৭৪টি স্বাভাবিকীকৃত মানব Git পরিচয়</b> — ৭৫৯টি কমিটের লেখক হিসেবে দেখা যায় (মেইনটেইনারসহ) এবং ৩১৫টি কেবলমাত্র স্পষ্ট <code>Co-authored-by</code> ট্রেলারে রয়েছে। এই গণনায় <code>.mailmap</code> প্রয়োগ করা হয়, ই-মেইল ঠিকানাগুলোর তুলনা কেস-অনসেনসিটিভভাবে করা হয়, সংখ্যাসূচক ও সাধারণ GitHub noreply ঠিকানাগুলো কেবল একই হ্যান্ডেল এনকোড করলে একত্র করা হয়, ২৯টি বট/এজেন্ট/সার্ভিস/প্লেসহোল্ডার পরিচয় বাদ দেওয়া হয়, এবং শুধু প্রদর্শিত নাম মিলে গেলেই সাধারণ ই-মেইল ঠিকানাগুলো একত্র করা হয় না। ২০২৬-০৮-২৪-এর অডিটে ৬৩৯ জন প্রকাশিত হয়েছিল; সেই অডিটের বেস <code>ac02c5b42f</code>-এ এই পদ্ধতি পুনরায় চালিয়ে ৬১৯ জন পাওয়া যায়, তাই বৃদ্ধিটি নতুন অবদানকারীদের কারণে, আরও শিথিল পদ্ধতির কারণে নয়।</sub>
 
@@ -1658,11 +1658,11 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 ## 📊 স্টারসমূহ
 
-<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="স্টার ইতিহাসের চার্ট" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <img alt="স্টার ইতিহাসের চার্ট" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
  </picture>
 </a>
 

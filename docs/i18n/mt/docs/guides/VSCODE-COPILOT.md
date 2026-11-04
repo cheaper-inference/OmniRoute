@@ -114,7 +114,7 @@ npm start
 Mingħajr build attivat għall-inkorporazzjoni, il-paġna tirrifjuta li tidher f'frame; l-estensjoni tinduna b'dan mill-
 headers tar-rispons u terġa' lura għall-browser estern — xejn ma jinkiser, u tavżak darba.
 Ara [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) u l-issue
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
 
 ---
 

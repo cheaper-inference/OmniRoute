@@ -260,7 +260,7 @@ Wannan yana faruwa sau ɗaya a fara kunnawa bayan sabuntawa. Yi amfani da `migra
 
 ## Kasuwar Proxy Kyauta ta 1proxy
 
-> 🆕 **Gudummawa daga [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Matsala [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕 **Gudummawa daga [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Matsala [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
 
 OmniRoute yana haɗuwa da dandalin al’umma na **[1proxy](https://1proxy-api.aitradepulse.com)** don samar da damar amfani da **ɗaruruwan proxy kyauta da aka tabbatar** daga ko’ina cikin duniya. Wannan ya dace sosai da masu amfani waɗanda ba su da nasu ababen more rayuwa na proxy.
 

@@ -4,9 +4,9 @@
 
 ---
 
-> **Status:** Akzeptiert · **Kontext:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
-> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Vertrag:** `domain/routing/routerBackends.ts`
-> (typisierte Registry — der Code wird mit [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) integriert)
+> **Status:** Akzeptiert · **Kontext:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
+> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Vertrag:** `domain/routing/routerBackends.ts`
+> (typisierte Registry — der Code wird mit [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) integriert)
 
 Dieser ADR legt fest, wie `ts` (nativ), `bifrost`, `cliproxy`, `9router` und
 VibeProxy-kompatible Engines zueinander in Beziehung stehen, damit Mitwirkende
@@ -40,7 +40,7 @@ Relay-Weiterleitung, das (historisch) ausschließlich `external` war.
 ## Die Registry — zentrale Quelle der Wahrheit
 
 Das Vertragsmodul `domain/routing/routerBackends.ts` (der Code wird mit
-[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) integriert) deklariert jede Engine genau einmal,
+[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) integriert) deklariert jede Engine genau einmal,
 einschließlich ihres Lebenszyklus, ihrer Fähigkeiten, Dienstidentität, ihres
 Standardports, ihrer Health-Konfiguration und ihrer Telemetrieunterstützung.
 Verbraucher rufen Engines über `getRouterBackend(id)`, `listRouterBackends()` und
@@ -57,7 +57,7 @@ behandeln.
 
 ¹ Die Hochstufung von Bifrost zu einem `supervised` eingebetteten Dienst (über
 `/api/services/bifrost/` installierbar/startbar) wird in
-[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817) nachverfolgt; bis dieser PR integriert ist,
+[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817) nachverfolgt; bis dieser PR integriert ist,
 ist Bifrost ausschließlich `external` (nur über `BIFROST_BASE_URL` erreichbar).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -126,8 +126,8 @@ Backend aus; die Hauptschnittstelle `/api/v1/chat/completions` bezieht
 Die Auswahl erfolgt derzeit **auf Relay-Ebene nach dem Alles-oder-nichts-Prinzip** — in `release/v3.8.43` gibt es
 keinen Engine-Wechsel pro Anbieter oder Anfrage. Die anfragebezogene Schranke wird derzeit
 durch die Sidecar-Manifest-Arbeiten hinzugefügt
-([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) Manifest +
-[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) Manifest +
+[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 wodurch `auto` nur noch laut Manifest geeignete Anbieter über Bifrost routen kann.
 
 ## Dashboard-Integration

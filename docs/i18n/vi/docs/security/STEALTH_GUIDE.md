@@ -149,7 +149,7 @@ Các điểm liên quan:
 
 - `open-sse/executors/antigravity.ts` — đọc `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — hệ thống kết nối thông tin xác thực
-- Báo cáo sự cố ban đầu: Thảo luận [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Báo cáo sự cố ban đầu: Thảo luận [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

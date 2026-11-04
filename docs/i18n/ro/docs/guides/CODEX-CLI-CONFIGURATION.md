@@ -482,7 +482,7 @@ Două valori implicite OmniRoute pot sabota în mod discret sesiunile Codex CLI 
 | Sesiunea continuă să schimbe conturile / continuitatea cache-ului promptului se pierde între interacțiuni | TTL-ul afinității sesiunii este `0` (dezactivat)                                                   | `sessionAffinityTtlMs`   |
 | Conexiunea se întrerupe în timpul raționamentului, fără nicio solicitare vizibilă pentru client           | Monitorul de inactivitate al fluxului s-a declanșat după 10 minute fără niciun fragment din amonte | `STREAM_IDLE_TIMEOUT_MS` |
 
-Discuții asociate: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (întreruperi ale sarcinilor lungi), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (de ce afinitatea este dezactivată implicit). Urmărire: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Discuții asociate: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (întreruperi ale sarcinilor lungi), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (de ce afinitatea este dezactivată implicit). Urmărire: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. Afinitatea sesiunii — fixați o conversație la un singur cont
 

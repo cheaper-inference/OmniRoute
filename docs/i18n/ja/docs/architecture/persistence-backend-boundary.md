@@ -5,7 +5,7 @@
 ---
 
 - **ステータス:** 提案中 — ランタイムに関する作業を開始する前にメンテナーの承認が必要
-- **トラッキング issue:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
+- **トラッキング issue:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
 - **スコープ:** 永続化アーキテクチャのみ。この決定では外部データベースの追加または選定は行わない
 
 ## コンテキスト

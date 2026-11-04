@@ -476,7 +476,7 @@ Is féidir le dhá réamhshocrú OmniRoute loitiméireacht chiúin a dhéanamh a
 | Coinníonn an seisiún air ag athrú cuntas / cailltear leanúnachas taisce na leid idir sealanna | Is é `0` TTL chleamhnas an tseisiúin (díchumasaithe)                                           | `sessionAffinityTtlMs`   |
 | Teipeann ar an gceangal i lár réasúnaithe gan aon leid don chliant                            | Gníomhachtaíodh faireoir díomhaointis an tsrutha tar éis 10 nóiméad gan smután réamhtheachtach | `STREAM_IDLE_TIMEOUT_MS` |
 
-Plé gaolmhar: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (teipeanna ar thascanna fada), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (an fáth a bhfuil cleamhnas múchta de réir réamhshocraithe). Rianú: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Plé gaolmhar: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (teipeanna ar thascanna fada), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (an fáth a bhfuil cleamhnas múchta de réir réamhshocraithe). Rianú: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. Cleamhnas seisiúin — pionnáil comhrá amháin le cuntas amháin
 

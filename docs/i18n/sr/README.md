@@ -45,9 +45,9 @@
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=social)](https://github.com/cheaper-inference/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/OmniRoute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 Придружите се заједници
@@ -96,7 +96,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![Electron Downloads](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -521,7 +521,7 @@ curl http://localhost:20128/v1/chat/completions \
 OmniRoute је лиценциран под MIT лиценцом и одржава се јавно. Ако вам штеди време или новац, ево како можете помоћи да остане независан — изаберите оно што вам одговара. Спонзорство никада не утиче на приоритет рутирања; оно доноси видљивост, а не бољи ранг.
 
 <table>
-  <tr><td nowrap>⭐ <b>Означите репозиторијум звездицом</b></td><td>Бесплатно — заиста помаже видљивости</td><td><a href="https://github.com/diegosouzapw/OmniRoute">Означите OmniRoute звездицом</a></td></tr>
+  <tr><td nowrap>⭐ <b>Означите репозиторијум звездицом</b></td><td>Бесплатно — заиста помаже видљивости</td><td><a href="https://github.com/cheaper-inference/OmniRoute">Означите OmniRoute звездицом</a></td></tr>
   <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>Једнократно или месечно · без накнаде платформе</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
   <tr><td nowrap>☕ <b>Ko-fi</b></td><td>Брза једнократна донација, без регистрације донатора</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
   <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>Мали, неформални гест</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
@@ -558,7 +558,7 @@ Pix за копирање и лепљење:
 
 </details>
 
-🐛 Пронашли сте грешку или имате повратне информације? Отворите [Дискусију](https://github.com/diegosouzapw/OmniRoute/discussions).
+🐛 Пронашли сте грешку или имате повратне информације? Отворите [Дискусију](https://github.com/cheaper-inference/OmniRoute/discussions).
 
 <br/>
 
@@ -1263,7 +1263,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 такође га
 
 Канонске метрике на дан 2026-10-18: **1.976 јединствених видео-снимака** · **20.220.289 познатих прегледа** (`v > 0`) · **1.210 канала/профила по мрежи**. Необрађена контролна табла садржи 1.976 редова (YouTube 1.352 = 740 дугих видео-снимака + 612 Shorts · TikTok 334 · Instagram 290); након нормализације према канонском URL-у, која задржава највећи број прегледа по видео-снимку, није преостао ниједан дупликат. Прикупљање података са YouTube-а замрзнуто је на датум 2026-10-13 (квота API-ја исцрпљена од 14. до 18.10), а са TikTok-а/Instagram-а од 2026-09-02 (нема кредита за прикупљање); 76 видео-снимака још увек нема број прегледа.
 
-> 🎬 **Направили сте видео о OmniRoute-у?** Отворите [пријаву](https://github.com/diegosouzapw/OmniRoute/issues/new) или [дискусију](https://github.com/diegosouzapw/OmniRoute/discussions) са линком — представићемо га овде.
+> 🎬 **Направили сте видео о OmniRoute-у?** Отворите [пријаву](https://github.com/cheaper-inference/OmniRoute/issues/new) или [дискусију](https://github.com/cheaper-inference/OmniRoute/discussions) са линком — представићемо га овде.
 
 <br/>
 
@@ -1283,8 +1283,8 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 такође га
 | 🟢 **WhatsApp — 🇧🇷 Бразил**                    | [придружите се групи](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                      |
 | 🌍 **Веб-сајт**                                | [omniroute.online](https://omniroute.online)                                                                                |
 | 🌍 **🌍StHub OmniRoute заједница (бесплатно)** | [StHub портал](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                       |
-| 📦 **Изворни кôд**                             | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                              |
-| 🐛 **Пријавите грешку**                        | [отворите пријаву](https://github.com/diegosouzapw/OmniRoute/issues) — приложите излаз команде `npm run system-info`        |
+| 📦 **Изворни кôд**                             | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                                    |
+| 🐛 **Пријавите грешку**                        | [отворите пријаву](https://github.com/cheaper-inference/OmniRoute/issues) — приложите излаз команде `npm run system-info`   |
 | 🤝 **Дајте допринос**                          | [CONTRIBUTING.md](CONTRIBUTING.md) · [Модел гранања и издавања](docs/ops/BRANCHING_MODEL.md) · изаберите `good first issue` |
 | 💚 **Подржите пројекат**                       | [Начини да пружите подршку ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)            |
 
@@ -1642,7 +1642,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 такође га
 
 </div>
 
-[![Contributors](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
 
 <sub>Revizija obavljena 2026-11-02 na aktivnom vrhu grane <code>release/v3.8.53</code> <code>1c7135e0fb</code> (7.972 komitova): <b>1.074 normalizovana ljudska Git identiteta</b> — 759 se pojavljuje kao autori komitova (uključujući održavaoca), a 315 samo u eksplicitnim završecima <code>Co-authored-by</code>. Popis primenjuje <code>.mailmap</code>, upoređuje adrese e-pošte bez obzira na velika i mala slova, spaja numeričke i obične GitHub noreply adrese samo kada kodiraju isto korisničko ime, isključuje 29 identiteta botova/agenta/servisa/zamenika i ne spaja obične adrese e-pošte samo zato što im se prikazivačka imena podudaraju. Revizija od 2026-08-24 objavila je broj 639; ponovljena primena ove metode na osnovu te revizije <code>ac02c5b42f</code> daje 619, tako da povećanje potiče od novih saradnika, a ne od blaže metode.</sub>
 
@@ -1671,11 +1671,11 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 ## 📊 Звездице
 
-<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="Графикон историје звездица" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <img alt="Графикон историје звездица" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
  </picture>
 </a>
 

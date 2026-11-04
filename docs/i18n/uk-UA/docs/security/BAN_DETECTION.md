@@ -51,8 +51,8 @@ Google Cloud Code / Antigravity повертають його як `403 VALIDATI
 Збереження цієї фрази в списку блокувань також робило недосяжною відновлювану гілку 403 для cloud-code у
 `classifyProviderError` для такого формулювання, оскільки `accountDeactivated`
 перевіряється першим — тому відновлення маршруту проєкту, додане для Gemini Code Assist у
-[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) і
-[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452), ніколи не могло виконатися.
+[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) і
+[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452), ніколи не могло виконатися.
 
 Три суміжні, **окремі** таблиці сигналів _не_ є частиною виявлення ключових слів блокування:
 

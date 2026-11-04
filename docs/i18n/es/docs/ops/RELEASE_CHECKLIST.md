@@ -454,7 +454,7 @@ valida exactamente esa compilación (parte (a) de #8084). Solo para PR del mismo
 gh workflow run preview-artifact.yml -f pr_number=<N>   # o añada la etiqueta `preview-artifact`
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # instalación de vista previa
 ```
 

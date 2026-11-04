@@ -129,7 +129,7 @@ handleComboChat (සුරැකි combos භාවිත කරන එම එ�
 
 ## සැබෑ Model Id එකකට ගැළපෙන Combo නම්
 
-හිස් model id එකකට සමාන `name` එකක් ඇති combo එකක් (උදා. `gpt-5.5` නමින් ඇති combo එකක්) යනු දෝෂයක් නොව, **හිතාමතාම සපයන සහය දක්වන රටාවකි**: එය [#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940) හි ලේඛනගත කර ඇති එක් එක් model id සඳහා provider fallback යාන්ත්රණයයි. හිස්-model-id විසඳීමට පෙර combo විසඳීම පරීක්ෂා කරන බැවින් (`src/sse/services/model.ts` හි `getComboForModel()`), හිස් id එක වන `gpt-5.5` සඳහා ඉල්ලීමක් සෘජුවම තනි provider කෙනෙකු වෙත යැවීම වෙනුවට combo එකේ targets හරහා (උදා. `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) යොමු කරයි — මෙය [#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) සඳහා ගොඩනැගූ combo-before-rewrite ප්රමුඛතාව නැවත භාවිත කරන අතර `tests/unit/responses-combo-resolution-3227.test.ts` සහ `tests/unit/combo-name-codex-responses-rewrite.test.ts` මඟින් regression පරීක්ෂාවට ලක් කර ඇත.
+හිස් model id එකකට සමාන `name` එකක් ඇති combo එකක් (උදා. `gpt-5.5` නමින් ඇති combo එකක්) යනු දෝෂයක් නොව, **හිතාමතාම සපයන සහය දක්වන රටාවකි**: එය [#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940) හි ලේඛනගත කර ඇති එක් එක් model id සඳහා provider fallback යාන්ත්රණයයි. හිස්-model-id විසඳීමට පෙර combo විසඳීම පරීක්ෂා කරන බැවින් (`src/sse/services/model.ts` හි `getComboForModel()`), හිස් id එක වන `gpt-5.5` සඳහා ඉල්ලීමක් සෘජුවම තනි provider කෙනෙකු වෙත යැවීම වෙනුවට combo එකේ targets හරහා (උදා. `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) යොමු කරයි — මෙය [#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) සඳහා ගොඩනැගූ combo-before-rewrite ප්රමුඛතාව නැවත භාවිත කරන අතර `tests/unit/responses-combo-resolution-3227.test.ts` සහ `tests/unit/combo-name-codex-responses-rewrite.test.ts` මඟින් regression පරීක්ෂාවට ලක් කර ඇත.
 
 සැබෑ model id එකක් සඟවන නමකට combo එකක් සෑදීම හෝ නැවත නම් කිරීම **කිසිවිටෙක ප්රතික්ෂේප නොකෙරේ** — එසේ කිරීමෙන් මෙම ලේඛනගත workflow එක බිඳ වැටෙනු ඇත. ඒ වෙනුවට (#8530), (නව) නම සැබෑ model id එකක් සමඟ ගැටෙන විට `POST /api/combos` සහ `PUT /api/combos/[id]` response එකට ක්රියාකාරිත්වය අවහිර නොකරන `warning` field එකක් එක් කරයි:
 
@@ -165,7 +165,7 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 - **`auto` ඔබගේ combos භාවිත නොකරයි.** `auto`/`auto/*` තමන්ගේම zero-config candidate pool එකක් ගොඩනඟන අතර, `auto` යන නමම ඇති combo එකක් තිබේ නම් පමණක් persist කර ඇති combos සලකා බලයි (නිර්දේශ නොකෙරේ). Combo එකක් හරහා යොමු කිරීමට, `auto` නොව එහි නිශ්චිත නම යවන්න.
 - **`openrouter/auto` යනු සැබෑ ගෙවීම් සහිත OpenRouter නිෂ්පාදනයකි** ("Auto Best Available"), OmniRoute alias එකක් නොවේ. එය OpenRouter registry එකේ (`open-sse/config/providers/registry/openrouter/index.ts`) ඇති එකම static model entry එක වන අතර ඒ සඳහා වෙනම ගාස්තු අය කෙරේ. එය `auto` pools වෙතින් ඉවත් කිරීමට Settings → Routing → Hide paid models භාවිත කරන්න.
 
-මෙහි ලේඛනගත කර ඇති මුල් ව්යාකූලතාව සඳහා [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) සහ [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) බලන්න.
+මෙහි ලේඛනගත කර ඇති මුල් ව්යාකූලතාව සඳහා [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) සහ [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) බලන්න.
 
 ## එය ක්රියා කරන ආකාරය (ස්ථිරව සුරැකුණු Auto-Combos)
 

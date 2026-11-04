@@ -90,7 +90,7 @@ outra receber 503") é imposto incondicionalmente pelo sistema 1 e pelo sistema 
 
 ## 4. `/v1/responses` longas em um único processo (folga saudável)
 
-O [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) adicionou
+O [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) adicionou
 `tryAcquireHealthyHeadroom` para que uma segunda solicitação estruturalmente pesada seja admitida
 quando o heap estiver abaixo de `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. O caminho BYTE
 usado por `admitChatRequest` (corpos ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

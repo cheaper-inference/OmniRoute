@@ -125,7 +125,7 @@ ovillkorligen av system 1 och av system 2 när det uttryckligen har aktiverats.
 
 ## 4. Lång `/v1/responses` i en process (healthy-headroom)
 
-[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) lade till
+[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) lade till
 `tryAcquireHealthyHeadroom` så att en andra strukturellt tung begäran släpps
 igenom när heapen ligger under `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`.
 BYTE-sökvägen som används av `admitChatRequest` (meddelandetexter ≥

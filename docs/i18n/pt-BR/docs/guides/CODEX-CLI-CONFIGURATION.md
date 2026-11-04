@@ -482,7 +482,7 @@ Dois padrões do OmniRoute podem sabotar silenciosamente sessões de várias hor
 | A sessão continua alternando entre contas / a continuidade do cache de prompts é perdida entre turnos | O TTL de afinidade de sessão é `0` (desabilitado)                                          | `sessionAffinityTtlMs`   |
 | A conexão é encerrada durante o raciocínio sem nenhum prompt visível para o cliente                   | O watchdog de inatividade do stream foi acionado após 10 minutos sem nenhum chunk upstream | `STREAM_IDLE_TIMEOUT_MS` |
 
-Discussões relacionadas: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (interrupções em tarefas longas), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (por que a afinidade vem desabilitada por padrão). Acompanhamento: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Discussões relacionadas: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (interrupções em tarefas longas), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (por que a afinidade vem desabilitada por padrão). Acompanhamento: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. Afinidade de sessão — fixe uma conversa em uma conta
 

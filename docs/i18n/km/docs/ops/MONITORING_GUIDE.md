@@ -223,7 +223,7 @@ livenessProbe:
 
 **កុំ** កំណត់ **liveness** របស់ kubelet ទៅកាន់ `/api/monitoring/health`។ ផ្លូវនោះអនុវត្តការងារ DB/ការត្រួតពិនិត្យពិតប្រាកដ ហើយនឹងផ្ដល់លទ្ធផលវិជ្ជមានក្លែងក្លាយក្រោមបន្ទុក។
 
-ពាក់ព័ន្ធ៖ [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (probes ខណៈដែល event loop កំពុងរវល់), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (ការកំណត់តម្លៃកាតាឡុកប្រើធនធានច្រើន), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (ការរាប់ token សម្រាប់ការបង្ហាប់ប្រើធនធានច្រើន)។
+ពាក់ព័ន្ធ៖ [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (probes ខណៈដែល event loop កំពុងរវល់), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (ការកំណត់តម្លៃកាតាឡុកប្រើធនធានច្រើន), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (ការរាប់ token សម្រាប់ការបង្ហាប់ប្រើធនធានច្រើន)។
 
 ### systemd watchdog (event loop ដែលជាប់គាំង)
 

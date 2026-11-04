@@ -5,7 +5,7 @@
 ---
 
 Șablon: xquik #11370 (fuzionat în release/v3.8.51). Mod: `fallbackOnly`.
-Propunere upstream: problema diegosouzapw/OmniRoute#11637.
+Propunere upstream: problema cheaper-inference/OmniRoute#11637.
 
 ## 1. Datele de referință ale serviciului (documentație oficială, verificată încrucișat)
 

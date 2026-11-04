@@ -45,9 +45,9 @@
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=social)](https://github.com/cheaper-inference/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/OmniRoute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 ප්රජාවට එකතු වන්න
@@ -96,7 +96,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 [![බලපත්රය: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker ඇදගැනීම්](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron බාගැනීම්](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![Electron බාගැනීම්](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -521,7 +521,7 @@ combo එකක් සෑදීමට අවශ්ය නැත. ඔබේ ම�
 OmniRoute MIT බලපත්රය යටතේ පවතින අතර විවෘතව නඩත්තු කෙරේ. එය ඔබේ කාලය හෝ මුදල් ඉතිරි කරන්නේ නම්, එහි ස්වාධීනත්වය පවත්වා ගැනීමට ඔබට ගැළපෙන ඕනෑම ක්රමයක් තෝරාගන්න. අනුග්රාහකත්වය කිසිවිටෙකත් මාර්ගගත කිරීමේ ප්රමුඛතාවට බලපාන්නේ නැත; එය ලබා දෙන්නේ දෘශ්යතාව මිස ශ්රේණිගත කිරීමක් නොවේ.
 
 <table>
-  <tr><td nowrap>⭐ <b>Repo එකට Star එකක් දෙන්න</b></td><td>නොමිලේ — දෘශ්යතාව වැඩි කිරීමට සැබවින්ම උපකාරී වේ</td><td><a href="https://github.com/diegosouzapw/OmniRoute">OmniRoute වෙත Star එකක් දෙන්න</a></td></tr>
+  <tr><td nowrap>⭐ <b>Repo එකට Star එකක් දෙන්න</b></td><td>නොමිලේ — දෘශ්යතාව වැඩි කිරීමට සැබවින්ම උපකාරී වේ</td><td><a href="https://github.com/cheaper-inference/OmniRoute">OmniRoute වෙත Star එකක් දෙන්න</a></td></tr>
   <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>එක් වරක් හෝ මාසිකව · වේදිකා ගාස්තුවක් නැත</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
   <tr><td nowrap>☕ <b>Ko-fi</b></td><td>ඉක්මන් එක්වර පරිත්යාගයක්, පරිත්යාගශීලියාට ලියාපදිංචි වීම අවශ්ය නොවේ</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
   <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>කුඩා, අවිධිමත් සහායක්</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
@@ -558,7 +558,7 @@ Pix පිටපත් කර අලවන්න:
 
 </details>
 
-🐛 දෝෂයක් හමු වූවාද, නැතිනම් ප්රතිචාරයක් තිබේද? [Discussion](https://github.com/diegosouzapw/OmniRoute/discussions) එකක් විවෘත කරන්න.
+🐛 දෝෂයක් හමු වූවාද, නැතිනම් ප්රතිචාරයක් තිබේද? [Discussion](https://github.com/cheaper-inference/OmniRoute/discussions) එකක් විවෘත කරන්න.
 
 <br/>
 
@@ -1253,7 +1253,7 @@ Dashboard රහිත, headless runtime එකක් සඳහා Docker `base`
 
 2026-10-18 දින කැනොනිකල් ප්රමිතික: **අද්විතීය වීඩියෝ 1.976ක්** · **දන්නා නැරඹීම් 20.220.289ක්** (`v > 0`) · **ජාලය අනුව නාලිකා/පැතිකඩ 1.210ක්**. අමු උපකරණ පුවරුවේ පේළි 1.976ක් ඇත (YouTube 1.352 = දිගු වීඩියෝ 740 + Shorts 612 · TikTok 334 · Instagram 290); එක් වීඩියෝවකට ඉහළම ගණන රඳවා ගන්නා කැනොනිකල් URL අනුව සාමාන්යකරණය කිරීමෙන් පසු කිසිදු අනුපිටපතක් ඉතිරි නොවීය. YouTube දත්ත රැස් කිරීම 2026-10-13 දින සිට අත්හිටුවා ඇත (14 සිට 18/10 දක්වා API කෝටාව අවසන් වී ඇත), එමෙන්ම TikTok/Instagram දත්ත රැස් කිරීම 2026-09-02 සිට අත්හිටුවා ඇත (දත්ත රැස් කිරීමේ ණය නොමැති බැවින්); වීඩියෝ 76කට තවමත් නැරඹීම් ගණනක් නොමැත.
 
-> 🎬 **OmniRoute ගැන වීඩියෝවක් සෑදුවාද?** සබැඳිය සමඟ [ගැටලුවක්](https://github.com/diegosouzapw/OmniRoute/issues/new) හෝ [සාකච්ඡාවක්](https://github.com/diegosouzapw/OmniRoute/discussions) විවෘත කරන්න — අපි එය මෙහි විශේෂයෙන් පෙන්වන්නෙමු.
+> 🎬 **OmniRoute ගැන වීඩියෝවක් සෑදුවාද?** සබැඳිය සමඟ [ගැටලුවක්](https://github.com/cheaper-inference/OmniRoute/issues/new) හෝ [සාකච්ඡාවක්](https://github.com/cheaper-inference/OmniRoute/discussions) විවෘත කරන්න — අපි එය මෙහි විශේෂයෙන් පෙන්වන්නෙමු.
 
 <br/>
 
@@ -1273,8 +1273,8 @@ Dashboard රහිත, headless runtime එකක් සඳහා Docker `base`
 | 🟢 **WhatsApp — 🇧🇷 බ්රසීලය**                     | [සමූහයට එක්වන්න](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                             |
 | 🌍 **වෙබ් අඩවිය**                                | [omniroute.online](https://omniroute.online)                                                                                  |
 | 🌍 **🌍StHub OmniRoute ප්රජාව (නොමිලේ)**         | [StHub ද්වාරය](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                         |
-| 📦 **මූලාශ්ර කේතය**                              | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                                |
-| 🐛 **දෝෂයක් වාර්තා කරන්න**                       | [ගැටලුවක් විවෘත කරන්න](https://github.com/diegosouzapw/OmniRoute/issues) — `npm run system-info` ප්රතිදානය අමුණන්න            |
+| 📦 **මූලාශ්ර කේතය**                              | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                                      |
+| 🐛 **දෝෂයක් වාර්තා කරන්න**                       | [ගැටලුවක් විවෘත කරන්න](https://github.com/cheaper-inference/OmniRoute/issues) — `npm run system-info` ප්රතිදානය අමුණන්න       |
 | 🤝 **දායක වන්න**                                 | [CONTRIBUTING.md](CONTRIBUTING.md) · [ශාඛාකරණ සහ නිකුතු ආකෘතිය](docs/ops/BRANCHING_MODEL.md) · `good first issue` එකක් තෝරන්න |
 | 💚 **ව්යාපෘතියට සහාය වන්න**                      | [සහාය විය හැකි ක්රම ↑](#-support-omniroute) · [GitHub අනුග්රාහකයෝ](https://github.com/sponsors/diegosouzapw)                  |
 
@@ -1632,7 +1632,7 @@ Dashboard රහිත, headless runtime එකක් සඳහා Docker `base`
 
 </div>
 
-[![දායකයින්](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![දායකයින්](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
 
 <sub>2026-11-02 දින සජීවී <code>release/v3.8.53</code> ටිප් එකේ <code>1c7135e0fb</code> (කමිට් 7,972) විගණනය කරන ලදී: <b>සාමාන්යකරණය කළ මානව Git අනන්යතා 1,074ක්</b> — 759ක් කමිට් කර්තෘවරුන් ලෙස (නඩත්තුකරු ද ඇතුළුව) පෙනී සිටින අතර 315ක් පැහැදිලි <code>Co-authored-by</code> ට්රේලර්වල පමණක් පෙනී සිටී. මෙම ගණනය <code>.mailmap</code> යොදයි, ඊමේල් ලිපින අකුරු විශාලත්වය නොසලකා සසඳයි, සංඛ්යාත්මක සහ සාමාන්ය GitHub noreply ලිපින එකම හෑන්ඩලය සංකේතවත් කරන විට පමණක් ඒකාබද්ධ කරයි, bot/agent/service/placeholder අනන්යතා 29ක් බැහැර කරයි, සහ පෙන්වන නම් ගැළපෙන පමණින් සාමාන්ය ඊමේල් ලිපින ඒකාබද්ධ නොකරයි. 2026-08-24 විගණනයේ 639ක් ප්රකාශයට පත් කර තිබූ අතර; එම විගණනයේ මූලික <code>ac02c5b42f</code> මත මෙම ක්රමය නැවත ධාවනය කළ විට 619ක් ලැබේ, එබැවින් වැඩිවීම සිදුවී ඇත්තේ නව දායකයින් නිසා මිස ලිහිල් ක්රමයක් නිසා නොවේ.</sub>
 
@@ -1661,11 +1661,11 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 ## 📊 තරු
 
-<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="තරු ඉතිහාස ප්රස්ථාරය" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <img alt="තරු ඉතිහාස ප්රස්ථාරය" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
  </picture>
 </a>
 

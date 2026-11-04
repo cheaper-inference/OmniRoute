@@ -223,7 +223,7 @@ livenessProbe:
 
 **請勿**將 kubelet 的**存活探針**指向 `/api/monitoring/health`。該路徑會執行實際的資料庫／監控工作，並且在高負載下產生誤判。
 
-相關資訊：[#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052)（事件迴圈忙碌時的探針）、[#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055)（目錄定價工作獨占資源）、[#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117)（壓縮權杖計數工作獨占資源）。
+相關資訊：[#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052)（事件迴圈忙碌時的探針）、[#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055)（目錄定價工作獨占資源）、[#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117)（壓縮權杖計數工作獨占資源）。
 
 ### systemd 看門狗（事件迴圈凍結）
 

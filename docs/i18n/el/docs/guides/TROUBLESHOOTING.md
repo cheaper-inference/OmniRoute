@@ -249,7 +249,7 @@ npx playwright install chromium
    [Convert]::ToBase64String($b)
    ```
    Η έξοδος πρέπει να αντιστοιχεί στο `latest.yml` → `sha512`. Αν δεν αντιστοιχεί, διαγράψτε το αρχείο και
-   πραγματοποιήστε ξανά λήψη μόνο από τη [σελίδα εκδόσεων του GitHub](https://github.com/diegosouzapw/OmniRoute/releases).
+   πραγματοποιήστε ξανά λήψη μόνο από τη [σελίδα εκδόσεων του GitHub](https://github.com/cheaper-inference/OmniRoute/releases).
 2. **Επαναφορά + εξαίρεση** — επαναφέρετε από την καραντίνα τα στοιχεία που αφαιρέθηκαν κατά την αναίρεση και προσθέστε μια εξαίρεση
    για το `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Ρυθμίσεις → Απειλές και εξαιρέσεις)
    και, στη συνέχεια, επανεγκαταστήστε.
@@ -844,7 +844,7 @@ omniroute serve --ready-timeout 180000
 
 ## Εξακολουθείτε να αντιμετωπίζετε πρόβλημα;
 
-- **Ζητήματα GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Ζητήματα GitHub**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **Αρχιτεκτονική**: Ανατρέξτε στο [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) για εσωτερικές λεπτομέρειες
 - **Αναφορά API**: Ανατρέξτε στο [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) για όλα τα endpoints
 - **Πίνακας κατάστασης εύρυθμης λειτουργίας**: Ελέγξτε το **Dashboard → Health** για την κατάσταση του συστήματος σε πραγματικό χρόνο

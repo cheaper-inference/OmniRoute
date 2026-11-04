@@ -260,7 +260,7 @@ curl -X POST http://localhost:20128/api/v1/management/proxies/bulk-assign \
 
 ## بازار پراکسی رایگان 1proxy
 
-> 🆕 **مشارکت توسط [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Issue [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕 **مشارکت توسط [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Issue [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
 
 OmniRoute با پلتفرم جامعهمحور **[1proxy](https://1proxy-api.aitradepulse.com)** یکپارچه میشود تا دسترسی به **صدها پراکسی رایگان و اعتبارسنجیشده** از سراسر جهان را فراهم کند. این قابلیت برای کاربرانی که زیرساخت پراکسی اختصاصی ندارند، ایدئال است.
 

@@ -28,7 +28,7 @@ Thank you for your interest in contributing! This guide covers everything you ne
 ### குளோன் செய்து நிறுவுதல்
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -427,4 +427,4 @@ VPS deployment-களுக்கு, `npm run build` அல்லாமல் `
 - **API குறிப்பு**: [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)-ஐப் பார்க்கவும்
 - **பாதுகாப்பு ஆவணங்கள்**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
 - **செயல்பாட்டு ஆவணங்கள்**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **சிக்கல்கள்**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **சிக்கல்கள்**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

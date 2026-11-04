@@ -5,7 +5,7 @@
 ---
 
 - **Status:** Vorgeschlagen — erfordert die Genehmigung eines Maintainers, bevor mit der Laufzeitimplementierung begonnen wird
-- **Tracking-Issue:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
+- **Tracking-Issue:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
 - **Geltungsbereich:** Ausschließlich Persistenzarchitektur; diese Entscheidung fügt keine externe Datenbank hinzu und wählt auch keine aus
 
 ## Kontext

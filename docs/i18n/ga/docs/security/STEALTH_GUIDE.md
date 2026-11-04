@@ -170,7 +170,7 @@ Pointí teagmhála:
 
 - `open-sse/executors/antigravity.ts` — léann sé `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — sreangú dintiúr
-- Buntuairisc teagmhais: Plé [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Buntuairisc teagmhais: Plé [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

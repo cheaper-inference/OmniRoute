@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 କୋଡ୍ କ୍ଲୋନ୍ କରି ଡିରେକ୍ଟୋରୀରେ ପ୍ରବେଶ କରନ୍ତୁ
 
 ```powershell
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly ସ୍ୱୟଂଚାଳିତ ଭାବରେ ମେସିନ୍ ଗୁଡ�
 
 ### ୯.୧ ଆପଣଙ୍କ ଫୋର୍କର `fly.toml` ସୁରକ୍ଷିତ ରଖି ଅପଷ୍ଟ୍ରିମ୍ ରିପୋଜିଟୋରୀ ଅପଡେଟ୍ ଟ୍ରାକ୍ କରିବା
 
-ଯଦି ବର୍ତ୍ତମାନର ରିପୋଜିଟୋରୀ ଏକ ଫୋର୍କ ଏବଂ ଆପଣ ଅପଷ୍ଟ୍ରିମ୍ `https://github.com/diegosouzapw/OmniRoute` ରୁ ଅପଡେଟ୍ ସିଙ୍କ୍ କରିବାକୁ ଚାହାଁନ୍ତି, ତେବେ ନିମ୍ନଲିଖିତ କାର୍ଯ୍ୟକ୍ରମ ଅନୁସରଣ କରନ୍ତୁ।
+ଯଦି ବର୍ତ୍ତମାନର ରିପୋଜିଟୋରୀ ଏକ ଫୋର୍କ ଏବଂ ଆପଣ ଅପଷ୍ଟ୍ରିମ୍ `https://github.com/cheaper-inference/OmniRoute` ରୁ ଅପଡେଟ୍ ସିଙ୍କ୍ କରିବାକୁ ଚାହାଁନ୍ତି, ତେବେ ନିମ୍ନଲିଖିତ କାର୍ଯ୍ୟକ୍ରମ ଅନୁସରଣ କରନ୍ତୁ।
 
 ପ୍ରଥମେ, ଆପଣଙ୍କ ରିମୋଟ୍ ଯାଞ୍ଚ କରନ୍ତୁ:
 
@@ -309,7 +309,7 @@ git remote -v
 ଯଦି `upstream` କନଫିଗର ହୋଇ ନାହିଁ, ଏହାକୁ ଯୋଗ କରନ୍ତୁ:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
 ଅପଷ୍ଟ୍ରିମ୍ ସହ ସିଙ୍କ୍ କରିବା ପୂର୍ବରୁ, ସର୍ବଶେଷ କମିଟ୍ ଏବଂ ଟ୍ୟାଗ୍ ଆଣନ୍ତୁ:

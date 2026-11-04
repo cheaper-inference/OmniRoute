@@ -128,8 +128,8 @@ HAR ترميز وقت انتهاء صلاحية JWT ويعرض المدة الم
 
 ## المراجع
 
-- المشكلة: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- المناقشة: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- المشكلة: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- المناقشة: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - المصدر: `src/shared/constants/providers/web-cookie.ts` (تعريف المزوّد)
 - استيراد HAR: `src/shared/utils/m365HarImport.ts`
 - حقول بيانات الاعتماد: `src/shared/providers/webSessionCredentials.ts`

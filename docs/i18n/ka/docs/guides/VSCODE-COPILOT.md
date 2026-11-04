@@ -108,7 +108,7 @@ npm start
 
 ჩაშენების მხარდაჭერით აგებული ვერსიის გარეშე გვერდი ფრეიმში გახსნაზე უარს ამბობს; გაფართოება ამას პასუხის სათაურებიდან ამოიცნობს და გარე ბრაუზერზე გადაერთვება — არაფერი გაფუჭდება და გაფართოება ამის შესახებ ერთხელ შეგატყობინებთ.
 იხილეთ [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) და საკითხი
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
 
 ---
 

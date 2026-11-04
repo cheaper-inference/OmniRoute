@@ -45,9 +45,9 @@
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=social)](https://github.com/cheaper-inference/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/OmniRoute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 Připojte se ke komunitě
@@ -96,7 +96,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 [![Licence: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Stažení z Dockeru](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Stažení Electronu](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![Stažení Electronu](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -521,7 +521,7 @@ Všech **20** strategií — libovolně je kombinujte v jednotlivých krocích k
 OmniRoute je licencován pod licencí MIT a vyvíjen otevřeně. Pokud vám šetří čas nebo peníze, zde jsou možnosti, jak mu pomoci zachovat nezávislost — vyberte si, co vám vyhovuje. Sponzorství nikdy neovlivňuje prioritu směrování; kupuje viditelnost, nikoli pořadí.
 
 <table>
-  <tr><td nowrap>⭐ <b>Označte repozitář hvězdičkou</b></td><td>Zdarma — skutečně pomáhá zviditelnění</td><td><a href="https://github.com/diegosouzapw/OmniRoute">Označit OmniRoute hvězdičkou</a></td></tr>
+  <tr><td nowrap>⭐ <b>Označte repozitář hvězdičkou</b></td><td>Zdarma — skutečně pomáhá zviditelnění</td><td><a href="https://github.com/cheaper-inference/OmniRoute">Označit OmniRoute hvězdičkou</a></td></tr>
   <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>Jednorázově nebo měsíčně · nulový poplatek platformě</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
   <tr><td nowrap>☕ <b>Ko-fi</b></td><td>Rychlý jednorázový příspěvek, dárce se nemusí registrovat</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
   <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>Malé, neformální gesto</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
@@ -558,7 +558,7 @@ Pix copia-e-cola:
 
 </details>
 
-🐛 Našli jste chybu nebo máte zpětnou vazbu? Otevřete [diskusi](https://github.com/diegosouzapw/OmniRoute/discussions).
+🐛 Našli jste chybu nebo máte zpětnou vazbu? Otevřete [diskusi](https://github.com/cheaper-inference/OmniRoute/discussions).
 
 <br/>
 
@@ -1262,7 +1262,7 @@ stejný proces na jednom portu, takže v současnosti neexistuje samostatný bal
 
 Kanonické metriky k 2026-10-18: **1.976 unikátních videí** · **20.220.289 známých zhlédnutí** (`v > 0`) · **1.210 kanálů/profilů podle sítě**. Nezpracovaný panel obsahuje 1.976 řádků (YouTube 1.352 = 740 dlouhých videí + 612 Shorts · TikTok 334 · Instagram 290); po normalizaci podle kanonické adresy URL, která u každého videa zachovává nejvyšší počet zhlédnutí, nezůstaly žádné duplicity. Sběr dat z YouTube je zmrazen k 2026-10-13 (kvóta API byla od 14. do 18. 10. vyčerpána) a sběr dat z TikToku/Instagramu k 2026-09-02 (nejsou k dispozici kredity pro sběr dat); u 76 videí stále chybí počet zhlédnutí.
 
-> 🎬 **Vytvořili jste video o OmniRoute?** Otevřete [hlášení](https://github.com/diegosouzapw/OmniRoute/issues/new) nebo [diskusi](https://github.com/diegosouzapw/OmniRoute/discussions) s odkazem — zveřejníme ho zde.
+> 🎬 **Vytvořili jste video o OmniRoute?** Otevřete [hlášení](https://github.com/cheaper-inference/OmniRoute/issues/new) nebo [diskusi](https://github.com/cheaper-inference/OmniRoute/discussions) s odkazem — zveřejníme ho zde.
 
 <br/>
 
@@ -1282,8 +1282,8 @@ Kanonické metriky k 2026-10-18: **1.976 unikátních videí** · **20.220.289 z
 | 🟢 **WhatsApp — 🇧🇷 Brazílie**               | [připojit se ke skupině](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                 |
 | 🌍 **Webové stránky**                       | [omniroute.online](https://omniroute.online)                                                                              |
 | 🌍 **🌍 Komunita StHub OmniRoute (zdarma)** | [portál StHub](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                     |
-| 📦 **Zdrojový kód**                         | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                            |
-| 🐛 **Nahlásit chybu**                       | [otevřít hlášení](https://github.com/diegosouzapw/OmniRoute/issues) — přiložte výstup příkazu `npm run system-info`       |
+| 📦 **Zdrojový kód**                         | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                                  |
+| 🐛 **Nahlásit chybu**                       | [otevřít hlášení](https://github.com/cheaper-inference/OmniRoute/issues) — přiložte výstup příkazu `npm run system-info`  |
 | 🤝 **Přispět**                              | [CONTRIBUTING.md](CONTRIBUTING.md) · [Model větvení a vydávání](docs/ops/BRANCHING_MODEL.md) · vyberte `good first issue` |
 | 💚 **Podpořit projekt**                     | [Způsoby podpory ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)                    |
 
@@ -1641,7 +1641,7 @@ Upřímné poděkování lidem, kteří financují OmniRoute z vlastní kapsy �
 
 </div>
 
-[![Přispěvatelé](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Přispěvatelé](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
 
 <sub>Auditováno dne 2026-11-02 na aktuálním vrcholu <code>release/v3.8.53</code> <code>1c7135e0fb</code> (7 972 commitů): <b>1 074 normalizovaných lidských identit Git</b> — 759 se objevuje jako autoři commitů (včetně správce) a 315 pouze v explicitních dodatcích <code>Co-authored-by</code>. Sčítání používá <code>.mailmap</code>, porovnává e-mailové adresy bez rozlišení velikosti písmen, spojuje číselné a běžné anonymní adresy GitHubu pouze tehdy, když kódují stejný účet, vylučuje 29 identit botů, agentů, služeb a zástupných identit a neslučuje běžné e-mailové adresy pouze na základě shody zobrazovaných jmen. Audit z 2026-08-24 uváděl 639; opětovné spuštění této metody nad jeho základním commitem <code>ac02c5b42f</code> dává 619, takže nárůst pochází od nových přispěvatelů, nikoli z volnější metody.</sub>
 
@@ -1670,11 +1670,11 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 ## 📊 Hvězdičky
 
-<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="Graf historie hvězdiček" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <img alt="Graf historie hvězdiček" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
  </picture>
 </a>
 

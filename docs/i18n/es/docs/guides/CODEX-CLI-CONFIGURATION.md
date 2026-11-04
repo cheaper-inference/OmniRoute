@@ -478,7 +478,7 @@ Dos valores predeterminados de OmniRoute pueden sabotear silenciosamente las ses
 | La sesión sigue cambiando de cuenta / se pierde la continuidad de la caché de prompts entre turnos | El TTL de afinidad de sesión es `0` (deshabilitado)                                                    | `sessionAffinityTtlMs`   |
 | La conexión se interrumpe en pleno razonamiento sin ningún aviso visible para el cliente           | El supervisor de inactividad del flujo se activó tras 10 minutos sin fragmentos del servicio de origen | `STREAM_IDLE_TIMEOUT_MS` |
 
-Debates relacionados: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (interrupciones en tareas largas), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (por qué la afinidad está desactivada de forma predeterminada). Seguimiento: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Debates relacionados: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (interrupciones en tareas largas), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (por qué la afinidad está desactivada de forma predeterminada). Seguimiento: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. Afinidad de sesión — fijar una conversación a una cuenta
 

@@ -223,7 +223,7 @@ livenessProbe:
 
 kubelet को **जीवन्तता** जाँचलाई `/api/monitoring/health` तर्फ लक्षित **नगर्नुहोस्**। त्यो पाथले वास्तविक DB/निगरानी कार्य गर्छ र लोडमा गलत रूपमा समस्या देखाउँछ।
 
-सम्बन्धित: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (इभेन्ट लूप व्यस्त हुँदा प्रोबहरू), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (क्याटलग मूल्य निर्धारणले स्रोत अत्यधिक ओगट्ने समस्या), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (कम्प्रेसन टोकन-गणनाले स्रोत अत्यधिक ओगट्ने समस्या)।
+सम्बन्धित: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (इभेन्ट लूप व्यस्त हुँदा प्रोबहरू), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (क्याटलग मूल्य निर्धारणले स्रोत अत्यधिक ओगट्ने समस्या), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (कम्प्रेसन टोकन-गणनाले स्रोत अत्यधिक ओगट्ने समस्या)।
 
 ### systemd वाचडग (अड्किएको इभेन्ट लूप)
 

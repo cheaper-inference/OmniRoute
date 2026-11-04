@@ -5,7 +5,7 @@
 ---
 
 Malli: xquik #11370 (yhdistetty haaraan release/v3.8.51). Toimintatapa: `fallbackOnly`.
-Ylävirran ehdotus: issue diegosouzapw/OmniRoute#11637.
+Ylävirran ehdotus: issue cheaper-inference/OmniRoute#11637.
 
 ## 1. Palvelun vahvistetut tiedot (viralliset dokumentit, ristiintarkistettu)
 

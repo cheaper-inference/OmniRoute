@@ -181,7 +181,7 @@ omniroute setup-5dive --model failover-demo --auth-profile omniroute --agent wor
 A na-enye 5dive igodo API ahụ na **stdin** (`--api-key=-`), ya mere ọ dịghị mgbe ọ na-apụta na mmepụta `ps`.
 
 Ịtụ profaịlụ ahụ aka na **combo** OmniRoute kama otu ụdịdị bụ ihe na-eme ka ìgwè ahụ nweta failover onye na-eweta: mgbe ebe njedebe bụ isi kwụsịrị kpamkpam n'etiti ntụgharị n'ime ọsọ e dekọrọ na
-[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), onye nnọchi anya ahụ mechara nzọụkwụ ndị fọdụrụ na fallback ahụ ma ọ dịghị mgbe o gosipụtara nkwụsị ọrụ ahụ.
+[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), onye nnọchi anya ahụ mechara nzọụkwụ ndị fọdụrụ na fallback ahụ ma ọ dịghị mgbe o gosipụtara nkwụsị ọrụ ahụ.
 
 ---
 

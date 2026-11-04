@@ -414,7 +414,7 @@ mmejuputa ya ka na-echere).
 ### Ratchet CodeQL: ugboro ume ọhụrụ na mkpali aka
 
 `check:codeql-ratchet` na-agụ **ọnọdụ repo, nke a na-eme ka ọ dị ọhụrụ dịka nhazi oge si dị — ọ bụghị maka PR ọ bụla.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` na-akọ
+`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` na-akọ
 `state: configured`, `schedule: weekly`: nke a bụ nyocha default-setup nke GitHub, ọ bụghị
 nyocha maka push ọ bụla. Nsonaazụ ya bụ: mgbe PR nke NA-EDOZI ọkwa ịdọ aka ná ntị jikọtara,
 ratchet ahụ na-aga n'ihu ịgụ ọnụọgụ ochie ahụ dị elu ruo mgbe nyocha ọzọ ahaziri oge ya

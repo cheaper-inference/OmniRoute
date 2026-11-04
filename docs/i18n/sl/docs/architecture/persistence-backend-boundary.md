@@ -5,7 +5,7 @@
 ---
 
 - **Stanje:** Predlagano — pred začetkom dela na izvajanju je potrebna odobritev vzdrževalca
-- **Težava za sledenje:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
+- **Težava za sledenje:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
 - **Obseg:** Samo arhitektura trajnega shranjevanja; ta odločitev ne dodaja ali izbira zunanje podatkovne zbirke
 
 ## Kontekst

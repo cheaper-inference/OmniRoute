@@ -453,7 +453,7 @@ PR این شاخه باز میشوند. اسکریپت هرگز dist-tagهای n
 gh workflow run preview-artifact.yml -f pr_number=<N>   # یا برچسب `preview-artifact` را اضافه کنید
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # نصب نسخه پیشنمایش
 ```
 

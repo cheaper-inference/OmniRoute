@@ -9,7 +9,7 @@
 ਜੇਕਰ ਤੁਹਾਨੂੰ OmniRoute ਵਿੱਚ ਕੋਈ ਸੁਰੱਖਿਆ ਕਮਜ਼ੋਰੀ ਮਿਲਦੀ ਹੈ, ਤਾਂ ਕਿਰਪਾ ਕਰਕੇ ਜ਼ਿੰਮੇਵਾਰੀ ਨਾਲ ਇਸਦੀ ਰਿਪੋਰਟ ਕਰੋ:
 
 1. ਜਨਤਕ GitHub issue **ਨਾ ਖੋਲ੍ਹੋ**
-2. [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) ਦੀ ਵਰਤੋਂ ਕਰੋ
+2. [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) ਦੀ ਵਰਤੋਂ ਕਰੋ
 3. ਇਹ ਸ਼ਾਮਲ ਕਰੋ: ਵੇਰਵਾ, ਮੁੜ ਪੈਦਾ ਕਰਨ ਦੇ ਪੜਾਅ, ਅਤੇ ਸੰਭਾਵੀ ਪ੍ਰਭਾਵ
 
 ## ਜਵਾਬ ਦੀ ਸਮਾਂ-ਸੀਮਾ
@@ -42,7 +42,7 @@
   ਗੰਭੀਰ ਰਿਗ੍ਰੈਸ਼ਨਾਂ ਦੇ ਸੁਧਾਰ ਮਿਲਦੇ ਹਨ**। ਨਤੀਜੇ ਵਜੋਂ ਨਿਰਧਾਰਤ ਸਮਾਪਤੀ ਮਿਤੀ ਕੱਟ ਹੋਣ ਸਮੇਂ 3.9.0 ਦੇ ਰਿਲੀਜ਼ ਨੋਟਸ ਅਤੇ
   [`ROADMAP.md`](ROADMAP.md) ਵਿੱਚ ਦਰਜ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।
 - **LTS ਲਾਈਨ ਵਿੱਚ ਕਿਸੇ ਕਮਜ਼ੋਰੀ ਦੀ ਰਿਪੋਰਟ ਕਰਨਾ:** ਉਹੀ ਚੈਨਲ ਵਰਤੋ ਜੋ ਕਿਸੇ ਵੀ ਹੋਰ ਸੰਸਕਰਣ ਲਈ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ—
-  ਇੱਕ ਨਿੱਜੀ [GitHub ਸੁਰੱਖਿਆ ਸਲਾਹ](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
+  ਇੱਕ ਨਿੱਜੀ [GitHub ਸੁਰੱਖਿਆ ਸਲਾਹ](https://github.com/cheaper-inference/OmniRoute/security/advisories/new),
   ਕਦੇ ਵੀ ਕੋਈ ਸਰਵਜਨਕ ਇਸ਼ੂ ਨਹੀਂ। ਦੱਸੋ ਕਿ ਤੁਸੀਂ ਕਿਹੜੇ ਸੰਸਕਰਣ ਦੀ ਜਾਂਚ ਕੀਤੀ ਸੀ (ਉਦਾਹਰਨ ਲਈ `3.9.2`); ਸੁਧਾਰ
   `stable/v3` ਉੱਤੇ ਲਾਗੂ ਹੁੰਦੇ ਹਨ ਅਤੇ v4 ਵਿੱਚ ਫਾਰਵਰਡ-ਪੋਰਟ ਕੀਤੇ ਜਾਂਦੇ ਹਨ।
 - **LTS ਕੱਟ ਵੇਲੇ ਸੁਰੱਖਿਆ ਬੇਸਲਾਈਨ:** ਮਾਪੀ ਗਈ ਸਕੈਨਰ ਸਥਿਤੀ, ਰੂਟ-ਗਾਰਡ ਅਤੇ

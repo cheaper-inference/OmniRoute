@@ -4,9 +4,9 @@
 
 ---
 
-> **Status:** Diterima · **Konteks:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
-> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Kontrak:** `domain/routing/routerBackends.ts`
-> (daftar berjenis — kod disertakan dalam [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
+> **Status:** Diterima · **Konteks:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
+> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Kontrak:** `domain/routing/routerBackends.ts`
+> (daftar berjenis — kod disertakan dalam [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
 
 ADR ini menetapkan cara enjin `ts` (asli), `bifrost`, `cliproxy`, `9router`, dan
 yang serasi dengan VibeProxy saling berkaitan, supaya penyumbang tidak lagi
@@ -39,7 +39,7 @@ hanya bersifat `external`.
 ## Daftar — satu-satunya sumber kebenaran
 
 Kontrak `domain/routing/routerBackends.ts` (kod disertakan dalam
-[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) mengisytiharkan setiap enjin sekali, berserta
+[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) mengisytiharkan setiap enjin sekali, berserta
 kitar hayat, keupayaan, identiti perkhidmatan, port lalai, konfigurasi kesihatan dan
 sokongan telemetrinya. Pengguna mendapatkan enjin melalui `getRouterBackend(id)`,
 `listRouterBackends()`, dan `listRouterBackendsByCapability(cap)` dan bukannya
@@ -55,7 +55,7 @@ mengendalikan setiap proses sampingan secara khusus.
 
 ¹ Penaiktarafan Bifrost kepada perkhidmatan terbenam `supervised` (boleh dipasang/dimulakan
 daripada `/api/services/bifrost/`) dijejaki dalam
-[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817); sehingga ia digabungkan,
+[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817); sehingga ia digabungkan,
 Bifrost hanya bersifat `external` (boleh dicapai semata-mata melalui `BIFROST_BASE_URL`).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -123,8 +123,8 @@ penghantaran; permukaan utama `/api/v1/chat/completions` tidak pernah merujuk
 Pemilihan adalah **semua-atau-tiada pada peringkat geganti buat masa ini** — tiada pertukaran enjin
 bagi setiap penyedia atau setiap permintaan pada `release/v3.8.43`. Get setiap permintaan sedang ditambahkan
 oleh kerja manifes proses sampingan
-([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifes +
-[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifes +
+[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 yang membolehkan `auto` menghalakan hanya penyedia yang layak berdasarkan manifes melalui Bifrost.
 
 ## Integrasi papan pemuka

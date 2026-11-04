@@ -64,7 +64,7 @@
 ଅପମାନଜନକ, ଉତ୍ପୀଡ଼ନମୂଳକ କିମ୍ବା ଅନ୍ୟଥା ଅଗ୍ରହଣୀୟ ଆଚରଣର ଘଟଣାଗୁଡ଼ିକ
 ପ୍ରବର୍ତ୍ତନ ପାଇଁ ଦାୟୀ ସମୁଦାୟ ନେତୃବୃନ୍ଦଙ୍କୁ ଏଠାରେ ଏକ
 ବ୍ୟକ୍ତିଗତ ସୁରକ୍ଷା ପରାମର୍ଶ ଖୋଲି ଜଣାଯାଇପାରିବ
-<https://github.com/diegosouzapw/OmniRoute/security/advisories/new>
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
 କିମ୍ବା ରକ୍ଷଣାବେକ୍ଷକଙ୍କୁ diegosouza.pw@outlook.com ଠିକଣାରେ ଇମେଲ୍ କରି ଜଣାଯାଇପାରିବ।
 ସୁରକ୍ଷା-ସମ୍ବେଦନଶୀଳ ଘଟଣାଗୁଡ଼ିକ ପାଇଁ [`SECURITY.md`](SECURITY.md) ଦେଖନ୍ତୁ।
 ସମସ୍ତ ଅଭିଯୋଗର ତୁରନ୍ତ ଓ ନ୍ୟାୟସଙ୍ଗତ ଭାବେ ସମୀକ୍ଷା ଏବଂ ତଦନ୍ତ କରାଯିବ।

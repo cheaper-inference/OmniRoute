@@ -180,7 +180,7 @@ Har ikkala shakl ham bitta 5dive **autentifikatsiya profilini** yozadi va ushbu 
 
 API kaliti 5dive vositasiga **stdin** orqali (`--api-key=-`) beriladi, shu sababli u hech qachon `ps` chiqishida koʻrinmaydi.
 
-Profilni bitta modelga emas, OmniRoute **kombinatsiyasiga** yoʻnaltirish parkka provayderlar oʻrtasida avtomatik almashish imkonini beradi: [#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578) da qayd etilgan ishga tushirish jarayonida asosiy endpoint vazifa oʻrtasida butunlay ishdan chiqqanida, agent qolgan bosqichlarni zaxira endpointda yakunladi va uzilishni foydalanuvchiga koʻrsatmadi.
+Profilni bitta modelga emas, OmniRoute **kombinatsiyasiga** yoʻnaltirish parkka provayderlar oʻrtasida avtomatik almashish imkonini beradi: [#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578) da qayd etilgan ishga tushirish jarayonida asosiy endpoint vazifa oʻrtasida butunlay ishdan chiqqanida, agent qolgan bosqichlarni zaxira endpointda yakunladi va uzilishni foydalanuvchiga koʻrsatmadi.
 
 ---
 

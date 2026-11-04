@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 שכפול הקוד ומעבר לספרייה
 
 ```powershell
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly יבצע באופן אוטומטי עדכון הדרגתי של המכונו
 
 ### 9.1 מעקב אחר עדכונים במאגר המקור תוך שמירה על `fly.toml` של הפיצול שלכם
 
-אם המאגר הנוכחי הוא פיצול וברצונכם לסנכרן עדכונים ממאגר המקור `https://github.com/diegosouzapw/OmniRoute`, פעלו לפי תהליך העבודה הבא.
+אם המאגר הנוכחי הוא פיצול וברצונכם לסנכרן עדכונים ממאגר המקור `https://github.com/cheaper-inference/OmniRoute`, פעלו לפי תהליך העבודה הבא.
 
 ראשית, אמתו את המאגרים המרוחקים שלכם:
 
@@ -309,7 +309,7 @@ git remote -v
 אם `upstream` אינו מוגדר, הוסיפו אותו:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
 לפני הסנכרון עם מאגר המקור, משכו את ה־commits והתגיות העדכניים ביותר:

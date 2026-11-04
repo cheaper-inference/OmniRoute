@@ -172,7 +172,7 @@ aider, continue.dev, copilot, avante, codecompanion
 
 - `open-sse/executors/antigravity.ts` — קורא את `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — תשתית העברת פרטי ההזדהות
-- דוח התקרית המקורי: דיון [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- דוח התקרית המקורי: דיון [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

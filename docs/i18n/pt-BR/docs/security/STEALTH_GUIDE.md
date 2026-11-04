@@ -170,7 +170,7 @@ Pontos de contato:
 
 - `open-sse/executors/antigravity.ts` — lê `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — infraestrutura de credenciais
-- Relato original do incidente: Discussão [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Relato original do incidente: Discussão [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

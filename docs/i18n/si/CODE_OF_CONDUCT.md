@@ -41,7 +41,7 @@
 ## බලාත්මක කිරීම
 
 අපයෝජනාත්මක, හිරිහැරකාරී හෝ වෙනත් ආකාරයකින් පිළිගත නොහැකි හැසිරීම් පිළිබඳ සිදුවීම්,
-<https://github.com/diegosouzapw/OmniRoute/security/advisories/new>
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
 හි පෞද්ගලික ආරක්ෂක උපදේශනයක් විවෘත කිරීමෙන් හෝ නඩත්තුකරුට diegosouza.pw@outlook.com ඔස්සේ විද්යුත් තැපෑලක් යැවීමෙන්, බලාත්මක කිරීම සඳහා වගකිව යුතු ප්රජා නායකයන්ට වාර්තා කළ හැක.
 ආරක්ෂාවට සංවේදී සිදුවීම් සඳහා, [`SECURITY.md`](SECURITY.md) බලන්න.
 සියලු පැමිණිලි කඩිනමින් සහ සාධාරණව සමාලෝචනය කර විමර්ශනය කරනු ඇත.

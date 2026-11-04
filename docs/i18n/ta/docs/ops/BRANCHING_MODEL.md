@@ -55,7 +55,7 @@ flowchart LR
 நீங்கள் விரும்பும் கிளையில் merge செய்ய முடியும் என்று கருதுவதற்கு முன், திறந்த உறைநிலை உள்ளதா எனச் சரிபார்க்கவும்:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Merge செயல்முறைகள் (உரிமையாளரின் `queue` label → Mergify) குறித்து

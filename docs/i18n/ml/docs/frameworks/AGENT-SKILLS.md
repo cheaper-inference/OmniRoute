@@ -18,7 +18,7 @@ OmniRoute-ന്റെ REST API-യും CLI-യും എങ്ങനെ ഉ�
 - ഒരു **കാനോണിക്കൽ ID** (`omni-auth`, `cli-serve` തുടങ്ങിയവ)
 - YAML ഫ്രണ്ട്മാറ്ററും (`name`, `description`) സമ്പന്നമായ മാർക്ക്ഡൗൺ ഉള്ളടക്കവുമുള്ള `skills/{id}/SKILL.md` എന്ന **SKILL.md** ഫയൽ
 - OpenAPI സ്പെക്കിൽ നിന്നും CLI രജിസ്ട്രിയിൽ നിന്നും ലഭ്യമാക്കുന്ന **REST എൻഡ്പോയിന്റുകൾ** (API സ്കില്ലുകൾ) അല്ലെങ്കിൽ **CLI സബ്കമാൻഡുകൾ** (CLI സ്കില്ലുകൾ)
-- തത്സമയം ലഭ്യമാക്കുന്നതിനുള്ള ഒരു **GitHub റോ URL**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- തത്സമയം ലഭ്യമാക്കുന്നതിനുള്ള ഒരു **GitHub റോ URL**: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. നേരിട്ടുള്ള GitHub raw ലഭ്യമാക്കൽ (സെർവർ ആവശ്യമില്ല)
 
 ```bash
-BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

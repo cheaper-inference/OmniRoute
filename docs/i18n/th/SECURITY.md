@@ -9,7 +9,7 @@
 หากคุณค้นพบช่องโหว่ด้านความปลอดภัยใน OmniRoute โปรดรายงานอย่างมีความรับผิดชอบ:
 
 1. **อย่า** เปิด GitHub issue แบบสาธารณะ
-2. ใช้ [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
+2. ใช้ [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
 3. ระบุ: คำอธิบาย ขั้นตอนการทำซ้ำ และผลกระทบที่อาจเกิดขึ้น
 
 ## กรอบเวลาการตอบสนอง
@@ -42,7 +42,7 @@
   แล้วแต่ว่ากำหนดใดจะสิ้นสุดช้ากว่า** วันที่สิ้นสุดที่ได้จะถูกบันทึกไว้ในบันทึกประจำรุ่น 3.9.0 และใน
   [`ROADMAP.md`](ROADMAP.md) เมื่อมีการเปิดตัว
 - **การรายงานช่องโหว่ในสาย LTS:** ใช้ช่องทางเดียวกับเวอร์ชันอื่น ๆ —
-  [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) แบบส่วนตัว
+  [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) แบบส่วนตัว
   และห้ามรายงานเป็น issue สาธารณะ ระบุเวอร์ชันที่คุณทดสอบ (เช่น `3.9.2`) การแก้ไขจะถูกนำไปใช้กับ
   `stable/v3` และพอร์ตต่อไปยัง v4
 - **ข้อมูลพื้นฐานด้านความปลอดภัย ณ เวลาที่เปิดตัว LTS:** สถานะของเครื่องสแกนที่วัดไว้ หลักฐานของ route-guard และ

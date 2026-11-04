@@ -149,7 +149,7 @@ Antigravity अनुरोध कॉलर के टेक्स्ट को 
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` पढ़ता है
 - `src/lib/oauth/providers/antigravity.ts` — क्रेडेंशियल प्लंबिंग
-- मूल घटना रिपोर्ट: चर्चा [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- मूल घटना रिपोर्ट: चर्चा [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

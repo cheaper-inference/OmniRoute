@@ -115,7 +115,7 @@ npm start
 Bez kompilacji z włączonym osadzaniem strona odmawia wyświetlenia w ramce, rozszerzenie wykrywa to na podstawie
 nagłówków odpowiedzi i przełącza się na zewnętrzną przeglądarkę — nic się nie psuje, a użytkownik zostaje o tym jednorazowo poinformowany.
 Zobacz [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) oraz zgłoszenie
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
 
 ---
 

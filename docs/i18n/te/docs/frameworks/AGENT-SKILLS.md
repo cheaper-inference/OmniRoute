@@ -18,7 +18,7 @@ Agent Skills అనేవి బాహ్య ఏజెంట్లు, MCP క�
 - ఒక **కానానికల్ ID** (`omni-auth`, `cli-serve` మొదలైనవి)
 - YAML ఫ్రంట్మ్యాటర్ (`name`, `description`) + సమగ్ర markdown బాడీతో కూడిన `skills/{id}/SKILL.md`లోని ఒక **SKILL.md** ఫైల్
 - OpenAPI స్పెక్ మరియు CLI రిజిస్ట్రీ నుండి ఉత్పన్నమైన **REST ఎండ్పాయింట్లు** (API స్కిల్స్) లేదా **CLI సబ్కమాండ్లు** (CLI స్కిల్స్)
-- ప్రత్యక్షంగా పొందడం కోసం ఒక **GitHub raw URL**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- ప్రత్యక్షంగా పొందడం కోసం ఒక **GitHub raw URL**: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. నేరుగా GitHub raw ఫెచ్ (సర్వర్ అవసరం లేదు)
 
 ```bash
-BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

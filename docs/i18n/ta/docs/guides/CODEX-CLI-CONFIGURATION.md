@@ -482,7 +482,7 @@ codex debug models --bundled       # தொகுக்கப்பட்ட ம
 | அமர்வு தொடர்ந்து கணக்குகளை மாற்றுகிறது / முறைமைகளுக்கு இடையில் prompt-cache தொடர்ச்சி இழக்கப்படுகிறது | Session affinity TTL `0` ஆக உள்ளது (முடக்கப்பட்டுள்ளது)                                | `sessionAffinityTtlMs`   |
 | கிளையன்டுக்குத் தெரியும் எந்த அறிவிப்பும் இல்லாமல் reasoning நடுவில் இணைப்பு துண்டிக்கப்படுகிறது      | upstream chunk எதுவும் வராமல் 10 நிமிடங்கள் கடந்ததால் stream idle watchdog செயல்பட்டது | `STREAM_IDLE_TIMEOUT_MS` |
 
-தொடர்புடைய விவாதங்கள்: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (நீண்ட பணிகள் துண்டிக்கப்படுதல்), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (affinity ஏன் இயல்பாக முடக்கப்பட்டுள்ளது). கண்காணிப்பு: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+தொடர்புடைய விவாதங்கள்: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (நீண்ட பணிகள் துண்டிக்கப்படுதல்), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (affinity ஏன் இயல்பாக முடக்கப்பட்டுள்ளது). கண்காணிப்பு: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. Session affinity — ஒரு உரையாடலை ஒரே கணக்குடன் நிலையாக இணைத்தல்
 

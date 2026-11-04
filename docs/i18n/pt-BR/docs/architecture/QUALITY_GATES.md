@@ -432,7 +432,7 @@ implementação pendente).
 ### Ratchet do CodeQL: frequência de atualização e acionamento manual
 
 `check:codeql-ratchet` lê o **estado do repositório, atualizado de acordo com uma programação — não por PR.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` informa
+`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` informa
 `state: configured`, `schedule: weekly`: a análise da configuração padrão do GitHub, não uma análise
 a cada push. Consequência: depois que um PR que CORRIGE alertas é mesclado, o ratchet continua lendo
 a contagem antiga e mais alta até que a próxima análise programada seja executada — portanto, ele relata uma regressão

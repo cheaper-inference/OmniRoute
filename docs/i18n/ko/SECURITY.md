@@ -9,7 +9,7 @@
 OmniRoute에서 보안 취약점을 발견한 경우 다음 절차에 따라 책임감 있게 보고해 주세요.
 
 1. 공개 GitHub 이슈를 **생성하지 마세요**
-2. [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)를 사용하세요
+2. [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)를 사용하세요
 3. 설명, 재현 단계 및 잠재적 영향을 포함하세요
 
 ## 대응 일정
@@ -35,7 +35,7 @@ OmniRoute에서 보안 취약점을 발견한 경우 다음 절차에 따라 책
 
 - **`stable/v3`에 포함되는 사항:** 버그 수정, 보안 패치 및 공급자 업데이트입니다. 새로운 기능은 v4 채널에 추가되며, LTS 라인은 안정성을 최우선으로 합니다. `npm install omniroute`(`latest` dist-tag)는 전체 v4 주기 동안 v3로 유지됩니다.
 - **지원 기간:** `stable/v3`는 **3.9.0 릴리스 후 12개월 또는 v4.0.0이 `latest`로 게시된 후 90일까지 보안 수정과 심각한 회귀 수정을 제공하며, 둘 중 더 늦은 시점을 기준으로 합니다**. 최종 종료일은 릴리스 시점에 3.9.0 릴리스 노트와 [`ROADMAP.md`](ROADMAP.md)에 기록됩니다.
-- **LTS 라인의 취약점 보고:** 다른 모든 버전과 동일한 채널인 비공개 [GitHub 보안 권고](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)를 이용해야 하며, 공개 이슈로 보고해서는 안 됩니다. 테스트한 버전(예: `3.9.2`)을 명시하세요. 수정 사항은 `stable/v3`에 반영된 후 v4로 포워드 포팅됩니다.
+- **LTS 라인의 취약점 보고:** 다른 모든 버전과 동일한 채널인 비공개 [GitHub 보안 권고](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)를 이용해야 하며, 공개 이슈로 보고해서는 안 됩니다. 테스트한 버전(예: `3.9.2`)을 명시하세요. 수정 사항은 `stable/v3`에 반영된 후 v4로 포워드 포팅됩니다.
 - **LTS 릴리스 시점의 보안 기준선:** 측정된 스캐너 상태, 라우트 가드 및 공개 자격 증명 검증 결과는 [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md)에 기록됩니다.
 
 ---

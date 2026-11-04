@@ -18,7 +18,7 @@ Agent Skills jẹ́ àwọn fáìlì SKILL.md tí a ṣètò sí ìlànà, tí �
 - **ID àṣẹ** kan (`omni-auth`, `cli-serve`, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ)
 - Fáìlì **SKILL.md** kan nínú `skills/{id}/SKILL.md` pẹ̀lú YAML frontmatter (`name`, `description`) + àkóónú markdown ọlọ́rọ̀
 - **Àwọn endpoint REST** (àwọn skill API) tàbí **àwọn subcommand CLI** (àwọn skill CLI) tí a mú jáde láti inú OpenAPI spec àti àkọsílẹ̀ CLI
-- **URL raw GitHub** kan fún gbígbà á ní tààrà: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- **URL raw GitHub** kan fún gbígbà á ní tààrà: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Gbígba raw láti GitHub ní tààrà (kò nílò server)
 
 ```bash
-BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

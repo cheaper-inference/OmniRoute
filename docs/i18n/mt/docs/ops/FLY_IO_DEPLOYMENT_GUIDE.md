@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 Cloni tal-Kodici u Dħul fid-Direttorju
 
 ```powershell
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -291,7 +291,7 @@ Fly se twettaq awtomatikament aġġornament ta' rotta tal-magni.
 
 ### 9.1 Traċċar tal-Aġġornamenti tal-Repositorju ta' Linn fuq il-Linja, filwaqt li Jippreserva l-`fly.toml` tal-Fork Tiegħek
 
-Jekk ir-repositorju attwali huwa fork u trid tissinkronizza aġġornamenti mir-repositorju ta' linn fuq il-linja `https://github.com/diegosouzapw/OmniRoute`, segwi l-workflow hawn taħt.
+Jekk ir-repositorju attwali huwa fork u trid tissinkronizza aġġornamenti mir-repositorju ta' linn fuq il-linja `https://github.com/cheaper-inference/OmniRoute`, segwi l-workflow hawn taħt.
 
 L-ewwel, ivverifika r-remotes tiegħek:
 
@@ -307,7 +307,7 @@ Għandek tara tal-inqas:
 Jekk `upstream` ma huwiex konkfigurat, żidu:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
 Qabel tissinkronizza mal-upstream, ġib l-aħħar commits u tags:

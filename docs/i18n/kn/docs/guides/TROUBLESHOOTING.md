@@ -221,7 +221,7 @@ npx playwright install chromium
    [Convert]::ToBase64String($b)
    ```
    ಔಟ್ಪುಟ್ `latest.yml` → `sha512` ಗೆ ಹೊಂದಿಕೆಯಾಗಬೇಕು. ಅದು ಹೊಂದಿಕೆಯಾಗದಿದ್ದರೆ, ಫೈಲ್ ಅನ್ನು ಅಳಿಸಿ ಮತ್ತು
-   [GitHub ಬಿಡುಗಡೆಗಳ ಪುಟ](https://github.com/diegosouzapw/OmniRoute/releases)ದಿಂದ ಮಾತ್ರ ಮರು-ಡೌನ್ಲೋಡ್ ಮಾಡಿ.
+   [GitHub ಬಿಡುಗಡೆಗಳ ಪುಟ](https://github.com/cheaper-inference/OmniRoute/releases)ದಿಂದ ಮಾತ್ರ ಮರು-ಡೌನ್ಲೋಡ್ ಮಾಡಿ.
 2. **ಮರುಸ್ಥಾಪಿಸಿ + ಹೊರತುಪಡಿಸಿ** — ಕ್ವಾರಂಟೈನ್ನಿಂದ ರೋಲ್ ಬ್ಯಾಕ್ ಮಾಡಲಾದ ಅಂಶಗಳನ್ನು ಮರುಸ್ಥಾಪಿಸಿ ಮತ್ತು
    `%LOCALAPPDATA%\Programs\OmniRoute` ಗಾಗಿ ಹೊರತುಪಡಿಸುವಿಕೆಯನ್ನು ಸೇರಿಸಿ (Kaspersky → Settings → Threats and Exclusions),
    ನಂತರ ಮರುಸ್ಥಾಪನೆ ಮಾಡಿ.
@@ -820,7 +820,7 @@ omniroute serve --ready-timeout 180000
 
 ## ಇನ್ನೂ ಸಮಸ್ಯೆ ಬಗೆಹರಿದಿಲ್ಲವೇ?
 
-- **GitHub ಸಮಸ್ಯೆಗಳು**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **GitHub ಸಮಸ್ಯೆಗಳು**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **ಆರ್ಕಿಟೆಕ್ಚರ್**: ಆಂತರಿಕ ವಿವರಗಳಿಗಾಗಿ [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) ನೋಡಿ
 - **API ಉಲ್ಲೇಖ**: ಎಲ್ಲಾ ಎಂಡ್ಪಾಯಿಂಟ್ಗಳಿಗಾಗಿ [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) ನೋಡಿ
 - **ಆರೋಗ್ಯ ಡ್ಯಾಶ್ಬೋರ್ಡ್**: ನೈಜ-ಸಮಯದ ಸಿಸ್ಟಮ್ ಸ್ಥಿತಿಗಾಗಿ **Dashboard → Health** ಪರಿಶೀಲಿಸಿ

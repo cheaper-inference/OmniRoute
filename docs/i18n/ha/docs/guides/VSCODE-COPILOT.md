@@ -115,7 +115,7 @@ npm start
 Ba tare da build da aka kunna masa embedding ba, shafin zai ƙi shiga frame, extension ɗin zai gano hakan daga
 response headers sannan ya koma amfani da burauzar waje — babu abin da zai lalace, kuma zai sanar da haka sau ɗaya.
 Duba [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) da issue
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
 
 ---
 

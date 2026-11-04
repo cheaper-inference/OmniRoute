@@ -5,7 +5,7 @@
 ---
 
 - **Stav:** Navrženo — před zahájením prací na běhovém prostředí je vyžadováno schválení správcem
-- **Sledovací issue:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
+- **Sledovací issue:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
 - **Rozsah:** Pouze architektura perzistence; toto rozhodnutí nepřidává ani nevybírá externí databázi
 
 ## Kontext

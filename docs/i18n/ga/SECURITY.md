@@ -9,7 +9,7 @@
 Má aimsíonn tú leochaileacht slándála in OmniRoute, tuairiscigh í ar bhealach freagrach:
 
 1. **NÁ HOSCAIL** saincheist phoiblí GitHub
-2. Úsáid [Comhairleoirí Slándála GitHub](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
+2. Úsáid [Comhairleoirí Slándála GitHub](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
 3. Cuir san áireamh: cur síos, céimeanna atáirgthe, agus an tionchar féideartha
 
 ## Amlíne Freagartha
@@ -42,7 +42,7 @@ mbrainse `stable/v3` (féach [`ROADMAP.md`](ROADMAP.md) → "Céim 3 — v3.9.0 
   cibé acu is déanaí**. Déantar an dáta deiridh a eascraíonn as sin a thaifeadadh i nótaí eisiúna 3.9.0 agus in
   [`ROADMAP.md`](ROADMAP.md) nuair a dhéantar an eisiúint.
 - **Leochaileacht sa líne LTS a thuairisciú:** úsáid an cainéal céanna agus a úsáidtear le haghaidh aon leagain eile —
-  [Comhairleach Slándála GitHub](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) príobháideach,
+  [Comhairleach Slándála GitHub](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) príobháideach,
   agus ná húsáid saincheist phoiblí riamh. Luaigh cén leagan a ndearna tú tástáil air (mar shampla `3.9.2`); cuirtear ceartúcháin i bhfeidhm ar
   `stable/v3` agus cuirtear ar aghaidh chuig v4 iad.
 - **Bonnlíne slándála tráth eisiúna LTS:** déantar staid tomhaiste an scanóra, cosaint bealaigh agus

@@ -36,7 +36,7 @@ kapsamı ve uzlaştırma adımlarıyla eşleştirir.
 ### Klonlama ve Kurulum
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -436,4 +436,4 @@ Ardından `dist/` dizinini uzak `app/` dizinine rsync ile aktaran `/deploy-vps-*
 - **API Referansı**: Bkz. [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
 - **Güvenlik belgeleri**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
 - **Operasyon belgeleri**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Sorunlar**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Sorunlar**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

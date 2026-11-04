@@ -132,13 +132,13 @@ handleComboChat (նույն շարժիչը, ինչ պահպանված համակ
 Համակցությունը, որի `name`-ը նույնական է մոդելի պարզ ID-ին (օրինակ՝
 `gpt-5.5` անունով համակցությունը), **կանխամտածված և աջակցվող ձևանմուշ է**, ոչ թե վրիպակ․ սա
 յուրաքանչյուր մոդելի ID-ի համար մատակարարի պահուստային ընտրության մեխանիզմն է, որը փաստագրված է
-[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940)-ում։ Քանի որ համակցության
+[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940)-ում։ Քանի որ համակցության
 լուծումը ստուգվում է մոդելի պարզ ID-ի լուծումից առաջ
 (`getComboForModel()`՝ `src/sse/services/model.ts`-ում), պարզ
 `gpt-5.5` ID-ով հարցումն ուղղորդվում է համակցության թիրախներով (օրինակ՝
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`), այլ ոչ թե անմիջապես
 մեկ մատակարարի մոտ․ սա կրկին օգտագործում է համակցությունը վերագրումից առաջ մշակելու առաջնահերթությունը, որը ստեղծվել է
-[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227)-ի համար և
+[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227)-ի համար և
 ռեգրեսիոն եղանակով ստուգվում է `tests/unit/responses-combo-resolution-3227.test.ts` և
 `tests/unit/combo-name-codex-responses-rewrite.test.ts` թեստերով։
 
@@ -184,7 +184,7 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 - **`auto`-ն չի օգտագործում ձեր համակցությունները։** `auto`/`auto/*`-ն ստեղծում է իր սեփական՝ զրոյական կազմաձևմամբ թեկնածուների հավաքածուն և պահպանված համակցություններին դիմում է միայն այն դեպքում, երբ որևէ համակցություն բառացիորեն անվանված է `auto` (խորհուրդ չի տրվում)։ Համակցության միջոցով ուղղորդելու համար ուղարկեք դրա ճշգրիտ անունը, ոչ թե `auto`։
 - **`openrouter/auto`-ն OpenRouter-ի իրական վճարովի արտադրանք է** («Ավտոմատ կերպով լավագույն հասանելին»), ոչ թե OmniRoute-ի կեղծանուն։ Այն OpenRouter-ի գրանցամատյանի միակ ստատիկ մոդելային գրառումն է (`open-sse/config/providers/registry/openrouter/index.ts`) և առանձին է վճարագրվում։ Օգտագործեք Կարգավորումներ → Ուղղորդում → Թաքցնել վճարովի մոդելները՝ այն `auto` հավաքածուներից բացառելու համար։
 
-Այս փաստաթղթում նկարագրված սկզբնական շփոթության վերաբերյալ տե՛ս [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) և [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111)։
+Այս փաստաթղթում նկարագրված սկզբնական շփոթության վերաբերյալ տե՛ս [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) և [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111)։
 
 ## Ինչպես է այն աշխատում (պահպանվող ավտոմատ կոմբինացիաներ)
 

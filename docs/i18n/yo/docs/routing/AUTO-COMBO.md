@@ -132,13 +132,13 @@ handleComboChat (ẹ́ńjìnnì kan náà bí àwọn combo tí a ti tọ́jú)
 Combo kan tí `name` rẹ̀ bá ìdánimọ̀ àwòṣe lásán mu pátápátá (fún àpẹẹrẹ, combo tí orúkọ rẹ̀ jẹ́
 `gpt-5.5`) jẹ́ **àpẹẹrẹ tí a mọ̀ọ́mọ̀ ṣe tí a sì ṣe àtìlẹ́yìn fún**, kì í ṣe àṣìṣe: ó jẹ́
 ọ̀nà fún ìpadà-sí-olùpèsè ní ìpele ìdánimọ̀ àwòṣe gẹ́gẹ́ bí a ti ṣàkọsílẹ̀ rẹ̀ nínú
-[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Nítorí pé a máa ń ṣàyẹ̀wò
+[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940). Nítorí pé a máa ń ṣàyẹ̀wò
 yíyanju combo ṣáájú yíyanju ìdánimọ̀ àwòṣe lásán
 (`getComboForModel()` nínú `src/sse/services/model.ts`), ìbéèrè fún ìdánimọ̀ lásán
 `gpt-5.5` ni a máa darí gba àwọn ibi-àfojúsùn combo náà (fún àpẹẹrẹ,
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) dípò fífi ránṣẹ́ tààrà sí
 olùpèsè kan ṣoṣo — èyí tún ń lo ààyò combo-ṣáájú-àtúnkọ tí a kọ́ fún
-[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227), a sì ti dán an wò fún
+[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227), a sì ti dán an wò fún
 ìdènà ìpadà-àṣìṣe pẹ̀lú `tests/unit/responses-combo-resolution-3227.test.ts` àti
 `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
 
@@ -184,7 +184,7 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 - **`auto` kì í lo àwọn combo rẹ.** `auto`/`auto/*` máa ń kọ àkójọpọ̀ àwọn olùdíje tirẹ̀ tí kò nílò ìṣètò, ó sì máa ń ṣàyẹ̀wò àwọn combo tí a ti fi pamọ́ nìkan bí combo kan bá jẹ́ orúkọ `auto` ní ti gidi (a kò dámọ̀ràn rẹ̀). Láti darí ìbéèrè gba combo kan, fi orúkọ rẹ̀ gangan ránṣẹ́ — kì í ṣe `auto`.
 - **`openrouter/auto` jẹ́ ọjà OpenRouter gidi tí a ń sanwó fún** ("Auto Best Available"), kì í ṣe orúkọ-àpèjúwe OmniRoute. Ó jẹ́ ìforúkọsílẹ̀ àwòṣe adúróṣinṣin kan ṣoṣo nínú ìforúkọsílẹ̀ OpenRouter (`open-sse/config/providers/registry/openrouter/index.ts`), a sì máa ń gba owó rẹ̀ lọ́tọ̀. Lo Ètò → Ìdarí → Fi àwọn àwòṣe tí a ń sanwó fún pamọ́ láti yọ ọ́ kúrò nínú àwọn àkójọpọ̀ `auto`.
 
-Wo [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) àti [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) fún ìdàrúdàpọ̀ àkọ́kọ́ tí àkọsílẹ̀ yìí ń ṣàlàyé.
+Wo [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) àti [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) fún ìdàrúdàpọ̀ àkọ́kọ́ tí àkọsílẹ̀ yìí ń ṣàlàyé.
 
 ## Bí Ó Ṣe Ń Ṣiṣẹ́ (Àwọn Auto-Combo Tí A Fi Pamọ́)
 

@@ -126,7 +126,7 @@ fan-out میکنند. از #9654 Wave 2، **هر هدف fan-out پیش از ار
 
 ## 4. `/v1/responses` طولانی در یک پردازه (فضایاضافیِ سالم)
 
-[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) تابع
+[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) تابع
 `tryAcquireHealthyHeadroom` را اضافه کرد تا هنگامی که heap پایینتر از
 `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` است، درخواست دومی با ساختار سنگین
 پذیرفته شود. مسیر BYTE که توسط `admitChatRequest` استفاده میشود (بدنههای ≥

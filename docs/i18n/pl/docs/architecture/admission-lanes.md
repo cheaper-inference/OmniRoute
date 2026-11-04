@@ -121,7 +121,7 @@ błędu 503 w innej”) jest bezwarunkowo egzekwowane przez system 1, a przez sy
 
 ## 4. Długie `/v1/responses` w jednym procesie (zapas dla stabilnego stanu)
 
-W [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) dodano
+W [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) dodano
 `tryAcquireHealthyHeadroom`, dzięki czemu drugie żądanie o dużej złożoności strukturalnej jest przyjmowane,
 gdy wykorzystanie sterty jest poniżej `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. Ścieżka BYTE
 używana przez `admitChatRequest` (treści ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

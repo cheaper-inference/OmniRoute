@@ -41,7 +41,7 @@ Ushbu Xulq-atvor kodeksi hamjamiyatning barcha makonlarida, shuningdek, shaxs ja
 ## Qoidalarga rioya etilishini ta’minlash
 
 Haqoratli, ta’qib qiluvchi yoki boshqa shaklda nomaqbul xatti-harakat holatlari qoidalarga rioya etilishini ta’minlash uchun mas’ul hamjamiyat rahbarlariga
-<https://github.com/diegosouzapw/OmniRoute/security/advisories/new>
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
 manzilida maxfiy xavfsizlik tavsiyasini ochish yoki qo‘llab-quvvatlovchiga diegosouza.pw@outlook.com manzili orqali elektron xat yuborish orqali bildirilishi mumkin.
 Xavfsizlikka oid nozik hodisalar uchun [`SECURITY.md`](SECURITY.md) fayliga qarang.
 Barcha shikoyatlar tezkor va adolatli tarzda ko‘rib chiqiladi va tekshiriladi.

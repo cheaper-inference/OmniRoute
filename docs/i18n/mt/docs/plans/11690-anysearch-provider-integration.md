@@ -5,7 +5,7 @@
 ---
 
 Mudell: xquik #11370 (inkorporat f'release/v3.8.51). Pożizzjoni: `fallbackOnly`.
-Proposta upstream: kwistjoni diegosouzapw/OmniRoute#11637.
+Proposta upstream: kwistjoni cheaper-inference/OmniRoute#11637.
 
 ## 1. Verità bażi tas-servizz (dokumentazzjoni uffiċjali, kontroverifikata)
 

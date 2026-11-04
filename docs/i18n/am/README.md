@@ -45,9 +45,9 @@
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=social)](https://github.com/cheaper-inference/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/OmniRoute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 ማህበሩን ይቀላቀሉ
@@ -96,7 +96,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 [![ፈቃድ፦ MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![የDocker መሳቢያዎች](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![የElectron ውርዶች](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![የElectron ውርዶች](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -521,7 +521,7 @@ curl http://localhost:20128/v1/chat/completions \
 OmniRoute በMIT ፈቃድ የተለቀቀ ሲሆን በግልጽነት ይጠበቃል። ጊዜዎን ወይም ገንዘብዎን የሚቆጥብልዎት ከሆነ፣ ነጻነቱን ለማስጠበቅ ከእርስዎ ጋር የሚስማማውን መንገድ ይምረጡ። ስፖንሰርነት በማዘዋወሪያ ቅድሚያ ላይ ፈጽሞ ተጽዕኖ አያሳድርም፤ የሚገዛው ታይነትን እንጂ ደረጃን አይደለም።
 
 <table>
-  <tr><td nowrap>⭐ <b>ማከማቻውን በኮከብ ይመዝግቡ</b></td><td>ነጻ — ታይነቱን በእውነት ይረዳል</td><td><a href="https://github.com/diegosouzapw/OmniRoute">OmniRouteን በኮከብ ይመዝግቡ</a></td></tr>
+  <tr><td nowrap>⭐ <b>ማከማቻውን በኮከብ ይመዝግቡ</b></td><td>ነጻ — ታይነቱን በእውነት ይረዳል</td><td><a href="https://github.com/cheaper-inference/OmniRoute">OmniRouteን በኮከብ ይመዝግቡ</a></td></tr>
   <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>የአንድ ጊዜ ወይም ወርሃዊ · ምንም የመድረክ ክፍያ የለም</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
   <tr><td nowrap>☕ <b>Ko-fi</b></td><td>ፈጣን የአንድ ጊዜ ስጦታ፣ ለለጋሹ ምዝገባ አያስፈልግም</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
   <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>አነስተኛ፣ መደበኛ ያልሆነ ድጋፍ</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
@@ -558,7 +558,7 @@ OmniRoute በMIT ፈቃድ የተለቀቀ ሲሆን በግልጽነት ይጠ�
 
 </details>
 
-🐛 ስህተት አግኝተዋል ወይም አስተያየት አለዎት? [ውይይት](https://github.com/diegosouzapw/OmniRoute/discussions) ይክፈቱ።
+🐛 ስህተት አግኝተዋል ወይም አስተያየት አለዎት? [ውይይት](https://github.com/cheaper-inference/OmniRoute/discussions) ይክፈቱ።
 
 <br/>
 
@@ -1253,7 +1253,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1ም ይዘለዋ�
 
 በ2026-10-18 ያሉ ቀኖናዊ መለኪያዎች፦ **1.976 ልዩ ቪዲዮዎች** · **20.220.289 የታወቁ እይታዎች** (`v > 0`) · **1.210 ቻናሎች/መገለጫዎች በኔትወርክ**። ጥሬው ዳሽቦርድ 1.976 ረድፎችን ይዟል (YouTube 1.352 = 740 ረጅም ቪዲዮዎች + 612 Shorts · TikTok 334 · Instagram 290)፤ በቀኖናዊ URL መደበኛነት ከተከናወነ በኋላ ምንም የተደጋገመ መዝገብ አልቀረም፣ ይህም ለእያንዳንዱ ቪዲዮ ከፍተኛውን ቆጠራ ይይዛል። የYouTube ውሂብ ስብስብ ከ2026-10-13 ጀምሮ ቆሟል (ከ14 እስከ 18/10 የAPI ኮታው አልቋል)፣ የTikTok/Instagram ደግሞ ከ2026-09-02 ጀምሮ ቆሟል (የውሂብ ስብስብ ክሬዲት የለም)፤ 76 ቪዲዮዎች አሁንም የእይታ ቆጠራ የላቸውም።
 
-> 🎬 **ስለ OmniRoute ቪዲዮ ሠርተዋል?** ከአገናኙ ጋር [ጉዳይ](https://github.com/diegosouzapw/OmniRoute/issues/new) ወይም [ውይይት](https://github.com/diegosouzapw/OmniRoute/discussions) ይክፈቱ — እዚህ ላይ እናሳየዋለን።
+> 🎬 **ስለ OmniRoute ቪዲዮ ሠርተዋል?** ከአገናኙ ጋር [ጉዳይ](https://github.com/cheaper-inference/OmniRoute/issues/new) ወይም [ውይይት](https://github.com/cheaper-inference/OmniRoute/discussions) ይክፈቱ — እዚህ ላይ እናሳየዋለን።
 
 <br/>
 
@@ -1273,8 +1273,8 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1ም ይዘለዋ�
 | 🟢 **WhatsApp — 🇧🇷 ብራዚል**                     | [ቡድኑን ይቀላቀሉ](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                   |
 | 🌍 **ድረ-ገጽ**                                  | [omniroute.online](https://omniroute.online)                                                                    |
 | 🌍 **🌍StHub OmniRoute ማህበረሰብ (ነፃ)**          | [StHub ፖርታል](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)             |
-| 📦 **ምንጭ ኮድ**                                 | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                  |
-| 🐛 **ሳንካ ሪፖርት ያድርጉ**                          | [ችግር ይክፈቱ](https://github.com/diegosouzapw/OmniRoute/issues) — የ`npm run system-info` ውጤትን ያያይዙ                 |
+| 📦 **ምንጭ ኮድ**                                 | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                        |
+| 🐛 **ሳንካ ሪፖርት ያድርጉ**                          | [ችግር ይክፈቱ](https://github.com/cheaper-inference/OmniRoute/issues) — የ`npm run system-info` ውጤትን ያያይዙ            |
 | 🤝 **አስተዋጽዖ ያድርጉ**                            | [CONTRIBUTING.md](CONTRIBUTING.md) · [የቅርንጫፍ እና ልቀት ሞዴል](docs/ops/BRANCHING_MODEL.md) · `good first issue` ይምረጡ |
 | 💚 **ፕሮጀክቱን ይደግፉ**                            | [የድጋፍ መንገዶች ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)               |
 
@@ -1632,7 +1632,7 @@ OmniRouteን ከራሳቸው ኪስ ለሚደግፉ ሰዎች ከልብ የመ�
 
 </div>
 
-[![አስተዋጽኦ አድራጊዎች](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![አስተዋጽኦ አድራጊዎች](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
 
 <sub>በ2026-11-02 በቀጥታ ባለው <code>release/v3.8.53</code> ጫፍ <code>1c7135e0fb</code> (7,972 ኮሚቶች) ላይ የተደረገ ኦዲት፦ <b>1,074 መደበኛ የሰው Git መለያዎች</b> — 759 እንደ ኮሚት አዘጋጆች (ጠባቂውን ጨምሮ) ይታያሉ፣ 315 ደግሞ በግልጽ <code>Co-authored-by</code> ተከታይ መስመሮች ውስጥ ብቻ ይገኛሉ። ይህ ቆጠራ <code>.mailmap</code>ን ይተገብራል፣ የኢሜይል አድራሻዎችን የፊደል አጻጻፍ ልዩነትን ሳይመለከት ያነጻጽራል፣ ቁጥራዊ እና መደበኛ የGitHub noreply አድራሻዎችን ተመሳሳይ መያዣ ሲያመለክቱ ብቻ ያገናኛል፣ 29 የቦት/ወኪል/አገልግሎት/placeholder መለያዎችን ያስወግዳል፣ እና ተራ የኢሜይል አድራሻዎችን የማሳያ ስሞቻቸው ተመሳሳይ ስለሆኑ ብቻ አያዋህድም። የ2026-08-24 ኦዲት 639 አሳትሟል፤ ይህ ዘዴ በዚያ ኦዲት መነሻ <code>ac02c5b42f</code> ላይ እንደገና ሲሰራ 619 ያሳያል። ስለዚህ ጭማሪው የመጣው ከአዳዲስ አስተዋጽኦ አድራጊዎች እንጂ ከቀለል ያለ ዘዴ አይደለም።</sub>
 
@@ -1661,11 +1661,11 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 ## 📊 ኮከቦች
 
-<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="የኮከብ ታሪክ ገበታ" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <img alt="የኮከብ ታሪክ ገበታ" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
  </picture>
 </a>
 

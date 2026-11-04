@@ -453,7 +453,7 @@ memvalidasi build yang sama persis (#8084 bagian (a)). Hanya untuk PR dari repos
 gh workflow run preview-artifact.yml -f pr_number=<N>   # atau tambahkan label `preview-artifact`
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # instalasi pratinjau
 ```
 

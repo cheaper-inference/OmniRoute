@@ -56,7 +56,7 @@ Release တစ်ခုကို ပြန်လည်စိစစ်ညှိ�
 သင်အသုံးပြုလိုသည့် branch ကို merge လုပ်နိုင်သည်ဟု မယူဆမီ ဖွင့်ထားသော freeze ရှိမရှိ စစ်ဆေးပါ-
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Merge လုပ်ဆောင်ပုံများ (owner ၏ `queue` label → Mergify) ကို

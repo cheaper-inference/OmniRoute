@@ -470,7 +470,7 @@ Due impostazioni predefinite di OmniRoute possono compromettere silenziosamente 
 | La sessione continua a cambiare account / la continuità della cache dei prompt viene persa tra i turni | Il TTL dell'affinità di sessione è `0` (disabilitata)                                 | `sessionAffinityTtlMs`   |
 | La connessione si interrompe durante il ragionamento senza alcun prompt visibile al client             | Il watchdog di inattività dello stream è scattato dopo 10 minuti senza chunk upstream | `STREAM_IDLE_TIMEOUT_MS` |
 
-Discussioni correlate: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (interruzioni delle attività lunghe), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (perché l'affinità è disabilitata per impostazione predefinita). Monitoraggio: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Discussioni correlate: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (interruzioni delle attività lunghe), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (perché l'affinità è disabilitata per impostazione predefinita). Monitoraggio: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. Affinità di sessione — vincolare una conversazione a un account
 

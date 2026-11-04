@@ -55,7 +55,7 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ## Dalilin Samuwarsa
 
-An gabatar da shi a cikin PR [#3777](https://github.com/diegosouzapw/OmniRoute/pull/3777). Matsalolin da suka sa aka ƙirƙire shi:
+An gabatar da shi a cikin PR [#3777](https://github.com/cheaper-inference/OmniRoute/pull/3777). Matsalolin da suka sa aka ƙirƙire shi:
 
 | Matsala                                                | Abin da umarnin yake gyarawa                                                                                                                                                                                                                                                                                                                                                                          |
 | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

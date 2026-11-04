@@ -56,7 +56,7 @@ Tai **nesustabdo kūrimo darbų**:
 Prieš manydami, kad norimą šaką galima sujungti, patikrinkite, ar nėra aktyvaus užšaldymo:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Sujungimo mechanizmas (savininko `queue` etiketė → Mergify) aprašytas

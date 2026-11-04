@@ -61,7 +61,7 @@ przedstawiciel na wydarzeniu online lub offline.
 Przypadki obraźliwego, nękającego lub w inny sposób niedopuszczalnego zachowania mogą być
 zgłaszane liderom społeczności odpowiedzialnym za egzekwowanie poprzez otwarcie
 prywatnego powiadomienia bezpieczeństwa (security advisory) pod adresem
-<https://github.com/diegosouzapw/OmniRoute/security/advisories/new>
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
 lub poprzez wysłanie e-maila do opiekuna projektu na adres diegosouza.pw@outlook.com.
 W przypadku incydentów związanych z bezpieczeństwem zobacz [`SECURITY.md`](SECURITY.md).
 Wszystkie skargi będą niezwłocznie i sprawiedliwie rozpatrywane oraz badane.

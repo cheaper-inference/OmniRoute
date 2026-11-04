@@ -324,7 +324,7 @@ Tabia ya kumbukumbu katika Docker:
 
 ### RAM ya wakati wa utekelezaji kwa mawakala wa uandishi wa msimbo
 
-Chaguo-msingi la Docker la GiB 1 ni kiwango cha chini kwa dashibodi/mazungumzo mepesi, si ukubwa wa uzalishaji. Miili mirefu ya `POST /v1/responses` (mamia ya ujumbe, makumi ya zana) huhifadhi grafu nyingi kwenye kumbukumbu wakati wa ubanaji. Maombi mawili yanayopishana ya takriban MiB 3 / tokeni 750k kila moja yamesababisha V8 kusitishwa kwenye old-space ya **GiB 12** (`FATAL ERROR: Reached heap limit`) na pia yamesababisha OOM ya cgroup ya GiB 16. Tazama [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Chaguo-msingi la Docker la GiB 1 ni kiwango cha chini kwa dashibodi/mazungumzo mepesi, si ukubwa wa uzalishaji. Miili mirefu ya `POST /v1/responses` (mamia ya ujumbe, makumi ya zana) huhifadhi grafu nyingi kwenye kumbukumbu wakati wa ubanaji. Maombi mawili yanayopishana ya takriban MiB 3 / tokeni 750k kila moja yamesababisha V8 kusitishwa kwenye old-space ya **GiB 12** (`FATAL ERROR: Reached heap limit`) na pia yamesababisha OOM ya cgroup ya GiB 16. Tazama [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Weka ukubwa wa **cgroup `--memory` juu ya heap** — bafa asilia, SQLite, na data za kati za ubanaji hukaa nje ya V8.
 
@@ -696,7 +696,7 @@ spec:
 
 `preStop` kulala huruhusu kube kuacha Vituo vya huduma kabla ya SIGTERM hivyo** mpya** trafiki huacha kupiga mchakato wa kufa. `/v1/responses` SSE ndani ya ndege hutolewa hadi `SHUTDOWN_TIMEOUT_MS` (chaguo-msingi ya 30s) kupitia ukodishaji wa uandikishaji wa uzani mzito (#11015). Maombi mapya ambayo bado yanafikia mchakato huo pata `503` + `Retry-After: 5`. Tengeneza upya pengo la sehemu tupu hadi kibadilisho kiwe Tayari kinasalia kuwa tatizo kubwa - hiyo ni topolojia SQLite, si usanidi usiofaa wa uchunguzi.
 
-Postgres ya nje / waandishi wengi HA ni** sivyo** njia ya hisa iliyoandikwa. Ikiwa unahitaji HA, weka nakala moja au endesha topolojia ambayo mradi umejaribu na kurekodi tofauti. Kazi ya Postgres/MySQL inaishi [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Hadi meli hizo, njia pekee inayotumika ya kuzidisha** kubwa** uwezo wa `/v1/responses` ni michakato inayojitegemea ya N (sehemu inayofuata), sio `replicas > 1` kwenye juzuu moja.
+Postgres ya nje / waandishi wengi HA ni** sivyo** njia ya hisa iliyoandikwa. Ikiwa unahitaji HA, weka nakala moja au endesha topolojia ambayo mradi umejaribu na kurekodi tofauti. Kazi ya Postgres/MySQL inaishi [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Hadi meli hizo, njia pekee inayotumika ya kuzidisha** kubwa** uwezo wa `/v1/responses` ni michakato inayojitegemea ya N (sehemu inayofuata), sio `replicas > 1` kwenye juzuu moja.
 
 ## Scale-out: N michakato huru
 
@@ -706,11 +706,11 @@ Nakala za akaunti moja Codex lazima zisitumie tokeni yake ya kuonyesha upya ya m
 
 Tukio la tuli husoma tena muunganisho wakati uonyeshaji upya unahitajika na huchukua tokeni tofauti ya ufikiaji ambayo haijaisha muda wake. Vinginevyo kuonyesha upya kunazimwa bila kuisha muda au kulemaza muunganisho au kuhesabu kutofaulu kwa kivunja onyesha. Hitilafu halisi za uthibitishaji wa mkondo wa juu bado zinatumia uhasibu wa kawaida wa kutofaulu, upunguzaji wa hali ya juu na hitilafu ya kawaida ya mteja; uzima wa akaunti unasalia kuwa wa kudumu. Sawazisha tokeni zilizozungushwa za mmiliki kabla ya tokeni za ufikiaji kuisha (kiongozi chaguo-msingi cha kuonyesha upya upya ni dakika tano), au leta tena faili ya Codex auth. Uagizaji wa kupita kiasi huhifadhi tokeni zilizotolewa bila kuzithibitisha kwenye sehemu ya mwisho ya tokeni. Uboreshaji wa dashboard/API kwa mwongozo unarudisha `409 refresh_disabled`; logi mpya OAuth hazijabadilishwa. Tazama [kumbukumbu ya mazingira](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Mchakato wa Node moja ni** lundo moja la V8** . ~ 3 MiB / ~ 750k-tokeni ya wakala wa kuweka msimbo `POST /v1/responses` (RTK + Caveman) zinazopishana huondoa rundo hilo kwa ~ 12 Gi (`FATAL ERROR: Reached heap limit`) na inaweza OOM a 16 Gi cgroup. Tazama [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Kipimo hicho ni a** kumbukumbu - bajeti** onyo, si bidhaa ngumu-max ya `/v1/responses` mbili zinazofanana. Uandikishaji wa gumzo la uzani mzito huchangiwa na bajeti ya baiti inayotokana na otomatiki (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) yenye ukubwa kutoka V8/cgroup hiyo hiyo dari — ikiipandisha juu (au kuweka kikomo cha hesabu ya ombi `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ) kwenye mchakato wa ukubwa ambao tayari huleta uondoaji mimba. Soga ndogo, `/healthz`, `/v1/models`, na MCP ni** sivyo** katika kofia hiyo.
+Mchakato wa Node moja ni** lundo moja la V8** . ~ 3 MiB / ~ 750k-tokeni ya wakala wa kuweka msimbo `POST /v1/responses` (RTK + Caveman) zinazopishana huondoa rundo hilo kwa ~ 12 Gi (`FATAL ERROR: Reached heap limit`) na inaweza OOM a 16 Gi cgroup. Tazama [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Kipimo hicho ni a** kumbukumbu - bajeti** onyo, si bidhaa ngumu-max ya `/v1/responses` mbili zinazofanana. Uandikishaji wa gumzo la uzani mzito huchangiwa na bajeti ya baiti inayotokana na otomatiki (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) yenye ukubwa kutoka V8/cgroup hiyo hiyo dari — ikiipandisha juu (au kuweka kikomo cha hesabu ya ombi `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ) kwenye mchakato wa ukubwa ambao tayari huleta uondoaji mimba. Soga ndogo, `/healthz`, `/v1/models`, na MCP ni** sivyo** katika kofia hiyo.
 
 ### Mchakato mmoja: zaidi ya `/v1/responses` mbili ndefu
 
-A **healthy** process (heap below `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, default `0.75`) **may** run more than two concurrent long `POST /v1/responses` when the process-wide inflight-byte budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) still has room. Bodies at or above `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (default 256 KiB) take the same heavyweight lease as structure-heavy requests and use the same [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Tens of concurrent long SSE clients (operators often need 40–50) is a **memory-budget** question — size heap + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — not a hard “max 2” product limit. A pressured heap still sheds with retryable `503` so #7849 does not return.
+A **healthy** process (heap below `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, default `0.75`) **may** run more than two concurrent long `POST /v1/responses` when the process-wide inflight-byte budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) still has room. Bodies at or above `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (default 256 KiB) take the same heavyweight lease as structure-heavy requests and use the same [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Tens of concurrent long SSE clients (operators often need 40–50) is a **memory-budget** question — size heap + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — not a hard “max 2” product limit. A pressured heap still sheds with retryable `503` so #7849 does not return.
 
 Kwa** kuzidisha chungu** (nafasi huru za V8)** leo** :
 
@@ -753,7 +753,7 @@ volumes:
   omniroute-b-data:
 ```
 
-Msongamano wa mchakato (mgandamizo kutoka kwa HTTP pekee) ni [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Kundi moja la kimantiki kwenye hali ya kudumu ya pamoja ni [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+Msongamano wa mchakato (mgandamizo kutoka kwa HTTP pekee) ni [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Kundi moja la kimantiki kwenye hali ya kudumu ya pamoja ni [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
 ## Hitilafu za kikanda za Gemini ndani ya Docker
 
@@ -794,7 +794,7 @@ isiyothibitishwa; ni ombi la model lililothibitishwa pekee linalojaribu ustahiki
 
 ### Njia mbadala ya kiwango cha host: IPv6 inayofanya kazi na sera ya resolver
 
-Mtoa taarifa wa [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) alirejesha
+Mtoa taarifa wa [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) alirejesha
 ufikiaji katika mazingira yake kwa kuwezesha IPv6 ya container na kubadilisha uteuzi wa anwani
 wa glibc. Ichukulie hii kama njia mbadala mahususi kwa mazingira. Thibitisha kuwa IPv6 ya host
 inafanya kazi, pamoja na egress/uelekezaji wa container na kanuni za firewall kabla ya kurekebisha mapendeleo ya resolver.

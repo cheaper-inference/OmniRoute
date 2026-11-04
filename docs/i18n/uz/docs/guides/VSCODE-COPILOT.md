@@ -107,7 +107,7 @@ npm start
 
 Ichki joylashtirish yoqilgan qurilma bo‘lmasa, sahifa freym ichida ko‘rsatilishni rad etadi; kengaytma buni javob sarlavhalaridan aniqlaydi va tashqi brauzerga qaytadi — hech narsa buzilmaydi va bu haqda bir marta xabar beradi.
 [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) va
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273) muammosiga qarang.
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273) muammosiga qarang.
 
 ---
 

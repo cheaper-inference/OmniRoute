@@ -138,8 +138,8 @@ a bheith folaithe de réir réamhshocraithe i roinnt sraitheanna.
 
 ## Tagairtí
 
-- Saincheist: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Plé: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- Saincheist: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Plé: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - Foinse: `src/shared/constants/providers/web-cookie.ts` (sainmhíniú an tsoláthraí)
 - Iompórtáil HAR: `src/shared/utils/m365HarImport.ts`
 - Réimsí dintiúr: `src/shared/providers/webSessionCredentials.ts`

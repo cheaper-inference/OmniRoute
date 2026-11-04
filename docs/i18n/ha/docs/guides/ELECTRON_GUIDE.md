@@ -198,7 +198,7 @@ Saita ta hanyar `session.defaultSession.webRequest.onHeadersReceived`. Sanannen 
 
 ## Sabuntawa ta atomatik
 
-Yana amfani da `electron-updater` tare da mai bada GitHub (`diegosouzapw/OmniRoute`).
+Yana amfani da `electron-updater` tare da mai bada GitHub (`cheaper-inference/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Abubuwan da aka tura zuwa mai gabatarwa ta IPC `update-status` `checking` `available` `not-available`, `downloading` (tare da `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Kayan kayan tarihi na ƙasa a cikin `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Ana buga fitowar zuwa GitHub Releases (`diegosouzapw/OmniRoute`), wanda kuma shine inda `electron-updater` ke bincika sabbin nau'ikan.
+Ana buga fitowar zuwa GitHub Releases (`cheaper-inference/OmniRoute`), wanda kuma shine inda `electron-updater` ke bincika sabbin nau'ikan.
 
 ## Shirya matsala
 

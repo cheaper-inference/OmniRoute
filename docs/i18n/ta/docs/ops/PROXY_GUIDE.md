@@ -259,7 +259,7 @@ curl -X POST http://localhost:20128/api/v1/management/proxies/bulk-assign \
 
 ## 1proxy இலவச Proxy சந்தை
 
-> 🆕 **[@oyi77](https://github.com/oyi77) வழங்கியது** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (சிக்கல் [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕 **[@oyi77](https://github.com/oyi77) வழங்கியது** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (சிக்கல் [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
 
 உலகம் முழுவதிலும் உள்ள **நூற்றுக்கணக்கான இலவச, சரிபார்க்கப்பட்ட proxy-களுக்கான** அணுகலை வழங்க, OmniRoute ஆனது **[1proxy](https://1proxy-api.aitradepulse.com)** சமூகத் தளத்துடன் ஒருங்கிணைகிறது. சொந்த proxy உள்கட்டமைப்பு இல்லாத பயனர்களுக்கு இது மிகவும் ஏற்றது.
 

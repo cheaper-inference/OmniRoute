@@ -245,7 +245,7 @@ _動作_ を評価する Proactive Defense Module（System Watcher）による�
    [Convert]::ToBase64String($b)
    ```
    出力は `latest.yml` → `sha512` と一致する必要があります。一致しない場合はファイルを削除し、
-   [GitHub リリースページ](https://github.com/diegosouzapw/OmniRoute/releases)からのみ再ダウンロードしてください。
+   [GitHub リリースページ](https://github.com/cheaper-inference/OmniRoute/releases)からのみ再ダウンロードしてください。
 2. **復元して除外する** — ロールバックされて隔離された項目を復元し、
    `%LOCALAPPDATA%\Programs\OmniRoute` を除外対象に追加して（Kaspersky → 設定 → 脅威と除外）、
    再インストールしてください。
@@ -833,7 +833,7 @@ omniroute serve --ready-timeout 180000
 
 ## まだ解決しない場合
 
-- **GitHub Issues**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **GitHub Issues**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **アーキテクチャ**: 内部の詳細については、[`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) を参照してください
 - **API リファレンス**: すべてのエンドポイントについては、[`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) を参照してください
 - **ヘルスダッシュボード**: リアルタイムのシステム状態を確認するには、**Dashboard → Health** を確認してください

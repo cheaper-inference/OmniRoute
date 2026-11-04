@@ -56,7 +56,7 @@ sí. Èyí **kò dá ìdàgbàsókè dúró**:
 Ṣàyẹ̀wò bóyá freeze kan wà ní ṣíṣí kí o tó gbà pé ẹ̀ka tí o fẹ́ lè gba ìdapọ̀:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 A ṣàkọsílẹ̀ ìlànà ìdapọ̀ (label `queue` ti owner → Mergify) nínú

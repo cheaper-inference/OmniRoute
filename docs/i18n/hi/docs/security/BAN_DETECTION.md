@@ -58,8 +58,8 @@ Google Cloud Code / Antigravity इसे `403 VALIDATION_REQUIRED` के र�
 इस वाक्यांश को प्रतिबंध सूची में रखने से `classifyProviderError` की पुनर्प्राप्त करने योग्य
 cloud-code 403 शाखा भी इस शब्दावली के लिए अगम्य हो गई थी, क्योंकि `accountDeactivated`
 का मूल्यांकन पहले किया जाता है — इसलिए Gemini Code Assist के लिए
-[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) और
-[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) में जोड़ी गई
+[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) और
+[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) में जोड़ी गई
 प्रोजेक्ट-रूट पुनर्प्राप्ति कभी चल ही नहीं सकती थी।
 
 साथ वाली तीन, **अलग-अलग** संकेत तालिकाएँ प्रतिबंधित-कीवर्ड पहचान का हिस्सा _नहीं_ हैं:

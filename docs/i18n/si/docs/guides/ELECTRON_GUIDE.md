@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## ස්වයංක්‍රීය යාවත්කාලීන කිරීම
 
-GitHub සපයන්නා (`diegosouzapw/OmniRoute`) සමඟ `electron-updater` භාවිතා කරයි.
+GitHub සපයන්නා (`cheaper-inference/OmniRoute`) සමඟ `electron-updater` භාවිතා කරයි.
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - සිදුවීම් `update-status` IPC හරහා විදැහුම්කරු වෙත යොමු කරන ලදී: `checking`, `available`, `not-available`, `downloading` ( `percent` සමඟ ), `downloaded`, `error`
@@ -273,7 +273,7 @@ AppImage අත්සන් කිරීම වෛකල්පිත — සක�
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-නිකුතු GitHub Releases (`diegosouzapw/OmniRoute`) වෙත ප්‍රකාශයට පත් කරනු ලැබේ, එය `electron-updater` නව අනුවාද සඳහා පරීක්ෂා කරයි.
+නිකුතු GitHub Releases (`cheaper-inference/OmniRoute`) වෙත ප්‍රකාශයට පත් කරනු ලැබේ, එය `electron-updater` නව අනුවාද සඳහා පරීක්ෂා කරයි.
 
 ## දෝෂගවේෂණය
 

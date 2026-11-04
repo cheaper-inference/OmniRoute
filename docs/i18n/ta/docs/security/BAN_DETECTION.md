@@ -50,8 +50,8 @@ Google Cloud Code / Antigravity இதை `403 VALIDATION_REQUIRED` ஆகத்
 இந்தச் சொற்றொடரைத் தடைப் பட்டியலில் வைத்திருப்பது, `classifyProviderError`-இல் உள்ள மீட்டெடுக்கக்கூடிய cloud-code 403 கிளையை
 இந்தச் சொற்றொடருக்கு எட்ட முடியாததாகவும் ஆக்கியது; ஏனெனில் `accountDeactivated` முதலில்
 மதிப்பிடப்படுகிறது — எனவே Gemini Code Assist-க்காக
-[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) மற்றும்
-[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) ஆகியவற்றில் சேர்க்கப்பட்ட திட்ட-வழித்தட மீட்பு ஒருபோதும் இயங்க முடியவில்லை.
+[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) மற்றும்
+[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) ஆகியவற்றில் சேர்க்கப்பட்ட திட்ட-வழித்தட மீட்பு ஒருபோதும் இயங்க முடியவில்லை.
 
 அருகருகே உள்ள மூன்று, **தனித்தனி** சமிக்ஞை அட்டவணைகள் தடைசெய்யப்பட்ட-முக்கியச்சொல் கண்டறிதலின் பகுதியாக _இல்லை_:
 

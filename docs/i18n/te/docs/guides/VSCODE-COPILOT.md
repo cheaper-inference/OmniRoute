@@ -107,7 +107,7 @@ npm start
 
 ఎంబెడింగ్ ప్రారంభించిన build లేకపోతే, పేజీ frameలో లోడ్ కావడానికి నిరాకరిస్తుంది. extension దీన్ని response హెడర్ల ద్వారా గుర్తించి బాహ్య బ్రౌజర్కు fallback అవుతుంది — ఏదీ దెబ్బతినదు, అలాగే ఇది ఒకసారి ఆ విషయాన్ని తెలియజేస్తుంది.
 [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) మరియు issue
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273) చూడండి.
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273) చూడండి.
 
 ---
 

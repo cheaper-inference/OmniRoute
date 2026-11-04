@@ -5,7 +5,7 @@
 ---
 
 គំរូ: xquik #11370 (បានបញ្ចូលក្នុង release/v3.8.51)។ ស្ថានភាព: `fallbackOnly`។
-សំណើដើម: issue diegosouzapw/OmniRoute#11637។
+សំណើដើម: issue cheaper-inference/OmniRoute#11637។
 
 ## 1. ទិន្នន័យពិតរបស់សេវា (ឯកសារផ្លូវការ ដែលបានផ្ទៀងផ្ទាត់ឆ្លងគ្នា)
 

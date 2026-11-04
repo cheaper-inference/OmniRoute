@@ -5,7 +5,7 @@
 ---
 
 Vorlage: xquik #11370 (in release/v3.8.51 zusammengeführt). Verhalten: `fallbackOnly`.
-Upstream-Vorschlag: Issue diegosouzapw/OmniRoute#11637.
+Upstream-Vorschlag: Issue cheaper-inference/OmniRoute#11637.
 
 ## 1. Tatsächliches Dienstverhalten (offizielle Dokumentation, gegengeprüft)
 

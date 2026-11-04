@@ -240,7 +240,7 @@ Kaspersky संपूर्ण इन्स्टॉलेशन "रोल ब
    [Convert]::ToBase64String($b)
    ```
    आउटपुट `latest.yml` → `sha512` शी जुळले पाहिजे. तसे नसल्यास, फाइल हटवा आणि केवळ
-   [GitHub releases page](https://github.com/diegosouzapw/OmniRoute/releases) वरून पुन्हा डाउनलोड करा.
+   [GitHub releases page](https://github.com/cheaper-inference/OmniRoute/releases) वरून पुन्हा डाउनलोड करा.
 2. **पुनर्संचयित करा + वगळा** — रोल बॅक केलेले घटक क्वारंटाइनमधून पुनर्संचयित करा आणि
    `%LOCALAPPDATA%\Programs\OmniRoute` साठी अपवाद जोडा (Kaspersky → Settings → Threats and Exclusions),
    त्यानंतर पुन्हा इन्स्टॉल करा.
@@ -836,7 +836,7 @@ omniroute serve --ready-timeout 180000
 
 ## तरीही अडचण आहे?
 
-- **GitHub समस्या**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **GitHub समस्या**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **आर्किटेक्चर**: अंतर्गत तपशीलांसाठी [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) पहा
 - **API संदर्भ**: सर्व एंडपॉइंट्ससाठी [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) पहा
 - **आरोग्य डॅशबोर्ड**: प्रणालीची रिअल-टाइम स्थिती पाहण्यासाठी **Dashboard → Health** तपासा

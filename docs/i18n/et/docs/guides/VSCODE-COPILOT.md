@@ -108,7 +108,7 @@ npm start
 
 Ilma manustamist lubava järguta keeldub leht raami sees avanemast, laiendus tuvastab selle vastuse päistest ja kasutab varuvariandina välist brauserit — midagi ei lähe katki ning sellest teavitatakse üks kord.
 Vaadake faili [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) ja probleemi
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
 
 ---
 

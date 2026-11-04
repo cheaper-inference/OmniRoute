@@ -249,7 +249,7 @@ go dtí go gcuirfear i bhfeidhm é, d'fhéadfadh sé seo tarlú arís le heisiú
    [Convert]::ToBase64String($b)
    ```
    Ní mór don aschur a bheith ag teacht le `latest.yml` → `sha512`. Mura bhfuil, scrios an comhad agus
-   íoslódáil arís é ón [leathanach eisiúintí GitHub](https://github.com/diegosouzapw/OmniRoute/releases) amháin.
+   íoslódáil arís é ón [leathanach eisiúintí GitHub](https://github.com/cheaper-inference/OmniRoute/releases) amháin.
 2. **Aischuir + fág ar lár** — aischuir na míreanna a rolladh siar ón gcoraintín agus cuir eisceacht leis
    do `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Socruithe → Bagairtí agus Eisceachtaí),
    ansin athshuiteáil.
@@ -844,7 +844,7 @@ faoi `OMNIROUTE_READY_TIMEOUT_MS`.
 
 ## Fós i Sáinn?
 
-- **Fadhbanna GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Fadhbanna GitHub**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **Ailtireacht**: Féach [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) chun sonraí inmheánacha a fháil
 - **Tagairt API**: Féach [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) chun gach críochphointe a fheiceáil
 - **Painéal Sláinte**: Seiceáil **Painéal → Sláinte** le haghaidh stádas fíor-ama an chórais

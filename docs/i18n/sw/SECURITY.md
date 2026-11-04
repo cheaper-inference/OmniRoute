@@ -9,7 +9,7 @@
 Ukigundua udhaifu wa kiusalama katika OmniRoute, tafadhali uripoti kwa kuwajibika:
 
 1. **USIFUNGUE** suala la umma la GitHub
-2. Tumia [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
+2. Tumia [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
 3. Jumuisha: maelezo, hatua za kuzalisha tatizo upya, na athari zinazoweza kutokea
 
 ## Ratiba ya Majibu
@@ -42,7 +42,7 @@ Baada ya 3.8.59 toleo linalofuata ni **3.9.0**, ambalo linaanzisha mkondo wa usa
   chochote kitakachotokea baadaye**. Tarehe ya mwisho inayotokana na hilo hurekodiwa katika maelezo ya toleo la 3.9.0 na katika
   [`ROADMAP.md`](ROADMAP.md) wakati toleo hilo linapotolewa.
 - **Kuripoti udhaifu katika mkondo wa LTS:** tumia njia ileile kama kwa toleo lingine lolote —
-  [Ushauri wa Usalama wa GitHub](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) wa faragha,
+  [Ushauri wa Usalama wa GitHub](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) wa faragha,
   kamwe si suala la umma. Taja toleo ulilojaribu (kwa mfano `3.9.2`); marekebisho huwekwa kwenye
   `stable/v3` na kuhamishiwa mbele hadi v4.
 - **Msingi wa usalama wakati wa kutolewa kwa LTS:** hali iliyopimwa ya kichanganuzi, uthibitisho wa ulinzi wa njia na

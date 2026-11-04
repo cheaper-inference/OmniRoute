@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 Ṣe Ẹ̀dà Kóòdù Náà Kí O Sì Wọ Àpótí Ìtọ́ka Náà
 
 ```powershell
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly yóò ṣe ìmúdójúìwọ̀n àwọn machine ní ọ̀kọ̀ọ̀kan lá�
 
 ### 9.1 Títọ́pa Àwọn Ìmúdójúìwọ̀n Upstream Repository Nígbà Tí O Ń Pa `fly.toml` Ti Fork Rẹ Mọ́
 
-Tí repository lọ́wọ́lọ́wọ́ bá jẹ́ fork tí o sì fẹ́ mú àwọn ìmúdójúìwọ̀n pọ̀ pẹ̀lú upstream `https://github.com/diegosouzapw/OmniRoute`, tẹ̀lé ìṣàn iṣẹ́ tó wà ní ìsàlẹ̀.
+Tí repository lọ́wọ́lọ́wọ́ bá jẹ́ fork tí o sì fẹ́ mú àwọn ìmúdójúìwọ̀n pọ̀ pẹ̀lú upstream `https://github.com/cheaper-inference/OmniRoute`, tẹ̀lé ìṣàn iṣẹ́ tó wà ní ìsàlẹ̀.
 
 Lákọ̀ọ́kọ́, ṣàyẹ̀wò àwọn remote rẹ:
 
@@ -309,7 +309,7 @@ git remote -v
 Tí a kò bá tíì ṣètò `upstream`, ṣàfikún un:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
 Ṣáájú mímú pọ̀ pẹ̀lú upstream, gba àwọn commit àti tag tuntun jù lọ:

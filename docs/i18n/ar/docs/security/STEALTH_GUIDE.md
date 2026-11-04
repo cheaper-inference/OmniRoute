@@ -170,7 +170,7 @@ aider, continue.dev, copilot, avante, codecompanion
 
 - `open-sse/executors/antigravity.ts` — يقرأ `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — توصيل بيانات الاعتماد
-- تقرير الحادثة الأصلي: المناقشة [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- تقرير الحادثة الأصلي: المناقشة [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

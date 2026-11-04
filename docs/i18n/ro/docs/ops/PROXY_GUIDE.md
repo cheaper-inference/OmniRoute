@@ -260,7 +260,7 @@ Acest lucru se întâmplă o singură dată, la prima pornire după actualizare.
 
 ## Piața de proxy-uri gratuite 1proxy
 
-> 🆕 **Contribuție de la [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Problemă [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕 **Contribuție de la [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Problemă [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
 
 OmniRoute se integrează cu platforma comunitară **[1proxy](https://1proxy-api.aitradepulse.com)** pentru a oferi acces la **sute de proxy-uri gratuite și validate** din întreaga lume. Această opțiune este ideală pentru utilizatorii care nu dispun de propria infrastructură de proxy-uri.
 

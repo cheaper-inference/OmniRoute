@@ -324,7 +324,7 @@ Muistin toiminta Dockerissa:
 
 ### Koodausagenttien ajonaikainen RAM-muisti
 
-Dockerin 1 GiB:n oletusarvo on hallintapaneelin ja kevyen keskustelun vähimmäistaso, ei tuotantokäyttöön sopiva koko. Pitkät `POST /v1/responses` -pyyntörungot (satoja viestejä, kymmeniä työkaluja) säilyttävät pakkauksen aikana muistissa useita graafeja. Kaksi päällekkäistä, kooltaan noin 3 MiB:n / 750 000 tokenin pyyntöä ovat keskeyttäneet V8:n **12 GiB:n** old space -kekomuistilla (`FATAL ERROR: Reached heap limit`) ja myös aiheuttaneet cgroupin OOM-tilanteen 16 GiB:n muistilla. Katso [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Dockerin 1 GiB:n oletusarvo on hallintapaneelin ja kevyen keskustelun vähimmäistaso, ei tuotantokäyttöön sopiva koko. Pitkät `POST /v1/responses` -pyyntörungot (satoja viestejä, kymmeniä työkaluja) säilyttävät pakkauksen aikana muistissa useita graafeja. Kaksi päällekkäistä, kooltaan noin 3 MiB:n / 750 000 tokenin pyyntöä ovat keskeyttäneet V8:n **12 GiB:n** old space -kekomuistilla (`FATAL ERROR: Reached heap limit`) ja myös aiheuttaneet cgroupin OOM-tilanteen 16 GiB:n muistilla. Katso [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Mitoita **cgroupin `--memory` kekomuistia suuremmaksi** — natiivipuskurit, SQLite ja pakkauksen välitulokset sijaitsevat V8:n ulkopuolella.
 
@@ -702,7 +702,7 @@ spec:
 
 `preStop` sleep antaa kuben pudottaa palvelun päätepisteet ennen SIGTERM tä niin** uusi** liikenne lakkaa koskettamasta kuolettavaa prosessia. Lennon aikana `/v1/responses` SSE tyhjennetään `SHUTDOWN_TIMEOUT_MS` asti (oletus 30s) raskaan sarjan sisäänpääsysopimusten (#11015) kautta. Uudet pyynnöt, jotka edelleen saavuttavat prosessin, saavat `503` + `Retry-After: 5`. Luo tyhjän päätepisteen väli uudelleen, kunnes vaihto on valmis, pysyy kovana katkoksena – se on SQLite -topologia, ei koettimen määritysvirhe.
 
-Ulkoinen Postgres / monikirjoitin HA on** ei** dokumentoitu osakepolku. Jos tarvitset HA, säilytä yksi replika tai suorita topologia, jonka projekti on testannut ja dokumentoinut erikseen. Postgres/MySQL teos asuu paikassa [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Kunnes se toimitetaan, ainoa tuettu tapa kertoa** suuri** `/v1/responses` kapasiteetti on N riippumatonta prosessia (seuraava osa), ei `replicas > 1` yhdellä tilavuudella.
+Ulkoinen Postgres / monikirjoitin HA on** ei** dokumentoitu osakepolku. Jos tarvitset HA, säilytä yksi replika tai suorita topologia, jonka projekti on testannut ja dokumentoinut erikseen. Postgres/MySQL teos asuu paikassa [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Kunnes se toimitetaan, ainoa tuettu tapa kertoa** suuri** `/v1/responses` kapasiteetti on N riippumatonta prosessia (seuraava osa), ei `replicas > 1` yhdellä tilavuudella.
 
 ## Scale-out: N itsenäistä prosessia
 
@@ -712,11 +712,11 @@ Yhden Codex tilin kopiot eivät saa kuluttaa itsenäisesti sen kertakäyttöist�
 
 Passiivinen ilmentymä lukee yhteyden uudelleen, kun päivitystä tarvitaan, ja ottaa käyttöön vain erilaisen, vanhentumattoman käyttöoikeustunnuksen. Muussa tapauksessa päivitys poistetaan käytöstä ilman, että yhteys vanhenee tai deaktivoidaan tai lasketaan päivityksen katkaisijan vika. Todellisissa alkupään todennusvirheissä käytetään edelleen normaalia vikalaskentaa, eksponentiaalista jäähdytystä ja normaalia asiakasvirhettä; tilin deaktivointi pysyy pysyvänä. Synkronoi omistajan kierretyt tunnukset ennen kuin käyttöoikeudet vanhenevat (oletusarvoinen ennakoiva päivitysjohto on viisi minuuttia) tai tuo Codex auth-tiedosto uudelleen. Passiivinen tuonti tallentaa toimitetut tunnukset vahvistamatta niitä tunnuksen päätepisteessä. Manuaalinen dashboard/API refresh palauttaa `409 refresh_disabled`; uudet OAuth -kirjautumiset ovat ennallaan. Katso [ympäristöviite](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-One Node -prosessi on** yksi V8-kasa** . Kaksi päällekkäistä ~ 3 MiB / ~ 750k-tokenin koodausagenttia `POST /v1/responses` (RTK + Caveman) katkaisee keon ~ 12 Gi:ssä (`FATAL ERROR: Reached heap limit`) ja voi OOM 16 Gi:n c-ryhmän. Katso [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Tuo mitta on a** muisti-budjetti** varoitus, ei tuote hard-max kahdesta samanaikaisesta pitkästä `/v1/responses`. Raskaan keskustelun sisäänpääsy on aidattu automaattisesti johdetulla sisäänottotavubudjetilla (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`), joka on mitattu samasta V8/cgroup katosta. — ohittaa sen ylöspäin (tai vanhan `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` -pyyntömäärärajan asettaminen) jo kokoiselle prosessille palauttaa keskeytyksen. Pienet chatit, `/healthz`, `/v1/models` ja MCP ovat** ei** tuossa korkissa.
+One Node -prosessi on** yksi V8-kasa** . Kaksi päällekkäistä ~ 3 MiB / ~ 750k-tokenin koodausagenttia `POST /v1/responses` (RTK + Caveman) katkaisee keon ~ 12 Gi:ssä (`FATAL ERROR: Reached heap limit`) ja voi OOM 16 Gi:n c-ryhmän. Katso [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Tuo mitta on a** muisti-budjetti** varoitus, ei tuote hard-max kahdesta samanaikaisesta pitkästä `/v1/responses`. Raskaan keskustelun sisäänpääsy on aidattu automaattisesti johdetulla sisäänottotavubudjetilla (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`), joka on mitattu samasta V8/cgroup katosta. — ohittaa sen ylöspäin (tai vanhan `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` -pyyntömäärärajan asettaminen) jo kokoiselle prosessille palauttaa keskeytyksen. Pienet chatit, `/healthz`, `/v1/models` ja MCP ovat** ei** tuossa korkissa.
 
 ### Yksi prosessi: yli kaksi pitkää `/v1/responses`
 
-A** terveitä** prosessi (kaso `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`:n alapuolella, oletus `0.75`)** voi** ajaa enemmän kuin kaksi yhtäaikaista pitkää `POST /v1/responses`, kun prosessin laajuisessa inflight-tavubudjetissa (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) on vielä tilaa. `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (oletusarvo 256 KiB) tai sen yläpuolella olevat rungot ottavat saman raskaan sarjan vuokrasopimuksen kuin rakenteen vaativat pyynnöt ja käyttävät samaa [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape -poikkeamaa (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Kymmeniä samanaikaisia pitkiä SSE asiakkaita (operaattorit tarvitsevat usein 40–50) on a** muisti-budjetti** kysymys — koko kasa + primary/headroom paikat + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ei kova "max 2" tuoteraja. Painettu kasa irtoaa edelleen uudelleenyritettävästä `503`, joten #7849 ei palaa.
+A** terveitä** prosessi (kaso `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`:n alapuolella, oletus `0.75`)** voi** ajaa enemmän kuin kaksi yhtäaikaista pitkää `POST /v1/responses`, kun prosessin laajuisessa inflight-tavubudjetissa (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) on vielä tilaa. `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (oletusarvo 256 KiB) tai sen yläpuolella olevat rungot ottavat saman raskaan sarjan vuokrasopimuksen kuin rakenteen vaativat pyynnöt ja käyttävät samaa [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape -poikkeamaa (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Kymmeniä samanaikaisia pitkiä SSE asiakkaita (operaattorit tarvitsevat usein 40–50) on a** muisti-budjetti** kysymys — koko kasa + primary/headroom paikat + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ei kova "max 2" tuoteraja. Painettu kasa irtoaa edelleen uudelleenyritettävästä `503`, joten #7849 ei palaa.
 
 Vastaanottaja** moninkertaistaa kasoja** (itsenäiset V8 vanhat tilat)** tänään** :
 
@@ -759,7 +759,7 @@ volumes:
   omniroute-b-data:
 ```
 
-Prosessinaikainen tiheys (puristus pois HTTP isolaatista) on [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Yksi looginen klusteri jaetussa kestävässä tilassa on [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+Prosessinaikainen tiheys (puristus pois HTTP isolaatista) on [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Yksi looginen klusteri jaetussa kestävässä tilassa on [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
 ## Geminin alueelliset virheet Dockerissa
 
@@ -800,7 +800,7 @@ pyynnön virhe; vain todennettu mallipyyntö testaa Geminin käytettävyyden.
 
 ### Isäntätason vaihtoehto: toimiva IPv6 ja nimenselvityskäytäntö
 
-Raportin [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) tekijä palautti
+Raportin [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) tekijä palautti
 yhteyden omassa ympäristössään ottamalla IPv6:n käyttöön säilöissä ja muuttamalla glibc:n
 osoitteenvalintaa. Käsittele tätä ympäristökohtaisena vaihtoehtona. Varmista isäntäkoneen
 toimiva IPv6, säilön ulospäin suuntautuva yhteys ja reititys sekä palomuurisäännöt ennen nimenselvityksen asetusten muuttamista.

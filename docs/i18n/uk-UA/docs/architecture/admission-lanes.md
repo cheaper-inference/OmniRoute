@@ -90,7 +90,7 @@ Combo (за пріоритетом / циклічним перебором) і f
 
 ## 4. Тривалі `/v1/responses` в одному процесі (резерв за нормального стану)
 
-У [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) додано
+У [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) додано
 `tryAcquireHealthyHeadroom`, щоб дозволити другий структурно важкий запит,
 коли використання купи нижче за `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. Шлях BYTE,
 який використовується `admitChatRequest` (тіла ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

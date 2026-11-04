@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 Clónáil an Cód agus Déan Seiceáil ar an Eolaire
 
 ```powershell
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -291,7 +291,7 @@ Déanfaidh Fly uasghrádú rollaigh ar na meaisíní go huathoibríoch.
 
 ### 9.1 Ag Rianú Nuashonruithe stór上游 Ag Coinneáil `fly.toml` do Fhorc
 
-Má tá an stór reatha ina fhorc agus más mian leat nuashonruithe a shioncronú ón stór上游 `https://github.com/diegosouzapw/OmniRoute`, lean an sreabhadh oibre seo a leanas.
+Má tá an stór reatha ina fhorc agus más mian leat nuashonruithe a shioncronú ón stór上游 `https://github.com/cheaper-inference/OmniRoute`, lean an sreabhadh oibre seo a leanas.
 
 Ar dtús, dearbhaigh do remotes:
 
@@ -307,7 +307,7 @@ Ba cheart duit a fheiceáil ar a laghad:
 Má `upstream` gan cumrú, cuir é leis:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git`
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git`
 
 ```
 

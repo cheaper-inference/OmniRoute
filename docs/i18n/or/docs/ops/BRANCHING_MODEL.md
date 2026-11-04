@@ -55,7 +55,7 @@ flowchart LR
 ଆପଣ ଚାହୁଁଥିବା ବ୍ରାଞ୍ଚଟି ମର୍ଜ୍ଯୋଗ୍ୟ ବୋଲି ଧରିନେବା ପୂର୍ବରୁ କୌଣସି ଖୋଲା ଫ୍ରିଜ୍ ଅଛି କି ନାହିଁ ଯାଞ୍ଚ କରନ୍ତୁ:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 ମର୍ଜ୍ ପ୍ରକ୍ରିୟା (ମାଲିକଙ୍କ `queue` ଲେବଲ୍ → Mergify) ବିଷୟରେ

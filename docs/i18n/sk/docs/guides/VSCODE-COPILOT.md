@@ -114,7 +114,7 @@ npm start
 Bez zostavenia s povoleným vkladaním stránka odmietne zobrazenie v rámci, rozšírenie to zistí z
 hlavičiek odpovede a použije externý prehliadač — nič sa nepokazí a jednorazovo vás o tom informuje.
 Pozrite si [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) a problém
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
 
 ---
 

@@ -124,7 +124,7 @@ OmniRouteରେ ଭିନ୍ନ ପରିସର ସହିତ **ଦୁଇଟି**
 
 ## 4. ଏକ-ପ୍ରୋସେସ୍ ଦୀର୍ଘ `/v1/responses` (ସୁସ୍ଥ-ହେଡ୍ରୁମ୍)
 
-[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` ଯୋଡ଼ିଛି,
+[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` ଯୋଡ଼ିଛି,
 ଯାହାଦ୍ୱାରା ହିପ୍ `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` ତଳେ ଥିଲେ ଦ୍ୱିତୀୟ
 ଗଠନାତ୍ମକ ଭାବେ ଭାରୀ ଅନୁରୋଧକୁ ଗ୍ରହଣ କରାଯାଏ। `admitChatRequest` ଦ୍ୱାରା ବ୍ୟବହୃତ BYTE
 ପଥ (ବଡି ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

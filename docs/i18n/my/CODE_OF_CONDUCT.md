@@ -71,7 +71,7 @@ commits၊ code၊ wiki ပြင်ဆင်မှုများ၊ issues န
 
 အနိုင်ကျင့်မှု၊ နှောင့်ယှက်မှု သို့မဟုတ် အခြားနည်းဖြင့် လက်မခံနိုင်သော အပြုအမူ
 ဖြစ်ရပ်များကို
-<https://github.com/diegosouzapw/OmniRoute/security/advisories/new>
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
 တွင် private security advisory တစ်ခု ဖွင့်ခြင်းဖြင့်ဖြစ်စေ၊ ထိန်းသိမ်းသူထံ
 diegosouza.pw@outlook.com မှတစ်ဆင့် အီးမေးလ်ပို့ခြင်းဖြင့်ဖြစ်စေ
 စည်းကမ်းလိုက်နာစေရေးအတွက် တာဝန်ရှိသော အသိုင်းအဝိုင်းခေါင်းဆောင်များထံ

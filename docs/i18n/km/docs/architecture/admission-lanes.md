@@ -84,7 +84,7 @@ lane កម្រិត byte កំណត់ព្រំដែនសម្រា
 
 ## 4. `/v1/responses` រយៈពេលវែងក្នុង process តែមួយ (healthy-headroom)
 
-[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) បានបន្ថែម `tryAcquireHealthyHeadroom` ដើម្បីអនុញ្ញាតសំណើទីពីរដែលមានរចនាសម្ព័ន្ធធ្ងន់ នៅពេល heap ស្ថិតនៅក្រោម `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`។ ផ្លូវ BYTE ដែលប្រើដោយ `admitChatRequest` (body ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`, លំនាំដើម 256 KiB រួមទាំង `POST /v1/responses`) ប្រើច្រកលើកលែង **ដូចគ្នា**។
+[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) បានបន្ថែម `tryAcquireHealthyHeadroom` ដើម្បីអនុញ្ញាតសំណើទីពីរដែលមានរចនាសម្ព័ន្ធធ្ងន់ នៅពេល heap ស្ថិតនៅក្រោម `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`។ ផ្លូវ BYTE ដែលប្រើដោយ `admitChatRequest` (body ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`, លំនាំដើម 256 KiB រួមទាំង `POST /v1/responses`) ប្រើច្រកលើកលែង **ដូចគ្នា**។
 
 នេះជារូបមន្ត **process តែមួយ** ដែលបានគាំទ្រ សម្រាប់ SSE `/v1/responses` រយៈពេលវែងដែលដំណើរការស្របគ្នាច្រើនជាងពីរ៖ ដំឡើង primary + healthy-headroom ត្រឹមកម្រិតដែល heap និងថវិកា byte ដែលកំពុងដំណើរការទូទាំង process (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) អនុញ្ញាតប៉ុណ្ណោះ។ អតិថិជន SSE រយៈពេលវែងរាប់សិប (40–50) គឺជាបញ្ហាថវិកាអង្គចងចាំ មិនមែនជាដែនកំណត់រឹង “អតិបរមា 2” របស់ផលិតផលទេ។ heap ដែលស្ថិតក្រោមសម្ពាធនៅតែបដិសេធដោយប្រើ `503` ដែលអាចសាកល្បងឡើងវិញបាន ដើម្បីកុំឱ្យ #7849 កើតឡើងវិញ។
 

@@ -124,7 +124,7 @@ OmniRoute에는 범위가 서로 다른 **두 가지** 프로세스 로컬 레�
 
 ## 4. 단일 프로세스의 장시간 `/v1/responses`(충분한 여유 메모리)
 
-[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437)에서
+[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437)에서
 `tryAcquireHealthyHeadroom`을 추가하여, 힙이
 `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` 미만일 때 구조적으로 부하가 큰 두 번째 요청을 허용합니다.
 `admitChatRequest`에서 사용하는 BYTE 경로(본문 크기 ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

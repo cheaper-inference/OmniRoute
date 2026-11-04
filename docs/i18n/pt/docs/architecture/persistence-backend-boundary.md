@@ -5,7 +5,7 @@
 ---
 
 - **Estado:** Proposto — requer a aprovação de um responsável pela manutenção antes do início do trabalho de runtime
-- **Issue de acompanhamento:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
+- **Issue de acompanhamento:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
 - **Âmbito:** Apenas a arquitetura de persistência; esta decisão não adiciona nem seleciona uma base de dados externa
 
 ## Contexto

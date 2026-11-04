@@ -128,7 +128,7 @@ handleComboChat (وہی انجن جو مستقل محفوظ شدہ combos کے �
 
 ## ایسے کومبو نام جو کسی حقیقی ماڈل آئی ڈی سے مماثل ہوں
 
-ایسا کومبو جس کا `name` کسی سادہ ماڈل آئی ڈی کے عین مطابق ہو (مثلاً `gpt-5.5` نامی کومبو)، ایک **دانستہ اور معاونت یافتہ پیٹرن** ہے، بگ نہیں: یہ فی ماڈل آئی ڈی پرووائیڈر فال بیک کا طریقۂ کار ہے، جسے [#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940) میں دستاویزی شکل دی گئی ہے۔ چونکہ کومبو ریزولیوشن کو سادہ ماڈل آئی ڈی ریزولیوشن سے پہلے چیک کیا جاتا ہے (`src/sse/services/model.ts` میں `getComboForModel()`)، اس لیے سادہ آئی ڈی `gpt-5.5` کی درخواست براہِ راست کسی ایک پرووائیڈر کے پاس جانے کے بجائے کومبو کے اہداف (مثلاً `acme-responses/gpt-5.5`، `backup-responses/gpt-5.5`) کے ذریعے روٹ کی جاتی ہے — یہ [#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) کے لیے بنائی گئی کومبو-قبل-از-ری رائٹ ترجیح کو دوبارہ استعمال کرتا ہے، اور `tests/unit/responses-combo-resolution-3227.test.ts` اور `tests/unit/combo-name-codex-responses-rewrite.test.ts` کے ذریعے اس کی ریگریشن ٹیسٹنگ کی جاتی ہے۔
+ایسا کومبو جس کا `name` کسی سادہ ماڈل آئی ڈی کے عین مطابق ہو (مثلاً `gpt-5.5` نامی کومبو)، ایک **دانستہ اور معاونت یافتہ پیٹرن** ہے، بگ نہیں: یہ فی ماڈل آئی ڈی پرووائیڈر فال بیک کا طریقۂ کار ہے، جسے [#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940) میں دستاویزی شکل دی گئی ہے۔ چونکہ کومبو ریزولیوشن کو سادہ ماڈل آئی ڈی ریزولیوشن سے پہلے چیک کیا جاتا ہے (`src/sse/services/model.ts` میں `getComboForModel()`)، اس لیے سادہ آئی ڈی `gpt-5.5` کی درخواست براہِ راست کسی ایک پرووائیڈر کے پاس جانے کے بجائے کومبو کے اہداف (مثلاً `acme-responses/gpt-5.5`، `backup-responses/gpt-5.5`) کے ذریعے روٹ کی جاتی ہے — یہ [#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) کے لیے بنائی گئی کومبو-قبل-از-ری رائٹ ترجیح کو دوبارہ استعمال کرتا ہے، اور `tests/unit/responses-combo-resolution-3227.test.ts` اور `tests/unit/combo-name-codex-responses-rewrite.test.ts` کے ذریعے اس کی ریگریشن ٹیسٹنگ کی جاتی ہے۔
 
 کسی ایسے کومبو کو بنانا یا اس کا نام بدلنا جو کسی حقیقی ماڈل آئی ڈی کو شیڈو کرے، **کبھی مسترد نہیں کیا جاتا** — ایسا کرنے سے یہ دستاویزی ورک فلو ٹوٹ جائے گا۔ اس کے بجائے (#8530)، جب (نیا) نام کسی حقیقی ماڈل آئی ڈی سے متصادم ہو تو `POST /api/combos` اور `PUT /api/combos/[id]` ریسپانس کے ساتھ ایک غیر مسدود کرنے والی `warning` فیلڈ منسلک کرتے ہیں:
 
@@ -164,7 +164,7 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 - **`auto` آپ کے کومبوز استعمال نہیں کرتا۔** `auto`/`auto/*` اپنا زیرو-کنفیگ امیدوار پول بناتا ہے اور محفوظ شدہ کومبوز سے صرف اس صورت میں رجوع کرتا ہے جب کسی کومبو کا نام حرف بہ حرف `auto` ہو (اس کی سفارش نہیں کی جاتی)۔ کسی کومبو کے ذریعے روٹ کرنے کے لیے اس کا بالکل درست نام بھیجیں — `auto` نہیں۔
 - **`openrouter/auto` ایک حقیقی، بامعاوضہ OpenRouter پراڈکٹ** ("Auto Best Available") ہے، OmniRoute کا عرف نہیں۔ یہ OpenRouter رجسٹری (`open-sse/config/providers/registry/openrouter/index.ts`) کا واحد جامد ماڈل اندراج ہے اور اس کی بلنگ الگ سے ہوتی ہے۔ اسے `auto` پولز سے خارج کرنے کے لیے Settings → Routing → Hide paid models استعمال کریں۔
 
-اس دستاویز میں بیان کردہ اصل الجھن کے لیے [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) اور [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) دیکھیں۔
+اس دستاویز میں بیان کردہ اصل الجھن کے لیے [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) اور [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) دیکھیں۔
 
 ## یہ کیسے کام کرتا ہے (محفوظ شدہ آٹو-کومبوز)
 

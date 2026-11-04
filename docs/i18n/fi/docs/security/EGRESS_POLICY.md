@@ -55,7 +55,7 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ## Miksi se on olemassa
 
-Ominaisuus lisättiin PR:ssä [#3777](https://github.com/diegosouzapw/OmniRoute/pull/3777). Sen taustalla olevat ongelmat:
+Ominaisuus lisättiin PR:ssä [#3777](https://github.com/cheaper-inference/OmniRoute/pull/3777). Sen taustalla olevat ongelmat:
 
 | Ongelma                                                                      | Mitä direktiivi korjaa                                                                                                                                                                                                                                                                                                                                                                                                        |
 | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

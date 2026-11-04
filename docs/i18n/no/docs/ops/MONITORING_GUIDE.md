@@ -223,7 +223,7 @@ livenessProbe:
 
 **Ikke** rett kubelets **driftssjekk** mot `/api/monitoring/health`. Denne banen utfører reelt database-/overvåkingsarbeid og vil gi falske positiver under belastning.
 
-Relatert: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (prober mens hendelsesløkken er opptatt), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (katalogprising beslaglegger ressurser), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (telling av komprimeringstokens beslaglegger ressurser).
+Relatert: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (prober mens hendelsesløkken er opptatt), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (katalogprising beslaglegger ressurser), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (telling av komprimeringstokens beslaglegger ressurser).
 
 ### systemd-vakthund (fastlåst hendelsesløkke)
 

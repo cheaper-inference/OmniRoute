@@ -9,7 +9,7 @@
 Pokud objevíte bezpečnostní zranitelnost v OmniRoute, nahlaste ji prosím odpovědným způsobem:
 
 1. **NEOTVÍREJTE** veřejný problém na GitHubu
-2. Použijte [Bezpečnostní upozornění GitHubu](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
+2. Použijte [Bezpečnostní upozornění GitHubu](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
 3. Uveďte: popis, postup reprodukce a potenciální dopad
 
 ## Harmonogram reakce
@@ -42,7 +42,7 @@ Po verzi 3.8.59 následuje **3.9.0**, která na větvi
   podle toho, co nastane později**. Výsledné datum ukončení je při vydání zaznamenáno v poznámkách k verzi 3.9.0 a v
   [`ROADMAP.md`](ROADMAP.md).
 - **Nahlášení zranitelnosti v řadě LTS:** použijte stejný kanál jako u jakékoli jiné verze —
-  soukromé [bezpečnostní hlášení GitHubu](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
+  soukromé [bezpečnostní hlášení GitHubu](https://github.com/cheaper-inference/OmniRoute/security/advisories/new),
   nikdy veřejný issue. Uveďte, kterou verzi jste testovali (například `3.9.2`); opravy se nejprve začlení do
   `stable/v3` a následně se přenesou do v4.
 - **Výchozí stav zabezpečení při vydání LTS:** naměřený stav skeneru, ochrana tras a

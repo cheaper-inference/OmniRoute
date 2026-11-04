@@ -198,7 +198,7 @@ Sett via `session.defaultSession.webRequest.onHeadersReceived`. Viktige direktiv
 
 ## Automatisk oppdatering
 
-Bruker `electron-updater` med GitHub leverandøren (`diegosouzapw/OmniRoute`).
+Bruker `electron-updater` med GitHub leverandøren (`cheaper-inference/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - Hendelser videresendt til gjengiver via `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (med `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ Artefakter lander i `electron/dist-electron/`:
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Utgivelser publiseres til GitHub Releases (`diegosouzapw/OmniRoute`), som også er der `electron-updater` sjekker for nye versjoner.
+Utgivelser publiseres til GitHub Releases (`cheaper-inference/OmniRoute`), som også er der `electron-updater` sjekker for nye versjoner.
 
 ## Feilsøking
 

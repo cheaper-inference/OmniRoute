@@ -29,7 +29,7 @@ docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
 ### Chaguo C: Kutoka kwenye Msimbo Chanzo
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 npm run dev
@@ -165,4 +165,4 @@ OmniRoute huwaruka kiotomatiki watoa huduma walioshindwa na kujaribu anayefuata.
 
 - **[Utatuzi](../guides/TROUBLESHOOTING.md)** — Matatizo ya kawaida na marekebisho yake
 - **[Discord](https://discord.gg/U47eFqAXCn)** — Usaidizi wa jumuiya
-- **[GitHub Issues](https://github.com/diegosouzapw/OmniRoute/issues)** — Ripoti hitilafu
+- **[GitHub Issues](https://github.com/cheaper-inference/OmniRoute/issues)** — Ripoti hitilafu

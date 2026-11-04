@@ -215,7 +215,7 @@ livenessProbe:
 
 **Ná** dírigh **beogacht** kubelet ar `/api/monitoring/health`. Déanann an chonair sin fíorobair bunachair sonraí/monatóireachta agus tabharfaidh sí toradh dearfach bréagach faoi ualach.
 
-Gaolmhar: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (taiscéalaithe agus an lúb teagmhas gnóthach), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (monaplóir praghsála catalóige), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (monaplóir chomhairimh comharthaí an chomhbhrúite).
+Gaolmhar: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (taiscéalaithe agus an lúb teagmhas gnóthach), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (monaplóir praghsála catalóige), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (monaplóir chomhairimh comharthaí an chomhbhrúite).
 
 ### faireoir systemd (lúb teagmhas reoite)
 

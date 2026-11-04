@@ -483,7 +483,7 @@ OmniRoute’ning ikkita standart sozlamasi bir necha soat davom etadigan Codex C
 | Seans hisoblarni almashtirishda davom etadi / navbatlar orasida prompt keshi uzluksizligi yo‘qoladi | Seansga bog‘liqlik TTL qiymati `0` (o‘chirilgan)                                                        | `sessionAffinityTtlMs`   |
 | Mijozga hech qanday so‘rov ko‘rsatilmasdan, mulohaza yuritish o‘rtasida ulanish uziladi             | Yuqori oqimdan 10 daqiqa davomida bo‘lak kelmagani uchun oqimning faolsizlik nazoratchisi ishga tushgan | `STREAM_IDLE_TIMEOUT_MS` |
 
-Tegishli muhokamalar: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (uzoq vazifalarning uzilishi), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (bog‘liqlik nega standart holatda o‘chiq). Kuzatuv: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Tegishli muhokamalar: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (uzoq vazifalarning uzilishi), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (bog‘liqlik nega standart holatda o‘chiq). Kuzatuv: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. Seansga bog‘liqlik — bitta suhbatni bitta hisobga biriktirish
 

@@ -478,7 +478,7 @@ Tsoffin saituna biyu na OmniRoute na iya lalata zaman Codex CLI na sa'o'i da yaw
 | Zama yana ci gaba da sauya asusu / an rasa ci gaba na prompt-cache tsakanin juyi | Session affinity TTL yana `0` (a kashe)                                                        | `sessionAffinityTtlMs`   |
 | Haɗi yana yankewa a tsakiyar tunani ba tare da saƙon da abokin ciniki ke gani ba | Mai sa ido kan rashin aikin stream ya kunna bayan mintuna 10 ba tare da chunk daga upstream ba | `STREAM_IDLE_TIMEOUT_MS` |
 
-Tattaunawa masu alaƙa: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (yankewar dogon aiki), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (dalilin da ya sa affinity yake kashe a tsohon saiti). Bibiyar batu: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Tattaunawa masu alaƙa: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (yankewar dogon aiki), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (dalilin da ya sa affinity yake kashe a tsohon saiti). Bibiyar batu: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. Session affinity — ɗaure tattaunawa ɗaya ga asusu ɗaya
 

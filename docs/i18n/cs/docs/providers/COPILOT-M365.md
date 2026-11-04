@@ -139,8 +139,8 @@ být v některých úrovních ve výchozím nastavení skrytý.
 
 ## Reference
 
-- Problém: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Diskuse: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- Problém: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Diskuse: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - Zdroj: `src/shared/constants/providers/web-cookie.ts` (definice poskytovatele)
 - Import HAR: `src/shared/utils/m365HarImport.ts`
 - Pole přihlašovacích údajů: `src/shared/providers/webSessionCredentials.ts`

@@ -4,9 +4,9 @@
 
 ---
 
-> **Trạng thái:** Đã chấp nhận · **Bối cảnh:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
-> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Hợp đồng:** `domain/routing/routerBackends.ts`
-> (registry có kiểu — mã nguồn được tích hợp cùng [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
+> **Trạng thái:** Đã chấp nhận · **Bối cảnh:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
+> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Hợp đồng:** `domain/routing/routerBackends.ts`
+> (registry có kiểu — mã nguồn được tích hợp cùng [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
 
 ADR này xác định rõ mối quan hệ giữa `ts` (gốc), `bifrost`, `cliproxy`, `9router` và các engine tương thích với VibeProxy, để những người đóng góp không còn nhầm lẫn hai khái niệm khác biệt về mặt kiến trúc. Tài liệu này xác định registry có kiểu được giới thiệu trong quá trình triển khai router-backend-registry là nguồn thông tin chính xác duy nhất cho mô hình đó.
 
@@ -28,7 +28,7 @@ Sai lầm cần tránh: coi "dịch vụ nhúng" và "backend định tuyến" l
 ## Registry — nguồn thông tin chính xác duy nhất
 
 Hợp đồng `domain/routing/routerBackends.ts` (mã nguồn được tích hợp cùng
-[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) khai báo mỗi engine đúng một lần, cùng với vòng đời, các khả năng, định danh dịch vụ, cổng mặc định, cấu hình kiểm tra tình trạng và hỗ trợ đo từ xa của engine đó. Các thành phần sử dụng tra cứu engine thông qua `getRouterBackend(id)`, `listRouterBackends()` và `listRouterBackendsByCapability(cap)` thay vì xử lý đặc biệt từng sidecar.
+[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) khai báo mỗi engine đúng một lần, cùng với vòng đời, các khả năng, định danh dịch vụ, cổng mặc định, cấu hình kiểm tra tình trạng và hỗ trợ đo từ xa của engine đó. Các thành phần sử dụng tra cứu engine thông qua `getRouterBackend(id)`, `listRouterBackends()` và `listRouterBackendsByCapability(cap)` thay vì xử lý đặc biệt từng sidecar.
 
 | Backend     | Vòng đời     | Dịch vụ (trục A) | Backend relay (trục B)   | Kiểm tra tình trạng | Cổng mặc định |
 | ----------- | ------------ | ---------------- | ------------------------ | ------------------- | ------------- |
@@ -39,7 +39,7 @@ Hợp đồng `domain/routing/routerBackends.ts` (mã nguồn được tích h�
 | `vibeproxy` | `external`   | —                | — (adapter nhà cung cấp) | `/v1/models`        | —             |
 
 ¹ Việc nâng cấp Bifrost thành một dịch vụ nhúng `supervised` (có thể cài đặt/khởi động từ `/api/services/bifrost/`) đang được theo dõi trong
-[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817); cho đến khi thay đổi này được hợp nhất, Bifrost chỉ ở dạng `external` (chỉ có thể truy cập thông qua `BIFROST_BASE_URL`).
+[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817); cho đến khi thay đổi này được hợp nhất, Bifrost chỉ ở dạng `external` (chỉ có thể truy cập thông qua `BIFROST_BASE_URL`).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
 `oauth-backed`, `dashboard-embed`, `model-sync`, `native-hot-path`) cho phép bên gọi lọc theo những gì một engine thực sự có thể thực hiện, thay vì mã hóa cứng các nhánh riêng cho từng id.
@@ -105,8 +105,8 @@ Chỉ đường dẫn proxy relay `/api/v1/relay/chat/completions` mới chọn 
 Hiện tại, việc lựa chọn là **tất cả hoặc không gì cả ở cấp relay** — không có việc chuyển đổi engine
 theo từng provider hoặc từng request trên `release/v3.8.43`. Cơ chế kiểm soát theo từng request đang được bổ sung
 bởi phần triển khai manifest của sidecar
-([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 cho phép `auto` chỉ định tuyến các provider đủ điều kiện theo manifest thông qua Bifrost.
 
 ## Tích hợp dashboard

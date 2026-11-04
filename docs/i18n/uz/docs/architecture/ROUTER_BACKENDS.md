@@ -4,9 +4,9 @@
 
 ---
 
-> **Holat:** Qabul qilingan · **Kontekst:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
-> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Shartnoma:** `domain/routing/routerBackends.ts`
-> (tiplashtirilgan reyestr — kod [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) bilan qoʻshiladi)
+> **Holat:** Qabul qilingan · **Kontekst:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
+> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Shartnoma:** `domain/routing/routerBackends.ts`
+> (tiplashtirilgan reyestr — kod [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) bilan qoʻshiladi)
 
 Ushbu ADR `ts` (mahalliy), `bifrost`, `cliproxy`, `9router` va
 VibeProxy bilan mos keluvchi dvigatellarning oʻzaro munosabatini aniq belgilaydi, toki hissa qoʻshuvchilar
@@ -39,7 +39,7 @@ faqat `external` boʻlgan rele yoʻnaltirish backendi.
 ## Reyestr — yagona ishonchli manba
 
 `domain/routing/routerBackends.ts` shartnomasi (kod
-[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) bilan qoʻshiladi) har bir dvigatelni uning
+[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) bilan qoʻshiladi) har bir dvigatelni uning
 hayotiy sikli, imkoniyatlari, xizmat identifikatori, standart porti, sogʻliqni tekshirish konfiguratsiyasi va
 telemetriya qoʻllab-quvvatlashi bilan bir marta eʼlon qiladi. Isteʼmolchilar har bir yordamchi jarayon uchun
 alohida maxsus mantiq yozish oʻrniga dvigatellarni `getRouterBackend(id)`,
@@ -55,7 +55,7 @@ alohida maxsus mantiq yozish oʻrniga dvigatellarni `getRouterBackend(id)`,
 
 ¹ Bifrost’ni `supervised` ichki xizmatga (`/api/services/bifrost/` orqali
 oʻrnatiladigan/ishga tushiriladigan) aylantirish
-[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817) da kuzatilmoqda; u birlashtirilmaguncha
+[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817) da kuzatilmoqda; u birlashtirilmaguncha
 Bifrost faqat `external` boʻlib qoladi (unga faqat `BIFROST_BASE_URL` orqali kirish mumkin).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -125,8 +125,8 @@ backendini tanlaydi; asosiy `/api/v1/chat/completions` interfeysi hech qachon
 Bugungi kunda tanlash relay darajasida **hammasi yoki hech narsa** tamoyiliga asoslanadi —
 `release/v3.8.43` versiyasida har bir provayder yoki har bir so‘rov bo‘yicha mexanizmni
 almashtirish yo‘q. Har bir so‘rov uchun darvoza sidecar manifesti ishlari orqali qo‘shilmoqda
-([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 bu `auto` rejimiga faqat manifest talablariga mos provayderlarni Bifrost orqali marshrutlash imkonini beradi.
 
 ## Boshqaruv paneli integratsiyasi

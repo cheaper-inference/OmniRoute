@@ -255,7 +255,7 @@ Module-ի (System Watcher) կողմից, որը գնահատում է, թե տե
    [Convert]::ToBase64String($b)
    ```
    Արդյունքը պետք է համընկնի `latest.yml` → `sha512` արժեքին։ Եթե չի համընկնում, ջնջեք ֆայլը և
-   կրկին ներբեռնեք միայն [GitHub-ի թողարկումների էջից](https://github.com/diegosouzapw/OmniRoute/releases)։
+   կրկին ներբեռնեք միայն [GitHub-ի թողարկումների էջից](https://github.com/cheaper-inference/OmniRoute/releases)։
 2. **Վերականգնեք + բացառեք** — կարանտինից վերականգնեք հետ շրջված տարրերը և բացառություն
    ավելացրեք `%LOCALAPPDATA%\Programs\OmniRoute`-ի համար (Kaspersky → Settings → Threats and Exclusions),
    ապա նորից տեղադրեք։
@@ -846,7 +846,7 @@ omniroute serve --ready-timeout 180000
 
 ## Դեռևս չե՞ք կարողանում շարունակել
 
-- **GitHub-ի խնդիրներ**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **GitHub-ի խնդիրներ**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **Ճարտարապետություն**: Ներքին մանրամասների համար տե՛ս [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
 - **API-ի տեղեկատու**: Բոլոր վերջնակետերի համար տե՛ս [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)
 - **Վիճակի կառավարման վահանակ**: Համակարգի իրական ժամանակի վիճակը տեսնելու համար ստուգեք **Dashboard → Health** բաժինը

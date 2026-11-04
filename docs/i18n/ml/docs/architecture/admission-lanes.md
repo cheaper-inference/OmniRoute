@@ -129,7 +129,7 @@ OmniRoute-ൽ വ്യത്യസ്ത വ്യാപ്തികളുള�
 
 ## 4. ഒറ്റ-പ്രോസസിലുള്ള ദീർഘ `/v1/responses` (ആരോഗ്യകരമായ-ഹെഡ്റൂം)
 
-[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437)
+[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437)
 `tryAcquireHealthyHeadroom` ചേർത്തു; അതുവഴി ഹീപ്പ്
 `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`-നു താഴെയായിരിക്കുമ്പോൾ ഘടനാപരമായി ഭാരമേറിയ രണ്ടാമത്തെ അഭ്യർത്ഥന അനുവദിക്കുന്നു.
 `admitChatRequest` ഉപയോഗിക്കുന്ന BYTE പാതയും (ബോഡികൾ ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

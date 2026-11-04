@@ -9,7 +9,7 @@
 Agar OmniRoute’da xavfsizlik zaifligini aniqlasangiz, bu haqda mas’uliyat bilan xabar bering:
 
 1. Ommaviy GitHub muammosini **OCHMANG**
-2. [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) xizmatidan foydalaning
+2. [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) xizmatidan foydalaning
 3. Quyidagilarni kiriting: tavsif, takrorlash bosqichlari va ehtimoliy ta’sir
 
 ## Javob berish muddati
@@ -35,7 +35,7 @@ Agar OmniRoute’da xavfsizlik zaifligini aniqlasangiz, bu haqda mas’uliyat bi
 
 - **`stable/v3` nimalarni oladi:** xatolarni tuzatish, xavfsizlik yamoqlari va provayder yangilanishlari. Yangi funksiyalar v4 kanaliga yuboriladi; LTS liniyasida barqarorlik birinchi oʻrinda turadi. `npm install omniroute` (`latest` dist-tegi) butun v4 sikli davomida v3 versiyasida qoladi.
 - **Qoʻllab-quvvatlash muddati:** `stable/v3` **3.9.0 chiqarilganidan keyin 12 oy davomida yoki v4.0.0 `latest` sifatida eʼlon qilinganidan keyin 90 kun oʻtguniga qadar — qaysi biri kechroq boʻlsa**, xavfsizlik tuzatishlari va jiddiy regressiya tuzatishlarini oladi. Yakuniy tugash sanasi 3.9.0 versiyasining reliz qaydlarida va reliz chiqarilganda [`ROADMAP.md`](ROADMAP.md) faylida qayd etiladi.
-- **LTS liniyasidagi zaiflik haqida xabar berish:** boshqa barcha versiyalardagi kabi bir xil kanal orqali — faqat yopiq [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new), hech qachon ommaviy muammo sifatida emas. Qaysi versiyani sinaganingizni koʻrsating (masalan, `3.9.2`); tuzatishlar `stable/v3` tarmogʻiga kiritiladi va v4 versiyasiga ham koʻchiriladi.
+- **LTS liniyasidagi zaiflik haqida xabar berish:** boshqa barcha versiyalardagi kabi bir xil kanal orqali — faqat yopiq [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new), hech qachon ommaviy muammo sifatida emas. Qaysi versiyani sinaganingizni koʻrsating (masalan, `3.9.2`); tuzatishlar `stable/v3` tarmogʻiga kiritiladi va v4 versiyasiga ham koʻchiriladi.
 - **LTS chiqarilishidagi xavfsizlik asosiy holati:** skanerning oʻlchangan holati, marshrut himoyasi va ommaviy hisob maʼlumotlariga oid dalillar [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md) faylida qayd etiladi.
 
 ---

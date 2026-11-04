@@ -45,9 +45,9 @@
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=social)](https://github.com/cheaper-inference/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/OmniRoute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 Alătură-te comunității
@@ -96,7 +96,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 [![Licență: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Descărcări Docker](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Descărcări Electron](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![Descărcări Electron](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -521,7 +521,7 @@ Toate cele **20** de strategii — combină-le după preferință pentru fiecare
 OmniRoute este licențiat sub MIT și întreținut în mod deschis. Dacă te ajută să economisești timp sau bani, iată cum îl poți ajuta să rămână independent — alege opțiunea care ți se potrivește. Sponsorizarea nu afectează niciodată prioritatea rutării; aceasta oferă vizibilitate, nu o poziție mai bună în clasament.
 
 <table>
-  <tr><td nowrap>⭐ <b>Acordă o stea depozitului</b></td><td>Gratuit — ajută cu adevărat la vizibilitate</td><td><a href="https://github.com/diegosouzapw/OmniRoute">Acordă o stea OmniRoute</a></td></tr>
+  <tr><td nowrap>⭐ <b>Acordă o stea depozitului</b></td><td>Gratuit — ajută cu adevărat la vizibilitate</td><td><a href="https://github.com/cheaper-inference/OmniRoute">Acordă o stea OmniRoute</a></td></tr>
   <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>Unică sau lunară · fără comision de platformă</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
   <tr><td nowrap>☕ <b>Ko-fi</b></td><td>Donație unică rapidă, fără înregistrare pentru donator</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
   <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>Un gest mic și informal</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
@@ -558,7 +558,7 @@ Pix copia-e-cola:
 
 </details>
 
-🐛 Ai găsit o eroare sau ai sugestii? Deschide o [Discuție](https://github.com/diegosouzapw/OmniRoute/discussions).
+🐛 Ai găsit o eroare sau ai sugestii? Deschide o [Discuție](https://github.com/cheaper-inference/OmniRoute/discussions).
 
 <br/>
 
@@ -1262,7 +1262,7 @@ proces pe un singur port, astfel că în prezent nu există un pachet separat de
 
 Metrici canonice la 2026-10-18: **1.976 de videoclipuri unice** · **20.220.289 de vizualizări cunoscute** (`v > 0`) · **1.210 canale/profiluri în funcție de rețea**. Panoul brut conține 1.976 de rânduri (YouTube 1.352 = 740 videoclipuri lungi + 612 Shorts · TikTok 334 · Instagram 290); nu a rămas niciun duplicat după normalizarea după URL-ul canonic, care păstrează cel mai mare număr de vizualizări pentru fiecare videoclip. Colectarea datelor de pe YouTube este înghețată la 2026-10-13 (cota API epuizată în perioada 14–18/10), iar cea de pe TikTok/Instagram începând cu 2026-09-02 (fără credite pentru colectare); 76 de videoclipuri încă nu au un număr de vizualizări.
 
-> 🎬 **Ai realizat un videoclip despre OmniRoute?** Deschide un [tichet](https://github.com/diegosouzapw/OmniRoute/issues/new) sau o [discuție](https://github.com/diegosouzapw/OmniRoute/discussions) cu linkul — îl vom prezenta aici.
+> 🎬 **Ai realizat un videoclip despre OmniRoute?** Deschide un [tichet](https://github.com/cheaper-inference/OmniRoute/issues/new) sau o [discuție](https://github.com/cheaper-inference/OmniRoute/discussions) cu linkul — îl vom prezenta aici.
 
 <br/>
 
@@ -1282,8 +1282,8 @@ Metrici canonice la 2026-10-18: **1.976 de videoclipuri unice** · **20.220.289 
 | 🟢 **WhatsApp — 🇧🇷 Brazilia**                       | [intră în grup](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                                           |
 | 🌍 **Site web**                                     | [omniroute.online](https://omniroute.online)                                                                                               |
 | 🌍 **Comunitatea 🌍StHub OmniRoute (gratuită)**     | [portalul sthub](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                                    |
-| 📦 **Cod sursă**                                    | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                                             |
-| 🐛 **Raportează o eroare**                          | [deschide o sesizare](https://github.com/diegosouzapw/OmniRoute/issues) — atașează rezultatul comenzii `npm run system-info`               |
+| 📦 **Cod sursă**                                    | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                                                   |
+| 🐛 **Raportează o eroare**                          | [deschide o sesizare](https://github.com/cheaper-inference/OmniRoute/issues) — atașează rezultatul comenzii `npm run system-info`          |
 | 🤝 **Contribuie**                                   | [CONTRIBUTING.md](CONTRIBUTING.md) · [Modelul de ramificare și lansare](docs/ops/BRANCHING_MODEL.md) · alege o problemă `good first issue` |
 | 💚 **Susține proiectul**                            | [Modalități de susținere ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)                             |
 
@@ -1641,7 +1641,7 @@ Mulțumiri din inimă celor care finanțează OmniRoute din propriul buzunar —
 
 </div>
 
-[![Contributors](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
 
 <sub>Auditat la 2026-11-02 pe tip-ul live <code>release/v3.8.53</code> <code>1c7135e0fb</code> (7.972 de commituri): <b>1.074 de identități Git umane normalizate</b> — 759 apar ca autori ai commiturilor (inclusiv maintainerul), iar 315 apar doar în trailere explicite <code>Co-authored-by</code>. Recensământul aplică <code>.mailmap</code>, compară adresele de e-mail fără diferențiere între litere mari și mici, asociază adresele numerice și simple GitHub noreply doar atunci când codifică același handle, exclude 29 de identități de tip bot/agent/serviciu/placeholder și nu combină adrese de e-mail obișnuite doar pentru că numele afișate coincid. Auditul din 2026-08-24 a publicat 639; această metodă, rulată din nou pe baza acelui audit <code>ac02c5b42f</code>, oferă 619, astfel încât creșterea provine de la contributori noi, nu de la o metodă mai permisivă.</sub>
 
@@ -1670,11 +1670,11 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 ## 📊 Stele
 
-<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="Graficul istoricului stelelor" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <img alt="Graficul istoricului stelelor" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
  </picture>
 </a>
 

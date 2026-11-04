@@ -478,7 +478,7 @@ codex debug models --bundled       # แสดงรายการแค็ต�
 | เซสชันสลับบัญชีอยู่เรื่อย ๆ / ความต่อเนื่องของแคชพรอมต์สูญหายไประหว่างรอบการสนทนา | TTL ของความสัมพันธ์ของเซสชันเป็น `0` (ปิดใช้งาน)                                     | `sessionAffinityTtlMs`   |
 | การเชื่อมต่อขาดระหว่างการให้เหตุผลโดยไม่มีพรอมต์แสดงต่อไคลเอนต์                   | ตัวตรวจจับสตรีมที่ไม่มีความเคลื่อนไหวทำงานหลังจากไม่มีชังก์จากต้นทางเป็นเวลา 10 นาที | `STREAM_IDLE_TIMEOUT_MS` |
 
-การอภิปรายที่เกี่ยวข้อง: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (งานระยะยาวหลุด), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (เหตุผลที่ปิดความสัมพันธ์ไว้เป็นค่าเริ่มต้น) การติดตาม: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287)
+การอภิปรายที่เกี่ยวข้อง: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (งานระยะยาวหลุด), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (เหตุผลที่ปิดความสัมพันธ์ไว้เป็นค่าเริ่มต้น) การติดตาม: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287)
 
 ### 1. ความสัมพันธ์ของเซสชัน — ตรึงหนึ่งการสนทนาไว้กับหนึ่งบัญชี
 

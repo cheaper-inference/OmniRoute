@@ -247,7 +247,7 @@ Kaspersky හි `PDM:` උපසර්ගය යනු, දන්නා අන�
    [Convert]::ToBase64String($b)
    ```
    ප්රතිදානය `latest.yml` → `sha512` සමඟ ගැළපිය යුතුය. එය නොගැළපේ නම්, ගොනුව මකා
-   [GitHub නිකුතු පිටුවෙන්](https://github.com/diegosouzapw/OmniRoute/releases) පමණක්
+   [GitHub නිකුතු පිටුවෙන්](https://github.com/cheaper-inference/OmniRoute/releases) පමණක්
    නැවත බාගන්න.
 2. **ප්රතිසාධනය කර බැහැර කරන්න** — ආපසු හරවන ලද අයිතම නිරෝධායනයෙන් ප්රතිසාධනය කර
    `%LOCALAPPDATA%\Programs\OmniRoute` සඳහා බැහැර කිරීමක් එක් කරන්න (Kaspersky → Settings → Threats and Exclusions),
@@ -842,7 +842,7 @@ omniroute serve --ready-timeout 180000
 
 ## තවමත් සිරවී සිටිනවාද?
 
-- **GitHub ගැටලු**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **GitHub ගැටලු**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **ගෘහනිර්මාණය**: අභ්යන්තර විස්තර සඳහා [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) බලන්න
 - **API යොමුව**: සියලුම අන්ත ලක්ෂ්ය සඳහා [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) බලන්න
 - **සෞඛ්ය උපකරණ පුවරුව**: තත්ය කාලීන පද්ධති තත්ත්වය සඳහා **Dashboard → Health** පරීක්ෂා කරන්න

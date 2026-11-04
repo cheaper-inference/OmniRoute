@@ -18,7 +18,7 @@ Agent Skills — это структурированные файлы SKILL.md, 
 - **Канонический ID** (`omni-auth`, `cli-serve` и т. д.)
 - Файл **SKILL.md** в `skills/{id}/SKILL.md` с YAML frontmatter (`name`, `description`) и содержательным Markdown-текстом
 - **Конечные точки REST** (навыки API) или **подкоманды CLI** (навыки CLI), полученные из спецификации OpenAPI и реестра CLI
-- **Необработанный URL GitHub** для загрузки актуальной версии: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- **Необработанный URL GitHub** для загрузки актуальной версии: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Прямое получение необработанного файла с GitHub (сервер не требуется)
 
 ```bash
-BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

@@ -5,7 +5,7 @@
 ---
 
 Det här dokumentet redovisar implementeringsbeslutet för
-[Issue #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854). De publika produkterna
+[Issue #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854). De publika produkterna
 representeras som fyra leverantörsfamiljer. Region är anslutningsdata, inte en separat produkt.
 
 ## Beslut

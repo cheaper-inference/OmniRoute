@@ -18,7 +18,7 @@ Agent Skills は、外部エージェント、MCP クライアント、A2A オ�
 - **正規 ID**（`omni-auth`、`cli-serve` など）
 - YAML フロントマター（`name`、`description`）と内容豊富な Markdown 本文を含む、`skills/{id}/SKILL.md` の **SKILL.md** ファイル
 - OpenAPI 仕様と CLI レジストリから派生した **REST エンドポイント**（API スキル）または **CLI サブコマンド**（CLI スキル）
-- ライブ取得用の **GitHub raw URL**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- ライブ取得用の **GitHub raw URL**: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. GitHub raw からの直接取得（サーバー不要）
 
 ```bash
-BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

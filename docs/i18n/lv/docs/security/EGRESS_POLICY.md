@@ -55,7 +55,7 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ## Kāpēc tā pastāv
 
-Ieviesta PR [#3777](https://github.com/diegosouzapw/OmniRoute/pull/3777). Galvenās problēmas, kuru dēļ tā tika ieviesta:
+Ieviesta PR [#3777](https://github.com/cheaper-inference/OmniRoute/pull/3777). Galvenās problēmas, kuru dēļ tā tika ieviesta:
 
 | Problēma                                                        | Ko direktīva novērš                                                                                                                                                                                                                                                                                                                                              |
 | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

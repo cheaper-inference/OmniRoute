@@ -254,7 +254,7 @@ Koda parakstīšana ir plānota; līdz tās ieviešanai tas var atkārtoties jau
    [Convert]::ToBase64String($b)
    ```
    Izvadei jāsakrīt ar `latest.yml` → `sha512`. Ja tā nesakrīt, izdzēsiet failu un
-   atkārtoti lejupielādējiet to tikai no [GitHub laidienu lapas](https://github.com/diegosouzapw/OmniRoute/releases).
+   atkārtoti lejupielādējiet to tikai no [GitHub laidienu lapas](https://github.com/cheaper-inference/OmniRoute/releases).
 2. **Atjaunojiet un pievienojiet izņēmumu** — atjaunojiet atsauktos vienumus no karantīnas un
    pievienojiet izņēmumu `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Settings → Threats and Exclusions),
    pēc tam instalējiet vēlreiz.
@@ -850,7 +850,7 @@ Pilnu informāciju par `OMNIROUTE_READY_TIMEOUT_MS` skatiet
 
 ## Joprojām neizdodas?
 
-- **GitHub problēmas**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **GitHub problēmas**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **Arhitektūra**: Iekšējo informāciju skatiet [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
 - **API atsauce**: Visus galapunktus skatiet [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)
 - **Darbspējas informācijas panelis**: Sistēmas statusu reāllaikā skatiet sadaļā **Informācijas panelis → Darbspēja**

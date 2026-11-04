@@ -53,7 +53,7 @@ flowchart LR
 یہ فرض کرنے سے پہلے کہ مطلوبہ branch merge کی جا سکتی ہے، کسی کھلے freeze کی جانچ کریں:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Merge کا طریقۂ کار (مالک کا `queue` label → Mergify)

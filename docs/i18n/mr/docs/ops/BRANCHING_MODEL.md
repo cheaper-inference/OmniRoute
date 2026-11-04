@@ -53,7 +53,7 @@ flowchart LR
 तुम्हाला हवी असलेली ब्रँच मर्ज करण्यायोग्य आहे असे गृहीत धरण्यापूर्वी खुला फ्रीझ आहे का ते तपासा:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 मर्जची कार्यपद्धती (मालकाचे `queue` लेबल → Mergify)

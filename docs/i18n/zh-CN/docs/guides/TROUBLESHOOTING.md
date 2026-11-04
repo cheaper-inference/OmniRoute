@@ -214,7 +214,7 @@ Avast 和 AVG 会运行一种启发式检测，将包含大量类似 HTTP 请求
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   输出必须与 `latest.yml` → `sha512` 一致。如果不一致，请删除该文件，并仅从 [GitHub 发行版页面](https://github.com/diegosouzapw/OmniRoute/releases)重新下载。
+   输出必须与 `latest.yml` → `sha512` 一致。如果不一致，请删除该文件，并仅从 [GitHub 发行版页面](https://github.com/cheaper-inference/OmniRoute/releases)重新下载。
 2. **恢复并排除** — 从隔离区恢复被回滚的项目，并为 `%LOCALAPPDATA%\Programs\OmniRoute` 添加排除项（Kaspersky → 设置 → 威胁和排除项），然后重新安装。
 3. **报告误报** — <https://opentip.kaspersky.com/>。用户提交的误报报告确实能够加快加入允许列表的速度。
 
@@ -798,7 +798,7 @@ omniroute serve --ready-timeout 180000
 
 ## 仍然无法解决？
 
-- **GitHub Issues**：[github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **GitHub Issues**：[github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **架构**：有关内部实现的详细信息，请参阅 [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
 - **API 参考**：有关所有端点的信息，请参阅 [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)
 - **健康状态仪表板**：查看 **Dashboard → Health** 以了解实时系统状态

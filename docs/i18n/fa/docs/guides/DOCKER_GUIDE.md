@@ -325,7 +325,7 @@ docker build --target runner-base \
 
 ### RAM زمان اجرا برای عاملهای کدنویسی
 
-مقدار پیشفرض ۱ GiB در Docker، حداقل لازم برای داشبورد/گفتوگوی سبک است، نه اندازهای مناسب برای محیط عملیاتی. بدنههای طولانی `POST /v1/responses` (صدها پیام و دهها ابزار) هنگام فشردهسازی، چندین گراف را در حافظه نگه میدارند. دو درخواست همپوشان با اندازهٔ حدود ۳ MiB / حدود ۷۵۰ هزار توکن، V8 را با old-space برابر با **۱۲ GiB** متوقف کردهاند (`FATAL ERROR: Reached heap limit`) و همچنین موجب OOM در cgroup با ۱۶ GiB شدهاند. [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) را ببینید.
+مقدار پیشفرض ۱ GiB در Docker، حداقل لازم برای داشبورد/گفتوگوی سبک است، نه اندازهای مناسب برای محیط عملیاتی. بدنههای طولانی `POST /v1/responses` (صدها پیام و دهها ابزار) هنگام فشردهسازی، چندین گراف را در حافظه نگه میدارند. دو درخواست همپوشان با اندازهٔ حدود ۳ MiB / حدود ۷۵۰ هزار توکن، V8 را با old-space برابر با **۱۲ GiB** متوقف کردهاند (`FATAL ERROR: Reached heap limit`) و همچنین موجب OOM در cgroup با ۱۶ GiB شدهاند. [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849) را ببینید.
 
 اندازهٔ **`--memory` در cgroup را بیشتر از heap** در نظر بگیرید — بافرهای بومی، SQLite و دادههای میانی فشردهسازی خارج از V8 قرار میگیرند.
 
@@ -672,7 +672,7 @@ spec:
 
 خواب `preStop` به Kube اجازه میدهد تا نقاط پایانی سرویس را قبل از SIGTERM رها کند** جدید** ترافیک روند مرگ را متوقف می کند. `/v1/responses` SSE در پرواز تا `SHUTDOWN_TIMEOUT_MS` (پیشفرض 30s) از طریق اجاره نامههای سنگین وزن (#11015) تخلیه میشود. درخواستهای جدیدی که هنوز به فرآیند میرسند `503` + `Retry-After: 5` دریافت میکنند. بازآفرینی شکاف نقطه پایانی خالی تا زمانی که جایگزین آماده شود، یک قطعی سخت باقی می ماند - این توپولوژی SQLite است، نه یک پیکربندی نادرست پروب.
 
-Postgres خارجی / چندنویسنده HA است** نه** یک مسیر سهام مستند اگر به HA نیاز دارید، یک ماکت را نگه دارید یا توپولوژی را که پروژه آزمایش و مستند کرده است به طور جداگانه اجرا کنید. اثر Postgres/MySQL در [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) زندگی می کند. تا زمانی که کشتی، تنها راه پشتیبانی شده برای تکثیر** بزرگ** ظرفیت `/v1/responses` N فرآیند مستقل است (بخش بعدی)، نه `replicas > 1` در یک حجم.
+Postgres خارجی / چندنویسنده HA است** نه** یک مسیر سهام مستند اگر به HA نیاز دارید، یک ماکت را نگه دارید یا توپولوژی را که پروژه آزمایش و مستند کرده است به طور جداگانه اجرا کنید. اثر Postgres/MySQL در [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) زندگی می کند. تا زمانی که کشتی، تنها راه پشتیبانی شده برای تکثیر** بزرگ** ظرفیت `/v1/responses` N فرآیند مستقل است (بخش بعدی)، نه `replicas > 1` در یک حجم.
 
 ## Scale out: N فرآیند مستقل
 
@@ -682,11 +682,11 @@ Postgres خارجی / چندنویسنده HA است** نه** یک مسیر سه
 
 نمونه غیرفعال زمانی که نیاز به بهروزرسانی باشد، اتصال را دوباره میخواند و فقط یک نشانه دسترسی متفاوت و منقضی نشده را میپذیرد. در غیر این صورت رفرش بدون منقضی شدن یا غیرفعال کردن اتصال یا شمارش خرابی رفرش شکن غیرفعال می شود. خرابیهای واقعی احراز هویت بالادستی همچنان از حسابداری شکست عادی، خنک شدن نمایی و خطای مشتری عادی استفاده میکنند. غیرفعال کردن حساب دائمی است. قبل از منقضی شدن نشانههای دسترسی، توکنهای چرخانده مالک را همگامسازی کنید (سرنخ پیشفرض تازهسازی فعال پنج دقیقه است)، یا فایل تأیید Codex را دوباره وارد کنید. واردات غیرفعال توکن های عرضه شده را بدون اعتبارسنجی در نقطه پایانی توکن ذخیره می کند. رفرش دستی dashboard/API `409 refresh_disabled` را برمی گرداند. لاگین های جدید OAuth بدون تغییر هستند. [مرجع محیط را](../reference/ENVIRONMENT.md#passive-codex-token-refresh) ببینید.
 
-فرآیند یک گره است** یک پشته V8** . دو همپوشانی ~ 3 MiB / ~ 750k-token-coding-agent `POST /v1/responses` (RTK + Caveman) آن پشته را در ~ 12 Gi (`FATAL ERROR: Reached heap limit`) لغو میکنند و میتوانند یک cgroup 16 Gi را OOM. [شماره #7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) را ببینید. آن اندازه گیری الف است** حافظه-بودجه** هشدار، محصول هارد حداکثر دو `/v1/responses` طولانی نیست. پذیرش چت سنگین توسط یک بودجه بایت ورودی بهدستآمده خودکار (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`، `src/shared/middleware/admissionBudget.ts`) با اندازه همان سقف V8/cgroup — انجام میشود که آن را به سمت بالا نادیده میگیرد (یا تنظیم سقف شمارش درخواست `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` قدیمی) در فرآیندی با اندازه قبلی، توقف را دوباره معرفی میکند. چت های کوچک، `/healthz`، `/v1/models` و MCP هستند** نه** در آن کلاه
+فرآیند یک گره است** یک پشته V8** . دو همپوشانی ~ 3 MiB / ~ 750k-token-coding-agent `POST /v1/responses` (RTK + Caveman) آن پشته را در ~ 12 Gi (`FATAL ERROR: Reached heap limit`) لغو میکنند و میتوانند یک cgroup 16 Gi را OOM. [شماره #7849](https://github.com/cheaper-inference/OmniRoute/issues/7849) را ببینید. آن اندازه گیری الف است** حافظه-بودجه** هشدار، محصول هارد حداکثر دو `/v1/responses` طولانی نیست. پذیرش چت سنگین توسط یک بودجه بایت ورودی بهدستآمده خودکار (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`، `src/shared/middleware/admissionBudget.ts`) با اندازه همان سقف V8/cgroup — انجام میشود که آن را به سمت بالا نادیده میگیرد (یا تنظیم سقف شمارش درخواست `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` قدیمی) در فرآیندی با اندازه قبلی، توقف را دوباره معرفی میکند. چت های کوچک، `/healthz`، `/v1/models` و MCP هستند** نه** در آن کلاه
 
 ### یک فرآیند: بیش از دو `/v1/responses` طولانی
 
-الف** سالم** فرآیند (هپ زیر `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`، `0.75` پیشفرض)** می** بیش از دو `POST /v1/responses` طولانی همزمان اجرا کنید، زمانی که بودجه بایت بایتی در کل فرآیند (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) هنوز جا دارد. بدنههایی در یا بالاتر از `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (پیشفرض 256 KiB) همان اجاره سنگین وزن را به عنوان درخواستهای ساختاری سنگین میگیرند و از همان [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) استفاده میکنند. ده ها مشتری طولانی SSE همزمان (اپراتورها اغلب به 40 تا 50 نیاز دارند) a** حافظه-بودجه** سوال — اندازه پشته + primary/headroom اسلات + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — محدودیت محصول "حداکثر 2" سخت نیست. یک پشته تحت فشار همچنان با `503` قابل آزمایش مجدد می ریزد بنابراین #7849 برنمی گردد.
+الف** سالم** فرآیند (هپ زیر `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`، `0.75` پیشفرض)** می** بیش از دو `POST /v1/responses` طولانی همزمان اجرا کنید، زمانی که بودجه بایت بایتی در کل فرآیند (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) هنوز جا دارد. بدنههایی در یا بالاتر از `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (پیشفرض 256 KiB) همان اجاره سنگین وزن را به عنوان درخواستهای ساختاری سنگین میگیرند و از همان [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) استفاده میکنند. ده ها مشتری طولانی SSE همزمان (اپراتورها اغلب به 40 تا 50 نیاز دارند) a** حافظه-بودجه** سوال — اندازه پشته + primary/headroom اسلات + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — محدودیت محصول "حداکثر 2" سخت نیست. یک پشته تحت فشار همچنان با `503` قابل آزمایش مجدد می ریزد بنابراین #7849 برنمی گردد.
 
 به** توده ها را ضرب کنید** (فضاهای قدیمی V8 مستقل)** امروز** :
 
@@ -729,7 +729,7 @@ volumes:
   omniroute-b-data:
 ```
 
-چگالی در فرآیند (فشرده سازی جدایه HTTP ) [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023) است. یک خوشه منطقی در حالت بادوام مشترک [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) است.
+چگالی در فرآیند (فشرده سازی جدایه HTTP ) [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023) است. یک خوشه منطقی در حالت بادوام مشترک [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) است.
 
 ## خطاهای منطقهای Gemini در داخل Docker
 
@@ -771,7 +771,7 @@ docker compose exec omniroute node -e 'require("node:dns").lookup("generativelan
 
 ### جایگزین در سطح میزبان: IPv6 فعال و سیاست resolver
 
-گزارشدهنده [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) با فعال کردن
+گزارشدهنده [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) با فعال کردن
 IPv6 کانتینر و تغییر نحوه انتخاب آدرس در glibc، دسترسی را در محیط خود بازیابی کرد.
 این راهکار را بهعنوان جایگزینی مختص همان محیط در نظر بگیرید. پیش از تغییر ترجیحات resolver،
 از کارکرد صحیح IPv6 میزبان، خروجی/مسیریابی کانتینر و قوانین فایروال اطمینان حاصل کنید.

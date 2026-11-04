@@ -223,7 +223,7 @@ livenessProbe:
 
 **Не** насочвайте проверката за **жизненост** на kubelet към `/api/monitoring/health`. Този път извършва реални операции с базата данни/наблюдението и при натоварване ще отчита фалшиви положителни резултати.
 
-Свързани: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (проверки, докато цикълът на събитията е зает), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (монополизиране на ресурсите от ценообразуването на каталога), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (монополизиране на ресурсите от броенето на токени при компресия).
+Свързани: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (проверки, докато цикълът на събитията е зает), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (монополизиране на ресурсите от ценообразуването на каталога), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (монополизиране на ресурсите от броенето на токени при компресия).
 
 ### systemd watchdog (замръзнал цикъл на събитията)
 

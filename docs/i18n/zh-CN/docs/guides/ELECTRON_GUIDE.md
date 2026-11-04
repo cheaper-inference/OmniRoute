@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## 自动更新
 
-`electron-updater`与GitHub提供程序 (`diegosouzapw/OmniRoute`) 结合使用。
+`electron-updater`与GitHub提供程序 (`cheaper-inference/OmniRoute`) 结合使用。
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - 通过`update-status` IPC转发到渲染器的事件： `checking`、 `available`、 `not-available`、 `downloading` （使用`percent`）、 `downloaded`、 `error`
@@ -273,7 +273,7 @@ AppImage签名是可选的—如果签名则设置`LINUX_GPG_KEY` 。
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-版本发布到GitHub版本 (`diegosouzapw/OmniRoute`)，这也是`electron-updater`检查新版本的地方。
+版本发布到GitHub版本 (`cheaper-inference/OmniRoute`)，这也是`electron-updater`检查新版本的地方。
 
 ## 故障排除
 

@@ -171,7 +171,7 @@ Antigravity ವಿನಂತಿಗಳು ಕರೆಮಾಡುವವರ ಪಠ್
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` ಅನ್ನು ಓದುತ್ತದೆ
 - `src/lib/oauth/providers/antigravity.ts` — ಕ್ರೆಡೆನ್ಷಿಯಲ್ ಪ್ಲಂಬಿಂಗ್
-- ಮೂಲ ಘಟನೆ ವರದಿ: ಚರ್ಚೆ [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- ಮೂಲ ಘಟನೆ ವರದಿ: ಚರ್ಚೆ [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

@@ -467,7 +467,7 @@ OmniRoute の2つのデフォルト設定が、数時間にわたる Codex CLI �
 | セッションがアカウントを切り替え続ける／ターン間でプロンプトキャッシュの連続性が失われる | セッションアフィニティの TTL が `0`（無効）                              | `sessionAffinityTtlMs`   |
 | クライアント側にプロンプトが表示されないまま、推論途中で接続が切れる                     | 上流からのチャンクがない状態が10分続き、ストリームアイドル監視が作動した | `STREAM_IDLE_TIMEOUT_MS` |
 
-関連ディスカッション：[#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126)（長時間タスクの切断）、[#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718)（アフィニティがデフォルトで無効になっている理由）。追跡用：[#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287)。
+関連ディスカッション：[#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126)（長時間タスクの切断）、[#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718)（アフィニティがデフォルトで無効になっている理由）。追跡用：[#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287)。
 
 ### 1. セッションアフィニティ — 1つの会話を1つのアカウントに固定する
 

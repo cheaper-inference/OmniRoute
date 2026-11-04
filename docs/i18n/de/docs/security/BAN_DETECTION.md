@@ -51,8 +51,8 @@ keine automatische Wiederherstellung), während der Betreiber eine Verifizierung
 Wenn die Formulierung in der Sperrliste verbleibt, ist außerdem der wiederherstellbare Cloud-Code-403-Zweig in
 `classifyProviderError` für diesen Wortlaut nicht erreichbar, da `accountDeactivated` zuerst
 ausgewertet wird — sodass die in
-[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) und
-[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) hinzugefügte Projektrouten-Wiederherstellung für Gemini Code Assist niemals ausgeführt werden konnte.
+[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) und
+[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) hinzugefügte Projektrouten-Wiederherstellung für Gemini Code Assist niemals ausgeführt werden konnte.
 
 Drei angrenzende, **separate** Signaltabellen sind _nicht_ Teil der Erkennung gesperrter Schlüsselwörter:
 

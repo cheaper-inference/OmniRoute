@@ -197,7 +197,7 @@ API-avain annetaan 5divelle **vakiosyötteen** kautta (`--api-key=-`), joten se 
 
 Kun profiili kohdistetaan yksittäisen mallin sijasta OmniRoute-**yhdistelmään**, parvi saa
 palveluntarjoajan vikasietoisen vaihdon: kun ensisijainen päätepiste kaatui kokonaan kesken vuoron
-kohteessa [#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578) tallennetussa ajossa, agentti suoritti
+kohteessa [#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578) tallennetussa ajossa, agentti suoritti
 jäljellä olevat vaiheensa varapalvelussa eikä tuonut käyttökatkoa koskaan näkyviin.
 
 ---

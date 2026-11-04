@@ -51,8 +51,8 @@ Google Cloud Code / Antigravity آن را بهصورت `403 VALIDATION_REQUIRED`
 نگهداشتن این عبارت در فهرست مسدودسازی همچنین باعث میشد شاخه قابلبازیابی 403 مربوط به cloud-code در
 `classifyProviderError` برای این عبارت دسترسناپذیر شود، زیرا `accountDeactivated` ابتدا
 ارزیابی میشود — بنابراین بازیابی مسیر پروژه که برای Gemini Code Assist در
-[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) و
-[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) اضافه شده بود، هرگز نمیتوانست اجرا شود.
+[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) و
+[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) اضافه شده بود، هرگز نمیتوانست اجرا شود.
 
 سه جدول سیگنال مجاور و **مجزا** بخشی از تشخیص کلیدواژههای مسدودسازی _نیستند_:
 

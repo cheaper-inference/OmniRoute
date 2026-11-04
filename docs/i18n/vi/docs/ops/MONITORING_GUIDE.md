@@ -220,7 +220,7 @@ livenessProbe:
 
 **Không** trỏ probe **liveness** của kubelet tới `/api/monitoring/health`. Đường dẫn đó thực hiện công việc DB/giám sát thực tế và sẽ báo lỗi giả khi chịu tải.
 
-Liên quan: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (các probe khi vòng lặp sự kiện đang bận), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (định giá danh mục chiếm dụng tài nguyên), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (đếm token khi nén chiếm dụng tài nguyên).
+Liên quan: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (các probe khi vòng lặp sự kiện đang bận), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (định giá danh mục chiếm dụng tài nguyên), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (đếm token khi nén chiếm dụng tài nguyên).
 
 ### Watchdog của systemd (vòng lặp sự kiện bị đóng băng)
 

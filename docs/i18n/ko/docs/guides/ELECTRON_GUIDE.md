@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## 자동 업데이트
 
-GitHub 공급자(`diegosouzapw/OmniRoute`)와 함께 `electron-updater` 사용합니다.
+GitHub 공급자(`cheaper-inference/OmniRoute`)와 함께 `electron-updater` 사용합니다.
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - `update-status` IPC 통해 렌더러로 전달되는 이벤트: `checking`, `available`, `not-available`, `downloading` ( `percent` 사용 ), `downloaded`, `error`
@@ -273,7 +273,7 @@ AppImage 서명은 선택 사항입니다. — 서명하는 경우 `LINUX_GPG_KE
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-릴리스는 GitHub 릴리스(`diegosouzapw/OmniRoute`)에 게시되며 `electron-updater` 새 버전을 확인하는 곳이기도 합니다.
+릴리스는 GitHub 릴리스(`cheaper-inference/OmniRoute`)에 게시되며 `electron-updater` 새 버전을 확인하는 곳이기도 합니다.
 
 ## 문제 해결
 

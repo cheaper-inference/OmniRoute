@@ -455,7 +455,7 @@ repozitorija; nič se ne objavi.
 gh workflow run preview-artifact.yml -f pr_number=<N>   # ali dodajte oznako `preview-artifact`
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # namestitev predogleda
 ```
 

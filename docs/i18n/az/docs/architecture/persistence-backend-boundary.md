@@ -5,7 +5,7 @@
 ---
 
 - **Status:** Təklif edilib — icra mühiti üzrə işlər başlamazdan əvvəl müşayiətçinin təsdiqi tələb olunur
-- **İzləmə məsələsi:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
+- **İzləmə məsələsi:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
 - **Əhatə dairəsi:** Yalnız davamlılıq arxitekturası; bu qərar xarici verilənlər bazası əlavə etmir və ya seçmir
 
 ## Kontekst

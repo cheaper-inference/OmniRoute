@@ -5,7 +5,7 @@
 ---
 
 - **狀態：** 提議中 — 在執行階段相關工作開始前，需要維護者核准
-- **追蹤議題：** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
+- **追蹤議題：** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
 - **範圍：** 僅限持久化架構；此決策不會新增或選定外部資料庫
 
 ## 背景

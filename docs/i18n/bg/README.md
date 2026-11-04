@@ -45,9 +45,9 @@
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=social)](https://github.com/cheaper-inference/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/OmniRoute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 Присъединете се към общността
@@ -96,7 +96,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![Electron Downloads](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -521,7 +521,7 @@ curl http://localhost:20128/v1/chat/completions \
 OmniRoute е лицензиран под MIT и се поддържа открито. Ако ви спестява време или пари, ето как можете да помогнете да остане независим — изберете най-подходящия за вас начин. Спонсорството никога не влияе върху приоритета на маршрутизиране; то осигурява видимост, а не по-високо класиране.
 
 <table>
-  <tr><td nowrap>⭐ <b>Добавете звездичка на хранилището</b></td><td>Безплатно — наистина помага за видимостта</td><td><a href="https://github.com/diegosouzapw/OmniRoute">Добавете звездичка на OmniRoute</a></td></tr>
+  <tr><td nowrap>⭐ <b>Добавете звездичка на хранилището</b></td><td>Безплатно — наистина помага за видимостта</td><td><a href="https://github.com/cheaper-inference/OmniRoute">Добавете звездичка на OmniRoute</a></td></tr>
   <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>Еднократно или месечно · без такса за платформата</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
   <tr><td nowrap>☕ <b>Ko-fi</b></td><td>Бърз еднократен бакшиш, без регистрация за дарителя</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
   <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>Малък, неформален жест</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
@@ -558,7 +558,7 @@ OmniRoute е лицензиран под MIT и се поддържа откри
 
 </details>
 
-🐛 Открихте грешка или имате обратна връзка? Отворете [дискусия](https://github.com/diegosouzapw/OmniRoute/discussions).
+🐛 Открихте грешка или имате обратна връзка? Отворете [дискусия](https://github.com/cheaper-inference/OmniRoute/discussions).
 
 <br/>
 
@@ -1262,7 +1262,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 също го п�
 
 Канонични показатели към 2026-10-18: **1.976 уникални видеоклипа** · **20.220.289 известни гледания** (`v > 0`) · **1.210 канала/профила по мрежи**. Необработеното табло съдържа 1.976 реда (YouTube 1.352 = 740 дълги видеоклипа + 612 Shorts · TikTok 334 · Instagram 290); след нормализирането по каноничен URL адрес не останаха дубликати, като за всеки видеоклип се запазва най-големият брой гледания. Събирането на данни от YouTube е замразено към 2026-10-13 (квотата на API беше изчерпана от 14 до 18/10), а от TikTok/Instagram — от 2026-09-02 (липсват кредити за събиране на данни); за 76 видеоклипа все още няма данни за броя гледания.
 
-> 🎬 **Създадохте видеоклип за OmniRoute?** Отворете [issue](https://github.com/diegosouzapw/OmniRoute/issues/new) или [discussion](https://github.com/diegosouzapw/OmniRoute/discussions) с връзката — ще го представим тук.
+> 🎬 **Създадохте видеоклип за OmniRoute?** Отворете [issue](https://github.com/cheaper-inference/OmniRoute/issues/new) или [discussion](https://github.com/cheaper-inference/OmniRoute/discussions) с връзката — ще го представим тук.
 
 <br/>
 
@@ -1282,8 +1282,8 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 също го п�
 | 🟢 **WhatsApp — 🇧🇷 Бразилия**                     | [присъединете се към групата](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                     |
 | 🌍 **Уебсайт**                                    | [omniroute.online](https://omniroute.online)                                                                                       |
 | 🌍 **🌍StHub OmniRoute общност (безплатна)**      | [порталът на sthub](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                         |
-| 📦 **Изходен код**                                | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                                     |
-| 🐛 **Докладвайте за грешка**                      | [отворете проблем](https://github.com/diegosouzapw/OmniRoute/issues) — приложете резултата от `npm run system-info`                |
+| 📦 **Изходен код**                                | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                                           |
+| 🐛 **Докладвайте за грешка**                      | [отворете проблем](https://github.com/cheaper-inference/OmniRoute/issues) — приложете резултата от `npm run system-info`           |
 | 🤝 **Допринесете**                                | [CONTRIBUTING.md](CONTRIBUTING.md) · [Модел за разклоняване и издаване](docs/ops/BRANCHING_MODEL.md) · изберете `good first issue` |
 | 💚 **Подкрепете проекта**                         | [Начини за подкрепа ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)                          |
 
@@ -1641,7 +1641,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 също го п�
 
 </div>
 
-[![Contributors](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
 
 <sub>Одитирано на 2026-11-02 при live <code>release/v3.8.53</code> tip <code>1c7135e0fb</code> (7 972 комита): <b>1 074 нормализирани човешки Git идентичности</b> — 759 се появяват като автори на комити (включително поддържащия проекта), а 315 са само в изрични трейлъри <code>Co-authored-by</code>. Преброяването прилага <code>.mailmap</code>, сравнява имейл адресите без разлика между главни и малки букви, обединява числови и обикновени GitHub noreply адреси само когато кодират един и същ handle, изключва 29 идентичности на ботове/агенти/услуги/заместители и не обединява обикновени имейл адреси само защото показваните им имена съвпадат. Одитът от 2026-08-24 публикува 639; повторното изпълнение на този метод върху базата на онзи одит <code>ac02c5b42f</code> дава 619, така че увеличението идва от нови приноси, а не от по-свободен метод.</sub>
 
@@ -1670,11 +1670,11 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 ## 📊 Звезди
 
-<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="Графика на историята на звездите" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <img alt="Графика на историята на звездите" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
  </picture>
 </a>
 

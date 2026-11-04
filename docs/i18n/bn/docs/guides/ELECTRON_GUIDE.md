@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## স্বয়ংক্রিয় আপডেট
 
-GitHub প্রদানকারীর সাথে `electron-updater` ব্যবহার করে (`diegosouzapw/OmniRoute`)।
+GitHub প্রদানকারীর সাথে `electron-updater` ব্যবহার করে (`cheaper-inference/OmniRoute`)।
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - `update-status` IPC এর মাধ্যমে রেন্ডারারের কাছে ইভেন্ট ফরওয়ার্ড করা হয়েছে : `checking`, `available`, `not-available`, `downloading` ( `percent` সহ ), `downloaded`, `error`
@@ -273,7 +273,7 @@ AppImage স্বাক্ষর হল ঐচ্ছিক — সেট `LINUX
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-রিলিজগুলি GitHub রিলিজে প্রকাশিত হয় (`diegosouzapw/OmniRoute`), যেখানে `electron-updater` নতুন সংস্করণের জন্য পরীক্ষা করে।
+রিলিজগুলি GitHub রিলিজে প্রকাশিত হয় (`cheaper-inference/OmniRoute`), যেখানে `electron-updater` নতুন সংস্করণের জন্য পরীক্ষা করে।
 
 ## সমস্যা সমাধান
 

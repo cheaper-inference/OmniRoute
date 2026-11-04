@@ -4,9 +4,9 @@
 
 ---
 
-> **Status:** Qəbul edilib · **Kontekst:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
-> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Müqavilə:** `domain/routing/routerBackends.ts`
-> (tipləşdirilmiş reyestr — kod [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) ilə əlavə olunur)
+> **Status:** Qəbul edilib · **Kontekst:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
+> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Müqavilə:** `domain/routing/routerBackends.ts`
+> (tipləşdirilmiş reyestr — kod [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) ilə əlavə olunur)
 
 Bu ADR `ts` (yerli), `bifrost`, `cliproxy`, `9router` və VibeProxy ilə uyğun mühərriklərin bir-biri ilə necə əlaqəli olduğunu dəqiqləşdirir ki, töhfəçilər arxitektura baxımından fərqli olan iki anlayışı qarışdırmasınlar. O, marşrutlaşdırma backend-i reyestri işi çərçivəsində təqdim edilmiş tipləşdirilmiş reyestri bu model üçün vahid həqiqət mənbəyi kimi sənədləşdirir.
 
@@ -27,7 +27,7 @@ Yol verilməməli səhv: «daxili xidmət» və «marşrutlaşdırma backend-i»
 
 ## Reyestr — vahid həqiqət mənbəyi
 
-`domain/routing/routerBackends.ts` müqaviləsi (kod [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) ilə əlavə olunur) hər bir mühərriki həyat dövrü, imkanları, xidmət identifikatoru, standart portu, sağlamlıq konfiqurasiyası və telemetriya dəstəyi ilə birlikdə bir dəfə elan edir. İstehlakçılar hər bir yan prosesi xüsusi şərtlərlə idarə etmək əvəzinə mühərrikləri `getRouterBackend(id)`, `listRouterBackends()` və `listRouterBackendsByCapability(cap)` vasitəsilə axtarırlar.
+`domain/routing/routerBackends.ts` müqaviləsi (kod [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) ilə əlavə olunur) hər bir mühərriki həyat dövrü, imkanları, xidmət identifikatoru, standart portu, sağlamlıq konfiqurasiyası və telemetriya dəstəyi ilə birlikdə bir dəfə elan edir. İstehlakçılar hər bir yan prosesi xüsusi şərtlərlə idarə etmək əvəzinə mühərrikləri `getRouterBackend(id)`, `listRouterBackends()` və `listRouterBackendsByCapability(cap)` vasitəsilə axtarırlar.
 
 | Backend     | Həyat dövrü  | Xidmət (A oxu) | Relay backend-i (B oxu) | Sağlamlıq     | Standart port |
 | ----------- | ------------ | -------------- | ----------------------- | ------------- | ------------- |
@@ -38,7 +38,7 @@ Yol verilməməli səhv: «daxili xidmət» və «marşrutlaşdırma backend-i»
 | `vibeproxy` | `external`   | —              | — (provayder adapteri)  | `/v1/models`  | —             |
 
 ¹ Bifrost-un `/api/services/bifrost/` ünvanından quraşdırıla və başladıla bilən `supervised` daxili xidmətə yüksəldilməsi
-[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817) çərçivəsində izlənilir; bu dəyişiklik birləşdirilənədək Bifrost yalnız `external` olaraq qalır (yalnız `BIFROST_BASE_URL` vasitəsilə əlçatandır).
+[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817) çərçivəsində izlənilir; bu dəyişiklik birləşdirilənədək Bifrost yalnız `external` olaraq qalır (yalnız `BIFROST_BASE_URL` vasitəsilə əlçatandır).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
 `oauth-backed`, `dashboard-embed`, `model-sync`, `native-hot-path`) çağıran tərəflərə hər bir identifikator üçün ayrıca şərtləri sərt şəkildə kodlaşdırmaq əvəzinə mühərrikləri onların faktiki olaraq nə edə bildiyinə görə filtrləməyə imkan verir.
@@ -104,8 +104,8 @@ backend-i seçir; əsas `/api/v1/chat/completions` səthi heç vaxt
 Seçim **hazırda relay səviyyəsində ya hamısı, ya heç nə prinsipinə əsaslanır** —
 `release/v3.8.43` versiyasında hər provayder və ya hər sorğu üzrə mühərrik dəyişimi yoxdur.
 Hər sorğu üzrə yoxlama sidecar manifesti işi ilə əlavə edilir
-([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`);
+([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`);
 bu, `auto` rejiminə yalnız manifestə uyğun provayderləri Bifrost vasitəsilə marşrutlaşdırmağa imkan verir.
 
 ## İdarəetmə panelinə inteqrasiya

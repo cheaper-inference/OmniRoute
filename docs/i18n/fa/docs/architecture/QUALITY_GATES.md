@@ -404,7 +404,7 @@ git add quality-baseline.json
 ### ratchet مربوط به CodeQL: تناوب نوسازی و اجرای دستی
 
 `check:codeql-ratchet` **وضعیت repo را میخواند که طبق یک زمانبندی نوسازی میشود — نه بهازای هر PR.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` مقادیر
+`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` مقادیر
 `state: configured` و `schedule: weekly` را گزارش میکند: اسکن default-setup گیتهاب، نه تحلیلی بهازای هر push.
 نتیجه: پس از merge شدن PRای که هشدارها را رفع میکند، ratchet تا زمان اجرای اسکن زمانبندیشده بعدی
 همچنان تعداد قدیمی و بالاتر را میخواند — بنابراین تا زمانی که اسکن بهروز شود، در هر PR باز،

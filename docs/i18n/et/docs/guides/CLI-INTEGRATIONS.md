@@ -200,7 +200,7 @@ see kunagi `ps` väljundisse.
 
 Profiili suunamine ühe mudeli asemel OmniRoute'i **kombole** annab pargile pakkujate
 tõrkesiirde: kui esmane lõpp-punkt katkes
-[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578) juures salvestatud
+[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578) juures salvestatud
 käituse ajal keset toimingut täielikult, lõpetas agent ülejäänud sammud varuvariandi
 abil ega toonud katkestust kunagi kasutajani.
 

@@ -221,7 +221,7 @@ Avast እና AVG ብዙ HTTP ጥያቄዎችን የሚመስሉ አገናኞች�
      [System.IO.File]::ReadAllBytes("$PWD\OmniRoute.Setup.<version>.exe"))
    [Convert]::ToBase64String($b)
    ```
-   ውጤቱ ከ`latest.yml` → `sha512` ጋር መመሳሰል አለበት። ካልተመሳሰለ ፋይሉን ይሰርዙ እና ከ[GitHub ልቀቶች ገጽ](https://github.com/diegosouzapw/OmniRoute/releases) ብቻ እንደገና ያውርዱ።
+   ውጤቱ ከ`latest.yml` → `sha512` ጋር መመሳሰል አለበት። ካልተመሳሰለ ፋይሉን ይሰርዙ እና ከ[GitHub ልቀቶች ገጽ](https://github.com/cheaper-inference/OmniRoute/releases) ብቻ እንደገና ያውርዱ።
 2. **ይመልሱ + ከቅኝት ያስቀሩ** — ወደኋላ የተመለሱትን ንጥሎች ከማግለያው ይመልሱ እና ለ`%LOCALAPPDATA%\Programs\OmniRoute` ከቅኝት ማስቀሪያ ያክሉ (Kaspersky → Settings → Threats and Exclusions)፣ ከዚያ እንደገና ይጫኑ።
 3. **የተሳሳተውን ማስጠንቀቂያ ሪፖርት ያድርጉ** — <https://opentip.kaspersky.com/>። በተጠቃሚዎች የሚቀርቡ የተሳሳተ ማስጠንቀቂያ ሪፖርቶች ወደ የተፈቀዱ ዝርዝር የመጨመሩን ሂደት በእርግጥ ያፋጥናሉ።
 
@@ -811,7 +811,7 @@ omniroute serve --ready-timeout 180000
 
 ## አሁንም ተቸግረዋል?
 
-- **GitHub ችግሮች**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **GitHub ችግሮች**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **አርክቴክቸር**: ለውስጣዊ ዝርዝሮች [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)ን ይመልከቱ
 - **API ማጣቀሻ**: ሁሉንም የመዳረሻ ነጥቦች ለማየት [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)ን ይመልከቱ
 - **የጤና ዳሽቦርድ**: የስርዓቱን ቅጽበታዊ ሁኔታ ለማየት **Dashboard → Health**ን ይፈትሹ

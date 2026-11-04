@@ -58,8 +58,8 @@ herstelt nooit automatisch), terwijl de operator een verificatieverzoek in een b
 Door de zin in de blokkeringslijst te houden, werd ook de herstelbare cloud-code 403-vertakking in
 `classifyProviderError` onbereikbaar voor deze formulering, omdat `accountDeactivated` als
 eerste wordt geëvalueerd — waardoor het herstel van de projectroute dat voor Gemini Code Assist is toegevoegd in
-[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) en
-[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) nooit kon worden uitgevoerd.
+[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) en
+[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) nooit kon worden uitgevoerd.
 
 Drie aangrenzende, **afzonderlijke** signaaltabellen maken _geen_ deel uit van de detectie van geblokkeerde trefwoorden:
 

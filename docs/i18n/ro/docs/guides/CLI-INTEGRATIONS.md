@@ -199,7 +199,7 @@ ieșirea `ps`.
 Direcționarea profilului către o **combinație** OmniRoute, în locul unui singur model, este ceea ce
 oferă flotei mecanismul de comutare în caz de defecțiune a furnizorului: când endpointul principal a devenit complet indisponibil în timpul unei interacțiuni
 în execuția înregistrată în
-[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), agentul și-a finalizat
+[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), agentul și-a finalizat
 pașii rămași folosind alternativa și nu a expus niciodată întreruperea.
 
 ---

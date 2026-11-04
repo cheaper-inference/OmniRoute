@@ -91,7 +91,7 @@ mediante el sistema 1 y mediante el sistema 2 una vez habilitada la activación 
 
 ## 4. `/v1/responses` prolongadas en un solo proceso (margen saludable)
 
-[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) añadió
+[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) añadió
 `tryAcquireHealthyHeadroom` para que se admita una segunda solicitud estructuralmente pesada
 cuando el heap está por debajo de `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. La ruta BYTE
 utilizada por `admitChatRequest` (cuerpos ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

@@ -260,7 +260,7 @@ curl -X POST http://localhost:20128/api/v1/management/proxies/bulk-assign \
 
 ## Αγορά δωρεάν διακομιστών μεσολάβησης 1proxy
 
-> 🆕 **Συνεισφορά από τον [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Ζήτημα [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕 **Συνεισφορά από τον [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Ζήτημα [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
 
 Το OmniRoute ενσωματώνεται με την κοινοτική πλατφόρμα **[1proxy](https://1proxy-api.aitradepulse.com)** για να παρέχει πρόσβαση σε **εκατοντάδες δωρεάν, επικυρωμένους διακομιστές μεσολάβησης** από όλο τον κόσμο. Αυτό είναι ιδανικό για χρήστες που δεν διαθέτουν δική τους υποδομή διακομιστών μεσολάβησης.
 

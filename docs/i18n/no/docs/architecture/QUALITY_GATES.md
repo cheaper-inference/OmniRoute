@@ -420,7 +420,7 @@ venter på implementering).
 ### CodeQL-ratchet: oppdateringsfrekvens og manuell utløsning
 
 `check:codeql-ratchet` leser **tilstanden til repositoriet, som oppdateres etter en tidsplan — ikke per PR.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` rapporterer
+`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` rapporterer
 `state: configured`, `schedule: weekly`: GitHubs skanning med standardoppsett, ikke en analyse
 for hver push. Konsekvens: Etter at en PR som RETTER varsler, er slått sammen, fortsetter ratchet-motoren
 å lese det gamle, høyere antallet frem til neste planlagte skanning kjøres — dermed rapporterer den en regresjon

@@ -65,7 +65,7 @@ a họpụtara ịnọchite anya obodo na mmemme dị n'ịntanetị ma ọ bụ
 Enwere ike ịkọrọ ndị ndu obodo na-ahụ maka mmanye ihe omume
 mkparị, mmekpa ahụ, ma ọ bụ omume ndị ọzọ a na-anaghị anabata site na imepe
 ndụmọdụ nchekwa nzuzo na
-<https://github.com/diegosouzapw/OmniRoute/security/advisories/new>
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
 ma ọ bụ site n'izigara onye na-elekọta ya email na diegosouza.pw@outlook.com.
 Maka ihe omume metụtara ozi nchekwa dị nro, lee [`SECURITY.md`](SECURITY.md).
 A ga-enyocha ma mee nchọpụta banyere mkpesa niile ngwa ngwa na n'ụzọ ziri ezi.

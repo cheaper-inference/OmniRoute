@@ -9,7 +9,7 @@
 Če odkrijete varnostno ranljivost v OmniRoute, jo odgovorno prijavite:
 
 1. **NE** odpirajte javne težave v GitHubu
-2. Uporabite [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
+2. Uporabite [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
 3. Vključite: opis, korake za ponovitev in morebitni vpliv
 
 ## Časovnica odziva
@@ -42,7 +42,7 @@ Po različici 3.8.59 je naslednja različica **3.9.0**, ki na veji
   kar koli nastopi pozneje**. Končni datum bo ob izdaji zabeležen v opombah ob izdaji različice 3.9.0 in v
   [`ROADMAP.md`](ROADMAP.md).
 - **Prijava ranljivosti v liniji LTS:** uporabite isti kanal kot za katero koli drugo različico —
-  zasebno [GitHubovo varnostno obvestilo](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
+  zasebno [GitHubovo varnostno obvestilo](https://github.com/cheaper-inference/OmniRoute/security/advisories/new),
   nikoli javne prijave težave. Navedite, katero različico ste preizkusili (na primer `3.9.2`); popravki se dodajo v
   `stable/v3` in se prenesejo naprej v v4.
 - **Varnostno izhodišče ob izdaji LTS:** izmerjeno stanje pregledovalnika, preverjanja varoval poti in

@@ -107,7 +107,7 @@ npm start
 
 embed-enabled build کے بغیر صفحہ frame ہونے سے انکار کر دیتا ہے۔ extension، response headers سے اس کا پتا لگا کر بیرونی براؤزر پر واپس چلی جاتی ہے — کچھ خراب نہیں ہوتا، اور یہ ایک بار اس بارے میں اطلاع بھی دیتی ہے۔
 [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) اور issue
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273) دیکھیں۔
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273) دیکھیں۔
 
 ---
 

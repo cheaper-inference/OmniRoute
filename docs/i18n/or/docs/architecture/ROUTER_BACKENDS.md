@@ -4,9 +4,9 @@
 
 ---
 
-> **ସ୍ଥିତି:** ଗୃହୀତ · **ପ୍ରସଙ୍ଗ:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
-> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **ଚୁକ୍ତି:** `domain/routing/routerBackends.ts`
-> (ଟାଇପ୍ଯୁକ୍ତ ରେଜିଷ୍ଟ୍ରି — କୋଡ୍ଟି [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) ସହିତ ଆସିବ)
+> **ସ୍ଥିତି:** ଗୃହୀତ · **ପ୍ରସଙ୍ଗ:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
+> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **ଚୁକ୍ତି:** `domain/routing/routerBackends.ts`
+> (ଟାଇପ୍ଯୁକ୍ତ ରେଜିଷ୍ଟ୍ରି — କୋଡ୍ଟି [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) ସହିତ ଆସିବ)
 
 ଏହି ADR, `ts` (ନେଟିଭ୍), `bifrost`, `cliproxy`, `9router`, ଏବଂ
 VibeProxy-ସୁସଙ୍ଗତ ଇଞ୍ଜିନ୍ଗୁଡ଼ିକ ପରସ୍ପର ସହିତ କିପରି ସମ୍ପର୍କିତ ତାହା ସ୍ପଷ୍ଟ କରେ, ଯାହାଦ୍ୱାରା ଅବଦାନକାରୀମାନେ
@@ -38,7 +38,7 @@ VibeProxy-ସୁସଙ୍ଗତ ଇଞ୍ଜିନ୍ଗୁଡ଼ିକ ପର�
 ## ରେଜିଷ୍ଟ୍ରି — ସତ୍ୟର ଏକମାତ୍ର ଉତ୍ସ
 
 `domain/routing/routerBackends.ts` ଚୁକ୍ତି (କୋଡ୍ଟି
-[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) ସହିତ ଆସିବ) ପ୍ରତ୍ୟେକ ଇଞ୍ଜିନ୍କୁ ଏହାର
+[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) ସହିତ ଆସିବ) ପ୍ରତ୍ୟେକ ଇଞ୍ଜିନ୍କୁ ଏହାର
 ଜୀବନଚକ୍ର, କ୍ଷମତା, ସେବା ପରିଚୟ, ଡିଫଲ୍ଟ ପୋର୍ଟ, ସ୍ୱାସ୍ଥ୍ୟ ବିନ୍ୟାସ, ଏବଂ
 ଟେଲିମେଟ୍ରି ସମର୍ଥନ ସହିତ କେବଳ ଥରେ ଘୋଷଣା କରେ। ପ୍ରତ୍ୟେକ ସାଇଡ୍କାର୍ ପାଇଁ
 ବିଶେଷ-କେସ୍ ଲେଖିବା ପରିବର୍ତ୍ତେ ଉପଭୋକ୍ତାମାନେ `getRouterBackend(id)`,
@@ -54,7 +54,7 @@ VibeProxy-ସୁସଙ୍ଗତ ଇଞ୍ଜିନ୍ଗୁଡ଼ିକ ପର�
 
 ¹ Bifrostକୁ ଏକ `supervised` ଏମ୍ବେଡେଡ୍ ସେବାକୁ ପଦୋନ୍ନତି କରିବା (ଯାହାକୁ
 `/api/services/bifrost/`ରୁ ଇନ୍ଷ୍ଟଲ୍/ଆରମ୍ଭ କରାଯାଇପାରିବ)
-[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817)ରେ ଟ୍ରାକ୍ କରାଯାଉଛି; ଏହା ମର୍ଜ୍ ହେବା ପର୍ଯ୍ୟନ୍ତ,
+[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817)ରେ ଟ୍ରାକ୍ କରାଯାଉଛି; ଏହା ମର୍ଜ୍ ହେବା ପର୍ଯ୍ୟନ୍ତ,
 Bifrost କେବଳ `external` ଅଟେ (କେବଳ `BIFROST_BASE_URL` ମାଧ୍ୟମରେ ପହଞ୍ଚଯୋଗ୍ୟ)।
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -123,8 +123,8 @@ Bifrost କେବଳ `external` ଅଟେ (କେବଳ `BIFROST_BASE_URL` ମ�
 ଆଜି ରିଲେ ସ୍ତରରେ ଚୟନ **ସମ୍ପୂର୍ଣ୍ଣ-କିମ୍ବା-କିଛି-ନୁହେଁ** — `release/v3.8.43`ରେ କୌଣସି ପ୍ରତି-ପ୍ରଦାନକାରୀ
 କିମ୍ବା ପ୍ରତି-ଅନୁରୋଧ ଇଞ୍ଜିନ୍ ସ୍ୱାପ୍ ନାହିଁ। ପ୍ରତି-ଅନୁରୋଧ ଗେଟ୍କୁ
 ସାଇଡ୍କାର୍-ମାନିଫେଷ୍ଟ କାର୍ଯ୍ୟ ଦ୍ୱାରା ଯୋଡ଼ାଯାଉଛି
-([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) ମାନିଫେଷ୍ଟ +
-[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) ମାନିଫେଷ୍ଟ +
+[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 ଯାହା `auto`କୁ କେବଳ ମାନିଫେଷ୍ଟ-ଯୋଗ୍ୟ ପ୍ରଦାନକାରୀମାନଙ୍କୁ Bifrost ମାଧ୍ୟମରେ ରୁଟ୍ କରିବାକୁ ଦିଏ।
 
 ## ଡ୍ୟାସବୋର୍ଡ ସମନ୍ୱୟ

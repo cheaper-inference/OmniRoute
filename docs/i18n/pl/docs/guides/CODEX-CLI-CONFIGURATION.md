@@ -478,7 +478,7 @@ Dwie wartości domyślne OmniRoute mogą niepostrzeżenie zakłócać wielogodzi
 | Sesja stale przełącza konta / ciągłość pamięci podręcznej promptów zanika między turami | TTL koligacji sesji wynosi `0` (wyłączony)                                                                | `sessionAffinityTtlMs`   |
 | Połączenie zrywa się w trakcie rozumowania bez komunikatu widocznego dla klienta        | Mechanizm nadzorujący bezczynność strumienia zadziałał po 10 minutach bez fragmentu z serwera nadrzędnego | `STREAM_IDLE_TIMEOUT_MS` |
 
-Powiązane dyskusje: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (przerywanie długich zadań), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (dlaczego koligacja jest domyślnie wyłączona). Śledzenie: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Powiązane dyskusje: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (przerywanie długich zadań), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (dlaczego koligacja jest domyślnie wyłączona). Śledzenie: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. Koligacja sesji — przypisz jedną konwersację do jednego konta
 

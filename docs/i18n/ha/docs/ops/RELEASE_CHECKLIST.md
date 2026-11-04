@@ -453,7 +453,7 @@ yana inganta ainihin build ɗin nan (#8084 sashe (a)). PR na repository iri ɗay
 gh workflow run preview-artifact.yml -f pr_number=<N>   # ko ƙara lakabin `preview-artifact`
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # shigarwar samfoti
 ```
 

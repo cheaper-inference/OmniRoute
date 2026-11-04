@@ -112,7 +112,7 @@ npm start
 Ohne einen Build mit aktivierter Einbettung verweigert die Seite die Darstellung in einem Frame. Die Erweiterung erkennt dies anhand der
 Antwort-Header und weicht auf den externen Browser aus — nichts geht kaputt, und es wird einmalig darauf hingewiesen.
 Siehe [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) und Issue
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
 
 ---
 

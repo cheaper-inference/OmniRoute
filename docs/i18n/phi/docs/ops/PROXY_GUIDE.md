@@ -261,7 +261,7 @@ Isang beses itong nangyayari sa unang pag-start pagkatapos ng pag-upgrade. Gamit
 
 ## Marketplace ng Libreng Proxy ng 1proxy
 
-> 🆕 **Iniambag ni [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Isyu [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕 **Iniambag ni [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Isyu [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
 
 Nakikipag-integrate ang OmniRoute sa platform ng komunidad na **[1proxy](https://1proxy-api.aitradepulse.com)** upang magbigay ng access sa **daan-daang libre at napatunayang proxy** mula sa buong mundo. Perpekto ito para sa mga user na walang sariling imprastraktura ng proxy.
 

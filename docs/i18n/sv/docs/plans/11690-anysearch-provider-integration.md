@@ -5,7 +5,7 @@
 ---
 
 Mall: xquik #11370 (sammanslagen i release/v3.8.51). Förhållningssätt: `fallbackOnly`.
-Ursprungsförslag: ärende diegosouzapw/OmniRoute#11637.
+Ursprungsförslag: ärende cheaper-inference/OmniRoute#11637.
 
 ## 1. Grundläggande fakta om tjänsten (officiell dokumentation, dubbelkontrollerad)
 

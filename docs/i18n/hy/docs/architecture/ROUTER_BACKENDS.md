@@ -4,9 +4,9 @@
 
 ---
 
-> **Կարգավիճակ՝** Ընդունված · **Համատեքստ՝** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
-> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Պայմանագիր՝** `domain/routing/routerBackends.ts`
-> (տիպավորված ռեեստր — կոդը ներառվում է [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)-ով)
+> **Կարգավիճակ՝** Ընդունված · **Համատեքստ՝** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
+> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Պայմանագիր՝** `domain/routing/routerBackends.ts`
+> (տիպավորված ռեեստր — կոդը ներառվում է [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)-ով)
 
 Այս ADR-ը հստակեցնում է, թե ինչպես են `ts` (բնիկ), `bifrost`, `cliproxy`, `9router` և
 VibeProxy-ի հետ համատեղելի շարժիչները կապված միմյանց հետ, որպեսզի մասնակիցներն այլևս
@@ -39,7 +39,7 @@ router-backend-registry աշխատանքի շրջանակում ներդրված
 ## Ռեեստրը՝ ճշմարտության միակ աղբյուր
 
 `domain/routing/routerBackends.ts` պայմանագիրը (կոդը ներառվում է
-[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)-ով) յուրաքանչյուր շարժիչ հայտարարում է մեկ անգամ՝ նշելով դրա
+[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)-ով) յուրաքանչյուր շարժիչ հայտարարում է մեկ անգամ՝ նշելով դրա
 կենսափուլը, հնարավորությունները, ծառայության նույնականացումը, լռելյայն միացքը, առողջական վիճակի կարգավորումները և
 հեռաչափության աջակցությունը։ Սպառողները շարժիչները որոնում են `getRouterBackend(id)`,
 `listRouterBackends()` և `listRouterBackendsByCapability(cap)` գործառույթների միջոցով՝
@@ -55,7 +55,7 @@ router-backend-registry աշխատանքի շրջանակում ներդրված
 
 ¹ Bifrost-ի՝ որպես `supervised` ներկառուցված ծառայության (որը հնարավոր է տեղադրել/գործարկել
 `/api/services/bifrost/`-ից) առաջխաղացումը հետևվում է
-[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817)-ում․ մինչև դրա միավորումը,
+[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817)-ում․ մինչև դրա միավորումը,
 Bifrost-ը միայն `external` է (հասանելի է բացառապես `BIFROST_BASE_URL`-ի միջոցով)։
 
 `capabilities`-ը (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -124,8 +124,8 @@ Bifrost-ը միայն `external` է (հասանելի է բացառապես `BIF
 Այսօր ընտրությունը **ամբողջական է relay-ի մակարդակում**․ `release/v3.8.43`-ում չկա ըստ մատակարարի
 կամ ըստ հարցման շարժիչի փոխարկում։ Ըստ հարցման սահմանափակիչն ավելացվում է
 sidecar manifest-ի աշխատանքով
-([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 ինչը թույլ է տալիս `auto`-ին Bifrost-ի միջոցով երթուղավորել միայն manifest-ի պահանջներին համապատասխանող մատակարարներին։
 
 ## Վահանակի ինտեգրում

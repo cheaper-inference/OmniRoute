@@ -9,7 +9,7 @@
 თუ OmniRoute-ში უსაფრთხოების მოწყვლადობას აღმოაჩენთ, გთხოვთ, პასუხისმგებლობით შეგვატყობინოთ:
 
 1. **არ გახსნათ** საჯარო GitHub issue
-2. გამოიყენეთ [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
+2. გამოიყენეთ [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
 3. მიუთითეთ: აღწერა, რეპროდუცირების ნაბიჯები და პოტენციური გავლენა
 
 ## რეაგირების ვადები
@@ -42,7 +42,7 @@
   იმის მიხედვით, თუ რომელი თარიღიც უფრო გვიან დადგება**. შესაბამისი დასრულების თარიღი ჩაიწერება 3.9.0-ის გამოშვების შენიშვნებსა და
   [`ROADMAP.md`](ROADMAP.md)-ში, როდესაც გამოშვება შედგება.
 - **LTS ხაზში მოწყვლადობის შეტყობინება:** გამოიყენეთ იგივე არხი, რაც ნებისმიერი სხვა ვერსიისთვის —
-  [GitHub-ის უსაფრთხოების კონფიდენციალური შეტყობინება](https://github.com/diegosouzapw/OmniRoute/security/advisories/new);
+  [GitHub-ის უსაფრთხოების კონფიდენციალური შეტყობინება](https://github.com/cheaper-inference/OmniRoute/security/advisories/new);
   არასდროს შექმნათ საჯარო issue. მიუთითეთ, რომელი ვერსია გამოსცადეთ (მაგალითად, `3.9.2`); შესწორებები ხვდება
   `stable/v3`-ში და შემდეგ გადადის v4-ში.
 - **უსაფრთხოების საბაზისო მდგომარეობა LTS-ის გამოშვებისას:** სკანერის გაზომილი მდგომარეობა, მარშრუტის დაცვისა და

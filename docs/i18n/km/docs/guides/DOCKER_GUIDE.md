@@ -324,7 +324,7 @@ container ឱ្យខ្ពស់ជាងតម្លៃនោះប្រហ�
 
 ### RAM ពេលដំណើរការសម្រាប់ coding agents
 
-តម្លៃលំនាំដើម 1 GiB របស់ Docker គឺជាកម្រិតអប្បបរមាសម្រាប់ dashboard/light-chat មិនមែនជាទំហំសម្រាប់ production ទេ។ Body វែងៗរបស់ `POST /v1/responses` (សាររាប់រយ និង tools រាប់សិប) រក្សាទុកក្រាហ្វជាច្រើននៅក្នុង memory អំឡុងពេល compression។ Request ពីរដែលត្រួតគ្នា និងមានទំហំប្រហែល ~3 MiB / ~750k-token បានធ្វើឱ្យ V8 បញ្ឈប់នៅ old-space ទំហំ **12 GiB** (`FATAL ERROR: Reached heap limit`) ហើយក៏បានជួប cgroup OOM ទំហំ 16 GiB ផងដែរ។ សូមមើល [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849)។
+តម្លៃលំនាំដើម 1 GiB របស់ Docker គឺជាកម្រិតអប្បបរមាសម្រាប់ dashboard/light-chat មិនមែនជាទំហំសម្រាប់ production ទេ។ Body វែងៗរបស់ `POST /v1/responses` (សាររាប់រយ និង tools រាប់សិប) រក្សាទុកក្រាហ្វជាច្រើននៅក្នុង memory អំឡុងពេល compression។ Request ពីរដែលត្រួតគ្នា និងមានទំហំប្រហែល ~3 MiB / ~750k-token បានធ្វើឱ្យ V8 បញ្ឈប់នៅ old-space ទំហំ **12 GiB** (`FATAL ERROR: Reached heap limit`) ហើយក៏បានជួប cgroup OOM ទំហំ 16 GiB ផងដែរ។ សូមមើល [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849)។
 
 កំណត់ទំហំ **cgroup `--memory` ឱ្យខ្ពស់ជាង heap** — native buffers, SQLite និងទិន្នន័យបណ្ដោះអាសន្នរបស់ compression ស្ថិតនៅក្រៅ V8។
 
@@ -671,7 +671,7 @@ spec:
 
 `preStop` sleep អនុញ្ញាតឱ្យ kube ទម្លាក់ចំណុចបញ្ចប់សេវាកម្ម មុនពេល SIGTERM ដូច្នេះ** ថ្មី។** ចរាចរណ៍ឈប់ប៉ះពាល់ដល់ដំណើរការស្លាប់។ នៅក្នុងជើងហោះហើរ `/v1/responses` SSE ត្រូវបានបង្ហូររហូតដល់ `SHUTDOWN_TIMEOUT_MS` (30s លំនាំដើម) តាមរយៈការជួលចូលប្រើប្រាស់ទម្ងន់ធ្ងន់ (#11015)។ សំណើថ្មីដែលនៅតែឈានដល់ដំណើរការទទួលបាន `503` + `Retry-After: 5`។ គម្លាតចំណុចបញ្ចប់ទទេឡើងវិញ រហូតទាល់តែការជំនួសគឺរួចរាល់ នៅតែជាការដាច់ខ្លាំង — នោះគឺជា SQLite topology មិនមែនជាការស៊ើបអង្កេតខុសនោះទេ។
 
-Postgres ខាងក្រៅ / ពហុអ្នកនិពន្ធ HA គឺ** ទេ។** ផ្លូវស្តុកឯកសារ។ ប្រសិនបើអ្នកត្រូវការ HA សូមរក្សាការចម្លងតែមួយ ឬដំណើរការ topology ដែលគម្រោងបានសាកល្បង និងចងក្រងជាឯកសារដាច់ដោយឡែក។ ការងារ Postgres/MySQL រស់នៅក្នុង [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) ។ រហូតដល់កប៉ាល់នោះ មធ្យោបាយតែមួយគត់ដើម្បីគុណ** ធំ** សមត្ថភាព `/v1/responses` គឺ N ដំណើរការឯករាជ្យ (ផ្នែកបន្ទាប់) មិនមែន `replicas > 1` នៅលើភាគមួយ។
+Postgres ខាងក្រៅ / ពហុអ្នកនិពន្ធ HA គឺ** ទេ។** ផ្លូវស្តុកឯកសារ។ ប្រសិនបើអ្នកត្រូវការ HA សូមរក្សាការចម្លងតែមួយ ឬដំណើរការ topology ដែលគម្រោងបានសាកល្បង និងចងក្រងជាឯកសារដាច់ដោយឡែក។ ការងារ Postgres/MySQL រស់នៅក្នុង [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) ។ រហូតដល់កប៉ាល់នោះ មធ្យោបាយតែមួយគត់ដើម្បីគុណ** ធំ** សមត្ថភាព `/v1/responses` គឺ N ដំណើរការឯករាជ្យ (ផ្នែកបន្ទាប់) មិនមែន `replicas > 1` នៅលើភាគមួយ។
 
 ## ការធ្វើមាត្រដ្ឋាន៖ ដំណើរការឯករាជ្យ
 
@@ -681,11 +681,11 @@ Postgres ខាងក្រៅ / ពហុអ្នកនិពន្ធ HA គ�
 
 វត្ថុអកម្មអានការតភ្ជាប់ឡើងវិញនៅពេលដែលត្រូវការការធ្វើឱ្យស្រស់ឡើងវិញ ហើយទទួលយកតែសញ្ញាសម្គាល់ការចូលប្រើដែលមិនទាន់ផុតកំណត់ខុសគ្នា។ បើមិនដូច្នេះទេ ការធ្វើឱ្យស្រស់ត្រូវបានបិទដោយមិនផុតកំណត់ ឬបិទដំណើរការការតភ្ជាប់ ឬរាប់ការបរាជ័យនៃកម្មវិធីបំបែកការធ្វើឱ្យស្រស់។ ការបរាជ័យនៃការផ្ទៀងផ្ទាត់ភាពត្រឹមត្រូវតាមចរន្តពិតប្រាកដនៅតែប្រើការបរាជ័យធម្មតានៃគណនេយ្យ ការបន្ថយអិចស្ប៉ូណង់ស្យែល និងកំហុសម៉ាស៊ីនភ្ញៀវធម្មតា។ ការបិទគណនីនៅតែជាអចិន្ត្រៃយ៍។ ធ្វើសមកាលកម្មថូខឹនដែលបានបង្វិលរបស់ម្ចាស់ មុនពេលការចូលប្រើថូខឹនផុតកំណត់ (លំនាំដើមនៃការធ្វើឱ្យស្រស់សកម្មគឺប្រាំនាទី) ឬនាំចូលឯកសារផ្ទៀងផ្ទាត់ Codex ឡើងវិញ។ ការនាំចូលអកម្មរក្សាទុកថូខឹនដែលបានផ្តល់ដោយមិនចាំបាច់បញ្ជាក់សុពលភាពវានៅចំណុចបញ្ចប់សញ្ញាសម្ងាត់។ dashboard/API refresh ដោយដៃ ត្រឡប់ `409 refresh_disabled`; ការចូល OAuth ថ្មីមិនផ្លាស់ប្តូរទេ។ សូមមើល [ឯកសារយោងបរិស្ថាន](../reference/ENVIRONMENT.md#passive-codex-token-refresh) ។
 
-ដំណើរការ Node មួយគឺ** មួយ V8 ហ៊ា** . ~ 3 MiB / ~ 750k-token coding-agent `POST /v1/responses` (RTK + Caveman) បោះបង់ហ៊ានោះនៅ ~ 12 Gi (`FATAL ERROR: Reached heap limit`) ហើយអាច OOM a 16 Gi cgroup ។ សូមមើល [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) ។ ការវាស់វែងនោះគឺ ក** ថវិកានៃការចងចាំ** ការព្រមាន មិនមែនជាផលិតផល hard-max នៃ `/v1/responses` វែងស្របគ្នាពីរទេ។ ការចូលប្រើការជជែកដែលមានទម្ងន់ធ្ងន់ត្រូវបានបិទដោយថវិកា ingest byte ដែលទាញយកដោយស្វ័យប្រវត្តិ (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) ដែលមានទំហំពីពិដាន V8/cgroup ដូចគ្នា — ត្រួតលើវាឡើងលើ (ឬការកំណត់ចំនួនកេរ្តិ៍ដំណែល `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` request-count cap) នៅលើដំណើរការដែលមានទំហំរួចហើយ ណែនាំការបោះបង់ឡើងវិញ។ ការជជែកតូច `/healthz` `/v1/models` និង MCP គឺ** ទេ។** នៅក្នុងមួកនោះ។
+ដំណើរការ Node មួយគឺ** មួយ V8 ហ៊ា** . ~ 3 MiB / ~ 750k-token coding-agent `POST /v1/responses` (RTK + Caveman) បោះបង់ហ៊ានោះនៅ ~ 12 Gi (`FATAL ERROR: Reached heap limit`) ហើយអាច OOM a 16 Gi cgroup ។ សូមមើល [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849) ។ ការវាស់វែងនោះគឺ ក** ថវិកានៃការចងចាំ** ការព្រមាន មិនមែនជាផលិតផល hard-max នៃ `/v1/responses` វែងស្របគ្នាពីរទេ។ ការចូលប្រើការជជែកដែលមានទម្ងន់ធ្ងន់ត្រូវបានបិទដោយថវិកា ingest byte ដែលទាញយកដោយស្វ័យប្រវត្តិ (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) ដែលមានទំហំពីពិដាន V8/cgroup ដូចគ្នា — ត្រួតលើវាឡើងលើ (ឬការកំណត់ចំនួនកេរ្តិ៍ដំណែល `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` request-count cap) នៅលើដំណើរការដែលមានទំហំរួចហើយ ណែនាំការបោះបង់ឡើងវិញ។ ការជជែកតូច `/healthz` `/v1/models` និង MCP គឺ** ទេ។** នៅក្នុងមួកនោះ។
 
 ### ដំណើរការមួយ: ច្រើនជាងពីរ `/v1/responses` វែង
 
-ក** មានសុខភាពល្អ** ដំណើរការ (ហ៊ាបខាងក្រោម `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, `0.75` លំនាំដើម)** ឧសភា** ដំណើរការ `POST /v1/responses` យូរជាងពីរក្នុងពេលដំណាលគ្នា នៅពេលដែលថវិកាដំណើរការ-បៃបៃ (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) នៅតែមានកន្លែង។ តួនៅ ឬខាងលើ `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (លំនាំដើម 256 KiB) ទទួលយកការជួលទម្ងន់ធ្ងន់ដូចគ្នាទៅនឹងសំណើដែលមានរចនាសម្ព័ន្ធធ្ងន់ ហើយប្រើ [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` ដូចគ្នា (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) ។ អតិថិជន SSE យូរដំណាលគ្នារាប់សិបនាក់ (ប្រតិបត្តិករជាញឹកញាប់ត្រូវការ 40-50) គឺ a** ថវិកានៃការចងចាំ** សំណួរ — ទំហំ heap + primary/headroom រន្ធ + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — មិនមែនជាដែនកំណត់ផលិតផល "អតិបរមា 2" រឹង។ គំនរសម្ពាធនៅតែស្រក់ជាមួយ `503` ដែលអាចសាកល្បងបាន ដូច្នេះ #7849 មិនត្រឡប់មកវិញទេ។
+ក** មានសុខភាពល្អ** ដំណើរការ (ហ៊ាបខាងក្រោម `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, `0.75` លំនាំដើម)** ឧសភា** ដំណើរការ `POST /v1/responses` យូរជាងពីរក្នុងពេលដំណាលគ្នា នៅពេលដែលថវិកាដំណើរការ-បៃបៃ (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) នៅតែមានកន្លែង។ តួនៅ ឬខាងលើ `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (លំនាំដើម 256 KiB) ទទួលយកការជួលទម្ងន់ធ្ងន់ដូចគ្នាទៅនឹងសំណើដែលមានរចនាសម្ព័ន្ធធ្ងន់ ហើយប្រើ [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` ដូចគ្នា (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`) ។ អតិថិជន SSE យូរដំណាលគ្នារាប់សិបនាក់ (ប្រតិបត្តិករជាញឹកញាប់ត្រូវការ 40-50) គឺ a** ថវិកានៃការចងចាំ** សំណួរ — ទំហំ heap + primary/headroom រន្ធ + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — មិនមែនជាដែនកំណត់ផលិតផល "អតិបរមា 2" រឹង។ គំនរសម្ពាធនៅតែស្រក់ជាមួយ `503` ដែលអាចសាកល្បងបាន ដូច្នេះ #7849 មិនត្រឡប់មកវិញទេ។
 
 ទៅ** គុណនឹងហ៊ា** (ចន្លោះចាស់ V8 ឯករាជ្យ)** ថ្ងៃនេះ** :
 
@@ -728,7 +728,7 @@ volumes:
   omniroute-b-data:
 ```
 
-ដង់ស៊ីតេនៅក្នុងដំណើរការ (ការបង្ហាប់ចេញពី HTTP ដាច់ដោយឡែក) គឺ [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023) ។ ចង្កោមឡូជីខលមួយនៅលើស្ថានភាពប្រើប្រាស់បានយូរដែលបានចែករំលែកគឺ [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) ។
+ដង់ស៊ីតេនៅក្នុងដំណើរការ (ការបង្ហាប់ចេញពី HTTP ដាច់ដោយឡែក) គឺ [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023) ។ ចង្កោមឡូជីខលមួយនៅលើស្ថានភាពប្រើប្រាស់បានយូរដែលបានចែករំលែកគឺ [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) ។
 
 ## កំហុសតាមតំបន់របស់ Gemini នៅក្នុង Docker
 
@@ -769,7 +769,7 @@ HTTP response បញ្ជាក់ពីការតភ្ជាប់សម្
 
 ### ជម្រើសនៅកម្រិត host៖ IPv6 ដែលដំណើរការ និងគោលការណ៍ resolver
 
-អ្នករាយការណ៍នៃ [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) បានស្ដារ
+អ្នករាយការណ៍នៃ [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) បានស្ដារ
 ការចូលប្រើនៅក្នុងបរិស្ថានរបស់ពួកគេ ដោយបើក IPv6 របស់ container និងផ្លាស់ប្ដូរ
 ការជ្រើសរើសអាសយដ្ឋានរបស់ glibc។ សូមចាត់ទុកវាជាជម្រើសជាក់លាក់សម្រាប់បរិស្ថាននោះ។ បញ្ជាក់ថា
 IPv6 របស់ host ដំណើរការ, egress/routing របស់ container និង firewall rules ត្រឹមត្រូវ មុនពេលកែសម្រួល preference របស់ resolver។

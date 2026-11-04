@@ -49,7 +49,7 @@ Combo（优先级/轮询）和 fusion 会在一个父请求下扇出 N 个模型
 
 ## 4. 单进程长时 `/v1/responses`（健康余量）
 
-[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) 添加了 `tryAcquireHealthyHeadroom`，以便在堆内存低于 `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` 时，允许第二个结构复杂的请求进入。`admitChatRequest` 使用的 BYTE 路径（请求体 ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`，默认为 256 KiB，包括 `POST /v1/responses`）使用**相同的**宽限机制。
+[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) 添加了 `tryAcquireHealthyHeadroom`，以便在堆内存低于 `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` 时，允许第二个结构复杂的请求进入。`admitChatRequest` 使用的 BYTE 路径（请求体 ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`，默认为 256 KiB，包括 `POST /v1/responses`）使用**相同的**宽限机制。
 
 这是支持在**单进程**中运行两个以上并发长时 SSE `/v1/responses` 的方案：仅在堆内存和进程级在途字节预算（`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110）允许的范围内，提高主要准入额度和健康余量。能否支持数十个长时 SSE 客户端（40–50 个）取决于该内存预算，而不是产品存在硬性的“最多 2 个”限制。堆内存面临压力时，系统仍会通过可重试的 `503` 进行卸载，从而避免 #7849 的问题再次出现。
 

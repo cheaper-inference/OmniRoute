@@ -5,7 +5,7 @@
 ---
 
 Template: xquik #11370 (incorporado em release/v3.8.51). Postura: `fallbackOnly`.
-Proposta upstream: issue diegosouzapw/OmniRoute#11637.
+Proposta upstream: issue cheaper-inference/OmniRoute#11637.
 
 ## 1. Fonte oficial do serviço (documentação oficial, verificada de forma cruzada)
 

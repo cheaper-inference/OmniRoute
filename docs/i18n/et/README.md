@@ -45,9 +45,9 @@
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=social)](https://github.com/cheaper-inference/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/OmniRoute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 Liitu kogukonnaga
@@ -96,7 +96,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 ![Litsents: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Dockeri allalaadimised](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electoni allalaadimised](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![Electoni allalaadimised](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -521,7 +521,7 @@ Kõik **20** strateegiat — kombineeri neid kombo igas etapis:
 OmniRoute'il on MIT-litsents ja seda hooldatakse avalikult. Kui see säästab teie aega või raha, saate selle sõltumatuna hoidmiseks valida endale sobiva viisi. Sponsorlus ei mõjuta kunagi marsruutimise prioriteeti; see annab nähtavust, mitte paremat järjestust.
 
 <table>
-  <tr><td nowrap>⭐ <b>Märkige repositoorium tärniga</b></td><td>Tasuta — aitab nähtavusele tõepoolest kaasa</td><td><a href="https://github.com/diegosouzapw/OmniRoute">Märkige OmniRoute tärniga</a></td></tr>
+  <tr><td nowrap>⭐ <b>Märkige repositoorium tärniga</b></td><td>Tasuta — aitab nähtavusele tõepoolest kaasa</td><td><a href="https://github.com/cheaper-inference/OmniRoute">Märkige OmniRoute tärniga</a></td></tr>
   <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>Ühekordne või igakuine · platvormitasu puudub</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
   <tr><td nowrap>☕ <b>Ko-fi</b></td><td>Kiire ühekordne annetus, annetaja ei pea registreeruma</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
   <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>Väike, mitteametlik toetusavaldus</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
@@ -558,7 +558,7 @@ Pix copia-e-cola:
 
 </details>
 
-🐛 Leidsite vea või soovite tagasisidet anda? Avage [arutelu](https://github.com/diegosouzapw/OmniRoute/discussions).
+🐛 Leidsite vea või soovite tagasisidet anda? Avage [arutelu](https://github.com/cheaper-inference/OmniRoute/discussions).
 
 <br/>
 
@@ -1266,7 +1266,7 @@ sama protsess ühe pordi kaudu, seega eraldi ainult CLI jaoks mõeldud paketti p
 
 Kanoonilised mõõdikud seisuga 2026-10-18: **1.976 unikaalset videot** · **20.220.289 teadaolevat vaatamist** (`v > 0`) · **1.210 kanalit/profiili võrgustiku kohta**. Töötlemata juhtpaneel sisaldab 1.976 rida (YouTube 1.352 = 740 pikka videot + 612 Shortsi · TikTok 334 · Instagram 290); pärast kanoonilise URL-i alusel normaliseerimist ei jäänud ühtegi duplikaati, kusjuures iga video puhul säilitatakse suurim vaatamiste arv. YouTube'i andmekogumine on külmutatud seisuga 2026-10-13 (API-kvoot oli 14.–18.10 ammendunud) ning TikToki/Instagrami andmekogumine seisuga 2026-09-02 (andmekogumiskrediidid puuduvad); 76 videol puudub endiselt vaatamiste arv.
 
-> 🎬 **Tegid OmniRoute'i kohta video?** Ava linki sisaldav [probleem](https://github.com/diegosouzapw/OmniRoute/issues/new) või [arutelu](https://github.com/diegosouzapw/OmniRoute/discussions) — tõstame selle siin esile.
+> 🎬 **Tegid OmniRoute'i kohta video?** Ava linki sisaldav [probleem](https://github.com/cheaper-inference/OmniRoute/issues/new) või [arutelu](https://github.com/cheaper-inference/OmniRoute/discussions) — tõstame selle siin esile.
 
 <br/>
 
@@ -1286,8 +1286,8 @@ Kanoonilised mõõdikud seisuga 2026-10-18: **1.976 unikaalset videot** · **20.
 | 🟢 **WhatsApp — 🇧🇷 Brasiilia**                  | [liitu grupiga](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                          |
 | 🌍 **Veebisait**                                | [omniroute.online](https://omniroute.online)                                                                              |
 | 🌍 **🌍StHub OmniRoute'i kogukond (tasuta)**    | [StHubi portaal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                   |
-| 📦 **Lähtekood**                                | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                            |
-| 🐛 **Teata veast**                              | [ava probleem](https://github.com/diegosouzapw/OmniRoute/issues) — lisa `npm run system-info` väljund                     |
+| 📦 **Lähtekood**                                | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                                  |
+| 🐛 **Teata veast**                              | [ava probleem](https://github.com/cheaper-inference/OmniRoute/issues) — lisa `npm run system-info` väljund                |
 | 🤝 **Panusta**                                  | [CONTRIBUTING.md](CONTRIBUTING.md) · [Harude ja väljalasete mudel](docs/ops/BRANCHING_MODEL.md) · vali `good first issue` |
 | 💚 **Toeta projekti**                           | [Toetamise võimalused ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)               |
 
@@ -1645,7 +1645,7 @@ Südamlik tänu inimestele, kes rahastavad OmniRoute'i oma taskust — iga panus
 
 </div>
 
-[![Contributors](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
 
 <sub>Auditeeritud 2026-11-02 aktiivse <code>release/v3.8.53</code> tipu <code>1c7135e0fb</code> juures (7 972 commit'i): <b>1 074 normaliseeritud inimeste Git-identiteeti</b> — 759 esinevad commit'ide autoritena (sealhulgas hooldaja) ja 315 ainult selgesõnalistes <code>Co-authored-by</code> jalustes. Loend rakendab faili <code>.mailmap</code>, võrdleb e-posti aadresse tõstutundlikkuseta, ühendab numbrilised ja tavalised GitHubi noreply-aadressid ainult juhul, kui need kodeerivad sama kasutajanime, välistab 29 roboti/agendi/teenusekohatäite identiteeti ega ühenda tavalisi e-posti aadresse pelgalt seetõttu, et nende kuvatavad nimed ühtivad. 2026-08-24 audit avaldas tulemuse 639; sama meetodi uuesti rakendamine selle auditi baasile <code>ac02c5b42f</code> annab tulemuseks 619, seega tuleneb kasv uutest kaastöölistest, mitte leebemast meetodist.</sub>
 
@@ -1674,11 +1674,11 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 ## 📊 Tähed
 
-<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="Tähtede ajaloo diagramm" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <img alt="Tähtede ajaloo diagramm" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
  </picture>
 </a>
 

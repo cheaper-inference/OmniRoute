@@ -59,7 +59,7 @@ Pirms pieņemt, ka vajadzīgajā zarā drīkst veikt apvienošanu, pārbaudiet, 
 aktīvas iesaldēšanas:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Apvienošanas mehānika (īpašnieka `queue` etiķete → Mergify) ir dokumentēta

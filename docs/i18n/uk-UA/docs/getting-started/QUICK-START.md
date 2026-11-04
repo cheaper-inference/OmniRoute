@@ -29,7 +29,7 @@ docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
 ### Варіант C: з вихідного коду
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 npm run dev
@@ -165,4 +165,4 @@ OmniRoute автоматично пропускає провайдерів, пі
 
 - **[Усунення несправностей](../guides/TROUBLESHOOTING.md)** — Поширені проблеми та способи їх виправлення
 - **[Discord](https://discord.gg/U47eFqAXCn)** — Підтримка спільноти
-- **[Проблеми на GitHub](https://github.com/diegosouzapw/OmniRoute/issues)** — Повідомити про помилки
+- **[Проблеми на GitHub](https://github.com/cheaper-inference/OmniRoute/issues)** — Повідомити про помилки

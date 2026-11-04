@@ -5,7 +5,7 @@
 ---
 
 - **Status:** Propost — jeħtieġ l-approvazzjoni tal-mantenitur qabel ma jibda x-xogħol fuq ir-runtime
-- **Kwistjoni ta' traċċar:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
+- **Kwistjoni ta' traċċar:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
 - **Ambitu:** L-arkitettura tal-persistenza biss; din id-deċiżjoni ma żżidx u ma tagħżilx database esterna
 
 ## Kuntest

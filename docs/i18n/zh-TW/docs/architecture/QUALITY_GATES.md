@@ -381,7 +381,7 @@ git add quality-baseline.json
 ### CodeQL 棘輪：重新整理頻率與手動觸發
 
 `check:codeql-ratchet` 讀取的是**依排程重新整理的儲存庫狀態，而非每個 PR 的狀態。**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` 會回報
+`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` 會回報
 `state: configured`、`schedule: weekly`：這是 GitHub 的預設設定掃描，而非每次推送時
 執行的分析。其後果是：當修正警示的 PR 合併後，棘輪仍會繼續讀取
 舊的較高數量，直到下一次排程掃描執行為止——因此，在掃描結果更新之前，

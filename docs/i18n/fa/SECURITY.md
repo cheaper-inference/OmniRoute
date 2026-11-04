@@ -9,7 +9,7 @@
 اگر یک آسیبپذیری امنیتی در OmniRoute پیدا کردید، لطفاً آن را بهشکلی مسئولانه گزارش دهید:
 
 1. **بههیچوجه** یک issue عمومی در GitHub باز نکنید
-2. از [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) استفاده کنید
+2. از [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) استفاده کنید
 3. این موارد را ذکر کنید: توضیحات، مراحل بازتولید و تأثیر احتمالی
 
 ## زمانبندی پاسخگویی
@@ -41,7 +41,7 @@
   رفع مشکلات امنیتی و پسرفتهای بحرانی را دریافت میکند — هرکدام که دیرتر باشد**. تاریخ پایان حاصل، هنگام انتشار نسخه
   در یادداشتهای انتشار 3.9.0 و در [`ROADMAP.md`](ROADMAP.md) ثبت میشود.
 - **گزارش یک آسیبپذیری در خط LTS:** از همان کانال سایر نسخهها استفاده کنید —
-  یک [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) خصوصی،
+  یک [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) خصوصی،
   و هرگز یک issue عمومی ایجاد نکنید. نسخهای را که آزمایش کردهاید ذکر کنید (برای مثال `3.9.2`)؛ اصلاحات در
   `stable/v3` اعمال شده و به v4 نیز منتقل میشوند.
 - **خط مبنای امنیتی هنگام انتشار LTS:** وضعیت اندازهگیریشده اسکنر، شواهد محافظ مسیر و

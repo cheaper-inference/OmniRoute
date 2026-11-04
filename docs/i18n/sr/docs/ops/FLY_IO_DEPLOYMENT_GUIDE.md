@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 Клонирање кода и улазак у директоријум
 
 ```powershell
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly ће аутоматски извршити тзв. rolling update машин
 
 ### 9.1 Праћење ажурирања из upstream репозиторијума уз задржавање `fly.toml` из твог форка
 
-Ако је тренутни репозиторијум форк и желиш да синхронизујеш ажурирања из upstream репозиторијума `https://github.com/diegosouzapw/OmniRoute`, следи ток рада испод.
+Ако је тренутни репозиторијум форк и желиш да синхронизујеш ажурирања из upstream репозиторијума `https://github.com/cheaper-inference/OmniRoute`, следи ток рада испод.
 
 Прво, провери своје remote-ове:
 
@@ -309,7 +309,7 @@ git remote -v
 Ако `upstream` није подешен, додај га:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
 Пре синхронизације са upstream, преузми најновије commit-ове и тагове:

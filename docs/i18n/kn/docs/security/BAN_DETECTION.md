@@ -59,8 +59,8 @@ Google Cloud Code / Antigravity ಇದನ್ನು `403 VALIDATION_REQUIRED` ಆ
 ಪರಿಹರಿಸಬಹುದು. ಈ ಪದಗುಚ್ಛವನ್ನು ನಿಷೇಧ ಪಟ್ಟಿಯಲ್ಲಿ ಉಳಿಸುವುದರಿಂದ `classifyProviderError` ನಲ್ಲಿನ
 ಚೇತರಿಸಿಕೊಳ್ಳಬಹುದಾದ cloud-code 403 ಶಾಖೆಯು ಈ ಪದಪ್ರಯೋಗಕ್ಕೆ ತಲುಪಲಾಗದಂತೆಯೂ ಆಯಿತು, ಏಕೆಂದರೆ
 `accountDeactivated` ಅನ್ನು ಮೊದಲು ಮೌಲ್ಯಮಾಪನ ಮಾಡಲಾಗುತ್ತದೆ — ಹೀಗಾಗಿ Gemini Code Assist ಗಾಗಿ
-[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) ಮತ್ತು
-[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) ನಲ್ಲಿ ಸೇರಿಸಲಾದ project-route
+[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) ಮತ್ತು
+[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) ನಲ್ಲಿ ಸೇರಿಸಲಾದ project-route
 ಚೇತರಿಕೆ ಎಂದಿಗೂ ಚಾಲನೆಯಾಗಲು ಸಾಧ್ಯವಾಗುತ್ತಿರಲಿಲ್ಲ.
 
 ಪಕ್ಕದಲ್ಲಿರುವ ಮೂರು **ಪ್ರತ್ಯೇಕ** ಸಂಕೇತ ಕೋಷ್ಟಕಗಳು ನಿಷೇಧಿತ-ಕೀವರ್ಡ್ ಪತ್ತೆಯ ಭಾಗವಲ್ಲ:

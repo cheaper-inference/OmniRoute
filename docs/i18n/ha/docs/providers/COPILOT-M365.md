@@ -129,8 +129,8 @@ Tabbatar cewa an kunna `copilot-m365-web` a **Dashboard → Providers**. Ana iya
 
 ## Manazarta
 
-- Matsala: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Tattaunawa: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- Matsala: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Tattaunawa: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - Tushe: `src/shared/constants/providers/web-cookie.ts` (ma'anar mai samarwa)
 - Shigo da HAR: `src/shared/utils/m365HarImport.ts`
 - Filayen bayanan shaida: `src/shared/providers/webSessionCredentials.ts`

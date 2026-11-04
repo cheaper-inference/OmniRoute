@@ -114,7 +114,7 @@ npm start
 Jei paketas nesukompiliuotas su įjungtu įterpimu, puslapis atsisako būti rodomas rėmelyje, plėtinys tai aptinka pagal
 atsako antraštes ir grįžta prie išorinės naršyklės — niekas nesugenda, o apie tai vieną kartą pranešama.
 Žr. [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) ir problemą
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
 
 ---
 

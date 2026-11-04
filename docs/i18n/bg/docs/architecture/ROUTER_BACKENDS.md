@@ -4,9 +4,9 @@
 
 ---
 
-> **Статус:** Прието · **Контекст:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
-> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Договор:** `domain/routing/routerBackends.ts`
-> (типизиран регистър — кодът се добавя с [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
+> **Статус:** Прието · **Контекст:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
+> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Договор:** `domain/routing/routerBackends.ts`
+> (типизиран регистър — кодът се добавя с [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
 
 Този ADR уточнява как `ts` (вграден), `bifrost`, `cliproxy`, `9router` и
 съвместимите с VibeProxy машини са свързани помежду си, така че сътрудниците да спрат
@@ -39,7 +39,7 @@
 ## Регистърът — единствен източник на истина
 
 Договорът `domain/routing/routerBackends.ts` (кодът се добавя с
-[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) декларира всяка машина еднократно, заедно с нейния
+[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) декларира всяка машина еднократно, заедно с нейния
 жизнен цикъл, възможности, идентичност на услугата, порт по подразбиране, конфигурация за проверка на изправността и
 поддръжка на телеметрия. Потребителите намират машините чрез `getRouterBackend(id)`,
 `listRouterBackends()` и `listRouterBackendsByCapability(cap)`, вместо
@@ -55,7 +55,7 @@
 
 ¹ Преобразуването на Bifrost във вградена услуга със статус `supervised` (която може да бъде инсталирана/стартирана
 чрез `/api/services/bifrost/`) се проследява в
-[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817); докато тази промяна не бъде слята,
+[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817); докато тази промяна не бъде слята,
 Bifrost е само `external` (достъпен единствено чрез `BIFROST_BASE_URL`).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -123,8 +123,8 @@ Bifrost е само `external` (достъпен единствено чрез `
 Към момента изборът е **изцяло или никак на ниво препредаване** — в `release/v3.8.43` няма
 смяна на изпълняващия механизъм за отделен доставчик или отделна заявка. Ограничението за отделни заявки се добавя
 чрез работата по манифеста на страничния процес
-([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) манифест +
-[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) манифест +
+[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 което позволява на `auto` да насочва през Bifrost само доставчици, допустими според манифеста.
 
 ## Интеграция с таблото

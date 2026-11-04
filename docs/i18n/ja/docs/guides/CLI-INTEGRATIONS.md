@@ -180,7 +180,7 @@ omniroute setup-5dive --model failover-demo --auth-profile omniroute --agent wor
 
 API キーは **stdin**（`--api-key=-`）で 5dive に渡されるため、`ps` の出力には表示されません。
 
-プロファイルを単一モデルではなく OmniRoute の **combo** に向けることで、フリートでプロバイダーのフェイルオーバーが利用可能になります。[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578) に記録された実行では、プライマリエンドポイントがターンの途中で完全にダウンした際、エージェントは残りのステップをフォールバック上で完了し、障害が表面化することはありませんでした。
+プロファイルを単一モデルではなく OmniRoute の **combo** に向けることで、フリートでプロバイダーのフェイルオーバーが利用可能になります。[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578) に記録された実行では、プライマリエンドポイントがターンの途中で完全にダウンした際、エージェントは残りのステップをフォールバック上で完了し、障害が表面化することはありませんでした。
 
 ---
 

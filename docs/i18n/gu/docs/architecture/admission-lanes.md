@@ -126,7 +126,7 @@ OmniRoute માં અલગ-અલગ વ્યાપ ધરાવતી **બ
 
 ## 4. એક-પ્રોસેસવાળું લાંબું `/v1/responses` (સ્વસ્થ-હેડરૂમ)
 
-[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437)એ
+[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437)એ
 `tryAcquireHealthyHeadroom` ઉમેર્યું, જેથી હીપ `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`
 કરતાં નીચે હોય ત્યારે બીજી માળખાકીય રીતે ભારે વિનંતીને પ્રવેશ આપવામાં આવે.
 `admitChatRequest` દ્વારા વપરાતો BYTE પાથ (બૉડી ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

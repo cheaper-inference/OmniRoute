@@ -45,9 +45,9 @@
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=social)](https://github.com/cheaper-inference/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/OmniRoute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 Gå med i communityn
@@ -96,7 +96,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![Electron Downloads](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -521,7 +521,7 @@ Alla **20** strategier — blanda fritt per steg i kombinationen:
 OmniRoute är MIT-licensierat och underhålls öppet. Om det sparar tid eller pengar åt dig kan du hjälpa till att hålla det oberoende — välj det alternativ som passar dig. Sponsring påverkar aldrig routningsprioriteten; den ger synlighet, inte högre rankning.
 
 <table>
-  <tr><td nowrap>⭐ <b>Stjärnmärk kodförrådet</b></td><td>Kostnadsfritt — hjälper verkligen synligheten</td><td><a href="https://github.com/diegosouzapw/OmniRoute">Stjärnmärk OmniRoute</a></td></tr>
+  <tr><td nowrap>⭐ <b>Stjärnmärk kodförrådet</b></td><td>Kostnadsfritt — hjälper verkligen synligheten</td><td><a href="https://github.com/cheaper-inference/OmniRoute">Stjärnmärk OmniRoute</a></td></tr>
   <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>Engångsbidrag eller månadsvis · ingen plattformsavgift</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
   <tr><td nowrap>☕ <b>Ko-fi</b></td><td>Snabbt engångsbidrag, ingen registrering krävs för givaren</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
   <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>Liten, informell gest</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
@@ -558,7 +558,7 @@ Pix copia-e-cola:
 
 </details>
 
-🐛 Hittat ett fel eller har du synpunkter? Starta en [diskussion](https://github.com/diegosouzapw/OmniRoute/discussions).
+🐛 Hittat ett fel eller har du synpunkter? Starta en [diskussion](https://github.com/cheaper-inference/OmniRoute/discussions).
 
 <br/>
 
@@ -1262,7 +1262,7 @@ process på en port, så det finns för närvarande inget separat paket enbart f
 
 Kanoniska mätvärden den 2026-10-18: **1.976 unika videor** · **20.220.289 kända visningar** (`v > 0`) · **1.210 kanaler/profiler per nätverk**. Råpanelen innehåller 1.976 rader (YouTube 1.352 = 740 långa videor + 612 Shorts · TikTok 334 · Instagram 290); inga dubbletter återstod efter normaliseringen utifrån den kanoniska URL:en, där det högsta antalet per video behålls. Insamlingen från YouTube är fryst sedan 2026-10-13 (API-kvoten var förbrukad från 14 till 18/10) och TikTok/Instagram sedan 2026-09-02 (inga insamlingskrediter); 76 videor saknar fortfarande antal visningar.
 
-> 🎬 **Har du gjort en video om OmniRoute?** Öppna ett [ärende](https://github.com/diegosouzapw/OmniRoute/issues/new) eller en [diskussion](https://github.com/diegosouzapw/OmniRoute/discussions) med länken — så lyfter vi fram den här.
+> 🎬 **Har du gjort en video om OmniRoute?** Öppna ett [ärende](https://github.com/cheaper-inference/OmniRoute/issues/new) eller en [diskussion](https://github.com/cheaper-inference/OmniRoute/discussions) med länken — så lyfter vi fram den här.
 
 <br/>
 
@@ -1282,8 +1282,8 @@ Kanoniska mätvärden den 2026-10-18: **1.976 unika videor** · **20.220.289 kä
 | 🟢 **WhatsApp — 🇧🇷 Brasilien**              | [gå med i gruppen](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                              |
 | 🌍 **Webbplats**                            | [omniroute.online](https://omniroute.online)                                                                                     |
 | 🌍 **🌍StHub OmniRoute-community (gratis)** | [StHub-portalen](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                          |
-| 📦 **Källkod**                              | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                                   |
-| 🐛 **Rapportera ett fel**                   | [skapa ett ärende](https://github.com/diegosouzapw/OmniRoute/issues) — bifoga utdata från `npm run system-info`                  |
+| 📦 **Källkod**                              | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                                         |
+| 🐛 **Rapportera ett fel**                   | [skapa ett ärende](https://github.com/cheaper-inference/OmniRoute/issues) — bifoga utdata från `npm run system-info`             |
 | 🤝 **Bidra**                                | [CONTRIBUTING.md](CONTRIBUTING.md) · [Förgrenings- och releasemodell](docs/ops/BRANCHING_MODEL.md) · välj ett `good first issue` |
 | 💚 **Stöd projektet**                       | [Sätt att stödja ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)                           |
 
@@ -1641,7 +1641,7 @@ Ett varmt tack till alla som finansierar OmniRoute ur egen ficka — varje bidra
 
 </div>
 
-[![Bidragsgivare](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Bidragsgivare](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
 
 <sub>Granskad 2026-11-02 vid live-<code>release/v3.8.53</code>-tippen <code>1c7135e0fb</code> (7 972 commits): <b>1 074 normaliserade mänskliga Git-identiteter</b> — 759 visas som commitförfattare (inklusive underhållaren) och 315 endast i explicita <code>Co-authored-by</code>-trailers. Kartläggningen tillämpar <code>.mailmap</code>, jämför e-postadresser skiftlägesokänsligt, sammanfogar numeriska och vanliga GitHub noreply-adresser endast när de kodar samma användarnamn, utesluter 29 bot-/agent-/tjänste-/platshållaridentiteter och slår inte samman vanliga e-postadresser enbart för att deras visningsnamn matchar. Granskningen 2026-08-24 publicerade 639; när denna metod körs igen på den granskningens bas <code>ac02c5b42f</code> blir resultatet 619, så ökningen beror på nya bidragsgivare, inte på en mindre strikt metod.</sub>
 
@@ -1670,11 +1670,11 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 ## 📊 Stjärnor
 
-<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="Diagram över stjärnhistorik" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <img alt="Diagram över stjärnhistorik" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
  </picture>
 </a>
 

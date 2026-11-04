@@ -5,7 +5,7 @@
 ---
 
 Sjabloon: xquik #11370 (samengevoegd in release/v3.8.51). Houding: `fallbackOnly`.
-Upstreamvoorstel: issue diegosouzapw/OmniRoute#11637.
+Upstreamvoorstel: issue cheaper-inference/OmniRoute#11637.
 
 ## 1. Feitelijke servicegegevens (officiële documentatie, kruiselings gecontroleerd)
 

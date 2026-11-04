@@ -260,7 +260,7 @@ Nke a na-eme naanị otu ugboro na mbido mbụ mgbe emelitechara. Jiri `migrateL
 
 ## 1proxy Ahịa Proxy N'efu
 
-> 🆕 **Onye [@oyi77](https://github.com/oyi77) nyere aka** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Nsogbu [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕 **Onye [@oyi77](https://github.com/oyi77) nyere aka** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Nsogbu [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
 
 OmniRoute na-ejikọta na nyiwe obodo **[1proxy](https://1proxy-api.aitradepulse.com)** iji nye ohere iji **ọtụtụ narị proxy efu a kwadoro** sitere n'akụkụ ụwa niile. Nke a dabara nke ọma maka ndị ọrụ na-enweghị akụrụngwa proxy nke ha.
 

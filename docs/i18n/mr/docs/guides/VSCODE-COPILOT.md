@@ -107,7 +107,7 @@ npm start
 
 एम्बेडिंग सक्षम असलेला बिल्ड नसेल तर पृष्ठ फ्रेममध्ये उघडण्यास नकार देते, एक्स्टेंशनला प्रतिसाद हेडर्सवरून ते आढळते आणि ते बाह्य ब्राउझरचा पर्याय वापरते — काहीही बिघडत नाही आणि ते याबद्दल एकदा सूचित करते.
 [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) आणि issue
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273) पहा.
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273) पहा.
 
 ---
 

@@ -250,7 +250,7 @@ installer ਦੀ reputation ਸਿਫ਼ਰ ਹੁੰਦੀ ਹੈ ਅਤੇ beh
    [Convert]::ToBase64String($b)
    ```
    output ਦਾ `latest.yml` → `sha512` ਨਾਲ ਮੇਲ ਖਾਣਾ ਲਾਜ਼ਮੀ ਹੈ। ਜੇ ਇਹ ਮੇਲ ਨਹੀਂ ਖਾਂਦਾ, ਤਾਂ ਫਾਈਲ ਮਿਟਾਓ ਅਤੇ
-   ਸਿਰਫ਼ [GitHub releases page](https://github.com/diegosouzapw/OmniRoute/releases) ਤੋਂ ਮੁੜ download ਕਰੋ।
+   ਸਿਰਫ਼ [GitHub releases page](https://github.com/cheaper-inference/OmniRoute/releases) ਤੋਂ ਮੁੜ download ਕਰੋ।
 2. **Restore + exclude ਕਰੋ** — ਕਵਾਰੰਟੀਨ ਤੋਂ roll back ਕੀਤੀਆਂ items ਨੂੰ restore ਕਰੋ ਅਤੇ
    `%LOCALAPPDATA%\Programs\OmniRoute` ਲਈ exclusion ਸ਼ਾਮਲ ਕਰੋ (Kaspersky → Settings → Threats and Exclusions),
    ਫਿਰ ਦੁਬਾਰਾ install ਕਰੋ।
@@ -845,7 +845,7 @@ omniroute serve --ready-timeout 180000
 
 ## ਅਜੇ ਵੀ ਸਮੱਸਿਆ ਹੱਲ ਨਹੀਂ ਹੋਈ?
 
-- **GitHub ਮੁੱਦੇ**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **GitHub ਮੁੱਦੇ**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **ਆਰਕੀਟੈਕਚਰ**: ਅੰਦਰੂਨੀ ਵੇਰਵਿਆਂ ਲਈ [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) ਵੇਖੋ
 - **API ਹਵਾਲਾ**: ਸਾਰੇ ਐਂਡਪੌਇੰਟਾਂ ਲਈ [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) ਵੇਖੋ
 - **ਸਿਹਤ ਡੈਸ਼ਬੋਰਡ**: ਰੀਅਲ-ਟਾਈਮ ਸਿਸਟਮ ਸਥਿਤੀ ਲਈ **Dashboard → Health** ਦੀ ਜਾਂਚ ਕਰੋ

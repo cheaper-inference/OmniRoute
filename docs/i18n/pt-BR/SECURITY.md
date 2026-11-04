@@ -9,7 +9,7 @@
 Se você descobrir uma vulnerabilidade de segurança no OmniRoute, relate-a de forma responsável:
 
 1. **NÃO** abra uma issue pública no GitHub
-2. Use os [Avisos de Segurança do GitHub](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
+2. Use os [Avisos de Segurança do GitHub](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
 3. Inclua: descrição, etapas de reprodução e impacto potencial
 
 ## Prazo de Resposta
@@ -42,7 +42,7 @@ branch `stable/v3` (consulte [`ROADMAP.md`](ROADMAP.md) → "Fase 3 — v3.9.0 L
   o que ocorrer por último**. A data final resultante é registrada nas notas de lançamento da 3.9.0 e no
   [`ROADMAP.md`](ROADMAP.md) quando o lançamento ocorrer.
 - **Como relatar uma vulnerabilidade na linha LTS:** use o mesmo canal de qualquer outra versão —
-  um [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) privado,
+  um [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) privado,
   nunca uma issue pública. Informe qual versão você testou (por exemplo, `3.9.2`); as correções são aplicadas à
   `stable/v3` e encaminhadas para a v4.
 - **Linha de base de segurança no lançamento da LTS:** o estado medido do scanner, as verificações de proteção de rotas e

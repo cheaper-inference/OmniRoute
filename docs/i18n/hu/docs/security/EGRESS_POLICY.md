@@ -55,7 +55,7 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ## Miért létezik?
 
-A [#3777](https://github.com/diegosouzapw/OmniRoute/pull/3777) számú PR-ben került bevezetésre. A változtatást indokoló problémák:
+A [#3777](https://github.com/cheaper-inference/OmniRoute/pull/3777) számú PR-ben került bevezetésre. A változtatást indokoló problémák:
 
 | Probléma                                                  | Amit a direktíva megold                                                                                                                                                                                                                                                                                                                                                                      |
 | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

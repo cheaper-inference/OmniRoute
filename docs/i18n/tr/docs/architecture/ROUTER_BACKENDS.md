@@ -4,9 +4,9 @@
 
 ---
 
-> **Durum:** Kabul Edildi · **Bağlam:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
-> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Sözleşme:** `domain/routing/routerBackends.ts`
-> (tür güvenli kayıt defteri — kod [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) ile ekleniyor)
+> **Durum:** Kabul Edildi · **Bağlam:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
+> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Sözleşme:** `domain/routing/routerBackends.ts`
+> (tür güvenli kayıt defteri — kod [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) ile ekleniyor)
 
 Bu ADR, katkıda bulunanların mimari açıdan farklı iki kavramı birbirine karıştırmasını önlemek amacıyla `ts` (yerel), `bifrost`, `cliproxy`, `9router` ve VibeProxy uyumlu motorların birbiriyle nasıl ilişkili olduğunu kesinleştirir. Router-backend-registry çalışmasıyla sunulan tür güvenli kayıt defterini bu model için tek doğruluk kaynağı olarak belgeler.
 
@@ -28,7 +28,7 @@ Kaçınılması gereken hata: "gömülü hizmet" ile "yönlendirme arka ucunu" t
 
 ## Kayıt defteri — tek doğruluk kaynağı
 
-`domain/routing/routerBackends.ts` sözleşmesi (kod [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868) ile ekleniyor), her motoru yaşam döngüsü, yetenekleri, hizmet kimliği, varsayılan bağlantı noktası, sağlık yapılandırması ve telemetri desteğiyle birlikte bir kez tanımlar. Tüketiciler, her yardımcı işlemi ayrı ayrı özel durum olarak ele almak yerine motorları `getRouterBackend(id)`, `listRouterBackends()` ve `listRouterBackendsByCapability(cap)` aracılığıyla arar.
+`domain/routing/routerBackends.ts` sözleşmesi (kod [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868) ile ekleniyor), her motoru yaşam döngüsü, yetenekleri, hizmet kimliği, varsayılan bağlantı noktası, sağlık yapılandırması ve telemetri desteğiyle birlikte bir kez tanımlar. Tüketiciler, her yardımcı işlemi ayrı ayrı özel durum olarak ele almak yerine motorları `getRouterBackend(id)`, `listRouterBackends()` ve `listRouterBackendsByCapability(cap)` aracılığıyla arar.
 
 | Arka uç     | Yaşam döngüsü | Hizmet (eksen A) | Aktarıcı arka ucu (eksen B) | Sağlık        | Varsayılan bağlantı noktası |
 | ----------- | ------------- | ---------------- | --------------------------- | ------------- | --------------------------- |
@@ -38,7 +38,7 @@ Kaçınılması gereken hata: "gömülü hizmet" ile "yönlendirme arka ucunu" t
 | `9router`   | `supervised`  | `9router`        | — (sağlayıcı)               | `/api/health` | 20130                       |
 | `vibeproxy` | `external`    | —                | — (sağlayıcı adaptörü)      | `/v1/models`  | —                           |
 
-¹ Bifrost'un (`/api/services/bifrost/` üzerinden kurulabilen/başlatılabilen) `supervised` bir gömülü hizmete yükseltilmesi [#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817) kapsamında takip edilmektedir; bu değişiklik birleştirilene kadar Bifrost yalnızca `external` olarak kullanılabilir (yalnızca `BIFROST_BASE_URL` üzerinden erişilebilir).
+¹ Bifrost'un (`/api/services/bifrost/` üzerinden kurulabilen/başlatılabilen) `supervised` bir gömülü hizmete yükseltilmesi [#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817) kapsamında takip edilmektedir; bu değişiklik birleştirilene kadar Bifrost yalnızca `external` olarak kullanılabilir (yalnızca `BIFROST_BASE_URL` üzerinden erişilebilir).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
 `oauth-backed`, `dashboard-embed`, `model-sync`, `native-hot-path`), çağrı yapanların kimlik başına dalları sabit kodlamak yerine motorları gerçekten yapabildikleri işlemlere göre filtrelemesine olanak tanır.
@@ -106,8 +106,8 @@ dosyasına başvurmaz.
 Seçim bugün **aktarma düzeyinde ya hep ya hiç şeklindedir** — `release/v3.8.43`
 sürümünde sağlayıcı veya istek başına motor değişimi yoktur. İstek başına geçit,
 yardımcı süreç manifesti çalışması kapsamında eklenmektedir
-([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`);
+([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`);
 bu sayede `auto`, yalnızca manifest açısından uygun sağlayıcıları Bifrost üzerinden
 yönlendirebilir.
 

@@ -6,7 +6,7 @@
 
 **ਸਥਿਤੀ:** ਪ੍ਰਸਤਾਵ (@diegosouzapw ਦੀ ਸਮੀਖਿਆ ਦੀ ਉਡੀਕ ਵਿੱਚ)
 **ਮਿਤੀ:** 2026-06-20
-**ਹਵਾਲੇ:** [#3932](https://github.com/diegosouzapw/OmniRoute/issues/3932), PR #4381
+**ਹਵਾਲੇ:** [#3932](https://github.com/cheaper-inference/OmniRoute/issues/3932), PR #4381
 
 ## ਸੰਖੇਪ
 

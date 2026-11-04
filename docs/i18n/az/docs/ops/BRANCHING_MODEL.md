@@ -57,7 +57,7 @@ Bu, **inkişafı dayandırmır**:
 olub-olmadığını yoxlayın:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Birləşdirmə mexanizmləri (sahibin `queue` etiketi → Mergify)

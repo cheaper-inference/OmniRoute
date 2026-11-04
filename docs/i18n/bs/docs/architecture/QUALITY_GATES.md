@@ -426,7 +426,7 @@ implementacija na čekanju).
 ### CodeQL ratchet: učestalost osvježavanja i ručno pokretanje
 
 `check:codeql-ratchet` čita **stanje repozitorija, osvježeno prema rasporedu — ne po PR-u.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` prijavljuje
+`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` prijavljuje
 `state: configured`, `schedule: weekly`: GitHub-ovo skeniranje putem 'default-setup', a ne
 analiza po push-u. Posljedica: nakon što se PR koji POPRAVLJA upozorenja merge-uje,
 ratchet nastavlja čitati stari, veći broj sve dok se ne pokrene sljedeće zakazano skeniranje

@@ -478,7 +478,7 @@ Dvi numatytosios OmniRoute nuostatos gali nepastebimai pakenkti daug valandų tr
 | Seansas nuolat perjungia paskyras / tarp veiksmų prarandamas raginimų podėlio tęstinumas | Seanso susiejimo TTL yra `0` (išjungtas)                                                                  | `sessionAffinityTtlMs`   |
 | Ryšys nutrūksta samprotavimo metu, klientui nepateikiant jokio raginimo                  | Srauto neveiklumo stebėjimo mechanizmas suveikė, kai 10 minučių negauta jokio pirminio serverio fragmento | `STREAM_IDLE_TIMEOUT_MS` |
 
-Susijusios diskusijos: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (ilgų užduočių nutrūkimai), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (kodėl susiejimas pagal numatytąją nuostatą išjungtas). Stebėjimas: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Susijusios diskusijos: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (ilgų užduočių nutrūkimai), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (kodėl susiejimas pagal numatytąją nuostatą išjungtas). Stebėjimas: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. Seanso susiejimas — vieną pokalbį priskirkite vienai paskyrai
 

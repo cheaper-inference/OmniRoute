@@ -169,7 +169,7 @@ Fún àwọn relay Anthropic ti ẹni-kẹta tí wọ́n gba ìrìn-àjò “Cla
 
 - `open-sse/executors/antigravity.ts` — ń ka `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — ìṣètò credential
-- Ìròyìn ìṣẹ̀lẹ̀ àkọ́kọ́: Ìjíròrò [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Ìròyìn ìṣẹ̀lẹ̀ àkọ́kọ́: Ìjíròrò [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

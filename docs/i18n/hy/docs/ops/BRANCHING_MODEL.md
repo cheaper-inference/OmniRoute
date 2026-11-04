@@ -56,7 +56,7 @@ flowchart LR
 Նախքան ենթադրելը, որ ձեր ուզած ճյուղը հնարավոր է միավորել, ստուգեք՝ արդյոք կա բաց սառեցում․
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Միավորման մեխանիզմը (սեփականատիրոջ `queue` պիտակ → Mergify) փաստաթղթավորված է

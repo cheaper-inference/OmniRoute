@@ -234,7 +234,7 @@ Kaspersky는 전체 설치를 "롤백"하여 이미 작성된 파일까지 삭�
    [Convert]::ToBase64String($b)
    ```
    출력값은 `latest.yml` → `sha512`와 일치해야 합니다. 일치하지 않으면 파일을 삭제하고
-   [GitHub 릴리스 페이지](https://github.com/diegosouzapw/OmniRoute/releases)에서만 다시 다운로드하세요.
+   [GitHub 릴리스 페이지](https://github.com/cheaper-inference/OmniRoute/releases)에서만 다시 다운로드하세요.
 2. **복원 + 제외 설정** — 롤백되어 격리된 항목을 복원하고
    `%LOCALAPPDATA%\Programs\OmniRoute`를 제외 항목으로 추가한 다음
    (Kaspersky → 설정 → 위협 및 제외) 다시 설치하세요.
@@ -830,7 +830,7 @@ omniroute serve --ready-timeout 180000
 
 ## 여전히 해결되지 않나요?
 
-- **GitHub 이슈**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **GitHub 이슈**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **아키텍처**: 내부 세부 정보는 [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)를 참조하세요
 - **API 레퍼런스**: 모든 엔드포인트는 [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)를 참조하세요
 - **상태 대시보드**: 실시간 시스템 상태는 **Dashboard → Health**에서 확인하세요

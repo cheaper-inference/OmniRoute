@@ -56,7 +56,7 @@ Kapag nire-reconcile ang isang release, nagbubukas ng marker issue na may label 
 Suriin kung may bukas na freeze bago ipagpalagay na maaaring i-merge ang branch na gusto mo:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Ang mga mekanismo ng merge (`queue` label ng may-ari → Mergify) ay nakadokumento sa

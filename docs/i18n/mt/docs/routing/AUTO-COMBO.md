@@ -131,11 +131,11 @@ Il-punteġġ awtomatiku jagħżel l-aħjar fornitur/mudell għal kull talba
 
 Kombinazzjoni li l-`name` tagħha huwa identiku għal id ta’ mudell mhux ikkwalifikat (eż. kombinazzjoni bl-isem
 `gpt-5.5`) hija **mudell intenzjonat u appoġġjat**, mhux bug: dan huwa l-mekkaniżmu għall-użu ta’ fornitur alternattiv għal kull id ta’ mudell, kif iddokumentat f’
-[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Minħabba li r-riżoluzzjoni tal-kombinazzjonijiet tiġi ċċekkjata qabel ir-riżoluzzjoni tal-id ta’ mudell mhux ikkwalifikat
+[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940). Minħabba li r-riżoluzzjoni tal-kombinazzjonijiet tiġi ċċekkjata qabel ir-riżoluzzjoni tal-id ta’ mudell mhux ikkwalifikat
 (`getComboForModel()` f’`src/sse/services/model.ts`), talba għall-id mhux ikkwalifikat
 `gpt-5.5` tiġi diretta permezz tal-miri tal-kombinazzjoni (eż.
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) minflok direttament lejn fornitur wieħed — dan jerġa’ juża l-preċedenza tal-kombinazzjoni qabel il-kitba mill-ġdid, mibnija għal
-[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227), u hija ttestjata kontra rigressjonijiet minn `tests/unit/responses-combo-resolution-3227.test.ts` u
+[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227), u hija ttestjata kontra rigressjonijiet minn `tests/unit/responses-combo-resolution-3227.test.ts` u
 `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
 
 Il-ħolqien jew il-bdil tal-isem ta’ kombinazzjoni għal isem li jgħatti id ta’ mudell reali
@@ -176,7 +176,7 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 - **`auto` ma jużax il-kombinazzjonijiet tiegħek.** `auto`/`auto/*` jibni l-ġabra tiegħu stess ta’ kandidati mingħajr konfigurazzjoni u jikkonsulta l-kombinazzjonijiet persistenti biss jekk kombinazzjoni tkun litteralment jisimha `auto` (mhux rakkomandat). Biex tidderieġi t-talbiet permezz ta’ kombinazzjoni, ibgħat l-isem eżatt tagħha — mhux `auto`.
 - **`openrouter/auto` huwa prodott reali bi ħlas ta’ OpenRouter** ("Auto Best Available"), mhux alias ta’ OmniRoute. Huwa l-unika entrata statika ta’ mudell fir-reġistru ta’ OpenRouter (`open-sse/config/providers/registry/openrouter/index.ts`) u jiġi ċċarġjat separatament. Uża Settings → Routing → Hide paid models biex teskludih mill-ġabriet `auto`.
 
-Ara [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) u [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) għall-konfużjoni oriġinali li dan jiddokumenta.
+Ara [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) u [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) għall-konfużjoni oriġinali li dan jiddokumenta.
 
 ## Kif Jaħdem (Auto-Combos Persistiti)
 

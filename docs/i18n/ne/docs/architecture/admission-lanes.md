@@ -125,7 +125,7 @@ OmniRoute मा फरक दायरा भएका **दुई** प्र�
 
 ## 4. एक-प्रोसेसमा लामो `/v1/responses` (स्वस्थ-हेडरुम)
 
-[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) ले
+[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) ले
 `tryAcquireHealthyHeadroom` थप्यो, जसले हिप
 `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` भन्दा तल हुँदा संरचनात्मक रूपमा भारी दोस्रो अनुरोधलाई प्रवेश दिन्छ। `admitChatRequest` ले प्रयोग गर्ने BYTE
 पथले (`OMNIROUTE_CHAT_LARGE_BODY_BYTES` वा सोभन्दा ठूला बडीहरू,

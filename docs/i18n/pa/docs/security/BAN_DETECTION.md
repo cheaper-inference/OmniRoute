@@ -58,8 +58,8 @@ Google Cloud Code / Antigravity ਇਸਨੂੰ `403 VALIDATION_REQUIRED` ਵਜ
 ਕਰਦਾ ਹੈ। ਇਸ ਵਾਕਾਂਸ਼ ਨੂੰ ਪਾਬੰਦੀ ਸੂਚੀ ਵਿੱਚ ਰੱਖਣ ਨਾਲ `classifyProviderError` ਵਿੱਚ ਮੁੜ-ਪ੍ਰਾਪਤਯੋਗ
 cloud-code `403` ਬ੍ਰਾਂਚ ਵੀ ਇਸ ਸ਼ਬਦਾਵਲੀ ਲਈ ਪਹੁੰਚ ਤੋਂ ਬਾਹਰ ਹੋ ਗਈ ਸੀ, ਕਿਉਂਕਿ
 `accountDeactivated` ਦਾ ਮੁਲਾਂਕਣ ਪਹਿਲਾਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ — ਇਸ ਲਈ Gemini Code Assist ਲਈ
-[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) ਅਤੇ
-[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) ਵਿੱਚ ਜੋੜੀ ਗਈ ਪ੍ਰੋਜੈਕਟ-ਰੂਟ
+[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) ਅਤੇ
+[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) ਵਿੱਚ ਜੋੜੀ ਗਈ ਪ੍ਰੋਜੈਕਟ-ਰੂਟ
 ਰਿਕਵਰੀ ਕਦੇ ਵੀ ਚੱਲ ਨਹੀਂ ਸਕਦੀ ਸੀ।
 
 ਨਾਲ ਲੱਗਦੀਆਂ ਤਿੰਨ, **ਵੱਖਰੀਆਂ** ਸਿਗਨਲ ਟੇਬਲਾਂ ਪਾਬੰਦੀਸ਼ੁਦਾ-ਕੀਵਰਡ ਪਛਾਣ ਦਾ ਹਿੱਸਾ _ਨਹੀਂ_ ਹਨ:

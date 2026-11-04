@@ -56,7 +56,7 @@ akan dibuka. Perkara itu **tidak menghentikan pembangunan**:
 Semak sama ada terdapat pembekuan terbuka sebelum menganggap cabang yang anda inginkan boleh digabungkan:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Mekanisme penggabungan (label `queue` oleh pemilik → Mergify) didokumenkan dalam

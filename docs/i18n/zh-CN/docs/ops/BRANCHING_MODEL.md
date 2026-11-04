@@ -54,7 +54,7 @@ flowchart LR
 在认定所需分支可合并之前，请先检查是否存在开放的冻结：
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 合并机制（所有者添加 `queue` 标签 → Mergify）记录在

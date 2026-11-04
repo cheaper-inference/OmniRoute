@@ -477,7 +477,7 @@ OmniRoute का दुई पूर्वनिर्धारित मान�
 | सेसनले निरन्तर अकाउन्टहरू बदल्छ / टर्नहरूबीच प्रम्प्ट-क्यास निरन्तरता हराउँछ | सेसन एफिनिटी TTL `0` (असक्षम) छ                                              | `sessionAffinityTtlMs`   |
 | क्लाइन्टतर्फ कुनै प्रम्प्ट नदेखाई रिजनिङकै बीचमा कनेक्सन टुट्छ               | 10 मिनेटसम्म कुनै अपस्ट्रिम चङ्क नआएपछि स्ट्रिम निष्क्रियता वाचडग सक्रिय भयो | `STREAM_IDLE_TIMEOUT_MS` |
 
-सम्बन्धित छलफलहरू: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (लामो कार्य ड्रपहरू), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (एफिनिटी पूर्वनिर्धारित रूपमा किन बन्द हुन्छ)। ट्र्याकिङ: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287)।
+सम्बन्धित छलफलहरू: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (लामो कार्य ड्रपहरू), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (एफिनिटी पूर्वनिर्धारित रूपमा किन बन्द हुन्छ)। ट्र्याकिङ: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287)।
 
 ### 1. सेसन एफिनिटी — एउटै वार्तालापलाई एउटै अकाउन्टमा निश्चित गर्नुहोस्
 

@@ -115,7 +115,7 @@ npm start
 Tanpa binaan yang mendayakan pembenaman, halaman tersebut enggan dipaparkan dalam bingkai. Sambungan mengesan perkara itu daripada
 pengepala respons lalu kembali menggunakan pelayar luaran — tiada apa-apa yang rosak dan ia memaklumkan perkara itu sekali sahaja.
 Lihat [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) dan isu
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
 
 ---
 

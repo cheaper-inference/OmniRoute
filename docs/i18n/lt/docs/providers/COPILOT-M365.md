@@ -122,8 +122,8 @@ teikėjas pagal numatytuosius nustatymus gali būti paslėptas.
 
 ## Nuorodos
 
-- Problema: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Diskusija: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- Problema: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Diskusija: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - Šaltinis: `src/shared/constants/providers/web-cookie.ts` (teikėjo apibrėžimas)
 - HAR importavimas: `src/shared/utils/m365HarImport.ts`
 - Prisijungimo duomenų laukai: `src/shared/providers/webSessionCredentials.ts`

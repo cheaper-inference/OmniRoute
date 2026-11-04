@@ -5,7 +5,7 @@
 ---
 
 Şablon: xquik #11370 (`release/v3.8.51` buraxılışına birləşdirilib). Rejim: `fallbackOnly`.
-Yuxarı axın təklifi: diegosouzapw/OmniRoute#11637 məsələsi.
+Yuxarı axın təklifi: cheaper-inference/OmniRoute#11637 məsələsi.
 
 ## 1. Xidmət üzrə faktiki məlumatlar (rəsmi sənədlər, çarpaz yoxlanılıb)
 

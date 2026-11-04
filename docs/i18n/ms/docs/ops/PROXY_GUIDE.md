@@ -261,7 +261,7 @@ Ini berlaku sekali sahaja pada permulaan pertama selepas naik taraf. Gunakan `mi
 
 ## Pasaran Proksi Percuma 1proxy
 
-> 🆕 **Disumbangkan oleh [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Isu [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕 **Disumbangkan oleh [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Isu [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
 
 OmniRoute berintegrasi dengan platform komuniti **[1proxy](https://1proxy-api.aitradepulse.com)** untuk menyediakan akses kepada **ratusan proksi percuma yang telah disahkan** dari seluruh dunia. Ini sesuai untuk pengguna yang tidak mempunyai infrastruktur proksi sendiri.
 

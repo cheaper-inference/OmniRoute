@@ -225,7 +225,7 @@ livenessProbe:
 
 **Nemojte** usmjeravati kubelet provjeru **aktivnosti** na `/api/monitoring/health`. Ta putanja obavlja stvarni rad s bazom podataka/nadzorom i pod opterećenjem će davati lažno pozitivne rezultate.
 
-Povezano: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (sonde dok je petlja događaja zauzeta), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (određivanje cijena kataloga zauzima resurse), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (brojanje tokena za kompresiju zauzima resurse).
+Povezano: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (sonde dok je petlja događaja zauzeta), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (određivanje cijena kataloga zauzima resurse), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (brojanje tokena za kompresiju zauzima resurse).
 
 ### systemd watchdog (zamrznuta petlja događaja)
 

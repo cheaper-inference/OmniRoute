@@ -133,13 +133,13 @@ Automatsko bodovanje odabire najboljeg pružatelja/model za svaki zahtjev
 Kombinacija čiji je `name` identičan osnovnom ID-u modela (npr. kombinacija nazvana
 `gpt-5.5`) predstavlja **namjeran, podržan obrazac**, a ne grešku: to je
 mehanizam za rezervni odabir pružaoca po ID-u modela, dokumentovan u
-[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Budući da se
+[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940). Budući da se
 razrješavanje kombinacije provjerava prije razrješavanja osnovnog ID-a modela
 (`getComboForModel()` u `src/sse/services/model.ts`), zahtjev za osnovni
 ID `gpt-5.5` usmjerava se kroz ciljeve kombinacije (npr.
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) umjesto direktno prema
 jednom pružaocu — time se ponovo koristi prvenstvo kombinacije nad prepisivanjem, napravljeno za
-[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227), a regresijsko
+[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227), a regresijsko
 testiranje obavljaju `tests/unit/responses-combo-resolution-3227.test.ts` i
 `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
 
@@ -185,7 +185,7 @@ Dvije česte zamke:
 - **`auto` ne koristi vaše kombinacije.** `auto`/`auto/*` gradi vlastiti skup kandidata bez konfiguracije i provjerava sačuvane kombinacije samo ako je neka kombinacija doslovno nazvana `auto` (nije preporučeno). Za usmjeravanje kroz kombinaciju pošaljite njen tačan naziv — ne `auto`.
 - **`openrouter/auto` je stvarni plaćeni OpenRouter proizvod** („Auto Best Available“), a ne OmniRoute alias. To je jedini statički unos modela u OpenRouter registru (`open-sse/config/providers/registry/openrouter/index.ts`) i naplaćuje se zasebno. Koristite Postavke → Usmjeravanje → Sakrij plaćene modele kako biste ga isključili iz `auto` skupova.
 
-Pogledajte [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) i [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) za prvobitnu zabunu koju ovo dokumentuje.
+Pogledajte [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) i [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) za prvobitnu zabunu koju ovo dokumentuje.
 
 ## Kako funkcioniše (trajne automatske kombinacije)
 

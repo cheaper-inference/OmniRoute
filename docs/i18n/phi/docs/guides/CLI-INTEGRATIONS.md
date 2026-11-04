@@ -180,7 +180,7 @@ Ang dalawang anyo ay parehong nagsusulat ng isang **auth profile** ng 5dive, at 
 
 Ipinapasa ang API key sa 5dive sa pamamagitan ng **stdin** (`--api-key=-`), kaya hindi ito kailanman lumilitaw sa output ng `ps`.
 
-Ang pagtutok ng profile sa isang **combo** ng OmniRoute sa halip na sa iisang model ang nagbibigay sa fleet ng provider failover: nang tuluyang bumagsak ang pangunahing endpoint sa kalagitnaan ng turn sa run na naitala sa [#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), tinapos ng agent ang mga natitirang hakbang nito gamit ang fallback at hindi kailanman inilantad ang outage.
+Ang pagtutok ng profile sa isang **combo** ng OmniRoute sa halip na sa iisang model ang nagbibigay sa fleet ng provider failover: nang tuluyang bumagsak ang pangunahing endpoint sa kalagitnaan ng turn sa run na naitala sa [#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), tinapos ng agent ang mga natitirang hakbang nito gamit ang fallback at hindi kailanman inilantad ang outage.
 
 ---
 

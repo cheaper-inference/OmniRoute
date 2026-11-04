@@ -336,10 +336,10 @@ depends="openssl"
 short_desc="LLM සපයන්නන් කිහිපයක් සඳහා බුද්ධිමත් මාර්ගගත කිරීම සහිත විශ්වීය AI ද්වාරය"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 # සෑම නිකුතුවක් සඳහාම checksum එක පහත පරිදි නැවත ජනනය කරන්න:
-#   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
+#   curl -L -o /tmp/omniroute.tar.gz "https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"

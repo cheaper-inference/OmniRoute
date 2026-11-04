@@ -323,7 +323,7 @@ Docker에서의 메모리 동작:
 
 ### 코딩 에이전트용 런타임 RAM
 
-Docker 기본값인 1 GiB는 대시보드/가벼운 채팅을 위한 최저 기준이지, 프로덕션용 크기가 아닙니다. 긴 `POST /v1/responses` 본문(수백 개의 메시지, 수십 개의 도구)은 압축 중에 여러 인메모리 그래프를 유지합니다. 서로 겹치는 약 3 MiB/약 750k 토큰 요청 두 건은 **12 GiB** old-space에서 V8을 중단시켰고(`FATAL ERROR: Reached heap limit`), 16 GiB cgroup OOM도 유발했습니다. [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849)를 참조하세요.
+Docker 기본값인 1 GiB는 대시보드/가벼운 채팅을 위한 최저 기준이지, 프로덕션용 크기가 아닙니다. 긴 `POST /v1/responses` 본문(수백 개의 메시지, 수십 개의 도구)은 압축 중에 여러 인메모리 그래프를 유지합니다. 서로 겹치는 약 3 MiB/약 750k 토큰 요청 두 건은 **12 GiB** old-space에서 V8을 중단시켰고(`FATAL ERROR: Reached heap limit`), 16 GiB cgroup OOM도 유발했습니다. [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849)를 참조하세요.
 
 **cgroup `--memory`는 힙보다 크게 설정하세요** — 네이티브 버퍼, SQLite 및 압축 중간 데이터는 V8 외부에 위치합니다.
 
@@ -683,7 +683,7 @@ spec:
 
 `preStop` sleep을 사용하면 kube가 SIGTERM 전에 서비스 엔드포인트를 삭제할 수 있습니다.** 새로운** 트래픽이 죽어가는 과정을 멈춥니다. 비행 중 `/v1/responses` SSE 는 헤비급 허용 임대(#11015)를 통해 최대 `SHUTDOWN_TIMEOUT_MS` (기본값 30초)까지 소모됩니다. 여전히 프로세스에 도달하는 새 요청은 `503` + `Retry-After: 5` 얻습니다. 교체가 준비될 때까지 빈 엔드포인트 간격을 다시 생성하면 하드 중단이 유지됩니다. 이는 프로브 구성 오류가 아닌 SQLite 토폴로지입니다.
 
-외부 Postgres /멀티라이터 HA 는** ~ 아니다** 문서화된 재고 경로. HA 필요한 경우 단일 복제본을 유지하거나 프로젝트에서 별도로 테스트하고 문서화한 토폴로지를 실행하세요. Postgres/MySQL 작업은 [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) 에 있습니다. 그것이 출시될 때까지, 곱셈을 지원하는 유일한 방법은** 크기가 큰** `/v1/responses` 용량은 하나의 볼륨에 있는 `replicas > 1` 아니라 N개의 독립적인 프로세스(다음 섹션)입니다.
+외부 Postgres /멀티라이터 HA 는** ~ 아니다** 문서화된 재고 경로. HA 필요한 경우 단일 복제본을 유지하거나 프로젝트에서 별도로 테스트하고 문서화한 토폴로지를 실행하세요. Postgres/MySQL 작업은 [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) 에 있습니다. 그것이 출시될 때까지, 곱셈을 지원하는 유일한 방법은** 크기가 큰** `/v1/responses` 용량은 하나의 볼륨에 있는 `replicas > 1` 아니라 N개의 독립적인 프로세스(다음 섹션)입니다.
 
 ## 확장: N개의 독립적인 프로세스
 
@@ -693,11 +693,11 @@ spec:
 
 패시브 인스턴스는 새로 고침이 필요할 때 연결을 다시 읽고 만료되지 않은 다른 액세스 토큰만 채택합니다. 그렇지 않으면 연결이 만료되거나 비활성화되거나 새로 고침 차단 실패가 계산되지 않고 새로 고침이 비활성화됩니다. 실제 업스트림 인증 실패는 여전히 일반 실패 계산, 지수 쿨다운 및 일반 클라이언트 오류를 사용합니다. 계정 비활성화는 영구적으로 유지됩니다. 액세스 토큰이 만료되기 전에 소유자의 순환된 토큰을 동기화하거나(기본 사전 새로 고침 리드는 5분) Codex 인증 파일을 다시 가져옵니다. 수동 가져오기는 제공된 토큰을 토큰 엔드포인트에서 검증하지 않고 저장합니다. 수동 dashboard/API 새로 고침은 `409 refresh_disabled` 를 반환합니다. 새로운 OAuth 로그인은 변경되지 않습니다. [환경 참조 를](../reference/ENVIRONMENT.md#passive-codex-token-refresh) 참조하세요.
 
-원노드 프로세스는** V8 힙 1개** . 두 개의 겹치는 ~ 3 MiB / ~ 750k 토큰 코딩 에이전트 `POST /v1/responses` (RTK + Caveman)는 ~ 12 Gi (`FATAL ERROR: Reached heap limit`)에서 해당 힙을 중단하고 16 Gi cgroup을 OOM 할 수 있습니다. [#7849를](https://github.com/diegosouzapw/OmniRoute/issues/7849) 참조하세요. 해당 측정값은** 메모리 예산** 경고, 두 개의 동시 long `/v1/responses` 제품의 hard-max가 아닙니다. 헤비급 채팅 허용은 동일한 V8/cgroup 한도 — 에서 크기가 지정된 자동 파생 수집 바이트 예산(`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`)에 의해 제어됩니다. 이미 크기가 지정된 프로세스에서 이를 상향 조정하거나 기존 `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` 요청 수 한도를 설정하면 중단이 다시 발생합니다. 소규모 채팅인 `/healthz`, `/v1/models` 및 MCP 은** ~ 아니다** 그 모자에.
+원노드 프로세스는** V8 힙 1개** . 두 개의 겹치는 ~ 3 MiB / ~ 750k 토큰 코딩 에이전트 `POST /v1/responses` (RTK + Caveman)는 ~ 12 Gi (`FATAL ERROR: Reached heap limit`)에서 해당 힙을 중단하고 16 Gi cgroup을 OOM 할 수 있습니다. [#7849를](https://github.com/cheaper-inference/OmniRoute/issues/7849) 참조하세요. 해당 측정값은** 메모리 예산** 경고, 두 개의 동시 long `/v1/responses` 제품의 hard-max가 아닙니다. 헤비급 채팅 허용은 동일한 V8/cgroup 한도 — 에서 크기가 지정된 자동 파생 수집 바이트 예산(`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`)에 의해 제어됩니다. 이미 크기가 지정된 프로세스에서 이를 상향 조정하거나 기존 `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` 요청 수 한도를 설정하면 중단이 다시 발생합니다. 소규모 채팅인 `/healthz`, `/v1/models` 및 MCP 은** ~ 아니다** 그 모자에.
 
 ### 단일 프로세스: 두 개 이상의 긴 `/v1/responses`
 
-에이** 건강한** 프로세스( `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` 아래의 힙, 기본값 `0.75`)** 5월** 프로세스 전체의 인플라이트 바이트 예산(`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110)에 아직 공간이 있는 경우 두 개 이상의 동시 긴 `POST /v1/responses` 실행합니다. `OMNIROUTE_CHAT_LARGE_BODY_BYTES` 이상의 본문(기본값 256 KiB)은 구조가 많은 요청과 동일한 중량 임대를 사용하고 동일한 [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` 이스케이프(`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`)를 사용합니다. 수십 개의 동시 긴 SSE 클라이언트(운영자는 종종 40~50개가 필요함)는** 메모리 예산** 질문 — 크기 힙 + primary/headroom 슬롯 + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — 엄격한 "최대 2" 제품 제한이 아닙니다. 압력이 가해진 힙은 여전히 재시도 가능한 `503` 로 인해 발생하므로 #7849가 반환되지 않습니다.
+에이** 건강한** 프로세스( `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` 아래의 힙, 기본값 `0.75`)** 5월** 프로세스 전체의 인플라이트 바이트 예산(`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110)에 아직 공간이 있는 경우 두 개 이상의 동시 긴 `POST /v1/responses` 실행합니다. `OMNIROUTE_CHAT_LARGE_BODY_BYTES` 이상의 본문(기본값 256 KiB)은 구조가 많은 요청과 동일한 중량 임대를 사용하고 동일한 [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` 이스케이프(`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`)를 사용합니다. 수십 개의 동시 긴 SSE 클라이언트(운영자는 종종 40~50개가 필요함)는** 메모리 예산** 질문 — 크기 힙 + primary/headroom 슬롯 + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — 엄격한 "최대 2" 제품 제한이 아닙니다. 압력이 가해진 힙은 여전히 재시도 가능한 `503` 로 인해 발생하므로 #7849가 반환되지 않습니다.
 
 에게** 힙을 곱하다** (독립적인 V8 Old-Spaces)** 오늘** :
 
@@ -740,7 +740,7 @@ volumes:
   omniroute-b-data:
 ```
 
-공정 중 밀도( HTTP 분리물 압축)는 [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023) 입니다. 공유 내구성 상태의 논리적 클러스터 중 하나는 [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) 입니다.
+공정 중 밀도( HTTP 분리물 압축)는 [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023) 입니다. 공유 내구성 상태의 논리적 클러스터 중 하나는 [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) 입니다.
 
 ## Docker 내부의 Gemini 지역 오류
 
@@ -782,7 +782,7 @@ IPv6 DNS 결과가 있다는 의미일 뿐이며, 사용 가능한 IPv6 경로�
 
 ### 호스트 수준 대안: 정상적으로 작동하는 IPv6 및 리졸버 정책
 
-[#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762)의 보고자는
+[#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762)의 보고자는
 컨테이너 IPv6를 활성화하고 glibc 주소 선택을 변경하여 자신의 환경에서
 접근을 복구했습니다. 이는 환경별 대안으로 간주하세요. 리졸버 기본 설정을
 조정하기 전에 호스트 IPv6가 정상적으로 작동하는지, 컨테이너 이그레스/라우팅 및

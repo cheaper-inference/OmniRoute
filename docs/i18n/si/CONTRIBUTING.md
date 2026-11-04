@@ -34,7 +34,7 @@ UI/UX, i18n, CLI, database, සහ build/deploy වෙනස්කම් ඒව�
 ### ක්ලෝන කිරීම සහ ස්ථාපනය
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -439,4 +439,4 @@ VPS යෙදවීම් සඳහා, `npm run build` වෙනුවට `npm 
 - **API යොමුව**: [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) බලන්න
 - **ආරක්ෂක ලේඛන**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
 - **මෙහෙයුම් ලේඛන**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **ගැටලු**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **ගැටලු**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

@@ -199,7 +199,7 @@ keluaran `ps`.
 Mengarahkan profil ke **combo** OmniRoute alih-alih satu model adalah yang
 memberikan failover penyedia kepada armada: ketika endpoint utama mati total di tengah giliran
 dalam proses yang dicatat pada
-[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), agen menyelesaikan
+[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), agen menyelesaikan
 langkah-langkah sisanya pada fallback dan tidak pernah menampilkan gangguan tersebut.
 
 ---

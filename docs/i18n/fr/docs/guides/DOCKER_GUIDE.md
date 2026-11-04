@@ -324,7 +324,7 @@ Comportement de la mémoire dans Docker :
 
 ### RAM d’exécution pour les agents de codage
 
-La valeur Docker par défaut de 1 Gio constitue un minimum pour le tableau de bord et les conversations légères, et non un dimensionnement adapté à la production. Les corps volumineux de requêtes `POST /v1/responses` (des centaines de messages et des dizaines d’outils) conservent plusieurs graphes en mémoire pendant la compression. Deux requêtes simultanées d’environ 3 Mio / 750 000 jetons ont provoqué l’arrêt de V8 avec un espace ancien de **12 Gio** (`FATAL ERROR: Reached heap limit`) et ont également déclenché une erreur de mémoire insuffisante du cgroup à 16 Gio. Voir [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+La valeur Docker par défaut de 1 Gio constitue un minimum pour le tableau de bord et les conversations légères, et non un dimensionnement adapté à la production. Les corps volumineux de requêtes `POST /v1/responses` (des centaines de messages et des dizaines d’outils) conservent plusieurs graphes en mémoire pendant la compression. Deux requêtes simultanées d’environ 3 Mio / 750 000 jetons ont provoqué l’arrêt de V8 avec un espace ancien de **12 Gio** (`FATAL ERROR: Reached heap limit`) et ont également déclenché une erreur de mémoire insuffisante du cgroup à 16 Gio. Voir [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Dimensionnez la **mémoire cgroup `--memory` au-dessus de la taille du tas** — les tampons natifs, SQLite et les données intermédiaires de compression résident en dehors de V8.
 
@@ -691,7 +691,7 @@ spec:
 
 `preStop` sleep permet à kube de supprimer les points de terminaison du service avant SIGTERM donc** nouveau** le trafic cesse de heurter le processus de mort. `/v1/responses` SSE en vol est drainé jusqu'à `SHUTDOWN_TIMEOUT_MS` (30 s par défaut) via des baux d'admission lourds (# 11015). Les nouvelles requêtes qui parviennent encore au processus obtiennent `503` + `Retry-After: 5`. L'espace Recréer un point de terminaison vide jusqu'à ce que le remplacement soit Prêt reste une panne grave - c'est la topologie SQLite, pas une mauvaise configuration de la sonde.
 
-Postgres externe / HA multi-écrivain est** pas** un chemin de stock documenté. Si vous avez besoin de HA, conservez une seule réplique ou exécutez une topologie que le projet a testée et documentée séparément. L'œuvre Postgres/MySQL vit au [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Jusqu'à ce que cela soit livré, le seul moyen pris en charge de multiplier** grand** La capacité `/v1/responses` est de N processus indépendants (section suivante), et non `replicas > 1` sur un seul volume.
+Postgres externe / HA multi-écrivain est** pas** un chemin de stock documenté. Si vous avez besoin de HA, conservez une seule réplique ou exécutez une topologie que le projet a testée et documentée séparément. L'œuvre Postgres/MySQL vit au [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Jusqu'à ce que cela soit livré, le seul moyen pris en charge de multiplier** grand** La capacité `/v1/responses` est de N processus indépendants (section suivante), et non `replicas > 1` sur un seul volume.
 
 ## Scale-out : N processus indépendants
 
@@ -701,11 +701,11 @@ Les copies d'un compte Codex ne doivent pas consommer indépendamment son jeton 
 
 L'instance passive relit la connexion lorsqu'une actualisation est nécessaire et adopte uniquement un jeton d'accès différent et non expiré. Sinon, l'actualisation est désactivée sans expirer ni désactiver la connexion ni compter une défaillance du disjoncteur d'actualisation. Les véritables échecs d'authentification en amont utilisent toujours la comptabilité des échecs normale, le temps de recharge exponentiel et l'erreur client normale ; la désactivation du compte reste permanente. Synchronisez les jetons en rotation du propriétaire avant l'expiration des jetons d'accès (le délai d'actualisation proactive par défaut est de cinq minutes) ou réimportez le fichier d'authentification Codex. Les importations passives stockent les jetons fournis sans les valider au point de terminaison du jeton. L'actualisation manuelle dashboard/API renvoie `409 refresh_disabled`; les nouvelles connexions OAuth sont inchangées. Voir [la référence sur l'environnement](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Un processus de nœud est** un tas V8** . Deux agents de codage de jetons ~ 3 MiB / ~ 750k qui se chevauchent `POST /v1/responses` (RTK + Caveman ) abandonnent ce tas à ~ 12 Gi (`FATAL ERROR: Reached heap limit`) et peuvent OOM un cgroup de 16 Gi. Voir [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Cette mesure est une** budget mémoire** avertissement, pas un produit hard-max de deux longs `/v1/responses` simultanés. L'admission au chat lourd est contrôlée par un budget d'octets d'ingestion dérivé automatiquement (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) dimensionné à partir de ce même plafond V8/cgroup — le remplaçant vers le haut (ou en définissant l'ancien plafond de nombre de requêtes `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ) sur un processus déjà dimensionné réintroduit l'abandon. Les petits chats, `/healthz`, `/v1/models` et MCP sont** pas** dans cette casquette.
+Un processus de nœud est** un tas V8** . Deux agents de codage de jetons ~ 3 MiB / ~ 750k qui se chevauchent `POST /v1/responses` (RTK + Caveman ) abandonnent ce tas à ~ 12 Gi (`FATAL ERROR: Reached heap limit`) et peuvent OOM un cgroup de 16 Gi. Voir [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Cette mesure est une** budget mémoire** avertissement, pas un produit hard-max de deux longs `/v1/responses` simultanés. L'admission au chat lourd est contrôlée par un budget d'octets d'ingestion dérivé automatiquement (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) dimensionné à partir de ce même plafond V8/cgroup — le remplaçant vers le haut (ou en définissant l'ancien plafond de nombre de requêtes `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ) sur un processus déjà dimensionné réintroduit l'abandon. Les petits chats, `/healthz`, `/v1/models` et MCP sont** pas** dans cette casquette.
 
 ### Un seul processus : plus de deux `/v1/responses` longs
 
-UN** en bonne santé** processus (tas sous `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, `0.75` par défaut)** peut** exécutez plus de deux `POST /v1/responses` longs simultanés lorsque le budget d'octets en vol à l'échelle du processus (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) a encore de la place. Les corps égaux ou supérieurs à `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (par défaut 256 KiB) prennent le même bail lourd que les requêtes lourdes en structure et utilisent le même échappement [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Des dizaines de clients SSE longs simultanés (les opérateurs ont souvent besoin de 40 à 50) représentent un** budget mémoire** question — taille du tas + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — pas une limite de produit stricte « max 2 ». Un tas sous pression perd toujours du `503` réessayable, donc #7849 ne revient pas.
+UN** en bonne santé** processus (tas sous `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, `0.75` par défaut)** peut** exécutez plus de deux `POST /v1/responses` longs simultanés lorsque le budget d'octets en vol à l'échelle du processus (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) a encore de la place. Les corps égaux ou supérieurs à `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (par défaut 256 KiB) prennent le même bail lourd que les requêtes lourdes en structure et utilisent le même échappement [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Des dizaines de clients SSE longs simultanés (les opérateurs ont souvent besoin de 40 à 50) représentent un** budget mémoire** question — taille du tas + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — pas une limite de produit stricte « max 2 ». Un tas sous pression perd toujours du `503` réessayable, donc #7849 ne revient pas.
 
 À** multiplier les tas** (anciens espaces V8 indépendants)** aujourd'hui** :
 
@@ -748,7 +748,7 @@ volumes:
   omniroute-b-data:
 ```
 
-La densité en cours de processus (compression de l'isolat HTTP ) est [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Un cluster logique sur un état durable partagé est [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+La densité en cours de processus (compression de l'isolat HTTP ) est [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Un cluster logique sur un état durable partagé est [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
 ## Erreurs régionales Gemini dans Docker
 
@@ -789,7 +789,7 @@ seule la requête authentifiée au modèle permet de tester l’éligibilité à
 
 ### Alternative au niveau de l’hôte : IPv6 fonctionnel et stratégie du résolveur
 
-L’auteur du signalement [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) a rétabli
+L’auteur du signalement [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) a rétabli
 l’accès dans son environnement en activant IPv6 pour les conteneurs et en modifiant la sélection
 des adresses de la glibc. Considérez cette solution comme une alternative propre à l’environnement. Vérifiez le bon fonctionnement
 d’IPv6 sur l’hôte, la sortie et le routage des conteneurs ainsi que les règles du pare-feu avant d’ajuster les préférences du résolveur.

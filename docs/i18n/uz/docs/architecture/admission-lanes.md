@@ -142,7 +142,7 @@ so‘zsiz, 2-tizim tomonidan esa ixtiyoriy yoqish faollashtirilgach ta’minlana
 
 ## 4. Bitta jarayondagi uzoq `/v1/responses` (sog‘lom zaxira)
 
-[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) heap
+[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) heap
 `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` dan past bo‘lganda tuzilma jihatidan og‘ir
 ikkinchi so‘rovni qabul qilish uchun `tryAcquireHealthyHeadroom` funksiyasini qo‘shdi.
 `admitChatRequest` ishlatadigan BYTE yo‘li (`OMNIROUTE_CHAT_LARGE_BODY_BYTES` dan

@@ -260,7 +260,7 @@ curl -X POST http://localhost:20128/api/v1/management/proxies/bulk-assign \
 
 ## שוק הפרוקסי החינמי של 1proxy
 
-> 🆕 **נתרם על ידי [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (בעיה [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕 **נתרם על ידי [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (בעיה [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
 
 OmniRoute משתלב עם הפלטפורמה הקהילתית **[1proxy](https://1proxy-api.aitradepulse.com)** כדי לספק גישה ל**מאות שרתי פרוקסי חינמיים ומאומתים** מרחבי העולם. פתרון זה מושלם למשתמשים שאין להם תשתית פרוקסי משלהם.
 

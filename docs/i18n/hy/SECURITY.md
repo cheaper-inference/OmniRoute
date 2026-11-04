@@ -9,7 +9,7 @@
 Եթե OmniRoute-ում հայտնաբերեք անվտանգության խոցելիություն, խնդրում ենք դրա մասին պատասխանատու կերպով հաղորդել՝
 
 1. **ՄԻ՛** բացեք հանրային GitHub issue
-2. Օգտագործեք [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
+2. Օգտագործեք [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
 3. Ներառեք՝ նկարագրությունը, վերարտադրման քայլերը և հնարավոր ազդեցությունը
 
 ## Արձագանքման ժամանակացույց
@@ -42,7 +42,7 @@
   կախված նրանից, թե որն է ավելի ուշ**։ Արդյունքում սահմանված ավարտի ամսաթիվը գրանցվում է 3.9.0-ի թողարկման նշումներում և
   [`ROADMAP.md`](ROADMAP.md)-ում՝ թողարկման պահին։
 - **LTS գծում խոցելիության մասին հաղորդելը․** օգտագործեք նույն ալիքը, ինչ ցանկացած այլ տարբերակի դեպքում՝
-  մասնավոր [GitHub անվտանգության ծանուցում](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
+  մասնավոր [GitHub անվտանգության ծանուցում](https://github.com/cheaper-inference/OmniRoute/security/advisories/new),
   և երբեք՝ հրապարակային issue։ Նշեք, թե որ տարբերակն եք փորձարկել (օրինակ՝ `3.9.2`)․ ուղղումներն ավելացվում են
   `stable/v3`-ում և տեղափոխվում առաջ՝ դեպի v4։
 - **Անվտանգության ելակետային վիճակը LTS թողարկման պահին․** սկաների չափված վիճակը, երթուղու պաշտպանության և

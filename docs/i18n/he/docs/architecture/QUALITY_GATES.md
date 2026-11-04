@@ -422,7 +422,7 @@ git add quality-baseline.json
 ### הקו המתקדם של CodeQL: תדירות הרענון והפעלה ידנית
 
 `check:codeql-ratchet` קורא **את מצב המאגר, שמתעדכן לפי לוח זמנים — ולא עבור כל PR.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` מדווח
+`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` מדווח
 `state: configured`, `schedule: weekly`: זוהי סריקת ברירת המחדל של GitHub, ולא ניתוח בכל push.
 כתוצאה מכך, לאחר מיזוג PR שמתקן התראות, הקו המתקדם ממשיך לקרוא
 את הספירה הישנה והגבוהה יותר עד להפעלת הסריקה המתוזמנת הבאה — ולכן הוא מדווח על נסיגה

@@ -132,13 +132,13 @@ Uwekaji alama kiotomatiki huchagua mtoa huduma/muundo bora kwa kila ombi
 Combo ambayo `name` yake inafanana kabisa na kitambulisho tupu cha modeli (k.m. combo inayoitwa
 `gpt-5.5`) ni **muundo wa makusudi unaotumika**, wala si hitilafu: ndiyo
 utaratibu wa kutumia mtoa huduma mbadala kwa kila kitambulisho cha modeli, kama ilivyoelezwa katika
-[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Kwa sababu utatuzi wa combo
+[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940). Kwa sababu utatuzi wa combo
 hukaguliwa kabla ya utatuzi wa kitambulisho tupu cha modeli
 (`getComboForModel()` katika `src/sse/services/model.ts`), ombi la kitambulisho tupu
 `gpt-5.5` hupitishwa kupitia malengo ya combo (k.m.
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) badala ya kwenda moja kwa moja kwa
 mtoa huduma mmoja — hii hutumia tena kipaumbele cha combo-kabla-ya-kuandika-upya kilichoundwa kwa ajili ya
-[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) na
+[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) na
 imejaribiwa dhidi ya hitilafu zinazoweza kujirudia na `tests/unit/responses-combo-resolution-3227.test.ts` pamoja na
 `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
 
@@ -184,7 +184,7 @@ Mitego miwili ya kawaida:
 - **`auto` haitumii combo zako.** `auto`/`auto/*` huunda mkusanyiko wake wa wagombea usiohitaji usanidi na huzingatia combo zilizohifadhiwa tu ikiwa combo imepewa jina halisi la `auto` (haipendekezwi). Ili kupitisha ombi kupitia combo, tuma jina lake kamili — si `auto`.
 - **`openrouter/auto` ni bidhaa halisi ya kulipia ya OpenRouter** ("Auto Best Available"), wala si jina mbadala la OmniRoute. Ni ingizo moja tuli la modeli katika sajili ya OpenRouter (`open-sse/config/providers/registry/openrouter/index.ts`) na hutozwa kando. Tumia Settings → Routing → Hide paid models ili kuiondoa kwenye mikusanyiko ya `auto`.
 
-Angalia [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) na [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) kuhusu mkanganyiko wa awali unaofafanuliwa hapa.
+Angalia [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) na [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) kuhusu mkanganyiko wa awali unaofafanuliwa hapa.
 
 ## Jinsi Inavyofanya Kazi (Auto-Combos Zinazohifadhiwa)
 

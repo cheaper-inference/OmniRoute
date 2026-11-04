@@ -324,7 +324,7 @@ Mälukäitumine Dockeris:
 
 ### Kodeerimisagentide käitusaegne RAM
 
-Dockeri 1 GiB vaikeväärtus on juhtpaneeli ja kerge vestluse miinimum, mitte tootmiskeskkonnale sobiv maht. Pikad `POST /v1/responses` päringukehad (sajad sõnumid, kümned tööriistad) hoiavad tihendamise ajal mälus mitut graafi. Kaks kattuvat ~3 MiB / ~750k-tokenilist päringut on põhjustanud V8 töö katkemise **12 GiB** old-space'i juures (`FATAL ERROR: Reached heap limit`) ning tabanud ka 16 GiB cgroup'i OOM-i. Vt [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Dockeri 1 GiB vaikeväärtus on juhtpaneeli ja kerge vestluse miinimum, mitte tootmiskeskkonnale sobiv maht. Pikad `POST /v1/responses` päringukehad (sajad sõnumid, kümned tööriistad) hoiavad tihendamise ajal mälus mitut graafi. Kaks kattuvat ~3 MiB / ~750k-tokenilist päringut on põhjustanud V8 töö katkemise **12 GiB** old-space'i juures (`FATAL ERROR: Reached heap limit`) ning tabanud ka 16 GiB cgroup'i OOM-i. Vt [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Määrake **cgroup'i `--memory` kuhjamälust suuremaks** — omapuhvrid, SQLite ja tihendamise vahetulemused asuvad väljaspool V8-t.
 
@@ -699,7 +699,7 @@ spec:
 
 `preStop` sleep laseb kube'il loobuda teenuse lõpp-punktidest enne SIGTERM d nii** uus** liiklus lakkab tabamast surevat protsessi. Lennu ajal `/v1/responses` SSE tühjendatakse kuni `SHUTDOWN_TIMEOUT_MS` (vaikimisi 30 s) raskekaalu sissepääsulepingute (#11015) kaudu. Uued taotlused, mis ikka protsessi jõuavad, saavad `503` + `Retry-After: 5`. Tühja lõpp-punkti tühiku taasloomine, kuni asendus on valmis, jääb tõsiseks katkestuseks – see on SQLite topoloogia, mitte sondi vale konfiguratsioon.
 
-Väline Postgres / mitmekirjutaja HA on** mitte** dokumenteeritud aktsiatee. Kui vajate HA, säilitage üks koopia või käivitage topoloogia, mida projekt on eraldi testinud ja dokumenteerinud. Postgres/MySQL teos asub asukohas [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Kuni selle tarnimiseni on ainus toetatud viis paljundamiseks** suur** `/v1/responses` võimsus on N sõltumatut protsessi (järgmine jaotis), mitte `replicas > 1` ühel köitel.
+Väline Postgres / mitmekirjutaja HA on** mitte** dokumenteeritud aktsiatee. Kui vajate HA, säilitage üks koopia või käivitage topoloogia, mida projekt on eraldi testinud ja dokumenteerinud. Postgres/MySQL teos asub asukohas [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Kuni selle tarnimiseni on ainus toetatud viis paljundamiseks** suur** `/v1/responses` võimsus on N sõltumatut protsessi (järgmine jaotis), mitte `replicas > 1` ühel köitel.
 
 ## Scale-out: N sõltumatut protsessi
 
@@ -709,11 +709,11 @@ Väline Postgres / mitmekirjutaja HA on** mitte** dokumenteeritud aktsiatee. Kui
 
 Passiivne eksemplar loeb ühenduse uuesti, kui on vaja värskendust, ja võtab kasutusele ainult erineva, aegumata juurdepääsuloa. Vastasel juhul on värskendamine keelatud ilma ühendust aegumata või desaktiveerimata või värskenduslüliti tõrkeid arvestamata. Tõelised ülesvoolu autentimise tõrked kasutavad endiselt tavalist rikete arvestust, eksponentsiaalset jahtumist ja tavalist kliendi viga; konto deaktiveerimine jääb püsivaks. Sünkroonige omaniku pööratud märgid enne juurdepääsulubade aegumist (vaikimisi ennetav värskendusviis on viis minutit) või importige Codex autentimisfail uuesti. Passiivne import salvestab tarnitud märgid ilma neid loa lõpp-punktis kinnitamata. Manuaalne dashboard/API refresh tagastab `409 refresh_disabled`; uued OAuth sisselogimised on muutumatud. Vaata [keskkonnaviiteid](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-One Node protsess on** üks V8 hunnik** . Kaks kattuvat ~ 3 MiB / ~ 750k-märgiga kodeerimisagent `POST /v1/responses` (RTK + Caveman) katkestavad selle kuhja ~ 12 Gi (`FATAL ERROR: Reached heap limit`) juures ja võivad OOM 16 Gi crühma. Vt [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). See mõõtmine on a** mälu-eelarve** hoiatus, mitte toote hard-max kahe samaaegse pika `/v1/responses`. Raskekaalulise vestluse lubamist piirab automaatselt tuletatud sisestusbaitide eelarve (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`), mille suurus on sama V8/cgroup ülemmäära järgi. — alistamine ülespoole (või pärand `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` taotluste arvu ülempiiri määramine) juba suure protsessi korral taastab katkestamise. Väikesed vestlused, `/healthz`, `/v1/models` ja MCP on** mitte** selles korgis.
+One Node protsess on** üks V8 hunnik** . Kaks kattuvat ~ 3 MiB / ~ 750k-märgiga kodeerimisagent `POST /v1/responses` (RTK + Caveman) katkestavad selle kuhja ~ 12 Gi (`FATAL ERROR: Reached heap limit`) juures ja võivad OOM 16 Gi crühma. Vt [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). See mõõtmine on a** mälu-eelarve** hoiatus, mitte toote hard-max kahe samaaegse pika `/v1/responses`. Raskekaalulise vestluse lubamist piirab automaatselt tuletatud sisestusbaitide eelarve (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`), mille suurus on sama V8/cgroup ülemmäära järgi. — alistamine ülespoole (või pärand `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` taotluste arvu ülempiiri määramine) juba suure protsessi korral taastab katkestamise. Väikesed vestlused, `/healthz`, `/v1/models` ja MCP on** mitte** selles korgis.
 
 ### Üks protsess: rohkem kui kaks pikka `/v1/responses`
 
-A** terve** protsess (hunnik allpool `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, vaikimisi `0.75`)** võib** käitage rohkem kui kahte samaaegset pikka `POST /v1/responses` kui kogu protsessi hõlmavas lennubaidieelarves (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) on veel ruumi. Kehad, mille väärtus on `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (vaikeväärtus 256 KiB) või sellest kõrgemal, võtavad sama raskekaalu rendilepingu kui struktuursed päringud ja kasutavad sama [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` põgenemist (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Kümned samaaegsed pikad SSE kliendid (operaatorid vajavad sageli 40–50) on a** mälu-eelarve** küsimus — suurus hunnik + primary/headroom pesad + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ei ole range "max 2" tootelimiit. Korduvproovitava `503` ga kaob endiselt survestatud hunnik, nii et #7849 ei naase.
+A** terve** protsess (hunnik allpool `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, vaikimisi `0.75`)** võib** käitage rohkem kui kahte samaaegset pikka `POST /v1/responses` kui kogu protsessi hõlmavas lennubaidieelarves (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) on veel ruumi. Kehad, mille väärtus on `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (vaikeväärtus 256 KiB) või sellest kõrgemal, võtavad sama raskekaalu rendilepingu kui struktuursed päringud ja kasutavad sama [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` põgenemist (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Kümned samaaegsed pikad SSE kliendid (operaatorid vajavad sageli 40–50) on a** mälu-eelarve** küsimus — suurus hunnik + primary/headroom pesad + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ei ole range "max 2" tootelimiit. Korduvproovitava `503` ga kaob endiselt survestatud hunnik, nii et #7849 ei naase.
 
 To** hunnikuid korrutada** (iseseisvad V8 vanad ruumid)** täna** :
 
@@ -756,7 +756,7 @@ volumes:
   omniroute-b-data:
 ```
 
-Protsessi tihedus ( HTTP isolaadi kokkusurumine) on [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Üks loogiline klaster jagatud püsivas olekus on [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+Protsessi tihedus ( HTTP isolaadi kokkusurumine) on [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Üks loogiline klaster jagatud püsivas olekus on [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
 ## Gemini piirkondlikud vead Dockeris
 
@@ -797,7 +797,7 @@ päringu viga; Gemini kasutusõigust kontrollib ainult autenditud mudelipäring.
 
 ### Hostitaseme alternatiiv: toimiv IPv6 ja nimelahendaja poliitika
 
-Probleemi [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) raporteerija taastas
+Probleemi [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) raporteerija taastas
 oma keskkonnas juurdepääsu, lubades konteineri IPv6 ja muutes glibc aadressivalikut.
 Käsitlege seda keskkonnaspetsiifilise alternatiivina. Enne nimelahendaja eelistuste muutmist
 veenduge, et hosti IPv6, konteineri väljaminev ühendus/marsruutimine ja tulemüürireeglid töötaksid.

@@ -9,7 +9,7 @@
 Jeśli odkryjesz podatność bezpieczeństwa w OmniRoute, zgłoś ją w odpowiedzialny sposób:
 
 1. **NIE** otwieraj publicznego zgłoszenia w GitHub
-2. Użyj [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
+2. Użyj [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
 3. Dołącz: opis, kroki umożliwiające odtworzenie oraz potencjalny wpływ
 
 ## Harmonogram reakcji
@@ -42,7 +42,7 @@ Po wersji 3.8.59 następną wersją jest **3.9.0**, która rozpoczyna linię dł
   w zależności od tego, który termin przypada później**. Wynikowa data zakończenia wsparcia jest odnotowywana w informacjach o wydaniu 3.9.0 oraz w
   [`ROADMAP.md`](ROADMAP.md) w momencie wydania.
 - **Zgłaszanie luki w zabezpieczeniach w linii LTS:** należy użyć tego samego kanału co w przypadku każdej innej wersji —
-  prywatnego zgłoszenia [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
+  prywatnego zgłoszenia [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new),
   nigdy publicznego zgłoszenia problemu. Podaj przetestowaną wersję (na przykład `3.9.2`); poprawki trafiają do
   `stable/v3`, a następnie są przenoszone do v4.
 - **Stan bazowy zabezpieczeń w momencie wydania LTS:** zmierzony stan skanera oraz dowody dotyczące zabezpieczeń tras

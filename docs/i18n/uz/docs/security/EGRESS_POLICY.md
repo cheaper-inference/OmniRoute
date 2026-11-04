@@ -55,7 +55,7 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ## U nima uchun mavjud
 
-PR [#3777](https://github.com/diegosouzapw/OmniRoute/pull/3777) doirasida joriy etilgan. Bunga sabab bo‘lgan muammolar:
+PR [#3777](https://github.com/cheaper-inference/OmniRoute/pull/3777) doirasida joriy etilgan. Bunga sabab bo‘lgan muammolar:
 
 | Muammo                                                  | Direktiva nimani tuzatadi                                                                                                                                                                                                                                                                                                                                                           |
 | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

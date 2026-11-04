@@ -18,7 +18,7 @@ Agent Skills คือไฟล์ SKILL.md ที่มีโครงสร้
 - **ID มาตรฐาน** (`omni-auth`, `cli-serve` ฯลฯ)
 - ไฟล์ **SKILL.md** ใน `skills/{id}/SKILL.md` พร้อม YAML frontmatter (`name`, `description`) + เนื้อหา markdown โดยละเอียด
 - **REST endpoints** (สกิล API) หรือ **CLI subcommands** (สกิล CLI) ที่ได้มาจากข้อกำหนด OpenAPI และรีจิสทรี CLI
-- **GitHub raw URL** สำหรับดึงข้อมูลสด: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- **GitHub raw URL** สำหรับดึงข้อมูลสด: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. การดึงข้อมูลดิบจาก GitHub โดยตรง (ไม่จำเป็นต้องมีเซิร์ฟเวอร์)
 
 ```bash
-BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

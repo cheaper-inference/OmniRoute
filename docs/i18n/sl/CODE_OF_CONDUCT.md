@@ -65,7 +65,7 @@ predstavnika na spletnem ali dogodku v živo.
 Primere zlorabljajočega, nadlegovalnega ali drugače nesprejemljivega vedenja je mogoče
 prijaviti vodjem skupnosti, odgovornim za uveljavljanje, tako da odprete
 zasebno varnostno obvestilo na
-<https://github.com/diegosouzapw/OmniRoute/security/advisories/new>
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
 ali pošljete e-pošto vzdrževalcu na naslov diegosouza.pw@outlook.com.
 Za incidente, povezane z varnostjo, glejte [`SECURITY.md`](SECURITY.md).
 Vse pritožbe bodo pregledane in preiskane hitro ter pravično.

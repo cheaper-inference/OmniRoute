@@ -453,7 +453,7 @@ PR-ը։ Սկրիպտը երբեք չի փոփոխում npm dist-tag-երը. դ�
 gh workflow run preview-artifact.yml -f pr_number=<N>   # կամ ավելացրեք `preview-artifact` պիտակը
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # նախադիտման տեղադրում
 ```
 

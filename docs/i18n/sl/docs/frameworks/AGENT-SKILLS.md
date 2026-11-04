@@ -18,7 +18,7 @@ Katalog vsebuje **45 Agent Skills** (23 za REST API + 21 za CLI + 1 potek dela z
 - **Kanonični ID** (`omni-auth`, `cli-serve` itd.)
 - Datoteko **SKILL.md** v `skills/{id}/SKILL.md` z uvodnimi metapodatki YAML (`name`, `description`) in obsežno vsebino markdown
 - **Končne točke REST** (veščine API) ali **podukaze CLI** (veščine CLI), izpeljane iz specifikacije OpenAPI in registra CLI
-- **Neobdelani URL GitHub** za sprotno pridobivanje: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- **Neobdelani URL GitHub** za sprotno pridobivanje: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Neposreden prenos neobdelane vsebine iz GitHub (strežnik ni potreben)
 
 ```bash
-BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

@@ -56,7 +56,7 @@ Acest lucru **nu oprește dezvoltarea**:
 Verificați dacă există o înghețare activă înainte de a presupune că ramura dorită poate primi îmbinări:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Mecanismele de îmbinare (eticheta `queue` aplicată de proprietar → Mergify) sunt documentate în

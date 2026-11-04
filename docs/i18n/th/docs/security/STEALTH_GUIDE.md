@@ -172,7 +172,7 @@ aider, continue.dev, copilot, avante, codecompanion
 
 - `open-sse/executors/antigravity.ts` — อ่าน `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — การเชื่อมต่อข้อมูลรับรอง
-- รายงานเหตุการณ์ต้นฉบับ: การสนทนา [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- รายงานเหตุการณ์ต้นฉบับ: การสนทนา [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

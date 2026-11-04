@@ -260,7 +260,7 @@ See toimub üks kord esimesel käivitamisel pärast versiooniuuendust. Uuesti k�
 
 ## 1proxy tasuta puhverserverite turg
 
-> 🆕 **Lisas [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (probleem [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕 **Lisas [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (probleem [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
 
 OmniRoute integreerub **[1proxy](https://1proxy-api.aitradepulse.com)** kogukonnaplatvormiga, et pakkuda juurdepääsu **sadadele tasuta valideeritud puhverserveritele** üle kogu maailma. See sobib ideaalselt kasutajatele, kellel puudub oma puhverserveritaristu.
 

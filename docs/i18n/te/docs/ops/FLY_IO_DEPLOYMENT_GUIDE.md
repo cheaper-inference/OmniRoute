@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 కోడ్ను క్లోన్ చేసి డైరెక్టరీలోకి ప్రవేశించడం
 
 ```powershell
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly స్వయంచాలకంగా మెషీన్ల రోలిం�
 
 ### 9.1 మీ ఫోర్క్కు చెందిన `fly.toml`ను అలాగే ఉంచుతూ అప్స్ట్రీమ్ రిపోజిటరీ నవీకరణలను ట్రాక్ చేయడం
 
-ప్రస్తుత రిపోజిటరీ ఒక ఫోర్క్ అయి ఉండి, అప్స్ట్రీమ్ `https://github.com/diegosouzapw/OmniRoute` నుండి నవీకరణలను సమకాలీకరించాలనుకుంటే, కింది వర్క్ఫ్లోను అనుసరించండి.
+ప్రస్తుత రిపోజిటరీ ఒక ఫోర్క్ అయి ఉండి, అప్స్ట్రీమ్ `https://github.com/cheaper-inference/OmniRoute` నుండి నవీకరణలను సమకాలీకరించాలనుకుంటే, కింది వర్క్ఫ్లోను అనుసరించండి.
 
 మొదట, మీ రిమోట్లను ధృవీకరించండి:
 
@@ -309,7 +309,7 @@ git remote -v
 `upstream` కాన్ఫిగర్ చేయబడి లేకపోతే, దాన్ని జోడించండి:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
 అప్స్ట్రీమ్తో సమకాలీకరించే ముందు, తాజా కమిట్లు మరియు ట్యాగ్లను పొందండి:

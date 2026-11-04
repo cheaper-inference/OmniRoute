@@ -30,7 +30,7 @@ Thank you for your interest in contributing! This guide covers everything you ne
 ### Clonazione e installazione
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -437,4 +437,4 @@ Quindi usa le skill `/deploy-vps-*-cc`, che sincronizzano `dist/` tramite rsync 
 - **Riferimento API**: Consulta [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
 - **Documentazione sulla sicurezza**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
 - **Documentazione operativa**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Segnalazioni**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Segnalazioni**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

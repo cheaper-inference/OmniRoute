@@ -45,9 +45,9 @@
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=social)](https://github.com/cheaper-inference/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/OmniRoute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 შემოუერთდით საზოგადოებას
@@ -96,7 +96,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 ![ლიცენზია: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker-ის ჩამოტვირთვები](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron-ის ჩამოტვირთვები](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![Electron-ის ჩამოტვირთვები](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -521,7 +521,7 @@ curl http://localhost:20128/v1/chat/completions \
 OmniRoute ვრცელდება MIT ლიცენზიით და ღიად ვითარდება. თუ ის დროს ან ფულს გიზოგავთ, აი, როგორ შეგიძლიათ მისი დამოუკიდებლობის შენარჩუნებაში დახმარება — აირჩიეთ თქვენთვის შესაფერისი ვარიანტი. სპონსორობა არასოდეს ახდენს გავლენას მარშრუტიზაციის პრიორიტეტზე; ის უზრუნველყოფს ხილვადობას და არა რეიტინგში უპირატესობას.
 
 <table>
-  <tr><td nowrap>⭐ <b>მიანიჭეთ რეპოზიტორიას ვარსკვლავი</b></td><td>უფასოა — ნამდვილად ეხმარება ხილვადობას</td><td><a href="https://github.com/diegosouzapw/OmniRoute">მიანიჭეთ OmniRoute-ს ვარსკვლავი</a></td></tr>
+  <tr><td nowrap>⭐ <b>მიანიჭეთ რეპოზიტორიას ვარსკვლავი</b></td><td>უფასოა — ნამდვილად ეხმარება ხილვადობას</td><td><a href="https://github.com/cheaper-inference/OmniRoute">მიანიჭეთ OmniRoute-ს ვარსკვლავი</a></td></tr>
   <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>ერთჯერადი ან ყოველთვიური · პლატფორმის საკომისიოს გარეშე</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
   <tr><td nowrap>☕ <b>Ko-fi</b></td><td>სწრაფი ერთჯერადი შემოწირულება, დონორის რეგისტრაციის გარეშე</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
   <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>მცირე, არაფორმალური მხარდაჭერა</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
@@ -558,7 +558,7 @@ Pix-ის დასაკოპირებელი კოდი:
 
 </details>
 
-🐛 იპოვეთ შეცდომა ან გაქვთ უკუკავშირი? გახსენით [დისკუსია](https://github.com/diegosouzapw/OmniRoute/discussions).
+🐛 იპოვეთ შეცდომა ან გაქვთ უკუკავშირი? გახსენით [დისკუსია](https://github.com/cheaper-inference/OmniRoute/discussions).
 
 <br/>
 
@@ -1253,7 +1253,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-იც გამ�
 
 კანონიკური მეტრიკები 2026-10-18 მდგომარეობით: **1.976 უნიკალური ვიდეო** · **20.220.289 ცნობილი ნახვა** (`v > 0`) · **1.210 არხი/პროფილი ქსელების მიხედვით**. დაუმუშავებელი მართვის პანელი შეიცავს 1.976 სტრიქონს (YouTube 1.352 = 740 გრძელი ვიდეო + 612 Shorts · TikTok 334 · Instagram 290); კანონიკური URL-ის მიხედვით ნორმალიზაციის შემდეგ დუბლიკატები აღარ დარჩა — თითოეული ვიდეოსთვის შენარჩუნებულია ნახვების უდიდესი რაოდენობა. YouTube-ის მონაცემთა შეგროვება გაყინულია 2026-10-13 მდგომარეობით (API-ის კვოტა ამოიწურა 14-დან 18/10-მდე), ხოლო TikTok/Instagram-ის — 2026-09-02-დან (მონაცემთა შეგროვების კრედიტების არარსებობის გამო); 76 ვიდეოს ჯერ კიდევ არ აქვს ნახვების რაოდენობა.
 
-> 🎬 **გადაიღეთ ვიდეო OmniRoute-ის შესახებ?** გახსენით [საკითხი](https://github.com/diegosouzapw/OmniRoute/issues/new) ან [დისკუსია](https://github.com/diegosouzapw/OmniRoute/discussions) ბმულის მითითებით — და ჩვენ მას აქ გამოვაჩენთ.
+> 🎬 **გადაიღეთ ვიდეო OmniRoute-ის შესახებ?** გახსენით [საკითხი](https://github.com/cheaper-inference/OmniRoute/issues/new) ან [დისკუსია](https://github.com/cheaper-inference/OmniRoute/discussions) ბმულის მითითებით — და ჩვენ მას აქ გამოვაჩენთ.
 
 <br/>
 
@@ -1273,8 +1273,8 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-იც გამ�
 | 🟢 **WhatsApp — 🇧🇷 ბრაზილია**                            | [შეუერთდით ჯგუფს](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                                |
 | 🌍 **ვებსაიტი**                                          | [omniroute.online](https://omniroute.online)                                                                                      |
 | 🌍 **🌍StHub OmniRoute-ის საზოგადოება (უფასო)**          | [StHub-ის პორტალი](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                         |
-| 📦 **საწყისი კოდი**                                      | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                                    |
-| 🐛 **შეცდომის შეტყობინება**                              | [გახსენით საკითხი](https://github.com/diegosouzapw/OmniRoute/issues) — დაურთეთ `npm run system-info`-ის შედეგი                    |
+| 📦 **საწყისი კოდი**                                      | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                                          |
+| 🐛 **შეცდომის შეტყობინება**                              | [გახსენით საკითხი](https://github.com/cheaper-inference/OmniRoute/issues) — დაურთეთ `npm run system-info`-ის შედეგი               |
 | 🤝 **წვლილის შეტანა**                                    | [CONTRIBUTING.md](CONTRIBUTING.md) · [განშტოებისა და გამოშვების მოდელი](docs/ops/BRANCHING_MODEL.md) · აირჩიეთ `good first issue` |
 | 💚 **პროექტის მხარდაჭერა**                               | [მხარდაჭერის გზები ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)                          |
 
@@ -1632,7 +1632,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-იც გამ�
 
 </div>
 
-[![კონტრიბუტორები](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![კონტრიბუტორები](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
 
 <sub>აუდიტი ჩატარდა 2026-11-02-ს live <code>release/v3.8.53</code> tip <code>1c7135e0fb</code>-ზე (7,972 commit): <b>1,074 ნორმალიზებული ადამიანის Git-იდენტიფიკატორი</b> — 759 ჩანს commit-ის ავტორებად (მათ შორის, maintainer-იც), ხოლო 315 მხოლოდ მკაფიო <code>Co-authored-by</code> trailer-ებში. აღწერისას გამოყენებულია <code>.mailmap</code>, ელფოსტის მისამართები შედარებულია რეგისტრის გაუთვალისწინებლად, რიცხვითი და ჩვეულებრივი GitHub noreply მისამართები გაერთიანებულია მხოლოდ მაშინ, როცა ისინი ერთსა და იმავე handle-ს განსაზღვრავენ, გამორიცხულია 29 ბოტის/აგენტის/სერვისის/placeholder-ის იდენტიფიკატორი და ჩვეულებრივი ელფოსტის მისამართები არ გაერთიანებულა მხოლოდ display name-ების დამთხვევის საფუძველზე. 2026-08-24-ის აუდიტში გამოქვეყნებული იყო 639; ამ აუდიტის საბაზისო <code>ac02c5b42f</code>-ზე მეთოდის ხელახლა გაშვების შედეგად მიიღება 619, ამიტომ ზრდა ახალი კონტრიბუტორებით არის განპირობებული და არა უფრო ნაკლები შეზღუდვის მქონე მეთოდით.</sub>
 
@@ -1661,11 +1661,11 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 ## 📊 ვარსკვლავები
 
-<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="ვარსკვლავების ისტორიის დიაგრამა" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <img alt="ვარსკვლავების ისტორიის დიაგრამა" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
  </picture>
 </a>
 

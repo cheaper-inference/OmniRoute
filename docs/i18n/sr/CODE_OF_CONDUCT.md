@@ -65,7 +65,7 @@
 Инциденти злоупотребе, узнемиравања или другог неприхватљивог понашања могу се
 пријавити лидерима заједнице одговорним за спровођење отварањем
 приватног безбедносног саветовања на
-<https://github.com/diegosouzapw/OmniRoute/security/advisories/new>
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
 или слањем е-поште одржаваоцу на diegosouza.pw@outlook.com.
 За безбедносно осетљиве инциденте, погледајте [`SECURITY.md`](SECURITY.md).
 Све притужбе ће бити прегледане и истражене брзо и правично.

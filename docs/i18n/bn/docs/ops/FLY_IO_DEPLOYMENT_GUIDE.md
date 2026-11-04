@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 কোড ক্লোন করে ডিরেক্টরিতে প্রবেশ করুন
 
 ```powershell
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly স্বয়ংক্রিয়ভাবে মেশিনগুলো
 
 ### 9.1 আপনার ফর্কের `fly.toml` সংরক্ষণ করে আপস্ট্রিম রিপোজিটরির আপডেট অনুসরণ করা
 
-বর্তমান রিপোজিটরিটি যদি একটি ফর্ক হয় এবং আপনি আপস্ট্রিম `https://github.com/diegosouzapw/OmniRoute` থেকে আপডেট সিঙ্ক করতে চান, তাহলে নিচের ওয়ার্কফ্লোটি অনুসরণ করুন।
+বর্তমান রিপোজিটরিটি যদি একটি ফর্ক হয় এবং আপনি আপস্ট্রিম `https://github.com/cheaper-inference/OmniRoute` থেকে আপডেট সিঙ্ক করতে চান, তাহলে নিচের ওয়ার্কফ্লোটি অনুসরণ করুন।
 
 প্রথমে আপনার রিমোটগুলো যাচাই করুন:
 
@@ -309,7 +309,7 @@ git remote -v
 `upstream` কনফিগার করা না থাকলে, এটি যোগ করুন:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
 আপস্ট্রিমের সঙ্গে সিঙ্ক করার আগে সর্বশেষ কমিট ও ট্যাগগুলো ফেচ করুন:

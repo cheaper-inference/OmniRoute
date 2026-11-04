@@ -5,7 +5,7 @@
 ---
 
 See dokument talletab lahenduse juurutamise otsuse
-[probleemi #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854) kohta. Avalikud tooted on
+[probleemi #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854) kohta. Avalikud tooted on
 esitatud nelja teenusepakkujate perekonnana. Piirkond on ühenduse teave, mitte eraldiseisev toode.
 
 ## Otsus

@@ -129,7 +129,7 @@ handleComboChat (నిల్వ చేయబడిన కాంబోల కో
 
 ## నిజమైన Model Idతో సరిపోలే Combo పేర్లు
 
-`name` ఒక bare model idకి సమానంగా ఉండే combo (ఉదా. `gpt-5.5` అనే పేరు గల combo) ఒక **ఉద్దేశపూర్వకమైన, మద్దతు ఉన్న నమూనా**, బగ్ కాదు: ఇది [#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940)లో డాక్యుమెంట్ చేయబడిన, ప్రతి model idకి provider fallbackను అందించే విధానం. Bare-model-id resolution కంటే ముందు combo resolution తనిఖీ చేయబడుతుంది కాబట్టి (`src/sse/services/model.ts`లోని `getComboForModel()`), bare id `gpt-5.5` కోసం వచ్చిన అభ్యర్థన నేరుగా ఒకే providerకు వెళ్లకుండా, combo లక్ష్యాల ద్వారా (ఉదా. `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) route చేయబడుతుంది — ఇది [#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) కోసం రూపొందించిన combo-before-rewrite ప్రాధాన్యతను తిరిగి ఉపయోగిస్తుంది మరియు `tests/unit/responses-combo-resolution-3227.test.ts`, `tests/unit/combo-name-codex-responses-rewrite.test.ts` ద్వారా regression పరీక్ష చేయబడుతుంది.
+`name` ఒక bare model idకి సమానంగా ఉండే combo (ఉదా. `gpt-5.5` అనే పేరు గల combo) ఒక **ఉద్దేశపూర్వకమైన, మద్దతు ఉన్న నమూనా**, బగ్ కాదు: ఇది [#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940)లో డాక్యుమెంట్ చేయబడిన, ప్రతి model idకి provider fallbackను అందించే విధానం. Bare-model-id resolution కంటే ముందు combo resolution తనిఖీ చేయబడుతుంది కాబట్టి (`src/sse/services/model.ts`లోని `getComboForModel()`), bare id `gpt-5.5` కోసం వచ్చిన అభ్యర్థన నేరుగా ఒకే providerకు వెళ్లకుండా, combo లక్ష్యాల ద్వారా (ఉదా. `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) route చేయబడుతుంది — ఇది [#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) కోసం రూపొందించిన combo-before-rewrite ప్రాధాన్యతను తిరిగి ఉపయోగిస్తుంది మరియు `tests/unit/responses-combo-resolution-3227.test.ts`, `tests/unit/combo-name-codex-responses-rewrite.test.ts` ద్వారా regression పరీక్ష చేయబడుతుంది.
 
 నిజమైన model idను shadow చేసే పేరుతో comboను సృష్టించడం లేదా దాని పేరు మార్చడం **ఎప్పటికీ తిరస్కరించబడదు** — అలా చేయడం ఈ డాక్యుమెంట్ చేసిన workflowను విచ్ఛిన్నం చేస్తుంది. బదులుగా (#8530), (కొత్త) పేరు నిజమైన model idతో ఘర్షణ పడినప్పుడు `POST /api/combos` మరియు `PUT /api/combos/[id]` responseకు అభ్యర్థనను నిరోధించని `warning` fieldను జోడిస్తాయి:
 
@@ -165,7 +165,7 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 - **`auto` మీ combosను ఉపయోగించదు.** `auto`/`auto/*` తన స్వంత zero-config candidate poolను నిర్మిస్తుంది మరియు ఏదైనా comboకు అక్షరాలా `auto` అనే పేరు ఉంటే మాత్రమే persist చేసిన combosను పరిశీలిస్తుంది (ఇది సిఫార్సు చేయబడదు). Combo ద్వారా route చేయడానికి, దాని ఖచ్చితమైన పేరును పంపండి — `auto`ను కాదు.
 - **`openrouter/auto` అనేది నిజమైన paid OpenRouter product** ("Auto Best Available"), OmniRoute alias కాదు. ఇది OpenRouter registry (`open-sse/config/providers/registry/openrouter/index.ts`)లోని ఏకైక static model entry మరియు దీనికి విడిగా billing చేయబడుతుంది. దీన్ని `auto` pools నుండి మినహాయించడానికి Settings → Routing → Hide paid modelsను ఉపయోగించండి.
 
-ఇక్కడ డాక్యుమెంట్ చేసిన అసలు గందరగోళం గురించి తెలుసుకోవడానికి [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) మరియు [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) చూడండి.
+ఇక్కడ డాక్యుమెంట్ చేసిన అసలు గందరగోళం గురించి తెలుసుకోవడానికి [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) మరియు [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) చూడండి.
 
 ## ఇది ఎలా పనిచేస్తుంది (నిల్వ చేయబడిన Auto-Combos)
 

@@ -5,7 +5,7 @@
 ---
 
 Teimpléad: xquik #11370 (cumaiscthe in release/v3.8.51). Staid: `fallbackOnly`.
-Togra réamhtheachtach: saincheist diegosouzapw/OmniRoute#11637.
+Togra réamhtheachtach: saincheist cheaper-inference/OmniRoute#11637.
 
 ## 1. Bunfhírinne na seirbhíse (doiciméid oifigiúla, cros-seiceáilte)
 

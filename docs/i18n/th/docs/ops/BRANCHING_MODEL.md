@@ -56,7 +56,7 @@ flowchart LR
 ตรวจสอบว่ามีการตรึงที่เปิดอยู่หรือไม่ ก่อนสันนิษฐานว่าสาขาที่คุณต้องการสามารถรวมได้:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 กลไกการรวม (ป้ายกำกับ `queue` โดยเจ้าของ → Mergify) มีเอกสารอยู่ใน

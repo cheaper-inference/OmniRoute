@@ -139,8 +139,8 @@ Assurez-vous que `copilot-m365-web` est activé dans **Tableau de bord → Fourn
 
 ## Références
 
-- Problème : [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Discussion : [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- Problème : [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Discussion : [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - Source : `src/shared/constants/providers/web-cookie.ts` (définition du fournisseur)
 - Importation HAR : `src/shared/utils/m365HarImport.ts`
 - Champs des identifiants : `src/shared/providers/webSessionCredentials.ts`

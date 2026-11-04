@@ -324,7 +324,7 @@ Halayen ƙwaƙwalwa a cikin Docker:
 
 ### RAM na lokacin aiki don coding agents
 
-Tsohuwar ƙimar Docker ta 1 GiB ita ce mafi ƙarancin abin da dashboard/light-chat ke buƙata, ba girman da ya dace da tsarin production ba. Dogayen jikin buƙatun `POST /v1/responses` (ɗaruruwan saƙonni, kayan aiki goma-goma) suna riƙe da graphs da yawa a ƙwaƙwalwar ajiya yayin compression. Buƙatu biyu masu cin karo, kowannensu kusan ~3 MiB / ~750k-token, sun sa V8 ya tsaya a old-space na **12 GiB** (`FATAL ERROR: Reached heap limit`) sannan kuma suka kai ga cgroup OOM na 16 GiB. Duba [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Tsohuwar ƙimar Docker ta 1 GiB ita ce mafi ƙarancin abin da dashboard/light-chat ke buƙata, ba girman da ya dace da tsarin production ba. Dogayen jikin buƙatun `POST /v1/responses` (ɗaruruwan saƙonni, kayan aiki goma-goma) suna riƙe da graphs da yawa a ƙwaƙwalwar ajiya yayin compression. Buƙatu biyu masu cin karo, kowannensu kusan ~3 MiB / ~750k-token, sun sa V8 ya tsaya a old-space na **12 GiB** (`FATAL ERROR: Reached heap limit`) sannan kuma suka kai ga cgroup OOM na 16 GiB. Duba [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Saita girman **cgroup `--memory` fiye da heap** — native buffers, SQLite, da matsaka itan compression suna wajen V8.
 
@@ -696,7 +696,7 @@ spec:
 
 barci `preStop` yana barin kube sauke wuraren ƙarshen sabis kafin SIGTERM haka** sabo** zirga-zirga yana tsayawa yana bugun tsarin mutuwa. A cikin jirgin `/v1/responses` SSE ana zubar da shi har zuwa `SHUTDOWN_TIMEOUT_MS` (tsohon 30s) ta hanyar hayar shigar da nauyi (#11015). Sabbin buƙatun da har yanzu suka kai ga tsari suna samun `503` + `Retry-After: 5`. Sake ƙirƙira tazarar fanko-ƙarshen ƙarshen har sai an shirya wanda zai maye gurbin ya kasance mai wahala - wato SQLite topology, ba kuskuren bincike ba.
 
-Postgres na waje/marubuci da yawa HA shine** ba** hanyar haja da aka rubuta. Idan kuna buƙatar HA, adana kwafi ɗaya ko gudanar da topology aikin ya gwada kuma an rubuta shi daban. Aikin Postgres/MySQL yana rayuwa a [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Har sai wannan jirgi, hanya ɗaya da aka goyan baya don haɓaka** babba** Ƙarfin `/v1/responses` shine N matakai masu zaman kansu (sashe na gaba), ba `replicas > 1` akan juzu'i ɗaya ba.
+Postgres na waje/marubuci da yawa HA shine** ba** hanyar haja da aka rubuta. Idan kuna buƙatar HA, adana kwafi ɗaya ko gudanar da topology aikin ya gwada kuma an rubuta shi daban. Aikin Postgres/MySQL yana rayuwa a [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Har sai wannan jirgi, hanya ɗaya da aka goyan baya don haɓaka** babba** Ƙarfin `/v1/responses` shine N matakai masu zaman kansu (sashe na gaba), ba `replicas > 1` akan juzu'i ɗaya ba.
 
 ## Sikeli-fita: N matakai masu zaman kansu
 
@@ -706,11 +706,11 @@ Dole ne kwafin asusun Codex ɗaya kada ya cinye alamar wartsakewar amfanin guda 
 
 Misalin m yana sake karanta haɗin kai lokacin da ake buƙatar wartsakewa kuma yana ɗaukar wata alama ce ta daban, mara ƙarewa. In ba haka ba ana kashe wartsakewa ba tare da ƙarewa ko kashe haɗin haɗin gwiwa ko ƙirga gazawar mai wartsawa ba. Haƙiƙanin gazawar tantancewa ta sama har yanzu tana amfani da lissafin gazawar al'ada, sanyi mai faɗi da kuskuren abokin ciniki na yau da kullun; kashe asusu ya kasance na dindindin. Haɗa alamun jujjuyawar mai shi kafin alamun samun damar ƙarewa (tsofaffin jagorar wartsakewa shine mintuna biyar), ko sake shigo da fayil ɗin Codex auth. Shigo da keɓaɓɓu yana adana alamun da aka kawo ba tare da inganta su a ƙarshen alamar ba. Manual dashboard/API refresh dawo `409 refresh_disabled`; sababbin login OAuth ba su canzawa. Duba [bayanin muhalli](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Ɗayan tsari na Node shine** guda V8** . ~ 3 MiB / ~ 750k-token codeing-agent `POST /v1/responses` (RTK + Caveman) sun zubar da tsibin a ~ 12 Gi (`FATAL ERROR: Reached heap limit`) kuma suna iya OOM a 16 Gi rukuni. Duba [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Wannan ma'aunin shine a** ƙwaƙwalwar ajiya-kasafin kuɗi** gargadi, ba samfur mai wuya-max na tsayin `/v1/responses` guda biyu na lokaci ɗaya ba. An shigar da shigar da hira mai nauyi ta hanyar kasafin kudin shigar da aka samu ta atomatik (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) mai girman daga wancan V8/cgroup rufin — ya tsallake shi sama (ko saita madaidaicin ƙidaya `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ) akan tsari mai girman gaske yana sake dawo da zubar da ciki. Ƙananan hirarraki, `/healthz`, `/v1/models`, da MCP sune** ba** a cikin wannan hular.
+Ɗayan tsari na Node shine** guda V8** . ~ 3 MiB / ~ 750k-token codeing-agent `POST /v1/responses` (RTK + Caveman) sun zubar da tsibin a ~ 12 Gi (`FATAL ERROR: Reached heap limit`) kuma suna iya OOM a 16 Gi rukuni. Duba [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Wannan ma'aunin shine a** ƙwaƙwalwar ajiya-kasafin kuɗi** gargadi, ba samfur mai wuya-max na tsayin `/v1/responses` guda biyu na lokaci ɗaya ba. An shigar da shigar da hira mai nauyi ta hanyar kasafin kudin shigar da aka samu ta atomatik (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) mai girman daga wancan V8/cgroup rufin — ya tsallake shi sama (ko saita madaidaicin ƙidaya `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ) akan tsari mai girman gaske yana sake dawo da zubar da ciki. Ƙananan hirarraki, `/healthz`, `/v1/models`, da MCP sune** ba** a cikin wannan hular.
 
 ### Tsari ɗaya: fiye da dogayen `/v1/responses` biyu
 
-A** lafiya** tsari (tuni kasa `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, tsoho `0.75`)** mai yiwuwa** gudanar da `POST /v1/responses` fiye da guda biyu na lokaci ɗaya lokacin da tsarin kasafin-faɗin inflight-byte (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) har yanzu yana da ɗaki. Jiki a ko sama da `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (tsoho 256 KiB) suna ɗaukar haya mai nauyi iri ɗaya kamar buƙatun-nauyin tsari kuma suna amfani da guda [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` gudun hijira (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Dubun abokan ciniki na SSE masu tsayi (masu aiki galibi suna buƙatar 40-50) shine a** ƙwaƙwalwar ajiya-kasafin kuɗi** tambaya — girman tsibi + primary/headroom ramummuka + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ba ƙaƙƙarfan ƙayyadaddun samfur na “max 2”. Har yanzu tulin matsi yana zubar da `503` mai sake gwadawa don haka #7849 baya dawowa.
+A** lafiya** tsari (tuni kasa `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, tsoho `0.75`)** mai yiwuwa** gudanar da `POST /v1/responses` fiye da guda biyu na lokaci ɗaya lokacin da tsarin kasafin-faɗin inflight-byte (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) har yanzu yana da ɗaki. Jiki a ko sama da `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (tsoho 256 KiB) suna ɗaukar haya mai nauyi iri ɗaya kamar buƙatun-nauyin tsari kuma suna amfani da guda [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` gudun hijira (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Dubun abokan ciniki na SSE masu tsayi (masu aiki galibi suna buƙatar 40-50) shine a** ƙwaƙwalwar ajiya-kasafin kuɗi** tambaya — girman tsibi + primary/headroom ramummuka + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ba ƙaƙƙarfan ƙayyadaddun samfur na “max 2”. Har yanzu tulin matsi yana zubar da `503` mai sake gwadawa don haka #7849 baya dawowa.
 
 Zuwa** ninka tsibi** (tsofaffin wuraren V8 masu zaman kansu)** yau** :
 
@@ -753,7 +753,7 @@ volumes:
   omniroute-b-data:
 ```
 
-Yawan aiki (matsi daga keɓewar HTTP ) shine [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Ɗayan tari mai ma'ana akan yanayi mai dorewa da aka raba shine [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+Yawan aiki (matsi daga keɓewar HTTP ) shine [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Ɗayan tari mai ma'ana akan yanayi mai dorewa da aka raba shine [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
 ## Kurakuran yanki na Gemini a cikin Docker
 
@@ -794,7 +794,7 @@ buƙatar model da aka tantance ce kawai ke gwada cancantar Gemini.
 
 ### Madadin matakin host: IPv6 mai aiki da manufofin resolver
 
-Mai bayar da rahoton [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) ya dawo
+Mai bayar da rahoton [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) ya dawo
 da damar shiga a muhallinsa ta hanyar kunna IPv6 na container da canza zaɓin adireshin glibc.
 Ɗauki wannan a matsayin madadin da ya keɓanta ga muhalli. Tabbatar da cewa IPv6 na host yana aiki,
 egress/routing na container da kuma dokokin firewall kafin daidaita fifikon resolver.

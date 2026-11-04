@@ -453,7 +453,7 @@ PR より前に開かれます。このスクリプトが npm dist-tag を変更
 gh workflow run preview-artifact.yml -f pr_number=<N>   # または `preview-artifact` ラベルを追加
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # プレビュー版をインストール
 ```
 

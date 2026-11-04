@@ -84,7 +84,7 @@ npm start
 | `npm install -g omniroute` | ❌ objavljeni paket isporučuje već izgrađeni bundle — umjesto toga izgradite iz izvornog koda                                                    |
 | Docker slika               | ✅ `docker build --build-arg DASHBOARD_ALLOW_EMBED=vscode -t omniroute:embed .` — već izgrađena slika na Docker Hub-u nema omogućeno ugrađivanje |
 
-Bez build-a sa omogućenim ugrađivanjem, stranica odbija da se prikaže u okviru (frame), ekstenzija to detektuje iz zaglavlja odgovora i vraća se na eksterni pretraživač — ništa se ne kvari, i to se prijavi samo jednom. Pogledajte [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) i issue [#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
+Bez build-a sa omogućenim ugrađivanjem, stranica odbija da se prikaže u okviru (frame), ekstenzija to detektuje iz zaglavlja odgovora i vraća se na eksterni pretraživač — ništa se ne kvari, i to se prijavi samo jednom. Pogledajte [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) i issue [#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
 
 ---
 

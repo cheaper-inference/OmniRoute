@@ -18,7 +18,7 @@ Agent Skills წარმოადგენს სტრუქტურირე
 - **კანონიკური ID** (`omni-auth`, `cli-serve` და ა.შ.)
 - **SKILL.md** ფაილი `skills/{id}/SKILL.md`-ში, YAML frontmatter-ით (`name`, `description`) + შინაარსობრივად მდიდარი markdown ტექსტით
 - OpenAPI სპეციფიკაციიდან და CLI რეესტრიდან მიღებული **REST საბოლოო წერტილები** (API უნარები) ან **CLI ქვეკომანდები** (CLI უნარები)
-- რეალურ დროში მიღებისთვის განკუთვნილი **GitHub raw URL**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- რეალურ დროში მიღებისთვის განკუთვნილი **GitHub raw URL**: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. პირდაპირი GitHub raw-მიღება (სერვერი საჭირო არ არის)
 
 ```bash
-BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

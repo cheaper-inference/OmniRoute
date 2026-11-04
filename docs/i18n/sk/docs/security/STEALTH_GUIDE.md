@@ -170,7 +170,7 @@ Dotknuté miesta:
 
 - `open-sse/executors/antigravity.ts` — číta `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — spracovanie prihlasovacích údajov
-- Pôvodné hlásenie incidentu: diskusia [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Pôvodné hlásenie incidentu: diskusia [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

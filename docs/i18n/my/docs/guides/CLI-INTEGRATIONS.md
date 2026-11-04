@@ -180,7 +180,7 @@ omniroute setup-5dive --model failover-demo --auth-profile omniroute --agent wor
 
 API key ကို **stdin** (`--api-key=-`) မှတစ်ဆင့် 5dive ထံ လွှဲပေးသောကြောင့် ၎င်းသည် `ps` output တွင် လုံးဝပေါ်လာမည်မဟုတ်ပါ။
 
-Profile ကို model တစ်ခုတည်းအစား OmniRoute **combo** တစ်ခုသို့ ညွှန်ခြင်းဖြင့် fleet provider failover ကို ရရှိစေသည်။ [#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578) တွင် မှတ်တမ်းတင်ထားသော run အတွင်း primary endpoint သည် turn တစ်ခု၏ အလယ်တွင် လုံးဝ ရပ်တန့်သွားသောအခါ agent သည် ကျန်ရှိသော အဆင့်များကို fallback ပေါ်တွင် ပြီးဆုံးစေခဲ့ပြီး ပြတ်တောက်မှုကို အသုံးပြုသူထံ မဖော်ပြခဲ့ပါ။
+Profile ကို model တစ်ခုတည်းအစား OmniRoute **combo** တစ်ခုသို့ ညွှန်ခြင်းဖြင့် fleet provider failover ကို ရရှိစေသည်။ [#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578) တွင် မှတ်တမ်းတင်ထားသော run အတွင်း primary endpoint သည် turn တစ်ခု၏ အလယ်တွင် လုံးဝ ရပ်တန့်သွားသောအခါ agent သည် ကျန်ရှိသော အဆင့်များကို fallback ပေါ်တွင် ပြီးဆုံးစေခဲ့ပြီး ပြတ်တောက်မှုကို အသုံးပြုသူထံ မဖော်ပြခဲ့ပါ။
 
 ---
 

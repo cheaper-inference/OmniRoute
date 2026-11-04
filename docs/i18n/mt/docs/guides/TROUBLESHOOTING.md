@@ -252,7 +252,7 @@ L-iffirmar tal-kodiċi huwa ppjanat; sakemm jiġi implimentat, rilaxxi ġodda ji
    [Convert]::ToBase64String($b)
    ```
    L-output irid jaqbel ma’ `latest.yml` → `sha512`. Jekk ma jaqbilx, ħassar il-fajl u
-   niżżlu mill-ġdid biss mill-[paġna tar-rilaxxi ta’ GitHub](https://github.com/diegosouzapw/OmniRoute/releases).
+   niżżlu mill-ġdid biss mill-[paġna tar-rilaxxi ta’ GitHub](https://github.com/cheaper-inference/OmniRoute/releases).
 2. **Irrestawra + eskludi** — irrestawra mill-kwarantina l-elementi li tneħħew meta l-installazzjoni
    treġġgħet lura u żid esklużjoni għal `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky →
    Settings → Threats and Exclusions), imbagħad installa mill-ġdid.
@@ -847,7 +847,7 @@ dwar `OMNIROUTE_READY_TIMEOUT_MS`.
 
 ## Għadek Imwaħħal?
 
-- **Kwistjonijiet fuq GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Kwistjonijiet fuq GitHub**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **Arkitettura**: Ara [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) għad-dettalji interni
 - **Referenza tal-API**: Ara [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) għall-endpoints kollha
 - **Dashboard tas-Saħħa**: Iċċekkja **Dashboard → Health** għall-istatus tas-sistema f’ħin reali

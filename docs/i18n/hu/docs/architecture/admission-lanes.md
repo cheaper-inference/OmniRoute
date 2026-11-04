@@ -130,7 +130,7 @@ nem okoz 503-as hibát egy másiknál”) az 1. rendszer feltétel nélkül, a 2
 
 ## 4. Hosszú `/v1/responses` egyetlen folyamatban (egészséges tartalék)
 
-A [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) hozzáadta a
+A [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) hozzáadta a
 `tryAcquireHealthyHeadroom` funkciót, így egy második, szerkezetileg erőforrás-igényes kérés is
 befogadható, ha a heap kihasználtsága az `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`
 értéke alatt van. Az `admitChatRequest` által használt BYTE

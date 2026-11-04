@@ -223,7 +223,7 @@ livenessProbe:
 
 **Atụnyela** **liveness** nke kubelet aka na `/api/monitoring/health`. Path ahụ na-arụ ezigbo ọrụ DB/nlekota ma nwee ike igosi nsogbu na-ezighi ezi mgbe ibu dị ukwuu.
 
-Ihe ndị metụtara ya: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (nyocha mgbe event loop na-arụsi ọrụ ike), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (ọrụ ọnụahịa katalọgụ na-ejide akụrụngwa), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (ọrụ ịgụ token nke mkpọkọta na-ejide akụrụngwa).
+Ihe ndị metụtara ya: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (nyocha mgbe event loop na-arụsi ọrụ ike), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (ọrụ ọnụahịa katalọgụ na-ejide akụrụngwa), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (ọrụ ịgụ token nke mkpọkọta na-ejide akụrụngwa).
 
 ### watchdog nke systemd (event loop jụrụ akpụ)
 

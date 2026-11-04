@@ -201,7 +201,7 @@ bayyana a cikin fitowar `ps`.
 Nuna profile ɗin zuwa **combo** na OmniRoute maimakon model guda ɗaya shi ne ke ba
 rundunar damar failover na provider: lokacin da primary endpoint ya daina aiki
 gaba ɗaya a tsakiyar turn a cikin aikin da aka rubuta a
-[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), agent ɗin ya
+[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), agent ɗin ya
 kammala sauran matakansa a kan fallback kuma bai taɓa bayyana katsewar ba.
 
 ---

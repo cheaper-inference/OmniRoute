@@ -139,8 +139,8 @@ in einigen Tarifen standardmäßig ausgeblendet sein.
 
 ## Referenzen
 
-- Issue: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Diskussion: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- Issue: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Diskussion: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - Quellcode: `src/shared/constants/providers/web-cookie.ts` (Anbieterdefinition)
 - HAR-Import: `src/shared/utils/m365HarImport.ts`
 - Anmeldedatenfelder: `src/shared/providers/webSessionCredentials.ts`

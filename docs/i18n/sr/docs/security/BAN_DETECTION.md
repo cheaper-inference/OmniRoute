@@ -58,8 +58,8 @@ Google Cloud Code / Antigravity га враћају као `403 VALIDATION_REQUI
 Задржавање ове фразе на листи забрана такође је чинило опорављиву cloud-code грану за 403 у
 `classifyProviderError` недоступном за ову формулацију, јер се `accountDeactivated`
 проверава први — па опоравак пројектне руте додат за Gemini Code Assist у
-[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) и
-[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) никада није могао да се изврши.
+[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) и
+[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) никада није могао да се изврши.
 
 Три суседне, **одвојене** табеле сигнала _нису_ део откривања забрањених кључних речи:
 

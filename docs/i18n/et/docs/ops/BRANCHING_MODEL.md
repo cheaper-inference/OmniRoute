@@ -47,7 +47,7 @@ Väljalaske kooskõlastamise ajal avatakse märgendiga `release-freeze` tähista
 Enne soovitud haru mestitavaks pidamist kontrollige, kas mõni külmutamine on aktiivne:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Mestimise mehhanism (omaniku märgend `queue` → Mergify) on dokumenteeritud failis [MERGE_TRAIN.md](./MERGE_TRAIN.md).

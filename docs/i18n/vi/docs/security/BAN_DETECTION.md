@@ -58,8 +58,8 @@ chờ 1 năm, không bao giờ tự động khôi phục), trong khi người v�
 trong trình duyệt. Việc giữ cụm từ này trong danh sách cấm cũng khiến nhánh xử lý 403 của cloud-code
 có thể khôi phục trong `classifyProviderError` không thể được thực thi đối với cách diễn đạt này, vì
 `accountDeactivated` được đánh giá trước — do đó cơ chế khôi phục tuyến dự án được thêm cho Gemini
-Code Assist trong [#868](https://github.com/diegosouzapw/OmniRoute/pull/868) và
-[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) không bao giờ có thể chạy.
+Code Assist trong [#868](https://github.com/cheaper-inference/OmniRoute/pull/868) và
+[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) không bao giờ có thể chạy.
 
 Ba bảng tín hiệu liền kề nhưng **tách biệt** sau đây _không_ thuộc cơ chế phát hiện từ khóa cấm:
 

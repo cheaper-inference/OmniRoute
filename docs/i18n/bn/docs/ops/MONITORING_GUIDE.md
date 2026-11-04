@@ -223,7 +223,7 @@ livenessProbe:
 
 kubelet-এর **লাইভনেস** `/api/monitoring/health`-এর দিকে নির্দেশ **করবেন না**। ওই পাথটি প্রকৃত DB/মনিটরিং কাজ করে এবং লোডের সময় ভুলভাবে পজিটিভ ফল দেবে।
 
-সম্পর্কিত: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (ইভেন্ট লুপ ব্যস্ত থাকা অবস্থায় প্রোব), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (ক্যাটালগ প্রাইসিংয়ের অতিরিক্ত রিসোর্স ব্যবহার), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (কম্প্রেশন টোকেন গণনার অতিরিক্ত রিসোর্স ব্যবহার)।
+সম্পর্কিত: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (ইভেন্ট লুপ ব্যস্ত থাকা অবস্থায় প্রোব), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (ক্যাটালগ প্রাইসিংয়ের অতিরিক্ত রিসোর্স ব্যবহার), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (কম্প্রেশন টোকেন গণনার অতিরিক্ত রিসোর্স ব্যবহার)।
 
 ### systemd ওয়াচডগ (স্থবির ইভেন্ট লুপ)
 

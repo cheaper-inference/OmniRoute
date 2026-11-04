@@ -4,9 +4,9 @@
 
 ---
 
-> **Katayuan:** Tinanggap · **Konteksto:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
-> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Kontrata:** `domain/routing/routerBackends.ts`
-> (may-type na registry — kasama ang code sa [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
+> **Katayuan:** Tinanggap · **Konteksto:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
+> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Kontrata:** `domain/routing/routerBackends.ts`
+> (may-type na registry — kasama ang code sa [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
 
 Itinatakda ng ADR na ito kung paano nauugnay sa isa't isa ang `ts` (native), `bifrost`, `cliproxy`, `9router`, at mga engine na compatible sa VibeProxy, upang hindi na pag-isahin ng mga contributor ang dalawang bagay na magkaiba sa arkitektura. Idinudokumento nito ang may-type na registry na ipinakilala ng gawain sa router-backend-registry bilang nag-iisang source of truth para sa modelong iyon.
 
@@ -28,7 +28,7 @@ Ang pagkakamaling dapat iwasan: ang pagturing sa "embedded service" at "routing 
 
 ## Ang registry — nag-iisang source of truth
 
-Idinedeklara nang isang beses ng kontratang `domain/routing/routerBackends.ts` (kasama ang code sa [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) ang bawat engine, kasama ang lifecycle, capabilities, service identity, default port, health config, at suporta sa telemetry nito. Hinahanap ng mga consumer ang mga engine sa pamamagitan ng `getRouterBackend(id)`, `listRouterBackends()`, at `listRouterBackendsByCapability(cap)` sa halip na maglagay ng espesyal na kundisyon para sa bawat sidecar.
+Idinedeklara nang isang beses ng kontratang `domain/routing/routerBackends.ts` (kasama ang code sa [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) ang bawat engine, kasama ang lifecycle, capabilities, service identity, default port, health config, at suporta sa telemetry nito. Hinahanap ng mga consumer ang mga engine sa pamamagitan ng `getRouterBackend(id)`, `listRouterBackends()`, at `listRouterBackendsByCapability(cap)` sa halip na maglagay ng espesyal na kundisyon para sa bawat sidecar.
 
 | Backend     | Lifecycle    | Serbisyo (axis A) | Relay backend (axis B) | Kalagayan     | Default na port |
 | ----------- | ------------ | ----------------- | ---------------------- | ------------- | --------------- |
@@ -38,7 +38,7 @@ Idinedeklara nang isang beses ng kontratang `domain/routing/routerBackends.ts` (
 | `9router`   | `supervised` | `9router`         | — (provider)           | `/api/health` | 20130           |
 | `vibeproxy` | `external`   | —                 | — (provider adapter)   | `/v1/models`  | —               |
 
-¹ Ang pag-promote sa Bifrost bilang isang `supervised` na embedded service (maaaring i-install/simulan mula sa `/api/services/bifrost/`) ay sinusubaybayan sa [#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817); hanggang sa ma-merge ito, ang Bifrost ay `external`-only (maaabot lamang sa pamamagitan ng `BIFROST_BASE_URL`).
+¹ Ang pag-promote sa Bifrost bilang isang `supervised` na embedded service (maaaring i-install/simulan mula sa `/api/services/bifrost/`) ay sinusubaybayan sa [#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817); hanggang sa ma-merge ito, ang Bifrost ay `external`-only (maaabot lamang sa pamamagitan ng `BIFROST_BASE_URL`).
 
 Nagbibigay-daan ang `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`, `oauth-backed`, `dashboard-embed`, `model-sync`, `native-hot-path`) sa mga caller na mag-filter batay sa kung ano talaga ang kayang gawin ng isang engine sa halip na mag-hard-code ng mga branch para sa bawat id.
 
@@ -103,8 +103,8 @@ surface na `/api/v1/chat/completions`.
 Ang pagpili ay **all-or-nothing sa antas ng relay sa kasalukuyan** — walang per-provider
 o per-request na pagpapalit ng engine sa `release/v3.8.43`. Idinaragdag ang per-request gate
 sa pamamagitan ng sidecar-manifest work
-([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 na nagbibigay-daan sa `auto` na idaan lamang sa Bifrost ang mga provider na kuwalipikado ayon sa manifest.
 
 ## Integrasyon ng dashboard

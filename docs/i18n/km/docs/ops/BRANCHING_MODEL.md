@@ -56,7 +56,7 @@ flowchart LR
 ពិនិត្យមើលថាតើមានការបង្កកដែលបើកឬអត់ មុននឹងសន្មត់ថាសាខាដែលអ្នកចង់បានអាច merge បាន៖
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 យន្តការ merge (ស្លាក `queue` របស់ម្ចាស់ → Mergify) ត្រូវបានចងក្រងជាឯកសារនៅក្នុង

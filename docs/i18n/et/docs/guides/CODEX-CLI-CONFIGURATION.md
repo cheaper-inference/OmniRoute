@@ -468,7 +468,7 @@ Kaks OmniRoute'i vaikeväärtust võivad mitmetunniseid Codex CLI seansse märka
 | Seanss vahetab pidevalt kontosid / viiba vahemälu järjepidevus kaob käikude vahel | Seansi afiinsuse TTL on `0` (keelatud)                                         | `sessionAffinityTtlMs`   |
 | Ühendus katkeb arutluse ajal ilma kliendile kuvatava viibata                      | Voo jõudeoleku valve käivitus pärast 10 minutit ilma ülesvoolust saabuva osata | `STREAM_IDLE_TIMEOUT_MS` |
 
-Seotud arutelud: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (pikkade ülesannete katkemine), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (miks afiinsus on vaikimisi välja lülitatud). Jälgimine: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Seotud arutelud: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (pikkade ülesannete katkemine), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (miks afiinsus on vaikimisi välja lülitatud). Jälgimine: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. Seansi afiinsus — seo üks vestlus ühe kontoga
 

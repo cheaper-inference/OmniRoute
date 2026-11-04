@@ -125,7 +125,7 @@ tilasta shi ta tsarin 1 ba tare da wani sharadi ba, sannan ta tsarin 2 bayan an 
 
 ## 4. `/v1/responses` mai tsawo a process guda (healthy-headroom)
 
-[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) ya ƙara
+[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) ya ƙara
 `tryAcquireHealthyHeadroom` domin a karɓi buƙata ta biyu mai nauyin tsari
 idan heap yana ƙasa da `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. Hanyar BYTE
 da `admitChatRequest` ke amfani da ita (bodies ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

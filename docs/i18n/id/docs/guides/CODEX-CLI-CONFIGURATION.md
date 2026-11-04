@@ -478,7 +478,7 @@ Dua nilai bawaan OmniRoute dapat secara diam-diam menyabotase sesi Codex CLI yan
 | Sesi terus berganti akun / kontinuitas cache prompt hilang di antara giliran | TTL afinitas sesi adalah `0` (dinonaktifkan)                       | `sessionAffinityTtlMs`   |
 | Koneksi terputus saat proses penalaran tanpa prompt yang terlihat oleh klien | Pengawas idle stream terpicu setelah 10 menit tanpa chunk upstream | `STREAM_IDLE_TIMEOUT_MS` |
 
-Diskusi terkait: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (tugas panjang terputus), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (alasan afinitas dinonaktifkan secara bawaan). Pelacakan: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Diskusi terkait: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (tugas panjang terputus), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (alasan afinitas dinonaktifkan secara bawaan). Pelacakan: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. Afinitas sesi — pertahankan satu percakapan pada satu akun
 

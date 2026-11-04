@@ -9,7 +9,7 @@
 Ọ bụrụ na ị chọpụta adịghị ike nchekwa na OmniRoute, biko kọọ ya n'ụzọ kwesịrị ekwesị:
 
 1. **EMEGHELA** okwu ọhaneze na GitHub
-2. Jiri [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
+2. Jiri [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
 3. Tinye: nkọwa, usoro iji mepụtaghachi ya, na mmetụta ọ nwere ike inwe
 
 ## Oge Nzaghachi
@@ -42,7 +42,7 @@ alaka `stable/v3` (lee [`ROADMAP.md`](ROADMAP.md) → "Nkeji 3 — v3.9.0 LTS").
   nke ọ bụla mechara**. A ga-edekọ ụbọchị njedebe sitere na nke a na ndetu mwepụta 3.9.0 nakwa na
   [`ROADMAP.md`](ROADMAP.md) mgbe mwepụta ahụ mere.
 - **Ịkọ adịghị ike nchekwa n’usoro LTS:** jiri otu ọwa ahụ a na-eji maka ụdị ọ bụla ọzọ —
-  [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) nzuzo,
+  [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) nzuzo,
   ọ bụghị mkpesa ọhaneze ma ọlị. Kwuo ụdị ị nwalere (dịka ọmụmaatụ `3.9.2`); ndozi ga-abata na
   `stable/v3`, a ga-ebufekwa ha gaa n’ihu na v4.
 - **Ntọala nchekwa mgbe e wepụtara LTS:** a na-edekọ ọnọdụ nyocha e tụrụ atụ, route-guard na

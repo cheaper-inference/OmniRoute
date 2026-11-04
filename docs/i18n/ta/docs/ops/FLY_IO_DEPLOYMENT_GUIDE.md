@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 குறியீட்டைக் குளோன் செய்து கோப்பகத்திற்குள் செல்லுதல்
 
 ```powershell
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly தானாகவே இயந்திரங்களின் படி�
 
 ### 9.1 உங்கள் Fork-இன் `fly.toml`-ஐப் பாதுகாத்தவாறு Upstream களஞ்சியப் புதுப்பிப்புகளைக் கண்காணித்தல்
 
-தற்போதைய களஞ்சியம் ஒரு fork ஆக இருந்து, upstream `https://github.com/diegosouzapw/OmniRoute`-இலிருந்து புதுப்பிப்புகளை ஒத்திசைக்க விரும்பினால், கீழேயுள்ள பணிப்பாய்வைப் பின்பற்றவும்.
+தற்போதைய களஞ்சியம் ஒரு fork ஆக இருந்து, upstream `https://github.com/cheaper-inference/OmniRoute`-இலிருந்து புதுப்பிப்புகளை ஒத்திசைக்க விரும்பினால், கீழேயுள்ள பணிப்பாய்வைப் பின்பற்றவும்.
 
 முதலில், உங்கள் remotes-ஐச் சரிபார்க்கவும்:
 
@@ -309,7 +309,7 @@ git remote -v
 `upstream` உள்ளமைக்கப்படவில்லை என்றால், அதைச் சேர்க்கவும்:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
 Upstream உடன் ஒத்திசைப்பதற்கு முன், சமீபத்திய commits மற்றும் tags-ஐப் பெறவும்:

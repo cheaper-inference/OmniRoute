@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 კოდის კლონირება და დირექტორიაში გადასვლა
 
 ```powershell
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly ავტომატურად შეასრულებს მან�
 
 ### 9.1 ზედა დონის რეპოზიტორიის განახლებების თვალყურის დევნება თქვენი ფორკის `fly.toml`-ის შენარჩუნებით
 
-თუ მიმდინარე რეპოზიტორია ფორკია და გსურთ განახლებების სინქრონიზაცია ზედა დონის `https://github.com/diegosouzapw/OmniRoute` რეპოზიტორიიდან, მიჰყევით ქვემოთ მოცემულ სამუშაო პროცესს.
+თუ მიმდინარე რეპოზიტორია ფორკია და გსურთ განახლებების სინქრონიზაცია ზედა დონის `https://github.com/cheaper-inference/OmniRoute` რეპოზიტორიიდან, მიჰყევით ქვემოთ მოცემულ სამუშაო პროცესს.
 
 პირველ რიგში, გადაამოწმეთ თქვენი დისტანციური რეპოზიტორიები:
 
@@ -309,7 +309,7 @@ git remote -v
 თუ `upstream` კონფიგურირებული არ არის, დაამატეთ ის:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
 ზედა დონის რეპოზიტორიასთან სინქრონიზაციამდე ჩამოტვირთეთ უახლესი კომიტები და ტეგები:

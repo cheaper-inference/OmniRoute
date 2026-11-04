@@ -55,7 +55,7 @@ flowchart LR
 यह मानने से पहले कि आपकी इच्छित ब्रांच मर्ज की जा सकती है, जाँचें कि कोई फ़्रीज़ खुला तो नहीं है:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 मर्ज की कार्यप्रणाली (स्वामी का `queue` लेबल → Mergify) का दस्तावेज़ीकरण

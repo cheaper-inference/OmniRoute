@@ -58,8 +58,8 @@ Google Cloud Code / Antigravity מחזירים אותו בתור `403 VALIDATION
 השארת הביטוי ברשימת החסימות גם הפכה את ענף 403 של cloud-code הניתן להתאוששות
 ב-`classifyProviderError` לבלתי נגיש עבור ניסוח זה, משום ש-`accountDeactivated`
 נבדק ראשון — ולכן מנגנון ההתאוששות של נתיב הפרויקט שנוסף עבור Gemini Code Assist
-ב-[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) וב-
-[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) לא היה יכול לפעול לעולם.
+ב-[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) וב-
+[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) לא היה יכול לפעול לעולם.
 
 שלוש טבלאות האותות הסמוכות וה**נפרדות** הבאות _אינן_ חלק מזיהוי מילות מפתח לחסימה:
 

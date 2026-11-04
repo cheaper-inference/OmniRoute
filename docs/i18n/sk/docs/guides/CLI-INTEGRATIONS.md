@@ -199,7 +199,7 @@ výstupe `ps`.
 Nasmerovanie profilu na **kombináciu** OmniRoute namiesto jedného modelu poskytne
 flotile prepnutie pri zlyhaní poskytovateľa: keď primárny koncový bod počas interakcie úplne prestal fungovať
 v behu zaznamenanom v
-[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), agent dokončil
+[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), agent dokončil
 zostávajúce kroky cez záložný koncový bod bez toho, aby používateľovi oznámil výpadok.
 
 ---

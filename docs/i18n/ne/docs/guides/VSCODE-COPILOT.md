@@ -106,7 +106,7 @@ npm start
 
 Embedding सक्षम गरिएको build बिना पृष्ठले frame हुन अस्वीकार गर्छ, extension ले response headers बाट त्यो पत्ता लगाउँछ र बाह्य ब्राउजरमा फर्कन्छ — केही पनि बिग्रँदैन, र यसले एकपटक त्यसबारे जानकारी दिन्छ।
 [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) र issue
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273) हेर्नुहोस्।
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273) हेर्नुहोस्।
 
 ---
 

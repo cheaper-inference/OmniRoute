@@ -9,7 +9,7 @@
 如果您在 OmniRoute 中发现安全漏洞，请负责任地进行报告：
 
 1. **请勿**创建公开的 GitHub issue
-2. 使用 [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
+2. 使用 [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
 3. 请包含：漏洞描述、复现步骤和潜在影响
 
 ## 响应时间表
@@ -40,7 +40,7 @@
   以两者中较晚的日期为准**。确定的结束日期将在 3.9.0 发布时记录于其发行说明和
   [`ROADMAP.md`](ROADMAP.md) 中。
 - **报告 LTS 支持线中的漏洞：**使用与任何其他版本相同的渠道——
-  私密的 [GitHub 安全公告](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)，
+  私密的 [GitHub 安全公告](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)，
   切勿提交公开议题。请说明测试的版本（例如 `3.9.2`）；修复将合入
   `stable/v3`，并向前移植到 v4。
 - **LTS 发布时的安全基线：**扫描器的实测状态、路由防护及

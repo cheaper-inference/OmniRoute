@@ -259,7 +259,7 @@ Legacy key_value store → proxy_registry + proxy_assignments
 
 ## 1proxy મફત પ્રોક્સી માર્કેટપ્લેસ
 
-> 🆕 **આ યોગદાન [@oyi77](https://github.com/oyi77) દ્વારા આપવામાં આવ્યું છે** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (સમસ્યા [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕 **આ યોગદાન [@oyi77](https://github.com/oyi77) દ્વારા આપવામાં આવ્યું છે** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (સમસ્યા [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
 
 OmniRoute વિશ્વભરમાંથી **સેંકડો મફત, માન્ય કરાયેલા પ્રોક્સીઓ**ની ઍક્સેસ આપવા માટે **[1proxy](https://1proxy-api.aitradepulse.com)** સમુદાય પ્લેટફોર્મ સાથે એકીકૃત થાય છે. જે વપરાશકર્તાઓ પાસે પોતાનું પ્રોક્સી ઇન્ફ્રાસ્ટ્રક્ચર નથી તેમના માટે આ ઉત્તમ છે.
 

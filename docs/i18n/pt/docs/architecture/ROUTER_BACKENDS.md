@@ -4,9 +4,9 @@
 
 ---
 
-> **Estado:** Aceite · **Contexto:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
-> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Contrato:** `domain/routing/routerBackends.ts`
-> (registo tipado — o código será integrado com [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
+> **Estado:** Aceite · **Contexto:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
+> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Contrato:** `domain/routing/routerBackends.ts`
+> (registo tipado — o código será integrado com [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
 
 Este ADR define como os motores `ts` (nativo), `bifrost`, `cliproxy`, `9router` e
 os motores compatíveis com VibeProxy se relacionam entre si, para que os contribuidores deixem de
@@ -39,7 +39,7 @@ era apenas `external`.
 ## O registo — única fonte de verdade
 
 O contrato `domain/routing/routerBackends.ts` (o código será integrado com
-[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) declara cada motor uma única vez, com o respetivo
+[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) declara cada motor uma única vez, com o respetivo
 ciclo de vida, capacidades, identidade do serviço, porta predefinida, configuração de
 estado e suporte de telemetria. Os consumidores consultam os motores através de `getRouterBackend(id)`,
 `listRouterBackends()` e `listRouterBackendsByCapability(cap)`, em vez de
@@ -55,7 +55,7 @@ tratarem cada sidecar como um caso especial.
 
 ¹ A promoção do Bifrost a um serviço incorporado `supervised` (instalável/iniciável
 a partir de `/api/services/bifrost/`) está a ser acompanhada em
-[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817); até ser integrada,
+[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817); até ser integrada,
 o Bifrost é apenas `external` (acessível exclusivamente através de `BIFROST_BASE_URL`).
 
 As `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -123,8 +123,8 @@ de despacho; a superfície principal `/api/v1/chat/completions` nunca consulta
 Atualmente, a seleção é **tudo ou nada ao nível do relay** — não existe troca de
 motor por fornecedor ou por pedido em `release/v3.8.43`. A condição por pedido está a ser adicionada
 pelo trabalho do manifesto de sidecars
-([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifesto +
-[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifesto +
+[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 o que permite que `auto` encaminhe através do Bifrost apenas os fornecedores elegíveis segundo o manifesto.
 
 ## Integração no dashboard

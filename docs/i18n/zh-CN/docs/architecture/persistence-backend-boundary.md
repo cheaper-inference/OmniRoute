@@ -5,7 +5,7 @@
 ---
 
 - **状态：** 已提议 — 在开始运行时相关工作前需要维护者批准
-- **跟踪议题：** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
+- **跟踪议题：** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
 - **范围：** 仅限持久化架构；此决策不会添加或选择外部数据库
 
 ## 背景

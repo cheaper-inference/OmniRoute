@@ -149,7 +149,7 @@ Mga touch point:
 
 - `open-sse/executors/antigravity.ts` — binabasa ang `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — pamamahala ng credential
-- Orihinal na ulat ng insidente: Talakayan [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Orihinal na ulat ng insidente: Talakayan [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

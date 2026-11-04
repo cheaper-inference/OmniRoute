@@ -138,8 +138,8 @@ nakatago bilang default ang provider sa ilang tier.
 
 ## Mga sanggunian
 
-- Isyu: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Talakayan: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- Isyu: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Talakayan: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - Source: `src/shared/constants/providers/web-cookie.ts` (depinisyon ng provider)
 - Pag-import ng HAR: `src/shared/utils/m365HarImport.ts`
 - Mga field ng credential: `src/shared/providers/webSessionCredentials.ts`

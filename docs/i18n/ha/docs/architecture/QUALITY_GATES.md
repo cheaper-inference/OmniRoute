@@ -421,7 +421,7 @@ ana jiran aiwatarwa).
 ### Ratchet na CodeQL: lokacin sabuntawa da kunnawa da hannu
 
 `check:codeql-ratchet` yana karanta **yanayin repo, wanda ake sabuntawa bisa jadawali — ba a kowane PR ba.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` yana bayar da rahoton
+`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` yana bayar da rahoton
 `state: configured`, `schedule: weekly`: binciken default-setup na GitHub ne, ba bincike
 a kowane push ba. Sakamako: bayan an haɗa PR da ya GYARA faɗakarwa, ratchet zai ci gaba da karanta
 tsohon adadi mafi girma har sai an gudanar da bincike na gaba da aka tsara — don haka yana bayar da rahoton koma-baya

@@ -200,7 +200,7 @@ v izpisu `ps`.
 Usmeritev profila na **kombinacijo** OmniRoute namesto na en sam model floti omogoči
 preklop ponudnika ob napaki: ko je primarna končna točka sredi koraka popolnoma
 prenehala delovati v izvajanju, zabeleženem v
-[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), je agent preostale
+[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), je agent preostale
 korake dokončal na rezervni možnosti, ne da bi uporabniku prikazal izpad.
 
 ---

@@ -49,8 +49,8 @@ bez automatycznego przywracania), podczas gdy operator usuwa monit weryfikacyjny
 Pozostawienie tej frazy na liście blokad sprawiało również, że możliwa do naprawienia gałąź obsługi błędów 403 usługi Cloud Code w
 `classifyProviderError` była nieosiągalna dla tego sformułowania, ponieważ `accountDeactivated` jest
 sprawdzane jako pierwsze — dlatego mechanizm odzyskiwania tras projektu dodany dla Gemini Code Assist w
-[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) i
-[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) nie mógł się uruchomić.
+[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) i
+[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) nie mógł się uruchomić.
 
 Trzy sąsiadujące, **odrębne** tabele sygnałów _nie_ są częścią mechanizmu wykrywania zablokowanych słów kluczowych:
 

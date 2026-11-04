@@ -18,7 +18,7 @@
 - एउटा **आधिकारिक ID** (`omni-auth`, `cli-serve`, आदि)
 - `skills/{id}/SKILL.md` मा YAML frontmatter (`name`, `description`) + समृद्ध markdown सामग्रीसहितको एउटा **SKILL.md** फाइल
 - OpenAPI स्पेसिफिकेसन र CLI रजिस्ट्रीबाट प्राप्त **REST एन्डपोइन्टहरू** (API स्किलहरू) वा **CLI सबकमाण्डहरू** (CLI स्किलहरू)
-- प्रत्यक्ष रूपमा प्राप्त गर्नका लागि एउटा **GitHub raw URL**: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- प्रत्यक्ष रूपमा प्राप्त गर्नका लागि एउटा **GitHub raw URL**: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. प्रत्यक्ष GitHub raw प्राप्ति (सर्भर आवश्यक पर्दैन)
 
 ```bash
-BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

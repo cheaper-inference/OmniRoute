@@ -9,7 +9,7 @@
 OmniRoute'ta bir güvenlik açığı keşfederseniz lütfen bunu sorumlu bir şekilde bildirin:
 
 1. Herkese açık bir GitHub sorunu **AÇMAYIN**
-2. [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) kullanın
+2. [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) kullanın
 3. Şunları ekleyin: açıklama, yeniden oluşturma adımları ve olası etki
 
 ## Yanıt Zaman Çizelgesi
@@ -42,7 +42,7 @@ OmniRoute'ta bir güvenlik açığı keşfederseniz lütfen bunu sorumlu bir şe
   düzeltmeleri** alır. Ortaya çıkan bitiş tarihi, sürüm yayınlandığında 3.9.0 sürüm notlarına ve
   [`ROADMAP.md`](ROADMAP.md) dosyasına kaydedilir.
 - **LTS hattındaki bir güvenlik açığını bildirme:** diğer tüm sürümlerle aynı kanal kullanılmalıdır —
-  herkese açık bir issue yerine özel bir [GitHub Güvenlik Bildirimi](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
+  herkese açık bir issue yerine özel bir [GitHub Güvenlik Bildirimi](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
   gönderilmelidir. Test ettiğiniz sürümü belirtin (örneğin `3.9.2`); düzeltmeler `stable/v3` dalına eklenir
   ve v4'e ileri taşınır.
 - **LTS yayınındaki güvenlik temeli:** ölçülen tarayıcı durumu, rota koruması ve

@@ -18,7 +18,7 @@ Danh mục chứa **45 Agent Skills** (23 REST API + 21 CLI + 1 quy trình cấu
 - Một **ID chuẩn** (`omni-auth`, `cli-serve`, v.v.)
 - Một tệp **SKILL.md** trong `skills/{id}/SKILL.md` với phần mở đầu YAML (`name`, `description`) + nội dung markdown phong phú
 - Các **endpoint REST** (skill API) hoặc **lệnh con CLI** (skill CLI) được lấy từ đặc tả OpenAPI và registry CLI
-- Một **URL raw trên GitHub** để truy xuất trực tiếp: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- Một **URL raw trên GitHub** để truy xuất trực tiếp: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Tải trực tiếp nội dung thô từ GitHub (không yêu cầu máy chủ)
 
 ```bash
-BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

@@ -56,7 +56,7 @@ flowchart LR
 სანამ ჩათვლით, რომ სასურველ ბრენჩზე მერჯი შესაძლებელია, შეამოწმეთ, არის თუ არა გაყინვა ღია:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 მერჯის მექანიზმი (მფლობელის `queue` ლეიბლი → Mergify) აღწერილია

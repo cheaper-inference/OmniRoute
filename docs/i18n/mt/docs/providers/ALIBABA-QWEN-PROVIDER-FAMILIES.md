@@ -5,7 +5,7 @@
 ---
 
 Dan id-dokument jirreġistra d-deċiżjoni ta’ implimentazzjoni għal
-[Il-Ħarġa #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854). Il-prodotti pubbliċi huma
+[Il-Ħarġa #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854). Il-prodotti pubbliċi huma
 rrappreżentati bħala erba’ familji ta’ fornituri. Ir-reġjun huwa data tal-konnessjoni, mhux prodott separat.
 
 ## Deċiżjoni

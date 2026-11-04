@@ -115,7 +115,7 @@ npm start
 من دون بناء مهيأ للتضمين، سترفض الصفحة العرض داخل إطار، وستكتشف الإضافة ذلك من
 ترويسات الاستجابة وتعود إلى استخدام المتصفح الخارجي — لن يتعطل شيء، وستعرض إشعارًا بذلك مرة واحدة.
 راجع [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) والمشكلة
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
 
 ---
 

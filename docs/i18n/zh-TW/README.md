@@ -45,9 +45,9 @@
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=social)](https://github.com/cheaper-inference/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/OmniRoute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 加入社群
@@ -96,7 +96,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 ![授權：MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker 拉取次數](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron 下載次數](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![Electron 下載次數](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -521,7 +521,7 @@ curl http://localhost:20128/v1/chat/completions \
 OmniRoute 採用 MIT 授權，並以開放方式維護。如果它為您節省了時間或金錢，您可以透過以下方式協助它保持獨立 — 請選擇最適合您的方式。贊助絕不會影響路由優先順序；它只能換取曝光，而非排名。
 
 <table>
-  <tr><td nowrap>⭐ <b>為儲存庫加上星號</b></td><td>免費 — 確實有助於提升能見度</td><td><a href="https://github.com/diegosouzapw/OmniRoute">為 OmniRoute 加上星號</a></td></tr>
+  <tr><td nowrap>⭐ <b>為儲存庫加上星號</b></td><td>免費 — 確實有助於提升能見度</td><td><a href="https://github.com/cheaper-inference/OmniRoute">為 OmniRoute 加上星號</a></td></tr>
   <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>單次或每月贊助 · 平台費用為零</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
   <tr><td nowrap>☕ <b>Ko-fi</b></td><td>快速單次贊助，贊助者無須註冊</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
   <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>小額、非正式的支持</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
@@ -558,7 +558,7 @@ Pix 複製貼上碼：
 
 </details>
 
-🐛 發現錯誤或有意見要回饋？請建立一則[討論](https://github.com/diegosouzapw/OmniRoute/discussions)。
+🐛 發現錯誤或有意見要回饋？請建立一則[討論](https://github.com/cheaper-inference/OmniRoute/discussions)。
 
 <br/>
 
@@ -1253,7 +1253,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也會略過
 
 截至 2026-10-18 的標準化指標：**1.976 部不重複影片** · **20.220.289 次已知觀看**（`v > 0`）· **各平台共 1.210 個頻道／個人檔案**。原始面板包含 1.976 筆資料（YouTube 1.352 = 740 部長片 + 612 部 Shorts · TikTok 334 · Instagram 290）；依標準 URL 正規化後已無任何重複項目，且每部影片會保留最高的觀看次數。YouTube 資料擷取已凍結於 2026-10-13（14 至 18/10 期間 API 配額已用盡），TikTok／Instagram 則自 2026-09-02 起凍結（無資料擷取額度）；仍有 76 部影片尚無觀看次數資料。
 
-> 🎬 **製作了關於 OmniRoute 的影片嗎？** 請附上連結開啟一個 [issue](https://github.com/diegosouzapw/OmniRoute/issues/new) 或 [discussion](https://github.com/diegosouzapw/OmniRoute/discussions) — 我們會在此推薦該影片。
+> 🎬 **製作了關於 OmniRoute 的影片嗎？** 請附上連結開啟一個 [issue](https://github.com/cheaper-inference/OmniRoute/issues/new) 或 [discussion](https://github.com/cheaper-inference/OmniRoute/discussions) — 我們會在此推薦該影片。
 
 <br/>
 
@@ -1273,8 +1273,8 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也會略過
 | 🟢 **WhatsApp — 🇧🇷 巴西**                | [加入群組](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                      |
 | 🌍 **網站**                              | [omniroute.online](https://omniroute.online)                                                                     |
 | 🌍 **🌍StHub OmniRoute 社群（免費）**    | [StHub 入口網站](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)          |
-| 📦 **原始碼**                            | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                   |
-| 🐛 **回報錯誤**                          | [建立問題](https://github.com/diegosouzapw/OmniRoute/issues) — 附上 `npm run system-info` 的輸出                 |
+| 📦 **原始碼**                            | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                         |
+| 🐛 **回報錯誤**                          | [建立問題](https://github.com/cheaper-inference/OmniRoute/issues) — 附上 `npm run system-info` 的輸出            |
 | 🤝 **貢獻**                              | [CONTRIBUTING.md](CONTRIBUTING.md) · [分支與發布模型](docs/ops/BRANCHING_MODEL.md) · 選擇一個 `good first issue` |
 | 💚 **支持此專案**                        | [支持方式 ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)                  |
 
@@ -1632,7 +1632,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也會略過
 
 </div>
 
-[![Contributors](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
 
 <sub>於 2026-11-02 在 live <code>release/v3.8.53</code> 提交端 <code>1c7135e0fb</code>（7,972 次提交）完成稽核：<b>1,074 個正規化的人類 Git 身分</b> — 759 個以提交作者身分出現（包括維護者），315 個僅出現在明確的 <code>Co-authored-by</code> 尾註中。此統計套用 <code>.mailmap</code>，不區分大小寫地比對電子郵件地址，僅在數字形式與一般 GitHub noreply 地址編碼相同帳號時將其合併，排除 29 個機器人／代理程式／服務／佔位身分，且不會僅因一般電子郵件地址的顯示名稱相同而將其合併。2026-08-24 的稽核公布了 639 個；以該稽核基準的 <code>ac02c5b42f</code> 重新執行此方法得到 619 個，因此增幅來自新貢獻者，而非較寬鬆的方法。</sub>
 
@@ -1661,11 +1661,11 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 ## 📊 Stars
 
-<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="Star 歷史圖表" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <img alt="Star 歷史圖表" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
  </picture>
 </a>
 

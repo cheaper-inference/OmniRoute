@@ -45,9 +45,9 @@
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=social)](https://github.com/cheaper-inference/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/OmniRoute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 Bí páirteach sa phobal
@@ -96,7 +96,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 ![Ceadúnas: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Tarraingtí Docker](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Íoslódálacha Electron](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![Íoslódálacha Electron](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -521,7 +521,7 @@ Gach ceann de na **20** straitéis — measc agus meaitseáil iad ag gach céim 
 Tá OmniRoute ceadúnaithe faoi MIT agus á chothabháil go hoscailte. Má shábhálann sé am nó airgead duit, seo mar is féidir cabhrú leis fanacht neamhspleách — roghnaigh cibé rud a oireann duit. Ní théann urraíocht i bhfeidhm riamh ar thosaíocht ródaithe; ceannaíonn sí infheictheacht, ní rangú.
 
 <table>
-  <tr><td nowrap>⭐ <b>Cuir réalta leis an stór</b></td><td>Saor in aisce — cuidíonn sé go mór leis an infheictheacht</td><td><a href="https://github.com/diegosouzapw/OmniRoute">Cuir réalta le OmniRoute</a></td></tr>
+  <tr><td nowrap>⭐ <b>Cuir réalta leis an stór</b></td><td>Saor in aisce — cuidíonn sé go mór leis an infheictheacht</td><td><a href="https://github.com/cheaper-inference/OmniRoute">Cuir réalta le OmniRoute</a></td></tr>
   <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>Aonuaire nó míosúil · gan aon táille ardáin</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
   <tr><td nowrap>☕ <b>Ko-fi</b></td><td>Síntiús tapa aonuaire, ní gá don deontóir clárú</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
   <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>Comhartha beag neamhfhoirmiúil</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
@@ -558,7 +558,7 @@ PIX le cóipeáil agus greamú:
 
 </details>
 
-🐛 Ar aimsigh tú fabht nó an bhfuil aiseolas agat? Oscail [Plé](https://github.com/diegosouzapw/OmniRoute/discussions).
+🐛 Ar aimsigh tú fabht nó an bhfuil aiseolas agat? Oscail [Plé](https://github.com/cheaper-inference/OmniRoute/discussions).
 
 <br/>
 
@@ -1262,7 +1262,7 @@ ar phort amháin, mar sin níl aon phacáiste ar leith don CLI amháin ann faoi 
 
 Méadrachtaí canónacha ar 2026-10-18: **1.976 físeán uathúil** · **20.220.289 amharc aitheanta** (`v > 0`) · **1.210 cainéal/próifíl de réir líonra**. Tá 1.976 líne sa phainéal amh (YouTube 1.352 = 740 físeán fada + 612 Shorts · TikTok 334 · Instagram 290); níor fágadh aon dúblach tar éis normalú de réir an URL chanónaigh, a choinníonn an líon is airde do gach físeán. Tá bailiú sonraí YouTube reoite ag 2026-10-13 (cóta an API ídithe ón 14 go dtí an 18/10) agus tá bailiú sonraí TikTok/Instagram reoite ó 2026-09-02 (gan creidmheasanna bailithe); níl comhaireamh amharc fós ag 76 físeán.
 
-> 🎬 **An ndearna tú físeán faoi OmniRoute?** Oscail [saincheist](https://github.com/diegosouzapw/OmniRoute/issues/new) nó [plé](https://github.com/diegosouzapw/OmniRoute/discussions) leis an nasc — cuirfimid chun suntais anseo é.
+> 🎬 **An ndearna tú físeán faoi OmniRoute?** Oscail [saincheist](https://github.com/cheaper-inference/OmniRoute/issues/new) nó [plé](https://github.com/cheaper-inference/OmniRoute/discussions) leis an nasc — cuirfimid chun suntais anseo é.
 
 <br/>
 
@@ -1282,8 +1282,8 @@ Méadrachtaí canónacha ar 2026-10-18: **1.976 físeán uathúil** · **20.220.
 | 🟢 **WhatsApp — 🇧🇷 An Bhrasaíl**                            | [glac páirt sa ghrúpa](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                            |
 | 🌍 **Suíomh gréasáin**                                      | [omniroute.online](https://omniroute.online)                                                                                       |
 | 🌍 **🌍Pobal StHub OmniRoute (saor in aisce)**              | [tairseach StHub](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                           |
-| 📦 **Cód foinseach**                                        | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                                     |
-| 🐛 **Tuairiscigh fabht**                                    | [oscail saincheist](https://github.com/diegosouzapw/OmniRoute/issues) — ceangail aschur `npm run system-info` leis                 |
+| 📦 **Cód foinseach**                                        | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                                           |
+| 🐛 **Tuairiscigh fabht**                                    | [oscail saincheist](https://github.com/cheaper-inference/OmniRoute/issues) — ceangail aschur `npm run system-info` leis            |
 | 🤝 **Rannchuidigh**                                         | [CONTRIBUTING.md](CONTRIBUTING.md) · [Samhail Brainseála agus Eisiúna](docs/ops/BRANCHING_MODEL.md) · roghnaigh `good first issue` |
 | 💚 **Tacaigh leis an tionscadal**                           | [Bealaí chun tacú ↑](#-support-omniroute) · [Urraitheoirí GitHub](https://github.com/sponsors/diegosouzapw)                        |
 
@@ -1641,7 +1641,7 @@ Buíochas ó chroí leis na daoine a mhaoiníonn OmniRoute as a bpóca féin —
 
 </div>
 
-[![Contributors](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
 
 <sub>Iniúchadh déanta an 2026-11-02 ar an leid bheo <code>release/v3.8.53</code> <code>1c7135e0fb</code> (7,972 coimit): <b>1,074 aitheantas daonna normalaithe Git</b> — tá 759 le feiceáil mar údair choimit (an cothaitheoir san áireamh) agus níl 315 eile le feiceáil ach i dtrailéirí sainráite <code>Co-authored-by</code>. Cuirtear <code>.mailmap</code> i bhfeidhm sa daonáireamh, cuirtear seoltaí ríomhphoist i gcomparáid gan idirdhealú idir cásanna, ceanglaítear seoltaí uimhriúla agus simplí GitHub noreply ach amháin nuair a ionchódaíonn siad an láimhseáil chéanna, fágtar 29 aitheantas róbó, gníomhaire, seirbhíse agus ionadchoinneálaí ar lár, agus ní dhéantar gnáthsheoltaí ríomhphoist a chumasc díreach toisc go bhfuil a n-ainmneacha taispeána mar an gcéanna. D’fhoilsigh iniúchadh 2026-08-24 639; tugann an modh seo, nuair a reáchtáiltear arís é ar bhunús an iniúchta sin <code>ac02c5b42f</code>, 619, mar sin is ó rannpháirtithe nua a thagann an méadú, ní ó mhodh níos scaoilte.</sub>
 
@@ -1670,11 +1670,11 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 ## 📊 Réaltaí
 
-<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="Cairt Stair na Réaltaí" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <img alt="Cairt Stair na Réaltaí" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
  </picture>
 </a>
 

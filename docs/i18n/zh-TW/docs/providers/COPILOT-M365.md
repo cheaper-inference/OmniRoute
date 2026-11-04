@@ -118,8 +118,8 @@ OmniRoute 會掃描 HAR 以尋找 Chathub WebSocket URL、擷取 `access_token` 
 
 ## 參考資料
 
-- 問題：[#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- 討論：[#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- 問題：[#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- 討論：[#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - 原始碼：`src/shared/constants/providers/web-cookie.ts`（提供者定義）
 - HAR 匯入：`src/shared/utils/m365HarImport.ts`
 - 認證資訊欄位：`src/shared/providers/webSessionCredentials.ts`

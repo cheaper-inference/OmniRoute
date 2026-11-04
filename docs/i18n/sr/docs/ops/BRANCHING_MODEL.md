@@ -56,7 +56,7 @@ To **ne zaustavlja razvoj**:
 Proverite da li postoji aktivno zamrzavanje pre nego što pretpostavite da grana koju želite može da se spoji:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Mehanizam spajanja (vlasnička oznaka `queue` → Mergify) dokumentovan je u

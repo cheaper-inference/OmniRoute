@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 Klon Kod dan Masuk ke Direktori
 
 ```powershell
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly akan melaksanakan kemas kini berperingkat pada mesin secara automatik.
 
 ### 9.1 Menjejaki Kemas Kini Repositori Hulu Sambil Mengekalkan `fly.toml` Fork Anda
 
-Jika repositori semasa ialah fork dan anda mahu menyegerakkan kemas kini daripada repositori hulu `https://github.com/diegosouzapw/OmniRoute`, ikuti aliran kerja di bawah.
+Jika repositori semasa ialah fork dan anda mahu menyegerakkan kemas kini daripada repositori hulu `https://github.com/cheaper-inference/OmniRoute`, ikuti aliran kerja di bawah.
 
 Mula-mula, sahkan remote anda:
 
@@ -309,7 +309,7 @@ Anda sepatutnya melihat sekurang-kurangnya:
 Jika `upstream` belum dikonfigurasikan, tambahkannya:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
 Sebelum menyegerakkan dengan repositori hulu, dapatkan commit dan tag terkini:

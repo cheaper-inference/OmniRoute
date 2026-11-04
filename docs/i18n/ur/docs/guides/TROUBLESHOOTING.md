@@ -249,7 +249,7 @@ HTTP/SSE اینڈ پوائنٹس، A2A کا `.well-known` URL، اور `curl` ک
    [Convert]::ToBase64String($b)
    ```
    آؤٹ پٹ کا `latest.yml` → `sha512` سے مماثل ہونا ضروری ہے۔ اگر مماثلت نہ ہو تو فائل حذف کریں اور
-   صرف [GitHub ریلیزز کے صفحے](https://github.com/diegosouzapw/OmniRoute/releases) سے دوبارہ ڈاؤن لوڈ کریں۔
+   صرف [GitHub ریلیزز کے صفحے](https://github.com/cheaper-inference/OmniRoute/releases) سے دوبارہ ڈاؤن لوڈ کریں۔
 2. **بحال کریں + خارج کریں** — رول بیک کی گئی اشیا کو قرنطینہ سے بحال کریں اور
    `%LOCALAPPDATA%\Programs\OmniRoute` کے لیے ایک exclusion شامل کریں (Kaspersky → Settings → Threats and Exclusions)،
    پھر دوبارہ انسٹال کریں۔
@@ -843,7 +843,7 @@ omniroute serve --ready-timeout 180000
 
 ## اب بھی مسئلہ برقرار ہے؟
 
-- **GitHub مسائل**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **GitHub مسائل**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **معماری**: اندرونی تفصیلات کے لیے [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) دیکھیں
 - **API حوالہ**: تمام اینڈ پوائنٹس کے لیے [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) دیکھیں
 - **صحت کا ڈیش بورڈ**: سسٹم کی لحظہ بہ لحظہ حالت کے لیے **Dashboard → Health** دیکھیں

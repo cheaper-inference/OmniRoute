@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 استنساخ الكود والدخول إلى الدليل
 
 ```powershell
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ flyctl secrets set KEY=value -a omniroute
 
 ### 9.1 تتبّع تحديثات المستودع الأساسي مع الحفاظ على ملف `fly.toml` الخاص بتفرّعك
 
-إذا كان المستودع الحالي تفرّعًا وكنت تريد مزامنة التحديثات من المستودع الأساسي `https://github.com/diegosouzapw/OmniRoute`، فاتبع سير العمل أدناه.
+إذا كان المستودع الحالي تفرّعًا وكنت تريد مزامنة التحديثات من المستودع الأساسي `https://github.com/cheaper-inference/OmniRoute`، فاتبع سير العمل أدناه.
 
 أولًا، تحقق من المستودعات البعيدة:
 
@@ -309,7 +309,7 @@ git remote -v
 إذا لم يكن `upstream` مهيأً، فأضفه:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
 قبل المزامنة مع المستودع الأساسي، اجلب أحدث الالتزامات والعلامات:

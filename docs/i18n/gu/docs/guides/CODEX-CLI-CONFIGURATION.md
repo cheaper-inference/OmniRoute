@@ -478,7 +478,7 @@ OmniRoute ના બે ડિફૉલ્ટ બહુ-કલાકીય Codex
 | સત્ર સતત એકાઉન્ટ બદલે છે / ટર્ન્સ વચ્ચે પ્રૉમ્પ્ટ-કૅશ સાતત્ય ખોવાઈ જાય છે  | સત્ર અફિનિટી TTL `0` છે (અક્ષમ)                                            | `sessionAffinityTtlMs`   |
 | ક્લાયન્ટને કોઈ પ્રૉમ્પ્ટ દેખાયા વિના રિઝનિંગની વચ્ચે કનેક્શન બંધ થઈ જાય છે | કોઈ અપસ્ટ્રીમ ચંક વિના 10 મિનિટ પછી સ્ટ્રીમ નિષ્ક્રિયતા વૉચડૉગ સક્રિય થયું | `STREAM_IDLE_TIMEOUT_MS` |
 
-સંબંધિત ચર્ચાઓ: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (લાંબા કાર્યો અટકી જાય છે), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (અફિનિટી ડિફૉલ્ટ રૂપે શા માટે બંધ છે). ટ્રૅકિંગ: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+સંબંધિત ચર્ચાઓ: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (લાંબા કાર્યો અટકી જાય છે), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (અફિનિટી ડિફૉલ્ટ રૂપે શા માટે બંધ છે). ટ્રૅકિંગ: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. સત્ર અફિનિટી — એક વાતચીતને એક એકાઉન્ટ સાથે પિન કરો
 

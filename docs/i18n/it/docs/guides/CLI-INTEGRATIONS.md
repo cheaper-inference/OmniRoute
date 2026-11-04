@@ -180,7 +180,7 @@ Entrambe le forme scrivono un **profilo di autenticazione** 5dive e ogni postazi
 
 La chiave API viene passata a 5dive tramite **stdin** (`--api-key=-`), quindi non compare mai nell'output di `ps`.
 
-Puntare il profilo a una **combinazione** OmniRoute anziché a un singolo modello consente alla flotta di utilizzare il failover del provider: quando l'endpoint primario è diventato completamente irraggiungibile a metà interazione durante l'esecuzione documentata in [#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), l'agente ha completato i passaggi rimanenti usando il fallback senza mai mostrare l'interruzione.
+Puntare il profilo a una **combinazione** OmniRoute anziché a un singolo modello consente alla flotta di utilizzare il failover del provider: quando l'endpoint primario è diventato completamente irraggiungibile a metà interazione durante l'esecuzione documentata in [#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), l'agente ha completato i passaggi rimanenti usando il fallback senza mai mostrare l'interruzione.
 
 ---
 

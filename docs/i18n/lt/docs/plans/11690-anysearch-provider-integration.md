@@ -5,7 +5,7 @@
 ---
 
 Šablonas: xquik #11370 (sujungta į release/v3.8.51). Veikimo režimas: `fallbackOnly`.
-Pirminis pasiūlymas: diegosouzapw/OmniRoute#11637 problema.
+Pirminis pasiūlymas: cheaper-inference/OmniRoute#11637 problema.
 
 ## 1. Faktinė paslaugos informacija (oficiali dokumentacija, patikrinta pagal kelis šaltinius)
 

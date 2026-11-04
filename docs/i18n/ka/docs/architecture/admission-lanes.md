@@ -124,7 +124,7 @@ Combo (პრიორიტეტული / round-robin) და fusion ერ�
 
 ## 4. ერთი პროცესის ხანგრძლივი `/v1/responses` (ჯანსაღი თავისუფალი რესურსი)
 
-[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437)-მა დაამატა
+[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437)-მა დაამატა
 `tryAcquireHealthyHeadroom`, რათა მეორე, სტრუქტურულად მძიმე მოთხოვნა დაშვებული იყოს,
 როდესაც heap `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`-ზე დაბალია. `admitChatRequest`-ის მიერ გამოყენებული BYTE
 გზა (body-ები ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

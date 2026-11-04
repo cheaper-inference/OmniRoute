@@ -326,7 +326,7 @@ Iompar cuimhne in Docker:
 
 ### RAM ag am rite do ghníomhairí códúcháin
 
-Is íosmhéid do dheais/comhrá éadrom é réamhshocrú Docker de 1 GiB, ní méid táirgthe. Coinníonn coirp fhada `POST /v1/responses` (na céadta teachtaireachtaí, na deicheanna uirlisí) iliomad graf sa chuimhne le linn comhbhrúite. Chuir dhá iarratas fhorluiteacha de thart ar 3 MiB / 750k comhartha deireadh le V8 ag sean-spás **12 GiB** (`FATAL ERROR: Reached heap limit`) agus shroich siad OOM cgroup 16 GiB freisin. Féach [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Is íosmhéid do dheais/comhrá éadrom é réamhshocrú Docker de 1 GiB, ní méid táirgthe. Coinníonn coirp fhada `POST /v1/responses` (na céadta teachtaireachtaí, na deicheanna uirlisí) iliomad graf sa chuimhne le linn comhbhrúite. Chuir dhá iarratas fhorluiteacha de thart ar 3 MiB / 750k comhartha deireadh le V8 ag sean-spás **12 GiB** (`FATAL ERROR: Reached heap limit`) agus shroich siad OOM cgroup 16 GiB freisin. Féach [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Socraigh méid **cgroup `--memory` os cionn an chairn** — tá maoláin dhúchasacha, SQLite, agus torthaí idirmheánacha comhbhrúite lasmuigh de V8.
 
@@ -698,7 +698,7 @@ spec:
 
 Ligeann codlata `preStop` do kube críochphointí na Seirbhíse a laghdú roimh SIGTERM mar sin** nua** stopann trácht ag bualadh leis an bpróiseas ag fáil bháis. Déantar `/v1/responses` SSE san eitilt a dhraenáil suas go `SHUTDOWN_TIMEOUT_MS` (30idí réamhshocraithe) trí léasanna iontrála trom-mheáchain (#11015). Faigheann iarratais nua a shroicheann an próiseas fós `503` + `Retry-After: 5`. Is briseadh crua fós é an bhearna chríochphointe Recreate folamh go dtí go bhfuil an t-athsholáthar Réidh - is é sin topology SQLite, ní misconfig taiscéalaithe.
 
-Tá Postgres seachtrach / il-scríbhneoir HA** nach bhfuil** cosán stoc doiciméadaithe. Más gá duit HA, coinnigh macasamhail amháin nó rith topology a ndearna an tionscadal tástáil air agus doiciméadaithe ar leithligh. Tá cónaí ar an obair Postgres/MySQL i [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Go dtí go long, an t-aon bhealach tacaithe a iolrú** mór** Is éard atá in acmhainn `/v1/responses` ná N próisis neamhspleácha (an chéad chuid eile), ní `replicas > 1` ar imleabhar amháin.
+Tá Postgres seachtrach / il-scríbhneoir HA** nach bhfuil** cosán stoc doiciméadaithe. Más gá duit HA, coinnigh macasamhail amháin nó rith topology a ndearna an tionscadal tástáil air agus doiciméadaithe ar leithligh. Tá cónaí ar an obair Postgres/MySQL i [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Go dtí go long, an t-aon bhealach tacaithe a iolrú** mór** Is éard atá in acmhainn `/v1/responses` ná N próisis neamhspleácha (an chéad chuid eile), ní `replicas > 1` ar imleabhar amháin.
 
 ## Scála amach: N próisis neamhspleácha
 
@@ -708,11 +708,11 @@ Ní ceadmhach cóipeanna de chuntas Codex amháin a chomhartha athnuachana aonú
 
 Athléann an cás éighníomhach an nasc nuair a bhíonn gá le hathnuachan agus ní ghlacann sé ach comhartha rochtana eile nach bhfuil caite. Seachas sin díchumasaítear athnuachan gan an nasc a dhul in éag nó a dhíghníomhachtú nó teip athnuachana a chur san áireamh. Úsáideann teipeanna fíordheimhnithe réamhtheachtacha fós gnáthchuntas teip, fuarú easpónantúil agus gnáthearráid an chliaint; tá díghníomhachtú cuntais fós buan. Sioncrónaigh comharthaí rothlaithe an úinéara sula dtéann na comharthaí rochtana in éag (cúig nóiméad an treoir athnuachana réamhghníomhach réamhshocraithe), nó athiompórtáil an comhad Codex auth arís. Stórálann allmhairí éighníomhacha na comharthaí soláthraithe gan iad a bhailíochtú ag críochphointe an chomharthaí. Tuairisceáin athnuachana dashboard/API láimhe `409 refresh_disabled`; níl aon athrú ar logáil isteach nua OAuth. Féach [tagairt don chomhshaol](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Is próiseas Nód amháin** gcarn amháin V8** . Toirmeascann dhá ghníomhaire códaithe ~ 3 MiB / ~ 750k-token `POST /v1/responses` (RTK + Caveman) an gcarn sin ag ~ 12 Gi (`FATAL ERROR: Reached heap limit`) agus is féidir leo OOM a 16 Gi cgroup. Féach [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Is é an tomhas sin a** buiséad cuimhne** rabhadh, ní táirge crua-uas de dhá `/v1/responses` fada comhthráthach . Tá iontráil comhrá trom-mheáchain faoi réir ag buiséad beart ingest uathdhíorthaithe (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) meánmhéide ón uasteorainn V8/cgroup céanna sin — á shárú aníos (nó ag socrú an chaipín iarratais ar chomhaireamh `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` oidhreachta) ar phróiseas atá ar mhéid cheana féin a thugann an ginmhilleadh isteach arís. Tá comhráite beaga, `/healthz`, `/v1/models`, agus MCP** nach bhfuil** sa chaipín sin.
+Is próiseas Nód amháin** gcarn amháin V8** . Toirmeascann dhá ghníomhaire códaithe ~ 3 MiB / ~ 750k-token `POST /v1/responses` (RTK + Caveman) an gcarn sin ag ~ 12 Gi (`FATAL ERROR: Reached heap limit`) agus is féidir leo OOM a 16 Gi cgroup. Féach [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Is é an tomhas sin a** buiséad cuimhne** rabhadh, ní táirge crua-uas de dhá `/v1/responses` fada comhthráthach . Tá iontráil comhrá trom-mheáchain faoi réir ag buiséad beart ingest uathdhíorthaithe (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) meánmhéide ón uasteorainn V8/cgroup céanna sin — á shárú aníos (nó ag socrú an chaipín iarratais ar chomhaireamh `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` oidhreachta) ar phróiseas atá ar mhéid cheana féin a thugann an ginmhilleadh isteach arís. Tá comhráite beaga, `/healthz`, `/v1/models`, agus MCP** nach bhfuil** sa chaipín sin.
 
 ### Próiseas amháin: níos mó ná dhá `/v1/responses` fada
 
-A** sláintiúil** próiseas (carn thíos `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, `0.75` réamhshocraithe )** féadfaidh** níos mó ná dhá `POST /v1/responses` fada comhthráthach a reáchtáil nuair a bhíonn spás fós sa bhuiséad inflight-byte ar fud an phróisis (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110). Tógann comhlachtaí ag `OMNIROUTE_CHAT_LARGE_BODY_BYTES` nó os a chionn (réamhshocraithe 256 KiB) an léas trom-mheáchain céanna agus a thógann iarratais ar struchtúir throma agus úsáideann siad an t-éalú céanna [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Na mílte cliant SSE comhthráthach fada (ní mór oibritheoirí go minic 40-50) is a** buiséad cuimhne** ceist — méid gcarn + sliotáin primary/headroom + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ní teorainn táirge chrua “uasmhéid 2”. Cailleann carn faoi bhrú fós le `503` in-athraithe ionas nach bhfilleann #7849.
+A** sláintiúil** próiseas (carn thíos `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, `0.75` réamhshocraithe )** féadfaidh** níos mó ná dhá `POST /v1/responses` fada comhthráthach a reáchtáil nuair a bhíonn spás fós sa bhuiséad inflight-byte ar fud an phróisis (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110). Tógann comhlachtaí ag `OMNIROUTE_CHAT_LARGE_BODY_BYTES` nó os a chionn (réamhshocraithe 256 KiB) an léas trom-mheáchain céanna agus a thógann iarratais ar struchtúir throma agus úsáideann siad an t-éalú céanna [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Na mílte cliant SSE comhthráthach fada (ní mór oibritheoirí go minic 40-50) is a** buiséad cuimhne** ceist — méid gcarn + sliotáin primary/headroom + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — ní teorainn táirge chrua “uasmhéid 2”. Cailleann carn faoi bhrú fós le `503` in-athraithe ionas nach bhfilleann #7849.
 
 Chuig** heaps iolrú** (seanspásanna neamhspleácha V8)** inniu** :
 
@@ -755,7 +755,7 @@ volumes:
   omniroute-b-data:
 ```
 
-Is é [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023) an dlús inphróisis (comhbhrú as an leithlis HTTP ). Is é [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) braisle loighciúil amháin ar staid marthanach roinnte.
+Is é [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023) an dlús inphróisis (comhbhrú as an leithlis HTTP ). Is é [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) braisle loighciúil amháin ar staid marthanach roinnte.
 
 ## Earráidí réigiúnacha Gemini taobh istigh de Docker
 
@@ -796,7 +796,7 @@ Cruthaíonn freagra HTTP nascacht don taiscéalaí sin, fiú más earráid neamh
 
 ### Rogha eile ar leibhéal an óstaigh: IPv6 oibríoch agus beartas réiteora
 
-D’athchóirigh tuairisceoir [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762)
+D’athchóirigh tuairisceoir [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762)
 rochtain ina dtimpeallacht trí IPv6 coimeádáin a chumasú agus roghnú seoltaí glibc
 a athrú. Caith leis seo mar rogha eile a bhaineann go sonrach leis an timpeallacht. Deimhnigh IPv6 oibríoch ar an óstach,
 imeacht/ródú an choimeádáin agus rialacha an bhalla dóiteáin sula n-athraítear sainroghanna an réiteora.

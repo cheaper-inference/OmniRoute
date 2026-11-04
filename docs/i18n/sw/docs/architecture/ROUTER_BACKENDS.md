@@ -4,9 +4,9 @@
 
 ---
 
-> **Hali:** Imekubaliwa · **Muktadha:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
-> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Mkataba:** `domain/routing/routerBackends.ts`
-> (rejista yenye aina — msimbo unaingia kupitia [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
+> **Hali:** Imekubaliwa · **Muktadha:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
+> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Mkataba:** `domain/routing/routerBackends.ts`
+> (rejista yenye aina — msimbo unaingia kupitia [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
 
 ADR hii inabainisha jinsi injini za `ts` (asili), `bifrost`, `cliproxy`, `9router`, na
 zinazooana na VibeProxy zinavyohusiana, ili wachangiaji waache kuchanganya
@@ -39,7 +39,7 @@ ilikuwa ya `external` pekee.
 ## Rejista — chanzo pekee cha ukweli
 
 Mkataba wa `domain/routing/routerBackends.ts` (msimbo unaingia kupitia
-[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) hutangaza kila injini mara moja, pamoja na
+[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) hutangaza kila injini mara moja, pamoja na
 mzunguko wake wa maisha, uwezo, utambulisho wa huduma, port chaguomsingi, usanidi wa
 afya, na usaidizi wa telemetria. Watumiaji hutafuta injini kupitia `getRouterBackend(id)`,
 `listRouterBackends()`, na `listRouterBackendsByCapability(cap)` badala ya
@@ -55,7 +55,7 @@ kuweka masharti maalumu kwa kila sidecar.
 
 ¹ Kupandishwa kwa Bifrost kuwa huduma iliyopachikwa ya `supervised` (inayoweza kusakinishwa/kuanzishwa
 kutoka `/api/services/bifrost/`) kunafuatiliwa katika
-[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817); hadi iunganishwe,
+[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817); hadi iunganishwe,
 Bifrost ni ya `external` pekee (inafikiwa tu kupitia `BIFROST_BASE_URL`).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -124,8 +124,8 @@ wa usambazaji; kiolesura kikuu cha `/api/v1/chat/completions` hakitumii kamwe
 Kwa sasa uteuzi ni wa **yote-au-hakuna katika kiwango cha relay** — hakuna ubadilishaji wa injini
 kwa kila mtoa huduma au kwa kila ombi kwenye `release/v3.8.43`. Kizuizi cha kila ombi kinaongezwa
 kupitia kazi ya manifest ya sidecar
-([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 ambacho huruhusu `auto` kuelekeza kupitia Bifrost watoa huduma wanaostahiki kulingana na manifest pekee.
 
 ## Ujumuishaji wa dashibodi

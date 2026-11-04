@@ -454,7 +454,7 @@ commit ដំឡើងកំណែ develop ត្រូវបានបង្ក�
 gh workflow run preview-artifact.yml -f pr_number=<N>   # ឬបន្ថែមស្លាក `preview-artifact`
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # ការដំឡើងកំណែមើលជាមុន
 ```
 

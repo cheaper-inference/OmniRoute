@@ -5,7 +5,7 @@
 ---
 
 Πρότυπο: xquik #11370 (ενσωματώθηκε στο release/v3.8.51). Στάση: `fallbackOnly`.
-Πρόταση upstream: issue diegosouzapw/OmniRoute#11637.
+Πρόταση upstream: issue cheaper-inference/OmniRoute#11637.
 
 ## 1. Πραγματικά δεδομένα υπηρεσίας (επίσημη τεκμηρίωση, διασταυρωμένα)
 

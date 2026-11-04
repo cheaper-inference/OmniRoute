@@ -249,7 +249,7 @@ Avast ו-AVG מפעילים מנגנון היוריסטי שמסמן קובצי 
    [Convert]::ToBase64String($b)
    ```
    הפלט חייב להתאים אל `latest.yml` ← `sha512`. אם הוא אינו תואם, מחקו את הקובץ
-   והורידו אותו מחדש רק מ[דף המהדורות ב-GitHub](https://github.com/diegosouzapw/OmniRoute/releases).
+   והורידו אותו מחדש רק מ[דף המהדורות ב-GitHub](https://github.com/cheaper-inference/OmniRoute/releases).
 2. **שחזרו + החריגו** — שחזרו מההסגר את הפריטים שהוסרו במהלך ההחזרה לאחור והוסיפו החרגה
    עבור `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky ← הגדרות ← איומים והחרגות),
    ולאחר מכן התקינו מחדש.
@@ -839,7 +839,7 @@ omniroute serve --ready-timeout 180000
 
 ## עדיין תקועים?
 
-- **תקלות ב-GitHub**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **תקלות ב-GitHub**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **ארכיטקטורה**: לפרטים פנימיים, ראו [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
 - **חומר עזר ל-API**: לכל נקודות הקצה, ראו [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md)
 - **לוח בקרת תקינות**: בדקו את **לוח הבקרה → תקינות** לקבלת מצב המערכת בזמן אמת

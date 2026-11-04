@@ -56,7 +56,7 @@ Khi một bản phát hành đang được đối soát, một issue đánh dấ
 Hãy kiểm tra xem có đợt đóng băng nào đang mở hay không trước khi cho rằng nhánh bạn muốn có thể được hợp nhất:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Cơ chế hợp nhất (nhãn `queue` của chủ sở hữu → Mergify) được ghi lại trong

@@ -56,7 +56,7 @@ Dan **ma jwaqqafx l-iżvilupp**:
 Iċċekkja jekk hemmx iffriżar miftuħ qabel tassumi li l-fergħa li trid tista’ tiġi merged:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Il-mekkaniżmi tal-merge (it-tikketta `queue` tas-sid → Mergify) huma dokumentati f’

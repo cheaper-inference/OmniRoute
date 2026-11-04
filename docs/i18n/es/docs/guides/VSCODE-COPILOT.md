@@ -113,7 +113,7 @@ npm start
 Sin una compilación que permita la incrustación, la página rechaza mostrarse en un marco; la extensión lo detecta mediante los
 encabezados de respuesta y recurre al navegador externo. Nada deja de funcionar y se informa de ello una vez.
 Consulte [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) y la incidencia
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
 
 ---
 

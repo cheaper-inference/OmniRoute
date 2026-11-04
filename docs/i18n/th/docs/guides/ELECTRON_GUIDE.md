@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## อัปเดตอัตโนมัติ
 
-ใช้ `electron-updater` กับผู้ให้บริการ GitHub (`diegosouzapw/OmniRoute`)
+ใช้ `electron-updater` กับผู้ให้บริการ GitHub (`cheaper-inference/OmniRoute`)
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - เหตุการณ์ที่ส่งต่อไปยัง renderer ผ่าน `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (กับ `percent`), `downloaded`, `error`
@@ -273,7 +273,7 @@ npm run electron:build:win
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-มีการเผยแพร่การเผยแพร่ไปยัง GitHub Releases (`diegosouzapw/OmniRoute`) ซึ่งเป็นที่ที่ `electron-updater` ตรวจสอบเวอร์ชันใหม่ด้วย
+มีการเผยแพร่การเผยแพร่ไปยัง GitHub Releases (`cheaper-inference/OmniRoute`) ซึ่งเป็นที่ที่ `electron-updater` ตรวจสอบเวอร์ชันใหม่ด้วย
 
 ## การแก้ไขปัญหา
 

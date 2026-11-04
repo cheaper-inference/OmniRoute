@@ -56,7 +56,7 @@ flowchart LR
 בדקו אם קיימת הקפאה פתוחה לפני שתניחו שניתן למזג אל הענף הרצוי:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 מנגנון המיזוג (תווית `queue` של הבעלים ← Mergify) מתועד ב-

@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 Sao chép mã nguồn và chuyển vào thư mục
 
 ```powershell
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly sẽ tự động thực hiện cập nhật cuốn chiếu các máy.
 
 ### 9.1 Theo dõi các bản cập nhật từ kho lưu trữ thượng nguồn trong khi vẫn giữ nguyên `fly.toml` của bản fork
 
-Nếu kho lưu trữ hiện tại là một bản fork và bạn muốn đồng bộ các bản cập nhật từ kho lưu trữ thượng nguồn `https://github.com/diegosouzapw/OmniRoute`, hãy làm theo quy trình dưới đây.
+Nếu kho lưu trữ hiện tại là một bản fork và bạn muốn đồng bộ các bản cập nhật từ kho lưu trữ thượng nguồn `https://github.com/cheaper-inference/OmniRoute`, hãy làm theo quy trình dưới đây.
 
 Trước tiên, hãy xác minh các kho lưu trữ từ xa:
 
@@ -309,7 +309,7 @@ Bạn sẽ thấy ít nhất:
 Nếu `upstream` chưa được cấu hình, hãy thêm nó:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
 Trước khi đồng bộ với thượng nguồn, hãy tải về các commit và thẻ mới nhất:

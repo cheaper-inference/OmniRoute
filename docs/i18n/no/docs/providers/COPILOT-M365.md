@@ -139,8 +139,8 @@ være skjult som standard i enkelte nivåer.
 
 ## Referanser
 
-- Problem: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Diskusjon: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- Problem: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Diskusjon: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - Kilde: `src/shared/constants/providers/web-cookie.ts` (leverandørdefinisjon)
 - HAR-import: `src/shared/utils/m365HarImport.ts`
 - Felt for påloggingsinformasjon: `src/shared/providers/webSessionCredentials.ts`

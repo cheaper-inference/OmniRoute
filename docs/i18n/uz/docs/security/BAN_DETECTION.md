@@ -50,8 +50,8 @@ hech qachon avtomatik tiklanmaydi), tasdiqlash soʻrovini esa operator brauzerda
 Ushbu iborani bloklash roʻyxatida saqlash `classifyProviderError` ichidagi tiklanadigan
 cloud-code 403 tarmogʻini ham bu ifoda uchun erishib boʻlmaydigan holga keltirgan, chunki
 `accountDeactivated` birinchi boʻlib tekshiriladi — shu sababli Gemini Code Assist uchun
-[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) va
-[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) da qoʻshilgan loyiha-marshrutini tiklash
+[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) va
+[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) da qoʻshilgan loyiha-marshrutini tiklash
 hech qachon ishga tushmas edi.
 
 Yonma-yon joylashgan quyidagi uchta, **alohida** signal jadvali bloklangan kalit soʻzlarni aniqlashning

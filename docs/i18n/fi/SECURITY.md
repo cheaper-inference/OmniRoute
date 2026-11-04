@@ -9,7 +9,7 @@
 Jos löydät OmniRoutesta tietoturvahaavoittuvuuden, ilmoita siitä vastuullisesti:
 
 1. **ÄLÄ** avaa julkista GitHub-issue-raporttia
-2. Käytä [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) -palvelua
+2. Käytä [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) -palvelua
 3. Sisällytä: kuvaus, toistamisohjeet ja mahdolliset vaikutukset
 
 ## Vastausaikataulu
@@ -42,7 +42,7 @@ Versionin 3.8.59 jälkeen seuraava versio on **3.9.0**, joka avaa pitkäaikaisen
   sen mukaan, kumpi ajankohta on myöhemmin**. Lopullinen päättymispäivä kirjataan version 3.9.0 julkaisutietoihin ja
   tiedostoon [`ROADMAP.md`](ROADMAP.md), kun julkaisu tehdään.
 - **LTS-linjan haavoittuvuudesta ilmoittaminen:** käytä samaa kanavaa kuin muidenkin versioiden kohdalla —
-  yksityistä [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) -ilmoitusta,
+  yksityistä [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) -ilmoitusta,
   ei koskaan julkista ongelmaraporttia. Ilmoita, minkä version testasit (esimerkiksi `3.9.2`); korjaukset lisätään
   `stable/v3`-haaraan ja siirretään eteenpäin v4-versioon.
 - **Tietoturvan lähtötaso LTS-julkaisun yhteydessä:** mitattu tarkistustyökalun tila sekä reittisuojauksen ja

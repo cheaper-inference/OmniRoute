@@ -408,7 +408,7 @@ ieviešana vēl nav pabeigta).
 ### CodeQL ratchet: atsvaidzināšanas biežums un manuāla palaišana
 
 `check:codeql-ratchet` nolasa **repozitorija stāvokli, kas tiek atsvaidzināts pēc grafika, nevis katram PR.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` ziņo
+`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` ziņo
 `state: configured`, `schedule: weekly`: tas ir GitHub noklusējuma iestatījuma skenējums, nevis
 analīze pēc katras izmaiņu nosūtīšanas. Sekas: pēc tam, kad tiek sapludināts PR, kas IZLABO
 brīdinājumus, ratchet turpina nolasīt veco, lielāko skaitu, līdz tiek izpildīts nākamais

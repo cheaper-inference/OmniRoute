@@ -89,7 +89,7 @@ combo（優先順位 / ラウンドロビン）と fusion は、1 つの親リ�
 
 ## 4. 単一プロセスでの長時間 `/v1/responses`（正常時のヘッドルーム）
 
-[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) では、
+[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) では、
 ヒープが `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` を下回っている場合に、構造的負荷の高い
 2 つ目のリクエストを受け入れられるようにする `tryAcquireHealthyHeadroom` が追加されました。
 `admitChatRequest` が使用する BYTE パス（`OMNIROUTE_CHAT_LARGE_BODY_BYTES` 以上のボディ、

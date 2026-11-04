@@ -418,7 +418,7 @@ git add quality-baseline.json
 ### Храповик CodeQL: периодичность обновления и ручной запуск
 
 `check:codeql-ratchet` считывает **состояние репозитория, обновляемое по расписанию, а не для каждого PR.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` сообщает
+`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` сообщает
 `state: configured`, `schedule: weekly`: это сканирование GitHub с настройками по умолчанию, а не анализ
 при каждой отправке изменений. Следствие: после слияния PR, ИСПРАВЛЯЮЩЕГО предупреждения, храповик продолжает считывать
 старое, более высокое значение до следующего запуска сканирования по расписанию — поэтому он сообщает о регрессии

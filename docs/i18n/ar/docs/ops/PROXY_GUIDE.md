@@ -260,7 +260,7 @@ curl -X POST http://localhost:20128/api/v1/management/proxies/bulk-assign \
 
 ## سوق 1proxy للوكلاء المجانيين
 
-> 🆕 **بمساهمة من [@oyi77](https://github.com/oyi77)** — طلب السحب [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (المشكلة [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕 **بمساهمة من [@oyi77](https://github.com/oyi77)** — طلب السحب [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (المشكلة [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
 
 يتكامل OmniRoute مع منصة مجتمع **[1proxy](https://1proxy-api.aitradepulse.com)** لتوفير الوصول إلى **مئات الوكلاء المجانيين الذين جرى التحقق منهم** من جميع أنحاء العالم. وهذا مثالي للمستخدمين الذين لا يملكون بنية تحتية خاصة بهم للوكلاء.
 

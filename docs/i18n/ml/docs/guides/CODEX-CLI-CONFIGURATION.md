@@ -479,7 +479,7 @@ codex debug models --bundled       # ബണ്ടിൽ ചെയ്ത മോ�
 | സെഷൻ അക്കൗണ്ടുകൾ മാറിക്കൊണ്ടിരിക്കുന്നു / ടേണുകൾക്കിടയിൽ പ്രോംപ്റ്റ്-കാഷ് തുടർച്ച നഷ്ടപ്പെടുന്നു | സെഷൻ അഫിനിറ്റി TTL `0` ആണ് (പ്രവർത്തനരഹിതം)                                            | `sessionAffinityTtlMs`   |
 | ക്ലയന്റിന് ദൃശ്യമാകുന്ന പ്രോംപ്റ്റൊന്നുമില്ലാതെ റീസണിങ്ങിനിടെ കണക്ഷൻ അവസാനിക്കുന്നു              | അപ്സ്ട്രീം ചങ്ക് ഒന്നുമില്ലാതെ 10 മിനിറ്റിനുശേഷം സ്ട്രീം ഐഡിൽ വാച്ച്ഡോഗ് പ്രവർത്തിച്ചു | `STREAM_IDLE_TIMEOUT_MS` |
 
-ബന്ധപ്പെട്ട ചർച്ചകൾ: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (ദീർഘ ടാസ്കുകൾ ഡ്രോപ്പ് ആകുന്നത്), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (അഫിനിറ്റി ഡിഫോൾട്ടായി പ്രവർത്തനരഹിതമായിരിക്കുന്നത് എന്തുകൊണ്ട്). ട്രാക്കിങ്: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+ബന്ധപ്പെട്ട ചർച്ചകൾ: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (ദീർഘ ടാസ്കുകൾ ഡ്രോപ്പ് ആകുന്നത്), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (അഫിനിറ്റി ഡിഫോൾട്ടായി പ്രവർത്തനരഹിതമായിരിക്കുന്നത് എന്തുകൊണ്ട്). ട്രാക്കിങ്: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. സെഷൻ അഫിനിറ്റി — ഒരു സംഭാഷണം ഒരു അക്കൗണ്ടിലേക്ക് പിൻ ചെയ്യുക
 

@@ -5,7 +5,7 @@
 ---
 
 टेम्प्लेट: xquik #11370 (`release/v3.8.51` मा मर्ज गरिएको)। पोस्चर: `fallbackOnly`।
-अपस्ट्रिम प्रस्ताव: issue diegosouzapw/OmniRoute#11637।
+अपस्ट्रिम प्रस्ताव: issue cheaper-inference/OmniRoute#11637।
 
 ## 1. सेवाको आधिकारिक तथ्य (आधिकारिक कागजातहरूबाट, परस्पर जाँच गरिएको)
 

@@ -181,7 +181,7 @@ Raakvlakken:
 
 - `open-sse/executors/antigravity.ts` — leest `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — verwerking van referenties
-- Oorspronkelijke incidentmelding: Discussion [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Oorspronkelijke incidentmelding: Discussion [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

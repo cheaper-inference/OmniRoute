@@ -260,7 +260,7 @@ curl -X POST http://localhost:20128/api/v1/management/proxies/bulk-assign \
 
 ## 1proxy ነፃ ፕሮክሲ የገበያ ቦታ
 
-> 🆕 **በ[@oyi77](https://github.com/oyi77) የተበረከተ** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (ጉዳይ [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕 **በ[@oyi77](https://github.com/oyi77) የተበረከተ** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (ጉዳይ [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
 
 OmniRoute በዓለም ዙሪያ ያሉ **በመቶዎች የሚቆጠሩ ነፃና የተረጋገጡ ፕሮክሲዎችን** ለማግኘት ከ**[1proxy](https://1proxy-api.aitradepulse.com)** የማህበረሰብ መድረክ ጋር ይዋሃዳል። ይህ የራሳቸው የፕሮክሲ መሠረተ ልማት ለሌላቸው ተጠቃሚዎች እጅግ ተስማሚ ነው።
 

@@ -4,9 +4,9 @@
 
 ---
 
-> **Статус:** Прийнято · **Контекст:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
-> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Контракт:** `domain/routing/routerBackends.ts`
-> (типізований реєстр — код додається в [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
+> **Статус:** Прийнято · **Контекст:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
+> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Контракт:** `domain/routing/routerBackends.ts`
+> (типізований реєстр — код додається в [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
 
 Цей ADR чітко визначає, як `ts` (нативний), `bifrost`, `cliproxy`, `9router` і
 VibeProxy-сумісні рушії співвідносяться між собою, щоб учасники розробки припинили
@@ -39,7 +39,7 @@ VibeProxy-сумісні рушії співвідносяться між соб
 ## Реєстр — єдине джерело істини
 
 Контракт `domain/routing/routerBackends.ts` (код додається в
-[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) оголошує кожен рушій один раз, разом із його
+[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) оголошує кожен рушій один раз, разом із його
 життєвим циклом, можливостями, ідентифікатором сервісу, стандартним портом, конфігурацією
 перевірки працездатності та підтримкою телеметрії. Споживачі знаходять рушії через `getRouterBackend(id)`,
 `listRouterBackends()` і `listRouterBackendsByCapability(cap)` замість
@@ -55,7 +55,7 @@ VibeProxy-сумісні рушії співвідносяться між соб
 
 ¹ Переведення Bifrost у статус вбудованого сервісу `supervised` (який можна встановлювати/запускати
 з `/api/services/bifrost/`) відстежується в
-[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817); доки його не об’єднано,
+[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817); доки його не об’єднано,
 Bifrost доступний лише як `external` (винятково через `BIFROST_BASE_URL`).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -123,8 +123,8 @@ Bifrost доступний лише як `external` (винятково чере
 Наразі вибір здійснюється за принципом **«усе або нічого» на рівні ретранслятора** — у
 `release/v3.8.43` немає перемикання рушія для окремого провайдера або окремого запиту. У межах роботи
 над маніфестом сайдкара додається шлюз для кожного запиту
-([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) маніфест +
-[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) маніфест +
+[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 який дає змогу `auto` маршрутизувати через Bifrost лише провайдерів, що відповідають вимогам маніфесту.
 
 ## Інтеграція з панеллю керування

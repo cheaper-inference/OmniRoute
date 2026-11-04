@@ -48,7 +48,7 @@ Kada se izdanje usklađuje, otvara se marker issue sa oznakom `release-freeze`. 
 Provjerite da li postoji otvoreno zamrzavanje prije nego što pretpostavite da je grana koju želite spojiva:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Mehanika spajanja (vlasnik `queue` oznaka → Mergify) je dokumentovana u [MERGE_TRAIN.md](./MERGE_TRAIN.md).

@@ -173,7 +173,7 @@ aider, continue.dev, copilot, avante, codecompanion
 
 - `open-sse/executors/antigravity.ts` — зчитує `process.env.ANTIGRAVITY_CREDITS`
 - `src/lib/oauth/providers/antigravity.ts` — передавання облікових даних
-- Оригінальний звіт про інцидент: обговорення [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Оригінальний звіт про інцидент: обговорення [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

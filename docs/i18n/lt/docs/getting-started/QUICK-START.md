@@ -29,7 +29,7 @@ docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
 ### C parinktis: iš pirminio kodo
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 npm run dev
@@ -165,4 +165,4 @@ OmniRoute automatiškai praleidžia neveikiančius tiekėjus ir išbando kitą. 
 
 - **[Trikčių šalinimas](../guides/TROUBLESHOOTING.md)** — dažniausios problemos ir jų sprendimai
 - **[Discord](https://discord.gg/U47eFqAXCn)** — bendruomenės pagalba
-- **[GitHub problemos](https://github.com/diegosouzapw/OmniRoute/issues)** — praneškite apie klaidas
+- **[GitHub problemos](https://github.com/cheaper-inference/OmniRoute/issues)** — praneškite apie klaidas

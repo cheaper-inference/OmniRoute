@@ -45,9 +45,9 @@
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=social)](https://github.com/cheaper-inference/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/OmniRoute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 சமூகத்தில் சேருங்கள்
@@ -96,7 +96,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 [![உரிமம்: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker பதிவிறக்கங்கள்](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron பதிவிறக்கங்கள்](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![Electron பதிவிறக்கங்கள்](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -521,7 +521,7 @@ combo எதையும் உருவாக்கத் தேவையில
 OmniRoute MIT உரிமம் பெற்றது மற்றும் வெளிப்படையாகப் பராமரிக்கப்படுகிறது. இது உங்கள் நேரத்தையோ பணத்தையோ சேமித்தால், இதைச் சுயாதீனமாக வைத்திருக்க உதவும் வழிகள் இங்கே உள்ளன — உங்களுக்கு ஏற்றதைத் தேர்ந்தெடுக்கவும். ஆதரவுத்தொகை ஒருபோதும் வழிச்செலுத்தல் முன்னுரிமையைப் பாதிக்காது; அது தரவரிசையை அல்ல, பார்வைத்தன்மையையே வழங்குகிறது.
 
 <table>
-  <tr><td nowrap>⭐ <b>களஞ்சியத்திற்கு நட்சத்திரமிடுங்கள்</b></td><td>இலவசம் — பார்வைத்தன்மைக்கு உண்மையாகவே உதவுகிறது</td><td><a href="https://github.com/diegosouzapw/OmniRoute">OmniRoute-க்கு நட்சத்திரமிடுங்கள்</a></td></tr>
+  <tr><td nowrap>⭐ <b>களஞ்சியத்திற்கு நட்சத்திரமிடுங்கள்</b></td><td>இலவசம் — பார்வைத்தன்மைக்கு உண்மையாகவே உதவுகிறது</td><td><a href="https://github.com/cheaper-inference/OmniRoute">OmniRoute-க்கு நட்சத்திரமிடுங்கள்</a></td></tr>
   <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>ஒருமுறை அல்லது மாதந்தோறும் · தளக் கட்டணம் இல்லை</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
   <tr><td nowrap>☕ <b>Ko-fi</b></td><td>விரைவான ஒருமுறை நன்கொடை; நன்கொடையாளர் பதிவுசெய்யத் தேவையில்லை</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
   <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>சிறிய, முறைசாரா ஆதரவு</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
@@ -558,7 +558,7 @@ Pix நகலெடுத்து ஒட்டுவதற்கான கு�
 
 </details>
 
-🐛 பிழையைக் கண்டீர்களா அல்லது கருத்து உள்ளதா? ஒரு [கலந்துரையாடலை](https://github.com/diegosouzapw/OmniRoute/discussions) தொடங்கவும்.
+🐛 பிழையைக் கண்டீர்களா அல்லது கருத்து உள்ளதா? ஒரு [கலந்துரையாடலை](https://github.com/cheaper-inference/OmniRoute/discussions) தொடங்கவும்.
 
 <br/>
 
@@ -1261,7 +1261,7 @@ Dashboard இல்லாத headless runtime-க்கு Docker `base` profile
 
 2026-10-18 நிலவரப்படி நியம அளவீடுகள்: **1.976 தனித்துவமான வீடியோக்கள்** · **20.220.289 அறியப்பட்ட பார்வைகள்** (`v > 0`) · **ஒவ்வொரு வலைப்பின்னலிலும் 1.210 சேனல்கள்/சுயவிவரங்கள்**. மூல டாஷ்போர்டில் 1.976 வரிகள் உள்ளன (YouTube 1.352 = 740 நீளமான வீடியோக்கள் + 612 Shorts · TikTok 334 · Instagram 290); ஒவ்வொரு வீடியோவிற்குமான அதிகபட்ச எண்ணிக்கையைத் தக்கவைக்கும் நியம URL அடிப்படையிலான சீராக்கத்திற்குப் பிறகு எந்த நகலும் எஞ்சவில்லை. YouTube தரவுச் சேகரிப்பு 2026-10-13 முதல் முடக்கப்பட்டுள்ளது (14 முதல் 18/10 வரை API ஒதுக்கீடு தீர்ந்துவிட்டது); TikTok/Instagram தரவுச் சேகரிப்பு 2026-09-02 முதல் முடக்கப்பட்டுள்ளது (சேகரிப்புக் கிரெடிட்கள் இல்லை); 76 வீடியோக்களுக்கு இன்னும் பார்வை எண்ணிக்கை இல்லை.
 
-> 🎬 **OmniRoute பற்றிய வீடியோவை உருவாக்கியுள்ளீர்களா?** அதன் இணைப்புடன் ஓர் [issue](https://github.com/diegosouzapw/OmniRoute/issues/new) அல்லது [discussion](https://github.com/diegosouzapw/OmniRoute/discussions) ஒன்றைத் திறக்கவும் — அதை இங்கே சிறப்பித்துக் காட்டுவோம்.
+> 🎬 **OmniRoute பற்றிய வீடியோவை உருவாக்கியுள்ளீர்களா?** அதன் இணைப்புடன் ஓர் [issue](https://github.com/cheaper-inference/OmniRoute/issues/new) அல்லது [discussion](https://github.com/cheaper-inference/OmniRoute/discussions) ஒன்றைத் திறக்கவும் — அதை இங்கே சிறப்பித்துக் காட்டுவோம்.
 
 <br/>
 
@@ -1281,8 +1281,8 @@ Dashboard இல்லாத headless runtime-க்கு Docker `base` profile
 | 🟢 **WhatsApp — 🇧🇷 பிரேசில்**                                               | [குழுவில் இணையுங்கள்](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                                                   |
 | 🌍 **இணையதளம்**                                                             | [omniroute.online](https://omniroute.online)                                                                                                             |
 | 🌍 **🌍StHub OmniRoute சமூகம் (இலவசம்)**                                    | [StHub இணையவாசல்](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                                                 |
-| 📦 **மூலக் குறியீடு**                                                       | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                                                           |
-| 🐛 **பிழையைப் புகாரளிக்கவும்**                                              | [சிக்கலைத் திறக்கவும்](https://github.com/diegosouzapw/OmniRoute/issues) — `npm run system-info` வெளியீட்டை இணைக்கவும்                                   |
+| 📦 **மூலக் குறியீடு**                                                       | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                                                                 |
+| 🐛 **பிழையைப் புகாரளிக்கவும்**                                              | [சிக்கலைத் திறக்கவும்](https://github.com/cheaper-inference/OmniRoute/issues) — `npm run system-info` வெளியீட்டை இணைக்கவும்                              |
 | 🤝 **பங்களிக்கவும்**                                                        | [CONTRIBUTING.md](CONTRIBUTING.md) · [கிளையாக்கம் மற்றும் வெளியீட்டு மாதிரி](docs/ops/BRANCHING_MODEL.md) · ஒரு `good first issue`-ஐத் தேர்ந்தெடுக்கவும் |
 | 💚 **திட்டத்திற்கு ஆதரவளிக்கவும்**                                          | [ஆதரவளிப்பதற்கான வழிகள் ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)                                            |
 
@@ -1640,7 +1640,7 @@ Dashboard இல்லாத headless runtime-க்கு Docker `base` profile
 
 </div>
 
-[![Contributors](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
 
 <sub>2026-11-02 அன்று நேரடி <code>release/v3.8.53</code> முனை <code>1c7135e0fb</code> இல் தணிக்கை செய்யப்பட்டது (7,972 கமிட்கள்): <b>1,074 இயல்பாக்கப்பட்ட மனித Git அடையாளங்கள்</b> — 759 பேர் கமிட் ஆசிரியர்களாகத் தோன்றுகின்றனர் (பராமரிப்பாளரை உள்ளடக்கி), மேலும் 315 பேர் வெளிப்படையான <code>Co-authored-by</code> டிரெய்லர்களில் மட்டுமே உள்ளனர். இந்தக் கணக்கெடுப்பு <code>.mailmap</code> ஐப் பயன்படுத்துகிறது, மின்னஞ்சல் முகவரிகளை எழுத்து வடிவ வேறுபாடுகளைப் பொருட்படுத்தாமல் ஒப்பிடுகிறது, ஒரே ஹேண்டிலை குறியாக்கும் போது மட்டுமே எண் மற்றும் எளிய GitHub noreply முகவரிகளை இணைக்கிறது, 29 bot/agent/service/placeholder அடையாளங்களை விலக்குகிறது, மேலும் காட்சிப் பெயர்கள் பொருந்துகின்றன என்பதற்காக மட்டுமே வழக்கமான மின்னஞ்சல் முகவரிகளை ஒன்றிணைக்காது. 2026-08-24 தணிக்கையில் 639 பேர் வெளியிடப்பட்டனர்; அந்தத் தணிக்கையின் அடிப்படையான <code>ac02c5b42f</code> இல் இந்த முறையை மீண்டும் இயக்கியபோது 619 கிடைத்தது, எனவே அதிகரிப்பு புதிய பங்களிப்பாளர்களால் ஏற்பட்டது, தளர்வான முறையால் அல்ல.</sub>
 
@@ -1669,11 +1669,11 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 ## 📊 நட்சத்திரங்கள்
 
-<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="நட்சத்திர வரலாற்று விளக்கப்படம்" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <img alt="நட்சத்திர வரலாற்று விளக்கப்படம்" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
  </picture>
 </a>
 

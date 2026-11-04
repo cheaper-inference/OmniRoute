@@ -479,7 +479,7 @@ Två standardinställningar i OmniRoute kan obemärkt sabotera Codex CLI-session
 | Sessionen fortsätter att byta konto/promptcachekontinuiteten går förlorad mellan turer | TTL för sessionsaffinitet är `0` (inaktiverad)                             | `sessionAffinityTtlMs`   |
 | Anslutningen bryts mitt under resonemanget utan något meddelande till klienten         | Övervakningen av inaktiv ström utlöstes efter 10 minuter utan uppströmsdel | `STREAM_IDLE_TIMEOUT_MS` |
 
-Relaterade diskussioner: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (avbrott i långa uppgifter), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (varför affinitet är inaktiverad som standard). Spårning: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Relaterade diskussioner: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (avbrott i långa uppgifter), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (varför affinitet är inaktiverad som standard). Spårning: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. Sessionsaffinitet — lås en konversation till ett konto
 

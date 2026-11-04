@@ -124,7 +124,7 @@ combo (עדיפות / round-robin) ו-fusion מפצלים N יעדי מודל ת
 
 ## 4. `/v1/responses` ארוך בתהליך יחיד (מרווח קיבולת תקין)
 
-[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) הוסיף את
+[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) הוסיף את
 `tryAcquireHealthyHeadroom`, כך שבקשה שנייה בעלת מבנה כבד מתקבלת
 כאשר ה־heap נמוך מ־`OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. מסלול BYTE
 שבו משתמש `admitChatRequest` (גופי בקשה בגודל ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

@@ -45,9 +45,9 @@
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=social)](https://github.com/cheaper-inference/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/OmniRoute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 കമ്മ്യൂണിറ്റിയിൽ ചേരൂ
@@ -96,7 +96,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 [![ലൈസൻസ്: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker പുൾസ്](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron ഡൗൺലോഡുകൾ](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![Electron ഡൗൺലോഡുകൾ](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -521,7 +521,7 @@ curl http://localhost:20128/v1/chat/completions \
 OmniRoute MIT ലൈസൻസുള്ളതും തുറന്ന രീതിയിൽ പരിപാലിക്കപ്പെടുന്നതുമാണ്. ഇത് നിങ്ങളുടെ സമയമോ പണമോ ലാഭിക്കുന്നുവെങ്കിൽ, അതിന്റെ സ്വാതന്ത്ര്യം നിലനിർത്താൻ സഹായിക്കുന്ന വഴികൾ ഇതാ — നിങ്ങൾക്ക് അനുയോജ്യമായത് തിരഞ്ഞെടുക്കുക. സ്പോൺസർഷിപ്പ് ഒരിക്കലും റൂട്ടിംഗ് മുൻഗണനയെ ബാധിക്കില്ല; അത് നൽകുന്നത് ദൃശ്യപരതയാണ്, റാങ്കിംഗല്ല.
 
 <table>
-  <tr><td nowrap>⭐ <b>റിപ്പോസിറ്ററിക്ക് സ്റ്റാർ നൽകുക</b></td><td>സൗജന്യം — ദൃശ്യപരത വർധിപ്പിക്കാൻ ഇത് യഥാർത്ഥത്തിൽ സഹായിക്കുന്നു</td><td><a href="https://github.com/diegosouzapw/OmniRoute">OmniRoute-ന് സ്റ്റാർ നൽകുക</a></td></tr>
+  <tr><td nowrap>⭐ <b>റിപ്പോസിറ്ററിക്ക് സ്റ്റാർ നൽകുക</b></td><td>സൗജന്യം — ദൃശ്യപരത വർധിപ്പിക്കാൻ ഇത് യഥാർത്ഥത്തിൽ സഹായിക്കുന്നു</td><td><a href="https://github.com/cheaper-inference/OmniRoute">OmniRoute-ന് സ്റ്റാർ നൽകുക</a></td></tr>
   <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>ഒറ്റത്തവണയോ പ്രതിമാസമോ · പ്ലാറ്റ്ഫോം ഫീസ് ഇല്ല</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
   <tr><td nowrap>☕ <b>Ko-fi</b></td><td>വേഗത്തിലുള്ള ഒറ്റത്തവണ സംഭാവന, സംഭാവന നൽകുന്നയാൾ സൈൻ അപ്പ് ചെയ്യേണ്ടതില്ല</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
   <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>ചെറിയ, അനൗപചാരികമായ പിന്തുണ</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
@@ -558,7 +558,7 @@ Pix പകർത്തി ഒട്ടിക്കുക:
 
 </details>
 
-🐛 ഒരു ബഗ് കണ്ടെത്തിയോ അഭിപ്രായമുണ്ടോ? ഒരു [ചർച്ച](https://github.com/diegosouzapw/OmniRoute/discussions) ആരംഭിക്കുക.
+🐛 ഒരു ബഗ് കണ്ടെത്തിയോ അഭിപ്രായമുണ്ടോ? ഒരു [ചർച്ച](https://github.com/cheaper-inference/OmniRoute/discussions) ആരംഭിക്കുക.
 
 <br/>
 
@@ -1253,7 +1253,7 @@ port-ൽ ഒരേ process വഴിയാണ് ലഭ്യമാക്കു�
 
 2026-10-18-ലെ കാനോനിക്കൽ മെട്രിക്കുകൾ: **1.976 തനതായ വീഡിയോകൾ** · **20.220.289 അറിയപ്പെടുന്ന കാഴ്ചകൾ** (`v > 0`) · **ഓരോ നെറ്റ്വർക്കിലുമായി 1.210 ചാനലുകൾ/പ്രൊഫൈലുകൾ**. അസംസ്കൃത ഡാഷ്ബോർഡിൽ 1.976 വരികളുണ്ട് (YouTube 1.352 = 740 ദൈർഘ്യമേറിയ വീഡിയോകൾ + 612 Shorts · TikTok 334 · Instagram 290); ഓരോ വീഡിയോയുടെയും ഏറ്റവും ഉയർന്ന കാഴ്ചകളുടെ എണ്ണം നിലനിർത്തുന്ന കാനോനിക്കൽ URL അടിസ്ഥാനമാക്കിയുള്ള നോർമലൈസേഷനുശേഷം ആവർത്തനങ്ങളൊന്നും ശേഷിച്ചിട്ടില്ല. YouTube ഡാറ്റ ശേഖരണം 2026-10-13 മുതൽ മരവിപ്പിച്ചിരിക്കുകയാണ് (14 മുതൽ 18/10 വരെ API ക്വോട്ട തീർന്നതിനാൽ), TikTok/Instagram ഡാറ്റ ശേഖരണം 2026-09-02 മുതലും (ശേഖരണ ക്രെഡിറ്റുകൾ ഇല്ലാത്തതിനാൽ); 76 വീഡിയോകൾക്ക് ഇപ്പോഴും കാഴ്ചകളുടെ എണ്ണം ലഭ്യമല്ല.
 
-> 🎬 **OmniRoute-നെക്കുറിച്ച് ഒരു വീഡിയോ തയ്യാറാക്കിയോ?** ലിങ്ക് സഹിതം ഒരു [ഇഷ്യൂ](https://github.com/diegosouzapw/OmniRoute/issues/new) അല്ലെങ്കിൽ [ചർച്ച](https://github.com/diegosouzapw/OmniRoute/discussions) ആരംഭിക്കൂ — ഞങ്ങൾ അത് ഇവിടെ ഫീച്ചർ ചെയ്യും.
+> 🎬 **OmniRoute-നെക്കുറിച്ച് ഒരു വീഡിയോ തയ്യാറാക്കിയോ?** ലിങ്ക് സഹിതം ഒരു [ഇഷ്യൂ](https://github.com/cheaper-inference/OmniRoute/issues/new) അല്ലെങ്കിൽ [ചർച്ച](https://github.com/cheaper-inference/OmniRoute/discussions) ആരംഭിക്കൂ — ഞങ്ങൾ അത് ഇവിടെ ഫീച്ചർ ചെയ്യും.
 
 <br/>
 
@@ -1273,8 +1273,8 @@ port-ൽ ഒരേ process വഴിയാണ് ലഭ്യമാക്കു�
 | 🟢 **WhatsApp — 🇧🇷 ബ്രസീൽ**                              | [ഗ്രൂപ്പിൽ ചേരുക](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                                    |
 | 🌍 **വെബ്സൈറ്റ്**                                        | [omniroute.online](https://omniroute.online)                                                                                          |
 | 🌍 **🌍StHub OmniRoute കമ്മ്യൂണിറ്റി (സൗജന്യം)**         | [StHub പോർട്ടൽ](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                                |
-| 📦 **സോഴ്സ് കോഡ്**                                       | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                                        |
-| 🐛 **ഒരു ബഗ് റിപ്പോർട്ട് ചെയ്യുക**                       | [ഒരു ഇഷ്യൂ തുറക്കുക](https://github.com/diegosouzapw/OmniRoute/issues) — `npm run system-info` ഔട്ട്പുട്ട് അറ്റാച്ച് ചെയ്യുക          |
+| 📦 **സോഴ്സ് കോഡ്**                                       | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                                              |
+| 🐛 **ഒരു ബഗ് റിപ്പോർട്ട് ചെയ്യുക**                       | [ഒരു ഇഷ്യൂ തുറക്കുക](https://github.com/cheaper-inference/OmniRoute/issues) — `npm run system-info` ഔട്ട്പുട്ട് അറ്റാച്ച് ചെയ്യുക     |
 | 🤝 **സംഭാവന ചെയ്യുക**                                    | [CONTRIBUTING.md](CONTRIBUTING.md) · [ബ്രാഞ്ചിംഗ് & റിലീസ് മോഡൽ](docs/ops/BRANCHING_MODEL.md) · ഒരു `good first issue` തിരഞ്ഞെടുക്കുക |
 | 💚 **പ്രോജക്റ്റിനെ പിന്തുണയ്ക്കുക**                      | [പിന്തുണയ്ക്കാനുള്ള മാർഗങ്ങൾ ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)                    |
 
@@ -1632,7 +1632,7 @@ port-ൽ ഒരേ process വഴിയാണ് ലഭ്യമാക്കു�
 
 </div>
 
-[![Contributors](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
 
 <sub>2026-11-02-ന് ലൈവ് <code>release/v3.8.53</code> ടിപ്പായ <code>1c7135e0fb</code>-ൽ (7,972 കമ്മിറ്റുകൾ) ഓഡിറ്റ് ചെയ്തത്: <b>1,074 സാധാരണപ്പെടുത്തിയ മനുഷ്യ Git ഐഡന്റിറ്റികൾ</b> — 759 എണ്ണം കമ്മിറ്റ് രചയിതാക്കളായി (മെയിന്റെയ്നർ ഉൾപ്പെടെ) പ്രത്യക്ഷപ്പെടുന്നു, 315 എണ്ണം വ്യക്തമായ <code>Co-authored-by</code> ട്രെയിലറുകളിൽ മാത്രം കാണപ്പെടുന്നു. ഈ കണക്കെടുപ്പിൽ <code>.mailmap</code> പ്രയോഗിക്കുന്നു, ഇ-മെയിൽ വിലാസങ്ങളെ വലിയക്ഷരവും ചെറിയക്ഷരവും പരിഗണിക്കാതെ താരതമ്യം ചെയ്യുന്നു, ഒരേ ഹാൻഡിൽ എൻകോഡ് ചെയ്യുന്ന സാഹചര്യത്തിൽ മാത്രം സംഖ്യാ, സാധാരണ GitHub noreply വിലാസങ്ങളെ കൂട്ടിച്ചേർക്കുന്നു, 29 ബോട്ട്/ഏജന്റ്/സർവീസ്/പ്ലേസ്ഹോൾഡർ ഐഡന്റിറ്റികളെ ഒഴിവാക്കുന്നു, കൂടാതെ പ്രദർശനനാമങ്ങൾ ഒത്തുപോകുന്നു എന്ന കാരണത്താൽ മാത്രം സാധാരണ ഇ-മെയിൽ വിലാസങ്ങളെ ലയിപ്പിക്കുന്നില്ല. 2026-08-24-ലെ ഓഡിറ്റിൽ 639 പേർ പ്രസിദ്ധീകരിച്ചിരുന്നു; ആ ഓഡിറ്റിന്റെ അടിസ്ഥാനമായ <code>ac02c5b42f</code>-ൽ ഇതേ രീതി വീണ്ടും പ്രയോഗിച്ചപ്പോൾ 619 ലഭിച്ചു. അതിനാൽ വർധനവ് പുതിയ സംഭാവകരുടെ വരവുകൊണ്ടാണ്, കൂടുതൽ ഇളവുള്ള രീതിയിലൂടെ അല്ല.</sub>
 
@@ -1661,11 +1661,11 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 ## 📊 നക്ഷത്രങ്ങൾ
 
-<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="നക്ഷത്ര ചരിത്ര ചാർട്ട്" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <img alt="നക്ഷത്ര ചരിത്ര ചാർട്ട്" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
  </picture>
 </a>
 

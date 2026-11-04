@@ -4,9 +4,9 @@
 
 ---
 
-> **Status:** Accepteret · **Kontekst:** [#5670](https://github.com/diegosouzapw/OmniRoute/issues/5670),
-> [#5603](https://github.com/diegosouzapw/OmniRoute/issues/5603) · **Kontrakt:** `domain/routing/routerBackends.ts`
-> (typet register — koden lander med [#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868))
+> **Status:** Accepteret · **Kontekst:** [#5670](https://github.com/cheaper-inference/OmniRoute/issues/5670),
+> [#5603](https://github.com/cheaper-inference/OmniRoute/issues/5603) · **Kontrakt:** `domain/routing/routerBackends.ts`
+> (typet register — koden lander med [#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868))
 
 Denne ADR fastlægger, hvordan `ts` (native), `bifrost`, `cliproxy`, `9router` og
 VibeProxy-kompatible motorer forholder sig til hinanden, så bidragydere holder op
@@ -39,7 +39,7 @@ relay-dispatch, som historisk set kun var `external`.
 ## Registret — den eneste autoritative kilde
 
 Kontrakten `domain/routing/routerBackends.ts` (koden lander med
-[#5868](https://github.com/diegosouzapw/OmniRoute/pull/5868)) deklarerer hver motor én gang med dens
+[#5868](https://github.com/cheaper-inference/OmniRoute/pull/5868)) deklarerer hver motor én gang med dens
 livscyklus, kapabiliteter, tjenesteidentitet, standardport, sundhedskonfiguration
 og understøttelse af telemetri. Forbrugere slår motorer op via
 `getRouterBackend(id)`, `listRouterBackends()` og
@@ -55,7 +55,7 @@ og understøttelse af telemetri. Forbrugere slår motorer op via
 
 ¹ Bifrosts opgradering til en `supervised` indlejret tjeneste (som kan installeres/startes
 fra `/api/services/bifrost/`) spores i
-[#5817](https://github.com/diegosouzapw/OmniRoute/pull/5817); indtil den flettes,
+[#5817](https://github.com/cheaper-inference/OmniRoute/pull/5817); indtil den flettes,
 er Bifrost udelukkende `external` (kan kun nås via `BIFROST_BASE_URL`).
 
 `capabilities` (`chat`, `responses`, `streaming`, `tools`, `vision`,
@@ -128,8 +128,8 @@ hovedgrænsefladen `/api/v1/chat/completions` konsulterer aldrig
 Valget er **alt-eller-intet på relay-niveau i dag** — der er intet engineskift pr.
 udbyder eller pr. anmodning på `release/v3.8.43`. Gate-funktionen pr. anmodning
 tilføjes gennem arbejdet med sidecar-manifestet
-([#5869](https://github.com/diegosouzapw/OmniRoute/pull/5869) manifest +
-[#5870](https://github.com/diegosouzapw/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
+([#5869](https://github.com/cheaper-inference/OmniRoute/pull/5869) manifest +
+[#5870](https://github.com/cheaper-inference/OmniRoute/pull/5870) `shouldTryBifrostForRequest`),
 hvilket gør det muligt for `auto` kun at dirigere udbydere, der er kvalificerede
 ifølge manifestet, gennem Bifrost.
 

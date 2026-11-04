@@ -5,7 +5,7 @@
 ---
 
 टेम्पलेट: xquik #11370 (release/v3.8.51 मध्ये विलीन). पोस्चर: `fallbackOnly`.
-अपस्ट्रीम प्रस्ताव: issue diegosouzapw/OmniRoute#11637.
+अपस्ट्रीम प्रस्ताव: issue cheaper-inference/OmniRoute#11637.
 
 ## 1. सेवेबाबतचे अधिकृत सत्य (अधिकृत दस्तऐवज, परस्पर पडताळलेले)
 

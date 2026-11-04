@@ -132,13 +132,13 @@ handleComboChat (المحرك نفسه المستخدم مع التركيبات 
 إن المجموعة التي يكون `name` الخاص بها مطابقًا لمعرّف نموذج مجرد (مثل مجموعة باسم
 `gpt-5.5`) هي **نمط مقصود ومدعوم** وليست خطأً برمجيًا: فهي الآلية المستخدمة لتوفير
 الانتقال الاحتياطي بين المزوّدين لكل معرّف نموذج، كما هو موثق في
-[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). ولأن التحقق من
+[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940). ولأن التحقق من
 المجموعة يسبق تحليل معرّف النموذج المجرّد
 (`getComboForModel()` في `src/sse/services/model.ts`)، فإن الطلب الخاص بالمعرّف
 المجرّد `gpt-5.5` يُوجَّه عبر أهداف المجموعة (مثل
 `acme-responses/gpt-5.5` و`backup-responses/gpt-5.5`) بدلًا من توجيهه مباشرةً إلى
 مزوّد واحد — ويعيد هذا استخدام أسبقية المجموعة قبل إعادة الكتابة التي بُنيت من أجل
-[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227)، كما تغطيه
+[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227)، كما تغطيه
 اختبارات منع الانحدار `tests/unit/responses-combo-resolution-3227.test.ts` و
 `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
 
@@ -183,7 +183,7 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 - **لا يستخدم `auto` مجموعاتك.** يبني `auto`/`auto/*` مجموعة المرشحين الخاصة به من دون إعداد، ولا يرجع إلى المجموعات المحفوظة إلا إذا كانت هناك مجموعة اسمها حرفيًا `auto` (وهذا غير مستحسن). للتوجيه عبر مجموعة، أرسل اسمها المطابق تمامًا — وليس `auto`.
 - **يُعد `openrouter/auto` منتجًا حقيقيًا مدفوعًا من OpenRouter** ("أفضل خيار متاح تلقائيًا")، وليس اسمًا مستعارًا في OmniRoute. وهو إدخال النموذج الثابت الوحيد في سجل OpenRouter (`open-sse/config/providers/registry/openrouter/index.ts`)، وتُحتسب تكلفته بصورة منفصلة. استخدم الإعدادات ← التوجيه ← إخفاء النماذج المدفوعة لاستبعاده من مجموعات `auto`.
 
-راجع [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) و[#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) للاطلاع على الالتباس الأصلي الذي توضحه هذه الوثائق.
+راجع [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) و[#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) للاطلاع على الالتباس الأصلي الذي توضحه هذه الوثائق.
 
 ## كيف تعمل (التركيبات التلقائية المستمرة)
 

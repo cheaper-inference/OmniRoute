@@ -18,7 +18,7 @@ Tá **45 Scil Gníomhaire** sa chatalóg (23 REST API + 21 CLI + 1 sreabhadh oib
 - **Aitheantas canónach** (`omni-auth`, `cli-serve`, etc.)
 - Comhad **SKILL.md** in `skills/{id}/SKILL.md` le réamhábhar YAML (`name`, `description`) + corp saibhir markdown
 - **Críochphointí REST** (scileanna API) nó **fo-orduithe CLI** (scileanna CLI) a dhíorthaítear ó shonraíocht OpenAPI agus ó chlárlann CLI
-- **URL amh GitHub** le haghaidh aisghabháil bheo: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
+- **URL amh GitHub** le haghaidh aisghabháil bheo: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/{id}/SKILL.md`
 
 ---
 
@@ -246,7 +246,7 @@ table = resp.json()["result"]["artifacts"][0]["content"]
 ### 4. Aisghabháil dhíreach amh ó GitHub (níl freastalaí ag teastáil)
 
 ```bash
-BASE="https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills"
+BASE="https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills"
 curl "${BASE}/omni-providers/SKILL.md"
 ```
 

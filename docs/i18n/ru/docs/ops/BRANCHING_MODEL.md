@@ -56,7 +56,7 @@ flowchart LR
 Прежде чем считать нужную ветку доступной для слияния, проверьте наличие активной заморозки:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Механика слияния (метка владельца `queue` → Mergify) описана в

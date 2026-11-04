@@ -465,7 +465,7 @@ OmniRoute 的两个默认设置可能会悄无声息地破坏持续数小时的 
 | 会话不断切换账户／各轮之间的提示缓存连续性丢失 | 会话亲和性 TTL 为 `0`（已禁用）                  | `sessionAffinityTtlMs`   |
 | 推理过程中连接中断，且客户端未收到任何提示     | 连续 10 分钟未收到上游数据块，触发了流空闲监视器 | `STREAM_IDLE_TIMEOUT_MS` |
 
-相关讨论：[#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126)（长任务中断）、[#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718)（为何默认关闭亲和性）。跟踪问题：[#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287)。
+相关讨论：[#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126)（长任务中断）、[#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718)（为何默认关闭亲和性）。跟踪问题：[#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287)。
 
 ### 1. 会话亲和性 — 将一个对话固定到一个账户
 

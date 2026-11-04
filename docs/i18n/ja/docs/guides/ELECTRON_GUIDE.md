@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## 自動更新
 
-`electron-updater` GitHubプロバイダー (`diegosouzapw/OmniRoute`) とともに使用します。
+`electron-updater` GitHubプロバイダー (`cheaper-inference/OmniRoute`) とともに使用します。
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - `update-status` IPC経由でレンダラーに転送されるイベント: `checking`、 `available`、 `not-available`、 `downloading` ( `percent`を使用)、 `downloaded`、 `error`
@@ -273,7 +273,7 @@ AppImage署名はオプションです。署名する場合は—設定し、 `L
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-リリースはGitHubリリース (`diegosouzapw/OmniRoute`) に公開され、 `electron-updater`新しいバージョンをチェックする場所でもあります。
+リリースはGitHubリリース (`cheaper-inference/OmniRoute`) に公開され、 `electron-updater`新しいバージョンをチェックする場所でもあります。
 
 ## トラブルシューティング
 

@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 Clone o Código e Acesse o Diretório
 
 ```powershell
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ A Fly realizará automaticamente uma atualização gradual das máquinas.
 
 ### 9.1 Acompanhando atualizações do repositório upstream enquanto preserva o `fly.toml` do seu fork
 
-Se o repositório atual for um fork e você quiser sincronizar atualizações do upstream `https://github.com/diegosouzapw/OmniRoute`, siga o fluxo de trabalho abaixo.
+Se o repositório atual for um fork e você quiser sincronizar atualizações do upstream `https://github.com/cheaper-inference/OmniRoute`, siga o fluxo de trabalho abaixo.
 
 Primeiro, verifique seus remotos:
 
@@ -309,7 +309,7 @@ Você deve ver pelo menos:
 Se `upstream` não estiver configurado, adicione-o:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
 Antes de sincronizar com o upstream, busque os commits e as tags mais recentes:

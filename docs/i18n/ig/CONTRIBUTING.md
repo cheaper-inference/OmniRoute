@@ -35,7 +35,7 @@ na usoro ime ka ihe kwekọọ.
 ### Klọnụ na Wụnye
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 ```
@@ -435,4 +435,4 @@ Mgbe ahụ, jiri skills `/deploy-vps-*-cc` ndị na-eji rsync ebuga `dist/` na d
 - **Ntụaka API**: Hụ [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
 - **Akwụkwọ nchekwa**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
 - **Akwụkwọ ọrụ sistemụ**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
-- **Nsogbu**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **Nsogbu**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)

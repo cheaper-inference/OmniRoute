@@ -5,7 +5,7 @@
 ---
 
 Mall: xquik #11370 (liidetud harusse release/v3.8.51). Režiim: `fallbackOnly`.
-Ülesvoolu ettepanek: probleem diegosouzapw/OmniRoute#11637.
+Ülesvoolu ettepanek: probleem cheaper-inference/OmniRoute#11637.
 
 ## 1. Teenuse tegelik toimimine (ametlik dokumentatsioon, ristkontrollitud)
 

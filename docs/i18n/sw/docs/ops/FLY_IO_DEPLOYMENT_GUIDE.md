@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 Nakili Msimbo na Uingie kwenye Saraka
 
 ```powershell
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly itafanya kiotomatiki sasisho la hatua kwa hatua la mashine.
 
 ### 9.1 Kufuatilia Masasisho ya Hifadhi ya Upstream Huku Ukihifadhi `fly.toml` ya Fork Yako
 
-Ikiwa hifadhi ya sasa ni fork na unataka kusawazisha masasisho kutoka upstream `https://github.com/diegosouzapw/OmniRoute`, fuata mtiririko wa kazi ulio hapa chini.
+Ikiwa hifadhi ya sasa ni fork na unataka kusawazisha masasisho kutoka upstream `https://github.com/cheaper-inference/OmniRoute`, fuata mtiririko wa kazi ulio hapa chini.
 
 Kwanza, thibitisha remote zako:
 
@@ -309,7 +309,7 @@ Unapaswa kuona angalau:
 Ikiwa `upstream` haijasanidiwa, iongeze:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
 Kabla ya kusawazisha na upstream, pakua commit na tag za hivi karibuni:

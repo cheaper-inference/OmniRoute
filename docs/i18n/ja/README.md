@@ -45,9 +45,9 @@
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=social)](https://github.com/cheaper-inference/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/OmniRoute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 コミュニティに参加しよう
@@ -96,7 +96,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 ![ライセンス: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker ダウンロード数](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron ダウンロード数](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![Electron ダウンロード数](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -521,7 +521,7 @@ curl http://localhost:20128/v1/chat/completions \
 OmniRoute は MIT ライセンスで公開され、オープンに保守されています。時間や費用の節約に役立った場合は、独立性を維持するために、ご自分に合った方法でご支援ください。スポンサーシップがルーティングの優先順位に影響することはありません。得られるのは可視性であり、順位ではありません。
 
 <table>
-  <tr><td nowrap>⭐ <b>リポジトリにスターを付ける</b></td><td>無料 — 可視性の向上に本当に役立ちます</td><td><a href="https://github.com/diegosouzapw/OmniRoute">OmniRoute にスターを付ける</a></td></tr>
+  <tr><td nowrap>⭐ <b>リポジトリにスターを付ける</b></td><td>無料 — 可視性の向上に本当に役立ちます</td><td><a href="https://github.com/cheaper-inference/OmniRoute">OmniRoute にスターを付ける</a></td></tr>
   <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>単発または月額 · プラットフォーム手数料なし</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
   <tr><td nowrap>☕ <b>Ko-fi</b></td><td>手軽な単発支援、支援者の登録は不要</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
   <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>少額で気軽な支援</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
@@ -558,7 +558,7 @@ Pix コピー＆ペースト：
 
 </details>
 
-🐛 バグを見つけた場合やフィードバックがある場合は、[Discussion](https://github.com/diegosouzapw/OmniRoute/discussions) を作成してください。
+🐛 バグを見つけた場合やフィードバックがある場合は、[Discussion](https://github.com/cheaper-inference/OmniRoute/discussions) を作成してください。
 
 <br/>
 
@@ -1255,7 +1255,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 でも省略さ�
 
 2026-10-18 時点の正規指標: **1.976 件のユニーク動画** · **20.220.289 回の既知の視聴数**（`v > 0`）· **ネットワーク別のチャンネル／プロフィール数 1.210 件**。未加工のダッシュボードには 1.976 行（YouTube 1.352 = 長尺動画 740 + Shorts 612 · TikTok 334 · Instagram 290）が含まれています。正規 URL による正規化後、重複は残っておらず、動画ごとに最大の視聴回数が保持されています。YouTube のデータ収集は 2026-10-13 以降停止しており（14/10～18/10 に API クォータを使い切ったため）、TikTok／Instagram は 2026-09-02 以降停止しています（収集クレジットがないため）。76 件の動画には、まだ視聴回数がありません。
 
-> 🎬 **OmniRoute についての動画を作成しましたか？** リンクを添えて [issue](https://github.com/diegosouzapw/OmniRoute/issues/new) または [discussion](https://github.com/diegosouzapw/OmniRoute/discussions) を作成してください。こちらで紹介します。
+> 🎬 **OmniRoute についての動画を作成しましたか？** リンクを添えて [issue](https://github.com/cheaper-inference/OmniRoute/issues/new) または [discussion](https://github.com/cheaper-inference/OmniRoute/discussions) を作成してください。こちらで紹介します。
 
 <br/>
 
@@ -1275,8 +1275,8 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 でも省略さ�
 | 🟢 **WhatsApp — 🇧🇷 ブラジル**                  | [グループに参加](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                            |
 | 🌍 **ウェブサイト**                            | [omniroute.online](https://omniroute.online)                                                                                 |
 | 🌍 **🌍StHub OmniRoute コミュニティ（無料）**  | [StHubポータル](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                       |
-| 📦 **ソースコード**                            | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                               |
-| 🐛 **バグを報告**                              | [Issueを作成](https://github.com/diegosouzapw/OmniRoute/issues) — `npm run system-info` の出力を添付してください             |
+| 📦 **ソースコード**                            | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                                     |
+| 🐛 **バグを報告**                              | [Issueを作成](https://github.com/cheaper-inference/OmniRoute/issues) — `npm run system-info` の出力を添付してください        |
 | 🤝 **コントリビュート**                        | [CONTRIBUTING.md](CONTRIBUTING.md) · [ブランチおよびリリースモデル](docs/ops/BRANCHING_MODEL.md) · `good first issue` を選択 |
 | 💚 **プロジェクトを支援**                      | [支援方法 ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)                              |
 
@@ -1634,7 +1634,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 でも省略さ�
 
 </div>
 
-[![コントリビューター](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![コントリビューター](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
 
 <sub>2026-11-02、ライブの <code>release/v3.8.53</code> の先端 <code>1c7135e0fb</code>（7,972コミット）で監査：<b>正規化された人間のGitアイデンティティ1,074件</b> — 759件はコミット作成者（メンテナーを含む）として表示され、315件は明示的な <code>Co-authored-by</code> トレーラーにのみ表示されます。この集計では <code>.mailmap</code> を適用し、メールアドレスを大文字と小文字を区別せずに比較し、数値形式と通常形式のGitHub noreplyアドレスについては同じハンドルを示す場合にのみ統合しています。また、ボット、エージェント、サービス、プレースホルダーのアイデンティティ29件を除外し、表示名が一致するという理由だけで通常のメールアドレスを統合することはありません。2026-08-24の監査では639件が公開されましたが、その監査のベース <code>ac02c5b42f</code> に対してこの方法を再実行すると619件となるため、増加は新しいコントリビューターによるものであり、方法を緩和した結果ではありません。</sub>
 
@@ -1663,11 +1663,11 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 ## 📊 スター
 
-<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="スター履歴チャート" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <img alt="スター履歴チャート" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
  </picture>
 </a>
 

@@ -55,7 +55,7 @@ flowchart LR
 ਇਹ ਮੰਨਣ ਤੋਂ ਪਹਿਲਾਂ ਕਿ ਤੁਹਾਡੀ ਚਾਹੀਦੀ ਬ੍ਰਾਂਚ ਮਰਜ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ, ਕਿਸੇ ਖੁੱਲ੍ਹੇ ਫ੍ਰੀਜ਼ ਦੀ ਜਾਂਚ ਕਰੋ:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 ਮਰਜ ਦੀ ਕਾਰਜ-ਵਿਧੀ (ਮਾਲਕ ਦਾ `queue` ਲੇਬਲ → Mergify)

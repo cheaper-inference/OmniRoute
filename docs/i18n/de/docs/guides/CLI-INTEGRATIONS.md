@@ -198,7 +198,7 @@ Ausgabe von `ps` erscheint.
 
 Indem das Profil statt auf ein einzelnes Modell auf eine OmniRoute-**Kombination** verweist,
 erhält die Flotte Provider-Failover: Als der primäre Endpunkt während des in
-[#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578) dokumentierten Durchlaufs mitten in einer Ausführung
+[#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578) dokumentierten Durchlaufs mitten in einer Ausführung
 vollständig ausfiel, führte der Agent seine verbleibenden Schritte über das Fallback aus, ohne
 den Ausfall offenzulegen.
 

@@ -55,7 +55,7 @@ flowchart LR
 使用したいブランチがマージ可能だと判断する前に、オープンな凍結がないか確認してください。
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 マージの仕組み（オーナーが `queue` ラベルを付与 → Mergify）は、

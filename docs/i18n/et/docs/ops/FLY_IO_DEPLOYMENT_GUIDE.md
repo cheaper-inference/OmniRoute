@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 Kloonige kood ja liikuge kataloogi
 
 ```powershell
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly teeb masinatele automaatselt astmelise (rolling) uuenduse.
 
 ### 9.1 Ülempoolse hoidla (upstream) uuenduste jälgimine, säilitades samal ajal oma forgi `fly.toml` faili
 
-Kui praegune hoidla on fork ja soovid sünkroonida uuendusi ülempoolsest hoidlast `https://github.com/diegosouzapw/OmniRoute`, järgi allolevat töövoogu.
+Kui praegune hoidla on fork ja soovid sünkroonida uuendusi ülempoolsest hoidlast `https://github.com/cheaper-inference/OmniRoute`, järgi allolevat töövoogu.
 
 Kõigepealt kontrolli oma remote'e:
 
@@ -309,7 +309,7 @@ Peaksid näha vähemalt:
 Kui `upstream` ei ole konfigureeritud, lisa see:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
 Enne ülempoolse hoidlaga sünkroonimist tõmba (fetch) uusimad commit'id ja tagid:

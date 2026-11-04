@@ -48,7 +48,7 @@ Egy kiadás egyeztetésekor megnyitunk egy `release-freeze` címkével ellátott
 Mielőtt egy ágról azt feltételeznéd, hogy egyesíthető, ellenőrizd, van-e folyamatban kiadási befagyasztás:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Az egyesítés működését (a tulajdonos által hozzáadott `queue` címke → Mergify) a

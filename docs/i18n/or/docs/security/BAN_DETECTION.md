@@ -50,8 +50,8 @@ Google Cloud Code / Antigravity ଏହାକୁ `403 VALIDATION_REQUIRED` ଭା
 ବାକ୍ୟାଂଶଟିକୁ ନିଷେଧ ତାଲିକାରେ ରଖିବା ଫଳରେ `classifyProviderError` ମଧ୍ୟରେ ଥିବା ପୁନରୁଦ୍ଧାରଯୋଗ୍ୟ cloud-code 403 ଶାଖାଟି
 ଏହି ଶବ୍ଦାବଳୀ ପାଇଁ ଅପହଞ୍ଚ ହୋଇଯାଇଥିଲା, କାରଣ `accountDeactivated`କୁ
 ପ୍ରଥମେ ମୂଲ୍ୟାୟନ କରାଯାଏ — ତେଣୁ Gemini Code Assist ପାଇଁ
-[#868](https://github.com/diegosouzapw/OmniRoute/pull/868) ଏବଂ
-[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452)ରେ ଯୋଡ଼ାଯାଇଥିବା project-route ପୁନରୁଦ୍ଧାର କେବେବି ଚାଲିପାରୁ ନଥିଲା।
+[#868](https://github.com/cheaper-inference/OmniRoute/pull/868) ଏବଂ
+[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452)ରେ ଯୋଡ଼ାଯାଇଥିବା project-route ପୁନରୁଦ୍ଧାର କେବେବି ଚାଲିପାରୁ ନଥିଲା।
 
 ପାଖାପାଖି ଥିବା ତିନୋଟି **ପୃଥକ** ସଙ୍କେତ ଟେବୁଲ୍ ନିଷିଦ୍ଧ-କୀୱାର୍ଡ ଚିହ୍ନଟର ଅଂଶ _ନୁହେଁ_:
 

@@ -55,7 +55,7 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ## Kwa Nini Lipo
 
-Lilianzishwa katika PR [#3777](https://github.com/diegosouzapw/OmniRoute/pull/3777). Matatizo yaliyochochea kuanzishwa kwake:
+Lilianzishwa katika PR [#3777](https://github.com/cheaper-inference/OmniRoute/pull/3777). Matatizo yaliyochochea kuanzishwa kwake:
 
 | Tatizo                                                            | Kile ambacho agizo hurekebisha                                                                                                                                                                                                                                                                                                                                                           |
 | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

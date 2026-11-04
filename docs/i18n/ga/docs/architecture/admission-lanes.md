@@ -124,7 +124,7 @@ faoi deara 503 do sheisiún eile") i bhfeidhm gan choinníoll, agus cuireann có
 
 ## 4. `/v1/responses` fada in aon phróiseas amháin (corrlach-sláintiúil)
 
-Chuir [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437)
+Chuir [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437)
 `tryAcquireHealthyHeadroom` leis ionas go gceadaítear an dara hiarratas atá trom ó thaobh struchtúir de
 nuair atá an carn faoi bhun `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`. Úsáideann an cosán BYTE
 a úsáideann `admitChatRequest` (coirp ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`,

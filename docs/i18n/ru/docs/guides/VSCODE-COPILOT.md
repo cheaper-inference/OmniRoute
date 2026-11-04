@@ -115,7 +115,7 @@ npm start
 Без сборки с поддержкой встраивания страница запрещает отображение во фрейме, расширение определяет это по
 заголовкам ответа и переключается на внешний браузер — ничего не ломается, а уведомление об этом выводится один раз.
 См. [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) и обсуждение
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
 
 ---
 

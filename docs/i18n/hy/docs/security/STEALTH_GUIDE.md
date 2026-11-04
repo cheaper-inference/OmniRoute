@@ -170,7 +170,7 @@ Antigravity հարցումները պահպանում են կանչողի տեք
 
 - `open-sse/executors/antigravity.ts` — կարդում է `process.env.ANTIGRAVITY_CREDITS`-ը
 - `src/lib/oauth/providers/antigravity.ts` — հավատարմագրերի կապակցում
-- Միջադեպի սկզբնական զեկույց՝ Քննարկում [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Միջադեպի սկզբնական զեկույց՝ Քննարկում [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

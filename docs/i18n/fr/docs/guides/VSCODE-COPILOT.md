@@ -115,7 +115,7 @@ npm start
 Sans une compilation autorisant l’intégration, la page refuse d’être affichée dans un cadre ; l’extension le détecte à partir des
 en-têtes de réponse et revient au navigateur externe — rien ne se casse, et elle le signale une fois.
 Consultez [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) et l’issue
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
 
 ---
 

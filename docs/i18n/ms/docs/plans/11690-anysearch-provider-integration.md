@@ -5,7 +5,7 @@
 ---
 
 Templat: xquik #11370 (digabungkan dalam release/v3.8.51). Postur: `fallbackOnly`.
-Cadangan huluan: isu diegosouzapw/OmniRoute#11637.
+Cadangan huluan: isu cheaper-inference/OmniRoute#11637.
 
 ## 1. Maklumat sahih perkhidmatan (dokumentasi rasmi, disemak silang)
 

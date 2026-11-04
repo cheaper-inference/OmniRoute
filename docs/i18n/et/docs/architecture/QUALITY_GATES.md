@@ -424,7 +424,7 @@ rakendamine on ootel).
 ### CodeQL-i ratchet: värskendamissagedus ja käsitsi käivitamine
 
 `check:codeql-ratchet` loeb **hoidla olekut, mida värskendatakse ajakava alusel — mitte iga PR-i korral.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` annab tulemuseks
+`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` annab tulemuseks
 `state: configured`, `schedule: weekly`: see on GitHubi vaikeseadistuse kontroll, mitte iga tõuke
 korral tehtav analüüs. Tagajärg: pärast hoiatusi PARANDAVA PR-i mestimist loeb ratchet
 endiselt vana, suuremat arvu kuni järgmise ajastatud kontrolli käivitumiseni — seega teatab see

@@ -50,8 +50,8 @@ Google Cloud Code / Antigravity ഇത് `403 VALIDATION_REQUIRED` ആയി �
 ഈ വാചകം നിരോധന ലിസ്റ്റിൽ നിലനിർത്തിയത്, `classifyProviderError`-ലെ വീണ്ടെടുക്കാവുന്ന cloud-code 403 ശാഖയെ
 ഈ പദപ്രയോഗത്തിന് എത്തിച്ചേരാനാകാത്തതുമാക്കി, കാരണം `accountDeactivated` ആണ്
 ആദ്യം വിലയിരുത്തപ്പെടുന്നത് — അതിനാൽ Gemini Code Assist-നായി
-[#868](https://github.com/diegosouzapw/OmniRoute/pull/868),
-[#6452](https://github.com/diegosouzapw/OmniRoute/pull/6452) എന്നിവയിൽ ചേർത്ത project-route വീണ്ടെടുക്കൽ ഒരിക്കലും പ്രവർത്തിക്കുമായിരുന്നില്ല.
+[#868](https://github.com/cheaper-inference/OmniRoute/pull/868),
+[#6452](https://github.com/cheaper-inference/OmniRoute/pull/6452) എന്നിവയിൽ ചേർത്ത project-route വീണ്ടെടുക്കൽ ഒരിക്കലും പ്രവർത്തിക്കുമായിരുന്നില്ല.
 
 അടുത്തടുത്തുള്ള മൂന്ന് **വേറിട്ട** സിഗ്നൽ പട്ടികകൾ നിരോധിത-കീവേഡ് കണ്ടെത്തലിന്റെ ഭാഗമല്ല:
 

@@ -56,7 +56,7 @@ geopend. Dat **stopt de ontwikkeling niet**:
 Controleer of er een open freeze is voordat je ervan uitgaat dat de gewenste branch kan worden samengevoegd:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Het mergemechanisme (`queue`-label van de eigenaar → Mergify) wordt beschreven in

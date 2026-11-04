@@ -173,7 +173,7 @@ Google ఉచిత-స్థాయి కోటా అభ్యర్థనల�
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS`ను చదువుతుంది
 - `src/lib/oauth/providers/antigravity.ts` — క్రెడెన్షియల్ ప్లంబింగ్
-- అసలు సంఘటన నివేదిక: చర్చ [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- అసలు సంఘటన నివేదిక: చర్చ [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

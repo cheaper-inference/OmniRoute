@@ -327,7 +327,7 @@ Comportamento da memória no Docker:
 
 ### RAM de execução para agentes de programação
 
-A predefinição de 1 GiB do Docker é um valor mínimo para o painel e conversas ligeiras, não uma configuração para produção. Corpos extensos de pedidos `POST /v1/responses` (centenas de mensagens, dezenas de ferramentas) mantêm vários grafos em memória durante a compressão. Dois pedidos sobrepostos de ~3 MiB / ~750 mil tokens provocaram o encerramento do V8 com uma old-space de **12 GiB** (`FATAL ERROR: Reached heap limit`) e também atingiram um OOM de cgroup com 16 GiB. Consulte [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+A predefinição de 1 GiB do Docker é um valor mínimo para o painel e conversas ligeiras, não uma configuração para produção. Corpos extensos de pedidos `POST /v1/responses` (centenas de mensagens, dezenas de ferramentas) mantêm vários grafos em memória durante a compressão. Dois pedidos sobrepostos de ~3 MiB / ~750 mil tokens provocaram o encerramento do V8 com uma old-space de **12 GiB** (`FATAL ERROR: Reached heap limit`) e também atingiram um OOM de cgroup com 16 GiB. Consulte [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Dimensione a **`--memory` do cgroup acima da heap** — os buffers nativos, o SQLite e os dados intermédios da compressão residem fora do V8.
 
@@ -705,7 +705,7 @@ spec:
 
 `preStop` sleep permite ao kube descartar os endpoints do serviço antes SIGTERM pelo que** novo** o tráfego deixa de atingir o processo de morte. `/v1/responses` SSE em voo é drenado até `SHUTDOWN_TIMEOUT_MS` (padrão 30s) através de concessões de admissão pesadas (#11015). Os novos pedidos que ainda chegam ao processo recebem `503` + `Retry-After: 5`. A lacuna Recriar ponto final vazio até que a substituição esteja pronta permanece uma interrupção grave — esta é a topologia SQLite, não uma configuração incorreta do probe.
 
-Postgres externo/multi-gravador HA é** não** um caminho de stock documentado. Se precisar de HA, mantenha uma única réplica ou execute uma topologia que o projeto testou e documentou separadamente. O trabalho Postgres/MySQL reside em [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Até que seja enviado, a única forma suportada de multiplicar** grande** A capacidade `/v1/responses` é N processos independentes (secção seguinte), e não `replicas > 1` num volume.
+Postgres externo/multi-gravador HA é** não** um caminho de stock documentado. Se precisar de HA, mantenha uma única réplica ou execute uma topologia que o projeto testou e documentou separadamente. O trabalho Postgres/MySQL reside em [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Até que seja enviado, a única forma suportada de multiplicar** grande** A capacidade `/v1/responses` é N processos independentes (secção seguinte), e não `replicas > 1` num volume.
 
 ## Escalabilidade: N processos independentes
 
@@ -715,11 +715,11 @@ As cópias de uma conta Codex não devem consumir independentemente o seu token 
 
 A instância passiva relê a ligação quando é necessária uma atualização e adota apenas um token de acesso diferente e não expirado. Caso contrário, a atualização será desativada sem expirar ou desativar a ligação ou contar uma falha no disjuntor de atualização. As falhas reais de autenticação upstream ainda utilizam a contabilização de falhas normal, arrefecimento exponencial e erro normal do cliente; a desativação da conta mantém-se permanente. Sincronize os tokens rotacionados do proprietário antes de os tokens de acesso expirarem (o tempo de atualização proativa predefinido é de cinco minutos) ou importe novamente o ficheiro de autenticação Codex. As importações passivas armazenam os tokens fornecidos sem os validar no ponto final do token. A atualização manual dashboard/API retorna `409 refresh_disabled`; novos logins OAuth permanecem inalterados. Consulte [referência de ambiente](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Um processo de nó é** uma pilha V8** . Dois agentes de codificação ~ 3 MiB / ~ 750k tokens sobrepostos `POST /v1/responses` (RTK + Caveman ) abortam aquele heap em ~ 12 Gi (`FATAL ERROR: Reached heap limit`) e podem OOM um cgroup de 16 Gi. Consulte [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Esta medição é uma** orçamento de memória** aviso, não é um produto hard-max de dois `/v1/responses` simultâneos longos. A admissão de chat pesado é controlada por um orçamento de bytes de ingestão derivado automaticamente (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) dimensionado a partir do mesmo V8/cgroup teto — substituindo-o para cima (ou definindo o limite de contagem de pedidos `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` herdado) num processo já dimensionado reintroduz a interrupção. Os pequenos chats, `/healthz`, `/v1/models` e MCP são** não** naquele boné.
+Um processo de nó é** uma pilha V8** . Dois agentes de codificação ~ 3 MiB / ~ 750k tokens sobrepostos `POST /v1/responses` (RTK + Caveman ) abortam aquele heap em ~ 12 Gi (`FATAL ERROR: Reached heap limit`) e podem OOM um cgroup de 16 Gi. Consulte [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Esta medição é uma** orçamento de memória** aviso, não é um produto hard-max de dois `/v1/responses` simultâneos longos. A admissão de chat pesado é controlada por um orçamento de bytes de ingestão derivado automaticamente (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) dimensionado a partir do mesmo V8/cgroup teto — substituindo-o para cima (ou definindo o limite de contagem de pedidos `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` herdado) num processo já dimensionado reintroduz a interrupção. Os pequenos chats, `/healthz`, `/v1/models` e MCP são** não** naquele boné.
 
 ### Processo único: mais de dois `/v1/responses` longos
 
-UM** saudável** processo (pilha abaixo de `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, padrão `0.75`)** maio** executar mais de dois `POST /v1/responses` longos simultâneos quando o orçamento de bytes em curso para todo o processo (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` /#10110) ainda tiver espaço. Os corpos iguais ou superiores a `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (padrão 256 KiB) recebem o mesmo leasing pesado que os pedidos de estrutura pesada e utilizam o mesmo escape [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Dezenas de clientes SSE longos simultâneos (as operadoras geralmente precisam de 40 a 50) é um** orçamento de memória** pergunta — tamanho heap + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — não é um limite de produto “máximo de 2” rígido. Um heap pressionado é ainda eliminado com `503` reutilizável, pelo que #7849 não retorna.
+UM** saudável** processo (pilha abaixo de `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, padrão `0.75`)** maio** executar mais de dois `POST /v1/responses` longos simultâneos quando o orçamento de bytes em curso para todo o processo (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` /#10110) ainda tiver espaço. Os corpos iguais ou superiores a `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (padrão 256 KiB) recebem o mesmo leasing pesado que os pedidos de estrutura pesada e utilizam o mesmo escape [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Dezenas de clientes SSE longos simultâneos (as operadoras geralmente precisam de 40 a 50) é um** orçamento de memória** pergunta — tamanho heap + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — não é um limite de produto “máximo de 2” rígido. Um heap pressionado é ainda eliminado com `503` reutilizável, pelo que #7849 não retorna.
 
 Para** multiplicar montes** (espaços antigos V8 independentes)** hoje** :
 
@@ -762,7 +762,7 @@ volumes:
   omniroute-b-data:
 ```
 
-A densidade em processo (compressão do isolado HTTP ) é [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Um cluster lógico em estado durável partilhado é [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+A densidade em processo (compressão do isolado HTTP ) é [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Um cluster lógico em estado durável partilhado é [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
 ## Erros regionais do Gemini dentro do Docker
 
@@ -803,7 +803,7 @@ apenas o pedido autenticado ao modelo testa a elegibilidade para o Gemini.
 
 ### Alternativa ao nível do anfitrião: IPv6 funcional e política do resolvedor
 
-O autor do relato [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) restaurou
+O autor do relato [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) restaurou
 o acesso no respetivo ambiente ao ativar o IPv6 do contentor e alterar a seleção de endereços
 da glibc. Trate esta opção como uma alternativa específica do ambiente. Confirme que o IPv6
 do anfitrião funciona e verifique o encaminhamento/tráfego de saída do contentor e as regras da firewall antes de ajustar as preferências do resolvedor.

@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 コードをクローンしてディレクトリに移動する
 
 ```powershell
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly はマシンのローリングアップデートを自動的に実行しま�
 
 ### 9.1 フォークの `fly.toml` を維持しながらアップストリームリポジトリの更新を取り込む
 
-現在のリポジトリがフォークであり、アップストリームの `https://github.com/diegosouzapw/OmniRoute` から更新を同期する場合は、以下のワークフローに従ってください。
+現在のリポジトリがフォークであり、アップストリームの `https://github.com/cheaper-inference/OmniRoute` から更新を同期する場合は、以下のワークフローに従ってください。
 
 まず、リモートを確認します。
 
@@ -309,7 +309,7 @@ git remote -v
 `upstream` が設定されていない場合は、追加します。
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
 アップストリームと同期する前に、最新のコミットとタグを取得します。

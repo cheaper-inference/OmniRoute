@@ -55,7 +55,7 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ## Miks see olemas on
 
-Lisatud PR-is [#3777](https://github.com/diegosouzapw/OmniRoute/pull/3777). Peamised ajendid:
+Lisatud PR-is [#3777](https://github.com/cheaper-inference/OmniRoute/pull/3777). Peamised ajendid:
 
 | Probleem                                                             | Mida direktiiv parandab                                                                                                                                                                                                                                                                                                                                                  |
 | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

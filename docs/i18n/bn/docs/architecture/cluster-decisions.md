@@ -6,7 +6,7 @@
 
 **অবস্থা:** প্রস্তাব (এখনও @diegosouzapw-এর পর্যালোচনার অপেক্ষায়)
 **তারিখ:** 2026-06-20
-**রেফারেন্স:** [#3932](https://github.com/diegosouzapw/OmniRoute/issues/3932), PR #4381
+**রেফারেন্স:** [#3932](https://github.com/cheaper-inference/OmniRoute/issues/3932), PR #4381
 
 ## সংক্ষেপে
 

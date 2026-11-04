@@ -138,8 +138,8 @@ disembunyikan secara default pada beberapa tingkat langganan.
 
 ## Referensi
 
-- Isu: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Diskusi: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- Isu: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Diskusi: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - Sumber: `src/shared/constants/providers/web-cookie.ts` (definisi penyedia)
 - Impor HAR: `src/shared/utils/m365HarImport.ts`
 - Kolom kredensial: `src/shared/providers/webSessionCredentials.ts`

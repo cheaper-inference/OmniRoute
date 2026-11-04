@@ -56,7 +56,7 @@ flowchart LR
 የሚፈልጉት ቅርንጫፍ ሊዋሃድ የሚችል ነው ብለው ከመገመትዎ በፊት፣ ክፍት የማገድ ጉዳይ እንዳለ ያረጋግጡ፦
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 የውህደት አሠራሮች (የባለቤቱ `queue` መለያ → Mergify) በ

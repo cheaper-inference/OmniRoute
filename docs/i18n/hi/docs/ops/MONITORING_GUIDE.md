@@ -223,7 +223,7 @@ livenessProbe:
 
 kubelet **लाइवनेस** को `/api/monitoring/health` पर इंगित **न करें**। वह पथ वास्तविक DB/मॉनिटरिंग कार्य करता है और लोड के अंतर्गत ग़लत-पॉज़िटिव परिणाम देगा।
 
-संबंधित: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (इवेंट लूप के व्यस्त होने के दौरान प्रोब), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (कैटलॉग प्राइसिंग द्वारा संसाधनों पर कब्ज़ा), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (कंप्रेशन टोकन-गणना द्वारा संसाधनों पर कब्ज़ा)।
+संबंधित: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (इवेंट लूप के व्यस्त होने के दौरान प्रोब), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (कैटलॉग प्राइसिंग द्वारा संसाधनों पर कब्ज़ा), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (कंप्रेशन टोकन-गणना द्वारा संसाधनों पर कब्ज़ा)।
 
 ### systemd वॉचडॉग (जमा हुआ इवेंट लूप)
 

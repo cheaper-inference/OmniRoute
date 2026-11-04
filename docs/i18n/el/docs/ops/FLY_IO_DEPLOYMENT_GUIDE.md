@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 Κλωνοποίηση του Κώδικα και Είσοδος στον Κατάλογο
 
 ```powershell
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ flyctl secrets set KEY=value -a omniroute
 
 ### 9.1 Παρακολούθηση Ενημερώσεων του Upstream Repository με Διατήρηση του `fly.toml` του Fork σας
 
-Εάν το τρέχον repository είναι ένα fork και θέλετε να συγχρονίσετε ενημερώσεις από το upstream `https://github.com/diegosouzapw/OmniRoute`, ακολουθήστε την παρακάτω ροή εργασίας.
+Εάν το τρέχον repository είναι ένα fork και θέλετε να συγχρονίσετε ενημερώσεις από το upstream `https://github.com/cheaper-inference/OmniRoute`, ακολουθήστε την παρακάτω ροή εργασίας.
 
 Αρχικά, επαληθεύστε τα remotes σας:
 
@@ -309,7 +309,7 @@ git remote -v
 Εάν το `upstream` δεν έχει ρυθμιστεί, προσθέστε το:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
 Πριν από τον συγχρονισμό με το upstream, ανακτήστε τα τελευταία commits και tags:

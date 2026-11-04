@@ -97,7 +97,7 @@ Combo (ลำดับความสำคัญ / วนรอบ) และ f
 
 ## 4. `/v1/responses` แบบใช้เวลานานในกระบวนการเดียว (พื้นที่สำรองเมื่อระบบยังแข็งแรง)
 
-[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) เพิ่ม
+[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) เพิ่ม
 `tryAcquireHealthyHeadroom` เพื่ออนุญาตคำขอที่สองซึ่งมีโครงสร้างซับซ้อน
 เมื่อฮีปต่ำกว่า `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` เส้นทาง BYTE
 ที่ `admitChatRequest` ใช้ (บอดี ≥ `OMNIROUTE_CHAT_LARGE_BODY_BYTES`

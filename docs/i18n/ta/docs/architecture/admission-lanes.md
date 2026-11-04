@@ -90,7 +90,7 @@ byte-நிலை வழித்தடங்கள் அதிக நினை
 
 ## 4. ஒற்றை-process நீண்ட `/v1/responses` (ஆரோக்கியமான-headroom)
 
-[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) ஆனது
+[#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) ஆனது
 `tryAcquireHealthyHeadroom`-ஐச் சேர்த்தது; இதனால் heap,
 `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`-ஐ விடக் குறைவாக இருக்கும்போது, கட்டமைப்பு ரீதியாக அதிகச் சுமையுள்ள இரண்டாவது கோரிக்கை அனுமதிக்கப்படுகிறது.
 `admitChatRequest` பயன்படுத்தும் BYTE பாதை (`OMNIROUTE_CHAT_LARGE_BODY_BYTES`-க்கு

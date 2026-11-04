@@ -429,7 +429,7 @@ git add quality-baseline.json
 ### CodeQL र्याचेट: रिफ्रेस आवृत्ति र म्यानुअल ट्रिगर
 
 `check:codeql-ratchet` ले **तालिकाअनुसार रिफ्रेस हुने रिपोको अवस्था पढ्छ — प्रत्येक PR मा होइन।**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` ले
+`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` ले
 `state: configured`, `schedule: weekly` रिपोर्ट गर्छ: यो GitHub को default-setup स्क्यान हो,
 प्रत्येक push को विश्लेषण होइन। परिणामस्वरूप: अलर्टहरू समाधान गर्ने PR मर्ज भएपछि, र्याचेटले
 अर्को निर्धारित स्क्यान नचल्दासम्म पुरानै, बढी सङ्ख्या पढिरहन्छ — त्यसैले स्क्यान अद्यावधिक

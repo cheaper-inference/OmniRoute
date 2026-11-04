@@ -29,7 +29,7 @@ docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
 ### Տարբերակ C․ Սկզբնական կոդից
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 npm run dev
@@ -165,4 +165,4 @@ OmniRoute-ն ավտոմատ կերպով բաց է թողնում չաշխատո
 
 - **[Խնդիրների լուծում](../guides/TROUBLESHOOTING.md)** — Տարածված խնդիրներ և լուծումներ
 - **[Discord](https://discord.gg/U47eFqAXCn)** — Համայնքային աջակցություն
-- **[GitHub Issues](https://github.com/diegosouzapw/OmniRoute/issues)** — Հաղորդեք սխալների մասին
+- **[GitHub Issues](https://github.com/cheaper-inference/OmniRoute/issues)** — Հաղորդեք սխալների մասին

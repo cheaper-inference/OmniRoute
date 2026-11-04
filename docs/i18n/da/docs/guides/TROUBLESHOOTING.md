@@ -250,7 +250,7 @@ indtil den er på plads, kan dette gentage sig ved nye udgivelser.
    [Convert]::ToBase64String($b)
    ```
    Outputtet skal svare til `latest.yml` → `sha512`. Hvis det ikke gør, skal du slette filen og
-   downloade den igen udelukkende fra [GitHubs udgivelsesside](https://github.com/diegosouzapw/OmniRoute/releases).
+   downloade den igen udelukkende fra [GitHubs udgivelsesside](https://github.com/cheaper-inference/OmniRoute/releases).
 2. **Gendan + ekskluder** — gendan de tilbagerullede elementer fra karantænen, og tilføj en undtagelse
    for `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Indstillinger → Trusler og undtagelser),
    og geninstaller derefter.
@@ -846,7 +846,7 @@ oplysninger om `OMNIROUTE_READY_TIMEOUT_MS`.
 
 ## Sidder du stadig fast?
 
-- **GitHub Issues**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **GitHub Issues**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **Arkitektur**: Se [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) for interne oplysninger
 - **API-reference**: Se [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) for alle slutpunkter
 - **Sundhedsdashboard**: Se **Dashboard → Sundhed** for systemstatus i realtid

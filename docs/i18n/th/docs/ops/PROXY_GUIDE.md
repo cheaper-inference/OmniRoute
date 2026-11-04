@@ -260,7 +260,7 @@ curl -X POST http://localhost:20128/api/v1/management/proxies/bulk-assign \
 
 ## ตลาดพร็อกซีฟรี 1proxy
 
-> 🆕 **สนับสนุนโดย [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Issue [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕 **สนับสนุนโดย [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Issue [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
 
 OmniRoute ผสานการทำงานกับแพลตฟอร์มชุมชน **[1proxy](https://1proxy-api.aitradepulse.com)** เพื่อให้สามารถเข้าถึง **พร็อกซีฟรีที่ผ่านการตรวจสอบแล้วหลายร้อยรายการ** จากทั่วโลก เหมาะอย่างยิ่งสำหรับผู้ใช้ที่ไม่มีโครงสร้างพื้นฐานพร็อกซีเป็นของตนเอง
 

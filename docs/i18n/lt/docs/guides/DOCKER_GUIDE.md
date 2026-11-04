@@ -324,7 +324,7 @@ Atminties veikimas Docker aplinkoje:
 
 ### Vykdymo aplinkos RAM programavimo agentams
 
-Numatytoji Docker 1 GiB reikšmė yra apatinė riba valdymo skydui ir lengviems pokalbiams, o ne gamybinės aplinkos dydis. Ilgi `POST /v1/responses` turiniai (šimtai pranešimų, dešimtys įrankių) glaudinimo metu atmintyje išlaiko kelis grafus. Dvi persidengiančios ~3 MiB / ~750 tūkst. žetonų užklausos nutraukė V8 veikimą esant **12 GiB** senosios kartos sričiai (`FATAL ERROR: Reached heap limit`) ir taip pat pasiekė 16 GiB cgroup OOM ribą. Žr. [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Numatytoji Docker 1 GiB reikšmė yra apatinė riba valdymo skydui ir lengviems pokalbiams, o ne gamybinės aplinkos dydis. Ilgi `POST /v1/responses` turiniai (šimtai pranešimų, dešimtys įrankių) glaudinimo metu atmintyje išlaiko kelis grafus. Dvi persidengiančios ~3 MiB / ~750 tūkst. žetonų užklausos nutraukė V8 veikimą esant **12 GiB** senosios kartos sričiai (`FATAL ERROR: Reached heap limit`) ir taip pat pasiekė 16 GiB cgroup OOM ribą. Žr. [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Nustatykite **cgroup `--memory` reikšmę didesnę už kaupą** — savieji buferiai, SQLite ir tarpiniai glaudinimo duomenys yra už V8 ribų.
 
@@ -700,7 +700,7 @@ spec:
 
 `preStop` sleep“ leidžia „kube“ atsisakyti paslaugų galinių taškų prieš SIGTERM.** naujas** eismas nustoja smogti mirštančiam procesui. Skrydžio metu `/v1/responses` SSE išleidžiamas iki `SHUTDOWN_TIMEOUT_MS` (numatytasis 30 s) pagal sunkiasvorių įleidimo nuomos sutartis (#11015). Naujos užklausos, kurios vis dar pasiekia procesą, gauna `503` + `Retry-After: 5`. Atkurti tuščią galinio taško spragą, kol pakeitimas bus paruoštas, išlieka rimtu gedimu – tai yra SQLite topologija, o ne zondo klaidinga konfigūracija.
 
-Išorinis Postgres / multi-writer HA yra** ne** dokumentais patvirtintas atsargų kelias. Jei jums reikia HA, pasilikite vieną kopiją arba paleiskite topologiją, kurią projektas išbandė ir dokumentavo atskirai. Postgres/MySQL darbas gyvena [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Kol bus išsiųstas, vienintelis palaikomas būdas daugintis** didelis** `/v1/responses` talpa yra N nepriklausomų procesų (kitas skyrius), o ne `replicas > 1` viename tome.
+Išorinis Postgres / multi-writer HA yra** ne** dokumentais patvirtintas atsargų kelias. Jei jums reikia HA, pasilikite vieną kopiją arba paleiskite topologiją, kurią projektas išbandė ir dokumentavo atskirai. Postgres/MySQL darbas gyvena [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Kol bus išsiųstas, vienintelis palaikomas būdas daugintis** didelis** `/v1/responses` talpa yra N nepriklausomų procesų (kitas skyrius), o ne `replicas > 1` viename tome.
 
 ## Padidinimas: N nepriklausomų procesų
 
@@ -710,11 +710,11 @@ Vienos Codex paskyros kopijos negali atskirai sunaudoti jos vienkartinio atnauji
 
 Pasyvus egzempliorius perskaito ryšį, kai reikia atnaujinti, ir priima tik kitą, nepasibaigusį prieigos raktą. Kitu atveju atnaujinimas išjungiamas nenutrūkus ar neišaktyvinus ryšio arba neįskaičiuojant atnaujinimo pertraukiklio gedimo. Tikrosios tiekėjų autentifikavimo nesėkmės vis dar naudoja įprastą gedimų apskaitą, eksponentinį atšalimą ir įprastą kliento klaidą; paskyros išjungimas išlieka visam laikui. Sinchronizuokite savininko pasuktus prieigos raktus prieš pasibaigiant prieigos prieigos raktų galiojimo laikui (numatytasis aktyvus atnaujinimas yra penkios minutės) arba iš naujo importuokite Codex auth failą. Pasyvus importavimas saugo pateiktus prieigos raktus nepatvirtindamas jų prieigos rakto galutiniame taške. Rankinis dashboard/API atnaujinimas grąžina `409 refresh_disabled`; nauji OAuth prisijungimai nepakitę. Žr. [aplinkos nuorodą](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-„One Node“ procesas yra** viena V8 krūva** . Du persidengiantys ~ 3 MiB / ~ 750k žetonų kodavimo agentas `POST /v1/responses` (RTK + Caveman) nutraukia tą krūvą esant ~ 12 Gi (`FATAL ERROR: Reached heap limit`) ir gali OOM 16 Gi cgrupę. Žr. [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Tas matavimas yra a** atmintis-biudžetas** įspėjimas, o ne produktas hard-max iš dviejų vienu metu vykstančių ilgų `/v1/responses`. Sunkusis pokalbių priėmimas yra apribotas automatiškai gautu apdorojimo baitų biudžetu (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`), kurio dydis yra tas pats V8/cgroup lubos — viršijantis jį aukštyn (arba nustačius seną `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` užklausų skaičiaus viršutinę ribą) jau tokio dydžio procese, vėl įvedamas nutraukimas. Maži pokalbiai, `/healthz`, `/v1/models` ir MCP yra** ne** toje kepure.
+„One Node“ procesas yra** viena V8 krūva** . Du persidengiantys ~ 3 MiB / ~ 750k žetonų kodavimo agentas `POST /v1/responses` (RTK + Caveman) nutraukia tą krūvą esant ~ 12 Gi (`FATAL ERROR: Reached heap limit`) ir gali OOM 16 Gi cgrupę. Žr. [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Tas matavimas yra a** atmintis-biudžetas** įspėjimas, o ne produktas hard-max iš dviejų vienu metu vykstančių ilgų `/v1/responses`. Sunkusis pokalbių priėmimas yra apribotas automatiškai gautu apdorojimo baitų biudžetu (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`), kurio dydis yra tas pats V8/cgroup lubos — viršijantis jį aukštyn (arba nustačius seną `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` užklausų skaičiaus viršutinę ribą) jau tokio dydžio procese, vėl įvedamas nutraukimas. Maži pokalbiai, `/healthz`, `/v1/models` ir MCP yra** ne** toje kepure.
 
 ### Vienas procesas: daugiau nei du ilgi `/v1/responses`
 
-A** sveikas** procesas (krūva žemiau `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, numatytasis `0.75`)** gali** paleiskite daugiau nei du ilgus `POST /v1/responses` vienu metu, kai viso proceso skrydžio baitų biudžete (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) dar yra vietos. Korpusai, esantys arba didesni už `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (numatytasis 256 KiB), naudojasi tokiomis pat sunkiomis nuomos sutartimis kaip ir sudėtingos struktūros užklausos ir naudoja tą patį [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` pabėgimą (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Dešimtys vienu metu veikiančių ilgų SSE klientų (operatoriams dažnai reikia 40–50) yra a** atmintis-biudžetas** klausimas — dydžio krūva + primary/headroom lizdai + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — nėra griežta „max 2“ produkto riba. Slėgio krūva vis dar išsiskiria su pakartotinai bandomu `503`, todėl #7849 negrįžta.
+A** sveikas** procesas (krūva žemiau `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, numatytasis `0.75`)** gali** paleiskite daugiau nei du ilgus `POST /v1/responses` vienu metu, kai viso proceso skrydžio baitų biudžete (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) dar yra vietos. Korpusai, esantys arba didesni už `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (numatytasis 256 KiB), naudojasi tokiomis pat sunkiomis nuomos sutartimis kaip ir sudėtingos struktūros užklausos ir naudoja tą patį [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` pabėgimą (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Dešimtys vienu metu veikiančių ilgų SSE klientų (operatoriams dažnai reikia 40–50) yra a** atmintis-biudžetas** klausimas — dydžio krūva + primary/headroom lizdai + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — nėra griežta „max 2“ produkto riba. Slėgio krūva vis dar išsiskiria su pakartotinai bandomu `503`, todėl #7849 negrįžta.
 
 Į** dauginti krūvas** (nepriklausomos V8 senosios erdvės)** šiandien** :
 
@@ -757,7 +757,7 @@ volumes:
   omniroute-b-data:
 ```
 
-Proceso tankis (suspaudimas nuo HTTP izoliato) yra [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Vienas loginis klasteris bendroje patvarioje būsenoje yra [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+Proceso tankis (suspaudimas nuo HTTP izoliato) yra [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Vienas loginis klasteris bendroje patvarioje būsenoje yra [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
 ## „Gemini“ regioninės klaidos „Docker“ aplinkoje
 
@@ -800,7 +800,7 @@ klaida; „Gemini“ tinkamumą naudoti patikrina tik autentifikuota modelio už
 
 ### Pagrindinės sistemos lygmens alternatyva: veikiantis IPv6 ir vardų išsprendimo politika
 
-Pranešimo [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) autorius savo
+Pranešimo [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) autorius savo
 aplinkoje atkūrė prieigą įjungęs konteinerio IPv6 ir pakeitęs glibc adresų
 pasirinkimą. Laikykite tai konkrečiai aplinkai skirta alternatyva. Prieš keisdami vardų išsprendimo nuostatas
 įsitikinkite, kad pagrindinės sistemos IPv6, konteinerio išeinantis ryšys / maršrutizavimas ir užkardos taisyklės veikia.

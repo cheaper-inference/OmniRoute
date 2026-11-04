@@ -109,7 +109,7 @@ npm start
 
 ਐਂਬੈਡਿੰਗ ਲਈ ਸਮਰੱਥ ਬਿਲਡ ਤੋਂ ਬਿਨਾਂ ਪੰਨਾ ਫ੍ਰੇਮ ਵਿੱਚ ਖੁੱਲ੍ਹਣ ਤੋਂ ਇਨਕਾਰ ਕਰਦਾ ਹੈ। ਐਕਸਟੈਂਸ਼ਨ ਰਿਸਪਾਂਸ ਹੈਡਰਾਂ ਤੋਂ ਇਸਦਾ ਪਤਾ ਲਗਾਉਂਦੀ ਹੈ ਅਤੇ ਬਾਹਰੀ ਬ੍ਰਾਊਜ਼ਰ ਉੱਤੇ ਵਾਪਸ ਚਲੀ ਜਾਂਦੀ ਹੈ — ਕੁਝ ਵੀ ਖ਼ਰਾਬ ਨਹੀਂ ਹੁੰਦਾ ਅਤੇ ਇਹ ਇਸ ਬਾਰੇ ਇੱਕ ਵਾਰ ਸੂਚਿਤ ਕਰਦੀ ਹੈ।
 [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) ਅਤੇ ਮੁੱਦਾ
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273) ਵੇਖੋ।
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273) ਵੇਖੋ।
 
 ---
 

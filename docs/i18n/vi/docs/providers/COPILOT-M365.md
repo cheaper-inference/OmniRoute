@@ -128,8 +128,8 @@ Mã thông báo có thể đã hết hạn trong khoảng thời gian từ lúc 
 
 ## Tài liệu tham khảo
 
-- Vấn đề: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Thảo luận: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- Vấn đề: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Thảo luận: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - Mã nguồn: `src/shared/constants/providers/web-cookie.ts` (định nghĩa nhà cung cấp)
 - Nhập HAR: `src/shared/utils/m365HarImport.ts`
 - Các trường thông tin xác thực: `src/shared/providers/webSessionCredentials.ts`

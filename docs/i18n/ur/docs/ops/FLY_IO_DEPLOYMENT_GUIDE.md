@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 کوڈ کلون کریں اور ڈائریکٹری میں داخل ہوں
 
 ```powershell
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly خودکار طور پر مشینوں کی رولنگ اپ ڈیٹ انجام
 
 ### 9.1 اپنے فورک کی `fly.toml` محفوظ رکھتے ہوئے اپ اسٹریم ریپوزٹری کی اپ ڈیٹس ٹریک کرنا
 
-اگر موجودہ ریپوزٹری ایک فورک ہے اور آپ اپ اسٹریم `https://github.com/diegosouzapw/OmniRoute` سے اپ ڈیٹس ہم وقت کرنا چاہتے ہیں، تو ذیل کے ورک فلو پر عمل کریں۔
+اگر موجودہ ریپوزٹری ایک فورک ہے اور آپ اپ اسٹریم `https://github.com/cheaper-inference/OmniRoute` سے اپ ڈیٹس ہم وقت کرنا چاہتے ہیں، تو ذیل کے ورک فلو پر عمل کریں۔
 
 سب سے پہلے، اپنے ریموٹس کی تصدیق کریں:
 
@@ -309,7 +309,7 @@ git remote -v
 اگر `upstream` کنفیگر نہیں ہے، تو اسے شامل کریں:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
 اپ اسٹریم کے ساتھ ہم وقت کرنے سے پہلے، تازہ ترین کمیٹس اور ٹیگز حاصل کریں:

@@ -53,7 +53,7 @@ flowchart LR
 તમને જોઈતી બ્રાન્ચ મર્જ કરી શકાય તેવી છે એવું માનતા પહેલાં ખુલ્લી ફ્રીઝ તપાસો:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 મર્જ પ્રક્રિયા (માલિકનું `queue` લેબલ → Mergify)નું દસ્તાવેજીકરણ

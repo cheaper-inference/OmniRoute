@@ -223,7 +223,7 @@ livenessProbe:
 
 **Ne faites pas** pointer la sonde de **vivacité** de kubelet vers `/api/monitoring/health`. Ce chemin effectue de véritables opérations de base de données et de surveillance, et produira des faux positifs sous charge.
 
-Voir aussi : [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (sondes lorsque la boucle d'événements est occupée), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (la tarification du catalogue monopolise les ressources), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (le comptage des jetons de compression monopolise les ressources).
+Voir aussi : [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (sondes lorsque la boucle d'événements est occupée), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (la tarification du catalogue monopolise les ressources), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (le comptage des jetons de compression monopolise les ressources).
 
 ### Chien de garde systemd (boucle d'événements figée)
 

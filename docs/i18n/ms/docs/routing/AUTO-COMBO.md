@@ -132,13 +132,13 @@ Pemarkahan automatik memilih penyedia/model terbaik bagi setiap permintaan
 Combo yang `name`-nya sama dengan id model biasa (contohnya combo bernama
 `gpt-5.5`) ialah **corak yang disengajakan dan disokong**, bukannya pepijat: ia merupakan
 mekanisme sandaran penyedia bagi setiap id model yang didokumentasikan dalam
-[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Oleh sebab resolusi combo
+[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940). Oleh sebab resolusi combo
 disemak sebelum resolusi id model biasa
 (`getComboForModel()` dalam `src/sse/services/model.ts`), permintaan untuk id biasa
 `gpt-5.5` dihalakan melalui sasaran combo tersebut (contohnya
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) dan bukannya terus kepada
 satu penyedia — ini menggunakan semula keutamaan combo-sebelum-penulisan-semula yang dibina untuk
-[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) dan
+[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) dan
 diuji bagi regresi oleh `tests/unit/responses-combo-resolution-3227.test.ts` dan
 `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
 
@@ -184,7 +184,7 @@ Dua kesilapan lazim:
 - **`auto` tidak menggunakan combo anda.** `auto`/`auto/*` membina kumpulan calonnya sendiri tanpa konfigurasi dan hanya merujuk combo tersimpan jika sesuatu combo benar-benar dinamakan `auto` (tidak disyorkan). Untuk menghalakan melalui combo, hantar nama tepatnya — bukan `auto`.
 - **`openrouter/auto` ialah produk OpenRouter berbayar yang sebenar** ("Auto Best Available"), bukannya alias OmniRoute. Ia merupakan entri model statik tunggal dalam daftar OpenRouter (`open-sse/config/providers/registry/openrouter/index.ts`) dan dibilkan secara berasingan. Gunakan Settings → Routing → Hide paid models untuk mengecualikannya daripada kumpulan `auto`.
 
-Lihat [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) dan [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) untuk kekeliruan asal yang didokumentasikan di sini.
+Lihat [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) dan [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) untuk kekeliruan asal yang didokumentasikan di sini.
 
 ## Cara Ia Berfungsi (Auto-Combo Tersimpan)
 

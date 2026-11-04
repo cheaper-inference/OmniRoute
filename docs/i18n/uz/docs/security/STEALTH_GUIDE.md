@@ -162,7 +162,7 @@ Tegishli nuqtalar:
 
 - `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS` ni oʻqiydi
 - `src/lib/oauth/providers/antigravity.ts` — hisob maʼlumotlarini ulash
-- Dastlabki hodisa hisoboti: Muhokama [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- Dastlabki hodisa hisoboti: Muhokama [#1183](https://github.com/cheaper-inference/OmniRoute/discussions/1183)
 
 ---
 

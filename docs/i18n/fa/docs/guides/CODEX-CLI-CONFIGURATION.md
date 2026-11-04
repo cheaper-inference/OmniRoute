@@ -478,7 +478,7 @@ codex debug models --bundled       # فهرست کردن کاتالوگ مدله
 | نشست پیوسته حسابها را عوض میکند / تداوم کش پرامپت میان نوبتها از بین میرود | TTL وابستگی نشست روی `0` است (غیرفعال)                                    | `sessionAffinityTtlMs`   |
 | اتصال در میانه استدلال، بدون هیچ پرامپتی در سمت کلاینت، قطع میشود          | نگهبان بیکاری جریان پس از ۱۰ دقیقه بدون دریافت قطعه بالادستی فعال شده است | `STREAM_IDLE_TIMEOUT_MS` |
 
-بحثهای مرتبط: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (قطع شدن وظایف طولانی)، [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (دلیل غیرفعال بودن پیشفرض وابستگی). پیگیری: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+بحثهای مرتبط: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (قطع شدن وظایف طولانی)، [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (دلیل غیرفعال بودن پیشفرض وابستگی). پیگیری: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. وابستگی نشست — ثابت نگه داشتن یک مکالمه روی یک حساب
 

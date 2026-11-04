@@ -138,8 +138,8 @@ səviyyələrdə provayder standart olaraq gizlədilə bilər.
 
 ## İstinadlar
 
-- Problem: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- Müzakirə: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- Problem: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- Müzakirə: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - Mənbə: `src/shared/constants/providers/web-cookie.ts` (provayder tərifi)
 - HAR idxalı: `src/shared/utils/m365HarImport.ts`
 - Giriş məlumatı sahələri: `src/shared/providers/webSessionCredentials.ts`

@@ -56,7 +56,7 @@ Nke ahụ **anaghị akwụsị mmepe**:
 Lelee ma enwere mkpọchi mepere emepe tupu i chee na a pụrụ ijikọ alaka ịchọrọ:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 E dekọrọ usoro njikọta (label `queue` nke onye nwe ya → Mergify) na

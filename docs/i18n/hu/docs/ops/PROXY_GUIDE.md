@@ -260,7 +260,7 @@ Ez a frissítés utáni első indításkor egyszer történik meg. Az újbóli f
 
 ## 1proxy ingyenes proxy piactér
 
-> 🆕 **Közreműködő: [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (Hibajegy: [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕 **Közreműködő: [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (Hibajegy: [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788))
 
 Az OmniRoute integrálható a **[1proxy](https://1proxy-api.aitradepulse.com)** közösségi platformmal, így hozzáférést biztosít **több száz ingyenes, ellenőrzött proxyhoz** a világ minden tájáról. Ez tökéletes megoldás azoknak a felhasználóknak, akik nem rendelkeznek saját proxyinfrastruktúrával.
 

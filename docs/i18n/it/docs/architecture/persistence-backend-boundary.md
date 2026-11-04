@@ -5,7 +5,7 @@
 ---
 
 - **Stato:** Proposto — richiede l'approvazione del maintainer prima dell'inizio del lavoro sul runtime
-- **Issue di tracciamento:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
+- **Issue di tracciamento:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
 - **Ambito:** Solo architettura della persistenza; questa decisione non aggiunge né seleziona un database esterno
 
 ## Contesto

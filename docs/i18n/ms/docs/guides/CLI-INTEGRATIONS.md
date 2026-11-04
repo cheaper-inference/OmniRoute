@@ -181,7 +181,7 @@ Kedua-dua bentuk menulis satu **profil pengesahan** 5dive, dan setiap kedudukan 
 
 Kunci API diserahkan kepada 5dive melalui **stdin** (`--api-key=-`), jadi ia tidak pernah muncul dalam output `ps`.
 
-Menghalakan profil kepada **kombo** OmniRoute dan bukannya satu model tunggal membolehkan armada mendapat pemindahan ganti penyedia: apabila titik akhir utama terputus sepenuhnya di pertengahan giliran dalam pelaksanaan yang direkodkan pada [#11578](https://github.com/diegosouzapw/OmniRoute/issues/11578), ejen menyelesaikan langkah-langkah yang selebihnya menggunakan sandaran tanpa pernah mendedahkan gangguan tersebut.
+Menghalakan profil kepada **kombo** OmniRoute dan bukannya satu model tunggal membolehkan armada mendapat pemindahan ganti penyedia: apabila titik akhir utama terputus sepenuhnya di pertengahan giliran dalam pelaksanaan yang direkodkan pada [#11578](https://github.com/cheaper-inference/OmniRoute/issues/11578), ejen menyelesaikan langkah-langkah yang selebihnya menggunakan sandaran tanpa pernah mendedahkan gangguan tersebut.
 
 ---
 

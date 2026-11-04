@@ -5,7 +5,7 @@
 ---
 
 Šajā dokumentā ir fiksēts ieviešanas lēmums saistībā ar
-[problēmu #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854). Publiskie produkti ir
+[problēmu #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854). Publiskie produkti ir
 attēloti kā četras pakalpojumu sniedzēju saimes. Reģions ir savienojuma dati, nevis atsevišķs produkts.
 
 ## Lēmums

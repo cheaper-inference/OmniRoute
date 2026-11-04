@@ -4,7 +4,7 @@
 
 ---
 
-이 문서는 [Issue #7854](https://github.com/diegosouzapw/OmniRoute/issues/7854)에 대한 구현 결정을 기록합니다. 공개 제품은 네 가지 공급자 제품군으로 표시됩니다. 리전은 연결 데이터이며 별도의 제품이 아닙니다.
+이 문서는 [Issue #7854](https://github.com/cheaper-inference/OmniRoute/issues/7854)에 대한 구현 결정을 기록합니다. 공개 제품은 네 가지 공급자 제품군으로 표시됩니다. 리전은 연결 데이터이며 별도의 제품이 아닙니다.
 
 ## 결정
 

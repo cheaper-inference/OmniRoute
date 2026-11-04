@@ -223,7 +223,7 @@ livenessProbe:
 
 **Má ṣe** darí **liveness** kubelet sí `/api/monitoring/health`. Path yẹn ń ṣe iṣẹ́ DB/monitoring gidi, yóò sì fi ìkìlọ̀ èké hàn lábẹ́ ẹrù.
 
-Ohun tó jọmọ́: [#10052](https://github.com/diegosouzapw/OmniRoute/issues/10052) (àwọn ìwádìí nígbà tí event loop bá dí), [#9685](https://github.com/diegosouzapw/OmniRoute/issues/9685) / [#10055](https://github.com/diegosouzapw/OmniRoute/pull/10055) (catalog pricing tó ń gba agbára púpọ̀), [#10117](https://github.com/diegosouzapw/OmniRoute/issues/10117) (compression token-count tó ń gba agbára púpọ̀).
+Ohun tó jọmọ́: [#10052](https://github.com/cheaper-inference/OmniRoute/issues/10052) (àwọn ìwádìí nígbà tí event loop bá dí), [#9685](https://github.com/cheaper-inference/OmniRoute/issues/9685) / [#10055](https://github.com/cheaper-inference/OmniRoute/pull/10055) (catalog pricing tó ń gba agbára púpọ̀), [#10117](https://github.com/cheaper-inference/OmniRoute/issues/10117) (compression token-count tó ń gba agbára púpọ̀).
 
 ### watchdog systemd (event loop tó di)
 

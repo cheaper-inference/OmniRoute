@@ -5,7 +5,7 @@
 ---
 
 Kiolezo: xquik #11370 (iliunganishwa katika release/v3.8.51). Mkao: `fallbackOnly`.
-Pendekezo la upstream: issue diegosouzapw/OmniRoute#11637.
+Pendekezo la upstream: issue cheaper-inference/OmniRoute#11637.
 
 ## 1. Ukweli halisi wa huduma (nyaraka rasmi, zilizohakikiwa kwa kulinganisha)
 

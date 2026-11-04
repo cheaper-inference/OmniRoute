@@ -65,7 +65,7 @@ zástupca na online či osobnom podujatí.
 Prípady hrubého, obťažujúceho alebo inak neprijateľného správania možno
 nahlásiť vedúcim predstaviteľom komunity zodpovedným za presadzovanie otvorením
 súkromného bezpečnostného upozornenia na adrese
-<https://github.com/diegosouzapw/OmniRoute/security/advisories/new>
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
 alebo odoslaním e-mailu správcovi na adresu diegosouza.pw@outlook.com.
 Informácie o incidentoch citlivých z hľadiska bezpečnosti nájdete v súbore [`SECURITY.md`](SECURITY.md).
 Všetky sťažnosti budú bezodkladne a spravodlivo preskúmané a prešetrené.

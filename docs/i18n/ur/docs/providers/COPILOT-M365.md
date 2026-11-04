@@ -137,8 +137,8 @@ BizChat کی روٹنگ اور ماڈل تک رسائی کو متاثر کرتا
 
 ## حوالہ جات
 
-- مسئلہ: [#12779](https://github.com/diegosouzapw/OmniRoute/issues/12779)
-- مباحثہ: [#12756](https://github.com/diegosouzapw/OmniRoute/discussions/12756)
+- مسئلہ: [#12779](https://github.com/cheaper-inference/OmniRoute/issues/12779)
+- مباحثہ: [#12756](https://github.com/cheaper-inference/OmniRoute/discussions/12756)
 - ماخذ: `src/shared/constants/providers/web-cookie.ts` (فراہم کنندہ کی تعریف)
 - HAR درآمد: `src/shared/utils/m365HarImport.ts`
 - Credential فیلڈز: `src/shared/providers/webSessionCredentials.ts`

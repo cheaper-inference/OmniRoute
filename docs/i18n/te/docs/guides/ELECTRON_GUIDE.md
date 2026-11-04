@@ -198,7 +198,7 @@ spawn(process.execPath, [serverScript], {
 
 ## స్వీయ-నవీకరణ
 
-GitHub ప్రొవైడర్ (`diegosouzapw/OmniRoute`)తో `electron-updater` ఉపయోగిస్తుంది.
+GitHub ప్రొవైడర్ (`cheaper-inference/OmniRoute`)తో `electron-updater` ఉపయోగిస్తుంది.
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
 - ఈవెంట్లు `update-status` IPC ద్వారా రెండరర్కు ఫార్వార్డ్ చేయబడ్డాయి: `checking`, `available`, `not-available`, `downloading` ( `percent` తో), `downloaded`, `error`
@@ -273,7 +273,7 @@ npm run electron:build:win
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-విడుదలలు GitHub విడుదలలకు ప్రచురించబడతాయి (`diegosouzapw/OmniRoute`), ఇక్కడ కూడా `electron-updater` కొత్త సంస్కరణల కోసం తనిఖీ చేస్తుంది.
+విడుదలలు GitHub విడుదలలకు ప్రచురించబడతాయి (`cheaper-inference/OmniRoute`), ఇక్కడ కూడా `electron-updater` కొత్త సంస్కరణల కోసం తనిఖీ చేస్తుంది.
 
 ## ట్రబుల్షూటింగ్
 

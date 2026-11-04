@@ -412,7 +412,7 @@ git add quality-baseline.json
 ### CodeQL ರ್ಯಾಚೆಟ್: ರಿಫ್ರೆಶ್ ಆವರ್ತನೆ ಮತ್ತು ಹಸ್ತಚಾಲಿತ ಟ್ರಿಗರ್
 
 `check:codeql-ratchet` **ರೆಪೊ ಸ್ಥಿತಿಯನ್ನು ಓದುತ್ತದೆ; ಅದನ್ನು ವೇಳಾಪಟ್ಟಿಯ ಪ್ರಕಾರ ರಿಫ್ರೆಶ್ ಮಾಡಲಾಗುತ್ತದೆ — ಪ್ರತಿ PR ಗೆ ಅಲ್ಲ.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` ವರದಿ ಮಾಡುವ
+`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` ವರದಿ ಮಾಡುವ
 `state: configured`, `schedule: weekly` ಎಂಬುದು GitHub ನ ಡೀಫಾಲ್ಟ್-ಸೆಟಪ್ ಸ್ಕ್ಯಾನ್ ಆಗಿದ್ದು,
 ಪ್ರತಿ ಪುಶ್ಗೆ ನಡೆಯುವ ವಿಶ್ಲೇಷಣೆಯಲ್ಲ. ಪರಿಣಾಮ: ಎಚ್ಚರಿಕೆಗಳನ್ನು ಸರಿಪಡಿಸುವ PR ವಿಲೀನಗೊಂಡ ನಂತರವೂ,
 ಮುಂದಿನ ನಿಗದಿತ ಸ್ಕ್ಯಾನ್ ನಡೆಯುವವರೆಗೆ ರ್ಯಾಚೆಟ್ ಹಳೆಯ, ಹೆಚ್ಚಿನ ಸಂಖ್ಯೆಯನ್ನೇ ಓದುತ್ತಿರುತ್ತದೆ —

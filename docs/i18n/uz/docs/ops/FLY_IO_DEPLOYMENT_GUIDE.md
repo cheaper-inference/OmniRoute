@@ -89,7 +89,7 @@ flyctl version
 ### 4.1 Kodni klonlash va katalogga kirish
 
 ```powershell
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 ```
 
@@ -293,7 +293,7 @@ Fly mashinalarni avtomatik ravishda bosqichma-bosqich yangilaydi.
 
 ### 9.1 Forkingizdagi `fly.toml` faylini saqlagan holda yuqori oqim repozitoriysi yangilanishlarini kuzatish
 
-Agar joriy repozitoriy fork boʻlsa va `https://github.com/diegosouzapw/OmniRoute` yuqori oqim repozitoriysidagi yangilanishlarni sinxronlashtirmoqchi boʻlsangiz, quyidagi ish jarayoniga amal qiling.
+Agar joriy repozitoriy fork boʻlsa va `https://github.com/cheaper-inference/OmniRoute` yuqori oqim repozitoriysidagi yangilanishlarni sinxronlashtirmoqchi boʻlsangiz, quyidagi ish jarayoniga amal qiling.
 
 Avval masofaviy repozitoriylaringizni tekshiring:
 
@@ -309,7 +309,7 @@ Kamida quyidagilar koʻrinishi kerak:
 Agar `upstream` sozlanmagan boʻlsa, uni qoʻshing:
 
 ```powershell
-git remote add upstream https://github.com/diegosouzapw/OmniRoute.git
+git remote add upstream https://github.com/cheaper-inference/OmniRoute.git
 ```
 
 Yuqori oqim bilan sinxronlashtirishdan oldin, eng soʻnggi commitlar va teglarni oling:

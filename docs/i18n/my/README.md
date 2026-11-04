@@ -45,9 +45,9 @@
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=social)](https://github.com/cheaper-inference/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/OmniRoute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 အသိုင်းအဝိုင်းထဲ ဝင်ရောက်ပါ
@@ -96,7 +96,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 [![လိုင်စင်: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker ဆွဲယူမှုများ](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron ဒေါင်းလုဒ်များ](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![Electron ဒေါင်းလုဒ်များ](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -521,7 +521,7 @@ strategy **20** ခုလုံးကို ကွန်ဘိုအဆင့်
 OmniRoute သည် MIT လိုင်စင်ရရှိထားပြီး အများမြင်နိုင်စွာ ထိန်းသိမ်းဖွံ့ဖြိုးထားသည်။ ၎င်းက သင့်အချိန် သို့မဟုတ် ငွေကြေးကို ချွေတာပေးပါက လွတ်လပ်စွာ ဆက်လက်ရပ်တည်နိုင်ရန် သင့်နှင့်ကိုက်ညီသည့် နည်းလမ်းကို ရွေးချယ်ပံ့ပိုးနိုင်သည်။ ပံ့ပိုးကူညီမှုသည် လမ်းကြောင်းရွေးချယ်မှု ဦးစားပေးအစီအစဉ်ကို မည်သည့်အခါမျှ မသက်ရောက်ပါ၊ ၎င်းသည် အဆင့်သတ်မှတ်ချက်မဟုတ်ဘဲ မြင်သာမှုကိုသာ ဝယ်ယူခြင်းဖြစ်သည်။
 
 <table>
-  <tr><td nowrap>⭐ <b>Repo ကို ကြယ်ပေးပါ</b></td><td>အခမဲ့ — မြင်သာမှုကို အမှန်တကယ် အထောက်အကူပြုသည်</td><td><a href="https://github.com/diegosouzapw/OmniRoute">OmniRoute ကို ကြယ်ပေးပါ</a></td></tr>
+  <tr><td nowrap>⭐ <b>Repo ကို ကြယ်ပေးပါ</b></td><td>အခမဲ့ — မြင်သာမှုကို အမှန်တကယ် အထောက်အကူပြုသည်</td><td><a href="https://github.com/cheaper-inference/OmniRoute">OmniRoute ကို ကြယ်ပေးပါ</a></td></tr>
   <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>တစ်ကြိမ်တည်း သို့မဟုတ် လစဉ် · ပလက်ဖောင်းအခကြေးငွေ လုံးဝမရှိ</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
   <tr><td nowrap>☕ <b>Ko-fi</b></td><td>လျင်မြန်သော တစ်ကြိမ်တည်း အလှူငွေ၊ အလှူရှင်အတွက် စာရင်းသွင်းရန်မလို</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
   <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>သေးငယ်ပြီး အလွတ်သဘော ပံ့ပိုးမှု</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
@@ -558,7 +558,7 @@ Pix copia-e-cola:
 
 </details>
 
-🐛 ချို့ယွင်းချက်တစ်ခု တွေ့ရှိပါသလား သို့မဟုတ် အကြံပြုချက်ရှိပါသလား။ [ဆွေးနွေးမှု](https://github.com/diegosouzapw/OmniRoute/discussions) တစ်ခု ဖွင့်ပါ။
+🐛 ချို့ယွင်းချက်တစ်ခု တွေ့ရှိပါသလား သို့မဟုတ် အကြံပြုချက်ရှိပါသလား။ [ဆွေးနွေးမှု](https://github.com/cheaper-inference/OmniRoute/discussions) တစ်ခု ဖွင့်ပါ။
 
 <br/>
 
@@ -1256,7 +1256,7 @@ port တစ်ခုတည်းရှိ process တစ်ခုတည်းက
 
 2026-10-18 ရက်နေ့ရှိ canonical မက်ထရစ်များ: **သီးခြားဗီဒီယို 1.976 ခု** · **သိရှိထားသော ကြည့်ရှုမှု 20.220.289 ကြိမ်** (`v > 0`) · **ကွန်ရက်အလိုက် ချန်နယ်/ပရိုဖိုင် 1.210 ခု**။ မူရင်းဒက်ရှ်ဘုတ်တွင် အတန်း 1.976 တန်း (YouTube 1.352 = ဗီဒီယိုအရှည် 740 ခု + Shorts 612 ခု · TikTok 334 ခု · Instagram 290 ခု) ပါဝင်သည်။ ဗီဒီယိုတစ်ခုစီအတွက် အများဆုံးကြည့်ရှုမှုအရေအတွက်ကို ထိန်းသိမ်းထားသည့် canonical URL ဖြင့် စံသတ်မှတ်ပြီးနောက် ထပ်နေသည့်အရာ တစ်ခုမျှ မကျန်တော့ပါ။ YouTube ဒေတာစုဆောင်းမှုကို 2026-10-13 ရက်နေ့တွင် ရပ်တန့်ထားသည် (14 မှ 18/10 အတွင်း API quota ကုန်ဆုံးသွားသောကြောင့်)။ TikTok/Instagram ဒေတာစုဆောင်းမှုကိုလည်း 2026-09-02 မှစ၍ ရပ်တန့်ထားသည် (ဒေတာစုဆောင်းရန် ခရက်ဒစ်မရှိသောကြောင့်)။ ဗီဒီယို 76 ခုအတွက် ကြည့်ရှုမှုအရေအတွက် မရှိသေးပါ။
 
-> 🎬 **OmniRoute အကြောင်း ဗီဒီယိုတစ်ခု ဖန်တီးထားပါသလား။** လင့်ခ်နှင့်အတူ [ပြဿနာတစ်ခု](https://github.com/diegosouzapw/OmniRoute/issues/new) သို့မဟုတ် [ဆွေးနွေးမှုတစ်ခု](https://github.com/diegosouzapw/OmniRoute/discussions) ဖွင့်ပါ — ၎င်းကို ဤနေရာတွင် ဖော်ပြပေးပါမည်။
+> 🎬 **OmniRoute အကြောင်း ဗီဒီယိုတစ်ခု ဖန်တီးထားပါသလား။** လင့်ခ်နှင့်အတူ [ပြဿနာတစ်ခု](https://github.com/cheaper-inference/OmniRoute/issues/new) သို့မဟုတ် [ဆွေးနွေးမှုတစ်ခု](https://github.com/cheaper-inference/OmniRoute/discussions) ဖွင့်ပါ — ၎င်းကို ဤနေရာတွင် ဖော်ပြပေးပါမည်။
 
 <br/>
 
@@ -1276,8 +1276,8 @@ port တစ်ခုတည်းရှိ process တစ်ခုတည်းက
 | 🟢 **WhatsApp — 🇧🇷 ဘရာဇီး**                                            | [အဖွဲ့သို့ ဝင်ရောက်ရန်](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                                         |
 | 🌍 **ဝဘ်ဆိုက်**                                                        | [omniroute.online](https://omniroute.online)                                                                                                     |
 | 🌍 **🌍StHub OmniRoute အသိုင်းအဝိုင်း (အခမဲ့)**                        | [StHub ပေါ်တယ်](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                                           |
-| 📦 **အရင်းအမြစ်ကုဒ်**                                                  | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                                                   |
-| 🐛 **ချို့ယွင်းချက်တစ်ခုကို တိုင်ကြားရန်**                             | [ပြဿနာတစ်ခု ဖွင့်ရန်](https://github.com/diegosouzapw/OmniRoute/issues) — `npm run system-info` ၏ ရလဒ်ကို ပူးတွဲပါ                               |
+| 📦 **အရင်းအမြစ်ကုဒ်**                                                  | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                                                         |
+| 🐛 **ချို့ယွင်းချက်တစ်ခုကို တိုင်ကြားရန်**                             | [ပြဿနာတစ်ခု ဖွင့်ရန်](https://github.com/cheaper-inference/OmniRoute/issues) — `npm run system-info` ၏ ရလဒ်ကို ပူးတွဲပါ                          |
 | 🤝 **ပါဝင်ကူညီရန်**                                                    | [CONTRIBUTING.md](CONTRIBUTING.md) · [ဘရန်ချ်ခွဲခြင်းနှင့် ထုတ်ဝေမှုပုံစံ](docs/ops/BRANCHING_MODEL.md) · `good first issue` တစ်ခုကို ရွေးချယ်ပါ |
 | 💚 **ပရောဂျက်ကို ပံ့ပိုးရန်**                                          | [ပံ့ပိုးနိုင်သည့် နည်းလမ်းများ ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)                             |
 
@@ -1635,7 +1635,7 @@ port တစ်ခုတည်းရှိ process တစ်ခုတည်းက
 
 </div>
 
-[![Contributors](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
 
 <sub>2026-11-02 တွင် live <code>release/v3.8.53</code> tip <code>1c7135e0fb</code> (commit ၇,၉၇၂ ခု) ကို စစ်ဆေးခဲ့သည် — <b>ပုံမှန်ပြုထားသော လူသား Git အထောက်အထား ၁,၀၇၄ ခု</b> ရှိပြီး ၇၅၉ ခုသည် commit author များအဖြစ် (maintainer အပါအဝင်) ပေါ်လာကာ ၃၁၅ ခုသည် <code>Co-authored-by</code> trailer များတွင်သာ ပါဝင်သည်။ ဤစာရင်းကောက်ယူမှုတွင် <code>.mailmap</code> ကို အသုံးပြုထားပြီး e-mail လိပ်စာများကို စာလုံးအကြီးအသေးမခွဲခြားဘဲ နှိုင်းယှဉ်ထားသည်။ ဂဏန်းပါသော GitHub noreply လိပ်စာနှင့် ရိုးရိုး GitHub noreply လိပ်စာတို့သည် တူညီသော handle ကို ဖော်ပြသည့်အခါတွင်သာ ပေါင်းစည်းထားသည်။ bot/agent/service/placeholder အထောက်အထား ၂၉ ခုကို ဖယ်ထုတ်ထားပြီး display name တူညီရုံမျှဖြင့် ပုံမှန် e-mail လိပ်စာများကို မပေါင်းစည်းထားပါ။ 2026-08-24 စစ်ဆေးမှုတွင် ၆၃၉ ခုကို ထုတ်ပြန်ခဲ့သည်။ ထိုစစ်ဆေးမှု၏ အခြေခံ <code>ac02c5b42f</code> ပေါ်တွင် ဤနည်းလမ်းကို ပြန်လည်အသုံးပြုသောအခါ ၆၁၉ ခု ရရှိသဖြင့် တိုးလာခြင်းသည် နည်းလမ်းကို ပိုမိုလျော့ရဲစွာ အသုံးပြုခြင်းကြောင့်မဟုတ်ဘဲ ပံ့ပိုးသူအသစ်များကြောင့် ဖြစ်သည်။</sub>
 
@@ -1664,11 +1664,11 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 ## 📊 ကြယ်များ
 
-<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="ကြယ်မှတ်တမ်းဇယား" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <img alt="ကြယ်မှတ်တမ်းဇယား" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
  </picture>
 </a>
 

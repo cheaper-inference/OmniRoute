@@ -9,7 +9,7 @@
 Nếu phát hiện lỗ hổng bảo mật trong OmniRoute, vui lòng báo cáo một cách có trách nhiệm:
 
 1. **KHÔNG** mở issue công khai trên GitHub
-2. Sử dụng [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
+2. Sử dụng [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
 3. Bao gồm: mô tả, các bước tái hiện và tác động tiềm ẩn
 
 ## Thời gian phản hồi
@@ -42,7 +42,7 @@ nhánh `stable/v3` (xem [`ROADMAP.md`](ROADMAP.md) → "Giai đoạn 3 — v3.9.
   tùy thời điểm nào muộn hơn**. Ngày kết thúc tương ứng được ghi lại trong ghi chú phát hành 3.9.0 và trong
   [`ROADMAP.md`](ROADMAP.md) khi bản phát hành được tạo.
 - **Báo cáo lỗ hổng trong dòng LTS:** sử dụng cùng kênh như mọi phiên bản khác —
-  một [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) riêng tư,
+  một [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) riêng tư,
   tuyệt đối không sử dụng issue công khai. Hãy nêu rõ phiên bản bạn đã kiểm thử (ví dụ `3.9.2`); các bản sửa lỗi được đưa vào
   `stable/v3` và được chuyển tiếp sang v4.
 - **Đường cơ sở bảo mật tại thời điểm phát hành LTS:** trạng thái trình quét đã đo lường, các bằng chứng về bộ bảo vệ tuyến và

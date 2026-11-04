@@ -132,13 +132,13 @@ handleComboChat (engine ដូចគ្នានឹង combos ដែលបាន
 Combo ដែលមាន `name` ដូចគ្នាបេះបិទនឹង model id ទទេមួយ (ឧ. combo ដែលមានឈ្មោះ
 `gpt-5.5`) គឺជា **លំនាំដែលគាំទ្រ និងមានចេតនា** មិនមែនជា bug ទេ៖ វាជា
 យន្តការសម្រាប់ provider fallback តាម model id នីមួយៗ ដែលបានចងក្រងជាឯកសារនៅក្នុង
-[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940)។ ដោយសារការដោះស្រាយ combo
+[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940)។ ដោយសារការដោះស្រាយ combo
 ត្រូវបានពិនិត្យមុនការដោះស្រាយ bare-model-id
 (`getComboForModel()` នៅក្នុង `src/sse/services/model.ts`) សំណើសម្រាប់ bare id
 `gpt-5.5` នឹងត្រូវបានបញ្ជូនឆ្លងកាត់ targets របស់ combo (ឧ.
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) ជំនួសឱ្យការបញ្ជូនដោយផ្ទាល់ទៅ
 provider តែមួយ — វាប្រើឡើងវិញនូវអាទិភាព combo-before-rewrite ដែលបានបង្កើតសម្រាប់
-[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) ហើយត្រូវបាន
+[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) ហើយត្រូវបាន
 សាកល្បង regression ដោយ `tests/unit/responses-combo-resolution-3227.test.ts` និង
 `tests/unit/combo-name-codex-responses-rewrite.test.ts`។
 
@@ -184,7 +184,7 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 - **`auto` មិនប្រើ combos របស់អ្នកទេ។** `auto`/`auto/*` បង្កើត candidate pool ដែលមិនត្រូវការការកំណត់រចនាសម្ព័ន្ធដោយខ្លួនឯង ហើយពិគ្រោះ combo ដែលបានរក្សាទុកតែក្នុងករណីដែលមាន combo មួយឈ្មោះ `auto` ពិតប្រាកដប៉ុណ្ណោះ (មិនត្រូវបានណែនាំ)។ ដើម្បី route តាមរយៈ combo សូមផ្ញើឈ្មោះពិតប្រាកដរបស់វា — មិនមែន `auto` ទេ។
 - **`openrouter/auto` គឺជាផលិតផល OpenRouter បង់ប្រាក់ពិតប្រាកដ** ("Auto Best Available") មិនមែនជា alias របស់ OmniRoute ទេ។ វាគឺជាធាតុ static model តែមួយគត់នៃ OpenRouter registry (`open-sse/config/providers/registry/openrouter/index.ts`) ហើយត្រូវបានគិតថ្លៃដោយឡែក។ ប្រើ Settings → Routing → Hide paid models ដើម្បីដកវាចេញពី `auto` pools។
 
-សូមមើល [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) និង [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) សម្រាប់ភាពច្រឡំដំបូងដែលឯកសារនេះពន្យល់។
+សូមមើល [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) និង [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) សម្រាប់ភាពច្រឡំដំបូងដែលឯកសារនេះពន្យល់។
 
 ## របៀបដែលវាដំណើរការ (Auto-Combos ដែលត្រូវបានរក្សាទុក)
 

@@ -107,7 +107,7 @@ npm start
 
 एम्बेड-सक्षम बिल्ड के बिना पेज फ़्रेम में खुलने से मना कर देता है। एक्सटेंशन रिस्पॉन्स हेडर से इसका पता लगाता है और बाहरी ब्राउज़र पर वापस चला जाता है — कुछ भी खराब नहीं होता और यह एक बार इसकी सूचना देता है।
 [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) और इश्यू
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273) देखें।
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273) देखें।
 
 ---
 

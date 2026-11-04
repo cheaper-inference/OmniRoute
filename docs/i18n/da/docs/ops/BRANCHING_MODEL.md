@@ -56,7 +56,7 @@ Det **stopper ikke udviklingen**:
 Kontrollér, om der er en åben frysning, før du antager, at den ønskede gren kan sammenflettes:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 Mekanismerne for sammenfletning (ejerens `queue`-etiket → Mergify) er dokumenteret i

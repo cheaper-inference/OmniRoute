@@ -401,7 +401,7 @@ git add quality-baseline.json
 ### የCodeQL ratchet፦ የማደሻ ድግግሞሽ እና በእጅ ማስጀመር
 
 `check:codeql-ratchet` **በጊዜ ሰሌዳ የሚታደሰውን የrepo ሁኔታ እንጂ በእያንዳንዱ PR የሚታደሰውን አያነብም።**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup`
+`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup`
 `state: configured`፣ `schedule: weekly` የሚል ውጤት ይሰጣል፦ ይህ የGitHub default-setup scan እንጂ
 በእያንዳንዱ push የሚካሄድ analysis አይደለም። ውጤቱም፦ alertsን የሚያስተካክል PR merge ከተደረገ በኋላ፣
 ቀጣዩ በጊዜ ሰሌዳ የተያዘ scan እስኪካሄድ ድረስ ratchet የቆየውን ከፍተኛ ብዛት ማንበቡን ይቀጥላል፤

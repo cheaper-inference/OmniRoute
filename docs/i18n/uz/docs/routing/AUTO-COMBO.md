@@ -131,14 +131,14 @@ Avtomatik baholash har bir soʻrov uchun eng yaxshi provayder/modelni tanlaydi
 
 `name` maydoni oddiy model idʼi bilan bir xil bo‘lgan combo (masalan,
 `gpt-5.5` nomli combo) — xatolik emas, balki **ataylab yaratilgan va qo‘llab-quvvatlanadigan andoza**:
-bu [#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940) da hujjatlashtirilgan
+bu [#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940) da hujjatlashtirilgan
 har bir model idʼi uchun provayderga zaxiraviy o‘tish mexanizmidir. Combo
 aniqlash oddiy model idʼini aniqlashdan oldin tekshirilgani sababli
 (`src/sse/services/model.ts` ichidagi `getComboForModel()`), oddiy
 `gpt-5.5` idʼiga yuborilgan so‘rov to‘g‘ridan-to‘g‘ri bitta provayderga emas,
 combo maqsadlari (masalan, `acme-responses/gpt-5.5`,
 `backup-responses/gpt-5.5`) orqali yo‘naltiriladi — bunda
-[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) uchun yaratilgan
+[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) uchun yaratilgan
 qayta yozishdan oldin combo ustuvorligi qayta ishlatiladi va bu
 `tests/unit/responses-combo-resolution-3227.test.ts` hamda
 `tests/unit/combo-name-codex-responses-rewrite.test.ts` orqali regressiyaga qarshi
@@ -191,7 +191,7 @@ Ikkita keng tarqalgan xato:
 - **`auto` sizning combolaringizdan foydalanmaydi.** `auto`/`auto/*` o‘zining nol sozlamali nomzodlar jamlanmasini yaratadi va faqat combo aynan `auto` deb nomlangan bo‘lsa, saqlangan combolarni ko‘rib chiqadi (tavsiya etilmaydi). Combo orqali yo‘naltirish uchun `auto` emas, uning aniq nomini yuboring.
 - **`openrouter/auto` haqiqiy pulli OpenRouter mahsulotidir** ("Auto Best Available"), OmniRoute taxallusi emas. U OpenRouter reyestrining yagona statik model yozuvidir (`open-sse/config/providers/registry/openrouter/index.ts`) va alohida hisob-kitob qilinadi. Uni `auto` jamlanmalaridan chiqarib tashlash uchun Settings → Routing → Hide paid models parametridan foydalaning.
 
-Bu yerda hujjatlashtirilgan dastlabki chalkashlik haqida [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) va [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) ga qarang.
+Bu yerda hujjatlashtirilgan dastlabki chalkashlik haqida [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) va [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) ga qarang.
 
 ## U qanday ishlaydi (saqlanadigan avtomatik kombinatsiyalar)
 

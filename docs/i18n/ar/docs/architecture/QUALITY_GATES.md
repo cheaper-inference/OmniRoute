@@ -381,7 +381,7 @@ git add quality-baseline.json
 ### آلية ratchet الخاصة بـ CodeQL: وتيرة التحديث والتشغيل اليدوي
 
 يقرأ `check:codeql-ratchet` **حالة المستودع، التي تُحدَّث وفق جدول زمني — وليس لكل PR.**
-يعرض `gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup`
+يعرض `gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup`
 القيمتين `state: configured` و`schedule: weekly`: أي فحص الإعداد الافتراضي في GitHub، وليس تحليلًا
 يُجرى مع كل عملية دفع. والنتيجة: بعد دمج طلب PR يعمل على إصلاح التنبيهات، تستمر آلية ratchet في قراءة
 العدد القديم الأعلى حتى تشغيل الفحص المجدول التالي — ولذلك تُبلغ عن تراجع

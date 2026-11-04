@@ -454,7 +454,7 @@ validiert exakt diesen Build (Ausschnitt (a) von #8084). Nur PRs aus demselben R
 gh workflow run preview-artifact.yml -f pr_number=<N>   # oder das Label `preview-artifact` hinzufügen
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # Vorschauinstallation
 ```
 

@@ -114,7 +114,7 @@ npm start
 Ọ bụrụ na build anaghị akwado ntinye ahụ, ibe ahụ agaghị ekwe ka e tinye ya n'ime frame; extension ahụ ga-achọpụta nke a site na
 nkụnye isi nzaghachi wee laghachi n'iji ihe nchọgharị mpụga — ọ dịghị ihe ga-emebi, ọ ga-ekwukwa ya otu ugboro.
 Lee [`ENVIRONMENT.md`](../reference/ENVIRONMENT.md) na issue
-[#10273](https://github.com/diegosouzapw/OmniRoute/issues/10273).
+[#10273](https://github.com/cheaper-inference/OmniRoute/issues/10273).
 
 ---
 

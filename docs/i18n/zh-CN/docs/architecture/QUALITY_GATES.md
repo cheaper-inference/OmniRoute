@@ -373,7 +373,7 @@ git add quality-baseline.json
 ### CodeQL 棘轮：刷新频率和手动触发
 
 `check:codeql-ratchet` 读取的是**按计划刷新，而非每个 PR 都刷新的仓库状态。**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` 报告
+`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` 报告
 `state: configured`、`schedule: weekly`：这是 GitHub 的默认设置扫描，而非每次推送时
 都执行的分析。因此，在修复警报的 PR 合并后，棘轮会继续读取旧的、更高的数量，
 直到下一次计划扫描运行——在扫描结果更新前，它会在每个打开的 PR 上报告退化，

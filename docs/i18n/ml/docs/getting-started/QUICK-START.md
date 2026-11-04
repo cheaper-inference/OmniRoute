@@ -29,7 +29,7 @@ docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
 ### ഓപ്ഷൻ C: സോഴ്സിൽ നിന്ന്
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 npm run dev
@@ -165,4 +165,4 @@ OmniRoute തന്നെ **സൗജന്യവും ഓപ്പൺ സോ�
 
 - **[പ്രശ്നപരിഹാരം](../guides/TROUBLESHOOTING.md)** — സാധാരണ പ്രശ്നങ്ങളും പരിഹാരങ്ങളും
 - **[Discord](https://discord.gg/U47eFqAXCn)** — കമ്മ്യൂണിറ്റി പിന്തുണ
-- **[GitHub Issues](https://github.com/diegosouzapw/OmniRoute/issues)** — ബഗുകൾ റിപ്പോർട്ട് ചെയ്യുക
+- **[GitHub Issues](https://github.com/cheaper-inference/OmniRoute/issues)** — ബഗുകൾ റിപ്പോർട്ട് ചെയ്യുക

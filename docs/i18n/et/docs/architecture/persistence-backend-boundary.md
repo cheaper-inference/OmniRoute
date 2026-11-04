@@ -5,7 +5,7 @@
 ---
 
 - **Olek:** Kavandatud — enne käituskeskkonna töö alustamist on vaja hooldaja kinnitust
-- **Jälgimisülesanne:** [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)
+- **Jälgimisülesanne:** [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075)
 - **Ulatus:** Ainult püsivusarhitektuur; see otsus ei lisa ega vali välist andmebaasi
 
 ## Kontekst

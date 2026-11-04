@@ -42,7 +42,7 @@ Samplaí d'ionadaíocht ar ár bpobal áirítear úsáid seoladh ríomhphoist oi
 ## Forfheidhmiúcháin
 
 Is féidir cásanna de iompar maslach, ciaptha nó indéanta eile a thuairisciú do cheannairce phobal atá freagrach as an bhforfheidhmiúcháin trí chairtreach slándála príobháideach a oscailt ag
-<https://github.com/diegosouzapw/OmniRoute/security/advisories/new>
+<https://github.com/cheaper-inference/OmniRoute/security/advisories/new>
 ná trí ríomhphost a sheoladh chuig an gcoimeádaí ag diegosouza.pw@outlook.com.
 Le haghaidh eachtraí íogaire slándála, féach [`SECURITY.md`](SECURITY.md).
 Déanfar gach gearán a athbhreithniú agus a imscrúdú go tapa agus go cothrom.

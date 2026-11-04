@@ -492,7 +492,7 @@ Az OmniRoute két alapértelmezett beállítása észrevétlenül tönkreteheti 
 | A munkamenet folyamatosan fiókot vált / a prompt-gyorsítótár folytonossága megszakad a fordulók között | A munkamenet-affinitás TTL-je `0` (letiltva)                                          | `sessionAffinityTtlMs`   |
 | A kapcsolat az érvelés közben megszakad anélkül, hogy a kliens bármilyen üzenetet kapna                | Az adatfolyam inaktivitásfigyelője 10 perc után aktiválódott upstream adatrész nélkül | `STREAM_IDLE_TIMEOUT_MS` |
 
-Kapcsolódó beszélgetések: [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (hosszú feladatok megszakadása), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (miért van alapértelmezetten kikapcsolva az affinitás). Nyomon követés: [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287).
+Kapcsolódó beszélgetések: [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (hosszú feladatok megszakadása), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (miért van alapértelmezetten kikapcsolva az affinitás). Nyomon követés: [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
 ### 1. Munkamenet-affinitás — egy beszélgetés rögzítése egy fiókhoz
 
