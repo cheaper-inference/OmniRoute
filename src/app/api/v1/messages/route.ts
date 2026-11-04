@@ -212,7 +212,14 @@ async function postHandler(request: any, context: any, preParsedBody: any = null
       })
     );
   }
-  return applyHeaders(await handleChat(request, null, body));
+  return applyHeaders(
+    await handleChat(
+      request,
+      null,
+      body,
+      resolveIncomingCorrelationId(request.headers.get("x-correlation-id")) ?? undefined
+    )
+  );
 }
 
 // `logger: null` — the guardrail registry re-evaluates this request inside
