@@ -1,10 +1,29 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { proxyFetch, runWithProxyContext } from "../../open-sse/utils/proxyFetch.ts";
+import {
+  __setProxyHealthTcpCheckForTesting,
+  invalidateProxyHealth,
+} from "../../src/lib/proxyHealth.ts";
 import { getDefaultDispatcher, getDedicatedCodexImageDispatcher } from "../../open-sse/utils/proxyDispatcher.ts";
 
 const CODEX_GENERATION = "https://chatgpt.com/backend-api/codex/images/generations";
 const CODEX_EDITS = "https://chatgpt.com/backend-api/codex/images/edits";
+
+async function runWithHealthyProxyContext<T>(
+  proxy: { type: "http"; host: string; port: number },
+  fn: () => Promise<T>
+): Promise<T> {
+  const proxyUrl = `http://${proxy.host}:${proxy.port}`;
+  invalidateProxyHealth(proxyUrl);
+  __setProxyHealthTcpCheckForTesting(async () => true);
+  try {
+    return await runWithProxyContext(proxy, fn);
+  } finally {
+    __setProxyHealthTcpCheckForTesting(null);
+    invalidateProxyHealth(proxyUrl);
+  }
+}
 
 async function withTimeoutOverrides<T>(fn: () => Promise<T>): Promise<T> {
   const originalDirect = process.env.OMNIROUTE_DIRECT_HEADERS_TIMEOUT_MS;
@@ -126,7 +145,7 @@ test("proxied Codex image generation honors its own response-start deadline", as
   await withTimeoutOverrides(async () => {
     const proxy = { type: "http" as const, host: "127.0.0.1", port: 7897 };
     const capture = { calls: 0, dispatchers: [] as unknown[] };
-    const res = await runWithProxyContext(proxy, () =>
+    const res = await runWithHealthyProxyContext(proxy, () =>
       proxyFetch(
         CODEX_GENERATION,
         { method: "POST", body: JSON.stringify({ prompt: "test" }) },
@@ -144,7 +163,7 @@ test("proxied Codex image response-start timeout does not resubmit", async () =>
     const proxy = { type: "http" as const, host: "127.0.0.1", port: 7897 };
     const capture = { calls: 0, dispatchers: [] as unknown[] };
     await assert.rejects(
-      runWithProxyContext(proxy, () =>
+      runWithHealthyProxyContext(proxy, () =>
         proxyFetch(
           CODEX_EDITS,
           { method: "POST", body: JSON.stringify({ prompt: "test", images: [] }) },
