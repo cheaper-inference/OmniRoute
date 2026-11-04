@@ -19,7 +19,7 @@
  */
 
 import { isCompatibleProviderConnectionId } from "@/shared/utils/compatibleProviderId";
-import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import { isRegisteredFeatureFlagEnabled } from "../utils/registeredFeatureFlag.ts";
 import { isClaudeExtraUsageAllowed } from "@/lib/providers/claudeExtraUsage";
 import { filterCodexQuotaWindows } from "@/lib/providers/codexQuotaWindowPolicy";
 import { isCodexQuotaFilteringDisabled } from "@/lib/providers/codexQuotaFiltering";
@@ -516,7 +516,7 @@ export function resolveDynamicQuotaFetcher(
   if (!psd || psd.newApiAggregatorBalance !== true) return undefined;
 
   // Feature flag must be enabled
-  if (!isFeatureFlagEnabled("NEWAPI_AGGREGATOR_BALANCE")) return undefined;
+  if (!isRegisteredFeatureFlagEnabled("NEWAPI_AGGREGATOR_BALANCE")) return undefined;
 
   // The aggregator fetcher has no static registrar, so its invalidator is
   // registered on the first dynamic resolution — the same moment the fetcher's
