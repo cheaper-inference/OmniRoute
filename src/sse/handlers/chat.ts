@@ -28,6 +28,12 @@ import {
   recordModelLockoutFailure,
   isDailyQuotaExhausted,
 } from "@omniroute/open-sse/services/accountFallback.ts";
+import {
+  applyAvalancheSuppressionHeaders,
+  evaluateAvalancheRisk,
+  resolveAvalancheSettings,
+} from "@omniroute/open-sse/services/accountFallback/antiAvalanche.ts";
+import { estimateTokens } from "@omniroute/open-sse/services/contextManager.ts";
 import { getCombo, getComboForModel, getModelInfo } from "../services/model";
 import { stripContextWindowSuffix } from "@omniroute/open-sse/services/model.ts";
 import { resolveBareModelToConnectionDefault } from "@omniroute/open-sse/services/model.ts";
@@ -46,6 +52,7 @@ import { mergeAbortSignals } from "@omniroute/open-sse/executors/base.ts";
 import { resolveRequestAutoControls } from "@omniroute/open-sse/services/autoCombo/requestControls.ts";
 import { isVerifiedNativeCodexRequest } from "@omniroute/open-sse/config/codexIdentity.ts";
 import { resolveCompressionSettings } from "@omniroute/open-sse/handlers/chatCore/compressionSettings.ts";
+import { runWithTurnExecutionOwnership } from "@omniroute/open-sse/handlers/chatCore/turnExecutionContext.ts";
 import type { CompressionExclusions } from "@omniroute/open-sse/services/compression/exclusions.ts";
 import { resolveComboConfig } from "@omniroute/open-sse/services/comboConfig.ts";
 import { injectHandoffIntoBody } from "@omniroute/open-sse/services/contextHandoff.ts";
@@ -1445,7 +1452,13 @@ async function handleChatImplementation(
   );
 }
 
-export const handleChat = chatAdmission.withChatAdmission(handleChatImplementation);
+// One turn-execution ownership scope per client request (#18716): every account retry, rotation
+// and combo leg of this request re-enters chatCore under it and reuses the turn slot the request
+// already holds instead of 409ing itself. A scope per dispatch would not span those attempts.
+export const handleChat = chatAdmission.withChatAdmission(
+  (...args: Parameters<typeof handleChatImplementation>) =>
+    runWithTurnExecutionOwnership(() => handleChatImplementation(...args))
+);
 
 function readEmptyStreamSiblingRecoveryFlag(): boolean {
   try {
@@ -1618,7 +1631,7 @@ async function handleSingleModelChat(
   })();
   const resolvedModelGate = resolvedPolicy.createVisibleResolvedModelGate({
     apiKeyInfo,
-    apiKey: (await resolveClientApiKey(request)).apiKey,
+    request,
     contextModel: runtimeOptions.authorizationContextModel,
     comboGrantsTargets: runtimeOptions.comboGrantsTargets,
     provider,
@@ -2539,7 +2552,7 @@ async function handleSingleModelChat(
       }
 
       // Emergency fallback for budget exhaustion (402 / billing / quota keywords):
-      // reroute to a free model (default provider/model: nvidia + openai/gpt-oss-120b) exactly once.
+      // reroute to a free model (default provider/model: nvidia + nvidia/nemotron-3.5-super-vl-120b-a12b) exactly once.
       // Combo targets never emergency-hop: the combo is the operator's fallback policy
       // (target-level orchestration plus the global fallback #689 after it), and a
       // per-target hop burns extra upstream calls against exhausted providers (#1731).
@@ -2727,6 +2740,18 @@ async function handleSingleModelChat(
       const skipConnectionDisable =
         isRefusalReplay || shouldSkipConnDisable(result, is401, hasExtraKeys, provider);
 
+      // Anti-Avalanche Guard (opt-in): detect TPM / context-overflow rejections to suppress domino failover
+      const avalancheRisk =
+        (result.status === 429 || result.status === 400) && resolveAvalancheSettings().enabled
+          ? evaluateAvalancheRisk({
+              status: result.status,
+              errorText: errorStr,
+              provider,
+              model: effectiveModel,
+              promptTokens: estimateTokens(requestBody?.messages ?? requestBody),
+            })
+          : null;
+
       const { shouldFallback, cooldownMs } = skipConnectionDisable
         ? { shouldFallback: false, cooldownMs: 0 }
         : await markAccountUnavailable(
@@ -2744,9 +2769,20 @@ async function handleSingleModelChat(
               ),
               isCombo,
               headers: result.response.headers,
+              isAvalancheRisk: avalancheRisk?.isAvalancheRisk ?? false,
+              avalancheCooldownMs: avalancheRisk?.suggestedCooldownMs,
+              suppressFallback: avalancheRisk?.shouldSuppressFallback ?? false,
               structuredError: { code: result.errorCode, type: result.errorType },
             })
           );
+
+      if (avalancheRisk?.shouldSuppressFallback) {
+        log.warn(
+          "ANTI_AVALANCHE",
+          `${provider}/${model} cascading failover suppressed (${avalancheRisk.reason}, ~${avalancheRisk.promptTokens} tokens, attempt ${excludedConnectionIds.size + 1}) to prevent key exhaustion`
+        );
+        applyAvalancheSuppressionHeaders(result.response, avalancheRisk.reason);
+      }
 
       // An explicit pin (combo step `connectionId` / `x-omniroute-connection`) is an
       // operator instruction, not a suggestion: the account cooldown above is still

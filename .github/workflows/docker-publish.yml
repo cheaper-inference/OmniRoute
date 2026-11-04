@@ -61,11 +61,21 @@ jobs:
     if: >-
       github.event_name != 'schedule' &&
       (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
-    runs-on: ubuntu-latest
+    # With DOCKER_AMD64_RUNNER=blacksmith the small jobs around the build run on Blacksmith as
+    # well: on 2026-11-03 this job waited 3 h for a hosted ubuntu-latest slot behind ~300 queued
+    # PR runs. About 2.5 min here plus 4.5 min in `merge` per publish, on 2 vCPU.
+    runs-on: ${{ vars.DOCKER_AMD64_RUNNER == 'blacksmith' && 'blacksmith-2vcpu-ubuntu-2404' || 'ubuntu-latest' }}
+    permissions:
+      contents: read
+      # Read this month's docker-publish jobs for the Blacksmith budget step.
+      actions: read
     outputs:
       version: ${{ steps.version.outputs.version }}
       promote_latest: ${{ steps.version.outputs.promote_latest }}
       skip: ${{ steps.version.outputs.skip }}
+      # 'true' while DOCKER_AMD64_RUNNER=blacksmith and the month's Blacksmith minutes are
+      # under BLACKSMITH_MONTHLY_MINUTES_CAP; `build` and `merge` route on it.
+      blacksmith: ${{ steps.budget.outputs.blacksmith }}
     env:
       IMAGE_NAME: diegosouzapw/omniroute
     steps:
@@ -74,8 +84,23 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/v{0}', inputs.version) || '' }}
-          # Need full tag history for semver comparison when deciding :latest.
-          fetch-depth: 0
+          # Shallow: the :latest decision reads tag NAMES from `git ls-remote` below, so the
+          # 2.6 GB history is not needed. A full clone took 30+ min on a Blacksmith runner
+          # (outside GitHub's network) on 2026-11-03.
+          fetch-depth: 1
+
+      # Blacksmith keeps running and invoices past its free 3,000 minutes, and a publish costs
+      # ~90 of them, so the month's usage is summed here and the build falls back to the hosted
+      # runner at the cap (default 2,500, leaving room for the jobs already in flight).
+      - name: Stay within the Blacksmith monthly minutes
+        id: budget
+        env:
+          WANT: ${{ vars.DOCKER_AMD64_RUNNER }}
+          CAP: ${{ vars.BLACKSMITH_MONTHLY_MINUTES_CAP || '2500' }}
+          REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+          SELF_RUN_ID: ${{ github.run_id }}
+        run: node scripts/ci/blacksmith-budget.mjs
 
       - name: Resolve version, latest-promotion, and skip flag
         id: version
@@ -116,12 +141,16 @@ jobs:
           elif [ "$EVENT_NAME" = "workflow_dispatch" ]; then
             PROMOTE="${PROMOTE_INPUT:-false}"
           else
-            git fetch --tags --quiet || true
             # Decide via the extracted helper, which folds VERSION into the
             # candidate set so the result is independent of git-tag sync timing
             # on `release` events (#5301). Without that, the freshly-created tag
             # is often not yet visible here and :latest stays a release behind.
-            PROMOTE=$(git tag -l 'v[0-9]*' | bash scripts/ci/should-promote-latest.sh "$VERSION")
+            # Tag names come straight from the remote (same set `git fetch --tags`
+            # gave the full clone); under pipefail a failed listing fails the step
+            # instead of promoting against an empty list.
+            PROMOTE=$(git ls-remote --tags --refs origin \
+              | sed -n 's#^[0-9a-f]*[[:space:]]refs/tags/\(v[0-9].*\)$#\1#p' \
+              | bash scripts/ci/should-promote-latest.sh "$VERSION")
             if [ "$PROMOTE" != "true" ]; then
               echo "Version $VERSION is not the highest stable semver. Not promoting :latest."
             fi
@@ -152,6 +181,7 @@ jobs:
     needs: prepare
     if: >-
       github.event_name != 'schedule' && needs.prepare.outputs.skip != 'true' && vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' &&
+      vars.DOCKER_AMD64_RUNNER != 'blacksmith' && vars.DOCKER_AMD64_RUNNER != 'hosted' &&
       (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -177,7 +207,7 @@ jobs:
           echo "online omni-build runners: ${ONLINE}"
           if [ "${ONLINE}" -eq 0 ]; then
             echo "::error::No ONLINE runner carries the omni-build label. The amd64 build would queue forever (silent publish stall, #14560)."
-            echo "Check the self-hosted runner pool, or set USE_VPS_RUNNER=false to fall back to hosted (note: hosted ~7GB dies ResourceExhausted on this build, #11976)."
+            echo "Check the self-hosted runner pool, or set DOCKER_AMD64_RUNNER=hosted (or blacksmith) to build amd64 off the .113 slot."
             exit 1
           fi
 
@@ -192,21 +222,30 @@ jobs:
       (needs.runner-preflight.result == 'success' || needs.runner-preflight.result == 'skipped') &&
       (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
     # amd64: the .113 omni-build pool (31 GB / 32 cores, ONE listener since
-    # #12048). Hosted ubuntu-24.04 is ~7 GB and dies ResourceExhausted (#11976).
-    # Falls back to hosted when USE_VPS_RUNNER is off. arm64: no ARM box — stay
+    # #12048). Hosted ubuntu-24.04 is 16 GB; the ~7 GB runners of #11976 died
+    # ResourceExhausted. Falls back to hosted when USE_VPS_RUNNER is off. arm64: no ARM box — stay
     # on GitHub's ubuntu-24.04-arm.
     # Webpack on BOTH arches: Turbopack on omniroute-113-6 hit
     # TurbopackInternalError "there must be a path to a root" after 26 min
     # (run 33253576569). The same tree's arm64 webpack build on hosted ARM
     # succeeded (run 33264823398). Dockerfile already documents webpack as the
     # Docker escape hatch (OMNIROUTE_USE_TURBOPACK=0).
-    runs-on: ${{ matrix.arch == 'amd64' && (vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && fromJSON('["self-hosted","omni-build"]') || 'ubuntu-24.04') || 'ubuntu-24.04-arm' }}
+    # DOCKER_AMD64_RUNNER (repository variable) moves the amd64 leg off the .113 slot, which takes
+    # 90-165 min per publish while the same build on a 16 GB / 4 vCPU hosted runner takes 20-45:
+    #   blacksmith → blacksmith-4vcpu-ubuntu-2404 (16 GB; needs the Blacksmith app on the org; the
+    #                free tier is 3,000 2-vCPU minutes a month and a 4 vCPU minute counts as two)
+    #   hosted     → ubuntu-24.04 (16 GB)
+    #   unset      → unchanged: omni-build when the .113 opt-in is on, hosted otherwise
+    # The Dockerfile build is sized for 16 GB (OMNIROUTE_BUILD_WORKERS, #7518).
+    # `blacksmith` routes through prepare's budget output; at the monthly cap it lands on hosted.
+    runs-on: ${{ matrix.arch == 'amd64' && (needs.prepare.outputs.blacksmith == 'true' && 'blacksmith-4vcpu-ubuntu-2404' || vars.DOCKER_AMD64_RUNNER != 'hosted' && vars.DOCKER_AMD64_RUNNER != 'blacksmith' && vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && fromJSON('["self-hosted","omni-build"]') || 'ubuntu-24.04') || 'ubuntu-24.04-arm' }}
     # Share the 1-slot omni-build ceiling (#12048) with ci.yml `Build` /
     # npm-publish. Same group as main's Build so a :next publish waits beside
     # the artefact instead of sitting next to it. arm64 is hosted — its own
-    # group, cancelled by the workflow-level concurrency.
+    # group, cancelled by the workflow-level concurrency. An amd64 leg moved by
+    # DOCKER_AMD64_RUNNER does not hold the slot, so it gets a per-ref group.
     concurrency:
-      group: ${{ matrix.arch == 'amd64' && 'heavy-build-main' || format('docker-publish-arm-{0}', github.ref) }}
+      group: ${{ matrix.arch == 'amd64' && (vars.DOCKER_AMD64_RUNNER != 'blacksmith' && vars.DOCKER_AMD64_RUNNER != 'hosted' && 'heavy-build-main' || format('docker-publish-amd64-{0}', github.ref)) || format('docker-publish-arm-{0}', github.ref) }}
       cancel-in-progress: ${{ matrix.arch != 'amd64' }}
     # Backstop for a hung BUILD step only — it cannot and must not bound the
     # queue wait (that is runner-preflight's job): the clock starts when a
@@ -234,7 +273,8 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/v{0}', inputs.version) || '' }}
-          fetch-depth: 0
+          # .dockerignore drops .git, so the image build never reads history.
+          fetch-depth: 1
 
       - name: Assert Docker Engine
         run: docker info
@@ -299,6 +339,22 @@ jobs:
           no-cache: false
         env:
           DOCKER_BUILDKIT_INLINE_CACHE: 1
+
+      # Check the binaries in both final Node images on each native architecture,
+      # before their digests can reach the multi-arch manifest/promotion job.
+      - name: Verify published Node runtimes
+        env:
+          DIGEST_BASE: ${{ steps.build.outputs.digest }}
+          DIGEST_WEB: ${{ steps.build-web.outputs.digest }}
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          set -euo pipefail
+          for digest in "$DIGEST_BASE" "$DIGEST_WEB"; do
+            image="${GHCR_IMAGE_NAME}@${digest}"
+            echo "Verifying Node runtime in ${image} (${PLATFORM})"
+            docker run --rm --pull always --platform "$PLATFORM" --entrypoint node -i \
+              "$image" --input-type=module < scripts/ci/check-docker-node-runtime.mjs
+          done
 
       - name: Build and push BUN base platform image by digest
         id: build-bun-base
@@ -425,10 +481,17 @@ jobs:
     needs:
       - prepare
       - build
+    # Explicit results, like `build`: an implicit success() also looks at `build`'s own
+    # dependency runner-preflight, which is SKIPPED whenever amd64 is off the omni-build slot
+    # (DOCKER_AMD64_RUNNER, USE_VPS_RUNNER off), and that silently skipped this job after both
+    # images built (run 41703618029, 2026-11-03).
     if: >-
-      github.event_name != 'schedule' && needs.prepare.outputs.skip != 'true' &&
+      !cancelled() && github.event_name != 'schedule' &&
+      needs.prepare.result == 'success' && needs.build.result == 'success' &&
+      needs.prepare.outputs.skip != 'true' &&
       (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
-    runs-on: ubuntu-latest
+    # On Blacksmith with the amd64 build; on hosted once the monthly budget is spent.
+    runs-on: ${{ needs.prepare.outputs.blacksmith == 'true' && 'blacksmith-2vcpu-ubuntu-2404' || 'ubuntu-latest' }}
     permissions:
       contents: read
       packages: write
@@ -444,7 +507,8 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/v{0}', inputs.version) || '' }}
-          fetch-depth: 0
+          # Manifests, smoke test and scans read no git history.
+          fetch-depth: 1
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4

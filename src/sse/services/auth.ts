@@ -7,6 +7,7 @@ import { hydrateConnectionProviderSpecificData } from "./compatibleNodeBaseUrl.t
 import { extractGoogApiKeyHeader } from "./googApiKeyAuth.ts";
 import { isCooldownRetrySkipRefusalsEnabled } from "./cooldownAwareRetry.ts";
 import { describeUpstreamFailure } from "@/shared/utils/upstreamError";
+import { isRequestScopedMisalignmentRefusal } from "@omniroute/open-sse/utils/providerSafety.ts";
 import { buildAllExpiredCredentials } from "./authExpiredCredentials.ts";
 import { pickExpiryFirstConnection } from "./expiryFirstAccountSelection.ts";
 import { isModelScopedFailure, isQuotaExhaustedSignal } from "./modelScopedQuotaFailure.ts"; // #13548
@@ -58,6 +59,7 @@ import {
   getQuotaWindowStatus,
   hydrateCodexQuotaCacheForRequest,
   isQuotaExhaustedForRequest,
+  isCodexSubscriptionExhaustedForRequest,
   getClaudeQuotaPreflightResetAt,
   resolveClaudeQuotaCooldownMs as resolveClaudeCooldown,
 } from "@/domain/quotaCache";
@@ -73,6 +75,7 @@ import {
   isConfiguredCutoff,
 } from "./quotaPreflightPolicy";
 export { shouldApplyQuotaCutoff, resolveMinRemainingPercent } from "./quotaPreflightPolicy";
+import { isCodexPaidCreditsEnabled } from "@/lib/providers/codexPaidCredits";
 import {
   getQuotaScopeLabelForProvider,
   isAntigravityQuotaProvider,
@@ -106,6 +109,7 @@ import {
 } from "@omniroute/open-sse/services/accountFallback.ts";
 import { copilotRejectionFlag, lockCopilotModelNotSupported } from "./copilotModelNotSupportedLock";
 import { isSharedWalletCredits402 } from "@omniroute/open-sse/services/accountFallback/sharedWalletCredits.ts";
+import { resolveAvalancheCooldownMs } from "@omniroute/open-sse/services/accountFallback/antiAvalanche.ts";
 import { isModelScopedAccessDenial } from "@omniroute/open-sse/services/accountFallback/modelScopedAccessDenial.ts";
 import { isModelUnsupported401 } from "@omniroute/open-sse/services/accountFallback/perModelFailureScope.ts";
 import { postOutputFailureReachesLockout } from "@omniroute/open-sse/services/accountFallback/postOutputFailureStreak.ts";
@@ -296,6 +300,31 @@ function isTerminalConnectionStatusForModel(
 }
 
 export { resolveQuotaLimitPolicy, evaluateQuotaLimitPolicy } from "./quotaLimitPolicy";
+/**
+ * Paid credits are the last resort: an account whose Codex subscription windows are spent
+ * and that would be served only from paid credits waits while any candidate still has
+ * subscription quota for this request.
+ */
+function holdBackCodexCreditOnlyAccounts<T extends ProviderConnectionView>(
+  provider: string,
+  connections: T[],
+  requestedModel: string | null
+): T[] {
+  if (provider !== "codex") return connections;
+  const creditOnly = connections.filter(
+    (connection) =>
+      isCodexPaidCreditsEnabled(provider, connection.providerSpecificData, requestedModel) &&
+      isCodexSubscriptionExhaustedForRequest(connection.id, requestedModel)
+  );
+  if (creditOnly.length === 0 || creditOnly.length === connections.length) return connections;
+  log.info(
+    "AUTH",
+    `${provider} | paid credits held back while ${connections.length - creditOnly.length} account(s) have subscription quota: ${creditOnly
+      .map((connection) => connection.id.slice(0, 8))
+      .join(", ")}`
+  );
+  return connections.filter((connection) => !creditOnly.includes(connection));
+}
 function parseFutureDateMs(value: string | null): number | null {
   if (!value) return null;
   // Tolerate numeric-epoch strings (e.g. "1781696905131.0") as well as ISO
@@ -1622,6 +1651,43 @@ export async function getProviderCredentials(
         ? new Date(earliestResetMs).toISOString()
         : new Date(Date.now() + 5 * 60 * 1000).toISOString();
 
+      // #18664: an account filtered out only by a short retryable model lockout still
+      // has quota. When its lockout ends before the earliest quota reset, the request
+      // is blocked by that lockout, not by quota exhaustion: report it as a model
+      // cooldown with the lockout's retry time.
+      const earliestModelLockout = requestedModel
+        ? connections
+            .filter((connection) => connectionFilterStatus.get(connection.id) === "modelLocked")
+            .map((connection) => {
+              const lockout = getModelLockoutInfo(provider, connection.id, requestedModel);
+              return lockout &&
+                lockout.remainingMs > 0 &&
+                isRetryableModelLockoutReason(lockout.reason)
+                ? { connection, untilMs: Date.now() + lockout.remainingMs }
+                : null;
+            })
+            .filter((entry): entry is NonNullable<typeof entry> => entry !== null)
+            .sort((a, b) => a.untilMs - b.untilMs)[0]
+        : undefined;
+      if (earliestModelLockout && earliestModelLockout.untilMs < new Date(retryAfter).getTime()) {
+        const lockoutRetryAfter = new Date(earliestModelLockout.untilMs).toISOString();
+        log.warn(
+          "AUTH",
+          `${provider} | remaining accounts quota-exhausted; account ${earliestModelLockout.connection.id?.slice(0, 8)} cooling down for model ${requestedModel} (${formatRetryAfter(lockoutRetryAfter)})`
+        );
+        invalidateManagedLease(options, "MODEL_INELIGIBLE");
+        return {
+          allRateLimited: true,
+          retryAfter: lockoutRetryAfter,
+          retryAfterHuman: formatRetryAfter(lockoutRetryAfter),
+          lastError: earliestModelLockout.connection.lastError || null,
+          lastErrorCode: 429,
+          cooldownScope: "model",
+          cooldownModel: requestedModel,
+          connectionsCount: connections.length,
+        };
+      }
+
       invalidateManagedLease(options, "QUOTA_UNAVAILABLE");
       return {
         allRateLimited: true,
@@ -1632,9 +1698,10 @@ export async function getProviderCredentials(
       };
     }
 
+    const subscriptionFirst = holdBackCodexCreditOnlyAccounts(provider, withQuota, requestedModel);
     const policyValidLeaseCandidates = options._leaseCandidateIds
-      ? withQuota.filter((candidate) => options._leaseCandidateIds!.includes(candidate.id))
-      : withQuota;
+      ? subscriptionFirst.filter((candidate) => options._leaseCandidateIds!.includes(candidate.id))
+      : subscriptionFirst;
     if (policyValidLeaseCandidates.length === 0) return null;
     const leasePolicy = await applyExclusiveConnectionLeasePolicy(
       policyValidLeaseCandidates,
@@ -2332,6 +2399,16 @@ function isStreamContentStall(errorText: string): boolean {
   return /stream content stall/i.test(String(errorText || ""));
 }
 
+/** The reset an upstream announced for this failure, as opposed to a locally computed backoff. */
+function resolveUpstreamResetMs(fallback: {
+  usedUpstreamRetryHint?: boolean;
+  cooldownMs?: number;
+  quotaResetHintMs?: number | null;
+}): number | null {
+  if (fallback.usedUpstreamRetryHint === true) return fallback.cooldownMs ?? null;
+  return fallback.quotaResetHintMs ?? null;
+}
+
 export async function markAccountUnavailable(
   connectionId: string,
   status: number,
@@ -2346,6 +2423,9 @@ export async function markAccountUnavailable(
     headers?: Headers | Record<string, string> | null;
     correlationId?: string | null;
     streamOutputEmitted?: boolean;
+    isAvalancheRisk?: boolean;
+    avalancheCooldownMs?: number;
+    suppressFallback?: boolean;
     structuredError?: { code?: string | null; type?: string | null } | null;
   } = {}
 ) {
@@ -2360,6 +2440,11 @@ export async function markAccountUnavailable(
 
   try {
     await currentMutex;
+
+    // A concurrent cooldown or terminal-state write must not turn this refusal into rotation.
+    if (isRequestScopedMisalignmentRefusal({ status, code: options.structuredError?.code })) {
+      return { shouldFallback: false, cooldownMs: 0 };
+    }
 
     // STRICT_ZERO_COST: this connection just failed (whatever the reason) —
     // drop any cached "SAFE" free-allowance reading for it immediately rather
@@ -2558,6 +2643,9 @@ export async function markAccountUnavailable(
     const disableCooling = connProviderSpecificData.disableCooling === true;
     const claudeQuotaScope = readClaudeScope({ connectionId, provider, status, errorText, model });
     const isModelScopedClaudeQuota = claudeQuotaScope.scope === "model";
+    // #18296: headroom-scoped decisions carry no cached reset, so they use the 429's own hint
+    // under the operator's maxCooldownMs instead of an uncapped "upstream reset".
+    const hasClaudeScopedReset = isModelScopedClaudeQuota && claudeQuotaScope.cooldownMs !== null;
     const isPerModelQuotaProvider =
       hasPerModelQuota(provider, model, connectionPassthroughModels) || isModelScopedClaudeQuota;
     // #10334 — connection-scope branch: the matched provider rule declared scope
@@ -2801,6 +2889,15 @@ export async function markAccountUnavailable(
         status === 429
           ? ANTIGRAVITY_FAMILY_INFERRED_BASE_COOLDOWN_MS
           : null;
+      // #18296: a headroom-scoped decision carries no cached reset, so it falls back to the
+      // 429's own hint (operator-capped) instead of an uncapped "upstream reset".
+      const upstreamCooldownMs = hasClaudeScopedReset
+        ? claudeQuotaScope.cooldownMs
+        : (resolveUpstreamResetMs(fallbackResult) ??
+          (isModelScopedClaudeQuota ? (fallbackResult.cooldownMs ?? null) : null));
+      const exactCooldownMs = options.isAvalancheRisk
+        ? resolveAvalancheCooldownMs(options.avalancheCooldownMs, upstreamCooldownMs)
+        : upstreamCooldownMs;
       const lockout = recordModelLockoutFailure(
         provider,
         connectionId,
@@ -2817,18 +2914,16 @@ export async function markAccountUnavailable(
         effectiveProviderProfile,
         {
           ...modelLockoutOptions,
-          exactCooldownMs: isModelScopedClaudeQuota
-            ? claudeQuotaScope.cooldownMs
-            : fallbackResult.usedUpstreamRetryHint === true
-              ? fallbackResult.cooldownMs
-              : (fallbackResult.quotaResetHintMs ?? null),
+          exactCooldownMs,
           maxCooldownMs: mlSettings.maxCooldownMs,
           scope: usesExactAntigravityLock ? "exact" : undefined,
           // Only a transport header, google.rpc.RetryInfo, or cached Claude reset can bypass
-          // maxCooldownMs. Prose and generic JSON hints remain exact but operator-capped.
+          // maxCooldownMs. Prose and generic JSON hints remain exact but operator-capped, and
+          // so does the avalanche burst cooldown when it outlasts the upstream reset.
           exactCooldownIsUpstreamReset:
-            retryHintBypassesMaxCooldownMs(fallbackResult.retryHintSource) ||
-            isModelScopedClaudeQuota,
+            exactCooldownMs === upstreamCooldownMs &&
+            (retryHintBypassesMaxCooldownMs(fallbackResult.retryHintSource) ||
+              hasClaudeScopedReset),
         }
       );
       // Update last error for observability (without changing terminal status)
@@ -2849,7 +2944,10 @@ export async function markAccountUnavailable(
         cooldownMs: lockout.cooldownMs,
         reason,
       });
-      return { shouldFallback: true, cooldownMs: lockout.cooldownMs };
+      return {
+        shouldFallback: options.suppressFallback ? false : true,
+        cooldownMs: lockout.cooldownMs,
+      };
     }
     const result = fallbackResult;
     if (isSharedWalletCredits402(provider, status, errorText)) {
@@ -2859,6 +2957,16 @@ export async function markAccountUnavailable(
     }
     const { shouldFallback, cooldownMs: rawCooldownMs, newBackoffLevel, reason } = result;
     if (!shouldFallback) return { shouldFallback: false, cooldownMs: 0 };
+    if (options.suppressFallback) {
+      const suppressedCooldownMs =
+        resolveAvalancheCooldownMs(options.avalancheCooldownMs, resolveUpstreamResetMs(result)) ??
+        rawCooldownMs;
+      // This path skips the connection cooldown below, so the lock is what keeps the key out.
+      if (provider && suppressedCooldownMs > 0 && !disableCooling) {
+        lockModel(provider, connectionId, model, reason || "unknown", suppressedCooldownMs);
+      }
+      return { shouldFallback: false, cooldownMs: suppressedCooldownMs };
+    }
     const providerErrorType = classifyProviderError(status, errorText, provider);
 
     if (
@@ -3152,7 +3260,8 @@ export async function markAccountUnavailable(
     };
     const persistUnavailableState = options.persistUnavailableState !== false;
 
-    if (!persistUnavailableState) {
+    if (!persistUnavailableState && !terminalStatus) {
+      // Terminal account failures must persist even when a combo owns transient cooldowns.
       // Combo-managed transient failure (e.g. 429): keep the connection clean in
       // the DB, but record an in-memory model lockout so credential selection
       // skips this exact provider+connection+model while it cools down — other

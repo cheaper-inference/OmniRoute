@@ -133,31 +133,31 @@ Cookie: auth_token=<JWT signed with JWT_SECRET>
 ## ਪਾਈਪਲਾਈਨ
 
 ```
-ਆਉਣ ਵਾਲੀ ਬੇਨਤੀ → src/proxy.ts
-  → src/server/authz/pipeline.ts ਵਿੱਚ runAuthzPipeline()
-    1. ਭਰੋਸੇਯੋਗ ਅੰਦਰੂਨੀ ਹੈਡਰ ਹਟਾਓ (x-omniroute-auth-*, x-omniroute-route-class)
-    2. ਬੇਨਤੀ ID ਬਣਾਓ, classifyRoute() ਰਾਹੀਂ ਰੂਟ ਦਾ ਵਰਗੀਕਰਨ ਕਰੋ
-    3. ਜੇ pathname == "/" → /dashboard ਵੱਲ ਰੀਡਾਇਰੈਕਟ ਕਰੋ
-    4. ਜੇ ਡਰੇਨਿੰਗ (ਸੁਚਾਰੂ ਸ਼ਟਡਾਊਨ) ਚੱਲ ਰਹੀ ਹੈ ਅਤੇ /api/* ਹੈ → 503
-    5. ਜੇ non-GET /api/* ਹੈ → checkBodySize() ਗਾਰਡ
-    6. ਜੇ OPTIONS ਹੈ → CORS ਪ੍ਰੀਫਲਾਈਟ 204
-    7. ਜੇ options.enforce == false ਹੈ → ਰੂਟ-ਕਲਾਸ ਹੈਡਰਾਂ ਸਮੇਤ ਜਿਉਂ ਦਾ ਤਿਉਂ ਅੱਗੇ ਭੇਜੋ
-    8. ਨਹੀਂ ਤਾਂ: POLICIES[routeClass].evaluate(ctx)
-       - ਮਨਜ਼ੂਰ  → x-omniroute-auth-{kind,id,label,scopes} ਲਗਾਓ → NextResponse.next()
-       - ਅਸਵੀਕਾਰ → correlation_id ਸਮੇਤ JSON ਗਲਤੀ (ਡੈਸ਼ਬੋਰਡ ਪੰਨੇ → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-ਭਰੋਸੇਯੋਗ ਅੰਦਰੂਨੀ ਹੈਡਰ (`src/server/authz/headers.ts` ਵਿੱਚ ਪਰਿਭਾਸ਼ਿਤ) ਵਰਗੀਕਰਨ ਤੋਂ ਪਹਿਲਾਂ **ਆਉਣ ਵਾਲੀਆਂ ਬੇਨਤੀਆਂ ਵਿੱਚੋਂ ਹਟਾ ਦਿੱਤੇ ਜਾਂਦੇ ਹਨ** — ਕਲਾਇੰਟ ਕਿਸੇ ਸਬਜੈਕਟ ਦੀ ਨਕਲ ਕਰਨ ਲਈ `x-omniroute-auth-*` ਨੂੰ ਪਹਿਲਾਂ ਤੋਂ ਭਰ ਨਹੀਂ ਸਕਦੇ।
+ਭਰੋਸੇਯੋਗ ਅੰਦਰੂਨੀ ਸਿਰਲੇਖ ( `src/server/authz/headers.ts` ਵਿੱਚ ਪਰਿਭਾਸ਼ਿਤ) ਹਨ** ਆਉਣ ਵਾਲੀਆਂ ਬੇਨਤੀਆਂ ਤੋਂ ਹਟਾ ਦਿੱਤਾ ਗਿਆ** ਵਰਗੀਕਰਨ ਤੋਂ ਪਹਿਲਾਂ — ਕਲਾਇੰਟ ਕਿਸੇ ਵਿਸ਼ੇ ਦੀ ਨਕਲ ਕਰਨ ਲਈ `x-omniroute-auth-*` ਪਹਿਲਾਂ ਤੋਂ ਤਿਆਰ ਨਹੀਂ ਕਰ ਸਕਦੇ ਹਨ।
 
-### ਪਾਲਿਸੀ ਕਾਂਟ੍ਰੈਕਟ
+### ਨੀਤੀ ਦੇ ਠੇਕੇ
 
-ਹਰੇਕ ਰੂਟ ਕਲਾਸ ਲਈ `src/server/authz/policies/` ਵਿੱਚ ਇੱਕ ਪਾਲਿਸੀ ਹੈ:
+ਹਰੇਕ ਰੂਟ ਕਲਾਸ ਦੀ `src/server/authz/policies/` ਵਿੱਚ ਇੱਕ ਨੀਤੀ ਹੈ:
 
-- **`publicPolicy`** (`policies/public.ts`) — ਹਮੇਸ਼ਾ `allow({ kind: "anonymous", id: "anonymous" })` ਵਾਪਸ ਕਰਦੀ ਹੈ।
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearer ਕੱਢਦੀ ਹੈ, `validateApiKey()` ਰਾਹੀਂ ਪ੍ਰਮਾਣਿਤ ਕਰਦੀ ਹੈ। ਸਿਰਫ਼ ਉਦੋਂ ਹੀ anonymous ਵੱਲ ਫਾਲ-ਥਰੂ ਕਰਦੀ ਹੈ ਜਦੋਂ ਪ੍ਰਭਾਵੀ `REQUIRE_API_KEY` ਫੀਚਰ ਫਲੈਗ ਅਸਮਰੱਥ ਹੋਵੇ। ਪ੍ਰਭਾਵੀ ਫਲੈਗ `isRequireApiKeyEnabled()` (`DB ਫੀਚਰ ਫਲੈਗ ਓਵਰਰਾਈਡ > process.env.REQUIRE_API_KEY > ਡਿਫਾਲਟ`) ਰਾਹੀਂ ਨਿਰਧਾਰਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਤਾਂ ਜੋ ਡੈਸ਼ਬੋਰਡ ਫੀਚਰ ਫਲੈਗ ਅਤੇ ਇਨਵਾਇਰਨਮੈਂਟ ਵੇਰੀਏਬਲ `/api/v1/*`, `/api/v1beta/*`, ਅਤੇ ਉਪਨਾਮਾਂ ਨੂੰ ਇਕਸਾਰ ਢੰਗ ਨਾਲ ਨਿਯੰਤ੍ਰਿਤ ਕਰਨ; ਰਿਜ਼ਾਲਵਰ ਦੀਆਂ ਅਸਫਲਤਾਵਾਂ ਵਿੱਚ ਪਹੁੰਚ ਬੰਦ ਰਹਿੰਦੀ ਹੈ। ਕਲਾਇੰਟ API ਰੂਟਾਂ 'ਤੇ ਡੈਸ਼ਬੋਰਡ-ਸੈਸ਼ਨ ਬੇਨਤੀਆਂ ਨੂੰ ਮਨਜ਼ੂਰ ਕਰਦੀ ਹੈ (ਇਸ ਵਿੱਚ `/api/v1/models` ਵੀ ਸ਼ਾਮਲ ਹੈ, ਜਿਸਨੂੰ ਡੈਸ਼ਬੋਰਡ ਮਾਡਲ ਕੈਟਾਲੌਗ ਵਰਤਦਾ ਹੈ)।
-- **`managementPolicy`** (`policies/management.ts`) — ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ, ਅੰਦਰੂਨੀ ਮਾਡਲ-ਸਿੰਕ ਬੇਨਤੀਆਂ (`/api/providers/[name]/(sync-models|models)` ਨਾਲ ਮਿਲਾਈਆਂ ਜਾਂਦੀਆਂ), ਨੂੰ ਸਵੀਕਾਰ ਕਰਦੀ ਹੈ ਜਾਂ ਜੇ `isAuthRequired()` false ਵਾਪਸ ਕਰੇ ਤਾਂ ਪੂਰੀ ਤਰ੍ਹਾਂ ਛੱਡ ਦਿੰਦੀ ਹੈ। ਜਦੋਂ Bearer ਟੋਕਨ ਮੌਜੂਦ ਪਰ ਅਵੈਧ ਹੋਵੇ ਤਾਂ 403 (`AUTH_001`), ਨਹੀਂ ਤਾਂ 401 ਵਾਪਸ ਕਰਦੀ ਹੈ। ਇਹ ਕਿਸੇ ਵੀ ਪ੍ਰਮਾਣਿਕਤਾ ਸ਼ਾਖਾ ਤੋਂ ਪਹਿਲਾਂ ਰੂਟ-ਗਾਰਡ ਟੀਅਰਾਂ (LOCAL_ONLY / ALWAYS_PROTECTED) ਨੂੰ ਵੀ ਲਾਗੂ ਕਰਦੀ ਹੈ — [ਰੂਟ ਗਾਰਡ ਟੀਅਰ](../security/ROUTE_GUARD_TIERS.md) ਵੇਖੋ। `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ਵਿੱਚ ਮੌਜੂਦ LOCAL_ONLY ਪਾਥਾਂ (ਵਰਤਮਾਨ ਵਿੱਚ: `/api/mcp/`) ਤੱਕ non-loopback ਤੋਂ ਪਹੁੰਚ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ, ਜਦੋਂ Bearer ਕੁੰਜੀ ਕੋਲ `manage` ਸਕੋਪ ਹੋਵੇ; ਹੋਰ ਸਾਰੇ LOCAL_ONLY ਪਾਥ ਸਕੋਪ ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ ਸਖ਼ਤੀ ਨਾਲ loopback ਤੱਕ ਸੀਮਤ ਰਹਿੰਦੇ ਹਨ।
+- **`publicPolicy`** (`policies/public.ts`) — ਹਮੇਸ਼ਾ `allow({ kind: "anonymous", id: "anonymous" })` ਵਾਪਸ ਕਰਦਾ ਹੈ।
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — ਬੇਅਰਰ ਨੂੰ ਕੱਢਦਾ ਹੈ, `validateApiKey()` ਰਾਹੀਂ ਪ੍ਰਮਾਣਿਤ ਕਰਦਾ ਹੈ। ਉਦੋਂ ਹੀ ਗੁਮਨਾਮ 'ਤੇ ਡਿੱਗਦਾ ਹੈ ਜਦੋਂ ਪ੍ਰਭਾਵੀ `REQUIRE_API_KEY` ਵਿਸ਼ੇਸ਼ਤਾ ਫਲੈਗ ਅਸਮਰੱਥ ਹੁੰਦਾ ਹੈ। ਪ੍ਰਭਾਵੀ ਫਲੈਗ ਨੂੰ `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) ਦੁਆਰਾ ਹੱਲ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਇਸਲਈ ਡੈਸ਼ਬੋਰਡ ਫੀਚਰ ਫਲੈਗ ਅਤੇ ਵਾਤਾਵਰਣ ਵੇਰੀਏਬਲ `/api/v1/*`, `/api/v1beta/*`, ਅਤੇ ਉਪਨਾਮਾਂ ਨੂੰ ਲਗਾਤਾਰ ਨਿਯੰਤਰਿਤ ਕਰਦੇ ਹਨ; ਰਿਜ਼ੋਲਵਰ ਅਸਫਲਤਾਵਾਂ ਬੰਦ ਹੋ ਜਾਂਦੀਆਂ ਹਨ। ਕਲਾਇੰਟ API ਰੂਟਾਂ ( `/api/v1/models` ਸਮੇਤ, ਡੈਸ਼ਬੋਰਡ ਮਾਡਲ ਕੈਟਾਲਾਗ ਦੁਆਰਾ ਵਰਤੇ ਗਏ) 'ਤੇ ਡੈਸ਼ਬੋਰਡ-ਸ਼ੈਸ਼ਨ ਬੇਨਤੀਆਂ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਜਦੋਂ Entra ID SSO ਸਮਰਥਿਤ ਹੁੰਦਾ ਹੈ, ਤਾਂ ਇੱਕ ਬੇਅਰਰ ਜੋ ਕਿ ਢਾਂਚਾਗਤ ਤੌਰ 'ਤੇ ਇੱਕ Entra ਟੋਕਨ ਹੁੰਦਾ ਹੈ (ਤਿੰਨ base64url ਖੰਡ, `RS*` alg, `kid`) ਨੂੰ SSO ਸ਼ਾਖਾ ਦੁਆਰਾ ਸੰਭਾਲਿਆ ਜਾਂਦਾ ਹੈ।** ਅੱਗੇ** `validateApiKey()` ਅਤੇ ਇਸਦਾ ਫੈਸਲਾ ਅੰਤਿਮ — ਹੈ ਇਹ ਕਦੇ ਵੀ API-ਕੁੰਜੀ ਮਾਰਗ ਜਾਂ ਡੀਗਰੇਡ-ਟੂ-ਅਨਾਮ ਬ੍ਰਾਂਚ ਵਿੱਚ ਨਹੀਂ ਆਉਂਦਾ ਹੈ, ਇਸਲਈ ਇੱਕ ਪਛਾਣ-ਪ੍ਰਦਾਤਾ ਆਊਟੇਜ ਖੁੱਲ੍ਹੀ ਪਹੁੰਚ ਨਹੀਂ ਬਣ ਸਕਦਾ। ਸਥਿਰ API ਕੁੰਜੀਆਂ ਪ੍ਰਭਾਵਿਤ ਨਹੀਂ ਹੁੰਦੀਆਂ ਹਨ। [Entra ID SSO](../security/ENTRA_SSO.md) ਦੇਖੋ।
+- **`managementPolicy`** (`policies/management.ts`) — ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ, ਅੰਦਰੂਨੀ ਮਾਡਲ-ਸਿੰਕ ਬੇਨਤੀਆਂ ਨੂੰ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ ( `/api/providers/[name]/(sync-models|models)` ਨਾਲ ਮੇਲ ਖਾਂਦਾ ਹੈ), ਜਾਂ ਪੂਰੀ ਤਰ੍ਹਾਂ ਛੱਡ ਦਿੰਦਾ ਹੈ ਜੇਕਰ `isAuthRequired()` ਗਲਤ ਵਾਪਸ ਕਰਦਾ ਹੈ। 403 (`AUTH_001`) ਵਾਪਸ ਕਰਦਾ ਹੈ ਜਦੋਂ ਇੱਕ ਬੇਅਰਰ ਟੋਕਨ ਮੌਜੂਦ ਹੁੰਦਾ ਹੈ ਪਰ ਅਵੈਧ ਹੁੰਦਾ ਹੈ, ਨਹੀਂ ਤਾਂ 401। ਕਿਸੇ ਵੀ ਪ੍ਰਮਾਣਿਤ ਸ਼ਾਖਾ — [ਰੂਟ ਗਾਰਡ ਟੀਅਰਜ਼ ਨੂੰ](../security/ROUTE_GUARD_TIERS.md) ਦੇਖਣ ਤੋਂ ਪਹਿਲਾਂ ਰੂਟ-ਗਾਰਡ ਟੀਅਰਜ਼ (LOCAL_ONLY / ALWAYS_PROTECTED) ਨੂੰ ਵੀ ਲਾਗੂ ਕਰਦਾ ਹੈ। `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (ਅੱਜ: `/api/mcp/`) ਵਿੱਚ LOCAL_ONLY ਮਾਰਗਾਂ ਨੂੰ ਗੈਰ-ਲੂਪਬੈਕ ਤੋਂ ਐਕਸੈਸ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ ਜਦੋਂ ਬੇਅਰਰ ਕੁੰਜੀ `manage` ਸਕੋਪ ਨੂੰ ਲੈ ਕੇ ਜਾਂਦੀ ਹੈ; ਹੋਰ ਸਾਰੇ LOCAL_ONLY ਮਾਰਗ ਸਕੋਪ ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ ਸਖਤ-ਲੂਪਬੈਕ ਰਹਿੰਦੇ ਹਨ।
 
-ਇੱਕ ਸਫਲ ਪਾਲਿਸੀ `AuthSubject` ਵਾਪਸ ਕਰਦੀ ਹੈ, ਜਿਸ ਵਿੱਚ `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }` ਹੁੰਦਾ ਹੈ। ਡਾਊਨਸਟ੍ਰੀਮ ਹੈਂਡਲਰ ਪ੍ਰਮਾਣਿਕਤਾ ਤਰਕ ਨੂੰ ਮੁੜ ਚਲਾਉਣ ਦੀ ਬਜਾਏ `src/server/authz/assertAuth.ts` ਵਿੱਚ `assertAuth(request, "CLIENT_API")` ਰਾਹੀਂ ਇਸਨੂੰ ਪੜ੍ਹ ਸਕਦੇ ਹਨ।
+ਇੱਕ ਸਫਲ ਨੀਤੀ `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` ਨਾਲ `AuthSubject` ਵਾਪਸ ਕਰਦੀ ਹੈ। ਡਾਊਨਸਟ੍ਰੀਮ ਹੈਂਡਲਰ ਇਸ ਨੂੰ `src/server/authz/assertAuth.ts` ਵਿੱਚ `assertAuth(request, "CLIENT_API")` ਦੁਆਰਾ ਪ੍ਰਮਾਣਿਤ ਤਰਕ ਨੂੰ ਮੁੜ ਚਲਾਉਣ ਦੀ ਬਜਾਏ ਪੜ੍ਹ ਸਕਦੇ ਹਨ।
 
 ## ਸਰਵਜਨਿਕ ਰੂਟਾਂ ਦੀ ਸੂਚੀ
 
@@ -305,23 +305,23 @@ MCP ਪ੍ਰਮਾਣਿਕਤਾ ਜਾਣਕਾਰੀ, ਬੇਨਤੀ ਮੈ
 
 ## ਡੀਬੱਗਿੰਗ
 
-ਪਾਈਪਲਾਈਨ ਹਮੇਸ਼ਾ ਜਵਾਬਾਂ ਉੱਤੇ ਇਹ ਮੁਹਰ ਲਗਾਉਂਦੀ ਹੈ:
+ਪਾਈਪਲਾਈਨ ਹਮੇਸ਼ਾ ਜਵਾਬਾਂ 'ਤੇ ਮੋਹਰ ਲਗਾਉਂਦੀ ਹੈ:
 
 ```
-x-request-id:               <ਸਹਿ-ਸੰਬੰਧ ID, ਗਲਤੀ ਦੇ ਮੁੱਖ ਭਾਗਾਂ ਵਿੱਚ ਦੁਹਰਾਈ ਜਾਂਦੀ ਹੈ>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-ਪ੍ਰਮਾਣਿਤ ਬੇਨਤੀਆਂ ਲਈ ਅੱਪਸਟ੍ਰੀਮ (ਹੈਂਡਲਰ-ਪਾਸੇ ਦੇ) ਬੇਨਤੀ ਹੈਡਰਾਂ ਵਿੱਚ ਇਹ ਵੀ ਸ਼ਾਮਲ ਹੁੰਦਾ ਹੈ:
+ਪ੍ਰਮਾਣਿਤ ਬੇਨਤੀਆਂ ਲਈ ਅੱਪਸਟ੍ਰੀਮ (ਹੈਂਡਲਰ-ਸਾਈਡ) ਬੇਨਤੀ ਸਿਰਲੇਖਾਂ ਵਿੱਚ ਇਹ ਵੀ ਸ਼ਾਮਲ ਹਨ:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<ਆਖਰੀ-4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (ਵਿਕਲਪਿਕ)
-x-omniroute-auth-scopes:    ਕੌਮਿਆਂ ਨਾਲ ਵੱਖ ਕੀਤੀ ਸੂਚੀ
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-ਹੈਂਡਲਰਾਂ ਦੇ ਅੰਦਰ `assertAuth(req, expectedClass)` ਦੀ ਵਰਤੋਂ ਕਰੋ — ਜੇ ਮਿਡਲਵੇਅਰ ਨੂੰ ਬਾਈਪਾਸ ਕੀਤਾ ਗਿਆ ਹੋਵੇ, ਤਾਂ ਇਹ `AUTHZ_NOT_INITIALIZED` ਕੋਡ ਨਾਲ `AuthzAssertionError` ਸੁੱਟਦਾ ਹੈ (ਟੈਸਟਾਂ ਵਿੱਚ ਕੌਂਫਿਗਰੇਸ਼ਨ ਰਿਗ੍ਰੈਸ਼ਨਾਂ ਨੂੰ ਫੜਨ ਲਈ ਲਾਭਦਾਇਕ)।
+ਹੈਂਡਲਰਜ਼ — ਦੇ ਅੰਦਰ `assertAuth(req, expectedClass)` ਵਰਤੋਂ ਕਰੋ ਇਹ ਕੋਡ `AUTHZ_NOT_INITIALIZED` ਨਾਲ `AuthzAssertionError` ਸੁੱਟਦਾ ਹੈ ਜੇਕਰ ਮਿਡਲਵੇਅਰ ਨੂੰ ਬਾਈਪਾਸ ਕੀਤਾ ਗਿਆ ਸੀ (ਟੈਸਟਾਂ ਵਿੱਚ ਸੰਰਚਨਾ ਰੀਗਰੈਸ਼ਨ ਨੂੰ ਫੜਨ ਲਈ ਮਦਦਗਾਰ)।
 
 ## ਇਹ ਵੀ ਵੇਖੋ
 

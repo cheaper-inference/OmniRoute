@@ -38,6 +38,7 @@ import {
 } from "@omniroute/open-sse/services/claudeResetCreditCount.ts";
 import { cooldownUntilMs } from "@omniroute/open-sse/services/accountFallback.ts";
 import { rotationGroupFor } from "@omniroute/open-sse/services/refreshSerializer.ts";
+import { readStoredVerificationUrl } from "@omniroute/open-sse/services/antigravityVerification.ts";
 import {
   extractCodeAssistOnboardTierId,
   extractCodeAssistSubscriptionTier,
@@ -597,6 +598,10 @@ export async function maybeClearRecoveredQuotaState(
 ): Promise<ProviderConnectionLike> {
   if (!hasUsableQuota(usage)) return connection;
   if (isTerminalStatusForQuotaRecovery(connection.testStatus)) return connection;
+  // Google keeps reporting Antigravity quota for an account blocked by 403 VALIDATION_REQUIRED,
+  // so usable quota says nothing about that block: keep the error until a passing connection
+  // test drops the stored verification link.
+  if (readStoredVerificationUrl(connection.providerSpecificData)) return connection;
   let verifiedResetRecovery = false;
   if (hasActiveCooldown(connection)) {
     // A future rateLimitedUntil written from a real upstream signal is a hard
@@ -866,6 +871,10 @@ async function syncClaudeBootstrapIfNeeded(
     ["organization_name", "organizationName"],
     ["organization_type", "organizationType"],
     ["organization_rate_limit_tier", "organizationRateLimitTier"],
+    // The account's own tier: `rateLimitTier` is otherwise frozen at import (copied from the
+    // CLI credentials file) and goes stale when a Team admin moves seats.
+    ["user_rate_limit_tier", "rateLimitTier"],
+    ["seat_tier", "seatTier"],
   ];
 
   const nextPsd: JsonRecord = { ...psd };
@@ -1019,7 +1028,7 @@ async function fetchLiveProviderLimitsWithOptions(
     const usage = sanitizeUsageQuotasForProvider(
       connection.provider,
       (await runWithProxyContext(apiKeyProxy?.proxy ?? null, () =>
-        getUsageForProvider(connection as unknown as JsonRecord, options)
+        getUsageForProvider(connection as unknown as JsonRecord, { ...options, includePlan: true })
       )) as JsonRecord,
       await refreshLiveModelIds(connection.provider)
     );
@@ -1058,7 +1067,10 @@ async function fetchLiveProviderLimitsWithOptions(
 
       let usageData = sanitizeUsageQuotasForProvider(
         conn.provider,
-        (await getUsageForProvider(conn as unknown as JsonRecord, options)) as JsonRecord,
+        (await getUsageForProvider(conn as unknown as JsonRecord, {
+          ...options,
+          includePlan: true,
+        })) as JsonRecord,
         await refreshLiveModelIds(conn.provider)
       );
 
@@ -1077,7 +1089,10 @@ async function fetchLiveProviderLimitsWithOptions(
           if (forced.refreshed) await syncToCloudIfEnabled();
           usageData = sanitizeUsageQuotasForProvider(
             conn.provider,
-            (await getUsageForProvider(conn as unknown as JsonRecord, options)) as JsonRecord,
+            (await getUsageForProvider(conn as unknown as JsonRecord, {
+              ...options,
+              includePlan: true,
+            })) as JsonRecord,
             await refreshLiveModelIds(conn.provider)
           );
         }

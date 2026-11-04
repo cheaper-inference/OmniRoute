@@ -4,11 +4,13 @@
 
 ---
 
-OmniRoute'il on kolm eristatavat, kuid omavahel seotud vastupidavuse mehhanismi. Igal neist on erinev ulatus ja eesmärk. Hoidke need marsruuti käitumise silumisel eraldi.
+OmniRoute on kolm erinevat, kuid omavahel seotud vastupidavusmehhanismi. Igal neist on erinev ulatus ja eesmärk. Hoidke need marsruutimise käitumise silumisel eraldi.
 
-![3-kihiline vastupidavuse mudel](../diagrams/exported/resilience-3layers.svg)
+![3-layer resilience model](../diagrams/exported/resilience-3layers.svg)
 
 > Allikas: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
+
+> **Vastupidavuse lülitite ümbris-vs-armatuurlaua prioriteetsus.** Lubatud vastupidavus lülitab keskkonnast külvatud — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — ainult _vaikeväärtuse_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). `resilienceSettings` (Armatuurlaud →** Seaded → Vastupidavus** / `PATCH /api/resilience`, salvestatud `key_value`) võidab env väärtuse: normaliseerimine (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) säilitab salvestatud tõeväärtuse, kui see on olemas. Sellise env var väärtuseks `true` määramine juurutamisel, kus armatuurlaud on `false` juba salvestatud, ei muuda seetõttu midagi — lülitab lüliti sisse** Seadistused → Vastupidavus** (või tühjendage salvestatud väli).
 
 ## 1. Pakkuja katkestaja
 
@@ -59,194 +61,120 @@ Neljandaks kihiks on valikulise osalemise kiht (`PROVIDER_COOLDOWN_ENABLED`, vai
 
 Alates sellest künnist ei peeta teenusepakkujat jahutavas olekus; edukas päring tühistab akna. Ühenduse tasemel kirjed (`provider:connectionId`) kasutavad eksponentsiaalset tagasilükkamist `minRetryCooldownMs → maxRetryCooldownMs`. Ülekirjutused: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Regresseerimise kontroll: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
-## 2. Ühenduse cooldown
+## 2. Ühenduse jahtumine
 
-**Ulatus:** üks teenusepakkuja ühendus/konto/võti.
+**Ulatus:** ühe pakkuja connection/account/key.
 
-**Eesmärk:** jätta üks vigane võti vahele, samal ajal kui sama pakkuja teised ühendused teenindavad edasi.
+**Eesmärk:** jätke üks halb võti vahele, samal ajal kui teised sama teenusepakkuja ühendused jätkavad teenindamist.
 
-**Teostus:**
+**Rakendamine:**
 
-- Kättesaamatuks märkimine: `src/sse/services/auth.ts::markAccountUnavailable()`
+- Märgi kättesaamatuks: `src/sse/services/auth.ts::markAccountUnavailable()`
 - Valik: `getProviderCredentials*` samas failis
-- Cooldown'i arvutus: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Jahutusarvutus: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Seaded: `src/lib/resilience/settings.ts`
 
 **Väljad ühenduse kohta:**
 
-- `rateLimitedUntil` — ajatempel, kuni cooldown aegub
+- `rateLimitedUntil` — ajatempel kuni jahtumise aegumiseni
 - `testStatus: "unavailable"`
 - `lastError`, `lastErrorType`, `errorCode`
-- `backoffLevel` — eksponentsiaalse tagasiastumise loendur
+- `backoffLevel` — eksponentsiaalne taganemisloendur
 
-**Vaikimisi cooldown'id:**
+**Vaikimisi jahtumine:**
 
-- OAuth-i alus: 5 s
-- API-võtme alus: 3 s
-- API-võtme 429: eelistab ülesvoo `Retry-After`/lähtestamispäiseid/parsitavat lähtestamisteksti
-- Tagasiastumine: `baseCooldownMs * 2 ** failureIndex`
+- OAuth alus: 5s
+- API-võtmebaas: 3 s
+- API-võti 429: eelistab ülesvoolu `Retry-After`/reset headers/parseable lähtestamise teksti
+- Tagasivõtmine: `baseCooldownMs * 2 ** failureIndex`
 
-**Thundering-herd-efekti vastane kaitse:** hoiab ära, et samaaegsed tõrked cooldown'i liigselt pikendaksid või `backoffLevel` väärtust topelt suurendaksid.
+**Pakkujapõhine korduskatse viivitus.** Pakkuja üksikasjade lehel on a** Proovi viivitus uuesti** vali (Automaatne, 15s kuni 1h). See säästab `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600, `PATCH /api/resilience` kaudu). Kui kiiruspiirangu tõrge ei sisalda ülesvoolu uuesti proovimise vihjet, asendab see väärtus pakkuja skaleeritud tagasilöögi ja lähtestab `backoffLevel` väärtusele 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Piiratud sagedusega vea prioriteetsus, kõrgeim kõigepealt: ülesvoolu uuesti proovimise vihje, seejärel ühendusepõhine `providerSpecificData.rotationOverrides.rateLimitResetSeconds`, seejärel teenusepakkujapõhine korduskatse viivitus, seejärel env `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, seejärel skaleeritud tagasiminek. Auto eemaldab välja. See mõjutab ainult kiiruspiirangu põhjust, mitte kunagi lõppolekuid.
 
-**Konkurentsipiirangu 429 vastused ei roni tagasiastumise redelil.** `429` vastus, mille keha teatab konkurentsipiirangust ("too many concurrent requests", "concurrency limit", "parallel request limit", GLM `并发数过高`), tähendab, et konto on terve, kuid hõivatud.
-`checkFallbackError()` tagastab põhjusena `concurrency_limited`: lülitu kohe järgmisele ühendusele, jahuta seda ühendust fikseeritud `CONCURRENCY_LIMIT_COOLDOWN_MS` (1 s) või ülesvoo kordamisvihje ulatuses, jäta `backoffLevel` muutumata ja sea `skipProviderBreaker`.
-Sõnaselge kvooditeatega keha võidab ikkagi, seega keha, mis vastab ka kvoodimustrile, jääb kvoodiotsuseks. Tuvastus: `looksLikeConcurrencyLimit()` failis `src/shared/utils/classify429.ts`;
-otsus: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()` (katkestaja `FailureKind`) on muutmata ja loeb nende kehade puhul endiselt `rate_limit`.
+**Äikesevastane karjavalvur:** hoiab ära samaaegsete rikete liigse jahtumise või `backoffLevel` kahekordse suurendamise.
 
-**Voo sisutõrked ei jahuta kontot.** Kui sisutõrke watchdog
-(`open-sse/utils/streamHandler.ts`) loobub voost, mis ei saatnud õigel ajal mudeli väljundit, salvestab `markAccountUnavailable()` vea ühenduse külge, kuid ei sea cooldown'i: tõrge kuulub sellele konkreetsele päringule — enamasti on tegu pika põhjendamiskäiguga, mille väljundit pole veel tulnud. Operaatorid saavad selle tagasi sisse lülitada seadistuse `resilienceSettings.streamStallCooldown.enabled` abil
-(vaikimisi `false`).
+**Samaaegsuse limiit 429 ei roni tagandusredelil.** `429` mille keha teatab samaaegsuse piirangust ("liiga palju samaaegseid taotlusi", "samaaegsuse limiit", "paralleeltaotluse limiit", GLM `并发数过高`), tähendab, et konto on korras, kuid hõivatud. `checkFallbackError()` tagastab põhjuse `concurrency_limited`: viige kohe üle järgmisele ühendusele, jahutage seda fikseeritud `CONCURRENCY_LIMIT_COOLDOWN_MS` (1s) või ülesvoolu uuesti proovimise vihje jaoks, hoidke `backoffLevel` muutmata ja määrake `skipProviderBreaker`. Selgesõnaline kvoodi keha võidab ikkagi, seega jääb keha, mis vastab ka kvoodimustrile, kvoodiotsuseks. Tuvastamine: `looksLikeConcurrencyLimit()` in `src/shared/utils/classify429.ts`; otsus: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()` (murdja `FailureKind`) on muutumatu ja loeb nende kehade puhul endiselt `rate_limit`.
 
-**`p2c` konto valiku igapalgeselt sisse lülitatav latentsussignaal.** Iga välja saadetud katse salvestab oma esimese baidi saabumisaja (time-to-first-byte) ja tulemuse ühenduse kaupa (ning ühenduse + mudeli kaupa) mälus olevasse rulluvasse aknasse: viimased 20 näidist 15 minuti jooksul
-(`open-sse/services/connectionLatencyTracker.ts`, salvestatakse funktsioonist `safeLogEvents()` failis
-`src/sse/handlers/chatHelpers.ts`). Kui `resilienceSettings.p2cLatency.weight` on suurem kui `0`
-(vahemik 0–20, vaikimisi `0` = väljas), lisab `compareP2CConnections()` failis `src/sse/services/auth.ts`
-paari kummalegi kandidaadile kuni `weight` punkti. Pool sellest tuleb latentsusest suhtena kiirema kandidaadi omasse (kaks korda aeglasem saab terve poole) ja pool rulluvast veasagedusest.
-See liige rakendub ainult siis, kui mõlemal kandidaadil on vähemalt 3 näidist, nii et uued kontod ei saa trahvi, ja selle lagi jääb alla kvoodiblokeeringu ja kvoodi ammendumise trahvide. See
-ei loo omaenda lülitusahelat: ebaõnnestuvaid kontosid käsitlevad endiselt cooldown'i, lukustuse ja
-katkestaja kihid. Sea see päringuga `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`.
+**Voogesisu kioskid ei jahuta kontot.** Kui sisu seiskumise valvekoer (`open-sse/utils/streamHandler.ts`) loobub voost, mis ei saatnud õigel ajal mudeliväljundit, registreerib `markAccountUnavailable()` ühenduse vea, kuid ei seadista jahtumist: seiskumine kuulub selle päringu juurde, enamasti pikk arutluskäik ilma väljundita. Operaatorid saavad uuesti lubada `resilienceSettings.streamStallCooldown.enabled` (vaikimisi `false`).
 
-**Põhjendamiskaadrid taaskäivitavad sisutõrke eelarve.** Põhjendav mudel võib enne oma esimest nähtavat tokenit minuteid mõelda: Claude voogesitab `thinking_delta` kaadreid, mille
-mõtlemistekst võib olla tühi, ja Responses API voogesitab üht põhjendamisüksust
-teise järel. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) tunneb
-need kaadrid ära ja watchdog taaskäivitab oma eelarve iga kaadri peal, selle asemel et
-käiku tühistada. Need ei ole siiski mudeli väljund, seega käik, mis lõpeb ainult põhjendamisega,
-teatatakse endiselt tühjana, ja käik, mis lõpetab põhjendamise ja saadab edasi ainult heartbeat'e,
-käivitab endiselt watchdog'i.
+**Lubatud latentsussignaal `p2c` konto valimiseks.** Iga saadetud katse salvestab oma aja esimese baidini ja tulemuse ühenduse kohta (ja ühenduse + mudeli kohta) mälus jooksvas aknas: viimased 20 proovi 15 minuti jooksul (`open-sse/services/connectionLatencyTracker.ts`, salvestatud `safeLogEvents()` -st `src/sse/handlers/chatHelpers.ts`). Kui `resilienceSettings.p2cLatency.weight` on suurem kui `0` (vahemik 0–20, vaikimisi `0` = on välja lülitatud), liidab `compareP2CConnections()` - `src/sse/services/auth.ts` `weight` -punktid igale paari kandidaadile. Pool sellest tuleneb latentsusest kui suhtarvust kiirema kandidaadiga (kaks korda aeglasem võtab täis poole) ja pool veerevast veamäärast. See tähtaeg kehtib ainult siis, kui mõlemal kandidaadil on vähemalt 3 näidist, nii et uusi kontosid ei karistata ja selle ülemmäär jääb allapoole kvoodiga blokeeritud ja kvoodiga ammendatud karistusi. See ei lisa oma vooluringi: ebaõnnestunud kontodega tegelevad endiselt jahtumis-, lukustus- ja kaitselülitikihid. Määrake `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`.
 
-Kiro binaarsed `reasoningContentEvent` kaadrid mittetühja signatuuriga säilitavad selle põhjendamisaktiivsuse läbi käivitaja (executor) tühja `reasoning_content` deltana. Signatuuri
-ei edastata. Metaandmed, mittetäielikud kaadrid ja tühjad signatuurid ei taaskäivita
-sisueelarvet; sõltumatu aktiivse voo ajalõpp ja kliendi tühistamine kehtivad endiselt
-(`open-sse/executors/kiro/reasoning.ts`).
+**Põhjendusraamid taaskäivitavad sisu seiskumise eelarve.** Arutlusmudel suudab mõelda minutite jooksul enne oma esimest nähtavat tunnust: Claude voogustab `thinking_delta` -kaadreid, mille mõtlemistekst võib olla tühi, ja vastused API voogestab ühe arutlusüksuse teise järel. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) tunneb need kaadrid ära ja valvekoer taaskäivitab oma eelarve pöörde tühistamise asemel. Need ei ole ikka veel mudeliväljundid, nii et pööre, mis lõpeb ainult arutlemisega, teatatakse endiselt tühjaks ja pööre, mis peatab arutlemise ja saadab ainult südamelööke, paneb valvekoera ikkagi komistama.
 
-**Lõppolekud (MITTE cooldown'id):**
+Kiro binaarsed `reasoningContentEvent` kaadrid mittetühja allkirjaga säilitavad selle arutlustegevuse läbi täitja tühja `reasoning_content` deltana. Allkirja ei edastata. Metaandmed, mittetäielikud raamid ja tühjad allkirjad ei taaskäivita sisueelarvet; sõltumatu aktiivse voo ajalõpp ja kliendi tühistamine kehtivad endiselt (`open-sse/executors/kiro/reasoning.ts`).
 
-- `banned` — määravad keelatud märksõna / konto keelu tuvastus (vt [BAN_DETECTION](../security/BAN_DETECTION.md)) ja kolm järjestikust ülesvoo päringupõhist keeldumist (`request_rejected`, nt Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); üksik keeldumine seab ühendusele vaid cooldown'i
-- `expired` (liigub lõppolekusse piiratud arvu korduste järel — `EXPIRED_RETRY_MAX = 3` koos eksponentsiaalse tagasiastumisega — nii et mööduvad OAuth-i vead saavad eneseterveneda enne, kui konto lõplikult deaktiveeritakse)
+**Terminalolekud (NOT jahtumine):**
+
+- `banned` — määratud keelatud märksõna / konto keelu tuvastamisega (vt [BAN_DETECTION](../security/BAN_DETECTION.md) ) ja kolme järjestikuse päringupõhise tagasilükkamisega (`request_rejected`, nt Anthropic OAuth 403 "Taotlus pole lubatud" — `open-sse/services/requestRejectedStreak.ts`); üksainus keeldumine ainult jahutab ühendust
+- `expired` (üleminek terminalile pärast piiratud korduskatseid — `EXPIRED_RETRY_MAX = 3` eksponentsiaalse tagasilöögiga —, et mööduvad OAuth vead saaksid ise paraneda enne, kui konto jäädavalt inaktiveeritakse)
 - `credits_exhausted`
 
-Need püsivad, kuni mandaate muudetakse või operaator need lähtestab. Ära kirjuta lõppolekuid mööduva cooldown-olekuga üle.
+Need püsivad seni, kuni mandaadid muutuvad või operaator need lähtestab. Ärge kirjutage terminali olekuid üle mööduva jahtumise olekuga.
 
-**Laisk taastumine:** kui `rateLimitedUntil` on möödunud, muutub ühendus jälle valitavaks. Eduka kasutuse korral puhastab `clearAccountError()` kõik veaväljad.
+**Laisk taastumine:** kui `rateLimitedUntil` on möödas, muutub ühendus uuesti sobivaks. Eduka kasutamise korral kustutab `clearAccountError()` kõik veaväljad.
 
-### Claude OAuth-i kasutussein: madalama prioriteediga rada + seansipiirangu lähtestamine
+### Claude OAuth kasutussein: madalama prioriteediga rada + seansipiirangu lähtestamine
 
-**Ulatus:** üks Claude'i tellimuse (OAuth) ühendus. Mõlemad funktsioonid on **ühenduse kaupa
-sisse lülitatavad** (Muuda ühendust → Claude'i jaotis → `lowPriorityMode` / `autoLimitReset` väljal
-`providerSpecificData`, mõlemad vaikimisi väljas) ja peegeldavad Claude Code'i käske `/low-priority` ja
-`/limit-reset` (protokollileping, mis jäädvustati Claude Code 2.1.263-st).
+**Ulatus:** üks Claude abonemendi (OAuth) ühendus. Mõlemad omadused on** luba ühenduse kohta** (Redigeeri ühenduse → Claude sektsiooni → `lowPriorityMode` / `autoLimitReset` in `providerSpecificData`, mõlemad on vaikimisi välja lülitatud) ja peegeldage Claude koodi `/low-priority` ja `/limit-reset` käske (juhtmeleping on jäädvustatud Claude koodist 2.1.263).
 
-**Teostus:**
+**Rakendamine:**
 
-- Olekumasin + vastuste klassifitseerimine: `open-sse/services/claudeLowPriority.ts`
-- Lähtestamise staatuse/taotluse klient: `open-sse/services/claudeLimitReset.ts`
-- Täitja konks (päise süstimine + sama konto taaskatse): `open-sse/executors/base.ts::execute()`
-- Nõusolekul põhinev püsimine (opt-in): `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
+- Oleku masina + vastuse klassifikatsioon: `open-sse/services/claudeLowPriority.ts`
+- status/claim kliendi lähtestamine: `open-sse/services/claudeLimitReset.ts`
+- Täitja konks (päise süstimine + sama konto uuesti proovimine): `open-sse/executors/base.ts::execute()`
+- Valiku püsivus: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
 
-**Päästik:** 5-tunnine kasutussein — `429`, mille päised kannavad
-`anthropic-ratelimit-unified-status: rejected` ja, kui konto on abikõlblik,
-`anthropic-ratelimit-unified-slow-offer: treatment`. Enne seda esimest seina-429-t ei saadeta
-midagi; ühtsete päisteta purske-429 läbib tavapärast cooldowni-teed.
+**Päästiku:** 5-tunnise kasutuse sein — a `429`, mille päistel on `anthropic-ratelimit-unified-status: rejected` ja kui konto on sobilik, `anthropic-ratelimit-unified-slow-offer: treatment`. Enne seda esimest seina ei saadeta midagi 429; sarivõte 429 ilma ühtsete päisteta läbib tavalise jahtumise tee.
 
-**Madalama prioriteediga rada** (`lowPriorityMode`):
+**Madalama prioriteediga sõidurada** (`lowPriorityMode`):
 
-- Seina-429 korral võtab täitja pakkumise vastu ja proovib kohe uuesti **sama**
-  kontot päisega `anthropic-usage-limit: slow`; rada jääb aktiivseks kuni teatatud
-  `anthropic-ratelimit-unified-reset`-ini (+60 s armuaega) ja iga päring selles aknas kannab
-  seda päist. Püütud 429 ei jõua kunagi `handleChatCore`-ni, seega ühendust **ei** panda
-  cooldowni ega vahetata ringlusest välja.
-- `anthropic-ratelimit-unified-slow-status` hilisemates vastustes: `active` / `not_needed`
-  hoiavad rada alles; `slot_busy` (429) või `529` ootavad serveri määratud
-  `anthropic-ratelimit-unified-slow-retry-after` (vaikimisi 20 s, piiratud vahemikku 5–600 s, ±30% jitter)
-  ja proovivad uuesti, ülempiiriks `anthropic-ratelimit-unified-slow-max-wait` (vaikimisi 20 min, piiratud
-  vahemikku 1 min–6 h) — pärast seda rada lõpeb ja 10-minutiline jahtumine blokeerib uuesti
-  vastuvõtmise. Ooteaega piirab lisaks see, mis on järel päringu enda upstream-alustuse
-  ajalõpust (`resolveFetchStartTimeout`, vaikimisi 10 min) miinus 5 s varu: ilma selle
-  piiranguta elaks 20-minutiline vaikimisi maksimaalne ooteaeg päringust kauem ja uni
-  katkestataks oote keskel, tuues pinnale `TimeoutError`i sujuva `max_wait`-lõpu + jahtumise
-  asemel.
-- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, 5-tunnise akna uuenemine või
-  `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (mis lõpetab raja mis tahes
-  staatusel `extra_usage`-na, kuna tasuline ületus nüüd seina katab) lõpetavad raja;
-  vastus voolab seejärel tavapärasesse cooldowni-teele. `budget_exhausted` peetakse meeles
-  kuni teatatud eelarve lähtestamiseni (≤ 8 päeva).
-- Seinakontroll käivitatakse pärast täitja enda 400-st juhitud katse-siseseid taaskatseid
-  (konteksti redigeerimine, thinking/effort-piirangud, parameetrite automaatõpe), nii et
-  seina-429, mis ilmneb alles ühel neist taaskatsetest, püütakse ikkagi kinni, selle asemel
-  et jõuda cooldowni-teele.
-- Olek on ühenduse kohta mälus (taaskäivitus maksab ühe lisaseina-429 pakkumise uuesti
-  vastuvõtmiseks).
+- Seinal 429 võtab testamenditäitja pakkumise vastu ja proovib kohe uuesti** sama** konto `anthropic-usage-limit: slow`; rada jääb aktiivseks kuni väljakuulutatud `anthropic-ratelimit-unified-reset` (+ 60s grace) ja iga selles aknas olev päring kannab päist. Pealt võetud 429 ei jõua kunagi `handleChatCore`, seega ühendus on** mitte** panna jahutusse ja seda ei pöörata ära.
+- `anthropic-ratelimit-unified-slow-status` hilisematel vastustel: `active` / `not_needed` hoia sõidurada; `slot_busy` (429) või `529` ootavad serveri `anthropic-ratelimit-unified-slow-retry-after` (vaikimisi 20 s, klamber 5–600 s, ± 30% värinat) ja proovige uuesti, piirnedes `anthropic-ratelimit-unified-slow-max-wait` (vaikeseade 20 min, klambriga 1 min–6 h) — möödudes sellest, kui rada lõpeb ja jahtub 10-minutiline blokeering. Ooteaeg on lisaks piiratud päringu enda ülesvoolu käivituse ajalõpu järelejäämisega (`resolveFetchStartTimeout`, vaikimisi 10 min) miinus 5 s varu: ilma selle ülempiirita ületaks 20-minutiline vaikimisi maksimaalne ooteaeg taotluse ja unerežiim katkestataks keset ootamist, jäädes nähtavale `TimeoutError` asemel `max_wait` lõpp- +.
+- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, 5-tunnine akna ümberminek või `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (mis lõpetab selle mis tahes olekus kui `extra_usage`, kuna tasuline ülejääk katab nüüd seina) lõpetab sõiduraja; reaktsioon liigub seejärel tavalisele jahtumisrajale. `budget_exhausted` jäetakse meelde kuni väljakuulutatud eelarve lähtestamiseni (≤ 8 päeva).
+- Seinakontroll käitatakse pärast täitja enda 400 juhitud sisekatset (konteksti redigeerimine, thinking/effort klambrid, parameeter automaatne õppimine), nii et sein 429, mis jääb pinnale ainult ühel neist korduskatsetest, püütakse siiski kinni, selle asemel et jõuda jahtumisrajale.
+- Olek on ühenduse kohta mälus (taaskäivitamine maksab ühe lisaseina 429 uuesti vastuvõtmiseks).
 
-**Seansilimiidi lähtestus** (`autoLimitReset`, proovitakse enne rada, kui mõlemad on sisse
-lülitatud):
+**Seansipiirangu lähtestamine** (`autoLimitReset`, proovitud enne sõidurada, kui mõlemad on sisse lülitatud):
 
-- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → `juniper_tide`-plokk;
-  kui `arm: "reset"` ja `available: true`, siis
-  `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` koos
-  `{ "program": "juniper_tide" }`-ga (organisatsiooni UUID saadakse
-  `providerSpecificData.organizationUUID`-st, tagavarana bootstrap).
-- `result: reset|not_limited` → päringut proovitakse uuesti täiskiirusel (ilma slow-päiseta).
-  `already_used` / `not_offered` jätab meelde `next_available_at` (vaikimisi üks nädal); iga
-  tõrke puhul oodatakse 15 minutit. Lähtestust saab teha korra nädalas ja see arvestub
-  ikkagi nädalalimiiti.
+- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → `juniper_tide` plokk; kui `arm: "reset"` ja `available: true`, `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` koos `{ "program": "juniper_tide" }` (organisatsioon UUID alates `providerSpecificData.organizationUUID`, alglaadimisvaru).
+- `result: reset|not_limited` → taotlust proovitakse uuesti täiskiirusel (aeglast päist pole). `already_used` / `not_offered` memoise `next_available_at` (vaikimisi üks nädal); iga rike taandub 15 minutiga. Lähtestamine toimub kord nädalas ja see arvestatakse ikkagi nädala limiidi hulka.
 
-Regressioonikaitsed: `tests/unit/claude-low-priority-mode.test.ts`,
-`tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
+Regressioonikaitsed: `tests/unit/claude-low-priority-mode.test.ts`, `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
 ### Seansi afiinsus (#7274)
 
-**Ulatus:** üks kliendiseanss (päis `X-Session-Id` / `x-codex-session-id` / `x-omniroute-session`), kinnitatud ühele ühendusele, **mis tahes** pakkujale.
+**Ulatus:** üks kliendiseanss (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` päis) on kinnitatud ühele ühendusele,** ükskõik milline** pakkuja.
 
-**Eesmärk:** hoida mitmekäiguline agent (Claude Code, aider, kohandatud agendid) päringute vahel samal kontol, vähendades kontodevahelist kontekstikadu ja korduvaid külmkäivituse 429-sid pakkujatel, kellel on kontopõhine seansi olek.
+**Eesmärk:** hoidke mitme käiguga agenti (Claude kood, abistaja, kohandatud agendid) taotluste lõikes samal kontol, vähendades kontoülese konteksti kadu ja korduvaid külmkäivitusi kontopõhise seansi olekuga pakkujate puhul.
 
-**Teostus:**
+**Rakendamine:**
 
-- TTL-i lahendamine: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
-- Kinnituse valimine/loomine: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
-- Päiste eraldamine (üldine, mis tahes pakkujale): `src/sse/services/auth.ts::extractSessionAffinityKey()`
-- Püsinud kinnitustabel: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
-- Seade: `sessionAffinityTtlMs` (globaalne TTL millisekundites, `0` lülitab välja) — `src/lib/db/settings.ts`. Nimetati ümber Codex-spetsiifilisest `codexSessionAffinityTtlMs`-st migratsiooni `124_generic_session_affinity_ttl.sql` käigus, mis kannab kõik varem seadistatud Codexi TTL-id üle uue vaikimisi väärtusena.
+- TTL eraldusvõime: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
+- Pin selection/creation: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
+- Päise ekstraheerimine (üldine, mis tahes pakkuja): `src/sse/services/auth.ts::extractSessionAffinityKey()`
+- Püsiva nööpnõela laud: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
+- Seade: `sessionAffinityTtlMs` (globaalne TTL ms-des, `0` keelab) — `src/lib/db/settings.ts`. Nimetatud ainult Codexi jaoks mõeldud `codexSessionAffinityTtlMs` ümber migreerimise teel `124_generic_session_affinity_ttl.sql`, mis kannab uue vaikeväärtusena üle kõik varem konfigureeritud Codex TTL.
 
-Enne #7274 lõpetas `resolveSessionAffinityTtlMs()` jõuliselt `0`-ga iga pakkuja puhul peale `codex`-i, nii et TTL-seadistusel (ja seansipäistel) ei olnud mujal mingit toimet, kuigi kinnitusmehhanism ja päiste eraldamine olid juba pakkujaagnostilised. Parandus eemaldas selle varajase väljumise; TTL kehtib nüüd ühtlaselt igale pakkujale, kui see on globaalselt seatud väärtusele üle `0`.
+Enne #7274 kasutas `resolveSessionAffinityTtlMs()` `0` -d kõigi pakkujate jaoks, välja arvatud `codex`, nii et TTL säte (ja seansi päised) ei mõjutanud kusagil mujal, kuigi kinnitusmehhanism ja päise ekstraheerimine olid juba pakkuja-agnostilised. Parandus eemaldas selle varajase tagastamise; TTL kehtib nüüd ühtselt kõikidele pakkujatele, kui see on globaalselt seatud väärtusest `0` kõrgemale.
 
-Kolme seansiafiinsuse päist ei edastata kunagi ülesvoolu — täitjad ehitavad oma ülesvoolu päised nullist, selle asemel et kliendi päiseid edasi anda, seega jääb see vaid sisemiseks korrelatsiooni-ID-ks.
+Kolme seansi afiinsusega päist ei edastata kunagi ülesvoolu — täitjad loovad oma ülesvoolu päised nullist, selle asemel, et klientide päiseid läbi lasta, nii et see jääb ainult sisemiseks korrelatsiooni ID-ks.
 
-### Eksklusiivsed hallatud seansi ühendusliisingud
+### Eksklusiivsed hallatud seansiühenduse liisingud
 
-**Ulatus:** üks aktiivne hallatud HTTP-klient/-seanss omab üht sobivat OmniRoute'i ühendust.
+**Ulatus:** üks aktiivne hallatav HTTP client/session omab ühte sobilikku OmniRoute ühendust.
 
-**Eesmärk:** pakkuda püsivat eksklusiivset ühenduse omandit klientidele, kes vajavad
-päringute vahel kõva marsruutimispiiret. See erineb seansiafiinsusest, mis on pehme
-järjepidevuse eelistus: eksklusiivne liising säilitab elutsükli oleku SQLite'is, jõustab
-globaalse aktiivse omaniku ja aktiivse ühenduse unikaalsuse ning lükkab aegunud
-generatsiooni tagasi enne pakkujale edastamist.
+**Eesmärk:** pakkuda püsivat eksklusiivset ühenduse omandiõigust klientidele, kes vajavad rasket marsruutimispiiret üle taotluste. See erineb seansi afiinsusest, mis on pehme järjepidevuse eelistus: eksklusiivne liising püsib SQLite elutsükli olekus, jõustab globaalse aktiivse omaniku ja aktiivse ühenduse unikaalsuse ning lükkab tagasi aegunud genereerimise enne pakkuja väljasaatmist.
 
-Funktsioon on iga API võtme puhul vabatahtlikult sisse lülitatav. Hallatud võtmel peab olema
-`lease:exclusive` skoop ja selgesõnaliselt määratud mittetühi `allowedConnections` loend. Elutsükli
-lõpp-punkti saab kasutada iga HTTP klient; kliendi nime, kasutajaagenti, teenusepakkujat, OAuth
-meetodit ega mudelit ei nõuta. Liising omab ühendust, mitte mudelit, seega mudeli vahetus säilitab
-sideme seni, kuni ühendus püsib tavapäraselt sobivana. Tavalised mudeli, kvoodi, tervise,
-jahtumisaja ja lubatud loendi reeglid jäävad määravaks ning võivad sama generatsiooni suunata üle
-teisele vabale sobivale ühendusele.
+Funktsioon on lubatav API klahvi kohta. Hallatud võtmel peab olema `lease:exclusive` ulatus ja selge, mittetühi `allowedConnections` loend. Iga HTTP klient saab kasutada elutsükli lõpp-punkti; kliendi nime, kasutajaagenti, pakkujat, OAuth meetodit ega mudelit pole vaja. Liisingulepingule kuulub ühendus, mitte mudel, nii et mudeli muudatus säilitab siduvuse, kuni ühendus jääb tavaliselt kõlblikuks. Tavamudeli-, kvoodi-, tervise-, jahtumis- ja lubade loendi reeglid jäävad autoriteetseks ning võivad sama põlvkonna üle kanda teisele tasuta sobilikule ühendusele.
 
-Elutsükkel on `POST /api/v1/session-leases` koos JSON-toimingutega `acquire`, `renew` ja `release`.
-Hallatud inferentsipäringud esitavad läbipaistmatu `X-OmniRoute-Lease-Owner` väärtuse ja täpse
-`X-OmniRoute-Lease-Generation` väärtuse. Omaniku väärtus algab eesliitega `vlo_`, millele järgneb 43
-base64url märki; salvestatakse ainult selle SHA-256 räsi. Iga lõplik saatmistõke seob lisaks
-autenditud API võtme ID ja aktiivse ühenduse ID. Liisingu juhtpäised eemaldatakse logidest,
-talletatud päringute hetktõmmistest ja ülesvoolu täitja päistest.
+Elutsükkel on `POST /api/v1/session-leases` koos JSON toimingutega `acquire`, `renew` ja `release`. Hallatud järelduspäringud esitavad läbipaistmatu `X-OmniRoute-Lease-Owner` väärtuse ja täpse `X-OmniRoute-Lease-Generation`. Omanik kasutab `vlo_` millele järgneb 43 märki base64url; salvestatakse ainult selle SHA-256 räsi. Iga lõplik väljasaatmispiirkond seob ka autentitud API -klahvi ID ja aktiivse ühenduse ID. Rendikontrolli päised eemaldatakse logidest, säilitatud päringu hetktõmmistest ja ülesvoolu täitjapäistest.
 
-Kui tavalisel marsruutimisel on sobivaid hallatud kandidaate, kuid kõik vabad kandidaadid on
-hõivanud võõras aktiivne liising, tagastab OmniRoute HTTP `429`, liisingu mahu puudumist tähistava
-koodi, mahu ootamist tähistava oleku ja ülevalt piiratud `Retry-After` väärtuse, mis arvutatakse
-varaseima asjaomase aegumise põhjal. Tavaline sobivate kandidaatide puudumine ei ole liisingu
-konkurents ning säilitab senise marsruutimisvea semantika.
+Kui tavalisel marsruutimisel on sobilikud hallatud kandidaadid, kuid iga vaba kandidaadi hõivab välisriigi aktiivne liising, tagastab OmniRoute koodi HTTP `429`, rendivõimsuse puudumise koodi, võimsuse ootamise oleku ja piiratud `Retry-After` mis on tuletatud varaseimast asjakohasest aegumistähtamisest. Tavaline tühi sobivus ei ole rendivaidlus ja säilitab olemasoleva marsruutimise vea semantika.
 
-Seotud mehhanismid jäävad eraldi:
+Seotud mehhanismid jäävad eraldiseisvaks:
 
-- OAuth seansi hõivatus on OAuth kontode protsessisisene pehme jaotus.
-- Konto semaforid annavad päringute rööpsuse lubasid ja lõppevad päringu valmimisel.
-- Eksklusiivsed hallatud seansiliisingud on püsiv elutsükli omand koos generatsioonitõkega.
+- OAuth seansi hõivatus on protsessi kohalik pehme jaotus OAuth kontode jaoks.
+- Konto semaforid annavad päringu samaaegsuse load ja lõpevad, kui päring on lõpule viidud.
+- Eksklusiivsed hallatud seansirendilepingud on kestvad elutsükli omad koos põlvkonnataraga.
 
 ---
 
@@ -355,17 +283,25 @@ lukustuse _olek_ on efemeerne.
 
 ---
 
-## 4. Kvoodijagamise samaaegsuse kontroll (v3.8.36)
+## 4. Kvoodijagamise konkurentsikontroll (v3.8.36)
 
-Tellimuskontod (GLM, MiniMax jne) aktsepteerivad sageli vaid ~1–3 samaaegset päringut; selle ületamine käivitab 429-vead ja jahtumisperioodid. See on eriti terav **kvoodijagamise** (`qtSd/…`) kombinatsioonide puhul, kus mitu API-võtit jagavad ühte ülesvoolu kontot. Kolm kihti hoiavad jagatud konto üleujutamise eest.
+Tellimuspõhised kontod (GLM, MiniMax jne) aktsepteerivad sageli ainult ~1–3
+samaaegset päringut; selle ületamine käivitab 429 vead ja jahtumisperioodid. See
+on eriti terav **kvoodijagamise** (`qtSd/…`) kombinatsioonide korral, kus mitu API-võtit
+jagavad sama ülesvoolu kontot. Jagatud konto üleujutamise vältimiseks kasutatakse kolme kihti.
 
-### Ühendusepõhine samaaegsuse piirang (`max_concurrent`)
+### Ühendusepõhine konkurentsipiirang (`max_concurrent`)
 
-Iga pakkuja ühendus saab deklareerida `max_concurrent` ülempiiri (`provider_connections.max_concurrent`, määratud ühenduse modaalis / API-s / andmebaasis). Jätke see tühjaks, kui piirangut pole. See on ainus nupp, mis juhib allolevat serialiseerimiskihit – seadke see konto tegelikule samaaegsusele (nt GLM ~1, MiniMax ~2).
+Iga pakkuja ühendus võib deklareerida `max_concurrent` ülempiiri
+(`provider_connections.max_concurrent`, määratakse ühenduse modaalaknas / API kaudu / andmebaasis).
+Piirangu puudumiseks jätke väli tühjaks. See on ainus säte, mis juhib allpool kirjeldatud
+serialiseerimiskihti — määrake selle väärtuseks konto tegelik konkurentsipiirang
+(nt GLM ~1, MiniMax ~2).
 
-### Mudelipõhised samaaegsuse piirangud (`modelConcurrency`)
+### Mudelipõhised konkurentsipiirangud (`modelConcurrency`)
 
-Ühendus saab lisaks deklareerida täpsed mudelipõhised samaaegsuse ülempiirid oma `rateLimitOverrides` kaardis:
+Ühendus võib lisaks deklareerida täpsed mudelipõhised konkurentsipiirangud oma
+`rateLimitOverrides` kaardil:
 
 ```json
 {
@@ -376,13 +312,31 @@ Iga pakkuja ühendus saab deklareerida `max_concurrent` ülempiiri (`provider_co
 }
 ```
 
-Määrake see ühenduse modaalis (**Rate limit overrides → Per-model concurrency caps**, üks `model=cap` rea kohta) või `PATCH /api/providers/[id]` kaudu sama JSON-kujuga. Võtme semantika:
+Määrake see ühenduse modaalaknas (**Rate limit overrides → Per-model
+concurrency caps**, üks `model=cap` rea kohta) või `PATCH /api/providers/[id]`
+kaudu sama JSON-kujuga. Olulised tähendused:
 
-- **Ühenduseülene vs mudelispetsiifiline:** `maxConcurrent` jääb jagatud ühenduseüleseks ülempiiriks. Kui mõlemad kehtivad, omandatakse mõlemad väravad aatomiliselt samas liitväravas (`global → provider → account → model`); tegelik käitumine on rangem kohaldatav piirang.
-- **Täpne mudelivõtme vaste:** võti on mudeli string, mis edastatakse täitjale pärast marsruutimise lahendamist – tavaliselt paljas ülesvoolu mudeli ID (`glm-5`), mitte kliendipoolne `provider/model` alias (`zai/glm-5` ei vasta `glm-5`). Väärtused on positiivsed täisarvulised samaaegsete päringute ülempiirid.
-- **Kohalik järjekord, puudub avastamine:** liigsed päringud järjekorda kohapeal olemasoleva järjekorra/ajalõpu semantikaga (tüübitud `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` vastuvõtuvead). OmniRoute ei avasta ega järelda ülesvoolu poliitikat – see jõustab täpsed piirangud, mille operaator on konfigureerinud. Küllastunud mudelivärav ei lülita kunagi pakkujat välja ega loo püsivat mudeli lukustust; ülesvoolu 429/jahtumis-/tagavaramehhanismi käitumine jääb veapiiriks.
-- **Ühendusepõhine, protsessipõhine ulatus:** piirangud on andmebaasi ühendusepõhised ja hoitakse mälus, nii et kaks ühendust, mis kasutavad sama ülesvoolu API-võtit, ei koordineeri omavahel.
-- **Konfigureerimata tähendab muutumatut:** kaardi väljajätmine (või armatuurlaua välja tühjaks jätmine) ei lisa mudeliväravat. Näide konfiguratsioonist ilma universaalset pakkuja piirangut kehtestamata:
+- **Ühenduseülene vs mudelipõhine:** `maxConcurrent` jääb kogu ühendust hõlmavaks
+  ühiskasutatavaks ülempiiriks. Kui mõlemad kehtivad, hangitakse mõlemad väravad
+  samaaegselt samas komposiitväravas
+  (`global → provider → account → model`); tegelik käitumine järgib rangemat
+  rakenduvat piirangut.
+- **Mudeli võtme täpne vaste:** võti on mudelistring, mis edastatakse täitjale pärast
+  marsruudi lahendamist — tavaliselt ülesvoolu mudeli paljas identifikaator
+  (`glm-5`), mitte kliendipoolne `provider/model` alias (`zai/glm-5` ei vasta
+  `glm-5`-le). Väärtused on positiivsed täisarvulised samaaegsete päringute ülempiirid.
+- **Kohalik järjekorda panemine, avastamist ei toimu:** liigsed päringud pannakse
+  olemasoleva järjekorra-/ajalõpu semantika kohaselt kohalikku järjekorda (tüübitud
+  `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` vastuvõtuvigadega). OmniRoute ei
+  avasta ega tuleta ülesvoolu poliitikat — see jõustab operaatori konfigureeritud
+  täpsed ülempiirid. Küllastunud mudelivärav ei keela pakkujat ega loo püsivat mudeli
+  blokeeringut; ülesvoolu 429 / jahtumis- / varuvariandi käitumine jääb veakaitseks.
+- **Ühenduse- ja protsessipõhine ulatus:** piirangud kehtivad andmebaasiühenduse
+  kohta ja neid hoitakse mälus, mistõttu kaks sama ülesvoolu API-võtit taaskasutavat
+  ühendust ei koordineeri omavahel.
+- **Konfigureerimata tähendab muutmata:** kaardi väljajätmine (või juhtpaneeli välja
+  tühjaks jätmine) ei lisa mudeliväravat. Näidiskonfiguratsioon ilma universaalset
+  pakkujapõhist piirangut kehtestamata:
 
 ```text
 glm-5=1
@@ -391,15 +345,51 @@ glm-4.7=3
 
 ### Kvoodijagamise päringute serialiseerimine
 
-Kui kvoodijagamise dispetšer suunab päringu ühendusele, mis deklareerib positiivse `max_concurrent`, serialiseeritakse samaaegsed päringud sellele **kontole** ühendusepõhise semafori kaudu (võti `qsconn:<connectionId>`): liigsed päringud **ootavad järjekorras** konto üleujutamise asemel. See on **fail-open** – küllastunud järjekord või ajalõpp jätkub ilma pesata, selle asemel et kunagi dispetšeeritavat päringut tagasi lükata. Lülitage sisse **Settings → Resilience → Quota-share per-connection concurrency** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, vaikimisi sisse lülitatud). Ilma `max_concurrent` piiranguta jääb käitumine muutumatuks.
+Kui kvoodijagamise väljasaatmine sihib ühendust, millele on määratud positiivne
+`max_concurrent`, serialiseeritakse sama **konto** samaaegsed päringud
+ühendusepõhise semafori kaudu (võti `qsconn:<connectionId>`): liigsed päringud
+**ootavad järjekorras**, selle asemel et kontot üle ujutada. See on **tõrgetele
+avatud** — küllastunud järjekord või ajalõpp jätkab ilma pesata, selle asemel et
+kunagi väljasaatmist lubavat päringut tagasi lükata. Lüliti asub jaotises
+**Settings → Resilience → Quota-share per-connection
+concurrency** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, vaikimisi
+sees). Ilma `max_concurrent` piiranguta jääb käitumine muutumatuks.
 
-> Kvoodijagamise marsruutimisvärav (`selectQuotaShareTarget`, DRR + P2C) on iseenesest fail-open ja ainult _deprioriseerib_ piirini jõudnud ühenduse – ühe ühenduse puhul ei saa see kõvasti piirata, seega see semafor on see, mis tegelikult üleujutust ohjeldab.
+> Kvoodijagamise marsruutimisvärav (`selectQuotaShareTarget`, DRR + P2C) on ise
+> tõrgetele avatud ja ainult _vähendab_ piirini jõudnud ühenduse prioriteeti — ühe
+> ühendusega kogumi korral ei saa see ranget piirangut rakendada, seega just see
+> semafor piirab tegelikult üleujutust.
 
-### Kombineeritud jahtumisperioodi teadlik korduskatse
+### Kombinatsiooni jahtumisperioodist teadlik korduskatse
 
-Iga kombineeritud strateegia puhul (kui see on lubatud) ootab päring, mis kristalliseeriks 429-vea LÜHIKESE mööduva jahtumisperioodi jaoks, selle ära ja saadab uuesti, selle asemel et tagastada 429 – see hõlmab Gemini-klassi TPM/RPM aknaid (~60s retry-after) mitme mudeli kombinatsioonide puhul, nt mõlemad 2-mudeli kombinatsiooni sihtmärgid jõuavad mudelipõhise piirini. Piiratud `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) seadetes **Settings → Resilience**. See ei oota kunagi `quota_exhausted` (lukustatud südaööni) ega autentimis-/mitteleidmise põhjuste puhul.
+Iga kombinatsioonistrateegia korral (kui see on lubatud) ootab päring, mis
+põhjustaks LÜHIKESE ajutise jahtumisperioodi tõttu 429 vea, jaotuse lõppemist ja
+saadetakse uuesti, selle asemel et tagastada 429 — see hõlmab Gemini-klassi
+TPM/RPM aknaid (~60 s retry-after) mitme mudeliga kombinatsioonidel, näiteks kui
+mõlemad 2-mudelilise kombinatsiooni sihtmärgid jõuavad mudelipõhise
+kiiruspiiranguni. Seda piiravad `comboCooldownWait` (`enabled`, `maxWaitMs`,
+`maxAttempts`, `budgetMs`) jaotises **Settings → Resilience**. See ei oota
+`quota_exhausted` korral (lukustatud kuni keskööni) ega autentimise / puuduva
+ressursi põhjuste korral.
 
-Sama värav katab eeldispetšerimise juhtumi (#16319): kui iga kombinatsiooni sihtmärk jäetakse vahele enne mis tahes katse tegemist, kuna selle mudel on lühiajalises mööduvas lukustuses, ootab nullkatse tee luku ära samade piirangute all ja dispetšeerib uuesti, selle asemel et vastata vihjeta `503 ALL_TARGETS_SKIPPED`. Kui ootamine pole lubatud (piirang, katse või eelarve on ammendatud või funktsioon on välja lülitatud), uuendatakse lõplik vastus `429 rate_limit_error`-ks, mis sisaldab `retry_after` / `reset_at` varaseimast mööduvast luku aegumisest; kvoodi-, autentimis- ja mitteleidmise lukud säilitavad vihjeta 503.
+Kombinatsioon võib sellest loobuda suvandiga
+`config.comboCooldownWaitEnabled: false`. Ainult sõnasõnaline `false` keelab need
+jagatud kombinatsiooni ootamised (väljasaatmisjärgne jahtumine ning
+väljasaatmiseelne kaitselüliti avatud / mudeli lukustuse ootamine) ja nende
+ootamise eelarve ajalõpu alampiiri pikenduse. Puuduv väärtus või `true` säilitab
+ülemaailmse poliitika; `true` ei saa ülemaailmselt keelatud ootamist lubada. Selgesõnaliselt
+määratud `targetTimeoutMs` on endiselt ülimuslik. See loobumine ei muuda eraldi
+native-Codexi pöörde kinnistamise väljasaatmiseelset ootamist.
+
+Sama värav hõlmab ka väljasaatmiseelset juhtumit (#16319): kui kõik kombinatsiooni
+sihtmärgid jäetakse enne esimese katse tegemist vahele, sest nende mudel on lühikeses
+ajutises lukustuses, ootab nullkatsete tee sama ülempiiri alusel luku lõppemist ja
+saadab päringu uuesti, selle asemel et vastata vihjeta
+`503 ALL_TARGETS_SKIPPED`. Kui ootamine pole lubatud (ülempiir, katsete arv või
+eelarve on ammendunud või funktsioon on välja lülitatud), täiendatakse lõplikku
+vastust kujule `429 rate_limit_error`, mis sisaldab varaseima ajutise luku
+`retry_after` / `reset_at` väärtust; kvoodi-, autentimis- ja puuduva ressursi
+lukud säilitavad vihjeta 503 vastuse.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)
@@ -483,30 +473,13 @@ Vaikimisi lubab OmniRoute automaatselt kiirusepiirangu järjekorrakaitse kõigil
 
 ---
 
-## 6. Aeglase voo läbilaskevõime watchdog (#9709)
+## 6. Aeglase voo läbilaskevõimega valvekoer (#9709)
 
-Valikuline `resilienceSettings.streamRecovery.throughputWatchdog`-kaitse tuvastab
-ülesvoo, mis endiselt saadab tükke, kuid toodab assistendi väljundit alla
-konfigureeritud kasuliku väljundi määra. See on tahtlikult erinev tegevusetuse
-ajalõpust: heartbeat-signaalid ega metaandmed ei lähtesta kumbagi taimerit ega
-loeta edusammuks. Samuti erineb see jäigast katse tähtajast (#9153), mis jääb
-absoluutseks turvalagiks olenemata väljundi kvaliteedist.
+Valikuline `resilienceSettings.streamRecovery.throughputWatchdog` valvur tuvastab ülesvoolu, mis saadab endiselt tükke, kuid toodab assistendi väljundit, mis jääb alla konfigureeritud kasuliku väljundkiiruse. See erineb teadlikult jõudeoleku ajalõpust: südamelöögid ja metaandmed ei lähtesta kumbagi taimerit ega loeta edenemiseks. See erineb ka raske katse tähtajast (#9153), mis jääb väljundkvaliteedist sõltumata absoluutseks ohutuks ülemmääraks.
 
-Watchdog vajab enne katkestamist soojenemisperioodi, millele järgneb täielik
-liuvaken. See loeb tekstideltaid Chat Completionsi ja Responses API
-väljundsündmustest (konservatiivne UTF-8 baidipõhine asendusmõõt), ignoreerib
-ainult kasutusandmeid sisaldavaid ja tühje sündmusi ning peatab hinnangu, kuni
-tööriistakõne või arutlussündmused on pooleli. See on vaikimisi välja lülitatud
-ja selle saab sisse lülitada sättega `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`;
-akent, soojenemist, minimummäära ja minimaalset mõõdetavat väljundit piirab
-tavaline resilience-sätete normaliseerimiskiht.
+Enne katkestamist vajab valvekoer soojendusperioodi, millele järgneb täielik veerev aken. See loendab teksti deltasid vestluse lõpuleviimistest ja vastustest API väljundsündmustest (konservatiivne UTF-8 baidi puhverserver), ignoreerib ainult kasutust ja tühje sündmusi ning peatab otsuse tegemise ajal, kui tööriistakutsung või arutlussündmused on lendu. See on vaikimisi keelatud ja seda saab lubada `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` ga (see env-väärtus annab ainult vaikeväärtuse — võidab salvestatud `resilienceSettings.streamRecovery.throughputWatchdog.enabled` tõeväärtus; vt selle juhendi ülaosas olevat env-vs-armatuurlaua tähtsuse märkust); aken, soojenemine, minimaalne kiirus ja minimaalne mõõdetav väljund on piiratud normaalse vastupidavuse seadete normaliseerimiskihiga.
 
-Kui watchdog on lubatud, rakendub selle katkestus ainult aktiivsele ülesvoo
-katsele. Enne mis tahes kliendile nähtavaid baite võib olemasolev sama konto
-varajase taastumise tee katse uuesti avada. Pärast commitimist ei korrata voogu
-kunagi pimesi; sufiksi saab kokku õmmelda ainult olemasolev turvaline voo keskel
-jätkamise leping. Lõpuleviimine jääb ühekäiguliseks, nii et kasutuse arvestust
-ja semafori vabastust ei dubleerita.
+Kui see on lubatud, rakendatakse valvekatkestus ainult aktiivsele ülesvoolu katsele. Enne mis tahes kliendile nähtavaid baite võib olemasolev sama konto varajase taastamise tee katse uuesti avada. Pärast sidumist ei esitata voogu kunagi pimesi uuesti; järelliite saab õmmelda ainult olemasolev turvalise keskvoo jätkulepinguga. Lõpetamine jääb ühekordseks, nii et kasutusarvestust ja semafori vabastamist ei dubleerita.
 
 ---
 

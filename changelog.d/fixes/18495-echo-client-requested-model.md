@@ -1,0 +1,1 @@
+- **fix(sse):** the response-model echo (`echoRequestedModelName`, Codex CLI, Claude Code) now returns the model the client requested instead of the combo leaf target ([#18495](https://github.com/cheaper-inference/OmniRoute/pull/18495), closes [#18494](https://github.com/cheaper-inference/OmniRoute/issues/18494)) — thanks @xiaoyaner0201

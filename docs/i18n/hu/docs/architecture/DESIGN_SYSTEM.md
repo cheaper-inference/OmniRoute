@@ -4,86 +4,89 @@
 
 ---
 
-> **Állapot:** a műszerfal a** Keak CI UI készlet** (`@keak/cheaper-inference-ui-kit`), a `packages/ui-kit` munkaterület (`@omniroute/ui-kit`; az upstream pillanatkép rögzítve van `packages/ui-kit/UPSTREAM.md` -ben, és `npm run check:ui-kit-snapshot` védi). A fény a kanonikus téma; az alapértelmezett beállítás a `system`. Az akcentus a Keak lime (`--ci-color-accent`). A Switzer az egyetlen család UI hoz, a kijelzőhöz és a kódszöveghez (`--ci-font-ui`; `--ci-font-display` és `--ci-font-mono` ezt oldja meg), amelyet maga a készlet tárol (`packages/ui-kit/src/ci-fonts.css`, importálta `ci-tokens.css`). Minden ikon egy Lucide jelkép.
+> **Állapot:** az irányítópult a **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) alapján készült, és
+> a `packages/ui-kit` munkaterületként (`@omniroute/ui-kit`) van beépítve (a külső forrás pillanatképe a
+> `packages/ui-kit/UPSTREAM.md` fájlban van rögzítve, és az `npm run check:ui-kit-snapshot` ellenőrzi). A világos a kanonikus
+> téma; az alapértelmezett beállítás a `system`. Az alapértelmezett paletta a készlet **Editions** megjelenése
+> (meleg, papírszerű semleges színek és a rézszínű `#e5ac82` kiemelőszín, `packages/ui-kit/src/ci-editions.css`); a Beállítások →
+> Megjelenés → Színpaletta menüpontban elérhető a **Classic**, amely a készlet alaptokenjeit használja lime kiemelőszínnel. A Switzer
+> az egyetlen betűcsalád a felhasználói felület, a megjelenítési és a kódszövegek számára (`--ci-font-ui`; a `--ci-font-display` és a
+> `--ci-font-mono` is erre oldódik fel), és maga a készlet szolgálja ki helyileg (`packages/ui-kit/src/ci-fonts.css`,
+> amelyet a `ci-tokens.css` importál). A Switzer által nem támogatott írásrendszerek karakterenként tartalék betűtípusra váltanak (`src/app/globals.css`):
+> cirill, görög és vietnámi szöveghez az Inter, arab íráshoz pedig kizárólag a `html[dir="rtl"]` alatt a Vazirmatn használatos.
+> Minden ikon Lucide-karakterjel.
 
-## 1. Hol mi található
+## 1. Hol találhatók a dolgok
 
-- **Kit.** A `packages/ui-kit/src` az upstream `src/` bájtpontos másolata a
-  `packages/ui-kit/UPSTREAM.md`-ben rögzített commitnál (amely a licencfelhatalmazást is rögzíti); a
-  `PATCHES.md` sorolja a helyi patcheket (nincsenek). Forrásként kerül felhasználásra, build nélkül: a
-  `next.config.mjs` transzpileálja, a `tsconfig.json` pedig az `@omniroute/ui-kit` →
-  `packages/ui-kit/src` és az `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` leképezést adja (a
-  `vitest.config.ts` és a `vitest.mcp.config.ts` ugyanazt az aliast hordozza). A kit komponenst az
-  alútvonalán importáld (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), soha ne az
-  `@omniroute/ui-kit` barrel-en keresztül: a barrel minden komponenst (beleértve a dátumválasztót is)
-  behúz minden importálóba. A kit stíluslapja a `src/app/globals.css`-en keresztül érkezik
+- **Készlet.** A `packages/ui-kit/src` bájtról bájtra megegyező másolata a külső projekt `src/` könyvtárának a
+  `packages/ui-kit/UPSTREAM.md` fájlban rögzített commitnál (amely a licencengedélyt is dokumentálja); a `PATCHES.md` sorolja fel a helyi
+  javításokat (nincsenek). Közvetlenül forrásként van felhasználva, build nélkül: a `next.config.mjs` transzpilálja, a
+  `tsconfig.json` pedig az `@omniroute/ui-kit` → `packages/ui-kit/src` és az `@omniroute/ui-kit/*` →
+  `packages/ui-kit/src/*` leképezést használja (a `vitest.config.ts` és a `vitest.mcp.config.ts` ugyanezt az aliast tartalmazza). A
+  készlet komponenseit az alútvonalukon keresztül importáld (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), soha ne
+  az `@omniroute/ui-kit` gyűjtőmodulon keresztül: a gyűjtőmodul minden komponenst (köztük a dátumválasztót is)
+  behúz minden importálóba. A készlet stíluslapját az `src/app/globals.css` tölti be
   (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **Tokenek.** A `packages/ui-kit/src/ci-tokens.css` deklarálja a `--ci-*` tokeneket; a
-  `src/app/globals.css` hidat képez hozzájuk a régi OmniRoute-nevekkel (`--color-*`, `--radius-*`,
-  `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), így a meglévő
-  `var(--color-*)` kiolvasások és a Tailwind utility-k tovább működnek. Az új kód a Tailwind
-  utility-ket (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`,
-  `bg-chart-1`…) vagy a kit-osztályokat használja — soha hexadecimális értéket (a
-  `tests/unit/design-kit-bridge.test.ts` kikényszeríti a hidat). A `text-primary` a
-  `--text-color-primary`-n keresztül a `--color-primary-ink`-re oldódik fel (világos módban lime-800,
-  sötét módban a lime accent), így az elsődleges szöveg olvasható marad, miközben a
-  `bg-primary`/`border-primary` megtartja a lime felületet. A diagramsorozatok a `--color-chart-1` …
-  `--color-chart-5` tokeneket használják.
-- **Témák.** A `<html className="ci-theme">` (`src/app/layout.tsx`) a dokumentum számára engedélyezi
-  a kit témáját. A beállítás értéke `light`, `dark` vagy `system`
-  (`THEME_CONFIG.defaultTheme = "system"` a `src/shared/constants/appConfig.ts`-ben; a `system` a
-  `prefers-color-scheme`-et követi). A `src/store/themeStore.ts`-beli `applyTheme()` (amelyet a
-  `src/app/layout.tsx`-ben lévő, a hidratálás előtt futó inline bootstrap szkript tükröz) egyszerre
-  állítja be a `data-theme="dark"|"light"` attribútumot és kapcsolgatja a `<html>` elem `.dark`
-  osztályát. A kit sötét tokenkészlete a `data-theme="dark"`-hoz kötődik
-  (`packages/ui-kit/src/ci-tokens.css`); az OmniRoute saját sötét felülírásai (a `.dark` blokk a
-  `globals.css`-ben) és a régi Tailwind `dark:` utility-k a `.dark` osztályhoz kötődnek. Nincsenek
-  accent-szín presetek: az accent mindig a kitből származik, és egy régebbi buildből perzisztált
-  preset a store betöltődésekor eldobódik.
-- **Komponensek (adapterek).** A `src/shared/components/index.tsx` megtartja az OmniRoute
-  komponens-API-t (ugyanazok a nevek, default exportok és propok), a mögötte álló primitívek pedig a
-  kitre épülő adapterek: űrlapok (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`,
-  `Badge`, `Card`), overlay-ek és visszajelzés (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`,
-  `NotificationToast`, `EmptyState`, `Loading`), struktúra (`Collapsible`, `CollapsibleSection`,
-  `SegmentedControl`, `Breadcrumbs`, `Avatar`) és táblázatok (`DataTable`, `FilterBar`,
-  `ColumnToggle`, `FilterPills`, `PresetSlider`). Egy adapter alútvonalon importálja a kit
-  komponenst, és a régi propokat képezi rá — például a `Button variant="primary"` a kit `default`
-  gombja (`--ci-button-primary-*`: világos módban az inverz felület, sötét módban az accent a hozzá
-  tartozó `--ci-color-accent-foreground` tintával), a `danger` a `destructive`, a `warning` pedig az
-  `outline` plusz a `.ci-button--warning` kiterjesztés. A `globals.css` végén álló
-  `.ci-button--warning` és `.ci-badge[data-tone]` szabályok (`@layer components`) az OmniRoute saját,
-  a kit-osztályokra épülő kiterjesztései. A `tests/unit/ui/adapters/*.test.tsx` minden adaptert
-  rögzít.
-- **Shell.** A `src/app/(dashboard)/layout.tsx` a `DashboardLayout`-ot rendereli, amely a
-  `src/shared/components/layouts/DashboardShell.tsx`-et rendereli: a kit `SidebarProvider` /
-  `Sidebar` / `SidebarInset` komponenseit (`packages/ui-kit/src/sidebar.tsx`), az OmniRoute
-  navigációs logikájával a `src/shared/components/Sidebar.tsx`-ben. Egy „ugrás a tartalomra”
-  hivatkozás a `#main-content`-re az első fókuszálható elem. A
-  `src/shared/components/Header.tsx` tartalmazza a kit `SidebarTrigger`-ét (a shell egyetlen
-  oldalsávkapcsolója), a Keak `ProductSwitcher`-t és a parancspaletta megnyitóját; az útvonal címét
-  csak addig mutatja, amíg a `#main-content`-en belül nincs kit `PageHeader` (`.ci-page-header`)
-  mountolva, így a saját `PageHeader`-rel rendelkező oldalon egyetlen `h1` szerepel. A
-  `src/shared/components/CommandPalette.tsx` egy kit `Dialog`.
-- **Ikonok.** Az `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) a nevet (a
-  képernyők által használt Material Symbols szókészletet) az `ICON_MAP`-en
-  (`src/shared/constants/iconMap.ts`) keresztül egy Lucide-glifára oldja fel. A Material Symbols
-  betűtípus és csomag eltávolításra került: a térképből hiányzó név semleges helyőrző glifát renderel
-  (`data-icon-missing="true"`), és a production környezeten kívül konzolfigyelmeztetést naplóz. Az
-  `npm run gen:icon-map` kilistázza a használatban lévő, de a térképből hiányzó neveket (a
-  `tests/unit/icon-map-coverage.test.ts` minden Lucide-ikon nélküli név esetén elbukik; a
-  `tests/unit/icon-map-object-values.test.ts` a keresőobjektumokban tárolt neveket fedi le); a
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` a literális
-  `<span className="material-symbols-outlined">` spaneket `<Icon>`-ra írja át.
-- **Arculat.** A `src/shared/components/OmniRouteLogo.tsx` a kitet burkolja: a default export
-  `OmniRouteLogo` a `ProductIcon product="omniroute" variant="glyph"` komponenst rendereli (inline
-  SVG, `basePath`-biztos), az `OmniRouteLockup` pedig a `ProductLockup product="omniroute"`-ot
-  (hozzáférhető név: „Keak OmniRoute”), vagy white-label üzemeltetők esetén a saját
-  `name`/`logoSrc` értékeiket. A termékváltó céljai a `src/shared/constants/keakProducts.ts`-ben
-  találhatók (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Az önálló képernyők —
-  `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
-  `src/app/offline/page.tsx`, `src/app/not-found.tsx` és
-  `src/shared/components/ErrorPageScaffold.tsx` — a lockupot jelenítik meg; a
-  `tests/unit/brand-pages-static.test.ts` ezt őrzi.
+- **Tokenek.** A `packages/ui-kit/src/ci-tokens.css` deklarálja a `--ci-*` tokeneket; az `src/app/globals.css`
+  összeköti ezeket a régi OmniRoute-nevekkel (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
+  `--table-*`, `--orch-status-*`, `--color-fd-*`), így a meglévő `var(--color-*)` hivatkozások és Tailwind-
+  segédosztályok továbbra is működnek. Az új kód a Tailwind-segédosztályokat (`bg-surface`, `text-text-muted`,
+  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) vagy a készlet osztályait használja — hexadecimális értéket
+  soha (`tests/unit/design-kit-bridge.test.ts` kényszeríti ki az összekötést). A `text-primary` a
+  `--color-primary-ink` értékre oldódik fel a `--text-color-primary` változón keresztül, így az elsődleges szöveg olvasható marad, miközben a
+  `bg-primary`/`border-primary` megtartja a kiemelőfelületet: Editions alatt ez a készlet
+  `--ci-color-accent-active` értéke (világos módban a mély rézszínű `#99562f`, sötét módban pedig a rézszínű kiemelés); Classic alatt
+  világos módban lime-800, sötét módban pedig a lime kiemelés. A diagramsorozatok a
+  `--color-chart-1` … `--color-chart-5` változókat használják.
+- **Témák.** A `<html className="ci-theme">` (`src/app/layout.tsx`) bekapcsolja a készlet témáját a dokumentumon.
+  A beállítás `light`, `dark` vagy `system` lehet (`THEME_CONFIG.defaultTheme = "system"` az
+  `src/shared/constants/appConfig.ts` fájlban; a `system` követi a `prefers-color-scheme` értékét). Az
+  `src/store/themeStore.ts` fájlban található `applyTheme()` (amelynek megfelelője a `THEME_BOOT_SCRIPT`, beágyazva az
+  `src/app/layout.tsx` fájlba, és a hidratálás előtt fut) beállítja a `data-theme="dark"|"light"` attribútumot, és ezzel egyidejűleg
+  ki- vagy bekapcsolja a `.dark` osztályt a `<html>` elemen. A készlet sötét tokenkészlete a `data-theme="dark"` alapján aktiválódik
+  (`packages/ui-kit/src/ci-tokens.css`); az OmniRoute saját sötét felülírásai (a `.dark` blokk a `globals.css` fájlban) és a régi Tailwind `dark:`
+  segédosztályok a `.dark` osztályt használják. Nincsenek előre beállított kiemelőszínek: a kiemelés mindig a
+  készletből származik, és egy régebbi buildből megmaradt beállítást a tároló betöltésekor eldob a rendszer.
+- **Paletták.** Kettő van, mindkettő a készletből származik (`src/shared/constants/appearancePalette.ts`): az alapértelmezett `editions` és a
+  `classic`. Az Editions a készlet `data-ci-appearance="editions"` attribútuma a `<html>` elemen, amelyet a
+  `ci-editions.css` (a `ci-ui.css` importálja) a `data-theme` attribútummal együtt használ; a Classicot az attribútum
+  hiánya jelöli. A gyökérszintű elrendezés szerveroldalon rendereli az attribútumot, így egy olyan látogató, akinél nincs semmi eltárolva (vagy nincs JS),
+  minden felületen az Editions megjelenést kapja — az irányítópulton, a bejelentkezési oldalon, a `/status` oldalon, a hibaoldalakon, a `/docs` oldalon és a PWA-ban.
+  A választás a témával együtt, ugyanabban a `theme` tárolóban marad meg (`palette`, `setPalette()`, `applyPalette()` az
+  `src/store/themeStore.ts` fájlban), és még a kirajzolás előtt alkalmazza a `THEME_BOOT_SCRIPT`
+  (`src/shared/utils/themeBootScript.ts`, beágyazva az elrendezés `<head>` elemébe), amely csak akkor távolítja el az attribútumot,
+  ha a tárolt paletta `"classic"`; a gyökérszintű elrendezésen kívüli `src/app/global-error.tsx` ugyanezen
+  tárolóból alkalmazza azt. Ne helyezd a `data-ci-appearance` attribútumot más elemre: a készlet a
+  `html:root:has([data-ci-appearance="editions"])` szelektorral illeszti, így egyetlen leszármazott is átváltaná az egész dokumentumot.
+  Az Editions `data-ci-editions-variant="landing"` változata marketingoldalakhoz való, nem az irányítópulthoz.
+  A böngésző felülete (`viewport.themeColor`, a webes jegyzék) nem tudja olvasni a CSS-t vagy a tárolt választást, ezért
+  az alapértelmezést követi: az `src/shared/constants/pwaThemeColors.ts` fájlban található `PWA_THEME_COLORS` az Editions
+  `--ci-color-background` értékének (`#f3f1e9` / `#11120f`) egyetlen másolata, amelyet a
+  `tests/unit/pwa-theme-colors.test.ts` rögzít a `ci-editions.css` fájlhoz. A Monaco egy vizsgálóelemről olvassa ki a színeit (`monacoKitTheme.ts`);
+  Editions alatt a vizsgálóelem kiolvasása egyetlen szinkron menet erejéig átváltja a gyökérelem `data-theme` attribútumát, mert a készlet
+  a gyökérelem alapján határozza meg az Editions világos/sötét módját.
+- **Komponensek (adapterek).** Az `src/shared/components/index.tsx` megtartja az OmniRoute komponens-API-ját (azonos
+  nevek, alapértelmezett exportok és propok), a mögötte álló primitívek pedig a készletet használó adapterek: űrlapok
+  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), átfedő elemek és visszajelzések
+  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
+  szerkezeti elemek (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) és táblázatok
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Az adapter az alútvonalán keresztül importálja a készlet
+  komponensét, és leképezi rá a régi propokat — például a `Button variant="primary"` a készlet
+  `default` gombja (`--ci-button-primary-*`: világos módban az inverz felület, sötét módban pedig a kiemelés a hozzá tartozó
+  `--ci-color-accent-foreground` tintaszínnel), a `danger` a `destructive`, a `warning` pedig az `outline` és
+  a `.ci-button--warning` kiegészítés kombinációja. A `globals.css` végén (`@layer components`) található
+  `.ci-button--warning` és `.ci-badge[data-tone]` szabályok OmniRoute-kiegészítések a készlet osztályaihoz.
+  A `tests/unit/ui/adapters/*.test.tsx` minden adaptert rögzít.
+- **Alkalmazáskeret.** Az `src/app/(dashboard)/layout.tsx` rendereli a `DashboardLayout` komponenst, amely a
+  `src/shared/components/layouts/DashboardShell.tsx` fájlt rendereli: a készlet `SidebarProvider` / `Sidebar` /
+  `SidebarInset` komponenseit (`packages/ui-kit/src/sidebar.tsx`), az OmniRoute navigációs logikájával az
+  `src/shared/components/Sidebar.tsx` fájlban. A `#main-content` elemre mutató „ugrás a tartalomhoz” hivatkozás az első fókuszálható
+  elem. Az `src/shared/components/Header.tsx` tartalmazza a készlet `SidebarTrigger` elemét (az alkalmazáskeret egyetlen oldalsáv-
+  kapcsolóját), a Keak `ProductSwitcher` elemét és a parancspaletta megnyitóját; az útvonal címét csak addig jeleníti meg, amíg nincs
+  a készletből származó `PageHeader` (`.ci-page-header`) a `#main-content` elemen belül, így a saját
+  `PageHeader` elemmel rendelkező oldalon egyetlen `h1` található. Az `src/shared/components/CommandPalette.tsx` a készlet egy `Dialog` komponense.
+- **Ikonok.** Az `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) a nevet (a képernyők által használt Material Symbols-szókészletből) az `ICON_MAP` (`src/shared/constants/iconMap.ts`) segítségével egy Lucide karakterjelre képezi le. A Material Symbols betűtípus és csomag már nincs használatban: ha egy név hiányzik a leképezésből, egy semleges helyőrző karakterjel (`data-icon-missing="true"`) jelenik meg, és az alkalmazás éles környezeten kívül figyelmeztetést ír a konzolra. Az `npm run gen:icon-map` kilistázza a használatban lévő, de a leképezésből hiányzó neveket (a `tests/unit/icon-map-coverage.test.ts` minden Lucide ikon nélküli név esetén sikertelen; a `tests/unit/icon-map-object-values.test.ts` a keresési objektumokban tárolt neveket ellenőrzi); a `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` a literális `<span className="material-symbols-outlined">` elemeket `<Icon>` elemekre írja át.
+- **Márka.** A `src/shared/components/OmniRouteLogo.tsx` foglalja egységbe a készletet: az alapértelmezett export, az `OmniRouteLogo`, a `ProductIcon product="omniroute" variant="glyph"` elemet jeleníti meg (beágyazott SVG, `basePath`-kompatibilis), az `OmniRouteLockup` pedig a `ProductLockup product="omniroute"` elemet (akadálymentes név: „Keak OmniRoute”), illetve saját márkás szolgáltatók esetén azok saját `name`/`logoSrc` értékeit. A termékváltó célhelyei a `src/shared/constants/keakProducts.ts` fájlban találhatók (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Az önálló képernyők — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` és `src/shared/components/ErrorPageScaffold.tsx` — megjelenítik a kombinált emblémát; ezt a `tests/unit/brand-pages-static.test.ts` felügyeli.
 
 ## 2. Szabályok
 
@@ -130,32 +133,76 @@ components` részében, ha a javítás stílusjellegű), soha ne a `packages/ui-
 
 ## 5. A készlet frissítése
 
-`npm run check:ui-kit-upstream` összehasonlítja a `packages/ui-kit/UPSTREAM.md` ben rögzített verziót az upstream repo legújabb `v*` címkéjével, és kiírja a szinkronizálási parancsot, amikor egy kiadás megjelent. A heti `UI Kit upstream watch` munkafolyamat (`.github/workflows/ui-kit-upstream-watch.yml`) ugyanazt az ellenőrzést futtatja, és nyitva tart egy nyomkövetési problémát, amíg a tű mögött van; az upstream repo privát, így a munkafolyamatnak csak olvasható tokenre van szüksége a `UI_KIT_READ_TOKEN` secret-ben, és e nélkül is inert marad.
+`npm run check:ui-kit-upstream` összehasonlítja a `packages/ui-kit/UPSTREAM.md` ben rögzített verziót az upstream repo legújabb `v*` címkéjével, és kiírja a szinkronizálási parancsot, amikor egy kiadás megjelent.
+
+A napi `UI Kit upstream watch` munkafolyamat (`.github/workflows/ui-kit-upstream-watch.yml`) ugyanazt az ellenőrzést futtatja. Amíg a tű mögött van, `scripts/ci/ui-kit-sync-pr.sh` egy szinkronizáló PR nyitva tart a legmagasabb `release/vX.Y.Z` ágon, a `chore/ui-kit-sync-latest` gördülő ágon. Soha nem olvad össze: minden készletkiadást továbbra is vizuálisan ellenőrizni kell a helyi VPS n. Az ág újjáépül, amikor egy újabb kiadás megjelenik, és különben magára hagyják. Egy nyitott PR amely kézzel tolja a véglegesítéseket, nem íródik felül, és egy olyan verzióhoz tartozó PR, amelyet a karbantartó bezárt, összevonva zárva marad, egészen egy újabb kiadásig.
+
+Ha nem lehet megnyitni PR (a célkiadás le van fagyva, a PR kézzel tolták a véglegesítéseket, a PR zárva volt, vagy nincs beállítva PR token), a munkafolyamat nyitva tart egy nyomkövetési problémát, amely megmondja, hogy miért.
+
+A munkafolyamat két titkot használ:
+
+- `secrets.UI_KIT_READ_TOKEN`: csak olvasható token a privát upstream repóhoz. Ha a munkafolyamat nem tudja olvasni az upstreamet (nincs token, egy token, amely leállt, vagy GitHub nem érhető el), a futtatás zölden marad, de figyelmeztetést ír, és nyitva tart egy külön problémát, amely bezárul, ha egy későbbi futás ismét képes olvasni az áramlás irányába.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: egy finom szemcsés token ezen a tárhelyen, tartalom- és lehívási kéréssel. Az alapértelmezett `GITHUB_TOKEN` itt nem tud PRs létrehozni, és az általa megnyitott PR nem váltja ki CI. E token nélkül a munkafolyamat csak az ágat tolja.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` átmásolja az upstream `src/` az adott véglegesítésnél (`latest` = a legújabb `v*` címke) `packages/ui-kit/src` be, alkalmazza az egyetlen engedélyezett átalakítást (elhagyja a `.js` utótagot a relatív importálásból), és beállítja a `packages/ui-kit/package.json` és `package-lock.json` munkaterület verzióját az upstream verzióra. Ezután tekintse át `git diff packages/ui-kit`, végezzen vizuális átadást a szolgáltatókról, a beállításokról, a kombinációkról, a használatról és a végpontról mindkét témában, futtassa `npm run check:ui-kit-snapshot` és `npm run test:vitest:ui`, és nyissa meg a PR az upstream változásnaplóval.
 
-## 6. README diagramok
+## 6. README-diagramok
 
-A `README.md` gyökér beágyazott tizenkét diagramja (`docs/diagrams/*.svg`) a statikus képre alkalmazott készlet, és generálásuk nem kézzel történik: 13 generátorfájl `scripts/docs/gen-readme-*.mjs` ben (tizenkét diagram plusz a `gen-readme-diagrams.mjs` illesztőprogram) és 12 elavultsági teszt `tests/unit/docs/readme-*-svg.test.ts` nél, diagramonként egy, minden egyes byte-com-fájl a kimeneti `test-unit` jával.
+A gyökérszintű `README.md` által beágyazott tizenkét diagram (`docs/diagrams/*.svg`) a statikus képre alkalmazott készletet használja,
+és nem kézzel készül, hanem generált: 13 generátorfájl található a `scripts/docs/gen-readme-*.mjs`
+útvonalon (tizenkét diagram, valamint a `gen-readme-diagrams.mjs` vezérlő), továbbá 12 elavultsági teszt a
+`tests/unit/docs/readme-*-svg.test.ts` útvonalon, diagramonként egy; mindegyik bájtról bájtra összehasonlítja a verziókövetőbe mentett fájlt a
+generátor kimenetével (`test-unit` feladat).
 
-- **Tokenek.** `scripts/docs/readme-diagram-theme.mjs` átmásolja a palettát `packages/ui-kit/src/ci-tokens.css` ből ( `tests/unit/docs/readme-diagram-theme.test.ts` rögzíti ehhez a fájlhoz), és meghatározza a szövegszerepeket a készlet korábbi felületein – Instrument Serif a megjelenítéshez, Inter UI szöveghez, IBM Plex Mono a számokhoz és kódhoz – a `@fontsource` csomagokból (maga a műszerfal a kit 60.0 készletét használja, mivel a kit 60.0.0). A világos értékek `:root`, a sötét értékek `prefers-color-scheme: dark` mögött, a fájlon belül helyezkednek el, így minden kép követi a GitHub lévő néző sémáját.
-- **Betűtípusok.** `scripts/docs/readme-fonts.mjs` ezeket a woff2 fájlokat az egyes diagramok által megrajzolt karakterjelekre osztja be, és `@font-face` `data:` URIs -ként beágyazza – ez az egyetlen módja annak, hogy a kit tipográfia elérje a README képet, mivel GitHub Markdown nem hordoz CSS, és a camo proxy blokkol minden külső lekérést. Az alhalmazok csak latin nyelvűek; a rendszerverembe visszaeső szimbólumok egyenként engedélyezettek `SYMBOL_FALLBACKS`-ban és minden más fedetlen karakterjel-dobásban.
-- **Regenerátum.** `npm run docs:readme-diagrams` átírja mind a tizenkettőt README sorrendben, és fájlonként egy sort nyomtat a méretével együtt. Egyetlen generátor önállóan is fut (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` `node --import tsx/esm` van szüksége, mert az adatok a `open-sse/config/freeModelCatalog.ts` élő katalógusbetöltőjéből származnak; a katalógusváltás CI következménye `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`-ben van). Kösd le a generátort és a SVG együtt.
-- **Bizonyíték.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` úgy jeleníti meg a fájlt, ahogyan GitHub kiszolgálja ( `<img>` címke, camo's `Content-Security-Policy`, `image/svg+xml`), rögzít egy világos és egy sötét keretet, és jelenti a külső betűtípus kéréseket az oldal elkészítéséhez (0-nak kell lennie).
-- **Költségvetés.** 200 KB alatt fájlonként (minden elévültségi teszt ezt igazolja); 500 KB a kemény sapka minden README képhez (a SVG studio validátor szabálya).
-- **Változatlan másolat, a kaputól számítva.** Az új márka típusát és palettáját változtatta meg, nem szavakat: minden generátor a diagram másolatát egy `*_COPY` konstansban hordozza (vagy az élő katalógusból építi fel), amely egyszerre a rajzolt szöveg és a betűkészlet-alkészlet bemenete. A kanonikus ábrák `<text>` csomópontokban maradnak, `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) olvassa el; a gate által beolvasott diagramok elavultsági tesztjei szintén a generált fájlon futtatják az érvényesítőit, így a kódtól eltávolodó figura megbukik a teszten – javítsa a forrást, amelyet a gate olvas, és soha ne a generátorban lévő számot.
+- **Tokenek.** A `scripts/docs/readme-diagram-theme.mjs` átmásolja az Editions-palettát (az alapértelmezett megjelenést) a
+  `packages/ui-kit/src/ci-editions.css` fájlból (ehhez a fájlhoz a
+  `tests/unit/docs/readme-diagram-theme.test.ts` rögzíti, amely mindkét sémában minden szövegszín és minden
+  felület kombinációjára ellenőrzi a WCAG AA megfelelést is; az egyetlen kivétel a világos `warn`, amelynél a készlet
+  figyelmeztető színe 10%-kal sötétebb, mert a készlet értéke 4.46:1 a vásznon), és meghatározza a szövegszerepeket a készlet tipográfiai skáláján (`ci-tokens.css`): mindenhez Switzer betűtípust használ a készlet súlyaival (400/500/600, a kiemelt szöveghez 500) és betűközzel,
+  kivéve a kódszerepeket (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`), amelyek
+  IBM Plex Mono betűtípust használnak, és kizárólag parancsokhoz, URL-ekhez, azonosítókhoz és terminálképernyőkhöz valók.
+  A világos értékek a fájlon belül a `:root` alatt, a sötét értékek pedig a `prefers-color-scheme: dark` mögött
+  találhatók, így a GitHubon minden kép követi a megtekintő színsémáját.
+- **Betűtípusok.** A GitHub Markdown nem tartalmaz CSS-t, a camo proxy pedig minden külső lekérést blokkol, ezért a készlet
+  betűtípusának magában a fájlban kell utaznia. A `scripts/docs/readme-outline.mjs`, minden generátor utolsó lépése, HarfBuzz használatával formázza meg a
+  Switzer-szerepeket, és vektorkontúrokként rajzolja meg őket (`<defs>` útvonalakkal és `<use>` elemekkel), a Switzerből
+  hiányzó nyilakat és geometriai szimbólumokat pedig a betűtípus saját metrikái alapján rajzolja meg. Mindig kontúrokat használjon, soha ne beágyazott betűtípust: a Switzer
+  licence (`packages/ui-kit/src/fonts/FFL.txt`) írásos engedély nélkül tiltja a részhalmazképzést és a formátumkonverziót,
+  de engedélyezi a vektoros rajzokat, ezért ne vezessen be újra Switzer `@font-face` szabályt vagy `data:` URI-t. A fájlban maradó egyetlen
+  betűtípus az OFL-licencű IBM Plex Mono részhalmaza a tényleges kódszövegként megmaradó tartalomhoz
+  (`scripts/docs/readme-fonts.mjs`), amely ezekből a karakterekből épül fel; ha valamely karakterjelet nem tudja beágyazni, hibát dob.
+- **Újragenerálás.** Az `npm run docs:readme-diagrams` mind a tizenkét fájlt újraírja a README sorrendjében, és fájlonként
+  egy sort ír ki a fájl méretével. Egyetlen generátor önállóan is futtatható (`node scripts/docs/gen-readme-<name>.mjs`;
+  a `free-tier-budget` esetében `node --import tsx/esm` szükséges, mert a számadatai az
+  `open-sse/config/freeModelCatalog.ts` élő katalógusbetöltőjéből származnak; egy katalógusmódosítás CI-következményét lásd:
+  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). A generátort és az SVG-t együtt mentse a verziókövetőbe.
+- **Ellenőrzés.** A `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` úgy rendereli a fájlt, ahogyan a GitHub
+  kiszolgálja (egy `<img>` címkével, a camo `Content-Security-Policy` szabályával és `image/svg+xml` típussal), világos és sötét képkockát
+  rögzít, valamint jelenti az oldal által indított külső betűtípus-lekéréseket (az értéküknek 0-nak kell lennie).
+- **Méretkorlát.** Fájlonként 200 KB alatt (ezt minden elavultsági teszt ellenőrzi); bármely README-kép
+  abszolút felső korlátja 500 KB (az SVG studio validátor szabálya).
+- **A szöveg változatlan, a számadatok az ellenőrzési kapuból származnak.** Az arculatváltás a betűtípust és a palettát módosította, nem a szöveget: minden generátor
+  egy `*_COPY` konstansban tartalmazza a diagram szövegét (vagy az élő katalógusból építi fel), amely egyszerre
+  a kirajzolt szöveg és a kontúrozási lépés bemenete. A hiteles számadatok `<text>` csomópontokban maradnak (a kontúrozás után
+  láthatatlanul, `fill-opacity:0` értékkel), és a `check:docs-counts`
+  (`scripts/check/check-docs-counts-sync.mjs`) olvassa be őket; az ellenőrzési kapu által olvasott diagramok elavultsági tesztjei
+  a generált fájlon is futtatják a validátorait, így a kódtól eltérő számadat meghiúsítja a tesztet — mindig
+  az ellenőrzési kapu által olvasott forrást javítsa, soha ne a generátorban szereplő számot.
 
-## 7. Referenciaindex
+## 7. Hivatkozási jegyzék
 
-- `src/app/globals.css` — token-híd, `.dark` felülírások, OmniRoute `@layer components` kiterjesztések
-- `packages/ui-kit/UPSTREAM.md` — rögzített upstream commit és licencengedélyezés; `packages/ui-kit/PATCHES.md`
-- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/app/globals.css` — tokenhíd, `.dark` felülírások, OmniRoute `@layer components` bővítmények
+- `packages/ui-kit/UPSTREAM.md` — rögzített upstream commit és licencengedély; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-editions.css`, `packages/ui-kit/src/ci-ui.css`,
+  `packages/ui-kit/src/keak-brand.tsx`
 - `src/shared/components/index.tsx` és a mellette található adapterek; `src/shared/components/layouts/DashboardShell.tsx`,
   `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
 - `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
   `scripts/dev/codemod-material-icons.mjs`
 - `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
-- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `src/store/themeStore.ts`, `src/shared/utils/themeBootScript.ts`, `src/shared/constants/appearancePalette.ts`,
+  `src/shared/constants/pwaThemeColors.ts`, `src/shared/constants/appConfig.ts`,
+  `src/shared/constants/statusColors.ts`
 - `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
   `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
   `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

@@ -23,10 +23,12 @@ import {
 import { estimateSizeFast } from "../../utils/estimateSize.ts";
 import { jsonLength } from "../../utils/jsonSize.ts";
 import { COMBO_FAILURE_THRESHOLD, recordComboFailure } from "./failureTracker.ts";
+import { COMBO_HEDGE_CANCELLED_REASON } from "./comboAbortReasons.ts";
 import {
   buildAllTargetsCoolingDownResponse,
   buildNoUpstreamResponseDiagnostics,
   formatPreDispatchExclusions,
+  resolveAllFailedTerminalReason,
 } from "./pinRecovery.ts";
 import { collectQuotaWindowExclusions, formatQuotaSkipMessage } from "./quotaSkipDiagnostics.ts";
 import { recordComboRequest } from "../comboMetrics.ts";
@@ -254,17 +256,8 @@ export async function dispatchWithCooldownRetry(opts: {
           "COMBO",
           `All targets failed — retrying set (${setTry}/${extra.maxSetRetries})`
         );
-        await new Promise((resolve) => {
-          const timer = setTimeout(resolve, extra.setRetryDelayMs);
-          deps.signal?.addEventListener(
-            "abort",
-            () => {
-              clearTimeout(timer);
-              resolve(undefined);
-            },
-            { once: true }
-          );
-        });
+        // Keep zero-delay retries on a timer turn so queued cancellation can run.
+        await waitForCooldownAwareRetry(Math.max(1, extra.setRetryDelayMs), deps.signal);
         if (deps.signal?.aborted) {
           deps.log.info("COMBO", "Client disconnected during set retry delay — aborting");
           return errorResponse(499, "Client disconnected");
@@ -415,14 +408,19 @@ export async function dispatchWithCooldownRetry(opts: {
                 anySuccess = true;
                 globalResolve!(res.response!);
                 for (const [idx, ac] of state.abortControllers.entries()) {
-                  if (idx !== i) ac.abort();
+                  // Reasoned abort: a superseded sibling must be distinguishable
+                  // from a client disconnect downstream (fetch rejection, stream
+                  // teardown, attempt logging) — a bare abort reads as "client
+                  // closed the request" and pollutes 499 metrics with hedge
+                  // cancellations the client never made.
+                  if (idx !== i) ac.abort(new Error(COMBO_HEDGE_CANCELLED_REASON));
                 }
               } else if (res.response) {
                 // Fatal error, abort combo
                 anySuccess = true;
                 globalResolve!(res.response);
                 for (const [idx, ac] of state.abortControllers.entries()) {
-                  if (idx !== i) ac.abort();
+                  if (idx !== i) ac.abort(new Error(COMBO_HEDGE_CANCELLED_REASON));
                 }
               }
             }
@@ -905,11 +903,9 @@ export async function dispatchWithCooldownRetry(opts: {
       // terminalReason instead of forwarding the raw upstream error string. The raw
       // string falls through buildRecoveryHint's default branch ("retry" / "failed
       // transiently"), which is actively misleading for a durable wallet/quota
-      // exhaustion — retrying the same combo will never refill it.
-      const terminalReason =
-        state.observedFailure && state.allObservedFailuresQuota
-          ? "quota_exhausted"
-          : (state.lastError ?? "all_models_failed");
+      // exhaustion. Retrying the same combo will never refill it. #18360 adds the
+      // same treatment for an all-authentication failure.
+      const terminalReason = resolveAllFailedTerminalReason(state);
       return withQuotaExhaustionClassification(
         errorResponseWithComboDiagnostics(
           status,
