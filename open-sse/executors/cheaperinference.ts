@@ -1,4 +1,9 @@
-import { BaseExecutor, type ProviderCredentials } from "./base.ts";
+import { BaseExecutor, type ExecuteInput, type ProviderCredentials } from "./base.ts";
+import { containsMediaKind } from "../utils/mediaParts.ts";
+import { makeExecutorErrorResult } from "../utils/error.ts";
+import { ciTransportSupportsInput } from "../../src/shared/constants/cheaperInferenceInputModalities";
+import { sendCIPayload } from "../utils/ciPayloadTransport.ts";
+import { normalizeCIMixedMedia } from "../utils/ciMixedMedia.ts";
 import { PROVIDERS } from "../config/constants.ts";
 import { getModelTargetFormat, PROVIDER_ID_TO_ALIAS } from "../config/providerModels.ts";
 
@@ -25,6 +30,44 @@ import { getModelTargetFormat, PROVIDER_ID_TO_ALIAS } from "../config/providerMo
 export class CheaperInferenceExecutor extends BaseExecutor {
   constructor(provider = "cheaperinference") {
     super(provider, PROVIDERS[provider]);
+  }
+
+  /**
+   * @executorRecovery native
+   * @executorRecoveryReason Reject incompatible media before dispatch; every accepted payload delegates to the base recovery loop unchanged.
+   * @executorRecoveryTest tests/unit/cheaperinference-executor.test.ts
+   */
+  async execute(input: ExecuteInput) {
+    const body = (input.body || {}) as Record<string, unknown>;
+    for (const [kind, partKind] of [
+      ["audio", "audio"],
+      ["pdf", "document"],
+      ["video", "video"],
+    ] as const) {
+      if (
+        !ciTransportSupportsInput(this.provider, input.model, kind) &&
+        containsMediaKind([{ content: [body.messages, body.input, body.contents] }], partKind)
+      ) {
+        return makeExecutorErrorResult(
+          400,
+          `This Cheaper Inference model has no verified ${kind} input transport. Select a supported model such as gemini-4-argon.`,
+          input.body,
+          this.buildUrl(input.model, input.stream, 0)
+        );
+      }
+    }
+    return super.execute(input);
+  }
+
+  protected dispatchRequest(
+    url: string,
+    init: RequestInit,
+    credentials: ProviderCredentials
+  ): Promise<Response> {
+    return sendCIPayload(url, init, (target, options) => {
+      this.assertOutboundUrlAllowed(target);
+      return super.dispatchRequest(target, options, credentials);
+    });
   }
 
   /**
@@ -60,7 +103,7 @@ export class CheaperInferenceExecutor extends BaseExecutor {
     }
     if (!this.usesResponsesEndpoint(model)) {
       // Chat Completions rejects unknown params — never add `store` on that surface.
-      return cleanedBody;
+      return normalizeCIMixedMedia(cleanedBody as Record<string, unknown>);
     }
     return { ...(cleanedBody as Record<string, unknown>), store: false };
   }

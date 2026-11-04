@@ -45,9 +45,9 @@
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
-<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Stars](https://img.shields.io/github/stars/cheaper-inference/OmniRoute?style=social)](https://github.com/cheaper-inference/OmniRoute)
+<a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="cheaper-inference%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+[![Star History Rank](https://api.star-history.com/badge?repo=cheaper-inference/OmniRoute&theme=dark)](https://www.star-history.com/cheaper-inference/OmniRoute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 Word lid van de community
@@ -96,7 +96,7 @@
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 [![Licentie: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker-downloads](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron-downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![Electron-downloads](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -521,7 +521,7 @@ Alle **20** strategieën — naar wens te combineren per combostap:
 OmniRoute heeft een MIT-licentie en wordt openbaar onderhouden. Als het je tijd of geld bespaart, kun je het zo onafhankelijk helpen houden — kies wat bij je past. Sponsoring heeft nooit invloed op de routeringsprioriteit; het zorgt voor zichtbaarheid, niet voor een hogere positie.
 
 <table>
-  <tr><td nowrap>⭐ <b>Geef de repository een ster</b></td><td>Gratis — helpt echt met de zichtbaarheid</td><td><a href="https://github.com/diegosouzapw/OmniRoute">Geef OmniRoute een ster</a></td></tr>
+  <tr><td nowrap>⭐ <b>Geef de repository een ster</b></td><td>Gratis — helpt echt met de zichtbaarheid</td><td><a href="https://github.com/cheaper-inference/OmniRoute">Geef OmniRoute een ster</a></td></tr>
   <tr><td nowrap>🐙 <b>GitHub Sponsors</b></td><td>Eenmalig of maandelijks · geen platformkosten</td><td><a href="https://github.com/sponsors/diegosouzapw">github.com/sponsors/diegosouzapw</a></td></tr>
   <tr><td nowrap>☕ <b>Ko-fi</b></td><td>Snelle eenmalige fooi, geen registratie voor de donateur nodig</td><td><a href="https://ko-fi.com/diegosouzapw">ko-fi.com/diegosouzapw</a></td></tr>
   <tr><td nowrap>🧋 <b>Buy Me a Coffee</b></td><td>Klein, informeel gebaar</td><td><a href="https://www.buymeacoffee.com/diegosouzapw">buymeacoffee.com/diegosouzapw</a></td></tr>
@@ -558,7 +558,7 @@ Pix kopiëren en plakken:
 
 </details>
 
-🐛 Een bug gevonden of heb je feedback? Open een [Discussie](https://github.com/diegosouzapw/OmniRoute/discussions).
+🐛 Een bug gevonden of heb je feedback? Open een [Discussie](https://github.com/cheaper-inference/OmniRoute/discussions).
 
 <br/>
 
@@ -1253,7 +1253,7 @@ proces op één poort aangeboden, dus er is momenteel geen afzonderlijk pakket m
 
 Canonieke statistieken op 2026-10-18: **1.976 unieke video's** · **20.220.289 bekende weergaven** (`v > 0`) · **1.210 kanalen/profielen per netwerk**. Het ruwe dashboard bevat 1.976 regels (YouTube 1.352 = 740 lange video's + 612 Shorts · TikTok 334 · Instagram 290); na normalisatie op basis van de canonieke URL zijn er geen duplicaten overgebleven, waarbij het hoogste aantal per video wordt behouden. De gegevensverzameling van YouTube is bevroren op 2026-10-13 (API-quotum uitgeput van 14 t/m 18/10) en die van TikTok/Instagram sinds 2026-09-02 (geen verzamelcredits); voor 76 video's ontbreekt nog steeds het aantal weergaven.
 
-> 🎬 **Heb je een video over OmniRoute gemaakt?** Open een [issue](https://github.com/diegosouzapw/OmniRoute/issues/new) of [discussie](https://github.com/diegosouzapw/OmniRoute/discussions) met de link — dan nemen we deze hier op.
+> 🎬 **Heb je een video over OmniRoute gemaakt?** Open een [issue](https://github.com/cheaper-inference/OmniRoute/issues/new) of [discussie](https://github.com/cheaper-inference/OmniRoute/discussions) met de link — dan nemen we deze hier op.
 
 <br/>
 
@@ -1273,8 +1273,8 @@ Canonieke statistieken op 2026-10-18: **1.976 unieke video's** · **20.220.289 b
 | 🟢 **WhatsApp — 🇧🇷 Brazilië**               | [word lid van de groep](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)                                  |
 | 🌍 **Website**                              | [omniroute.online](https://omniroute.online)                                                                              |
 | 🌍 **🌍StHub OmniRoute-community (gratis)** | [StHub-portaal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)                    |
-| 📦 **Broncode**                             | [github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute)                                            |
-| 🐛 **Een bug melden**                       | [open een issue](https://github.com/diegosouzapw/OmniRoute/issues) — voeg de uitvoer van `npm run system-info` toe        |
+| 📦 **Broncode**                             | [github.com/cheaper-inference/OmniRoute](https://github.com/cheaper-inference/OmniRoute)                                  |
+| 🐛 **Een bug melden**                       | [open een issue](https://github.com/cheaper-inference/OmniRoute/issues) — voeg de uitvoer van `npm run system-info` toe   |
 | 🤝 **Bijdragen**                            | [CONTRIBUTING.md](CONTRIBUTING.md) · [Branch- en releasemodel](docs/ops/BRANCHING_MODEL.md) · kies een `good first issue` |
 | 💚 **Steun het project**                    | [Manieren om te steunen ↑](#-support-omniroute) · [GitHub Sponsors](https://github.com/sponsors/diegosouzapw)             |
 
@@ -1632,7 +1632,7 @@ Een welgemeend dankjewel aan de mensen die OmniRoute uit eigen zak financieren �
 
 </div>
 
-[![Bijdragers](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Bijdragers](https://contrib.rocks/image?repo=cheaper-inference/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/cheaper-inference/OmniRoute/graphs/contributors)
 
 <sub>Gecontroleerd op 2026-11-02 bij de live <code>release/v3.8.53</code>-tip <code>1c7135e0fb</code> (7.972 commits): <b>1.074 genormaliseerde menselijke Git-identiteiten</b> — 759 verschijnen als commit-auteurs (waaronder de maintainer) en 315 alleen in expliciete <code>Co-authored-by</code>-trailers. De telling past <code>.mailmap</code> toe, vergelijkt e-mailadressen hoofdletterongevoelig, voegt numerieke en gewone GitHub-noreply-adressen alleen samen wanneer ze dezelfde gebruikersnaam coderen, sluit 29 bot-/agent-/service-/placeholder-identiteiten uit en voegt gewone e-mailadressen niet samen enkel omdat hun weergavenamen overeenkomen. De audit van 2026-08-24 publiceerde 639; wanneer deze methode opnieuw wordt uitgevoerd op de basis van die audit, <code>ac02c5b42f</code>, levert dat 619 op. De toename komt dus door nieuwe bijdragers en niet door een soepelere methode.</sub>
 
@@ -1661,11 +1661,11 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 ## 📊 Sterren
 
-<a href="https://www.star-history.com/?repos=diegosouzapw%2FOmniRoute&type=date&legend=top-left">
+<a href="https://www.star-history.com/?repos=cheaper-inference%2FOmniRoute&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
-   <img alt="Star History-grafiek" src="https://api.star-history.com/chart?repos=diegosouzapw/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&theme=dark&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
+   <img alt="Star History-grafiek" src="https://api.star-history.com/chart?repos=cheaper-inference/OmniRoute&type=date&legend=top-left&sealed_token=XP_ycEjv7s31p1edvhsMOXry51OWYsUjDRWjflSG7jQKRpO9hPGg7i_EHvwhI6QtrARTMH-YGjJhi8sumRYflEJD0DPlH_MMHjizhBYCX8fbHFrHEiNvVA" />
  </picture>
 </a>
 

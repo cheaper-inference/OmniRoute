@@ -18,6 +18,7 @@ import { fisherYatesShuffle, getNextFromDeck } from "../../../src/shared/utils/s
 import { handleFusionChat, type FusionTuning } from "../fusion.ts";
 import { handleAgenticPipelineChat, type AgenticOrchestrationConfig } from "../agenticPipeline.ts";
 import { getResolvedModelCapabilities } from "../modelCapabilities.ts";
+import { hasMediaRequirements, nonImageMediaFailures } from "./mediaCompatibility.ts";
 import { errorResponseWithComboDiagnostics } from "../../utils/error.ts";
 import { parseModel } from "../model.ts";
 import { handlePipelineChat, type PipelineStep } from "../pipeline.ts";
@@ -329,6 +330,28 @@ export async function tryPinnedModelDispatch(args: {
     hiddenModelsByProvider
   );
   const pinInCombo = !haveFullCombos || comboTargets.some((t) => t.modelStr === pinnedModel);
+  const pinRequirements = deriveRequestCompatibilityRequirements(body);
+  if (hasMediaRequirements(pinRequirements)) {
+    const pinCaps = getResolvedModelCapabilities(pinnedModel);
+    const pinCandidate = comboTargets.find((t) => t.modelStr === pinnedModel);
+    if (
+      isVisionIncompatibleTarget(
+        {
+          provider: pinCaps.provider ?? "unknown",
+          providerId: pinCaps.provider,
+          modelStr: pinnedModel,
+          connectionId: pinCandidate?.connectionId ?? null,
+        },
+        pinRequirements
+      )
+    ) {
+      log.warn(
+        "COMBO",
+        "Context pin cannot read the current media; falling through to compatible targets"
+      );
+      return null;
+    }
+  }
   // Honor the pin only if it is still a combo target AND its provider is not
   // DURABLY down. Without the health gate a pin keeps routing a session to a
   // dead/credits-exhausted/throttled account forever (strategy bypassed, no
@@ -435,10 +458,19 @@ export async function tryFusionDispatch(args: {
   // way an operator-hidden judge is dropped below, so fusion falls back to a
   // (vision-confirmed) panel member instead of silently losing the image for
   // the synthesis step.
+  const judgeCapabilities = configuredJudge ? getResolvedModelCapabilities(configuredJudge) : null;
   const judgeLacksConfirmedVision =
-    judgeFusionRequirements.requiresVision &&
     !!configuredJudge &&
-    getResolvedModelCapabilities(configuredJudge).supportsVision !== true;
+    ((judgeFusionRequirements.requiresVision && judgeCapabilities?.supportsVision !== true) ||
+      nonImageMediaFailures(
+        {
+          provider: judgeCapabilities?.provider ?? "unknown",
+          providerId: judgeCapabilities?.provider ?? null,
+          modelStr: configuredJudge,
+          connectionId: null,
+        },
+        judgeFusionRequirements
+      ).length > 0);
   // The panel is filtered for hidden models by resolveComboTargets, but the
   // explicit judge is a bare string that never passes through it (#8878). Drop a
   // hidden judge so fusion falls back to a surviving panel member instead of
@@ -500,26 +532,30 @@ export async function tryFusionDispatch(args: {
   // (isVisionIncompatibleTarget: unknown is excluded too): a panel fan-out has no
   // "last resort" tier, so the panel only receives targets with confirmed vision.
   const fusionRequirements = judgeFusionRequirements;
-  const resolvedFusionTargets = fusionRequirements.requiresVision
+  const resolvedFusionTargets = hasMediaRequirements(fusionRequirements)
     ? allResolvedFusionTargets.filter(
         (target) => !isVisionIncompatibleTarget(target, fusionRequirements)
       )
     : allResolvedFusionTargets;
-  if (fusionRequirements.requiresVision && resolvedFusionTargets.length === 0) {
+  if (hasMediaRequirements(fusionRequirements) && resolvedFusionTargets.length === 0) {
     log.warn(
       "COMBO",
       `Combo "${combo.name}" fusion panel has no target with confirmed vision support for this image request — every candidate was excluded (#3378)`
     );
     return errorResponseWithComboDiagnostics(
       400,
-      `No target in combo ${combo.name} has confirmed vision support for this image request`,
+      fusionRequirements.requiresVision
+        ? `No target in combo ${combo.name} has confirmed vision support for this image request`
+        : `No target in combo ${combo.name} supports every required audio, video or file input`,
       {
         poolSize: allResolvedFusionTargets.length,
         attempted: 0,
         excluded: allResolvedFusionTargets.map((target) => ({
           provider: target.provider,
           model: target.modelStr,
-          reason: "vision",
+          reason: fusionRequirements.requiresVision
+            ? "vision"
+            : nonImageMediaFailures(target, fusionRequirements).join("+"),
         })),
         attemptOrder: [],
         terminalReason: "capability_mismatch",
@@ -590,7 +626,7 @@ export async function tryFusionDispatch(args: {
  * below. The step list is `combo.models` (in order); an optional per-step
  * `prompt` is read off the target object (comboModelStepInputSchema.prompt).
  */
-export async function tryPipelineDispatch(args: {
+type PipelineDispatchArgs = {
   body: Record<string, unknown>;
   combo: ComboLike;
   config: ComboSetupConfig;
@@ -601,7 +637,9 @@ export async function tryPipelineDispatch(args: {
   handleSingleModelWithTimeout: HandleSingleModel;
   log: ComboLogger;
   hiddenModelsByProvider?: HiddenModelsByProvider;
-}): Promise<Response | null> {
+};
+
+export async function tryPipelineDispatch(args: PipelineDispatchArgs): Promise<Response | null> {
   const {
     body,
     combo,
@@ -765,7 +803,7 @@ async function orderRuntimeUnits(args: {
  * Returns null when the combo has no executable combo-ref, when the mode is
  * `flatten`, or when the strategy needs the full target machinery.
  */
-export async function tryRuntimeUnitDispatch(args: {
+type RuntimeUnitDispatchArgs = {
   body: Record<string, unknown>;
   combo: ComboLike;
   config: ComboSetupConfig;
@@ -788,7 +826,11 @@ export async function tryRuntimeUnitDispatch(args: {
   endpointPath?: string | null;
   requestHeaders?: Headers | Record<string, unknown> | null;
   runCombo: RunCombo;
-}): Promise<Response | null> {
+};
+
+export async function tryRuntimeUnitDispatch(
+  args: RuntimeUnitDispatchArgs
+): Promise<Response | null> {
   const { body, combo, config, strategy, allCombos, log, settings } = args;
   const nestingContext = buildDefaultNesting(args.nesting, combo.name, config);
   const nestedComboMode = normalizeNestedComboMode(config.nestedComboMode);

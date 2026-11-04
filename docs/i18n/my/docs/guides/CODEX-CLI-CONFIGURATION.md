@@ -478,7 +478,7 @@ OmniRoute ၏ မူလသတ်မှတ်ချက်နှစ်ခုသည
 | Session က account များကို ဆက်တိုက်ပြောင်းနေသည် / turn များကြားတွင် prompt-cache ဆက်လက်တည်ရှိမှု ပျောက်ဆုံးသည် | Session affinity TTL သည် `0` ဖြစ်သည် (ပိတ်ထားသည်)                                | `sessionAffinityTtlMs`   |
 | Client ဘက်သို့ အသိပေး prompt မရှိဘဲ စဉ်းစားတွက်ချက်နေစဉ်အတွင်း connection ပြတ်သွားသည်                         | Upstream chunk မရှိဘဲ 10 မိနစ်ကြာပြီးနောက် stream idle watchdog အလုပ်လုပ်သွားသည် | `STREAM_IDLE_TIMEOUT_MS` |
 
-ဆက်စပ်ဆွေးနွေးချက်များ- [#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126) (ကြာမြင့်သော task ပြတ်တောက်မှုများ), [#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718) (affinity ကို မူလအတိုင်း ပိတ်ထားရသည့်အကြောင်းရင်း)။ ခြေရာခံရန်- [#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287)။
+ဆက်စပ်ဆွေးနွေးချက်များ- [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) (ကြာမြင့်သော task ပြတ်တောက်မှုများ), [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) (affinity ကို မူလအတိုင်း ပိတ်ထားရသည့်အကြောင်းရင်း)။ ခြေရာခံရန်- [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287)။
 
 ### 1. Session affinity — စကားဝိုင်းတစ်ခုကို account တစ်ခုတည်းတွင် pin လုပ်ထားရန်
 
