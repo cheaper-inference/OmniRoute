@@ -100,7 +100,11 @@ test.describe("Advertised CLI client version card", () => {
     await gotoDashboardRoute(page, "/dashboard/providers/codex");
 
     await expect(page.getByText("Advertised CLI client version")).toBeVisible({ timeout: 20000 });
-    await expect(page.getByText(/gpt-6-astra/)).toBeVisible();
+    // The hint's own sentence: the page's model list also shows cx/gpt-6-astra and its
+    // variants, so a bare /gpt-6-astra/ matched 8 elements (strict-mode violation).
+    await expect(
+      page.getByText(/The 'gpt-6-astra' model requires a newer version of Codex/)
+    ).toBeVisible();
     await expect(page.getByText(/Inference caveat/)).toBeVisible();
   });
 
