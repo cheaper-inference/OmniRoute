@@ -1329,8 +1329,9 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
     const trackedEntry = callId ? map?.get(callId) : undefined;
     // Some upstreams (e.g. Codex) send the complete payload only in output_item.done,
     // with no preceding output_item.added at all — there is no tracked entry to read an
-    // index from.
-    const entry = trackedEntry || { index: null, argsBuffer: "", deferred: false };
+    // index from. Nothing was emitted for such a call yet, so treat it as deferred: the
+    // single chunk below must carry the id/type/name header together with the arguments.
+    const entry = trackedEntry || { index: null, argsBuffer: "", deferred: true };
 
     const buffered = entry.argsBuffer || "";
     const toolName = normalizeToolName(item.name);
