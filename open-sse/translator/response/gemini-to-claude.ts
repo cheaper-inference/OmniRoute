@@ -443,6 +443,28 @@ export function geminiToClaudeResponse(chunk, state) {
   if (candidate.finishReason) {
     // Close any still-open text block before finishing
     flushMarkdownBuffer(state, results);
+    // An unterminated <tool_call>/<invoke> tail held in the XML buffer was
+    // prose after all (or a MAX_TOKENS cut mid-call): no later chunk can
+    // complete it, so release it as text instead of dropping everything from
+    // the marker on — same release the openai-to-claude finish path performs.
+    if (state._xmlInvokeBuffer) {
+      const held = state._xmlInvokeBuffer;
+      state._xmlInvokeBuffer = "";
+      if (state.openTextBlockIdx === null) {
+        const idx = state.contentBlockIndex++;
+        state.openTextBlockIdx = idx;
+        results.push({
+          type: "content_block_start",
+          index: idx,
+          content_block: { type: "text", text: "" },
+        });
+      }
+      results.push({
+        type: "content_block_delta",
+        index: state.openTextBlockIdx,
+        delta: { type: "text_delta", text: held },
+      });
+    }
     if (state.openTextBlockIdx !== null) {
       results.push({ type: "content_block_stop", index: state.openTextBlockIdx });
       state.openTextBlockIdx = null;

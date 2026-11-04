@@ -1,0 +1,1 @@
+- **fix(sse):** Gemini-to-Claude streams no longer drop the text held back while an XML-style tool call is being detected: a reply that only mentions `<tool_call>` in prose, or is cut off by the token limit mid-call, now keeps everything from the marker on instead of ending the message early.
