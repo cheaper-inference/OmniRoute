@@ -1,0 +1,1 @@
+- **fix(vision-bridge):** lock the rejected provider/connection/model after a model-scoped 400 so later selections skip it while fallback continues ([#18271](https://github.com/cheaper-inference/OmniRoute/pull/18271)) — thanks @RaviTharuma

@@ -118,9 +118,9 @@
 
 ---
 
-## 📖 ಪೂರೈಕೆದಾರರ ಸೆಟಪ್
+## 📖 ಪೂರೈಕೆದಾರ ಸೆಟಪ್
 
-CSV ಅಥವಾ JSON ಫೈಲ್ನಿಂದ API-ಕೀ ಸಂಪರ್ಕಗಳನ್ನು ಒಟ್ಟಾಗಿ ಸೇರಿಸಲು, **ಡ್ಯಾಶ್ಬೋರ್ಡ್ → ಪೂರೈಕೆದಾರರು → ಫೈಲ್ನಿಂದ ಆಮದು ಮಾಡಿ** ಬಳಸಿ. ಕಾಲಮ್ಗಳು ಸ್ಥಾನಾಧಾರಿತವಾಗಿವೆ (`provider,name,apiKey,baseUrl,priority`); `provider` ಈಗಾಗಲೇ ನಿರ್ವಹಿತ ಪೂರೈಕೆದಾರ ಅಥವಾ ಹೊಂದಾಣಿಕೆಯ ನೋಡ್ ಆಗಿ ಅಸ್ತಿತ್ವದಲ್ಲಿರಬೇಕು. [CSV ಅಥವಾ JSON ಫೈಲ್ನಿಂದ ಪೂರೈಕೆದಾರರನ್ನು ಆಮದು ಮಾಡುವುದು](../providers/CSV-IMPORT.md) ನೋಡಿ.
+CSV ಅಥವಾ JSON ಫೈಲ್ನಿಂದ API-ಕೀ ಸಂಪರ್ಕಗಳನ್ನು ಬಲ್ಕ್-ಆಡ್ ಮಾಡಲು, **ಡ್ಯಾಶ್ಬೋರ್ಡ್ → ಪೂರೈಕೆದಾರರು → ಫೈಲ್ನಿಂದ ಆಮದು** ಬಳಸಿ. ಕಾಲಮ್ಗಳು ಕ್ರಮಾಧಾರಿತವಾಗಿವೆ (`provider,name,apiKey,baseUrl,priority`); `provider` ಈಗಾಗಲೇ ನಿರ್ವಹಿತ ಪೂರೈಕೆದಾರವಾಗಿ ಅಥವಾ ಹೊಂದಾಣಿಕೆಯ ನೋಡ್ ಆಗಿ ಅಸ್ತಿತ್ವದಲ್ಲಿರಬೇಕು. [CSV ಅಥವಾ JSON ಫೈಲ್ನಿಂದ ಪೂರೈಕೆದಾರರನ್ನು ಆಮದು ಮಾಡುವುದು](../providers/CSV-IMPORT.md) ನೋಡಿ.
 
 ### 🔐 ಚಂದಾದಾರಿಕೆ ಪೂರೈಕೆದಾರರು
 
@@ -128,7 +128,7 @@ CSV ಅಥವಾ JSON ಫೈಲ್ನಿಂದ API-ಕೀ ಸಂಪರ್ಕಗ�
 
 ```bash
 ಡ್ಯಾಶ್ಬೋರ್ಡ್ → ಪೂರೈಕೆದಾರರು → Claude Code ಸಂಪರ್ಕಿಸಿ
-→ OAuth ಲಾಗಿನ್ → ಸ್ವಯಂಚಾಲಿತ ಟೋಕನ್ ರಿಫ್ರೆಶ್
+→ OAuth ಲಾಗಿನ್ → ಟೋಕನ್ ಸ್ವಯಂ ರಿಫ್ರೆಶ್
 → 5-ಗಂಟೆ + ಸಾಪ್ತಾಹಿಕ ಕೋಟಾ ಟ್ರ್ಯಾಕಿಂಗ್
 
 ಮಾದರಿಗಳು:
@@ -137,18 +137,21 @@ CSV ಅಥವಾ JSON ಫೈಲ್ನಿಂದ API-ಕೀ ಸಂಪರ್ಕಗ�
   cc/claude-haiku-4-5-20251001
 ```
 
-**ತಜ್ಞರ ಸಲಹೆ:** ಸಂಕೀರ್ಣ ಕಾರ್ಯಗಳಿಗೆ Opus ಮತ್ತು ವೇಗಕ್ಕಾಗಿ Sonnet ಬಳಸಿ. OmniRoute ಪ್ರತಿ ಮಾದರಿಯ ಕೋಟಾವನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡುತ್ತದೆ!
+**ಪ್ರೊ ಟಿಪ್:** ಸಂಕೀರ್ಣ ಕಾರ್ಯಗಳಿಗೆ Opus, ವೇಗಕ್ಕಾಗಿ Sonnet ಬಳಸಿ. OmniRoute ಪ್ರತಿ ಮಾದರಿಗೆ ಕೋಟಾವನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡುತ್ತದೆ!
 
-OmniRoute ಹೋಸ್ಟ್ನಲ್ಲಿ ಬ್ರೌಸರ್ ಇಲ್ಲವೇ? Claude Code ಲಾಗಿನ್ ಆಗಿರುವ ಯಾವುದೇ ಸ್ಥಳದಲ್ಲಿ `claude setup-token` ರನ್ ಮಾಡಿ ಮತ್ತು ಒಂದು ವರ್ಷದ ಟೋಕನ್ ಅನ್ನು **Setup Token** ಟ್ಯಾಬ್ನಲ್ಲಿ ಅಂಟಿಸಿ. [ಸೆಟಪ್ ಟೋಕನ್ನೊಂದಿಗೆ Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md) ನೋಡಿ.
+OmniRoute ಹೋಸ್ಟ್ನಲ್ಲಿ ಬ್ರೌಸರ್ ಇಲ್ಲವೇ? Claude Code ಲಾಗಿನ್ ಆಗಿರುವ ಯಾವುದೇ ಸ್ಥಳದಲ್ಲಿ `claude setup-token` ರನ್ ಮಾಡಿ ಮತ್ತು ಒಂದು ವರ್ಷದ ಟೋಕನ್ ಅನ್ನು **ಸೆಟಪ್ ಟೋಕನ್** ಟ್ಯಾಬ್ಗೆ ಪೇಸ್ಟ್ ಮಾಡಿ. [ಸೆಟಪ್ ಟೋಕನ್ನೊಂದಿಗೆ Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md) ನೋಡಿ.
 
-Claude ಮತ್ತು Claude Code-ಹೊಂದಾಣಿಕೆಯ ಮಾರ್ಗಗಳು Opus ಮತ್ತು Sonnet ಮಾದರಿಗಳಿಗಾಗಿ `max` ಚಿಂತನಾ ಪ್ರಯತ್ನವನ್ನು ಉಳಿಸಿಕೊಳ್ಳುತ್ತವೆ. Haiku ಮಾದರಿಗಳು `max` ಪ್ರಯತ್ನದ ಹಂತವನ್ನು ಸ್ವೀಕರಿಸುವುದಿಲ್ಲ, ಆದ್ದರಿಂದ OmniRoute ಆ ವಿನಂತಿಯನ್ನು ಅಪ್ಸ್ಟ್ರೀಮ್ಗೆ ಕಳುಹಿಸುವ ಮೊದಲು ಹೆಚ್ಚಿನ ಚಿಂತನಾ ಬಜೆಟ್ಗೆ ಇಳಿಸುತ್ತದೆ.
+Claude ಮತ್ತು Claude Code-ಹೊಂದಾಣಿಕೆಯ ಮಾರ್ಗಗಳು Opus ಮತ್ತು Sonnet
+ಮಾದರಿಗಳಿಗೆ `max` ಥಿಂಕಿಂಗ್ ಪ್ರಯತ್ನವನ್ನು ಉಳಿಸಿಕೊಳ್ಳುತ್ತವೆ. Haiku ಮಾದರಿಗಳು `max` ಪ್ರಯತ್ನದ
+ಟಿಯರ್ ಅನ್ನು ಸ್ವೀಕರಿಸುವುದಿಲ್ಲ, ಆದ್ದರಿಂದ OmniRoute ಆ ವಿನಂತಿಯನ್ನು ಅಪ್ಸ್ಟ್ರೀಮ್ಗೆ ಕಳುಹಿಸುವ ಮೊದಲು
+ಹೆಚ್ಚಿನ ಥಿಂಕಿಂಗ್ ಬಜೆಟ್ಗೆ ಇಳಿಸುತ್ತದೆ.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
 ಡ್ಯಾಶ್ಬೋರ್ಡ್ → ಪೂರೈಕೆದಾರರು → Codex ಸಂಪರ್ಕಿಸಿ
 → OAuth ಲಾಗಿನ್ (ಪೋರ್ಟ್ 1455)
-→ 5-ಗಂಟೆ + ಸಾಪ್ತಾಹಿಕ ಮರುಹೊಂದಿಕೆ
+→ 5-ಗಂಟೆ + ಸಾಪ್ತಾಹಿಕ ರೀಸೆಟ್
 
 ಮಾದರಿಗಳು:
   cx/gpt-5.5
@@ -162,7 +165,7 @@ Claude ಮತ್ತು Claude Code-ಹೊಂದಾಣಿಕೆಯ ಮಾರ್�
 ```bash
 ಡ್ಯಾಶ್ಬೋರ್ಡ್ → ಪೂರೈಕೆದಾರರು → GitHub ಸಂಪರ್ಕಿಸಿ
 → GitHub ಮೂಲಕ OAuth
-→ ಮಾಸಿಕ ಮರುಹೊಂದಿಕೆ (ತಿಂಗಳ 1ನೇ ದಿನ)
+→ ಮಾಸಿಕ ರೀಸೆಟ್ (ತಿಂಗಳ 1ನೇ ದಿನ)
 
 ಮಾದರಿಗಳು:
   gh/gpt-5.5
@@ -172,47 +175,63 @@ Claude ಮತ್ತು Claude Code-ಹೊಂದಾಣಿಕೆಯ ಮಾರ್�
   gh/gemini-3.1-pro-preview
 ```
 
+**AI ಕ್ರೆಡಿಟ್ಗಳು (ಟೋಕನ್ ಆಧಾರಿತ ಬಿಲ್ಲಿಂಗ್).** GitHub ಖಾತೆಗಾಗಿ `credits_used` ಅನ್ನು ವರದಿ ಮಾಡಿದಾಗ,
+Provider Limits ಕಾರ್ಡ್ ಪ್ರಸ್ತುತ ಬಿಲ್ಲಿಂಗ್ ಅವಧಿಯಲ್ಲಿ ಬಳಸಲಾದ ಕ್ರೆಡಿಟ್ಗಳೊಂದಿಗೆ **AI ಕ್ರೆಡಿಟ್ಗಳು** ಸಾಲನ್ನು
+ತೋರಿಸುತ್ತದೆ; ಅನಿಯಮಿತ ಸಂಸ್ಥೆಯ ಯೋಜನೆಗಳಲ್ಲಿಯೂ ಇದು ಅನ್ವಯಿಸುತ್ತದೆ.
+
+**ಸ್ಥಳೀಯ AI ಕ್ರೆಡಿಟ್ ಮಿತಿ.** GitHub ಸಂಪರ್ಕವನ್ನು ಸಂಪಾದಿಸಿ ಮತ್ತು ಪ್ರತಿ
+ಬಿಲ್ಲಿಂಗ್ ಅವಧಿಗೆ **AI ಕ್ರೆಡಿಟ್ಗಳ ಮಿತಿ** (`providerSpecificData.githubCreditLimit`) ಹೊಂದಿಸಿ.
+ಖಾಲಿ ಬಿಟ್ಟರೆ ಅದು ನಿಷ್ಕ್ರಿಯಗೊಳ್ಳುತ್ತದೆ; `0` ಸಂಪರ್ಕವನ್ನು ಯಾವಾಗಲೂ ಬಿಟ್ಟುಹೋಗುವಂತೆ ಮಾಡುತ್ತದೆ. ಕೊನೆಯ ಬಳಕೆಯ
+ಓದು ಮಿತಿಗಿಂತ ಹೆಚ್ಚಾಗಿದ್ದರೆ ಅಥವಾ ಅದಕ್ಕೆ ಸಮನಾಗಿದ್ದರೆ, ಖಾತೆ ಆಯ್ಕೆಯು ಆ ಸಂಪರ್ಕವನ್ನು ಬಿಟ್ಟುಹೋಗುತ್ತದೆ ಮತ್ತು
+ಕೋಟಾ-ನೀತಿ ಕಟ್ಆಫ್ನಂತೆಯೇ ರೂಟಿಂಗ್ ನಿಮ್ಮ ಇತರ ಸಂಪರ್ಕಗಳಿಗೆ ಹಿಂತಿರುಗುತ್ತದೆ. ಈ ಪರಿಶೀಲನೆಯು ಆವರ್ತಕ ಕೋಟಾ
+ರಿಫ್ರೆಶ್ ಈಗಾಗಲೇ ಸಂಗ್ರಹಿಸುವ ಬಳಕೆಯ ಮಾಹಿತಿಯನ್ನು ಓದುತ್ತದೆ — ಇದು ವಿನಂತಿಯ ಮಾರ್ಗದಲ್ಲಿ GitHub ಅನ್ನು
+ಎಂದಿಗೂ ಕರೆಯುವುದಿಲ್ಲ — ಮತ್ತು ಇದು fail open ರೀತಿಯಲ್ಲಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ: ಕಾಣೆಯಾದ ಅಥವಾ ಹಳೆಯ ಓದು
+(15 ನಿಮಿಷಗಳಿಗಿಂತ ಹಳೆಯದು, ಅಥವಾ ಈಗಾಗಲೇ ರೀಸೆಟ್ ಆಗಿರುವ ಬಿಲ್ಲಿಂಗ್ ಅವಧಿಯದ್ದು) ಸಂಪರ್ಕವನ್ನು ನಿರ್ಬಂಧಿಸುವುದಿಲ್ಲ.
+ಇದು ಸ್ಥಳೀಯ ಸುರಕ್ಷತಾ ಕ್ರಮ ಮಾತ್ರ, **ಖರ್ಚಿನ ಖಚಿತ ಗರಿಷ್ಠ ಮಿತಿ ಅಲ್ಲ**: GitHub ವರದಿ ವಿಳಂಬಗಳು, ರಿಫ್ರೆಶ್
+ಅಂತರ, ನಡೆಯುತ್ತಿರುವ ವಿನಂತಿಗಳು ಮತ್ತು OmniRoute ಹೊರಗಿನ ಬಳಕೆಯಿಂದಾಗಿ ಈ ಮಿತಿಯನ್ನು ಮೀರಬಹುದು. ಕಟ್ಟುನಿಟ್ಟಾದ
+ಮಿತಿಗಾಗಿ GitHubನ ಸ್ವಂತ ಖರ್ಚು ನಿಯಂತ್ರಣಗಳನ್ನು ಬಳಸಿ.
+
 ### 💰 ಅಗ್ಗದ ಪೂರೈಕೆದಾರರು
 
-#### GLM-4.7 (ದೈನಂದಿನ ಮರುಹೊಂದಿಕೆ, $0.6/1M)
+#### GLM-4.7 (ದೈನಂದಿನ ರೀಸೆಟ್, $0.6/1M)
 
-1. ನೋಂದಾಯಿಸಿ: [Zhipu AI](https://open.bigmodel.cn)
-2. Coding Planನಿಂದ API ಕೀ ಪಡೆಯಿರಿ
+1. ನೋಂದಣಿ ಮಾಡಿ: [Zhipu AI](https://open.bigmodel.cn)
+2. Coding Plan ನಿಂದ API ಕೀ ಪಡೆಯಿರಿ
 3. ಡ್ಯಾಶ್ಬೋರ್ಡ್ → API ಕೀ ಸೇರಿಸಿ: ಪೂರೈಕೆದಾರ: `glm`, API ಕೀ: `your-key`
 
-**ಬಳಕೆ:** `glm/glm-4.7` — **ತಜ್ಞರ ಸಲಹೆ:** Coding Plan 1/7 ವೆಚ್ಚದಲ್ಲಿ 3× ಕೋಟಾವನ್ನು ನೀಡುತ್ತದೆ! ಪ್ರತಿದಿನ ಬೆಳಿಗ್ಗೆ 10:00 ಗಂಟೆಗೆ ಮರುಹೊಂದಿಸಲಾಗುತ್ತದೆ.
+**ಬಳಕೆ:** `glm/glm-4.7` — **ಪ್ರೊ ಟಿಪ್:** Coding Plan 1/7 ವೆಚ್ಚದಲ್ಲಿ 3× ಕೋಟಾವನ್ನು ನೀಡುತ್ತದೆ! ಪ್ರತಿದಿನ ಬೆಳಗ್ಗೆ 10:00ಕ್ಕೆ ರೀಸೆಟ್ ಆಗುತ್ತದೆ.
 
-#### MiniMax M2.1 (5ಗಂ ಮರುಹೊಂದಿಕೆ, $0.20/1M)
+#### MiniMax M2.1 (5-ಗಂಟೆ ರೀಸೆಟ್, $0.20/1M)
 
-1. ನೋಂದಾಯಿಸಿ: [MiniMax](https://www.minimax.io)
+1. ನೋಂದಣಿ ಮಾಡಿ: [MiniMax](https://www.minimax.io)
 2. API ಕೀ ಪಡೆಯಿರಿ → ಡ್ಯಾಶ್ಬೋರ್ಡ್ → API ಕೀ ಸೇರಿಸಿ
 
-**ಬಳಕೆ:** `minimax/MiniMax-M2.1` — **ತಜ್ಞರ ಸಲಹೆ:** ದೀರ್ಘ ಸಂದರ್ಭಕ್ಕಾಗಿ ಅತ್ಯಂತ ಅಗ್ಗದ ಆಯ್ಕೆ (1M ಟೋಕನ್ಗಳು)!
+**ಬಳಕೆ:** `minimax/MiniMax-M2.1` — **ಪ್ರೊ ಟಿಪ್:** ದೀರ್ಘ ಕಾಂಟೆಕ್ಸ್ಟ್ಗೆ ಅತ್ಯಂತ ಅಗ್ಗದ ಆಯ್ಕೆ (1M ಟೋಕನ್ಗಳು)!
 
-#### Kimi K2 (ತಿಂಗಳಿಗೆ ನಿಗದಿತ $9)
+#### Kimi K2 ($9/ತಿಂಗಳು ಸ್ಥಿರ ಶುಲ್ಕ)
 
 1. ಚಂದಾದಾರರಾಗಿ: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
 2. API ಕೀ ಪಡೆಯಿರಿ → ಡ್ಯಾಶ್ಬೋರ್ಡ್ → API ಕೀ ಸೇರಿಸಿ
 
-**ಬಳಕೆ:** `kimi/kimi-k2.5` — **ತಜ್ಞರ ಸಲಹೆ:** 10M ಟೋಕನ್ಗಳಿಗೆ ತಿಂಗಳಿಗೆ ನಿಗದಿತ $9 = $0.90/1M ಪರಿಣಾಮಕಾರಿ ವೆಚ್ಚ!
+**ಬಳಕೆ:** `kimi/kimi-k2.5` — **ಪ್ರೊ ಟಿಪ್:** 10M ಟೋಕನ್ಗಳಿಗೆ ಸ್ಥಿರ $9/ತಿಂಗಳು = ಪರಿಣಾಮಕಾರಿ ವೆಚ್ಚ $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
-1. ನೋಂದಾಯಿಸಿ: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
+1. ನೋಂದಣಿ ಮಾಡಿ: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
 2. Qianfan API ಕೀ ರಚಿಸಿ → ಡ್ಯಾಶ್ಬೋರ್ಡ್ → API ಕೀ ಸೇರಿಸಿ: ಪೂರೈಕೆದಾರ: `qianfan`
 
-**ಬಳಕೆ:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, ಅಥವಾ ಮತ್ತೊಂದು Qianfan OpenAI-ಹೊಂದಾಣಿಕೆಯ ಮಾದರಿ ID.
+**ಬಳಕೆ:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, ಅಥವಾ ಇನ್ನೊಂದು Qianfan OpenAI-ಹೊಂದಾಣಿಕೆಯ ಮಾದರಿ ID.
 
 ### 🆓 ಉಚಿತ ಪೂರೈಕೆದಾರರು
 
-ದೃಢೀಕರಣ ಅಗತ್ಯವಿಲ್ಲದ ಉಚಿತ ಪೂರೈಕೆದಾರರ ಪೂರೈಕೆದಾರ ಪುಟದಲ್ಲಿ **ದೃಢೀಕರಣ ಅಗತ್ಯವಿಲ್ಲ** ಎಂಬುದರ ಪಕ್ಕದಲ್ಲಿ ಸ್ವಿಚ್ ಇರುತ್ತದೆ.
-ಅದನ್ನು ಆಫ್ ಮಾಡುವುದರಿಂದ ಆ ಪೂರೈಕೆದಾರ ನಿಷ್ಕ್ರಿಯಗೊಳ್ಳುತ್ತದೆ, ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾದ/ಸಂಕ್ಷಿಪ್ತ ಪೂರೈಕೆದಾರರ ವೀಕ್ಷಣೆಗಳಿಂದ ತೆಗೆದುಹಾಕಲ್ಪಡುತ್ತದೆ ಮತ್ತು
-ಅದರ ಮಾದರಿಗಳು `/v1/models` ನಿಂದ ತೆಗೆದುಹಾಕಲ್ಪಡುತ್ತವೆ.
+ದೃಢೀಕರಣವಿಲ್ಲದ ಉಚಿತ ಪೂರೈಕೆದಾರರ ಪೂರೈಕೆದಾರ ಪುಟದಲ್ಲಿ **ದೃಢೀಕರಣ ಅಗತ್ಯವಿಲ್ಲ** ಎಂಬುದರ ಪಕ್ಕದಲ್ಲಿ ಸ್ವಿಚ್ ಇರುತ್ತದೆ.
+ಅದನ್ನು ಆಫ್ ಮಾಡಿದರೆ ಆ ಪೂರೈಕೆದಾರ ನಿಷ್ಕ್ರಿಯಗೊಳ್ಳುತ್ತದೆ, Providers configured/compact ವೀಕ್ಷಣೆಗಳಿಂದ ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ ಮತ್ತು
+ಅದರ ಮಾದರಿಗಳನ್ನು `/v1/models` ನಿಂದ ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ.
 
 #### Qoder (9 ಉಚಿತ ಮಾದರಿಗಳು)
 
 ```bash
-ಡ್ಯಾಶ್ಬೋರ್ಡ್ → Qoder ಸಂಪರ್ಕಿಸಿ → OAuth ಲಾಗಿನ್ → ಪ್ರವೇಶವು ಪ್ರಸ್ತುತ ಪೂರೈಕೆದಾರರ ಮಿತಿಗಳಿಗೆ ಒಳಪಟ್ಟಿರುತ್ತದೆ
+ಡ್ಯಾಶ್ಬೋರ್ಡ್ → Qoder ಸಂಪರ್ಕಿಸಿ → OAuth ಲಾಗಿನ್ → ಪ್ರವೇಶವು ಪ್ರಸ್ತುತ ಪೂರೈಕೆದಾರ ಮಿತಿಗಳಿಗೆ ಒಳಪಟ್ಟಿರುತ್ತದೆ
 
 ಮಾದರಿಗಳು: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -220,7 +239,7 @@ Claude ಮತ್ತು Claude Code-ಹೊಂದಾಣಿಕೆಯ ಮಾರ್�
 #### Kiro (Claude ಉಚಿತ)
 
 ```bash
-ಡ್ಯಾಶ್ಬೋರ್ಡ್ → Kiro ಸಂಪರ್ಕಿಸಿ → AWS Builder ID ಅಥವಾ Google/GitHub → ~50 ಕ್ರೆಡಿಟ್ಗಳು/ತಿಂಗಳು
+ಡ್ಯಾಶ್ಬೋರ್ಡ್ → Kiro ಸಂಪರ್ಕಿಸಿ → AWS Builder ID ಅಥವಾ Google/GitHub → ತಿಂಗಳಿಗೆ ಸುಮಾರು 50 ಕ್ರೆಡಿಟ್ಗಳು
 
 ಮಾದರಿಗಳು: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -610,19 +629,19 @@ post_install() {
 ## 📊 ಲಭ್ಯವಿರುವ ಮಾದರಿಗಳು
 
 <details>
-<summary><b>ಎಲ್ಲಾ ಲಭ್ಯವಿರುವ ಮಾದರಿಗಳನ್ನು ನೋಡಿ</b></summary>
+<summary><b>ಲಭ್ಯವಿರುವ ಎಲ್ಲ ಮಾದರಿಗಳನ್ನು ವೀಕ್ಷಿಸಿ</b></summary>
 
-> ಕೆಳಗಿನ ಪಟ್ಟಿಯನ್ನು v3.8.0 ಗಾಗಿ `open-sse/config/providerRegistry.ts` ನಿಂದ ಸಂಗ್ರಹಿಸಲಾಗಿದೆ. ಕ್ಲೌಡ್ ಕ್ಯಾಟಲಾಗ್ಗಳು (Gemini, OpenRouter, ಇತ್ಯಾದಿ) ಕ್ರಿಯಾತ್ಮಕವಾಗಿ ಸಿಂಕ್ ಆಗುತ್ತವೆ — ಪೂರ್ಣ ಲೈವ್ ಕ್ಯಾಟಲಾಗ್ಗಾಗಿ **ಡ್ಯಾಶ್ಬೋರ್ಡ್ → Providers → [provider] → ಲಭ್ಯವಿರುವ ಮಾದರಿಗಳು** ತೆರೆಯಿರಿ ಅಥವಾ `GET /api/models/catalog` ಅನ್ನು ಕರೆಯಿರಿ.
+> ಕೆಳಗಿನ ಪಟ್ಟಿಯನ್ನು v3.8.0 ಗಾಗಿ `open-sse/config/providerRegistry.ts` ನಿಂದ ಆಯ್ಕೆ ಮಾಡಲಾಗಿದೆ. ಕ್ಲೌಡ್ ಕ್ಯಾಟಲಾಗ್ಗಳು (Gemini, OpenRouter ಇತ್ಯಾದಿ) ಡೈನಾಮಿಕ್ ಆಗಿ ಸಿಂಕ್ ಆಗುತ್ತವೆ — ಸಂಪೂರ್ಣ ಲೈವ್ ಕ್ಯಾಟಲಾಗ್ಗಾಗಿ **ಡ್ಯಾಶ್ಬೋರ್ಡ್ → ಪೂರೈಕೆದಾರರು → [ಪೂರೈಕೆದಾರ] → ಲಭ್ಯವಿರುವ ಮಾದರಿಗಳು** ತೆರೆಯಿರಿ ಅಥವಾ `GET /api/models/catalog` ಕರೆ ಮಾಡಿ.
 >
-> ಪ್ರೊವೈಡರ್ನ ಅಂತರ್ನಿರ್ಮಿತ ಪಟ್ಟಿಯು ಬದಲಾಗಿದ್ದರೆ, ಲೈವ್ ಅಪ್ಸ್ಟ್ರೀಮ್ ಕ್ಯಾಟಲಾಗ್ ಅನ್ನು ಪಡೆಯಲು ಆ ಪುಟದಲ್ಲಿರುವ **/models ನಿಂದ ಆಮದು ಮಾಡಿ** ಅನ್ನು ಬಳಸಿ (ಅಥವಾ **ಸ್ವಯಂ-ಸಿಂಕ್** ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ). ಇದನ್ನು v3.8.50 ನಲ್ಲಿ LLM7.io (`gemini-3.1-flash-lite`) ಮತ್ತು UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ಗಾಗಿ ಪರಿಶೀಲಿಸಲಾಗಿದೆ; ಅದೇ ಪರೀಕ್ಷಾ ಹಂತದಲ್ಲಿ Pollinations ನ ಅನಾಮಧೇಯ ಪ್ರವೇಶವು ಅಪ್ಸ್ಟ್ರೀಮ್-ಸೀಮಿತವಾಗಿಯೇ ಮುಂದುವರಿದಿತು.
+> ಪೂರೈಕೆದಾರರ ಅಂತರ್ನಿರ್ಮಿತ ಪಟ್ಟಿಯು ಬದಲಾಗಿದ್ದರೆ, ಲೈವ್ ಅಪ್ಸ್ಟ್ರೀಮ್ ಕ್ಯಾಟಲಾಗ್ ಪಡೆಯಲು ಆ ಪುಟದಲ್ಲಿರುವ **/models ನಿಂದ ಆಮದು ಮಾಡಿ** ಬಳಸಿ (ಅಥವಾ **ಸ್ವಯಂ-ಸಿಂಕ್** ಸಕ್ರಿಯಗೊಳಿಸಿ). ಇದನ್ನು v3.8.50 ನಲ್ಲಿ LLM7.io (`gemini-3.1-flash-lite`) ಮತ್ತು UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ಗಾಗಿ ಪರಿಶೀಲಿಸಲಾಗಿದೆ; ಅದೇ ಪರೀಕ್ಷಾ ಹಂತದಲ್ಲಿ Pollinations ನ ಅನಾಮಧೇಯ ಪ್ರವೇಶವು ಅಪ್ಸ್ಟ್ರೀಮ್ ಮಿತಿಗೊಳಿತವಾಗಿಯೇ ಉಳಿಯಿತು.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ effort ಮಟ್ಟಗಳು: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ ಪ್ರಯತ್ನದ ಹಂತಗಳು: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — ಉಚಿತ OAuth: **ಡ್ಯಾಶ್ಬೋರ್ಡ್ → Providers → Kiro → ಲಭ್ಯವಿರುವ ಮಾದರಿಗಳು** ಅಡಿಯಲ್ಲಿ ತೋರಿಸಿರುವ ಲೈವ್ ಕ್ಯಾಟಲಾಗ್ ಅನ್ನು ಬಳಸಿ. ಲಭ್ಯತೆಯು ಖಾತೆ ಮತ್ತು ಪ್ಲ್ಯಾನ್ ಅನ್ನು ಅವಲಂಬಿಸಿರುತ್ತದೆ.
+**Kiro (`kr/`)** — ಉಚಿತ OAuth: **ಡ್ಯಾಶ್ಬೋರ್ಡ್ → ಪೂರೈಕೆದಾರರು → Kiro → ಲಭ್ಯವಿರುವ ಮಾದರಿಗಳು** ಅಡಿಯಲ್ಲಿ ತೋರಿಸಿರುವ ಲೈವ್ ಕ್ಯಾಟಲಾಗ್ ಬಳಸಿ. ಲಭ್ಯತೆ ಖಾತೆ ಮತ್ತು ಯೋಜನೆಯ ಮೇಲೆ ಅವಲಂಬಿತವಾಗಿರುತ್ತದೆ.
 
 **Qoder (`if/`)** — ಉಚಿತ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -630,25 +649,25 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ತಿಂಗಳು ಫ್ಲಾಟ್ ಅಥವಾ ಬಳಕೆ-ಆಧಾರಿತ: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ತಿಂಗಳು ಸ್ಥಿರ ದರ ಅಥವಾ ಬಳಕೆಯ ಪ್ರಕಾರ: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API ಕೀ: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — ಅತಿ-ವೇಗದ: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — ಅತಿ ವೇಗದ: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok ನೇಟಿವ್: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok ಸ್ಥಳೀಯ: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU-ಯಲ್ಲಿ ಹೋಸ್ಟ್ ಮಾಡಲಾದ: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU-ಹೋಸ್ಟ್ ಮಾಡಲಾದ: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
 **Perplexity (`pplx/`)** — ಹುಡುಕಾಟ-ವರ್ಧಿತ: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — ಓಪನ್-ಸೋರ್ಸ್: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ಉಚಿತ), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — ಮುಕ್ತ-ಮೂಲ: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ಉಚಿತ), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — ವೇಗದ ಇನ್ಫರೆನ್ಸ್: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — ವೇಫರ್-ಸ್ಕೇಲ್: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — ವೇಫರ್-ಮಟ್ಟದ: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG-ಕೇಂದ್ರೀತ: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — RAG-ಕೇಂದ್ರಿತ: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
 **NVIDIA NIM (`nvidia/`)** — ಎಂಟರ್ಪ್ರೈಸ್: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
@@ -656,11 +675,11 @@ post_install() {
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: ಪ್ರತಿ API ಕೀಗೆ Google ನಿಂದ ಲೈವ್ ಸಿಂಕ್ ಆಗುತ್ತದೆ — ಸ್ಥಿರ ಪಟ್ಟಿಯಿಲ್ಲ. **ಡ್ಯಾಶ್ಬೋರ್ಡ್ → Providers** ನಲ್ಲಿ ಕೀ ಅನ್ನು ಸಂಪರ್ಕಿಸಿ ಮತ್ತು ಪ್ರಸ್ತುತ ಕ್ಯಾಟಲಾಗ್ ಅನ್ನು ಆಮದು ಮಾಡಿಕೊಳ್ಳಲು **ಲಭ್ಯವಿರುವ ಮಾದರಿಗಳು** ಅನ್ನು ಬಳಸಿ (ಉದಾ. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Google ನಿಂದ API ಕೀಗೆ ಅನುಗುಣವಾಗಿ ಲೈವ್ ಸಿಂಕ್ ಆಗುತ್ತದೆ — ಸ್ಥಿರ ಪಟ್ಟಿ ಇಲ್ಲ. **ಡ್ಯಾಶ್ಬೋರ್ಡ್ → ಪೂರೈಕೆದಾರರು** ನಲ್ಲಿ ಕೀಯನ್ನು ಸಂಪರ್ಕಿಸಿ, ನಂತರ ಪ್ರಸ್ತುತ ಕ್ಯಾಟಲಾಗ್ ಆಮದು ಮಾಡಲು **ಲಭ್ಯವಿರುವ ಮಾದರಿಗಳು** ಬಳಸಿ (ಉದಾ. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**ಇತರ ಹೊಂದಾಣಿಕೆಯ ಪ್ರೊವೈಡರ್ಗಳು** (ಆಯ್ದವು): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` ಮೂಲಕ), `azure-ai`, `openrouter` (ಪಾಸ್ಥ್ರೂ ಕ್ಯಾಟಲಾಗ್), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. ಪ್ರತಿಯೊಂದೂ `providerRegistry.ts` ನಲ್ಲಿ ತನ್ನದೇ ಆದ ಮಾದರಿ ಪಟ್ಟಿಯನ್ನು ನಿರ್ವಹಿಸುತ್ತದೆ ಮತ್ತು ಪ್ರೊವೈಡರ್ `/models` ಎಂಡ್ಪಾಯಿಂಟ್ ಅನ್ನು ಒದಗಿಸಿದಾಗ ಸ್ವಯಂ-ಸಿಂಕ್ ಮಾಡಬಹುದು.
+**ಇತರ ಹೊಂದಾಣಿಕೆಯ ಪೂರೈಕೆದಾರರು** (ಆಯ್ದವು): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` ಮೂಲಕ), `azure-ai`, `openrouter` (ಪಾಸ್ಥ್ರೂ ಕ್ಯಾಟಲಾಗ್), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. ಪ್ರತಿಯೊಂದೂ ತನ್ನದೇ ಆದ ಮಾದರಿ ಪಟ್ಟಿಯನ್ನು `providerRegistry.ts` ನಲ್ಲಿ ನಿರ್ವಹಿಸುತ್ತದೆ ಮತ್ತು ಪೂರೈಕೆದಾರರು `/models` ಎಂಡ್ಪಾಯಿಂಟ್ ಒದಗಿಸಿದಾಗ ಸ್ವಯಂ-ಸಿಂಕ್ ಮಾಡಬಹುದು.
 
-**ಮಾದರಿ ID ಗಳ ಬಗ್ಗೆ ಗಮನಿಸಿ:** OmniRoute ಪ್ರೊವೈಡರ್-ನೇಟಿವ್ ID ಗಳನ್ನು ಬಳಸುತ್ತದೆ (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). ಕೆಲವು ID ಗಳು ಚುಕ್ಕೆಯುಳ್ಳ ಆವೃತ್ತಿಗಳನ್ನು ಒಳಗೊಂಡಿರುತ್ತವೆ ಏಕೆಂದರೆ ಅಪ್ಸ್ಟ್ರೀಮ್ API ಅವುಗಳನ್ನು ಆ ರೀತಿಯಲ್ಲಿಯೇ ನಿರೀಕ್ಷಿಸುತ್ತದೆ. ಯಾವುದಾದರೂ ಮಾದರಿಯು ಮೇಲೆ ಪಟ್ಟಿ ಮಾಡಲಾಗಿಲ್ಲದಿದ್ದರೆ, ಲಭ್ಯತೆಯನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಲು `omniroute models --search <term>` ಅನ್ನು ಚಲಾಯಿಸಿ ಅಥವಾ `GET /api/models/catalog` ಅನ್ನು ಬಳಸಿ.
+**ಮಾದರಿ ID ಗಳ ಕುರಿತು ಸೂಚನೆ:** OmniRoute ಪೂರೈಕೆದಾರರ ಸ್ಥಳೀಯ ID ಗಳನ್ನು ಬಳಸುತ್ತದೆ (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). ಕೆಲವು ID ಗಳಲ್ಲಿ ಡಾಟ್ ಹೊಂದಿರುವ ಆವೃತ್ತಿಗಳಿವೆ, ಏಕೆಂದರೆ ಅಪ್ಸ್ಟ್ರೀಮ್ API ಅವುಗಳನ್ನು ಹೀಗೆ ನಿರೀಕ್ಷಿಸುತ್ತದೆ. ಮೇಲಿನ ಪಟ್ಟಿಯಲ್ಲಿ ಮಾದರಿ ಇಲ್ಲದಿದ್ದರೆ, ಲಭ್ಯತೆಯನ್ನು ಖಚಿತಪಡಿಸಲು `omniroute models --search <term>` ರನ್ ಮಾಡಿ ಅಥವಾ `GET /api/models/catalog` ಗೆ ವಿನಂತಿ ಕಳುಹಿಸಿ.
 
 </details>
 

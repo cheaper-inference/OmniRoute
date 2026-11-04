@@ -120,16 +120,16 @@ Giriş vasitələri: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ## 📖 Provayderin quraşdırılması
 
-CSV və ya JSON faylından API açarı bağlantılarını toplu şəkildə əlavə etmək üçün **İdarəetmə paneli → Provayderlər → Fayldan idxal et** yolundan istifadə edin. Sütunların sırası sabitdir (`provider,name,apiKey,baseUrl,priority`); `provider` artıq idarə olunan provayder və ya uyğun bir qovşaq kimi mövcud olmalıdır. Baxın: [Provayderləri CSV və ya JSON faylından idxal etmək](../providers/CSV-IMPORT.md).
+CSV və ya JSON faylından API açarı bağlantılarını toplu şəkildə əlavə etmək üçün **Dashboard → Providers → Import from file** bölməsindən istifadə edin. Sütunlar mövqeyə əsaslanır (`provider,name,apiKey,baseUrl,priority`); `provider` artıq idarə olunan provayder və ya uyğun node kimi mövcud olmalıdır. Baxın: [CSV və ya JSON faylından provayderləri idxal edin](../providers/CSV-IMPORT.md).
 
 ### 🔐 Abunəlik provayderləri
 
 #### Claude Code (Pro/Max)
 
 ```bash
-İdarəetmə paneli → Provayderlər → Claude Code-a qoşul
-→ OAuth ilə daxil olma → Tokenin avtomatik yenilənməsi
-→ 5 saatlıq + həftəlik kvotanın izlənməsi
+Dashboard → Providers → Claude Code-a qoşulun
+→ OAuth girişi → Tokenin avtomatik yenilənməsi
+→ 5 saatlıq + həftəlik kvota izlənməsi
 
 Modellər:
   cc/claude-opus-4-7
@@ -137,18 +137,21 @@ Modellər:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Peşəkar məsləhət:** Mürəkkəb tapşırıqlar üçün Opus, sürət üçün Sonnet istifadə edin. OmniRoute kvotanı hər model üzrə izləyir!
+**Peşəkar məsləhət:** Mürəkkəb tapşırıqlar üçün Opus-dan, sürət üçün Sonnet-dən istifadə edin. OmniRoute kvotanı hər model üzrə izləyir!
 
-OmniRoute hostunda brauzer yoxdur? Claude Code-a daxil olduğunuz istənilən yerdə `claude setup-token` əmrini icra edin və birillik tokeni **Quraşdırma tokeni** tabına yapışdırın. Baxın: [Claude Code-dan quraşdırma tokeni ilə istifadə](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+OmniRoute hostunda brauzer yoxdursa, Claude Code-a daxil olduğunuz istənilən yerdə `claude setup-token` əmrini icra edin və birillik tokeni **Setup Token** tabına yapışdırın. Baxın: [Quraşdırma tokeni ilə Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Claude və Claude Code ilə uyğun marşrutlar Opus və Sonnet modelləri üçün `max` düşünmə səyini qoruyur. Haiku modelləri `max` səy səviyyəsini qəbul etmir, buna görə də OmniRoute həmin sorğunu yuxarı axına göndərməzdən əvvəl onu yüksək düşünmə büdcəsi səviyyəsinə endirir.
+Claude və Claude Code ilə uyğun marşrutlar Opus və Sonnet
+modelləri üçün `max` düşünmə səviyyəsini qoruyur. Haiku modelləri `max`
+səy səviyyəsini qəbul etmir, buna görə də OmniRoute həmin
+sorğunu upstream-ə göndərməzdən əvvəl yüksək düşünmə büdcəsinə endirir.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-İdarəetmə paneli → Provayderlər → Codex-ə qoşul
-→ OAuth ilə daxil olma (port 1455)
-→ 5 saatlıq + həftəlik sıfırlanma
+Dashboard → Providers → Codex-ə qoşulun
+→ OAuth girişi (port 1455)
+→ 5 saatlıq + həftəlik sıfırlama
 
 Modellər:
   cx/gpt-5.5
@@ -160,9 +163,9 @@ Modellər:
 #### GitHub Copilot
 
 ```bash
-İdarəetmə paneli → Provayderlər → GitHub-a qoşul
+Dashboard → Providers → GitHub-a qoşulun
 → GitHub vasitəsilə OAuth
-→ Aylıq sıfırlanma (ayın 1-i)
+→ Aylıq sıfırlama (ayın 1-i)
 
 Modellər:
   gh/gpt-5.5
@@ -172,55 +175,72 @@ Modellər:
   gh/gemini-3.1-pro-preview
 ```
 
+**AI kreditləri (token əsaslı hesablaşma).** GitHub hesab üçün `credits_used` bildirdikdə,
+Provider Limits kartında cari hesablaşma dövründə istifadə edilmiş kreditləri göstərən
+**AI Credits** sətri görünür; bu, limitsiz təşkilat planlarına da aiddir.
+
+**Yerli AI kreditləri limiti.** GitHub bağlantısını redaktə edin və **Hesablaşma dövrü
+üçün AI Credits limiti** (`providerSpecificData.githubCreditLimit`) təyin edin. Boş
+saxlanıldıqda məhdudiyyət deaktiv edilir; `0` bağlantının həmişə atlanmasına səbəb olur. Son
+istifadə göstəricisi limitə bərabər və ya ondan yuxarı olduqda, hesab seçimi həmin bağlantını
+ötürür və marşrutlaşdırma kvota siyasətindəki kəsilmə ilə eyni şəkildə digər
+bağlantılarınıza keçir. Yoxlama dövri kvota yenilənməsinin artıq topladığı istifadə
+məlumatlarını oxuyur — sorğu yolunda heç vaxt GitHub-a müraciət etmir — və açıq uğursuzluq
+prinsipi ilə işləyir: çatışmayan və ya köhnəlmiş göstərici (15 dəqiqədən köhnə və ya artıq
+sıfırlanmış hesablaşma dövrünə aid) bağlantını bloklamır. Bu, yerli qoruyucu mexanizmdir,
+**zəmanətli xərc tavanı deyil**: GitHub-dakı hesabat gecikmələri, yenilənmə intervalı,
+davam edən sorğular və OmniRoute xaricindəki istifadə limiti aşa bilər. Sərt limit üçün
+GitHub-un öz xərc nəzarətlərindən istifadə edin.
+
 ### 💰 Ucuz provayderlər
 
-#### GLM-4.7 (Gündəlik sıfırlanma, $0.6/1M)
+#### GLM-4.7 (Gündəlik sıfırlama, $0.6/1M)
 
 1. Qeydiyyatdan keçin: [Zhipu AI](https://open.bigmodel.cn)
 2. Coding Plan-dan API açarı əldə edin
-3. İdarəetmə paneli → API açarı əlavə et: Provayder: `glm`, API açarı: `your-key`
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**İstifadə:** `glm/glm-4.7` — **Peşəkar məsləhət:** Coding Plan xərcin 1/7-si müqabilində 3× kvota təklif edir! Hər gün saat 10:00-da sıfırlanır.
+**İstifadə:** `glm/glm-4.7` — **Peşəkar məsləhət:** Coding Plan 1/7 qiymətə 3× kvota təklif edir! Gündəlik saat 10:00-da sıfırlanır.
 
-#### MiniMax M2.1 (5 saatlıq sıfırlanma, $0.20/1M)
+#### MiniMax M2.1 (5 saatlıq sıfırlama, $0.20/1M)
 
 1. Qeydiyyatdan keçin: [MiniMax](https://www.minimax.io)
-2. API açarı əldə edin → İdarəetmə paneli → API açarı əlavə et
+2. API açarı əldə edin → Dashboard → Add API Key
 
-**İstifadə:** `minimax/MiniMax-M2.1` — **Peşəkar məsləhət:** Uzun kontekst (1M token) üçün ən ucuz seçimdir!
+**İstifadə:** `minimax/MiniMax-M2.1` — **Peşəkar məsləhət:** Uzun kontekst üçün ən ucuz seçimdir (1M token)!
 
-#### Kimi K2 (aylıq sabit $9)
+#### Kimi K2 (sabit $9/ay)
 
 1. Abunə olun: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. API açarı əldə edin → İdarəetmə paneli → API açarı əlavə et
+2. API açarı əldə edin → Dashboard → Add API Key
 
-**İstifadə:** `kimi/kimi-k2.5` — **Peşəkar məsləhət:** 10M token üçün aylıq sabit $9 = effektiv xərc $0.90/1M!
+**İstifadə:** `kimi/kimi-k2.5` — **Peşəkar məsləhət:** 10M token üçün sabit $9/ay = faktiki $0.90/1M xərc!
 
 #### Baidu Qianfan / ERNIE
 
 1. Qeydiyyatdan keçin: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Qianfan API açarı yaradın → İdarəetmə paneli → API açarı əlavə et: Provayder: `qianfan`
+2. Qianfan API açarı yaradın → Dashboard → Add API Key: Provider: `qianfan`
 
-**İstifadə:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` və ya OpenAI ilə uyğun başqa Qianfan model ID-si.
+**İstifadə:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` və ya başqa Qianfan OpenAI-uyğun model ID-si.
 
-### 🆓 PULSUZ provayderlər
+### 🆓 ÖDƏNİŞSİZ provayderlər
 
-Autentifikasiya tələb etməyən pulsuz provayderlərin öz səhifəsində **Autentifikasiya tələb olunmur** seçiminin yanında keçid düyməsi var.
-Onu söndürmək həmin provayderi deaktiv edir, Provayderlərin konfiqurasiya edilmiş/yığcam görünüşlərindən çıxarır və
+Autentifikasiya tələb etməyən ödənişsiz provayderlərin provayder səhifəsində **No authentication required** seçiminin yanında keçid olur.
+Bu seçimi söndürmək həmin provayderi deaktiv edir, onu Providers configured/compact görünüşlərindən çıxarır və
 modellərini `/v1/models` siyahısından silir.
 
-#### Qoder (9 PULSUZ model)
+#### Qoder (9 ÖDƏNİŞSİZ model)
 
 ```bash
-İdarəetmə paneli → Qoder-ə qoşul → OAuth ilə daxil olma → Giriş cari provayder limitlərinə tabedir
+Dashboard → Qoder-ə qoşulun → OAuth girişi → Giriş cari provayder limitlərindən asılıdır
 
 Modellər: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude PULSUZ)
+#### Kiro (Claude ÖDƏNİŞSİZ)
 
 ```bash
-İdarəetmə paneli → Kiro-ya qoşul → AWS Builder ID və ya Google/GitHub → ayda təxminən 50 kredit
+Dashboard → Kiro-ya qoşulun → AWS Builder ID və ya Google/GitHub → ayda təxminən 50 kredit
 
 Modellər: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -607,14 +627,14 @@ Mühit dəyişənlərinin tam siyahısı üçün [README](../README.md) faylına
 
 ---
 
-## 📊 Mövcud Modellər
+## 📊 Mövcud modellər
 
 <details>
 <summary><b>Bütün mövcud modellərə baxın</b></summary>
 
-> Aşağıdakı siyahı v3.8.0 üçün `open-sse/config/providerRegistry.ts` faylından tərtib edilmişdir. Bulud kataloqları (Gemini, OpenRouter və s.) dinamik şəkildə sinxronlaşdırılır — tam canlı kataloq üçün **Panel → Provayderlər → [provayder] → Mövcud Modellər** bölməsini açın və ya `GET /api/models/catalog` çağırışını edin.
+> Aşağıdakı siyahı v3.8.0 üçün `open-sse/config/providerRegistry.ts` faylından seçilib. Bulud kataloqları (Gemini, OpenRouter və s.) dinamik şəkildə sinxronlaşdırılır — tam canlı kataloqu açmaq üçün **Dashboard → Providers → [provider] → Available Models** bölməsinə keçin və ya `GET /api/models/catalog` çağırışını edin.
 >
-> Əgər provayderin daxili siyahısı köhnəlibsə, canlı upstream kataloqunu çəkmək üçün həmin səhifədə **/models-dən idxal et** seçimindən istifadə edin (və ya **Avto-Sinxronizasiya**-nı aktivləşdirin). Bu, v3.8.50-də LLM7.io (`gemini-3.1-flash-lite`) və UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) üçün yoxlanılıb; eyni test mərhələsində Pollinations-un anonim girişi upstream tərəfindən məhdud qaldı.
+> Provayderin daxili siyahısı aktuallığını itiribsə, canlı yuxarı axın kataloqunu əldə etmək üçün həmin səhifədə **Import from /models** seçimindən istifadə edin (və ya **Auto-Sync** funksiyasını aktivləşdirin). Bu, v3.8.50 versiyasında LLM7.io (`gemini-3.1-flash-lite`) və UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) üçün təsdiqlənib; eyni sınaq mərhələsində Pollinations anonim girişinin yuxarı axın məhdudiyyətləri qüvvədə qalıb.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -622,7 +642,7 @@ Mühit dəyişənlərinin tam siyahısı üçün [README](../README.md) faylına
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — PULSUZ OAuth: **Panel → Provayderlər → Kiro → Mövcud Modellər** bölməsində göstərilən canlı kataloqdan istifadə edin. Mövcudluq hesabdan və plandan asılıdır.
+**Kiro (`kr/`)** — PULSUZ OAuth: **Dashboard → Providers → Kiro → Available Models** bölməsində göstərilən canlı kataloqdan istifadə edin. Mövcudluq hesabdan və plandan asılıdır.
 
 **Qoder (`if/`)** — PULSUZ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -630,37 +650,37 @@ Mühit dəyişənlərinin tam siyahısı üçün [README](../README.md) faylına
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ay sabit qiymət və ya istifadəyə görə: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — aylıq $9 və ya istifadəyə görə: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API açarı: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Ultra-sürətli: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Ultra sürətli: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
 **xAI (`xai/`)** — Doğma Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Aİ-də yerləşdirilmiş: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Aİ-də yerləşdirilir: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Axtarışla gücləndirilmiş: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Axtarışla zənginləşdirilmiş: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Açıq mənbə: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (pulsuz), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — Açıq mənbəli: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (pulsuz), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — Sürətli inferens: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Wafer-miqyaslı: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Vafersəviyyəli: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — RAG-yönümlü: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Korporativ: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Müəssisələr üçün: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google-dan hər API açarı üzrə canlı sinxronlaşdırılır — statik siyahı yoxdur. **Panel → Provayderlər** bölməsində açar bağlayın, sonra cari kataloqu idxal etmək üçün **Mövcud Modellər** bölməsindən istifadə edin (məs. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: API açarına əsasən Google-dan canlı şəkildə sinxronlaşdırılır — statik siyahı yoxdur. **Dashboard → Providers** bölməsində açarı qoşun, sonra cari kataloqu idxal etmək üçün **Available Models** seçimindən istifadə edin (məsələn, `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Digər uyğun provayderlər** (seçilmiş): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` vasitəsilə), `azure-ai`, `openrouter` (birbaşa ötürmə kataloqu), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Hər biri `providerRegistry.ts` faylında öz model siyahısını saxlayır və provayder `/models` endpoint-i təqdim etdikdə avtomatik sinxronlaşdırıla bilər.
+**Digər uyğun provayderlər** (seçilmiş): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` vasitəsilə), `azure-ai`, `openrouter` (kataloq ötürməsi), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Hər biri `providerRegistry.ts` faylında öz model siyahısını saxlayır və provayder `/models` son nöqtəsini təqdim etdikdə avtomatik sinxronlaşdırıla bilər.
 
-**Model ID-ləri haqqında qeyd:** OmniRoute provayderə xas ID-lərdən istifadə edir (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Bəzi ID-lərə nöqtəli versiyalar daxildir, çünki upstream API onları məhz bu formada gözləyir. Əgər model yuxarıda sadalanmayıbsa, mövcudluğu təsdiqləmək üçün `omniroute models --search <term>` əmrini icra edin və ya `GET /api/models/catalog` ünvanına sorğu göndərin.
+**Model identifikatorları haqqında qeyd:** OmniRoute provayderin doğma identifikatorlarından istifadə edir (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Bəzi identifikatorlarda nöqtəli versiyalar var, çünki yuxarı axın API-si onları bu formatda gözləyir. Model yuxarıda siyahıda yoxdursa, mövcudluğu təsdiqləmək üçün `omniroute models --search <term>` əmrini icra edin və ya `GET /api/models/catalog` sorğusuna müraciət edin.
 
 </details>
 

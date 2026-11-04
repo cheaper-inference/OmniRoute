@@ -1621,7 +1621,7 @@ Mô hình kênh (`latest` = v3 cho đến khi có bản GA 4.0, `next` = rc, `ni
 
 ---
 
-## Phiên âm âm thanh
+## Chuyển đổi âm thanh thành văn bản
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1629,7 +1629,8 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Phiên âm các tệp âm thanh bằng bất kỳ nhà cung cấp STT nào đã được cấu hình. Phân đoạn đường dẫn đầu tiên chọn nhà cung cấp gốc (`openai/…`, `deepgram/…`). Các gateway tái xuất bản mô hình của nhà cung cấp khác sử dụng id đủ điều kiện (`openrouter/deepgram/nova-3`).
+Chuyển đổi các tệp âm thanh thành văn bản bằng bất kỳ nhà cung cấp STT nào đã được cấu hình. Phân đoạn đường dẫn đầu tiên sẽ chọn nhà cung cấp gốc (`openai/…`, `deepgram/…`). Các gateway tái xuất mô hình của nhà cung cấp khác sẽ sử dụng mã định danh đủ điều kiện
+(`openrouter/deepgram/nova-3`).
 
 **Yêu cầu:**
 
@@ -1651,12 +1652,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Ví dụ về id mô hình:** `openai/whisper-1` (yêu cầu khóa OpenAI),
+**Mã định danh mô hình mẫu:** `openai/whisper-1` (yêu cầu khóa OpenAI),
 `openrouter/deepgram/nova-3` (yêu cầu khóa OpenRouter),
-`deepgram/nova-3` (yêu cầu khóa Deepgram gốc). Một yêu cầu `deepgram/nova-3` không
-sử dụng OpenRouter.
+`deepgram/nova-3` (yêu cầu khóa Deepgram gốc). Một yêu cầu
+`deepgram/nova-3` đơn lẻ **không** sử dụng OpenRouter.
 
 **Các định dạng được hỗ trợ:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** chuyển đổi tệp thành văn bản ở chế độ tệp thông qua
+WebSocket Gemini Live (yêu cầu khóa API Gemini). Tệp tải lên được chuyển đổi thành PCM đơn kênh 16 kHz bằng `ffmpeg`
+(`ffmpeg` phải có trong `PATH`, trừ khi tệp đã là WAV PCM đơn kênh 16 kHz), được truyền đến phiên và
+văn bản đã hoàn tất được trả về dưới dạng `{ "text": "..." }`. Các trường biểu mẫu `language` và `prompt` tùy chọn
+sẽ được chuyển tiếp. Giới hạn: các tệp tải lên lớn hơn 25 MiB hoặc âm thanh đã giải mã dài hơn 10 phút sẽ trả về
+`413`; quá trình chuyển đổi chạy lâu hơn 60 giây sẽ bị dừng và trả về `504`. Khóa API chỉ được gửi
+trong tiêu đề `x-goog-api-key`, không bao giờ được đưa vào URL WebSocket.
 
 ---
 

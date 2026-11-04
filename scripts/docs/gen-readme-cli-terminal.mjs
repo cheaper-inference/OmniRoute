@@ -132,7 +132,7 @@ const SCREENS = [
 
 SCREENS[0].footer = `… ${PROVIDER_TOTAL - SCREENS[0].lines.length} more providers`;
 
-// Subcommand ticker: 32 top-level commands, the lime ones are the diagram's brand emphasis.
+// Subcommand ticker: 32 top-level commands, the accent ones are the diagram's brand emphasis.
 const TICKER = [
   ["providers", true],
   ["oauth"],
