@@ -17,7 +17,8 @@ process.env.API_KEY_SECRET = "synthetic-catalog-hidden-effort-18726";
 process.env.CATALOG_BUILD_TIMEOUT_MS = "120000";
 
 const { resetDbInstance } = await import("../../src/lib/db/core.ts");
-const { createProviderConnection } = await import("../../src/lib/db/providers.ts");
+const { createProviderConnection, createProviderNode } =
+  await import("../../src/lib/db/providers.ts");
 const { replaceSyncedAvailableModelsForConnection, setModelIsHidden } =
   await import("../../src/lib/db/models.ts");
 const { updateSettings } = await import("../../src/lib/db/settings.ts");
@@ -126,4 +127,67 @@ test("/v1/models honors a hidden effort variant and a denylisted variant glob", 
   );
   assert.ok(afterDeny.includes(`${prefix}/claude-opus-4-7`));
   assert.ok(afterDeny.includes(`${prefix}/claude-opus-4-7-high`));
+
+  // A variant inherits its base's allowlist match: allowlisting only the base
+  // must keep advertising the variants that are not hidden or denied.
+  await updateSettings({ modelVisibilityAllowlist: ["claude-opus-4-7"] });
+  const afterAllow = await catalogIds();
+  assert.ok(afterAllow.includes(`${prefix}/claude-opus-4-7`));
+  assert.ok(
+    afterAllow.includes(`${prefix}/claude-opus-4-7-high`),
+    "allowlisting the base must not drop its variants"
+  );
+  assert.equal(
+    afterAllow.some((id) => id.endsWith("/claude-opus-4-7-low")),
+    false,
+    "a hidden variant stays hidden under an allowlist"
+  );
+  await updateSettings({ modelVisibilityAllowlist: [], modelVisibilityDenylist: [] });
+});
+
+test("/v1/models checks a compatible node's effort variants under the node id", async () => {
+  const nodeId = "openai-compatible-chat-effort-variants-18726";
+  await createProviderNode({
+    id: nodeId,
+    type: "openai-compatible",
+    name: nodeId,
+    prefix: "effortnode",
+    baseUrl: "https://fixture.invalid/v1",
+  });
+  const connection = await createProviderConnection({
+    provider: nodeId,
+    authType: "apikey",
+    name: nodeId,
+    apiKey: "sk-catalog-fixture",
+    isActive: true,
+    testStatus: "active",
+    providerSpecificData: { baseUrl: "https://fixture.invalid/v1" },
+  });
+  await replaceSyncedAvailableModelsForConnection(nodeId, String(connection.id), [
+    {
+      id: "my-model",
+      name: "Node model",
+      source: "imported",
+      supportedEndpoints: ["chat"],
+      supportedThinkingEfforts: ["low", "medium", "high"],
+    },
+  ]);
+
+  const before = await catalogIds();
+  for (const tier of ["low", "medium", "high"]) {
+    assert.ok(
+      before.includes(`effortnode/my-model-${tier}`),
+      `baseline must advertise effortnode/my-model-${tier}; do not skip this assertion`
+    );
+  }
+
+  // The dashboard keys the hidden row by the node id, not the public prefix.
+  setModelIsHidden(nodeId, "my-model-high", true);
+  await updateSettings({ modelVisibilityDenylist: [`${nodeId}/my-model-low`] });
+  const after = await catalogIds();
+  assert.equal(after.includes("effortnode/my-model-high"), false, "node-id hidden row applies");
+  assert.equal(after.includes("effortnode/my-model-low"), false, "node-id deny entry applies");
+  assert.ok(after.includes("effortnode/my-model"));
+  assert.ok(after.includes("effortnode/my-model-medium"));
+  await updateSettings({ modelVisibilityDenylist: [] });
 });

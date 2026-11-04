@@ -899,15 +899,25 @@ async function buildUnifiedModelsResponseCore(
     // (or matched by the exposure denylist) is re-checked by its own id. A
     // compatible-node prefix maps back to the node id the hidden row is keyed by.
     // A `no-think/` alias of a hidden variant is checked by the real model id.
+    // Only the denylist applies here: a variant inherits its base's allowlist
+    // match, so allowlisting a base keeps advertising its variants. A deny entry
+    // under the public prefix, the canonical id or the node id hides the variant.
+    const variantDenylistOnly = { modelVisibilityDenylist: settings.modelVisibilityDenylist };
+    const isSyntheticVariantDenied = (providerKeys: string[], modelId: string): boolean =>
+      providerKeys.some((key) => !isModelExposureAllowed(key, modelId, variantDenylistOnly));
     const isSyntheticVariantHidden = (model: Record<string, any>): boolean => {
       const id = typeof model.id === "string" ? stripNoThinkingAlias(model.id) : "";
       const slash = id.indexOf("/");
       if (slash <= 0 || slash === id.length - 1) return false;
       const providerKey = id.slice(0, slash);
       const modelId = id.slice(slash + 1);
+      const nodeId = providerNodeIdByPrefix[providerKey];
+      const providerKeys = [providerKey, aliasToProviderId[providerKey], nodeId].filter(
+        (key): key is string => Boolean(key)
+      );
       return (
-        isModelHiddenBulk(providerNodeIdByPrefix[providerKey] || providerKey, modelId) ||
-        shouldHideByExposure(providerKey, modelId)
+        isModelHiddenBulk(nodeId || providerKey, modelId) ||
+        isSyntheticVariantDenied(providerKeys, modelId)
       );
     };
     const postFilterContext = {
