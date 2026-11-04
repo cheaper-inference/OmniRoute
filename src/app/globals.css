@@ -171,6 +171,17 @@ html:root[data-ci-appearance="editions"] {
   --color-primary-ink: var(--ci-color-accent-active);
 }
 
+/* Warning text. The kit's light Editions warning #99631f reads only ≈ 4.1:1 on its own
+   --ci-color-warning-bg and ≈ 4.5:1 on the canvas, short of AA for small badge/button text, so
+   light Editions uses the same hue darkened (≈ 4.7:1 on the tinted background). Classic and both
+   dark palettes keep the kit value. Upstream fix requested; drop this when the kit ships it. */
+:root {
+  --color-warning-ink: var(--ci-color-warning);
+}
+html:root[data-ci-appearance="editions"]:not([data-theme="dark"]) {
+  --color-warning-ink: #8c5a1b;
+}
+
 /* Dark: the kit flips every --ci-* value on `data-theme="dark"` (themeStore sets it with the
    class). Only what the kit does not own stays here. */
 .dark {
@@ -189,6 +200,8 @@ html:root[data-ci-appearance="editions"] {
   --text-color-primary: var(--color-primary-ink);
   /* --color-accent is the same kit accent (var(--ci-color-accent)), so text-accent gets the ink. */
   --text-color-accent: var(--color-primary-ink);
+  /* text-warning gets the readable warning ink; bg-/border-warning keep the kit colour. */
+  --text-color-warning: var(--color-warning-ink);
 
   /* Accent */
   --color-accent: var(--color-accent);
@@ -856,7 +869,7 @@ html[dir="rtl"] :where(.react-flow) {
 @layer components {
   /* Button variant="warning" (spec §3.6): kit has no warning button; outline + warning ink. */
   .ci-button--warning {
-    color: var(--ci-color-warning);
+    color: var(--color-warning-ink);
     border-color: var(--ci-color-warning);
     background: var(--ci-color-warning-bg);
   }
@@ -871,7 +884,7 @@ html[dir="rtl"] :where(.react-flow) {
     border-color: transparent;
   }
   .ci-badge[data-tone="warning"] {
-    color: var(--ci-color-warning);
+    color: var(--color-warning-ink);
     background: var(--ci-color-warning-bg);
     border-color: transparent;
   }
