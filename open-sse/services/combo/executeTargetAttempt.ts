@@ -65,7 +65,6 @@ import {
   isLocalQueueCapacityErrorBody,
   toRecordedTarget,
   resolveDelayMs,
-  COMBO_LOOP_SAFETY_TIMEOUT_MS,
   isModelScoped400,
   isContextOverflowFailure,
   requestScopedReplayKey,
@@ -94,10 +93,7 @@ import {
 } from "./quotaExhaustion.ts";
 import { markAccountExhaustedFromCredits } from "../../../src/domain/quotaCache.ts";
 import { classifyComboOutcome, redactConnectionLabel } from "./comboErrorAggregation.ts";
-import { waitForCooldownAwareRetry } from "../../../src/sse/services/cooldownAwareRetry.ts";
-import { resolvePersistedRetryCooldown } from "./persistedConnectionCooldown.ts";
-import { COMBO_COOLDOWN_WAIT_MARGIN_MS, shouldWaitForComboCooldown } from "./comboCooldownRetry.ts";
-import { readConnectionForCooldownGate } from "./executeTargetGates.ts";
+import { resolveRetryCooldownWait, waitForAuthorizedRetry } from "./authorizedRetryWait.ts";
 import { recordLkgpPin } from "./recordLkgpPin.ts";
 import {
   handlePreContentStreamRetry,
@@ -152,14 +148,7 @@ export async function executeTargetAttempt(
     });
 
   const targetSignal = state.abortControllers.get(i)?.signal;
-  const waitSettings = deps.resilienceSettings.comboCooldownWait;
-  const cooldownWait = deps.retryCooldownWait ?? {
-    attempt: { current: 0 },
-    budgetLeftMs: { current: waitSettings?.budgetMs ?? 0 },
-    deadline:
-      deps.startTime +
-      (resolveDelayMs(deps.config.comboTimeoutMs, 0) || COMBO_LOOP_SAFETY_TIMEOUT_MS),
-  };
+  const cooldownWait = resolveRetryCooldownWait(deps);
   const familyTried = new Set<string>();
   // #16438 opt-in (EMPTY_STREAM_SIBLING_RECOVERY_ENABLED): an empty_content turn spends
   // this loop's existing retry on a sibling connection with no lockout. Off = release path.
@@ -220,69 +209,19 @@ export async function executeTargetAttempt(
         "COMBO",
         `Retrying ${modelStr} in ${retryDelayMs}ms (attempt ${retry + 1}/${deps.maxRetries + 1})`
       );
-      const deadlineController = new AbortController();
-      const retrySignal = AbortSignal.any(
-        [deps.signal, targetSignal, deadlineController.signal].filter(
-          (signal): signal is AbortSignal => Boolean(signal)
-        )
-      );
-      const expire = () => {
-        state.comboExpired = true;
-        deadlineController.abort();
-      };
-      const timeLeftMs = cooldownWait.deadline - Date.now();
-      const deadlineTimer = setTimeout(expire, Math.max(0, timeLeftMs));
-      if (timeLeftMs <= 0) expire();
-      let persistedCooldownWaited = false;
-      try {
-        if (!(await waitForCooldownAwareRetry(retryDelayMs, retrySignal))) {
-          return deps.signal?.aborted
-            ? { ok: false, response: errorResponse(499, "Client disconnected") }
-            : null;
-        }
-        // A concurrent request can extend or reclassify the row while this retry waits.
-        for (;;) {
-          const persisted = await resolvePersistedRetryCooldown(
-            target,
-            (id) => readConnectionForCooldownGate(id, true),
-            persistedCooldownWaited,
-            allowRateLimitedConnection
-          );
-          if (Date.now() >= cooldownWait.deadline) expire();
-          if (retrySignal.aborted || state.comboExpired) {
-            return deps.signal?.aborted
-              ? { ok: false, response: errorResponse(499, "Client disconnected") }
-              : null;
-          }
-          if (!persisted.skipReason) break;
-          const decision =
-            waitSettings &&
-            shouldWaitForComboCooldown({
-              reason: persisted.cooldown?.reason,
-              waitMs: persisted.cooldown
-                ? persisted.cooldown.untilMs - Date.now() + COMBO_COOLDOWN_WAIT_MARGIN_MS
-                : 0,
-              attempt: cooldownWait.attempt.current,
-              budgetLeftMs: cooldownWait.budgetLeftMs.current,
-              settings: waitSettings,
-            });
-          if (!decision?.wait) {
-            deps.log.info("COMBO", persisted.skipReason);
-            state.fallbackCount++;
-            return null;
-          }
-          persistedCooldownWaited = true;
-          cooldownWait.attempt.current++;
-          cooldownWait.budgetLeftMs.current -= decision.waitMs;
-          if (!(await waitForCooldownAwareRetry(decision.waitMs, retrySignal))) {
-            return deps.signal?.aborted
-              ? { ok: false, response: errorResponse(499, "Client disconnected") }
-              : null;
-          }
-        }
-      } finally {
-        clearTimeout(deadlineTimer);
+      const outcome = await waitForAuthorizedRetry({
+        state,
+        deps,
+        target,
+        targetSignal,
+        retryDelayMs,
+        cooldownWait,
+        allowRateLimitedConnection,
+      });
+      if (outcome === "client_disconnected") {
+        return { ok: false, response: errorResponse(499, "Client disconnected") };
       }
+      if (outcome === "stop") return null;
     }
 
     deps.log.info(
