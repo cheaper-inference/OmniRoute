@@ -17,10 +17,7 @@ import {
   type ExecuteInput,
   type ProviderCredentials,
 } from "./base.ts";
-import {
-  CODEX_CHAT_DEFAULT_INSTRUCTIONS,
-  CODEX_DEFAULT_INSTRUCTIONS,
-} from "../config/codexInstructions.ts";
+import { CODEX_CHAT_DEFAULT_INSTRUCTIONS } from "../config/codexInstructions.ts";
 import { FETCH_BODY_TIMEOUT_MS, HTTP_STATUS, PROVIDERS } from "../config/constants.ts";
 import { readCodexPeekChunk, buildCodexTimeoutSafePassthroughBody } from "./codex/bodyTimeout.ts";
 import { stripCodexPassthroughRejectedParams } from "./codex/stripPassthroughRejectedParams.ts";
@@ -36,6 +33,7 @@ import {
   applyCodexClientMetadata,
   applyCodexOriginalIdentityHeaders,
   type CodexClientIdentity,
+  getCodexClientSessionId,
   resolveCodexThreadScopedPromptCacheKey,
   withCodexFingerprintCredentials,
 } from "../config/codexIdentity.ts";
@@ -75,7 +73,10 @@ import {
   isCodexCompactionWebReplay,
 } from "./codex/compactionReplay.ts";
 import { CODEX_ULTRA_ALIAS_MODELS, splitCodexReasoningSuffix } from "./codex/reasoningSuffix.ts";
-import { applyCodexReasoningSelection } from "./codex/reasoningPolicy.ts";
+import {
+  applyCodexReasoningSelection,
+  normalizeCodexSummaryStreamOptions,
+} from "./codex/reasoningPolicy.ts";
 import { repairMissingCodexToolCallOutputs } from "./codex/toolCallRepair.ts";
 import { recoverCodexReasoningReplayRejection } from "./codex/reasoningReplayRejection.ts";
 import { resolveAppServerConfig } from "./codex/appServerConfig.ts";
@@ -963,7 +964,17 @@ export class CodexExecutor extends BaseExecutor {
     }
 
     const url = CODEX_RESPONSES_WS_URL;
-    const headers = normalizeCodexWsHeaders(this.buildHeaders(nextInput.credentials, true));
+    // Same identity inputs as the HTTP path (base.ts): the client's session headers and body.
+    const headers = normalizeCodexWsHeaders(
+      this.buildHeaders(
+        nextInput.credentials,
+        true,
+        nextInput.clientHeaders,
+        nextInput.model,
+        undefined,
+        nextInput.body
+      )
+    );
     mergeUpstreamExtraHeaders(headers, nextInput.upstreamExtraHeaders);
 
     const transformedBody = (await this.transformRequest(
@@ -1196,7 +1207,8 @@ export class CodexExecutor extends BaseExecutor {
     stream = true,
     clientHeaders?: Record<string, string> | null,
     model?: string,
-    health?: Record<string, KeyHealth>
+    health?: Record<string, KeyHealth>,
+    body?: unknown
   ) {
     const isCompactRequest = isCompactResponsesEndpoint(credentials?.requestEndpointPath);
     const headers = super.buildHeaders(
@@ -1231,12 +1243,13 @@ export class CodexExecutor extends BaseExecutor {
     // Ref: openai/codex login/src/auth/default_client.rs DEFAULT_ORIGINATOR = "codex_cli_rs"
     headers["originator"] = CODEX_CLI_RS_ORIGINATOR;
 
-    // session_id header — enables prompt cache affinity on the Codex backend.
-    // The official Codex client sets this to conversation_id (a stable UUID per session).
-    // Ref: openai/codex codex-api/src/requests/headers.rs build_conversation_headers()
-    const cacheSessionId = this.getPromptCacheSessionId(credentials, null);
-    if (cacheSessionId) {
-      headers["session_id"] = cacheSessionId;
+    // session_id header — the CLIENT's own session (the official Codex client sends its
+    // conversation_id). Never the account-wide workspaceId: that presented every
+    // conversation on an account to the backend as one session. Converged identity below
+    // still owns this header when fingerprint convergence is enabled.
+    const requestSessionId = this.getClientRequestSessionId(credentials, clientHeaders, body);
+    if (requestSessionId) {
+      headers["session_id"] = requestSessionId;
     }
     applyCodexOriginalIdentityHeaders(headers, originalIdentityHeaders);
     applyCodexClientIdentityHeaders(headers, clientIdentity);
@@ -1249,6 +1262,24 @@ export class CodexExecutor extends BaseExecutor {
     }
 
     return headers;
+  }
+
+  /**
+   * The session the client itself presented: a session header/alias first, then the
+   * outbound `prompt_cache_key` unless that is only the account-wide workspace fallback.
+   * Ref: openai/codex codex-api/src/requests/headers.rs build_conversation_headers()
+   */
+  private getClientRequestSessionId(
+    credentials: ProviderCredentials | null | undefined,
+    clientHeaders: Record<string, string> | null | undefined,
+    body: unknown
+  ): string | null {
+    const fromHeaders = getCodexClientSessionId(clientHeaders);
+    if (fromHeaders) return fromHeaders;
+    const record = body && typeof body === "object" ? (body as Record<string, unknown>) : null;
+    const cacheKey = normalizeCodexSessionId(record?.prompt_cache_key);
+    const workspace = normalizeCodexSessionId(credentials?.providerSpecificData?.workspaceId);
+    return cacheKey && cacheKey !== workspace ? cacheKey : null;
   }
 
   /**
@@ -1350,6 +1381,7 @@ export class CodexExecutor extends BaseExecutor {
       delete body.include;
     } else {
       body.stream = true;
+      normalizeCodexSummaryStreamOptions(body);
     }
     delete body._nativeCodexPassthrough;
 
@@ -1425,29 +1457,19 @@ export class CodexExecutor extends BaseExecutor {
     // Ref: PR #1346 (original fix for passthrough only)
     convertSystemToDeveloperRole(body);
 
-    if (nativeCodexPassthrough) {
-      // Passthrough: minimal placeholder instructions.
-      if (
-        !body.instructions ||
-        (typeof body.instructions === "string" && body.instructions.trim() === "")
-      ) {
-        body.instructions = "Follow the developer instructions in the conversation.";
-      }
-    } else {
-      // Translated: keep the full Codex tool instructions only for tool-capable
-      // requests. Bare chat requests still need a neutral instructions value
-      // because the Codex Responses backend rejects requests without it.
-      const hasTools = Array.isArray(body.tools) && body.tools.length > 0;
-      if (
-        !body.instructions ||
-        (typeof body.instructions === "string" && body.instructions.trim() === "")
-      ) {
-        if (hasTools) {
-          body.instructions = CODEX_DEFAULT_INSTRUCTIONS;
-        } else {
-          body.instructions = CODEX_CHAT_DEFAULT_INSTRUCTIONS;
-        }
-      }
+    // Passthrough forwards the client's own `instructions` (or their absence): native Codex
+    // 0.166+ sends none and the backend accepts that, so injecting a placeholder made
+    // OmniRoute's wire differ from the same client talking to Codex directly.
+    // Translated clients (OpenCode, SDKs) are not Codex CLI: never give them the Codex CLI
+    // persona (whose approval/sandbox rules tell the model to work around constraints). The
+    // backend still requires a value for translated requests, so a neutral one is used only
+    // when the client sent none; the client's own system prompt stays in `input`.
+    if (
+      !nativeCodexPassthrough &&
+      (!body.instructions ||
+        (typeof body.instructions === "string" && body.instructions.trim() === ""))
+    ) {
+      body.instructions = CODEX_CHAT_DEFAULT_INSTRUCTIONS;
     }
 
     // Store: regular Codex Responses rejects store=true with
@@ -1496,7 +1518,9 @@ export class CodexExecutor extends BaseExecutor {
       allowConnectionReasoningDefaults,
       getForcedReasoningEffort(credentials)
     );
-    ensureCodexReasoningSummary(body, skipReasoningSummaryDefaults);
+    // Native passthrough keeps the client's reasoning object as sent (a summary it did not
+    // ask for is a rewrite); translated clients get summaries unless #18124 opted them out.
+    if (!nativeCodexPassthrough) ensureCodexReasoningSummary(body, skipReasoningSummaryDefaults);
     if (isCompactRequest) {
       delete body.include;
     }
@@ -1583,6 +1607,7 @@ export class CodexExecutor extends BaseExecutor {
       "tools",
       "tool_choice",
       "stream",
+      "stream_options",
       "store",
       "reasoning",
       "service_tier",

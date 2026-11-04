@@ -16,7 +16,7 @@ const block = (selector: string) => {
 test("globals.css loads the vendored kit CSS right after Tailwind, and the kit self-hosts its font", () => {
   const order = [
     '@import "tailwindcss" source(none);',
-    '@import "../../packages/ui-kit/src/ci-ui.css";',
+    '@import "../../packages/ui-kit/src/ci-styles.css";',
   ].map((needle) => css.indexOf(needle));
   assert.ok(
     order.every((i) => i >= 0),
@@ -30,9 +30,10 @@ test("globals.css loads the vendored kit CSS right after Tailwind, and the kit s
   // Since kit 0.0.66 the UI and display roles are Switzer, declared by the kit itself:
   // ci-ui.css → ci-tokens.css → ci-fonts.css → local woff2 files. Instrument Serif and IBM Plex
   // Mono are gone; Inter comes back ONLY as the per-script fallback after Switzer (Switzer has no
-  // Cyrillic / Greek / Vietnamese glyphs), never as a primary face.
+  // Cyrillic / Greek / Vietnamese glyphs), never as a primary face. Vazirmatn is the Arabic-script
+  // fallback, named only under html[dir="rtl"] (tests/unit/rtl-font-stack.test.ts).
   const fontsourceImports = [...css.matchAll(/@import "@fontsource\/([^/"]+)\//g)].map((m) => m[1]);
-  assert.deepEqual([...new Set(fontsourceImports)], ["inter"]);
+  assert.deepEqual([...new Set(fontsourceImports)], ["inter", "vazirmatn"]);
   assert.doesNotMatch(css, /--font-(sans|display):\s*"Inter"/);
   assert.doesNotMatch(css, /fonts\.googleapis\.com/);
   const tokens = read("packages/ui-kit/src/ci-tokens.css");
@@ -432,6 +433,65 @@ test("text-primary resolves to a readable primary ink; lime stays on bg/border/r
 
   // The inline ::selection rule colours TEXT, so it reads the ink too.
   assert.match(css, /::selection \{[^}]*\n\s*color: var\(--color-primary-ink\);/);
+});
+
+test("Editions (default palette): text-primary reads the kit's accent-active, AA in light and dark", () => {
+  // The Classic ink (lime-800 / lime) would be wrong on the copper palette, so Editions bridges
+  // --color-primary-ink to --ci-color-accent-active, which ci-editions.css flips per theme.
+  const editionsRoot = block('html:root[data-ci-appearance="editions"] {');
+  assert.match(editionsRoot, /--color-primary-ink:\s*var\(--ci-color-accent-active\);/);
+  assert.doesNotMatch(editionsRoot, /#[0-9a-fA-F]{3,6}\b/, "the Editions bridge carries no hex");
+  // It must outrank the Classic dark rule (:root[data-theme="dark"], specificity 0,2,0).
+  assert.ok(
+    css.indexOf('html:root[data-ci-appearance="editions"] {') >
+      css.indexOf(':root[data-theme="dark"] {'),
+    "the Editions ink comes after the Classic dark ink"
+  );
+
+  const editions = read("packages/ui-kit/src/ci-editions.css").replace(/\/\*[\s\S]*?\*\//g, "");
+  const blockOf = (startsWith: string) => {
+    const start = editions.indexOf(startsWith);
+    assert.ok(start >= 0, `ci-editions.css has the block ${startsWith}`);
+    const body = editions.slice(editions.indexOf("{", start) + 1, editions.indexOf("}", start));
+    return new Map([...body.matchAll(/(--[\w-]+):\s*([^;]+);/g)].map((m) => [m[1], m[2].trim()]));
+  };
+  const light = blockOf(':is(html:root:has([data-ci-appearance="editions"])');
+  const dark = blockOf(':is(html:root[data-theme="dark"]:has([data-ci-appearance="editions"])');
+  const lookup = (token: string, scopes: Map<string, string>[]) => {
+    const value = scopes.map((scope) => scope.get(token)).find((v) => v !== undefined);
+    assert.ok(value, `${token} is declared in ci-editions.css`);
+    assert.match(value, /^#[0-9a-f]{6}$/i, `${token} is a literal hex in ci-editions.css`);
+    return value;
+  };
+  const luminance = (hex: string) => {
+    const [r, g, b] = [1, 3, 5]
+      .map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+      .map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const contrast = (a: string, b: string) => {
+    const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+    return (hi + 0.05) / (lo + 0.05);
+  };
+  for (const [name, scopes] of [
+    ["light", [light]],
+    ["dark", [dark, light]],
+  ] as const) {
+    const ink = lookup("--ci-color-accent-active", [...scopes]);
+    for (const surface of ["--ci-color-background", "--ci-color-surface"]) {
+      const ratio = contrast(ink, lookup(surface, [...scopes]));
+      assert.ok(ratio >= 4.5, `${name} ink ${ink} on ${surface}: ${ratio.toFixed(2)}:1`);
+    }
+    // Sanity: the copper accent itself is unreadable as text on light — the reason for the ink.
+    if (name === "light") {
+      const accent = lookup("--ci-color-accent", [...scopes]);
+      assert.ok(contrast(accent, lookup("--ci-color-background", [...scopes])) < 4.5);
+    }
+    // The accent surface still carries its own dark foreground at AA.
+    const fg = lookup("--ci-color-accent-foreground", [...scopes]);
+    const accent = lookup("--ci-color-accent", [...scopes]);
+    assert.ok(contrast(fg, accent) >= 4.5, `${name} accent foreground on the accent`);
+  }
 });
 
 test("token aliases with no consumer are gone (KEA-7886 F4)", () => {

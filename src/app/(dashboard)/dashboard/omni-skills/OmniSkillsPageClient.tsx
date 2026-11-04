@@ -15,6 +15,7 @@ import { OmniExecutionsTab } from "./components/OmniExecutionsTab";
 import { OmniSandboxTab } from "./components/OmniSandboxTab";
 import { OmniMarketplaceTab } from "./components/OmniMarketplaceTab";
 import type { OmniSkill } from "./components/OmniSkillCard";
+import type { JSX } from "react";
 
 interface Execution {
   id: string;

@@ -1,0 +1,1 @@
+- fix(sse): a combo can opt out of the cooldown wait with `config.comboCooldownWaitEnabled: false`, so it fails fast instead of waiting out a model lock; the global `comboCooldownWait` setting still has to be enabled for any combo to wait. (#18708)

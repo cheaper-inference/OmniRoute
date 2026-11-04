@@ -19,7 +19,7 @@ import { applyNodePrefix, resolveProviderDisplay } from "./callLogDisplay";
 export { applyNodePrefix, resolveProviderDisplay } from "./callLogDisplay";
 import { dashboardDetailIo, resolveCallLogDetail } from "./callLogDetailResolver";
 import { shouldPersistToDisk } from "./migrations";
-import { updateRequestTokensById } from "./usageHistory";
+import { markRequestPersistedById, updateRequestTokensById } from "./usageHistory";
 import { getCallLogApiKeyContext } from "./callLogApiKeyContext";
 import { serializeResilienceActions, resetResilienceActions } from "./resilienceActionsContext";
 import { parseResilienceActions } from "./resilienceActionsParse";
@@ -485,6 +485,11 @@ async function saveCallLogOperation(entry: any): Promise<void> {
     }
   }
   if (!inserted) return;
+  markRequestPersistedById(
+    entry.pendingRequestId,
+    entry.pendingRequestGeneration,
+    String(prepared.logEntry.id)
+  );
   try {
     await publishCallLogDetail(prepared);
   } catch (error) {
@@ -716,6 +721,14 @@ async function buildCallLogRow(entry: any): Promise<PreparedCallLogRow> {
         ? entry.addedWaitMs
         : null,
     addedWaitCause: toStringOrNull(entry.addedWaitCause),
+    // Ms this execution waited from start to the first upstream dispatch
+    // (migration 224). Null when nothing was dispatched (rejected before egress).
+    queueWaitMs:
+      typeof entry.queueWaitMs === "number" &&
+      Number.isFinite(entry.queueWaitMs) &&
+      entry.queueWaitMs >= 0
+        ? entry.queueWaitMs
+        : null,
     modelPinned: entry.modelPinned ? 1 : 0,
     sessionTag: entry.sessionTag || null,
     // The client's own session id (call_logs.client_session_id, migration 214); NULL for
@@ -810,7 +823,7 @@ function insertCallLogRow(prepared: PreparedCallLogRow): void {
         has_request_body, has_response_body, has_pipeline_details, request_summary,
         correlation_id, model_pinned, session_tag, client_session_id, response_id, error_type,
         video_content_removed, has_content, usage_provenance,
-        added_wait_ms, added_wait_cause${resilienceCol}
+        added_wait_ms, added_wait_cause, queue_wait_ms${resilienceCol}
       )
       VALUES (
         @id, @timestamp, @method, @path, @status, @model, @requestedModel, @provider,
@@ -827,7 +840,7 @@ function insertCallLogRow(prepared: PreparedCallLogRow): void {
         @hasRequestBody, @hasResponseBody, @hasPipelineDetails, @requestSummary,
         @correlationId, @modelPinned, @sessionTag, @clientSessionId, @responseId, @errorType,
         @videoContentRemoved, @hasContent, @usageProvenance,
-        @addedWaitMs, @addedWaitCause${resilienceParam}
+        @addedWaitMs, @addedWaitCause, @queueWaitMs${resilienceParam}
       )
     `
   );

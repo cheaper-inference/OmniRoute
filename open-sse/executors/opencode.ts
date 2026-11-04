@@ -280,6 +280,15 @@ function normalizeResponsesToolEntry(t: unknown): Record<string, unknown> | null
   return toolObj;
 }
 
+/** Whether a Responses-API reasoning item carries plaintext in `content` or `summary`. */
+function hasReplayableReasoningText(item: Record<string, unknown>): boolean {
+  return [item.content, item.summary].some(
+    (parts) =>
+      Array.isArray(parts) &&
+      parts.some((part) => isPlainRecord(part) && typeof part.text === "string" && part.text !== "")
+  );
+}
+
 /**
  * Whether a Responses-API `input` item should be kept, normalizing
  * function_call/function_call_output entries in place as a side effect.
@@ -287,9 +296,11 @@ function normalizeResponsesToolEntry(t: unknown): Record<string, unknown> | null
 function shouldKeepResponsesInputItem(item: unknown): boolean {
   if (!item || typeof item !== "object" || Array.isArray(item)) return true;
   const rec = item as Record<string, unknown>;
-  if (rec.type === "reasoning") return false;
   delete rec.encrypted_content;
   delete rec.reasoning_encrypted_content;
+  // An opaque reasoning item means nothing to this upstream, but one with readable text is the
+  // replayed thinking DeepSeek rejects a turn without (#13031).
+  if (rec.type === "reasoning") return hasReplayableReasoningText(rec);
   if (rec.type === "function_call") {
     if (!rec.name || typeof rec.name !== "string" || (rec.name as string).trim() === "")
       return false;
@@ -1681,9 +1692,9 @@ export class OpencodeExecutor extends BaseExecutor {
 
     const prompt =
       "You must respond with valid JSON that strictly follows " +
-      "this JSON schema:\\n```json\\n" +
+      "this JSON schema:\n```json\n" +
       schemaJson +
-      "\\n```\\nRespond ONLY with the JSON object, no other text and no markdown code fences.";
+      "\n```\nRespond ONLY with the JSON object, no other text and no markdown code fences.";
 
     const messages: Array<Record<string, unknown>> = Array.isArray(record.messages)
       ? (record.messages as Array<Record<string, unknown>>).map((message) => ({ ...message }))
@@ -1693,12 +1704,9 @@ export class OpencodeExecutor extends BaseExecutor {
 
     if (systemMessage) {
       if (typeof systemMessage.content === "string") {
-        systemMessage.content = `${systemMessage.content}\\n\\n${prompt}`;
+        systemMessage.content = `${systemMessage.content}\n\n${prompt}`;
       } else if (Array.isArray(systemMessage.content)) {
-        systemMessage.content = [
-          ...systemMessage.content,
-          { type: "text", text: `\\n\\n${prompt}` },
-        ];
+        systemMessage.content = [...systemMessage.content, { type: "text", text: `\n\n${prompt}` }];
       }
     } else {
       messages.unshift({

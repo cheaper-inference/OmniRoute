@@ -22,6 +22,11 @@ import { getModelsByProviderId } from "@omniroute/open-sse/config/providerModels
 import { getRegistryEntry } from "@omniroute/open-sse/config/providerRegistry.ts";
 import { getProviderById, getProviderByAlias } from "@/shared/constants/providers";
 import { getCachedProviderNodes } from "@/lib/db/readCache";
+import {
+  isProviderNodePrefixReserved,
+  selectCompatibleNodeForPrefix,
+  type CompatibleNodeLike,
+} from "@/lib/providerNodePrefixes";
 import { getComboByName } from "@/lib/db/combos";
 import { createBuiltinAutoCombo } from "@omniroute/open-sse/services/autoCombo/builtinCatalog.ts";
 import {
@@ -48,6 +53,12 @@ export interface CcDiscoveryResolveDeps {
   isRegistryProvider(prefix: string): boolean;
   /** Prefixes of operator-defined compatible provider nodes (DB) — Gap 1. */
   customProviderPrefixes: Set<string>;
+  /**
+   * #18517: compatible-node prefix -> node id. The dashboard toggle saves its setting under the
+   * node id while request ids carry the prefix, so the gate checks both. A Map because the prefix
+   * comes from the client's model string, and a plain object would match `constructor`.
+   */
+  providerNodeIdsByPrefix?: ReadonlyMap<string, string>;
   /** Combo row by name (or null). Only called for `claude/combo/<name>` ids. */
   getCombo(name: string): Promise<{ models?: unknown[] } | null>;
   gateGlobal(): boolean;
@@ -85,17 +96,38 @@ function parseCcAliasTarget(rest: string): CcAliasTarget {
   };
 }
 
-/** Resolve the three-level gate (model > provider > global) for a parsed alias target. */
+/** First non-null setting across the candidate provider keys, in order. */
+function firstGateSetting(
+  providerKeys: string[],
+  lookup: (providerKey: string) => CcAliasSetting
+): CcAliasSetting {
+  for (const providerKey of providerKeys) {
+    const setting = lookup(providerKey);
+    if (setting !== null) return setting;
+  }
+  return null;
+}
+
+/**
+ * Resolve the three-level gate (model > provider > global) for a parsed alias target. Same key
+ * order as the catalog predicate (src/app/api/v1/models/ccAliasPredicate.ts): the public prefix
+ * first, then the node id. They must match or an alias could be listed yet not routed.
+ */
 function resolveGateFor(target: CcAliasTarget, deps: CcDiscoveryResolveDeps): boolean {
   const gateProviderId = target.isComboAlias
     ? CC_DISCOVERY_COMBO_PROVIDER_KEY
     : target.providerPrefix;
   if (!gateProviderId) return deps.gateGlobal();
 
+  const nodeId = target.isComboAlias
+    ? undefined
+    : deps.providerNodeIdsByPrefix?.get(gateProviderId);
+  const providerKeys =
+    nodeId && nodeId !== gateProviderId ? [gateProviderId, nodeId] : [gateProviderId];
   const modelKey = target.isComboAlias ? target.comboName : target.modelPart;
   return resolveCcAliasEnabled({
-    model: deps.gateModel(gateProviderId, modelKey as string),
-    provider: deps.gateProvider(gateProviderId),
+    model: firstGateSetting(providerKeys, (key) => deps.gateModel(key, modelKey as string)),
+    provider: firstGateSetting(providerKeys, deps.gateProvider),
     global: deps.gateGlobal(),
   });
 }
@@ -171,12 +203,19 @@ export async function resolveCcDiscoveryAliasStrip(
   // Operator-defined compatible provider nodes (OpenAI/Anthropic-compatible),
   // keyed by their `prefix` — the same source catalog.ts uses to mirror them.
   const customProviderPrefixes = new Set<string>();
+  const providerNodeIdsByPrefix = new Map<string, string>();
   try {
-    const nodes = (await getCachedProviderNodes()) as Array<{ prefix?: unknown }>;
+    const nodes = (await getCachedProviderNodes()) as CompatibleNodeLike[];
     for (const node of nodes) {
       if (typeof node?.prefix === "string" && node.prefix) {
         customProviderPrefixes.add(node.prefix);
       }
+    }
+    // The same winner rule catalog.ts uses, so both sides read the same node's toggle.
+    for (const prefix of customProviderPrefixes) {
+      if (isProviderNodePrefixReserved(prefix)) continue;
+      const winner = selectCompatibleNodeForPrefix(nodes, prefix);
+      if (winner?.id) providerNodeIdsByPrefix.set(prefix, winner.id);
     }
   } catch {
     // A node-fetch failure just means custom prefixes are unavailable this call;
@@ -189,6 +228,7 @@ export async function resolveCcDiscoveryAliasStrip(
     claudeModelIds,
     isRegistryProvider: (prefix) => isRoutableProviderPrefix(prefix),
     customProviderPrefixes,
+    providerNodeIdsByPrefix,
     getCombo: async (name) => {
       if (name.startsWith("auto/")) {
         try {

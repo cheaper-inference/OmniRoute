@@ -567,6 +567,21 @@ export function translateRequest(
                 }
               : credentials;
           result = toOpenAI(model, result, stream, step1Credentials);
+          // Responses creates messages after the initial role pass; normalize before
+          // Gemini targets consume the pivot and discard unsupported developer turns.
+          if (
+            sourceFormat === FORMATS.OPENAI_RESPONSES &&
+            (targetFormat === FORMATS.GEMINI || targetFormat === FORMATS.ANTIGRAVITY) &&
+            Array.isArray(result.messages)
+          ) {
+            result.messages = normalizeRoles(
+              result.messages,
+              provider || "",
+              model || "",
+              targetFormat,
+              preserveDeveloperRole
+            );
+          }
           // Log OpenAI intermediate format
           reqLogger?.logOpenAIRequest?.(result);
         }
@@ -622,6 +637,10 @@ export function translateRequest(
                           options.signatureNamespace,
                           model
                         ),
+                        // Raw connection id (chatCore threads the serving connection as
+                        // signatureNamespace): openai-to-claude binds the Claude signed-
+                        // thinking restore on it (#17324 — signatures are org-scoped).
+                        _connectionId: options.signatureNamespace,
                       }
                     : {}),
                   ...(hasPreCompression ? { _preCompressionBody: options.preCompressionBody } : {}),

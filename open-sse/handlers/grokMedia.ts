@@ -3,7 +3,7 @@ import { buildMultipartBody } from "../utils/audioMultipart.ts";
 import { audioStreamResponse } from "../utils/audioResponse.ts";
 import { CORS_HEADERS } from "../utils/cors.ts";
 import { errorResponse, sanitizeErrorMessage } from "../utils/error.ts";
-import { checkAndRefreshToken } from "@/sse/services/tokenRefresh";
+import { getRegisteredCredentialRefresher } from "../utils/registeredCredentialRefresher.ts";
 import { saveImageSuccessResult, saveImageErrorResult } from "./imageResult.ts";
 import { buildXaiImageRequest } from "./imageGeneration/providers/xaiImage.ts";
 
@@ -23,7 +23,8 @@ function requestError(message: string, status = 400): Error & { status: number }
 
 export async function getGrokMediaToken(credentials?: GrokCredentials | null): Promise<string> {
   if (!credentials?.accessToken) throw requestError("Grok OAuth access token is required", 401);
-  const refreshed = await checkAndRefreshToken("grok-cli", credentials);
+  const refresher = getRegisteredCredentialRefresher();
+  const refreshed = refresher ? await refresher("grok-cli", credentials) : credentials;
   const expiresAt = refreshed.expiresAt ? Date.parse(refreshed.expiresAt) : null;
   if (
     !refreshed.accessToken ||

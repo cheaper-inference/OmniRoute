@@ -25,6 +25,82 @@ curl -X POST http://localhost:20128/api/auth/login \
   -d '{"password":"<management-password>"}'
 ```
 
+### POST /api/auth/mfa/verify
+
+Complete a two-factor sign-in
+
+Login step 2 (public). Trades the MFA-pending cookie set by `/api/auth/login` plus a TOTP or recovery code for the dashboard session cookie. Shares the login brute-force lockout; a TOTP step and a recovery code are each accepted once.
+
+
+```bash
+CSRF_TOKEN=$(curl -s http://localhost:20128/api/auth/csrf -b cookie.jar | jq -r .token)
+curl -X POST http://localhost:20128/api/auth/mfa/verify \
+  -b cookie.jar \
+  -H "x-omniroute-csrf: $CSRF_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### GET /api/auth/mfa/status
+
+Two-factor authentication status
+
+```bash
+curl http://localhost:20128/api/auth/mfa/status \
+  -b cookie.jar
+```
+
+### POST /api/auth/mfa/setup
+
+Start two-factor enrollment
+
+Re-authenticates with the current password and returns a candidate TOTP secret, its `otpauth://` URI and a QR code (PNG data URI). Nothing is persisted.
+
+
+```bash
+CSRF_TOKEN=$(curl -s http://localhost:20128/api/auth/csrf -b cookie.jar | jq -r .token)
+curl -X POST http://localhost:20128/api/auth/mfa/setup \
+  -b cookie.jar \
+  -H "x-omniroute-csrf: $CSRF_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/auth/mfa/enable
+
+Finish two-factor enrollment
+
+Persists the secret (encrypted at rest) once the current password and a code generated from it both verify. Returns ten single-use recovery codes, shown once.
+
+
+```bash
+CSRF_TOKEN=$(curl -s http://localhost:20128/api/auth/csrf -b cookie.jar | jq -r .token)
+curl -X POST http://localhost:20128/api/auth/mfa/enable \
+  -b cookie.jar \
+  -H "x-omniroute-csrf: $CSRF_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/auth/mfa/disable
+
+Turn two-factor authentication off
+
+Requires the current password and a live TOTP or recovery code. While
+`OMNIROUTE_DISABLE_MFA=true` is set, a request from the host itself (loopback
+peer and loopback `Host`) may omit `code` to remove a factor that can no longer
+be verified; the session and password are still required.
+
+
+```bash
+CSRF_TOKEN=$(curl -s http://localhost:20128/api/auth/csrf -b cookie.jar | jq -r .token)
+curl -X POST http://localhost:20128/api/auth/mfa/disable \
+  -b cookie.jar \
+  -H "x-omniroute-csrf: $CSRF_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
 ### POST /api/auth/logout
 
 Log out
@@ -99,7 +175,7 @@ See the full OpenAPI specification at `GET /api/openapi/spec` or `docs/openapi.y
 
 # OmniRoute
 
-Local/remote AI gateway exposing OpenAI-compatible REST. One key, 377 providers,
+Local/remote AI gateway exposing OpenAI-compatible REST. One key, 380 providers,
 auto-fallback, RTK token saver, MCP server, A2A agents.
 
 ## Setup

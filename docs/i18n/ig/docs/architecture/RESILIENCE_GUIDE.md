@@ -4,11 +4,13 @@
 
 ---
 
-OmniRoute nwere usoro resilience atọ dị iche iche mana metụtara ibe ha. Nke ọ bụla nwere oke na ebumnuche dị iche. Jide ha iche iche mgbe ị na-edozi omume routing.
+OmniRoute nwere usoro nkwụghachi azụ atọ dị iche iche. Nke ọ bụla nwere oke na ebumnuche dị iche. Debe ha iche mgbe ị na-emezigharị omume ntụgharị.
 
-![Ihe nlereanya resilience nke ọkwa atọ](../diagrams/exported/resilience-3layers.svg)
+![3-layer resilience model](../diagrams/exported/resilience-3layers.svg)
 
 > Isi mmalite: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
+
+> **Env-vs-dashboard ụzọ maka mgbanwe ngbanwe.** Mwepu nnabata na-atụgharị mkpụrụ sitere na gburugburu — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — na-enye naanị _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Otu boolean nọgidere na `resilienceSettings` (Dashboard →** Ntọala → Resilience** / `PATCH /api/resilience`, echekwara na `key_value`) meriri uru env: normalization (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) na-edobe boolean echekwara mgbe ọ bụla ọ dị. Ịtọlite ụdị env var ka `true` na mbugharị ebe dashboard echekwara `false` ya mere ọ dịghị agbanwe ihe ọ bụla — tụgharịa ngbanwe ahụ.** Ntọala → Resilience** (ma ọ bụ kpochapụ ubi echekwara) kama.
 
 ## 1. Mgbochi Sekiti Provider
 
@@ -59,196 +61,122 @@ OmniRoute nwere usoro resilience atọ dị iche iche mana metụtara ibe ha. Nk
 
 N'okpuru ọkọlọtọ ahụ, **anaghị** agụ provider dị ka nke na-adị jụụ; ihe ịga nke ọma na-ehichapụ windo ahụ. Ntinye nke ogo njikọ (`provider:connectionId`) kama na-ejide backoff exponential nke `minRetryCooldownMs → maxRetryCooldownMs`. Ihe ndị na-anọchi anya: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Nchekwa regression: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
-## 2. Oge Nkwụsịtụ Njikọ
+## 2. Njikọ dị jụụ
 
-**Oke:** otu njikọ/akaụntụ/igodo nke otu onye na-enye.
+**Oke:** otu onye na-enye connection/account/key.
 
-**Ebumnuche:** gafere otu igodo na-adịghị mma ka njikọ ndị ọzọ nke otu onye na-enye ahụ na-aga n'ihu na-eje ozi.
+**Ebumnuche:** mafee otu igodo ọjọọ ebe njikọ ndị ọzọ maka otu onye na-eweta na-eje ozi.
 
-**Nhazi:**
+**Mmejuputa:**
 
-- Ika ka ọ dịghị: `src/sse/services/auth.ts::markAccountUnavailable()`
-- Nhọrọ: `getProviderCredentials*` n'otu faịlụ ahụ
-- Ịgbakọ oge nkwụsịtụ: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Mark adịghị: `src/sse/services/auth.ts::markAccountUnavailable()`
+- Nhọrọ: `getProviderCredentials*` n'otu faịlụ
+- Calc jụrụ oyi: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Ntọala: `src/lib/resilience/settings.ts`
 
-**Ogbe maka njikọ ọ bụla:**
+**Ubi kwa njikọ:**
 
-- `rateLimitedUntil` — akara oge ruo mgbe oge nkwụsịtụ ga-agwụ
+- `rateLimitedUntil` — timestamp ruo mgbe nju oyi ga-agwụ
 - `testStatus: "unavailable"`
 - `lastError`, `lastErrorType`, `errorCode`
-- `backoffLevel` — ọnụ ọgụgụ backoff exponential
+- `backoffLevel` — exponential backoff counter
 
-**Oge nkwụsịtụ ndabara:**
+**Ntugharị ndapụta:**
 
-- OAuth ndabara: 5s
-- API-key ndabara: 3s
-- API-key 429: na-ahọrọ ndị isi `Retry-After`/reset nke upstream ma ọ bụ ederede reset a pụrụ ịgụ
-- Backoff: `baseCooldownMs * 2 ** failureIndex`
+- ukwu OAuth : 5s
+- Isi igodo API: 3s
+- API-igodo 429: na-ahọrọ `Retry-After` elu / tọgharịa ederede nrụpụta headers/parseable
+- azụ: `baseCooldownMs * 2 ** failureIndex`
 
-**Nchekwa megide thundering-herd:** na-egbochi ọdịda ndị na-eme n'otu oge izu oke ịgbatị oge nkwụsịtụ karịrị ọ dị mkpa ma ọ bụ ịgbakwụnye `backoffLevel` ugboro abụọ.
+**Onye na-eweta ya nwaa oge igbu oge.** Ibe nkọwa nke ndị na-eweta nwere a** Gbalịa igbu oge** họrọ (Na akpaaka, 15s ruo 1h). Ọ na-echekwa `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1-21600, site na `PATCH /api/resilience`). Mgbe njehie oke oke na-ebughị ihe nleba anya nnwagharị mgbago elu, uru ahụ na-edochi azụ azụ agbatịgoro maka onye na-eweta ya wee tọgharịa `backoffLevel` na 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Ọdịmma maka njehie nwere oke oke, nke kachasị elu: mgbago mgbago mgbagharị ọzọ, emesia njikọ ọ bụla `providerSpecificData.rotationOverrides.rateLimitResetSeconds`, wee nwaa onye na-eweta ya nwughari oge, wee env `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, wee laghachi azụ azụ. Akpaaka na-ewepụ ogige ahụ. Ọ na-emetụta naanị oke-oke ihe kpatara ya, ọ dịghị mgbe ọ ga-akwụsị.
 
-**429 nke oke concurrency anaghị arịgo nzọụkwụ backoff.** Otu `429` nke ahụ ya na-akọ oke
-concurrency ("too many concurrent requests", "concurrency limit", "parallel request
-limit", GLM `并发数过高`) pụtara na akaụntụ ahụ dị mma ma na-arụsi ọrụ ike.
-`checkFallbackError()` na-enye ihe mere bụ `concurrency_limited`: gafee njikọ
-na-esote ozugbo, jụọ nke a oge `CONCURRENCY_LIMIT_COOLDOWN_MS` kwụsie ike (1s) ma ọ bụ
-ntụziaka retry nke upstream, debe `backoffLevel` ka ọ ghara ịgbanwe, debe `skipProviderBreaker`.
-Ahụ quota a kapịrị ọnụ ka na-emeri, ya mere ahụ nke kwekọrịta ụdị quota na-anọgide dị ka ikpe
-quota. Nchọpụta: `looksLikeConcurrencyLimit()` na `src/shared/utils/classify429.ts`;
-ikpe: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()`
-(`FailureKind` nke breaker) adịghị agbanwe ma ka na-agụ `rate_limit` maka ahụ ndị a.
+**Onye nche igwe mgbochi egbe:** na-egbochi ọdịda n'otu oge site n'ịgbatị oke oyi ma ọ bụ na-abawanye `backoffLevel` ugboro abụọ.
 
-**Nkwụsị ọdịnaya stream anaghị ejụ akaụntụ.** Mgbe nlekọta nkwụsị ọdịnaya
-(`open-sse/utils/streamHandler.ts`) kwụsịtụrụ stream nke ezighị mmepụta model ọ bụla
-n'oge, `markAccountUnavailable()` na-edekọ njehie ahụ na njikọ ahụ ma anaghị edobe
-oge nkwụsịtụ: nkwụsị ahụ bụ nke arịrị ahụ, nke ọtụtụ ugboro bụ otu ntụgharị reasoning
-ogologo nke na-enwebeghị mmepụta ọ bụla. Ndị na-arụ ọrụ nwere ike ịhọrọ ịlaghachi na ya site na
-`resilienceSettings.streamStallCooldown.enabled`
-(ndabara `false`).
+**Concurrency-oke 429 adịghị arịgoro n'ọkwa azụ azụ.** A `429` nke ahụ ya na-akọ oke concurrency ("ọtụtụ arịrịọ otu oge", "oke nkwekọrịta", "oke arịrịọ myirịta", GLM `并发数过高`) pụtara na akaụntụ ahụ dị mma mana ọ nọ n'ọrụ. `checkFallbackError()` na-eweghachite ihe kpatara `concurrency_limited`: daa na njikọ na-esote ugbu a, mee ka nke a dị jụụ maka `CONCURRENCY_LIMIT_COOLDOWN_MS` (1s) edoziri ma ọ bụ ihe mgbago mgbago ọzọ, mee ka `backoffLevel` gbanwee, wee tọọ `skipProviderBreaker`. Ahụ oke n'ụzọ doro anya ka na-emeri, yabụ ahụ nke dabara na ụkpụrụ oke na-anọ na mkpebi oke oke. Nchọpụta: `looksLikeConcurrencyLimit()` na `src/shared/utils/classify429.ts`; ikpe: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()` ( `FailureKind` onye na-agbaji) adịghị agbanwe agbanwe ma na-agụ `rate_limit` maka ahụ ndị a.
 
-**Ihe ngosi latency nke bụ opt-in maka nhọrọ akaụntụ `p2c`.** Nnwa ọ bụla e zipụrụ na-edekọ
-oge ọ ruru ruo byte mbụ na nsonaazụ ya maka njikọ ọ bụla (na maka njikọ + model) n'ime
-windo na-agagharị n'ime nchekwa: ihe nlere 20 ikpeazụ n'ime nkeji 15
-(`open-sse/services/connectionLatencyTracker.ts`, edekọtara site na `safeLogEvents()` na
-`src/sse/handlers/chatHelpers.ts`). Mgbe `resilienceSettings.p2cLatency.weight` karịrị `0`
-(oke 0-20, ndabara `0` = gbanyụrụ), `compareP2CConnections()` na `src/sse/services/auth.ts` na-agbakwụnye
-ruo ihe `weight` n'ọnụ ọgụgụ onye asọmpi ọ bụla n'ime abụọ ahụ. Ọkara nke ya sitere na latency dị ka
-nkesa metụtara onye asọmpi na-arụ ọrụ ngwa karịa ya (nke nwayọọ ugboro abụọ na-ewere ọkara ahụ
-niile) na ọkara sitere na ọnụego njehie na-agagharị.
-Okwu ahụ na-arụ ọrụ naanị mgbe ndị asọmpi abụọ ahụ nwere opekempe ihe nlere 3, ka e ghara ịta
-akaụntụ ọhụrụ ahụhụ, ma oke elu ya ka dị n'okpuru ntaramahụhụ quota-blocked na
-quota-exhausted. Ọ naghị etinye circuit nke ya: akaụntụ ndị na-adịda ka oyi nkwụsịtụ,
-igbachi na breaker na-elekọta. Hazie ya site na `PATCH /api/resilience`
-`{ "p2cLatency": { "weight": 10 } }`.
+**Ụlọ ahịa ọdịnaya iyi anaghị ajụ akaụntụ ahụ.** Mgbe onye na-ahụ maka nchekwa ọdịnaya (`open-sse/utils/streamHandler.ts`) na-ahapụ na iyi nke ezipụghị mmepụta ihe nlereanya n'oge, `markAccountUnavailable()` na-edekọ njehie na njikọ ahụ mana ọ naghị edozi ya: ụlọ ahịa ahụ bụ nke arịrịọ ahụ, ọtụtụ mgbe ogologo echiche na-atụgharị na-enweghị mmepụta ma. Ndị na-arụ ọrụ nwere ike jiri `resilienceSettings.streamStallCooldown.enabled` banye ( `false` ndabara).
 
-**Frame reasoning na-amaliteghachi ego nkwụsị ọdịnaya.** Model reasoning nwere ike iche echiche
-ruo nkeji ole na ole tupu token mbụ ya a hụrụ anya: Claude na-ezipụta frame `thinking_delta`
-nke ederede echiche ya nwere ike ịdị ohere, ma Responses API na-ezipụta otu ihe reasoning
-n'otu n'otu. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) na-amata
-frame ndị a, ma nlekọta ahụ na-amaliteghachi ego ya n'otu ọ bụla n'ime ha kama ịkagbu
-ntụgharị ahụ. Ha ka abụghị mmepụta model, ya mere ntụgharị nke gụsịrị naanị na reasoning
-ka a na-akọ dị ka ohere, ma ntụgharị nke kwụsịrị reasoning ma na-eziga naanị heartbeat
-ka na-akpali nlekọta ahụ.
+**Ịbanye mgbama latency maka nhọrọ akaụntụ `p2c`.** Mgbalị ọ bụla ezigara na-edekọ oge ya-na-nke mbụ-byte na nsonaazụ kwa njikọ (na kwa njikọ + nlereanya) na windo na-atụgharị ebe nchekwa: ihe nlele 20 ikpeazụ n'ime nkeji 15 (`open-sse/services/connectionLatencyTracker.ts`, dekọrọ site na `safeLogEvents()` na `src/sse/handlers/chatHelpers.ts`). Mgbe `resilienceSettings.p2cLatency.weight` dị n'elu `0` (nso 0-20, ndabara `0` = kwụsịrị), `compareP2CConnections()` na `src/sse/services/auth.ts` na-agbakwụnye ruo `weight` ntụaka nye onye ọ bụla n'ime ụzọ abụọ ahụ. Ọkara nke na-abịa site na latency dị ka oke na onye na-azọ ọkwa ngwa ngwa (okpukpu abụọ na-eji nwayọọ na-ewe ọkara zuru ezu) na ọkara site na ọnụego njehie ntụgharị. Okwu a na-emetụta naanị mgbe ndị na-eme ntuli aka abụọ nwere opekata mpe 3, ya mere, anaghị akwụ ụgwọ akaụntụ ọhụrụ, na uko ụlọ ya na-anọ n'okpuru ntaramahụhụ oke oke na oke ike gwụrụ. Ọ naghị agbakwunye sekit nke ya: a ka na-edozi akaụntụ ndị na-ada ada site na oyi oyi, mkpọchi na ọkwa nkwụsị. Tọọ ya na `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`.
 
-Frame binary `reasoningContentEvent` nke Kiro nwere mbinye aka na-adịghị ohere na-edebe
-ọrụ reasoning a site na executor dị ka delta `reasoning_content` ohere. Agaghị ezipụ
-mbinye aka ahụ. Metadata, frame ndị na-ezughị oke na mbinye aka ohere anaghị amaliteghachi
-ego ọdịnaya; oge oke stream na-arụ ọrụ nke onwe ya na ịkagbu onye ahịa ka na-arụ ọrụ
-(`open-sse/executors/kiro/reasoning.ts`).
+**Oghere echiche na-amalitegharị mmefu ego ụlọ ahịa ọdịnaya.** Ụdị ntụgharị uche nwere ike iche nkeji nkeji tupu akara ngosi mbụ a na-ahụ anya: Claude iyi `thinking_delta` okpokolo agba nke ederede echiche ha nwere ike ịbụ ihe efu, na nzaghachi API na-ebufe otu ihe na-atụgharị uche na nke ọzọ. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) na-amata okpokolo agba ndị a, onye nche na-amalitegharị mmefu ego ya na nke ọ bụla kama ịkagbu ntụgharị. Ha ka na-abụghị ihe nlereanya mmepụta, ya mere, ntụgharị nke na-agwụ na iche echiche naanị ka a na-akọ dị ka ihe efu, na ntụgharị na-akwụsị iche echiche na na-eziga naanị obi iti ka na-ejegharị na nche.
 
-**Ọnọdụ ikpeazụ (ABỤGHỊ oge nkwụsịtụ):**
+fremu `reasoningContentEvent` ọnụọgụ abụọ nke Kiro nwere mbinye aka na-adịghị efu na-echekwa ọrụ ntụgharị uche a site n'aka onye mmebe dịka `reasoning_content` delta efu. Ebugharịghị mbinye aka. Metadata, okpokolo agba ezughị ezu na mbinye aka efu anaghị amalitegharị mmefu ego ọdịnaya; Oge nkwụsị ọrụ nke nọọrọ onwe ya yana ịkagbu ndị ahịa ka na-adịkwa (`open-sse/executors/kiro/reasoning.ts`).
 
-- `banned` — nke nchọpụta okwu machibidoro / machibido akaụntụ na-edobe (lee [BAN_DETECTION](../security/BAN_DETECTION.md)), na site na mmeju atọ n'usoro nke upstream maka arịrị ọ bụla (`request_rejected`, dị ka Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); otu mmeju na-ejụ naanị njikọ ahụ
-- `expired` (na-agafe na ọnọdụ ikpeazụ mgbe nnwa nwere oke gafere — `EXPIRED_RETRY_MAX = 3` nwere backoff exponential — ka njehie OAuth nke oge obere nwee ike ịgwọ onwe ha tupu e kwụsịrị akaụntụ ahụ kpamkpam)
+**Steeti ọdụ (NOT cooldowns):**
+
+- `banned` — setịpụrụ site na nchọta isiokwu amachibidoro / amachibido iwu akaụntụ (lee [BAN_DETECTION](../security/BAN_DETECTION.md) ), yana site na mgbago elu atọ n'usoro ọjụjụ ọ bụla (`request_rejected`, dịka Anthropic OAuth 403 "Achọghị arịrịọ" — `open-sse/services/requestRejectedStreak.ts`); otu ọjụjụ na-eme ka njikọ ahụ dị jụụ
+- `expired` (ntụgharị gaa n'ọnụ ọnụ ka emechiri emechi — `EXPIRED_RETRY_MAX = 3` nwere azụ azụ — ya mere njehie OAuth na-agafe agafe nwere ike gwọọ onwe ya tupu ewepụ akaụntụ ahụ kpamkpam)
 - `credits_exhausted`
 
-Ndị a na-anọgide ruo mgbe nzere gbanwere ma ọ bụ onye na-arụ ọrụ tọgharịrị ha. Emela idewanye ọnọdụ nkwụsịtụ nke oge obere n'elu ọnọdụ ikpeazụ.
+Ndị a na-adịgide ruo mgbe nzere gbanwere ma ọ bụ onye na-arụ ọrụ tọgharịa ha. Edeghachila steeti ọnụ nwere ọnọdụ nkwụsịtụ na-adịru nwa oge.
 
-**Nweghachi nwayọọ:** mgbe `rateLimitedUntil` gafere, njikọ ahụ na-etozu oke ọzọ. Mgbe e jiri ya rụọ ọrụ nke ọma, `clearAccountError()` na-ehichapụ ogbe njehie niile.
+**mgbake ume ume:** mgbe `rateLimitedUntil` gafere, njikọ ga-erukwa ọzọ. Na iji ihe ịga nke ọma, `clearAccountError()` na-ehichapụ mpaghara njehie niile.
 
-### Mgbidi ojiji Claude OAuth: ụzọ ọkwa dị ala + ntọgharị oke session
+### Mgbidi ojiji Claude OAuth : ụzọ dị ala + ntọgharị oge-oke
 
-**Oke:** otu njikọ ndebanye aha Claude (OAuth). Atụmatụ abụọ ahụ bụ **opt-in maka
-njikọ ọ bụla** (Dezie njikọ → ngalaba Claude → `lowPriorityMode` / `autoLimitReset` na
-`providerSpecificData`, abụọ ndabara gbanyụrụ) ma na-egosipụta omume iwu `/low-priority` na
-`/limit-reset` nke Claude Code (nkwekọrịta wire e nwetara site na Claude Code 2.1.263).
+**Oke:** otu njikọ ndenye aha Claude (OAuth). Njirimara abụọ a bụ** Nwepu kwa njikọ** (Dezie njikọ → Claude ngalaba → `lowPriorityMode` / `autoLimitReset` na `providerSpecificData`, ma ndabara kwụsịrị) na mirror `/low-priority` Usoro Claude na `/limit-reset` iwu (nkwekọrịta waya weghaara na Claude Code 2.1.263).
 
-**Nhazi:**
+**Mmejuputa:**
 
-- Igwe steeti + nkewa nzaghachi: `open-sse/services/claudeLowPriority.ts`
-- Client ọnọdụ ịtọgharị/claim: `open-sse/services/claudeLimitReset.ts`
-- Hook executor (ịtinye header + nnwa ọzọ n'otu akaụntụ): `open-sse/executors/base.ts::execute()`
-- Ịdịgide opt-in: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
+- Nhazi nzaghachi + igwe steeti: `open-sse/services/claudeLowPriority.ts`
+- Tọgharia onye ahịa status/claim : `open-sse/services/claudeLimitReset.ts`
+- nko onye mmebe (ngwunye nkụnye eji isi mee + otu akaụntụ-nwale): `open-sse/executors/base.ts::execute()`
+- Mwepu nkwụsi ike: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
 
-**Ihe na-akpata:** mgbidi ojiji awa 5 — `429` nke headers ya na-ebu
-`anthropic-ratelimit-unified-status: rejected` na, mgbe akaụntụ ahụ ruru eru,
-`anthropic-ratelimit-unified-slow-offer: treatment`. Enweghị ihe a na-ezipụ tupu mgbidi
-429 mbụ ahụ; 429 mgbawa na-enweghị unified headers na-aga n'ụzọ cooldown nkịtị.
+**Mkpali:** mgbidi ojiji nke awa 5 — a `429` nke isi ya na-ebu `anthropic-ratelimit-unified-status: rejected` na, mgbe akaụntụ ahụ ruru eru, `anthropic-ratelimit-unified-slow-offer: treatment`. Ọ dịghị ihe na-eziga n'ihu mgbidi mbụ ahụ 429; a gbawara 429 na-enweghị otu nkụnye eji isi mee na-aga n'ụzọ nkịtị cooldown ụzọ.
 
-**Ụzọ mkpa dị ala** (`lowPriorityMode`):
+**Ụzọ obere ụzọ** (`lowPriorityMode`):
 
-- Na mgbidi 429 ahụ, executor na-anabata onyinye ahụ ma na-anwa ozugbo akaụntụ **otu**
-  ahụ ọzọ site na `anthropic-usage-limit: slow`; ụzọ ahụ na-anọgide na-arụ ọrụ ruo oge
-  `anthropic-ratelimit-unified-reset` a kwupụtara (+60s oge amara) ma arịrị ọ bụla n'ime
-  windo ahụ na-ebu header ahụ. 429 a jidere anaghị erute `handleChatCore`, yabụ a **anaghị**
-  etinye njikọ ahụ na cooldown ma ọ bụ tụgharịa ya pụọ.
-- `anthropic-ratelimit-unified-slow-status` na nzaghachi ndị sochirinụ: `active` /
-  `not_needed` na-edebe ụzọ ahụ; `slot_busy` (429) ma ọ bụ `529` na-echere
-  `anthropic-ratelimit-unified-slow-retry-after` nke sava (ndabara 20s, clamp 5–600s,
-  ±30% jitter) wee nwaa ọzọ, nke `anthropic-ratelimit-unified-slow-max-wait` (ndabara
-  20 min, clamp 1 min–6 h) na-agbochị oke — gafere nke ahụ ụzọ ahụ na-agwụ ma cool-off
-  nke nkeji 10 na-egbochi ịnabata ọzọ. A na-agbochị oge ọchere ahụ nke ọzọ site na ihe
-  fọdụrụ n'ime timeout mmalite upstream nke arịrị ahụ n'onwe ya
-  (`resolveFetchStartTimeout`, 10 min n'ụzọ ndabara) wepụ oke sekọnd 5: n'enweghị oke
-  ahụ, max-wait ndabara nke nkeji 20 ga-adị ndụ karịa arịrị ahụ ma a ga-akwụsị ụra ahụ
-  n'etiti oge ọchere, na-egosi `TimeoutError` kama njedebe `max_wait` dị nwayọ + cool-off.
-- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, ntụgharị windo awa 5, ma ọ bụ
-  `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (nke na-agwụcha ya dị ka
-  `extra_usage` n'ọnọdụ ọ bụla, ebe ọ bụ na overage a kwụrụ ụgwọ ugbu a na-ekpuchi mgbidi
-  ahụ) na-agwụcha ụzọ ahụ; nzaghachi ahụ wee na-asọ n'ụzọ cooldown nkịtị. A na-echeta
-  `budget_exhausted` ruo ịtọgharị budget a kwupụtara (≤ ụbọchị 8).
-- Nlele mgbidi ahụ na-agba ọsọ mgbe nnwa ọzọ n'ime otu mbọ nke executor n'onwe ya nke 400
-  na-akpali (ndezi ọdịnaya, clamp thinking/effort, auto-learn param) gachara, yabụ mgbidi
-  429 nke na-apụta naanị n'otu n'ime nnwa ọzọ ndị ahụ ka a na-ejide kama ọ ga-eru ụzọ
-  cooldown.
-- Steeti ahụ dị na nchekwa maka njikọ ọ bụla (ịmalite ọzọ na-eri otu mgbidi 429 ọzọ iji
-  nara ọzọ).
+- N'elu mgbidi 429 onye ọrụ ahụ na-anabata onyinye ahụ wee maliteghachi ozugbo** otu** akaụntụ na `anthropic-usage-limit: slow`; Ụzọ ahụ na-arụ ọrụ ruo mgbe ọkwa `anthropic-ratelimit-unified-reset` (amara + 60s) na arịrịọ ọ bụla dị na windo ahụ na-ebu nkụnye eji isi mee. 429 a kpọchiri akpọchi anaghị erute `handleChatCore`, yabụ njikọ ahụ bụ** ọ bụghị** tinye na cooldown na-adịghị atụgharị pụọ.
+- `anthropic-ratelimit-unified-slow-status` na nzaghachi ndị ọzọ: `active` / `not_needed` debe ụzọ ahụ; `slot_busy` (429) ma ọ bụ `529` chere `anthropic-ratelimit-unified-slow-retry-after` nkesa (20s ndabara, mpịakọta 5-600s, ± 30% jitter) wee nwaa, nke `anthropic-ratelimit-unified-slow-max-wait` gbara ya (nkeji 20 ndabara, mwekota 1 min – 6 h) — gafere na ụzọ ahụ kwụsịrị na nkwụsị nkwụsị nkeji nkeji iri. A na-echekwa nchere ahụ site na ihe fọdụrụ na oge mmalite mmalite nke arịrịọ ahụ (`resolveFetchStartTimeout`, 10 min na ndabara) na-ewepu oke 5 s: na-enweghị okpu ahụ, nkeji 20 ndabara ga-adị ndụ karịa arịrịọ ahụ, a ga-ewepụkwa ụra n'etiti ichere, na-ekpuchi `TimeoutError` kama + `max_wait` dị mma.
+- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, 5h-window rollover, ma ọ bụ `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (nke na-ejedebe ya dị ka `extra_usage` na ọkwa ọ bụla, ebe ọ bụ na overage akwụ ụgwọ ugbu a na-ekpuchi mgbidi) mechie ụzọ ahụ; nzaghachi wee na-aga n'ụzọ oyi nkịtị. a na-echeta `budget_exhausted` ruo mgbe nrụpụta mmefu ego ekwuputara ( ụbọchị ≤ 8).
+- Nlele mgbidi ahụ na-aga n'ihu n'ime nnwale intra-400 nke onye mmebe ahụ mere (ntụgharị ọnọdụ, thinking/effort clamps, param auto-learn), ya mere mgbidi 429 nke naanị n'elu otu n'ime ihe ndị ahụ ka na-egbochi kama iru n'ụzọ jụrụ oyi.
+- Steeti nọ na ebe nchekwa maka njikọ ọ bụla (mbidogharị na-efu otu mgbidi 429 ọzọ iji nabata ọzọ).
 
-**Ịtọgharị oke oge** (`autoLimitReset`, a na-anwa ya tupu ụzọ ahụ mgbe ha abụọ nọ n'ọrụ):
+**Ntọgharị oge-oke** (`autoLimitReset`, nwara n'ihu ụzọ mgbe ha abụọ nọ):
 
-- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → blọk
-  `juniper_tide`; mgbe `arm: "reset"` na `available: true`,
-  `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` na
-  `{ "program": "juniper_tide" }` (UUID òtù ahụ sitere na
-  `providerSpecificData.organizationUUID`, fallback bootstrap).
-- `result: reset|not_limited` → a na-anwa arịrị ahụ ọzọ n'ọsọ zuru oke (enweghị header
-  slow). `already_used` / `not_offered` na-echeta `next_available_at` (ndabara otu izu);
-  ọdịda ọ bụla na-alaghachi azụ nkeji 15. Ịtọgharị ahụ bụ otu ugboro n'izu ma ka na-agụ
-  na oke izu ahụ.
+- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → `juniper_tide` ngọngọ; mgbe `arm: "reset"` na `available: true`, `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` nwere `{ "program": "juniper_tide" }` (nhazi UUID sitere na `providerSpecificData.organizationUUID`, bootstrap fallback).
+- `result: reset|not_limited` → a na-anwalegharị arịrịọ ahụ na ọsọ zuru oke (ọ nweghị nkụnye eji isi mee nwayọ). `already_used` / `not_offered` memoise `next_available_at` (ndabara otu izu); ọdịda ọ bụla na-eweghachi nkeji iri na ise. Ntọgharị ahụ bụ otu ugboro n'izu ma ka na-adabere na njedebe izu.
 
-Nchekwa regression: `tests/unit/claude-low-priority-mode.test.ts`,
-`tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
+Ndị nche mgbagha: `tests/unit/claude-low-priority-mode.test.ts`, `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
-### Mmasi oge (#7274)
+### Mmekọrịta nnọkọ (#7274)
 
-**Oke:** otu oge onye ahịa (header `X-Session-Id` / `x-codex-session-id` / `x-omniroute-session`) kpịrịrị n'otu njikọ, maka onye na-enye **ọ bụla**.
+**Oke:** otu nnọkọ ndị ahịa (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` nkụnye eji isi mee ) etinyere na otu njikọ, maka** nke ọ bụla** onye na-eweta.
 
-**Ebumnuche:** idebe agent multi-turn (Claude Code, aider, ndị agent omenala) n'otu akaụntụ gafee arịrị, na-ebelata mfu ọdịnaya gafee akaụntụ na 429 mmalite oyi ugboro ugboro na ndị na-enye nwere steeti oge nke akaụntụ ọ bụla.
+**Ebumnuche:** dobe onye nnọchi anya ọtụtụ ntụgharị ( koodu Claude, onye enyemaka, ndị nnọchi anya omenala) n'otu akaụntụ ahụ gafere arịrịọ, na-ebelata mfu ọnọdụ akaụntụ na 429s mmalite oyi ugboro ugboro na ndị na-enye nwere steeti nnọkọ otu akaụntụ.
 
-**Nhazi:**
+**Mmejuputa:**
 
-- Ngwọta TTL: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
-- Nhọrọ/ịmepụta pin: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
-- Mwepụ header (izugbe, onye na-enye ọ bụla): `src/sse/services/auth.ts::extractSessionAffinityKey()`
-- Tebul pin echekwara: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
-- Ntọala: `sessionAffinityTtlMs` (TTL zuru ụwa ọnụ na ms, `0` na-agbanyụ ya) — `src/lib/db/settings.ts`. A kpọgharịrị aha ya site na `codexSessionAffinityTtlMs` nke bụ naanị Codex site na migration `124_generic_session_affinity_ttl.sql`, nke na-ebufe TTL Codex ọ bụla haziri na mbụ dị ka ndabara ọhụrụ.
+- mkpebi TTL : `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
+- Pin selection/creation: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
+- Mwepụta nkụnye eji isi mee (ọgwụ, onye ọ bụla na-eweta): `src/sse/services/auth.ts::extractSessionAffinityKey()`
+- Tebụl pin na-adịgide adịgide: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
+- Ntọala: `sessionAffinityTtlMs` ( TTL zuru ụwa ọnụ na ms, `0` gbanyụọ) — `src/lib/db/settings.ts`. Akpọrọ aha ya site na Codex-only `codexSessionAffinityTtlMs` site na mbugharị `124_generic_session_affinity_ttl.sql`, nke na-ebufe Codex TTL ọ bụla ahaziri mbụ dị ka ndabara ọhụrụ.
 
-Tupu #7274, `resolveSessionAffinityTtlMs()` siri ike laghachi na `0` maka onye na-enye ọ bụla ma e wepụ `codex`, yabụ ntọala TTL (na headers oge ahụ) enweghị mmetụta n'ebe ọ bụla ọzọ ọbụlagodi na usoro ịkpịnịrị na mwepụ header ahụ adabereghị na onye na-enye ọ bụla. Ndochi ahụ wepụrụ early-return ahụ; TTL ugbu a na-etinye n'otu ụzọ na onye na-enye ọ bụla ozugbo e setịpụrụ ya zuru ụwa ọnụ n'elu `0`.
+Tupu #7274, `resolveSessionAffinityTtlMs()` hard-bailed to `0` maka onye ọ bụla na-eweta ma e wezụga `codex`, yabụ ntọala TTL (na ndị isi nnọkọ) enweghị mmetụta ọ bụla n'ebe ọ bụla ọzọ n'agbanyeghị na usoro pinning na ntinye nkụnye eji isi mee bụbu onye na-eweta-agnostic. Ndozi wepụrụ n'oge-nlọghachi; TTL na-emetụta ugbu a n'otu n'otu nye ndị na-eweta ya ozugbo etinyere n'ụwa niile n'elu `0`.
 
-A naghị ezipụ headers mmasi oge atọ ahụ gaa upstream — ndị executor na-ewu headers upstream ha n'onwe ha site n'isi kama ịgafe headers onye ahịa, yabụ nke a na-anọgide dị ka id mmekọrịta ime ọnụ naanị.
+A naghị ebugharị ndị isi okwu atọ a na-enwe mmekọrịta n'elu — ndị na-arụ ọrụ na-ewulite nkụnye eji isi mee nke ha site na ọkọ kama ịgafe nkụnye ndị ahịa, yabụ nke a na-anọ naanị id mmekọrịta.
 
-### Mgbazinye njikọ oge a na-achịkwa pụrụ iche
+### Mgbazinye njikọ nnọkọ nnọkọ jikwaa naanị
 
-**Oke:** otu onye ahịa/oge HTTP a na-achịkwa nke na-arụ ọrụ nwere otu njikọ OmniRoute ruuru eru.
+**Oke:** otu HTTP client/session na-arụsi ọrụ ike nwere otu njikọ OmniRoute tozuru oke.
 
-**Ebumnuche:** inye ịnwe njikọ pụrụ iche na-adịgide maka ndị ahịa chọrọ mgbidi nhazi siri
-ike gafee arịrị. Nke a dị iche na mmasi oge, nke bụ mmasị ịga n'ihu dị nwayọ:
-mgbazinye pụrụ iche na-edebe steeti lifecycle na SQLite, na-akwado ịdị pụrụ iche nke
-onye nwe na-arụ ọrụ na njikọ na-arụ ọrụ zuru ụwa ọnụ, ma na-ajụ ọgbọ ochie tupu iziga
-onye na-enye.
+**Ebumnuche:** na-enye nwe njikọ pụrụ iche na-adịgide adịgide maka ndị ahịa chọrọ ngere ụzọ siri ike gafee arịrịọ. Nke a dị iche na nnọkọ nnọkọ, nke bụ mmasị na-aga n'ihu dị nro: ụgwọ mgbazinye pụrụ iche na-anọgide na-adị ndụ ndụ na SQLite, na-eme ka onye nwe ya na-arụ ọrụ zuru ụwa ọnụ na njikọ dị iche iche na-arụ ọrụ, ma na-ajụ ọgbọ ochie tupu izipu onye na-eweta ya.
 
-Atụmatụ a bụ nke a na-ahọrọ (opt-in) maka API key ọ bụla. Key a na-achịkwa ga-enwe scope `lease:exclusive` na ndepụta `allowedConnections` kọwara nke ọma nke na-abụghị nke efu. HTTP client ọ bụla nwere ike iji endpoint lifecycle ahụ; achọghị aha client, user-agent, onye na-enye ọrụ, usoro OAuth, ma ọ bụ model. Lease ahụ nwere njikọ, ọ bụghị model, ya mere mgbanwe model na-edebe ijikọ ahụ mgbe njikọ ahụ ka na-adị irè dị ka o na-adị nkịtị. Iwu model nkịtị, quota, ahụike, cooldown, na allowlist ka na-anọgide na nke kacha ike, ha nwekwara ike ịkwaga otu generation ahụ na njikọ ọzọ dị onwe nke dị irè.
+Njirimara bụ Nwepu kwa igodo API. Igodo ejirila ga-enwerịrị oghere `lease:exclusive` yana ndepụta `allowedConnections` na-adịghị efu. Onye ahịa HTTP ọ bụla nwere ike iji njedebe njedebe ndụ; enweghị aha onye ahịa, onye nnọchite ọrụ, onye na-eweta, usoro OAuth, ma ọ bụ ihe nlereanya achọrọ. Mgbazinye ụlọ ahụ nwere njikọ, ọ bụghị ihe nlereanya, yabụ mgbanwe nlereanya na-ejigide njikọ ahụ ebe njikọ ahụ ka tozuru oke. Ụdị nkịtị, oke, ahụike, nkwụsịtụ, na iwu ndepụta inye ohere ka nwere ikike ma nwee ike ịtụgharị otu ọgbọ gaa na njikọ ọzọ tozuru oke n'efu.
 
-Lifecycle ahụ bụ `POST /api/v1/session-leases` nwere omume JSON `acquire`, `renew`, na `release`. Arịrịọ inference a na-achịkwa na-ewetara uru `X-OmniRoute-Lease-Owner` nke a na-apụghị ịgụ na `X-OmniRoute-Lease-Generation` ziri ezi. Onye nwe lease na-eji `vlo_` nke 43 mkpụrụedemede base64url na-eso ya; naanị hash SHA-256 ya ka a na-echekwa. Fence nzipu ikpeazụ ọ bụla na-ejikọkwa ID API key e kwadoro na ID njikọ na-arụ ọrụ. A na-ewepụ header nchịkwa lease na log, na foto arịrịọ e debere, na header onye na-agba ọsọ upstream.
+okirikiri ndụ bụ `POST /api/v1/session-leases` nwere omume JSON `acquire`, `renew`, na `release`. Arịrịọ ntinye aka jisiri ike na-egosi uru `X-OmniRoute-Lease-Owner` na-adịghị ahụkebe yana kpọmkwem `X-OmniRoute-Lease-Generation`. Onye nwe ya na-eji `vlo_` sochiri mkpụrụedemede 43 base64url; naanị SHA-256 hash ya ka a na-echekwa. Ngwongwo izipu ikpeazụ ọ bụla na-ejikọkwa API igodo ID na njikọ ID na-arụ ọrụ. A na-ewepụ ndị nkụnye eji isi mee ihe n'akwụkwọ ndekọ aha, echekwabara arịrịọ snapshots, yana ndị nkụnye eji isi mee elu.
 
-Ọ bụrụ na routing nkịtị nwere ndị a na-achịkwa dị irè ma lease ọzọ na-arụ ọrụ jupụtara na onye ọ bụla dị onwe, OmniRoute na-alọghachi HTTP `429`, koodu lease-capacity-unavailable, ọnọdụ na-echere ikike, na `Retry-After` nwere ókè nke sitere na oge mmechi metụtara kacha ọsọ. Enweghị ihe dị irè nkịtị abụghị esemokwu lease; ọ na-edebe semantics njehie routing ya dị ka o dị.
+Ọ bụrụ na ịnya ụgbọ ala nwere ndị tozuru etozu jikwaa mana onye ọ bụla nwere onwe ya bụ onye mgbazinye mba ofesi na-arụ ọrụ, OmniRoute na-eweghachi HTTP `429`, koodu mgbazinye-ike-adịghị adị, steeti echere maka ikike, yana `Retry-After` oke ewepụtara site na njedebe izizi. Ntozu efu efu abụghị esemokwu ịgbazinye ego ma na-edobe semantics njehie ụzọ dị ugbu a.
 
-Usoro ndị metụtara ka na-adị iche iche:
+Usoro ndị metụtara ya ka dị iche:
 
-- Ịnọ n'ime session OAuth bụ nkesa nro nke process maka akaụntụ OAuth.
-- Semaphore akaụntụ na-enye ikike arịrịọ n'otu oge ma na-agwụ mgbe arịrịọ zuru ezu.
-- Lease session naanị otu onye a na-achịkwa bụ nnwere lifecycle na-adịgide adịgide nwere fence generation.
+- Ịnọ n'otu oge OAuth bụ usoro-nkesa dị nro nke mpaghara maka akaụntụ OAuth.
+- Semaphores akaụntụ na-enye ikike arịrịọ-concurrency ma kwụsị mgbe arịrịọ gwụchara.
+- Mgbazinye oge a na-achịkwa nke ọma bụ nwe okirikiri ndụ na-adịgide adịgide yana ngere ọgbọ.
+
+---
 
 ## 3. Mkpochi Model (Model Lockout)
 
@@ -353,17 +281,22 @@ mkpochi na-arụ ọrụ dị n'oge gachara.
 
 ---
 
-## 4. Njikwa Ọtụtụ Arịrị Otu Oge nke Quota-Share (v3.8.36)
+## 4. Njikwa Njikọta Quota-Share (v3.8.36)
 
-Akaụntụ ndebanye aha (GLM, MiniMax, wdg.) na-anabatakarị naanị ~1–3 arịrị otu oge; ịgafere nke ahụ na-akpata 429 na oge cooldown. Nke a na-adị oke njọ n'okpuru combo **quota-share** (`qtSd/…`), ebe ọtụtụ igodo API na-ekekọrịta otu akaụntụ upstream. Ọkwa atọ na-egbochi ka arịrị jupụta akaụntụ ekerịta.
+Akaụntụ ndebanye aha (GLM, MiniMax, wdg.) na-anabatakarị naanị arịrịọ jikọtara ọnụ ~1–3; ịgafe ọnụ ọgụgụ ahụ na-ebute 429s na oge jụrụ oyi. Nke a na-akawanye njọ n'okpuru ngwakọta **quota-share** (`qtSd/…`), ebe igodo API dị iche iche na-ekerịta otu akaụntụ upstream. Usoro atọ na-egbochi ideju akaụntụ a.
 
-### Oke arịrị otu oge maka njikọ ọ bụla (`max_concurrent`)
+### Oke njikọta kwa njikọ (`max_concurrent`)
 
-Njikọ onye na-enye ọ bụla nwere ike ịkwupụta oke `max_concurrent` (`provider_connections.max_concurrent`, edobere na modal njikọ / API / DB). Hapụ ya oghere maka enweghị oke. Nke a bụ otu bọtịnụ ahụ na-achịkwa ọkwa ịdobe n'usoro dị n'okpuru — debe ya na ọnụọgụ arịrị otu oge n'ezie nke akaụntụ ahụ (dịka GLM ~1, MiniMax ~2).
+Njikọ onye na-eweta ọrụ ọ bụla nwere ike ikwupụta oke `max_concurrent`
+(`provider_connections.max_concurrent`, nke a na-edobe na modal njikọ / API / DB).
+Hapụ ya oghere ma ọ bụrụ na ịchọghị oke. Nke a bụ naanị bọtịnụ na-achịkwa
+usoro serialization dị n'okpuru — debe ya ka ọ hà nhata njikọta akaụntụ ahụ
+(n'ịmaatụ, GLM ~1, MiniMax ~2).
 
-### Oke arịrị otu oge maka nlereanya ọ bụla (`modelConcurrency`)
+### Oke njikọta kwa ụdị (`modelConcurrency`)
 
-Njikọ nwere ike ịkwupụtakwa oke arịrị otu oge ziri ezi maka nlereanya ọ bụla n'ime map `rateLimitOverrides` ya:
+Njikọ nwere ike ikwupụtakwa oke njikọta kpọmkwem maka ụdị ọ bụla
+n'ime map `rateLimitOverrides` ya:
 
 ```json
 {
@@ -374,30 +307,85 @@ Njikọ nwere ike ịkwupụtakwa oke arịrị otu oge ziri ezi maka nlereanya 
 }
 ```
 
-Debe ya na modal njikọ (**Ndọpụta oke ọnụego → Oke arịrị otu oge maka nlereanya ọ bụla**, otu `model=cap` n'ahịrị ọ bụla) ma ọ bụ site na `PATCH /api/providers/[id]` na otu ụdị JSON ahụ. Ọdịmma ndị igodo:
+Debe ya na modal njikọ (**Rate limit overrides → Per-model
+concurrency caps**, otu `model=cap` n'ahịrị ọ bụla) ma ọ bụ jiri
+`PATCH /api/providers/[id]` nwere otu ọdịdị JSON ahụ. Ihe igodo ya pụtara bụ:
 
-- **Nke njikọ dum vs nke nlereanya pụrụ iche:** `maxConcurrent` ka na-anọgide dị ka oke ekerịta nke njikọ dum. Mgbe ha abụọ na-adị irè, a na-enweta ụzọ abụọ ahụ otu oge n'otu ụzọ mejupụtara (`global → provider → account → model`); omume dị irè bụ oke kacha sie ike nke na-adị irè.
-- **Nnabata igodo-nlereanya ziri ezi:** igodo ahụ bụ eriri nlereanya e nyefere onye na-arụ ọrụ mgbe routing dochachara — n'ọtụtụ oge ọ bụ id nlereanya upstream dị larịị (`glm-5`), ọ bụghị aha ọzọ `provider/model` n'akụkụ onye ahịa (`zai/glm-5` adabaghị na `glm-5`). Ọnụ ọgụgụ ndị ahụ bụ oke arịrị otu oge nke ọnụọgụ ezi karịa efu.
-- **Nhazi ahịrị n'ebe ahụ, enweghị nchọpụta:** arịrị karịrị oke na-eche n'ahịrị n'ebe ahụ na ọdịmma ahịrị/timeout dị adị (njehie nnabata edepụtara `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL`). OmniRoute anaghị achọpụta ma ọ bụ nyochaa iwu upstream — ọ na-amanye oke ndị onye ọrụ haziri ziri ezi. Ụzọ nlereanya jupụtara anaghị agbanyụ onye na-enye ma ọ bụ mepụta mkpọchị nlereanya na-adịgide adịgide; omume upstream 429/cooldown/fallback ka na-anọgide dị ka nchekwa njehie ikpeazụ.
-- **Oke nke njikọ ọ bụla, usoro ọ bụla:** oke ndị ahụ bụ nke njikọ nchekwa data ọ bụla ma e jide ha n'echeta, ya mere njikọ abụọ na-eji otu igodo API upstream ahụ ọzọ anaghị arụkọ ọrụ ọnụ.
-- **Enweghị nhazi pụtara enweghị mgbanwe:** ịhapụ map ahụ (ma ọ bụ ịhapụ oghere dashboard n'efu) anaghị etinye ụzọ nlereanya ọ bụla. Nhazi nlereanya na-ekwupụtaghị oke ọ bụla zuru ụwa ọnụ nke onye na-enye:
+- **Oke njikọ dum na nke ụdị kpọmkwem:** `maxConcurrent` ka bụ oke njikọta
+  nke njikọ ahụ dum. Mgbe ha abụọ metụtara, a na-enweta gates abụọ ahụ
+  n'otu oge n'ime composite gate
+  (`global → provider → account → model`); omume dị irè bụ oke siri ike
+  karị n'ime oke ndị metụtara.
+- **Nkwekọrịta igodo ụdị kpọmkwem:** igodo ahụ bụ eriri ụdị a gafere executor
+  mgbe emechara routing resolution — na-adịkarị ka bare upstream model id
+  (`glm-5`), ọ bụghị alias `provider/model` nke akụkụ client
+  (`zai/glm-5` adabaghị na `glm-5`). Ụkpụrụ ndị ahụ bụ oke arịrịọ jikọtara ọnụ
+  nke integer dị mma.
+- **Queue mpaghara, enweghị nchọpụta:** arịrịọ gafere oke na-abanye n'ahịrị
+  n'ime mpaghara, na-eji semantics queue/timeout dị ugbu a (njehie nnabata
+  `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` nke nwere ụdị). OmniRoute anaghị
+  achọpụta ma ọ bụ tụọ iwu upstream — ọ na-amanye naanị oke ndị onye ọrụ
+  haziri kpọmkwem. Gate ụdị jupụtara anaghị agbanyụọ onye na-eweta ọrụ ma ọ bụ
+  mepụta mgbochi ụdị na-adịgide adịgide; omume njehie backstop nke upstream
+  429/cooldown/fallback ka dị.
+- **Oke kwa njikọ, kwa process:** oke ndị a bụ kwa njikọ nchekwa data ma na-adị
+  n'ime ebe nchekwa, ya mere njikọ abụọ na-ejikwa otu igodo API upstream
+  anaghị ahazi onwe ha.
+- **Ihe a hazighị pụtara na ọ dịghị mgbanwe:** ịhapụ map ahụ (ma ọ bụ ịhapụ
+  ubi dashboard ahụ oghere) anaghị etinye gate ụdị ọ bụla. Nhazi atụ na-enweghị
+  ikwupụta oke universal nke onye na-eweta ọrụ ọ bụla:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Ịdobe arịrị Quota-share n'usoro
+### Serializashọn arịrịọ Quota-share
 
-Mgbe nkesa quota-share lekwasịrị njikọ na-akpọsa `max_concurrent` dị mma, a na-edobe arịrị otu oge gaa na **akaụntụ** ahụ n'usoro site na semaphore nke njikọ ọ bụla (igodo `qsconn:<connectionId>`): arịrị karịrị oke **na-eche n'ahịrị** kama ịjupụta akaụntụ ahụ. Ọ bụ **fail-open** — ahịrị jupụtara ma ọ bụ timeout na-aga n'ihu na-enweghị ohere kama ịjụ arịrị nwere ike ịkesa ọ bụla. Gbanwee ya na **Ntọala → Nkwusi ike → Ọtụtụ arịrị otu oge nke njikọ ọ bụla nke Quota-share** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, ndabara bụ ọn). Na-enweghị oke `max_concurrent`, omume ahụ adịghị agbanwe.
+Mgbe dispatch quota-share na-ezube njikọ nke kwupụtara `max_concurrent` dị mma,
+a na-esi na semaphore kwa njikọ (igodo `qsconn:<connectionId>`) hazie arịrịọ
+ndị na-aga n'otu **akaụntụ** ahụ: arịrịọ gafere oke **na-eche n'ahịrị** kama
+ideju akaụntụ ahụ. Ọ bụ **fail-open** — queue jupụtara ma ọ bụ timeout na-aga
+n'ihu na-enweghị slot kama ịjụ arịrịọ enwere ike dispatch mgbe ọ bụla. Gbanwee
+ya na **Settings → Resilience → Quota-share per-connection
+concurrency** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, nke
+ndabara ya bụ on). Ọ bụrụ na enweghị oke `max_concurrent`, omume ahụ anaghị
+agbanwe.
 
-> Ụzọ routing quota-share (`selectQuotaShareTarget`, DRR + P2C) n'onwe ya bụ fail-open ma ọ na-_belata mkpa_ naanị njikọ ruru oke — na pool nwere naanị otu njikọ, ọ nweghị ike ịnye oke siri ike, ya mere semaphore a ka bụ nke na-egbochi ide arịrị ahụ n'ezie.
+> Gate routing quota-share (`selectQuotaShareTarget`, DRR + P2C) n'onwe ya
+> bụ fail-open ma na-ebelata naanị ọkwa njikọ nke ruru oke — na pool nwere
+> naanị otu njikọ, ọ nweghị ike itinye oke siri ike, ya mere semaphore a bụ
+> ihe na-egbochi ideju ahụ n'ezie.
 
-### Ịnwale ọzọ na-amata cooldown nke combo
+### Retry na-amata cooldown nke combo
 
-Maka atụmatụ combo ọ bụla (mgbe e gbasara ya), arịrị ga-akpụ 429 maka cooldown nwa oge na-agafe agafe na-eche ka ọ gafee ma kesaa ọzọ kama ịweghachite 429 ahụ — nke a na-ekpuchi windo TPM/RPM klaasị Gemini (~60s retry-after) na combo ọtụtụ nlereanya, dịka ebumnuche abụọ nke combo nlereanya 2 na-akụ oke ọnụego nke nlereanya ọ bụla. Oke ya bụ `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) na **Ntọala → Nkwusi ike**. Ọ naghị eche na `quota_exhausted` (ekpochiri ruo etiti abalị) ma ọ bụ ihe mere bụ auth/not-found.
+Maka atụmatụ combo ọ bụla (mgbe agbanyere ya), arịrịọ nke ga-eme ka 429
+kwụsie ike maka cooldown dị mkpirikpi nke na-adịru nwa oge na-eche ka ọ gafee
+ma zighachi ya kama iweghachite 429 — nke a gụnyere windo TPM/RPM nke ụdị
+Gemini (~60s retry-after) na combo nwere ọtụtụ ụdị, dịka targets abụọ nke combo
+ụdị abụọ na-erute oke ọnụego kwa ụdị. `comboCooldownWait` na-ekpebi oke ya
+(`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) na **Settings → Resilience**.
+Ọ naghị eche mgbe ọ bụ `quota_exhausted` (akpọchiri ruo etiti abalị) ma ọ bụ
+maka ihe kpatara auth/not-found.
 
-Ụzọ ahụ ka ahụ na-ekpuchi ọnọdụ tupu ekesa (#16319): mgbe a na-agafe ebumnuche ọ bụla nke combo tupu e me nnwale ọ bụla n'ihi na nlereanya ya nọ n'ọnọdụ mkpọchị nwa oge na-agafe agafe, ụzọ na-enweghị nnwale ahụ na-eche ka mkpọchị ahụ gafee n'okpuru otu oke ahụ ma kesaa ọzọ, kama ịza `503 ALL_TARGETS_SKIPPED` na-enweghị ntụzịaka. Mgbe achọtaghị ịchere (oke, nnwale ma ọ bụ ego enyere ezuola, ma ọ bụ a gbanyụrụ atụmatụ ahụ), nzaghachi ikpeazụ na-arịgo na `429 rate_limit_error` na-ebu `retry_after` / `reset_at` site na oge njedebe mkpọchị na-agafe agafe kacha nta; mkpọchị quota, auth na not-found na-edebe 503 na-enweghị ntụzịaka.
+Combo nwere ike ịpụ na ya site na `config.comboCooldownWaitEnabled: false`.
+Naanị `false` nke bụ literal na-agbanyụ waits combo ndị a na-ekekọrịta
+(cooldown mgbe dispatch gasịrị na waits circuit-open/model-lock tupu dispatch)
+yana ndọtị wait-budget timeout-floor ha. Ọ bụrụ na ọ na-efu ma ọ bụ bụrụ `true`,
+amụma zuru ụwa ọnụ ka na-arụ ọrụ; `true` enweghị ike ịgbanye waiting nke ụwa
+dum agbanyụrụ. `targetTimeoutMs` akọwapụtara n'ụzọ doro anya ka na-enwe
+mmeri. Nhọrọ ịpụ a anaghị agbanwe pre-dispatch wait nke native-Codex
+turn-pin dị iche.
+
+Otu gate ahụ na-ekpuchikwa ọnọdụ pre-dispatch (#16319): mgbe a na-amapụ
+target combo niile tupu emee mbọ ọ bụla n'ihi na ụdị ha nọ n'ime mkpọchi
+dị mkpirikpi nke na-adịru nwa oge, ụzọ zero-attempt na-eche ka mkpọchi ahụ
+gwụ n'okpuru oke ndị ahụ ma zighachi ya, kama ịza
+`503 ALL_TARGETS_SKIPPED` na-enweghị hint. Mgbe enweghị ikike ichere (oke,
+mbọ ma ọ bụ budget agwụla, ma ọ bụ feature agbanyụrụ), nzaghachi ikpeazụ na-
+aghọ `429 rate_limit_error` nke nwere `retry_after` / `reset_at` sitere na
+oge mkpọchi nwa oge kacha nso ga-agwụ; mkpọchi quota, auth na not-found ka
+na-edobe 503 na-enweghị hint.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)
@@ -465,13 +453,13 @@ A na-esochi nchebe rate-limit nke njikọ ọ bụla site na ubi boolean `rateLi
 
 ---
 
-## 6. Nchele nnyefe (throughput) maka stream na-adị nwayọọ (#9709)
+## 6. Onye na-ahụ maka ihe na-eme ngwa ngwa (#9709)
 
-Nchele nhọrọ `resilienceSettings.streamRecovery.throughputWatchdog` na-achọpụta upstream nke ka na-eziga chunks ma na-emepụta output nke assistant dị n'okpuru ọnụego output bara uru e debeere. E mere ya ka ọ dị iche na idle timeout n'ebumuche: heartbeats na metadata anaghị edozigharị oge elekere (timer) ọ bụla, ha anaghịkwa agụ dị ka ọganihu. Ọ dịkwa iche na hard attempt deadline (#9153), nke ka na-anọgide dị ka ọnụ nchekwa zuru oke n'agbanyeghị àgwà output.
+Onye nche `resilienceSettings.streamRecovery.throughputWatchdog` nhọrọ na-achọpụta mgbago elu nke ka na-eziga chunks mana na-emepụta ihe enyemaka n'okpuru ọnụego mmepụta bara uru ahaziri. Ọ bụ ụma dị iche na oge nkwụsị na-abaghị uru: obi mgbawa na metadata ntọgharị abụghị ngụ oge na anaghị agụta dị ka ọganihu. Ọ dịkwa iche na njedebe mgbalị siri ike (#9153), nke na-anọgide na-echekwa nchekwa zuru oke n'agbanyeghị àgwà mmepụta.
 
-Nchele ahụ chọrọ oge warm-up nke sochiri windo na-agagharị (rolling window) zuru oke tupu ọ nwee ike ịkwụsị (abort). Ọ na-agụ text deltas sitere na Chat Completions na events output nke Responses API (ihe nnọchi byte UTF-8 e ji ụzọ gbochie gụọ), ọ na-eleghara events bụ naanị usage na ndị dị oghere anya, ọ na-atụkwụsịkwa ikpe mgbe events tool-call ma ọ bụ reasoning ka nọ n'ụzọ. A gbanyụsịrị ya n'ụzọ ndabara, enwere ike ịgbanye ya site na `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; windo, warm-up, ọnụego kacha nta, na output kacha nta a nwere ike ịtụle, ha niile ka n'okpuru oke nke ọwa normalization nke resilience-settings nkịtị.
+Ndị nche na-achọ oge ikpo ọkụ ga-esochi windo na-agbagharị agbagharị zuru oke tupu ya enwee ike ibipụ. Ọ na-agụta deltas ederede site na mmecha nkata na nzaghachi API mmemme mmepụta (proxy UTF-8 byte conservative), na-eleghara mmemme naanị ojiji na efu, ma kwụsịtụ ikpe mgbe oku ngwaọrụ ma ọ bụ ihe ntụgharị uche na-agba ọsọ. Ọ nwere nkwarụ site na ndabara ma nwee ike iji `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` mee ya (ọnụ ahịa env ahụ bụ naanị mkpụrụ nke ndabara — a zọpụtara `resilienceSettings.streamRecovery.throughputWatchdog.enabled` boolean na-enweta mmeri; lee akwụkwọ mbu env-vs-dashboard dị n'elu ntuziaka a); mpio, ikpo ọkụ, opekempe ọnụego, na kacha nta mmepụta na-ejichi nkịtị resilience-ntọala normalization oyi akwa.
 
-Mgbe a gbanyere ya, ịkwụsị nke nchele na-emetụta naanị mgbalị (attempt) upstream na-arụ ọrụ. Tupu bytes ọ bụla rụọ aka onye ahịa, ụzọ early-recovery nke otu akaụntụ dị adị nwere ike imepegharị mgbalị ahụ. Mgbe e mesịrị commit, anaghị achọpụtaghachi (replay) stream ahụ n'ụzọ na-enweghị nlele; naanị nkwekọrịta safe mid-stream continuation dị adị nwere ike ijikọ suffix. Finalization ka na-abụ otu ugbororo (single-shot), n'ihi ya ịgụ usage na mwepụta semaphore anaghị eme ugboro abụọ.
+Mgbe enyere ya aka, a na-etinye ihe nleba anya ime naanị maka mbọ mgbago elu na-arụ ọrụ. Tupu bytes ọ bụla a na-ahụ anya nke ndị ahịa, ụzọ mgbake mbụ nke otu akaụntụ dị nwere nwere ike imepegharị mbọ ahụ. Mgbe emechara, a naghị emegharị iyi ahụ na-enweghị isi; naanị nkwekọrịta na-aga n'ihu n'etiti mmiri dị mma nwere ike ịdụnye suffix. Mmecha na-anọgide na-otu-mgba, ya mere azaghị ojiji na ntọhapụ semaphore abụghị oyiri.
 
 ---
 
