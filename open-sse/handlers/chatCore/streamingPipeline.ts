@@ -32,6 +32,7 @@ import {
 import { isFeatureFlagEnabled as defaultFeatureFlag } from "@/shared/utils/featureFlags";
 import { OMNIROUTE_RESPONSE_HEADERS } from "@/shared/constants/headers";
 import { SSE_HEARTBEAT_INTERVAL_MS } from "../../config/constants.ts";
+import { createDetokenizingStream, isReversibleVaultEnabled } from "../../utils/tokenVault.ts";
 /**
  * Pipeline assembly instrumentation — performance.mark() along the SSE hot path.
  * Marks are visible to Node.js perf_hooks consumers and DevTools' Performance
@@ -56,6 +57,8 @@ export interface StreamingPipelineDeps {
   createSseHeartbeatTransform: typeof defaultHeartbeat;
   shapeForClientFormat: typeof defaultShape;
   createModelEchoTransform: typeof defaultModelEcho;
+  createDetokenizingStream?: typeof createDetokenizingStream;
+  isReversibleVaultEnabled?: typeof isReversibleVaultEnabled;
 }
 
 const DEFAULT_DEPS: StreamingPipelineDeps = {
@@ -68,7 +71,19 @@ const DEFAULT_DEPS: StreamingPipelineDeps = {
   createSseHeartbeatTransform: defaultHeartbeat,
   shapeForClientFormat: defaultShape,
   createModelEchoTransform: defaultModelEcho,
+  createDetokenizingStream: createDetokenizingStream,
+  isReversibleVaultEnabled: isReversibleVaultEnabled,
 };
+
+function attachReversibleVaultTransform(
+  stream: ReadableStream<Uint8Array>,
+  deps: StreamingPipelineDeps,
+): ReadableStream<Uint8Array> {
+  const checkVault = deps.isReversibleVaultEnabled ?? isReversibleVaultEnabled;
+  if (!checkVault()) return stream;
+  const makeDetokenizer = deps.createDetokenizingStream ?? createDetokenizingStream;
+  return stream.pipeThrough(makeDetokenizer());
+}
 
 export function assembleStreamingPipeline(
   args: {
@@ -156,6 +171,7 @@ export function assembleStreamingPipeline(
   if (args.echoModel) {
     finalStream = finalStream.pipeThrough(deps.createModelEchoTransform(args.echoModel));
   }
+  finalStream = attachReversibleVaultTransform(finalStream, deps);
   performance.mark(PIPELINE_END);
   performance.measure(PIPELINE_MEASURE, PIPELINE_START, PIPELINE_END);
   return finalStream;

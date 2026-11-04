@@ -296,6 +296,9 @@ OmniRoute provides a two-layer defense: request-side injection scanning and resp
 | -------------------------------- | -------- | ------------------------- | ----------------------------------------------------------------------- |
 | `PII_RESPONSE_SANITIZATION`      | `false`  | `src/lib/piiSanitizer.ts` | Scan LLM responses for leaked PII before returning to client.           |
 | `PII_RESPONSE_SANITIZATION_MODE` | `redact` | `src/lib/piiSanitizer.ts` | `redact` = mask PII, `warn` = log only, `block` = drop entire response. |
+| `PII_REVERSIBLE_VAULT_ENABLED`   | `false`  | `src/lib/pii/tokenVault.ts` | Reversible in-memory PII token vault for streaming and non-streaming responses. |
+| `PII_VAULT_TTL_MS`              | `120000` | `src/lib/pii/tokenVault.ts` | TTL (ms) for surrogate token mappings in memory.                               |
+| `PII_VAULT_MAX_ENTRIES`         | `5000`   | `src/lib/pii/tokenVault.ts` | Maximum entries per request token vault before LRU eviction.                   |
 
 ### VS Code Tokenized-Route Context Sanitizer
 
