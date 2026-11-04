@@ -8,7 +8,7 @@
    `@layer theme, base, components, utilities` order as Tailwind v4, so Tailwind utilities on
    legacy screens keep winning over kit components, and the kit's `@layer base` (.ci-theme)
    wins over the preflight because of selector specificity. */
-@import "../../packages/ui-kit/src/ci-ui.css";
+@import "../../packages/ui-kit/src/ci-styles.css";
 /* Script fallback for Switzer, which ships Latin only (no Cyrillic, Greek or Vietnamese glyphs,
    no "ə"): fontsource declares one Inter @font-face per subset with a unicode-range, so a browser
    fetches an Inter subset only for a glyph Switzer lacks and Latin text keeps Switzer. */
