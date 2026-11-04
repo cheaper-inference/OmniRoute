@@ -43,6 +43,10 @@ vi.mock("../../../src/shared/utils/featureFlags.ts", () => ({
   isMcpScopeEnforcementEnabled: () => true,
 }));
 const { handleMcpV2Http } = await import("../../../open-sse/mcp-server/v2/server.ts");
+const { registerMcpV2HostHooks } = await import("../../../open-sse/mcp-server/v2/hostHooks.ts");
+const { isMcpScopeEnforcementEnabled } = await import("../../../src/shared/utils/featureFlags.ts");
+// Register after the featureFlags mock above so the scope check sees the mocked flag.
+registerMcpV2HostHooks({ isScopeEnforcementEnabled: isMcpScopeEnforcementEnabled });
 const { omniRouteFetch } = await import("../../../open-sse/mcp-server/internalFetch.ts");
 const { resetDbInstance } = await import("../../../src/lib/db/core.ts");
 
