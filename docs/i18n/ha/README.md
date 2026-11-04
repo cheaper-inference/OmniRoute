@@ -6,16 +6,16 @@
 
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute Dashboard" width="820"/>
+<img src="./docs/screenshots/MainOmniRoute.png" alt="Dashboard ɗin OmniRoute" width="820"/>
 
 <br/>
 <br/>
 
-# 🚀 OmniRoute — Kofar AI Kyauta
+# 🚀 OmniRoute — Ƙofar AI Kyauta
 
-**Created by [Diego Souza](https://github.com/diegosouzapw)**
+**Diego Souza ne ya ƙirƙire shi ([Diego Souza](https://github.com/diegosouzapw))**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Kada ka daina yin lamba. Kowanne kayan aikin AI → masu samarwa 380 — sama da 150 kyauta — ta hanyar hanya guda. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity zuwa CLAUDE / GPT / GEMINI KYAUTA tare da sauyawa ta atomatik idan daya ya kasa. RTK + Caveman stacked compression yana rage yawan tokens da ake amfani da su da kashi 15–95% (~89% matsakaici) — ba za ka taba kai iyaka ba. Masu samar da AI 380 · sama da 150 matakan kyauta · ~1.62B tokens kyauta a kowane wata · dabarun routing 20 · $0 don farawa."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Kada ka taɓa daina rubuta lamba. Kowace kayan aikin AI → masu samarwa 380 — 150+ kyauta — ta hanyar endpoint guda ɗaya. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity zuwa Claude / GPT / Gemini KYauta tare da juyawa ta atomatik. Matsi na RTK + Caveman da aka jera yana adana alamomi 15–95% (~89% a matsakaici) — kada ka taɓa kai wa iyaka. Masu samar da AI 380 · matakan kyauta 150+ · ~alamomi biliyan 1.62 kyauta a wata · dabarun routing 20 · $0 don farawa."/>
 
 </div>
 
@@ -1291,23 +1291,23 @@ Ma'aunai na asali a 2026-10-18: **bidiyoyi na musamman 1.976** · **sanannun kal
 
 <table>
   <tr><th align="left">Layer</th><th align="left">Fasaha</th></tr>
-  <tr><td nowrap><b>Yanayin gudu</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Harshen shirye-shirye</b></td><td>TypeScript 6.0 — <b>TypeScript 100%</b> a cikin <code>src/</code> da <code>open-sse/</code> (<code>any</code> sifili a cikin core tun daga v2.0)</td></tr>
+  <tr><td nowrap><b>Lokacin gudu</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Harshen shirye-shirye</b></td><td>TypeScript 6.0 — <b>TypeScript 100%</b> a cikin <code>src/</code> da <code>open-sse/</code> (babu <code>any</code> ko ɗaya a cikin ginshiƙi tun v2.0)</td></tr>
   <tr><td nowrap><b>Tsarin aiki</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Ma’adanar bayanai</b></td><td>better-sqlite3 (SQLite, rubutun WAL) + LowDB (JSON na gado) — modules na yanki 147, ƙaurar bayanai 220</td></tr>
-  <tr><td nowrap><b>Ƙwaƙwalwa</b></td><td>Cikakken binciken rubutu na SQLite FTS5 + embeddings na vector da aka ƙididdige su da int8, lalacewa mai nau’i</td></tr>
-  <tr><td nowrap><b>Tsare-tsare</b></td><td>Zod 4 — ingantawar shigarwa/fitarwa na kayan aikin MCP + kwangilolin API</td></tr>
+  <tr><td nowrap><b>Ma’ajiyar bayanai</b></td><td>better-sqlite3 (SQLite, rajistar WAL) + LowDB (JSON na gado) — kayayyakin yanki 147, ƙaura 221</td></tr>
+  <tr><td nowrap><b>Ƙwaƙwalwa</b></td><td>Cikakken rubutu na SQLite FTS5 + embeddings na vector da aka ƙididdige su zuwa int8, lalacewa mai nau’i</td></tr>
+  <tr><td nowrap><b>Tsare-tsare</b></td><td>Zod 4 — ingantaccen MCP tool I/O + kwangilolin API</td></tr>
   <tr><td nowrap><b>Ka’idoji</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Yawo da bayanai</b></td><td>Abubuwan da uwar garke ke aikawa (SSE) + gada ta WebSocket (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Matse bayanai</b></td><td>Bututun injuna 12 — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Tabbatarwa &amp; tsaro</b></td><td>OAuth 2.0 (PKCE) + JWT + Maɓallan API + ingantaccen izini mai iyaka na MCP · AES-256-GCM yayin ajiya · DOMPurify</td></tr>
-  <tr><td nowrap><b>Ɓoyewa</b></td><td>wreq-js — kwaikwayon sawun yatsa na JA3 / JA4 TLS, wakili mai matakai 3</td></tr>
-  <tr><td nowrap><b>Juriya</b></td><td>Mai katse da’ira, ja da baya mai ƙaruwa a hankali, rigakafin cunkoson thundering-herd, gyaran kai ta auto-combo</td></tr>
-  <tr><td nowrap><b>Rajista</b></td><td>pino — rajistar JSON mai tsari tare da mahallin buƙata</td></tr>
-  <tr><td nowrap><b>Gwaji</b></td><td>Mai gudanar da gwaje-gwaje na Node.js + Vitest — <b>sanarwar gwaje-gwaje na tsaye sama da 60,000</b> a cikin fayilolin gwaji sama da 8,400 da aka bi diddigi (naúrar, haɗewa, E2E, tsaro, tsarin muhalli)</td></tr>
-  <tr><td nowrap><b> dandamali</b></td><td>Kwamfuta (Electron) · Android (Termux) · PWA (kowane burauza)</td></tr>
+  <tr><td nowrap><b>Yawo</b></td><td>Abubuwan da uwar garke ke aika (SSE) + gadar WebSocket (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Matsewa</b></td><td>Bututun injuna 12 — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Tabbatarwa &amp; tsaro</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + ingantaccen MCP mai iyakantaccen yanki · AES-256-GCM a lokacin ajiya · DOMPurify</td></tr>
+  <tr><td nowrap><b>Ɓoyewa</b></td><td>wreq-js — kwaikwayon tambarin yatsar TLS na JA3 / JA4, wakili mai matakai 3</td></tr>
+  <tr><td nowrap><b>Juriya</b></td><td>Mai katse da’ira, koma-baya mai ƙaruwa a hankali, rigakafin cunkoson buƙatu, gyaran-kai ta auto-combo</td></tr>
+  <tr><td nowrap><b>Rajista</b></td><td>pino — rajistan JSON tsararre tare da mahallin buƙata</td></tr>
+  <tr><td nowrap><b>Gwaji</b></td><td>Mai gudanar da gwajin Node.js + Vitest — <b>sanarwar gwaji ta tsaye sama da 60,000</b> a cikin fayilolin gwaji sama da 8,400 da aka bi diddigi (naúra, haɗewa, E2E, tsaro, tsarin muhalli)</td></tr>
+  <tr><td nowrap><b>Dandamali</b></td><td>Kwamfuta (Electron) · Android (Termux) · PWA (kowane burauza)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — wallafa npm ta atomatik + Docker Hub yayin fitarwa</td></tr>
-  <tr><td nowrap><b>Hanyoyi</b></td><td><a href="https://omniroute.online">Yanar gizo</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>Hanyoyin haɗi</b></td><td><a href="https://omniroute.online">Yanar gizo</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">
@@ -1799,15 +1799,15 @@ OmniRoute ya tsaya ne a kan kafaɗun manyan ayyuka. Ya fara ne a matsayin cokali
 
 ## 📄 Lasisi
 
-Lasisin MIT - duba [LICENSE](LICENSE) don ƙarin bayani.
+Lasisi na MIT - duba [LICENSE](LICENSE) don ƙarin bayani.
 
 ---
 
 <div align="center">
 
-**[⬆ Koma sama](#-omniroute)** · An gina shi da ❤️ don al'ummar AI ta buɗaɗɗen tushe.
+**[⬆ Komawa sama](#-omniroute)** · An gina shi da ❤️ don al'ummar AI mai buɗaɗɗen tushe.
 
-<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Lasisin MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Diego Souza ne ya ƙirƙira shi ta <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Lasisi na MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
-<!-- An kunna GitHub Discussions don tambayoyi da amsoshin al'umma -->
+<!-- An kunna GitHub Discussions don tambayoyi da amsoshi na al'umma -->
