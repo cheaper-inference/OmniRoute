@@ -3,6 +3,7 @@ import {
   captureCodexConnectionFence,
   runWithCodexConnectionFence,
   isCodexConnectionFenceCurrent,
+  StaleCodexOperationError,
 } from "@/lib/db/codexConnectionFences";
 import {
   getProviderConnectionFamilyIds,
@@ -164,6 +165,7 @@ import { fetchClaudeDiscoveryModels } from "./discovery/claude";
 import { applyConnectionCustomHeaders } from "./discovery/connectionCustomHeaders";
 import { maybeHandleConolOrSyntxModelDiscovery } from "./webSessionDiscovery";
 import { maybeHandleTwinmindModelDiscovery } from "./twinmindDiscovery";
+import { maybeHandleDevinDesktopModelDiscovery } from "./devinDesktopDiscovery";
 import { maybeHandleVertexModelDiscovery } from "./vertexDiscovery";
 import { buildNoAuthModelsResponse, filterModelsForRoute } from "./modelRouteProjection";
 
@@ -721,6 +723,9 @@ export async function GET(
       refreshToken: (connection as { refreshToken?: unknown }).refreshToken,
     });
     if (twinmindResponse) return twinmindResponse;
+
+    const devinDesktopResponse = await maybeHandleDevinDesktopModelDiscovery(webDiscoveryArgs);
+    if (devinDesktopResponse) return devinDesktopResponse;
 
     if (provider === "bedrock") {
       const cachedResponse = maybeReturnCachedDiscovery();
@@ -2625,6 +2630,9 @@ export async function GET(
 
     return buildApiDiscoveryResponse(allModels);
   } catch (error) {
+    if (error instanceof StaleCodexOperationError) {
+      return errorResponse(409, error.message);
+    }
     if (error instanceof SafeOutboundFetchError && error.code === "URL_GUARD_BLOCKED") {
       return NextResponse.json({ error: sanitizeErrorMessage(error.message) }, { status: 400 });
     }

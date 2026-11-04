@@ -6,16 +6,16 @@
 
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute Контролна табла" width="820"/>
+<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute kontrolna tabla" width="820"/>
 
 <br/>
 <br/>
 
-# 🚀 OmniRoute — Бесплатни AI Гејтвеј
+# 🚀 OmniRoute — Besplatni AI prolaz
 
-**Created by [Diego Souza](https://github.com/diegosouzapw)**
+**Kreirao [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Никада не престајте да кодирате. Сваки AI алат → 380 провајдера — 150+ бесплатних — преко једне крајње тачке. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity у БЕСПЛАТНИ Claude / GPT / Gemini са аутоматским пребацивањем. RTK + Caveman компресија штеди 15–95% токена (~89% у просеку) — никада не достижете лимите. 380 AI провајдера · 150+ бесплатних нивоа · ~1.62B бесплатних токена/месечно · 20 стратегија рутирања · $0 за почетак."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nikada ne prestajte da programirate. Svaki AI alat → 380 provajdera — 150+ besplatnih — kroz jednu krajnju tačku. Claude Code, Codex, Cursor, Cline, Copilot i Antigravity do BESPLATNIH Claude / GPT / Gemini modela uz automatski rezervni izbor. RTK + Caveman kompresija u nizu štedi 15–95% tokena (~89% u proseku) — nikada ne dostignite ograničenja. 380 AI provajdera · 150+ besplatnih nivoa · ~1,62 milijarde besplatnih tokena mesečno · 20 strategija rutiranja · $0 za početak."/>
 
 </div>
 
@@ -1301,22 +1301,22 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 такође га
 
 <table>
   <tr><th align="left">Слој</th><th align="left">Технологија</th></tr>
-  <tr><td nowrap><b>Окружење извршавања</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Језик</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> у директоријумима <code>src/</code> и <code>open-sse/</code> (без <code>any</code> у језгру од верзије v2.0)</td></tr>
+  <tr><td nowrap><b>Окружење за извршавање</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Језик</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> у <code>src/</code> и <code>open-sse/</code> (без <code>any</code> у језгру од v2.0)</td></tr>
   <tr><td nowrap><b>Оквир</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>База података</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (наслеђени JSON) — 147 доменских модула, 223 миграција</td></tr>
-  <tr><td nowrap><b>Меморија</b></td><td>SQLite FTS5 претрага целог текста + векторски уграђени записи квантизовани на int8, типизовано опадање</td></tr>
+  <tr><td nowrap><b>База података</b></td><td>better-sqlite3 (SQLite, WAL журналирање) + LowDB (наслеђени JSON) — 147 доменских модула, 222 миграција</td></tr>
+  <tr><td nowrap><b>Меморија</b></td><td>SQLite FTS5 претраживање целог текста + векторски ембединг квантизован на int8, типизовано опадање</td></tr>
   <tr><td nowrap><b>Шеме</b></td><td>Zod 4 — валидација улаза/излаза MCP алата + API уговори</td></tr>
   <tr><td nowrap><b>Протоколи</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Стримовање</b></td><td>Догађаји послати са сервера (SSE) + WebSocket мост (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Компресија</b></td><td>Цевовод са 12 механизама — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Аутентификација и безбедност</b></td><td>OAuth 2.0 (PKCE) + JWT + API кључеви + MCP аутентификација са опсегом · AES-256-GCM у стању мировања · DOMPurify</td></tr>
+  <tr><td nowrap><b>Стримовање</b></td><td>Server-Sent Events (SSE) + WebSocket мост (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Компресија</b></td><td>цевовод са 12 механизама — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Аутентификација и безбедност</b></td><td>OAuth 2.0 (PKCE) + JWT + API кључеви + MCP аутентификација са ограниченим опсегом · AES-256-GCM при мировању · DOMPurify</td></tr>
   <tr><td nowrap><b>Прикривеност</b></td><td>wreq-js — имитација JA3 / JA4 TLS отиска, прокси са 3 нивоа</td></tr>
-  <tr><td nowrap><b>Отпорност</b></td><td>Прекидач струјног кола, експоненцијално повратно чекање, заштита од навале захтева, аутоматско комбиновано самоисцељивање</td></tr>
+  <tr><td nowrap><b>Отпорност</b></td><td>Прекидач кола, експоненцијално повратно чекање, заштита од налета захтева, аутоматско самопоправљање комбинација</td></tr>
   <tr><td nowrap><b>Евидентирање</b></td><td>pino — структурирани JSON дневници са контекстом захтева</td></tr>
-  <tr><td nowrap><b>Тестирање</b></td><td>Node.js покретач тестова + Vitest — <b>више од 60.000 статичких декларација тестова</b> у више од 8.400 праћених тест датотека (јединични, интеграциони, E2E, безбедносни тестови и тестови екосистема)</td></tr>
-  <tr><td nowrap><b>Платформе</b></td><td>Рачунари (Electron) · Android (Termux) · PWA (било који прегледач)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — аутоматска npm објава + Docker Hub приликом објављивања</td></tr>
+  <tr><td nowrap><b>Тестирање</b></td><td>Node.js покретач тестова + Vitest — <b>60.000+ статичких декларација тестова</b> у више од 8.400 праћених датотека тестова (јединични, интеграциони, E2E, безбедносни, екосистемски)</td></tr>
+  <tr><td nowrap><b>Платформе</b></td><td>Десктоп (Electron) · Android (Termux) · PWA (било који прегледач)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — аутоматско објављивање на npm + Docker Hub при објављивању верзије</td></tr>
   <tr><td nowrap><b>Везе</b></td><td><a href="https://omniroute.online">Веб-сајт</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
@@ -1809,15 +1809,15 @@ OmniRoute стоји на раменима великана. Започео је
 
 ## 📄 Лиценца
 
-MIT лиценца – погледајте [LICENSE](LICENSE) за детаље.
+Лиценца MIT — детаље потражите у [LICENSE](LICENSE).
 
 ---
 
 <div align="center">
 
-**[⬆ Назад на врх](#-omniroute)** · Направљено са ❤️ за open-source AI заједницу.
+**[⬆ Назад на врх](#-omniroute)** · Направљено са ❤️ за AI заједницу отвореног кода.
 
-<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT лиценца · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Креирао <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Лиценца MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
-<!-- GitHub Discussions су омогућене за питања и одговоре у заједници -->
+<!-- GitHub Discussions је омогућен за питања и одговоре у заједници -->

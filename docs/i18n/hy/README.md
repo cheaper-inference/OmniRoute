@@ -6,16 +6,16 @@
 
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute Վահանակ" width="820"/>
+<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute-ի վահանակ" width="820"/>
 
 <br/>
 <br/>
 
-# 🚀 OmniRoute — Անվճար AI Դարպաս
+# 🚀 OmniRoute — Անվճար AI դարպաս
 
-**Created by [Diego Souza](https://github.com/diegosouzapw)**
+**Ստեղծողը՝ [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Երբեք մի դադարեք կոդ գրել։ Ամեն AI գործիք → 380 մատակարար — 150+ անվճար — մեկ վերջնակետով։ Claude Code, Codex, Cursor, Cline, Copilot & Antigravity դեպի ԱՆՎՃԱՐ Claude / GPT / Gemini ավտոմատ փոխարինմամբ։ RTK + Caveman կուտակային սեղմումը խնայում է 15–95% թոքեն (~89% միջին) — երբեք մի հասեք սահմաններին։ 380 AI մատակարար · 150+ անվճար մակարդակ · ~1.62B անվճար թոքեն/ամիս · 20 երթուղավորման ռազմավարություն · $0 մեկնարկի համար."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Երբեք մի՛ դադարեք կոդ գրել։ Յուրաքանչյուր AI գործիք → 380 մատակարար — 150+-ը՝ անվճար — մեկ endpoint-ի միջոցով։ Claude Code, Codex, Cursor, Cline, Copilot և Antigravity՝ անվճար Claude / GPT / Gemini ծառայություններով՝ ավտոմատ fallback-ով։ RTK + Caveman շերտավորված սեղմումը խնայում է թոքենների 15–95%-ը (միջինը՝ ~89%) — երբեք մի՛ հասեք սահմանաչափերին։ 380 AI մատակարար · 150+ անվճար մակարդակ · ~1.62B անվճար թոքեն/ամիս · երթուղավորման 20 ռազմավարություն · սկսեք $0-ից։"/>
 
 </div>
 
@@ -1286,27 +1286,27 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-ը նույնպե
 <br/>
 <div align="center">
 
-## 🛠️ Տեխնոլոգիական փաթեթ
+## 🛠️ Տեխնոլոգիական ստեկ
 
 </div>
 
 <table>
   <tr><th align="left">Շերտ</th><th align="left">Տեխնոլոգիա</th></tr>
-  <tr><td nowrap><b>Կատարում</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Լեզու</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b>՝ <code>src/</code> և <code>open-sse/</code> գրացուցակներում (v2.0-ից սկսած core-ում զրո <code>any</code>)</td></tr>
+  <tr><td nowrap><b>Կատարման միջավայր</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Լեզու</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> <code>src/</code>-ում և <code>open-sse/</code>-ում (v2.0-ից ի վեր core-ում զրո <code>any</code>)</td></tr>
   <tr><td nowrap><b>Ֆրեյմվորք</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Տվյալների բազա</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 դոմենային մոդուլ, 223 միգրացիա</td></tr>
-  <tr><td nowrap><b>Հիշողություն</b></td><td>SQLite FTS5 լրիվ տեքստային որոնում + int8-քվանտավորված վեկտորային embedding-ներ, տիպավորված մարում</td></tr>
-  <tr><td nowrap><b>Սխեմաներ</b></td><td>Zod 4 — MCP գործիքների I/O վավերացում + API պայմանագրեր</td></tr>
+  <tr><td nowrap><b>Տվյալների բազա</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 դոմենային մոդուլ, 222 միգրացիա</td></tr>
+  <tr><td nowrap><b>Հիշողություն</b></td><td>SQLite FTS5 ամբողջական տեքստային որոնում + int8-քվանտավորված վեկտորային embedding-ներ, տիպավորված մարում</td></tr>
+  <tr><td nowrap><b>Սխեմաներ</b></td><td>Zod 4 — MCP գործիքների մուտքի/ելքի վավերացում + API պայմանագրեր</td></tr>
   <tr><td nowrap><b>Արձանագրություններ</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>Հոսքային փոխանցում</b></td><td>Server-Sent Events (SSE) + WebSocket կամուրջ (<code>/v1/ws</code>)</td></tr>
   <tr><td nowrap><b>Սեղմում</b></td><td>12 շարժիչից բաղկացած pipeline — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Նույնականացում և անվտանգություն</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP scoped auth · AES-256-GCM պահպանված տվյալների համար · DOMPurify</td></tr>
-  <tr><td nowrap><b>Գաղտագողի ռեժիմ</b></td><td>wreq-js — JA3 / JA4 TLS fingerprint impersonation, 3-մակարդականի պրոքսի</td></tr>
-  <tr><td nowrap><b>Կայունություն</b></td><td>Շղթայի անջատիչ, էքսպոնենցիալ հետաձգում, միաժամանակյա զանգվածային հարցումների կանխարգելում, auto-combo ինքնավերականգնում</td></tr>
-  <tr><td nowrap><b>Մատյանավորում</b></td><td>pino — կառուցվածքային JSON մատյաններ՝ հարցման համատեքստով</td></tr>
-  <tr><td nowrap><b>Թեստավորում</b></td><td>Node.js test runner + Vitest — <b>60,000+ ստատիկ թեստերի հայտարարումներ</b>՝ 8,400+ վերահսկվող թեստային ֆայլերում (միավորային, ինտեգրացիոն, E2E, անվտանգության, էկոհամակարգի)</td></tr>
-  <tr><td nowrap><b>Հարթակներ</b></td><td>Սեղանադիր (Electron) · Android (Termux) · PWA (ցանկացած դիտարկիչ)</td></tr>
+  <tr><td nowrap><b>Նույնականացում և անվտանգություն</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP scoped auth · AES-256-GCM at rest · DOMPurify</td></tr>
+  <tr><td nowrap><b>Գաղտագողիություն</b></td><td>wreq-js — JA3 / JA4 TLS մատնահետքի նմանակում, 3 մակարդակի պրոքսի</td></tr>
+  <tr><td nowrap><b>Կայունություն</b></td><td>Շղթայի անջատիչ, էքսպոնենցիալ backoff, anti-thundering-herd, auto-combo ինքնավերականգնում</td></tr>
+  <tr><td nowrap><b>Գրանցամատյանավորում</b></td><td>pino — կառուցվածքային JSON գրանցամատյաններ՝ հարցման համատեքստով</td></tr>
+  <tr><td nowrap><b>Թեստավորում</b></td><td>Node.js test runner + Vitest — <b>60,000+ ստատիկ թեստի հայտարարություն</b> 8,400+ վերահսկվող թեստային ֆայլերում (մոդուլային, ինտեգրացիոն, E2E, անվտանգության, էկոհամակարգի)</td></tr>
+  <tr><td nowrap><b>Հարթակներ</b></td><td>Սեղանադիր (Electron) · Android (Termux) · PWA (ցանկացած զննարկիչ)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — թողարկման ժամանակ npm-ի ավտոմատ հրապարակում + Docker Hub</td></tr>
   <tr><td nowrap><b>Հղումներ</b></td><td><a href="https://omniroute.online">Կայք</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
@@ -1800,15 +1800,15 @@ OmniRoute-ը ստեղծվել է հսկաների ուսերին։ Այն սկս
 
 ## 📄 Լիցենզիա
 
-MIT License - մանրամասների համար տե՛ս [LICENSE](LICENSE)։
+MIT License - մանրամասների համար տեսեք [LICENSE](LICENSE)։
 
 ---
 
 <div align="center">
 
-**[⬆ Վերև վերադառնալ](#-omniroute)** · Ստեղծված է ❤️-ով բաց կոդով AI համայնքի համար։
+**[⬆ Վերև](#-omniroute)** · Ստեղծված է ❤️-ով՝ բաց կոդով AI համայնքի համար։
 
-<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Ստեղծող՝ <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
-<!-- GitHub Discussions-ը միացված է համայնքի հարց ու պատասխանի համար -->
+<!-- GitHub Discussions-ը միացված է համայնքի հարցուպատասխանի համար -->

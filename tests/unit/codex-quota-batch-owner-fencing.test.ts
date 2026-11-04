@@ -11,6 +11,8 @@ const providers = await import("../../src/lib/db/providers.ts");
 const limits = await import("../../src/lib/usage/providerLimits.ts");
 const { setCodexUsageFetchForTests } = await import("../../open-sse/services/usage/codex.ts");
 const quotaCache = await import("../../src/domain/quotaCache.ts");
+const dbLimits = await import("../../src/lib/db/providerLimits.ts");
+const { captureCodexConnectionFence } = await import("../../src/lib/db/codexConnectionFences.ts");
 function deferred<T>() {
   let resolve!: (value: T) => void;
   const promise = new Promise<T>((done) => {
@@ -90,6 +92,35 @@ test("deferred batch persistence rechecks the owner of an earlier completed quot
     "batch response must not advertise the replaced owner's quota"
   );
   assert.ok(limits.getCachedProviderLimitsMap()[second.id]);
+});
+
+test("batch quota observations survive a newer same-owner cooldown without clearing it", async () => {
+  const connection = await providers.createProviderConnection({
+    provider: "codex",
+    authType: "oauth",
+    isActive: true,
+    testStatus: "active",
+    ...owner("a"),
+  });
+  const fence = captureCodexConnectionFence(connection);
+  const until = new Date(Date.now() + 60_000).toISOString();
+  await providers.updateProviderConnection(connection.id, { rateLimitedUntil: until });
+  const entry = {
+    quotas: { session: { used: 15, limit: 100 } },
+    plan: null,
+    message: null,
+    fetchedAt: new Date().toISOString(),
+  };
+  dbLimits.setProviderLimitsCacheBatch([{ connectionId: connection.id, entry, codexFence: fence }]);
+  assert.deepEqual(dbLimits.getProviderLimitsCache(connection.id)?.quotas, entry.quotas);
+  assert.equal((await providers.getProviderConnectionById(connection.id))?.rateLimitedUntil, until);
+  await providers.updateProviderConnection(connection.id, owner("b"));
+  dbLimits.setProviderLimitsCacheBatch([{ connectionId: connection.id, entry, codexFence: fence }]);
+  assert.equal(
+    dbLimits.getProviderLimitsCache(connection.id),
+    null,
+    "replacement owner remains fenced"
+  );
 });
 
 test("owner replacement invalidates already-hydrated routing quota rather than blocking the new owner", async () => {

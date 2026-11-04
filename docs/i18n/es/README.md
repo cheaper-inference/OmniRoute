@@ -6,16 +6,16 @@
 
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="Panel de Control de OmniRoute" width="820"/>
+<img src="./docs/screenshots/MainOmniRoute.png" alt="Panel de OmniRoute" width="820"/>
 
 <br/>
 <br/>
 
-# 🚀 OmniRoute — La Pasarela de IA Gratuita
+# 🚀 OmniRoute — La puerta de enlace de IA gratuita
 
-**Created by [Diego Souza](https://github.com/diegosouzapw)**
+**Creado por [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nunca dejes de programar. Cada herramienta de IA → 380 proveedores — más de 150 gratuitas — a través de un solo endpoint. Claude Code, Codex, Cursor, Cline, Copilot y Antigravity en Claude / GPT / Gemini GRATIS con conmutación automática. Compresión apilada RTK + Caveman ahorra 15–95% de tokens (~89% promedio) — nunca llegues al límite. 380 proveedores de IA · más de 150 planes gratuitos · ~1.62B tokens gratuitos/mes · 20 estrategias de enrutamiento · $0 para empezar."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nunca dejes de programar. Cada herramienta de IA → 380 proveedores — 150+ gratuitos — a través de un único endpoint. Claude Code, Codex, Cursor, Cline, Copilot y Antigravity en Claude / GPT / Gemini GRATUITOS con conmutación automática por error. La compresión combinada de RTK + Caveman ahorra entre un 15 y un 95 % de tokens (~89 % de media) — nunca alcances los límites. 380 proveedores de IA · más de 150 niveles gratuitos · ~1.62B tokens gratuitos/mes · 20 estrategias de enrutamiento · $0 para empezar."/>
 
 </div>
 
@@ -1295,19 +1295,19 @@ Métricas canónicas al 2026-10-18: **1.976 vídeos únicos** · **20.220.289 vi
   <tr><td nowrap><b>Entorno de ejecución</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Lenguaje</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> en <code>src/</code> y <code>open-sse/</code> (cero <code>any</code> en el núcleo desde v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Base de datos</b></td><td>better-sqlite3 (SQLite, registro WAL) + LowDB (JSON heredado) — 147 módulos de dominio, 223 migraciones</td></tr>
+  <tr><td nowrap><b>Base de datos</b></td><td>better-sqlite3 (SQLite, registro WAL) + LowDB (JSON heredado) — 147 módulos de dominio, 222 migraciones</td></tr>
   <tr><td nowrap><b>Memoria</b></td><td>Búsqueda de texto completo con SQLite FTS5 + embeddings vectoriales cuantizados a int8, decaimiento tipado</td></tr>
-  <tr><td nowrap><b>Esquemas</b></td><td>Zod 4 — validación de entrada/salida de herramientas MCP + contratos de API</td></tr>
+  <tr><td nowrap><b>Esquemas</b></td><td>Zod 4 — validación de E/S de herramientas MCP + contratos de API</td></tr>
   <tr><td nowrap><b>Protocolos</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>Transmisión</b></td><td>Eventos enviados por el servidor (SSE) + puente WebSocket (<code>/v1/ws</code>)</td></tr>
   <tr><td nowrap><b>Compresión</b></td><td>Pipeline de 12 motores — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Autenticación &amp; seguridad</b></td><td>OAuth 2.0 (PKCE) + JWT + claves de API + autenticación con alcance MCP · AES-256-GCM en reposo · DOMPurify</td></tr>
+  <tr><td nowrap><b>Autenticación y seguridad</b></td><td>OAuth 2.0 (PKCE) + JWT + claves de API + autenticación con alcance MCP · AES-256-GCM en reposo · DOMPurify</td></tr>
   <tr><td nowrap><b>Sigilo</b></td><td>wreq-js — suplantación de huellas digitales TLS JA3 / JA4, proxy de 3 niveles</td></tr>
-  <tr><td nowrap><b>Resiliencia</b></td><td>Disyuntor, retroceso exponencial, protección contra estampida de solicitudes, autorreparación automática de combinaciones</td></tr>
+  <tr><td nowrap><b>Resiliencia</b></td><td>Cortacircuitos, retroceso exponencial, prevención de estampida, autorrecuperación mediante auto-combinación</td></tr>
   <tr><td nowrap><b>Registro</b></td><td>pino — registros JSON estructurados con contexto de solicitud</td></tr>
-  <tr><td nowrap><b>Pruebas</b></td><td>Ejecutor de pruebas de Node.js + Vitest — <b>más de 60.000 declaraciones de pruebas estáticas</b> en más de 8.400 archivos de prueba registrados (unitarias, de integración, E2E, de seguridad y del ecosistema)</td></tr>
+  <tr><td nowrap><b>Pruebas</b></td><td>Ejecutor de pruebas de Node.js + Vitest — <b>más de 60.000 declaraciones de pruebas estáticas</b> en más de 8.400 archivos de pruebas registrados (unitarias, de integración, E2E, de seguridad y del ecosistema)</td></tr>
   <tr><td nowrap><b>Plataformas</b></td><td>Escritorio (Electron) · Android (Termux) · PWA (cualquier navegador)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — publicación automática en npm + Docker Hub en cada lanzamiento</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — publicación automática en npm + Docker Hub al realizar una versión</td></tr>
   <tr><td nowrap><b>Enlaces</b></td><td><a href="https://omniroute.online">Sitio web</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
@@ -1800,15 +1800,15 @@ OmniRoute se apoya en el trabajo de gigantes. Comenzó como un fork de **[9route
 
 ## 📄 Licencia
 
-Licencia MIT: consulta [LICENSE](LICENSE) para más detalles.
+Licencia MIT - consulta [LICENSE](LICENSE) para obtener más información.
 
 ---
 
 <div align="center">
 
-**[⬆ Volver arriba](#-omniroute)** · Hecho con ❤️ para la comunidad de IA de código abierto.
+**[⬆ Volver al principio](#-omniroute)** · Creado con ❤️ para la comunidad de IA de código abierto.
 
-<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Licencia MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Creado por <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Licencia MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
-<!-- GitHub Discussions habilitado para preguntas y respuestas de la comunidad -->
+<!-- Debates de GitHub habilitados para preguntas y respuestas de la comunidad -->

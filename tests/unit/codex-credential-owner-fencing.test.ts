@@ -172,6 +172,25 @@ for (const aba of [false, true]) {
   });
 }
 
+test("discovery returns a sanitized 409 when its credential snapshot is already stale", async () => {
+  const connection = await seed();
+  const { getCachedProviderConnectionById } = await import("../../src/lib/db/readCache.ts");
+  const snapshot = await getCachedProviderConnectionById(connection.id);
+  assert.ok(snapshot);
+  // Model a read that completed just before another request rotated credentials.
+  snapshot.accessToken = "synthetic-stale-snapshot";
+  const response = await GET(
+    new Request(`http://localhost/api/providers/${connection.id}/models`),
+    {
+      params: { id: connection.id },
+    }
+  );
+  assert.equal(response.status, 409);
+  const body = JSON.stringify(await response.json());
+  assert.ok(body.includes("retry"));
+  assert.ok(!body.includes("at /") && !body.includes("synthetic-stale-snapshot"));
+});
+
 test("current-owner discovery keeps upstream catalog projection and version diagnostics", async () => {
   const connection = await seed();
   const client = await import("../../open-sse/config/codexClient.ts");

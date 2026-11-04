@@ -6,16 +6,16 @@
 
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute Табло" width="820"/>
+<img src="./docs/screenshots/MainOmniRoute.png" alt="Табло на OmniRoute" width="820"/>
 
 <br/>
 <br/>
 
 # 🚀 OmniRoute — Безплатният AI шлюз
 
-**Created by [Diego Souza](https://github.com/diegosouzapw)**
+**Създадено от [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Никога не спирайте да кодирате. Всеки AI инструмент → 380 доставчици — 150+ безплатни — през един крайна точка. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity във БЕЗПЛАТЕН Claude / GPT / Gemini с автоматичен fallback. RTK + Caveman компресията спестява 15–95% токени (~89% средно) — никога не достигайте лимити. 380 AI доставчици · 150+ безплатни нива · ~1.62B безплатни токени/месец · 20 стратегии за маршрутизиране · $0 за старт."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Никога не спирайте да програмирате. Всеки AI инструмент → 380 доставчици — 150+ безплатни — чрез една крайна точка. Claude Code, Codex, Cursor, Cline, Copilot и Antigravity към БЕЗПЛАТНИ Claude / GPT / Gemini с автоматично превключване. Компресията RTK + Caveman на няколко нива спестява 15–95% от токените (~89% средно) — никога не достигайте лимитите. 380 AI доставчици · 150+ безплатни нива · ~1,62 млрд. безплатни токена/месец · 20 стратегии за маршрутизиране · $0 за начало."/>
 
 </div>
 
@@ -1303,19 +1303,19 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 също го п�
   <tr><td nowrap><b>Среда за изпълнение</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Език</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> в <code>src/</code> и <code>open-sse/</code> (нула <code>any</code> в ядрото от v2.0)</td></tr>
   <tr><td nowrap><b>Рамка</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>База данни</b></td><td>better-sqlite3 (SQLite, журнал с WAL) + LowDB (JSON наследена) — 147 домейн модула, 223 миграции</td></tr>
-  <tr><td nowrap><b>Памет</b></td><td>Пълнотекстово търсене с SQLite FTS5 + векторни embedding-и с int8 квантизация, типизирано затихване</td></tr>
-  <tr><td nowrap><b>Схеми</b></td><td>Zod 4 — валидиране на I/O на MCP инструментите + API договори</td></tr>
+  <tr><td nowrap><b>База данни</b></td><td>better-sqlite3 (SQLite, WAL журнал) + LowDB (JSON наследена) — 147 домейн модула, 222 миграции</td></tr>
+  <tr><td nowrap><b>Памет</b></td><td>Пълнотекстово търсене чрез SQLite FTS5 + векторни embeddings с int8 квантизация, типизирано затихване</td></tr>
+  <tr><td nowrap><b>Схеми</b></td><td>Zod 4 — проверка на входа/изхода на MCP инструментите + API договори</td></tr>
   <tr><td nowrap><b>Протоколи</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Поточно предаване</b></td><td>Server-Sent Events (SSE) + мост към WebSocket (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Компресия</b></td><td>12-машинен конвейер — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Удостоверяване и сигурност</b></td><td>OAuth 2.0 (PKCE) + JWT + API ключове + обхватно MCP удостоверяване · AES-256-GCM при съхранение · DOMPurify</td></tr>
-  <tr><td nowrap><b>Скритост</b></td><td>wreq-js — имитация на JA3 / JA4 TLS отпечатък, 3-степенен прокси</td></tr>
-  <tr><td nowrap><b>Устойчивост</b></td><td>Автоматичен прекъсвач, експоненциално изчакване, защита от thundering herd, автоматично комбинирано самовъзстановяване</td></tr>
+  <tr><td nowrap><b>Поточно предаване</b></td><td>Server-Sent Events (SSE) + WebSocket мост (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Компресиране</b></td><td>12-двигателен конвейер — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Удостоверяване и сигурност</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP удостоверяване с обхват · AES-256-GCM в покой · DOMPurify</td></tr>
+  <tr><td nowrap><b>Стелт</b></td><td>wreq-js — имитиране на JA3 / JA4 TLS отпечатък, 3-нивов прокси</td></tr>
+  <tr><td nowrap><b>Устойчивост</b></td><td>Автоматичен прекъсвач, експоненциално отстъпване, защита от thundering herd, автоматично комбинирано самовъзстановяване</td></tr>
   <tr><td nowrap><b>Регистриране</b></td><td>pino — структурирани JSON регистри с контекст на заявката</td></tr>
   <tr><td nowrap><b>Тестване</b></td><td>Тестов изпълнител на Node.js + Vitest — <b>над 60 000 статични декларации на тестове</b> в над 8 400 проследявани тестови файла (модулни, интеграционни, E2E, за сигурност, за екосистемата)</td></tr>
   <tr><td nowrap><b>Платформи</b></td><td>Настолни компютри (Electron) · Android (Termux) · PWA (всеки браузър)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — автоматично публикуване в npm + Docker Hub при издаване</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — автоматично публикуване в npm + Docker Hub при издание</td></tr>
   <tr><td nowrap><b>Връзки</b></td><td><a href="https://omniroute.online">Уебсайт</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
@@ -1808,15 +1808,15 @@ OmniRoute е изграден върху постиженията на гига�
 
 ## 📄 Лиценз
 
-MIT License – вижте [LICENSE](LICENSE) за подробности.
+Лиценз MIT — вижте [ЛИЦЕНЗ](LICENSE) за подробности.
 
 ---
 
 <div align="center">
 
-**[⬆ Обратно към началото](#-omniroute)** · Създаден с ❤️ за общността на отворения код в AI.
+**[⬆ Обратно към началото](#-omniroute)** · Създадено ❤️ за общността на AI с отворен код.
 
-<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Създадено от <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Лиценз MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
-<!-- GitHub Discussions е активиран за въпроси и отговори в общността -->
+<!-- GitHub Discussions е активиран за въпроси и отговори от общността -->

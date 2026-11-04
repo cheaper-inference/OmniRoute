@@ -6,16 +6,16 @@
 
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute Dashboard" width="820"/>
+<img src="./docs/screenshots/MainOmniRoute.png" alt="Dashboard OmniRoute" width="820"/>
 
 <br/>
 <br/>
 
-# 🚀 OmniRoute — Ụzọ Ọnụ Ụzọ AI N'efu
+# 🚀 OmniRoute — Ọnụ ụzọ AI efu
 
-**Created by [Diego Souza](https://github.com/diegosouzapw)**
+**Onye mepụtara ya bụ [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Ekwela ka ị kwụsị ide koodu. Ngwaọrụ AI niile → ndị na-eweta 380 — 150+ n'efu — site n'otu njedebe. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity na-etinye n'ime FREE Claude / GPT / Gemini na auto-fallback. RTK + Caveman stacked compression na-echekwa 15–95% tokens (~89% n'ogo) — agaghị emetụ oke. Ndị na-eweta AI 380 · 150+ ọkwa n'efu · ~1.62B tokens n'efu kwa ọnwa · 20 ụzọ mbufe · $0 ịmalite."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Akwụsịla ide koodu. Ngwaọrụ AI ọ bụla → ndị na-enye ọrụ 380 — 150+ n’efu — site n’otu endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity banye n’ime Claude / GPT / Gemini efu site na auto-fallback. Mkpakọ RTK + Caveman jikọtara ọnụ na-echekwa tokens 15–95% (~89% ná nkezi) — agaghị eru oke. Ndị na-enye AI 380 · tiers efu 150+ · ~1.62B tokens efu kwa ọnwa · atụmatụ ntụgharị 20 · $0 iji malite."/>
 
 </div>
 
@@ -1283,28 +1283,28 @@ Metrik iwu na 2026-10-18: **vidiyo pụrụ iche 1.976** · **nlele amaara 20.22
 <br/>
 <div align="center">
 
-## 🛠️ Nchịkọta Teknụzụ
+## 🛠️ Ngwakọta Teknụzụ
 
 </div>
 
 <table>
   <tr><th align="left">Oyi akwa</th><th align="left">Teknụzụ</th></tr>
-  <tr><td nowrap><b>Oge ịgba ọsọ</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Asụsụ</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> n'ofe <code>src/</code> na <code>open-sse/</code> (<code>any</code> efu n'ime isi kemgbe v2.0)</td></tr>
+  <tr><td nowrap><b>Oge ịrụ ọrụ</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Asụsụ</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> n'ofe <code>src/</code> na <code>open-sse/</code> (<code>any</code> efu na isi sistemụ kemgbe v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Ebe nchekwa data</b></td><td>better-sqlite3 (SQLite, ndekọ WAL) + LowDB (JSON ochie) — modul ngalaba 147, mbugharị 223</td></tr>
-  <tr><td nowrap><b>Ncheta</b></td><td>SQLite FTS5 maka ederede zuru oke + ntinye vector nke ejiri int8 mee quantization, mbelata nwere ụdị</td></tr>
+  <tr><td nowrap><b>Ebe nchekwa data</b></td><td>better-sqlite3 (SQLite, ndekọ WAL) + LowDB (JSON ochie) — modulu ngalaba 147, mbugharị 222</td></tr>
+  <tr><td nowrap><b>Ncheta</b></td><td>SQLite FTS5 ọchụchọ ederede zuru ezu + ntinye vector ndị e jiri int8 mee quantization, ire ụdị</td></tr>
   <tr><td nowrap><b>Schemas</b></td><td>Zod 4 — nkwado MCP tool I/O + nkwekọrịta API</td></tr>
   <tr><td nowrap><b>Protocol</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Mbufe iyi</b></td><td>Ihe omume Server-Sent (SSE) + àkwà mmiri WebSocket (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Mbelata nha</b></td><td>Pipeline injin 12 — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Nyocha onye ọrụ &amp; nchekwa</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + ikike MCP nwere oke · AES-256-GCM mgbe echekwara · DOMPurify</td></tr>
-  <tr><td nowrap><b>Nzuzo</b></td><td>wreq-js — iṅomi akara mkpịsị aka JA3 / JA4 TLS, proxy ọkwa 3</td></tr>
-  <tr><td nowrap><b>Ịkwụsi ike</b></td><td>Ihe na-egbochi sekit, nkwụsị na-abawanye n'usoro, mgbochi igwe na-awakpo otu oge, auto-combo na-agwọ onwe ya</td></tr>
-  <tr><td nowrap><b>Ndekọ</b></td><td>pino — ndekọ JSON ahaziri ahazi nwere ọnọdụ arịrịọ</td></tr>
-  <tr><td nowrap><b>Nnwale</b></td><td>Node.js test runner + Vitest — <b>nkwupụta nnwale static karịrị 60,000</b> n'ofe faịlụ nnwale karịrị 8,400 a na-enyocha (unit, integration, E2E, nchekwa, gburugburu)</td></tr>
-  <tr><td nowrap><b>Platform</b></td><td>Kọmpụta desktọpụ (Electron) · Android (Termux) · PWA (ihe nchọgharị ọ bụla)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — mbipụta npm na akpaghị aka + Docker Hub mgbe ewepụtara</td></tr>
+  <tr><td nowrap><b>Ntugharị data</b></td><td>Ihe omume Server-Sent (SSE) + njikọ WebSocket (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Mkpokọta</b></td><td>Pipeline engine 12 — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Nyocha &amp; nchekwa</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP scoped auth · AES-256-GCM n'oge nchekwa · DOMPurify</td></tr>
+  <tr><td nowrap><b>Izobe onwe</b></td><td>wreq-js — iṅomi akara mkpịsị aka JA3 / JA4 TLS, proxy ọkwa 3</td></tr>
+  <tr><td nowrap><b>Nkwụsi ike</b></td><td>Onye na-egbochi sekit, nlọghachi na-abawanye n'usoro geometric, mgbochi ìgwè na-awakpo otu oge, mmezi onwe nke auto-combo</td></tr>
+  <tr><td nowrap><b>Ndekọ</b></td><td>pino — ndekọ JSON ahaziri nke nwere ọnọdụ arịrịọ</td></tr>
+  <tr><td nowrap><b>Nnwale</b></td><td>Onye na-agba ule Node.js + Vitest — <b>nkwupụta ule static karịrị 60,000</b> n'ofe faịlụ ule karịrị 8,400 e debanyere (unit, integration, E2E, nchekwa, gburugburu)</td></tr>
+  <tr><td nowrap><b>Usoro ikpo okwu</b></td><td>Kọmpụta desktọpụ (Electron) · Android (Termux) · PWA (ihe nchọgharị ọ bụla)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — mbipụta npm akpaaka + Docker Hub mgbe ewepụtara ya</td></tr>
   <tr><td nowrap><b>Njikọ</b></td><td><a href="https://omniroute.online">Weebụsaịtị</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
@@ -1795,17 +1795,17 @@ OmniRoute guzoro n'ubu ndị nnukwu ndị bu ya ụzọ. Ọ malitere dị ka fo
   <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,955</td><td>Ọ chọpụtara ebe quota Grok Build dị; OmniRoute mechara nyochaa ma dozie usoro wire dị ndụ n’onwe ya.</td></tr>
 </table>
 
-## 📄 Ikikere
+## 📄 Akwụkwọ ikike
 
-Ikikere MIT - lee [LICENSE](LICENSE) maka nkọwa.
+Akwụkwọ ikike MIT - lee [LICENSE](LICENSE) maka nkọwa.
 
 ---
 
 <div align="center">
 
-**[⬆ Laghachi n'elu](#-omniroute)** · E wuru ya site n'❤️ maka obodo AI open-source.
+**[⬆ Laghachi n'elu](#-omniroute)** · Ejiri ❤️ wuo ya maka obodo AI mepere emepe.
 
-<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Ikikere MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Ọ bụ <a href="https://github.com/diegosouzapw">Diego Souza</a> mepụtara ya · OmniRoute v3.8.53 · Node ≥22.22.2 · Akwụkwọ ikike MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
-<!-- Emeghe GitHub Discussions maka ajụjụ na azịza nke obodo -->
+<!-- GitHub Discussions agbanyere maka ajụjụ na azịza obodo -->

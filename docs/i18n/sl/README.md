@@ -6,16 +6,16 @@
 
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute Nadzorna plošča" width="820"/>
+<img src="./docs/screenshots/MainOmniRoute.png" alt="Nadzorna plošča OmniRoute" width="820"/>
 
 <br/>
 <br/>
 
-# 🚀 OmniRoute — Brezplačni AI prehod
+# 🚀 OmniRoute — Brezplačni prehod za umetno inteligenco
 
-**Created by [Diego Souza](https://github.com/diegosouzapw)**
+**Ustvaril [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nikoli ne nehaj programirati. Vsako AI orodje → 380 ponudnikov — 150+ brezplačnih — prek ene končne točke. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity v BREZPLAČNI Claude / GPT / Gemini z avtomatskim preklopom. RTK + Caveman stisnjena kompresija prihrani 15–95% žetonov (~89% povprečno) — nikoli ne presezi omejitev. 380 AI ponudnikov · 150+ brezplačnih paketov · ~1,62 milijarde brezplačnih žetonov/mesec · 20 strategij usmerjanja · $0 za začetek."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nikoli ne prenehajte programirati. Vsako orodje umetne inteligence → 380 ponudnikov — 150+ brezplačnih — prek ene končne točke. Claude Code, Codex, Cursor, Cline, Copilot in Antigravity v BREZPLAČNE Claude / GPT / Gemini z avtomatskim preklopom. Zloženo stiskanje RTK + Caveman prihrani 15–95 % žetonov (povprečno ~89 %) — nikoli ne dosezite omejitev. 380 ponudnikov umetne inteligence · 150+ brezplačnih paketov · ~1,62 milijarde brezplačnih žetonov/mesec · 20 strategij usmerjanja · Začnite za 0 $."/>
 
 </div>
 
@@ -1302,20 +1302,20 @@ Kanonične metrike na dan 2026-10-18: **1.976 edinstvenih videoposnetkov** · **
 <table>
   <tr><th align="left">Plast</th><th align="left">Tehnologija</th></tr>
   <tr><td nowrap><b>Izvajalno okolje</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Jezik</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> v <code>src/</code> in <code>open-sse/</code> (v jedru od v2.0 ni nobenega <code>any</code>)</td></tr>
+  <tr><td nowrap><b>Jezik</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> v <code>src/</code> in <code>open-sse/</code> (brez <code>any</code> v jedru od v2.0)</td></tr>
   <tr><td nowrap><b>Ogrodje</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Zbirka podatkov</b></td><td>better-sqlite3 (SQLite, beleženje WAL) + LowDB (podedovani JSON) — 147 domenskih modulov, 223 migracij</td></tr>
-  <tr><td nowrap><b>Pomnilnik</b></td><td>Polno besedilno iskanje SQLite FTS5 + vektorske vložitve, kvantizirane z int8, s tipiziranim bledenjem</td></tr>
+  <tr><td nowrap><b>Zbirka podatkov</b></td><td>better-sqlite3 (SQLite, beleženje WAL) + LowDB (podedovani JSON) — 147 domenskih modulov, 222 migracij</td></tr>
+  <tr><td nowrap><b>Pomnilnik</b></td><td>Celotno besedilo SQLite FTS5 + vektorske vgradnje, kvantizirane v int8, s tipiziranim pojemanjem</td></tr>
   <tr><td nowrap><b>Sheme</b></td><td>Zod 4 — preverjanje V/I orodij MCP + pogodbe API</td></tr>
   <tr><td nowrap><b>Protokoli</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Pretočno izvajanje</b></td><td>Dogodki, poslani s strežnika (SSE) + most WebSocket (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Stiskanje</b></td><td>12-strojni cevovod — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Pretakanje</b></td><td>Dogodki, poslani s strežnika (SSE) + most WebSocket (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Stiskanje</b></td><td>Cevovod z 12 mehanizmi — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
   <tr><td nowrap><b>Preverjanje pristnosti in varnost</b></td><td>OAuth 2.0 (PKCE) + JWT + ključi API + omejeno preverjanje pristnosti MCP · AES-256-GCM v mirovanju · DOMPurify</td></tr>
   <tr><td nowrap><b>Prikritost</b></td><td>wreq-js — posnemanje prstnega odtisa TLS JA3 / JA4, 3-stopenjski posredniški strežnik</td></tr>
-  <tr><td nowrap><b>Odpornost</b></td><td>Odklopnik, eksponentni umik, preprečevanje navala zahtev, samozdravljenje samodejnih kombinacij</td></tr>
-  <tr><td nowrap><b>Beleženje</b></td><td>pino — strukturirani dnevniki JSON s kontekstom zahteve</td></tr>
-  <tr><td nowrap><b>Testiranje</b></td><td>Testni izvajalnik Node.js + Vitest — <b>več kot 60.000 statičnih deklaracij testov</b> v več kot 8.400 sledenih testnih datotekah (enotski, integracijski, E2E, varnostni testi in testi ekosistema)</td></tr>
-  <tr><td nowrap><b>Platforme</b></td><td>Namizje (Electron) · Android (Termux) · PWA (kateri koli brskalnik)</td></tr>
+  <tr><td nowrap><b>Odpornost</b></td><td>Odklopnik, eksponentno vračanje, preprečevanje stampeda zahtev, samodejno samozdravljenje kombinacij</td></tr>
+  <tr><td nowrap><b>Beleženje</b></td><td>pino — strukturirani dnevniki JSON s kontekstom zahtev</td></tr>
+  <tr><td nowrap><b>Preizkušanje</b></td><td>Izvajalnik testov Node.js + Vitest — <b>več kot 60.000 statičnih deklaracij testov</b> v več kot 8.400 sledenih testnih datotekah (enotski, integracijski, E2E, varnostni testi in testi ekosistema)</td></tr>
+  <tr><td nowrap><b>Platforme</b></td><td>Namizni računalnik (Electron) · Android (Termux) · PWA (poljuben brskalnik)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — samodejna objava v npm + Docker Hub ob izdaji</td></tr>
   <tr><td nowrap><b>Povezave</b></td><td><a href="https://omniroute.online">Spletno mesto</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
@@ -1809,15 +1809,15 @@ OmniRoute stoji na ramenih velikanov. Začel se je kot razcep projekta **[9route
 
 ## 📄 Licenca
 
-Licenca MIT – podrobnosti si oglejte v datoteki [LICENSE](LICENSE).
+Licenca MIT – za podrobnosti glejte [LICENSE](LICENSE).
 
 ---
 
 <div align="center">
 
-**[⬆ Nazaj na vrh](#-omniroute)** · Zgrajeno z ❤️ za odprtokodno skupnost umetne inteligence.
+**[⬆ Nazaj na vrh](#-omniroute)** · Ustvarjeno z ❤️ za odprtokodno skupnost umetne inteligence.
 
-<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Licenca MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Ustvaril <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Licenca MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
-<!-- Razprave GitHub so omogočene za vprašanja in odgovore skupnosti -->
+<!-- Omogočene so razprave GitHub Discussions za vprašanja in odgovore skupnosti -->

@@ -242,6 +242,7 @@ import { isJsonRecord } from "./chatCore/nonStreamingResponseParse.ts";
 import { recordNonStreamingUsageStats } from "./chatCore/nonStreamingUsageStats.ts";
 import { getModelNormalizeToolCallId, getModelPreserveOpenAIDeveloperRole } from "@/lib/db/models";
 import { extractSessionAffinityKey } from "@/sse/services/auth";
+import { adoptCommittedCodexRefresh, persistCodexRefresh } from "@/sse/services/tokenRefresh";
 import { createManagedLeaseFence } from "./chatCore/managedLeaseFence.ts";
 
 import { getCacheControlSettings } from "@/lib/cacheControlSettings";
@@ -2727,14 +2728,19 @@ async function handleChatCoreInner({
     const attemptedRefreshToken =
       typeof targetCredentials?.refreshToken === "string" ? targetCredentials.refreshToken : null;
     credentialRefreshPersistRan = false;
-    const persistFn = onCredentialsRefreshed && provider !== "codex"
+    const persistFn = refreshFence && !isPassiveCodex(provider)
       ? async (refreshResult: Record<string, unknown>) => {
+          await persistCodexRefresh(refreshResult, refreshFence);
           credentialRefreshPersistRan = true;
-          Object.assign(targetCredentials, refreshResult);
-          Object.assign(credentials, refreshResult);
-          await onCredentialsRefreshed(refreshResult);
         }
-      : undefined;
+      : onCredentialsRefreshed && provider !== "codex"
+        ? async (refreshResult: Record<string, unknown>) => {
+            credentialRefreshPersistRan = true;
+            Object.assign(targetCredentials, refreshResult);
+            Object.assign(credentials, refreshResult);
+            await onCredentialsRefreshed(refreshResult);
+          }
+        : undefined;
 
     const casConnectionId =
       typeof targetCredentials?.connectionId === "string"
@@ -2780,8 +2786,11 @@ async function handleChatCoreInner({
         return newCredentials;
       }
       if (refreshFence) {
-        const persisted = await updateProviderConnection(refreshFence.connectionId, newCredentials, { expectedCodexFence: refreshFence });
-        if (!persisted) return null;
+        // getAccessToken persisted before releasing the mutex. Every waiter adopts
+        // that same durable version instead of issuing another fenced write.
+        if (!adoptCommittedCodexRefresh(newCredentials, refreshFence)) {
+          throw new StaleCodexOperationError();
+        }
         credentialRefreshPersistRan = true;
         Object.assign(targetCredentials, newCredentials);
         Object.assign(credentials, newCredentials);

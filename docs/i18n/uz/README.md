@@ -6,16 +6,16 @@
 
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute Boshqaruv paneli" width="820"/>
+<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute boshqaruv paneli" width="820"/>
 
 <br/>
 <br/>
 
-# 🚀 OmniRoute — Bepul AI Shlyuzi
+# 🚀 OmniRoute — Bepul AI shlyuzi
 
-**Created by [Diego Souza](https://github.com/diegosouzapw)**
+**[Diego Souza](https://github.com/diegosouzapw) tomonidan yaratilgan**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Kod yozishni to‘xtatmang. Har bir AI vositasi → 380 ta provayder — 150+ bepul — bitta endpoint orqali. Claude Code, Codex, Cursor, Cline, Copilot va Antigravity-ni BEPUL Claude / GPT / Gemini-ga avtomatik zaxira bilan ulang. RTK + Caveman asosidagi siqish 15–95% tokenlarni tejaydi (~89% o‘rtacha) — limitlarga yetmang. 380 ta AI provayder · 150+ bepul tarif · ~1.62 mlrd bepul token/oy · 20 ta marshrutlash strategiyasi · Boshlash uchun $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Dasturlashni hech qachon to‘xtatmang. Har bir AI vositasi → bitta endpoint orqali 380 ta provayder — 150+ tasi bepul. Claude Code, Codex, Cursor, Cline, Copilot va Antigravity → avtomatik zaxira yo‘naltirish bilan BEPUL Claude / GPT / Gemini’ga. RTK + Caveman’ning birgalikdagi siqishi tokenlarni 15–95% tejaydi (o‘rtacha ~89%) — limitlarga hech qachon yetib bormang. 380 ta AI provayderi · 150+ ta bepul tarif · oyiga ~1,62 mlrd bepul token · 20 ta yo‘naltirish strategiyasi · boshlash uchun $0."/>
 
 </div>
 
@@ -1286,7 +1286,7 @@ bitta jarayon xizmat koʻrsatadi, shu sababli hozircha faqat CLI uchun alohida p
 <br/>
 <div align="center">
 
-## 🛠️ Texnologiyalar toʻplami
+## 🛠️ Texnologik stek
 
 </div>
 
@@ -1295,18 +1295,18 @@ bitta jarayon xizmat koʻrsatadi, shu sababli hozircha faqat CLI uchun alohida p
   <tr><td nowrap><b>Ishlash muhiti</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Dasturlash tili</b></td><td>TypeScript 6.0 — <code>src/</code> va <code>open-sse/</code> bo‘ylab <b>100% TypeScript</b> (v2.0 dan beri yadroda nolta <code>any</code>)</td></tr>
   <tr><td nowrap><b>Freymvork</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Ma’lumotlar bazasi</b></td><td>better-sqlite3 (SQLite, WAL jurnallash) + LowDB (JSON merosi) — 147 ta domen moduli, 223 ta migratsiya</td></tr>
+  <tr><td nowrap><b>Ma’lumotlar bazasi</b></td><td>better-sqlite3 (SQLite, WAL jurnallash) + LowDB (JSON legacy) — 147 ta domen moduli, 222 ta migratsiya</td></tr>
   <tr><td nowrap><b>Xotira</b></td><td>SQLite FTS5 to‘liq matnli qidiruvi + int8-kvantlangan vektorli embeddinglar, tiplashtirilgan so‘nish</td></tr>
-  <tr><td nowrap><b>Sxemalar</b></td><td>Zod 4 — MCP vositalari kiritish/chiqarishini tekshirish + API shartnomalari</td></tr>
+  <tr><td nowrap><b>Sxemalar</b></td><td>Zod 4 — MCP vositalari kiritish/chiqarishini tekshirish + API kontraktlari</td></tr>
   <tr><td nowrap><b>Protokollar</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>Oqimli uzatish</b></td><td>Server tomonidan yuboriladigan hodisalar (SSE) + WebSocket ko‘prigi (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Siqish</b></td><td>12 ta dvigateldan iborat pipeline — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Autentifikatsiya va xavfsizlik</b></td><td>OAuth 2.0 (PKCE) + JWT + API kalitlari + MCP doirasidagi autentifikatsiya · Saqlanayotgan ma’lumotlar uchun AES-256-GCM · DOMPurify</td></tr>
+  <tr><td nowrap><b>Siqish</b></td><td>12 dvigatelli pipeline — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Autentifikatsiya va xavfsizlik</b></td><td>OAuth 2.0 (PKCE) + JWT + API kalitlari + MCP doirasidagi autentifikatsiya · Saqlangan ma’lumotlar uchun AES-256-GCM · DOMPurify</td></tr>
   <tr><td nowrap><b>Yashirinlik</b></td><td>wreq-js — JA3 / JA4 TLS fingerprint taqlidi, 3 darajali proksi</td></tr>
-  <tr><td nowrap><b>Barqarorlik</b></td><td>Avtomatik uzgich, eksponensial kechikish, bir vaqtdagi ko‘plab so‘rovlarning oldini olish, avtomatik kombinatsiyali o‘zini tiklash</td></tr>
-  <tr><td nowrap><b>Jurnallash</b></td><td>pino — so‘rov konteksti bilan tuzilgan JSON jurnallari</td></tr>
-  <tr><td nowrap><b>Sinovdan o‘tkazish</b></td><td>Node.js test runner + Vitest — 8 400 dan ortiq kuzatiladigan test fayllari bo‘ylab <b>60 000 dan ortiq statik test deklaratsiyasi</b> (unit, integratsion, E2E, xavfsizlik, ekotizim)</td></tr>
-  <tr><td nowrap><b>Platformalar</b></td><td>Ish stoli (Electron) · Android (Termux) · PWA (istalgan brauzer)</td></tr>
+  <tr><td nowrap><b>Barqarorlik</b></td><td>O‘chirgich, eksponensial kechikish, bir vaqtdagi ortiqcha yuklanishga qarshi himoya, avtomatik kombinatsiyali o‘z-o‘zini tiklash</td></tr>
+  <tr><td nowrap><b>Jurnallash</b></td><td>pino — so‘rov konteksti bilan tizimli JSON jurnallari</td></tr>
+  <tr><td nowrap><b>Testlash</b></td><td>Node.js test runner + Vitest — 8 400 dan ortiq kuzatiladigan test fayllari bo‘ylab <b>60 000 dan ortiq statik test deklaratsiyasi</b> (unit, integratsion, E2E, xavfsizlik, ekotizim)</td></tr>
+  <tr><td nowrap><b>Platformalar</b></td><td>Desktop (Electron) · Android (Termux) · PWA (istalgan brauzer)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — reliz paytida avtomatik npm nashri + Docker Hub</td></tr>
   <tr><td nowrap><b>Havolalar</b></td><td><a href="https://omniroute.online">Veb-sayt</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
@@ -1800,15 +1800,15 @@ OmniRoute buyuk loyihalar yelkasida qurilgan. U **[9router](https://github.com/d
 
 ## 📄 Litsenziya
 
-MIT Litsenziyasi — batafsil ma'lumot uchun [LICENSE](LICENSE) ga qarang.
+MIT litsenziyasi — batafsil ma’lumot uchun [LICENSE](LICENSE) ga qarang.
 
 ---
 
 <div align="center">
 
-**[⬆ Yuqoriga qaytish](#-omniroute)** · Ochiq kodli AI hamjamiyati uchun ❤️ bilan yaratilgan.
+**[⬆ Yuqoriga qaytish](#-omniroute)** · Ochiq kodli AI hamjamiyati uchun ❤️ bilan yaratildi.
 
-<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT Litsenziyasi · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> tomonidan yaratilgan · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT litsenziyasi · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Hamjamiyat savol-javoblari uchun GitHub Discussions yoqilgan -->

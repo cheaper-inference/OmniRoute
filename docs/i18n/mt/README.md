@@ -6,16 +6,16 @@
 
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute Dashboard" width="820"/>
+<img src="./docs/screenshots/MainOmniRoute.png" alt="Dashboard ta’ OmniRoute" width="820"/>
 
 <br/>
 <br/>
 
-# 🚀 OmniRoute — Il-Gateway AI B'xejn
+# 🚀 OmniRoute — Il-Bieb Ħieles għall-IA
 
-**Created by [Diego Souza](https://github.com/diegosouzapw)**
+**Maħluq minn [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Qatt tieqafx tikteb il-kodiċi. Kull għodda AI → 380 fornitur — 150+ b’xejn — minn endpoint wieħed. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity f’Claude / GPT / Gemini B’XEJN b’fallback awtomatiku. RTK + Caveman stacked compression tiffranka 15–95% tokens (~89% medja) — qatt ma tilħaq il-limiti. 380 fornitur AI · 150+ livelli b’xejn · ~1.62B tokens b’xejn/kull xahar · 20 strateġija ta’ routing · $0 biex tibda."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Qatt tieqaf tikkodifika. Kull għodda tal-IA → 380 fornitur — 150+ b’xejn — permezz ta’ endpoint wieħed. Claude Code, Codex, Cursor, Cline, Copilot u Antigravity f’Claude / GPT / Gemini B’XEJN b’fallback awtomatiku. Il-kompressjoni kombinata ta’ RTK + Caveman tiffranka 15–95% tat-tokens (~89% bħala medja) — qatt ma tilħaq il-limiti. 380 fornitur tal-IA · 150+ pjan b’livell b’xejn · ~1.62B token b’xejn/xahar · 20 strateġija ta’ routing · $0 biex tibda."/>
 
 </div>
 
@@ -1286,29 +1286,29 @@ Metriċi kanoniċi fl-2026-10-18: **1.976 vidjo uniku** · **20.220.289 darba ma
 <br/>
 <div align="center">
 
-## 🛠️ Munzell Teknoloġiku
+## 🛠️ Munzell teknoloġiku
 
 </div>
 
 <table>
   <tr><th align="left">Saff</th><th align="left">Teknoloġija</th></tr>
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Lingwa</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> f’<code>src/</code> u <code>open-sse/</code> (l-ebda <code>any</code> fil-qalba minn v2.0)</td></tr>
+  <tr><td nowrap><b>Lingwa</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> f’<code>src/</code> u <code>open-sse/</code> (żero <code>any</code> fil-qalba minn v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Bażi tad-dejta</b></td><td>better-sqlite3 (SQLite, journaling WAL) + LowDB (JSON legacy) — 147-il modulu tad-dominju, 223 migrazzjoni</td></tr>
-  <tr><td nowrap><b>Memorja</b></td><td>Test sħiħ f’SQLite FTS5 + embeddings vettorjali kwantizzati għal int8, tnaqqis ittajpjat</td></tr>
+  <tr><td nowrap><b>Bażi tad-dejta</b></td><td>better-sqlite3 (SQLite, ġurnaling WAL) + LowDB (JSON legacy) — 147-il modulu tad-dominju, 222 migrazzjoni</td></tr>
+  <tr><td nowrap><b>Memorja</b></td><td>Fittex b’test sħiħ SQLite FTS5 + embeddings vettorjali kwantizzati f’int8, tħassir ittajpjat</td></tr>
   <tr><td nowrap><b>Schemas</b></td><td>Zod 4 — validazzjoni tal-I/O tal-għodod MCP + kuntratti tal-API</td></tr>
   <tr><td nowrap><b>Protokolli</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>Streaming</b></td><td>Server-Sent Events (SSE) + pont WebSocket (<code>/v1/ws</code>)</td></tr>
   <tr><td nowrap><b>Kompressjoni</b></td><td>Pipeline bi 12-il magna — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Awtentikazzjoni &amp; sigurtà</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + awtentikazzjoni MCP b’ambitu · AES-256-GCM waqt il-ħażna · DOMPurify</td></tr>
-  <tr><td nowrap><b>Stealth</b></td><td>wreq-js — impersonazzjoni tal-marki tas-swaba’ TLS JA3 / JA4, proxy bi 3 livelli</td></tr>
-  <tr><td nowrap><b>Reżiljenza</b></td><td>Circuit breaker, backoff esponenzjali, prevenzjoni ta’ thundering herd, awto-fejqan auto-combo</td></tr>
-  <tr><td nowrap><b>Logging</b></td><td>pino — logs JSON strutturati b’kuntest tat-talba</td></tr>
-  <tr><td nowrap><b>Testing</b></td><td>Node.js test runner + Vitest — <b>aktar minn 60,000 dikjarazzjoni ta’ test statiku</b> f’aktar minn 8,400 fajl tat-test ittraċċjat (unit, integration, E2E, security, ecosystem)</td></tr>
+  <tr><td nowrap><b>Awtentikazzjoni &amp; sigurtà</b></td><td>OAuth 2.0 (PKCE) + JWT + Ċwievet API + awtentikazzjoni MCP b’ambitu · AES-256-GCM waqt il-ħażna · DOMPurify</td></tr>
+  <tr><td nowrap><b>Stealth</b></td><td>wreq-js — impersonifikazzjoni tal-marki tas-swaba’ TLS JA3 / JA4, proxy bi 3 livelli</td></tr>
+  <tr><td nowrap><b>Reżiljenza</b></td><td>Interruttur taċ-ċirkwit, backoff esponenzjali, prevenzjoni tal-effett tal-merħla, awto-fejqan b’kombinazzjoni awtomatika</td></tr>
+  <tr><td nowrap><b>Logging</b></td><td>pino — logs JSON strutturati bil-kuntest tat-talba</td></tr>
+  <tr><td nowrap><b>Ittestjar</b></td><td>Node.js test runner + Vitest — <b>aktar minn 60,000 dikjarazzjoni ta’ test statiku</b> f’aktar minn 8,400 fajl tat-test irreġistrat (unità, integrazzjoni, E2E, sigurtà, ekosistema)</td></tr>
   <tr><td nowrap><b>Pjattaformi</b></td><td>Desktop (Electron) · Android (Termux) · PWA (kwalunkwe browser)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — pubblikazzjoni awtomatika fuq npm + Docker Hub mar-rilaxx</td></tr>
-  <tr><td nowrap><b>Links</b></td><td><a href="https://omniroute.online">Websajt</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>Links</b></td><td><a href="https://omniroute.online">Sit web</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">
@@ -1800,15 +1800,15 @@ OmniRoute tistrieħ fuq spallejn ġganti. Bdiet bħala fork ta’ **[9router](ht
 
 ## 📄 Liċenzja
 
-Liċenzja MIT - ara [LICENSE](LICENSE) għad-dettalji.
+Liċenzja MIT - ara [LIĊENZJA](LICENSE) għal aktar dettalji.
 
 ---
 
 <div align="center">
 
-**[⬆ Lura fil-quċċata](#-omniroute)** · Mibni b'❤️ għall-komunità open-source tal-IA.
+**[⬆ Lura għall-quċċata](#-omniroute)** · Mibni b’❤️ għall-komunità tal-IA open-source.
 
-<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Liċenzja MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Maħluq minn <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Liċenzja MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
-<!-- GitHub Discussions attivati għall-mistoqsijiet u tweġibiet tal-komunità -->
+<!-- Id-Diskussjonijiet ta’ GitHub huma attivati għall-mistoqsijiet u t-tweġibiet tal-komunità -->

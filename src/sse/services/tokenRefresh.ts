@@ -189,6 +189,37 @@ export const getAllAccessTokens = (userInfo: any) => _getAllAccessTokens(userInf
 // successful write committed. Weak keys do not extend the token object's lifetime.
 const committedCodexRefreshes = new WeakMap<object, CodexConnectionFence>();
 
+/** Reuse a shared rotation only while its committed owner/version is still current. */
+export function adoptCommittedCodexRefresh(
+  result: object,
+  expected: CodexConnectionFence | null
+): CodexConnectionFence | null {
+  const committed = committedCodexRefreshes.get(result);
+  if (!expected || !committed) return null;
+  if (
+    committed.connectionId !== expected.connectionId ||
+    committed.ownerEpoch !== expected.ownerEpoch ||
+    !isCodexConnectionFenceCurrent(committed)
+  ) {
+    throw new StaleCodexOperationError();
+  }
+  return committed;
+}
+
+/** Called inside getAccessToken's connection mutex, before its result reaches waiters. */
+export async function persistCodexRefresh(
+  result: Record<string, unknown>,
+  expected: CodexConnectionFence
+): Promise<void> {
+  if (adoptCommittedCodexRefresh(result, expected)) return;
+  const applied = await runWithCodexConnectionFence(expected, () =>
+    updateProviderCredentials(expected.connectionId, result, (committed) => {
+      committedCodexRefreshes.set(result, committed);
+    })
+  );
+  if (!applied) throw new StaleCodexOperationError();
+}
+
 // Local-specific: Update credentials in localDb
 export async function updateProviderCredentials(
   connectionId: string,
@@ -301,14 +332,8 @@ export async function checkAndRefreshToken(provider: string, credentials: any) {
 async function checkAndRefreshTokenInner(provider: string, credentials: any) {
   let resultFence = getCodexOperationFence(String(credentials.connectionId || ""));
   const adoptCommittedRefresh = (result: object): boolean => {
-    const committed = committedCodexRefreshes.get(result);
-    if (!resultFence || !committed) return false;
-    if (
-      committed.connectionId !== resultFence.connectionId ||
-      committed.ownerEpoch !== resultFence.ownerEpoch ||
-      !isCodexConnectionFenceCurrent(committed)
-    )
-      throw new StaleCodexOperationError();
+    const committed = adoptCommittedCodexRefresh(result, resultFence);
+    if (!committed) return false;
     resultFence = committed;
     return true;
   };
@@ -342,10 +367,12 @@ async function checkAndRefreshTokenInner(provider: string, credentials: any) {
       const persistCallback = connectionId
         ? async (result: any) => {
             if (adoptCommittedRefresh(result)) return;
-            const applied = await updateProviderCredentials(connectionId, result, (nextFence) => {
-              resultFence = nextFence;
-              committedCodexRefreshes.set(result, nextFence);
-            });
+            if (resultFence) {
+              await persistCodexRefresh(result, resultFence);
+              adoptCommittedRefresh(result);
+              return;
+            }
+            const applied = await updateProviderCredentials(connectionId, result);
             if (!applied && getCodexOperationFence(connectionId))
               throw new StaleCodexOperationError();
           }

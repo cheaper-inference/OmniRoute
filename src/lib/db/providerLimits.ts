@@ -162,7 +162,9 @@ export function setProviderLimitsCacheBatch(
   );
   const tx = db.transaction((items: typeof entries) => {
     for (const item of items) {
-      if (item.codexFence && !isCodexConnectionFenceCurrent(item.codexFence, true)) continue;
+      // A newer cooldown must not discard valid quota observations. Owner and
+      // credential revisions still fence out a replaced connection.
+      if (item.codexFence && !isCodexConnectionFenceCurrent(item.codexFence)) continue;
       insert.run(
         PROVIDER_LIMITS_CACHE_NAMESPACE,
         item.connectionId,
