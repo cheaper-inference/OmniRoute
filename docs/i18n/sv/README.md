@@ -6,14 +6,16 @@
 
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute Dashboard" width="820"/>
+<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute-instrumentpanel" width="820"/>
 
 <br/>
 <br/>
 
-# 🚀 OmniRoute — Den fria AI-gatewayen
+# 🚀 OmniRoute — Den kostnadsfria AI-gatewayen
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Sluta aldrig koda. Alla AI-verktyg → 380 leverantörer — 150+ gratis — via en enda endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity till GRATIS Claude / GPT / Gemini med automatisk fallback. RTK + Caveman staplad komprimering sparar 15–95% tokens (~89% i snitt) — nå aldrig gränser. 380 AI-leverantörer · 150+ gratisnivåer · ~1,62 miljarder gratis tokens/mån · 20 routningsstrategier · 0 kr att börja."/>
+**Skapad av [Diego Souza](https://github.com/diegosouzapw)**
+
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Sluta aldrig koda. Alla AI-verktyg → 380 leverantörer — 150+ kostnadsfria — via en enda endpoint. Claude Code, Codex, Cursor, Cline, Copilot och Antigravity till kostnadsfria Claude / GPT / Gemini med automatisk reservväxling. RTK + Caveman-staplad komprimering sparar 15–95 % av tokens (i genomsnitt ~89 %) — nå aldrig gränserna. 380 AI-leverantörer · 150+ kostnadsfria nivåer · ~1,62 miljarder kostnadsfria tokens/mån · 20 routningsstrategier · 0 $ för att komma igång."/>
 
 </div>
 
@@ -1298,22 +1300,22 @@ Kanoniska mätvärden den 2026-10-18: **1.976 unika videor** · **20.220.289 kä
 
 <table>
   <tr><th align="left">Lager</th><th align="left">Teknik</th></tr>
-  <tr><td nowrap><b>Körmiljö</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Körningstid</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Språk</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> i <code>src/</code> och <code>open-sse/</code> (ingen <code>any</code> i kärnan sedan v2.0)</td></tr>
   <tr><td nowrap><b>Ramverk</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Databas</b></td><td>better-sqlite3 (SQLite, WAL-journalföring) + LowDB (äldre JSON) — 147 domänmoduler, 220 migreringar</td></tr>
-  <tr><td nowrap><b>Minne</b></td><td>Fulltextsökning med SQLite FTS5 + int8-kvantiserade vektorinbäddningar, typad avklingning</td></tr>
+  <tr><td nowrap><b>Databas</b></td><td>better-sqlite3 (SQLite, WAL-journalföring) + LowDB (äldre JSON) — 147 domänmoduler, 221 migreringar</td></tr>
+  <tr><td nowrap><b>Minne</b></td><td>SQLite FTS5-fulltextsökning + int8-kvantiserade vektorinbäddningar, typad avklingning</td></tr>
   <tr><td nowrap><b>Schema</b></td><td>Zod 4 — validering av MCP-verktygens I/O + API-kontrakt</td></tr>
   <tr><td nowrap><b>Protokoll</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>Strömning</b></td><td>Server-Sent Events (SSE) + WebSocket-brygga (<code>/v1/ws</code>)</td></tr>
   <tr><td nowrap><b>Komprimering</b></td><td>Pipeline med 12 motorer — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Autentisering &amp; säkerhet</b></td><td>OAuth 2.0 (PKCE) + JWT + API-nycklar + MCP-begränsad autentisering · AES-256-GCM i vila · DOMPurify</td></tr>
-  <tr><td nowrap><b>Smygläge</b></td><td>wreq-js — imitation av JA3 / JA4 TLS-fingeravtryck, proxy i tre nivåer</td></tr>
-  <tr><td nowrap><b>Robusthet</b></td><td>Kretsbrytare, exponentiell backoff, skydd mot överbelastning från samtidiga förfrågningar, automatisk kombinerad självläkning</td></tr>
-  <tr><td nowrap><b>Loggning</b></td><td>pino — strukturerade JSON-loggar med kontext för förfrågningar</td></tr>
-  <tr><td nowrap><b>Testning</b></td><td>Node.js test runner + Vitest — <b>över 60 000 statiska testdeklarationer</b> i över 8 400 spårade testfiler (enhetstester, integrationstester, E2E, säkerhet, ekosystem)</td></tr>
+  <tr><td nowrap><b>Autentisering och säkerhet</b></td><td>OAuth 2.0 (PKCE) + JWT + API-nycklar + MCP-omfattningsbegränsad autentisering · AES-256-GCM vid vila · DOMPurify</td></tr>
+  <tr><td nowrap><b>Förklädnad</b></td><td>wreq-js — JA3 / JA4 TLS-fingeravtrycksimpersonering, proxy i tre nivåer</td></tr>
+  <tr><td nowrap><b>Återhämtningsförmåga</b></td><td>Kretsbrytare, exponentiell backoff, skydd mot flockbeteende, automatisk kombinationsbaserad självläkning</td></tr>
+  <tr><td nowrap><b>Loggning</b></td><td>pino — strukturerade JSON-loggar med begärandekontext</td></tr>
+  <tr><td nowrap><b>Testning</b></td><td>Node.js-testkörning + Vitest — <b>60 000+ statiska testdeklarationer</b> i över 8 400 spårade testfiler (enhets-, integrations-, E2E-, säkerhets- och ekosystemtester)</td></tr>
   <tr><td nowrap><b>Plattformar</b></td><td>Skrivbord (Electron) · Android (Termux) · PWA (valfri webbläsare)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — automatisk publicering till npm + Docker Hub vid release</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — automatisk npm-publicering + Docker Hub vid release</td></tr>
   <tr><td nowrap><b>Länkar</b></td><td><a href="https://omniroute.online">Webbplats</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
@@ -1806,15 +1808,15 @@ OmniRoute står på jättars axlar. Det började som en fork av **[9router](http
 
 ## 📄 Licens
 
-MIT-licens – se [LICENSE](LICENSE) för detaljer.
+MIT-licens – se [LICENSE](LICENSE) för mer information.
 
 ---
 
 <div align="center">
 
-**[⬆ Tillbaka till toppen](#-omniroute)** · Byggt med ❤️ för AI-gemenskapen med öppen källkod.
+**[⬆ Tillbaka till toppen](#-omniroute)** · Byggt med ❤️ för open source-AI-communityn.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT-licens · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Skapad av <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT-licens · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
-<!-- GitHub Discussions aktiverat för frågor och svar i communityn -->
+<!-- GitHub Discussions är aktiverat för frågor och svar från communityn -->

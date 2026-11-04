@@ -567,6 +567,9 @@ export function validateTranslatedChunk(source, output) {
   if (fences[0] !== fences[1]) problems.push(`code fences ${fences[1]}/${fences[0]}`);
   const rows = [countLines(/^\s*\|/, source), countLines(/^\s*\|/, text)];
   if (rows[0] !== rows[1]) problems.push(`table rows ${rows[1]}/${rows[0]}`);
+  else problems.push(...tableCellProblems(source, text));
+  const refs = issueRefProblem(source, text);
+  if (refs) problems.push(refs);
   const meta = META_PROSE.filter((re) => countMatches(re, text) > countMatches(re, source));
   if (meta.length) problems.push(`meta-prose ${meta.map((re) => re.source).join(", ")}`);
   const lost = lostInlineCode(source, text);
@@ -580,6 +583,59 @@ export function validateTranslatedChunk(source, output) {
   const leaked = countMatches(LEAKED_PLACEHOLDER, text) - countMatches(LEAKED_PLACEHOLDER, source);
   if (leaked > 0) problems.push(`leaked translator placeholder x${leaked}`);
   return { text, problems };
+}
+
+// GitHub issue / PR references are literals a mirror test may pin (`#15281` in QUALITY_GATES.md's
+// check:cycles row): the Google engine wrote `# 15281` in six locales on #18795. The output must
+// carry the same multiset as the source; order may change with the sentence.
+const ISSUE_REF = /(?<![\w&])#\d+(?!\d)/g;
+
+function issueRefProblem(source, translated) {
+  const tally = (text) => {
+    const counts = new Map();
+    for (const [ref] of text.matchAll(ISSUE_REF)) counts.set(ref, (counts.get(ref) ?? 0) + 1);
+    return counts;
+  };
+  const before = tally(source);
+  const after = tally(translated);
+  const changed = [...new Set([...before.keys(), ...after.keys()])]
+    .filter((ref) => (before.get(ref) ?? 0) !== (after.get(ref) ?? 0))
+    .map((ref) => `${ref} ${after.get(ref) ?? 0}/${before.get(ref) ?? 0}`);
+  if (!changed.length) return null;
+  return `issue refs ${changed.slice(0, 4).join(", ")}${changed.length > 4 ? ` (+${changed.length - 4})` : ""}`;
+}
+
+// Cell separators of one table row: unescaped pipes outside code spans, and escaped pipes apart.
+// The row-count check alone let a row through that gained a cell, and the Google engine escapes
+// a pipe the translator writes (`or` answered the danda as `|`, shipped as `\|` on #18795), so
+// the cell count holds there and only the escaped count moves.
+function tableRowShape(row) {
+  let cells = 0;
+  let escaped = 0;
+  let tick = false;
+  for (let i = 0; i < row.length; i++) {
+    if (row[i] === "\\" && row[i + 1] === "|") {
+      escaped++;
+      i++;
+    } else if (row[i] === "`") tick = !tick;
+    else if (row[i] === "|" && !tick) cells++;
+  }
+  return { cells, escaped };
+}
+
+function tableCellProblems(source, translated) {
+  const rowsOf = (text) => text.split("\n").filter((l) => /^\s*\|/.test(l));
+  const src = rowsOf(source);
+  const out = rowsOf(translated);
+  const bad = [];
+  for (let i = 0; i < src.length; i++) {
+    const a = tableRowShape(src[i]);
+    const b = tableRowShape(out[i] ?? "");
+    if (a.cells !== b.cells || a.escaped !== b.escaped) bad.push(i + 1);
+  }
+  if (!bad.length) return [];
+  const shown = bad.slice(0, 4).join(", ");
+  return [`table cells changed in row ${shown}${bad.length > 4 ? ` (+${bad.length - 4})` : ""}`];
 }
 
 // The Google engine's masking tokens (`<span translate="no">zqa</span>`, bare `zqi`, private-use
@@ -1252,6 +1308,30 @@ export function mergeStateUpdates(fresh, touched, fallback) {
   return base;
 }
 
+/**
+ * Move a source-level `source_hash` to the current source hash when EVERY docs locale already
+ * records that hash — the mirrors were brought up to date outside this runner (a hand re-sync
+ * that updated only the locale records, #18824). With no unit left to translate, nothing else
+ * would ever move the source-level hash and the drift check would report `source-changed`
+ * forever (refresh run 41636350056). A locale that lags, failed or has no record blocks the
+ * heal, so a source whose locales did not all translate is never marked as done.
+ * `currentHashes` maps rel → sha256 of the source; `locales` is the full docs locale list.
+ * Mutates `state`; returns the healed rels.
+ */
+export function healSourceHashes(state, currentHashes, locales) {
+  const healed = [];
+  if (!locales.length) return healed;
+  for (const [rel, hash] of currentHashes) {
+    const entry = state?.sources?.[rel];
+    if (!entry || entry.source_hash === hash) continue;
+    if (locales.every((locale) => entry.locales?.[locale]?.source_hash === hash)) {
+      entry.source_hash = hash;
+      healed.push(rel);
+    }
+  }
+  return healed;
+}
+
 async function main() {
   const opts = parseArgs(process.argv);
   const config = await loadConfig();
@@ -1267,7 +1347,8 @@ async function main() {
   }
 
   const docsExcluded = new Set(config.docsExcluded ?? ["en"]);
-  let targetLocales = config.locales.map((l) => l.code).filter((code) => !docsExcluded.has(code));
+  const docsLocales = config.locales.map((l) => l.code).filter((code) => !docsExcluded.has(code));
+  let targetLocales = docsLocales;
   if (opts.locales) {
     targetLocales = targetLocales.filter((code) => opts.locales.includes(code));
     const missing = opts.locales.filter((c) => !config.locales.some((l) => l.code === c));
@@ -1497,7 +1578,12 @@ async function main() {
   } catch (err) {
     logWarn(`${err.message} at save time — merging into this run's snapshot instead`);
   }
-  await saveState(mergeStateUpdates(fresh, touched, state));
+  const merged = mergeStateUpdates(fresh, touched, state);
+  const currentHashes = new Map([...sourceHashes].map(([rel, { hash }]) => [rel, hash]));
+  for (const rel of healSourceHashes(merged, currentHashes, docsLocales)) {
+    logInfo(`${rel}: every locale already records the current source — source hash updated`);
+  }
+  await saveState(merged);
 
   const elapsedSec = ((Date.now() - startMs) / 1000).toFixed(1);
   logInfo(

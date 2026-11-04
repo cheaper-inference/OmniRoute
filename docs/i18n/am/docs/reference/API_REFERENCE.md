@@ -1439,7 +1439,7 @@ GET /api/system/version
 
 ---
 
-## የድምጽ ወደ ጽሑፍ መቀየር
+## የድምጽ ጽሑፍ መቀየር
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1447,7 +1447,9 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-ማንኛውንም የተዋቀረ STT አቅራቢ በመጠቀም የድምጽ ፋይሎችን ወደ ጽሑፍ ይቀይሩ። የመንገዱ የመጀመሪያ ክፍል ቤተኛውን አቅራቢ ይመርጣል (`openai/…`, `deepgram/…`)። የሌላ አቅራቢን ሞዴል እንደገና የሚያቀርቡ ጌትዌዮች ብቁ መለያ ይጠቀማሉ
+የተዋቀረ ማንኛውንም STT አቅራቢ በመጠቀም የድምጽ ፋይሎችን ወደ ጽሑፍ ይቀይሩ። የመጀመሪያው የመንገድ
+ክፍል ቤተኛውን አቅራቢ ይመርጣል (`openai/…`, `deepgram/…`)። የሌላ አቅራቢን
+ሞዴል እንደገና የሚያቀርቡ ጌትዌዮች ብቁ መለያ ይጠቀማሉ
 (`openrouter/deepgram/nova-3`)።
 
 **ጥያቄ፦**
@@ -1472,10 +1474,19 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 **የሞዴል መለያዎች ምሳሌዎች፦** `openai/whisper-1` (የOpenAI ቁልፍ ያስፈልገዋል)፣
 `openrouter/deepgram/nova-3` (የOpenRouter ቁልፍ ያስፈልገዋል)፣
-`deepgram/nova-3` (ቤተኛ የDeepgram ቁልፍ ያስፈልገዋል)። ብቻውን የሚላክ
+`deepgram/nova-3` (ቤተኛ የDeepgram ቁልፍ ያስፈልገዋል)። ባዶ
 `deepgram/nova-3` ጥያቄ OpenRouterን **አይጠቀምም**።
 
 **የሚደገፉ ቅርጸቶች፦** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`)፦** በGemini Live
+WebSocket በኩል በፋይል ሁነታ የሚከናወን የድምጽ ጽሑፍ መቀየር ነው
+(የGemini API ቁልፍ ያስፈልገዋል)። ስቀሉ በ
+`ffmpeg` ወደ 16 kHz ሞኖ PCM ይቀየራል (`PATH` ላይ መኖር አለበት፣ ፋይሉ አስቀድሞ 16 kHz ሞኖ PCM WAV ካልሆነ በስተቀር)፣ ወደ ክፍለ ጊዜው ይላካል እና
+የመጨረሻ ጽሑፉ እንደ `{ "text": "..." }` ይመለሳል። እንደ አማራጭ የሚቀርቡት
+`language` እና `prompt` የቅጽ መስኮች ወደ አገልግሎቱ ይተላለፋሉ። ገደቦች፦ ከ25 MiB በላይ የሆኑ ስቀላዎች ወይም ከ10 ደቂቃ በላይ የሚረዝሙ ከተፈቱ የድምጽ ፋይሎች
+`413` ምላሽ ያገኛሉ፤ ከ60 ሰከንድ በላይ የሚፈጅ ለውጥ ይቋረጣል እና `504` ምላሽ ይሰጣል። የAPI ቁልፉ የሚላከው በ
+`x-goog-api-key` ራስጌ ብቻ ነው፤ በWebSocket URL ውስጥ በፍጹም አይላክም።
 
 ---
 
@@ -1551,7 +1562,7 @@ GET /api/telemetry/summary
 ## በጀት
 
 ```bash
-# የሁሉም API ቁልፎች የበጀት ሁኔታን ያግኙ
+# ለሁሉም API ቁልፎች የበጀት ሁኔታን ያግኙ
 GET /api/usage/budget
 
 # በጀት ያዘጋጁ ወይም ያዘምኑ
@@ -1568,7 +1579,7 @@ Content-Type: application/json
 }
 ```
 
-> **የስኪማ ማስታወሻዎች** (`setBudgetSchema`)፦ `apiKeyId` ግዴታ ነው፤ ከ`dailyLimitUsd`፣ `weeklyLimitUsd` ወይም `monthlyLimitUsd` ቢያንስ አንዱ ከዜሮ በላይ መሆን አለበት። አማራጭ መስኮች፦ `warningThreshold` (0–1)፣ `resetInterval` (`daily` | `weekly` | `monthly`)፣ `resetTime` (`HH:MM`)። የቆየው `{keyId, limit, period}` ቅርጽ `400 Bad Request` ይመልሳል።
+> **የስኪማ ማስታወሻዎች** (`setBudgetSchema`): `apiKeyId` ግዴታ ነው፤ ከ`dailyLimitUsd`፣ `weeklyLimitUsd` ወይም `monthlyLimitUsd` ውስጥ ቢያንስ አንዱ ከዜሮ በላይ መሆን አለበት። አማራጭ መስኮች፦ `warningThreshold` (0–1)፣ `resetInterval` (`daily` | `weekly` | `monthly`)፣ `resetTime` (`HH:MM`)። የቆየው `{keyId, limit, period}` ቅርጽ `400 Bad Request` ይመልሳል።
 
 ## የቶከን ገደቦች
 

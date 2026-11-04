@@ -11,9 +11,11 @@
 <br/>
 <br/>
 
-# 🚀 OmniRoute — Bezmaksas AI vārteja
+# 🚀 OmniRoute — Bezmaksas MI vārteja
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nekad nepārtrauc kodēt. Katrs AI rīks → 380 nodrošinātāji — 150+ bezmaksas — caur vienu galapunktu. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity uz BEZMAKSAS Claude / GPT / Gemini ar automātisku pārsūtīšanu. RTK + Caveman apvienotā kompresija ietaupa 15–95% tokenu (~89% vidēji) — nekad nesasniedz limitus. 380 AI nodrošinātāji · 150+ bezmaksas līmeņi · ~1,62B bezmaksas tokenu/mēn · 20 maršrutēšanas stratēģijas · $0, lai sāktu."/>
+**Izveidojis [Diego Souza](https://github.com/diegosouzapw)**
+
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nekad nepārtrauc programmēt. Katrs MI rīks → 380 pakalpojumu sniedzēji — vairāk nekā 150 bezmaksas — izmantojot vienu galapunktu. Claude Code, Codex, Cursor, Cline, Copilot un Antigravity kļūst par BEZMAKSAS Claude / GPT / Gemini ar automātisku atkāpšanos. RTK + Caveman kombinētā saspiešana ietaupa 15–95% marķieru (~89% vidēji) — nekad nepārsniedziet ierobežojumus. 380 MI pakalpojumu sniedzēji · vairāk nekā 150 bezmaksas plānu · ~1,62 miljardi bezmaksas marķieru mēnesī · 20 maršrutēšanas stratēģijas · $0, lai sāktu."/>
 
 </div>
 
@@ -1289,22 +1291,22 @@ Kanoniskie rādītāji 2026-10-18: **1.976 unikāli videoklipi** · **20.220.289
 
 <table>
   <tr><th align="left">Slānis</th><th align="left">Tehnoloģija</th></tr>
-  <tr><td nowrap><b>Izpildvide</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Izpildlaiks</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Valoda</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> visā <code>src/</code> un <code>open-sse/</code> (kopš v2.0 kodolā nav neviena <code>any</code>)</td></tr>
-  <tr><td nowrap><b>Ietvars</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Datubāze</b></td><td>better-sqlite3 (SQLite, WAL žurnalēšana) + LowDB (mantots JSON) — 147 domēna moduļi, 220 migrācijas</td></tr>
-  <tr><td nowrap><b>Atmiņa</b></td><td>SQLite FTS5 pilnteksta meklēšana + int8 kvantizēti vektoru iegulumi, tipizēta novecošana</td></tr>
+  <tr><td nowrap><b>ietvars</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>Datu bāze</b></td><td>better-sqlite3 (SQLite, WAL žurnalēšana) + LowDB (mantots JSON) — 147 domēna moduļi, 221 migrācija</td></tr>
+  <tr><td nowrap><b>Atmiņa</b></td><td>SQLite FTS5 pilnteksta meklēšana + int8 kvantizēti vektoru iegulumi, tipizēta noārdīšanās</td></tr>
   <tr><td nowrap><b>Shēmas</b></td><td>Zod 4 — MCP rīku I/O validācija + API līgumi</td></tr>
   <tr><td nowrap><b>Protokoli</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>Straumēšana</b></td><td>Servera nosūtīti notikumi (SSE) + WebSocket tilts (<code>/v1/ws</code>)</td></tr>
   <tr><td nowrap><b>Saspiešana</b></td><td>12 dzinēju konveijers — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Autentifikācija &amp; drošība</b></td><td>OAuth 2.0 (PKCE) + JWT + API atslēgas + MCP tvēruma autentifikācija · AES-256-GCM miera stāvoklī · DOMPurify</td></tr>
+  <tr><td nowrap><b>Autentifikācija un drošība</b></td><td>OAuth 2.0 (PKCE) + JWT + API atslēgas + MCP tvēruma autentifikācija · AES-256-GCM miera stāvoklī · DOMPurify</td></tr>
   <tr><td nowrap><b>Maskēšanās</b></td><td>wreq-js — JA3 / JA4 TLS pirkstu nospiedumu imitācija, 3 līmeņu starpniekserveris</td></tr>
-  <tr><td nowrap><b>Noturība</b></td><td>Ķēdes pārtraucējs, eksponenciāla atkāpšanās, aizsardzība pret vienlaicīgu pieprasījumu pieplūdumu, automātiska kombināciju pašatkopšana</td></tr>
+  <tr><td nowrap><b>Noturība</b></td><td>Slēdža pārtraucējs, eksponenciāla atkāpšanās, pret stampēšanās pūļa efektu, automātiska kombinēta pašatjaunošanās</td></tr>
   <tr><td nowrap><b>Žurnalēšana</b></td><td>pino — strukturēti JSON žurnāli ar pieprasījuma kontekstu</td></tr>
-  <tr><td nowrap><b>Testēšana</b></td><td>Node.js testu palaidējs + Vitest — <b>vairāk nekā 60 000 statisku testu deklarāciju</b> vairāk nekā 8 400 izsekotos testu failos (vienību, integrācijas, E2E, drošības, ekosistēmas)</td></tr>
+  <tr><td nowrap><b>Testēšana</b></td><td>Node.js testu palaidējs + Vitest — <b>vairāk nekā 60 000 statisku testu deklarāciju</b> vairāk nekā 8 400 uzskaitītos testu failos (vienību, integrācijas, E2E, drošības, ekosistēmas)</td></tr>
   <tr><td nowrap><b>Platformas</b></td><td>Dators (Electron) · Android (Termux) · PWA (jebkura pārlūkprogramma)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — automātiska publicēšana npm + Docker Hub laidiena laikā</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — automātiska npm publicēšana + Docker Hub izlaiduma laikā</td></tr>
   <tr><td nowrap><b>Saites</b></td><td><a href="https://omniroute.online">Tīmekļa vietne</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
@@ -1797,15 +1799,15 @@ OmniRoute balstās uz milžu pleciem. Tas sākās kā **[9router](https://github
 
 ## 📄 Licence
 
-MIT licence — sīkāku informāciju skatiet [LICENSE](LICENSE).
+MIT licence — skatiet [LICENSE](LICENSE), lai iegūtu plašāku informāciju.
 
 ---
 
 <div align="center">
 
-**[⬆ Atpakaļ uz augšu](#-omniroute)** · Izveidots ar ❤️ atvērtā koda AI kopienai.
+**[⬆ Atgriezties augšā](#-omniroute)** · Izveidots ❤️ ar atvērtā pirmkoda MI kopienai.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT licence · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Izveidoja <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT licence · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
-<!-- GitHub Discussions iespējotas kopienas jautājumiem un atbildēm -->
+<!-- GitHub Discussions iespējots kopienas jautājumiem un atbildēm -->

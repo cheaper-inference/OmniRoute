@@ -33,7 +33,7 @@ export function buildProxyTypes(socks5Enabled: boolean) {
     : ALL_PROXY_TYPES.filter((type) => type.value !== "socks5");
 }
 
-type ProxyConfigLevel = "global" | "provider" | "combo" | "key";
+export type ProxyConfigLevel = "global" | "provider" | "combo" | "key";
 
 type ProxyRegistryItem = {
   id: string;

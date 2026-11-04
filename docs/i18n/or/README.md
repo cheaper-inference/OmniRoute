@@ -6,14 +6,16 @@
 
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute Dashboard" width="820"/>
+<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute ଡ୍ୟାସବୋର୍ଡ" width="820"/>
 
 <br/>
 <br/>
 
 # 🚀 OmniRoute — ମାଗଣା AI ଗେଟୱେ
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — କେବେ ଥମ୍ବନ୍ତୁ ନାହିଁ କୋଡିଂ। ପ୍ରତ୍ୟେକ AI ଟୁଲ → ୩୮୦ଟି ପ୍ରଭାଇଡର୍ — ୧୫୦+ ମାଗଣା — ଗୋଟିଏ ଏଣ୍ଡପଏଣ୍ଟ ଦ୍ୱାରା। Claude Code, Codex, Cursor, Cline, Copilot & Antigravity କୁ ମାଗଣା Claude / GPT / Gemini ସହିତ ଅଟୋ-ଫଲ୍ବ୍ୟାକ୍ ମାଧ୍ୟମରେ। RTK + Caveman ଷ୍ଟ୍ୟାକ୍ କମ୍ପ୍ରେସନ୍ ୧୫–୯୫% ଟୋକେନ୍ ସଞ୍ଚୟ କରେ (~୮୯% ଔସତ) — କେବେ ଲିମିଟ୍ ରେ ପହଞ୍ଚନ୍ତୁ ନାହିଁ। ୩୮୦ AI ପ୍ରଭାଇଡର୍ · ୧୫୦+ ମାଗଣା ଟିଅର୍ · ~୧.୬୨B ମାଗଣା ଟୋକେନ୍/ମାସ୍ · ୨୦ଟି ରାଉଟିଂ ଷ୍ଟ୍ରାଟେଜି · ଆରମ୍ଭ କରିବାକୁ $0।"/>
+**ସୃଷ୍ଟିକର୍ତ୍ତା: [Diego Souza](https://github.com/diegosouzapw)**
+
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — କେବେ କୋଡିଂ ବନ୍ଦ କରନ୍ତୁ ନାହିଁ। ପ୍ରତ୍ୟେକ AI ଟୁଲ୍ → 380 ପ୍ରୋଭାଇଡର୍ — 150+ ମାଗଣା — ଗୋଟିଏ ଏଣ୍ଡପଏଣ୍ଟ୍ ମାଧ୍ୟମରେ। Claude Code, Codex, Cursor, Cline, Copilot ଏବଂ Antigravity କୁ auto-fallback ସହିତ ମାଗଣା Claude / GPT / Gemini ରେ ପରିଣତ କରନ୍ତୁ। RTK + Caveman ଷ୍ଟାକ୍ଡ୍ କମ୍ପ୍ରେସନ୍ 15–95% ଟୋକେନ୍ (~89% ହାରାହାରି) ସଞ୍ଚୟ କରେ — କେବେ ସୀମାରେ ପହଞ୍ଚିବେ ନାହିଁ। 380 AI ପ୍ରୋଭାଇଡର୍ · 150+ ମାଗଣା ଟିଅର୍ · ~1.62B ମାଗଣା ଟୋକେନ୍/ମାସ · 20ଟି ରାଉଟିଂ କୌଶଳ · ଆରମ୍ଭ ପାଇଁ $0।"/>
 
 </div>
 
@@ -1284,28 +1286,28 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ମଧ୍ୟ ଏ�
 <br/>
 <div align="center">
 
-## 🛠️ ଟେକ୍ ଷ୍ଟାକ୍
+## 🛠️ ପ୍ରଯୁକ୍ତି ଷ୍ଟାକ୍
 
 </div>
 
 <table>
   <tr><th align="left">ସ୍ତର</th><th align="left">ପ୍ରଯୁକ୍ତି</th></tr>
   <tr><td nowrap><b>ରନ୍ଟାଇମ୍</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>ଭାଷା</b></td><td>TypeScript 6.0 — <code>src/</code> ଏବଂ <code>open-sse/</code> ମଧ୍ୟରେ <b>100% TypeScript</b> (v2.0 ଠାରୁ କୋର୍ରେ ଶୂନ୍ୟ <code>any</code>)</td></tr>
+  <tr><td nowrap><b>ଭାଷା</b></td><td>TypeScript 6.0 — <code>src/</code> ଏବଂ <code>open-sse/</code> ଜୁଡ଼ି <b>100% TypeScript</b> (v2.0 ଠାରୁ କୋର୍ରେ ଶୂନ୍ୟ <code>any</code>)</td></tr>
   <tr><td nowrap><b>ଫ୍ରେମୱର୍କ</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ଡାଟାବେସ୍</b></td><td>better-sqlite3 (SQLite, WAL ଜର୍ନାଲିଂ) + LowDB (JSON ଲେଗାସି) — 147 ଡୋମେନ୍ ମଡ୍ୟୁଲ୍, 220 ମାଇଗ୍ରେସନ୍</td></tr>
-  <tr><td nowrap><b>ମେମୋରୀ</b></td><td>SQLite FTS5 ପୂର୍ଣ୍ଣ-ଟେକ୍ସଟ୍ + int8-କ୍ୱାଣ୍ଟାଇଜ୍ଡ୍ ଭେକ୍ଟର୍ ଏମ୍ବେଡିଂ, ଟାଇପ୍ଯୁକ୍ତ କ୍ଷୟ</td></tr>
-  <tr><td nowrap><b>ସ୍କିମା</b></td><td>Zod 4 — MCP ଟୁଲ୍ I/O ଭାଲିଡେସନ୍ + API କନ୍ଟ୍ରାକ୍ଟ</td></tr>
+  <tr><td nowrap><b>ଡାଟାବେସ୍</b></td><td>better-sqlite3 (SQLite, WAL ଜର୍ନାଲିଂ) + LowDB (JSON ଲେଗେସି) — 147 ଡୋମେନ୍ ମଡ୍ୟୁଲ୍, 221 ମାଇଗ୍ରେସନ୍</td></tr>
+  <tr><td nowrap><b>ମେମୋରି</b></td><td>SQLite FTS5 ଫୁଲ୍-ଟେକ୍ସଟ୍ + int8-କ୍ୱାଣ୍ଟାଇଜ୍ଡ୍ ଭେକ୍ଟର୍ ଏମ୍ବେଡିଂ, ଟାଇପ୍ଡ୍ ଡିକେ</td></tr>
+  <tr><td nowrap><b>ସ୍କିମା</b></td><td>Zod 4 — MCP ଟୁଲ୍ I/O ଯାଞ୍ଚ + API କନ୍ଟ୍ରାକ୍ଟ</td></tr>
   <tr><td nowrap><b>ପ୍ରୋଟୋକଲ୍</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>ଷ୍ଟ୍ରିମିଂ</b></td><td>Server-Sent Events (SSE) + WebSocket ବ୍ରିଜ୍ (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>କମ୍ପ୍ରେସନ୍</b></td><td>12-ଇଞ୍ଜିନ୍ ପାଇପଲାଇନ୍ — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>ଅଥ୍ ଏବଂ ସୁରକ୍ଷା</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP ସ୍କୋପ୍ଡ୍ ଅଥ୍ · AES-256-GCM ଅବସ୍ଥିତ ଡାଟା ପାଇଁ · DOMPurify</td></tr>
+  <tr><td nowrap><b>କମ୍ପ୍ରେସନ୍</b></td><td>12-ଇଞ୍ଜିନ୍ ପାଇପ୍ଲାଇନ୍ — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>ପ୍ରମାଣୀକରଣ ଏବଂ ସୁରକ୍ଷା</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP ସ୍କୋପ୍ଡ୍ ଅଥ୍ · ସଂରକ୍ଷିତ ଅବସ୍ଥାରେ AES-256-GCM · DOMPurify</td></tr>
   <tr><td nowrap><b>ଷ୍ଟେଲ୍ଥ୍</b></td><td>wreq-js — JA3 / JA4 TLS ଫିଙ୍ଗରପ୍ରିଣ୍ଟ ଇମ୍ପର୍ସୋନେସନ୍, 3-ସ୍ତରୀୟ ପ୍ରକ୍ସି</td></tr>
-  <tr><td nowrap><b>ରେଜିଲିଏନ୍ସ</b></td><td>ସର୍କିଟ୍ ବ୍ରେକର୍, ଏକ୍ସପୋନେନ୍ସିଆଲ୍ ବ୍ୟାକ୍ଅଫ୍, ଆଣ୍ଟି-ଥଣ୍ଡରିଂ-ହର୍ଡ୍, auto-combo ସ୍ୱୟଂ-ସୁସ୍ଥତା</td></tr>
-  <tr><td nowrap><b>ଲଗିଂ</b></td><td>pino — ରିକ୍ୱେଷ୍ଟ୍ କନ୍ଟେକ୍ସ୍ଟ ସହିତ ଷ୍ଟ୍ରକ୍ଚର୍ଡ୍ JSON ଲଗ୍</td></tr>
-  <tr><td nowrap><b>ଟେଷ୍ଟିଂ</b></td><td>Node.js ଟେଷ୍ଟ୍ ରନର୍ + Vitest — 8,400+ ଟ୍ରାକ୍ କରାଯାଇଥିବା ଟେଷ୍ଟ୍ ଫାଇଲ୍ରେ <b>60,000+ ଷ୍ଟାଟିକ୍ ଟେଷ୍ଟ୍ ଘୋଷଣା</b> (ୟୁନିଟ୍, ଇଣ୍ଟିଗ୍ରେସନ୍, E2E, ସୁରକ୍ଷା, ଇକୋସିଷ୍ଟମ୍)</td></tr>
-  <tr><td nowrap><b>ପ୍ଲାଟଫର୍ମ୍</b></td><td>ଡେସ୍କଟପ୍ (Electron) · Android (Termux) · PWA (ଯେକୌଣସି ବ୍ରାଉଜର୍)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — ରିଲିଜ୍ ସମୟରେ ସ୍ୱୟଂଚାଳିତ npm ପ୍ରକାଶନ + Docker Hub</td></tr>
+  <tr><td nowrap><b>ରେଜିଲିଏନ୍ସ</b></td><td>ସର୍କିଟ୍ ବ୍ରେକର୍, ଏକ୍ସପୋନେନ୍ସିଆଲ୍ ବ୍ୟାକଅଫ୍, ଆଣ୍ଟି-ଥଣ୍ଡରିଂ-ହର୍ଡ୍, ସ୍ୱୟଂଚାଳିତ-କମ୍ବୋ ସେଲ୍ଫ୍-ହିଲିଂ</td></tr>
+  <tr><td nowrap><b>ଲଗିଂ</b></td><td>pino — ରିକ୍ୱେଷ୍ଟ କନ୍ଟେକ୍ସ୍ଟ ସହିତ ଗଠିତ JSON ଲଗ୍</td></tr>
+  <tr><td nowrap><b>ପରୀକ୍ଷଣ</b></td><td>Node.js ଟେଷ୍ଟ ରନର୍ + Vitest — 8,400+ ଟ୍ରାକ୍ କରାଯାଇଥିବା ଟେଷ୍ଟ ଫାଇଲ୍ରେ <b>60,000+ ଷ୍ଟାଟିକ୍ ଟେଷ୍ଟ ଘୋଷଣା</b> (ୟୁନିଟ୍, ଇଣ୍ଟିଗ୍ରେସନ୍, E2E, ସୁରକ୍ଷା, ଇକୋସିଷ୍ଟମ୍)</td></tr>
+  <tr><td nowrap><b>ପ୍ଲାଟଫର୍ମ</b></td><td>ଡେସ୍କଟପ୍ (Electron) · Android (Termux) · PWA (ଯେକୌଣସି ବ୍ରାଉଜର୍)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — ରିଲିଜ୍ ସମୟରେ ସ୍ୱୟଂଚାଳିତ npm ପବ୍ଲିଶ୍ + Docker Hub</td></tr>
   <tr><td nowrap><b>ଲିଙ୍କ୍</b></td><td><a href="https://omniroute.online">ୱେବସାଇଟ୍</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
@@ -1804,9 +1806,9 @@ MIT ଲାଇସେନ୍ସ - ବିବରଣୀ ପାଇଁ [LICENSE](LICENSE
 
 <div align="center">
 
-**[⬆ ଉପରକୁ ଫେରନ୍ତୁ](#-omniroute)** · ମୁକ୍ତ ଉତ୍ସ AI ସମ୍ପ୍ରଦାୟ ପାଇଁ ❤️ ସହିତ ନିର୍ମିତ।
+**[⬆ ଶୀର୍ଷକୁ ଫେରନ୍ତୁ](#-omniroute)** · ମୁକ୍ତ-ଉତ୍ସ AI ସମୁଦାୟ ପାଇଁ ❤️ ସହିତ ନିର୍ମିତ।
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT ଲାଇସେନ୍ସ · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub><a href="https://github.com/diegosouzapw">Diego Souza</a>ଙ୍କ ଦ୍ୱାରା ସୃଷ୍ଟି · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT ଲାଇସେନ୍ସ · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
-<!-- ସମ୍ପ୍ରଦାୟ ପ୍ରଶ୍ନ-ଉତ୍ତର ପାଇଁ GitHub Discussions ସକ୍ଷମ କରାଯାଇଛି -->
+<!-- ସମୁଦାୟ ପ୍ରଶ୍ନୋତ୍ତର ପାଇଁ GitHub Discussions ସକ୍ଷମ କରାଯାଇଛି -->

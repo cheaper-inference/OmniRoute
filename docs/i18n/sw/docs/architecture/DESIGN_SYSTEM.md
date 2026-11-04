@@ -119,7 +119,16 @@
 
 ## 5. Kusasisha kit
 
-`npm run check:ui-kit-upstream` inalinganisha toleo lililobandikwa katika `packages/ui-kit/UPSTREAM.md` na lebo mpya zaidi ya `v*` ya repo ya juu na huchapisha amri ya kusawazisha wakati toleo limetoka. Mtiririko wa kazi `UI Kit upstream watch` wa kila wiki (`.github/workflows/ui-kit-upstream-watch.yml`) huendesha hundi sawa na huweka suala moja la ufuatiliaji wazi wakati pini iko nyuma; repo ya juu ni ya faragha, kwa hivyo mtiririko wa kazi unahitaji ishara ya kusoma tu katika siri ya `UI_KIT_READ_TOKEN`. Wakati haiwezi kusoma juu ya mkondo (hakuna ishara, ishara ambayo iliacha kufanya kazi, au GitHub haipatikani) kukimbia hubaki kijani lakini huandika onyo na kuweka suala moja tofauti wazi, ambalo hujifunga mara moja kukimbia baadaye kunaweza kusoma juu ya mkondo tena.
+`npm run check:ui-kit-upstream` inalinganisha toleo lililobandikwa katika `packages/ui-kit/UPSTREAM.md` na lebo mpya zaidi ya `v*` ya repo ya juu na huchapisha amri ya kusawazisha wakati toleo limetoka.
+
+Mtiririko wa kila siku `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) huendesha hundi sawa. Wakati pini iko nyuma, `scripts/ci/ui-kit-sync-pr.sh` huweka PR moja ya usawazishaji wazi dhidi ya tawi la juu zaidi `release/vX.Y.Z`, kwenye tawi linaloviringishwa `chore/ui-kit-sync-latest`. Haiunganishi kamwe: kila toleo la kit bado linahitaji ukaguzi wa kuona kwenye VPS ya ndani. Tawi hujengwa upya wakati toleo jipya limetoka na kuachwa pekee vinginevyo. PR iliyofunguliwa iliyo na ahadi zinazosukumwa kwa mkono haibatiliwi, na PR ya toleo ambalo mtunza huduma alilifunga bila kuunganishwa husalia kufungwa hadi toleo jipya zaidi.
+
+Wakati hakuna PR inayoweza kufunguliwa (toleo la lengo limegandishwa, PR ina ahadi zilizosukumwa kwa mkono, PR ilifungwa, au hakuna tokeni PR iliyowekwa) mtiririko wa kazi huweka suala moja la ufuatiliaji wazi ambalo linasema kwa nini.
+
+Mtiririko wa kazi hutumia siri mbili:
+
+- `secrets.UI_KIT_READ_TOKEN`: tokeni ya kusoma tu kwa repo ya faragha ya juu ya mkondo. Wakati mtiririko wa kazi hauwezi kusoma juu ya mkondo (hakuna ishara, ishara ambayo iliacha kufanya kazi, au GitHub haiwezi kufikiwa) kukimbia hubaki kijani lakini huandika onyo na kuweka suala moja tofauti wazi, ambalo hujifunga mara moja kukimbia baadaye kunaweza kusoma juu ya mkondo tena.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: tokeni nzuri kwenye hazina hii yenye Yaliyomo na Vuta maombi ya kufikia kuandika. `GITHUB_TOKEN` chaguo-msingi haiwezi kuunda PRs hapa, na PR iliyofunguliwa haingesababisha CI. Bila ishara hii mtiririko wa kazi unasukuma tawi tu.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` inakili `src/` ya juu kwenye ahadi hiyo (`latest` = `v*` tag mpya zaidi) katika `packages/ui-kit/src`, inatumia badiliko moja linaloruhusiwa (hudondosha kiambishi tamati cha `.js` kutoka kwa uagizaji jamaa), na kuweka toleo la nafasi ya kazi katika `packages/ui-kit/package.json` na `package-lock.json` hadi moja ya juu. Kisha: kagua `git diff packages/ui-kit`, fanya kibali cha kuona kwa watoa huduma, mipangilio, michanganyiko, matumizi na sehemu ya mwisho katika mada zote mbili, endesha `npm run check:ui-kit-snapshot` na `npm run test:vitest:ui`, na ufungue PR na logi ya mabadiliko ya mkondo wa juu.
 
