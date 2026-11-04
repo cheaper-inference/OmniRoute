@@ -1,4 +1,5 @@
 import { projectFailureUsageErrorCode } from "./failureUsage.ts";
+import { isHedgeCancelledReasonError } from "../../services/combo/comboAbortReasons.ts";
 import { isPassiveCodex, recordRejectedToken } from "../../services/tokenRefresh/passiveCodex.ts";
 
 export { extractSystemRoleMessages, relocateDirectiveOnlyMessages } from "./claudeSystemRole.ts";
@@ -420,6 +421,36 @@ export async function runStreamingResponse(deps: StreamingDeps) {
           errorType: "account_semaphore_capacity",
           errorCode: semaphoreCode,
         },
+        carry: {
+          translatedBody,
+          currentModel,
+          effectiveServiceTier,
+          finalBody,
+          pipelineRecovered,
+          providerHeaders,
+          providerResponse,
+          providerUrl,
+        },
+      };
+    }
+    // A hedge-cancelled attempt was superseded by a sibling target (see
+    // COMBO_HEDGE_CANCELLED_REASON): the request it belonged to is served by
+    // the winner, so this attempt is neither a client abort nor an upstream
+    // failure. Falling through would persist it as 499 "Request aborted",
+    // making every status-keyed dashboard count internal hedge cancellations
+    // as client disconnects. Mirror the per-model timeout loser semantics
+    // (targetTimeoutRunner's status-599 sentinel): tear down quietly, persist
+    // nothing — the combo loop ignores this result, a sibling has already
+    // resolved the execution.
+    if (isHedgeCancelledReasonError(error)) {
+      streamController.handleError(createSafeAbortError());
+      return {
+        response: createErrorResult(
+          599,
+          "Superseded by hedge sibling",
+          null,
+          "hedge_cancelled"
+        ),
         carry: {
           translatedBody,
           currentModel,
