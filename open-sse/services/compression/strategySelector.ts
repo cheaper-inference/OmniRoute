@@ -43,7 +43,6 @@ import { adaptBodyForCompression } from "./bodyAdapter.ts";
 import {
   detectCachingContext,
   getCacheAwareStrategy,
-  mustKeepOpenCodeHistoryVerbatim,
   type CachingDetectionContext,
 } from "./cachingAware.ts";
 import { resolveCompressionPlan } from "./resolveCompressionPlan.ts";
@@ -252,12 +251,6 @@ export function selectCompressionPlan(
 
   // Apply caching-aware adjustments to the mode if body is provided
   if (body) {
-    // #18787: a new compression pass must never rewrite previously cached
-    // OpenCode tool output. Skip the plan rather than reporting a stacked
-    // pipeline that the execution guard will deliberately leave untouched.
-    if (mustKeepOpenCodeHistoryVerbatim(body, context)) {
-      return { ...plan, mode: "off", stackedPipeline: [] };
-    }
     const ctx = detectCachingContext(body, context);
     const cacheAware = getCacheAwareStrategy(plan.mode as CompressionMode, ctx);
     return { ...plan, mode: cacheAware.strategy as CompressionMode }; // ...plan preserves source
