@@ -166,3 +166,118 @@ test("catalog-backed enabled:false with no effort resolves to none and drops oth
   );
   assert.deepEqual(body.reasoning, { effort: "none" });
 });
+
+const catalogThinking = {
+  model: "gpt-5.6-sol",
+  supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
+  defaultThinkingEffort: "high",
+};
+
+const unusableEfforts: Array<[string, unknown]> = [
+  ["undefined", undefined],
+  ["null", null],
+  ["empty", ""],
+  ["blank", "   "],
+  ["number", 42],
+  ["object", {}],
+  ["array", []],
+];
+
+for (const [name, value] of unusableEfforts) {
+  for (const carrier of ["nested", "flat"]) {
+    test(`own ${name} metadata falls back to ${carrier} translated effort (#18746)`, () => {
+      const body: Record<string, unknown> = {
+        model: "gpt-5.6-sol",
+        ...(carrier === "nested"
+          ? { reasoning: { effort: "medium", summary: "auto" } }
+          : { reasoning_effort: "medium", reasoning: { summary: "auto" } }),
+      };
+      applyCodexReasoningSelection(
+        "gpt-5.6-sol",
+        body,
+        { ...catalogThinking, requestedThinkingEffort: value },
+        "low",
+        true
+      );
+      assert.deepEqual(body.reasoning, { effort: "medium", summary: "auto" });
+    });
+  }
+}
+
+test("missing effort metadata preserves translated effort over connection defaults", () => {
+  const body: Record<string, unknown> = { model: "gpt-5.6-sol", reasoning_effort: "medium" };
+  applyCodexReasoningSelection("gpt-5.6-sol", body, catalogThinking, "low", true);
+  assert.deepEqual(body.reasoning, { effort: "medium" });
+});
+
+for (const allowDefaults of [true, false]) {
+  test(`original native max is restored only in passthrough mode (allowDefaults=${allowDefaults})`, () => {
+    const body: Record<string, unknown> = {
+      model: "gpt-5.6-sol",
+      reasoning: { effort: "xhigh", summary: "auto" },
+    };
+    applyCodexReasoningSelection(
+      "gpt-5.6-sol",
+      body,
+      { ...catalogThinking, requestedThinkingEffort: "max" },
+      "low",
+      allowDefaults
+    );
+    assert.deepEqual(body.reasoning, {
+      effort: allowDefaults ? "max" : "xhigh",
+      summary: "auto",
+    });
+  });
+}
+
+for (const forcedEffort of [undefined, "low"]) {
+  test(`catalog suffix outranks explicit effort; server force outranks suffix (force=${forcedEffort})`, () => {
+    const body: Record<string, unknown> = {
+      model: "gpt-5.6-sol",
+      reasoning: { effort: "medium" },
+    };
+    applyCodexReasoningSelection(
+      "gpt-5.6-sol",
+      body,
+      { ...catalogThinking, requestedThinkingEffort: "medium", resolvedThinkingEffort: "high" },
+      "low",
+      true,
+      forcedEffort
+    );
+    assert.equal(body.model, "gpt-5.6-sol");
+    assert.deepEqual(body.reasoning, { effort: forcedEffort ?? "high" });
+  });
+}
+
+for (const disabled of [{ effort: "none" }, { enabled: false }]) {
+  test(`explicit ${JSON.stringify(disabled)} beats connection defaults with unusable metadata`, () => {
+    const body: Record<string, unknown> = { model: "gpt-5.6-sol", reasoning: disabled };
+    applyCodexReasoningSelection(
+      "gpt-5.6-sol",
+      body,
+      { ...catalogThinking, requestedThinkingEffort: undefined },
+      "low",
+      true
+    );
+    assert.deepEqual(body.reasoning, { effort: "none" });
+  });
+}
+
+const defaultCases = [
+  { connection: "low", catalog: "high", expected: "low" },
+  { connection: undefined, catalog: "high", expected: "high" },
+  { connection: undefined, catalog: undefined, expected: "medium" },
+];
+for (const { connection, catalog, expected } of defaultCases) {
+  test(`no-effort request uses connection=${connection}, catalog=${catalog}, fallback=${expected}`, () => {
+    const body: Record<string, unknown> = { model: "gpt-5.6-sol" };
+    applyCodexReasoningSelection(
+      "gpt-5.6-sol",
+      body,
+      { ...catalogThinking, defaultThinkingEffort: catalog },
+      connection,
+      true
+    );
+    assert.deepEqual(body.reasoning, { effort: expected });
+  });
+}
