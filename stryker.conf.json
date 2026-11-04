@@ -53,6 +53,7 @@
       "tests/unit/account-fallback-concurrency-429.test.ts",
       "tests/unit/cursor-entitlement-scope-17167.test.ts",
       "tests/unit/cursor-execute-error-stream.test.ts",
+      "tests/unit/anthropic-compatible-prefill.test.ts",
       "tests/unit/anthropic-fallback-policy-16406.test.ts",
       "tests/unit/combo-cooldown-wait-opt-out.test.ts",
       "tests/unit/combo-family-selected-connection-16223.test.ts",
