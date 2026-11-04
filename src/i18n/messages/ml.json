@@ -1112,7 +1112,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "OpenCode Zen/Go അഭ്യർത്ഥനകളിൽ OpenCode v2 CLI ക്ലയന്റ് ഫിംഗർപ്രിന്റ് അയയ്ക്കുക: opencode/latest/<2.x>/cli User-Agent, x-opencode-client cli എന്നിവയും, ഫ്രീ-ടയർ അഭ്യർത്ഥനകളിൽ v2 സെഷൻ ഹെഡറുകൾ, v2 CLI read/shell ടൂൾ സ്കീമകൾ എന്നിവയും അയയ്ക്കുക; tool_choice \"none\" അയയ്ക്കരുത്. ഡിഫോൾട്ടായി ഓഫാണ്: എല്ലാ OpenCode അഭ്യർത്ഥനകളും നിലവിലെ ഐഡന്റിറ്റി, ഹെഡറുകൾ, ബോഡി എന്നിവ മാറ്റമില്ലാതെ നിലനിർത്തുന്നു.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "ടൂൾ-കോളിംഗ് പ്രീ-ഫിൽട്ടർ പ്രവർത്തിക്കുന്നതിന് മുമ്പുതന്നെ ഒരു auto combo-യുടെ കാൻഡിഡേറ്റ് പൂൾ ശൂന്യമാണെങ്കിൽ (കൂൾഡൗണുകൾ, ലോക്കൗട്ടുകൾ, അല്ലെങ്കിൽ ശേഷി തീർന്നത് കാരണം എല്ലാ ടാർഗെറ്റുകളും ഒഴിവാക്കിയിട്ടുണ്ടെങ്കിൽ), പഴയ 400 \"No target supports tool calling\" capability_mismatch-ന് പകരം 503 no_eligible_targets എന്ന മറുപടി നൽകുക. ഡിഫോൾട്ടായി ഓഫാണ്: ശൂന്യമായ പൂൾ പഴയ 400 നിലനിർത്തും.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "വിശ്വസനീയമായ മോഡൽ എൻഡ്പോയിന്റ് ടാഗുകൾ (പ്രൊവൈഡർ കാറ്റലോഗ് പ്രഖ്യാപിച്ചതോ, ഒരു പ്രത്യേക മോഡൽ id-യിൽ നിന്ന് അനുമാനിച്ചതോ, അല്ലെങ്കിൽ ഓപ്പറേറ്റർ സജ്ജമാക്കിയതോ) നിർബന്ധമാക്കുക: /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations, /v1/audio/* എന്നിവയിൽ മോഡൽ സേവനം നൽകാത്ത ഒരു എൻഡ്പോയിന്റിലേക്ക് അയച്ച അഭ്യർത്ഥന ഡിസ്പാച്ച് ചെയ്യുന്നതിന് മുമ്പ് HTTP 400 ഉപയോഗിച്ച് നിരസിക്കുക; ടാഗ് ചെയ്ത എൻഡ്പോയിന്റുകൾക്ക് OmniRoute അഡാപ്റ്റർ ഇല്ലാത്ത മോഡലുകൾ /v1/models-ൽ നിന്ന് മറയ്ക്കുക; അത്തരം മോഡലുകൾക്കായുള്ള ഡാഷ്ബോർഡ് മോഡൽ പരിശോധനയ്ക്ക് 422 ഉപയോഗിച്ച് മറുപടി നൽകുക. ഡിഫോൾട്ടായി ഓഫാണ്: എൻഡ്പോയിന്റ് ടാഗുകൾ വിവരദായകമായി തുടരുകയും അഭ്യർത്ഥനകൾ മുമ്പത്തേതുപോലെ തന്നെ ഡിസ്പാച്ച് ചെയ്യപ്പെടുകയും ചെയ്യും.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "സാധാരണ anthropic-അനുയോജ്യമായ റിലേകളിൽ, സംഭാഷണത്തിനിടയിലെ system ടേണുകളെ ഉയർന്ന തലത്തിലുള്ള system prompt-ലേക്ക് മാറ്റുന്നതിനുപകരം സന്ദേശപ്പട്ടികയ്ക്കുള്ളിൽ തന്നെ നിലനിർത്തുക; ഇതുവഴി കാഷ് ചെയ്ത prompt prefix ടേണുകളിലുടനീളം സ്ഥിരമായി തുടരും. ക്ലയന്റ് തന്നെ mid-conversation-system-2026-04-07 ബീറ്റ അയച്ചപ്പോൾ മാത്രമാണ് ഇത് ബാധകമാകുന്നത്. ഡിഫോൾട്ടായി ഓഫാണ്: ആ ബീറ്റയില്ലാത്ത റിലേകൾ സന്ദേശപ്പട്ടികയിലെ system ടേണുകൾ നിരസിക്കുന്നതിനാൽ, മുമ്പത്തെപ്പോലെതന്നെ ഓരോ system ടേണും system prompt-ലേക്ക് മാറ്റപ്പെടും.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "ഓപ്പറേറ്റർ ഓവർറൈഡോ പ്രൊവൈഡർ രജിസ്ട്രിയോ ഒന്നും പ്രഖ്യാപിക്കാത്തപ്പോൾ models.dev പ്രസിദ്ധീകരിക്കുന്ന റീസണിംഗ് എഫർട്ട് ടിയറുകൾ ഉപയോഗിക്കുക, അറിയപ്പെടുന്ന എഫർട്ട് ലെവലുകൾ മാത്രം നിലനിർത്തുക, കൂടാതെ ശൂന്യമായി പ്രഖ്യാപിച്ച ടിയർ ലിസ്റ്റിനെ \"ടിയറുകളൊന്നുമില്ല\" എന്ന് കണക്കാക്കുക. ഡിഫോൾട്ടായി ഓഫാണ്: മോഡൽ കാറ്റലോഗും നിർണ്ണയിക്കപ്പെട്ട എഫർട്ട് ടിയറുകളും മുമ്പുണ്ടായിരുന്നതുപോലെ തന്നെ തുടരും.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "auto/* അഭ്യർത്ഥനകളെ പരിഹരിച്ച മോഡൽ കഴിവുകളും (വിഷൻ, റീസണിംഗ്, തിങ്കിംഗ്) നിരീക്ഷിച്ച ഗുണനിലവാര സ്കോറുകളും ഉപയോഗിച്ച്, ഒരൊറ്റ ബൾക്ക് റീഡിൽ, കാൻഡിഡേറ്റ് പൂൾ നിർമ്മിക്കാൻ അനുവദിക്കുന്നു. സ്ഥിരമായി ഓഫ്: അഭ്യർത്ഥന സമയത്തെ കാൻഡിഡേറ്റ് വെയ്റ്റുകൾ മുമ്പത്തെപ്പോലെ തന്നെ തുടരും. ഓൺ ആയാൽ: ഈ സിഗ്നലുകൾ സ്നാപ്ഷോട്ട് വെയ്റ്റുകളിലേക്ക് ചേരുന്നു, അതിനാൽ കാൻഡിഡേറ്റ് വെയ്റ്റുകളും തിരഞ്ഞെടുപ്പും മാറാം.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "ഗേറ്റ്വേ സ്വയം ഓഫാക്കിയ കണക്ഷനുകൾ ക്രെഡൻഷ്യൽ ആരോഗ്യ പരിശോധന വീണ്ടും പരിശോധിക്കാനും (ഓരോന്നും പരമാവധി 6 മണിക്കൂറിൽ ഒരിക്കൽ, ഓരോ പരിശോധനയിലും 5 എണ്ണം), പുനഃപരിശോധന വിജയിക്കുമ്പോൾ അവയിൽ ഒന്നിനെ വീണ്ടും ഓണാക്കാനും അനുവദിക്കുക. ഡിഫോൾട്ടായി ഓഫ്: ഒരു ഓപ്പറേറ്റർ നടപടി എടുക്കുന്നതുവരെ അത്തരം കണക്ഷനുകൾ ഓഫായിത്തന്നെ തുടരും. ഓപ്പറേറ്റർ പ്രവർത്തനരഹിതമാക്കിയതും ശാശ്വതമായി നിരോധിച്ചതുമായ കണക്ഷനുകൾ ഒരിക്കലും വീണ്ടും പരിശോധിക്കില്ല.",
@@ -2016,7 +2015,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# അഭ്യർ‍ത്ഥന} other {# അഭ്യർത്ഥനകൾ}}, {keys, plural, one {# പരിമിത കീ} other {# പരിമിത കീകൾ}}",
     "unpricedUsageMore": "…കൂടാതെ {count} കൂടുതൽ",
     "unpricedUsageConfigure": "വില ക്രമീകരിക്കുക",
-    "unpricedUsageDismiss": "ഒഴിവാക്കുക"
+    "unpricedUsageDismiss": "ഒഴിവാക്കുക",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "വിശകലനം",
@@ -6341,6 +6349,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "താൽക്കാലിക കൂൾഡൗൺ ഒഴിവാക്കുക, അതുവഴി വീണ്ടെടുക്കാവുന്ന പിശകുകൾക്ക് ശേഷവും ഈ കണക്ഷൻ യോഗ്യമായി തുടരും (നിരോധിച്ചത്/കാലഹരണപ്പെട്ടത് പോലുള്ള അന്തിമ നിലകൾ തുടർന്നും ബാധകമാണ്).",
     "disableCoolingLabel": "ഈ കണക്ഷന്റെ കൂൾഡൗൺ പ്രവർത്തനരഹിതമാക്കുക",
+    "keepMidConversationSystemDescription": "സിസ്റ്റം സന്ദേശങ്ങൾ ഉയർന്ന തലത്തിലുള്ള സിസ്റ്റം പ്രോംപ്റ്റിലേക്ക് നീക്കുന്നതിന് പകരം സന്ദേശ ലിസ്റ്റിനുള്ളിൽ സംഭാഷണത്തിൻ്റെ മധ്യത്തിൽ വിടുക, അതിനാൽ പ്രോംപ്റ്റ് കാഷെ തിരിവുകളിലുടനീളം അടിക്കുന്നത് തുടരുന്നു. ഈ അപ്സ്ട്രീം സന്ദേശങ്ങൾക്കുള്ളിൽ റോൾ \"സിസ്റ്റം\" സ്വീകരിച്ചാൽ മാത്രം പ്രവർത്തനക്ഷമമാക്കുക (അല്ലെങ്കിൽ അത് 400-ന് ഉത്തരം നൽകുന്നു).",
+    "keepMidConversationSystemLabel": "മധ്യ-സംഭാഷണ സിസ്റ്റം സന്ദേശങ്ങൾ സ്ഥലത്ത് സൂക്ഷിക്കുക",
+    "requireUserLastMessageDescription": "അസിസ്റ്റൻ്റ് പ്രീഫിൽ നിരസിക്കുന്ന അപ്സ്ട്രീമുകൾക്ക്: അയയ്ക്കുന്നതിന് മുമ്പ് ട്രെയിലിംഗ് അസിസ്റ്റൻ്റ് ടേണുകൾ (ടൂൾ_ഉപയോഗമില്ല) ഡ്രോപ്പ് ചെയ്യുക. മോഡൽ അതിൻ്റെ മുമ്പത്തെ ഉത്തരം പുനർനിർമ്മിച്ചേക്കാം.",
+    "requireUserLastMessageLabel": "ഒരു ഉപയോക്തൃ സന്ദേശത്തിൽ സംഭാഷണം അവസാനിപ്പിക്കേണ്ടതുണ്ട്",
     "bulkPasteAdded": "{count, plural, one {1 കീ ചേർത്തു} other {# കീകൾ ചേർത്തു}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 തനിപ്പകർപ്പ് ഒഴിവാക്കി} other {# തനിപ്പകർപ്പുകൾ ഒഴിവാക്കി}}",
     "bulkPasteHint": "ഓരോ വരിയിലും ഒരു API കീ വീതം ഒട്ടിക്കുക. ശൂന്യമായ വരികൾ അവഗണിക്കുകയും തനിപ്പകർപ്പ് കീകൾ ഒഴിവാക്കുകയും ചെയ്യും.",
@@ -6440,6 +6452,9 @@
     "localProviders": "ലോക്കൽ ദാതാക്കൾ",
     "maxConcurrentWholeNumberError": "പരമാവധി സമകാലിക എണ്ണം പൂർണ്ണസംഖ്യയായിരിക്കണം",
     "m365TierLabel": "Copilot ടിയർ",
+    "m365RefreshTokenLabel": "ടോക്കൺ പുതുക്കുക (ഓപ്ഷണൽ)",
+    "m365RefreshTokenHint": "Microsoft 365 ആക്സസ് ടോക്കൺ സ്വയമേവ പുതുക്കാൻ ഉപയോഗിക്കുന്നു.",
+    "m365RefreshTokenEditHint": "നിലവിലുള്ള ടോക്കൺ നിലനിർത്താൻ ശൂന്യമായി വിടുക. പകരം ഒരു പുതിയ ടോക്കൺ ഒട്ടിക്കുക.",
     "m365TierHint": "ഈ കണക്ഷൻ ഉപയോഗിക്കുന്ന Microsoft 365 Copilot സർഫേസ് തിരഞ്ഞെടുക്കുക. Individual എന്നത് ഡിഫോൾട്ട് ഉപഭോക്തൃ BizChat ആണ്; Education, Enterprise (work) എന്നിവ അതത് ടെനന്റ് സർഫേസുകൾ തിരഞ്ഞെടുക്കുന്നു.",
     "m365TierIndividualOption": "Individual (ഡിഫോൾട്ട്)",
     "m365TierEduOption": "വിദ്യാഭ്യാസം",
@@ -7174,6 +7189,7 @@
     "proxySubTabsAria": "പ്രോക്സി വിഭാഗങ്ങൾ",
     "requestBodyLimitTitle": "അഭ്യർത്ഥന ബോഡി പരിധി",
     "requestBodyLimitDescription": "അഭ്യർത്ഥന ബോഡി പാഴ്സ് ചെയ്യുന്നതിന് മുമ്പ് അനുവദിക്കുന്ന പരമാവധി API പേലോഡ് വലുപ്പം. പ്രത്യേക അപ്ലോഡ് റൂട്ടുകൾക്ക് അവയുടെ അന്തർനിർമ്മിതമായ 100 MB പരിധിയെങ്കിലും നിലനിർത്തും.",
+    "requestBodyLimitChatHint": "നിങ്ങൾ ഇവിടെ ഒരു പരിധി സംരക്ഷിക്കുന്നതുവരെ Chat Completions, Responses എന്നിവ പരമാവധി 50 MB സ്വീകരിക്കും. സംരക്ഷിച്ച പരിധി കുറഞ്ഞതായാലും കൂടുതലായാലും അവയ്ക്കും ബാധകമാണ്.",
     "requestBodyLimitInputLabel": "MB-യിലുള്ള അഭ്യർത്ഥന ബോഡി പരിധി",
     "requestBodyLimitEmptyError": "MB-യിൽ ഒരു പരിധി നൽകുക",
     "requestBodyLimitWholeNumberError": "ഒരു പൂർണ്ണ സംഖ്യ ഉപയോഗിക്കുക",
@@ -14243,6 +14259,10 @@
         "label": "പങ്കിട്ട ഇഗ്രെസ് പൂൾ ക്രമം",
         "description": "ഇഗ്രെസ് വിലാസം അടിസ്ഥാനമാക്കി ക്വാട്ട നിശ്ചയിച്ചിട്ടുള്ള പ്രൊവൈഡർമാർക്കായി, അടുത്തിടെ നിരസിക്കപ്പെട്ട ഒരു അംഗത്തിന്റെ നിരീക്ഷിത ഇഗ്രെസ് വിലാസം പങ്കിടുന്ന പൂൾ അംഗത്തെ പ്രവർത്തനക്ഷമമായ അംഗങ്ങൾക്ക് തൊട്ടുതാഴെയായി റാങ്ക് ചെയ്യുക. ക്രമത്തിൽ മാറ്റം വരുത്താൻ മാത്രം, ഒരിക്കലും ഒഴിവാക്കില്ല. ഇതിന് PROXY_SKIP_RECENTLY_FAILED ആവശ്യമാണ്, ഇത് വായിക്കുന്ന നിരസിക്കൽ സിഗ്നൽ നൽകുന്നത് അതാണ്. ഡിഫോൾട്ടായി ഓഫ് ആണ്: തിരഞ്ഞെടുക്കൽ ക്രമം കൃത്യമായി സാധാരണ റൊട്ടേഷൻ മാത്രമായിരിക്കും."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "റൊട്ടേഷൻ ആട്രിബ്യൂഷൻ ലോഗിംഗ്",
         "description": "ഏത് അക്കൗണ്ടാണ് സേവനം നൽകിയതെന്നോ ഒഴിവാക്കപ്പെട്ടതെന്നോ opencode റൊട്ടേഷൻ രേഖപ്പെടുത്തുന്നു (മാസ്ക് ചെയ്ത id-കൾ മാത്രം, ഒരിക്കലും പൂർണ്ണമായ അക്കൗണ്ട് id-കൾ അല്ല), കൂടാതെ പ്രോക്സി ലോഗ് എൻട്രികളെ അവയുടെ അഭ്യർത്ഥനയുമായി ബന്ധിപ്പിക്കുന്നു, അതിനാൽ ഓപ്പറേറ്റർക്ക് ഒഴിവാക്കിയ അക്കൗണ്ടുകളെ ഉപയോഗിക്കാത്തവയിൽ നിന്ന് തിരിച്ചറിയാൻ കഴിയും. ഡിഫോൾട്ടായി ഓഫ് ആണ്: അധിക ലോഗ് വരികളോ അധിക കോളങ്ങളോ രേഖപ്പെടുത്തില്ല."
@@ -14474,6 +14494,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "കോംബോ: കണ്ടന്റ്-പോളിസി നിരസിക്കലിൽ നിർത്തുക",
         "description": "ഒരു കോംബോ ടാർഗെറ്റ് കൃത്യമായ കണ്ടന്റ്-പോളിസി നിരസിക്കൽ (കോഡ് അല്ലെങ്കിൽ തരം cyber_policy / content_policy_violation) നൽകി മറുപടി നൽകുമ്പോൾ, അടുത്ത ടാർഗെറ്റിലേക്ക് പോകുന്നതിന് പകരം, ബാക്കിയുള്ള ടാർഗെറ്റുകൾ വ്യത്യസ്‌ത മോഡലുകൾ ആണെങ്കിൽപ്പോലും കോംബോ അവസാനിപ്പിക്കുകയും ആ നിരസിക്കൽ തിരികെ നൽകുകയും ചെയ്യുക. സ്വതവേ ഓഫാണ്: ഈ നിരസിക്കൽ ഒരിക്കലും അക്കൗണ്ടിനെ കൂൾ ഡൗൺ ചെയ്യുകയോ പ്രൊവൈഡർ ബ്രേക്കർ ട്രിപ്പ് ചെയ്യുകയോ ഇല്ല, കൂടാതെ കോംബോ മുൻപത്തെപ്പോലെ തന്നെ അതിന്റെ അടുത്ത ടാർഗെറ്റിലേക്ക് നീങ്ങുകയും ചെയ്യും."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "കൂൾഡൗൺ റീട്രൈ: 403/410 നിരസിക്കലുകൾ ഒഴിവാക്കുക",

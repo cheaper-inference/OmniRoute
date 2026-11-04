@@ -14,8 +14,8 @@ import type { HttpAttemptSelection } from "../../utils/providerHttpAttempts.ts";
  * failure is returned so the freshest diagnostic surfaces).
  */
 import { ensureStreamReadiness, type StreamReadinessResult } from "../../utils/streamReadiness.ts";
+import { isRegisteredFeatureFlagEnabled } from "../../utils/registeredFeatureFlag.ts";
 import { isPublicProviderSafetyCode } from "../../utils/providerSafety.ts";
-import { isStreamReadinessStallRetryEnabled } from "@/shared/utils/featureFlags.ts";
 import { maybeConvertJsonBodyToSse } from "./jsonBodyToSse.ts";
 
 type LoggerLike = {
@@ -234,7 +234,7 @@ export async function maybeFallbackAfterReadiness(ctx: ReadinessFallbackContext)
   finalBody: unknown;
   upstreamHttpSelection?: HttpAttemptSelection | null;
 }> {
-  if (!isStreamReadinessStallRetryEnabled()) {
+  if (!isRegisteredFeatureFlagEnabled("STREAM_READINESS_STALL_RETRY")) {
     return {
       readiness: ctx.streamReadiness,
       providerResponse: ctx.failedBody,

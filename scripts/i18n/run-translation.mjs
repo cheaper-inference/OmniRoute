@@ -980,6 +980,18 @@ export function mirrorNeedsRebuild(mirrorText, sourceText) {
   return looksUntranslated(body, sourceBody); // still English
 }
 
+/**
+ * True when the mirror on disk no longer matches the target_hash its record holds (a hand
+ * edit such as #18659, or a scripted rewrite of the mirrors). `i18n:check` reports it as a
+ * drifted target, so the refresh has to queue it: with the source unchanged every section is
+ * reused from the mirror itself (no translation call, the edit survives) and the new hash is
+ * recorded. Skipping it left the drift in place and failed every scheduled refresh
+ * (runs 41748740681, 41786406551).
+ */
+export function mirrorEdited(record, mirrorBuf) {
+  return !!record?.target_hash && sha256(mirrorBuf) !== record.target_hash;
+}
+
 export function extractMirrorBody(mirrorText) {
   return mirrorText
     .replace(/^# .+\r?\n+/, "")
@@ -1474,17 +1486,19 @@ async function main() {
       const previous = entry.locales[locale];
       const sourceChanged = previous?.source_hash !== sourceHash;
       const missingTarget = !existsSync(targetAbs);
+      const mirrorBuf =
+        !opts.force && !sourceChanged && !missingTarget ? await fs.readFile(targetAbs) : null;
       const needsRebuild =
-        !opts.force &&
-        !sourceChanged &&
-        !missingTarget &&
-        mirrorNeedsRebuild(await fs.readFile(targetAbs, "utf8"), sourceHashes.get(rel).text);
-      if (!opts.force && !sourceChanged && !missingTarget && !needsRebuild) {
+        !!mirrorBuf && mirrorNeedsRebuild(mirrorBuf.toString("utf8"), sourceHashes.get(rel).text);
+      const edited = !!mirrorBuf && !needsRebuild && mirrorEdited(previous, mirrorBuf);
+      if (!opts.force && !sourceChanged && !missingTarget && !needsRebuild && !edited) {
         stats.skipped++;
         continue;
       }
       if (needsRebuild)
         logInfo(`${rel} → ${locale}: mirror needs a rebuild (English copy or leaked frontmatter)`);
+      if (edited)
+        logInfo(`${rel} → ${locale}: mirror edited since its last record — re-recording it`);
       tasks.push({ rel, locale, targetAbs, sourceChanged, missingTarget });
     }
   }

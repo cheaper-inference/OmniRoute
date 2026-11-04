@@ -2,6 +2,7 @@ import { splitCodexReasoningSuffix } from "@omniroute/open-sse/executors/codex/r
 import { isRegisteredImageModel } from "@omniroute/open-sse/config/imageRegistry";
 import { isModelAdvertisedByConnection } from "@/domain/connectionModelRules";
 import { isSelfHostedChatProvider } from "@/shared/constants/providers";
+import { inventoryOrFailOpen, isPerAccountCatalogProvider } from "./perAccountCatalogFilter.ts";
 import { type ProviderConnectionView } from "@/lib/db/providers/lazyConnectionView";
 import {
   getSyncedAvailableModelsByConnection,
@@ -43,9 +44,77 @@ export function isRequestedModelAdvertised(
   return baseModel !== rawModel && isModelAdvertisedByConnection(baseModel, advertised);
 }
 
+type InventoryAccumulator = {
+  advertised: Map<string, Set<string>>;
+  // Per-account catalogs (Antigravity plans): `antigravity` and `agy` connections share one pool,
+  // so their inventories are merged and judged together before the fail-open rule applies.
+  perAccountInventory: Map<string, Set<string>>;
+  perAccountMalformed: boolean;
+};
+
+/** Unreadable or malformed persisted rows: a per-account catalog can no longer be trusted. */
+function markPerAccountMalformed(providerId: string, acc: InventoryAccumulator): void {
+  if (isPerAccountCatalogProvider(providerId)) acc.perAccountMalformed = true;
+}
+
+/** Does any Codex account's non-empty synced inventory advertise the requested model? */
+function isAdvertisedByAnyCodexAccount(
+  byConnection: SyncedAvailableModelsByConnection,
+  requestedModel: string
+): boolean {
+  return Object.values(byConnection).some(
+    (models) =>
+      Array.isArray(models) &&
+      // An empty set means "advertises everything" to the matcher, so an
+      // empty row must not count as evidence for the requested model.
+      models.length > 0 &&
+      isRequestedModelAdvertised("codex", requestedModel, new Set(models.map((m) => m.id)))
+  );
+}
+
+function recordConnectionInventories(
+  providerId: string,
+  byConnection: SyncedAvailableModelsByConnection,
+  acc: InventoryAccumulator
+): void {
+  for (const [connectionId, models] of Object.entries(byConnection)) {
+    if (!Array.isArray(models) || models.length === 0) continue;
+    const ids = new Set(models.map((m) => m.id));
+    if (isPerAccountCatalogProvider(providerId)) acc.perAccountInventory.set(connectionId, ids);
+    else acc.advertised.set(connectionId, ids);
+  }
+}
+
+async function collectProviderInventory(
+  providerId: string,
+  connections: ProviderConnectionView[],
+  requestedModel: string,
+  acc: InventoryAccumulator
+): Promise<void> {
+  let byConnection: SyncedAvailableModelsByConnection;
+  try {
+    byConnection = await getSyncedAvailableModelsByConnection(providerId);
+  } catch {
+    markPerAccountMalformed(providerId, acc);
+    return;
+  }
+  // Malformed persisted rows: fail open for the whole provider.
+  if (byConnection[SYNCED_AVAILABLE_MODELS_MALFORMED]) {
+    markPerAccountMalformed(providerId, acc);
+    return;
+  }
+  if (providerId === "codex") {
+    if (!isAdvertisedByAnyCodexAccount(byConnection, requestedModel)) return;
+    for (const connection of connections) {
+      if (connection.provider === providerId) acc.advertised.set(connection.id, new Set());
+    }
+  }
+  recordConnectionInventories(providerId, byConnection, acc);
+}
+
 /**
- * Self-hosted hosts and Codex subscription accounts can advertise different
- * inventories. For Codex, once an account inventory advertises the requested
+ * Self-hosted hosts, Codex subscription accounts and Antigravity/agy accounts (plans list
+ * different models) can advertise different inventories. For Codex, once an account inventory advertises the requested
  * model, unsynchronized accounts are not eligible guesses for it. With no
  * inventories at all, retain the existing bootstrap/offline behavior.
  *
@@ -54,6 +123,10 @@ export function isRequestedModelAdvertised(
  * account can serve it, so Codex accounts are not filtered for it and the
  * upstream decides. Filtering every account answered a misleading
  * provider_not_configured despite active accounts.
+ *
+ * Antigravity and agy share one pool and one per-account catalog: accounts whose synced
+ * inventory does not list the requested model are skipped, failing open when no account
+ * lists it (see perAccountCatalogFilter.ts).
  */
 export async function loadAdvertisedModelsForConnections(
   connections: ProviderConnectionView[],
@@ -68,41 +141,35 @@ export async function loadAdvertisedModelsForConnections(
       .filter(
         (p): p is string =>
           typeof p === "string" &&
-          (isSelfHostedChatProvider(p) || (p === "codex" && !isCodexImageModel(requestedModel)))
+          (isSelfHostedChatProvider(p) ||
+            (p === "codex" && !isCodexImageModel(requestedModel)) ||
+            isPerAccountCatalogProvider(p))
       )
   );
   if (inventoryProviders.size === 0) return advertised;
 
+  const acc: InventoryAccumulator = {
+    advertised,
+    perAccountInventory: new Map<string, Set<string>>(),
+    perAccountMalformed: false,
+  };
+
   await Promise.all(
-    [...inventoryProviders].map(async (providerId) => {
-      let byConnection: SyncedAvailableModelsByConnection;
-      try {
-        byConnection = await getSyncedAvailableModelsByConnection(providerId);
-      } catch {
-        return;
-      }
-      // Malformed persisted rows: fail open for the whole provider.
-      if (byConnection[SYNCED_AVAILABLE_MODELS_MALFORMED]) return;
-      if (providerId === "codex") {
-        const advertisedByAnyAccount = Object.values(byConnection).some(
-          (models) =>
-            Array.isArray(models) &&
-            // An empty set means "advertises everything" to the matcher, so an
-            // empty row must not count as evidence for the requested model.
-            models.length > 0 &&
-            isRequestedModelAdvertised(providerId, requestedModel, new Set(models.map((m) => m.id)))
-        );
-        if (!advertisedByAnyAccount) return;
-        for (const connection of connections) {
-          if (connection.provider === providerId) advertised.set(connection.id, new Set());
-        }
-      }
-      for (const [connectionId, models] of Object.entries(byConnection)) {
-        if (!Array.isArray(models) || models.length === 0) continue;
-        advertised.set(connectionId, new Set(models.map((m) => m.id)));
-      }
-    })
+    [...inventoryProviders].map((providerId) =>
+      collectProviderInventory(providerId, connections, requestedModel, acc)
+    )
   );
+
+  if (!acc.perAccountMalformed) {
+    // When no account advertises the model the lists are stale/incomplete: fail open instead of
+    // emptying the pool.
+    for (const [connectionId, ids] of inventoryOrFailOpen(
+      requestedModel,
+      acc.perAccountInventory
+    )) {
+      advertised.set(connectionId, ids);
+    }
+  }
 
   return advertised;
 }
