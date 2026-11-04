@@ -1556,7 +1556,7 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Transkripsikan fail audio menggunakan mana-mana penyedia STT yang dikonfigurasikan. Segmen laluan pertama memilih penyedia natif (`openai/…`, `deepgram/…`). Gerbang yang mengeksport semula model vendor lain menggunakan id yang berkelayakan
+Transkripsikan fail audio menggunakan mana-mana penyedia STT yang dikonfigurasikan. Segmen laluan pertama memilih penyedia natif (`openai/…`, `deepgram/…`). Gateway yang mengeksport semula model vendor lain menggunakan ID berkelayakan
 (`openrouter/deepgram/nova-3`).
 
 **Permintaan:**
@@ -1579,12 +1579,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Contoh id model:** `openai/whisper-1` (memerlukan kunci OpenAI),
+**Contoh ID model:** `openai/whisper-1` (memerlukan kunci OpenAI),
 `openrouter/deepgram/nova-3` (memerlukan kunci OpenRouter),
 `deepgram/nova-3` (memerlukan kunci Deepgram natif). Permintaan
-`deepgram/nova-3` yang tidak berkelayakan **tidak** menggunakan OpenRouter.
+`deepgram/nova-3` tanpa awalan **tidak** menggunakan OpenRouter.
 
 **Format yang disokong:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** transkripsi mod fail melalui WebSocket Gemini Live
+(memerlukan kunci API Gemini). Muat naik ditukar kepada PCM mono 16 kHz menggunakan `ffmpeg`
+(`ffmpeg` mesti berada dalam `PATH`, melainkan fail tersebut sudah merupakan WAV PCM mono 16 kHz), distrim ke sesi dan
+teks yang dimuktamadkan dikembalikan sebagai `{ "text": "..." }`. Medan borang `language` dan `prompt` pilihan
+dimajukan. Had: muat naik melebihi 25 MiB atau audio yang dinyahkod melebihi 10 minit akan memberikan respons
+`413`; penukaran yang berjalan lebih daripada 60 saat akan dihentikan dan memberikan respons `504`. Kunci API dihantar
+hanya dalam pengepala `x-goog-api-key`, tidak pernah dalam URL WebSocket.
 
 ---
 

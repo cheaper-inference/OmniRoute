@@ -1535,7 +1535,7 @@ GET /api/system/version
 
 ---
 
-## ការបម្លែងសំឡេងទៅជាអត្ថបទ
+## ការបម្លែងសំឡេងជាអត្ថបទ
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1543,8 +1543,7 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-បម្លែងឯកសារសំឡេងទៅជាអត្ថបទដោយប្រើអ្នកផ្តល់សេវា STT ដែលបានកំណត់រចនាសម្ព័ន្ធណាមួយ។ ផ្នែកដំបូងនៃផ្លូវកំណត់អ្នកផ្តល់សេវាដើម (`openai/…`, `deepgram/…`)។ Gateway ដែលបញ្ជូនបន្តម៉ូដែលរបស់អ្នកលក់ផ្សេងទៀត ប្រើ id ដែលមានបុព្វបទកំណត់ច្បាស់
-(`openrouter/deepgram/nova-3`)។
+បម្លែងឯកសារអូឌីយ៉ូជាអត្ថបទ ដោយប្រើអ្នកផ្តល់សេវា STT ដែលបានកំណត់រចនាសម្ព័ន្ធណាមួយ។ ផ្នែកផ្លូវដំបូងជ្រើសរើសអ្នកផ្តល់សេវាដើម (`openai/…`, `deepgram/…`)។ Gateway ដែលបញ្ចេញម៉ូដែលរបស់អ្នកលក់ផ្សេងទៀតឡើងវិញ ប្រើ ID ដែលមានការបញ្ជាក់ (`openrouter/deepgram/nova-3`)។
 
 **សំណើ៖**
 
@@ -1566,14 +1565,17 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**ឧទាហរណ៍ model ids៖** `openai/whisper-1` (តម្រូវឱ្យមាន OpenAI key),
-`openrouter/deepgram/nova-3` (តម្រូវឱ្យមាន OpenRouter key),
-`deepgram/nova-3` (តម្រូវឱ្យមាន native Deepgram key)។ សំណើ
-`deepgram/nova-3` ដែលមិនមានបុព្វបទ **មិន** ប្រើ OpenRouter ទេ។
+**ឧទាហរណ៍ model ids៖** `openai/whisper-1` (ត្រូវការកូនសោ OpenAI),
+`openrouter/deepgram/nova-3` (ត្រូវការកូនសោ OpenRouter),
+`deepgram/nova-3` (ត្រូវការកូនសោ Deepgram ដើម)។ សំណើ
+`deepgram/nova-3` ដែលគ្មានបុព្វបទ នឹង **មិន** ប្រើ OpenRouter ទេ។
 
-**ទ្រង់ទ្រាយដែលគាំទ្រ៖** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`។
+**ទម្រង់ដែលគាំទ្រ៖** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`។
 
----
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`)៖** ការបម្លែងឯកសារជាអត្ថបទតាមរយៈ
+WebSocket របស់ Gemini Live (ត្រូវការកូនសោ Gemini API)។ ឯកសារដែលបានផ្ទុកឡើងនឹងត្រូវបម្លែងទៅជា PCM mono កម្រិត 16 kHz ដោយប្រើ `ffmpeg`
+(ត្រូវតែមាននៅលើ `PATH` លើកលែងតែឯកសារនោះជាឯកសារ WAV PCM mono កម្រិត 16 kHz រួចហើយ) បន្ទាប់មកត្រូវបានបញ្ជូនជាស្ទ្រីមទៅកាន់សម័យ ហើយអត្ថបទដែលបានបញ្ចប់នឹងត្រូវបានត្រឡប់ជា `{ "text": "..." }`។ វាលទម្រង់ `language` និង `prompt` ជាជម្រើស ហើយនឹងត្រូវបញ្ជូនបន្ត។ ដែនកំណត់៖ ការផ្ទុកឡើងដែលមានទំហំលើស 25 MiB ឬសំឡេងដែលបានឌិកូដមានរយៈពេលលើស 10 នាទី នឹងឆ្លើយតបជា
+`413`; ការបម្លែងដែលដំណើរការលើស 60 វិនាទី នឹងត្រូវបញ្ឈប់ ហើយឆ្លើយតបជា `504`។ កូនសោ API នឹងត្រូវផ្ញើតែក្នុង header `x-goog-api-key` ប៉ុណ្ណោះ មិនដែលផ្ញើនៅក្នុង URL របស់ WebSocket ទេ។
 
 ## ភាពឆបគ្នាជាមួយ Ollama
 
