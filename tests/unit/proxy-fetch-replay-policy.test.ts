@@ -5,6 +5,13 @@ import { proxyFetch, runWithProxyContext } from "../../open-sse/utils/proxyFetch
 import { clearDispatcherCache } from "../../open-sse/utils/proxyDispatcher.ts";
 import { resetDbInstance } from "../../src/lib/db/core.ts";
 
+// Complete asynchronous setup before registering any tests: the native runner
+// can otherwise skip later tests when --test-force-exit is enabled in CI.
+// A real listener lets proxy reachability pass before the mocked dispatch fails.
+const proxyListener = net.createServer((socket) => socket.destroy());
+await new Promise<void>((resolve) => proxyListener.listen(0, "127.0.0.1", resolve));
+const proxied = `http://127.0.0.1:${(proxyListener.address() as net.AddressInfo).port}`;
+
 // Mock the dispatch boundary: no external sockets or provider credentials.
 test.after(() => {
   clearDispatcherCache();
@@ -119,10 +126,6 @@ test("a numeric transport code is preserved without replaying an ambiguous POST"
   assert.equal(nativeCalls, 0);
 });
 
-// A real listener, so the proxy reachability pre-check passes and the mock is what fails.
-const proxyListener = net.createServer((socket) => socket.destroy());
-await new Promise<void>((resolve) => proxyListener.listen(0, "127.0.0.1", resolve));
-const proxied = `http://127.0.0.1:${(proxyListener.address() as net.AddressInfo).port}`;
 test.after(() => new Promise<void>((resolve) => proxyListener.close(() => resolve())));
 const PRE_SEND_CODES = [
   "ECONNREFUSED",
