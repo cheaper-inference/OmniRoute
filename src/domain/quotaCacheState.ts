@@ -20,6 +20,8 @@ import type { QuotaBurnMetrics } from "./quotaBurnMetrics.ts";
 export interface QuotaInfo {
   remainingPercentage: number;
   resetAt: string | null;
+  // Codex observations are dated per window: refreshing a sibling scope must not renew this one.
+  observedAt?: number;
   // #10095 — upstream explicitly told us it did NOT report this window's
   // fraction (e.g. a fresh Antigravity account or a newly-launched
   // -tiered model id Google hasn't wired quota telemetry for yet).
