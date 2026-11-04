@@ -127,6 +127,23 @@ export async function executeImageWithCredentialFallback({
 
   while (currentCredentials && !isCredentialSentinel(currentCredentials)) {
     const connectionId = connectionIdOf(currentCredentials);
+    // Enforce the request key's narrowed account scope at the execution boundary,
+    // even if a future credential selector (or an injected test selector) ignores it.
+    // Empty allowlists from unscoped API keys are deliberately non-restrictive.
+    if (
+      Array.isArray(allowedConnections) &&
+      allowedConnections.length > 0 &&
+      (!connectionId || !allowedConnections.includes(connectionId))
+    ) {
+      return {
+        credentials: currentCredentials,
+        result: {
+          success: false,
+          status: 403,
+          error: "Image credential is outside the API key's allowed connections",
+        },
+      };
+    }
     if (connectionId && excludedConnectionIds.has(connectionId)) break;
     if (connectionId) excludedConnectionIds.add(connectionId);
 

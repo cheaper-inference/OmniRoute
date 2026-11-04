@@ -245,3 +245,64 @@ test("executeImageWithCredentialFallback handles 401 and retryable flags correct
   assert.equal(result400Retryable.result.success, true);
   assert.deepEqual(executedAccounts, ["conn-1", "conn-2"]);
 });
+
+test("image generation rejects an initial account outside a scoped API key before dispatch", async () => {
+  let executed = 0;
+  const { result } = await executeImageWithCredentialFallback({
+    provider: "codex",
+    requestedModel: "gpt-image-2",
+    credentials: { connectionId: "conn-unlisted", accessToken: "unused" },
+    allowedConnections: ["conn-permitted"],
+    execute: async (): Promise<MockImageResult> => {
+      executed++;
+      return { success: true, status: 200 };
+    },
+  });
+
+  assert.equal(result.success, false);
+  assert.equal(result.status, 403);
+  assert.equal(executed, 0, "no image request may use unlisted credentials");
+});
+
+test("image account rotation remains inside the caller key's allowlist", async () => {
+  const dispatched: string[] = [];
+  let selectorsCalled = 0;
+  const { result } = await executeImageWithCredentialFallback({
+    provider: "antigravity",
+    requestedModel: "gemini-3.1-flash-image",
+    credentials: { connectionId: "conn-permitted", accessToken: "token-1" },
+    allowedConnections: ["conn-permitted"],
+    execute: async (credential: MockImageCredentials): Promise<MockImageResult> => {
+      dispatched.push(credential.connectionId);
+      return { success: false, status: 401, error: "Unauthorized" };
+    },
+    // A faulty future selector must not make the executor run this key.
+    selectNextCredentials: async (_provider, _model, _excluded, allowed) => {
+      selectorsCalled++;
+      assert.deepEqual(allowed, ["conn-permitted"]);
+      return { connectionId: "conn-unlisted", accessToken: "token-2" };
+    },
+  });
+
+  assert.equal(result.success, false);
+  assert.equal(result.status, 403);
+  assert.equal(selectorsCalled, 1);
+  assert.deepEqual(dispatched, ["conn-permitted"]);
+});
+
+test("an empty API-key connection list remains unrestricted", async () => {
+  let executed = 0;
+  const { result } = await executeImageWithCredentialFallback({
+    provider: "antigravity",
+    requestedModel: "gemini-3.1-flash-image",
+    credentials: { connectionId: "conn-any", accessToken: "token" },
+    allowedConnections: [],
+    execute: async (): Promise<MockImageResult> => {
+      executed++;
+      return { success: true, status: 200 };
+    },
+  });
+
+  assert.equal(result.success, true);
+  assert.equal(executed, 1);
+});
