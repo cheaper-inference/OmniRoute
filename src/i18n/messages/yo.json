@@ -1939,7 +1939,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# ìbéèrè} other {# ìbéèrè}}, {keys, plural, one {# bọtini tí ó ní ìdínà} other {# bọtini tí ó ní ìdínà}}",
     "unpricedUsageMore": "… àti {count} míì",
     "unpricedUsageConfigure": "Ṣètò ìye",
-    "unpricedUsageDismiss": "Fagilé"
+    "unpricedUsageDismiss": "Fagilé",
+    "systemMetricsTitle": "Àwọn ìwọ̀n ètò",
+    "systemMetricsActive": "Àbojútó ń ṣiṣẹ́",
+    "systemMetricsLoading": "Ń kojọpọ̀...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Ìrántí",
+    "systemMetricsHost": "VPS / Agbàlejò",
+    "systemMetricsCpuCount": "{count} vCPU • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (ìṣiṣẹ́)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS Ìrántí / Òkìtì)"
   },
   "analytics": {
     "title": "Ìtúpalẹ̀",
