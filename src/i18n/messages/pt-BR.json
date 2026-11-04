@@ -3626,6 +3626,8 @@
     "testStepRunning": "Testando…",
     "testStepNotTestable": "Só é possível testar etapas com um único modelo",
     "saving": "Salvando...",
+    "liveAccountLabel": "conta: {id}",
+    "liveAccountTooltip": "Conta: {id}",
     "liveNoProviders": "Nenhum provedor observado ainda.",
     "liveFleetDataHint": "Os dados da frota chegam por meio de eventos de combo em tempo real.",
     "liveActiveCount": "Ativos ({count})",

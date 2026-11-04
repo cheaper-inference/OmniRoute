@@ -3626,6 +3626,8 @@
     "testStepRunning": "Notiek testēšana…",
     "testStepNotTestable": "Testēt var tikai viena modeļa soļus",
     "saving": "Saglabā...",
+    "liveAccountLabel": "akts: {id}",
+    "liveAccountTooltip": "Konts: {id}",
     "liveNoProviders": "Vēl nav novēroti pakalpojumu sniedzēji.",
     "liveFleetDataHint": "Flotes dati pienāk, izmantojot tiešraides kombo notikumus.",
     "liveActiveCount": "Aktīvi ({count})",

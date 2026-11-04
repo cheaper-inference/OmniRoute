@@ -3626,6 +3626,8 @@
     "testStepRunning": "Se testează…",
     "testStepNotTestable": "Pot fi testați doar pașii cu un singur model",
     "saving": "Se salvează...",
+    "liveAccountLabel": "acct: {id}",
+    "liveAccountTooltip": "Cont: {id}",
     "liveNoProviders": "Nu s-au observat furnizori încă.",
     "liveFleetDataHint": "Datele despre flotă sosesc prin evenimente combo live.",
     "liveActiveCount": "Active ({count})",

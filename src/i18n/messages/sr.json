@@ -3626,6 +3626,8 @@
     "testStepRunning": "Тестирање…",
     "testStepNotTestable": "Могу се тестирати само кораци са једним моделом",
     "saving": "Чување...",
+    "liveAccountLabel": "аццт: {id}",
+    "liveAccountTooltip": "Рачун: {id}",
     "liveNoProviders": "Још нема примећених провајдера.",
     "liveFleetDataHint": "Подаци о скупу долазе путем догађаја комбоа уживо.",
     "liveActiveCount": "Активни ({count})",

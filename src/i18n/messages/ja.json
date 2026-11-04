@@ -3626,6 +3626,8 @@
     "testStepRunning": "テスト中…",
     "testStepNotTestable": "テストできるのは単一モデルのステップのみです",
     "saving": "保存中...",
+    "liveAccountLabel": "アカウント: {id}",
+    "liveAccountTooltip": "アカウント: {id}",
     "liveNoProviders": "プロバイダーはまだ検出されていません。",
     "liveFleetDataHint": "フリートデータはライブコンボイベント経由で届きます。",
     "liveActiveCount": "アクティブ ({count})",

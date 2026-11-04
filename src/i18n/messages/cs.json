@@ -3703,6 +3703,8 @@
     "testStepRunning": "Testování…",
     "testStepNotTestable": "Testovat lze pouze kroky s jedním modelem",
     "saving": "Ukládám...",
+    "liveAccountLabel": "akt: {id}",
+    "liveAccountTooltip": "Účet: {id}",
     "liveNoProviders": "Zatím nebyli zaznamenáni žádní poskytovatelé.",
     "liveFleetDataHint": "Data flotily přicházejí prostřednictvím živých událostí combo.",
     "liveActiveCount": "Aktivní ({count})",
