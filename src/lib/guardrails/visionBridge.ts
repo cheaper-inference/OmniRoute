@@ -417,6 +417,13 @@ export class VisionBridgeGuardrail extends BaseGuardrail {
       return { block: false };
     }
 
+    // The image-only router cannot qualify a destination for other attachments.
+    // Auto's compatibility pass checks every required modality (including after
+    // catalog expansion); let it keep the complete mixed request intact.
+    if (isAuto && detectMediaParts(messages).some((part) => part.kind !== "image")) {
+      return { block: false };
+    }
+
     // 6. Get settings (injectable for testing)
     const getSettings = this.deps.getSettings ?? defaultGetSettings;
     let settings: Record<string, unknown> = {};
