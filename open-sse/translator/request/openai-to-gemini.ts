@@ -112,7 +112,7 @@ type ResolvedGeminiThinking = { level: GeminiThinkingLevel; includeThoughts: boo
 
 function resolveNativeGeminiThinkingLevel(
   model: string,
-  body: Record<string, any>,
+  body: Record<string, unknown>,
   explicitThinkingLevel: GeminiThinkingLevel | null
 ): ResolvedGeminiThinking | null {
   const spec = getModelSpec(model);
@@ -124,7 +124,10 @@ function resolveNativeGeminiThinkingLevel(
     return { level: explicitThinkingLevel, includeThoughts: true };
   }
 
-  const reasoning = body.reasoning && typeof body.reasoning === "object" ? body.reasoning : {};
+  const reasoning =
+    body.reasoning && typeof body.reasoning === "object" && !Array.isArray(body.reasoning)
+      ? (body.reasoning as Record<string, unknown>)
+      : {};
   const rawEffort = body.reasoning_effort ?? reasoning.effort;
   if (typeof rawEffort === "string") {
     const effort = rawEffort.trim().toLowerCase();
@@ -141,7 +144,10 @@ function resolveNativeGeminiThinkingLevel(
     }
   }
 
-  const thinking = body.thinking && typeof body.thinking === "object" ? body.thinking : {};
+  const thinking =
+    body.thinking && typeof body.thinking === "object" && !Array.isArray(body.thinking)
+      ? (body.thinking as Record<string, unknown>)
+      : {};
   if (body.thinking === false || thinking.type === "disabled") {
     const level = supported.includes("minimal") ? "minimal" : spec?.defaultGeminiThinkingLevel;
     return level && supported.includes(level) ? { level, includeThoughts: false } : null;
