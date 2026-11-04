@@ -1,8 +1,11 @@
+function mediaData(part: Record<string, unknown>) {
+  const inline = part.inlineData ?? part.inline_data;
+  return { inline, rawData: inline ?? part.fileData ?? part.file_data };
+}
+
 /** Normalize Gemini media into the matching OpenAI-compatible carrier, never image-label a PDF/video. */
 export function geminiMediaToOpenAI(part: Record<string, unknown>): Record<string, unknown> | null {
-  const inline = part.inlineData ?? part.inline_data;
-  const remote = part.fileData ?? part.file_data;
-  const rawData = inline ?? remote;
+  const { inline, rawData } = mediaData(part);
   if (!rawData || typeof rawData !== "object") return null;
   const data = rawData as Record<string, unknown>;
   const mime = String(data.mimeType ?? data.mime_type ?? "application/octet-stream").toLowerCase();

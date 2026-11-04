@@ -191,6 +191,32 @@ async function gateFirstOutput(params: FirstOutputGateParams): Promise<Response>
   return targetTimeoutResponse(modelStr);
 }
 
+function incompatibleMediaResponse(
+  b: Record<string, unknown>,
+  modelStr: string,
+  target?: SingleModelTarget
+): Response | null {
+  const media = requestMediaRequirements(b);
+  if (Object.values(media).some(Boolean)) {
+    const parsed = parseModel(modelStr);
+    const failures = nonImageMediaFailures(
+      {
+        modelStr,
+        provider: parsed.provider ?? "unknown",
+        providerId: parsed.provider,
+        connectionId: target && "connectionId" in target ? target.connectionId : null,
+      },
+      media
+    );
+    if (failures.length)
+      return errorResponse(
+        400,
+        `Selected model does not support required input: ${failures.join(", ")}`
+      );
+  }
+  return null;
+}
+
 export function buildTargetTimeoutRunner(deps: {
   handleSingleModel: HandleSingleModel;
   comboTargetTimeoutMs: number;
@@ -226,24 +252,8 @@ export function buildTargetTimeoutRunner(deps: {
   ): Promise<Response> => {
     // Also cover pipeline stages, nested dispatch and late tool attachments,
     // which can bypass the ordinary combo candidate prefilter.
-    const media = requestMediaRequirements(b);
-    if (Object.values(media).some(Boolean)) {
-      const parsed = parseModel(modelStr);
-      const failures = nonImageMediaFailures(
-        {
-          modelStr,
-          provider: parsed.provider ?? "unknown",
-          providerId: parsed.provider,
-          connectionId: target && "connectionId" in target ? target.connectionId : null,
-        },
-        media
-      );
-      if (failures.length)
-        return errorResponse(
-          400,
-          `Selected model does not support required input: ${failures.join(", ")}`
-        );
-    }
+    const incompatible = incompatibleMediaResponse(b, modelStr, target);
+    if (incompatible) return incompatible;
     const resolvedTimeoutMs = await resolveTargetTimeoutMs?.(target);
     const effectiveTimeoutMs =
       typeof resolvedTimeoutMs === "number" && Number.isFinite(resolvedTimeoutMs)

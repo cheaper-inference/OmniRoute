@@ -19,6 +19,54 @@ const VIDEO_EXTENSION: Record<string, string> = {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === "object" && !Array.isArray(value);
 
+function normalizeAudio(value: Record<string, unknown>, nextIndex: () => number) {
+  if (value.type === "input_audio" && isRecord(value.input_audio)) {
+    const audio = value.input_audio;
+    const format = String(audio.format).toLowerCase();
+    const mime = Object.hasOwn(AUDIO_MIME, format) ? AUDIO_MIME[format] : null;
+    if (
+      mime &&
+      typeof audio.data === "string" &&
+      !audio.data.startsWith("data:") &&
+      Object.keys(audio).every((key) => key === "data" || key === "format")
+    ) {
+      const { input_audio: _audio, ...rest } = value;
+      return {
+        ...rest,
+        type: "file",
+        file: {
+          filename: `audio-${nextIndex()}.${audio.format}`,
+          file_data: `data:${mime};base64,${audio.data}`,
+        },
+      };
+    }
+  }
+  return null;
+}
+
+function normalizeVideo(value: Record<string, unknown>, nextIndex: () => number) {
+  if (value.type === "video_url") {
+    const video = value.video_url;
+    const url = typeof video === "string" ? video : isRecord(video) ? video.url : null;
+    const match =
+      typeof url === "string" ? /^data:(video\/[a-z0-9.+-]{1,64});base64,/i.exec(url) : null;
+    const extension = match && VIDEO_EXTENSION[match[1].toLowerCase()];
+    if (
+      extension &&
+      (typeof video === "string" ||
+        (isRecord(video) && Object.keys(video).every((key) => key === "url")))
+    ) {
+      const { video_url: _video, ...rest } = value;
+      return {
+        ...rest,
+        type: "file",
+        file: { filename: `video-${nextIndex()}.${extension}`, file_data: url },
+      };
+    }
+  }
+  return null;
+}
+
 /**
  * CI's Gemini Chat routes accept mixed inline media through MIME-typed files.
  * The same bytes in video_url/input_audio carriers were rejected when combined
@@ -35,46 +83,8 @@ export function normalizeCIMixedMedia(body: Record<string, unknown>): Record<str
     if (depth > 32) return value;
     if (Array.isArray(value)) return value.map((entry) => visit(entry, depth + 1));
     if (!isRecord(value)) return value;
-    if (value.type === "input_audio" && isRecord(value.input_audio)) {
-      const audio = value.input_audio;
-      const format = String(audio.format).toLowerCase();
-      const mime = Object.hasOwn(AUDIO_MIME, format) ? AUDIO_MIME[format] : null;
-      if (
-        mime &&
-        typeof audio.data === "string" &&
-        !audio.data.startsWith("data:") &&
-        Object.keys(audio).every((key) => key === "data" || key === "format")
-      ) {
-        const { input_audio: _audio, ...rest } = value;
-        return {
-          ...rest,
-          type: "file",
-          file: {
-            filename: `audio-${++index}.${audio.format}`,
-            file_data: `data:${mime};base64,${audio.data}`,
-          },
-        };
-      }
-    }
-    if (value.type === "video_url") {
-      const video = value.video_url;
-      const url = typeof video === "string" ? video : isRecord(video) ? video.url : null;
-      const match =
-        typeof url === "string" ? /^data:(video\/[a-z0-9.+-]{1,64});base64,/i.exec(url) : null;
-      const extension = match && VIDEO_EXTENSION[match[1].toLowerCase()];
-      if (
-        extension &&
-        (typeof video === "string" ||
-          (isRecord(video) && Object.keys(video).every((key) => key === "url")))
-      ) {
-        const { video_url: _video, ...rest } = value;
-        return {
-          ...rest,
-          type: "file",
-          file: { filename: `video-${++index}.${extension}`, file_data: url },
-        };
-      }
-    }
+    const normalized = normalizeAudio(value, () => ++index) ?? normalizeVideo(value, () => ++index);
+    if (normalized) return normalized;
     return Object.fromEntries(
       Object.entries(value).map(([key, entry]) => [key, visit(entry, depth + 1)])
     );

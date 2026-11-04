@@ -626,7 +626,7 @@ export async function tryFusionDispatch(args: {
  * below. The step list is `combo.models` (in order); an optional per-step
  * `prompt` is read off the target object (comboModelStepInputSchema.prompt).
  */
-export async function tryPipelineDispatch(args: {
+type PipelineDispatchArgs = {
   body: Record<string, unknown>;
   combo: ComboLike;
   config: ComboSetupConfig;
@@ -637,7 +637,9 @@ export async function tryPipelineDispatch(args: {
   handleSingleModelWithTimeout: HandleSingleModel;
   log: ComboLogger;
   hiddenModelsByProvider?: HiddenModelsByProvider;
-}): Promise<Response | null> {
+};
+
+export async function tryPipelineDispatch(args: PipelineDispatchArgs): Promise<Response | null> {
   const {
     body,
     combo,
@@ -801,7 +803,7 @@ async function orderRuntimeUnits(args: {
  * Returns null when the combo has no executable combo-ref, when the mode is
  * `flatten`, or when the strategy needs the full target machinery.
  */
-export async function tryRuntimeUnitDispatch(args: {
+type RuntimeUnitDispatchArgs = {
   body: Record<string, unknown>;
   combo: ComboLike;
   config: ComboSetupConfig;
@@ -824,7 +826,11 @@ export async function tryRuntimeUnitDispatch(args: {
   endpointPath?: string | null;
   requestHeaders?: Headers | Record<string, unknown> | null;
   runCombo: RunCombo;
-}): Promise<Response | null> {
+};
+
+export async function tryRuntimeUnitDispatch(
+  args: RuntimeUnitDispatchArgs
+): Promise<Response | null> {
   const { body, combo, config, strategy, allCombos, log, settings } = args;
   const nestingContext = buildDefaultNesting(args.nesting, combo.name, config);
   const nestedComboMode = normalizeNestedComboMode(config.nestedComboMode);

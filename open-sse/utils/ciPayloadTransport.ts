@@ -24,16 +24,8 @@ export async function sendCIPayload(
   const target = new URL(url);
   const match = target.pathname.match(INFERENCE_PATH);
   const headers = new Headers(init.headers);
-  if (
-    !match ||
-    init.method !== "POST" ||
-    typeof init.body !== "string" ||
-    !headers.get("content-type")?.toLowerCase().startsWith("application/json") ||
-    headers.has("content-encoding")
-  )
-    return send(url, init);
-
-  const bytes = Buffer.from(init.body, "utf8");
+  if (!match || !isJsonUpload(init, headers)) return send(url, init);
+  const bytes = Buffer.from(init.body as string, "utf8");
   if (bytes.length > CI_MAX_JSON_BYTES)
     return refusal("CI accepts at most 20 MiB of JSON per request, including chunked uploads.");
   if (bytes.length < MIN_GZIP_BYTES) return send(url, init);
@@ -47,9 +39,31 @@ export async function sendCIPayload(
     return send(url, { ...init, headers, body: compressed });
   }
 
+  return uploadAndDispatch(url, init, send, target, match[1], headers, bytes, compressed);
+}
+
+function isJsonUpload(init: RequestInit, headers: Headers): boolean {
+  return (
+    init.method === "POST" &&
+    typeof init.body === "string" &&
+    Boolean(headers.get("content-type")?.toLowerCase().startsWith("application/json")) &&
+    !headers.has("content-encoding")
+  );
+}
+
+async function uploadAndDispatch(
+  url: string,
+  init: RequestInit,
+  send: Transport,
+  target: URL,
+  path: string,
+  headers: Headers,
+  bytes: Buffer,
+  compressed: Buffer
+): Promise<Response> {
   // Upload traffic stays on the same origin/base path and the same guarded transport.
   // Only an opaque id returned by CI is used; never follow a returned upload URL.
-  const endpoint = `/${match[1]}`;
+  const endpoint = `/${path}`;
   const base = new URL(target);
   base.pathname = target.pathname.slice(0, -endpoint.length) + "/payload-uploads";
   base.search = "";
@@ -107,23 +121,32 @@ export async function sendCIPayload(
     needsCleanup = !response.ok;
     return response;
   } finally {
-    // DELETE removes prompt bytes, not the consumed tombstone. Keep the original response/error.
-    // Abandoned uploads also expire on the server if cancellation prevents this cleanup.
-    if (needsCleanup && !init.signal?.aborted) {
-      try {
-        const cleaned = await send(resource, {
-          ...init,
-          method: "DELETE",
-          headers: uploadHeaders,
-          body: undefined,
-          signal: init.signal
-            ? AbortSignal.any([init.signal, AbortSignal.timeout(2000)])
-            : AbortSignal.timeout(2000),
-        });
-        await cleaned.body?.cancel();
-      } catch {
-        /* The server's retention worker reaps abandoned uploads. */
-      }
+    if (needsCleanup) await cleanUpload(resource, init, uploadHeaders, send);
+  }
+}
+
+async function cleanUpload(
+  resource: string,
+  init: RequestInit,
+  uploadHeaders: Headers,
+  send: Transport
+) {
+  // DELETE removes prompt bytes, not the consumed tombstone. Keep the original response/error.
+  // Abandoned uploads also expire on the server if cancellation prevents this cleanup.
+  if (!init.signal?.aborted) {
+    try {
+      const cleaned = await send(resource, {
+        ...init,
+        method: "DELETE",
+        headers: uploadHeaders,
+        body: undefined,
+        signal: init.signal
+          ? AbortSignal.any([init.signal, AbortSignal.timeout(2000)])
+          : AbortSignal.timeout(2000),
+      });
+      await cleaned.body?.cancel();
+    } catch {
+      /* The server's retention worker reaps abandoned uploads. */
     }
   }
 }

@@ -14,59 +14,90 @@ function mimeKind(mime: string): MediaKind | null {
   return value ? "file" : null;
 }
 
+const first = (...values: unknown[]): unknown => values.find((value) => value != null);
+
+function geminiAttachment(obj: Record<string, unknown>): Attachment | null {
+  const inline = record(obj.inlineData ?? obj.inline_data);
+  const remote = record(obj.fileData ?? obj.file_data);
+  const data = Object.keys(inline).length ? inline : remote;
+  const kind = mimeKind(string(data.mimeType ?? data.mime_type));
+  return kind
+    ? { kind, ref: string(first(data.data, data.fileUri, data.file_uri)), shape: "file_part" }
+    : null;
+}
+
+function hasExtractedText(obj: Record<string, unknown>, file: Record<string, unknown>) {
+  if (obj.type !== "file") return false;
+  const references = [
+    file.file_data,
+    file.data,
+    file.url,
+    file.file_id,
+    obj.file_data,
+    obj.file_url,
+    obj.file_id,
+  ];
+  return (
+    !references.some(Boolean) &&
+    typeof first(file.content, file.text, obj.content, obj.text) === "string"
+  );
+}
+
+function fileReference(
+  obj: Record<string, unknown>,
+  file: Record<string, unknown>,
+  source: Record<string, unknown>
+) {
+  return string(
+    first(
+      file.file_data,
+      file.data,
+      file.url,
+      obj.file_data,
+      obj.file_url,
+      source.data,
+      source.url,
+      file.file_id,
+      obj.file_id,
+      source.file_id
+    )
+  );
+}
+
+function fileKind(
+  obj: Record<string, unknown>,
+  file: Record<string, unknown>,
+  source: Record<string, unknown>,
+  ref: string
+): MediaKind {
+  const mime =
+    string(
+      first(source.media_type, source.mime_type, file.mime_type, obj.mime_type, obj.media_type)
+    ) ||
+    (/^data:([^;,]+)/i.exec(ref)?.[1] ?? "");
+  const name = string(first(file.filename, file.name, obj.filename, obj.name));
+  return (
+    mimeKind(mime) ??
+    (/\.pdf(?:$|[?#])/i.test(name || ref) ||
+    ref.startsWith("JVBER") ||
+    string(obj.type).toLowerCase() === "document"
+      ? "document"
+      : "file")
+  );
+}
+
 /** Typed file carriers only; ordinary text mentioning a file remains text. */
 export function inspectAttachmentPart(obj: Record<string, unknown>): Attachment | null {
   const type = string(obj.type).toLowerCase();
-  const inline = record(obj.inlineData ?? obj.inline_data);
-  const remote = record(obj.fileData ?? obj.file_data);
-  if (Object.keys(inline).length || Object.keys(remote).length) {
-    const data = Object.keys(inline).length ? inline : remote;
-    const mime = string(data.mimeType ?? data.mime_type);
-    const kind = mimeKind(mime);
-    if (kind)
-      return { kind, ref: string(data.data ?? data.fileUri ?? data.file_uri), shape: "file_part" };
-  }
+  const native = geminiAttachment(obj);
+  if (native) return native;
   const source = record(obj.source);
   if (type === "document" && ["text", "content"].includes(string(source.type))) return null;
   if (!["file", "file_url", "input_file", "document"].includes(type)) return null;
-  const file = record(obj.file ?? obj.document ?? obj.file_url);
-  // Already extracted text is safe for a text-only route.
-  if (
-    type === "file" &&
-    !file.file_data &&
-    !file.data &&
-    !file.url &&
-    !file.file_id &&
-    !obj.file_data &&
-    !obj.file_url &&
-    !obj.file_id &&
-    typeof (file.content ?? file.text ?? obj.content ?? obj.text) === "string"
-  )
-    return null;
-  const ref = string(
-    file.file_data ??
-      file.data ??
-      file.url ??
-      obj.file_data ??
-      obj.file_url ??
-      source.data ??
-      source.url ??
-      file.file_id ??
-      obj.file_id ??
-      source.file_id
-  );
-  const mime =
-    string(
-      source.media_type ?? source.mime_type ?? file.mime_type ?? obj.mime_type ?? obj.media_type
-    ) ||
-    (/^data:([^;,]+)/i.exec(ref)?.[1] ?? "");
-  const name = string(file.filename ?? file.name ?? obj.filename ?? obj.name);
-  const kind =
-    mimeKind(mime) ??
-    (/\.pdf(?:$|[?#])/i.test(name || ref) || ref.startsWith("JVBER") || type === "document"
-      ? "document"
-      : "file");
-  return { kind, ref, shape: "file_part" };
+  const file = record(first(obj.file, obj.document, obj.file_url));
+  if (hasExtractedText({ ...obj, type }, file)) return null;
+  const ref = fileReference(obj, file, source);
+  return { kind: fileKind(obj, file, source, ref), ref, shape: "file_part" };
 }
 
 export function dataUriKind(value: string): MediaKind | null {

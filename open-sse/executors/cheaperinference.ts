@@ -32,6 +32,11 @@ export class CheaperInferenceExecutor extends BaseExecutor {
     super(provider, PROVIDERS[provider]);
   }
 
+  /**
+   * @executorRecovery native
+   * @executorRecoveryReason Reject incompatible media before dispatch; every accepted payload delegates to the base recovery loop unchanged.
+   * @executorRecoveryTest tests/unit/cheaperinference-executor.test.ts
+   */
   async execute(input: ExecuteInput) {
     const body = (input.body || {}) as Record<string, unknown>;
     for (const [kind, partKind] of [
