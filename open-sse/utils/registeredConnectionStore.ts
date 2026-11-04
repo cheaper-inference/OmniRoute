@@ -2,9 +2,12 @@
 // read and patch one connection without importing src/ (boundary ratchet,
 // scripts/quality/measure-boundary.mjs). The store sits on a process-wide
 // symbol so every module instance in the process sees the same registration.
+import type { CodexFenceStore } from "../services/codexAccount/fenceTypes.ts";
+
 const CONNECTION_STORE_KEY = Symbol.for("omniroute.providerConnectionStore");
 
 export type RegisteredConnectionStore = {
+  codexFences?: CodexFenceStore;
   getProviderConnectionById: (id: string) => Promise<unknown>;
   mergeConnectionProviderSpecificData: (
     id: string,

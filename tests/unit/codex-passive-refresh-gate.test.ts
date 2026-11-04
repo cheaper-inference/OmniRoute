@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { AsyncResource } from "node:async_hooks";
 
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-codex-refresh-gate-"));
 process.env.DATA_DIR = dataDir;
@@ -241,18 +242,33 @@ for (const stream of [false, true]) {
           : ["Bearer synthetic-access"]
       );
       assert.equal(tokenCalls, 0);
-      await nonterminal(c.id);
+      const row = await nonterminal(c.id);
+      if (stored === "different") {
+        assert.equal(
+          row.providerSpecificData.apiKeyHealth?.primary?.failures,
+          1,
+          "only the current synchronized credential records its authentication failure"
+        );
+        assert.ok(
+          Date.parse(row.rateLimitedUntil) > Date.now(),
+          "the current synchronized credential retains its upstream cooldown"
+        );
+      }
     });
   }
 }
 
 for (const stream of [false, true]) {
-  test(`authentication rollback never dispatches a rejected token twice stream=${stream}`, async () => {
+  test(`authentication rollback never redispatches rejected tokens or writes stale health stream=${stream}`, async () => {
     const c = await connection();
+    // Replica writes must not inherit the in-flight request's stale operation scope.
+    const replica = new AsyncResource("synthetic-codex-replica");
     mockFetch(async () => {
-      await db.updateProviderConnection(c.id, {
-        accessToken: dispatches.length === 1 ? "synthetic-synchronized" : c.accessToken,
-      });
+      const accessToken = dispatches.length === 1 ? "synthetic-synchronized" : c.accessToken;
+      const updated = await replica.runInAsyncScope(() =>
+        db.updateProviderConnection(c.id, { accessToken })
+      );
+      assert.equal(updated?.accessToken, accessToken, "replica synchronization actually commits");
     });
     const response = await chat(stream);
     await response.text();
@@ -260,8 +276,10 @@ for (const stream of [false, true]) {
     assert.deepEqual(dispatches, ["Bearer synthetic-access", "Bearer synthetic-synchronized"]);
     assert.equal(new Set(dispatches).size, dispatches.length);
     const row = await nonterminal(c.id);
-    assert.equal(row.providerSpecificData.apiKeyHealth.primary.failures, 2);
-    assert.ok(Date.parse(row.rateLimitedUntil) > Date.now());
+    // Both failures belong to obsolete credential revisions (A -> B -> A).
+    // The newly synchronized revision must not inherit either failure.
+    assert.equal(row.providerSpecificData.apiKeyHealth, undefined);
+    assert.equal(row.rateLimitedUntil ?? null, null);
     assert.equal(tokenCalls, 0);
   });
 }
@@ -431,6 +449,10 @@ test("adoption during chatCore recovery preserves request-local metadata without
     _omnirouteCodexThinking: { supportedThinkingEfforts: ["low"], defaultThinkingEffort: "low" },
     workspaceId: "synthetic-local-workspace",
   };
+  // Workspace identity is durable owner data, not an arbitrary request override.
+  await db.updateProviderConnection(c.id, {
+    providerSpecificData: { ...c.providerSpecificData, workspaceId: localData.workspaceId },
+  });
   let callbacks = 0;
   mockFetch(async () => {
     if (dispatches.length === 1)

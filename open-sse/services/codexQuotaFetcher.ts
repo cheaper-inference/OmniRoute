@@ -116,6 +116,9 @@ const MAX_QUOTA_CACHE_ENTRIES = 200;
  * @param meta - Access token and optional workspace ID
  */
 export function registerCodexConnection(connectionId: string, meta: CodexConnectionMeta): void {
+  const current = connectionRegistry.get(connectionId);
+  if (current?.accessToken === meta.accessToken && current.workspaceId === meta.workspaceId) return;
+  deleteQuotaCacheForConnection(connectionId);
   if (!connectionRegistry.has(connectionId) && connectionRegistry.size >= MAX_CONNECTIONS) {
     const oldestKey = connectionRegistry.keys().next().value;
     if (oldestKey !== undefined) {
@@ -123,7 +126,8 @@ export function registerCodexConnection(connectionId: string, meta: CodexConnect
       connectionRegistry.delete(oldestKey);
     }
   }
-  connectionRegistry.set(connectionId, meta);
+  // Object identity is an immutable registration epoch, including A -> B -> A.
+  connectionRegistry.set(connectionId, Object.freeze({ ...meta }));
 }
 
 function getQuotaCacheKey(connectionId: string, requestedModel?: string | null): string {
@@ -174,15 +178,8 @@ function getCodexConnectionMeta(
 
     if (accessToken) {
       const meta = { accessToken, ...(workspaceId ? { workspaceId } : {}) };
-      if (!connectionRegistry.has(connectionId) && connectionRegistry.size >= MAX_CONNECTIONS) {
-        const oldestKey = connectionRegistry.keys().next().value;
-        if (oldestKey !== undefined) {
-          deleteQuotaCacheForConnection(oldestKey);
-          connectionRegistry.delete(oldestKey);
-        }
-      }
-      connectionRegistry.set(connectionId, meta);
-      return meta;
+      registerCodexConnection(connectionId, meta);
+      return connectionRegistry.get(connectionId) ?? null;
     }
   }
 
@@ -205,17 +202,13 @@ export async function fetchCodexQuota(
   const requestedModel = getRequestedModel(connection);
   const cacheKey = getQuotaCacheKey(connectionId, requestedModel);
 
-  // Check cache first
+  // Resolve credentials first: a connection id can be reused for a different owner.
+  const meta = getCodexConnectionMeta(connectionId, connection);
+  if (!meta?.accessToken) return null;
+  const isCurrent = () => connectionRegistry.get(connectionId) === meta;
   const cached = quotaCache.get(cacheKey);
   if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
     return cached.quota;
-  }
-
-  // Look up credentials
-  const meta = getCodexConnectionMeta(connectionId, connection);
-  if (!meta?.accessToken) {
-    // No credentials registered — skip preflight gracefully
-    return null;
   }
 
   try {
@@ -238,13 +231,14 @@ export async function fetchCodexQuota(
     // hits above never reach here; this only paces genuine network calls and is
     // configurable (OMNIROUTE_QUOTA_FETCH_MIN_INTERVAL_MS, 0 = disabled).
     await throttleQuotaFetch();
+    if (!isCurrent()) return null;
 
     const response = await fetchWithConnectionProxy(connectionId, CODEX_USAGE_URL, {
       method: "GET",
       headers,
       signal: AbortSignal.timeout(8_000),
     });
-    if (!response) return null;
+    if (!response || !isCurrent()) return null;
 
     if (!response.ok) {
       // Non-2xx: could be token expired or quota API down.
@@ -260,10 +254,10 @@ export async function fetchCodexQuota(
     const data = await response.json();
     const quota = parseCodexUsageResponse(data, requestedModel);
 
-    if (!quota) return null;
+    if (!quota || !isCurrent()) return null;
 
     // Store in cache
-    if (!quotaCache.has(connectionId) && quotaCache.size >= MAX_QUOTA_CACHE_ENTRIES) {
+    if (!quotaCache.has(cacheKey) && quotaCache.size >= MAX_QUOTA_CACHE_ENTRIES) {
       const oldestCacheKey = quotaCache.keys().next().value;
       if (oldestCacheKey !== undefined) quotaCache.delete(oldestCacheKey);
     }

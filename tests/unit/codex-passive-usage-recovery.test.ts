@@ -135,21 +135,30 @@ for (const stored of [
           },
         });
       };
-      const result = await fetchAndPersistProviderLimits(connection.id, "manual", {
+      const operation = fetchAndPersistProviderLimits(connection.id, "manual", {
         allowRotatingRefresh: true,
       });
       const adopted = stored.startsWith("different");
+      let result: Awaited<typeof operation> | undefined;
+      if (adopted) result = await operation;
+      else {
+        // Synchronization changed the credential revision, but supplied no
+        // eligible replacement. Do not persist or serve the old usage result.
+        await assert.rejects(operation, { code: "codex_connection_changed" });
+      }
       assert.deepEqual(
         sends,
         adopted ? ["Bearer synthetic-A", "Bearer synthetic-B"] : ["Bearer synthetic-A"]
       );
-      assert.equal(result.connection.accessToken, adopted ? "synthetic-B" : "synthetic-A");
-      assert.equal(
-        result.usage.message,
-        stored === "different"
-          ? undefined
-          : "Codex token expired or access denied. Please re-authenticate the connection."
-      );
+      if (result) {
+        assert.equal(result.connection.accessToken, "synthetic-B");
+        assert.equal(
+          result.usage.message,
+          stored === "different"
+            ? undefined
+            : "Codex token expired or access denied. Please re-authenticate the connection."
+        );
+      }
       assert.equal(tokenCalls, 0);
       assert.equal(credentialWrites, 0, "only the simulated synchronization may write credentials");
       assert.equal(cloudPathCalls, 0, "adoption must not enter syncToCloudIfEnabled");

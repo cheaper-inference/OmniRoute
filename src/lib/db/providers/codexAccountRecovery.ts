@@ -2,6 +2,7 @@ import { backupDbFile } from "../backup";
 import { getDbInstance, rowToCamel } from "../core";
 import { invalidateDbCache } from "../readCache";
 import { toRecord } from "./columns";
+import { mayWriteCodexConnection } from "../codexConnectionFences";
 
 type RecordValue = Record<string, unknown>;
 type Scope = "codex" | "spark";
@@ -27,6 +28,7 @@ export async function clearCodexAccountCooldown(id: string, scope: Scope = "code
 function mutate(id: string, apply: (data: RecordValue) => void): RecordValue | null {
   const db = getDbInstance();
   const result = db.transaction(() => {
+    if (!mayWriteCodexConnection(id)) return null;
     const row = db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(id);
     if (!row) return null;
     const connection = toRecord(rowToCamel(row));
