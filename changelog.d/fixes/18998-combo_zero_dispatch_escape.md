@@ -1,0 +1,1 @@
+- #18998: fix(combo): bail early after consecutive zero-dispatch set-tries instead of burn
