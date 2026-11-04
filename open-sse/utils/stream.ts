@@ -919,6 +919,9 @@ export function createSSEStream(options: StreamOptions = {}) {
   let passthroughHasToolCalls = false;
   /** Passthrough: whether a chunk with non-null finish_reason was seen (#7800) */
   let passthroughSawFinishReason = false;
+  /** Passthrough: the upstream's own terminal finish_reason ("length", …). Kept for
+   * the assembled body so the cache-store truncation guard can see a cut turn. */
+  let passthroughFinishReason: string | null = null;
   /** Passthrough: accumulate tool_calls deltas for call log responseBody */
   const passthroughToolCalls = new Map<string, ToolCall>();
   let passthroughToolCallSeq = 0;
@@ -2431,6 +2434,13 @@ export function createSSEStream(options: StreamOptions = {}) {
                         ...failureBoundaryOptions(),
                       });
                     passthroughSawFinishReason = true;
+                    // Record the raw upstream reason BEFORE the T18 tool_calls rewrite
+                    // below: a `length` cut must stay visible to the truncation guard
+                    // even when tool calls were streamed.
+                    const upstreamFinish = parsed.choices[0]?.finish_reason;
+                    if (typeof upstreamFinish === "string" && upstreamFinish) {
+                      passthroughFinishReason = upstreamFinish;
+                    }
                   }
 
                   if (isFinishChunk && passthroughHasToolCalls) {
@@ -2975,7 +2985,13 @@ export function createSSEStream(options: StreamOptions = {}) {
                     // #7800: track finish_reason in the flush path too, so a
                     // final chunk without trailing newline still suppresses the
                     // synthetic finish_reason synthesis.
-                    if (hasFinishReason) passthroughSawFinishReason = true;
+                    if (hasFinishReason) {
+                      passthroughSawFinishReason = true;
+                      const flushedFinish = flushedParsed.choices?.[0]?.finish_reason;
+                      if (typeof flushedFinish === "string" && flushedFinish) {
+                        passthroughFinishReason = flushedFinish;
+                      }
+                    }
                     if (flushChanged) {
                       output = `data: ${JSON.stringify(flushedParsed)}\n\n`;
                     }
@@ -3179,7 +3195,15 @@ export function createSSEStream(options: StreamOptions = {}) {
                   choices: [
                     {
                       message,
-                      finish_reason: passthroughHasToolCalls ? "tool_calls" : "stop",
+                      // Keep the upstream's own terminal reason ("length",
+                      // "content_filter", …): masking it made a cut reply cache as
+                      // complete. Only "stop" upgrades to "tool_calls".
+                      finish_reason:
+                        passthroughFinishReason && passthroughFinishReason !== "stop"
+                          ? passthroughFinishReason
+                          : passthroughHasToolCalls
+                            ? "tool_calls"
+                            : "stop",
                     },
                   ],
                   usage: {
@@ -3584,11 +3608,23 @@ export function createSSEStream(options: StreamOptions = {}) {
               if (hasToolCalls) {
                 message.tool_calls = normalizedToolCalls;
               }
+              // Same rule as the passthrough branch: the translators record the
+              // upstream's terminal reason on state.finishReason — keep it when it
+              // is not "stop" so the cache-store truncation guard can see a cut turn.
+              const upstreamFinishReason =
+                typeof state?.finishReason === "string" && state.finishReason
+                  ? state.finishReason
+                  : null;
               const responseBody = {
                 choices: [
                   {
                     message,
-                    finish_reason: hasToolCalls ? "tool_calls" : "stop",
+                    finish_reason:
+                      upstreamFinishReason && upstreamFinishReason !== "stop"
+                        ? upstreamFinishReason
+                        : hasToolCalls
+                          ? "tool_calls"
+                          : "stop",
                   },
                 ],
                 usage: {
