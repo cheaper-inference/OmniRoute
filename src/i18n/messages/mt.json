@@ -14286,6 +14286,10 @@
         "label": "Għażla mill-Ġdid tal-Pool f'429 ta' OpenCode",
         "description": "Għar-rotazzjoni ta' diversi kontijiet ta' OpenCode, wara 429 minn fornitur egress-bucketed fuq kont mingħajr proxy taħt kuntest ta' ambient pool, itlob membru ieħor mill-connection pool għat-tentattiv li jmiss minflok ma terġa' tipprova l-istess indirizz ta' egress. Tordna, qatt ma teskludi: pool eżawrita żżomm l-imġiba attwali. Mitfi b'mod awtomatiku: kull 429 iddur għall-kont li jmiss eżattament bħal qabel."
       },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress Probe",
+        "description": "Għall-eżekutur OpenCode, meta talba bi prokura tiġi mwieġba 403 jew 451 FreeTierError u l-għodda osservat mill-ġdid fallew jew ma applikawx, ibgħat it-talba darba permezz ta' prokura differenti (prokura ta' kont ieħor jew membru ieħor tal-grupp, qatt konnessjoni diretta). Biss meta dik is-sonda twieġeb 200 hija l-ewwel ħruġ mwarrba fil-memorja tar-rifjut tal-prokura u r-rispons tas-sonda moqdija; meta t-tnejn jirrifjutaw, ir-rifjut oriġinali jintbagħat lura u xejn ma jiġi rreġistrat. L-istess test ta' rifjut ikopri IP ta' ħruġ b'marka u forma ta' talba miċħuda, għalhekk is-sonda tgħarrafhom b'evidenza. Mitfi b'mod awtomatiku: ir-rifjut jiġi rritornat mhux mibdul."
+      },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Fingerprint tal-Klijent OpenCode v2",
         "description": "Ibgħat il-fingerprint tal-klijent CLI ta' OpenCode v2 fuq talbiet ta' OpenCode Zen/Go (#16571): User-Agent opencode/latest/<2.x>/cli u x-opencode-client cli, User-Agent tal-klijent miżmum biss meta jkun klijent OpenCode 2.x, u fuq talbiet gated free-tier l-ebda x-opencode-request, is-sessjoni riflessa fuq x-opencode-session-id/x-session-affinity/x-session-id, l-iskemi v2 CLI read/shell fuq placeholder tools injettati u tool_choice ta' \"none\" imwaqqgħa. Mitfi b'mod awtomatiku: kull talba ta' OpenCode żżomm l-identità, l-intestaturi u l-korp attwali byte b'byte."

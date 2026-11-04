@@ -14209,6 +14209,10 @@
         "label": "Pemilihan Ulang Pool 429 OpenCode",
         "description": "Untuk rotasi multi-akun OpenCode, setelah menerima 429 dari penyedia dengan bucket per egress pada akun tanpa proksi di bawah konteks pool ambien, minta anggota lain dari connection pool untuk percobaan berikutnya alih-alih mencoba kembali alamat egress yang sama. Mengurutkan, tidak pernah mengecualikan: pool yang habis tetap mempertahankan perilaku saat ini. Nonaktif secara default: setiap 429 berotasi ke akun berikutnya persis seperti sebelumnya."
       },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Pemeriksaan Jalan Keluar Tingkat Bebas",
+        "description": "Untuk pelaksana OpenCode, ketika permintaan proksi dijawab 403 atau 451 FreeTierError dan percobaan ulang alat yang diamati gagal atau tidak berlaku, kirim permintaan sekali melalui proksi yang berbeda (proksi akun lain atau anggota kumpulan lain, tidak pernah koneksi langsung). Hanya ketika penyelidikan itu menjawab 200, jalan keluar pertama disisihkan dalam memori penolakan proksi dan respons penyelidikan disajikan; ketika keduanya menolak, penolakan awal dikembalikan dan tidak ada yang dicatat. Teks penolakan yang sama mencakup IP jalan keluar yang ditandai dan formulir permintaan yang ditolak, sehingga penyelidikan membedakan keduanya berdasarkan bukti. Nonaktif secara default: penolakan dikembalikan tanpa perubahan."
+      },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Sidik Jari Klien OpenCode v2",
         "description": "Kirim sidik jari klien CLI OpenCode v2 pada permintaan OpenCode Zen/Go (#16571): User-Agent opencode/latest/<2.x>/cli dan x-opencode-client cli, User-Agent klien hanya dipertahankan jika merupakan klien OpenCode 2.x, dan pada permintaan gated free-tier tanpa x-opencode-request, sesi dicerminkan ke x-opencode-session-id/x-session-affinity/x-session-id, skema read/shell CLI v2 pada placeholder tools yang disuntikkan dan tool_choice \"none\" dihapus. Nonaktif secara default: setiap permintaan OpenCode mempertahankan identitas, header, dan body saat ini byte demi byte."

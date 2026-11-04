@@ -14209,6 +14209,10 @@
         "label": "OpenCode 429 kogumi uuestivalimine",
         "description": "OpenCode'i mitme konto rotatsiooni puhul, kui saadi 429 väljundpõhiselt piiratud teenusepakkujalt ilma proksita kontol ümbritsevas kogumikontekstis, küsi ühenduste kogumilt järgmise katse jaoks teist liiget, selle asemel et proovida uuesti sama väljuvat aadressi. Järjestab, ei välista kunagi: ammendunud kogum säilitab praeguse käitumise. Vaikimisi väljas: iga 429 roteerub järgmisele kontole täpselt nagu varem."
       },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode vabatasemeline väljapääsusond",
+        "description": "Kui OpenCode täitja puhul vastatakse puhverserveri päringule 403 või 451 FreeTierError ja vaadeldavate tööriistade korduskatse ebaõnnestus või ei rakendunud, saatke päring üks kord teise puhverserveri kaudu (teine konto puhverserver või muu kogumi liige, mitte kunagi otseühendus). Ainult siis, kui see sond vastab 200, jäetakse esimene väljapääs puhverserveri keeldumise mällu kõrvale ja sondi vastus teenindatakse; kui mõlemad keelduvad, tagastatakse algne keeldumine ja midagi ei salvestata. Sama keeldumise tekst katab lipuga märgitud väljumise IP ja tagasilükatud taotluse kuju, nii et sond eristab neid tõendite abil. Vaikimisi väljas: keeldumine tagastatakse muutmata kujul."
+      },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 kliendi sõrmejälg",
         "description": "Saada OpenCode v2 CLI kliendi sõrmejälg OpenCode Zen/Go päringutel (#16571): User-Agent opencode/latest/<2.x>/cli ja x-opencode-client cli, kliendi User-Agent säilitatakse ainult siis, kui tegemist on 2.x OpenCode kliendiga, piiratud tasuta taseme päringutel puudub x-opencode-request, seanss peegeldatakse päistesse x-opencode-session-id/x-session-affinity/x-session-id, lisatud kohatäitetööriistadel kasutatakse v2 CLI read/shell skeeme ning tool_choice väärtusega \"none\" eemaldatakse. Vaikimisi väljas: iga OpenCode päring säilitab praeguse identiteedi, päised ja keha bait-baidilt."

@@ -14209,6 +14209,10 @@
         "label": "Pilih Semula Kolam 429 OpenCode",
         "description": "Untuk penggiliran berbilang akaun OpenCode, selepas 429 daripada penyedia berkumpulan egress pada akaun tanpa proksi di bawah konteks kolam ambien, minta ahli lain daripada kolam sambungan untuk percubaan seterusnya dan bukannya mencuba semula alamat egress yang sama. Menyusun urutan, tidak sekali-kali mengecualikan: kolam yang kehabisan mengekalkan kelakuan semasa. Dinyahaktifkan secara lalai: setiap 429 bergilir ke akaun seterusnya tepat seperti sebelum ini."
       },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Siasatan Keluar Tahap Bebas",
+        "description": "Untuk pelaksana OpenCode, apabila permintaan yang diproksi dijawab 403 atau 451 FreeTierError dan alat pemerhatian cuba semula gagal atau tidak digunakan, hantar permintaan itu sekali melalui proksi lain (proksi akaun lain atau ahli kumpulan lain, jangan sekali-kali sambungan langsung). Hanya apabila siasatan itu menjawab 200, jalan keluar pertama diketepikan dalam memori penolakan proksi dan respons siasatan disampaikan; apabila kedua-duanya menolak, penolakan asal dikembalikan dan tiada apa-apa yang direkodkan. Teks penolakan yang sama meliputi IP jalan keluar yang dibenderakan dan bentuk permintaan yang ditolak, jadi siasatan membezakan mereka melalui bukti. Mati secara lalai: penolakan dikembalikan tidak berubah."
+      },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Cap Jari Klien OpenCode v2",
         "description": "Hantar cap jari klien CLI OpenCode v2 pada permintaan OpenCode Zen/Go (#16571): User-Agent opencode/latest/<2.x>/cli dan x-opencode-client cli, User-Agent klien dikekalkan hanya apabila ia merupakan klien OpenCode 2.x, dan pada permintaan peringkat percuma berpagar tiada x-opencode-request, sesi dicerminkan pada x-opencode-session-id/x-session-affinity/x-session-id, skema read/shell CLI v2 pada alat pemegang tempat yang disuntik dan tool_choice \"none\" digugurkan. Dimatikan secara lalai: setiap permintaan OpenCode mengekalkan identiti, pengepala dan badan semasa bait demi bait."

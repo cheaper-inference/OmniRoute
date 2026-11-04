@@ -14209,6 +14209,10 @@
         "label": "Reselectare pool 429 OpenCode",
         "description": "Pentru rotația multi-cont OpenCode, după un 429 primit de la un furnizor segmentat pe bază de ieșire (egress) pe un cont fără proxy într-un context de pool ambiental, solicită pool-ului de conexiuni un alt membru pentru următoarea încercare în loc să reîncerce aceeași adresă de ieșire. Ordonează, nu exclude niciodată: un pool epuizat păstrează comportamentul curent. Dezactivat în mod prestabilit: fiecare 429 trece la următorul cont, exact ca înainte."
       },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress Probe",
+        "description": "Pentru executorul OpenCode, atunci când la o solicitare proxy i se răspunde 403 sau 451 FreeTierError și reîncercarea instrumentelor observate a eșuat sau nu s-a aplicat, trimiteți cererea o dată printr-un alt proxy (un alt proxy de cont sau alt membru al grupului, niciodată o conexiune directă). Numai când acea sondă răspunde 200, prima ieșire este pusă deoparte în memoria de refuz al proxy și răspunsul sondei este servit; când ambii refuză, refuzul inițial este returnat și nimic nu este înregistrat. Același text de refuz acoperă un IP de ieșire marcat și o formă de cerere refuzată, astfel încât sonda le diferențiază prin dovezi. Oprit implicit: refuzul este returnat neschimbat."
+      },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Amprentă client OpenCode v2",
         "description": "Trimite amprenta de client OpenCode v2 CLI la cererile OpenCode Zen/Go (#16571): User-Agent opencode/latest/<2.x>/cli și x-opencode-client cli, un User-Agent de client păstrat doar când este un client OpenCode 2.x, iar la cererile din planul gratuit restricționat fără x-opencode-request, sesiunea reflectată pe x-opencode-session-id/x-session-affinity/x-session-id, schemele read/shell v2 CLI pe instrumentele placeholder injectate și un tool_choice de \"none\" eliminat. Dezactivat în mod implicit: fiecare cerere OpenCode păstrează identitatea, anteturile și corpul curente octet cu octet."

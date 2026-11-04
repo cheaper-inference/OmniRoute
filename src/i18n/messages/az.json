@@ -14286,6 +14286,10 @@
         "label": "OpenCode 429 Hovuzun Yenidən Seçilməsi",
         "description": "OpenCode çoxhesablı rotasiyası üçün, ümumi hovuz kontekstində proksisiz hesabda çıxışa görə qruplaşdırılmış (egress-bucketed) provayderdən 429 xətası alındıqdan sonra, eyni çıxış ünvanı ilə yenidən cəhd etmək əvəzinə, növbəti cəhd üçün bağlantı hovuzundan başqa bir üzv tələb edin. Sıralayır, heç vaxt istisna etmir: tükənmiş hovuz mövcud davranışı saxlayır. Varsayılan olaraq deaktivdir: hər bir 429 əvvəlki kimi növbəti hesaba keçir."
       },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Pulsuz Səviyyəli Çıxış Probu",
+        "description": "OpenCode icraçısı üçün proksiləşdirilmiş sorğuya 403 və ya 451 FreeTierError cavab verildikdə və müşahidə alətlərinin təkrar cəhdi uğursuz olduqda və ya tətbiq edilmədikdə, sorğunu bir dəfə fərqli proksi vasitəsilə göndərin (başqa bir hesab proksisi və ya başqa bir hovuz üzvü, heç vaxt birbaşa əlaqə olmadan). Yalnız bu zond 200-ə cavab verdikdə, proksi imtina yaddaşında ilk çıxış ayrılır və sorğu cavabı verilir; hər ikisi imtina etdikdə, imtinanın əsli qaytarılır və heç nə qeydə alınmır. Eyni imtina mətni işarələnmiş çıxış IP və rədd edilmiş sorğu formasını əhatə edir, ona görə də araşdırma onları sübutlarla ayırır. Defolt olaraq söndürülür: imtina dəyişməz olaraq qaytarılır."
+      },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 Klient Barmaq İzi",
         "description": "OpenCode Zen/Go sorğularında OpenCode v2 CLI klient barmaq izini göndərin (#16571): User-Agent opencode/latest/<2.x>/cli və x-opencode-client cli, klient User-Agent yalnız 2.x OpenCode klienti olduqda saxlanılır və məhdudlaşdırılmış pulsuz tarif sorğularında x-opencode-request olmur, sessiya x-opencode-session-id/x-session-affinity/x-session-id üzərinə əks etdirilir, daxil edilmiş pleysholder alətlərindəki v2 CLI read/shell sxemləri və \"none\" dəyərindəki tool_choice silinir. Defolt olaraq qapalıdır: hər bir OpenCode sorğusu cari kimliyi, başlıqları və gövdəni baytba-bayt saxlayır."

@@ -14209,6 +14209,10 @@
         "label": "OpenCode 429 opätovný výber bazéna",
         "description": "Pre viacúčtovú rotáciu OpenCode, po 429 od providera s egress bucketovaním na účte bez proxie v prostredí bazénového kontextu, požiadať konekčný bazén o iného člena pre ďalší pokus namiesto opakovania tej istej egress adresy. Poradia, nikdy nevylučujú: vyčerpaný bazén zachováva aktuálne správanie. Štandardne vypnuté: každé 429 rotuje na ďalší účet presne ako predtým."
       },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Voľná výstupná sonda",
+        "description": "V prípade spúšťača OpenCode, keď sa na žiadosť cez proxy odpovie 403 alebo 451 FreeTierError a opakovaný pokus sledovaných nástrojov zlyhal alebo sa nepoužil, odošlite požiadavku raz cez iný proxy (iný proxy účtu alebo iný člen fondu, nikdy nie priame pripojenie). Len keď táto sonda odpovie 200, je prvý výstup odložený v proxy odmietnutej pamäti a odošle sa odpoveď sondy; keď obaja odmietnu, vráti sa pôvodné odmietnutie a nič sa nezaznamená. Rovnaký text odmietnutia zahŕňa označený výstup IP a tvar zamietnutej žiadosti, takže sonda ich rozlíši podľa dôkazov. Štandardne vypnuté: odmietnutie sa vráti nezmenené."
+      },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Otvorené vloženie klientov OpenCode v2",
         "description": "Odoslať odtlačok prstov klienta OpenCode v2 CLI pri žiadaniach OpenCode Zen/Go (#16571): User-Agent opencode/latest/<2.x>/cli a hlavička x-opencode-client cli, klientova User-Agent sa udržiava len ak je to klient OpenCode 2.x, a pri gateovaných žiadaniach bezplatnej úrovne chýba hlavička x-opencode-request, relácia je zrkadlená do x-opencode-session-id/x-session-affinity/x-session-id, schémy pre čítanie/shell v2 CLI sú na injikovaných nástrojoch s placeholde a tool_choice \"none\" je odobrané. Predvolene vypnuté; každé žiadanie OpenCode si zachováva súčasnú identitu, hlavičky a telo byte po byte."

@@ -14209,6 +14209,10 @@
         "label": "Ponovni izbirni pool za OpenCode 429",
         "description": "Za večračunalniško rotacijo OpenCode, po 429 od ponudnika, razdeljenega po izstopnem loncu, na računu brez posrednika v ambientalnem kontekstu poola, se obrnite na pool povezav za drugega člana za naslednji poskus namesto ponovnega poskusa iste izstopne naslove. Red, nikoli izločanje: izčrpan pool ohranja trenutno vedenje. Privzeto izklopljeno: vsak 429 se nanaša na naslednji račun natančno kot prej."
       },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress Probe",
+        "description": "Za izvajalca OpenCode, ko na proksi zahtevo odgovori 403 ali 451 FreeTierError in ponovni poskus opazovanih orodij ni uspel ali se ni uporabil, pošlji zahtevo enkrat prek drugega proxyja (drugega računa proxy ali drugega člana skupine, nikoli neposredne povezave). Šele ko ta sonda odgovori 200, se prvi izhod postavi na stran v pomnilniku za zavrnitev proxyja in odziv sonde se postreže; če oba zavrneta, se izvirna zavrnitev vrne in nič se ne zabeleži. Enako besedilo zavrnitve zajema označeni izstopni IP in zavrnjeno obliko zahteve, tako da ju sonda loči na podlagi dokazov. Privzeto izklopljeno: zavrnitev se vrne nespremenjena."
+      },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Odprtje OpenCode v2 oznake zahtevka stranke",
         "description": "Pošlji oznako zahtevka OpenCode v2 CLI stranke na zahteve OpenCode Zen/Go (#16571): Uporabniška oznaka opencode/latest/<2.x>/cli in x-opencode-client cli, uporabniška oznaka zahtevka stranke se ohrani samo, ko gre za OpenCode stranko 2.x, ter na omejenih zahtevkih proste tarife brez x-opencode-request, zrcalo seje na x-opencode-session-id/x-session-affinity/x-session-id, shemi za branje/ustvarjanje lupine za v2 CLI na vgrajenih zamenjalnih orodjih ter izpadlo tool_choice, ki je \"none\". Privzeto izklopljeno: vsaka zahteva OpenCode ohrani trenutno identiteto, glave in telo do zadnjega znaka."

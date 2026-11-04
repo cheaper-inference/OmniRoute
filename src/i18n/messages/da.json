@@ -14286,6 +14286,10 @@
         "label": "Genvalg af pool ved OpenCode 429",
         "description": "For OpenCode-multikonto-rotationen: efter en 429 fra en egress-bucketed udbyder på en proxyfri konto under en omgivende pool-kontekst, anmodes forbindelsespoolen om et andet medlem til det næste forsøg i stedet for at prøve den samme egress-adresse igen. Sorterer, udelukker aldrig: en udtømt pool bevarer den nuværende adfærd. Deaktiveret som standard: enhver 429 roterer til den næste konto, præcis som før."
       },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress Probe",
+        "description": "For OpenCode eksekutoren, når en fuldmagtsanmodning besvares 403 eller 451 FreeTierError og de observerede værktøjer igen mislykkedes eller ikke fandt anvendelse, skal du sende anmodningen én gang via en anden proxy (en anden kontoproxy eller et andet puljemedlem, aldrig en direkte forbindelse). Først når denne sonde svarer 200, bliver den første udgang sat til side i proxy-afvisningshukommelsen, og sondesvaret serveret; når begge nægter, returneres det oprindelige afslag, og intet registreres. Den samme afvisningstekst dækker en markeret egress IP og en form for afvist anmodning, så sonden adskiller dem ved bevis. Fra som standard: afslaget returneres uændret."
+      },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2-klientfingeraftryk",
         "description": "Send OpenCode v2 CLI-klientfingeraftrykket ved OpenCode Zen/Go-anmodninger (#16571): User-Agent opencode/latest/<2.x>/cli og x-opencode-client cli, en klient-User-Agent bevares kun, når det er en 2.x OpenCode-klient, og ved adgangsbegrænsede free-tier-anmodninger ingen x-opencode-request, sessionen spejlet over på x-opencode-session-id/x-session-affinity/x-session-id, v2 CLI read/shell-skemaerne på indsatte placeholder-værktøjer og et tool_choice på \"none\" fjernet. Slået fra som standard: enhver OpenCode-anmodning bevarer den nuværende identitet, headers og body byte for byte."

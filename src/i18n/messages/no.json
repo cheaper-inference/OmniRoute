@@ -14209,6 +14209,10 @@
         "label": "OpenCode 429: gjenvalg av pool",
         "description": "For OpenCode-rotasjon over flere kontoer: etter en 429 fra en leverandør med kvoter per utgående IP på en proxy-løs konto i en omgivende pool-kontekst, be tilkoblingspoolen om et annet medlem for neste forsøk i stedet for å prøve den samme utgående adressen på nytt. Sorterer, ekskluderer aldri: en uttømt pool beholder gjeldende oppførsel. Deaktivert som standard: hver 429 roterer til neste konto nøyaktig som før."
       },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress Probe",
+        "description": "For OpenCode utføreren, når en proxy-forespørsel er besvart 403 eller 451 FreeTierError og de observerte verktøyene mislyktes eller ikke gjaldt, send forespørselen én gang via en annen proxy (en annen kontoproxy eller et annet gruppemedlem, aldri en direkte tilkobling). Først når den sonden svarer 200 blir den første utgangen satt til side i proxy-avslagsminnet og sondesvaret servert; når begge nekter, returneres det opprinnelige avslaget og ingenting registreres. Den samme avvisningsteksten dekker en flagget utgående IP og en form for avvist forespørsel, så sonden skiller dem fra hverandre ved hjelp av bevis. Av som standard: avslaget returneres uendret."
+      },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2-klientfingeravtrykk",
         "description": "Send OpenCode v2 CLI-klientfingeravtrykket ved OpenCode Zen/Go-forespørsler (#16571): User-Agent opencode/latest/<2.x>/cli og x-opencode-client cli, en klient-User-Agent som kun beholdes når det er en 2.x OpenCode-klient, og på adgangsbegrensede gratisnivå-forespørsler ingen x-opencode-request, økten speilet til x-opencode-session-id/x-session-affinity/x-session-id, v2 CLI read/shell-skjemaer på injiserte plassholderverktøy og en tool_choice satt til \"none\" utelates. Deaktivert som standard: hver OpenCode-forespørsel beholder gjeldende identitet, headere og brødtekst byte for byte."

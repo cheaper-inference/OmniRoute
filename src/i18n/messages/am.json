@@ -14286,6 +14286,10 @@
         "label": "OpenCode 429 የፑል ድጋሚ ምርጫ",
         "description": "ለOpenCode ባለብዙ መለያ ቅብብሎሽ፣ በአካባቢ ፑል (ambient pool) አውድ ስር ፕሮክሲ በሌለው መለያ ላይ ከ egress-bucketed አቅራቢ 429 ከተቀበለ በኋላ፣ ተመሳሳዩን የ egress አድራሻ እንደገና ከመሞከር ይልቅ ለቀጣዩ ሙከራ የግንኙነት ፑሉን ሌላ አባል ይጠይቁ። ቅደም ተከተል ያስይዛል እንጂ በጭራሽ አያገልልም፦ የተሟጠጠ ፑል አሁን ያለውን ባህሪ ጠብቆ ያቆያል። በነባሪ ጠፍቷል፡ እያንዳንዱ 429 ልክ እንደበፊቱ ወደ ቀጣዩ መለያ ይሽከረከራል።"
       },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode ነፃ-ደረጃ ኢግረስ ምርመራ",
+        "description": "ለ OpenCode ፈጻሚ፣ የተኪ ጥያቄ 403 ወይም 451 FreeTierError ሲመለስ እና የተስተዋሉ መሳሪያዎች ድጋሚ ሲሞክሩ ወይም ሳይተገበሩ ሲቀሩ፣ ጥያቄውን አንድ ጊዜ በተለያየ ፕሮክሲ በኩል ይላኩ (ሌላ የመለያ ፕሮክሲ ወይም ሌላ ገንዳ አባል፣ በጭራሽ ቀጥተኛ ግንኙነት)። ያ ፍተሻ 200 ሲመልስ ብቻ በፕሮክሲ እምቢታ ማህደረ ትውስታ ውስጥ የተቀመጠው የመጀመሪያው መውጣት እና የፍተሻ ምላሹ አገልግሎት ይሰጣል። ሁለቱም እምቢ ሲሉ, ዋናው እምቢታ ይመለሳል እና ምንም ነገር አይመዘገብም. ተመሳሳዩ የእምቢታ ጽሑፍ ባንዲራ የተደረገ egress IP እና ውድቅ የተደረገ የጥያቄ ቅርፅን ይሸፍናል፣ ስለዚህ መርማሪው በማስረጃ ይለያቸዋል። በነባሪ ጠፍቷል፡ እምቢታው ሳይለወጥ ይመለሳል።"
+      },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "የOpenCode v2 ደንበኛ የጣት አሻራ",
         "description": "በOpenCode Zen/Go ጥያቄዎች ላይ የOpenCode v2 CLI ደንበኛ የጣት አሻራን ይላኩ (#16571)፦ User-Agent opencode/latest/<2.x>/cli እና x-opencode-client cli፣ የደንበኛ User-Agent የሚቀመጠው የ2.x OpenCode ደንበኛ ሲሆን ብቻ ነው፣ እና በተገደቡ የነጻ-እርከን ጥያቄዎች ላይ ምንም x-opencode-request የለም፣ ክፍለ-ጊዜው ወደ x-opencode-session-id/x-session-affinity/x-session-id ተንጸባርቋል፣ በተከተቱ የቦታ ያዥ መሣሪያዎች ላይ ያሉ የv2 CLI read/shell ስኪማዎች እና የ\"none\" tool_choice ተጥለዋል። በነባሪነት ጠፍቷል፦ እያንዳንዱ የOpenCode ጥያቄ የአሁኑን ማንነት፣ ራስጌዎች እና አካል ባይት በባይት እንዳለ ይጠብቃል።"

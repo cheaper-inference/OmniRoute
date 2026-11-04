@@ -14209,6 +14209,10 @@
         "label": "OpenCode 429 pool-herselectie",
         "description": "Voor de OpenCode multi-account-rotatie: vraag na een 429 van een provider met egress-bucketing op een proxy-loos account binnen een ambient pool-context de verbindingspool om een ander lid voor de volgende poging, in plaats van hetzelfde egress-adres opnieuw te proberen. Rangschikt, sluit nooit uit: een uitgeputte pool behoudt het huidige gedrag. Standaard uitgeschakeld: elke 429 roteert precies zoals voorheen naar het volgende account."
       },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress-sonde",
+        "description": "Voor de OpenCode uitvoerder: wanneer een proxyverzoek wordt beantwoord met 403 of 451 FreeTierError en de nieuwe poging van de waargenomen tools mislukt of niet van toepassing is, verzendt u het verzoek één keer via een andere proxy (een andere accountproxy of een ander poollid, nooit een directe verbinding). Alleen wanneer die sonde 200 antwoordt, wordt de eerste uitgang gereserveerd in het proxyweigeringsgeheugen en wordt het sondeantwoord geserveerd; wanneer beiden weigeren, wordt de oorspronkelijke weigering geretourneerd en wordt er niets geregistreerd. Dezelfde weigeringstekst omvat een gemarkeerde uitgaande IP en een geweigerde verzoekvorm, dus de sonde onderscheidt ze door bewijsmateriaal. Standaard uitgeschakeld: de weigering wordt ongewijzigd geretourneerd."
+      },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2-clientfingerprint",
         "description": "Verstuur de OpenCode v2 CLI-clientfingerprint bij OpenCode Zen/Go-verzoeken (#16571): User-Agent opencode/latest/<2.x>/cli en x-opencode-client cli, een client User-Agent die alleen behouden blijft wanneer het een 2.x OpenCode-client is, en bij gated free-tier-verzoeken geen x-opencode-request, de sessie gespiegeld naar x-opencode-session-id/x-session-affinity/x-session-id, de v2 CLI-read/shell-schema's op geïnjecteerde placeholder-tools en een tool_choice van \"none\" weggelaten. Standaard uitgeschakeld: elk OpenCode-verzoek behoudt de huidige identiteit, headers en body byte voor byte."
