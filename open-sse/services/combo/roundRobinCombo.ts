@@ -1395,17 +1395,7 @@ export async function handleRoundRobinCombo({
               : 0;
           if ([502, 503, 504].includes(result.status) && fallbackWaitMs > 0) {
             log.debug?.("COMBO-RR", `Waiting ${fallbackWaitMs}ms before fallback to next model`);
-            await new Promise((resolve) => {
-              const timer = setTimeout(resolve, fallbackWaitMs);
-              signal?.addEventListener(
-                "abort",
-                () => {
-                  clearTimeout(timer);
-                  resolve(undefined);
-                },
-                { once: true }
-              );
-            });
+            await waitForCooldownAwareRetry(fallbackWaitMs, signal);
             if (signal?.aborted) {
               log.info("COMBO-RR", `Client disconnected during fallback wait — aborting`);
               return errorResponse(499, "Client disconnected");
