@@ -3626,6 +3626,8 @@
     "testStepRunning": "جانچ جاری ہے…",
     "testStepNotTestable": "صرف واحد ماڈل والے مراحل کی جانچ کی جا سکتی ہے",
     "saving": "محفوظ کیا جا رہا ہے...",
+    "liveAccountLabel": "acct : {id}",
+    "liveAccountTooltip": "اکاؤنٹ: {id}",
     "liveNoProviders": "ابھی تک کوئی فراہم کنندگان نہیں دیکھے گئے۔",
     "liveFleetDataHint": "فلیٹ ڈیٹا لائیو کومبو ایونٹس کے ذریعے موصول ہوتا ہے۔",
     "liveActiveCount": "فعال ({count})",

@@ -3626,6 +3626,8 @@
     "testStepRunning": "Sinalmoqda…",
     "testStepNotTestable": "Faqat bitta modelli qadamlarni sinash mumkin",
     "saving": "Saqlanmoqda...",
+    "liveAccountLabel": "akt: {id}",
+    "liveAccountTooltip": "Hisob: {id}",
     "liveNoProviders": "Hali hech qanday provayder kuzatilmadi.",
     "liveFleetDataHint": "Infratuzilma maʼlumotlari jonli combo hodisalari orqali keladi.",
     "liveActiveCount": "Faol ({count})",

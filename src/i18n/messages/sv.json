@@ -3626,6 +3626,8 @@
     "testStepRunning": "Testar…",
     "testStepNotTestable": "Endast steg med en enda modell kan testas",
     "saving": "Sparar...",
+    "liveAccountLabel": "acct: {id}",
+    "liveAccountTooltip": "Konto: {id}",
     "liveNoProviders": "Inga leverantörer har observerats ännu.",
     "liveFleetDataHint": "Flottdata anländer via live-kombinationshändelser.",
     "liveActiveCount": "Aktiva ({count})",

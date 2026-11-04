@@ -3703,6 +3703,8 @@
     "testStepRunning": "جارٍ الاختبار…",
     "testStepNotTestable": "يمكن اختبار الخطوات ذات النموذج الواحد فقط",
     "saving": "جارٍ الحفظ...",
+    "liveAccountLabel": "الحساب: {id}",
+    "liveAccountTooltip": "الحساب : {id}",
     "liveNoProviders": "لم يتم رصد أي مزودين بعد.",
     "liveFleetDataHint": "تصل بيانات الأسطول من خلال أحداث المجموعة المباشرة.",
     "liveActiveCount": "نشط ({count})",

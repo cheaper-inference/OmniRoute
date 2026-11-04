@@ -3703,6 +3703,8 @@
     "testStepRunning": "Test in corso…",
     "testStepNotTestable": "Si possono testare solo i passaggi con un singolo modello",
     "saving": "Risparmio...",
+    "liveAccountLabel": "acct: {id}",
+    "liveAccountTooltip": "Conto: {id}",
     "liveNoProviders": "Nessun provider ancora osservato.",
     "liveFleetDataHint": "I dati della flotta arrivano tramite eventi combo in tempo reale.",
     "liveActiveCount": "Attivi ({count})",

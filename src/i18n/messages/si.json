@@ -3626,6 +3626,8 @@
     "testStepRunning": "පරීක්ෂා කරමින්…",
     "testStepNotTestable": "තනි-මාදිලි පියවර පමණක් පරීක්ෂා කළ හැක",
     "saving": "සුරකිමින්...",
+    "liveAccountLabel": "පනත: {id}",
+    "liveAccountTooltip": "ගිණුම: {id}",
     "liveNoProviders": "තවමත් කිසිදු සැපයුම්කරුවෙකු නිරීක්ෂණය කර නැත.",
     "liveFleetDataHint": "සජීවී කොම්බෝ සිදුවීම් හරහා සමූහ දත්ත පැමිණේ.",
     "liveActiveCount": "සක්රිය ({count})",

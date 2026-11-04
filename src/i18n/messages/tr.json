@@ -3626,6 +3626,8 @@
     "testStepRunning": "Test ediliyor…",
     "testStepNotTestable": "Yalnızca tek modelli adımlar test edilebilir",
     "saving": "Kaydediliyor...",
+    "liveAccountLabel": "hesap: {id}",
+    "liveAccountTooltip": "Hesap: {id}",
     "liveNoProviders": "Henüz hiçbir sağlayıcı gözlemlenmedi.",
     "liveFleetDataHint": "Filo verileri canlı kombo etkinlikleri aracılığıyla gelir.",
     "liveActiveCount": "Aktif ({count})",

@@ -3703,6 +3703,8 @@
     "testStepRunning": "በመሞከር ላይ…",
     "testStepNotTestable": "መሞከር የሚቻለው ነጠላ-ሞዴል ደረጃዎችን ብቻ ነው",
     "saving": "በማስቀመጥ ላይ...",
+    "liveAccountLabel": "አክት {id}",
+    "liveAccountTooltip": "መለያ {id}",
     "liveNoProviders": "እስካሁን ምንም አቅራቢዎች አልታዩም።",
     "liveFleetDataHint": "የአቅራቢዎች ስብስብ ውሂብ በቀጥታ የኮምቦ ክስተቶች በኩል ይደርሳል።",
     "liveActiveCount": "ንቁ ({count})",
