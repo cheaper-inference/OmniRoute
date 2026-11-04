@@ -14259,6 +14259,10 @@
         "label": "Ordinamento del pool con egress condiviso",
         "description": "Per i provider la cui quota è suddivisa in base all'indirizzo di egress, posiziona un membro del pool che condivide l'indirizzo di egress rilevato di un membro rifiutato di recente appena sotto i membri operativi. Solo ordinamento, mai escluso. Richiede PROXY_SKIP_RECENTLY_FAILED, che genera il segnale di rifiuto letto. Disattivato per impostazione predefinita: l'ordine di selezione corrisponde esattamente alla rotazione standard."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
         "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
         "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."

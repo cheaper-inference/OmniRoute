@@ -14259,6 +14259,10 @@
         "label": "শেয়ার্ড ইগ্রেস পুলের ক্রম",
         "description": "যেসব প্রোভাইডারের কোটা ইগ্রেস অ্যাড্রেস অনুযায়ী ভাগ করা হয়, তাদের ক্ষেত্রে সম্প্রতি প্রত্যাখ্যাত কোনো মেম্বারের পর্যবেক্ষিত ইগ্রেস অ্যাড্রেস শেয়ার করা পুল মেম্বারকে সুস্থ মেম্বারদের ঠিক নিচে স্থান দেওয়া হয়। এটি কেবল ক্রম নির্ধারণ করে, কখনোই বাদ দেয় না। এর জন্য PROXY_SKIP_RECENTLY_FAILED প্রয়োজন, যা প্রত্যাখ্যানের সিগন্যাল তৈরি করে। ডিফল্টভাবে বন্ধ: নির্বাচনের ক্রম পুরোপুরি সাধারণ রোটেশনের মতো থাকে।"
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
         "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
         "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."

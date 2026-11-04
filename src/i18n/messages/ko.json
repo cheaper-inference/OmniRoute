@@ -14182,6 +14182,10 @@
         "label": "공유 이그레스 풀 순서",
         "description": "이그레스 주소별로 쿼터가 할당되는 제공자의 경우, 최근 거부된 멤버와 관측된 이그레스 주소를 공유하는 풀 멤버의 우선순위를 정상 멤버 바로 아래로 낮춥니다. 순서만 조정될 뿐 제외되지는 않습니다. 거부 신호를 읽기 위해 PROXY_SKIP_RECENTLY_FAILED가 필요합니다. 기본값은 꺼짐(Off)이며, 선택 순서는 일반 로테이션과 정확히 동일합니다."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
         "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
         "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
