@@ -296,7 +296,10 @@ export function providerUsesAutomaticPrefixCaching(
   }
   if (!provider) return false;
   const providerId = provider.toLowerCase();
-  if (OPENCODE_LANES.has(providerId)) return isOpenCodeCacheableModel(providerId, model);
+  if (OPENCODE_LANES.has(providerId)) {
+    // OpenCode uses implicit prefixes unless a marker passthrough format was selected.
+    return connectionCacheOverride?.supportsPromptCaching === true || isOpenCodeCacheableModel(providerId, model);
+  }
   return AUTOMATIC_PREFIX_CACHING_PROVIDERS.has(providerId);
 }
 
