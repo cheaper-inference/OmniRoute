@@ -1,1 +1,0 @@
-- **fix(sse):** streams aborted by the client (499) or failed mid-answer now advance the per-API-key rpm/tpm quota counters for the tokens already generated; previously such requests were invisible to the quota gate.
