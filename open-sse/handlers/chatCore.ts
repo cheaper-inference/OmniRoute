@@ -300,7 +300,10 @@ import type {
   CompressionPipelineStep,
   CompressionResult,
 } from "../services/compression/types.ts";
-import type { CachingDetectionContext } from "../services/compression/cachingAware.ts";
+import {
+  mustKeepOpenCodeHistoryVerbatim,
+  type CachingDetectionContext,
+} from "../services/compression/cachingAware.ts";
 import { runLiveZoneCompression } from "./chatCore/liveZoneCompression.ts";
 import { prepareWebSearchFallbackBody } from "../services/webSearchFallback.ts";
 import { prepareWebFetchFallbackBody } from "../services/webFetchInterception.ts";
