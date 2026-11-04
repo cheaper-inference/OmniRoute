@@ -110,6 +110,39 @@ type GeminiRequest = {
 type GeminiThinkingLevel = "minimal" | "low" | "medium" | "high";
 type ResolvedGeminiThinking = { level: GeminiThinkingLevel; includeThoughts: boolean };
 
+const GEMINI_NATIVE_EFFORT_LEVELS: ReadonlyMap<string, GeminiThinkingLevel> = new Map<string, GeminiThinkingLevel>([
+  ["none", "minimal"],
+  ["minimal", "minimal"],
+  ["low", "low"],
+  ["medium", "medium"],
+  ["high", "high"],
+  ["xhigh", "high"],
+  ["max", "high"],
+  ["auto", "high"],
+]);
+
+function nativeGeminiEffort(
+  rawEffort: unknown,
+  supported: readonly GeminiThinkingLevel[]
+): ResolvedGeminiThinking | null {
+  if (typeof rawEffort !== "string") return null;
+  const effort = rawEffort.trim().toLowerCase();
+  const mapped = GEMINI_NATIVE_EFFORT_LEVELS.get(effort);
+  if (!mapped || !supported.includes(mapped)) return null;
+  return { level: mapped, includeThoughts: effort !== "none" };
+}
+
+function nativeGeminiBudget(
+  rawBudget: unknown,
+  supported: readonly GeminiThinkingLevel[]
+): ResolvedGeminiThinking | null {
+  if (typeof rawBudget !== "number" || !Number.isFinite(rawBudget)) return null;
+  const level: GeminiThinkingLevel =
+    rawBudget <= 0 ? "minimal" : rawBudget <= 1024 ? "low" : rawBudget <= 8192 ? "medium" : "high";
+  if (!supported.includes(level)) return null;
+  return { level, includeThoughts: rawBudget > 0 };
+}
+
 function resolveNativeGeminiThinkingLevel(
   model: string,
   body: Record<string, unknown>,
@@ -128,21 +161,8 @@ function resolveNativeGeminiThinkingLevel(
     body.reasoning && typeof body.reasoning === "object" && !Array.isArray(body.reasoning)
       ? (body.reasoning as Record<string, unknown>)
       : {};
-  const rawEffort = body.reasoning_effort ?? reasoning.effort;
-  if (typeof rawEffort === "string") {
-    const effort = rawEffort.trim().toLowerCase();
-    const mapped: GeminiThinkingLevel | null =
-      effort === "none" || effort === "minimal"
-        ? "minimal"
-        : effort === "low" || effort === "medium" || effort === "high"
-          ? effort
-          : effort === "xhigh" || effort === "max" || effort === "auto"
-            ? "high"
-            : null;
-    if (mapped && supported.includes(mapped)) {
-      return { level: mapped, includeThoughts: effort !== "none" };
-    }
-  }
+  const fromEffort = nativeGeminiEffort(body.reasoning_effort ?? reasoning.effort, supported);
+  if (fromEffort) return fromEffort;
 
   const thinking =
     body.thinking && typeof body.thinking === "object" && !Array.isArray(body.thinking)
@@ -152,14 +172,8 @@ function resolveNativeGeminiThinkingLevel(
     const level = supported.includes("minimal") ? "minimal" : spec?.defaultGeminiThinkingLevel;
     return level && supported.includes(level) ? { level, includeThoughts: false } : null;
   }
-  const rawBudget = thinking.budget_tokens ?? thinking.budgetTokens;
-  if (typeof rawBudget === "number" && Number.isFinite(rawBudget)) {
-    const mapped: GeminiThinkingLevel =
-      rawBudget <= 0 ? "minimal" : rawBudget <= 1024 ? "low" : rawBudget <= 8192 ? "medium" : "high";
-    if (supported.includes(mapped)) {
-      return { level: mapped, includeThoughts: rawBudget > 0 };
-    }
-  }
+  const fromBudget = nativeGeminiBudget(thinking.budget_tokens ?? thinking.budgetTokens, supported);
+  if (fromBudget) return fromBudget;
 
   const level =
     spec?.defaultGeminiThinkingLevel && supported.includes(spec.defaultGeminiThinkingLevel)
