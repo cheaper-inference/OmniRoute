@@ -42,29 +42,35 @@ noutbukingiz                            masofaviy OmniRoute (VPS)
 
 ## Ulanish
 
-### Boshqaruv paroli bilan (dastlabki sozlash)
+### Boshqaruv paroli bilan (bootstrap)
 
 ```bash
 omniroute connect 192.168.0.15
 # http://192.168.0.15:20128 uchun boshqaruv paroli: ********
-# ✔ http://192.168.0.15:20128 manziliga ulandi — kontekst: '192.168.0.15' (qamrov: admin)
+# ✔ http://192.168.0.15:20128 ga ulandi — kontekst '192.168.0.15' (qamrov: admin)
 ```
 
-Parol orqali ulanish jarayoni standart holatda **admin** tokenini yaratadi (parol sizda ekan, demak
-allaqachon toʻliq boshqaruvga egasiz). Qamrovni `--scope` bilan kamaytiring:
+Parol oqimi sukut bo‘yicha **admin** tokenini yaratadi (parol sizda bo‘lgani
+uchun sizda allaqachon to‘liq boshqaruv mavjud). `--scope` bilan qamrovni
+toraytiring:
 
 ```bash
 omniroute connect 192.168.0.15 --scope write
 ```
 
-Parametrlar: `--port <p>` (host’da port koʻrsatilmagan boʻlsa), `--name <ctx>` (kontekst nomi),
-`--scope read|write|admin`. Toʻliq URL oʻzgartirilmasdan ishlatiladi:
+Parametrlar: `--port <p>` (hostda port ko‘rsatilmagan bo‘lsa), `--name <ctx>`
+(kontekst nomi), `--scope read|write|admin`. To‘liq URL o‘z holicha qabul qilinadi:
 `omniroute connect https://omni.example.com`.
+
+Serverda boshqaruv panelining ikki bosqichli autentifikatsiyasi yoqilganida
+(Settings → Security), faqat parol rad etiladi: shunda CLI autentifikator
+ilovasidagi kodni (yoki tiklash kodini) so‘raydi. Interaktiv bo‘lmagan
+foydalanish uchun uni `--totp <code>` bilan oldindan uzating.
 
 ### Oldindan yaratilgan token bilan
 
-Boshqaruv panelida (yoki `omniroute tokens create` yordamida) qamrovli token yarating va
-uni kiriting — parol talab qilinmaydi:
+Boshqaruv panelida (yoki `omniroute tokens create` yordamida) qamrovli token
+yarating va uni kiriting — parol kerak emas:
 
 ```bash
 omniroute connect 192.168.0.15 --key oma_live_xxxxxxxx
@@ -434,14 +440,14 @@ omniroute contexts remove 192-168-0-15 --yes   # mahalliy kontekstni olib tashla
 
 ---
 
-## API endpointlari (ma’lumotnoma)
+## API endpointlari (maʼlumot uchun)
 
-| Usul   | Yo‘nalish             | Autentifikatsiya | Ruxsat doirasi                      |
-| ------ | --------------------- | ---------------- | ----------------------------------- |
-| POST   | `/api/cli/connect`    | boshqaruv paroli | — (ochiq, parol bilan himoyalangan) |
-| GET    | `/api/cli/whoami`     | kirish tokeni    | o‘qish                              |
-| GET    | `/api/cli/tokens`     | kirish tokeni    | administrator                       |
-| POST   | `/api/cli/tokens`     | kirish tokeni    | administrator                       |
-| DELETE | `/api/cli/tokens/:id` | kirish tokeni    | administrator                       |
+| Metod  | Yo‘nalish             | Autentifikatsiya           | Qamrov                                |
+| ------ | --------------------- | -------------------------- | ------------------------------------- |
+| POST   | `/api/cli/connect`    | parol; yoqilgan bo‘lsa 2FA | — (ommaviy, parol bilan himoyalangan) |
+| GET    | `/api/cli/whoami`     | kirish tokeni              | o‘qish                                |
+| GET    | `/api/cli/tokens`     | kirish tokeni              | administratorlik                      |
+| POST   | `/api/cli/tokens`     | kirish tokeni              | administratorlik                      |
+| DELETE | `/api/cli/tokens/:id` | kirish tokeni              | administratorlik                      |
 
 To‘liq sxemalar uchun [openapi.yaml](../openapi.yaml) fayliga qarang.
