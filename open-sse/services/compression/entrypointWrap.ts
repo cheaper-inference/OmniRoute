@@ -11,6 +11,7 @@ import {
 } from "./quantumLock/index.ts";
 
 export interface CompressionEntrypointOptions {
+  model?: string;
   config?: CompressionConfig;
   riskGate?: RiskGateConfig;
   cachingContext?: CachingDetectionContext;
