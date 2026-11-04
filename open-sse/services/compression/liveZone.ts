@@ -458,7 +458,9 @@ export async function applyLiveZoneCompression(
   // A global hard budget needs the complete history to make correct keep/drop decisions.
   if (hasGlobalHardBudget(options.variant)) return compress(body);
   const context = resolveLiveZoneContext(body, options);
-  if (!context) return compress(body);
+  if (!context) {
+    return options.preserveRawPrefixOnMiss ? { body, compressed: false, stats: null } : compress(body);
+  }
   prune(context.now);
   const previous = entries.get(context.key);
 
