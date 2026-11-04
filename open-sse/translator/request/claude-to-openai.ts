@@ -1,3 +1,4 @@
+import { OPENAI_SERVICE_TIERS, SERVICE_TIER_PROVIDERS } from "../../config/serviceTier.ts";
 import { register } from "../registry.ts";
 import { FORMATS } from "../formats.ts";
 import { adjustMaxTokens } from "../helpers/maxTokensHelper.ts";
@@ -98,14 +99,10 @@ function nativeWebSearchTargetFormat(credentials: unknown): string | null {
 
 // OpenAI service_tier values. Anthropic's "standard_only" has no OpenAI twin beyond
 // "default"; "fast" is the alias the Codex billing/executor path already accepts.
-const OPENAI_SERVICE_TIERS = new Set(["auto", "default", "flex", "priority", "scale"]);
 const CLAUDE_TO_OPENAI_SERVICE_TIER: Record<string, string> = {
   standard_only: "default",
   fast: "priority",
 };
-// Only targets known to accept a top-level service_tier get it; strict
-// OpenAI-compatible gateways reject unknown fields with a 400.
-const SERVICE_TIER_PROVIDERS = new Set(["openai", "azure-openai", "codex"]);
 
 /** Client service_tier to keep across the Claude → OpenAI pivot, or undefined to drop it. */
 function resolveOpenAIServiceTier(tier: unknown, credentials: unknown): string | undefined {

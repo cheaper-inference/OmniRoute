@@ -120,39 +120,40 @@ $20 վճարելու և սահմանափակումներին բախվելու փ
 
 ## 📖 Մատակարարի կարգավորում
 
-CSV կամ JSON ֆայլից API բանալիով կապեր զանգվածաբար ավելացնելու համար օգտագործեք **Կառավարման վահանակ → Մատակարարներ → Ներմուծել ֆայլից**։ Սյունակների հերթականությունը ֆիքսված է (`provider,name,apiKey,baseUrl,priority`)․ `provider`-ը պետք է արդեն գոյություն ունենա որպես կառավարվող մատակարար կամ համատեղելի հանգույց։ Տե՛ս [Մատակարարների ներմուծում CSV կամ JSON ֆայլից](../providers/CSV-IMPORT.md)։
+CSV կամ JSON ֆայլից API-բանալիով կապերը զանգվածաբար ավելացնելու համար օգտագործեք **Վահանակ → Մատակարարներ → Ներմուծել ֆայլից**։ Սյունակները դիրքային են (`provider,name,apiKey,baseUrl,priority`), իսկ `provider`-ը պետք է արդեն գոյություն ունենա որպես կառավարվող մատակարար կամ համատեղելի հանգույց։ Տեսեք [Մատակարարների ներմուծում CSV կամ JSON ֆայլից](../providers/CSV-IMPORT.md)։
 
 ### 🔐 Բաժանորդագրությամբ մատակարարներ
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Կառավարման վահանակ → Մատակարարներ → Միացնել Claude Code-ը
-→ OAuth մուտք → Թոքենի ավտոմատ թարմացում
+Վահանակ → Մատակարարներ → Միացնել Claude Code-ը
+→ Մուտք OAuth-ով → Նշանի ավտոմատ թարմացում
 → 5-ժամյա + շաբաթական քվոտայի հետևում
 
-Մոդելներ՝
+Մոդելներ:
   cc/claude-opus-4-7
   cc/claude-sonnet-4-6
   cc/claude-haiku-4-5-20251001
 ```
 
-**Մասնագիտական խորհուրդ․** Բարդ առաջադրանքների համար օգտագործեք Opus-ը, իսկ արագության համար՝ Sonnet-ը։ OmniRoute-ը հետևում է յուրաքանչյուր մոդելի քվոտային։
+**Մասնագիտական խորհուրդ․** Բարդ առաջադրանքների համար օգտագործեք Opus-ը, իսկ արագության համար՝ Sonnet-ը։ OmniRoute-ը հետևում է քվոտային ըստ մոդելի։
 
-OmniRoute-ի հոսթում դիտարկիչ չկա՞։ Գործարկեք `claude setup-token`-ը ցանկացած միջավայրում, որտեղ մուտք եք գործել Claude Code, և մեկ տարվա թոքենը տեղադրեք **Setup Token** ներդիրում։ Տե՛ս [Claude Code-ի օգտագործումը setup token-ով](../providers/CLAUDE_CODE_SETUP_TOKEN.md)։
+OmniRoute-ի հոսքերը, որոնք համատեղելի են Claude-ի և Claude Code-ի հետ, Opus և Sonnet
+մոդելների համար պահպանում են մտածողության `max` ջանքը։ Haiku մոդելները չեն ընդունում
+`max` ջանքի մակարդակը, ուստի OmniRoute-ը այդ հարցումը դեպի վերին հոսք ուղարկելուց առաջ
+իջեցնում է մինչև բարձր մտածողության բյուջե։
 
-Claude-ի և Claude Code-ի հետ համատեղելի երթուղիները պահպանում են Opus և Sonnet
-մոդելների մտածողության `max` ջանքը։ Haiku մոդելները չեն ընդունում `max` ջանքի մակարդակը, ուստի OmniRoute-ն այդ
-հարցումը փոխարկում է մտածողության բարձր բյուջեի՝ նախքան այն վերին հոսք ուղարկելը։
+OmniRoute-ի հոսթում զննարկիչ չկա՞։ Ցանկացած վայրում, որտեղ Claude Code-ը մուտք է գործած, գործարկեք `claude setup-token` և մեկ տարվա նշանը տեղադրեք **Կարգավորման նշան** ներդիրում։ Տեսեք [Claude Code-ը կարգավորման նշանով](../providers/CLAUDE_CODE_SETUP_TOKEN.md)։
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Կառավարման վահանակ → Մատակարարներ → Միացնել Codex-ը
-→ OAuth մուտք (պորտ 1455)
-→ 5-ժամյա + շաբաթական վերակայում
+Վահանակ → Մատակարարներ → Միացնել Codex-ը
+→ Մուտք OAuth-ով (պորտ 1455)
+→ 5-ժամյա + շաբաթական վերականգնում
 
-Մոդելներ՝
+Մոդելներ:
   cx/gpt-5.5
   cx/gpt-5.4
   cx/gpt-5.3-codex
@@ -162,11 +163,11 @@ Claude-ի և Claude Code-ի հետ համատեղելի երթուղիները �
 #### GitHub Copilot
 
 ```bash
-Կառավարման վահանակ → Մատակարարներ → Միացնել GitHub-ը
-→ OAuth՝ GitHub-ի միջոցով
-→ Ամսական վերակայում (ամսվա 1-ին օրը)
+Վահանակ → Մատակարարներ → Միացնել GitHub-ը
+→ OAuth GitHub-ի միջոցով
+→ Ամսական վերականգնում (ամսվա 1-ին օրը)
 
-Մոդելներ՝
+Մոդելներ:
   gh/gpt-5.5
   gh/gpt-5.4
   gh/claude-sonnet-4.6
@@ -174,47 +175,66 @@ Claude-ի և Claude Code-ի հետ համատեղելի երթուղիները �
   gh/gemini-3.1-pro-preview
 ```
 
+**AI կրեդիտներ (նշանների վրա հիմնված հաշվարկ)։** Երբ GitHub-ը հաշվի համար հաղորդում է
+`credits_used`, Մատակարարի սահմանաչափերի քարտում ցուցադրվում է **AI կրեդիտներ** տողը՝
+ընթացիկ հաշվարկային ժամանակահատվածում սպառված կրեդիտներով, այդ թվում՝ անսահմանափակ
+կազմակերպությունների պլաններում։
+
+**AI կրեդիտների տեղական սահմանաչափ։** Խմբագրեք GitHub-ի կապը և սահմանեք **AI կրեդիտների
+սահմանաչափը յուրաքանչյուր հաշվարկային ժամանակահատվածի համար** (`providerSpecificData.githubCreditLimit`)։
+Դատարկ արժեքը անջատում է այն, իսկ `0`-ն միշտ բաց է թողնում այդ կապը։ Երբ օգտագործման
+վերջին ընթերցված արժեքը հավասար է կամ գերազանցում է սահմանաչափը, հաշվի ընտրությունը բաց է
+թողնում այդ կապը, իսկ երթուղավորումը անցնում է ձեր մյուս կապերին՝ նույն կերպ, ինչպես
+քվոտայի քաղաքականության դադարեցման դեպքում։ Ստուգումն օգտագործում է այն օգտագործման
+տվյալները, որոնք պարբերական քվոտայի թարմացումն արդեն հավաքում է. այն երբեք GitHub-ին չի
+դիմում հարցման ճանապարհին, և գործում է թույլատրող ռեժիմով․ բացակայող կամ հնացած ընթերցված
+արժեքը (15 րոպեից ավելի հին, կամ արդեն վերականգնված հաշվարկային ժամանակահատվածից) չի
+արգելափակում կապը։ Սա տեղական պաշտպանիչ մեխանիզմ է, **ոչ թե ծախսերի երաշխավորված
+առաստաղ**․ GitHub-ի հաղորդման ուշացումները, թարմացման պարբերականությունը, ընթացքի մեջ
+գտնվող հարցումները և OmniRoute-ից դուրս կատարված օգտագործումը կարող են գերազանցել այն։
+Կոշտ սահմանաչափի համար օգտագործեք GitHub-ի սեփական ծախսերի վերահսկման գործիքները։
+
 ### 💰 Էժան մատակարարներ
 
-#### GLM-4.7 (օրական վերակայում, $0.6/1M)
+#### GLM-4.7 (օրական վերականգնում, $0.6/1M)
 
 1. Գրանցվեք՝ [Zhipu AI](https://open.bigmodel.cn)
-2. Ստացեք API բանալին Coding Plan-ից
-3. Կառավարման վահանակ → Ավելացնել API բանալի․ Մատակարար՝ `glm`, API բանալի՝ `your-key`
+2. Coding Plan-ից ստացեք API բանալի
+3. Վահանակ → Ավելացնել API բանալի․ Մատակարար՝ `glm`, API բանալի՝ `your-key`
 
-**Օգտագործում․** `glm/glm-4.7` — **Մասնագիտական խորհուրդ․** Coding Plan-ն առաջարկում է 3× քվոտա՝ 1/7 գնով։ Վերակայվում է ամեն օր՝ առավոտյան ժամը 10:00-ին։
+**Օգտագործում․** `glm/glm-4.7` — **Մասնագիտական խորհուրդ․** Coding Plan-ն առաջարկում է 3× քվոտա՝ արժեքի 1/7-ի դիմաց։ Վերականգնումն ամեն օր ժամը 10:00-ին է։
 
-#### MiniMax M2.1 (5-ժամյա վերակայում, $0.20/1M)
+#### MiniMax M2.1 (5-ժամյա վերականգնում, $0.20/1M)
 
 1. Գրանցվեք՝ [MiniMax](https://www.minimax.io)
-2. Ստացեք API բանալին → Կառավարման վահանակ → Ավելացնել API բանալի
+2. Ստացեք API բանալի → Վահանակ → Ավելացնել API բանալի
 
-**Օգտագործում․** `minimax/MiniMax-M2.1` — **Մասնագիտական խորհուրդ․** Երկար համատեքստի համար ամենաէժան տարբերակն է (1M թոքեն)։
+**Օգտագործում․** `minimax/MiniMax-M2.1` — **Մասնագիտական խորհուրդ․** Երկար կոնտեքստի համար ամենաէժան տարբերակն է (1M նշան)։
 
-#### Kimi K2 (ֆիքսված $9/ամիս)
+#### Kimi K2 ($9/ամիս հաստատագրված)
 
 1. Բաժանորդագրվեք՝ [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Ստացեք API բանալին → Կառավարման վահանակ → Ավելացնել API բանալի
+2. Ստացեք API բանալի → Վահանակ → Ավելացնել API բանալի
 
-**Օգտագործում․** `kimi/kimi-k2.5` — **Մասնագիտական խորհուրդ․** Ֆիքսված $9/ամիս՝ 10M թոքենի համար = $0.90/1M փաստացի արժեք։
+**Օգտագործում․** `kimi/kimi-k2.5` — **Մասնագիտական խորհուրդ․** Հաստատագրված $9/ամիս՝ 10M նշանի համար = $0.90/1M արդյունավետ արժեք։
 
 #### Baidu Qianfan / ERNIE
 
 1. Գրանցվեք՝ [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Ստեղծեք Qianfan API բանալի → Կառավարման վահանակ → Ավելացնել API բանալի․ Մատակարար՝ `qianfan`
+2. Ստեղծեք Qianfan API բանալի → Վահանակ → Ավելացնել API բանալի․ Մատակարար՝ `qianfan`
 
-**Օգտագործում․** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` կամ Qianfan-ի՝ OpenAI-ի հետ համատեղելի մեկ այլ մոդելի ID։
+**Օգտագործում․** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` կամ Qianfan-ի հետ OpenAI-ի համատեղելի մեկ այլ մոդելի ID։
 
 ### 🆓 ԱՆՎՃԱՐ մատակարարներ
 
-Նույնականացում չպահանջող անվճար մատակարարների էջում **Նույնականացում չի պահանջվում** դաշտի կողքին կա փոխարկիչ։
-Այն անջատելու դեպքում տվյալ մատակարարը կանջատվի, կհեռացվի Մատակարարների կազմաձևված/կոմպակտ տեսքերից, իսկ
-նրա մոդելները կհեռացվեն `/v1/models`-ից։
+Առանց նույնականացման անվճար մատակարարների էջում **Նույնականացում չի պահանջվում** ընտրանքի կողքին կա անջատիչ։
+Այն անջատելը անջատում է տվյալ մատակարարին, հեռացնում է այն Կազմաձևված մատակարարների/կոմպակտ տեսքերից
+և հեռացնում է դրա մոդելները `/v1/models`-ից։
 
 #### Qoder (9 ԱՆՎՃԱՐ մոդել)
 
 ```bash
-Կառավարման վահանակ → Միացնել Qoder-ը → OAuth մուտք → Հասանելիությունը ենթակա է մատակարարի ընթացիկ սահմանափակումներին
+Վահանակ → Միացնել Qoder-ը → Մուտք OAuth-ով → Մատչելիությունը կախված է մատակարարի ընթացիկ սահմանաչափերից
 
 Մոդելներ՝ if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -222,7 +242,7 @@ Claude-ի և Claude Code-ի հետ համատեղելի երթուղիները �
 #### Kiro (Claude ԱՆՎՃԱՐ)
 
 ```bash
-Կառավարման վահանակ → Միացնել Kiro-ն → AWS Builder ID կամ Google/GitHub → ~50 կրեդիտ/ամիս
+Վահանակ → Միացնել Kiro-ն → AWS Builder ID կամ Google/GitHub → մոտ 50 կրեդիտ/ամիս
 
 Մոդելներ՝ kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -614,55 +634,55 @@ post_install() {
 <details>
 <summary><b>Դիտել բոլոր հասանելի մոդելները</b></summary>
 
-> Ստորև բերված ցանկը կազմվել է `open-sse/config/providerRegistry.ts`-ից՝ v3.8.0-ի համար։ Ամպային կատալոգները (Gemini, OpenRouter և այլն) համաժամեցվում են դինամիկ կերպով — ամբողջական ակտիվ կատալոգի համար բացեք **Վահանակ → Մատակարարներ → [provider] → Հասանելի մոդելներ** կամ կանչեք `GET /api/models/catalog`։
+> Ստորև ներկայացված ցանկը կազմված է `open-sse/config/providerRegistry.ts`-ից՝ v3.8.0-ի համար։ Ամպային կատալոգները (Gemini, OpenRouter և այլն) համաժամեցվում են դինամիկ եղանակով — ամբողջական ընթացիկ կատալոգը բացելու համար անցեք **Dashboard → Providers → [provider] → Available Models** կամ կանչեք `GET /api/models/catalog`։
 >
-> Եթե մատակարարի ներկառուցված ցանկը հնացել է, օգտագործեք այդ էջի **Ներմուծել /models-ից** տարբերակը (կամ միացրեք **Ավտոհամաժամեցումը**)՝ վերին աղբյուրի ակտիվ կատալոգը քաղելու համար։ Սա ստուգվել է v3.8.50-ում LLM7.io-ի (`gemini-3.1-flash-lite`) և UncloseAI-ի (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) համար. Pollinations-ի անանուն հասանելիությունը նույն փորձարկման ընթացքում մնացել է սահմանափակված վերին աղբյուրի կողմից։
+> Եթե մատակարարի ներկառուցված ցանկը շեղվել է, այդ էջում օգտագործեք **Import from /models** (կամ միացրեք **Auto-Sync**)՝ ընթացիկ վերին հոսքի կատալոգը ներբեռնելու համար։ Սա հաստատվել է v3.8.50-ում՝ LLM7.io-ի (`gemini-3.1-flash-lite`) և UncloseAI-ի (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) համար․ նույն թեստավորման ընթացքում Pollinations-ի անանուն հասանելիությունը շարունակում էր սահմանափակված լինել վերին հոսքի կողմից։
 
-**Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — Pro/Max OAuth՝ `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ ջանքի մակարդակներ. `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth՝ `cx/gpt-5.5` (գործողության մակարդակներ՝ `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
-**GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
+**GitHub Copilot (`gh/`)** — OAuth՝ `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — ԱՆՎՃԱՐ OAuth: օգտագործեք **Վահանակ → Մատակարարներ → Kiro → Հասանելի մոդելներ** բաժնում ցուցադրվող ակտիվ կատալոգը։ Հասանելիությունը կախված է հաշվից և պլանից։
+**Kiro (`kr/`)** — ԱՆՎՃԱՐ OAuth՝ օգտագործեք **Dashboard → Providers → Kiro → Available Models** բաժնում ցուցադրված ընթացիկ կատալոգը։ Հասանելիությունը կախված է հաշվից և փաթեթից։
 
-**Qoder (`if/`)** — ԱՆՎՃԱՐ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — ԱՆՎՃԱՐ OAuth՝ `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M՝ `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M՝ `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ամիս ֆիքսված կամ ըստ օգտագործման. `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ամիս հաստատագրված կամ ըստ օգտագործման՝ `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — API բանալի. `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — API բանալի՝ `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Գերհարաճ. `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Գերարագ՝ `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Բնիկ Grok. `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok-ի բնիկ՝ `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Տեղակայված ԵՄ-ում. `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Հոսթինգ ԵՄ-ում՝ `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Որոնմամբ ընդլայնված. `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Որոնմամբ ընդլայնված՝ `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Բաց կոդով. `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (անվճար), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — Բաց կոդով՝ `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (անվճար), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Արագ ինֆերենս. `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Արագ եզրակացություն՝ `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Wafer-scale. `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Վաֆերային մասշտաբով՝ `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG-կենտրոն. `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Կենտրոնացած RAG-ի վրա՝ `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Կորպորատիվ. `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Ձեռնարկությունների համար՝ `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
-**Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
+**Baidu Qianfan (`qianfan/`)** — ERNIE՝ `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
-**Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
+**Ollama Cloud (`ollama-cloud/`)**՝ `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Համաժամեցվում է ակտիվ ռեժիմում Google-ից՝ ըստ յուրաքանչյուր API բանալու — ստատիկ ցանկ չկա։ Միացրեք բանալին **Վահանակ → Մատակարարներ** բաժնում, ապա օգտագործեք **Հասանելի մոդելներ**՝ ընթացիկ կատալոգը ներմուծելու համար (օր. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)։
+**Gemini (Google Cloud `gemini/`)**՝ Համաժամեցվում է ընթացիկ վիճակով՝ ըստ Google-ի API բանալու — ստատիկ ցանկ չկա։ Միացրեք բանալին **Dashboard → Providers** բաժնում, ապա օգտագործեք **Available Models**-ը՝ ընթացիկ կատալոգը ներմուծելու համար (օրինակ՝ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)։
 
-**Այլ համատեղելի մատակարարներ** (ընտրված). `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (passthrough կատալոգ), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`։ Յուրաքանչյուրը պահում է մոդելների իր սեփական ցանկը `providerRegistry.ts`-ում և կարող է ավտոմատ համաժամեցվել, երբ մատակարարը տրամադրում է `/models` վերջակետ։
+**Այլ համատեղելի մատակարարներ** (ընտրված)՝ `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock`-ի միջոցով), `azure-ai`, `openrouter` (անցումային կատալոգ), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`։ Յուրաքանչյուրը պահպանում է իր մոդելների ցանկը `providerRegistry.ts`-ում և կարող է ավտոմատ համաժամեցվել, երբ մատակարարը տրամադրում է `/models` վերջնակետ։
 
-**Նշում մոդելների ID-ների մասին.** OmniRoute-ը օգտագործում է մատակարարի բնիկ ID-ներ (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)։ Որոշ ID-ներում տարբերակները գրվում են կետով, քանի որ վերին աղբյուրի API-ն այդ ձևով է սպասում դրանց։ Եթե մոդելը նշված չէ վերևում, գործարկեք `omniroute models --search <term>` կամ դիմեք `GET /api/models/catalog`-ին՝ հասանելիությունը հաստատելու համար։
+**Նշում մոդելների ID-ների վերաբերյալ․** OmniRoute-ն օգտագործում է մատակարարի բնիկ ID-ներ (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)։ Որոշ ID-ներ ներառում են կետերով գրված տարբերակներ, քանի որ վերին հոսքի API-ն դրանք այդպես է ակնկալում։ Եթե մոդելը վերևում նշված չէ, գործարկեք `omniroute models --search <term>` կամ կանչեք `GET /api/models/catalog`՝ հասանելիությունը հաստատելու համար։
 
 </details>
 

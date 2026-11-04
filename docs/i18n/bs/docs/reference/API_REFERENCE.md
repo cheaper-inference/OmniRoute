@@ -1599,7 +1599,9 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Transkribujte audio datoteke koristeći bilo kojeg konfigurisanog STT pružaoca usluge. Prvi segment putanje bira nativnog pružaoca (`openai/…`, `deepgram/…`). Gateway-i koji ponovo izlažu model drugog dobavljača koriste kvalifikovani ID
+Transkribirajte audio datoteke koristeći bilo kojeg konfiguriranog STT
+pružaoca usluge. Prvi segment putanje bira izvornog pružaoca (`openai/…`,
+`deepgram/…`). Gateway-i koji ponovo izlažu model drugog proizvođača koriste kvalifikovani ID
 (`openrouter/deepgram/nova-3`).
 
 **Zahtjev:**
@@ -1622,12 +1624,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Primjeri ID-ova modela:** `openai/whisper-1` (zahtijeva OpenAI ključ),
+**Primjeri ID-jeva modela:** `openai/whisper-1` (zahtijeva OpenAI ključ),
 `openrouter/deepgram/nova-3` (zahtijeva OpenRouter ključ),
-`deepgram/nova-3` (zahtijeva nativni Deepgram ključ). Samostalan zahtjev
-`deepgram/nova-3` **ne** koristi OpenRouter.
+`deepgram/nova-3` (zahtijeva izvorni Deepgram ključ). Zahtjev za
+`deepgram/nova-3` bez prefiksa ne koristi OpenRouter.
 
 **Podržani formati:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** transkripcija u režimu datoteke putem Gemini Live
+WebSocket-a (zahtijeva Gemini API ključ). Učitavanje se konvertuje u 16 kHz mono PCM pomoću `ffmpeg`
+(`ffmpeg` mora biti na `PATH`-u, osim ako je datoteka već 16 kHz mono PCM WAV), zatim se
+strimuje u sesiju i vraća se finalizovani tekst u obliku `{ "text": "..." }`. Opcionalna polja obrasca
+`language` i `prompt` prosljeđuju se dalje. Ograničenja: učitavanja veća od 25 MiB ili dekodirani audio duži od 10 minuta vraćaju
+`413`; konverzija koja traje duže od 60 s prekida se i vraća `504`. API ključ se šalje
+samo u zaglavlju `x-goog-api-key`, nikada u URL-u WebSocket-a.
 
 ---
 
@@ -1683,7 +1693,7 @@ Napomene:
 ## Telemetrija
 
 ```bash
-# Get latency telemetry summary (p50/p95/p99 per provider)
+# Dohvati sažetak telemetrije latencije (p50/p95/p99 po pružaocu)
 GET /api/telemetry/summary
 ```
 
@@ -1703,10 +1713,10 @@ GET /api/telemetry/summary
 ## Budžet
 
 ```bash
-# Get budget status for all API keys
+# Dohvati status budžeta za sve API ključeve
 GET /api/usage/budget
 
-# Set or update a budget
+# Postavi ili ažuriraj budžet
 POST /api/usage/budget
 Content-Type: application/json
 
@@ -1720,7 +1730,7 @@ Content-Type: application/json
 }
 ```
 
-> **Napomene o šemi** (`setBudgetSchema`): `apiKeyId` je obavezan; najmanje jedan od `dailyLimitUsd`, `weeklyLimitUsd` ili `monthlyLimitUsd` mora biti veći od nule. Opcionalna polja: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). Naslijeđeni oblik `{keyId, limit, period}` vraća `400 Bad Request`.
+> **Napomene o šemi** (`setBudgetSchema`): `apiKeyId` je obavezan; najmanje jedno od polja `dailyLimitUsd`, `weeklyLimitUsd` ili `monthlyLimitUsd` mora biti veće od nule. Opcionalna polja: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). Naslijeđeni oblik `{keyId, limit, period}` vraća `400 Bad Request`.
 
 ## Ograničenja tokena
 
