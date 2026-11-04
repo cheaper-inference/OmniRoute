@@ -13,9 +13,10 @@ import type { ModelLockoutEntry, ModelFailureState } from "../accountFallback.ts
 import { resolveAntigravityModelId } from "../../config/antigravityModelAliases.ts";
 
 function canonicalizeExactModel(provider: string, model: string): string {
-  const normalized = model.trim().toLowerCase().replace(/^(?:antigravity|ag|agy)\//, "");
+  const normalized = model.trim().toLowerCase();
   if (provider === "antigravity" || provider === "agy" || provider === "ag") {
-    return resolveAntigravityModelId(normalized).trim().toLowerCase();
+    const bareModel = normalized.replace(/^(?:antigravity|ag|agy)\//, "");
+    return resolveAntigravityModelId(bareModel).trim().toLowerCase();
   }
   return normalized;
 }

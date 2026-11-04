@@ -35,6 +35,10 @@ test("exact Antigravity locks still distinguish different real upstream tiers/ac
 });
 
 test("non-Antigravity providers do not rewrite model aliases", () => {
+  assert.equal(
+    buildExactModelLockKey("claude", "account-1", "agy/gemini-3.7-flash-high"),
+    "claude:account-1:exact:agy/gemini-3.7-flash-high"
+  );
   assert.notEqual(
     buildExactModelLockKey("claude", "account-1", "gemini-3.7-flash-high"),
     buildExactModelLockKey("claude", "account-1", "gemini-3.7-flash-tiered")
