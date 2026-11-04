@@ -68,7 +68,7 @@ export async function runLiveZoneCompression({
       },
       ttlMinutes: compressionConfig.cacheMinutes,
       preserveRawPrefixOnMiss,
-    }
+    },
     runCompression
   );
 }
