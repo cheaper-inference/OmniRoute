@@ -1,0 +1,1 @@
+- **fix(dashboard): readable warning text in the light Editions palette**: warning badges, warning buttons and `text-warning` use a darker copper (`#8c5a1b`) in light Editions. They reach WCAG AA on the tinted background (4.74:1), the canvas and surfaces, where the kit's `#99631f` was 4.09:1. Classic and dark keep the kit colour.
