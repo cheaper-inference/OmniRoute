@@ -2540,11 +2540,21 @@ async function handleChatCoreInner({
 
   const dedupRequestBody = { ...translatedBody, model: `${provider}/${model}`, stream };
   const dedupEnabled = shouldDeduplicate(dedupRequestBody);
-  // Namespaced by the calling API key: dedup hands the SAME response object to
-  // every joiner, so a shared hash across keys is a cross-principal response
-  // leak (GHSA-6c7w-56xp-wpc6).
+  // Namespaced by the calling API key AND the selected provider connection: dedup
+  // hands the SAME response object to every joiner, so a shared hash across keys
+  // is a cross-principal response leak (GHSA-6c7w-56xp-wpc6), and a shared hash
+  // across connections serves the request from an account the caller did not
+  // select — a pin on another account would silently be ignored while its
+  // response header still named the pinned one. Keyless installs keep dedup
+  // within a connection: identical requests that select the same connection
+  // still join. The hash is computed once, before dispatch; rotation inside the
+  // pipeline is handled by `allowDedup` (first attempt only), not here.
   const dedupHash = dedupEnabled
-    ? computeRequestHash(dedupRequestBody, apiKeyInfo?.id, trustedEffortContext)
+    ? computeRequestHash(
+        dedupRequestBody,
+        `${apiKeyInfo?.id ?? ""}:${getCurrentConnectionId() ?? ""}`,
+        trustedEffortContext
+      )
     : null;
 
   const toolDisclosure = resolveToolDisclosureConfig(settings);
