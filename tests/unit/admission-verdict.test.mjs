@@ -319,7 +319,12 @@ for (const profile of ["ci", "quality"]) {
         .sort(),
       ids
     );
-    assert.equal(verdict.name, policy.profiles[profile].checkName);
+    // The exact check name, except on a Mergify queue-draft edit run (ci-mergify-candidate.test.mjs).
+    const checkName = policy.profiles[profile].checkName;
+    assert.ok(
+      verdict.name.endsWith(`&& '${checkName} (queue-draft edit)' || '${checkName}' }}`),
+      verdict.name
+    );
     // always(), except a description edit on a Mergify queue draft (ci-mergify-candidate.test.mjs).
     assert.match(
       verdict.if,

@@ -233,6 +233,16 @@ for (const name of ["ci.yml", "quality.yml"]) {
     }
   });
 
+  test(`${name}: only an edit run renames the gate check`, () => {
+    // 2026-11-04: the edit run's skipped "Gate / CI" was the latest check of that name on draft
+    // #18962, and Mergify dequeued #18961 on it before the real run reported.
+    const checkName = name === "ci.yml" ? "Gate / CI" : "Gate / Quality";
+    assert.equal(
+      wf.jobs["admission-verdict"].name,
+      `\${{ (${QUEUE_DRAFT_EDIT}) && '${checkName} (queue-draft edit)' || '${checkName}' }}`
+    );
+  });
+
   test(`${name}: everything else still runs the gate and the classifier`, () => {
     for (const values of [
       ready,
