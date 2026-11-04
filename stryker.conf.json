@@ -728,7 +728,8 @@
       "tests/unit/singbox-routes-local-only.test.ts",
       "tests/unit/combo-precontent-transport-recovery-routing.test.ts",
       "tests/unit/combo-precontent-transport-recovery.test.ts",
-      "tests/unit/combo/hedge-cancel-streaming-leg.test.ts"
+      "tests/unit/combo/hedge-cancel-streaming-leg.test.ts",
+      "tests/unit/boundary-engine-feature-flags.test.ts"
     ],
     "nodeArgs": [
       "--import",
