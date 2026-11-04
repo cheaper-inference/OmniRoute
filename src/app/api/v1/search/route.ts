@@ -13,6 +13,8 @@ import {
   isUnconfiguredLoopbackSearchProvider,
   SEARCH_PROVIDERS,
   getSearchCredentialFallbacks,
+  autoSearchCandidates,
+  admitsAutoCandidate,
 } from "@omniroute/open-sse/config/searchRegistry.ts";
 import { buildErrorBody, errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
@@ -262,14 +264,8 @@ async function postHandler(request: Request, context: unknown) {
     if (!credentials) {
       // Sort by cost to find cheapest with credentials (fallback-only providers
       // are reached via the last-resort step below, never the primary pick).
-      const sortedIds = Object.values(SEARCH_PROVIDERS)
-        .filter(
-          (provider) =>
-            !provider.fallbackOnly &&
-            supportsSearchType(provider, body.search_type) &&
-            !isProviderBlockedByIdOrAlias(provider.id, blockedProviders)
-        )
-        .sort((a, b) => a.costPerQuery - b.costPerQuery)
+      const sortedIds = autoSearchCandidates(body.search_type)
+        .filter((provider) => !isProviderBlockedByIdOrAlias(provider.id, blockedProviders))
         .map((p) => p.id);
 
       for (const pid of sortedIds) {
@@ -282,7 +278,7 @@ async function postHandler(request: Request, context: unknown) {
           firstRateLimitedCredentials ??= { providerId: pid, credentials: altCreds };
           continue;
         }
-        if (altConfig && altCreds) {
+        if (altConfig && admitsAutoCandidate(altConfig, altCreds)) {
           providerConfig = altConfig;
           credentials = altCreds;
           break;
@@ -338,11 +334,7 @@ async function postHandler(request: Request, context: unknown) {
 
     // Find alternate for failover — must bind credentials to the matched provider.
     // Exclude fallback-only providers; they are only used by the last-resort step.
-    const otherIds = Object.values(SEARCH_PROVIDERS)
-      .filter(
-        (provider) => !provider.fallbackOnly && supportsSearchType(provider, body.search_type)
-      )
-      .sort((a, b) => a.costPerQuery - b.costPerQuery)
+    const otherIds = autoSearchCandidates(body.search_type)
       .map((p) => p.id)
       .filter((id) => id !== providerConfig.id);
 
@@ -352,7 +344,7 @@ async function postHandler(request: Request, context: unknown) {
         ? await resolveSearchExecutionCredentials(altConfig, allowedConnections)
         : null;
       if (isAllRateLimitedCredentials(creds)) continue;
-      if (creds) {
+      if (altConfig && admitsAutoCandidate(altConfig, creds)) {
         alternateProviderId = pid;
         alternateCredentials = creds;
         break;

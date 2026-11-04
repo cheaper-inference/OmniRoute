@@ -11,6 +11,8 @@ import {
   getSearchCredentialFallbacks,
   SEARCH_PROVIDERS,
   type SearchProviderConfig,
+  autoSearchCandidates,
+  admitsAutoCandidate,
 } from "@omniroute/open-sse/config/searchRegistry.ts";
 import { handleSearch, type SearchResponse } from "@omniroute/open-sse/handlers/search.ts";
 import {
@@ -191,13 +193,11 @@ export async function executeWebSearch(
     // credentials. Fallback-only free providers are a last resort, so a
     // configured paid provider is never skipped just because a cheaper
     // no-credentials provider appears first in the cost sort (issue #11524).
-    const candidateProviders = Object.values(SEARCH_PROVIDERS)
-      .filter((provider) => !provider.fallbackOnly && supportsSearchType(provider, searchType))
-      .sort((a, b) => a.costPerQuery - b.costPerQuery);
+    const candidateProviders = autoSearchCandidates(searchType);
 
     for (const candidate of candidateProviders) {
       const candidateCredentials = await resolveSearchCredentials(candidate.id);
-      if (candidateCredentials) {
+      if (admitsAutoCandidate(candidate, candidateCredentials)) {
         providerConfig = candidate;
         credentials = candidateCredentials;
         break;
@@ -236,16 +236,14 @@ export async function executeWebSearch(
 
     // Exclude fallback-only providers from execution-time alternates.
     // They are reserved for last-resort primary selection.
-    const otherIds = Object.values(SEARCH_PROVIDERS)
-      .filter((provider) => !provider.fallbackOnly && supportsSearchType(provider, searchType))
-      .sort((a, b) => a.costPerQuery - b.costPerQuery)
+    const otherIds = autoSearchCandidates(searchType)
       .map((provider) => provider.id)
       .filter((providerId) => providerId !== providerConfig!.id);
 
     for (const providerId of otherIds) {
       const altConfig = getSearchProvider(providerId);
       const altCreds = await resolveSearchCredentials(providerId);
-      if (altConfig && altCreds) {
+      if (altConfig && admitsAutoCandidate(altConfig, altCreds)) {
         alternateProviderId = providerId;
         alternateCredentials = altCreds;
         break;

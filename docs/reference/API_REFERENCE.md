@@ -864,6 +864,12 @@ Web/search provider abstraction (Tavily, Brave, Exa, Serper, etc.).
 
 **Auth:** Bearer API key (`extractApiKey` + `isValidApiKey`). Search policy enforced via `enforceApiKeyPolicy`.
 
+**Auto-select:** without `provider`, the cheapest provider with a configured connection runs
+first and the next cheapest is the failover. Free last-resort providers (`duckduckgo-free`) are
+used only when nothing else is configured. A self-hosted SearXNG counts as configured once its
+connection stores a real `baseUrl` (not the catalog default `http://localhost:8888/search`): it
+then ranks as a $0 provider ahead of keyed ones, with the cheapest keyed provider as failover.
+
 ### Exa and Tavily `provider_options`
 
 Exa and Tavily read provider-specific fields from a namespaced bag:
