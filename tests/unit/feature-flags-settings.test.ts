@@ -64,7 +64,8 @@ const {
 // audit rows, default off) takes it to 115.
 // CLAUDE_CACHE_TAIL_TTL_1H (1h TTL for the Claude cache conversation tail, default off)
 // takes it to 116.
-const EXPECTED_FEATURE_FLAG_COUNT = 116;
+// OMNIROUTE_MCP_V2 adds the opt-in sidecar to the active release registry (-> 117).
+const EXPECTED_FEATURE_FLAG_COUNT = 117;
 // tool_call wrapper repair, default on) to 86; OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED
 // (#16571, OpenCode v2 client fingerprint, default off) to 87.
 // tool_call wrapper repair, default on) to 86; CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED

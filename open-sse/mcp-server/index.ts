@@ -2,6 +2,7 @@
  * OmniRoute MCP Server — barrel export.
  */
 export { createMcpServer, startMcpStdio } from "./server.ts";
+export { createMcpServerV2, startMcpStdioV2 } from "./v2/server.ts";
 export { logToolCall, getRecentAuditEntries, getAuditStats, queryAuditEntries } from "./audit.ts";
 export {
   resolveMcpHeartbeatPath,

@@ -304,11 +304,69 @@ async function handleStreamableRequest(request: Request): Promise<Response> {
   }
 }
 
+// ----------------------------------------------------------------------------
+// Modern-revision pointer
+// ----------------------------------------------------------------------------
+
+/**
+ * First protocol revision served by the v2 sidecar rather than these transports.
+ * ISO dates compare lexicographically, so `requested >= floor` means "modern".
+ */
+const MODERN_PROTOCOL_FLOOR = "2026-07-28";
+const PROTOCOL_DATE = /^\d{4}-\d{2}-\d{2}$/;
+const V2_ENDPOINT = "/api/mcp/v2";
+
+/**
+ * The 2025-era transports answer a modern `MCP-Protocol-Version` with the SDK's
+ * bare version list ("Unsupported protocol version: 2026-07-28 (supported
+ * versions: ...)"), which reads as a bug rather than as "wrong endpoint".
+ *
+ * A client asking for a modern revision is not broken, so instead of letting the
+ * transport reject it, answer with a JSON-RPC error that names the endpoint that
+ * does serve it. Runs after the caller has been authenticated by the route, and
+ * returns null for everything these transports should keep handling. Non-date
+ * junk still falls through to the SDK's own validation, unchanged.
+ */
+export async function modernProtocolPointer(request: Request): Promise<Response | null> {
+  const requested = (request.headers.get("mcp-protocol-version") ?? "").trim();
+  if (!PROTOCOL_DATE.test(requested) || requested < MODERN_PROTOCOL_FLOOR) return null;
+
+  // Echo the request id when we can. Without it a client cannot match the error
+  // to its call and may report the pointer as a protocol violation.
+  let id: string | number | null = null;
+  if (request.method === "POST") {
+    try {
+      const body = await request.clone().json();
+      const first = Array.isArray(body) ? body[0] : body;
+      if (typeof first?.id === "string" || typeof first?.id === "number") id = first.id;
+    } catch {
+      // Unparseable bodies are the transport's problem, not ours.
+    }
+  }
+
+  return new Response(
+    JSON.stringify({
+      jsonrpc: "2.0",
+      id,
+      error: {
+        code: -32000,
+        message:
+          `MCP protocol revision ${requested} is not served by this endpoint; it serves the 2025-era revisions. ` +
+          `Use the stateless v2 sidecar at ${V2_ENDPOINT}, which requires OMNIROUTE_MCP_V2=true.`,
+        data: { requestedProtocolVersion: requested, modernEndpoint: V2_ENDPOINT },
+      },
+    }),
+    { status: 400, headers: { "Content-Type": "application/json" } }
+  );
+}
+
 /**
  * Handle Streamable HTTP requests (POST / GET / DELETE).
  * Used by the Next.js route at /api/mcp/stream.
  */
 export async function handleMcpStreamableHTTP(request: Request): Promise<Response> {
+  const pointer = await modernProtocolPointer(request);
+  if (pointer) return pointer;
   return protectMcpSseResponse(request, await handleStreamableRequest(request));
 }
 
@@ -323,6 +381,8 @@ interface RpcRequest {
  * and POST for messages (the Streamable HTTP transport supports both patterns).
  */
 export async function handleMcpSSE(request: Request): Promise<Response> {
+  const pointer = await modernProtocolPointer(request);
+  if (pointer) return pointer;
   if (request.method === "POST") {
     try {
       const body = await request.clone().json();
@@ -334,7 +394,7 @@ export async function handleMcpSSE(request: Request): Promise<Response> {
         console.log("[MCP] New client initialize detected, resetting SSE singleton...");
         closeSseTransport();
       }
-    } catch (err) {}
+    } catch {}
   }
   const { transport } = ensureSseServer();
 

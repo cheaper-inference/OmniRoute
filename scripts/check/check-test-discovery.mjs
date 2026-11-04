@@ -118,6 +118,7 @@ export const COLLECTORS = [
   },
   { glob: "tests/unit/autoCombo/**/*.test.ts", sources: ["vitest.mcp.config.ts"] },
   { glob: "tests/unit/api/**/*.spec.ts", sources: ["vitest.mcp.config.ts"] },
+  { glob: "tests/unit/mcp/v2-*.spec.ts", sources: ["vitest.mcp.config.ts"] },
   { glob: "src/lib/memory/__tests__/generic-backend.test.ts", sources: ["vitest.mcp.config.ts"] },
   { glob: "tests/unit/encryption.spec.ts", sources: ["vitest.mcp.config.ts"] },
   { glob: "src/shared/components/**/*.test.tsx", sources: ["vitest.mcp.config.ts"] },
