@@ -382,8 +382,11 @@ async function reuseLiveZoneEntry(
   body: Record<string, unknown>,
   context: LiveZoneContext,
   previous: LiveZoneEntry,
-  compress: (body: Record<string, unknown>) => Promise<CompressionResult>
+  compress: (body: Record<string, unknown>) => Promise<CompressionResult>,
+  preserveRawPrefixOnMiss = false
 ): Promise<CompressionResult> {
+  const fallback = () =>
+    preserveRawPrefixOnMiss ? storeRawPrefix(body, context) : compress(body);
   entries.delete(context.key);
   previous.lastAccess = context.now;
   entries.set(context.key, previous);
