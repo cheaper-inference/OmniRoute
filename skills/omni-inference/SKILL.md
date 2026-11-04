@@ -164,7 +164,7 @@ See the full OpenAPI specification at `GET /api/openapi/spec` or `docs/openapi.y
 
 ## Chat completions
 
-Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
+Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
 
 ### Endpoints
 
@@ -210,9 +210,9 @@ curl -X POST $OMNIROUTE_URL/v1/messages \
 ### Tool use
 
 Supports OpenAI `tools` array and Anthropic `tools` block. Tool results
-auto-compressed via RTK (47 filters: git-diff, grep, test-jest, terraform-plan,
+auto-compressed via RTK (56 filters: git-diff, grep, test-jest, terraform-plan,
 docker-logs, etc.) — 20-40% token savings. Disable per-request with
-`X-Omniroute-Rtk: off` header.
+`x-omniroute-compression: off` header.
 
 ### Reasoning / thinking
 
@@ -222,27 +222,25 @@ verbatim. Cached automatically via reasoning cache.
 ### Errors
 
 - `401` → invalid API key
-- `400 invalid_model` → model not in registry; check `/v1/models`
-- `503 circuit_open` → provider circuit breaker tripped; retry later or use combo
+- `400 Invalid model format` → model string not parseable; check `/v1/models`
+- `503 provider_circuit_open` → provider circuit breaker tripped; honor `Retry-After` or use combo
 - `429 rate_limited` → honor `Retry-After`; consider using a combo for auto-fallback
 
 ## Image generation
 
-Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
+Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
 
 ### Endpoints
 
 - `POST $OMNIROUTE_URL/v1/images/generations` — Text-to-image
 - `POST $OMNIROUTE_URL/v1/images/edits` — Image edit (mask)
-- `POST $OMNIROUTE_URL/v1/images/variations` — Variations
+- `POST $OMNIROUTE_URL/v1/images/upscale` — Upscale
 
 ### Discover
 
 ```bash
-curl $OMNIROUTE_URL/v1/models/image | jq '.data[]'
+curl "$OMNIROUTE_URL/v1/models?kind=image" | jq '.data[]'
 ```
-
-Returns `{ id, owned_by, sizes:[...], capabilities:[...] }` per model.
 
 ### Generate example
 
@@ -263,13 +261,12 @@ Response: `{ created, data: [{ url? or b64_json, revised_prompt }] }`
 
 ### Errors
 
-- `400 invalid_size` → not supported by this model; check `/v1/models/image`
 - `400 content_policy_violation` → blocked by provider safety
-- `503` → provider unavailable; try another model in `/v1/models/image`
+- `503` → provider unavailable; try another model from `/v1/models?kind=image`
 
 ## Text-to-speech
 
-Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
+Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
 
 ### Endpoint
 
@@ -278,10 +275,9 @@ Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://ra
 ### Discover
 
 ```bash
-curl $OMNIROUTE_URL/v1/models/tts | jq '.data[]'
+curl "$OMNIROUTE_URL/v1/models?kind=audio" | jq '.data[]'
+curl "$OMNIROUTE_URL/v1/voices" | jq
 ```
-
-Each entry includes `voices:[...]` for the available voice names per provider.
 
 ### Example
 
@@ -299,18 +295,16 @@ curl -X POST $OMNIROUTE_URL/v1/audio/speech \
 
 ### Voices
 
-Voice names vary by provider. Check `/v1/models/tts` — each entry has `voices:[...]`.
+Voice names vary by provider. List them with `GET /v1/voices`.
 Common OpenAI voices: `alloy`, `echo`, `fable`, `onyx`, `nova`, `shimmer`.
 
 ### Errors
 
-- `400 invalid_voice` → voice not supported by this model
-- `400 input_too_long` → input exceeds model character limit
-- `503` → provider unavailable; try another model in `/v1/models/tts`
+- `503` → provider unavailable; try another model from `/v1/models?kind=audio`
 
 ## Speech-to-text
 
-Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
+Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
 
 ### Endpoints
 
@@ -320,7 +314,7 @@ Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://ra
 ### Discover
 
 ```bash
-curl $OMNIROUTE_URL/v1/models/stt | jq '.data[]'
+curl "$OMNIROUTE_URL/v1/models?kind=audio" | jq '.data[]'
 ```
 
 ### Example
@@ -342,13 +336,12 @@ Response formats: `json`, `text`, `srt`, `verbose_json`, `vtt`.
 
 ### Errors
 
-- `400 invalid_file_format` → unsupported audio format
 - `400 file_too_large` → exceeds provider limit (usually 25MB)
-- `503` → provider unavailable; try another model in `/v1/models/stt`
+- `503` → provider unavailable; try another model from `/v1/models?kind=audio`
 
 ## Embeddings
 
-Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
+Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
 
 ### Endpoint
 
@@ -357,10 +350,8 @@ Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://ra
 ### Discover
 
 ```bash
-curl $OMNIROUTE_URL/v1/models/embedding | jq '.data[]'
+curl "$OMNIROUTE_URL/v1/models?kind=embedding" | jq '.data[]'
 ```
-
-Each entry: `{ id, owned_by, dimensions, max_input_tokens }`.
 
 ### Example
 
@@ -383,95 +374,76 @@ Response: `{ data:[{ embedding:[...], index }], usage:{ prompt_tokens, total_tok
 
 ### Errors
 
-- `400 input_too_long` → input exceeds `max_input_tokens` for this model
-- `400 invalid_encoding_format` → use `float` or `base64`
-- `503` → provider unavailable; try another model in `/v1/models/embedding`
+- `503` → provider unavailable; try another model from `/v1/models?kind=embedding`
 
 ## Web search
 
-Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
-
-### Endpoint
-
-- `POST $OMNIROUTE_URL/v1/web/search` — unified search format
-
-### Discover
+Setup: see `omni-auth`. Search: `POST $OMNIROUTE_URL/v1/search`. List providers: `GET $OMNIROUTE_URL/v1/search`.
 
 ```bash
-curl $OMNIROUTE_URL/v1/models/web | jq '.data[] | select(.kind == "webSearch")'
-```
-
-### Example
-
-```bash
-curl -X POST $OMNIROUTE_URL/v1/web/search \
+curl -X POST "$OMNIROUTE_URL/v1/search" \
   -H "Authorization: Bearer $OMNIROUTE_KEY" \
   -H "Content-Type: application/json" \
-  -d '{
-    "model": "tavily/search",
-    "query": "OmniRoute github latest release",
-    "max_results": 5,
-    "include_answer": true
-  }'
+  -d '{"query":"OmniRoute release notes","provider":"tavily","max_results":5,"search_type":"web"}'
 ```
 
-Response: `{ answer?, results:[{ url, title, content, score }] }`
+| Field | Notes |
+| --- | --- |
+| `query` | Required. 1 to 500 characters. |
+| `provider` | Alias or id, for example `tavily` or `tavily-search`. If you omit it, OmniRoute walks the providers by cost and uses the first one that has credentials. |
+| `max_results` | 1 to 100. Default 5. |
+| `search_type` | `web` (default), `news`, `x`, `finance`. Not every provider supports every type. |
+| `time_range` | `any`, `hour`, `day`, `week`, `month`, `year`. |
+| `filters` | `include_domains`, `exclude_domains` (20 each), `safe_search`. |
+| `provider_options` | Passed to the provider. Tavily: `{"tavily":{"search_depth":"advanced"}}`. Google PSE needs `{"cx":"<engine id>"}`. |
 
-### Parameters
+Do not send `model`. OmniRoute ignores it. It does not select a provider.
 
-| Field            | Type    | Description                          |
-| ---------------- | ------- | ------------------------------------ |
-| `model`          | string  | Provider model from `/v1/models/web` |
-| `query`          | string  | Search query                         |
-| `max_results`    | number  | Max results (default: 5)             |
-| `include_answer` | boolean | Include AI-synthesized answer        |
-| `search_depth`   | string  | `basic` or `advanced` (Tavily)       |
+Response (values are examples):
 
-### Errors
+```json
+{ "provider": "tavily-search", "query": "...",
+  "results": [{ "title": "...", "url": "...", "snippet": "...", "position": 1, "score": 0.9,
+                "citation": { "provider": "tavily-search", "retrieved_at": "...", "rank": 1 } }],
+  "answer": null,
+  "usage": { "queries_used": 1, "search_cost_usd": 0.008 },
+  "metrics": { "response_time_ms": 850, "upstream_latency_ms": 700, "total_results_available": 12 },
+  "errors": [] }
+```
 
-- `400 query_too_long` → shorten the search query
-- `503` → provider unavailable; try another model in `/v1/models/web`
+`answer` is always `null` today. Read `results[].snippet`. Top-level `include_answer` and `search_depth` are ignored.
+Errors: `400 Unknown search provider: <id>`, `400 ... does not support search_type: <type>`,
+`400 No credentials configured for search provider: <id>`.
 
 ## Web fetch
 
-Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
-
-### Endpoint
-
-- `POST $OMNIROUTE_URL/v1/web/fetch`
-
-### Discover
+`POST $OMNIROUTE_URL/v1/web/fetch`
 
 ```bash
-curl $OMNIROUTE_URL/v1/models/web | jq '.data[] | select(.kind == "webFetch")'
-```
-
-### Example
-
-```bash
-curl -X POST $OMNIROUTE_URL/v1/web/fetch \
+curl -X POST "$OMNIROUTE_URL/v1/web/fetch" \
   -H "Authorization: Bearer $OMNIROUTE_KEY" \
   -H "Content-Type: application/json" \
-  -d '{
-    "model": "jina/reader",
-    "url": "https://anthropic.com",
-    "format": "markdown"
-  }'
+  -d '{"url":"https://example.com","provider":"jina-reader","format":"markdown","include_metadata":true}'
 ```
 
-Response: `{ url, title, markdown, links?:[...], images?:[...] }`
+| Field | Notes |
+| --- | --- |
+| `url` | Required. A valid `http` or `https` URL. |
+| `provider` | `firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `anysearch-search`, `context7`, `nimble-search`, `parallel-search`. If you omit it, OmniRoute uses the first provider that has credentials, in this order. `context7` is never automatic. An explicit provider has no fallback. |
+| `format` | `markdown` (default), `html`, `links`, `screenshot`. `text` returns 400. Some providers support only `markdown`. |
+| `depth`, `wait_for_selector` | Used by Firecrawl. Other providers ignore them. |
+| `include_metadata` | `true` adds `metadata.title` and `metadata.description`. |
 
-### Parameters
+Response (values are examples):
 
-| Field    | Type   | Description                                                             |
-| -------- | ------ | ----------------------------------------------------------------------- |
-| `model`  | string | Provider from `/v1/models/web` (e.g. `jina/reader`, `firecrawl/scrape`) |
-| `url`    | string | URL to fetch                                                            |
-| `format` | string | `markdown` (default), `html`, `text`                                    |
+```json
+{ "provider": "jina-reader", "url": "https://example.com", "content": "# Example Domain ...",
+  "links": [], "metadata": { "title": "Example Domain", "description": null }, "screenshot_url": null }
+```
 
-### Errors
+`content` is a string. Errors: `400 No credentials configured for web-fetch provider: <id>`,
+`401 Authentication required` (only when a key is required),
+`429 All configured web-fetch providers are rate limited or quota-exhausted`,
+`web_fetch_error` with the upstream status (default 502). The `/v1/models` catalog has no web-fetch entries. The eight ids above are the full set.
 
-- `400 invalid_url` → URL must be http/https
-- `403 blocked` → provider blocked by target site; try a different model
-- `503` → provider unavailable; try another model in `/v1/models/web`
 <!-- skill:custom-end -->

@@ -181,7 +181,7 @@ See the full OpenAPI specification at `GET /api/openapi/spec` or `docs/openapi.y
 
 # OmniRoute — Routing & Combos
 
-Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
+Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
 
 ## What is a combo?
 
@@ -268,15 +268,16 @@ curl -X POST $OMNIROUTE_URL/v1/chat/completions \
 
 ```bash
 # Activate
-curl -X PUT $OMNIROUTE_URL/api/combos/{id}/toggle \
+curl -X PUT $OMNIROUTE_URL/api/combos/{id} \
   -H "Authorization: Bearer $OMNIROUTE_KEY" \
-  -d '{ "enabled": true }'
+  -H "Content-Type: application/json" \
+  -d '{ "isActive": true }'
 ```
 
 ## Get combo metrics
 
 ```bash
-curl $OMNIROUTE_URL/api/combos/{id}/metrics \
+curl "$OMNIROUTE_URL/api/combos/metrics?combo=<name>" \
   -H "Authorization: Bearer $OMNIROUTE_KEY"
 ```
 
@@ -285,10 +286,10 @@ Returns p50/p95/p99 latency, success rate, cost, and per-target breakdown.
 ## Simulate routing (dry run)
 
 ```bash
-curl -X POST $OMNIROUTE_URL/api/routing/simulate \
+curl -X POST $OMNIROUTE_URL/api/playground/simulate-route \
   -H "Authorization: Bearer $OMNIROUTE_KEY" \
   -H "Content-Type: application/json" \
-  -d '{ "comboId": "{id}", "messages": [{ "role": "user", "content": "test" }] }'
+  -d '{ "comboId": "{id}", "promptTokens": 1000 }'
 ```
 
 Returns which provider would be selected and why — no actual API call is made.

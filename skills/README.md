@@ -12,7 +12,7 @@ consume OmniRoute via OpenAI-compatible REST in one fetch.
 
 ## How agents discover capabilities
 
-- **MCP tool**: `omniroute_agent_skills_list` (scope `read:catalog`) — returns the full 45-entry catalog in one call.
+- **MCP tool**: `omniroute_agent_skills_list` (scope `read:catalog`) — returns the full 46-entry catalog in one call.
 - **A2A skill**: `list-capabilities` — JSON-RPC 2.0 endpoint that returns the agent card with all registered skills.
 
 See [`docs/frameworks/AGENT-SKILLS.md`](../docs/frameworks/AGENT-SKILLS.md) for the full framework reference.
@@ -22,7 +22,7 @@ See [`docs/frameworks/AGENT-SKILLS.md`](../docs/frameworks/AGENT-SKILLS.md) for 
 ## API Skills (23)
 
 Each manifest URL follows the pattern:
-`https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/<id>/SKILL.md`
+`https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/<id>/SKILL.md`
 
 | ID                     | Name                          | Description                                                                                                                                                                                    |
 | ---------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -84,6 +84,12 @@ Each manifest URL follows the pattern:
 | ------------------ | ----------------- | --------------------------------------------------------------------- |
 | `config-codex-cli` | Config: Codex CLI | Configure Codex CLI to use OmniRoute as an OpenAI-compatible backend. |
 
+## External (1)
+
+| ID         | Name                         | Description                                                                                                          |
+| ---------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `ponytail` | Ponytail (Minimalism Ladder) | External agent skill (MIT). Pushes the simplest working solution: YAGNI, reuse, standard library before custom code. |
+
 ---
 
 ## Raw manifest URLs
@@ -91,13 +97,13 @@ Each manifest URL follows the pattern:
 All manifests are publicly accessible:
 
 ```
-https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/<id>/SKILL.md
+https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/<id>/SKILL.md
 ```
 
 Examples:
 
-- API entry: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-auth/SKILL.md`
-- CLI entry: `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/cli-serve/SKILL.md`
+- API entry: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-auth/SKILL.md`
+- CLI entry: `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/cli-serve/SKILL.md`
 
 ---
 
