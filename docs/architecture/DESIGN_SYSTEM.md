@@ -27,7 +27,7 @@ lastUpdated: 2026-11-03
   kit component by its subpath (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), never
   through the `@omniroute/ui-kit` barrel: the barrel pulls every component (including the date picker)
   into each importer. The kit stylesheet enters through `src/app/globals.css`
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
+  (`@import "../../packages/ui-kit/src/ci-styles.css"`, the complete sheet: the core `ci-ui.css` plus every pattern family).
 - **Tokens.** `packages/ui-kit/src/ci-tokens.css` declares the `--ci-*` tokens; `src/app/globals.css`
   bridges them to the legacy OmniRoute names (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
   `--table-*`, `--orch-status-*`, `--color-fd-*`), so the existing `var(--color-*)` reads and Tailwind

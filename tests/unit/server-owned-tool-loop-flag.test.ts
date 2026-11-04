@@ -77,7 +77,7 @@ describe("feature-flags-settings count update", () => {
     // REASONING_REPLAY_ENABLED (#12486, default on) to 84; COMBO_AUTO_PRUNE_STALE_STEPS
     // (#13505, default off) to 85; KIRO_TOOL_CALL_REPAIR_ENABLED (default on) to 86;
     // OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED (#16798, default off) to 87.
-    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 117);
+    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 118);
     // COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE (#17114, default off) to 114.
     // CURSOR_GROK_47_DROP_MAX_EFFORT (#17386, default off) to 112.
     // UNPRICED_USAGE_BUDGET_POLICY (#14604, default fail_closed) to 113.
@@ -91,7 +91,7 @@ describe("feature-flags-settings count update", () => {
     // (#16797, default off) to 89.
     // CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED (#17003, default off) to 87;
     // MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED (#16929/#16956, default off) to 88.
-    // ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM (#16236, default off) to 88.
+    // ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM (#16236, moved to the per-connection keepMidConversationSystem opt-in) — 115 back to 114.
     // MODELS_DEV_EFFORT_TIERS_ENABLED (#15944, default off) to 88.
     // CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED (#16190, default off) to 88.
     // CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY (#16599, default off) to 88.

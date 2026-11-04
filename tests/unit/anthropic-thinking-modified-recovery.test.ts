@@ -132,8 +132,10 @@ test("Anthropic thinking-modified recovery contract", async (t) => {
   await t.test("a store-restored block in the latest message is dropped and forgotten", () => {
     clearClaudeThinkingStore();
     const stored = storeClaudeThinkingBlocks({
-      toolUseIds: ["toolu_restored"],
-      blocks: [{ type: "thinking", thinking: "server-restored", signature: "RESTORED_SIG" }],
+      content: [
+        { type: "thinking", thinking: "server-restored", signature: "RESTORED_SIG" },
+        { type: "tool_use", id: "toolu_restored" },
+      ],
       provider: "claude",
       model: "claude-opus-5-5",
       connectionId: "conn-recovery",
