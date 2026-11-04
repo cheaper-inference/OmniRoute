@@ -4,12 +4,14 @@
 
 ---
 
-🌐 **ಭಾಷೆಗಳು:** 🇺🇸 [English](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
+🌐 **ಭಾಷೆಗಳು:** 🇺🇸 [ಇಂಗ್ಲಿಷ್](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
 
-OmniRoute APIಗೆ ಇದು ಮೂಲ ಉಲ್ಲೇಖವಾಗಿದೆ. ಇದು ಸಾರ್ವಜನಿಕ `/v1` ಇಂಟರ್ಫೇಸ್ ಮತ್ತು ಹೆಚ್ಚಾಗಿ ಬಳಸಲಾಗುವ ನಿರ್ವಹಣಾ ಎಂಡ್ಪಾಯಿಂಟ್ಗಳನ್ನು ಒಳಗೊಂಡಿದೆ; ಯಂತ್ರ-ಓದಬಹುದಾದ [`docs/openapi.yaml`](../openapi.yaml) ಮತ್ತು `src/app/api/` ಅಡಿರುವ ಮಾರ್ಗಗಳ ವೃಕ್ಷವೇ ಸಂಪೂರ್ಣ ಮೂಲಗಳಾಗಿವೆ.
+OmniRoute API ಗಾಗಿ ಮೂಲ ಉಲ್ಲೇಖ. ಇದು ಸಾರ್ವಜನಿಕ `/v1` ಮೇಲ್ಮೈ ಮತ್ತು ಹೆಚ್ಚಾಗಿ ಬಳಸಲಾಗುವ ನಿರ್ವಹಣಾ ಎಂಡ್ಪಾಯಿಂಟ್ಗಳನ್ನು ಒಳಗೊಂಡಿದೆ; ಯಂತ್ರ-ಓದಬಹುದಾದ [`docs/openapi.yaml`](../openapi.yaml) ಮತ್ತು `src/app/api/` ಅಡಿಯಲ್ಲಿರುವ ಮಾರ್ಗ ವೃಕ್ಷವು ಸಂಪೂರ್ಣ ಮೂಲಗಳಾಗಿವೆ.
 
-OpenAI-ಗೆ ಹೊಂದಿಕೆಯಾಗುವ ಪ್ರೋಟೋಕಾಲ್ ಮತ್ತು ಪೂರೈಕೆದಾರರ ಸಾಮರ್ಥ್ಯಗಳ ಕೇಂದ್ರೀಕೃತ ಮ್ಯಾಟ್ರಿಕ್ಸ್ಗಾಗಿ
-[`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md) ನೋಡಿ.
+ಕೇಂದ್ರಿತ OpenAI-ಹೊಂದಾಣಿಕೆಯ ಪ್ರೋಟೋಕಾಲ್ ಮತ್ತು ಪೂರೈಕೆದಾರ ಸಾಮರ್ಥ್ಯಗಳ ಮ್ಯಾಟ್ರಿಕ್ಸ್ಗಾಗಿ, ನೋಡಿ
+[`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md).
+
+ಪ್ರತಿಯೊಂದು ನಿಯೋಜನೆಯು ತನ್ನದೇ ಆದ ಸ್ಪೆಕ್ ಪ್ರತಿಯನ್ನು `/openapi.yaml` ನಲ್ಲಿ ಒದಗಿಸುತ್ತದೆ. ಇದನ್ನು ಬಿಲ್ಡ್ ಸಮಯದಲ್ಲಿ `docs/openapi.yaml` ನಿಂದ ರಚಿಸಲಾಗುತ್ತದೆ. ಇದರಲ್ಲಿ ಬಿಲ್ಡ್ನ ಆವೃತ್ತಿ ಮತ್ತು ಸಂಬಂಧಿತ ಸರ್ವರ್ URL (`./`) ಇರುತ್ತದೆ; ಆದ್ದರಿಂದ ವಿನಂತಿಗಳು ಡಾಕ್ಯುಮೆಂಟ್ ಒದಗಿಸಿದ ಹೋಸ್ಟ್ನಲ್ಲಿಯೇ ಉಳಿಯುತ್ತವೆ. ಡೌನ್ಲೋಡ್ ಮಾಡಿದ ಫೈಲ್ ಅನ್ನು ಆಮದುಮಾಡುವ ಉಪಕರಣಕ್ಕೆ ಅಂತಹ ಹೋಸ್ಟ್ ಇರುವುದಿಲ್ಲ, ಆದ್ದರಿಂದ ಮೂಲ URL ಅನ್ನು ಕೈಯಾರೆ ಹೊಂದಿಸಬೇಕು.
 
 ---
 
@@ -1573,9 +1575,9 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-ಯಾವುದೇ ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾದ STT ಪೂರೈಕೆದಾರವನ್ನು ಬಳಸಿಕೊಂಡು ಆಡಿಯೋ ಫೈಲ್ಗಳನ್ನು ಪ್ರತಿಲಿಪಿ ಮಾಡಿ. ಮೊದಲ ಪಾಥ್
-ಸೆಗ್ಮೆಂಟ್ ಸ್ಥಳೀಯ ಪೂರೈಕೆದಾರರನ್ನು ಆಯ್ಕೆಮಾಡುತ್ತದೆ (`openai/…`, `deepgram/…`). ಮತ್ತೊಂದು ವೆಂಡರ್ನ
-ಮಾದರಿಯನ್ನು ಮರು-ರಫ್ತು ಮಾಡುವ ಗೇಟ್ವೇಗಳು ಅರ್ಹಿತ ಐಡಿಯನ್ನು ಬಳಸುತ್ತವೆ
+ಯಾವುದೇ ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾದ STT ಪೂರೈಕೆದಾರರನ್ನು ಬಳಸಿಕೊಂಡು ಆಡಿಯೋ ಫೈಲ್ಗಳ ಪ್ರತಿಲಿಪಿ ಮಾಡಿ. ಮೊದಲ ಪಾತ್
+ಸೆಗ್ಮೆಂಟ್ ಸ್ಥಳೀಯ ಪೂರೈಕೆದಾರರನ್ನು ಆಯ್ಕೆಮಾಡುತ್ತದೆ (`openai/…`, `deepgram/…`). ಮತ್ತೊಬ್ಬ
+ವೆಂಡರ್ನ ಮಾದರಿಯನ್ನು ಮರು-ರಫ್ತು ಮಾಡುವ ಗೇಟ್ವೇಗಳು ಅರ್ಹತೆಯಿರುವ ಐಡಿಯನ್ನು ಬಳಸುತ್ತವೆ
 (`openrouter/deepgram/nova-3`).
 
 **ವಿನಂತಿ:**
@@ -1598,14 +1600,22 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**ಉದಾಹರಣೆ ಮಾದರಿ ಐಡಿಗಳು:** `openai/whisper-1` (OpenAI ಕೀ ಅಗತ್ಯವಿದೆ),
+**ಮಾದರಿ ಐಡಿಗಳ ಉದಾಹರಣೆಗಳು:** `openai/whisper-1` (OpenAI ಕೀ ಅಗತ್ಯವಿದೆ),
 `openrouter/deepgram/nova-3` (OpenRouter ಕೀ ಅಗತ್ಯವಿದೆ),
-`deepgram/nova-3` (ಸ್ಥಳೀಯ Deepgram ಕೀ ಅಗತ್ಯವಿದೆ). ಸರಳ
+`deepgram/nova-3` (ಸ್ಥಳೀಯ Deepgram ಕೀ ಅಗತ್ಯವಿದೆ). ಕೇವಲ
 `deepgram/nova-3` ವಿನಂತಿಯು **OpenRouter ಅನ್ನು ಬಳಸುವುದಿಲ್ಲ**.
 
-**ಬೆಂಬಲಿತ ಫಾರ್ಮ್ಯಾಟ್ಗಳು:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+**ಬೆಂಬಲಿತ ಸ್ವರೂಪಗಳು:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
 
----
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** Gemini Live
+WebSocket ಮೂಲಕ ಫೈಲ್-ಮೋಡ್ ಪ್ರತಿಲಿಪಿ (Gemini API ಕೀ ಅಗತ್ಯವಿದೆ). ಅಪ್ಲೋಡ್ ಅನ್ನು `ffmpeg`
+ಬಳಸಿ 16 kHz ಮೊನೊ PCM ಗೆ ಪರಿವರ್ತಿಸಲಾಗುತ್ತದೆ
+(ಫೈಲ್ ಈಗಾಗಲೇ 16 kHz ಮೊನೊ PCM WAV ಆಗಿದ್ದರೆ `PATH` ನಲ್ಲಿ ಇರಬೇಕೆಂಬ ಅಗತ್ಯವಿಲ್ಲ), ಸೆಷನ್ಗೆ
+ಸ್ಟ್ರೀಮ್ ಮಾಡಲಾಗುತ್ತದೆ ಮತ್ತು ಅಂತಿಮಗೊಳಿಸಿದ ಪಠ್ಯವನ್ನು `{ "text": "..." }` ರೂಪದಲ್ಲಿ ಹಿಂತಿರುಗಿಸಲಾಗುತ್ತದೆ. ಐಚ್ಛಿಕ
+`language` ಮತ್ತು `prompt` ಫಾರ್ಮ್ ಕ್ಷೇತ್ರಗಳನ್ನು ಫಾರ್ವರ್ಡ್ ಮಾಡಲಾಗುತ್ತದೆ. ಮಿತಿಗಳು: 25 MiB ಗಿಂತ ಹೆಚ್ಚಿನ ಅಪ್ಲೋಡ್ಗಳು ಅಥವಾ
+10 ನಿಮಿಷಗಳಿಗಿಂತ ಉದ್ದವಾದ ಡಿಕೋಡ್ ಮಾಡಿದ ಆಡಿಯೋಗೆ `413` ಪ್ರತಿಕ್ರಿಯೆ ಬರುತ್ತದೆ; ಪರಿವರ್ತನೆ
+60 ಸೆಕೆಂಡುಗಳಿಗಿಂತ ಹೆಚ್ಚು ಕಾಲ ನಡೆದರೆ ಅದನ್ನು ನಿಲ್ಲಿಸಲಾಗುತ್ತದೆ ಮತ್ತು `504` ಪ್ರತಿಕ್ರಿಯೆ ಬರುತ್ತದೆ. API ಕೀಯನ್ನು
+`x-goog-api-key` ಹೆಡರ್ನಲ್ಲಿ ಮಾತ್ರ ಕಳುಹಿಸಲಾಗುತ್ತದೆ, WebSocket URL ನಲ್ಲಿ ಎಂದಿಗೂ ಅಲ್ಲ.
 
 ## Ollama ಹೊಂದಾಣಿಕೆ
 
@@ -1659,7 +1669,7 @@ curl -X POST https://your-host.example/api/v1/vscode/YOUR_API_KEY/chat/completio
 ## ಟೆಲಿಮೆಟ್ರಿ
 
 ```bash
-# Get latency telemetry summary (p50/p95/p99 per provider)
+# ಪ್ರತಿ ಪೂರೈಕೆದಾರರಿಗೆ ಲೇಟೆನ್ಸಿ ಟೆಲಿಮೆಟ್ರಿ ಸಾರಾಂಶವನ್ನು ಪಡೆಯಿರಿ (p50/p95/p99)
 GET /api/telemetry/summary
 ```
 
@@ -1679,10 +1689,10 @@ GET /api/telemetry/summary
 ## ಬಜೆಟ್
 
 ```bash
-# Get budget status for all API keys
+# ಎಲ್ಲಾ API ಕೀಗಳ ಬಜೆಟ್ ಸ್ಥಿತಿಯನ್ನು ಪಡೆಯಿರಿ
 GET /api/usage/budget
 
-# Set or update a budget
+# ಬಜೆಟ್ ಹೊಂದಿಸಿ ಅಥವಾ ನವೀಕರಿಸಿ
 POST /api/usage/budget
 Content-Type: application/json
 
@@ -1696,7 +1706,7 @@ Content-Type: application/json
 }
 ```
 
-> **ಸ್ಕೀಮಾ ಟಿಪ್ಪಣಿಗಳು** (`setBudgetSchema`): `apiKeyId` ಅಗತ್ಯವಿದೆ; `dailyLimitUsd`, `weeklyLimitUsd`, ಅಥವಾ `monthlyLimitUsd` ಗಳಲ್ಲಿ ಕನಿಷ್ಠ ಒಂದಾದರೂ ಶೂನ್ಯಕ್ಕಿಂತ ಹೆಚ್ಚಿರಬೇಕು. ಐಚ್ಛಿಕ ಫೀಲ್ಡ್ಗಳು: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). ಲೆಗಸಿ `{keyId, limit, period}` ಆಕಾರವು `400 Bad Request` ಅನ್ನು ಹಿಂತಿರುಗಿಸುತ್ತದೆ.
+> **ಸ್ಕೀಮಾ ಟಿಪ್ಪಣಿಗಳು** (`setBudgetSchema`): `apiKeyId` ಅಗತ್ಯವಿದೆ; `dailyLimitUsd`, `weeklyLimitUsd`, ಅಥವಾ `monthlyLimitUsd` ಇವುಗಳಲ್ಲಿ ಕನಿಷ್ಠ ಒಂದಾದರೂ ಶೂನ್ಯಕ್ಕಿಂತ ಹೆಚ್ಚಿರಬೇಕು. ಐಚ್ಛಿಕ ಕ್ಷೇತ್ರಗಳು: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). ಪರಂಪರೆಯ `{keyId, limit, period}` ಆಕಾರವು `400 Bad Request` ಅನ್ನು ಹಿಂತಿರುಗಿಸುತ್ತದೆ.
 
 ## ಟೋಕನ್ ಮಿತಿಗಳು
 

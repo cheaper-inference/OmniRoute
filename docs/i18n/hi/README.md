@@ -1294,26 +1294,26 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 भी इसे 
 <br/>
 <div align="center">
 
-## 🛠️ टेक स्टैक
+## 🛠️ तकनीकी स्टैक
 
 </div>
 
 <table>
-  <tr><th align="left">परत</th><th align="left">तकनीक</th></tr>
+  <tr><th align="left">परत</th><th align="left">प्रौद्योगिकी</th></tr>
   <tr><td nowrap><b>रनटाइम</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>भाषा</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> <code>src/</code> और <code>open-sse/</code> में (v2.0 से कोर में शून्य <code>any</code>)</td></tr>
+  <tr><td nowrap><b>भाषा</b></td><td>TypeScript 6.0 — <code>src/</code> और <code>open-sse/</code> में <b>100% TypeScript</b> (v2.0 से कोर में शून्य <code>any</code>)</td></tr>
   <tr><td nowrap><b>फ़्रेमवर्क</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>डेटाबेस</b></td><td>better-sqlite3 (SQLite, WAL जर्नलिंग) + LowDB (JSON लेगेसी) — 147 डोमेन मॉड्यूल, 221 माइग्रेशन</td></tr>
-  <tr><td nowrap><b>मेमोरी</b></td><td>SQLite FTS5 पूर्ण-पाठ + int8-क्वांटाइज़्ड वेक्टर एम्बेडिंग्स, टाइप्ड क्षय</td></tr>
-  <tr><td nowrap><b>स्कीमा</b></td><td>Zod 4 — MCP टूल I/O वैधीकरण + API कॉन्ट्रैक्ट</td></tr>
+  <tr><td nowrap><b>डेटाबेस</b></td><td>better-sqlite3 (SQLite, WAL जर्नलिंग) + LowDB (JSON लेगेसी) — 147 डोमेन मॉड्यूल, 222 माइग्रेशन</td></tr>
+  <tr><td nowrap><b>मेमोरी</b></td><td>SQLite FTS5 पूर्ण-पाठ + int8-क्वांटाइज़्ड वेक्टर एम्बेडिंग, टाइप्ड क्षय</td></tr>
+  <tr><td nowrap><b>स्कीमा</b></td><td>Zod 4 — MCP टूल I/O सत्यापन + API अनुबंध</td></tr>
   <tr><td nowrap><b>प्रोटोकॉल</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>स्ट्रीमिंग</b></td><td>Server-Sent Events (SSE) + WebSocket ब्रिज (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>कंप्रेशन</b></td><td>12-इंजन पाइपलाइन — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>प्रमाणीकरण और सुरक्षा</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP स्कोप्ड ऑथ · AES-256-GCM एट रेस्ट · DOMPurify</td></tr>
+  <tr><td nowrap><b>स्ट्रीमिंग</b></td><td>सर्वर-सेंट इवेंट्स (SSE) + WebSocket ब्रिज (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>संपीड़न</b></td><td>12-इंजन पाइपलाइन — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>प्रमाणीकरण और सुरक्षा</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP स्कोप्ड ऑथ · रेस्ट में AES-256-GCM · DOMPurify</td></tr>
   <tr><td nowrap><b>स्टील्थ</b></td><td>wreq-js — JA3 / JA4 TLS फ़िंगरप्रिंट प्रतिरूपण, 3-स्तरीय प्रॉक्सी</td></tr>
-  <tr><td nowrap><b>रेज़िलिएंस</b></td><td>सर्किट ब्रेकर, एक्सपोनेंशियल बैकऑफ़, एंटी-थंडरिंग-हर्ड, ऑटो-कॉम्बो सेल्फ-हीलिंग</td></tr>
-  <tr><td nowrap><b>लॉगिंग</b></td><td>pino — अनुरोध संदर्भ के साथ संरचित JSON लॉग</td></tr>
-  <tr><td nowrap><b>परीक्षण</b></td><td>Node.js टेस्ट रनर + Vitest — 8,400+ ट्रैक किए गए टेस्ट फ़ाइलों में <b>60,000+ स्थिर टेस्ट घोषणाएँ</b> (यूनिट, इंटीग्रेशन, E2E, सुरक्षा, इकोसिस्टम)</td></tr>
+  <tr><td nowrap><b>लचीलापन</b></td><td>सर्किट ब्रेकर, घातीय बैकऑफ़, एंटी-थंडरिंग-हर्ड, ऑटो-कॉम्बो सेल्फ-हीलिंग</td></tr>
+  <tr><td nowrap><b>लॉगिंग</b></td><td>pino — अनुरोध संदर्भ वाले संरचित JSON लॉग</td></tr>
+  <tr><td nowrap><b>परीक्षण</b></td><td>Node.js टेस्ट रनर + Vitest — 8,400+ ट्रैक की गई टेस्ट फ़ाइलों में <b>60,000+ स्थिर टेस्ट घोषणाएँ</b> (यूनिट, इंटीग्रेशन, E2E, सुरक्षा, इकोसिस्टम)</td></tr>
   <tr><td nowrap><b>प्लेटफ़ॉर्म</b></td><td>डेस्कटॉप (Electron) · Android (Termux) · PWA (कोई भी ब्राउज़र)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — रिलीज़ पर स्वचालित npm प्रकाशन + Docker Hub</td></tr>
   <tr><td nowrap><b>लिंक</b></td><td><a href="https://omniroute.online">वेबसाइट</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>

@@ -1295,7 +1295,7 @@ Kanoniske målinger pr. 2026-10-18: **1.976 unikke videoer** · **20.220.289 ken
 <br/>
 <div align="center">
 
-## 🛠️ Teknologisk stak
+## 🛠️ Teknologistak
 
 </div>
 
@@ -1303,20 +1303,20 @@ Kanoniske målinger pr. 2026-10-18: **1.976 unikke videoer** · **20.220.289 ken
   <tr><th align="left">Lag</th><th align="left">Teknologi</th></tr>
   <tr><td nowrap><b>Kørselstid</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Sprog</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> på tværs af <code>src/</code> og <code>open-sse/</code> (ingen <code>any</code> i kernen siden v2.0)</td></tr>
-  <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL-journalføring) + LowDB (ældre JSON) — 147 domænemoduler, 221 migreringer</td></tr>
-  <tr><td nowrap><b>Hukommelse</b></td><td>SQLite FTS5-fuldtekst + int8-kvantiserede vektorembeddings, typet henfald</td></tr>
-  <tr><td nowrap><b>Skemaer</b></td><td>Zod 4 — validering af MCP-værktøjs-I/O + API-kontrakter</td></tr>
+  <tr><td nowrap><b>Rammeværk</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL-journalføring) + LowDB (ældre JSON) — 147 domænemoduler, 222 migreringer</td></tr>
+  <tr><td nowrap><b>Hukommelse</b></td><td>SQLite FTS5-fuldtekst + int8-kvantiserede vektorembeddings, typebaseret henfald</td></tr>
+  <tr><td nowrap><b>Skemaer</b></td><td>Zod 4 — MCP-værktøjs-I/O-validering + API-kontrakter</td></tr>
   <tr><td nowrap><b>Protokoller</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Streaming</b></td><td>Server-Sent Events (SSE) + WebSocket-bro (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Datastrømning</b></td><td>Server-Sent Events (SSE) + WebSocket-bro (<code>/v1/ws</code>)</td></tr>
   <tr><td nowrap><b>Komprimering</b></td><td>Pipeline med 12 motorer — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Godkendelse og sikkerhed</b></td><td>OAuth 2.0 (PKCE) + JWT + API-nøgler + MCP-begrænset godkendelse · AES-256-GCM ved lagring · DOMPurify</td></tr>
-  <tr><td nowrap><b>Skjult tilstand</b></td><td>wreq-js — JA3 / JA4 TLS-fingeraftryksimitation, proxy i 3 niveauer</td></tr>
-  <tr><td nowrap><b>Robusthed</b></td><td>Kredsløbsafbryder, eksponentiel backoff, beskyttelse mod flok-effekten, automatisk kombinationsbaseret selvheling</td></tr>
-  <tr><td nowrap><b>Logføring</b></td><td>pino — strukturerede JSON-logfiler med anmodningskontekst</td></tr>
-  <tr><td nowrap><b>Test</b></td><td>Node.js-testløber + Vitest — <b>over 60.000 statiske testdeklarationer</b> på tværs af over 8.400 registrerede testfiler (enhed, integration, E2E, sikkerhed, økosystem)</td></tr>
+  <tr><td nowrap><b>Godkendelse og sikkerhed</b></td><td>OAuth 2.0 (PKCE) + JWT + API-nøgler + MCP-omfangsbegrænset godkendelse · AES-256-GCM ved lagring · DOMPurify</td></tr>
+  <tr><td nowrap><b>Stealth</b></td><td>wreq-js — JA3 / JA4 TLS-fingeraftryksefterligning, proxy i 3 niveauer</td></tr>
+  <tr><td nowrap><b>Robusthed</b></td><td>Kredsløbsafbryder, eksponentiel backoff, beskyttelse mod stormløb, selvhelbredelse med auto-combo</td></tr>
+  <tr><td nowrap><b>Logning</b></td><td>pino — strukturerede JSON-logge med anmodningskontekst</td></tr>
+  <tr><td nowrap><b>Testning</b></td><td>Node.js-testkørsel + Vitest — <b>60.000+ statiske testdeklarationer</b> på tværs af 8.400+ sporede testfiler (enheds-, integrations-, E2E-, sikkerheds- og økosystemtest)</td></tr>
   <tr><td nowrap><b>Platforme</b></td><td>Desktop (Electron) · Android (Termux) · PWA (enhver browser)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — automatisk npm-publicering + Docker Hub ved udgivelser</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — automatisk npm-udgivelse + Docker Hub ved udgivelse</td></tr>
   <tr><td nowrap><b>Links</b></td><td><a href="https://omniroute.online">Websted</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 

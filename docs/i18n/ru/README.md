@@ -1293,21 +1293,21 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 также про
 <table>
   <tr><th align="left">Слой</th><th align="left">Технология</th></tr>
   <tr><td nowrap><b>Среда выполнения</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Язык</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> в <code>src/</code> и <code>open-sse/</code> (с версии v2.0 в ядре отсутствует <code>any</code>)</td></tr>
+  <tr><td nowrap><b>Язык</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> в <code>src/</code> и <code>open-sse/</code> (в ядре отсутствует <code>any</code> начиная с версии 2.0)</td></tr>
   <tr><td nowrap><b>Фреймворк</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>База данных</b></td><td>better-sqlite3 (SQLite, журналирование WAL) + LowDB (устаревший JSON) — 147 доменных модулей, 221 миграция</td></tr>
+  <tr><td nowrap><b>База данных</b></td><td>better-sqlite3 (SQLite, журналирование WAL) + LowDB (устаревший JSON) — 147 предметных модулей, 222 миграции</td></tr>
   <tr><td nowrap><b>Память</b></td><td>Полнотекстовый поиск SQLite FTS5 + векторные эмбеддинги с квантованием int8, типизированное затухание</td></tr>
   <tr><td nowrap><b>Схемы</b></td><td>Zod 4 — проверка ввода-вывода инструментов MCP + контракты API</td></tr>
   <tr><td nowrap><b>Протоколы</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>Потоковая передача</b></td><td>Server-Sent Events (SSE) + мост WebSocket (<code>/v1/ws</code>)</td></tr>
   <tr><td nowrap><b>Сжатие</b></td><td>Конвейер из 12 движков — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Аутентификация и безопасность</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + область действия аутентификации MCP · AES-256-GCM для данных в состоянии покоя · DOMPurify</td></tr>
+  <tr><td nowrap><b>Аутентификация и безопасность</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + ограниченная область авторизации MCP · AES-256-GCM для данных в состоянии покоя · DOMPurify</td></tr>
   <tr><td nowrap><b>Скрытность</b></td><td>wreq-js — имитация TLS-отпечатков JA3 / JA4, прокси с 3 уровнями</td></tr>
-  <tr><td nowrap><b>Отказоустойчивость</b></td><td>Автоматический выключатель, экспоненциальная задержка, защита от эффекта «стада», автоматическое комбинированное самовосстановление</td></tr>
-  <tr><td nowrap><b>Журналирование</b></td><td>pino — структурированные журналы JSON с контекстом запроса</td></tr>
-  <tr><td nowrap><b>Тестирование</b></td><td>Средство запуска тестов Node.js + Vitest — <b>более 60 000 статических объявлений тестов</b> в более чем 8 400 отслеживаемых файлах тестов (модульные, интеграционные, E2E, безопасности, экосистемы)</td></tr>
+  <tr><td nowrap><b>Отказоустойчивость</b></td><td>Автоматический выключатель, экспоненциальная задержка, защита от эффекта стада, автоматическое комбинированное самовосстановление</td></tr>
+  <tr><td nowrap><b>Ведение журналов</b></td><td>pino — структурированные журналы JSON с контекстом запроса</td></tr>
+  <tr><td nowrap><b>Тестирование</b></td><td>Средство запуска тестов Node.js + Vitest — <b>более 60 000 статических объявлений тестов</b> в более чем 8 400 отслеживаемых файлах тестов (модульные, интеграционные, E2E, тесты безопасности и экосистемы)</td></tr>
   <tr><td nowrap><b>Платформы</b></td><td>Настольные компьютеры (Electron) · Android (Termux) · PWA (любой браузер)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — автоматическая публикация в npm + Docker Hub при выпуске релиза</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — автоматическая публикация в npm + Docker Hub при выпуске</td></tr>
   <tr><td nowrap><b>Ссылки</b></td><td><a href="https://omniroute.online">Веб-сайт</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
