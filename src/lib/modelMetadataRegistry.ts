@@ -646,7 +646,9 @@ export function enrichCatalogModelEntry<T extends JsonRecord>(
 
   if (
     typeof metadata.limits.maxInputTokens === "number" &&
-    (typeof nextEntry.max_input_tokens !== "number" || authoritativeContextWindow !== null)
+    (typeof nextEntry.max_input_tokens !== "number" ||
+      authoritativeContextWindow !== null ||
+      persistedContextWindow !== null)
   ) {
     nextEntry.max_input_tokens = metadata.limits.maxInputTokens;
   }

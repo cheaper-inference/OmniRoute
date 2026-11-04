@@ -409,6 +409,18 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "caution",
   },
   {
+    key: "OPENCODE_FREE_TIER_EGRESS_PROBE",
+    label: "OpenCode Free-Tier Egress Probe",
+    description:
+      "For the OpenCode executor, when a proxied request is answered 403 or 451 FreeTierError and the observed-tools retry failed or did not apply, send the request once through a different proxy (another account proxy or another pool member, never a direct connection). Only when that probe answers 200 is the first egress set aside in the proxy refusal memory and the probe response served; when both refuse, the original refusal is returned and nothing is recorded. The same refusal text covers a flagged egress IP and a refused request shape, so the probe tells them apart by evidence. Off by default: the refusal is returned unchanged.",
+    descriptionI18nKey: "featureFlagOpencodeFreeTierEgressProbeDescription",
+    category: "network",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
     key: "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED",
     label: "OpenCode v2 Client Fingerprint",
     description:
@@ -1248,18 +1260,6 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "caution",
   },
   {
-    key: "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM",
-    label: "Anthropic-Compatible Mid-Conversation System Turns",
-    description:
-      "On plain anthropic-compatible-* relays (claude → claude passthrough), keep mid-conversation role:system turns inside messages[] instead of hoisting them into the top-level system parameter, so the cached prompt prefix stays stable across turns. Applies only when the client itself sent the mid-conversation-system-2026-04-07 anthropic-beta (forwarded upstream as-is). Off by default: every system turn is hoisted exactly as before, because relays that do not support the beta reject role:system messages with 400.",
-    descriptionI18nKey: "featureFlagAnthropicCompatibleMidConversationSystemDescription",
-    category: "runtime",
-    defaultValue: "false",
-    type: "boolean",
-    requiresRestart: false,
-    warningLevel: "caution",
-  },
-  {
     key: "CLAUDE_CACHE_TAIL_TTL_1H",
     label: "Claude Cache Tail 1h TTL",
     description:
@@ -1397,6 +1397,30 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     description:
       "Stop offering and forwarding the max reasoning effort for Cursor Grok 4.7, which Cursor's docs do not list (low, medium, high, xhigh only): the grok-4.7-max fallback alias disappears from the catalog and a max effort request is sent without an effort parameter. Off by default: max stays offered and forwarded, as a live AgentService/Run probe accepted it.",
     descriptionI18nKey: "featureFlagCursorGrok47DropMaxEffortDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "PROXY_STRICT_POST_REPLAY_ENABLED",
+    label: "Proxy Fetch: Strict POST Replay",
+    description:
+      "For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket.",
+    descriptionI18nKey: "featureFlagProxyStrictPostReplayEnabledDescription",
+    category: "network",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED",
+    label: "Responses: Transport-Only Keepalive",
+    description:
+      "Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event.",
+    descriptionI18nKey: "featureFlagResponsesTransportKeepaliveEnabledDescription",
     category: "runtime",
     defaultValue: "false",
     type: "boolean",
