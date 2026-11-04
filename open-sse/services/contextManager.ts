@@ -188,6 +188,7 @@ function isInlineAudioVideoBlock(node: Record<string, unknown>): boolean {
   return typeof url === "string" && /^data:(?:audio|video)\/[a-z0-9.+-]{1,64};base64,/i.test(url);
 }
 
+/** Recognize Gemini audio/video bytes that must not enter image pruning. */
 function isNonImageGeminiMedia(node: Record<string, unknown>): boolean {
   const data = node.inlineData ?? node.inline_data;
   if (!data || typeof data !== "object") return false;
@@ -348,6 +349,7 @@ function isOmittedValue(value: unknown): boolean {
   return value === undefined || typeof value === "function" || typeof value === "symbol";
 }
 
+/** Estimate context text while excluding opaque attachment bytes from token accounting. */
 function measureVirtual(node: unknown, seen: Set<object>, flags?: MeasureFlags): VirtualMeasure {
   if (node === null) return { chars: 4, mediaTokens: 0 };
   const type = typeof node;

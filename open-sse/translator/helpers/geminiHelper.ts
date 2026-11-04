@@ -200,6 +200,7 @@ function normalizeAudioMimeType(format: unknown): string {
 }
 
 // Convert OpenAI content to Gemini parts
+/** Translate OpenAI content to Gemini parts while retaining typed media carriers. */
 export function convertOpenAIContentToParts(content: unknown): JsonRecord[] {
   const parts: JsonRecord[] = [];
 

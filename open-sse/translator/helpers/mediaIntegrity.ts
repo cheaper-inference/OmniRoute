@@ -9,6 +9,7 @@ export function requestMediaRefs(body: Record<string, unknown>): Set<string> {
   );
 }
 
+/** Reject a CI translation if an original attachment reference disappears. */
 export function assertCIMediaPreserved(
   before: ReadonlySet<string> | null,
   after: Record<string, unknown>

@@ -71,6 +71,7 @@ function hasToolCalls(msg: { tool_calls?: unknown }): boolean {
   return Array.isArray(msg.tool_calls) && msg.tool_calls.length > 0;
 }
 
+/** Normalize cross-provider history while preserving supported OpenAI media parts. */
 export function filterToOpenAIFormat(body, opts: FilterToOpenAIFormatOptions = {}) {
   // #2069 — when the routed provider honors OpenAI-format cache_control
   // breakpoints (DashScope/alibaba, Xiaomi MiMo, etc.) and preservation was

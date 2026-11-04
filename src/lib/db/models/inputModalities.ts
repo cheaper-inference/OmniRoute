@@ -7,6 +7,7 @@ import { CI_INPUT_MODALITIES } from "@/shared/constants/cheaperInferenceInputMod
 export type InputModalityMap = ReadonlyMap<string, ReadonlyMap<string, readonly string[]>>;
 let cache: { version: number; values: InputModalityMap } | undefined;
 
+/** Read model input declarations with both account-specific and provider-wide lookup keys. */
 export function listInputModalities(): InputModalityMap {
   const values = new Map<string, Map<string, string[]>>();
   const add = (key: string, id: string, inputs: string[]) => {
@@ -35,6 +36,7 @@ export function listInputModalities(): InputModalityMap {
   return values;
 }
 
+/** Resolve declarations for this model/account, preserving unknown-model capability fallback. */
 export function getInputModalities(
   provider: string | null,
   model: string | null,
@@ -54,6 +56,6 @@ export function getInputModalities(
   if (found) return found;
   if (provider === "cheaperinference" || provider === "cinf")
     return Object.hasOwn(CI_INPUT_MODALITIES, model) ? CI_INPUT_MODALITIES[model] : undefined;
-  if (connectionId && values.has(provider)) return [];
+  if (connectionId && values.get(provider)?.has(model)) return [];
   return undefined;
 }

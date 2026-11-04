@@ -873,6 +873,7 @@ function resolveSyncedEffortTierFallback(
   return isModelsDevEffortTiersEnabled() ? knownReasoningEffortTiers(syncedEfforts) : null;
 }
 
+/** Resolve model capabilities with executor transport limits ahead of advertised catalog claims. */
 export function getResolvedModelCapabilities(
   input: CapabilityInput,
   options?: ResolveModelCapabilitiesOptions,

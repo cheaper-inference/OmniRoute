@@ -259,6 +259,7 @@ function inspectImageIndicators(
   return true;
 }
 
+/** Inspect nested message and tool content with bounded attachment traversal. */
 function inspect(value: unknown, ctx: DetectCtx, depth: number, path: (string | number)[]): void {
   if (ctx.found || depth > MAX_DEPTH || value == null) return;
   if (typeof value === "string") {

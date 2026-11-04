@@ -20,7 +20,7 @@ omniroute --version
 
 ### `provider-cmd provider [subcommand]`
 
-Manage provider connections (use
+Manage provider connections (use 
 
 **Example:**
 

@@ -118,3 +118,94 @@ test("MCP stdio advertises analysis and sanitizes local file errors", async () =
     await rm(folder, { recursive: true, force: true });
   }
 });
+
+test("media tool preserves HTTP status for non-JSON and null gateway errors", async () => {
+  const folder = await mkdtemp(path.join(tmpdir(), "omni-media-errors-"));
+  const pdf = path.join(folder, "sample.pdf");
+  const originalFetch = globalThis.fetch;
+  try {
+    await writeFile(pdf, "%PDF-1.4 fixture");
+    const input = { prompt: "read", files: [{ path: pdf }] };
+    const connection = {
+      baseURL: "https://gateway.example/v1",
+      key: "private-fixture",
+      model: "auto",
+    };
+    for (const [status, payload] of [
+      [413, "<html>too large</html>"],
+      [502, "bad gateway"],
+      [504, "null"],
+    ]) {
+      globalThis.fetch = async () => new Response(payload, { status });
+      await assert.rejects(
+        analyzeMedia(input, { connection }),
+        new RegExp(`OmniRoute HTTP ${status}: Media analysis failed`)
+      );
+    }
+    globalThis.fetch = async () =>
+      Response.json({ error: { message: "private-fixture " + "x".repeat(2000) } }, { status: 429 });
+    await assert.rejects(analyzeMedia(input, { connection }), (error) => {
+      assert.match(error.message, /OmniRoute HTTP 429: \[redacted\]/);
+      assert.ok(!error.message.includes(connection.key));
+      assert.ok(error.message.length < 1100);
+      return true;
+    });
+    for (const payload of ["null", "not JSON", "[]", '"text"']) {
+      globalThis.fetch = async () => new Response(payload);
+      await assert.rejects(
+        analyzeMedia(input, { connection }),
+        /non-JSON|invalid JSON|no text analysis/
+      );
+    }
+  } finally {
+    globalThis.fetch = originalFetch;
+    await rm(folder, { recursive: true, force: true });
+  }
+});
+
+test("mediaConnection enforces URL and credential boundaries with isolated configuration", async () => {
+  const { mediaConnection } = await import("../../../scripts/cli/omniroute-media-mcp.mjs");
+  const folder = await mkdtemp(path.join(tmpdir(), "omni-media-config-"));
+  const config = path.join(folder, "opencode.json");
+  const names = [
+    "OMNIROUTE_MEDIA_CONFIG",
+    "OMNIROUTE_MEDIA_API_KEY",
+    "OMNIROUTE_MEDIA_PROVIDER",
+    "OMNIROUTE_MEDIA_MODEL",
+    "OMNI_MEDIA_FIXTURE_KEY",
+  ];
+  const original = Object.fromEntries(names.map((name) => [name, process.env[name]]));
+  try {
+    for (const name of names) delete process.env[name];
+    process.env.OMNIROUTE_MEDIA_CONFIG = config;
+    const settings = async (baseURL, apiKey = "fixture") =>
+      writeFile(
+        config,
+        JSON.stringify({ providers: { omniroute: { settings: { baseURL, apiKey } } } })
+      );
+    for (const url of ["http://example.com/v1", "https://user:pw@host/v1"]) {
+      await settings(url);
+      await assert.rejects(mediaConnection(), /HTTPS/);
+    }
+    await settings("http://[::1]/v1/");
+    assert.deepEqual(await mediaConnection(), {
+      baseURL: "http://[::1]/v1",
+      key: "fixture",
+      model: "auto",
+    });
+    await settings("https://gateway.example/v1", "{env:OMNI_MEDIA_FIXTURE_KEY}");
+    await assert.rejects(mediaConnection(), /credential is unavailable/);
+    process.env.OMNI_MEDIA_FIXTURE_KEY = "referenced";
+    assert.equal((await mediaConnection()).key, "referenced");
+    process.env.OMNIROUTE_MEDIA_API_KEY = "override";
+    assert.equal((await mediaConnection()).key, "override");
+    process.env.OMNIROUTE_MEDIA_API_KEY = "{env:UNRESOLVED}";
+    await assert.rejects(mediaConnection(), /credential is unavailable/);
+  } finally {
+    for (const name of names) {
+      if (original[name] === undefined) delete process.env[name];
+      else process.env[name] = original[name];
+    }
+    await rm(folder, { recursive: true, force: true });
+  }
+});

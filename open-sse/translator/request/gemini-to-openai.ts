@@ -115,6 +115,7 @@ function splitCoLocatedFunctionResponses(contents) {
   return out;
 }
 
+/** Convert Gemini history to OpenAI messages with its tool calls and media intact. */
 function convertGeminiContent(content, toolCallIds) {
   const role = content.role === "user" ? "user" : "assistant";
 

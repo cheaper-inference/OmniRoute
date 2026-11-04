@@ -91,6 +91,7 @@ export class CheaperInferenceExecutor extends BaseExecutor {
     return this.config.baseUrl;
   }
 
+  /** Normalize CI media carriers and keep Responses-only options off Chat requests. */
   transformRequest(
     model: string,
     body: unknown,

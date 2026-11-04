@@ -1,10 +1,13 @@
 import type { MediaKind, MediaPart } from "./mediaParts.ts";
 
 type Attachment = { kind: MediaKind; ref: string; shape: MediaPart["shape"] };
+/** Read an attachment object without coercing primitive values. */
 const record = (value: unknown): Record<string, unknown> =>
   value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+/** Read a textual attachment field without coercing non-string values. */
 const string = (value: unknown): string => (typeof value === "string" ? value : "");
 
+/** Classify declared MIME types without treating arbitrary binary files as images. */
 function mimeKind(mime: string): MediaKind | null {
   const value = mime.toLowerCase().split(";")[0];
   if (value.startsWith("image/")) return "image";
@@ -16,6 +19,7 @@ function mimeKind(mime: string): MediaKind | null {
 
 const first = (...values: unknown[]): unknown => values.find((value) => value != null);
 
+/** Read typed Gemini inline/file attachments without decoding their content. */
 function geminiAttachment(obj: Record<string, unknown>): Attachment | null {
   const inline = record(obj.inlineData ?? obj.inline_data);
   const remote = record(obj.fileData ?? obj.file_data);
@@ -26,6 +30,7 @@ function geminiAttachment(obj: Record<string, unknown>): Attachment | null {
     : null;
 }
 
+/** Recognize document text that has already been extracted for ordinary text transport. */
 function hasExtractedText(obj: Record<string, unknown>, file: Record<string, unknown>) {
   if (obj.type !== "file") return false;
   const references = [
@@ -64,6 +69,7 @@ function fileReference(
   );
 }
 
+/** Resolve PDF, media and opaque file kinds from the declared attachment metadata. */
 function fileKind(
   obj: Record<string, unknown>,
   file: Record<string, unknown>,
@@ -100,6 +106,7 @@ export function inspectAttachmentPart(obj: Record<string, unknown>): Attachment 
   return { kind: fileKind(obj, file, source, ref), ref, shape: "file_part" };
 }
 
+/** Classify the MIME prefix of a data URI without decoding its content. */
 export function dataUriKind(value: string): MediaKind | null {
   const mime = /^data:([^;,]+)/i.exec(value)?.[1];
   return mime ? mimeKind(mime) : null;

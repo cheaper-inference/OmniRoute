@@ -537,6 +537,7 @@ export function detectModelModality(
   };
 }
 
+/** Normalize discovered model records while retaining explicit input-modality declarations. */
 export function normalizeDiscoveredModels(
   models: unknown,
   providerId?: string

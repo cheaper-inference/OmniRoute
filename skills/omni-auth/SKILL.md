@@ -32,6 +32,7 @@ Complete a two-factor sign-in
 
 Login step 2 (public). Trades the MFA-pending cookie set by `/api/auth/login` plus a TOTP or recovery code for the dashboard session cookie. Shares the login brute-force lockout; a TOTP step and a recovery code are each accepted once.
 
+
 ```bash
 CSRF_TOKEN=$(curl -s http://localhost:20128/api/auth/csrf -b cookie.jar | jq -r .token)
 curl -X POST http://localhost:20128/api/auth/mfa/verify \
@@ -56,6 +57,7 @@ Start two-factor enrollment
 
 Re-authenticates with the current password and returns a candidate TOTP secret, its `otpauth://` URI and a QR code (PNG data URI). Nothing is persisted.
 
+
 ```bash
 CSRF_TOKEN=$(curl -s http://localhost:20128/api/auth/csrf -b cookie.jar | jq -r .token)
 curl -X POST http://localhost:20128/api/auth/mfa/setup \
@@ -70,6 +72,7 @@ curl -X POST http://localhost:20128/api/auth/mfa/setup \
 Finish two-factor enrollment
 
 Persists the secret (encrypted at rest) once the current password and a code generated from it both verify. Returns ten single-use recovery codes, shown once.
+
 
 ```bash
 CSRF_TOKEN=$(curl -s http://localhost:20128/api/auth/csrf -b cookie.jar | jq -r .token)
@@ -88,6 +91,7 @@ Requires the current password and a live TOTP or recovery code. While
 `OMNIROUTE_DISABLE_MFA=true` is set, a request from the host itself (loopback
 peer and loopback `Host`) may omit `code` to remove a factor that can no longer
 be verified; the session and password are still required.
+
 
 ```bash
 CSRF_TOKEN=$(curl -s http://localhost:20128/api/auth/csrf -b cookie.jar | jq -r .token)
@@ -120,6 +124,7 @@ via `{issuer}/.well-known/openid-configuration`, falling back to `{issuer}/autho
 sets a short-lived `oidc_state` cookie, and redirects the browser. Password login
 remains available as a fallback while OIDC is enabled.
 
+
 ```bash
 curl http://localhost:20128/api/auth/oidc/login \
   -b cookie.jar
@@ -137,6 +142,7 @@ configured array claim in the verified ID token). When both are present,
 both must match. Without either policy the callback returns `not_configured`.
 On success it mints the same 30-day `auth_token` dashboard-session JWT
 used by password login and redirects to `/dashboard`.
+
 
 ```bash
 curl http://localhost:20128/api/auth/oidc/callback \

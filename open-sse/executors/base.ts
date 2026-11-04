@@ -744,6 +744,7 @@ export class BaseExecutor {
     }
   }
 
+  /** Dispatch a validated provider request through its recovery loop and transport hook. */
   async execute(input: ExecuteInput): Promise<ExecutorExecuteResult> {
     const {
       model,
@@ -991,6 +992,7 @@ export class BaseExecutor {
       }
 
       try {
+        /** Bound connection startup while using the provider-specific wire transport. */
         const fetchWithStartTimeout = async (requestUrl: string, requestOptions: RequestInit) => {
           // GHSA-4f49: guard here (not only next to the first buildUrl) so retries
           // and fallback URLs are validated too, before any bytes leave the host.

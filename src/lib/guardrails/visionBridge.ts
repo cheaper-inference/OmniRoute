@@ -327,6 +327,7 @@ export class VisionBridgeGuardrail extends BaseGuardrail {
     this.deps = options?.deps ?? {};
   }
 
+  /** Apply the configured vision bridge while preserving ordinary non-image content. */
   async preCall(payload: unknown, context: GuardrailContext): Promise<GuardrailResult<unknown>> {
     // 1. Check if disabled at guardrail level
     if (!this.enabled) {

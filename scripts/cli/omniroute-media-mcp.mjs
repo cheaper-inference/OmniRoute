@@ -26,6 +26,7 @@ export const MediaArguments = z.object({
   max_tokens: z.number().int().min(128).max(8192).default(2048),
 });
 
+/** Identify supported media from its signature, rather than trusting a filename extension. */
 function mediaType(bytes, filename, kind) {
   const text = bytes.subarray(0, 16).toString("latin1");
   if (text.startsWith("%PDF-")) return "application/pdf";
@@ -55,6 +56,7 @@ function mediaType(bytes, filename, kind) {
   );
 }
 
+/** Build one multimodal request after validating local files and serialized size bounds. */
 export async function buildMediaRequest(input, model = "auto") {
   const args = MediaArguments.parse(input);
   const files = await Promise.all(
@@ -99,6 +101,7 @@ export async function buildMediaRequest(input, model = "auto") {
   return body;
 }
 
+/** Resolve the user-configured gateway and key, rejecting unsafe URLs and unresolved secrets. */
 export async function mediaConnection() {
   const configPath =
     process.env.OMNIROUTE_MEDIA_CONFIG ||
@@ -133,6 +136,7 @@ export async function mediaConnection() {
   };
 }
 
+/** Submit requested media and return text analysis while preserving sanitized HTTP errors. */
 export async function analyzeMedia(input, options = {}) {
   const connection = options.connection || (await mediaConnection());
   const body = await buildMediaRequest(input, connection.model);
@@ -146,13 +150,20 @@ export async function analyzeMedia(input, options = {}) {
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${connection.key}` },
     body: JSON.stringify(body),
   });
-  const result = await response.json();
+  let result;
+  try {
+    result = JSON.parse(await response.text());
+  } catch {
+    result = null;
+  }
   if (!response.ok) {
-    const message = String(result.error?.message || "Media analysis failed")
+    const message = String(result?.error?.message || "Media analysis failed")
       .replaceAll(connection.key, "[redacted]")
       .slice(0, 1000);
     throw new Error(`OmniRoute HTTP ${response.status}: ${message}`);
   }
+  if (!result || typeof result !== "object" || Array.isArray(result))
+    throw new Error("OmniRoute returned an invalid JSON response.");
   const answer = result.choices?.[0]?.message?.content;
   if (typeof answer !== "string" || !answer.trim())
     throw new Error("The model returned no text analysis.");

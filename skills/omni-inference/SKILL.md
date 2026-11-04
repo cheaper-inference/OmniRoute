@@ -153,7 +153,6 @@ All requests require a valid Bearer token or session cookie. Obtain a token via 
 - [`POST /api/v1/vscode/raw/{token}/v1/chat/completions`](references/endpoints.md#post-apiv1vscoderawtokenv1chatcompletions)
 - [`GET /api/v1/vscode/raw/{token}/v1/models`](references/endpoints.md#get-apiv1vscoderawtokenv1models)
 - [`POST /api/v1/web/fetch`](references/endpoints.md#post-apiv1webfetch)
-
 ## Payloads
 
 See the full OpenAPI specification at `GET /api/openapi/spec` or `docs/openapi.yaml` for detailed request/response schemas.

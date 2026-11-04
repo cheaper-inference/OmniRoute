@@ -51,6 +51,7 @@ function isJsonUpload(init: RequestInit, headers: Headers): boolean {
   );
 }
 
+/** Upload bounded same-origin parts, then issue one inference request for the reservation. */
 async function uploadAndDispatch(
   url: string,
   init: RequestInit,
@@ -84,17 +85,20 @@ async function uploadAndDispatch(
     }),
   });
   if (!created.ok) return created;
-  const reservation = (await created.json()) as { id?: unknown; part_bytes?: unknown };
+  const reservation = (await created.json().catch(() => null)) as {
+    id?: unknown;
+    part_bytes?: unknown;
+  } | null;
   if (
-    typeof reservation.id !== "string" ||
-    !/^[0-9a-f-]{36}$/.test(reservation.id) ||
-    reservation.part_bytes !== CI_PAYLOAD_PART_BYTES
-  ) {
+    typeof reservation?.id !== "string" ||
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(reservation.id)
+  )
     throw new Error("CI returned an invalid payload upload reservation.");
-  }
   const resource = `${uploadUrl}/${reservation.id}`;
   let needsCleanup = true;
   try {
+    if (reservation.part_bytes !== CI_PAYLOAD_PART_BYTES)
+      throw new Error("CI returned an invalid payload upload reservation.");
     const partHeaders = new Headers(uploadHeaders);
     partHeaders.set("content-type", "application/octet-stream");
     for (
@@ -125,28 +129,26 @@ async function uploadAndDispatch(
   }
 }
 
+/** Best-effort delete reserved bytes independently of the caller cancellation signal. */
 async function cleanUpload(
   resource: string,
   init: RequestInit,
   uploadHeaders: Headers,
   send: Transport
 ) {
-  // DELETE removes prompt bytes, not the consumed tombstone. Keep the original response/error.
-  // Abandoned uploads also expire on the server if cancellation prevents this cleanup.
-  if (!init.signal?.aborted) {
-    try {
-      const cleaned = await send(resource, {
-        ...init,
-        method: "DELETE",
-        headers: uploadHeaders,
-        body: undefined,
-        signal: init.signal
-          ? AbortSignal.any([init.signal, AbortSignal.timeout(2000)])
-          : AbortSignal.timeout(2000),
-      });
-      await cleaned.body?.cancel();
-    } catch {
-      /* The server's retention worker reaps abandoned uploads. */
-    }
+  // Cancellation must not cancel deletion of already-reserved prompt bytes.
+  // Keep the original response/error; server-side expiry is a final safety net.
+  try {
+    const cleaned = await send(resource, {
+      ...init,
+      method: "DELETE",
+      headers: uploadHeaders,
+      body: undefined,
+      redirect: "error",
+      signal: AbortSignal.timeout(2000),
+    });
+    await cleaned.body?.cancel();
+  } catch {
+    /* The receiver's retention worker reaps abandoned uploads. */
   }
 }

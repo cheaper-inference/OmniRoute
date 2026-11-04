@@ -322,3 +322,42 @@ test("fusion excludes text-only panel members and judges from PDF input", async 
   assert.ok(sent.includes(capable.modelStr));
   assert.ok(!sent.includes(blind.modelStr));
 });
+
+test("an unrelated model's declaration does not suppress this connection's capability fallback", async () => {
+  const { getInputModalities } = await import("../../src/lib/db/models/inputModalities.ts");
+  const values = new Map([
+    [
+      "openrouter",
+      new Map([
+        ["embedding-only", ["text"]],
+        ["declared-chat", ["text", "pdf"]],
+      ]),
+    ],
+    ["openrouter:first", new Map([["declared-chat", ["text", "pdf"]]])],
+  ]);
+  assert.equal(getInputModalities("openrouter", "undeclared-chat", values, "second"), undefined);
+  assert.deepEqual(getInputModalities("openrouter", "declared-chat", values, "second"), []);
+  assert.deepEqual(getInputModalities("openrouter", "declared-chat", values, "first"), [
+    "text",
+    "pdf",
+  ]);
+});
+
+test("non-CI unknown PDF/file capabilities preserve fallback while explicit denials and CI stay strict", async () => {
+  const { nonImageMediaFailures } =
+    await import("../../open-sse/services/combo/mediaCompatibility.ts");
+  const unknown = target("openrouter/undeclared-compatible-model");
+  for (const requirements of [{ requiresPdf: true }, { requiresFiles: true }]) {
+    assert.deepEqual(nonImageMediaFailures(unknown, requirements), []);
+    assert.ok(nonImageMediaFailures(blind, requirements).length > 0);
+    assert.ok(nonImageMediaFailures(target("cinf/gpt-4o-mini"), requirements).length > 0);
+  }
+  await replaceSyncedAvailableModelsForConnection("openrouter", "scoped-denial", [
+    { id: "explicitly-text-only", name: "Explicit", supportedInputTypes: ["text"] },
+  ]);
+  const denied = { ...target("openrouter/explicitly-text-only"), connectionId: "scoped-denial" };
+  assert.deepEqual(nonImageMediaFailures(denied, { requiresPdf: true, requiresFiles: true }), [
+    "pdf",
+    "file",
+  ]);
+});

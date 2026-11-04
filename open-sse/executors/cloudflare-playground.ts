@@ -503,6 +503,7 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
     super("cloudflare-playground", { id: "cloudflare-playground", baseUrl: PLAYGROUND_URL });
   }
 
+  /** Execute Cloudflare text chat, rejecting media before opening its browser transport. */
   async execute(input: ExecuteInput) {
     const { body, signal, stream: wantStream } = input;
     const bodyObj = (body || {}) as Record<string, unknown>;

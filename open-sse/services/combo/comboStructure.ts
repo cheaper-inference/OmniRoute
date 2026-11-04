@@ -627,6 +627,7 @@ export function computeCompatRejectedTargets(
   );
 }
 
+/** Collect capability mismatches for a target, including required media inputs. */
 function getTargetCompatibilityFailures(
   target: ResolvedComboTarget,
   requirements: RequestCompatibilityRequirements
@@ -839,6 +840,7 @@ function preferConfirmedVisionTargets(
   return partitionConfirmedVisionTargets(targets, requirements).targets;
 }
 
+/** Filter incompatible targets without restoring unsupported media through fail-open routing. */
 export function filterTargetsByRequestCompatibility(
   targets: ResolvedComboTarget[],
   body: Record<string, unknown>,

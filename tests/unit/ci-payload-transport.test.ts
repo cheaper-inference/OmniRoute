@@ -181,3 +181,41 @@ test("small bodies, encoded bodies and unrelated paths pass through; abort and s
   });
   assert.equal(calls, 3);
 });
+
+test("cancellation deletes a known upload with its own bounded signal", async () => {
+  const controller = new AbortController();
+  let deleted = 0;
+  await assert.rejects(
+    sendCIPayload(url, init(largeBody(), controller.signal), async (target, options) => {
+      if (target.endsWith("/payload-uploads"))
+        return Response.json({ id, part_bytes: CI_PAYLOAD_PART_BYTES });
+      if (options.method === "DELETE") {
+        deleted++;
+        assert.notEqual(options.signal, controller.signal);
+        assert.equal(options.signal?.aborted, false);
+        assert.equal(options.redirect, "error");
+        return new Response(null, { status: 204 });
+      }
+      controller.abort();
+      controller.signal.throwIfAborted();
+      throw new Error("inference must not run");
+    }),
+    { name: "AbortError" }
+  );
+  assert.equal(deleted, 1);
+});
+
+test("a malformed reservation still deletes its validated upload ID", async () => {
+  let deleted = 0;
+  await assert.rejects(
+    sendCIPayload(url, init(largeBody()), async (target, options) => {
+      if (target.endsWith("/payload-uploads")) return Response.json({ id, part_bytes: 123 });
+      assert.equal(options.method, "DELETE");
+      assert.equal(target, `https://api.cheaperinference.com/v1/payload-uploads/${id}`);
+      deleted++;
+      return new Response(null, { status: 204 });
+    }),
+    /invalid payload upload reservation/
+  );
+  assert.equal(deleted, 1);
+});

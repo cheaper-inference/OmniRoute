@@ -2410,6 +2410,7 @@ function resolveUpstreamResetMs(fallback: {
   return fallback.quotaResetHintMs ?? null;
 }
 
+/** Record provider/account health failures while keeping upload-admission errors request-scoped. */
 export async function markAccountUnavailable(
   connectionId: string,
   status: number,

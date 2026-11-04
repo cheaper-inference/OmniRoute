@@ -451,6 +451,7 @@ function resolveBaseCatalogPricing(
   return null;
 }
 
+/** Expose normalized capability and input-modality metadata to model-list clients. */
 export function enrichCatalogModelEntry<T extends JsonRecord>(
   entry: T,
   input?: { provider?: string | null; model?: string | null },

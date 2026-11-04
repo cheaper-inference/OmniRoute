@@ -28,6 +28,7 @@ export function geminiMediaToOpenAI(part: Record<string, unknown>): Record<strin
   };
 }
 
+/** Convert supported video carriers to Gemini parts without rewriting their source bytes. */
 export function videoPartToGemini(part: Record<string, unknown>): Record<string, unknown> | null {
   if (part.type !== "video_url" && part.type !== "input_video") return null;
   const raw = part.video_url ?? part.url ?? part.input_video;

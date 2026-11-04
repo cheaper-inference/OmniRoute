@@ -191,6 +191,7 @@ async function gateFirstOutput(params: FirstOutputGateParams): Promise<Response>
   return targetTimeoutResponse(modelStr);
 }
 
+/** Reject incompatible media before starting a target timer or provider request. */
 function incompatibleMediaResponse(
   b: Record<string, unknown>,
   modelStr: string,

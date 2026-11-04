@@ -639,6 +639,7 @@ type PipelineDispatchArgs = {
   hiddenModelsByProvider?: HiddenModelsByProvider;
 };
 
+/** Dispatch a configured pipeline through the shared target compatibility checks. */
 export async function tryPipelineDispatch(args: PipelineDispatchArgs): Promise<Response | null> {
   const {
     body,
@@ -828,6 +829,7 @@ type RuntimeUnitDispatchArgs = {
   runCombo: RunCombo;
 };
 
+/** Dispatch a runtime unit after resolving its target and request compatibility. */
 export async function tryRuntimeUnitDispatch(
   args: RuntimeUnitDispatchArgs
 ): Promise<Response | null> {

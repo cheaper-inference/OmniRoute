@@ -118,6 +118,7 @@ function resolveOpenAIServiceTier(tier: unknown, credentials: unknown): string |
 }
 
 // Convert Claude request to OpenAI format
+/** Translate Claude requests and their tool/media history to the OpenAI request format. */
 export function claudeToOpenAIRequest(model, body, stream, credentials: unknown = null) {
   const routedProvider =
     credentials && typeof credentials === "object" ? (credentials as JsonRecord)._provider : null;
@@ -471,6 +472,7 @@ function fixMissingToolResponses(messages) {
 // (Claude Code sends PDFs this way) becomes the Chat Completions `file` part, which
 // OpenAI accepts natively and geminiHelper turns into `inlineData`. Plain-text and URL
 // documents become text, because OpenAI `file` parts only carry base64 data.
+/** Retain Claude document sources as OpenAI file parts or extracted text. */
 function convertClaudeDocumentBlock(
   block,
   preserveCacheControl = false,
@@ -521,6 +523,7 @@ function buildOmittedBlocksNotice(types: string[]): string {
 }
 
 // Convert single Claude message - returns single message or array of messages
+/** Convert Claude message blocks while retaining tools and typed attachments. */
 function convertClaudeMessage(msg, preserveCacheControl = false, preserveDocumentUrls = false) {
   // Preserve system role for mid-conversation system turns (#6954).
   // Previously any role that wasn't "user" or "tool" was mapped to "assistant",

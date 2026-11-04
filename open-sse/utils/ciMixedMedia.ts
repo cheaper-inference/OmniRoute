@@ -19,6 +19,7 @@ const VIDEO_EXTENSION: Record<string, string> = {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === "object" && !Array.isArray(value);
 
+/** Express inline audio using the CI MIME-typed file carrier without re-encoding it. */
 function normalizeAudio(value: Record<string, unknown>, nextIndex: () => number) {
   if (value.type === "input_audio" && isRecord(value.input_audio)) {
     const audio = value.input_audio;
@@ -44,6 +45,7 @@ function normalizeAudio(value: Record<string, unknown>, nextIndex: () => number)
   return null;
 }
 
+/** Express inline video using the CI MIME-typed file carrier without re-encoding it. */
 function normalizeVideo(value: Record<string, unknown>, nextIndex: () => number) {
   if (value.type === "video_url") {
     const video = value.video_url;
@@ -79,6 +81,7 @@ export function normalizeCIMixedMedia(body: Record<string, unknown>): Record<str
   );
   if (kinds.size < 2) return body;
   let index = 0;
+  /** Walk bounded request content recursively, retaining unrecognized object fields. */
   const visit = (value: unknown, depth = 0): unknown => {
     if (depth > 32) return value;
     if (Array.isArray(value)) return value.map((entry) => visit(entry, depth + 1));
