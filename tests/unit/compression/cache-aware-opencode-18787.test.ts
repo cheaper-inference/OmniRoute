@@ -94,6 +94,8 @@ test("#18787: automatic cache detection preserves system prompt and retains sele
     deterministicOnly: true,
   });
   assert.equal(mustKeepOpenCodeHistoryVerbatim(firstBody, { provider, model }), true);
+  assert.equal(detectCachingContext(firstBody).isCachingProvider, true);
+  assert.equal(detectCachingContext(firstBody).usesAutomaticPrefixCaching, true);
   // Do not globally disable the compression plan: only the live-zone prefix is frozen.
   assert.equal(selectCompressionPlan(config, null, 4096, firstBody, { provider, model }).mode, "stacked");
 });
