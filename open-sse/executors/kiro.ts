@@ -130,6 +130,48 @@ export function flushBufferedToolArgs(
   state.toolArgsBuffered.clear();
 }
 
+/**
+ * Give argument-less tool calls a parseable `"{}"` before the stream finishes.
+ *
+ * A tool call starts with `arguments: ""`. When Kiro sends no input for it (a
+ * tool with no parameters, or one whose parameters are all optional and the
+ * model passed none), nothing replaces that empty string, so the client
+ * reassembles `""` — which strict OpenAI clients reject as a malformed call.
+ * OpenAI itself sends `"{}"` for these, so match that.
+ *
+ * Only call this at the terminal flush: injecting `"{}"` earlier could be
+ * followed by a late argument fragment for the same call.
+ */
+export function flushEmptyToolCallArgs(
+  state: Pick<KiroStreamState, "seenToolIds" | "toolArgsEmitted">,
+  controller: { enqueue: (chunk: Uint8Array) => void },
+  ctx: { responseId: string; created: number; model: string }
+): void {
+  if (!state.seenToolIds || state.seenToolIds.size === 0) return;
+  const { responseId, created, model } = ctx;
+  for (const [toolCallId, toolIndex] of state.seenToolIds) {
+    const emitted = state.toolArgsEmitted.get(toolCallId) || "";
+    if (emitted.trim() !== "") continue;
+    const argsChunk: JsonRecord = {
+      id: responseId,
+      object: "chat.completion.chunk",
+      created,
+      model,
+      choices: [
+        {
+          index: 0,
+          delta: {
+            tool_calls: [{ index: toolIndex, function: { arguments: "{}" } }],
+          },
+          finish_reason: null,
+        },
+      ],
+    };
+    controller.enqueue(TEXT_ENCODER.encode(`data: ${JSON.stringify(argsChunk)}\n\n`));
+    state.toolArgsEmitted.set(toolCallId, emitted + "{}");
+  }
+}
+
 function buildKiroFinishChunk(
   state: KiroStreamState,
   responseId: string,
@@ -648,7 +690,10 @@ export class KiroExecutor extends BaseExecutor {
         emitToolCallStart(controller, toolCall.toolCallId, toolCall.toolName, toolIndex);
         const argumentsStr =
           typeof toolInput === "string" ? toolInput : JSON.stringify(toolInput ?? {});
-        if (argumentsStr) emitToolCallArguments(controller, toolIndex, argumentsStr);
+        if (argumentsStr) {
+          emitToolCallArguments(controller, toolIndex, argumentsStr);
+          state.toolArgsEmitted.set(toolCall.toolCallId, argumentsStr);
+        }
       }
       state.pendingWrapperToolCalls.clear();
       return true;
@@ -1090,6 +1135,8 @@ export class KiroExecutor extends BaseExecutor {
           // Flush any buffered tool arguments (partial-object payloads) before finishing —
           // idempotent against toolArgsEmitted if messageStopEvent already flushed them.
           flushBufferedToolArgs(state, controller, { responseId, created, model });
+          // A tool call that never received input still has `arguments: ""`; send "{}".
+          flushEmptyToolCallArgs(state, controller, { responseId, created, model });
 
           // Drain any pending inline-thinking tag fragment so we don't drop
           // trailing characters when the stream ends mid-tag (e.g. `<thi`).
