@@ -105,6 +105,7 @@ export function phaseComboSetup(ctx: ComboContext): ComboSetup {
     "" // provider/model not yet known — resolved per-model in loop
   );
   ctx.body = agentBody;
+
   const clientRequestedStream = ctx.body?.stream === true;
 
   // Use config cascade before dispatch so all strategies, pinned context routes,

@@ -29,7 +29,7 @@ const THINKING_MODEL_PATTERNS: RegExp[] = [
   /\bminimax\b/i,
   /\bmimo\b/i, // xiaomi-tokenplan mimo family (e.g. xiaomi-tokenplan/mimo-v2.5-pro)
 ];
-const K3_AUTHENTIC_REASONING_PATTERN = /(?:^|\/)(?:kimi-)?k3(?:$|-)/i;
+const K3_AUTHENTIC_REASONING_PATTERN = /(?:^|\/)(?:kimi-)?k3(?:$|[.-])/i;
 const NATIVE_K27_AUTHENTIC_REASONING_PATTERN = /(?:^|\/)kimi-k2\.7-code(?:$|-)/i;
 
 /**

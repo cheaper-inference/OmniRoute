@@ -280,6 +280,10 @@
     "tests/unit/sidebar-icon-accents-3812.test.ts": {
       "replacement": "tests/unit/sidebar-nav-contrast-aa.test.ts",
       "reason": "1e8125fe (KEA-7886, kit Sidebar family, 2026-10-20) removed the per-item curated icon accents (#3812): the kit Sidebar renders icons with the kit palette, so the accent map and its fallback hash no longer exist. The sidebar contrast test was rewritten in the same commit for the kit shell and pins the navigation colors that replaced the accents. Release-green base-red #17219 (test-masking vs main, 2026-10-24)."
+    },
+    "tests/unit/call-log-artifact-worker-tsx-cache.test.ts": {
+      "replacement": "tests/unit/call-log-artifact-worker-native.test.ts",
+      "reason": "v3.8.53 #18511 (fix(call-logs): avoid esbuild zombies in source workers) removed the tsx-loader path for the call-log artifact worker: source workers now run natively without CLI preloads, so TSX_DISABLE_CACHE and the tsx disk-cache environment no longer exist. The native-worker test added in the same PR pins the replacement behavior (writes survive idle restarts and forced close without esbuild children; no inherited CLI preloads)."
     }
   },
   "tests/unit/catalog-updates-v3x.test.ts": "v3.8.45 #6248: fix(providers) remove deprecated MiMo V2 entries — os 5 asserts removidos pinavam specs de modelos mimo-v2-* que deixaram de existir no catálogo (54→49). Asserts seguem a remoção dos modelos, não enfraquecimento. Verificado legítimo. Prune após v3.8.45 mergear para main.",

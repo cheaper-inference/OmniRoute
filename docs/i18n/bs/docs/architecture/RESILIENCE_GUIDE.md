@@ -284,25 +284,27 @@ _stanje_ zaključavanja je efemerno.
 
 ---
 
-## 4. Kontrola istovremenosti kod dijeljenja kvote (v3.8.36)
+## 4. Kontrola konkurentnosti dijeljenjem kvote (v3.8.36)
 
-Računi pretplate (GLM, MiniMax itd.) često prihvataju samo ~1–3 istovremena
-zahtjeva; prekoračenje toga izaziva 429 greške i periode hlađenja. Ovo je posebno
-izraženo kod **quota-share** (`qtSd/…`) kombinacija, gdje više API ključeva dijeli
-jedan upstream račun. Tri sloja sprječavaju da dijeljeni račun bude preplavljen.
+Pretplatnički nalozi (GLM, MiniMax itd.) često prihvataju samo ~1–3
+istovremena zahtjeva; prekoračenje tog broja aktivira 429 greške i periode
+hlađenja. Ovo je naročito izraženo kod kombinacija **quota-share**
+(`qtSd/…`), gdje više API ključeva dijeli isti upstream nalog. Tri sloja
+sprječavaju preopterećenje zajedničkog naloga.
 
-### Ograničenje istovremenosti po konekciji (`max_concurrent`)
+### Ograničenje konkurentnosti po konekciji (`max_concurrent`)
 
-Svaka konekcija provajdera može deklarisati gornju granicu `max_concurrent`
-(`provider_connections.max_concurrent`, postavlja se u modalnom prozoru konekcije /
-API-ju / bazi podataka). Ostavite prazno za neograničeno. Ovo je jedini regulator
-koji pokreće sloj serijalizacije opisan ispod — postavite ga na stvarnu
-istovremenost računa (npr. GLM ~1, MiniMax ~2).
+Svaka konekcija provajdera može deklarisati gornju granicu
+`max_concurrent`
+(`provider_connections.max_concurrent`, postavljenu u modalu konekcije / API-ju / bazi podataka).
+Ostavite prazno za neograničeno. Ovo je jedina postavka koja upravlja slojem
+serijalizacije u nastavku — postavite je na stvarnu konkurentnost naloga
+(npr. GLM ~1, MiniMax ~2).
 
-### Ograničenja istovremenosti po modelu (`modelConcurrency`)
+### Ograničenja konkurentnosti po modelu (`modelConcurrency`)
 
-Konekcija može dodatno deklarisati tačna ograničenja istovremenosti po modelu
-unutar svoje `rateLimitOverrides` mape:
+Konekcija može dodatno deklarisati precizne gornje granice konkurentnosti po modelu
+unutar svoje mape `rateLimitOverrides`:
 
 ```json
 {
@@ -313,76 +315,84 @@ unutar svoje `rateLimitOverrides` mape:
 }
 ```
 
-Postavlja se u modalnom prozoru konekcije (**Zaobilaženja ograničenja brzine →
-Ograničenja istovremenosti po modelu**, jedan `model=cap` po redu) ili putem
-`PATCH /api/providers/[id]` s istim JSON oblikom. Ključna semantika:
+Postavite ovo u modalu konekcije (**Rate limit overrides → Per-model
+concurrency caps**, po jedan `model=cap` u svakom redu) ili putem
+`PATCH /api/providers/[id]` s istim JSON oblikom. Značenje ključeva:
 
-- **Na nivou konekcije naspram po modelu:** `maxConcurrent` ostaje dijeljena
-  gornja granica na nivou konekcije. Kada oba važe, obje kapije se zauzimaju
-  atomski u istoj kompozitnoj kapiji
+- **Ograničenje za cijelu konekciju naspram ograničenja specifičnog za model:** `maxConcurrent` ostaje zajednička
+  gornja granica za cijelu konekciju. Kada se primjenjuju oba ograničenja, oba
+  mehanizma se pribavljaju atomski u istom kompozitnom mehanizmu
   (`global → provider → account → model`); efektivno ponašanje određuje strože
   primjenjivo ograničenje.
-- **Tačno podudaranje ključa modela:** ključ je string modela koji se prosljeđuje
-  izvršiocu nakon razrješenja rutiranja — obično goli upstream ID modela
-  (`glm-5`), a ne klijentski `provider/model` alias (`zai/glm-5` ne odgovara
-  `glm-5`). Vrijednosti su gornje granice istovremenih zahtjeva u obliku
-  pozitivnih cijelih brojeva.
-- **Lokalno čekanje u redu, bez otkrivanja:** višak zahtjeva čeka lokalno u redu
-  s postojećom semantikom reda/isteka vremena (tipizirane greške prijema
-  `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL`). OmniRoute ne otkriva niti
-  zaključuje upstream politiku — on nameće tačne granice koje je operator
-  konfigurisao. Zasićena kapija modela nikada ne onemogućava provajdera i nikada
-  ne stvara trajnu blokadu modela; upstream ponašanje 429/cooldown/fallback
-  ostaje krajnja zaštita od grešaka.
-- **Opseg po konekciji i po procesu:** ograničenja važe po konekciji baze
-  podataka i drže se u memoriji, pa dvije konekcije koje koriste isti upstream
-  API ključ ne koordiniraju međusobno.
-- **Nekonfigurisano znači nepromijenjeno:** izostavljanje mape (ili ostavljanje
-  polja na kontrolnoj ploči praznim) ne dodaje kapiju modela. Primjer
-  konfiguracije bez nametanja bilo kakvog univerzalnog ograničenja provajdera:
+- **Tačno podudaranje ključa modela:** ključ je niz modela proslijeđen izvršiocu nakon
+  razrješenja rutiranja — obično osnovni upstream ID modela
+  (`glm-5`), a ne pseudonim `provider/model` na strani klijenta (`zai/glm-5` se ne
+  podudara s `glm-5`). Vrijednosti su gornje granice broja istovremenih zahtjeva
+  izražene pozitivnim cijelim brojevima.
+- **Lokalno stavljanje u red, bez otkrivanja:** zahtjevi koji prekorače ograničenje čekaju lokalno, uz
+  postojeću semantiku reda čekanja/vremenskog ograničenja (tipizirane greške pri
+  prijemu `SEMAPHORE_TIMEOUT` /
+  `SEMAPHORE_QUEUE_FULL`). OmniRoute ne otkriva niti zaključuje politiku upstreama — on
+  primjenjuje tačne granice koje je konfigurisao operater. Zasićeni mehanizam
+  modela nikada ne onemogućava provajdera i nikada ne stvara trajno zaključavanje
+  modela; ponašanje upstreama za 429 greške/period hlađenja/rezervni izbor ostaje
+  zaštita u slučaju greške.
+- **Opseg po konekciji i procesu:** ograničenja se primjenjuju po konekciji iz baze podataka
+  i čuvaju u memoriji, tako da dvije konekcije koje ponovo koriste isti upstream API ključ
+  ne koordiniraju jedna s drugom.
+- **Nekonfigurisano znači bez promjene:** izostavljanje mape (ili ostavljanje polja na
+  kontrolnoj tabli praznim) ne dodaje ograničenje po modelu. Primjer konfiguracije
+  bez postavljanja univerzalnog ograničenja za provajdera:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Serijalizacija zahtjeva kod dijeljenja kvote
+### Serijalizacija zahtjeva dijeljenjem kvote
 
-Kada otpremanje kod dijeljenja kvote cilja konekciju koja deklariše pozitivan
-`max_concurrent`, istovremeni zahtjevi prema tom **računu** serijaliziraju se kroz
-semafor po konekciji (ključ `qsconn:<connectionId>`): višak zahtjeva **čeka u
-redu** umjesto da preplavi račun. To je **fail-open** — zasićen red ili istek
-vremena nastavlja bez zauzetog mjesta, umjesto da ikada odbije zahtjev koji se
-može otpremiti. Uključuje se u **Postavke → Otpornost → Istovremenost po
-konekciji kod dijeljenja kvote**
-(`resilienceSettings.quotaShareConcurrencyLimit.enabled`, zadano uključeno). Bez
-ograničenja `max_concurrent` ponašanje je nepromijenjeno.
+Kada slanje putem quota-share cilja konekciju koja ima deklarisan pozitivan
+`max_concurrent`, istovremeni zahtjevi prema tom **nalogu** serijalizuju se kroz
+semafor po konekciji (ključ `qsconn:<connectionId>`): zahtjevi iznad ograničenja
+**čekaju u redu** umjesto da preplave nalog. Ovo je ponašanje **fail-open** —
+zasićen red ili istek vremena nastavljaju obradu bez slota, umjesto da ikada
+odbiju zahtjev koji se može poslati. Uključuje se u **Settings → Resilience → Quota-share per-connection
+concurrency** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, podrazumijevano
+uključeno). Bez ograničenja `max_concurrent`, ponašanje ostaje nepromijenjeno.
 
-> Kapija rutiranja dijeljenja kvote (`selectQuotaShareTarget`, DRR + P2C) je sama
-> po sebi fail-open i samo _smanjuje prioritet_ konekciji koja je na granici — s
-> bazenom od jedne konekcije ne može strogo ograničiti, pa je ovaj semafor ono
-> što zapravo obuzdava poplavu.
+> Mehanizam rutiranja quota-share (`selectQuotaShareTarget`, DRR + P2C) sam po sebi
+> je fail-open i samo _smanjuje prioritet_ konekcije koja je dostigla ograničenje — s
+> bazenom od jedne konekcije ne može nametnuti tvrdo ograničenje, pa je ovaj semafor
+> ono što zapravo zadržava preplavljivanje.
 
-### Ponovni pokušaj kombinacija svjestan perioda hlađenja
+### Ponovni pokušaj kombinacije uzimajući u obzir period hlađenja
 
-Za svaku strategiju kombinacija (kada je omogućena), zahtjev koji bi kristalizirao
-429 zbog KRATKOG prolaznog perioda hlađenja pričeka ga i ponovo otprema umjesto
-da vrati 429 — ovo pokriva TPM/RPM prozore klase Gemini (~60s retry-after) kod
-kombinacija s više modela, npr. kada oba cilja kombinacije od 2 modela pogode
-ograničenje brzine po modelu. Ograničeno s `comboCooldownWait` (`enabled`,
-`maxWaitMs`, `maxAttempts`, `budgetMs`) u **Postavke → Otpornost**. Nikada ne čeka
-na `quota_exhausted` (zaključano do ponoći) niti na razloge autentikacije /
-nije-pronađeno.
+Za svaku strategiju kombinacije (kada je omogućena), zahtjev koji bi proizveo 429
+grešku zbog KRATKOG privremenog perioda hlađenja čeka da on istekne i ponovo se
+šalje umjesto vraćanja 429 greške — ovo obuhvata TPM/RPM prozore klase Gemini
+(~60 s za `retry-after`) na kombinacijama s više modela, npr. kada oba cilja
+kombinacije s 2 modela dosegnu ograničenje stope po modelu. Ograničeno je postavkom
+`comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`,
+`budgetMs`) u **Settings → Resilience**. Nikada ne čeka na
+`quota_exhausted` (zaključano do ponoći) niti na razloge autentifikacije/nepostojanja.
 
-Ista kapija pokriva slučaj prije otpremanja (#16319): kada se svaki cilj
-kombinacije preskoči prije nego što je ijedan pokušaj izvršen jer se njegov model
-nalazi u kratkoj prolaznoj blokadi, putanja bez pokušaja pričeka blokadu pod
-istim granicama i ponovo otprema, umjesto da odgovori s
-`503 ALL_TARGETS_SKIPPED` bez nagovještaja. Kada čekanje nije dozvoljeno
-(iscrpljena granica, pokušaji ili budžet, ili je funkcija isključena), završni
-odgovor se nadograđuje na `429 rate_limit_error` koji nosi `retry_after` /
-`reset_at` od najranijeg isteka prolazne blokade; blokade kvote, autentikacije i
-nije-pronađeno zadržavaju 503 bez nagovještaja.
+Kombinacija može isključiti ovu funkciju pomoću `config.comboCooldownWaitEnabled: false`. Samo literalno
+`false` onemogućava ova zajednička čekanja kombinacije (čekanje perioda hlađenja nakon
+slanja i čekanje otvorenog prekidača/modela prije slanja) i njihovo proširenje donje
+granice vremenskog budžeta čekanja. Izostavljena vrijednost ili `true` zadržava globalnu
+politiku; `true` ne može globalno onemogućeno čekanje ponovo uključiti. Eksplicitni
+`targetTimeoutMs` i dalje ima prednost. Ovo isključenje ne mijenja odvojeno izvorno
+prethodno čekanje za vezivanje obrta native-Codexa.
+
+Isti mehanizam obuhvata slučaj prije slanja (#16319): kada se svaki cilj
+kombinacije preskoči prije bilo kakvog pokušaja jer se njegov model nalazi u
+kratkotrajnom privremenom zaključavanju, putanja bez pokušaja čeka da se zaključavanje
+okonča u skladu s istim granicama i ponovo šalje zahtjev, umjesto vraćanja
+`503 ALL_TARGETS_SKIPPED` bez napomene. Kada čekanje nije dozvoljeno (dostignuta
+granica, iscrpljen broj pokušaja ili budžet, ili je funkcija isključena), konačni
+odgovor se unapređuje na `429 rate_limit_error` i sadrži
+`retry_after` / `reset_at` iz najranijeg isteka privremenog zaključavanja; zaključavanja
+kvote, autentifikacije i nepostojanja zadržavaju 503 bez napomene.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)

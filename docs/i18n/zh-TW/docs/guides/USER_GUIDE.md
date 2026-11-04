@@ -120,15 +120,15 @@
 
 ## 📖 提供者設定
 
-若要從 CSV 或 JSON 檔案批次新增 API 金鑰連線，請使用 **控制台 → 提供者 → 從檔案匯入**。欄位採用固定位置順序（`provider,name,apiKey,baseUrl,priority`）；`provider` 必須已作為受管理的提供者或相容節點存在。請參閱[從 CSV 或 JSON 檔案匯入提供者](../providers/CSV-IMPORT.md)。
+若要從 CSV 或 JSON 檔案大量新增 API 金鑰連線，請使用 **儀表板 → 提供者 → 從檔案匯入**。欄位依位置排列（`provider,name,apiKey,baseUrl,priority`）；`provider` 必須已經存在，且是受管理的提供者或相容節點。請參閱[從 CSV 或 JSON 檔案匯入提供者](../providers/CSV-IMPORT.md)。
 
 ### 🔐 訂閱型提供者
 
-#### Claude Code (Pro/Max)
+#### Claude Code（Pro/Max）
 
 ```bash
-控制台 → 提供者 → 連線 Claude Code
-→ OAuth 登入 → 自動重新整理權杖
+儀表板 → 提供者 → 連線 Claude Code
+→ OAuth 登入 → 自動更新權杖
 → 5 小時 + 每週配額追蹤
 
 模型：
@@ -137,18 +137,20 @@
   cc/claude-haiku-4-5-20251001
 ```
 
-**專業提示：**複雜任務使用 Opus，追求速度則使用 Sonnet。OmniRoute 會追蹤各模型的配額！
+**專業提示：** 複雜工作使用 Opus，追求速度使用 Sonnet。OmniRoute 會依模型追蹤配額！
 
-OmniRoute 主機上沒有瀏覽器？請在任何已登入 Claude Code 的環境執行 `claude setup-token`，並將一年期權杖貼到 **Setup Token** 分頁中。請參閱[使用設定權杖的 Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md)。
+沒有瀏覽器可供 OmniRoute 主機使用？請在任何已登入 Claude Code 的位置執行 `claude setup-token`，然後將一年期權杖貼到 **設定權杖** 分頁。請參閱[使用設定權杖搭配 Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md)。
 
-Claude 與 Claude Code 相容路由會保留 Opus 和 Sonnet 模型的 `max` 思考強度。Haiku 模型不接受 `max` 強度層級，因此 OmniRoute 會在將該要求傳送至上游之前，將其降級為高思考預算。
+Claude 與 Claude Code 相容的路由會為 Opus 和 Sonnet
+模型保留 `max` 思考強度。Haiku 模型不接受 `max` 強度層級，因此 OmniRoute 會在將該
+請求傳送至上游之前，將其降級為高思考預算。
 
-#### OpenAI Codex (Plus/Pro)
+#### OpenAI Codex（Plus/Pro）
 
 ```bash
-控制台 → 提供者 → 連線 Codex
+儀表板 → 提供者 → 連線 Codex
 → OAuth 登入（連接埠 1455）
-→ 每 5 小時 + 每週重設
+→ 5 小時 + 每週重設
 
 模型：
   cx/gpt-5.5
@@ -160,8 +162,8 @@ Claude 與 Claude Code 相容路由會保留 Opus 和 Sonnet 模型的 `max` 思
 #### GitHub Copilot
 
 ```bash
-控制台 → 提供者 → 連線 GitHub
-→ 透過 GitHub 進行 OAuth
+儀表板 → 提供者 → 連線 GitHub
+→ 透過 GitHub 使用 OAuth
 → 每月重設（每月 1 日）
 
 模型：
@@ -172,56 +174,61 @@ Claude 與 Claude Code 相容路由會保留 Opus 和 Sonnet 模型的 `max` 思
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 平價提供者
+**AI 點數（以權杖計費）。** 當 GitHub 回報帳戶的 `credits_used` 時，提供者限制卡片會顯示 **AI 點數** 列，其中包含目前計費期間消耗的點數，包括不限量的組織方案。
+
+**本機 AI 點數限制。** 編輯 GitHub 連線，並設定每個**計費期間的 AI 點數限制**（`providerSpecificData.githubCreditLimit`）。留白可停用此限制；設為 `0` 則一律略過該連線。當最後一次使用量讀值大於或等於限制時，帳戶選取會略過該連線，路由會回退至其他連線，其行為與配額原則截斷相同。此檢查會讀取定期配額重新整理已收集的使用量——不會在請求路徑上呼叫 GitHub——並採取故障開放原則：缺少讀值、讀值過時（超過 15 分鐘），或讀值來自已重設的計費期間，都不會封鎖該連線。這是本機防護措施，**不是保證的支出上限**：GitHub 回報延遲、重新整理間隔、執行中的請求，以及 OmniRoute 之外的使用量，都可能使實際使用量超過此限制。若需要硬性上限，請使用 GitHub 自己的支出控制。
+
+### 💰 低價提供者
 
 #### GLM-4.7（每日重設，$0.6/1M）
 
-1. 註冊：[Zhipu AI](https://open.bigmodel.cn)
+1. 註冊：[智譜 AI](https://open.bigmodel.cn)
 2. 從 Coding Plan 取得 API 金鑰
-3. 控制台 → 新增 API 金鑰：提供者：`glm`，API 金鑰：`your-key`
+3. 儀表板 → 新增 API 金鑰：提供者：`glm`，API 金鑰：`your-key`
 
-**使用方式：**`glm/glm-4.7` — **專業提示：**Coding Plan 以 1/7 的成本提供 3 倍配額！每日上午 10:00 重設。
+**使用方式：** `glm/glm-4.7` — **專業提示：** Coding Plan 以 1/7 的成本提供 3 倍配額！每日上午 10:00 重設。
 
-#### MiniMax M2.1（每 5 小時重設，$0.20/1M）
+#### MiniMax M2.1（5 小時重設，$0.20/1M）
 
 1. 註冊：[MiniMax](https://www.minimax.io)
-2. 取得 API 金鑰 → 控制台 → 新增 API 金鑰
+2. 取得 API 金鑰 → 儀表板 → 新增 API 金鑰
 
-**使用方式：**`minimax/MiniMax-M2.1` — **專業提示：**這是長上下文（1M 個權杖）最便宜的選項！
+**使用方式：** `minimax/MiniMax-M2.1` — **專業提示：** 長內容的最低價選項（1M 權杖）！
 
 #### Kimi K2（每月固定 $9）
 
 1. 訂閱：[Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. 取得 API 金鑰 → 控制台 → 新增 API 金鑰
+2. 取得 API 金鑰 → 儀表板 → 新增 API 金鑰
 
-**使用方式：**`kimi/kimi-k2.5` — **專業提示：**每月固定 $9 可使用 10M 個權杖，實際成本為 $0.90/1M！
+**使用方式：** `kimi/kimi-k2.5` — **專業提示：** 每月固定 $9 可使用 10M 權杖 = 實際成本 $0.90/1M！
 
 #### Baidu Qianfan / ERNIE
 
 1. 註冊：[Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. 建立 Qianfan API 金鑰 → 控制台 → 新增 API 金鑰：提供者：`qianfan`
+2. 建立 Qianfan API 金鑰 → 儀表板 → 新增 API 金鑰：提供者：`qianfan`
 
-**使用方式：**`qianfan/ernie-5.1`、`qianfan/ernie-x1.1`，或其他與 OpenAI 相容的 Qianfan 模型 ID。
+**使用方式：** `qianfan/ernie-5.1`、`qianfan/ernie-x1.1`，或其他 Qianfan OpenAI 相容模型 ID。
 
 ### 🆓 免費提供者
 
-無須驗證的免費提供者，其提供者頁面上的 **不需要驗證** 旁設有開關。
-關閉該開關會停用該提供者、將其從「已設定的提供者」／精簡檢視中移除，並從 `/v1/models` 移除其模型。
+無需驗證的免費提供者，其提供者頁面上的 **不需要驗證** 旁邊會有一個切換開關。
+關閉該開關會停用提供者，將其從已設定提供者／精簡檢視中移除，
+並將其模型從 `/v1/models` 移除。
 
 #### Qoder（9 個免費模型）
 
 ```bash
-控制台 → 連線 Qoder → OAuth 登入 → 存取權受目前提供者限制約束
+儀表板 → 連線 Qoder → OAuth 登入 → 存取受目前提供者限制約束
 
-模型：if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
+模型：if/qwen3.8-max-preview、if/qwen3.7-max、if/qwen3.7-plus、if/kimi-k3、if/kimi-k2.7-code、if/glm-5.2、if/deepseek-v4-pro、if/deepseek-v4-flash、if/minimax-m3
 ```
 
-#### Kiro（免費 Claude）
+#### Kiro（Claude 免費版）
 
 ```bash
-控制台 → 連線 Kiro → AWS Builder ID 或 Google/GitHub → 每月約 50 點額度
+儀表板 → 連線 Kiro → AWS Builder ID 或 Google/GitHub → 每月約 50 點數
 
-模型：kr/claude-sonnet-4.5, kr/claude-haiku-4.5
+模型：kr/claude-sonnet-4.5、kr/claude-haiku-4.5
 ```
 
 ---
@@ -611,55 +618,55 @@ post_install() {
 <details>
 <summary><b>查看所有可用模型</b></summary>
 
-> 以下列表整理自 v3.8.0 的 `open-sse/config/providerRegistry.ts`。雲端目錄（Gemini、OpenRouter 等）會動態同步——如需完整的即時目錄，請開啟 **Dashboard → Providers → [provider] → Available Models**，或呼叫 `GET /api/models/catalog`。
+> 以下清單整理自 v3.8.0 的 `open-sse/config/providerRegistry.ts`。雲端目錄（Gemini、OpenRouter 等）會動態同步 — 若要查看完整的即時目錄，請開啟 **Dashboard → Providers → [provider] → Available Models**，或呼叫 `GET /api/models/catalog`。
 >
-> 如果某提供者的內建清單已與上游不一致，請在該頁面使用 **Import from /models**（或啟用 **Auto-Sync**）來拉取即時的上游目錄。此流程已在 v3.8.50 中針對 LLM7.io（`gemini-3.1-flash-lite`）與 UncloseAI（`solidrust/Hermes-3-Llama-3.1-8B-AWQ`）完成驗證；在同一輪測試中，Pollinations 的匿名存取仍受上游限制。
+> 如果提供者的內建清單已經過時，請在該頁面使用 **Import from /models**（或啟用 **Auto-Sync**）以擷取上游的即時目錄。此功能已在 v3.8.50 中針對 LLM7.io（`gemini-3.1-flash-lite`）和 UncloseAI（`solidrust/Hermes-3-Llama-3.1-8B-AWQ`）完成驗證；在同一輪測試期間，Pollinations 的匿名存取仍受上游限制。
 
-**Claude Code（`cc/`）** — Pro/Max OAuth：`cc/claude-opus-4-8`、`cc/claude-opus-4-7`、`cc/claude-opus-4-6`、`cc/claude-opus-4-5-20251101`、`cc/claude-sonnet-4-6`、`cc/claude-sonnet-4-5-20250929`、`cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — Pro/Max OAuth：`cc/claude-opus-4-8`、`cc/claude-opus-4-7`、`cc/claude-opus-4-6`、`cc/claude-opus-4-5-20251101`、`cc/claude-sonnet-4-6`、`cc/claude-sonnet-4-5-20250929`、`cc/claude-haiku-4-5-20251001`
 
-**Codex（`cx/`）** — Plus/Pro OAuth：`cx/gpt-5.5`（+ effort 層級：`gpt-5.5-xhigh`、`gpt-5.5-high`、`gpt-5.5-medium`、`gpt-5.5-low`）、`cx/gpt-5.4`、`cx/gpt-5.4-mini`、`cx/gpt-5.3-codex`、`cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth：`cx/gpt-5.5`（+ 推理層級：`gpt-5.5-xhigh`、`gpt-5.5-high`、`gpt-5.5-medium`、`gpt-5.5-low`）、`cx/gpt-5.4`、`cx/gpt-5.4-mini`、`cx/gpt-5.3-codex`、`cx/gpt-5.3-codex-spark`
 
-**GitHub Copilot（`gh/`）** — OAuth：`gh/gpt-5.5`、`gh/gpt-5.4`、`gh/gpt-5.4-mini`、`gh/gpt-5-mini`、`gh/gpt-5.3-codex`、`gh/claude-opus-4.7`、`gh/claude-opus-4.6`、`gh/claude-opus-4-5-20251101`、`gh/claude-sonnet-4.6`、`gh/claude-sonnet-4.5`、`gh/claude-haiku-4.5`、`gh/gemini-3.1-pro-preview`、`gh/gemini-3-flash-preview`、`gh/oswe-vscode-prime`
+**GitHub Copilot (`gh/`)** — OAuth：`gh/gpt-5.5`、`gh/gpt-5.4`、`gh/gpt-5.4-mini`、`gh/gpt-5-mini`、`gh/gpt-5.3-codex`、`gh/claude-opus-4.7`、`gh/claude-opus-4.6`、`gh/claude-opus-4-5-20251101`、`gh/claude-sonnet-4.6`、`gh/claude-sonnet-4.5`、`gh/claude-haiku-4.5`、`gh/gemini-3.1-pro-preview`、`gh/gemini-3-flash-preview`、`gh/oswe-vscode-prime`
 
-**Kiro（`kr/`）** — 免費 OAuth：請使用 **Dashboard → Providers → Kiro → Available Models** 下顯示的即時目錄。可用性取決於帳號與方案。
+**Kiro (`kr/`)** — 免費 OAuth：請使用 **Dashboard → Providers → Kiro → Available Models** 下顯示的即時目錄。可用性取決於帳戶與方案。
 
-**Qoder（`if/`）** — 免費 OAuth：`if/qwen3.8-max-preview`、`if/qwen3.7-max`、`if/qwen3.7-plus`、`if/kimi-k3`、`if/kimi-k2.7-code`、`if/glm-5.2`、`if/deepseek-v4-pro`、`if/deepseek-v4-flash`、`if/minimax-m3`
+**Qoder (`if/`)** — 免費 OAuth：`if/qwen3.8-max-preview`、`if/qwen3.7-max`、`if/qwen3.7-plus`、`if/kimi-k3`、`if/kimi-k2.7-code`、`if/glm-5.2`、`if/deepseek-v4-pro`、`if/deepseek-v4-flash`、`if/minimax-m3`
 
-**GLM（`glm/`、`glm-cn/`、`zai/`、`glmt/`）** — $0.2–0.6/1M：`glm/glm-5.1`、`glm/glm-5`、`glm/glm-5-turbo`、`glm/glm-4.7`、`glm/glm-4.7-flash`、`glm/glm-4.6`、`glm/glm-4.6v`、`glm/glm-4.5`、`glm/glm-4.5v`、`glm/glm-4.5-air`
+**GLM (`glm/`、`glm-cn/`、`zai/`、`glmt/`)** — $0.2–0.6/1M：`glm/glm-5.1`、`glm/glm-5`、`glm/glm-5-turbo`、`glm/glm-4.7`、`glm/glm-4.7-flash`、`glm/glm-4.6`、`glm/glm-4.6v`、`glm/glm-4.5`、`glm/glm-4.5v`、`glm/glm-4.5-air`
 
-**MiniMax（`minimax/`、`minimax-cn/`）** — $0.2/1M：`minimax/MiniMax-M2.7`、`minimax/MiniMax-M2.7-highspeed`、`minimax/MiniMax-M2.5`、`minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`、`minimax-cn/`)** — $0.2/1M：`minimax/MiniMax-M2.7`、`minimax/MiniMax-M2.7-highspeed`、`minimax/MiniMax-M2.5`、`minimax/MiniMax-M2.5-highspeed`
 
-**Kimi（`kimi/`、`kimi-coding/`、`kimi-coding-apikey/`）** — $9/月固定費率或按量計費：`kimi/kimi-k2.6`、`kimi/kimi-k2.5`
+**Kimi (`kimi/`、`kimi-coding/`、`kimi-coding-apikey/`)** — 每月 $9 固定費用或按用量計費：`kimi/kimi-k2.6`、`kimi/kimi-k2.5`
 
-**DeepSeek（`ds/`）** — API 金鑰：`ds/deepseek-v4-pro`、`ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — API 金鑰：`ds/deepseek-v4-pro`、`ds/deepseek-v4-flash`
 
-**Groq（`groq/`）** — 超高速：`groq/llama-3.3-70b-versatile`、`groq/meta-llama/llama-4-maverick-17b-128e-instruct`、`groq/qwen/qwen3-32b`、`groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — 超快速：`groq/llama-3.3-70b-versatile`、`groq/meta-llama/llama-4-maverick-17b-128e-instruct`、`groq/qwen/qwen3-32b`、`groq/openai/gpt-oss-120b`
 
-**xAI（`xai/`）** — Grok 原生：`xai/grok-4.3`、`xai/grok-4.20-multi-agent-0309`、`xai/grok-4.20-0309-reasoning`、`xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok 原生支援：`xai/grok-4.3`、`xai/grok-4.20-multi-agent-0309`、`xai/grok-4.20-0309-reasoning`、`xai/grok-4.20-0309-non-reasoning`
 
-**Mistral（`mistral/`）** — 歐盟託管：`mistral/mistral-large-latest`、`mistral/mistral-medium-3-5`、`mistral/mistral-small-latest`、`mistral/devstral-latest`、`mistral/codestral-latest`
+**Mistral (`mistral/`)** — 歐盟託管：`mistral/mistral-large-latest`、`mistral/mistral-medium-3-5`、`mistral/mistral-small-latest`、`mistral/codestral-latest`
 
-**Perplexity（`pplx/`）** — 搜尋增強：`pplx/sonar-deep-research`、`pplx/sonar-reasoning-pro`、`pplx/sonar-pro`、`pplx/sonar`
+**Perplexity (`pplx/`)** — 搜尋增強：`pplx/sonar-deep-research`、`pplx/sonar-reasoning-pro`、`pplx/sonar-pro`、`pplx/sonar`
 
-**Together AI（`together/`）** — 開源：`together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free`（免費）、`together/meta-llama/Llama-Vision-Free`、`together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`、`together/deepseek-ai/DeepSeek-R1`、`together/Qwen/Qwen3-235B-A22B`、`together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — 開放原始碼：`together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free`（免費）、`together/meta-llama/Llama-Vision-Free`、`together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`、`together/deepseek-ai/DeepSeek-R1`、`together/Qwen/Qwen3-235B-A22B`、`together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI（`fireworks/`）** — 快速推論：`fireworks/accounts/fireworks/models/kimi-k2p6`、`fireworks/accounts/fireworks/models/minimax-m2p7`、`fireworks/accounts/fireworks/models/qwen3p6-plus`、`fireworks/accounts/fireworks/models/glm-5p1`、`fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — 快速推論：`fireworks/accounts/fireworks/models/kimi-k2p6`、`fireworks/accounts/fireworks/models/minimax-m2p7`、`fireworks/accounts/fireworks/models/qwen3p6-plus`、`fireworks/accounts/fireworks/models/glm-5p1`、`fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras（`cerebras/`）** — 晶圓級：`cerebras/zai-glm-4.7`、`cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — 晶圓級：`cerebras/zai-glm-4.7`、`cerebras/gpt-oss-120b`
 
-**Cohere（`cohere/`）** — 專注 RAG：`cohere/command-a-reasoning-08-2025`、`cohere/command-a-vision-07-2025`、`cohere/command-a-03-2025`、`cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — 專注於 RAG：`cohere/command-a-reasoning-08-2025`、`cohere/command-a-vision-07-2025`、`cohere/command-a-03-2025`、`cohere/command-r-08-2024`
 
-**NVIDIA NIM（`nvidia/`）** — 企業級：`nvidia/z-ai/glm-5.1`、`nvidia/minimaxai/minimax-m2.7`、`nvidia/google/gemma-4-31b-it`、`nvidia/mistralai/mistral-small-4-119b-2603`、`nvidia/mistralai/mistral-large-3-675b-instruct-2512`、`nvidia/qwen/qwen3.5-397b-a17b`、`nvidia/deepseek-ai/deepseek-v4-pro`、`nvidia/openai/gpt-oss-120b`、`nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — 企業級：`nvidia/z-ai/glm-5.1`、`nvidia/minimaxai/minimax-m2.7`、`nvidia/google/gemma-4-31b-it`、`nvidia/mistralai/mistral-small-4-119b-2603`、`nvidia/mistralai/mistral-large-3-675b-instruct-2512`、`nvidia/qwen/qwen3.5-397b-a17b`、`nvidia/deepseek-ai/deepseek-v4-pro`、`nvidia/openai/gpt-oss-120b`、`nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
-**Baidu Qianfan（`qianfan/`）** — ERNIE：`qianfan/ernie-5.1`、`qianfan/ernie-5.0-thinking-latest`、`qianfan/ernie-x1.1`
+**Baidu Qianfan (`qianfan/`)** — ERNIE：`qianfan/ernie-5.1`、`qianfan/ernie-5.0-thinking-latest`、`qianfan/ernie-x1.1`
 
-**Ollama Cloud（`ollama-cloud/`）**：`ollama-cloud/deepseek-v4-pro`、`ollama-cloud/deepseek-v4-flash`、`ollama-cloud/kimi-k2.6`、`ollama-cloud/glm-5.1`、`ollama-cloud/minimax-m2.7`、`ollama-cloud/gemma4:31b`、`ollama-cloud/qwen3.5:397b`
+**Ollama Cloud (`ollama-cloud/`)**：`ollama-cloud/deepseek-v4-pro`、`ollama-cloud/deepseek-v4-flash`、`ollama-cloud/kimi-k2.6`、`ollama-cloud/glm-5.1`、`ollama-cloud/minimax-m2.7`、`ollama-cloud/gemma4:31b`、`ollama-cloud/qwen3.5:397b`
 
-**Gemini（Google Cloud `gemini/`）**：依 API 金鑰從 Google 即時同步——無靜態清單。請在 **Dashboard → Providers** 中連接金鑰，然後使用 **Available Models** 匯入目前的目錄（例如 `gemini/gemini-3-pro`、`gemini/gemini-3-flash`）。
+**Gemini（Google Cloud `gemini/`）**：根據 Google 的 API 金鑰即時同步 — 沒有靜態清單。請在 **Dashboard → Providers** 中連結金鑰，然後使用 **Available Models** 匯入目前的目錄（例如 `gemini/gemini-3-pro`、`gemini/gemini-3-flash`）。
 
-**其他相容提供者**（節選）：`cohere`、`databricks`、`snowflake`、`together`、`vertex`、`alibaba`、`alibaba-cn`、`bedrock`（透過 `aws-bedrock`）、`azure-ai`、`openrouter`（透傳目錄）、`siliconflow`、`hyperbolic`、`huggingface`、`featherless-ai`、`cloudflare-ai`、`scaleway`、`deepinfra`、`vercel-ai-gateway`、`bazaarlink`、`friendliai`、`nous-research`、`reka`、`volcengine`、`ai21`、`gigachat`。每個提供者都在 `providerRegistry.ts` 中維護各自的模型清單，並可在提供者提供 `/models` 端點時自動同步。
+**其他相容的提供者**（部分）：`cohere`、`databricks`、`snowflake`、`together`、`vertex`、`alibaba`、`alibaba-cn`、`bedrock`（透過 `aws-bedrock`）、`azure-ai`、`openrouter`（直通目錄）、`siliconflow`、`hyperbolic`、`huggingface`、`featherless-ai`、`cloudflare-ai`、`scaleway`、`deepinfra`、`vercel-ai-gateway`、`bazaarlink`、`friendliai`、`nous-research`、`reka`、`volcengine`、`ai21`、`gigachat`。每個提供者都會在 `providerRegistry.ts` 中維護自己的模型清單，並可在提供者公開 `/models` 端點時自動同步。
 
-**關於模型 ID 的說明：** OmniRoute 使用提供者原生 ID（`claude-opus-4-8`、`gpt-5.5`、`glm-5.1`、`MiniMax-M2.7`、`kimi-k2.5`、`grok-4.20-0309-reasoning`）。部分 ID 含有帶點的版本號，因為這正是上游 API 所要求的格式。如果某個模型未列於上方，請執行 `omniroute models --search <term>` 或呼叫 `GET /api/models/catalog` 以確認可用性。
+**模型 ID 注意事項：** OmniRoute 使用提供者原生 ID（`claude-opus-4-8`、`gpt-5.5`、`glm-5.1`、`MiniMax-M2.7`、`kimi-k2.5`、`grok-4.20-0309-reasoning`）。部分 ID 包含點號版本，因為上游 API 要求使用這種格式。如果上方未列出某個模型，請執行 `omniroute models --search <term>`，或呼叫 `GET /api/models/catalog` 以確認可用性。
 
 </details>
 
@@ -1278,36 +1285,36 @@ OmniRoute 可與雲端程式設計代理程式（**OpenAI Codex Cloud**、**Devi
 
 ---
 
-## 🛠️程式化管理
+## 🛠️ 程式化管理
 
-您可以使用HTTP來管理每個OmniRoute資源（提供者、組合、鍵、設定）**具有`manage`範圍的承載金鑰**。
+您可以透過 HTTP，使用具備 `manage` 範圍的 **Bearer 金鑰**管理每個 OmniRoute 資源（providers、combos、keys、settings）。
 
-產生金鑰**儀表板→ API密鑰→新密鑰→範圍：管理**， 然後：
+請前往 **Dashboard → API Keys → New Key → Scope: manage** 產生金鑰，然後：
 
 ```bash
-# List providers
+# 列出 providers
 curl http://localhost:20128/api/providers \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY"
 
-# Add a provider connection
+# 新增 provider 連線
 curl -X POST http://localhost:20128/api/providers \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "provider": "openai", "apiKey": "sk-...", "name": "main" }'
 
-# Create a combo
+# 建立 combo
 curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "name": "premium", "strategy": "priority", "models": [{ "model": "cc/claude-opus-4-7" }, { "model": "glm/glm-5.1" }] }'
 
-# List/create API keys
+# 列出／建立 API 金鑰
 curl http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY"
 curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -d '{ "name": "ci-bot", "scopes": ["chat"] }'
 ```
 
-有關完整端點目錄和request/response架構，請參閱[API_REFERENCE.md](../reference/API_REFERENCE.md) 。
+請參閱 [API_REFERENCE.md](../reference/API_REFERENCE.md)，以取得完整的端點目錄及請求／回應結構描述。
 
 ---
 

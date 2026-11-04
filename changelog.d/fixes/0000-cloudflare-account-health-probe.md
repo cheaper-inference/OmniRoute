@@ -1,0 +1,1 @@
+- **fix(providers):** Check Cloudflare Workers AI credentials with account-scoped model metadata instead of inference; support explicitly configured Global API Key headers and keep ambiguous 403/429 probes neutral.
