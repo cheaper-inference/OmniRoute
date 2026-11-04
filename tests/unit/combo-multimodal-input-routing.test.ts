@@ -66,6 +66,26 @@ test("PDF/video require proven CI transports despite advertisements, including f
   assert.equal(getResolvedModelCapabilities(advertised.modelStr).supportsPdf, false);
   assert.equal(getResolvedModelCapabilities(oldVideo.modelStr).supportsVideo, false);
 });
+test("Chat audio excludes transcription-only and unverified transports", () => {
+  const transcribe = target("cinf/gpt-4o-mini-transcribe");
+  const oldChat = target("cinf/gemini-2.5-flash");
+  const provenChat = target("cinf/gemini-3.7-flash");
+  assert.deepEqual(
+    filterTargetsByRequestCompatibility(
+      [transcribe, oldChat, provenChat, capable],
+      body(fixtures[0].part),
+      log,
+      "test",
+      { failOpen: true }
+    ),
+    [provenChat, capable]
+  );
+  assert.deepEqual(
+    computeCompatRejectedTargets([transcribe, oldChat], [], body(fixtures[0].part)),
+    []
+  );
+  assert.equal(getResolvedModelCapabilities(transcribe.modelStr).supportsAudio, false);
+});
 const body = (part: unknown) => ({
   messages: [
     { role: "user", content: [part] },

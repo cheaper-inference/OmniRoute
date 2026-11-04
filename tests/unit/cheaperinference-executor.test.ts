@@ -15,6 +15,10 @@ test("direct PDF/video requests cannot silently enter unverified CI transports",
   const executor = new CheaperInferenceExecutor();
   for (const [model, part] of [
     [
+      "gpt-4o-mini-transcribe",
+      { type: "input_audio", input_audio: { data: "fixture", format: "wav" } },
+    ],
+    [
       "gpt-4o-mini",
       {
         type: "file",

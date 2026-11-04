@@ -34,6 +34,7 @@ export class CheaperInferenceExecutor extends BaseExecutor {
   async execute(input: ExecuteInput) {
     const body = (input.body || {}) as Record<string, unknown>;
     for (const [kind, partKind] of [
+      ["audio", "audio"],
       ["pdf", "document"],
       ["video", "video"],
     ] as const) {

@@ -1059,11 +1059,13 @@ export function getResolvedModelCapabilities(
     /^(?:global:|cn:)?deepseek-v4\.1-flash$/i.test(resolved.model ?? "")
       ? true
       : supportsVision;
-  const supportsAudio = textOnlyTransport
-    ? false
-    : inputDeclarations
-      ? inputDeclarations.includes("audio")
-      : resolveAudioCapability(spec, registryModel, modalitiesInput);
+  const supportsAudio =
+    textOnlyTransport ||
+    !ciTransportSupportsInput(resolved.provider ?? "", resolved.model ?? "", "audio")
+      ? false
+      : inputDeclarations
+        ? inputDeclarations.includes("audio")
+        : resolveAudioCapability(spec, registryModel, modalitiesInput);
   const supportsVideo =
     textOnlyTransport ||
     !ciTransportSupportsInput(resolved.provider ?? "", resolved.model ?? "", "video")
