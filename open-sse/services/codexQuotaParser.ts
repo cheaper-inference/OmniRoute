@@ -6,6 +6,12 @@ import {
 } from "../config/codexQuotaScopes.ts";
 import { parseCodexPaidCredits } from "@/lib/providers/codexPaidCredits";
 import type { CodexDualWindowQuota } from "./codexQuotaFetcher.ts";
+import {
+  codexQuotaWindowKey,
+  isCodexLimitReached,
+  parseCodexQuotaWindow,
+  type CodexQuotaWindow,
+} from "./codexQuotaSignals.ts";
 export const CODEX_WINDOW_SESSION = "session";
 export const CODEX_WINDOW_WEEKLY = "weekly";
 
@@ -21,21 +27,6 @@ function toRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
     : {};
-}
-function parseWindowReset(window: Record<string, unknown>): string | null {
-  const resetAt = parseCodexNumber(window["reset_at"] ?? window["resetAt"], 0);
-  if (resetAt > 0) return new Date(resetAt * 1000).toISOString();
-  const resetAfterSeconds = parseCodexNumber(
-    window["reset_after_seconds"] ?? window["resetAfterSeconds"],
-    0
-  );
-  if (resetAfterSeconds > 0) return new Date(Date.now() + resetAfterSeconds * 1000).toISOString();
-  return null;
-}
-function parseCodexWindow(window: Record<string, unknown> | null | undefined) {
-  if (!window || Object.keys(window).length === 0) return null;
-  const percentUsed = parseCodexNumber(window["used_percent"] ?? window["usedPercent"], 0) / 100;
-  return { percentUsed, resetAt: parseWindowReset(window) };
 }
 function parseBankedResetCredits(data: Record<string, unknown>): number | undefined {
   const resetCredits = toRecord(data["rate_limit_reset_credits"] ?? data["rateLimitResetCredits"]);
@@ -76,11 +67,18 @@ function findSparkRateLimit(data: Record<string, unknown>): Record<string, unkno
   }
   return null;
 }
-function getCodexRateLimitWindows(rateLimit: Record<string, unknown>) {
+function getCodexRateLimitWindows(rateLimit: Record<string, unknown>): {
+  primary: CodexQuotaWindow | null;
+  secondary: CodexQuotaWindow | null;
+} {
   return {
-    primary: parseCodexWindow(toRecord(rateLimit["primary_window"] ?? rateLimit["primaryWindow"])),
-    secondary: parseCodexWindow(
-      toRecord(rateLimit["secondary_window"] ?? rateLimit["secondaryWindow"])
+    primary: parseCodexQuotaWindow(
+      rateLimit["primary_window"] ?? rateLimit["primaryWindow"],
+      "primary"
+    ),
+    secondary: parseCodexQuotaWindow(
+      rateLimit["secondary_window"] ?? rateLimit["secondaryWindow"],
+      "secondary"
     ),
   };
 }
@@ -90,8 +88,8 @@ function assignCodexWindows(
   names: { primary: string; secondary: string }
 ): void {
   const { primary, secondary } = getCodexRateLimitWindows(rateLimit);
-  if (primary) target[names.primary] = primary;
-  if (secondary) target[names.secondary] = secondary;
+  if (primary) target[codexQuotaWindowKey(primary, names)] = primary;
+  if (secondary) target[codexQuotaWindowKey(secondary, names)] = secondary;
 }
 function getSelectedCodexRateLimit(
   normalRateLimit: Record<string, unknown>,
@@ -105,14 +103,13 @@ function parseCodexPlan(data: Record<string, unknown>): string | undefined {
   const rawPlan = data["plan_type"] ?? data["planType"];
   return typeof rawPlan === "string" && rawPlan.trim() ? rawPlan.trim() : undefined;
 }
-function getDominantResetAt(
-  quota: Pick<CodexDualWindowQuota, "window5h" | "window7d">
-): string | null {
-  if (quota.window7d.percentUsed > quota.window5h.percentUsed)
-    return quota.window7d.resetAt || quota.window5h.resetAt;
-  if (quota.window5h.percentUsed > quota.window7d.percentUsed)
-    return quota.window5h.resetAt || quota.window7d.resetAt;
-  return quota.window7d.resetAt || quota.window5h.resetAt;
+function getDominantResetAt(windows: CodexQuotaWindow[]): string | null {
+  const dominant = [...windows].sort(
+    (a, b) =>
+      b.percentUsed - a.percentUsed ||
+      Number(b.windowSeconds === 604800) - Number(a.windowSeconds === 604800)
+  );
+  return dominant.find((window) => window.resetAt)?.resetAt ?? null;
 }
 /** The dispatch fetcher's parser, also usable without importing its network/identity graph. */
 export function parseCodexUsageResponse(
@@ -132,12 +129,11 @@ export function parseCodexUsageResponse(
   const { primary: parsedPrimary, secondary: parsedSecondary } =
     getCodexRateLimitWindows(selectedRateLimit);
   if (!parsedPrimary && !parsedSecondary) return null;
-  const window5h = parsedPrimary ?? { percentUsed: 0, resetAt: null };
-  const window7d = parsedSecondary ?? { percentUsed: 0, resetAt: null };
-  const worstPercentUsed = Math.max(window5h.percentUsed, window7d.percentUsed);
-  const limitReached = Boolean(
-    selectedRateLimit["limit_reached"] ?? selectedRateLimit["limitReached"]
+  const measured = [parsedPrimary, parsedSecondary].filter(
+    (window): window is CodexQuotaWindow => window !== null
   );
+  const worstPercentUsed = Math.max(...measured.map((window) => window.percentUsed));
+  const limitReached = isCodexLimitReached(selectedRateLimit);
   const windows: Record<string, { percentUsed: number; resetAt: string | null }> = {};
   assignCodexWindows(windows, selectedRateLimit, {
     primary: useSparkWindows ? CODEX_SPARK_QUOTA_SESSION : CODEX_WINDOW_SESSION,
@@ -153,6 +149,9 @@ export function parseCodexUsageResponse(
     primary: CODEX_WINDOW_SESSION,
     secondary: CODEX_WINDOW_WEEKLY,
   });
+  // Fixed compatibility slots follow measured durations, never primary/secondary position.
+  const window5h = windows[useSparkWindows ? CODEX_SPARK_QUOTA_SESSION : CODEX_WINDOW_SESSION];
+  const window7d = windows[useSparkWindows ? CODEX_SPARK_QUOTA_WEEKLY : CODEX_WINDOW_WEEKLY];
   const bankedResetCredits = parseBankedResetCredits(obj);
   const paidCredits = parseCodexPaidCredits(obj.credits);
   const rateLimitReachedType = parseRateLimitReachedType(obj);
@@ -162,7 +161,7 @@ export function parseCodexUsageResponse(
     used: Math.round(worstPercentUsed * 100),
     total: 100,
     percentUsed: worstPercentUsed,
-    resetAt: getDominantResetAt({ window5h, window7d }),
+    resetAt: getDominantResetAt(measured),
     windows,
     allWindows,
     window5h,
