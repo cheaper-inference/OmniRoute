@@ -2396,7 +2396,7 @@ paths:
           description: Invalid `withLimits` value
 
   /api/models/alias:
-    post:
+    put:
       tags: [Models]
       summary: Create or update a model alias
       requestBody:
@@ -2661,7 +2661,7 @@ paths:
           description: A provider node with the resulting id already exists
 
   /api/provider-nodes/{id}:
-    patch:
+    put:
       tags: [Provider Nodes]
       summary: Update provider node
       parameters:
@@ -3775,7 +3775,7 @@ paths:
       responses:
         "200":
           description: Current proxy settings
-    patch:
+    put:
       tags: [Settings]
       summary: Update proxy settings
       responses:

@@ -15,6 +15,72 @@ All requests require a valid Bearer token or session cookie. Obtain a token via 
 
 ## Endpoints
 
+### GET /api/db-backups
+
+List database backups
+
+```bash
+curl http://localhost:20128/api/db-backups \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/db-backups
+
+Restore a database backup by id
+
+Replaces the live database with the stored backup named in `backupId`. Operator-only: dashboard session, local CLI, or login disabled.
+
+```bash
+curl -X POST http://localhost:20128/api/db-backups \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### PATCH /api/db-backups
+
+Save database backup retention settings
+
+Persists `keepLatest` / `retentionDays`. Operator-only: dashboard session, local CLI, or login disabled — the persisted values drive the automatic pruning after every backup.
+
+```bash
+curl -X PATCH http://localhost:20128/api/db-backups \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### GET /api/db-backups/export
+
+GET db backups › export
+
+```bash
+curl http://localhost:20128/api/db-backups/export \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/db-backups/exportAll
+
+GET db backups › exportAll
+
+```bash
+curl http://localhost:20128/api/db-backups/exportAll \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/db-backups/import
+
+POST db backups › import
+
+Replaces the live database with an uploaded `.sqlite` backup (multipart `file` field, or the raw bytes with `?filename=`). The upload is checked for SQLite integrity and the required OmniRoute tables first. Operator-only: accepts the dashboard session, the local CLI credential, or login disabled; API keys of any scope and `oma_` access tokens are refused (403), for the dry run as well.
+
+```bash
+curl -X POST http://localhost:20128/api/db-backups/import \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
 ### GET /api/system/env/repair
 
 GET system › env › repair

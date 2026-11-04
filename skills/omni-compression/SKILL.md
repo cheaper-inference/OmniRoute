@@ -15,6 +15,50 @@ All requests require a valid Bearer token or session cookie. Obtain a token via 
 
 ## Endpoints
 
+### GET /api/settings/compression
+
+Get global compression settings
+
+```bash
+curl http://localhost:20128/api/settings/compression \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### PUT /api/settings/compression
+
+Update global compression settings
+
+Partial update: only the sent top-level keys change. `engines` merges by engine id — an entry overwrites only the fields it sends, engines left out are kept as-is, and until an engines row is stored the merge base is the map derived from the legacy per-engine settings.
+
+```bash
+curl -X PUT http://localhost:20128/api/settings/compression \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### GET /api/settings/compression/mcp-accessibility
+
+Get the MCP tool-output accessibility (trimming) config
+
+```bash
+curl http://localhost:20128/api/settings/compression/mcp-accessibility \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### PUT /api/settings/compression/mcp-accessibility
+
+Update the MCP tool-output accessibility (trimming) config
+
+Partial-merge update. Numeric floors (e.g. a maxTextChars below the truncation-tail reserve) are folded back to the safe defaults server-side, so the response reflects the effective config.
+
+```bash
+curl -X PUT http://localhost:20128/api/settings/compression/mcp-accessibility \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
 ### POST /api/compression/preview
 
 Preview compression for a message payload
@@ -84,6 +128,24 @@ curl -X POST http://localhost:20128/api/compression/retrieve \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'
+```
+
+### GET /api/settings/compression/rules
+
+GET settings › compression › rules
+
+```bash
+curl http://localhost:20128/api/settings/compression/rules \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/settings/compression/run-telemetry
+
+GET settings › compression › run telemetry
+
+```bash
+curl http://localhost:20128/api/settings/compression/run-telemetry \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
 ## Payloads

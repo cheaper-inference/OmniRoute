@@ -15,7 +15,287 @@ All requests require a valid Bearer token or session cookie. Obtain a token via 
 
 ## Endpoints
 
-_No endpoints mapped for this area yet._
+### GET /api/settings/proxy
+
+Get proxy settings
+
+```bash
+curl http://localhost:20128/api/settings/proxy \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### PUT /api/settings/proxy
+
+Update proxy settings
+
+```bash
+curl -X PUT http://localhost:20128/api/settings/proxy \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/settings/proxy/test
+
+Test proxy connection
+
+```bash
+curl -X POST http://localhost:20128/api/settings/proxy/test \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### GET /api/settings/proxies
+
+GET settings › proxies
+
+```bash
+curl http://localhost:20128/api/settings/proxies \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/settings/proxies
+
+POST settings › proxies
+
+```bash
+curl -X POST http://localhost:20128/api/settings/proxies \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### PATCH /api/settings/proxies
+
+PATCH settings › proxies
+
+```bash
+curl -X PATCH http://localhost:20128/api/settings/proxies \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### DELETE /api/settings/proxies
+
+DELETE settings › proxies
+
+```bash
+curl -X DELETE http://localhost:20128/api/settings/proxies \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/settings/proxies/{id}/repair-relay
+
+POST settings › proxies › <id> › repair relay
+
+```bash
+curl -X POST http://localhost:20128/api/settings/proxies/{id}/repair-relay \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### GET /api/settings/proxies/assignments
+
+GET settings › proxies › assignments
+
+```bash
+curl http://localhost:20128/api/settings/proxies/assignments \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### PUT /api/settings/proxies/assignments
+
+PUT settings › proxies › assignments
+
+```bash
+curl -X PUT http://localhost:20128/api/settings/proxies/assignments \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/settings/proxies/auto-test
+
+POST settings › proxies › auto test
+
+```bash
+curl -X POST http://localhost:20128/api/settings/proxies/auto-test \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/settings/proxies/batch-activate
+
+POST settings › proxies › batch activate
+
+```bash
+curl -X POST http://localhost:20128/api/settings/proxies/batch-activate \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/settings/proxies/batch-delete
+
+POST settings › proxies › batch delete
+
+```bash
+curl -X POST http://localhost:20128/api/settings/proxies/batch-delete \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### PUT /api/settings/proxies/bulk-assign
+
+PUT settings › proxies › bulk assign
+
+```bash
+curl -X PUT http://localhost:20128/api/settings/proxies/bulk-assign \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/settings/proxies/bulk-import
+
+POST settings › proxies › bulk import
+
+```bash
+curl -X POST http://localhost:20128/api/settings/proxies/bulk-import \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### GET /api/settings/proxies/egress
+
+GET settings › proxies › egress
+
+```bash
+curl http://localhost:20128/api/settings/proxies/egress \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/settings/proxies/egress
+
+POST settings › proxies › egress
+
+```bash
+curl -X POST http://localhost:20128/api/settings/proxies/egress \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### GET /api/settings/proxies/health
+
+GET settings › proxies › health
+
+```bash
+curl http://localhost:20128/api/settings/proxies/health \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/settings/proxies/migrate
+
+POST settings › proxies › migrate
+
+```bash
+curl -X POST http://localhost:20128/api/settings/proxies/migrate \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### GET /api/settings/proxies/pool
+
+GET settings › proxies › pool
+
+```bash
+curl http://localhost:20128/api/settings/proxies/pool \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### PUT /api/settings/proxies/pool
+
+PUT settings › proxies › pool
+
+```bash
+curl -X PUT http://localhost:20128/api/settings/proxies/pool \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### PATCH /api/settings/proxies/pool
+
+PATCH settings › proxies › pool
+
+```bash
+curl -X PATCH http://localhost:20128/api/settings/proxies/pool \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### DELETE /api/settings/proxies/pool
+
+DELETE settings › proxies › pool
+
+```bash
+curl -X DELETE http://localhost:20128/api/settings/proxies/pool \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/settings/proxies/pool/egress-observation
+
+GET settings › proxies › pool › egress observation
+
+Read-only observation of how many distinct egress IPs actually served the members of a proxy pool over the last 24 h, read from the proxy log (numbers only, never used for routing). Opt-in through the PROXY_POOL_EGRESS_OBSERVATION feature flag: while it is off, or when the read fails, the body is JSON null. Results are cached for 30 seconds per normalized scope (key is read as account, global as the stored global pool).
+
+```bash
+curl http://localhost:20128/api/settings/proxies/pool/egress-observation \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/settings/proxy/cloudflare-deploy
+
+POST settings › proxy › cloudflare deploy
+
+```bash
+curl -X POST http://localhost:20128/api/settings/proxy/cloudflare-deploy \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/settings/proxy/deno-deploy
+
+POST settings › proxy › deno deploy
+
+```bash
+curl -X POST http://localhost:20128/api/settings/proxy/deno-deploy \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/settings/proxy/vercel-deploy
+
+POST settings › proxy › vercel deploy
+
+```bash
+curl -X POST http://localhost:20128/api/settings/proxy/vercel-deploy \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
 ## Payloads
 
 See the full OpenAPI specification at `GET /api/openapi/spec` or `docs/openapi.yaml` for detailed request/response schemas.
