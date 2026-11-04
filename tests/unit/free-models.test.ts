@@ -57,8 +57,9 @@ test("isFreeModel: a model id listed in the free catalog for that provider is fr
   assert.equal(isFreeModel(sample.provider, { id: sample.modelId }), true);
 });
 
-test("isFreeModel: NVIDIA GPT OSS 120B remains in the reviewed trial catalog", () => {
-  assert.equal(isFreeModel("nvidia", { id: "openai/gpt-oss-120b" }), true);
+test("isFreeModel: NVIDIA's retired GPT OSS 120B left the trial catalog (#18418)", () => {
+  assert.equal(isFreeModel("nvidia", { id: "openai/gpt-oss-120b" }), false);
+  assert.equal(isFreeModel("nvidia", { id: "nvidia/nemotron-3.5-super-vl-120b-a12b" }), true);
 });
 
 test("selectModelsForImport: passthrough when importFreeOnly is false", () => {
