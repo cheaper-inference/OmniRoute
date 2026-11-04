@@ -6273,6 +6273,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Hopp over den forbigående nedkjølingen slik at denne tilkoblingen forblir kvalifisert selv etter gjenopprettelige feil (sluttilstander som utestengt/utløpt gjelder fortsatt).",
     "disableCoolingLabel": "Deaktiver nedkjøling for denne tilkoblingen",
+    "requireUserLastMessageDescription": "For oppstrøms som avviser assistent-prefill: slipp etterfølgende assistentsvinger (ingen tool_use) før sending. Modellen kan gjenskape sitt tidligere svar.",
+    "requireUserLastMessageLabel": "Krev at samtalen avsluttes med en brukermelding",
     "bulkPasteAdded": "{count, plural, one {1 nøkkel lagt til} other {# nøkler lagt til}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplikat hoppet over} other {# duplikater hoppet over}}",
     "bulkPasteHint": "Lim inn én API-nøkkel per linje. Tomme linjer ignoreres, og duplikatnøkler hoppes over.",

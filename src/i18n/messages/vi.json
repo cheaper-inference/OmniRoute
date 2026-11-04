@@ -6266,6 +6266,8 @@
     "claudeAutoLimitResetDescription": "Khi tài khoản này đạt giới hạn sử dụng 5 giờ và có thể đặt lại giới hạn phiên, OmniRoute sẽ tự động sử dụng lượt đặt lại đó rồi thử lại ở tốc độ tối đa. Thao tác này sử dụng lượt đặt lại mỗi tuần một lần của tài khoản và vẫn được tính vào giới hạn hằng tuần.",
     "disableCoolingDescription": "Bỏ qua thời gian chờ tạm thời để kết nối này vẫn đủ điều kiện hoạt động ngay cả sau các lỗi có thể khôi phục (các trạng thái cuối cùng như bị cấm hoặc hết hạn vẫn áp dụng).",
     "disableCoolingLabel": "Vô hiệu hóa thời gian chờ cho kết nối này",
+    "requireUserLastMessageDescription": "Đối với các tuyến thượng nguồn từ chối điền trước trợ lý: bỏ lượt trợ lý ở cuối (không có tool_use) trước khi gửi. Mô hình có thể tạo lại câu trả lời trước đó của nó.",
+    "requireUserLastMessageLabel": "Yêu cầu cuộc trò chuyện kết thúc bằng tin nhắn của người dùng",
     "bulkPasteAdded": "{count, plural, one {Đã thêm 1 khóa} other {Đã thêm # khóa}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Đã bỏ qua 1 khóa trùng lặp} other {Đã bỏ qua # khóa trùng lặp}}",
     "bulkPasteHint": "Dán một khóa API trên mỗi dòng. Các dòng trống sẽ bị bỏ qua và các khóa trùng lặp sẽ bị bỏ qua.",

@@ -6273,6 +6273,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "ತಾತ್ಕಾಲಿಕ ಕೂಲ್ಡೌನ್ ಅನ್ನು ಬಿಟ್ಟುಬಿಡಿ, ಇದರಿಂದ ಮರುಪಡೆಯಬಹುದಾದ ದೋಷಗಳ ನಂತರವೂ ಈ ಸಂಪರ್ಕವು ಅರ್ಹವಾಗಿರುತ್ತದೆ (ನಿಷೇಧಿತ/ಅವಧಿ ಮುಗಿದಂತಹ ಅಂತಿಮ ಸ್ಥಿತಿಗಳು ಇನ್ನೂ ಅನ್ವಯಿಸುತ್ತವೆ).",
     "disableCoolingLabel": "ಈ ಸಂಪರ್ಕಕ್ಕಾಗಿ ಕೂಲ್ಡೌನ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ",
+    "requireUserLastMessageDescription": "ಅಸಿಸ್ಟೆಂಟ್ ಪ್ರಿಫಿಲ್ ಅನ್ನು ತಿರಸ್ಕರಿಸುವ ಅಪ್ಸ್ಟ್ರೀಮ್ಗಳಿಗಾಗಿ: ಕಳುಹಿಸುವ ಮೊದಲು ಟ್ರೇಲಿಂಗ್ ಅಸಿಸ್ಟೆಂಟ್ ಟರ್ನ್ಗಳನ್ನು ಬಿಡಿ (ಟೂಲ್_ಯೂಸ್ ಇಲ್ಲ). ಮಾದರಿಯು ಅದರ ಹಿಂದಿನ ಉತ್ತರವನ್ನು ಪುನರುತ್ಪಾದಿಸಬಹುದು.",
+    "requireUserLastMessageLabel": "ಬಳಕೆದಾರರ ಸಂದೇಶದೊಂದಿಗೆ ಕೊನೆಗೊಳ್ಳಲು ಸಂಭಾಷಣೆಯ ಅಗತ್ಯವಿದೆ",
     "bulkPasteAdded": "{count, plural, one {1 ಕೀ ಸೇರಿಸಲಾಗಿದೆ} other {# ಕೀಗಳನ್ನು ಸೇರಿಸಲಾಗಿದೆ}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 ನಕಲನ್ನು ಬಿಟ್ಟುಬಿಡಲಾಗಿದೆ} other {# ನಕಲುಗಳನ್ನು ಬಿಟ್ಟುಬಿಡಲಾಗಿದೆ}}",
     "bulkPasteHint": "ಪ್ರತಿ ಸಾಲಿಗೆ ಒಂದು API ಕೀಯನ್ನು ಅಂಟಿಸಿ. ಖಾಲಿ ಸಾಲುಗಳನ್ನು ನಿರ್ಲಕ್ಷಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ನಕಲಿ ಕೀಗಳನ್ನು ಬಿಟ್ಟುಬಿಡಲಾಗುತ್ತದೆ.",
