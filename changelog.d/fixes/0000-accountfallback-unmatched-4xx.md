@@ -1,0 +1,1 @@
+- **fix(sse):** An unmatched 4xx (for example 405, 409 or 415) no longer puts a healthy account on a transient cooldown; it is treated like a generic 400 request error.

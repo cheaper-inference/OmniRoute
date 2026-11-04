@@ -2470,6 +2470,24 @@ export function checkFallbackError(
     return { shouldFallback: false, cooldownMs: 0, reason: RateLimitReason.UNKNOWN };
   }
 
+  // Unmatched 4xx (e.g. 405, 409, 415) is request-shaped, like a generic 400:
+  // not account-fallback-worthy, so a healthy account takes no cooldown for it.
+  // Auth-shaped 401/402/403 and retryable 408/429 are classified before this
+  // point and keep their fallback. 9router 20a43f5a.
+  if (
+    status >= HTTP_STATUS.BAD_REQUEST &&
+    status < HTTP_STATUS.SERVER_ERROR &&
+    ![
+      HTTP_STATUS.UNAUTHORIZED,
+      HTTP_STATUS.PAYMENT_REQUIRED,
+      HTTP_STATUS.FORBIDDEN,
+      HTTP_STATUS.REQUEST_TIMEOUT,
+      HTTP_STATUS.RATE_LIMITED,
+    ].includes(status)
+  ) {
+    return { shouldFallback: false, cooldownMs: 0, reason: RateLimitReason.UNKNOWN };
+  }
+
   // All other errors - fallback with transient cooldown
   return {
     shouldFallback: true,
