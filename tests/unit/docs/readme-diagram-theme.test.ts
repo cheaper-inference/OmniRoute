@@ -163,22 +163,14 @@ test("every KIT value equals what its Editions token resolves to (light warn exc
   }
 });
 
-test("light warn darkens the kit warning only while the kit value misses AA on a diagram surface", () => {
+test("warn is the kit's own Editions warning, which clears AA on every light diagram surface", () => {
+  // Kit 0.0.89 brought the light Editions warning to AA on every surface, so the diagrams read
+  // the kit value as is, in both schemes.
   const kitWarn = resolve("--ci-color-warning", lightBlock);
-  assert.equal(kitWarn, "#8c5a1b");
-  const surfaces = ["bg", "surface", "warnBg", "surfaceSubtle", "surfaceMuted"];
-  // The kit value (AA since kit 0.0.88 on bg, surface and warnBg) still misses one diagram surface;
-  // when it clears all of them, drop the override and use the kit value as is.
-  assert.ok(
-    surfaces.some((bg) => contrast(kitWarn, KIT.light[bg]) < 4.5),
-    "the kit warning clears AA everywhere: use it in readme-diagram-theme.mjs"
-  );
-  // The override must be a darker ink than the kit's, never a lighter or unrelated one.
-  assert.ok(
-    contrast(KIT.light.warn, KIT.light.surfaceMuted) > contrast(kitWarn, KIT.light.surfaceMuted),
-    "the diagram warn is darker than the kit warning"
-  );
-  for (const bg of surfaces) {
+  assert.equal(kitWarn, "#8a591c");
+  assert.equal(KIT.light.warn, kitWarn);
+  assert.equal(KIT.dark.warn, resolve("--ci-color-warning", darkBlock));
+  for (const bg of ["bg", "surface", "warnBg", "surfaceSubtle", "surfaceMuted"]) {
     const ratio = contrast(KIT.light.warn, KIT.light[bg]);
     assert.ok(ratio >= 4.5, `light warn on ${bg}: ${ratio.toFixed(2)}:1`);
   }
