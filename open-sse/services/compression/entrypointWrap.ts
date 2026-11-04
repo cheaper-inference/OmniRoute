@@ -22,6 +22,9 @@ export function withCompressionEntrypointGuards<T extends CompressionEntrypointO
   options: T | undefined,
   run: (body: Record<string, unknown>) => CompressionResult
 ): CompressionResult {
+  if (mustKeepOpenCodeHistoryVerbatim(body, options?.cachingContext ?? { model: options?.model })) {
+    return { body, compressed: false, stats: null };
+  }
   return withQuantumLock(
     body,
     resolveQuantumLock(options),
