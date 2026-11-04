@@ -57,6 +57,16 @@ test("#18787: OpenCode providers use implicit prefix caching, not explicit cache
     assert.equal(providerSupportsCaching(providerId, "openai", null, model), true);
     assert.equal(providerUsesAutomaticPrefixCaching(providerId, null, model), true);
     assert.equal(providerHonorsOpenAIFormatCacheControl(providerId), false);
+    assert.equal(providerSupportsCaching(providerId, "openai", null, "uncached-model"), false);
+    assert.equal(providerUsesAutomaticPrefixCaching(providerId, null, "uncached-model"), false);
+    assert.equal(
+      providerUsesAutomaticPrefixCaching(
+        providerId,
+        { supportsPromptCaching: true, cacheControlPassthrough: "strip" },
+        "uncached-model"
+      ),
+      true
+    );
     assert.equal(
       providerSupportsCaching(providerId, "openai", { supportsPromptCaching: false }, model),
       false
