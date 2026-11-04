@@ -1625,6 +1625,9 @@ async function handleChatCoreInner({
           connectionCacheOverride,
         };
         const compressionConfig = resolveCacheAwareConfig(config, compressionInputBody, cacheCtx);
+        // #18787: keep the upstream cacheable prefix untouched until a stable
+        // live-zone baseline exists; subsequent requests can still compress new tool outputs.
+        const protectOpenCodePrefix = mustKeepOpenCodeHistoryVerbatim(compressionInputBody, cacheCtx);
         const compressionPrincipalId = apiKeyInfo?.id ? String(apiKeyInfo.id) : undefined;
         const compressionOptions = {
           model: effectiveModel,
