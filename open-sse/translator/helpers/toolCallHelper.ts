@@ -391,6 +391,81 @@ export function fixMissingToolResponses<T extends ToolCallBody>(body: T): T {
   return body;
 }
 
+/**
+ * Hoist displaced tool results back into their assistant turn's result run.
+ *
+ * Clients that steer mid-turn (queued user messages, task notifications) can
+ * interleave a non-tool message between an assistant tool_calls message and
+ * part of its results: [assistant(tc:c1,c2), tool(c1), user, tool(c2)]. Strict
+ * upstream validators (DeepSeek V4 thinking confirmed live) reject that with
+ * "insufficient tool messages following tool_calls message". The result
+ * belongs to the turn, so move it up to the end of the contiguous run.
+ * Stops at the next assistant message: a later assistant turn's own pairing
+ * must not be scrambled.
+ */
+export function repairDisplacedToolResults<T extends ToolCallBody>(body: T): T {
+  if (!body.messages || !Array.isArray(body.messages)) return body;
+  const messages = body.messages;
+
+  let turnIds: Set<string> | null = null;
+
+  for (let i = 0; i < messages.length; i++) {
+    const msg = messages[i];
+    const ids = getToolCallIds(msg);
+    if (ids.length > 0) {
+      turnIds = new Set(ids);
+      continue;
+    }
+    if (!turnIds || turnIds.size === 0) continue;
+    // Stable non-null alias: `turnIds` is reassigned below, which defeats narrowing in callbacks.
+    const openIds: Set<string> = turnIds;
+
+    if (msg.role === "assistant") {
+      // A new assistant turn (without tool calls) ends the previous turn's window.
+      turnIds = null;
+      continue;
+    }
+    if (respondedToolIds(msg).some((id) => openIds.has(id))) {
+      // Contiguous member of the run — still fine where it is.
+      continue;
+    }
+    // Non-tool message inside the turn's window: scan ahead for response
+    // messages that resolve the turn's remaining calls and hoist them above
+    // this message.
+    const ahead: number[] = [];
+    for (let j = i + 1; j < messages.length; j++) {
+      const later = messages[j];
+      if (later.role === "assistant") break;
+      const resolved = respondedToolIds(later).filter((id) => openIds.has(id));
+      if (resolved.length > 0) {
+        ahead.push(j);
+        for (const id of resolved) openIds.delete(id);
+        if (openIds.size === 0) break;
+      }
+    }
+    if (ahead.length > 0) {
+      const hoisted = ahead.map((idx) => messages[idx]);
+      const aheadSet = new Set(ahead);
+      const rebuilt: ToolMessage[] = [];
+      for (let j = 0; j < messages.length; j++) {
+        if (j === i) {
+          rebuilt.push(...hoisted);
+        }
+        if (!aheadSet.has(j)) rebuilt.push(messages[j]);
+      }
+      messages.length = 0;
+      messages.push(...rebuilt);
+      // Re-scan from the same index: the hoisted results now precede msg.
+      i -= 1;
+    } else {
+      // Nothing ahead belongs to this turn; close the window at this boundary.
+      turnIds = null;
+    }
+  }
+
+  return body;
+}
+
 // Strip tool-result carriers whose id has no matching tool call anywhere in the
 // conversation. Mirrors fixMissingToolResponses on the result side: that helper
 // ensures every call has a result; this one ensures every result has a call.
