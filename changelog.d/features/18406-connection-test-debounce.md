@@ -1,0 +1,1 @@
+- **feat(providers):** the batch connection-test loop now serves results from a hit-stable debounce cache (`OMNIROUTE_TEST_DEBOUNCE_MS`, default 6 min) instead of re-probing every upstream on each dashboard auto-refresh; the per-connection Test button always runs a real test ([#18406](https://github.com/cheaper-inference/OmniRoute/pull/18406)) — thanks @jjxyxsjr
