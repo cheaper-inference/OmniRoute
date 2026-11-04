@@ -46,35 +46,40 @@ máy tính xách tay của bạn                 OmniRoute từ xa (VPS)
 
 ## Kết nối
 
-### Bằng mật khẩu quản lý (khởi tạo)
+### Với mật khẩu quản trị (bootstrap)
 
 ```bash
 omniroute connect 192.168.0.15
-# Mật khẩu quản lý cho http://192.168.0.15:20128: ********
-# ✔ Đã kết nối với http://192.168.0.15:20128 — ngữ cảnh '192.168.0.15' (phạm vi: admin)
+# Mật khẩu quản trị cho http://192.168.0.15:20128: ********
+# ✔ Đã kết nối tới http://192.168.0.15:20128 — ngữ cảnh '192.168.0.15' (phạm vi: admin)
 ```
 
-Luồng dùng mật khẩu mặc định cấp một token **admin** (bạn nắm giữ mật khẩu, vì vậy
-bạn đã có toàn quyền kiểm soát). Giới hạn phạm vi bằng `--scope`:
+Luồng mật khẩu mặc định tạo một token **admin** (bạn nắm giữ mật khẩu, vì vậy
+bạn đã có toàn quyền kiểm soát). Hạ phạm vi quyền bằng `--scope`:
 
 ```bash
 omniroute connect 192.168.0.15 --scope write
 ```
 
 Các tùy chọn: `--port <p>` (khi máy chủ không có cổng), `--name <ctx>` (tên ngữ cảnh),
-`--scope read|write|admin`. URL đầy đủ được giữ nguyên:
+`--scope read|write|admin`. URL đầy đủ được sử dụng nguyên trạng:
 `omniroute connect https://omni.example.com`.
 
-### Bằng token được tạo sẵn
+Khi máy chủ bật xác thực hai yếu tố cho bảng điều khiển (Cài đặt →
+Bảo mật), chỉ mật khẩu sẽ bị từ chối: CLI sau đó yêu cầu mã từ ứng dụng
+xác thực (hoặc mã khôi phục). Truyền mã trước bằng `--totp <code>` để sử dụng
+không tương tác.
 
-Tạo một token có phạm vi trong bảng điều khiển (hoặc bằng `omniroute tokens create`) và
-dán token đó — không cần mật khẩu:
+### Với token được tạo trước
+
+Tạo một token có phạm vi trong bảng điều khiển (hoặc bằng `omniroute tokens create`) rồi
+dán token đó vào — không cần mật khẩu:
 
 ```bash
 omniroute connect 192.168.0.15 --key oma_live_xxxxxxxx
 ```
 
-CLI xác thực token qua `GET /api/cli/whoami` và lưu token làm ngữ cảnh đang hoạt động.
+CLI xác thực token thông qua `GET /api/cli/whoami` và lưu token đó làm ngữ cảnh đang hoạt động.
 
 ---
 
@@ -440,14 +445,14 @@ omniroute contexts remove 192-168-0-15 --yes   # xóa context cục bộ (ngay c
 
 ---
 
-## Điểm cuối API (tham khảo)
+## Các endpoint API (tham khảo)
 
-| Phương thức | Tuyến                 | Xác thực         | Phạm vi                                  |
-| ----------- | --------------------- | ---------------- | ---------------------------------------- |
-| POST        | `/api/cli/connect`    | mật khẩu quản lý | — (công khai, được bảo vệ bằng mật khẩu) |
-| GET         | `/api/cli/whoami`     | token truy cập   | đọc                                      |
-| GET         | `/api/cli/tokens`     | token truy cập   | quản trị                                 |
-| POST        | `/api/cli/tokens`     | token truy cập   | quản trị                                 |
-| DELETE      | `/api/cli/tokens/:id` | token truy cập   | quản trị                                 |
+| Phương thức | Route                 | Xác thực              | Phạm vi                         |
+| ----------- | --------------------- | --------------------- | ------------------------------- |
+| POST        | `/api/cli/connect`    | mật khẩu; 2FA nếu bật | — (công khai, yêu cầu mật khẩu) |
+| GET         | `/api/cli/whoami`     | access token          | đọc                             |
+| GET         | `/api/cli/tokens`     | access token          | quản trị                        |
+| POST        | `/api/cli/tokens`     | access token          | quản trị                        |
+| DELETE      | `/api/cli/tokens/:id` | access token          | quản trị                        |
 
-Xem [openapi.yaml](../openapi.yaml) để biết đầy đủ các lược đồ.
+Xem [openapi.yaml](../openapi.yaml) để biết đầy đủ các schema.
