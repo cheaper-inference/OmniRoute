@@ -161,7 +161,30 @@ type PendingContinuationEntry = {
 // which never reaches "ready" (e.g. detailState becomes "missing") falls back
 // to the same permanent not-found the durable path already gives today.
 const PENDING_CONTINUATION_TTL_MS = 60_000;
+// Pending continuation payloads may contain full (large) Responses API histories.
+// TTL alone is not a memory bound unless expired entries are actually evicted.
+const PENDING_CONTINUATION_MAX_ENTRIES = 512;
+const PENDING_CONTINUATION_SWEEP_MS = 30_000;
 const pendingContinuationStates = new Map<string, PendingContinuationEntry>();
+let pendingContinuationSweep: ReturnType<typeof setInterval> | null = null;
+
+function prunePendingContinuationStates(now = Date.now()): void {
+  for (const [id, entry] of pendingContinuationStates) {
+    if (entry.expiresAt <= now) pendingContinuationStates.delete(id);
+  }
+}
+
+function startPendingContinuationSweep(): void {
+  if (pendingContinuationSweep !== null) return;
+  pendingContinuationSweep = setInterval(prunePendingContinuationStates, PENDING_CONTINUATION_SWEEP_MS);
+  pendingContinuationSweep.unref?.();
+}
+
+/** Non-payload diagnostic: counts pending continuation bridges, not their contents. */
+export function getPendingContinuationStateCount(): number {
+  prunePendingContinuationStates();
+  return pendingContinuationStates.size;
+}
 
 /**
  * Called from callLogs.ts the moment a response id and its pipeline payload
@@ -179,6 +202,15 @@ export function seedPendingContinuationState(
   if (!responseId) return;
   const state = extractContinuationState(pipeline, videoContentRemoved);
   if (!state) return;
+  startPendingContinuationSweep();
+  prunePendingContinuationStates();
+  // Replacing an existing ID also refreshes its insertion order for FIFO eviction.
+  pendingContinuationStates.delete(responseId);
+  while (pendingContinuationStates.size >= PENDING_CONTINUATION_MAX_ENTRIES) {
+    const oldest = pendingContinuationStates.keys().next().value;
+    if (oldest === undefined) break;
+    pendingContinuationStates.delete(oldest);
+  }
   pendingContinuationStates.set(responseId, {
     apiKeyId,
     state,
