@@ -21,6 +21,7 @@ export async function runLiveZoneCompression({
   mode,
   effectiveModel,
   compressionConfig,
+  preserveRawPrefixOnMiss = false,
   runCompression,
 }: {
   compressionInputBody: Record<string, unknown>;
