@@ -129,6 +129,35 @@ function pruneExpired(now: number) {
 }
 
 /**
+ * Group an ordered assistant content array into one segment per tool_use, each
+ * holding the signed blocks that preceded it. Null when any thinking-ish block is
+ * not replayable, when thinking trails the last tool_use (no anchor to replay
+ * against), when nothing is stored, or when the turn exceeds the entry size cap.
+ */
+function collectThinkingSegments(
+  content: unknown[]
+): { segments: ClaudeThinkingSegment[]; size: number } | null {
+  const segments: ClaudeThinkingSegment[] = [];
+  let pending: ClaudeSignedThinkingBlock[] = [];
+  let size = 0;
+  for (const block of content) {
+    const record = (block ?? {}) as Record<string, unknown>;
+    if (record.type === "thinking" || record.type === "redacted_thinking") {
+      const normalized = normalizeBlock(block);
+      if (!normalized) return null;
+      pending.push(normalized);
+      size += blockSize(normalized);
+    } else if (record.type === "tool_use" && typeof record.id === "string" && record.id) {
+      segments.push({ toolUseId: record.id, blocks: pending });
+      pending = [];
+    }
+  }
+  if (size === 0 || size > MAX_CLAUDE_THINKING_ENTRY_CHARS || pending.length > 0) return null;
+  if (segments.length === 0) return null;
+  return { segments, size };
+}
+
+/**
  * Remember the signed thinking blocks of one assistant turn, in their original
  * layout, under each of its tool_use ids. `content` is the ordered content array
  * (thinking / redacted_thinking / tool_use; other block types are ignored). No-op
@@ -143,24 +172,9 @@ export function storeClaudeThinkingBlocks(args: {
   const model = normalizeClaudeThinkingModel(args.model);
   if (!model || !Array.isArray(args.content)) return false;
 
-  const segments: ClaudeThinkingSegment[] = [];
-  let pending: ClaudeSignedThinkingBlock[] = [];
-  let size = 0;
-  for (const block of args.content) {
-    const record = (block ?? {}) as Record<string, unknown>;
-    if (record.type === "thinking" || record.type === "redacted_thinking") {
-      const normalized = normalizeBlock(block);
-      if (!normalized) return false;
-      pending.push(normalized);
-      size += blockSize(normalized);
-    } else if (record.type === "tool_use" && typeof record.id === "string" && record.id) {
-      segments.push({ toolUseId: record.id, blocks: pending });
-      pending = [];
-    }
-  }
-  // Thinking after the last tool_use has no anchor to replay against.
-  if (size === 0 || size > MAX_CLAUDE_THINKING_ENTRY_CHARS || pending.length > 0) return false;
-  if (segments.length === 0) return false;
+  const collected = collectThinkingSegments(args.content);
+  if (!collected) return false;
+  const { segments, size } = collected;
 
   const now = Date.now();
   const provider = normalizeProvider(args.provider);
@@ -234,11 +248,17 @@ export function restoreClaudeThinkingBlocks(args: {
     if (!entry) continue;
     if (entry.provider !== provider || entry.model !== model) return null;
     if (entry.connectionId !== connectionId) return null;
-    const segments = cloneSegments(entry.segments);
-    for (const segment of segments) for (const block of segment.blocks) restoredBlocks.add(block);
-    return segments;
+    return markRestored(cloneSegments(entry.segments));
   }
   return null;
+}
+
+/** Tag every block of freshly cloned segments as restored-by-binding provenance. */
+function markRestored(segments: ClaudeThinkingSegment[]): ClaudeThinkingSegment[] {
+  for (const segment of segments) {
+    for (const block of segment.blocks) restoredBlocks.add(block);
+  }
+  return segments;
 }
 
 function sameBlock(stored: ClaudeSignedThinkingBlock, block: unknown): boolean {
