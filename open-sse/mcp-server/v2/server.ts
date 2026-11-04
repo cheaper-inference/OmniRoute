@@ -30,7 +30,7 @@ import {
   costReportTool,
 } from "../schemas/tools.ts";
 import { omniRouteFetch } from "../internalFetch.ts";
-import { isMcpScopeEnforcementEnabled } from "../../../src/shared/utils/featureFlags.ts";
+import { getMcpV2HostHooks } from "./hostHooks.ts";
 import {
   buildScopeDenialMessage,
   evaluateToolScopes,
@@ -38,11 +38,6 @@ import {
   shouldForceScopeEnforcement,
   type McpToolExtraLike,
 } from "../scopeEnforcement.ts";
-import {
-  getComboModelProvider,
-  getComboModelString,
-  getComboStepTarget,
-} from "../../../src/lib/combos/steps.ts";
 import { analyticsRangeForPeriod, readAnalyticsTotals } from "../analyticsShape.ts";
 import type { TextToolResult } from "../toolResult.ts";
 
@@ -53,10 +48,11 @@ function normalizeComboModels(
 ): Array<{ provider: string; model: string; priority: number }> {
   return toArray(rawModels).map((rawModel, index) => {
     const modelRecord = toRecord(rawModel);
-    const modelString = getComboModelString(rawModel);
-    const target = getComboStepTarget(rawModel);
+    const hostHooks = getMcpV2HostHooks();
+    const modelString = hostHooks.getComboModelString(rawModel);
+    const target = hostHooks.getComboStepTarget(rawModel);
     const provider =
-      getComboModelProvider(rawModel) ||
+      hostHooks.getComboModelProvider(rawModel) ||
       (modelString ? "unknown" : target ? "combo" : toString(modelRecord.provider, "unknown"));
     return {
       provider,
@@ -81,7 +77,6 @@ function toString(value: unknown, fallback = ""): string {
 }
 
 import { logToolCall } from "../audit.ts";
-import { normalizeQuotaResponse } from "../../../src/shared/contracts/quota.ts";
 import { toNumber } from "../../utils/numeric.ts";
 
 // Re-export types
@@ -144,7 +139,7 @@ function withScopeEnforcement(
     const scopeCheck = evaluateToolScopes(
       toolName,
       scopeContext.scopes,
-      isMcpScopeEnforcementEnabled() || shouldForceScopeEnforcement(scopeContext),
+      getMcpV2HostHooks().isScopeEnforcementEnabled() || shouldForceScopeEnforcement(scopeContext),
       toolScopes
     );
     if (!scopeCheck.allowed) {
@@ -639,7 +634,7 @@ async function handleCheckQuota(args: { provider?: string; connectionId?: string
 
     const result = withResultType(
       toRecord(
-        normalizeQuotaResponse(await omniRouteFetch(path), {
+        getMcpV2HostHooks().normalizeQuotaResponse(await omniRouteFetch(path), {
           provider: args.provider || null,
           connectionId: args.connectionId || null,
         })

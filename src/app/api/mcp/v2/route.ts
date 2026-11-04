@@ -18,7 +18,19 @@
 import { NextResponse } from "next/server";
 import { getCachedSettings } from "@/lib/db/settings";
 import { isMcpV2Enabled, handleMcpV2Http } from "@omniroute/open-sse/mcp-server/v2/server";
+import { registerMcpV2HostHooks } from "@omniroute/open-sse/mcp-server/v2/hostHooks";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
+import { isMcpScopeEnforcementEnabled } from "@/shared/utils/featureFlags";
+import { getComboModelProvider, getComboModelString, getComboStepTarget } from "@/lib/combos/steps";
+import { normalizeQuotaResponse } from "@/shared/contracts/quota";
+
+registerMcpV2HostHooks({
+  isScopeEnforcementEnabled: isMcpScopeEnforcementEnabled,
+  getComboModelProvider,
+  getComboModelString,
+  getComboStepTarget,
+  normalizeQuotaResponse: (raw, filters) => normalizeQuotaResponse(raw, filters),
+});
 
 async function guardEnabled(): Promise<NextResponse | null> {
   const settings = await getCachedSettings();

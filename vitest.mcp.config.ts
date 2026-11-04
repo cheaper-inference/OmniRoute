@@ -30,6 +30,7 @@ export default defineConfig({
       "src/app/(dashboard)/**/__tests__/**/*.test.tsx",
     ],
     exclude: ["**/node_modules/**", "**/.git/**"],
+    setupFiles: ["tests/unit/mcp/v2-host-hooks.setup.ts"],
     coverage: {
       reportsDirectory: "coverage",
     },
