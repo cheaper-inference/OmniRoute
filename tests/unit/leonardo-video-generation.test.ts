@@ -7,12 +7,13 @@
  */
 
 import assert from "node:assert/strict";
-import { mkdtempSync } from "node:fs";
+import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 
-process.env.DATA_DIR = mkdtempSync(join(tmpdir(), "omniroute-leonardo-video-"));
+const TEST_DATA_DIR = mkdtempSync(join(tmpdir(), "omniroute-leonardo-video-"));
+process.env.DATA_DIR = TEST_DATA_DIR;
 
 const { handleLeonardoVideoGeneration } =
   await import("../../open-sse/handlers/videoGeneration/leonardoHandler.ts");
@@ -23,9 +24,15 @@ const SUBMIT_URL = "https://cloud.leonardo.ai/api/rest/v1/generations-text-to-vi
 const STATUS_URL = "https://cloud.leonardo.ai/api/rest/v1/generations";
 const MP4 = new Uint8Array([0, 0, 0, 24, 102, 116, 121, 112]);
 
+const { waitForCallLogSaves } = await import("../../src/lib/usage/callLogs.ts");
+const { resetDbInstance } = await import("../../src/lib/db/core.ts");
+
 const originalFetch = globalThis.fetch;
-test.after(() => {
+test.after(async () => {
   globalThis.fetch = originalFetch;
+  await waitForCallLogSaves(1_000);
+  resetDbInstance();
+  rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 function json(payload: unknown) {
@@ -36,7 +43,19 @@ function json(payload: unknown) {
 }
 
 /** Fake Leonardo: records the submit request and completes the job on the first poll. */
-async function generate(model: string, body: Record<string, unknown> = {}) {
+async function generate(
+  model: string,
+  body: Record<string, unknown> = {},
+  {
+    fetchVideo = async () => new Response(MP4),
+    signal = null,
+    downloadTimeoutMs,
+  }: {
+    fetchVideo?: (options?: RequestInit) => Promise<Response>;
+    signal?: AbortSignal | null;
+    downloadTimeoutMs?: number;
+  } = {}
+) {
   let submitted: { url: string; body: Record<string, unknown> } | null = null;
   globalThis.fetch = (async (url: unknown, options?: RequestInit) => {
     const href = String(url);
@@ -57,7 +76,7 @@ async function generate(model: string, body: Record<string, unknown> = {}) {
         },
       });
     }
-    if (href === "https://cdn.leonardo.ai/video.mp4") return new Response(MP4);
+    if (href === "https://cdn.leonardo.ai/video.mp4") return fetchVideo(options);
     if (href === "https://cdn.leonardo.ai/thumb.jpg") return new Response("jpeg");
     throw new Error(`unexpected fetch ${href}`);
   }) as typeof fetch;
@@ -69,7 +88,9 @@ async function generate(model: string, body: Record<string, unknown> = {}) {
     body: { prompt: "a paper boat drifting on a pond", ...body },
     credentials: { apiKey: "test-key" },
     log: null,
+    signal,
     pollIntervalMs: 0,
+    ...(downloadTimeoutMs ? { downloadTimeoutMs } : {}),
   });
   return { result, submitted };
 }
@@ -123,4 +144,52 @@ test("the catalog lists the Motion 2.0 models", () => {
     providerConfig.models.map((m: { id: string }) => m.id),
     ["motion-2.0", "motion-2.0-fast"]
   );
+});
+
+/** A CDN response that never arrives; it rejects only when the request's signal aborts. */
+function stalledDownload(options?: RequestInit): Promise<Response> {
+  return new Promise((_, reject) => {
+    options?.signal?.addEventListener("abort", () => reject(options.signal?.reason));
+  });
+}
+
+test("a failed mp4 download is an upstream error, not a corrupt video", async () => {
+  const { result } = await generate(
+    "motion-2.0-fast",
+    {},
+    {
+      fetchVideo: async () => new Response("AccessDenied", { status: 403 }),
+    }
+  );
+  assert.equal(result.success, false);
+  assert.equal(result.status, 502);
+});
+
+test("a client abort during the mp4 download stops it", async () => {
+  const controller = new AbortController();
+  const { result } = await generate(
+    "motion-2.0-fast",
+    {},
+    {
+      signal: controller.signal,
+      fetchVideo: (options) => {
+        setTimeout(() => controller.abort(), 5);
+        return stalledDownload(options);
+      },
+    }
+  );
+  assert.equal(result.status, 499);
+});
+
+test("a stalled mp4 download times out", async () => {
+  const { result } = await generate(
+    "motion-2.0-fast",
+    {},
+    {
+      downloadTimeoutMs: 20,
+      fetchVideo: stalledDownload,
+    }
+  );
+  assert.equal(result.success, false);
+  assert.equal(result.status, 504);
 });

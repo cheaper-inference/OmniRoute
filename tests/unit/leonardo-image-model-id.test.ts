@@ -6,23 +6,30 @@
  */
 
 import assert from "node:assert/strict";
-import { mkdtempSync } from "node:fs";
+import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 
-process.env.DATA_DIR = mkdtempSync(join(tmpdir(), "omniroute-leonardo-model-id-"));
+const TEST_DATA_DIR = mkdtempSync(join(tmpdir(), "omniroute-leonardo-model-id-"));
+process.env.DATA_DIR = TEST_DATA_DIR;
 
-const { handleLeonardoImageGeneration } =
+const { handleLeonardoImageGeneration, resolveLeonardoImageSize } =
   await import("../../open-sse/handlers/imageGeneration/providers/leonardo.ts");
 
 const BASE_URL = "https://cloud.leonardo.ai/api/rest/v1/generations";
 const PHOENIX_1_0 = "de7d3faf-762f-48e0-b3b7-9d0ac3a3fcf3";
 const SDXL_1_0 = "16e7060a-803e-4df3-97ee-edcfa5dc9cc8";
 
+const { waitForCallLogSaves } = await import("../../src/lib/usage/callLogs.ts");
+const { resetDbInstance } = await import("../../src/lib/db/core.ts");
+
 const originalFetch = globalThis.fetch;
-test.after(() => {
+test.after(async () => {
   globalThis.fetch = originalFetch;
+  await waitForCallLogSaves(1_000);
+  resetDbInstance();
+  rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 function json(payload: unknown) {
@@ -32,13 +39,16 @@ function json(payload: unknown) {
   });
 }
 
-/** Fake Leonardo: records the submitted modelId and completes the generation on first poll. */
-async function submittedModelId(model: string): Promise<unknown> {
-  let modelId: unknown;
+/** Fake Leonardo: records the submitted body and completes the generation on first poll. */
+async function submitted(
+  model: string,
+  body: Record<string, unknown> = {}
+): Promise<Record<string, unknown>> {
+  let sent: Record<string, unknown> = {};
   globalThis.fetch = (async (url: unknown, options?: RequestInit) => {
     const href = String(url);
     if (href === BASE_URL && options?.method === "POST") {
-      modelId = JSON.parse(String(options.body)).modelId;
+      sent = JSON.parse(String(options.body));
       return json({ sdGenerationJob: { generationId: "gen-1" } });
     }
     if (href === `${BASE_URL}/gen-1`) {
@@ -57,13 +67,17 @@ async function submittedModelId(model: string): Promise<unknown> {
     model,
     provider: "leonardo",
     providerConfig: { baseUrl: BASE_URL },
-    body: { prompt: "a red apple" },
+    body: { prompt: "a red apple", ...body },
     credentials: { apiKey: "test-key" },
     log: null,
     pollIntervalMs: 0,
   });
   assert.equal(result.success, true);
-  return modelId;
+  return sent;
+}
+
+async function submittedModelId(model: string): Promise<unknown> {
+  return (await submitted(model)).modelId;
 }
 
 test("the phoenix catalog id is sent as the Phoenix 1.0 model UUID", async () => {
@@ -81,4 +95,18 @@ test("a model UUID passes through unchanged, so any Leonardo model can be used",
 
 test("no model falls back to Phoenix 1.0", async () => {
   assert.equal(await submittedModelId(""), PHOENIX_1_0);
+});
+
+test("an OpenAI-style size is sent as Leonardo's width and height", async () => {
+  const body = await submitted("phoenix", { size: "576x1024" });
+  assert.deepEqual([body.width, body.height], [576, 1024]);
+});
+
+test("explicit width/height win over size, and a missing size defaults to 1024", () => {
+  assert.deepEqual(resolveLeonardoImageSize({ size: "576x1024", width: 768 }), {
+    width: 768,
+    height: 1024,
+  });
+  assert.deepEqual(resolveLeonardoImageSize({}), { width: 1024, height: 1024 });
+  assert.deepEqual(resolveLeonardoImageSize({ size: "auto" }), { width: 1024, height: 1024 });
 });

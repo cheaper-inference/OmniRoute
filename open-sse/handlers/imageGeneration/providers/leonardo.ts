@@ -19,6 +19,22 @@ export function resolveLeonardoModelId(model: string | undefined): string {
   return LEONARDO_MODEL_IDS[id] ?? id;
 }
 
+/**
+ * Output size: explicit `width`/`height` win, then an OpenAI-style `size` ("576x1024"),
+ * then 1024 for whatever is still missing.
+ */
+export function resolveLeonardoImageSize(body: {
+  size?: unknown;
+  width?: number;
+  height?: number;
+}): { width: number; height: number } {
+  const match = typeof body.size === "string" ? body.size.trim().match(/^(\d+)x(\d+)$/i) : null;
+  return {
+    width: body.width || (match ? Number(match[1]) : 1024),
+    height: body.height || (match ? Number(match[2]) : 1024),
+  };
+}
+
 export async function handleLeonardoImageGeneration({
   model,
   provider,
@@ -41,8 +57,7 @@ export async function handleLeonardoImageGeneration({
       body: JSON.stringify({
         modelId: resolveLeonardoModelId(model),
         prompt,
-        width: body.width || 1024,
-        height: body.height || 1024,
+        ...resolveLeonardoImageSize(body),
         num_images: 1,
       }),
     });

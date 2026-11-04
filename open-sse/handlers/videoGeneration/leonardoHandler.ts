@@ -23,7 +23,8 @@ export function resolveLeonardoVideoModel(model: string): string {
   return LEONARDO_VIDEO_MODELS[model] ?? model;
 }
 
-// Leonardo's video sizes as [long side, short side].
+// Leonardo's video sizes as [long side, short side]. 1280x720 with RESOLUTION_720 was checked
+// live (Motion 2.0 Fast, 2026-11-03): the job completes as a 1280x720 mp4.
 const LEONARDO_VIDEO_SIZES = {
   RESOLUTION_480: [832, 480],
   RESOLUTION_720: [1280, 720],
@@ -52,6 +53,70 @@ function leonardoVideoUrl(generation: {
   return generation.generated_images?.[0]?.motionMP4URL;
 }
 
+// A stalled CDN must not hold the request open after the job itself has finished.
+const LEONARDO_VIDEO_DOWNLOAD_TIMEOUT_MS = 120000;
+
+/**
+ * Downloads the finished mp4, cut short by the client's abort or the download timeout.
+ * Returns the bytes, `POLL_ABORTED` when the client went away, or an upstream error.
+ */
+async function downloadLeonardoVideo(
+  videoUrl: string,
+  signal: AbortSignal | null,
+  timeoutMs = LEONARDO_VIDEO_DOWNLOAD_TIMEOUT_MS
+): Promise<ArrayBuffer | typeof POLL_ABORTED | { status: number; error: string }> {
+  const timeout = AbortSignal.timeout(timeoutMs);
+  try {
+    const res = await fetch(videoUrl, {
+      signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
+    });
+    if (!res.ok)
+      return { status: 502, error: `Leonardo video download failed (HTTP ${res.status})` };
+    return await res.arrayBuffer();
+  } catch (err) {
+    if (signal?.aborted) return POLL_ABORTED;
+    if (timeout.aborted) return { status: 504, error: "Leonardo video download timed out" };
+    throw err;
+  }
+}
+
+/** Logs one Leonardo video call; `error` is set on failures. */
+function logLeonardoVideoCall(
+  provider: string,
+  model: string,
+  startTime: number,
+  status: number,
+  error?: string
+) {
+  saveCallLog({
+    method: "POST",
+    path: "/v1/videos/generations",
+    status,
+    model: `${provider}/${model}`,
+    provider,
+    duration: Date.now() - startTime,
+    ...(error ? { error } : {}),
+  }).catch(() => {});
+}
+
+/** The handler result for a finished download: the mp4, an abort, or a logged failure. */
+function videoDownloadResult(
+  buf: Awaited<ReturnType<typeof downloadLeonardoVideo>>,
+  fail: (status: number, error: string) => { success: boolean; status: number; error: string },
+  logSuccess: () => void
+) {
+  if (buf === POLL_ABORTED) return abortedVideoResult();
+  if (!(buf instanceof ArrayBuffer)) return fail(buf.status, buf.error);
+  logSuccess();
+  return {
+    success: true,
+    data: {
+      created: Math.floor(Date.now() / 1000),
+      data: [{ b64_json: Buffer.from(buf).toString("base64"), format: "mp4" }],
+    },
+  };
+}
+
 export async function handleLeonardoVideoGeneration({
   model,
   provider,
@@ -61,9 +126,14 @@ export async function handleLeonardoVideoGeneration({
   log,
   signal = null,
   pollIntervalMs = 5000,
+  downloadTimeoutMs = LEONARDO_VIDEO_DOWNLOAD_TIMEOUT_MS,
 }) {
   const startTime = Date.now();
   const token = credentials?.apiKey || "";
+  const fail = (status: number, error: string, logged = error) => {
+    logLeonardoVideoCall(provider, model, startTime, status, logged);
+    return { success: false, status, error };
+  };
   const res = await fetch(providerConfig.baseUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -76,31 +146,11 @@ export async function handleLeonardoVideoGeneration({
   });
   if (!res.ok) {
     const errorText = await res.text();
-    saveCallLog({
-      method: "POST",
-      path: "/v1/videos/generations",
-      status: res.status,
-      model: `${provider}/${model}`,
-      provider,
-      duration: Date.now() - startTime,
-      error: errorText.slice(0, 500),
-    }).catch(() => {});
-    return { success: false, status: res.status, error: errorText };
+    return fail(res.status, errorText, errorText.slice(0, 500));
   }
   const { motionVideoGenerationJob } = await res.json();
   const genId = motionVideoGenerationJob?.generationId;
-  if (!genId) {
-    saveCallLog({
-      method: "POST",
-      path: "/v1/videos/generations",
-      status: 502,
-      model: `${provider}/${model}`,
-      provider,
-      duration: Date.now() - startTime,
-      error: "No generation ID returned",
-    }).catch(() => {});
-    return { success: false, status: 502, error: "No generation ID returned" };
-  }
+  if (!genId) return fail(502, "No generation ID returned");
   const deadline = Date.now() + 300000;
   while (Date.now() < deadline) {
     const status = await pollJsonAfter(
@@ -111,49 +161,14 @@ export async function handleLeonardoVideoGeneration({
     );
     if (status === POLL_ABORTED) return abortedVideoResult();
     const gen = status.generations_by_pk || status;
-    if (gen.status === "COMPLETE") {
-      const videoUrl = leonardoVideoUrl(gen);
-      if (videoUrl) {
-        const videoRes = await fetch(videoUrl);
-        const buf = await videoRes.arrayBuffer();
-        saveCallLog({
-          method: "POST",
-          path: "/v1/videos/generations",
-          status: 200,
-          model: `${provider}/${model}`,
-          provider,
-          duration: Date.now() - startTime,
-        }).catch(() => {});
-        return {
-          success: true,
-          data: {
-            created: Math.floor(Date.now() / 1000),
-            data: [{ b64_json: Buffer.from(buf).toString("base64"), format: "mp4" }],
-          },
-        };
-      }
+    const videoUrl = gen.status === "COMPLETE" ? leonardoVideoUrl(gen) : undefined;
+    if (videoUrl) {
+      const buf = await downloadLeonardoVideo(videoUrl, signal, downloadTimeoutMs);
+      return videoDownloadResult(buf, fail, () =>
+        logLeonardoVideoCall(provider, model, startTime, 200)
+      );
     }
-    if (gen.status === "FAILED") {
-      saveCallLog({
-        method: "POST",
-        path: "/v1/videos/generations",
-        status: 502,
-        model: `${provider}/${model}`,
-        provider,
-        duration: Date.now() - startTime,
-        error: "Leonardo video generation failed",
-      }).catch(() => {});
-      return { success: false, status: 502, error: "Leonardo video generation failed" };
-    }
+    if (gen.status === "FAILED") return fail(502, "Leonardo video generation failed");
   }
-  saveCallLog({
-    method: "POST",
-    path: "/v1/videos/generations",
-    status: 504,
-    model: `${provider}/${model}`,
-    provider,
-    duration: Date.now() - startTime,
-    error: "Leonardo video generation timed out",
-  }).catch(() => {});
-  return { success: false, status: 504, error: "Leonardo video generation timed out" };
+  return fail(504, "Leonardo video generation timed out");
 }
