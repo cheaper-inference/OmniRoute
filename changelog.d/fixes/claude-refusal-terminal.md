@@ -1,0 +1,1 @@
+- **fix(claude):** treat `stop_reason: "refusal"` as an ordinary terminal instead of a failed turn. When Claude declines to answer it closes the stream with `message_stop` and no output, which the combo read as an untrusted empty turn, failed over, and reported as HTTP 502. The caller now receives the refusal it can act on rather than a gateway error.
