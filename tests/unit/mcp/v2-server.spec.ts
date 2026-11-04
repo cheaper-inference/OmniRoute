@@ -12,6 +12,17 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+
+// Run before application imports: real MCP modules must never discover the
+// developer's data/plugins. Reuse the repository's trust, DNS and browser guards.
+await vi.hoisted(async () => {
+  delete process.env.DATA_DIR;
+  delete process.env.OMNIROUTE_PLUGINS_DIR;
+  process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
+  await import("../../_setup/isolateDataDir.ts");
+  const { mkdirSync } = await import("node:fs");
+  mkdirSync(process.env.OMNIROUTE_PLUGINS_DIR!, { recursive: true });
+});
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import {

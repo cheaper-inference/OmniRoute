@@ -11,9 +11,21 @@
  * v2-scope-enforcement.test.ts), so a green run means the actually-registered
  * tool returns the right shape — not that a test hook does.
  */
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterAll } from "vitest";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+
+// Run before application imports: real MCP modules must never discover the
+// developer's data/plugins. Reuse the repository's trust, DNS and browser guards.
+await vi.hoisted(async () => {
+  delete process.env.DATA_DIR;
+  delete process.env.OMNIROUTE_PLUGINS_DIR;
+  process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
+  await import("../../_setup/isolateDataDir.ts");
+  const { mkdirSync } = await import("node:fs");
+  mkdirSync(process.env.OMNIROUTE_PLUGINS_DIR!, { recursive: true });
+});
+const { resetDbInstance } = await import("../../../src/lib/db/core.ts");
 
 // Intercept the network layer before v2 imports it (v2 pulls omniRouteFetch
 // from ../../../open-sse/mcp-server/internalFetch.ts as a value import, so the module specifier must be mocked).
@@ -24,10 +36,12 @@ vi.mock("../../../open-sse/mcp-server/audit.ts", () => ({
   logToolCall: vi.fn().mockResolvedValue(undefined),
 }));
 
-import { createMcpServerV2 } from "../../../open-sse/mcp-server/v2/server.js";
-import { omniRouteFetch } from "../../../open-sse/mcp-server/internalFetch.js";
+const { createMcpServerV2 } = await import("../../../open-sse/mcp-server/v2/server.js");
+const { omniRouteFetch } = await import("../../../open-sse/mcp-server/internalFetch.js");
 
 const mockedFetch = vi.mocked(omniRouteFetch);
+
+afterAll(() => resetDbInstance());
 
 async function connect() {
   const v2 = createMcpServerV2();

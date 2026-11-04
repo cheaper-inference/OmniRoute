@@ -31,6 +31,11 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const execFileAsync = promisify(execFile);
+
+// Cold `tsx` + barrel import can exceed a short budget on slow CI runners. Keep the
+// budget named and overridable instead of hard-coding it per call site.
+const LINK_TIMEOUT_MS = Number(process.env.OMNIROUTE_MCP_LINK_TIMEOUT_MS) || 60_000;
+const LINK_TEST_TIMEOUT_MS = LINK_TIMEOUT_MS + 30_000;
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(HERE, "..", "..", "..");
 
@@ -50,7 +55,7 @@ async function importViaNode(entry: string): Promise<{ ok: boolean; output: stri
          const names = Object.keys(m).sort().join(",");
          process.stdout.write("OK:" + names);`,
       ],
-      { cwd: REPO_ROOT, timeout: 60_000 }
+      { cwd: REPO_ROOT, timeout: LINK_TIMEOUT_MS }
     );
     return { ok: true, output: `${stdout}${stderr}` };
   } catch (err) {
@@ -60,23 +65,31 @@ async function importViaNode(entry: string): Promise<{ ok: boolean; output: stri
 }
 
 describe("v2 sidecar — real ESM link", () => {
-  it("v2/server.ts loads under Node ESM (not just vitest's transform)", async () => {
-    const { ok, output } = await importViaNode(V2_ENTRY);
-    expect(
-      ok,
-      `v2/server.ts failed to link under real Node ESM:\n${output}\n\n` +
-        `If this says "does not provide an export named X", the fix is to export X ` +
-        `from the module v2 imports it from — not to loosen the test.`
-    ).toBe(true);
-    expect(output).toContain("OK:");
-  }, 90_000);
+  it(
+    "v2/server.ts loads under Node ESM (not just vitest's transform)",
+    async () => {
+      const { ok, output } = await importViaNode(V2_ENTRY);
+      expect(
+        ok,
+        `v2/server.ts failed to link under real Node ESM:\n${output}\n\n` +
+          `If this says "does not provide an export named X", the fix is to export X ` +
+          `from the module v2 imports it from — not to loosen the test.`
+      ).toBe(true);
+      expect(output).toContain("OK:");
+    },
+    LINK_TEST_TIMEOUT_MS
+  );
 
-  it("the mcp-server barrel links under Node ESM and re-exports the v2 surface", async () => {
-    const { ok, output } = await importViaNode(BARREL_ENTRY);
-    expect(ok, `mcp-server/index.ts failed to link under real Node ESM:\n${output}`).toBe(true);
-    // The barrel must expose the v2 factory, or `import { createMcpServerV2 }`
-    // from the package entry point is undefined for every consumer.
-    expect(output).toContain("createMcpServerV2");
-    expect(output).toContain("startMcpStdioV2");
-  }, 90_000);
+  it(
+    "the mcp-server barrel links under Node ESM and re-exports the v2 surface",
+    async () => {
+      const { ok, output } = await importViaNode(BARREL_ENTRY);
+      expect(ok, `mcp-server/index.ts failed to link under real Node ESM:\n${output}`).toBe(true);
+      // The barrel must expose the v2 factory, or `import { createMcpServerV2 }`
+      // from the package entry point is undefined for every consumer.
+      expect(output).toContain("createMcpServerV2");
+      expect(output).toContain("startMcpStdioV2");
+    },
+    LINK_TEST_TIMEOUT_MS
+  );
 });

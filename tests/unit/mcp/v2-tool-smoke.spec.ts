@@ -17,9 +17,21 @@
  * observable outcomes: the call resolves, and it is not an SDK-level error.
  * Network is mocked; the tool-call path is not.
  */
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterAll } from "vitest";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+
+// Run before application imports: real MCP modules must never discover the
+// developer's data/plugins. Reuse the repository's trust, DNS and browser guards.
+await vi.hoisted(async () => {
+  delete process.env.DATA_DIR;
+  delete process.env.OMNIROUTE_PLUGINS_DIR;
+  process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
+  await import("../../_setup/isolateDataDir.ts");
+  const { mkdirSync } = await import("node:fs");
+  mkdirSync(process.env.OMNIROUTE_PLUGINS_DIR!, { recursive: true });
+});
+const { resetDbInstance } = await import("../../../src/lib/db/core.ts");
 
 vi.mock("../../../open-sse/mcp-server/internalFetch.ts", () => ({ omniRouteFetch: vi.fn() }));
 
@@ -28,10 +40,12 @@ vi.mock("../../../open-sse/mcp-server/audit.ts", () => ({
   logToolCall: vi.fn().mockResolvedValue(undefined),
 }));
 
-import { createMcpServerV2 } from "../../../open-sse/mcp-server/v2/server.js";
-import { omniRouteFetch } from "../../../open-sse/mcp-server/internalFetch.js";
+const { createMcpServerV2 } = await import("../../../open-sse/mcp-server/v2/server.js");
+const { omniRouteFetch } = await import("../../../open-sse/mcp-server/internalFetch.js");
 
 const mockedFetch = vi.mocked(omniRouteFetch);
+
+afterAll(() => resetDbInstance());
 
 /** Minimal args that satisfy each tool's input schema. */
 const ARGS: Record<string, Record<string, unknown>> = {

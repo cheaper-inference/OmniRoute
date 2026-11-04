@@ -20,6 +20,9 @@ import { describe, it, expect, vi } from "vitest";
 await vi.hoisted(async () => {
   delete process.env.DATA_DIR;
   delete process.env.OMNIROUTE_PLUGINS_DIR;
+  // The sidecar reads this flag at module load, so clear any inherited value
+  // before the server import below runs.
+  delete process.env.OMNIROUTE_MCP_V2;
   process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
   await import("../../_setup/isolateDataDir.ts");
   const { mkdirSync } = await import("node:fs");
