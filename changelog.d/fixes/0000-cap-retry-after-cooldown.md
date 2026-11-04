@@ -1,1 +1,0 @@
-- **fix(sse):** An upstream `Retry-After` header or a JSON `retryDelay` hint now puts a connection in cooldown for 30 days at most. Before, an epoch-like value locked the connection for decades, and a 14-digit value made the cooldown writer throw.
