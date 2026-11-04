@@ -295,24 +295,18 @@ API-key `connectionCooldown` මූලික කූල්ඩවුන් සහ 
 
 ## 4. කෝටා-බෙදාගැනීමේ සමගාමීතා පාලනය (v3.8.36)
 
-Subscription ගිණුම් (GLM, MiniMax ආදිය) සාමාන්යයෙන් එකවර ~1–3
-ඉල්ලීම් පමණක් පිළිගනී; එය ඉක්මවා ගිය විට 429s සහ cooldowns ඇති වේ. මෙය
-**quota-share** (`qtSd/…`) සංයෝජන යටතේ වඩාත් තීව්ර වේ, එහිදී API keys කිහිපයක්
-එකම upstream ගිණුමක් බෙදාගනී. බෙදාගත් ගිණුමක් අධික ලෙස පිරී යාම වැළැක්වීමට
-ස්තර තුනක් භාවිත වේ.
+දායකත්ව ගිණුම් (GLM, MiniMax ආදිය) සාමාන්යයෙන් එකවර පිළිගන්නේ ~1–3 ඉල්ලීම් පමණි; එය ඉක්මවා ගිය විට 429 දෝෂ සහ cooldowns ඇති වේ. **කෝටා-බෙදාගැනීමේ**
+(`qtSd/…`) සංයෝජන යටතේ මෙය වඩාත් තීව්ර වේ, මන්ද API යතුරු කිහිපයක් එකම upstream ගිණුමක් බෙදාගන්නා බැවිනි. හවුල් ගිණුමක් අධික ලෙස පිරී යාම වැළැක්වීමට ස්තර තුනක් භාවිතා වේ.
 
-### සම්බන්ධතාවයකට අදාළ සමගාමීතා සීමාව (`max_concurrent`)
+### එක් සම්බන්ධතාවයක සමගාමීතා සීමාව (`max_concurrent`)
 
-සෑම provider සම්බන්ධතාවයකටම `max_concurrent` උපරිම සීමාවක් ප්රකාශ කළ හැක
-(`provider_connections.max_concurrent`, connection modal / API / DB තුළ සකසනු ලැබේ).
-සීමාවක් අවශ්ය නොවේ නම් එය හිස්ව තබන්න. පහත serialization ස්තරය පාලනය කරන
-ප්රධාන සැකසුම මෙයයි — එය ගිණුමේ සැබෑ සමගාමීතා අගයට සකසන්න (උදා. GLM ~1,
-MiniMax ~2).
+සෑම provider connection එකකටම `max_concurrent` උපරිම සීමාවක් ප්රකාශ කළ හැක
+(`provider_connections.max_concurrent`, සම්බන්ධතා modal / API / DB තුළ සකසනු ලැබේ).
+සීමාවක් නොමැති වීමට එය හිස්ව තබන්න. පහත serialization ස්තරය පාලනය කරන එකම ප්රධාන සැකසුම මෙයයි — එය ගිණුමේ සැබෑ සමගාමීතා ප්රමාණයට සකසන්න (උදා: GLM ~1, MiniMax ~2).
 
-### මාදිලියකට අදාළ සමගාමීතා සීමා (`modelConcurrency`)
+### එක් ආකෘතියකට සමගාමීතා සීමා (`modelConcurrency`)
 
-සම්බන්ධතාවයකට එහි `rateLimitOverrides` map එක තුළ මාදිලියකට නිශ්චිත
-සමගාමීතා උපරිම සීමා අමතරව ප්රකාශ කළ හැක:
+සම්බන්ධතාවකට එහි `rateLimitOverrides` map එක තුළ නිශ්චිත එක්-ආකෘති සමගාමීතා සීමා අතිරේකව ප්රකාශ කළ හැක:
 
 ```json
 {
@@ -323,76 +317,38 @@ MiniMax ~2).
 }
 ```
 
-එය connection modal තුළ (**Rate limit overrides → Per-model
-concurrency caps**, එක් පේළියකට එක් `model=cap`) හෝ එම JSON හැඩතලය සමඟ
-`PATCH /api/providers/[id]` හරහා සකසන්න. ප්රධාන අර්ථකථන:
+එය සම්බන්ධතා modal තුළ (**Rate limit overrides → Per-model
+concurrency caps**, එක් පේළියකට එක `model=cap`) හෝ
+`PATCH /api/providers/[id]` හරහා එකම JSON ආකෘතියෙන් සකසන්න. ප්රධාන අර්ථකථන:
 
-- **සම්බන්ධතාවය පුරාද, මාදිලියට විශේෂිතද:** `maxConcurrent` සම්බන්ධතාවය පුරා
-  බෙදාගන්නා උපරිම සීමාව ලෙස පවතී. දෙකම අදාළ වන විට, gate දෙකම එකම composite gate
-  (`global → provider → account → model`) තුළ පරමාණුකව ලබාගනී; ක්රියාකාරී
-  හැසිරීම අදාළ වන වඩාත් දැඩි සීමාව අනුගමනය කරයි.
-- **නිශ්චිත මාදිලි-යතුරු ගැළපීම:** යතුර යනු routing resolution එකෙන් පසු executor
-  වෙත යවන model string එකයි — සාමාන්යයෙන් bare upstream model id
-  (`glm-5`) වේ, client-side `provider/model` alias එකක් නොවේ
-  (`zai/glm-5` යන්න `glm-5` සමඟ නොගැළපේ). අගයන් ධනාත්මක පූර්ණ-සංඛ්යා
-  සමගාමී-ඉල්ලීම් සීමා වේ.
-- **දේශීය පෝලිම් කිරීම, සොයාගැනීමක් නොමැත:** අතිරේක ඉල්ලීම් පවතින
-  queue/timeout semantics සමඟ දේශීයව පෝලිම් වේ (වර්ගීකෘත
-  `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` admission errors). OmniRoute
-  upstream policy සොයාගැනීමක් හෝ අනුමාන කිරීමක් නොකරයි — operator විසින්
-  සකසා ඇති නිශ්චිත සීමා පමණක් ක්රියාත්මක කරයි. සංතෘප්ත model gate එකක්
-  provider අක්රිය නොකරන අතර ස්ථිර model lockout එකක්ද නිර්මාණය නොකරයි;
-  upstream 429/cooldown/fallback හැසිරීම error backstop ලෙස දිගටම පවතී.
-- **සම්බන්ධතාවයකට, process එකකට අදාළ පරාසය:** සීමා database connection එකකට
-  අදාළ වන අතර memory තුළ තබා ගනී; එබැවින් එකම upstream API key නැවත භාවිත කරන
-  connections දෙකක් එකිනෙකා සමඟ සම්බන්ධීකරණය නොකරයි.
-- **සකසා නොමැති විට වෙනසක් නොමැත:** map එක අත්හැර දැමීම (හෝ dashboard
-  field එක හිස්ව තැබීම) model gate එකක් එක් නොකරයි. කිසිදු universal provider
-  සීමාවක් ප්රකාශ නොකරන උදාහරණ වින්යාසය:
+- **සම්බන්ධතාවය පුරාද, ආකෘතියට විශේෂිතද:** `maxConcurrent` සම්බන්ධතාවය පුරාම බෙදාගන්නා සීමාව ලෙස පවතී. දෙකම අදාළ වන විට, දෙකම එකම සංයුක්ත gate එකෙහි (`global → provider → account → model`) පරමාණුකව ලබා ගනී; ක්රියාකාරී හැසිරීම අදාළ වන වඩාත් දැඩි සීමාව අනුගමනය කරයි.
+- **නිශ්චිත ආකෘති-යතුරු ගැළපීම:** යතුර යනු routing resolution එකෙන් පසු executor වෙත යවන model string එකයි — සාමාන්යයෙන් bare upstream model id (`glm-5`) මිස client-side `provider/model` alias එකක් නොවේ (`zai/glm-5` යන්න `glm-5` සමඟ නොගැළපේ). අගයන් ධනාත්මක පූර්ණ සංඛ්යා වන සමගාමී ඉල්ලීම් සීමාවන් වේ.
+- **දේශීය පෝලිම්ගත කිරීම, සොයාගැනීමක් නොමැත:** අතිරික්ත ඉල්ලීම් දැනට පවතින queue/timeout අර්ථකථන සමඟ දේශීයව පෝලිම්ගත වේ (වර්ගීකෘත `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` admission දෝෂ). OmniRoute upstream ප්රතිපත්තිය සොයාගැනීමක් හෝ අනුමානයක් නොකරයි — operator විසින් සකසා ඇති නිශ්චිත සීමා එය ක්රියාත්මක කරයි. පිරුණු model gate එකක් provider අක්රිය නොකරන අතර ස්ථිර model lockout එකක්ද නිර්මාණය නොකරයි; upstream 429/cooldown/fallback හැසිරීම දෝෂ සඳහා අවසාන ආරක්ෂක පියවර ලෙස පවතී.
+- **එක් සම්බන්ධතාවයකට, එක් process එකකට සීමා වේ:** සීමා එක් database connection එකකට අදාළ වන අතර මතකයේ රඳවා ගනී; එබැවින් එකම upstream API key නැවත භාවිතා කරන සම්බන්ධතා දෙකක් එකිනෙකා සමඟ සම්බන්ධීකරණය නොවේ.
+- **වින්යාස නොකළ විට වෙනසක් නොමැත:** map එක අතහැර දැමීමෙන් (හෝ dashboard ක්ෂේත්රය හිස්ව තැබීමෙන්) කිසිදු model gate එකක් එක් නොවේ. කිසිදු විශ්වීය provider සීමාවක් ප්රකාශ නොකරන උදාහරණ වින්යාසය:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Quota-share ඉල්ලීම් අනුක්රමණය
+### කෝටා-බෙදාගැනීමේ ඉල්ලීම් අනුක්රමිකකරණය
 
-Quota-share dispatch එකක් ධනාත්මක `max_concurrent` අගයක් ප්රකාශ කර ඇති
-connection එකක් ඉලක්ක කරන විට, එම **ගිණුමට** යොමු වන සමගාමී ඉල්ලීම්
-connection එකකට අදාළ semaphore එකක් (`qsconn:<connectionId>`) හරහා
-අනුක්රමණය කෙරේ: අතිරේක ඉල්ලීම් ගිණුම පිරී යාමට ඉඩ දීම වෙනුවට
-**පෝලිමේ රැඳී සිටී**. මෙය **fail-open** වේ — සංතෘප්ත පෝලිමක් හෝ timeout එකක්
-ඇති විට slot එකක් නොමැතිව ඉදිරියට යන අතර dispatch කළ හැකි ඉල්ලීමක් කිසිවිටෙක
-ප්රතික්ෂේප නොකරයි. **Settings → Resilience → Quota-share per-connection
+කෝටා-බෙදාගැනීමේ dispatch එකක් ධනාත්මක
+`max_concurrent` අගයක් ප්රකාශ කර ඇති සම්බන්ධතාවයක් ඉලක්ක කරන විට, එම **ගිණුමට** යන සමගාමී ඉල්ලීම් එක් සම්බන්ධතාවයක semaphore එකක් (`qsconn:<connectionId>`) හරහා අනුක්රමිකව සිදු කරයි: අතිරික්ත ඉල්ලීම් ගිණුමට අධික ඉල්ලීම් යැවීම වෙනුවට **පෝලිමේ රැඳී සිටී**. මෙය **fail-open** වේ — පිරුණු පෝලිමක් හෝ timeout එකක් ඇති විට dispatch කළ හැකි ඉල්ලීමක් කිසි විටෙක ප්රතික්ෂේප නොකර slot එකක් නොමැතිව ඉදිරියට යයි. **Settings → Resilience → Quota-share per-connection
 concurrency** තුළ toggle කරන්න
-(`resilienceSettings.quotaShareConcurrencyLimit.enabled`, පෙරනිමියෙන් on).
-`max_concurrent` සීමාවක් නොමැති විට හැසිරීම වෙනස් නොවේ.
+(`resilienceSettings.quotaShareConcurrencyLimit.enabled`, පෙරනිමිය on). `max_concurrent` සීමාවක් නොමැති විට හැසිරීම වෙනස් නොවේ.
 
-> Quota-share routing gate (`selectQuotaShareTarget`, DRR + P2C) ද fail-open
-> වන අතර උපරිම සීමාවට පැමිණි connection එකක ප්රමුඛතාවය පමණක්
-> _අඩු කරයි_ — එක්-connection pool එකක් සමඟ එයට දැඩි සීමාවක් පැනවිය
-> නොහැකි බැවින්, flood එක සැබවින්ම පාලනය කරන්නේ මෙම semaphore එකයි.
+> කෝටා-බෙදාගැනීමේ routing gate (`selectQuotaShareTarget`, DRR + P2C) මෙන්ම
+> fail-open වන අතර සීමාවට පැමිණි සම්බන්ධතාවයක ප්රමුඛතාවය පමණක් _අඩු කරයි_ — එක් සම්බන්ධතා pool එකක් ඇති විට එයට දැඩි සීමාවක් පැනවිය නොහැකි බැවින්, ගලා ඒම සැබවින්ම පාලනය කරන්නේ මෙම semaphore එකයි.
 
-### Combo cooldown-aware retry
+### සංයෝජන cooldown-දැනුවත් නැවත උත්සාහය
 
-සෑම combo strategy එකක් සඳහාම (සක්රීය කළ විට), SHORT transient cooldown එකක්
-සඳහා 429ක් ස්ථිර වීමට ඉඩ ඇති ඉල්ලීමක්, 429 ආපසු ලබා දීම වෙනුවට cooldown කාලය
-ගත වන තෙක් රැඳී නැවත dispatch කරයි — මෙය multi-model combos මත Gemini-class
-TPM/RPM windows (~60s retry-after) ආවරණය කරයි. උදාහරණයක් ලෙස, 2-model combo
-එකක targets දෙකම per-model rate limit එකකට ලක් වූ විටය. මෙය
-**Settings → Resilience** තුළ ඇති `comboCooldownWait` (`enabled`, `maxWaitMs`,
-`maxAttempts`, `budgetMs`) මඟින් සීමා වේ. එය `quota_exhausted` (මධ්යම රාත්රිය
-දක්වා locked) හෝ auth/not-found හේතු මත කිසිවිටෙක රැඳී නොසිටී.
+සෑම combo strategy එකක් සඳහාම (සක්රිය කළ විට), SHORT transient cooldown එකක් සඳහා 429 තත්ත්වයක් ස්ථිර කිරීමට ඉඩ ඇති ඉල්ලීමක්, 429 ආපසු ලබා දීම වෙනුවට එම cooldown කාලය අවසන් වන තෙක් රැඳී නැවත dispatch කරයි — මෙය multi-model combos මත Gemini-class TPM/RPM කවුළු (~60s retry-after) ආවරණය කරයි. උදාහරණයක් ලෙස, 2-model combo එකක targets දෙකම එක්-ආකෘති rate limit එකකට ලක් වීම. මෙය **Settings → Resilience** තුළ ඇති `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) මගින් සීමා වේ. එය `quota_exhausted` (මධ්යම රාත්රිය දක්වා අගුළු දමා ඇති) හෝ auth/not-found හේතු සඳහා කිසි විටෙක රැඳී නොසිටී.
 
-එම gate එක pre-dispatch අවස්ථාවද ආවරණය කරයි (#16319): උත්සාහයක් කිරීමට පෙර
-combo එකක සෑම target එකක්ම short transient lockout එකක ඇති model එකක් නිසා
-skip වූ විට, zero-attempt path එක එම lockout කාලය සඳහා එකම සීමාවන් යටතේ රැඳී
-නැවත dispatch කරයි; hint-රහිත `503 ALL_TARGETS_SKIPPED` එකක් ලබා දීම වෙනුවටය.
-රැඳී සිටීමට අවසර නොමැති විට (ceiling, attempt හෝ budget අවසන් වූ විට, හෝ
-feature එක off වූ විට), terminal response එක `429 rate_limit_error` වෙත
-upgrade වන අතර, ආරම්භක transient lock expiry එකෙන් ලැබෙන
-`retry_after` / `reset_at` දරයි; quota, auth සහ not-found locks hint-රහිත
-503 තත්ත්වය පවත්වා ගනී.
+Combo එකකට `config.comboCooldownWaitEnabled: false` මඟින් ඉවත් විය හැක. literal `false` පමණක් මෙම හවුල් combo waits (dispatch පසු cooldown සහ dispatch පෙර circuit-open/model-lock waits) සහ ඒවායේ wait-budget timeout-floor extension අක්රිය කරයි. නොමැති වීම හෝ `true` වීම global policy එක පවත්වා ගනී; `true` මඟින් ගෝලීයව අක්රිය කර ඇති waiting සක්රිය කළ නොහැක. පැහැදිලි `targetTimeoutMs` එකක් තවමත් ප්රමුඛ වේ. මෙම opt-out එක වෙනම native-Codex turn-pin dispatch-පෙර wait එක වෙනස් නොකරයි.
+
+එම gate එකම dispatch-පෙර අවස්ථාව (#16319) ද ආවරණය කරයි: combo එකක සෑම target එකක්ම කිසිදු උත්සාහයකට පෙර, එහි model එක කෙටි transient lockout එකක ඇති බැවින් skip කළ විට, zero-attempt path එක එම lockout කාලය එකම සීමාවන් යටතේ බලා සිට, hint-රහිත `503 ALL_TARGETS_SKIPPED` ලබා දීම වෙනුවට නැවත dispatch කරයි. රැඳී සිටීමට අවසර නොමැති විට (ceiling, attempt හෝ budget අවසන් වූ විට, හෝ feature එක අක්රිය වූ විට), අවසාන ප්රතිචාරය earliest transient lock expiry වෙතින් `retry_after` / `reset_at` රැගෙන යන `429 rate_limit_error` බවට උසස් වේ; quota, auth සහ not-found locks hint-රහිත 503 තත්ත්වය පවත්වා ගනී.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)
