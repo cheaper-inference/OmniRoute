@@ -17,6 +17,8 @@ interface LiveZoneEntry {
   transformedPrefix: unknown[];
   transformedStableFields: Record<string, unknown>;
   stats: CompressionStats | null;
+  /** Sparse, digest-validated raw prefix; large unchanged messages are never retained. */
+  rawPrefixPatches?: Array<{ index: number; value: unknown }>;
   lastAccess: number;
   expiresAt: number;
   bytes: number;
