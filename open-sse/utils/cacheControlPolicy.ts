@@ -297,7 +297,9 @@ export function providerUsesAutomaticPrefixCaching(
     return true;
   }
   if (!provider) return false;
-  return AUTOMATIC_PREFIX_CACHING_PROVIDERS.has(provider.toLowerCase());
+  const providerId = provider.toLowerCase();
+  if (OPENCODE_LANES.has(providerId)) return isOpenCodeCacheableModel(providerId, model);
+  return AUTOMATIC_PREFIX_CACHING_PROVIDERS.has(providerId);
 }
 
 /**
