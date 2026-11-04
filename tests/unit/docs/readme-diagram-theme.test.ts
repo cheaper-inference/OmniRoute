@@ -173,6 +173,11 @@ test("light warn darkens the kit warning only while the kit value misses AA on a
     surfaces.some((bg) => contrast(kitWarn, KIT.light[bg]) < 4.5),
     "the kit warning clears AA everywhere: use it in readme-diagram-theme.mjs"
   );
+  // The override must be a darker ink than the kit's, never a lighter or unrelated one.
+  assert.ok(
+    contrast(KIT.light.warn, KIT.light.surfaceMuted) > contrast(kitWarn, KIT.light.surfaceMuted),
+    "the diagram warn is darker than the kit warning"
+  );
   for (const bg of surfaces) {
     const ratio = contrast(KIT.light.warn, KIT.light[bg]);
     assert.ok(ratio >= 4.5, `light warn on ${bg}: ${ratio.toFixed(2)}:1`);
