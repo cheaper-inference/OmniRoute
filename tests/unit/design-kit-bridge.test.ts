@@ -13,22 +13,10 @@ const block = (selector: string) => {
   return css.slice(start, css.indexOf("\n}", start));
 };
 
-test("globals.css loads the self-hosted Keak fonts and the vendored kit CSS right after Tailwind", () => {
+test("globals.css loads the vendored kit CSS right after Tailwind, and the kit self-hosts its font", () => {
   const order = [
     '@import "tailwindcss" source(none);',
-    // Static weights, not `@fontsource-variable/inter`: the variable package registers the
-    // family "Inter Variable", which the kit's `--ci-font-ui: "Inter", …` never matches.
-    '@import "@fontsource/inter/400.css";',
-    '@import "@fontsource/inter/500.css";',
-    '@import "@fontsource/inter/600.css";',
-    '@import "@fontsource/inter/700.css";',
-    '@import "@fontsource/instrument-serif/400.css";',
-    '@import "@fontsource/instrument-serif/400-italic.css";',
-    '@import "@fontsource/ibm-plex-mono/400.css";',
-    '@import "@fontsource/ibm-plex-mono/500.css";',
-    '@import "@fontsource/ibm-plex-mono/600.css";',
-    '@import "@fontsource/ibm-plex-mono/700.css";',
-    '@import "../../packages/ui-kit/src/ci-ui.css";',
+    '@import "../../packages/ui-kit/src/ci-styles.css";',
   ].map((needle) => css.indexOf(needle));
   assert.ok(
     order.every((i) => i >= 0),
@@ -39,8 +27,22 @@ test("globals.css loads the self-hosted Keak fonts and the vendored kit CSS righ
     order,
     "imports keep this order"
   );
+  // Since kit 0.0.66 the UI and display roles are Switzer, declared by the kit itself:
+  // ci-ui.css → ci-tokens.css → ci-fonts.css → local woff2 files. Instrument Serif and IBM Plex
+  // Mono are gone; Inter comes back ONLY as the per-script fallback after Switzer (Switzer has no
+  // Cyrillic / Greek / Vietnamese glyphs), never as a primary face. Vazirmatn is the Arabic-script
+  // fallback, named only under html[dir="rtl"] (tests/unit/rtl-font-stack.test.ts).
+  const fontsourceImports = [...css.matchAll(/@import "@fontsource\/([^/"]+)\//g)].map((m) => m[1]);
+  assert.deepEqual([...new Set(fontsourceImports)], ["inter", "vazirmatn"]);
+  assert.doesNotMatch(css, /--font-(sans|display):\s*"Inter"/);
   assert.doesNotMatch(css, /fonts\.googleapis\.com/);
-  assert.doesNotMatch(css, /@fontsource-variable/);
+  const tokens = read("packages/ui-kit/src/ci-tokens.css");
+  assert.match(tokens, /^@import "\.\/ci-fonts\.css";/m);
+  assert.match(tokens, /--ci-font-ui: "Switzer"/);
+  const fonts = read("packages/ui-kit/src/ci-fonts.css");
+  for (const [, file] of fonts.matchAll(/url\("\.\/(fonts\/[^"]+\.woff2)"\)/g))
+    assert.ok(fs.existsSync(path.join(ROOT, "packages/ui-kit/src", file)), `${file} is vendored`);
+  assert.doesNotMatch(fonts, /https?:\/\//, "the kit font is self-hosted");
 });
 
 test("the OmniRoute color tokens are aliases of kit tokens (no hex left in :root / .dark)", () => {
@@ -93,7 +95,13 @@ test("the graph-paper grid, the coral/indigo palette and the macOS font stack ar
   assert.doesNotMatch(css, /"SF Pro Text"/);
   const theme = block("@theme inline {");
   assert.match(theme, /--font-sans:\s*var\(--ci-font-ui\);/);
-  assert.match(theme, /--font-mono:\s*var\(--ci-font-mono\);/);
+  // Code text is monospace again: kit 0.0.66 points --ci-font-mono at Switzer (proportional),
+  // so `font-mono` maps to the code stack (upstream 0.0.76 names it --ci-font-code).
+  assert.match(theme, /--font-mono:\s*var\(--ci-font-code\);/);
+  assert.match(css, /--ci-font-code:\s*ui-monospace[^;]*monospace;/);
+  // Switzer is Latin-only: Inter's subsets (unicode-range) cover Cyrillic / Greek / Vietnamese.
+  assert.match(css, /--ci-font-ui:\s*"Switzer",\s*"Inter",/);
+  assert.match(css, /@import "@fontsource\/inter\/400\.css";/);
   assert.match(theme, /--font-display:\s*var\(--ci-font-display\);/);
   for (const t of [
     "--color-success-bg",
@@ -223,8 +231,8 @@ test("flow surfaces still express state with --orch-status-* tokens, not fixed h
   for (const tone of ["text-success", "text-warning", "text-error"]) {
     assert.ok(badge.includes(`"${tone}"`), `badge reads the ${tone} status token`);
   }
-  // EngineNode keeps the categorical LAYER_COLORS palette (hex by design); its state colors
-  // are the tokens above, so the forbidden literal there is the old warning hex.
+  // EngineNode's categorical layer pills ride the chart tokens (P8, asserted below); its state
+  // colors are the tokens above, so the forbidden literal there is the old warning hex.
   for (const [name, src] of Object.entries({ combo, edges, badge })) {
     assert.ok(!src.includes('"#22c55e"'), `${name} hardcodes no success hex`);
   }
@@ -303,12 +311,19 @@ test("every flow surface expresses state with --orch-status-* tokens; categorica
   assert.ok(!cockpit.includes('"#22c55e"'), "cockpit hardcodes no success hex");
   assert.ok(io.includes('"var(--orch-status-success)"'), "IoNode savings = success token");
 
-  // Deliberately NOT migrated — categorical/brand palettes, not state.
-  assert.ok(strategy.includes("STRATEGY_COLORS"), "strategy hues stay a categorical palette");
-  assert.ok(engine.includes("LAYER_COLORS"), "layer pills stay a categorical palette");
+  // Categorical palettes (not state) ride the kit chart tokens, never hex (KEA-7886, P8).
   assert.ok(
-    io.includes('isInput ? "#6366f1" : "#22c55e"'),
-    "IoNode keeps its indigo/green input-output identity pair"
+    strategy.includes("strategyColorVar(") && !/#[0-9a-fA-F]{6}/.test(strategy),
+    "strategy hues come from the shared chart-token strategy palette"
+  );
+  assert.ok(
+    engine.includes("categoricalSlotFor(LAYER_ORDER, layer)") &&
+      !/LAYER_COLORS|"#[0-9a-fA-F]{6}/.test(engine),
+    "layer pills stay a categorical palette, on the chart tokens"
+  );
+  assert.ok(
+    io.includes('isInput ? "var(--color-chart-2)" : "var(--color-chart-4)"'),
+    "IoNode keeps an input/output identity pair, on the chart tokens"
   );
 });
 
@@ -317,6 +332,22 @@ test("@theme inline still exposes bg-surface-2 and rounded-card", () => {
   assert.match(theme, /--color-surface-2:\s*var\(--surface-2\);/);
   assert.match(theme, /--radius-card:\s*var\(--radius\);/);
   assert.match(theme, /--radius-control:\s*var\(--radius-control\);/);
+});
+
+test("bg-alt, muted and surface-secondary have @theme entries so their utilities paint (KEA-7886 P4)", () => {
+  // Before P4 these three had a :root value but no @theme entry: `bg-bg-alt` (41 uses),
+  // `bg-muted/50` and `bg-surface-secondary/30` generated no CSS at all.
+  const theme = block("@theme inline {");
+  const root = block(":root {\n  --desktop-safe-top");
+  for (const [name, kit] of [
+    ["--color-bg-alt", "var(--ci-color-surface-subtle)"],
+    ["--color-muted", "var(--ci-color-surface-muted)"],
+    ["--color-surface-secondary", "var(--ci-color-surface-subtle)"],
+  ] as const) {
+    assert.ok(theme.includes(`${name}: var(${name});`), `@theme inline exposes ${name}`);
+    // Kit token → flips with data-theme="dark", so light and dark both get a kit surface.
+    assert.ok(root.includes(`${name}: ${kit};`), `:root maps ${name} → ${kit}`);
+  }
 });
 
 test("cn() still dedupes via tailwind-merge and DataTable paints an opaque surface", () => {
@@ -402,6 +433,65 @@ test("text-primary resolves to a readable primary ink; lime stays on bg/border/r
 
   // The inline ::selection rule colours TEXT, so it reads the ink too.
   assert.match(css, /::selection \{[^}]*\n\s*color: var\(--color-primary-ink\);/);
+});
+
+test("Editions (default palette): text-primary reads the kit's accent-active, AA in light and dark", () => {
+  // The Classic ink (lime-800 / lime) would be wrong on the copper palette, so Editions bridges
+  // --color-primary-ink to --ci-color-accent-active, which ci-editions.css flips per theme.
+  const editionsRoot = block('html:root[data-ci-appearance="editions"] {');
+  assert.match(editionsRoot, /--color-primary-ink:\s*var\(--ci-color-accent-active\);/);
+  assert.doesNotMatch(editionsRoot, /#[0-9a-fA-F]{3,6}\b/, "the Editions bridge carries no hex");
+  // It must outrank the Classic dark rule (:root[data-theme="dark"], specificity 0,2,0).
+  assert.ok(
+    css.indexOf('html:root[data-ci-appearance="editions"] {') >
+      css.indexOf(':root[data-theme="dark"] {'),
+    "the Editions ink comes after the Classic dark ink"
+  );
+
+  const editions = read("packages/ui-kit/src/ci-editions.css").replace(/\/\*[\s\S]*?\*\//g, "");
+  const blockOf = (startsWith: string) => {
+    const start = editions.indexOf(startsWith);
+    assert.ok(start >= 0, `ci-editions.css has the block ${startsWith}`);
+    const body = editions.slice(editions.indexOf("{", start) + 1, editions.indexOf("}", start));
+    return new Map([...body.matchAll(/(--[\w-]+):\s*([^;]+);/g)].map((m) => [m[1], m[2].trim()]));
+  };
+  const light = blockOf(':is(html:root:has([data-ci-appearance="editions"])');
+  const dark = blockOf(':is(html:root[data-theme="dark"]:has([data-ci-appearance="editions"])');
+  const lookup = (token: string, scopes: Map<string, string>[]) => {
+    const value = scopes.map((scope) => scope.get(token)).find((v) => v !== undefined);
+    assert.ok(value, `${token} is declared in ci-editions.css`);
+    assert.match(value, /^#[0-9a-f]{6}$/i, `${token} is a literal hex in ci-editions.css`);
+    return value;
+  };
+  const luminance = (hex: string) => {
+    const [r, g, b] = [1, 3, 5]
+      .map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+      .map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const contrast = (a: string, b: string) => {
+    const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+    return (hi + 0.05) / (lo + 0.05);
+  };
+  for (const [name, scopes] of [
+    ["light", [light]],
+    ["dark", [dark, light]],
+  ] as const) {
+    const ink = lookup("--ci-color-accent-active", [...scopes]);
+    for (const surface of ["--ci-color-background", "--ci-color-surface"]) {
+      const ratio = contrast(ink, lookup(surface, [...scopes]));
+      assert.ok(ratio >= 4.5, `${name} ink ${ink} on ${surface}: ${ratio.toFixed(2)}:1`);
+    }
+    // Sanity: the copper accent itself is unreadable as text on light — the reason for the ink.
+    if (name === "light") {
+      const accent = lookup("--ci-color-accent", [...scopes]);
+      assert.ok(contrast(accent, lookup("--ci-color-background", [...scopes])) < 4.5);
+    }
+    // The accent surface still carries its own dark foreground at AA.
+    const fg = lookup("--ci-color-accent-foreground", [...scopes]);
+    const accent = lookup("--ci-color-accent", [...scopes]);
+    assert.ok(contrast(fg, accent) >= 4.5, `${name} accent foreground on the accent`);
+  }
 });
 
 test("token aliases with no consumer are gone (KEA-7886 F4)", () => {

@@ -8,14 +8,19 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## Utvecklingsmiljö
+## Utvecklingskonfiguration
 
 ### Förutsättningar
 
-- **Node.js** `>=22.22.2 <23` eller `>=24.0.0 <27` (rekommenderat: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, eller `>=24.0.0 <27` (rekommenderas: 24 LTS)
 - **npm** 10+
 
-> **För användare av npm v11+ (Node 24+):** Efter `npm install`, verifiera att de systemspecifika modulerna har installerats:
+> **Windows med Node 24:** använd den aktuella 24 LTS-korrigeringsversionen (minst 24.20.0).
+> Äldre versioner kan avslutas efter lyckade tester när `--test-force-exit` stänger
+> processen. Node:s [Windows libuv-korrigering](https://github.com/nodejs/node/pull/61999) åtgärdar
+> denna krasch i runtime; behåll testkontrollerna och kontrollerna av körarens avslut aktiverade.
+
+> **Användare av npm v11+ (Node 24+):** Efter `npm install` ska du verifiera att inbyggda moduler har installerats:
 > `node -e "require('better-sqlite3')"`. Om kommandot misslyckas med `MODULE_NOT_FOUND`,
 > kör `npm approve-scripts better-sqlite3 && npm install`. Se
 > [Felsökning](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
@@ -36,7 +41,7 @@ npm install
 # Skapa din .env från mallen
 cp .env.example .env
 
-# Generera nödvändiga hemligheter
+# Generera obligatoriska hemligheter
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
@@ -48,76 +53,76 @@ Viktiga variabler för utveckling:
 | `PORT`                 | `20128`                      | Serverport                       |
 | `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`     | Bas-URL för frontend             |
 | `JWT_SECRET`           | (generera ovan)              | Hemlighet för JWT-signering      |
-| `INITIAL_PASSWORD`     | `CHANGEME`                   | Lösenord vid första inloggningen |
+| `INITIAL_PASSWORD`     | `CHANGEME`                   | Lösenord för första inloggningen |
 | `APP_LOG_LEVEL`        | `info`                       | Detaljnivå för loggning          |
 
-### Inställningar i kontrollpanelen
+### Inställningar för instrumentpanelen
 
-Kontrollpanelen innehåller reglage för funktioner som även kan konfigureras via miljövariabler:
+Instrumentpanelen innehåller UI-reglage för funktioner som även kan konfigureras via miljövariabler:
 
-| Inställningens plats      | Reglage               | Beskrivning                               |
-| ------------------------- | --------------------- | ----------------------------------------- |
-| Inställningar → Avancerat | Felsökningsläge       | Aktivera felsökningsloggar för anrop (UI) |
-| Inställningar → Allmänt   | Sidofältets synlighet | Visa/dölj avsnitt i sidofältet            |
+| Inställningens plats | Reglage            | Beskrivning                                    |
+| -------------------- | ------------------ | ---------------------------------------------- |
+| Settings → Advanced  | Debug Mode         | Aktivera felsökningsloggar för begäranden (UI) |
+| Settings → General   | Sidebar Visibility | Visa/dölj avsnitt i sidofältet                 |
 
-Dessa inställningar lagras i databasen och finns kvar efter omstarter. När de har angetts åsidosätter de miljövariablernas standardvärden.
+Dessa inställningar lagras i databasen och finns kvar efter omstarter. När de har angetts åsidosätter de standardvärdena för miljövariablerna.
 
-### Köra lokalt
+### Kör lokalt
 
 ```bash
 # Utvecklingsläge (automatisk omladdning)
 npm run dev
 
 # Produktionsbygge
-npm run build    # next build → .build/next/ och därefter assembleStandalone → dist/
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Snabb kompilering enbart av backend/API för bidragsgivares ändringar
+# Snabb backend-/API-kompilering för bidragsgivares ändringar
 npm run build:contributor
 
-# Versionsbygge (ren ombyggnad + HEAD-kontrollmarkör — krävs för driftsättning)
-npm run build:release   # rm -rf .build dist && bygger + skriver dist/BUILD_SHA
+# Releasebygge (ren ombyggnad + HEAD-sentinell — krävs för driftsättning)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
 # Vanlig portkonfiguration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Bygget för bidragsgivare utför endast kompileringsvalidering: det skapar inte den fristående
-distributionen och bygger inte heller valfria systemspecifika paketeringsresurser. Använd det vanliga produktionsbygget när
-du behöver validera det leveransklara paketet.
+Bidragsgivarbygget utför validering som endast omfattar kompilering: det sammanställer inte
+den fristående distributionen och bygger inte valfria inbyggda paketeringstillgångar. Använd
+det vanliga produktionsbygget när du behöver validera det leveransklara paketet.
 
-### Katalogstruktur för byggutdata
+### Layout för byggutdata
 
-| Katalog   | Innehåll                                                                              | Versionshanterad |
-| --------- | ------------------------------------------------------------------------------------- | ---------------- |
-| `src/`    | Applikationens källkod (TypeScript / TSX)                                             | Ja               |
-| `.build/` | Mellanresultat — utdata från `next build` (ignoreras av Git, `distDir = .build/next`) | Nej              |
-| `dist/`   | Leveransklart paket — sammanställt av `assembleStandalone` (ignoreras av Git)         | Nej              |
+| Katalog   | Innehåll                                                                   | Versionshanterad |
+| --------- | -------------------------------------------------------------------------- | ---------------- |
+| `src/`    | Programmets källkod (TypeScript / TSX)                                     | Ja               |
+| `.build/` | Mellanresultat — `next build`-utdata (gitignored, `distDir = .build/next`) | Nej              |
+| `dist/`   | Leveransklart paket — sammanställt av `assembleStandalone` (gitignored)    | Nej              |
 
-Byggprocessen utförs i ett enda steg:
+Byggprocessen består av ett enda steg:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (utdata från Next.js)
-  └─ assembleStandalone()                 (kopierar fristående paket + statiska filer + offentliga filer + systemspecifika resurser)
-       └─ utdata: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js-utdata)
+  └─ assembleStandalone()                 (kopierar standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
 `npm run build:release` rensar dessutom båda katalogerna först och skriver
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) som en kontrollmarkör för driftsättningens integritet.
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) som en integritetssentinell för driftsättning.
 
-`npm run build:contributor` använder byggprofilen enbart för backend. Den ersätter tillfälligt
-kontrollpanelens UI-filer med stubbar under bygget, behåller API-rutthanterarna och återställer originalfilerna
-efter bygget. Använd `npm run build` för ändringar som påverkar kontrollpanelens UI eller för fullständig
-versionsvalidering; bidragsgivarprofilen ersätter inte versionsbygget.
+`npm run build:contributor` använder backendens enda byggprofil. Den ersätter tillfälligt
+filer för instrumentpanelens UI med stubbar under bygget, behåller API-routarnas hanterare
+och återställer originalfilerna efter bygget. Använd `npm run build` för ändringar som påverkar
+instrumentpanelens UI eller för fullständig releasevalidering; bidragsgivarprofilen ersätter inte releasebygget.
 
-> **Anmärkning om driftsättning på VPS:** fjärrbildens katalog `/usr/lib/node_modules/omniroute/app/`
-> är oförändrad. Driftsättningsverktygen använder rsync för att synkronisera innehållet i `dist/` till den.
-> Endast sökvägen för byggutdata i kodförrådet har ändrats (`app/` → `dist/`).
+> **Obs! om VPS-driftsättning:** den fjärranslutna bildkatalogen `/usr/lib/node_modules/omniroute/app/`
+> är oförändrad. Driftsättningsfärdigheterna rsync:ar innehållet i `dist/` till den.
+> Endast byggutdatasökvägen i projektet flyttades (`app/` → `dist/`).
 
 Standard-URL:er:
 
-- **Kontrollpanel**: `http://localhost:20128/dashboard`
+- **Instrumentpanel**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -170,18 +175,18 @@ Omfattningar (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, 
 ## Köra tester
 
 ```bash
-# Alla tester (enhet + vitest + ekosystem + e2e)
+# Alla tester (unit + vitest + ecosystem + e2e)
 npm run test:all
 
-# Enskild testfil (Node.js inbyggda testkörare — de flesta tester använder denna)
+# En enskild testfil (Node.js inbyggda testkörare — de flesta tester använder denna)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
 # Endast de enhetstester som påverkas av din ändring (samma TIA-väljare som CI-grinden, #8084)
-npm run test:scoped            # ändringar i den senaste committen (eller arbetskatalogen)
-npm run test:scoped:staged     # endast stageade ändringar — passar bra med en körning före commit
-npm run test:scoped:full       # bygg först om importgrafkartan (efter att filer lagts till/flyttats)
-# Avslutningskod 1 + "run the full suite" betyder att en navfil (tsconfig, package.json, …) eller en
-# omappad källfil har ändrats — väljaren avbryter säkert och hoppar aldrig över något i tysthet.
+npm run test:scoped            # ändringar i den senaste committen (eller arbetsträdet)
+npm run test:scoped:staged     # endast ändringar i stagingområdet — passar bra med en pre-commit-körning
+npm run test:scoped:full       # bygg först om kartan över importgrafen (efter att filer lagts till/flyttats)
+# Avslutningskod 1 + "kör hela testsviten" innebär att en central fil (tsconfig, package.json, …) eller en
+# omappad källfil har ändrats — väljaren stänger säkert och hoppar aldrig över något i tysthet.
 
 # Vitest (MCP-server, autoCombo, cache)
 npm run test:vitest
@@ -203,40 +208,41 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Grindad smoke-test av kombinationer mot verkliga uppströmstjänster (kräver VPS-åtkomst + krediter hos riktiga leverantörer)
-# Anropar VERKLIGA leverantörer — kostar lite. Körs ALDRIG i CI. Hoppas över utan fel om grinden saknas.
+# Grindstyrt kombinerat smoke-test mot verkliga uppströmstjänster (kräver VPS-åtkomst + riktiga leverantörskrediter)
+# Anropar VERKLIGA leverantörer — kostar lite. Körs ALDRIG i CI. Hoppas över på ett kontrollerat sätt utan grinden.
 # Kräver: åtkomst via ssh root@192.168.0.15 (hämtar en skrivskyddad DB-ögonblicksbild från VPS:en).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Fas 3-live-smoke-test på VPS — vanliga Node ESM-skript som anropar live-servern på .15 direkt.
+# Live-smoke-test för fas 3 på VPS — vanliga Node ESM-skript som anropar live-servern på .15 direkt.
 # Kräver: åtkomst via ssh root@192.168.0.15 (kombinationer skapas/tas bort via SSH sqlite).
-# Anropar VERKLIGA leverantörer (liten kostnad). Skapar/raderar endast kombinationer av typen __live_test__*. Körs ALDRIG i CI.
-# REQUIRE_API_KEY=false på .15, så ingen API-nyckel behövs, men COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY respekteras om de är angivna.
-npm run test:combo:live:vps              # 7 HTTP-scenarier (prioritet/round-robin/viktad/kostnad/fusion/auto + hälsa)
-npm run test:combo:live:vps:failover     # lägger till ett verkligt redundansscenario mellan leverantörer (totalt 8)
+# Anropar VERKLIGA leverantörer (liten kostnad). Skapar/tar endast bort kombinationer av typen __live_test__*. Körs ALDRIG i CI.
+# REQUIRE_API_KEY=false på .15, så ingen API-nyckel behövs, men COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY respekteras om de har angetts.
+npm run test:combo:live:vps              # 7 HTTP-scenarier (priority/round-robin/weighted/cost/fusion/auto + hälsa)
+npm run test:combo:live:vps:failover     # lägger till ett verkligt redundansväxlingsscenario mellan leverantörer (totalt 8)
 ```
 
-Kommentarer om täckning:
+Anmärkningar om täckning:
 
-- `npm run test:coverage` mäter källtäckningen för huvudsviten med enhetstester, exkluderar `tests/**` och inkluderar `open-sse/**`
+- `npm run test:coverage` mäter källtäckning för den huvudsakliga enhetstestsviten, exkluderar `tests/**` och inkluderar `open-sse/**`
 - Pull requests måste hålla täckningsgrinden på **60 %+** för satser/rader/funktioner/grenar
 - Om en PR ändrar produktionskod i `src/`, `open-sse/`, `electron/` eller `bin/` måste automatiserade tester läggas till eller uppdateras i samma PR
 - `npm run coverage:report` skriver ut en detaljerad rapport fil för fil från den senaste täckningskörningen
 - `npm run test:coverage:legacy` bevarar det äldre mätvärdet för historisk jämförelse
-- Se `docs/ops/COVERAGE_PLAN.md` för den stegvisa planen för förbättrad täckning
+- Se `docs/ops/COVERAGE_PLAN.md` för den stegvisa färdplanen för förbättrad täckning
 
-### Krav för Pull Requests
+### Krav för pull requests
 
 Innan du öppnar en PR ska du använda
 [Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) för att köra den fokuserade loopen för
-det du har ändrat. Den fullständiga enhetstestsviten (4 CI-shards), Vitest, täckningsgrinden på **60 %+** och
-produktionsbygget är CI:s ansvar — att köra dem lokalt tillför ingen information som PR-
-kontrollerna inte redan ger dig, och på mindre maskiner kan det överbelasta värddatorn (#8084):
+det du ändrade. Den fullständiga enhetstestsviten (4 CI-shards), Vitest, täckningsgrinden på **60 %+** och
+produktionsbygget är CI:s ansvar — att köra dem lokalt ger ingen ytterligare information utöver vad PR-
+kontrollerna redan ger, och på mindre datorer kan det överbelasta värden (#8084):
 
 - Kör testfilerna som täcker din ändring: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Kör `npm run lint`
 - Lägg till eller uppdatera automatiserade tester i samma PR när produktionskod ändras
-- Inkludera de ändrade eller tillagda testfilerna i PR-beskrivningen när produktionskod har ändrats
+- I `node:test`-filer ska varje `await` på toppnivå (exempelvis `await import(...)`) placeras före den första `test()` / `describe()`: med `--test-force-exit` kan tester som registreras efter det i tysthet aldrig köras (#18045; upprätthålls av `npm run check:test-tla-order`)
+- Inkludera de ändrade eller tillagda testfilerna i PR-beskrivningen när produktionskoden har ändrats
 - Kontrollera SonarQube-resultatet för PR:en när projektets hemligheter är konfigurerade i CI
 
 Aktuell teststatus: **122 enhetstestfiler** som täcker:
@@ -246,9 +252,9 @@ Aktuell teststatus: **122 enhetstestfiler** som täcker:
 - Semantisk cache, idempotens och förloppsspårning
 - Databasåtgärder och schema (21 DB-moduler)
 - OAuth-flöden och autentisering
-- Validering av API-endpoints (Zod v4)
-- MCP-serververktyg och tillämpning av behörighetsomfång
-- Minnes- och Skills-system
+- Validering av API-slutpunkter (Zod v4)
+- MCP-serververktyg och tillämpning av omfång
+- Systemen Memory och Skills
 
 ---
 

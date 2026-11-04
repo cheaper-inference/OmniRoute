@@ -5,6 +5,7 @@ import Button from "@/shared/components/Button";
 import ProviderConnectionPermissionList, {
   type ProviderConnection,
 } from "@/app/(dashboard)/dashboard/api-manager/components/ProviderConnectionPermissionList";
+import PreferredConnectionsSection from "@/app/(dashboard)/dashboard/api-manager/components/PreferredConnectionsSection";
 import type { ApiKeyAccessFormState } from "../useApiKeyAccessForm";
 import TabErrorList from "./TabErrorList";
 
@@ -13,6 +14,9 @@ interface ConnectionsTabProps {
   allConnections: ProviderConnection[];
   setAllowAllConnections: (allow: boolean) => void;
   setSelectedConnections: (connections: string[]) => void;
+  togglePreferredConnection: (connectionId: string) => void;
+  movePreferredConnection: (connectionId: string, direction: -1 | 1) => void;
+  clearPreferredConnections: () => void;
   errors?: string[];
 }
 
@@ -21,6 +25,9 @@ export default function ConnectionsTab({
   allConnections,
   setAllowAllConnections,
   setSelectedConnections,
+  togglePreferredConnection,
+  movePreferredConnection,
+  clearPreferredConnections,
   errors,
 }: ConnectionsTabProps) {
   const t = useTranslations("apiManager");
@@ -76,6 +83,16 @@ export default function ConnectionsTab({
           </div>
         )}
       </div>
+
+      <PreferredConnectionsSection
+        connections={allConnections}
+        allowAllConnections={formState.allowAllConnections}
+        selectedConnections={formState.selectedConnections}
+        preferredConnections={formState.selectedPreferredConnections}
+        onTogglePreferred={togglePreferredConnection}
+        onMovePreferred={movePreferredConnection}
+        onClearPreferred={clearPreferredConnections}
+      />
     </div>
   );
 }

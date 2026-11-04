@@ -481,13 +481,13 @@ Công cụ Auto Combo không yêu cầu các combo được định nghĩa sẵn
 
 ## API
 
-**Không có endpoint `POST /api/combos/auto` chuyên biệt** — Auto-Combo được sử dụng theo hai cách:
+**Không có endpoint chuyên dụng `POST /api/combos/auto`** — Auto-Combo được sử dụng theo hai cách:
 
-1. **Không cần cấu hình (khuyến nghị):** Gửi bất kỳ yêu cầu hoàn thành hội thoại nào với `model: "auto"` hoặc `model: "auto/<variant>"`. Factory ảo sẽ xây dựng combo cho từng yêu cầu — không cần lưu trữ lâu dài hay gọi API.
+1. **Không cần cấu hình (khuyến nghị):** Gửi bất kỳ yêu cầu hoàn thành hội thoại nào với `model: "auto"` hoặc `model: "auto/<variant>"`. Factory ảo sẽ tạo combo cho từng yêu cầu — không cần lưu trữ lâu dài, không cần gọi API.
 
 2. **Combo được lưu trữ với `strategy: "auto"`:** Tạo một combo thông thường qua `POST /api/combos` và đặt `strategy: "auto"` cùng với `config.auto.weights` / `config.auto.candidatePool`. Cùng một công cụ chấm điểm sẽ được sử dụng; combo được lưu trong `combos` và có thể tái sử dụng bằng ID.
 
-Để khám phá, `GET /api/combos/auto` liệt kê mọi biến thể cùng với nhóm ứng viên đã được phân giải, cộng thêm `context_length` / `max_output_tokens` — giá trị MAX trên toàn bộ các cửa sổ của nhóm ứng viên. Các client (ví dụ: plugin opencode) phải công bố những giá trị này thay vì `0`: context bằng 0 sẽ vô hiệu hóa hoàn toàn tính năng tự động rút gọn của opencode, khiến các phiên tiếp tục tăng kích thước cho đến khi cơ chế xóa lịch sử của gateway phá hủy context. Có thể công bố MAX một cách an toàn vì bộ lọc trước theo context của auto-combo sẽ định tuyến các yêu cầu quá lớn đến những ứng viên có cửa sổ lớn.
+Để khám phá, `GET /api/combos/auto` liệt kê mọi biến thể cùng với nhóm ứng viên đã được phân giải và `context_length` / `max_output_tokens` — giá trị MAX trên tất cả cửa sổ trong nhóm ứng viên. Các client (ví dụ: plugin opencode) phải công bố những giá trị này thay vì `0`: context bằng không sẽ vô hiệu hóa hoàn toàn tính năng tự động nén của opencode, khiến phiên tiếp tục tăng kích thước cho đến khi cơ chế xóa lịch sử của gateway làm mất context. Có thể công bố MAX một cách an toàn vì bộ lọc trước theo context của auto-combo sẽ định tuyến các yêu cầu quá lớn đến những ứng viên có cửa sổ lớn.
 
 ```bash
 # Sử dụng không cần cấu hình (không tạo combo)
@@ -496,39 +496,39 @@ curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# Combo auto được lưu trữ thông qua endpoint combos thông thường
+# Combo tự động được lưu trữ thông qua endpoint combos thông thường
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### Các chiến lược bộ định tuyến auto
+### Các chiến lược router tự động
 
-Các combo được lưu trữ có `strategy: "auto"` có thể đặt `config.routerStrategy` (hoặc trường cũ
+Các combo `strategy: "auto"` được lưu trữ có thể đặt `config.routerStrategy` (hoặc dạng cũ
 `config.auto.routerStrategy`) thành một trong các giá trị sau:
 
 - `rules` — chấm điểm có trọng số mặc định
-- `score` — chọn điểm có trọng số đã cấu hình cao nhất. Khi điểm bằng nhau hoàn toàn, thứ tự
+- `score` — chọn điểm có trọng số được cấu hình cao nhất. Khi điểm hoàn toàn bằng nhau, thứ tự
   ứng viên đã cấu hình được giữ nguyên; `explorationRate` hiện có lấy mẫu từ toàn bộ nhóm đã xếp hạng.
-- `cost` / `eco` — nhà cung cấp hoạt động tốt có chi phí thấp nhất
+- `cost` / `eco` — nhà cung cấp khỏe mạnh có chi phí thấp nhất
 - `latency` / `fast` — độ trễ p95 thấp nhất kèm hệ số phạt về độ tin cậy
-- `sla-aware` / `sla` — ưu tiên các ứng viên đáp ứng SLO về độ trễ p95, tỷ lệ lỗi và tùy chọn
-  chi phí
+- `sla-aware` / `sla` — ưu tiên các ứng viên đáp ứng SLO về độ trễ p95, tỷ lệ lỗi và
+  chi phí tùy chọn
 - `lkgp` — ưu tiên nhà cung cấp hoạt động tốt gần nhất
-- `nadir` — yêu cầu API quyết định của [Nadir](https://getnadir.com) xác định prompt cần mô hình nào trong nhóm;
-  phải chủ động bật, khi lỗi sẽ chuyển sang `rules`
+- `nadir` — yêu cầu API quyết định của [Nadir](https://getnadir.com) xác định mô hình nào trong nhóm mà
+  prompt cần; cần chủ động bật, khi lỗi sẽ chuyển sang `rules`
 
-### Chi tiết về các chiến lược bộ định tuyến
+### Chi tiết các chiến lược router
 
-Công cụ auto-combo cung cấp 7 phần triển khai **RouterStrategy** có thể cắm thay thế,
-mà bạn có thể chuyển đổi qua `config.routerStrategy` (hoặc trường cũ `config.auto.routerStrategy`).
-Mỗi chiến lược chọn một nhà cung cấp từ nhóm ứng viên dựa trên một `RoutingContext`
-(loại tác vụ, gợi ý về công cụ/thị giác, ước tính token, chính sách SLA tùy chọn, nhà cung cấp
-hoạt động tốt gần nhất tùy chọn).
+Công cụ auto-combo cung cấp 7 cách triển khai **RouterStrategy** có thể thay thế
+thông qua `config.routerStrategy` (hoặc dạng cũ `config.auto.routerStrategy`).
+Mỗi chiến lược chọn một nhà cung cấp từ nhóm ứng viên dựa trên `RoutingContext`
+(loại tác vụ, gợi ý về công cụ/thị giác, ước tính token, chính sách SLA tùy chọn,
+nhà cung cấp hoạt động tốt gần nhất tùy chọn).
 
 #### 1. `rules` (mặc định) — chấm điểm có trọng số theo 16 yếu tố
 
-Bao bọc công cụ chấm điểm hiện có. Lọc bỏ các ứng viên circuit breaker ở trạng thái `OPEN`,
+Bao bọc công cụ chấm điểm hiện có. Lọc bỏ các ứng viên có circuit breaker ở trạng thái `OPEN`,
 sau đó chạy `scorePool()` với loại tác vụ hiện tại và `getTaskFitness()`,
 rồi chọn nhà cung cấp có điểm cao nhất.
 
@@ -550,16 +550,16 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Khi nào nên sử dụng**: Mặc định. Sử dụng khi bạn muốn có sự cân bằng giữa tất cả các tín hiệu.
+**Khi nào nên sử dụng**: Mặc định. Sử dụng khi bạn muốn cân bằng giữa tất cả các tín hiệu.
 
 **Bí danh**: `rules` (không có bí danh)
 
 ---
 
-#### 2. `cost` / `eco` — nhà cung cấp hoạt động tốt có chi phí thấp nhất
+#### 2. `cost` / `eco` — nhà cung cấp khỏe mạnh có chi phí thấp nhất
 
 Sắp xếp nhóm ứng viên theo `costPer1MTokens` (tăng dần) và chọn ứng viên có chi phí thấp nhất.
-Lọc bỏ các ứng viên `OPEN` trước.
+Trước tiên, lọc bỏ các ứng viên `OPEN`.
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -574,7 +574,8 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Khi nào nên sử dụng**: Khối lượng công việc nhạy cảm về chi phí, xử lý hàng loạt hoặc các tác vụ nền.
+**Khi nào nên sử dụng**: Khối lượng công việc nhạy cảm về chi phí, xử lý hàng loạt hoặc
+các tác vụ nền.
 
 **Bí danh**: `cost`, `eco`
 
@@ -611,13 +612,13 @@ trợ lý lập trình tương tác.
 
 Chấm điểm từng ứng viên dựa trên mức độ đáp ứng chính sách SLO đã cấu hình:
 
-| Yếu tố        | Trọng số | Công thức                                                |
-| ------------- | -------- | -------------------------------------------------------- |
-| Điểm độ trễ   | 35%      | `threshold / max(value, ε)`                              |
-| Điểm lỗi      | 35%      | `threshold / max(value, ε)`                              |
-| Điểm sức khỏe | 15%      | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)        |
-| Điểm chi phí  | 10%      | `threshold / max(value, ε)` hoặc nghịch đảo đã chuẩn hóa |
-| Điểm ổn định  | 5%       | độ lệch chuẩn độ trễ được chuẩn hóa nghịch đảo           |
+| Yếu tố        | Trọng số | Công thức                                             |
+| ------------- | -------- | ----------------------------------------------------- |
+| Điểm độ trễ   | 35%      | `threshold / max(value, ε)`                           |
+| Điểm lỗi      | 35%      | `threshold / max(value, ε)`                           |
+| Điểm sức khỏe | 15%      | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)     |
+| Điểm chi phí  | 10%      | `threshold / max(value, ε)` hoặc chuẩn hóa nghịch đảo |
+| Điểm ổn định  | 5%       | độ lệch chuẩn độ trễ được chuẩn hóa nghịch đảo        |
 
 Khi `hardConstraints: true`, các ứng viên được sắp xếp chủ yếu theo **điểm vi phạm**
 (mức độ vượt quá bất kỳ SLO nào), sau đó theo điểm tổng hợp. Nếu không, chúng chỉ được
@@ -627,7 +628,7 @@ sắp xếp theo điểm tổng hợp.
 class SLAStrategyImpl implements RouterStrategy {
   readonly name = "sla-aware";
   readonly description =
-    "Chọn nhà cung cấp có khả năng đáp ứng tốt nhất các SLO về độ trễ, tỷ lệ lỗi và chi phí";
+    "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
     // ... chấm điểm từng ứng viên theo chính sách: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
@@ -650,23 +651,22 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Khi nào nên dùng**: Các khối lượng công việc production có ngân sách nghiêm ngặt về độ trễ, tỷ lệ lỗi hoặc chi phí.
+**Khi nào nên sử dụng**: Khối lượng công việc production có yêu cầu nghiêm ngặt về độ trễ, tỷ lệ lỗi hoặc ngân sách chi phí.
 
 **Bí danh**: `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — ưu tiên nhà cung cấp tốt gần nhất đã biết
+#### 5. `lkgp` — ưu tiên nhà cung cấp tốt gần nhất được biết
 
-Trước tiên thử **nhà cung cấp tốt gần nhất đã biết** (nếu được thiết lập), sau đó chuyển sang
-chiến lược `rules`. Hữu ích để duy trì tính gắn kết của phiên — cùng một nhà cung cấp xử lý
+Thử **nhà cung cấp tốt gần nhất được biết** (nếu đã đặt) trước, sau đó chuyển dự phòng sang
+chiến lược `rules`. Hữu ích để duy trì tính nhất quán trong phiên — cùng một nhà cung cấp xử lý
 các yêu cầu tiếp theo trong một cuộc hội thoại.
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
   readonly name = "lkgp";
-  readonly description =
-    "Trước tiên thử nhà cung cấp tốt gần nhất đã biết, sau đó chuyển sang rules";
+  readonly description = "Tries last known good provider first, then falls back to rules";
 
   select(pool, context) {
     if (context.lkgpEnabled === false) {
@@ -682,27 +682,27 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // Chuyển sang chiến lược rules
+    // Chuyển dự phòng sang chiến lược rules
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**Khi nào nên dùng**: Các cuộc hội thoại nhiều lượt mà bạn muốn cùng một nhà cung cấp xử lý
-các yêu cầu tiếp theo (ví dụ: để lưu bộ nhớ đệm, duy trì tính liên tục của ngữ cảnh hoặc tính nhất quán về giá).
+**Khi nào nên sử dụng**: Các cuộc hội thoại nhiều lượt mà bạn muốn cùng một nhà cung cấp xử lý
+các yêu cầu tiếp theo (ví dụ: để lưu vào bộ nhớ đệm, duy trì tính liên tục của ngữ cảnh hoặc tính nhất quán về giá).
 
 **Bí danh**: `lkgp` (không có bí danh)
 
 ---
 
-#### 6. `nadir` — lựa chọn mô hình nhận biết prompt thông qua Nadir
+#### 6. `nadir` — lựa chọn mô hình có nhận biết prompt thông qua Nadir
 
 Mỗi chiến lược ở trên đều xếp hạng các ứng viên dựa trên dữ liệu đo từ xa riêng; không chiến lược nào đọc
-yêu cầu. `nadir` gửi lượt cuối của người dùng cùng với các id mô hình trong pool tới
-API quyết định của [Nadir](https://getnadir.com) (`POST /v1/bucket`) và định tuyến tới mô hình
-mà Nadir chọn từ danh sách đó (`simple` → mô hình có năng lực phù hợp với chi phí thấp nhất, `complex` → mô hình
+yêu cầu. `nadir` gửi lượt người dùng cuối cùng cùng với các ID mô hình trong pool đến
+API quyết định của [Nadir](https://getnadir.com) (`POST /v1/bucket`) và định tuyến đến mô hình
+mà Nadir chọn từ danh sách đó (`simple` → mô hình có khả năng đáp ứng với chi phí thấp nhất, `complex` → mô hình
 frontier). Kết nối phục vụ mô hình đó vẫn được `rules` lựa chọn, vì vậy hạn ngạch,
-tình trạng sức khỏe và chi phí vẫn quyết định tài khoản nào được dùng.
+tình trạng và chi phí vẫn quyết định tài khoản nào được dùng.
 
 ```json
 {
@@ -719,28 +719,31 @@ tình trạng sức khỏe và chi phí vẫn quyết định tài khoản nào 
 ```
 
 `OMNIROUTE_NADIR_API_KEY` và `OMNIROUTE_NADIR_BASE_URL` là các giá trị dự phòng từ môi trường cho hai
-chuỗi này. `baseUrl` chỉ cần thiết đối với Nadir tự lưu trữ (đuôi `/v1` vẫn được chấp nhận).
-Các lệnh gọi không có khóa sẽ được chuyển đến tầng ẩn danh của Nadir, vốn bị giới hạn tốc độ theo IP.
+chuỗi này. `baseUrl` chỉ cần thiết đối với Nadir tự lưu trữ (dấu `/v1` ở cuối vẫn được chấp nhận).
+Các lệnh gọi không có khóa sẽ sử dụng gói ẩn danh của Nadir, vốn bị giới hạn tốc độ theo từng IP. Khi có khóa
+([tạo khóa](https://app.getnadir.com/dashboard/api-keys)), mỗi quyết định sẽ được
+ghi lại vào bảng điều khiển Nadir của bạn. Hướng dẫn thiết lập và xác minh đầy đủ:
+[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-Dữ liệu được gửi ra ngoài: văn bản của tin nhắn cuối cùng từ người dùng (16k ký tự đầu tiên), các
-id mô hình ứng viên và thẻ kênh `source: "omniroute"`. Không có system prompt, lịch sử, công cụ hoặc
+Dữ liệu được gửi ra ngoài: nội dung văn bản của tin nhắn người dùng cuối cùng (16k ký tự đầu tiên), các ID
+mô hình ứng viên và thẻ kênh `source: "omniroute"`. Không có system prompt, lịch sử, công cụ hoặc
 header nào được gửi.
 
-Cơ chế xử lý lỗi là fail-open: hết thời gian chờ (mặc định 2000 ms), phản hồi không phải 2xx, máy chủ
-không thể truy cập, phản hồi không hợp lệ hoặc lựa chọn nằm ngoài pool đều được chuyển sang quyết định của `rules`
+Cơ chế xử lý lỗi là fail-open: timeout (mặc định 2000 ms), phản hồi không phải 2xx, máy chủ
+không thể truy cập, phản hồi sai định dạng hoặc lựa chọn nằm ngoài pool đều sẽ được chuyển thành quyết định của `rules`
 và lý do được thêm tiền tố `NadirStrategy: fallback (…)`. Sau một lệnh gọi thất bại, chiến lược sẽ
-bỏ qua mạng trong 30 giây, nhờ đó sự cố ngừng hoạt động chỉ gây ra một lần hết thời gian chờ mỗi 30 giây thay vì
-mỗi yêu cầu. Các sự kiện định tuyến chỉ báo cáo `strategy: "nadir"` khi Nadir thực sự đưa ra
+bỏ qua mạng trong 30 giây, vì vậy một sự cố ngừng hoạt động chỉ gây ra một lần timeout mỗi 30 giây thay vì
+một lần cho mỗi yêu cầu. Các sự kiện định tuyến chỉ báo cáo `strategy: "nadir"` khi Nadir thực sự đưa ra
 lựa chọn.
 
-**Khi nào nên dùng**: lưu lượng có độ khó hỗn hợp trên một pool bao gồm nhiều tầng mô hình (một mô hình nhỏ, một mô hình
-tầm trung và một mô hình frontier), khi bạn muốn cắt giảm chi phí do luôn sử dụng mô hình frontier.
+**Khi nào nên sử dụng**: lưu lượng có độ khó hỗn hợp trên một pool bao gồm nhiều cấp mô hình (một mô hình nhỏ, một mô hình tầm trung
+và một mô hình frontier), khi bạn muốn cắt giảm chi phí do luôn sử dụng mô hình frontier.
 
 **Bí danh**: `nadir` (không có bí danh)
 
 ---
 
-### Chiến lược router tùy chỉnh
+### Chiến lược bộ định tuyến tùy chỉnh
 
 Bạn có thể đăng ký phần triển khai `RouterStrategy` của riêng mình thông qua API công khai:
 
@@ -752,10 +755,10 @@ import {
 
 class MyCustomStrategy implements RouterStrategy {
   readonly name = "my-custom";
-  readonly description = "Chiến lược định tuyến tùy chỉnh của tôi";
+  readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // Logic định tuyến của bạn tại đây
+    // Logic định tuyến của bạn ở đây
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -783,16 +786,16 @@ Sau đó sử dụng chiến lược này:
 
 ---
 
-### Hướng dẫn lựa chọn chiến lược router
+### Hướng dẫn lựa chọn chiến lược bộ định tuyến
 
-| Trường hợp sử dụng            | Chiến lược  | Lý do                                     |
-| ----------------------------- | ----------- | ----------------------------------------- |
-| Khối lượng công việc cân bằng | `rules`     | Mặc định — xem xét tất cả các yếu tố      |
-| Giảm thiểu chi phí            | `cost`      | Luôn chọn phương án rẻ nhất               |
-| Giảm thiểu độ trễ             | `latency`   | Chọn nhà cung cấp đáng tin cậy nhanh nhất |
-| SLO nghiêm ngặt               | `sla-aware` | Lọc theo ngưỡng p95/lỗi/chi phí           |
-| Hội thoại nhiều lượt          | `lkgp`      | Duy trì tính gắn kết của phiên            |
-| Độ khó hỗn hợp                | `nadir`     | Chọn tầng mô hình cho từng prompt         |
+| Trường hợp sử dụng            | Chiến lược  | Lý do                                        |
+| ----------------------------- | ----------- | -------------------------------------------- |
+| Khối lượng công việc cân bằng | `rules`     | Mặc định — xem xét tất cả các yếu tố         |
+| Giảm thiểu chi phí            | `cost`      | Luôn chọn phương án rẻ nhất                  |
+| Giảm thiểu độ trễ             | `latency`   | Chọn nhà cung cấp nhanh và đáng tin cậy nhất |
+| SLO nghiêm ngặt               | `sla-aware` | Lọc theo ngưỡng p95/lỗi/chi phí              |
+| Trò chuyện nhiều lượt         | `lkgp`      | Duy trì tính nhất quán trong phiên           |
+| Độ khó hỗn hợp                | `nadir`     | Chọn cấp độ mô hình cho từng prompt          |
 
 Các trường nhận biết SLA:
 

@@ -1,6 +1,6 @@
 /**
- * Regression: combo routing must not send an image request to a model that is
- * not confirmed vision-capable.
+ * Regression: combo routing must not send image requests to models
+ * explicitly known to lack vision, while allowing unknown-capability fallbacks.
  *
  * Root cause: `getResolvedModelCapabilities` returned `supportsVision: null` for
  * every Mistral model — including Pixtral, which IS multimodal — because Mistral
@@ -14,14 +14,10 @@
  *  A) resolveVisionCapability falls back to a conservative model-id heuristic so
  *     known-multimodal families (pixtral, llava, qwen-vl, gpt-4o, …) resolve to
  *     `true` when there is no synced/registry/spec data.
- *  B) the combo filter treats anything that is not confirmed `=== true` as
- *     vision-incompatible for image requests. Unlike the other requirement
- *     dimensions (tools, structured output, context window), the "keep all when
- *     none qualify" degrade-to-unfiltered safety net does NOT apply to vision
- *     (#8332): dispatching an image body to a confirmed-non-vision model can
- *     never succeed upstream, so a combo with zero confirmed-vision members must
- *     return no targets for an image request rather than resurrecting a
- *     guaranteed-to-fail one.
+ *  B) the combo filter excludes explicitly non-vision targets (#8332).
+ *     Unknown capability remains unknown and may be attempted only after
+ *     confirmed vision models (#17289); that does not resurrect a target with
+ *     an explicit negative verdict.
  */
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -91,15 +87,18 @@ const imageBody = {
   ],
 };
 
-test("image request: combo drops the non-vision target, keeps the vision target", () => {
+test("image request: confirmed vision wins while unknown metadata remains fallback (#17289)", () => {
+  assert.equal(getResolvedModelCapabilities("mistral/ministral-14b-latest").supportsVision, null);
   const out = filterTargetsByRequestCompatibility(
-    [target("mistral/pixtral-12b-latest"), target("mistral/ministral-14b-latest")],
+    [target("mistral/ministral-14b-latest"), target("mistral/pixtral-12b-latest")],
     imageBody,
     noopLog
   );
-  const ids = out.map((t) => t.modelStr);
-  assert.ok(ids.includes("mistral/pixtral-12b-latest"), "vision target must be kept");
-  assert.ok(!ids.includes("mistral/ministral-14b-latest"), "non-vision target must be dropped");
+  assert.deepEqual(
+    out.map((t) => t.modelStr),
+    ["mistral/pixtral-12b-latest", "mistral/ministral-14b-latest"],
+    "confirmed vision must dispatch first; unknown metadata is last resort"
+  );
 });
 
 test("nested case-insensitive image indicators still enforce hard vision compatibility", () => {
@@ -125,20 +124,16 @@ test("nested case-insensitive image indicators still enforce hard vision compati
 });
 
 test(
-  "image request with NO confirmed-vision target: strip all (#8332 — never dispatch " +
-    "an image body to a confirmed-non-vision target, even as a last resort)",
+  "image request with explicitly non-vision targets fails closed (#8332, #17289)",
   () => {
-    const out = filterTargetsByRequestCompatibility(
-      [target("mistral/ministral-14b-latest"), target("groq/llama-3.1-8b-instant")],
-      imageBody,
-      noopLog
-    );
-    assert.equal(
-      out.length,
-      0,
-      "an image request with zero confirmed-vision targets must yield no executable targets, " +
-        "not a guaranteed-to-fail dispatch to a text-only model"
-    );
+    // Explicitly text-only variants stay excluded even after unknown-capability
+    // fallbacks were enabled for other models.
+    const models = ["cmd/gpt-5.3-codex", "mimo/mimo-v2.5-pro"];
+    for (const model of models) {
+      assert.equal(getResolvedModelCapabilities(model).supportsVision, false, model);
+    }
+    const out = filterTargetsByRequestCompatibility(models.map(target), imageBody, noopLog);
+    assert.deepEqual(out, [], "confirmed text-only targets must not receive images");
   }
 );
 

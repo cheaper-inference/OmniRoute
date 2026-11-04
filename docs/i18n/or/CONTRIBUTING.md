@@ -13,21 +13,25 @@ UI/UX, i18n, CLI, database, ଏବଂ build/deploy ପରିବର୍ତ୍ତ�
 
 ---
 
-## ଡେଭଲପମେଣ୍ଟ ସେଟଅପ୍
+## ବିକାଶ ସେଟଅପ୍
 
-### ପୂର୍ବାବଶ୍ୟକତା
+### ପୂର୍ବାପେକ୍ଷିତା
 
-- **Node.js** `>=22.22.2 <23`, କିମ୍ବା `>=24.0.0 <27` (ସୁପାରିସକୃତ: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, କିମ୍ବା `>=24.0.0 <27` (ସୁପାରିଶ: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ ବ୍ୟବହାରକାରୀମାନେ (Node 24+):** `npm install` ପରେ, ନେଟିଭ୍ ମଡ୍ୟୁଲଗୁଡ଼ିକ ଇନଷ୍ଟଲ୍ ହୋଇଛି କି ନାହିଁ ଯାଞ୍ଚ କରନ୍ତୁ:
-> `node -e "require('better-sqlite3')"`. ଯଦି ଏହା `MODULE_NOT_FOUND` ସହିତ ବିଫଳ ହୁଏ,
-> `npm approve-scripts better-sqlite3 && npm install` ଚଲାନ୍ତୁ। ଦେଖନ୍ତୁ
-> [ସମସ୍ୟା ସମାଧାନ](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)।
+> **Node 24 ସହିତ Windows:** ବର୍ତ୍ତମାନର 24 LTS ପ୍ୟାଚ୍ ରିଲିଜ୍ (ଅତି କମରେ 24.20.0) ବ୍ୟବହାର କରନ୍ତୁ।
+> ପୂର୍ବରୁ ଥିବା ରିଲିଜ୍ଗୁଡ଼ିକ `--test-force-exit` ପ୍ରକ୍ରିୟା ବନ୍ଦ କରିବା ପରେ ସଫଳ ପରୀକ୍ଷଣଗୁଡ଼ିକ ପରେ
+> ବନ୍ଦ ହୋଇପାରେ। Node ର [Windows libuv ସମାଧାନ](https://github.com/nodejs/node/pull/61999) ଏହି
+> ରନ୍ଟାଇମ୍ କ୍ରାଶ୍ର ସମାଧାନ କରେ; ପରୀକ୍ଷଣ ଅସର୍ସନ୍ଗୁଡ଼ିକ ଏବଂ ରନର୍ ଏକ୍ଜିଟ୍ ଯାଞ୍ଚଗୁଡ଼ିକ ସକ୍ରିୟ ରଖନ୍ତୁ।
+
+> **npm v11+ ବ୍ୟବହାରକାରୀମାନେ (Node 24+):** `npm install` ପରେ, ନେଟିଭ୍ ମଡ୍ୟୁଲ୍ଗୁଡ଼ିକ ସ୍ଥାପିତ ହୋଇଛି କି ଯାଞ୍ଚ କରନ୍ତୁ:
+> `node -e "require('better-sqlite3')"`। ଯଦି ଏହା `MODULE_NOT_FOUND` ସହିତ ବିଫଳ ହୁଏ,
+> `npm approve-scripts better-sqlite3 && npm install` ଚଲାନ୍ତୁ। [ସମସ୍ୟା ସମାଧାନ](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) ଦେଖନ୍ତୁ।
 
 - **Git**
 
-### କ୍ଲୋନ୍ ଏବଂ ଇନଷ୍ଟଲ୍
+### କ୍ଲୋନ୍ ଏବଂ ସ୍ଥାପନ
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -38,87 +42,87 @@ npm install
 ### ପରିବେଶ ଭେରିଏବଲ୍ଗୁଡ଼ିକ
 
 ```bash
-# ଟେମ୍ପଲେଟ୍ରୁ ଆପଣଙ୍କର .env ତିଆରି କରନ୍ତୁ
+# ଟେମ୍ପଲେଟ୍ରୁ ଆପଣଙ୍କ .env ସୃଷ୍ଟି କରନ୍ତୁ
 cp .env.example .env
 
-# ଆବଶ୍ୟକ ସିକ୍ରେଟ୍ଗୁଡ଼ିକ ଜେନେରେଟ୍ କରନ୍ତୁ
+# ଆବଶ୍ୟକ ସିକ୍ରେଟ୍ଗୁଡ଼ିକ ସୃଷ୍ଟି କରନ୍ତୁ
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-ଡେଭଲପମେଣ୍ଟ ପାଇଁ ପ୍ରମୁଖ ଭେରିଏବଲ୍ଗୁଡ଼ିକ:
+ବିକାଶ ପାଇଁ ମୁଖ୍ୟ ଭେରିଏବଲ୍ଗୁଡ଼ିକ:
 
-| ଭେରିଏବଲ୍               | ଡେଭଲପମେଣ୍ଟ ଡିଫଲ୍ଟ        | ବର୍ଣ୍ଣନା                 |
+| ଭେରିଏବଲ୍               | ବିକାଶ ଡିଫଲ୍ଟ             | ବର୍ଣ୍ଣନା                 |
 | ---------------------- | ------------------------ | ------------------------ |
-| `PORT`                 | `20128`                  | ସର୍ଭର ପୋର୍ଟ              |
+| `PORT`                 | `20128`                  | ସର୍ଭର୍ ପୋର୍ଟ             |
 | `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | ଫ୍ରଣ୍ଟଏଣ୍ଡ ପାଇଁ ବେସ୍ URL |
-| `JWT_SECRET`           | (ଉପରେ ଜେନେରେଟ୍ କରନ୍ତୁ)   | JWT ସାଇନିଂ ସିକ୍ରେଟ୍      |
+| `JWT_SECRET`           | (ଉପରେ ସୃଷ୍ଟି କରନ୍ତୁ)     | JWT ସାଇନିଂ ସିକ୍ରେଟ୍      |
 | `INITIAL_PASSWORD`     | `CHANGEME`               | ପ୍ରଥମ ଲଗଇନ୍ ପାସୱାର୍ଡ     |
-| `APP_LOG_LEVEL`        | `info`                   | ଲଗ୍ ବିବରଣୀ ସ୍ତର          |
+| `APP_LOG_LEVEL`        | `info`                   | ଲଗ୍ ବିସ୍ତୃତତା ସ୍ତର       |
 
 ### ଡ୍ୟାସବୋର୍ଡ ସେଟିଂସ୍
 
-ଡ୍ୟାସବୋର୍ଡ ଏପରି ବୈଶିଷ୍ଟ୍ୟଗୁଡ଼ିକ ପାଇଁ UI ଟଗଲ୍ ପ୍ରଦାନ କରେ, ଯେଉଁଗୁଡ଼ିକୁ ପରିବେଶ ଭେରିଏବଲ୍ଗୁଡ଼ିକ ମାଧ୍ୟମରେ ମଧ୍ୟ କନଫିଗର୍ କରାଯାଇପାରେ:
+ଡ୍ୟାସବୋର୍ଡରେ ଏପରି ବୈଶିଷ୍ଟ୍ୟ ପାଇଁ UI ଟଗଲ୍ଗୁଡ଼ିକ ରହିଛି, ଯାହାକୁ ପରିବେଶ ଭେରିଏବଲ୍ ମାଧ୍ୟମରେ ମଧ୍ୟ ବିନ୍ୟାସ କରାଯାଇପାରେ:
 
-| ସେଟିଂର ଅବସ୍ଥାନ   | ଟଗଲ୍                | ବର୍ଣ୍ଣନା                                    |
-| ---------------- | ------------------- | ------------------------------------------- |
-| ସେଟିଂସ୍ → ଉନ୍ନତ  | ଡିବଗ୍ ମୋଡ୍          | ଡିବଗ୍ ରିକ୍ୱେଷ୍ଟ ଲଗ୍ଗୁଡ଼ିକ ସକ୍ଷମ କରନ୍ତୁ (UI) |
-| ସେଟିଂସ୍ → ସାଧାରଣ | ସାଇଡବାର୍ ଦୃଶ୍ୟମାନତା | ସାଇଡବାର୍ ବିଭାଗଗୁଡ଼ିକ ଦେଖାନ୍ତୁ/ଲୁଚାନ୍ତୁ      |
+| ସେଟିଂ ସ୍ଥାନ         | ଟଗଲ୍                | ବର୍ଣ୍ଣନା                               |
+| ------------------- | ------------------- | -------------------------------------- |
+| ସେଟିଂସ୍ → ଅଡଭାନ୍ସ୍ଡ | ଡିବଗ୍ ମୋଡ୍          | ଡିବଗ୍ ରିକ୍ୱେଷ୍ଟ ଲଗ୍ ସକ୍ରିୟ କରନ୍ତୁ (UI) |
+| ସେଟିଂସ୍ → ସାଧାରଣ    | ସାଇଡବାର୍ ଦୃଶ୍ୟମାନତା | ସାଇଡବାର୍ ବିଭାଗଗୁଡ଼ିକ ଦେଖାନ୍ତୁ/ଲୁଚାନ୍ତୁ |
 
-ଏହି ସେଟିଂସ୍ଗୁଡ଼ିକ ଡାଟାବେସ୍ରେ ସଂରକ୍ଷିତ ହୁଏ ଏବଂ ପୁନଃଚାଳନ ପରେ ମଧ୍ୟ ବଜାୟ ରହେ; ସେଟ୍ କରାଯାଇଥିଲେ ଏଗୁଡ଼ିକ env var ଡିଫଲ୍ଟଗୁଡ଼ିକୁ ଓଭରରାଇଡ୍ କରେ।
+ଏହି ସେଟିଂସ୍ଗୁଡ଼ିକ ଡାଟାବେସ୍ରେ ସଂରକ୍ଷିତ ହୁଏ ଏବଂ ପୁନଃଆରମ୍ଭ ପରେ ମଧ୍ୟ ରହିଥାଏ; ସେଗୁଡ଼ିକ ସେଟ୍ ହୋଇଥିଲେ env var ଡିଫଲ୍ଟଗୁଡ଼ିକୁ ଅତିକ୍ରମ କରେ।
 
-### ସ୍ଥାନୀୟ ଭାବରେ ଚଲାଇବା
+### ସ୍ଥାନୀୟ ଭାବେ ଚଲାଇବା
 
 ```bash
-# ଡେଭଲପମେଣ୍ଟ ମୋଡ୍ (ହଟ୍ ରିଲୋଡ୍)
+# ବିକାଶ ମୋଡ୍ (ହଟ୍ ରିଲୋଡ୍)
 npm run dev
 
 # ପ୍ରଡକ୍ସନ୍ ବିଲ୍ଡ
-npm run build    # next build → .build/next/ ତା’ପରେ assembleStandalone → dist/
+npm run build    # next build → .build/next/ ତାପରେ assembleStandalone → dist/
 npm run start
 
-# ଅବଦାନକାରୀଙ୍କ ପରିବର୍ତ୍ତନ ପାଇଁ ଦ୍ରୁତ ବ୍ୟାକଏଣ୍ଡ/API-ମାତ୍ର କମ୍ପାଇଲ୍
+# ଯୋଗଦାନକାରୀ ପରିବର୍ତ୍ତନ ପାଇଁ ଦ୍ରୁତ ବ୍ୟାକଏଣ୍ଡ/API-କେବଳ କମ୍ପାଇଲ୍
 npm run build:contributor
 
 # ରିଲିଜ୍ ବିଲ୍ଡ (ପରିଷ୍କାର ପୁନଃବିଲ୍ଡ + HEAD ସେଣ୍ଟିନେଲ୍ — ଡିପ୍ଲୟ ପାଇଁ ଆବଶ୍ୟକ)
-npm run build:release   # rm -rf .build dist && ବିଲ୍ଡ + dist/BUILD_SHA ଲେଖେ
+npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA ଲେଖେ
 
-# ସାଧାରଣ ପୋର୍ଟ କନଫିଗରେସନ୍
+# ସାଧାରଣ ପୋର୍ଟ ବିନ୍ୟାସ
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-ଅବଦାନକାରୀ ବିଲ୍ଡ କେବଳ କମ୍ପାଇଲ୍ ସତ୍ୟାପନ କରେ: ଏହା ଷ୍ଟାଣ୍ଡଅଲୋନ୍
-ଡିଷ୍ଟ୍ରିବ୍ୟୁସନ୍ ସଂଯୋଜନ କରେ ନାହିଁ କିମ୍ବା ଇଚ୍ଛାଧୀନ ନେଟିଭ୍ ପ୍ୟାକେଜିଂ ଆସେଟ୍ଗୁଡ଼ିକ ବିଲ୍ଡ କରେ ନାହିଁ। ପଠାଯୋଗ୍ୟ ବଣ୍ଡଲ୍ ସତ୍ୟାପନ
-କରିବା ଆବଶ୍ୟକ ହେଲେ ନିୟମିତ ପ୍ରଡକ୍ସନ୍ ବିଲ୍ଡ ବ୍ୟବହାର କରନ୍ତୁ।
+ଯୋଗଦାନକାରୀ ବିଲ୍ଡ କେବଳ କମ୍ପାଇଲ୍-ଭିତ୍ତିକ ଯାଞ୍ଚ କରେ: ଏହା standalone
+ଡିଷ୍ଟ୍ରିବ୍ୟୁସନ୍ ଏକତ୍ର କରେ ନାହିଁ କିମ୍ବା ଐଚ୍ଛିକ ନେଟିଭ୍ ପ୍ୟାକେଜିଂ ଆସେଟ୍ଗୁଡ଼ିକୁ ବିଲ୍ଡ କରେ ନାହିଁ। ଯେତେବେଳେ
+ପଠାଯୋଗ୍ୟ ବଣ୍ଡଲ୍ ଯାଞ୍ଚ କରିବାକୁ ଆବଶ୍ୟକ ହୁଏ, ସାଧାରଣ ପ୍ରଡକ୍ସନ୍ ବିଲ୍ଡ ବ୍ୟବହାର କରନ୍ତୁ।
 
-### ବିଲ୍ଡ ଆଉଟପୁଟ୍ ବିନ୍ୟାସ
+### ବିଲ୍ଡ ଆଉଟପୁଟ୍ ଲେଆଉଟ୍
 
-| ଡିରେକ୍ଟୋରୀ | ବିଷୟବସ୍ତୁ                                                                            | ଟ୍ରାକ୍ କରାଯାଏ |
-| ---------- | ------------------------------------------------------------------------------------ | ------------- |
-| `src/`     | ଆପ୍ଲିକେସନ୍ ସୋର୍ସ (TypeScript / TSX)                                                  | ହଁ            |
-| `.build/`  | ମଧ୍ୟବର୍ତ୍ତୀ ଫାଇଲ୍ଗୁଡ଼ିକ — `next build` ଆଉଟପୁଟ୍ (gitignored, `distDir = .build/next`) | ନା            |
-| `dist/`    | ପଠାଯୋଗ୍ୟ ବଣ୍ଡଲ୍ — `assembleStandalone` ଦ୍ୱାରା ସଂଯୋଜିତ (gitignored)                   | ନା            |
+| ଡିରେକ୍ଟୋରୀ | ବିଷୟବସ୍ତୁ                                                                      | ଟ୍ରାକ୍ କରାଯାଇଛି |
+| ---------- | ------------------------------------------------------------------------------ | --------------- |
+| `src/`     | ଆପ୍ଲିକେସନ୍ ସୋର୍ସ (TypeScript / TSX)                                            | ହଁ              |
+| `.build/`  | ମଧ୍ୟବର୍ତ୍ତୀଗୁଡ଼ିକ — `next build` ଆଉଟପୁଟ୍ (gitignored, `distDir = .build/next`) | ନା              |
+| `dist/`    | ପଠାଯୋଗ୍ୟ ବଣ୍ଡଲ୍ — `assembleStandalone` ଦ୍ୱାରା ଏକତ୍ରିତ (gitignored)             | ନା              |
 
-ବିଲ୍ଡ ପାଇପଲାଇନ୍ ଗୋଟିଏ ପାସ୍ରେ ସମ୍ପନ୍ନ ହୁଏ:
+ବିଲ୍ଡ ପାଇପଲାଇନ୍ ଏକକ ପାସ୍ରେ ଚାଲେ:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js ଆଉଟପୁଟ୍)
-  └─ assembleStandalone()                 (ଷ୍ଟାଣ୍ଡଅଲୋନ୍ + ଷ୍ଟାଟିକ୍ + ପବ୍ଲିକ୍ + ନେଟିଭ୍ ଆସେଟ୍ଗୁଡ଼ିକ କପି କରେ)
-       └─ ଆଉଟପୁଟ୍: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` ଅତିରିକ୍ତ ଭାବରେ ପ୍ରଥମେ ଉଭୟ ଡିରେକ୍ଟୋରୀକୁ ପରିଷ୍କାର କରେ ଏବଂ ଡିପ୍ଲୟ ଅଖଣ୍ଡତା ସେଣ୍ଟିନେଲ୍ ଭାବେ
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ଲେଖେ।
+`npm run build:release` ଅତିରିକ୍ତ ଭାବେ ପ୍ରଥମେ ଉଭୟ ଡିରେକ୍ଟୋରୀକୁ ପରିଷ୍କାର କରେ ଏବଂ
+ଡିପ୍ଲୟ ଇଣ୍ଟେଗ୍ରିଟି ସେଣ୍ଟିନେଲ୍ ଭାବେ `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ଲେଖେ।
 
-`npm run build:contributor` କେବଳ ବ୍ୟାକଏଣ୍ଡ ପାଇଁ ଥିବା ବିଲ୍ଡ ପ୍ରୋଫାଇଲ୍ ବ୍ୟବହାର କରେ। ବିଲ୍ଡ କରିବା ସମୟରେ ଏହା ଅସ୍ଥାୟୀ ଭାବରେ
-ଡ୍ୟାସବୋର୍ଡ UI ଫାଇଲ୍ଗୁଡ଼ିକୁ ଷ୍ଟବ୍ କରେ, API ରୁଟ୍ ହ୍ୟାଣ୍ଡଲର୍ଗୁଡ଼ିକୁ ରଖେ ଏବଂ ବିଲ୍ଡ ପରେ ମୂଳ ଫାଇଲ୍ଗୁଡ଼ିକୁ
-ପୁନଃସ୍ଥାପନ କରେ। ଡ୍ୟାସବୋର୍ଡ UIକୁ ପ୍ରଭାବିତ କରୁଥିବା ପରିବର୍ତ୍ତନ କିମ୍ବା ସମ୍ପୂର୍ଣ୍ଣ
-ରିଲିଜ୍ ସତ୍ୟାପନ ପାଇଁ `npm run build` ବ୍ୟବହାର କରନ୍ତୁ; ଅବଦାନକାରୀ ପ୍ରୋଫାଇଲ୍ ରିଲିଜ୍ ବିଲ୍ଡର ବିକଳ୍ପ ନୁହେଁ।
+`npm run build:contributor` ବ୍ୟାକଏଣ୍ଡ-କେବଳ ବିଲ୍ଡ ପ୍ରୋଫାଇଲ୍ ବ୍ୟବହାର କରେ। ବିଲ୍ଡ ସମୟରେ ଏହା
+ଡ୍ୟାସବୋର୍ଡ UI ଫାଇଲ୍ଗୁଡ଼ିକୁ ସାମୟିକ ଭାବେ ଷ୍ଟବ୍ କରେ, API ରୁଟ୍ ହ୍ୟାଣ୍ଡଲର୍ଗୁଡ଼ିକୁ ରଖେ ଏବଂ ବିଲ୍ଡ ପରେ
+ମୂଳ ଫାଇଲ୍ଗୁଡ଼ିକୁ ପୁନଃସ୍ଥାପନ କରେ। ଡ୍ୟାସବୋର୍ଡ UI ପ୍ରଭାବିତ କରୁଥିବା ପରିବର୍ତ୍ତନ ପାଇଁ କିମ୍ବା ସମ୍ପୂର୍ଣ୍ଣ
+ରିଲିଜ୍ ଯାଞ୍ଚ ପାଇଁ `npm run build` ବ୍ୟବହାର କରନ୍ତୁ; ଯୋଗଦାନକାରୀ ପ୍ରୋଫାଇଲ୍ ରିଲିଜ୍ ବିଲ୍ଡର ପରିବର୍ତ୍ତେ ବ୍ୟବହାରଯୋଗ୍ୟ ନୁହେଁ।
 
 > **VPS ଡିପ୍ଲୟ ଟିପ୍ପଣୀ:** ରିମୋଟ୍ ଇମେଜ୍ ଡିରେକ୍ଟୋରୀ `/usr/lib/node_modules/omniroute/app/`
-> ଅପରିବର୍ତ୍ତିତ ରହିଛି। ଡିପ୍ଲୟ ସ୍କିଲ୍ଗୁଡ଼ିକ `dist/`ର ବିଷୟବସ୍ତୁକୁ ଏଥିରେ rsync କରନ୍ତି।
-> କେବଳ ରିପୋଜିଟୋରୀ ମଧ୍ୟରେ ଥିବା ବିଲ୍ଡ ଆଉଟପୁଟ୍ ପଥ ପରିବର୍ତ୍ତିତ ହୋଇଛି (`app/` → `dist/`)।
+> ଅପରିବର୍ତ୍ତିତ ରହେ। ଡିପ୍ଲୟ ସ୍କିଲ୍ଗୁଡ଼ିକ `dist/` ର ବିଷୟବସ୍ତୁକୁ ଏଥିରେ rsync କରେ।
+> କେବଳ ରିପୋଜିଟୋରୀ ଭିତରର ବିଲ୍ଡ ଆଉଟପୁଟ୍ ପଥ ବଦଳିଛି (`app/` → `dist/`)।
 
 ଡିଫଲ୍ଟ URLଗୁଡ଼ିକ:
 
@@ -171,35 +175,35 @@ Scopeଗୁଡ଼ିକ (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`,
 
 ---
 
-## Test ଚଲାଇବା
+## ପରୀକ୍ଷାଗୁଡ଼ିକ ଚଲାଇବା
 
 ```bash
-# ସମସ୍ତ test (unit + vitest + ecosystem + e2e)
+# ସମସ୍ତ ପରୀକ୍ଷା (unit + vitest + ecosystem + e2e)
 npm run test:all
 
-# ଗୋଟିଏ test file (Node.js native test runner — ଅଧିକାଂଶ test ଏହାକୁ ବ୍ୟବହାର କରେ)
+# ଏକକ ପରୀକ୍ଷା ଫାଇଲ୍ (Node.js ନେଟିଭ୍ ପରୀକ୍ଷା ରନର୍ — ଅଧିକାଂଶ ପରୀକ୍ଷା ଏହାକୁ ବ୍ୟବହାର କରେ)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# କେବଳ ଆପଣଙ୍କ ପରିବର୍ତ୍ତନରେ ପ୍ରଭାବିତ unit testଗୁଡ଼ିକ (CI gate ପରି ସମାନ TIA selector, #8084)
+# କେବଳ ଆପଣଙ୍କ ପରିବର୍ତ୍ତନ ଦ୍ୱାରା ପ୍ରଭାବିତ unit ପରୀକ୍ଷାଗୁଡ଼ିକ (CI ଗେଟ୍ ସହିତ ସମାନ TIA ସିଲେକ୍ଟର୍, #8084)
 npm run test:scoped            # ଶେଷ commitରେ (କିମ୍ବା working treeରେ) ହୋଇଥିବା ପରିବର୍ତ୍ତନ
-npm run test:scoped:staged     # କେବଳ staged ପରିବର୍ତ୍ତନ — pre-commit run ସହିତ ଭଲ ଭାବରେ କାମ କରେ
-npm run test:scoped:full       # ପ୍ରଥମେ import-graph map ପୁନଃନିର୍ମାଣ କରନ୍ତୁ (file ଯୋଗ/ସ୍ଥାନାନ୍ତର କରିବା ପରେ)
-# Exit 1 + "ସମ୍ପୂର୍ଣ୍ଣ suite ଚଲାନ୍ତୁ"ର ଅର୍ଥ ହେଉଛି ଏକ hub file (tsconfig, package.json, …) କିମ୍ବା ଏକ
-# map ହୋଇନଥିବା source ପରିବର୍ତ୍ତିତ ହୋଇଛି — selector ସୁରକ୍ଷିତ ଭାବେ ବିଫଳ ହୁଏ, ଏହା କେବେବି ନିରବରେ ଛାଡ଼ିଯାଏ ନାହିଁ।
+npm run test:scoped:staged     # କେବଳ staged ପରିବର୍ତ୍ତନଗୁଡ଼ିକ — pre-commit ରନ୍ ସହିତ ଭଲ ଭାବେ କାମ କରେ
+npm run test:scoped:full       # ପ୍ରଥମେ import-graph ମ୍ୟାପ୍ ପୁନଃନିର୍ମାଣ କରେ (ଫାଇଲ୍ ଯୋଡ଼ିବା/ସ୍ଥାନାନ୍ତର କରିବା ପରେ)
+# Exit 1 + "ସମ୍ପୂର୍ଣ୍ଣ suite ଚଲାନ୍ତୁ"ର ଅର୍ଥ ହେଉଛି ଗୋଟିଏ hub ଫାଇଲ୍ (tsconfig, package.json, …) କିମ୍ବା
+# ମ୍ୟାପ୍ ହୋଇନଥିବା source ପରିବର୍ତ୍ତିତ ହୋଇଛି — ସିଲେକ୍ଟର୍ ନିରାପଦ ଭାବେ ବିଫଳ ହୁଏ, ଏହା କେବେ ମଧ୍ୟ ନିରବରେ ଛାଡ଼ି ଦିଏ ନାହିଁ।
 
 # Vitest (MCP server, autoCombo, cache)
 npm run test:vitest
 
-# E2E test (Playwright ଆବଶ୍ୟକ)
+# E2E ପରୀକ୍ଷାଗୁଡ଼ିକ (Playwright ଆବଶ୍ୟକ)
 npm run test:e2e
 
-# Protocol client E2E (MCP transport, A2A)
+# Protocol clients E2E (MCP transports, A2A)
 npm run test:protocols:e2e
 
-# Ecosystem compatibility test
+# Ecosystem ସୁସଙ୍ଗତତା ପରୀକ୍ଷାଗୁଡ଼ିକ
 npm run test:ecosystem
 
-# Coverage gate: statement/line/function/branch ପାଇଁ 60%
+# Coverage ଗେଟ୍: statements/lines/functions/branches ପାଇଁ 60%
 npm run test:coverage
 npm run coverage:report
 
@@ -207,51 +211,52 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Gate ଦ୍ୱାରା ନିୟନ୍ତ୍ରିତ real-upstream combo smoke (VPS access + ପ୍ରକୃତ provider credit ଆବଶ୍ୟକ)
-# ପ୍ରକୃତ providerଗୁଡ଼ିକୁ hit କରେ — ଅଳ୍ପ ଖର୍ଚ୍ଚ ହୁଏ। CIରେ କେବେବି ଚାଲେ ନାହିଁ। Gate ନଥିଲେ ସ୍ୱଚ୍ଛ ଭାବରେ skip କରେ।
-# ଆବଶ୍ୟକ: ssh root@192.168.0.15 access (VPSରୁ ଏକ read-only DB snapshot source କରେ)।
+# ଗେଟ୍ କରାଯାଇଥିବା ପ୍ରକୃତ-upstream combo smoke (VPS ପ୍ରବେଶ + ପ୍ରକୃତ provider credits ଆବଶ୍ୟକ)
+# ପ୍ରକୃତ providersକୁ ଅନୁରୋଧ ପଠାଏ — ଅଳ୍ପ ଖର୍ଚ୍ଚ ହୁଏ। CIରେ କେବେ ମଧ୍ୟ ଚାଲେ ନାହିଁ। ଗେଟ୍ ନଥିଲେ ସ୍ୱଚ୍ଛ ଭାବେ ଛାଡ଼ିଦିଏ।
+# ଆବଶ୍ୟକ: ssh root@192.168.0.15 ପ୍ରବେଶ (VPSରୁ ଗୋଟିଏ read-only DB snapshot source କରେ)।
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS live smoke — ସରଳ Node ESM script, live .15 serverକୁ ସିଧାସଳଖ hit କରେ।
-# ଆବଶ୍ୟକ: ssh root@192.168.0.15 access (SSH sqlite ମାଧ୍ୟମରେ combo ତିଆରି/ଅପସାରଣ କରାଯାଏ)।
-# ପ୍ରକୃତ providerଗୁଡ଼ିକୁ hit କରେ (ଅଳ୍ପ ଖର୍ଚ୍ଚ)। କେବଳ __live_test__* combo ତିଆରି/ବିଲୋପ କରେ। CIରେ କେବେବି ଚାଲେ ନାହିଁ।
-# .15ରେ REQUIRE_API_KEY=false ଥିବାରୁ API key ଆବଶ୍ୟକ ନୁହେଁ, କିନ୍ତୁ ସେଟ୍ ହୋଇଥିଲେ COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEYକୁ ସମ୍ମାନ କରେ।
-npm run test:combo:live:vps              # 7ଟି HTTP scenario (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # ଏକ ପ୍ରକୃତ cross-provider failover scenario ଯୋଗ କରେ (ମୋଟ 8ଟି)
+# Phase-3 VPS live smoke — ସାଧାରଣ Node ESM scripts, live .15 serverକୁ ସିଧାସଳଖ ଅନୁରୋଧ ପଠାଏ।
+# ଆବଶ୍ୟକ: ssh root@192.168.0.15 ପ୍ରବେଶ (SSH sqlite ମାଧ୍ୟମରେ combos ସୃଷ୍ଟି/ବିଲୋପ କରାଯାଏ)।
+# ପ୍ରକୃତ providersକୁ ଅନୁରୋଧ ପଠାଏ (ଅଳ୍ପ ଖର୍ଚ୍ଚ)। କେବଳ __live_test__* combos ସୃଷ୍ଟି/ବିଲୋପ କରେ। CIରେ କେବେ ମଧ୍ୟ ଚାଲେ ନାହିଁ।
+# .15ରେ REQUIRE_API_KEY=false, ତେଣୁ API key ଆବଶ୍ୟକ ନାହିଁ, କିନ୍ତୁ ସେଟ୍ ହୋଇଥିଲେ COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEYକୁ ସମ୍ମାନ କରେ।
+npm run test:combo:live:vps              # 7ଟି HTTP ପରିଦୃଶ୍ୟ (priority/round-robin/weighted/cost/fusion/auto + health)
+npm run test:combo:live:vps:failover     # ଏକ ପ୍ରକୃତ cross-provider failover ପରିଦୃଶ୍ୟ ଯୋଡ଼େ (ମୋଟ 8ଟି)
 ```
 
-Coverage ଟିପ୍ପଣୀ:
+Coverage ସମ୍ବନ୍ଧୀୟ ଟିପ୍ପଣୀ:
 
-- `npm run test:coverage` ମୁଖ୍ୟ unit test suite ପାଇଁ source coverage ମାପେ, `tests/**`କୁ ବାଦ ଦିଏ ଏବଂ `open-sse/**`କୁ ସାମିଲ କରେ
-- Pull requestଗୁଡ଼ିକରେ statement/line/function/branch ପାଇଁ coverage gate **60%+** ରହିବା ଆବଶ୍ୟକ
-- ଯଦି ଏକ PR `src/`, `open-sse/`, `electron/`, କିମ୍ବା `bin/`ର production code ପରିବର୍ତ୍ତନ କରେ, ତେବେ ସେହି PRରେ automated test ଯୋଗ କିମ୍ବା ଅଦ୍ୟତନ କରିବା ଆବଶ୍ୟକ
-- `npm run coverage:report` ସର୍ବଶେଷ coverage runରୁ ବିସ୍ତୃତ file-by-file report print କରେ
+- `npm run test:coverage` ମୁଖ୍ୟ unit test suite ପାଇଁ source coverage ମାପେ, `tests/**`କୁ ବାଦ ଦିଏ ଏବଂ `open-sse/**`କୁ ଅନ୍ତର୍ଭୁକ୍ତ କରେ
+- Pull requestsଗୁଡ଼ିକୁ statements/lines/functions/branches ପାଇଁ coverage ଗେଟ୍ **60%+**ରେ ରଖିବାକୁ ହେବ
+- ଯଦି କୌଣସି PR `src/`, `open-sse/`, `electron/`, କିମ୍ବା `bin/`ରେ production code ପରିବର୍ତ୍ତନ କରେ, ତେବେ ସେହି PRରେ automated tests ଯୋଡ଼ିବା କିମ୍ବା ଅଦ୍ୟତନ କରିବା ଆବଶ୍ୟକ
+- `npm run coverage:report` ସର୍ବଶେଷ coverage runରୁ ବିସ୍ତୃତ file-by-file report ପ୍ରିଣ୍ଟ କରେ
 - `npm run test:coverage:legacy` ଐତିହାସିକ ତୁଳନା ପାଇଁ ପୁରୁଣା metricକୁ ସଂରକ୍ଷିତ ରଖେ
-- ପର୍ଯ୍ୟାୟଭିତ୍ତିକ coverage ଉନ୍ନତି roadmap ପାଇଁ `docs/ops/COVERAGE_PLAN.md` ଦେଖନ୍ତୁ
+- ପର୍ଯ୍ୟାୟକ୍ରମିକ coverage ଉନ୍ନତି roadmap ପାଇଁ `docs/ops/COVERAGE_PLAN.md` ଦେଖନ୍ତୁ
 
-### Pull Request ଆବଶ୍ୟକତା
+### Pull Request ଆବଶ୍ୟକତାଗୁଡ଼ିକ
 
-ଏକ PR ଖୋଲିବା ପୂର୍ବରୁ, ଆପଣ ଯାହା ପରିବର୍ତ୍ତନ କରିଛନ୍ତି ତାହା ପାଇଁ focused loop ଚଲାଇବାକୁ
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) ବ୍ୟବହାର କରନ୍ତୁ। ସମ୍ପୂର୍ଣ୍ଣ unit suite (4ଟି CI shard), Vitest, **60%+** coverage gate ଏବଂ
+ଗୋଟିଏ PR ଖୋଲିବା ପୂର୍ବରୁ, ଆପଣ ଯାହା ପରିବର୍ତ୍ତନ କରିଛନ୍ତି ତାହା ପାଇଁ କେନ୍ଦ୍ରିତ loop ଚଲାଇବାକୁ
+[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) ବ୍ୟବହାର କରନ୍ତୁ। ସମ୍ପୂର୍ଣ୍ଣ unit suite (4ଟି CI shards), Vitest, **60%+** coverage ଗେଟ୍, ଏବଂ
 production build ହେଉଛି CIର ଦାୟିତ୍ୱ — ସେଗୁଡ଼ିକୁ ସ୍ଥାନୀୟ ଭାବେ ଚଲାଇଲେ PR
-ଯାଞ୍ଚରୁ ପୂର୍ବରୁ ନ ମିଳିବା ଭଳି କୌଣସି ଅତିରିକ୍ତ ସଙ୍କେତ ମିଳେ ନାହିଁ, ଏବଂ ଛୋଟ machineରେ ଏହା hostକୁ ଅତ୍ୟଧିକ ବ୍ୟସ୍ତ କରିପାରେ (#8084):
+ଯାଞ୍ଚଗୁଡ଼ିକ ପୂର୍ବରୁ ଦେଉନଥିବା କୌଣସି ଅତିରିକ୍ତ ସଙ୍କେତ ମିଳେ ନାହିଁ, ଏବଂ ଛୋଟ machineଗୁଡ଼ିକରେ ଏହା hostକୁ ସନ୍ତୃପ୍ତ କରିପାରେ (#8084):
 
-- ଆପଣଙ୍କ ପରିବର୍ତ୍ତନକୁ cover କରୁଥିବା test fileଗୁଡ଼ିକ ଚଲାନ୍ତୁ: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- ଆପଣଙ୍କ ପରିବର୍ତ୍ତନକୁ cover କରୁଥିବା test files ଚଲାନ୍ତୁ: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint` ଚଲାନ୍ତୁ
-- Production code ପରିବର୍ତ୍ତିତ ହେଲେ ସେହି PRରେ automated test ଯୋଗ କିମ୍ବା ଅଦ୍ୟତନ କରନ୍ତୁ
-- Production code ପରିବର୍ତ୍ତିତ ହେଲେ PR descriptionରେ ପରିବର୍ତ୍ତିତ କିମ୍ବା ଯୋଗ କରାଯାଇଥିବା test fileଗୁଡ଼ିକ ସାମିଲ କରନ୍ତୁ
-- CIରେ project secretଗୁଡ଼ିକ configure ହୋଇଥିଲେ PRରେ SonarQube result ଯାଞ୍ଚ କରନ୍ତୁ
+- production code ପରିବର୍ତ୍ତିତ ହେଲେ ସେହି PRରେ automated tests ଅନ୍ତର୍ଭୁକ୍ତ କିମ୍ବା ଅଦ୍ୟତନ କରନ୍ତୁ
+- `node:test` ଫାଇଲ୍ଗୁଡ଼ିକରେ, ପ୍ରତ୍ୟେକ top-level `await` (ଯେପରିକି `await import(...)`)କୁ ପ୍ରଥମ `test()` / `describe()` ପୂର୍ବରୁ ରଖନ୍ତୁ: `--test-force-exit` ଅଧୀନରେ, ଏହା ପରେ register ହୋଇଥିବା tests କେବେ ମଧ୍ୟ ନିରବରେ ଚାଲିନପାରେ (#18045; `npm run check:test-tla-order` ଦ୍ୱାରା ବାଧ୍ୟତାମୂଳକ)
+- production code ପରିବର୍ତ୍ତିତ ହେଲେ PR ବର୍ଣ୍ଣନାରେ ପରିବର୍ତ୍ତିତ କିମ୍ବା ଯୋଡ଼ାଯାଇଥିବା test files ଅନ୍ତର୍ଭୁକ୍ତ କରନ୍ତୁ
+- CIରେ project secrets configure ହୋଇଥିଲେ PRରେ SonarQube ଫଳାଫଳ ଯାଞ୍ଚ କରନ୍ତୁ
 
-ବର୍ତ୍ତମାନର test ସ୍ଥିତି: **122ଟି unit test file**, ଯେଉଁଗୁଡ଼ିକ ଏସବୁକୁ cover କରେ:
+ବର୍ତ୍ତମାନର test ସ୍ଥିତି: **122ଟି unit test files**, ଯାହା ନିମ୍ନଲିଖିତକୁ cover କରେ:
 
-- Provider translator ଏବଂ format conversion
-- Rate limiting, circuit breaker ଏବଂ resilience
-- Semantic cache, idempotency ଏବଂ progress tracking
-- Database operation ଏବଂ schema (21ଟି DB module)
-- OAuth flow ଏବଂ authentication
+- Provider translators ଏବଂ format conversion
+- Rate limiting, circuit breaker, ଏବଂ resilience
+- Semantic cache, idempotency, progress tracking
+- Database operations ଏବଂ schema (21ଟି DB modules)
+- OAuth flows ଏବଂ authentication
 - API endpoint validation (Zod v4)
-- MCP server tool ଏବଂ scope enforcement
-- Memory ଏବଂ Skills system
+- MCP server tools ଏବଂ scope enforcement
+- Memory ଏବଂ Skills systems
 
 ---
 

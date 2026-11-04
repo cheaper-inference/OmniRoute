@@ -60,12 +60,18 @@ const TOASTER_SELECTOR = '[data-slot="toaster"]';
 const isFromToaster = (event: Event) =>
   event.target instanceof Element && event.target.closest(TOASTER_SELECTOR) !== null;
 
+// Dialogs take ~70% of the viewport from the `sm` breakpoint up, so settings-style modals
+// (API key permissions, provider config, routing editors) stop cramming their forms into a
+// 28rem column. Below `sm` they keep the kit's `calc(100vw - 3rem)` width with its 30rem cap
+// lifted (`max-w-none`), i.e. full width minus the mobile gutter. Only `sm` keeps a fixed
+// narrow width — it is the confirm/alert dialog size.
+const WIDE = "max-w-none sm:w-[70vw] sm:max-w-[70vw]";
 const SIZES = {
   sm: "max-w-sm",
-  md: "max-w-md",
-  lg: "max-w-lg",
-  xl: "max-w-xl",
-  full: "max-w-4xl",
+  md: WIDE,
+  lg: WIDE,
+  xl: WIDE,
+  full: WIDE,
 } as const;
 
 // The element focused right now, unless it is <body> (nothing to return to).

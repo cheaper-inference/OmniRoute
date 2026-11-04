@@ -69,6 +69,7 @@ export const REFUSAL_POLICIES: {
   transport: { baseMs: 60_000; maxMs: 600_000 };
   slow: { baseMs: 60_000; maxMs: 600_000 };
   geo_blocked: { baseMs: 60_000; maxMs: 600_000 };
+  operator_reported: { baseMs: 60_000; maxMs: 600_000 };
 } = {
   /** The TCP probe could not open a connection to the proxy. */
   proxy_unreachable: { baseMs: 60_000, maxMs: 600_000 },
@@ -88,6 +89,8 @@ export const REFUSAL_POLICIES: {
   slow: { baseMs: 60_000, maxMs: 600_000 },
   /** The provider refused this region through this member; short set-aside. */
   geo_blocked: { baseMs: 60_000, maxMs: 600_000 },
+  /** The operator reported this member as failed; short set-aside. */
+  operator_reported: { baseMs: 60_000, maxMs: 600_000 },
 };
 
 export type ProxyRefusalKind = keyof typeof REFUSAL_POLICIES;
@@ -379,14 +382,13 @@ export interface ProxySetAsideSnapshot {
   streak: number;
 }
 
-export function snapshotProxySetAside(
-  key: string | null,
-  nowMs: number = Date.now()
+function snapshotLatestSetAside(
+  read: (kind: ProxyRefusalKind) => RefusalState | undefined,
+  nowMs: number
 ): ProxySetAsideSnapshot | null {
-  if (key === null || memory.size === 0) return null;
   let latest: (ProxySetAsideSnapshot & { seq: number }) | null = null;
   for (const kind of REFUSAL_KINDS) {
-    const state = readState(key, kind, nowMs);
+    const state = read(kind);
     if (!state || state.until <= nowMs || (latest !== null && state.seq <= latest.seq)) continue;
     // Recompute the period from the stored streak with the same doubling curve as
     // noteProxyRefusal so setAsideAt = until - periodMs (read-only, no state change).
@@ -403,6 +405,14 @@ export function snapshotProxySetAside(
   if (!latest) return null;
   const { seq: _seq, ...snapshot } = latest;
   return snapshot;
+}
+
+export function snapshotProxySetAside(
+  key: string | null,
+  nowMs: number = Date.now()
+): ProxySetAsideSnapshot | null {
+  if (key === null || memory.size === 0) return null;
+  return snapshotLatestSetAside((kind) => readState(key, kind, nowMs), nowMs);
 }
 
 /**
@@ -450,23 +460,7 @@ export function snapshotMemberSetAside(
   nowMs: number = Date.now()
 ): ProxySetAsideSnapshot | null {
   if (entryKey === null || member === null || memory.size === 0) return null;
-  let latest: (ProxySetAsideSnapshot & { seq: number }) | null = null;
-  for (const kind of REFUSAL_KINDS) {
-    const state = readMemberState(entryKey, member, kind, nowMs);
-    if (!state || state.until <= nowMs || (latest !== null && state.seq <= latest.seq)) continue;
-    const policy = REFUSAL_POLICIES[kind];
-    const periodMs = Math.min(policy.baseMs * 2 ** (state.streak - 1), policy.maxMs);
-    latest = {
-      kind,
-      setAsideAt: state.until - periodMs,
-      endsAt: state.until,
-      streak: state.streak,
-      seq: state.seq,
-    };
-  }
-  if (!latest) return null;
-  const { seq: _seq, ...snapshot } = latest;
-  return snapshot;
+  return snapshotLatestSetAside((kind) => readMemberState(entryKey, member, kind, nowMs), nowMs);
 }
 
 /**
