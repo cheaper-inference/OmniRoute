@@ -23,7 +23,7 @@ export function withCompressionEntrypointGuards<T extends CompressionEntrypointO
   options: T | undefined,
   run: (body: Record<string, unknown>) => CompressionResult
 ): CompressionResult {
-  if (mustKeepOpenCodeHistoryVerbatim(body, options?.cachingContext ?? { model: options?.model })) {
+  if (mustKeepOpenCodeHistoryVerbatim(body, options?.cachingContext ?? { provider: options?.provider, model: options?.model })) {
     return { body, compressed: false, stats: null };
   }
   return withQuantumLock(
@@ -40,7 +40,7 @@ export function withCompressionEntrypointGuardsAsync<T extends CompressionEntryp
   options: T | undefined,
   run: (body: Record<string, unknown>) => Promise<CompressionResult>
 ): Promise<CompressionResult> {
-  if (mustKeepOpenCodeHistoryVerbatim(body, options?.cachingContext ?? { model: options?.model })) {
+  if (mustKeepOpenCodeHistoryVerbatim(body, options?.cachingContext ?? { provider: options?.provider, model: options?.model })) {
     return Promise.resolve({ body, compressed: false, stats: null });
   }
   return withQuantumLockAsync(
