@@ -14170,6 +14170,10 @@
         "label": "Bendro išvesties telkinio tvarka",
         "description": "Teikėjams, kurių kvota skirstoma pagal išvesties adresą, telkinio narį, turintį tą patį stebėtą išvesties adresą kaip ir neseniai atmestas narys, rikiuoti iškart po veikiančių narių. Tik rikiavimas, niekada neatmetama. Reikalingas PROXY_SKIP_RECENTLY_FAILED, kuris pateikia nuskaitomą atmetimo signalą. Pagal numatytuosius nustatymus išjungta: pasirinkimo tvarka yra visiškai tokia pati, kaip įprastos rotacijos."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotacijos priskyrimo žurnalizavimas",
         "description": "„opencode“ rotacija fiksuoja, kuri paskyra aptarnavo užklausą arba buvo praleista (tik užmaskuoti ID, niekada ne pilni paskyrų ID), ir susieja proxy žurnalo įrašus su jų užklausa, kad operatorius galėtų atskirti praleistas paskyras nuo nenaudotų. Pagal numatytuosius nustatymus išjungta: papildomų žurnalo eilučių ar stulpelių nerašoma."
@@ -14401,6 +14405,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: sustabdyti gavus turinio politikos atmetimą",
         "description": "Kai „combo“ taikinys atsako tiksliu turinio politikos atmetimu (kodas arba tipas cyber_policy / content_policy_violation), sustabdyti „combo“ ir grąžinti tą atmetimą net tada, kai likę taikiniai yra kitokie modeliai, užuot pereinant prie kito taikinio. Pagal numatytuosius nustatymus išjungta: atmetimas niekada neatvėsina paskyros ir nesuaktyvina teikėjo grandinės pertraukiklio, o „combo“ pereina prie kito taikinio lygiai taip pat, kaip anksčiau."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Atvėsimo pakartotinis bandymas: praleisti 403/410 atmetimus",

@@ -66,7 +66,8 @@ const {
 // takes it to 116.
 // ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM (#16236, moved to the per-connection
 // keepMidConversationSystem opt-in) takes it back to 115.
-const EXPECTED_FEATURE_FLAG_COUNT = 115;
+// PROXY_STRICT_POST_REPLAY_ENABLED and RESPONSES_TRANSPORT_KEEPALIVE_ENABLED (#18312, default off) take it to 117.
+const EXPECTED_FEATURE_FLAG_COUNT = 117;
 // tool_call wrapper repair, default on) to 86; OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED
 // (#16571, OpenCode v2 client fingerprint, default off) to 87.
 // tool_call wrapper repair, default on) to 86; CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED
