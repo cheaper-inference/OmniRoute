@@ -88,8 +88,14 @@ function assignCodexWindows(
   names: { primary: string; secondary: string }
 ): void {
   const { primary, secondary } = getCodexRateLimitWindows(rateLimit);
-  if (primary) target[codexQuotaWindowKey(primary, names)] = primary;
-  if (secondary) target[codexQuotaWindowKey(secondary, names)] = secondary;
+  // Publish only the declared {percentUsed, resetAt} shape; identity/duration stay internal.
+  for (const window of [primary, secondary]) {
+    if (!window) continue;
+    target[codexQuotaWindowKey(window, names)] = {
+      percentUsed: window.percentUsed,
+      resetAt: window.resetAt,
+    };
+  }
 }
 function getSelectedCodexRateLimit(
   normalRateLimit: Record<string, unknown>,

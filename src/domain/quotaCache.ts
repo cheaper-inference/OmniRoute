@@ -443,7 +443,8 @@ function isCodexQuotaExhausted(
   connectionId: string,
   entry: QuotaCacheEntry,
   requestedModel: string | null,
-  providerSpecificData: unknown
+  // Optional: callers without the connection's settings keep the default (all windows tracked).
+  providerSpecificData?: unknown
 ): boolean {
   if (Object.keys(entry.quotas).length === 0) return entry.exhausted;
   const windows = filterCodexQuotaWindows(entry.quotas, providerSpecificData);
