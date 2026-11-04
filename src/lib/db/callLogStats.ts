@@ -1,3 +1,4 @@
+import { logicalCallSql, logicalCallWhere } from "./logicalCallSql";
 import { getDbInstance } from "./core";
 import { ERROR_TYPE_CONTRACT } from "@omniroute/open-sse/services/errorClassifier.ts";
 import {
@@ -120,14 +121,14 @@ export const PROVIDER_METRICS_SQL = `SELECT
       (
         SELECT c2.status
         FROM call_logs c2
-        WHERE c2.provider = c.provider
+        WHERE ${logicalCallSql("c2")} AND c2.provider = c.provider
         ORDER BY c2.timestamp DESC, c2.id DESC
         LIMIT 1
       ) as lastStatus,
       (
         SELECT c3.status
         FROM call_logs c3
-        WHERE c3.provider = c.provider
+        WHERE ${logicalCallSql("c3")} AND c3.provider = c.provider
           AND (
             (c3.status IS NOT NULL AND (c3.status < 200 OR c3.status >= 400))
             OR c3.error_summary IS NOT NULL
@@ -136,7 +137,7 @@ export const PROVIDER_METRICS_SQL = `SELECT
         LIMIT 1
       ) as lastErrorStatus
     FROM call_logs c
-    WHERE c.provider IS NOT NULL AND c.provider != '-'
+    WHERE ${logicalCallSql("c")} AND c.provider IS NOT NULL AND c.provider != '-'
       AND ${LIVE_PROVIDER_FILTER_SQL}
     GROUP BY c.provider`;
 
@@ -171,7 +172,7 @@ export function getProviderUsageSince(since: string): ProviderUsageRow[] {
           COUNT(c.duration) as latencySamples,
           MAX(c.timestamp) as lastRequestAt
         FROM call_logs c
-        WHERE c.provider IS NOT NULL AND c.provider != '-'
+        WHERE ${logicalCallSql("c")} AND c.provider IS NOT NULL AND c.provider != '-'
           AND c.timestamp >= @since
           AND ${LIVE_PROVIDER_FILTER_SQL}
         GROUP BY c.provider`
@@ -379,7 +380,7 @@ export function getFallbackStats(
           THEN 1 ELSE 0 END
         ), 0) as fallbacks
       FROM call_logs
-      ${whereClause}
+      ${logicalCallWhere(whereClause)}
     `
     )
     .get(params) as FallbackStatsRow | undefined;
@@ -434,7 +435,7 @@ export function getErrorTypeBreakdown(
         END AS errorType,
         COUNT(*) AS count
       FROM call_logs
-      ${whereClause} ${whereClause ? "AND" : "WHERE"} (status >= 400 OR error_summary IS NOT NULL)
+      ${logicalCallWhere(whereClause)} AND (status >= 400 OR error_summary IS NOT NULL)
       GROUP BY 1
       ORDER BY count DESC, errorType ASC
       `

@@ -1,3 +1,4 @@
+import type { HttpAttemptSelection } from "../../utils/providerHttpAttempts.ts";
 /**
  * Non-streaming response path, lifted out of handleChatCore.
  * The body matches the barrel. Closed-over request state arrives through
@@ -204,6 +205,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     traceEnabled,
     videoBridgeObserved,
   } = deps;
+  let upstreamHttpSelection: HttpAttemptSelection | null = null;
   const familyFallback = createRequestFamilyFallback(provider, {
     headers: clientRawRequest?.headers,
     hasApiKeyMetadata: Boolean(apiKeyInfo),
@@ -234,12 +236,14 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       policy,
       model: pipelineModel,
       translatedBody: wireBody,
+      upstreamHttpRejection,
     }) => {
       translatedBody = wireBody as typeof translatedBody;
       syncExecuteTranslatedBody(translatedBody);
       currentModel = pipelineModel;
       triedModels.add(pipelineModel);
       return runProviderExecutionPipeline({
+        upstreamHttpRejection,
         getNextFamilyFallback: familyFallback.getNext,
         policy,
         target: {
@@ -326,8 +330,8 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
             });
           },
         },
-        sendProviderAttempt: (modelToCall, allowDedup) =>
-          executeProviderRequest(modelToCall, allowDedup),
+        sendProviderAttempt: (modelToCall, allowDedup, rejection) =>
+          executeProviderRequest(modelToCall, allowDedup, undefined, rejection),
         getLastOutboundBody: () => providerRequestCapture.latest()?.body,
         onSignatureFailure: reportSignatureFailure,
       });
@@ -344,8 +348,8 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       allowAccountRotation: !managedLease && comboStrategy !== "context-relay",
       allowModelFallback: true,
       hasApiKeyMetadata: Boolean(apiKeyInfo),
-      executeProviderRequest: (modelToCall, allowDedup) =>
-        executeProviderRequest(modelToCall, allowDedup),
+      executeProviderRequest: (modelToCall, allowDedup, policy, rejection) =>
+        executeProviderRequest(modelToCall, allowDedup, policy, rejection),
       runProviderExecution: runNonStreamingPipeline,
       setRequestWireState: ({ translatedBody: nextBody, effectiveModel: nextModel }) => {
         translatedBody = nextBody as typeof translatedBody;
@@ -373,6 +377,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       log,
     });
 
+    upstreamHttpSelection = legResult.upstreamHttpSelection ?? null;
     if (legResult.kind === "error") {
       const err = legResult.result;
       const errMessage =
@@ -425,6 +430,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         status: `FAILED ${err.status}`,
       }).catch(() => {});
       persistAttemptLogs({
+        upstreamHttpSelection,
         status: err.status,
         error: err.error || "Provider request failed",
         providerRequest: finalBody || translatedBody,
@@ -551,8 +557,8 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         return runNonStreamingProviderLeg(
           followUpLegInput(
             {
-              executeProviderRequest: (modelToCall, allowDedup) =>
-                executeProviderRequest(modelToCall, allowDedup),
+              executeProviderRequest: (modelToCall, allowDedup, policy, rejection) =>
+                executeProviderRequest(modelToCall, allowDedup, policy, rejection),
               runProviderExecution: runNonStreamingPipeline,
               setRequestWireState: ({ translatedBody: nextBody, effectiveModel: nextModel }) => {
                 translatedBody = nextBody as typeof translatedBody;
@@ -590,6 +596,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       return {
         response: await finalizeToolLoopError({
           loop: loopApply.loop,
+          upstreamHttpSelection: loopApply.loop.upstreamHttpSelection ?? null,
           model,
           provider,
           connectionId: pendingConnId,
@@ -627,6 +634,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       okLeg = loopApply.leg;
     }
 
+    upstreamHttpSelection = okLeg.upstreamHttpSelection ?? null;
     if (okLeg.upstreamResponse) {
       providerResponse = okLeg.upstreamResponse;
       providerHeaders = normalizeHeaders(okLeg.upstreamResponse.headers);
@@ -809,6 +817,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     if (postCallGuardrails.blocked) {
       const guardrailMessage = postCallGuardrails.message || "Response blocked by guardrail";
       persistAttemptLogs({
+        upstreamHttpSelection,
         status: HTTP_STATUS.BAD_REQUEST,
         tokens: usage,
         responseBody,
@@ -915,6 +924,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       persistAttemptLogs({
         status: HTTP_STATUS.BAD_GATEWAY,
         error: malformedDiagnostic,
+        upstreamHttpSelection,
         tokens: usage,
         responseBody: sanitizedMalformedResponse,
         providerRequest: finalBody || translatedBody,
@@ -1000,6 +1010,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     await saveIdempotency(idempotencyKey, translatedResponse, 200);
     reqLogger.logConvertedResponse(translatedResponse);
     persistAttemptLogs({
+      upstreamHttpSelection,
       status: 200,
       tokens: usage,
       responseBody,
@@ -1180,6 +1191,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       }).catch(() => {});
       const failureMessage = sanitizeErrorMessage(errorMetadata.message) || "Semaphore timeout";
       persistAttemptLogs({
+        upstreamHttpSelection: null,
         status: HTTP_STATUS.RATE_LIMITED,
         error: failureMessage,
         providerRequest: finalBody || translatedBody,
