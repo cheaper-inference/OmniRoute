@@ -104,3 +104,36 @@ test("handleSearch executes Keenable through the standard gateway fetch and norm
     globalThis.fetch = originalFetch;
   }
 });
+
+
+test("Keenable normalizer enforces include_domains and exclude_domains filters", () => {
+  const rows = {
+    results: [
+      { title: "Sibling", url: "https://sub.example.com/c" },
+      { title: "Root", url: "https://example.com/a" },
+      { title: "Other", url: "https://other.com/b" },
+      { title: "Blocked domain", url: "https://excluded.org/d" },
+      { title: "Blocked sub", url: "https://excluded.org/deep/page" },
+    ],
+  };
+  const collect = (domainFilter?: string[]) =>
+    normalizeKeenableSearchResponse(rows, (id, item) => ({ title: item.title, url: item.url }) as never, domainFilter)
+      .results.map((item: { url: string }) => item.url.replace(/^https?:\/\//, ""));
+
+  // include_domains keeps only the allowed domains (host + subdomains).
+  assert.deepEqual(collect(["example.com"]), ["sub.example.com/c", "example.com/a"]);
+  // exclude_domains removes blocked domains, keeps the rest.
+  assert.deepEqual(collect(["-excluded.org", "-other.com"]), [
+    "sub.example.com/c",
+    "example.com/a",
+  ]);
+  // Without a filter nothing is dropped.
+  assert.equal(collect(undefined).length, 5);
+  // totalResults reflects the filtered set, not the upstream count.
+  const filtered = normalizeKeenableSearchResponse(
+    rows,
+    (id, item) => ({ title: item.title, url: item.url }) as never,
+    ["example.com"]
+  );
+  assert.equal(filtered.totalResults, 2);
+});

@@ -340,7 +340,12 @@ async function postHandler(request: Request, context: unknown) {
     // Exclude fallback-only providers; they are only used by the last-resort step.
     const otherIds = Object.values(SEARCH_PROVIDERS)
       .filter(
-        (provider) => !provider.fallbackOnly && supportsSearchType(provider, body.search_type)
+        (provider) =>
+          !provider.fallbackOnly &&
+          supportsSearchType(provider, body.search_type) &&
+          // Failover must honor operator blocks just like primary selection:
+          // a blocked provider is never sent the caller's query.
+          !isProviderBlockedByIdOrAlias(provider.id, blockedProviders)
       )
       .sort((a, b) => a.costPerQuery - b.costPerQuery)
       .map((p) => p.id)
@@ -370,6 +375,7 @@ async function postHandler(request: Request, context: unknown) {
       );
       for (const provider of freeFallbacks) {
         if (!provider.fallbackOnly || provider.id === providerConfig.id) continue;
+        if (isProviderBlockedByIdOrAlias(provider.id, blockedProviders)) continue;
         if (isUnconfiguredLoopbackSearchProvider(provider)) continue;
         if (!supportsSearchType(provider, body.search_type)) continue;
         const fallbackCreds = await resolveSearchExecutionCredentials(provider, allowedConnections);

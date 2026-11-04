@@ -515,3 +515,58 @@ test("v1 search POST uses Keenable first and falls back to DuckDuckGo when it fa
     globalThis.fetch = originalFetch;
   }
 });
+
+
+test("failover alternate selection skips operators-blocked providers", async () => {
+  const settingsDb = await import("../../src/lib/db/settings.ts");
+  await providersDb.createProviderConnection({
+    provider: "tavily-search",
+    authType: "apikey",
+    name: "tavily-keys",
+    apiKey: "tavily-key",
+    isActive: true,
+    testStatus: "active",
+    providerSpecificData: {},
+  });
+  await providersDb.createProviderConnection({
+    provider: "brave-search",
+    authType: "apikey",
+    name: "brave-keys",
+    apiKey: "brave-key",
+    isActive: true,
+    testStatus: "active",
+    providerSpecificData: {},
+  });
+  await settingsDb.updateSettings({ blockedProviders: ["tavily-search"] });
+
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (input) => {
+    const url = String(input);
+    // Primary default (Keenable) fails retriable so the failover alternate runs.
+    if (url.includes("keenable")) return new Response("keenable down", { status: 502 });
+    if (url.includes("tavily")) return new Response("tavily down", { status: 500 });
+    return new Response(
+      JSON.stringify({
+        web: { results: [{ title: "Brave hit", url: "https://example.com/brave" }] },
+        results: [{ title: "Brave hit", url: "https://example.com/brave" }],
+      }),
+      { status: 200, headers: { "content-type": "application/json" } }
+    );
+  };
+  try {
+    const response = await searchRoute.POST(
+      new Request("http://localhost/api/v1/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: "blocked failover probe", max_results: 5, search_type: "web" }),
+      })
+    );
+    const data = (await response.json()) as any;
+    assert.equal(response.status, 200);
+    assert.notEqual(data.provider, "tavily-search", "a blocked provider must never serve the query");
+    assert.equal(data.provider, "brave-search");
+  } finally {
+    globalThis.fetch = originalFetch;
+    await settingsDb.updateSettings({ blockedProviders: [] });
+  }
+});
