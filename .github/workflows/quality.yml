@@ -595,7 +595,7 @@ jobs:
   # Merge integrity is required regardless of who owns the PR branch.
   merge-integrity:
     needs: changes
-    name: Merge integrity (changelog + generated skills)
+    name: ${{ (github.event_name != 'pull_request' || github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'pull_request' || github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true' || needs.changes.result != 'success') && 'Merge integrity (changelog + generated skills)' || 'Merge integrity not requested' }}
     # Always on non-draft PRs — CHANGELOG/skills can break on docs-only merges too.
     if: ${{ github.event_name != 'pull_request' || (github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true') }}
     runs-on: ubuntu-latest
