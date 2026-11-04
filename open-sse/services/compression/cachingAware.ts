@@ -98,6 +98,7 @@ export function detectCachingContext(
     inferProviderFromModel(context.model) ??
     inferProviderFromModel(bodyRecord.model);
   const targetFormat = normalizeString(context.targetFormat)?.toLowerCase() ?? null;
+  const resolvedModel = context.model ?? normalizeString(bodyRecord.model);
   const isAntigravityTarget = provider === "antigravity" || provider === "agy";
   const geminiPromptCacheMode = context.geminiPromptCacheMode === "implicit" ? "implicit" : "off";
 
