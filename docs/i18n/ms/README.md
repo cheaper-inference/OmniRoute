@@ -1289,19 +1289,19 @@ Metrik kanonik pada 2026-10-18: **1.976 video unik** · **20.220.289 tontonan ya
 <table>
   <tr><th align="left">Lapisan</th><th align="left">Teknologi</th></tr>
   <tr><td nowrap><b>Masa jalan</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Bahasa</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> merentas <code>src/</code> dan <code>open-sse/</code> (<code>any</code> sifar dalam teras sejak v2.0)</td></tr>
+  <tr><td nowrap><b>Bahasa</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> merentasi <code>src/</code> dan <code>open-sse/</code> (sifar <code>any</code> dalam teras sejak v2.0)</td></tr>
   <tr><td nowrap><b>Rangka kerja</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Pangkalan data</b></td><td>better-sqlite3 (SQLite, penjurnalan WAL) + LowDB (JSON legasi) — 147 modul domain, 221 migrasi</td></tr>
-  <tr><td nowrap><b>Memori</b></td><td>Teks penuh SQLite FTS5 + pembenaman vektor terkuantum int8, pereputan bertip</td></tr>
+  <tr><td nowrap><b>Pangkalan data</b></td><td>better-sqlite3 (SQLite, pengelogan WAL) + LowDB (JSON legasi) — 147 modul domain, 222 migrasi</td></tr>
+  <tr><td nowrap><b>Memori</b></td><td>SQLite FTS5 teks penuh + pembenaman vektor terkuantum int8, pereputan bertype</td></tr>
   <tr><td nowrap><b>Skema</b></td><td>Zod 4 — pengesahan I/O alat MCP + kontrak API</td></tr>
   <tr><td nowrap><b>Protokol</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Penstriman</b></td><td>Acara Dihantar Pelayan (SSE) + jambatan WebSocket (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Pemampatan</b></td><td>Paip 12 enjin — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Pengesahan &amp; keselamatan</b></td><td>OAuth 2.0 (PKCE) + JWT + Kunci API + pengesahan berskop MCP · AES-256-GCM ketika tidak digunakan · DOMPurify</td></tr>
+  <tr><td nowrap><b>Penstriman</b></td><td>Peristiwa Dihantar Pelayan (SSE) + jambatan WebSocket (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Pemampatan</b></td><td>Saluran paip 12 enjin — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Pengesahan &amp; keselamatan</b></td><td>OAuth 2.0 (PKCE) + JWT + Kunci API + pengesahan berskop MCP · AES-256-GCM semasa tidak digunakan · DOMPurify</td></tr>
   <tr><td nowrap><b>Penyamaran</b></td><td>wreq-js — penyamaran cap jari TLS JA3 / JA4, proksi 3 peringkat</td></tr>
-  <tr><td nowrap><b>Ketahanan</b></td><td>Pemutus litar, backoff eksponen, pencegahan kumpulan berduyun-duyun, pemulihan kendiri auto-combo</td></tr>
-  <tr><td nowrap><b>Pengelogan</b></td><td>pino — log JSON berstruktur dengan konteks permintaan</td></tr>
-  <tr><td nowrap><b>Pengujian</b></td><td>Pelaksana ujian Node.js + Vitest — <b>60,000+ pengisytiharan ujian statik</b> merentas 8,400+ fail ujian yang dijejaki (unit, integrasi, E2E, keselamatan, ekosistem)</td></tr>
+  <tr><td nowrap><b>Ketahanan</b></td><td>Pemutus litar, undur eksponen, pencegahan thundering herd, pemulihan kendiri auto-combo</td></tr>
+  <tr><td nowrap><b>Pembalakan</b></td><td>pino — log JSON berstruktur dengan konteks permintaan</td></tr>
+  <tr><td nowrap><b>Pengujian</b></td><td>Pelaksana ujian Node.js + Vitest — <b>60,000+ pengisytiharan ujian statik</b> merentasi 8,400+ fail ujian dijejaki (unit, integrasi, E2E, keselamatan, ekosistem)</td></tr>
   <tr><td nowrap><b>Platform</b></td><td>Desktop (Electron) · Android (Termux) · PWA (mana-mana pelayar)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — penerbitan npm automatik + Docker Hub semasa keluaran</td></tr>
   <tr><td nowrap><b>Pautan</b></td><td><a href="https://omniroute.online">Laman web</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>

@@ -8,6 +8,7 @@
 import {
   checkFallbackError,
   classifyLockoutReason,
+  classifyLockoutScope,
   decayModelFailureCount,
   hasPerModelQuota,
   isModelLocked,
@@ -59,11 +60,11 @@ import {
   isComboRequestScopedFailure as isScopedFailure,
   shouldRecordModelLockoutForComboFailure,
   isLocalKeyPolicyBreachErrorBody,
+  isHedgeCancelledSentinel,
   isAccountSemaphoreCapacityFailure,
   isLocalQueueCapacityErrorBody,
   toRecordedTarget,
   resolveDelayMs,
-  resolvePersistedConnectionCooldownSkipReason,
   isModelScoped400,
   isContextOverflowFailure,
   requestScopedReplayKey,
@@ -92,8 +93,7 @@ import {
 } from "./quotaExhaustion.ts";
 import { markAccountExhaustedFromCredits } from "../../../src/domain/quotaCache.ts";
 import { classifyComboOutcome, redactConnectionLabel } from "./comboErrorAggregation.ts";
-import { waitForCooldownAwareRetry } from "../../../src/sse/services/cooldownAwareRetry.ts";
-import { readConnectionForCooldownGate } from "./executeTargetGates.ts";
+import { resolveRetryCooldownWait, waitForAuthorizedRetry } from "./authorizedRetryWait.ts";
 import { recordLkgpPin } from "./recordLkgpPin.ts";
 import {
   handlePreContentStreamRetry,
@@ -147,6 +147,8 @@ export async function executeTargetAttempt(
       cause,
     });
 
+  const targetSignal = state.abortControllers.get(i)?.signal;
+  const cooldownWait = resolveRetryCooldownWait(deps);
   const familyTried = new Set<string>();
   // #16438 opt-in (EMPTY_STREAM_SIBLING_RECOVERY_ENABLED): an empty_content turn spends
   // this loop's existing retry on a sibling connection with no lockout. Off = release path.
@@ -159,6 +161,7 @@ export async function executeTargetAttempt(
       deps.log.info("COMBO", `Client disconnected — aborting combo loop before model ${modelStr}`);
       return { ok: false, response: errorResponse(499, "Client disconnected") };
     }
+    if (state.comboExpired || targetSignal?.aborted) return null;
     state.globalAttempts++;
     if (state.globalAttempts > maxGlobalAttempts) {
       deps.log.warn(
@@ -206,36 +209,19 @@ export async function executeTargetAttempt(
         "COMBO",
         `Retrying ${modelStr} in ${retryDelayMs}ms (attempt ${retry + 1}/${deps.maxRetries + 1})`
       );
-      await new Promise((resolve) => {
-        const timer = setTimeout(resolve, retryDelayMs);
-        deps.signal?.addEventListener(
-          "abort",
-          () => {
-            clearTimeout(timer);
-            resolve(undefined);
-          },
-          { once: true }
-        );
+      const outcome = await waitForAuthorizedRetry({
+        state,
+        deps,
+        target,
+        targetSignal,
+        retryDelayMs,
+        cooldownWait,
+        allowRateLimitedConnection,
       });
-      if (deps.signal?.aborted) {
-        deps.log.info("COMBO", `Client disconnected during retry delay — aborting`);
+      if (outcome === "client_disconnected") {
         return { ok: false, response: errorResponse(499, "Client disconnected") };
       }
-
-      // Retry re-check: a sibling attempt (or attempt 1) may have persisted
-      // a quota cooldown while this attempt was sleeping out its retry delay
-      // ("Trying model 1/7: zai/glm-5.3 (retry 1)" after "already marked
-      // unavailable until …"). Reads fresh, not cached: see readConnectionForCooldownGate.
-      const persistedRetrySkip = await resolvePersistedConnectionCooldownSkipReason(
-        target,
-        (id) => readConnectionForCooldownGate(id, true),
-        allowRateLimitedConnection
-      );
-      if (persistedRetrySkip) {
-        deps.log.info("COMBO", persistedRetrySkip);
-        state.fallbackCount++;
-        return null;
-      }
+      if (outcome === "stop") return null;
     }
 
     deps.log.info(
@@ -249,6 +235,7 @@ export async function executeTargetAttempt(
       model: modelStr,
       timestamp: Date.now(),
       strategy: deps.strategy,
+      ...(target.connectionId ? { connectionId: target.connectionId } : {}),
     });
     // QA P0 diagnostics: capture the attempt order (provider/model ids only).
     state.comboAttemptOrder.push({ provider: provider ?? "unknown", model: modelStr });
@@ -355,6 +342,13 @@ export async function executeTargetAttempt(
         target: modelStr,
         decision: "dispatched",
       });
+    }
+    if (retry > 0) {
+      if (Date.now() >= cooldownWait.deadline) state.comboExpired = true;
+      if (deps.signal?.aborted) {
+        return { ok: false, response: errorResponse(499, "Client disconnected") };
+      }
+      if (state.comboExpired || targetSignal?.aborted) return null;
     }
     const result = await deps.handleSingleModelWithTimeout(attemptBody, modelStr, {
       ...targetForAttempt,
@@ -480,6 +474,7 @@ export async function executeTargetAttempt(
           model: modelStr,
           error: `Quality: ${quality.reason}`,
           latencyMs: Date.now() - deps.startTime,
+          ...(effectiveConnectionId ? { connectionId: effectiveConnectionId } : {}),
         });
         state.observeFailure(false, target.executionKey);
         // #17049: an in-stream provider safety stop is terminal — no same-target retry,
@@ -584,6 +579,7 @@ export async function executeTargetAttempt(
         provider,
         model: modelStr,
         latencyMs,
+        ...(effectiveConnectionId ? { connectionId: effectiveConnectionId } : {}),
       });
       deps.log.info(
         "COMBO",
@@ -837,6 +833,14 @@ export async function executeTargetAttempt(
       // executeTarget must return the {ok,response} contract — a raw Response
       // here makes the speculative loop's res.ok/res.response checks both miss,
       // so the combo would wrongly fall through to the next model after a 499.
+      return { ok: false, response: result };
+    }
+    // A hedge loser superseded by a sibling (status-599 `hedge_cancelled`
+    // sentinel) is not a failure: skip all failure bookkeeping (comboErrors,
+    // fallbackCount, LKGP clear, provider cooldown, failure logs) — the
+    // sibling that won already resolved this execution.
+    if (isHedgeCancelledSentinel(result.status, structuredError)) {
+      deps.log.info("COMBO", `Hedge sibling superseded ${modelStr} — ignoring its attempt result`);
       return { ok: false, response: result };
     }
     if (isLocalQueueCapacity) {
@@ -1178,7 +1182,7 @@ export async function executeTargetAttempt(
             provider,
             targetWithConnection.connectionId || "",
             rawModel,
-            classifyLockoutReason(result.status),
+            classifyLockoutReason(result.status, errorText),
             result.status,
             mlSettings.baseCooldownMs,
             profile,
@@ -1190,6 +1194,10 @@ export async function executeTargetAttempt(
               exactCooldownMs:
                 modelScopedClaudeCooldownMs ?? selectLockoutCooldownMs(lockoutHintMs, mlSettings),
               maxCooldownMs: mlSettings.maxCooldownMs,
+              // A 403 with no quota proof locks the exact model, not the quota
+              // family — a restricted key/forbidden route must not park sibling
+              // models of the same connection for the cooldown.
+              scope: classifyLockoutScope(result.status, errorText),
               // Preserve authoritative structured/header resets; clamp body prose.
               exactCooldownIsUpstreamReset: lockoutHintVerified,
             }
@@ -1272,7 +1280,7 @@ export async function executeTargetAttempt(
           provider,
           targetWithConnection.connectionId || "",
           rawModel,
-          classifyLockoutReason(result.status),
+          classifyLockoutReason(result.status, errorText),
           result.status,
           mlSettings.baseCooldownMs,
           profile,
@@ -1283,6 +1291,10 @@ export async function executeTargetAttempt(
             exactCooldownMs:
               modelScopedClaudeCooldownMs ?? selectLockoutCooldownMs(lockoutHintMs, mlSettings),
             maxCooldownMs: mlSettings.maxCooldownMs,
+            // A 403 with no quota proof locks the exact model, not the quota
+            // family — a restricted key/forbidden route must not park sibling
+            // models of the same connection for the cooldown.
+            scope: classifyLockoutScope(result.status, errorText),
             // Preserve authoritative structured/header resets; clamp body prose.
             exactCooldownIsUpstreamReset: lockoutHintVerified,
           }

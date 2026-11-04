@@ -1286,27 +1286,27 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-ը նույնպե
 <br/>
 <div align="center">
 
-## 🛠️ Տեխնոլոգիական ստեկ
+## 🛠️ Տեխնոլոգիական փաթեթ
 
 </div>
 
 <table>
   <tr><th align="left">Շերտ</th><th align="left">Տեխնոլոգիա</th></tr>
-  <tr><td nowrap><b>Կատարման միջավայր</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Լեզու</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> <code>src/</code>-ում և <code>open-sse/</code>-ում (v2.0-ից ի վեր core-ում զրո <code>any</code>)</td></tr>
+  <tr><td nowrap><b>Կատարողական միջավայր</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Լեզու</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b>՝ <code>src/</code> և <code>open-sse/</code> գրացուցակներում (v2.0-ից ի վեր core-ում զրո <code>any</code>)</td></tr>
   <tr><td nowrap><b>Ֆրեյմվորք</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Տվյալների բազա</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 դոմենային մոդուլ, 221 միգրացիա</td></tr>
-  <tr><td nowrap><b>Հիշողություն</b></td><td>SQLite FTS5 ամբողջական տեքստային որոնում + int8-քվանտավորված վեկտորային embedding-ներ, տիպավորված մարում</td></tr>
-  <tr><td nowrap><b>Սխեմաներ</b></td><td>Zod 4 — MCP գործիքների մուտքի/ելքի վավերացում + API պայմանագրեր</td></tr>
+  <tr><td nowrap><b>Տվյալների բազա</b></td><td>better-sqlite3 (SQLite, WAL մատյանավորում) + LowDB (JSON legacy) — 147 դոմենային մոդուլ, 222 միգրացիա</td></tr>
+  <tr><td nowrap><b>Հիշողություն</b></td><td>SQLite FTS5 ամբողջական տեքստի որոնում + int8-քվանտավորված վեկտորային ներդրումներ, տիպավորված մարում</td></tr>
+  <tr><td nowrap><b>Սխեմաներ</b></td><td>Zod 4 — MCP գործիքների I/O վավերացում + API պայմանագրեր</td></tr>
   <tr><td nowrap><b>Արձանագրություններ</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Հոսքային փոխանցում</b></td><td>Server-Sent Events (SSE) + WebSocket կամուրջ (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Սեղմում</b></td><td>12 շարժիչից բաղկացած pipeline — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Նույնականացում և անվտանգություն</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP scoped auth · AES-256-GCM at rest · DOMPurify</td></tr>
-  <tr><td nowrap><b>Գաղտագողիություն</b></td><td>wreq-js — JA3 / JA4 TLS մատնահետքի նմանակում, 3 մակարդակի պրոքսի</td></tr>
-  <tr><td nowrap><b>Կայունություն</b></td><td>Շղթայի անջատիչ, էքսպոնենցիալ backoff, anti-thundering-herd, auto-combo ինքնավերականգնում</td></tr>
-  <tr><td nowrap><b>Գրանցամատյանավորում</b></td><td>pino — կառուցվածքային JSON գրանցամատյաններ՝ հարցման համատեքստով</td></tr>
-  <tr><td nowrap><b>Թեստավորում</b></td><td>Node.js test runner + Vitest — <b>60,000+ ստատիկ թեստի հայտարարություն</b> 8,400+ վերահսկվող թեստային ֆայլերում (մոդուլային, ինտեգրացիոն, E2E, անվտանգության, էկոհամակարգի)</td></tr>
-  <tr><td nowrap><b>Հարթակներ</b></td><td>Սեղանադիր (Electron) · Android (Termux) · PWA (ցանկացած զննարկիչ)</td></tr>
+  <tr><td nowrap><b>Հոսքային փոխանցում</b></td><td>Սերվերից ուղարկվող իրադարձություններ (SSE) + WebSocket կամուրջ (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Սեղմում</b></td><td>12-շարժիչանոց pipeline — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Նույնականացում և անվտանգություն</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP սահմանափակված նույնականացում · AES-256-GCM՝ հանգստի վիճակում · DOMPurify</td></tr>
+  <tr><td nowrap><b>Քողարկում</b></td><td>wreq-js — JA3 / JA4 TLS մատնահետքի նմանակում, 3 մակարդակի պրոքսի</td></tr>
+  <tr><td nowrap><b>Կայունություն</b></td><td>Շղթայի անջատիչ, էքսպոնենցիալ հետաձգում, միաժամանակյա հարցումների գերբեռնվածության կանխում, auto-combo ինքնավերականգնում</td></tr>
+  <tr><td nowrap><b>Մատյանավորում</b></td><td>pino — կառուցվածքային JSON մատյաններ՝ հարցման համատեքստով</td></tr>
+  <tr><td nowrap><b>Թեստավորում</b></td><td>Node.js թեստերի գործարկիչ + Vitest — <b>60,000+ ստատիկ թեստերի հայտարարություններ</b>՝ 8,400+ վերահսկվող թեստային ֆայլերում (միավորային, ինտեգրացիոն, E2E, անվտանգության, էկոհամակարգի)</td></tr>
+  <tr><td nowrap><b>Հարթակներ</b></td><td>Սեղանադիր (Electron) · Android (Termux) · PWA (ցանկացած բրաուզեր)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — թողարկման ժամանակ npm-ի ավտոմատ հրապարակում + Docker Hub</td></tr>
   <tr><td nowrap><b>Հղումներ</b></td><td><a href="https://omniroute.online">Կայք</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>

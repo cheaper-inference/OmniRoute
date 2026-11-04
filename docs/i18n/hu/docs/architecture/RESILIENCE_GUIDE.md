@@ -293,21 +293,25 @@ A beállítások a szokásos beállítástárolón keresztül őrződnek meg, é
 
 ---
 
-## 4. Kvótamegosztásos párhuzamosság-szabályozás (v3.8.36)
+## 4. Kvóta-megosztásos konkurenciavezérlés (v3.8.36)
 
-Az előfizetéses fiókok (GLM, MiniMax stb.) gyakran csak ~1–3 egyidejű kérést fogadnak el; az ezt meghaladó terhelés 429-es hibákat és cooldownokat vált ki. Ez különösen kritikus a **kvótamegosztásos** (`qtSd/…`) kombóknál, ahol több API-kulcs osztozik egyetlen upstream fiókon. Három réteg védi a megosztott fiókot az elárasztástól.
+Az előfizetéses fiókok (GLM, MiniMax stb.) gyakran csak ~1–3 egyidejű
+kérést fogadnak el; ennek túllépése 429-es hibákat és cooldownokat vált ki. Ez különösen
+súlyos **kvóta-megosztásos** (`qtSd/…`) kombinációk esetén, ahol több API-kulcs osztozik
+ugyanazon a felsőbb szintű fiókon. Három réteg akadályozza meg a megosztott fiók
+elárasztását.
 
-### Kapcsolatonkénti párhuzamossági korlát (`max_concurrent`)
+### Kapcsolatonkénti konkurenciakorlát (`max_concurrent`)
 
 Minden szolgáltatói kapcsolat deklarálhat egy `max_concurrent` felső korlátot
-(`provider_connections.max_concurrent`, a kapcsolat modális ablakában / API-n / adatbázisban állítható be).
-Korlát nélküli működéshez hagyja üresen. Ez az egyetlen szabályozó, amely az alábbi
-sorosítási réteget vezérli — állítsa a fiók tényleges párhuzamosságára (pl. GLM ~1, MiniMax ~2).
+(`provider_connections.max_concurrent`, amely a kapcsolatmodálban / API-n / DB-ben állítható be).
+Hagyja üresen korlátlan működéshez. Ez az egyetlen kapcsoló, amely az alábbi
+szerializálási réteget vezérli — állítsa a fiók tényleges konkurenciájára (pl. GLM ~1, MiniMax ~2).
 
-### Modellenkénti párhuzamossági korlátok (`modelConcurrency`)
+### Modellenkénti konkurenciakorlátok (`modelConcurrency`)
 
-Egy kapcsolat emellett pontos, modellenkénti párhuzamossági felső korlátokat is deklarálhat
-a `rateLimitOverrides` mapjében:
+Egy kapcsolat ezenfelül pontos, modellenkénti konkurenciakorlátokat is deklarálhat
+a `rateLimitOverrides` térképén belül:
 
 ```json
 {
@@ -318,75 +322,68 @@ a `rateLimitOverrides` mapjében:
 }
 ```
 
-Beállítható a kapcsolat modális ablakában (**Sebességkorlát-felülbírálások → Modellenkénti
-párhuzamossági korlátok**, soronként egy `model=cap`) vagy a
-`PATCH /api/providers/[id]` végponton keresztül, ugyanazzal a JSON-alakzattal. A kulcsok szemantikája:
+Állítsa be a kapcsolatmodálban (**Rate limit overrides → Per-model
+concurrency caps**, soronként egy `model=cap` értékkel), vagy a
+`PATCH /api/providers/[id]` végponton keresztül, ugyanilyen JSON-struktúrával. A kulcsok jelentése:
 
-- **Kapcsolatszintű vs. modellspecifikus:** a `maxConcurrent` továbbra is a megosztott,
-  kapcsolatszintű felső korlát marad. Ha mindkettő érvényes, mindkét kapu atomikusan
-  kerül lefoglalásra ugyanabban az összetett kapuban
-  (`global → provider → account → model`); a tényleges viselkedés a
-  szigorúbb alkalmazható korlátot követi.
-- **Pontos modellkulcs-egyezés:** a kulcs az útválasztási feloldás után a
-  végrehajtónak átadott modellstring — általában a puszta upstream modellazonosító
-  (`glm-5`), nem pedig egy kliensoldali `provider/model` alias (a `zai/glm-5` nem
-  egyezik a `glm-5`-tel). Az értékek pozitív egész számú, egyidejű kérésekre vonatkozó
-  felső korlátok.
-- **Helyi sorbaállítás, felderítés nélkül:** a többletkérések helyben állnak sorba a
-  meglévő várólista-/időtúllépési szemantikával (típusos `SEMAPHORE_TIMEOUT` /
-  `SEMAPHORE_QUEUE_FULL` beléptetési hibák). Az OmniRoute nem deríti fel és nem
-  következteti le az upstream szabályzatát — pontosan az üzemeltető által beállított
-  korlátokat kényszeríti ki. Egy telített modellkapu sosem tiltja le a szolgáltatót,
-  és sosem hoz létre végleges modellzárolást; az upstream 429/cooldown/fallback
-  viselkedés marad a hibakezelés utolsó védővonala.
-- **Kapcsolatonkénti, folyamatonkénti hatókör:** a korlátok adatbázis-kapcsolatonként
-  érvényesek és memóriában tárolódnak, így két, ugyanazt az upstream API-kulcsot
-  újrahasznosító kapcsolat nem koordinál egymással.
-- **A beállítás hiánya változatlanságot jelent:** a map elhagyása (vagy a
-  vezérlőpulti mező üresen hagyása) nem ad hozzá modellkaput. Példakonfiguráció
-  bármilyen univerzális szolgáltatói korlát állítása nélkül:
+- **Kapcsolatszintű és modellspecifikus:** a `maxConcurrent` továbbra is a teljes kapcsolatra
+  érvényes közös korlát. Ha mindkettő érvényes, akkor mindkét kaput atomikusan kell megszerezni ugyanabban az összetett kapuban
+  (`global → provider → account → model`); a tényleges viselkedést a szigorúbb alkalmazandó korlát határozza meg.
+- **Pontos modellkulcs-egyezés:** a kulcs az útválasztás feloldása után a végrehajtónak átadott modellkarakterlánc — általában a csupasz felsőbb szintű modellazonosító
+  (`glm-5`), nem pedig kliensoldali `provider/model` alias (`zai/glm-5` nem egyezik a `glm-5` értékkel). Az értékek pozitív egész számú, egyidejű kérésekre vonatkozó korlátok.
+- **Helyi sorba állítás, felderítés nélkül:** a többletkérések helyben sorba állnak a meglévő sor- és időkorlát-szemantikával (típusos `SEMAPHORE_TIMEOUT` /
+  `SEMAPHORE_QUEUE_FULL` beléptetési hibák). Az OmniRoute nem deríti fel és nem következteti ki a felsőbb szintű házirendet — a kezelő által
+  konfigurált pontos korlátokat kényszeríti ki. Egy telített modellkapu soha nem tiltja le a szolgáltatót, és nem hoz létre végleges modellzárolást; a felsőbb szintű 429-es hiba/cooldown/tartalékra váltás továbbra is a hibakezelési visszalépés.
+- **Kapcsolatonkénti, folyamatonkénti hatókör:** a korlátok adatbáziskapcsolatonként érvényesek, és memóriában vannak tárolva, így két, ugyanazt a felsőbb szintű API-kulcsot újrahasználó kapcsolat nem koordinál egymással.
+- **A konfigurálatlan állapot változatlan működést jelent:** a térkép elhagyása (vagy a vezérlőpulti mező üresen hagyása) nem ad hozzá modellkaput. Példakonfiguráció bármilyen univerzális szolgáltatói korlát megadása nélkül:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Kvótamegosztásos kéréssorosítás
+### Kvóta-megosztásos kérések szerializálása
 
-Ha egy kvótamegosztásos továbbítás olyan kapcsolatot céloz, amely pozitív
-`max_concurrent` értéket deklarál, az adott **fiókra** irányuló egyidejű kérések egy
-kapcsolatonkénti szemaforon (kulcs: `qsconn:<connectionId>`) keresztül sorosítódnak: a
-többletkérések **a várólistában várnak** ahelyett, hogy elárasztanák a fiókot. A működés
-**fail-open** — telített várólista vagy időtúllépés esetén a kérés slot nélkül folytatódik,
-ahelyett hogy valaha is elutasítana egy továbbítható kérést. Kapcsolható a
-**Beállítások → Hibatűrés → Kvótamegosztásos kapcsolatonkénti
-párhuzamosság** alatt (`resilienceSettings.quotaShareConcurrencyLimit.enabled`,
-alapértelmezetten bekapcsolva). `max_concurrent` korlát nélkül a viselkedés változatlan.
+Amikor egy kvóta-megosztásos küldés olyan kapcsolatot céloz, amely pozitív
+`max_concurrent` értéket deklarál, az adott **fiókhoz** intézett egyidejű kérések egy
+kapcsolatonkénti szemaforon keresztül szerializálódnak (`qsconn:<connectionId>`): a többletkérések
+**a sorban várakoznak**, ahelyett hogy elárasztanák a fiókot. Ez **fail-open** működésű — a telített
+sor vagy az időkorlát lejárta helyfoglalás nélkül folytatódik, és soha nem utasít el egy küldhető
+kérést. A kapcsolónak a **Settings → Resilience → Quota-share per-connection
+concurrency** helyen állítható be az értéke
+(`resilienceSettings.quotaShareConcurrencyLimit.enabled`, alapértelmezés szerint bekapcsolva). `max_concurrent` korlát nélkül a viselkedés változatlan.
 
-> A kvótamegosztásos útválasztási kapu (`selectQuotaShareTarget`, DRR + P2C) önmagában is
-> fail-open, és egy korlátot elért kapcsolatot csupán _deprioritizál_ —
-> egykapcsolatos pool esetén nem képes szigorú korlátozásra, ezért az
-> áradatot valójában ez a szemafor tartja vissza.
+> A kvóta-megosztásos útválasztási kapu (`selectQuotaShareTarget`, DRR + P2C) maga is
+> fail-open, és csak _alacsonyabb prioritásúvá teszi_ a korláton lévő kapcsolatot — egy
+> egyetlen kapcsolatból álló készletben nem tud kemény korlátot érvényesíteni, ezért ténylegesen ez a szemafor
+> tartja kordában az elárasztást.
 
-### Cooldown-tudatos kombó-újrapróbálkozás
+### Kombinációs cooldown-tudatos újrapróbálás
 
-Minden kombóstratégia esetén (ha engedélyezve van) az a kérés, amely RÖVID,
-átmeneti cooldown miatt eredményezne 429-est, kivárja azt és újra továbbítódik,
-a 429-es visszaadása helyett — ez lefedi a Gemini-osztályú TPM/RPM-ablakokat
-(~60 mp-es retry-after) többmodelles kombóknál, például amikor egy 2 modelles kombó
-mindkét célja modellenkénti sebességkorlátba ütközik. Korlátozza a `comboCooldownWait`
-(`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) a **Beállítások → Hibatűrés** alatt.
-Soha nem vár `quota_exhausted` (éjfélig zárolt) vagy hitelesítési/nem található okok esetén.
+Minden kombinációs stratégia esetén (ha engedélyezve van) az a kérés, amely egy SHORT
+átmeneti cooldown miatt 429-es hibát eredményezne, kivárja annak lejártát, majd újraküldi ahelyett,
+hogy visszaadná a 429-es hibát — ez lefedi a Gemini-osztályú TPM/RPM-ablakokat (~60 másodperces
+retry-after értékkel) a többmodellű kombinációkban, például amikor egy 2 modellből álló kombináció mindkét célpontját
+modellenkénti sebességkorlát érinti. Ezt a `comboCooldownWait` korlátozza
+(`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) a **Settings → Resilience** helyen. Soha nem várakozik
+`quota_exhausted` esetén (éjfélig zárolva), illetve hitelesítési/„nem található” okok esetén.
 
-Ugyanez a kapu lefedi a továbbítás előtti esetet is (#16319): ha egy kombó
-minden célja még bármilyen kísérlet megtétele előtt azért kerül kihagyásra, mert a modellje
-rövid, átmeneti zárolás alatt áll, a nulla kísérletes útvonal ugyanazon korlátok alatt
-kivárja a zárolást és újra továbbít, ahelyett hogy hint nélküli
-`503 ALL_TARGETS_SKIPPED` választ adna. Ha várakozás nem megengedett (a korlát,
-a kísérletek vagy a keret kimerült, illetve a funkció ki van kapcsolva), a végső válasz
-`429 rate_limit_error` értékre emelkedik, amely a legkorábbi átmeneti zárolás lejáratából
-származó `retry_after` / `reset_at` értékeket hordozza; a kvóta-, hitelesítési és
-nem található zárolások megtartják a hint nélküli 503-ast.
+Egy kombináció letilthatja ezt a `config.comboCooldownWaitEnabled: false` beállítással. Csak a szó szerinti
+`false` tiltja le ezeket a megosztott kombinációs várakozásokat (a küldés utáni cooldown- és
+küldés előtti áramkörnyitott/modellzárolási várakozásokat), valamint a várakozási költségkeret
+időtúllépési alsó korlátjának kiterjesztését. A hiányzó érték vagy a `true` megőrzi a globális
+házirendet; a `true` nem tudja globálisan letiltott várakozást engedélyezni. A kifejezetten megadott
+`targetTimeoutMs` továbbra is elsőbbséget élvez. Ez a letiltás nem módosítja a natív Codex-forduló rögzítésének
+külön, küldés előtti várakozását.
+
+Ugyanez a kapu fedi a küldés előtti esetet is (#16319): amikor egy kombináció minden célpontját
+kihagyja a rendszer, még mielőtt bármilyen próbálkozás történne, mert a modell rövid ideig tartó
+átmeneti zárolásban van, a nulla próbálkozásos útvonal ugyanazon korlátok szerint kivárja a zárolás
+lejártát és újraküldi a kérést, ahelyett hogy súgó nélküli
+`503 ALL_TARGETS_SKIPPED` választ adna. Ha nincs engedélyezett várakozás (a korlát, a próbálkozások
+vagy a költségkeret kimerült, illetve a funkció ki van kapcsolva), a végső válasz
+`429 rate_limit_error` értékre vált, és a legkorábbi átmeneti zárolás lejárati idejétől származó
+`retry_after` / `reset_at` értéket tartalmazza; a kvóta-, hitelesítési és „nem található” zárolások továbbra is súgó nélküli 503-as választ adnak.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)

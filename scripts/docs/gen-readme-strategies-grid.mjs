@@ -292,7 +292,7 @@ function tile(T, i) {
   const begin = n(0.22 * i);
   const dur = T.dur.toFixed(1);
   const parts = [];
-  // The one lime moment per tile: the request origin.
+  // The one accent moment per tile: the request origin.
   parts.push(
     `<circle cx="20" cy="79" r="4" class="accent stroke-ink" stroke-width="1.6"/><circle cx="20" cy="79" r="1.6" class="ink"/>`
   );
