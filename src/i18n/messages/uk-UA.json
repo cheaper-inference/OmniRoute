@@ -14183,12 +14183,12 @@
         "description": "Для провайдерів, квота яких розподіляється за IP-адресами виходу в мережу, розміщуйте члена пулу, який спільно з нещодавно відхиленим членом має спостережуваний IP виходу в мережу, трохи нижче за здоровими членами. Лише порядок, ніколи не виключається. Потребує PROXY_SKIP_RECENTLY_FAILED, який генерує сигнал відхилень, з якого здійснюється читання. Вимкнено за замовчуванням: порядок вибору є точною звичайною ротацією."
       },
       "PROXY_REFUSAL_MODEL_SCOPE": {
-        "label": "__MISSING__:Model-Scoped Quota Refusals",
-        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+        "label": "Відмова від квот на основі моделі",
+        "description": "Застосовуйте квоту 429 opencode лише до моделі, яка її досягла, щоб той самий вихід продовжував обслуговувати інші моделі, і очищайте її лише тоді, коли ця модель успішно працює. Споживачі, які не мають моделі (обертання пулу, паркування та повторне відтворення, видимість адміністратора, тригер селектора, перевірка здоров’я), усе одно бачать її. Потрібна PROXY_SKIP_RECENTLY_FAILED, яка створює відмову. Вимкнено за замовчуванням: квота однієї моделі 429 відкладає вихід для кожної моделі."
       },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "Отримання проксі: суворе відтворення POST",
+        "description": "Для неідемпотентного запиту (POST, PUT, PATCH, DELETE) надішліть повторно після транспортної помилки (новий сокет, запасний проксі-сервер, вихідний резервний варіант) лише тоді, коли помилка доводить, що нічого не було надіслано: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH або час очікування підключення. Помилка сокета після запису може означати, що висхідний канал прийняв запит, тому повторне надсилання може створити та виставити рахунок двічі. Вимкнено за замовчуванням: повторно відтворюване тіло повторно надсилається один раз у разі будь-якої помилки транспортування, що також відновлює застарілий об’єднаний сокет."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "Журналювання призначення ротації",
@@ -14427,8 +14427,8 @@
         "description": "Якщо ціль комбо відповідає точною відмовою щодо політики контенту (код або тип cyber_policy / content_policy_violation), зупиніть комбо та поверніть цю відмову, навіть якщо решта цілей — інші моделі, замість переходу до наступної цілі. Вимкнено за замовчуванням: відмова ніколи не охолоджує акаунт і не спрацьовує запобіжний розривник провайдера, а комбо переходить до наступної цілі точно так, як раніше."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "Відповіді: підтримувати активність лише через транспорт",
+        "description": "Надсилайте повідомлення підтримки активності відповідей як порожній рядок замість події response.in_progress, тому синтетичний знімок ніколи не може замінити справжню відповідь в офіційному SDK. Порожній рядок не надсилає жодної події SSE, тому клієнтський сторожовий таймер, який скидається лише за подіями, не буде скинутий під час тривалої фази мовчання. Вимкнено за замовчуванням: таймери надсилають дійсну специфікацію подію response.in_progress."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Повторна спроба після паузи: пропуск відхилень 403/410",

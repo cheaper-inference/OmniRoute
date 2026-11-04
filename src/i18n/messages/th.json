@@ -14183,12 +14183,12 @@
         "description": "สำหรับผู้ให้บริการที่ปริมาณการใช้งานถูกแบ่งตามที่อยู่ egress ให้จัดอันดับสมาชิกโพลที่แบ่งปันที่อยู่ egress ที่สังเกตได้ของสมาชิกที่ถูกปฏิเสธเมื่อไม่นานมาอยู่ใต้สมาชิกที่มีสุขภาพดีเท่านั้น เป็นการจัดลำดับเท่านั้น ไม่มีการตัดออก จำเป็นต้องใช้ PROXY_SKIP_RECENTLY_FAILED ซึ่งสร้างสัญญาณการปฏิเสธให้มันอ่าน ปิดใช้งานโดยค่าเริ่มต้น: ลำดับการเลือกเป็นการวนเวียนธรรมดาเท่านั้น"
       },
       "PROXY_REFUSAL_MODEL_SCOPE": {
-        "label": "__MISSING__:Model-Scoped Quota Refusals",
-        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+        "label": "การปฏิเสธโควต้าที่กำหนดขอบเขตโมเดล",
+        "description": "ใช้โควต้า opencode 429 กับโมเดลที่เข้าชมเท่านั้น ดังนั้นทางออกเดียวกันจะยังคงให้บริการกับโมเดลอื่นๆ และล้างข้อมูลเมื่อโมเดลนั้นสำเร็จเท่านั้น ผู้บริโภคที่ไม่มีโมเดล (การหมุนพูล การจอดและการเล่นซ้ำ การมองเห็นของผู้ดูแลระบบ ตัวเลือกทริกเกอร์ การกวาดล้างสุขภาพ) ยังคงเห็นอยู่ ต้องการ PROXY_SKIP_RECENTLY_FAILED ซึ่งทำให้เกิดการปฏิเสธ ปิดโดยค่าเริ่มต้น: โควต้า 429 ของรุ่นหนึ่งจะตั้งค่าทางออกไว้สำหรับทุกรุ่น"
       },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "การดึงข้อมูลพร็อกซี: เล่นซ้ำ POST อย่างเข้มงวด",
+        "description": "สำหรับคำขอที่ไม่ใช่ idempotent (POST, PUT, PATCH, DELETE) ให้ส่งอีกครั้งหลังจากเกิดข้อผิดพลาดในการขนส่ง (ซ็อกเก็ตใหม่, ทางเลือกสำรองของพร็อกซี, ทางเลือกดั้งเดิม) เฉพาะเมื่อข้อผิดพลาดพิสูจน์ได้ว่าไม่มีการส่งสิ่งใด: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH หรือหมดเวลาการเชื่อมต่อ ข้อผิดพลาดของซ็อกเก็ตหลังจากการเขียนอาจหมายถึงอัปสตรีมยอมรับคำขอ ดังนั้นการส่งซ้ำจึงสามารถสร้างและเรียกเก็บเงินสองครั้ง ปิดตามค่าเริ่มต้น: เนื้อหาที่เล่นซ้ำได้จะถูกส่งอีกครั้งเมื่อมีข้อผิดพลาดในการขนส่ง ซึ่งจะกู้คืนซ็อกเก็ตที่พูลเก่าด้วย"
       },
       "ROTATION_ATTRIBUTION": {
         "label": "บันทึกการระบุที่มาของลำดับการวนเวียน",
@@ -14427,8 +14427,8 @@
         "description": "เมื่อเป้าหมายคอมโตอบสนองด้วยการปฏิเสธนโยบายเนื้อหาคงที่ (โค้ดหรือประเภท cyber_policy / content_policy_violation) ให้หยุดคอมโบและส่งการปฏิเสธนั้นกลับแม้ว่าเป้าหมายที่เหลือจะเป็นโมเดลอื่น แทนที่จะดำเนินการต่อเป้าหมายถัดไป ปิดไว้เป็นค่าเริ่มต้น: การปฏิเสธจะไม่ทำให้บัญชีเย็นลงหรือทำให่เบรกก์เกอร์ผู้ให้บริการทำงาน และคอมโบจะดำเนินการต่อเป้าหมายถัดไปตามเดิม"
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "คำตอบ: Keepalive เหนือการขนส่งเท่านั้น",
+        "description": "ส่งการตอบกลับ Keepalive เป็นบรรทัดว่างแทนที่จะเป็นเหตุการณ์ response.in_progress ดังนั้นสแน็ปช็อตสังเคราะห์จึงไม่สามารถแทนที่การตอบกลับที่แท้จริงใน SDK อย่างเป็นทางการได้ บรรทัดว่างไม่ส่งเหตุการณ์ SSE ดังนั้นโปรแกรมเฝ้าระวังไคลเอ็นต์ที่รีเซ็ตเฉพาะเหตุการณ์จะไม่ถูกรีเซ็ตในระหว่างเฟสที่เงียบเป็นเวลานาน ปิดตามค่าเริ่มต้น: ตัวจับเวลาส่งเหตุการณ์ response.in_progress ที่ถูกต้องตามข้อกำหนด"
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown Retry: ข้ามการปฏิเสธสถานะ 403/410",

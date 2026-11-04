@@ -14260,12 +14260,12 @@
         "description": "Za pružaoce usluga čija se kvota raspoređuje prema izlaznoj adresi, rangira člana poola koji dijeli uočenu izlaznu adresu nedavno odbijenog člana neposredno ispod ispravnih članova. Mijenja se samo redoslijed, nikada se ne isključuje. Zahtijeva PROXY_SKIP_RECENTLY_FAILED, koji generiše signal odbijanja koji se očitava. Isključeno po zadanim postavkama: redoslijed odabira je identičan običnoj rotaciji."
       },
       "PROXY_REFUSAL_MODEL_SCOPE": {
-        "label": "__MISSING__:Model-Scoped Quota Refusals",
-        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+        "label": "Odbijanja kvota u okviru modela",
+        "description": "Primijenite opencode kvotu 429 samo na model koji ju je pogodio, tako da isti izlaz nastavlja služiti drugim modelima, i obrišite ga samo kada taj model uspije. Potrošači koji nemaju model (rotacija bazena, parkiranje i ponovno igranje, vidljivost administratora, okidač birača, pregled zdravlja) i dalje ga vide. Potreban je PROXY_SKIP_RECENTLY_FAILED, koji proizvodi odbijanje. Isključeno prema zadanim postavkama: kvota jednog modela 429 stavlja izlaz na stranu za svaki model."
       },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "Proxy preuzimanje: stroga POST repriza",
+        "description": "Za zahtjev koji nije idempotentan (POST, PUT, PATCH, DELETE), ponovo pošaljite nakon transportne greške (svježa utičnica, proxy rezervni, izvorni rezervni) samo kada greška dokaže da ništa nije poslano: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH ili vremensko ograničenje povezivanja. Greška utičnice nakon pisanja može značiti da je upstream prihvatio zahtjev, tako da bi ponovno slanje moglo generirati i naplatiti ga dva puta. Isključeno prema zadanim postavkama: tijelo koje se može reproducirati se ponovo šalje jednom prilikom svake greške u transportu, što također oporavlja zastarjeli skupni soket."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "Evidentiranje atribucije rotacije",
@@ -14504,8 +14504,8 @@
         "description": "Kada cilj komboa odgovori tačnim odbijanjem zbog politike sadržaja (kod ili tip cyber_policy / content_policy_violation), zaustavite combo i vratite to odbijanje čak i kada su preostali ciljevi različiti modeli, umjesto prelaska na sljedeći cilj. Podrazumijevano isključeno: odbijanje nikada ne hladi nalog niti aktivira prekidač pružaoca usluge, a combo prelazi na svoj sljedeći cilj tačno kao i ranije."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "Odgovori: samo preko transporta",
+        "description": "Pošaljite odgovore kao praznu liniju umjesto response.in_progress događaja, tako da sintetički snimak nikada ne može zamijeniti pravi odgovor u službenom SDK. Prazan red ne šalje SSE događaj, tako da se klijent čuvar koji se resetuje samo na događaje ne bi resetovao tokom duge tihe faze. Isključeno prema zadanim postavkama: tajmeri šalju response.in_progress događaj koji vrijedi za specifikaciju."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Ponovni pokušaj tokom hlađenja: Preskoči odbijanja 403/410",

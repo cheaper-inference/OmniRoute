@@ -14260,12 +14260,12 @@
         "description": "იმ პროვაიდერებისთვის, რომელთა კვოტაც დაჯგუფებულია გამავალი მისამართის მიხედვით, პულის იმ წევრს, რომელიც იზიარებს ახლახან უარყოფილი წევრის დაფიქსირებულ გამავალ მისამართს, ანიჭებს რიგითობას უშუალოდ გამართული წევრების ქვემოთ. იცვლება მხოლოდ თანმიმდევრობა, არასოდეს გამოირიცხება. საჭიროებს PROXY_SKIP_RECENTLY_FAILED-ს, რომელიც აგენერირებს უარყოფის სიგნალს, რომელსაც ის კითხულობს. გამორთულია ნაგულისხმევად: შერჩევის თანმიმდევრობა ჩვეულებრივი როტაციის იდენტურია."
       },
       "PROXY_REFUSAL_MODEL_SCOPE": {
-        "label": "__MISSING__:Model-Scoped Quota Refusals",
-        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+        "label": "მოდელის ფარგლებში კვოტაზე უარის თქმა",
+        "description": "გამოიყენეთ opencode კვოტა 429 მხოლოდ იმ მოდელზე, რომელიც მოხვდა მასზე, ასე რომ, იგივე გამოსვლა განაგრძობს სხვა მოდელებს და გაასუფთავეთ იგი მხოლოდ მაშინ, როდესაც ეს მოდელი წარმატებული იქნება. მომხმარებლები, რომლებსაც არ აქვთ მოდელი (აუზის როტაცია, პარკი და გამეორება, ადმინისტრატორის ხილვადობა, სელექტორის ტრიგერი, ჯანმრთელობის გაწმენდა) მაინც ხედავენ მას. სჭირდება PROXY_SKIP_RECENTLY_FAILED, რაც იწვევს უარს. ნაგულისხმევად გამორთულია: ერთი მოდელის კვოტა 429 გამოყოფს გამოსვლას ყველა მოდელისთვის."
       },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "პროქსის მიღება: მკაცრი POST გამეორება",
+        "description": "არაიდემპოტენტური მოთხოვნისთვის (POST, PUT, PATCH, DELETE), ხელახლა გაგზავნეთ სატრანსპორტო შეცდომის შემდეგ (ახალი სოკეტი, პროქსის სარეზერვო საშუალება, მშობლიური ჩანაცვლება) მხოლოდ მაშინ, როდესაც შეცდომა დაადასტურებს, რომ არაფერი იყო გაგზავნილი: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH ან დაკავშირების დრო. ჩაწერის შემდეგ სოკეტის შეცდომა შეიძლება ნიშნავს, რომ ზემო დინამ მიიღო მოთხოვნა, ასე რომ, ხელახლა გაგზავნამ შეიძლება შექმნას და გადაიხადოს იგი ორჯერ. ნაგულისხმევად გამორთულია: ხელახლა დაკვრადი სხეული ხელახლა გაიგზავნება ერთხელ ნებისმიერი სატრანსპორტო შეცდომის გამო, რომელიც ასევე აღადგენს შემორჩენილ ბაქან სოკეტს."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "როტაციის ატრიბუციის ლოგირება",
@@ -14504,8 +14504,8 @@
         "description": "როდესაც combo სამიზნე პასუხობს ზუსტი content-policy უარით (კოდი ან ტიპი cyber_policy / content_policy_violation), შეაჩერეთ combo და დააბრუნეთ ეს უარი მაშინაც კი, როდესაც დარჩენილი სამიზნეები სხვა მოდელებია, შემდეგ სამიზნეზე გადასვლის ნაცვლად. ნაგულისხმევად გამორთულია: უარი არასოდეს გადაიყვანს ანგარიშს cooldown-ში და არ ააქტიურებს provider breaker-ს, ხოლო combo გადადის მის შემდეგ სამიზნეზე ზუსტად ისე, როგორც ადრე."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "პასუხები: ინახება მხოლოდ ტრანსპორტით",
+        "description": "გამოაგზავნეთ პასუხების შესანახი სტრიქონები, როგორც ცარიელი ხაზი response.in_progress მოვლენის ნაცვლად, ასე რომ, სინთეტიკური სნეპშოტი ვერასოდეს ჩაანაცვლებს რეალურ პასუხს ოფიციალურ SDK ში. ცარიელი ხაზი არ აგზავნის SSE მოვლენას, ამიტომ კლიენტის დამკვირვებელი, რომელიც გადაიტვირთება მხოლოდ მოვლენებზე, არ აღდგება ხანგრძლივი ჩუმ ფაზის დროს. ნაგულისხმევად გამორთულია: ტაიმერები აგზავნიან spec-valid response.in_progress მოვლენას."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown-ის განმეორებითი ცდა: 403/410 უარყოფების გამოტოვება",

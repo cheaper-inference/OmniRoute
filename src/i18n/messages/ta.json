@@ -14183,12 +14183,12 @@
         "description": "egress முகவரி அடிப்படையில் ஒதுக்கீடு பிரிக்கப்படும் வழங்குநர்களுக்கு, சமீபத்தில் மறுக்கப்பட்ட உறுப்பினரின் கவனிக்கப்பட்ட egress முகவரியைப் பகிரும் pool உறுப்பினரை ஆரோக்கியமான உறுப்பினர்களுக்குச் சற்றுக் கீழே வரிசைப்படுத்தவும். வரிசை மட்டுமே; ஒருபோதும் விலக்கப்படாது. இது படிக்கும் மறுப்பு சமிக்ஞையை உருவாக்கும் PROXY_SKIP_RECENTLY_FAILED தேவை. இயல்பாக முடக்கப்பட்டது: தேர்வு வரிசை சாதாரண சுழற்சியே."
       },
       "PROXY_REFUSAL_MODEL_SCOPE": {
-        "label": "__MISSING__:Model-Scoped Quota Refusals",
-        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+        "label": "மாதிரி நோக்கம் கொண்ட ஒதுக்கீடு மறுப்புகள்",
+        "description": "opencode கோட்டா 429ஐ அதைத் தாக்கிய மாடலுக்கு மட்டும் பயன்படுத்தவும், அதனால் அதே வெளியேற்றம் மற்ற மாடல்களுக்குச் சேவை செய்யும், மேலும் அந்த மாதிரி வெற்றிபெறும் போது மட்டுமே அதை அழிக்கவும். மாதிரி இல்லாத நுகர்வோர் (பூல் சுழற்சி, பார்க் மற்றும் ரீப்ளே, நிர்வாகத் தெரிவுநிலை, தேர்வாளர் தூண்டுதல், சுகாதார ஸ்வீப்) இன்னும் அதைப் பார்க்கிறார்கள். PROXY_SKIP_RECENTLY_FAILED தேவை, இது மறுப்பை உருவாக்குகிறது. இயல்பாக ஆஃப்: ஒரு மாடலின் ஒதுக்கீடு 429 ஒவ்வொரு மாடலுக்கும் முன்னேற்றத்தை ஒதுக்குகிறது."
       },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "ப்ராக்ஸி பெறுதல்: கண்டிப்பான POST ரீப்ளே",
+        "description": "செயலற்ற கோரிக்கைக்கு (POST, PUT, PATCH, DELETE), போக்குவரத்துப் பிழைக்குப் பிறகு (புதிய சாக்கெட், ப்ராக்ஸி ஃபால்பேக், நேட்டிவ் ஃபால்பேக்) எதுவும் அனுப்பப்படவில்லை என்பதை நிரூபிக்கும் போது மட்டுமே மீண்டும் அனுப்பவும்: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH அல்லது இணைப்பு நேரம் முடிந்தது. எழுதுவதற்குப் பிறகு ஒரு சாக்கெட் பிழையானது அப்ஸ்ட்ரீம் கோரிக்கையை ஏற்றுக்கொண்டதைக் குறிக்கும், எனவே மறுபரிசீலனை செய்யப்பட்டால் அதை இரண்டு முறை உருவாக்கி பில் செய்யலாம். இயல்புநிலையாக முடக்கப்பட்டுள்ளது: ஏதேனும் போக்குவரத்துப் பிழையின் போது மீண்டும் இயக்கக்கூடிய உடல் ஒருமுறை மீண்டும் அனுப்பப்படும், இது பழைய பூல் செய்யப்பட்ட சாக்கெட்டையும் மீட்டெடுக்கிறது."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "சுழற்சி குறிப்பு ஆவணப்படுத்தல்",
@@ -14427,8 +14427,8 @@
         "description": "ஒரு கொம்போ குறிப்பு ஒரு உரிய உள்ளடக்க-முறேக் நிராகரிப்பால் (குறியீடு அல்லது வகை cyber_policy / content_policy_violation) பதிலளிக்கிறபோது, அடுத்த குறிப்புக்கு செல்லாமல், மீதமுள்ள குறிப்புகள் வேறுபட்ட மாதிரிகள் என்றாலும், கொம்போவை நிறுத்தி அந்த நிராகரிப்பை திருப்பி அனுப்பவும். இயல்புநிலையில் அணைக்கப்பட்டது: நிராகரிப்பு ஒரு கணக்கை குளிர்விக்கவோ அல்லது பிராவிடர் பிரேக்கரை (provider breaker) அடிக்கவோ செய்யாது, மேலும் கொம்போ முன்பு இருந்தபடி அதன் அடுத்த குறிப்புக்கு செல்கிறது."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "பதில்கள்: போக்குவரத்தின் மீது மட்டுமே உயிர்",
+        "description": "response.in_progress நிகழ்விற்குப் பதிலாக வெற்று வரியாக பதில்களை அனுப்பவும், எனவே ஒரு செயற்கை ஸ்னாப்ஷாட் அதிகாரப்பூர்வ SDK இல் உள்ள உண்மையான பதிலை ஒருபோதும் மாற்ற முடியாது. ஒரு வெற்று வரி SSE நிகழ்வை அனுப்பாது, எனவே நிகழ்வுகளில் மட்டும் மீட்டமைக்கும் கிளையன்ட் கண்காணிப்பு நீண்ட அமைதியான கட்டத்தில் மீட்டமைக்கப்படாது. முன்னிருப்பாக ஆஃப்: டைமர்கள் ஸ்பெக் செல்லுபடியாகும் response.in_progress நிகழ்வை அனுப்பும்."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "குளோடோவேன் மீண்டும் முயற்சி: 403/410 நிராகரிப்புகளை தவிர்",

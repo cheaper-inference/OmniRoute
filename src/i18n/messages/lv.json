@@ -14183,12 +14183,12 @@
         "description": "Pakalpojumu sniedzējiem, kuru kvota tiek grupēta pēc izejošās adreses, ierindot pūla dalībnieku, kuram ir kopīga novērotā izejošā adrese ar nesen noraidītu dalībnieku, tieši aiz veselajiem dalībniekiem. Tikai secība, nekad netiek izslēgts. Nepieciešams PROXY_SKIP_RECENTLY_FAILED, kas nodrošina noraidījuma signālu tā nolasīšanai. Pēc noklusējuma izslēgts: atlases secība precīzi atbilst parastajai rotācijai."
       },
       "PROXY_REFUSAL_MODEL_SCOPE": {
-        "label": "__MISSING__:Model-Scoped Quota Refusals",
-        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+        "label": "Kvotu atteikumi uz modeli",
+        "description": "Lietojiet opencode kvotu 429 tikai tam modelim, kas to trāpījis, lai tā pati izeja turpinātu apkalpot citus modeļus, un notīriet to tikai tad, kad šim modelim ir izdevies. Patērētāji, kuriem nav modeļa (baseina rotācija, stāvēšana un atkārtošana, administratora redzamība, selektora aktivizētājs, veselības pārbaude), joprojām to redz. Nepieciešams PROXY_SKIP_RECENTLY_FAILED, kas rada atteikumu. Izslēgts pēc noklusējuma: viena modeļa kvota 429 katram modelim nosaka izeju."
       },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "Starpniekservera ielāde: stingra POST atkārtošana",
+        "description": "Ja pieprasījums nav idempotens (POST, PUT, PATCH, DELETE), atkārtoti sūtiet pēc transportēšanas kļūdas (svaiga ligzda, starpniekservera atkāpšanās, vietējā atkāpšanās) tikai tad, ja kļūda pierāda, ka nekas nav nosūtīts: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH vai savienojuma taimauts. Kontaktligzdas kļūda pēc rakstīšanas var nozīmēt, ka augšējais pieprasījums ir pieņēmis pieprasījumu, tāpēc atkārtota sūtīšana var ģenerēt un iekasēt to divreiz. Pēc noklusējuma izslēgts: atkārtoti atskaņojams pamatteksts tiek nosūtīts atkārtoti jebkuras transportēšanas kļūdas gadījumā, kas arī atkopj novecojušu apvienoto ligzdu."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotācijas atribūcijas reģistrēšana",
@@ -14427,8 +14427,8 @@
         "description": "Kad combo mērķis atbild ar precīzu satura politikas atteikumu (kods vai tips cyber_policy / content_policy_violation), apturēt combo un atgriezt šo atteikumu pat tad, ja atlikušie mērķi ir citi modeļi, nevis pāriet pie nākamā mērķa. Pēc noklusējuma izslēgts: atteikums nekad neatvēsina kontu un neiedarbina pakalpojumu sniedzēja slēdzi, un combo pāriet pie nākamā mērķa tieši tāpat kā iepriekš."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "Atbildes: saglabāt dzīvību tikai transporta laikā",
+        "description": "Nosūtiet atbildes kā tukšu rindiņu, nevis response.in_progress notikumu, tāpēc sintētisks momentuzņēmums nekad nevar aizstāt reālo atbildi oficiālajā SDK. Tukša rinda nenosūta SSE notikumu, tāpēc klienta sargsuns, kas atiestata tikai notikumus, netiktu atiestatīts ilgstošas klusuma fāzes laikā. Pēc noklusējuma izslēgts: taimeri nosūta specifikācijas derīgu response.in_progress notikumu."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Atdzišanas atkārtošana: izlaist 403/410 atteikumus",

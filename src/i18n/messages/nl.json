@@ -14183,12 +14183,12 @@
         "description": "Voor providers waarvan het quotum is gegroepeerd op egress-adres: rangschik een pool-lid dat het waargenomen egress-adres deelt met een recent geweigerd lid net onder gezonde leden. Alleen volgorde, nooit uitgesloten. Vereist PROXY_SKIP_RECENTLY_FAILED, dat het weigeringssignaal genereert dat het uitleest. Standaard uitgeschakeld: selectievolgorde is exact de standaardrotatie."
       },
       "PROXY_REFUSAL_MODEL_SCOPE": {
-        "label": "__MISSING__:Model-Scoped Quota Refusals",
-        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+        "label": "Op modellen gerichte quotaweigeringen",
+        "description": "Pas een opencode quotum 429 alleen toe op het model dat het heeft geraakt, zodat dezelfde uitgang andere modellen blijft bedienen, en maak het alleen vrij als dat model slaagt. Consumenten die geen model hebben (poolrotatie, parkeren en opnieuw afspelen, beheerderszichtbaarheid, selectortrigger, gezondheidsonderzoek) zien het nog steeds. Heeft PROXY_SKIP_RECENTLY_FAILED nodig, wat de weigering oplevert. Standaard uitgeschakeld: het quotum 429 van één model zet het uitgaande verkeer voor elk model opzij."
       },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "Proxy ophalen: strikte POST -herhaling",
+        "description": "Voor een niet-idempotent verzoek (POST, PUT, PATCH, DELETE), verzendt u het opnieuw na een transportfout (verse socket, proxy fallback, native fallback) alleen wanneer de fout bewijst dat er niets is verzonden: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH of een connect time-out. Een socketfout na het schrijven kan betekenen dat de upstream het verzoek heeft geaccepteerd, dus een nieuwe verzending kan het verzoek twee keer genereren en factureren. Standaard uitgeschakeld: een herspeelbaar lichaam wordt één keer opnieuw verzonden bij elke transportfout, waardoor ook een verouderde gepoolde socket wordt hersteld."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotatie-attributielogging",
@@ -14427,8 +14427,8 @@
         "description": "Wanneer een combo-doel antwoordt met een exacte content-policy-weigering (code of type cyber_policy / content_policy_violation), stop dan de combo en retourneer die weigering zelfs wanneer de resterende doelen andere modellen zijn, in plaats van door te gaan naar het volgende doel. Standaard uitgeschakeld: de weigering plaatst het account nooit in een cooldown en activeert de provider-breaker niet, en de combo gaat precies zoals voorheen door naar het volgende doel."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "Reacties: alleen over het transport blijven",
+        "description": "Stuur reacties keepalives als een lege regel in plaats van een response.in_progress gebeurtenis, dus een synthetische momentopname kan nooit het echte antwoord in de officiële SDK vervangen. Een lege regel verzendt geen SSE -gebeurtenis, dus een client-watchdog die alleen reset bij gebeurtenissen, wordt niet gereset tijdens een lange stille fase. Standaard uitgeschakeld: timers verzenden de spec-geldige response.in_progress gebeurtenis."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown-retry: 403/410-weigeringen overslaan",
