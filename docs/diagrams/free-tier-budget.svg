@@ -306,12 +306,12 @@
     <rect x="509" y="702" width="83" height="22" rx="11" class="surface-muted rule" stroke-width="1"/>
     <g class="label-sm" style="fill:var(--muted)" transform="translate(517.02 717) scale(.011 -.011)"><use href="#gz"/><use href="#gq" x="648"/><use href="#g1w" x="894"/><use href="#gl" x="1140"/><use href="#g9" x="1932"/><use href="#gh" x="2648"/><use href="#gp" x="3234"/><use href="#go" x="3560"/><use href="#g23" x="4138"/><use href="#gh" x="4976"/><use href="#g21" x="5547"/></g>
   <text x="550.5" y="717" class="ol">Kilo Gateway</text>
-    <rect x="600" y="702" width="85" height="22" rx="11" class="surface-muted rule" stroke-width="1"/>
-    <g class="label-sm" style="fill:var(--muted)" transform="translate(608.37 717) scale(.011 -.011)"><use href="#gd"/><use href="#g1w" x="761"/><use href="#g1w" x="1007"/><use href="#gh" x="1253"/><use href="#g1q" x="1839"/><use href="#gh" x="2722"/><use href="#g28" x="3514"/><use href="#g1w" x="4210"/><use href="#gl" x="4456"/><use href="#g1p" x="5042"/><use href="#gg" x="5624"/></g>
-  <text x="642.5" y="717" class="ol">Ollama Cloud</text>
-    <rect x="693" y="702" width="34" height="22" rx="11" class="surface-muted rule" stroke-width="1"/>
-    <g class="label-sm" style="fill:var(--muted)" transform="translate(705.92 717) scale(.011 -.011)"><use href="#g2i"/></g>
-  <text x="710" y="717" class="ol">…</text>
+    <rect x="600" y="702" width="76" height="22" rx="11" class="surface-muted rule" stroke-width="1"/>
+    <g class="label-sm" style="fill:var(--muted)" transform="translate(608.42 717) scale(.011 -.011)"><use href="#ge"/><use href="#gc" x="710"/><use href="#g5" x="1408"/><use href="#g8" x="1676"/><use href="#g5" x="2387"/><use href="#g11" x="2655"/><use href="#ge" x="3529"/><use href="#g5" x="4239"/><use href="#g10" x="4507"/></g>
+  <text x="638" y="717" class="ol">NVIDIA NIM</text>
+    <rect x="684" y="702" width="34" height="22" rx="11" class="surface-muted rule" stroke-width="1"/>
+    <g class="label-sm" style="fill:var(--muted)" transform="translate(696.92 717) scale(.011 -.011)"><use href="#g2i"/></g>
+  <text x="701" y="717" class="ol">…</text>
   </g>
   <g class="label"><g style="fill:var(--warn)" transform="translate(760 718) scale(.013 -.013)"><use href="#g2k"/><use href="#gv" x="586"/><use href="#g1z" x="1172"/></g><g transform="translate(782.85 718) scale(.013 -.013)"><use href="#gd" x="206"/><use href="#g1v" x="967"/><use href="#go" x="1559"/><use href="#g1r" x="2145"/><use href="#g1" x="2733"/><use href="#gl" x="3373"/><use href="#g1p" x="3959"/><use href="#gp" x="4541"/><use href="#go" x="4867"/><use href="#gm" x="5453"/><use href="#gp" x="6052"/><use href="#gl" x="6378"/><use href="#g1v" x="6964"/><use href="#g3" x="7556"/><use href="#g1p" x="7962"/><use href="#g1v" x="8544"/><use href="#g2l" x="9342"/></g><g style="fill:var(--ok)" transform="translate(918.81 718) scale(.013 -.013)"><use href="#g2a"/><use href="#gy" x="586"/><use href="#g1t" x="1172"/><use href="#g10" x="1758"/><use href="#gf" x="2640"/><use href="#g1q" x="3000"/><use href="#gl" x="3883"/></g></g>
   <text x="760" y="718" class="ol">$10 OpenRouter top-up → +24M/mo</text>

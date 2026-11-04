@@ -31,7 +31,10 @@ import {
 
 interface QuotaCacheView {
   provider?: string;
-  quotas?: Record<string, { remainingPercentage?: number; resetAt?: string | null }>;
+  quotas?: Record<
+    string,
+    { remainingPercentage?: number; resetAt?: string | null; fractionReported?: boolean }
+  >;
 }
 
 interface ExpiryFirstCandidate {
@@ -64,22 +67,37 @@ export function buildConnectionQuotaWindowsView(
   const quotas = entry?.quotas;
   if (!quotas) return null;
 
-  const windows: Record<string, { percentUsed: number; resetAt: string | null }> = {};
+  const windows: Record<
+    string,
+    { percentUsed: number | null; resetAt: string | null; fractionReported?: false }
+  > = {};
+  let hasReportedWindow = false;
   const quotaNames = Object.keys(quotas);
   const provider = expiryFirstQuotaProvider(entry?.provider, scope?.provider);
   const windowNames = scope ? selectExpiryFirstQuotaWindowNames(quotaNames, scope) : quotaNames;
   for (const windowName of windowNames) {
     const quota = quotas[windowName];
     if (!quota) continue;
+    if (quota.fractionReported === false) {
+      // Keep reset telemetry without turning the cache's sentinel zero into an
+      // exhausted fraction (or promoting a short session to the deadline).
+      windows[expiryFirstWindowName(provider, windowName, quotaNames)] = {
+        percentUsed: null,
+        resetAt: toStringOrNull(quota.resetAt),
+        fractionReported: false,
+      };
+      continue;
+    }
     const remainingPercent = toNumber(quota?.remainingPercentage, Number.NaN);
     if (!Number.isFinite(remainingPercent)) continue;
+    hasReportedWindow = true;
     windows[expiryFirstWindowName(provider, windowName, quotaNames)] = {
       percentUsed: Math.min(1, Math.max(0, 1 - remainingPercent / 100)),
       resetAt: toStringOrNull(quota?.resetAt),
     };
   }
 
-  return Object.keys(windows).length > 0 ? { windows } : null;
+  return hasReportedWindow ? { windows } : null;
 }
 
 /**
