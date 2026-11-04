@@ -78,7 +78,7 @@ function assignDurationQuotas(
     const window = parseCodexQuotaWindow(raw, id);
     if (!window) continue;
     const key = codexQuotaWindowKey(window, names);
-    const family = windowDurationLabel(raw);
+    const family = windowDurationLabel(window.windowSeconds);
     const label = displayName
       ? family === "Weekly"
         ? `${displayName} Weekly`
@@ -120,12 +120,10 @@ function isLatentWindow(window: JsonRecord): boolean {
  * e.g. a 7-day `primary_window` is labeled "Weekly" rather than "Session".
  * Returns undefined for durations that don't clearly map to either bucket.
  */
-function windowDurationLabel(window: JsonRecord): "Session" | "Weekly" | "Monthly" | undefined {
-  const limitWindow = toNumber(
-    getFieldValue(window, "limit_window_seconds", "limitWindowSeconds"),
-    0
-  );
-  if (limitWindow <= 0) return undefined;
+function windowDurationLabel(
+  limitWindow: number | null
+): "Session" | "Weekly" | "Monthly" | undefined {
+  if (limitWindow === null || limitWindow <= 0) return undefined;
   const inferred = inferWindowFamilyLabel(limitWindow);
   if (inferred === "Monthly" || inferred === "Weekly" || inferred === "Session") return inferred;
   if (limitWindow >= MONTHLY_MIN_WINDOW_SECONDS) return "Monthly";
@@ -253,7 +251,8 @@ function appendCodexReserveQuotas(data: JsonRecord, quotas: Record<string, Codex
   for (const [key, windowValue, fallbackLabel] of windows) {
     const window = toRecord(windowValue);
     if (Object.keys(window).length === 0 || isLatentWindow(window)) continue;
-    const label = windowDurationLabel(window) || fallbackLabel;
+    const label =
+      windowDurationLabel(parseCodexQuotaWindow(window)?.windowSeconds ?? null) || fallbackLabel;
     assignPercentageQuota(quotas, key, window, label ? `${displayName} ${label}` : displayName);
   }
 }

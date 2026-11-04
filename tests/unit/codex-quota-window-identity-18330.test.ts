@@ -148,7 +148,34 @@ test("alternate duration keys preserve weekly classification and Spark scope", a
     ],
   }).quotas;
   assert.equal(display.gpt_5_3_codex_spark_weekly?.used, 94);
+  assert.equal(display.gpt_5_3_codex_spark_weekly?.displayName, "GPT-5.3-Codex-Spark Weekly");
 });
+
+for (const key of [
+  "limit_window_seconds",
+  "limitWindowSeconds",
+  "window_seconds",
+  "windowSeconds",
+]) {
+  test(`parsed duration ${key} keeps quota keys and display labels aligned`, () => {
+    const quotas = buildCodexUsageQuotas({
+      rateLimit: { primaryWindow: { usedPercent: 20, [key]: "2592000" } },
+      additionalRateLimits: [
+        {
+          limitId: "codex_bengalfox",
+          rateLimit: { primaryWindow: { usedPercent: 94, [key]: "604800" } },
+        },
+        {
+          limitName: "gpt-reserve",
+          rateLimit: { primaryWindow: { usedPercent: 10, [key]: "2592000" } },
+        },
+      ],
+    }).quotas;
+    assert.equal(quotas.unknown_primary?.displayName, "Monthly");
+    assert.equal(quotas.gpt_5_3_codex_spark_weekly?.displayName, "GPT-5.3-Codex-Spark Weekly");
+    assert.equal(quotas.reserve_session?.displayName, "Luna Reserve Monthly");
+  });
+}
 
 for (const duration of [undefined, 3600]) {
   test(`unknown usage duration ${duration} cannot hydrate the pool 5h or weekly slots`, () => {
