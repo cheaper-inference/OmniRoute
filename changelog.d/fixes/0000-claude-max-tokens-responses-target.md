@@ -1,1 +1,0 @@
-- **fix(sse):** Claude-format clients targeting a Responses-only model (codex and similar) no longer lose their `max_tokens` output cap: requests now reach the upstream with the limit instead of unlimited output.
