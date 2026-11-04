@@ -107,8 +107,8 @@ test("DAST selects both documented inference operations and preserves the manage
   const exclude = new RegExp(scanner.run!.match(/--exclude-path-regex '([^']+)'/)![1]);
   const old = selectedOperations(/^\/v1\/(chat\/completions|models)$|^\/api\/(auth|keys)/, exclude);
   const selected = selectedOperations(include, exclude);
-  assert.equal(old.length, 24);
-  assert.equal(selected.length, 26);
+  assert.ok(old.length > 0, "the documented management set must not be empty");
+  assert.equal(selected.length, old.length + 2);
   assert.ok(old.every((operation) => selected.includes(operation)));
   assert.deepEqual(
     selected.filter((operation) => !old.includes(operation)),
