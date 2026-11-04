@@ -1682,7 +1682,7 @@ async function handleChatCoreInner({
             });
         }
         let result: CompressionResult;
-        if (compressionConfig.liveZone?.enabled === true) {
+        if (compressionConfig.liveZone?.enabled === true || protectOpenCodePrefix) {
           // Live-zone lane extracted to chatCore/liveZoneCompression.ts (chatCore slice 2).
           result = await runLiveZoneCompression({
             compressionInputBody,
