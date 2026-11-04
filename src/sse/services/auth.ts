@@ -3143,7 +3143,13 @@ export async function markAccountUnavailable(
           // A structured upstream reset (reset_at/retry_after JSON or header) is the
           // provider's own clock: a new, shorter hint must shrink a stale longer
           // lock, otherwise the model stays parked after the provider recovered.
-          authoritativeBodyReset: isAuthoritativeRetryHintSource(fallbackResult.retryHintSource),
+          // Only an ACTUALLY-APPLIED upstream hint qualifies — the same condition as
+          // exactCooldownMs above. A locally scaled cooldown (usedUpstreamRetryHint
+          // === false, e.g. hints disabled in the profile while the body still
+          // carries a structured hint) must never shorten a longer lock (#CO-402).
+          authoritativeBodyReset:
+            fallbackResult.usedUpstreamRetryHint === true &&
+            isAuthoritativeRetryHintSource(fallbackResult.retryHintSource),
         }
       );
       updateProviderConnection(connectionId, {

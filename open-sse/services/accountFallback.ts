@@ -2199,7 +2199,7 @@ export function checkFallbackError(
     if (shouldUseQuotaSignal && !isCreditsExhausted(errorStr) && !isDailyQuotaExhausted(errorStr)) {
       const subResult = buildSubscriptionQuotaFallback(
         errorStr,
-        () => getUpstreamRetryHint()?.retryAfterMs ?? null,
+        getUpstreamRetryHint,
         parseRetryFromErrorText,
         provider
       );
@@ -2386,7 +2386,7 @@ export function checkFallbackError(
   if (status === HTTP_STATUS.PLAN_LIMIT_EXCEEDED) {
     const subResult = buildSubscriptionQuotaFallback(
       errorStr,
-      () => getUpstreamRetryHint()?.retryAfterMs ?? null,
+      getUpstreamRetryHint,
       parseRetryFromErrorText,
       provider
     );
