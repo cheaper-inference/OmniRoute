@@ -5,6 +5,7 @@ import {
   unlinkSync,
   mkdirSync,
   realpathSync,
+  renameSync,
 } from "node:fs";
 import { execFileSync, execSync } from "node:child_process";
 import { homedir } from "node:os";
@@ -535,8 +536,18 @@ function isStaleInstalledCli(previous, current) {
   if (!isInstalledCli(previous) || !isInstalledCli(current) || isNpxCachePath(current)) {
     return false;
   }
-  const target = installedVersion(previous) ?? "0.0.0";
+  // A package.json left behind without the script it describes is a removed target.
+  const target = (existsSync(previous) && installedVersion(previous)) || "0.0.0";
   return compareCliVersions(target, installedVersion(current)) === -1;
+}
+
+/**
+ * Scratch file for replacing the VBS, in the same folder so the rename stays on one
+ * volume. Windows runs everything in the Startup folder at login, so a leftover must
+ * not be a script: `.tmp` has no handler.
+ */
+export function winVbsTempPath(vbsPath) {
+  return `${vbsPath}.${process.pid}.tmp`;
 }
 
 /**
@@ -555,7 +566,20 @@ export function refreshWinAutostartCliPath({
   if (process.platform !== "win32" || !cliPath || !vbsPath || !existsSync(vbsPath)) return false;
   const rewritten = rewriteWinVbsCliPath(readFileSync(vbsPath, "utf8"), cliPath);
   if (!rewritten || !isStaleInstalledCli(rewritten.previousCliPath, cliPath)) return false;
-  writeFileSync(vbsPath, rewritten.content, { mode: 0o644 });
+  // Write beside the VBS and rename over it: a failed write must not leave a
+  // truncated entry that later refreshes reject as foreign.
+  const tempPath = winVbsTempPath(vbsPath);
+  try {
+    writeFileSync(tempPath, rewritten.content, { mode: 0o644 });
+    renameSync(tempPath, vbsPath);
+  } catch (err) {
+    try {
+      unlinkSync(tempPath);
+    } catch {
+      // never written, or already renamed away
+    }
+    throw err;
+  }
   return true;
 }
 

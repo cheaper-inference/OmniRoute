@@ -1,7 +1,17 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
+import { dirname, extname, join } from "node:path";
 import { tmpdir } from "node:os";
 
 const autostart = await import("../../../bin/cli/tray/autostart.mjs");
@@ -11,7 +21,9 @@ const {
   refreshWinAutostartCliPath,
   compareCliVersions,
   isNpxCachePath,
+  winVbsTempPath,
 } = autostart;
+const { refreshAutostartEntry } = await import("../../../bin/cli/commands/serve.mjs");
 
 // #18601: the Startup VBS pins the real path of the CLI that enabled autostart.
 // pnpm installs each version under its own directory, so after an upgrade every
@@ -155,6 +167,24 @@ test("refresh repairs a VBS whose install was removed", () => {
 
     assert.equal(refreshWinAutostartCliPath({ cliPath: newCli, vbsPath }), true);
     assert.ok(execLineOf(readFileSync(vbsPath, "utf8")).includes(`"${newCli}"`));
+  });
+});
+
+test("refresh repairs a VBS whose CLI script is gone but whose package.json remains", () => {
+  if (process.platform !== "win32") return;
+  withTmp((dir) => {
+    // Same version as the running install, then a newer one: a package.json
+    // without the script it describes must not make a broken target look current.
+    for (const version of ["3.8.52", "3.9.0"]) {
+      const oldCli = fakeInstall(dir, `old-${version}`, version);
+      const newCli = fakeInstall(dir, `new-${version}`, "3.8.52");
+      const vbsPath = join(dir, `OmniRoute-${version}.vbs`);
+      writeFileSync(vbsPath, buildWinVbsContent(oldCli));
+      rmSync(oldCli);
+
+      assert.equal(refreshWinAutostartCliPath({ cliPath: newCli, vbsPath }), true, version);
+      assert.ok(execLineOf(readFileSync(vbsPath, "utf8")).includes(`"${newCli}"`), version);
+    }
   });
 });
 
@@ -305,6 +335,108 @@ test("refresh does nothing when autostart is off or the VBS is foreign", () => {
     writeFileSync(vbsPath, 'MsgBox "custom"\n');
     assert.equal(refreshWinAutostartCliPath({ cliPath: newCli, vbsPath }), false);
     assert.equal(readFileSync(vbsPath, "utf8"), 'MsgBox "custom"\n');
+  });
+});
+
+test("refresh replaces the VBS atomically and leaves no temp file behind", () => {
+  if (process.platform !== "win32") return;
+  withTmp((dir) => {
+    const oldCli = fakeInstall(dir, "old", "3.8.51");
+    const newCli = fakeInstall(dir, "new", "3.8.52");
+    const vbsPath = join(dir, "OmniRoute.vbs");
+    writeFileSync(vbsPath, buildWinVbsContent(oldCli));
+    const before = statSync(vbsPath, { bigint: true }).ino;
+
+    assert.equal(refreshWinAutostartCliPath({ cliPath: newCli, vbsPath }), true);
+    // A new file renamed over the old one, not the old one truncated and rewritten.
+    assert.notEqual(statSync(vbsPath, { bigint: true }).ino, before);
+    assert.ok(execLineOf(readFileSync(vbsPath, "utf8")).includes(`"${newCli}"`));
+    assert.deepEqual(
+      readdirSync(dir).filter((name) => name.startsWith("OmniRoute")),
+      ["OmniRoute.vbs"]
+    );
+  });
+});
+
+test("a failed replace keeps the old VBS intact, throws, and removes its temp file", () => {
+  if (process.platform !== "win32") return;
+  withTmp((dir) => {
+    const oldCli = fakeInstall(dir, "old", "3.8.51");
+    const newCli = fakeInstall(dir, "new", "3.8.52");
+    const startup = join(dir, "Startup");
+    mkdirSync(startup);
+    const vbsPath = join(startup, "OmniRoute.vbs");
+    const vbs = buildWinVbsContent(oldCli);
+    writeFileSync(vbsPath, vbs);
+    chmodSync(vbsPath, 0o444); // read-only: the rename over it fails after the temp is written
+    try {
+      assert.throws(() => refreshWinAutostartCliPath({ cliPath: newCli, vbsPath }));
+      assert.equal(readFileSync(vbsPath, "utf8"), vbs, "old VBS untouched, not truncated");
+      assert.deepEqual(readdirSync(startup), ["OmniRoute.vbs"], "temp file removed");
+    } finally {
+      chmodSync(vbsPath, 0o644);
+    }
+  });
+});
+
+test("the temp file sits next to the VBS under an extension Windows will not run", () => {
+  const vbsPath = "C:\\Users\\u\\Startup\\OmniRoute.vbs";
+  const temp = winVbsTempPath(vbsPath);
+  assert.notEqual(temp, vbsPath);
+  assert.equal(dirname(temp).toLowerCase(), dirname(vbsPath).toLowerCase(), "same volume");
+  // Everything in the Startup folder is run at login: a leftover temp must not be a script.
+  assert.equal(extname(temp).toLowerCase(), ".tmp");
+});
+
+test("serve skips the autostart refresh when the install has no server to start", () => {
+  const calls: string[] = [];
+  const refresh = () => {
+    calls.push("refresh");
+    return true;
+  };
+  const withApp = (files: string[], fn: (appDir: string) => void) =>
+    withTmp((dir) => {
+      for (const file of files) writeFileSync(join(dir, file), "");
+      fn(dir);
+    });
+
+  withApp([], (appDir) => {
+    assert.equal(refreshAutostartEntry({ appDir, platform: "win32", refresh }), false);
+  });
+  assert.deepEqual(calls, [], "no server-ws.mjs or server.js: the entry must not move");
+
+  withApp(["server.js"], (appDir) => {
+    assert.equal(refreshAutostartEntry({ appDir, platform: "win32", refresh }), true);
+  });
+  withApp(["server-ws.mjs"], (appDir) => {
+    assert.equal(refreshAutostartEntry({ appDir, platform: "win32", refresh }), true);
+  });
+  assert.deepEqual(calls, ["refresh", "refresh"]);
+
+  withApp(["server.js"], (appDir) => {
+    assert.equal(refreshAutostartEntry({ appDir, platform: "linux", refresh }), false);
+  });
+  assert.equal(calls.length, 2, "not on other platforms");
+});
+
+test("serve leaves a working VBS alone when the newer install has no server", () => {
+  if (process.platform !== "win32") return;
+  withTmp((dir) => {
+    const oldCli = fakeInstall(dir, "old", "3.8.51");
+    const newCli = fakeInstall(dir, "new", "3.8.52");
+    const vbsPath = join(dir, "OmniRoute.vbs");
+    const vbs = buildWinVbsContent(oldCli);
+    writeFileSync(vbsPath, vbs);
+    const refresh = () => refreshWinAutostartCliPath({ cliPath: newCli, vbsPath });
+
+    const appDir = join(dir, "new", "node_modules", "omniroute", "dist");
+    mkdirSync(appDir);
+    assert.equal(refreshAutostartEntry({ appDir, refresh }), false);
+    assert.equal(readFileSync(vbsPath, "utf8"), vbs);
+
+    writeFileSync(join(appDir, "server.js"), "");
+    assert.equal(refreshAutostartEntry({ appDir, refresh }), true);
+    assert.ok(execLineOf(readFileSync(vbsPath, "utf8")).includes(`"${newCli}"`));
   });
 });
 
