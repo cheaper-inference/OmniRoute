@@ -1940,15 +1940,15 @@
     "unpricedUsageMore": "… àti {count} míì",
     "unpricedUsageConfigure": "Ṣètò ìye",
     "unpricedUsageDismiss": "Fagilé",
-    "systemMetricsTitle": "System metrics",
-    "systemMetricsActive": "Monitoring active",
-    "systemMetricsLoading": "Loading...",
+    "systemMetricsTitle": "Àwọn ìwọ̀n ètò",
+    "systemMetricsActive": "Àbojútó ń ṣiṣẹ́",
+    "systemMetricsLoading": "Ń kojọpọ̀...",
     "systemMetricsCpu": "CPU",
-    "systemMetricsMemory": "Memory",
-    "systemMetricsHost": "VPS / Host",
-    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
-    "systemMetricsProcessCpu": "OmniRoute (process)",
-    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
+    "systemMetricsMemory": "Ìrántí",
+    "systemMetricsHost": "VPS / Agbàlejò",
+    "systemMetricsCpuCount": "{count} vCPU • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (ìṣiṣẹ́)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS Ìrántí / Òkìtì)"
   },
   "analytics": {
     "title": "Ìtúpalẹ̀",
