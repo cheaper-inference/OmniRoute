@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "Seções de proxy",
     "requestBodyLimitTitle": "Limite do corpo da solicitação",
     "requestBodyLimitDescription": "Tamanho máximo da carga útil da API aceito antes que o corpo da solicitação seja analisado. As rotas dedicadas de upload mantêm pelo menos o limite integrado de 100 MB.",
+    "requestBodyLimitChatHint": "Chat Completions e Responses aceitam até 50 MB até você salvar um limite aqui. Um limite salvo também se aplica a eles, seja menor ou maior.",
     "requestBodyLimitInputLabel": "Limite do corpo da solicitação em MB",
     "requestBodyLimitEmptyError": "Insira um limite em MB",
     "requestBodyLimitWholeNumberError": "Use um número inteiro",

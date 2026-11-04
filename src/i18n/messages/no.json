@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "Proxyseksjoner",
     "requestBodyLimitTitle": "Grense for forespørselskropp",
     "requestBodyLimitDescription": "Maksimal størrelse på API-nyttelasten som godtas før forespørselskroppen analyseres. Dedikerte opplastingsruter beholder minst den innebygde grensen på 100 MB.",
+    "requestBodyLimitChatHint": "Chat Completions og Responses godtar opptil 50 MB til du lagrer en grense her. En lagret grense gjelder også for dem, enten den er lavere eller høyere.",
     "requestBodyLimitInputLabel": "Grense for forespørselskropp i MB",
     "requestBodyLimitEmptyError": "Angi en grense i MB",
     "requestBodyLimitWholeNumberError": "Bruk et heltall",

@@ -7097,6 +7097,7 @@
     "proxySubTabsAria": "Sassan Proxy",
     "requestBodyLimitTitle": "Iyakar Jikin Buƙata",
     "requestBodyLimitDescription": "Matsakaicin girman bayanan API da ake karɓa kafin a tantance jikin buƙata. Hanyoyin lodawa na musamman suna riƙe aƙalla iyakarsu ta asali ta 100 MB.",
+    "requestBodyLimitChatHint": "Chat Completions da Responses suna karɓar har zuwa 50 MB har sai kun adana iyaka a nan. Iyakar da aka adana tana shafar su ma, ko ta yi ƙasa ko ta yi sama.",
     "requestBodyLimitInputLabel": "Iyakar jikin buƙata a MB",
     "requestBodyLimitEmptyError": "Shigar da iyaka a MB",
     "requestBodyLimitWholeNumberError": "Yi amfani da cikakkiyar lamba",

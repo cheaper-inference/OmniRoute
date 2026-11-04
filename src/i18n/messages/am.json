@@ -7174,6 +7174,7 @@
     "proxySubTabsAria": "የፕሮክሲ ክፍሎች",
     "requestBodyLimitTitle": "የጥያቄ ይዘት ገደብ",
     "requestBodyLimitDescription": "የጥያቄው ይዘት ከመተንተኑ በፊት ተቀባይነት የሚያገኘው ከፍተኛው የAPI ጭነት መጠን። ልዩ የሰቀላ መስመሮች ቢያንስ አብሮገነብ የ100 MB ገደባቸውን ይይዛሉ።",
+    "requestBodyLimitChatHint": "Chat Completions እና Responses እዚህ ገደብ እስኪያስቀምጡ ድረስ እስከ 50 MB ይቀበላሉ። የተቀመጠ ገደብ በእነሱ ላይም ይተገበራል፣ ዝቅተኛም ይሁን ከፍተኛ።",
     "requestBodyLimitInputLabel": "የጥያቄ ይዘት ገደብ በMB",
     "requestBodyLimitEmptyError": "ገደቡን በMB ያስገቡ",
     "requestBodyLimitWholeNumberError": "ሙሉ ቁጥር ይጠቀሙ",

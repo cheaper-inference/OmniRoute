@@ -7174,6 +7174,7 @@
     "proxySubTabsAria": "أقسام بروكسي",
     "requestBodyLimitTitle": "حد حجم نص الطلب",
     "requestBodyLimitDescription": "أقصى حجم مقبول لحمولة API قبل تحليل نص الطلب. تحتفظ مسارات الرفع المخصصة بحدها المضمّن البالغ 100 ميجابايت على الأقل.",
+    "requestBodyLimitChatHint": "تقبل Chat Completions وResponses ما يصل إلى 50 ميغابايت إلى أن تحفظ حدًا هنا. ينطبق الحد المحفوظ عليهما أيضًا، سواء كان أقل أو أعلى.",
     "requestBodyLimitInputLabel": "حد نص الطلب (ميجابايت)",
     "requestBodyLimitEmptyError": "أدخل الحد بالميجابايت",
     "requestBodyLimitWholeNumberError": "استخدم عددًا صحيحًا",
