@@ -77,34 +77,60 @@ function releaseProcessSlot() {
   else activeProcesses--;
 }
 
-/** No shell, inherited provider keys, user-selected executable or public stderr. */
-export const runRosebud: RosebudRunner = async (profile, args, timeoutMs = 120000) => {
-  const folder = await rosebudProfile(profile);
-  const env: NodeJS.ProcessEnv = {
-    PATH: process.env.PATH,
-    HOME: folder,
-    USERPROFILE: folder,
-    SYSTEMROOT: process.env.SYSTEMROOT,
-    TMPDIR: process.env.TMPDIR,
-    TEMP: process.env.TEMP,
-    ROSEBUD_CREDENTIALS_DIR: folder,
-  };
-  const bin = process.env.ROSEBUD_CLI_SCRIPT
-    ? process.execPath
-    : process.env.ROSEBUD_CLI_BIN || "rosebud";
+/** Resolve the configured command. An HTTP request can never select the executable. */
+function rosebudCliCommand(args: string[]) {
+  const script = process.env.ROSEBUD_CLI_SCRIPT;
+  if (script) return { bin: process.execPath, argv: [script, ...args] };
+  const bin = process.env.ROSEBUD_CLI_BIN || "rosebud";
   // Windows cannot start a .cmd shim without a shell, and this runner never uses one.
-  if (!process.env.ROSEBUD_CLI_SCRIPT && process.platform === "win32" && !/\.exe$/i.test(bin))
+  if (process.platform === "win32" && !/\.exe$/i.test(bin))
     throw new RosebudError("cli_script_required_on_windows", 503);
-  const argv = process.env.ROSEBUD_CLI_SCRIPT ? [process.env.ROSEBUD_CLI_SCRIPT, ...args] : args;
-  const releaseProfile = await acquireProfileSlot(profile);
+  return { bin, argv: args };
+}
+
+const AUTH_FAILURES = new Set(["invalid_key", "key_expired", "key_revoked", "login_required"]);
+
+function cliErrorStatus(name: string) {
+  if (name === "insufficient_credits") return 402;
+  if (AUTH_FAILURES.has(name)) return 401;
+  return name === "throttled" ? 429 : 502;
+}
+
+/** Translate a failed CLI result without exposing its stderr to callers. */
+function cliFailure(result: JsonObject, code: number | null, signal: NodeJS.Signals | null) {
+  const error =
+    result.error && typeof result.error === "object" ? (result.error as JsonObject) : result;
+  const name =
+    typeof error.code === "string" && /^[a-z_]{1,80}$/.test(error.code) ? error.code : "cli_failed";
+  const outcomeUnknown =
+    code === 4 || code === 130 || code === 143 || Boolean(signal) || error.outcome === "unknown";
+  return new RosebudError(name, cliErrorStatus(name), outcomeUnknown);
+}
+
+function parseCliOutput(
+  output: { code: number | null; signal: NodeJS.Signals | null; stdout: string; stderr: string },
+  exceeded: boolean
+): JsonObject {
+  let result: JsonObject;
   try {
-    await acquireProcessSlot();
-  } catch (error) {
-    releaseProfile();
-    throw error;
+    result = JSON.parse(output.code === 0 ? output.stdout : output.stderr);
+  } catch {
+    throw new RosebudError(exceeded ? "output_too_large" : "invalid_cli_response", 502, true);
   }
+  if (output.code === 0 && !output.signal) return result;
+  throw cliFailure(result, output.code, output.signal);
+}
+
+const MAX_CLI_OUTPUT_CHARS = 8 * 1024 * 1024;
+
+function runCliProcess(
+  command: { bin: string; argv: string[] },
+  env: NodeJS.ProcessEnv,
+  folder: string,
+  timeoutMs: number
+) {
   return new Promise<JsonObject>((accept, reject) => {
-    const child = spawn(bin, argv, {
+    const child = spawn(command.bin, command.argv, {
       shell: false,
       windowsHide: true,
       env,
@@ -122,7 +148,7 @@ export const runRosebud: RosebudRunner = async (profile, args, timeoutMs = 12000
       killTimer = setTimeout(() => child.kill("SIGKILL"), 5000);
     }, timeoutMs);
     const collect = (chunk: string, error: boolean) => {
-      if (stdout.length + stderr.length + chunk.length > 8 * 1024 * 1024) {
+      if (stdout.length + stderr.length + chunk.length > MAX_CLI_OUTPUT_CHARS) {
         exceeded = true;
         child.kill("SIGTERM");
         return;
@@ -139,42 +165,36 @@ export const runRosebud: RosebudRunner = async (profile, args, timeoutMs = 12000
     child.on("close", (code, signal) => {
       clearTimeout(timer);
       if (killTimer) clearTimeout(killTimer);
-      let result: JsonObject;
       try {
-        result = JSON.parse(code === 0 ? stdout : stderr);
-      } catch {
-        reject(new RosebudError(exceeded ? "output_too_large" : "invalid_cli_response", 502, true));
-        return;
+        accept(parseCliOutput({ code, signal, stdout, stderr }, exceeded));
+      } catch (error) {
+        reject(error);
       }
-      if (code === 0 && !signal) {
-        accept(result);
-        return;
-      }
-      const error =
-        result.error && typeof result.error === "object" ? (result.error as JsonObject) : result;
-      const name =
-        typeof error.code === "string" && /^[a-z_]{1,80}$/.test(error.code)
-          ? error.code
-          : "cli_failed";
-      reject(
-        new RosebudError(
-          name,
-          name === "insufficient_credits"
-            ? 402
-            : ["invalid_key", "key_expired", "key_revoked", "login_required"].includes(name)
-              ? 401
-              : name === "throttled"
-                ? 429
-                : 502,
-          code === 4 ||
-            code === 130 ||
-            code === 143 ||
-            Boolean(signal) ||
-            error.outcome === "unknown"
-        )
-      );
     });
-  }).finally(() => {
+  });
+}
+
+/** No shell, inherited provider keys, user-selected executable or public stderr. */
+export const runRosebud: RosebudRunner = async (profile, args, timeoutMs = 120000) => {
+  const folder = await rosebudProfile(profile);
+  const env: NodeJS.ProcessEnv = {
+    PATH: process.env.PATH,
+    HOME: folder,
+    USERPROFILE: folder,
+    SYSTEMROOT: process.env.SYSTEMROOT,
+    TMPDIR: process.env.TMPDIR,
+    TEMP: process.env.TEMP,
+    ROSEBUD_CREDENTIALS_DIR: folder,
+  };
+  const command = rosebudCliCommand(args);
+  const releaseProfile = await acquireProfileSlot(profile);
+  try {
+    await acquireProcessSlot();
+  } catch (error) {
+    releaseProfile();
+    throw error;
+  }
+  return runCliProcess(command, env, folder, timeoutMs).finally(() => {
     releaseProcessSlot();
     releaseProfile();
   });

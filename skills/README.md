@@ -111,7 +111,7 @@ examples, and error codes. Assume the reader is an agent with no prior context.
 
 ## What makes OmniRoute skills unique
 
-- `omni-mcp` — 110 MCP tools across 33 scopes over SSE/stdio/Streamable HTTP
+- `omni-mcp` — 129 MCP tools across 34 scopes over SSE/stdio/Streamable HTTP
 - `omni-agents-a2a` — 6 A2A skills (smart-routing, quota, discovery, cost, health, list-capabilities) via JSON-RPC 2.0
 - `omni-combos-routing` — create/configure combos, 19 strategies, Auto-combo scoring, fallback chains
 - `omni-compression` — RTK + Caveman + stacked mode + MCP accessibility filter (60–90% token savings)

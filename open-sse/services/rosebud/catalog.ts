@@ -37,33 +37,42 @@ export const rosebudModel = z
   .passthrough();
 export type RosebudModel = z.infer<typeof rosebudModel>;
 
+type InputSpec = RosebudModel["inputs"][number];
+
+function numberField(spec: InputSpec): z.ZodType {
+  let number = z.number().finite();
+  if (spec.type === "integer") number = number.int();
+  if (spec.minimum !== undefined) number = number.min(spec.minimum);
+  if (spec.maximum !== undefined) number = number.max(spec.maximum);
+  return number;
+}
+
+function stringField(spec: InputSpec): z.ZodType {
+  let string = z.string().min(1);
+  if (spec.max_length !== undefined) string = string.max(spec.max_length);
+  if (spec.type !== "file") return string;
+  return string.refine(
+    (value) => /^[a-zA-Z0-9_-]+$/.test(value) || /^https:\/\//.test(value),
+    "Use an asset ID or HTTPS URL"
+  );
+}
+
+function inputField(spec: InputSpec): z.ZodType {
+  if (spec.type === "integer" || spec.type === "number") return numberField(spec);
+  if (spec.type === "boolean") return z.boolean();
+  if (spec.type === "string" || spec.type === "file") return stringField(spec);
+  if (spec.type === "enum")
+    return z
+      .union([z.string(), z.number()])
+      .refine((value) => spec.values?.includes(value) === true);
+  throw new RosebudError("unsupported_input_type", 400);
+}
+
 /** Validate against the live provider schema before quoting or spending credits. */
 export function validateRosebudInput(model: RosebudModel, input: Record<string, unknown>) {
   const fields: Record<string, z.ZodType> = {};
   for (const spec of model.inputs) {
-    let field: z.ZodType;
-    if (spec.type === "integer" || spec.type === "number") {
-      let number = z.number().finite();
-      if (spec.type === "integer") number = number.int();
-      if (spec.minimum !== undefined) number = number.min(spec.minimum);
-      if (spec.maximum !== undefined) number = number.max(spec.maximum);
-      field = number;
-    } else if (spec.type === "boolean") field = z.boolean();
-    else if (spec.type === "enum") {
-      field = z
-        .union([z.string(), z.number()])
-        .refine((value) => spec.values?.includes(value) === true);
-    } else if (spec.type === "string" || spec.type === "file") {
-      let string = z.string().min(1);
-      if (spec.max_length !== undefined) string = string.max(spec.max_length);
-      field =
-        spec.type === "file"
-          ? string.refine(
-              (value) => /^[a-zA-Z0-9_-]+$/.test(value) || /^https:\/\//.test(value),
-              "Use an asset ID or HTTPS URL"
-            )
-          : string;
-    } else throw new RosebudError("unsupported_input_type", 400);
+    const field = inputField(spec);
     fields[spec.name] = spec.required ? field : field.optional();
   }
   return z.object(fields).strict().parse(input);

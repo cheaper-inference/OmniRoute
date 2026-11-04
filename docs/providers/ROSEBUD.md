@@ -157,7 +157,7 @@ Official references: [asset instructions](https://rosebud.ai/developer-assets/AG
 Live image verification (spends existing account credits): set `ROSEBUD_LIVE_TEST=1`,
 `OMNIROUTE_BASE_URL`, `OMNIROUTE_API_KEY` (management scope), and
 `ROSEBUD_CONNECTION_ID`, then run
-`node --test tests/integration/rosebud-live.test.mjs`.
+`node --import tsx/esm --test tests/integration/rosebud-live.test.ts`.
 Use an account without concurrent external generation when comparing balances.
 The private job directory is owned by one OmniRoute server process; sharing it
 between independently running servers is unsupported. A missing or malformed

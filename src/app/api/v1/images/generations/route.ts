@@ -1,5 +1,6 @@
 import { isDashboardSessionAuthenticated } from "@/shared/utils/apiAuth";
 import { rosebudModelConnections } from "@/lib/rosebud/provider";
+import { handleRosebudImageGeneration } from "@/lib/rosebud/imageGeneration";
 import {
   rosebudImageBinding,
   scopedRosebudKey,
@@ -510,10 +511,11 @@ async function postHandler(request, _context) {
               clientHeaders: publicBaseUrlHeaders(request.headers),
               // Trusted "loopback"|"lan"|"remote" verdict stamped by the authz
               // pipeline from the real TCP peer (never the spoofable Host
-              // header). Only the spawn-capable cursor-agent-image provider
-              // consumes this (Hard Rules #15 + #17) — every other image
+              // header). Only the spawn-capable cursor-agent-image and Rosebud
+              // providers consume this (Hard Rules #15 + #17) — every other image
               // provider ignores it.
               peerLocality: request.headers.get(AUTHZ_HEADER_PEER_LOCALITY),
+              rosebudImageHandler: handleRosebudImageGeneration,
             })
         );
 

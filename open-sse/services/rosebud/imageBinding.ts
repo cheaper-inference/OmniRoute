@@ -14,6 +14,29 @@ function canonical(value: unknown): unknown {
   return value;
 }
 
+/** Publish a binding atomically; when another request won the race, its binding stands. */
+async function writeBinding(folder: string, file: string, binding: Record<string, string>) {
+  await mkdir(folder, { recursive: true, mode: 0o700 });
+  const temporary = file + "." + randomUUID();
+  await writeFile(temporary, JSON.stringify(binding), { mode: 0o600 });
+  try {
+    await link(temporary, file);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+  } finally {
+    await rm(temporary, { force: true });
+  }
+}
+
+async function readBinding(file: string) {
+  try {
+    return JSON.parse(await readFile(file, "utf8"));
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
+    throw error;
+  }
+}
+
 /** Pin a caller's retry to the original account before another paid submit is possible. */
 export async function rosebudImageBinding(
   scope: string,
@@ -30,27 +53,9 @@ export async function rosebudImageBinding(
   const fingerprint = digest(canonical(body));
   const folder = join(rosebudRoot(), "image-bindings");
   const file = join(folder, digest([scope, key]) + ".json");
-  if (candidate) {
-    await mkdir(folder, { recursive: true, mode: 0o700 });
-    const temporary = file + "." + randomUUID();
-    await writeFile(temporary, JSON.stringify({ connectionId: candidate, fingerprint }), {
-      mode: 0o600,
-    });
-    try {
-      await link(temporary, file);
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
-    } finally {
-      await rm(temporary, { force: true });
-    }
-  }
-  let saved;
-  try {
-    saved = JSON.parse(await readFile(file, "utf8"));
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
-    throw error;
-  }
+  if (candidate) await writeBinding(folder, file, { connectionId: candidate, fingerprint });
+  const saved = await readBinding(file);
+  if (!saved) return undefined;
   if (saved.fingerprint !== fingerprint) throw new RosebudError("idempotency_conflict", 409);
   if (typeof saved.connectionId !== "string") throw new RosebudError("invalid_image_binding", 409);
   if (allowed?.length && !allowed.includes(saved.connectionId))

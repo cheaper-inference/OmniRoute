@@ -32,34 +32,46 @@ export async function rosebudConnection(id: string) {
   await rosebudProfile(profile);
   return { connection, profile };
 }
+function modelCatalogIsStale(data?: Record<string, unknown>) {
+  return (
+    !Array.isArray(data?.rosebudModels) ||
+    !data?.rosebudModelsChecked ||
+    Date.now() - Date.parse(String(data.rosebudModelsChecked)) > 300000
+  );
+}
+
+function catalogHasModel(data: Record<string, unknown> | undefined, model: string) {
+  const models = data?.rosebudModels;
+  const id = model.replace(/^rosebud\//, "");
+  return (
+    Array.isArray(models) &&
+    models.some((entry) => entry && typeof entry === "object" && entry.id === id)
+  );
+}
+
+/** A pre-submit discovery failure must not hide healthy accounts, so it only skips this one. */
+async function currentCatalogData(id: string, data?: Record<string, unknown>) {
+  if (!modelCatalogIsStale(data)) return data;
+  try {
+    await discoverRosebud(id);
+  } catch {
+    return undefined;
+  }
+  return (await getProviderConnectionById(id))?.providerSpecificData as
+    Record<string, unknown> | undefined;
+}
+
 /** Limit first submissions to accounts whose current catalog supports this model. */
 export async function rosebudModelConnections(model: string, allowed: string[] | null) {
   const ids: string[] = [];
   for (const connection of await getProviderConnections({ provider: "rosebud" })) {
-    if (typeof connection.id !== "string") continue;
-    if (!connection.isActive || (allowed?.length && !allowed.includes(connection.id))) continue;
-    let data = connection.providerSpecificData as Record<string, unknown> | undefined;
-    if (
-      !Array.isArray(data?.rosebudModels) ||
-      Date.now() - Date.parse(String(data?.rosebudModelsChecked || "")) > 300000 ||
-      !data?.rosebudModelsChecked
-    ) {
-      try {
-        await discoverRosebud(connection.id);
-      } catch {
-        continue;
-      } // A pre-submit discovery failure must not hide healthy accounts.
-      data = (await getProviderConnectionById(connection.id))?.providerSpecificData as
-        Record<string, unknown> | undefined;
-    }
-    if (
-      Array.isArray(data?.rosebudModels) &&
-      data.rosebudModels.some(
-        (entry) =>
-          entry && typeof entry === "object" && entry.id === model.replace(/^rosebud\//, "")
-      )
-    )
-      ids.push(connection.id);
+    if (typeof connection.id !== "string" || !connection.isActive) continue;
+    if (allowed?.length && !allowed.includes(connection.id)) continue;
+    const data = await currentCatalogData(
+      connection.id,
+      connection.providerSpecificData as Record<string, unknown> | undefined
+    );
+    if (catalogHasModel(data, model)) ids.push(connection.id);
   }
   return ids;
 }

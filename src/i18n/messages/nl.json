@@ -13444,7 +13444,7 @@
       },
       "omni-mcp": {
         "name": "MCP-server",
-        "description": "Maak verbinding met de OmniRoute MCP-server (110 tools, 3 transporten: SSE/stdio/HTTP). Omvat routering, cache, compressie, geheugen, vaardigheden, providers en audit-tools over 33 machtigingsbereiken."
+        "description": "Maak verbinding met de OmniRoute MCP-server (129 tools, 3 transporten: SSE/stdio/HTTP). Omvat routering, cache, compressie, geheugen, vaardigheden, providers en audit-tools over 33 machtigingsbereiken."
       },
       "omni-agents-a2a": {
         "name": "Agents & A2A-protocol",

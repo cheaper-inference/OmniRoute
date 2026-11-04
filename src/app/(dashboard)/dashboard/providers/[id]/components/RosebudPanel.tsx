@@ -2,7 +2,32 @@
 import { useState } from "react";
 import { Card, Button } from "@/shared/components";
 
-type Connection = { id: string; name?: string };
+type Connection = { id?: string; name?: string };
+function ConnectionRow({
+  connection,
+  busy,
+  call,
+}: {
+  connection: Connection;
+  busy: boolean;
+  call: (action: string, connectionId?: string) => unknown;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <span>{connection.name || "Rosebud"}</span>
+      <Button disabled={busy} variant="outline" onClick={() => call("account", connection.id)}>
+        Check authorization and credits
+      </Button>
+      <Button disabled={busy} variant="outline" onClick={() => call("authorize", connection.id)}>
+        Reauthorize
+      </Button>
+      <Button disabled={busy} variant="outline" onClick={() => call("models", connection.id)}>
+        Refresh models
+      </Button>
+    </div>
+  );
+}
+
 export default function RosebudPanel({
   connections,
   refresh,
@@ -61,24 +86,11 @@ export default function RosebudPanel({
           Approve on Rosebud
         </a>
       )}
-      {connections.map((connection) => (
-        <div key={connection.id} className="flex flex-wrap items-center gap-3">
-          <span>{connection.name || "Rosebud"}</span>
-          <Button disabled={busy} variant="outline" onClick={() => call("account", connection.id)}>
-            Check authorization and credits
-          </Button>
-          <Button
-            disabled={busy}
-            variant="outline"
-            onClick={() => call("authorize", connection.id)}
-          >
-            Reauthorize
-          </Button>
-          <Button disabled={busy} variant="outline" onClick={() => call("models", connection.id)}>
-            Refresh models
-          </Button>
-        </div>
-      ))}
+      {connections
+        .filter((connection) => connection.id)
+        .map((connection) => (
+          <ConnectionRow key={connection.id} connection={connection} busy={busy} call={call} />
+        ))}
       {message && <p role="status">{message}</p>}
     </Card>
   );

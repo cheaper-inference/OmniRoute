@@ -8,8 +8,7 @@ test("native image dispatch requires locality and uses the selected connected ac
   const folder = await mkdtemp(join(tmpdir(), "rosebud-image-test-"));
   const previous = process.env.DATA_DIR;
   process.env.DATA_DIR = folder;
-  const { handleRosebudImageGeneration } =
-    await import("../../open-sse/handlers/imageGeneration/providers/rosebud.ts");
+  const { handleRosebudImageGeneration } = await import("../../src/lib/rosebud/imageGeneration.ts");
   const { rosebudRuntime } = await import("../../open-sse/services/rosebud/runtime.ts");
   const { createProviderConnection } = await import("../../src/lib/db/providers.ts");
   const { resetDbInstance } = await import("../../src/lib/db/core.ts");

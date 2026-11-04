@@ -31,3 +31,24 @@ test("the image route rejects untrusted peers before binding or model discovery"
   assert.ok(gate < route.indexOf("rosebudPinned = await bindRosebud()"));
   assert.ok(gate < route.indexOf("await rosebudModelConnections("));
 });
+
+const source = (path: string) => readFileSync(new URL("../../" + path, import.meta.url), "utf8");
+
+test("only the Rosebud-aware image route can reach the CLI runner", () => {
+  assert.match(
+    source("src/app/api/v1/images/generations/route.ts"),
+    /rosebudImageHandler: handleRosebudImageGeneration/
+  );
+  assert.doesNotMatch(source("src/app/api/v1/images/edits/route.ts"), /rosebudImageHandler/);
+  assert.doesNotMatch(source("open-sse/handlers/imageGeneration.ts"), /rosebud\/imageGeneration/);
+});
+
+test("both MCP HTTP routes supply the trusted peer verdict before serving a request", () => {
+  for (const route of ["src/app/api/mcp/stream/route.ts", "src/app/api/mcp/sse/route.ts"]) {
+    const text = source(route);
+    const marks = text.match(/markMcpPeerLocality\(request, getRequestPeerLocality\(request\)\);/g);
+    const serves = text.match(/return handleMcp\w+\(request\);/g);
+    assert.ok(serves?.length);
+    assert.equal(marks?.length, serves?.length, route);
+  }
+});

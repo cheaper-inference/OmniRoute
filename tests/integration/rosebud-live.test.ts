@@ -13,7 +13,7 @@ test(
     const key = process.env.OMNIROUTE_API_KEY;
     const connectionId = process.env.ROSEBUD_CONNECTION_ID;
     assert.ok(key && connectionId, "Set OMNIROUTE_API_KEY and ROSEBUD_CONNECTION_ID");
-    const call = async (path, body) => {
+    const call = async (path: string, body: unknown) => {
       const response = await fetch(base + path, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
@@ -36,10 +36,12 @@ test(
     assert.ok(Array.isArray(connections), "Could not list Rosebud connections");
     assert.equal(connections.length, total, "Rosebud connection list is incomplete");
     assert.ok(
-      connections.some((connection) => connection.id === connectionId),
+      connections.some((connection: { id: string }) => connection.id === connectionId),
       "ROSEBUD_CONNECTION_ID is not a Rosebud connection"
     );
-    for (const { id } of connections.filter((connection) => connection.id !== connectionId)) {
+    for (const { id } of connections.filter(
+      (connection: { id: string }) => connection.id !== connectionId
+    )) {
       const probe = await fetch(base + "/api/rosebud/account", {
         method: "POST",
         headers,
@@ -67,7 +69,8 @@ test(
     );
     assert.ok(
       after.usage.some(
-        (row) => row.id === output.rosebud_usage.job_id && row.status === "succeeded"
+        (row: { id: string; status: string }) =>
+          row.id === output.rosebud_usage.job_id && row.status === "succeeded"
       )
     );
     if (typeof output.rosebud_usage.consumed === "number") {

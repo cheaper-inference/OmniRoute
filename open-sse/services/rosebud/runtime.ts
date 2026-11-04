@@ -51,7 +51,7 @@ const refreshState = globalThis as typeof globalThis & {
 };
 const refreshes = (refreshState[REFRESHES] ??= new Map<string, Promise<RosebudJob>>());
 const ordered = (input: JsonObject) =>
-  Object.fromEntries(Object.entries(input).sort(([a], [b]) => a.localeCompare(b)));
+  Object.fromEntries(Object.entries(input).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)));
 const hash = (text: string) => createHash("sha256").update(text).digest("hex");
 export class RosebudRuntime {
   constructor(private run: RosebudRunner = runRosebud) {}
@@ -157,7 +157,8 @@ export class RosebudRuntime {
     if (job.profile !== profile) throw new RosebudError("job_not_found", 404);
     return job;
   }
-  async generate(profile: string, raw: unknown, signal?: AbortSignal | null): Promise<RosebudJob> {
+  /** Check a generation against the live catalog before any job state exists. */
+  private async prepareGeneration(profile: string, raw: unknown) {
     const request = generationInput.parse(raw);
     const modelId = request.model.replace(/^rosebud\//, "");
     const model = (await this.models(profile)).find((entry) => entry.id === modelId);
@@ -174,21 +175,50 @@ export class RosebudRuntime {
       )
     )
       throw new RosebudError("unsupported_output_format", 400);
-
-    const fingerprint = hash(JSON.stringify([modelId, ordered(input), request.maxCredits ?? null]));
-    const id = hash(JSON.stringify([profile, request.idempotencyKey ?? randomUUID()]));
-    const folder = this.folder(id);
-    await mkdir(folder, { recursive: true, mode: 0o700 });
-    let existing: RosebudJob | undefined;
+    return { request, modelId, model, input };
+  }
+  /** Return the job this key already owns, unless it failed without being paid for. */
+  private async reusableJob(profile: string, id: string, fingerprint: string) {
+    let existing: RosebudJob;
     try {
       existing = await this.read(profile, id);
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+      return undefined;
     }
-    if (existing && existing.fingerprint !== fingerprint)
-      throw new RosebudError("idempotency_conflict", 409);
-    if (existing && !existing.unpaidFailure)
-      return existing.upstreamId ? this.refresh(profile, id) : existing;
+    if (existing.fingerprint !== fingerprint) throw new RosebudError("idempotency_conflict", 409);
+    if (existing.unpaidFailure) return undefined;
+    return existing.upstreamId ? this.refresh(profile, id) : existing;
+  }
+  /** Identical input may only be pending once; another job must be reconciled first. */
+  private async claimPending(claim: string, jobId: string) {
+    await mkdir(join(rosebudRoot(), "pending"), { recursive: true, mode: 0o700 });
+    try {
+      await writeFile(claim, jobId, { flag: "wx", mode: 0o600 });
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+      if ((await readFile(claim, "utf8")) !== jobId)
+        throw new RosebudError("matching_request_requires_reconciliation", 409);
+    }
+  }
+  /** Persist how a generation ended so that a retry cannot pay twice for an unknown outcome. */
+  private async recordGenerationFailure(job: RosebudJob, error: unknown, submitted: boolean) {
+    const uncertain = submitted && (!(error instanceof RosebudError) || error.uncertain);
+    job.unpaidFailure = !uncertain;
+    job.status = uncertain ? "uncertain" : "failed";
+    job.error = error instanceof RosebudError ? error.code : "generation_failed";
+    await this.save(job);
+    if (error instanceof RosebudError) error.jobId = job.id;
+  }
+  /** Quote and submit one paid job, or return the job its idempotency key already owns. */
+  async generate(profile: string, raw: unknown, signal?: AbortSignal | null): Promise<RosebudJob> {
+    const { request, modelId, model, input } = await this.prepareGeneration(profile, raw);
+    const fingerprint = hash(JSON.stringify([modelId, ordered(input), request.maxCredits ?? null]));
+    const id = hash(JSON.stringify([profile, request.idempotencyKey ?? randomUUID()]));
+    const folder = this.folder(id);
+    await mkdir(folder, { recursive: true, mode: 0o700 });
+    const existing = await this.reusableJob(profile, id, fingerprint);
+    if (existing) return existing;
     const unlock = await this.lock(id);
     const job: RosebudJob = {
       id,
@@ -210,13 +240,8 @@ export class RosebudRuntime {
       hash(JSON.stringify([profile, modelId, ordered(input)]))
     );
     try {
-      try {
-        const latest = await this.read(profile, id);
-        if (latest.fingerprint !== fingerprint) throw new RosebudError("idempotency_conflict", 409);
-        if (!latest.unpaidFailure) return latest.upstreamId ? this.refresh(profile, id) : latest;
-      } catch (error) {
-        if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
-      }
+      const latest = await this.reusableJob(profile, id, fingerprint);
+      if (latest) return latest;
       persist = true;
       await this.save(job);
       const quote = await this.quote(profile, modelId, input, model);
@@ -224,25 +249,12 @@ export class RosebudRuntime {
       await writeFile(join(folder, "input.json"), JSON.stringify(input), { mode: 0o600 });
       await this.save(job);
       if (signal?.aborted) throw new RosebudError("request_cancelled", 408);
-      await mkdir(join(rosebudRoot(), "pending"), { recursive: true, mode: 0o700 });
-      try {
-        await writeFile(claim, job.id, { flag: "wx", mode: 0o600 });
-      } catch (error) {
-        if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
-        if ((await readFile(claim, "utf8")) !== job.id)
-          throw new RosebudError("matching_request_requires_reconciliation", 409);
-      }
+      await this.claimPending(claim, job.id);
       claimed = true;
       submitted = true;
       return await this.submit(job, request.maxCredits);
     } catch (error) {
-      if (!persist) throw error;
-      const uncertain = submitted && (!(error instanceof RosebudError) || error.uncertain);
-      job.unpaidFailure = !uncertain;
-      job.status = uncertain ? "uncertain" : "failed";
-      job.error = error instanceof RosebudError ? error.code : "generation_failed";
-      await this.save(job);
-      if (error instanceof RosebudError) error.jobId = job.id;
+      if (persist) await this.recordGenerationFailure(job, error, submitted);
       throw error;
     } finally {
       if (claimed && (job.upstreamId || job.unpaidFailure)) await rm(claim, { force: true });
