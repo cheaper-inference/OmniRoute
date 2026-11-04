@@ -11,7 +11,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { openaiToClaudeRequest } from "../../open-sse/translator/request/openai-to-claude.ts";
-import { storeClaudeThinkingBlocks } from "../../open-sse/services/claudeThinkingStore.ts";
+import { storeClaudeThinkingFromResponse } from "../../open-sse/services/claudeThinkingStore.ts";
 
 const PROVIDER = "claude";
 const MODEL = "claude-opus-5-5";
@@ -44,6 +44,22 @@ function body(assistantTurns: Array<{ id: string }>) {
   };
 }
 
+// Warm the store the way production does: from a complete Claude Messages response
+// (signed thinking block followed by the tool_use it precedes). This entry point is
+// stable across the store's internal layout, so the test also holds on top of the
+// exact-replay layout change (#18607).
+function warmStore(id: string, thinking: string, signature: string): boolean {
+  return storeClaudeThinkingFromResponse(
+    {
+      content: [
+        { type: "thinking", thinking, signature },
+        { type: "tool_use", id, name: "get_time", input: {} },
+      ],
+    },
+    { provider: PROVIDER, model: MODEL, connectionId: CONNECTION }
+  );
+}
+
 function translate(turns: Array<{ id: string }>): { messages: Msg[] } {
   return openaiToClaudeRequest(
     MODEL,
@@ -67,15 +83,7 @@ function thinkingBlocks(msg: Msg | undefined): Block[] {
 
 test("duplicated tool_call id: no restore from the store (prevents the 400 'cannot be modified')", () => {
   const id = "toolu_dup_1";
-  assert.ok(
-    storeClaudeThinkingBlocks({
-      toolUseIds: [id],
-      blocks: [{ type: "thinking", thinking: "old generation", signature: "IMZA_A" }],
-      provider: PROVIDER,
-      model: MODEL,
-      connectionId: CONNECTION,
-    })
-  );
+  assert.ok(warmStore(id, "old generation", "IMZA_A"));
   const out = translate([{ id }, { id }]);
   const son = lastAssistant(out.messages);
   assert.equal(
@@ -87,15 +95,7 @@ test("duplicated tool_call id: no restore from the store (prevents the 400 'cann
 
 test("unique tool_call id: the store restore still runs (feature preserved)", () => {
   const id = "toolu_tekil_1";
-  assert.ok(
-    storeClaudeThinkingBlocks({
-      toolUseIds: [id],
-      blocks: [{ type: "thinking", thinking: "right generation", signature: "IMZA_B" }],
-      provider: PROVIDER,
-      model: MODEL,
-      connectionId: CONNECTION,
-    })
-  );
+  assert.ok(warmStore(id, "right generation", "IMZA_B"));
   const out = translate([{ id }]);
   const son = lastAssistant(out.messages);
   assert.equal(thinkingBlocks(son).length, 1, "a unique id must get its thinking block restored");
@@ -104,13 +104,8 @@ test("unique tool_call id: the store restore still runs (feature preserved)", ()
 test("distinct ids but one duplicated: only the duplicated turn is skipped", () => {
   const dup = "toolu_mix_dup";
   const tek = "toolu_mix_tek";
-  storeClaudeThinkingBlocks({
-    toolUseIds: [dup, tek],
-    blocks: [{ type: "thinking", thinking: "x", signature: "IMZA_C" }],
-    provider: PROVIDER,
-    model: MODEL,
-    connectionId: CONNECTION,
-  });
+  assert.ok(warmStore(dup, "x", "IMZA_C"));
+  assert.ok(warmStore(tek, "y", "IMZA_D"));
   const out = translate([{ id: dup }, { id: dup }, { id: tek }]);
   const asistans = out.messages.filter((m) => m.role === "assistant");
   const duz = asistans.filter((m) => thinkingBlocks(m).length > 0);
