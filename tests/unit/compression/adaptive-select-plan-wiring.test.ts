@@ -19,11 +19,18 @@ function legacyCfg() {
   };
 }
 
-test("no contextBudget → auto-trigger path is byte-identical to legacy", () => {
+test("no contextBudget → auto-trigger path retains legacy selection with safe Lite", () => {
   const cfg = legacyCfg(); // no contextBudget field
-  // under threshold → derived default ("lite")
+  // Under threshold → scoped Lite; opted-in legacy requests still select standalone Lite.
   const small = selectCompressionPlan(cfg, null, 1000);
-  assert.equal(small.mode, "lite");
+  assert.equal(small.mode, "stacked");
+  assert.deepEqual(small.stackedPipeline, [
+    { engine: "lite", config: { compressToolResults: false, preserveToolWhitespace: true } },
+  ]);
+  assert.equal(
+    selectCompressionPlan(cfg, null, 1000, undefined, undefined, {}, "allow-lossy").mode,
+    "lite"
+  );
   // over threshold → auto-trigger fires → "aggressive" (lossy, so only when the request opts
   // in — #14529; header-less it is downgraded to the safe stacked pair).
   const big = selectCompressionPlan(cfg, null, 200000, undefined, undefined, {}, "allow-lossy");

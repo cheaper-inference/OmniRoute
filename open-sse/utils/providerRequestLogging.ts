@@ -97,10 +97,21 @@ async function capturePreparedRequest(
   log?: WarnLog | null
 ) {
   if (!requestCapture) return;
-  const latest = requestCapture.latest?.();
-  if (latest?.url === url && latest.bodyString === bodyString) return;
-
   try {
+    const headerEntries = Array.from(new Headers(headers).entries());
+    const latest = requestCapture.latest?.();
+    if (latest?.url === url && latest.bodyString === bodyString) {
+      const latestEntries = Array.from(new Headers(latest.headers).entries());
+      if (
+        headerEntries.length === latestEntries.length &&
+        headerEntries.every(
+          ([name, value], index) =>
+            name === latestEntries[index][0] && value === latestEntries[index][1]
+        )
+      ) {
+        return;
+      }
+    }
     await requestCapture.capture({ url, headers, body, bodyString });
   } catch {
     // Capture hooks can fail while processing a provider payload. The thrown
@@ -290,11 +301,11 @@ export function createPreparedRequestLogger(
       // a direct call from a settled dispatch's async resource must not overwrite the
       // body of a fresh retry on this same Capture.
       if (dispatchContext.getStore()?.settled) return;
-      latest = request;
-      reqLogger.logTargetRequest(request.url, request.headers, request.body);
+      latest = { ...request, headers: { ...request.headers } };
+      reqLogger.logTargetRequest(latest.url, latest.headers, latest.body);
       updatePendingScope(scope, {
-        providerRequest: request.body,
-        providerUrl: request.url,
+        providerRequest: latest.body,
+        providerUrl: latest.url,
         stage: "sending_to_provider",
       });
     },

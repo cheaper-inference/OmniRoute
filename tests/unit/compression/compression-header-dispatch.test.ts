@@ -111,7 +111,7 @@ describe("header precedence in resolveBasePlan (Phase 3)", () => {
     assert.equal(plan.mode, "stacked");
     assert.deepEqual(plan.stackedPipeline, [
       { engine: "session-dedup" },
-      { engine: "lite", config: { compressToolResults: false } },
+      { engine: "lite", config: { compressToolResults: false, preserveToolWhitespace: true } },
     ]);
     assert.equal(planWithHeader(config, "engine:rtk").mode, "rtk");
   });
