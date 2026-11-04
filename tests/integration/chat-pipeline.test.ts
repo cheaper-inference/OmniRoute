@@ -739,6 +739,8 @@ test("chat pipeline applies Codex OAuth fingerprint and priority tier inside com
   assert.notEqual(call.headers["session-id"], "combo-client-session");
   assert.equal(call.headers["session-id"], call.body.client_metadata.session_id);
   assert.equal(call.body.service_tier, "priority");
+  assert.equal(Object.hasOwn(call.body, "instructions"), false);
+  assert.equal(Object.hasOwn(call.body, "include"), false);
 });
 
 test("chat pipeline applies Codex CLI fingerprint to OAuth responses requests", async () => {
@@ -769,6 +771,9 @@ test("chat pipeline applies Codex CLI fingerprint to OAuth responses requests", 
     buildRequest({
       url: "http://localhost/v1/responses",
       body: {
+        // Deliberately before model: serialization must still use the CLI field order.
+        include: ["reasoning.encrypted_content"],
+        instructions: "Keep the reply concise.",
         model: "codex/gpt-5.5-low",
         stream: false,
         conversation_id: "conv_codex_fingerprint",
@@ -825,6 +830,8 @@ test("chat pipeline applies Codex CLI fingerprint to OAuth responses requests", 
   );
   assert.equal(call.body.model, "gpt-5.5");
   assert.equal(call.body.store, false);
+  assert.equal(call.body.instructions, "Keep the reply concise.");
+  assert.deepEqual(call.body.include, ["reasoning.encrypted_content"]);
   assert.equal(
     call.body.client_metadata["x-codex-installation-id"],
     "11111111-1111-4111-a111-111111111111"
