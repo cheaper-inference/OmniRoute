@@ -450,10 +450,9 @@ function isCodexQuotaExhausted(
   const scopedWindowNames = quotaNames.filter((windowName) => filterWindow?.(windowName));
   return (
     scopedWindowNames.length > 0 &&
+    // Exhaustion is distinct from the operator-configured early quota cutoff.
     scopedWindowNames.every(
-      (windowName) =>
-        getQuotaWindowStatus(connectionId, windowName, DEFAULT_QUOTA_THRESHOLD_PERCENT)
-          ?.reachedThreshold
+      (windowName) => getQuotaWindowStatus(connectionId, windowName, 100)?.reachedThreshold
     )
   );
 }
@@ -767,6 +766,21 @@ export function isQuotaExhaustedForRequest(
 }
 
 /**
+ * Subscription-window exhaustion of a Codex account, ignoring its paid-credit opt-in and
+ * recent successes (those may have been paid with credits). Routing uses it to keep
+ * credit-only accounts behind accounts that still have subscription quota.
+ */
+export function isCodexSubscriptionExhaustedForRequest(
+  connectionId: string,
+  requestedModel: string | null = null
+): boolean {
+  const entry = getState().cache.get(connectionId) || hydrateQuotaCacheFromSnapshots(connectionId);
+  if (!entry) return false;
+  if (advancedWindowResetAt(entry, Date.now())) return false;
+  return isCodexQuotaExhausted(connectionId, entry, requestedModel);
+}
+
+/**
  * Store quota data for a connection (called by usage endpoint and background refresh).
  */
 export function setQuotaCache(
@@ -871,6 +885,15 @@ export function setQuotaCache(
  */
 export function getQuotaCache(connectionId: string): QuotaCacheEntry | null {
   return getState().cache.get(connectionId) || null;
+}
+
+/**
+ * Cached quota entry, hydrated from `quota_snapshots` on a miss (#5015). Account
+ * ranking reads through this so an evicted entry is not mistaken for "no
+ * telemetry" (#18541).
+ */
+export function getQuotaCacheOrSnapshot(connectionId: string): QuotaCacheEntry | null {
+  return hydrateQuotaCacheFromSnapshots(connectionId);
 }
 
 function hydrateQuotaCacheFromSnapshots(connectionId: string): QuotaCacheEntry | null {

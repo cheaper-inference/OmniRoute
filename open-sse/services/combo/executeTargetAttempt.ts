@@ -8,6 +8,7 @@
 import {
   checkFallbackError,
   classifyLockoutReason,
+  classifyLockoutScope,
   decayModelFailureCount,
   hasPerModelQuota,
   isModelLocked,
@@ -59,6 +60,7 @@ import {
   isComboRequestScopedFailure as isScopedFailure,
   shouldRecordModelLockoutForComboFailure,
   isLocalKeyPolicyBreachErrorBody,
+  isHedgeCancelledSentinel,
   isAccountSemaphoreCapacityFailure,
   isLocalQueueCapacityErrorBody,
   toRecordedTarget,
@@ -841,6 +843,14 @@ export async function executeTargetAttempt(
       // so the combo would wrongly fall through to the next model after a 499.
       return { ok: false, response: result };
     }
+    // A hedge loser superseded by a sibling (status-599 `hedge_cancelled`
+    // sentinel) is not a failure: skip all failure bookkeeping (comboErrors,
+    // fallbackCount, LKGP clear, provider cooldown, failure logs) — the
+    // sibling that won already resolved this execution.
+    if (isHedgeCancelledSentinel(result.status, structuredError)) {
+      deps.log.info("COMBO", `Hedge sibling superseded ${modelStr} — ignoring its attempt result`);
+      return { ok: false, response: result };
+    }
     if (isLocalQueueCapacity) {
       deps.log.info(
         "COMBO",
@@ -1180,7 +1190,7 @@ export async function executeTargetAttempt(
             provider,
             targetWithConnection.connectionId || "",
             rawModel,
-            classifyLockoutReason(result.status),
+            classifyLockoutReason(result.status, errorText),
             result.status,
             mlSettings.baseCooldownMs,
             profile,
@@ -1192,6 +1202,10 @@ export async function executeTargetAttempt(
               exactCooldownMs:
                 modelScopedClaudeCooldownMs ?? selectLockoutCooldownMs(lockoutHintMs, mlSettings),
               maxCooldownMs: mlSettings.maxCooldownMs,
+              // A 403 with no quota proof locks the exact model, not the quota
+              // family — a restricted key/forbidden route must not park sibling
+              // models of the same connection for the cooldown.
+              scope: classifyLockoutScope(result.status, errorText),
               // Preserve authoritative structured/header resets; clamp body prose.
               exactCooldownIsUpstreamReset: lockoutHintVerified,
             }
@@ -1274,7 +1288,7 @@ export async function executeTargetAttempt(
           provider,
           targetWithConnection.connectionId || "",
           rawModel,
-          classifyLockoutReason(result.status),
+          classifyLockoutReason(result.status, errorText),
           result.status,
           mlSettings.baseCooldownMs,
           profile,
@@ -1285,6 +1299,10 @@ export async function executeTargetAttempt(
             exactCooldownMs:
               modelScopedClaudeCooldownMs ?? selectLockoutCooldownMs(lockoutHintMs, mlSettings),
             maxCooldownMs: mlSettings.maxCooldownMs,
+            // A 403 with no quota proof locks the exact model, not the quota
+            // family — a restricted key/forbidden route must not park sibling
+            // models of the same connection for the cooldown.
+            scope: classifyLockoutScope(result.status, errorText),
             // Preserve authoritative structured/header resets; clamp body prose.
             exactCooldownIsUpstreamReset: lockoutHintVerified,
           }

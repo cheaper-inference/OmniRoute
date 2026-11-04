@@ -63,12 +63,32 @@ quality-ratchet/
 # runtime. The previous `docs/*` block hid every file except openapi.yaml,
 # so the in-product help screen failed with ENOENT for every page.
 # We now keep the English markdown tree plus the docs assets imported by MDX
-# during `next build`, while still dropping the bulky translated docs and
-# extra raster diagram sources that account for most of the docs footprint
-# of the ~50 MB docs directory. The Docs viewer reads the default-locale
-# (English) sources at runtime, so translations are not required in the
-# container image.
+# during `next build`, while still dropping the extra raster diagram sources
+# and the translated files the runtime never reads.
+#
+# 2026-11-03 (owner decision): the image serves the translated /docs pages
+# (#18699), which read docs/i18n/<locale>/docs/<section>/<PAGE>.md at runtime.
+# Re-include exactly those mirrors: the sections source.config.ts compiles,
+# minus the operator-internal security pages re-excluded below. The README,
+# CHANGELOG, agent-guide and llm.txt mirrors at each locale root stay out.
+# Keep in sync with scripts/build/docsMirrorRuntime.mjs (enforced by
+# tests/unit/docs-mirror-runtime-shipping.test.ts).
 docs/i18n/**
+!docs/i18n/*/docs/getting-started/**/*.md
+!docs/i18n/*/docs/guides/**/*.md
+!docs/i18n/*/docs/architecture/**/*.md
+!docs/i18n/*/docs/reference/**/*.md
+!docs/i18n/*/docs/frameworks/**/*.md
+!docs/i18n/*/docs/routing/**/*.md
+!docs/i18n/*/docs/security/**/*.md
+!docs/i18n/*/docs/compression/**/*.md
+!docs/i18n/*/docs/ops/**/*.md
+!docs/i18n/*/docs/providers/**/*.md
+!docs/i18n/*/docs/comparison/**/*.md
+docs/i18n/*/docs/security/STEALTH_GUIDE.md
+docs/i18n/*/docs/security/SOCKET_DEV_FINDINGS.md
+docs/i18n/*/docs/security/MITM-TPROXY-DECRYPT.md
+docs/i18n/*/docs/security/PUBLIC_CREDS.md
 # Internal planning artifacts (gitignored). `*.md` above only matches the root,
 # so without this rule these land in /app/docs and become readable through the
 # dashboard's Docs viewer at runtime.
