@@ -32,6 +32,7 @@ export async function runLiveZoneCompression({
   mode: string;
   effectiveModel: string;
   compressionConfig: CompressionConfig;
+  preserveRawPrefixOnMiss?: boolean;
   runCompression: (input: Record<string, unknown>) => Promise<CompressionResult>;
 }): Promise<CompressionResult> {
   const { applyLiveZoneCompression } = await import("../../services/compression/liveZone.ts");
