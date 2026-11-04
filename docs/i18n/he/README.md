@@ -6,16 +6,16 @@
 
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute Dashboard" width="820"/>
+<img src="./docs/screenshots/MainOmniRoute.png" alt="לוח הבקרה של OmniRoute" width="820"/>
 
 <br/>
 <br/>
 
 # 🚀 OmniRoute — שער ה-AI החינמי
 
-**Created by [Diego Souza](https://github.com/diegosouzapw)**
+**נוצר על ידי [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — אף פעם אל תפסיק לקודד. כל כלי AI → 380 ספקים — 150+ חינמיים — דרך נקודת קצה אחת. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ל- Claude / GPT / Gemini חינמיים עם מעבר אוטומטי במקרה של כשל. דחיסה משולבת RTK + Caveman חוסכת 15–95% טוקנים (~89% בממוצע) — לעולם לא תגיעו למגבלות. 380 ספקי AI · 150+ מסלולים חינמיים · ~1.62B טוקנים חינמיים בחודש · 20 אסטרטגיות ניתוב · $0 להתחלה."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — לעולם אל תפסיקו לתכנת. כל כלי AI → 380 ספקים — 150+ בחינם — דרך נקודת קצה אחת. Claude Code, Codex, Cursor, Cline, Copilot ו-Antigravity אל Claude / GPT / Gemini בחינם, עם מעבר אוטומטי במקרה של כשל. דחיסה משולבת של RTK + Caveman חוסכת 15–95% מהטוקנים (ממוצע של ~89%) — לעולם לא תגיעו למגבלות. 380 ספקי AI · יותר מ-150 מסלולים בחינם · ~1.62 מיליארד טוקנים בחינם בחודש · 20 אסטרטגיות ניתוב · $0 להתחלה."/>
 
 </div>
 
@@ -1288,20 +1288,20 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # גם CI=1 מדלג ע�
 
 <table>
   <tr><th align="left">שכבה</th><th align="left">טכנולוגיה</th></tr>
-  <tr><td nowrap><b>סביבת ריצה</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>שפה</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> בכל רחבי <code>src/</code> ו־<code>open-sse/</code> (אפס <code>any</code> בליבה מאז v2.0)</td></tr>
+  <tr><td nowrap><b>סביבת הרצה</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>שפה</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> בכל רחבי <code>src/</code> ו־<code>open-sse/</code> (ללא <code>any</code> בליבה מאז v2.0)</td></tr>
   <tr><td nowrap><b>מסגרת</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>מסד נתונים</b></td><td>better-sqlite3 (SQLite, יומן WAL) + LowDB (JSON מדור קודם) — 147 מודולי תחום, 222 מיגרציות</td></tr>
-  <tr><td nowrap><b>זיכרון</b></td><td>חיפוש טקסט מלא באמצעות SQLite FTS5 + הטמעות וקטוריות מכוּמתות int8, דעיכה עם טיפוסים</td></tr>
+  <tr><td nowrap><b>מסד נתונים</b></td><td>better-sqlite3 (SQLite, רישום WAL) + LowDB (JSON מדור קודם) — 147 מודולי תחום, 222 הגירות</td></tr>
+  <tr><td nowrap><b>זיכרון</b></td><td>חיפוש טקסט מלא באמצעות SQLite FTS5 + הטמעות וקטוריות שעברו קוונטיזציה ל־int8, דעיכה עם טיפוסים</td></tr>
   <tr><td nowrap><b>סכמות</b></td><td>Zod 4 — אימות קלט/פלט של כלי MCP + חוזי API</td></tr>
   <tr><td nowrap><b>פרוטוקולים</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>הזרמה</b></td><td>אירועים שנשלחים מהשרת (SSE) + גשר WebSocket (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>הזרמת נתונים</b></td><td>אירועים שנשלחים מהשרת (SSE) + גשר WebSocket (<code>/v1/ws</code>)</td></tr>
   <tr><td nowrap><b>דחיסה</b></td><td>צינור בעל 12 מנועים — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>אימות ואבטחה</b></td><td>OAuth 2.0 (PKCE) + JWT + מפתחות API + אימות MCP מוגבל להיקף · AES-256-GCM במנוחה · DOMPurify</td></tr>
+  <tr><td nowrap><b>אימות ואבטחה</b></td><td>OAuth 2.0 (PKCE) + JWT + מפתחות API + אימות MCP בהיקף מוגדר · AES-256-GCM במנוחה · DOMPurify</td></tr>
   <tr><td nowrap><b>הסוואה</b></td><td>wreq-js — התחזות לטביעת אצבע TLS מסוג JA3 / JA4, פרוקסי בעל 3 רמות</td></tr>
-  <tr><td nowrap><b>עמידות</b></td><td>מפסק מעגל, נסיגה מעריכית, מניעת הסתערות בו־זמנית, ריפוי עצמי אוטומטי משולב</td></tr>
-  <tr><td nowrap><b>רישום</b></td><td>pino — יומני JSON מובְנים עם הקשר של הבקשה</td></tr>
-  <tr><td nowrap><b>בדיקות</b></td><td>מריץ הבדיקות של Node.js + Vitest — <b>יותר מ־60,000 הצהרות בדיקה סטטיות</b> ביותר מ־8,400 קובצי בדיקה במעקב (יחידה, אינטגרציה, E2E, אבטחה, אקוסיסטם)</td></tr>
+  <tr><td nowrap><b>עמידות</b></td><td>מפסק מעגל, השהיה מעריכית, מניעת עומס־יתר פתאומי, ריפוי עצמי אוטומטי באמצעות auto-combo</td></tr>
+  <tr><td nowrap><b>רישום</b></td><td>pino — יומני JSON מובנים עם הקשר של הבקשה</td></tr>
+  <tr><td nowrap><b>בדיקות</b></td><td>מריץ הבדיקות של Node.js + Vitest — <b>יותר מ־60,000 הצהרות בדיקה סטטיות</b> ביותר מ־8,400 קובצי בדיקות במעקב (יחידה, אינטגרציה, E2E, אבטחה, אקוסיסטם)</td></tr>
   <tr><td nowrap><b>פלטפורמות</b></td><td>מחשב שולחני (Electron) · Android (Termux) · PWA (כל דפדפן)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — פרסום npm אוטומטי + Docker Hub בעת שחרור</td></tr>
   <tr><td nowrap><b>קישורים</b></td><td><a href="https://omniroute.online">אתר</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
@@ -1796,15 +1796,15 @@ OmniRoute עומד על כתפי ענקים. הוא התחיל כ-fork של **[9
 
 ## 📄 רישיון
 
-רישיון MIT - ראו [LICENSE](LICENSE) לפרטים.
+רישיון MIT - לפרטים, ראו [LICENSE](LICENSE).
 
 ---
 
 <div align="center">
 
-**[⬆ חזרה למעלה](#-omniroute)** · נבנה עם ❤️ עבור קהילת ה-AI בקוד פתוח.
+**[⬆ חזרה לראש העמוד](#-omniroute)** · נבנה ❤️ עבור קהילת הבינה המלאכותית בקוד פתוח.
 
-<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · רישיון MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>נוצר על ידי <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · רישיון MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
-<!-- GitHub Discussions מופעל לשאלות ותשובות של הקהילה -->
+<!-- דיונים ב-GitHub מופעלים לשאלות ותשובות של הקהילה -->

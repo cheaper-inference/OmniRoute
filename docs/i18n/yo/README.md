@@ -6,16 +6,16 @@
 
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="Pánẹ́ẹ̀lì OmniRoute" width="820"/>
+<img src="./docs/screenshots/MainOmniRoute.png" alt="Dasibodu OmniRoute" width="820"/>
 
 <br/>
 <br/>
 
 # 🚀 OmniRoute — Ẹnu-ọ̀nà AI Ọ̀fẹ́
 
-**Created by [Diego Souza](https://github.com/diegosouzapw)**
+**[Diego Souza](https://github.com/diegosouzapw) ló dá a sílẹ̀**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Má ṣe dá kóòdù dúró láé. Gbogbo irinṣẹ́ AI → àwọn olùpèsè 380 — 150+ ọ̀fẹ́ — nípasẹ̀ endpoint kan. Claude Code, Codex, Cursor, Cline, Copilot àti Antigravity sí Claude / GPT / Gemini Ọ̀fẹ́ pẹ̀lú àyípadà aládàáṣiṣẹ́. Ìfúnpọ̀ RTK + Caveman tí a kó jọ ń fi 15–95% àwọn token pamọ́ (~89% ní àárín) — má ṣe dé ààlà láé. Àwọn olùpèsè AI 380 · àwọn ìpele ọ̀fẹ́ 150+ · ~1.62B token ọ̀fẹ́/oṣù · àwọn ọgbọ́n ìtọ́sọ́nà 20 · $0 láti bẹ̀rẹ̀."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Má ṣe dá kóòdù dúró. Gbogbo irinṣẹ́ AI → àwọn olùpèsè 380 — 150+ ọ̀fẹ́ — nípasẹ̀ endpoint kan. Claude Code, Codex, Cursor, Cline, Copilot àti Antigravity sínú Claude / GPT / Gemini Ọ̀fẹ́ pẹ̀lú auto-fallback. Ìfipamọ́ àmì 15–95% (~89% ní àpapọ̀) nípasẹ̀ ìkópọ̀ RTK + Caveman — má ṣe kọjá àwọn ààlà. Àwọn olùpèsè AI 380 · àwọn ipele ọ̀fẹ́ 150+ · ~àmì ọ̀fẹ́ 1.62B/osù · àwọn ọgbọ́n ìtọ́sọ́nà 20 · $0 láti bẹ̀rẹ̀."/>
 
 </div>
 
@@ -1295,29 +1295,29 @@ port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
 <br/>
 <div align="center">
 
-## 🛠️ Àwọn Ẹ̀rọ Ìmọ̀ Ẹ̀rọ
+## 🛠️ Àkójọpọ̀ Ẹ̀rọ Ìmọ̀ẹ̀rọ
 
 </div>
 
 <table>
-  <tr><th align="left">Ìpele</th><th align="left">Ẹ̀rọ ìmọ̀ ẹ̀rọ</th></tr>
+  <tr><th align="left">Ìpele</th><th align="left">Ẹ̀rọ ìmọ̀ẹ̀rọ</th></tr>
   <tr><td nowrap><b>Àkókò ìṣiṣẹ́</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Èdè</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> káàkiri <code>src/</code> àti <code>open-sse/</code> (<code>any</code> kò sí nínú kókó láti v2.0)</td></tr>
+  <tr><td nowrap><b>Èdè</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> kọjá <code>src/</code> àti <code>open-sse/</code> (<code>any</code> kò sí rárá nínú mojú ìpìlẹ̀ láti v2.0)</td></tr>
   <tr><td nowrap><b>Ilé-iṣẹ́</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Ìpamọ́ data</b></td><td>better-sqlite3 (SQLite, ìkọ̀wé WAL) + LowDB (JSON àtọwọ́dọ́wọ́) — 147 modulu àgbègbè, 222 ìyípadà</td></tr>
-  <tr><td nowrap><b>Ìrántí</b></td><td>Àwárí-kíkún SQLite FTS5 + àwọn àwòrán vector tí a ṣe quantization int8, ìdíyẹ̀ tí a tẹ̀</td></tr>
-  <tr><td nowrap><b>Àwọn ìlànà ìṣètò</b></td><td>Zod 4 — ìmúdájú MCP tool I/O + àwọn àdéhùn API</td></tr>
+  <tr><td nowrap><b>Àkójọpọ̀ dátà</b></td><td>better-sqlite3 (SQLite, ìkọ̀wé WAL) + LowDB (JSON ogún) — modulu àgbègbè 147, ìyípadà 222</td></tr>
+  <tr><td nowrap><b>Ìrántí</b></td><td>Ìwádìí ọ̀rọ̀ kíkún SQLite FTS5 + àwọn embedding fekito tí a ṣe quantize sí int8, ìdíwọ̀n tí a tẹ̀</td></tr>
+  <tr><td nowrap><b>Àwọn ètò àkójọpọ̀</b></td><td>Zod 4 — ìmúdájú MCP tool I/O + àwọn àdéhùn API</td></tr>
   <tr><td nowrap><b>Àwọn ìlànà</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Ìṣàn</b></td><td>Àwọn ìṣẹ̀lẹ̀ tí olupin ń ránṣẹ́ (SSE) + afárá WebSocket (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Ìdínkù</b></td><td>Pipeline ẹ́ńjìnì 12 — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Ìfàṣẹsí &amp; ààbò</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + àṣẹ ààlà MCP · AES-256-GCM nígbà tí a bá fi pamọ́ · DOMPurify</td></tr>
-  <tr><td nowrap><b>Ìfarasin</b></td><td>wreq-js — àfarawé ìtọ́ka JA3 / JA4 TLS, aṣojú onípò 3</td></tr>
-  <tr><td nowrap><b>Ìfaradà</b></td><td>Ìdènà àyíká, ìpadà sẹ́yìn pẹ̀lú ìgbésókè alákàntí, ìdènà ogun tí ń pariwo, ìmúpadà ara ẹni auto-combo</td></tr>
-  <tr><td nowrap><b>Ìkọ̀wé àkọsílẹ̀</b></td><td>pino — àwọn àkọsílẹ̀ JSON tí a ṣètò pẹ̀lú àyíká ìbéèrè</td></tr>
-  <tr><td nowrap><b>Ìdánwò</b></td><td>Node.js test runner + Vitest — <b>àwọn ìkéde ìdánwò aimi tó ju 60,000 lọ</b> káàkiri àwọn fáìlì ìdánwò tí a tọpinpin tó ju 8,400 lọ (unit, integration, E2E, ààbò, ecosystem)</td></tr>
-  <tr><td nowrap><b>Àwọn pẹpẹ</b></td><td>Kọ̀ǹpútà (Electron) · Android (Termux) · PWA (ẹ̀rọ aṣàwárí èyíkéyìí)</td></tr>
+  <tr><td nowrap><b>Ìṣàn dátà</b></td><td>Server-Sent Events (SSE) + afárá WebSocket (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Fífúnkúrò</b></td><td>Pipeline ẹ́ńjìnnì 12 — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Ìfàṣẹsí &amp; ààbò</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + ìfàṣẹsí MCP tí a ní ààlà · AES-256-GCM nígbà tí ó wà ní ìsinmi · DOMPurify</td></tr>
+  <tr><td nowrap><b>Ìpamọ́</b></td><td>wreq-js — àfarawé àmì-ìka TLS JA3 / JA4, aṣojú ipele 3</td></tr>
+  <tr><td nowrap><b>Agbara ìfaradà</b></td><td>Olùdènà àyíká, ìpadà sẹ́yìn tó ń pọ̀ sí i, ìdènà anti-thundering-herd, ìwòsàn ara-ẹni auto-combo</td></tr>
+  <tr><td nowrap><b>Àkọsílẹ̀</b></td><td>pino — àwọn àkọsílẹ̀ JSON tó ní ìṣètò pẹ̀lú àyíká ìbéèrè</td></tr>
+  <tr><td nowrap><b>Ìdánwò</b></td><td>Olùṣiṣẹ́ ìdánwò Node.js + Vitest — <b>ìkéde ìdánwò aimi tó ju 60,000 lọ</b> kọjá àwọn fáìlì ìdánwò 8,400+ tí a ń tọpinpin (ẹyọkan, ìṣọ̀kan, E2E, ààbò, àyíká-ẹ̀rọ)</td></tr>
+  <tr><td nowrap><b>Àwọn pẹpẹ̀</b></td><td>Kọ̀ǹpútà (Electron) · Android (Termux) · PWA (àṣàwákiri èyíkéyìí)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — ìtẹ̀jáde npm aládàáṣiṣẹ́ + Docker Hub nígbà ìtújáde</td></tr>
-  <tr><td nowrap><b>Àwọn ìjápọ̀</b></td><td><a href="https://omniroute.online">Ojúlé ayélujára</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>Àwọn ìjápọ̀</b></td><td><a href="https://omniroute.online">Ojúlé wẹ́ẹ̀bù</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">
@@ -1807,17 +1807,17 @@ OmniRoute dúró lórí àyà àwọn òmìrán. Ó bẹ̀rẹ̀ gẹ́gẹ́ b�
   <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,955</td><td>Ó ṣe ìdámọ̀ oju quota Grok Build; OmniRoute sì ṣàyẹ̀wò ó, ó sì ṣe àtúnṣe wire format alààyè ní òmìnira.</td></tr>
 </table>
 
-## 📄 Iwe-aṣẹ
+## 📄 Àṣẹ
 
-Iwe-aṣẹ MIT - wo [LICENSE](LICENSE) fún àlàyé.
+Àṣẹ MIT - wo [LICENSE](LICENSE) fún àlàyé.
 
 ---
 
 <div align="center">
 
-**[⬆ Padà sókè](#-omniroute)** · A kọ́ ọ́ pẹ̀lú ❤️ fún àwùjọ AI orísun ṣíṣílẹ̀.
+**[⬆ Padà sí òkè](#-omniroute)** · A fi ❤️ kọ́ ọ́ fún àwùjọ AI orísun-ṣíṣi.
 
-<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Iwe-aṣẹ MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Ẹ dá a sílẹ̀ láti ọwọ́ <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Àṣẹ MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
-<!-- A gba GitHub Discussions láàyè fún ìbéèrè àti ìdáhùn àwùjọ -->
+<!-- Ìjíròrò GitHub ti ṣiṣẹ́ fún Ìbéèrè àti Àwọn Ìdáhùn àwùjọ -->
