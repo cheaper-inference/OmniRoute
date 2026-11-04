@@ -137,13 +137,19 @@ const OPENAI_FORMAT_CACHE_CONTROL_PROVIDERS = new Set([
 /** Providers whose cache is populated from the longest matching prefix without
  * an explicit `cache_control` breakpoint. This is deliberately narrower than
  * CACHING_PROVIDERS, which also includes explicit-breakpoint providers. */
-const AUTOMATIC_PREFIX_CACHING_PROVIDERS = new Set([
-  "openai",
-  "codex",
-  "azure",
-  "opencode",
-  "opencode-go",
-]);
+const AUTOMATIC_PREFIX_CACHING_PROVIDERS = new Set(["openai", "codex", "azure"]);
+
+// #18787: these provider lanes contain both caching and non-caching upstream models.
+// Enable the implicit-cache guard only for a verified model, or a per-connection
+// explicit automatic-cache override; otherwise avoid suppressing useful compression.
+const OPENCODE_LANES = new Set(["opencode", "opencode-go"]);
+const OPENCODE_PREFIX_CACHED_MODEL = /^deepseek-v4\.1-flash(?:$|-[a-z0-9]+$)/i;
+
+function isOpenCodeCacheableModel(provider: string, model?: string | null): boolean {
+  if (!OPENCODE_LANES.has(provider) || !model) return false;
+  const modelId = model.toLowerCase().split("/").filter(Boolean).at(-1) ?? "";
+  return OPENCODE_PREFIX_CACHED_MODEL.test(modelId);
+}
 
 /**
  * Per-connection override for cache behavior, resolved from the connection's
