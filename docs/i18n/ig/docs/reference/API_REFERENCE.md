@@ -1501,7 +1501,7 @@ A kọwara ụdị ọwa ahụ (`latest` = v3 ruo mgbe 4.0 GA ga-apụta, `next`
 
 ---
 
-## Ntugharị Ọdịnaya Audio
+## Ntụgharị Ọdịyo
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1509,7 +1509,9 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Jiri onye na-enye STT ọ bụla ahaziri hazie faịlụ audio ka ọ bụrụ ederede. Akụkụ mbụ nke ụzọ ahụ na-ahọrọ onye na-enye ọrụ obodo (`openai/…`, `deepgram/…`). Gateway ndị na-ebupụtaghachi ụdị onye na-ere ọrụ ọzọ na-eji id nwere nkọwa
+Jiri ndị na-enye STT ahaziri ahazi ọ bụla tụgharịa faịlụ ọdịyo gaa n’ederede. Akụkụ mbụ nke ụzọ ahụ
+na-ahọrọ onye na-enye ọrụ obodo (`openai/…`, `deepgram/…`). Gateways ndị na-ebupụtaghachi
+model nke onye na-ere ọrụ ọzọ na-eji id nwere nkọwa
 (`openrouter/deepgram/nova-3`).
 
 **Arịrịọ:**
@@ -1532,13 +1534,21 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Ihe atụ nke model ids:** `openai/whisper-1` (chọrọ igodo OpenAI),
+**Ihe atụ model ids:** `openai/whisper-1` (chọrọ igodo OpenAI),
 `openrouter/deepgram/nova-3` (chọrọ igodo OpenRouter),
-`deepgram/nova-3` (chọrọ igodo Deepgram obodo). Arịrịọ `deepgram/nova-3` naanị ya anaghị eji OpenRouter.
+`deepgram/nova-3` (chọrọ igodo Deepgram obodo). Arịrịọ
+`deepgram/nova-3` nke na-enweghị prefix anaghị eji OpenRouter.
 
 **Ụdị faịlụ akwadoro:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
 
----
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** ntụgharị ederede n’ọnọdụ faịlụ site na Gemini Live
+WebSocket (chọrọ igodo Gemini API). A na-agbanwe faịlụ a bugoro ka ọ bụrụ 16 kHz mono PCM site na `ffmpeg`
+(`ffmpeg` ga-adị na `PATH`, belụsọ ma faịlụ ahụ adịlarị dịka 16 kHz mono PCM WAV), zigara ya na
+session ahụ, ma a na-eweghachi ederede ikpeazụ dịka `{ "text": "..." }`. A na-ebufe ụdị ubi
+`language` na `prompt` nhọrọ gaa n’ihu. Oke: faịlụ ndị karịrị 25 MiB ma ọ bụ ọdịyo a kpụpụtara nke
+dị ogologo karịa nkeji 10 na-alaghachi na `413`; ọ bụrụ na ntụgharị ahụ were karịa sekọnd 60, a na-egbu ya
+ma ọ na-alaghachi na `504`. A na-eziga igodo API naanị na nkụnye eji isi mee `x-goog-api-key`, ọ bụghị
+mgbe ọ bụla na URL WebSocket.
 
 ## Ndakọrịta Ollama
 

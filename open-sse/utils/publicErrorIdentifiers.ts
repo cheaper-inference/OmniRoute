@@ -101,6 +101,7 @@ const SAFE_PUBLIC_ERROR_IDENTIFIERS = new Set([
   "gemini_tpm_exhausted",
   "grok_error",
   "heap_pressure",
+  "hedge_cancelled",
   "huggingchat_generation_error",
   "incompatible_reasoning_effort",
   "inspector_error",
