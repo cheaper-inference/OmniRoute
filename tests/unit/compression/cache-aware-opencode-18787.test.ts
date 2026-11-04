@@ -72,6 +72,11 @@ test("#18787: OpenCode providers use implicit prefix caching, not explicit cache
       true
     );
     assert.equal(
+      providerUsesAutomaticPrefixCaching(providerId, { supportsPromptCaching: true }, "uncached-model"),
+      true,
+      "OpenCode cache opt-in without marker passthrough uses automatic prefix caching"
+    );
+    assert.equal(
       providerSupportsCaching(providerId, "openai", { supportsPromptCaching: false }, model),
       false
     );
