@@ -112,31 +112,89 @@ const MAX_RETRY_AFTER_SECONDS = 3600;
 
 /**
  * Wrap a fast-path verbatim SSE body so a mid-flight upstream failure appends
- * ONE format-correct terminal error frame before the stream closes. Bytes flow
- * through untouched until the error; healthy streams stay byte-identical.
- * Converts an abrupt transport close (client sees "connection dropped
- * mid-response") into a deliberate, parseable failure event the client's retry
- * logic can react to.
+ * ONE format-correct terminal error frame before the stream closes. Converts an
+ * abrupt transport close (client sees "connection dropped mid-response") into a
+ * deliberate, parseable failure event the client's retry logic can react to.
+ *
+ * Framing safety (CodeRabbit review 18948): bytes are buffered until they
+ * complete an SSE frame (a blank line: `\n\n`, `\r\n\r\n`, or a frame already
+ * spanning a previous buffer). Completed frames are forwarded unchanged; on
+ * failure any buffered INCOMPLETE frame is discarded before the terminal error
+ * frame, so the error's `data:` line can never merge into a partial upstream
+ * event and corrupt the client's parser.
+ *
+ * Zero-content failure (CodeRabbit 125): if the first read fails, the caller's
+ * configured `errorFrame` is emitted verbatim (same contract as the slow
+ * path's zero-content branch) rather than the generic partial-content frame.
+ *
+ * `recordGeneratedFrame` (CodeRabbit 608): invoked only for frames this wrapper
+ * generates (the terminal error frame), so `correlationId` call logs include
+ * bytes actually sent to the client. Forwarded upstream bytes stay unrecorded —
+ * the handler's own reqLogger already captured them.
  */
 function wrapSseBodyWithMidStreamFailure(
   body: ReadableStream<Uint8Array>,
   format: "anthropic" | "responses" | "chat",
-  buildFrame: (fmt: "anthropic" | "responses" | "chat") => Uint8Array
+  buildFrame: (fmt: "anthropic" | "responses" | "chat") => Uint8Array,
+  configuredErrorFrame: Uint8Array,
+  recordGeneratedFrame?: (frame: Uint8Array) => void
 ): ReadableStream<Uint8Array> {
   const reader = body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = ""; // decoded but not-yet-frame-complete upstream bytes
+  let bytesForwarded = 0;
+
+  /** Split complete SSE frames off the front of `buffer`. Returns them in order. */
+  const takeCompleteFrames = (): string[] => {
+    const frames: string[] = [];
+    for (;;) {
+      // SSE frame boundary: blank line. Accept CRLF and LF framings.
+      const crlf = buffer.indexOf("\r\n\r\n");
+      const lf = buffer.indexOf("\n\n");
+      if (crlf === -1 && lf === -1) break;
+      let end: number;
+      if (crlf === -1) end = lf + 2;
+      else if (lf === -1) end = crlf + 4;
+      else end = Math.min(lf + 2, crlf + 4) === lf + 2 ? lf + 2 : crlf + 4;
+      frames.push(buffer.slice(0, end));
+      buffer = buffer.slice(end);
+    }
+    return frames;
+  };
+
   return new ReadableStream<Uint8Array>({
     async pull(controller) {
       try {
         const { done, value } = await reader.read();
         if (done) {
+          // Healthy close: flush any trailing bytes even without a terminal
+          // blank line (some upstreams end exactly at frame end without the
+          // final blank line being observable as a separate read).
+          if (buffer.length > 0) {
+            controller.enqueue(ENCODER.encode(buffer));
+            buffer = "";
+          }
           controller.close();
           return;
         }
-        controller.enqueue(value);
+        if (value) {
+          bytesForwarded += value.byteLength;
+          buffer += decoder.decode(value, { stream: true });
+          for (const frame of takeCompleteFrames()) {
+            controller.enqueue(ENCODER.encode(frame));
+          }
+        }
       } catch {
-        // Upstream failed mid-flight — emit the terminal error frame, then close.
+        // Upstream failed mid-flight. Discard any buffered INCOMPLETE frame so
+        // the terminal error's `data:` line cannot merge into it, then emit
+        // ONE terminal frame: the caller's configured errorFrame when nothing
+        // was forwarded (same contract as the slow path), otherwise the
+        // format-derived partial-content frame.
+        buffer = "";
+        const frame = bytesForwarded === 0 ? configuredErrorFrame : buildFrame(format);
         try {
-          controller.enqueue(buildFrame(format));
+          controller.enqueue(frame);
+          recordGeneratedFrame?.(frame);
         } catch {
           /* consumer gone */
         }
@@ -654,7 +712,14 @@ export async function withEarlyStreamKeepalive(
           wrapSseBodyWithMidStreamFailure(
             response.body,
             errorFrameFormat,
-            buildPartialContentErrorFrame
+            buildPartialContentErrorFrame,
+            // Zero-content failure: the caller's configured frame verbatim,
+            // same contract as the slow path's zero-content branch.
+            errorFrame,
+            // Record only GENERATED frames (terminal error) so correlationId
+            // call logs include bytes actually sent; forwarded upstream bytes
+            // are already captured by the handler's reqLogger.
+            recordClientBytes
           ),
           {
             status: response.status,

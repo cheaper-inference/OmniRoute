@@ -139,3 +139,68 @@ test("zero-content upstream drop still emits the error frame (unchanged behavior
     "zero-content drop must still emit the error frame"
   );
 });
+
+// CodeRabbit 18948 line 793: a mid-flight failure after an INCOMPLETE SSE
+// frame (no blank line yet) must not merge the terminal error's data: line
+// into that partial frame — the buffered incomplete frame is discarded.
+test("mid-stream drop after an incomplete frame discards it before the error frame", async () => {
+  // Last frame deliberately lacks its terminating blank line.
+  const partial = new TextEncoder().encode('data: {"delta":"hi"\n');
+  const handler = Promise.resolve(partialThenCrashResponse(partial));
+
+  const response = await withEarlyStreamKeepalive(handler, {
+    thresholdMs: 0,
+    intervalMs: 10_000,
+    errorFrame: OPENAI_CHAT_ERROR_FRAME,
+  });
+
+  const text = await readAll(response);
+  // The incomplete frame was NOT forwarded...
+  assert.ok(!text.includes('"delta":"hi"'), `incomplete frame must be discarded, got: ${text}`);
+  // ...so the error frame is intact and parseable (its data: line standalone).
+  const lines = text.split("\n").filter((l) => l.startsWith("data: "));
+  assert.ok(lines.length >= 1, "error frame data: line must survive standalone");
+  assert.doesNotThrow(() => JSON.parse(lines[lines.length - 1]!.slice(6)));
+});
+
+// Complete frames that arrived before the failure must still be forwarded.
+test("mid-stream drop forwards prior complete frames then the error frame", async () => {
+  const complete = new TextEncoder().encode('data: {"delta":"a"}\n\ndata: {"delta":"b"}\n\n');
+  const handler = Promise.resolve(partialThenCrashResponse(complete));
+
+  const response = await withEarlyStreamKeepalive(handler, {
+    thresholdMs: 0,
+    intervalMs: 10_000,
+    errorFrame: OPENAI_CHAT_ERROR_FRAME,
+  });
+
+  const text = await readAll(response);
+  assert.ok(text.includes('"delta":"a"'), "complete frame 1 must be forwarded");
+  assert.ok(text.includes('"delta":"b"'), "complete frame 2 must be forwarded");
+  assert.ok(text.includes('"type":"stream_error"'), "terminal error frame must follow");
+  // Each data: line is independently parseable JSON.
+  for (const line of text.split("\n").filter((l) => l.startsWith("data: "))) {
+    assert.doesNotThrow(() => JSON.parse(line.slice(6)), `line must parse standalone: ${line}`);
+  }
+});
+
+// CodeRabbit 18948 line 125: a zero-content fast-path failure must emit the
+// caller's CONFIGURED errorFrame verbatim (not the generic partial frame).
+test("fast-path zero-content failure emits the configured custom errorFrame", async () => {
+  const customFrame = new TextEncoder().encode(
+    'data: {"custom":"configured-frame","type":"stream_error"}\n\n'
+  );
+  const handler = Promise.resolve(zeroContentCrashResponse());
+
+  const response = await withEarlyStreamKeepalive(handler, {
+    thresholdMs: 0,
+    intervalMs: 10_000,
+    errorFrame: customFrame,
+  });
+
+  const text = await readAll(response);
+  assert.ok(
+    text.includes('"configured-frame"'),
+    `zero-content failure must use the configured errorFrame, got: ${text}`
+  );
+});
