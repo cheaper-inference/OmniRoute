@@ -60,6 +60,8 @@ test("#18787: OpenCode providers use implicit prefix caching, not explicit cache
     assert.equal(providerHonorsOpenAIFormatCacheControl(providerId), false);
     assert.equal(providerSupportsCaching(providerId, "openai", null, "uncached-model"), false);
     assert.equal(providerUsesAutomaticPrefixCaching(providerId, null, "uncached-model"), false);
+    assert.equal(providerUsesAutomaticPrefixCaching(providerId, null, "deepseek-v4.1-flash:free"), true);
+    assert.equal(providerUsesAutomaticPrefixCaching(providerId, null, "deepseek-v4.1-flash-preview-0820"), true);
     assert.equal(
       providerUsesAutomaticPrefixCaching(
         providerId,
