@@ -386,14 +386,19 @@ export function claudeToOpenAIRequest(model, body, stream, credentials: unknown 
 // Tool messages whose tool_call_id matches no assistant.tool_calls are dropped here
 // (supersedes the standalone #4385 orphan filter — same drop behavior, plus ordering).
 function regroupToolMessages(messages: JsonRecord[]): JsonRecord[] {
-  // tool_call_id -> index of the assistant message that issued it (first wins).
-  const callIdToAssistant = new Map<string, number>();
+  // tool_call_id -> FIFO of assistant indexes that issued it. An id is only unique
+  // within one assistant turn (agent sessions reuse `call_0`-style ids), so each
+  // tool message pairs with the oldest assistant that still lacks a result for it;
+  // first-wins dropped the 2nd real result and left the 2nd turn unanswered.
+  const openAssistantsByCallId = new Map<string, number[]>();
   messages.forEach((msg, idx) => {
     if (msg.role === "assistant" && Array.isArray(msg.tool_calls)) {
       for (const tc of msg.tool_calls as { id?: string }[]) {
-        if (tc.id && !callIdToAssistant.has(String(tc.id))) {
-          callIdToAssistant.set(String(tc.id), idx);
-        }
+        if (!tc.id) continue;
+        const callId = String(tc.id);
+        const queue = openAssistantsByCallId.get(callId);
+        if (queue) queue.push(idx);
+        else openAssistantsByCallId.set(callId, [idx]);
       }
     }
   });
@@ -403,8 +408,8 @@ function regroupToolMessages(messages: JsonRecord[]): JsonRecord[] {
   for (const msg of messages) {
     if (msg.role !== "tool") continue;
     const callId = String(msg.tool_call_id ?? "");
-    const assistantIdx = callIdToAssistant.get(callId);
-    if (assistantIdx === undefined) continue; // orphan -> drop
+    const assistantIdx = callId ? openAssistantsByCallId.get(callId)?.shift() : undefined;
+    if (assistantIdx === undefined) continue; // orphan or already paired -> drop
     let group = toolsByAssistant.get(assistantIdx);
     if (!group) {
       group = new Map();
