@@ -862,9 +862,13 @@ export async function POST(
       try {
         // Map the raw token via the provider's mapTokens() — skips the HTTP exchange entirely.
         // Providers that must verify the token upstream first expose an async importToken().
+        // That upstream check carries the token, so it goes through the provider's proxy
+        // like the code exchange above (provider-level → global → direct).
         const providerData = getProvider(provider);
         const tokenData = providerData.importToken
-          ? await providerData.importToken(token)
+          ? await runWithProxyContextOrDirect(await resolveProxyForProvider(provider), () =>
+              providerData.importToken(token)
+            )
           : providerData.mapTokens({ accessToken: token });
 
         // Normalize: if name is missing, use email as fallback display label
