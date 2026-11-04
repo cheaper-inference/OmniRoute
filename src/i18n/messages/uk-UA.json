@@ -6273,6 +6273,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Пропускати тимчасовий період очікування, щоб це підключення залишалося доступним навіть після відновлюваних помилок (термінальні стани, як-от banned/expired, все одно застосовуються).",
     "disableCoolingLabel": "Вимкнути період очікування для цього підключення",
+    "requireUserLastMessageDescription": "Для вихідних потоків, які відхиляють попереднє заповнення помічника: перед надсиланням видаляйте кінцеві ходи помічника (без tool_use). Модель може регенерувати свою попередню відповідь.",
+    "requireUserLastMessageLabel": "Вимагати завершення розмови повідомленням користувача",
     "bulkPasteAdded": "{count, plural, one {Додано 1 ключ} few {Додано # ключі} many {Додано # ключів} other {Додано # ключа}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Пропущено 1 дублікат} few {Пропущено # дублікати} many {Пропущено # дублікатів} other {Пропущено # дубліката}}",
     "bulkPasteHint": "Вставте по одному API-ключу в кожному рядку. Порожні рядки ігноруються, а дублікати ключів пропускаються.",

@@ -6273,6 +6273,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Ohita tilapäinen jäädytysaika, jotta tämä yhteys pysyy käytettävissä myös palautettavien virheiden jälkeen (lopulliset tilat, kuten estetty/vanhentunut, ovat edelleen voimassa).",
     "disableCoolingLabel": "Poista jäädytysaika käytöstä tälle yhteydelle",
+    "requireUserLastMessageDescription": "Vastavirtaan, joka hylkää avustajan esitäytön: pudota perässä olevat avustajan käännökset (ei työkalun käyttöä) ennen lähettämistä. Malli voi luoda uudelleen aiemman vastauksensa.",
+    "requireUserLastMessageLabel": "Vaadi keskustelun päättymistä käyttäjäviestiin",
     "bulkPasteAdded": "{count, plural, one {1 avain lisätty} other {# avainta lisätty}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 päällekkäinen avain ohitettu} other {# päällekkäistä avainta ohitettu}}",
     "bulkPasteHint": "Liitä yksi API-avain kullekin riville. Tyhjät rivit jätetään huomiotta ja päällekkäiset avaimet ohitetaan.",

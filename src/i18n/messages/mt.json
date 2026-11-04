@@ -6350,6 +6350,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Aqbeż il-perjodu ta’ stennija temporanju sabiex din il-konnessjoni tibqa’ eliġibbli anke wara żbalji li jistgħu jiġu rkuprati (l-istati terminali bħal ipprojbiti jew skaduti xorta jibqgħu japplikaw).",
     "disableCoolingLabel": "Iddiżattiva l-perjodu ta’ stennija għal din il-konnessjoni",
+    "requireUserLastMessageDescription": "Għal upstreams li jirrifjutaw il-mili minn qabel tal-assistent: waqqa' dawriet tal-assistent ta' wara (l-ebda tool_use) qabel ma tibgħat. Il-mudell jista' jirriġenera t-tweġiba preċedenti tiegħu.",
+    "requireUserLastMessageLabel": "Jeħtieġ li l-konversazzjoni tintemm b'messaġġ tal-utent",
     "bulkPasteAdded": "{count, plural, one {Żdiedet ċavetta waħda} other {Żdiedu # ċwievet}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Inqabeż duplikat wieħed} other {Inqabżu # duplikati}}",
     "bulkPasteHint": "Waħħal ċavetta tal-API waħda f’kull linja. Il-linji vojta jiġu injorati u ċ-ċwievet duplikati jinqabżu.",

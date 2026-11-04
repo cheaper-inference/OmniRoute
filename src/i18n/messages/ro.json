@@ -6273,6 +6273,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Omite perioada de răcire tranzitorie, astfel încât această conexiune să rămână eligibilă chiar și după erori recuperabile (stările terminale precum blocat/expirat se aplică în continuare).",
     "disableCoolingLabel": "Dezactivează perioada de răcire pentru această conexiune",
+    "requireUserLastMessageDescription": "Pentru amontele care resping completarea prealabilă a asistentului: renunțați la viraje ale asistentului (fără tool_use) înainte de a trimite. Modelul își poate regenera răspunsul anterior.",
+    "requireUserLastMessageLabel": "Solicitați ca conversația să se încheie cu un mesaj de utilizator",
     "bulkPasteAdded": "{count, plural, one {1 cheie adăugată} other {# chei adăugate}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplicat omis} other {# duplicate omise}}",
     "bulkPasteHint": "Lipește câte o cheie API pe fiecare rând. Rândurile goale sunt ignorate, iar cheile duplicate sunt omise.",

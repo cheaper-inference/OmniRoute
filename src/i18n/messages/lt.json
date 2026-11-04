@@ -6273,6 +6273,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Praleisti laikiną atvėsimo laikotarpį, kad šį ryšį būtų galima naudoti net ir po klaidų, po kurių galima atkurti veikimą (galutinės būsenos, pvz., užblokavimas ar galiojimo pabaiga, vis tiek taikomos).",
     "disableCoolingLabel": "Išjungti šio ryšio atvėsimo laikotarpį",
+    "requireUserLastMessageDescription": "Prieš srovę, kuri atmeta asistento išankstinį užpildymą: prieš siųsdami nuleiskite asistento posūkius (jokio įrankio_naudojimo). Modelis gali atkurti ankstesnį atsakymą.",
+    "requireUserLastMessageLabel": "Reikalauti, kad pokalbis baigtųsi vartotojo pranešimu",
     "bulkPasteAdded": "{count, plural, one {Pridėtas 1 raktas} other {Pridėta # raktų}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Praleistas 1 pasikartojantis raktas} other {Praleista # pasikartojančių raktų}}",
     "bulkPasteHint": "Įklijuokite po vieną API raktą kiekvienoje eilutėje. Tuščios eilutės ignoruojamos, o pasikartojantys raktai praleidžiami.",

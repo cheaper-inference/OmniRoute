@@ -6350,6 +6350,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Salta il cooldown transitorio in modo che questa connessione rimanga idonea anche dopo errori ripristinabili (gli stati terminali come bannato/scaduto si applicano ancora).",
     "disableCoolingLabel": "Disabilita il cooldown per questa connessione",
+    "requireUserLastMessageDescription": "Per gli upstream che rifiutano la precompilazione dell'assistente: eliminare i turni finali dell'assistente (no tool_use) prima dell'invio. Il modello può rigenerare la sua risposta precedente.",
+    "requireUserLastMessageLabel": "Richiedi che la conversazione termini con un messaggio utente",
     "bulkPasteAdded": "{count, plural, one {1 chiave aggiunta} other {# chiavi aggiunte}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplicato ignorato} other {# duplicati ignorati}}",
     "bulkPasteHint": "Incolla una chiave API per riga. Le righe vuote e le chiavi duplicate vengono ignorate.",

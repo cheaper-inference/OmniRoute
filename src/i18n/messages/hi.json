@@ -6273,6 +6273,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "अस्थायी कूलडाउन को छोड़ें ताकि पुनर्प्राप्ति योग्य त्रुटियों के बाद भी यह कनेक्शन योग्य बना रहे (प्रतिबंधित/समाप्त जैसी अंतिम स्थितियां अभी भी लागू होती हैं)।",
     "disableCoolingLabel": "इस कनेक्शन के लिए कूलडाउन अक्षम करें",
+    "requireUserLastMessageDescription": "उन अपस्ट्रीम के लिए जो सहायक प्रीफ़िल को अस्वीकार करते हैं: भेजने से पहले सहायक सहायक घुमावों को छोड़ दें (कोई टूल_उपयोग नहीं)। मॉडल अपने पिछले उत्तर को पुन: उत्पन्न कर सकता है।",
+    "requireUserLastMessageLabel": "उपयोगकर्ता संदेश के साथ बातचीत समाप्त करना आवश्यक है",
     "bulkPasteAdded": "{count, plural, one {1 कुंजी जोड़ी गई} other {# कुंजियाँ जोड़ी गईं}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 डुप्लिकेट छोड़ा गया} other {# डुप्लिकेट छोड़े गए}}",
     "bulkPasteHint": "प्रति पंक्ति एक API कुंजी पेस्ट करें। खाली पंक्तियों को अनदेखा किया जाता है और डुप्लिकेट कुंजियाँ छोड़ दी जाती हैं।",

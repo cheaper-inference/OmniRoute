@@ -6273,6 +6273,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Langkau tempoh bertenang sementara supaya sambungan ini kekal layak walaupun selepas ralat yang boleh dipulihkan (keadaan terminal seperti disekat/tamat tempoh masih terpakai).",
     "disableCoolingLabel": "Nyahdayakan tempoh bertenang untuk sambungan ini",
+    "requireUserLastMessageDescription": "Untuk huluan yang menolak praisi pembantu: lepaskan selekoh pembantu mengekor (tiada tool_use) sebelum menghantar. Model itu boleh menjana semula jawapan sebelumnya.",
+    "requireUserLastMessageLabel": "Memerlukan perbualan untuk diakhiri dengan mesej pengguna",
     "bulkPasteAdded": "{count, plural, one {1 kunci ditambah} other {# kunci ditambah}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 pendua dilangkau} other {# pendua dilangkau}}",
     "bulkPasteHint": "Tampal satu kunci API bagi setiap baris. Baris kosong akan diabaikan dan kunci pendua akan dilangkau.",

@@ -6273,6 +6273,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Παραλείπει την προσωρινή περίοδο αναμονής, ώστε αυτή η σύνδεση να παραμένει διαθέσιμη προς επιλογή ακόμα και μετά από σφάλματα από τα οποία μπορεί να ανακάμψει (οι τελικές καταστάσεις, όπως η απαγόρευση ή η λήξη, εξακολουθούν να ισχύουν).",
     "disableCoolingLabel": "Απενεργοποίηση περιόδου αναμονής για αυτή τη σύνδεση",
+    "requireUserLastMessageDescription": "Για ανοδικές ροές που απορρίπτουν την προπλήρωση του βοηθού: απορρίψτε τις στροφές του τελευταίου βοηθού (χωρίς χρήση_εργαλείου) πριν από την αποστολή. Το μοντέλο μπορεί να αναγεννήσει την προηγούμενη απάντησή του.",
+    "requireUserLastMessageLabel": "Απαιτείται η συνομιλία να τελειώνει με ένα μήνυμα χρήστη",
     "bulkPasteAdded": "{count, plural, one {Προστέθηκε 1 κλειδί} other {Προστέθηκαν # κλειδιά}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Παραλείφθηκε 1 διπλότυπο} other {Παραλείφθηκαν # διπλότυπα}}",
     "bulkPasteHint": "Επικολλήστε ένα κλειδί API ανά γραμμή. Οι κενές γραμμές αγνοούνται και τα διπλότυπα κλειδιά παραλείπονται.",

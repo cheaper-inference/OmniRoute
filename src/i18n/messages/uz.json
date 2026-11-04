@@ -6273,6 +6273,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Vaqtinchalik kutish davrini chetlab o‘tadi, shunda ushbu ulanish tiklanadigan xatolardan keyin ham foydalanish uchun yaroqli bo‘lib qoladi (bloklangan yoki muddati tugagan kabi yakuniy holatlar baribir amal qiladi).",
     "disableCoolingLabel": "Ushbu ulanish uchun kutish davrini o‘chirish",
+    "requireUserLastMessageDescription": "Yordamchini oldindan toʻldirishni rad etuvchi yuqori oqimlar uchun: joʻnatishdan oldin keyingi yordamchi burilishni tashlab qoʻying (asbobdan foydalanishsiz). Model avvalgi javobini qayta tiklashi mumkin.",
+    "requireUserLastMessageLabel": "Suhbatni foydalanuvchi xabari bilan yakunlashni talab qiling",
     "bulkPasteAdded": "{count, plural, one {1 ta kalit qo‘shildi} other {# ta kalit qo‘shildi}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 ta takroriy kalit o‘tkazib yuborildi} other {# ta takroriy kalit o‘tkazib yuborildi}}",
     "bulkPasteHint": "Har bir qatorga bittadan API kalitini joylang. Bo‘sh qatorlar e’tiborga olinmaydi va takroriy kalitlar o‘tkazib yuboriladi.",

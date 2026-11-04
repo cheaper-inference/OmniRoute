@@ -6273,6 +6273,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Pomiń tymczasowy cooldown, aby to połączenie pozostało kwalifikowalne nawet po błędach podlegających naprawie (stany terminalne, takie jak banned/expired, nadal obowiązują).",
     "disableCoolingLabel": "Wyłącz cooldown dla tego połączenia",
+    "requireUserLastMessageDescription": "W przypadku upstreamów, które odrzucają wstępne wypełnienie asystenta: upuść końcowe zwroty asystenta (bez użycia narzędzia) przed wysłaniem. Model może zregenerować swoją poprzednią odpowiedź.",
+    "requireUserLastMessageLabel": "Wymagaj, aby rozmowa kończyła się wiadomością dla użytkownika",
     "bulkPasteAdded": "{count, plural, one {Dodano 1 klucz} other {Dodano # kluczy}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Pominięto 1 duplikat} other {Pominięto # duplikatów}}",
     "bulkPasteHint": "Wklej jeden klucz API w wierszu. Puste linie są ignorowane, a zduplikowane klucze są pomijane.",

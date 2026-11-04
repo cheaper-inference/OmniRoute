@@ -6273,6 +6273,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Ignorer le délai de récupération temporaire pour que cette connexion reste éligible même après des erreurs récupérables (les états terminaux comme banni/expiré s'appliquent toujours).",
     "disableCoolingLabel": "Désactiver le délai de récupération pour cette connexion",
+    "requireUserLastMessageDescription": "Pour les utilisateurs en amont qui rejettent le pré-remplissage de l'assistant : supprimez les tours d'assistant de fin (pas de tool_use) avant l'envoi. Le modèle peut régénérer sa réponse précédente.",
+    "requireUserLastMessageLabel": "Exiger que la conversation se termine par un message utilisateur",
     "bulkPasteAdded": "{count, plural, one {1 clé ajoutée} other {# clés ajoutées}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 doublon ignoré} other {# doublons ignorés}}",
     "bulkPasteHint": "Collez une clé API par ligne. Les lignes vides sont ignorées, tout comme les clés en double.",

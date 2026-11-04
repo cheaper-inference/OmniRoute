@@ -6273,6 +6273,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "דלג על תקופת הצינון הזמנית כדי שחיבור זה יישאר זמין גם לאחר שגיאות הניתנות לשחזור (מצבים סופיים כמו חסום/פג תוקף עדיין חלים).",
     "disableCoolingLabel": "השבת תקופת צינון עבור חיבור זה",
+    "requireUserLastMessageDescription": "במעלה הזרמים שדוחים מילוי מראש של עוזר: שחרר פניות של עוזר נגרר (ללא כלי_שימוש) לפני השליחה. המודל עשוי לשחזר את התשובה הקודמת שלו.",
+    "requireUserLastMessageLabel": "דרוש שהשיחה תסתיים בהודעת משתמש",
     "bulkPasteAdded": "{count, plural, one {נוסף מפתח אחד} other {נוספו # מפתחות}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {דילוג על כפילות אחת} other {דילוג על # כפילויות}}",
     "bulkPasteHint": "יש להדביק מפתח API אחד בכל שורה. המערכת מתעלמת משורות ריקות ומדלגת על מפתחות כפולים.",

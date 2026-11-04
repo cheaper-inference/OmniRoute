@@ -6273,6 +6273,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "અસ્થાયી કૂલડાઉન છોડો જેથી પુનઃપ્રાપ્ત કરી શકાય તેવી ભૂલો પછી પણ આ કનેક્શન પાત્ર રહે (પ્રતિબંધિત/સમાપ્ત જેવી ટર્મિનલ સ્થિતિઓ હજુ પણ લાગુ પડે છે).",
     "disableCoolingLabel": "આ કનેક્શન માટે કૂલડાઉન અક્ષમ કરો",
+    "requireUserLastMessageDescription": "સહાયક પ્રીફિલને નકારતા અપસ્ટ્રીમ્સ માટે: મોકલતા પહેલા પાછળના સહાયક વળાંક છોડો (કોઈ સાધન_ઉપયોગ નથી). મોડેલ તેના પહેલાના જવાબને ફરીથી બનાવી શકે છે.",
+    "requireUserLastMessageLabel": "વાતચીતને વપરાશકર્તા સંદેશ સાથે સમાપ્ત કરવાની જરૂર છે",
     "bulkPasteAdded": "{count, plural, one {1 કી ઉમેરાઈ} other {# કીઓ ઉમેરાઈ}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 ડુપ્લિકેટ અવગણાયું} other {# ડુપ્લિકેટ્સ અવગણાયા}}",
     "bulkPasteHint": "દરેક લાઇનમાં એક API કી પેસ્ટ કરો. ખાલી લાઇનો અવગણવામાં આવે છે અને ડુપ્લિકેટ કીઓ છોડવામાં આવે છે.",
