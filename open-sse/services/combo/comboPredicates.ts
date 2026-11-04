@@ -299,6 +299,9 @@ const REQUEST_SCOPED_UPSTREAM_ERROR_CODES: Record<string, true> = {
   upstream_request_cancelled: true,
   // Local combo per-target timer (targetTimeoutRunner) — not a connection health signal.
   combo_target_timeout: true,
+  // A hedge loser superseded by a sibling target (streamingResponse sentinel) —
+  // no failure of the provider or the connection.
+  hedge_cancelled: true,
   // Local limiter queue-capacity codes — not a provider/connection health signal.
   rate_limit_queue_timeout: true,
   rate_limit_queue_full: true,
@@ -358,6 +361,22 @@ export function isRequestScopedUpstreamFailure(error?: {
     // account for the same request; never a connection/model health signal.
     type === "freetiererror" ||
     code === "freetiererror"
+  );
+}
+
+/**
+ * The status-599 `hedge_cancelled` sentinel a hedge loser returns once a
+ * sibling target has resolved the combo. It is not a failure: the combo loop
+ * must neither record it nor advance fallback state because of it.
+ */
+export function isHedgeCancelledSentinel(
+  status: number,
+  error?: { code?: string | null } | null
+): boolean {
+  return (
+    status === 599 &&
+    typeof error?.code === "string" &&
+    error.code.toLowerCase() === "hedge_cancelled"
   );
 }
 
