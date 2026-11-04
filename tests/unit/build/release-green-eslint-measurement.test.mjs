@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import test from "node:test";
 import { load as parseYaml } from "js-yaml";
 import { copyReleaseGreenModuleFixture } from "../../_helpers/copyReleaseGreenModuleFixture.mjs";
+import { writeReleaseGreenEslintFixture } from "../../_helpers/writeReleaseGreenEslintFixture.mjs";
 
 const root = fileURLToPath(new URL("../../../", import.meta.url));
 const report = [{ filePath: "/repo/source.ts", errorCount: 0, warningCount: 2 }];
@@ -182,16 +183,11 @@ function observe(lintOutput, lintCode = 0, collectionCode = 0, diagnosticOutput 
       "bin/git",
       `console.log(process.argv.at(-1) === "${baseSha}^{commit}" ? "${baseSha}" : "${sha}");`
     );
-    executable(
-      "bin/npx",
-      `
-      const outputIndex = process.argv.indexOf("--output-file");
-      if(outputIndex < 0 || !process.argv[outputIndex + 1]) process.exit(33);
-      require("node:fs").writeFileSync(process.argv[outputIndex + 1], ${JSON.stringify(lintOutput)});
-      console.log(${JSON.stringify(diagnosticOutput)});
-      process.exit(${lintCode});
-    `
-    );
+    writeReleaseGreenEslintFixture(join(dir, "bin"), {
+      measurementText: lintOutput,
+      diagnosticText: diagnosticOutput,
+      exitCode: lintCode,
+    });
     executable(
       "bin/npm",
       `

@@ -841,5 +841,12 @@ test("--suites-from replaces the local suite lanes and keeps only the build on t
   );
   // the webpack build gets the docker-publish heap instead of build-next-isolated's 8192 MB
   assert.match(src, /const BUILD_GATE_ENV = \{ OMNIROUTE_BUILD_MEMORY_MB: "12288" \};/);
-  assert.match(src, /args: \["run", "build:cli"\], env: BUILD_GATE_ENV/);
+  assert.match(
+    src,
+    /phaseId: "build-next",\s*cmd: npmCmd,\s*args: \["run", "build"\],\s*env: BUILD_GATE_ENV/
+  );
+  assert.match(
+    src,
+    /phaseId: "build-cli",\s*cmd: npmCmd,\s*args: \["run", "build:cli"\],\s*env: \{ \.\.\.BUILD_GATE_ENV, OMNIROUTE_REQUIRE_PREBUILT_NEXT: "1" \}/
+  );
 });

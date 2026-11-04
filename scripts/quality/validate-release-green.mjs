@@ -840,7 +840,7 @@ const runAsync = run;
 export const PACK_POLICY_TIMEOUT_MS = 3 * 60 * 1000;
 
 export function makePackPhaseReference(phase, invocationId, candidateSha, context = {}) {
-  const phases = ["build-cli", "stamp-build-sha", "validate-pack-artifact"];
+  const phases = ["build-next", "build-cli", "stamp-build-sha", "validate-pack-artifact"];
   if (
     !phases.includes(phase?.phaseId) ||
     !["shared", "independent-policy"].includes(phase.mode) ||
@@ -918,7 +918,15 @@ export async function runPackArtifactGate(
   }
   const deadline = now() + timeoutMs;
   const steps = [
-    { phaseId: "build-cli", cmd: npmCmd, args: ["run", "build:cli"], env: BUILD_GATE_ENV },
+    // Match CI: npm runs prebuild/build/postbuild before the strict package consumer.
+    // Both commands and the stamp spend the same preparation deadline.
+    { phaseId: "build-next", cmd: npmCmd, args: ["run", "build"], env: BUILD_GATE_ENV },
+    {
+      phaseId: "build-cli",
+      cmd: npmCmd,
+      args: ["run", "build:cli"],
+      env: { ...BUILD_GATE_ENV, OMNIROUTE_REQUIRE_PREBUILT_NEXT: "1" },
+    },
     {
       phaseId: "stamp-build-sha",
       cmd: process.execPath,

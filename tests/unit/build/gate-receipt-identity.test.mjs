@@ -49,6 +49,14 @@ test("canonical command receipts persist their invocation identity", async () =>
   assert.equal(persisted.invocationId, invocationId);
 });
 
+test("Next producer identity is persisted separately with the command result", async () => {
+  const producer = { ...packPhase, phaseId: "build-next" };
+  const { result, persisted } = await observe({ invocationId, packPhase: producer });
+  assert.equal(result.code, 0);
+  assert.deepEqual(persisted.packPhase, producer);
+  assert.equal(persisted.invocationId, invocationId);
+});
+
 test("pack phase identity is persisted exactly with the command result", async () => {
   const { result, persisted } = await observe({ invocationId, packPhase });
   assert.equal(result.code, 0);

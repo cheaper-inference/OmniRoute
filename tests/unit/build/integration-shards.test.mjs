@@ -3,16 +3,15 @@ import assert from "node:assert/strict";
 import {
   integrationPlanFromCiJob,
   executeIntegrationPlan,
+  integrationPartitions,
 } from "../../../scripts/quality/integration-shards.mjs";
 
 const base =
-  'cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit --test-concurrency=1 tests/integration/*.test.ts "tests/integration/combo-matrix/*.test.ts"';
+  'cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit --test-concurrency=1 --test-reporter=spec --test-reporter=./scripts/ci/integration-progress-reporter.mjs --test-reporter-destination=stdout --test-reporter-destination=stderr tests/integration/*.test.ts "tests/integration/combo-matrix/*.test.ts"';
 const scripts = {
   "test:integration": base,
-  "test:integration:ci": base.replace(
-    "--test-concurrency=1 ",
-    "--test-concurrency=1 --test-shard=$TEST_SHARD "
-  ),
+  "test:integration:ci":
+    "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node scripts/ci/run-integration-shard.mjs",
 };
 const job = () => ({
   "timeout-minutes": 15,
@@ -99,28 +98,35 @@ for (const [kind, mutate] of [
 }
 
 test("rejects changed filters, selection, preloads or isolation between the two aliases", () => {
-  for (const changed of [
-    scripts["test:integration:ci"].replace("--test-force-exit ", ""),
-    scripts["test:integration:ci"].replace("--test-concurrency=1", "--test-concurrency=4"),
-    scripts["test:integration:ci"].replace("--import tsx/esm ", ""),
-    scripts["test:integration:ci"] + " --test-name-pattern=smoke",
-    scripts["test:integration:ci"].replace("combo-matrix", "combo-live"),
+  for (const [alias, changed] of [
+    ["test:integration", base.replace("--test-force-exit ", "")],
+    ["test:integration", base.replace("--test-concurrency=1", "--test-concurrency=4")],
+    ["test:integration", base.replace("--import tsx/esm ", "")],
+    ["test:integration:ci", scripts["test:integration:ci"] + " --test-name-pattern=smoke"],
+    ["test:integration", base.replace("combo-matrix", "combo-live")],
   ])
-    assert.throws(() =>
-      integrationPlanFromCiJob(job(), { ...scripts, "test:integration:ci": changed })
-    );
+    assert.throws(() => integrationPlanFromCiJob(job(), { ...scripts, [alias]: changed }));
 });
 
-test("147 unique file fixtures partition into 37/37/37/36 with no duplication or omission", () => {
-  const files = Array.from({ length: 147 }, (_, i) => `tests/integration/file-${i}.test.ts`);
-  // This is Node 24's inspected modulo distribution, not a new runtime selector.
-  const shards = plan().commands.map((_, shard) => files.filter((_, i) => i % 4 === shard));
+test("147 unique file fixtures partition into 1/49/49/48 with no duplication or omission", () => {
+  const files = [
+    "tests/integration/batch-e2e-rate-limit.test.ts",
+    ...Array.from({ length: 146 }, (_, i) => `tests/integration/file-${i}.test.ts`),
+  ];
+  const shards = integrationPartitions(files);
   assert.deepEqual(
     shards.map((part) => part.length),
-    [37, 37, 37, 36]
+    [1, 49, 49, 48]
   );
   assert.equal(new Set(shards.flat()).size, 147);
   assert.deepEqual([...shards.flat()].sort(), [...files].sort());
+});
+
+test("rejects a three-leg matrix instead of confusing internal partitions with CI identity", () => {
+  const value = job();
+  value.strategy.matrix.shard = [1, 2, 3];
+  value.steps[0].env.TEST_SHARD = "${{ matrix.shard }}/3";
+  assert.throws(() => integrationPlanFromCiJob(value, scripts), /INTEGRATION_CI_PLAN_INVALID/);
 });
 
 test("runs one shard at a time and preserves CI fail-fast=false after an actual failure", async () => {

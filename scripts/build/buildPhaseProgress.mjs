@@ -12,10 +12,10 @@ const EVENTS = new Set(["STARTED", "RETURNED", "THREW"]);
 const BUILD_PROGRESS_MAX_EVENTS = 16;
 const BUILD_PROGRESS_MAX_EVENT_BYTES = 1024;
 
-/** Enable diagnostics only for the already-bound preparation command. */
+/** Enable diagnostics only for the already-bound build or package command. */
 export function buildProgressEnvironment(phase) {
   if (
-    phase?.phaseId !== "build-cli" ||
+    !["build-next", "build-cli"].includes(phase?.phaseId) ||
     !INVOCATION.test(phase.invocationId || "") ||
     !SHA.test(phase.candidateSha || "")
   ) {

@@ -41,6 +41,10 @@ test("only a bound preparation enables progress, with no extra phase fields copi
     OMNIROUTE_BUILD_INVOCATION_ID: invocationId,
     OMNIROUTE_BUILD_CANDIDATE_SHA: candidateSha,
   });
+  assert.deepEqual(
+    buildProgressEnvironment({ phaseId: "build-next", invocationId, candidateSha }),
+    env
+  );
   for (const phase of [
     null,
     { phaseId: "stamp-build-sha", invocationId, candidateSha },
