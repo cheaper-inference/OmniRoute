@@ -22,7 +22,7 @@ const { resolveIncomingCorrelationId } = transpile(
   () => { throw new Error("Resolver should have no dependencies"); }
 );
 
-async function exercise({ correlationId = null, requestId = null, stream = false } = {}) {
+async function exercise({ correlationId = null, requestId = null, stream = false, simulatedSlowPath = false } = {}) {
   const traces = [];
   const keepalives = [];
   let nextId = 0;
@@ -65,7 +65,14 @@ async function exercise({ correlationId = null, requestId = null, stream = false
       ANTHROPIC_PING_FRAME: new Uint8Array(),
       withEarlyStreamKeepalive: async (reply, options) => {
         keepalives.push(options.correlationId);
-        return await reply;
+        const original = await reply;
+        if (simulatedSlowPath) {
+          return new Response(original.body, {
+            status: 200,
+            headers: { "content-type": "text/event-stream", ...(options.extraHeaders ?? {}) },
+          });
+        }
+        return original;
       },
     },
     "@omniroute/open-sse/utils/streamDeadlineSignal": {
@@ -139,6 +146,16 @@ test("Anthropic streaming generates one consistent correlation if absent", async
   const x = await exercise({ stream: true });
   assert.equal(x.traces[0].supplied, "omniroute-generated-1");
   assert.deepEqual(x.keepalives, ["omniroute-generated-1"]);
+  assert.equal(x.response.headers.get("x-correlation-id"), "omniroute-generated-1");
+});
+
+test("Anthropic slow-stream preserves caller correlation in synthetic response", async () => {
+  const x = await exercise({ correlationId: "slow-caller-123", stream: true, simulatedSlowPath: true });
+  assert.equal(x.response.headers.get("x-correlation-id"), "slow-caller-123");
+});
+
+test("Anthropic slow-stream preserves generated correlation in synthetic response", async () => {
+  const x = await exercise({ stream: true, simulatedSlowPath: true });
   assert.equal(x.response.headers.get("x-correlation-id"), "omniroute-generated-1");
 });
 
