@@ -223,3 +223,33 @@ test("targetFormat undefined (e.g. an uncovered call site) also no-ops -- fail c
   });
   assert.equal(out, body);
 });
+
+test("K3.1 literal auto remains an invalid client effort instead of adaptive mapping", () => {
+  for (const model of [
+    "kimi-k3.1-pro",
+    "kimi-k3.1-pro-highspeed",
+    "k3.1-pro",
+    "k3.1-pro-highspeed",
+  ]) {
+    const body = { model, reasoning_effort: "auto" };
+    const out = wireAdaptiveEffort(body, {
+      rawBody: { messages: trivialMsgs },
+      headerEffort: null,
+      targetFormat: FORMATS.OPENAI,
+      model,
+    });
+    assert.equal(out, body, model);
+    assert.equal(out.reasoning_effort, "auto", model);
+  }
+
+  const headerOnly = wireAdaptiveEffort(
+    { model: "k3.1-pro" },
+    {
+      rawBody: { messages: heavyMsgs },
+      headerEffort: "auto",
+      targetFormat: FORMATS.OPENAI,
+      model: "k3.1-pro",
+    }
+  );
+  assert.equal(headerOnly.reasoning_effort, "high");
+});

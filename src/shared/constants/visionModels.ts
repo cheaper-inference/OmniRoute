@@ -57,7 +57,9 @@ export const VISION_MODEL_ID_FRAGMENTS = [
   "glm-4v",
   "glm-4.5v",
   "glm-4.6v",
-  "glm-5.3",
+  // Only Flash accepts images; the base GLM-5.3 and its effort aliases are text-only.
+  // https://docs.z.ai/guides/llm/glm-5.3
+  "glm-5.3-flash",
   "gpt-4o",
   "gpt-4.1",
   "gpt-4-turbo",

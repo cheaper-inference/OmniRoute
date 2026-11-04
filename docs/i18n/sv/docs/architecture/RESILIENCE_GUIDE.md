@@ -274,24 +274,23 @@ lockout-_tillståndet_ är flyktigt.
 
 ---
 
-## 4. Samtidighetsstyrning för kvotdelning (v3.8.36)
+## 4. Samtidighetskontroll med kvotdelning (v3.8.36)
 
-Prenumerationskonton (GLM, MiniMax osv.) accepterar ofta bara ~1–3 samtidiga
-förfrågningar; att överskrida det utlöser 429-svar och nedkylningar. Detta är
-särskilt akut vid **kvotdelningskombos** (`qtSd/…`), där flera API-nycklar delar
-ett uppströmskonto. Tre lager hindrar att ett delat konto översvämmas.
+Prenumerationskonton (GLM, MiniMax osv.) accepterar ofta endast ~1–3 samtidiga
+förfrågningar; om detta överskrids utlöses 429-fel och nedkylningsperioder. Detta är
+särskilt problematiskt för **quota-share**-kombinationer (`qtSd/…`), där flera API-nycklar
+delar på samma uppströmskonto. Tre lager förhindrar att ett delat konto överbelastas.
 
-### Samtidighetstak per anslutning (`max_concurrent`)
+### Tak för samtidighet per anslutning (`max_concurrent`)
 
-Varje leverantörsanslutning kan deklarera ett `max_concurrent`-tak
-(`provider_connections.max_concurrent`, anges i anslutningsmodalen / API:t /
-databasen). Lämna det tomt för ingen gräns. Detta är det enda reglage som styr
-serialiseringslagret nedan – ställ in det på kontots verkliga samtidighet
-(t.ex. GLM ~1, MiniMax ~2).
+Varje leverantörsanslutning kan ange ett tak för `max_concurrent`
+(`provider_connections.max_concurrent`, angivet i anslutningsdialogrutan / API:t / databasen).
+Lämna fältet tomt om ingen gräns ska gälla. Detta är den enda inställningen som styr
+serialiseringslagret nedan — ange kontots faktiska samtidighet (t.ex. GLM ~1, MiniMax ~2).
 
-### Samtidighetstak per modell (`modelConcurrency`)
+### Tak för samtidighet per modell (`modelConcurrency`)
 
-En anslutning kan dessutom deklarera exakta samtidighetstak per modell i sin
+En anslutning kan dessutom ange exakta samtidighetstak per modell i sin
 `rateLimitOverrides`-mappning:
 
 ```json
@@ -303,76 +302,84 @@ En anslutning kan dessutom deklarera exakta samtidighetstak per modell i sin
 }
 ```
 
-Ange det i anslutningsmodalen (**Åsidosättanden av hastighetsgränser →
+Ange detta i anslutningsdialogrutan (**Åsidosättningar för hastighetsbegränsning →
 Samtidighetstak per modell**, en `model=cap` per rad) eller via
-`PATCH /api/providers/[id]` med samma JSON-struktur. Viktig semantik:
+`PATCH /api/providers/[id]` med samma JSON-struktur. Viktiga egenskaper:
 
-- **Anslutningsövergripande kontra modellspecifik:** `maxConcurrent` förblir
-  det delade anslutningsövergripande taket. När båda gäller förvärvas båda
-  grindarna atomärt i samma sammansatta grind
-  (`global → provider → account → model`); det effektiva beteendet är den
+- **Anslutningsövergripande kontra modellspecifikt:** `maxConcurrent` förblir taket
+  för hela anslutningen. När båda gäller hämtas båda låsen atomiskt i samma sammansatta
+  lås (`global → provider → account → model`); den faktiska effekten styrs av den
   striktare tillämpliga gränsen.
-- **Exakt modellnyckelmatchning:** nyckeln är modellsträngen som skickas till
-  exekveraren efter routingupplösning – normalt det rena uppströmsmodell-ID:t
-  (`glm-5`), inte ett `provider/model`-alias på klientsidan (`zai/glm-5`
-  matchar inte `glm-5`). Värdena är tak för samtidiga förfrågningar uttryckta
-  som positiva heltal.
-- **Lokal köbildning, ingen upptäckt:** överskjutande förfrågningar köar lokalt
-  med befintlig kö-/timeout-semantik (typade `SEMAPHORE_TIMEOUT` /
-  `SEMAPHORE_QUEUE_FULL`-tillträdesfel). OmniRoute upptäcker eller härleder
-  inte uppströmspolicy – den upprätthåller exakt de tak som operatören
-  konfigurerat. En mättad modellgrind inaktiverar aldrig leverantören och
-  skapar aldrig en permanent modellutelåsning; uppströms
-  429-/nedkylnings-/fallback-beteende förblir felhanteringens sista skyddsnät.
-- **Omfattning per anslutning, per process:** taken gäller per databasanslutning
-  och hålls i minnet, så två anslutningar som återanvänder samma
-  uppströms-API-nyckel koordinerar inte med varandra.
-- **Okonfigurerat betyder oförändrat:** att utelämna mappningen (eller lämna
-  instrumentpanelfältet tomt) lägger inte till någon modellgrind.
-  Exempelkonfiguration utan att hävda någon universell leverantörsgräns:
+- **Exakt matchning av modellnyckel:** nyckeln är modellsträngen som skickas till
+  exekveraren efter routningslösningen — normalt det rena uppströmsmodell-id:t
+  (`glm-5`), inte ett klientalias i formen `provider/model` (`zai/glm-5` matchar inte
+  `glm-5`). Värdena är positiva heltal som anger taket för samtidiga förfrågningar.
+- **Lokal köhantering, ingen identifiering:** överflödiga förfrågningar placeras i
+  kö lokalt med den befintliga kö- och timeoutsemantiken (typade
+  `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL`-fel vid tilldelning). OmniRoute
+  identifierar eller härleder inte uppströmsregler — det tillämpar de exakta tak
+  som operatören har konfigurerat. Ett mättat modellås inaktiverar aldrig leverantören
+  och skapar aldrig en permanent modellblockering; uppströms-429-/nedkylnings-/
+  reservbeteendet kvarstår som felhantering i sista hand.
+- **Omfattning per anslutning och process:** taken gäller per databasanslutning och
+  hålls i minnet, så två anslutningar som återanvänder samma uppströms-API-nyckel
+  samordnar inte med varandra.
+- **Ej konfigurerat innebär oförändrat beteende:** om mappningen utelämnas (eller
+  instrumentfältet i kontrollpanelen lämnas tomt) läggs inget modellås till. Exempel
+  på konfiguration utan att ange någon universell leverantörsgräns:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Serialisering av kvotdelningsförfrågningar
+### Serialisering av quota-share-förfrågningar
 
-När en kvotdelningsdispatch riktar sig mot en anslutning som deklarerar ett
-positivt `max_concurrent` serialiseras samtidiga förfrågningar till det
-**kontot** genom en semafor per anslutning (nyckel `qsconn:<connectionId>`):
-överskjutande förfrågningar **väntar i kön** istället för att översvämma
-kontot. Den är **fail-open** – en mättad kö eller timeout fortsätter utan en
-plats istället för att någonsin avvisa en dispatchbar förfrågan. Växla i
-**Inställningar → Återhämtning → Samtidighet per anslutning för kvotdelning**
-(`resilienceSettings.quotaShareConcurrencyLimit.enabled`, på som standard).
-Utan ett `max_concurrent`-tak är beteendet oförändrat.
+När en quota-share-dispatch riktas mot en anslutning som anger ett positivt
+`max_concurrent`, serialiseras samtidiga förfrågningar till det **kontot** genom
+en semafor per anslutning (nyckel `qsconn:<connectionId>`): överflödiga förfrågningar
+**väntar i kön** i stället för att överbelasta kontot. Den är **fail-open** — en
+mättad kö eller timeout fortsätter utan en plats i stället för att någonsin avvisa
+en förfrågan som kan dispatchas. Aktivera eller inaktivera i **Inställningar →
+Robusthet → Quota-share-samtidighet per anslutning**
+(`resilienceSettings.quotaShareConcurrencyLimit.enabled`, standard är på). Utan ett
+`max_concurrent`-tak är beteendet oförändrat.
 
-> Kvotdelningens routinggrind (`selectQuotaShareTarget`, DRR + P2C) är i sig
-> fail-open och _nedprioriterar_ bara en anslutning som nått taket – med en
-> pool med en enda anslutning kan den inte hårdbegränsa, så det är denna
-> semafor som faktiskt håller tillbaka flödet.
+> Routningslåset för quota-share (`selectQuotaShareTarget`, DRR + P2C) är självt
+> fail-open och **nedprioriterar** endast en anslutning som nått sitt tak — med en
+> pool som innehåller en enda anslutning kan det inte sätta en hård gräns, så denna
+> semafor är det som faktiskt begränsar överbelastningen.
 
-### Nedkylningsmedveten omprövning för kombos
+### Försök igen för kombinationer med hänsyn till nedkylningsperioder
 
-För varje kombostrategi (när den är aktiverad) väntar en förfrågan som skulle
-kristallisera en 429 för en KORT övergående nedkylning ut den och dispatchar om
-istället för att returnera 429:an – detta täcker Gemini-klassens TPM/RPM-fönster
-(~60 s retry-after) på flermodellskombos, t.ex. när båda målen i en
-2-modellskombo träffar en hastighetsgräns per modell. Begränsas av
-`comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) i
-**Inställningar → Återhämtning**. Den väntar aldrig på `quota_exhausted`
-(låst till midnatt) eller autentiserings-/hittades-inte-orsaker.
+För varje kombinationsstrategi (när den är aktiverad) väntar en förfrågan som skulle
+resultera i ett 429-fel under en KORT tillfällig nedkylningsperiod ut perioden och
+distribueras på nytt i stället för att returnera 429-felet — detta omfattar
+TPM-/RPM-fönster i Gemini-klassen (~60 sekunders `retry-after`) för kombinationer
+med flera modeller, exempelvis när båda målen i en kombination med två modeller
+träffar en hastighetsgräns per modell. Beteendet begränsas av `comboCooldownWait`
+(`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) i **Inställningar → Robusthet**.
+Det väntar aldrig vid `quota_exhausted` (låst till midnatt) eller vid orsaker som
+gäller autentisering eller att resursen inte hittades.
 
-Samma grind täcker fallet före dispatch (#16319): när varje mål i en kombo
-hoppas över innan något försök gjorts eftersom dess modell befinner sig i en
-kort övergående utelåsning, väntar nollförsöksvägen ut låset under samma tak
-och dispatchar om, istället för att svara med en `503 ALL_TARGETS_SKIPPED`
-utan ledtråd. När ingen väntan är tillåten (tak, försök eller budget
-förbrukade, eller funktionen av) uppgraderas det slutgiltiga svaret till
-`429 rate_limit_error` med `retry_after` / `reset_at` från den tidigaste
-övergående låsets utgång; kvot-, autentiserings- och hittades-inte-lås
-behåller 503:an utan ledtråd.
+En kombination kan välja bort detta med `config.comboCooldownWaitEnabled: false`.
+Endast det bokstavliga värdet `false` inaktiverar dessa gemensamma väntetider
+(nedkylningsperiod efter dispatch samt väntetider före dispatch när kretsen är öppen
+eller modellen är låst) och deras förlängning av timeoutens nedre gräns med
+väntetidsbudgeten. Om värdet saknas eller är `true` gäller den globala policyn;
+`true` kan inte aktivera väntan om den är globalt inaktiverad. Ett explicit
+`targetTimeoutMs` har fortfarande företräde. Detta val bort påverkar inte den
+separata väntan före dispatch för inbyggd Codex-omgångslåsning.
+
+Samma lås omfattar fallet före dispatch (#16319): när alla mål i en kombination
+hoppas över innan något försök görs eftersom deras modeller befinner sig i en
+kortvarig låsning, väntar sökvägen med noll försök ut låsningen enligt samma tak
+och distribuerar sedan på nytt, i stället för att svara med ett
+`503 ALL_TARGETS_SKIPPED` utan ledtråd. När ingen väntan är tillåten (taket,
+försöksgränsen eller budgeten är förbrukad, eller funktionen är avstängd) uppgraderas
+det slutliga svaret till `429 rate_limit_error` med `retry_after` / `reset_at` från
+den tidigaste tillfälliga låsningens utgångstid; kvot-, autentiserings- och
+”hittades inte”-lås behåller 503-svaret utan ledtråd.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)
