@@ -1595,7 +1595,8 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Transcrivez des fichiers audio à l'aide de n'importe quel fournisseur STT configuré. Le premier segment du chemin sélectionne le fournisseur natif (`openai/…`, `deepgram/…`). Les passerelles qui réexportent le modèle d'un autre fournisseur utilisent un identifiant qualifié (`openrouter/deepgram/nova-3`).
+Transcrivez des fichiers audio à l’aide de n’importe quel fournisseur STT configuré. Le premier segment du chemin sélectionne le fournisseur natif (`openai/…`, `deepgram/…`). Les passerelles qui réexportent le modèle d’un autre fournisseur utilisent un identifiant qualifié
+(`openrouter/deepgram/nova-3`).
 
 **Requête :**
 
@@ -1617,12 +1618,16 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Exemples d'identifiants de modèle :** `openai/whisper-1` (nécessite une clé OpenAI),
+**Exemples d’identifiants de modèles :** `openai/whisper-1` (nécessite une clé OpenAI),
 `openrouter/deepgram/nova-3` (nécessite une clé OpenRouter),
-`deepgram/nova-3` (nécessite une clé Deepgram native). Une requête
-`deepgram/nova-3` simple **n'utilise pas OpenRouter**.
+`deepgram/nova-3` (nécessite une clé Deepgram native). Une requête simple vers
+`deepgram/nova-3` **n’utilise pas OpenRouter**.
 
 **Formats pris en charge :** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`) :** transcription en mode fichier via le WebSocket Gemini Live (nécessite une clé API Gemini). Le fichier importé est converti en PCM mono 16 kHz avec `ffmpeg`
+(`ffmpeg` doit être disponible dans `PATH`, sauf si le fichier est déjà un fichier WAV PCM mono 16 kHz), diffusé vers la session, puis le texte finalisé est renvoyé sous la forme `{ "text": "..." }`. Les champs de formulaire `language` et `prompt` facultatifs sont transmis. Limites : les importations de plus de 25 MiB ou les fichiers audio décodés de plus de 10 minutes renvoient
+`413` ; une conversion qui dure plus de 60 s est arrêtée et renvoie `504`. La clé API est envoyée uniquement dans l’en-tête `x-goog-api-key`, jamais dans l’URL WebSocket.
 
 ---
 

@@ -1602,7 +1602,7 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Prepišite zvočne datoteke z uporabo katerega koli konfiguriranega ponudnika STT. Prvi segment poti izbere izvornega ponudnika (`openai/…`, `deepgram/…`). Prehodi, ki ponovno izvozijo model drugega ponudnika, uporabljajo kvalificiran ID
+Prepišite zvočne datoteke s katerim koli konfiguriranim ponudnikom STT. Prvi segment poti izbere izvornega ponudnika (`openai/…`, `deepgram/…`). Prehodi, ki ponovno izvozijo model drugega ponudnika, uporabljajo kvalificiran ID
 (`openrouter/deepgram/nova-3`).
 
 **Zahteva:**
@@ -1627,12 +1627,17 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 **Primeri ID-jev modelov:** `openai/whisper-1` (zahteva ključ OpenAI),
 `openrouter/deepgram/nova-3` (zahteva ključ OpenRouter),
-`deepgram/nova-3` (zahteva izvorni ključ Deepgram). Zahteva za
-`deepgram/nova-3` brez predpone ne uporablja OpenRouterja.
+`deepgram/nova-3` (zahteva izvorni ključ Deepgram). Zahteva z golim
+`deepgram/nova-3` **ne** uporablja OpenRouterja.
 
 **Podprti formati:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
 
----
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** prepisovanje v načinu datoteke prek Gemini Live
+WebSocket (zahteva ključ API-ja Gemini). Datoteka se s programom `ffmpeg`
+pretvori v mono PCM pri 16 kHz (`ffmpeg` mora biti na `PATH`, razen če je datoteka že mono PCM WAV pri 16 kHz), nato se
+pretaka v sejo, končno besedilo pa se vrne kot `{ "text": "..." }`. Izbirna polja obrazca `language` in `prompt` se posredujejo naprej. Omejitve: pri nalaganju datotek, večjih od 25 MiB, ali dekodiranem zvoku, daljšem od 10 minut, API vrne
+`413`; če pretvorba traja več kot 60 s, se prekine in API vrne `504`. Ključ API-ja se pošlje samo v glavi
+`x-goog-api-key`, nikoli v URL-ju WebSocket.
 
 ## Združljivost z Ollamo
 
