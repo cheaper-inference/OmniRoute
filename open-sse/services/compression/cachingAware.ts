@@ -132,8 +132,9 @@ export function detectCachingContext(
  * OpenCode's upstream automatic-prefix cache and retroactive history compression
  * cannot safely run together: stacked lite/session-dedup steps may rewrite
  * previously sent tool results, invalidating the prefix on the next turn.
- * Treat the native cache as authoritative unless the connection explicitly
- * opts out through supportsPromptCaching=false or a different cache mode.
+ * The chatCore live-zone path uses this signal to preserve cold prefixes verbatim
+ * and reuse them on subsequent turns while still processing new tool outputs.
+ * Explicit per-connection cache overrides remain authoritative.
  */
 export function mustKeepOpenCodeHistoryVerbatim(
   body: unknown,
