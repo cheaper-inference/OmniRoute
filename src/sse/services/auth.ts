@@ -6,6 +6,7 @@ import { getProviderSearchPool } from "@omniroute/open-sse/services/providerConn
 import { hydrateConnectionProviderSpecificData } from "./compatibleNodeBaseUrl.ts"; // #13452
 import { extractGoogApiKeyHeader } from "./googApiKeyAuth.ts";
 import { isCooldownRetrySkipRefusalsEnabled } from "./cooldownAwareRetry.ts";
+import { isPerAccountCatalogProvider } from "./perAccountCatalogFilter.ts";
 import { describeUpstreamFailure } from "@/shared/utils/upstreamError";
 import { isRequestScopedMisalignmentRefusal } from "@omniroute/open-sse/utils/providerSafety.ts";
 import { buildAllExpiredCredentials } from "./authExpiredCredentials.ts";
@@ -1268,6 +1269,15 @@ export async function getProviderCredentials(
       connections,
       requestedModel
     );
+    // An account the operator pinned for this request (dashboard test) is their call: the inferred
+    // per-account inventory must not veto it, or an entitlement Google under-reports is untestable.
+    if (
+      forcedConnectionId &&
+      options.explicitConnectionPin &&
+      isPerAccountCatalogProvider(provider)
+    ) {
+      advertisedModelsByConnection.delete(forcedConnectionId);
+    }
     // Filter out unavailable accounts and excluded connection
     let availableConnections = connections.filter((c) => {
       if (excludedConnectionIds.has(c.id)) {
@@ -2532,6 +2542,23 @@ export async function markAccountUnavailable(
         shouldFallback: true,
         cooldownMs: existingCooldownMs - Date.now(),
       };
+    }
+
+    // Per-request refusal (#12859/#18574): chatCore already excluded this exact model with a
+    // `request_rejected` lockout and recorded the refusal on the connection. Now that the
+    // exclusion is model-scoped the connection carries no cooldown, so the guard above no
+    // longer catches the duplicate — without this one the generic path below would overwrite
+    // `lastErrorType` with `server_error` and stack a second 5s lockout on the same model.
+    if (
+      provider &&
+      model &&
+      getModelLockoutInfo(provider, connectionId, model)?.reason === "request_rejected"
+    ) {
+      log.info(
+        "AUTH",
+        `${connectionId.slice(0, 8)} ${provider}:${model} already excluded by a request_rejected lockout, skipping duplicate mark`
+      );
+      return { shouldFallback: true, cooldownMs: 0 };
     }
 
     // T09: Codex scope-aware lockout guard (codex vs spark independent pools).

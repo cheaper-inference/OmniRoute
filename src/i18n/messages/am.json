@@ -1112,7 +1112,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "በOpenCode Zen/Go ጥያቄዎች ላይ የOpenCode v2 CLI ደንበኛ አሻራን ይላኩ፦ opencode/latest/<2.x>/cli User-Agent እና x-opencode-client cli፤ እንዲሁም በነፃ ዕቅድ ጥያቄዎች ላይ የv2 ክፍለ-ጊዜ ራስጌዎችን፣ የv2 CLI read/shell መሣሪያ መርሃግብሮችን እና tool_choice \"none\" እንዳይኖር ያድርጉ። በነባሪነት ጠፍቷል፦ እያንዳንዱ የOpenCode ጥያቄ አሁን ያለውን ማንነት፣ ራስጌዎች እና የጥያቄ አካል ሳይለውጥ ይጠብቃል።",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "የauto combo የዕጩዎች ስብስብ የመሣሪያ ጥሪ ቅድመ-ማጣሪያው ከመስራቱ በፊት ባዶ ከሆነ (ሁሉም ዒላማዎች በcooldowns፣ lockouts ወይም exhaustion ምክንያት ሲዘለሉ)፣ ከቀድሞው 400 \"ምንም ዒላማ የመሣሪያ ጥሪን አይደግፍም\" capability_mismatch ይልቅ 503 no_eligible_targets ይመልሳል። በነባሪነት ጠፍቷል፦ ባዶው ስብስብ ቀድሞውን 400 ይዞ ይቆያል።",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "የታመኑ የሞዴል መጨረሻ ነጥብ መለያዎችን (በአቅራቢው ካታሎግ የተገለጹ፣ ከልዩ ሞዴል መታወቂያ የተገመቱ፣ ወይም በኦፕሬተሩ የተዘጋጁ) በግዴታ ተግብር፦ ሞዴሉ ወደማያገለግለው መጨረሻ ነጥብ የተላከን ጥያቄ ወደ /v1/chat/completions፣ /v1/embeddings፣ /v1/rerank፣ /v1/images/generations፣ /v1/videos/generations፣ /v1/music/generations እና /v1/audio/* ከማሰራጨት በፊት በHTTP 400 ውድቅ አድርግ፤ መለያ የተሰጣቸው መጨረሻ ነጥቦች የOmniRoute አስማሚ የሌላቸውን ሞዴሎች ከ/v1/models ደብቅ፤ እና ለእነዚህ ሞዴሎች የዳሽቦርድ ሞዴል ሙከራን በ422 መልስ። በነባሪ ጠፍቷል፦ የመጨረሻ ነጥብ መለያዎች ለመረጃ ብቻ ሆነው ይቆያሉ፣ እና ጥያቄዎች ልክ እንደበፊቱ ይሰራጫሉ።",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "በመደበኛ anthropic-ተኳሃኝ ሪሌዎች ላይ፣ የተሸጎጠው የፕሮምፕት ቅድመ ቅጥያ በየተራው የተረጋጋ ሆኖ እንዲቆይ፣ በውይይት መካከል ያሉ የስርዓት ተራዎችን ወደ ከፍተኛ ደረጃው የስርዓት ፕሮምፕት ከማዛወር ይልቅ በመልዕክት ዝርዝሩ ውስጥ ያቆዩ። ይህ የሚሠራው ደንበኛው ራሱ mid-conversation-system-2026-04-07 ቤታን ሲልክ ብቻ ነው። በነባሪነት ጠፍቷል፦ ያ ቤታ የሌላቸው ሪሌዎች በመልዕክት ዝርዝሩ ውስጥ ያሉ የስርዓት ተራዎችን ስለማይቀበሉ፣ እያንዳንዱ የስርዓት ተራ ልክ እንደበፊቱ ወደ የስርዓት ፕሮምፕቱ ይዛወራል።",
   "featureFlagModelsDevEffortTiersEnabledDescription": "ኦፕሬተር መሻርም ሆነ የአቅራቢው መዝገብ ምንም ደረጃዎችን ባላወጀበት ጊዜ models.dev የሚያትማቸውን የማመዛዘን ጥረት ደረጃዎች ይጠቀሙ፤ የታወቁ የጥረት ደረጃዎችን ብቻ ያስቀሩ፣ እና ባዶ የታወጀ የደረጃዎች ዝርዝርን \"ምንም ደረጃዎች የሉም\" ብለው ይቁጠሩ። በነባሪ ጠፍቷል፦ የሞዴል ካታሎጉ እና በመጨረሻ የተወሰኑት የጥረት ደረጃዎች ልክ እንደበፊቱ ይቆያሉ።",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "auto/* ጥያቄዎች የእጩ ስብስቡን በተፈቱ የሞዴል ችሎታዎች (ራዕይ፣ ምክንያታዊነት፣ አስተሳሰብ) እና በተስተዋሉ የጥራት ውጤቶች በአንድ የጅምላ ንባብ እንዲገነቡ ያስችላል። በነባሪ ጠፍቷል፦ በጥያቄ ጊዜ የእጩዎች ክብደቶች ልክ እንደበፊቱ ይቆያሉ። ሲበራ፦ እነዚህ ምልክቶች የቅጽበታዊ ክብደቶችን ይመግባሉ፣ ስለዚህ የእጩዎች ክብደቶች እና ምርጫ ሊቀየሩ ይችላሉ።",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "የምስክርነት መረጃ ጤንነት ቅኝቱ፣ ጌትዌዩ በራሱ ያጠፋቸውን ግንኙነቶች (እያንዳንዳቸውን ቢበዛ በየ6 ሰዓቱ አንድ ጊዜ፣ በእያንዳንዱ ቅኝት 5) እንደገና እንዲፈትሽ እና ዳግም ፍተሻቸውን ሲያልፉ መልሶ እንዲያበራቸው ፍቀድ። በነባሪነት ጠፍቷል፦ እንዲህ ያሉ ግንኙነቶች ኦፕሬተር እርምጃ እስኪወስድ ድረስ ጠፍተው ይቆያሉ። በኦፕሬተር የተሰናከሉ እና በቋሚነት የታገዱ ግንኙነቶች ፈጽሞ ዳግም አይፈተሹም።",
@@ -2016,7 +2015,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# ጥያቄ} other {# ጥያቄዎች}}, {keys, plural, one {# የጥቅም ገደብ ያለ ቁልፍ} other {# የጥቅም ገደብ ያሉ ቁልፎች}}",
     "unpricedUsageMore": "…እና {count} ተጨማሪ",
     "unpricedUsageConfigure": "ዋጋን ያቀናብሩ",
-    "unpricedUsageDismiss": "ዝጋ"
+    "unpricedUsageDismiss": "ዝጋ",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "ትንታኔ",
@@ -6341,6 +6349,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "ይህ ግንኙነት ሊታረሙ ከሚችሉ ስህተቶች በኋላም ብቁ ሆኖ እንዲቆይ ጊዜያዊውን የማቀዝቀዝ ጊዜ ይዝለሉ (እንደ የታገደ/ጊዜው ያለፈ ያሉ የመጨረሻ ሁኔታዎች አሁንም ተፈጻሚ ናቸው)።",
     "disableCoolingLabel": "ለዚህ ግንኙነት የማቀዝቀዝ ጊዜን አሰናክል",
+    "keepMidConversationSystemDescription": "ወደ ከፍተኛ ደረጃ የስርዓት መጠየቂያ ከማስገባት ይልቅ በመልእክት ዝርዝሩ ውስጥ የተላኩትን የስርዓት መልእክቶች መካከለኛ ውይይት ውስጥ ይተው፣ ስለዚህ የጥያቄው መሸጎጫ ተራ በተራ መምታቱን ይቀጥላል። ይህ የላይኛው ዥረት በመልእክቶች ውስጥ ሚና \"ስርዓት\" የሚቀበል ከሆነ ብቻ ያንቁ (አለበለዚያ 400 ይመልሳል)።",
+    "keepMidConversationSystemLabel": "የመሃል የውይይት ስርዓት መልዕክቶችን በቦታቸው ያቆዩ",
+    "requireUserLastMessageDescription": "ለላይ ዥረቶች የረዳት ቅድመ ሙሌትን አይቀበሉም፡ ከመላክዎ በፊት ተከታይ ረዳት ተራዎችን ጣል (የመሳሪያ_አጠቃቀም የለም)። ሞዴሉ የቀደመውን መልስ ሊያድስ ይችላል።",
+    "requireUserLastMessageLabel": "በተጠቃሚ መልእክት ለመጨረስ ውይይት ጠይቅ",
     "bulkPasteAdded": "{count, plural, one {1 ቁልፍ ታክሏል} other {# ቁልፎች ታክለዋል}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 የተደገመ ቁልፍ ታልፏል} other {# የተደገሙ ቁልፎች ታልፈዋል}}",
     "bulkPasteHint": "በእያንዳንዱ መስመር አንድ API ቁልፍ ይለጥፉ። ባዶ መስመሮች ችላ ይባላሉ፣ የተደገሙ ቁልፎችም ይዘለላሉ።",
@@ -7174,6 +7186,7 @@
     "proxySubTabsAria": "የፕሮክሲ ክፍሎች",
     "requestBodyLimitTitle": "የጥያቄ ይዘት ገደብ",
     "requestBodyLimitDescription": "የጥያቄው ይዘት ከመተንተኑ በፊት ተቀባይነት የሚያገኘው ከፍተኛው የAPI ጭነት መጠን። ልዩ የሰቀላ መስመሮች ቢያንስ አብሮገነብ የ100 MB ገደባቸውን ይይዛሉ።",
+    "requestBodyLimitChatHint": "እዚህ ገደብ እስኪያስቀምጡ ድረስ Chat Completions እና Responses እስከ 50 MB ይቀበላሉ። ያስቀመጡት ገደብ ዝቅተኛም ሆነ ከፍተኛ ለእነሱም ይተገበራል።",
     "requestBodyLimitInputLabel": "የጥያቄ ይዘት ገደብ በMB",
     "requestBodyLimitEmptyError": "ገደቡን በMB ያስገቡ",
     "requestBodyLimitWholeNumberError": "ሙሉ ቁጥር ይጠቀሙ",
@@ -14234,6 +14247,10 @@
         "label": "የጋራ መውጫ ስብስብ ቅደም ተከተል",
         "description": "ኮታቸው በመውጫ አድራሻ ለተከፋፈለ አቅራቢዎች፣ በቅርቡ ውድቅ የተደረገውን አባል የታየበትን የመውጫ አድራሻ የሚጋራ የስብስብ አባልን ከጤናማ አባላት በታች ደረጃ ይስጡ። ቅደም ተከተል ብቻ ነው፣ በጭራሽ አይገለልም። የሚያነበውን የውድቅ ማድረጊያ ምልክት የሚያመነጨውን PROXY_SKIP_RECENTLY_FAILED ይፈልጋል። በነባሪነት ጠፍቷል፦ የመምረጫ ቅደም ተከተል ልክ እንደ መደበኛው ዝውውር ነው።"
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "የዝውውር አበርክቶ ምዝገባ",
         "description": "የOpencode ዝውውር የትኛው መለያ እንዳገለገለ ወይም እንደተዘለለ ይመዘግባል (የተሸፈኑ መታወቂያዎች ብቻ፣ በጭራሽ ሙሉ የመለያ መታወቂያዎች አይደሉም) እና ኦፕሬተሩ የተዘለሉ መለያዎችን ካልተጠቀሙባቸው ለይቶ ማወቅ እንዲችል የፕሮክሲ ምዝግብ ግቤቶችን ከጥያቄያቸው ጋር ያገናኛል። በነባሪነት ጠፍቷል፦ ምንም ተጨማሪ የምዝግብ መስመሮች፣ ምንም ተጨማሪ አምዶች አይጻፉም።"
@@ -14465,6 +14482,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo፦ የይዘት ፖሊሲ እምቢታ ሲያጋጥም አቁም",
         "description": "አንድ የ Combo ዒላማ በትክክለኛ የይዘት ፖሊሲ እምቢታ (ኮድ ወይም ዓይነት cyber_policy / content_policy_violation) ምላሽ ሲሰጥ፣ ወደ ቀጣዩ ዒላማ ከማለፍ ይልቅ የቀሩት ዒላማዎች የተለያዩ ሞዴሎች ቢሆኑም እንኳ Comboውን ያቁሙ እና ያንን እምቢታ ይመልሱ። በነባሪነት ጠፍቷል፦ እምቢታው መለያውን በፍጹም cooldown ውስጥ አያስገባም ወይም provider breakerን አያስነሳም፣ እንዲሁም Comboው ልክ እንደቀድሞው ወደ ቀጣዩ ዒላማው ያልፋል።"
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "የ Cooldown ዳግም ሙከራ፦ የ 403/410 እምቢታዎችን ዝለል",
