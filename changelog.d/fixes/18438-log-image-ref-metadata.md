@@ -1,0 +1,1 @@
+- **fix(usage):** oversized image data URLs in persisted chat-log payloads now collapse into an `_omniroute_image_ref` record (mime, byte count, sha256 fingerprint, head) instead of a corrupt half-image ([#18438](https://github.com/cheaper-inference/OmniRoute/pull/18438)) — thanks @jjxyxsjr

@@ -1583,7 +1583,7 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Transcreva ficheiros de áudio utilizando qualquer fornecedor STT configurado. O primeiro segmento do caminho seleciona o fornecedor nativo (`openai/…`, `deepgram/…`). Os gateways que reexportam o modelo de outro fornecedor utilizam um ID qualificado
+Transcreva ficheiros de áudio utilizando qualquer fornecedor STT configurado. O primeiro segmento do caminho seleciona o fornecedor nativo (`openai/…`, `deepgram/…`). Os gateways que exportam novamente o modelo de outro fornecedor utilizam um ID qualificado
 (`openrouter/deepgram/nova-3`).
 
 **Pedido:**
@@ -1608,10 +1608,18 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 **IDs de modelo de exemplo:** `openai/whisper-1` (requer uma chave OpenAI),
 `openrouter/deepgram/nova-3` (requer uma chave OpenRouter),
-`deepgram/nova-3` (requer uma chave nativa Deepgram). Um pedido
-`deepgram/nova-3` simples **não** utiliza o OpenRouter.
+`deepgram/nova-3` (requer uma chave nativa Deepgram). Um pedido simples
+`deepgram/nova-3` **não** utiliza o OpenRouter.
 
 **Formatos suportados:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** transcrição em modo de ficheiro através do WebSocket
+Gemini Live (requer uma chave de API Gemini). O carregamento é convertido para PCM mono de 16 kHz com `ffmpeg`
+(deve estar em `PATH`, exceto quando o ficheiro já for um WAV PCM mono de 16 kHz), transmitido para a sessão e
+o texto finalizado é devolvido como `{ "text": "..." }`. Os campos de formulário opcionais `language` e `prompt`
+são encaminhados. Limites: os carregamentos superiores a 25 MiB ou áudio descodificado com mais de 10 minutos respondem
+com `413`; uma conversão que demore mais de 60 s é terminada e responde com `504`. A chave de API é enviada
+apenas no cabeçalho `x-goog-api-key`, nunca no URL do WebSocket.
 
 ---
 

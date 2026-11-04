@@ -1527,7 +1527,7 @@ A ṣàlàyé àwòṣe ìkànnì náà (`latest` = v3 títí di GA 4.0, `next` 
 
 ---
 
-## Àkọsílẹ̀ Ohùn
+## Ìkọ̀wé Ohùn
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1535,7 +1535,9 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Ṣàkọsílẹ̀ àwọn fáìlì ohùn nípa lílo olùpèsè STT èyíkéyìí tí a ti ṣètò. Apá àkọ́kọ́ ọ̀nà URL máa ń yan olùpèsè abinibi (`openai/…`, `deepgram/…`). Àwọn gateway tí wọ́n tún ń pín àwòṣe olùtajà mìíràn máa ń lo ID tí a sọ di pàtó
+Yí àwọn fáìlì ohun padà sí ọ̀rọ̀ ní lílo olùpèsè STT èyíkéyìí tí a ti ṣètò. Abala ọ̀nà
+àkọ́kọ́ máa ń yan olùpèsè abínibí (`openai/…`, `deepgram/…`). Àwọn gateway tí
+wọ́n tún ń pèsè àpẹẹrẹ olùtajà mìíràn máa ń lo id tó ní ìdánimọ̀ kún un
 (`openrouter/deepgram/nova-3`).
 
 **Ìbéèrè:**
@@ -1558,14 +1560,22 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Àwọn ID àwòṣe àpẹẹrẹ:** `openai/whisper-1` (ó nílò bọtìnì OpenAI),
-`openrouter/deepgram/nova-3` (ó nílò bọtìnì OpenRouter),
-`deepgram/nova-3` (ó nílò bọtìnì Deepgram abinibi). Ìbéèrè `deepgram/nova-3` tí kò ní àfikún
-kò lo OpenRouter.
+**Àpẹẹrẹ àwọn id àwòṣe:** `openai/whisper-1` (ó nílò kọ́kọ́rọ́ OpenAI),
+`openrouter/deepgram/nova-3` (ó nílò kọ́kọ́rọ́ OpenRouter),
+`deepgram/nova-3` (ó nílò kọ́kọ́rọ́ Deepgram abínibí). Ìbéèrè
+`deepgram/nova-3` tí kò ní àfikún kankan **kò** lo OpenRouter.
 
-**Àwọn ọ̀nà fáìlì tí a ń ṣe àtìlẹ́yìn:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+**Àwọn ọ̀nà fáìlì tí a ṣe àtìlẹ́yìn:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
 
----
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** ìkọ̀wé fáìlì sí ọ̀rọ̀ lórí
+WebSocket Gemini Live (ó nílò kọ́kọ́rọ́ API Gemini). A máa yí fáìlì tí a gbé sókè
+padà sí 16 kHz mono PCM pẹ̀lú `ffmpeg` (ó gbọ́dọ̀ wà lórí `PATH`, àyàfi tí fáìlì náà bá ti jẹ́
+16 kHz mono PCM WAV tẹ́lẹ̀), a sì máa rán án sí session náà ní ìṣàn; lẹ́yìn náà
+a máa dá ọ̀rọ̀ tí a parí padà gẹ́gẹ́ bí `{ "text": "..." }`. Àwọn fọ́ọ̀mù
+`language` àti `prompt` tó wà yàn fún ni a máa fi ránṣẹ́ síwájú. Ààlà: àwọn fáìlì
+tí ó ju 25 MiB lọ tàbí ohun tí a tú sílẹ̀ tí ó gùn ju ìṣẹ́jú mẹ́wàá lọ máa dáhùn
+`413`; bí ìyípadà bá gba ju s 60 lọ, a máa pa á, ó sì máa dáhùn `504`. A máa rán
+kọ́kọ́rọ́ API sínú àkọlé `x-goog-api-key` nìkan, kì í ṣe sínú URL WebSocket.
 
 ## Ìbámu pẹ̀lú Ollama
 

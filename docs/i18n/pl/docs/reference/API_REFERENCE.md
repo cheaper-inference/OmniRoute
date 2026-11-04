@@ -1595,7 +1595,10 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Transkrybuj pliki audio przy użyciu dowolnego skonfigurowanego dostawcy STT. Pierwszy segment ścieżki wybiera natywnego dostawcę (`openai/…`, `deepgram/…`). Bramy, które ponownie udostępniają model innego dostawcy, używają kwalifikowanego identyfikatora (`openrouter/deepgram/nova-3`).
+Transkrybuj pliki audio za pomocą dowolnego skonfigurowanego dostawcy STT. Pierwszy segment ścieżki
+wybiera natywnego dostawcę (`openai/…`, `deepgram/…`). Bramy, które ponownie
+udostępniają model innego dostawcy, używają kwalifikowanego identyfikatora
+(`openrouter/deepgram/nova-3`).
 
 **Żądanie:**
 
@@ -1619,10 +1622,17 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 **Przykładowe identyfikatory modeli:** `openai/whisper-1` (wymaga klucza OpenAI),
 `openrouter/deepgram/nova-3` (wymaga klucza OpenRouter),
-`deepgram/nova-3` (wymaga natywnego klucza Deepgram). Żądanie
-`deepgram/nova-3` bez prefiksu nie korzysta z OpenRouter.
+`deepgram/nova-3` (wymaga natywnego klucza Deepgram). Żądanie z użyciem samego
+`deepgram/nova-3` **nie** korzysta z OpenRouter.
 
 **Obsługiwane formaty:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** transkrypcja w trybie plikowym za pośrednictwem
+protokołu WebSocket Gemini Live (wymaga klucza API Gemini). Przesłany plik jest konwertowany do formatu
+16 kHz mono PCM za pomocą `ffmpeg` (musi znajdować się w `PATH`, chyba że plik jest już plikiem WAV
+16 kHz mono PCM), następnie przesyłany strumieniowo do sesji, a sfinalizowany tekst jest zwracany jako `{ "text": "..." }`. Opcjonalne pola formularza `language` i `prompt` są przekazywane dalej. Limity: przesłanie pliku większego niż 25 MiB lub dźwięku po dekodowaniu dłuższego niż 10 minut skutkuje odpowiedzią
+`413`; konwersja trwająca dłużej niż 60 s zostaje przerwana i skutkuje odpowiedzią `504`. Klucz API jest wysyłany
+wyłącznie w nagłówku `x-goog-api-key`, nigdy w adresie URL WebSocket.
 
 ---
 
