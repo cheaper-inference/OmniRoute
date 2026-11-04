@@ -1939,14 +1939,14 @@
     "unpricedUsageMore": "…සහ තව {count}ක්",
     "unpricedUsageConfigure": "මිල සකස් කරන්න",
     "unpricedUsageDismiss": "අවලංගු කරන්න",
-    "systemMetricsTitle": "System metrics",
-    "systemMetricsActive": "Monitoring active",
-    "systemMetricsLoading": "Loading...",
+    "systemMetricsTitle": "පද්ධති මිනුම්",
+    "systemMetricsActive": "අධීක්‍ෂණය සක්‍රීයයි",
+    "systemMetricsLoading": "පූරණය වෙමින්...",
     "systemMetricsCpu": "CPU",
-    "systemMetricsMemory": "Memory",
-    "systemMetricsHost": "VPS / Host",
+    "systemMetricsMemory": "මතකය",
+    "systemMetricsHost": "VPS / සත්කාරක",
     "systemMetricsCpuCount": "{count} vCPUs • {platform}",
-    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessCpu": "OmniRoute (ක්‍රියාවලිය)",
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
@@ -14183,12 +14183,12 @@
         "description": "මාර්ග ඉවත් වීම් අනුව ඉක්මන් කළ සැපයුම්කරු සඳහා, ඉක්මන් කළ සාමාන්‍යයක් සමඟ නිරීක්ෂණය කරන ලද මාර්ග ඉවත් වීම් ලක්ෂ්‍යය හෙළි කරන සාමාන්‍යයක් උරමක් කිරීම ඉක්මන් කිරීම. අනුපිළිවෙල පමණි, ඉවත් කිරීමක් නොවේ. PROXY_SKIP_RECENTLY_FAILED අවශ්‍ය වේ, එය අනුපිළිවෙල පාලනය කරයි. පෙරනිමියෙන් අක්‍රියයි: තේරීමේ අනුපිළිවෙල වඩාත් ප්‍රබලයි."
       },
       "PROXY_REFUSAL_MODEL_SCOPE": {
-        "label": "__MISSING__:Model-Scoped Quota Refusals",
-        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+        "label": "ආදර්ශ විෂය පථය ප්‍රතික්ෂේප කිරීම්",
+        "description": "opencode කෝටාව 429 එය පහර දුන් ආකෘතියට පමණක් යොදන්න, එම නිසා එම ප්‍රගමනයම අනෙකුත් මාදිලිවලට සේවය කරමින්, එම ආකෘතිය සාර්ථක වූ විට පමණක් එය ඉවත් කරන්න. ආකෘතියක් නොමැති පාරිභෝගිකයින් (තටාක භ්‍රමණය, උද්‍යානය සහ නැවත ධාවනය, පරිපාලක දෘශ්‍යතාව, තේරීම් ප්‍රේරකය, සෞඛ්‍ය ස්වීප්) තවමත් එය දකියි. ප්‍රතික්ෂේප කිරීම නිපදවන PROXY_SKIP_RECENTLY_FAILED අවශ්‍යයි. පෙරනිමියෙන් අක්‍රියයි: එක් මාදිලියක කෝටාව 429 සෑම ආකෘතියක් සඳහාම පිටවීම වෙන් කරයි."
       },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "ප්‍රොක්සි ලබා ගැනීම: දැඩි POST නැවත ධාවනය",
+        "description": "අසම්පූර්ණ ඉල්ලීමක් සඳහා (POST, PUT, PATCH, DELETE), ප්‍රවාහන දෝෂයකින් පසු (නැවුම් සොකට්, ප්‍රොක්සි ෆෝල්බැක්, ස්වදේශීය පසුබෑම) යලි යවන්න, දෝෂය කිසිවක් යවා නැති බව ඔප්පු වූ විට පමණි: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH හෝ සම්බන්ධ වීමේ කල් ඉකුත්වීම. ලිවීමෙන් පසු සොකට් දෝශයක් අදහස් වන්නේ උඩු ප්‍රවාහය ඉල්ලීම පිළිගෙන ඇති බවයි, එබැවින් නැවත යැවීමක් උත්පාදනය කර එය දෙවරක් බිල් කළ හැකිය. පෙරනිමියෙන් ක්‍රියාවිරහිතයි: කිසියම් ප්‍රවාහන දෝෂයක් මත නැවත ධාවනය කළ හැකි ශරීරයක් නැවත යවනු ලබන අතර, එය පරණ සංචිත සොකට් එකක් ද ප්‍රතිසාධනය කරයි."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "පිළිවෙල මාලිමා ලිපිනය",
@@ -14243,7 +14243,7 @@
         "description": "OpenCode බහු-ගොඩනැගිල්ලේ භාවිතා-සීමාව හේතුවෙන්, proxy-less ගොඩනැගිල්ලක් යටතේ ambient පූල් සන්දර්භයක් යටතේ egress-bucketed provider එකකින් 429 නිසා, එම egress ලකුණා නැවත ඉල්ලා ගැනීම වෙනුවට ඊළඟ ඉල්ලීම සඳහා සම්බන්ධතා පූල් එකෙන් තවත් සාමාජිකයෙකු ඉල්ලා ගනී. අනුපිළිවෙල, ඉවත් නොකරයි: පූල් එක කෙළවර වූ විට වර්තමාන ව්‍යුහය පවත්වා ගනී. පෙරනිමියෙන් අක්‍රියයි: 429 සෑමක්ම පෙර පරිද්දට සරිලි ප්‍රමාණයට පසු ගොඩනැගිල්ලකට මාරු වේ."
       },
       "OPENCODE_FREE_TIER_EGRESS_PROBE": {
-        "label": "OpenCode Free-Tier Egress Probe",
+        "label": "OpenCode සඳහා නිදහස් ස්ථර පිටවීම පිළිබඳ විමර්ශනය",
         "description": "OpenCode executor සඳහා, ප්‍රොක්සි ඉල්ලීමකට 403 හෝ 451 FreeTierError පිළිතුරු ලැබුණු විට සහ නිරීක්ෂණය කරන ලද මෙවලම් නැවත උත්සාහ කිරීම අසාර්ථක වූ විට හෝ අදාළ නොවූ විට, වෙනත් ප්‍රොක්සියක් හරහා ඉල්ලීම එක් වරක් යවන්න (වෙනත් ගිණුම් ප්‍රොක්සියක් හෝ වෙනත් සංචිත සාමාජිකයෙකු, කිසි විටෙකත් සෘජු සම්බන්ධතාවයක් නොවේ). එම පරීක්ෂණය 200 ට පිළිතුරු දෙන විට පමණක් ප්‍රොක්සි ප්‍රතික්ෂේප කිරීමේ මතකයේ පළමු පිටවීම වෙන් කර විමර්ශන ප්‍රතිචාරය ලබා දෙයි; දෙදෙනාම ප්රතික්ෂේප කරන විට, මුල් ප්රතික්ෂේප කිරීම ආපසු ලබා දෙන අතර කිසිවක් වාර්තා නොකෙරේ. එම ප්‍රතික්‍ෂේප කිරීමේ පාඨය සලකුණු කළ egress IP සහ ප්‍රතික්ෂේප කළ ඉල්ලීම් හැඩයක් ආවරණය කරයි, එබැවින් විමර්ශනය සාක්ෂි මගින් ඒවා වෙන් කරයි. පෙරනිමියෙන් අක්‍රියයි: ප්‍රතික්ෂේප කිරීම නොවෙනස්ව ආපසු එවනු ලැබේ."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
@@ -14427,8 +14427,8 @@
         "description": "combo ඉලක්කයක කතුවරයන් එකෙහි විවිධ ආදර්ශ ආරක්ෂක ක්‍රියාවකින් මතභා ස්‍රෝයානයක් (කෝඩ් හෝ විඳි cyber_policy / content_policy_violation) දැනුම් දෙන විට, ඉතිරි ඉලක්ක අලෙවියන් වෙනස් ආදර්ශ වුවත්, combo එක නවත්වන්න සහ එම මතභා ස්‍රෝයානය ආපතා කන්න, අනුප්‍රාප්තිවක් එවකරම ඊළඟ ඉලක්කයට යන අවස්ථාවට සරියටම තබා ගැනීම. පෙරනිමියෙන් අක්‍රියයි: මතභා ස්‍රෝයානය කිසිදා වරායකට උරුම නොකරන අතර, provider breaker එකක් ඉවැද්දර නොකරයි, සහ combo එක පෙර පරිද්ථ සේ ඊළඟ ඉලක්කයට යයි."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "ප්‍රතිචාර: ප්‍රවාහනයේදී පමණක් ජීවත් වන්න",
+        "description": "response.in_progress සිදුවීමක් වෙනුවට ප්‍රතිචාර තබාගැනීම් හිස් රේඛාවක් ලෙස යවන්න, එබැවින් කෘත්‍රිම සැණරුවකට නිල SDK හි සැබෑ ප්‍රතිචාරය ප්‍රතිස්ථාපනය කළ නොහැක. හිස් රේඛාවක් SSE සිදුවීමක් නොයවයි, එබැවින් සිදුවීම් මත පමණක් යළි සකසන සේවාදායක මුරකරු දිගු නිශ්ශබ්ද අවධියකදී යළි පිහිටුවන්නේ නැත. පෙරනිමියෙන් ක්‍රියාවිරහිතයි: ටයිමර විශේෂ-වලංගු response.in_progress සිදුවීම යවයි."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "සිසිලන කාලයේ නැවත උත්සාහය: 403/410 ප්‍රතික්ෂේප මඟ හරින්න",

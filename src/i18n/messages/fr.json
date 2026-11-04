@@ -14183,12 +14183,12 @@
         "description": "Pour les fournisseurs dont le quota est compartimenté par adresse d'egress, classe un membre du pool partageant l'adresse d'egress observée d'un membre récemment refusé juste en dessous des membres sains. Ordre uniquement, jamais exclu. Nécessite PROXY_SKIP_RECENTLY_FAILED, qui produit le signal de refus qu'il lit. Désactivé par défaut : l'ordre de sélection correspond exactement à la rotation standard."
       },
       "PROXY_REFUSAL_MODEL_SCOPE": {
-        "label": "__MISSING__:Model-Scoped Quota Refusals",
-        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+        "label": "Refus de quotas limités à un modèle",
+        "description": "Appliquez un quota opencode 429 uniquement au modèle qui l'a atteint, afin que la même sortie continue de servir d'autres modèles et ne l'effacez que lorsque ce modèle réussit. Les consommateurs qui n'ont pas de modèle (rotation du pool, parcage et relecture, visibilité de l'administrateur, déclencheur de sélecteur, balayage de santé) le voient toujours. Il faut PROXY_SKIP_RECENTLY_FAILED, ce qui produit le refus. Désactivé par défaut : le quota 429 d'un modèle réserve la sortie pour chaque modèle."
       },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "Récupération du proxy : relecture stricte POST",
+        "description": "Pour une requête non idempotente (POST, PUT, PATCH, DELETE), renvoyer après une erreur de transport (nouvelle socket, proxy fallback, native fallback) uniquement lorsque l'erreur prouve que rien n'a été envoyé : ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH ou un délai d'attente de connexion. Une erreur de socket après l'écriture peut signifier que l'amont a accepté la demande, donc un renvoi pourrait la générer et la facturer deux fois. Désactivé par défaut : un corps rejouable est renvoyé une fois en cas d'erreur de transport, ce qui récupère également un socket poolé obsolète."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "Journalisation de l'attribution de rotation",
@@ -14427,8 +14427,8 @@
         "description": "Lorsqu'une cible de combo répond par un refus exact lié à la politique de contenu (code ou type cyber_policy / content_policy_violation), arrêter le combo et renvoyer ce refus même lorsque les cibles restantes sont des modèles différents, au lieu de passer à la cible suivante. Désactivé par défaut : le refus ne met jamais le compte en période de refroidissement et ne déclenche pas le disjoncteur du fournisseur, et le combo passe à sa cible suivante exactement comme avant."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "Réponses : rester en vie pendant le transport uniquement",
+        "description": "Envoyez les réponses keepalives sous la forme d'une ligne vierge au lieu d'un événement response.in_progress, de sorte qu'un instantané synthétique ne pourra jamais remplacer la vraie réponse dans le SDK officiel. Une ligne vide ne distribue aucun événement SSE, donc un chien de garde client qui se réinitialise uniquement sur les événements ne sera pas réinitialisé pendant une longue phase silencieuse. Désactivé par défaut : les minuteries envoient l'événement response.in_progress conforme aux spécifications."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Réessai lors du cooldown : ignorer les refus 403/410",

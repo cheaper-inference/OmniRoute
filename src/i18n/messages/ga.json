@@ -14183,12 +14183,12 @@
         "description": "I gcás soláthraithe a ndéantar a gcuóta a bhuicéadú de réir seoladh aschuir, rangaigh ball linne a roinneann seoladh aschuir breathnaithe de chuid ball ar diúltaíodh dó le déanaí díreach faoi bhun ball folláin. Ord amháin, ní eisiatar riamh é. Teastaíonn PROXY_SKIP_RECENTLY_FAILED uaidh, rud a tháirgeann an comhartha diúltaithe a léann sé. Múchta de réir réamhshocraithe: is ionann ord an roghnaithe agus an ghnáthuainíocht go díreach."
       },
       "PROXY_REFUSAL_MODEL_SCOPE": {
-        "label": "__MISSING__:Model-Scoped Quota Refusals",
-        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+        "label": "Diúltuithe cuóta scóipe múnla",
+        "description": "Cuir cuóta opencode 429 i bhfeidhm ach amháin ar an múnla a bhuaileann é, mar sin coinníonn an bealach amach céanna ag freastal ar mhúnlaí eile, agus é a ghlanadh ach amháin nuair a éiríonn leis an tsamhail sin. Feiceann tomhaltóirí nach bhfuil aon mhúnla acu (uainíocht linnte, páirceáil agus athimirt, infheictheacht riaracháin, truicear roghnóir, scuabadh sláinte) é fós. Riachtanais PROXY_SKIP_RECENTLY_FAILED, a tháirgeann an diúltú. As de réir réamhshocraithe: cuireann cuóta 429 samhail amháin an bealach amach ar leataobh do gach samhail."
       },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "Beir seachfhreastalaí: replay POST",
+        "description": "Le hiarratas neamhchinnte (POST, PUT, PATCH, DELETE), athsheol tar éis earráid iompair (soicéad úr, seachfhreastalaí, cúl-tuilleamh dúchais) ach amháin nuair a chruthaíonn an earráid nár seoladh aon rud: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH nó teorainn ama ceangail. D'fhéadfadh earráid soicéad tar éis an scríobh a chiallaíonn gur ghlac an t-iarratas in aghaidh an tsrutha, agus mar sin d'fhéadfadh athsheoladh é a ghiniúint agus a bhilleáil faoi dhó. As de réir réamhshocraithe: déantar doicheall ar chorp inathimeartha uair amháin ar aon earráid iompair, rud a aisghabhann soicéad sean-chomhthiomsaithe freisin."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "Logáil Sannacháin Uainíochta",
@@ -14427,8 +14427,8 @@
         "description": "Nuair a fhreagraíonn sprioc theaglaime le diúltú beacht pholasaí ábhair (cód nó cineál cyber_policy / content_policy_violation), stop an teaglaim agus seol an diúltú sin ar ais fiú nuair is samhlacha difriúla iad na spriocanna atá fágtha, in ionad dul ar aghaidh go dtí an chéad sprioc eile. Múchta de réir réamhshocraithe: ní chuireann an diúltú fuarú ar an gcuntas riamh ná ní thuraisíonn sé scoradán an tsoláthraí, agus téann an teaglaim ar aghaidh go dtí an chéad sprioc eile díreach mar a bhí roimhe seo."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "Freagraí: coimeád beo ar an iompar amháin",
+        "description": "Seol Freagraí slán mar líne bhán in ionad imeacht response.in_progress, mar sin ní féidir le pictiúr sintéiseach choíche ionad an fhreagra iarbhír sa SDK oifigiúil . Ní sheolann líne bán aon imeacht SSE, mar sin ní athshocródh faire cliant a athshocraíonn ach ar imeachtaí le linn tréimhse fhada chiúin. Múchta de réir réamhshocraithe: seolann amadóirí an t-imeacht response.in_progress spec-valid."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Atriail Tréimhse Fuaraigh: Scipeáil Diúltuithe 403/410",

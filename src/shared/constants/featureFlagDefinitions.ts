@@ -1,15 +1,6 @@
-export interface FeatureFlagDefinition {
-  key: string;
-  label: string;
-  description: string;
-  descriptionI18nKey: string;
-  category: "security" | "network" | "policies" | "runtime" | "cli" | "health";
-  defaultValue: string;
-  type: "boolean" | "enum";
-  enumValues?: string[];
-  requiresRestart: boolean;
-  warningLevel?: "info" | "caution" | "danger";
-}
+import type { FeatureFlagDefinition } from "./featureFlagTypes";
+
+export type { FeatureFlagDefinition };
 
 export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
   // ──────────────── Security (10) ────────────────

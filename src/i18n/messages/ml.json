@@ -14260,12 +14260,12 @@
         "description": "ഇഗ്രെസ് വിലാസം അടിസ്ഥാനമാക്കി ക്വാട്ട നിശ്ചയിച്ചിട്ടുള്ള പ്രൊവൈഡർമാർക്കായി, അടുത്തിടെ നിരസിക്കപ്പെട്ട ഒരു അംഗത്തിന്റെ നിരീക്ഷിത ഇഗ്രെസ് വിലാസം പങ്കിടുന്ന പൂൾ അംഗത്തെ പ്രവർത്തനക്ഷമമായ അംഗങ്ങൾക്ക് തൊട്ടുതാഴെയായി റാങ്ക് ചെയ്യുക. ക്രമത്തിൽ മാറ്റം വരുത്താൻ മാത്രം, ഒരിക്കലും ഒഴിവാക്കില്ല. ഇതിന് PROXY_SKIP_RECENTLY_FAILED ആവശ്യമാണ്, ഇത് വായിക്കുന്ന നിരസിക്കൽ സിഗ്നൽ നൽകുന്നത് അതാണ്. ഡിഫോൾട്ടായി ഓഫ് ആണ്: തിരഞ്ഞെടുക്കൽ ക്രമം കൃത്യമായി സാധാരണ റൊട്ടേഷൻ മാത്രമായിരിക്കും."
       },
       "PROXY_REFUSAL_MODEL_SCOPE": {
-        "label": "__MISSING__:Model-Scoped Quota Refusals",
-        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+        "label": "മോഡൽ സ്കോപ്പ് ക്വാട്ട നിരസിക്കുന്നു",
+        "description": "ഒരു opencode ക്വാട്ട 429 അടിച്ച മോഡലിന് മാത്രം ബാധകമാക്കുക, അതിനാൽ അതേ മുന്നേറ്റം മറ്റ് മോഡലുകൾക്കും സേവനം നൽകുന്നു, ആ മോഡൽ വിജയിക്കുമ്പോൾ മാത്രം അത് മായ്ക്കുക. മോഡൽ ഇല്ലാത്ത ഉപഭോക്താക്കൾ (പൂൾ റൊട്ടേഷൻ, പാർക്ക്, റീപ്ലേ, അഡ്മിൻ ദൃശ്യപരത, സെലക്ടർ ട്രിഗർ, ഹെൽത്ത് സ്വീപ്പ്) ഇപ്പോഴും ഇത് കാണുന്നു. PROXY_SKIP_RECENTLY_FAILED ആവശ്യമാണ്, അത് നിരസിക്കൽ ഉണ്ടാക്കുന്നു. ഡിഫോൾട്ടായി ഓഫാണ്: ഒരു മോഡലിൻ്റെ ക്വാട്ട 429 എല്ലാ മോഡലുകൾക്കും എഗ്രെസ്സ് മാറ്റിവെക്കുന്നു."
       },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "പ്രോക്സി ലഭ്യമാക്കൽ: കർശനമായ POST റീപ്ലേ",
+        "description": "ഒരു നോൺ-ഇംപോട്ടൻ്റ് അഭ്യർത്ഥനയ്ക്കായി (POST, PUT, PATCH, DELETE), ഒരു ഗതാഗത പിശകിന് ശേഷം (ഫ്രഷ് സോക്കറ്റ്, പ്രോക്സി ഫാൾബാക്ക്, നേറ്റീവ് ഫാൾബാക്ക്) ഒന്നും അയച്ചിട്ടില്ലെന്ന് പിശക് തെളിയിക്കുമ്പോൾ മാത്രം വീണ്ടും അയയ്ക്കുക: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH അല്ലെങ്കിൽ കണക്റ്റ് ടൈംഔട്ട്. റൈറ്റിനു ശേഷമുള്ള ഒരു സോക്കറ്റ് പിശക്, അപ്സ്ട്രീം അഭ്യർത്ഥന സ്വീകരിച്ചുവെന്ന് അർത്ഥമാക്കാം, അതിനാൽ വീണ്ടും അയച്ചാൽ അത് രണ്ടുതവണ ജനറേറ്റ് ചെയ്യാനും ബിൽ ചെയ്യാനും കഴിയും. ഡിഫോൾട്ടായി ഓഫ്: ഏതെങ്കിലും ഗതാഗത പിശകിൽ ഒരിക്കൽ റീപ്ലേ ചെയ്യാവുന്ന ബോഡി വീണ്ടും അയച്ചു, അത് പഴകിയ പൂൾ ചെയ്ത സോക്കറ്റും വീണ്ടെടുക്കുന്നു."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "റൊട്ടേഷൻ ആട്രിബ്യൂഷൻ ലോഗിംഗ്",
@@ -14504,8 +14504,8 @@
         "description": "ഒരു കോംബോ ടാർഗെറ്റ് കൃത്യമായ കണ്ടന്റ്-പോളിസി നിരസിക്കൽ (കോഡ് അല്ലെങ്കിൽ തരം cyber_policy / content_policy_violation) നൽകി മറുപടി നൽകുമ്പോൾ, അടുത്ത ടാർഗെറ്റിലേക്ക് പോകുന്നതിന് പകരം, ബാക്കിയുള്ള ടാർഗെറ്റുകൾ വ്യത്യസ്‌ത മോഡലുകൾ ആണെങ്കിൽപ്പോലും കോംബോ അവസാനിപ്പിക്കുകയും ആ നിരസിക്കൽ തിരികെ നൽകുകയും ചെയ്യുക. സ്വതവേ ഓഫാണ്: ഈ നിരസിക്കൽ ഒരിക്കലും അക്കൗണ്ടിനെ കൂൾ ഡൗൺ ചെയ്യുകയോ പ്രൊവൈഡർ ബ്രേക്കർ ട്രിപ്പ് ചെയ്യുകയോ ഇല്ല, കൂടാതെ കോംബോ മുൻപത്തെപ്പോലെ തന്നെ അതിന്റെ അടുത്ത ടാർഗെറ്റിലേക്ക് നീങ്ങുകയും ചെയ്യും."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "പ്രതികരണങ്ങൾ: ഗതാഗതത്തിൽ മാത്രം സൂക്ഷിക്കുക",
+        "description": "ഒരു response.in_progress ഇവൻ്റിന് പകരം ഒരു ശൂന്യമായ വരിയായി പ്രതികരണങ്ങൾ സൂക്ഷിക്കുക, അതിനാൽ ഒരു സിന്തറ്റിക് സ്നാപ്പ്ഷോട്ടിന് ഒരിക്കലും ഔദ്യോഗിക SDK യിലെ യഥാർത്ഥ പ്രതികരണത്തെ മാറ്റിസ്ഥാപിക്കാൻ കഴിയില്ല. ഒരു ശൂന്യമായ വരി SSE ഇവൻ്റുകളൊന്നും അയയ്ക്കുന്നില്ല, അതിനാൽ ഇവൻ്റുകളിൽ മാത്രം റീസെറ്റ് ചെയ്യുന്ന ഒരു ക്ലയൻ്റ് വാച്ച്ഡോഗ് ദീർഘ നിശ്ശബ്ദ ഘട്ടത്തിൽ റീസെറ്റ് ചെയ്യില്ല. ഡിഫോൾട്ടായി ഓഫ്: ടൈമറുകൾ സ്പെക്ക്-സാധുതയുള്ള response.in_progress ഇവൻ്റ് അയയ്ക്കുന്നു."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "കൂൾഡൗൺ റീട്രൈ: 403/410 നിരസിക്കലുകൾ ഒഴിവാക്കുക",

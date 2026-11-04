@@ -22,13 +22,8 @@ import { resolveProxyForConnection } from "@/lib/db/settings";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
 import { safePercentage } from "@/shared/utils/formatting";
 import { isQuotaWindowBoundedParkEnabled } from "@/shared/utils/featureFlags";
-import {
-  saveQuotaSnapshot,
-  getLatestQuotaSnapshotsForConnection,
-  isUnreportedQuotaSnapshot,
-} from "@/lib/db/quotaSnapshots";
+import { getLatestQuotaSnapshotsForConnection } from "@/lib/db/quotaSnapshots";
 import { runQuotaSnapshotCleanup } from "./quotaSnapshotCleanup";
-import { recordProviderQuotaResetEventIfChanged } from "@/lib/db/quotaResetEvents";
 import {
   CODEX_SPARK_QUOTA_SESSION,
   CODEX_SPARK_QUOTA_WEEKLY,
@@ -59,7 +54,9 @@ import {
 import type { ClaudeQuotaMetadata } from "@omniroute/open-sse/services/usage/quota.ts";
 import { getRequestQuotaCacheState as getState } from "./quotaCacheReadView";
 import {
+  ACTIVE_TTL_MS,
   EXHAUSTED_MAX_PARK_MS,
+  parseDate,
   type QuotaCacheEntry,
   type QuotaInfo,
   unmarkQuotaHealthy,
@@ -67,9 +64,12 @@ import {
 } from "./quotaCacheState";
 import { isCodexPaidCreditsEnabled } from "@/lib/providers/codexPaidCredits";
 import { updateQuotaBurnMetrics } from "./quotaBurnMetrics";
+import { persistQuotaWindowSnapshots } from "./quotaSnapshotPersistence";
 
 // Keep markQuotaHealthy's public import path; the remaining leaf state stays internal.
 export { markQuotaHealthy } from "./quotaCacheState";
+// Snapshot-persistence helpers live in ./quotaSnapshotPersistence; keep the public path.
+export { quotaSnapshotChanged } from "./quotaSnapshotPersistence";
 
 export { normalizeQuotas, isExhausted, earliestResetAt, capParkWindow };
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -91,7 +91,6 @@ export interface QuotaWindowObservation {
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
-const ACTIVE_TTL_MS = 5 * 60 * 1000; // 5 minutes for active accounts
 const EXHAUSTED_TTL_MS = 5 * 60 * 1000; // 5 minutes for 429-sourced entries (no resetAt)
 const EXHAUSTED_REFRESH_MS = 5 * 60 * 1000; // 5 minutes: recheck exhausted accounts (aligned with TTL)
 const REFRESH_INTERVAL_MS = 60 * 1000; // Background tick every 1 minute
@@ -161,11 +160,6 @@ function advancedWindowResetAt(entry: QuotaCacheEntry, now: number): { exhausted
   return null;
 }
 
-function parseDate(value: string): number | null {
-  const ms = new Date(value).getTime();
-  return Number.isNaN(ms) ? null : ms;
-}
-
 function clampPercent(value: number): number {
   if (!Number.isFinite(value)) return 0;
   return Math.max(0, Math.min(100, value));
@@ -222,34 +216,6 @@ function earliestResetAt(quotas: Record<string, QuotaInfo>): string | null {
     }
   }
   return earliest;
-}
-
-/**
- * #4438 — Decide whether a quota snapshot row is worth persisting.
- *
- * The background refresh ticks every 60s for ALL connections, so idle accounts
- * (whose quota never changes) were generating 400K+ identical snapshot rows/day.
- * Returns true only when this window has no prior cached observation, or when its
- * `remaining_percentage` / `is_exhausted` differs from the last cached entry — so
- * the first observation and every real change persist, but idle no-op refreshes
- * stop writing. Pure (no I/O) for trivial unit testing.
- */
-export function quotaSnapshotChanged(
-  prior:
-    | { quotas?: Record<string, { remainingPercentage: number }>; exhausted?: boolean }
-    | null
-    | undefined,
-  windowKey: string,
-  remainingPercentage: number,
-  exhausted: boolean
-): boolean {
-  if (!prior) return true;
-  const priorWindow = prior.quotas?.[windowKey];
-  if (!priorWindow) return true;
-  return (
-    priorWindow.remainingPercentage !== remainingPercentage ||
-    (prior.exhausted ?? false) !== exhausted
-  );
 }
 
 function normalizeQuotas(rawQuotas: Record<string, unknown>): Record<string, QuotaInfo> {
@@ -808,157 +774,6 @@ export function isCodexSubscriptionExhaustedForRequest(
 /**
  * Store quota data for a connection (called by usage endpoint and background refresh).
  */
-
-/** A persisted snapshot already records this exact fresh Codex observation. */
-function savedCodexSnapshotMatches(
-  snapshots: ReturnType<typeof getLatestQuotaSnapshotsForConnection> | undefined,
-  windowKey: string,
-  remainingPercentage: number,
-  windowExhausted: boolean,
-  resetAt: string | null
-): boolean {
-  const snapshot = snapshots?.find((row) => {
-    const saved = row as unknown as Record<string, unknown>;
-    return (saved.windowKey ?? row.window_key) === windowKey;
-  });
-  if (!snapshot || isUnreportedQuotaSnapshot(snapshot)) return false;
-  const saved = snapshot as unknown as Record<string, unknown>;
-  const savedAt = parseDate(String(saved.createdAt ?? saved.created_at ?? ""));
-  if (savedAt === null || savedAt > Date.now() || Date.now() - savedAt >= ACTIVE_TTL_MS)
-    return false;
-  return (
-    Number(saved.remainingPercentage ?? saved.remaining_percentage) === remainingPercentage &&
-    Number(saved.isExhausted ?? saved.is_exhausted) === Number(windowExhausted) &&
-    (saved.nextResetAt ?? saved.next_reset_at ?? null) === resetAt
-  );
-}
-
-/**
- * #4438 stays unchanged for other providers. Codex also needs a fresh durable fact:
- * a warm cache timestamp does not prove its deduplicated snapshot survived restart.
- */
-function quotaWindowSnapshotIsCurrent(
-  connectionId: string,
-  provider: string,
-  windowKey: string,
-  remainingPercentage: number,
-  windowExhausted: boolean,
-  fractionReported: boolean,
-  reportedFlag: boolean | undefined,
-  resetAt: string | null,
-  prior: QuotaCacheEntry | null,
-  codexSnapshots: { current?: ReturnType<typeof getLatestQuotaSnapshotsForConnection> }
-): boolean {
-  const priorWindow = prior?.quotas?.[windowKey];
-  if (
-    quotaSnapshotChanged(prior, windowKey, remainingPercentage, windowExhausted) ||
-    (priorWindow !== undefined && priorWindow.fractionReported !== reportedFlag)
-  )
-    return false;
-  if (provider !== "codex" || !fractionReported) return true;
-  codexSnapshots.current ??= getLatestQuotaSnapshotsForConnection(connectionId);
-  return savedCodexSnapshotMatches(
-    codexSnapshots.current,
-    windowKey,
-    remainingPercentage,
-    windowExhausted,
-    resetAt
-  );
-}
-
-function persistOneQuotaWindow(
-  connectionId: string,
-  provider: string,
-  entry: QuotaCacheEntry,
-  windowKey: string,
-  quotaInfo: unknown,
-  quotas: Record<string, QuotaInfo>,
-  prior: QuotaCacheEntry | null,
-  retainedCodexWindows: Set<string>,
-  codexSnapshots: { current?: ReturnType<typeof getLatestQuotaSnapshotsForConnection> }
-): void {
-  if (!quotaInfo || typeof quotaInfo !== "object") return;
-  const normalized = quotas[windowKey];
-  // Retaining an old fact is not a new observation, including in restart snapshots.
-  if (!normalized || retainedCodexWindows.has(windowKey)) return;
-  const { remainingPercentage } = normalized;
-  const fractionReported = normalized.fractionReported !== false;
-  if (fractionReported) {
-    recordProviderQuotaResetEventIfChanged({
-      provider,
-      connectionId,
-      windowKey,
-      currentResetAt: normalized.resetAt,
-      currentRemainingPercentage: remainingPercentage,
-      previousObservation: prior?.quotas?.[windowKey]
-        ? {
-            resetAt: prior.quotas[windowKey].resetAt,
-            remainingPercentage: prior.quotas[windowKey].remainingPercentage,
-          }
-        : null,
-    });
-  }
-  // #5923 (Finding #5) — is_exhausted must reflect THIS window's own remaining
-  // percentage, not the connection-wide AND-across-all-windows aggregate
-  // (`entry.exhausted`). A connection with one 0% window and other non-zero
-  // windows previously never flagged that window's row as exhausted.
-  const windowExhausted = fractionReported && remainingPercentage <= 0;
-  if (
-    quotaWindowSnapshotIsCurrent(
-      connectionId,
-      provider,
-      windowKey,
-      remainingPercentage,
-      windowExhausted,
-      fractionReported,
-      normalized.fractionReported,
-      normalized.resetAt,
-      prior,
-      codexSnapshots
-    )
-  )
-    return;
-  try {
-    saveQuotaSnapshot({
-      provider,
-      connection_id: connectionId,
-      window_key: windowKey,
-      remaining_percentage: remainingPercentage,
-      is_exhausted: windowExhausted ? 1 : 0,
-      next_reset_at: normalized.resetAt,
-      window_duration_ms: entry.windowDurationMs ?? null,
-      // Persist only the interpretation, never the raw provider payload.
-      raw_data: fractionReported ? null : JSON.stringify({ fractionReported: false }),
-    });
-  } catch (error) {
-    console.error("[quotaCache] Failed to save snapshot:", error);
-  }
-}
-
-function persistQuotaWindowSnapshots(
-  connectionId: string,
-  provider: string,
-  entry: QuotaCacheEntry,
-  rawQuotas: Record<string, unknown>,
-  quotas: Record<string, QuotaInfo>,
-  prior: QuotaCacheEntry | null,
-  retainedCodexWindows: Set<string>
-): void {
-  const codexSnapshots: { current?: ReturnType<typeof getLatestQuotaSnapshotsForConnection> } = {};
-  for (const [windowKey, quotaInfo] of Object.entries(rawQuotas)) {
-    persistOneQuotaWindow(
-      connectionId,
-      provider,
-      entry,
-      windowKey,
-      quotaInfo,
-      quotas,
-      prior,
-      retainedCodexWindows,
-      codexSnapshots
-    );
-  }
-}
 
 /**
  * Unknown Codex telemetry must not erase or redate a still-fresh reported fact.

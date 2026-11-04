@@ -14260,12 +14260,12 @@
         "description": "ਉਨ੍ਹਾਂ ਪ੍ਰਦਾਤਾਵਾਂ ਲਈ ਜਿਨ੍ਹਾਂ ਦਾ ਕੋਟਾ ਐਗਰੈੱਸ ਪਤੇ ਅਨੁਸਾਰ ਨਿਰਧਾਰਤ ਕੀਤਾ ਗਿਆ ਹੈ, ਹਾਲ ਹੀ ਵਿੱਚ ਅਸਵੀਕਾਰ ਕੀਤੇ ਗਏ ਮੈਂਬਰ ਦੇ ਦੇਖੇ ਗਏ ਐਗਰੈੱਸ ਪਤੇ ਨੂੰ ਸਾਂਝਾ ਕਰਨ ਵਾਲੇ ਪੂਲ ਮੈਂਬਰ ਨੂੰ ਤੰਦਰੁਸਤ ਮੈਂਬਰਾਂ ਤੋਂ ਤੁਰੰਤ ਹੇਠਾਂ ਦਰਜਾ ਦਿਓ। ਸਿਰਫ਼ ਕ੍ਰਮਬੱਧ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਕਦੇ ਬਾਹਰ ਨਹੀਂ ਕੱਢਿਆ ਜਾਂਦਾ। PROXY_SKIP_RECENTLY_FAILED ਦੀ ਲੋੜ ਹੈ, ਜੋ ਅਸਵੀਕਾਰਤਾ ਸਿਗਨਲ ਤਿਆਰ ਕਰਦਾ ਹੈ ਜਿਸਨੂੰ ਇਹ ਪੜ੍ਹਦਾ ਹੈ। ਮੂਲ ਰੂਪ ਵਿੱਚ ਬੰਦ: ਚੋਣ ਕ੍ਰਮ ਬਿਲਕੁਲ ਸਧਾਰਨ ਰੋਟੇਸ਼ਨ ਹੁੰਦਾ ਹੈ।"
       },
       "PROXY_REFUSAL_MODEL_SCOPE": {
-        "label": "__MISSING__:Model-Scoped Quota Refusals",
-        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+        "label": "ਮਾਡਲ-ਸਕੋਪਡ ਕੋਟਾ ਅਸਵੀਕਾਰ",
+        "description": "ਇੱਕ opencode ਕੋਟਾ 429 ਨੂੰ ਸਿਰਫ਼ ਉਸ ਮਾਡਲ 'ਤੇ ਲਾਗੂ ਕਰੋ ਜੋ ਇਸਨੂੰ ਹਿੱਟ ਕਰਦਾ ਹੈ, ਇਸਲਈ ਉਹੀ ਨਿਕਾਸ ਦੂਜੇ ਮਾਡਲਾਂ ਦੀ ਸੇਵਾ ਕਰਦਾ ਰਹਿੰਦਾ ਹੈ, ਅਤੇ ਇਸਨੂੰ ਉਦੋਂ ਹੀ ਸਾਫ਼ ਕਰੋ ਜਦੋਂ ਉਹ ਮਾਡਲ ਸਫਲ ਹੁੰਦਾ ਹੈ। ਉਹ ਖਪਤਕਾਰ ਜਿਨ੍ਹਾਂ ਕੋਲ ਕੋਈ ਮਾਡਲ ਨਹੀਂ ਹੈ (ਪੂਲ ਰੋਟੇਸ਼ਨ, ਪਾਰਕ ਅਤੇ ਰੀਪਲੇਅ, ਐਡਮਿਨ ਵਿਜ਼ੀਬਿਲਟੀ, ਚੋਣਕਾਰ ਟਰਿੱਗਰ, ਹੈਲਥ ਸਵੀਪ) ਅਜੇ ਵੀ ਇਸਨੂੰ ਦੇਖਦੇ ਹਨ। PROXY_SKIP_RECENTLY_FAILED ਦੀ ਲੋੜ ਹੈ, ਜੋ ਇਨਕਾਰ ਪੈਦਾ ਕਰਦਾ ਹੈ। ਮੂਲ ਰੂਪ ਵਿੱਚ ਬੰਦ: ਇੱਕ ਮਾਡਲ ਦਾ ਕੋਟਾ 429 ਹਰੇਕ ਮਾਡਲ ਲਈ ਬਾਹਰ ਨਿਕਲਣ ਨੂੰ ਇੱਕ ਪਾਸੇ ਸੈੱਟ ਕਰਦਾ ਹੈ।"
       },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "ਪ੍ਰੌਕਸੀ ਫੈਚ: ਸਖਤ POST ਰੀਪਲੇਅ",
+        "description": "ਇੱਕ ਗੈਰ-ਇਦਮਿਕ ਬੇਨਤੀ (POST, PUT, PATCH, DELETE) ਲਈ, ਇੱਕ ਟ੍ਰਾਂਸਪੋਰਟ ਅਸ਼ੁੱਧੀ (ਤਾਜ਼ਾ ਸਾਕਟ, ਪ੍ਰੌਕਸੀ ਫਾਲਬੈਕ, ਮੂਲ ਫਾਲਬੈਕ) ਤੋਂ ਬਾਅਦ ਹੀ ਦੁਬਾਰਾ ਭੇਜੋ ਜਦੋਂ ਗਲਤੀ ਸਾਬਤ ਕਰਦੀ ਹੈ ਕਿ ਕੁਝ ਨਹੀਂ ਭੇਜਿਆ ਗਿਆ ਸੀ: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH ਜਾਂ ਇੱਕ ਕਨੈਕਟ ਟਾਈਮਆਊਟ। ਲਿਖਣ ਤੋਂ ਬਾਅਦ ਇੱਕ ਸਾਕਟ ਗਲਤੀ ਦਾ ਮਤਲਬ ਇਹ ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਅੱਪਸਟ੍ਰੀਮ ਨੇ ਬੇਨਤੀ ਨੂੰ ਸਵੀਕਾਰ ਕਰ ਲਿਆ ਹੈ, ਇਸਲਈ ਇੱਕ ਦੁਬਾਰਾ ਭੇਜੀ ਜਾ ਸਕਦੀ ਹੈ ਅਤੇ ਇਸਨੂੰ ਦੋ ਵਾਰ ਬਿਲ ਕਰ ਸਕਦਾ ਹੈ। ਡਿਫੌਲਟ ਤੌਰ 'ਤੇ ਬੰਦ: ਕਿਸੇ ਟਰਾਂਸਪੋਰਟ ਗਲਤੀ 'ਤੇ ਇੱਕ ਵਾਰ ਮੁੜ ਚਲਾਉਣ ਯੋਗ ਬਾਡੀ ਮੁੜ ਭੇਜੀ ਜਾਂਦੀ ਹੈ, ਜੋ ਇੱਕ ਪੁਰਾਣੀ ਪੂਲਡ ਸਾਕਟ ਨੂੰ ਵੀ ਮੁੜ ਪ੍ਰਾਪਤ ਕਰਦੀ ਹੈ।"
       },
       "ROTATION_ATTRIBUTION": {
         "label": "ਰੋਟੇਸ਼ਨ ਐਟਰੀਬਿਊਸ਼ਨ ਲੌਗਿੰਗ",
@@ -14504,8 +14504,8 @@
         "description": "ਜਦੋਂ ਕੋਈ ਕੰਬੋ ਟਾਰਗੇਟ ਇੱਕ ਸਟੀਕ ਸਮੱਗਰੀ-ਨੀਤੀ ਅਸਵੀਕਾਰ (ਕੋਡ ਜਾਂ ਕਿਸਮ cyber_policy / content_policy_violation) ਨਾਲ ਜਵਾਬ ਦਿੰਦਾ ਹੈ, ਤਾਂ ਅਗਲੇ ਟਾਰਗੇਟ 'ਤੇ ਜਾਣ ਦੀ ਬਜਾਏ ਕੰਬੋ ਨੂੰ ਰੋਕੋ ਅਤੇ ਉਹ ਅਸਵੀਕਾਰ ਵਾਪਸ ਕਰੋ, ਭਾਵੇਂ ਬਾਕੀ ਬਚੇ ਟਾਰਗੇਟ ਵੱਖ-ਵੱਖ ਮਾਡਲ ਹੋਣ। ਪੂਰਵ-ਨਿਰਧਾਰਤ ਤੌਰ 'ਤੇ ਬੰਦ: ਅਸਵੀਕਾਰ ਕਦੇ ਵੀ ਖਾਤੇ ਨੂੰ ਕੂਲ ਨਹੀਂ ਕਰਦਾ ਜਾਂ ਪ੍ਰੋਵਾਈਡਰ ਬ੍ਰੇਕਰ ਨੂੰ ਟ੍ਰਿਪ ਨਹੀਂ ਕਰਦਾ, ਅਤੇ ਕੰਬੋ ਬਿਲਕੁਲ ਪਹਿਲਾਂ ਵਾਂਗ ਆਪਣੇ ਅਗਲੇ ਟਾਰਗੇਟ ਵੱਲ ਵਧਦਾ ਹੈ।"
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "ਜਵਾਬ: ਸਿਰਫ ਟ੍ਰਾਂਸਪੋਰਟ ਉੱਤੇ ਜਿੰਦਾ ਰੱਖੋ",
+        "description": "ਜਵਾਬਾਂ ਨੂੰ ਇੱਕ response.in_progress ਇਵੈਂਟ ਦੀ ਬਜਾਏ ਇੱਕ ਖਾਲੀ ਲਾਈਨ ਦੇ ਰੂਪ ਵਿੱਚ ਰੱਖੋ, ਇਸਲਈ ਇੱਕ ਸਿੰਥੈਟਿਕ ਸਨੈਪਸ਼ਾਟ ਕਦੇ ਵੀ ਅਧਿਕਾਰਤ SDK ਵਿੱਚ ਅਸਲ ਜਵਾਬ ਨੂੰ ਨਹੀਂ ਬਦਲ ਸਕਦਾ। ਇੱਕ ਖਾਲੀ ਲਾਈਨ ਕੋਈ SSE ਇਵੈਂਟ ਨਹੀਂ ਭੇਜਦੀ ਹੈ, ਇਸਲਈ ਇੱਕ ਕਲਾਇੰਟ ਵਾਚਡੌਗ ਜੋ ਸਿਰਫ ਇਵੈਂਟਾਂ 'ਤੇ ਰੀਸੈਟ ਹੁੰਦਾ ਹੈ ਇੱਕ ਲੰਬੇ ਚੁੱਪ ਪੜਾਅ ਦੌਰਾਨ ਰੀਸੈਟ ਨਹੀਂ ਕੀਤਾ ਜਾਵੇਗਾ। ਮੂਲ ਰੂਪ ਵਿੱਚ ਬੰਦ: ਟਾਈਮਰ ਵਿਸ਼ੇਸ਼-ਵੈਧ response.in_progress ਇਵੈਂਟ ਭੇਜਦੇ ਹਨ।"
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "ਕੂਲਡਾਊਨ ਮੁੜ-ਕੋਸ਼ਿਸ਼: 403/410 ਅਸਵੀਕਾਰੀਆਂ ਨੂੰ ਛੱਡੋ",
