@@ -1573,9 +1573,9 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-ಯಾವುದೇ ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾದ STT ಪೂರೈಕೆದಾರವನ್ನು ಬಳಸಿಕೊಂಡು ಆಡಿಯೋ ಫೈಲ್ಗಳನ್ನು ಪ್ರತಿಲಿಪಿ ಮಾಡಿ. ಮೊದಲ ಪಾಥ್
-ಸೆಗ್ಮೆಂಟ್ ಸ್ಥಳೀಯ ಪೂರೈಕೆದಾರರನ್ನು ಆಯ್ಕೆಮಾಡುತ್ತದೆ (`openai/…`, `deepgram/…`). ಮತ್ತೊಂದು ವೆಂಡರ್ನ
-ಮಾದರಿಯನ್ನು ಮರು-ರಫ್ತು ಮಾಡುವ ಗೇಟ್ವೇಗಳು ಅರ್ಹಿತ ಐಡಿಯನ್ನು ಬಳಸುತ್ತವೆ
+ಯಾವುದೇ ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾದ STT ಪೂರೈಕೆದಾರರನ್ನು ಬಳಸಿಕೊಂಡು ಆಡಿಯೋ ಫೈಲ್ಗಳ ಪ್ರತಿಲಿಪಿ ಮಾಡಿ. ಮೊದಲ ಪಾತ್
+ಸೆಗ್ಮೆಂಟ್ ಸ್ಥಳೀಯ ಪೂರೈಕೆದಾರರನ್ನು ಆಯ್ಕೆಮಾಡುತ್ತದೆ (`openai/…`, `deepgram/…`). ಮತ್ತೊಬ್ಬ
+ವೆಂಡರ್ನ ಮಾದರಿಯನ್ನು ಮರು-ರಫ್ತು ಮಾಡುವ ಗೇಟ್ವೇಗಳು ಅರ್ಹತೆಯಿರುವ ಐಡಿಯನ್ನು ಬಳಸುತ್ತವೆ
 (`openrouter/deepgram/nova-3`).
 
 **ವಿನಂತಿ:**
@@ -1598,14 +1598,22 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**ಉದಾಹರಣೆ ಮಾದರಿ ಐಡಿಗಳು:** `openai/whisper-1` (OpenAI ಕೀ ಅಗತ್ಯವಿದೆ),
+**ಮಾದರಿ ಐಡಿಗಳ ಉದಾಹರಣೆಗಳು:** `openai/whisper-1` (OpenAI ಕೀ ಅಗತ್ಯವಿದೆ),
 `openrouter/deepgram/nova-3` (OpenRouter ಕೀ ಅಗತ್ಯವಿದೆ),
-`deepgram/nova-3` (ಸ್ಥಳೀಯ Deepgram ಕೀ ಅಗತ್ಯವಿದೆ). ಸರಳ
+`deepgram/nova-3` (ಸ್ಥಳೀಯ Deepgram ಕೀ ಅಗತ್ಯವಿದೆ). ಕೇವಲ
 `deepgram/nova-3` ವಿನಂತಿಯು **OpenRouter ಅನ್ನು ಬಳಸುವುದಿಲ್ಲ**.
 
-**ಬೆಂಬಲಿತ ಫಾರ್ಮ್ಯಾಟ್ಗಳು:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+**ಬೆಂಬಲಿತ ಸ್ವರೂಪಗಳು:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
 
----
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** Gemini Live
+WebSocket ಮೂಲಕ ಫೈಲ್-ಮೋಡ್ ಪ್ರತಿಲಿಪಿ (Gemini API ಕೀ ಅಗತ್ಯವಿದೆ). ಅಪ್ಲೋಡ್ ಅನ್ನು `ffmpeg`
+ಬಳಸಿ 16 kHz ಮೊನೊ PCM ಗೆ ಪರಿವರ್ತಿಸಲಾಗುತ್ತದೆ
+(ಫೈಲ್ ಈಗಾಗಲೇ 16 kHz ಮೊನೊ PCM WAV ಆಗಿದ್ದರೆ `PATH` ನಲ್ಲಿ ಇರಬೇಕೆಂಬ ಅಗತ್ಯವಿಲ್ಲ), ಸೆಷನ್ಗೆ
+ಸ್ಟ್ರೀಮ್ ಮಾಡಲಾಗುತ್ತದೆ ಮತ್ತು ಅಂತಿಮಗೊಳಿಸಿದ ಪಠ್ಯವನ್ನು `{ "text": "..." }` ರೂಪದಲ್ಲಿ ಹಿಂತಿರುಗಿಸಲಾಗುತ್ತದೆ. ಐಚ್ಛಿಕ
+`language` ಮತ್ತು `prompt` ಫಾರ್ಮ್ ಕ್ಷೇತ್ರಗಳನ್ನು ಫಾರ್ವರ್ಡ್ ಮಾಡಲಾಗುತ್ತದೆ. ಮಿತಿಗಳು: 25 MiB ಗಿಂತ ಹೆಚ್ಚಿನ ಅಪ್ಲೋಡ್ಗಳು ಅಥವಾ
+10 ನಿಮಿಷಗಳಿಗಿಂತ ಉದ್ದವಾದ ಡಿಕೋಡ್ ಮಾಡಿದ ಆಡಿಯೋಗೆ `413` ಪ್ರತಿಕ್ರಿಯೆ ಬರುತ್ತದೆ; ಪರಿವರ್ತನೆ
+60 ಸೆಕೆಂಡುಗಳಿಗಿಂತ ಹೆಚ್ಚು ಕಾಲ ನಡೆದರೆ ಅದನ್ನು ನಿಲ್ಲಿಸಲಾಗುತ್ತದೆ ಮತ್ತು `504` ಪ್ರತಿಕ್ರಿಯೆ ಬರುತ್ತದೆ. API ಕೀಯನ್ನು
+`x-goog-api-key` ಹೆಡರ್ನಲ್ಲಿ ಮಾತ್ರ ಕಳುಹಿಸಲಾಗುತ್ತದೆ, WebSocket URL ನಲ್ಲಿ ಎಂದಿಗೂ ಅಲ್ಲ.
 
 ## Ollama ಹೊಂದಾಣಿಕೆ
 
@@ -1659,7 +1667,7 @@ curl -X POST https://your-host.example/api/v1/vscode/YOUR_API_KEY/chat/completio
 ## ಟೆಲಿಮೆಟ್ರಿ
 
 ```bash
-# Get latency telemetry summary (p50/p95/p99 per provider)
+# ಪ್ರತಿ ಪೂರೈಕೆದಾರರಿಗೆ ಲೇಟೆನ್ಸಿ ಟೆಲಿಮೆಟ್ರಿ ಸಾರಾಂಶವನ್ನು ಪಡೆಯಿರಿ (p50/p95/p99)
 GET /api/telemetry/summary
 ```
 
@@ -1679,10 +1687,10 @@ GET /api/telemetry/summary
 ## ಬಜೆಟ್
 
 ```bash
-# Get budget status for all API keys
+# ಎಲ್ಲಾ API ಕೀಗಳ ಬಜೆಟ್ ಸ್ಥಿತಿಯನ್ನು ಪಡೆಯಿರಿ
 GET /api/usage/budget
 
-# Set or update a budget
+# ಬಜೆಟ್ ಹೊಂದಿಸಿ ಅಥವಾ ನವೀಕರಿಸಿ
 POST /api/usage/budget
 Content-Type: application/json
 
@@ -1696,7 +1704,7 @@ Content-Type: application/json
 }
 ```
 
-> **ಸ್ಕೀಮಾ ಟಿಪ್ಪಣಿಗಳು** (`setBudgetSchema`): `apiKeyId` ಅಗತ್ಯವಿದೆ; `dailyLimitUsd`, `weeklyLimitUsd`, ಅಥವಾ `monthlyLimitUsd` ಗಳಲ್ಲಿ ಕನಿಷ್ಠ ಒಂದಾದರೂ ಶೂನ್ಯಕ್ಕಿಂತ ಹೆಚ್ಚಿರಬೇಕು. ಐಚ್ಛಿಕ ಫೀಲ್ಡ್ಗಳು: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). ಲೆಗಸಿ `{keyId, limit, period}` ಆಕಾರವು `400 Bad Request` ಅನ್ನು ಹಿಂತಿರುಗಿಸುತ್ತದೆ.
+> **ಸ್ಕೀಮಾ ಟಿಪ್ಪಣಿಗಳು** (`setBudgetSchema`): `apiKeyId` ಅಗತ್ಯವಿದೆ; `dailyLimitUsd`, `weeklyLimitUsd`, ಅಥವಾ `monthlyLimitUsd` ಇವುಗಳಲ್ಲಿ ಕನಿಷ್ಠ ಒಂದಾದರೂ ಶೂನ್ಯಕ್ಕಿಂತ ಹೆಚ್ಚಿರಬೇಕು. ಐಚ್ಛಿಕ ಕ್ಷೇತ್ರಗಳು: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). ಪರಂಪರೆಯ `{keyId, limit, period}` ಆಕಾರವು `400 Bad Request` ಅನ್ನು ಹಿಂತಿರುಗಿಸುತ್ತದೆ.
 
 ## ಟೋಕನ್ ಮಿತಿಗಳು
 

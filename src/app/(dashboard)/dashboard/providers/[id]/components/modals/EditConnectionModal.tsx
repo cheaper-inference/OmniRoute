@@ -20,8 +20,6 @@ import {
 } from "@/shared/constants/antigravityClientProfile";
 import { parseExtraApiKeys } from "@/shared/utils/parseApiKeys";
 import { providerHasFreeModels } from "@/shared/utils/freeModels";
-import { maskEmail } from "@/shared/utils/maskEmail";
-import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { useNotificationStore } from "@/store/notificationStore";
 import { type CodexServiceTier } from "@/lib/providers/requestDefaults";
 import type { ConnectionRateLimitOverrides } from "@/lib/db/providers/columns";
@@ -75,8 +73,12 @@ import { assignEditApiKeyProviderSpecificData } from "./connectionProviderSpecif
 import { isM365TierCapableProvider, normalizeM365TierValue, type M365TierValue } from "./m365Tier";
 import ProviderTierField from "./ProviderTierField";
 import AgentrouterConsoleFields from "./AgentrouterConsoleFields";
+import CommandCodeZdrToggle from "./CommandCodeZdrToggle";
+import { buildProviderValidateRequestBody } from "./providerValidateRequestBody";
 import { getVertexCredentialCopy } from "./vertexCredentialCopy";
 import QuotaScrapingFields, { EMPTY_QUOTA_SCRAPING_FIELDS } from "./QuotaScrapingFields";
+import { useGitHubCreditLimitDraft } from "./GitHubCreditLimitField";
+import ConnectionEmailCard from "./ConnectionEmailCard";
 import GlmTeamQuotaFields, { EMPTY_GLM_TEAM_QUOTA_FIELDS } from "./GlmTeamQuotaFields";
 import ProviderRegionField, { getProviderRegionConfig } from "./AlibabaProviderRegionField";
 import PeakHourProtectionEditor, {
@@ -178,6 +180,7 @@ export default function EditConnectionModal({
     passthroughModels: connectionProviderSpecificData?.passthroughModels === true,
     disableCooling: connectionProviderSpecificData?.disableCooling === true,
     importFreeModelsOnly: connectionProviderSpecificData?.importFreeModelsOnly === true,
+    commandCodeZdrEnabled: connectionProviderSpecificData?.zdrEnabled === true,
     tunnelId: stringField(connectionProviderSpecificData?.tunnelId),
     runtimeKey: "",
     connectorName:
@@ -197,12 +200,12 @@ export default function EditConnectionModal({
   const [doctorLoading, setDoctorLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const testModel = useConnectionTestModelDraft(isOpen ? connection : null, saving);
+  const credits = useGitHubCreditLimitDraft(isOpen ? connection : null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [extraApiKeys, setExtraApiKeys] = useState<string[]>([]);
   const [newExtraKey, setNewExtraKey] = useState("");
   const [apiKeyHealth, setApiKeyHealth] = useState<ApiKeyHealthMap>({});
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const showEmail = useEmailPrivacyStore((state) => state.emailsVisible);
   // #6147 — built-in providers can opt in to an advanced base-URL override.
   // OAuth connections are excluded: their save path does not persist
   // providerSpecificData.baseUrl.
@@ -406,6 +409,7 @@ export default function EditConnectionModal({
         passthroughModels: connection?.providerSpecificData?.passthroughModels === true,
         disableCooling: connection?.providerSpecificData?.disableCooling === true,
         importFreeModelsOnly: connection?.providerSpecificData?.importFreeModelsOnly === true,
+        commandCodeZdrEnabled: connection.providerSpecificData?.zdrEnabled === true,
         tunnelId: stringField(connection.providerSpecificData?.tunnelId),
         runtimeKey: "",
         connectorName:
@@ -476,6 +480,18 @@ export default function EditConnectionModal({
       setTesting(false);
     }
   };
+  const validateRequestBody = (apiKey: string) =>
+    JSON.stringify(
+      buildProviderValidateRequestBody({
+        provider,
+        apiKey,
+        formData,
+        isAwsPolly,
+        showsRegion,
+        defaultRegion,
+        isChatGptWebCodex,
+      })
+    );
   const handleValidate = async () => {
     if (
       !provider ||
@@ -491,24 +507,7 @@ export default function EditConnectionModal({
       const res = await fetch("/api/providers/validate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          provider,
-          apiKey: formData.apiKey,
-          validationModelId: formData.validationModelId || undefined,
-          customUserAgent: formData.customUserAgent.trim() || undefined,
-          baseUrl: formData.baseUrl.trim() || undefined,
-          region: isAwsPolly
-            ? formData.region.trim() || "us-east-1"
-            : showsRegion
-              ? formData.region.trim() || defaultRegion
-              : undefined,
-          accessKeyId: isAwsPolly ? formData.awsAccessKeyId.trim() || undefined : undefined,
-          sessionToken: isAwsPolly ? formData.awsSessionToken.trim() || undefined : undefined,
-          cx: formData.cx.trim() || undefined,
-          runtimeKey: isChatGptWebCodex ? formData.runtimeKey.trim() || undefined : undefined,
-          tunnelId: isChatGptWebCodex ? formData.tunnelId.trim() || undefined : undefined,
-          connectorName: isChatGptWebCodex ? formData.connectorName.trim() || undefined : undefined,
-        }),
+        body: validateRequestBody(formData.apiKey),
       });
       const data = await res.json();
       setValidationResult(data.valid ? "success" : "failed");
@@ -595,26 +594,7 @@ export default function EditConnectionModal({
             const res = await fetch("/api/providers/validate", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                provider,
-                apiKey: formData.apiKey,
-                validationModelId: formData.validationModelId || undefined,
-                customUserAgent: formData.customUserAgent.trim() || undefined,
-                baseUrl: formData.baseUrl.trim() || undefined,
-                region: isAwsPolly
-                  ? formData.region.trim() || "us-east-1"
-                  : showsRegion
-                    ? formData.region.trim() || defaultRegion
-                    : undefined,
-                accessKeyId: isAwsPolly ? formData.awsAccessKeyId.trim() || undefined : undefined,
-                sessionToken: isAwsPolly ? formData.awsSessionToken.trim() || undefined : undefined,
-                cx: formData.cx.trim() || undefined,
-                runtimeKey: isChatGptWebCodex ? formData.runtimeKey.trim() || undefined : undefined,
-                tunnelId: isChatGptWebCodex ? formData.tunnelId.trim() || undefined : undefined,
-                connectorName: isChatGptWebCodex
-                  ? formData.connectorName.trim() || undefined
-                  : undefined,
-              }),
+              body: validateRequestBody(formData.apiKey),
             });
             const data = await res.json();
             isValid = !!data.valid;
@@ -757,6 +737,7 @@ export default function EditConnectionModal({
         updates.providerSpecificData.importFreeModelsOnly = formData.importFreeModelsOnly === true;
       }
       testModel.applyTo(updates.providerSpecificData);
+      if (!credits.applyTo(updates.providerSpecificData)) return setSaveError(credits.error);
       const error = (await onSave(updates)) as void | unknown;
       if (error) {
         setSaveError(typeof error === "string" ? error : t("failedSaveConnection"));
@@ -842,6 +823,7 @@ export default function EditConnectionModal({
             onChange={(patch) => setFormData({ ...formData, ...patch })}
           />
         )}
+        {credits.field}
         {isClaude && (
           <ClaudeConnectionFields
             values={formData}
@@ -871,6 +853,11 @@ export default function EditConnectionModal({
           )}
           {preserveEncryptedReasoningToggle}
           {openaiResponsesStoreToggle}
+          <CommandCodeZdrToggle
+            provider={provider}
+            checked={formData.commandCodeZdrEnabled}
+            onChange={(checked) => setFormData({ ...formData, commandCodeZdrEnabled: checked })}
+          />
           <Toggle
             checked={formData.disableCooling}
             onChange={(checked) => setFormData({ ...formData, disableCooling: checked })}
@@ -919,14 +906,7 @@ export default function EditConnectionModal({
             />
           </div>
         )}
-        {isOAuth && connection.email && (
-          <div className="bg-bg-subtle p-3 rounded-lg">
-            <p className="text-sm text-text-muted mb-1">{t("email")}</p>
-            <p className="font-medium" title={showEmail ? connection.email : undefined}>
-              {showEmail ? connection.email : maskEmail(connection.email)}
-            </p>
-          </div>
-        )}
+        {isOAuth && <ConnectionEmailCard email={connection.email} label={t("email")} />}
         <Input
           label={t("healthCheckMinutes")}
           type="number"
