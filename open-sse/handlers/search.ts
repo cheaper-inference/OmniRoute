@@ -37,6 +37,7 @@ import { buildJinaSearchRequest, extractJinaSearchItems } from "./search/jinaSea
 import * as xSearch from "./search/xSearch.ts";
 import * as xquikSearch from "./search/xquikSearch.ts";
 import * as anysearchSearch from "./search/anysearchSearch.ts";
+import * as keenableSearch from "./search/keenableSearch.ts";
 import * as kimiSearch from "./search/kimiSearch.ts";
 import * as parallelSearch from "./search/parallelSearch.ts";
 import { freeWebSearch } from "../services/freeWebSearch.ts";
@@ -758,6 +759,7 @@ type SearchRequestBuilder = (
 ) => { url: string; init: RequestInit };
 
 const requestBuilders: Record<string, SearchRequestBuilder> = {
+  "keenable-search": keenableSearch.buildKeenableSearchRequest,
   "serper-search": buildSerperRequest,
   "brave-search": buildBraveRequest,
   context7: buildContext7Request,
@@ -1391,6 +1393,7 @@ type SearchResponseNormalizer = (
 ) => { results: SearchResult[]; totalResults: number | null };
 
 const responseNormalizers: Record<string, SearchResponseNormalizer> = {
+  "keenable-search": (data) => keenableSearch.normalizeKeenableSearchResponse(data, makeResult),
   "serper-search": normalizeSerperResponse,
   "brave-search": normalizeBraveResponse,
   context7: normalizeContext7Response,

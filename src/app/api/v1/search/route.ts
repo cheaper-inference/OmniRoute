@@ -363,7 +363,12 @@ async function postHandler(request: Request, context: unknown) {
     // failover so out-of-the-box search still works when no credentialed provider
     // is configured. Only used when no real alternate was found above.
     if (!alternateProviderId) {
-      for (const provider of Object.values(SEARCH_PROVIDERS)) {
+      // Prefer general-purpose DuckDuckGo to docs-only Context7 when the
+      // default Keenable search fails and there are no paid alternatives.
+      const freeFallbacks = [...Object.values(SEARCH_PROVIDERS)].sort(
+        (a, b) => Number(b.id === "duckduckgo-free") - Number(a.id === "duckduckgo-free")
+      );
+      for (const provider of freeFallbacks) {
         if (!provider.fallbackOnly || provider.id === providerConfig.id) continue;
         if (isUnconfiguredLoopbackSearchProvider(provider)) continue;
         if (!supportsSearchType(provider, body.search_type)) continue;

@@ -69,6 +69,24 @@ export interface SearchProviderConfig {
 }
 
 export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
+  // Official keyless Keenable REST API; non-fallback so it is the default web
+  // search provider while existing paid providers remain available on errors.
+  "keenable-search": {
+    id: "keenable-search",
+    name: "Keenable Search",
+    baseUrl: "https://api.keenable.ai/v1/search/public",
+    method: "POST",
+    authType: "none",
+    authHeader: "none",
+    costPerQuery: 0,
+    freeMonthlyQuota: 999999,
+    searchTypes: ["web"],
+    defaultMaxResults: 5,
+    maxMaxResults: 50,
+    timeoutMs: 12_000,
+    cacheTTLMs: 5 * 60 * 1000,
+  },
+
   "serper-search": {
     id: "serper-search",
     name: "Serper Search",
@@ -520,6 +538,8 @@ export const SEARCH_PROVIDER_ALIASES: Record<string, string> = {
   "jina-ai": "jina-search",
   jina: "jina-search",
   brave: "brave-search",
+  keenable: "keenable-search",
+  keenable_search: "keenable-search",
   serper: "serper-search",
   perplexity: "perplexity-search",
   exa: "exa-search",

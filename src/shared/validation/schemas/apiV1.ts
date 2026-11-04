@@ -612,6 +612,8 @@ export const v1SearchSchema = z.preprocess(
     if (o.provider === "xquik" || o.provider === "xquik_search") o.provider = "xquik-search";
     if (o.provider === "anysearch" || o.provider === "anysearch_search")
       o.provider = "anysearch-search";
+    if (o.provider === "keenable" || o.provider === "keenable_search")
+      o.provider = "keenable-search";
     if (o.provider === "x-search" || o.provider === "xquik-search") o.search_type = "x";
     return o;
   },

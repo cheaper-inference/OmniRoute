@@ -95,6 +95,9 @@ async function resolveProviderStatus(
   providerId: string,
   useCredentialFallback = true
 ): Promise<ProviderStatus> {
+  // Keenable's public REST endpoint needs no credentials, so the dashboard
+  // must not present it as missing an API key.
+  if (providerId === "keenable-search") return "configured";
   try {
     const credentials = await getProviderCredentials(providerId).catch(() => null);
 

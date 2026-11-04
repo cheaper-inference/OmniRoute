@@ -2,7 +2,7 @@
  * Integration tests for GET /api/search/providers — extended catalog (F4).
  *
  * Tests:
- * - Returns 29 items total (22 search + 7 fetch providers).
+ * - Returns 30 items total (23 search + 7 fetch providers).
  * - Each item carries the correct `kind` field.
  * - Status reflects actual DB credential state:
  *   - "configured"  when an active, non-rate-limited connection exists.
@@ -51,7 +51,7 @@ const route = await import("../../src/app/api/search/providers/route.ts");
 // 21 search-kind providers: serper, brave, perplexity, exa, tavily, nimble-search, firecrawl,
 // google-pse, linkup, searchapi, youcom, searxng, ollama, zai, jina-search, anysearch-search,
 // context7 (#11140), duckduckgo-free, x-search, xquik-search, parallel-search, kimi-search.
-const EXPECTED_SEARCH_COUNT = 22;
+const EXPECTED_SEARCH_COUNT = 23;
 const EXPECTED_FETCH_COUNT = 7;
 const EXPECTED_TOTAL = EXPECTED_SEARCH_COUNT + EXPECTED_FETCH_COUNT;
 
@@ -138,7 +138,7 @@ test("search-providers-catalog: returns 401 for unauthenticated requests when au
   assert.ok(!bodyStr.includes(" at /"), "error body must not contain stack trace");
 });
 
-test("search-providers-catalog: returns 29 providers (22 search + 7 fetch)", async () => {
+test("search-providers-catalog: returns 30 providers (23 search + 7 fetch)", async () => {
   const req = await buildAuthRequest();
   const res = await route.GET(req);
 
@@ -186,17 +186,18 @@ test("search-providers-catalog: every item has a valid kind value", async () => 
   }
 });
 
-test("search-providers-catalog: status=missing when no DB credentials exist", async () => {
-  // No connections seeded — all providers should be "missing"
+test("search-providers-catalog: keyless Keenable is configured; others missing without credentials", async () => {
+  // Keenable uses an anonymous public REST endpoint; other providers require credentials.
   const req = await buildAuthRequest();
   const res = await route.GET(req);
   const body = await res.json();
 
   for (const item of body.providers) {
+    const expected = item.id === "keenable-search" ? "configured" : "missing";
     assert.equal(
       item.status,
-      "missing",
-      `provider ${item.id} should be 'missing', got '${item.status}'`
+      expected,
+      `provider ${item.id} should be '${expected}', got '${item.status}'`
     );
   }
 });
@@ -219,7 +220,8 @@ test("search-providers-catalog: status=configured when active credentials seeded
 
   // Other providers (no creds) should still be "missing"
   const missingItems = body.providers.filter(
-    (p: { id: string; status: string }) => p.id !== "serper-search" && p.id !== "perplexity-search"
+    (p: { id: string; status: string }) =>
+      p.id !== "serper-search" && p.id !== "perplexity-search" && p.id !== "keenable-search"
   );
   for (const item of missingItems) {
     assert.equal(item.status, "missing", `${item.id} should be 'missing'`);
