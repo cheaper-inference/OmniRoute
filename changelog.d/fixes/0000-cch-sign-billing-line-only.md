@@ -1,1 +1,0 @@
-- **fix(sse):** Claude Code CCH signing now rewrites only the `cch=00000;` placeholder in the billing header. User text that contains `cch=xxxxx;` reaches the upstream unchanged, and the billing header is always signed.
