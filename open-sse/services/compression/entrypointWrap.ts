@@ -2,6 +2,7 @@ import type { CompressionConfig, CompressionResult } from "./types.ts";
 import type { CachingDetectionContext } from "./cachingAware.ts";
 import type { RiskGateConfig } from "./riskGate/riskGate.ts";
 import { resolveRiskGate, withRiskGate } from "./riskGate/strategyWrap.ts";
+import { mustKeepOpenCodeHistoryVerbatim } from "./cachingAware.ts";
 import {
   resolveQuantumLock,
   quantumCachingContext,
