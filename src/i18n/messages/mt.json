@@ -14247,6 +14247,10 @@
         "label": "Ordni tal-Pool b'Egress Kondiviż",
         "description": "Għal fornituri li l-kwota tagħhom hija raggruppata skont l-indirizz tal-egress, ikklassifika membru tal-pool li jikkondividi l-indirizz tal-egress osservat ta' membru miċħud riċentement eżatt taħt membri f'saħħithom. Ordni biss, qatt ma jiġi eskluż. Jeħtieġ PROXY_SKIP_RECENTLY_FAILED, li jipproduċi s-sinjal ta' rifjut li jaqra. Mitfi b'mod awtomatiku: l-ordni tal-għażla tkun eżattament ir-rotazzjoni ordinarja."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Logging tal-Attribuzzjoni tar-Rotazzjoni",
         "description": "Ir-rotazzjoni ta' Opencode tirreġistra liema kont serva jew ġie maqbuż (IDs moħbija biss, qatt IDs sħaħ tal-kont) u tgħaqqad l-entrati tal-log tal-proxy mat-talba tagħhom, sabiex l-operatur ikun jista' jiddistingwi bejn kontijiet maqbuża u dawk mhux użati. Mitfi b'mod awtomatiku: l-ebda linji żejda fil-log, l-ebda kolonni żejda miktuba."
@@ -14478,6 +14482,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Ieqaf fuq Rifjut tal-Politika tal-Kontenut",
         "description": "Meta mira ta' combo twieġeb b'rifjut eżatt tal-politika tal-kontenut (kodiċi jew tip cyber_policy / content_policy_violation), waqqaf il-combo u rritorna dak ir-rifjut anke meta l-miri li jifdal ikunu mudelli differenti, minflok ma tkompli għall-mira li jmiss. Mitfi b'mod awtomatiku: ir-rifjut qatt ma jberred il-kont u lanqas ma jattiva l-breaker tal-fornitur, u l-combo tkompli għall-mira li jmiss tagħha eżattament bħal qabel."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Pruwa mill-Ġdid tal-Cooldown: Aqbeż ir-Rifjuti 403/410",

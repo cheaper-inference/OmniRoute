@@ -14170,6 +14170,10 @@
         "label": "साझा इग्रेस पूल क्रम",
         "description": "उन प्रदाताओं के लिए जिनका कोटा इग्रेस पते के अनुसार विभाजित है, हाल ही में अस्वीकृत सदस्य के देखे गए इग्रेस पते को साझा करने वाले पूल सदस्य को स्वस्थ सदस्यों के ठीक नीचे रैंक करें। केवल क्रमबद्ध किया जाता है, कभी बाहर नहीं किया जाता। PROXY_SKIP_RECENTLY_FAILED की आवश्यकता होती है, जो इसके द्वारा पढ़े जाने वाले अस्वीकृति सिग्नल को उत्पन्न करता है। डिफ़ॉल्ट रूप से बंद: चयन क्रम बिल्कुल सामान्य रोटेशन जैसा होता है।"
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "रोटेशन एट्रिब्यूशन लॉगिंग",
         "description": "Opencode रोटेशन यह रिकॉर्ड करता है कि किस खाते ने सर्व किया या किसे छोड़ दिया गया (केवल मास्क्ड आईडी, कभी भी पूर्ण खाता आईडी नहीं) और प्रॉक्सी लॉग प्रविष्टियों को उनके अनुरोध से लिंक करता है, ताकि ऑपरेटर छोड़े गए खातों और अप्रयुक्त खातों में अंतर कर सके। डिफ़ॉल्ट रूप से बंद: कोई अतिरिक्त लॉग पंक्तियाँ नहीं, कोई अतिरिक्त कॉलम नहीं लिखे जाते।"
@@ -14401,6 +14405,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "कॉम्बो: कंटेंट-पॉलिसी रिफ़्यूज़ल पर रोकें",
         "description": "जब कोई कॉम्बो टार्गेट किसी सटीक कंटेंट-पॉलिसी रिफ़्यूज़ल (कोड या प्रकार cyber_policy / content_policy_violation) के साथ उत्तर देता है, तो अगले टार्गेट पर आगे बढ़ने के बजाय कॉम्बो को रोकें और वह रिफ़्यूज़ल लौटाएं, भले ही शेष टार्गेट्स अलग मॉडल हों। डिफ़ॉल्ट रूप से बंद: यह रिफ़्यूज़ल कभी भी अकाउंट को कूल नहीं करता है या प्रोवाइडर ब्रेकर को ट्रिप नहीं करता है, और कॉम्बो बिल्कुल पहले की तरह अपने अगले टार्गेट पर आगे बढ़ता है।"
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "कूलडाउन पुनः प्रयास: 403/410 अस्वीकृतियों को छोड़ें",

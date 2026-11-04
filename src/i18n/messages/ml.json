@@ -14247,6 +14247,10 @@
         "label": "പങ്കിട്ട ഇഗ്രെസ് പൂൾ ക്രമം",
         "description": "ഇഗ്രെസ് വിലാസം അടിസ്ഥാനമാക്കി ക്വാട്ട നിശ്ചയിച്ചിട്ടുള്ള പ്രൊവൈഡർമാർക്കായി, അടുത്തിടെ നിരസിക്കപ്പെട്ട ഒരു അംഗത്തിന്റെ നിരീക്ഷിത ഇഗ്രെസ് വിലാസം പങ്കിടുന്ന പൂൾ അംഗത്തെ പ്രവർത്തനക്ഷമമായ അംഗങ്ങൾക്ക് തൊട്ടുതാഴെയായി റാങ്ക് ചെയ്യുക. ക്രമത്തിൽ മാറ്റം വരുത്താൻ മാത്രം, ഒരിക്കലും ഒഴിവാക്കില്ല. ഇതിന് PROXY_SKIP_RECENTLY_FAILED ആവശ്യമാണ്, ഇത് വായിക്കുന്ന നിരസിക്കൽ സിഗ്നൽ നൽകുന്നത് അതാണ്. ഡിഫോൾട്ടായി ഓഫ് ആണ്: തിരഞ്ഞെടുക്കൽ ക്രമം കൃത്യമായി സാധാരണ റൊട്ടേഷൻ മാത്രമായിരിക്കും."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "റൊട്ടേഷൻ ആട്രിബ്യൂഷൻ ലോഗിംഗ്",
         "description": "ഏത് അക്കൗണ്ടാണ് സേവനം നൽകിയതെന്നോ ഒഴിവാക്കപ്പെട്ടതെന്നോ opencode റൊട്ടേഷൻ രേഖപ്പെടുത്തുന്നു (മാസ്ക് ചെയ്ത id-കൾ മാത്രം, ഒരിക്കലും പൂർണ്ണമായ അക്കൗണ്ട് id-കൾ അല്ല), കൂടാതെ പ്രോക്സി ലോഗ് എൻട്രികളെ അവയുടെ അഭ്യർത്ഥനയുമായി ബന്ധിപ്പിക്കുന്നു, അതിനാൽ ഓപ്പറേറ്റർക്ക് ഒഴിവാക്കിയ അക്കൗണ്ടുകളെ ഉപയോഗിക്കാത്തവയിൽ നിന്ന് തിരിച്ചറിയാൻ കഴിയും. ഡിഫോൾട്ടായി ഓഫ് ആണ്: അധിക ലോഗ് വരികളോ അധിക കോളങ്ങളോ രേഖപ്പെടുത്തില്ല."
@@ -14478,6 +14482,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "കോംബോ: കണ്ടന്റ്-പോളിസി നിരസിക്കലിൽ നിർത്തുക",
         "description": "ഒരു കോംബോ ടാർഗെറ്റ് കൃത്യമായ കണ്ടന്റ്-പോളിസി നിരസിക്കൽ (കോഡ് അല്ലെങ്കിൽ തരം cyber_policy / content_policy_violation) നൽകി മറുപടി നൽകുമ്പോൾ, അടുത്ത ടാർഗെറ്റിലേക്ക് പോകുന്നതിന് പകരം, ബാക്കിയുള്ള ടാർഗെറ്റുകൾ വ്യത്യസ്‌ത മോഡലുകൾ ആണെങ്കിൽപ്പോലും കോംബോ അവസാനിപ്പിക്കുകയും ആ നിരസിക്കൽ തിരികെ നൽകുകയും ചെയ്യുക. സ്വതവേ ഓഫാണ്: ഈ നിരസിക്കൽ ഒരിക്കലും അക്കൗണ്ടിനെ കൂൾ ഡൗൺ ചെയ്യുകയോ പ്രൊവൈഡർ ബ്രേക്കർ ട്രിപ്പ് ചെയ്യുകയോ ഇല്ല, കൂടാതെ കോംബോ മുൻപത്തെപ്പോലെ തന്നെ അതിന്റെ അടുത്ത ടാർഗെറ്റിലേക്ക് നീങ്ങുകയും ചെയ്യും."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "കൂൾഡൗൺ റീട്രൈ: 403/410 നിരസിക്കലുകൾ ഒഴിവാക്കുക",

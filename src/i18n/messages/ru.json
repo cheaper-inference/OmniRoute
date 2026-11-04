@@ -14170,6 +14170,10 @@
         "label": "Порядок Общего Пула Исходящего Трафика",
         "description": "Для провайдеров, у которых квота сегментируется по адресу исходящего соединения, участнику пула, чей наблюдаемый исходящий адрес совпадает с адресом недавно отклонённого участника, назначается приоритет чуть ниже, чем у здоровых участников. Только порядок, без исключения. Требует PROXY_SKIP_RECENTLY_FAILED, который генерирует сигнал об отказе для чтения. Отключено по умолчанию: порядок выбора соответствует простому чередованию."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Журналирование атрибуции ротации",
         "description": "Ротация Opencode записывает, какая учётная запись обработала запрос или была пропущена (только маскированные идентификаторы, полные идентификаторы учётных записей никогда не записываются) и связывает записи журнала прокси с соответствующим запросом, что позволяет оператору отличать пропущенные учётные записи от неиспользуемых. Отключено по умолчанию: не записываются дополнительные строки журнала, не добавляются новые столбцы."
@@ -14401,6 +14405,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Комбо: остановка при отказе по политике контента",
         "description": "Если цель комбинированного шлюза отвечает точным отказом по политике контента (код или тип cyber_policy / content_policy_violation), остановите комбинированный шлюз и верните этот отказ, даже если оставшиеся цели — это другие модели, а не переходите к следующей цели. По умолчанию отключено: отказ никогда не охлаждает учётную запись и не срабатывает предохранитель провайдера, а комбинированный шлюз переходит к следующей цели именно так, как прежде."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Повторная попытка во время ожидания: пропуск отказов 403/410",

@@ -14247,6 +14247,10 @@
         "label": "የጋራ መውጫ ስብስብ ቅደም ተከተል",
         "description": "ኮታቸው በመውጫ አድራሻ ለተከፋፈለ አቅራቢዎች፣ በቅርቡ ውድቅ የተደረገውን አባል የታየበትን የመውጫ አድራሻ የሚጋራ የስብስብ አባልን ከጤናማ አባላት በታች ደረጃ ይስጡ። ቅደም ተከተል ብቻ ነው፣ በጭራሽ አይገለልም። የሚያነበውን የውድቅ ማድረጊያ ምልክት የሚያመነጨውን PROXY_SKIP_RECENTLY_FAILED ይፈልጋል። በነባሪነት ጠፍቷል፦ የመምረጫ ቅደም ተከተል ልክ እንደ መደበኛው ዝውውር ነው።"
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "የዝውውር አበርክቶ ምዝገባ",
         "description": "የOpencode ዝውውር የትኛው መለያ እንዳገለገለ ወይም እንደተዘለለ ይመዘግባል (የተሸፈኑ መታወቂያዎች ብቻ፣ በጭራሽ ሙሉ የመለያ መታወቂያዎች አይደሉም) እና ኦፕሬተሩ የተዘለሉ መለያዎችን ካልተጠቀሙባቸው ለይቶ ማወቅ እንዲችል የፕሮክሲ ምዝግብ ግቤቶችን ከጥያቄያቸው ጋር ያገናኛል። በነባሪነት ጠፍቷል፦ ምንም ተጨማሪ የምዝግብ መስመሮች፣ ምንም ተጨማሪ አምዶች አይጻፉም።"
@@ -14478,6 +14482,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo፦ የይዘት ፖሊሲ እምቢታ ሲያጋጥም አቁም",
         "description": "አንድ የ Combo ዒላማ በትክክለኛ የይዘት ፖሊሲ እምቢታ (ኮድ ወይም ዓይነት cyber_policy / content_policy_violation) ምላሽ ሲሰጥ፣ ወደ ቀጣዩ ዒላማ ከማለፍ ይልቅ የቀሩት ዒላማዎች የተለያዩ ሞዴሎች ቢሆኑም እንኳ Comboውን ያቁሙ እና ያንን እምቢታ ይመልሱ። በነባሪነት ጠፍቷል፦ እምቢታው መለያውን በፍጹም cooldown ውስጥ አያስገባም ወይም provider breakerን አያስነሳም፣ እንዲሁም Comboው ልክ እንደቀድሞው ወደ ቀጣዩ ዒላማው ያልፋል።"
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "የ Cooldown ዳግም ሙከራ፦ የ 403/410 እምቢታዎችን ዝለል",
