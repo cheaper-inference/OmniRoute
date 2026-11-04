@@ -1,3 +1,7 @@
+import {
+  getActiveTokenVault,
+  isReversibleVaultEnabled,
+} from "../../lib/pii/tokenVault.ts";
 /**
  * Input Sanitizer — FASE-01 Security Hardening
  *
@@ -377,7 +381,18 @@ function processPII(text, redact = false, options = undefined) {
     if (matches && matches.length > 0) {
       detections.push({ type: rule.name, count: matches.length });
       if (redact) {
-        processed = processed.replace(rule.pattern, rule.replacement);
+        if (isReversibleVaultEnabled()) {
+          const vault = getActiveTokenVault();
+          if (vault) {
+            processed = processed.replace(rule.pattern, (m) => vault.getOrCreateToken(rule.name, m));
+          } else {
+            // Fail-closed fallback: when reversible vault is enabled but no active context exists,
+            // fall back to safe standard redaction to prevent raw PII exposure.
+            processed = processed.replace(rule.pattern, rule.replacement);
+          }
+        } else {
+          processed = processed.replace(rule.pattern, rule.replacement);
+        }
       }
     }
   }
