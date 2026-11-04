@@ -1,0 +1,1 @@
+- **fix(sse):** A semantic-cache hit is served only when the stored reply is already in the client's wire format (Chat, Claude Messages or Responses; JSON or SSE). Other hits fall through to the provider instead of returning the wrong protocol. Streamed replies are cached as complete `chat.completion` objects.
