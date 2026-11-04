@@ -108,19 +108,20 @@ type GeminiRequest = {
 };
 
 type GeminiThinkingLevel = "minimal" | "low" | "medium" | "high";
+type ResolvedGeminiThinking = { level: GeminiThinkingLevel; includeThoughts: boolean };
 
 function resolveNativeGeminiThinkingLevel(
   model: string,
   body: Record<string, any>,
   explicitThinkingLevel: GeminiThinkingLevel | null
-): GeminiThinkingLevel | null {
+): ResolvedGeminiThinking | null {
   const spec = getModelSpec(model);
   const supported = spec?.geminiThinkingLevels;
   if (!supported?.length) return null;
   // The operator's explicit Gemini 3 thinkingLevel takes precedence over
   // a translated OpenAI effort or the model default.
   if (explicitThinkingLevel && supported.includes(explicitThinkingLevel)) {
-    return explicitThinkingLevel;
+    return { level: explicitThinkingLevel, includeThoughts: true };
   }
 
   const reasoning = body.reasoning && typeof body.reasoning === "object" ? body.reasoning : {};
@@ -135,23 +136,30 @@ function resolveNativeGeminiThinkingLevel(
           : effort === "xhigh" || effort === "max" || effort === "auto"
             ? "high"
             : null;
-    if (mapped && supported.includes(mapped)) return mapped;
+    if (mapped && supported.includes(mapped)) {
+      return { level: mapped, includeThoughts: effort !== "none" };
+    }
   }
 
   const thinking = body.thinking && typeof body.thinking === "object" ? body.thinking : {};
   if (body.thinking === false || thinking.type === "disabled") {
-    return supported.includes("minimal") ? "minimal" : (spec?.defaultGeminiThinkingLevel ?? null);
+    const level = supported.includes("minimal") ? "minimal" : spec?.defaultGeminiThinkingLevel;
+    return level && supported.includes(level) ? { level, includeThoughts: false } : null;
   }
   const rawBudget = thinking.budget_tokens ?? thinking.budgetTokens;
   if (typeof rawBudget === "number" && Number.isFinite(rawBudget)) {
     const mapped: GeminiThinkingLevel =
       rawBudget <= 0 ? "minimal" : rawBudget <= 1024 ? "low" : rawBudget <= 8192 ? "medium" : "high";
-    if (supported.includes(mapped)) return mapped;
+    if (supported.includes(mapped)) {
+      return { level: mapped, includeThoughts: rawBudget > 0 };
+    }
   }
 
-  return spec?.defaultGeminiThinkingLevel && supported.includes(spec.defaultGeminiThinkingLevel)
-    ? spec.defaultGeminiThinkingLevel
-    : supported[0] ?? null;
+  const level =
+    spec?.defaultGeminiThinkingLevel && supported.includes(spec.defaultGeminiThinkingLevel)
+      ? spec.defaultGeminiThinkingLevel
+      : supported[0];
+  return level ? { level, includeThoughts: true } : null;
 }
 
 // Convert OpenAI tool_choice into Gemini's functionCallingConfig mode. Mirrors
@@ -333,8 +341,8 @@ function openaiToGeminiBase(
     : resolveNativeGeminiThinkingLevel(model, body, explicitThinkingLevel);
   if (nativeThinkingLevel !== null) {
     result.generationConfig.thinkingConfig = {
-      thinkingLevel: nativeThinkingLevel,
-      includeThoughts: true,
+      thinkingLevel: nativeThinkingLevel.level,
+      includeThoughts: nativeThinkingLevel.includeThoughts,
     };
   } else if (model.startsWith("gemma-4") || rejectsThinkingConfig) {
     // gemma-4 models returns - 400: Thinking budget is not supported for this model

@@ -1923,6 +1923,40 @@ test("OpenAI -> Gemini 3.5 Flash-Lite maps OpenAI effort to native thinking leve
   }
 });
 
+test("OpenAI -> Gemini 3.5 Flash-Lite disables summaries only for selected opt-outs", () => {
+  const messages = [{ role: "user", content: "Reply exactly OK" }];
+  const cases: Array<{
+    name: string;
+    request: Record<string, unknown>;
+    level: string;
+    includeThoughts: boolean;
+  }> = [
+    { name: "reasoning none", request: { reasoning_effort: "none" }, level: "minimal", includeThoughts: false },
+    { name: "reasoning minimal", request: { reasoning_effort: "minimal" }, level: "minimal", includeThoughts: true },
+    { name: "disabled thinking", request: { thinking: { type: "disabled" } }, level: "minimal", includeThoughts: false },
+    { name: "false thinking", request: { thinking: false }, level: "minimal", includeThoughts: false },
+    { name: "zero numeric budget", request: { thinking: { budget_tokens: 0 } }, level: "minimal", includeThoughts: false },
+    { name: "negative numeric budget", request: { thinking: { budget_tokens: -50 } }, level: "minimal", includeThoughts: false },
+    { name: "effort overrides disabled", request: { reasoning_effort: "high", thinking: { type: "disabled" } }, level: "high", includeThoughts: true },
+    { name: "effort overrides zero", request: { reasoning_effort: "low", thinking: { budget_tokens: 0 } }, level: "low", includeThoughts: true },
+    { name: "explicit overrides none", request: { thinkingLevel: "high", reasoning_effort: "none" }, level: "high", includeThoughts: true },
+    { name: "explicit overrides disabled", request: { thinkingLevel: "low", thinking: { type: "disabled" } }, level: "low", includeThoughts: true },
+    { name: "default", request: {}, level: "minimal", includeThoughts: true },
+  ];
+  for (const item of cases) {
+    const response = openaiToGeminiRequest(
+      "gemini-3.5-flash-lite",
+      { messages, ...item.request },
+      false
+    ) as any;
+    assert.deepEqual(
+      response.generationConfig.thinkingConfig,
+      { thinkingLevel: item.level, includeThoughts: item.includeThoughts },
+      item.name
+    );
+  }
+});
+
 test("OpenAI -> Gemini 3.5 Flash-Lite converts legacy numeric thinking budgets to levels", () => {
   const result = openaiToGeminiRequest(
     "gemini-3.5-flash-lite",
