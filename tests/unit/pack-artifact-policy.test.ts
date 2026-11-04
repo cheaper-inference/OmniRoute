@@ -340,6 +340,8 @@ test("findMissingArtifactPaths flags missing root runtime files in the tarball",
     "config/release/wreq-js-native-manifest.json",
     "config/release/wreq-js-rust-license-inventory.json",
     "config/release/wreq-js-rust-notices.md",
+    // 2026-11-03: one translated docs mirror, so losing the mirrors fails the pack gate.
+    "dist/docs/i18n/pt-BR/docs/getting-started/QUICK-START.md",
     "dist/h2c-upgrade-guard.cjs",
     "dist/head-response-guard.cjs",
     "dist/http-method-guard.cjs",
