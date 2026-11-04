@@ -120,15 +120,15 @@ Aylık maliyet: $0
 
 ## 📖 Sağlayıcı Kurulumu
 
-Bir CSV veya JSON dosyasından toplu olarak API anahtarı bağlantıları eklemek için **Kontrol Paneli → Sağlayıcılar → Dosyadan içe aktar** seçeneğini kullanın. Sütunlar konuma dayalıdır (`provider,name,apiKey,baseUrl,priority`); `provider`, yönetilen bir sağlayıcı veya uyumlu bir düğüm olarak zaten mevcut olmalıdır. Bkz. [Sağlayıcıları bir CSV veya JSON dosyasından içe aktarma](../providers/CSV-IMPORT.md).
+CSV veya JSON dosyasından API anahtarı bağlantılarını toplu olarak eklemek için **Dashboard → Sağlayıcılar → Dosyadan içe aktar** seçeneğini kullanın. Sütunlar konumsaldır (`provider,name,apiKey,baseUrl,priority`); `provider`, yönetilen bir sağlayıcı veya uyumlu bir düğüm olarak zaten mevcut olmalıdır. Bkz. [Sağlayıcıları CSV veya JSON dosyasından içe aktarma](../providers/CSV-IMPORT.md).
 
 ### 🔐 Abonelik Sağlayıcıları
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Kontrol Paneli → Sağlayıcılar → Claude Code'u Bağla
-→ OAuth ile oturum açma → Otomatik token yenileme
+Dashboard → Sağlayıcılar → Claude Code'a bağlan
+→ OAuth ile giriş → Otomatik token yenileme
 → 5 saatlik + haftalık kota takibi
 
 Modeller:
@@ -137,17 +137,19 @@ Modeller:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Uzman İpucu:** Karmaşık görevler için Opus'u, hız için Sonnet'i kullanın. OmniRoute, kotayı model bazında takip eder!
+**Profesyonel İpucu:** Karmaşık görevler için Opus'u, hız için Sonnet'i kullanın. OmniRoute, kotayı model bazında takip eder!
 
-OmniRoute ana makinesinde tarayıcı yok mu? Claude Code'da oturum açılmış herhangi bir yerde `claude setup-token` komutunu çalıştırın ve bir yıllık token'ı **Kurulum Token'ı** sekmesine yapıştırın. Bkz. [Kurulum token'ıyla Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+OmniRoute ana bilgisayarında tarayıcı yok mu? Claude Code'un oturumunun açık olduğu herhangi bir yerde `claude setup-token` komutunu çalıştırın ve bir yıllık token'ı **Kurulum Token'ı** sekmesine yapıştırın. Bkz. [Kurulum token'ı ile Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Claude ve Claude Code uyumlu rotalar, Opus ve Sonnet modelleri için `max` düşünme eforunu korur. Haiku modelleri `max` efor düzeyini kabul etmediğinden OmniRoute, isteği üst sağlayıcıya göndermeden önce yüksek bir düşünme bütçesine düşürür.
+Claude ve Claude Code uyumlu rotalar, Opus ve Sonnet
+modelleri için `max` düşünme eforunu korur. Haiku modelleri `max` efor katmanını kabul etmez; bu nedenle OmniRoute,
+isteği üst akışa göndermeden önce yüksek bir düşünme bütçesine düşürür.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Kontrol Paneli → Sağlayıcılar → Codex'i Bağla
-→ OAuth ile oturum açma (port 1455)
+Dashboard → Sağlayıcılar → Codex'e bağlan
+→ OAuth ile giriş (port 1455)
 → 5 saatlik + haftalık sıfırlama
 
 Modeller:
@@ -160,9 +162,9 @@ Modeller:
 #### GitHub Copilot
 
 ```bash
-Kontrol Paneli → Sağlayıcılar → GitHub'ı Bağla
+Dashboard → Sağlayıcılar → GitHub'a bağlan
 → GitHub üzerinden OAuth
-→ Aylık sıfırlama (ayın 1'inde)
+→ Aylık sıfırlama (ayın 1'i)
 
 Modeller:
   gh/gpt-5.5
@@ -172,54 +174,58 @@ Modeller:
   gh/gemini-3.1-pro-preview
 ```
 
+**Yapay Zekâ Kredileri (token tabanlı faturalandırma).** GitHub hesap için `credits_used` bildirdiğinde Sağlayıcı Sınırları kartında, sınırsız kuruluş planlarında da dahil olmak üzere, mevcut faturalandırma döneminde tüketilen kredileri gösteren bir **Yapay Zekâ Kredileri** satırı görünür.
+
+**Yerel Yapay Zekâ Kredileri sınırı.** Bir GitHub bağlantısını düzenleyin ve **Faturalandırma dönemi başına Yapay Zekâ Kredileri sınırı** (`providerSpecificData.githubCreditLimit`) değerini ayarlayın. Boş bırakılması bu özelliği devre dışı bırakır; `0` bağlantının her zaman atlanmasını sağlar. Son kullanım okuması sınıra eşit veya sınırın üzerindeyse hesap seçimi bu bağlantıyı atlar ve kota politikası kesme davranışında olduğu gibi yönlendirme diğer bağlantılarınıza geri döner. Denetim, periyodik kota yenilemesinin zaten topladığı kullanım verilerini okur — istek yolunda GitHub'ı hiçbir zaman çağırmaz — ve güvenli tarafta kalır: eksik veya güncel olmayan bir okuma (15 dakikadan eski ya da zaten sıfırlanmış bir faturalandırma döneminden kalan) bağlantıyı engellemez. Bu yerel bir korumadır; **garantili bir harcama tavanı değildir**: GitHub raporlama gecikmeleri, yenileme aralığı, devam eden istekler ve OmniRoute dışındaki kullanımlar bu sınırın aşılmasına neden olabilir. Kesin bir sınır için GitHub'ın kendi harcama denetimlerini kullanın.
+
 ### 💰 Ucuz Sağlayıcılar
 
-#### GLM-4.7 (Günlük sıfırlama, $0.6/1M)
+#### GLM-4.7 (Günlük sıfırlama, 0,6 $/1M)
 
 1. Kaydolun: [Zhipu AI](https://open.bigmodel.cn)
 2. Coding Plan'den API anahtarını alın
-3. Kontrol Paneli → API Anahtarı Ekle: Sağlayıcı: `glm`, API Anahtarı: `your-key`
+3. Dashboard → API Anahtarı Ekle: Sağlayıcı: `glm`, API Anahtarı: `your-key`
 
-**Kullanım:** `glm/glm-4.7` — **Uzman İpucu:** Coding Plan, maliyetin 1/7'sine 3 kat kota sunar! Her gün saat 10:00'da sıfırlanır.
+**Kullanım:** `glm/glm-4.7` — **Profesyonel İpucu:** Coding Plan, maliyetin 1/7'sine 3 kat kota sunar! Her gün 10:00'da sıfırlanır.
 
-#### MiniMax M2.1 (5 saatte sıfırlama, $0.20/1M)
+#### MiniMax M2.1 (5 saatlik sıfırlama, 0,20 $/1M)
 
 1. Kaydolun: [MiniMax](https://www.minimax.io)
-2. API anahtarını alın → Kontrol Paneli → API Anahtarı Ekle
+2. API anahtarını alın → Dashboard → API Anahtarı Ekle
 
-**Kullanım:** `minimax/MiniMax-M2.1` — **Uzman İpucu:** Uzun bağlam (1M token) için en ucuz seçenek!
+**Kullanım:** `minimax/MiniMax-M2.1` — **Profesyonel İpucu:** Uzun bağlam için en ucuz seçenek (1 milyon token)!
 
-#### Kimi K2 (Aylık sabit $9)
+#### Kimi K2 (sabit 9 $/ay)
 
 1. Abone olun: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. API anahtarını alın → Kontrol Paneli → API Anahtarı Ekle
+2. API anahtarını alın → Dashboard → API Anahtarı Ekle
 
-**Kullanım:** `kimi/kimi-k2.5` — **Uzman İpucu:** 10M token için aylık sabit $9 = etkin maliyet $0.90/1M!
+**Kullanım:** `kimi/kimi-k2.5` — **Profesyonel İpucu:** 10 milyon token için sabit 9 $/ay = etkin maliyet 0,90 $/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Kaydolun: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Bir Qianfan API anahtarı oluşturun → Kontrol Paneli → API Anahtarı Ekle: Sağlayıcı: `qianfan`
+2. Bir Qianfan API anahtarı oluşturun → Dashboard → API Anahtarı Ekle: Sağlayıcı: `qianfan`
 
-**Kullanım:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` veya OpenAI ile uyumlu başka bir Qianfan model kimliği.
+**Kullanım:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` veya başka bir Qianfan OpenAI uyumlu model kimliği.
 
 ### 🆓 ÜCRETSİZ Sağlayıcılar
 
-Kimlik doğrulaması gerektirmeyen ücretsiz sağlayıcıların sağlayıcı sayfasında **Kimlik doğrulaması gerekli değil** seçeneğinin yanında bir anahtar bulunur.
-Bu anahtarın kapatılması, ilgili sağlayıcıyı devre dışı bırakır, onu Sağlayıcılar'ın yapılandırılmış/kompakt görünümlerinden kaldırır ve modellerini `/v1/models` listesinden çıkarır.
+Kimlik doğrulama gerektirmeyen ücretsiz sağlayıcıların sağlayıcı sayfasında **Kimlik doğrulama gerekli değil** seçeneğinin yanında bir anahtar bulunur.
+Bu seçeneğin kapatılması sağlayıcıyı devre dışı bırakır, Sağlayıcılar yapılandırılmış/sıkıştırılmış görünümlerinden kaldırır ve modellerini `/v1/models` listesinden çıkarır.
 
 #### Qoder (9 ÜCRETSİZ model)
 
 ```bash
-Kontrol Paneli → Qoder'ı Bağla → OAuth ile oturum açma → Erişim, sağlayıcının mevcut sınırlarına tabidir
+Dashboard → Qoder'a bağlan → OAuth ile giriş → Erişim, mevcut sağlayıcı sınırlarına tabidir
 
 Modeller: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude ÜCRETSİZ)
+#### Kiro (ÜCRETSİZ Claude)
 
 ```bash
-Kontrol Paneli → Kiro'yu Bağla → AWS Builder ID veya Google/GitHub → Ayda ~50 kredi
+Dashboard → Kiro'ya bağlan → AWS Builder ID veya Google/GitHub → yaklaşık 50 kredi/ay
 
 Modeller: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -606,30 +612,30 @@ Ortam değişkenlerinin tam listesi için [README](../README.md) dosyasına bak�
 
 ---
 
-## 📊 Mevcut Modeller
+## 📊 Kullanılabilir Modeller
 
 <details>
-<summary><b>Tüm mevcut modelleri görüntüle</b></summary>
+<summary><b>Kullanılabilir tüm modelleri görüntüle</b></summary>
 
-> Aşağıdaki liste, v3.8.0 için `open-sse/config/providerRegistry.ts` dosyasından derlenmiştir. Bulut katalogları (Gemini, OpenRouter vb.) dinamik olarak senkronize edilir — canlı kataloğun tamamı için **Panel → Sağlayıcılar → [sağlayıcı] → Mevcut Modeller** yolunu açın veya `GET /api/models/catalog` çağrısını yapın.
+> Aşağıdaki liste, v3.8.0 için `open-sse/config/providerRegistry.ts` dosyasından derlenmiştir. Bulut katalogları (Gemini, OpenRouter vb.) dinamik olarak senkronize edilir — güncel kataloğun tamamı için **Pano → Sağlayıcılar → [sağlayıcı] → Kullanılabilir Modeller** bölümünü açın veya `GET /api/models/catalog` çağrısını yapın.
 >
-> Bir sağlayıcının yerleşik listesi sapmışsa, canlı yukarı akış kataloğunu çekmek için o sayfadaki **/models'den İçe Aktar** seçeneğini kullanın (veya **Otomatik Senkronizasyon**'u etkinleştirin). Bu, v3.8.50 sürümünde LLM7.io (`gemini-3.1-flash-lite`) ve UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) için doğrulanmıştır; Pollinations anonim erişimi aynı test turunda yukarı akış tarafında sınırlı kaldı.
+> Bir sağlayıcının yerleşik listesi güncelliğini yitirdiyse, canlı üst kaynak kataloğunu almak için bu sayfadaki **/models'dan içe aktar** seçeneğini kullanın (veya **Otomatik Senkronizasyon** özelliğini etkinleştirin). Bu işlem, LLM7.io (`gemini-3.1-flash-lite`) ve UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) için v3.8.50 sürümünde doğrulanmıştır; Pollinations anonim erişimi aynı test çalışması sırasında üst kaynak kısıtlamalarına tabi olmaya devam etmiştir.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ effort kademeleri: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ çaba katmanları: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — ÜCRETSİZ OAuth: **Panel → Sağlayıcılar → Kiro → Mevcut Modeller** altında gösterilen canlı kataloğu kullanın. Kullanılabilirlik hesaba ve plana bağlıdır.
+**Kiro (`kr/`)** — ÜCRETSİZ OAuth: **Pano → Sağlayıcılar → Kiro → Kullanılabilir Modeller** bölümünde gösterilen canlı kataloğu kullanın. Kullanılabilirlik, hesaba ve plana bağlıdır.
 
 **Qoder (`if/`)** — ÜCRETSİZ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — 1M başına 0,2–0,6 ABD doları: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — 1M başına 0,2 ABD doları: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — Aylık $9 sabit ücret veya kullanım başına: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — Aylık sabit 9 ABD doları veya kullanım başına: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API anahtarı: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
@@ -637,15 +643,15 @@ Ortam değişkenlerinin tam listesi için [README](../README.md) dosyasına bak�
 
 **xAI (`xai/`)** — Yerel Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — AB'de barındırılan: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — AB'de barındırılır: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Arama destekli: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Aramayla zenginleştirilmiş: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Açık kaynak: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ücretsiz), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — Hızlı çıkarım: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Wafer ölçekli: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Gofret ölçeğinde: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — RAG odaklı: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
@@ -655,11 +661,11 @@ Ortam değişkenlerinin tam listesi için [README](../README.md) dosyasına bak�
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google'dan API anahtarı başına canlı olarak senkronize edilir — statik liste yoktur. **Panel → Sağlayıcılar** bölümünden bir anahtar bağlayın, ardından güncel kataloğu içe aktarmak için **Mevcut Modeller** seçeneğini kullanın (örn. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Google'dan API anahtarı başına canlı olarak senkronize edilir — statik liste yoktur. **Pano → Sağlayıcılar** bölümünde bir anahtar bağlayın, ardından güncel kataloğu içe aktarmak için **Kullanılabilir Modeller** seçeneğini kullanın (ör. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Diğer uyumlu sağlayıcılar** (seçilmiş): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` aracılığıyla), `azure-ai`, `openrouter` (doğrudan aktarım kataloğu), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Her biri kendi model listesini `providerRegistry.ts` içinde tutar ve sağlayıcı bir `/models` uç noktası sunduğunda otomatik olarak senkronize edilebilir.
+**Diğer uyumlu sağlayıcılar** (seçili): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` aracılığıyla), `azure-ai`, `openrouter` (geçiş kataloğu), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Her biri kendi model listesini `providerRegistry.ts` dosyasında tutar ve sağlayıcı bir `/models` uç noktası sunduğunda otomatik olarak senkronize edilebilir.
 
-**Model kimlikleri hakkında not:** OmniRoute, sağlayıcıya özgü kimlikler kullanır (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Bazı kimlikler noktalı sürümler içerir çünkü yukarı akış API'si bunları bu biçimde bekler. Bir model yukarıda listelenmemişse, kullanılabilirliği doğrulamak için `omniroute models --search <term>` komutunu çalıştırın veya `GET /api/models/catalog` çağrısını yapın.
+**Model kimlikleri hakkında:** OmniRoute, sağlayıcıya özgü kimlikleri kullanır (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Bazı kimliklerde noktalı sürümler bulunur; bunun nedeni, üst kaynak API'sinin bunları bu şekilde beklemesidir. Bir model yukarıda listelenmemişse, kullanılabilirliği doğrulamak için `omniroute models --search <term>` komutunu çalıştırın veya `GET /api/models/catalog` çağrısını yapın.
 
 </details>
 

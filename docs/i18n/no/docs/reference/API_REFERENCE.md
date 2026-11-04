@@ -15,35 +15,35 @@ For den fokuserte OpenAI-kompatible protokollen og matrisen over leverandørfunk
 
 ## Innholdsfortegnelse
 
-- [Chat Completions](#chat-completions)
-- [Exclusive Managed Session Leases](#exclusive-managed-session-leases)
-- [Embeddings](#embeddings)
-- [Image Generation](#image-generation)
-- [Document OCR](#document-ocr)
-- [List Models](#list-models)
-- [Provider Plugin Manifest](#provider-plugin-manifest)
-- [Compatibility Endpoints](#compatibility-endpoints)
-- [Files API](#files-api)
-- [Batches API](#batches-api)
-- [Search API](#search-api)
-- [WebSocket Streaming](#websocket-streaming)
-- [Quotas & Issues Reporting](#quotas--issues-reporting)
-- [Semantic Cache](#semantic-cache)
-- [CLIProxyAPI Management Compatibility](#cliproxyapi-management-compatibility)
-- [Dashboard & Management](#dashboard--management)
-- [Combo Management](#combo-management)
+- [Chat Completion](#chat-completions)
+- [Eksklusive leieavtaler for administrerte økter](#exclusive-managed-session-leases)
+- [Embeddinger](#embeddings)
+- [Bildegenerering](#image-generation)
+- [Dokument-OCR](#document-ocr)
+- [Liste over modeller](#list-models)
+- [Manifest for leverandørplugin](#provider-plugin-manifest)
+- [Kompatibilitetsendepunkter](#compatibility-endpoints)
+- [Fil-API](#files-api)
+- [Batch-API](#batches-api)
+- [Søke-API](#search-api)
+- [WebSocket-strømming](#websocket-streaming)
+- [Kvoter og rapportering av problemer](#quotas--issues-reporting)
+- [Semantisk hurtigbuffer](#semantic-cache)
+- [CLIProxyAPI-kompatibilitet for administrasjon](#cliproxyapi-management-compatibility)
+- [Kontrollpanel og administrasjon](#dashboard--management)
+- [Combo-administrasjon](#combo-management)
 - [Webhooks](#webhooks)
-- [Registered Keys (Auto-Management)](#registered-keys-auto-management)
-- [Agents Protocol](#agents-protocol)
-- [Management Proxies](#management-proxies)
-- [Resilience (extended)](#resilience-extended)
-- [Skills](#skills)
-- [Memory](#memory)
-- [MCP Server](#mcp-server)
-- [A2A Server](#a2a-server)
-- [Cloud, Evals & Assess](#cloud-evals--assess)
-- [Request Processing](#request-processing)
-- [Authentication](#authentication)
+- [Registrerte nøkler (automatisk administrasjon)](#registered-keys-auto-management)
+- [Agentprotokoll](#agents-protocol)
+- [Administrasjonsproxyer](#management-proxies)
+- [Robusthet (utvidet)](#resilience-extended)
+- [Ferdigheter](#skills)
+- [Minne](#memory)
+- [MCP-server](#mcp-server)
+- [A2A-server](#a2a-server)
+- [Cloud, evalueringer og vurdering](#cloud-evals--assess)
+- [Behandling av forespørsler](#request-processing)
+- [Autentisering](#authentication)
 
 ---
 
@@ -1599,9 +1599,9 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Transkriber lydfiler ved hjelp av en konfigurert STT-leverandør. Det første bane-
-segmentet velger den opprinnelige leverandøren (`openai/…`, `deepgram/…`). Gatewayer som
-eksporterer en annen leverandørs modell på nytt, bruker en kvalifisert id
+Transkriber lydfiler ved hjelp av en konfigurert STT-leverandør. Det første
+baneanet velger den opprinnelige leverandøren (`openai/…`, `deepgram/…`). Gatewayer som
+videredistribuerer en annen leverandørs modell, bruker en kvalifisert id
 (`openrouter/deepgram/nova-3`).
 
 **Forespørsel:**
@@ -1624,12 +1624,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Eksempel på modell-ID-er:** `openai/whisper-1` (krever en OpenAI-nøkkel),
+**Eksempler på modell-ider:** `openai/whisper-1` (krever en OpenAI-nøkkel),
 `openrouter/deepgram/nova-3` (krever en OpenRouter-nøkkel),
-`deepgram/nova-3` (krever en opprinnelig Deepgram-nøkkel). En forespørsel med bare
-`deepgram/nova-3` bruker **ikke** OpenRouter.
+`deepgram/nova-3` (krever en opprinnelig Deepgram-nøkkel). En ren
+`deepgram/nova-3`-forespørsel bruker **ikke** OpenRouter.
 
 **Støttede formater:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** filmodus-transkripsjon over Gemini Live
+WebSocket (krever en Gemini API-nøkkel). Opplastingen konverteres til 16 kHz mono PCM med `ffmpeg`
+(`PATH` må inneholde dette, med mindre filen allerede er en 16 kHz mono PCM WAV), strømmes til økten, og
+den ferdigstilte teksten returneres som `{ "text": "..." }`. Valgfrie `language`- og `prompt`-skjemafelt
+videresendes. Begrensninger: opplastinger på over 25 MiB eller dekodet lyd som varer lenger enn 10 minutter, gir
+`413`; en konvertering som varer lenger enn 60 s, avsluttes og gir `504`. API-nøkkelen sendes
+bare i `x-goog-api-key`-headeren, aldri i WebSocket-URL-en.
 
 ---
 
