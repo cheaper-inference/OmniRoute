@@ -17,6 +17,13 @@ import xxhashInit from "xxhash-wasm";
 const CCH_SEED = 0x6e52736ac806831en;
 const CCH_PATTERN = /\bcch=([0-9a-f]{5});/;
 
+// The billing header is the only place a `cch=` value must be rewritten. It is
+// injected as a system text block (or a legacy top-level key). Both anchors
+// contain unescaped quotes, so they cannot occur inside a JSON string value —
+// user text that merely looks like `cch=xxxxx;` can never match them.
+const BILLING_ANCHORS = ['"text":"x-anthropic-billing-header', '"x-anthropic-billing-header":"'];
+const CCH_PLACEHOLDER = "cch=00000;";
+
 let xxhashPromise: Promise<void> | null = null;
 let xxhash64Fn: ((input: Uint8Array, seed: bigint) => bigint) | null = null;
 
@@ -39,11 +46,25 @@ export async function computeCCH(bodyBytes: Uint8Array): Promise<string> {
 }
 
 export async function signRequestBody(bodyString: string): Promise<string> {
-  if (!CCH_PATTERN.test(bodyString)) return bodyString;
+  // Sign only the literal placeholder inside the billing header. A first-match
+  // `cch=[0-9a-f]{5};` rewrite can hit user text (messages serialise before
+  // system), leaving the real billing header unsigned.
+  let anchor = -1;
+  for (const a of BILLING_ANCHORS) {
+    const at = bodyString.indexOf(a);
+    if (at >= 0 && (anchor < 0 || at < anchor)) anchor = at;
+  }
+  if (anchor < 0) return bodyString;
+  const placeholderAt = bodyString.indexOf(CCH_PLACEHOLDER, anchor);
+  if (placeholderAt < 0) return bodyString;
   const encoder = new TextEncoder();
   const bodyBytes = encoder.encode(bodyString);
   const token = await computeCCH(bodyBytes);
-  return bodyString.replace(CCH_PATTERN, `cch=${token};`);
+  return (
+    bodyString.slice(0, placeholderAt) +
+    `cch=${token};` +
+    bodyString.slice(placeholderAt + CCH_PLACEHOLDER.length)
+  );
 }
 
 export { CCH_PATTERN };
