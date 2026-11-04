@@ -878,7 +878,7 @@ function flattenAnyOfOneOf(obj: unknown): void {
       const bestIdx = selectBest(nonNullSchemas);
       const selected = nonNullSchemas[bestIdx];
       delete record.anyOf;
-      Object.assign(record, toRecord(selected));
+      mergeBranchIntoRecord(record, selected);
     }
   }
 
@@ -888,11 +888,32 @@ function flattenAnyOfOneOf(obj: unknown): void {
       const bestIdx = selectBest(nonNullSchemas);
       const selected = nonNullSchemas[bestIdx];
       delete record.oneOf;
-      Object.assign(record, toRecord(selected));
+      mergeBranchIntoRecord(record, selected);
     }
   }
 
   forEachSubschema(record, flattenAnyOfOneOf);
+}
+
+// A branch may carry its own `properties`/`required` ("at least one of" constraint
+// branches, oneOf variants that add fields); Object.assign would clobber the
+// parent's, silently dropping mandatory parameters, so merge those two keys and
+// assign the rest as before.
+function mergeBranchIntoRecord(record: JsonRecord, selected: unknown): void {
+  const branch = toRecord(selected);
+  const parentProperties = record.properties;
+  const parentRequired = record.required;
+  for (const key of Object.keys(branch)) {
+    if (key === "properties" && parentProperties) {
+      record.properties = { ...toRecord(parentProperties), ...toRecord(branch.properties) };
+    } else if (key === "required" && Array.isArray(parentRequired)) {
+      record.required = Array.from(
+        new Set([...parentRequired, ...(Array.isArray(branch.required) ? branch.required : [])])
+      );
+    } else {
+      record[key] = branch[key];
+    }
+  }
 }
 
 // Gemini only accepts `items` on an ARRAY node and `properties` on an OBJECT node
@@ -1193,6 +1214,35 @@ export function cleanJSONSchemaForAntigravity(
   }
 
   ensureArrayItems(cleaned);
+
+  // Phase 9: protobuf field predicates — Gemini accepts `items` only on ARRAY
+  // nodes and `properties`/`required` only on OBJECT nodes ("items: field
+  // predicate failed: $type == Type.ARRAY"). Phase 2's union collapse keeps the
+  // keyword when no branch member matches the node type, so drop the
+  // contradictory predicates here (9router enforceTypeConstraints).
+  function enforceTypePredicates(obj: unknown): void {
+    if (!obj || typeof obj !== "object") return;
+
+    if (Array.isArray(obj)) {
+      for (const item of obj) {
+        enforceTypePredicates(item);
+      }
+      return;
+    }
+
+    const record = obj as JsonRecord;
+    if (record.type !== "array") {
+      delete record.items;
+    }
+    if (record.type !== "object") {
+      delete record.properties;
+      delete record.required;
+    }
+
+    forEachSubschema(record, enforceTypePredicates);
+  }
+
+  enforceTypePredicates(cleaned);
 
   return cleaned;
 }

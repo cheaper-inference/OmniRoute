@@ -753,9 +753,21 @@ function openaiToGeminiBase(
       result.tools.push({ googleSearch: {} });
     }
     if (result.tools.some((tool) => (tool.functionDeclarations?.length ?? 0) > 0)) {
-      result.toolConfig = {
-        functionCallingConfig: convertOpenAIToolChoiceToGemini(body.tool_choice),
-      };
+      const functionCallingConfig = convertOpenAIToolChoiceToGemini(body.tool_choice);
+      // The forced name must match the DECLARED (sanitized) name or Gemini rejects
+      // the config, so map it through the table buildGeminiTools filled above. A
+      // name that matches no declared tool is left as the client sent it.
+      if (functionCallingConfig.allowedFunctionNames) {
+        functionCallingConfig.allowedFunctionNames = functionCallingConfig.allowedFunctionNames.map(
+          (name) => {
+            for (const [sanitizedName, rawName] of toolNameMap.entries()) {
+              if (rawName === name) return sanitizedName;
+            }
+            return name;
+          }
+        );
+      }
+      result.toolConfig = { functionCallingConfig };
     }
   } else if (hasGoogleSearch) {
     result.tools = [{ googleSearch: {} }];
