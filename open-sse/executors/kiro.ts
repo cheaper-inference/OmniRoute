@@ -31,6 +31,7 @@ import {
   appendBufferedKiroToolInput,
   encodeSse,
   getBufferedKiroToolInput,
+  kiroRequestDeclaresToolCallWrapperName,
   validateKiroToolCallWrapperInput,
   validateKiroToolName,
   validateKiroToolUse,
@@ -529,18 +530,24 @@ export class KiroExecutor extends BaseExecutor {
         )?.userInputMessage as Record<string, unknown>
       )?.content as string) || "";
     const thinkingExpected = userContent.includes("<thinking_mode>enabled</thinking_mode>");
+    // A client tool named `tool_call` is not the Kiro MCP wrapper (#18675). Read the
+    // pre-allowlist body: it carries the names openai-to-kiro synthesized from history.
+    const sseOpts = {
+      thinkingExpected,
+      clientDeclaresWrapperName: kiroRequestDeclaresToolCallWrapperName(body),
+    };
     const transformedResponse =
       stream && isKiroToolCallRepairEnabled()
         ? createKiroToolCallRepairStream({
             upstream: response,
             transform: (raw, opts) =>
-              this.transformEventStreamToSSE(raw, model, { thinkingExpected, ...opts }),
+              this.transformEventStreamToSSE(raw, model, { ...sseOpts, ...opts }),
             retry: async (payload, retrySignal) => (await send(payload, retrySignal)).res,
             transformedBody,
             signal,
             log,
           })
-        : this.transformEventStreamToSSE(response, model, { thinkingExpected });
+        : this.transformEventStreamToSSE(response, model, sseOpts);
 
     return { response: transformedResponse, url, headers, transformedBody };
   }
@@ -564,6 +571,11 @@ export class KiroExecutor extends BaseExecutor {
     model: string,
     opts: {
       thinkingExpected?: boolean;
+      /**
+       * The request declared its own tool named `tool_call`: treat those events as
+       * ordinary client tool calls instead of the Kiro MCP wrapper (#18675).
+       */
+      clientDeclaresWrapperName?: boolean;
       /** Return true to suppress the error frame (the one-shot repair will retry). */
       onInvalidToolCall?: (message: string) => boolean;
       responseId?: string;
@@ -919,7 +931,7 @@ export class KiroExecutor extends BaseExecutor {
                 const toolCallId = getToolCallId(singleToolUse);
                 const toolInput = singleToolUse.input;
 
-                if (toolName === KIRO_TOOL_CALL_WRAPPER) {
+                if (toolName === KIRO_TOOL_CALL_WRAPPER && !opts.clientDeclaresWrapperName) {
                   let pending = state.pendingWrapperToolCalls.get(toolCallId);
                   if (!pending) {
                     if (state.seenToolIds.has(toolCallId)) {
