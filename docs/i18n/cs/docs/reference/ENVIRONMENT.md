@@ -1366,7 +1366,7 @@ Služba, která je celý měsíc v režimu spánku, využívá přibližně 744 
 
 ## Scénáře nasazení
 
-Pokyny SRE pro backend relé (chování ts/bifrost/auto, umístění 9router versus CLIProxyAPI a strategie záložního řešení s vysokou propustností najdete v dokumentu [Strategie backendu relé](/docs/reference/RELAY_BACKEND_STRATEGY.md).
+Pokyny SRE pro backend relay (chování `ts/bifrost/auto`, umístění 9router oproti CLIProxyAPI a strategie fallbacku s vysokou propustností) najdete v dokumentu [Strategie backendu relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).
 
 ### Minimální lokální vývoj
 
@@ -1870,3 +1870,14 @@ Používají ho `open-sse/services/combo.ts` a `src/lib/quota/quotaScheduler.ts`
 | Variabilní                     | Výchozí | Zdrojový soubor                              | Popis                                                                                                                                                                                                                                       |
 | ------------------------------ | ------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`     | `src/lib/providerModels/modelSyncTimings.ts` | Nastavte na `1`, chcete-li zaznamenat časování fáze, vygenerovaný požadavek ID a výsledky fáze success/error během synchronizace modelu. Zakázáno pro všechny ostatní hodnoty. Protokoly vynechávají data požadavků, účtů, katalogu a chyb. |
+
+## Nástroj OpenCode pro analýzu médií v místním prostředí
+
+Používá ho `scripts/cli/omniroute-media-mcp.mjs`. Nastavte tyto proměnné v prostředí procesu místního nástroje.
+
+| Proměnná                   | Výchozí hodnota                                                                   | Popis                                                                                                     |
+| -------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (or `~/.config/opencode/opencode.json`) | Konfigurace OpenCode načítaná nástrojem pro práci s médii a instalačním programem.                        |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                       | Položka poskytovatele načítaná nástrojem pro práci s médii z konfigurace OpenCode.                        |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                            | Model odesílaný nástrojem pro práci s médii. Jeho poskytovatel musí podporovat požadované typy médií.     |
+| `OMNIROUTE_MEDIA_API_KEY`  | Configured provider API key or its environment reference                          | Volitelné přepsání přihlašovacího údaje. Ponechte ho v prostředí místního procesu; nikdy ho necommitujte. |
