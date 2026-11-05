@@ -1,13 +1,13 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import { createHash, randomUUID } from "node:crypto";
 import { resolveAntigravityModelId } from "../config/antigravityModelAliases.ts";
+import { isAntigravityPreResponseTimeout } from "./antigravityTimeout.ts";
 
 function normalizeAntigravityTimingModel(value: string): string {
   const normalized = value.trim().replace(/^(?:antigravity|agy)\//i, "").toLowerCase();
   if (!/^[a-z0-9_.:-]{1,160}$/.test(normalized)) return "unknown";
   return resolveAntigravityModelId(normalized);
 }
-import { isAntigravityPreResponseTimeout } from "./antigravityTimeout.ts";
 
 type TimingContext = {
   connectionId: string;
@@ -133,6 +133,31 @@ function wrapTrackedResponseBody(
   });
 }
 
+/** Reuse bounded per-account telemetry state without altering dispatch eligibility. */
+function claimTimingAccount(
+  accounts: Map<string, AccountTiming>,
+  connectionId: string
+): AccountTiming | null {
+  let account = accounts.get(connectionId);
+  if (account) return account;
+  if (accounts.size >= MAX_ACCOUNTS) {
+    const idle = [...accounts].find(([, item]) => item.inflight === 0);
+    if (!idle) return null;
+    accounts.delete(idle[0]);
+  }
+  account = { inflight: 0, lastFinishedAt: null };
+  accounts.set(connectionId, account);
+  return account;
+}
+
+function classifyTimingAbort(signal: AbortSignal | null | undefined): string {
+  if (isAntigravityPreResponseTimeout(signal?.reason)) return "pre_response_timeout";
+  if ((signal?.reason as { name?: string } | undefined)?.name === "TimeoutError") {
+    return "upstream_deadline";
+  }
+  return "caller_abort";
+}
+
 export class AntigravityTimingTracker {
   private accounts = new Map<string, AccountTiming>();
   constructor(
@@ -143,16 +168,8 @@ export class AntigravityTimingTracker {
   async fetch(send: () => Promise<Response>, signal?: AbortSignal | null): Promise<Response> {
     const scope = context.getStore();
     if (!scope) return send();
-    let account = this.accounts.get(scope.connectionId);
-    if (!account) {
-      if (this.accounts.size >= MAX_ACCOUNTS) {
-        const idle = [...this.accounts].find(([, item]) => item.inflight === 0);
-        if (!idle) return send();
-        this.accounts.delete(idle[0]);
-      }
-      account = { inflight: 0, lastFinishedAt: null };
-      this.accounts.set(scope.connectionId, account);
-    }
+    const account = claimTimingAccount(this.accounts, scope.connectionId);
+    if (!account) return send();
     const started = this.now();
     const idleDurationMs = account.inflight > 0 ? 0 : account.lastFinishedAt === null
       ? null : Math.max(0, started - account.lastFinishedAt);
@@ -187,10 +204,7 @@ export class AntigravityTimingTracker {
       signal?.removeEventListener("abort", onAbort);
       event(phase);
     };
-    const abortPhase = () => isAntigravityPreResponseTimeout(signal?.reason)
-      ? "pre_response_timeout"
-      : (signal?.reason as { name?: string } | undefined)?.name === "TimeoutError"
-        ? "upstream_deadline" : "caller_abort";
+    const abortPhase = () => classifyTimingAbort(signal);
     const onAbort = () => finish(abortPhase());
     signal?.addEventListener("abort", onAbort, { once: true });
     // Bound *telemetry state*, not upstream execution. This also protects HTTP 200
