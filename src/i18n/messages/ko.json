@@ -923,6 +923,8 @@
     "batchListTitle": "배치",
     "batchListCount": "배치 {count}개",
     "batchListRemovingCompleted": "삭제 중…",
+    "batchListRemoveCompletedPartial": "많은 수의 배치를 삭제했습니다. 나머지도 삭제하려면 다시 클릭하세요.",
+    "batchListRemoveCompletedFailed": "배치를 삭제하는 중 오류가 발생했습니다.",
     "batchListRemoveCompleted": "완료된 항목 삭제",
     "batchListTableStatus": "상태",
     "batchListTableId": "ID",

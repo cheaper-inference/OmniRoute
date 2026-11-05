@@ -923,6 +923,8 @@
     "batchListTitle": "Baisceanna",
     "batchListCount": "{count} baisceanna",
     "batchListRemovingCompleted": "Ag baint…",
+    "batchListRemoveCompletedPartial": "Baineadh líon mór baisceanna. Cliceáil arís chun an chuid eile a ghlanadh.",
+    "batchListRemoveCompletedFailed": "Tharla earráid agus baisceanna á mbaint.",
     "batchListRemoveCompleted": "Bain na cinn chríochnaithe",
     "batchListTableStatus": "Stádas",
     "batchListTableId": "ID",

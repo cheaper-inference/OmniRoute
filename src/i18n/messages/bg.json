@@ -1000,6 +1000,8 @@
     "batchListTitle": "Партиди",
     "batchListCount": "{count} партиди",
     "batchListRemovingCompleted": "Премахване…",
+    "batchListRemoveCompletedPartial": "Премахнат е голям брой партиди. Щракнете отново, за да изчистите останалите.",
+    "batchListRemoveCompletedFailed": "Възникна грешка при премахването на партидите.",
     "batchListRemoveCompleted": "Премахване на завършените",
     "batchListTableStatus": "Състояние",
     "batchListTableId": "ID",

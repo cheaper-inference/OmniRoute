@@ -923,6 +923,8 @@
     "batchListTitle": "Ogbe",
     "batchListCount": "Ogbe {count}",
     "batchListRemovingCompleted": "Na-ewepụ…",
+    "batchListRemoveCompletedPartial": "E wepụrụ ọtụtụ batches. Pịa ọzọ ka ihichapụ ndị fọdụrụ.",
+    "batchListRemoveCompletedFailed": "Njehie mere mgbe a na-ewepụ batches.",
     "batchListRemoveCompleted": "Wepụ ndị emechara",
     "batchListTableStatus": "Ọnọdụ",
     "batchListTableId": "ID",

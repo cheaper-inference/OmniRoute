@@ -923,6 +923,8 @@
     "batchListTitle": "Kelompok",
     "batchListCount": "{count} kelompok",
     "batchListRemovingCompleted": "Mengalih keluar…",
+    "batchListRemoveCompletedPartial": "Sebilangan besar kelompok telah dialih keluar. Klik sekali lagi untuk mengosongkan selebihnya.",
+    "batchListRemoveCompletedFailed": "Ralat berlaku semasa mengalih keluar kelompok.",
     "batchListRemoveCompleted": "Alih keluar yang selesai",
     "batchListTableStatus": "Status",
     "batchListTableId": "ID",

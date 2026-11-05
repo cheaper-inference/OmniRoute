@@ -1000,6 +1000,8 @@
     "batchListTitle": "Batchkørsler",
     "batchListCount": "{count} batchkørsler",
     "batchListRemovingCompleted": "Fjerner…",
+    "batchListRemoveCompletedPartial": "Et stort antal batches blev fjernet. Klik igen for at rydde resten.",
+    "batchListRemoveCompletedFailed": "Der opstod en fejl under fjernelse af batches.",
     "batchListRemoveCompleted": "Fjern fuldførte",
     "batchListTableStatus": "Status",
     "batchListTableId": "ID",

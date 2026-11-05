@@ -48,18 +48,31 @@ async function renderModal(props: Partial<React.ComponentProps<typeof ModelSelec
   return { container: dialogs[dialogs.length - 1], root };
 }
 
+// The kit confirm dialog renders the mocked `common` keys as labels ("confirmAction", "cancel").
+function findDialogButton(label: string): HTMLButtonElement | null {
+  const buttons = document.body.querySelectorAll<HTMLButtonElement>('[role="dialog"] button');
+  return [...buttons].find((b) => b.textContent?.trim() === label) ?? null;
+}
+
+// These tests exercise selection bookkeeping, not the confirm-above-threshold UX (see
+// modelSelectModalHelpers.ts::shouldConfirmSelectAll): accept the kit confirm dialog when
+// it opens, so assertions don't depend on how many models the fixture catalog exposes.
+async function clickAndAccept(button: HTMLButtonElement) {
+  await act(async () => {
+    button.click();
+  });
+  const accept = findDialogButton("confirmAction");
+  if (accept) {
+    await act(async () => {
+      accept.click();
+    });
+  }
+}
+
 beforeEach(() => {
   (
     globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
   ).IS_REACT_ACT_ENVIRONMENT = true;
-  // These tests exercise selection bookkeeping, not the confirm-above-threshold
-  // UX (see modelSelectModalHelpers.ts::shouldConfirmSelectAll) — stub confirm
-  // to always accept so assertions don't depend on how many models the fixture
-  // catalog happens to expose.
-  vi.stubGlobal(
-    "confirm",
-    vi.fn(() => true)
-  );
   vi.stubGlobal(
     "fetch",
     vi.fn(async (url: string) => {
@@ -120,9 +133,7 @@ describe("ModelSelectModal — Select all / Unselect all visible models", () => 
     ) as HTMLButtonElement;
     expect(toggle).not.toBeNull();
 
-    await act(async () => {
-      toggle.click();
-    });
+    await clickAndAccept(toggle);
 
     expect(onSelectMany).toHaveBeenCalledTimes(1);
     expect(onDeselectMany).not.toHaveBeenCalled();
@@ -142,9 +153,7 @@ describe("ModelSelectModal — Select all / Unselect all visible models", () => 
     const probeToggle = probe.container.querySelector(
       '[data-testid="model-select-toggle-all-visible"]'
     ) as HTMLButtonElement;
-    await act(async () => {
-      probeToggle.click();
-    });
+    await clickAndAccept(probeToggle);
     const allValues = (probeSelect.mock.calls[0][0] as Array<{ value: string }>).map(
       (m) => m.value
     );
@@ -163,9 +172,7 @@ describe("ModelSelectModal — Select all / Unselect all visible models", () => 
     ) as HTMLButtonElement;
     expect(toggle.textContent).toMatch(/Unselect all/i);
 
-    await act(async () => {
-      toggle.click();
-    });
+    await clickAndAccept(toggle);
 
     expect(onDeselectMany).toHaveBeenCalledTimes(1);
     expect(onSelectMany).not.toHaveBeenCalled();
@@ -183,9 +190,7 @@ describe("ModelSelectModal — Select all / Unselect all visible models", () => 
     const probeToggle = probe.container.querySelector(
       '[data-testid="model-select-toggle-all-visible"]'
     ) as HTMLButtonElement;
-    await act(async () => {
-      probeToggle.click();
-    });
+    await clickAndAccept(probeToggle);
     const allValues = (probeSelect.mock.calls[0][0] as Array<{ value: string }>).map(
       (m) => m.value
     );
@@ -201,9 +206,7 @@ describe("ModelSelectModal — Select all / Unselect all visible models", () => 
     const toggle = container.querySelector(
       '[data-testid="model-select-toggle-all-visible"]'
     ) as HTMLButtonElement;
-    await act(async () => {
-      toggle.click();
-    });
+    await clickAndAccept(toggle);
 
     const selected = onSelectMany.mock.calls[0][0] as Array<{ value: string }>;
     expect(selected.some((m) => m.value === alreadyAdded[0])).toBe(false);
@@ -211,9 +214,6 @@ describe("ModelSelectModal — Select all / Unselect all visible models", () => 
   });
 
   it("asks for confirmation before Select all above the threshold, and honors decline", async () => {
-    const confirmSpy = vi.fn(() => false);
-    vi.stubGlobal("confirm", confirmSpy);
-
     const onSelectMany = vi.fn();
     // openai (20 models) + anthropic (10 models) = 30 candidates, comfortably
     // above SELECT_ALL_CONFIRM_THRESHOLD (20) — see modelSelectModalHelpers.ts.
@@ -232,8 +232,42 @@ describe("ModelSelectModal — Select all / Unselect all visible models", () => 
       toggle.click();
     });
 
-    expect(confirmSpy).toHaveBeenCalledTimes(1);
+    // The kit confirm dialog (not the native confirm()) asks before the batch add.
+    expect(onSelectMany).not.toHaveBeenCalled();
+    expect(document.body.textContent).toMatch(/Add \d+ models to this combo\?/);
+    const cancel = findDialogButton("cancel");
+    expect(cancel, "expected the confirm dialog Cancel button").not.toBeNull();
+    await act(async () => {
+      cancel!.click();
+    });
+
     // Declining the confirmation must abort the batch add entirely.
     expect(onSelectMany).not.toHaveBeenCalled();
+    expect(findDialogButton("confirmAction")).toBeNull();
+  });
+
+  it("adds the models only after the confirm dialog is accepted", async () => {
+    const onSelectMany = vi.fn();
+    const { container } = await renderModal({
+      activeProviders: [{ provider: "openai" }, { provider: "anthropic" }],
+      onSelectMany,
+      onDeselectMany: vi.fn(),
+      addedModelValues: [],
+    });
+
+    const toggle = container.querySelector(
+      '[data-testid="model-select-toggle-all-visible"]'
+    ) as HTMLButtonElement;
+    await act(async () => {
+      toggle.click();
+    });
+    expect(onSelectMany).not.toHaveBeenCalled();
+
+    await act(async () => {
+      findDialogButton("confirmAction")!.click();
+    });
+    expect(onSelectMany).toHaveBeenCalledTimes(1);
+    // Above SELECT_ALL_CONFIRM_THRESHOLD (20), which is why the dialog asked.
+    expect((onSelectMany.mock.calls[0][0] as unknown[]).length).toBeGreaterThan(20);
   });
 });

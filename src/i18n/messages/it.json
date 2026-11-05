@@ -1000,6 +1000,8 @@
     "batchListTitle": "Batch",
     "batchListCount": "{count} batch",
     "batchListRemovingCompleted": "Rimozione in corso…",
+    "batchListRemoveCompletedPartial": "È stato rimosso un gran numero di batch. Fai di nuovo clic per eliminare quelli rimanenti.",
+    "batchListRemoveCompletedFailed": "Si è verificato un errore durante la rimozione dei batch.",
     "batchListRemoveCompleted": "Rimuovi completati",
     "batchListTableStatus": "Stato",
     "batchListTableId": "ID",

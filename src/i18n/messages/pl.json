@@ -923,6 +923,8 @@
     "batchListTitle": "Zadania wsadowe",
     "batchListCount": "{count} zadań wsadowych",
     "batchListRemovingCompleted": "Usuwanie…",
+    "batchListRemoveCompletedPartial": "Usunięto dużą liczbę partii. Kliknij ponownie, aby usunąć pozostałe.",
+    "batchListRemoveCompletedFailed": "Wystąpił błąd podczas usuwania partii.",
     "batchListRemoveCompleted": "Usuń ukończone",
     "batchListTableStatus": "Stan",
     "batchListTableId": "ID",

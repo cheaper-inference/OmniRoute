@@ -923,6 +923,8 @@
     "batchListTitle": "தொகுதிகள்",
     "batchListCount": "{count} தொகுதிகள்",
     "batchListRemovingCompleted": "அகற்றப்படுகிறது…",
+    "batchListRemoveCompletedPartial": "அதிக எண்ணிக்கையிலான தொகுதிகள் அகற்றப்பட்டன. மீதமுள்ளவற்றை அழிக்க மீண்டும் கிளிக் செய்யவும்.",
+    "batchListRemoveCompletedFailed": "தொகுதிகளை அகற்றும்போது பிழை ஏற்பட்டது.",
     "batchListRemoveCompleted": "நிறைவடைந்தவற்றை அகற்று",
     "batchListTableStatus": "நிலை",
     "batchListTableId": "ID",

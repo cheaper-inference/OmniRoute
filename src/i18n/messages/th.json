@@ -923,6 +923,8 @@
     "batchListTitle": "แบตช์",
     "batchListCount": "{count} แบตช์",
     "batchListRemovingCompleted": "กำลังนำออก…",
+    "batchListRemoveCompletedPartial": "ลบแบตช์จำนวนมากแล้ว คลิกอีกครั้งเพื่อลบส่วนที่เหลือ",
+    "batchListRemoveCompletedFailed": "เกิดข้อผิดพลาดขณะลบแบตช์",
     "batchListRemoveCompleted": "นำรายการที่เสร็จสิ้นแล้วออก",
     "batchListTableStatus": "สถานะ",
     "batchListTableId": "รหัส",
