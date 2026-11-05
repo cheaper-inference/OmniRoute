@@ -36,8 +36,10 @@ function completionLogger(expected: number) {
     resolve = r;
   });
   let completed = 0;
+  const failures: string[] = [];
   const mark = (message: unknown) => {
     const text = String(message);
+    if (text.includes("failed")) failures.push(text);
     if (
       text.includes("completed with status") ||
       text.includes("skipped (unavailable)") ||
@@ -52,12 +54,12 @@ function completionLogger(expected: number) {
     warn: (_tag, message) => mark(message),
     debug: () => undefined,
   };
-  return { done, log };
+  return { done, log, failures };
 }
 
 test("single shadow target receives the synchronous snapshot without modifying caller history", async () => {
   const body = requestBody();
-  const { done, log } = completionLogger(1);
+  const { done, log, failures } = completionLogger(1);
   let observedContent = "";
   scheduleShadowRouting(
     combo,
@@ -80,6 +82,7 @@ test("single shadow target receives the synchronous snapshot without modifying c
   );
   body.messages[0].content = "caller changed after scheduling";
   await done;
+  assert.deepEqual(failures, [], "shadow executor must not fail silently");
   assert.equal(observedContent, "original");
   assert.equal(body.messages[0].content, "caller changed after scheduling");
   assert.equal(body.tools[0].function.name, "read_file");
@@ -87,7 +90,7 @@ test("single shadow target receives the synchronous snapshot without modifying c
 
 test("multiple shadow executors remain isolated even when one mutates nested content", async () => {
   const body = requestBody();
-  const { done, log } = completionLogger(2);
+  const { done, log, failures } = completionLogger(2);
   const observed: string[] = [];
   scheduleShadowRouting(
     combo,
@@ -105,13 +108,14 @@ test("multiple shadow executors remain isolated even when one mutates nested con
     log
   );
   await done;
+  assert.deepEqual(failures, [], "shadow executor must not fail silently");
   assert.deepEqual(observed, ["first:original", "second:original"]);
   assert.equal(body.messages[0].content, "original");
 });
 
 test("unavailable shadow candidates do not dispatch and available siblings keep original history", async () => {
   const body = requestBody();
-  const { done, log } = completionLogger(2);
+  const { done, log, failures } = completionLogger(2);
   const dispatched: string[] = [];
   scheduleShadowRouting(
     combo,
@@ -128,6 +132,7 @@ test("unavailable shadow candidates do not dispatch and available siblings keep 
     log
   );
   await done;
+  assert.deepEqual(failures, [], "shadow executor must not fail silently");
   assert.deepEqual(dispatched, ["online"]);
   assert.equal(body.messages[0].content, "original");
 });
