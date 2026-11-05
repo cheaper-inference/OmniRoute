@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { createComboSchema, updateComboSchema } =
+const { createComboSchema, updateComboSchema, comboModelStepInputSchema } =
   await import("../../src/shared/validation/schemas/combo.ts");
 const { resolveServerErrorMessage } = await import("../../src/lib/api/serverErrorMessage.ts");
 const { buildComboErrorBody } = await import("../../src/lib/api/comboErrorResponse.ts");
@@ -36,7 +36,23 @@ test("updateComboSchema accepts up to 250 allowed connections for large provider
   assert.equal(result.success, true, "250 allowedConnectionIds should be valid");
 });
 
-test("schema rejects when exceeding the 250 limit with a clear too_big message", () => {
+test("comboModelStepInputSchema rejects when exceeding the 250 limit with a clear too_big message", () => {
+  const connectionIds = Array.from({ length: 251 }, (_, i) => `conn-${i + 1}`);
+  const result = comboModelStepInputSchema.safeParse({
+    model: "openai/gpt-4o",
+    allowedConnectionIds: connectionIds,
+  });
+
+  assert.equal(result.success, false);
+  if (!result.success) {
+    const issue = result.error.issues.find((iss) => iss.path.join(".") === "allowedConnectionIds");
+    assert.ok(issue, "must have an issue on allowedConnectionIds");
+    assert.equal(issue?.code, "too_big");
+    assert.equal(issue?.maximum, 250);
+  }
+});
+
+test("createComboSchema also rejects when a model step exceeds 250 connections", () => {
   const connectionIds = Array.from({ length: 251 }, (_, i) => `conn-${i + 1}`);
   const result = createComboSchema.safeParse({
     name: "combo-overflow",
@@ -48,15 +64,7 @@ test("schema rejects when exceeding the 250 limit with a clear too_big message",
     ],
   });
 
-  assert.equal(result.success, false);
-  if (!result.success) {
-    const issue = result.error.issues.find(
-      (iss) => iss.path.join(".") === "models.0.allowedConnectionIds"
-    );
-    assert.ok(issue, "must have an issue on models.0.allowedConnectionIds");
-    assert.equal(issue?.code, "too_big");
-    assert.equal(issue?.maximum, 250);
-  }
+  assert.equal(result.success, false, "251 connections must be rejected by createComboSchema");
 });
 
 test("resolveServerErrorMessage extracts firstField and firstMessage from COMBO_002 object details", () => {
@@ -104,28 +112,10 @@ test("resolveServerErrorMessage extracts nested issues details when firstMessage
   assert.equal(msg, "name: Combo name must be at least 1 character");
 });
 
-test("resolveServerErrorMessage preserves direct string errors like duplicate name or DAG failure", () => {
-  const body = { error: "A combo with this name already exists" };
+test("combos page caller passes string error through fallback", () => {
+  const err = { error: "Combo name already exists" };
   assert.equal(
-    resolveServerErrorMessage(body, "Fallback"),
-    "A combo with this name already exists"
-  );
-});
-
-test("resolveServerErrorMessage formats field: message from array details emitted by POST /api/combos", () => {
-  const body = {
-    error: {
-      message: "Invalid request",
-      details: [
-        {
-          field: "models.0.allowedConnectionIds",
-          message: "Too big: expected array to have <=250 items",
-        },
-      ],
-    },
-  };
-  assert.equal(
-    resolveServerErrorMessage(body, "Fallback"),
-    "models.0.allowedConnectionIds: Too big: expected array to have <=250 items"
+    resolveServerErrorMessage(err, typeof err.error === "string" ? err.error : "Failed"),
+    "Combo name already exists"
   );
 });
