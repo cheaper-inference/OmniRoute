@@ -85,7 +85,7 @@ test("round counting ignores completed tool loops before the current user reques
 });
 
 test("agentic planner consumes its original response without teeing a buffered copy", async () => {
-  const planner = responseText("OMNIROUTE_ROUTE: TOOLS\\nRead the requested file.");
+  const planner = responseText("OMNIROUTE_ROUTE: TOOLS\nRead the requested file.");
   Object.defineProperty(planner, "clone", {
     value: () => {
       throw new Error("planner response must not be cloned");
