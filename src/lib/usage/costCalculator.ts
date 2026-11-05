@@ -138,8 +138,14 @@ function isCodexProvider(provider: string | null | undefined): boolean {
  */
 export function getPricingLookupModels(provider: string, model: string): string[] {
   const keys = [model];
+  // #18676: a prefixed nested id (`openrouter/black-forest-labs/flux.2-pro`) is priced
+  // under its provider-local id; the last path segment alone would miss it.
+  const providerPrefix = provider ? `${provider}/` : "";
+  if (providerPrefix && model.startsWith(providerPrefix)) {
+    keys.push(model.slice(providerPrefix.length));
+  }
   const normalized = normalizeModelName(model);
-  if (normalized !== model) keys.push(normalized);
+  if (!keys.includes(normalized)) keys.push(normalized);
   if (isCodexProvider(provider)) keys.push(...getCodexEffortlessPricingKeys(normalized));
   return keys;
 }
