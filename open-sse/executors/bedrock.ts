@@ -528,8 +528,14 @@ function claudeThinkingFields(model, request, inferenceConfig) {
   if (fitted.thinking.budget_tokens) inferenceConfig.maxTokens = fitted.maxTokens;
   // Claude rejects a non-default temperature while extended thinking is on.
   delete inferenceConfig.temperature;
+  // Adaptive thinking omits the thinking text by default, so a client that asked for
+  // reasoning would get an empty reasoning_content; ask for the summarized display.
+  const shown =
+    fitted.thinking.type === "adaptive" && !fitted.thinking.display
+      ? { ...fitted.thinking, display: "summarized" }
+      : fitted.thinking;
   return {
-    thinking: fitted.thinking,
+    thinking: shown,
     ...(mapped.effort ? { output_config: { effort: mapped.effort } } : {}),
   };
 }

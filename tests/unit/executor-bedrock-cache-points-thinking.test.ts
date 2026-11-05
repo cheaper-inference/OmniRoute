@@ -235,7 +235,9 @@ test("reasoning_effort maps to adaptive thinking plus effort on adaptive-only Cl
     max_tokens: 4000,
   });
   assert.deepEqual(input.additionalModelRequestFields, {
-    thinking: { type: "adaptive" },
+    // Adaptive thinking omits the thinking text unless display is set, which would
+    // leave reasoning_content empty for a client that asked for reasoning.
+    thinking: { type: "adaptive", display: "summarized" },
     output_config: { effort: "high" },
   });
 });
@@ -255,7 +257,9 @@ test("a Claude thinking block maps to additionalModelRequestFields", async () =>
     thinking: { type: "enabled", budget_tokens: 2048 },
     max_tokens: 4000,
   });
-  assert.deepEqual(adaptive.additionalModelRequestFields, { thinking: { type: "adaptive" } });
+  assert.deepEqual(adaptive.additionalModelRequestFields, {
+    thinking: { type: "adaptive", display: "summarized" },
+  });
 });
 
 test("no reasoning request and non-Claude models send no thinking fields", async () => {
