@@ -8,9 +8,9 @@
       "justification": "The four group handlers already required their JSON inputs and two DELETE query parameters and returned 201 on creation at the immutable event base. Both the authz proxy and chat handler already returned an error object for 401. The 14 contract sources are byte-identical at reviewed base and candidate; the ten scanner findings correct historical specification drift. Zod and Next versions differ, so this source proof does not claim whole-runtime equivalence. Candidate DAST and request-contract tests remain required.",
       "baseSha": "26bf6812c06afb33abeb877160585050c0f5ca5d",
       "baseSpecSha256": "b5ca0929a47416f4f223c79572c58c5e070595483cd36f13f6312149e50a9b03",
-      "candidateSpecSha256": "40f0c33b017e124a38b88e199cf81f6be80c5aebcceaa655be84deb4d9e695f4",
+      "candidateSpecSha256": "10224a13ec7930e67c6befe3a97de35782194382eaaa1a08617390566e3ee1dd",
       "scannerVersion": "1.19.1",
-      "reviewedCandidateSha": "f4c167d3a01cbdc40a20b8fed8cf90ac292e1ff0",
+      "reviewedCandidateSha": "f785665ce6213de69d0f5d7689beaececc937270",
       "expiresOn": "2026-12-04",
       "contractSources": [
         {
