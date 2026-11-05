@@ -1236,16 +1236,16 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "caution",
   },
   {
-    key: "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM",
-    label: "Anthropic-Compatible Mid-Conversation System Turns",
+    key: "CLAUDE_CACHE_TAIL_TTL_1H",
+    label: "Claude Cache Tail 1h TTL",
     description:
-      "On plain anthropic-compatible-* relays (claude → claude passthrough), keep mid-conversation role:system turns inside messages[] instead of hoisting them into the top-level system parameter, so the cached prompt prefix stays stable across turns. Applies only when the client itself sent the mid-conversation-system-2026-04-07 anthropic-beta (forwarded upstream as-is). Off by default: every system turn is hoisted exactly as before, because relays that do not support the beta reject role:system messages with 400.",
-    descriptionI18nKey: "featureFlagAnthropicCompatibleMidConversationSystemDescription",
+      "Mark the conversation tail OmniRoute anchors for Claude prompt caching (the second-to-last user turn and the last assistant turn) with the same 1h TTL already used for system and tools, so a pause longer than five minutes does not rewrite the cached prefix. Vertex keeps the 5m TTL. Off by default: the tail keeps the 5m TTL exactly as before. A 1h cache write costs 2x the input price instead of 1.25x, so fast agent loops that never idle past five minutes pay more with this on. Client-managed (passthrough) cache markers are never changed.",
+    descriptionI18nKey: "featureFlagClaudeCacheTailTtl1hDescription",
     category: "runtime",
     defaultValue: "false",
     type: "boolean",
     requiresRestart: false,
-    warningLevel: "caution",
+    warningLevel: "info",
   },
   {
     key: "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED",
@@ -1373,6 +1373,30 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     description:
       "Stop offering and forwarding the max reasoning effort for Cursor Grok 4.7, which Cursor's docs do not list (low, medium, high, xhigh only): the grok-4.7-max fallback alias disappears from the catalog and a max effort request is sent without an effort parameter. Off by default: max stays offered and forwarded, as a live AgentService/Run probe accepted it.",
     descriptionI18nKey: "featureFlagCursorGrok47DropMaxEffortDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "PROXY_STRICT_POST_REPLAY_ENABLED",
+    label: "Proxy Fetch: Strict POST Replay",
+    description:
+      "For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket.",
+    descriptionI18nKey: "featureFlagProxyStrictPostReplayEnabledDescription",
+    category: "network",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED",
+    label: "Responses: Transport-Only Keepalive",
+    description:
+      "Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event.",
+    descriptionI18nKey: "featureFlagResponsesTransportKeepaliveEnabledDescription",
     category: "runtime",
     defaultValue: "false",
     type: "boolean",

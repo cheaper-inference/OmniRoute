@@ -44,31 +44,36 @@ vaš prenosnik                            oddaljeni OmniRoute (VPS)
 
 ---
 
-## Vzpostavljanje povezave
+## Povezovanje
 
-### Z geslom za upravljanje (začetna nastavitev)
+### Z geslom za upravljanje (zagon)
 
 ```bash
 omniroute connect 192.168.0.15
 # Geslo za upravljanje za http://192.168.0.15:20128: ********
-# ✔ Povezava z http://192.168.0.15:20128 je vzpostavljena — kontekst '192.168.0.15' (obseg: admin)
+# ✔ Povezava z http://192.168.0.15:20128 — kontekst '192.168.0.15' (obseg: skrbnik)
 ```
 
-Potek z geslom privzeto izda žeton **admin** (ker imate geslo,
-že imate popoln nadzor). Obseg omejite z `--scope`:
+Tok z geslom privzeto ustvari žeton **admin** (geslo imate, zato že imate
+popoln nadzor). Obseg omejite z `--scope`:
 
 ```bash
 omniroute connect 192.168.0.15 --scope write
 ```
 
-Možnosti: `--port <p>` (ko gostitelj nima navedenih vrat), `--name <ctx>` (ime konteksta),
-`--scope read|write|admin`. Celoten URL se uporabi nespremenjen:
+Možnosti: `--port <p>` (kadar gostitelj nima vrat), `--name <ctx>` (ime
+konteksta), `--scope read|write|admin`. Polni URL se upošteva nespremenjen:
 `omniroute connect https://omni.example.com`.
+
+Ko je v nadzorni plošči omogočeno dvostopenjsko preverjanje pristnosti (Nastavitve →
+Varnost), samo geslo ni sprejeto: CLI nato zahteva kodo iz aplikacije za
+preverjanje pristnosti (ali obnovitveno kodo). Za neinteraktivno uporabo jo
+podajte vnaprej z `--totp <code>`.
 
 ### Z vnaprej ustvarjenim žetonom
 
-V nadzorni plošči (ali z `omniroute tokens create`) ustvarite žeton z določenim obsegom in
-ga prilepite — geslo ni potrebno:
+Ustvarite žeton z določenim obsegom v nadzorni plošči (ali z
+`omniroute tokens create`) in ga prilepite — geslo ni potrebno:
 
 ```bash
 omniroute connect 192.168.0.15 --key oma_live_xxxxxxxx
@@ -411,14 +416,14 @@ omniroute contexts remove 192-168-0-15 --yes   # odstrani lokalni kontekst (tudi
 
 ---
 
-## Končne točke API (referenca)
+## Končne točke API-ja (referenca)
 
-| Metoda | Pot                   | Preverjanje pristnosti | Obseg                         |
-| ------ | --------------------- | ---------------------- | ----------------------------- |
-| POST   | `/api/cli/connect`    | geslo za upravljanje   | — (javno, zaščiteno z geslom) |
-| GET    | `/api/cli/whoami`     | žeton za dostop        | branje                        |
-| GET    | `/api/cli/tokens`     | žeton za dostop        | skrbništvo                    |
-| POST   | `/api/cli/tokens`     | žeton za dostop        | skrbništvo                    |
-| DELETE | `/api/cli/tokens/:id` | žeton za dostop        | skrbništvo                    |
+| Method | Route                 | Auth                        | Scope                         |
+| ------ | --------------------- | --------------------------- | ----------------------------- |
+| POST   | `/api/cli/connect`    | geslo; 2FA, če je omogočena | — (javno, zaščiteno z geslom) |
+| GET    | `/api/cli/whoami`     | žeton za dostop             | branje                        |
+| GET    | `/api/cli/tokens`     | žeton za dostop             | skrbnik                       |
+| POST   | `/api/cli/tokens`     | žeton za dostop             | skrbnik                       |
+| DELETE | `/api/cli/tokens/:id` | žeton za dostop             | skrbnik                       |
 
-Za celotne sheme glejte [openapi.yaml](../openapi.yaml).
+Za celotne sheme si oglejte [openapi.yaml](../openapi.yaml).

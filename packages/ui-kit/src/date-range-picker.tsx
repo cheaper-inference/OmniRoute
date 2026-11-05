@@ -30,10 +30,43 @@ import {
 export interface DateRangeValue { from: string; to: string; }
 export type DateRangePickerVariant = "default" | "capsule";
 export type DateRangePreset = "today" | "yesterday" | "week" | "7days" | "28days" | "month" | "lastMonth" | "year";
+/** A built-in day preset id, or the id of a custom day preset. */
+export type DateRangePresetId = DateRangePreset | (string & {});
+export type DateRangePickerMode = "date" | "timestamp";
+/** What a custom day-mode preset range receives. */
+export interface DateRangeDayPresetContext {
+  /** The picker's authoritative local date (YYYY-MM-DD). */
+  referenceDate: string;
+  weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  min?: string;
+  max?: string;
+}
+/** A relabelled built-in day preset (`range` omitted) or a custom day preset (`range` required). */
+export interface DateRangePresetOption {
+  id: DateRangePresetId;
+  label: string;
+  /**
+   * Required for custom ids. Omit it on a built-in id to relabel the built-in range. It must
+   * return strict YYYY-MM-DD dates; the result is clamped to min/max. It runs on every render to
+   * match the committed value, so keep it pure and cheap, and do calendar-day arithmetic in local
+   * time (for example with `Date#setDate`).
+   */
+  range?: (context: DateRangeDayPresetContext) => DateRangeValue;
+  /** Timestamp-only (`DateRangeRelativePreset`); never valid on a day preset. */
+  duration?: never;
+  /** Timestamp-only (`DateRangeRelativePreset`); never valid on a day preset. */
+  resolve?: never;
+}
+/** One entry of the day-mode preset column: a built-in id (English label) or a preset option. */
+export type DateRangeDayPreset = DateRangePreset | DateRangePresetOption;
+/** `presets` accepted by each mode: day presets in date mode, relative presets in timestamp mode. */
+export type DateRangePickerPresets<M extends DateRangePickerMode = DateRangePickerMode> = M extends "timestamp"
+  ? readonly DateRangeRelativePreset[]
+  : readonly DateRangeDayPreset[];
 
-export interface DateRangePickerProps extends Omit<ComponentProps<"button">, "value" | "defaultValue" | "onChange"> {
+export interface DateRangePickerProps<M extends DateRangePickerMode = DateRangePickerMode> extends Omit<ComponentProps<"button">, "value" | "defaultValue" | "onChange"> {
   /** Date mode uses inclusive YYYY-MM-DD values; timestamp mode uses [from, to) ISO instants. */
-  mode?: "date" | "timestamp";
+  mode?: M;
   value?: DateRangeValue;
   defaultValue?: DateRangeValue;
   onValueChange?: (value: DateRangeValue) => void;
@@ -54,13 +87,19 @@ export interface DateRangePickerProps extends Omit<ComponentProps<"button">, "va
   referenceDate?: string;
   /** Identifies the preset represented by the committed value when ranges overlap. */
   valuePreset?: DateRangePreset | (string & {});
-  /** Relative presets for timestamp mode. Supply an empty array for calendar-only selection. */
-  presets?: readonly DateRangeRelativePreset[];
+  /**
+   * Preset column, in order. Supply an empty array for calendar-only selection.
+   * - Date mode: built-in ids keep their English labels (`"7days"`), `{ id: "today", label: "Hoje" }`
+   *   relabels a built-in, and `{ id, label, range }` adds a custom range. Defaults to
+   *   `defaultDateRangePresets`, the eight built-ins.
+   * - Timestamp mode: relative presets. Defaults to `defaultDateRangeRelativePresets`.
+   */
+  presets?: DateRangePickerPresets<M>;
   /** Authoritative ISO instant used by timestamp presets. Defaults to the time the popover opens. */
   referenceTime?: string;
   /** IANA timezone for timestamp labels and civil calendar-day boundaries. Defaults to UTC. */
   timeZone?: string;
-  /** Committed preset identity; undefined after a calendar selection or Clear. */
+  /** Committed preset id on Apply in both modes; undefined after a calendar selection or Clear. */
   onPresetChange?: (preset: string | undefined) => void;
   /** Timestamp-mode helper content can explain application-specific bounds using the pending range. */
   helper?: ReactNode | ((state: { draft: DateRangeValue; preset: string | undefined }) => ReactNode);
@@ -81,18 +120,20 @@ function toIso(date: Date) { return `${date.getFullYear()}-${String(date.getMont
 function startOfDay(date: Date) { const next = new Date(date); next.setHours(0, 0, 0, 0); return next; }
 function addDays(date: Date, days: number) { const next = new Date(date); next.setDate(next.getDate() + days); return next; }
 function startOfMonth(date: Date) { return new Date(date.getFullYear(), date.getMonth(), 1); }
-function parseReferenceDate(value: string) {
+function isIsoDate(value: string) {
   const parts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
   const date = parseIso(value);
-  const isValid = parts
+  return Boolean(parts
     && !Number.isNaN(date.getTime())
     && date.getFullYear() === Number(parts[1])
     && date.getMonth() === Number(parts[2]) - 1
-    && date.getDate() === Number(parts[3]);
-  if (!isValid) {
+    && date.getDate() === Number(parts[3]));
+}
+function parseReferenceDate(value: string) {
+  if (!isIsoDate(value)) {
     throw new RangeError(`DateRangePicker referenceDate must be a valid YYYY-MM-DD date; received "${value}".`);
   }
-  return startOfDay(date);
+  return startOfDay(parseIso(value));
 }
 function monthForValue(value: DateRangeValue, referenceDate = new Date()) {
   const initial = value.from || value.to;
@@ -127,6 +168,37 @@ function subscribeToCompactChange(onChange: () => void) {
 }
 
 const presetLabels: Array<[DateRangePreset, string]> = [["today", "Today"], ["yesterday", "Yesterday"], ["week", "This Week"], ["7days", "Last 7 Days"], ["28days", "Last 28 Days"], ["month", "This Month"], ["lastMonth", "Last Month"], ["year", "This Year"]];
+const builtInLabels = new Map<string, string>(presetLabels);
+/** The eight built-in day presets, in their default order. */
+export const defaultDateRangePresets: readonly DateRangePreset[] = presetLabels.map(([preset]) => preset);
+
+interface ResolvedDayPreset { id: string; label: string; range: (context: DateRangeDayPresetContext) => DateRangeValue; }
+
+function resolveDayPresets(presets: readonly DateRangeDayPreset[]): ResolvedDayPreset[] {
+  const seen = new Set<string>();
+  return presets.map((preset) => {
+    const option: DateRangePresetOption = typeof preset === "string" ? { id: preset, label: builtInLabels.get(preset) ?? preset } : preset;
+    const { id, label, range: customRange } = option;
+    if (seen.has(id)) throw new RangeError(`DateRangePicker presets must have unique ids; "${id}" is repeated.`);
+    seen.add(id);
+    if (customRange) {
+      return {
+        id,
+        label,
+        range: (context) => {
+          const next = customRange(context);
+          const dates: unknown[] = [next?.from, next?.to];
+          const invalid = dates.findIndex((date) => typeof date !== "string" || !isIsoDate(date));
+          if (invalid !== -1) throw new RangeError(`DateRangePicker preset "${id}" range must return YYYY-MM-DD dates; received "${String(dates[invalid])}".`);
+          return next;
+        },
+      };
+    }
+    if (!builtInLabels.has(id)) throw new RangeError(`DateRangePicker preset "${id}" needs a range function.`);
+    const builtIn = id as DateRangePreset;
+    return { id, label, range: ({ weekStartsOn, referenceDate }) => presetRange(builtIn, weekStartsOn, startOfDay(parseIso(referenceDate))) };
+  });
+}
 
 function presetRange(preset: DateRangePreset, weekStartsOn: number, now = startOfDay(new Date())): DateRangeValue {
   if (preset === "today") return { from: toIso(now), to: toIso(now) };
@@ -139,18 +211,12 @@ function presetRange(preset: DateRangePreset, weekStartsOn: number, now = startO
   return { from: toIso(new Date(now.getFullYear(), 0, 1)), to: toIso(now) };
 }
 
-function matchingPreset(
-  value: DateRangeValue,
-  weekStartsOn: number,
-  min?: string,
-  max?: string,
-  referenceDate?: Date,
-): DateRangePreset | undefined {
+function matchingPreset(value: DateRangeValue, presets: ResolvedDayPreset[], context: DateRangeDayPresetContext): string | undefined {
   if (!value.from || !value.to) return undefined;
-  return presetLabels.find(([preset]) => {
-    const candidate = normalizeRange(presetRange(preset, weekStartsOn, referenceDate), min, max);
+  return presets.find((preset) => {
+    const candidate = normalizeRange(preset.range(context), context.min, context.max);
     return candidate.from === value.from && candidate.to === value.to;
-  })?.[0];
+  })?.id;
 }
 
 function CalendarDayButton({ day, modifiers, ...props }: DayButtonProps) {
@@ -213,13 +279,19 @@ const calendarClassNames = {
   range_end: "ci-range-calendar__day--range-end",
 } as const;
 
-export function DateRangePicker(props: DateRangePickerProps) {
-  return props.mode === "timestamp" ? <TimestampDateRangePicker {...props} /> : <CalendarDateRangePicker {...props} />;
+/**
+ * `mode` selects the `presets` type: omitted or `"date"` takes day presets, `"timestamp"` takes
+ * relative presets. `DateRangePickerProps` without a type argument accepts either.
+ */
+export function DateRangePicker<M extends DateRangePickerMode = "date">(props: DateRangePickerProps<M>) {
+  return props.mode === "timestamp"
+    ? <TimestampDateRangePicker {...(props as DateRangePickerProps<"timestamp">)} />
+    : <CalendarDateRangePicker {...(props as DateRangePickerProps<"date">)} />;
 }
 
 function CalendarDateRangePicker({
   mode: _mode,
-  presets: _presets,
+  presets = defaultDateRangePresets,
   referenceTime: _referenceTime,
   timeZone: _timeZone,
   onPresetChange,
@@ -245,7 +317,7 @@ function CalendarDateRangePicker({
   variant = "default",
   triggerSize: triggerSizeProp,
   ...props
-}: DateRangePickerProps) {
+}: DateRangePickerProps<"date">) {
   const referenceDateIso = referenceDate ?? toIso(startOfDay(new Date()));
   const referenceDateValue = useMemo(
     () => parseReferenceDate(referenceDateIso),
@@ -253,7 +325,9 @@ function CalendarDateRangePicker({
   );
   const [uncontrolled, setUncontrolled] = useState(() => normalizeRange(defaultValue, min, max));
   const value = normalizeRange(controlled ?? uncontrolled, min, max);
-  const committedPreset = valuePreset ?? matchingPreset(value, weekStartsOn, min, max, referenceDateValue);
+  const resolvedPresets = useMemo(() => resolveDayPresets(presets), [presets]);
+  const presetContext: DateRangeDayPresetContext = { referenceDate: referenceDateIso, weekStartsOn, min, max };
+  const committedPreset = valuePreset ?? matchingPreset(value, resolvedPresets, presetContext);
   const [draft, setDraft] = useState(value);
   const [activePreset, setActivePreset] = useState<string | undefined>(committedPreset);
   const [month, setMonth] = useState(() => monthForValue(value, referenceDateValue));
@@ -307,14 +381,14 @@ function CalendarDateRangePicker({
     }}>
       <PopoverTrigger asChild><Button variant="outline" size={triggerSize} data-trigger-variant={variant} className={cn("ci-date-range-trigger", className)} {...props}><CalendarDays aria-hidden="true" /><span>{label}</span></Button></PopoverTrigger>
       <PopoverContent className="ci-date-range-popover" align="end" aria-label="Choose date range">
-        <div className="ci-date-range-presets">
-          {presetLabels.map(([preset, text]) => <button type="button" key={preset} aria-pressed={activePreset === preset} data-active={activePreset === preset || undefined} onClick={() => {
-            const next = normalizeRange(presetRange(preset, weekStartsOn, referenceDateValue), min, max);
-            setActivePreset(preset);
+        {resolvedPresets.length > 0 && <div className="ci-date-range-presets">
+          {resolvedPresets.map((preset) => <button type="button" key={preset.id} aria-pressed={activePreset === preset.id} data-active={activePreset === preset.id || undefined} onClick={() => {
+            const next = normalizeRange(preset.range(presetContext), min, max);
+            setActivePreset(preset.id);
             setDraft(next);
             setMonth(monthForValue(next, referenceDateValue));
-          }}>{text}</button>)}
-        </div>
+          }}>{preset.label}</button>)}
+        </div>}
         <div className="ci-range-calendars" data-months={numberOfMonths}>
           <DayPicker
             aria-label="Date range calendar"
@@ -387,7 +461,7 @@ function TimestampDateRangePicker({
   variant = "default",
   triggerSize: triggerSizeProp,
   ...props
-}: DateRangePickerProps) {
+}: DateRangePickerProps<"timestamp">) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
   const open = controlledOpen ?? uncontrolledOpen;
   const [openedAt, setOpenedAt] = useState(() => new Date().toISOString());

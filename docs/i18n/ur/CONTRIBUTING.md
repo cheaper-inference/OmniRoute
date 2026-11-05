@@ -15,14 +15,18 @@ Thank you for your interest in contributing! This guide covers everything you ne
 - **Node.js** `>=22.22.2 <23`، یا `>=24.0.0 <27` (تجویز کردہ: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ صارفین (Node 24+):** `npm install` کے بعد تصدیق کریں کہ مقامی ماڈیولز انسٹال ہو گئے ہیں:
-> `node -e "require('better-sqlite3')"`. اگر یہ `MODULE_NOT_FOUND` کے ساتھ ناکام ہو جائے،
-> تو `npm approve-scripts better-sqlite3 && npm install` چلائیں۔ دیکھیے
-> [مسائل کا ازالہ](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)۔
+> **Node 24 کے ساتھ Windows:** موجودہ 24 LTS پیچ ریلیز (کم از کم 24.20.0) استعمال کریں۔
+> اس سے پہلے کی ریلیزز `--test-force-exit` کے ذریعے عمل ختم ہونے پر کامیاب ٹیسٹس کے بعد ختم ہو سکتی ہیں۔
+> Node کا [Windows libuv حل](https://github.com/nodejs/node/pull/61999) اس رن ٹائم کریش کو حل کرتا ہے؛
+> ٹیسٹ assertions اور رنر کے exit checks فعال رکھیں۔
+
+> **npm v11+ صارفین (Node 24+):** `npm install` کے بعد تصدیق کریں کہ native modules انسٹال ہو گئے ہیں:
+> `node -e "require('better-sqlite3')"`۔ اگر یہ `MODULE_NOT_FOUND` کے ساتھ ناکام ہو،
+> تو `npm approve-scripts better-sqlite3 && npm install` چلائیں۔ [مسائل کے حل](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) دیکھیں۔
 
 - **Git**
 
-### کلون اور انسٹال کرنا
+### کلون اور انسٹالیشن
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -30,90 +34,89 @@ cd OmniRoute
 npm install
 ```
 
-### ماحولیاتی متغیرات
+### ماحول کے متغیرات
 
 ```bash
-# ٹیمپلیٹ سے اپنی .env فائل بنائیں
+# اپنے ٹیمپلیٹ سے .env بنائیں
 cp .env.example .env
 
-# مطلوبہ خفیہ قدریں بنائیں
+# مطلوبہ secrets تیار کریں
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 ڈیولپمنٹ کے لیے اہم متغیرات:
 
-| متغیر                  | ڈیولپمنٹ کی ڈیفالٹ قدر   | وضاحت                       |
-| ---------------------- | ------------------------ | --------------------------- |
-| `PORT`                 | `20128`                  | سرور پورٹ                   |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | فرنٹ اینڈ کے لیے بنیادی URL |
-| `JWT_SECRET`           | (اوپر بنائیں)            | JWT دستخطی خفیہ قدر         |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | پہلی لاگ اِن کا پاس ورڈ     |
-| `APP_LOG_LEVEL`        | `info`                   | لاگ کی تفصیل کی سطح         |
+| متغیر                  | ڈیولپمنٹ ڈیفالٹ          | وضاحت                   |
+| ---------------------- | ------------------------ | ----------------------- |
+| `PORT`                 | `20128`                  | سرور پورٹ               |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | فرنٹ اینڈ کا بنیادی URL |
+| `JWT_SECRET`           | (اوپر تیار کریں)         | JWT signing secret      |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | پہلی لاگ اِن کا پاس ورڈ |
+| `APP_LOG_LEVEL`        | `info`                   | لاگ کی تفصیل کی سطح     |
 
 ### ڈیش بورڈ کی ترتیبات
 
-ڈیش بورڈ ان خصوصیات کے لیے UI ٹوگلز فراہم کرتا ہے جنہیں ماحولیاتی متغیرات کے ذریعے بھی ترتیب دیا جا سکتا ہے:
+ڈیش بورڈ ان خصوصیات کے لیے UI ٹوگلز فراہم کرتا ہے جنہیں ماحول کے متغیرات کے ذریعے بھی ترتیب دیا جا سکتا ہے:
 
-| ترتیب کا مقام            | ٹوگل             | وضاحت                            |
-| ------------------------ | ---------------- | -------------------------------- |
-| ترتیبات → اعلیٰ اختیارات | ڈیبگ موڈ         | ڈیبگ درخواست لاگز فعال کریں (UI) |
-| ترتیبات → عمومی          | سائڈبار کی مرئیت | سائڈبار کے حصے دکھائیں/چھپائیں   |
+| ترتیبات کا مقام     | ٹوگل               | وضاحت                            |
+| ------------------- | ------------------ | -------------------------------- |
+| Settings → Advanced | Debug Mode         | ڈیبگ ریکوئسٹ لاگز فعال کریں (UI) |
+| Settings → General  | Sidebar Visibility | سائڈبار کے حصے دکھائیں/چھپائیں   |
 
-یہ ترتیبات ڈیٹابیس میں محفوظ ہوتی ہیں اور دوبارہ شروع کیے جانے کے بعد بھی برقرار رہتی ہیں، اور مقرر ہونے کی صورت میں env var کی ڈیفالٹ قدروں پر فوقیت رکھتی ہیں۔
+یہ ترتیبات ڈیٹابیس میں محفوظ ہوتی ہیں اور ری اسٹارٹس کے بعد بھی برقرار رہتی ہیں، اور سیٹ کیے جانے پر env var defaults کو اوور رائڈ کرتی ہیں۔
 
 ### مقامی طور پر چلانا
 
 ```bash
-# ڈیولپمنٹ موڈ (ہاٹ ری لوڈ)
+# ڈیولپمنٹ موڈ (hot reload)
 npm run dev
 
 # پروڈکشن بلڈ
 npm run build    # next build → .build/next/ پھر assembleStandalone → dist/
 npm run start
 
-# معاونین کی تبدیلیوں کے لیے تیز، صرف بیک اینڈ/API کمپائل
+# contributors کی تبدیلیوں کے لیے تیز backend/API-only compile
 npm run build:contributor
 
-# ریلیز بلڈ (صاف دوبارہ بلڈ + HEAD سینٹینل — تعیناتی کے لیے درکار)
-npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA لکھتا ہے
+# ریلیز بلڈ (صاف rebuild + HEAD sentinel — deploy کے لیے ضروری)
+npm run build:release   # rm -rf .build dist پھر build + dist/BUILD_SHA لکھتا ہے
 
-# عام پورٹ کنفیگریشن
+# عام پورٹ کی ترتیب
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-معاون بلڈ صرف کمپائل کی توثیق انجام دیتا ہے: یہ standalone
-ڈسٹری بیوشن کو اسمبل نہیں کرتا اور نہ ہی اختیاری مقامی پیکیجنگ اثاثے بناتا ہے۔ جب آپ کو
-قابلِ ترسیل بنڈل کی توثیق کرنی ہو تو باقاعدہ پروڈکشن بلڈ استعمال کریں۔
+Contributor build صرف compile-only validation انجام دیتا ہے: یہ standalone distribution کو assemble نہیں کرتا اور optional native packaging assets بھی build نہیں کرتا۔ جب آپ کو shippable bundle کی توثیق کرنی ہو تو معمول کا production build استعمال کریں۔
 
-### بلڈ آؤٹ پٹ کی ساخت
+### بلڈ آؤٹ پٹ کا لے آؤٹ
 
-| ڈائریکٹری | مندرجات                                                                    | ٹریک شدہ |
-| --------- | -------------------------------------------------------------------------- | -------- |
-| `src/`    | ایپلیکیشن سورس (TypeScript / TSX)                                          | ہاں      |
-| `.build/` | درمیانی فائلیں — `next build` آؤٹ پٹ (gitignored، `distDir = .build/next`) | نہیں     |
-| `dist/`   | قابلِ ترسیل بنڈل — `assembleStandalone` کے ذریعے اسمبل کردہ (gitignored)   | نہیں     |
+| ڈائریکٹری | مواد                                                                               | ٹریک شدہ |
+| --------- | ---------------------------------------------------------------------------------- | -------- |
+| `src/`    | ایپلیکیشن کا source (TypeScript / TSX)                                             | ہاں      |
+| `.build/` | درمیانی فائلیں — `next build` کا output (gitignored, `distDir = .build/next`)      | نہیں     |
+| `dist/`   | Shippable bundle — `assembleStandalone` کے ذریعے assemble کیا جاتا ہے (gitignored) | نہیں     |
 
-بلڈ پائپ لائن ایک ہی مرحلے میں چلتی ہے:
+بلڈ پائپ لائن ایک ہی مرحلے میں مکمل ہوتی ہے:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js آؤٹ پٹ)
-  └─ assembleStandalone()                 (standalone + static + public + مقامی اثاثے کاپی کرتا ہے)
-       └─ آؤٹ پٹ: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (standalone + static + public + native assets کاپی کرتا ہے)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` اضافی طور پر پہلے دونوں ڈائریکٹریوں کو صاف کرتا ہے اور
-تعیناتی کی سالمیت کے سینٹینل کے طور پر `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) لکھتا ہے۔
+`npm run build:release` اضافی طور پر پہلے دونوں ڈائریکٹریز کو صاف کرتا ہے اور
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) کو deploy integrity sentinel کے طور پر لکھتا ہے۔
 
-`npm run build:contributor` صرف بیک اینڈ والا بلڈ پروفائل استعمال کرتا ہے۔ یہ بلڈ کے دوران عارضی طور پر
-ڈیش بورڈ UI فائلوں کی جگہ اسٹبز استعمال کرتا ہے، API روٹ ہینڈلرز برقرار رکھتا ہے، اور بلڈ کے بعد اصل فائلیں
-بحال کر دیتا ہے۔ ڈیش بورڈ UI کو متاثر کرنے والی تبدیلیوں یا مکمل ریلیز کی توثیق کے لیے `npm run build`
-استعمال کریں؛ معاون پروفائل ریلیز بلڈ کا متبادل نہیں ہے۔
+`npm run build:contributor` backend-only build profile استعمال کرتا ہے۔ یہ build کے دوران
+dashboard UI فائلوں کو عارضی طور پر stub کرتا ہے، API route handlers برقرار رکھتا ہے، اور
+build کے بعد اصل فائلیں بحال کر دیتا ہے۔ ایسی تبدیلیوں کے لیے `npm run build` استعمال کریں
+جو dashboard UI کو متاثر کرتی ہوں، یا مکمل release validation کے لیے؛ contributor profile
+release build کا متبادل نہیں ہے۔
 
-> **VPS تعیناتی کا نوٹ:** ریموٹ امیج ڈائریکٹری `/usr/lib/node_modules/omniroute/app/`
-> میں کوئی تبدیلی نہیں ہوئی۔ تعیناتی کی اسکلز `dist/` کے مندرجات کو rsync کے ذریعے اس میں منتقل کرتی ہیں۔
-> صرف ریپوزٹری کے اندر بلڈ آؤٹ پٹ کا پاتھ تبدیل ہوا ہے (`app/` → `dist/`)۔
+> **VPS deploy نوٹ:** remote image directory `/usr/lib/node_modules/omniroute/app/`
+> میں کوئی تبدیلی نہیں کی جاتی۔ deploy skills، `dist/` کے مواد کو اس میں rsync کرتی ہیں۔
+> صرف in-repo build output path تبدیل ہوا ہے (`app/` → `dist/`)۔
 
 ڈیفالٹ URLs:
 

@@ -56,8 +56,11 @@ export const FREE_MODELS: FreeModelSpec[] = [
     displayName: "Gemini 3.1 Flash-Lite",
   },
   { provider: "gemini", model: "gemini/gemma-4-31b-it", displayName: "Gemma 4 31B (Gemini)" },
-  { provider: "nvidia", model: "nvidia/openai/gpt-oss-120b", displayName: "GPT OSS 120B (NVIDIA)" },
-  { provider: "nvidia", model: "nvidia/moonshotai/kimi-k3", displayName: "Kimi K3 (NVIDIA)" },
+  {
+    provider: "nvidia",
+    model: "nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b",
+    displayName: "Nemotron 3.5 Super VL (NVIDIA)",
+  },
   {
     provider: "nvidia",
     model: "nvidia/google/gemma-4-31b-it",

@@ -4,80 +4,18 @@
 
 ---
 
-> **Durum:** gösterge paneli bunun üzerine inşa edilmiştir** Keak CI UI Kiti** (`@keak/cheaper-inference-ui-kit`), `packages/ui-kit` çalışma alanı olarak satılır (`@omniroute/ui-kit`; yukarı akış anlık görüntüsü `packages/ui-kit/UPSTREAM.md` sabitlenir ve `npm run check:ui-kit-snapshot` tarafından korunur). Işık kanonik temadır; varsayılan tercih `system`. Aksan Keak limonudur (`--ci-color-accent`). Switzer, kitin kendisi tarafından barındırılan (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` tarafından içe aktarılan) UI, görüntüleme ve kod metni (`--ci-font-ui`; `--ci-font-display` ve `--ci-font-mono` buna çözümlenir) için tek bir ailedir. Komut Dosyaları Switzer'de glif yoluyla glif (`src/app/globals.css`) yoktur: Kiril, Yunanca ve Vietnamca için Inter ve yalnızca `html[dir="rtl"]` altında, Arap alfabesi için Vazirmatn. Her simge bir Lucide glifidir.
+> **Durum:** gösterge paneli bunun üzerine inşa edilmiştir** Keak CI UI Kiti** (`@keak/cheaper-inference-ui-kit`), `packages/ui-kit` çalışma alanı olarak satılır (`@omniroute/ui-kit`; yukarı akış anlık görüntüsü `packages/ui-kit/UPSTREAM.md` sabitlenir ve `npm run check:ui-kit-snapshot` tarafından korunur). Işık kanonik temadır; varsayılan tercih `system`. Varsayılan palet kitin** Sürümler** görünüm (sıcak kağıt nötrleri ve bakır vurgusu `#e5ac82`, `packages/ui-kit/src/ci-editions.css`); Ayarlar → Görünüm → Renk paleti teklifleri** Klasik** , kitin limon vurgulu temel jetonları. Switzer, kitin kendisi tarafından barındırılan (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` tarafından içe aktarılan) UI, görüntüleme ve kod metni (`--ci-font-ui`; `--ci-font-display` ve `--ci-font-mono` buna çözümlenir) için tek bir ailedir. Komut Dosyaları Switzer'de glif yoluyla glif (`src/app/globals.css`) yoktur: Kiril, Yunanca ve Vietnamca için Inter ve yalnızca `html[dir="rtl"]` altında, Arap alfabesi için Vazirmatn. Her simge bir Lucide glifidir.
 
-## 1. Nerede ne bulunur
+## 1. Nesnelerin yaşadığı yer
 
-- **Kit.** `packages/ui-kit/src`, `packages/ui-kit/UPSTREAM.md` dosyasında sabitlenmiş commit'teki
-  upstream `src/` dizininin bayt bayt kopyasıdır (bu dosya lisans yetkilendirmesini de kaydeder);
-  `PATCHES.md` yerel yamaları listeler (hiçbiri yok). Derleme olmadan, kaynak olarak tüketilir:
-  `next.config.mjs` onu transpile eder ve `tsconfig.json`, `@omniroute/ui-kit` → `packages/ui-kit/src`
-  ile `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` eşlemesini yapar (`vitest.config.ts` ve
-  `vitest.mcp.config.ts` aynı takma adı taşır). Bir kit bileşenini her zaman alt yoluyla içe aktarın
-  (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), asla `@omniroute/ui-kit` barrel'ı
-  üzerinden değil: barrel, tarih seçici dahil her bileşeni her içe aktarıcıya çeker. Kit stil sayfası
-  `src/app/globals.css` üzerinden dahil edilir
-  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **Token'lar.** `packages/ui-kit/src/ci-tokens.css`, `--ci-*` token'larını tanımlar;
-  `src/app/globals.css` bunları eski OmniRoute adlarına köprüler (`--color-*`, `--radius-*`,
-  `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), böylece mevcut
-  `var(--color-*)` okumaları ve Tailwind yardımcı sınıfları çalışmaya devam eder. Yeni kod, Tailwind
-  yardımcı sınıflarını (`bg-surface`, `text-text-muted`, `border-border`, `text-success`,
-  `bg-success-bg`, `bg-chart-1`…) veya kit sınıflarını kullanır — asla hex değeri kullanılmaz
-  (`tests/unit/design-kit-bridge.test.ts` köprüyü zorunlu kılar). `text-primary`,
-  `--text-color-primary` üzerinden `--color-primary-ink`'e çözümlenir (açık temada lime-800, koyu
-  temada lime vurgu rengi), böylece `bg-primary`/`border-primary` lime yüzeyini korurken birincil
-  metin okunabilir kalır. Grafik serileri `--color-chart-1` … `--color-chart-5` kullanır.
-- **Temalar.** `<html className="ci-theme">` (`src/app/layout.tsx`), belgeyi kit temasına dahil eder.
-  Tercih `light`, `dark` veya `system`'dir (`src/shared/constants/appConfig.ts` içinde
-  `THEME_CONFIG.defaultTheme = "system"`; `system`, `prefers-color-scheme`'i izler).
-  `src/store/themeStore.ts` içindeki `applyTheme()` (hidrasyondan önce çalışan, `src/app/layout.tsx`
-  içindeki satır içi önyükleme betiği tarafından yansıtılır), `data-theme="dark"|"light"`
-  özniteliğini ayarlar ve `<html>` üzerindeki `.dark` sınıfını birlikte açıp kapatır. Kit'in koyu
-  token kümesi `data-theme="dark"` özniteliğine bağlıdır (`packages/ui-kit/src/ci-tokens.css`);
-  OmniRoute'un kendi koyu geçersiz kılmaları (`globals.css` içindeki `.dark` bloğu) ve eski Tailwind
-  `dark:` yardımcı sınıfları ise `.dark` sınıfına bağlıdır. Vurgu rengi ön ayarları yoktur: vurgu her
-  zaman kit'ten gelir ve eski bir derlemeden kalma kalıcı bir ön ayar, store yüklendiğinde atılır.
-- **Bileşenler (adaptörler).** `src/shared/components/index.tsx`, OmniRoute bileşen API'sini korur
-  (aynı adlar, varsayılan dışa aktarımlar ve prop'lar) ve arkasındaki primitifler, kit üzerine
-  kurulmuş adaptörlerdir: formlar (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`,
-  `Badge`, `Card`), overlay'ler ve geri bildirim (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`,
-  `NotificationToast`, `EmptyState`, `Loading`), yapı (`Collapsible`, `CollapsibleSection`,
-  `SegmentedControl`, `Breadcrumbs`, `Avatar`) ve tablolar (`DataTable`, `FilterBar`, `ColumnToggle`,
-  `FilterPills`, `PresetSlider`). Bir adaptör, kit bileşenini alt yoluyla içe aktarır ve eski prop'ları
-  ona eşler — örneğin `Button variant="primary"`, kit'in `default` düğmesidir
-  (`--ci-button-primary-*`: açık temada ters yüzey, koyu temada `--ci-color-accent-foreground`
-  mürekkebiyle vurgu rengi), `danger` `destructive`'tir ve `warning`, `outline` artı
-  `.ci-button--warning` uzantısıdır. `globals.css` dosyasının sonundaki `.ci-button--warning` ve
-  `.ci-badge[data-tone]` kuralları (`@layer components`), kit sınıflarının üzerine eklenmiş OmniRoute
-  uzantılarıdır. `tests/unit/ui/adapters/*.test.tsx`, her adaptörü sabitler.
-- **Kabuk.** `src/app/(dashboard)/layout.tsx`, `DashboardLayout`'u render eder; o da
-  `src/shared/components/layouts/DashboardShell.tsx`'i render eder: kit'in `SidebarProvider` /
-  `Sidebar` / `SidebarInset` bileşenleri (`packages/ui-kit/src/sidebar.tsx`) ile OmniRoute'un gezinme
-  mantığı `src/shared/components/Sidebar.tsx` içindedir. `#main-content`'e giden bir "içeriğe atla"
-  bağlantısı, odaklanabilen ilk öğedir. `src/shared/components/Header.tsx`; kit `SidebarTrigger`'ını
-  (kabuğun kenar çubuğunu açıp kapatan tek kontrol), Keak `ProductSwitcher`'ını ve komut paleti
-  açıcısını barındırır; `#main-content` içinde bir kit `PageHeader`'ı (`.ci-page-header`) monte
-  edilmediği sürece yalnızca rota başlığını gösterir, böylece kendi `PageHeader`'ı olan bir sayfada
-  tek bir `h1` bulunur. `src/shared/components/CommandPalette.tsx` bir kit `Dialog`'udur.
-- **Simgeler.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`), adı (ekranların
-  kullandığı Material Symbols sözlüğü) `ICON_MAP` (`src/shared/constants/iconMap.ts`) üzerinden bir
-  Lucide glifine çözümler. Material Symbols yazı tipi ve paketi artık yok: haritada bulunmayan bir
-  ad, nötr bir yer tutucu glif render eder (`data-icon-missing="true"`) ve production dışında konsola
-  bir uyarı yazar. `npm run gen:icon-map`, kullanımda olup haritada eksik olan adları yazdırır
-  (`tests/unit/icon-map-coverage.test.ts`, Lucide simgesi olmayan herhangi bir ad olduğunda başarısız
-  olur; `tests/unit/icon-map-object-values.test.ts`, lookup nesnelerinde saklanan adları kapsar);
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]`, düz
-  `<span className="material-symbols-outlined">` span'larını `<Icon>` bileşenine dönüştürür.
-- **Marka.** `src/shared/components/OmniRouteLogo.tsx`, kit'i sarar: varsayılan dışa aktarım
-  `OmniRouteLogo`, `ProductIcon product="omniroute" variant="glyph"` render eder (satır içi SVG,
-  `basePath`-güvenli) ve `OmniRouteLockup`, `ProductLockup product="omniroute"` (erişilebilir adı
-  "Keak OmniRoute") ya da beyaz etiket operatörleri için kendi `name`/`logoSrc` değerlerini render
-  eder. Ürün değiştiricinin hedefleri `src/shared/constants/keakProducts.ts` içinde tanımlıdır
-  (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Bağımsız ekranlar — `src/app/login/page.tsx`,
-  `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`,
-  `src/app/not-found.tsx` ve `src/shared/components/ErrorPageScaffold.tsx` — lockup'ı gösterir;
-  `tests/unit/brand-pages-static.test.ts` bunu güvence altına alır.
+- **Kit.** `packages/ui-kit/src` `packages/ui-kit/UPSTREAM.md` sabitlenmiş taahhütteki yukarı akış `src/` bayt bayt kopyasıdır (aynı zamanda lisans yetkilendirmesini de kaydeder); `PATCHES.md` yerel yamaları listeler (yok). Hiçbir yapı olmadan kaynak olarak tüketilir: `next.config.mjs` onu aktarır ve `tsconfig.json`, `@omniroute/ui-kit` → `packages/ui-kit/src` ve `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` ve `vitest.mcp.config.ts` aynı takma adı taşır) eşler. Bir kit bileşenini alt yoluyla (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…) içe aktarın; asla `@omniroute/ui-kit` namlusu aracılığıyla değil: namlu her bileşeni (tarih seçici dahil) her bir ithalatçıya çeker. Kit stil sayfası `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-styles.css"`, tam sayfa: çekirdek `ci-ui.css` artı her kalıp ailesi) aracılığıyla girer.
+- **Jetonlar.** `packages/ui-kit/src/ci-tokens.css` `--ci-*` tokenlarını beyan eder; `src/app/globals.css` bunları eski OmniRoute adlarıyla (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`) birleştirir, böylece mevcut `var(--color-*)` okunur ve Tailwind yardımcı programları çalışmaya devam eder. Yeni kod, Tailwind yardımcı programlarını (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) veya — kit sınıflarını asla onaltılık bir değer kullanmaz (`tests/unit/design-kit-bridge.test.ts` köprüyü zorlar). `text-primary` `--color-primary-ink` ile `--text-color-primary` arasında çözümlenir, böylece `bg-primary`/`border-primary` vurgu yüzeyini korurken birincil metin okunabilir kalır: Sürümler altında bu, kitin `--ci-color-accent-active` (ışıkta derin bakır `#99562f`, karanlıkta bakır vurgu); Klasik altında, açık renkte lime-800 ve karanlıkta limon rengi vurgu. Grafik serileri `--color-chart-1` … `--color-chart-5` kullanır.
+- **Temalar.** `<html className="ci-theme">` (`src/app/layout.tsx`) belgeyi kit temasına dahil eder. Tercih `light`, `dark` veya `system` ( `src/shared/constants/appConfig.ts` `THEME_CONFIG.defaultTheme = "system"` ; `system` `prefers-color-scheme` takip eder). `src/store/themeStore.ts` `applyTheme()` ( `THEME_BOOT_SCRIPT` ile yansıtılır, `src/app/layout.tsx` ile satır içi yapılır, hidrasyondan önce çalışır) `data-theme="dark"|"light"` ayarlar ve `<html>` `.dark` sınıfını birlikte değiştirir. Kitin koyu token seti `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`) üzerine anahtarlanmıştır; OmniRoute kendi karanlık geçersiz kılmaları ( `globals.css` içindeki `.dark` bloğu) ve `.dark` sınıfındaki eski Tailwind `dark:` yardımcı programları anahtarı. Vurgu rengi ön ayarı yoktur: vurgu her zaman kitten gelir ve mağaza yüklendiğinde eski bir yapıdaki kalıcı ön ayar bırakılır.
+- **Paletler.** İkisi de kitten (`src/shared/constants/appearancePalette.ts`): `editions`, varsayılan ve `classic`. Sürümler, kitin `<html>` üzerindeki `data-ci-appearance="editions"` özelliğidir ve `ci-editions.css` ( `ci-ui.css` tarafından içe aktarılmıştır) `data-theme` ile birleştirilir; Klasik, niteliğin yokluğudur. Kök düzen sunucusu özniteliği işler, böylece depolanmış hiçbir şeyi olmayan (veya JS olmayan) bir ziyaretçi — panosunda, oturum açmada, `/status`, hata sayfalarında, `/docs` ve PWA Sürümleri alır. Seçim, aynı `theme` deposunda (`palette`, `setPalette()`, `applyPalette()`, `src/store/themeStore.ts`) temanın yanında kalıcı olur ve boyamadan önce `THEME_BOOT_SCRIPT` (`src/shared/utils/themeBootScript.ts`, düzenin `<head>` satır içi) tarafından uygulanır; bu, yalnızca depolanan palet `"classic"` olduğunda özniteliği kaldırır; `src/app/global-error.tsx` kök düzeninin dışında, onu aynı depodan uygular. `data-ci-appearance` başka bir öğenin üzerine koymayın: kit onu `html:root:has([data-ci-appearance="editions"])` ile eşleştirir, böylece bir alt öğe tüm belgeyi değiştirir. Editions `data-ci-editions-variant="landing"` çeşidi, kontrol paneli için değil, pazarlama sayfaları içindir. Tarayıcı kromu: sunucu, varsayılan Sürümleri `viewport.themeColor` ( `prefers-color-scheme` başına bir etiket) olarak ve — `PWA_THEME_COLORS` web bildirimini `src/shared/constants/pwaThemeColors.ts` içinde, `--ci-color-background` Sürümlerinin (`#f3f1e9` / `#11120f`) tek aynası olan ve `tests/unit/pwa-theme-colors.test.ts` `ci-editions.css` tarafından sabitlenmiş olarak işler. Canlı `<meta name="theme-color">` daha sonra depolanan paleti ve modu takip eder: `THEME_BOOT_SCRIPT` boyamadan önce etiketleri yeniden yazar ve tema mağazasının eylemleri bunu her değişiklikte yapar ( `src/shared/utils/themeColorMeta.ts` `resolveThemeColor()` / `applyThemeColor()`, `CLASSIC_PAGE_BACKGROUND` kitin `ciTokens` okunur). Açık bir light/dark teması her etiketi bu moda ayarlar; `system` şema başına bir renk tutar. Bildiri Sürümler olarak kalır: tercih olmaksızın kurulum başına bir kez getirilir. Monaco renklerini bir sondadan (`monacoKitTheme.ts`) okuyor; Sürümler altında prob okuması, bir eşzamanlı geçiş için kök `data-theme` çevirir, çünkü kit, Sürümler light/dark kökten çözer.
+- **Bileşenler (adaptörler).** `src/shared/components/index.tsx` OmniRoute bileşeni API (aynı adlar, varsayılan dışa aktarmalar ve destekler) tutar ve arkasındaki temel öğeler, kit üzerindeki bağdaştırıcılardır: formlar (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), katmanlar ve geri bildirimler (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`), yapı (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) ve tablolar (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Bir bağdaştırıcı, kit bileşenini alt yola göre içe aktarır ve eski donanımları bunun üzerine eşler — örneğin `Button variant="primary"`, kit `default` düğmesidir (`--ci-button-primary-*`: ışıkta ters yüzey, karanlıkta `--ci-color-accent-foreground` mürekkebi ile vurgu), `danger` `destructive` ve `warning`, `outline` artı `.ci-button--warning` uzantısıdır. `globals.css` (`@layer components`) sonundaki `.ci-button--warning` ve `.ci-badge[data-tone]` kuralları, kit sınıflarının üstündeki OmniRoute uzantılarıdır. `tests/unit/ui/adapters/*.test.tsx` her adaptörü pinleyin.
+- **Kabuk.** `src/app/(dashboard)/layout.tsx`, `DashboardLayout` işler, o da `src/shared/components/layouts/DashboardShell.tsx` işler: `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`) kiti, OmniRoute `src/shared/components/Sidebar.tsx` gezinme mantığıyla birlikte. `#main-content` giden "içeriğe atla" bağlantısı ilk odaklanılabilir öğedir. `src/shared/components/Header.tsx` `SidebarTrigger` kitini (kabuğun tek kenar çubuğu geçişi), Keak `ProductSwitcher` ve komut paleti açıcıyı içerir; yalnızca `#main-content` içine hiçbir `PageHeader` (`.ci-page-header`) monte edilmemişken rota başlığını gösterir, dolayısıyla kendi `PageHeader` sahip bir sayfada tek bir `h1` bulunur. `src/shared/components/CommandPalette.tsx` bir `Dialog` kitidir.
+- **Simgeler.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`), adı (ekranların kullandığı Maddi Semboller sözlüğü) `ICON_MAP` (`src/shared/constants/iconMap.ts`) aracılığıyla bir Lucide glifine dönüştürür. Materyal Sembolleri yazı tipi ve paketi gitti: Haritada eksik olan bir ad, nötr bir yer tutucu glifi (`data-icon-missing="true"`) oluşturuyor ve üretim dışında bir konsol uyarısını günlüğe kaydediyor. `npm run gen:icon-map` haritada eksik olan kullanımdaki adları yazdırır (`tests/unit/icon-map-coverage.test.ts` Lucide simgesi olmayan herhangi bir ad üzerinde başarısız olur; `tests/unit/icon-map-object-values.test.ts` arama nesnelerinde saklanan adları kapsar); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` `<span className="material-symbols-outlined">` yayılmalarını `<Icon>` olarak yeniden yazar.
+- **Marka.** `src/shared/components/OmniRouteLogo.tsx` kiti sarar: varsayılan dışa aktarma `OmniRouteLogo` `ProductIcon product="omniroute" variant="glyph"` (satır içi SVG, `basePath` -safe) ve `OmniRouteLockup`, `ProductLockup product="omniroute"` (erişilebilir ad "Keak OmniRoute") veya beyaz etiket operatörleri için kendi `name`/`logoSrc` oluşturur. Ürün değiştirici hedefleri `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`) bulunur. Bağımsız ekranlar — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` ve `src/shared/components/ErrorPageScaffold.tsx` — kilitlemeyi gösterir; `tests/unit/brand-pages-static.test.ts` onu korur.
 
 ## 2. Kurallar
 
@@ -137,24 +75,20 @@ Hiçbir PR açılamadığında (hedef sürüm donmuşsa, PR elle gönderilen taa
 
 Kök `README.md` yerleştirdiği on iki diyagram (`docs/diagrams/*.svg`), statik bir görüntüye uygulanan kittir ve elle çizilmeden oluşturulurlar: `scripts/docs/gen-readme-*.mjs` 13 oluşturucu dosya (on iki diyagram artı `gen-readme-diagrams.mjs` sürücüsü) ve `tests/unit/docs/readme-*-svg.test.ts` her diyagram için bir tane olmak üzere 12 bayatlık testi, her biri taahhüt edilen dosyayı oluşturucunun çıktısıyla (job `test-unit`) karşılaştırır.
 
-- **Jetonlar.** `scripts/docs/readme-diagram-theme.mjs` paleti `packages/ui-kit/src/ci-tokens.css` kopyalar ( `tests/unit/docs/readme-diagram-theme.test.ts` ile bu dosyaya sabitlenir) ve kitin tür ölçeğindeki metin rollerini tanımlar: Kitin ağırlıklarında Switzer (400/500/600, 500'de ekran) ve IBM Plex Mono olan ve yalnızca komutlar için olan kod rolleri (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`) hariç her şey için izleme, URLs, tanımlayıcılar ve terminal ekranları. Açık değerler dosyanın içinde `:root` üzerinde, koyu değerler ise `prefers-color-scheme: dark` arkasında yer alır, böylece her görüntü izleyicinin GitHub şemasını takip eder.
+- **Jetonlar.** `scripts/docs/readme-diagram-theme.mjs` Editions paletini (varsayılan görünüm) `packages/ui-kit/src/ci-editions.css` kopyalar ( `tests/unit/docs/readme-diagram-theme.test.ts` ile bu dosyaya sabitlenir; bu aynı zamanda her iki şemadaki her yüzeydeki her metin rengi için WCAG AA de kontrol eder; bunun tek istisnası, light `warn`, kit değeri tuvalde 4.46:1 olduğundan kit uyarısının %10 karartılmasıdır) ve kitin tür ölçeğindeki (`ci-tokens.css`) metin rollerini tanımlar: Kitin ağırlıklarında Switzer (400/500/600, 500'de görüntüleme) ve IBM Plex Mono olan ve yalnızca komutlar, URLs, tanımlayıcılar ve terminal ekranları için olan kod rolleri (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`) dışındaki her şeyi izleme. Açık değerler dosyanın içinde `:root` üzerinde, koyu değerler ise `prefers-color-scheme: dark` arkasında yer alır, böylece her görüntü izleyicinin GitHub üzerindeki şemasını takip eder.
 - **Yazı tipleri.** GitHub Markdown CSS taşımaz ve kamuflaj proxy'si her harici getirmeyi engeller, bu nedenle kit tipinin dosya içinde seyahat etmesi gerekir. Her oluşturucunun son adımı olan `scripts/docs/readme-outline.mjs`, Switzer rollerini HarfBuzz ile şekillendirir ve bunları, Switzer'in kendi metriklerinde çizilmemiş olan oklar ve geometrik sembollerle vektör ana hatları (`<defs>` yolları ve `<use>`) olarak çizer. Ana hatlar, asla gömülü bir yazı tipi değil: Switzer lisansı (`packages/ui-kit/src/fonts/FFL.txt`), yazılı izin olmadan alt kümelemeyi ve format dönüştürmeyi yasaklar ve vektör çizimlerine izin verir; bu nedenle, Switzer `@font-face` veya `data:` URI yeniden kullanmayın. Dosyada kalan tek yazı tipi, bu karakterlerden oluşturulmuş, gerçek kod metni (`scripts/docs/readme-fonts.mjs`) olarak kalan OFL IBM Plex Mono alt kümesidir; yerleştiremeyeceği herhangi bir glif atar.
 - **Yenile.** `npm run docs:readme-diagrams` on iki tanesinin tamamını README sırasıyla yeniden yazar ve boyutuyla birlikte dosya başına bir satır yazdırır. Tek bir oluşturucu da kendi başına çalışır (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` `node --import tsx/esm` ihtiyacı vardır çünkü rakamları `open-sse/config/freeModelCatalog.ts` canlı katalog yükleyicisinden gelir; katalog değişikliğinin CI sonucu `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Jeneratörü ve SVG birlikte kaydedin.
 - **Kanıt.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` bir dosyayı GitHub sunduğu şekilde işler (bir `<img>` etiketi, kamuflajın `Content-Security-Policy`, `image/svg+xml`), bir açık ve koyu çerçeve yakalar ve sayfanın oluşturduğu harici yazı tipi isteklerini bildirir (0 olmalıdır).
 - **Bütçe.** Dosya başına 200 KB altında (her bayatlık testi bunu ileri sürer); 500 KB herhangi bir README görüntüsü için sabit sınırdır ( SVG studio doğrulayıcının kuralı).
 - **Kopyalama değişmeden yapılır, kapıdan sayılır.** Yeniden markalama, sözcükleri değil, türü ve paleti değiştirdi: her oluşturucu, diyagramının kopyasını, hem çizilen metin hem de taslak oluşturma adımının girdisi olan bir `*_COPY` sabitinde taşır (veya canlı katalogdan oluşturur). Kanonik rakamlar `<text>` düğümlerinde kalır (ana hatları çizildiğinde görünmez, `fill-opacity:0`), `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) tarafından okunur; Kapının okuduğu diyagramların bayatlık testleri aynı zamanda oluşturulan dosya üzerinde doğrulayıcılarını da çalıştırır, dolayısıyla koddan çıkan bir şekil — testinde başarısız olur, kapının okuduğu kaynağı sabitler, asla jeneratördeki sayıyı değil.
 
-## 7. Referans dizini
+## 7. Referans indeksi
 
 - `src/app/globals.css` — token köprüsü, `.dark` geçersiz kılmaları, OmniRoute `@layer components` uzantıları
-- `packages/ui-kit/UPSTREAM.md` — sabitlenmiş upstream commit'i ve lisans yetkilendirmesi; `packages/ui-kit/PATCHES.md`
-- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
-- `src/shared/components/index.tsx` ve yanındaki adaptörler; `src/shared/components/layouts/DashboardShell.tsx`,
-  `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
-- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
-  `scripts/dev/codemod-material-icons.mjs`
+- `packages/ui-kit/UPSTREAM.md` — sabitlenmiş yukarı yönde taahhüt ve lisans yetkilendirmesi; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-editions.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` ve yanındaki adaptörler; `src/shared/components/layouts/DashboardShell.tsx`, `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`, `scripts/dev/codemod-material-icons.mjs`
 - `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
-- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
-- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
-  `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
-  `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`
+- `src/store/themeStore.ts`, `src/shared/utils/themeBootScript.ts`, `src/shared/constants/appearancePalette.ts`, `src/shared/constants/pwaThemeColors.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`
