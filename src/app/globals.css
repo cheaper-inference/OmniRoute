@@ -23,10 +23,6 @@
 @import "@fontsource/vazirmatn/500.css";
 @import "@fontsource/vazirmatn/600.css";
 @import "@fontsource/vazirmatn/700.css";
-/* react18-json-view (request/response JSON tree in RequestLoggerDetail) — imported here
-   instead of in the component so node:test / esbuild never see a .css import. */
-@import "react18-json-view/src/style.css";
-@import "react18-json-view/src/dark.css";
 
 :root,
 .ci-theme {
@@ -447,20 +443,6 @@ body.electron-macos {
       min-width: 0;
     }
   }
-}
-
-/* react18-json-view fold control: the SVG chevron itself is ~14px, too small
-   a touch target on mobile. Padding + a matching negative margin grows the
-   hit area without shifting sibling layout -- unlike the row-level icon this
-   replaces (see the reverted react-json-view-lite alignment attempt), this
-   click target is a trailing decoration appended after the object/array's
-   opening brace, not a leading element sibling keys align against, so
-   padding it here cannot reproduce that regression. */
-.jv-size-chevron {
-  display: inline-flex;
-  align-items: center;
-  padding: 10px 4px;
-  margin: -10px -4px;
 }
 
 /* Animations */

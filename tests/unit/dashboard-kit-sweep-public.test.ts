@@ -198,10 +198,6 @@ const ARBITRARY_HEX_ALLOWED: Allow = {
     max: 12,
     reason: BRAND_GAP,
   },
-  "src/shared/components/ConsoleLogViewer.tsx": {
-    max: 33,
-    reason: `always-dark console log-level inks (DESIGN_SYSTEM §2.1 exception; kit gap keak-ai/cheaper-inference-ui-kit#168) — ${TRACKED}`,
-  },
 };
 
 const RGB_HSL_ALLOWED: Allow = {
