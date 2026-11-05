@@ -111,7 +111,12 @@ export function authenticateA2A(request: Request): boolean {
  * Só skills da frota (`conductor` / `conductor-cli-<profile>` — as anunciadas no
  * Agent Card) são delegáveis; os estados voltam pelo espelho SSE→A2A (RF1).
  */
-export async function POST(request: Request) {
+
+/**
+ * POST auth: the GET gate first, then the legacy OMNIROUTE_API_KEY check when
+ * REQUIRE_API_KEY is off. Returns a 401 Response, or null when the caller may continue.
+ */
+async function authorizeConductorTaskPost(request: Request): Promise<Response | null> {
   // POST used to check only OMNIROUTE_API_KEY and ignored REQUIRE_API_KEY,
   // so it was open when that env key was unset. Run the GET gate first.
   const auth = await authorizeA2ATaskRoute(request);
@@ -122,6 +127,12 @@ export async function POST(request: Request) {
       { status: 401 }
     );
   }
+  return null;
+}
+
+export async function POST(request: Request) {
+  const denied = await authorizeConductorTaskPost(request);
+  if (denied) return denied;
   const settings = await getSettings();
   if (settings.a2aEnabled !== true) {
     return NextResponse.json(
