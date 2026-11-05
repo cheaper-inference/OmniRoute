@@ -6375,6 +6375,9 @@
     "localProviders": "Lokala leverantörer",
     "maxConcurrentWholeNumberError": "Maximalt antal samtidiga måste vara ett heltal",
     "m365TierLabel": "Copilot-nivå",
+    "m365RefreshTokenLabel": "Uppdatera token (valfritt)",
+    "m365RefreshTokenHint": "Används för att automatiskt uppdatera Microsoft 365-åtkomsttoken.",
+    "m365RefreshTokenEditHint": "Lämna tomt för att behålla den befintliga token. Klistra in en ny token för att ersätta den.",
     "m365TierHint": "Välj vilken Microsoft 365 Copilot-yta denna anslutning använder. Individual är standard för konsument-BizChat; Education och Enterprise (arbete) ansluter till sina klientorganisationsytor.",
     "m365TierIndividualOption": "Individual (standard)",
     "m365TierEduOption": "Utbildning",
@@ -12295,7 +12298,9 @@
       "failedTitle": "Alla {count} försök misslyckades",
       "failed": "misslyckades",
       "pinnedTitle": "Modell vald via kontext-cache sessionspinning",
-      "pinned": "fäst"
+      "pinned": "fäst",
+      "recoveredAttemptsTitle": "Begäran återställdes efter {count} försök",
+      "latestOutcomeFailed": "Det senaste resultatet av begäran misslyckades"
     },
     "attempts": "försök",
     "detail": {
@@ -12397,13 +12402,20 @@
       "continuesFromParent": "fortsätter från överordnad",
       "continuesFrom": "Fortsätter från {id}",
       "viewConversation": "visa konversation",
-      "openConversation": "Öppna konversation {id}"
+      "openConversation": "Öppna konversation {id}",
+      "omittedHttpAttempts": "{count} HTTP-sändningar sparades inte",
+      "noHttpResponse": "Inget HTTP-svar observerades",
+      "transportError": "Transportfel"
     },
     "tableLabel": "Förfrågningsloggar",
     "throughputPostFirstToken": "Efter första token",
     "throughputEndToEnd": "End-to-end",
     "throughputRate": "{value} tokens/sek",
-    "throughputExplanation": "Båda hastigheterna använder det största av antalet output- och reasoning-tokens. Efter första token bortser från en giltig TTFT; i övrigt används hela varaktigheten. End-to-end använder alltid hela varaktigheten. Ett buffrat svar kan ha en hög burst-leveranshastighet utan att modellgenereringen är snabbare."
+    "throughputExplanation": "Båda hastigheterna använder det största av antalet output- och reasoning-tokens. Efter första token bortser från en giltig TTFT; i övrigt används hela varaktigheten. End-to-end använder alltid hela varaktigheten. Ett buffrat svar kan ha en hög burst-leveranshastighet utan att modellgenereringen är snabbare.",
+    "omittedHttpAttempts": "{count} HTTP-sändningar sparades inte",
+    "upstreamStatus": "Uppströmsserver {status}",
+    "noHttpResponse": "Inget HTTP-svar observerades",
+    "transportError": "Transportfel"
   },
   "proxyLogger": {
     "filterAll": "Alla",
@@ -14170,6 +14182,14 @@
         "label": "Delad utgängspools ordning",
         "description": "För leverantörer vars kvot bucketas efter utgångsadress, rangordna en poolmedlem som delar en nyligen avvisad medlems observerade utgångsadress direkt under friska medlemmar. Endast ordning, aldrig utesluten. Kräver PROXY_SKIP_RECENTLY_FAILED, som producerar avvisningssignalen den läser. Inaktiverad som standard: urvalsordningen är exakt den vanliga rotationen."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Avslag på kvoter med modellomfattning",
+        "description": "Tillämpa en opencode -kvot 429 endast på modellen som träffade den, så att samma utgång fortsätter att tjäna andra modeller, och rensa den först när den modellen lyckas. Konsumenter som inte har någon modell (poolrotation, park och replay, adminsynlighet, väljartrigger, hälsosvep) ser det fortfarande. Behöver PROXY_SKIP_RECENTLY_FAILED, vilket ger avslag. Av som standard: en modells kvot 429 avsätter utgången för varje modell."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Proxyhämtning: strikt POST repris",
+        "description": "För en icke-idempotent begäran (POST, PUT, PATCH, DELETE), skicka om efter ett transportfel (fresh socket, proxy-fallback, native fallback) endast när felet bevisar att inget skickades: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH eller en anslutningstidsgräns. Ett socket-fel efter skrivningen kan betyda att uppströmssidan accepterade begäran, så en återsändning kunde generera och fakturera den två gånger. Av som standard: en omspelbar kropp skickas om en gång vid ett transportfel, vilket också återställer en inaktuell poolad socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Loggning av rotationsattribuerings",
         "description": "Opencodes rotation registrerar vilket konto som serverade eller hoppades över (endast maskerade id:n, aldrig kompletta kontoid:n) och länkar proxyloggposter till deras begäran, så att operatören kan skilja hoppade konton från oanvända. Inaktiverad som standard: inga extra loggrader, inga extra kolumner skrivna."
@@ -14221,6 +14241,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 Pool Återval",
         "description": "För OpenCode-flera-kontor rotation, efter en 429 från en utgångs-bucketad leverantör på ett proxyfritt konto under ett omgivande poolkontext, bea ansökningspoolen om en annan medlem för nästa försök i stället för att återförsöka samma utgångsadress. Ordning, exkluderar aldrig: en uttömd pool bibehåller det nuvarande beteendet. Av som standard: varje 429 roterar till nästa konto exakt som tidigare."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Leer Egress Probe",
+        "description": "För OpenCode exekutorn, när en fullmaktsbegäran besvaras 403 eller 451 FreeTierError och de observerade verktygen misslyckades eller inte användes, skicka begäran en gång via en annan proxy (en annan kontoproxy eller en annan poolmedlem, aldrig en direkt anslutning). Först när den sonden svarar 200 sätts den första utgången åt sidan i proxyavvisningsminnet och sondsvaret serveras; när båda vägrar, returneras det ursprungliga avslaget och ingenting registreras. Samma avslagstext täcker en flaggad egress IP och en form av nekad begäran, så sonden skiljer dem åt genom bevis. Av som standard: avslaget returneras oförändrat."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2-klientfingerprint",
@@ -14401,6 +14425,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Stoppa vid innehållspolitiskt avslag",
         "description": "När en combo-måltavla svarar med ett exakt innehållspolitiskt avslag (kod eller typ cyber_policy / content_policy_violation), stoppa combo:n och returnera det avslaget även när återstående måltavlor är olika modeller, istället för att avancera till nästa måltavla. Avstängt som standard: avslaget svalkar aldrig kontot eller triggar leverantörens brytare, och combo:n avancera till sin nästa måltavla exakt som tidigare."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Svar: Keepalive endast över transporten",
+        "description": "Skicka svar keepalives som en tom rad istället för en response.in_progress händelse, så en syntetisk ögonblicksbild kan aldrig ersätta det verkliga svaret i den officiella SDK. En tom rad skickar ingen SSE händelse, så en klientövervakning som endast återställer händelser skulle inte återställas under en lång tyst fas. Av som standard: timers skickar den spec-giltiga response.in_progress händelsen."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Avsiktning vid återförsök: Hoppa över 403/410-avvisanden",

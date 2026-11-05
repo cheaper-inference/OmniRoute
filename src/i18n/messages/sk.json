@@ -6375,6 +6375,9 @@
     "localProviders": "Lokálni poskytovatelia",
     "maxConcurrentWholeNumberError": "Maximálny počet súbežných požiadaviek musí byť celé číslo",
     "m365TierLabel": "Úroveň Copilot",
+    "m365RefreshTokenLabel": "Obnoviť token (voliteľné)",
+    "m365RefreshTokenHint": "Používa sa na automatické obnovenie prístupového tokenu Microsoft 365.",
+    "m365RefreshTokenEditHint": "Ak chcete zachovať existujúci token, nechajte pole prázdne. Nahraďte ho vložením nového tokenu.",
     "m365TierHint": "Vyberte, ktoré rozhranie Microsoft 365 Copilot toto pripojenie používa. Individual je predvolený spotrebiteľský BizChat; Education a Enterprise (pracovné) sa prihlasujú do rozhraní svojich tenantov.",
     "m365TierIndividualOption": "Individual (predvolené)",
     "m365TierEduOption": "Vzdelávanie",
@@ -12295,7 +12298,9 @@
       "failedTitle": "Všetkých {count} pokusov zlyhalo",
       "failed": "zlyhalo",
       "pinnedTitle": "Model vybraný prostredníctvom prichytávania relácie cache kontextu",
-      "pinned": "pripnuté"
+      "pinned": "pripnuté",
+      "recoveredAttemptsTitle": "Požiadavka bola obnovená po {count} pokusoch",
+      "latestOutcomeFailed": "Výsledok poslednej požiadavky bol neúspešný"
     },
     "attempts": "pokusy",
     "detail": {
@@ -12397,13 +12402,20 @@
       "continuesFromParent": "pokračuje z nadradenej konverzácie",
       "continuesFrom": "Pokračuje z {id}",
       "viewConversation": "zobraziť konverzáciu",
-      "openConversation": "Otvoriť konverzáciu {id}"
+      "openConversation": "Otvoriť konverzáciu {id}",
+      "omittedHttpAttempts": "{count} odoslaní HTTP nebolo uchovaných",
+      "noHttpResponse": "Nebola zaznamenaná žiadna odpoveď HTTP",
+      "transportError": "Chyba prenosu"
     },
     "tableLabel": "Záznamy požiadaviek",
     "throughputPostFirstToken": "Po prvom tokene",
     "throughputEndToEnd": "Od začiatku do konca",
     "throughputRate": "{value} tokenov/s",
-    "throughputExplanation": "Obe rýchlosti používajú väčší z počtov výstupných tokenov a tokenov uvažovania. Hodnota Po prvom tokene nezahŕňa platný TTFT; inak používa celkové trvanie. Hodnota Od začiatku do konca vždy používa celkové trvanie. Odpoveď vo vyrovnávacej pamäti môže mať vysokú rýchlosť doručenia v dávke bez toho, aby model generoval rýchlejšie."
+    "throughputExplanation": "Obe rýchlosti používajú väčší z počtov výstupných tokenov a tokenov uvažovania. Hodnota Po prvom tokene nezahŕňa platný TTFT; inak používa celkové trvanie. Hodnota Od začiatku do konca vždy používa celkové trvanie. Odpoveď vo vyrovnávacej pamäti môže mať vysokú rýchlosť doručenia v dávke bez toho, aby model generoval rýchlejšie.",
+    "omittedHttpAttempts": "{count} odoslaní HTTP nebolo uchovaných",
+    "upstreamStatus": "Nadradený server {status}",
+    "noHttpResponse": "Nebola zaznamenaná žiadna odpoveď HTTP",
+    "transportError": "Chyba prenosu"
   },
   "proxyLogger": {
     "filterAll": "Všetko",
@@ -14170,6 +14182,14 @@
         "label": "Poradie zdieľaného odchozího poolu",
         "description": "Pre poskytovateľov, ktorých kvóta je rozdelená podľa odchozej adresy, zoradte člena poolu, ktorý zdieľa pozorovanú odchozú adresu nedávno odmietnutého člena, tesne pod zdravými členmi. Iba poradie, nikdy sa nevylučuje. Vyžaduje PROXY_SKIP_RECENTLY_FAILED, ktorý produkuje signál odmietnutia, ktorý sa číta. V predvolenom nastavení vypnuté: poradie výberu je presne rotácia v čistom tvare."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Modelové odmietnutia kvót",
+        "description": "Aplikujte kvótu opencode 429 iba na model, ktorý ju zasiahol, takže rovnaký výstup bude slúžiť iným modelom a zrušte ho iba vtedy, keď tento model uspeje. Spotrebitelia, ktorí nemajú žiadny model (rotácia bazéna, zaparkovanie a prehratie, viditeľnosť správcu, spúšť voliča, kontrola stavu), ho stále vidia. Potrebuje PROXY_SKIP_RECENTLY_FAILED, čo vedie k odmietnutiu. Predvolene vypnuté: kvóta jedného modelu 429 vyhradí výstup pre každý model."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Načítanie proxy: prísne prehrávanie POST",
+        "description": "V prípade neidempotentnej požiadavky (POST, PUT, PATCH, DELETE) odošlite znova po chybe prenosu (čerstvý soket, záložný server proxy, natívny záložný zdroj) iba vtedy, keď chyba preukáže, že nebolo odoslané nič: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH alebo časový limit pripojenia. Chyba soketu po zápise môže znamenať, že upstream prijal požiadavku, takže opätovné odoslanie by ju mohlo vygenerovať a účtovať dvakrát. Predvolene vypnuté: znovu sa odošle telo, ktoré možno prehrať, pri akejkoľvek chybe prenosu, čím sa obnoví aj zastaraný spoločný soket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Logovanie atribúcie rotácie",
         "description": "Rotácia opencode zaznamenáva, ktorý účet slúžil alebo bol preskočený (iba maskované ID, nikdy celé ID účtu) a spája položky proxy denníka so svojou žiadosťou, takže operátor vie rozlíšiť preskočené účty od nepoužitých. V predvolenom nastavení vypnuté: žiadne dodatočné riadky v logu, žiadne dodatočné stĺpce nie sú zapisované."
@@ -14221,6 +14241,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 opätovný výber bazéna",
         "description": "Pre viacúčtovú rotáciu OpenCode, po 429 od providera s egress bucketovaním na účte bez proxie v prostredí bazénového kontextu, požiadať konekčný bazén o iného člena pre ďalší pokus namiesto opakovania tej istej egress adresy. Poradia, nikdy nevylučujú: vyčerpaný bazén zachováva aktuálne správanie. Štandardne vypnuté: každé 429 rotuje na ďalší účet presne ako predtým."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Voľná výstupná sonda",
+        "description": "V prípade spúšťača OpenCode, keď sa na žiadosť cez proxy odpovie 403 alebo 451 FreeTierError a opakovaný pokus sledovaných nástrojov zlyhal alebo sa nepoužil, odošlite požiadavku raz cez iný proxy (iný proxy účtu alebo iný člen fondu, nikdy nie priame pripojenie). Len keď táto sonda odpovie 200, je prvý výstup odložený v proxy odmietnutej pamäti a odošle sa odpoveď sondy; keď obaja odmietnu, vráti sa pôvodné odmietnutie a nič sa nezaznamená. Rovnaký text odmietnutia zahŕňa označený výstup IP a tvar zamietnutej žiadosti, takže sonda ich rozlíši podľa dôkazov. Štandardne vypnuté: odmietnutie sa vráti nezmenené."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Otvorené vloženie klientov OpenCode v2",
@@ -14401,6 +14425,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Zastavenie pri odmietení politikou obsahu",
         "description": "Keď cieľ combo odpovie presným odmietnutím politiky obsahu (kód alebo typ cyber_policy / content_policy_violation), zastaviť combo a vrátiť toto odmietnutie aj vtedy, ak zvyšné ciele sú iné modely, namiesto pokračovania na ďalší cieľ. V prednastavenom stave je vypnuté: toto odmietnutie nikdy nezchladí účet ani nespadne predmetový spínač, a combo pokračuje na svoj ďalší cieľ presne ako predtým."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Odpovede: Udržujte nažive iba počas prepravy",
+        "description": "Pošlite odozvy udržiavacie ako prázdny riadok namiesto udalosti response.in_progress, takže syntetická snímka nikdy nemôže nahradiť skutočnú odpoveď v oficiálnom SDK. Prázdny riadok neodošle žiadnu udalosť SSE, takže klientsky strážny pes, ktorý sa resetuje iba pri udalostiach, by sa počas dlhej tichej fázy neresetoval. Predvolene vypnuté: časovače odosielajú udalosť response.in_progress s platnou špecifikáciou."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown Retry: Skip 403/410 Odmietnutia",

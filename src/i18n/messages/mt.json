@@ -2016,12 +2016,12 @@
     "unpricedUsageMore": "…u {count} aktar",
     "unpricedUsageConfigure": "Ikkonfigura prezzijiet",
     "unpricedUsageDismiss": "Għalaq",
-    "systemMetricsTitle": "System metrics",
-    "systemMetricsActive": "Monitoring active",
-    "systemMetricsLoading": "Loading...",
+    "systemMetricsTitle": "Metriċi tas-sistema",
+    "systemMetricsActive": "Monitoraġġ attiv",
+    "systemMetricsLoading": "Tagħbija...",
     "systemMetricsCpu": "CPU",
-    "systemMetricsMemory": "Memory",
-    "systemMetricsHost": "VPS / Host",
+    "systemMetricsMemory": "Memorja",
+    "systemMetricsHost": "VPS / Ospitanti",
     "systemMetricsCpuCount": "{count} vCPUs • {platform}",
     "systemMetricsProcessCpu": "OmniRoute (process)",
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
@@ -6452,6 +6452,9 @@
     "localProviders": "Fornituri lokali",
     "maxConcurrentWholeNumberError": "Żball: in-numru massimu ta’ talbiet simultanji jrid ikun numru sħiħ",
     "m365TierLabel": "Livell ta’ Copilot",
+    "m365RefreshTokenLabel": "Aġġorna token (mhux obbligatorju)",
+    "m365RefreshTokenHint": "Użat biex jġedded it-token ta' aċċess Microsoft 365 awtomatikament.",
+    "m365RefreshTokenEditHint": "Ħalli vojt biex iżżomm it-token eżistenti. Paste token ġdid biex tissostitwiha.",
     "m365TierHint": "Agħżel liema ambjent ta’ Microsoft 365 Copilot tuża din il-konnessjoni. Individual huwa l-BizChat standard għall-konsumaturi; Education u Enterprise (work) jużaw l-ambjenti tat-tenant rispettivi tagħhom.",
     "m365TierIndividualOption": "Individwali (predefinit)",
     "m365TierEduOption": "Edukazzjoni",
@@ -12372,7 +12375,9 @@
       "failedTitle": "{count} tentattivi fallew kollha",
       "failed": "falla",
       "pinnedTitle": "Mudell magħżul permezz tal-iffissar tas-sessjoni fil-cache tal-kuntest",
-      "pinned": "iffissat"
+      "pinned": "iffissat",
+      "recoveredAttemptsTitle": "It-talba rkuprat wara {count} tentattivi",
+      "latestOutcomeFailed": "L-aħħar riżultat tat-talba falla"
     },
     "attempts": "tentattivi",
     "detail": {
@@ -12474,13 +12479,20 @@
       "continuesFromParent": "ikompli mill-ġenitur",
       "continuesFrom": "Ikompli minn {id}",
       "viewConversation": "ara l-konverżazzjoni",
-      "openConversation": "Iftaħ il-konverżazzjoni {id}"
+      "openConversation": "Iftaħ il-konverżazzjoni {id}",
+      "omittedHttpAttempts": "{count} trażmissjonijiet HTTP ma nżammux",
+      "noHttpResponse": "Ma ġiet osservata l-ebda tweġiba HTTP",
+      "transportError": "Żball fit-trasport"
     },
     "tableLabel": "Reġistri tat-talbiet",
     "throughputPostFirstToken": "Wara l-ewwel token",
     "throughputEndToEnd": "Mit-tarf għat-tarf",
     "throughputRate": "{value} tokens/sec",
-    "throughputExplanation": "Iż-żewġ rati jużaw l-akbar fost l-għadd ta' tokens tal-output u tar-raġunament. Il-metrika 'Wara l-ewwel token' teskludi TTFT validu; inkella tuża t-tul sħiħ. Mit-tarf għat-tarf dejjem juża t-tul sħiħ. Risposta b'buffer tista' jkollha rata għolja ta' twassil f'daqqa mingħajr ġenerazzjoni aktar mgħaġġla mill-mudell."
+    "throughputExplanation": "Iż-żewġ rati jużaw l-akbar fost l-għadd ta' tokens tal-output u tar-raġunament. Il-metrika 'Wara l-ewwel token' teskludi TTFT validu; inkella tuża t-tul sħiħ. Mit-tarf għat-tarf dejjem juża t-tul sħiħ. Risposta b'buffer tista' jkollha rata għolja ta' twassil f'daqqa mingħajr ġenerazzjoni aktar mgħaġġla mill-mudell.",
+    "omittedHttpAttempts": "{count} trażmissjonijiet HTTP ma nżammux",
+    "upstreamStatus": "Server upstream {status}",
+    "noHttpResponse": "Ma ġiet osservata l-ebda tweġiba HTTP",
+    "transportError": "Żball fit-trasport"
   },
   "proxyLogger": {
     "filterAll": "Kollha",
@@ -14247,6 +14259,14 @@
         "label": "Ordni tal-Pool b'Egress Kondiviż",
         "description": "Għal fornituri li l-kwota tagħhom hija raggruppata skont l-indirizz tal-egress, ikklassifika membru tal-pool li jikkondividi l-indirizz tal-egress osservat ta' membru miċħud riċentement eżatt taħt membri f'saħħithom. Ordni biss, qatt ma jiġi eskluż. Jeħtieġ PROXY_SKIP_RECENTLY_FAILED, li jipproduċi s-sinjal ta' rifjut li jaqra. Mitfi b'mod awtomatiku: l-ordni tal-għażla tkun eżattament ir-rotazzjoni ordinarja."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Ċaħdiet ta' kwoti b'ambitu ta' mudell",
+        "description": "Applika kwota ta opencode 429 biss fuq il-mudell li laqtuha, sabiex l-istess egress tibqa' sservi mudelli ohra, u kklerjaha biss meta dak il-mudell jirnexxi. Konsumaturi li m'għandhom l-ebda mudell (rotazzjoni tal-pool, park u replay, viżibilità tal-amministratur, trigger selettur, sweep tas-saħħa) għadhom jarawha. Bżonnijiet PROXY_SKIP_RECENTLY_FAILED, li jipproduċi r-rifjut. Mitfi b'mod awtomatiku: kwota 429 ta' mudell wieħed iwarrab il-ħruġ għal kull mudell."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Proxy fetch: stretta POST replay",
+        "description": "Għal talba mhux idempotenti (POST, PUT, PATCH, DELETE), ibgħat mill-ġdid wara żball tat-trasport (socket frisk, proxy fallback, native fallback) biss meta l-iżball juri li ma ntbagħat xejn: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH jew timeout tal-konnessjoni. Żball tas-socket wara l-kitba jista 'jfisser li l-upstream aċċetta t-talba, għalhekk resend jista' jiġġenera u jħallasha darbtejn. Mitfi b'mod awtomatiku: korp replayable jiġi resent darba fuq kwalunkwe żball tat-trasport, li jirkupra wkoll socket miġbura mqassam."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Logging tal-Attribuzzjoni tar-Rotazzjoni",
         "description": "Ir-rotazzjoni ta' Opencode tirreġistra liema kont serva jew ġie maqbuż (IDs moħbija biss, qatt IDs sħaħ tal-kont) u tgħaqqad l-entrati tal-log tal-proxy mat-talba tagħhom, sabiex l-operatur ikun jista' jiddistingwi bejn kontijiet maqbuża u dawk mhux użati. Mitfi b'mod awtomatiku: l-ebda linji żejda fil-log, l-ebda kolonni żejda miktuba."
@@ -14298,6 +14318,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "Għażla mill-Ġdid tal-Pool f'429 ta' OpenCode",
         "description": "Għar-rotazzjoni ta' diversi kontijiet ta' OpenCode, wara 429 minn fornitur egress-bucketed fuq kont mingħajr proxy taħt kuntest ta' ambient pool, itlob membru ieħor mill-connection pool għat-tentattiv li jmiss minflok ma terġa' tipprova l-istess indirizz ta' egress. Tordna, qatt ma teskludi: pool eżawrita żżomm l-imġiba attwali. Mitfi b'mod awtomatiku: kull 429 iddur għall-kont li jmiss eżattament bħal qabel."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "Sonda tal-egress tal-livell b'xejn ta' OpenCode",
+        "description": "Għall-eżekutur OpenCode, meta talba bi prokura tiġi mwieġba 403 jew 451 FreeTierError u l-għodda osservat mill-ġdid fallew jew ma applikawx, ibgħat it-talba darba permezz ta' prokura differenti (prokura ta' kont ieħor jew membru ieħor tal-grupp, qatt konnessjoni diretta). Biss meta dik is-sonda twieġeb 200 hija l-ewwel ħruġ mwarrba fil-memorja tar-rifjut tal-prokura u r-rispons tas-sonda moqdija; meta t-tnejn jirrifjutaw, ir-rifjut oriġinali jintbagħat lura u xejn ma jiġi rreġistrat. L-istess test ta' rifjut ikopri IP ta' ħruġ b'marka u forma ta' talba miċħuda, għalhekk is-sonda tgħarrafhom b'evidenza. Mitfi b'mod awtomatiku: ir-rifjut jiġi rritornat mhux mibdul."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Fingerprint tal-Klijent OpenCode v2",
@@ -14478,6 +14502,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Ieqaf fuq Rifjut tal-Politika tal-Kontenut",
         "description": "Meta mira ta' combo twieġeb b'rifjut eżatt tal-politika tal-kontenut (kodiċi jew tip cyber_policy / content_policy_violation), waqqaf il-combo u rritorna dak ir-rifjut anke meta l-miri li jifdal ikunu mudelli differenti, minflok ma tkompli għall-mira li jmiss. Mitfi b'mod awtomatiku: ir-rifjut qatt ma jberred il-kont u lanqas ma jattiva l-breaker tal-fornitur, u l-combo tkompli għall-mira li jmiss tagħha eżattament bħal qabel."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Tweġibiet: keepalive fuq it-trasport biss",
+        "description": "Ibgħat il-keepalives taż Responses API bħala linja vojta minflok avveniment response.in_progress, għalhekk snapshot sintetiku qatt ma jista 'jissostitwixxi r-rispons reali SDK uffiċjali. Linja vojta ma tibgħat l-ebda avveniment SSE, għalhekk watchdog tal-klijent li reset biss fuq avvenimenti ma jkunx reset matul fażi twila siekta. Mitfi b'mod awtomatiku: it-tajmers jibagħtu l-avveniment response.in_progress spec-valid."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Pruwa mill-Ġdid tal-Cooldown: Aqbeż ir-Rifjuti 403/410",

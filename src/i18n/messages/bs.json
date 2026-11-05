@@ -6452,6 +6452,9 @@
     "localProviders": "Lokalni provajderi",
     "maxConcurrentWholeNumberError": "Greška za maksimalni konkurentni cijeli broj",
     "m365TierLabel": "Copilot nivo",
+    "m365RefreshTokenLabel": "Osvježi token (opcionalno)",
+    "m365RefreshTokenHint": "Koristi se za automatsko osvježavanje Microsoft 365 pristupnog tokena.",
+    "m365RefreshTokenEditHint": "Ostavite prazno da zadržite postojeći token. Zalijepite novi token da ga zamijenite.",
     "m365TierHint": "Odaberite koji Microsoft 365 Copilot interfejs ovo povezivanje koristi. Individual je podrazumijevani potrošački BizChat; Education i Enterprise (posao) se opredeljavaju za svoje tenant interfejse.",
     "m365TierIndividualOption": "Individual (podrazumijevano)",
     "m365TierEduOption": "Obrazovanje",
@@ -12372,7 +12375,9 @@
       "failedTitle": "Svih {count} pokušaja nije uspjelo",
       "failed": "neuspjelo",
       "pinnedTitle": "Model odabran putem context-cache session pinning-a",
-      "pinned": "zakačeno"
+      "pinned": "zakačeno",
+      "recoveredAttemptsTitle": "Zahtjev je oporavljen kroz {count} pokušaja",
+      "latestOutcomeFailed": "Ishod posljednjeg zahtjeva nije uspješan"
     },
     "attempts": "pokušaja",
     "detail": {
@@ -12474,13 +12479,20 @@
       "continuesFromParent": "nastavlja se od nadređenog",
       "continuesFrom": "Nastavlja se od {id}",
       "viewConversation": "prikaži razgovor",
-      "openConversation": "Otvori razgovor {id}"
+      "openConversation": "Otvori razgovor {id}",
+      "omittedHttpAttempts": "{count} HTTP slanja nije sačuvano",
+      "noHttpResponse": "HTTP odgovor nije zabilježen",
+      "transportError": "Greška u prijenosu"
     },
     "tableLabel": "Zapisnici zahtjeva",
     "throughputPostFirstToken": "Nakon prvog tokena",
     "throughputEndToEnd": "Od početka do kraja",
     "throughputRate": "{value} tokena/s",
-    "throughputExplanation": "Obje stope koriste veću vrijednost između broja izlaznih tokena i tokena zaključivanja. Stopa nakon prvog tokena isključuje važeći TTFT; u suprotnom koristi puno trajanje. Stopa od početka do kraja uvijek koristi puno trajanje. Baferisani odgovor može imati visoku stopu isporuke u rafalu bez brže generacije modela."
+    "throughputExplanation": "Obje stope koriste veću vrijednost između broja izlaznih tokena i tokena zaključivanja. Stopa nakon prvog tokena isključuje važeći TTFT; u suprotnom koristi puno trajanje. Stopa od početka do kraja uvijek koristi puno trajanje. Baferisani odgovor može imati visoku stopu isporuke u rafalu bez brže generacije modela.",
+    "omittedHttpAttempts": "{count} HTTP slanja nije sačuvano",
+    "upstreamStatus": "Nadređeni server {status}",
+    "noHttpResponse": "HTTP odgovor nije zabilježen",
+    "transportError": "Greška u prijenosu"
   },
   "proxyLogger": {
     "filterAll": "Sve",
@@ -14247,6 +14259,14 @@
         "label": "Redoslijed poola sa zajedničkim izlazom",
         "description": "Za pružaoce usluga čija se kvota raspoređuje prema izlaznoj adresi, rangira člana poola koji dijeli uočenu izlaznu adresu nedavno odbijenog člana neposredno ispod ispravnih članova. Mijenja se samo redoslijed, nikada se ne isključuje. Zahtijeva PROXY_SKIP_RECENTLY_FAILED, koji generiše signal odbijanja koji se očitava. Isključeno po zadanim postavkama: redoslijed odabira je identičan običnoj rotaciji."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Odbijanja kvota u okviru modela",
+        "description": "Primijenite opencode kvotu 429 samo na model koji ju je pogodio, tako da isti izlaz nastavlja služiti drugim modelima, i obrišite ga samo kada taj model uspije. Potrošači koji nemaju model (rotacija bazena, parkiranje i ponovno igranje, vidljivost administratora, okidač birača, pregled zdravlja) i dalje ga vide. Potreban je PROXY_SKIP_RECENTLY_FAILED, koji proizvodi odbijanje. Isključeno prema zadanim postavkama: kvota jednog modela 429 stavlja izlaz na stranu za svaki model."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Proxy preuzimanje: stroga POST repriza",
+        "description": "Za zahtjev koji nije idempotentan (POST, PUT, PATCH, DELETE), ponovo pošaljite nakon transportne greške (svježa utičnica, proxy rezervni, izvorni rezervni) samo kada greška dokaže da ništa nije poslano: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH ili vremensko ograničenje povezivanja. Greška utičnice nakon pisanja može značiti da je upstream prihvatio zahtjev, tako da bi ponovno slanje moglo generirati i naplatiti ga dva puta. Isključeno prema zadanim postavkama: tijelo koje se može reproducirati se ponovo šalje jednom prilikom svake greške u transportu, što također oporavlja zastarjeli skupni soket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Evidentiranje atribucije rotacije",
         "description": "Opencode rotacija bilježi koji je račun poslužio ili bio preskočen (samo maskirani ID-jevi, nikada potpuni ID-jevi računa) i povezuje unose iz proxy loga s njihovim zahtjevom, kako bi operater mogao razlikovati preskočene račune od nekorištenih. Isključeno po zadanim postavkama: nema dodatnih linija u logu, niti se upisuju dodatne kolone."
@@ -14298,6 +14318,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 ponovni odabir bazena",
         "description": "Za OpenCode rotaciju s više računa, nakon 429 odgovora od egress-bucketed provajdera na računu bez proxyja pod kontekstom ambijentalnog bazena, zatraži od bazena konekcija drugog člana za sljedeći pokušaj umjesto ponovnog pokušaja na istoj egress adresi. Raspoređuje, nikada ne isključuje: iscrpljeni bazen zadržava trenutno ponašanje. Podrazumijevano isključeno: svaki 429 rotira na sljedeći račun tačno kao i ranije."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode izlazna sonda slobodnog nivoa",
+        "description": "Za OpenCode executor, kada se na proxy zahtjev odgovori 403 ili 451 FreeTierError i pokušaj ponovnog pokušaja promatranih alata nije uspio ili se ne primjenjuje, pošaljite zahtjev jednom preko drugog proxy servera (drugi proxy naloga ili drugi član skupa, nikad direktna veza). Tek kada ta sonda odgovori na 200, prvi izlaz se ostavlja po strani u memoriji odbijanja proxy servera i služi odgovor sonde; kada oboje odbiju, originalno odbijanje se vraća i ništa se ne evidentira. Isti tekst odbijanja pokriva označeni izlazni IP i odbijeni oblik zahtjeva, tako da ih sonda razlikuje dokazima. Podrazumevano isključeno: odbijanje se vraća nepromenjeno."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Otisak OpenCode v2 klijenta",
@@ -14478,6 +14502,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Zaustavljanje pri odbijanju zbog politike sadržaja",
         "description": "Kada cilj komboa odgovori tačnim odbijanjem zbog politike sadržaja (kod ili tip cyber_policy / content_policy_violation), zaustavite combo i vratite to odbijanje čak i kada su preostali ciljevi različiti modeli, umjesto prelaska na sljedeći cilj. Podrazumijevano isključeno: odbijanje nikada ne hladi nalog niti aktivira prekidač pružaoca usluge, a combo prelazi na svoj sljedeći cilj tačno kao i ranije."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Odgovori: samo preko transporta",
+        "description": "Pošaljite odgovore kao praznu liniju umjesto response.in_progress događaja, tako da sintetički snimak nikada ne može zamijeniti pravi odgovor u službenom SDK. Prazan red ne šalje SSE događaj, tako da se klijent čuvar koji se resetuje samo na događaje ne bi resetovao tokom duge tihe faze. Isključeno prema zadanim postavkama: tajmeri šalju response.in_progress događaj koji vrijedi za specifikaciju."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Ponovni pokušaj tokom hlađenja: Preskoči odbijanja 403/410",

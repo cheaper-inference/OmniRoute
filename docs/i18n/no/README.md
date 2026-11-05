@@ -21,17 +21,17 @@
 
 <div align="center">
 
-## 💰 ~1.62B tokens / måned på tvers av tredjeparts gratisnivåer
+## 💰 ~1.62B tokens / måned på tvers av gratisnivåer fra tredjeparter
 
 </div>
 
-> **Bruk dine egne leverandørkontoer.** Dette er et estimert samlet tall på tvers av separat kvalifiserte gratisnivåer fra tredjeparter, ikke en token-tildeling fra OmniRoute. Registrer deg, skaff legitimasjon der det kreves, og koble til leverandørene du kan bruke; hver leverandør styrer sine egne grenser, sin tilgjengelighet og sine vilkår.
+> **Bruk egne leverandørkontoer.** Dette er et estimert samlet tall på tvers av separat kvalifiserte gratisnivåer fra tredjeparter, ikke en token-tildeling fra OmniRoute. Registrer deg, skaff legitimasjon der det kreves, og koble til leverandørene du kan bruke; hver leverandør styrer sine egne grenser, sin tilgjengelighet og sine vilkår.
 >
-> Det er tungvint å sette sammen gratisnivåer manuelt — dusinvis av SDK-er, dusinvis av hastighetsgrenser og ingen oversikt over hvor mye du faktisk har. OmniRoute katalogiserer **484 oppføringer på gratisnivået fordelt på 34 gjentakende puljenøkler** og beregner tokenoverskriften fra **17 puljer med et publisert positivt månedlig budsjett, pluss fem Groq-grenser per modell**, deduplisert etter delt pulje. Kvoter som bare åpnes etter en regional identitetskontroll (i dag: ModelScope), vises separat, +~6M etter regional identitetsverifisering, og summeres aldri inn i overskriften. Resultatet forblir synlig på dashbordet (`/dashboard/free-tiers`).
+> Det er vanskelig å sette sammen gratisnivåer manuelt — dusinvis av SDK-er, dusinvis av hastighetsgrenser og ingen oversikt over hvor mye du faktisk har. OmniRoute katalogiserer **485 gratisnivåoppføringer fordelt på 34 tilbakevendende pool-nøkler** og beregner tokenoverskriften fra de **17 poolene med et publisert positivt månedsbudsjett, pluss fem Groq-grenser per modell**, deduplisert etter delt pool. Kvoter som først blir tilgjengelige etter en regional identitetskontroll (i dag: ModelScope), vises separat, +~6M etter regional identitetsverifisering, og summeres aldri inn i hovedtallet. Resultatet er fortsatt synlig på dashbordet (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoutes kort for gratisnivåbudsjett: ~1.62B gratis tokens per måned som standard, opptil ~2.22B den første måneden med registreringskreditter, fra 34 dokumenterte gjentakende puljenøkler som dekker 484 katalogiserte oppføringer på gratisnivået bak ett endepunkt. Ærlig matematikk deduplisert etter pulje — hver delt pulje telles én gang, inkludert 17 gjentakende puljer med et publisert positivt månedlig tokenbudsjett, pluss fem Groq-grenser per modell; 12 leverandører er merket som bør unngås i katalogen over vilkårsrisiko, slik at du kan ta avgjørelsen. Budsjettlinjen inkluderer Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (fem grenser per modell) og mindre puljer, pluss registreringskreditter for den første måneden og leverandører som er permanent gratis uten tokenbegrensning, vist separat slik at de aldri blåser opp overskriften. Live brukt/gjenstående på /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute-kort for gratisnivåbudsjett: ~1.62B gratis tokens per måned stabilt, opptil ~2.22B den første måneden med registreringskreditter, fra 34 dokumenterte tilbakevendende pool-nøkler som dekker 485 katalogiserte gratisnivåoppføringer bak ett endepunkt. Ærlig pool-deduplisert beregning — hver delt pool telles én gang, inkludert 17 tilbakevendende pooler med et publisert positivt månedlig tokenbudsjett, pluss fem Groq-grenser per modell; 12 leverandører er merket som leverandører som bør unngås i katalogen over risikable vilkår, slik at du kan ta avgjørelsen. Budsjettlinjen inkluderer Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (fem grenser per modell) og mindre pooler, pluss registreringskreditter for den første måneden og leverandører som er permanent gratis uten tokenbegrensning, vist separat slik at de aldri blåser opp hovedtallet. Live brukt/gjenstående på /dashboard/free-tiers."/>
 
-> Animert sammendrag av den aktive siden `/dashboard/free-tiers`. Full metode (puljededuplisering, kredittnivåer, leverandørvilkår): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+> Animert sammendrag av den aktive siden `/dashboard/free-tiers`. Fullstendig metodikk (pool-deduplisering, kredittnivåer, leverandørvilkår): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
 > <sub>Disse tallene revideres på nytt annenhver uke mot den aktive katalogen og **går begge veier** — en leverandør avslutter et gratisnivå, og tallet synker; en ny kommer til, og det stiger. Vi publiserer det katalogen faktisk beregner, aldri et avrundet best-case-tall.</sub>
 
@@ -47,7 +47,7 @@
 
 [![Stjerner](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Stjernehistorikkrangering](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Rangering i stjernehistorikk](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 Bli med i fellesskapet
@@ -224,23 +224,23 @@
 
 <a id="first-run"></a>
 
-## 🆓 Installer, koble til en leverandør, og rut deretter gjennom ett endepunkt
+## 🆓 Installer, koble til en leverandør, og rute gjennom ett endepunkt
 
 </div>
 
-<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Tre steg: installer og start OmniRoute, koble til en kvalifisert leverandør med din egen konto eller API-nøkkel, og pek deretter verktøyet ditt mot localhost:20128/v1 med en OmniRoute API-nøkkel og modell auto. Rutingen avhenger av tilgjengelige kvalifiserte tilkoblinger og leverandørgrenser."/>
+<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Tre trinn: installer og start OmniRoute, koble til en kvalifisert leverandør med din egen konto eller API-nøkkel, og pek verktøyet ditt mot localhost:20128/v1 med en OmniRoute API-nøkkel og modellen auto. Ruting avhenger av tilgjengelige kvalifiserte tilkoblinger og leverandørbegrensninger."/>
 
 ```bash
-# Etter å ha koblet til en leverandør, kopier din OmniRoute-nøkkel fra Dashboard → Endpoints:
+# Etter at du har koblet til en leverandør, kopierer du OmniRoute-nøkkelen din fra Dashboard → Endpoints:
 curl http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer YOUR_OMNIROUTE_KEY" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-<sub>`auto` trenger en kvalifisert rute. En fersk installasjon kan mangle kvalifiserte nøkkelløse mål, og en nøkkelløs leverandør kan avvise tredjepartsklienter. Leverandører merket `tos: avoid`, inkludert Kiro, er ekskludert fra automatisk ruting som standard; tilkobling av en konto overstyrer ikke denne innstillingen. Se [Free Tiers Guide](docs/getting-started/FREE-TIERS-GUIDE.md) før du velger en leverandør.</sub>
+<sub>`auto` trenger en kvalifisert rute. En ny installasjon kan ha ingen kvalifiserte nøkkelfrie mål, og en nøkkelfri leverandør kan avvise tredjepartsklienter. Leverandører merket med `tos: avoid`, inkludert Kiro, er som standard utelukket fra automatisk ruting; tilkobling av en konto overstyrer ikke denne innstillingen. Se [veiledningen for gratistilbud](docs/getting-started/FREE-TIERS-GUIDE.md) før du velger en leverandør.</sub>
 
-<sub>📦 Kopier og lim inn hurtigstart-skript for **Python, Node.js, PHP og cURL** → [`examples/quickstart/`](examples/quickstart/)</sub>
+<sub>📦 Kopier-og-lim-inn-hurtigstartskript for **Python, Node.js, PHP og cURL** → [`examples/quickstart/`](examples/quickstart/)</sub>
 
 <br/>
 
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Løftet — Ett endepunkt og 380 leverandører. Automatisk fallback fortsetter rutingen så lenge et annet friskt mål er tilgjengelig. Seks søyler: robust fallback på tvers av 380 leverandører · opptil 95 % tokensparing på kvalifiserte arbeidsmengder · 0 kr å starte med 150+ gratisnivåer og 53 gjentakende/nøkkelløse gratis-for-alltid-leverandører · 39 CLI/agent-integrasjoner gjennom én konfigurasjon · OpenAI, Claude, Gemini og Responses API-kompatibilitet på /v1 · produksjonskontroller inkludert circuit breakers, TLS stealth, MCP 110-verktøy, A2A, minne, guardrails, evals og 56 000+ statiske testdeklarasjoner på tvers av 7 800+ overvåkede testfiler."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Løftet — Ett endepunkt og 380 leverandører. Automatisk reservefunksjon opprettholder rutingen så lenge et annet tilgjengelig, friskt mål finnes. Seks søyler: robust reservefunksjon på tvers av 380 leverandører · opptil 95 % tokenbesparelse på kvalifiserte arbeidsbelastninger · $0 for å komme i gang med over 150 gratistilbud og 54 tilbakevendende eller nøkkelfrie leverandører som alltid er gratis · 39 CLI-/agentintegrasjoner gjennom én konfigurasjon · kompatibilitet med OpenAI-, Claude-, Gemini- og Responses API på /v1 · produksjonskontroller, inkludert kretsbrytere, TLS-stealth, MCP med 110 verktøy, A2A, minne, sikkerhetsregler, evalueringer og over 56 000 statiske testdeklarasjoner på tvers av over 7 800 sporede testfiler."/>
 
 <br/>
 <br/>
@@ -261,11 +261,11 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Hvorfor OmniRoute — slutt å sjonglere 10 dashbord, døde API-nøkler og overraskende regninger. Ti daglige smerter vs løsninger: kvoter utløper ubrukt → maksimer abonnementer; rate limits midt i koding → 4-nivå automatisk fallback (Abonnement → API → Billig → Gratis); verktøyutdata brenner tokens → RTK + Caveman-komprimering (15–95 %); dyre API-er → kostnadsoptimalisert ruting; hvert verktøy sin egen oppsett → ett endepunkt, ett dashbord; AI blokkert → 3-nivå proxy + TLS stealth; døde nøkler → 3-lags robusthet (circuit breakers, nøkkelnedkjøling, modellutestengelse); team deler ett abonnement → nøkkelpooler med rettferdige kvoter; prompt gjennom andres sky → lokal-først med AES-256-GCM-krypterte nøkler; ingen oversikt over forbruk → sanntidsanalyse (bruk, kvote, besparelser, p95-latens)."/>
+<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Hvorfor OmniRoute — slutt å håndtere 10 dashbord, døde API-nøkler og uventede regninger. Ti daglige problemer kontra løsninger: kvote som utløper ubrukt → maksimer abonnementer; hastighetsbegrensninger midt i kodingen → automatisk reservefunksjon i 4 nivåer (Abonnement → API → Rimelig → Gratis); verktøyutdata som bruker opp tokens → RTK + Caveman-komprimering (15–95 %); dyre API-er → kostnadsoptimalisert ruting; hvert verktøy har sitt eget oppsett → ett endepunkt, ett dashbord; AI blokkert → proxy på 3 nivåer + TLS-stealth; døde nøkler → robusthet i 3 lag (kretsbrytere, nedkjøling av nøkler, modellutkobling); team som deler ett abonnement → nøkkelgrupper med rettferdig deling av kvoter; forespørsler gjennom andres sky → lokal-først med AES-256-GCM-krypterte nøkler; ingen oversikt over forbruk → direkteanalyse (bruk, kvote, besparelser, p95-forsinkelse)."/>
 
 <div align="center">
 
-<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRoute forespørselsflyt: din IDE eller CLI (Claude Code, Cursor, Cline…) kaller ett lokalt endepunkt (http://localhost:20128/v1); OmniRoute Smart Router (RTK + Caveman-komprimering, 20 rutingsstrategier, circuit breakers, TLS stealth, MCP, A2A, guardrails) kan falle tilbake over 4 leverandørnivåer så lenge et kvalifisert friskt mål gjenstår — Nivå 1 Abonnement, Nivå 2 API-nøkkel, Nivå 3 Billig og Nivå 4 Gratis."/>
+<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRoute-forespørselsflyt: IDE-en eller CLI-et ditt (Claude Code, Cursor, Cline …) kaller ett lokalt endepunkt (http://localhost:20128/v1); OmniRoute Smart Router (RTK + Caveman-komprimering, 20 rutingstrategier, kretsbrytere, TLS-stealth, MCP, A2A, sikkerhetsregler) kan falle tilbake på tvers av 4 leverandørnivåer så lenge et kvalifisert, friskt mål er tilgjengelig — Nivå 1 Abonnement, Nivå 2 API-nøkkel, Nivå 3 Rimelig og Nivå 4 Gratis."/>
 
 </div>
 
@@ -698,11 +698,11 @@ av shell-historikken din. → [CLI-integrasjoner](docs/guides/CLI-INTEGRATIONS.m
 
 <div align="center">
 
-## 🌐 380 AI-leverandører — 153 katalog-merket gratis
+## 🌐 380 AI-leverandører — 153 katalogmerkede som gratis
 
 </div>
 
-> **380 registrerte leverandører** på tvers av de kanoniske samlingene for chat, media, søk, lokal, sky-agent og system, inkludert **153 med `hasFree: true` oppdagelsesmetadata**. Chatmodellregisteret dekker **239 leverandører / 3 059 distinkte leverandør-modell-par / 1 475 rå modell-IDer**; den separate gratis-budsjettkatalogen har **471 rader per modell**, **34 gjentakende puljer** og **53 gjentakende/nøkkelfrie gratis-for-alltid-leverandører**. Dette er ulike nevner med hensikt; definisjoner og pulje-dedupliserte beregninger finnes i [Leverandørreferanse](docs/reference/PROVIDER_REFERENCE.md) og [Gratisnivåer](docs/reference/FREE_TIERS.md).
+> **380 registrerte leverandører** på tvers av de kanoniske chat-, medie-, søke-, lokal-, skyagent- og systemsamlingene, inkludert **153 med `hasFree: true`-metadata for oppdagelse**. Chatmodellregisteret dekker **239 leverandører / 3 059 distinkte leverandør-modell-par / 1 475 rå modell-ID-er**; den separate katalogen for gratisbudsjett har **471 rader per modell**, **34 tilbakevendende puljer** og **54 tilbakevendende/nøkkelløse leverandører som er gratis for alltid**. Dette er ulike nevnerverdier med hensikt; definisjoner og beregninger deduplisert etter pulje finnes i [Leverandørreferanse](docs/reference/PROVIDER_REFERENCE.md) og [Gratisnivåer](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -735,16 +735,16 @@ av shell-historikken din. → [CLI-integrasjoner](docs/guides/CLI-INTEGRATIONS.m
   </tr>
 </table>
 
-<sub>…og 350+ til — hvert ikon hentes direkte fra dashbordets leverandørkatalog. 📖 [Leverandørreferanse](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>…og 350+ flere — hvert ikon lastes direkte fra dashbordets leverandørkatalog. 📖 [Leverandørreferanse](docs/reference/PROVIDER_REFERENCE.md)</sub>
 
 <br/>
 
-### 🆓 Gratis for alltid — 0 kr, ingen kort
+### 🆓 Gratis for alltid — $0, ikke noe kort nødvendig
 
 <table>
   <tr>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4, Nemotron 3<br/>Ingen token-begrensning</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>Auto-router, Tencent Hy3<br/>Gratis for alltid</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4, Nemotron 3<br/>Ingen tokenbegrensning</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>Automatisk ruting, Tencent Hy3<br/>Gratis for alltid</sub></td>
     <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B, Nemotron<br/>Gratis for alltid</sub></td>
     <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>Gratisnivå</sub></td>
     <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>Gratis for alltid</sub></td>
@@ -756,7 +756,7 @@ av shell-historikken din. → [CLI-integrasjoner](docs/guides/CLI-INTEGRATIONS.m
     <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>50+ modeller<br/>10K nevroner/dag</sub></td>
     <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>~40 RPM gratis</sub></td>
     <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>Engangskreditt på $5; kort kreves</sub></td>
-    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:gratis modeller<br/>+$10 → høyere RPM</sub></td>
+    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:gratis-modeller<br/>+$10 → høyere RPM</sub></td>
   </tr>
 </table>
 
@@ -1329,12 +1329,12 @@ Kanoniske måledata per 2026-10-18: **1.976 unike videoer** · **20.220.289 kjen
 
 <table>
   <tr><th align="left">Dokument</th><th align="left">Beskrivelse</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">Brukerveiledning</a></b></td><td>Leverandører, kombinasjoner, CLI-integrasjon, distribusjon</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">Installasjonsveiledning</a></b></td><td>Komplette installasjonsmetoder, konfigurasjon av CLI-verktøy, protokolloppsett, justering av tidsavbrudd</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">Brukerveiledning</a></b></td><td>Tilbydere, kombinasjoner, CLI-integrasjon, distribusjon</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">Oppsettveiledning</a></b></td><td>Fullstendige installasjonsmetoder, konfigurasjoner av CLI-verktøy, protokolloppsett, justering av tidsavbrudd</td></tr>
   <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">Veiledning for CLI-verktøy</a></b></td><td>Oppsett per verktøy for Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Ekstern modus</a></b></td><td>Styr en ekstern OmniRoute (VPS) fra CLI-en på den bærbare datamaskinen din via tilgangstokener med begrenset omfang</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Ekstern modus</a></b></td><td>Styr en ekstern OmniRoute (VPS) fra laptopens CLI via tilgangstokener med begrenset omfang</td></tr>
   <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code-konfigurasjon</a></b></td><td>Koble Claude Code til OmniRoute (lokalt/eksternt) med <code>launch</code> + profiler per modell</td></tr>
-  <tr><td nowrap><b><a href="README.md#-quick-start">Hurtigstart</a></b></td><td>Installasjon → tilkobling → konfigurering i 3 trinn</td></tr>
+  <tr><td nowrap><b><a href="README.md#-quick-start">Hurtigstart</a></b></td><td>Installer → koble til → konfigurer i 3 trinn</td></tr>
 </table>
 
 ### 🔧 Drift og distribusjon
@@ -1343,12 +1343,12 @@ Kanoniske måledata per 2026-10-18: **1.976 unike videoer** · **20.220.289 kjen
   <tr><th align="left">Dokument</th><th align="left">Beskrivelse</th></tr>
   <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker-veiledning</a></b></td><td>Docker-kjøring, Compose-profiler, Caddy HTTPS, tunneler, image-tagger</td></tr>
   <tr><td nowrap><b><a href="contrib/podman/README.md">Podman-veiledning</a></b></td><td>Quadlet-systemd-integrasjon, podman-compose, SELinux</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">VM-distribusjon</a></b></td><td>Komplett veiledning: oppsett av VM + nginx + Cloudflare</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io-distribusjon</a></b></td><td>Distribuer til Fly.io med vedvarende lagring</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">VM-distribusjon</a></b></td><td>Fullstendig veiledning: oppsett av VM + nginx + Cloudflare</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io-distribusjon</a></b></td><td>Distribuer til Fly.io med permanent lagring</td></tr>
   <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termux-veiledning</a></b></td><td>Kjør OmniRoute på Android via Termux</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA-veiledning</a></b></td><td>Installasjon av progressiv webapp, hurtigbufring, arkitektur</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">Avinstalleringsveiledning</a></b></td><td>Fullstendig fjerning for alle installasjonsmetoder</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Miljøkonfigurasjon</a></b></td><td>Komplette <code>.env</code>-variabler og referanser</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA-veiledning</a></b></td><td>Installasjon, hurtigbufring og arkitektur for progressive webapper</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">Avinstalleringsveiledning</a></b></td><td>Ryddig fjerning for alle installasjonsmetoder</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Miljøkonfigurasjon</a></b></td><td>Fullstendige <code>.env</code>-variabler og referanser</td></tr>
 </table>
 
 ### 🧠 Funksjoner og arkitektur
@@ -1356,16 +1356,16 @@ Kanoniske måledata per 2026-10-18: **1.976 unike videoer** · **20.220.289 kjen
 <table>
   <tr><th align="left">Dokument</th><th align="left">Beskrivelse</th></tr>
   <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Arkitektur</a></b></td><td>Systemarkitektur, dataflyt og interne detaljer</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Komprimeringsveiledning</a></b></td><td>Pipeline med 7 alternativer: off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Komprimeringsveiledning</a></b></td><td>Pipeline med 7 alternativer: av / lite / standard / aggressiv / ultra / RTK / stablet</td></tr>
   <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK-komprimering</a></b></td><td>Komprimering av kommandoutdata, filtre, tillit, verifisering, gjenoppretting av råutdata</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Komprimeringsmotorer</a></b></td><td>Caveman-, RTK- og stablede pipelines, dashbord/API/MCP-grensesnitt</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Komprimeringsmotorer</a></b></td><td>Caveman-, RTK- og stablede pipelines, dashboard-/API-/MCP-grensesnitt</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Format for komprimeringsregler</a></b></td><td>JSON-skjemaer for regelpakker for Caveman- og RTK-filtre</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Språkpakker for komprimering</a></b></td><td>Språkgjenkjenning og utvikling av Caveman-regelpakker</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Veiledning for robusthet</a></b></td><td>Kretsbrytere, nedkjølingsperioder, kø, beskyttelse mot stormløp, TLS-spoofing</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Robusthetsveiledning</a></b></td><td>Automatiske kretsbrytere, nedkjølingsperioder, kø, beskyttelse mot «thundering herd», TLS-spoofing</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo-motor</a></b></td><td>Poengberegning basert på 16 faktorer, moduspakker, selvreparasjon</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Proxy-veiledning</a></b></td><td>Proxy-system på 3 nivåer, 1proxy-markedsplass, CRUD for registeret</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Gratisnivåer</a></b></td><td>Konsolidert katalog: 34 dokumenterte tilbakevendende samlinger / 484 katalogiserte oppføringer på gratisnivå</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Funksjonsgalleri</a></b></td><td>Visuell gjennomgang av dashbordet med skjermbilder</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Proxy-veiledning</a></b></td><td>Proxy-system i 3 nivåer, 1proxy-markedsplass, CRUD for registeret</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Gratisnivåer</a></b></td><td>Samlet katalog: 34 dokumenterte tilbakevendende samlinger / 485 katalogførte oppføringer på gratisnivå</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Funksjonsgalleri</a></b></td><td>Visuell gjennomgang av dashboardet med skjermbilder</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Dokumentasjon av kodebasen</a></b></td><td>Nybegynnervennlig gjennomgang av kodebasen</td></tr>
 </table>
 
@@ -1376,7 +1376,7 @@ Kanoniske måledata per 2026-10-18: **1.976 unike videoer** · **20.220.289 kjen
   <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">API-referanse</a></b></td><td>Alle endepunkter med eksempler</td></tr>
   <tr><td nowrap><b><a href="docs/openapi.yaml">OpenAPI-spesifikasjon</a></b></td><td>OpenAPI 3.0-spesifikasjon</td></tr>
   <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP-server</a></b></td><td>110 MCP-verktøy, IDE-konfigurasjoner, Python/TS/Go-klienter</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">Veiledning for MCP-server</a></b></td><td>MCP-installasjon, transportmekanismer og verktøyreferanse</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">Veiledning for MCP-server</a></b></td><td>MCP-installasjon, transporter og verktøyreferanse</td></tr>
   <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A-server</a></b></td><td>JSON-RPC 2.0-protokoll, ferdigheter, strømming, oppgavehåndtering</td></tr>
   <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">Veiledning for A2A-server</a></b></td><td>A2A-agentkort, oppgaver, ferdigheter og strømming</td></tr>
 </table>
@@ -1385,13 +1385,13 @@ Kanoniske måledata per 2026-10-18: **1.976 unike videoer** · **20.220.289 kjen
 
 <table>
   <tr><th align="left">Dokument</th><th align="left">Beskrivelse</th></tr>
-  <tr><td nowrap><b><a href="CONTRIBUTING.md">Bidrag</a></b></td><td>Utviklingsoppsett og retningslinjer</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Forgrenings- og utgivelsesmodell</a></b></td><td>Hvor PR-er målrettes (<code>release/*</code>), og hva <code>main</code> og tagger betyr</td></tr>
-  <tr><td nowrap><b><a href="CHANGELOG.md">Endringslogg</a></b></td><td>Full utgivelseshistorikk per versjon</td></tr>
+  <tr><td nowrap><b><a href="CONTRIBUTING.md">Bidrag</a></b></td><td>Oppsett og retningslinjer for utvikling</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Forgrenings- og utgivelsesmodell</a></b></td><td>Hvor PR-er skal målrettes (<code>release/*</code>), og hva <code>main</code> og tagger betyr</td></tr>
+  <tr><td nowrap><b><a href="CHANGELOG.md">Endringslogg</a></b></td><td>Fullstendig utgivelseshistorikk per versjon</td></tr>
   <tr><td nowrap><b><a href="SECURITY.md">Sikkerhetspolicy</a></b></td><td>Rapportering av sårbarheter og sikkerhetspraksis</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n-veiledning</a></b></td><td>Støtte for 67 språk, arbeidsflyt for oversettelse, RTL</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n-veiledning</a></b></td><td>Støtte for 67 språk, arbeidsflyt for oversettelser, RTL</td></tr>
   <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Sjekkliste for utgivelse</a></b></td><td>Valideringstrinn før utgivelse</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Dekningsplan</a></b></td><td>Strategi for testdekning for over 60,000 statiske testdeklarasjoner på tvers av over 8,400 registrerte testfiler</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Dekningsplan</a></b></td><td>Strategi for testdekning av over 60 000 statiske testdeklarasjoner fordelt på over 8 400 sporede testfiler</td></tr>
 </table>
 
 <br/>
@@ -1400,7 +1400,7 @@ Kanoniske måledata per 2026-10-18: **1.976 unike videoer** · **20.220.289 kjen
 
 # ⭐ Viktigste bidragsytere
 
-> OmniRoute formes av et engasjert åpen kildekode-fellesskap. Disse personene har gitt eksepsjonelle bidrag som direkte påvirker prosjektets kvalitet, stabilitet og rekkevidde. **Tusen takk.**
+> OmniRoute formes av et engasjert åpen kildekode-fellesskap. Disse personene har gitt eksepsjonelle bidrag som direkte påvirker prosjektets kvalitet, stabilitet og rekkevidde. **Takk.**
 
 ### Eksterne bidragsytere etter sammenslåtte pull-forespørsler
 
@@ -1428,7 +1428,7 @@ Kanoniske måledata per 2026-10-18: **1.976 unike videoer** · **20.220.289 kjen
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
 </table>
 
-<sub>Opptellingen ble gjort 2026-11-03 03:01:19 UTC med live-tippen til <code>release/v3.8.53</code> <code>05bc048d6c</code>. Den paginerte GitHub GraphQL-opptellingen inneholder 9,947 sammenslåtte PR-er: 4,130 av eieren av repositoriet, 240 av Dependabot, 6 av andre boter/apper og <b>5,571 eksterne PR-er fra 883 unike bidragsytere</b>. «Endrede linjer» er GitHub-tilføyelser + slettinger og inkluderer genererte filer, låsefiler, kataloger, oversettelser og dokumentasjon; det er endringsomfang, ikke forfattet LOC. 53 PR-er rapporterer GitHub-differanser på over 500,000 linjer (for eksempel #13399, der ett enkelt leverandørbidrag viser 2,347 endrede filer), noe som blåser opp flere av totalene ovenfor. Lik plassering rangeres sammen.</sub>
+<sub>Opptellingen ble gjort 2026-11-03 03:01:19 UTC med aktivt <code>release/v3.8.53</code>-tips <code>05bc048d6c</code>. Den paginerte GitHub GraphQL-opptellingen inneholder 9 947 sammenslåtte PR-er: 4 130 av repository-eieren, 240 av Dependabot, 6 av andre boter/apper og <b>5 571 eksterne PR-er fra 883 unike bidragsytere</b>. «Endrede linjer» er GitHub-tilføyelser + slettinger og inkluderer genererte filer, låsefiler, kataloger, oversettelser og dokumentasjon; det er endringsomfang, ikke forfatterens LOC. 53 PR-er rapporterer GitHub-differanser på over 500 000 linjer (for eksempel #13399, et enkelt leverandørtillegg, viser 2 347 endrede filer), noe som blåser opp flere av totalsummene ovenfor. Lik plassering rangeres sammen.</sub>
 
 ### GitHub-tilskrevne commits
 
@@ -1523,9 +1523,9 @@ Kanoniske måledata per 2026-10-18: **1.976 unike videoer** · **20.220.289 kjen
   </tr>
 </table>
 
-<sub>Kontrollert på nytt 2026-11-03 02:09:16 UTC: GitHub-tilskrevne commits rapportert av Contributors-API-et til GitHub for standardgrenen <code>release/v3.8.53</code>. API-et returnerte 903 identiteter (429 brukere, 2 boter, 472 anonyme); denne tabellen utelater vedlikeholderen, boter og anonyme identiteter, og beholder delte plasseringer. Den er forskjellig fra både rangeringen ovenfor av sammenslåtte PR-er og Git-metadata-kartleggingen nedenfor.</sub>
+<sub>Kontrollert på nytt 2026-11-03 02:09:16 UTC: GitHub-tilskrevne commits rapportert av Contributors API for repositoriets standardgren <code>release/v3.8.53</code>. API-et returnerte 903 identiteter (429 brukere, 2 roboter, 472 anonyme); denne tabellen utelater vedlikeholderen, roboter og anonyme identiteter, og beholder delte plasseringer. Den er forskjellig fra både rangeringen av sammenslåtte PR-er ovenfor og Git-metadataopptellingen nedenfor.</sub>
 
-> 🙏 Funksjonene, feilrettingene og infrastrukturforbedringene til disse bidragsyterne er en **kjernekomponent** i det som gjør OmniRoute pålitelig og funksjonsrikt. Hver pull request, hvert testtilfelle og hver i18n-oversettelsesfil betyr noe. Åpen kildekode bygges av mennesker som dem.
+> 🙏 Funksjonene, feilrettingene og infrastrukturforbedringene til disse bidragsyterne er en **kjernebestanddel** av det som gjør OmniRoute pålitelig og funksjonsrikt. Hver pull request, hvert testtilfelle og hver i18n-oversettelsesfil betyr noe. Åpen kildekode bygges av mennesker som dem.
 
 </div>
 

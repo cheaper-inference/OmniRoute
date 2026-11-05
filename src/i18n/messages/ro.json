@@ -6375,6 +6375,9 @@
     "localProviders": "Furnizori locali",
     "maxConcurrentWholeNumberError": "Eroare: numărul maxim de solicitări simultane trebuie să fie un număr întreg",
     "m365TierLabel": "Nivel Copilot",
+    "m365RefreshTokenLabel": "Jeton de reîmprospătare (opțional)",
+    "m365RefreshTokenHint": "Folosit pentru a reîmprospăta automat jetonul de acces Microsoft 365.",
+    "m365RefreshTokenEditHint": "Lăsați necompletat pentru a păstra simbolul existent. Lipiți un nou token pentru al înlocui.",
     "m365TierHint": "Alegeți ce interfață Microsoft 365 Copilot utilizează această conexiune. Individual este BizChat-ul implicit pentru consumatori; Education și Enterprise (lucru) optează pentru interfețele din tenantul lor.",
     "m365TierIndividualOption": "Individual (implicit)",
     "m365TierEduOption": "Educație",
@@ -12295,7 +12298,9 @@
       "failedTitle": "Toate cele {count} încercări au eșuat",
       "failed": "eșuat",
       "pinnedTitle": "Model selectat prin fixarea sesiunii context-cache",
-      "pinned": "fixat"
+      "pinned": "fixat",
+      "recoveredAttemptsTitle": "Cererea a fost recuperată după {count} încercări",
+      "latestOutcomeFailed": "Ultimul rezultat al cererii a eșuat"
     },
     "attempts": "încercări",
     "detail": {
@@ -12397,13 +12402,20 @@
       "continuesFromParent": "continuă de la părinte",
       "continuesFrom": "Continuă de la {id}",
       "viewConversation": "vezi conversația",
-      "openConversation": "Deschide conversația {id}"
+      "openConversation": "Deschide conversația {id}",
+      "omittedHttpAttempts": "{count} trimiteri HTTP nu au fost păstrate",
+      "noHttpResponse": "Nu a fost observat niciun răspuns HTTP",
+      "transportError": "Eroare de transport"
     },
     "tableLabel": "Jurnale de solicitări",
     "throughputPostFirstToken": "După primul token",
     "throughputEndToEnd": "De la un capăt la altul",
     "throughputRate": "{value} tokeni/sec",
-    "throughputExplanation": "Ambele rate folosesc valoarea mai mare dintre numărul de tokeni de ieșire și cel de raționament. Rata după primul token exclude un TTFT valid; în caz contrar, folosește durata completă. Rata de la un capăt la altul folosește întotdeauna durata completă. Un răspuns tamponat poate avea o rată de livrare în rafală ridicată fără o generare mai rapidă a modelului."
+    "throughputExplanation": "Ambele rate folosesc valoarea mai mare dintre numărul de tokeni de ieșire și cel de raționament. Rata după primul token exclude un TTFT valid; în caz contrar, folosește durata completă. Rata de la un capăt la altul folosește întotdeauna durata completă. Un răspuns tamponat poate avea o rată de livrare în rafală ridicată fără o generare mai rapidă a modelului.",
+    "omittedHttpAttempts": "{count} trimiteri HTTP nu au fost păstrate",
+    "upstreamStatus": "Server amonte {status}",
+    "noHttpResponse": "Nu a fost observat niciun răspuns HTTP",
+    "transportError": "Eroare de transport"
   },
   "proxyLogger": {
     "filterAll": "Toate",
@@ -14170,6 +14182,14 @@
         "label": "Ordine în pool pentru egress partajat",
         "description": "Pentru furnizorii a căror cotă este grupată după adresa de egress, plasează un membru al pool-ului care partajează adresa de egress observată a unui membru refuzat recent imediat sub membrii sănătoși. Doar ordonare, nu este exclus niciodată. Necesită PROXY_SKIP_RECENTLY_FAILED, care generează semnalul de refuz pe care îl citește. Dezactivat implicit: ordinea de selecție este exact rotația simplă."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Refuzurile cotelor în funcție de model",
+        "description": "Aplicați o cotă opencode 429 numai modelului care l-a lovit, astfel încât aceeași ieșire continuă să servească alte modele și ștergeți-o numai atunci când modelul respectiv reușește. Consumatorii care nu au nici un model (rotația piscinei, parcarea și reluarea, vizibilitatea administratorului, declanșarea selectorului, măsurarea sănătății) îl văd în continuare. Necesită PROXY_SKIP_RECENTLY_FAILED, care produce refuzul. Dezactivat în mod implicit: cota 429 a unui model pune deoparte ieșirea pentru fiecare model."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Preluare proxy: reluare strictă POST",
+        "description": "Pentru o cerere non-idempotentă (POST, PUT, PATCH, DELETE), retrimiteți după o eroare de transport (socket proaspăt, fallback proxy, fallback nativ) numai atunci când eroarea dovedește că nu a fost trimis nimic: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH sau un timeout de conectare. O eroare de socket după scriere poate însemna că partea din amonte a acceptat cererea, astfel încât o retrimitere ar putea genera și factura de două ori. Dezactivat în mod implicit: un corp rejucat este retrimis o dată la orice eroare de transport, care recuperează, de asemenea, un socket învechit."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Jurnalizare atribuire rotație",
         "description": "Rotația opencode înregistrează ce cont a servit cererea sau a fost omis (doar ID-uri mascate, niciodată ID-uri complete de cont) și asociază intrările din jurnalul proxy-ului cu cererea lor, astfel încât operatorul să poată distinge conturile omise de cele neutilizate. Dezactivat implicit: nu sunt scrise linii suplimentare în jurnal și nici coloane suplimentare."
@@ -14221,6 +14241,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "Reselectare pool 429 OpenCode",
         "description": "Pentru rotația multi-cont OpenCode, după un 429 primit de la un furnizor segmentat pe bază de ieșire (egress) pe un cont fără proxy într-un context de pool ambiental, solicită pool-ului de conexiuni un alt membru pentru următoarea încercare în loc să reîncerce aceeași adresă de ieșire. Ordonează, nu exclude niciodată: un pool epuizat păstrează comportamentul curent. Dezactivat în mod prestabilit: fiecare 429 trece la următorul cont, exact ca înainte."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress Probe",
+        "description": "Pentru executorul OpenCode, atunci când la o solicitare proxy i se răspunde 403 sau 451 FreeTierError și reîncercarea instrumentelor observate a eșuat sau nu s-a aplicat, trimiteți cererea o dată printr-un alt proxy (un alt proxy de cont sau alt membru al grupului, niciodată o conexiune directă). Numai când acea sondă răspunde 200, prima ieșire este pusă deoparte în memoria de refuz al proxy și răspunsul sondei este servit; când ambii refuză, refuzul inițial este returnat și nimic nu este înregistrat. Același text de refuz acoperă un IP de ieșire marcat și o formă de cerere refuzată, astfel încât sonda le diferențiază prin dovezi. Oprit implicit: refuzul este returnat neschimbat."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Amprentă client OpenCode v2",
@@ -14401,6 +14425,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Oprire la refuzul politicii de conținut",
         "description": "Atunci când o țintă din combo răspunde cu un refuz exact legat de politica de conținut (cod sau tip cyber_policy / content_policy_violation), oprește combo-ul și returnează acel refuz chiar și atunci când țintele rămase sunt modele diferite, în loc să avansezi la următoarea țintă. Dezactivat în mod implicit: refuzul nu plasează niciodată contul în cooldown și nu declanșează disjunctorul furnizorului, iar combo-ul avansează la următoarea sa țintă exact ca înainte."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Răspunsuri: menținerea în viață numai în timpul transportului",
+        "description": "Trimiteți răspunsurile păstrează ca o linie goală în loc de un eveniment response.in_progress, astfel încât un instantaneu sintetic nu poate înlocui niciodată răspunsul real din SDK oficial. O linie goală nu trimite niciun eveniment SSE, astfel încât un watchdog client care se resetează numai pe evenimente nu ar fi resetat în timpul unei faze lungi de silențioasă. Dezactivat în mod implicit: temporizatoarele trimit evenimentul response.in_progress valabil pentru specificații."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Reîncercare cooldown: Omite refuzurile 403/410",
