@@ -1,6 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { resolveM365Profile } from "../../open-sse/executors/m365Protocol/profile.ts";
+import {
+  M365_DOCUMENTED_MODELS,
+  resolveM365Profile,
+} from "../../open-sse/executors/m365Protocol/profile.ts";
 
 test("legacy IDs retain tier routing and tone", () => {
   for (const model of [
@@ -97,6 +100,10 @@ const DOCUMENTED_TONES: Record<string, string> = {
   "gpt-5.2-think-deeper": "Gpt_5_2_Reasoning",
 };
 test("all documented standalone IDs select exact tones and model-aware scenarios across tiers", () => {
+  assert.deepEqual(
+    Object.keys(M365_DOCUMENTED_MODELS).sort(),
+    Object.keys(DOCUMENTED_TONES).sort()
+  );
   for (const [model, tone] of Object.entries(DOCUMENTED_TONES)) {
     const paid =
       (["Claude_Opus", "Claude_Sonnet_5", "Gpt_6_Reasoning"].includes(tone) &&

@@ -66,6 +66,60 @@ test("catalog capabilities expose emulated tools without unsupported vision or p
     assert.doesNotMatch(model.name, /BizChat|benchmark|\d+\/30|available to all/i);
   }
 });
+
+// Frozen public protocol catalog, including paid and historical aliases; not an account probe.
+const DISPLAY_NAMES: Record<string, string> = {
+  "copilot-m365": "Auto (Legacy)",
+  "copilot-m365-claude-opus": "Claude Opus (Legacy)",
+  "copilot-m365-gpt-5-6-reasoning": "GPT 5.6 Reasoning (Legacy)",
+  "copilot-m365-gpt-5-5-chat": "GPT 5.5 Chat (Legacy)",
+  "m365-copilot": "Auto (Default)",
+  auto: "Auto",
+  quick: "Quick",
+  "think-deeper": "Think Deeper",
+  claude: "Claude (Alias)",
+  "claude-sonnet": "Claude Sonnet",
+  "claude-sonnet-4.5": "Claude Sonnet 4.5 (Alias)",
+  "claude-sonnet-4.6": "Claude Sonnet 4.6",
+  "claude-sonnet-5.5": "Claude Sonnet 5.5",
+  "claude-sonnet-5": "Claude Sonnet 5",
+  "claude-sonnet-think-deeper": "Claude Sonnet Think Deeper",
+  "claude-opus": "Claude Opus",
+  "claude-opus-5": "Claude Opus 5 (Alias)",
+  "claude-opus-5.5": "Claude Opus 5.5",
+  "claude-opus-4.8": "Claude Opus 4.8",
+  "claude-opus-4.5": "Claude Opus 4.5 (Alias)",
+  "gpt-5.5": "GPT 5.5",
+  "gpt-5.5-quick": "GPT 5.5 Quick",
+  "gpt-5.5-think-deeper": "GPT 5.5 Think Deeper",
+  "gpt-5.6": "GPT 5.6",
+  "gpt-5.6-quick": "GPT 5.6 Quick",
+  "gpt-5.6-think-deeper": "GPT 5.6 Think Deeper",
+  "gpt-6-think-deeper": "GPT 6 Think Deeper",
+  "gpt-6-sol": "GPT 6 Sol",
+  "gpt-6.1-sol": "GPT 6.1 Sol",
+  "gpt-5.4": "GPT 5.4",
+  "gpt-5.4-think-deeper": "GPT 5.4 Think Deeper",
+  "gpt-5.4-quick": "GPT 5.4 Quick",
+  "gpt-5.3": "GPT 5.3",
+  "gpt-5.3-quick": "GPT 5.3 Quick",
+  "gpt-5.3-think-deeper": "GPT 5.3 Think Deeper",
+  "gpt-5.2": "GPT 5.2",
+  "gpt-5.2-quick": "GPT 5.2 Quick",
+  "gpt-5.2-think-deeper": "GPT 5.2 Think Deeper",
+};
+test("every evidenced route has a concise, distinct model label without provider or entitlement boilerplate", () => {
+  assert.deepEqual(
+    Object.fromEntries(provider.models.map(({ id, name }) => [id, name])),
+    DISPLAY_NAMES
+  );
+  assert.equal(new Set(provider.models.map(({ name }) => name)).size, provider.models.length);
+  for (const { id, name } of provider.models) {
+    assert.doesNotMatch(name, /Microsoft 365|Copilot|availability|account|entitlement/i, id);
+    assert.doesNotMatch(name, /gpt-6-chat|opus-99|sonnet-5\.5\[1m\]/i, id);
+  }
+});
+
 test("native provider copy describes sign-in and legacy HAR, not unrelated device-code advice", () => {
   const ui = WEB_COOKIE_PROVIDERS["copilot-m365-web"];
   assert.equal(ui.name, "Microsoft 365 Copilot");

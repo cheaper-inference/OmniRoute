@@ -138,7 +138,12 @@ take precedence and should only be used when you know the required wire values.
 ## Models and routing
 
 The native catalog includes all documented standalone IDs plus the four original native IDs.
-The catalog is static, not an account entitlement probe. The standalone proxy's
+The catalog is static and account-independent, not an account entitlement probe: paid routes
+and compatibility aliases remain listed even when a connected account cannot use them. Model
+display labels omit the provider name and per-model availability boilerplate; the provider
+remains **Microsoft 365 Copilot**. Labels marked **Alias** or **Legacy** retain their existing
+identifiers and protocol mappings, not a guarantee of a historical model version. The
+standalone proxy's
 **Import from /models** instructions do not apply to this native WebSocket provider.
 
 | Model family      | Canonical IDs                                                                                    |
@@ -153,7 +158,10 @@ The catalog is static, not an account entitlement probe. The standalone proxy's
 Aliases such as `auto`, `quick`, `think-deeper`, and version aliases are also registered.
 The existing `copilot-m365`, `copilot-m365-claude-opus`,
 `copilot-m365-gpt-5-6-reasoning` and `copilot-m365-gpt-5-5-chat` remain valid.
-Registration is not a promise that Microsoft serves that model to every account.
+Registration is not a promise that Microsoft serves that model to every account. The
+standalone IDs follow the public [protocol catalog](https://github.com/cramt/m365-copilot-proxy/blob/main/packages/core/src/copilot.ts)
+(the exported model-to-tone map and its model-aware scenario metadata). All native profiles retain
+`availability: "unverified"`; inclusion in the catalog is not a successful account test.
 
 - An explicit model licence refusal returns **403** `m365_model_not_licensed`, not 502.
   Routing locks that connection/model pair, leaving licensed models on the connection usable.
