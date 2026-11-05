@@ -38,7 +38,8 @@ lastUpdated: 2026-11-03
   `bg-primary`/`border-primary` keep the accent surface: under Editions it is the kit's
   `--ci-color-accent-active` (the deep copper `#99562f` in light, the copper accent in dark); under Classic,
   lime-800 in light and the lime accent in dark. Chart series use
-  `--color-chart-1` … `--color-chart-5`.
+  `--color-chart-1` … `--color-chart-8`, each with a text-safe `--color-chart-N-ink` and an opaque
+  `--color-chart-N-subtle` chip tint, assigned in the kit series order (`ciChartSeriesOrder`).
 - **Themes.** `<html className="ci-theme">` (`src/app/layout.tsx`) opts the document into the kit theme.
   The preference is `light`, `dark` or `system` (`THEME_CONFIG.defaultTheme = "system"` in
   `src/shared/constants/appConfig.ts`; `system` follows `prefers-color-scheme`). `applyTheme()` in
@@ -115,7 +116,8 @@ lastUpdated: 2026-11-03
 1. Tokens, never literals. Exceptions kept on purpose: the always-dark console terminal and
    `STATUS_HEX` (`src/shared/constants/statusColors.ts`), the resolved-hex mirror of the kit status
    palette for callers that need a literal hex. The categorical palettes are no exception any more:
-   they ride on the kit's five chart tokens (`--color-chart-1..5`) through
+   they ride on the kit's eight chart tokens (`--color-chart-1..8`, plus `-ink`/`-subtle`), in the
+   kit series order, through
    `src/shared/utils/categoricalPalette.ts` and, for routing strategies,
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow edges and the orchestration
    canvas read the theme-aware `--orch-status-*` variables (`src/shared/components/flow/edgeStyles.ts`).

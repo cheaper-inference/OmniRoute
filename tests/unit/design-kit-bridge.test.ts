@@ -88,6 +88,24 @@ test("the OmniRoute color tokens are aliases of kit tokens (no hex left in :root
   assert.match(dark, /color-scheme:\s*dark/);
 });
 
+test("the coral/indigo rgba() leftovers and the orphan legacy blocks are gone (#19066)", () => {
+  // The hex check above missed the same colours written as rgba() (coral 229,77,94 and
+  // indigo 99,102,241): the ::selection fallback, `border-glow` and the route progress glow.
+  const legacyRgba = /rgba\(\s*(?:229,\s*77,\s*94|99,\s*102,\s*241)\b/;
+  assert.doesNotMatch(css, legacyRgba);
+  assert.doesNotMatch(read("src/shared/components/NavigationProgress.tsx"), legacyRgba);
+  assert.doesNotMatch(read("src/shared/components/NavigationProgress.tsx"), /rgba?\(/);
+  // Blocks with no consumer anywhere in src/: an old coral glow, a macOS vibrancy panel and the
+  // antd table (antd is not a dependency).
+  for (const orphan of [/border-glow/, /\.bg-vibrancy\b/, /\.ant-table\b/]) {
+    assert.doesNotMatch(css, orphan);
+  }
+  assert.match(
+    css,
+    /::selection \{\s*background-color: color-mix\(in srgb, var\(--color-primary\) 22%, transparent\);/
+  );
+});
+
 test("the graph-paper grid, the coral/indigo palette and the macOS font stack are gone", () => {
   assert.doesNotMatch(css, /body::before/);
   assert.doesNotMatch(css, /--grid-line|--grid-size|--section-alt/);
@@ -111,9 +129,33 @@ test("the graph-paper grid, the coral/indigo palette and the macOS font stack ar
     "--color-info-bg",
     "--color-chart-1",
     "--color-chart-5",
+    "--color-chart-8",
+    "--color-chart-3-ink",
+    "--color-chart-2-subtle",
   ]) {
     assert.ok(theme.includes(`${t}:`), `@theme inline exposes ${t}`);
   }
+});
+
+test("all eight kit chart tokens, their -ink and -subtle are bridged in :root and @theme (#19066)", () => {
+  const root = block(":root {\n  --desktop-safe-top");
+  const theme = block("@theme inline {");
+  const dark = block(".dark {");
+  for (let n = 1; n <= 8; n++) {
+    for (const suffix of ["", "-ink", "-subtle"]) {
+      const name = `--color-chart-${n}${suffix}`;
+      assert.ok(
+        root.includes(`${name}: var(--ci-chart-${n}${suffix});`),
+        `:root maps ${name} → var(--ci-chart-${n}${suffix})`
+      );
+      // Tailwind utilities (bg-chart-6, text-chart-3-ink, bg-chart-2-subtle) need the @theme entry.
+      assert.ok(theme.includes(`${name}: var(${name});`), `@theme inline exposes ${name}`);
+      // The kit flips --ci-chart-* per theme/edition; OmniRoute never re-declares them per theme.
+      assert.ok(!dark.includes(`${name}:`), `.dark does not redefine ${name}`);
+    }
+  }
+  assert.ok(!root.includes("--color-chart-9"), "the kit has exactly eight chart tokens");
+  assert.doesNotMatch(root, /--color-chart-[\w-]+:\s*#/, "chart bridge carries no hex");
 });
 
 test("focus ring lives in @layer base so kit controls keep their own focus styles", () => {
