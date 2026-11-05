@@ -6,26 +6,32 @@
  *
  *   { error: { message: string, details?: Array<{ message?: string }> } }
  *
- * Field-level validation errors (e.g. COMBO_002) carry the most specific
- * text in `error.details[0].message` or in `error.details.firstMessage` /
- * `error.details.issues.details[0]`; other errors carry it in `error.message`.
- * This helper prefers the most specific available message and falls back to a
- * caller-supplied default when the body is missing, malformed, or not an
- * object — so a failed `fetch().json()` (which may be `null`) never throws at
- * the call site.
+ * As well as plain `{ error: string }` bodies emitted by simple routes (e.g.
+ * "Combo name already exists" on POST /api/combos).
+ *
+ * Field-level validation errors (e.g. COMBO_002 or validateBody envelopes) carry
+ * the most specific text in `error.details[0].message` or in
+ * `error.details.firstMessage` / `error.details.issues.details[0]`.
+ * This helper prefers the most specific available message, prefixes the
+ * offending field name when present, and falls back to a caller-supplied
+ * default when the body is missing, malformed, or not an object.
  */
 export function resolveServerErrorMessage(body: unknown, fallback: string): string {
   if (!body || typeof body !== "object") return fallback;
   const error = (body as { error?: unknown }).error;
+  if (typeof error === "string" && error.trim().length > 0) return error.trim();
   if (!error || typeof error !== "object") return fallback;
 
   const details = (error as { details?: unknown }).details;
   if (Array.isArray(details) && details.length > 0) {
     const first = details[0];
     if (first && typeof first === "object") {
-      const detailMessage = (first as { message?: unknown }).message;
-      if (typeof detailMessage === "string" && detailMessage.length > 0) {
-        return detailMessage;
+      const rec = first as { field?: unknown; message?: unknown };
+      const detailMessage = typeof rec.message === "string" ? rec.message : "";
+      if (detailMessage.length > 0) {
+        const prefix =
+          typeof rec.field === "string" && rec.field.length > 0 ? `${rec.field}: ` : "";
+        return `${prefix}${detailMessage}`;
       }
     }
   }

@@ -103,3 +103,29 @@ test("resolveServerErrorMessage extracts nested issues details when firstMessage
   const msg = resolveServerErrorMessage(body, "Fallback");
   assert.equal(msg, "name: Combo name must be at least 1 character");
 });
+
+test("resolveServerErrorMessage preserves direct string errors like duplicate name or DAG failure", () => {
+  const body = { error: "A combo with this name already exists" };
+  assert.equal(
+    resolveServerErrorMessage(body, "Fallback"),
+    "A combo with this name already exists"
+  );
+});
+
+test("resolveServerErrorMessage formats field: message from array details emitted by POST /api/combos", () => {
+  const body = {
+    error: {
+      message: "Invalid request",
+      details: [
+        {
+          field: "models.0.allowedConnectionIds",
+          message: "Too big: expected array to have <=250 items",
+        },
+      ],
+    },
+  };
+  assert.equal(
+    resolveServerErrorMessage(body, "Fallback"),
+    "models.0.allowedConnectionIds: Too big: expected array to have <=250 items"
+  );
+});
