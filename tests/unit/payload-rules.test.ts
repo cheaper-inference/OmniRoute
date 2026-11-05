@@ -165,10 +165,12 @@ test("configured empty payload rules avoid duplicating large input histories", a
 
 test("configured nonempty payload rules still clone and isolate caller-owned history", async () => {
   setPayloadRulesConfig({
-    override: [{
-      models: [{ name: "gpt-5.4", protocol: "openai" }],
-      params: { temperature: 0.2 },
-    }],
+    override: [
+      {
+        models: [{ name: "gpt-5.4", protocol: "openai" }],
+        params: { temperature: 0.2 },
+      },
+    ],
   });
   const payload = {
     model: "gpt-5.4",
