@@ -38,6 +38,13 @@ admission policy (E2E, integration, package artifact, Electron smoke, Bun SQLite
 and protocol clients) run only on a Mergify queue draft or on a full run:
 `gh workflow run ci.yml --ref <branch>`.
 
+Each JSON receipt identifies the checked-out SHA, workflow run and attempt.
+The CLI rejects a checkout/event SHA mismatch. Workflow tests bind policy membership
+to the verdict job's `needs` list so a new or removed lane cannot silently disappear.
+The receipts cover their own workflow, not publication, deployment, or the internals
+of an existing advisory scanner. Activating both check names in branch rules is a
+separate administrative change; adding these jobs does not itself protect a branch.
+
 ### Merge queue
 
 The `queue` label sends a PR to the Mergify queue (`.mergify.yml`). Mergify opens a draft PR on
@@ -51,13 +58,6 @@ matrix. Only `Merge integrity` still runs. The skipped gate job carries a differ
 because Mergify reads a skipped `Gate / CI` as a failed check and dequeues the PR.
 
 After a dequeue, a push does not always requeue the PR. Comment `@mergifyio queue` on it.
-
-Each JSON receipt identifies the checked-out SHA, workflow run and attempt.
-The CLI rejects a checkout/event SHA mismatch. Workflow tests bind policy membership
-to the verdict job's `needs` list so a new or removed lane cannot silently disappear.
-The receipts cover their own workflow, not publication, deployment, or the internals
-of an existing advisory scanner. Activating both check names in branch rules is a
-separate administrative change; adding these jobs does not itself protect a branch.
 
 ### Static scan inventory
 
