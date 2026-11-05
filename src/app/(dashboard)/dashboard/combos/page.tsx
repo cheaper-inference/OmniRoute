@@ -22,6 +22,7 @@ import { Field } from "@omniroute/ui-kit/field";
 import { Input as KitInput } from "@omniroute/ui-kit/input";
 import { ChoiceCard } from "@omniroute/ui-kit/onboarding-patterns";
 import { RadioGroup } from "@omniroute/ui-kit/radio-group";
+import { Tile } from "@omniroute/ui-kit/tile";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import GlobalModelSearchPanel from "./GlobalModelSearchPanel";
@@ -3552,48 +3553,35 @@ function ComboFormModal({
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
                     {COMBO_TEMPLATES.map((template) => (
-                      // kit-exception: a multi-line template tile (icon, title, description,
-                      // CTA). The kit Button is a single-line pill control; the tile keeps the
-                      // kit tokens and the global :focus-visible ring.
-                      <button
-                        type="button"
+                      // Kit Tile (a plain action): the featured template keeps its FREE badge.
+                      <Tile
                         key={template.id}
                         onClick={() => applyTemplate(template)}
                         data-testid={`combo-template-${template.id}`}
-                        className={`text-start rounded-md border px-3 py-2 transition-all ${
-                          template.isFeatured
-                            ? "border-success/50 bg-success/5 hover:border-success/80 hover:bg-success/10 ring-1 ring-success/20"
-                            : "border-border bg-surface hover:border-primary/40 hover:bg-primary/5"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2">
+                        className="px-3 py-2"
+                        icon={
                           <Icon
                             name={template.icon}
                             size={16}
                             className={template.isFeatured ? "text-success" : "text-primary"}
                           />
-                          <span className="text-[12px] font-semibold text-text-main">
-                            {getI18nOrFallback(t, template.titleKey, template.fallbackTitle)}
-                          </span>
-                          {template.isFeatured && (
-                            <Badge
-                              size="sm"
-                              variant="success"
-                              className="ms-auto font-bold uppercase tracking-wide"
-                            >
+                        }
+                        title={getI18nOrFallback(t, template.titleKey, template.fallbackTitle)}
+                        meta={
+                          template.isFeatured ? (
+                            <Badge size="sm" variant="success" className="uppercase tracking-wide">
                               FREE
                             </Badge>
-                          )}
-                        </div>
-                        <p className="text-[10px] text-text-muted mt-1.5 leading-[1.5]">
-                          {getI18nOrFallback(t, template.descKey, template.fallbackDesc)}
-                        </p>
-                        <p
-                          className={`text-[10px] mt-1.5 font-medium ${template.isFeatured ? "text-success" : "text-primary"}`}
+                          ) : undefined
+                        }
+                        description={getI18nOrFallback(t, template.descKey, template.fallbackDesc)}
+                      >
+                        <span
+                          className={`text-xs font-medium ${template.isFeatured ? "text-success" : "text-primary"}`}
                         >
                           {getI18nOrFallback(t, "templateApply", COMBO_TEMPLATE_FALLBACK.apply)} →
-                        </p>
-                      </button>
+                        </span>
+                      </Tile>
                     ))}
                   </div>
                 </div>

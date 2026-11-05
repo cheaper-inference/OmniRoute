@@ -63,39 +63,38 @@ nhập HAR giải mã thời điểm hết hạn của JWT và hiển thị th�
 > **Tuyệt đối không commit tệp HAR xuất thực tế, access token hoặc refresh token.** Các giá trị dùng cho kiểm thử và
 > tài liệu phải luôn là giá trị giữ chỗ.
 
-## Thời hạn token và làm mới
+## Thời hạn và làm mới token
 
-`access_token` có thời hạn ngắn (thường là **~75 phút**). Sau khi hết hạn, nhà cung cấp
-sẽ báo lỗi kết nối và bạn phải thu thập lại thông tin xác thực.
+`access_token` có thời hạn ngắn (thường là **~75 phút**). Nếu không có token
+làm mới có thể sử dụng, bạn phải lấy lại thông tin xác thực sau khi hết hạn.
 
-### Tự động làm mới bằng `refreshToken`
+### Tự động làm mới với `refreshToken`
 
-Để tránh phải thu thập lại theo cách thủ công, bạn có thể lưu refresh token của Microsoft trong
-**Advanced Settings → providerSpecificData** của kết nối:
+Trong hộp thoại **Thêm kết nối** hoặc **Chỉnh sửa kết nối** của nhà cung cấp Microsoft 365, mở
+**Cài đặt nâng cao → Token làm mới (tùy chọn)**. Dán token làm mới OAuth của Microsoft cho
+phạm vi `substrate.office.com/sydney` rồi lưu. Giá trị nhập sẽ được che và không bao giờ được
+điền sẵn bằng token đã lưu. Khi chỉnh sửa, để trống để giữ lại token hiện tại;
+dán token mới để thay thế token đó.
 
-| Trường         | Mô tả                                                                   |
-| -------------- | ----------------------------------------------------------------------- |
-| `refreshToken` | Refresh token Microsoft OAuth cho phạm vi `substrate.office.com/sydney` |
-| `tier`         | `individual` (mặc định), `edu` hoặc `enterprise`                        |
+Lấy token làm mới từ quy trình mã thiết bị hoặc mã ủy quyền của Microsoft
+với phạm vi `substrate.office.com/sydney`; bảng điều khiển không tự lấy token này cho bạn.
+Khi đã cấu hình token làm mới, OmniRoute sẽ kiểm tra `access_token` trước mỗi yêu cầu
+và chỉ làm mới khi cần. Việc làm mới thành công cũng lưu lại token làm mới đã được xoay vòng,
+giúp tránh phải lấy lại thủ công trong thời gian token làm mới còn hiệu lực.
 
-Lấy refresh token từ luồng mã thiết bị hoặc mã ủy quyền của Microsoft
-với phạm vi `substrate.office.com/sydney`. Khi `refreshToken` được thiết lập, OmniRoute
-sẽ làm mới trước `access_token` trước mỗi yêu cầu, vì vậy bạn không cần
-thu thập lại sau mỗi lần hết hạn khoảng 75 phút.
-
-Nếu `refreshToken` không được thiết lập, bạn phải thu thập lại thông tin xác thực WebSocket theo cách thủ công
+Nếu chưa thiết lập `refreshToken`, bạn phải lấy lại thông tin xác thực WebSocket theo cách thủ công
 sau mỗi lần hết hạn.
 
-### Lựa chọn cấp độ
+### Lựa chọn cấp
 
-| Cấp độ       | Bí danh      | Dịch vụ                         |
-| ------------ | ------------ | ------------------------------- |
-| `individual` | _(mặc định)_ | M365 Copilot dành cho cá nhân   |
-| `edu`        | `included`   | M365 Copilot dành cho giáo dục  |
-| `enterprise` | `work`       | M365 Copilot dành cho công việc |
+| Cấp          | Bí danh      | Phạm vi                                  |
+| ------------ | ------------ | ---------------------------------------- |
+| `individual` | _(mặc định)_ | Copilot M365 dành cho người dùng cá nhân |
+| `edu`        | `included`   | Copilot M365 dành cho giáo dục           |
+| `enterprise` | `work`       | Copilot M365 dành cho công việc          |
 
-Thiết lập cấp độ trong **Advanced Settings → providerSpecificData → tier**. Cấp độ này ảnh hưởng đến
-việc định tuyến BizChat và quyền truy cập mô hình.
+Đặt cấp trong **Cài đặt nâng cao → Cấp Copilot**. Cấp này ảnh hưởng đến
+định tuyến BizChat và quyền truy cập mô hình.
 
 ## Mô hình bảo mật
 
@@ -106,25 +105,25 @@ việc định tuyến BizChat và quyền truy cập mô hình.
 
 ## Khắc phục sự cố
 
-### Xác thực thất bại ngay lập tức
+### Xác thực không thành công ngay lập tức
 
-- Xác minh rằng bạn đã sao chép từ **URL WebSocket**, không phải từ một yêu cầu XHR/Fetch. Thông tin xác thực nằm trong tham số truy vấn `access_token` của kết nối WebSocket Chathub — không nằm trong tiêu đề `Authorization: Bearer`.
+- Hãy xác minh rằng bạn đã sao chép từ **URL WebSocket**, không phải từ một yêu cầu XHR/Fetch. Thông tin xác thực nằm trong tham số truy vấn `access_token` của kết nối WebSocket Chathub — không nằm trong tiêu đề `Authorization: Bearer`.
 - Đảm bảo `chathubPath` bao gồm đầy đủ phân đoạn `<oid>@<tenant>` từ đường dẫn URL.
 
-### Mã thông báo hết hạn sau khoảng 75 phút
+### Token hết hạn sau khoảng 75 phút
 
-Đây là hành vi dự kiến. Nếu không có `refreshToken`, mã thông báo truy cập chỉ có hiệu lực trong thời gian ngắn. Bạn có thể:
+Đây là hành vi dự kiến. Nếu không có `refreshToken`, access token sẽ có thời gian tồn tại ngắn. Bạn có thể:
 
-- Thu thập lại thông tin xác thực từ DevTools, hoặc
-- Cấu hình `refreshToken` trong phần Cài đặt nâng cao để tự động làm mới.
+- Ghi lại thông tin xác thực từ DevTools, hoặc
+- Cấu hình **Cài đặt nâng cao → Token làm mới (tùy chọn)** trong hộp thoại Thêm hoặc Chỉnh sửa kết nối để tự động làm mới.
 
-### Kiểm tra kết nối thành công nhưng trò chuyện trả về 401
+### Kiểm tra kết nối thành công nhưng cuộc trò chuyện trả về 401
 
-Mã thông báo có thể đã hết hạn trong khoảng thời gian từ lúc xác thực đến yêu cầu đầu tiên. Hãy thu thập lại thông tin xác thực mới.
+Token có thể đã hết hạn giữa lúc xác thực và lúc gửi yêu cầu đầu tiên. Hãy ghi lại thông tin xác thực mới.
 
 ### Copilot không xuất hiện trong danh sách nhà cung cấp
 
-Đảm bảo `copilot-m365-web` được bật trong **Bảng điều khiển → Nhà cung cấp**. Nhà cung cấp này có thể bị ẩn theo mặc định ở một số gói dịch vụ.
+Đảm bảo `copilot-m365-web` được bật trong **Bảng điều khiển → Nhà cung cấp**. Nhà cung cấp này có thể bị ẩn theo mặc định ở một số gói.
 
 ## Tài liệu tham khảo
 
