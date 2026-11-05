@@ -1,5 +1,8 @@
 "use client";
 
+import { classifyHttpLog, parseUpstreamHttp } from "@/shared/utils/upstreamHttp";
+import { sortRelatedLogs } from "./requestLoggerGroups";
+
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { JsonView } from "@/shared/components/jsonView";
@@ -477,7 +480,9 @@ export default function RequestLoggerDetail({
     }
   };
 
-  const providerStatus = detail?.pipelinePayloads?.providerResponse?.status;
+  const upstreamHttp = parseUpstreamHttp(detail?.upstreamHttp ?? log.upstreamHttp);
+  const providerStatus =
+    upstreamHttp?.send?.status ?? detail?.pipelinePayloads?.providerResponse?.status;
   const hasStatusDiscrepancy = providerStatus && providerStatus !== log.status;
 
   const formatDate = (iso) => {
@@ -611,6 +616,15 @@ export default function RequestLoggerDetail({
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-bold bg-warning/20 text-warning border border-warning/30">
                     <span className="inline-block h-3 w-3 rounded-full border-2 border-current border-t-transparent animate-spin" />
                   </span>
+                ) : classifyHttpLog(log) === "transport_error" ||
+                  classifyHttpLog(log) === "no_response" ? (
+                  <Badge variant={classifyHttpLog(log) === "transport_error" ? "error" : "info"}>
+                    {t(
+                      classifyHttpLog(log) === "transport_error"
+                        ? "transportError"
+                        : "noHttpResponse"
+                    )}
+                  </Badge>
                 ) : log.status === 0 ? (
                   <span className="inline-block px-2.5 py-1 rounded text-xs font-bold bg-success/20 text-success border border-success/30">
                     {t("completed")}
@@ -624,6 +638,11 @@ export default function RequestLoggerDetail({
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-bg-subtle border border-border text-text-muted">
                     {t("upstreamStatus", { status: providerStatus })}
                   </span>
+                )}
+                {upstreamHttp?.role === "logical" && upstreamHttp.omitted > 0 && (
+                  <Badge variant="info">
+                    {t("omittedHttpAttempts", { count: upstreamHttp.omitted })}
+                  </Badge>
                 )}
                 {log.method && <span className="font-bold text-lg">{log.method}</span>}
               </div>
@@ -1038,16 +1057,8 @@ export default function RequestLoggerDetail({
                 {t("relatedRequests", { count: relatedLogs.length })}
               </div>
               <div className="flex flex-col gap-1">
-                {[...relatedLogs]
-                  .sort((a, b) => {
-                    const aStart = getRequestTimeRange(a).startMs;
-                    const bStart = getRequestTimeRange(b).startMs;
-                    return (
-                      (Number.isFinite(aStart) ? aStart : 0) -
-                      (Number.isFinite(bStart) ? bStart : 0)
-                    );
-                  })
-                  .map((r) => {
+                {sortRelatedLogs(relatedLogs, (row) => getRequestTimeRange(row).startMs).map(
+                  (r) => {
                     const isCurrent = r.id === log.id;
                     const { startMs } = getRequestTimeRange(r);
                     return (
@@ -1065,10 +1076,20 @@ export default function RequestLoggerDetail({
                       >
                         <Badge
                           size="sm"
-                          variant={r.active ? "default" : httpStatusTone(r.status)}
+                          variant={
+                            r.active
+                              ? "default"
+                              : classifyHttpLog(r) === "transport_error"
+                                ? "error"
+                                : httpStatusTone(r.status)
+                          }
                           className="min-w-[28px] justify-center text-[9px] font-bold"
                         >
-                          {r.status || "..."}
+                          {classifyHttpLog(r) === "transport_error"
+                            ? t("transportError")
+                            : classifyHttpLog(r) === "no_response"
+                              ? t("noHttpResponse")
+                              : r.status || "..."}
                         </Badge>
                         <span className="font-mono text-text-muted">{r.id}</span>
                         <span className="text-text-muted">{r.model}</span>
@@ -1087,7 +1108,8 @@ export default function RequestLoggerDetail({
                         )}
                       </Button>
                     );
-                  })}
+                  }
+                )}
               </div>
             </div>
           )}
