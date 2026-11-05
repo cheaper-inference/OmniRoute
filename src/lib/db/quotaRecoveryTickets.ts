@@ -168,8 +168,9 @@ export function claimQuotaRecoveryTicket(id: string, now = new Date()): QuotaRec
  * The ranking reads only the due index, rowid and api_key_id. Those sit in front of
  * the encrypted payload (up to about 1 MiB), so no due row's overflow pages are read.
  * Reading expires_at or created_at there would walk every one of them. Ties fall back
- * to rowid (insert order). Expiry is checked on the joined rows; the tick expires stale
- * tickets before it calls this, so that check does not shrink a batch in practice.
+ * to rowid (insert order). Expired pending rows are excluded before ranking and the
+ * inner LIMIT, so they cannot take slots from still-valid tickets. The outer
+ * expires_at check stays as a safety net if a row expires between the two reads.
  */
 export function listDueQuotaRecoveryTickets(now = new Date(), limit = 25): QuotaRecoveryTicket[] {
   const iso = now.toISOString();
@@ -180,14 +181,14 @@ export function listDueQuotaRecoveryTickets(now = new Date(), limit = 25): Quota
            PARTITION BY api_key_id ORDER BY next_attempt_at, rowid
          ) AS key_rank
          FROM quota_recovery_tickets
-         WHERE state = 'pending' AND next_attempt_at <= ?
+         WHERE state = 'pending' AND next_attempt_at <= ? AND expires_at > ?
          ORDER BY key_rank, next_attempt_at, rid LIMIT ?
        ) AS due
        JOIN quota_recovery_tickets AS t ON t.rowid = due.rid
        WHERE t.expires_at > ?
        ORDER BY due.key_rank, due.next_attempt_at, due.rid`
     )
-    .all(iso, Math.max(1, Math.min(limit, 100)), iso) as TicketRow[];
+    .all(iso, iso, Math.max(1, Math.min(limit, 100)), iso) as TicketRow[];
   return rows.map(toTicket);
 }
 

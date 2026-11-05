@@ -394,12 +394,51 @@ test("a tick expires stale tickets before it lists due ones, so they take no bat
   }
 });
 
+/** Open a second handle on the live DB file with the same driver the suite uses. */
+async function openPeerDb(file: string): Promise<{
+  prepare: (sql: string) => { run: (...args: unknown[]) => unknown };
+  close: () => void;
+}> {
+  const driver = core.getDbInstance().driver;
+  if (driver === "better-sqlite3") {
+    const Database = (await import("better-sqlite3")).default;
+    const other = new Database(file);
+    other.pragma("busy_timeout = 0");
+    return {
+      prepare: (sql: string) => other.prepare(sql),
+      close: () => other.close(),
+    };
+  }
+  const { DatabaseSync } = await import("node:sqlite");
+  const other = new DatabaseSync(file);
+  other.exec("PRAGMA busy_timeout = 0");
+  return {
+    prepare: (sql: string) => other.prepare(sql),
+    close: () => other.close(),
+  };
+}
+
+test("an expired pending ticket does not take a due-batch slot from a later valid one", () => {
+  // With expiry filtered only after LIMIT, the stale row would fill the only slot and
+  // the still-valid ticket would wait another tick.
+  const now = new Date("2018-06-01T00:05:00.000Z");
+  enqueue("steal-stale", "stale", "2018-06-01T00:01:00.000Z", "2018-06-01T00:02:00.000Z");
+  enqueue("steal-live", "live", "2018-06-01T00:03:00.000Z", "2018-06-02T00:00:00.000Z");
+  try {
+    const batch = tickets.listDueQuotaRecoveryTickets(now, 1).map((t) => t.turnKey);
+    assert.deepEqual(batch, ["live"]);
+  } finally {
+    core
+      .getDbInstance()
+      .prepare("DELETE FROM quota_recovery_tickets WHERE api_key_id LIKE 'steal-%'")
+      .run();
+  }
+});
+
 test("another connection cannot add a ticket between the per-key count and the insert", async () => {
   // A second process sharing the database must wait for the write lock: with only a
   // read transaction (or none), both could count below the limit and both insert.
-  const { DatabaseSync } = await import("node:sqlite");
-  const other = new DatabaseSync(core.SQLITE_FILE as string);
-  other.exec("PRAGMA busy_timeout = 0");
+  const other = await openPeerDb(core.SQLITE_FILE as string);
   const db = core.getDbInstance();
   const prepare = db.prepare.bind(db);
   let intrusion = "not attempted";
@@ -468,9 +507,8 @@ test("a turn another connection parks just before the transaction is returned at
   // The existing-turn lookup must run under the write lock too: looked up earlier, it
   // misses the other connection's row, the count then sees the key at its limit and the
   // re-sent turn gets the original quota error instead of its ticket.
-  const { DatabaseSync } = await import("node:sqlite");
   const { createHash } = await import("node:crypto");
-  const other = new DatabaseSync(core.SQLITE_FILE as string);
+  const other = await openPeerDb(core.SQLITE_FILE as string);
   const db = core.getDbInstance();
   const immediate = db.immediate.bind(db);
   const payload = JSON.stringify({ turnKey: "shared" });
