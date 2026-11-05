@@ -99,6 +99,16 @@ test("#8926: explicit provider/model rejects a stale static model before upstrea
   );
 });
 
+test("reconcile accepts a live model with matching canonical or alias provider prefix", async () => {
+  const { reconcileProvidersWithActiveSyncedCatalog } =
+    await import("../../src/lib/db/models/activeSyncedCatalog.ts");
+  for (const requested of [`github/${LIVE_MODEL}`, `gh/${LIVE_MODEL}`]) {
+    const result = await reconcileProvidersWithActiveSyncedCatalog([PROVIDER], requested);
+    assert.deepEqual(result.providers, [PROVIDER], requested);
+    assert.deepEqual(result.excludedProviders, [], requested);
+  }
+});
+
 test("#8926: active alternative provider remains eligible", async () => {
   await seedProviderCatalog("ghe-copilot", "ghe-copilot-active-8926", []);
 
