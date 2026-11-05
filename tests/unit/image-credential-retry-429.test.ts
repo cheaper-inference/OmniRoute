@@ -301,3 +301,36 @@ test("an empty API-key allowlist is not equivalent to an unscoped image request"
   assert.equal(executions, 0);
   assert.equal(result.result.status, 403);
 });
+
+test("image account policy sentinel returns 403 without dispatch", async () => {
+  let dispatched = 0;
+  const { result } = await executeImageWithCredentialFallback({
+    provider: "codex",
+    requestedModel: "gpt-image-2",
+    credentials: { blockedByKeyPolicy: true, blockedCount: 2 },
+    allowedConnections: ["conn-permitted"],
+    execute: async (): Promise<MockImageResult> => {
+      dispatched++;
+      return { success: true, status: 200 };
+    },
+  });
+  assert.equal(result.status, 403);
+  assert.equal(dispatched, 0);
+});
+
+test("policy denial after rotating a rejected account takes precedence over prior 401", async () => {
+  let dispatched = 0;
+  const { result } = await executeImageWithCredentialFallback({
+    provider: "codex",
+    requestedModel: "gpt-image-2",
+    credentials: { connectionId: "conn-permitted", accessToken: "unused" },
+    allowedConnections: ["conn-permitted"],
+    execute: async (): Promise<MockImageResult> => {
+      dispatched++;
+      return { success: false, status: 401 };
+    },
+    selectNextCredentials: async () => ({ blockedByKeyPolicy: true }),
+  });
+  assert.equal(result.status, 403);
+  assert.equal(dispatched, 1);
+});

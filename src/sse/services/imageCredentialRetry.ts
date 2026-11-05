@@ -64,6 +64,27 @@ function isCredentialSentinel(credentials: any): boolean {
   return isCredentialDiagnosticSentinel(credentials);
 }
 
+function finalImageRetryFailure(
+  currentCredentials: any,
+  lastResult: ImageGenerationResult | null
+): ImageGenerationResult {
+  // The selector can deny a scoped key with a sentinel instead of credentials.
+  // Preserve that denial after the fallback loop, even if an earlier account
+  // returned an authentication error.
+  if (currentCredentials?.blockedByKeyPolicy === true) {
+    return {
+      success: false,
+      status: 403,
+      error: "No image-provider connection is allowed for this API key",
+    };
+  }
+  return lastResult || {
+    success: false,
+    status: 401,
+    error: "Authentication failed for all eligible image-provider accounts",
+  };
+}
+
 /**
  * Image generation is non-idempotent, so account rotation stays deliberately
  * narrower than chat failover. Antigravity's explicit exhausted-quota signal
@@ -201,10 +222,6 @@ export async function executeImageWithCredentialFallback({
 
   return {
     credentials: lastCredentials,
-    result: lastResult || {
-      success: false,
-      status: 401,
-      error: "Authentication failed for all eligible image-provider accounts",
-    },
+    result: finalImageRetryFailure(currentCredentials, lastResult),
   };
 }
