@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import type { ComboLike, ComboLogger, ResolvedComboTarget } from "../../open-sse/services/combo/types.ts";
 
 import {
   drainShadowResponse,
@@ -75,10 +76,10 @@ test("scheduled shadow routing consumes the original stream, not a tee", async (
   });
   const logs: string[] = [];
   scheduleShadowRouting(
-    { name: "shadow-memory-regression", models: [] } as any,
+    { name: "shadow-memory-regression", models: [] } as ComboLike,
     { shadowRouting: { enabled: true, sampleRate: 1, timeoutMs: 1000 } },
     { model: "primary", messages: [{ role: "user", content: "hi" }] },
-    [{ modelStr: "shadow-model", provider: "test-provider", executionKey: "test" }] as any,
+    [{ modelStr: "shadow-model", provider: "test-provider", executionKey: "test" }] as ResolvedComboTarget[],
     async () => response,
     undefined,
     "priority",
@@ -91,7 +92,7 @@ test("scheduled shadow routing consumes the original stream, not a tee", async (
         logs.push(message);
         complete();
       },
-    } as any
+    } as ComboLogger
   );
   await Promise.race([
     done,
