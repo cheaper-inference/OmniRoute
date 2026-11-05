@@ -923,6 +923,8 @@
     "batchListTitle": "Batchar",
     "batchListCount": "{count} batchar",
     "batchListRemovingCompleted": "Tar bort…",
+    "batchListRemoveCompletedPartial": "Ett stort antal batcher togs bort. Klicka igen för att rensa resten.",
+    "batchListRemoveCompletedFailed": "Ett fel uppstod när batcher skulle tas bort.",
     "batchListRemoveCompleted": "Ta bort slutförda",
     "batchListTableStatus": "Status",
     "batchListTableId": "ID",

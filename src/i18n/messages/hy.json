@@ -923,6 +923,8 @@
     "batchListTitle": "Փաթեթներ",
     "batchListCount": "{count} փաթեթ",
     "batchListRemovingCompleted": "Հեռացվում է…",
+    "batchListRemoveCompletedPartial": "Հեռացվել է մեծ թվով խմբաքանակ։ Կրկին սեղմեք՝ մնացածը մաքրելու համար։",
+    "batchListRemoveCompletedFailed": "Խմբաքանակները հեռացնելիս սխալ է տեղի ունեցել։",
     "batchListRemoveCompleted": "Հեռացնել ավարտվածները",
     "batchListTableStatus": "Կարգավիճակ",
     "batchListTableId": "ID",

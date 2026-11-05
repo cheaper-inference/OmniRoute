@@ -1000,6 +1000,8 @@
     "batchListTitle": "Paketlər",
     "batchListCount": "{count} paket",
     "batchListRemovingCompleted": "Silinir…",
+    "batchListRemoveCompletedPartial": "Çox sayda paket silindi. Qalanlarını təmizləmək üçün yenidən klikləyin.",
+    "batchListRemoveCompletedFailed": "Paketlər silinərkən xəta baş verdi.",
     "batchListRemoveCompleted": "Tamamlanmışları sil",
     "batchListTableStatus": "Vəziyyət",
     "batchListTableId": "ID",

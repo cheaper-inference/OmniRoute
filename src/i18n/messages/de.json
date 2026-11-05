@@ -923,6 +923,8 @@
     "batchListTitle": "Stapel",
     "batchListCount": "{count} Batches",
     "batchListRemovingCompleted": "Wird entfernt…",
+    "batchListRemoveCompletedPartial": "Eine große Anzahl von Batches wurde entfernt. Klicken Sie erneut, um die restlichen zu löschen.",
+    "batchListRemoveCompletedFailed": "Beim Entfernen der Batches ist ein Fehler aufgetreten.",
     "batchListRemoveCompleted": "Abgeschlossene entfernen",
     "batchListTableStatus": "Status",
     "batchListTableId": "ID",

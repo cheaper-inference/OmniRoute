@@ -923,6 +923,8 @@
     "batchListTitle": "ಬ್ಯಾಚ್ಗಳು",
     "batchListCount": "{count} ಬ್ಯಾಚ್ಗಳು",
     "batchListRemovingCompleted": "ತೆಗೆದುಹಾಕಲಾಗುತ್ತಿದೆ…",
+    "batchListRemoveCompletedPartial": "ಹೆಚ್ಚಿನ ಸಂಖ್ಯೆಯ ಬ್ಯಾಚ್ಗಳನ್ನು ತೆಗೆದುಹಾಕಲಾಗಿದೆ. ಉಳಿದವುಗಳನ್ನು ತೆರವುಗೊಳಿಸಲು ಮತ್ತೆ ಕ್ಲಿಕ್ ಮಾಡಿ.",
+    "batchListRemoveCompletedFailed": "ಬ್ಯಾಚ್ಗಳನ್ನು ತೆಗೆದುಹಾಕುವಾಗ ದೋಷ ಸಂಭವಿಸಿದೆ.",
     "batchListRemoveCompleted": "ಪೂರ್ಣಗೊಂಡವುಗಳನ್ನು ತೆಗೆದುಹಾಕಿ",
     "batchListTableStatus": "ಸ್ಥಿತಿ",
     "batchListTableId": "ಐಡಿ",

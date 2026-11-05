@@ -923,6 +923,8 @@
     "batchListTitle": "Dávky",
     "batchListCount": "Počet dávok: {count}",
     "batchListRemovingCompleted": "Odstraňuje sa…",
+    "batchListRemoveCompletedPartial": "Odstránil sa veľký počet dávok. Kliknutím znova vymažete zvyšné.",
+    "batchListRemoveCompletedFailed": "Pri odstraňovaní dávok sa vyskytla chyba.",
     "batchListRemoveCompleted": "Odstrániť dokončené",
     "batchListTableStatus": "Stav",
     "batchListTableId": "ID",

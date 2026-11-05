@@ -1000,6 +1000,8 @@
     "batchListTitle": "ব্যাচসমূহ",
     "batchListCount": "{count}টি ব্যাচ",
     "batchListRemovingCompleted": "সরানো হচ্ছে…",
+    "batchListRemoveCompletedPartial": "অনেকগুলো ব্যাচ সরানো হয়েছে। বাকিগুলো মুছে ফেলতে আবার ক্লিক করুন।",
+    "batchListRemoveCompletedFailed": "ব্যাচগুলো সরানোর সময় একটি ত্রুটি ঘটেছে।",
     "batchListRemoveCompleted": "সম্পন্নগুলো সরান",
     "batchListTableStatus": "স্থিতি",
     "batchListTableId": "আইডি",

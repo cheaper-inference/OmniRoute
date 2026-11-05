@@ -923,6 +923,8 @@
     "batchListTitle": "Paketai",
     "batchListCount": "Paketų skaičius: {count}",
     "batchListRemovingCompleted": "Šalinama…",
+    "batchListRemoveCompletedPartial": "Pašalinta daug paketų. Spustelėkite dar kartą, kad išvalytumėte likusius.",
+    "batchListRemoveCompletedFailed": "Šalinant paketus įvyko klaida.",
     "batchListRemoveCompleted": "Pašalinti užbaigtus",
     "batchListTableStatus": "Būsena",
     "batchListTableId": "ID",

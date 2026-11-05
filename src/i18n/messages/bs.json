@@ -1000,6 +1000,8 @@
     "batchListTitle": "Serije",
     "batchListCount": "{count} serija",
     "batchListRemovingCompleted": "Uklanjanje…",
+    "batchListRemoveCompletedPartial": "Uklonjen je veliki broj paketa. Kliknite ponovo da biste uklonili preostale.",
+    "batchListRemoveCompletedFailed": "Došlo je do greške prilikom uklanjanja paketa.",
     "batchListRemoveCompleted": "Ukloni završene",
     "batchListTableStatus": "Status",
     "batchListTableId": "ID",

@@ -923,6 +923,8 @@
     "batchListTitle": "Toplu işlemler",
     "batchListCount": "{count} toplu işlem",
     "batchListRemovingCompleted": "Kaldırılıyor…",
+    "batchListRemoveCompletedPartial": "Çok sayıda toplu işlem kaldırıldı. Kalanları temizlemek için tekrar tıklayın.",
+    "batchListRemoveCompletedFailed": "Toplu işlemler kaldırılırken bir hata oluştu.",
     "batchListRemoveCompleted": "Tamamlananları kaldır",
     "batchListTableStatus": "Durum",
     "batchListTableId": "Kimlik",

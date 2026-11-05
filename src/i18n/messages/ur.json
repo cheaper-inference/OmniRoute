@@ -923,6 +923,8 @@
     "batchListTitle": "بیچز",
     "batchListCount": "{count} بیچز",
     "batchListRemovingCompleted": "ہٹایا جا رہا ہے…",
+    "batchListRemoveCompletedPartial": "بڑی تعداد میں بیچز ہٹا دیے گئے۔ باقی کو صاف کرنے کے لیے دوبارہ کلک کریں۔",
+    "batchListRemoveCompletedFailed": "بیچز ہٹاتے وقت ایک خرابی پیش آگئی۔",
     "batchListRemoveCompleted": "مکمل شدہ ہٹائیں",
     "batchListTableStatus": "حالت",
     "batchListTableId": "ID",

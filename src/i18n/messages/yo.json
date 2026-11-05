@@ -923,6 +923,8 @@
     "batchListTitle": "Àwọn ìdìpọ̀",
     "batchListCount": "Àwọn ìdìpọ̀ {count}",
     "batchListRemovingCompleted": "Ń yọ kúrò…",
+    "batchListRemoveCompletedPartial": "A ti yọ ọ̀pọ̀lọpọ̀ àwọn ìpele kúrò. Tẹ̀ lẹ́ẹ̀kan sí i láti pa ìyókù rẹ́.",
+    "batchListRemoveCompletedFailed": "Àṣìṣe kan ṣẹlẹ̀ nígbà tí a ń yọ àwọn ìpele kúrò.",
     "batchListRemoveCompleted": "Yọ àwọn tó ti parí kúrò",
     "batchListTableStatus": "Ìpò",
     "batchListTableId": "ID",

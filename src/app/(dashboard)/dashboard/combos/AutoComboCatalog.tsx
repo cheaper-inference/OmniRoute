@@ -10,6 +10,8 @@ import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import { cn } from "@/shared/utils/cn";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
+import { useNotificationStore } from "@/store/notificationStore";
 import { AUTO_COMBO_TEMPLATES, type AutoComboTemplate } from "@/domain/assessment/types";
 import AutoComboTosControl from "./AutoComboTosControl";
 
@@ -222,6 +224,8 @@ export default function AutoComboCatalog({
   testingName?: string | null;
 }) {
   const t = useTranslations("combos");
+  const notifyError = useNotificationStore((s) => s.error);
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   const [open, setOpen] = useState(false);
   const [duplicatingName, setDuplicatingName] = useState<string | null>(null);
   const [liveItems, setLiveItems] = useState<CatalogItem[] | null>(null);
@@ -261,9 +265,10 @@ export default function AutoComboCatalog({
   const handleDuplicateEntry = useCallback(
     async (item: CatalogItem) => {
       if (
-        !confirm(
-          `${t("duplicateAutoComboConfirm", { name: item.id })}\n\n${t("duplicateAutoComboSnapshotMsg")}`
-        )
+        !(await requestConfirm({
+          message: `${t("duplicateAutoComboConfirm", { name: item.id })}\n\n${t("duplicateAutoComboSnapshotMsg")}`,
+          variant: "primary",
+        }))
       )
         return;
 
@@ -283,7 +288,7 @@ export default function AutoComboCatalog({
 
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
-          alert(
+          notifyError(
             `${t("duplicateAutoComboFailedPrefix")} ${data.error || t("duplicateAutoComboUnknownError")}`
           );
           return;
@@ -295,14 +300,14 @@ export default function AutoComboCatalog({
         onComboCreated?.(String(combo.id));
       } catch (err) {
         console.error("Error duplicating auto-combo:", err);
-        alert(
+        notifyError(
           `${t("duplicateAutoComboFailedPrefix")} ${err instanceof Error ? err.message : t("duplicateAutoComboUnknownError")}`
         );
       } finally {
         setDuplicatingName(null);
       }
     },
-    [t, onComboCreated]
+    [t, onComboCreated, requestConfirm, notifyError]
   );
 
   const items = liveItems ?? FALLBACK_ITEMS;
@@ -355,6 +360,7 @@ export default function AutoComboCatalog({
           ))}
         </div>
       )}
+      {confirmDialog}
     </Card>
   );
 }

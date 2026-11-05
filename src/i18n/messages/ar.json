@@ -1000,6 +1000,8 @@
     "batchListTitle": "دفعات",
     "batchListCount": "{count} دفعة",
     "batchListRemovingCompleted": "جارٍ الإزالة...",
+    "batchListRemoveCompletedPartial": "تمت إزالة عدد كبير من الدفعات. انقر مرة أخرى لمسح الباقي.",
+    "batchListRemoveCompletedFailed": "حدث خطأ أثناء إزالة الدفعات.",
     "batchListRemoveCompleted": "إزالة الدفعات المكتملة",
     "batchListTableStatus": "الحالة",
     "batchListTableId": "معرف",

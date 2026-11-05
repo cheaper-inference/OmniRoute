@@ -923,6 +923,8 @@
     "batchListTitle": "Групе",
     "batchListCount": "{count} група",
     "batchListRemovingCompleted": "Уклањање…",
+    "batchListRemoveCompletedPartial": "Уклоњен је велики број група. Кликните поново да бисте обрисали преостале.",
+    "batchListRemoveCompletedFailed": "Дошло је до грешке при уклањању група.",
     "batchListRemoveCompleted": "Уклони завршене",
     "batchListTableStatus": "Статус",
     "batchListTableId": "ID",
