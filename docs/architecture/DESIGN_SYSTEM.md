@@ -60,10 +60,16 @@ lastUpdated: 2026-11-03
   it from the same store. Do not put `data-ci-appearance` on any other element: the kit matches it with
   `html:root:has([data-ci-appearance="editions"])`, so one descendant would switch the whole document.
   The Editions `data-ci-editions-variant="landing"` variant is for marketing pages, not the dashboard.
-  Browser chrome (`viewport.themeColor`, the web manifest) cannot read CSS or the stored choice, so it
-  follows the default: `PWA_THEME_COLORS` in `src/shared/constants/pwaThemeColors.ts` is the one mirror of
-  the Editions `--ci-color-background` (`#f3f1e9` / `#11120f`), pinned to `ci-editions.css` by
-  `tests/unit/pwa-theme-colors.test.ts`. Monaco reads its colours off a probe (`monacoKitTheme.ts`);
+  Browser chrome: the server renders the default, Editions, in `viewport.themeColor` (one tag per
+  `prefers-color-scheme`) and the web manifest — `PWA_THEME_COLORS` in
+  `src/shared/constants/pwaThemeColors.ts`, the one mirror of the Editions `--ci-color-background`
+  (`#f3f1e9` / `#11120f`), pinned to `ci-editions.css` by `tests/unit/pwa-theme-colors.test.ts`. The live
+  `<meta name="theme-color">` then follows the stored palette and mode: `THEME_BOOT_SCRIPT` rewrites the
+  tags before paint and the theme store's actions do it on every change (`resolveThemeColor()` /
+  `applyThemeColor()` in `src/shared/utils/themeColorMeta.ts`, with `CLASSIC_PAGE_BACKGROUND` read from
+  the kit's `ciTokens`). An explicit light/dark theme sets every tag to that mode; `system` keeps one
+  colour per scheme. The manifest stays Editions: it is fetched once per install, without the
+  preference. Monaco reads its colours off a probe (`monacoKitTheme.ts`);
   under Editions the probe read flips the root `data-theme` for one synchronous pass, because the kit
   resolves Editions light/dark from the root.
 - **Components (adapters).** `src/shared/components/index.tsx` keeps the OmniRoute component API (same
