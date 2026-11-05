@@ -1,0 +1,1 @@
+- Add opt-in, per-account Antigravity physical-send phase timing diagnostics without logging request content or credentials.
