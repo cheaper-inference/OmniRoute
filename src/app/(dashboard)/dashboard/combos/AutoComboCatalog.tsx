@@ -1,5 +1,6 @@
 "use client";
 
+import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-kit/disclosure";
 import Icon from "@/shared/components/Icon";
 
 import Link from "next/link";
@@ -10,6 +11,8 @@ import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import { cn } from "@/shared/utils/cn";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
+import { useNotificationStore } from "@/store/notificationStore";
 import { AUTO_COMBO_TEMPLATES, type AutoComboTemplate } from "@/domain/assessment/types";
 import AutoComboTosControl from "./AutoComboTosControl";
 
@@ -222,6 +225,8 @@ export default function AutoComboCatalog({
   testingName?: string | null;
 }) {
   const t = useTranslations("combos");
+  const notifyError = useNotificationStore((s) => s.error);
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   const [open, setOpen] = useState(false);
   const [duplicatingName, setDuplicatingName] = useState<string | null>(null);
   const [liveItems, setLiveItems] = useState<CatalogItem[] | null>(null);
@@ -261,9 +266,10 @@ export default function AutoComboCatalog({
   const handleDuplicateEntry = useCallback(
     async (item: CatalogItem) => {
       if (
-        !confirm(
-          `${t("duplicateAutoComboConfirm", { name: item.id })}\n\n${t("duplicateAutoComboSnapshotMsg")}`
-        )
+        !(await requestConfirm({
+          message: `${t("duplicateAutoComboConfirm", { name: item.id })}\n\n${t("duplicateAutoComboSnapshotMsg")}`,
+          variant: "primary",
+        }))
       )
         return;
 
@@ -283,7 +289,7 @@ export default function AutoComboCatalog({
 
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
-          alert(
+          notifyError(
             `${t("duplicateAutoComboFailedPrefix")} ${data.error || t("duplicateAutoComboUnknownError")}`
           );
           return;
@@ -295,66 +301,65 @@ export default function AutoComboCatalog({
         onComboCreated?.(String(combo.id));
       } catch (err) {
         console.error("Error duplicating auto-combo:", err);
-        alert(
+        notifyError(
           `${t("duplicateAutoComboFailedPrefix")} ${err instanceof Error ? err.message : t("duplicateAutoComboUnknownError")}`
         );
       } finally {
         setDuplicatingName(null);
       }
     },
-    [t, onComboCreated]
+    [t, onComboCreated, requestConfirm, notifyError]
   );
 
   const items = liveItems ?? FALLBACK_ITEMS;
 
   return (
     <Card className="p-4">
-      {/* kit-exception: Raw <button> on purpose: a full-width disclosure header that carries the section
-          heading — the kit Button is a fixed-height control, not a disclosure region. Focus
-          ring comes from the global :focus-visible rule (globals.css). */}
-      <button
-        type="button"
-        onClick={() => setOpen((prev) => !prev)}
-        className="flex w-full items-start justify-between gap-3 rounded-md text-start"
-        aria-expanded={open}
-        aria-label={open ? t("autoCatalogCollapse") : t("autoCatalogExpand")}
-      >
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <Icon name="auto_awesome" size={20} className="text-primary" />
-            <h2 className="text-base font-bold text-text-main">{t("autoCatalogTitle")}</h2>
-            <Badge size="sm" variant="primary" className="font-semibold">
-              {liveItems
-                ? t("autoCatalogComboCount", { count: liveItems.length })
-                : t("autoCatalogTemplateCount", { count: FALLBACK_ITEMS.length })}
-            </Badge>
-          </div>
-          <p className="mt-1 text-xs text-text-muted">{t("autoCatalogDescription")}</p>
-        </div>
-        <Icon name={open ? "expand_less" : "expand_more"} size={16} className="text-text-muted" />
-      </button>
+      <Disclosure open={open} onOpenChange={setOpen}>
+        <DisclosureTrigger
+          className="items-start"
+          aria-label={open ? t("autoCatalogCollapse") : t("autoCatalogExpand")}
+        >
+          <span className="block min-w-0">
+            <div className="flex items-center gap-2">
+              <Icon name="auto_awesome" size={20} className="text-primary" />
+              <h2 className="text-base font-bold text-text-main">{t("autoCatalogTitle")}</h2>
+              <Badge size="sm" variant="primary" className="font-semibold">
+                {liveItems
+                  ? t("autoCatalogComboCount", { count: liveItems.length })
+                  : t("autoCatalogTemplateCount", { count: FALLBACK_ITEMS.length })}
+              </Badge>
+            </div>
+            <p className="mt-1 text-xs text-text-muted">{t("autoCatalogDescription")}</p>
+          </span>
+        </DisclosureTrigger>
 
-      <AutoComboTosControl onPolicyChange={refreshCatalog} />
+        {/* The ToS control stays visible between the header and the collapsible catalog. */}
+        <AutoComboTosControl onPolicyChange={refreshCatalog} />
 
-      {open && items.length === 0 && (
-        <p className="mt-4 text-xs text-text-muted">{t("autoCatalogNoCandidates")}</p>
-      )}
+        <DisclosureContent>
+          {items.length === 0 && (
+            <p className="mt-4 text-xs text-text-muted">{t("autoCatalogNoCandidates")}</p>
+          )}
 
-      {open && items.length > 0 && (
-        <div className="mt-4 grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
-          {items.map((item) => (
-            <CatalogItemCard
-              key={item.id}
-              item={item}
-              testing={testingName === item.id}
-              duplicatingName={duplicatingName}
-              onTestCombo={onTestCombo}
-              onDuplicate={handleDuplicateEntry}
-              t={t}
-            />
-          ))}
-        </div>
-      )}
+          {items.length > 0 && (
+            <div className="mt-4 grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
+              {items.map((item) => (
+                <CatalogItemCard
+                  key={item.id}
+                  item={item}
+                  testing={testingName === item.id}
+                  duplicatingName={duplicatingName}
+                  onTestCombo={onTestCombo}
+                  onDuplicate={handleDuplicateEntry}
+                  t={t}
+                />
+              ))}
+            </div>
+          )}
+        </DisclosureContent>
+      </Disclosure>
+      {confirmDialog}
     </Card>
   );
 }

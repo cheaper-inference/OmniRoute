@@ -62,10 +62,12 @@ function buildQuotaResponse(usedPercent, resetAfterSeconds = 3600) {
       rate_limit: {
         primary_window: {
           used_percent: usedPercent,
+          limit_window_seconds: 18000,
           reset_after_seconds: resetAfterSeconds,
         },
         secondary_window: {
           used_percent: 0,
+          limit_window_seconds: 604800,
           reset_after_seconds: 86400,
         },
       },

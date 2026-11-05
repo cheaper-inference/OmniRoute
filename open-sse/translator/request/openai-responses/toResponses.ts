@@ -536,6 +536,10 @@ export function openaiToOpenAIResponsesRequest(
     result.max_output_tokens = root.max_tokens;
   }
   if (root.top_p !== undefined) result.top_p = root.top_p;
+  // A client's explicit tool-parallelism choice is a request control, not a Chat-only field.
+  if (typeof root.parallel_tool_calls === "boolean") {
+    result.parallel_tool_calls = root.parallel_tool_calls;
+  }
   mapChatResponseFormatToResponsesText(root, result);
   ensureJsonObjectInputHint(result);
   // GPT-5 verbosity: Chat Completions `verbosity` → Responses `text.verbosity`.

@@ -34,82 +34,91 @@ Klienta pieprasījums
 
 ### Izslēgts
 
-Saspiešana netiek lietota. Visi ziņojumi iet cauri bez izmaiņām.
+Saspiešana netiek lietota. Visi ziņojumi tiek nodoti tālāk bez izmaiņām.
 
-### Lite režīms (~15% ietaupījums, <1ms latentums)
+### Vieglā režīma (~15% ietaupījums, <1 ms aizkave)
 
-Drošākais režīms — nekādu semantisku izmaiņu, tikai formatējuma sakārtošana:
+Drošākais režīms — formatējuma tīrīšana. Tā rīka rezultātu saīsināšana ir ar datu zudumu, tāpēc noklusējuma ceļš (bez
+`allow-lossy`, `engine:lite` vai nosaukta kombinētā režīma izvēles) palaiž vieglo režīmu ar
+`compressToolResults: false`: iepriekšējie rīku rezultāti sasniedz nodrošinātāju nemainīti.
 
-| Paņēmiens                | Apraksts                                               |
-| ------------------------ | ------------------------------------------------------ |
-| `collapseWhitespace`     | Apvieno secīgas tukšas rindas un rindu beigu atstarpes |
-| `dedupSystemPrompt`      | Noņem dublētus sistēmas ziņojumus                      |
-| `compressToolResults`    | Saspiež izvērstas rīku/funkciju izvades                |
-| `removeRedundantContent` | Noņem atkārtotas instrukcijas                          |
-| `replaceImageUrls`       | Saīsina base64 attēlu datu URI                         |
+| Paņēmiens                | Apraksts                                                                                                                    |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| `collapseWhitespace`     | Apvieno secīgas tukšās rindas un beigu atstarpes                                                                            |
+| `dedupSystemPrompt`      | Noņem dublētus sistēmas ziņojumus                                                                                           |
+| `compressToolResults`    | Saīsina iepriekšējo rīku rezultātus līdz vieglā režīma ierobežojumam (ar datu zudumu: tikai ar skaidru pieprasījuma izvēli) |
+| `removeRedundantContent` | Noņem atkārtotas instrukcijas                                                                                               |
+| `replaceImageUrls`       | Saīsina base64 attēlu datu URI                                                                                              |
 
-**Piemērotākais:** Pastāvīgai lietošanai, drošības ziņā kritiskām darbplūsmām.
+**Vislabāk piemērots:** vienmēr ieslēgtai lietošanai, drošībai kritiskām darbplūsmām.
 
 ### Standarta režīms (~30% ietaupījums)
 
-Iedvesmots no [Caveman](https://github.com/JuliusBrussee/caveman) — noņem aizpildvārdus un izvērstus formulējumus, saglabājot nozīmi:
+Iedvesmots no [Caveman](https://github.com/JuliusBrussee/caveman) — noņem aizpildvārdus un izteikti izvērstu formulējumu, saglabājot nozīmi:
 
 - Noņem aizpildvārdus ("please", "I think", "basically", "actually")
 - Saīsina izvērstas frāzes ("in order to" → "to", "as a result of" → "because")
-- Atbrīvojas no pieklājīgi mīkstinošiem formulējumiem ("Would you mind...", "If you could possibly...")
-- 30+ regex noteikumi, kas noregulēti programmēšanas uzvednēm
+- Noņem pieklājīgu izvairīgu formulējumu ("Would you mind...", "If you could possibly...")
+- Vairāk nekā 30 regulārās izteiksmes, kas pielāgotas kodēšanas uzvednēm
 
-**Piemērotākais:** Ikdienas programmēšanas darbplūsmām, izmaksas apzinīgām komandām.
+**Vislabāk piemērots:** ikdienas kodēšanas darbplūsmām, komandām, kas rūpējas par izmaksām.
 
 ### Agresīvais režīms (~50% ietaupījums)
 
-Vieda vēstures pārvaldība garām sesijām:
+Viedā vēstures pārvaldība ilgām sesijām:
 
 - **Ziņojumu novecošana** — vecāki ziņojumi tiek pakāpeniski saspiesti
-- **Rīku rezultātu saspiešana** — garas rīku izvades tiek apgrieztas vai saīsinātas (pirmās/pēdējās rindas, atbilstošo rindu filtrēšana, JSON atslēgu blīvēšana)
-- **Strukturālās integritātes aizsargi** — nodrošina, ka `tool_use` + `tool_result` pāri paliek savstarpēji konsekventi
-- **Konteksta loga apziņa** — ievēro katra modeļa tokenu ierobežojumus
+- **Rīku rezultātu saspiešana** — gari rīku izvadi tiek saīsināti vai izlaisti (pirmās/pēdējās rindas,
+  atbilstīgo rindu filtrēšana, JSON atslēgu sablīvēšana)
+- **Struktūras integritātes aizsargi** — nodrošina, ka `tool_use` + `tool_result` pāri paliek konsekventi
+- **Konteksta loga apzināšanās** — ievēro katra modeļa tokenu ierobežojumus
 
-**Piemērotākais:** Ilgstošām atkļūdošanas sesijām, lielām koda bāzēm.
+**Vislabāk piemērots:** ilgstošām atkļūdošanas sesijām, lielām kodu bāzēm.
 
-### Ultra režīms (~75% ietaupījums)
+### Īpaši intensīvais režīms (~75% ietaupījums)
 
-Maksimāla saspiešana tokenu ziņā kritiskos scenārijos:
+Maksimāla saspiešana scenārijiem, kuros tokenu skaits ir kritisks:
 
-- **Heiristiskā atzarošana** — uz vērtējuma balstīta prozas tokenu atzarošana
-- **Struktūras saglabāšana** — nožogotie koda bloki, iekšrindas kods, URL un identifikatori tiek aizstāti ar vietturiem un pēc tam burtiski atjaunoti, nekad netiekot atzaroti
-- **Neobligāts SLM līmenis** — mazs lokāls modelis var precizēt atzarošanu, ja tas ir konfigurēts
-- Neatkarīgs no agresīvā režīma: tas neizpilda ziņojumu novecošanu, rīku rezultātu saspiešanu vai rezerves kopsavilkotāju (tikai SLM līmeņa kļūme var novirzīt rezerves izpildi caur agresīvo režīmu)
+- **Heiristiskā apgriešana** — uz vērtējumu balstīta prozas tokenu apgriešana
+- **Struktūras saglabāšana** — atdalīti koda bloki, iekļautais kods, URL un identifikatori tiek
+  aizsargāti un no jauna ievietoti burtiski, nekad netiek apgriezti
+- **Neobligāts SLM līmenis** — mazs lokālais modelis var precizēt apgriešanu, ja tas ir konfigurēts
+- Neatkarīgs no agresīvā režīma: tas neveic ziņojumu novecošanu, rīku rezultātu saspiešanu
+  vai rezerves kopsavilkuma veidošanu (tikai SLM līmeņa kļūme var novirzīt rezerves caurlaidi uz
+  agresīvo režīmu)
 
-**Piemērotākais:** Gadījumiem, kad atkārtoti sasniedzat konteksta ierobežojumus.
+**Vislabāk piemērots:** kad atkārtoti tiek sasniegti konteksta ierobežojumi.
 
-### RTK režīms (60–90% diapazons augšplūsmā)
+### RTK režīms (60–90% augšupplūsmas diapazons)
 
-RTK režīms ir optimizēts izvērstām rīku izvadēm, kas parādās kodēšanas aģentu sesijās:
+RTK režīms ir optimizēts izvērstiem rīku izvadiem, kas parādās kodēšanas aģentu sesijās:
 
-- Atpazīst komandu/izvades klases, piemēram, `git status`, `git diff`, `git log`, testu palaidējus, TypeScript/Vite/Webpack būvējumus, ESLint/Biome/Prettier, npm audit/instalācijas, Docker žurnālus, infrastruktūras izvadi un vispārīgu komandu čaulas izvadi
-- Lieto JSON filtru komplektus no `open-sse/services/compression/engines/rtk/filters/`
-- Importē RTK TOML shēmas v1 filtrus no projekta vai globālajiem `filters.toml` failiem ar iebūvēto testu validāciju un uzticamības kontroli projekta failiem
-- Ietver 56 iebūvētus filtrus ar iebūvētiem pārbaudes paraugiem
-- Noņem ANSI vadības secības, progresa joslas, atkārtotas rindas un neinformatīvu troksni
-- Saglabā neveiksmes, kļūdas, brīdinājumus, izmainītos failus, kopsavilkumus un garas izvades beigu daļu
-- Atbalsta uzticamības kontrolētus projekta filtrus, globālos filtrus un neobligātu rediģētas neapstrādātas izvades atjaunošanu
+- Nosaka komandu/izvades klases, piemēram, `git status`, `git diff`, `git log`, testu palaidējus,
+  TypeScript/Vite/Webpack būvējumus, ESLint/Biome/Prettier, npm auditus/instalācijas, Docker žurnālus, infrastruktūras
+  izvadi un vispārīgu čaulas izvadi
+- Lieto JSON filtru pakotnes no `open-sse/services/compression/engines/rtk/filters/`
+- Importē RTK TOML shēmas v1 filtrus no projekta vai globālajiem `filters.toml` failiem, ar iekļautu testu
+  validāciju un uzticamības pārbaudi projekta failiem
+- Ietver 56 iebūvētus filtrus ar iekļautiem pārbaudes paraugiem
+- Noņem ANSI vadības sekvences, norises joslas, atkārtotas rindas un troksni, kas nav saistīts ar darbībām
+- Saglabā kļūmes, kļūdas, brīdinājumus, mainītos failus, kopsavilkumus un gara izvades satura beigas
+- Atbalsta uzticamības pārbaudei pakļautus projekta filtrus, globālos filtrus un neobligātu neapstrādātās izvades atkopšanu ar rediģēšanu
 
-**Piemērotākais:** Aģentu sesijām ar čaulas, būvējumu, testu, git, grep un failu izvades transkriptiem.
+**Vislabāk piemērots:** aģentu sesijām ar čaulas, būvēšanas, testēšanas, git, grep un failu izvades transkriptiem.
 
-### Slāņotais režīms (78–95% piemērojamajā diapazonā)
+### Sakrautais režīms (78–95% piemērojamais diapazons)
 
-Slāņotais režīms izpilda vairākus saspiešanas dzinējus deterministiskā secībā. Noklusējuma konveijers ir:
+Sakrautais režīms palaiž vairākus saspiešanas dzinējus determinētā secībā. Noklusējuma konveijers ir:
 
 ```txt
 RTK -> Caveman
 ```
 
-Šāda secība vispirms padara termināļa/rīku izvadi kompaktu un pēc tam piemēro Caveman semantisko blīvēšanu atlikušajai dabiskās valodas uzvednei. Slāņotos konveijerus var konfigurēt globāli vai caur saspiešanas kombinācijām, kas piešķirtas maršrutēšanas kombinācijām.
+Šī secība vispirms padara termināļa/rīku izvadi kompaktu, pēc tam piemēro Caveman semantisko kondensēšanu
+atlikušajai dabiskās valodas uzvednei. Sakrautos konveijerus var konfigurēt globāli vai ar maršrutēšanas kombinācijām
+piešķirtām saspiešanas kombinācijām.
 
-**Piemērotākais:** Jauktam kontekstam ar lieliem rīku žurnāliem kopā ar cilvēka instrukcijām vai asistenta kopsavilkumiem.
-
----
+**Vislabāk piemērots:** jauktam kontekstam ar lieliem rīku žurnāliem, kā arī cilvēku instrukcijām vai asistenta kopsavilkumiem.
 
 ## Augšupējo projektu ietaupījumu aprēķins
 
@@ -179,61 +188,68 @@ Ar Stacked:       nosūtīti 10K-2.5K tokenu     (piemērotās RTK+Caveman slodz
 
 ### Informācijas panelis
 
-Dodieties uz `Informācijas panelis → Konteksts un kešatmiņa`:
+Pārejiet uz `Dashboard → Context & Cache`:
 
-- **Caveman** — režīma izvēle, valodu pakotnes, priekšskatījums un globālie noklusējumi
-- **RTK** — komandu filtru priekšskatījums, RTK drošības iestatījumi un filtru katalogs
-- **Saspiešanas kombinācijas** — nosaukti dzinēju konveijeri, kas piešķirti maršrutēšanas kombinācijām
-- **Automātiskās aktivizēšanas slieksnis** — automātiski aktivizē saspiešanu, kad marķieru skaits pārsniedz slieksni
+- **Caveman** — režīma atlase, valodu pakotnes, priekšskatījums un globālie noklusējuma iestatījumi
+- **RTK** — komandu filtra priekšskatījums, RTK drošības iestatījumi un filtru katalogs
+- **Compression Combos** — nosauktas dzinēju konveijera konfigurācijas, kas piešķirtas maršrutēšanas kombinācijām
+- **Auto-Trigger Threshold** — automātiski aktivizē saspiešanu, kad marķieru skaits pārsniedz slieksni
 
-### Pārrakstīšana katrai kombinācijai
+### Kombinācijas līmeņa ignorēšana
 
-Sadaļā `Informācijas panelis → Konteksts un kešatmiņa → Saspiešanas kombinācijas` piešķiriet saspiešanas kombināciju maršrutēšanas
+Sadaļā `Dashboard → Context & Cache → Compression Combos` piešķiriet saspiešanas kombināciju maršrutēšanas
 kombinācijai:
 
 ```txt
-Kombinācija: "free-tier-fallback"
-  Saspiešanas kombinācija: "coding-agent-stack"
-  Konveijers: RTK -> Caveman
-  Mērķi:
+Combo: "free-tier-fallback"
+  Compression Combo: "coding-agent-stack"
+  Pipeline: RTK -> Caveman
+  Targets:
     1. if/kimi-k2.7-code
     2. if/qwen3.8-max-preview
 ```
 
-Tas ļauj izmantot vairāku līmeņu saspiešanu bezmaksas/kodēšanas pakalpojumu sniedzējiem, vienlaikus saglabājot vienkāršoto režīmu maksas
-abonementiem.
+Tas ļauj izmantot kombinētu saspiešanu bezmaksas/kodēšanas pakalpojumu sniedzējiem, vienlaikus saglabājot
+vieglā režīma izmantošanu maksas abonementiem.
 
-Šis „Pārrakstīšanas katrai kombinācijai” piešķīrums ir atšķirīga vadīkla no **maršrutēšanas kombinācijas saspiešanas
-režīma** pārrakstīšanas (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — lauka
-shēma pieņem arī `rtk`, `stacked` un `omniglyph`) — šī pārrakstīšana neizvēlas nosauktu
-saspiešanas kombinācijas konveijeru; tā tikai iestata lauku `compressionMode`, ko izmanto
-`resolveCompressionPlan`. To var iestatīt vai nu kombinācijas kartītē (`Informācijas panelis → Kombinācijas`), vai, sākot ar
-#6760, katrai maršrutēšanas kombinācijai sarakstā „Piešķirt maršrutēšanai”, kas atrodas
-`Informācijas panelis → Konteksts un kešatmiņa → Saspiešanas kombinācijas`, tieši blakus iepriekš aprakstītajai konveijera piešķiršanas izvēles rūtiņai.
-Abās saskarnēs izmaiņas tiek saglabātas, izmantojot vienu un to pašu galapunktu `PUT /api/combos/{id}`.
+Šis **Per-Combo Override** piešķīrums ir atšķirīga vadīkla no **routing-combo compression
+mode** ignorēšanas (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — lauka shēma pieņem arī
+`rtk`, `stacked` un `omniglyph`) — šī ignorēšana neizvēlas nosauktu saspiešanas kombinācijas konveijera
+konfigurāciju; tā tikai iestata `compressionMode` lauku, ko izmanto
+`resolveCompressionPlan`. To var iestatīt kombinācijas kartītē (`Dashboard → Combos`) vai, sākot ar
+#6760, katrai maršrutēšanas kombinācijai sarakstā "Assign to routing"
+sadaļā `Dashboard → Context & Cache → Compression Combos`, tieši blakus iepriekš dokumentētajai
+konveijera piešķiršanas izvēles rūtiņai. Abas saskarnes saglabā datus, izmantojot to pašu
+`PUT /api/combos/{id}` galapunktu.
 
-### Pārrakstīšana katram pieprasījumam
+### Pieprasījuma līmeņa ignorēšana
 
-Nosūtiet pieprasījuma galveni `x-omniroute-compression`, lai pārrakstītu saspiešanas plānu vienam
-pieprasījumam. Tai ir augstākā prioritāte — tā ir svarīgāka par maršrutēšanas kombinācijas pārrakstīšanu, aktīvo profilu,
+Nosūtiet `x-omniroute-compression` pieprasījuma galveni, lai ignorētu saspiešanas plānu vienam
+pieprasījumam. Tai ir visaugstākā prioritāte — tā ir svarīgāka par maršrutēšanas kombinācijas ignorēšanu, aktīvo profilu,
 automātisko aktivizēšanu un paneļa noklusējuma iestatījumu. Nezināmas vērtības tiek ignorētas (pieprasījums nekad netiek noraidīts), un
-globālais galvenais slēdzis joprojām kontrolē visu: ja saspiešana ir globāli izslēgta, galvene nevar
-to ieslēgt. Vērtības:
+globālais galvenais slēdzis joprojām kontrolē visu: ja saspiešana ir globāli izslēgta, galvene to nevar
+ieslēgt. Vērtības:
 
-| Vērtība       | Efekts                                                                                                           |
+| Vērtība       | Ietekme                                                                                                          |
 | ------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `off`         | Šim pieprasījumam netiek veikta saspiešana.                                                                      |
-| `default`     | No paneļa iegūtais noklusējuma profils (ignorē aktīvo profilu). Zudumradošie dzinēji paliek izslēgti.            |
-| `safe`        | Tas pats, kas galvenes nenorādīšana: tikai dublikātu noņemšana un atstarpju sakļaušana.                          |
+| `off`         | Šim pieprasījumam saspiešana netiek izmantota.                                                                   |
+| `default`     | Paneļa atvasinātais Default profils (aktīvais profils tiek ignorēts). Dzinēji ar zudumiem paliek izslēgti.       |
+| `safe`        | Tas pats, kas galvenes nenorādīšana.                                                                             |
 | `allow-lossy` | Saglabā šī pieprasījuma operatora plānu, tostarp kopsavilkumus, atbilstības filtrus un stila pārrakstīšanu.      |
-| `engine:<id>` | Viens dzinējs, ja tas ir iespējots, piem., `engine:rtk`. Tā ir šī dzinēja iespējošana konkrētajam pieprasījumam. |
-| `<combo>`     | Nosaukta kombinācija, ko vispirms salīdzina pēc nosaukuma (neņemot vērā reģistru), pēc tam pēc ID.               |
+| `engine:<id>` | Viens iespējots dzinējs, piemēram, `engine:rtk`. Šī ir pieprasījuma līmeņa izvēles iespēja konkrētajam dzinējam. |
+| `<combo>`     | Nosaukta kombinācija, kas vispirms tiek meklēta pēc nosaukuma (neatkarīgi no reģistra), pēc tam pēc ID.          |
 
-Bez `allow-lossy`, `engine:<id>` vai nosauktas kombinācijas zudumradošie dzinēji netiek izmantoti.
-Ja saspiešana ir ieslēgta, pieprasījumam joprojām tiek veikta sesijas dublikātu noņemšana un atstarpju sakļaušana.
+Ja nav norādīts `allow-lossy`, `engine:<id>` vai nosaukta kombinācija, dzinēji ar zudumiem netiek lietoti. Ja
+Default, automātiskās aktivizēšanas vai maršrutēšanas ignorēšanas iestatījums ar zudumiem tiek pazemināts,
+OmniRoute saglabā atpazītos bezzudumu soļus no konfigurētā kombinētā konveijera konfigurācijas konfigurētajā secībā.
+Tas izmanto `session-dedup → lite` tikai tad, ja neviens konfigurētais bezzudumu solis nepaliek.
 
-Lietotais plāns tiek atgriezts atbildes galvenē `X-OmniRoute-Compression: <mode>; source=<source>`,
-kur `<source>` ir viena no vērtībām `request-header`, `routing-override`, `active-profile`,
+Iestatījumu paneļa priekšskatījumā **Effective pipeline** tiek rādīts parastais plāns miera stāvoklī. Ja
+var tikt izpildīta automātiskā aktivizēšana, tajā pašā priekšskatījumā tiek rādīts arī nosacītais efektīvais konveijers,
+lai paneļa un izpildlaika izšķiršana bez galvenes paliktu saskaņota.
+
+Piemērotais plāns tiek atgriezts `X-OmniRoute-Compression: <mode>; source=<source>` atbildes
+galvenē, kur `<source>` ir viena no vērtībām `request-header`, `routing-override`, `active-profile`,
 `auto-trigger`, `default` vai `off`.
 
 ### API
@@ -247,7 +263,7 @@ curl -X PUT http://localhost:20128/api/settings/compression \
   -H "Content-Type: application/json" \
   -d '{"defaultMode":"stacked","autoTriggerMode":"stacked","autoTriggerTokens":32000}'
 
-# Priekšskatīt konkrētu RTK/vairāku līmeņu lietderīgo slodzi
+# Priekšskatīt konkrētu RTK/stacked lietderīgo slodzi
 curl -X POST http://localhost:20128/api/compression/preview \
   -H "Content-Type: application/json" \
   -d '{"mode":"rtk","messages":[{"role":"tool","content":"npm test output here"}]}'
@@ -255,7 +271,7 @@ curl -X POST http://localhost:20128/api/compression/preview \
 # Uzskaitīt RTK filtru pakotnes
 curl http://localhost:20128/api/context/rtk/filters
 
-# Testēt RTK tieši ar neobligātiem komandas metadatiem
+# Tieši testēt RTK ar neobligātiem komandas metadatiem
 curl -X POST http://localhost:20128/api/context/rtk/test \
   -H "Content-Type: application/json" \
   -d '{"command":"npm test","text":"FAIL tests/example.test.ts\nError: boom"}'
