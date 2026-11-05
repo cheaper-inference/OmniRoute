@@ -143,6 +143,39 @@ function nativeGeminiBudget(
   return { level, includeThoughts: rawBudget > 0 };
 }
 
+function nativeGeminiRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+function nativeGeminiDefault(
+  supported: readonly GeminiThinkingLevel[],
+  configured: GeminiThinkingLevel | undefined
+): ResolvedGeminiThinking | null {
+  const level = configured && supported.includes(configured) ? configured : supported[0];
+  return level ? { level, includeThoughts: true } : null;
+}
+
+function nativeGeminiRequestControls(
+  body: Record<string, unknown>,
+  supported: readonly GeminiThinkingLevel[],
+  defaultLevel: GeminiThinkingLevel | undefined
+): ResolvedGeminiThinking | null {
+  const reasoning = nativeGeminiRecord(body.reasoning);
+  const fromEffort = nativeGeminiEffort(body.reasoning_effort ?? reasoning.effort, supported);
+  if (fromEffort) return fromEffort;
+
+  const thinking = nativeGeminiRecord(body.thinking);
+  if (body.thinking === false || thinking.type === "disabled") {
+    const level = supported.includes("minimal") ? "minimal" : defaultLevel;
+    return level && supported.includes(level) ? { level, includeThoughts: false } : null;
+  }
+
+  const fromBudget = nativeGeminiBudget(thinking.budget_tokens ?? thinking.budgetTokens, supported);
+  return fromBudget ?? nativeGeminiDefault(supported, defaultLevel);
+}
+
 function resolveNativeGeminiThinkingLevel(
   model: string,
   body: Record<string, unknown>,
@@ -151,35 +184,11 @@ function resolveNativeGeminiThinkingLevel(
   const spec = getModelSpec(model);
   const supported = spec?.geminiThinkingLevels;
   if (!supported?.length) return null;
-  // The operator's explicit Gemini 3 thinkingLevel takes precedence over
-  // a translated OpenAI effort or the model default.
+  // Explicit native levels override translated effort and any model default.
   if (explicitThinkingLevel && supported.includes(explicitThinkingLevel)) {
     return { level: explicitThinkingLevel, includeThoughts: true };
   }
-
-  const reasoning =
-    body.reasoning && typeof body.reasoning === "object" && !Array.isArray(body.reasoning)
-      ? (body.reasoning as Record<string, unknown>)
-      : {};
-  const fromEffort = nativeGeminiEffort(body.reasoning_effort ?? reasoning.effort, supported);
-  if (fromEffort) return fromEffort;
-
-  const thinking =
-    body.thinking && typeof body.thinking === "object" && !Array.isArray(body.thinking)
-      ? (body.thinking as Record<string, unknown>)
-      : {};
-  if (body.thinking === false || thinking.type === "disabled") {
-    const level = supported.includes("minimal") ? "minimal" : spec?.defaultGeminiThinkingLevel;
-    return level && supported.includes(level) ? { level, includeThoughts: false } : null;
-  }
-  const fromBudget = nativeGeminiBudget(thinking.budget_tokens ?? thinking.budgetTokens, supported);
-  if (fromBudget) return fromBudget;
-
-  const level =
-    spec?.defaultGeminiThinkingLevel && supported.includes(spec.defaultGeminiThinkingLevel)
-      ? spec.defaultGeminiThinkingLevel
-      : supported[0];
-  return level ? { level, includeThoughts: true } : null;
+  return nativeGeminiRequestControls(body, supported, spec.defaultGeminiThinkingLevel);
 }
 
 // Convert OpenAI tool_choice into Gemini's functionCallingConfig mode. Mirrors
