@@ -1,5 +1,6 @@
 "use client";
 
+import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-kit/disclosure";
 import { useState, useEffect } from "react";
 import Icon from "@/shared/components/Icon";
 import { Card, Button } from "@/shared/components";
@@ -339,16 +340,10 @@ export default function CopilotToolCard({
             </div>
 
             {/* Step 4: Advanced options (collapsible) */}
-            <details className="group">
-              <summary className="flex items-center gap-2 cursor-pointer text-sm text-text-muted hover:text-text-main transition-colors">
-                <Icon
-                  name="chevron_right"
-                  size={16}
-                  className="group-open:rotate-90 transition-transform"
-                />
-                {t("advancedOptions")}
-              </summary>
-              <div className="mt-3 grid grid-cols-2 gap-3 pl-6">
+            <Disclosure>
+              <DisclosureTrigger>{t("advancedOptions")}</DisclosureTrigger>
+              {/* keepMounted: the fields keep their state while collapsed, as in the old details element. */}
+              <DisclosureContent keepMounted className="mt-3 grid grid-cols-2 gap-3 pl-6">
                 <Input
                   label={t("copilotMaxInputTokens")}
                   type="number"
@@ -371,8 +366,8 @@ export default function CopilotToolCard({
                   onChange={(e) => setVision(e.target.checked)}
                   label={t("vision")}
                 />
-              </div>
-            </details>
+              </DisclosureContent>
+            </Disclosure>
 
             {/* Step 5: Generated config */}
             {selectedModels.size > 0 && (
