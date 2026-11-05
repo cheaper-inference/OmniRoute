@@ -10,19 +10,24 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ## Usanidi wa Maendeleo
 
-### Mahitaji ya Awali
+### Masharti ya Awali
 
 - **Node.js** `>=22.22.2 <23`, au `>=24.0.0 <27` (inapendekezwa: 24 LTS)
 - **npm** 10+
 
+> **Windows yenye Node 24:** tumia toleo la sasa la patch la 24 LTS (angalau 24.20.0).
+> Matoleo ya awali yanaweza kusitisha mchakato baada ya majaribio kufanikiwa wakati `--test-force-exit` inafunga
+> mchakato. [Marekebisho ya Windows libuv ya Node](https://github.com/nodejs/node/pull/61999) yanashughulikia
+> hitilafu hii ya wakati wa utekelezaji; acha assertions za majaribio na ukaguzi wa kutoka kwa runner vikiwa vimewezeshwa.
+
 > **Watumiaji wa npm v11+ (Node 24+):** Baada ya `npm install`, thibitisha kuwa moduli asilia zilisakinishwa:
-> `node -e "require('better-sqlite3')"`. Ikiwa itashindwa kwa `MODULE_NOT_FOUND`,
+> `node -e "require('better-sqlite3')"`. Ikishindwa kwa `MODULE_NOT_FOUND`,
 > endesha `npm approve-scripts better-sqlite3 && npm install`. Tazama
 > [Utatuzi wa Matatizo](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Nakili na Usakinishe
+### Ku-clone na Kusakinisha
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -43,79 +48,74 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 Vigezo muhimu kwa ajili ya maendeleo:
 
-| Kigezo                 | Chaguo-msingi la Maendeleo | Maelezo                            |
-| ---------------------- | -------------------------- | ---------------------------------- |
-| `PORT`                 | `20128`                    | Mlango wa seva                     |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`   | URL ya msingi ya upande wa mbele   |
-| `JWT_SECRET`           | (tengeneza hapo juu)       | Siri ya kutia saini JWT            |
-| `INITIAL_PASSWORD`     | `CHANGEME`                 | Nenosiri la kuingia mara ya kwanza |
-| `APP_LOG_LEVEL`        | `info`                     | Kiwango cha kina cha kumbukumbu    |
+| Kigezo                 | Chaguo-msingi la Maendeleo | Maelezo                         |
+| ---------------------- | -------------------------- | ------------------------------- |
+| `PORT`                 | `20128`                    | Porti ya seva                   |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`   | URL ya msingi ya frontend       |
+| `JWT_SECRET`           | (tengeneza hapo juu)       | Siri ya kusaini JWT             |
+| `INITIAL_PASSWORD`     | `CHANGEME`                 | Nenosiri la kwanza la kuingia   |
+| `APP_LOG_LEVEL`        | `info`                     | Kiwango cha kina cha kumbukumbu |
 
 ### Mipangilio ya Dashibodi
 
-Dashibodi hutoa vitufe vya UI vya kuwasha au kuzima vipengele ambavyo vinaweza pia kusanidiwa kupitia vigezo vya mazingira:
+Dashibodi hutoa vigeuzi vya UI vya vipengele ambavyo pia vinaweza kusanidiwa kupitia vigezo vya mazingira:
 
-| Eneo la Mpangilio   | Kitufe                       | Maelezo                                    |
-| ------------------- | ---------------------------- | ------------------------------------------ |
-| Mipangilio → Mahiri | Hali ya Utatuzi              | Washa kumbukumbu za maombi ya utatuzi (UI) |
-| Mipangilio → Jumla  | Mwonekano wa Upau wa Pembeni | Onyesha/ficha sehemu za upau wa pembeni    |
+| Mahali pa Mipangilio | Kigeuzi            | Maelezo                                    |
+| -------------------- | ------------------ | ------------------------------------------ |
+| Settings → Advanced  | Debug Mode         | Washa kumbukumbu za maombi ya utatuzi (UI) |
+| Settings → General   | Sidebar Visibility | Onyesha/ficha sehemu za upau wa pembeni    |
 
-Mipangilio hii huhifadhiwa kwenye hifadhidata na huendelea kuwepo baada ya kuwasha upya, ikibatilisha chaguo-msingi za vigezo vya mazingira inapowekwa.
+Mipangilio hii huhifadhiwa kwenye hifadhidata na hudumu baada ya kuwasha upya, huku ikibatilisha chaguo-msingi za vigezo vya mazingira inapowekwa.
 
-### Kuendesha Ndani ya Mfumo
+### Kuendesha Kwenye Kompyuta ya Ndani
 
 ```bash
 # Hali ya maendeleo (upakiaji upya wa moja kwa moja)
 npm run dev
 
-# Muundo wa uzalishaji
+# Build ya uzalishaji
 npm run build    # next build → .build/next/ kisha assembleStandalone → dist/
 npm run start
 
-# Ukusanyaji wa haraka wa backend/API pekee kwa mabadiliko ya wachangiaji
+# Mkusanyiko wa haraka wa backend/API pekee kwa mabadiliko ya wachangiaji
 npm run build:contributor
 
-# Muundo wa toleo (ujenzi upya safi + kiashiria cha HEAD — unahitajika kwa upelekaji)
-npm run build:release   # rm -rf .build dist && build + huandika dist/BUILD_SHA
+# Build ya toleo (build safi upya + sentinel ya HEAD — inahitajika kwa uwasilishaji)
+npm run build:release   # rm -rf .build dist kisha build + huandika dist/BUILD_SHA
 
-# Usanidi wa kawaida wa mlango
+# Usanidi wa kawaida wa porti
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Muundo wa wachangiaji hufanya uthibitishaji wa ukusanyaji pekee: haukusanyi
-usambazaji wa pekee wala kujenga rasilimali za hiari za ufungashaji asilia. Tumia muundo wa kawaida wa uzalishaji wakati
-unahitaji kuthibitisha kifurushi kinachoweza kusambazwa.
+Build ya wachangiaji hufanya uthibitishaji wa mkusanyiko pekee: haikusanyi usambazaji wa standalone wala kujenga vipengee vya hiari vya ufungashaji wa asili. Tumia build ya kawaida ya uzalishaji unapohitaji kuthibitisha kifurushi kinachoweza kusafirishwa.
 
-### Mpangilio wa Matokeo ya Muundo
+### Mpangilio wa Matokeo ya Build
 
-| Saraka    | Yaliyomo                                                                                    | Inafuatiliwa |
-| --------- | ------------------------------------------------------------------------------------------- | ------------ |
-| `src/`    | Chanzo cha programu (TypeScript / TSX)                                                      | Ndiyo        |
-| `.build/` | Faili za kati — matokeo ya `next build` (yamepuuzwa na git, `distDir = .build/next`)        | Hapana       |
-| `dist/`   | Kifurushi kinachoweza kusambazwa — kimekusanywa na `assembleStandalone` (kimepuuzwa na git) | Hapana       |
+| Saraka    | Yaliyomo                                                                             | Inafuatiliwa |
+| --------- | ------------------------------------------------------------------------------------ | ------------ |
+| `src/`    | Chanzo cha programu (TypeScript / TSX)                                               | Ndiyo        |
+| `.build/` | Vya kati — matokeo ya `next build` (gitignored, `distDir = .build/next`)             | Hapana       |
+| `dist/`   | Kifurushi kinachoweza kusafirishwa — hukusanywa na `assembleStandalone` (gitignored) | Hapana       |
 
-Mchakato wa ujenzi ni wa hatua moja:
+Mchakato wa build hupita mara moja:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (matokeo ya Next.js)
-  └─ assembleStandalone()                 (hunakili standalone + static + public + rasilimali asilia)
-       └─ matokeo: dist/                  (server.js, .next/static/, public/, node_modules/)
+  └─ assembleStandalone()                 (hunakili standalone + static + public + vipengee asilia)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` pia husafisha saraka zote mbili kwanza na kuandika
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kama kiashiria cha uadilifu wa upelekaji.
+`npm run build:release` husafisha saraka zote mbili kwanza na kuandika
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kama sentinel ya uadilifu wa uwasilishaji.
 
-`npm run build:contributor` hutumia wasifu wa muundo wa backend pekee. Huweka vibadala kwa muda
-kwa faili za UI ya dashibodi wakati wa kujenga, huhifadhi vidhibiti vya njia za API, na kurejesha faili asili
-baada ya ujenzi. Tumia `npm run build` kwa mabadiliko yanayoathiri UI ya dashibodi au kwa uthibitishaji kamili
-wa toleo; wasifu wa wachangiaji si mbadala wa muundo wa toleo.
+`npm run build:contributor` hutumia wasifu wa build wa backend pekee. Huunda stabu za faili za UI za dashibodi kwa muda wakati wa build, huhifadhi vishughulikiaji vya njia za API, na kurejesha faili asili baada ya build. Tumia `npm run build` kwa mabadiliko yanayoathiri UI ya dashibodi au kwa uthibitishaji kamili wa toleo; wasifu wa wachangiaji si mbadala wa build ya toleo.
 
-> **Dokezo la upelekaji wa VPS:** saraka ya mbali ya taswira `/usr/lib/node_modules/omniroute/app/`
-> haijabadilika. Zana za upelekaji hutumia rsync kusawazisha yaliyomo kwenye `dist/` hadi humo.
-> Ni njia ya matokeo ya muundo ndani ya hazina pekee ndiyo iliyohamishwa (`app/` → `dist/`).
+> **Dokezo la uwasilishaji wa VPS:** saraka ya picha ya mbali `/usr/lib/node_modules/omniroute/app/`
+> haijabadilishwa. Ujuzi wa uwasilishaji husawazisha yaliyomo kwenye `dist/` ndani yake.
+> Ni njia ya matokeo ya build iliyo ndani ya hifadhi pekee iliyohamishwa (`app/` → `dist/`).
 
-URL chaguo-msingi:
+URL za chaguo-msingi:
 
 - **Dashibodi**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`

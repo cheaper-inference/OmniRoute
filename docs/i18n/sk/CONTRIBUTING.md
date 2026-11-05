@@ -15,13 +15,18 @@ a krokom zosúladenia.
 
 ## Nastavenie vývojového prostredia
 
-### Požiadavky
+### Predpoklady
 
 - **Node.js** `>=22.22.2 <23` alebo `>=24.0.0 <27` (odporúčané: 24 LTS)
 - **npm** 10+
 
+> **Windows s Node 24:** použite aktuálne opravné vydanie 24 LTS (aspoň 24.20.0).
+> Staršie vydania sa môžu po úspešných testoch prerušiť, keď `--test-force-exit` ukončí
+> proces. [Oprava libuv pre Windows](https://github.com/nodejs/node/pull/61999) v Node rieši
+> toto zlyhanie za behu; ponechajte kontroly testovacích tvrdení a ukončenia spúšťača zapnuté.
+
 > **Používatelia npm v11+ (Node 24+):** Po spustení `npm install` overte, či boli nainštalované natívne moduly:
-> `node -e "require('better-sqlite3')"`. Ak príkaz zlyhá s chybou `MODULE_NOT_FOUND`,
+> `node -e "require('better-sqlite3')"`. Ak zlyhá s hlásením `MODULE_NOT_FOUND`,
 > spustite `npm approve-scripts better-sqlite3 && npm install`. Pozrite si
 > [Riešenie problémov](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
@@ -41,31 +46,31 @@ npm install
 # Vytvorte súbor .env zo šablóny
 cp .env.example .env
 
-# Vygenerujte požadované tajné hodnoty
+# Vygenerujte požadované tajné kľúče
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 Kľúčové premenné pre vývoj:
 
-| Premenná               | Predvolená hodnota pre vývoj | Popis                             |
-| ---------------------- | ---------------------------- | --------------------------------- |
-| `PORT`                 | `20128`                      | Port servera                      |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`     | Základná URL adresa frontendu     |
-| `JWT_SECRET`           | (vygenerujte vyššie)         | Tajný kľúč na podpisovanie JWT    |
-| `INITIAL_PASSWORD`     | `CHANGEME`                   | Heslo na prvé prihlásenie         |
-| `APP_LOG_LEVEL`        | `info`                       | Úroveň podrobnosti protokolovania |
+| Premenná               | Predvolená hodnota pre vývoj | Popis                          |
+| ---------------------- | ---------------------------- | ------------------------------ |
+| `PORT`                 | `20128`                      | Port servera                   |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`     | Základná URL adresa frontendu  |
+| `JWT_SECRET`           | (vygenerujte vyššie)         | Tajný kľúč na podpisovanie JWT |
+| `INITIAL_PASSWORD`     | `CHANGEME`                   | Heslo na prvé prihlásenie      |
+| `APP_LOG_LEVEL`        | `info`                       | Úroveň podrobnosti protokolov  |
 
 ### Nastavenia ovládacieho panela
 
-Ovládací panel poskytuje prepínače používateľského rozhrania pre funkcie, ktoré možno nakonfigurovať aj pomocou premenných prostredia:
+Ovládací panel poskytuje prepínače používateľského rozhrania pre funkcie, ktoré možno konfigurovať aj prostredníctvom premenných prostredia:
 
-| Umiestnenie nastavenia | Prepínač                   | Popis                                           |
-| ---------------------- | -------------------------- | ----------------------------------------------- |
-| Nastavenia → Pokročilé | Režim ladenia              | Zapnutie protokolov požiadaviek na ladenie (UI) |
-| Nastavenia → Všeobecné | Viditeľnosť bočného panela | Zobrazenie/skrytie sekcií bočného panela        |
+| Umiestnenie nastavenia | Prepínač                   | Popis                                       |
+| ---------------------- | -------------------------- | ------------------------------------------- |
+| Nastavenia → Rozšírené | Režim ladenia              | Zapne protokoly požiadaviek na ladenie (UI) |
+| Nastavenia → Všeobecné | Viditeľnosť bočného panela | Zobrazí/skryje sekcie bočného panela        |
 
-Tieto nastavenia sú uložené v databáze a zachovávajú sa aj po reštartovaní. Ak sú nastavené, majú prednosť pred predvolenými hodnotami premenných prostredia.
+Tieto nastavenia sú uložené v databáze a zachovávajú sa aj po reštartoch. Ak sú nastavené, prepíšu predvolené hodnoty premenných prostredia.
 
 ### Lokálne spustenie
 
@@ -80,16 +85,16 @@ npm run start
 # Rýchla kompilácia iba backendu/API pre zmeny prispievateľov
 npm run build:contributor
 
-# Vydávacie zostavenie (čisté opätovné zostavenie + kontrolný súbor HEAD — vyžaduje sa na nasadenie)
-npm run build:release   # rm -rf .build dist && zostavenie + zapísanie dist/BUILD_SHA
+# Zostavenie vydania (čisté opätovné zostavenie + kontrolný súbor HEAD — povinné pre nasadenie)
+npm run build:release   # rm -rf .build dist && zostavenie + zápis dist/BUILD_SHA
 
 # Bežná konfigurácia portu
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
 Zostavenie pre prispievateľov vykonáva iba overenie kompilácie: nevytvára samostatnú
-distribúciu ani voliteľné natívne balíčkové prostriedky. Keď potrebujete overiť
-distribuovateľný balík, použite bežné produkčné zostavenie.
+distribúciu ani voliteľné natívne balíčkové artefakty. Ak potrebujete overiť balík
+určený na distribúciu, použite bežné produkčné zostavenie.
 
 ### Rozloženie výstupu zostavenia
 
@@ -99,26 +104,26 @@ distribuovateľný balík, použite bežné produkčné zostavenie.
 | `.build/` | Medzivýstupy — výstup `next build` (ignorovaný Gitom, `distDir = .build/next`)     | Nie       |
 | `dist/`   | Distribuovateľný balík — zostavený pomocou `assembleStandalone` (ignorovaný Gitom) | Nie       |
 
-Proces zostavenia prebieha v jednom priechode:
+Proces zostavenia prebieha v jednom prechode:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (výstup Next.js)
-  └─ assembleStandalone()                 (skopíruje samostatné + statické + verejné + natívne prostriedky)
+  └─ assembleStandalone()                 (kopíruje samostatný výstup + statické + verejné + natívne prostriedky)
        └─ výstup: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
 `npm run build:release` navyše najskôr vyčistí oba adresáre a zapíše
 `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ako kontrolný súbor integrity nasadenia.
 
-`npm run build:contributor` používa profil zostavenia iba pre backend. Počas zostavovania dočasne nahradí
-súbory používateľského rozhrania ovládacieho panela zástupnými súbormi, zachová obslužné rutiny trás API a po
-zostavení obnoví pôvodné súbory. Pre zmeny ovplyvňujúce používateľské rozhranie ovládacieho panela alebo úplné
-overenie vydania použite `npm run build`; profil pre prispievateľov nenahrádza vydávacie zostavenie.
+`npm run build:contributor` používa profil zostavenia iba pre backend. Počas zostavenia dočasne nahradí
+súbory používateľského rozhrania ovládacieho panela zástupnými súbormi, ponechá obslužné rutiny trás API a po zostavení obnoví pôvodné súbory.
+Pre zmeny ovplyvňujúce používateľské rozhranie ovládacieho panela alebo na úplné
+overenie vydania použite `npm run build`; profil pre prispievateľov nenahrádza zostavenie vydania.
 
-> **Poznámka k nasadeniu na VPS:** vzdialený adresár obrazu `/usr/lib/node_modules/omniroute/app/`
-> sa nemení. Nástroje na nasadenie pomocou rsync synchronizujú jeho obsah s obsahom adresára `dist/`.
-> Zmenila sa iba cesta k výstupu zostavenia v repozitári (`app/` → `dist/`).
+> **Poznámka k nasadeniu na VPS:** adresár vzdialeného obrazu `/usr/lib/node_modules/omniroute/app/`
+> zostáva nezmenený. Nástroje nasadenia synchronizujú obsah adresára `dist/` doň pomocou rsync.
+> Zmenila sa iba cesta výstupu zostavenia v repozitári (`app/` → `dist/`).
 
 Predvolené URL adresy:
 
