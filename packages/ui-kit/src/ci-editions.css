@@ -65,7 +65,8 @@
   --ci-color-live: #477665;
   --ci-color-success: #3c735b;
   --ci-color-success-bg: #e4ece3;
-  --ci-color-warning: #99631f;
+  /* Warning is also small text (badges, alerts): 4.5:1 on warning-bg and every content surface. */
+  --ci-color-warning: #8a591c;
   --ci-color-warning-bg: #f3e6cf;
   --ci-color-danger: #ae4340;
   --ci-color-danger-bg: #f5e2dc;
