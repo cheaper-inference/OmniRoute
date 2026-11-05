@@ -208,7 +208,11 @@ test("Chat→Responses: deprecated function_call with object arguments is serial
 
 test("Chat→Responses: supplied malformed nonempty arguments fail closed", () => {
   for (const args of ["   ", '{"city":', "San Francisco"])
-    assert.throws(() => responsesFunctionCalls(chatBody(args)));
+    assert.throws(() => responsesFunctionCalls(chatBody(args)), {
+      message: "Historical tool call has malformed arguments",
+      statusCode: 400,
+      errorType: "invalid_tool_call_arguments",
+    });
 });
 test("Chat→Responses: pending call does not synthesize an empty completed output", () => {
   const body = chatBody("{}");
