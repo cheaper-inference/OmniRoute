@@ -21,6 +21,19 @@ test("Fix 2: unknown client formats map to a parseable OPENAI_CHUNK heartbeat", 
     shapeForClientFormat("openai-responses"),
     HEARTBEAT_SHAPES.OPENAI_RESPONSES_IN_PROGRESS
   );
+  assert.equal(shapeForClientFormat("openai-response"), HEARTBEAT_SHAPES.OPENAI_RESPONSES_IN_PROGRESS);
+});
+
+test("native non-[OI] client formats get the payload-free blank-line keepalive", () => {
+  // An [OI] chunk or a `:` comment injected into these envelopes is a protocol
+  // error for the client SDK, so they must receive bytes with no payload.
+  for (const format of ["gemini", "antigravity", "clova", "kiro"]) {
+    assert.equal(
+      shapeForClientFormat(format),
+      HEARTBEAT_SHAPES.TRANSPORT_BLANK,
+      `${format} must not receive an [OI] chunk heartbeat`
+    );
+  }
 });
 
 test("Fix 2: heartbeat transform for unknown format emits real data: frames, not comments", async () => {
@@ -69,6 +82,41 @@ test("Fix 2: heartbeat transform for unknown format emits real data: frames, not
     !out.includes(": keepalive"),
     `no comment-shaped frames for unknown formats, got: ${out}`
   );
+});
+
+test("Fix 2: a native Gemini-shaped stream receives only blank-line keepalives", async (t) => {
+  // The [OI]-chunk default would corrupt a Gemini `candidates` SSE stream; the
+  // transport-blank shape adds bytes with no parseable payload.
+  t.mock.timers.enable({ apis: ["setInterval"] });
+  delete process.env.OMNIROUTE_SSE_COMMENTS;
+  const transform = createSseHeartbeatTransform({
+    intervalMs: 20,
+    shape: shapeForClientFormat("gemini"),
+  });
+  const writer = transform.writable.getWriter();
+  const reader = transform.readable.getReader();
+  const decoder = new TextDecoder();
+  const pump = (async () => {
+    const chunks: string[] = [];
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      chunks.push(decoder.decode(value));
+    }
+    return chunks;
+  })();
+
+  await writer.write(new TextEncoder().encode('data: {"candidates":[]}\n\n'));
+  t.mock.timers.tick(20);
+  await writer.close();
+
+  const chunks = await pump;
+  assert.equal(chunks[0], 'data: {"candidates":[]}\n\n', "upstream bytes pass through");
+  assert.ok(chunks.includes("\n\n"), `keepalive must be a payload-free blank line: ${chunks}`);
+  for (const chunk of chunks) {
+    assert.ok(!chunk.includes("chat.completion.chunk"), "no [OI] chunk in a Gemini stream");
+    assert.ok(!chunk.includes("keepalive "), "no comment line in a Gemini stream");
+  }
 });
 
 test("Fix 3: aborting the signal stops the heartbeat interval before its next tick", async () => {

@@ -6,6 +6,7 @@
  * - [2026-07-28] [Cursor Grok 4.5] - Brand-neutral default OpenAI keepalive id/model
  */
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import { FORMATS } from "../translator/formats.ts";
 import {
   buildResponsesInProgressPayload,
   createResponsesInProgressTracker,
@@ -46,6 +47,13 @@ export const HEARTBEAT_SHAPES = {
   ANTHROPIC_PING: "anthropic-ping",
   OPENAI_CHUNK: "openai-chunk",
   OPENAI_RESPONSES_IN_PROGRESS: "openai-responses-in-progress",
+  /**
+   * Payload-free keepalive: a bare blank line. Spec-conforming SSE parsers treat
+   * it as an empty event boundary and skip it, so it is safe for native client
+   * envelopes (Gemini `candidates`, CLOVA, Antigravity) whose strict parsers
+   * would choke on a foreign `data:` chunk or a `:` comment line.
+   */
+  TRANSPORT_BLANK: "transport-blank",
 } as const;
 
 export type HeartbeatShape = (typeof HEARTBEAT_SHAPES)[keyof typeof HEARTBEAT_SHAPES];
@@ -56,12 +64,21 @@ export function shapeForClientFormat(
   clientResponseFormat: string | undefined | null
 ): HeartbeatShape {
   switch (clientResponseFormat) {
-    case "claude":
+    case FORMATS.CLAUDE:
       return HEARTBEAT_SHAPES.ANTHROPIC_PING;
-    case "openai":
+    case FORMATS.OPENAI:
       return HEARTBEAT_SHAPES.OPENAI_CHUNK;
-    case "openai-responses":
+    case FORMATS.OPENAI_RESPONSES:
+    case FORMATS.OPENAI_RESPONSE:
       return HEARTBEAT_SHAPES.OPENAI_RESPONSES_IN_PROGRESS;
+    case FORMATS.GEMINI:
+    case FORMATS.ANTIGRAVITY:
+    case FORMATS.CLOVA:
+    case FORMATS.KIRO:
+      // Native client envelopes with their own strict chunk parser: an injected
+      // [OI] chunk (or a `:` comment) is a protocol error there, so emit the
+      // payload-free blank-line keepalive instead of no keepalive at all (#10524).
+      return HEARTBEAT_SHAPES.TRANSPORT_BLANK;
     default:
       // Unmapped/unknown client formats are overwhelmingly [OI]-Chat-compatible
       // (custom gateways, executors that don't declare a format). The old
@@ -96,6 +113,10 @@ function buildHeartbeatPayload(
       };
       return `data: ${JSON.stringify(payload)}\n\n`;
     }
+    case HEARTBEAT_SHAPES.TRANSPORT_BLANK:
+      // Empty event boundary: bytes on the wire (idle watchdogs reset) with no
+      // payload any SSE parser can trip over.
+      return "\n\n";
     case HEARTBEAT_SHAPES.COMMENT:
     default:
       return `: keepalive ${new Date().toISOString()}\n\n`;
