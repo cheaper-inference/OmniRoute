@@ -341,7 +341,8 @@ export default function MemoriesTab() {
           </Button>
         </div>
         <div className="flex gap-2 flex-wrap">
-          {/* kit-exception: Native file picker for Import (driven by the Import button; adapters have none). */}
+          {/* kit-exception: Hidden picker behind the toolbar Import button, which also shows the import's
+              loading state; the pick imports at once, so a kit FileInput status line has no role here. */}
           <input
             type="file"
             ref={fileInputRef}

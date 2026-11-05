@@ -22,6 +22,7 @@ import Checkbox from "@/shared/components/Checkbox";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
 import CompressionHub from "./CompressionHub";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 
 type PipelineStep = { engine: string; intensity?: string };
 type OutputStyleSelection = { id: string; level: "lite" | "full" | "ultra" };
@@ -56,6 +57,7 @@ function NamedCombosManager() {
   const t = useTranslations("contextCombos");
   const tSettings = useTranslations("settings");
   const tCommon = useTranslations("common");
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   const [combos, setCombos] = useState<CompressionCombo[]>([]);
   const [routingCombos, setRoutingCombos] = useState<RoutingCombo[]>([]);
   const [languagePacks, setLanguagePacks] = useState<LanguagePack[]>([]);
@@ -202,7 +204,7 @@ function NamedCombosManager() {
   };
 
   const deleteCombo = async (combo: CompressionCombo) => {
-    if (!confirm(t("deleteNamedConfirm", { name: combo.name }))) return;
+    if (!(await requestConfirm(t("deleteNamedConfirm", { name: combo.name })))) return;
     const res = await fetch(`/api/context/combos/${combo.id}`, { method: "DELETE" });
     if (res.ok) refresh();
   };
@@ -494,6 +496,7 @@ function NamedCombosManager() {
           </Card>
         ))}
       </section>
+      {confirmDialog}
     </div>
   );
 }

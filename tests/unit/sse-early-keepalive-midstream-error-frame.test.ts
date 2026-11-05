@@ -184,6 +184,27 @@ test("mid-stream drop forwards prior complete frames then the error frame", asyn
   }
 });
 
+// The frame-boundary scanner must handle CRLF framing too: a complete
+// `\r\n\r\n`-terminated event is forwarded, and a trailing incomplete one is
+// discarded rather than pasted in front of the terminal error frame.
+test("mid-stream drop handles CRLF framing (complete forwarded, incomplete discarded)", async () => {
+  const partial = new TextEncoder().encode(
+    'data: {"delta":"crlf-ok"}\r\n\r\ndata: {"delta":"incomplete"}\r\n'
+  );
+  const handler = Promise.resolve(partialThenCrashResponse(partial));
+
+  const response = await withEarlyStreamKeepalive(handler, {
+    thresholdMs: 0,
+    intervalMs: 10_000,
+    errorFrame: OPENAI_CHAT_ERROR_FRAME,
+  });
+
+  const text = await readAll(response);
+  assert.ok(text.includes('"delta":"crlf-ok"'), `CRLF frame must be forwarded, got: ${text}`);
+  assert.ok(!text.includes('"delta":"incomplete"'), "CRLF incomplete frame must be discarded");
+  assert.ok(text.includes('"type":"stream_error"'), "terminal error frame must follow");
+});
+
 // CodeRabbit 18948 line 125: a zero-content fast-path failure must emit the
 // caller's CONFIGURED errorFrame verbatim (not the generic partial frame).
 test("fast-path zero-content failure emits the configured custom errorFrame", async () => {

@@ -251,9 +251,12 @@ test("shapeForClientFormat maps formats correctly", () => {
   assert.equal(shapeForClientFormat("claude"), "anthropic-ping");
   assert.equal(shapeForClientFormat("openai"), "openai-chunk");
   assert.equal(shapeForClientFormat("openai-responses"), "openai-responses-in-progress");
-  assert.equal(shapeForClientFormat("gemini"), "comment");
-  assert.equal(shapeForClientFormat(undefined), "comment");
-  assert.equal(shapeForClientFormat(null), "comment");
+  // #18948: unknown/unmapped formats must get a parseable keepalive. The old
+  // "comment" default was a no-op unless OMNIROUTE_SSE_COMMENTS was enabled, so
+  // those streams had no keepalive at all and died to client idle watchdogs.
+  assert.equal(shapeForClientFormat("gemini"), "openai-chunk");
+  assert.equal(shapeForClientFormat(undefined), "openai-chunk");
+  assert.equal(shapeForClientFormat(null), "openai-chunk");
 });
 
 test("no shape collides with stream.ts event: keepalive strip regex", async () => {

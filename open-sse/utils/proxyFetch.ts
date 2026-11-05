@@ -26,10 +26,7 @@ import { sanitizeTransportError } from "./proxyTransportError.ts";
 import { isProxyReachable } from "@/lib/proxyHealth";
 import { isDirectBypassHost } from "./proxyDirectBypass.ts";
 import { noProxyMatch, resolveEnvProxyUrl } from "./proxyEnv.ts";
-import {
-  isControlPlaneProxyDirectFallbackEnabled,
-  isFeatureFlagEnabled,
-} from "@/shared/utils/featureFlags";
+import { isRegisteredFeatureFlagEnabled } from "./registeredFeatureFlag.ts";
 import {
   directFetchWithBoundedResponseStart,
   isDirectResponseStartTimeout,
@@ -186,6 +183,12 @@ export function isTransportRetryableError(msg: string, errCode: unknown): boolea
   );
 }
 
+/** Read `.code` off an unknown thrown value without fabricating a shape. */
+function errorCodeOf(err: unknown): unknown {
+  if (err && typeof err === "object" && "code" in err) return err.code;
+  return undefined;
+}
+
 /**
  * Whether `code` is a mid-connection reset that may only be retried for
  * idempotent methods (see isTransportRetryableError's two-tier doc). Returns
@@ -218,12 +221,24 @@ function isIdempotentMethod(method: string | null | undefined): boolean {
   );
 }
 
-/** Extract the HTTP method from a fetch input for the idempotency gate. */
-function methodOfInput(input: unknown): string | null {
-  if (typeof input === "string") return "GET"; // Request-constructed default
-  if (input && typeof input === "object" && "method" in input) {
-    const m = (input as { method?: unknown }).method;
-    if (typeof m === "string") return m;
+/**
+ * Resolve the effective HTTP method for the idempotency gate.
+ *
+ * `options.method` wins over the input: `proxyFetch(url, { method: "POST" })` is
+ * a POST even though a string/URL input would otherwise imply GET (CodeRabbit
+ * review 18948). Then a `Request` object's own method, then the GET default.
+ */
+function methodOfRequest(
+  input: unknown,
+  options?: { method?: unknown } | null
+): string | null {
+  const optionMethod = options?.method;
+  if (typeof optionMethod === "string" && optionMethod.trim() !== "") return optionMethod;
+  if (typeof Request !== "undefined" && input instanceof Request) {
+    return typeof input.method === "string" ? input.method : null;
+  }
+  if (typeof input === "string" || (typeof URL !== "undefined" && input instanceof URL)) {
+    return "GET"; // Request-constructed default for URL inputs
   }
   return null;
 }
@@ -514,6 +529,53 @@ function isAmbiguousFailureReplaySafe(
   );
 }
 
+// Transport errors raised while still connecting: no request byte left this host, so a resend
+// cannot deliver the request twice, whatever the method. ETIMEDOUT stays out because it can also
+// fire on an established socket after the body was written.
+const PRE_SEND_ERROR_CODES = new Set([
+  "ECONNREFUSED",
+  "ENOTFOUND",
+  "EAI_AGAIN",
+  "ENETUNREACH",
+  "UND_ERR_CONNECT_TIMEOUT",
+]);
+
+function isPreSendConnectionError(error: unknown): boolean {
+  let current = error;
+  for (let depth = 0; depth < 4 && current && typeof current === "object"; depth++) {
+    const { code, cause } = current as { code?: unknown; cause?: unknown };
+    if (typeof code === "string" && PRE_SEND_ERROR_CODES.has(code)) return true;
+    current = cause;
+  }
+  return false;
+}
+
+function isStrictPostReplayEnabled(): boolean {
+  try {
+    return isRegisteredFeatureFlagEnabled("PROXY_STRICT_POST_REPLAY_ENABLED");
+  } catch {
+    // no-effect: an unreadable flag store keeps the legacy resend policy
+    return false;
+  }
+}
+
+/**
+ * Whether this transport error allows another delivery attempt (fresh socket, proxy fallback or
+ * native fallback). A consumed body can never be resent. With PROXY_STRICT_POST_REPLAY_ENABLED on
+ * (default off), a non-idempotent request also needs proof that nothing was sent: a socket error
+ * after the write can mean the upstream accepted the request, and a resend generates and bills it
+ * twice. Off, a replayable body is resent, which is what recovers a stale pooled socket (#4252).
+ */
+function canResendAfterTransportError(
+  input: RequestInfo | URL,
+  options: FetchWithDispatcherOptions,
+  error: unknown
+): boolean {
+  if (requestHasNonReplayableBody(input, options)) return false;
+  if (!isStrictPostReplayEnabled()) return true;
+  return isAmbiguousFailureReplaySafe(input, options) || isPreSendConnectionError(error);
+}
+
 function getEffectiveSignal(
   input: RequestInfo | URL,
   options: FetchWithDispatcherOptions
@@ -659,7 +721,8 @@ export async function runWithProxyContext(
   // The caller must opt in, and the runtime feature flag must also be enabled.
   // This fallback changes egress IP, so upgrades must not silently turn it on.
   const directFallbackOnUnreachable =
-    opts?.directFallbackOnUnreachable === true && isControlPlaneProxyDirectFallbackEnabled();
+    opts?.directFallbackOnUnreachable === true &&
+    isRegisteredFeatureFlagEnabled("OMNIROUTE_CONTROL_PLANE_PROXY_DIRECT_FALLBACK");
   // Keep an explicit direct sentinel so resolveProxyForRequest cannot re-read
   // HTTPS_PROXY/HTTP_PROXY after the control-plane route decision.
   const runDirect = () => proxyContext.run(DIRECT_PROXY_CONTEXT, fn);
@@ -982,31 +1045,34 @@ async function patchedFetchUnrecorded(
           );
           throw dispatcherError;
         }
+        // Read before tagging: the tag overwrites the transport code the retry
+        // policy and the ECONNRESET/EPIPE idempotency gate both classify on.
+        const errCode = errorCodeOf(dispatcherError);
+        const canResend = canResendAfterTransportError(input, options, dispatcherError);
         // Retry/fallback only for connection errors, never HTTP errors.
         tagProxyUnreachable(dispatcherError);
-        const errCode = (dispatcherError as { code?: unknown })?.code;
         // CodeRabbit 18948: ECONNRESET/EPIPE can fire after the upstream
         // accepted the request — only retry them for idempotent methods.
-        // Non-idempotent POSTs keep the legacy codes' behavior unchanged.
         const midConnectionReset = isMidConnectionResetCode(msg, errCode);
         const retryable =
           isTransportRetryableError(msg, errCode) &&
-          (!midConnectionReset || isIdempotentMethod(methodOfInput(input)));
+          (!midConnectionReset || isIdempotentMethod(methodOfRequest(input, options)));
         if (retryable) {
-          if (attempt === 0 && maxAttempts > 1) {
+          if (attempt === 0 && canResend) {
             // Retry after a short fixed backoff on a fresh socket.
             lastDispatcherError = dispatcherError;
             await new Promise((r) => setTimeout(r, RETRY_BACKOFF_MS));
             continue;
           }
-          if (hasNonReplayableBody) {
+          if (!canResend) {
+            const reason = hasNonReplayableBody
+              ? "non-replayable request body"
+              : "request may already have been delivered";
             const detail = describeFallbackFailure(
               describeFetchCause(dispatcherError),
-              "skipped: non-replayable request body"
+              `skipped: ${reason}`
             );
-            console.warn(
-              `[ProxyFetch] skipping native fetch fallback for non-replayable body: ${detail}`
-            );
+            console.warn(`[ProxyFetch] skipping native fetch fallback, ${reason}: ${detail}`);
             if (dispatcherError instanceof Error) {
               (dispatcherError as Error & { proxyFetchDetail?: string }).proxyFetchDetail = detail;
             }
@@ -1017,7 +1083,7 @@ async function patchedFetchUnrecorded(
           if (
             !tlsDirectFallback &&
             source === "direct" &&
-            isFeatureFlagEnabled("PROXY_AUTO_SELECT_ENABLED")
+            isRegisteredFeatureFlagEnabled("PROXY_AUTO_SELECT_ENABLED")
           ) {
             let targetHostname = "";
             try {
@@ -1154,14 +1220,19 @@ async function patchedFetchUnrecorded(
         }
         if (isCallerAbort(relayError, options?.signal)) throw relayError;
         const msg = relayError instanceof Error ? relayError.message : String(relayError);
-        const errCode = (relayError as { code?: unknown })?.code;
+        const errCode = errorCodeOf(relayError);
         // CodeRabbit 18948: same idempotency gate as the direct path —
         // ECONNRESET/EPIPE only retry for idempotent methods.
         const midConnectionReset = isMidConnectionResetCode(msg, errCode);
         const isTransportFailure =
           isTransportRetryableError(msg, errCode) &&
-          (!midConnectionReset || isIdempotentMethod(methodOfInput(input)));
-        if (attempt === 0 && maxRelayAttempts > 1 && isTransportFailure) {
+          (!midConnectionReset || isIdempotentMethod(methodOfRequest(input, options)));
+        if (
+          attempt === 0 &&
+          maxRelayAttempts > 1 &&
+          isTransportFailure &&
+          canResendAfterTransportError(input, options, relayError)
+        ) {
           lastRelayError = relayError;
           // #9158: fixed OMNIROUTE_RETRY_BACKOFF_MS backoff — the retry uses a
           // FRESH no-keep-alive RELAY_RETRY_AGENT (connections: 1, keepAliveTimeout:
@@ -1247,14 +1318,19 @@ async function patchedFetchUnrecorded(
     } catch (error) {
       if (isCallerAbort(error, getEffectiveSignal(input, options))) throw error;
       const msg = error instanceof Error ? error.message : String(error);
-      const errCode = (error as { code?: unknown })?.code;
+      const errCode = errorCodeOf(error);
       const isTransportFailure =
         msg.includes("fetch failed") ||
         errCode === "ECONNREFUSED" ||
         msg.includes("ECONNREFUSED") ||
         (typeof errCode === "string" && errCode.startsWith("UND_ERR")) ||
         msg.includes("UND_ERR");
-      if (attempt === 0 && maxProxyAttempts > 1 && isTransportFailure) {
+      if (
+        attempt === 0 &&
+        maxProxyAttempts > 1 &&
+        isTransportFailure &&
+        canResendAfterTransportError(input, options, error)
+      ) {
         lastProxyError = error;
         // #9158: fixed OMNIROUTE_RETRY_BACKOFF_MS backoff — the retry uses a
         // fresh no-keep-alive dispatcher (getProxyRetryDispatcher), so the old

@@ -923,6 +923,8 @@
     "batchListTitle": "Loturi",
     "batchListCount": "{count} loturi",
     "batchListRemovingCompleted": "Se elimină…",
+    "batchListRemoveCompletedPartial": "A fost eliminat un număr mare de loturi. Faceți clic din nou pentru a le șterge pe cele rămase.",
+    "batchListRemoveCompletedFailed": "A apărut o eroare la eliminarea loturilor.",
     "batchListRemoveCompleted": "Elimină loturile finalizate",
     "batchListTableStatus": "Stare",
     "batchListTableId": "ID",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "Se reîmprospătează…",
     "batchListRefresh": "Reîmprospătați",
     "uploadFileModalRemove": "Eliminați",
+    "fileInputChoose": "Alegeți fișierul",
+    "fileInputChooseMultiple": "Alegeți fișierele",
+    "fileInputEmpty": "Niciun fișier ales",
+    "fileInputSelectedCount": "{count, plural, one {# fișier selectat} other {# fișiere selectate}}",
+    "fileDropLabel": "Plasați un fișier aici sau alegeți unul",
+    "fileDropLabelMultiple": "Plasați fișiere aici sau alegeți fișiere",
     "uploadFileModalUploading": "Se încarcă…",
     "wizardInputReading": "Se citește fișierul…",
     "wizardInputReady": "Gata",
@@ -1035,7 +1043,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "Trimite amprenta clientului CLI OpenCode v2 în solicitările OpenCode Zen/Go: User-Agent-ul opencode/latest/<2.x>/cli și x-opencode-client cli, iar în solicitările din nivelul gratuit, antetele de sesiune v2, schemele instrumentelor read/shell ale CLI-ului v2 și fără tool_choice \"none\". Dezactivat implicit: fiecare solicitare OpenCode păstrează neschimbate identitatea, antetele și corpul actuale.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Atunci când grupul de candidați al unui combo automat este deja gol înainte de rularea prefiltrului pentru apelarea instrumentelor (fiecare țintă fiind omisă din cauza perioadelor de așteptare, a blocărilor sau a epuizării), răspunde cu 503 no_eligible_targets în locul vechiului răspuns 400 „Nicio țintă nu acceptă apelarea instrumentelor” capability_mismatch. Dezactivat în mod implicit: dacă grupul este gol, se păstrează vechiul răspuns 400.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Impune etichetele de încredere pentru endpointurile modelelor (declarate de catalogul furnizorului, deduse din ID-ul unui model specializat sau setate de operator): respinge cu HTTP 400, înainte de expediere, o cerere trimisă către un endpoint pe care modelul nu îl deservește, pentru /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations și /v1/audio/*; ascunde din /v1/models modelele ale căror endpointuri etichetate nu au un adaptor OmniRoute; și răspunde cu 422 la testul de model din panoul de control pentru astfel de modele. Dezactivat în mod implicit: etichetele endpointurilor rămân informative, iar cererile sunt expediate exact ca înainte.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "Pentru releele simple compatibile cu Anthropic, păstrează mesajele de sistem din mijlocul conversației în lista de mesaje, în loc să le muți în promptul de sistem de nivel superior, astfel încât prefixul promptului memorat în cache să rămână stabil de la un schimb la altul. Se aplică numai atunci când clientul însuși a trimis versiunea beta mid-conversation-system-2026-04-07. Opțiunea este dezactivată în mod implicit: fiecare mesaj de sistem este mutat în promptul de sistem exact ca înainte, deoarece releele fără acea versiune beta resping mesajele de sistem din lista de mesaje.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Folosește nivelurile de efort de raționament publicate de models.dev atunci când nici o suprascriere a operatorului, nici registrul furnizorului nu declară vreunul, păstrând doar nivelurile de efort cunoscute și tratând o listă goală de niveluri declarate drept „fără niveluri”. Dezactivat în mod implicit: catalogul de modele și nivelurile de efort determinate rămân exact ca înainte.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "Permite cererilor auto/* să construiască grupul de candidați cu capabilitățile de model rezolvate (viziune, raționament, gândire) și scorurile de calitate observate, citite într-o singură citire în bloc. Dezactivat implicit: ponderile candidaților la momentul cererii rămân exact ca înainte. Activat: aceste semnale intră în ponderile instantaneului, astfel încât ponderile candidaților și selecția se pot schimba.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Permite verificării stării credențialelor să retesteze conexiunile pe care gateway-ul le-a dezactivat automat (cel mult o dată la fiecare 6 ore pentru fiecare conexiune, câte 5 per verificare) și să reactiveze o conexiune atunci când aceasta trece retestarea. Dezactivată implicit: astfel de conexiuni rămân dezactivate până când intervine un operator. Conexiunile dezactivate de operator și cele blocate permanent nu sunt retestate niciodată.",
@@ -1939,7 +1946,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# cerere} other {# cereri}}, {keys, plural, one {# cheie limitată} other {# chei limitate}}",
     "unpricedUsageMore": "…și încă {count}",
     "unpricedUsageConfigure": "Configurează prețurile",
-    "unpricedUsageDismiss": "Închide"
+    "unpricedUsageDismiss": "Închide",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analiză",
@@ -6264,6 +6280,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Omite perioada de răcire tranzitorie, astfel încât această conexiune să rămână eligibilă chiar și după erori recuperabile (stările terminale precum blocat/expirat se aplică în continuare).",
     "disableCoolingLabel": "Dezactivează perioada de răcire pentru această conexiune",
+    "keepMidConversationSystemDescription": "Lăsați mesajele de sistem trimise la mijlocul conversației în lista de mesaje, în loc să le mutați în promptul de sistem de nivel superior, astfel încât memoria cache a prompturilor continuă să lovească în rânduri. Activați numai dacă acest sistem în amonte acceptă rolul „sistem” în interiorul mesajelor (în caz contrar, răspunde la 400).",
+    "keepMidConversationSystemLabel": "Păstrați mesajele sistemului de la mijlocul conversației în loc",
+    "requireUserLastMessageDescription": "Pentru amontele care resping completarea prealabilă a asistentului: renunțați la viraje ale asistentului (fără tool_use) înainte de a trimite. Modelul își poate regenera răspunsul anterior.",
+    "requireUserLastMessageLabel": "Solicitați ca conversația să se încheie cu un mesaj de utilizator",
     "bulkPasteAdded": "{count, plural, one {1 cheie adăugată} other {# chei adăugate}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplicat omis} other {# duplicate omise}}",
     "bulkPasteHint": "Lipește câte o cheie API pe fiecare rând. Rândurile goale sunt ignorate, iar cheile duplicate sunt omise.",
@@ -6363,6 +6383,9 @@
     "localProviders": "Furnizori locali",
     "maxConcurrentWholeNumberError": "Eroare: numărul maxim de solicitări simultane trebuie să fie un număr întreg",
     "m365TierLabel": "Nivel Copilot",
+    "m365RefreshTokenLabel": "Jeton de reîmprospătare (opțional)",
+    "m365RefreshTokenHint": "Folosit pentru a reîmprospăta automat jetonul de acces Microsoft 365.",
+    "m365RefreshTokenEditHint": "Lăsați necompletat pentru a păstra simbolul existent. Lipiți un nou token pentru al înlocui.",
     "m365TierHint": "Alegeți ce interfață Microsoft 365 Copilot utilizează această conexiune. Individual este BizChat-ul implicit pentru consumatori; Education și Enterprise (lucru) optează pentru interfețele din tenantul lor.",
     "m365TierIndividualOption": "Individual (implicit)",
     "m365TierEduOption": "Educație",
@@ -7097,6 +7120,7 @@
     "proxySubTabsAria": "Secțiuni proxy",
     "requestBodyLimitTitle": "Limita corpului cererii",
     "requestBodyLimitDescription": "Dimensiunea maximă acceptată a sarcinii utile API înainte ca un corp de cerere să fie analizat. Rutele dedicate pentru încărcări își păstrează cel puțin limita încorporată de 100 MB.",
+    "requestBodyLimitChatHint": "Chat Completions și Responses acceptă până la 50 MB până când salvați o limită aici. Limita salvată li se aplică și lor, indiferent dacă este mai mică sau mai mare.",
     "requestBodyLimitInputLabel": "Limita corpului cererii în MB",
     "requestBodyLimitEmptyError": "Introdu o limită în MB",
     "requestBodyLimitWholeNumberError": "Folosește un număr întreg",
@@ -12282,7 +12306,9 @@
       "failedTitle": "Toate cele {count} încercări au eșuat",
       "failed": "eșuat",
       "pinnedTitle": "Model selectat prin fixarea sesiunii context-cache",
-      "pinned": "fixat"
+      "pinned": "fixat",
+      "recoveredAttemptsTitle": "Cererea a fost recuperată după {count} încercări",
+      "latestOutcomeFailed": "Ultimul rezultat al cererii a eșuat"
     },
     "attempts": "încercări",
     "detail": {
@@ -12384,13 +12410,20 @@
       "continuesFromParent": "continuă de la părinte",
       "continuesFrom": "Continuă de la {id}",
       "viewConversation": "vezi conversația",
-      "openConversation": "Deschide conversația {id}"
+      "openConversation": "Deschide conversația {id}",
+      "omittedHttpAttempts": "{count} trimiteri HTTP nu au fost păstrate",
+      "noHttpResponse": "Nu a fost observat niciun răspuns HTTP",
+      "transportError": "Eroare de transport"
     },
     "tableLabel": "Jurnale de solicitări",
     "throughputPostFirstToken": "După primul token",
     "throughputEndToEnd": "De la un capăt la altul",
     "throughputRate": "{value} tokeni/sec",
-    "throughputExplanation": "Ambele rate folosesc valoarea mai mare dintre numărul de tokeni de ieșire și cel de raționament. Rata după primul token exclude un TTFT valid; în caz contrar, folosește durata completă. Rata de la un capăt la altul folosește întotdeauna durata completă. Un răspuns tamponat poate avea o rată de livrare în rafală ridicată fără o generare mai rapidă a modelului."
+    "throughputExplanation": "Ambele rate folosesc valoarea mai mare dintre numărul de tokeni de ieșire și cel de raționament. Rata după primul token exclude un TTFT valid; în caz contrar, folosește durata completă. Rata de la un capăt la altul folosește întotdeauna durata completă. Un răspuns tamponat poate avea o rată de livrare în rafală ridicată fără o generare mai rapidă a modelului.",
+    "omittedHttpAttempts": "{count} trimiteri HTTP nu au fost păstrate",
+    "upstreamStatus": "Server amonte {status}",
+    "noHttpResponse": "Nu a fost observat niciun răspuns HTTP",
+    "transportError": "Eroare de transport"
   },
   "proxyLogger": {
     "filterAll": "Toate",
@@ -14157,6 +14190,14 @@
         "label": "Ordine în pool pentru egress partajat",
         "description": "Pentru furnizorii a căror cotă este grupată după adresa de egress, plasează un membru al pool-ului care partajează adresa de egress observată a unui membru refuzat recent imediat sub membrii sănătoși. Doar ordonare, nu este exclus niciodată. Necesită PROXY_SKIP_RECENTLY_FAILED, care generează semnalul de refuz pe care îl citește. Dezactivat implicit: ordinea de selecție este exact rotația simplă."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Refuzurile cotelor în funcție de model",
+        "description": "Aplicați o cotă opencode 429 numai modelului care l-a lovit, astfel încât aceeași ieșire continuă să servească alte modele și ștergeți-o numai atunci când modelul respectiv reușește. Consumatorii care nu au nici un model (rotația piscinei, parcarea și reluarea, vizibilitatea administratorului, declanșarea selectorului, măsurarea sănătății) îl văd în continuare. Necesită PROXY_SKIP_RECENTLY_FAILED, care produce refuzul. Dezactivat în mod implicit: cota 429 a unui model pune deoparte ieșirea pentru fiecare model."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Preluare proxy: reluare strictă POST",
+        "description": "Pentru o cerere non-idempotentă (POST, PUT, PATCH, DELETE), retrimiteți după o eroare de transport (socket proaspăt, fallback proxy, fallback nativ) numai atunci când eroarea dovedește că nu a fost trimis nimic: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH sau un timeout de conectare. O eroare de socket după scriere poate însemna că partea din amonte a acceptat cererea, astfel încât o retrimitere ar putea genera și factura de două ori. Dezactivat în mod implicit: un corp rejucat este retrimis o dată la orice eroare de transport, care recuperează, de asemenea, un socket învechit."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Jurnalizare atribuire rotație",
         "description": "Rotația opencode înregistrează ce cont a servit cererea sau a fost omis (doar ID-uri mascate, niciodată ID-uri complete de cont) și asociază intrările din jurnalul proxy-ului cu cererea lor, astfel încât operatorul să poată distinge conturile omise de cele neutilizate. Dezactivat implicit: nu sunt scrise linii suplimentare în jurnal și nici coloane suplimentare."
@@ -14208,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "Reselectare pool 429 OpenCode",
         "description": "Pentru rotația multi-cont OpenCode, după un 429 primit de la un furnizor segmentat pe bază de ieșire (egress) pe un cont fără proxy într-un context de pool ambiental, solicită pool-ului de conexiuni un alt membru pentru următoarea încercare în loc să reîncerce aceeași adresă de ieșire. Ordonează, nu exclude niciodată: un pool epuizat păstrează comportamentul curent. Dezactivat în mod prestabilit: fiecare 429 trece la următorul cont, exact ca înainte."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress Probe",
+        "description": "Pentru executorul OpenCode, atunci când la o solicitare proxy i se răspunde 403 sau 451 FreeTierError și reîncercarea instrumentelor observate a eșuat sau nu s-a aplicat, trimiteți cererea o dată printr-un alt proxy (un alt proxy de cont sau alt membru al grupului, niciodată o conexiune directă). Numai când acea sondă răspunde 200, prima ieșire este pusă deoparte în memoria de refuz al proxy și răspunsul sondei este servit; când ambii refuză, refuzul inițial este returnat și nimic nu este înregistrat. Același text de refuz acoperă un IP de ieșire marcat și o formă de cerere refuzată, astfel încât sonda le diferențiază prin dovezi. Oprit implicit: refuzul este returnat neschimbat."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Amprentă client OpenCode v2",
@@ -14388,6 +14433,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Oprire la refuzul politicii de conținut",
         "description": "Atunci când o țintă din combo răspunde cu un refuz exact legat de politica de conținut (cod sau tip cyber_policy / content_policy_violation), oprește combo-ul și returnează acel refuz chiar și atunci când țintele rămase sunt modele diferite, în loc să avansezi la următoarea țintă. Dezactivat în mod implicit: refuzul nu plasează niciodată contul în cooldown și nu declanșează disjunctorul furnizorului, iar combo-ul avansează la următoarea sa țintă exact ca înainte."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Răspunsuri: menținerea în viață numai în timpul transportului",
+        "description": "Trimiteți răspunsurile păstrează ca o linie goală în loc de un eveniment response.in_progress, astfel încât un instantaneu sintetic nu poate înlocui niciodată răspunsul real din SDK oficial. O linie goală nu trimite niciun eveniment SSE, astfel încât un watchdog client care se resetează numai pe evenimente nu ar fi resetat în timpul unei faze lungi de silențioasă. Dezactivat în mod implicit: temporizatoarele trimit evenimentul response.in_progress valabil pentru specificații."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Reîncercare cooldown: Omite refuzurile 403/410",

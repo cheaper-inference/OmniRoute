@@ -147,18 +147,20 @@ function wrapSseBodyWithMidStreamFailure(
   /** Split complete SSE frames off the front of `buffer`. Returns them in order. */
   const takeCompleteFrames = (): string[] => {
     const frames: string[] = [];
+    let from = 0; // absolute offset scanned so far — avoids rescanning the buffer
     for (;;) {
-      // SSE frame boundary: blank line. Accept CRLF and LF framings.
-      const crlf = buffer.indexOf("\r\n\r\n");
-      const lf = buffer.indexOf("\n\n");
-      if (crlf === -1 && lf === -1) break;
-      let end: number;
-      if (crlf === -1) end = lf + 2;
-      else if (lf === -1) end = crlf + 4;
-      else end = Math.min(lf + 2, crlf + 4) === lf + 2 ? lf + 2 : crlf + 4;
-      frames.push(buffer.slice(0, end));
-      buffer = buffer.slice(end);
+      // SSE frame boundary: a blank line. Accept CRLF and LF framings.
+      const lf = buffer.indexOf("\n\n", from);
+      const crlf = buffer.indexOf("\r\n\r\n", from);
+      const lfEnd = lf === -1 ? Number.POSITIVE_INFINITY : lf + 2;
+      const crlfEnd = crlf === -1 ? Number.POSITIVE_INFINITY : crlf + 4;
+      const end = Math.min(lfEnd, crlfEnd);
+      if (!Number.isFinite(end)) break;
+      frames.push(buffer.slice(from, end));
+      from = end;
     }
+    // Keep only the trailing incomplete frame.
+    if (from > 0) buffer = buffer.slice(from);
     return frames;
   };
 
@@ -463,16 +465,11 @@ export function __getDeadlineTokenRegistrySizeForTests(): number {
  *
  * The wrapped request MUST be the one the route hands downstream (admission,
  * body parse, `handleChat`): the handler snapshots `request.signal` after
- * admission, so wrapping after that point would not propagate. Rebuilt
- * field-by-field (`new Request(request.url, { method, headers, body, signal,
- * duplex: "half" })`) — NOT via `new Request(request, …)`: under the Next.js
- * App Router the inbound request is a Proxy, and passing it as the
- * constructor input makes undici read `#state` on the proxy receiver, which
- * ECMAScript mandates to throw. Field reads below go through the proxy get
- * trap and are safe. Note: unlike the constructor-input form, the original
- * request's `bodyUsed` stays `false` here; its stream is still transferred,
- * so reading it afterwards fails regardless — do not reuse the input object
- * after wrapping.
+ * admission, so wrapping after that point would not propagate. Rebuild from
+ * URL + public request fields instead of passing `request` as the Request
+ * constructor input: packaged Next can hand us a Request branded by a different
+ * Undici/realm instance, and `new Request(request, ...)` then trips that class's
+ * private `#state` brand check. The body stream itself is safe to transfer.
  *
  * Controller recovery downstream (`getDeadlineController`) is two-layered:
  * the combined signal object (fast path — same object when nothing rebuilds),
@@ -496,28 +493,16 @@ export function withDeadlineSignal(request: Request): {
   // admission rebuilds, which both copy headers but mint new signal objects.
   const token = `dl-${Date.now().toString(36)}-${(deadlineTokenSeq += 1)}`;
   headers.set(DEADLINE_TOKEN_HEADER, token);
-  // Build the wrapped request field-by-field. Passing the incoming request
-  // object itself as the constructor input is NOT safe under the Next.js App
-  // Router runtime: for `dynamic: "auto"` routes Next hands handlers a Proxy
-  // around the real request (app-route runtime), and the undici constructor
-  // reads `input.#state` with that proxy as the receiver. ECMAScript gives a
-  // Proxy no [[PrivateFieldValues]], so the access throws
-  // "TypeError: Cannot read private member #state from an object whose class
-  // did not declare it" (observed 2026-09-26 as every request on the
-  // /v1/chat/completions, /v1/messages and /v1/responses routes answering
-  // HTTP 500 after #14808 wired this wrapper into those routes). Property
-  // reads (url/method/body/headers) go through the proxy get trap with
-  // receiver = target and are safe; only the constructor's private-field
-  // path breaks. Do not "simplify" back to `new Request(request, ...)`.
-  const wrappedReq = new Request(request.url, {
+  const requestInit: RequestInit & { duplex?: "half" } = {
     method: request.method,
     headers,
-    body: request.body,
     signal: combined,
-    // `duplex` is an undici extension absent from the DOM-lib RequestInit;
-    // it is required whenever `body` is a ReadableStream.
-    duplex: "half",
-  } as RequestInit & { duplex: "half" });
+  };
+  if (request.method !== "GET" && request.method !== "HEAD" && request.body !== null) {
+    requestInit.body = request.body;
+    requestInit.duplex = "half";
+  }
+  const wrappedReq = new Request(request.url, requestInit);
   deadlineControllers.set(combined, deadlineController);
   deadlineControllersByToken.set(token, new WeakRef(deadlineController));
   deadlineTokenByController.set(deadlineController, token);

@@ -5,6 +5,7 @@ import {
   shapeForClientFormat,
   createSseHeartbeatTransform,
   HEARTBEAT_SHAPES,
+  isResponsesTransportKeepaliveEnabled,
 } from "../../open-sse/utils/sseHeartbeat.ts";
 
 function withEnv(value: string | undefined, fn: () => void) {
@@ -75,10 +76,15 @@ test("shapeForClientFormat maps known client formats", () => {
     shapeForClientFormat("openai-responses"),
     HEARTBEAT_SHAPES.OPENAI_RESPONSES_IN_PROGRESS
   );
-  assert.equal(shapeForClientFormat(undefined), HEARTBEAT_SHAPES.COMMENT);
+  // #18948: an unmapped format must not fall back to the no-op COMMENT
+  // heartbeat — it gets a parseable [OI]-chunk keepalive instead.
+  assert.equal(shapeForClientFormat(undefined), HEARTBEAT_SHAPES.OPENAI_CHUNK);
 });
 
 test("comment opt-out suppresses only COMMENT heartbeats, not data-event heartbeats", async () => {
+  // The Responses shape reads its feature flag when the transform is built. The first read in a
+  // process opens the settings store, which can outlast the 35 ms input window below, so warm it.
+  isResponsesTransportKeepaliveEnabled();
   await withEnvAsync("off", async () => {
     const comment = await collectHeartbeatOutput(HEARTBEAT_SHAPES.COMMENT);
     assert.doesNotMatch(comment, /: keepalive/, "comment heartbeat should be suppressed");
