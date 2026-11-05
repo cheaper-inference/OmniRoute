@@ -1762,9 +1762,11 @@ async function handleSingleModelChat(
   let sameAccountRetries = 0;
   let routingWaitMs = 0;
   const accountFallbackReasons: string[] = [];
-  const noteAccountFallback = (reason: string): void => {
-    accountFallbacks += 1;
-    if (accountFallbackReasons.length < 8) accountFallbackReasons.push(reason);
+  let pendingFallback: { reason: string; previousConnectionId: string } | null = null;
+  let pendingStreamRetryConnectionId: string | null = null;
+  // An intention to rotate is not yet a completed account switch.
+  const noteAccountFallback = (reason: string, previousConnectionId: string): void => {
+    pendingFallback = { reason, previousConnectionId };
   };
   const routingTelemetry = () => ({
     accountFallbacks,
@@ -1902,7 +1904,7 @@ async function handleSingleModelChat(
         "allExpired" in credentials ||
         !credentials.connectionId
       ) {
-        if (earlyEofOriginal) return earlyEofOriginal;
+        if (earlyEofOriginal) return withRoutingTelemetry(earlyEofOriginal, null);
         if (!credentials?.allRateLimited && agy.earliestRetryHintAtMs !== null)
           return agyLease.buildAntigravityPoolBusyResponse(agy.earliestRetryHintAtMs);
         if (credentials?.allRateLimited) {
@@ -2003,6 +2005,25 @@ async function handleSingleModelChat(
         return withRoutingTelemetry(noCredsRes, lastFailedConnectionId);
       }
 
+      if (pendingFallback !== null) {
+        const candidate = pendingFallback;
+        pendingFallback = null;
+        if (credentials.connectionId !== candidate.previousConnectionId) {
+          accountFallbacks += 1;
+          if (accountFallbackReasons.length < 8) accountFallbackReasons.push(candidate.reason);
+        }
+      }
+      if (pendingStreamRetryConnectionId !== null) {
+        if (credentials.connectionId === pendingStreamRetryConnectionId) {
+          sameAccountRetries += 1;
+        } else {
+          accountFallbacks += 1;
+          if (accountFallbackReasons.length < 8) {
+            accountFallbackReasons.push("empty_content_sibling");
+          }
+        }
+        pendingStreamRetryConnectionId = null;
+      }
       const accountId = credentials.connectionId.slice(0, 8);
       const releaseOAuthSession = credentials.releaseOAuthSession ?? (() => {});
       // Undefined whenever the lease flag is off, which makes every release/hold below a no-op.
@@ -2300,6 +2321,8 @@ async function handleSingleModelChat(
         );
         if (museDelayMs !== null) {
           await new Promise((resolve) => setTimeout(resolve, museDelayMs));
+          sameAccountRetries += 1;
+          routingWaitMs += Math.max(0, museDelayMs);
           continue;
         }
         if (muse.museFailureMarksAccount(result)) {
@@ -2406,7 +2429,7 @@ async function handleSingleModelChat(
           !(isCombo && result.errorCode === "empty_content")
         ) {
           streamEarlyEofRetries += 1;
-          sameAccountRetries += 1;
+          pendingStreamRetryConnectionId = credentials.connectionId;
           if (result.errorCode === "empty_content") {
             runtimeOptions.emptyTurnConnectionId = credentials.connectionId;
           }
@@ -2449,7 +2472,7 @@ async function handleSingleModelChat(
         ) {
           // Retry spent and nothing emitted yet: one hop to a sibling (routing only, no mark).
           log.warn("STREAM", `${provider}/${model} early-EOF retry exhausted — trying one sibling`);
-          noteAccountFallback("stream_early_eof");
+          noteAccountFallback("stream_early_eof", credentials.connectionId);
           earlyEofOriginal = withRoutingTelemetry(
             result.response,
             credentials.connectionId
@@ -2498,7 +2521,7 @@ async function handleSingleModelChat(
               // best-effort: selection also excludes this connection for the current retry.
             }
           }
-          noteAccountFallback("stream_readiness");
+          noteAccountFallback("stream_readiness", credentials.connectionId);
           excludedConnectionIds.add(credentials.connectionId);
           lastError = classificationError;
           lastStatus = result.status;
@@ -2548,7 +2571,7 @@ async function handleSingleModelChat(
               // best-effort: selection also excludes this connection for the current retry.
             }
           }
-          noteAccountFallback("pre_response_timeout");
+          noteAccountFallback("pre_response_timeout", credentials.connectionId);
           excludedConnectionIds.add(credentials.connectionId);
           lastError = result.error;
           lastStatus = result.status;
@@ -2571,7 +2594,7 @@ async function handleSingleModelChat(
           "AUTH",
           `Account ${accountId}... at local concurrency cap, trying fallback account`
         );
-        noteAccountFallback("capacity");
+        noteAccountFallback("capacity", credentials.connectionId);
         excludedConnectionIds.add(credentials.connectionId);
         lastError = result.error;
         lastStatus = result.status;
@@ -2845,7 +2868,8 @@ async function handleSingleModelChat(
         noteAccountFallback(
           typeof result.status === "number" && result.status >= 100 && result.status <= 599
             ? "http_" + result.status
-            : "upstream_error"
+            : "upstream_error",
+          credentials.connectionId
         );
         excludedConnectionIds.add(credentials.connectionId);
         lastError = result.error;

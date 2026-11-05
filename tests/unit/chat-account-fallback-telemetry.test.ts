@@ -99,3 +99,36 @@ test("account rotation is exposed through bounded routing telemetry headers", as
   assert.equal(response.headers.get("X-OmniRoute-Routing-Wait-Ms"), null);
 
 });
+
+test("a failed account without an eligible sibling does not claim a completed fallback", async () => {
+  await seedConnection("openai", { apiKey: "sk-only-account", priority: 1 });
+  globalThis.fetch = async () =>
+    new Response(JSON.stringify({
+      error: { message: "Invalid API key", type: "invalid_request_error", code: "invalid_api_key" },
+    }), { status: 401, headers: { "Content-Type": "application/json" } });
+
+  const response = await handleChat(
+    buildRequest({
+      body: {
+        model: "openai/gpt-4o-mini",
+        stream: false,
+        messages: [{ role: "user", content: "hello" }],
+      },
+    })
+  );
+  assert.equal(response.headers.get("X-OmniRoute-Account-Fallbacks"), null);
+  assert.equal(response.headers.get("X-OmniRoute-Account-Fallback-Reasons"), null);
+});
+
+test("completed empty-content sibling rotation uses its own allowlisted reason", () => {
+  const response = withSelectedConnectionHeader(new Response("ok"), "safe-id", {
+    accountFallbacks: 1,
+    accountFallbackReasons: ["empty_content_sibling"],
+    sameAccountRetries: 0,
+  });
+  assert.equal(
+    response.headers.get("X-OmniRoute-Account-Fallback-Reasons"),
+    "empty_content_sibling"
+  );
+  assert.equal(response.headers.get("X-OmniRoute-Same-Account-Retries"), null);
+});

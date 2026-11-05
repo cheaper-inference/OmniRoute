@@ -19,6 +19,7 @@ const SAFE_FALLBACK_REASONS = new Set([
   "capacity",
   "stream_early_eof",
   "stream_readiness",
+  "empty_content_sibling",
   "pre_response_timeout",
   "upstream_error",
 ]);
