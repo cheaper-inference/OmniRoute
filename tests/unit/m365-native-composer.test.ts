@@ -146,3 +146,51 @@ test("invalid explicit cursor does not redirect a delta into the anonymous answe
   c.push(update({ cursor: { j: "invalid", p: -1 } }, { writeAtCursor: "hidden" }));
   assert.equal(c.text, "");
 });
+
+test("a cursor on a card body snapshots that card, not the message's preview token", () => {
+  // Copilot can preview the first token in message.text while the cursor targets an empty
+  // card body that writeAtCursor then fills: snapshotting the preview duplicated the token
+  // ("cc0ffee") and turned the final snapshot into an unrecoverable stream rewrite.
+  const composer = new M365TurnComposer();
+  const message = {
+    author: "bot",
+    messageId: "reply",
+    text: "c",
+    adaptiveCards: [{ body: [{ text: "" }] }],
+  };
+  const updates = [
+    { cursor: { j: "$['reply'].adaptiveCards[0].body[0].text", p: -1 }, messages: [message] },
+    { writeAtCursor: "c0ffee" },
+    { messages: [{ ...message, text: "c0ffee", adaptiveCards: [{ body: [{ text: "c0ffee" }] }] }] },
+  ];
+  let streamed = "";
+  for (const argument of updates) {
+    const update = composer.push({ type: 1, target: "update", arguments: [argument] });
+    assert.equal(update.streamingDiverged, false);
+    streamed += update.delta;
+  }
+  assert.equal(streamed, "c0ffee");
+  assert.equal(composer.text, "c0ffee");
+});
+
+test("a card cursor for another message does not change this message's snapshot", () => {
+  const composer = new M365TurnComposer();
+  composer.push({
+    type: 1,
+    target: "update",
+    arguments: [
+      {
+        cursor: { j: "$['other'].adaptiveCards[0].body[0].text", p: -1 },
+        messages: [
+          {
+            author: "bot",
+            messageId: "reply",
+            text: "kept",
+            adaptiveCards: [{ body: [{ text: "" }] }],
+          },
+        ],
+      },
+    ],
+  });
+  assert.equal(composer.text, "kept");
+});

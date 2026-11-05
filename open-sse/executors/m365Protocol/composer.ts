@@ -6,6 +6,25 @@ const record = (value: unknown): JsonRecord | null =>
     : null;
 export const M365_MAX_TEXT_LENGTH = 1_000_000;
 export const M365_MAX_MESSAGES = 256;
+
+const CARD_CURSOR = /^\$\[['"]([^'"\]]+)['"]\]\.adaptiveCards\[(\d+)\]\.body\[(\d+)\]\.text$/;
+
+/**
+ * When the cursor targets one of this message's card bodies, that card text is the snapshot
+ * `writeAtCursor` appends to. `message.text` can meanwhile preview a token the following
+ * writes repeat, so using it would duplicate that token.
+ */
+function cursorCardText(
+  cursor: JsonRecord | null,
+  id: string,
+  message: JsonRecord
+): string | undefined {
+  const match = typeof cursor?.j === "string" ? CARD_CURSOR.exec(cursor.j) : null;
+  if (!match || match[1] !== id || !Array.isArray(message.adaptiveCards)) return undefined;
+  const card = record(message.adaptiveCards[Number(match[2])]);
+  const body = card && Array.isArray(card.body) ? record(card.body[Number(match[3])]) : null;
+  return typeof body?.text === "string" ? body.text : undefined;
+}
 export interface M365ComposerOptions {
   maxTextLength?: number;
   maxMessages?: number;
@@ -81,7 +100,7 @@ export class M365TurnComposer {
     }
     if (typeof message.text === "string" && !this.blocked.has(id)) {
       if (id === "__anonymous__" && !cursor) this.cursorSuppressed = false;
-      this.setText(id, message.text);
+      this.setText(id, cursorCardText(cursor, id, message) ?? message.text);
     }
     return false;
   }
