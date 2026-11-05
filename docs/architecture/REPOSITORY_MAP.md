@@ -267,7 +267,7 @@ Separate npm workspace (`@omniroute/open-sse`). Handles request processing + pro
 ```
 open-sse/
 ├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
-├── executors/           # 150 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
 ├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
