@@ -1,7 +1,7 @@
 import { BaseExecutor, type ExecuteInput, type ProviderCredentials } from "./base.ts";
 import { containsMediaKind } from "../utils/mediaParts.ts";
 import { makeExecutorErrorResult } from "../utils/error.ts";
-import { ciTransportSupportsInput } from "../../src/shared/constants/cheaperInferenceInputModalities";
+import { ciTransportSupportsInput } from "../utils/ciTransportInput.ts";
 import { sendCIPayload } from "../utils/ciPayloadTransport.ts";
 import { normalizeCIMixedMedia } from "../utils/ciMixedMedia.ts";
 import { PROVIDERS } from "../config/constants.ts";

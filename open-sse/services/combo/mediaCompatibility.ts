@@ -1,8 +1,10 @@
 import { containsMediaKind, type MediaKind } from "../../utils/mediaParts.ts";
-import { getResolvedModelCapabilities } from "../modelCapabilities.ts";
-import { getInputModalities } from "../../../src/lib/db/models/inputModalities";
-import { ciTransportSupportsInput } from "../../../src/shared/constants/cheaperInferenceInputModalities";
-import { isTextOnlyChatTransport } from "../../../src/shared/constants/visionModels";
+import { ciTransportSupportsInput } from "../../utils/ciTransportInput.ts";
+import {
+  getInputModalities,
+  getResolvedModelCapabilities,
+  isTextOnlyChatTransport,
+} from "../modelCapabilities.ts";
 import type { ResolvedComboTarget } from "./types.ts";
 import type { RequestCompatibilityRequirements } from "./comboStructure.ts";
 

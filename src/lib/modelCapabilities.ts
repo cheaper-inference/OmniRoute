@@ -16,7 +16,7 @@ import {
   type ModelSpec,
 } from "@/shared/constants/modelSpecs";
 import { getSyncedCapability } from "@/lib/modelsDevSync";
-import { ciTransportSupportsInput } from "@/shared/constants/cheaperInferenceInputModalities";
+import { ciTransportSupportsInput } from "@omniroute/open-sse/utils/ciTransportInput.ts";
 import { knownReasoningEffortTiers, MODELS_DEV_PROVIDER_MAP } from "@/lib/modelsDevSync/transform";
 import { isModelsDevEffortTiersEnabled } from "@/shared/utils/featureFlags";
 import { getModelContextOverride } from "@/lib/db/modelContextOverrides";
@@ -47,6 +47,8 @@ export { resolveAudioCapability } from "@/lib/modelCapabilityModalities";
 export type { ModelLimitSources } from "@/lib/modelCapabilityLimits";
 import { isTextOnlyChatTransport, isVisionModelId } from "@/shared/constants/visionModels";
 import { getInputModalities } from "@/lib/db/models/inputModalities";
+
+export { getInputModalities, isTextOnlyChatTransport };
 import { getUnsupportedParams } from "@omniroute/open-sse/config/providerRegistry.ts";
 import {
   getLearnedThinkingCap,
