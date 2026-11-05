@@ -36,6 +36,25 @@ function m365RoutingTenant(credentials: ProviderCredentials): string | null {
   return typeof tenant === "string" ? tenant : "common";
 }
 
+/**
+ * Redeem the stored refresh token for another resource the M365 first-party client is
+ * preauthorized for (e.g. {@link M365_IMAGE_ARTIFACT_SCOPE}), routed to the same tenant as the
+ * chat refresh. Returns the projected result; the caller persists a rotated refresh token.
+ */
+export async function refreshM365ScopedToken(
+  refreshToken: string,
+  credentials: ProviderCredentials,
+  scope: string,
+  options: { log?: RefreshLogger; signal?: AbortSignal } = {}
+) {
+  const routingTenant = m365RoutingTenant(credentials);
+  if (routingTenant === null) return { error: "invalid_tenant" };
+  return refreshM365AccessToken(refreshToken, routingTenant, options.log ?? undefined, {
+    scope,
+    signal: options.signal,
+  });
+}
+
 /** Shared bounded M365 grant; orchestration, mutex and persistence stay in getAccessToken. */
 export async function refreshM365Token(
   refreshToken: string,

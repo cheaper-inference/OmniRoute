@@ -35,6 +35,10 @@ import {
 type JsonRecord = Record<string, unknown>;
 const DIAGNOSTIC_URL = "wss://substrate.office.com/m365Copilot/Chathub?access_token=REDACTED";
 let WebSocketCtor: typeof WebSocket = WebSocket;
+/** The WebSocket constructor M365 turns use (swappable in tests). */
+export function m365WebSocketCtor(): M365WebSocketConstructor {
+  return WebSocketCtor as unknown as M365WebSocketConstructor;
+}
 export function __setCopilotM365WebSocketForTesting(ctor: typeof WebSocket): () => void {
   const previous = WebSocketCtor;
   WebSocketCtor = ctor;
@@ -121,55 +125,94 @@ function conversationScope(
   ].join("|");
 }
 
+/** What a request needs to refresh its connection's credentials. */
+type M365CredentialInput = Pick<ExecuteInput, "credentials" | "onCredentialsRefreshed" | "signal">;
+
+async function refreshM365Credentials(input: M365CredentialInput): Promise<void> {
+  const credentials = input.credentials;
+  const psd = record(credentials.providerSpecificData);
+  const legacy = typeof psd.refreshToken === "string" ? psd.refreshToken : "";
+  if (!credentials.refreshToken && legacy) credentials.refreshToken = legacy;
+  if (!credentials.refreshToken) return;
+  const current = currentM365AccessToken(credentials);
+  const expires = credentials.expiresAt ? Date.parse(credentials.expiresAt) : NaN;
+  if (!(Number.isFinite(expires) ? expires <= Date.now() + 300_000 : tokenNeedsRefresh(current)))
+    return;
+  const nextCredentials = (result: JsonRecord) => ({
+    ...credentials,
+    ...result,
+    accessToken: typeof result.accessToken === "string" ? result.accessToken : "",
+    refreshToken:
+      typeof result.refreshToken === "string" && result.refreshToken
+        ? result.refreshToken
+        : credentials.refreshToken,
+  });
+  let refreshed: unknown;
+  try {
+    refreshed = await getAccessToken(
+      "copilot-m365-web",
+      credentials,
+      undefined,
+      null,
+      async (result: JsonRecord) => {
+        await input.onCredentialsRefreshed?.(nextCredentials(result));
+      }
+    );
+  } catch {
+    throw new M365ExecutorError(
+      401,
+      "m365_refresh_failed",
+      "Microsoft 365 Copilot credential refresh failed."
+    );
+  }
+  const result = record(refreshed);
+  if (typeof result.accessToken !== "string" || !result.accessToken || result.error)
+    throw new M365ExecutorError(
+      401,
+      "m365_refresh_failed",
+      "Microsoft 365 Copilot credential refresh failed. Reconnect this account."
+    );
+  Object.assign(credentials, nextCredentials(result));
+}
+
+/**
+ * Refresh the connection's chat token when it is close to expiry and persist the result. The
+ * refresh belongs to the canonical connection mutex, not this request: cancellation detaches
+ * only our wait, and the grant, its persistence and any rejection still complete and are
+ * observed.
+ */
+export async function prepareM365Credentials(input: M365CredentialInput): Promise<void> {
+  const preflight = refreshM365Credentials(input);
+  if (input.signal) {
+    const requestSignal = input.signal;
+    await new Promise<void>((resolve, reject) => {
+      const onAbort = () => {
+        requestSignal.removeEventListener("abort", onAbort);
+        reject(new M365TurnError("M365_ABORTED"));
+      };
+      const cleanup = () => requestSignal.removeEventListener("abort", onAbort);
+      requestSignal.addEventListener("abort", onAbort, { once: true });
+      if (requestSignal.aborted) onAbort();
+      preflight.then(
+        () => {
+          cleanup();
+          resolve();
+        },
+        (error: unknown) => {
+          cleanup();
+          reject(error);
+        }
+      );
+    });
+  } else {
+    await preflight;
+  }
+  if (input.signal?.aborted) throw new M365TurnError("M365_ABORTED");
+}
+
 export class CopilotM365WebExecutor extends BaseExecutor {
   constructor() {
     super("copilot-m365-web", { id: "copilot-m365-web", baseUrl: "wss://substrate.office.com" });
-  }
-  private async preflight(input: ExecuteInput): Promise<void> {
-    const credentials = input.credentials;
-    const psd = record(credentials.providerSpecificData);
-    const legacy = typeof psd.refreshToken === "string" ? psd.refreshToken : "";
-    if (!credentials.refreshToken && legacy) credentials.refreshToken = legacy;
-    if (!credentials.refreshToken) return;
-    const current = currentM365AccessToken(credentials);
-    const expires = credentials.expiresAt ? Date.parse(credentials.expiresAt) : NaN;
-    if (!(Number.isFinite(expires) ? expires <= Date.now() + 300_000 : tokenNeedsRefresh(current)))
-      return;
-    const nextCredentials = (result: JsonRecord) => ({
-      ...credentials,
-      ...result,
-      accessToken: typeof result.accessToken === "string" ? result.accessToken : "",
-      refreshToken:
-        typeof result.refreshToken === "string" && result.refreshToken
-          ? result.refreshToken
-          : credentials.refreshToken,
-    });
-    let refreshed: unknown;
-    try {
-      refreshed = await getAccessToken(
-        "copilot-m365-web",
-        credentials,
-        undefined,
-        null,
-        async (result: JsonRecord) => {
-          await input.onCredentialsRefreshed?.(nextCredentials(result));
-        }
-      );
-    } catch {
-      throw new M365ExecutorError(
-        401,
-        "m365_refresh_failed",
-        "Microsoft 365 Copilot credential refresh failed."
-      );
-    }
-    const result = record(refreshed);
-    if (typeof result.accessToken !== "string" || !result.accessToken || result.error)
-      throw new M365ExecutorError(
-        401,
-        "m365_refresh_failed",
-        "Microsoft 365 Copilot credential refresh failed. Reconnect this account."
-      );
-    Object.assign(credentials, nextCredentials(result));
   }
   async execute(input: ExecuteInput): Promise<{
     response: Response;
@@ -202,34 +245,7 @@ export class CopilotM365WebExecutor extends BaseExecutor {
           "m365_input_too_large",
           "Microsoft 365 Copilot input exceeded the size limit."
         );
-      // The refresh belongs to the canonical connection mutex, not this request.
-      // Detach only our wait on cancellation; keep grant/persistence and rejection observed.
-      const preflight = this.preflight(input);
-      if (input.signal) {
-        const requestSignal = input.signal;
-        await new Promise<void>((resolve, reject) => {
-          const onAbort = () => {
-            requestSignal.removeEventListener("abort", onAbort);
-            reject(new M365TurnError("M365_ABORTED"));
-          };
-          const cleanup = () => requestSignal.removeEventListener("abort", onAbort);
-          requestSignal.addEventListener("abort", onAbort, { once: true });
-          if (requestSignal.aborted) onAbort();
-          preflight.then(
-            () => {
-              cleanup();
-              resolve();
-            },
-            (error: unknown) => {
-              cleanup();
-              reject(error);
-            }
-          );
-        });
-      } else {
-        await preflight;
-      }
-      if (input.signal?.aborted) throw new M365TurnError("M365_ABORTED");
+      await prepareM365Credentials(input);
       const params = resolveConnectionParams(input.credentials);
       if ("error" in params) throw new M365ExecutorError(400, "invalid_credentials", params.error);
       const psd = record(input.credentials.providerSpecificData);

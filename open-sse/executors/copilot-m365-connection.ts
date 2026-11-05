@@ -325,7 +325,16 @@ function isM365Guid(value: unknown): value is string {
 export interface M365RefreshOptions {
   signal?: AbortSignal;
   timeoutMs?: number;
+  /** Scopes to request; defaults to the chat scopes ({@link M365_OAUTH_SCOPE}). */
+  scope?: string;
 }
+
+/**
+ * The service behind generated-image artifacts. The chat token is refused there; the same
+ * first-party client is preauthorized for it, so the stored refresh token can mint one.
+ */
+export const M365_IMAGE_ARTIFACT_SCOPE =
+  "openid profile offline_access https://designerappservice.officeapps.live.com/.default";
 
 export interface M365RefreshResult {
   accessToken: string;
@@ -354,7 +363,8 @@ async function redeemM365RefreshGrant(
   endpoint: string,
   refreshToken: string,
   signal: AbortSignal,
-  log?: MinimalLog
+  log?: MinimalLog,
+  scope: string = M365_OAUTH_SCOPE
 ): Promise<M365RefreshResult | { error: string }> {
   if (signal.aborted) return { error: "refresh_cancelled" };
   const res = await fetch(endpoint, {
@@ -369,7 +379,7 @@ async function redeemM365RefreshGrant(
       client_id: M365_OAUTH_CLIENT_ID,
       grant_type: "refresh_token",
       refresh_token: refreshToken,
-      scope: M365_OAUTH_SCOPE,
+      scope,
     }),
   });
   const data = (await res.json()) as Record<string, unknown> | null;
@@ -431,7 +441,7 @@ export async function refreshM365AccessToken(
     });
 
     return await Promise.race([
-      redeemM365RefreshGrant(endpoint, refreshToken, signal, log),
+      redeemM365RefreshGrant(endpoint, refreshToken, signal, log, options.scope),
       interrupted,
     ]);
   } catch (e) {

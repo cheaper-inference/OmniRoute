@@ -212,6 +212,26 @@ standalone IDs follow the public [protocol catalog](https://github.com/cramt/m36
   An upstream rewrite that cannot be represented by append-only streaming is an explicit
   stream error; non-streaming and buffered tool responses retain the final text.
 
+## Image generation
+
+`POST /v1/images/generations` with `model: "copilot-m365-web/m365-copilot-image"` (alias
+`m365copilot/m365-copilot-image`) draws with Copilot's built-in image tool, as the web client
+does. Each image is one Copilot turn: it opts in with the web client's image option sets and
+declares `GenerateGraphicArt`, and the image arrives on a progress entry pointing at an artifact
+on Microsoft's Designer service. That artifact refuses the chat token, so OmniRoute mints a
+Designer token from the connection's refresh token and downloads the bytes; the token is only
+ever sent to `designerapp.officeapps.live.com`.
+
+- Needs a native sign-in connection (a refresh token); a pasted token fails with **400**
+  before any turn is spent.
+- `n` is 1–4, one turn each. `size` only steers orientation (wider, taller or square), which
+  Copilot reads from the prompt; Copilot picks the render size.
+- Images are returned inline: `b64_json` by default, a data URL for `response_format: "url"`.
+- Generated images draw on a small daily budget, separate from chat. When it is used up the
+  request fails with **429**. A turn that answers without an image fails with **502** (or
+  **400** / **503** when Copilot's text reads as a refusal or a capacity problem); the
+  message says which.
+
 ## Security model
 
 - **Unofficial integration.** This provider reverse-engineers the BizChat WebSocket
