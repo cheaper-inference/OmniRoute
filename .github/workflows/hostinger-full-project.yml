@@ -1,0 +1,107 @@
+name: Hostinger full OmniRoute compatibility
+
+# Experimental full-project validation; does not deploy to Hostinger.
+on:
+  workflow_dispatch:
+  push:
+    branches: [hostinger-build-compatibility]
+    paths:
+      - .github/workflows/hostinger-full-project.yml
+
+permissions:
+  contents: read
+
+jobs:
+  full-build-rocky8:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Provision swap for memory-intensive build
+        run: |
+          sudo fallocate -l 12G /mnt/omniroute-swap || sudo dd if=/dev/zero of=/mnt/omniroute-swap bs=1M count=12288
+          sudo chmod 600 /mnt/omniroute-swap
+          sudo mkswap /mnt/omniroute-swap
+          sudo swapon /mnt/omniroute-swap
+          free -h
+      - name: Build real OmniRoute with GLIBC 2.28 and SWC WASM
+        run: |
+          docker run --rm --memory=7g --memory-swap=19g -v "$PWD:/src:ro" rockylinux:8 /bin/bash -lc '
+            set -euo pipefail
+            dnf install -y curl tar xz git findutils make gcc gcc-c++ python39 gcc-toolset-12-gcc gcc-toolset-12-gcc-c++ >/dev/null
+            source /opt/rh/gcc-toolset-12/enable
+            export PYTHON=/usr/bin/python3.9
+            curl -fsSL https://nodejs.org/dist/v22.23.4/node-v22.23.4-linux-x64.tar.xz -o /tmp/node.tar.xz
+            mkdir -p /opt/node
+            tar -xJf /tmp/node.tar.xz -C /opt/node --strip-components=1
+            export PATH=/opt/node/bin:$PATH
+            echo "=== Runtime ==="
+            node --version
+            ldd --version | sed -n "1p"
+            mkdir -p /work
+            cd /work
+            tar -C /src --exclude=.git -cf - . | tar -xf -
+            export NEXT_TELEMETRY_DISABLED=1 OMNIROUTE_USE_TURBOPACK=0 NEXT_DIST_DIR=.build/next
+            export ONNXRUNTIME_NODE_INSTALL=skip
+            export NODE_OPTIONS=--max-old-space-size=8192
+            echo "=== Install exact project dependencies ==="
+            npm ci --no-audit --no-fund
+            echo "=== Validate native SQLite ==="
+            npm_config_build_from_source=true npm rebuild better-sqlite3
+            echo "=== Force native addon compilation (npm rebuild may only reuse prebuild) ==="
+            cd node_modules/better-sqlite3
+            node /work/node_modules/node-gyp/bin/node-gyp.js rebuild --release --python=/usr/bin/python3.9 --force_build=1
+            cd /work
+            echo "=== Locate locally compiled addon ==="
+            find node_modules/better-sqlite3 -name better_sqlite3.node -print
+            test -f node_modules/better-sqlite3/build/Release/better_sqlite3.node
+            mkdir -p node_modules/better-sqlite3/prebuilds
+            cp node_modules/better-sqlite3/build/Release/better_sqlite3.node node_modules/better-sqlite3/prebuilds/linux-x64.node
+            echo "=== Check native addon GLIBC requirements ==="
+            ldd node_modules/better-sqlite3/prebuilds/linux-x64.node
+            node -e "const DB=require(\"better-sqlite3\"); const db=new DB(\":memory:\"); console.log(db.prepare(\"select sqlite_version() as v\").get()); db.close()"
+            echo "=== Build full OmniRoute ==="
+            npm run build
+            test -f .build/next/BUILD_ID
+            echo "Full OmniRoute build: PASS"
+            echo "=== Check standalone output ==="
+            if test -f .build/next/standalone/server.js; then
+              echo "Standalone server present"
+            else
+              echo "Standalone server not at standard path; inspect custom assembly"
+              find .build -name server.js -print | head -20
+            fi
+            echo "=== Hostinger runtime preflight ==="
+            export DATA_DIR=/tmp/omniroute-hostinger-data
+            mkdir -p "$DATA_DIR"
+            export JWT_SECRET=ci-only-jwt-secret-not-for-production-123
+            export API_KEY_SECRET=ci-only-api-secret-not-for-production-123
+            export INITIAL_PASSWORD=ci-only-initial-password-123
+            node scripts/ops/hostinger-preflight.mjs
+            echo "=== Standalone HTTP runtime smoke test ==="
+            export HOSTNAME=127.0.0.1 PORT=31876 NODE_ENV=production
+            node .build/next/standalone/server.js > /tmp/omniroute-standalone.log 2>&1 &
+            server_pid=$!
+            trap "kill $server_pid 2>/dev/null || true" EXIT
+            ready=0
+            for i in $(seq 1 60); do
+              if ! kill -0 "$server_pid" 2>/dev/null; then
+                echo "Standalone server exited prematurely"
+                cat /tmp/omniroute-standalone.log
+                exit 1
+              fi
+              if curl --silent --output /tmp/omniroute-http-response --max-time 5 http://127.0.0.1:31876/; then
+                ready=1
+                break
+              fi
+              sleep 2
+            done
+            if test "$ready" -ne 1; then
+              echo "Standalone server did not respond within 120 seconds"
+              tail -100 /tmp/omniroute-standalone.log
+              exit 1
+            fi
+            echo "Standalone HTTP runtime: PASS"
+            kill "$server_pid" 2>/dev/null || true
+            wait "$server_pid" 2>/dev/null || true
+          '

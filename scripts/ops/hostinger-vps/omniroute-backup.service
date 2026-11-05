@@ -1,0 +1,12 @@
+[Unit]
+Description=OmniRoute consistent SQLite backup and isolated restore verification
+After=omniroute.service
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/omniroute-backup
+UMask=0077
+Nice=10
+IOSchedulingClass=idle
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/var/backups/omniroute

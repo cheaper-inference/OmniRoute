@@ -1,0 +1,39 @@
+[Unit]
+Description=OmniRoute AI gateway
+Wants=network-online.target
+After=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=10
+
+[Service]
+Type=notify
+NotifyAccess=all
+WatchdogSec=180
+TimeoutStartSec=180
+User=omniroute
+Group=omniroute
+WorkingDirectory=/opt/omniroute/current
+EnvironmentFile=/etc/omniroute/omniroute.env
+ExecStart=/usr/local/bin/node dev/run-standalone.mjs
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=60
+KillSignal=SIGTERM
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/omniroute /var/log/omniroute
+RestrictSUIDSGID=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+LockPersonality=true
+LimitNOFILE=65536
+MemoryMax=6G
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

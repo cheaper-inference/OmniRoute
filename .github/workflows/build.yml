@@ -11,6 +11,9 @@ name: Build App
 # Dispatch this workflow by hand when a hosted build artefact is genuinely needed.
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - hostinger-build-compatibility
 
 permissions:
   contents: read

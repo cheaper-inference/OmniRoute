@@ -1,0 +1,56 @@
+name: Hostinger Next.js SWC feasibility
+
+# Diagnostic only: no deployment, no production branch changes.
+on:
+  workflow_dispatch:
+  push:
+    branches: [hostinger-build-compatibility]
+    paths:
+      - .github/workflows/hostinger-next-swc.yml
+
+permissions:
+  contents: read
+
+jobs:
+  next-build-glibc228:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Reproduce Next.js build on Rocky Linux 8
+        run: |
+          docker run --rm rockylinux:8 /bin/bash -lc '
+            set -euo pipefail
+            dnf install -y curl tar xz >/dev/null
+            curl -fsSL https://nodejs.org/dist/v22.23.4/node-v22.23.4-linux-x64.tar.xz -o /tmp/node.tar.xz
+            mkdir -p /opt/node
+            tar -xJf /tmp/node.tar.xz -C /opt/node --strip-components=1
+            export PATH=/opt/node/bin:$PATH
+            node --version
+            npm --version
+            ldd --version | sed -n "1p"
+            mkdir /work && cd /work
+            printf "{\"name\":\"hostinger-next-probe\",\"version\":\"1.0.0\",\"private\":true,\"scripts\":{\"build\":\"next build --webpack\"},\"dependencies\":{\"next\":\"16.3.8\",\"react\":\"19.2.4\",\"react-dom\":\"19.2.4\"}}" > package.json
+            mkdir -p app
+            printf "export default function Page(){return <main>Hostinger Next probe</main>}" > app/page.jsx
+            printf "export default function RootLayout({children}){return <html><body>{children}</body></html>}" > app/layout.jsx
+            printf "export default { output: \"standalone\" };" > next.config.mjs
+            npm install --no-audit --no-fund
+            echo "=== SWC native probe ==="
+            node -e "try { require(\"@next/swc-linux-x64-gnu\"); console.log(\"Native SWC loaded\") } catch(e) { console.log(\"Native SWC unavailable:\", e.message) }"
+            echo "=== Next webpack production build ==="
+            NEXT_TELEMETRY_DISABLED=1 npm run build
+            echo "=== Verify standalone Next.js server on GLIBC 2.28 ==="
+            test -f .next/standalone/server.js
+            PORT=3100 HOSTNAME=127.0.0.1 node .next/standalone/server.js > /tmp/next-server.log 2>&1 &
+            server_pid=$!
+            trap "kill $server_pid 2>/dev/null || true" EXIT
+            ready=0
+            for i in $(seq 1 20); do
+              if curl -fsS http://127.0.0.1:3100/ > /tmp/next-home.html; then ready=1; break; fi
+              sleep 1
+            done
+            cat /tmp/next-server.log
+            test "$ready" -eq 1
+            grep -q "Hostinger Next probe" /tmp/next-home.html
+            echo "Standalone HTTP smoke test: PASS"
+          '

@@ -1,0 +1,93 @@
+name: Hostinger compatibility diagnostics
+
+# This workflow does not deploy or modify the Hostinger account.
+# It tests the native dependencies against the same glibc family (2.28)
+# reported by Hostinger SSH, without changing the OmniRoute production branch.
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - hostinger-build-compatibility
+    paths:
+      - .github/workflows/hostinger-compatibility.yml
+
+permissions:
+  contents: read
+
+jobs:
+  hostinger-native-compatibility:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test native dependencies on glibc 2.28
+        run: |
+          docker run --rm --entrypoint /bin/bash rockylinux:8 -lc '
+            set -eu
+            echo "=== Rocky Linux 8 / glibc ==="
+            ldd --version | sed -n "1p"
+            echo "=== Next.js / SWC compatibility ==="
+            echo "Hostinger reported Next.js 16.3.8 SWC requiring GLIBC_2.29."
+            echo "A modern-Ubuntu build artifact is NOT automatically runnable on glibc 2.28."
+            echo "Native dependencies such as better-sqlite3 must be built and tested for the target runtime."
+          '
+      - name: Summarize findings
+        run: |
+          {
+            echo '## Hostinger deployment constraints'
+            echo ''
+            echo '- Hostinger SSH reported glibc 2.28.'
+            echo '- Next.js 16.3.8 SWC requires GLIBC_2.29 on that host.'
+            echo '- better-sqlite3 was missing from the Hostinger node_modules.'
+            echo '- Building on Ubuntu 24.04 does not prove runtime compatibility on glibc 2.28.'
+            echo '- Existing manual workflow `.github/workflows/build.yml` already attempts a full build and warns about hosted runner memory limits.'
+            echo '- Do not deploy until the Node runtime, native SQLite module and persistent data directory are verified.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # Independent of the upstream PR admission policy; this is a non-mutating
+  # runtime compatibility probe for the Hostinger shared Linux environment.
+  native-sqlite-probe:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check better-sqlite3 on glibc 2.28 / Node 22
+        run: |
+          docker run --rm -v "$PWD:/src:ro" -w /work rockylinux:8 /bin/bash -lc '
+            set -euo pipefail
+            dnf install -y curl tar gzip xz gcc gcc-c++ make python39 findutils gcc-toolset-12-gcc gcc-toolset-12-gcc-c++ >/dev/null
+            source /opt/rh/gcc-toolset-12/enable
+            g++ --version | sed -n '1p'
+            export PYTHON=/usr/bin/python3.9
+            "$PYTHON" --version
+            curl -fsSL https://nodejs.org/dist/v22.16.0/node-v22.16.0-linux-x64.tar.xz -o /tmp/node.tar.xz
+            mkdir -p /opt/node
+            tar -xJf /tmp/node.tar.xz -C /opt/node --strip-components=1
+            export PATH=/opt/node/bin:$PATH
+            node --version
+            npm --version
+            ldd --version | sed -n '1p'
+            mkdir -p /work && cd /work
+            npm init -y >/dev/null
+            npm install --save-exact better-sqlite3@13.0.3
+            echo "=== Package build metadata ==="
+            node -e "const p=require(\"./node_modules/better-sqlite3/package.json\"); console.log(JSON.stringify({version:p.version,scripts:p.scripts},null,2))"
+            ls -la node_modules/better-sqlite3
+            echo "=== Source availability ==="
+            if test -f node_modules/better-sqlite3/binding.gyp; then
+              echo "binding.gyp available: attempting native rebuild"
+              cd node_modules/better-sqlite3
+              "$PYTHON" --version
+              node /opt/node/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js rebuild --release --force_build=1
+              cd /work
+            else
+              echo "No binding.gyp shipped with better-sqlite3@13.0.3: source compilation from this npm package is unavailable"
+              exit 1
+            fi
+            echo "=== Compiled SQLite binding dependencies ==="
+            find node_modules/better-sqlite3 -name '*.node' -type f -print
+            test -f node_modules/better-sqlite3/build/Release/better_sqlite3.node
+            ldd node_modules/better-sqlite3/build/Release/better_sqlite3.node
+            node -e "const DB=require(\"better-sqlite3\"); const db=new DB(\":memory:\", {nativeBinding: \"./node_modules/better-sqlite3/build/Release/better_sqlite3.node\"}); console.log(\"SQLite runtime:\", db.prepare(\"select sqlite_version() AS v\").get()); db.close()"
+            echo "=== Validate default application binding resolution ==="
+            cp node_modules/better-sqlite3/build/Release/better_sqlite3.node node_modules/better-sqlite3/prebuilds/linux-x64.node
+            node -e "const DB=require(\"better-sqlite3\"); const db=new DB(\":memory:\"); db.exec(\"create table hostinger_probe (id integer primary key, value text)\"); db.prepare(\"insert into hostinger_probe (value) values (?)\").run(\"ok\"); const row=db.prepare(\"select value from hostinger_probe where id = 1\").get(); if(row.value !== \"ok\") process.exit(1); console.log(\"Default binding SQLite CRUD: PASS\"); db.close()"
+          '

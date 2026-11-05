@@ -1,0 +1,8 @@
+[Unit]
+Description=Daily OmniRoute backup
+[Timer]
+OnCalendar=*-*-* 03:30:00 America/Sao_Paulo
+RandomizedDelaySec=15m
+Persistent=true
+[Install]
+WantedBy=timers.target

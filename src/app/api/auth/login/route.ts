@@ -19,7 +19,6 @@ import {
   endLoginAttempt,
   recordLoginFailure,
 } from "@/server/auth/loginGuard";
-import { AUTHZ_HEADER_TRUSTED_PEER_IP } from "@/server/authz/headers";
 import {
   MFA_PENDING_COOKIE,
   getDashboardJwtSecret,
@@ -60,6 +59,7 @@ export const authRouteInternals = {
 
 export async function POST(request: NextRequest) {
   const auditContext = getAuditRequestContext(request);
+  const clientIp = getLoginLockoutKey(request, auditContext.ipAddress);
   // Slot reserved by the guard while the password is verified; released on every exit.
   let heldSlotKey: string | null | undefined;
   let holdsSlot = false;
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
         target: "dashboard-auth",
         resourceType: "auth_session",
         status: "failed",
-        ipAddress: auditContext.ipAddress || undefined,
+        ipAddress: clientIp || undefined,
         requestId: auditContext.requestId,
         metadata: { reason: "missing_jwt_secret" },
       });
@@ -108,11 +108,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid password payload" }, { status: 400 });
     }
     const settings = await getCachedSettings();
-    const trustedPeerIp = process.env.OMNIROUTE_PEER_STAMP_TOKEN
-      ? request.headers.get(AUTHZ_HEADER_TRUSTED_PEER_IP)
-      : null;
-    const clientIp = trustedPeerIp || auditContext.ipAddress || null;
-    const lockoutKey = getLoginLockoutKey(request, auditContext.ipAddress);
+    const lockoutKey = clientIp;
     const oidcDisabledPassword =
       settings.oidcEnabled === true &&
       (settings.oidcDisablePasswordLogin === true ||
@@ -176,7 +172,7 @@ export async function POST(request: NextRequest) {
         target: "dashboard-auth",
         resourceType: "auth_session",
         status: "failed",
-        ipAddress: auditContext.ipAddress || undefined,
+        ipAddress: clientIp || undefined,
         requestId: auditContext.requestId,
         metadata: { reason: "missing_persisted_password" },
       });
@@ -210,7 +206,7 @@ export async function POST(request: NextRequest) {
         target: "dashboard-auth",
         resourceType: "auth_session",
         status: "failed",
-        ipAddress: auditContext.ipAddress || undefined,
+        ipAddress: clientIp || undefined,
         requestId: auditContext.requestId,
         metadata: {
           reason: "well_known_default_password_non_loopback",
@@ -279,7 +275,7 @@ export async function POST(request: NextRequest) {
         target: "dashboard-auth",
         resourceType: "auth_session",
         status: "success",
-        ipAddress: auditContext.ipAddress || undefined,
+        ipAddress: clientIp || undefined,
         requestId: auditContext.requestId,
         metadata: {
           hasStoredPassword: Boolean(storedHash),
@@ -300,7 +296,7 @@ export async function POST(request: NextRequest) {
       target: "dashboard-auth",
       resourceType: "auth_session",
       status: "failed",
-      ipAddress: auditContext.ipAddress || undefined,
+      ipAddress: clientIp || undefined,
       requestId: auditContext.requestId,
       metadata: {
         reason: "invalid_password",
@@ -329,7 +325,7 @@ export async function POST(request: NextRequest) {
       target: "dashboard-auth",
       resourceType: "auth_session",
       status: "failed",
-      ipAddress: auditContext.ipAddress || undefined,
+      ipAddress: clientIp || undefined,
       requestId: auditContext.requestId,
       metadata: {
         message: error instanceof Error ? error.message : "unknown_error",

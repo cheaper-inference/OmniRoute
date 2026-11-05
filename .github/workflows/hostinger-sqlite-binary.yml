@@ -1,0 +1,52 @@
+name: Hostinger SQLite native binary
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [hostinger-build-compatibility]
+    paths:
+      - .github/workflows/hostinger-sqlite-binary.yml
+
+permissions:
+  contents: read
+
+jobs:
+  compile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile better-sqlite3 on Rocky Linux 8
+        run: |
+          mkdir -p hostinger-sqlite-artifact
+          docker run --rm -v "$PWD/hostinger-sqlite-artifact:/output" rockylinux:8 /bin/bash -lc '
+            set -euo pipefail
+            dnf install -y curl tar xz make gcc gcc-c++ python39 gcc-toolset-12-gcc gcc-toolset-12-gcc-c++ >/dev/null
+            source /opt/rh/gcc-toolset-12/enable
+            export PYTHON=/usr/bin/python3.9
+            curl -fsSL https://nodejs.org/dist/v22.23.4/node-v22.23.4-linux-x64.tar.xz -o /tmp/node.tar.xz
+            mkdir -p /opt/node
+            tar -xJf /tmp/node.tar.xz -C /opt/node --strip-components=1
+            export PATH=/opt/node/bin:$PATH
+            mkdir /work && cd /work
+            npm init -y >/dev/null
+            npm install --ignore-scripts --no-audit --no-fund better-sqlite3@13.0.3 node-gyp@12.4.0
+            cd node_modules/better-sqlite3
+            echo "=== Inspect native binding source ==="
+            ls -l binding.gyp src
+            echo "=== Compile from sources with node-gyp ==="
+            node /work/node_modules/node-gyp/bin/node-gyp.js rebuild --release --force_build=1
+            echo "=== Verify native binary ==="
+            test -s build/Release/better_sqlite3.node
+            mkdir -p prebuilds
+            cp build/Release/better_sqlite3.node prebuilds/linux-x64.node
+            ldd prebuilds/linux-x64.node
+            node -e "const DB=require(\"/work/node_modules/better-sqlite3\");const db=new DB(\":memory:\");db.exec(\"create table test (id integer)\");db.prepare(\"insert into test values (?)\").run(42);if(db.prepare(\"select id from test\").get().id!==42)process.exit(1);db.close();console.log(\"SQLite native CRUD: PASS\")"
+            cp prebuilds/linux-x64.node /output/better_sqlite3.node
+            sha256sum /output/better_sqlite3.node > /output/SHA256SUMS
+          '
+      - uses: actions/upload-artifact@v4
+        with:
+          name: better-sqlite3-node22-rocky8-glibc228
+          path: hostinger-sqlite-artifact/
+          if-no-files-found: error
