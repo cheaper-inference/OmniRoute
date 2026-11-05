@@ -105,6 +105,11 @@ describe("resource pressure policy", () => {
       ...fastThresholds,
       heapAbsoluteThresholdMb: 200,
     });
+    /**
+     * Builds a heap-only pressure sample with a fixed 1,000 MiB heap limit.
+     * @param heapUsedMb - Heap usage in MiB.
+     * @returns Resource signals with the requested heap usage and no cgroup or PSI data.
+     */
     const sample = (heapUsedMb: number) =>
       baseSignals({ v8: { heapUsedBytes: heapUsedMb * MiB, heapLimitBytes: 1_000 * MiB } });
     assert.equal(tracker.observe(sample(201)).severity, "normal", "first sample is provisional");

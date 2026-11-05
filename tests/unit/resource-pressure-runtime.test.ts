@@ -48,20 +48,36 @@ describe("ResourcePressureRuntime stale-while-revalidate cache", () => {
       heapThresholdMb: null,
       rssThresholdMb: null,
       thresholds: { heapAbsoluteThresholdMb: 200, sustainedSamplesCritical: 2 },
+      /** @returns The controlled clock time in milliseconds. */
       nowMs: () => now,
       staleAfterMs: 0,
+      /**
+       * Captures a refresh for explicit execution by the test.
+       * @param refresh - Refresh callback to run on the next tick.
+       */
       schedule: (refresh) => {
         scheduled = refresh;
       },
+      /** @returns A sample at the controlled time with heap usage above the absolute threshold. */
       sample: async () => signals(now, 201),
       selfRestart: {
         enabled: true,
         afterMs: 1_000,
+        /**
+         * Records a restart request without terminating the test process.
+         * @param code - Requested process exit code.
+         */
         exitFn: (code) => {
           exits.push(code);
         },
       },
     });
+    /**
+     * Advances the controlled clock and runs the refresh scheduled by a runtime check.
+     * @param atMs - Clock time in milliseconds for the check and sample.
+     * @returns A promise that settles when the refresh has settled.
+     * @throws If the check does not schedule a refresh.
+     */
     const tick = async (atMs: number) => {
       now = atMs;
       runtime.check();
