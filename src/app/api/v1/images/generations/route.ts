@@ -48,6 +48,11 @@ import {
 } from "@/lib/providerModels/syncedEndpointRouting";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
 import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
+import {
+  attachCodexImageQuotaHeaders,
+  canExposeCodexImageQuota,
+  type CodexImageQuotaSnapshot,
+} from "@omniroute/open-sse/services/codexImageQuotaTelemetry.ts";
 import { calculateModalCost } from "@/lib/usage/costCalculator";
 import { recordModalCallCost } from "@/domain/costRules";
 import { generateRequestId } from "@/shared/utils/requestId";
@@ -444,6 +449,11 @@ async function postHandler(request, context) {
       latencyMs: Date.now() - startTime,
       requestId: generateRequestId(),
     });
+    attachCodexImageQuotaHeaders(
+      headers,
+      (result as { telemetry?: { codexQuota?: CodexImageQuotaSnapshot } }).telemetry?.codexQuota,
+      canExposeCodexImageQuota(provider, request.headers, policy.apiKeyInfo?.scopes)
+    );
     return new Response(JSON.stringify((result as { data: unknown }).data), {
       status: 200,
       headers,
