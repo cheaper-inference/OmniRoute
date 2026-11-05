@@ -135,6 +135,17 @@ function getLatestSnapshotObservation(
   }
 }
 
+/**
+ * When a window whose reset time moved forward began. On a scheduled rollover the previous
+ * window ended at its reset time, so the new one began there (polls see it later). Otherwise
+ * the previous reset time is still in the future: the window restarted early (a reset the
+ * account redeems upstream), or it is a rolling window nobody has used yet, whose reset time
+ * slides forward with the clock. Either way the window began by the time it was observed.
+ */
+function movedWindowStart(previousResetIso: string, observedAt: string): string {
+  return Date.parse(previousResetIso) <= Date.parse(observedAt) ? previousResetIso : observedAt;
+}
+
 export function recordProviderQuotaResetEventIfChanged(input: ResetEventInput): void {
   if (!input.connectionId || !input.windowKey || !isPrimaryWeeklyWindow(input.windowKey)) return;
 
@@ -164,7 +175,9 @@ export function recordProviderQuotaResetEventIfChanged(input: ResetEventInput): 
 
   if (!resetMovedForward && !resetObservedWithinSameResetAt) return;
 
-  const windowStartedAt = resetMovedForward ? previousResetIso : observedAt;
+  const windowStartedAt = resetMovedForward
+    ? movedWindowStart(previousResetIso, observedAt)
+    : observedAt;
 
   try {
     const db = getDbInstance() as unknown as DbLike;
@@ -209,8 +222,9 @@ export function hasObservedClaudeQuotaResetAfter(
   if (!connectionId || !Number.isFinite(afterMs) || afterMs > nowMs) return false;
   try {
     const db = getDbInstance() as unknown as DbLike;
-    const rows = db.prepare<{ observedAt: string }>(
-      `SELECT observed_at AS observedAt FROM provider_quota_reset_events
+    const rows = db
+      .prepare<{ observedAt: string }>(
+        `SELECT observed_at AS observedAt FROM provider_quota_reset_events
        WHERE connection_id = ? AND LOWER(provider) = 'claude'
          -- Only the global weekly window can prove that the account-wide 429
          -- recovered. A model-specific Opus/Haiku weekly refill is insufficient.
@@ -220,7 +234,8 @@ export function hasObservedClaudeQuotaResetAfter(
          AND new_remaining_percentage > 0
          AND observed_at > ? AND observed_at <= ?
        ORDER BY observed_at DESC, id DESC LIMIT 1`
-    ).all(connectionId, new Date(afterMs).toISOString(), new Date(nowMs).toISOString());
+      )
+      .all(connectionId, new Date(afterMs).toISOString(), new Date(nowMs).toISOString());
     return rows.some((row) => {
       const time = Date.parse(row.observedAt);
       return Number.isFinite(time) && time > afterMs && time <= nowMs;
