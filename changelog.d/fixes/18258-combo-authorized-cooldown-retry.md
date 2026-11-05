@@ -1,0 +1,1 @@
+- **fix(combo):** Preserve an authorized same-target retry across a short transient connection cooldown, within existing wait limits and cancellation deadlines (#18257).
