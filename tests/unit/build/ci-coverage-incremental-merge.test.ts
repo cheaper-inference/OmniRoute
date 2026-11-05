@@ -67,3 +67,66 @@ test("Codecov uploads only the merged LCOV report and remains bounded/advisory",
   assert.equal(upload.with?.disable_search, true);
   assert.equal(upload.with?.fail_ci_if_error, false);
 });
+
+type CoverageStep = {
+  uses?: string;
+  with?: Record<string, unknown>;
+  env?: Record<string, unknown>;
+};
+
+type CoverageWorkflow = {
+  env: Record<string, unknown>;
+  jobs: Record<string, { env?: Record<string, unknown>; steps: CoverageStep[] }>;
+};
+
+function assertPinnedCoverageRuntime(candidate: CoverageWorkflow) {
+  const version = candidate.env.CI_NODE_VERSION;
+  assert.ok(typeof version === "string", "the common CI runtime must be a string");
+  assert.match(
+    version,
+    /^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$/,
+    "V8 coverage requires a complete Node version, not a major or range selector"
+  );
+  for (const jobName of ["test-unit", "test-coverage"]) {
+    const job = candidate.jobs[jobName];
+    assert.ok(job, `${jobName} must exist`);
+    assert.equal(job.env?.CI_NODE_VERSION, undefined, `${jobName} must not shadow the common pin`);
+    const setups = job.steps.filter((step) => step.uses?.startsWith("actions/setup-node@"));
+    assert.equal(setups.length, 1, `${jobName} must select exactly one runtime`);
+    assert.equal(
+      setups[0].with?.["node-version"],
+      "${{ env.CI_NODE_VERSION }}",
+      `${jobName} must resolve the common exact runtime`
+    );
+    assert.equal(setups[0].with?.["node-version-file"], undefined);
+    assert.equal(setups[0].env?.CI_NODE_VERSION, undefined);
+  }
+}
+
+test("V8 producers and consumer resolve one common complete Node version", () => {
+  assertPinnedCoverageRuntime(workflow);
+});
+
+for (const selector of ["24", "^24.22.2"]) {
+  test(`coverage runtime contract rejects floating selector ${selector}`, () => {
+    const candidate = structuredClone(workflow) as CoverageWorkflow;
+    candidate.env.CI_NODE_VERSION = "24.22.2";
+    assertPinnedCoverageRuntime(candidate);
+    candidate.env.CI_NODE_VERSION = selector;
+    assert.throws(() => assertPinnedCoverageRuntime(candidate), /complete Node version/);
+  });
+}
+
+for (const jobName of ["test-unit", "test-coverage"]) {
+  test(`coverage runtime contract rejects a divergent ${jobName} runtime`, () => {
+    const candidate = structuredClone(workflow) as CoverageWorkflow;
+    candidate.env.CI_NODE_VERSION = "24.22.2";
+    assertPinnedCoverageRuntime(candidate);
+    const setup = candidate.jobs[jobName].steps.find((step) =>
+      step.uses?.startsWith("actions/setup-node@")
+    );
+    assert.ok(setup?.with);
+    setup.with["node-version"] = "24.22.1";
+    assert.throws(() => assertPinnedCoverageRuntime(candidate), /common exact runtime/);
+  });
+}

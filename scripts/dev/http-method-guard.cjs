@@ -5,12 +5,15 @@ const http = require("node:http");
 const HIGH_RISK_METHOD_RULES = [
   [/^\/api\/auth\/login\/?$/, ["POST"]],
   [/^\/api\/auth\/logout\/?$/, ["POST"]],
+  // Next automatically serves HEAD through GET for the status route.
+  [/^\/api\/auth\/status\/?$/, ["GET", "HEAD"]],
   [/^\/api\/keys\/?$/, ["GET", "POST"]],
   // Match the group collection before the generic API-key id route.
   [/^\/api\/keys\/groups\/?$/, ["GET", "POST"]],
   [/^\/api\/keys\/groups\/[^/]+\/?$/, ["GET", "PUT", "DELETE"]],
   [/^\/api\/keys\/[^/]+\/?$/, ["GET", "PATCH", "DELETE"]],
   [/^\/api\/keys\/[^/]+\/devices\/?$/, ["GET"]],
+  [/^\/api\/keys\/[^/]+\/access\/?$/, ["POST"]],
 ];
 
 let installed = false;

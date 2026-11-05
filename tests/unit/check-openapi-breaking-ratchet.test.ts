@@ -4,7 +4,7 @@
 //
 // Strategy: test the exported pure evaluator without spawning oasdiff or touching
 // git. The evaluator is the load-bearing decision: regression iff a real breaking
-// change appears (measured > baseline); a null measurement (graceful skip) never
+// change appears (unknown > 0); a null measurement (graceful skip) never
 // blocks. End-to-end SKIP behavior (binary absent / base unresolved) is covered by
 // the script's own advisory tests and a process-level skip assertion below.
 import test from "node:test";
@@ -93,15 +93,15 @@ test("evaluateOpenapiRatchet: undefined current → graceful skip", () => {
   assert.equal(r.skipped, true);
 });
 
-test("evaluateOpenapiRatchet: measured == baseline → not regressed", () => {
+test("evaluateOpenapiRatchet: unknown findings cannot consume an equal numeric ceiling", () => {
   const r = evaluate({ current: 2, baseline: 2 });
-  assert.equal(r.regressed, false);
+  assert.equal(r.regressed, true);
   assert.equal(r.skipped, false);
 });
 
-test("evaluateOpenapiRatchet: measured < baseline → not regressed (improvement)", () => {
+test("evaluateOpenapiRatchet: one unknown finding blocks even below the stored ceiling", () => {
   const r = evaluate({ current: 1, baseline: 5 });
-  assert.equal(r.regressed, false);
+  assert.equal(r.regressed, true);
   assert.equal(r.skipped, false);
 });
 

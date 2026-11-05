@@ -7,12 +7,14 @@ on:
       - "@omniroute/opencode-plugin/**"
       - "@omniroute/opencode-plugin-v2/**"
       - ".github/workflows/opencode-plugin-ci.yml"
+      - "config/ci/toolchain.json"
   pull_request:
     branches: [main, "release/**"]
     paths:
       - "@omniroute/opencode-plugin/**"
       - "@omniroute/opencode-plugin-v2/**"
       - ".github/workflows/opencode-plugin-ci.yml"
+      - "config/ci/toolchain.json"
     types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
 
@@ -43,6 +45,26 @@ jobs:
         with:
           package-manager-cache: false
           node-version: ${{ matrix.node }}
+      - name: Select the lockfile-compatible npm version
+        id: npm
+        shell: bash
+        working-directory: .
+        run: |
+          set -euo pipefail
+          expected=$(node -p "require('./config/ci/toolchain.json').npm")
+          if ! [[ "$expected" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid pinned npm version" >&2
+            exit 1
+          fi
+          if [ "$(npm --version)" != "$expected" ]; then
+            npm install --global "npm@$expected" --no-audit --no-fund
+          fi
+          actual=$(npm --version)
+          if [ "$actual" != "$expected" ]; then
+            echo "npm version differs from the lockfile toolchain" >&2
+            exit 1
+          fi
+          echo "version=$actual" >> "$GITHUB_OUTPUT"
       - run: npm ci --no-audit --no-fund
       - run: npm run build
       - run: npm test
@@ -65,6 +87,26 @@ jobs:
         with:
           package-manager-cache: false
           node-version: ${{ matrix.node }}
+      - name: Select the lockfile-compatible npm version
+        id: npm
+        shell: bash
+        working-directory: .
+        run: |
+          set -euo pipefail
+          expected=$(node -p "require('./config/ci/toolchain.json').npm")
+          if ! [[ "$expected" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid pinned npm version" >&2
+            exit 1
+          fi
+          if [ "$(npm --version)" != "$expected" ]; then
+            npm install --global "npm@$expected" --no-audit --no-fund
+          fi
+          actual=$(npm --version)
+          if [ "$actual" != "$expected" ]; then
+            echo "npm version differs from the lockfile toolchain" >&2
+            exit 1
+          fi
+          echo "version=$actual" >> "$GITHUB_OUTPUT"
       - run: npm ci --no-audit --no-fund
       - run: npm run build
       - run: npm test
@@ -81,6 +123,26 @@ jobs:
         with:
           package-manager-cache: false
           node-version: "24.22.1"
+      - name: Select the lockfile-compatible npm version
+        id: npm
+        shell: bash
+        working-directory: .
+        run: |
+          set -euo pipefail
+          expected=$(node -p "require('./config/ci/toolchain.json').npm")
+          if ! [[ "$expected" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid pinned npm version" >&2
+            exit 1
+          fi
+          if [ "$(npm --version)" != "$expected" ]; then
+            npm install --global "npm@$expected" --no-audit --no-fund
+          fi
+          actual=$(npm --version)
+          if [ "$actual" != "$expected" ]; then
+            echo "npm version differs from the lockfile toolchain" >&2
+            exit 1
+          fi
+          echo "version=$actual" >> "$GITHUB_OUTPUT"
       - name: Build plugin-v2 artifact
         working-directory: "@omniroute/opencode-plugin-v2"
         run: npm ci --no-audit --no-fund && npm run build

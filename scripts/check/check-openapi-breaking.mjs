@@ -17,7 +17,8 @@
 // preserves SKIP/exit 0. GitHub event SHAs take precedence over local BASE_REF.
 // PR heads compare at merge-base; synthetic merges compare to their pinned base.
 // Local usage: BASE_REF=<commit-or-ref> node scripts/check/check-openapi-breaking.mjs
-// --json prints the scanner report but still enforces --ratchet.
+// --json preserves the raw scanner array; --assessment-json adds accepted/unknown evidence.
+// Historical spec corrections are exact reviewed records; every unknown finding blocks --ratchet.
 
 import fs from "node:fs";
 import os from "node:os";
@@ -25,10 +26,15 @@ import path from "node:path";
 import { execFileSync, spawnSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import { resolveOpenapiBaseline } from "./openapiBaseline.mjs";
+import {
+  assessOpenapiHistoricalCorrections,
+  validateOpenapiReport,
+} from "./openapiHistoricalCorrections.mjs";
 
 const ROOT = process.cwd();
 const QUIET = process.argv.includes("--quiet");
 const PRINT_JSON = process.argv.includes("--json");
+const PRINT_ASSESSMENT = process.argv.includes("--assessment-json");
 const RATCHET = process.argv.includes("--ratchet");
 
 const SPEC_REL = "docs/openapi.yaml";
@@ -131,8 +137,8 @@ export function parseOasdiffBreaking(oasdiffJson) {
 // ---------------------------------------------------------------------------
 
 /**
- * Avalia a contagem MEDIDA de breaking changes contra o baseline.
- * Direction: down (a contagem só pode CAIR — mais breaking changes = regressão).
+ * Evaluates the measured UNKNOWN findings after exact historical corrections.
+ * A numeric ceiling is not permission for a different, unreviewed API break.
  *
  * Uma medição ausente (current null/undefined) OU um baseline ausente
  * (baseline null/undefined) → { regressed:false, skipped:true }: sem uma das
@@ -140,7 +146,7 @@ export function parseOasdiffBreaking(oasdiffJson) {
  * obrigatório (exit 2 com --ratchet).
  *
  * @param {object} args
- * @param {number|null} args.current  - Breaking changes medidos agora (null = sem medição).
+ * @param {number|null} args.current  - Unreviewed breaking changes (null = no measurement).
  * @param {number|null} args.baseline - Contagem congelada em quality-baseline.json (null = sem baseline).
  * @returns {{ regressed: boolean, skipped: boolean }}
  */
@@ -148,7 +154,7 @@ export function evaluateOpenapiRatchet({ current, baseline }) {
   if (current === null || current === undefined || baseline === null || baseline === undefined) {
     return { regressed: false, skipped: true };
   }
-  return { regressed: current > baseline, skipped: false };
+  return { regressed: current > 0, skipped: false };
 }
 
 /**
@@ -309,7 +315,7 @@ function main() {
       fs.unlinkSync(candidateTmp);
     }
   }
-  if (!PRINT_JSON) {
+  if (!PRINT_JSON && !PRINT_ASSESSMENT) {
     console.log(
       `openapiBaseSha=${baseRef} openapiCandidateSha=${comparison.candidateSha} source=${comparison.source}`
     );
@@ -351,40 +357,91 @@ function main() {
       incomplete("invalid-report");
       return;
     }
-    let parsed = [];
-    if (trimmed && trimmed !== "null") {
-      try {
-        parsed = JSON.parse(trimmed);
-      } catch (parseErr) {
-        // JSON inesperado não é uma medição válida.
-        incomplete("parse-error");
-        if (!QUIET) {
-          process.stderr.write(
-            `[openapi-breaking] SKIP — JSON do oasdiff não parseável: ${parseErr.message}\n` +
-              `[openapi-breaking] stdout (primeiros 500): ${trimmed.slice(0, 500)}\n`
-          );
-        }
-        return;
+    let parsed;
+    try {
+      parsed = JSON.parse(trimmed);
+    } catch (parseErr) {
+      // JSON inesperado não é uma medição válida.
+      incomplete("parse-error");
+      if (!QUIET) {
+        process.stderr.write(
+          `[openapi-breaking] SKIP — JSON do oasdiff não parseável: ${parseErr.message}\n` +
+            `[openapi-breaking] stdout (primeiros 500): ${trimmed.slice(0, 500)}\n`
+        );
       }
+      return;
     }
 
-    if (
-      !Array.isArray(parsed) ||
-      parsed.some((item) => !item || typeof item !== "object" || Array.isArray(item))
-    ) {
+    try {
+      validateOpenapiReport(parsed);
+    } catch {
       incomplete("invalid-report");
       return;
     }
-    if (PRINT_JSON) {
-      process.stdout.write(JSON.stringify(parsed, null, 2) + "\n");
-      applyRatchet(parseOasdiffBreaking(parsed).count);
+    let assessment;
+    try {
+      const policyPath = path.join(ROOT, "config/quality/openapi-historical-corrections.json");
+      let policy = { schemaVersion: 1, corrections: [] };
+      if (fs.existsSync(policyPath)) {
+        if (!fs.lstatSync(policyPath).isFile()) throw new Error("Correction policy is not a file");
+        policy = JSON.parse(fs.readFileSync(policyPath, "utf8"));
+      }
+      let scannerVersion = null;
+      if (policy.corrections?.some((entry) => entry?.baseSha === comparison.baseSha)) {
+        const versionOutput = execFileSync(oasdiffBin, ["--version"], {
+          cwd: ROOT,
+          encoding: "utf8",
+          maxBuffer: 4096,
+          timeout: 5000,
+        });
+        const versions = [...versionOutput.matchAll(/\b(?:v)?(\d+\.\d+\.\d+)\b/g)];
+        if (versions.length !== 1) throw new Error("Unknown scanner version");
+        scannerVersion = versions[0][1];
+      }
+      const committedSource = (sha, relative) =>
+        execFileSync("git", ["show", `${sha}:${relative}`], {
+          cwd: ROOT,
+          maxBuffer: 8 * 1024 * 1024,
+          timeout: 30000,
+          stdio: ["ignore", "pipe", "pipe"],
+        });
+      assessment = assessOpenapiHistoricalCorrections({
+        report: parsed,
+        policy,
+        comparison,
+        baseSpec: fs.readFileSync(baseTmp),
+        candidateSpec: fs.readFileSync(SPEC_PATH),
+        scannerVersion,
+        readContract(relative) {
+          const candidatePath = path.join(ROOT, relative);
+          if (!fs.lstatSync(candidatePath).isFile())
+            throw new Error("Contract source is not a file");
+          return {
+            base: committedSource(comparison.baseSha, relative),
+            candidate: committedSource(comparison.candidateSha, relative),
+            worktree: fs.readFileSync(candidatePath),
+          };
+        },
+      });
+    } catch {
+      incomplete("historical-correction-unresolved");
+      return;
+    }
+    if (PRINT_JSON || PRINT_ASSESSMENT) {
+      process.stdout.write(
+        JSON.stringify(PRINT_ASSESSMENT ? { comparison, ...assessment } : parsed, null, 2) + "\n"
+      );
+      applyRatchet(assessment.unknownCount);
       return;
     }
 
     const { count, byId, byPath, items } = parseOasdiffBreaking(parsed);
 
-    // Emitir KEY=VALUE para o coletor de métricas.
-    console.log(`openapiBreaking=${count}`);
+    // Preserve the raw measurement separately; accepted findings are never hidden.
+    console.log(`openapiBreakingRaw=${assessment.rawCount}`);
+    console.log(`openapiBreakingAccepted=${assessment.acceptedCount}`);
+    console.log(`openapiBreakingUnknown=${assessment.unknownCount}`);
+    console.log(`openapiBreaking=${assessment.unknownCount}`);
 
     if (!QUIET) {
       if (count > 0) {
@@ -414,9 +471,8 @@ function main() {
         process.stderr.write(`[openapi-breaking]   affected paths: ${topPaths}\n`);
         if (RATCHET) {
           process.stderr.write(
-            "[openapi-breaking] Se a quebra é intencional (major bump), documente no PR e\n" +
-              "[openapi-breaking] re-baseline metrics.openapiBreaking em config/quality/quality-baseline.json\n" +
-              "[openapi-breaking] com justificativa + issue de tracking; senão, ajuste a spec.\n"
+            "[openapi-breaking] Historical spec corrections require exact reviewed evidence.\n" +
+              "[openapi-breaking] Every unknown finding blocks; do not raise the numeric ceiling.\n"
           );
         } else {
           process.stderr.write(
@@ -432,7 +488,7 @@ function main() {
     }
 
     // Medição bem-sucedida → aplica o ratchet (bloqueante só com --ratchet).
-    applyRatchet(count);
+    applyRatchet(assessment.unknownCount);
   } finally {
     // Limpa o arquivo temp da spec base.
     try {
@@ -446,9 +502,9 @@ function main() {
 /**
  * Aplica o ratchet (direction:down) sobre a contagem medida vs o baseline.
  * Sem --ratchet: advisory (exit 0). Com --ratchet: exit 1 numa regressão real
- * (medida > baseline). Baseline ausente → INCOMPLETE (exit 2).
+ * (unknown findings > 0). Baseline ausente → INCOMPLETE (exit 2).
  *
- * @param {number} count - Contagem MEDIDA de breaking changes (medição bem-sucedida).
+ * @param {number} count - Measured unknown findings after exact historical corrections.
  */
 function applyRatchet(count) {
   if (!RATCHET) {
@@ -474,10 +530,8 @@ function applyRatchet(count) {
 
   if (regressed) {
     process.stderr.write(
-      `[openapi-breaking] REGRESSÃO — ${count} breaking change(s) > baseline ${baselineValue}\n` +
-        "  → Ajuste a spec para não quebrar clientes existentes. Se a quebra é intencional\n" +
-        "    (major bump), re-baseline metrics.openapiBreaking em\n" +
-        "    config/quality/quality-baseline.json com justificativa + issue de tracking.\n"
+      `[openapi-breaking] REGRESSÃO — ${count} unreviewed breaking change(s) (stored ceiling ${baselineValue}).\n` +
+        "  Preserve the real API contract. A numeric ceiling does not authorize unknown findings.\n"
     );
     process.exitCode = 1;
     return;

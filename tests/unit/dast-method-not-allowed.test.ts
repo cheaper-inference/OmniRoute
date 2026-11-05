@@ -329,3 +329,73 @@ for (const { method, path, valid, invalid } of groupBodyCases) {
     for (const data of invalid) assert.equal(validate(data), false, JSON.stringify(data));
   });
 }
+
+test("status and key-access QUERY return 405 and Allow before authentication or body handling", () => {
+  for (const [path, allow] of [
+    ["/api/auth/status", "GET, HEAD"],
+    ["/api/keys/qg-key/access", "POST"],
+  ]) {
+    for (const suffix of ["", "/", "?view=all"]) {
+      for (const downstreamStatus of [400, 401]) {
+        const url = path + suffix;
+        const response = responseRecorder();
+        let calls = 0;
+        const listener = wrapRequestListenerWithMethodGuard(
+          (_request: unknown, result: ReturnType<typeof responseRecorder>) => {
+            calls += 1;
+            result.statusCode = downstreamStatus;
+            result.end();
+          }
+        );
+        listener(
+          {
+            method: "QUERY",
+            url,
+            get headers() {
+              throw new Error("method rejection must precede authentication");
+            },
+            on() {
+              throw new Error("method rejection must precede request body consumption");
+            },
+          },
+          response
+        );
+        assert.equal(calls, 0, url);
+        assert.equal(response.statusCode, 405, url);
+        assert.equal(response.headers.get("allow"), allow, url);
+        assert.equal(response.headers.get("cache-control"), "no-store", url);
+        assert.equal(JSON.parse(response.body).error.code, "METHOD_NOT_ALLOWED", url);
+      }
+    }
+  }
+});
+
+test("status and key-access retain their implemented and automatic methods", () => {
+  for (const [url, methods] of [
+    ["/api/auth/status", ["GET", "HEAD", "OPTIONS"]],
+    ["/api/keys/qg-key/access", ["POST", "OPTIONS"]],
+  ] as const) {
+    for (const method of methods) {
+      const response = responseRecorder();
+      let calls = 0;
+      const listener = wrapRequestListenerWithMethodGuard(
+        (_request: unknown, result: ReturnType<typeof responseRecorder>) => {
+          calls += 1;
+          result.statusCode = 204;
+          result.end();
+        }
+      );
+      listener({ method, url }, response);
+      assert.equal(calls, 1, `${method} ${url}`);
+      assert.equal(response.statusCode, 204, `${method} ${url}`);
+      assert.equal(response.headers.has("allow"), false, `${method} ${url}`);
+    }
+  }
+  for (const url of ["/api/auth/status/extra", "/api/keys/qg-key/access/extra"]) {
+    assert.equal(
+      maybeHandleDisallowedMethod({ method: "QUERY", url }, responseRecorder()),
+      false,
+      `the finite rules must not capture unrelated descendants: ${url}`
+    );
+  }
+});

@@ -32,8 +32,8 @@ test("provider CI runs versions inside the package engine contract", () => {
 test("both plugin variants install exactly their checked-in lockfiles", () => {
   const workflow = load(read(".github/workflows/opencode-plugin-ci.yml"));
   for (const id of ["test", "test-v2"]) {
-    const installs = workflow.jobs[id].steps.filter((step) =>
-      /npm (?:ci|install)/.test(step.run || "")
+    const installs = workflow.jobs[id].steps.filter(
+      (step) => step.id !== "npm" && /npm (?:ci|install)/.test(step.run || "")
     );
     assert.equal(installs.length, 1);
     assert.match(installs[0].run, /^npm ci\b/);
@@ -60,5 +60,31 @@ test("subpackage CI pins include the October 2026 Node security fixes", () => {
         assert.ok(semver.gte(version, floor), `${name}: Node ${version} predates ${floor}`);
       }
     }
+  }
+});
+
+const npmAction = load(read(".github/actions/npm-ci-retry/action.yml"));
+const canonicalBootstrap = npmAction.runs.steps.find((step) => step.id === "npm");
+
+for (const id of ["test", "test-v2", "build"]) {
+  test(`plugin ${id} selects the canonical npm before installing dependencies`, () => {
+    const workflow = load(read(".github/workflows/opencode-plugin-ci.yml"));
+    const job = workflow.jobs[id];
+    const setup = job.steps.findIndex((step) => step.uses?.startsWith("actions/setup-node@"));
+    const bootstrap = job.steps.findIndex((step) => step.id === "npm");
+    const install = job.steps.findIndex((step) => /^npm ci\b/.test(step.run || ""));
+    assert.ok(setup >= 0 && bootstrap > setup && install > bootstrap);
+    assert.equal(job.steps[bootstrap].shell, "bash");
+    assert.equal(job.steps[bootstrap]["working-directory"], ".");
+    assert.equal(job.steps[bootstrap].if, undefined);
+    assert.equal(job.steps[bootstrap].run, canonicalBootstrap.run);
+    if (id !== "build") assert.deepEqual(job.strategy.matrix.node, ["22.23.4", "24.22.1"]);
+  });
+}
+
+test("plugin CI is selected when its canonical npm pin changes", () => {
+  const workflow = load(read(".github/workflows/opencode-plugin-ci.yml"));
+  for (const event of ["push", "pull_request"]) {
+    assert.ok(workflow.on[event].paths.includes("config/ci/toolchain.json"));
   }
 });
