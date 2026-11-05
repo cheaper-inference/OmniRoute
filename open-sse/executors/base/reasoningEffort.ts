@@ -401,8 +401,11 @@ export function sanitizeReasoningEffortForProvider(
 
   const githubOptIn =
     provider === "github" && GITHUB_REASONING_EFFORT_OPT_IN_PATTERN.test(modelStr);
+  const mistralModel = provider === "mistral" ? getProviderModel(provider, modelStr) : undefined;
   const rejecting =
-    (provider === "mistral" && MISTRAL_NO_REASONING_EFFORT_PATTERN.test(modelStr)) ||
+    (provider === "mistral" &&
+      (MISTRAL_NO_REASONING_EFFORT_PATTERN.test(modelStr) ||
+        (mistralModel !== undefined && mistralModel.supportsReasoning !== true))) ||
     (provider === "github" && !githubOptIn && GITHUB_NO_REASONING_EFFORT_PATTERN.test(modelStr));
   if (rejecting) {
     log?.info?.(
