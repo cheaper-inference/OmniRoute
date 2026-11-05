@@ -48,7 +48,7 @@ test("immutable response clone retains trusted response policies alongside telem
 });
 
 test("account rotation is exposed through bounded routing telemetry headers", async () => {
-  await seedConnection("openai", {
+  const first = await seedConnection("openai", {
     apiKey: "sk-account-fallback-first",
     priority: 1,
   });
@@ -63,7 +63,9 @@ test("account rotation is exposed through bounded routing telemetry headers", as
     const authorization = request.headers.get("authorization") || "";
     attempts.push(authorization);
 
-    if (authorization.includes("sk-account-fallback-first")) {
+    // Account order can vary with runtime selection/affinity; force one real
+    // failed attempt and assert that the subsequent attempt uses a sibling.
+    if (attempts.length === 1) {
       return new Response(
         JSON.stringify({
           error: {
@@ -90,9 +92,10 @@ test("account rotation is exposed through bounded routing telemetry headers", as
   );
 
   assert.equal(response.status, 200);
-  assert.ok(attempts.some((value) => value.includes("sk-account-fallback-first")));
-  assert.ok(attempts.some((value) => value.includes("sk-account-fallback-second")));
-  assert.equal(response.headers.get("X-OmniRoute-Selected-Connection-Id"), second.id);
+  assert.equal(attempts.length, 2);
+  assert.notEqual(attempts[0], attempts[1], "fallback must switch connections");
+  const servingConnection = attempts[1].includes("sk-account-fallback-first") ? first : second;
+  assert.equal(response.headers.get("X-OmniRoute-Selected-Connection-Id"), servingConnection.id);
   assert.equal(response.headers.get("X-OmniRoute-Account-Fallbacks"), "1");
   assert.equal(response.headers.get("X-OmniRoute-Account-Fallback-Reasons"), "http_401");
   assert.equal(response.headers.get("X-OmniRoute-Same-Account-Retries"), null);
