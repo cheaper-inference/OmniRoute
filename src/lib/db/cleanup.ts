@@ -4,6 +4,7 @@
  * @module lib/db/cleanup
  */
 
+import { isBackgroundServicesDisabled } from "@/lib/env/backgroundServices";
 import { rollupUsageHistoryBeforeDate } from "@/lib/usage/aggregateHistory";
 import { purgeCallLogArtifactDirectory } from "@/lib/usage/callLogArtifacts";
 
@@ -1110,6 +1111,13 @@ export async function runScheduledCleanupPass(phase: "startup" | "periodic"): Pr
  */
 export function startCleanupScheduler(): void {
   if (_cleanupSchedulerTimer) return;
+
+  if (isBackgroundServicesDisabled()) {
+    console.log(
+      "[Cleanup] Background cleanup scheduler disabled (OMNIROUTE_DISABLE_BACKGROUND_SERVICES)."
+    );
+    return;
+  }
 
   // Run cleanup 30s after startup (let the server initialize first).
   setTimeout(async () => {

@@ -54,21 +54,26 @@ omniroute connect 192.168.0.15
 # ✔ Terhubung ke http://192.168.0.15:20128 — konteks '192.168.0.15' (cakupan: admin)
 ```
 
-Alur kata sandi secara default membuat token **admin** (Anda memiliki kata sandinya, sehingga
-Anda sudah memiliki kontrol penuh). Batasi cakupannya dengan `--scope`:
+Alur kata sandi menerbitkan token **admin** secara default (Anda memegang kata
+sandi, jadi Anda sudah memiliki kontrol penuh). Batasi cakupan dengan `--scope`:
 
 ```bash
 omniroute connect 192.168.0.15 --scope write
 ```
 
-Opsi: `--port <p>` (ketika host tidak menyertakan port), `--name <ctx>` (nama konteks),
+Opsi: `--port <p>` (saat host tidak memiliki port), `--name <ctx>` (nama konteks),
 `--scope read|write|admin`. URL lengkap digunakan apa adanya:
 `omniroute connect https://omni.example.com`.
 
-### Dengan token yang telah dibuat sebelumnya
+Saat server mengaktifkan autentikasi dua faktor dasbor (Pengaturan →
+Keamanan), kata sandi saja akan ditolak: CLI kemudian meminta kode dari
+aplikasi autentikator (atau kode pemulihan). Berikan kode tersebut sejak awal
+dengan `--totp <code>` untuk penggunaan non-interaktif.
 
-Buat token dengan cakupan tertentu di dasbor (atau dengan `omniroute tokens create`), lalu
-tempelkan token tersebut — tidak memerlukan kata sandi:
+### Dengan token yang dibuat sebelumnya
+
+Buat token dengan cakupan tertentu di dasbor (atau dengan `omniroute tokens create`) lalu
+tempelkan — tidak diperlukan kata sandi:
 
 ```bash
 omniroute connect 192.168.0.15 --key oma_live_xxxxxxxx
@@ -435,12 +440,12 @@ omniroute contexts remove 192-168-0-15 --yes   # hapus konteks lokal (meskipun a
 
 ## Endpoint API (referensi)
 
-| Metode | Rute                  | Autentikasi          | Cakupan                           |
-| ------ | --------------------- | -------------------- | --------------------------------- |
-| POST   | `/api/cli/connect`    | kata sandi manajemen | — (publik, dilindungi kata sandi) |
-| GET    | `/api/cli/whoami`     | token akses          | baca                              |
-| GET    | `/api/cli/tokens`     | token akses          | admin                             |
-| POST   | `/api/cli/tokens`     | token akses          | admin                             |
-| DELETE | `/api/cli/tokens/:id` | token akses          | admin                             |
+| Method | Route                 | Auth                | Scope                             |
+| ------ | --------------------- | ------------------- | --------------------------------- |
+| POST   | `/api/cli/connect`    | password; 2FA if on | — (publik, dilindungi kata sandi) |
+| GET    | `/api/cli/whoami`     | access token        | read                              |
+| GET    | `/api/cli/tokens`     | access token        | admin                             |
+| POST   | `/api/cli/tokens`     | access token        | admin                             |
+| DELETE | `/api/cli/tokens/:id` | access token        | admin                             |
 
 Lihat [openapi.yaml](../openapi.yaml) untuk skema lengkap.

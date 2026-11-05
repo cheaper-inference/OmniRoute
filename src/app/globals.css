@@ -8,7 +8,7 @@
    `@layer theme, base, components, utilities` order as Tailwind v4, so Tailwind utilities on
    legacy screens keep winning over kit components, and the kit's `@layer base` (.ci-theme)
    wins over the preflight because of selector specificity. */
-@import "../../packages/ui-kit/src/ci-ui.css";
+@import "../../packages/ui-kit/src/ci-styles.css";
 /* Script fallback for Switzer, which ships Latin only (no Cyrillic, Greek or Vietnamese glyphs,
    no "ə"): fontsource declares one Inter @font-face per subset with a unicode-range, so a browser
    fetches an Inter subset only for a glyph Switzer lacks and Latin text keeps Switzer. */
@@ -171,6 +171,13 @@ html:root[data-ci-appearance="editions"] {
   --color-primary-ink: var(--ci-color-accent-active);
 }
 
+/* Warning text. Badges, warning buttons and `text-warning` read the warning ink through this alias.
+   Since kit 0.0.88 (upstream #155) the kit's own light Editions warning (#8c5a1b) reaches AA on its
+   tinted background, the canvas and the surface, so the alias is just the kit value. */
+:root {
+  --color-warning-ink: var(--ci-color-warning);
+}
+
 /* Dark: the kit flips every --ci-* value on `data-theme="dark"` (themeStore sets it with the
    class). Only what the kit does not own stays here. */
 .dark {
@@ -189,6 +196,8 @@ html:root[data-ci-appearance="editions"] {
   --text-color-primary: var(--color-primary-ink);
   /* --color-accent is the same kit accent (var(--ci-color-accent)), so text-accent gets the ink. */
   --text-color-accent: var(--color-primary-ink);
+  /* text-warning gets the readable warning ink; bg-/border-warning keep the kit colour. */
+  --text-color-warning: var(--color-warning-ink);
 
   /* Accent */
   --color-accent: var(--color-accent);
@@ -856,7 +865,7 @@ html[dir="rtl"] :where(.react-flow) {
 @layer components {
   /* Button variant="warning" (spec §3.6): kit has no warning button; outline + warning ink. */
   .ci-button--warning {
-    color: var(--ci-color-warning);
+    color: var(--color-warning-ink);
     border-color: var(--ci-color-warning);
     background: var(--ci-color-warning-bg);
   }
@@ -871,7 +880,7 @@ html[dir="rtl"] :where(.react-flow) {
     border-color: transparent;
   }
   .ci-badge[data-tone="warning"] {
-    color: var(--ci-color-warning);
+    color: var(--color-warning-ink);
     background: var(--ci-color-warning-bg);
     border-color: transparent;
   }

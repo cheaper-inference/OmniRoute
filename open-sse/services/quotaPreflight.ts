@@ -31,6 +31,7 @@ import {
   isCodexPaidCreditsEnabled,
   type CodexPaidCredits,
 } from "@/lib/providers/codexPaidCredits";
+import { filterCodexQuotaWindows } from "./codexQuotaWindowPolicy.ts";
 import {
   fetchNewApiAggregatorQuota,
   invalidateNewApiAggregatorQuotaCache,
@@ -254,6 +255,9 @@ export function windowsForScope(
   windows: NonNullable<QuotaInfo["windows"]>,
   scope?: QuotaCutoffScope
 ): NonNullable<QuotaInfo["windows"]> {
+  if (scope?.provider === "codex") {
+    return filterCodexQuotaWindows(windows, scope.providerSpecificData);
+  }
   if (!scope?.requestedModel || !isAntigravityQuotaProvider(scope.provider ?? null)) {
     return windows;
   }
@@ -417,7 +421,10 @@ function windowedQuotaCutoffResult(
   if (isAntigravityQuotaProvider(scope?.provider ?? null) && scope?.requestedModel) {
     return { proceed: true, quotaPercent: quota.percentUsed };
   }
-  if (quota.limitReached === true) return limitReachedResult(quota);
+  // An aggregate signal cannot re-enable a Codex window explicitly removed by its toggle.
+  if (quota.limitReached === true && !(scope?.provider === "codex" && scopedWindows !== windows)) {
+    return limitReachedResult(quota);
+  }
   return { proceed: true, quotaPercent: quota.percentUsed };
 }
 

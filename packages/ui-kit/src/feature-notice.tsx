@@ -27,12 +27,14 @@ export interface FeatureNoticeProps extends Omit<ComponentPropsWithoutRef<"div">
   mobileAlign?: FeatureNoticeAlign;
   /** Preferred popup width in pixels; capped to the viewport with 16px gutters. */
   width?: number;
+  /** Accessible name for the notice's close button. Defaults to "Dismiss notification". */
+  closeLabel?: string;
 }
 
 /** A persistent contextual announcement attached to an existing control. */
 export function FeatureNotice({
   open, onDismiss, title, description, titleLeading, children,
-  side = "bottom", align = "end", mobileAlign = align, width = 384,
+  side = "bottom", align = "end", mobileAlign = align, width = 384, closeLabel,
   className, style, ...props
 }: FeatureNoticeProps) {
   const triggerRef = useRef<HTMLElement>(null);
@@ -73,6 +75,7 @@ export function FeatureNotice({
             }
             description={description}
             duration={Infinity}
+            closeLabel={closeLabel}
             onDismiss={dismiss}
           />
         </div>
