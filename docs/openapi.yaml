@@ -2943,6 +2943,29 @@ paths:
                           - key_allows_all_combos
                       message:
                         type: string
+        "413":
+          description: Declared request body exceeds the configured limit; rejected before authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [error]
+                properties:
+                  error:
+                    type: object
+                    additionalProperties: false
+                    required: [message, type, code]
+                    properties:
+                      message:
+                        type: string
+                        minLength: 1
+                      type:
+                        type: string
+                        enum: [payload_too_large]
+                      code:
+                        type: string
+                        enum: [PAYLOAD_TOO_LARGE]
 
   /api/combos:
     get:
