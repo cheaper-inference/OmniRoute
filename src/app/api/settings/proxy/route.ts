@@ -153,10 +153,26 @@ function normalizeProxyPayload(body: UpdateProxyConfigInput): UpdateProxyConfigI
   return normalized;
 }
 
+/** Cap on `?resolveIds=` entries: bounds one request's resolve fan-out. */
+const MAX_RESOLVE_IDS = 200;
+
+/**
+ * Parse the comma-separated `resolveIds` query value into a de-duplicated,
+ * capped id list. Returns null when the parameter is absent or empty so the
+ * request falls through to the existing single-resolve/full-config branches.
+ */
+function parseResolveIds(raw: string | null): string[] | null {
+  if (!raw) return null;
+  const ids = [...new Set(raw.split(",").map((value) => value.trim()).filter(Boolean))];
+  if (ids.length === 0) return null;
+  return ids.slice(0, MAX_RESOLVE_IDS);
+}
+
 /**
  * GET /api/settings/proxy — get proxy configuration
  * Optional query params: ?level=global|provider|combo|key&id=xxx
  * Or: ?resolve=connectionId to resolve effective proxy
+ * Or: ?resolveIds=id1,id2,... to resolve effective proxies for many connections
  */
 export async function GET(request: Request) {
   const authError = await requireManagementAuth(request);
@@ -167,6 +183,24 @@ export async function GET(request: Request) {
     const level = searchParams.get("level");
     const id = searchParams.get("id");
     const resolveId = searchParams.get("resolve");
+    const resolveIds = parseResolveIds(searchParams.get("resolveIds"));
+
+    // Resolve many connections in one request. The dashboard used to fire one
+    // HTTP request per connection here, and with many connections that burst
+    // slowed both the UI and the shared proxy process.
+    if (resolveIds) {
+      const results = await Promise.all(
+        resolveIds.map(async (connectionId) => {
+          try {
+            const resolved = await resolveProxyForConnection(connectionId);
+            return [connectionId, resolved?.proxy ? resolved : null] as const;
+          } catch {
+            return [connectionId, null] as const;
+          }
+        })
+      );
+      return Response.json({ results: Object.fromEntries(results) });
+    }
 
     // Resolve effective proxy for a connection
     if (resolveId) {

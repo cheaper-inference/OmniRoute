@@ -3,9 +3,11 @@ import { getDbInstance, SQLITE_FILE } from "@/lib/db/core";
 import { exportAllSummaryRows } from "@/lib/db/backup";
 import { getCallLogsDir } from "@/lib/usage/callLogArtifacts";
 import fs from "fs";
+import { createReadStream } from "node:fs";
 import path from "path";
 import os from "os";
-import { execFileSync } from "node:child_process";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import {
   CREDENTIAL_EXPORT_FORBIDDEN_MESSAGE,
   requireOperatorCredential,
@@ -26,10 +28,10 @@ export async function GET(request: NextRequest) {
   });
   if (operatorVerdict.ok === false) return operatorVerdict.response;
 
-  return buildFullExportResponse();
+  return buildFullExportResponse(request);
 }
 
-async function buildFullExportResponse(): Promise<Response> {
+async function buildFullExportResponse(request: NextRequest): Promise<Response> {
   try {
     if (!SQLITE_FILE) {
       return NextResponse.json(
@@ -91,27 +93,69 @@ async function buildFullExportResponse(): Promise<Response> {
 
       // A bare filename avoids GNU tar interpreting a Windows drive colon as a
       // remote archive. The exclusive work directory also isolates concurrent exports.
-      execFileSync("tar", ["-czf", archiveName, path.basename(payloadDir)], {
+      // Async exec: execFileSync blocked the shared event loop for the whole
+      // tar run (up to the 30s timeout), freezing the LLM proxy and the UI.
+      // Promisified per call (not at module scope) so the child_process export
+      // stays mockable in tests.
+      await promisify(execFile)("tar", ["-czf", archiveName, path.basename(payloadDir)], {
         cwd: workDir,
         timeout: 30000,
       });
-      const archiveBuffer = fs.readFileSync(tarPath);
 
-      return new NextResponse(archiveBuffer, {
+      // Size for Content-Length, then stream: reading the archive into the
+      // heap sized the response buffer at the whole backup and blocked the
+      // loop for the copy.
+      const { size: archiveSize } = await fs.promises.stat(tarPath);
+      const archiveStream = createReadStream(tarPath);
+
+      // The work dir holds the payload too, so it may only be removed once the
+      // response has consumed the archive.
+      let cleaned = false;
+      const cleanup = () => {
+        if (cleaned) return;
+        cleaned = true;
+        archiveStream.destroy();
+        try {
+          fs.rmSync(workDir, { recursive: true, force: true });
+        } catch {
+          // Cleanup must not replace a successful response.
+        }
+      };
+      request.signal.addEventListener("abort", cleanup, { once: true });
+
+      const webStream = new ReadableStream({
+        start(controller) {
+          archiveStream.on("data", (chunk) => controller.enqueue(chunk));
+          archiveStream.on("end", () => {
+            controller.close();
+            cleanup();
+          });
+          archiveStream.on("error", (err) => {
+            controller.error(err);
+            cleanup();
+          });
+        },
+        cancel() {
+          cleanup();
+        },
+      });
+
+      return new Response(webStream, {
         status: 200,
         headers: {
           "Content-Type": "application/gzip",
           "Content-Disposition": `attachment; filename="omniroute-full-backup-${timestamp}.tar.gz"`,
-          "Content-Length": archiveBuffer.length.toString(),
+          "Content-Length": String(archiveSize),
         },
       });
-    } finally {
-      // Includes partial archives from tar failures and timeouts.
+    } catch (error) {
+      // Nothing is streaming on the failure path: drop the work directory now.
       try {
         fs.rmSync(workDir, { recursive: true, force: true });
       } catch {
-        // Cleanup must not replace the original export error or response.
+        // Cleanup must not replace the original export error.
       }
+      throw error;
     }
   } catch (error: unknown) {
     console.error("[ExportAll] Error:", error);
