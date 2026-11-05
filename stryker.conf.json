@@ -58,6 +58,7 @@
       "tests/unit/account-fallback-concurrency-429.test.ts",
       "tests/unit/cursor-entitlement-scope-17167.test.ts",
       "tests/unit/cursor-execute-error-stream.test.ts",
+      "tests/unit/anthropic-compatible-prefill.test.ts",
       "tests/unit/anthropic-fallback-policy-16406.test.ts",
       "tests/unit/combo-cooldown-wait-opt-out.test.ts",
       "tests/unit/combo-authorized-retry-cooldown-18257.test.ts",
@@ -291,6 +292,7 @@
       "tests/unit/clinepass-provider.test.ts",
       "tests/unit/cliproxyapi-dedicated-credential-7645.test.ts",
       "tests/unit/cliproxyapi-model-mapping-dispatch.test.ts",
+      "tests/unit/codex-banked-reset-cache.test.ts",
       "tests/unit/codex-failover.test.ts",
       "tests/unit/codex-quota-selection-hydration.test.ts",
       "tests/unit/codex-responses-to-chat-9161.test.ts",
@@ -403,6 +405,7 @@
       "tests/unit/executor-web-cookie-sweep.test.ts",
       "tests/unit/executor-twinmind.test.ts",
       "tests/unit/expiry-first-account-rotation.test.ts",
+      "tests/unit/expiry-first-unreported-18552.test.ts",
       "tests/unit/explicit-inactive-probe-w2.test.ts",
       "tests/unit/false-terminal-401-quota.test.ts",
       "tests/unit/flagship-0day-discovery.test.ts",
@@ -731,7 +734,12 @@
       "tests/unit/combo/hedge-cancel-streaming-leg.test.ts",
       "tests/unit/singbox-routes-local-only.test.ts",
       "tests/unit/combo-precontent-transport-recovery-routing.test.ts",
-      "tests/unit/combo-precontent-transport-recovery.test.ts"
+      "tests/unit/combo-precontent-transport-recovery.test.ts",
+      "tests/unit/boundary-engine-feature-flags.test.ts",
+      "tests/unit/upstream-http-attempt-rows.test.ts",
+      "tests/unit/upstream-http-edge-selection.test.ts",
+      "tests/unit/issue-18600-muse-request-dispatch.test.ts",
+      "tests/unit/issue-18600-muse-followup-isolation.test.ts"
     ],
     "nodeArgs": [
       "--import",
