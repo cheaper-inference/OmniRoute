@@ -1,3 +1,8 @@
+import {
+  observeProviderHttpSend,
+  selectHttpResponse,
+  type HttpAttemptSelection,
+} from "../utils/providerHttpAttempts.ts";
 import { HTTP_STATUS, FETCH_TIMEOUT_MS } from "../config/constants.ts";
 import { getApiKeyCodexServiceTier } from "../../src/lib/providers/codexApiKeyServiceMode";
 import { resolveProviderUserAgentOverride } from "./providerUserAgentOverride.ts";
@@ -83,6 +88,10 @@ import {
   stripTrailingAssistantOrphanToolUse,
   stripTrailingAssistantForProvider,
 } from "../services/contextManager.ts";
+import {
+  requiresUserLastMessage,
+  stripTrailingAssistantTurns,
+} from "../services/assistantPrefill.ts";
 import { randomUUID } from "node:crypto";
 import {
   getClaudeCodeVersion,
@@ -134,6 +143,11 @@ import { assertValidationCredentials, validationFetch } from "./base/validationD
 import type { ProviderCredentials, StrictValidationDispatch } from "./base/validationDispatch.ts";
 export type { ProviderCredentials, StrictValidationDispatch } from "./base/validationDispatch.ts";
 import { applyReasoningEffortRecovery } from "./base/reasoningEffortRecovery.ts";
+import { applyMaxTokensRecovery } from "./base/maxTokensRecovery.ts";
+import {
+  clampTopLevelMaxTokens,
+  getLearnedMaxTokensCap,
+} from "../services/learnedMaxTokensCaps.ts";
 import { applyFieldDowngradeRecovery } from "./base/fieldDowngradeRecovery.ts";
 import { applyAdvisorUndecryptableRecovery } from "./base/advisorRecovery.ts";
 import { stripRedactThinkingBetaForVisibleThinking } from "./base/redactThinkingBeta.ts";
@@ -290,6 +304,7 @@ export type ExecutorExecuteResult =
   | Response
   | {
       response: Response;
+      upstreamHttpSelection?: HttpAttemptSelection | null;
       url?: string;
       headers?: Record<string, string>;
       transformedBody?: unknown;
@@ -863,6 +878,7 @@ export class BaseExecutor {
     // later retry URLs (bounded per URL); also recorded via recordLearnedThinkingCap.
     let thinkingBudgetClampedMax: number | null = null;
     let reasoningEffortClamped = false; // reasoning_effort 4xx clamp-and-retry below.
+    let maxTokensCeilingRecovered = false; // max_tokens ceiling 400 clamp-and-retry below.
     let advisorResultsReplaced = false;
     const applyCopilotIdentityFallback = createCopilotIdentityFallback(this.provider, log);
 
@@ -924,6 +940,15 @@ export class BaseExecutor {
         model,
         log
       );
+      // Learned max_tokens ceiling (recorded from an earlier 400 advertising
+      // one): pre-clamp with zero extra round-trips. No-op when nothing was
+      // learned for this provider/model.
+      {
+        const learnedMaxTokensCap = getLearnedMaxTokensCap(this.provider, model);
+        if (learnedMaxTokensCap !== null) {
+          clampTopLevelMaxTokens(transformedBody, learnedMaxTokensCap);
+        }
+      }
       if (this.provider === "groq") {
         transformedBody = stripGroqUnsupportedFields(
           transformedBody as Record<string, unknown>,
@@ -1000,7 +1025,19 @@ export class BaseExecutor {
               this.provider,
               model,
               requestCredentials,
-              (url, init) => dispatchGuarded(this.provider, url, init, requestCredentials)
+              (url, init) =>
+                observeProviderHttpSend(
+                  {
+                    provider: this.provider,
+                    model:
+                      typeof (serializedBody as Record<string, unknown> | null)?.model === "string"
+                        ? String((serializedBody as Record<string, unknown>).model)
+                        : model,
+                    connectionId: requestCredentials?.connectionId ?? null,
+                    endpoint: "unknown",
+                  },
+                  () => dispatchGuarded(this.provider, url, init, requestCredentials)
+                )
             )(requestUrl, optionsWithSignal);
           } finally {
             if (timeoutId) clearTimeout(timeoutId);
@@ -1382,6 +1419,19 @@ export class BaseExecutor {
             // trailing text-only assistant turn with 400. Strip here so combo
             // failover does not burn the next account on the same body.
             tb.messages = stripTrailingAssistantForProvider(stripped, this.provider);
+            // Per-connection opt-in for relays that ban assistant prefill.
+            if (requiresUserLastMessage(requestCredentials?.providerSpecificData)) {
+              const userLast = stripTrailingAssistantTurns(tb.messages as JsonRecord[]);
+              tb.messages = userLast.messages;
+              if (userLast.removedTurns > 0 || userLast.noUserTurn) {
+                log?.info?.(
+                  "PREFILL",
+                  userLast.noUserTurn
+                    ? "requireUserLastMessage: no user turn to end on — forwarded unchanged"
+                    : `requireUserLastMessage: dropped ${userLast.removedTurns} trailing assistant turn(s)`
+                );
+              }
+            }
           }
         }
 
@@ -1637,6 +1687,34 @@ export class BaseExecutor {
           transformedBody = recovery.body;
         }
 
+        // max_tokens ceiling 400 clamp-and-retry — the third learned-cap
+        // recovery: parse the upstream-advertised ceiling ("expected a value
+        // <= N"), clamp (squeezing a Claude-style thinking budget to keep
+        // budget_tokens < max_tokens), record it process-wide for the
+        // proactive pre-clamp above, and retry the same URL once.
+        if (
+          (response.status === HTTP_STATUS.BAD_REQUEST ||
+            response.status === HTTP_STATUS.UNPROCESSABLE_ENTITY) &&
+          !maxTokensCeilingRecovered &&
+          transformedBody &&
+          typeof transformedBody === "object"
+        ) {
+          const recovery = await applyMaxTokensRecovery({
+            response,
+            url,
+            provider: this.provider,
+            model,
+            body: transformedBody,
+            fetchOptions,
+            fetchFn: fetchWithStartTimeout,
+            serializeBody: serializeRetryBody,
+            log,
+          });
+          if (recovery.attempted) maxTokensCeilingRecovered = true;
+          response = recovery.response;
+          transformedBody = recovery.body;
+        }
+
         // Generic reactive 400 field-downgrade; each field is stripped at most once.
         response = await applyFieldDowngradeRecovery({
           response,
@@ -1757,6 +1835,7 @@ export class BaseExecutor {
 
         return {
           response,
+          upstreamHttpSelection: selectHttpResponse(response),
           url,
           headers: finalHeaders,
           transformedBody: serializedBody,

@@ -41,8 +41,8 @@ test.afterEach(() => {
 test("buildCodexUsageQuotas surfaces bankedResetCredits when present", () => {
   const { quotas, bankedResetCredits, rateLimitReachedType } = buildCodexUsageQuotas({
     rate_limit: {
-      primary_window: { used_percent: 10 },
-      secondary_window: { used_percent: 20 },
+      primary_window: { limit_window_seconds: 18000, used_percent: 10 },
+      secondary_window: { limit_window_seconds: 604800, used_percent: 20 },
     },
     rate_limit_reset_credits: { available_count: 3 },
     rate_limit_reached_type: { type: "secondary_window" },
@@ -57,7 +57,7 @@ test("buildCodexUsageQuotas surfaces bankedResetCredits when present", () => {
 
 test("buildCodexUsageQuotas tolerates camelCase field shape", () => {
   const { bankedResetCredits, rateLimitReachedType } = buildCodexUsageQuotas({
-    rateLimit: { primaryWindow: { usedPercent: 5 } },
+    rateLimit: { primaryWindow: { limitWindowSeconds: 18000, usedPercent: 5 } },
     rateLimitResetCredits: { availableCount: 7 },
     rateLimitReachedType: "primary_window",
   });
@@ -69,8 +69,8 @@ test("buildCodexUsageQuotas tolerates camelCase field shape", () => {
 test("buildCodexUsageQuotas leaves bankedResetCredits undefined when absent (fail-open)", () => {
   const result = buildCodexUsageQuotas({
     rate_limit: {
-      primary_window: { used_percent: 10 },
-      secondary_window: { used_percent: 20 },
+      primary_window: { limit_window_seconds: 18000, used_percent: 10 },
+      secondary_window: { limit_window_seconds: 604800, used_percent: 20 },
     },
   });
 
@@ -84,7 +84,7 @@ test("buildCodexUsageQuotas leaves bankedResetCredits undefined when absent (fai
 test("buildCodexUsageQuotas never throws on a garbage rate_limit_reset_credits shape", () => {
   assert.doesNotThrow(() => {
     const result = buildCodexUsageQuotas({
-      rate_limit: { primary_window: { used_percent: 1 } },
+      rate_limit: { primary_window: { limit_window_seconds: 18000, used_percent: 1 } },
       rate_limit_reset_credits: "not-an-object",
       rate_limit_reached_type: 12345,
     });
@@ -101,8 +101,8 @@ test("getCodexUsage threads bankedResetCredits through additively", async () => 
       JSON.stringify({
         plan_type: "plus",
         rate_limit: {
-          primary_window: { used_percent: 15 },
-          secondary_window: { used_percent: 25 },
+          primary_window: { limit_window_seconds: 18000, used_percent: 15 },
+          secondary_window: { limit_window_seconds: 604800, used_percent: 25 },
         },
         rate_limit_reset_credits: { available_count: 2 },
       }),
@@ -123,8 +123,8 @@ test("getCodexUsage omits bankedResetCredits and stays intact when absent", asyn
       JSON.stringify({
         plan_type: "plus",
         rate_limit: {
-          primary_window: { used_percent: 15 },
-          secondary_window: { used_percent: 25 },
+          primary_window: { limit_window_seconds: 18000, used_percent: 15 },
+          secondary_window: { limit_window_seconds: 604800, used_percent: 25 },
         },
       }),
       { status: 200, headers: { "content-type": "application/json" } }
@@ -146,8 +146,16 @@ test("fetchCodexQuota surfaces bankedResetCredits from the dual-window parser", 
     new Response(
       JSON.stringify({
         rate_limit: {
-          primary_window: { used_percent: 70, reset_after_seconds: 45 },
-          secondary_window: { used_percent: 20, reset_after_seconds: 300 },
+          primary_window: {
+            limit_window_seconds: 18000,
+            used_percent: 70,
+            reset_after_seconds: 45,
+          },
+          secondary_window: {
+            limit_window_seconds: 604800,
+            used_percent: 20,
+            reset_after_seconds: 300,
+          },
         },
         rate_limit_reset_credits: { available_count: 4 },
         rate_limit_reached_type: { type: "primary_window" },
@@ -180,8 +188,8 @@ test("fetchCodexQuota omits bankedResetCredits when the payload does not have it
     new Response(
       JSON.stringify({
         rate_limit: {
-          primary_window: { used_percent: 30 },
-          secondary_window: { used_percent: 10 },
+          primary_window: { limit_window_seconds: 18000, used_percent: 30 },
+          secondary_window: { limit_window_seconds: 604800, used_percent: 10 },
         },
       }),
       { status: 200, headers: { "content-type": "application/json" } }
