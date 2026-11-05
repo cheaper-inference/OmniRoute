@@ -84,6 +84,11 @@ export interface JsonTreeProps extends Omit<ComponentProps<"div">, "children" | 
   /** Text copied by "Copy path". Defaults to `formatJsonTreePath`. */
   formatPath?: (path: JsonTreePath) => string;
   labels?: Partial<JsonTreeLabels>;
+  /**
+   * Writes the text to the clipboard. Defaults to `navigator.clipboard.writeText`, which browsers
+   * only offer on secure origins. Reject to report a failure.
+   */
+  copyText?: (text: string) => Promise<void>;
   onCopy?: (detail: JsonTreeCopyDetail) => void;
   onCopyError?: (error: unknown, detail: Omit<JsonTreeCopyDetail, "text">) => void;
 }
@@ -273,6 +278,7 @@ export function JsonTree({
   redact,
   formatPath = formatJsonTreePath,
   labels: labelOverrides,
+  copyText = (text) => navigator.clipboard.writeText(text),
   onCopy,
   onCopyError,
   className,
@@ -347,7 +353,7 @@ export function JsonTree({
     let text: string;
     try {
       text = kind === "path" ? formatPath(row.path) : clipboardText(redact ? redactedValue(row, redact, labels.mask) : row.value);
-      await navigator.clipboard.writeText(text);
+      await copyText(text);
     } catch (error) {
       if (copyVersion.current !== version) return;
       setCopied(null);
