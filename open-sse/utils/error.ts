@@ -15,6 +15,7 @@ import { isRegisteredFeatureFlagEnabled } from "./registeredFeatureFlag.ts";
 import { resolveRetryAfterInstant } from "./retryAfterInstant.ts";
 import { parseAntigravityRetryTime, parseProseRetryDelayMs } from "./proseRetryDelay.ts";
 import { parseDetailedRetryHintFromJsonBody } from "../services/retryAfterJson.ts";
+import { NonStreamingResponseTooLargeError, readResponseTextWithinCap } from "./responseBodyCap.ts";
 
 import {
   isSafePublicErrorIdentifier,
@@ -489,7 +490,7 @@ export async function parseUpstreamError(response: Response, provider: string | 
   let rawText = "";
 
   try {
-    const text = await response.text();
+    const text = await readResponseTextWithinCap(response);
     rawText = text;
     responseBody = normalizePayloadForLog(text);
 
@@ -513,7 +514,10 @@ export async function parseUpstreamError(response: Response, provider: string | 
     } catch {
       message = text;
     }
-  } catch {
+  } catch (err) {
+    // Cap rejections must surface: swallowing them would hide a cut-short body
+    // and let callers keep treating the truncated JSON as a normal upstream error.
+    if (err instanceof NonStreamingResponseTooLargeError) throw err;
     message = `Upstream error: ${response.status}`;
     responseBody = { _rawText: message };
   }

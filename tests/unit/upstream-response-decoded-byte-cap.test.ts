@@ -22,6 +22,9 @@ const { maybeConvertJsonBodyToSse } =
   await import("../../open-sse/handlers/chatCore/jsonBodyToSse.ts");
 const { runProviderExecutionPipeline } =
   await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+const { parseUpstreamError } = await import("../../open-sse/utils/error.ts");
+const { shouldSkipCredentialRefresh } =
+  await import("../../open-sse/handlers/chatCore/skipCredentialRefresh.ts");
 
 function setCapEnv(value: string | undefined) {
   if (value === undefined) delete process.env[CAP_ENV];
@@ -542,4 +545,31 @@ test("withCapEnv restores the env var, also after a throw", async () => {
   } finally {
     setCapEnv(previous);
   }
+});
+
+test("parseUpstreamError rejects an over-cap gzip error body", async () => {
+  const res = await fetch(`${base}/err-gzip-bomb`);
+  await assert.rejects(
+    withCapEnv(() => parseUpstreamError(res, "mock")),
+    isCapError
+  );
+  await assertClosedEarly();
+});
+
+test("parseUpstreamError still returns a normal-size gzip error body", async () => {
+  const res = await fetch(`${base}/err-gzip-normal`);
+  const parsed = await withCapEnv(() => parseUpstreamError(res, "mock"));
+  assert.equal(parsed.statusCode, 500);
+  assert.ok(typeof parsed.message === "string");
+});
+
+test("shouldSkipCredentialRefresh treats an over-cap error body as unreadable", async () => {
+  // Synthetic decoded body past the cap: the helper must not keep the whole string, so
+  // readResponseTextWithinCap rejects and the catch returns null → keep credential refresh.
+  const over = new Response(new Uint8Array(CAP + 1).fill(0x61), {
+    status: 401,
+    headers: { "content-type": "text/plain", "content-length": String(CAP + 1) },
+  });
+  const result = await withCapEnv(() => shouldSkipCredentialRefresh("openai", over));
+  assert.equal(result, false, "over-cap body must not be treated as a safety refusal");
 });
