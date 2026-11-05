@@ -349,6 +349,24 @@ function stripEffortValue(b: Record<string, unknown>, c: EffortCarriers): Record
   return next;
 }
 
+/**
+ * Providers/models that reject the effort value outright, so it is stripped
+ * rather than clamped. Cloudflare Workers AI rejects only the `none` carrier a
+ * `force` + `none` rule emits (`400 AiError: Invalid input (code 8001)`), while
+ * low/medium/high and an absent field are accepted (#18994). Clamping to `low`
+ * would turn reasoning on for a request that asked for none.
+ */
+function rejectsReasoningEffort(provider: string, modelStr: string, effortStr: string): boolean {
+  if (provider === "mistral") return MISTRAL_NO_REASONING_EFFORT_PATTERN.test(modelStr);
+  if (provider === "github") {
+    return (
+      !GITHUB_REASONING_EFFORT_OPT_IN_PATTERN.test(modelStr) &&
+      GITHUB_NO_REASONING_EFFORT_PATTERN.test(modelStr)
+    );
+  }
+  return provider === "cloudflare-ai" && effortStr === "none";
+}
+
 export function sanitizeReasoningEffortForProvider(
   body: unknown,
   provider: string,
@@ -399,15 +417,10 @@ export function sanitizeReasoningEffortForProvider(
     return stripEffortValue(working, c);
   }
 
-  const githubOptIn =
-    provider === "github" && GITHUB_REASONING_EFFORT_OPT_IN_PATTERN.test(modelStr);
-  const rejecting =
-    (provider === "mistral" && MISTRAL_NO_REASONING_EFFORT_PATTERN.test(modelStr)) ||
-    (provider === "github" && !githubOptIn && GITHUB_NO_REASONING_EFFORT_PATTERN.test(modelStr));
-  if (rejecting) {
+  if (rejectsReasoningEffort(provider, modelStr, effortStr)) {
     log?.info?.(
       "REASONING_SANITIZE",
-      `${provider}/${modelStr}: removed unsupported reasoning_effort`
+      `${provider}/${modelStr}: removed unsupported reasoning_effort ${effortStr}`
     );
     return stripEffortValue(working, c);
   }

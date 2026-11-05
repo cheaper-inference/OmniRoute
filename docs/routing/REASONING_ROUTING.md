@@ -51,7 +51,11 @@ or thinking budget. A budget-only signal is therefore matched only by `any`.
 - `force` replaces the discrete effort with `targetEffort`.
 
 Independently, `budgetAction` can be `preserve`, `remove`, or `set`. `force` with `none` removes
-all recognized effort and budget fields. `none` together with `set` is invalid.
+all recognized effort and budget fields, then sets `reasoning_effort: "none"`, because some
+providers turn thinking on when the field is absent. Providers that reject the literal `none` are
+adjusted at dispatch in `open-sse/executors/base/reasoningEffort.ts`: Command Code maps it to
+`low`, and Cloudflare Workers AI (`cloudflare-ai`) drops the field. `none` together with `set` is
+invalid.
 
 Requests targeting known-incompatible models are rejected before the upstream call. For combo
 targets, incompatible entries are removed; if none remain, the request returns status `400`.
