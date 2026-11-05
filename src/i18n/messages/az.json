@@ -1000,6 +1000,8 @@
     "batchListTitle": "Paketlər",
     "batchListCount": "{count} paket",
     "batchListRemovingCompleted": "Silinir…",
+    "batchListRemoveCompletedPartial": "Çox sayda paket silindi. Qalanlarını təmizləmək üçün yenidən klikləyin.",
+    "batchListRemoveCompletedFailed": "Paketlər silinərkən xəta baş verdi.",
     "batchListRemoveCompleted": "Tamamlanmışları sil",
     "batchListTableStatus": "Vəziyyət",
     "batchListTableId": "ID",
@@ -1038,6 +1040,12 @@
     "batchListRefreshing": "Yenilənir…",
     "batchListRefresh": "Yenilə",
     "uploadFileModalRemove": "Sil",
+    "fileInputChoose": "Fayl seçin",
+    "fileInputChooseMultiple": "Faylları seçin",
+    "fileInputEmpty": "Heç bir fayl seçilməyib",
+    "fileInputSelectedCount": "{count, plural, one {# fayl seçilib} other {# fayl seçilib}}",
+    "fileDropLabel": "Faylı buraya buraxın və ya seçin",
+    "fileDropLabelMultiple": "Faylları buraya buraxın və ya seçin",
     "uploadFileModalUploading": "Yüklənir…",
     "wizardInputReading": "Fayl oxunur…",
     "wizardInputReady": "Hazırdır",
@@ -1112,7 +1120,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "OpenCode Zen/Go sorğularında OpenCode v2 CLI klientinin identifikatorunu göndərin: opencode/latest/<2.x>/cli User-Agent və x-opencode-client cli, pulsuz səviyyəli sorğularda isə v2 sessiya başlıqlarını, v2 CLI read/shell alət sxemlərini göndərin və tool_choice \"none\" istifadə etməyin. Defolt olaraq deaktivdir: hər OpenCode sorğusu cari identikliyi, başlıqları və gövdəni dəyişməz saxlayır.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Avtomatik kombinasiyanın namizəd hovuzu alət çağırışı üzrə ilkin filtr işə düşməzdən əvvəl artıq boş olduqda (bütün hədəflər gözləmə müddətləri, bloklamalar və ya tükənmə səbəbindən ötürüldükdə), köhnə 400 \"Heç bir hədəf alət çağırışını dəstəkləmir\" capability_mismatch əvəzinə 503 no_eligible_targets cavabını qaytarın. Defolt olaraq deaktivdir: boş hovuz köhnə 400 cavabını saxlayır.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Etibarlı model son nöqtəsi teqlərini (provayder kataloqu tərəfindən bəyan edilən, ixtisaslaşmış model identifikatorundan müəyyən edilən və ya operator tərəfindən təyin olunan) məcburi tətbiq edin: /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations və /v1/audio/* ünvanlarında modelin xidmət göstərmədiyi son nöqtəyə göndərilən sorğunu yönləndirmədən əvvəl HTTP 400 ilə rədd edin; teqlənmiş son nöqtələri üçün OmniRoute adapteri olmayan modelləri /v1/models siyahısından gizlədin; və belə modellər üçün idarəetmə panelindəki model testinə 422 ilə cavab verin. Defolt olaraq söndürülüb: son nöqtə teqləri məlumat xarakterli qalır və sorğular əvvəlki qaydada yönləndirilir.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "Adi anthropic-uyğun relelərdə, söhbətin ortasındakı sistem mesajlarını üst səviyyəli sistem sorğusuna köçürmək əvəzinə mesaj siyahısında saxlayın ki, keşlənmiş sorğu prefiksi mesajlar arasında sabit qalsın. Yalnız müştərinin özü mid-conversation-system-2026-04-07 beta versiyasını göndərdikdə tətbiq olunur. Defolt olaraq deaktivdir: həmin beta versiyasını dəstəkləməyən relelər mesaj siyahısındakı sistem mesajlarını rədd etdiyi üçün hər bir sistem mesajı əvvəlki kimi sistem sorğusuna köçürülür.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Nə operatorun üstəgəl təyini, nə də provayder reyestri hər hansı səviyyə elan etdikdə, yalnız məlum səy səviyyələrini saxlamaqla models.dev tərəfindən dərc olunan düşünmə səyi səviyyələrindən istifadə edin və boş elan edilmiş səviyyə siyahısını «səviyyə yoxdur» kimi qəbul edin. Defolt olaraq deaktivdir: model kataloqu və müəyyən edilmiş səy səviyyələri əvvəlki kimi qalır.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "auto/* sorğularına namizəd hovuzunu həll olunmuş model imkanları (görmə, mühakimə, düşünmə) və müşahidə olunan keyfiyyət balları ilə bir toplu oxumada qurmağa imkan verir. Defolt olaraq söndürülüb: sorğu zamanı namizəd çəkiləri əvvəlki kimi qalır. Aktiv olduqda: bu siqnallar snapshot çəkilərinə daxil olur, buna görə namizəd çəkiləri və seçim dəyişə bilər.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Etimadnamə vəziyyətinin yoxlanılması şlüzün öz-özünə söndürdüyü bağlantıları yenidən sınaqdan keçirsin (hər biri ən çox 6 saatda bir dəfə, hər yoxlamada 5 bağlantı) və yenidən sınaq uğurla keçdikdə bağlantını yenidən aktivləşdirsin. Defolt olaraq söndürülüb: belə bağlantılar operator müdaxilə edənədək söndürülmüş qalır. Operator tərəfindən söndürülmüş və daimi bloklanmış bağlantılar heç vaxt yenidən sınaqdan keçirilmir.",
@@ -2016,7 +2023,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# sorğu} other {# sorğular}}, {keys, plural, one {# limitli açar} other {# limitli açarlar}}",
     "unpricedUsageMore": "…və daha {count}",
     "unpricedUsageConfigure": "Qiymətləri təyin et",
-    "unpricedUsageDismiss": "Bağla"
+    "unpricedUsageDismiss": "Bağla",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analitika",
@@ -6341,6 +6357,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Müvəqqəti soyuma müddətini atlayın ki, bu bağlantı bərpa edilə bilən xətalardan sonra belə uyğun qalsın (bloklanmış/vaxtı keçmiş kimi terminal vəziyyətlər hələ də tətbiq olunur).",
     "disableCoolingLabel": "Bu bağlantı üçün soyuma müddətini söndürün",
+    "keepMidConversationSystemDescription": "Söhbətin ortasında göndərilmiş sistem mesajlarını yuxarı səviyyəli sistem sorğusuna köçürmək əvəzinə mesaj siyahısında buraxın, beləliklə, sorğu keşi növbələr arasında vurmağa davam edir. Yalnız bu yuxarı axını mesajlar daxilində rol \"sistemini\" qəbul etdikdə aktivləşdirin (əks halda 400 cavab verir).",
+    "keepMidConversationSystemLabel": "Söhbətin ortasındakı sistem mesajlarını yerində saxlayın",
+    "requireUserLastMessageDescription": "Köməkçinin əvvəlcədən doldurulmasını rədd edən yuxarı axınlar üçün: göndərməzdən əvvəl arxadakı köməkçini buraxın (alətdən istifadə olunmur). Model əvvəlki cavabını bərpa edə bilər.",
+    "requireUserLastMessageLabel": "Söhbətin istifadəçi mesajı ilə bitməsini tələb edin",
     "bulkPasteAdded": "{count, plural, one {1 açar əlavə edildi} other {# açar əlavə edildi}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 dublikat nəzərə alınmadı} other {# dublikat nəzərə alınmadı}}",
     "bulkPasteHint": "Hər sətirə bir API açarı yapışdırın. Boş sətirlər və dublikat açarlar nəzərə alınmır.",
@@ -6440,6 +6460,9 @@
     "localProviders": "Lokal provayderlər",
     "maxConcurrentWholeNumberError": "Maksimum paralel sorğu sayı tam ədəd olmalıdır",
     "m365TierLabel": "Copilot səviyyəsi",
+    "m365RefreshTokenLabel": "Tokeni yeniləyin (isteğe bağlı)",
+    "m365RefreshTokenHint": "Microsoft 365 giriş nişanını avtomatik yeniləmək üçün istifadə olunur.",
+    "m365RefreshTokenEditHint": "Mövcud nişanı saxlamaq üçün boş buraxın. Əvəz etmək üçün yeni token yapışdırın.",
     "m365TierHint": "Bu bağlantının hansı Microsoft 365 Copilot interfeysindən istifadə edəcəyini seçin. Fərdi standart istehlakçı BizChat-dır; Təhsil və Müəssisə (iş) öz tenant interfeyslərini seçirlər.",
     "m365TierIndividualOption": "Fərdi (standart)",
     "m365TierEduOption": "Təhsil",
@@ -7174,6 +7197,7 @@
     "proxySubTabsAria": "Proksi bölmələri",
     "requestBodyLimitTitle": "Sorğu gövdəsi limiti",
     "requestBodyLimitDescription": "Sorğu gövdəsi təhlil edilməzdən əvvəl qəbul edilən maksimum API faydalı yük ölçüsü. Ayrılmış yükləmə marşrutları ən azı daxili 100 MB limitini saxlayır.",
+    "requestBodyLimitChatHint": "Burada limit saxlayana qədər Chat Completions və Responses 50 MB-a qədər qəbul edir. Saxlanmış limit daha aşağı və ya yüksək olmasından asılı olmayaraq onlara da tətbiq edilir.",
     "requestBodyLimitInputLabel": "Sorğu gövdəsi limiti, MB ilə",
     "requestBodyLimitEmptyError": "MB ilə limit daxil edin",
     "requestBodyLimitWholeNumberError": "Tam ədəd istifadə edin",
@@ -12359,7 +12383,9 @@
       "failedTitle": "Bütün {count} cəhdlər uğursuz oldu",
       "failed": "başarısız oldu",
       "pinnedTitle": "Kontekst-cache sessiya pinləmə vasitəsilə model seçildi",
-      "pinned": "sabitləşdirilmiş"
+      "pinned": "sabitləşdirilmiş",
+      "recoveredAttemptsTitle": "Sorğu {count} cəhddə bərpa edildi",
+      "latestOutcomeFailed": "Son sorğunun nəticəsi uğursuz oldu"
     },
     "attempts": "cəhdlər",
     "detail": {
@@ -12461,13 +12487,20 @@
       "continuesFromParent": "ana elementdən davam edir",
       "continuesFrom": "{id} elementindən davam edir",
       "viewConversation": "söhbətə bax",
-      "openConversation": "{id} söhbətini aç"
+      "openConversation": "{id} söhbətini aç",
+      "omittedHttpAttempts": "{count} HTTP göndərişi saxlanılmayıb",
+      "noHttpResponse": "HTTP cavabı müşahidə edilməyib",
+      "transportError": "Nəqliyyat xətası"
     },
     "tableLabel": "Sorğu jurnalları",
     "throughputPostFirstToken": "İlk tokendən sonra",
     "throughputEndToEnd": "Ucdan-uca",
     "throughputRate": "{value} token/san",
-    "throughputExplanation": "Hər iki sürət çıxış və düşünmə tokenlərinin sayından daha böyük olanını istifadə edir. İlk tokendən sonrakı sürət etibarlı TTFT-ni nəzərə almır; əks halda, tam müddətdən istifadə edir. Ucdan-uca sürət həmişə tam müddətdən istifadə edir. Buferlənmiş cavab model daha sürətli generasiya etmədən də yüksək ani çatdırılma sürətinə malik ola bilər."
+    "throughputExplanation": "Hər iki sürət çıxış və düşünmə tokenlərinin sayından daha böyük olanını istifadə edir. İlk tokendən sonrakı sürət etibarlı TTFT-ni nəzərə almır; əks halda, tam müddətdən istifadə edir. Ucdan-uca sürət həmişə tam müddətdən istifadə edir. Buferlənmiş cavab model daha sürətli generasiya etmədən də yüksək ani çatdırılma sürətinə malik ola bilər.",
+    "omittedHttpAttempts": "{count} HTTP göndərişi saxlanılmayıb",
+    "upstreamStatus": "Yuxarı server {status}",
+    "noHttpResponse": "HTTP cavabı müşahidə edilməyib",
+    "transportError": "Nəqliyyat xətası"
   },
   "proxyLogger": {
     "filterAll": "Hamısı",
@@ -14234,6 +14267,14 @@
         "label": "Paylaşılan Egress Hovuzunun Sırası",
         "description": "Kvotası egress ünvanına görə qruplaşdırılan təminatçılar üçün, son vaxtlar rədd edilmiş üzvün müşahidə olunan egress ünvanını paylaşan hovuz üzvünü sağlam üzvlərdən dərhal aşağıda sıralayın. Yalnız sıralama üçündür, heç vaxt istisna edilmir. Oxuduğu imtina siqnalını yaradan PROXY_SKIP_RECENTLY_FAILED tələb olunur. Defolt olaraq qeyri-aktivdir: seçim sırası adi rotasiya ilə tamamilə eynidir."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Model üzrə kvotadan imtinalar",
+        "description": "opencode kvotası 429-u yalnız onu vuran modelə tətbiq edin ki, eyni çıxış digər modellərə xidmət etməyə davam etsin və yalnız həmin model uğur qazandıqda onu silin. Modeli olmayan istehlakçılar (hovuz fırlanması, park və təkrar oynatma, admin görünürlüğü, seçici tetikleyici, sağlamlıq taraması) hələ də bunu görür. İmtina çıxaran PROXY_SKIP_RECENTLY_FAILED lazımdır. Defolt olaraq söndürülür: bir modelin 429 kvotası hər model üçün çıxışı kənara qoyur."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Proksi gətirmə: ciddi POST təkrarı",
+        "description": "Qeyri-idempotent sorğu üçün (POST, PUT, PATCH, DELETE) nəql xətasından sonra (təzə yuva, proksi bərpası, yerli ehtiyat) yalnız xəta heç bir şeyin göndərilmədiyini sübut etdikdə yenidən göndərin: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH və ya qoşulma vaxtı aşımı. Yazmadan sonra bir yuva xətası yuxarı axının sorğunu qəbul etdiyi anlamına gələ bilər, beləliklə, yenidən göndərmə onu iki dəfə yarada və hesaba çıxara bilər. Defolt olaraq sönülüdür: təkrar oxuna bilən gövdə istənilən nəqliyyat xətasında bir dəfə göndərilir, bu da köhnə yığılmış rozetkanı bərpa edir."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotasiya Aidiyyətinin Loqlanması",
         "description": "Opencode rotasiyası hansı hesabın xidmət göstərdiyini və ya ötürüldüyünü qeydə alır (yalnız maskalanmış ID-lər, heç vaxt tam hesab ID-ləri deyil) və proksi loq qeydlərini onların sorğusuna bağlayır ki, operator ötürülmüş hesabları istifadə edilməyənlərdən fərqləndirə bilsin. Defolt olaraq qeyri-aktivdir: əlavə loq sətri yazılmır, əlavə sütun daxil edilmir."
@@ -14285,6 +14326,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 Hovuzun Yenidən Seçilməsi",
         "description": "OpenCode çoxhesablı rotasiyası üçün, ümumi hovuz kontekstində proksisiz hesabda çıxışa görə qruplaşdırılmış (egress-bucketed) provayderdən 429 xətası alındıqdan sonra, eyni çıxış ünvanı ilə yenidən cəhd etmək əvəzinə, növbəti cəhd üçün bağlantı hovuzundan başqa bir üzv tələb edin. Sıralayır, heç vaxt istisna etmir: tükənmiş hovuz mövcud davranışı saxlayır. Varsayılan olaraq deaktivdir: hər bir 429 əvvəlki kimi növbəti hesaba keçir."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Pulsuz Səviyyəli Çıxış Probu",
+        "description": "OpenCode icraçısı üçün proksiləşdirilmiş sorğuya 403 və ya 451 FreeTierError cavab verildikdə və müşahidə alətlərinin təkrar cəhdi uğursuz olduqda və ya tətbiq edilmədikdə, sorğunu bir dəfə fərqli proksi vasitəsilə göndərin (başqa bir hesab proksisi və ya başqa bir hovuz üzvü, heç vaxt birbaşa əlaqə olmadan). Yalnız bu zond 200-ə cavab verdikdə, proksi imtina yaddaşında ilk çıxış ayrılır və sorğu cavabı verilir; hər ikisi imtina etdikdə, imtinanın əsli qaytarılır və heç nə qeydə alınmır. Eyni imtina mətni işarələnmiş çıxış IP və rədd edilmiş sorğu formasını əhatə edir, ona görə də araşdırma onları sübutlarla ayırır. Defolt olaraq söndürülür: imtina dəyişməz olaraq qaytarılır."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 Klient Barmaq İzi",
@@ -14465,6 +14510,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Kombo: Məzmun Siyasətinə Görə İmtina Zamanı Dayandır",
         "description": "Kombo hədəfi dəqiq məzmun siyasəti imtinası ilə cavab verdikdə (kod və ya növü cyber_policy / content_policy_violation), növbəti hədəfə keçmək əvəzinə, komboyu dayandırın və qalan hədəflər fərqli modellər olsa belə, həmin imtina cavabını qaytarın. Defolt olaraq qeyri-aktivdir: rədd cavabı heç vaxt hesabı soyutmur və ya provayder kəsicisini işə salmır və kombo əvvəlki kimi növbəti hədəfinə keçir."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Cavablar: yalnız nəqliyyatda sağ olun",
+        "description": "Cavabları response.in_progress hadisəsi əvəzinə boş sətir kimi göndərin, beləliklə, sintetik snapshot heç vaxt rəsmi SDK-də real cavabı əvəz edə bilməz. Boş sətir heç bir SSE hadisəsi göndərmir, buna görə də yalnız hadisələrdə sıfırlanan müştəri nəzarətçisi uzun səssiz faza zamanı sıfırlanmayacaq. Defolt olaraq söndürülür: taymerlər etibarlı response.in_progress hadisəsini göndərir."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Soyuma Təkrar Cəhdi: 403/410 İmtinalarını Keç",

@@ -2,6 +2,7 @@ import { FORMATS } from "./formats.ts";
 import {
   ensureToolCallIds,
   fixMissingToolResponses,
+  repairDisplacedToolResults,
   stripOrphanedToolResults,
 } from "./helpers/toolCallHelper.ts";
 import {
@@ -439,6 +440,7 @@ export function translateRequest(
   ensureToolCallIds(result, { use9CharId });
 
   // Fix missing tool responses (insert empty tool_result if needed)
+  repairDisplacedToolResults(result);
   fixMissingToolResponses(result);
 
   // Claude reconciliation preserves orphaned tool output as labelled user text.
@@ -781,6 +783,7 @@ export function translateRequest(
 
   // Ensure unique tool_call ids on final payload (translators may have introduced duplicates)
   ensureToolCallIds(result, { use9CharId });
+  repairDisplacedToolResults(result);
   fixMissingToolResponses(result);
   stripOrphanedToolResults(result);
 

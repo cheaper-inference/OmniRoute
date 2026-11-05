@@ -1,0 +1,1 @@
+- **fix(catalog):** replace the stale Token Harbor `claude-haiku-5.5:free` route with the `deepseek-v4.1-flash:free` and `mimo-v2.6-flash:free` routes listed on the public Free catalog, with per-model evidence records (#18579)

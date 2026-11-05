@@ -1,0 +1,1 @@
+- **fix(sse):** Preserve explicit Claude reasoning effort when routing to Codex, without allowing connection defaults to override it ([#18788](https://github.com/cheaper-inference/OmniRoute/pull/18788)) — thanks @trespassmk
