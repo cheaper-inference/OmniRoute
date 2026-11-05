@@ -79,6 +79,11 @@ function sanitize(headers: Record<string, unknown>): Record<string, unknown> {
         "<PLATFORM>"
       )
       .replace(/(antigravity\/ide\/\d+\.\d+\.\d+) [^/\s]+\/[^\s)]+/g, "$1 <OS>/<ARCH>")
+      // The Muse Code client User-Agent reports the host as `<os>-<arch>` (museCodeClientUserAgent).
+      .replace(
+        /(muse-build\/\d+\.\d+\.\d+ \((?:non-)?interactive; )[a-z0-9]+-[a-z0-9_]+(;)/g,
+        "$1<OS>-<ARCH>$2"
+      )
       .replace(
         /(antigravity\/cli\/\d+\.\d+\.\d+ \(aidev_client; os_type=)[^;]+(; arch=)[^;]+(; auth_method=[^)]+\))/g,
         "$1<OS>$2<ARCH>$3"
