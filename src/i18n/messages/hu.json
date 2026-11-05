@@ -14183,12 +14183,12 @@
         "description": "Azon szolgáltatók esetén, amelyeknél a kvóta egress-címek szerint van csoportosítva, a nemrég elutasított tag megfigyelt egress-címén osztozó pool-tagot közvetlenül az egészséges tagok mögé rangsorolja. Csak sorrendezés, soha nem kizárás. A PROXY_SKIP_RECENTLY_FAILED beállítást igényli, amely létrehozza az általa beolvasott elutasítási jelet. Alapértelmezés szerint kikapcsolva: a kiválasztási sorrend pontosan megegyezik a sima rotációval."
       },
       "PROXY_REFUSAL_MODEL_SCOPE": {
-        "label": "__MISSING__:Model-Scoped Quota Refusals",
-        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+        "label": "Modell-hatókörű kvóta-elutasítások",
+        "description": "A opencode 429-es kvótáját csak arra a modellre alkalmazza, amelyik eltalálta, hogy ugyanaz a kimenet továbbra is kiszolgáljon más modelleket, és csak akkor törölje, ha az adott modell sikeres lesz. Azok a fogyasztók, akiknek nincs modellje (medence forgatás, parkolás és visszajátszás, adminisztrátori láthatóság, választó trigger, állapotsöprés), továbbra is látják. Szüksége van PROXY_SKIP_RECENTLY_FAILED, amely az elutasítást eredményezi. Alapértelmezés szerint ki: egy modell 429-es kvótája minden modellnél félreteszi a kilépést."
       },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "Proxy lekérés: szigorú POST visszajátszás",
+        "description": "Nem idempotens kérés esetén (POST, PUT, PATCH, DELETE) csak akkor küldjön újra egy szállítási hiba (friss socket, proxy backback, native backback) után, ha a hiba azt bizonyítja, hogy semmit sem küldtek: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH vagy csatlakozási időtúllépés. Az írás utáni socket hiba azt jelentheti, hogy az upstream elfogadta a kérést, így az újraküldés kétszer generálhat és számlázhat. Alapértelmezés szerint kikapcsolva: egy újrajátszható törzset a rendszer egyszer újraküld minden szállítási hiba esetén, ami az elavult poolsocketet is helyreállítja."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotációs hozzárendelés naplózása",
@@ -14427,8 +14427,8 @@
         "description": "Ha egy combo-célpont pontos tartalom-irányelvi elutasítással válaszol (cyber_policy / content_policy_violation kód vagy típus), állítsa le a combót, és küldje vissza ezt az elutasítást még akkor is, ha a fennmaradó célpontok más modellek, ahelyett, hogy továbblépne a következő célpontra. Alapértelmezés szerint kikapcsolva: az elutasítás soha nem helyezi nyugalmi állapotba a fiókot, nem oldja ki a provider breakert, és a combo pontosan úgy halad tovább a következő célpontra, mint korábban."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "Válaszok: csak a szállítás során maradjon életben",
+        "description": "A válaszok elküldése üres sorként a response.in_progress esemény helyett, így a szintetikus pillanatkép soha nem helyettesítheti a valódi választ a hivatalos SDK ben. Az üres sor nem küld SSE eseményt, így a csak eseményekre visszaállító kliensfigyelő nem indul vissza egy hosszú néma fázis alatt. Alapértelmezés szerint kikapcsolva: az időzítők elküldik a spec-valid response.in_progress eseményt."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown újrapróbálkozás: 403/410 elutasítások kihagyása",

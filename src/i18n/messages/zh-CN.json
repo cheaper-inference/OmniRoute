@@ -14260,12 +14260,12 @@
         "description": "对按出口地址配额的提供者，把与近期被拒成员观测到相同出口地址的池成员排在健康成员之后。只调顺序，绝不排除。依赖 PROXY_SKIP_RECENTLY_FAILED 提供它读取的拒绝信号。默认关闭：选择顺序与纯轮换完全一致。"
       },
       "PROXY_REFUSAL_MODEL_SCOPE": {
-        "label": "__MISSING__:Model-Scoped Quota Refusals",
-        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+        "label": "模型范围的配额拒绝",
+        "description": "仅将opencode配额 429 应用于命中它的模型，因此同一出口继续为其他模型提供服务，并且仅在该模型成功时才清除它。没有模型（池轮换、停放和重播、管理员可见性、选择器触发器、健康扫描）的消费者仍然可以看到它。需要PROXY_SKIP_RECENTLY_FAILED，这会产生拒绝。默认关闭：一个型号的配额 429 为每个型号预留出口。"
       },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "代理获取：严格的POST重放",
+        "description": "对于非幂等请求（POST、 PUT、 PATCH、 DELETE），仅当错误证明未发送任何内容时，才会在传输错误（新鲜套接字、代理回退、本机回退）后重新发送： ECONNREFUSED、 ENOTFOUND、 EAI_AGAIN、 ENETUNREACH或连接超时。写入后的套接字错误可能意味着上游接受了请求，因此重新发送可能会生成两次并计费。默认关闭：在任何传输错误时都会重新发送一次可重播主体，这也会恢复陈旧的池化套接字。"
       },
       "ROTATION_ATTRIBUTION": {
         "label": "轮换归因日志",
@@ -14504,8 +14504,8 @@
         "description": "当组合目标返回精确的内容策略拒绝（code 或 type 为 cyber_policy / content_policy_violation）时，停止组合并返回该拒绝，即使剩余目标是不同模型，不再前进到下一目标。默认关闭：该拒绝不冷却账户也不触发提供者断路器，组合与之前一样前进到下一目标。"
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "响应：仅通过传输保持活动状态",
+        "description": "将响应 keepalives 作为空行而不是response.in_progress事件发送，因此合成快照永远无法替代官方SDK中的真实响应。空行不会调度SSE事件，因此仅在事件发生时重置的客户端看门狗在长时间静默阶段不会重置。默认关闭：计时器发送规范有效的response.in_progress事件。"
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "冷却重试：跳过 403/410 拒绝",

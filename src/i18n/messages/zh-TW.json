@@ -14183,12 +14183,12 @@
         "description": "對按出口地址配額的提供者，把與近期被拒成員觀測到相同出口地址的池成員排在健康成員之後。只調順序，絕不排除。依賴 PROXY_SKIP_RECENTLY_FAILED 提供它讀取的拒絕訊號。預設關閉：選擇順序與純輪換完全一致。"
       },
       "PROXY_REFUSAL_MODEL_SCOPE": {
-        "label": "__MISSING__:Model-Scoped Quota Refusals",
-        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+        "label": "模型範圍的配額拒絕",
+        "description": "僅將opencode配額 429 應用於命中它的模型，因此同一出口繼續為其他模型提供服務，並且僅在該模型成功時才清除它。沒有模型（池輪換、停放和重播、管理員可見性、選擇器觸發器、健康掃描）的消費者仍然可以看到它。需要PROXY_SKIP_RECENTLY_FAILED，這會產生拒絕。預設為關閉：一個型號的配額 429 為每個型號預留出口。"
       },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "代理獲取：嚴格的POST重播",
+        "description": "對於非冪等請求（POST、 PUT、 PATCH、 DELETE），僅當錯誤證明未發送任何內容時，才會在傳輸錯誤（新鮮套接字、代理回退、本機回退）後重新發送： ECONNREFUSED、 ENOTFOUND、 EAI_AGAIN、 ENETUNREACH或連接逾時。寫入後的套接字錯誤可能意味著上游接受了請求，因此重新發送可能會產生兩次併計費。預設為關閉：在任何傳輸錯誤時都會重新發送一次可重播主體，這也會恢復陳舊的池化套接字。"
       },
       "ROTATION_ATTRIBUTION": {
         "label": "輪換歸因日誌",
@@ -14244,7 +14244,7 @@
       },
       "OPENCODE_FREE_TIER_EGRESS_PROBE": {
         "label": "OpenCode免費層出口探測器",
-        "description": "對於OpenCode執行器，當代理請求被回應 403 或 451 FreeTierError並且觀察到的工具重試失敗或不適用時，透過不同的代理（另一個帳戶代理或另一個池成員，從不直接連接）發送一次請求。只有當該探測回答 200 時，才是在代理拒絕記憶體中預留的第一個出口，並提供探測響應；當雙方都拒絕時，則返回最初的拒絕並且不記錄任何內容。相同的拒絕文字涵蓋了標記的出口IP和拒絕的請求形狀，因此探測器通過證據將它們區分開。預設為關閉：拒絕原樣返回。"
+        "description": "對於OpenCode執行器，當代理請求被回應 403 或 451 FreeTierError並且觀察到的工具重試失敗或不適用時，透過不同的代理（另一個帳戶代理或另一個池成員，從不直接連接）發送一次請求。只有當該探測回答 200 時，才是在代理拒絕記憶體中預留的第一個出口，並提供探測回應；當雙方都拒絕時，則返回最初的拒絕並且不記錄任何內容。相同的拒絕文字涵蓋了標記的出口IP和拒絕的請求形狀，因此探測器通過證據將它們區分開。預設為關閉：拒絕原樣返回。"
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 客戶端指紋",
@@ -14427,8 +14427,8 @@
         "description": "當組合目標返回精確的內容策略拒絕（code 或 type 為 cyber_policy / content_policy_violation）時，停止組合並返回該拒絕，即使剩餘目標是不同模型，不再前進到下一目標。預設關閉：該拒絕不冷卻帳戶也不觸發提供者斷路器，組合與之前一樣前進到下一目標。"
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "回應：僅透過傳輸保持活動狀態",
+        "description": "將回應 keepalives 作為空行而不是response.in_progress事件發送，因此合成快照永遠無法取代官方SDK中的真實回應。空白行不會調度SSE事件，因此僅在事件發生時重置的客戶端看門狗在長時間靜默階段不會重置。預設為關閉：計時器發送規範有效的response.in_progress事件。"
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "冷卻重試：跳過 403/410 拒絕",

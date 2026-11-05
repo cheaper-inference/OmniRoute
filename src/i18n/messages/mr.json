@@ -14183,12 +14183,12 @@
         "description": "ज्या प्रदात्यांचा कोटा इग्रेस पत्त्यानुसार विभागलेला असतो, त्यांच्यासाठी नुकत्याच नाकारलेल्या सदस्याचा नोंदवलेला इग्रेस पत्ता सामायिक करणाऱ्या पूल सदस्याला निरोगी सदस्यांच्या अगदी खाली स्थान द्या. केवळ क्रमवारी, कधीही वगळले जात नाही. यासाठी PROXY_SKIP_RECENTLY_FAILED आवश्यक आहे, जे ते वाचत असलेला नकार सिग्नल तयार करते. डीफॉल्टनुसार बंद: निवडीचा क्रम तंतोतंत सामान्य रोटेशनप्रमाणे असतो."
       },
       "PROXY_REFUSAL_MODEL_SCOPE": {
-        "label": "__MISSING__:Model-Scoped Quota Refusals",
-        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+        "label": "मॉडेल-स्कॉप्ड कोटा नकार",
+        "description": "opencode कोटा 429 फक्त त्याला हिट करणाऱ्या मॉडेलला लागू करा, त्यामुळे तेच बाहेर पडणे इतर मॉडेलना सेवा देत राहते आणि जेव्हा ते मॉडेल यशस्वी होईल तेव्हाच ते साफ करा. ज्या ग्राहकांकडे कोणतेही मॉडेल नाही (पूल रोटेशन, पार्क आणि रीप्ले, ॲडमिन दृश्यमानता, निवडक ट्रिगर, हेल्थ स्वीप) ते अजूनही पाहतात. PROXY_SKIP_RECENTLY_FAILED आवश्यक आहे, जे नकार निर्माण करते. डीफॉल्टनुसार बंद: एका मॉडेलचा कोटा 429 प्रत्येक मॉडेलसाठी बाहेर पडणे बाजूला ठेवतो."
       },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "प्रॉक्सी आणणे: कठोर POST रीप्ले",
+        "description": "गैर-आदर्श विनंतीसाठी (POST, PUT, PATCH, DELETE), वाहतूक त्रुटी (ताजे सॉकेट, प्रॉक्सी फॉलबॅक, मूळ फॉलबॅक) नंतर पुन्हा पाठवा जेव्हा त्रुटी सिद्ध होते की काहीही पाठवले गेले नाही: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH किंवा कनेक्ट टाइमआउट. लिहिल्यानंतर सॉकेट एररचा अर्थ असा असू शकतो की अपस्ट्रीमने विनंती स्वीकारली आहे, त्यामुळे पुन्हा पाठवल्यास ते दोनदा तयार होऊ शकते आणि बिल येऊ शकते. डीफॉल्टनुसार बंद: कोणत्याही ट्रान्सपोर्ट एररवर पुन्हा प्ले करण्यायोग्य बॉडी पुन्हा पाठवली जाते, जी एक शिळा पूल केलेले सॉकेट देखील पुनर्प्राप्त करते."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "रोटेशन अ‍ॅट्रिब्युशन लॉगिंग",
@@ -14427,8 +14427,8 @@
         "description": "जेव्हा एखादे कॉम्बो टार्गेट नेमक्या कंटेंट-पॉलिसी रिफ्युझलसह (कोड किंवा प्रकार cyber_policy / content_policy_violation) प्रतिसाद देते, तेव्हा पुढील टार्गेटकडे जाण्याऐवजी, उर्वरित टार्गेट्स वेगवेगळे मॉडेल्स असले तरीही कॉम्बो थांबवा आणि ते रिफ्युझल परत करा. बाय डीफॉल्ट बंद: हे रिफ्युझल कधीही खात्याला कूल करत नाही किंवा प्रोव्हायडर ब्रेकर ट्रिप करत नाही, आणि कॉम्बो अगदी पूर्वीप्रमाणेच त्याच्या पुढील टार्गेटकडे पुढे जातो."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "प्रतिसाद: फक्त वाहतुकीसाठी जिवंत ठेवा",
+        "description": "response.in_progress इव्हेंट ऐवजी रिक्त ओळ म्हणून प्रतिसाद पाठवा, त्यामुळे सिंथेटिक स्नॅपशॉट अधिकृत SDK मधील वास्तविक प्रतिसाद कधीही बदलू शकत नाही. रिक्त ओळ कोणत्याही SSE इव्हेंटला पाठवत नाही, म्हणून क्लायंट वॉचडॉग जो केवळ इव्हेंटवर रीसेट करतो तो दीर्घ शांत टप्प्यात रीसेट केला जाणार नाही. डीफॉल्टनुसार बंद: टाइमर विशिष्ट-वैध response.in_progress इव्हेंट पाठवतात."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "कूलडाउन रिट्राय: 403/410 नकार वगळा",

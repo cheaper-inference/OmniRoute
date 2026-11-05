@@ -14183,12 +14183,12 @@
         "description": "W przypadku dostawców, których limit jest dzielony według adresu wyjściowego (egress), umieszcza członka puli współdzielącego zaobserwowany adres wyjściowy niedawno odrzuconego członka tuż za sprawnymi członkami. Wpływa tylko na kolejność, nigdy nie wyklucza. Wymaga PROXY_SKIP_RECENTLY_FAILED, który generuje odczytywany sygnał odmowy. Domyślnie wyłączone: kolejność wyboru jest dokładnie taka sama jak w zwykłej rotacji."
       },
       "PROXY_REFUSAL_MODEL_SCOPE": {
-        "label": "__MISSING__:Model-Scoped Quota Refusals",
-        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+        "label": "Odmowy przydziału kwot na poziomie modelu",
+        "description": "Zastosuj limit opencode 429 tylko do modelu, który go trafił, aby to samo wyjście nadal obsługiwało inne modele i wyczyść je tylko wtedy, gdy ten model się powiedzie. Konsumenci, którzy nie mają modelu (rotacja puli, parkowanie i odtwarzanie, widoczność dla administratora, wyzwalacz selektora, przeglądanie stanu zdrowia), nadal go widzą. Potrzebuje PROXY_SKIP_RECENTLY_FAILED, co powoduje odmowę. Domyślnie wyłączone: limit jednego modelu 429 ustawia wyjście dla każdego modelu."
       },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "Pobieranie proxy: ścisłe odtwarzanie POST",
+        "description": "W przypadku żądania nieidempotentnego (POST, PUT, PATCH, DELETE) wyślij ponownie po błędzie transportu (świeże gniazdo, powrót proxy, natywny powrót) tylko wtedy, gdy błąd udowodni, że nic nie zostało wysłane: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH lub przekroczenie limitu czasu połączenia. Błąd gniazda po zapisie może oznaczać, że serwer nadrzędny zaakceptował żądanie, więc ponowne wysłanie może wygenerować i obciążyć je dwukrotnie. Domyślnie wyłączone: treść odtwarzalna jest wysyłana ponownie w przypadku każdego błędu transportu, co powoduje również odzyskanie przestarzałego gniazda w puli."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "Rejestrowanie atrybucji rotacji",
@@ -14427,8 +14427,8 @@
         "description": "Gdy cel combo odpowie dokładną odmową z powodu zasad dotyczących treści (kod lub typ cyber_policy / content_policy_violation), zatrzymaj combo i zwróć tę odmowę, nawet jeśli pozostałe cele to inne modele, zamiast przechodzić do następnego celu. Domyślnie wyłączone: odmowa nigdy nie nakłada na konto okresu karencji ani nie aktywuje wyłącznika awaryjnego dostawcy, a combo przechodzi do kolejnego celu dokładnie tak jak dotychczas."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "Odpowiedzi: utrzymywanie kontaktu tylko w transporcie",
+        "description": "Wysyłaj odpowiedzi podtrzymujące jako pustą linię zamiast zdarzenia response.in_progress, więc syntetyczny zrzut ekranu nigdy nie zastąpi prawdziwej odpowiedzi w oficjalnym SDK. Pusta linia nie wywołuje żadnego zdarzenia SSE, więc watchdog klienta, który resetuje się tylko w przypadku zdarzeń, nie zostanie zresetowany podczas długiej fazy cichej. Domyślnie wyłączone: liczniki czasu wysyłają zdarzenie response.in_progress o określonej specyfikacji."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Ponawianie w okresie schładzania: pomijaj odmowy 403/410",

@@ -14183,12 +14183,12 @@
         "description": "For leverandører der kvoten er inndelt etter egress-adresse, ranger et puljemedlem som deler et nylig avvist medlems observerte egress-adresse like under friske medlemmer. Kun rekkefølge, aldri ekskludert. Krever PROXY_SKIP_RECENTLY_FAILED, som produserer avvisningssignalet den leser. Av som standard: utvalgsrekkefølgen er nøyaktig den vanlige rotasjonen."
       },
       "PROXY_REFUSAL_MODEL_SCOPE": {
-        "label": "__MISSING__:Model-Scoped Quota Refusals",
-        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+        "label": "Modellbestemt kvoteavslag",
+        "description": "Bruk en opencode kvote 429 bare på modellen som treffer den, slik at den samme utgangen fortsetter å betjene andre modeller, og fjern den bare når den modellen lykkes. Forbrukere som ikke har noen modell (bassengrotasjon, park og replay, adminsynlighet, velgerutløser, helsesveip) ser det fortsatt. Trenger PROXY_SKIP_RECENTLY_FAILED, som produserer avslaget. Av som standard: én modells kvote 429 setter utgangen til side for hver modell."
       },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "Proxy-henting: streng POST replay",
+        "description": "For en ikke-idempotent forespørsel (POST, PUT, PATCH, DELETE), send på nytt etter en transportfeil (fresh socket, proxy-fallback, native fallback) bare når feilen beviser at ingenting ble sendt: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH eller en tilkoblingstidsavbrudd. En socket-feil etter skrivingen kan bety at oppstrømmen godtok forespørselen, slik at en ny sending kan generere og fakturere den to ganger. Av som standard: en gjenspillbar kropp sendes på nytt én gang ved enhver transportfeil, som også gjenoppretter en gammel samlekontakt."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "Logging av rotasjonsattribusjon",
@@ -14427,8 +14427,8 @@
         "description": "Når et kombomål svarer med en eksakt innholdspolicyavvisning (kode eller type cyber_policy / content_policy_violation), stopp komboen og returner denne avvisningen selv om de gjenværende målene er andre modeller, i stedet for å gå videre til neste mål. Deaktivert som standard: avvisningen kjøler aldri ned kontoen eller utløser leverandørens kretsbryter, og komboen går videre til sitt neste mål akkurat som før."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "Svar: hold liv kun over transporten",
+        "description": "Send svar keepalives som en tom linje i stedet for en response.in_progress -hendelse, så et syntetisk øyeblikksbilde kan aldri erstatte det virkelige svaret i den offisielle SDK. En tom linje sender ingen SSE -hendelser, så en klientvakthund som tilbakestiller kun på hendelser, vil ikke bli tilbakestilt under en lang stille fase. Av som standard: tidtakere sender den spesifikasjonsgyldige response.in_progress hendelsen."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Gjenforsøk ved nedkjøling: Hopp over 403/410-avvisninger",

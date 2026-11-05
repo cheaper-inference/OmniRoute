@@ -14183,12 +14183,12 @@
         "description": "עבור ספקים שהמכסה שלהם מחולקת לפי כתובת יציאה, דרג חבר מאגר שחולק את כתובת היציאה הנצפית של חבר שנדחה לאחרונה מיד מתחת לחברים תקינים. שינוי סדר בלבד, לעולם לא מוחרג. דורש את PROXY_SKIP_RECENTLY_FAILED, המפיק את אות הדחייה שהוא קורא. מושבת כברירת מחדל: סדר הבחירה זהה בדיוק לרוטציה הרגילה."
       },
       "PROXY_REFUSAL_MODEL_SCOPE": {
-        "label": "__MISSING__:Model-Scoped Quota Refusals",
-        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+        "label": "סירובי מכסה בהיקף של מודל",
+        "description": "החל מכסת opencode 429 רק על הדגם שפגע בו, כך שאותה יציאה תמשיך לשרת דגמים אחרים, ותנקה אותה רק כאשר הדגם הזה מצליח. צרכנים שאין להם דגם (סיבוב בריכה, חניה והשמעה חוזרת, נראות מנהל, טריגר בורר, סריקה בריאותית) עדיין רואים את זה. צריך PROXY_SKIP_RECENTLY_FAILED, שמייצר את הסירוב. כבוי כברירת מחדל: מכסה 429 של דגם אחד מפרידה את היציאה לכל דגם."
       },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "שליפת פרוקסי: שידור חוזר POST קפדני",
+        "description": "עבור בקשה שאינה אימפוטנטית (POST, PUT, PATCH, DELETE), שלח שוב לאחר שגיאת העברה (resh socket, proxy fallback, Native fallback) רק כאשר השגיאה מוכיחה ששום דבר לא נשלח: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH או פסק זמן לחיבור. שגיאת socket לאחר הכתיבה יכולה לומר שהמעלה קיבל את הבקשה, כך ששליחה חוזרת יכולה ליצור ולחייב אותה פעמיים. כבוי כברירת מחדל: גוף הניתן להשמעה חוזר נשלח פעם אחת בכל שגיאת העברה, אשר גם משחזרת שקע אסוף מיושן."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "תיעוד שיוך ברוטציה",
@@ -14427,8 +14427,8 @@
         "description": "כאשר יעד combo משיב עם סירוב מדויק של מדיניות תוכן (קוד או סוג cyber_policy / content_policy_violation), עצור את ה-combo והחזר סירוב זה גם כאשר היעדים הנותרים הם מודלים שונים, במקום להתקדם ליעד הבא. מושבת כברירת מחדל: הסירוב לעולם אינו מכניס את החשבון לתקופת צינון ואינו מפעיל את ה-breaker של הספק, וה-combo ממשיך ליעד הבא שלו בדיוק כמו בעבר."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "תגובות: שמירה על ההובלה בלבד",
+        "description": "שלח תגובות keepalives כשורה ריקה במקום אירוע response.in_progress, כך שתמונת מצב סינתטית לעולם לא תוכל להחליף את התגובה האמיתית ב- SDK הרשמי. שורה ריקה לא שולחת אירוע SSE, כך שכלב שמירה של לקוח שמתאפס רק על אירועים לא יאופס במהלך שלב שקט ארוך. כבוי כברירת מחדל: טיימרים שולחים את אירוע response.in_progress תקף למפרט."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "ניסיון חוזר בתקופת צינון: דילוג על סירובי 403/410",
