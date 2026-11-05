@@ -1,5 +1,6 @@
 "use client";
 
+import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-kit/disclosure";
 import Icon from "@/shared/components/Icon";
 
 import Link from "next/link";
@@ -309,52 +310,50 @@ export default function AutoComboCatalog({
 
   return (
     <Card className="p-4">
-      {/* kit-exception: Raw <button> on purpose: a full-width disclosure header that carries the section
-          heading — the kit Button is a fixed-height control, not a disclosure region. Focus
-          ring comes from the global :focus-visible rule (globals.css). */}
-      <button
-        type="button"
-        onClick={() => setOpen((prev) => !prev)}
-        className="flex w-full items-start justify-between gap-3 rounded-md text-start"
-        aria-expanded={open}
-        aria-label={open ? t("autoCatalogCollapse") : t("autoCatalogExpand")}
-      >
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <Icon name="auto_awesome" size={20} className="text-primary" />
-            <h2 className="text-base font-bold text-text-main">{t("autoCatalogTitle")}</h2>
-            <Badge size="sm" variant="primary" className="font-semibold">
-              {liveItems
-                ? t("autoCatalogComboCount", { count: liveItems.length })
-                : t("autoCatalogTemplateCount", { count: FALLBACK_ITEMS.length })}
-            </Badge>
-          </div>
-          <p className="mt-1 text-xs text-text-muted">{t("autoCatalogDescription")}</p>
-        </div>
-        <Icon name={open ? "expand_less" : "expand_more"} size={16} className="text-text-muted" />
-      </button>
+      <Disclosure open={open} onOpenChange={setOpen}>
+        <DisclosureTrigger
+          className="items-start"
+          aria-label={open ? t("autoCatalogCollapse") : t("autoCatalogExpand")}
+        >
+          <span className="block min-w-0">
+            <div className="flex items-center gap-2">
+              <Icon name="auto_awesome" size={20} className="text-primary" />
+              <h2 className="text-base font-bold text-text-main">{t("autoCatalogTitle")}</h2>
+              <Badge size="sm" variant="primary" className="font-semibold">
+                {liveItems
+                  ? t("autoCatalogComboCount", { count: liveItems.length })
+                  : t("autoCatalogTemplateCount", { count: FALLBACK_ITEMS.length })}
+              </Badge>
+            </div>
+            <p className="mt-1 text-xs text-text-muted">{t("autoCatalogDescription")}</p>
+          </span>
+        </DisclosureTrigger>
 
-      <AutoComboTosControl onPolicyChange={refreshCatalog} />
+        {/* The ToS control stays visible between the header and the collapsible catalog. */}
+        <AutoComboTosControl onPolicyChange={refreshCatalog} />
 
-      {open && items.length === 0 && (
-        <p className="mt-4 text-xs text-text-muted">{t("autoCatalogNoCandidates")}</p>
-      )}
+        <DisclosureContent>
+          {items.length === 0 && (
+            <p className="mt-4 text-xs text-text-muted">{t("autoCatalogNoCandidates")}</p>
+          )}
 
-      {open && items.length > 0 && (
-        <div className="mt-4 grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
-          {items.map((item) => (
-            <CatalogItemCard
-              key={item.id}
-              item={item}
-              testing={testingName === item.id}
-              duplicatingName={duplicatingName}
-              onTestCombo={onTestCombo}
-              onDuplicate={handleDuplicateEntry}
-              t={t}
-            />
-          ))}
-        </div>
-      )}
+          {items.length > 0 && (
+            <div className="mt-4 grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
+              {items.map((item) => (
+                <CatalogItemCard
+                  key={item.id}
+                  item={item}
+                  testing={testingName === item.id}
+                  duplicatingName={duplicatingName}
+                  onTestCombo={onTestCombo}
+                  onDuplicate={handleDuplicateEntry}
+                  t={t}
+                />
+              ))}
+            </div>
+          )}
+        </DisclosureContent>
+      </Disclosure>
     </Card>
   );
 }
