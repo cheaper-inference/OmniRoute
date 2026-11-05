@@ -1939,7 +1939,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {#건 요청} other {#건 요청}}, {keys, plural, one {#개의 제한된 키} other {#개의 제한된 키}}",
     "unpricedUsageMore": "…그리고 {count}개 더",
     "unpricedUsageConfigure": "가격 구성",
-    "unpricedUsageDismiss": "닫기"
+    "unpricedUsageDismiss": "닫기",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "분석",
@@ -7099,6 +7108,7 @@
     "proxySubTabsAria": "프록시 섹션",
     "requestBodyLimitTitle": "요청 본문 제한",
     "requestBodyLimitDescription": "요청 본문을 파싱하기 전에 허용되는 최대 API 페이로드 크기입니다. 전용 업로드 경로에는 최소한 기본 제공 한도인 100 MB가 유지됩니다.",
+    "requestBodyLimitChatHint": "여기에서 한도를 저장하기 전까지 Chat Completions와 Responses는 최대 50 MB를 허용합니다. 저장한 한도는 더 낮든 높든 두 API에도 적용됩니다.",
     "requestBodyLimitInputLabel": "요청 본문 제한(MB)",
     "requestBodyLimitEmptyError": "MB 단위로 제한값을 입력하세요",
     "requestBodyLimitWholeNumberError": "정수를 사용하세요",

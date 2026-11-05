@@ -1939,7 +1939,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# cerere} other {# cereri}}, {keys, plural, one {# cheie limitată} other {# chei limitate}}",
     "unpricedUsageMore": "…și încă {count}",
     "unpricedUsageConfigure": "Configurează prețurile",
-    "unpricedUsageDismiss": "Închide"
+    "unpricedUsageDismiss": "Închide",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analiză",
@@ -7099,6 +7108,7 @@
     "proxySubTabsAria": "Secțiuni proxy",
     "requestBodyLimitTitle": "Limita corpului cererii",
     "requestBodyLimitDescription": "Dimensiunea maximă acceptată a sarcinii utile API înainte ca un corp de cerere să fie analizat. Rutele dedicate pentru încărcări își păstrează cel puțin limita încorporată de 100 MB.",
+    "requestBodyLimitChatHint": "Chat Completions și Responses acceptă până la 50 MB până când salvați o limită aici. Limita salvată li se aplică și lor, indiferent dacă este mai mică sau mai mare.",
     "requestBodyLimitInputLabel": "Limita corpului cererii în MB",
     "requestBodyLimitEmptyError": "Introdu o limită în MB",
     "requestBodyLimitWholeNumberError": "Folosește un număr întreg",

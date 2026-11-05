@@ -1939,7 +1939,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# વિનંતી} other {# વિનંતીઓ}}, {keys, plural, one {# મર્યાદિત કી} other {# મર્યાદિત કીઓ}}",
     "unpricedUsageMore": "…અને {count} વધુ",
     "unpricedUsageConfigure": "કિંમત સેટ કરો",
-    "unpricedUsageDismiss": "બંદ કરો"
+    "unpricedUsageDismiss": "બંદ કરો",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "વિશ્લેષણ",
@@ -7099,6 +7108,7 @@
     "proxySubTabsAria": "પ્રોક્સી વિભાગો",
     "requestBodyLimitTitle": "વિનંતી બોડી મર્યાદા",
     "requestBodyLimitDescription": "વિનંતી બોડીનું વિશ્લેષણ થાય તે પહેલાં સ્વીકારવામાં આવતી મહત્તમ API પેલોડ સાઇઝ. સમર્પિત અપલોડ રૂટ્સ માટે ઓછામાં ઓછી તેમની બિલ્ટ-ઇન 100 MB મર્યાદા જળવાઈ રહે છે.",
+    "requestBodyLimitChatHint": "તમે અહીં મર્યાદા સાચવો ત્યાં સુધી Chat Completions અને Responses મહત્તમ 50 MB સ્વીકારે છે. સાચવેલી મર્યાદા ઓછી કે વધુ હોય, તે તેમને પણ લાગુ પડે છે.",
     "requestBodyLimitInputLabel": "MBમાં વિનંતી બોડી મર્યાદા",
     "requestBodyLimitEmptyError": "MBમાં મર્યાદા દાખલ કરો",
     "requestBodyLimitWholeNumberError": "પૂર્ણાંકનો ઉપયોગ કરો",

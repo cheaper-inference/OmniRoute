@@ -63,6 +63,7 @@ import type {
   SingleModelTarget,
   ComboLogger,
   HandleComboChatOptions,
+  HandleSingleModel,
   ResolvedComboTarget,
   AutoProviderCandidate,
   HistoricalLatencyStatsEntry,
@@ -838,8 +839,16 @@ async function handleComboChatInner({
   const traceInvocationId = invocationId ?? createInvocationId();
   startComboTrace(traceInvocationId, { strategy, comboName: combo.name });
 
+  const preContentTransportRecovery =
+    clientRequestedStream && resilienceSettings.streamRecovery.enabled === true;
+  const guardedHandleSingleModel: HandleSingleModel = preContentTransportRecovery
+    ? async (...dispatchArgs) =>
+        signal?.aborted
+          ? errorResponse(499, "Client disconnected")
+          : handleSingleModel(...dispatchArgs)
+    : handleSingleModel;
   const handleSingleModelWithTimeout = buildTargetTimeoutRunner({
-    handleSingleModel,
+    handleSingleModel: guardedHandleSingleModel,
     comboTargetTimeoutMs,
     resolveTargetTimeoutMs: (target) =>
       resolveTargetTimeoutMsForTarget(
@@ -869,6 +878,8 @@ async function handleComboChatInner({
       handleSingleModelWithTimeout,
       log,
       hiddenModelsByProvider,
+      preContentTransportRecovery: resilienceSettings.streamRecovery.enabled === true,
+      signal,
     });
     if (pinnedDispatch) return pinnedDispatch;
   }

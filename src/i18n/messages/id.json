@@ -1939,7 +1939,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# permintaan} other {# permintaan}}, {keys, plural, one {# kunci terbatas} other {# kunci terbatas}}",
     "unpricedUsageMore": "…dan {count} lagi",
     "unpricedUsageConfigure": "Konfigurasikan harga",
-    "unpricedUsageDismiss": "Tutup"
+    "unpricedUsageDismiss": "Tutup",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analisis",
@@ -7099,6 +7108,7 @@
     "proxySubTabsAria": "Bagian proksi",
     "requestBodyLimitTitle": "Batas Isi Permintaan",
     "requestBodyLimitDescription": "Ukuran maksimum payload API yang diterima sebelum isi permintaan diuraikan. Rute unggahan khusus tetap memiliki setidaknya batas bawaan sebesar 100 MB.",
+    "requestBodyLimitChatHint": "Chat Completions dan Responses menerima hingga 50 MB sampai Anda menyimpan batas di sini. Batas yang disimpan juga berlaku untuk keduanya, baik lebih rendah maupun lebih tinggi.",
     "requestBodyLimitInputLabel": "Batas ukuran isi permintaan dalam MB",
     "requestBodyLimitEmptyError": "Masukkan batas dalam MB",
     "requestBodyLimitWholeNumberError": "Gunakan bilangan bulat",

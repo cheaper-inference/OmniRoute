@@ -1939,7 +1939,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# בקשה} other {# בקשות}}, {keys, plural, one {# מפתח מוגבל} other {# מפתחות מוגבלים}}",
     "unpricedUsageMore": "…ועוד {count}",
     "unpricedUsageConfigure": "הגדר תמחור",
-    "unpricedUsageDismiss": "התעלם"
+    "unpricedUsageDismiss": "התעלם",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "אנליטיקס",
@@ -7099,6 +7108,7 @@
     "proxySubTabsAria": "מקטעי פרוקסי",
     "requestBodyLimitTitle": "מגבלת גוף הבקשה",
     "requestBodyLimitDescription": "הגודל המרבי של מטען API שיתקבל לפני ניתוח גוף הבקשה. נתיבי העלאה ייעודיים שומרים לפחות על המגבלה המובנית שלהם, העומדת על 100 MB.",
+    "requestBodyLimitChatHint": "Chat Completions ו-Responses מקבלים עד 50 MB עד לשמירת מגבלה כאן. המגבלה שנשמרה חלה גם עליהם, בין שהיא נמוכה יותר ובין שהיא גבוהה יותר.",
     "requestBodyLimitInputLabel": "מגבלת גוף הבקשה ב-MB",
     "requestBodyLimitEmptyError": "יש להזין מגבלה ב-MB",
     "requestBodyLimitWholeNumberError": "יש להשתמש במספר שלם",

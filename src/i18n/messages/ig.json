@@ -1939,7 +1939,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# arịrịọ} other {# arịrịọ}}, {keys, plural, one {# igodo nwere oke} other {# igodo nwere oke}}",
     "unpricedUsageMore": "…na {count} ọzọ",
     "unpricedUsageConfigure": "Tọọ ọnụahịa",
-    "unpricedUsageDismiss": "Mechie"
+    "unpricedUsageDismiss": "Mechie",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Nnyocha Data",
@@ -7099,6 +7108,7 @@
     "proxySubTabsAria": "Nkebi Ihe Nnọchiteanya",
     "requestBodyLimitTitle": "Oke Ahụ Arịrịọ",
     "requestBodyLimitDescription": "Oke kachasị nke ibu data API a na-anabata tupu a hazie ahụ arịrịọ. Ụzọ e wepụtara maka mbulite na-edobe opekata mpe oke 100 MB arụnyere n'ime ha.",
+    "requestBodyLimitChatHint": "Chat Completions na Responses na-anabata ihe ruru 50 MB ruo mgbe ị chekwara oke ebe a. Oke echekwara na-emetụtakwa ha, ma ọ dị ala ma ọ bụ karịa.",
     "requestBodyLimitInputLabel": "Oke ahụ arịrịọ na MB",
     "requestBodyLimitEmptyError": "Tinye oke na MB",
     "requestBodyLimitWholeNumberError": "Jiri ọnụọgụ zuru ezu",

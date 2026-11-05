@@ -1939,7 +1939,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# विनंती} other {# विनंत्या}}, {keys, plural, one {# मर्यादित की} other {# मर्यादित की}}",
     "unpricedUsageMore": "…आणि {count} अधिक",
     "unpricedUsageConfigure": "किंमत विन्यास करा",
-    "unpricedUsageDismiss": "रद्द करा"
+    "unpricedUsageDismiss": "रद्द करा",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "विश्लेषण",
@@ -7099,6 +7108,7 @@
     "proxySubTabsAria": "प्रॉक्सी विभाग",
     "requestBodyLimitTitle": "विनंती बॉडी मर्यादा",
     "requestBodyLimitDescription": "विनंती बॉडी पार्स करण्यापूर्वी स्वीकारला जाणारा कमाल API पेलोड आकार. समर्पित अपलोड मार्गांसाठी त्यांची अंगभूत 100 MB मर्यादा किमान कायम राहते.",
+    "requestBodyLimitChatHint": "तुम्ही येथे मर्यादा जतन करेपर्यंत Chat Completions आणि Responses कमाल 50 MB स्वीकारतात. जतन केलेली मर्यादा कमी किंवा जास्त असली तरी त्यांनाही लागू होते.",
     "requestBodyLimitInputLabel": "विनंती बॉडीची मर्यादा MB मध्ये",
     "requestBodyLimitEmptyError": "MB मध्ये मर्यादा प्रविष्ट करा",
     "requestBodyLimitWholeNumberError": "पूर्णांक वापरा",

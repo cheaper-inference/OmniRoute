@@ -1939,7 +1939,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# கோரிக்கை} other {# கோரிக்கைகள்}}, {keys, plural, one {# வரையறுக்கப்பட்ட விசை} other {# வரையறுக்கப்பட்ட விசைகள்}}",
     "unpricedUsageMore": "…மற்றும் {count} மேலும்",
     "unpricedUsageConfigure": "விலை அமைக்கவும்",
-    "unpricedUsageDismiss": "மறுக்கவும்"
+    "unpricedUsageDismiss": "மறுக்கவும்",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "பகுப்பாய்வு",
@@ -7099,6 +7108,7 @@
     "proxySubTabsAria": "ப்ராக்ஸி பிரிவுகள்",
     "requestBodyLimitTitle": "கோரிக்கை உள்ளடக்க அளவு வரம்பு",
     "requestBodyLimitDescription": "கோரிக்கையின் உள்ளடக்கம் பகுப்பாய்வு செய்யப்படுவதற்கு முன் ஏற்கப்படும் அதிகபட்ச API பேலோடு அளவு. பிரத்யேக பதிவேற்ற வழிகளுக்கு அவற்றின் உள்ளமைக்கப்பட்ட 100 MB வரம்பாவது தொடர்ந்து பொருந்தும்.",
+    "requestBodyLimitChatHint": "இங்கு வரம்பைச் சேமிக்கும் வரை Chat Completions மற்றும் Responses அதிகபட்சம் 50 MB ஏற்கும். சேமித்த வரம்பு குறைவாகவோ அதிகமாகவோ இருந்தாலும் அவற்றுக்கும் பொருந்தும்.",
     "requestBodyLimitInputLabel": "கோரிக்கை உள்ளடக்க அளவு வரம்பு (MB-இல்)",
     "requestBodyLimitEmptyError": "MB-இல் ஒரு வரம்பை உள்ளிடவும்",
     "requestBodyLimitWholeNumberError": "முழு எண்ணைப் பயன்படுத்தவும்",

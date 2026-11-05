@@ -1939,7 +1939,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# запрос} few {# запроса} many {# запросов} other {# запроса}}, {keys, plural, one {# ключ с лимитом} few {# ключа с лимитом} many {# ключей с лимитом} other {# ключей с лимитом}}",
     "unpricedUsageMore": "…и ещё {count}",
     "unpricedUsageConfigure": "Настроить цены",
-    "unpricedUsageDismiss": "Закрыть"
+    "unpricedUsageDismiss": "Закрыть",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Аналитика",
@@ -7099,6 +7108,7 @@
     "proxySubTabsAria": "Разделы прокси",
     "requestBodyLimitTitle": "Ограничение размера тела запроса",
     "requestBodyLimitDescription": "Максимальный размер данных API, принимаемых до разбора тела запроса. Для выделенных маршрутов загрузки сохраняется как минимум встроенный лимит в 100 МБ.",
+    "requestBodyLimitChatHint": "Chat Completions и Responses принимают до 50 MB, пока вы не сохраните здесь лимит. Сохранённый лимит действует и для них — как меньший, так и больший.",
     "requestBodyLimitInputLabel": "Ограничение размера тела запроса в МБ",
     "requestBodyLimitEmptyError": "Введите лимит в МБ",
     "requestBodyLimitWholeNumberError": "Используйте целое число",
