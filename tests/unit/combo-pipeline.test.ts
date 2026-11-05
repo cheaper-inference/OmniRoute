@@ -188,7 +188,7 @@ describe("handlePipelineChat — intermediate body memory", () => {
         throw new Error("intermediate response must not be cloned");
       },
     });
-    const final = new Response("data: final\\n\\n", {
+    const final = new Response("data: final\n\n", {
       headers: { "content-type": "text/event-stream" },
     });
     const handler = async (_body: Body, model: string): Promise<Response> =>
@@ -203,7 +203,7 @@ describe("handlePipelineChat — intermediate body memory", () => {
     assert.strictEqual(result, final);
     assert.equal(intermediate.bodyUsed, true);
     assert.equal(final.bodyUsed, false);
-    assert.equal(await final.text(), "data: final\\n\\n");
+    assert.equal(await final.text(), "data: final\n\n");
   });
 
   it("preserves upstream failure bodies without inspecting or cloning them", async () => {
