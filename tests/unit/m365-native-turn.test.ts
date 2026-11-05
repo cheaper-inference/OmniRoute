@@ -115,7 +115,7 @@ test("native Disengaged messages fail rather than allowing later completion", as
     arguments: [{ messages: [{ messageType: "Disengaged", text: "PRIVATE" }] }],
   });
   socket.frame({ type: 3 });
-  await rejected(promise, "M365_DISENGAGED");
+  await rejected(promise, "M365_DISENGAGED", 400);
   socket.closed();
 });
 
@@ -173,7 +173,7 @@ for (const [value, status, code] of [
   ["ForbiddenRequest", 403, "M365_FORBIDDEN"],
   ["InvalidCopilotLicense", 403, "M365_FORBIDDEN"],
   ["InternalError", 502, "M365_PROTOCOL_ERROR"],
-  ["Disengaged", 502, "M365_DISENGAGED"],
+  ["Disengaged", 400, "M365_DISENGAGED"],
 ] as const) {
   test(`type2 ${value} fails before composer can publish a success`, async () => {
     const seen: unknown[] = [];

@@ -20,6 +20,9 @@ function failureCode(error: M365TurnError | M365ExecutorError): string {
       : "m365_model_not_licensed";
   if (error.code === "M365_THROTTLED") return "m365_throttled";
   if (error.code === "M365_OUT_OF_CREDITS") return "priority_access_exhausted";
+  // The shared local label for an explicit provider safety stop (providerSafety.ts): routing
+  // and account health then treat it as terminal and request-scoped, never as a failover.
+  if (error.code === "M365_DISENGAGED") return "provider_safety_rejection";
   return error.code.toLowerCase();
 }
 function failureMetadata(
@@ -58,7 +61,13 @@ export function m365Failure(error: unknown, model: string) {
   const native = typed instanceof M365TurnError ? typed : undefined;
   const status = typed.status;
   const type =
-    status === 403 ? "permission_error" : status === 429 ? "rate_limit_error" : "upstream_error";
+    status === 400
+      ? "invalid_request_error"
+      : status === 403
+        ? "permission_error"
+        : status === 429
+          ? "rate_limit_error"
+          : "upstream_error";
   const body: { error: JsonRecord } = {
     error: {
       message: sanitizeErrorMessage(typed.message),

@@ -40,7 +40,8 @@ const ERRORS = {
   M365_THROTTLED: [429, "Microsoft 365 Copilot request throttled."],
   M365_OUT_OF_CREDITS: [429, "Microsoft 365 Copilot credits exhausted."],
   M365_FORBIDDEN: [403, "Microsoft 365 Copilot access denied."],
-  M365_DISENGAGED: [502, "Microsoft 365 Copilot disengaged from the turn."],
+  // Its safety filter declined this request: a request-scoped provider safety stop.
+  M365_DISENGAGED: [400, "Microsoft 365 Copilot declined this request."],
   M365_IDLE_TIMEOUT: [504, "Microsoft 365 Copilot turn idle timeout."],
   M365_TIMEOUT: [504, "Microsoft 365 Copilot turn timeout."],
 } as const;
