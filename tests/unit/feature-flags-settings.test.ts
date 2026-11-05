@@ -69,7 +69,8 @@ const {
 // The two #18312 transport flags (PROXY_STRICT_POST_REPLAY_ENABLED, RESPONSES_TRANSPORT_KEEPALIVE_ENABLED,
 // both default off) take it to 117.
 // OPENCODE_FREE_TIER_EGRESS_PROBE (one-hop egress probe after a FreeTierError, default off) takes it to 118.
-const EXPECTED_FEATURE_FLAG_COUNT = 118;
+// PROXY_REFUSAL_MODEL_SCOPE (#18686, default off) takes it to 119.
+const EXPECTED_FEATURE_FLAG_COUNT = 119;
 // tool_call wrapper repair, default on) to 86; OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED
 // (#16571, OpenCode v2 client fingerprint, default off) to 87.
 // tool_call wrapper repair, default on) to 86; CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED
