@@ -156,7 +156,6 @@ import { resolveComboDailyReset } from "./comboDailyResetClock.ts";
 import { resolveTargetTokenLimit } from "./targetTokenLimit.ts";
 import { isProviderProbeResponse } from "../../../src/shared/utils/providerProbeResult.ts";
 import { recordLocalCircuitRefusal } from "./localCircuitRefusal.ts";
-import { waitForCooldownAwareRetry } from "../../../src/sse/services/cooldownAwareRetry.ts";
 
 /**
  * Handle round-robin combo: each request goes to the next model in circular order.
