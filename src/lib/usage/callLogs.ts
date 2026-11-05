@@ -137,11 +137,6 @@ type CallLogSummaryRow = {
 export const RESOLVED_ACCOUNT_SQL =
   "COALESCE(NULLIF(pc.name, ''), NULLIF(pc.email, ''), cl.account)";
 
-type DeleteResult = {
-  deletedRows: number;
-  deletedArtifacts: number;
-};
-
 const CALL_LOG_ID_RETRY_LIMIT = 3;
 
 function generateLogId() {
@@ -821,14 +816,11 @@ function insertCallLogRow(prepared: PreparedCallLogRow): void {
 /** Write the inserted row's artifact and publish it, or make the row terminal missing. */
 async function publishCallLogDetail(prepared: PreparedCallLogRow): Promise<void> {
   const { db, logEntry, buildDetailArtifact } = prepared;
-  let detailState = prepared.detailState;
   if (buildDetailArtifact) {
     const id = String(logEntry.id);
     try {
       const artifactResult = await writeCallArtifactAsync(buildDetailArtifact());
-      if (artifactResult && publishPendingCallLogDetail(db, id, artifactResult)) {
-        detailState = "ready";
-      }
+      if (artifactResult) publishPendingCallLogDetail(db, id, artifactResult);
     } finally {
       // A null result or a thrown write must not strand the export cursor.
       failPendingCallLogDetail(db, id);
