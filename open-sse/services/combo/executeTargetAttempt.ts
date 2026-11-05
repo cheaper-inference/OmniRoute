@@ -40,6 +40,7 @@ import {
   getLastSessionModel,
   getHandoff,
 } from "../../../src/lib/db/contextHandoffs.ts";
+import { scopeHandoffSessionId } from "./handoffSessionScope.ts";
 import { resolveModelLockoutSettings } from "../../../src/lib/resilience/modelLockoutSettings";
 import { fetchCodexQuota } from "../codexQuotaFetcher.ts";
 import { emit } from "../../../src/lib/events/eventBus";
@@ -138,6 +139,11 @@ export async function executeTargetAttempt(
   const maxGlobalAttempts = clampGlobalAttempts(deps.config.maxGlobalAttempts);
   const retryDelayMs = resolveDelayMs(deps.config.retryDelayMs, 2000);
   const fallbackDelayMs = resolveDelayMs(deps.config.fallbackDelayMs, 0);
+  // Handoff and model-history rows are keyed per caller (see scopeHandoffSessionId).
+  const handoffSessionId = scopeHandoffSessionId(
+    deps.relayOptions?.sessionId,
+    deps.relayOptions?.apiKeyId
+  );
   const universalHandoffConfig = deps.universalHandoffConfig ?? DEFAULT_UNIVERSAL_HANDOFF_CONFIG;
   const stopTarget = (message: string, cause?: ProtectedPriorityStopCause) =>
     stopProtectedPriorityTarget({
@@ -289,12 +295,12 @@ export async function executeTargetAttempt(
     if (
       i === 0 &&
       universalHandoffConfig.enabled &&
-      deps.relayOptions?.sessionId &&
+      handoffSessionId &&
       !(deps.body as Record<string, unknown>)?.[SKIP_UNIVERSAL_HANDOFF_FLAG]
     ) {
-      const lastModel = getLastSessionModel(deps.relayOptions.sessionId, deps.combo.name);
+      const lastModel = getLastSessionModel(handoffSessionId, deps.combo.name);
       if (lastModel && lastModel !== modelStr) {
-        const existingHandoff = getHandoff(deps.relayOptions.sessionId, deps.combo.name);
+        const existingHandoff = getHandoff(handoffSessionId, deps.combo.name);
         attemptBody = injectUniversalHandoffBody(
           attemptBody, // Use the cloned body to maintain isolation
           lastModel,
@@ -672,12 +678,12 @@ export async function executeTargetAttempt(
       // Universal handoff: record model usage for session
       if (
         universalHandoffConfig.enabled &&
-        deps.relayOptions?.sessionId &&
+        handoffSessionId &&
         !(deps.body as Record<string, unknown>)?.[SKIP_UNIVERSAL_HANDOFF_FLAG]
       ) {
-        const prevModel = getLastSessionModel(deps.relayOptions.sessionId, deps.combo.name);
+        const prevModel = getLastSessionModel(handoffSessionId, deps.combo.name);
         recordSessionModelUsage(
-          deps.relayOptions.sessionId,
+          handoffSessionId,
           deps.combo.name,
           modelStr,
           provider,
@@ -699,7 +705,7 @@ export async function executeTargetAttempt(
                 : [];
 
           maybeGenerateUniversalHandoff({
-            sessionId: deps.relayOptions.sessionId,
+            sessionId: handoffSessionId,
             comboName: deps.combo.name,
             messages: handoffSourceMessages as MessageLike[],
             prevModel,
@@ -710,7 +716,7 @@ export async function executeTargetAttempt(
         }
 
         recordSessionModelUsage(
-          deps.relayOptions.sessionId,
+          handoffSessionId,
           deps.combo.name,
           modelStr,
           provider,
@@ -723,6 +729,7 @@ export async function executeTargetAttempt(
       if (
         getStrategyTraits(deps.strategy).contextRelay &&
         deps.relayOptions?.sessionId &&
+        handoffSessionId &&
         deps.relayConfig &&
         (deps.relayConfig.handoffProviders ?? []).includes(provider) &&
         provider === "codex"
@@ -746,7 +753,7 @@ export async function executeTargetAttempt(
                   : [];
 
             maybeGenerateHandoff({
-              sessionId: deps.relayOptions.sessionId,
+              sessionId: handoffSessionId,
               comboName: deps.combo.name,
               connectionId,
               percentUsed: quotaInfo.percentUsed,
