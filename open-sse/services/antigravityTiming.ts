@@ -25,24 +25,112 @@ const MAX_TIMING_OBSERVATION_MS = 300_000;
 type AccountTiming = { inflight: number; lastFinishedAt: number | null };
 
 /** Only allow actual Gemini output to set first delta; pings/errors/usage do not. */
+function isMeaningfulPart(value: unknown): boolean {
+  if (!value || typeof value !== "object") return false;
+  const part = value as {
+    text?: unknown;
+    functionCall?: { name?: unknown };
+    inlineData?: { data?: unknown };
+    executableCode?: unknown;
+    codeExecutionResult?: unknown;
+  };
+  return (typeof part.text === "string" && part.text.length > 0) ||
+    (typeof part.functionCall?.name === "string" && part.functionCall.name.length > 0) ||
+    (typeof part.inlineData?.data === "string" && part.inlineData.data.length > 0) ||
+    Boolean(part.executableCode || part.codeExecutionResult);
+}
+
+function candidateHasMeaningfulPart(value: unknown): boolean {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as { content?: { parts?: unknown[] } };
+  return Array.isArray(candidate.content?.parts) && candidate.content.parts.some(isMeaningfulPart);
+}
+
 export function hasAntigravityMeaningfulDelta(frame: string): boolean {
   for (const line of frame.split(/\r?\n/)) {
     if (!line.startsWith("data:")) continue;
     try {
       const parsed = JSON.parse(line.slice(5).trim()) as Record<string, unknown>;
-      const response = (parsed.response ?? parsed) as Record<string, unknown>;
-      if (!Array.isArray(response.candidates)) continue;
-      for (const candidate of response.candidates) {
-        const parts = candidate?.content?.parts;
-        if (!Array.isArray(parts)) continue;
-        if (parts.some((part) => (typeof part?.text === "string" && part.text.length > 0) ||
-          (typeof part?.functionCall?.name === "string" && part.functionCall.name.length > 0) ||
-          (typeof part?.inlineData?.data === "string" && part.inlineData.data.length > 0) ||
-          part?.executableCode || part?.codeExecutionResult)) return true;
+      const response = (parsed.response ?? parsed) as { candidates?: unknown[] };
+      if (Array.isArray(response.candidates) && response.candidates.some(candidateHasMeaningfulPart)) {
+        return true;
       }
     } catch { /* Partial, invalid or terminal frame: no measured delta. */ }
   }
   return false;
+}
+
+function createDeltaInspector(onFirstDelta: () => void): (bytes: Uint8Array) => void {
+  const decoder = new TextDecoder();
+  let pending = "";
+  let skipOversizedFrame = false;
+  let found = false;
+  return (bytes) => {
+    if (found) return;
+    if (bytes.byteLength > 65536) {
+      pending = "";
+      skipOversizedFrame = true;
+      return;
+    }
+    pending += decoder.decode(bytes, { stream: true });
+    for (;;) {
+      const boundary = pending.search(/\r?\n\r?\n/);
+      if (boundary < 0) break;
+      const frame = pending.slice(0, boundary);
+      pending = pending.slice(boundary).replace(/^\r?\n\r?\n/, "");
+      if (!skipOversizedFrame && hasAntigravityMeaningfulDelta(frame)) {
+        found = true;
+        pending = "";
+        onFirstDelta();
+        return;
+      }
+      skipOversizedFrame = false;
+    }
+    if (pending.length > 65536) {
+      pending = "";
+      skipOversizedFrame = true;
+    }
+  };
+}
+
+function wrapTrackedResponseBody(
+  response: Response,
+  handlers: {
+    finish: (phase: string) => void;
+    onChunk: () => void;
+    onFirstDelta: () => void;
+    isFinished: () => boolean;
+  }
+): Response {
+  const reader = response.body!.getReader();
+  const inspect = createDeltaInspector(handlers.onFirstDelta);
+  const body = new ReadableStream<Uint8Array>({
+    async pull(controller) {
+      try {
+        const chunk = await reader.read();
+        if (chunk.done) {
+          handlers.finish("complete");
+          reader.releaseLock();
+          controller.close();
+        } else {
+          handlers.onChunk();
+          if (!handlers.isFinished()) inspect(chunk.value);
+          controller.enqueue(chunk.value);
+        }
+      } catch (error) {
+        handlers.finish("body_error");
+        reader.releaseLock();
+        controller.error(error);
+      }
+    },
+    async cancel(reason) {
+      handlers.finish("cancelled");
+      try { await reader.cancel(reason); } finally { reader.releaseLock(); }
+    },
+  });
+  return new Response(body, {
+    status: response.status, statusText: response.statusText, headers: response.headers,
+  });
 }
 
 export class AntigravityTimingTracker {
@@ -99,14 +187,21 @@ export class AntigravityTimingTracker {
       signal?.removeEventListener("abort", onAbort);
       event(phase);
     };
-    const abortPhase = () => (signal?.reason as { name?: string } | undefined)?.name === "TimeoutError"
-      ? "upstream_deadline" : "caller_abort";
+    const abortPhase = () => isAntigravityPreResponseTimeout(signal?.reason)
+      ? "pre_response_timeout"
+      : (signal?.reason as { name?: string } | undefined)?.name === "TimeoutError"
+        ? "upstream_deadline" : "caller_abort";
     const onAbort = () => finish(abortPhase());
     signal?.addEventListener("abort", onAbort, { once: true });
     // Bound *telemetry state*, not upstream execution. This also protects HTTP 200
     // streams that a caller abandons without reading or cancelling their bodies.
-    observationTimer = setTimeout(() => finish("observation_expired"), this.maxObservationMs);
-    observationTimer.unref?.();
+    const armObservationTimer = () => {
+      if (finished) return;
+      if (observationTimer !== null) clearTimeout(observationTimer);
+      observationTimer = setTimeout(() => finish("observation_expired"), this.maxObservationMs);
+      observationTimer.unref?.();
+    };
+    armObservationTimer();
     try {
       const response = await send();
       headersAt = this.now();
@@ -126,55 +221,14 @@ export class AntigravityTimingTracker {
         finish("complete");
         return response;
       }
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let pending = "";
-      let skipOversizedFrame = false;
-      const inspect = (bytes: Uint8Array) => {
-        if (finished || firstDeltaAt !== null) return;
-        // Never retain an unbounded chunk/frame, including large image deltas.
-        if (bytes.byteLength > 65536) { pending = ""; skipOversizedFrame = true; return; }
-        pending += decoder.decode(bytes, { stream: true });
-        for (;;) {
-          const boundary = pending.search(/\r?\n\r?\n/);
-          if (boundary < 0) break;
-          const frame = pending.slice(0, boundary);
-          pending = pending.slice(boundary).replace(/^\r?\n\r?\n/, "");
-          if (!skipOversizedFrame && hasAntigravityMeaningfulDelta(frame)) {
-            firstDeltaAt = this.now();
-            event("first_meaningful_delta");
-            pending = "";
-            return;
-          }
-          skipOversizedFrame = false;
-        }
-        if (pending.length > 65536) { pending = ""; skipOversizedFrame = true; }
-      };
-      const body = new ReadableStream<Uint8Array>({
-        async pull(controller) {
-          try {
-            const chunk = await reader.read();
-            if (chunk.done) {
-              finish("complete");
-              reader.releaseLock();
-              controller.close();
-            } else {
-              inspect(chunk.value);
-              controller.enqueue(chunk.value);
-            }
-          } catch (error) {
-            finish("body_error");
-            reader.releaseLock();
-            controller.error(error);
-          }
+      return wrapTrackedResponseBody(response, {
+        finish,
+        onChunk: armObservationTimer,
+        isFinished: () => finished,
+        onFirstDelta: () => {
+          firstDeltaAt = this.now();
+          event("first_meaningful_delta");
         },
-        async cancel(reason) {
-          finish("cancelled");
-          try { await reader.cancel(reason); } finally { reader.releaseLock(); }
-        },
-      });
-      return new Response(body, {
-        status: response.status, statusText: response.statusText, headers: response.headers,
       });
     } catch (error) {
       finish(isAntigravityPreResponseTimeout(error) ? "pre_response_timeout" : signal?.aborted ? abortPhase() : "fetch_failed");
@@ -189,11 +243,13 @@ export const timeAntigravityFetch = (send: () => Promise<Response>, signal?: Abo
 
 export function withAntigravityTiming<T>(
   options: { enabled: boolean; connectionId: string; model: string; correlationId?: string | null;
-    emit: TimingContext["emit"] },
+    physicalSendOrdinal?: number; emit: TimingContext["emit"] },
   fn: () => T
 ): T {
   if (!options.enabled) return fn();
   const requestId = /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(options.correlationId ?? "")
     ? options.correlationId! : randomUUID();
-  return context.run({ ...options, requestId, sends: 0 }, fn);
+  const sends = options.physicalSendOrdinal && Number.isInteger(options.physicalSendOrdinal) &&
+    options.physicalSendOrdinal > 0 ? options.physicalSendOrdinal - 1 : 0;
+  return context.run({ ...options, requestId, sends }, fn);
 }
