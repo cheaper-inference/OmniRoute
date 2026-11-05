@@ -111,6 +111,14 @@ export const OPENAI_RESPONSES_ERROR_FRAME = ENCODER.encode(
 const MAX_RETRY_AFTER_SECONDS = 3600;
 
 /**
+ * Ceiling for the decoded-but-incomplete SSE frame the fast-path wrapper holds
+ * back. An upstream that keeps sending without ever emitting a blank line would
+ * otherwise grow this without bound; past the ceiling the wrapper releases whole
+ * lines so the terminal error frame still can never merge into a partial line.
+ */
+const MAX_BUFFERED_FRAME_BYTES = 1 << 20;
+
+/**
  * Wrap a fast-path verbatim SSE body so a mid-flight upstream failure appends
  * ONE format-correct terminal error frame before the stream closes. Converts an
  * abrupt transport close (client sees "connection dropped mid-response") into a
@@ -167,23 +175,46 @@ function wrapSseBodyWithMidStreamFailure(
   return new ReadableStream<Uint8Array>({
     async pull(controller) {
       try {
-        const { done, value } = await reader.read();
-        if (done) {
-          // Healthy close: flush any trailing bytes even without a terminal
-          // blank line (some upstreams end exactly at frame end without the
-          // final blank line being observable as a separate read).
-          if (buffer.length > 0) {
-            controller.enqueue(ENCODER.encode(buffer));
-            buffer = "";
+        // Loop until there is something to enqueue: a pull() that resolves
+        // without enqueuing stalls the pending read forever (the consumer is
+        // blocked on exactly this chunk), so holding back an incomplete frame
+        // must keep reading upstream instead of returning empty-handed.
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) {
+            // Flush any multibyte sequence the decoder still holds, then forward
+            // the trailing bytes even without a terminal blank line (some
+            // upstreams end exactly at frame end without the final blank line
+            // being observable as a separate read).
+            buffer += decoder.decode();
+            if (buffer.length > 0) {
+              controller.enqueue(ENCODER.encode(buffer));
+              buffer = "";
+            }
+            controller.close();
+            return;
           }
-          controller.close();
-          return;
-        }
-        if (value) {
+          if (!value || value.byteLength === 0) continue;
+
           bytesForwarded += value.byteLength;
           buffer += decoder.decode(value, { stream: true });
-          for (const frame of takeCompleteFrames()) {
-            controller.enqueue(ENCODER.encode(frame));
+          const frames = takeCompleteFrames();
+          if (frames.length > 0) {
+            for (const frame of frames) controller.enqueue(ENCODER.encode(frame));
+            return;
+          }
+          // An upstream that never emits a blank line must not grow the buffer
+          // without bound. Release everything up to the last complete LINE (so
+          // SSE line framing stays valid and the terminal error frame still
+          // cannot merge into a partial line); a single over-long line keeps
+          // accumulating, which is the upstream's own framing bug.
+          if (buffer.length >= MAX_BUFFERED_FRAME_BYTES) {
+            const lastNewline = buffer.lastIndexOf("\n");
+            if (lastNewline >= 0) {
+              controller.enqueue(ENCODER.encode(buffer.slice(0, lastNewline + 1)));
+              buffer = buffer.slice(lastNewline + 1);
+              return;
+            }
           }
         }
       } catch {
@@ -209,7 +240,9 @@ function wrapSseBodyWithMidStreamFailure(
       }
     },
     cancel(reason) {
-      reader.cancel(reason).catch(() => {});
+      // Propagate the promise so the caller's cancel() settles only after the
+      // upstream reader is released (no orphaned upstream socket).
+      return reader.cancel(reason).catch(() => {});
     },
   });
 }

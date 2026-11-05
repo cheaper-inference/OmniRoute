@@ -205,6 +205,32 @@ test("mid-stream drop handles CRLF framing (complete forwarded, incomplete disca
   assert.ok(text.includes('"type":"stream_error"'), "terminal error frame must follow");
 });
 
+// Regression guard: holding back an incomplete frame must not resolve pull()
+// empty. A ReadableStream pull that enqueues nothing leaves the pending read
+// blocked forever, so a frame split ACROSS upstream reads would deadlock the
+// whole stream instead of just being buffered.
+test("a frame split across upstream reads is forwarded instead of stalling", async () => {
+  const encoder = new TextEncoder();
+  const chunks = ['data: {"delta":"sp', 'lit"}\n', '\ndata: {"delta":"second"}\n\n'];
+  let index = 0;
+  const body = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      if (index === chunks.length) {
+        controller.close();
+        return;
+      }
+      controller.enqueue(encoder.encode(chunks[index++]));
+    },
+  });
+  const response = await withEarlyStreamKeepalive(
+    Promise.resolve(new Response(body, { headers: { "content-type": "text/event-stream" } })),
+    { thresholdMs: 0, intervalMs: 10_000, errorFrame: OPENAI_CHAT_ERROR_FRAME }
+  );
+
+  const text = await readAll(response);
+  assert.equal(text, 'data: {"delta":"split"}\n\ndata: {"delta":"second"}\n\n');
+});
+
 // CodeRabbit 18948 line 125: a zero-content fast-path failure must emit the
 // caller's CONFIGURED errorFrame verbatim (not the generic partial frame).
 test("fast-path zero-content failure emits the configured custom errorFrame", async () => {
@@ -224,4 +250,58 @@ test("fast-path zero-content failure emits the configured custom errorFrame", as
     text.includes('"configured-frame"'),
     `zero-content failure must use the configured errorFrame, got: ${text}`
   );
+});
+
+// An upstream that never closes a frame must not grow the wrapper's buffer
+// without bound: past the ceiling, whole lines are released (never half a line)
+// so the stream keeps flowing and a later terminal frame stays parseable.
+test("a never-terminated SSE line is released as whole lines instead of buffering forever", async () => {
+  const encoder = new TextEncoder();
+  const line = `data: ${"x".repeat(64 * 1024)}\n`;
+  let sent = 0;
+  const body = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      // 40 x 64 KiB lines with no terminating blank line = ~2.5 MiB.
+      if (sent === 40) {
+        controller.error(new Error("upstream socket reset"));
+        return;
+      }
+      sent++;
+      controller.enqueue(encoder.encode(line));
+    },
+  });
+  const response = await withEarlyStreamKeepalive(
+    Promise.resolve(new Response(body, { headers: { "content-type": "text/event-stream" } })),
+    { thresholdMs: 0, intervalMs: 10_000, errorFrame: OPENAI_CHAT_ERROR_FRAME }
+  );
+
+  const text = await readAll(response);
+  assert.ok(
+    text.length > 1024 * 1024,
+    "released lines must actually reach the client, not stay buffered"
+  );
+  // Whatever was released ends on a line boundary, and the error frame is intact.
+  const lastData = text.split("\n").filter((l) => l.startsWith("data: ")).pop() ?? "";
+  assert.doesNotThrow(() => JSON.parse(lastData.slice(6)), `error frame must parse: ${lastData}`);
+});
+
+// A client disconnect must release the upstream reader, otherwise the upstream
+// socket stays open until its own timeout.
+test("cancelling the wrapped body cancels the upstream reader", async () => {
+  let upstreamCancelled = false;
+  const body = new ReadableStream<Uint8Array>({
+    pull() {
+      /* never resolves the read — the client goes away first */
+    },
+    cancel() {
+      upstreamCancelled = true;
+    },
+  });
+  const response = await withEarlyStreamKeepalive(
+    Promise.resolve(new Response(body, { headers: { "content-type": "text/event-stream" } })),
+    { thresholdMs: 0, intervalMs: 10_000, errorFrame: OPENAI_CHAT_ERROR_FRAME }
+  );
+
+  await response.body!.cancel();
+  assert.equal(upstreamCancelled, true, "upstream body must be cancelled with the client");
 });
