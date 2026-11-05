@@ -58,6 +58,11 @@ function formatAutoRefreshCountdown(ms: number): string {
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
+function RefreshGlyph({ refreshing, scheduled }: { refreshing: boolean; scheduled: boolean }) {
+  if (refreshing) return <Spinner decorative size="sm" />;
+  return <Icon name={scheduled ? "schedule" : "refresh"} size={16} />;
+}
+
 function QuotaRow({ quota }: { quota: any }) {
   const t = useTranslations("usage");
   const percentage = Math.round(getQuotaRemainingPercentage(quota));
@@ -298,11 +303,7 @@ export default function ProviderQuotaWidget({
           disabled={loading || refreshingAll}
           className="gap-1.5 text-xs"
         >
-          {refreshingAll ? (
-            <Spinner decorative size="sm" />
-          ) : (
-            <Icon name={autoRefreshIntervalMs > 0 ? "schedule" : "refresh"} size={16} />
-          )}
+          <RefreshGlyph refreshing={refreshingAll} scheduled={autoRefreshIntervalMs > 0} />
           {refreshingAll
             ? tr("refreshing", "Refreshing")
             : autoRefreshIntervalMs > 0
