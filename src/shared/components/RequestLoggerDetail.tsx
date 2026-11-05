@@ -6,7 +6,7 @@ import { sortRelatedLogs } from "./requestLoggerGroups";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { JsonView } from "@/shared/components/jsonView";
-import { PROVIDER_COLORS, getProtocolColor } from "@/shared/constants/colors";
+import { PROVIDER_COLORS, getProtocolColor, neutralBadge } from "@/shared/constants/colors";
 import { formatDuration, formatApiKeyLabel, maskAccount } from "@/shared/utils/formatting";
 import { formatErrorForDisplay, formatReasoningStat } from "@/shared/utils/formatting";
 import { useTheme } from "@/shared/hooks/useTheme";
@@ -425,11 +425,8 @@ export default function RequestLoggerDetail({
   const { startMs, endMs } = getRequestTimeRange(timingLog);
   const protocolKey = log.sourceFormat || log.provider;
   const protocol = getProtocolColor(protocolKey, log.provider);
-  const providerColor = PROVIDER_COLORS[log.provider] || {
-    bg: "#374151",
-    text: "#fff",
-    label: (log.provider || "-").toUpperCase(),
-  };
+  const providerColor =
+    PROVIDER_COLORS[log.provider] || neutralBadge((log.provider || "-").toUpperCase());
   const providerLabel = log.providerDisplay || providerColor.label;
 
   const [unblocking, setUnblocking] = useState(false);
