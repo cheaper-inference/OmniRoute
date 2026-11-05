@@ -28,7 +28,7 @@ const cleanupCallbacks: Array<() => void> = [];
 // "cancel"); answer it the way a user would.
 async function answerConfirm(label: "confirmAction" | "cancel") {
   const button = [
-    ...document.body.querySelectorAll<HTMLButtonElement>('[role="dialog"] button'),
+    ...document.body.querySelectorAll<HTMLButtonElement>('[role="alertdialog"] button'),
   ].find((b) => b.textContent?.trim() === label);
   expect(button, `expected the confirm dialog "${label}" button`).toBeTruthy();
   await act(async () => {

@@ -60,7 +60,7 @@ vi.mock("../../../../../src/app/(dashboard)/dashboard/batch/components/useBatchA
 // are "confirmAction" / "cancel".
 async function answerConfirm(label: "confirmAction" | "cancel") {
   const button = Array.from(
-    document.body.querySelectorAll<HTMLButtonElement>('[role="dialog"] button')
+    document.body.querySelectorAll<HTMLButtonElement>('[role="alertdialog"] button')
   ).find((b) => b.textContent?.trim() === label);
   expect(button, `expected the confirm dialog "${label}" button`).toBeTruthy();
   await act(async () => {
