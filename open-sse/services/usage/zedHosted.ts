@@ -17,7 +17,7 @@
  * shortcut: the Orb portal API is non-public and its WAF header set will change; re-capture the request from the portal when it does.
  */
 
-import { createHash } from "node:crypto";
+import { opaqueTokenFingerprint } from "../../utils/opaqueTokenFingerprint.ts";
 
 import { toRecord, toNumber, roundCurrency, clampPercentage } from "./scalars.ts";
 import { type UsageQuota, parseResetTime } from "./quota.ts";
@@ -139,8 +139,8 @@ function isTimeoutError(error: unknown): boolean {
 
 function cacheKeyFor(connectionId: string, token: string): string | null {
   if (!connectionId) return null;
-  // Hash the token: a raw credential must never sit in a module-level key.
-  const digest = createHash("sha256").update(token).digest("hex").slice(0, 12);
+  // Fingerprint the token: a raw credential must never sit in a module-level key.
+  const digest = opaqueTokenFingerprint(token, { length: 12 });
   return `${connectionId}:${digest}`;
 }
 
