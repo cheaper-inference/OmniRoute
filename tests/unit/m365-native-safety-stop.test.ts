@@ -8,6 +8,10 @@ import {
 } from "../../open-sse/executors/copilot-m365-web.ts";
 import { encodeFrame } from "../../open-sse/executors/copilot-m365-frames.ts";
 import { isProviderSafetyRefusalBody } from "../../open-sse/utils/providerSafety.ts";
+import {
+  classifyProviderError,
+  PROVIDER_ERROR_TYPES,
+} from "../../open-sse/services/errorClassifier.ts";
 
 // M365 "Disengaged" is its safety filter declining the request. It must reach routing as an
 // explicit provider safety stop (request-scoped, terminal), never as a retryable 5xx that a
@@ -83,6 +87,11 @@ for (const [label, frames] of shapes) {
         assert.equal(body.error.code, "provider_safety_rejection");
         assert.equal(body.error.type, "invalid_request_error");
         assert.equal(isProviderSafetyRefusalBody(response.status, body), true);
+        // Account health classifies it as a safety refusal, not an upstream failure.
+        assert.equal(
+          classifyProviderError(response.status, body, "copilot-m365-web"),
+          PROVIDER_ERROR_TYPES.PROVIDER_SAFETY_REFUSAL
+        );
         assert.equal(response.headers.get("Retry-After"), null);
       } finally {
         restore();

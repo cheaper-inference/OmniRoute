@@ -160,6 +160,10 @@ Registration is not a promise that Microsoft serves that model to every account.
 - A per-user throttle returns **429** `m365_throttled` and cools down the connection.
   Priority-access exhaustion returns **429** `priority_access_exhausted` and is model-scoped.
   Supplied retry hints are preserved; a missing reset is not advertised as a known reset time.
+- A Copilot safety refusal (`Disengaged`) returns **400** `provider_safety_rejection`, the
+  shared provider safety-stop label. It never counts against the connection's health, client
+  SDKs do not retry a 400, and with `PROVIDER_SAFETY_STOPS_TERMINAL` enabled combo routing
+  stops there instead of replaying the request against another target.
 - Requests on one connection are serialized through the existing account semaphore. Prefer
   priority fallback rather than parallel panels; serialization alone does not eliminate
   Microsoft's conversation-rate limits.
