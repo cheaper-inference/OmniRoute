@@ -10,6 +10,7 @@ import {
   type OmniRouteRawCombo,
   type OmniRouteRawModelEntry,
 } from "../src/shared/index.js";
+import { withEmptyEnrichment } from "./helpers/network-fixtures.js";
 type BetaDraft = {
   provider: {
     list?: () => unknown[];
@@ -123,7 +124,9 @@ describe("v1-vs-v2 catalog parity", () => {
     const v1Keys = recorded.publishedKeys;
 
     const draft = fakeDraft();
-    const counts = await publishCatalog(draft, TEST_OPTS, { fetcher, combosFetcher });
+    const counts = await withEmptyEnrichment((enrichmentFetcher) =>
+      publishCatalog(draft, TEST_OPTS, { enrichmentFetcher, fetcher, combosFetcher })
+    );
     assert.equal(counts.models, 5);
     assert.equal(counts.combos, 2);
     assert.deepEqual(counts, { models: 5, combos: 2 });
@@ -190,7 +193,9 @@ describe("v1-vs-v2 catalog parity", () => {
     };
     try {
       const draft2 = fakeDraft();
-      await publishCatalog(draft2, TEST_OPTS, { fetcher, combosFetcher });
+      await withEmptyEnrichment((enrichmentFetcher) =>
+        publishCatalog(draft2, TEST_OPTS, { enrichmentFetcher, fetcher, combosFetcher })
+      );
       assert.ok(draft2.models.has("omniroute/Good Combo"), "combo keyed by its name in v2");
       assert.ok(
         draft2.models.has("omniroute/good-combo"),

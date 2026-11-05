@@ -20,7 +20,6 @@ set -uo pipefail
 WT="${1:?uso: run-doc-wave.sh <worktree> [nome]}"; NAME="${2:-wave-$(date +%m%d-%H%M)}"
 [[ "$NAME" =~ ^[a-zA-Z0-9._-]+$ ]] || { echo "invalid wave name" >&2; exit 2; }
 OUT="${I18N_OUT:-/home/diegosouzapw/dev/proxys/OmniRoute/_artifacts/i18n-waves}"
-KIT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 QUOTA_WAIT="${QUOTA_WAIT:-900}"; QUOTA_MAX="${QUOTA_MAX:-8}"
 DOWN_WAIT="${DOWN_WAIT:-300}";   DOWN_MAX="${DOWN_MAX:-6}"
 mkdir -p "$OUT/locks"; LOG="$OUT/$NAME.log"; : > "$LOG"
@@ -97,12 +96,78 @@ wip() {
       [ ! -f "$target" ] || paths+=("$target")
     done
   done
+  # Numeric values and their reviewed prose bindings must pass before publication.
+  # A changed translation anchor requires review; never regenerate bindings or adopt hashes here.
+  local count_gate=scripts/check/check-docs-counts-sync.mjs count_source input
+  local count_inputs=("$@" package.json "$count_gate" scripts/check/lib/readmeMigrationCount.mjs config/i18n.json)
+  local managed_inputs=(scripts/docs/lib/count-sync.mjs scripts/docs/lib/count-claims.json tests/fixtures/docs/readme-model-claims.json)
+  # Select from committed source: deleting managed files must never select legacy mode.
+  if ! count_source="$(git show "HEAD:$count_gate" 2>> "$LOG")"; then
+    log "ABORT: committed documentation count gate is unavailable"
+    return 2
+  fi
+  if [[ "$count_source" != *'from "./lib/readmeMigrationCount.mjs"'* ]]; then
+    log "ABORT: committed documentation count layout is unsupported"
+    return 2
+  fi
+  if [[ "$count_source" == *'../docs/lib/count-sync.mjs'* || "$count_source" == *'scripts/docs/lib/count-claims.json'* ]]; then
+    if [[ "$count_source" != *'from "../docs/lib/count-sync.mjs"'* || "$count_source" != *'scripts/docs/lib/count-claims.json'* ]]; then
+      log "ABORT: committed documentation count layout is incomplete"
+      return 2
+    fi
+    count_inputs+=("${managed_inputs[@]}")
+  elif [[ "$count_source" == *'from "./lib/readmeMigrationCount.mjs"'* ]]; then
+    for input in "${managed_inputs[@]}"; do
+      if git cat-file -e "HEAD:$input" 2>/dev/null || [ -e "$input" ] || [ -L "$input" ]; then
+        log "ABORT: legacy documentation count layout contains managed artifacts"
+        return 2
+      fi
+    done
+  else
+    log "ABORT: committed documentation count layout is unsupported"
+    return 2
+  fi
+  for input in "${count_inputs[@]}"; do
+    if ! git cat-file -e "HEAD:$input" 2>/dev/null || [ ! -f "$input" ] || [ -L "$input" ]; then
+      log "ABORT: required documentation count input is missing or not a regular file"
+      return 2
+    fi
+  done
+  if ! git diff --quiet -- "${count_inputs[@]}" ||
+     ! git diff --cached --quiet -- "${count_inputs[@]}"; then
+    log "ABORT: commit reviewed source/count-binding repairs separately before resuming the wave"
+    return 2
+  fi
+  if ! node -e 'try { const p=JSON.parse(require("node:fs").readFileSync("package.json","utf8")); process.exit(p.scripts?.["check:docs-counts"] === "node scripts/check/check-docs-counts-sync.mjs" ? 0 : 1); } catch { process.exit(1); }' >> "$LOG" 2>&1; then
+    log "ABORT: documentation count command is unsupported"
+    return 2
+  fi
+  if ! npm run check:docs-counts >> "$LOG" 2>&1; then
+    log "ABORT: documentation counts failed before commit; review stale values or changed claim bindings"
+    return 2
+  fi
   git add -- "${paths[@]}" >/dev/null 2>&1 || return 2
   git diff --cached --quiet
   rc=$?
   [ "$rc" -eq 0 ] && return 0
   [ "$rc" -eq 1 ] || return 2
   git commit -q -m "$message" >/dev/null 2>&1 || return 2
+  # Normal hooks may format the committed bytes. Keep a rejected commit locally, without push.
+  for input in "${count_inputs[@]}"; do
+    if ! git cat-file -e "HEAD:$input" 2>/dev/null || [ ! -f "$input" ] || [ -L "$input" ]; then
+      log "ABORT: required documentation count input disappeared after commit"
+      return 2
+    fi
+  done
+  if ! git diff --quiet -- "${paths[@]}" "${count_inputs[@]}" ||
+     ! git diff --cached --quiet -- "${paths[@]}" "${count_inputs[@]}"; then
+    log "ABORT: published count inputs differ from the local commit; review hook changes before push"
+    return 2
+  fi
+  if ! npm run check:docs-counts >> "$LOG" 2>&1; then
+    log "ABORT: documentation counts failed after commit; keep the local commit and review hook changes before push"
+    return 2
+  fi
   if ! git push -q -u origin "$B" >/dev/null 2>&1; then
     log "committed: $message ($(git rev-parse --short HEAD)) — PUSH REJECTED: remote branch moved (someone merged into it?); fetch + merge origin/$B before pushing"
     return 2
@@ -132,7 +197,12 @@ drift_docs() {
     console.log([...set].sort().join("\n"));' "$j" 2>>"$LOG"
 }
 
-locs=$(ls docs/i18n | grep -v '\.md$' | paste -sd,)
+locs=""
+for locale_dir in docs/i18n/*/; do
+  [ -d "$locale_dir" ] || continue
+  locale_dir="${locale_dir%/}"
+  locs+="${locs:+,}${locale_dir##*/}"
+done
 if [ -n "${FILES:-}" ]; then
   docs="$FILES"
 else

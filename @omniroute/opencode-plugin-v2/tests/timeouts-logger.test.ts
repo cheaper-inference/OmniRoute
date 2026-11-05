@@ -2,6 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { parsePluginOptions, resolveTimeouts } from "../src/options.js";
 import { publishCatalog } from "../src/catalog.js";
+import { withBootstrapNetwork } from "./helpers/network-fixtures.js";
 type BetaDraft = {
   provider: {
     list?: () => unknown[];
@@ -146,7 +147,7 @@ describe("plugin-v2 P2 parity: per-endpoint timeouts", () => {
         },
       };
       try {
-        await plugin.setup(ctx);
+        await withBootstrapNetwork(() => plugin.setup(ctx));
       } finally {
         console.warn = origWarn;
       }

@@ -1,6 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { buildProviderPayload, collectCatalog } from "../src/catalog.js";
+import { withEmptyEnrichment } from "./helpers/network-fixtures.js";
 
 const baseOpts = {
   providerId: "omniroute",
@@ -17,10 +18,13 @@ const rawModel = {
 };
 
 async function publish() {
-  const collected = await collectCatalog(baseOpts, {
-    fetcher: async () => [rawModel],
-    combosFetcher: async () => [],
-  });
+  const collected = await withEmptyEnrichment((enrichmentFetcher) =>
+    collectCatalog(baseOpts, {
+      enrichmentFetcher,
+      fetcher: async () => [rawModel],
+      combosFetcher: async () => [],
+    })
+  );
   const payload = buildProviderPayload(collected, baseOpts);
   assert.equal(collected.counts.models, 1);
   const model = payload.models[0] as unknown as Record<string, any>;

@@ -19,8 +19,21 @@ const cp = require("node:child_process");
 const name = path.basename(process.argv[1]);
 const args = process.argv.slice(2);
 fs.appendFileSync(process.env.MOCK_ACTIONS, name + "\\n");
+fs.appendFileSync(process.env.MOCK_ORDER, name + ":" + (name === "npm" ? args.join(" ") : (args[0] || "")) + "\\n");
 if (name === "pgrep") process.exit(1);
 if (name === "git") {
+  if (["show", "cat-file"].includes(args[0])) {
+    const r = cp.spawnSync("/usr/bin/git", args, { cwd: process.cwd(), env: process.env, stdio: "inherit" });
+    process.exit(r.status === null ? 2 : r.status);
+  }
+  if (args[0] === "diff" && args.includes("README.md")) {
+    fs.appendFileSync(process.env.MOCK_COUNT_DIFFS, JSON.stringify(args) + "\\n");
+    if (process.env.MOCK_COUNT_INPUTS_DIRTY === "1") process.exit(1);
+    const r = cp.spawnSync("/usr/bin/git", args, { cwd: process.cwd(), env: process.env, stdio: "inherit" });
+    process.exit(r.status === null ? 2 : r.status);
+  }
+  if (args[0] === "diff" && args.includes("--cached") && args.includes("--quiet"))
+    process.exit(process.env.MOCK_HAS_DIFF === "1" ? 1 : 0);
   if (args.includes("--show-current") || args.includes("--abbrev-ref")) console.log("docs/helper-test");
   else if (args[0] === "rev-parse") console.log("1".repeat(40));
   else if (args[0] === "branch" && args.includes("-r")) console.log("origin/release/v1.0.0");
@@ -45,11 +58,20 @@ if (name === "node") {
   process.exit(2);
 }
 if (name === "curl") { process.stdout.write("200"); process.exit(0); }
+if (name === "npm" && args.join(" ") === "run check:docs-counts") {
+  const order = fs.readFileSync(process.env.MOCK_ORDER, "utf8").split("\\n");
+  const failure = process.env.MOCK_COUNT_FAILURE;
+  if (failure || (process.env.MOCK_COUNT_AFTER_COMMIT === "1" && order.includes("git:commit"))) {
+    console.error(failure === "anchor" ? "COUNT_ANCHOR_MISSING" : "1 stale managed count(s)");
+    process.exit(1);
+  }
+  process.exit(0);
+}
 if (["gh", "npm", "npx", "sleep"].includes(name)) process.exit(0);
 process.exit(2);
 `;
 
-function fixture(t) {
+function fixture(t, layout = "legacy") {
   const dir = mkdtempSync(join(tmpdir(), "omniroute-wave-contract-"));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   writeFileSync(join(dir, "package.json"), '{"type":"commonjs"}\n');
@@ -61,6 +83,72 @@ function fixture(t) {
     mkdirSync(path, { recursive: true });
   }
   writeFileSync(join(wt, "README.md"), "reviewed source\n");
+  const countGate = "scripts/check/check-docs-counts-sync.mjs";
+  const migrationHelper = "scripts/check/lib/readmeMigrationCount.mjs";
+  const managedInputs = [
+    "scripts/docs/lib/count-sync.mjs",
+    "scripts/docs/lib/count-claims.json",
+    "tests/fixtures/docs/readme-model-claims.json",
+  ];
+  const write = (path, text) => {
+    mkdirSync(join(wt, path, ".."), { recursive: true });
+    writeFileSync(join(wt, path), text);
+  };
+  write(
+    "package.json",
+    JSON.stringify({
+      scripts: {
+        "check:docs-counts": "node scripts/check/check-docs-counts-sync.mjs",
+      },
+    })
+  );
+  write("config/i18n.json", JSON.stringify({ locales: [{ code: "xx" }] }));
+  write(migrationHelper, "export function buildReadmeMigrationChecks() {}\n");
+  const legacySource =
+    'import { buildReadmeMigrationChecks } from "./lib/readmeMigrationCount.mjs";\n';
+  write(
+    countGate,
+    legacySource +
+      (layout === "managed"
+        ? 'import { managedCountChecks } from "../docs/lib/count-sync.mjs";\nconst registry = "scripts/docs/lib/count-claims.json";\n'
+        : "")
+  );
+  if (layout === "managed") {
+    write(managedInputs[0], "export function managedCountChecks() {}\n");
+    write(managedInputs[1], "{}\n");
+    write(managedInputs[2], "{}\n");
+  }
+  const realGit = (...args) => {
+    const result = spawnSync("/usr/bin/git", args, {
+      cwd: wt,
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        GIT_CONFIG_GLOBAL: "/dev/null",
+        GIT_CONFIG_NOSYSTEM: "1",
+        GIT_AUTHOR_NAME: "Fixture",
+        GIT_AUTHOR_EMAIL: "fixture@example.invalid",
+        GIT_COMMITTER_NAME: "Fixture",
+        GIT_COMMITTER_EMAIL: "fixture@example.invalid",
+      },
+    });
+    assert.equal(result.status, 0, result.stderr);
+  };
+  realGit("init", "--quiet", "--initial-branch=main");
+  const commitFixture = () => {
+    realGit("add", "--all");
+    realGit(
+      "-c",
+      "gc.auto=0",
+      "-c",
+      "maintenance.auto=false",
+      "commit",
+      "--quiet",
+      "-m",
+      "fixture"
+    );
+  };
+  commitFixture();
   for (const name of ["bootstrap.sh", "wave.sh"]) {
     let source = readFileSync(join(templates, name), "utf8");
     if (name === "bootstrap.sh") {
@@ -109,6 +197,8 @@ function fixture(t) {
     I18N_OUT: join(dir, "output"),
     FILES: "README.md",
     MOCK_ACTIONS: join(dir, "actions.txt"),
+    MOCK_ORDER: join(dir, "order.txt"),
+    MOCK_COUNT_DIFFS: join(dir, "count-diffs.jsonl"),
     MOCK_REAL_NODE: process.execPath,
     MOCK_WT: wt,
     MOCK_DOTENV_MARKER: join(dir, "dotenv-executed"),
@@ -126,7 +216,34 @@ function fixture(t) {
     });
   const actions = () =>
     existsSync(env.MOCK_ACTIONS) ? readFileSync(env.MOCK_ACTIONS, "utf8").split("\n") : [];
-  return { dir, root, kit, wt, env, dotenv, run, actions };
+  const order = () =>
+    existsSync(env.MOCK_ORDER)
+      ? readFileSync(env.MOCK_ORDER, "utf8").split("\n").filter(Boolean)
+      : [];
+  const countDiffs = () =>
+    existsSync(env.MOCK_COUNT_DIFFS)
+      ? readFileSync(env.MOCK_COUNT_DIFFS, "utf8")
+          .trim()
+          .split("\n")
+          .map((line) => JSON.parse(line))
+      : [];
+  return {
+    dir,
+    root,
+    kit,
+    wt,
+    env,
+    dotenv,
+    run,
+    actions,
+    order,
+    countDiffs,
+    write,
+    commitFixture,
+    countGate,
+    legacySource,
+    managedInputs,
+  };
 }
 
 helperTest("bootstrap rejects a missing reviewed base before preparation or probing", (t) => {
@@ -232,3 +349,139 @@ helperTest("wave preserves an explicitly selected supported Google engine", (t) 
   assert.equal(f.actions().includes("curl"), false);
   assert.equal(existsSync(f.env.MOCK_READOPT_MARKER), false);
 });
+
+for (const layout of ["legacy", "managed"]) {
+  helperTest(`wave does not publish uncommitted count inputs (${layout})`, (t) => {
+    const f = fixture(t, layout);
+    const r = f.run("wave.sh", [f.wt, `count-dirty-${layout}`], {
+      MOCK_HAS_DIFF: "1",
+      MOCK_COUNT_INPUTS_DIRTY: "1",
+    });
+    assert.equal(r.status, 2, r.stderr);
+    for (const command of ["git:add", "git:commit", "git:push"])
+      assert.equal(f.order().includes(command), false, command);
+    assert.equal(existsSync(f.env.MOCK_READOPT_MARKER), false);
+  });
+
+  for (const failure of ["anchor", "numeric"]) {
+    helperTest(`wave blocks ${failure} count failures before publication (${layout})`, (t) => {
+      const f = fixture(t, layout);
+      const r = f.run("wave.sh", [f.wt, `count-${failure}-${layout}`], {
+        MOCK_HAS_DIFF: "1",
+        MOCK_COUNT_FAILURE: failure,
+      });
+      assert.equal(r.status, 2, r.stderr);
+      const order = f.order();
+      assert.equal(order.includes("node:scripts/i18n/run-translation.mjs"), true);
+      assert.equal(order.includes("npm:run check:docs-counts"), true);
+      for (const command of ["git:add", "git:commit", "git:push"])
+        assert.equal(order.includes(command), false, command);
+      assert.equal(existsSync(f.env.MOCK_READOPT_MARKER), false);
+    });
+  }
+
+  helperTest(
+    `wave checks real layout inputs and counts before and after hooks (${layout})`,
+    (t) => {
+      const f = fixture(t, layout);
+      const r = f.run("wave.sh", [f.wt, `count-valid-${layout}`], { MOCK_HAS_DIFF: "1" });
+      assert.equal(r.status, 0, r.stderr);
+      const publication = f
+        .order()
+        .filter((value) =>
+          ["npm:run check:docs-counts", "git:add", "git:commit", "git:push"].includes(value)
+        );
+      assert.deepEqual(publication, [
+        "npm:run check:docs-counts",
+        "git:add",
+        "git:commit",
+        "npm:run check:docs-counts",
+        "git:push",
+      ]);
+      const diffs = f.countDiffs();
+      assert.equal(diffs.length, 4);
+      for (const args of diffs) {
+        for (const path of [
+          "README.md",
+          "package.json",
+          f.countGate,
+          "scripts/check/lib/readmeMigrationCount.mjs",
+          "config/i18n.json",
+        ])
+          assert.equal(args.includes(path), true, path);
+        for (const path of f.managedInputs)
+          assert.equal(args.includes(path), layout === "managed", path);
+      }
+      assert.equal(existsSync(f.env.MOCK_READOPT_MARKER), false);
+    }
+  );
+
+  helperTest(`wave keeps a commit local when post-hook count validation fails (${layout})`, (t) => {
+    const f = fixture(t, layout);
+    const r = f.run("wave.sh", [f.wt, `count-after-hook-${layout}`], {
+      MOCK_HAS_DIFF: "1",
+      MOCK_COUNT_AFTER_COMMIT: "1",
+    });
+    assert.equal(r.status, 2, r.stderr);
+    const publication = f
+      .order()
+      .filter((value) =>
+        ["npm:run check:docs-counts", "git:add", "git:commit", "git:push"].includes(value)
+      );
+    assert.deepEqual(publication, [
+      "npm:run check:docs-counts",
+      "git:add",
+      "git:commit",
+      "npm:run check:docs-counts",
+    ]);
+    assert.equal(f.order().includes("git:push"), false);
+    assert.equal(f.order().includes("git:reset"), false);
+    assert.equal(existsSync(f.env.MOCK_READOPT_MARKER), false);
+  });
+}
+
+for (const scenario of [
+  "legacy-config-missing",
+  "managed-registry-missing",
+  "managed-fixture-missing",
+  "managed-module-missing",
+  "managed-working-tree-disguised-as-legacy",
+  "mixed-layout",
+  "unknown-committed-gate",
+  "unsupported-committed-command",
+  "managed-committed-partial",
+  "mixed-committed-layout",
+]) {
+  helperTest(`wave rejects an unsupported or incomplete count layout: ${scenario}`, (t) => {
+    const f = fixture(t, scenario.startsWith("managed-") ? "managed" : "legacy");
+    if (scenario === "legacy-config-missing") rmSync(join(f.wt, "config/i18n.json"));
+    if (scenario === "managed-registry-missing") rmSync(join(f.wt, f.managedInputs[1]));
+    if (scenario === "managed-fixture-missing") rmSync(join(f.wt, f.managedInputs[2]));
+    if (scenario === "managed-module-missing") rmSync(join(f.wt, f.managedInputs[0]));
+    if (scenario === "managed-working-tree-disguised-as-legacy") {
+      for (const path of f.managedInputs) rmSync(join(f.wt, path));
+      f.write(f.countGate, f.legacySource);
+    }
+    if (scenario === "managed-committed-partial") {
+      rmSync(join(f.wt, f.managedInputs[1]));
+      f.commitFixture();
+    }
+    if (scenario === "mixed-layout" || scenario === "mixed-committed-layout") {
+      f.write(f.managedInputs[1], "{}\n");
+      if (scenario === "mixed-committed-layout") f.commitFixture();
+    }
+    if (scenario === "unknown-committed-gate") {
+      f.write(f.countGate, "export const unknown = true;\n");
+      f.commitFixture();
+    }
+    if (scenario === "unsupported-committed-command") {
+      f.write("package.json", JSON.stringify({ scripts: { "check:docs-counts": "true" } }));
+      f.commitFixture();
+    }
+    const r = f.run("wave.sh", [f.wt, scenario], { MOCK_HAS_DIFF: "1" });
+    assert.equal(r.status, 2, r.stderr);
+    for (const command of ["git:add", "git:commit", "git:push"])
+      assert.equal(f.order().includes(command), false, command);
+    assert.equal(existsSync(f.env.MOCK_READOPT_MARKER), false);
+  });
+}

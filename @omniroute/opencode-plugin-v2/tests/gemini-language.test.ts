@@ -4,6 +4,7 @@ import type { Logger } from "../src/shared/index.js";
 import type { LanguageModelV3 } from "@ai-sdk/provider";
 import plugin from "../src/index.js";
 import { sanitizeToolSchemasFor } from "../src/gemini-language.js";
+import { withBootstrapNetwork } from "./helpers/network-fixtures.js";
 
 function collectingLogger(): { log: Logger; warnings: string[] } {
   const warnings: string[] = [];
@@ -170,7 +171,9 @@ describe("Gemini sanitising is wired into the host, and only where it belongs", 
     console.warn = () => {};
     console.log = () => {};
     try {
-      await (plugin as unknown as { setup: (c: unknown) => Promise<void> }).setup(ctx);
+      await withBootstrapNetwork(() =>
+        (plugin as unknown as { setup: (c: unknown) => Promise<() => void> }).setup(ctx)
+      );
     } finally {
       console.warn = warn;
       console.log = log;
