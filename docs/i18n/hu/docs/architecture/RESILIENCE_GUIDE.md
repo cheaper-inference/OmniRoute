@@ -144,7 +144,7 @@ A Kiro bináris `reasoningContentEvent` keretei, ha nem üres aláírást tartal
 
 **Végállapotok (NEM várakozási idők):**
 
-- `banned` — tiltott kulcsszó / fióktiltás észlelése állítja be (lásd: [BAN_DETECTION](../security/BAN_DETECTION.md)), valamint három egymást követő, szolgáltatói, kérésenkénti elutasítás (`request_rejected`, például Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); egyetlen elutasítás csak lehűti a kapcsolatot
+- `banned` — tiltott kulcsszó / fióktiltás észlelése által beállított (lásd [BAN_DETECTION](../security/BAN_DETECTION.md) ). Az upstream kérésenkénti elutasítások (`request_rejected`, pl. Anthropic OAuth 403 "Kérés nem engedélyezett") soha nem állítják be: kapcsolatonként és modellenként számolják, és kivonják a modellt a forgásból `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 óra) növekvő lehűtésével, vagy lehűtik a kapcsolatot, ha nem ismert modell — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (korlátozott számú újrapróbálkozás után végállapotba kerül — `EXPIRED_RETRY_MAX = 3`, exponenciális visszalépéssel —, így az átmeneti OAuth-hibák maguktól helyreállhatnak, mielőtt a fiók végleg deaktiválódik)
 - `credits_exhausted`
 

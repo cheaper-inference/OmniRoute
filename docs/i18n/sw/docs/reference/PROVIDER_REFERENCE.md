@@ -6,7 +6,7 @@
 
 > **Imetengenezwa kiotomatiki** kutoka `src/shared/constants/providers.ts` — usihariri mwenyewe.
 > Tengeneza upya kwa: `npm run gen:provider-reference`
-> **Mara ya mwisho kutengenezwa:** 2026-10-27
+> **Mara ya mwisho kutengenezwa:** 2026-11-05
 
 Jumla ya watoa huduma: **380**. Tazama mgawanyo wa kategoria hapa chini.
 
@@ -466,7 +466,7 @@ Tumia dashibodi kwenye `/dashboard/providers` kuwezesha, kusanidi, na kujaribu k
 
 - Katalogi: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Rejesta (maelezo ya kila modeli): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Vitekelezaji: [`open-sse/executors/`](../../open-sse/executors/) (utekelezaji 158)
+- Vitekelezaji: [`open-sse/executors/`](../../open-sse/executors/) (utekelezaji 162)
 - Watafsiri: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Angalia Pia

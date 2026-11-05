@@ -28,7 +28,7 @@ type Step = {
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const workflow = load(
   readFileSync(path.join(root, ".github/workflows/docker-publish.yml"), "utf8")
-) as { jobs: { prepare: { steps: Step[] } } };
+) as { jobs: { prepare: { steps: Step[] }; build: { steps: Step[] } } };
 const steps = workflow.jobs.prepare.steps;
 const budget = steps.find((step) => step.id === "budget");
 assert.ok(budget?.run, "the real prepare budget step must exist");
@@ -112,9 +112,14 @@ function fixture(t: TestContext, tagHelper: "absent" | "canonical" | "sentinel" 
 }
 
 test("budget tooling is pinned to the workflow while the requested tag stays the source", () => {
-  const source = steps.find((step) => step.name === "Checkout");
+  const control = steps.find((step) => step.name === "Checkout");
+  const source = workflow.jobs.build.steps.find((step) => step.name === "Checkout");
   const tools = steps.find((step) => step.name === "Checkout Docker budget tooling");
-  assert.ok(source && tools);
+  assert.ok(control && source && tools);
+  assert.equal(control.with?.ref, undefined);
+  assert.equal(control.with?.["persist-credentials"], false);
+  assert.equal(source.with?.["persist-credentials"], false);
+  assert.equal(source.uses, tools.uses);
   assert.equal(
     source.with?.ref,
     "${{ github.event_name == 'workflow_dispatch' && format('refs/tags/v{0}', inputs.version) || '' }}"
@@ -128,7 +133,7 @@ test("budget tooling is pinned to the workflow while the requested tag stays the
   assert.equal(tools.with?.["sparse-checkout-cone-mode"], false);
   assert.equal(budget.env?.EXPECTED_WORKFLOW_SHA, "${{ github.workflow_sha }}");
   assert.equal(budget.shell, "bash");
-  assert.ok(steps.indexOf(source) < steps.indexOf(tools));
+  assert.ok(steps.indexOf(control) < steps.indexOf(tools));
   assert.ok(steps.indexOf(tools) < steps.indexOf(budget));
 });
 

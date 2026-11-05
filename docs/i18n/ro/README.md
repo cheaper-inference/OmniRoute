@@ -27,9 +27,9 @@
 
 > **Folosește-ți propriile conturi de furnizor.** Aceasta este o estimare agregată a nivelurilor gratuite ale furnizorilor terți, eligibile separat, nu o alocare de tokeni din partea OmniRoute. Înregistrează-te, obține acreditările acolo unde este necesar și conectează furnizorii pe care îi poți utiliza; fiecare furnizor își controlează limitele, disponibilitatea și condițiile.
 >
-> Combinarea manuală a nivelurilor gratuite este anevoioasă — zeci de SDK-uri, zeci de limite de rată și nicio idee despre cât ai de fapt la dispoziție. OmniRoute cataloghează **484 de intrări de nivel gratuit din 34 de chei de grup recurente** și calculează cifra totală de tokeni din **cele 17 grupuri cu un buget lunar pozitiv publicat, plus cinci limite Groq per model**, deduplicate pe baza grupului comun. Cotele care devin disponibile numai după verificarea identității regionale (astăzi: ModelScope) sunt afișate separat, +~6M în urma verificării identității regionale, și nu sunt incluse niciodată în cifra totală. Rezultatul rămâne vizibil în tabloul de bord (`/dashboard/free-tiers`).
+> Combinarea manuală a nivelurilor gratuite este anevoioasă — zeci de SDK-uri, zeci de limite de rată și nicio idee despre cât ai de fapt la dispoziție. OmniRoute cataloghează **486 de intrări de nivel gratuit din 34 de chei de grup recurente** și calculează cifra totală de tokeni din **cele 17 grupuri cu un buget lunar pozitiv publicat, plus cinci limite Groq per model**, deduplicate pe baza grupului comun. Cotele care devin disponibile numai după verificarea identității regionale (astăzi: ModelScope) sunt afișate separat, +~6M în urma verificării identității regionale, și nu sunt incluse niciodată în cifra totală. Rezultatul rămâne vizibil în tabloul de bord (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Cardul de buget pentru nivelurile gratuite OmniRoute: ~1,62B de tokeni gratuiți pe lună, constant, până la ~2,22B în prima lună cu credite de înscriere, din 34 de chei de grup recurente documentate care acoperă 484 de intrări de nivel gratuit catalogate, accesibile printr-un singur endpoint. Calcul transparent, deduplicat pe grupuri — fiecare grup comun este numărat o singură dată, inclusiv 17 grupuri recurente cu un buget lunar pozitiv de tokeni publicat, plus cinci limite Groq per model; 12 furnizori sunt marcați ca de evitat în catalogul privind riscurile condițiilor, astfel încât tu să decizi. Bara de buget include Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (cinci limite per model) și grupuri mai mici, plus credite de înscriere pentru prima lună și furnizori permanent gratuiți, fără limită de tokeni, afișați separat, astfel încât să nu mărească artificial cifra totală. Utilizarea și valoarea rămasă în timp real pe /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Cardul de buget pentru nivelurile gratuite OmniRoute: ~1,62B de tokeni gratuiți pe lună, constant, până la ~2,22B în prima lună cu credite de înscriere, din 34 de chei de grup recurente documentate care acoperă 486 de intrări de nivel gratuit catalogate, accesibile printr-un singur endpoint. Calcul transparent, deduplicat pe grupuri — fiecare grup comun este numărat o singură dată, inclusiv 17 grupuri recurente cu un buget lunar pozitiv de tokeni publicat, plus cinci limite Groq per model; 12 furnizori sunt marcați ca de evitat în catalogul privind riscurile condițiilor, astfel încât tu să decizi. Bara de buget include Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (cinci limite per model) și grupuri mai mici, plus credite de înscriere pentru prima lună și furnizori permanent gratuiți, fără limită de tokeni, afișați separat, astfel încât să nu mărească artificial cifra totală. Utilizarea și valoarea rămasă în timp real pe /dashboard/free-tiers."/>
 
 > Rezumat animat al paginii live `/dashboard/free-tiers`. Metodologia completă (deduplicarea grupurilor, nivelurile de credit, condițiile furnizorilor): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -74,7 +74,7 @@
 |                                   |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
 | --------------------------------- | :------------------------: | :---------: | :-------------------: |
 | 🌐 Furnizori                      |            352             |   **358**   |          380          |
-| 🧠 ID-uri unice de modele de chat |            1320            |  **1374**   |         1494          |
+| 🧠 ID-uri unice de modele de chat |            1320            |  **1374**   |         1499          |
 | 🖼️ Punte pentru modalități        | 🆕 viziune + audio + video |      ✓      |           ✓           |
 | 📡 Catalog gratuit Radar          |   🆕 activare voluntară    |      ✓      |           ✓           |
 | ⚖️ Planificare în funcție de cote |       🆕 Quota-Share       |      ✓      |           ✓           |
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Promisiunea — Un singur endpoint și 380 de provideri. Fallback-ul automat continuă rutarea cât timp există o țintă sănătoasă disponibilă. Șase piloni: fallback rezilient între 380 de provideri · până la 95% economii de tokeni pe workload-uri eligibile · $0 la început cu peste 150 de free tiers și 52 de provideri recurenți/fără cheie, mereu gratuiți · 39 de integrări CLI/agent printr-o singură configurare · compatibilitate OpenAI, Claude, Gemini și Responses API la /v1 · controale de producție inclusiv circuit breakers, TLS stealth, MCP 110 tools, A2A, memorie, guardrails, evals și peste 56.000 de declarații de test statice în peste 7.800 de fișiere de test urmărite."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Promisiunea — Un singur endpoint și 380 de provideri. Fallback-ul automat continuă rutarea cât timp există o țintă sănătoasă disponibilă. Șase piloni: fallback rezilient între 380 de provideri · până la 95% economii de tokeni pe workload-uri eligibile · $0 la început cu peste 150 de free tiers și 54 de provideri recurenți/fără cheie, mereu gratuiți · 39 de integrări CLI/agent printr-o singură configurare · compatibilitate OpenAI, Claude, Gemini și Responses API la /v1 · controale de producție inclusiv circuit breakers, TLS stealth, MCP 110 tools, A2A, memorie, guardrails, evals și peste 56.000 de declarații de test statice în peste 7.800 de fișiere de test urmărite."/>
 
 <br/>
 <br/>
@@ -701,7 +701,7 @@ previzualizează exact env/args fără a executa, iar `--api-key-env NAME` păst
 
 </div>
 
-> **380 de furnizori înregistrați** în colecțiile canonice de chat, media, căutare, local, cloud-agent și sistem, inclusiv **156 care poartă metadatele de descoperire `hasFree: true`**. Registrul de modele de chat acoperă **241 furnizori / 3.109 perechi distincte furnizor-model / 1.494 ID-uri brute de model**; catalogul separat pentru buget gratuit are **484 rânduri per model**, **34 de pool-uri recurente** și **52 de furnizori gratuiți pentru totdeauna, fără cheie/recurență**. Aceștia sunt numitori diferiți, intenționat; definițiile și calculele deduplicate pe pool se găsesc în [Referința Furnizorilor](docs/reference/PROVIDER_REFERENCE.md) și [Niveluri Gratuite](docs/reference/FREE_TIERS.md).
+> **380 de furnizori înregistrați** în colecțiile canonice de chat, media, căutare, local, cloud-agent și sistem, inclusiv **156 care poartă metadatele de descoperire `hasFree: true`**. Registrul de modele de chat acoperă **241 furnizori / 3.114 perechi distincte furnizor-model / 1.499 ID-uri brute de model**; catalogul separat pentru buget gratuit are **486 rânduri per model**, **34 de pool-uri recurente** și **54 de furnizori gratuiți pentru totdeauna, fără cheie/recurență**. Aceștia sunt numitori diferiți, intenționat; definițiile și calculele deduplicate pe pool se găsesc în [Referința Furnizorilor](docs/reference/PROVIDER_REFERENCE.md) și [Niveluri Gratuite](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1381,7 +1381,7 @@ Metrici canonice la 2026-10-18: **1.976 de videoclipuri unice** · **20.220.289 
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Ghid de reziliență</a></b></td><td>Întrerupătoare de circuit, perioade de răcire, coadă, prevenirea efectului de turmă, imitarea TLS</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Motorul Auto-Combo</a></b></td><td>Evaluare pe baza a 16 factori, pachete de moduri, autoreparare</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Ghid pentru proxy</a></b></td><td>Sistem de proxy pe 3 niveluri, marketplace 1proxy, operații CRUD pentru registru</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Niveluri gratuite</a></b></td><td>Director consolidat: 34 de grupuri recurente documentate / 484 de intrări catalogate pentru nivelurile gratuite</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Niveluri gratuite</a></b></td><td>Director consolidat: 34 de grupuri recurente documentate / 486 de intrări catalogate pentru nivelurile gratuite</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Galeria funcționalităților</a></b></td><td>Tur vizual al dashboardului cu capturi de ecran</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Documentația bazei de cod</a></b></td><td>Prezentare a bazei de cod, accesibilă începătorilor</td></tr>
 </table>

@@ -6,7 +6,7 @@
 
 > **Emepụtara na-akpaghị aka** site na `src/shared/constants/providers.ts` — ejila aka dezie ya.
 > Mepụta ya ọzọ site na: `npm run gen:provider-reference`
-> **Oge ikpeazụ e mepụtara ya:** 2026-10-27
+> **Oge ikpeazụ e mepụtara ya:** 2026-11-05
 
 Ngụkọta ndị na-eweta ọrụ: **380**. Lee nkewa dịka otu dị n'okpuru.
 
@@ -466,7 +466,7 @@ Jiri dashboard dị na `/dashboard/providers` iji mee ka onye na-eweta ọrụ �
 
 - Katalọgụ: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Ndebanye aha (nkọwa maka ụdị ọ bụla): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Ndị mmejuputa iwu: [`open-sse/executors/`](../../open-sse/executors/) (mmejuputa 158)
+- Ndị mmejuputa iwu: [`open-sse/executors/`](../../open-sse/executors/) (mmejuputa 162)
 - Ndị ntụgharị: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Hụkwa

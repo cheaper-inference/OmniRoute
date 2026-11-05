@@ -27,9 +27,9 @@
 
 > **Tự cung cấp tài khoản nhà cung cấp của bạn.** Đây là tổng ước tính từ các gói miễn phí của bên thứ ba đủ điều kiện riêng biệt, không phải số token được OmniRoute cấp. Hãy đăng ký, lấy thông tin xác thực khi cần và kết nối các nhà cung cấp mà bạn có thể sử dụng; mỗi nhà cung cấp tự kiểm soát giới hạn, khả năng cung cấp và điều khoản của mình.
 >
-> Tự kết hợp các gói miễn phí thật rất khó khăn — hàng chục SDK, hàng chục giới hạn tốc độ và không biết chính xác bạn thực sự có bao nhiêu. OmniRoute lập danh mục **484 mục gói miễn phí trên 34 khóa nhóm định kỳ** và tính tổng token nổi bật từ **17 nhóm có ngân sách hàng tháng dương được công bố cùng năm giới hạn Groq theo từng model**, loại trùng theo nhóm dùng chung. Các hạn ngạch chỉ mở sau khi kiểm tra danh tính theo khu vực (hiện tại: ModelScope) được hiển thị riêng, +~6M sau xác minh danh tính theo khu vực và không bao giờ được cộng vào tổng nổi bật. Kết quả vẫn được hiển thị trên bảng điều khiển (`/dashboard/free-tiers`).
+> Tự kết hợp các gói miễn phí thật rất khó khăn — hàng chục SDK, hàng chục giới hạn tốc độ và không biết chính xác bạn thực sự có bao nhiêu. OmniRoute lập danh mục **486 mục gói miễn phí trên 34 khóa nhóm định kỳ** và tính tổng token nổi bật từ **17 nhóm có ngân sách hàng tháng dương được công bố cùng năm giới hạn Groq theo từng model**, loại trùng theo nhóm dùng chung. Các hạn ngạch chỉ mở sau khi kiểm tra danh tính theo khu vực (hiện tại: ModelScope) được hiển thị riêng, +~6M sau xác minh danh tính theo khu vực và không bao giờ được cộng vào tổng nổi bật. Kết quả vẫn được hiển thị trên bảng điều khiển (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Thẻ ngân sách gói miễn phí của OmniRoute: ~1.62B token miễn phí mỗi tháng một cách ổn định, lên đến ~2.22B trong tháng đầu tiên với tín dụng đăng ký, từ 34 khóa nhóm định kỳ được ghi nhận bao phủ 484 mục gói miễn phí trong danh mục, thông qua một endpoint. Phép tính trung thực, loại trùng theo nhóm — mỗi nhóm dùng chung chỉ được tính một lần, bao gồm 17 nhóm định kỳ có ngân sách token hàng tháng dương được công bố cùng năm giới hạn Groq theo từng model; 12 nhà cung cấp được đánh dấu tránh dùng trong danh mục rủi ro điều khoản để bạn tự quyết định. Thanh ngân sách bao gồm Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (năm giới hạn theo từng model) và các nhóm nhỏ hơn, cùng tín dụng đăng ký tháng đầu tiên và các nhà cung cấp miễn phí vĩnh viễn không giới hạn token được hiển thị riêng để chúng không làm tăng tổng nổi bật. Số lượng đã dùng/còn lại theo thời gian thực trên /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Thẻ ngân sách gói miễn phí của OmniRoute: ~1.62B token miễn phí mỗi tháng một cách ổn định, lên đến ~2.22B trong tháng đầu tiên với tín dụng đăng ký, từ 34 khóa nhóm định kỳ được ghi nhận bao phủ 486 mục gói miễn phí trong danh mục, thông qua một endpoint. Phép tính trung thực, loại trùng theo nhóm — mỗi nhóm dùng chung chỉ được tính một lần, bao gồm 17 nhóm định kỳ có ngân sách token hàng tháng dương được công bố cùng năm giới hạn Groq theo từng model; 12 nhà cung cấp được đánh dấu tránh dùng trong danh mục rủi ro điều khoản để bạn tự quyết định. Thanh ngân sách bao gồm Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (năm giới hạn theo từng model) và các nhóm nhỏ hơn, cùng tín dụng đăng ký tháng đầu tiên và các nhà cung cấp miễn phí vĩnh viễn không giới hạn token được hiển thị riêng để chúng không làm tăng tổng nổi bật. Số lượng đã dùng/còn lại theo thời gian thực trên /dashboard/free-tiers."/>
 
 > Tóm tắt động về trang `/dashboard/free-tiers` theo thời gian thực. Phương pháp đầy đủ (loại trùng nhóm, các bậc tín dụng, điều khoản nhà cung cấp): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -74,7 +74,7 @@
 |                             |            v3.8.50             | **v3.8.51** |      `v3.8.53+`       |
 | --------------------------- | :----------------------------: | :---------: | :-------------------: |
 | 🌐 Nhà cung cấp             |              352               |   **358**   |          380          |
-| 🧠 ID mô hình chat duy nhất |              1320              |  **1374**   |         1494          |
+| 🧠 ID mô hình chat duy nhất |              1320              |  **1374**   |         1499          |
 | 🖼️ Cầu nối đa phương thức   | 🆕 thị giác + âm thanh + video |      ✓      |           ✓           |
 | 📡 Danh mục miễn phí Radar  |      🆕 tự chọn tham gia       |      ✓      |           ✓           |
 | ⚖️ Lập lịch theo hạn ngạch  |         🆕 Quota-Share         |      ✓      |           ✓           |
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lời hứa — Một endpoint và 380 nhà cung cấp. Cơ chế dự phòng tự động giúp duy trì định tuyến khi vẫn còn một target khác đang hoạt động bình thường. Sáu trụ cột: dự phòng linh hoạt trên 380 nhà cung cấp · tiết kiệm tới 95% token cho các workload đủ điều kiện · bắt đầu với $0 cùng hơn 150 gói miễn phí và 52 nhà cung cấp miễn phí vĩnh viễn định kỳ/không cần key · 39 tích hợp CLI/agent thông qua một cấu hình · tương thích với OpenAI, Claude, Gemini và Responses API tại /v1 · các tính năng kiểm soát cho môi trường production, bao gồm circuit breaker, TLS stealth, MCP với 110 công cụ, A2A, memory, guardrail, eval và hơn 56.000 khai báo kiểm thử tĩnh trên hơn 7.800 tệp kiểm thử được theo dõi."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lời hứa — Một endpoint và 380 nhà cung cấp. Cơ chế dự phòng tự động giúp duy trì định tuyến khi vẫn còn một target khác đang hoạt động bình thường. Sáu trụ cột: dự phòng linh hoạt trên 380 nhà cung cấp · tiết kiệm tới 95% token cho các workload đủ điều kiện · bắt đầu với $0 cùng hơn 150 gói miễn phí và 54 nhà cung cấp miễn phí vĩnh viễn định kỳ/không cần key · 39 tích hợp CLI/agent thông qua một cấu hình · tương thích với OpenAI, Claude, Gemini và Responses API tại /v1 · các tính năng kiểm soát cho môi trường production, bao gồm circuit breaker, TLS stealth, MCP với 110 công cụ, A2A, memory, guardrail, eval và hơn 56.000 khai báo kiểm thử tĩnh trên hơn 7.800 tệp kiểm thử được theo dõi."/>
 
 <br/>
 <br/>
@@ -693,7 +693,7 @@ khỏi lịch sử shell của bạn. → [Tích hợp CLI](docs/guides/CLI-INTE
 
 </div>
 
-> **380 nhà cung cấp đã đăng ký** trên các bộ sưu tập chuẩn về trò chuyện, phương tiện, tìm kiếm, cục bộ, tác nhân đám mây và hệ thống, trong đó **156 nhà cung cấp có siêu dữ liệu khám phá `hasFree: true`**. Danh mục mô hình trò chuyện bao phủ **241 nhà cung cấp / 3,109 cặp nhà cung cấp-mô hình riêng biệt / 1,494 ID mô hình thô**; danh mục ngân sách miễn phí riêng biệt có **484 hàng cho từng mô hình**, **34 nhóm định kỳ** và **52 nhà cung cấp miễn phí vĩnh viễn định kỳ/không cần khóa API**. Các mẫu số này khác nhau theo thiết kế; định nghĩa và các phép tính đã loại trùng theo nhóm nằm trong [Tài liệu tham khảo nhà cung cấp](docs/reference/PROVIDER_REFERENCE.md) và [Các gói miễn phí](docs/reference/FREE_TIERS.md).
+> **380 nhà cung cấp đã đăng ký** trên các bộ sưu tập chuẩn về trò chuyện, phương tiện, tìm kiếm, cục bộ, tác nhân đám mây và hệ thống, trong đó **156 nhà cung cấp có siêu dữ liệu khám phá `hasFree: true`**. Danh mục mô hình trò chuyện bao phủ **241 nhà cung cấp / 3,114 cặp nhà cung cấp-mô hình riêng biệt / 1,499 ID mô hình thô**; danh mục ngân sách miễn phí riêng biệt có **486 hàng cho từng mô hình**, **34 nhóm định kỳ** và **54 nhà cung cấp miễn phí vĩnh viễn định kỳ/không cần khóa API**. Các mẫu số này khác nhau theo thiết kế; định nghĩa và các phép tính đã loại trùng theo nhóm nằm trong [Tài liệu tham khảo nhà cung cấp](docs/reference/PROVIDER_REFERENCE.md) và [Các gói miễn phí](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1370,7 +1370,7 @@ Số liệu chuẩn vào 2026-10-18: **1.976 video duy nhất** · **20.220.289 
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Hướng dẫn khả năng phục hồi</a></b></td><td>Circuit breaker, cooldown, hàng đợi, chống hiệu ứng đàn gia súc, giả mạo TLS</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Engine Auto-Combo</a></b></td><td>Chấm điểm theo 16 yếu tố, mode pack, tự khắc phục</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Hướng dẫn proxy</a></b></td><td>Hệ thống proxy 3 cấp, marketplace 1proxy, CRUD registry</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Tầng miễn phí</a></b></td><td>Danh mục hợp nhất: 34 pool định kỳ được lập tài liệu / 484 mục tầng miễn phí được lập danh mục</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Tầng miễn phí</a></b></td><td>Danh mục hợp nhất: 34 pool định kỳ được lập tài liệu / 486 mục tầng miễn phí được lập danh mục</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Thư viện tính năng</a></b></td><td>Tham quan dashboard trực quan với ảnh chụp màn hình</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Tài liệu codebase</a></b></td><td>Tổng quan codebase thân thiện với người mới bắt đầu</td></tr>
 </table>

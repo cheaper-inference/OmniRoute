@@ -104,7 +104,7 @@ Lábẹ́ ààlà náà, a **kò** ka olùpèsè náà sí ẹni tó ń tutù; �
 
 **Àwọn ipò ìparí (KÒ ṢE ìsinmi):**
 
-- `banned` — tí ìwárí ọ̀rọ̀-àyípadà tí a dínwọ́ / ìdínwọ́ àkántì ṣètò (wò [BAN_DETECTION](../security/BAN_DETECTION.md)), àti lọ́wọ́ àwọn ìkọ̀sílẹ̀ ìbéèrè-lẹ́yìn-ìbéèrè mẹ́ta láti ìsàtẹ̀yìn (`request_rejected`, b.i. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); ìkọ̀sílẹ̀ ẹyọ kan ṣoṣo ó kan ń mú kí ìsopọ̀ sinmi
+- `banned` — ṣeto nipasẹ awọn idinamọ-Koko / wiwa wiwọle-iroyin (wo [BAN_DETECTION](../security/BAN_DETECTION.md) ). Awọn ijusile ibeere fun oke (`request_rejected`, fun apẹẹrẹ Anthropic OAuth 403 “Ibeere ko gba laaye”) ko ṣeto rara: a ka wọn fun asopọ ati awoṣe ki o mu awoṣe yẹn kuro ni yiyi pẹlu itutu agbaiye ti o dagba ni `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h), tabi tutu asopọ naa nigbati ko si awoṣe ti a mọ — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (ó ń yí padà sí ìparí lẹ́yìn àwọn àtúngbìyànjú tí a dè — `EXPIRED_RETRY_MAX = 3` pẹ̀lú ìdàfẹ́yìn ìlòpọ̀-jíjáde — kí àwọn àṣìṣe OAuth kúkúrú lè wọ́lẹ̀ fúnra wọn ṣáájú kí àkántì jẹ́ dídẹ́kúnlẹ́yìn láérayé)
 - `credits_exhausted`
 

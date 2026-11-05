@@ -106,7 +106,7 @@ Kiro का बाइनरी `reasoningContentEvent` फ्रेमहरू�
 
 **टर्मिनल अवस्थाहरू (कूलडाउन होइनन्):**
 
-- `banned` — प्रतिबन्धित-कीवर्ड / खाता-प्रतिबन्ध पत्ता लगाउने प्रणालीबाट सेट हुन्छ (हेर्नुहोस् [BAN_DETECTION](../security/BAN_DETECTION.md)), र लगातार तीन अपस्ट्रिम प्रति-अनुरोध अस्वीकृतिबाट पनि (`request_rejected`, जस्तै Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); एउटै अस्वीकृतिले भने कनेक्सनलाई मात्र कूलडाउन गर्छ
+- `banned` — प्रतिबन्धित-कीवर्ड / खाता-प्रतिबन्ध पत्ता लगाउने ( [BAN_DETECTION](../security/BAN_DETECTION.md) हेर्नुहोस्) द्वारा सेट गरिएको छ। अपस्ट्रीम प्रति-अनुरोध अस्वीकारहरू (`request_rejected`, जस्तै Anthropic OAuth 403 "अनुरोध अनुमति छैन") यसलाई कहिले पनि सेट नगर्नुहोस्: तिनीहरू प्रति जडान र मोडेल गणना गरिन्छन् र `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h) मा बढ्दो कूलडाउन क्याप गरी त्यो मोडेललाई रोटेशनबाट बाहिर लैजान्छ, वा कुनै मोडेल — `open-sse/services/requestRejectedStreak.ts` थाहा नभएको बेला जडानलाई चिसो पार्छ।
 - `expired` (सीमित पुनःप्रयासहरूपछि टर्मिनलमा सर्छ — एक्सपोनेन्सियल ब्याकअफसहित `EXPIRED_RETRY_MAX = 3` — त्यसैले खाता स्थायी रूपमा निष्क्रिय हुनुअघि अस्थायी OAuth त्रुटिहरू आफैं निको हुन सक्छन्)
 - `credits_exhausted`
 

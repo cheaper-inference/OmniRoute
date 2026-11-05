@@ -27,9 +27,9 @@
 
 > **Öz provayder hesablarınızı gətirin.** Bu, ayrıca uyğunluq şərtlərinə malik üçüncü tərəf pulsuz paketləri üzrə təxmini ümumi göstəricidir və OmniRoute tərəfindən verilən token krediti deyil. Qeydiyyatdan keçin, tələb olunduqda giriş məlumatlarını əldə edin və istifadə edə bildiyiniz provayderləri qoşun; hər bir provayder limitlərinə, əlçatanlığına və şərtlərinə özü nəzarət edir.
 >
-> Pulsuz paketləri əl ilə birləşdirmək əziyyətlidir — onlarla SDK, onlarla sürət limiti və əlinizdə əslində nə qədər resurs olduğunu bilməmək. OmniRoute **34 təkrarlanan hovuz açarı üzrə 484 pulsuz paket girişini** kataloqlaşdırır və token göstəricisini **dərc edilmiş müsbət aylıq büdcəsi olan 17 hovuz, üstəgəl model üzrə beş Groq limiti** əsasında, ortaq hovuzlar üzrə təkrarları aradan qaldıraraq hesablayır. Yalnız regional şəxsiyyət yoxlamasından sonra açılan kvotalar (bu gün: ModelScope) ayrıca göstərilir, regional şəxsiyyət təsdiqinin arxasında +~6M olaraq qeyd olunur və əsas göstəriciyə heç vaxt əlavə edilmir. Nəticə paneldə görünməyə davam edir (`/dashboard/free-tiers`).
+> Pulsuz paketləri əl ilə birləşdirmək əziyyətlidir — onlarla SDK, onlarla sürət limiti və əlinizdə əslində nə qədər resurs olduğunu bilməmək. OmniRoute **34 təkrarlanan hovuz açarı üzrə 486 pulsuz paket girişini** kataloqlaşdırır və token göstəricisini **dərc edilmiş müsbət aylıq büdcəsi olan 17 hovuz, üstəgəl model üzrə beş Groq limiti** əsasında, ortaq hovuzlar üzrə təkrarları aradan qaldıraraq hesablayır. Yalnız regional şəxsiyyət yoxlamasından sonra açılan kvotalar (bu gün: ModelScope) ayrıca göstərilir, regional şəxsiyyət təsdiqinin arxasında +~6M olaraq qeyd olunur və əsas göstəriciyə heç vaxt əlavə edilmir. Nəticə paneldə görünməyə davam edir (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute pulsuz paket büdcəsi kartı: ayda sabit ~1,62 milyard pulsuz token, qeydiyyat kreditləri ilə ilk ayda ~2,22 milyarda qədər; bir giriş nöqtəsinin arxasında 484 kataloqlaşdırılmış pulsuz paket girişini əhatə edən 34 sənədləşdirilmiş təkrarlanan hovuz açarı. Dürüst, hovuz təkrarları aradan qaldırılmış hesab — 17 təkrarlanan hovuzun dərc edilmiş müsbət aylıq token büdcəsi və model üzrə beş Groq limiti daxil olmaqla, hər bir ortaq hovuz bir dəfə hesablanır; şərt-riski kataloqunda 12 provayderdən istifadə etməmək tövsiyə olunur, qərarı siz verirsiniz. Büdcə panelinə Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (model üzrə beş limit) və daha kiçik hovuzlar, həmçinin ilk ay qeydiyyat kreditləri və daimi pulsuz, token limiti olmayan provayderlər ayrıca daxil edilir ki, onlar əsas göstəricini heç vaxt şişirtməsin. /dashboard/free-tiers ünvanında real vaxtda istifadə edilmiş/qalan göstəricilər."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute pulsuz paket büdcəsi kartı: ayda sabit ~1,62 milyard pulsuz token, qeydiyyat kreditləri ilə ilk ayda ~2,22 milyarda qədər; bir giriş nöqtəsinin arxasında 486 kataloqlaşdırılmış pulsuz paket girişini əhatə edən 34 sənədləşdirilmiş təkrarlanan hovuz açarı. Dürüst, hovuz təkrarları aradan qaldırılmış hesab — 17 təkrarlanan hovuzun dərc edilmiş müsbət aylıq token büdcəsi və model üzrə beş Groq limiti daxil olmaqla, hər bir ortaq hovuz bir dəfə hesablanır; şərt-riski kataloqunda 12 provayderdən istifadə etməmək tövsiyə olunur, qərarı siz verirsiniz. Büdcə panelinə Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (model üzrə beş limit) və daha kiçik hovuzlar, həmçinin ilk ay qeydiyyat kreditləri və daimi pulsuz, token limiti olmayan provayderlər ayrıca daxil edilir ki, onlar əsas göstəricini heç vaxt şişirtməsin. /dashboard/free-tiers ünvanında real vaxtda istifadə edilmiş/qalan göstəricilər."/>
 
 > Real `/dashboard/free-tiers` səhifəsinin animasiyalı xülasəsi. Tam metodologiya (hovuz təkrarlarının aradan qaldırılması, kredit səviyyələri, provayder şərtləri): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -74,7 +74,7 @@ OMNIROUTE sizə pula qənaət etməyə və işinizi asanlaşdırmağa kömək ed
 |                                          |         v3.8.50          | **v3.8.51** |       `v3.8.53+`       |
 | ---------------------------------------- | :----------------------: | :---------: | :--------------------: |
 | 🌐 Təchizatçılar                         |           352            |   **358**   |          380           |
-| 🧠 Unikal söhbət model identifikatorları |           1320           |  **1374**   |          1494          |
+| 🧠 Unikal söhbət model identifikatorları |           1320           |  **1374**   |          1499          |
 | 🖼️ Modallıq körpüsü                      | 🆕 görmə + audio + video |      ✓      |           ✓            |
 | 📡 Radar pulsuz kataloqu                 |    🆕 könüllü qoşulma    |      ✓      |           ✓            |
 | ⚖️ Kvotadan xəbərdar planlaşdırma        |      🆕 Quota-Share      |      ✓      |           ✓            |
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Vəd — Bir endpoint və 380 provayder. Avtomatik ehtiyat marşrutlaşdırma başqa sağlam hədəf olduqca işləməyə davam edir. Altı sütun: 380 provayder üzrə dayanıqlı ehtiyat marşrutlaşdırma · uyğun iş yüklərində 95%-ə qədər token qənaəti · başlamaq üçün $0, 150+ pulsuz paket və 52 təkrarlanan/açarsız daimi pulsuz provayder · bir konfiqurasiya ilə 39 CLI/agent inteqrasiyası · /v1 ünvanında OpenAI, Claude, Gemini və Responses API uyğunluğu · istehsalat nəzarətləri: dövrə qırıcılar, TLS stealth, MCP 110 alətləri, A2A, yaddaş, qoruyucu baryerlər, qiymətləndirmələr və 7,800+ izlənən test faylında 56,000+ statik test bəyanatı."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Vəd — Bir endpoint və 380 provayder. Avtomatik ehtiyat marşrutlaşdırma başqa sağlam hədəf olduqca işləməyə davam edir. Altı sütun: 380 provayder üzrə dayanıqlı ehtiyat marşrutlaşdırma · uyğun iş yüklərində 95%-ə qədər token qənaəti · başlamaq üçün $0, 150+ pulsuz paket və 54 təkrarlanan/açarsız daimi pulsuz provayder · bir konfiqurasiya ilə 39 CLI/agent inteqrasiyası · /v1 ünvanında OpenAI, Claude, Gemini və Responses API uyğunluğu · istehsalat nəzarətləri: dövrə qırıcılar, TLS stealth, MCP 110 alətləri, A2A, yaddaş, qoruyucu baryerlər, qiymətləndirmələr və 7,800+ izlənən test faylında 56,000+ statik test bəyanatı."/>
 
 <br/>
 <br/>
@@ -693,7 +693,7 @@ shell tarixçənizdən kənarda saxlayır. → [CLI İnteqrasiyaları](docs/guid
 
 </div>
 
-> **380 qeydiyyatdan keçmiş təchizatçı** əsas chat, media, axtarış, lokal, bulud-agent və sistem kolleksiyalarında, o cümlədən **156-ü `hasFree: true` kəşfiyyat metadatası** daşıyır. Chat model reyestrində **241 təchizatçı / 3,109 fərqli təchizatçı-model cütü / 1,494 xam model ID-si** əhatə olunur; ayrıca pulsuz-büdcə kataloqunda **484 model üzrə sətir**, **34 təkrarlanan hovuz** və **52 təkrarlanan/kartsız həmişəlik pulsuz təchizatçı** var. Bunlar dizayna görə fərqli məxrəclərdir; təriflər və hovuz üzrə təkrarsız hesablamalar [Təchizatçı İstinadı](docs/reference/PROVIDER_REFERENCE.md) və [Pulsuz Səviyyələr](docs/reference/FREE_TIERS.md) bölməsində yerləşir.
+> **380 qeydiyyatdan keçmiş təchizatçı** əsas chat, media, axtarış, lokal, bulud-agent və sistem kolleksiyalarında, o cümlədən **156-ü `hasFree: true` kəşfiyyat metadatası** daşıyır. Chat model reyestrində **241 təchizatçı / 3,114 fərqli təchizatçı-model cütü / 1,499 xam model ID-si** əhatə olunur; ayrıca pulsuz-büdcə kataloqunda **486 model üzrə sətir**, **34 təkrarlanan hovuz** və **54 təkrarlanan/kartsız həmişəlik pulsuz təchizatçı** var. Bunlar dizayna görə fərqli məxrəclərdir; təriflər və hovuz üzrə təkrarsız hesablamalar [Təchizatçı İstinadı](docs/reference/PROVIDER_REFERENCE.md) və [Pulsuz Səviyyələr](docs/reference/FREE_TIERS.md) bölməsində yerləşir.
 
 <div align="center">
 
@@ -1372,7 +1372,7 @@ tərəfindən bir portda təqdim olunur, buna görə hazırda ayrıca yalnız CL
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Davamlılıq təlimatı</a></b></td><td>Elektrik açarları, soyuma müddətləri, növbə, kütləvi sorğuların qarşısının alınması, TLS saxtalaşdırılması</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo mühərriki</a></b></td><td>16 amilli qiymətləndirmə, rejim paketləri, özünü bərpa</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Proksi təlimatı</a></b></td><td>3 səviyyəli proksi sistemi, 1proxy marketplace, reyestrin CRUD əməliyyatları</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Pulsuz səviyyələr</a></b></td><td>Birləşdirilmiş kataloq: sənədləşdirilmiş 34 təkrarlanan hovuz / kataloqlaşdırılmış 484 pulsuz səviyyə qeydi</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Pulsuz səviyyələr</a></b></td><td>Birləşdirilmiş kataloq: sənədləşdirilmiş 34 təkrarlanan hovuz / kataloqlaşdırılmış 486 pulsuz səviyyə qeydi</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Funksiyalar qalereyası</a></b></td><td>Ekran görüntüləri ilə vizual dashboard icmalı</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Kod bazasının sənədləşməsi</a></b></td><td>Başlanğıc səviyyəsi üçün anlaşılan kod bazası icmalı</td></tr>
 </table>

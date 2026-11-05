@@ -66,22 +66,13 @@ HAR-importálás dekódolja a JWT lejárati idejét, és megjeleníti a token h�
 
 ## A token élettartama és frissítése
 
-Az `access_token` rövid élettartamú (jellemzően **~75 perc**). A lejárat után a szolgáltató
-kapcsolati hibát jelez, és újból rögzítenie kell a hitelesítő adatot.
+A `access_token` rövid életű (tipikusan **~ 75 perc** ). Használható frissítési token nélkül a lejárat után újra rögzítenie kell a hitelesítő adatokat.
 
 ### Automatikus frissítés `refreshToken` használatával
 
-A manuális újbóli rögzítés elkerüléséhez Microsoft-frissítési tokent tárolhat a kapcsolat
-**Advanced Settings → providerSpecificData** beállításában:
+A Microsoft 365 szolgáltatónál **Csatlakozás hozzáadása** vagy **Kapcsolat szerkesztése** párbeszédpanel, nyissa meg **Speciális beállítások → Frissítési token (opcionális)** . Illesszen be egy Microsoft OAuth frissítési tokent a `substrate.office.com/sydney` hatókörhöz, és mentse. A bemenet maszkolt, és soha nincs előre kitöltve a tárolt tokennel. Szerkesztéskor hagyja üresen a meglévő token megtartásához; illesszen be egy új tokent a helyére.
 
-| Mező           | Leírás                                                                      |
-| -------------- | --------------------------------------------------------------------------- |
-| `refreshToken` | Microsoft OAuth-frissítési token a `substrate.office.com/sydney` hatókörhöz |
-| `tier`         | `individual` (alapértelmezett), `edu` vagy `enterprise`                     |
-
-A frissítési tokent egy, a `substrate.office.com/sydney` hatókörre korlátozott Microsoft eszközkódos vagy engedélyezésikód-folyamatból szerezheti be.
-Ha a `refreshToken` be van állítva, az OmniRoute minden kérés előtt előzetesen frissíti az `access_token` értékét, így nem kell
-minden ~75 perces lejárat után újból rögzítenie azt.
+Szerezze be a frissítési tokent egy Microsoft eszközkódból vagy engedélyezési kódfolyamból, amelynek hatóköre `substrate.office.com/sydney`; a műszerfal nem szerzi be Önnek. Beállított frissítési token esetén OmniRoute a kérések előtt ellenőrzi a `access_token`, és csak akkor frissíti, ha frissítésre van szüksége. A sikeres frissítés az elforgatott frissítési jogkivonatot is megőrzi, elkerülve a kézi újbóli rögzítést, miközben a frissítési token érvényes marad.
 
 Ha a `refreshToken` nincs beállítva, minden lejárat után manuálisan kell újból
 rögzítenie a WebSocket hitelesítő adatát.
@@ -94,8 +85,7 @@ rögzítenie a WebSocket hitelesítő adatát.
 | `edu`        | `included`          | Oktatási M365 Copilot   |
 | `enterprise` | `work`              | M365 Copilot for Work   |
 
-Állítsa be a szintet az **Advanced Settings → providerSpecificData → tier** menüpontban. A szint hatással van
-a BizChat útválasztására és a modellekhez való hozzáférésre.
+Állítsa be a szintet **Speciális beállítások → Copilot szint** . A szint befolyásolja a BizChat útválasztást és a modellelérést.
 
 ## Biztonsági modell
 
@@ -116,7 +106,7 @@ a BizChat útválasztására és a modellekhez való hozzáférésre.
 Ez az elvárt működés. `refreshToken` nélkül a hozzáférési token rövid élettartamú. Válassza az alábbi lehetőségek egyikét:
 
 - Rögzítse újra a hitelesítő adatot a DevTools segítségével, vagy
-- Állítson be egy `refreshToken` értéket a Speciális beállításokban az automatikus frissítéshez.
+- Konfigurálás **Speciális beállítások → Refresh token (opcionális)** a Kapcsolat hozzáadása vagy szerkesztése párbeszédpanelen az automatikus frissítéshez.
 
 ### A kapcsolat tesztelése sikeres, de a csevegés 401-es hibát ad vissza
 

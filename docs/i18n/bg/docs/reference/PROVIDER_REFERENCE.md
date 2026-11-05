@@ -6,7 +6,7 @@
 
 > **Автоматично генерирано** от `src/shared/constants/providers.ts` — не редактирайте ръчно.
 > Генерирайте отново с: `npm run gen:provider-reference`
-> **Последно генериране:** 2026-10-27
+> **Последно генериране:** 2026-11-05
 
 Общ брой доставчици: **380**. Вижте разбивката по категории по-долу.
 
@@ -466,7 +466,7 @@
 
 - Каталог: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Регистър (подробности за всеки модел): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Изпълнители: [`open-sse/executors/`](../../open-sse/executors/) (158 реализации)
+- Изпълнители: [`open-sse/executors/`](../../open-sse/executors/) (162 реализации)
 - Транслатори: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Вижте също

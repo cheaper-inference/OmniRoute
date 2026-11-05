@@ -27,9 +27,9 @@
 
 > **Kasutage oma teenusepakkujate kontosid.** See on eraldi kasutuskõlblike kolmandate osapoolte tasuta tasandite hinnanguline koondsumma, mitte OmniRoute'i antud tokenitoetus. Registreeruge, hankige vajaduse korral mandaadid ja ühendage kasutatavad teenusepakkujad; iga teenusepakkuja määrab oma piirangud, saadavuse ja tingimused.
 >
-> Tasuta tasandite käsitsi kokkupanek on vaevarikas — kümneid SDK-sid, kümneid päringupiiranguid ja puudub ülevaade sellest, kui palju teil tegelikult kasutada on. OmniRoute kataloogib **484 tasuta tasandi kirjet 34 korduva kogumi võtme vahel** ning arvutab tokenite põhiväärtuse **17 kogumi põhjal, millel on avaldatud positiivne kuueelarve, ja viie mudelipõhise Groq'i piirangu põhjal**, eemaldades jagatud kogumite duplikaadid. Kvoodid, mis avanevad alles pärast piirkondliku identiteedikontrolli läbimist (praegu: ModelScope), kuvatakse eraldi, +~6M pärast piirkondlikku identiteedi kinnitamist, ning neid ei liideta põhiväärtusse. Tulemus on jätkuvalt nähtav juhtpaneelil (`/dashboard/free-tiers`).
+> Tasuta tasandite käsitsi kokkupanek on vaevarikas — kümneid SDK-sid, kümneid päringupiiranguid ja puudub ülevaade sellest, kui palju teil tegelikult kasutada on. OmniRoute kataloogib **486 tasuta tasandi kirjet 34 korduva kogumi võtme vahel** ning arvutab tokenite põhiväärtuse **17 kogumi põhjal, millel on avaldatud positiivne kuueelarve, ja viie mudelipõhise Groq'i piirangu põhjal**, eemaldades jagatud kogumite duplikaadid. Kvoodid, mis avanevad alles pärast piirkondliku identiteedikontrolli läbimist (praegu: ModelScope), kuvatakse eraldi, +~6M pärast piirkondlikku identiteedi kinnitamist, ning neid ei liideta põhiväärtusse. Tulemus on jätkuvalt nähtav juhtpaneelil (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute'i tasuta tasandi eelarvekaart: ~1.62B tasuta tokenit kuus stabiilselt, esimesel kuul registreerumiskrediitidega kuni ~2.22B, 34 dokumenteeritud korduva kogumi võtme kaudu, mis hõlmavad 484 kataloogitud tasuta tasandi kirjet ühe lõpp-punkti taga. Aus, kogumite duplikaate eemaldav arvestus — iga jagatud kogum loetakse üks kord, sealhulgas 17 korduvat kogumit, millel on avaldatud positiivne kuine tokenieelarve, ning viis mudelipõhist Groq'i piirangut; 12 teenusepakkujat on tingimustega seotud riskide kataloogis märgitud vältimiseks, seega otsustate teie. Eelarveriba sisaldab Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (viis mudelipõhist piirangut) ja väiksemaid kogumeid, lisaks esimese kuu registreerumiskrediite ning püsivalt tasuta teenusepakkujaid, kellel puudub tokenipiirang ja keda kuvatakse eraldi, et need ei suurendaks põhiväärtust. Reaalajas kasutatud/järelejäänud maht lehel /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute'i tasuta tasandi eelarvekaart: ~1.62B tasuta tokenit kuus stabiilselt, esimesel kuul registreerumiskrediitidega kuni ~2.22B, 34 dokumenteeritud korduva kogumi võtme kaudu, mis hõlmavad 486 kataloogitud tasuta tasandi kirjet ühe lõpp-punkti taga. Aus, kogumite duplikaate eemaldav arvestus — iga jagatud kogum loetakse üks kord, sealhulgas 17 korduvat kogumit, millel on avaldatud positiivne kuine tokenieelarve, ning viis mudelipõhist Groq'i piirangut; 12 teenusepakkujat on tingimustega seotud riskide kataloogis märgitud vältimiseks, seega otsustate teie. Eelarveriba sisaldab Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (viis mudelipõhist piirangut) ja väiksemaid kogumeid, lisaks esimese kuu registreerumiskrediite ning püsivalt tasuta teenusepakkujaid, kellel puudub tokenipiirang ja keda kuvatakse eraldi, et need ei suurendaks põhiväärtust. Reaalajas kasutatud/järelejäänud maht lehel /dashboard/free-tiers."/>
 
 > `/dashboard/free-tiers` lehe animeeritud kokkuvõte. Täielik metoodika (kogumite duplikaatide eemaldamine, krediiditasemed, teenusepakkujate tingimused): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -74,7 +74,7 @@
 |                                    |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
 | ---------------------------------- | :------------------------: | :---------: | :-------------------: |
 | 🌐 Teenusepakkujad                 |            352             |   **358**   |          380          |
-| 🧠 Unikaalsed vestlusmudelite ID-d |            1320            |  **1374**   |         1494          |
+| 🧠 Unikaalsed vestlusmudelite ID-d |            1320            |  **1374**   |         1499          |
 | 🖼️ Modaalsussild                   | 🆕 nägemine + heli + video |      ✓      |           ✓           |
 | 📡 Radari tasuta kataloog          |       🆕 vabatahtlik       |      ✓      |           ✓           |
 | ⚖️ Kvooditeadlik ajastamine        |       🆕 Quota-Share       |      ✓      |           ✓           |
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lubadus — Üks lõpp-punkt ja 380 pakkujat. Automaatne varuvariant hoiab suunamise töös seni, kuni mõni terve sihtkoht on saadaval. Kuus sammast: vastupidav varuvariant 380 pakkuja vahel · kuni 95% tokenite kokkuhoid sobivatel töökoormustel · $0 alustamiseks 150+ tasuta paketi ja 52 korduva/võtmeta igavesti tasuta pakkujaga · 39 CLI/agendi integratsiooni ühe konfiguratsiooniga · OpenAI, Claude, Gemini ja Responses API ühilduvus aadressil /v1 · tootmiskontrollid, sealhulgas voolukatkestid, TLS stealth, MCP 110 tööriista, A2A, mälu, piirangud, hindamised ja 56 000+ staatilist testideklaratsiooni üle 7 800+ jälgitava testifaili."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lubadus — Üks lõpp-punkt ja 380 pakkujat. Automaatne varuvariant hoiab suunamise töös seni, kuni mõni terve sihtkoht on saadaval. Kuus sammast: vastupidav varuvariant 380 pakkuja vahel · kuni 95% tokenite kokkuhoid sobivatel töökoormustel · $0 alustamiseks 150+ tasuta paketi ja 54 korduva/võtmeta igavesti tasuta pakkujaga · 39 CLI/agendi integratsiooni ühe konfiguratsiooniga · OpenAI, Claude, Gemini ja Responses API ühilduvus aadressil /v1 · tootmiskontrollid, sealhulgas voolukatkestid, TLS stealth, MCP 110 tööriista, A2A, mälu, piirangud, hindamised ja 56 000+ staatilist testideklaratsiooni üle 7 800+ jälgitava testifaili."/>
 
 <br/>
 <br/>
@@ -702,7 +702,7 @@ eemal sinu shelli ajaloost. → [CLI integratsioonid](docs/guides/CLI-INTEGRATIO
 
 </div>
 
-> **380 registreeritud teenusepakkujat** kõigis kanonilistes vestluse, meedia, otsingu, lokaalse, pilveagendi ja süsteemi kogumites, sealhulgas **156, millel on `hasFree: true` avastamis-metaandmed**. Vestlusmudelite registris on **241 teenusepakkujat / 3 109 erinevat pakkuja-mudeli paari / 1 494 toormudeli ID-d**; eraldi tasuta-eelarve kataloogis on **484 mudelipõhist rida**, **34 korduvat fondi** ja **52 korduvat/võtmeta igavesti tasuta teenusepakkujat**. Need on erinevad nimetajad teadlikult; definitsioonid ja fondide-duplikaatide arvestused asuvad [Teenusepakkujate viites](docs/reference/PROVIDER_REFERENCE.md) ja [Tasuta tasemetes](docs/reference/FREE_TIERS.md).
+> **380 registreeritud teenusepakkujat** kõigis kanonilistes vestluse, meedia, otsingu, lokaalse, pilveagendi ja süsteemi kogumites, sealhulgas **156, millel on `hasFree: true` avastamis-metaandmed**. Vestlusmudelite registris on **241 teenusepakkujat / 3 114 erinevat pakkuja-mudeli paari / 1 499 toormudeli ID-d**; eraldi tasuta-eelarve kataloogis on **486 mudelipõhist rida**, **34 korduvat fondi** ja **54 korduvat/võtmeta igavesti tasuta teenusepakkujat**. Need on erinevad nimetajad teadlikult; definitsioonid ja fondide-duplikaatide arvestused asuvad [Teenusepakkujate viites](docs/reference/PROVIDER_REFERENCE.md) ja [Tasuta tasemetes](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1383,7 +1383,7 @@ Kanoonilised mõõdikud seisuga 2026-10-18: **1.976 unikaalset videot** · **20.
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Töökindluse juhend</a></b></td><td>Ahelkaitsed, jahtumisperioodid, järjekord, massilise päringutulva vältimine, TLS-i võltsimine</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Automaatse kombinatsiooni mootor</a></b></td><td>16 teguriga hindamine, režiimipaketid, isetaastumine</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Puhverserveri juhend</a></b></td><td>3-tasemeline puhverserverisüsteem, 1proxy turg, registri CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Tasuta tasemed</a></b></td><td>Koondkataloog: 34 dokumenteeritud korduvat kogumit / 484 kataloogitud tasuta taseme kirjet</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Tasuta tasemed</a></b></td><td>Koondkataloog: 34 dokumenteeritud korduvat kogumit / 486 kataloogitud tasuta taseme kirjet</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Funktsioonide galerii</a></b></td><td>Visuaalne juhtpaneeli tutvustus ekraanipiltidega</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Koodibaasi dokumentatsioon</a></b></td><td>Algajasõbralik koodibaasi ülevaade</td></tr>
 </table>

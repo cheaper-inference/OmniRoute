@@ -6,7 +6,7 @@
 
 > **สร้างโดยอัตโนมัติ** จาก `src/shared/constants/providers.ts` — โปรดอย่าแก้ไขด้วยตนเอง
 > สร้างใหม่ด้วย: `npm run gen:provider-reference`
-> **สร้างล่าสุด:** 2026-10-27
+> **สร้างล่าสุด:** 2026-11-05
 
 ผู้ให้บริการทั้งหมด: **380** ราย ดูรายละเอียดแยกตามหมวดหมู่ด้านล่าง
 
@@ -466,7 +466,7 @@
 
 - แค็ตตาล็อก: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - รีจิสทรี (รายละเอียดของแต่ละโมเดล): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- ตัวดำเนินการ: [`open-sse/executors/`](../../open-sse/executors/) (การใช้งาน 158 รายการ)
+- ตัวดำเนินการ: [`open-sse/executors/`](../../open-sse/executors/) (การใช้งาน 162 รายการ)
 - ตัวแปล: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## ดูเพิ่มเติม

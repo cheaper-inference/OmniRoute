@@ -6,7 +6,7 @@
 
 > **Automatiškai sugeneruota** iš `src/shared/constants/providers.ts` — neredaguokite rankiniu būdu.
 > Sugeneruokite iš naujo naudodami: `npm run gen:provider-reference`
-> **Paskutinį kartą sugeneruota:** 2026-10-27
+> **Paskutinį kartą sugeneruota:** 2026-11-05
 
 Iš viso teikėjų: **380**. Toliau pateiktas suskirstymas pagal kategorijas.
 
@@ -466,7 +466,7 @@ Norėdami įjungti, sukonfigūruoti ir išbandyti kiekvieną teikėją, naudokit
 
 - Katalogas: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Registras (išsami informacija apie kiekvieną modelį): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Vykdyklės: [`open-sse/executors/`](../../open-sse/executors/) (158 realizacijos)
+- Vykdyklės: [`open-sse/executors/`](../../open-sse/executors/) (162 realizacijos)
 - Vertikliai: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Taip pat žr.

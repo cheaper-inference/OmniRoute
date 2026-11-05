@@ -539,7 +539,7 @@ test("sanitizeResponsesApiResponse preserves native continuation reasoning state
   assert.deepEqual(sanitized.output, [plaintext, opaque]);
 });
 
-test("sanitizeStreamingChunk keeps only safe chunk fields and preserves readable reasoning aliases", () => {
+test("sanitizeStreamingChunk keeps safe fields, readable reasoning aliases and content whitespace", () => {
   const sanitized = sanitizeStreamingChunk({
     id: "chunk_1",
     object: "chat.completion.chunk",
@@ -573,7 +573,8 @@ test("sanitizeStreamingChunk keeps only safe chunk fields and preserves readable
         index: 3,
         delta: {
           role: "assistant",
-          content: "Line 1\n\nLine 2",
+          // Chunk boundaries must not decide how many meaningful blank lines survive.
+          content: "Line 1\n\n\nLine 2",
           reasoning: "stream reasoning",
           tool_calls: [{ id: "call_1" }],
         },

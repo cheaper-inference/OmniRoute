@@ -149,7 +149,7 @@ Kiro 带有非空签名的二进制 `reasoningContentEvent` 帧会以空的 `rea
 
 **终态（非冷却）：**
 
-- `banned` — 由违禁关键词/账户封禁检测设置（参见 [BAN_DETECTION](../security/BAN_DETECTION.md)），以及由连续三次上游逐请求拒绝（`request_rejected`，例如 Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`）设置；单次拒绝只会冷却连接
+- `banned` —由禁止关键字/帐户禁止检测设置（请参阅[BAN_DETECTION](../security/BAN_DETECTION.md) ）。上游每个请求拒绝（`request_rejected`，例如Anthropic OAuth 403“不允许请求”）从不设置它：它们按连接和模型进行计数，并以`REQUEST_REJECTED_MAX_COOLDOWN_MS` （1 小时）为上限的不断增长的冷却时间使该模型停止旋转，或者在没有已知模型时冷却连接— `open-sse/services/requestRejectedStreak.ts`
 - `expired`（在有界重试后转为终态——`EXPIRED_RETRY_MAX = 3`，采用指数退避——因此瞬时 OAuth 错误可在账户被永久停用前自愈）
 - `credits_exhausted`
 

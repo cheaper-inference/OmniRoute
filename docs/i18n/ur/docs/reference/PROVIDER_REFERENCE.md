@@ -6,7 +6,7 @@
 
 > `src/shared/constants/providers.ts` سے **خودکار طور پر تیار کردہ** — دستی طور پر ترمیم نہ کریں۔
 > دوبارہ تیار کرنے کے لیے: `npm run gen:provider-reference`
-> **آخری بار تیار کیا گیا:** 2026-10-27
+> **آخری بار تیار کیا گیا:** 2026-11-05
 
 فراہم کنندگان کی کل تعداد: **380**۔ ذیل میں زمرہ وار تفصیل دیکھیں۔
 
@@ -466,7 +466,7 @@
 
 - کیٹلاگ: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - رجسٹری (ہر ماڈل کی تفصیلات): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- ایگزیکیوٹرز: [`open-sse/executors/`](../../open-sse/executors/) (158 امپلیمینٹیشنز)
+- ایگزیکیوٹرز: [`open-sse/executors/`](../../open-sse/executors/) (162 امپلیمینٹیشنز)
 - مترجمین: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## مزید دیکھیے

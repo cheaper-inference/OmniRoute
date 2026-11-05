@@ -27,9 +27,9 @@
 
 > **Gebruik je eigen provideraccounts.** Dit is een geschat totaal over afzonderlijk in aanmerking komende gratis tiers van derden, geen token-toekenning van OmniRoute. Meld je aan, verkrijg waar nodig inloggegevens en verbind de providers die je kunt gebruiken; elke provider bepaalt zijn eigen limieten, beschikbaarheid en voorwaarden.
 >
-> Gratis tiers handmatig combineren is lastig — tientallen SDK's, tientallen rate limits en geen idee hoeveel je daadwerkelijk tot je beschikking hebt. OmniRoute catalogiseert **484 gratis-tiervermeldingen over 34 terugkerende pool-sleutels** en berekent de tokenkopregel op basis van de **17 pools met een gepubliceerd positief maandelijks budget plus vijf model-specifieke Groq-limieten**, ontdubbeld op basis van gedeelde pools. Quota die pas beschikbaar komen na een regionale identiteitscontrole (vandaag: ModelScope) worden apart weergegeven, +~6M na regionale identiteitsverificatie, en worden nooit bij de kopregel opgeteld. Het resultaat blijft zichtbaar op het dashboard (`/dashboard/free-tiers`).
+> Gratis tiers handmatig combineren is lastig — tientallen SDK's, tientallen rate limits en geen idee hoeveel je daadwerkelijk tot je beschikking hebt. OmniRoute catalogiseert **486 gratis-tiervermeldingen over 34 terugkerende pool-sleutels** en berekent de tokenkopregel op basis van de **17 pools met een gepubliceerd positief maandelijks budget plus vijf model-specifieke Groq-limieten**, ontdubbeld op basis van gedeelde pools. Quota die pas beschikbaar komen na een regionale identiteitscontrole (vandaag: ModelScope) worden apart weergegeven, +~6M na regionale identiteitsverificatie, en worden nooit bij de kopregel opgeteld. Het resultaat blijft zichtbaar op het dashboard (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute-kaart voor het gratis-tierbudget: ~1.62B gratis tokens per maand stabiel, tot ~2.22B in de eerste maand met aanmeldcredits, afkomstig van 34 gedocumenteerde terugkerende pool-sleutels die 484 gecatalogiseerde gratis-tiervermeldingen achter één endpoint omvatten. Eerlijke, op pools ontdubbelde berekening — elke gedeelde pool wordt één keer geteld, inclusief 17 terugkerende pools met een gepubliceerd positief maandelijks tokenbudget plus vijf model-specifieke Groq-limieten; 12 providers zijn in de catalogus met risico's rond voorwaarden gemarkeerd als vermijden, zodat jij de beslissing neemt. De budgetbalk omvat Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (vijf model-specifieke limieten) en kleinere pools, plus aanmeldcredits voor de eerste maand en providers die permanent gratis zijn zonder tokenlimiet, afzonderlijk weergegeven zodat ze de kopregel nooit kunstmatig verhogen. Live gebruikt/resterend op /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute-kaart voor het gratis-tierbudget: ~1.62B gratis tokens per maand stabiel, tot ~2.22B in de eerste maand met aanmeldcredits, afkomstig van 34 gedocumenteerde terugkerende pool-sleutels die 486 gecatalogiseerde gratis-tiervermeldingen achter één endpoint omvatten. Eerlijke, op pools ontdubbelde berekening — elke gedeelde pool wordt één keer geteld, inclusief 17 terugkerende pools met een gepubliceerd positief maandelijks tokenbudget plus vijf model-specifieke Groq-limieten; 12 providers zijn in de catalogus met risico's rond voorwaarden gemarkeerd als vermijden, zodat jij de beslissing neemt. De budgetbalk omvat Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (vijf model-specifieke limieten) en kleinere pools, plus aanmeldcredits voor de eerste maand en providers die permanent gratis zijn zonder tokenlimiet, afzonderlijk weergegeven zodat ze de kopregel nooit kunstmatig verhogen. Live gebruikt/resterend op /dashboard/free-tiers."/>
 
 > Geanimeerd overzicht van de live-pagina `/dashboard/free-tiers`. Volledige methodologie (pool-ontdubbeling, credittiers, providervoorwaarden): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -74,7 +74,7 @@
 |                            |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | -------------------------- | :----------------------: | :---------: | :-------------------: |
 | 🌐 Aanbieders              |           352            |   **358**   |          380          |
-| 🧠 Unieke chatmodel-ID's   |           1320           |  **1374**   |         1494          |
+| 🧠 Unieke chatmodel-ID's   |           1320           |  **1374**   |         1499          |
 | 🖼️ Modalitybrug            | 🆕 visie + audio + video |      ✓      |           ✓           |
 | 📡 Gratis Radarcatalogus   |        🆕 opt-in         |      ✓      |           ✓           |
 | ⚖️ Quotabewuste planning   |      🆕 Quota-Share      |      ✓      |           ✓           |
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="De Belofte — Eén endpoint en 380 providers. Automatische fallback blijft routeren zolang er een ander gezond doel beschikbaar is. Zes pijlers: veerkrachtige fallback over 380 providers · tot 95% tokens besparen op geschikte workloads · $0 om te starten met 150+ gratis tiers en 52 terugkerende/keyless gratis-voor-altijd providers · 39 CLI/agent-integraties via één configuratie · OpenAI, Claude, Gemini en Responses API-compatibiliteit op /v1 · productiecontroles inclusief circuit breakers, TLS stealth, MCP 110 tools, A2A, geheugen, guardrails, evaluaties en 56.000+ statische testdeclaraties over 7.800+ gevolgde testbestanden."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="De Belofte — Eén endpoint en 380 providers. Automatische fallback blijft routeren zolang er een ander gezond doel beschikbaar is. Zes pijlers: veerkrachtige fallback over 380 providers · tot 95% tokens besparen op geschikte workloads · $0 om te starten met 150+ gratis tiers en 54 terugkerende/keyless gratis-voor-altijd providers · 39 CLI/agent-integraties via één configuratie · OpenAI, Claude, Gemini en Responses API-compatibiliteit op /v1 · productiecontroles inclusief circuit breakers, TLS stealth, MCP 110 tools, A2A, geheugen, guardrails, evaluaties en 56.000+ statische testdeclaraties over 7.800+ gevolgde testbestanden."/>
 
 <br/>
 <br/>
@@ -693,7 +693,7 @@ je shellgeschiedenis. → [CLI-integraties](docs/guides/CLI-INTEGRATIONS.md)
 
 </div>
 
-> **380 geregistreerde aanbieders** verspreid over de canonieke chat-, media-, zoek-, lokale-, cloud-agent- en systeemcollecties, waaronder **156 met `hasFree: true` discovery-metadata**. Het chatmodelregister omvat **241 aanbieders / 3.109 unieke aanbieder-modelcombinaties / 1.494 ruwe model-ID's**; de aparte gratis-budgetcatalogus bevat **484 per-model-rijen**, **34 terugkerende pools** en **52 terugkerende/sleutelloze altijd-gratis aanbieders**. Dit zijn opzetbewust verschillende noemers; definities en pool-gededupliceerde berekeningen vind je in de [Aanbiederreferentie](docs/reference/PROVIDER_REFERENCE.md) en [Gratis Tiers](docs/reference/FREE_TIERS.md).
+> **380 geregistreerde aanbieders** verspreid over de canonieke chat-, media-, zoek-, lokale-, cloud-agent- en systeemcollecties, waaronder **156 met `hasFree: true` discovery-metadata**. Het chatmodelregister omvat **241 aanbieders / 3.114 unieke aanbieder-modelcombinaties / 1.499 ruwe model-ID's**; de aparte gratis-budgetcatalogus bevat **486 per-model-rijen**, **34 terugkerende pools** en **54 terugkerende/sleutelloze altijd-gratis aanbieders**. Dit zijn opzetbewust verschillende noemers; definities en pool-gededupliceerde berekeningen vind je in de [Aanbiederreferentie](docs/reference/PROVIDER_REFERENCE.md) en [Gratis Tiers](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1372,7 +1372,7 @@ Canonieke statistieken op 2026-10-18: **1.976 unieke video's** · **20.220.289 b
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Handleiding voor veerkracht</a></b></td><td>Circuitbreakers, afkoelperioden, wachtrij, anti-thundering-herd, TLS-spoofing</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo-engine</a></b></td><td>Scoring op basis van 16 factoren, modusbundels, zelfherstel</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Proxyhandleiding</a></b></td><td>Proxysysteem met 3 niveaus, 1proxy-marktplaats, CRUD voor het register</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Gratis niveaus</a></b></td><td>Geconsolideerde directory: 34 gedocumenteerde terugkerende pools / 484 gecatalogiseerde items uit gratis niveaus</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Gratis niveaus</a></b></td><td>Geconsolideerde directory: 34 gedocumenteerde terugkerende pools / 486 gecatalogiseerde items uit gratis niveaus</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Functieoverzicht</a></b></td><td>Visuele rondleiding door het dashboard met schermafbeeldingen</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Documentatie van de codebase</a></b></td><td>Codebase-uitleg voor beginners</td></tr>
 </table>

@@ -66,23 +66,13 @@ an t-iompórtáil HAR dul in éag an JWT agus taispeánann sí an tréimhse saoi
 
 ## Saolré agus athnuachan an chomhartha
 
-Tá `access_token` gearrshaolach (**~75 nóiméad** de ghnáth). Tar éis dó dul in éag, tuairiscíonn an soláthraí
-earráid naisc agus ní mór duit an dintiúr a ghabháil arís.
+Tá an `access_token` gearr-chónaí (go hiondúil **~ 75 nóiméad** ). Gan comhartha athnuachana inúsáidte, ní mór duit an dintiúr a athghabháil tar éis dul in éag.
 
 ### Athnuachan uathoibríoch le `refreshToken`
 
-Chun nach mbeidh ort é a ghabháil arís de láimh, is féidir leat comhartha athnuachana Microsoft a stóráil i
-**Ardsocruithe → providerSpecificData** an naisc:
+Sna soláthraí Microsoft 365 **Cuir nasc leis** nó **Cuir nasc in eagar** dialóg, oscailte **Ardsocruithe → Athnuaigh comhartha (roghnach)** . Greamaigh comhartha athnuachana Microsoft OAuth don raon feidhme `substrate.office.com/sydney` agus sábháil. Déantar an t-ionchur a chumhdach agus ní chuirtear an comhartha stóráilte air roimh ré. Agus an eagarthóireacht á dhéanamh agat, fág bán é chun an comhartha reatha a choinneáil; greamaigh comhartha nua chun é a athsholáthar.
 
-| Réimse         | Cur síos                                                                     |
-| -------------- | ---------------------------------------------------------------------------- |
-| `refreshToken` | Comhartha athnuachana Microsoft OAuth do scóip `substrate.office.com/sydney` |
-| `tier`         | `individual` (réamhshocrú), `edu`, nó `enterprise`                           |
-
-Faigh an comhartha athnuachana ó shreabhadh cód gléis nó cód údaraithe Microsoft
-atá scóipeáilte chuig `substrate.office.com/sydney`. Agus `refreshToken` socraithe, déanann OmniRoute
-`access_token` a réamh-athnuachan roimh gach iarratas, mar sin ní gá duit é a
-ghabháil arís tar éis gach dul in éag thart ar 75 nóiméad.
+Faigh an comhartha athnuachana ó shreabhadh cód feiste nó cód údaraithe Microsoft scóipe go `substrate.office.com/sydney`; ní fhaigheann an painéal ar do shon é. Le comhartha athnuachana cumraithe, seiceálann OmniRoute an `access_token` roimh iarratais agus ní athnuachan ach amháin nuair is gá é a athnuachan. Maireann athnuachan rathúil freisin ar an comhartha athnuachana rothlaithe, ag seachaint athghabháil láimhe fad is atá an comhartha athnuachana fós bailí.
 
 Mura bhfuil `refreshToken` socraithe, ní mór duit an dintiúr WebSocket a ghabháil arís de láimh
 tar éis gach dul in éag.
@@ -95,8 +85,7 @@ tar éis gach dul in éag.
 | `edu`        | `included`      | M365 Copilot don Oideachas   |
 | `enterprise` | `work`          | M365 Copilot don Obair       |
 
-Socraigh an tsraith in **Ardsocruithe → providerSpecificData → tier**. Bíonn tionchar ag an tsraith ar
-ródú BizChat agus ar rochtain ar shamhlacha.
+Socraigh an sraith i **Ardsocruithe → Copilot tier** . Bíonn tionchar ag an tsraith ar ródú BizChat agus ar rochtain mhúnla.
 
 ## Samhail slándála
 
@@ -124,7 +113,7 @@ ródú BizChat agus ar rochtain ar shamhlacha.
 Tá coinne leis seo. Gan `refreshToken`, bíonn an comhartha rochtana gearrshaolach. Déan ceann amháin díobh seo:
 
 - Gabh an dintiúr arís ó DevTools, nó
-- Cumraigh `refreshToken` sna hArdsocruithe le haghaidh athnuachan uathoibríoch.
+- Cumraigh **Ardsocruithe → Athnuaigh comhartha (roghnach)** sa nasc Cuir leis nó Cuir in Eagar dialóg le haghaidh athnuachan uathoibríoch.
 
 ### Éiríonn leis an Nasc Tástála ach tugann an comhrá 401 ar ais
 

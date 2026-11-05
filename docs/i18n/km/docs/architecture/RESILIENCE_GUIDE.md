@@ -113,7 +113,7 @@ OmniRoute មានយន្តការភាពធន់ (resilience) បី�
 
 **ស្ថានភាពចុងក្រោយ (មិនមែនពេលផ្អាក):**
 
-- `banned` — កំណត់ដោយការរកឃើញពាក្យគន្លឹះដែលបានហាមឃាត់ / ការរកឃើញការហាមឃាត់គណនី (មើល [BAN_DETECTION](../security/BAN_DETECTION.md)) និងដោយការបដិសេធសំណើក្នុងមួយពេលពីខាងលើបីដងជាប់គ្នា (`request_rejected`, ឧ. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); ការបដិសេធតែមួយគ្រាប់ផ្អាកការភ្ជាប់បណ្តោះអាសន្នប៉ុណ្ណោះ
+- `banned` — កំណត់ដោយ banned-keyword / account-ban detection (មើល [BAN_DETECTION](../security/BAN_DETECTION.md) ) ។ ការបដិសេធចំពោះសំណើខាងលើ (`request_rejected` ឧ. Anthropic OAuth 403 "សំណើមិនត្រូវបានអនុញ្ញាត") មិនដែលកំណត់វាទេ៖ ពួកគេត្រូវបានរាប់ក្នុងមួយការតភ្ជាប់ និងគំរូ ហើយយកគំរូនោះចេញពីការបង្វិលជាមួយនឹងការកើនឡើង cooldown បិទនៅ `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 ម៉ោង) ឬធ្វើឱ្យការតភ្ជាប់ត្រជាក់នៅពេលដែលមិនស្គាល់ម៉ូដែល — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (ប្តូរទៅជាចុងក្រោយបន្ទាប់ពីការព្យាយាមឡើងវិញដែលមានដែនកំណត់ — `EXPIRED_RETRY_MAX = 3` ជាមួយ backoff អ៊ិចស្ប៉ូណង់ស្ស៊ែល — ដូច្នេះកំហុស OAuth បណ្តោះអាសន្នអាចព្យាបាលខ្លួនឯងបាន មុនពេលគណនីត្រូវបានបិទជាអចិន្ត្រៃយ៍)
 - `credits_exhausted`
 

@@ -152,7 +152,7 @@ fortfarande (`open-sse/executors/kiro/reasoning.ts`).
 
 **Terminala tillstånd (INTE nedkylningar):**
 
-- `banned` — sätts av detektering av bannlysta nyckelord / kontobannlysning (se [BAN_DETECTION](../security/BAN_DETECTION.md)) och av tre på varandra följande uppströms avvisanden per begäran (`request_rejected`, t.ex. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); ett enskilt avvisande kyler bara ned anslutningen
+- `banned` — ställs in av banned-keyword / account-ban upptäckt (se [BAN_DETECTION](../security/BAN_DETECTION.md) ). Uppströms avslag per begäran (`request_rejected`, t.ex. Anthropic OAuth 403 "Request not allowed") ställer aldrig in det: de räknas per anslutning och modell och tar den modellen ur rotation med en växande nedkylning som är begränsad till `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h), eller kyler anslutningen när ingen modell är känd — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (övergår till terminalt efter begränsade återförsök — `EXPIRED_RETRY_MAX = 3` med exponentiell backoff — så att tillfälliga OAuth-fel kan läka sig själva innan kontot inaktiveras permanent)
 - `credits_exhausted`
 

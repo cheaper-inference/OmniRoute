@@ -140,7 +140,7 @@ OmniRoute سه مکانیزم تابآوری متمایز اما مرتبط به
 
 **وضعیتهای نهایی (نه خنکسازی):**
 
-- `banned` — توسط تشخیص کلیدواژهٔ ممنوعه / بن حساب تنظیم میشود (به [BAN_DETECTION](../security/BAN_DETECTION.md) مراجعه کنید)، و همچنین توسط سه رد متوالیِ بهازایدرخواست از سمت بالادست (`request_rejected`، مثلاً Anthropic OAuth 403 با پیام "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`)؛ یک رد تکی فقط اتصال را وارد خنکسازی میکند
+- `banned` — توسط تشخیص کلمه کلیدی ممنوع / ممنوعیت حساب تنظیم شده است (به [BAN_DETECTION](../security/BAN_DETECTION.md) مراجعه کنید). رد کردن هر درخواست بالادست (`request_rejected`، به عنوان مثال Anthropic OAuth 403 "درخواست مجاز نیست") هرگز آن را تنظیم نمی کند: آنها در هر اتصال و مدل شمارش می شوند و آن مدل را از چرخش خارج می کنند و با کاهش روزافزون محدود به `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 ساعت)، یا زمانی که هیچ مدلی شناخته شده نیست — اتصال را خنک می کنند `open-sse/services/requestRejectedStreak.ts`
 - `expired` (پس از تلاشهای مجدد محدود — `EXPIRED_RETRY_MAX = 3` با پسرفت نمایی — به وضعیت نهایی تبدیل میشود، تا خطاهای گذرای OAuth پیش از غیرفعال شدن دائمی حساب فرصت خودترمیمی داشته باشند)
 - `credits_exhausted`
 

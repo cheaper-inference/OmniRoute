@@ -6,7 +6,7 @@
 
 > **Automaticky generované** zo súboru `src/shared/constants/providers.ts` — neupravujte ručne.
 > Znova vygenerujte pomocou: `npm run gen:provider-reference`
-> **Naposledy vygenerované:** 2026-10-27
+> **Naposledy vygenerované:** 2026-11-05
 
 Celkový počet poskytovateľov: **380**. Pozrite si rozdelenie podľa kategórií nižšie.
 
@@ -466,7 +466,7 @@ Na povolenie, konfiguráciu a testovanie jednotlivých poskytovateľov použite 
 
 - Katalóg: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Register (podrobnosti pre jednotlivé modely): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Vykonávacie moduly: [`open-sse/executors/`](../../open-sse/executors/) (158 implementácií)
+- Vykonávacie moduly: [`open-sse/executors/`](../../open-sse/executors/) (162 implementácií)
 - Prekladače: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Pozrite tiež

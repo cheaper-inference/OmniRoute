@@ -107,7 +107,7 @@ Cadrele binare `reasoningContentEvent` ale Kiro cu o semnătură nevidă păstre
 
 **Stări terminale (NU cooldown-uri):**
 
-- `banned` — setată de detecția de cuvinte-cheie interzise / interzicere a contului (vezi [BAN_DETECTION](../security/BAN_DETECTION.md)) și de trei refuzuri consecutive din amonte per cerere (`request_rejected`, de ex. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); un singur refuz doar răcește conexiunea
+- `banned` — setat prin detectarea cuvintelor cheie interzise/interzicerea contului (vezi [BAN_DETECTION](../security/BAN_DETECTION.md) ). Refuzurile în amonte per solicitare (`request_rejected`, de exemplu Anthropic OAuth 403 „Solicitarea nu este permisă”) nu le setează niciodată: sunt contorizate pe conexiune și model și scot modelul respectiv din rotație cu un timp de răcire în creștere limitat la `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h) sau răcește conexiunea atunci când nu se cunoaște niciun model — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (trece în stare terminală după reîncercări limitate — `EXPIRED_RETRY_MAX = 3` cu backoff exponențial — astfel că erorile tranzitorii OAuth se pot auto-vindeca înainte ca contul să fie dezactivat definitiv)
 - `credits_exhausted`
 

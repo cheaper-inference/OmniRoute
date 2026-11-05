@@ -6,7 +6,7 @@
 
 > **自动生成**自 `src/shared/constants/providers.ts` — 请勿手动编辑。
 > 使用以下命令重新生成：`npm run gen:provider-reference`
-> **最后生成时间：** 2026-10-27
+> **最后生成时间：** 2026-11-05
 
 提供者总数：**380**。请参阅下面的类别明细。
 
@@ -466,7 +466,7 @@
 
 - 目录：[`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - 注册表（各模型的详细信息）：[`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- 执行器：[`open-sse/executors/`](../../open-sse/executors/)（158 个实现）
+- 执行器：[`open-sse/executors/`](../../open-sse/executors/)（162 个实现）
 - 转换器：[`open-sse/translator/`](../../open-sse/translator/)
 
 ## 另请参阅

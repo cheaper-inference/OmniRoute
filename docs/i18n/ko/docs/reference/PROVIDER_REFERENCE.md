@@ -6,7 +6,7 @@
 
 > **자동 생성됨**: `src/shared/constants/providers.ts`에서 생성됨 — 직접 편집하지 마세요.
 > 다음 명령으로 다시 생성: `npm run gen:provider-reference`
-> **마지막 생성일:** 2026-10-27
+> **마지막 생성일:** 2026-11-05
 
 총 제공업체 수: **380**. 아래에서 카테고리별 분석을 확인하세요.
 
@@ -466,7 +466,7 @@
 
 - 카탈로그: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - 레지스트리(모델별 세부 정보): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- 실행기: [`open-sse/executors/`](../../open-sse/executors/) (158개 구현)
+- 실행기: [`open-sse/executors/`](../../open-sse/executors/) (162개 구현)
 - 변환기: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## 같이 보기

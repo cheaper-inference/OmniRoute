@@ -111,7 +111,7 @@ Kiro 帶有非空簽章的二進位 `reasoningContentEvent` 訊框，會以空�
 
 **終態（非冷卻）：**
 
-- `banned` — 由禁用關鍵字 / 帳號封禁偵測設定（見 [BAN_DETECTION](../security/BAN_DETECTION.md)），以及連續三次上游逐請求拒絕（`request_rejected`，例如 Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`）；單次拒絕只會冷卻連線
+- `banned` —由禁止關鍵字/帳號禁止偵測設定（請參閱[BAN_DETECTION](../security/BAN_DETECTION.md) ）。上游每個請求拒絕（`request_rejected`，例如Anthropic OAuth 403「不允許請求」）從不設定它：它們按連接和模型進行計數，並以`REQUEST_REJECTED_MAX_COOLDOWN_MS` （1 小時）為上限的不斷增長的冷卻時間使該模型停止旋轉，或者在沒有已知模型時冷卻連接— `open-sse/services/requestRejectedStreak.ts`
 - `expired`（在有上限的重試後轉為終態 — `EXPIRED_RETRY_MAX = 3` 搭配指數退避 — 因此暫時性的 OAuth 錯誤可在帳號被永久停用前自我修復）
 - `credits_exhausted`
 

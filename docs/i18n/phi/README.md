@@ -27,9 +27,9 @@
 
 > **Gamitin ang sarili mong mga account ng provider.** Tinatayang kabuuan ito mula sa magkakahiwalay at kwalipikadong libreng tier ng third party, hindi token grant mula sa OmniRoute. Mag-sign up, kumuha ng mga credential kung kinakailangan, at ikonekta ang mga provider na magagamit mo; bawat provider ang kumokontrol sa mga limitasyon, availability, at tuntunin nito.
 >
-> Mahirap pagsama-samahin nang mano-mano ang mga libreng tier — dose-dosenang SDK, dose-dosenang rate limit, at walang ideya kung gaano karami talaga ang mayroon ka. Itinatala ng OmniRoute ang **484 libreng-tier entry sa 34 umuulit na pool key** at kinukuwenta ang pangunahing bilang ng token mula sa **17 pool na may inilathalang positibong buwanang budget, kasama ang limang per-model na Groq cap**, na deduplicated batay sa shared pool. Ang mga quota na nagbubukas lamang pagkatapos ng pagsusuri sa pagkakakilanlan ayon sa rehiyon (sa ngayon: ModelScope) ay ipinapakita nang hiwalay, +~6M pagkatapos ng regional identity verification, at hindi kailanman isinasama sa pangunahing bilang. Nananatiling nakikita ang resulta sa dashboard (`/dashboard/free-tiers`).
+> Mahirap pagsama-samahin nang mano-mano ang mga libreng tier — dose-dosenang SDK, dose-dosenang rate limit, at walang ideya kung gaano karami talaga ang mayroon ka. Itinatala ng OmniRoute ang **486 libreng-tier entry sa 34 umuulit na pool key** at kinukuwenta ang pangunahing bilang ng token mula sa **17 pool na may inilathalang positibong buwanang budget, kasama ang limang per-model na Groq cap**, na deduplicated batay sa shared pool. Ang mga quota na nagbubukas lamang pagkatapos ng pagsusuri sa pagkakakilanlan ayon sa rehiyon (sa ngayon: ModelScope) ay ipinapakita nang hiwalay, +~6M pagkatapos ng regional identity verification, at hindi kailanman isinasama sa pangunahing bilang. Nananatiling nakikita ang resulta sa dashboard (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Libreng-tier budget card ng OmniRoute: ~1.62B libreng token bawat buwan nang tuloy-tuloy, hanggang ~2.22B sa unang buwan kasama ang signup credit, mula sa 34 dokumentadong umuulit na pool key na sumasaklaw sa 484 naka-catalog na libreng-tier entry sa ilalim ng isang endpoint. Tapat na pool-deduplicated na kalkulasyon — binibilang nang isang beses ang bawat shared pool, kabilang ang 17 umuulit na pool na may inilathalang positibong buwanang token budget at limang per-model na Groq cap; 12 provider ang minarkahang iwasan sa terms-risk catalog kaya ikaw ang magpapasya. Kasama sa budget bar ang Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (limang per-model na cap) at mas maliliit na pool, pati ang unang-buwang signup credit at mga provider na permanenteng libre at walang token cap na ipinapakita nang hiwalay upang hindi nila mapalaki ang pangunahing bilang. Live na nagamit/natitira sa /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Libreng-tier budget card ng OmniRoute: ~1.62B libreng token bawat buwan nang tuloy-tuloy, hanggang ~2.22B sa unang buwan kasama ang signup credit, mula sa 34 dokumentadong umuulit na pool key na sumasaklaw sa 486 naka-catalog na libreng-tier entry sa ilalim ng isang endpoint. Tapat na pool-deduplicated na kalkulasyon — binibilang nang isang beses ang bawat shared pool, kabilang ang 17 umuulit na pool na may inilathalang positibong buwanang token budget at limang per-model na Groq cap; 12 provider ang minarkahang iwasan sa terms-risk catalog kaya ikaw ang magpapasya. Kasama sa budget bar ang Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (limang per-model na cap) at mas maliliit na pool, pati ang unang-buwang signup credit at mga provider na permanenteng libre at walang token cap na ipinapakita nang hiwalay upang hindi nila mapalaki ang pangunahing bilang. Live na nagamit/natitira sa /dashboard/free-tiers."/>
 
 > Animated na buod ng live na pahina ng `/dashboard/free-tiers`. Buong pamamaraan (pool dedupe, credit tier, mga tuntunin ng provider): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -74,7 +74,7 @@
 |                                            |          v3.8.50          | **v3.8.51** |        `v3.8.53+`         |
 | ------------------------------------------ | :-----------------------: | :---------: | :-----------------------: |
 | 🌐 Mga provider                            |            352            |   **358**   |            380            |
-| 🧠 Mga natatanging ID ng modelo ng chat    |           1320            |  **1374**   |           1494            |
+| 🧠 Mga natatanging ID ng modelo ng chat    |           1320            |  **1374**   |           1499            |
 | 🖼️ Tulay ng modality                       | 🆕 vision + audio + video |      ✓      |             ✓             |
 | 📡 Libreng katalogo ng Radar               |         🆕 opt-in         |      ✓      |             ✓             |
 | ⚖️ Pag-iiskedyul na may kamalayan sa quota |      🆕 Quota-Share       |      ✓      |             ✓             |
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Ang Pangako — Isang endpoint at 380 provider. Ang automatic fallback ay nagpapatuloy ng routing habang may ibang healthy na target. Anim na haligi: matatag na fallback sa 380 provider · hanggang 95% token savings sa eligible na workload · ₱0 panimula gamit ang 150+ free tiers at 52 recurring/keyless free-forever provider · 39 CLI/agent integration sa iisang config · OpenAI, Claude, Gemini at Responses API compatibility sa /v1 · production controls kabilang ang circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals at 56,000+ static test declarations sa 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Ang Pangako — Isang endpoint at 380 provider. Ang automatic fallback ay nagpapatuloy ng routing habang may ibang healthy na target. Anim na haligi: matatag na fallback sa 380 provider · hanggang 95% token savings sa eligible na workload · ₱0 panimula gamit ang 150+ free tiers at 54 recurring/keyless free-forever provider · 39 CLI/agent integration sa iisang config · OpenAI, Claude, Gemini at Responses API compatibility sa /v1 · production controls kabilang ang circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals at 56,000+ static test declarations sa 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -693,7 +693,7 @@ mula sa iyong shell history. → [CLI Integrations](docs/guides/CLI-INTEGRATIONS
 
 </div>
 
-> **380 rehistradong provider** sa mga pangunahing koleksyon ng chat, media, search, local, cloud-agent at system, kabilang ang **156 na may `hasFree: true` discovery metadata**. Sinasaklaw ng chat model registry ang **241 provider / 3,109 natatanging provider-model na pares / 1,494 raw model ID**; ang hiwalay na free-budget catalog ay may **484 bawat-modelong row**, **34 recurring pool** at **52 recurring/keyless free-forever provider**. Sadyang magkaiba ang mga denominator na ito; ang mga depinisyon at pool-deduped na kalkulasyon ay matatagpuan sa [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) at [Free Tiers](docs/reference/FREE_TIERS.md).
+> **380 rehistradong provider** sa mga pangunahing koleksyon ng chat, media, search, local, cloud-agent at system, kabilang ang **156 na may `hasFree: true` discovery metadata**. Sinasaklaw ng chat model registry ang **241 provider / 3,114 natatanging provider-model na pares / 1,499 raw model ID**; ang hiwalay na free-budget catalog ay may **486 bawat-modelong row**, **34 recurring pool** at **54 recurring/keyless free-forever provider**. Sadyang magkaiba ang mga denominator na ito; ang mga depinisyon at pool-deduped na kalkulasyon ay matatagpuan sa [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) at [Free Tiers](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1370,7 +1370,7 @@ Mga canonical na sukatan noong 2026-10-18: **1.976 natatanging video** · **20.2
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Gabay sa Resilience</a></b></td><td>Mga circuit breaker, cooldown, queue, anti-thundering herd, TLS spoofing</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo Engine</a></b></td><td>Pagmamarka batay sa 16 na salik, mga mode pack, self-healing</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Gabay sa Proxy</a></b></td><td>Proxy system na may 3 antas, marketplace ng 1proxy, CRUD ng registry</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Mga Libreng Tier</a></b></td><td>Konsolidadong direktoryo: 34 na dokumentadong paulit-ulit na pool / 484 na naka-catalog na entry ng libreng tier</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Mga Libreng Tier</a></b></td><td>Konsolidadong direktoryo: 34 na dokumentadong paulit-ulit na pool / 486 na naka-catalog na entry ng libreng tier</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Gallery ng Mga Feature</a></b></td><td>Biswal na tour sa dashboard na may mga screenshot</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Dokumentasyon ng Codebase</a></b></td><td>Walkthrough ng codebase na madaling sundan ng mga baguhan</td></tr>
 </table>

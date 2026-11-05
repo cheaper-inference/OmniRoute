@@ -1371,7 +1371,7 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     apiHint:
       "Token Harbor is OpenAI-compatible. Use the tokenharbor provider prefix with the exact model ID from its live /v1/models catalog; API base URL: https://tokenharbor.ai/v1.",
     freeNote:
-      "Selected current :free model IDs use a personal rolling 7-day list-price allowance and never charge the wallet; base model IDs remain paid. Campaigns can expire. Enable free routes first; prompts and responses may be retained, read by staff, and used by upstream providers under their terms. Model availability and limits can change.",
+      "Selected current :free model IDs listed at https://tokenharbor.ai/models?category=free use a personal rolling 7-day list-price allowance and never charge the wallet; base model IDs remain paid. Campaigns can expire. Enable free routes first; prompts and responses may be retained, read by staff, and used by upstream providers under their terms. Model availability and limits can change.",
   },
   navy: {
     id: "navy",

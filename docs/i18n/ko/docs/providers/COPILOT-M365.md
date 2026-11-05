@@ -58,18 +58,13 @@ OmniRoute는 HAR에서 Chathub WebSocket URL을 검색하고 `access_token`과 `
 
 ## 토큰 수명 및 새로 고침
 
-`access_token`은 수명이 짧습니다(일반적으로 **약 75분**). 만료되면 공급자가 연결 오류를 보고하며 자격 증명을 다시 캡처해야 합니다.
+`access_token` 는 수명이 짧습니다(일반적으로 **~ 75분** ). 사용 가능한 새로 고침 토큰이 없으면 만료 후 자격 증명을 다시 캡처해야 합니다.
 
 ### `refreshToken`을 사용한 자동 새로 고침
 
-수동으로 다시 캡처하지 않으려면 연결의 **Advanced Settings → providerSpecificData**에 Microsoft 새로 고침 토큰을 저장할 수 있습니다.
+Microsoft 365 공급자의 경우 **연결 추가** 또는 **연결 수정** 대화 상자, 열기 **고급 설정 → 새로 고침 토큰(선택 사항)** . `substrate.office.com/sydney` 범위에 대한 Microsoft OAuth 새로 고침 토큰을 붙여넣고 저장합니다. 입력은 마스크되어 있으며 저장된 토큰으로 미리 채워지지 않습니다. 편집할 때 기존 토큰을 유지하려면 공백으로 남겨두세요. 교체하려면 새 토큰을 붙여넣으세요.
 
-| 필드           | 설명                                                                     |
-| -------------- | ------------------------------------------------------------------------ |
-| `refreshToken` | `substrate.office.com/sydney` 범위에 대한 Microsoft OAuth 새로 고침 토큰 |
-| `tier`         | `individual`(기본값), `edu` 또는 `enterprise`                            |
-
-`substrate.office.com/sydney` 범위로 설정된 Microsoft 디바이스 코드 또는 인증 코드 흐름에서 새로 고침 토큰을 가져옵니다. `refreshToken`이 설정되어 있으면 OmniRoute가 각 요청 전에 `access_token`을 미리 새로 고치므로 약 75분마다 만료된 후 다시 캡처할 필요가 없습니다.
+Microsoft 장치 코드 또는 `substrate.office.com/sydney` 범위의 인증 코드 흐름에서 새로 고침 토큰을 얻습니다. 대시보드는 이를 획득하지 않습니다. 새로 고침 토큰이 구성되면 OmniRoute 요청 전에 `access_token` 를 확인하고 새로 고침이 필요할 때만 새로 고칩니다. 또한 성공적인 새로 고침은 교체된 새로 고침 토큰을 유지하여 새로 고침 토큰이 유효한 상태로 유지되는 동안 수동으로 다시 캡처하는 것을 방지합니다.
 
 `refreshToken`이 설정되어 있지 않으면 만료될 때마다 WebSocket 자격 증명을 수동으로 다시 캡처해야 합니다.
 
@@ -81,7 +76,7 @@ OmniRoute는 HAR에서 Chathub WebSocket URL을 검색하고 `access_token`과 `
 | `edu`        | `included` | 교육용 M365 Copilot   |
 | `enterprise` | `work`     | 업무용 M365 Copilot   |
 
-**Advanced Settings → providerSpecificData → tier**에서 계층을 설정합니다. 계층은 BizChat 라우팅 및 모델 액세스에 영향을 줍니다.
+계층을 설정하세요.**고급 설정 → Copilot 계층** . 계층은 BizChat 라우팅 및 모델 액세스에 영향을 미칩니다.
 
 ## 보안 모델
 
@@ -102,7 +97,7 @@ OmniRoute는 HAR에서 Chathub WebSocket URL을 검색하고 `access_token`과 `
 이는 정상적인 동작입니다. `refreshToken`이 없으면 액세스 토큰의 수명이 짧습니다. 다음 중 하나를 수행하세요.
 
 - DevTools에서 자격 증명을 다시 캡처하거나
-- 자동 갱신을 위해 고급 설정에서 `refreshToken`을 구성하세요.
+- 구성 **고급 설정 → 새로 고침 토큰(선택 사항)** 자동 새로 고침을 위해 연결 추가 또는 편집 대화 상자에서
 
 ### 연결 테스트는 통과하지만 채팅에서 401이 반환되는 경우
 

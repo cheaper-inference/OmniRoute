@@ -58,18 +58,13 @@ OmniRoute በHAR ውስጥ የChathub WebSocket URLን ይፈልጋል፣ `acces
 
 ## የቶከን የቆይታ ጊዜ እና ማደስ
 
-`access_token` ለአጭር ጊዜ የሚሠራ ነው (በተለምዶ **~75 ደቂቃዎች**)። ጊዜው ካለፈ በኋላ አቅራቢው የግንኙነት ስህተት ሪፖርት ያደርጋል፣ እና ማረጋገጫውን እንደገና መያዝ ያስፈልግዎታል።
+`access_token` አጭር ነው (በተለምዶ **~ 75 ደቂቃዎች** ). ጥቅም ላይ ሊውል የሚችል የማደስ ማስመሰያ ከሌለ፣ ጊዜው ካለፈ በኋላ ማረጋገጫውን እንደገና ማንሳት አለብዎት።
 
 ### `refreshToken`ን በመጠቀም በራስ-ሰር ማደስ
 
-በእጅ እንደገና መያዝን ለማስወገድ፣ የMicrosoft refresh tokenን በግንኙነቱ **Advanced Settings → providerSpecificData** ውስጥ ማከማቸት ይችላሉ፦
+በ Microsoft 365 አቅራቢዎች ውስጥ **ግንኙነት ጨምር** ወይም **ግንኙነትን ያርትዑ** መገናኛ, ክፍት **የላቁ ቅንብሮች → አድስ ማስመሰያ (አማራጭ)** . ለ `substrate.office.com/sydney` ወሰን የ Microsoft OAuth አድስ ማስመሰያ ይለጥፉ እና ያስቀምጡ። ግብአቱ ተሸፍኗል እና በተከማቸ ማስመሰያ በጭራሽ አይሞላም። አርትዖት በሚደረግበት ጊዜ ነባሩን ማስመሰያ ለማቆየት ባዶውን ይተዉት; እሱን ለመተካት አዲስ ማስመሰያ ይለጥፉ።
 
-| መስክ            | መግለጫ                                                              |
-| -------------- | ----------------------------------------------------------------- |
-| `refreshToken` | ለ`substrate.office.com/sydney` ወሰን የMicrosoft OAuth refresh token |
-| `tier`         | `individual` (ነባሪ)፣ `edu` ወይም `enterprise`                        |
-
-የrefresh tokenን ለ`substrate.office.com/sydney` ወሰን ከተዋቀረ የMicrosoft device-code ወይም authorization-code ፍሰት ያግኙ። `refreshToken` ከተዋቀረ፣ OmniRoute ከእያንዳንዱ ጥያቄ በፊት `access_token`ን ቅድመ-በረራ ያድሳል፤ ስለዚህ ከእያንዳንዱ ~75 ደቂቃ ማብቂያ በኋላ እንደገና መያዝ አያስፈልግዎትም።
+የማደሻ ማስመሰያውን ከ Microsoft መሣሪያ-ኮድ ወይም የፈቀዳ-ኮድ ፍሰት ወደ `substrate.office.com/sydney` ያዙ። ዳሽቦርዱ ለእርስዎ አያገኝም። የማደስ ማስመሰያ ተዋቅሮ፣ OmniRoute ከመጠየቁ በፊት `access_token` ን ይፈትሽ እና የሚያድስ ሲፈልግ ብቻ ያድሳል። የተሳካ እድሳት እንዲሁ የተሽከረከረውን የማደስ ማስመሰያ እንደቀጠለ ነው፣የእድሳት ማስመሰያው ግን የሚሰራ ሆኖ ሳለ በእጅ እንደገና ከመያዝ በማስቀረት።
 
 `refreshToken` ካልተዋቀረ፣ ከእያንዳንዱ ማብቂያ በኋላ የWebSocket ማረጋገጫውን በእጅ እንደገና መያዝ አለብዎት።
 
@@ -81,7 +76,7 @@ OmniRoute በHAR ውስጥ የChathub WebSocket URLን ይፈልጋል፣ `acces
 | `edu`        | `included` | የትምህርት M365 Copilot |
 | `enterprise` | `work`     | M365 Copilot ለሥራ    |
 
-ደረጃውን በ**Advanced Settings → providerSpecificData → tier** ውስጥ ያዋቅሩ። ደረጃው የBizChat ማዘዋወርን እና የሞዴል መዳረሻን ይነካል።
+ደረጃውን ወደ ውስጥ ያዘጋጁ **የላቁ ቅንብሮች → Copilot ደረጃ** . ደረጃው የ BizChat ማዞሪያ እና የሞዴል መዳረሻን ይነካል።
 
 ## የደህንነት ሞዴል
 
@@ -109,7 +104,7 @@ OmniRoute በHAR ውስጥ የChathub WebSocket URLን ይፈልጋል፣ `acces
 ይህ የሚጠበቅ ነው። `refreshToken` ከሌለ የመዳረሻ ቶከኑ ለአጭር ጊዜ ብቻ ያገለግላል። ከሚከተሉት አንዱን ያድርጉ፦
 
 - ማረጋገጫውን ከDevTools እንደገና ይቅረጹ፣ ወይም
-- በራስ-ሰር ለማደስ በላቁ ቅንብሮች ውስጥ `refreshToken` ያዋቅሩ።
+- አዋቅር **የላቁ ቅንብሮች → አድስ ማስመሰያ (አማራጭ)** በራስሰር ለማደስ የግንኙነት አክል ወይም አርትዕ ውስጥ።
 
 ### የግንኙነት ሙከራው ይሳካል፣ ነገር ግን ውይይቱ 401 ይመልሳል
 

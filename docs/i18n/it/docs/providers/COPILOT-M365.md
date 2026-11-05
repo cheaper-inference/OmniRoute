@@ -66,23 +66,13 @@ HAR decodifica la scadenza del JWT e mostra il tempo di validità rimanente del 
 
 ## Durata e aggiornamento del token
 
-L'`access_token` ha una durata limitata (in genere **~75 minuti**). Dopo la scadenza, il provider
-segnala un errore di connessione ed è necessario acquisire nuovamente la credenziale.
+La `access_token` è di breve durata (tipicamente **~ 75 minuti** ). Senza un token di aggiornamento utilizzabile, è necessario acquisire nuovamente la credenziale dopo la scadenza.
 
 ### Aggiornamento automatico con `refreshToken`
 
-Per evitare di dover acquisire nuovamente la credenziale manualmente, puoi memorizzare un token di aggiornamento Microsoft nelle
-**Advanced Settings → providerSpecificData** della connessione:
+Nel fornitore Microsoft 365 **Aggiungi connessione** O **Modifica connessione** finestra di dialogo, aprire **Impostazioni avanzate → Aggiorna token (opzionale)** . Incolla un token di aggiornamento Microsoft OAuth per l'ambito `substrate.office.com/sydney` e salva. L'input è mascherato e non è mai precompilato con il token archiviato. Durante la modifica, lascialo vuoto per mantenere il token esistente; incolla un nuovo token per sostituirlo.
 
-| Campo          | Descrizione                                                                       |
-| -------------- | --------------------------------------------------------------------------------- |
-| `refreshToken` | Token di aggiornamento OAuth Microsoft per l'ambito `substrate.office.com/sydney` |
-| `tier`         | `individual` (predefinito), `edu` o `enterprise`                                  |
-
-Ottieni il token di aggiornamento da un flusso Microsoft con codice dispositivo o codice di autorizzazione
-limitato all'ambito `substrate.office.com/sydney`. Se `refreshToken` è impostato, OmniRoute
-aggiorna preventivamente l'`access_token` prima di ogni richiesta, evitando di doverlo
-acquisire nuovamente dopo ogni scadenza di ~75 minuti.
+Ottenere il token di aggiornamento da un flusso di codice dispositivo o codice di autorizzazione Microsoft con ambito `substrate.office.com/sydney`; la dashboard non lo acquisisce per te. Con un token di aggiornamento configurato, OmniRoute controlla `access_token` prima delle richieste e lo aggiorna solo quando è necessario aggiornarlo. Un aggiornamento riuscito mantiene inoltre il token di aggiornamento ruotato, evitando la nuova acquisizione manuale mentre il token di aggiornamento rimane valido.
 
 Se `refreshToken` non è impostato, devi acquisire nuovamente e manualmente la credenziale WebSocket
 dopo ogni scadenza.
@@ -95,8 +85,7 @@ dopo ogni scadenza.
 | `edu`        | `included`      | M365 Copilot per l'istruzione   |
 | `enterprise` | `work`          | M365 Copilot per il lavoro      |
 
-Imposta il livello in **Advanced Settings → providerSpecificData → tier**. Il livello influisce
-sull'instradamento di BizChat e sull'accesso ai modelli.
+Imposta il livello **Impostazioni avanzate → Livello Copilot** . Il livello influisce sul routing BizChat e sull'accesso al modello.
 
 ## Modello di sicurezza
 
@@ -124,7 +113,7 @@ sull'instradamento di BizChat e sull'accesso ai modelli.
 Questo comportamento è previsto. Senza un `refreshToken`, il token di accesso ha una durata limitata. Puoi:
 
 - Acquisire nuovamente la credenziale da DevTools oppure
-- Configurare un `refreshToken` nelle Impostazioni avanzate per l'aggiornamento automatico.
+- Configura **Impostazioni avanzate → Aggiorna token (opzionale)** nella finestra di dialogo Aggiungi o modifica connessione per l'aggiornamento automatico.
 
 ### Il test della connessione riesce, ma la chat restituisce 401
 

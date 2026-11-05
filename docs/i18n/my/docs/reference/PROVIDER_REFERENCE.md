@@ -6,7 +6,7 @@
 
 > `src/shared/constants/providers.ts` မှ **အလိုအလျောက် ဖန်တီးထားသည်** — ကိုယ်တိုင် မပြင်ဆင်ပါနှင့်။
 > ပြန်လည်ဖန်တီးရန်: `npm run gen:provider-reference`
-> **နောက်ဆုံး ဖန်တီးခဲ့သည့်ရက်:** 2026-10-27
+> **နောက်ဆုံး ဖန်တီးခဲ့သည့်ရက်:** 2026-11-05
 
 ဝန်ဆောင်မှုပေးသူ စုစုပေါင်း: **380**။ အောက်တွင် အမျိုးအစားအလိုက် ခွဲခြားဖော်ပြချက်ကို ကြည့်ပါ။
 
@@ -466,7 +466,7 @@
 
 - ကတ်တလောက်: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - စာရင်းသွင်းမှတ်တမ်း (မော်ဒယ်တစ်ခုချင်းစီ၏ အသေးစိတ်အချက်အလက်များ): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- လုပ်ဆောင်ပေးသည့် မော်ဂျူးများ: [`open-sse/executors/`](../../open-sse/executors/) (အကောင်အထည်ဖော်မှု 158 ခု)
+- လုပ်ဆောင်ပေးသည့် မော်ဂျူးများ: [`open-sse/executors/`](../../open-sse/executors/) (အကောင်အထည်ဖော်မှု 162 ခု)
 - ဘာသာပြန်ပေးသည့် မော်ဂျူးများ: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## ထပ်မံကြည့်ရှုရန်

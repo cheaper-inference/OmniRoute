@@ -150,7 +150,7 @@ akış zaman aşımı ve istemci iptali yine de geçerlidir (`open-sse/executors
 
 **Nihai durumlar (bekleme süresi DEĞİL):**
 
-- `banned` — yasaklı anahtar kelime / hesap yasağı algılaması tarafından ayarlanır (bkz. [BAN_DETECTION](../security/BAN_DETECTION.md)) ve art arda üç yukarı akış istek reddiyle ayarlanır (`request_rejected`, örn. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); tek bir ret yalnızca bağlantıyı bekletir
+- `banned` —, yasaklı anahtar kelime / hesap yasağı tespiti ile ayarlandı (bkz. [BAN_DETECTION](../security/BAN_DETECTION.md) ). İstek başına yukarı akış retleri (`request_rejected`, örn. Anthropic OAuth 403 "İsteğe izin verilmiyor") bunu asla ayarlamaz: bağlantı ve model başına sayılırlar ve `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 saat) ile sınırlı büyüyen bir bekleme süresiyle bu modeli rotasyondan çıkarırlar veya hiçbir model bilinmediğinde bağlantıyı soğuturlar — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (sınırlı yeniden denemeden sonra nihai duruma geçer — üstel geri çekilmeyle `EXPIRED_RETRY_MAX = 3` — böylece geçici OAuth hataları, hesap kalıcı olarak devre dışı bırakılmadan önce kendini iyileştirebilir)
 - `credits_exhausted`
 

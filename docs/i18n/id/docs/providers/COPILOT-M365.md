@@ -66,23 +66,13 @@ HAR mendekode waktu kedaluwarsa JWT dan menampilkan sisa masa berlaku token.
 
 ## Masa berlaku dan refresh token
 
-`access_token` berumur pendek (biasanya **~75 menit**). Setelah kedaluwarsa, penyedia
-melaporkan kesalahan koneksi dan Anda harus mengambil ulang kredensial.
+`access_token` berumur pendek (biasanya **~ 75 menit** ). Tanpa token penyegaran yang dapat digunakan, Anda harus mengambil kembali kredensial setelah habis masa berlakunya.
 
 ### Refresh otomatis dengan `refreshToken`
 
-Untuk menghindari pengambilan ulang secara manual, Anda dapat menyimpan token refresh Microsoft di
-**Advanced Settings → providerSpecificData** koneksi:
+Di penyedia Microsoft 365 **Tambahkan koneksi** atau **Sunting koneksi** dialog, buka **Pengaturan Lanjutan → Refresh token (opsional)** . Tempelkan token penyegaran Microsoft OAuth untuk cakupan `substrate.office.com/sydney` dan simpan. Masukannya ditutupi dan tidak pernah diisi sebelumnya dengan token yang disimpan. Saat mengedit, biarkan kosong untuk mempertahankan token yang ada; tempelkan token baru untuk menggantikannya.
 
-| Kolom          | Deskripsi                                                               |
-| -------------- | ----------------------------------------------------------------------- |
-| `refreshToken` | Token refresh OAuth Microsoft untuk scope `substrate.office.com/sydney` |
-| `tier`         | `individual` (default), `edu`, atau `enterprise`                        |
-
-Dapatkan token refresh dari alur device-code atau authorization-code Microsoft
-dengan scope `substrate.office.com/sydney`. Jika `refreshToken` telah ditetapkan, OmniRoute
-melakukan refresh awal terhadap `access_token` sebelum setiap permintaan sehingga Anda tidak perlu
-mengambil ulang kredensial setelah setiap periode kedaluwarsa ~75 menit.
+Dapatkan token penyegaran dari kode perangkat Microsoft atau aliran kode otorisasi yang dicakup ke `substrate.office.com/sydney`; dasbor tidak menyediakannya untuk Anda. Dengan token penyegaran yang dikonfigurasi, OmniRoute memeriksa `access_token` sebelum meminta dan menyegarkannya hanya ketika perlu disegarkan. Penyegaran yang berhasil juga mempertahankan token penyegaran yang diputar, menghindari pengambilan ulang secara manual sementara token penyegaran tetap valid.
 
 Jika `refreshToken` tidak ditetapkan, Anda harus mengambil ulang kredensial WebSocket secara manual
 setelah setiap kali kedaluwarsa.
@@ -95,8 +85,7 @@ setelah setiap kali kedaluwarsa.
 | `edu`        | `included`  | M365 Copilot Pendidikan      |
 | `enterprise` | `work`      | M365 Copilot untuk Pekerjaan |
 
-Tetapkan tingkat di **Advanced Settings → providerSpecificData → tier**. Tingkat tersebut memengaruhi
-perutean BizChat dan akses model.
+Tetapkan tingkatannya **Pengaturan Lanjutan → Tingkat Copilot** . Tingkat ini memengaruhi perutean BizChat dan akses model.
 
 ## Model keamanan
 
@@ -124,7 +113,7 @@ perutean BizChat dan akses model.
 Ini normal. Tanpa `refreshToken`, token akses berumur pendek. Anda dapat:
 
 - Mengambil ulang kredensial dari DevTools, atau
-- Mengonfigurasi `refreshToken` di Pengaturan Lanjutan untuk penyegaran otomatis.
+- Konfigurasikan **Pengaturan Lanjutan → Refresh token (opsional)** dalam dialog Tambah atau Edit koneksi untuk penyegaran otomatis.
 
 ### Uji Koneksi berhasil, tetapi chat menghasilkan 401
 

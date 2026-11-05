@@ -6,7 +6,7 @@
 
 > **Automaatselt genereeritud** failist `src/shared/constants/providers.ts` — ärge muutke käsitsi.
 > Taasgenereerimiseks: `npm run gen:provider-reference`
-> **Viimati genereeritud:** 2026-10-27
+> **Viimati genereeritud:** 2026-11-05
 
 Pakkujaid kokku: **380**. Kategooriate jaotust vaadake allpool.
 
@@ -466,7 +466,7 @@ Kasuta töölauda aadressil `/dashboard/providers`, et lubada, seadistada ja tes
 
 - Kataloog: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Register (mudelipõhised üksikasjad): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Käivitajad: [`open-sse/executors/`](../../open-sse/executors/) (158 teostust)
+- Käivitajad: [`open-sse/executors/`](../../open-sse/executors/) (162 teostust)
 - Teisendajad: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Vaata ka

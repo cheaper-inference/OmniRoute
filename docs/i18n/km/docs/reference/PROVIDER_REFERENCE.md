@@ -6,7 +6,7 @@
 
 > **បានបង្កើតដោយស្វ័យប្រវត្តិ** ពី `src/shared/constants/providers.ts` — កុំកែសម្រួលដោយដៃ។
 > បង្កើតឡើងវិញដោយ៖ `npm run gen:provider-reference`
-> **បានបង្កើតចុងក្រោយ៖** 2026-10-27
+> **បានបង្កើតចុងក្រោយ៖** 2026-11-05
 
 ចំនួនអ្នកផ្តល់សេវាសរុប៖ **380**។ សូមមើលការបែងចែកតាមប្រភេទខាងក្រោម។
 
@@ -466,7 +466,7 @@
 
 - កាតាឡុក៖ [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - បញ្ជីចុះឈ្មោះ (ព័ត៌មានលម្អិតតាមម៉ូដែលនីមួយៗ)៖ [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- កម្មវិធីប្រតិបត្តិ៖ [`open-sse/executors/`](../../open-sse/executors/) (ការអនុវត្តចំនួន 158)
+- កម្មវិធីប្រតិបត្តិ៖ [`open-sse/executors/`](../../open-sse/executors/) (ការអនុវត្តចំនួន 162)
 - កម្មវិធីបកប្រែ៖ [`open-sse/translator/`](../../open-sse/translator/)
 
 ## សូមមើលផងដែរ

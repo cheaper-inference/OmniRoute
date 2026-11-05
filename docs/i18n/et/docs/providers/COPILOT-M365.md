@@ -57,18 +57,13 @@ OmniRoute otsib HAR-ist Chathubi WebSocketi URL-i, eraldab väärtused `access_t
 
 ## Pääsuloa kehtivusaeg ja värskendamine
 
-`access_token` on lühikese elueaga (tavaliselt **~75 minutit**). Pärast selle aegumist teatab teenusepakkuja ühenduse veast ja peate mandaadi uuesti hankima.
+`access_token` on lühiajaline (tavaliselt **~ 75 minutit** ). Ilma kasutatava värskendusmärgita peate mandaadi pärast aegumist uuesti hõivama.
 
 ### Automaatne värskendamine väljaga `refreshToken`
 
-Käsitsi uuesti hankimise vältimiseks saate salvestada Microsofti värskendusloa ühenduse jaotises **Advanced Settings → providerSpecificData**:
+Microsoft 365 pakkujas **Lisage ühendus** või **Redigeeri ühendust** dialoog, avage **Täpsemad seaded → Värskenda tunnus (valikuline)** . Kleepige `substrate.office.com/sydney` ulatuse jaoks Microsoft OAuth värskendusluba ja salvestage. Sisend on maskeeritud ja seda ei ole kunagi salvestatud märgiga eeltäidetud. Redigeerimisel jätke see tühjaks, et säilitada olemasolev märk; kleepige selle asendamiseks uus märk.
 
-| Väli           | Kirjeldus                                                                   |
-| -------------- | --------------------------------------------------------------------------- |
-| `refreshToken` | Microsoft OAuthi värskendusluba ulatuse `substrate.office.com/sydney` jaoks |
-| `tier`         | `individual` (vaikimisi), `edu` või `enterprise`                            |
-
-Hankige värskendusluba Microsofti seadmekoodi- või autoriseerimiskoodivoo kaudu, mille ulatus on `substrate.office.com/sydney`. Kui `refreshToken` on määratud, värskendab OmniRoute enne iga päringut ennetavalt väärtust `access_token`, mistõttu ei pea te mandaati pärast iga ~75-minutilist aegumist uuesti hankima.
+Hankige värskendusluba Microsoft seadmekoodist või autoriseerimiskoodi voost, mille ulatus on `substrate.office.com/sydney`; armatuurlaud ei omanda seda teie eest. Kui värskendusluba on konfigureeritud, kontrollib OmniRoute `access_token` enne päringuid ja värskendab seda ainult siis, kui see vajab värskendamist. Eduka värskendamise korral säilib ka pööratud värskendusluba, vältides käsitsi uuesti jäädvustamist, kuni värskendusluba jääb kehtima.
 
 Kui `refreshToken` pole määratud, peate WebSocketi mandaadi pärast iga aegumist käsitsi uuesti hankima.
 
@@ -80,7 +75,7 @@ Kui `refreshToken` pole määratud, peate WebSocketi mandaadi pärast iga aegumi
 | `edu`        | `included`    | Hariduse M365 Copilot            |
 | `enterprise` | `work`        | M365 Copilot for Work            |
 
-Määrake tase jaotises **Advanced Settings → providerSpecificData → tier**. Tase mõjutab BizChati marsruutimist ja mudelitele juurdepääsu.
+Määrake tase **Täpsemad seaded → Copilot tase** . Tase mõjutab BizChat marsruutimist ja mudelile juurdepääsu.
 
 ## Turbemudel
 
@@ -107,7 +102,7 @@ Määrake tase jaotises **Advanced Settings → providerSpecificData → tier**.
 See on ootuspärane. Ilma `refreshToken`-ita on pääsutõend lühikese kehtivusajaga. Tehke ühte järgmistest:
 
 - Hõivake mandaat DevToolsi kaudu uuesti või
-- Seadistage täpsemates sätetes automaatseks värskendamiseks `refreshToken`.
+- Seadistage **Täpsemad seaded → Värskendusluba (valikuline)** automaatse värskendamise dialoogiboksis Ühenduse lisamine või muutmine.
 
 ### Ühenduse test õnnestub, kuid vestlus tagastab vea 401
 

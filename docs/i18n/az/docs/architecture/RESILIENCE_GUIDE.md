@@ -144,7 +144,7 @@ başlatmır; müstəqil aktiv-axın vaxt aşımı və müştəri ləğvi yenə d
 
 **Terminal vəziyyətlər (soyuma müddəti DEYİL):**
 
-- `banned` — qadağan edilmiş açar söz / hesab-qadağası aşkarlaması tərəfindən təyin edilir (bax [BAN_DETECTION](../security/BAN_DETECTION.md)), və üç ardıcıl yuxarı axın sorğu səviyyəli rədd etmə ilə (`request_rejected`, məs. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); tək bir rədd yalnız bağlantını soyudur
+- `banned` — qadağan edilmiş açar söz / hesab qadağasının aşkarlanması ilə təyin olunur (bax [BAN_DETECTION](../security/BAN_DETECTION.md) ). Upstream üzrə hər sorğudan imtinalar (`request_rejected`, məsələn Anthropic OAuth 403 "Sorğuya icazə verilmir") onu heç vaxt təyin etmir: onlar hər bir əlaqə və model üzrə sayılır və `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 saat) ilə məhdudlaşan artan soyutma müddəti ilə həmin modeli fırlanmadan çıxarın və ya heç bir model məlum olmayanda əlaqəni soyudun — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (məhdud sayda təkrar cəhddən sonra terminal vəziyyətə keçir — `EXPIRED_RETRY_MAX = 3` eksponensial geri çəkilmə ilə — belə ki, müvəqqəti OAuth xətaları hesab həmişəlik deaktivləşdirilməzdən əvvəl öz-özünə sağala bilsin)
 - `credits_exhausted`
 

@@ -27,9 +27,9 @@
 
 > **Gunakan akaun penyedia anda sendiri.** Ini ialah anggaran agregat merentasi tier percuma pihak ketiga yang layak secara berasingan, bukannya pemberian token daripada OmniRoute. Daftar, dapatkan kelayakan apabila diperlukan dan sambungkan penyedia yang boleh anda gunakan; setiap penyedia mengawal had, ketersediaan dan terma mereka sendiri.
 >
-> Menyusun tier percuma secara manual memang menyusahkan — berpuluh-puluh SDK, berpuluh-puluh had kadar dan tiada gambaran tentang jumlah sebenar yang anda ada. OmniRoute mengkatalogkan **484 entri tier percuma merentasi 34 kunci kumpulan berulang** dan mengira angka utama token daripada **17 kumpulan dengan belanjawan bulanan positif yang diterbitkan serta lima had Groq mengikut model**, dinyahpendua berdasarkan kumpulan yang dikongsi. Kuota yang hanya dibuka selepas semakan identiti serantau (hari ini: ModelScope) dipaparkan secara berasingan, +~6M selepas pengesahan identiti serantau, dan tidak pernah dijumlahkan ke dalam angka utama. Hasilnya kekal kelihatan pada papan pemuka (`/dashboard/free-tiers`).
+> Menyusun tier percuma secara manual memang menyusahkan — berpuluh-puluh SDK, berpuluh-puluh had kadar dan tiada gambaran tentang jumlah sebenar yang anda ada. OmniRoute mengkatalogkan **486 entri tier percuma merentasi 34 kunci kumpulan berulang** dan mengira angka utama token daripada **17 kumpulan dengan belanjawan bulanan positif yang diterbitkan serta lima had Groq mengikut model**, dinyahpendua berdasarkan kumpulan yang dikongsi. Kuota yang hanya dibuka selepas semakan identiti serantau (hari ini: ModelScope) dipaparkan secara berasingan, +~6M selepas pengesahan identiti serantau, dan tidak pernah dijumlahkan ke dalam angka utama. Hasilnya kekal kelihatan pada papan pemuka (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Kad belanjawan tier percuma OmniRoute: ~1.62B token percuma sebulan secara konsisten, sehingga ~2.22B pada bulan pertama dengan kredit pendaftaran, daripada 34 kunci kumpulan berulang yang didokumenkan merangkumi 484 entri tier percuma yang dikatalogkan di sebalik satu endpoint. Pengiraan jujur yang dinyahpendua mengikut kumpulan — setiap kumpulan dikongsi dikira sekali, termasuk 17 kumpulan berulang dengan belanjawan token bulanan positif yang diterbitkan serta lima had Groq mengikut model; 12 penyedia ditandakan sebagai elakkan dalam katalog risiko terma supaya anda boleh membuat keputusan. Bar belanjawan merangkumi Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (lima had mengikut model) dan kumpulan yang lebih kecil, serta kredit pendaftaran bulan pertama dan penyedia percuma secara kekal tanpa had token yang dipaparkan secara berasingan supaya tidak mengembangkan angka utama. Jumlah digunakan/baki secara langsung pada /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Kad belanjawan tier percuma OmniRoute: ~1.62B token percuma sebulan secara konsisten, sehingga ~2.22B pada bulan pertama dengan kredit pendaftaran, daripada 34 kunci kumpulan berulang yang didokumenkan merangkumi 486 entri tier percuma yang dikatalogkan di sebalik satu endpoint. Pengiraan jujur yang dinyahpendua mengikut kumpulan — setiap kumpulan dikongsi dikira sekali, termasuk 17 kumpulan berulang dengan belanjawan token bulanan positif yang diterbitkan serta lima had Groq mengikut model; 12 penyedia ditandakan sebagai elakkan dalam katalog risiko terma supaya anda boleh membuat keputusan. Bar belanjawan merangkumi Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (lima had mengikut model) dan kumpulan yang lebih kecil, serta kredit pendaftaran bulan pertama dan penyedia percuma secara kekal tanpa had token yang dipaparkan secara berasingan supaya tidak mengembangkan angka utama. Jumlah digunakan/baki secara langsung pada /dashboard/free-tiers."/>
 
 > Ringkasan beranimasi bagi halaman langsung `/dashboard/free-tiers`. Metodologi penuh (nyahpendua kumpulan, tier kredit, terma penyedia): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -74,7 +74,7 @@
 |                                 |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------------- | :---------------------: | :---------: | :-------------------: |
 | 🌐 Penyedia                     |           352           |   **358**   |          380          |
-| 🧠 ID model sembang unik        |          1320           |  **1374**   |         1494          |
+| 🧠 ID model sembang unik        |          1320           |  **1374**   |         1499          |
 | 🖼️ Jambatan modaliti            | 🆕 visi + audio + video |      ✓      |           ✓           |
 | 📡 Katalog percuma Radar        |    🆕 pilihan sertai    |      ✓      |           ✓           |
 | ⚖️ Penjadualan berasaskan kuota |     🆕 Quota-Share      |      ✓      |           ✓           |
@@ -249,7 +249,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Janji — Satu endpoint dan 380 pembekal. Fallback automatik memastikan penghalaan diteruskan selagi ada sasaran sihat yang lain. Enam tonggak: fallback berdaya tahan merentasi 380 pembekal · penjimatan token sehingga 95% untuk beban kerja yang layak · $0 untuk bermula dengan 150+ free tiers dan 52 penyedia percuma selama-lamanya yang berulang/tanpa kunci · 39 integrasi CLI/agen melalui satu konfigurasi · keserasian API OpenAI, Claude, Gemini dan Responses di /v1 · kawalan produksi termasuk circuit breakers, TLS stealth, MCP 110 tools, A2A, memori, guardrails, evals dan 56,000+ deklarasi ujian statik merentasi 7,800+ fail ujian yang dijejak."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Janji — Satu endpoint dan 380 pembekal. Fallback automatik memastikan penghalaan diteruskan selagi ada sasaran sihat yang lain. Enam tonggak: fallback berdaya tahan merentasi 380 pembekal · penjimatan token sehingga 95% untuk beban kerja yang layak · $0 untuk bermula dengan 150+ free tiers dan 54 penyedia percuma selama-lamanya yang berulang/tanpa kunci · 39 integrasi CLI/agen melalui satu konfigurasi · keserasian API OpenAI, Claude, Gemini dan Responses di /v1 · kawalan produksi termasuk circuit breakers, TLS stealth, MCP 110 tools, A2A, memori, guardrails, evals dan 56,000+ deklarasi ujian statik merentasi 7,800+ fail ujian yang dijejak."/>
 
 <br/>
 <br/>
@@ -692,7 +692,7 @@ masuk dalam sejarah shell anda. → [Integrasi CLI](docs/guides/CLI-INTEGRATIONS
 
 </div>
 
-> **380 penyedia berdaftar** merangkumi koleksi chat, media, carian, tempatan, ejen awan dan sistem, termasuk **156 yang membawa metadata penemuan `hasFree: true`**. Daftar model chat meliputi **241 penyedia / 3,109 pasangan penyedia-model yang berbeza / 1,494 ID model mentah**; katalog bajet percuma berasingan mempunyai **484 baris per-model**, **34 kolam berulang** dan **52 penyedia percuma selama-lamanya berulang/tanpa kunci**. Ini adalah penyebut yang berbeza secara reka bentuk; definisi dan pengiraan tanpa pendua kolam boleh didapati di [Rujukan Penyedia](docs/reference/PROVIDER_REFERENCE.md) dan [Tahap Percuma](docs/reference/FREE_TIERS.md).
+> **380 penyedia berdaftar** merangkumi koleksi chat, media, carian, tempatan, ejen awan dan sistem, termasuk **156 yang membawa metadata penemuan `hasFree: true`**. Daftar model chat meliputi **241 penyedia / 3,114 pasangan penyedia-model yang berbeza / 1,499 ID model mentah**; katalog bajet percuma berasingan mempunyai **486 baris per-model**, **34 kolam berulang** dan **54 penyedia percuma selama-lamanya berulang/tanpa kunci**. Ini adalah penyebut yang berbeza secara reka bentuk; definisi dan pengiraan tanpa pendua kolam boleh didapati di [Rujukan Penyedia](docs/reference/PROVIDER_REFERENCE.md) dan [Tahap Percuma](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1369,7 +1369,7 @@ Metrik kanonik pada 2026-10-18: **1.976 video unik** · **20.220.289 tontonan ya
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Panduan Ketahanan</a></b></td><td>Pemutus litar, tempoh bertenang, baris gilir, pencegahan gerombolan menggemparkan, pemalsuan TLS</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Enjin Auto-Combo</a></b></td><td>Pemarkahan 16 faktor, pek mod, pemulihan kendiri</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Panduan Proksi</a></b></td><td>Sistem proksi 3 tahap, pasaran 1proxy, CRUD pendaftaran</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Tahap Percuma</a></b></td><td>Direktori disatukan: 34 kumpulan berulang yang didokumenkan / 484 entri tahap percuma yang dikatalogkan</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Tahap Percuma</a></b></td><td>Direktori disatukan: 34 kumpulan berulang yang didokumenkan / 486 entri tahap percuma yang dikatalogkan</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Galeri Ciri</a></b></td><td>Lawatan visual dashboard dengan tangkapan skrin</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Dokumentasi Pangkalan Kod</a></b></td><td>Panduan menyeluruh pangkalan kod untuk pemula</td></tr>
 </table>

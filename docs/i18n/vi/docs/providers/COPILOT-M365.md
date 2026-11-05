@@ -65,23 +65,13 @@ nhập HAR giải mã thời điểm hết hạn của JWT và hiển thị th�
 
 ## Thời hạn token và làm mới
 
-`access_token` có thời hạn ngắn (thường là **~75 phút**). Sau khi hết hạn, nhà cung cấp
-sẽ báo lỗi kết nối và bạn phải thu thập lại thông tin xác thực.
+`access_token` tồn tại trong thời gian ngắn (thường **~ 75 phút** ). Nếu không có mã thông báo làm mới có thể sử dụng được, bạn phải lấy lại thông tin xác thực sau khi hết hạn.
 
 ### Tự động làm mới bằng `refreshToken`
 
-Để tránh phải thu thập lại theo cách thủ công, bạn có thể lưu refresh token của Microsoft trong
-**Advanced Settings → providerSpecificData** của kết nối:
+Trong nhà cung cấp Microsoft 365 **Thêm kết nối** hoặc **Chỉnh sửa kết nối** hộp thoại, mở **Cài đặt nâng cao → Mã thông báo làm mới (tùy chọn)** . Dán mã thông báo làm mới Microsoft OAuth cho phạm vi `substrate.office.com/sydney` và lưu. Đầu vào được che giấu và không bao giờ được điền trước bằng mã thông báo được lưu trữ. Khi chỉnh sửa, hãy để trống để giữ mã thông báo hiện có; dán mã thông báo mới để thay thế nó.
 
-| Trường         | Mô tả                                                                   |
-| -------------- | ----------------------------------------------------------------------- |
-| `refreshToken` | Refresh token Microsoft OAuth cho phạm vi `substrate.office.com/sydney` |
-| `tier`         | `individual` (mặc định), `edu` hoặc `enterprise`                        |
-
-Lấy refresh token từ luồng mã thiết bị hoặc mã ủy quyền của Microsoft
-với phạm vi `substrate.office.com/sydney`. Khi `refreshToken` được thiết lập, OmniRoute
-sẽ làm mới trước `access_token` trước mỗi yêu cầu, vì vậy bạn không cần
-thu thập lại sau mỗi lần hết hạn khoảng 75 phút.
+Nhận mã thông báo làm mới từ luồng mã thiết bị hoặc mã ủy quyền Microsoft trong phạm vi `substrate.office.com/sydney`; bảng điều khiển không thu được nó cho bạn. Với mã thông báo làm mới được định cấu hình, OmniRoute sẽ kiểm tra `access_token` trước khi yêu cầu và chỉ làm mới nó khi cần làm mới. Việc làm mới thành công cũng sẽ duy trì mã thông báo làm mới đã xoay, tránh việc thu thập lại thủ công trong khi mã thông báo làm mới vẫn hợp lệ.
 
 Nếu `refreshToken` không được thiết lập, bạn phải thu thập lại thông tin xác thực WebSocket theo cách thủ công
 sau mỗi lần hết hạn.
@@ -94,8 +84,7 @@ sau mỗi lần hết hạn.
 | `edu`        | `included`   | M365 Copilot dành cho giáo dục  |
 | `enterprise` | `work`       | M365 Copilot dành cho công việc |
 
-Thiết lập cấp độ trong **Advanced Settings → providerSpecificData → tier**. Cấp độ này ảnh hưởng đến
-việc định tuyến BizChat và quyền truy cập mô hình.
+Đặt cấp độ trong **Cài đặt nâng cao → Cấp Copilot** . Cấp này ảnh hưởng đến việc truy cập mô hình và định tuyến BizChat.
 
 ## Mô hình bảo mật
 
@@ -116,7 +105,7 @@ việc định tuyến BizChat và quyền truy cập mô hình.
 Đây là hành vi dự kiến. Nếu không có `refreshToken`, mã thông báo truy cập chỉ có hiệu lực trong thời gian ngắn. Bạn có thể:
 
 - Thu thập lại thông tin xác thực từ DevTools, hoặc
-- Cấu hình `refreshToken` trong phần Cài đặt nâng cao để tự động làm mới.
+- Cấu hình **Cài đặt nâng cao → Mã thông báo làm mới (tùy chọn)** trong hộp thoại Thêm hoặc Chỉnh sửa kết nối để tự động làm mới.
 
 ### Kiểm tra kết nối thành công nhưng trò chuyện trả về 401
 

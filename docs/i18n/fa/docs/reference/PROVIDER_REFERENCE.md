@@ -6,7 +6,7 @@
 
 > **تولیدشده بهصورت خودکار** از `src/shared/constants/providers.ts` — بهصورت دستی ویرایش نکنید.
 > بازتولید با: `npm run gen:provider-reference`
-> **آخرین تولید:** 2026-10-27
+> **آخرین تولید:** 2026-11-05
 
 تعداد کل ارائهدهندگان: **380**. تفکیک بر اساس دستهبندی را در ادامه ببینید.
 
@@ -466,7 +466,7 @@
 
 - کاتالوگ: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - رجیستری (جزئیات هر مدل): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- اجراکنندهها: [`open-sse/executors/`](../../open-sse/executors/) (158 پیادهسازی)
+- اجراکنندهها: [`open-sse/executors/`](../../open-sse/executors/) (162 پیادهسازی)
 - مترجمها: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## همچنین ببینید

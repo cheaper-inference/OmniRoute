@@ -6,7 +6,7 @@
 
 > **Аутоматски генерисано** из `src/shared/constants/providers.ts` — немојте ручно уређивати.
 > Поново генеришите помоћу: `npm run gen:provider-reference`
-> **Последњи пут генерисано:** 2026-10-27
+> **Последњи пут генерисано:** 2026-11-05
 
 Укупан број провајдера: **380**. Погледајте расподелу по категоријама у наставку.
 
@@ -466,7 +466,7 @@
 
 - Каталог: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Регистар (детаљи по моделу): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Извршиоци: [`open-sse/executors/`](../../open-sse/executors/) (158 имплементација)
+- Извршиоци: [`open-sse/executors/`](../../open-sse/executors/) (162 имплементација)
 - Преводиоци: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Погледајте и

@@ -64,23 +64,13 @@ HAR-tuonti purkaa JWT:n vanhenemisajan ja näyttää tunnisteen jäljellä oleva
 
 ## Tunnisteen voimassaoloaika ja päivittäminen
 
-`access_token` on lyhytikäinen (tavallisesti **~75 minuuttia**). Sen vanhennuttua palveluntarjoaja
-ilmoittaa yhteysvirheestä, ja tunnistetieto on tallennettava uudelleen.
+`access_token` on lyhytikäinen (tyypillisesti **~ 75 minuuttia** ). Ilman käyttökelpoista päivitystunnusta sinun on kerättävä kirjautumistiedot uudelleen vanhenemisen jälkeen.
 
 ### Automaattinen päivittäminen `refreshToken`-arvolla
 
-Voit välttää manuaalisen uudelleentallennuksen tallentamalla Microsoftin päivitystunnisteen yhteyden
-**Advanced Settings → providerSpecificData** -kohtaan:
+Microsoft 365 -toimittajassa **Lisää yhteys** tai **Muokkaa yhteyttä** dialogi, avaa **Lisäasetukset → Refresh token (valinnainen)** . Liitä Microsoft OAuth -päivitystunnus `substrate.office.com/sydney` -alueelle ja tallenna. Syöte on peitetty, eikä sitä koskaan esitäytetty tallennetulla tunnuksella. Kun muokkaat, jätä se tyhjäksi säilyttääksesi olemassa olevan tunnuksen. liitä uusi tunnus korvataksesi sen.
 
-| Kenttä         | Kuvaus                                                                               |
-| -------------- | ------------------------------------------------------------------------------------ |
-| `refreshToken` | Microsoft OAuth -päivitystunniste `substrate.office.com/sydney`-käyttöaluetta varten |
-| `tier`         | `individual` (oletus), `edu` tai `enterprise`                                        |
-
-Hanki päivitystunniste Microsoftin laitekoodi- tai valtuutuskoodiprosessilla,
-jonka käyttöalueena on `substrate.office.com/sydney`. Kun `refreshToken` on asetettu, OmniRoute
-päivittää `access_token`-arvon ennakoivasti ennen jokaista pyyntöä, joten tunnistetietoa ei tarvitse
-tallentaa uudelleen jokaisen noin 75 minuutin vanhenemisen jälkeen.
+Hanki päivitystunnus Microsoft -laitekoodista tai valtuutuskoodin vuosta, jonka laajuus on `substrate.office.com/sydney`; kojelauta ei hanki sitä puolestasi. Kun päivitystunnus on määritetty, OmniRoute tarkistaa `access_token` ennen pyyntöjä ja päivittää sen vain, kun se tarvitsee päivitystä. Onnistunut päivitys säilyttää myös kierretyn päivitystunnisteen, jolloin vältetään manuaalinen uudelleensieppaus, kun päivitystunnus pysyy voimassa.
 
 Jos `refreshToken`-arvoa ei ole asetettu, WebSocket-tunnistetieto on tallennettava manuaalisesti uudelleen
 jokaisen vanhenemisen jälkeen.
@@ -93,8 +83,7 @@ jokaisen vanhenemisen jälkeen.
 | `edu`        | `included` | Koulutuksen M365 Copilot |
 | `enterprise` | `work`     | M365 Copilot for Work    |
 
-Aseta taso kohdassa **Advanced Settings → providerSpecificData → tier**. Taso vaikuttaa
-BizChat-reititykseen ja mallien käyttöoikeuksiin.
+Aseta taso sisään **Lisäasetukset → Copilot taso** . Taso vaikuttaa BizChat -reititykseen ja mallin käyttöön.
 
 ## Suojausmalli
 
@@ -122,7 +111,7 @@ BizChat-reititykseen ja mallien käyttöoikeuksiin.
 Tämä on odotettua. Ilman `refreshToken`-tunnusta käyttöoikeustunnus on lyhytikäinen. Voit joko:
 
 - Kaapata tunnistetiedon uudelleen DevToolsista tai
-- määrittää `refreshToken`-tunnuksen lisäasetuksissa automaattista uusimista varten.
+- Määritä **Lisäasetukset → Refresh token (valinnainen)** Lisää tai Muokkaa yhteyttä -valintaikkunassa automaattista päivitystä varten.
 
 ### Yhteystesti onnistuu, mutta keskustelu palauttaa 401-virheen
 

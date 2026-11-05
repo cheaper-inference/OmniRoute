@@ -147,7 +147,7 @@ tajmaut aktivnog toka i otkazivanje od strane klijenta se i dalje primenjuju
 
 **Terminalna stanja (NISU cooldown-ovi):**
 
-- `banned` — postavlja ga detekcija zabranjenih ključnih reči / zabrane naloga (vidi [BAN_DETECTION](../security/BAN_DETECTION.md)), kao i tri uzastopna upstream odbijanja po zahtevu (`request_rejected`, npr. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); pojedinačno odbijanje samo hladi konekciju
+- `banned` — постављен детекцијом баннед-кеиворд / аццоунт-бан (погледајте [BAN_DETECTION](../security/BAN_DETECTION.md) ). Одбијања упстреам по захтеву (`request_rejected`, нпр. Anthropic OAuth 403 "Захтев није дозвољен") то никада не постављају: они се рачунају по конекцији и моделу и повлаче тај модел из ротације са растућим хлађењем ограниченим на `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 х), или хладе везу када није познат модел — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (prelazi u terminalno stanje nakon ograničenog broja ponovnih pokušaja — `EXPIRED_RETRY_MAX = 3` sa eksponencijalnim backoff-om — pa se prolazne OAuth greške mogu same ispraviti pre nego što se nalog trajno deaktivira)
 - `credits_exhausted`
 

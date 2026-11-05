@@ -105,7 +105,7 @@ OmniRoute에는 서로 구별되지만 관련된 세 가지 복원력(resilience
 
 **터미널 상태(쿨다운이 아님):**
 
-- `banned` — 금지 키워드/계정 밴 감지([BAN_DETECTION](../security/BAN_DETECTION.md) 참조) 및 연속 세 번의 업스트림 요청 단위 거부(`request_rejected`, 예: Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`)에 의해 설정됨; 단일 거부는 연결을 쿨다운시킬 뿐입니다
+- `banned` — banned-keyword / account-ban 감지에 의해 설정됩니다( [BAN_DETECTION](../security/BAN_DETECTION.md) 참조). 요청별 업스트림 거부(`request_rejected`, 예 Anthropic OAuth 403 "요청이 허용되지 않음")는 절대 설정하지 않습니다. 연결 및 모델별로 계산되며 `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1시간)로 증가하는 쿨다운으로 해당 모델을 회전에서 제외하거나 알려진 모델이 없을 때 연결을 냉각합니다. — `open-sse/services/requestRejectedStreak.ts`
 - `expired`(제한된 재시도 후 터미널로 전환 — 지수 백오프를 적용한 `EXPIRED_RETRY_MAX = 3` — 따라서 일시적인 OAuth 오류는 계정이 영구적으로 비활성화되기 전에 자가 복구될 수 있음)
 - `credits_exhausted`
 

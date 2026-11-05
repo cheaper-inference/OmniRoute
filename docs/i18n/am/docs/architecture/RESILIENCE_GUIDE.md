@@ -142,7 +142,7 @@ OmniRoute ሦስት የተለያዩ ግን የተያያዙ የመቋቋም አ�
 
 **የመጨረሻ ሁኔታዎች (የማቀዝቀዣ ጊዜዎች አይደሉም):**
 
-- `banned` — በታገደ-ቁልፍ-ቃል / የመለያ-እገዳ ማወቂያ (ይመልከቱ [BAN_DETECTION](../security/BAN_DETECTION.md))፣ እና በሦስት ተከታታይ ከላይኛው አገልግሎት የሚመጡ የእያንዳንዱ ጥያቄ እምቢታዎች (`request_rejected`፣ ለምሳሌ Anthropic OAuth 403 "ጥያቄው አይፈቀድም" — `open-sse/services/requestRejectedStreak.ts`) ይቀናበራል፤ አንድ እምቢታ ግን ግንኙነቱን ብቻ ያቀዘቅዛል
+- `banned` — በተከለከለው-ቁልፍ ቃል የተዘጋጀ/የመለያ እገዳን ፈልጎ ማግኘት ( [BAN_DETECTION](../security/BAN_DETECTION.md) ይመልከቱ)። ወደላይ የሚተላለፉ የጥያቄ ውድቀቶች (`request_rejected`፣ ለምሳሌ Anthropic OAuth 403 "መጠየቅ አይፈቀድም") በፍፁም አላስቀመጠውም፡ በአንድ ግኑኝነት እና ሞዴል ተቆጥረው ያንን ሞዴሉን ከዙሪያ ያወጡት በማደግ ላይ ያለ ማቀዝቀዣ በ `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 ሰ)፣ ወይም ምንም ሞዴል በማይታወቅበት ጊዜ ግንኙነቱን ያቀዘቅዙ — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (ከተወሰኑ ዳግም ሙከራዎች በኋላ ወደ መጨረሻ ሁኔታ ይሸጋገራል — `EXPIRED_RETRY_MAX = 3` ከኤክስፖነንሻል የመጠበቂያ ጊዜ ጋር — ስለዚህ ጊዜያዊ OAuth ስህተቶች መለያው በቋሚነት ከመቦዘኑ በፊት ራሳቸውን ማስተካከል ይችላሉ)
 - `credits_exhausted`
 

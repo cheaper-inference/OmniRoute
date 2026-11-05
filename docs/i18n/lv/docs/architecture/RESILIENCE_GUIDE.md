@@ -130,7 +130,7 @@ joprojām darbojas neatkarīgais aktīvās straumes taimauts un klienta atcelša
 
 **Galīgie stāvokļi (NAV dzesēšanas):**
 
-- `banned` — iestata aizliegto atslēgvārdu / konta bloķēšanas noteikšana (skatīt [BAN_DETECTION](../security/BAN_DETECTION.md)) un trīs secīgi augšup straumes pieprasījumu atteikumi (`request_rejected`, piemēram, Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); viens atteikums savienojumu tikai atdzesē
+- `banned` — ko iestata aizliegta atslēgvārda/konta aizlieguma noteikšana (skatiet [BAN_DETECTION](../security/BAN_DETECTION.md) ). Augšupējie pieprasījuma atteikumi (`request_rejected`, piemēram, Anthropic OAuth 403 "Pieprasījums nav atļauts") nekad to neiestata: tie tiek skaitīti katram savienojumam un modelim un tiek izņemti no rotācijas ar pieaugošu atdzišanu, kas ierobežota līdz `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h), vai atdzesē savienojumu, ja nav zināms modelis — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (pāriet galīgajā stāvoklī pēc ierobežota atkārtojumu skaita — `EXPIRED_RETRY_MAX = 3` ar eksponenciālu atkāpi —, lai pārejošas OAuth kļūdas varētu pašatjaunoties, pirms konts tiek neatgriezeniski deaktivizēts)
 - `credits_exhausted`
 

@@ -6,7 +6,7 @@
 
 > **Автоматически сгенерировано** из `src/shared/constants/providers.ts` — не редактируйте вручную.
 > Для повторной генерации выполните: `npm run gen:provider-reference`
-> **Дата последней генерации:** 2026-10-27
+> **Дата последней генерации:** 2026-11-05
 
 Всего провайдеров: **380**. Распределение по категориям приведено ниже.
 
@@ -466,7 +466,7 @@
 
 - Каталог: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Реестр (сведения по каждой модели): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Исполнители: [`open-sse/executors/`](../../open-sse/executors/) (158 реализаций)
+- Исполнители: [`open-sse/executors/`](../../open-sse/executors/) (162 реализаций)
 - Трансляторы: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## См. также

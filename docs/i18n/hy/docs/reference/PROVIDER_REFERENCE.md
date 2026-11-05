@@ -6,7 +6,7 @@
 
 > **Ավտոմատ գեներացված է** `src/shared/constants/providers.ts`-ից — ձեռքով չխմբագրել։
 > Կրկին գեներացնել հետևյալով՝ `npm run gen:provider-reference`
-> **Վերջին գեներացումը՝** 2026-10-27
+> **Վերջին գեներացումը՝** 2026-11-05
 
 Պրովայդերների ընդհանուր քանակը՝ **380**։ Ստորև տե՛ս ըստ կատեգորիաների բաշխումը։
 
@@ -466,7 +466,7 @@
 
 - Կատալոգ՝ [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Ռեեստր (յուրաքանչյուր մոդելի մանրամասները)՝ [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Կատարիչներ՝ [`open-sse/executors/`](../../open-sse/executors/) (158 իրականացում)
+- Կատարիչներ՝ [`open-sse/executors/`](../../open-sse/executors/) (162 իրականացում)
 - Թարգմանիչներ՝ [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Տես նաև

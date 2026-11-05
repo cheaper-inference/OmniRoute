@@ -66,23 +66,17 @@ afkoder JWT'ens udløbstidspunkt og viser tokens resterende levetid.
 
 ## Tokens levetid og opdatering
 
-`access_token` er kortlivet (typisk **~75 minutter**). Efter udløb rapporterer udbyderen
-en forbindelsesfejl, og du skal hente legitimationsoplysningerne igen.
+`access_token` er kortvarig (typisk **~ 75 minutter** ). Uden et brugbart opdateringstoken skal du genfange legitimationsoplysningerne efter udløb.
 
 ### Automatisk opdatering med `refreshToken`
 
-For at undgå manuel genhentning kan du gemme et Microsoft-opdateringstoken i forbindelsens
-**Advanced Settings → providerSpecificData**:
+I Microsoft 365-udbyderens **Tilføj forbindelse** eller **Rediger forbindelse** dialog, åben **Avancerede indstillinger → Refresh token (valgfrit)** . Indsæt et Microsoft OAuth -opdateringstoken til `substrate.office.com/sydney` -omfanget og gem. Inputtet er maskeret og er aldrig forudfyldt med det gemte token. Når du redigerer, skal du lade det stå tomt for at beholde det eksisterende token; indsæt et nyt token for at erstatte det.
 
-| Felt           | Beskrivelse                                                                 |
-| -------------- | --------------------------------------------------------------------------- |
-| `refreshToken` | Microsoft OAuth-opdateringstoken til omfanget `substrate.office.com/sydney` |
-| `tier`         | `individual` (standard), `edu` eller `enterprise`                           |
-
-Hent opdateringstokenet fra et Microsoft-enhedskode- eller godkendelseskodeflow
-med omfanget `substrate.office.com/sydney`. Når `refreshToken` er angivet, opdaterer OmniRoute
-`access_token` før hver anmodning, så du ikke behøver at hente legitimationsoplysningerne
-igen efter hvert udløb på cirka 75 minutter.
+Hent opdateringstokenet via et Microsoft-flow med enhedskode eller autorisationskode
+med scope `substrate.office.com/sydney`; dashboardet henter det ikke for dig.
+Når et opdateringstoken er konfigureret, kontrollerer OmniRoute `access_token` før anmodninger
+og fornyr det kun, når en fornyelse er nødvendig. En vellykket fornyelse gemmer også
+det roterede opdateringstoken, så manuel genindhentning undgås, så længe opdateringstokenet er gyldigt.
 
 Hvis `refreshToken` ikke er angivet, skal du manuelt hente WebSocket-legitimationsoplysningerne
 igen efter hvert udløb.
@@ -95,8 +89,7 @@ igen efter hvert udløb.
 | `edu`        | `included`   | M365 Copilot til uddannelse    |
 | `enterprise` | `work`       | M365 Copilot til arbejde       |
 
-Angiv niveauet under **Advanced Settings → providerSpecificData → tier**. Niveauet påvirker
-BizChat-routing og modeladgang.
+Indstil niveauet **Avancerede indstillinger → Copilot tier** . Niveauet påvirker BizChat -routing og modeladgang.
 
 ## Sikkerhedsmodel
 
@@ -124,7 +117,7 @@ BizChat-routing og modeladgang.
 Dette er forventet. Uden et `refreshToken` er adgangstokenet kortlivet. Du kan enten:
 
 - Hente legitimationsoplysningen igen fra DevTools eller
-- Konfigurere et `refreshToken` under Avancerede indstillinger for automatisk opdatering.
+- Konfigurer **Avancerede indstillinger → Refresh token (valgfrit)** i dialogboksen Tilføj eller Rediger forbindelse for automatisk opdatering.
 
 ### Test forbindelsen lykkes, men chatten returnerer 401
 

@@ -117,7 +117,7 @@ threshold အောက်တွင် provider ကို cooldown အဖြစ�
 
 **အဆုံးသတ်အခြေအနေများ (cooldown များ မဟုတ်ပေ):**
 
-- `banned` — banned-keyword / account-ban ရှာဖွေတွေ့ရှိမှုမှ သတ်မှတ်ခြင်း ([BAN_DETECTION](../security/BAN_DETECTION.md) ကို ကြည့်ပါ)၊ ထို့ပြင် အဆက်မပြတ် သုံးခါမြောက် upstream per-request ငြင်းပယ်မှုများမှလည်း သတ်မှတ်ခြင်း (`request_rejected`၊ ဥပမာ Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`)؛ တစ်ခါတည်းသော ငြင်းပယ်မှုက connection ကို ခဏ cooldown လုပ်ရုံသာ ဖြစ်သည်
+- `banned` — တားမြစ်ထားသော သော့ချက်စာလုံး/အကောင့်-ပိတ်ပင်မှု ထောက်လှမ်းမှုဖြင့် သတ်မှတ်ထားသည် ( [BAN_DETECTION](../security/BAN_DETECTION.md) ကြည့်ပါ)။ တောင်းဆိုချက်တစ်ခုအတွက် ငြင်းဆိုမှုများ (`request_rejected`၊ ဥပမာ Anthropic OAuth 403 "ခွင့်မပြုပါ") ၎င်းကို ဘယ်တော့မှ သတ်မှတ်မည်မဟုတ်ပါ- ၎င်းတို့ကို ချိတ်ဆက်မှုနှင့် မော်ဒယ်အလိုက် ရေတွက်ပြီး `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 နာရီ) တွင် ကန့်သတ်ထားသော ကြီးထွားလာသော cooldown ဖြင့် ထိုမော်ဒယ်ကို လည်ပတ်ခြင်းမှဖယ်ထုတ်ပါ သို့မဟုတ် မည်သည့်မော်ဒယ်ဖြစ်ကြောင်း မသိရသည့်အခါ ချိတ်ဆက်မှုကို အေးစေပါသည် — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (ကန့်သတ်ထားသော ပြန်လည်ကြိုးစားမှုများ — `EXPIRED_RETRY_MAX = 3` နှင့် exponential backoff — ပြီးနောက် terminal သို့ ပြောင်းရွှေ့သည်၊ ထို့ကြောင့် ခေတ္တ OAuth error များသည် account ကို အပြီးတိုင် ပိတ်ထားခြင်း မပြုမီ မိမိဘာသာ ပြန်ကောင်းလာနိုင်သည်)
 - `credits_exhausted`
 

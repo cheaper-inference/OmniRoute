@@ -66,22 +66,13 @@ OmniRoute 会扫描 HAR 以查找 Chathub WebSocket URL，提取
 
 ## 令牌有效期和刷新
 
-`access_token` 的有效期较短（通常约为 **~75 分钟**）。过期后，提供者
-会报告连接错误，此时必须重新获取凭据。
+`access_token`是短暂的（通常**~75分钟**）。如果没有可用的刷新令牌，您必须在过期后重新捕获凭证。
 
 ### 使用 `refreshToken` 自动刷新
 
-为了避免手动重新获取凭据，可以将 Microsoft 刷新令牌存储在连接的
-**Advanced Settings → providerSpecificData** 中：
+在Microsoft 365 提供者的**添加连接**或者**编辑连接**对话框，打开**高级设置→刷新令牌（可选）** 。粘贴Microsoft OAuth刷新令牌以用于`substrate.office.com/sydney`范围并保存。输入被屏蔽，并且永远不会用存储的令牌预先填充。编辑时留空，保留现有token；粘贴新令牌来替换它。
 
-| 字段           | 说明                                                               |
-| -------------- | ------------------------------------------------------------------ |
-| `refreshToken` | 用于 `substrate.office.com/sydney` 范围的 Microsoft OAuth 刷新令牌 |
-| `tier`         | `individual`（默认）、`edu` 或 `enterprise`                        |
-
-通过范围限定为 `substrate.office.com/sydney` 的 Microsoft 设备代码流程或授权代码流程
-获取刷新令牌。设置 `refreshToken` 后，OmniRoute 会在每次请求前预先刷新
-`access_token`，因此无需在每次约 75 分钟的有效期结束后重新获取凭据。
+从范围为`substrate.office.com/sydney`的Microsoft设备代码或授权代码流获取刷新令牌；仪表板不会为您获取它。配置刷新令牌后， OmniRoute在请求之前检查`access_token` ，仅在需要刷新时刷新它。成功的刷新还会保留轮换的刷新令牌，从而避免在刷新令牌保持有效时手动重新捕获。
 
 如果未设置 `refreshToken`，则必须在每次凭据过期后手动重新获取 WebSocket 凭据。
 
@@ -93,8 +84,7 @@ OmniRoute 会扫描 HAR 以查找 Chathub WebSocket URL，提取
 | `edu`        | `included` | 教育版 M365 Copilot       |
 | `enterprise` | `work`     | M365 Copilot for Work     |
 
-在 **Advanced Settings → providerSpecificData → tier** 中设置层级。该层级会影响
-BizChat 的路由和模型访问权限。
+将层级设置为**高级设置→ Copilot层**。该层影响BizChat路由和模型访问。
 
 ## 安全模型
 
@@ -122,7 +112,7 @@ BizChat 的路由和模型访问权限。
 这是预期行为。如果没有 `refreshToken`，访问令牌的有效期很短。你可以：
 
 - 从 DevTools 中重新获取凭据，或
-- 在高级设置中配置 `refreshToken`，以便自动刷新。
+- 配置**高级设置→刷新令牌（可选）**在“添加”或“编辑连接”对话框中进行自动刷新。
 
 ### 测试连接通过，但聊天返回 401
 

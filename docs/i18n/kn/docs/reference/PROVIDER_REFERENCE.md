@@ -6,7 +6,7 @@
 
 > `src/shared/constants/providers.ts` ನಿಂದ **ಸ್ವಯಂ-ರಚಿಸಲಾಗಿದೆ** — ಕೈಯಾರೆ ಸಂಪಾದಿಸಬೇಡಿ.
 > ಇದರೊಂದಿಗೆ ಮರುರಚಿಸಿ: `npm run gen:provider-reference`
-> **ಕೊನೆಯದಾಗಿ ರಚಿಸಿದ್ದು:** 2026-10-27
+> **ಕೊನೆಯದಾಗಿ ರಚಿಸಿದ್ದು:** 2026-11-05
 
 ಒಟ್ಟು ಪೂರೈಕೆದಾರರು: **380**. ಕೆಳಗೆ ವರ್ಗವಾರು ವಿವರವನ್ನು ನೋಡಿ.
 
@@ -466,7 +466,7 @@
 
 - ಕ್ಯಾಟಲಾಗ್: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - ರಿಜಿಸ್ಟ್ರಿ (ಪ್ರತಿ-ಮಾದರಿಯ ವಿವರಗಳು): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- ಎಕ್ಸಿಕ್ಯೂಟರ್ಗಳು: [`open-sse/executors/`](../../open-sse/executors/) (158 ಅನುಷ್ಠಾನಗಳು)
+- ಎಕ್ಸಿಕ್ಯೂಟರ್ಗಳು: [`open-sse/executors/`](../../open-sse/executors/) (162 ಅನುಷ್ಠಾನಗಳು)
 - ಟ್ರಾನ್ಸ್ಲೇಟರ್ಗಳು: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## ಇದನ್ನೂ ನೋಡಿ

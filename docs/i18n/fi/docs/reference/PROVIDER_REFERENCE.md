@@ -6,7 +6,7 @@
 
 > **Automaattisesti luotu** tiedostosta `src/shared/constants/providers.ts` — älä muokkaa käsin.
 > Luo uudelleen komennolla: `npm run gen:provider-reference`
-> **Luotu viimeksi:** 2026-10-27
+> **Luotu viimeksi:** 2026-11-05
 
 Palveluntarjoajia yhteensä: **380**. Katso alla oleva luokkakohtainen erittely.
 
@@ -466,7 +466,7 @@ Ota kukin palveluntarjoaja käyttöön, määritä sen asetukset ja testaa sitä
 
 - Luettelo: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Rekisteri (mallikohtaiset tiedot): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Suorittimet: [`open-sse/executors/`](../../open-sse/executors/) (158 toteutusta)
+- Suorittimet: [`open-sse/executors/`](../../open-sse/executors/) (162 toteutusta)
 - Muuntimet: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Katso myös

@@ -141,7 +141,7 @@ indipendenti tal-fluss attiv u l-kanċellazzjoni mill-klijent xorta japplikaw
 
 **Stati terminali (MHUX tkessiħ):**
 
-- `banned` — issettjat mid-detenzjoni ta' keywords projbiti / projbizzjoni tal-kont (ara [BAN_DETECTION](../security/BAN_DETECTION.md)), u minn tliet rifjuti konsekuttivi per-talba minn upstream (`request_rejected`, eż. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); rifjut wieħed biss jikessaħ il-konnessjoni
+- `banned` — issettjat minn skoperta banned-keyword / account-ban (ara [BAN_DETECTION](../security/BAN_DETECTION.md) ). Rifjut għal kull talba upstream (`request_rejected`, eż. Anthropic OAuth 403 "Talba mhux permessa") qatt ma jistabbilixxuh: huma magħduda għal kull konnessjoni u mudell u jieħdu dak il-mudell barra mir-rotazzjoni b'coodown dejjem jikber b'limitu ta `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h), jew kessaħ il-konnessjoni meta l-ebda mudell ma jkun magħruf — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (jgħaddi għal terminal wara retries limitati — `EXPIRED_RETRY_MAX = 3` b'backoff esponenzjali — sabiex żbalji OAuth transienti jistgħu jfejqu waħedhom qabel ma l-kont jiġi diżattivat b'mod permanenti)
 - `credits_exhausted`
 

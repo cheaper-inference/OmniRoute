@@ -6,7 +6,7 @@
 
 > `src/shared/constants/providers.ts`-ൽ നിന്ന് **സ്വയമേവ സൃഷ്ടിച്ചത്** — നേരിട്ട് തിരുത്തരുത്.
 > വീണ്ടും സൃഷ്ടിക്കാൻ: `npm run gen:provider-reference`
-> **അവസാനം സൃഷ്ടിച്ചത്:** 2026-10-27
+> **അവസാനം സൃഷ്ടിച്ചത്:** 2026-11-05
 
 ആകെ പ്രൊവൈഡർമാർ: **380**. താഴെയുള്ള വിഭാഗം തിരിച്ചുള്ള കണക്ക് കാണുക.
 
@@ -466,7 +466,7 @@
 
 - കാറ്റലോഗ്: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - രജിസ്ട്രി (ഓരോ മോഡലിന്റെയും വിശദാംശങ്ങൾ): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- എക്സിക്യൂട്ടറുകൾ: [`open-sse/executors/`](../../open-sse/executors/) (158 ഇംപ്ലിമെന്റേഷനുകൾ)
+- എക്സിക്യൂട്ടറുകൾ: [`open-sse/executors/`](../../open-sse/executors/) (162 ഇംപ്ലിമെന്റേഷനുകൾ)
 - ട്രാൻസ്ലേറ്ററുകൾ: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## ഇതും കാണുക

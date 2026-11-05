@@ -104,7 +104,7 @@
 
 **الحالات النهائية (ليست تهدئات):**
 
-- `banned` — تُضبَط بواسطة كشف الكلمات المحظورة / حظر الحساب (انظر [BAN_DETECTION](../security/BAN_DETECTION.md))، وكذلك بعد ثلاثة رفضات متتالية لكل طلب من المنبع (`request_rejected`، مثل Anthropic OAuth 403 مع الرسالة "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`)؛ أما الرفض الواحد فيُهدِّئ الاتصال فقط
+- تم تعيين `banned` — بواسطة اكتشاف حظر الكلمات الرئيسية / الحساب (راجع [BAN_DETECTION](../security/BAN_DETECTION.md) ). حالات رفض الطلبات لدى المنبع (`request_rejected`، على سبيل المثال Anthropic OAuth 403 "الطلب غير مسموح به") لا تُعيّن هذه الحالة أبدًا: يتم حسابها لكل اتصال ونموذج ويتم إخراج هذا النموذج من التدوير مع فترة تهدئة متزايدة متوجة بـ `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 ساعة)، أو تبريد الاتصال عندما لا يكون هناك نموذج معروف — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (تتحوّل إلى حالة نهائية بعد عدد محدود من إعادات المحاولة — `EXPIRED_RETRY_MAX = 3` مع تراجع أُسّي — بحيث تتعافى أخطاء OAuth العابرة ذاتيًا قبل تعطيل الحساب نهائيًا)
 - `credits_exhausted`
 

@@ -67,23 +67,13 @@ importēšanas laikā tiek dekodēts JWT derīguma termiņš un parādīts atlik
 
 ## Marķiera derīguma laiks un atsvaidzināšana
 
-`access_token` ir īslaicīgs (parasti **~75 minūtes**). Pēc derīguma termiņa beigām nodrošinātājs
-ziņo par savienojuma kļūdu, un jums akreditācijas dati ir jāiegūst atkārtoti.
+`access_token` ir īslaicīgs (parasti **~ 75 minūtes** ). Ja nav izmantojama atsvaidzināšanas pilnvara, pēc derīguma termiņa beigām akreditācijas dati ir atkārtoti jāiegūst.
 
 ### Automātiska atsvaidzināšana ar `refreshToken`
 
-Lai izvairītos no manuālas atkārtotas iegūšanas, Microsoft atsvaidzināšanas marķieri varat saglabāt savienojuma
-sadaļā **Advanced Settings → providerSpecificData**:
+Microsoft 365 nodrošinātājā **Pievienojiet savienojumu** vai **Rediģēt savienojumu** dialoglodziņš, atveriet **Papildu iestatījumi → Atsvaidzināšanas pilnvara (neobligāti)** . Ielīmējiet Microsoft OAuth atsvaidzināšanas pilnvaru `substrate.office.com/sydney` tvērumam un saglabājiet. Ievade ir maskēta un nekad nav iepriekš aizpildīta ar saglabāto pilnvaru. Rediģējot, atstājiet to tukšu, lai saglabātu esošo marķieri; ielīmējiet jaunu marķieri, lai to aizstātu.
 
-| Lauks          | Apraksts                                                                          |
-| -------------- | --------------------------------------------------------------------------------- |
-| `refreshToken` | Microsoft OAuth atsvaidzināšanas marķieris tvērumam `substrate.office.com/sydney` |
-| `tier`         | `individual` (noklusējums), `edu` vai `enterprise`                                |
-
-Iegūstiet atsvaidzināšanas marķieri no Microsoft ierīces koda vai autorizācijas koda plūsmas,
-kuras tvērums ir `substrate.office.com/sydney`. Ja ir iestatīts `refreshToken`, OmniRoute
-pirms katra pieprasījuma iepriekš atsvaidzina `access_token`, tāpēc tas nav atkārtoti
-jāiegūst pēc katra ~75 minūšu derīguma termiņa beigām.
+Iegūstiet atsvaidzināšanas pilnvaru no Microsoft ierīces koda vai autorizācijas koda plūsmas, kuras darbības joma ir `substrate.office.com/sydney`; informācijas panelis to neiegūst jūsu vietā. Ja ir konfigurēts atsvaidzināšanas pilnvaras, OmniRoute pārbauda `access_token` pirms pieprasījumiem un atsvaidzina to tikai tad, kad tas ir jāatsvaidzina. Veiksmīga atsvaidzināšana saglabā arī pagriezto atsvaidzināšanas pilnvaru, izvairoties no manuālas atkārtotas tveršanas, kamēr atsvaidzināšanas pilnvara paliek derīga.
 
 Ja `refreshToken` nav iestatīts, pēc katra derīguma termiņa beigām WebSocket akreditācijas dati
 ir jāiegūst atkārtoti manuāli.
@@ -96,8 +86,7 @@ ir jāiegūst atkārtoti manuāli.
 | `edu`        | `included`      | Izglītībai paredzētais M365 Copilot   |
 | `enterprise` | `work`          | M365 Copilot darbam                   |
 
-Iestatiet līmeni sadaļā **Advanced Settings → providerSpecificData → tier**. Līmenis ietekmē
-BizChat maršrutēšanu un piekļuvi modeļiem.
+Iestatiet līmeni **Papildu iestatījumi → Copilot līmenis** . Līmenis ietekmē BizChat maršrutēšanu un piekļuvi modelim.
 
 ## Drošības modelis
 
@@ -125,7 +114,7 @@ BizChat maršrutēšanu un piekļuvi modeļiem.
 Tā ir paredzētā darbība. Bez `refreshToken` piekļuves pilnvara ir īslaicīga. Varat:
 
 - Atkārtoti iegūt akreditācijas datus no DevTools vai
-- Konfigurēt `refreshToken` papildu iestatījumos, lai veiktu automātisku atsvaidzināšanu.
+- Konfigurēt **Papildu iestatījumi → atsvaidzināšanas pilnvara (neobligāti)** savienojuma pievienošanas vai rediģēšanas dialoglodziņā automātiskai atsvaidzināšanai.
 
 ### Savienojuma pārbaude ir sekmīga, bet tērzēšana atgriež 401
 

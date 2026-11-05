@@ -137,7 +137,7 @@ Các khung nhị phân `reasoningContentEvent` của Kiro có chữ ký không r
 
 **Trạng thái kết thúc (KHÔNG phải thời gian chờ):**
 
-- `banned` — được đặt bởi tính năng phát hiện từ khóa bị cấm / cấm tài khoản (xem [BAN_DETECTION](../security/BAN_DETECTION.md)), và bởi ba lần liên tiếp upstream từ chối theo từng yêu cầu (`request_rejected`, ví dụ OAuth 403 của Anthropic "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); một lần từ chối đơn lẻ chỉ khiến kết nối chờ
+- `banned` — được đặt bằng cách phát hiện từ khóa / tài khoản bị cấm (xem [BAN_DETECTION](../security/BAN_DETECTION.md) ). Từ chối theo yêu cầu ngược dòng (`request_rejected`, ví dụ Anthropic OAuth 403 "Yêu cầu không được phép") không bao giờ đặt nó: chúng được tính cho mỗi kết nối và mô hình và đưa mô hình đó ra khỏi vòng quay với thời gian hồi chiêu ngày càng tăng giới hạn ở `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 giờ) hoặc làm mát kết nối khi không biết mô hình — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (chuyển sang trạng thái kết thúc sau số lần thử lại có giới hạn — `EXPIRED_RETRY_MAX = 3` với backoff lũy thừa — để các lỗi OAuth tạm thời có thể tự khắc phục trước khi tài khoản bị vô hiệu hóa vĩnh viễn)
 - `credits_exhausted`
 

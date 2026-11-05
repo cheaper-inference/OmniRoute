@@ -142,7 +142,7 @@ content-budget niet; de onafhankelijke active-stream-timeout en client-annulerin
 
 **Terminale toestanden (GEEN cooldowns):**
 
-- `banned` — ingesteld door banned-keyword-/account-ban-detectie (zie [BAN_DETECTION](../security/BAN_DETECTION.md)), en door drie opeenvolgende upstream-weigeringen per verzoek (`request_rejected`, bijv. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); een enkele weigering koelt de connectie alleen af
+- `banned` — ingesteld door detectie van verboden trefwoord / accountverbod (zie [BAN_DETECTION](../security/BAN_DETECTION.md) ). Stroomopwaartse weigeringen per verzoek (`request_rejected`, bijv. Anthropic OAuth 403 "Verzoek niet toegestaan") stellen dit nooit in: ze worden geteld per verbinding en model en halen dat model uit de rotatie met een groeiende afkoeling beperkt tot `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 uur), of koelen de verbinding af als er geen model bekend is — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (gaat na begrensde retries over naar terminaal — `EXPIRED_RETRY_MAX = 3` met exponentiële backoff — zodat tijdelijke OAuth-fouten zichzelf kunnen herstellen voordat het account definitief wordt gedeactiveerd)
 - `credits_exhausted`
 

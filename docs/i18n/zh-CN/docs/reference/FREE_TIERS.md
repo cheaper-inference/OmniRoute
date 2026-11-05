@@ -275,7 +275,7 @@ OmniRoute 通过两种有意读取不同来源的机制来回答“它是否免�
 | `monsterapi`     | 无需密钥     | —                 | —        | 模糊     | 1      |
 | `muse-spark-web` | 无需密钥     | —                 | —        | 避免     | 3      |
 | `nlpcloud`       | 无需密钥     | —                 | —        | 避免     | 1      |
-| `nvidia`         | 无需密钥     | —                 | —        | 谨慎     | 13     |
+| `nvidia`         | 无上限       | 无上限\*          | —        | 谨慎     | 2      |
 | `pollinations`   | 无需密钥     | —                 | —        | 谨慎     | 31     |
 | `publicai`       | 无需密钥     | —                 | —        | 谨慎     | 3      |
 | `reka`           | 无需密钥     | —                 | —        | 谨慎     | 2      |
@@ -339,7 +339,7 @@ OmniRoute 通过两种有意读取不同来源的机制来回答“它是否免�
 - **`nlpcloud`** — 随附的 freeNote 称“新账户可获试用额度”，这暗示它是一次性试用。实际上，NLP Cloud 的免费层是每月循环提供的免费计划（每月 10,000 个请求），并非试用额度…
 - **`nomic`** — 我们随附的 freeNote 未加限定地称“免费的 Nomic Embed API”，暗示可以持续免费访问。实际情况是仅提供一次性 1M-token 试用额度——用完该 token 预算后，需要付费订阅…
 - **`nous-research`** — 于 2026-10-15 重新检查：[Nous Portal 免费计划](https://portal.nousresearch.com/)提供免费模型，每月额度为 $0，但无法证实 Hermes-4-405B 或 Hermes-4-70B 可免费访问。这两个未经验证的条目均未纳入随附的免费目录。这并不代表 Nous 没有免费模型。
-- **`nvidia`** — “40 RPM，70+ 个模型”这一速率限制与目录相符，但 freeNote 将其描述为简单的开发者访问层，未充分说明旧的一次性额度池已被移除——现在的访问已真正…
+- **`nvidia`** —两个活动的免费目录端点（Gemma 4 31B 和 Nemotron 3.5 Super VL）被归类为`recurring-uncapped`： [NVIDIA的FAQ](https://docs.api.nvidia.com/nim/docs/product)向开发人员计划成员授予用于原型设计的免费API访问权限，并且它们的模型页面宣传免费端点。需要一个帐户和API密钥。[目录限速通知](https://build.nvidia.com/search)发布最多40个RPM和10,000个requests/day，受型号和流量限制；它不发布任何数字代币限额。零token/credit金额意味着不量化的访问，而不是无限的吞吐量或计费保证。试用限制仍然存在（`tos: caution`）；试用条款可能允许积分。退役的`openai/gpt-oss-120b`遗留行在[#18443](https://github.com/cheaper-inference/OmniRoute/pull/18443)中单独处理，并从上面的两个活动模型中排除。
 - **`ollama-cloud`** — 我们随附的 freeNote 为“(无)”——这已经过时。Ollama Cloud 推出了一款云端推理产品，其中包含真正的免费层，可按每周 GPU 时间获得少量托管开放模型访问额度。
 - **`openrouter`** — 对于零信用额度账户，RPD 从 200 收紧至 50（RPM 仍为 20）。目录说明中的 RPM 准确，但对于无信用额度的基准层级，RPD 被夸大了 4 倍。**运行时跟踪（#6842）**：这不再只是一条静态说明 — `open-sse/services/openrouterQuotaFetcher.ts` 会轮询 `/api/v1/key` + `/api/v1/credits`，获取每个密钥的信用额度上限/剩余额度/重置时间，以及每日/每周/每月的美元支出；`open-sse/services/openrouterFreeWindow.ts` 则在本地跟踪上述 `:free` 模型每天 50 或 1000 次请求 + 20 RPM 的窗口（遇到 429 时，根据 `X-RateLimit-*` 响应标头进行校正），并显示在控制面板 → 提供者配额中。
 - **`phind`** — Phind 已于 2026 年 1 月 16 日关闭。该提供者现已从目录中**完全移除**（注册表、执行器，以及 Web Cookie 和 API 密钥目录条目）— 与失效服务移除的先例一致（#5246 Gemini CLI）。

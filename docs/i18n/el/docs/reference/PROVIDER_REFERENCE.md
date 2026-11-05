@@ -6,7 +6,7 @@
 
 > **Αυτόματα δημιουργημένο** από το `src/shared/constants/providers.ts` — μην το επεξεργάζεστε χειροκίνητα.
 > Αναδημιουργία με: `npm run gen:provider-reference`
-> **Τελευταία δημιουργία:** 2026-10-27
+> **Τελευταία δημιουργία:** 2026-11-05
 
 Σύνολο παρόχων: **380**. Δείτε παρακάτω την ανάλυση ανά κατηγορία.
 
@@ -466,7 +466,7 @@
 
 - Κατάλογος: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Μητρώο (λεπτομέρειες ανά μοντέλο): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Εκτελεστές: [`open-sse/executors/`](../../open-sse/executors/) (158 υλοποιήσεις)
+- Εκτελεστές: [`open-sse/executors/`](../../open-sse/executors/) (162 υλοποιήσεις)
 - Μεταφραστές: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Δείτε επίσης

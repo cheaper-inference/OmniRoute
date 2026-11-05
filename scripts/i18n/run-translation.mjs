@@ -676,8 +676,25 @@ const VOID_TAGS = new Set(["br", "hr", "img", "input", "meta", "link", "wbr", "s
 
 // Prose an HTML tag can live in: outside fences and outside backtick code spans (a tag inside
 // backticks is a literal, compared by lostInlineCode). <think> is checked on its own above.
+const AUTHORIZATION_PLACEHOLDERS = new Set([
+  "Authorization: Cloud-IDE-JWT <token>",
+  "Authorization: Key <token>",
+]);
+const AUTHORIZATION_PLACEHOLDER = /(?<![\w-])Authorization: (?:Cloud-IDE-JWT|Key) <token>/g;
+
+function authorizationPlaceholderCounts(markdown) {
+  const counts = new Map();
+  for (const [header] of proseOutsideFences(markdown).matchAll(AUTHORIZATION_PLACEHOLDER)) {
+    counts.set(header, (counts.get(header) ?? 0) + 1);
+  }
+  return counts;
+}
+
 function htmlProse(markdown) {
-  return proseOutsideFences(markdown).replace(/(`+)[^\n]*?\1/g, "");
+  // These exact HTTP examples are literals, not HTML, even without code delimiters.
+  return proseOutsideFences(markdown)
+    .replace(AUTHORIZATION_PLACEHOLDER, "")
+    .replace(/(`+)[^\n]*?\1/g, "");
 }
 
 function htmlTags(prose) {
@@ -705,6 +722,15 @@ function nestsWell(tags) {
 // `<code>` / `<kbd>` / `<samp>` spans, the same contract lostInlineCode applies to backticks.
 export function htmlStructureProblems(source, translated) {
   const problems = [];
+  const sourceHeaders = authorizationPlaceholderCounts(source);
+  const translatedHeaders = authorizationPlaceholderCounts(translated);
+  for (const header of AUTHORIZATION_PLACEHOLDERS) {
+    const expected = sourceHeaders.get(header) ?? 0;
+    const actual = translatedHeaders.get(header) ?? 0;
+    if (actual !== expected) {
+      problems.push(`authorization header placeholder changed: ${header} ${actual}/${expected}`);
+    }
+  }
   const src = htmlProse(source);
   const out = htmlProse(translated);
   const srcTags = htmlTags(src);
@@ -760,7 +786,10 @@ function inlineCodeSpans(markdown) {
   const spans = new Map();
   for (const match of joined.matchAll(/(?<!`)`([^`\n]+)`(?!`)/g)) {
     const span = match[1].replace(/\s+/g, " ").trim();
-    if (span) spans.set(span, (spans.get(span) ?? 0) + 1);
+    // The exact header multiset is checked separately, independent of its wrapper.
+    if (span && !AUTHORIZATION_PLACEHOLDERS.has(match[1].trim())) {
+      spans.set(span, (spans.get(span) ?? 0) + 1);
+    }
   }
   return spans;
 }

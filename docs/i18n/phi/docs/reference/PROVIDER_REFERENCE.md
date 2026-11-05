@@ -6,7 +6,7 @@
 
 > **Awtomatikong nabuo** mula sa `src/shared/constants/providers.ts` — huwag manu-manong i-edit.
 > Muling buuin gamit ang: `npm run gen:provider-reference`
-> **Huling nabuo:** 2026-10-27
+> **Huling nabuo:** 2026-11-05
 
 Kabuuang bilang ng mga provider: **380**. Tingnan ang pagkakahati ayon sa kategorya sa ibaba.
 
@@ -466,7 +466,7 @@ Gamitin ang dashboard sa `/dashboard/providers` upang i-enable, i-configure, at 
 
 - Catalog: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Registry (mga detalye ng bawat modelo): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Mga executor: [`open-sse/executors/`](../../open-sse/executors/) (158 na implementasyon)
+- Mga executor: [`open-sse/executors/`](../../open-sse/executors/) (162 na implementasyon)
 - Mga translator: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Tingnan Din

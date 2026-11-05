@@ -6,7 +6,7 @@
 
 > **Ti a ṣẹda láìfọwọ́yí** láti inú `src/shared/constants/providers.ts` — má ṣe ṣàtúnṣe rẹ̀ pẹ̀lú ọwọ́.
 > Ṣẹ̀dá rẹ̀ padà pẹ̀lú: `npm run gen:provider-reference`
-> **Ìgbà tí a ṣẹ̀ṣẹ̀ dá a:** 2026-10-27
+> **Ìgbà tí a ṣẹ̀ṣẹ̀ dá a:** 2026-11-05
 
 Àpapọ̀ àwọn olupèsè: **380**. Wo ìpín sí ẹ̀ka ní ìsàlẹ̀.
 
@@ -466,7 +466,7 @@ Lo dasibodu ni `/dashboard/providers` lati mu ṣiṣẹ, tunto, ati idanwo olup
 
 - Àkójọ: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Ìforúkọsílẹ̀ (àwọn àlàyé fún awoṣe kọ̀ọ̀kan): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Àwọn olùmúṣẹ: [`open-sse/executors/`](../../open-sse/executors/) (àwọn ìmúṣẹ 158)
+- Àwọn olùmúṣẹ: [`open-sse/executors/`](../../open-sse/executors/) (àwọn ìmúṣẹ 162)
 - Àwọn olùtumọ̀: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Wo Pẹ̀lú

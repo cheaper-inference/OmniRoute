@@ -148,7 +148,7 @@ limit", GLM `并发数过高`) જણાવે છે તેનો અર્થ 
 
 **ટર્મિનલ સ્ટેટ્સ (કૂલડાઉન નથી):**
 
-- `banned` — બેન્ડ-કીવર્ડ / એકાઉન્ટ-બૅન ડિટેક્શન દ્વારા સેટ થાય છે (જુઓ [BAN_DETECTION](../security/BAN_DETECTION.md)), અને ત્રણ સતત અપસ્ટ્રીમ પર-રીક્વેસ્ટ નકાર (`request_rejected`, દા.ત. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`) દ્વારા; એક નકાર ફક્ત કનેક્શનને કૂલ કરે છે
+- `banned` — પ્રતિબંધિત-કીવર્ડ / એકાઉન્ટ-બેન ડિટેક્શન દ્વારા સેટ કરવામાં આવે છે (જુઓ [BAN_DETECTION](../security/BAN_DETECTION.md) ). અપસ્ટ્રીમ પ્રતિ-વિનંતી ઇનકાર (`request_rejected`, દા.ત. Anthropic OAuth 403 "વિનંતી મંજૂર નથી") તેને ક્યારેય સેટ કરતા નથી: તે કનેક્શન અને મોડેલ દીઠ ગણવામાં આવે છે અને તે મોડેલને `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h) પર વધતા જતા કૂલડાઉન સાથે પરિભ્રમણમાંથી બહાર કાઢે છે, અથવા જ્યારે કોઈ મોડેલ — `open-sse/services/requestRejectedStreak.ts` જાણીતું ન હોય ત્યારે કનેક્શનને ઠંડુ કરો.
 - `expired` (મર્યાદિત રીટ્રાય પછી ટર્મિનલમાં સંક્રમણ કરે છે — ઘાતાંકીય બેકઑફ સાથે `EXPIRED_RETRY_MAX = 3` — જેથી કામચલાઉ OAuth એરર એકાઉન્ટ કાયમી નિષ્ક્રિય થાય તે પહેલાં સ્વ-સુધારો કરી શકે)
 - `credits_exhausted`
 

@@ -143,7 +143,7 @@ peruutus ovat edelleen voimassa (`open-sse/executors/kiro/reasoning.ts`).
 
 **Lopputilat (EIVÄT jäähdytysjaksoja):**
 
-- `banned` — asetettu kielletyn avainsanan / tilin eston tunnistuksen toimesta (katso [BAN_DETECTION](../security/BAN_DETECTION.md)) sekä kolmen peräkkäisen alkuperäispalvelun pyyntökohtaisen hylkäyksen toimesta (`request_rejected`, esim. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); yksittäinen hylkäys vain jäähdyttää yhteyden
+- `banned` — asetettu kielletyn avainsanan / tilikiellon tunnistuksen avulla (katso [BAN_DETECTION](../security/BAN_DETECTION.md) ). Ylävirran pyyntökohtaiset kieltäytymiset (`request_rejected`, esim. Anthropic OAuth 403 "Pyyntöä ei sallita") ei koskaan aseta sitä: ne lasketaan yhteys- ja mallikohtaisesti ja ne otetaan pois kierrosta kasvavan jäähtymisrajan ollessa `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h) tai jäähdytetään yhteyttä, kun mallia ei tunneta — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (siirtyy lopputilaan rajatun määrän uudelleenyrityksiä — `EXPIRED_RETRY_MAX = 3` eksponentiaalisella backoffilla — jälkeen, jotta ohimenevät OAuth-virheet voivat korjaantua itsestään ennen kuin tili poistetaan pysyvästi käytöstä)
 - `credits_exhausted`
 

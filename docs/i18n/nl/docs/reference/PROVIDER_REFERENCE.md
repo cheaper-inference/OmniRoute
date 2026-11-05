@@ -6,7 +6,7 @@
 
 > **Automatisch gegenereerd** vanuit `src/shared/constants/providers.ts` — niet handmatig bewerken.
 > Opnieuw genereren met: `npm run gen:provider-reference`
-> **Laatst gegenereerd:** 2026-10-27
+> **Laatst gegenereerd:** 2026-11-05
 
 Totaal aantal providers: **380**. Zie hieronder de uitsplitsing per categorie.
 
@@ -466,7 +466,7 @@ Gebruik het dashboard op `/dashboard/providers` om elke provider in te schakelen
 
 - Catalogus: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Register (details per model): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Uitvoerders: [`open-sse/executors/`](../../open-sse/executors/) (158 implementaties)
+- Uitvoerders: [`open-sse/executors/`](../../open-sse/executors/) (162 implementaties)
 - Vertalers: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Zie ook

@@ -150,7 +150,7 @@ Signature එක ඉදිරියට යවනු නොලැබේ. Metadata
 
 **අවසන් තත්ත්ව (සීතලනයන් නොවේ):**
 
-- `banned` — banned-keyword / account-ban හඳුනාගැනීම මගින් (බලන්න [BAN_DETECTION](../security/BAN_DETECTION.md)) සහ අඛණ්ඩ upstream ඉල්ලීම-ප්රතික්ෂේප තුනකින් (`request_rejected`, උදා. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`) සකසයි; තනි ප්රතික්ෂේපයක් සම්බන්ධතාව සීතල කරයි පමණි
+- `banned` — තහනම්-මූලපද/ගිණුම්-බාහික හඳුනාගැනීම මගින් සකසා ඇත ( [BAN_DETECTION](../security/BAN_DETECTION.md) බලන්න). Upstream per-request ප්‍රතික්ෂේප කිරීම් (`request_rejected`, උදා Anthropic OAuth 403 "ඉල්ලීමට අවසර නැත") කිසිවිටෙක එය සකසන්නේ නැත: ඒවා සම්බන්ධතාවයකට සහ ආකෘතියකට ගණන් කර එම ආකෘතිය `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h) ට ආවරණය කර ඇති වැඩෙන සිසිලනය සමඟ භ්‍රමණයෙන් පිටතට ගන්න, නැතහොත් කිසිදු මාදිලියක් නොදන්නා විට සම්බන්ධතාවය සිසිල් කරන්න — `open-sse/services/requestRejectedStreak.ts`.
 - `expired` (සීමාබද්ධ නැවත උත්සාහයන්ට පසු අවසන් තත්ත්වයට මාරු වේ — `EXPIRED_RETRY_MAX = 3` ඝාතීය backoff සමඟ — එබැවින් තාවකාලික OAuth දෝෂ ගිණුම ස්ථිරවම අක්රිය කිරීමට පෙර ස්වයං-සුව විය හැක)
 - `credits_exhausted`
 

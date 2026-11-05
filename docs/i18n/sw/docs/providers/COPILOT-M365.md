@@ -66,23 +66,13 @@ Uingizaji wa HAR husimbua muda wa kuisha kwa JWT na huonyesha muda uliosalia wa 
 
 ## Muda wa tokeni na uonyeshaji upya
 
-`access_token` ni ya muda mfupi (kwa kawaida **~dakika 75**). Baada ya kuisha, mtoa huduma
-huripoti hitilafu ya muunganisho na lazima unase kitambulisho upya.
+`access_token` ni ya muda mfupi (kawaida **~ dakika 75** ) Bila tokeni ya kuonyesha upya inayoweza kutumika, lazima unase upya kitambulisho baada ya muda wake kuisha.
 
 ### Uonyeshaji upya kiotomatiki kwa `refreshToken`
 
-Ili kuepuka kunasa upya mwenyewe, unaweza kuhifadhi tokeni ya kuonyesha upya ya Microsoft katika
-**Advanced Settings → providerSpecificData** ya muunganisho:
+Katika mtoaji wa Microsoft 365 **Ongeza muunganisho** au **Badilisha muunganisho** mazungumzo, fungua **Mipangilio ya Kina tokeni ya Kuonyesha upya → (si lazima)** . Bandika tokeni ya kuonyesha upya Microsoft OAuth kwa upeo wa `substrate.office.com/sydney` na uhifadhi. Ingizo limefunikwa na halijazwa tena na tokeni iliyohifadhiwa. Wakati wa kuhariri, iache tupu ili kuweka ishara iliyopo; bandika tokeni mpya ili kuibadilisha.
 
-| Sehemu         | Maelezo                                                                               |
-| -------------- | ------------------------------------------------------------------------------------- |
-| `refreshToken` | Tokeni ya kuonyesha upya ya Microsoft OAuth kwa upeo wa `substrate.office.com/sydney` |
-| `tier`         | `individual` (chaguo-msingi), `edu`, au `enterprise`                                  |
-
-Pata tokeni ya kuonyesha upya kutoka kwenye mtiririko wa Microsoft wa msimbo wa kifaa au msimbo wa uidhinishaji
-wenye upeo wa `substrate.office.com/sydney`. `refreshToken` ikiwa imewekwa, OmniRoute
-huonyesha upya `access_token` kabla ya kila ombi, kwa hivyo huhitaji
-kunasa upya baada ya kila muda wa ~dakika 75 kuisha.
+Pata tokeni ya kuonyesha upya kutoka kwa msimbo wa kifaa Microsoft au mtiririko wa msimbo wa uidhinishaji uliopangwa hadi `substrate.office.com/sydney`; dashibodi haikupatii. Kwa tokeni ya kuonyesha upya iliyosanidiwa, OmniRoute hukagua `access_token` kabla ya maombi na kuirejesha pale tu inapohitaji kuburudishwa. Uonyeshaji upya uliofaulu pia unaendelea na tokeni ya kuonyesha upya iliyozungushwa, kuepuka kunasa upya mwenyewe huku tokeni ya kuonyesha upya ikisalia kuwa halali.
 
 Ikiwa `refreshToken` haijawekwa, lazima unase upya kitambulisho cha WebSocket mwenyewe
 baada ya kila muda kuisha.
@@ -95,8 +85,7 @@ baada ya kila muda kuisha.
 | `edu`        | `included`        | M365 Copilot ya Elimu             |
 | `enterprise` | `work`            | M365 Copilot ya Kazi              |
 
-Weka kiwango katika **Advanced Settings → providerSpecificData → tier**. Kiwango huathiri
-uelekezaji wa BizChat na ufikiaji wa modeli.
+Weka safu ndani **Mipangilio ya Kina → Kiwango cha Copilot** . Kiwango kinaathiri uelekezaji BizChat na ufikiaji wa muundo.
 
 ## Muundo wa usalama
 
@@ -124,7 +113,7 @@ uelekezaji wa BizChat na ufikiaji wa modeli.
 Hili linatarajiwa. Bila `refreshToken`, tokeni ya ufikiaji ni ya muda mfupi. Unaweza:
 
 - Kunasa tena hati tambulishi kutoka DevTools, au
-- Kusanidi `refreshToken` katika Mipangilio ya Kina ili ionyeshwe upya kiotomatiki.
+- Sanidi **Mipangilio ya Kina → tokeni ya Kuonyesha upya (si lazima)** katika kidirisha cha Ongeza au Hariri muunganisho ili kuonyesha upya kiotomatiki.
 
 ### Jaribio la Muunganisho linafaulu lakini gumzo linarejesha 401
 

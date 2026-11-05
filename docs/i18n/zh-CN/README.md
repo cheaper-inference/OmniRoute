@@ -27,9 +27,9 @@
 
 > **使用您自己的提供者账户。** 这是对分别符合条件的第三方免费层进行的估算汇总，并非 OmniRoute 提供的 Token 额度。请注册，并在需要时获取凭据，然后连接您可以使用的提供者；每个提供者自行决定其限额、可用性和条款。
 >
-> 手动叠加免费层非常痛苦——几十个 SDK、几十种速率限制，而且完全不知道自己实际拥有多少额度。OmniRoute 汇总了 **34 个周期性池键中的 484 个免费层条目**，并根据 **17 个已公布正数月度预算的池，加上 Groq 的五个按模型计算的上限**，通过共享池去重后计算 Token 总量。只有完成区域身份验证后才开放的额度（目前为 ModelScope）会单独显示，区域身份验证后额外增加约 600 万，并且绝不会计入总标题。结果会持续显示在控制面板（`/dashboard/free-tiers`）上。
+> 手动叠加免费层非常痛苦——几十个 SDK、几十种速率限制，而且完全不知道自己实际拥有多少额度。OmniRoute 汇总了 **34 个周期性池键中的 486 个免费层条目**，并根据 **17 个已公布正数月度预算的池，加上 Groq 的五个按模型计算的上限**，通过共享池去重后计算 Token 总量。只有完成区域身份验证后才开放的额度（目前为 ModelScope）会单独显示，区域身份验证后额外增加约 600 万，并且绝不会计入总标题。结果会持续显示在控制面板（`/dashboard/free-tiers`）上。
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute 免费层预算卡：每月稳定提供约 16.2 亿免费 Tokens；首月包含注册额度时，最高可达约 22.2 亿，来自 34 个已记录的周期性池键，覆盖 484 个已编入目录的免费层条目，并统一通过一个端点提供。基于诚实的池去重计算——每个共享池只计算一次，包括 17 个已公布正数月度 Token 预算的周期性池，以及 Groq 的五个按模型计算的上限；条款风险目录中有 12 个提供者被标记为建议避开，由您自行决定。预算栏包含 Mistral 10 亿、Nara 2.1 亿、LLM7 1.5 亿、xKiro 1.5 亿、Groq 3000 万（五个按模型计算的上限）及其他较小的池，还包含首月注册额度，以及单独列出的永久免费且无 Token 上限的提供者，因此它们不会抬高总标题。/dashboard/free-tiers 上显示实时已使用/剩余额度。"/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute 免费层预算卡：每月稳定提供约 16.2 亿免费 Tokens；首月包含注册额度时，最高可达约 22.2 亿，来自 34 个已记录的周期性池键，覆盖 486 个已编入目录的免费层条目，并统一通过一个端点提供。基于诚实的池去重计算——每个共享池只计算一次，包括 17 个已公布正数月度 Token 预算的周期性池，以及 Groq 的五个按模型计算的上限；条款风险目录中有 12 个提供者被标记为建议避开，由您自行决定。预算栏包含 Mistral 10 亿、Nara 2.1 亿、LLM7 1.5 亿、xKiro 1.5 亿、Groq 3000 万（五个按模型计算的上限）及其他较小的池，还包含首月注册额度，以及单独列出的永久免费且无 Token 上限的提供者，因此它们不会抬高总标题。/dashboard/free-tiers 上显示实时已使用/剩余额度。"/>
 
 > `/dashboard/free-tiers` 实时页面的动画摘要。完整方法（池去重、额度层级、提供者条款）：**[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**。
 >
@@ -74,7 +74,7 @@
 |                     |        v3.8.50        | **v3.8.51** |      `v3.8.53+`       |
 | ------------------- | :-------------------: | :---------: | :-------------------: |
 | 🌐 供应商           |          352          |   **358**   |          380          |
-| 🧠 唯一聊天模型 ID  |         1320          |  **1374**   |         1494          |
+| 🧠 唯一聊天模型 ID  |         1320          |  **1374**   |         1499          |
 | 🖼️ 模态桥接         | 🆕 视觉 + 音频 + 视频 |      ✓      |           ✓           |
 | 📡 Radar 免费目录   |      🆕 可选加入      |      ✓      |           ✓           |
 | ⚖️ 配额感知调度     |    🆕 Quota-Share     |      ✓      |           ✓           |
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="承诺 — 一个端点和 380 个提供者。当另一个健康目标可用时，自动故障转移会继续进行路由。六大支柱：跨 380 个提供者的弹性故障转移 · 符合条件的工作负载最高可节省 95% 的令牌 · 150+ 个免费层级和 52 个周期性/免密钥永久免费的提供者，起步成本为 $0 · 通过一个配置支持 39 个 CLI/代理集成 · 在 /v1 提供 OpenAI、Claude、Gemini 和 Responses API 兼容性 · 生产级控制，包括熔断器、TLS 隐身、MCP 110 个工具、A2A、记忆、护栏、评估，以及 7,800+ 个受跟踪测试文件中的 56,000+ 条静态测试声明。"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="承诺 — 一个端点和 380 个提供者。当另一个健康目标可用时，自动故障转移会继续进行路由。六大支柱：跨 380 个提供者的弹性故障转移 · 符合条件的工作负载最高可节省 95% 的令牌 · 150+ 个免费层级和 54 个周期性/免密钥永久免费的提供者，起步成本为 $0 · 通过一个配置支持 39 个 CLI/代理集成 · 在 /v1 提供 OpenAI、Claude、Gemini 和 Responses API 兼容性 · 生产级控制，包括熔断器、TLS 隐身、MCP 110 个工具、A2A、记忆、护栏、评估，以及 7,800+ 个受跟踪测试文件中的 56,000+ 条静态测试声明。"/>
 
 <br/>
 <br/>
@@ -693,7 +693,7 @@ Shell 历史记录中。→ [CLI 集成](docs/guides/CLI-INTEGRATIONS.md)
 
 </div>
 
-> **380 个已注册的提供者**，涵盖规范聊天、媒体、搜索、本地、云代理和系统集合，其中包括 **156 个携带 `hasFree: true` 发现元数据的提供者**。聊天模型注册表涵盖 **241 个提供者 / 3,109 个不同的提供者-模型组合 / 1,494 个原始模型 ID**；独立的免费额度目录包含 **484 条按模型划分的记录**、**34 个周期性池**以及 **52 个周期性/免密钥永久免费的提供者**。这些分母有意设计为不同的数值；定义以及按池去重后的计算方式请参阅[提供者参考](docs/reference/PROVIDER_REFERENCE.md)和[免费层级](docs/reference/FREE_TIERS.md)。
+> **380 个已注册的提供者**，涵盖规范聊天、媒体、搜索、本地、云代理和系统集合，其中包括 **156 个携带 `hasFree: true` 发现元数据的提供者**。聊天模型注册表涵盖 **241 个提供者 / 3,114 个不同的提供者-模型组合 / 1,499 个原始模型 ID**；独立的免费额度目录包含 **486 条按模型划分的记录**、**34 个周期性池**以及 **54 个周期性/免密钥永久免费的提供者**。这些分母有意设计为不同的数值；定义以及按池去重后的计算方式请参阅[提供者参考](docs/reference/PROVIDER_REFERENCE.md)和[免费层级](docs/reference/FREE_TIERS.md)。
 
 <div align="center">
 
@@ -1369,7 +1369,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也会跳过该�
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">弹性指南</a></b></td><td>熔断器、冷却时间、队列、防止惊群效应、TLS 欺骗</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">自动组合引擎</a></b></td><td>16 因素评分、模式包、自我修复</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">代理指南</a></b></td><td>3 级代理系统、1proxy 市场、注册表 CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">免费层级</a></b></td><td>整合目录：34 个已记录的周期性资源池 / 484 个已编目的免费层级条目</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">免费层级</a></b></td><td>整合目录：34 个已记录的周期性资源池 / 486 个已编目的免费层级条目</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">功能展示</a></b></td><td>带截图的可视化仪表板导览</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">代码库文档</a></b></td><td>适合初学者的代码库导览</td></tr>
 </table>

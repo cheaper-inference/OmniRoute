@@ -144,7 +144,7 @@ content budget; nananatiling umaandar ang independyenteng active-stream timeout 
 
 **Mga terminal na estado (HINDI mga cooldown):**
 
-- `banned` — itinakda ng banned-keyword / account-ban detection (tingnan ang [BAN_DETECTION](../security/BAN_DETECTION.md)), at ng tatlong magkakasunod na upstream na pagtanggi sa bawat request (`request_rejected`, hal. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); ang iisang pagtanggi ay nagko-cool down lamang sa koneksyon
+- `banned` — na itinakda ng banned-keyword / account-ban detection (tingnan ang [BAN_DETECTION](../security/BAN_DETECTION.md) ). Ang mga upstream na pagtanggi sa bawat kahilingan (`request_rejected`, hal Anthropic OAuth 403 "Hindi pinapayagan ang kahilingan") ay hindi kailanman itinakda: binibilang ang mga ito sa bawat koneksyon at modelo at inaalis ang pag-ikot ng modelong iyon na may lumalagong cooldown na nilimitahan sa `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h), o palamigin ang koneksyon kapag walang modelong kilala — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (lumilipat sa terminal pagkatapos ng mga may hangganang retry — `EXPIRED_RETRY_MAX = 3` na may exponential backoff — kaya ang mga pansamantalang OAuth error ay maaaring mag-self-heal bago permanenteng ma-deactivate ang account)
 - `credits_exhausted`
 

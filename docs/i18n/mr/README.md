@@ -27,9 +27,9 @@
 
 > **तुमची provider खाती स्वतः जोडा.** हा अंदाज स्वतंत्रपणे पात्र ठरणाऱ्या तृतीय-पक्षांच्या मोफत स्तरांचा एकत्रित आकडा आहे; हा OmniRoute कडून मिळणारा token grant नाही. आवश्यक असल्यास साइन अप करा, credentials मिळवा आणि तुम्ही वापरू शकणारे providers जोडा; प्रत्येक provider त्याच्या मर्यादा, उपलब्धता आणि अटी नियंत्रित करतो.
 >
-> मोफत स्तर हाताने एकत्र करणे त्रासदायक आहे — डझनभर SDKs, डझनभर rate limits आणि तुमच्याकडे प्रत्यक्षात किती उपलब्ध आहे याची कल्पना नाही. OmniRoute **34 recurring pool keys मधील 484 free-tier entries** ची नोंद ठेवते आणि shared pool नुसार deduplicate करून, प्रकाशित सकारात्मक मासिक बजेट असलेल्या **17 pools तसेच प्रति-model Groq caps असलेल्या पाच pools** मधून token headline मोजते. प्रादेशिक identity check नंतरच उपलब्ध होणारे quotas (आज: ModelScope) स्वतंत्रपणे दाखवले जातात; regional identity verification मागे +~6M असून ते headline मध्ये कधीही जोडले जात नाहीत. हा निकाल dashboard वर (`/dashboard/free-tiers`) दृश्यमान राहतो.
+> मोफत स्तर हाताने एकत्र करणे त्रासदायक आहे — डझनभर SDKs, डझनभर rate limits आणि तुमच्याकडे प्रत्यक्षात किती उपलब्ध आहे याची कल्पना नाही. OmniRoute **34 recurring pool keys मधील 486 free-tier entries** ची नोंद ठेवते आणि shared pool नुसार deduplicate करून, प्रकाशित सकारात्मक मासिक बजेट असलेल्या **17 pools तसेच प्रति-model Groq caps असलेल्या पाच pools** मधून token headline मोजते. प्रादेशिक identity check नंतरच उपलब्ध होणारे quotas (आज: ModelScope) स्वतंत्रपणे दाखवले जातात; regional identity verification मागे +~6M असून ते headline मध्ये कधीही जोडले जात नाहीत. हा निकाल dashboard वर (`/dashboard/free-tiers`) दृश्यमान राहतो.
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute मोफत-स्तर बजेट कार्ड: दरमहा स्थिर ~1.62B मोफत टोकन्स, signup credits सह पहिल्या महिन्यात कमाल ~2.22B, एका endpoint मागे 484 cataloged free-tier entries व्यापणाऱ्या 34 documented recurring pool keys मधून. प्रामाणिक pool-deduped गणित — प्रत्येक shared pool एकदाच मोजला जातो; यात प्रकाशित सकारात्मक मासिक token budget असलेले 17 recurring pools तसेच प्रति-model Groq caps असलेले पाच pools समाविष्ट आहेत; terms-risk catalog मध्ये 12 providers ना avoid म्हणून चिन्हांकित केले आहे, त्यामुळे निर्णय तुमचा. Budget bar मध्ये Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (पाच per-model caps) आणि लहान pools, तसेच पहिल्या महिन्याचे signup credits आणि कायमचे मोफत, token-cap नसलेले providers स्वतंत्रपणे दाखवले आहेत, जेणेकरून ते headline वाढवणार नाहीत. /dashboard/free-tiers वर live used/remaining. "/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute मोफत-स्तर बजेट कार्ड: दरमहा स्थिर ~1.62B मोफत टोकन्स, signup credits सह पहिल्या महिन्यात कमाल ~2.22B, एका endpoint मागे 486 cataloged free-tier entries व्यापणाऱ्या 34 documented recurring pool keys मधून. प्रामाणिक pool-deduped गणित — प्रत्येक shared pool एकदाच मोजला जातो; यात प्रकाशित सकारात्मक मासिक token budget असलेले 17 recurring pools तसेच प्रति-model Groq caps असलेले पाच pools समाविष्ट आहेत; terms-risk catalog मध्ये 12 providers ना avoid म्हणून चिन्हांकित केले आहे, त्यामुळे निर्णय तुमचा. Budget bar मध्ये Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (पाच per-model caps) आणि लहान pools, तसेच पहिल्या महिन्याचे signup credits आणि कायमचे मोफत, token-cap नसलेले providers स्वतंत्रपणे दाखवले आहेत, जेणेकरून ते headline वाढवणार नाहीत. /dashboard/free-tiers वर live used/remaining. "/>
 
 > Live `/dashboard/free-tiers` पेजचा animated summary. संपूर्ण methodology (pool dedupe, credit tiers, provider terms): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -74,7 +74,7 @@
 |                           |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------- | :------------------------: | :---------: | :-------------------: |
 | 🌐 प्रदाते                |            352             |   **358**   |          380          |
-| 🧠 अद्वितीय चॅट मॉडेल IDs |            1320            |  **1374**   |         1494          |
+| 🧠 अद्वितीय चॅट मॉडेल IDs |            1320            |  **1374**   |         1499          |
 | 🖼️ मोडॅलिटी ब्रिज         | 🆕 दृष्टी + ऑडिओ + व्हिडिओ |      ✓      |           ✓           |
 | 📡 Radar विनामूल्य कॅटलॉग |         🆕 opt-in          |      ✓      |           ✓           |
 | ⚖️ कोटाविषयक वेळापत्रक    |       🆕 Quota-Share       |      ✓      |           ✓           |
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="वचन — एक एंडपॉइंट आणि 380 प्रदाते. दुसरा आरोग्यदायक टार्गेट उपलब्ध असेपर्यंत स्वयंचलित फॉलबॅक रूटिंग सुरू ठेवतो. सहा स्तंभ: 380 प्रदात्यांमध्ये लवचिक फॉलबॅक · पात्र वर्कलोड्सवर 95% पर्यंत टोकन बचत · 150+ फ्री टियर्स आणि 52 पुनरावृत्ती/कीलेस फ्री-फॉरएव्हर प्रदात्यांसह $0 पासून सुरू · एका कॉन्फिगमधून 39 CLI/एजंट इंटिग्रेशन्स · /v1 वर OpenAI, Claude, Gemini आणि Responses API सुसंगतता · उत्पादन नियंत्रणांमध्ये सर्किट ब्रेकर्स, TLS स्टेल्थ, MCP 110 टूल्स, A2A, मेमरी, गार्डरेल्स, इव्हॅल्स आणि 7,800+ ट्रॅक केलेल्या टेस्ट फाइल्समध्ये 56,000+ स्थिर टेस्ट डिक्लरेशन."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="वचन — एक एंडपॉइंट आणि 380 प्रदाते. दुसरा आरोग्यदायक टार्गेट उपलब्ध असेपर्यंत स्वयंचलित फॉलबॅक रूटिंग सुरू ठेवतो. सहा स्तंभ: 380 प्रदात्यांमध्ये लवचिक फॉलबॅक · पात्र वर्कलोड्सवर 95% पर्यंत टोकन बचत · 150+ फ्री टियर्स आणि 54 पुनरावृत्ती/कीलेस फ्री-फॉरएव्हर प्रदात्यांसह $0 पासून सुरू · एका कॉन्फिगमधून 39 CLI/एजंट इंटिग्रेशन्स · /v1 वर OpenAI, Claude, Gemini आणि Responses API सुसंगतता · उत्पादन नियंत्रणांमध्ये सर्किट ब्रेकर्स, TLS स्टेल्थ, MCP 110 टूल्स, A2A, मेमरी, गार्डरेल्स, इव्हॅल्स आणि 7,800+ ट्रॅक केलेल्या टेस्ट फाइल्समध्ये 56,000+ स्थिर टेस्ट डिक्लरेशन."/>
 
 <br/>
 <br/>
@@ -692,7 +692,7 @@ omniroute configure codex          # तसेच: claude opencode qwen aider go
 
 </div>
 
-> **३८० नोंदणीकृत प्रदाते** कॅनॉनिकल चॅट, मीडिया, सर्च, लोकल, क्लाउड-एजंट आणि सिस्टीम कलेक्शन्समध्ये, ज्यामध्ये **१५६ जणांकडे `hasFree: true` डिस्कव्हरी मेटाडेटा आहे**. चॅट मॉडेल रजिस्ट्रीत **२४१ प्रदाते / ३,१०९ वेगळ्या प्रदाता-मॉडेल जोड्या / १,४९४ कच्चे मॉडेल आयडी** आहेत; स्वतंत्र मोफत-बजेट कॅटलॉगमध्ये **४८४ प्रति-मॉडेल ओळी**, **३४ पुनरावृत्ती पूल** आणि **५२ पुनरावृत्ती/कीलेस कायमचे मोफत प्रदाते** आहेत. हे वेगळे हरकती मुद्दाम आहेत; व्याख्या आणि पूल-डिड्युप केलेली गणना [प्रदाता संदर्भ](docs/reference/PROVIDER_REFERENCE.md) आणि [मोफत टायर्स](docs/reference/FREE_TIERS.md) मध्ये आहेत.
+> **३८० नोंदणीकृत प्रदाते** कॅनॉनिकल चॅट, मीडिया, सर्च, लोकल, क्लाउड-एजंट आणि सिस्टीम कलेक्शन्समध्ये, ज्यामध्ये **१५६ जणांकडे `hasFree: true` डिस्कव्हरी मेटाडेटा आहे**. चॅट मॉडेल रजिस्ट्रीत **२४१ प्रदाते / ३,११४ वेगळ्या प्रदाता-मॉडेल जोड्या / १,४९९ कच्चे मॉडेल आयडी** आहेत; स्वतंत्र मोफत-बजेट कॅटलॉगमध्ये **४८६ प्रति-मॉडेल ओळी**, **३४ पुनरावृत्ती पूल** आणि **५४ पुनरावृत्ती/कीलेस कायमचे मोफत प्रदाते** आहेत. हे वेगळे हरकती मुद्दाम आहेत; व्याख्या आणि पूल-डिड्युप केलेली गणना [प्रदाता संदर्भ](docs/reference/PROVIDER_REFERENCE.md) आणि [मोफत टायर्स](docs/reference/FREE_TIERS.md) मध्ये आहेत.
 
 <div align="center">
 
@@ -1372,7 +1372,7 @@ port वर उपलब्ध केले जातात, त्यामु�
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">लवचिकता मार्गदर्शक</a></b></td><td>सर्किट ब्रेकर्स, कूलडाउन्स, रांग, anti-thundering herd, TLS spoofing</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">ऑटो-कॉम्बो इंजिन</a></b></td><td>१६-घटक स्कोअरिंग, मोड पॅक्स, स्व-उपचार</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">प्रॉक्सी मार्गदर्शक</a></b></td><td>३-स्तरीय प्रॉक्सी प्रणाली, 1proxy मार्केटप्लेस, रजिस्ट्री CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">मोफत स्तर</a></b></td><td>एकत्रित निर्देशिका: ३४ दस्तऐवजीकृत आवर्ती पूल / कॅटलॉगमध्ये नोंदवलेल्या ४८४ मोफत-स्तर नोंदी</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">मोफत स्तर</a></b></td><td>एकत्रित निर्देशिका: ३४ दस्तऐवजीकृत आवर्ती पूल / कॅटलॉगमध्ये नोंदवलेल्या ४८६ मोफत-स्तर नोंदी</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">वैशिष्ट्य गॅलरी</a></b></td><td>स्क्रीनशॉट्ससह दृश्य डॅशबोर्ड फेरफटका</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">कोडबेस दस्तऐवजीकरण</a></b></td><td>सुरुवातीच्या वापरकर्त्यांसाठी अनुकूल कोडबेस परिचय</td></tr>
 </table>

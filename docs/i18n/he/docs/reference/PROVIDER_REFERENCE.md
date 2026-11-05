@@ -6,7 +6,7 @@
 
 > **נוצר אוטומטית** מתוך `src/shared/constants/providers.ts` — אין לערוך ידנית.
 > ליצירה מחדש, יש להריץ: `npm run gen:provider-reference`
-> **נוצר לאחרונה:** 2026-10-27
+> **נוצר לאחרונה:** 2026-11-05
 
 סך כל הספקים: **380**. להלן פירוט לפי קטגוריות.
 
@@ -466,7 +466,7 @@
 
 - קטלוג: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - מאגר רישום (פרטים לכל מודל): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- רכיבי ביצוע: [`open-sse/executors/`](../../open-sse/executors/) (158 מימושים)
+- רכיבי ביצוע: [`open-sse/executors/`](../../open-sse/executors/) (162 מימושים)
 - מתרגמים: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## ראה גם

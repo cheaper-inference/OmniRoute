@@ -6,7 +6,7 @@
 
 > **Uathghinte** ó `src/shared/constants/providers.ts` — ná cuir in eagar de láimh.
 > Athghin le: `npm run gen:provider-reference`
-> **Gineadh go deireanach:** 2026-10-27
+> **Gineadh go deireanach:** 2026-11-05
 
 Líon iomlán soláthraithe: **380**. Féach an miondealú de réir catagóire thíos.
 
@@ -466,7 +466,7 @@ Clibeanna breise: `image`, `video`, `aggregator`, `enterprise`, `embed/rerank`, 
 
 - Catalóg: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Clárlann (sonraí de réir samhla): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Feidhmeoirí: [`open-sse/executors/`](../../open-sse/executors/) (158 cur chun feidhme)
+- Feidhmeoirí: [`open-sse/executors/`](../../open-sse/executors/) (162 cur chun feidhme)
 - Aistritheoirí: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Féach Freisin

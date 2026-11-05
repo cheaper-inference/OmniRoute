@@ -128,7 +128,7 @@ Os frames binários `reasoningContentEvent` do Kiro com uma assinatura não vazi
 
 **Estados terminais (NÃO são períodos de arrefecimento):**
 
-- `banned` — definido pela deteção de palavras-chave banidas / banimento da conta (consulte [BAN_DETECTION](../security/BAN_DETECTION.md)) e por três recusas consecutivas do fornecedor por pedido (`request_rejected`, por exemplo, 403 do OAuth da Anthropic "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); uma única recusa apenas arrefece a ligação
+- `banned` — definido pela deteção de palavra-chave banida/banimento de conta (consulte [BAN_DETECTION](../security/BAN_DETECTION.md) ). As recusas upstream por pedido (`request_rejected`, por exemplo Anthropic OAuth 403 "Pedido não permitido") nunca o definem: são contadas por ligação e modelo e retiram este modelo da rotação com um arrefecimento crescente limitado a `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h) ou arrefecem a ligação quando não se conhece nenhum modelo — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (transita para terminal após novas tentativas limitadas — `EXPIRED_RETRY_MAX = 3` com recuo exponencial — para que os erros OAuth transitórios possam recuperar automaticamente antes de a conta ser permanentemente desativada)
 - `credits_exhausted`
 

@@ -27,9 +27,9 @@
 
 > **ඔබේම provider ගිණුම් භාවිත කරන්න.** මෙය වෙන වෙනම සුදුසුකම් ලබන තුන්වන පාර්ශ්ව නොමිලේ ස්ථරවල ඇස්තමේන්තුගත සමස්ත එකතුවකි; OmniRoute වෙතින් ලැබෙන ටෝකන ප්රදානයක් නොවේ. ලියාපදිංචි වී, අවශ්ය අවස්ථාවල අක්තපත්ර ලබාගෙන, ඔබට භාවිත කළ හැකි providers සම්බන්ධ කරන්න; එක් එක් provider තම සීමා, ලබාගත හැකි බව සහ නියමයන් පාලනය කරයි.
 >
-> නොමිලේ ස්ථර අතින් එකතු කිරීම අපහසුය — SDK දුසිම් ගණනක්, rate limit දුසිම් ගණනක්, සහ ඔබ සතුව ඇත්තේ කොපමණද යන්න පිළිබඳ කිසිදු පැහැදිලි අදහසක් නැත. OmniRoute විසින් **නැවත නැවත භාවිත වන pool keys 34ක් හරහා නොමිලේ-ස්ථර ඇතුළත් කිරීම් 484ක්** ලේඛනගත කර ඇති අතර, හවුල් pool අනුව අනුපිටපත් ඉවත් කර, ප්රකාශිත ධනාත්මක මාසික budget එකක් ඇති pools 17කින් සහ එක් එක් model සඳහා වන Groq සීමා පහකින් token headline එක ගණනය කරයි. කලාපීය අනන්යතා පරීක්ෂාවකින් පසුව පමණක් විවෘත වන quotas (අද: ModelScope) වෙනම පෙන්වනු ලබන අතර, කලාපීය අනන්යතා තහවුරු කිරීමෙන් පසු +~6M ලෙස දක්වයි; ඒවා headline එකට කිසිවිටෙක එකතු නොකරයි. ප්රතිඵලය dashboard එකේ (`/dashboard/free-tiers`) දිගටම පෙනේ.
+> නොමිලේ ස්ථර අතින් එකතු කිරීම අපහසුය — SDK දුසිම් ගණනක්, rate limit දුසිම් ගණනක්, සහ ඔබ සතුව ඇත්තේ කොපමණද යන්න පිළිබඳ කිසිදු පැහැදිලි අදහසක් නැත. OmniRoute විසින් **නැවත නැවත භාවිත වන pool keys 34ක් හරහා නොමිලේ-ස්ථර ඇතුළත් කිරීම් 486ක්** ලේඛනගත කර ඇති අතර, හවුල් pool අනුව අනුපිටපත් ඉවත් කර, ප්රකාශිත ධනාත්මක මාසික budget එකක් ඇති pools 17කින් සහ එක් එක් model සඳහා වන Groq සීමා පහකින් token headline එක ගණනය කරයි. කලාපීය අනන්යතා පරීක්ෂාවකින් පසුව පමණක් විවෘත වන quotas (අද: ModelScope) වෙනම පෙන්වනු ලබන අතර, කලාපීය අනන්යතා තහවුරු කිරීමෙන් පසු +~6M ලෙස දක්වයි; ඒවා headline එකට කිසිවිටෙක එකතු නොකරයි. ප්රතිඵලය dashboard එකේ (`/dashboard/free-tiers`) දිගටම පෙනේ.
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute නොමිලේ-ස්ථර budget කාඩ්පත: මාසයකට ස්ථාවරව ~1.62B නොමිලේ ටෝකන, signup credits සමඟ පළමු මාසයේදී ~2.22B දක්වා, එක් endpoint එකක් පිටුපස ලේඛනගත නැවත නැවත භාවිත වන pool keys 34ක් හරහා catalog කර ඇති නොමිලේ-ස්ථර ඇතුළත් කිරීම් 484කින්. අවංක pool-deduped ගණනය — එක් එක් හවුල් pool එක වරක් පමණක් ගණනය කර ඇත; ප්රකාශිත ධනාත්මක මාසික token budget එකක් සහිත recurring pools 17ක් සහ එක් model එකකට Groq caps පහක් ද ඇතුළත්ය; terms-risk catalog එකේ providers 12ක් avoid ලෙස සලකුණු කර ඇති බැවින් තීරණය ඔබ සතුය. Budget තීරුවට Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (එක් එක් model සඳහා caps පහක්) සහ කුඩා pools ඇතුළත් වන අතර, පළමු මාසයේ signup credits සහ ස්ථිරව නොමිලේ, token-cap රහිත providers වෙනම පෙන්වනු ලබයි; එබැවින් ඒවා headline එක අතිශයෝක්තියට පත් නොකරයි. /dashboard/free-tiers හි සජීවී භාවිතය/ඉතිරිය. "/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute නොමිලේ-ස්ථර budget කාඩ්පත: මාසයකට ස්ථාවරව ~1.62B නොමිලේ ටෝකන, signup credits සමඟ පළමු මාසයේදී ~2.22B දක්වා, එක් endpoint එකක් පිටුපස ලේඛනගත නැවත නැවත භාවිත වන pool keys 34ක් හරහා catalog කර ඇති නොමිලේ-ස්ථර ඇතුළත් කිරීම් 486කින්. අවංක pool-deduped ගණනය — එක් එක් හවුල් pool එක වරක් පමණක් ගණනය කර ඇත; ප්රකාශිත ධනාත්මක මාසික token budget එකක් සහිත recurring pools 17ක් සහ එක් model එකකට Groq caps පහක් ද ඇතුළත්ය; terms-risk catalog එකේ providers 12ක් avoid ලෙස සලකුණු කර ඇති බැවින් තීරණය ඔබ සතුය. Budget තීරුවට Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (එක් එක් model සඳහා caps පහක්) සහ කුඩා pools ඇතුළත් වන අතර, පළමු මාසයේ signup credits සහ ස්ථිරව නොමිලේ, token-cap රහිත providers වෙනම පෙන්වනු ලබයි; එබැවින් ඒවා headline එක අතිශයෝක්තියට පත් නොකරයි. /dashboard/free-tiers හි සජීවී භාවිතය/ඉතිරිය. "/>
 
 > සජීවී `/dashboard/free-tiers` පිටුවේ සජීවීකරණය කළ සාරාංශය. සම්පූර්ණ ක්රමවේදය (pool dedupe, credit tiers, provider terms): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -74,7 +74,7 @@
 |                          |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------ | :------------------------: | :---------: | :-------------------: |
 | 🌐 සපයන්නන්              |            352             |   **358**   |          380          |
-| 🧠 අනන්ය chat model ID   |            1320            |  **1374**   |         1494          |
+| 🧠 අනන්ය chat model ID   |            1320            |  **1374**   |         1499          |
 | 🖼️ මාධ්යමය Bridge        | 🆕 දෘශ්ය + ශ්රව්ය + වීඩියෝ |      ✓      |           ✓           |
 | 📡 Radar නොමිලේ නාමාවලිය |    🆕 විකල්පයෙන් සක්රීය    |      ✓      |           ✓           |
 | ⚖️ Quota-දැනුවත් උපලේඛනය |       🆕 Quota-Share       |      ✓      |           ✓           |
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="පොරොන්දුව — එක් අවසන් ලක්ෂ්යයක් සහ සපයන්නන් 380ක්. තවත් සෞඛ්ය සම්පන්න ඉලක්කයක් තිබියදී ස්වයංක්රීය පසුබැසීම මාර්ගගත වීම තබා ගනී. තිළිණ හයයි: සපයන්නන් 380ක් හරහා ශක්තිමත් පසුබැසීම · සුදුසු වැඩබර සඳහා උපරිම 95% ටෝකන් ඉතිරි කිරීම · ආරම්භයට $0, නිදහස් තට්ටු 150+ සහ සදාකාලික නිදහස් සපයන්නන් 52ක් · එක් සැකසුමකින් CLI/agent ඒකාබද්ධතා 39ක් · OpenAI, Claude, Gemini සහ Responses API ගැළපීම /v1 · නිෂ්පාදන පාලන මෙවලම්: circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals සහ 56,000+ ස්ථාවර පරීක්ෂණ ප්රකාශන 7,800+ පරීක්ෂණ ගොනු හරහා."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="පොරොන්දුව — එක් අවසන් ලක්ෂ්යයක් සහ සපයන්නන් 380ක්. තවත් සෞඛ්ය සම්පන්න ඉලක්කයක් තිබියදී ස්වයංක්රීය පසුබැසීම මාර්ගගත වීම තබා ගනී. තිළිණ හයයි: සපයන්නන් 380ක් හරහා ශක්තිමත් පසුබැසීම · සුදුසු වැඩබර සඳහා උපරිම 95% ටෝකන් ඉතිරි කිරීම · ආරම්භයට $0, නිදහස් තට්ටු 150+ සහ සදාකාලික නිදහස් සපයන්නන් 54ක් · එක් සැකසුමකින් CLI/agent ඒකාබද්ධතා 39ක් · OpenAI, Claude, Gemini සහ Responses API ගැළපීම /v1 · නිෂ්පාදන පාලන මෙවලම්: circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals සහ 56,000+ ස්ථාවර පරීක්ෂණ ප්රකාශන 7,800+ පරීක්ෂණ ගොනු හරහා."/>
 
 <br/>
 <br/>
@@ -693,7 +693,7 @@ omniroute configure codex          # මෙයද: claude opencode qwen aider go
 
 </div>
 
-> **380 ලියාපදිංචි සැපයුම්කරුවන්** සම්මත chat, මාධ්ය, සෙවුම්, ප්රාදේශීය, වලාකුළු-නියෝජිත සහ පද්ධති එකතුවලින්, **156ක් `hasFree: true` සොයාගැනීමේ දත්ත සමඟ**. chat ආදර්ශ නාමාවලියට **241 සැපයුම්කරුවන් / 3,109 වෙනස් සැපයුම්කරු-ආදර්ශ යුගල / 1,494 මුළු ආදර්ශ හැඳුනුම්පත්** ඇතුළත් වේ; වෙනම නොමිලේ-අයවැය නාමාවලියට **484 ආදර්ශ-පේළි**, **34 නැවත පිරවිය හැකි කුළුණු** සහ **52 නැවත පිරවිය හැකි/යතුරු රහිත සදාකාලික නොමිලේ සැපයුම්කරුවන්** ඇත. මෙය හඳුනාගැනීම් සහ කුළුණු-අනුපිළිවෙළ අනුව වෙනස් වේ; නිර්වචන සහ කුළුණු-අනුපිළිවෙළ ගණනය [සැපයුම්කරු යොමු](docs/reference/PROVIDER_REFERENCE.md) සහ [නොමිලේ මට්ටම්](docs/reference/FREE_TIERS.md) හි ඇත.
+> **380 ලියාපදිංචි සැපයුම්කරුවන්** සම්මත chat, මාධ්ය, සෙවුම්, ප්රාදේශීය, වලාකුළු-නියෝජිත සහ පද්ධති එකතුවලින්, **156ක් `hasFree: true` සොයාගැනීමේ දත්ත සමඟ**. chat ආදර්ශ නාමාවලියට **241 සැපයුම්කරුවන් / 3,114 වෙනස් සැපයුම්කරු-ආදර්ශ යුගල / 1,499 මුළු ආදර්ශ හැඳුනුම්පත්** ඇතුළත් වේ; වෙනම නොමිලේ-අයවැය නාමාවලියට **486 ආදර්ශ-පේළි**, **34 නැවත පිරවිය හැකි කුළුණු** සහ **54 නැවත පිරවිය හැකි/යතුරු රහිත සදාකාලික නොමිලේ සැපයුම්කරුවන්** ඇත. මෙය හඳුනාගැනීම් සහ කුළුණු-අනුපිළිවෙළ අනුව වෙනස් වේ; නිර්වචන සහ කුළුණු-අනුපිළිවෙළ ගණනය [සැපයුම්කරු යොමු](docs/reference/PROVIDER_REFERENCE.md) සහ [නොමිලේ මට්ටම්](docs/reference/FREE_TIERS.md) හි ඇත.
 
 <div align="center">
 
@@ -1372,7 +1372,7 @@ process එක මඟින් සපයන බැවින්, දැනට ව
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Resilience මාර්ගෝපදේශය</a></b></td><td>Circuit breakers, cooldowns, queue, anti-thundering herd, TLS spoofing</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo Engine</a></b></td><td>සාධක 16ක scoring, mode packs, self-healing</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Proxy මාර්ගෝපදේශය</a></b></td><td>මට්ටම් 3ක proxy පද්ධතිය, 1proxy marketplace, registry CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">නොමිලේ මට්ටම්</a></b></td><td>ඒකාබද්ධ නාමාවලිය: ලේඛනගත recurring pools 34ක් / catalog කළ free-tier entries 484ක්</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">නොමිලේ මට්ටම්</a></b></td><td>ඒකාබද්ධ නාමාවලිය: ලේඛනගත recurring pools 34ක් / catalog කළ free-tier entries 486ක්</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">විශේෂාංග ගැලරිය</a></b></td><td>තිර රූ සමඟ දෘශ්ය dashboard සංචාරය</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Codebase ලේඛනය</a></b></td><td>ආරම්භකයන්ට හිතකර codebase පැහැදිලි කිරීම</td></tr>
 </table>

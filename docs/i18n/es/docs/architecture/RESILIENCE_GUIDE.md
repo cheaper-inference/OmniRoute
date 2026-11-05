@@ -145,11 +145,7 @@ cancelación del cliente siguen aplicándose (`open-sse/executors/kiro/reasoning
 
 **Estados terminales (NO enfriamientos):**
 
-- `banned` — establecido por la detección de palabras clave prohibidas / bloqueo de cuenta
-  (véase [BAN_DETECTION](../security/BAN_DETECTION.md)), y por tres rechazos consecutivos
-  por solicitud del servidor de origen (`request_rejected`, p. ej. Anthropic OAuth 403
-  "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); un solo rechazo
-  solo enfría la conexión
+- `banned` — establecido por detección de palabra clave prohibida/prohibición de cuenta (ver [BAN_DETECTION](../security/BAN_DETECTION.md) ). Los rechazos por solicitud ascendentes (`request_rejected`, por ejemplo Anthropic OAuth 403 "Solicitud no permitida") nunca lo configuran: se cuentan por conexión y modelo y sacan ese modelo de la rotación con un tiempo de reutilización creciente limitado a `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h), o enfrían la conexión cuando no se conoce ningún modelo — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (transita a terminal tras reintentos acotados — `EXPIRED_RETRY_MAX = 3` con
   retroceso exponencial — de modo que los errores transitorios de OAuth pueden
   autorrecuperarse antes de que la cuenta se desactive permanentemente)

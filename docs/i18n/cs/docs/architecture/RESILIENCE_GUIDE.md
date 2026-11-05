@@ -149,7 +149,7 @@ nezávislý timeout aktivního streamu a zrušení klientem platí i nadále
 
 **Terminální stavy (NE cooldowny):**
 
-- `banned` — nastavuje detekce zakázaných klíčových slov / zákazu účtu (viz [BAN_DETECTION](../security/BAN_DETECTION.md)) a také tři po sobě jdoucí odmítnutí jednotlivých požadavků z upstreamu (`request_rejected`, např. Anthropic OAuth 403 „Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); jediné odmítnutí připojení pouze ochladí
+- `banned` — nastaveno detekcí zakázaného klíčového slova / zákazu účtu (viz [BAN_DETECTION](../security/BAN_DETECTION.md) ). Odmítnutí na základě požadavku (`request_rejected`, např. Anthropic OAuth 403 "Požadavek není povoleno") nikdy nenastavujte: počítají se na připojení a model a vyřazují tento model z rotace s rostoucím cooldownem omezeným na `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h), nebo ochlazují připojení, když není znám žádný model — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (přejde do terminálního stavu po omezeném počtu opakování — `EXPIRED_RETRY_MAX = 3` s exponenciálním backoffem — takže přechodné chyby OAuth se mohou samy zotavit, než je účet trvale deaktivován)
 - `credits_exhausted`
 

@@ -27,9 +27,9 @@
 
 > **Použijte vlastní účty u poskytovatelů.** Jde o odhadovaný souhrn samostatně způsobilých bezplatných tarifů třetích stran, nikoli o přidělení tokenů od OmniRoute. Zaregistrujte se, případně získejte potřebné přihlašovací údaje a připojte poskytovatele, které můžete využít; každý poskytovatel určuje své limity, dostupnost a podmínky.
 >
-> Ruční skládání bezplatných tarifů je únavné — desítky SDK, desítky rychlostních limitů a žádná představa, kolik toho skutečně máte. OmniRoute eviduje **484 položek bezplatných tarifů napříč 34 opakujícími se klíči fondů** a vypočítává hlavní údaj ze **17 fondů s publikovaným kladným měsíčním rozpočtem a pěti limitů Groq pro jednotlivé modely**, přičemž započítává každý sdílený fond pouze jednou. Kvóty, které se zpřístupní až po regionální kontrole identity (dnes: ModelScope), jsou uvedeny zvlášť, +~6 mil. za regionálním ověřením identity, a nikdy se nezapočítávají do hlavního údaje. Výsledek zůstává viditelný na dashboardu (`/dashboard/free-tiers`).
+> Ruční skládání bezplatných tarifů je únavné — desítky SDK, desítky rychlostních limitů a žádná představa, kolik toho skutečně máte. OmniRoute eviduje **486 položek bezplatných tarifů napříč 34 opakujícími se klíči fondů** a vypočítává hlavní údaj ze **17 fondů s publikovaným kladným měsíčním rozpočtem a pěti limitů Groq pro jednotlivé modely**, přičemž započítává každý sdílený fond pouze jednou. Kvóty, které se zpřístupní až po regionální kontrole identity (dnes: ModelScope), jsou uvedeny zvlášť, +~6 mil. za regionálním ověřením identity, a nikdy se nezapočítávají do hlavního údaje. Výsledek zůstává viditelný na dashboardu (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Karta bezplatného tarifu OmniRoute: ~1,62 mld. bezplatných tokenů měsíčně stabilně, až ~2,22 mld. v prvním měsíci s kredity za registraci, z 34 zdokumentovaných opakujících se klíčů fondů pokrývajících 484 katalogizovaných položek bezplatných tarifů prostřednictvím jediného endpointu. Poctivý výpočet deduplikovaný podle fondů — každý sdílený fond započítaný pouze jednou, včetně 17 opakujících se fondů s publikovaným kladným měsíčním rozpočtem tokenů a pěti limitů Groq pro jednotlivé modely; 12 poskytovatelů je v katalogu rizik podmínek označeno jako nedoporučených, takže se můžete rozhodnout. Lišta rozpočtu zahrnuje Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (pět limitů pro jednotlivé modely) a menší fondy, dále kredity za registraci v prvním měsíci a poskytovatele trvale zdarma bez tokenového limitu zobrazené zvlášť, aby nikdy nenavyšovali hlavní údaj. Aktuálně využité a zbývající množství na /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Karta bezplatného tarifu OmniRoute: ~1,62 mld. bezplatných tokenů měsíčně stabilně, až ~2,22 mld. v prvním měsíci s kredity za registraci, z 34 zdokumentovaných opakujících se klíčů fondů pokrývajících 486 katalogizovaných položek bezplatných tarifů prostřednictvím jediného endpointu. Poctivý výpočet deduplikovaný podle fondů — každý sdílený fond započítaný pouze jednou, včetně 17 opakujících se fondů s publikovaným kladným měsíčním rozpočtem tokenů a pěti limitů Groq pro jednotlivé modely; 12 poskytovatelů je v katalogu rizik podmínek označeno jako nedoporučených, takže se můžete rozhodnout. Lišta rozpočtu zahrnuje Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (pět limitů pro jednotlivé modely) a menší fondy, dále kredity za registraci v prvním měsíci a poskytovatele trvale zdarma bez tokenového limitu zobrazené zvlášť, aby nikdy nenavyšovali hlavní údaj. Aktuálně využité a zbývající množství na /dashboard/free-tiers."/>
 
 > Animované shrnutí živé stránky `/dashboard/free-tiers`. Úplná metodika (deduplikace fondů, úrovně kreditů, podmínky poskytovatelů): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -74,7 +74,7 @@
 |                                    |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | ---------------------------------- | :----------------------: | :---------: | :-------------------: |
 | 🌐 Poskytovatelé                   |           352            |   **358**   |          380          |
-| 🧠 Jedinečná ID chatovacích modelů |           1320           |  **1374**   |         1494          |
+| 🧠 Jedinečná ID chatovacích modelů |           1320           |  **1374**   |         1499          |
 | 🖼️ Most modalit                    | 🆕 vidění + zvuk + video |      ✓      |           ✓           |
 | 📡 Bezplatný katalog Radar         |  🆕 s možností aktivace  |      ✓      |           ✓           |
 | ⚖️ Plánování s ohledem na kvótu    |      🆕 Quota-Share      |      ✓      |           ✓           |
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Příslib — Jeden endpoint a 380 poskytovatelů. Automatický fallback udržuje směrování, dokud je k dispozici další zdravý cíl. Šest pilířů: odolný fallback napříč 380 poskytovateli · až 95% úspora tokenů na způsobilých úlohách · 0 Kč na začátek s 150+ free tarify a 52 opakovanými/bezklíčovými poskytovateli zdarma navždy · 39 CLI/agent integrací přes jednu konfiguraci · kompatibilita s OpenAI, Claude, Gemini a Responses API na /v1 · produkční kontroly včetně jističů, TLS stealth, MCP 110 nástrojů, A2A, paměti, guardrails, evalů a 56 000+ statických testovacích deklarací napříč 7 800+ sledovanými testovacími soubory."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Příslib — Jeden endpoint a 380 poskytovatelů. Automatický fallback udržuje směrování, dokud je k dispozici další zdravý cíl. Šest pilířů: odolný fallback napříč 380 poskytovateli · až 95% úspora tokenů na způsobilých úlohách · 0 Kč na začátek s 150+ free tarify a 54 opakovanými/bezklíčovými poskytovateli zdarma navždy · 39 CLI/agent integrací přes jednu konfiguraci · kompatibilita s OpenAI, Claude, Gemini a Responses API na /v1 · produkční kontroly včetně jističů, TLS stealth, MCP 110 nástrojů, A2A, paměti, guardrails, evalů a 56 000+ statických testovacích deklarací napříč 7 800+ sledovanými testovacími soubory."/>
 
 <br/>
 <br/>
@@ -701,7 +701,7 @@ mimo historii vašeho shellu. → [Integrace CLI](docs/guides/CLI-INTEGRATIONS.m
 
 </div>
 
-> **380 registrovaných poskytovatelů** napříč kanonickými kolekcemi chat, média, vyhledávání, lokální, cloud-agent a systém, včetně **156 s discovery metadaty `hasFree: true`**. Registr modelů chatu pokrývá **241 poskytovatelů / 3 109 unikátních dvojic poskytovatel-model / 1 494 surových ID modelů**; samostatný katalog bezplatných rozpočtů má **484 řádků podle modelu**, **34 opakujících se poolů** a **52 poskytovatelů zdarma navždy (opakující se/bez klíče)**. Tyto hodnoty jsou záměrně různé; definice a výpočty deduplikované podle poolů najdete v [Referenci poskytovatelů](docs/reference/PROVIDER_REFERENCE.md) a [Bezplatných tarifech](docs/reference/FREE_TIERS.md).
+> **380 registrovaných poskytovatelů** napříč kanonickými kolekcemi chat, média, vyhledávání, lokální, cloud-agent a systém, včetně **156 s discovery metadaty `hasFree: true`**. Registr modelů chatu pokrývá **241 poskytovatelů / 3 114 unikátních dvojic poskytovatel-model / 1 499 surových ID modelů**; samostatný katalog bezplatných rozpočtů má **486 řádků podle modelu**, **34 opakujících se poolů** a **54 poskytovatelů zdarma navždy (opakující se/bez klíče)**. Tyto hodnoty jsou záměrně různé; definice a výpočty deduplikované podle poolů najdete v [Referenci poskytovatelů](docs/reference/PROVIDER_REFERENCE.md) a [Bezplatných tarifech](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1381,7 +1381,7 @@ Kanonické metriky k 2026-10-18: **1.976 unikátních videí** · **20.220.289 z
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Průvodce odolností</a></b></td><td>Obvodové jističe, doby ochlazení, fronta, prevence lavinového zahlcení, falšování TLS</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Engine automatických kombinací</a></b></td><td>Hodnocení podle 16 faktorů, balíčky režimů, samooprava</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Průvodce proxy</a></b></td><td>Proxy systém se 3 úrovněmi, marketplace 1proxy, operace CRUD registru</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Bezplatné tarify</a></b></td><td>Konsolidovaný katalog: 34 zdokumentovaných opakujících se poolů / 484 katalogizovaných položek bezplatných tarifů</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Bezplatné tarify</a></b></td><td>Konsolidovaný katalog: 34 zdokumentovaných opakujících se poolů / 486 katalogizovaných položek bezplatných tarifů</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Galerie funkcí</a></b></td><td>Vizuální prohlídka dashboardu se screenshoty</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Dokumentace zdrojové základny</a></b></td><td>Průchod zdrojovou základnou vhodný pro začátečníky</td></tr>
 </table>

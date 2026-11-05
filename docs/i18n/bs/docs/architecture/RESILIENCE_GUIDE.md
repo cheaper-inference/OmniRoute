@@ -116,7 +116,7 @@ Kirovi binarni `reasoningContentEvent` okviri s nepraznim potpisom čuvaju ovu a
 
 **Terminalna stanja (NE hlađenja):**
 
-- `banned` — postavlja detekcija zabranjenih ključnih riječi / zabrane računa (vidi [BAN_DETECTION](../security/BAN_DETECTION.md)), i tri uzastopna upstream odbijanja po zahtjevu (`request_rejected`, npr. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); jedno odbijanje samo hladi konekciju
+- `banned` — postavljen detekcijom banned-keyword / account-ban (pogledajte [BAN_DETECTION](../security/BAN_DETECTION.md) ). Upstream odbijanja po zahtjevu (`request_rejected`, npr. Anthropic OAuth 403 "Zahtjev nije dozvoljen") nikada ga ne postavljaju: oni se broje po vezi i modelu i povlače taj model iz rotacije s rastućim hlađenjem ograničenim na `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h), ili hlade vezu kada nije poznat model — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (prelazi u terminalno stanje nakon ograničenog broja ponovnih pokušaja — `EXPIRED_RETRY_MAX = 3` s eksponencijalnim backoff-om — pa se prolazne OAuth greške mogu same zacijeliti prije nego što se račun trajno deaktivira)
 - `credits_exhausted`
 

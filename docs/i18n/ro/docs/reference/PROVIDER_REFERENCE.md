@@ -6,7 +6,7 @@
 
 > **Generat automat** din `src/shared/constants/providers.ts` — nu editați manual.
 > Regenerați cu: `npm run gen:provider-reference`
-> **Ultima generare:** 2026-10-27
+> **Ultima generare:** 2026-11-05
 
 Număr total de furnizori: **380**. Consultați mai jos defalcarea pe categorii.
 
@@ -466,7 +466,7 @@ Utilizați panoul de control de la `/dashboard/providers` pentru a activa, confi
 
 - Catalog: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Registru (detalii pentru fiecare model): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Executori: [`open-sse/executors/`](../../open-sse/executors/) (158 de implementări)
+- Executori: [`open-sse/executors/`](../../open-sse/executors/) (162 de implementări)
 - Traductoare: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Vezi și

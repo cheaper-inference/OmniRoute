@@ -125,7 +125,7 @@ sisueelarvet; sõltumatu aktiivse voo ajalõpp ja kliendi tühistamine kehtivad 
 
 **Lõppolekud (MITTE cooldown'id):**
 
-- `banned` — määravad keelatud märksõna / konto keelu tuvastus (vt [BAN_DETECTION](../security/BAN_DETECTION.md)) ja kolm järjestikust ülesvoo päringupõhist keeldumist (`request_rejected`, nt Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); üksik keeldumine seab ühendusele vaid cooldown'i
+- `banned` — määratud keelatud märksõna / konto keelu tuvastamisega (vt [BAN_DETECTION](../security/BAN_DETECTION.md) ). Päringupõhised ülesvoolu keeldumised (`request_rejected`, nt Anthropic OAuth 403 "Taotlus ei ole lubatud") ei määra seda kunagi: neid loendatakse ühenduse ja mudeli järgi ning see mudel eemaldatakse pöörlemisest kasvava jahtumisega, mille piiriks on `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h), või jahutage ühendust, kui mudelit pole teada — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (liigub lõppolekusse piiratud arvu korduste järel — `EXPIRED_RETRY_MAX = 3` koos eksponentsiaalse tagasiastumisega — nii et mööduvad OAuth-i vead saavad eneseterveneda enne, kui konto lõplikult deaktiveeritakse)
 - `credits_exhausted`
 

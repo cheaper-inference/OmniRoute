@@ -6,7 +6,7 @@
 
 > **Automātiski ģenerēts** no `src/shared/constants/providers.ts` — nerediģējiet manuāli.
 > Ģenerējiet atkārtoti ar: `npm run gen:provider-reference`
-> **Pēdējoreiz ģenerēts:** 2026-10-27
+> **Pēdējoreiz ģenerēts:** 2026-11-05
 
 Kopējais pakalpojumu sniedzēju skaits: **380**. Kategoriju sadalījumu skatiet tālāk.
 
@@ -466,7 +466,7 @@ Izmantojiet informācijas paneli `/dashboard/providers`, lai iespējotu, konfigu
 
 - Katalogs: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Reģistrs (detalizēta informācija par katru modeli): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Izpildītāji: [`open-sse/executors/`](../../open-sse/executors/) (158 implementācijas)
+- Izpildītāji: [`open-sse/executors/`](../../open-sse/executors/) (162 implementācijas)
 - Tulkotāji: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Skatiet arī

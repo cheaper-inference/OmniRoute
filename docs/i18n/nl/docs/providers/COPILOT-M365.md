@@ -67,23 +67,13 @@ HAR-import decodeert de vervaldatum van de JWT en toont de resterende levensduur
 
 ## Levensduur en vernieuwing van tokens
 
-Het `access_token` is kortlevend (doorgaans **~75 minuten**). Na het verlopen meldt de provider
-een verbindingsfout en moet u de referentie opnieuw vastleggen.
+De `access_token` is van korte duur (doorgaans **~ 75 minuten** ). Zonder een bruikbaar vernieuwingstoken moet u de inloggegevens na het verlopen opnieuw vastleggen.
 
 ### Automatische vernieuwing met `refreshToken`
 
-Om te voorkomen dat u de referentie handmatig opnieuw moet vastleggen, kunt u een Microsoft-vernieuwingstoken opslaan in de
-**Advanced Settings → providerSpecificData** van de verbinding:
+In de Microsoft 365-aanbieders **Verbinding toevoegen** of **Verbinding bewerken** dialoog, geopend **Geavanceerde instellingen → Vernieuwingstoken (optioneel)** . Plak een Microsoft OAuth vernieuwingstoken voor het `substrate.office.com/sydney` bereik en sla het op. De invoer wordt gemaskeerd en nooit vooraf ingevuld met het opgeslagen token. Laat het tijdens het bewerken leeg om het bestaande token te behouden; plak een nieuw token om het te vervangen.
 
-| Veld           | Beschrijving                                                                    |
-| -------------- | ------------------------------------------------------------------------------- |
-| `refreshToken` | Microsoft OAuth-vernieuwingstoken voor het bereik `substrate.office.com/sydney` |
-| `tier`         | `individual` (standaard), `edu` of `enterprise`                                 |
-
-Verkrijg het vernieuwingstoken via een Microsoft device-code- of authorization-code-flow
-met het bereik `substrate.office.com/sydney`. Wanneer `refreshToken` is ingesteld, vernieuwt OmniRoute
-het `access_token` voorafgaand aan elk verzoek, zodat u het niet
-na elke vervalperiode van ~75 minuten opnieuw hoeft vast te leggen.
+Het vernieuwingstoken verkrijgen van een Microsoft -apparaatcode of autorisatiecodestroom gericht op `substrate.office.com/sydney`; het dashboard verkrijgt het niet voor u. Als er een vernieuwingstoken is geconfigureerd, controleert OmniRoute de `access_token` vóór aanvragen en vernieuwt deze alleen wanneer deze moet worden vernieuwd. Bij een succesvolle vernieuwing blijft ook het geroteerde vernieuwingstoken behouden, waardoor handmatig opnieuw vastleggen wordt vermeden terwijl het vernieuwingstoken geldig blijft.
 
 Als `refreshToken` niet is ingesteld, moet u de WebSocket-referentie handmatig opnieuw vastleggen
 nadat deze is verlopen.
@@ -96,8 +86,7 @@ nadat deze is verlopen.
 | `edu`        | `included`    | M365 Copilot voor onderwijs   |
 | `enterprise` | `work`        | M365 Copilot voor werk        |
 
-Stel de tier in via **Advanced Settings → providerSpecificData → tier**. De tier beïnvloedt
-de BizChat-routering en modeltoegang.
+Stel het niveau in **Geavanceerde instellingen → Copilot laag** . De laag is van invloed op de BizChat -routering en modeltoegang.
 
 ## Beveiligingsmodel
 
@@ -118,7 +107,7 @@ de BizChat-routering en modeltoegang.
 Dit is normaal. Zonder een `refreshToken` is het toegangstoken kortlevend. U kunt:
 
 - De referentie opnieuw vastleggen via DevTools, of
-- Een `refreshToken` configureren in Geavanceerde instellingen om het token automatisch te vernieuwen.
+- Configureer **Geavanceerde instellingen → Vernieuwingstoken (optioneel)** in het dialoogvenster Verbinding toevoegen of bewerken voor automatisch vernieuwen.
 
 ### Verbinding testen slaagt, maar chat retourneert 401
 

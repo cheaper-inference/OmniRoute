@@ -6,7 +6,7 @@
 
 > **Automatikusan generálva** a `src/shared/constants/providers.ts` fájlból — ne szerkessze kézzel.
 > Újragenerálás: `npm run gen:provider-reference`
-> **Legutóbb generálva:** 2026-10-27
+> **Legutóbb generálva:** 2026-11-05
 
 Szolgáltatók száma összesen: **380**. Lásd alább a kategóriák szerinti bontást.
 
@@ -466,7 +466,7 @@ Az egyes szolgáltatók engedélyezéséhez, konfigurálásához és tesztelés�
 
 - Katalógus: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Nyilvántartás (modellenkénti részletek): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Végrehajtók: [`open-sse/executors/`](../../open-sse/executors/) (158 implementáció)
+- Végrehajtók: [`open-sse/executors/`](../../open-sse/executors/) (162 implementáció)
 - Fordítók: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Lásd még

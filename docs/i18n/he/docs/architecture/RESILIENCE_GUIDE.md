@@ -140,7 +140,7 @@ limit", GLM `并发数过高`) משמעו שהחשבון תקין אך עסוק.
 
 **מצבים סופיים (לא צינונים):**
 
-- `banned` — נקבע על ידי זיהוי מילות-מפתח חסומות / חסימת חשבון (ראו [BAN_DETECTION](../security/BAN_DETECTION.md)), ועל ידי שלושה סירובי upstream רצופים ברמת-בקשה (`request_rejected`, למשל Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); סירוב בודד רק מצנן את החיבור
+- `banned` — מוגדר על ידי זיהוי של מילת מפתח אסורה / חסימת חשבון (ראה [BAN_DETECTION](../security/BAN_DETECTION.md) ). סירובים לכל בקשה במעלה הזרם (`request_rejected`, למשל Anthropic OAuth 403 "בקשה לא מותרת") אף פעם לא מגדירים את זה: הם נספרים לפי חיבור ודגם ומוציאים את הדגם הזה מסיבוב עם צינון גדל והולך עם מכסת `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h), או מצננים את החיבור כאשר אין דגם ידוע — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (עובר למצב סופי לאחר מספר תחום של ניסיונות חוזרים — `EXPIRED_RETRY_MAX = 3` עם backoff מעריכי — כך ששגיאות OAuth חולפות יכולות להשתקם מעצמן לפני שהחשבון מושבת לצמיתות)
 - `credits_exhausted`
 

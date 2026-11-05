@@ -57,7 +57,13 @@ export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # 将有界等待时间提高到�
 
 请在 OmniRoute 进程环境中设置这些变量（即守护进程，例如通过 LaunchAgent plist 或 `systemctl edit`），然后重启 OmniRoute。轮换标志是单个效果最显著的调节项：它会把硬失败转换为针对池中健康提供者的透明重试。
 
-**说明**：`OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` 用于限制同时运行的重量级（即长上下文）请求数量；此限制属于准入门控，而不是提供者速率限制器。**#503-fanout 更新：**此变量不再默认设置（现在仅在显式配置时才会生效，如上所示）——重量级请求的准入改由自动推导的字节预算（`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`）控制，该预算会根据主机的实际内存上限自行扩缩，因此全新部署即使完全不设置此变量，也应显著减少 `503 chat_admission_busy` 拒绝；此处显式设置该变量仍会完全按照文档所述生效。显式字节预算覆盖值会被限制在 8 MiB–2 GiB 之间。`413 body_exceeds_budget` 并非瞬态错误：请提高该字节预算、降低 `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`，或提高进程内存上限。`inflight_bytes_budget` 卸载表示暂时性资源争用，仍可重试。每个提供者的速率限制（`open-sse/services/rateLimitManager.ts`）由 `RATE_LIMIT_MAX_WAIT_MS`、`RATE_LIMIT_MAX_QUEUE_DEPTH` 和 `RATE_LIMIT_AUTO_ENABLE` 单独控制——请参阅 `.env.example`。
+**笔记**： `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT`限制一次运行多少个重量级—长上下文—请求；界限是准入门，而不是提供者速率限制器。**#503扇出更新：**默认情况下不再设置此变量（现在仅在显式配置时才绑定，如上所述） —重量级准入由自动派生的字节预算（`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`）控制，该预算从主机的实际内存上限进行扩展，因此全新部署应该会看到更少的`503 chat_admission_busy`拒绝，而无需设置此变量；在这里显式设置它仍然完全按照记录工作。显式字节预算将钳制覆盖为 8 MiB–2 GiB。 `413 body_exceeds_budget`不是暂时的：增加字节预算、降低`OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`或保存的请求正文限制，或增加进程内存上限。 `inflight_bytes_budget` shed 是临时争用，并且仍然可以重试。每个提供者的速率限制 (`open-sse/services/rateLimitManager.ts`) 由`RATE_LIMIT_MAX_WAIT_MS`、 `RATE_LIMIT_MAX_QUEUE_DEPTH`和`RATE_LIMIT_AUTO_ENABLE` —分别控制，请参阅`.env.example`。
+
+**升级说明：保存的请求正文限制现在也适用于聊天。**之前在“设置>高级>请求主体限制 (`maxBodySizeMb`)”下保存的限制现在也适用于`/v1/chat/completions`和`/v1/responses`。在此更改之前，无论保存的限制值是多少，这两条路由都接受最多 50 MB的请求正文，因此具有较低保存限制的安装开始拒绝高于其的聊天正文。从未保存限制的安装将保留 50 MB默认值。
+
+拒绝是HTTP `413`其中`error.code`设置为`PAYLOAD_TOO_LARGE` ， `error.type`设置为`payload_too_large`。该消息指定有效的限制：当声明的`Content-Length`超过它时为`Request body too large. Maximum allowed: 10 MB` ，或者当实际读取的字节超过时为`Request body too large for chat completions (max 10 MB).` 。这和上面的`413 body_exceeds_budget`不一样，后者来自内存预算，不会被这个设置改变。
+
+要提高限制，请在`/dashboard/settings/advanced`中保存更高的值，或使用`{"maxBodySizeMb": 50}`发送`PATCH /api/settings` 。接受 1 到 500 MB的值，无需重新启动即可应用，50 恢复之前的聊天限制。其他两个限制仍然可以阻止更大的主体： `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`在设置时也会限制已保存的限制，并且对于超过 50 MB任何内容，必须单独提高 Kubernetes 入口注释`proxy-body-size` （发货清单中的`50m` ）。
 
 **如何验证修复是否生效**：快速连续运行两次智能体/cron，并确认两次都成功。修复前，第二次运行通常会抛出 `429`/`401`。修复后，失败（如有）会被透明重试，调用最终能够完成。你也可以执行 `curl /monitoring/health`，观察提供者连接上的 `rateLimitedUntil` 字段，以及受影响提供者的 `circuitBreakers.providerBreakers[].state`——其状态为 `CLOSED`、`DEGRADED`、`OPEN` 或 `HALF_OPEN` 之一（参见 `src/shared/utils/circuitBreaker.ts`）；持续失败的提供者会依次从 `CLOSED → DEGRADED → OPEN` 切换，直到重置窗口允许探测请求通过（`HALF_OPEN`）。
 

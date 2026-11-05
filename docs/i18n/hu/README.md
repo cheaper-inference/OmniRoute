@@ -27,9 +27,9 @@
 
 > **Használd a saját szolgáltatói fiókjaidat.** Ez egy külön-külön jogosult harmadik féltől származó ingyenes csomagok összesített becslése, nem pedig az OmniRoute által biztosított tokenkeret. Regisztrálj, szerezd be a szükséges hitelesítő adatokat, majd csatlakoztasd az általad használható szolgáltatókat; minden szolgáltató maga határozza meg a korlátait, elérhetőségét és feltételeit.
 >
-> Az ingyenes csomagok kézi kombinálása nehézkes — több tucat SDK, több tucat sebességkorlát, és fogalmad sincs, valójában mennyivel rendelkezel. Az OmniRoute **34 ismétlődő készletkulcs alatt 484 ingyenes csomagbejegyzést** tart nyilván, és a token-összesítést a **17 közzétett, pozitív havi kerettel rendelkező készlet, valamint öt modellenkénti Groq-korlát** alapján számítja ki, a közös készletek duplikációinak kiszűrésével. A csak regionális személyazonosság-ellenőrzés után elérhető kvóták (jelenleg: ModelScope) külön jelennek meg, +~6M értékkel a regionális személyazonosság-ellenőrzés mögött, és soha nem kerülnek bele a kiemelt összesítésbe. Az eredmény továbbra is látható az irányítópulton (`/dashboard/free-tiers`).
+> Az ingyenes csomagok kézi kombinálása nehézkes — több tucat SDK, több tucat sebességkorlát, és fogalmad sincs, valójában mennyivel rendelkezel. Az OmniRoute **34 ismétlődő készletkulcs alatt 486 ingyenes csomagbejegyzést** tart nyilván, és a token-összesítést a **17 közzétett, pozitív havi kerettel rendelkező készlet, valamint öt modellenkénti Groq-korlát** alapján számítja ki, a közös készletek duplikációinak kiszűrésével. A csak regionális személyazonosság-ellenőrzés után elérhető kvóták (jelenleg: ModelScope) külön jelennek meg, +~6M értékkel a regionális személyazonosság-ellenőrzés mögött, és soha nem kerülnek bele a kiemelt összesítésbe. Az eredmény továbbra is látható az irányítópulton (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute ingyenes csomagkeret-kártyája: ~1.62B ingyenes token havonta stabilan, az első hónapban akár ~2.22B regisztrációs kreditekkel, 34 dokumentált, ismétlődő készletkulcsból, amelyek 484 katalogizált ingyenes csomagbejegyzést fednek le egyetlen végpont mögött. Őszinte, készletenként deduplikált számítás — minden közös készlet csak egyszer szerepel, beleértve a 17 ismétlődő készletet közzétett, pozitív havi tokenkerettel, valamint az öt modellenkénti Groq-korlátot; 12 szolgáltató az ÁSZF-kockázati katalógusban kerülendőként van megjelölve, így te dönthetsz. A keretsáv tartalmazza a Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (öt modellenkénti korlát) és kisebb készleteket, továbbá az első havi regisztrációs krediteket és a tartósan ingyenes, tokenkorlát nélküli szolgáltatókat külön jeleníti meg, így azok soha nem növelik a kiemelt összesítést. Élő felhasználási és fennmaradó érték a /dashboard/free-tiers oldalon."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute ingyenes csomagkeret-kártyája: ~1.62B ingyenes token havonta stabilan, az első hónapban akár ~2.22B regisztrációs kreditekkel, 34 dokumentált, ismétlődő készletkulcsból, amelyek 486 katalogizált ingyenes csomagbejegyzést fednek le egyetlen végpont mögött. Őszinte, készletenként deduplikált számítás — minden közös készlet csak egyszer szerepel, beleértve a 17 ismétlődő készletet közzétett, pozitív havi tokenkerettel, valamint az öt modellenkénti Groq-korlátot; 12 szolgáltató az ÁSZF-kockázati katalógusban kerülendőként van megjelölve, így te dönthetsz. A keretsáv tartalmazza a Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (öt modellenkénti korlát) és kisebb készleteket, továbbá az első havi regisztrációs krediteket és a tartósan ingyenes, tokenkorlát nélküli szolgáltatókat külön jeleníti meg, így azok soha nem növelik a kiemelt összesítést. Élő felhasználási és fennmaradó érték a /dashboard/free-tiers oldalon."/>
 
 > Az élő `/dashboard/free-tiers` oldal animált összefoglalója. A teljes módszertan (készletduplikációk kiszűrése, kreditszintek, szolgáltatói feltételek): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -74,7 +74,7 @@
 |                                 |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------------- | :---------------------: | :---------: | :-------------------: |
 | 🌐 Szolgáltatók                 |           352           |   **358**   |          380          |
-| 🧠 Egyedi chatmodell-azonosítók |          1320           |  **1374**   |         1494          |
+| 🧠 Egyedi chatmodell-azonosítók |          1320           |  **1374**   |         1499          |
 | 🖼️ Modalitáshíd                 | 🆕 látás + hang + videó |      ✓      |           ✓           |
 | 📡 Radar ingyenes katalógusa    | 🆕 önkéntes bekapcsolás |      ✓      |           ✓           |
 | ⚖️ Kvótatudatos ütemezés        |     🆕 Quota-Share      |      ✓      |           ✓           |
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Az Ígéret — Egy végpont és 380 szolgáltató. Az automatikus átváltás folyamatos útvonalválasztást biztosít, amíg elérhető egy másik egészséges cél. Hat pillér: ellenálló átváltás 380 szolgáltató között · akár 95% token megtakarítás jogosult munkafolyamatoknál · 0 Ft kezdéshez 150+ ingyenes csomaggal és 52 ismétlődő/kulcs nélküli örökké ingyenes szolgáltatóval · 39 CLI/ügynök integráció egyetlen konfigurációval · OpenAI, Claude, Gemini és Responses API kompatibilitás a /v1 végponton · gyártási kontrollok, beleértve az áramkörmegszakítókat, TLS rejtőzködést, MCP 110 eszközöket, A2A-t, memóriát, védőkorlátokat, értékeléseket és 56 000+ statikus teszt deklarációt 7 800+ nyomon követett tesztfájlban."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Az Ígéret — Egy végpont és 380 szolgáltató. Az automatikus átváltás folyamatos útvonalválasztást biztosít, amíg elérhető egy másik egészséges cél. Hat pillér: ellenálló átváltás 380 szolgáltató között · akár 95% token megtakarítás jogosult munkafolyamatoknál · 0 Ft kezdéshez 150+ ingyenes csomaggal és 54 ismétlődő/kulcs nélküli örökké ingyenes szolgáltatóval · 39 CLI/ügynök integráció egyetlen konfigurációval · OpenAI, Claude, Gemini és Responses API kompatibilitás a /v1 végponton · gyártási kontrollok, beleértve az áramkörmegszakítókat, TLS rejtőzködést, MCP 110 eszközöket, A2A-t, memóriát, védőkorlátokat, értékeléseket és 56 000+ statikus teszt deklarációt 7 800+ nyomon követett tesztfájlban."/>
 
 <br/>
 <br/>
@@ -693,7 +693,7 @@ megóvja a titkos adatokat a shell előzményétől. → [CLI Integrációk](doc
 
 </div>
 
-> **380 regisztrált szolgáltató** a kanonikus chat, média, kereső, helyi, felhő-ügynök és rendszer gyűjteményekben, köztük **156, amely rendelkezik `hasFree: true` felfedezési metadattal**. A chat modell regiszter **241 szolgáltatót / 3 109 egyedi szolgáltató-modell párost / 1 494 nyers modell azonosítót** tartalmaz; a különálló ingyenes-keret katalógusban **484 modell-soros bejegyzés**, **34 ismétlődő pool** és **52 ismétlődő/kulcs nélküli örökké ingyenes szolgáltató** található. Ezek szándékosan eltérő nevezők; a definíciók és a pool-duplikációtól mentes számítások a [Szolgáltató Referencia](docs/reference/PROVIDER_REFERENCE.md) és az [Ingyenes Szintek](docs/reference/FREE_TIERS.md) oldalon találhatók.
+> **380 regisztrált szolgáltató** a kanonikus chat, média, kereső, helyi, felhő-ügynök és rendszer gyűjteményekben, köztük **156, amely rendelkezik `hasFree: true` felfedezési metadattal**. A chat modell regiszter **241 szolgáltatót / 3 114 egyedi szolgáltató-modell párost / 1 499 nyers modell azonosítót** tartalmaz; a különálló ingyenes-keret katalógusban **486 modell-soros bejegyzés**, **34 ismétlődő pool** és **54 ismétlődő/kulcs nélküli örökké ingyenes szolgáltató** található. Ezek szándékosan eltérő nevezők; a definíciók és a pool-duplikációtól mentes számítások a [Szolgáltató Referencia](docs/reference/PROVIDER_REFERENCE.md) és az [Ingyenes Szintek](docs/reference/FREE_TIERS.md) oldalon találhatók.
 
 <div align="center">
 
@@ -1373,7 +1373,7 @@ Kanonikus mérőszámok 2026-10-18-án: **1.976 egyedi videó** · **20.220.289 
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Hibatűrési útmutató</a></b></td><td>Megszakítók, lehűlési idők, sor, a túlterhelési rohamok megelőzése, TLS-hamisítás</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Automatikus kombinációs motor</a></b></td><td>16 tényezős pontozás, módcsomagok, öngyógyítás</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Proxyútmutató</a></b></td><td>3 szintű proxyrendszer, 1proxy piactér, registry CRUD-műveletek</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Ingyenes csomagok</a></b></td><td>Összesített katalógus: 34 dokumentált, rendszeresen elérhető készlet / 484 katalogizált ingyenes csomagbejegyzés</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Ingyenes csomagok</a></b></td><td>Összesített katalógus: 34 dokumentált, rendszeresen elérhető készlet / 486 katalogizált ingyenes csomagbejegyzés</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Funkciógaléria</a></b></td><td>Vizuális dashboardbemutató képernyőképekkel</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Kódalap dokumentációja</a></b></td><td>Kezdőbarát áttekintés a kódalapról</td></tr>
 </table>

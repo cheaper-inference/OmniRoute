@@ -140,7 +140,7 @@ reasoning นี้ผ่าน executor ในรูปแบบ delta ขอ�
 
 **สถานะสิ้นสุด (Terminal states) (ไม่ใช่คูลดาวน์):**
 
-- `banned` — ตั้งค่าโดยการตรวจจับ banned-keyword / บัญชีถูกแบน (ดู [BAN_DETECTION](../security/BAN_DETECTION.md)) และโดยการถูก upstream ปฏิเสธ request ติดต่อกันสามครั้ง (`request_rejected` เช่น Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); การถูกปฏิเสธเพียงครั้งเดียวจะทำได้แค่คูลดาวน์การเชื่อมต่อ
+- `banned` — ตั้งค่าโดยการตรวจจับคำหลักที่ถูกแบน / การแบนบัญชี (ดู [BAN_DETECTION](../security/BAN_DETECTION.md) ) การปฏิเสธต่อคำขอต้นน้ำ (`request_rejected` เช่น Anthropic OAuth 403 "ไม่อนุญาตคำขอ") ไม่เคยตั้งค่า: จะถูกนับต่อการเชื่อมต่อและโมเดล และนำโมเดลนั้นออกจากการหมุนโดยมีคูลดาวน์ที่เพิ่มขึ้นต่อยอดที่ `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 ชั่วโมง) หรือทำให้การเชื่อมต่อเย็นลงเมื่อไม่รู้จักโมเดล — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (เปลี่ยนเป็นสถานะสิ้นสุดหลัง retry ตามจำนวนที่จำกัด — `EXPIRED_RETRY_MAX = 3` พร้อม exponential backoff — เพื่อให้ข้อผิดพลาด OAuth ชั่วคราวสามารถกู้คืนตัวเองได้ก่อนที่บัญชีจะถูกปิดใช้งานถาวร)
 - `credits_exhausted`
 

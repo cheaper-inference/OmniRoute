@@ -27,9 +27,9 @@
 
 > **Uporabite lastne račune pri ponudnikih.** To je ocenjena skupna vrednost ločeno upravičenih brezplačnih paketov tretjih ponudnikov, ne pa dodelitev žetonov s strani OmniRoute. Registrirajte se, po potrebi pridobite poverilnice in povežite ponudnike, ki jih lahko uporabljate; vsak ponudnik sam določa svoje omejitve, razpoložljivost in pogoje.
 >
-> Ročno združevanje brezplačnih paketov je naporno — na desetine SDK-jev, na desetine omejitev hitrosti in brez predstave, koliko jih dejansko imate. OmniRoute katalogizira **484 vnosov brezplačnih paketov v 34 ponavljajočih se ključih bazenov** in izračuna glavni podatek o žetonih iz **17 bazenov z objavljenim pozitivnim mesečnim proračunom ter petih omejitev Groq na model**, pri čemer odstrani podvajanja po skupnem bazenu. Kvote, ki se odprejo šele po regionalnem preverjanju identitete (trenutno: ModelScope), so prikazane ločeno, +~6M po regionalnem preverjanju identitete, in niso nikoli vključene v glavni podatek. Rezultat ostaja viden na nadzorni plošči (`/dashboard/free-tiers`).
+> Ročno združevanje brezplačnih paketov je naporno — na desetine SDK-jev, na desetine omejitev hitrosti in brez predstave, koliko jih dejansko imate. OmniRoute katalogizira **486 vnosov brezplačnih paketov v 34 ponavljajočih se ključih bazenov** in izračuna glavni podatek o žetonih iz **17 bazenov z objavljenim pozitivnim mesečnim proračunom ter petih omejitev Groq na model**, pri čemer odstrani podvajanja po skupnem bazenu. Kvote, ki se odprejo šele po regionalnem preverjanju identitete (trenutno: ModelScope), so prikazane ločeno, +~6M po regionalnem preverjanju identitete, in niso nikoli vključene v glavni podatek. Rezultat ostaja viden na nadzorni plošči (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Kartica brezplačnega proračuna OmniRoute: ~1,62B brezplačnih žetonov na mesec, stabilno, do ~2,22B v prvem mesecu z dobroimetjem ob registraciji, iz 34 dokumentiranih ponavljajočih se ključev bazenov, ki pokrivajo 484 katalogiziranih vnosov brezplačnih paketov prek ene končne točke. Pošten izračun z deduplikacijo bazenov — vsak skupni bazen je upoštevan enkrat, vključno s 17 ponavljajočimi se bazeni z objavljenim pozitivnim mesečnim proračunom žetonov ter petimi omejitvami Groq na model; 12 ponudnikov je v katalogu tveganj pogojev označenih kot ponudniki, ki se jim je treba izogniti, zato se odločite sami. Vrstica proračuna vključuje Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (pet omejitev na model) in manjše bazene ter dobroimetja ob registraciji v prvem mesecu in ponudnike, ki so trajno brezplačni brez omejitve števila žetonov, prikazane ločeno, da nikoli ne napihnejo glavnega podatka. Trenutna poraba/preostanek na /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Kartica brezplačnega proračuna OmniRoute: ~1,62B brezplačnih žetonov na mesec, stabilno, do ~2,22B v prvem mesecu z dobroimetjem ob registraciji, iz 34 dokumentiranih ponavljajočih se ključev bazenov, ki pokrivajo 486 katalogiziranih vnosov brezplačnih paketov prek ene končne točke. Pošten izračun z deduplikacijo bazenov — vsak skupni bazen je upoštevan enkrat, vključno s 17 ponavljajočimi se bazeni z objavljenim pozitivnim mesečnim proračunom žetonov ter petimi omejitvami Groq na model; 12 ponudnikov je v katalogu tveganj pogojev označenih kot ponudniki, ki se jim je treba izogniti, zato se odločite sami. Vrstica proračuna vključuje Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (pet omejitev na model) in manjše bazene ter dobroimetja ob registraciji v prvem mesecu in ponudnike, ki so trajno brezplačni brez omejitve števila žetonov, prikazane ločeno, da nikoli ne napihnejo glavnega podatka. Trenutna poraba/preostanek na /dashboard/free-tiers."/>
 
 > Animirani povzetek trenutne strani `/dashboard/free-tiers`. Celotna metodologija (deduplikacija bazenov, ravni dobroimetja, pogoji ponudnikov): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -74,7 +74,7 @@
 |                                       |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------------------- | :-----------------------: | :---------: | :-------------------: |
 | 🌐 Ponudniki                          |            352            |   **358**   |          380          |
-| 🧠 Enolični ID-ji klepetalnih modelov |           1320            |  **1374**   |         1494          |
+| 🧠 Enolični ID-ji klepetalnih modelov |           1320            |  **1374**   |         1499          |
 | 🖼️ Most za modalnosti                 |   🆕 vid + zvok + video   |      ✓      |           ✓           |
 | 📡 Katalog brezplačnih vsebin Radar   | 🆕 z možnostjo privolitve |      ✓      |           ✓           |
 | ⚖️ Razporejanje z upoštevanjem kvot   |      🆕 Quota-Share       |      ✓      |           ✓           |
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obljuba — Ena končna točka in 380 ponudnikov. Samodejni preklop zagotavlja usmerjanje, dokler je na voljo še ena zdrava tarča. Šest stebrov: zanesljiv preklop med 380 ponudniki · do 95 % prihranka žetonov pri ustreznih delovnih obremenitvah · 0 $ za začetek s 150+ brezplačnimi paketi in 52 ponavljajočimi/brezključnimi ponudniki za vedno brezplačno · 39 CLI/agent integracij prek ene konfiguracije · združljivost z OpenAI, Claude, Gemini in Responses API na /v1 · produkcijski nadzori, vključno s preklopniki tokokroga, TLS stealth, MCP 110 orodji, A2A, pomnilnikom, varovali, evalvacijami in 56.000+ statičnimi testnimi deklaracijami v več kot 7.800 spremljanih testnih datotekah."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obljuba — Ena končna točka in 380 ponudnikov. Samodejni preklop zagotavlja usmerjanje, dokler je na voljo še ena zdrava tarča. Šest stebrov: zanesljiv preklop med 380 ponudniki · do 95 % prihranka žetonov pri ustreznih delovnih obremenitvah · 0 $ za začetek s 150+ brezplačnimi paketi in 54 ponavljajočimi/brezključnimi ponudniki za vedno brezplačno · 39 CLI/agent integracij prek ene konfiguracije · združljivost z OpenAI, Claude, Gemini in Responses API na /v1 · produkcijski nadzori, vključno s preklopniki tokokroga, TLS stealth, MCP 110 orodji, A2A, pomnilnikom, varovali, evalvacijami in 56.000+ statičnimi testnimi deklaracijami v več kot 7.800 spremljanih testnih datotekah."/>
 
 <br/>
 <br/>
@@ -701,7 +701,7 @@ izven zgodovine vaše lupine. → [CLI integracije](docs/guides/CLI-INTEGRATIONS
 
 </div>
 
-> **380 registriranih ponudnikov** v kanoničnih zbirkah za klepet, medije, iskanje, lokalne, oblačne agente in sistemske storitve, vključno s **156, ki imajo `hasFree: true` metapodatke za odkrivanje**. Register modelov za klepet pokriva **241 ponudnikov / 3.109 različnih parov ponudnik-model / 1.494 surovih ID-jev modelov**; ločen katalog brezplačnih proračunov vsebuje **484 vrstic po modelu**, **34 ponavljajočih se skladov** in **52 ponudnikov, ki so vedno brezplačni (ponavljajoči/brez ključa)**. To so namerno različni imenovalci; definicije in izračuni brez podvajanja skladov so na voljo v [Referenca ponudnikov](docs/reference/PROVIDER_REFERENCE.md) in [Brezplačne stopnje](docs/reference/FREE_TIERS.md).
+> **380 registriranih ponudnikov** v kanoničnih zbirkah za klepet, medije, iskanje, lokalne, oblačne agente in sistemske storitve, vključno s **156, ki imajo `hasFree: true` metapodatke za odkrivanje**. Register modelov za klepet pokriva **241 ponudnikov / 3.114 različnih parov ponudnik-model / 1.499 surovih ID-jev modelov**; ločen katalog brezplačnih proračunov vsebuje **486 vrstic po modelu**, **34 ponavljajočih se skladov** in **54 ponudnikov, ki so vedno brezplačni (ponavljajoči/brez ključa)**. To so namerno različni imenovalci; definicije in izračuni brez podvajanja skladov so na voljo v [Referenca ponudnikov](docs/reference/PROVIDER_REFERENCE.md) in [Brezplačne stopnje](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1380,7 +1380,7 @@ Kanonične metrike na dan 2026-10-18: **1.976 edinstvenih videoposnetkov** · **
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Priročnik za odpornost</a></b></td><td>Odklopniki, čakalne dobe, čakalna vrsta, preprečevanje stampeda zahtev, ponarejanje TLS</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Mehanizem Auto-Combo</a></b></td><td>Točkovanje na podlagi 16 dejavnikov, paketi načinov, samozdravljenje</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Priročnik za posredniške strežnike</a></b></td><td>Tristopenjski sistem posredniških strežnikov, tržnica 1proxy, CRUD registra</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Brezplačne ravni</a></b></td><td>Združen imenik: 34 dokumentiranih ponavljajočih se zbirk / 484 katalogiziranih vnosov brezplačnih ravni</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Brezplačne ravni</a></b></td><td>Združen imenik: 34 dokumentiranih ponavljajočih se zbirk / 486 katalogiziranih vnosov brezplačnih ravni</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Galerija funkcij</a></b></td><td>Vizualni ogled nadzorne plošče s posnetki zaslona</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Dokumentacija kodne zbirke</a></b></td><td>Razlaga kodne zbirke, prijazna začetnikom</td></tr>
 </table>

@@ -143,7 +143,7 @@ ego ọdịnaya; oge oke stream na-arụ ọrụ nke onwe ya na ịkagbu onye ah
 
 **Ọnọdụ ikpeazụ (ABỤGHỊ oge nkwụsịtụ):**
 
-- `banned` — nke nchọpụta okwu machibidoro / machibido akaụntụ na-edobe (lee [BAN_DETECTION](../security/BAN_DETECTION.md)), na site na mmeju atọ n'usoro nke upstream maka arịrị ọ bụla (`request_rejected`, dị ka Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); otu mmeju na-ejụ naanị njikọ ahụ
+- `banned` — setịpụrụ site na nchọta isiokwu amachibidoro / mmachibido iwu akaụntụ (lee [BAN_DETECTION](../security/BAN_DETECTION.md) ). Ọjụjụ arịrịọ ọ bụla nke elu (`request_rejected`, eg Anthropic OAuth 403 "Achọghị arịrịọ") edobeghi ya: a na-agụ ha n'otu njikọ na ihe nlereanya wee wepụ ihe nlereanya ahụ site na ntụgharị na oyi oyi na-eto eto nke etinyere na `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h), ma ọ bụ mee ka njikọ ahụ dị jụụ ma ọ bụrụ na amaghị ihe nlereanya — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (na-agafe na ọnọdụ ikpeazụ mgbe nnwa nwere oke gafere — `EXPIRED_RETRY_MAX = 3` nwere backoff exponential — ka njehie OAuth nke oge obere nwee ike ịgwọ onwe ha tupu e kwụsịrị akaụntụ ahụ kpamkpam)
 - `credits_exhausted`
 

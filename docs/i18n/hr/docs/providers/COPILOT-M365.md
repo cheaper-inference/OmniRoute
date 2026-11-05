@@ -67,23 +67,13 @@ uvozu HAR datoteke dekodira se vrijeme isteka JWT-a i prikazuje preostalo vrijem
 
 ## Trajanje i osvježavanje tokena
 
-`access_token` je kratkotrajan (obično **~75 minuta**). Nakon isteka pružatelj
-prijavljuje pogrešku veze i morate ponovno dohvatiti vjerodajnicu.
+`access_token` je kratkog vijeka (obično **~ 75 minuta** ). Bez upotrebljivog tokena za osvježavanje, morate ponovno uhvatiti vjerodajnicu nakon isteka.
 
 ### Automatsko osvježavanje pomoću `refreshToken`
 
-Kako biste izbjegli ručno ponovno dohvaćanje, Microsoftov token za osvježavanje možete pohraniti u
-**Advanced Settings → providerSpecificData** veze:
+Kod pružatelja Microsoft 365 **Dodaj vezu** ili **Uredi vezu** dijalog, otvori **Napredne postavke → Osvježi token (neobavezno)** . Zalijepite Microsoft OAuth token za osvježavanje za `substrate.office.com/sydney` opseg i spremite. Unos je maskiran i nikada se unaprijed ne popunjava pohranjenim tokenom. Prilikom uređivanja ostavite prazno kako biste zadržali postojeći token; zalijepite novi token da ga zamijenite.
 
-| Polje          | Opis                                                                         |
-| -------------- | ---------------------------------------------------------------------------- |
-| `refreshToken` | Microsoft OAuth token za osvježavanje za opseg `substrate.office.com/sydney` |
-| `tier`         | `individual` (zadano), `edu` ili `enterprise`                                |
-
-Token za osvježavanje pribavite putem Microsoftova tijeka koda uređaja ili autorizacijskog koda
-s opsegom `substrate.office.com/sydney`. Kada je postavljen `refreshToken`, OmniRoute
-preventivno osvježava `access_token` prije svakog zahtjeva, stoga ga ne morate
-ponovno dohvaćati nakon svakog isteka od približno 75 minuta.
+Nabavite token za osvježavanje iz Microsoft koda uređaja ili protoka koda autorizacije u opsegu `substrate.office.com/sydney`; nadzorna ploča to ne preuzima umjesto vas. S konfiguriranim tokenom za osvježavanje, OmniRoute provjerava `access_token` prije zahtjeva i osvježava ga samo kada je potrebno osvježavanje. Uspješno osvježavanje također zadržava rotirani token osvježavanja, izbjegavajući ručno ponovno snimanje dok token osvježavanja ostaje važeći.
 
 Ako `refreshToken` nije postavljen, morate ručno ponovno dohvatiti WebSocket vjerodajnicu
 nakon svakog isteka.
@@ -96,8 +86,7 @@ nakon svakog isteka.
 | `edu`        | `included` | Obrazovni M365 Copilot             |
 | `enterprise` | `work`     | M365 Copilot za poslovne korisnike |
 
-Postavite razinu u **Advanced Settings → providerSpecificData → tier**. Razina utječe
-na usmjeravanje u usluzi BizChat i pristup modelima.
+Postavite razinu **Napredne postavke → Copilot razina** . Razina utječe na BizChat usmjeravanje i pristup modelu.
 
 ## Sigurnosni model
 
@@ -125,7 +114,7 @@ na usmjeravanje u usluzi BizChat i pristup modelima.
 To je očekivano. Bez `refreshToken` pristupni je token kratkotrajan. Možete:
 
 - Ponovno dohvatiti vjerodajnicu iz alata DevTools ili
-- Konfigurirati `refreshToken` u naprednim postavkama radi automatskog osvježavanja.
+- Konfigurirati **Napredne postavke → Refresh token (neobavezno)** u dijaloškom okviru Dodaj ili Uredi vezu za automatsko osvježavanje.
 
 ### Testiranje veze uspijeva, ali razgovor vraća 401
 

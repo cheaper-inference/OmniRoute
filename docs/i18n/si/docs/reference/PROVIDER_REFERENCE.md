@@ -6,7 +6,7 @@
 
 > `src/shared/constants/providers.ts` වෙතින් **ස්වයංක්රීයව ජනනය කරන ලදී** — අතින් සංස්කරණය නොකරන්න.
 > මෙය භාවිතයෙන් නැවත ජනනය කරන්න: `npm run gen:provider-reference`
-> **අවසන් වරට ජනනය කළේ:** 2026-10-27
+> **අවසන් වරට ජනනය කළේ:** 2026-11-05
 
 මුළු සැපයුම්කරුවන් ගණන: **380**. පහත ප්රවර්ග අනුව වෙන් කිරීම බලන්න.
 
@@ -466,7 +466,7 @@
 
 - නාමාවලිය: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - රෙජිස්ට්රිය (එක් එක් මොඩලයට අදාළ විස්තර): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- ක්රියාත්මක කරන්නන්: [`open-sse/executors/`](../../open-sse/executors/) (ක්රියාත්මක කිරීම් 158ක්)
+- ක්රියාත්මක කරන්නන්: [`open-sse/executors/`](../../open-sse/executors/) (ක්රියාත්මක කිරීම් 162ක්)
 - පරිවර්තකයන්: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## මෙයද බලන්න

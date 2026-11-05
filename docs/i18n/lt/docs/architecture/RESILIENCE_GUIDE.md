@@ -146,7 +146,7 @@ atšaukimas (`open-sse/executors/kiro/reasoning.ts`).
 
 **Galutinės būsenos (NE atvėsimai):**
 
-- `banned` — nustatoma uždraustų raktinių žodžių / paskyros užblokavimo aptikimo (žr. [BAN_DETECTION](../security/BAN_DETECTION.md)) ir po trijų iš eilės gautų upstream atskirų užklausų atmetimų (`request_rejected`, pvz., Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); vienas atmetimas jungtį tik atvėsina
+- `banned` — nustatytas pagal uždrausto raktinio žodžio / paskyros uždraudimo aptikimą (žr. [BAN_DETECTION](../security/BAN_DETECTION.md) ). Atmetimai pagal užklausą prieš srovę (`request_rejected`, pvz., Anthropic OAuth 403 "Užklausa neleidžiama") jo niekada nenustato: jie skaičiuojami kiekvienam ryšiui ir modeliui ir pašalina tą modelį iš rotacijos, augant vėsinimo ribai `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h), arba atvėsina ryšį, kai nežinomas joks modelis — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (pereina į galutinę būseną po apriboto pakartotinių bandymų skaičiaus — `EXPIRED_RETRY_MAX = 3` su eksponentiniu atidėjimu — kad laikinos OAuth klaidos spėtų savaime išsispręsti, kol paskyra visam laikui neišjungiama)
 - `credits_exhausted`
 

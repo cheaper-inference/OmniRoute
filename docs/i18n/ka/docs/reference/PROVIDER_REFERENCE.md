@@ -6,7 +6,7 @@
 
 > **ავტომატურად გენერირებული** `src/shared/constants/providers.ts`-დან — ხელით არ დაარედაქტიროთ.
 > ხელახლა გენერირება: `npm run gen:provider-reference`
-> **ბოლო გენერირება:** 2026-10-27
+> **ბოლო გენერირება:** 2026-11-05
 
 პროვაიდერების საერთო რაოდენობა: **380**. იხილეთ ქვემოთ კატეგორიების მიხედვით დაყოფა.
 
@@ -466,7 +466,7 @@
 
 - კატალოგი: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - რეესტრი (დეტალები თითოეული მოდელისთვის): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- შემსრულებლები: [`open-sse/executors/`](../../open-sse/executors/) (158 იმპლემენტაცია)
+- შემსრულებლები: [`open-sse/executors/`](../../open-sse/executors/) (162 იმპლემენტაცია)
 - ტრანსლატორები: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## აგრეთვე იხილეთ

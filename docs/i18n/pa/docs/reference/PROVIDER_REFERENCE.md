@@ -6,7 +6,7 @@
 
 > `src/shared/constants/providers.ts` ਤੋਂ **ਆਪਣੇ-ਆਪ ਤਿਆਰ ਕੀਤਾ ਗਿਆ** — ਹੱਥੀਂ ਸੋਧ ਨਾ ਕਰੋ।
 > ਇਸ ਨਾਲ ਮੁੜ ਤਿਆਰ ਕਰੋ: `npm run gen:provider-reference`
-> **ਆਖਰੀ ਵਾਰ ਤਿਆਰ ਕੀਤਾ ਗਿਆ:** 2026-10-27
+> **ਆਖਰੀ ਵਾਰ ਤਿਆਰ ਕੀਤਾ ਗਿਆ:** 2026-11-05
 
 ਕੁੱਲ ਪ੍ਰਦਾਤਾ: **380**। ਹੇਠਾਂ ਸ਼੍ਰੇਣੀ ਅਨੁਸਾਰ ਵੇਰਵਾ ਵੇਖੋ।
 
@@ -466,7 +466,7 @@
 
 - ਕੈਟਾਲਾਗ: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - ਰਜਿਸਟਰੀ (ਹਰੇਕ ਮਾਡਲ ਦੇ ਵੇਰਵੇ): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- ਐਗਜ਼ਿਕਿਊਟਰ: [`open-sse/executors/`](../../open-sse/executors/) (158 ਇੰਪਲੀਮੈਂਟੇਸ਼ਨਾਂ)
+- ਐਗਜ਼ਿਕਿਊਟਰ: [`open-sse/executors/`](../../open-sse/executors/) (162 ਇੰਪਲੀਮੈਂਟੇਸ਼ਨਾਂ)
 - ਟ੍ਰਾਂਸਲੇਟਰ: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## ਇਹ ਵੀ ਵੇਖੋ

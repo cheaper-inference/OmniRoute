@@ -67,23 +67,13 @@ HAR decodează data expirării JWT-ului și afișează durata de viață rămas�
 
 ## Durata de viață și reîmprospătarea tokenului
 
-`access_token` are o durată scurtă de viață (de obicei **~75 de minute**). După expirare, furnizorul
-raportează o eroare de conexiune și trebuie să capturați din nou acreditarea.
+`access_token` este de scurtă durată (de obicei **~ 75 de minute** ). Fără un token de reîmprospătare utilizabil, trebuie să recapturați acreditările după expirare.
 
 ### Reîmprospătarea automată cu `refreshToken`
 
-Pentru a evita recapturarea manuală, puteți stoca un token de reîmprospătare Microsoft în
-**Advanced Settings → providerSpecificData** pentru conexiune:
+În furnizorul Microsoft 365 **Adăugați conexiune** sau **Editați conexiunea** dialog, deschide **Setări avansate → Refresh token (opțional)** . Lipiți un simbol de reîmprospătare Microsoft OAuth pentru domeniul `substrate.office.com/sydney` și salvați. Intrarea este mascată și nu este niciodată precompletată cu simbolul stocat. Când editați, lăsați-l necompletat pentru a păstra simbolul existent; lipiți un nou token pentru al înlocui.
 
-| Câmp           | Descriere                                                                             |
-| -------------- | ------------------------------------------------------------------------------------- |
-| `refreshToken` | Token de reîmprospătare Microsoft OAuth pentru domeniul `substrate.office.com/sydney` |
-| `tier`         | `individual` (implicit), `edu` sau `enterprise`                                       |
-
-Obțineți tokenul de reîmprospătare dintr-un flux Microsoft bazat pe cod de dispozitiv sau cod de autorizare
-cu domeniul `substrate.office.com/sydney`. Când `refreshToken` este setat, OmniRoute
-reîmprospătează în prealabil `access_token` înaintea fiecărei solicitări, astfel încât să nu fie necesar să
-îl capturați din nou după fiecare expirare de ~75 de minute.
+Obțineți indicativul de reîmprospătare de la un cod de dispozitiv Microsoft sau un flux de cod de autorizare întins la `substrate.office.com/sydney`; tabloul de bord nu îl achiziționează pentru dvs. Cu un jeton de reîmprospătare configurat, OmniRoute verifică `access_token` înainte de solicitări și îl reîmprospătează numai atunci când are nevoie de reîmprospătare. O reîmprospătare reușită persistă, de asemenea, simbolul de reîmprospătare rotit, evitând recapturarea manuală în timp ce simbolul de reîmprospătare rămâne valabil.
 
 Dacă `refreshToken` nu este setat, trebuie să capturați din nou manual acreditarea WebSocket
 după fiecare expirare.
@@ -96,8 +86,7 @@ după fiecare expirare.
 | `edu`        | `included`   | M365 Copilot pentru educație           |
 | `enterprise` | `work`       | M365 Copilot pentru mediul profesional |
 
-Setați nivelul în **Advanced Settings → providerSpecificData → tier**. Nivelul influențează
-rutarea BizChat și accesul la modele.
+Setați nivelul **Setări avansate → Copilot tier** . Nivelul afectează rutarea BizChat și accesul la model.
 
 ## Model de securitate
 
@@ -125,7 +114,7 @@ rutarea BizChat și accesul la modele.
 Acest lucru este normal. Fără un `refreshToken`, tokenul de acces are o durată scurtă de viață. Puteți fie:
 
 - Să capturați din nou datele de autentificare din DevTools, fie
-- Să configurați un `refreshToken` în Setări avansate pentru reîmprospătare automată.
+- Configurați **Setări avansate → Jeton de reîmprospătare (opțional)** în caseta de dialog Adăugați sau Editați conexiunea pentru reîmprospătarea automată.
 
 ### Testarea conexiunii reușește, dar chatul returnează 401
 

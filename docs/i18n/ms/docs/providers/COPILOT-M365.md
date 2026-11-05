@@ -67,23 +67,13 @@ HAR menyahkod tamat tempoh JWT dan menunjukkan baki jangka hayat token.
 
 ## Jangka hayat dan penyegaran token
 
-`access_token` berjangka hayat pendek (biasanya **~75 minit**). Selepas tamat tempoh, penyedia
-melaporkan ralat sambungan dan anda perlu mendapatkan semula bukti kelayakan.
+`access_token` adalah jangka pendek (biasanya **~ 75 minit** ). Tanpa token muat semula yang boleh digunakan, anda mesti menangkap semula kelayakan selepas tamat tempoh.
 
 ### Penyegaran automatik dengan `refreshToken`
 
-Untuk mengelakkan keperluan mendapatkan semula bukti kelayakan secara manual, anda boleh menyimpan token penyegaran Microsoft dalam
-**Advanced Settings → providerSpecificData** sambungan:
+Dalam pembekal Microsoft 365 **Tambah sambungan** atau **Edit sambungan** dialog, buka **Token Segar Semula → Tetapan Lanjutan (pilihan)** . Tampalkan token muat semula Microsoft OAuth untuk skop `substrate.office.com/sydney` dan simpan. Input bertopeng dan tidak pernah diisi terlebih dahulu dengan token yang disimpan. Apabila mengedit, biarkan kosong untuk menyimpan token sedia ada; tampal token baharu untuk menggantikannya.
 
-| Medan          | Penerangan                                                                |
-| -------------- | ------------------------------------------------------------------------- |
-| `refreshToken` | Token penyegaran Microsoft OAuth untuk skop `substrate.office.com/sydney` |
-| `tier`         | `individual` (lalai), `edu` atau `enterprise`                             |
-
-Dapatkan token penyegaran daripada aliran kod peranti atau kod kebenaran Microsoft
-yang diskopkan kepada `substrate.office.com/sydney`. Apabila `refreshToken` ditetapkan, OmniRoute
-menyegarkan `access_token` terlebih dahulu sebelum setiap permintaan, jadi anda tidak perlu
-mendapatkannya semula selepas setiap tamat tempoh ~75 minit.
+Dapatkan token muat semula daripada kod peranti Microsoft atau aliran kod kebenaran yang diskop kepada `substrate.office.com/sydney`; papan pemuka tidak memperolehnya untuk anda. Dengan token muat semula yang dikonfigurasikan, OmniRoute menyemak `access_token` sebelum permintaan dan menyegarkannya hanya apabila ia memerlukan penyegaran. Muat semula yang berjaya juga mengekalkan token muat semula yang diputar, mengelakkan tangkapan semula manual sementara token muat semula kekal sah.
 
 Jika `refreshToken` tidak ditetapkan, anda perlu mendapatkan semula bukti kelayakan WebSocket secara manual
 selepas setiap tamat tempoh.
@@ -96,8 +86,7 @@ selepas setiap tamat tempoh.
 | `edu`        | `included` | M365 Copilot Pendidikan  |
 | `enterprise` | `work`     | M365 Copilot untuk Kerja |
 
-Tetapkan peringkat dalam **Advanced Settings → providerSpecificData → tier**. Peringkat tersebut mempengaruhi
-penghalaan BizChat dan akses model.
+Tetapkan peringkat itu **Tetapan Lanjutan → Copilot tier** . Peringkat mempengaruhi penghalaan BizChat dan akses model.
 
 ## Model keselamatan
 
@@ -118,7 +107,7 @@ penghalaan BizChat dan akses model.
 Ini adalah keadaan yang dijangka. Tanpa `refreshToken`, token akses mempunyai jangka hayat yang pendek. Anda boleh:
 
 - Tangkap semula bukti kelayakan daripada DevTools, atau
-- Konfigurasikan `refreshToken` dalam Tetapan Lanjutan untuk muat semula automatik.
+- Konfigurasikan **Tetapan Lanjutan → Refresh token (pilihan)** dalam dialog Tambah atau Edit sambungan untuk muat semula automatik.
 
 ### Uji Sambungan berjaya tetapi sembang mengembalikan 401
 

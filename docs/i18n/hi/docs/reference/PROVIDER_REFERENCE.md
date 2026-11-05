@@ -6,7 +6,7 @@
 
 > `src/shared/constants/providers.ts` से **स्वतः जनरेट किया गया** — इसे मैन्युअल रूप से संपादित न करें।
 > पुनः जनरेट करने के लिए: `npm run gen:provider-reference`
-> **अंतिम बार जनरेट किया गया:** 2026-10-27
+> **अंतिम बार जनरेट किया गया:** 2026-11-05
 
 कुल प्रदाता: **380**। नीचे श्रेणीवार विवरण देखें।
 
@@ -466,7 +466,7 @@
 
 - कैटलॉग: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - रजिस्ट्री (प्रति-मॉडल विवरण): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- निष्पादक: [`open-sse/executors/`](../../open-sse/executors/) (158 कार्यान्वयन)
+- निष्पादक: [`open-sse/executors/`](../../open-sse/executors/) (162 कार्यान्वयन)
 - अनुवादक: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## यह भी देखें

@@ -27,9 +27,9 @@
 
 > **Använd dina egna leverantörskonton.** Detta är en uppskattad totalsumma från separat kvalificerade kostnadsfria tredjepartsnivåer, inte en token-kvot från OmniRoute. Registrera dig, skaffa inloggningsuppgifter där det krävs och anslut de leverantörer du kan använda; varje leverantör styr sina gränser, sin tillgänglighet och sina villkor.
 >
-> Att stapla kostnadsfria nivåer manuellt är smärtsamt — dussintals SDK:er, dussintals hastighetsgränser och ingen aning om hur mycket du faktiskt har. OmniRoute katalogiserar **484 poster på kostnadsfria nivåer över 34 återkommande poolnycklar** och beräknar tokensiffran från **17 pooler med en publicerad positiv månadsbudget plus fem Groq-gränser per modell**, deduplicerade efter delad pool. Kvoter som endast blir tillgängliga efter en regional identitetskontroll (idag: ModelScope) visas separat, +~6 miljoner efter regional identitetsverifiering, och räknas aldrig in i totalsiffran. Resultatet förblir synligt på instrumentpanelen (`/dashboard/free-tiers`).
+> Att stapla kostnadsfria nivåer manuellt är smärtsamt — dussintals SDK:er, dussintals hastighetsgränser och ingen aning om hur mycket du faktiskt har. OmniRoute katalogiserar **486 poster på kostnadsfria nivåer över 34 återkommande poolnycklar** och beräknar tokensiffran från **17 pooler med en publicerad positiv månadsbudget plus fem Groq-gränser per modell**, deduplicerade efter delad pool. Kvoter som endast blir tillgängliga efter en regional identitetskontroll (idag: ModelScope) visas separat, +~6 miljoner efter regional identitetsverifiering, och räknas aldrig in i totalsiffran. Resultatet förblir synligt på instrumentpanelen (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoutes kort för budget för kostnadsfria nivåer: ~1,62 miljarder kostnadsfria tokens per månad i stadig takt, upp till ~2,22 miljarder den första månaden med registreringskrediter, från 34 dokumenterade återkommande poolnycklar som täcker 484 katalogiserade poster på kostnadsfria nivåer bakom en enda endpoint. Ärlig pooldeduplicerad beräkning — varje delad pool räknas en gång, inklusive 17 återkommande pooler med en publicerad positiv månatlig tokenbudget plus fem Groq-gränser per modell; 12 leverantörer är markerade som bör undvikas i villkorsriskkatalogen så att du kan fatta beslutet. Budgetfältet inkluderar Mistral 1 miljard, Nara 210 miljoner, LLM7 150 miljoner, xKiro 150 miljoner, Groq 30 miljoner (fem gränser per modell) och mindre pooler, plus registreringskrediter för den första månaden och leverantörer som är kostnadsfria permanent utan tokenbegränsning, vilka visas separat så att de aldrig blåser upp totalsiffran. Aktuellt använda och återstående mängder på /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoutes kort för budget för kostnadsfria nivåer: ~1,62 miljarder kostnadsfria tokens per månad i stadig takt, upp till ~2,22 miljarder den första månaden med registreringskrediter, från 34 dokumenterade återkommande poolnycklar som täcker 486 katalogiserade poster på kostnadsfria nivåer bakom en enda endpoint. Ärlig pooldeduplicerad beräkning — varje delad pool räknas en gång, inklusive 17 återkommande pooler med en publicerad positiv månatlig tokenbudget plus fem Groq-gränser per modell; 12 leverantörer är markerade som bör undvikas i villkorsriskkatalogen så att du kan fatta beslutet. Budgetfältet inkluderar Mistral 1 miljard, Nara 210 miljoner, LLM7 150 miljoner, xKiro 150 miljoner, Groq 30 miljoner (fem gränser per modell) och mindre pooler, plus registreringskrediter för den första månaden och leverantörer som är kostnadsfria permanent utan tokenbegränsning, vilka visas separat så att de aldrig blåser upp totalsiffran. Aktuellt använda och återstående mängder på /dashboard/free-tiers."/>
 
 > Animerad sammanfattning av den aktuella sidan `/dashboard/free-tiers`. Fullständig metodik (pooldeduplicering, kredittier, leverantörsvillkor): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -74,7 +74,7 @@
 |                                 |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------------- | :----------------------: | :---------: | :-------------------: |
 | 🌐 Leverantörer                 |           352            |   **358**   |          380          |
-| 🧠 Unika ID:n för chattmodeller |           1320           |  **1374**   |         1494          |
+| 🧠 Unika ID:n för chattmodeller |           1320           |  **1374**   |         1499          |
 | 🖼️ Modalitetsbrygga             |  🆕 syn + ljud + video   |      ✓      |           ✓           |
 | 📡 Radars kostnadsfria katalog  | 🆕 frivilligt deltagande |      ✓      |           ✓           |
 | ⚖️ Kvotmedveten schemaläggning  |      🆕 Quota-Share      |      ✓      |           ✓           |
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Löftet — En slutpunkt och 380 leverantörer. Automatisk fallback fortsätter routingen så länge ett annat friskt mål finns tillgängligt. Sex pelare: robust fallback över 380 leverantörer · upp till 95% tokensbesparing på berättigade arbetslaster · 0 kr att börja med 150+ gratistjänster och 52 återkommande/nyckellösa gratis-för-alltid-leverantörer · 39 CLI/agentintegrationer genom en konfiguration · OpenAI, Claude, Gemini och Responses API-kompatibilitet på /v1 · produktionskontroller inklusive circuit breakers, TLS stealth, MCP 110-verktyg, A2A, minne, skyddsräcken, utvärderingar och 56 000+ statiska testdeklarationer över 7 800+ spårade testfiler."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Löftet — En slutpunkt och 380 leverantörer. Automatisk fallback fortsätter routingen så länge ett annat friskt mål finns tillgängligt. Sex pelare: robust fallback över 380 leverantörer · upp till 95% tokensbesparing på berättigade arbetslaster · 0 kr att börja med 150+ gratistjänster och 54 återkommande/nyckellösa gratis-för-alltid-leverantörer · 39 CLI/agentintegrationer genom en konfiguration · OpenAI, Claude, Gemini och Responses API-kompatibilitet på /v1 · produktionskontroller inklusive circuit breakers, TLS stealth, MCP 110-verktyg, A2A, minne, skyddsräcken, utvärderingar och 56 000+ statiska testdeklarationer över 7 800+ spårade testfiler."/>
 
 <br/>
 <br/>
@@ -701,7 +701,7 @@ från din shellhistorik. → [CLI-integrationer](docs/guides/CLI-INTEGRATIONS.md
 
 </div>
 
-> **380 registrerade leverantörer** inom de kanoniska samlingarna för chatt, media, sök, lokal, moln-agent och system, inklusive **156 med `hasFree: true` upptäcktsmetadata**. Chattmodellregistret täcker **241 leverantörer / 3 109 unika leverantör-modell-par / 1 494 råa modell-ID:n**; den separata katalogen för gratisbudget har **484 rader per modell**, **34 återkommande pooler** och **52 återkommande/nyckellösa gratis-för-alltid-leverantörer**. Dessa är olika nämnare avsiktligt; definitioner och pool-avdubblerade beräkningar finns i [Leverantörsreferens](docs/reference/PROVIDER_REFERENCE.md) och [Gratisnivåer](docs/reference/FREE_TIERS.md).
+> **380 registrerade leverantörer** inom de kanoniska samlingarna för chatt, media, sök, lokal, moln-agent och system, inklusive **156 med `hasFree: true` upptäcktsmetadata**. Chattmodellregistret täcker **241 leverantörer / 3 114 unika leverantör-modell-par / 1 499 råa modell-ID:n**; den separata katalogen för gratisbudget har **486 rader per modell**, **34 återkommande pooler** och **54 återkommande/nyckellösa gratis-för-alltid-leverantörer**. Dessa är olika nämnare avsiktligt; definitioner och pool-avdubblerade beräkningar finns i [Leverantörsreferens](docs/reference/PROVIDER_REFERENCE.md) och [Gratisnivåer](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1381,7 +1381,7 @@ Kanoniska mätvärden den 2026-10-18: **1.976 unika videor** · **20.220.289 kä
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Resiliensguide</a></b></td><td>Kretsbrytare, nedkylningsperioder, kö, skydd mot överbelastning från samtidiga förfrågningar, TLS-spoofing</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Motor för automatiska kombinationer</a></b></td><td>Poängsättning utifrån 16 faktorer, lägespaket, självläkning</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Proxyguide</a></b></td><td>Proxy-system i tre nivåer, 1proxy-marknadsplats, CRUD för register</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Gratisnivåer</a></b></td><td>Konsoliderad katalog: 34 dokumenterade återkommande pooler / 484 katalogförda poster på gratisnivå</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Gratisnivåer</a></b></td><td>Konsoliderad katalog: 34 dokumenterade återkommande pooler / 486 katalogförda poster på gratisnivå</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Funktionsgalleri</a></b></td><td>Visuell rundtur i dashboarden med skärmbilder</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Dokumentation av kodbasen</a></b></td><td>Nybörjarvänlig genomgång av kodbasen</td></tr>
 </table>

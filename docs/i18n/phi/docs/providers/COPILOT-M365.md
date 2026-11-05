@@ -66,23 +66,13 @@ pag-import ng HAR ang pag-expire ng JWT at ipinapakita ang natitirang tagal ng t
 
 ## Tagal at pag-refresh ng token
 
-Panandalian ang `access_token` (karaniwang **~75 minuto**). Pagkatapos itong mag-expire, mag-uulat ang provider
-ng error sa koneksyon at kailangan mong kunin muli ang kredensyal.
+Ang `access_token` ay panandalian (karaniwang **~ 75 minuto** ). Kung walang magagamit na refresh token, dapat mong kunin muli ang kredensyal pagkatapos mag-expire.
 
 ### Awtomatikong pag-refresh gamit ang `refreshToken`
 
-Upang maiwasan ang manu-manong muling pagkuha, maaari kang mag-imbak ng Microsoft refresh token sa
-**Advanced Settings → providerSpecificData** ng koneksyon:
+Sa Microsoft 365 provider's **Magdagdag ng koneksyon** o **I-edit ang koneksyon** dialog, bukas **Mga Advanced na Setting → Refresh token (opsyonal)** . Mag-paste ng Microsoft OAuth refresh token para sa `substrate.office.com/sydney` scope at i-save. Ang input ay naka-mask at hindi kailanman napuno ng nakaimbak na token. Kapag nag-e-edit, iwanan itong blangko upang mapanatili ang umiiral na token; mag-paste ng bagong token para palitan ito.
 
-| Field          | Paglalarawan                                                                 |
-| -------------- | ---------------------------------------------------------------------------- |
-| `refreshToken` | Microsoft OAuth refresh token para sa scope na `substrate.office.com/sydney` |
-| `tier`         | `individual` (default), `edu`, o `enterprise`                                |
-
-Kunin ang refresh token mula sa isang Microsoft device-code o authorization-code flow
-na naka-scope sa `substrate.office.com/sydney`. Kapag nakatakda ang `refreshToken`, nire-refresh muna ng OmniRoute
-ang `access_token` bago ang bawat kahilingan, kaya hindi mo na kailangang kunin itong muli
-pagkatapos ng bawat ~75 minutong pag-expire.
+Kunin ang refresh token mula sa isang Microsoft device-code o authorization-code flow na saklaw sa `substrate.office.com/sydney`; hindi ito nakukuha ng dashboard para sa iyo. Sa isang refresh token na na-configure, sinusuri ng OmniRoute ang `access_token` bago humiling at nire-refresh lang ito kapag kailangan nitong i-refresh. Ang matagumpay na pag-refresh ay nagpapatuloy din sa rotated refresh token, na iniiwasan ang manu-manong muling pagkuha habang ang refresh token ay nananatiling wasto.
 
 Kung hindi nakatakda ang `refreshToken`, kailangan mong manu-manong kunin muli ang kredensyal ng WebSocket
 pagkatapos ng bawat pag-expire.
@@ -95,8 +85,7 @@ pagkatapos ng bawat pag-expire.
 | `edu`        | `included`  | M365 Copilot para sa Edukasyon |
 | `enterprise` | `work`      | M365 Copilot para sa Trabaho   |
 
-Itakda ang tier sa **Advanced Settings → providerSpecificData → tier**. Naaapektuhan ng tier
-ang pagruruta ng BizChat at access sa modelo.
+Itakda ang tier sa **Mga Advanced na Setting → Copilot tier** . Nakakaapekto ang tier sa pagruruta ng BizChat at pag-access sa modelo.
 
 ## Modelo ng seguridad
 
@@ -124,7 +113,7 @@ ang pagruruta ng BizChat at access sa modelo.
 Inaasahan ito. Kung walang `refreshToken`, panandalian lang ang access token. Maaari mong:
 
 - Kunin muli ang credential mula sa DevTools, o
-- Mag-configure ng `refreshToken` sa Advanced Settings para sa awtomatikong pag-refresh.
+- I-configure **Mga Advanced na Setting → Refresh token (opsyonal)** sa dialog na Magdagdag o Mag-edit ng koneksyon para sa awtomatikong pag-refresh.
 
 ### Pumapasa ang Test Connection ngunit nagbabalik ng 401 ang chat
 

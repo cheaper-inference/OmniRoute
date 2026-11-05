@@ -138,7 +138,7 @@ time-to-first-byte आणि परिणाम प्रत्येक कन�
 
 **टर्मिनल स्थिती (कूलडाउन नाहीत):**
 
-- `banned` — बॅन-कीवर्ड / खाते-बॅन डिटेक्शनद्वारे सेट (पहा [BAN_DETECTION](../security/BAN_DETECTION.md)), आणि तीन सलग अपस्ट्रीम प्रति-विनंती नकारांनी (`request_rejected`, उदा. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); एकल नकार फक्त कनेक्शन थंड करतो
+- `banned` — प्रतिबंधित-कीवर्ड / खाते-बंदी शोध ( [BAN_DETECTION](../security/BAN_DETECTION.md) पहा) द्वारे सेट केले आहे. अपस्ट्रीम प्रति-विनंती नाकारणे (`request_rejected`, उदा. Anthropic OAuth 403 "विनंती अनुमत नाही") ते कधीही सेट करत नाही: ते प्रति कनेक्शन आणि मॉडेल मोजले जातात आणि `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h) वर वाढत्या कूलडाऊनसह ते मॉडेल रोटेशनमधून बाहेर काढतात किंवा कोणतेही मॉडेल — `open-sse/services/requestRejectedStreak.ts` माहित नसताना कनेक्शन थंड करा.
 - `expired` (मर्यादित रिट्राय नंतर टर्मिनलमध्ये संक्रमण — `EXPIRED_RETRY_MAX = 3` एक्सपोनेंशियल बॅकऑफसह — जेणेकरून खाते कायमचे निष्क्रिय होण्यापूर्वी क्षणिक OAuth एरर्स स्वतःच बरे होऊ शकतात)
 - `credits_exhausted`
 

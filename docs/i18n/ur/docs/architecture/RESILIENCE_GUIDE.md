@@ -141,7 +141,7 @@ Kiro کے بائنری `reasoningContentEvent` فریمز جن میں غیر خ�
 
 **حتمی حالتیں (کول ڈاؤن نہیں):**
 
-- `banned` — بینڈ کلیدی الفاظ / اکاؤنٹ بین کی شناخت سے سیٹ ہوتی ہے (دیکھیں [BAN_DETECTION](../security/BAN_DETECTION.md))، اور اپ اسٹریم کی تین مسلسل فی درخواست انکاروں سے (`request_rejected`، مثلاً Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`)؛ ایک انکار صرف کنکشن کو کول ڈاؤن کرتا ہے
+- `banned` — ممنوعہ مطلوبہ الفاظ / اکاؤنٹ پر پابندی کا پتہ لگانے کے ذریعہ ترتیب دیا گیا ہے (دیکھیں [BAN_DETECTION](../security/BAN_DETECTION.md) )۔ اپ اسٹریم فی درخواست سے انکار (`request_rejected`، مثال کے طور پر Anthropic OAuth 403 "درخواست کی اجازت نہیں ہے") اسے کبھی بھی سیٹ نہیں کرتے ہیں: وہ فی کنکشن اور ماڈل شمار کیے جاتے ہیں اور `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h) پر بڑھتے ہوئے کولڈاؤن کے ساتھ اس ماڈل کو گردش سے باہر لے جاتے ہیں، یا جب کوئی ماڈل — `open-sse/services/requestRejectedStreak.ts` معلوم نہ ہو تو کنکشن کو ٹھنڈا کریں۔
 - `expired` (محدود دوبارہ کوششوں کے بعد حتمی حالت میں منتقل ہوتی ہے — `EXPIRED_RETRY_MAX = 3` ایکسپونینشل بیک آف کے ساتھ — تاکہ عارضی OAuth خرابیاں اکاؤنٹ کے مستقل غیر فعال ہونے سے پہلے خود ٹھیک ہو سکیں)
 - `credits_exhausted`
 

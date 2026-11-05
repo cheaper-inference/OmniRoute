@@ -27,9 +27,9 @@
 
 > **Medbring dine egne udbyderkonti.** Dette er et estimeret samlet tal på tværs af separat kvalificerende gratisniveauer hos tredjeparter – ikke en tokenbevilling fra OmniRoute. Opret konti, indhent legitimationsoplysninger, hvor det kræves, og tilslut de udbydere, du kan bruge; hver udbyder styrer selv sine grænser, sin tilgængelighed og sine vilkår.
 >
-> Det er besværligt at samle gratisniveauer manuelt – dusinvis af SDK'er, dusinvis af hastighedsgrænser og ingen idé om, hvor meget du faktisk har. OmniRoute katalogiserer **484 poster på gratisniveauet fordelt på 34 tilbagevendende poolnøgler** og beregner tokenoverskriften ud fra de **17 pools med et offentliggjort positivt månedligt budget samt fem per-model-Groq-grænser**, deduplikeret efter delt pool. Kvoter, der først åbnes efter et regionalt identitetstjek (i dag: ModelScope), vises separat, +~6M efter regional identitetsverificering, og medregnes aldrig i overskriften. Resultatet forbliver synligt på dashboardet (`/dashboard/free-tiers`).
+> Det er besværligt at samle gratisniveauer manuelt – dusinvis af SDK'er, dusinvis af hastighedsgrænser og ingen idé om, hvor meget du faktisk har. OmniRoute katalogiserer **486 poster på gratisniveauet fordelt på 34 tilbagevendende poolnøgler** og beregner tokenoverskriften ud fra de **17 pools med et offentliggjort positivt månedligt budget samt fem per-model-Groq-grænser**, deduplikeret efter delt pool. Kvoter, der først åbnes efter et regionalt identitetstjek (i dag: ModelScope), vises separat, +~6M efter regional identitetsverificering, og medregnes aldrig i overskriften. Resultatet forbliver synligt på dashboardet (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoutes kort over gratisniveauets budget: ~1,62 mia. gratis tokens pr. måned stabilt, op til ~2,22 mia. den første måned med tilmeldingskreditter, fra 34 dokumenterede tilbagevendende poolnøgler, der dækker 484 katalogiserede poster på gratisniveauet via ét endpoint. Ærlig pool-deduplikeret beregning – hver delt pool tælles én gang, inklusive 17 tilbagevendende pools med et offentliggjort positivt månedligt tokenbudget samt fem per-model-Groq-grænser; 12 udbydere er markeret som bør undgås i kataloget over vilkårsrisici, så du selv kan træffe beslutningen. Budgetlinjen inkluderer Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (fem per-model-grænser) og mindre pools samt tilmeldingskreditter for den første måned og permanent gratis udbydere uden tokenbegrænsning, som vises separat, så de aldrig kunstigt øger overskriften. Aktuelt forbrug og resterende mængde på /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoutes kort over gratisniveauets budget: ~1,62 mia. gratis tokens pr. måned stabilt, op til ~2,22 mia. den første måned med tilmeldingskreditter, fra 34 dokumenterede tilbagevendende poolnøgler, der dækker 486 katalogiserede poster på gratisniveauet via ét endpoint. Ærlig pool-deduplikeret beregning – hver delt pool tælles én gang, inklusive 17 tilbagevendende pools med et offentliggjort positivt månedligt tokenbudget samt fem per-model-Groq-grænser; 12 udbydere er markeret som bør undgås i kataloget over vilkårsrisici, så du selv kan træffe beslutningen. Budgetlinjen inkluderer Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (fem per-model-grænser) og mindre pools samt tilmeldingskreditter for den første måned og permanent gratis udbydere uden tokenbegrænsning, som vises separat, så de aldrig kunstigt øger overskriften. Aktuelt forbrug og resterende mængde på /dashboard/free-tiers."/>
 
 > Animeret oversigt over den aktuelle side `/dashboard/free-tiers`. Den fulde metode (pool-deduplikering, kreditniveauer, udbydervilkår): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -74,7 +74,7 @@
 |                                |       v3.8.50        | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------------ | :------------------: | :---------: | :-------------------: |
 | 🌐 Udbydere                    |         352          |   **358**   |          380          |
-| 🧠 Unikke chatmodel-id'er      |         1320         |  **1374**   |         1494          |
+| 🧠 Unikke chatmodel-id'er      |         1320         |  **1374**   |         1499          |
 | 🖼️ Modalitetsbro               | 🆕 syn + lyd + video |      ✓      |           ✓           |
 | 📡 Radars gratis katalog       |      🆕 tilvalg      |      ✓      |           ✓           |
 | ⚖️ Kvoteorienteret planlægning |    🆕 Quota-Share    |      ✓      |           ✓           |
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Løftet — Ét endpoint og 380 udbydere. Automatisk fallback fortsætter routing, så længe et andet sundt mål er tilgængeligt. Seks søjler: robust fallback på tværs af 380 udbydere · op til 95% tokensbesparelse på berettigede workloads · 0 kr. at starte med 150+ gratis niveauer og 52 tilbagevendende/nøgleløse gratis-for-evigt-udbydere · 39 CLI/agent-integrationer gennem én konfiguration · OpenAI, Claude, Gemini og Responses API-kompatibilitet på /v1 · produktionskontroller inkl. circuit breakers, TLS stealth, MCP 110-værktøjer, A2A, hukommelse, guardrails, evals og 56.000+ statiske testdeklarationer på tværs af 7.800+ overvågede testfiler."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Løftet — Ét endpoint og 380 udbydere. Automatisk fallback fortsætter routing, så længe et andet sundt mål er tilgængeligt. Seks søjler: robust fallback på tværs af 380 udbydere · op til 95% tokensbesparelse på berettigede workloads · 0 kr. at starte med 150+ gratis niveauer og 54 tilbagevendende/nøgleløse gratis-for-evigt-udbydere · 39 CLI/agent-integrationer gennem én konfiguration · OpenAI, Claude, Gemini og Responses API-kompatibilitet på /v1 · produktionskontroller inkl. circuit breakers, TLS stealth, MCP 110-værktøjer, A2A, hukommelse, guardrails, evals og 56.000+ statiske testdeklarationer på tværs af 7.800+ overvågede testfiler."/>
 
 <br/>
 <br/>
@@ -702,7 +702,7 @@ af din shell-historik. → [CLI-integrationer](docs/guides/CLI-INTEGRATIONS.md)
 
 </div>
 
-> **380 registrerede udbydere** på tværs af de kanoniske chat-, medie-, søge-, lokale-, cloud-agent- og systemkollektioner, inklusive **156 med `hasFree: true` opdagelsesmetadata**. Chatmodelregistret dækker **241 udbydere / 3.109 unikke udbyder-model-par / 1.494 rå model-ID'er**; det separate gratis-budgetkatalog har **484 rækker pr. model**, **34 tilbagevendende puljer** og **52 tilbagevendende/nøgleløse gratis-for-altid-udbydere**. Dette er forskellige nævnere med vilje; definitioner og pulje-afduplikerede beregninger findes i [Udbyderreference](docs/reference/PROVIDER_REFERENCE.md) og [Gratis niveauer](docs/reference/FREE_TIERS.md).
+> **380 registrerede udbydere** på tværs af de kanoniske chat-, medie-, søge-, lokale-, cloud-agent- og systemkollektioner, inklusive **156 med `hasFree: true` opdagelsesmetadata**. Chatmodelregistret dækker **241 udbydere / 3.114 unikke udbyder-model-par / 1.499 rå model-ID'er**; det separate gratis-budgetkatalog har **486 rækker pr. model**, **34 tilbagevendende puljer** og **54 tilbagevendende/nøgleløse gratis-for-altid-udbydere**. Dette er forskellige nævnere med vilje; definitioner og pulje-afduplikerede beregninger findes i [Udbyderreference](docs/reference/PROVIDER_REFERENCE.md) og [Gratis niveauer](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1382,7 +1382,7 @@ Kanoniske målinger pr. 2026-10-18: **1.976 unikke videoer** · **20.220.289 ken
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Robusthedsvejledning</a></b></td><td>Effektafbrydere, nedkølingsperioder, kø, beskyttelse mod stampeding herd, TLS-spoofing</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo-motor</a></b></td><td>Scoring baseret på 16 faktorer, tilstandspakker, selvreparation</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Proxy-vejledning</a></b></td><td>Proxy-system i 3 niveauer, 1proxy-markedsplads, CRUD for registreringsdatabase</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Gratis niveauer</a></b></td><td>Konsolideret katalog: 34 dokumenterede tilbagevendende puljer / 484 katalogiserede poster på gratisniveauer</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Gratis niveauer</a></b></td><td>Konsolideret katalog: 34 dokumenterede tilbagevendende puljer / 486 katalogiserede poster på gratisniveauer</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Funktionsgalleri</a></b></td><td>Visuel rundtur i dashboardet med skærmbilleder</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Dokumentation af kodebasen</a></b></td><td>Begyndervenlig gennemgang af kodebasen</td></tr>
 </table>

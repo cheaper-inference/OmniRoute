@@ -6,7 +6,7 @@
 
 > **Iġġenerat awtomatikament** minn `src/shared/constants/providers.ts` — teditjahx manwalment.
 > Iġġenerah mill-ġdid bi: `npm run gen:provider-reference`
-> **Iġġenerat l-aħħar:** 2026-10-27
+> **Iġġenerat l-aħħar:** 2026-11-05
 
 Total ta’ fornituri: **380**. Ara t-tqassim skont il-kategorija hawn taħt.
 
@@ -466,7 +466,7 @@ Uża d-dashboard f’`/dashboard/providers` biex tattiva, tikkonfigura u tittest
 
 - Katalgu: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Reġistru (dettalji għal kull mudell): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Eżekuturi: [`open-sse/executors/`](../../open-sse/executors/) (158 implimentazzjoni)
+- Eżekuturi: [`open-sse/executors/`](../../open-sse/executors/) (162 implimentazzjoni)
 - Tradutturi: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Ara Wkoll

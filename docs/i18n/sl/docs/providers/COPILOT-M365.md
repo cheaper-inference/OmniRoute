@@ -67,23 +67,13 @@ uvozu HAR se dekodira čas poteka JWT-ja in prikaže preostali čas veljavnosti 
 
 ## Veljavnost in osveževanje žetona
 
-`access_token` je kratkotrajen (običajno **~75 minut**). Po poteku veljavnosti ponudnik
-sporoči napako povezave, zato morate poverilnico znova pridobiti.
+`access_token` je kratkotrajen (običajno **~ 75 minut** ). Brez uporabnega žetona za osvežitev morate poverilnico po poteku ponovno zajeti.
 
 ### Samodejno osveževanje z `refreshToken`
 
-Da se izognete ročnemu ponovnemu pridobivanju, lahko Microsoftov žeton za osvežitev shranite v
-**Advanced Settings → providerSpecificData** povezave:
+Pri ponudniku Microsoft 365 **Dodajte povezavo** oz **Uredi povezavo** dialog, odpri **Napredne nastavitve → Osveži žeton (neobvezno)** . Prilepite žeton za osvežitev Microsoft OAuth za obseg `substrate.office.com/sydney` in shranite. Vnos je prikrit in nikoli vnaprej napolnjen s shranjenim žetonom. Pri urejanju pustite prazno, da obdržite obstoječi žeton; prilepite nov žeton, da ga nadomestite.
 
-| Polje          | Opis                                                                        |
-| -------------- | --------------------------------------------------------------------------- |
-| `refreshToken` | Microsoftov žeton za osvežitev OAuth za obseg `substrate.office.com/sydney` |
-| `tier`         | `individual` (privzeto), `edu` ali `enterprise`                             |
-
-Žeton za osvežitev pridobite z Microsoftovim tokom kode naprave ali avtorizacijske kode
-z obsegom `substrate.office.com/sydney`. Ko je nastavljen `refreshToken`, OmniRoute
-pred vsako zahtevo vnaprej osveži `access_token`, zato vam poverilnice ni treba
-znova pridobiti po vsakem poteku veljavnosti po približno 75 minutah.
+Pridobite žeton osveževanja iz kode naprave Microsoft ali toka avtorizacijske kode v obsegu `substrate.office.com/sydney`; armaturna plošča tega ne pridobi namesto vas. S konfiguriranim žetonom osveževanja OmniRoute preveri `access_token` pred zahtevami in ga osveži le, ko ga je treba osvežiti. Uspešna osvežitev prav tako ohrani obrnjeni žeton osveževanja, s čimer se izogne ročnemu ponovnemu zajemu, medtem ko žeton osveževanja ostane veljaven.
 
 Če `refreshToken` ni nastavljen, morate po vsakem poteku veljavnosti ročno
 znova pridobiti poverilnico WebSocket.
@@ -96,8 +86,7 @@ znova pridobiti poverilnico WebSocket.
 | `edu`        | `included`   | Izobraževalni M365 Copilot |
 | `enterprise` | `work`       | M365 Copilot za delo       |
 
-Raven nastavite v **Advanced Settings → providerSpecificData → tier**. Raven vpliva
-na usmerjanje BizChat in dostop do modelov.
+Nastavite stopnjo **Napredne nastavitve → Copilot nivo** . Raven vpliva na usmerjanje BizChat in dostop do modela.
 
 ## Varnostni model
 
@@ -125,7 +114,7 @@ na usmerjanje BizChat in dostop do modelov.
 To je pričakovano. Brez `refreshToken` je žeton za dostop kratkoživ. Izberite eno od možnosti:
 
 - Znova zajemite poverilnico v orodjih DevTools ali
-- Konfigurirajte `refreshToken` v naprednih nastavitvah za samodejno osveževanje.
+- Konfiguriraj **Napredne nastavitve → Refresh token (neobvezno)** v pogovornem oknu Dodaj ali Uredi povezavo za samodejno osveževanje.
 
 ### Preizkus povezave uspe, vendar klepet vrne 401
 

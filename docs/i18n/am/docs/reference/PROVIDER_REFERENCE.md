@@ -6,7 +6,7 @@
 
 > **በራስ-ሰር የተፈጠረ** ከ`src/shared/constants/providers.ts` — በእጅ አርትዕ አያድርጉት።
 > እንደገና ለማመንጨት፦ `npm run gen:provider-reference`
-> **ለመጨረሻ ጊዜ የተመነጨው፦** 2026-10-27
+> **ለመጨረሻ ጊዜ የተመነጨው፦** 2026-11-05
 
 ጠቅላላ አቅራቢዎች፦ **380**። የምድቦችን ዝርዝር ከታች ይመልከቱ።
 
@@ -466,7 +466,7 @@
 
 - ካታሎግ፦ [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - መዝገብ (የእያንዳንዱ ሞዴል ዝርዝሮች)፦ [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- አስፈጻሚዎች፦ [`open-sse/executors/`](../../open-sse/executors/) (158 ትግበራዎች)
+- አስፈጻሚዎች፦ [`open-sse/executors/`](../../open-sse/executors/) (162 ትግበራዎች)
 - ተርጓሚዎች፦ [`open-sse/translator/`](../../open-sse/translator/)
 
 ## ተጨማሪ ይመልከቱ

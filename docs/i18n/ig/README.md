@@ -27,9 +27,9 @@
 
 > **Jiri akaụntụ ndị na-eweta ọrụ nke gị.** Nke a bụ atụmatụ mkpokọta n’ofe free tier ndị atọ dị iche iche nwere ikike iche iche, ọ bụghị onyinye token sitere na OmniRoute. Debanye aha, nweta nzere ebe achọrọ ya, ma jikọọ ndị na-eweta ọrụ ị nwere ike iji; onye na-eweta ọrụ ọ bụla na-achịkwa oke ya, nnweta ya, na usoro ya.
 >
-> Ijikọta free tier n’aka bụ ihe na-agwụ ike — SDK iri na ọtụtụ, oke ọnụego iri na ọtụtụ, na enweghị nghọta banyere ihe ị nwere n’ezie. OmniRoute na-edekọ **ntinye free-tier 484 n’ofe igodo ọdọ mmiri na-emegharị ugboro 34** ma na-agbakọ ọnụ ọgụgụ token site na **ọdọ mmiri 17 nwere mmefu ego kwa ọnwa dị mma e bipụtara tinyere oke Groq ise kwa ụdị**, nke a wepụrụ ugboro ugboro site n’ịgụ ọdọ mmiri nkekọrịta naanị otu ugboro. A na-egosi oke ndị na-emeghe naanị mgbe nyochachara njirimara mpaghara (taa: ModelScope) iche, +~6M mgbe nyochachara njirimara mpaghara, a naghị etinyekwa ha n’ọnụ ọgụgụ isi. Nsonaazụ ahụ na-anọgide na-ahụ anya na dashboard (`/dashboard/free-tiers`).
+> Ijikọta free tier n’aka bụ ihe na-agwụ ike — SDK iri na ọtụtụ, oke ọnụego iri na ọtụtụ, na enweghị nghọta banyere ihe ị nwere n’ezie. OmniRoute na-edekọ **ntinye free-tier 486 n’ofe igodo ọdọ mmiri na-emegharị ugboro 34** ma na-agbakọ ọnụ ọgụgụ token site na **ọdọ mmiri 17 nwere mmefu ego kwa ọnwa dị mma e bipụtara tinyere oke Groq ise kwa ụdị**, nke a wepụrụ ugboro ugboro site n’ịgụ ọdọ mmiri nkekọrịta naanị otu ugboro. A na-egosi oke ndị na-emeghe naanị mgbe nyochachara njirimara mpaghara (taa: ModelScope) iche, +~6M mgbe nyochachara njirimara mpaghara, a naghị etinyekwa ha n’ọnụ ọgụgụ isi. Nsonaazụ ahụ na-anọgide na-ahụ anya na dashboard (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Kaadị mmefu ego free-tier nke OmniRoute: ~1.62B token efu kwa ọnwa n’ụzọ kwụsie ike, ruo ~2.22B n’ọnwa mbụ site na kredit ndebanye aha, sitere na igodo ọdọ mmiri na-emegharị ugboro 34 edekọtara nke na-ekpuchi ntinye free-tier 484 n’okpuru endpoint otu. Mgbakọ eziokwu nke wepụrụ ọdọ mmiri ugboro ugboro — a na-agụ ọdọ mmiri nkekọrịta ọ bụla naanị otu ugboro, gụnyere ọdọ mmiri na-emegharị ugboro 17 nwere mmefu ego token kwa ọnwa dị mma e bipụtara tinyere oke Groq ise kwa ụdị; ndị na-eweta ọrụ 12 ka akara ka a zere n’akwụkwọ katalọgụ ihe ize ndụ nke usoro ka ị nwee ike ikpebi. Ogwe mmefu ego gụnyere Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (oke ise kwa ụdị) na ọdọ mmiri nta ndị ọzọ, tinyere kredit ndebanye aha ọnwa mbụ na ndị na-eweta ọrụ na-adị n’efu ruo mgbe ebighị ebi na-enweghị oke token, nke a na-egosi iche ka ha ghara ịkwalite ọnụ ọgụgụ isi. Ejiri/ọdụrụ ugbu a na /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Kaadị mmefu ego free-tier nke OmniRoute: ~1.62B token efu kwa ọnwa n’ụzọ kwụsie ike, ruo ~2.22B n’ọnwa mbụ site na kredit ndebanye aha, sitere na igodo ọdọ mmiri na-emegharị ugboro 34 edekọtara nke na-ekpuchi ntinye free-tier 486 n’okpuru endpoint otu. Mgbakọ eziokwu nke wepụrụ ọdọ mmiri ugboro ugboro — a na-agụ ọdọ mmiri nkekọrịta ọ bụla naanị otu ugboro, gụnyere ọdọ mmiri na-emegharị ugboro 17 nwere mmefu ego token kwa ọnwa dị mma e bipụtara tinyere oke Groq ise kwa ụdị; ndị na-eweta ọrụ 12 ka akara ka a zere n’akwụkwọ katalọgụ ihe ize ndụ nke usoro ka ị nwee ike ikpebi. Ogwe mmefu ego gụnyere Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (oke ise kwa ụdị) na ọdọ mmiri nta ndị ọzọ, tinyere kredit ndebanye aha ọnwa mbụ na ndị na-eweta ọrụ na-adị n’efu ruo mgbe ebighị ebi na-enweghị oke token, nke a na-egosi iche ka ha ghara ịkwalite ọnụ ọgụgụ isi. Ejiri/ọdụrụ ugbu a na /dashboard/free-tiers."/>
 
 > Nchịkọta animated nke ibe `/dashboard/free-tiers` dị ndụ. Usoro zuru ezu (iwepụ ọdọ mmiri ugboro ugboro, ọkwa kredit, usoro ndị na-eweta ọrụ): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -74,7 +74,7 @@
 |                                  |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | -------------------------------- | :----------------------: | :---------: | :-------------------: |
 | 🌐 Ndị na-enye ọrụ               |           352            |   **358**   |          380          |
-| 🧠 NJirimara ụdị nkata pụrụ iche |           1320           |  **1374**   |         1494          |
+| 🧠 NJirimara ụdị nkata pụrụ iche |           1320           |  **1374**   |         1499          |
 | 🖼️ Àkwà mmiri ụdịdị              | 🆕 ọhụụ + ọdịyo + vidiyo |      ✓      |           ✓           |
 | 📡 Katalọgụ efu Radar            | 🆕 ịbanye site na nhọrọ  |      ✓      |           ✓           |
 | ⚖️ Nhazi oge maara oke           |      🆕 Quota-Share      |      ✓      |           ✓           |
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Nkwekọrịta — Otu njedebe na ndị na-enye ọrụ 380. Mmegharị akpaghị aka na-eme ka ụzọ dị mgbe e nwere ebe ọzọ dị mma. Pilar isii: mmegharị siri ike n'etiti ndị na-enye ọrụ 380 · ruo 95% nchekwa token na ọrụ kwekọrọ na ya · $0 ịmalite na 150+ free tiers na 52 recurring/keyless free-forever providers · 39 CLI/agent njikọta site na otu nhazi · OpenAI, Claude, Gemini na Responses API kwekọrọ na /v1 · njikwa mmepụta gụnyere circuit breakers, TLS stealth, MCP 110 ngwá ọrụ, A2A, memory, guardrails, evals na 56,000+ static test declarations n'ime 7,800+ tracked test files."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Nkwekọrịta — Otu njedebe na ndị na-enye ọrụ 380. Mmegharị akpaghị aka na-eme ka ụzọ dị mgbe e nwere ebe ọzọ dị mma. Pilar isii: mmegharị siri ike n'etiti ndị na-enye ọrụ 380 · ruo 95% nchekwa token na ọrụ kwekọrọ na ya · $0 ịmalite na 150+ free tiers na 54 recurring/keyless free-forever providers · 39 CLI/agent njikọta site na otu nhazi · OpenAI, Claude, Gemini na Responses API kwekọrọ na /v1 · njikwa mmepụta gụnyere circuit breakers, TLS stealth, MCP 110 ngwá ọrụ, A2A, memory, guardrails, evals na 56,000+ static test declarations n'ime 7,800+ tracked test files."/>
 
 <br/>
 <br/>
@@ -693,7 +693,7 @@ n’akụkọ ihe omume shell gị. → [CLI Integrations](docs/guides/CLI-INTEG
 
 </div>
 
-> **380 ndị na-enye aha edebanyere** n’ime nchịkọta chat, mgbasa ozi, ọchụchọ, mpaghara, igwe ojii na usoro, gụnyere **156 nwere `hasFree: true` metadata nchọpụta**. Ndebanye ụdị chat na-ekpuchi **241 ndị na-enye / 3,109 di iche iche n'etiti onye na-enye na ụdị / 1,494 ID ụdị dị ọcha**; katalọgụ free-budget dị iche nwere **484 ahịrị kwa ụdị**, **34 ọdọ mmiri na-emegharị** na **52 ndị na-enye free-forever na-emegharị/na-enweghị igodo**. Ndị a bụ ọnụ ọgụgụ dị iche iche n’ụzọ e mere ya; nkọwa na mgbakọ na mwepụ na-enweghị okpukpu abụọ dị na [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) na [Free Tiers](docs/reference/FREE_TIERS.md).
+> **380 ndị na-enye aha edebanyere** n’ime nchịkọta chat, mgbasa ozi, ọchụchọ, mpaghara, igwe ojii na usoro, gụnyere **156 nwere `hasFree: true` metadata nchọpụta**. Ndebanye ụdị chat na-ekpuchi **241 ndị na-enye / 3,114 di iche iche n'etiti onye na-enye na ụdị / 1,499 ID ụdị dị ọcha**; katalọgụ free-budget dị iche nwere **486 ahịrị kwa ụdị**, **34 ọdọ mmiri na-emegharị** na **54 ndị na-enye free-forever na-emegharị/na-enweghị igodo**. Ndị a bụ ọnụ ọgụgụ dị iche iche n’ụzọ e mere ya; nkọwa na mgbakọ na mwepụ na-enweghị okpukpu abụọ dị na [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) na [Free Tiers](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1370,7 +1370,7 @@ Metrik iwu na 2026-10-18: **vidiyo pụrụ iche 1.976** · **nlele amaara 20.22
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Ntuziaka Nkwụsi Ike</a></b></td><td>Circuit breakers, cooldowns, queue, mgbochi thundering herd, TLS spoofing</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Ngwaọrụ Auto-Combo</a></b></td><td>Ntụle ihe 16, mode packs, self-healing</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Ntuziaka Proxy</a></b></td><td>Sistemụ proxy ọkwa 3, ahịa 1proxy, registry CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Free Tiers</a></b></td><td>Akwụkwọ ndekọ jikọtara ọnụ: pools 34 a na-edekọ ugboro ugboro / ndenye free-tier 484 e depụtara</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Free Tiers</a></b></td><td>Akwụkwọ ndekọ jikọtara ọnụ: pools 34 a na-edekọ ugboro ugboro / ndenye free-tier 486 e depụtara</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Ụlọ Nlereanya Atụmatụ</a></b></td><td>Njem dashboard anya nwere screenshots</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Akwụkwọ Nkọwa Codebase</a></b></td><td>Njem n'ime codebase dị mfe maka ndị mbido</td></tr>
 </table>

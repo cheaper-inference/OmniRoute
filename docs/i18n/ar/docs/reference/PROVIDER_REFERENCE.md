@@ -6,7 +6,7 @@
 
 > **مُنشأ تلقائيًا** من `src/shared/constants/providers.ts` — لا تعدّله يدويًا.
 > أعد إنشاءه باستخدام: `npm run gen:provider-reference`
-> **آخر إنشاء:** 2026-10-27
+> **آخر إنشاء:** 2026-11-05
 
 إجمالي موفّري الخدمة: **380**. راجع التصنيف حسب الفئات أدناه.
 
@@ -466,7 +466,7 @@
 
 - الكتالوج: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - السجل (تفاصيل كل نموذج): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- المنفِّذات: [`open-sse/executors/`](../../open-sse/executors/) (158 تطبيقًا)
+- المنفِّذات: [`open-sse/executors/`](../../open-sse/executors/) (162 تطبيقًا)
 - المترجمات: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## انظر أيضًا

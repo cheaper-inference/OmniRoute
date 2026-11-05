@@ -6,7 +6,7 @@
 
 > `src/shared/constants/providers.ts` నుండి **స్వయంచాలకంగా రూపొందించబడింది** — చేతితో సవరించవద్దు.
 > దీనితో మళ్లీ రూపొందించండి: `npm run gen:provider-reference`
-> **చివరిగా రూపొందించబడిన తేదీ:** 2026-10-27
+> **చివరిగా రూపొందించబడిన తేదీ:** 2026-11-05
 
 మొత్తం ప్రొవైడర్లు: **380**. దిగువన వర్గాల వారీ విభజనను చూడండి.
 
@@ -466,7 +466,7 @@
 
 - కాటలాగ్: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - రిజిస్ట్రీ (ప్రతి మోడల్ వివరాలు): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- ఎగ్జిక్యూటర్లు: [`open-sse/executors/`](../../open-sse/executors/) (158 అమలులు)
+- ఎగ్జిక్యూటర్లు: [`open-sse/executors/`](../../open-sse/executors/) (162 అమలులు)
 - అనువాదకాలు: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## ఇవి కూడా చూడండి

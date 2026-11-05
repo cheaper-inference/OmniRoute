@@ -132,7 +132,7 @@ weiterhin (`open-sse/executors/kiro/reasoning.ts`).
 
 **Terminale Zustände (KEINE Cooldowns):**
 
-- `banned` — gesetzt durch die Banned-Keyword-/Account-Ban-Erkennung (siehe [BAN_DETECTION](../security/BAN_DETECTION.md)) sowie durch drei aufeinanderfolgende Upstream-Ablehnungen pro Request (`request_rejected`, z. B. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); eine einzelne Ablehnung versetzt die Verbindung nur in den Cooldown
+- `banned` — wird durch die Erkennung von Banned-Keywords/Kontosperren festgelegt (siehe [BAN_DETECTION](../security/BAN_DETECTION.md) ). Upstream-Abweisungen pro Anfrage (`request_rejected`, z. B. Anthropic OAuth 403 „Anfrage nicht erlaubt“) setzen es nie: Sie werden pro Verbindung und Modell gezählt und nehmen das Modell mit einer wachsenden Abklingzeit, die auf `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 Stunde) begrenzt ist, aus der Rotation oder kühlen die Verbindung ab, wenn kein Modell bekannt ist — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (wechselt nach begrenzten Wiederholungen in den terminalen Zustand — `EXPIRED_RETRY_MAX = 3` mit exponentiellem Backoff — damit sich vorübergehende OAuth-Fehler selbst heilen können, bevor der Account dauerhaft deaktiviert wird)
 - `credits_exhausted`
 

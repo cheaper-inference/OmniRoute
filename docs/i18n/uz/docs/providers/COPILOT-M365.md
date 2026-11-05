@@ -57,18 +57,13 @@ OmniRoute HAR faylini Chathub WebSocket URL manzili uchun tekshiradi, `access_to
 
 ## Tokenning amal qilish muddati va yangilanishi
 
-`access_token` qisqa muddat amal qiladi (odatda **~75 daqiqa**). Uning muddati tugagach, provayder ulanish xatosi haqida xabar beradi va hisob maʼlumotini qayta olishingiz kerak boʻladi.
+`access_token` qisqa muddatli (odatda **~ 75 daqiqa** ). Foydalanish mumkin bo'lgan yangilash tokenisiz, amal qilish muddati tugagandan so'ng hisob ma'lumotlarini qayta qo'lga kiritishingiz kerak.
 
 ### `refreshToken` yordamida avtomatik yangilash
 
-Qoʻlda qayta olish zaruratidan qochish uchun Microsoft yangilash tokenini ulanishning **Advanced Settings → providerSpecificData** boʻlimida saqlashingiz mumkin:
+Microsoft 365 provayderlarida **Ulanish qo'shing** yoki **Ulanishni tahrirlash** dialog, ochiq **Kengaytirilgan sozlamalar → tokenni yangilash (ixtiyoriy)** . `substrate.office.com/sydney` qamrovi uchun Microsoft OAuth yangilash tokenini joylashtiring va saqlang. Kirish maskalanadi va hech qachon saqlangan token bilan to'ldirilmaydi. Tahrirlashda mavjud tokenni saqlash uchun uni bo'sh qoldiring; uni almashtirish uchun yangi tokenni joylashtiring.
 
-| Maydon         | Tavsif                                                                       |
-| -------------- | ---------------------------------------------------------------------------- |
-| `refreshToken` | `substrate.office.com/sydney` doirasi uchun Microsoft OAuth yangilash tokeni |
-| `tier`         | `individual` (standart), `edu` yoki `enterprise`                             |
-
-Yangilash tokenini `substrate.office.com/sydney` doirasiga ega Microsoft qurilma kodi yoki avtorizatsiya kodi oqimi orqali oling. `refreshToken` oʻrnatilgan boʻlsa, OmniRoute har bir soʻrovdan oldin `access_token` ni oldindan yangilaydi, shuning uchun har bir ~75 daqiqalik amal qilish muddati tugaganidan keyin hisob maʼlumotini qayta olishingiz shart emas.
+Yangilash tokenini Microsoft qurilma kodi yoki `substrate.office.com/sydney` ga oʻrnatilgan avtorizatsiya kodi oqimidan oling; asboblar paneli buni siz uchun sotib olmaydi. Yangilash tokeni sozlangan boʻlsa, OmniRoute soʻrovlardan oldin `access_token` ni tekshiradi va uni faqat yangilash kerak boʻlganda yangilaydi. Muvaffaqiyatli yangilanish, shuningdek, aylantirilgan yangilash tokenini saqlab qoladi va yangilash tokeni amalda qolsa, qo'lda qayta yozib olishdan qochadi.
 
 Agar `refreshToken` oʻrnatilmagan boʻlsa, har safar amal qilish muddati tugaganidan keyin WebSocket hisob maʼlumotini qoʻlda qayta olishingiz kerak.
 
@@ -80,7 +75,7 @@ Agar `refreshToken` oʻrnatilmagan boʻlsa, har safar amal qilish muddati tugaga
 | `edu`        | `included`   | Taʼlim uchun M365 Copilot         |
 | `enterprise` | `work`       | Ish uchun M365 Copilot            |
 
-Darajani **Advanced Settings → providerSpecificData → tier** boʻlimida belgilang. Daraja BizChat yoʻnaltirilishi va modellarga kirish imkoniyatiga taʼsir qiladi.
+Darajani o'rnating **Kengaytirilgan sozlamalar → Copilot darajasi** . Darajali BizChat marshrutlash va modelga kirishga ta'sir qiladi.
 
 ## Xavfsizlik modeli
 
@@ -108,7 +103,7 @@ Darajani **Advanced Settings → providerSpecificData → tier** boʻlimida belg
 Bu kutilgan holat. `refreshToken` bo‘lmasa, kirish tokeni qisqa muddat amal qiladi. Quyidagilardan birini bajaring:
 
 - DevTools orqali hisobga kirish ma’lumotini qayta yozib oling yoki
-- Avtomatik yangilash uchun Kengaytirilgan sozlamalarda `refreshToken`ni sozlang.
+- Sozlang **Kengaytirilgan sozlamalar → yangilash tokeni (ixtiyoriy)** avtomatik yangilash uchun ulanishni qo'shish yoki tahrirlash dialog oynasida.
 
 ### Ulanishni tekshirish muvaffaqiyatli, ammo chat 401 xatosini qaytaradi
 

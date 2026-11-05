@@ -6,7 +6,7 @@
 
 > **Généré automatiquement** à partir de `src/shared/constants/providers.ts` — ne pas modifier manuellement.
 > Régénérer avec : `npm run gen:provider-reference`
-> **Dernière génération :** 2026-10-27
+> **Dernière génération :** 2026-11-05
 
 Nombre total de fournisseurs : **380**. Consultez la répartition par catégorie ci-dessous.
 
@@ -466,7 +466,7 @@ Utilisez le tableau de bord à l’adresse `/dashboard/providers` pour activer, 
 
 - Catalogue : [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Registre (détails par modèle) : [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Exécuteurs : [`open-sse/executors/`](../../open-sse/executors/) (158 implémentations)
+- Exécuteurs : [`open-sse/executors/`](../../open-sse/executors/) (162 implémentations)
 - Traducteurs : [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Voir aussi

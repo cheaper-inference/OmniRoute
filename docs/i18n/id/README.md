@@ -27,9 +27,9 @@
 
 > **Gunakan akun provider Anda sendiri.** Ini adalah estimasi agregat dari free tier pihak ketiga yang memenuhi syarat secara terpisah, bukan pemberian token dari OmniRoute. Daftar, dapatkan kredensial jika diperlukan, dan hubungkan provider yang dapat Anda gunakan; setiap provider mengontrol batas, ketersediaan, dan ketentuannya sendiri.
 >
-> Menumpuk free tier secara manual itu merepotkan — puluhan SDK, puluhan batas laju, dan tidak ada gambaran berapa banyak yang sebenarnya Anda miliki. OmniRoute mencatat **484 entri free tier di 34 kunci pool berulang** dan menghitung angka token utama dari **17 pool dengan anggaran bulanan positif yang dipublikasikan, ditambah lima batas Groq per model**, dengan deduplikasi berdasarkan pool bersama. Kuota yang hanya terbuka setelah pemeriksaan identitas regional (saat ini: ModelScope) ditampilkan secara terpisah, +~6 juta di balik verifikasi identitas regional, dan tidak pernah dijumlahkan ke angka utama. Hasilnya tetap terlihat di dasbor (`/dashboard/free-tiers`).
+> Menumpuk free tier secara manual itu merepotkan — puluhan SDK, puluhan batas laju, dan tidak ada gambaran berapa banyak yang sebenarnya Anda miliki. OmniRoute mencatat **486 entri free tier di 34 kunci pool berulang** dan menghitung angka token utama dari **17 pool dengan anggaran bulanan positif yang dipublikasikan, ditambah lima batas Groq per model**, dengan deduplikasi berdasarkan pool bersama. Kuota yang hanya terbuka setelah pemeriksaan identitas regional (saat ini: ModelScope) ditampilkan secara terpisah, +~6 juta di balik verifikasi identitas regional, dan tidak pernah dijumlahkan ke angka utama. Hasilnya tetap terlihat di dasbor (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Kartu anggaran free tier OmniRoute: ~1,62 miliar token gratis per bulan secara stabil, hingga ~2,22 miliar pada bulan pertama dengan kredit pendaftaran, dari 34 kunci pool berulang yang terdokumentasi dan mencakup 484 entri free tier yang dikatalogkan melalui satu endpoint. Perhitungan jujur dengan deduplikasi pool — setiap pool bersama dihitung satu kali, termasuk 17 pool berulang dengan anggaran token bulanan positif yang dipublikasikan, ditambah lima batas Groq per model; 12 provider ditandai sebagai hindari dalam katalog risiko ketentuan sehingga Anda dapat memutuskan. Bilah anggaran mencakup Mistral 1 miliar, Nara 210 juta, LLM7 150 juta, xKiro 150 juta, Groq 30 juta (lima batas per model), dan pool yang lebih kecil, ditambah kredit pendaftaran bulan pertama serta provider gratis permanen tanpa batas token yang ditampilkan secara terpisah agar tidak pernah memperbesar angka utama. Penggunaan/sisa aktif di /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Kartu anggaran free tier OmniRoute: ~1,62 miliar token gratis per bulan secara stabil, hingga ~2,22 miliar pada bulan pertama dengan kredit pendaftaran, dari 34 kunci pool berulang yang terdokumentasi dan mencakup 486 entri free tier yang dikatalogkan melalui satu endpoint. Perhitungan jujur dengan deduplikasi pool — setiap pool bersama dihitung satu kali, termasuk 17 pool berulang dengan anggaran token bulanan positif yang dipublikasikan, ditambah lima batas Groq per model; 12 provider ditandai sebagai hindari dalam katalog risiko ketentuan sehingga Anda dapat memutuskan. Bilah anggaran mencakup Mistral 1 miliar, Nara 210 juta, LLM7 150 juta, xKiro 150 juta, Groq 30 juta (lima batas per model), dan pool yang lebih kecil, ditambah kredit pendaftaran bulan pertama serta provider gratis permanen tanpa batas token yang ditampilkan secara terpisah agar tidak pernah memperbesar angka utama. Penggunaan/sisa aktif di /dashboard/free-tiers."/>
 
 > Ringkasan animasi halaman `/dashboard/free-tiers` langsung. Metodologi lengkap (deduplikasi pool, tingkatan kredit, ketentuan provider): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -74,7 +74,7 @@
 |                               |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
 | ----------------------------- | :---------------------: | :---------: | :-------------------: |
 | 🌐 Penyedia                   |           352           |   **358**   |          380          |
-| 🧠 ID model chat unik         |          1320           |  **1374**   |         1494          |
+| 🧠 ID model chat unik         |          1320           |  **1374**   |         1499          |
 | 🖼️ Jembatan modalitas         | 🆕 visi + audio + video |      ✓      |           ✓           |
 | 📡 Katalog gratis Radar       |       🆕 opsional       |      ✓      |           ✓           |
 | ⚖️ Penjadwalan berbasis kuota |     🆕 Quota-Share      |      ✓      |           ✓           |
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Janji — Satu endpoint dan 380 penyedia. Fallback otomatis menjaga perutean selama masih ada target sehat yang tersedia. Enam pilar: fallback tangguh di 380 penyedia · hemat token hingga 95% pada beban kerja yang memenuhi syarat · Rp0 untuk mulai dengan 150+ free tier dan 52 penyedia gratis selamanya (tanpa kunci/berulang) · 39 integrasi CLI/agen lewat satu konfigurasi · kompatibel dengan OpenAI, Claude, Gemini dan Responses API di /v1 · kontrol produksi termasuk circuit breaker, TLS stealth, MCP 110 tools, A2A, memori, guardrails, eval, dan 56.000+ deklarasi pengujian statis di 7.800+ file pengujian yang dipantau."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Janji — Satu endpoint dan 380 penyedia. Fallback otomatis menjaga perutean selama masih ada target sehat yang tersedia. Enam pilar: fallback tangguh di 380 penyedia · hemat token hingga 95% pada beban kerja yang memenuhi syarat · Rp0 untuk mulai dengan 150+ free tier dan 54 penyedia gratis selamanya (tanpa kunci/berulang) · 39 integrasi CLI/agen lewat satu konfigurasi · kompatibel dengan OpenAI, Claude, Gemini dan Responses API di /v1 · kontrol produksi termasuk circuit breaker, TLS stealth, MCP 110 tools, A2A, memori, guardrails, eval, dan 56.000+ deklarasi pengujian statis di 7.800+ file pengujian yang dipantau."/>
 
 <br/>
 <br/>
@@ -693,7 +693,7 @@ tetap aman dari riwayat shell Anda. → [Integrasi CLI](docs/guides/CLI-INTEGRAT
 
 </div>
 
-> **380 penyedia terdaftar** di seluruh koleksi chat, media, pencarian, lokal, cloud-agent, dan sistem, termasuk **156 yang membawa metadata penemuan `hasFree: true`**. Registri model chat mencakup **241 penyedia / 3.109 pasangan penyedia-model unik / 1.494 ID model mentah**; katalog gratis terpisah memiliki **484 baris per-model**, **34 pool berulang** dan **52 penyedia gratis-selamanya tanpa kunci/berulang**. Ini memang menggunakan penyebut yang berbeda; definisi dan perhitungan pool-dedup dapat ditemukan di [Referensi Penyedia](docs/reference/PROVIDER_REFERENCE.md) dan [Tingkatan Gratis](docs/reference/FREE_TIERS.md).
+> **380 penyedia terdaftar** di seluruh koleksi chat, media, pencarian, lokal, cloud-agent, dan sistem, termasuk **156 yang membawa metadata penemuan `hasFree: true`**. Registri model chat mencakup **241 penyedia / 3.114 pasangan penyedia-model unik / 1.499 ID model mentah**; katalog gratis terpisah memiliki **486 baris per-model**, **34 pool berulang** dan **54 penyedia gratis-selamanya tanpa kunci/berulang**. Ini memang menggunakan penyebut yang berbeda; definisi dan perhitungan pool-dedup dapat ditemukan di [Referensi Penyedia](docs/reference/PROVIDER_REFERENCE.md) dan [Tingkatan Gratis](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1373,7 +1373,7 @@ Metrik kanonis pada 2026-10-18: **1.976 video unik** · **20.220.289 tayangan ya
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Panduan Resiliensi</a></b></td><td>Circuit breaker, cooldown, antrean, anti-thundering herd, spoofing TLS</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Engine Auto-Combo</a></b></td><td>Penilaian 16 faktor, paket mode, pemulihan mandiri</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Panduan Proxy</a></b></td><td>Sistem proxy 3 tingkat, marketplace 1proxy, CRUD registry</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Tier Gratis</a></b></td><td>Direktori terkonsolidasi: 34 pool berulang yang terdokumentasi / 484 entri free tier yang dikatalogkan</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Tier Gratis</a></b></td><td>Direktori terkonsolidasi: 34 pool berulang yang terdokumentasi / 486 entri free tier yang dikatalogkan</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Galeri Fitur</a></b></td><td>Tur visual dashboard dengan tangkapan layar</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Dokumentasi Codebase</a></b></td><td>Penjelajahan codebase yang ramah bagi pemula</td></tr>
 </table>

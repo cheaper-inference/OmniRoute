@@ -27,9 +27,9 @@
 
 > **Use suas próprias contas de provedores.** Este é um agregado estimado entre níveis gratuitos de terceiros elegíveis separadamente, não uma concessão de tokens da OmniRoute. Cadastre-se, obtenha as credenciais quando necessário e conecte os provedores que você puder usar; cada provedor controla seus limites, disponibilidade e termos.
 >
-> Acumular níveis gratuitos manualmente é trabalhoso — dezenas de SDKs, dezenas de limites de taxa e nenhuma ideia de quanto você realmente tem. A OmniRoute cataloga **484 entradas de nível gratuito em 34 chaves de pool recorrentes** e calcula o total de tokens a partir dos **17 pools com um orçamento mensal positivo publicado, além de cinco limites do Groq por modelo**, deduplicados por pool compartilhado. As cotas que só ficam disponíveis após uma verificação de identidade regional (atualmente: ModelScope) são mostradas separadamente, +~6 mi após a verificação de identidade regional, e nunca são somadas ao total. O resultado permanece visível no painel (`/dashboard/free-tiers`).
+> Acumular níveis gratuitos manualmente é trabalhoso — dezenas de SDKs, dezenas de limites de taxa e nenhuma ideia de quanto você realmente tem. A OmniRoute cataloga **486 entradas de nível gratuito em 34 chaves de pool recorrentes** e calcula o total de tokens a partir dos **17 pools com um orçamento mensal positivo publicado, além de cinco limites do Groq por modelo**, deduplicados por pool compartilhado. As cotas que só ficam disponíveis após uma verificação de identidade regional (atualmente: ModelScope) são mostradas separadamente, +~6 mi após a verificação de identidade regional, e nunca são somadas ao total. O resultado permanece visível no painel (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Cartão de orçamento de nível gratuito da OmniRoute: ~1,62 bi de tokens gratuitos por mês de forma recorrente, até ~2,22 bi no primeiro mês com créditos de cadastro, provenientes de 34 chaves de pool recorrentes documentadas que abrangem 484 entradas de nível gratuito catalogadas por meio de um único endpoint. Cálculo honesto com deduplicação por pool — cada pool compartilhado é contado uma vez, incluindo 17 pools recorrentes com um orçamento mensal positivo de tokens publicado, além de cinco limites do Groq por modelo; 12 provedores estão marcados como evitar no catálogo de risco dos termos, para que você decida. A barra de orçamento inclui Mistral 1 bi, Nara 210 mi, LLM7 150 mi, xKiro 150 mi, Groq 30 mi (cinco limites por modelo) e pools menores, além de créditos de cadastro do primeiro mês e provedores permanentemente gratuitos sem limite de tokens, exibidos separadamente para que nunca inflem o total. Uso/restante atualizado em /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Cartão de orçamento de nível gratuito da OmniRoute: ~1,62 bi de tokens gratuitos por mês de forma recorrente, até ~2,22 bi no primeiro mês com créditos de cadastro, provenientes de 34 chaves de pool recorrentes documentadas que abrangem 486 entradas de nível gratuito catalogadas por meio de um único endpoint. Cálculo honesto com deduplicação por pool — cada pool compartilhado é contado uma vez, incluindo 17 pools recorrentes com um orçamento mensal positivo de tokens publicado, além de cinco limites do Groq por modelo; 12 provedores estão marcados como evitar no catálogo de risco dos termos, para que você decida. A barra de orçamento inclui Mistral 1 bi, Nara 210 mi, LLM7 150 mi, xKiro 150 mi, Groq 30 mi (cinco limites por modelo) e pools menores, além de créditos de cadastro do primeiro mês e provedores permanentemente gratuitos sem limite de tokens, exibidos separadamente para que nunca inflem o total. Uso/restante atualizado em /dashboard/free-tiers."/>
 
 > Resumo animado da página ativa `/dashboard/free-tiers`. Metodologia completa (deduplicação de pools, níveis de crédito, termos dos provedores): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -74,7 +74,7 @@
 |                                      |         v3.8.50          | **v3.8.51** |       `v3.8.53+`        |
 | ------------------------------------ | :----------------------: | :---------: | :---------------------: |
 | 🌐 Provedores                        |           352            |   **358**   |           380           |
-| 🧠 IDs exclusivos de modelos de chat |           1320           |  **1374**   |          1494           |
+| 🧠 IDs exclusivos de modelos de chat |           1320           |  **1374**   |          1499           |
 | 🖼️ Ponte de modalidades              | 🆕 visão + áudio + vídeo |      ✓      |            ✓            |
 | 📡 Catálogo gratuito do Radar        |        🆕 opt-in         |      ✓      |            ✓            |
 | ⚖️ Agendamento ciente de cotas       |      🆕 Quota-Share      |      ✓      |            ✓            |
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="A Promessa — Um endpoint e 380 provedores. O fallback automático mantém o roteamento enquanto houver outro alvo saudável disponível. Seis pilares: fallback resiliente entre 380 provedores · até 95% de economia de tokens em cargas elegíveis · $0 para começar com mais de 150 camadas gratuitas e 52 provedores gratuitos recorrentes/sem chave para sempre · 39 integrações CLI/agente com uma configuração · Compatibilidade com OpenAI, Claude, Gemini e API de Responses em /v1 · controles de produção incluindo circuit breakers, TLS stealth, MCP 110 ferramentas, A2A, memória, guardrails, avaliações e mais de 56.000 declarações de teste estáticas em mais de 7.800 arquivos de teste monitorados."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="A Promessa — Um endpoint e 380 provedores. O fallback automático mantém o roteamento enquanto houver outro alvo saudável disponível. Seis pilares: fallback resiliente entre 380 provedores · até 95% de economia de tokens em cargas elegíveis · $0 para começar com mais de 150 camadas gratuitas e 54 provedores gratuitos recorrentes/sem chave para sempre · 39 integrações CLI/agente com uma configuração · Compatibilidade com OpenAI, Claude, Gemini e API de Responses em /v1 · controles de produção incluindo circuit breakers, TLS stealth, MCP 110 ferramentas, A2A, memória, guardrails, avaliações e mais de 56.000 declarações de teste estáticas em mais de 7.800 arquivos de teste monitorados."/>
 
 <br/>
 <br/>
@@ -693,7 +693,7 @@ do histórico do seu shell. → [Integrações CLI](docs/guides/CLI-INTEGRATIONS
 
 </div>
 
-> **380 provedores registrados** nas coleções canônicas de chat, mídia, busca, local, cloud-agent e sistema, incluindo **156 com metadados de descoberta `hasFree: true`**. O registro de modelos de chat cobre **241 provedores / 3.109 pares distintos provedor-modelo / 1.494 IDs de modelos brutos**; o catálogo separado de orçamento gratuito possui **484 linhas por modelo**, **34 pools recorrentes** e **52 provedores gratuitos para sempre (recorrentes/sem chave)**. Estes são denominadores diferentes por design; definições e cálculos deduplicados por pool estão na [Referência de Provedores](docs/reference/PROVIDER_REFERENCE.md) e [Níveis Gratuitos](docs/reference/FREE_TIERS.md).
+> **380 provedores registrados** nas coleções canônicas de chat, mídia, busca, local, cloud-agent e sistema, incluindo **156 com metadados de descoberta `hasFree: true`**. O registro de modelos de chat cobre **241 provedores / 3.114 pares distintos provedor-modelo / 1.499 IDs de modelos brutos**; o catálogo separado de orçamento gratuito possui **486 linhas por modelo**, **34 pools recorrentes** e **54 provedores gratuitos para sempre (recorrentes/sem chave)**. Estes são denominadores diferentes por design; definições e cálculos deduplicados por pool estão na [Referência de Provedores](docs/reference/PROVIDER_REFERENCE.md) e [Níveis Gratuitos](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1373,7 +1373,7 @@ Métricas canônicas em 2026-10-18: **1.976 vídeos únicos** · **20.220.289 vi
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Guia de resiliência</a></b></td><td>Disjuntores, períodos de espera, fila, prevenção de sobrecarga por efeito manada, falsificação de TLS</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Mecanismo de combinações automáticas</a></b></td><td>Pontuação com 16 fatores, pacotes de modos, autorrecuperação</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Guia de proxy</a></b></td><td>Sistema de proxy em 3 níveis, marketplace 1proxy, CRUD do registro</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Planos gratuitos</a></b></td><td>Diretório consolidado: 34 grupos recorrentes documentados / 484 entradas de planos gratuitos catalogadas</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Planos gratuitos</a></b></td><td>Diretório consolidado: 34 grupos recorrentes documentados / 486 entradas de planos gratuitos catalogadas</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Galeria de recursos</a></b></td><td>Tour visual pelo dashboard com capturas de tela</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Documentação da base de código</a></b></td><td>Visão geral da base de código voltada para iniciantes</td></tr>
 </table>

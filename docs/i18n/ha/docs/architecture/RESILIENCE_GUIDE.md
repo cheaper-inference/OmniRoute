@@ -104,7 +104,7 @@ Firem-firem `reasoningContentEvent` na binary na Kiro masu sa hannu marar fanko 
 
 **Matsayoyin ƙarshe (BA cooldown ba):**
 
-- `banned` — an saita shi ta gano mabuɗan haramu / haramta asusun (dubi [BAN_DETECTION](../security/BAN_DETECTION.md)), da kuma ta ƙin buƙata na upstream uku a jere ga kowace buƙata (`request_rejected`, misali Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); ƙin buƙata ɗaya kaɗai tana sanya haɗin a cooldown kawai
+- `banned` — saita ta hanyar banned-keyword / gano haramun asusu (duba [BAN_DETECTION](../security/BAN_DETECTION.md) ). Ƙimar da ake buƙata ta sama (`request_rejected`, misali Anthropic OAuth 403 "Ba a yarda da buƙatar") ba ta taɓa saita ta: ana ƙidaya su ta hanyar haɗin kai da ƙira kuma a ɗauke wannan ƙirar daga juyawa tare da haɓakar sanyi wanda aka rufe a `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h), ko kwantar da haɗin haɗin lokacin da ba a san samfurin — `open-sse/services/requestRejectedStreak.ts` ba.
 - `expired` (yana koma ƙarshe bayan sake gwadawa masu iyaka — `EXPIRED_RETRY_MAX = 3` tare da exponential backoff — don kurakuran OAuth na wucin gadi su iya warware kansu kafin a kashe asusun har abada)
 - `credits_exhausted`
 

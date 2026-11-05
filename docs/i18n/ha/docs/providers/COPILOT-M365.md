@@ -66,23 +66,13 @@ HAR yana fassara lokacin ƙarewar JWT kuma yana nuna ragowar tsawon rayuwar toke
 
 ## Tsawon rayuwar token da sabuntawa
 
-`access_token` yana da ɗan gajeren wa'adin aiki (yawanci **~minti 75**). Bayan ya ƙare, mai samarwar
-zai bayar da rahoton kuskuren haɗi kuma dole ne ka sake samun bayanan shaidar.
+`access_token` yana ɗan gajeren lokaci (yawanci **~ 75 min** ). Ba tare da alamar annashuwa mai amfani ba, dole ne ka sake ɗaukar shaidar bayan ƙarewar.
 
 ### Sabuntawa ta atomatik da `refreshToken`
 
-Domin kauce wa sake samun bayanan da hannu, za ka iya adana Microsoft refresh token a cikin
-**Advanced Settings → providerSpecificData** na haɗin:
+A cikin masu samar da Microsoft 365 **Ƙara haɗi** ko **Gyara haɗi** zance, bude **Saitunan ci gaba → Alamar Refresh (na zaɓi)** . Manna alamar refresh Microsoft OAuth don iyakar `substrate.office.com/sydney` kuma ajiye. An rufe abin da aka shigar kuma ba a taɓa cika shi da alamar da aka adana ba. Lokacin gyarawa, bar shi babu komai don kiyaye alamar da ke akwai; manna sabon alamar don maye gurbinsa.
 
-| Fili           | Bayani                                                                |
-| -------------- | --------------------------------------------------------------------- |
-| `refreshToken` | Microsoft OAuth refresh token na iyakar `substrate.office.com/sydney` |
-| `tier`         | `individual` (tsoho), `edu`, ko `enterprise`                          |
-
-Samo refresh token daga tsarin Microsoft device-code ko authorization-code
-wanda aka iyakance zuwa `substrate.office.com/sydney`. Idan an saita `refreshToken`, OmniRoute
-yana sabunta `access_token` kafin kowace buƙata, don haka ba sai ka
-sake samun sa bayan duk lokacin ƙarewar ~minti 75 ba.
+Sami alamar wartsakewa daga lambar na'urar Microsoft ko kwararar lambar izini da aka keɓe zuwa `substrate.office.com/sydney`; dashboard din ba ya samo muku shi. Tare da daidaita alamar shakatawa, OmniRoute yana duba `access_token` kafin buƙatun kuma yana sabunta shi kawai lokacin da yake buƙatar shakatawa. Nasarar wartsakewa mai nasara kuma tana ci gaba da jujjuya alamar wartsakewa, gujewa sake kamawa da hannu yayin da alamar wartsake ta kasance mai aiki.
 
 Idan ba a saita `refreshToken` ba, dole ne ka sake samun bayanan shaidar WebSocket da hannu
 bayan duk lokacin ƙarewa.
@@ -95,8 +85,7 @@ bayan duk lokacin ƙarewa.
 | `edu`        | `included` | M365 Copilot na ilimi       |
 | `enterprise` | `work`     | M365 Copilot don aiki       |
 
-Saita matakin a **Advanced Settings → providerSpecificData → tier**. Matakin yana tasiri
-kan hanyar zirga-zirgar BizChat da damar amfani da model.
+Saita matakin ciki **Babban Saituna → Copilot matakin** . Tier yana rinjayar hanyar BizChat da samun samfurin.
 
 ## Tsarin tsaro
 
@@ -117,7 +106,7 @@ kan hanyar zirga-zirgar BizChat da damar amfani da model.
 Wannan abin tsammani ne. Idan babu `refreshToken`, access token ɗin yana da ɗan gajeren lokacin aiki. Yi ɗaya daga cikin waɗannan:
 
 - Sake samo bayanan shaidar daga DevTools, ko
-- Saita `refreshToken` a Advanced Settings domin sabuntawa ta atomatik.
+- Sanya **Babban Saituna → Refresh token (na zaɓi)** a cikin Ƙara ko Gyara maganganun haɗi don sabuntawa ta atomatik.
 
 ### Test Connection ya yi nasara amma chat yana mayar da 401
 

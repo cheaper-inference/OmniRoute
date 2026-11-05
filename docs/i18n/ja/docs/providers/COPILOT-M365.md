@@ -58,18 +58,13 @@ OmniRoute は HAR 内で Chathub WebSocket URL を検索し、`access_token` と
 
 ## トークンの有効期間と更新
 
-`access_token` の有効期間は短く（通常は **約75分**）、有効期限が切れるとプロバイダーから接続エラーが報告されるため、認証情報を再取得する必要があります。
+`access_token`は短命です (通常、**~ 75分**）。使用可能な更新トークンがない場合は、有効期限が切れた後に資格情報を再取得する必要があります。
 
 ### `refreshToken` による自動更新
 
-手動での再取得を避けるため、接続の **Advanced Settings → providerSpecificData** に Microsoft リフレッシュトークンを保存できます。
+Microsoft 365 プロバイダー内**接続の追加**または**接続の編集**ダイアログ、開く**詳細設定→リフレッシュ トークン (オプション)** 。 `substrate.office.com/sydney`スコープのMicrosoft OAuthリフレッシュ トークンを貼り付けて保存します。入力はマスクされ、保存されたトークンが事前に入力されることはありません。編集するときは、既存のトークンを保持するために空白のままにしておきます。新しいトークンを貼り付けて置き換えます。
 
-| フィールド     | 説明                                                                            |
-| -------------- | ------------------------------------------------------------------------------- |
-| `refreshToken` | `substrate.office.com/sydney` スコープ用の Microsoft OAuth リフレッシュトークン |
-| `tier`         | `individual`（デフォルト）、`edu`、または `enterprise`                          |
-
-`substrate.office.com/sydney` をスコープとする Microsoft のデバイスコードフローまたは認可コードフローから、リフレッシュトークンを取得します。`refreshToken` を設定すると、OmniRoute は各リクエストの前に `access_token` を事前更新するため、約75分ごとに有効期限が切れるたびに再取得する必要はありません。
+`substrate.office.com/sydney`をスコープとするMicrosoftデバイス コードまたは認可コード フローからリフレッシュ トークンを取得します。ダッシュボードはそれを取得しません。リフレッシュ トークンが構成されている場合、 OmniRouteリクエストの前に`access_token`をチェックし、リフレッシュが必要な場合にのみそれをリフレッシュします。更新が成功すると、ローテーションされたリフレッシュ トークンも保持されるため、リフレッシュ トークンが有効な間は手動での再キャプチャが回避されます。
 
 `refreshToken` を設定していない場合は、有効期限が切れるたびに WebSocket 認証情報を手動で再取得する必要があります。
 
@@ -81,7 +76,7 @@ OmniRoute は HAR 内で Chathub WebSocket URL を検索し、`access_token` と
 | `edu`        | `included`       | 教育向け M365 Copilot           |
 | `enterprise` | `work`           | 仕事向け M365 Copilot           |
 
-**Advanced Settings → providerSpecificData → tier** でティアを設定します。ティアは BizChat のルーティングとモデルへのアクセスに影響します。
+階層を設定します**詳細設定→ Copilot層**。この層は、 BizChatルーティングとモデル アクセスに影響します。
 
 ## セキュリティモデル
 
@@ -109,7 +104,7 @@ OmniRoute は HAR 内で Chathub WebSocket URL を検索し、`access_token` と
 これは想定された動作です。`refreshToken` がない場合、アクセストークンの有効期間は短くなります。次のいずれかを行ってください。
 
 - DevTools から認証情報を再取得する、または
-- 自動更新のために詳細設定で `refreshToken` を設定する。
+- 設定する**詳細設定→リフレッシュ トークン (オプション)** [接続の追加] または [接続の編集] ダイアログで自動更新します。
 
 ### 接続テストは成功するが、チャットが 401 を返す
 

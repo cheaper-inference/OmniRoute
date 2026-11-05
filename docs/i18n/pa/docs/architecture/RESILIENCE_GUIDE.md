@@ -117,7 +117,7 @@ OmniRoute ਵਿੱਚ ਤਿੰਨ ਵੱਖਰੇ ਪਰ ਆਪਸ ਵਿੱ�
 
 **ਟਰਮੀਨਲ ਸਥਿਤੀਆਂ (ਕੂਲਡਾਊਨ ਨਹੀਂ):**
 
-- `banned` — banned-ਕੀਵਰਡ / ਅਕਾਊਂਟ-ਬੈਨ ਖੋਜ ਦੁਆਰਾ ਸੈੱਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ (ਦੇਖੋ [BAN_DETECTION](../security/BAN_DETECTION.md)), ਅਤੇ ਤਿੰਨ ਲਗਾਤਾਰ ਅਪਸਟਰੀਮ ਪ੍ਰਤੀ-ਬੇਨਤੀ ਇਨਕਾਰਾਂ ਦੁਆਰਾ (`request_rejected`, ਜਿਵੇਂ Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); ਇੱਕ ਇਕੱਲਾ ਇਨਕਾਰ ਸਿਰਫ਼ ਕਨੈਕਸ਼ਨ ਨੂੰ ਕੂਲ ਕਰਦਾ ਹੈ
+- `banned` — ਪਾਬੰਦੀਸ਼ੁਦਾ-ਕੀਵਰਡ / ਖਾਤਾ-ਬੈਨ ਖੋਜ ਦੁਆਰਾ ਸੈੱਟ ਕੀਤਾ ਗਿਆ ਹੈ (ਵੇਖੋ [BAN_DETECTION](../security/BAN_DETECTION.md) )। ਅੱਪਸਟ੍ਰੀਮ ਪ੍ਰਤੀ ਬੇਨਤੀ ਇਨਕਾਰ (`request_rejected`, ਉਦਾਹਰਨ ਲਈ Anthropic OAuth 403 "ਬੇਨਤੀ ਨਹੀਂ") ਇਸਨੂੰ ਕਦੇ ਵੀ ਸੈੱਟ ਨਹੀਂ ਕਰਦੇ: ਉਹਨਾਂ ਨੂੰ ਪ੍ਰਤੀ ਕੁਨੈਕਸ਼ਨ ਅਤੇ ਮਾਡਲ ਗਿਣਿਆ ਜਾਂਦਾ ਹੈ ਅਤੇ `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h) 'ਤੇ ਕੈਪ ਕੀਤੇ ਵਧ ਰਹੇ ਕੂਲਡਾਉਨ ਦੇ ਨਾਲ ਉਸ ਮਾਡਲ ਨੂੰ ਰੋਟੇਸ਼ਨ ਤੋਂ ਬਾਹਰ ਲੈ ਜਾਂਦਾ ਹੈ, ਜਾਂ ਜਦੋਂ ਕੋਈ ਮਾਡਲ — `open-sse/services/requestRejectedStreak.ts` ਨਹੀਂ ਜਾਣਿਆ ਜਾਂਦਾ ਹੈ ਤਾਂ ਕਨੈਕਸ਼ਨ ਨੂੰ ਠੰਡਾ ਕਰੋ।
 - `expired` (ਸੀਮਿਤ ਰੀਟਰਾਈ ਤੋਂ ਬਾਅਦ ਟਰਮੀਨਲ ਵੱਲ ਤਬਦੀਲ ਹੁੰਦਾ ਹੈ — ਘਾਤਾਂਕੀ ਬੈਕਆਫ ਨਾਲ `EXPIRED_RETRY_MAX = 3` — ਤਾਂ ਜੋ ਅਸਥਾਈ OAuth ਗਲਤੀਆਂ ਅਕਾਊਂਟ ਨੂੰ ਪੱਕੇ ਤੌਰ 'ਤੇ ਨਿਰਸਤ ਹੋਣ ਤੋਂ ਪਹਿਲਾਂ ਸਵੈ-ਠੀਕ ਹੋ ਸਕਣ)
 - `credits_exhausted`
 

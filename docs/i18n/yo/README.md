@@ -27,9 +27,9 @@
 
 > **Mú àwọn àkọọ́lẹ̀ olupèsè tirẹ wá.** Èyí jẹ́ àṣírò àpapọ̀ tí a ṣe láàárín àwọn ipele ọfẹ ẹni-kẹta tí ọkọọkan ní ẹ̀tọ́ lọ́tọ̀, kì í ṣe ìpín token láti ọ̀dọ̀ OmniRoute. Forúkọsílẹ̀, gba àwọn ìwé-ẹ̀rí níbi tí ó bá pọndandan, kí o sì so àwọn olupèsè tí o lè lò pọ̀; olupèsè kọ̀ọ̀kan ló ń ṣàkóso àwọn ààlà, wíwà, àti àwọn ìlànà rẹ̀.
 >
-> Kíkó àwọn ipele ọfẹ jọ pẹ̀lú ọwọ́ ń ṣòro — ọ̀pọ̀lọpọ̀ SDK, ọ̀pọ̀lọpọ̀ ààlà oṣuwọn, àti àìmọ iye tí o ní gan-an. OmniRoute ṣàkójọ **àkọsílẹ̀ ipele ọfẹ 484 káàkiri àwọn kọ́kọ́rọ́ adágún àtúnṣe 34** ó sì ń ṣe àṣírò àkótán token láti inú **àdágún 17 tí ó ní isuna oṣù rere tí a tẹ̀jáde, pẹ̀lú ààlà Groq márùn-ún fún model kọ̀ọ̀kan**, tí a yọ àwọn àdágún tí ó jọra kúrò ní kíkà lẹ́ẹ̀mejì. Àwọn quota tí ó máa ń ṣí lẹ́yìn àyẹ̀wò ìdánimọ̀ agbègbè (lónìí: ModelScope) ni a fi hàn lọ́tọ̀, +~6M lẹ́yìn ìjẹ́rìísí ìdánimọ̀ agbègbè, a kò sì kà wọ́n sínú àkótán náà láé. Abajade náà ṣì hàn lórí dashboard (`/dashboard/free-tiers`).
+> Kíkó àwọn ipele ọfẹ jọ pẹ̀lú ọwọ́ ń ṣòro — ọ̀pọ̀lọpọ̀ SDK, ọ̀pọ̀lọpọ̀ ààlà oṣuwọn, àti àìmọ iye tí o ní gan-an. OmniRoute ṣàkójọ **àkọsílẹ̀ ipele ọfẹ 486 káàkiri àwọn kọ́kọ́rọ́ adágún àtúnṣe 34** ó sì ń ṣe àṣírò àkótán token láti inú **àdágún 17 tí ó ní isuna oṣù rere tí a tẹ̀jáde, pẹ̀lú ààlà Groq márùn-ún fún model kọ̀ọ̀kan**, tí a yọ àwọn àdágún tí ó jọra kúrò ní kíkà lẹ́ẹ̀mejì. Àwọn quota tí ó máa ń ṣí lẹ́yìn àyẹ̀wò ìdánimọ̀ agbègbè (lónìí: ModelScope) ni a fi hàn lọ́tọ̀, +~6M lẹ́yìn ìjẹ́rìísí ìdánimọ̀ agbègbè, a kò sì kà wọ́n sínú àkótán náà láé. Abajade náà ṣì hàn lórí dashboard (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Káàdì isuna ipele ọfẹ OmniRoute: ~1.62B token ọfẹ fún oṣù kọ̀ọ̀kan ní ìdúróṣinṣin, tó lè tó ~2.22B ní oṣù àkọ́kọ́ pẹ̀lú àwọn kirẹditi ìforúkọsílẹ̀, láti inú àwọn kọ́kọ́rọ́ adágún àtúnṣe 34 tí a ṣàkọsílẹ̀, tí wọ́n bo àkọsílẹ̀ ipele ọfẹ 484 lẹ́yìn endpoint kan. Ìṣirò tó ṣe kedere tí a yọ àdágún tí ó jọra kúrò — a ka adágún pínpín kọ̀ọ̀kan lẹ́ẹ̀kan ṣoṣo, pẹ̀lú àwọn adágún àtúnṣe 17 tí ó ní isuna token oṣù rere tí a tẹ̀jáde àti ààlà Groq márùn-ún fún model kọ̀ọ̀kan; àwọn olupèsè 12 ni a samisi láti yẹra fún nínú kátálógù ewu àwọn ìlànà, kí ìwọ lè ṣe ìpinnu. Ọ̀pá isuna náà ní Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (ààlà márùn-ún fún model kọ̀ọ̀kan) àti àwọn adágún kékeré, pẹ̀lú àwọn kirẹditi ìforúkọsílẹ̀ oṣù àkọ́kọ́ àti àwọn olupèsè tí ó jẹ́ ọ̀fẹ́ títí láé tí kò ní ààlà token, tí a fi hàn lọ́tọ̀ kí wọn má baà fi iye àkótán náà pọ̀ sí i láé. Iye tí a lò àti èyí tó kù lásìkò gidi lórí /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Káàdì isuna ipele ọfẹ OmniRoute: ~1.62B token ọfẹ fún oṣù kọ̀ọ̀kan ní ìdúróṣinṣin, tó lè tó ~2.22B ní oṣù àkọ́kọ́ pẹ̀lú àwọn kirẹditi ìforúkọsílẹ̀, láti inú àwọn kọ́kọ́rọ́ adágún àtúnṣe 34 tí a ṣàkọsílẹ̀, tí wọ́n bo àkọsílẹ̀ ipele ọfẹ 486 lẹ́yìn endpoint kan. Ìṣirò tó ṣe kedere tí a yọ àdágún tí ó jọra kúrò — a ka adágún pínpín kọ̀ọ̀kan lẹ́ẹ̀kan ṣoṣo, pẹ̀lú àwọn adágún àtúnṣe 17 tí ó ní isuna token oṣù rere tí a tẹ̀jáde àti ààlà Groq márùn-ún fún model kọ̀ọ̀kan; àwọn olupèsè 12 ni a samisi láti yẹra fún nínú kátálógù ewu àwọn ìlànà, kí ìwọ lè ṣe ìpinnu. Ọ̀pá isuna náà ní Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (ààlà márùn-ún fún model kọ̀ọ̀kan) àti àwọn adágún kékeré, pẹ̀lú àwọn kirẹditi ìforúkọsílẹ̀ oṣù àkọ́kọ́ àti àwọn olupèsè tí ó jẹ́ ọ̀fẹ́ títí láé tí kò ní ààlà token, tí a fi hàn lọ́tọ̀ kí wọn má baà fi iye àkótán náà pọ̀ sí i láé. Iye tí a lò àti èyí tó kù lásìkò gidi lórí /dashboard/free-tiers."/>
 
 > Àkótán alárààyè ti ojú-ìwé `/dashboard/free-tiers`. Ọ̀nà iṣẹ́ kíkún (yíyọ àdágún tí ó jọra kúrò, àwọn ipele kirẹditi, àwọn ìlànà olupèsè): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -74,7 +74,7 @@
 |                                    |        v3.8.50         | **v3.8.51** |       `v3.8.53+`       |
 | ---------------------------------- | :--------------------: | :---------: | :--------------------: |
 | 🌐 Àwọn olùpèsè                    |          352           |   **358**   |          380           |
-| 🧠 Àwọn ID àwòṣe ìjíròrò aláìlẹ́gbẹ́ |          1320          |  **1374**   |          1494          |
+| 🧠 Àwọn ID àwòṣe ìjíròrò aláìlẹ́gbẹ́ |          1320          |  **1374**   |          1499          |
 | 🖼️ Afárá ìrú                       | 🆕 ìran + ohun + fídíò |      ✓      |           ✓            |
 | 📡 Kátálọ́ọ̀gù Radar ọ̀fẹ́             | 🆕 ìforúkọsílẹ̀ àṣàyàn  |      ✓      |           ✓            |
 | ⚖️ Ìṣètò ètò tí ó mọ́ kòtà          |     🆕 Quota-Share     |      ✓      |           ✓            |
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Ìlérí Náà — Endpoint kan àti àwọn olupese 380. Ìpadà-sẹ́yìn aládàáṣiṣẹ́ ń jẹ́ kí ìtọ́sọ́nà máa tẹ̀síwájú nígbà tí ibi-afẹ́dé mìíràn tó ní ìlera bá wà. Àwọn ọ̀pá mẹ́fà: ìpadà-sẹ́yìn tó lágbára káàkiri àwọn olupese 380 · ìfipamọ́ tó tó 95% ti àwọn token lórí àwọn iṣẹ́ tó yẹ · $0 láti bẹ̀rẹ̀ pẹ̀lú àwọn ipele ọ̀fẹ́ tó ju 150 lọ àti àwọn olupese 52 tí wọ́n jẹ́ ọ̀fẹ́ títí láé pẹ̀lú àtúnṣe/ìlò keyless · ìṣọ̀kan CLI/agent 39 nípasẹ̀ ètò kan ṣoṣo · ìbámu pẹ̀lú OpenAI, Claude, Gemini àti Responses API ní /v1 · àwọn ìṣàkóso fún iṣelọpọ pẹ̀lú circuit breakers, TLS stealth, MCP 110 irinṣẹ́, A2A, memory, guardrails, evals àti àwọn ìkéde ìdánwò aimi tó ju 56,000 lọ káàkiri àwọn fáìlì ìdánwò tó lé ní 7,800 tí a ń tọ́pinpin."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Ìlérí Náà — Endpoint kan àti àwọn olupese 380. Ìpadà-sẹ́yìn aládàáṣiṣẹ́ ń jẹ́ kí ìtọ́sọ́nà máa tẹ̀síwájú nígbà tí ibi-afẹ́dé mìíràn tó ní ìlera bá wà. Àwọn ọ̀pá mẹ́fà: ìpadà-sẹ́yìn tó lágbára káàkiri àwọn olupese 380 · ìfipamọ́ tó tó 95% ti àwọn token lórí àwọn iṣẹ́ tó yẹ · $0 láti bẹ̀rẹ̀ pẹ̀lú àwọn ipele ọ̀fẹ́ tó ju 150 lọ àti àwọn olupese 54 tí wọ́n jẹ́ ọ̀fẹ́ títí láé pẹ̀lú àtúnṣe/ìlò keyless · ìṣọ̀kan CLI/agent 39 nípasẹ̀ ètò kan ṣoṣo · ìbámu pẹ̀lú OpenAI, Claude, Gemini àti Responses API ní /v1 · àwọn ìṣàkóso fún iṣelọpọ pẹ̀lú circuit breakers, TLS stealth, MCP 110 irinṣẹ́, A2A, memory, guardrails, evals àti àwọn ìkéde ìdánwò aimi tó ju 56,000 lọ káàkiri àwọn fáìlì ìdánwò tó lé ní 7,800 tí a ń tọ́pinpin."/>
 
 <br/>
 <br/>
@@ -702,7 +702,7 @@ nínú ìtàn shell rẹ. → [Àwọn Ìṣọ̀kan CLI](docs/guides/CLI-INTEGR
 
 </div>
 
-> **Àwọn olùpèsè 380 tí a forúkọsílẹ̀** jákèjádò àwọn àkójọpọ̀ chat, media, search, local, cloud-agent àti system tó jẹ́ ọ̀nà ìtọ́kasí, pẹ̀lú **156 tí ó ní metadata ìwádìí `hasFree: true`**. Àkọsílẹ̀ àwọn àwòṣe chat bo **àwọn olùpèsè 241 / àwọn ìbáṣepọ̀ olùpèsè-àwòṣe pàtàkì 3,109 / àwọn ID àwòṣe aise 1,494**; kàtàlọ́ọ̀gù ìnáwó ọ̀fẹ́ lọ́tọ̀ ní **àwọn ìlà fún àwòṣe kọ̀ọ̀kan 484**, **àwọn adágún tí ń tún ara wọn ṣe 34** àti **àwọn olùpèsè ọ̀fẹ́ títí láé 52 tí kò nílò kọ́kọ́rọ̀**. Àwọn wọ̀nyí jẹ́ àwọn ìpín iye ọ̀tọ̀ọ̀tọ̀ ní ìmọ̀lára, nítorí ìtumọ̀ àti ìṣirò tí a ṣe pẹ̀lú ìyọkúrò àtúnṣe adágún wà nínú [Ìtọ́kasí Olùpèsè](docs/reference/PROVIDER_REFERENCE.md) àti [Àwọn Ìpele Ọ̀fẹ́](docs/reference/FREE_TIERS.md).
+> **Àwọn olùpèsè 380 tí a forúkọsílẹ̀** jákèjádò àwọn àkójọpọ̀ chat, media, search, local, cloud-agent àti system tó jẹ́ ọ̀nà ìtọ́kasí, pẹ̀lú **156 tí ó ní metadata ìwádìí `hasFree: true`**. Àkọsílẹ̀ àwọn àwòṣe chat bo **àwọn olùpèsè 241 / àwọn ìbáṣepọ̀ olùpèsè-àwòṣe pàtàkì 3,114 / àwọn ID àwòṣe aise 1,499**; kàtàlọ́ọ̀gù ìnáwó ọ̀fẹ́ lọ́tọ̀ ní **àwọn ìlà fún àwòṣe kọ̀ọ̀kan 486**, **àwọn adágún tí ń tún ara wọn ṣe 34** àti **àwọn olùpèsè ọ̀fẹ́ títí láé 54 tí kò nílò kọ́kọ́rọ̀**. Àwọn wọ̀nyí jẹ́ àwọn ìpín iye ọ̀tọ̀ọ̀tọ̀ ní ìmọ̀lára, nítorí ìtumọ̀ àti ìṣirò tí a ṣe pẹ̀lú ìyọkúrò àtúnṣe adágún wà nínú [Ìtọ́kasí Olùpèsè](docs/reference/PROVIDER_REFERENCE.md) àti [Àwọn Ìpele Ọ̀fẹ́](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1381,7 +1381,7 @@ lórí port kan, nítorí náà kò sí package CLI-nìkan lọ́wọ́lọ́w�
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Ìtọ́sọ́nà Ìfaradà</a></b></td><td>Àwọn breaker àyíká, àwọn àkókò itutu, ìlà ìdúró, ìdènà ọ̀pọ̀ ìbéèrè lẹ́ẹ̀kan, TLS spoofing</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Ẹ̀rọ Auto-Combo</a></b></td><td>Ìṣírò àwọn kókó 16, àwọn akójọpọ̀ mode, ìmúláradá ara ẹni</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Ìtọ́sọ́nà Proxy</a></b></td><td>Ètò proxy ipele 3, ọjà 1proxy, CRUD registry</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Àwọn Ìpele Ọ̀fẹ́</a></b></td><td>Àkójọpọ̀ àtòjọ: àwọn adágún tí ń tún ara wọn ṣe 34 tí a ṣàkọsílẹ̀ / àwọn àkọsílẹ̀ ìpele ọ̀fẹ́ 484 tí a kà sí àkójọ</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Àwọn Ìpele Ọ̀fẹ́</a></b></td><td>Àkójọpọ̀ àtòjọ: àwọn adágún tí ń tún ara wọn ṣe 34 tí a ṣàkọsílẹ̀ / àwọn àkọsílẹ̀ ìpele ọ̀fẹ́ 486 tí a kà sí àkójọ</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Àfihàn Àwọn Ẹ̀yà</a></b></td><td>Ìrìn àjò dashboard ojú-ìran pẹ̀lú àwọn àwòrán iboju</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Ìwé Ìtọ́kasí Codebase</a></b></td><td>Ìrìn àjò codebase tí ó rọrùn fún olùbẹ̀rẹ̀</td></tr>
 </table>

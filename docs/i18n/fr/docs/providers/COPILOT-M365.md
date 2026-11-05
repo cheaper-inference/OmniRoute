@@ -67,23 +67,13 @@ HAR décode la date d’expiration du JWT et affiche la durée de validité rest
 
 ## Durée de validité et actualisation du jeton
 
-La durée de validité de `access_token` est limitée (généralement **environ 75 minutes**). Après son expiration, le fournisseur
-signale une erreur de connexion et vous devez récupérer à nouveau l’identifiant de connexion.
+Le `access_token` est de courte durée (généralement **~ 75 minutes** ). Sans jeton d’actualisation utilisable, vous devez capturer à nouveau les informations d’identification après expiration.
 
 ### Actualisation automatique avec `refreshToken`
 
-Pour éviter de devoir récupérer manuellement l’identifiant, vous pouvez stocker un jeton d’actualisation Microsoft dans les
-**Paramètres avancés → providerSpecificData** de la connexion :
+Chez le fournisseur Microsoft 365 **Ajouter une connexion** ou **Modifier la connexion** boîte de dialogue, ouvrir **Paramètres avancés → Jeton d'actualisation (facultatif)** . Collez un jeton d'actualisation Microsoft OAuth pour la portée `substrate.office.com/sydney` et enregistrez. L'entrée est masquée et jamais pré-remplie avec le jeton stocké. Lors de la modification, laissez-le vide pour conserver le jeton existant ; collez un nouveau jeton pour le remplacer.
 
-| Champ          | Description                                                                        |
-| -------------- | ---------------------------------------------------------------------------------- |
-| `refreshToken` | Jeton d’actualisation Microsoft OAuth pour la portée `substrate.office.com/sydney` |
-| `tier`         | `individual` (par défaut), `edu` ou `enterprise`                                   |
-
-Obtenez le jeton d’actualisation à partir d’un flux Microsoft de code d’appareil ou de code d’autorisation
-utilisant la portée `substrate.office.com/sydney`. Lorsque `refreshToken` est défini, OmniRoute
-actualise de manière préventive `access_token` avant chaque requête. Vous n’avez donc pas besoin de
-récupérer à nouveau l’identifiant après chaque expiration d’environ 75 minutes.
+Obtenez le jeton d'actualisation à partir d'un flux de code de périphérique ou de code d'autorisation Microsoft limité à `substrate.office.com/sydney`; le tableau de bord ne l'acquiert pas pour vous. Avec un jeton d'actualisation configuré, OmniRoute vérifie le `access_token` avant les requêtes et l'actualise uniquement lorsqu'il a besoin d'être actualisé. Une actualisation réussie conserve également le jeton d’actualisation pivoté, évitant ainsi une nouvelle capture manuelle pendant que le jeton d’actualisation reste valide.
 
 Si `refreshToken` n’est pas défini, vous devez récupérer manuellement l’identifiant de connexion WebSocket
 après chaque expiration.
@@ -96,8 +86,7 @@ après chaque expiration.
 | `edu`        | `included`     | M365 Copilot Éducation       |
 | `enterprise` | `work`         | M365 Copilot pour le travail |
 
-Définissez le niveau dans **Paramètres avancés → providerSpecificData → tier**. Le niveau affecte
-le routage de BizChat et l’accès aux modèles.
+Définir le niveau dans **Paramètres avancés → Niveau Copilot** . Le niveau affecte le routage BizChat et l'accès au modèle.
 
 ## Modèle de sécurité
 
@@ -125,7 +114,7 @@ le routage de BizChat et l’accès aux modèles.
 Ce comportement est attendu. Sans `refreshToken`, le jeton d’accès a une courte durée de vie. Vous pouvez :
 
 - Récupérer de nouveau les identifiants depuis DevTools, ou
-- Configurer un `refreshToken` dans les paramètres avancés afin d’activer l’actualisation automatique.
+- Configurer **Paramètres avancés → Jeton d'actualisation (facultatif)** dans la boîte de dialogue Ajouter ou Modifier une connexion pour une actualisation automatique.
 
 ### Le test de connexion réussit, mais le chat renvoie une erreur 401
 

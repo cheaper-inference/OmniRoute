@@ -106,7 +106,7 @@ Kiro'ning bo'sh bo'lmagan imzoga ega ikkilik `reasoningContentEvent` freymlari b
 
 **Yakuniy holatlar (sovush davrlari EMAS):**
 
-- `banned` — taqiqlangan kalit so'z / akkaunt-banini aniqlash orqali o'rnatiladi (qarang [BAN_DETECTION](../security/BAN_DETECTION.md)), shuningdek upstream tomonidan har bir so'rovning ketma-ket uch marta rad etilishi bilan (`request_rejected`, masalan, Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); bitta rad etish faqat ulanishni sovutadi
+- `banned` — taqiqlangan kalit so'z / hisobni taqiqlashni aniqlash orqali o'rnatiladi (qarang: [BAN_DETECTION](../security/BAN_DETECTION.md) ). Yuqori oqim boshiga so‘rovni rad etish (`request_rejected`, masalan Anthropic OAuth 403 “So‘rovga ruxsat yo‘q”) uni hech qachon o‘rnatmaydi: ular har bir ulanish va model bo‘yicha hisoblanadi va `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 soat) bilan chegaralangan o‘sib borayotgan sovutish vaqti bilan bu modelni aylanishdan olib tashlaydi yoki hech qanday model ma’lum bo‘lmasa, ulanishni sovutadi — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (cheklangan qayta urinishlardan so'ng yakuniy holatga o'tadi — eksponensial backoff bilan `EXPIRED_RETRY_MAX = 3` — shunda vaqtinchalik OAuth xatolari akkaunt butunlay o'chirilishidan oldin o'z-o'zidan tuzalishi mumkin)
 - `credits_exhausted`
 

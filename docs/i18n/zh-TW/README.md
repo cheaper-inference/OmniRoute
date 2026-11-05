@@ -27,9 +27,9 @@
 
 > **請自備提供者帳戶。** 這是分別符合資格的第三方免費方案之估計總量，並非 OmniRoute 提供的 Token 額度。請註冊、在需要時取得憑證，並連線至您可使用的提供者；每個提供者均自行控制其限制、可用性與條款。
 >
-> 手動疊加免費方案相當痛苦 — 數十個 SDK、數十種速率限制，而且完全不知道實際擁有多少額度。OmniRoute 編錄了 **34 個週期性額度池金鑰中的 484 個免費方案項目**，並根據 **17 個已公布正數月度額度的池，以及五個按模型計算的 Groq 上限**計算 Token 標題數字，且會依共用額度池去重。只有通過區域身分檢查後才會開放的額度（目前為 ModelScope）會另外顯示，區域身分驗證後再增加約 6M，且永遠不會加總至標題數字中。結果會持續顯示於儀表板（`/dashboard/free-tiers`）。
+> 手動疊加免費方案相當痛苦 — 數十個 SDK、數十種速率限制，而且完全不知道實際擁有多少額度。OmniRoute 編錄了 **34 個週期性額度池金鑰中的 486 個免費方案項目**，並根據 **17 個已公布正數月度額度的池，以及五個按模型計算的 Groq 上限**計算 Token 標題數字，且會依共用額度池去重。只有通過區域身分檢查後才會開放的額度（目前為 ModelScope）會另外顯示，區域身分驗證後再增加約 6M，且永遠不會加總至標題數字中。結果會持續顯示於儀表板（`/dashboard/free-tiers`）。
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute 免費方案預算卡：每月穩定提供約 1.62B 個免費 Token，首月加上註冊點數後最高約 2.22B，來自 34 個已記錄的週期性額度池金鑰，涵蓋 484 個編錄的免費方案項目，並透過單一端點提供。誠實且依額度池去重的計算方式 — 每個共用額度池只計算一次，包括 17 個已公布正數月度 Token 額度的週期性額度池，以及五個按模型計算的 Groq 上限；條款風險目錄中有 12 家提供者標記為應避免使用，交由您自行決定。預算列包含 Mistral 1B、Nara 210M、LLM7 150M、xKiro 150M、Groq 30M（五個按模型計算的上限）及較小的額度池，另外將首月註冊點數與永久免費且無 Token 上限的提供者分開顯示，因此不會膨脹標題數字。在 /dashboard/free-tiers 上查看即時已使用／剩餘額度。"/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute 免費方案預算卡：每月穩定提供約 1.62B 個免費 Token，首月加上註冊點數後最高約 2.22B，來自 34 個已記錄的週期性額度池金鑰，涵蓋 486 個編錄的免費方案項目，並透過單一端點提供。誠實且依額度池去重的計算方式 — 每個共用額度池只計算一次，包括 17 個已公布正數月度 Token 額度的週期性額度池，以及五個按模型計算的 Groq 上限；條款風險目錄中有 12 家提供者標記為應避免使用，交由您自行決定。預算列包含 Mistral 1B、Nara 210M、LLM7 150M、xKiro 150M、Groq 30M（五個按模型計算的上限）及較小的額度池，另外將首月註冊點數與永久免費且無 Token 上限的提供者分開顯示，因此不會膨脹標題數字。在 /dashboard/free-tiers 上查看即時已使用／剩餘額度。"/>
 
 > 即時 `/dashboard/free-tiers` 頁面的動畫摘要。完整方法說明（額度池去重、點數層級、提供者條款）：**[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**。
 >
@@ -74,7 +74,7 @@
 |                     |        v3.8.50        | **v3.8.51** |      `v3.8.53+`       |
 | ------------------- | :-------------------: | :---------: | :-------------------: |
 | 🌐 提供者           |          352          |   **358**   |          380          |
-| 🧠 唯一聊天模型 ID  |         1320          |  **1374**   |         1494          |
+| 🧠 唯一聊天模型 ID  |         1320          |  **1374**   |         1499          |
 | 🖼️ 模態橋接         | 🆕 視覺 + 音訊 + 影片 |      ✓      |           ✓           |
 | 📡 Radar 免費目錄   |      🆕 可選加入      |      ✓      |           ✓           |
 | ⚖️ 配額感知排程     |    🆕 Quota-Share     |      ✓      |           ✓           |
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="這項承諾 — 單一端點與 380 個提供者。只要仍有其他健康的目標可用，自動備援就能持續路由。六大支柱：在 380 個提供者之間提供具韌性的備援 · 符合資格的工作負載最高可節省 95% 的權杖 · 以 $0 起步，提供 150+ 個免費方案以及 52 個定期提供／免金鑰、永久免費的提供者 · 透過單一設定支援 39 個 CLI／代理程式整合 · 在 /v1 提供 OpenAI、Claude、Gemini 與 Responses API 相容性 · 生產環境控制功能，包括斷路器、TLS 隱匿、MCP 110 個工具、A2A、記憶體、防護機制、評估，以及分布於 7,800+ 個受追蹤測試檔案中的 56,000+ 個靜態測試宣告。"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="這項承諾 — 單一端點與 380 個提供者。只要仍有其他健康的目標可用，自動備援就能持續路由。六大支柱：在 380 個提供者之間提供具韌性的備援 · 符合資格的工作負載最高可節省 95% 的權杖 · 以 $0 起步，提供 150+ 個免費方案以及 54 個定期提供／免金鑰、永久免費的提供者 · 透過單一設定支援 39 個 CLI／代理程式整合 · 在 /v1 提供 OpenAI、Claude、Gemini 與 Responses API 相容性 · 生產環境控制功能，包括斷路器、TLS 隱匿、MCP 110 個工具、A2A、記憶體、防護機制、評估，以及分布於 7,800+ 個受追蹤測試檔案中的 56,000+ 個靜態測試宣告。"/>
 
 <br/>
 <br/>
@@ -693,7 +693,7 @@ Shell 歷程記錄中。→ [CLI 整合](docs/guides/CLI-INTEGRATIONS.md)
 
 </div>
 
-> 在標準聊天、媒體、搜尋、本機、雲端代理與系統集合中，共有 **380 家已註冊提供者**，其中 **156 家帶有 `hasFree: true` 探索中繼資料**。聊天模型登錄庫涵蓋 **241 家提供者 / 3,109 組不同的提供者－模型配對 / 1,494 個原始模型 ID**；獨立的免費額度目錄則包含 **484 筆個別模型資料列**、**34 個週期性資源池**，以及 **52 家提供週期性／免金鑰永久免費方案的提供者**。這些統計刻意採用不同的分母；定義與資源池去重後的計算方式請參閱[提供者參考資料](docs/reference/PROVIDER_REFERENCE.md)與[免費方案](docs/reference/FREE_TIERS.md)。
+> 在標準聊天、媒體、搜尋、本機、雲端代理與系統集合中，共有 **380 家已註冊提供者**，其中 **156 家帶有 `hasFree: true` 探索中繼資料**。聊天模型登錄庫涵蓋 **241 家提供者 / 3,114 組不同的提供者－模型配對 / 1,499 個原始模型 ID**；獨立的免費額度目錄則包含 **486 筆個別模型資料列**、**34 個週期性資源池**，以及 **54 家提供週期性／免金鑰永久免費方案的提供者**。這些統計刻意採用不同的分母；定義與資源池去重後的計算方式請參閱[提供者參考資料](docs/reference/PROVIDER_REFERENCE.md)與[免費方案](docs/reference/FREE_TIERS.md)。
 
 <div align="center">
 
@@ -1364,7 +1364,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也會略過此�
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">韌性指南</a></b></td><td>斷路器、冷卻時間、佇列、防止驚群效應、TLS 欺騙</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">自動組合引擎</a></b></td><td>16 項因素評分、模式套件、自我修復</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Proxy 指南</a></b></td><td>3 層 Proxy 系統、1proxy 市集、登錄檔 CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">免費方案</a></b></td><td>整合目錄：34 個有文件記錄的週期性資源池 / 484 個已編目的免費方案項目</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">免費方案</a></b></td><td>整合目錄：34 個有文件記錄的週期性資源池 / 486 個已編目的免費方案項目</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">功能展示</a></b></td><td>附有螢幕截圖的視覺化儀表板導覽</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">程式碼庫文件</a></b></td><td>適合初學者的程式碼庫導覽</td></tr>
 </table>

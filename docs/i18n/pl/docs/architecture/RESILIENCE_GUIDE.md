@@ -119,7 +119,7 @@ Binarne ramki `reasoningContentEvent` Kiro z niepustym podpisem zachowują tę a
 
 **Stany końcowe (NIE wyciszenia):**
 
-- `banned` — ustawiany przez wykrywanie zakazanych słów kluczowych / blokady konta (patrz [BAN_DETECTION](../security/BAN_DETECTION.md)) oraz przez trzy kolejne odmowy żądań z serwera nadrzędnego (`request_rejected`, np. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); pojedyncza odmowa jedynie wycisza połączenie
+- `banned` — ustawione przez wykrycie zbanowanego słowa kluczowego/banu konta (zobacz [BAN_DETECTION](../security/BAN_DETECTION.md) ). Odmowy upstream na żądanie (`request_rejected`, np. Anthropic OAuth 403 „Żądanie niedozwolone”) nigdy tego nie ustawiają: są liczone na połączenie i model i wycofują ten model z rotacji z rosnącym czasem odnowienia ograniczonym do `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h) lub schładzają połączenie, gdy żaden model nie jest znany — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (przechodzi w stan końcowy po ograniczonej liczbie ponownych prób — `EXPIRED_RETRY_MAX = 3` z wykładniczym wycofywaniem — dzięki czemu przejściowe błędy OAuth mogą się samoistnie naprawić, zanim konto zostanie trwale dezaktywowane)
 - `credits_exhausted`
 

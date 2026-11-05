@@ -27,9 +27,9 @@
 
 > **Bruk dine egne leverandørkontoer.** Dette er et estimert samlet tall på tvers av separat kvalifiserte gratisnivåer fra tredjeparter, ikke en token-tildeling fra OmniRoute. Registrer deg, skaff legitimasjon der det kreves, og koble til leverandørene du kan bruke; hver leverandør styrer sine egne grenser, sin tilgjengelighet og sine vilkår.
 >
-> Det er tungvint å sette sammen gratisnivåer manuelt — dusinvis av SDK-er, dusinvis av hastighetsgrenser og ingen oversikt over hvor mye du faktisk har. OmniRoute katalogiserer **484 oppføringer på gratisnivået fordelt på 34 gjentakende puljenøkler** og beregner tokenoverskriften fra **17 puljer med et publisert positivt månedlig budsjett, pluss fem Groq-grenser per modell**, deduplisert etter delt pulje. Kvoter som bare åpnes etter en regional identitetskontroll (i dag: ModelScope), vises separat, +~6M etter regional identitetsverifisering, og summeres aldri inn i overskriften. Resultatet forblir synlig på dashbordet (`/dashboard/free-tiers`).
+> Det er tungvint å sette sammen gratisnivåer manuelt — dusinvis av SDK-er, dusinvis av hastighetsgrenser og ingen oversikt over hvor mye du faktisk har. OmniRoute katalogiserer **486 oppføringer på gratisnivået fordelt på 34 gjentakende puljenøkler** og beregner tokenoverskriften fra **17 puljer med et publisert positivt månedlig budsjett, pluss fem Groq-grenser per modell**, deduplisert etter delt pulje. Kvoter som bare åpnes etter en regional identitetskontroll (i dag: ModelScope), vises separat, +~6M etter regional identitetsverifisering, og summeres aldri inn i overskriften. Resultatet forblir synlig på dashbordet (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoutes kort for gratisnivåbudsjett: ~1.62B gratis tokens per måned som standard, opptil ~2.22B den første måneden med registreringskreditter, fra 34 dokumenterte gjentakende puljenøkler som dekker 484 katalogiserte oppføringer på gratisnivået bak ett endepunkt. Ærlig matematikk deduplisert etter pulje — hver delt pulje telles én gang, inkludert 17 gjentakende puljer med et publisert positivt månedlig tokenbudsjett, pluss fem Groq-grenser per modell; 12 leverandører er merket som bør unngås i katalogen over vilkårsrisiko, slik at du kan ta avgjørelsen. Budsjettlinjen inkluderer Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (fem grenser per modell) og mindre puljer, pluss registreringskreditter for den første måneden og leverandører som er permanent gratis uten tokenbegrensning, vist separat slik at de aldri blåser opp overskriften. Live brukt/gjenstående på /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoutes kort for gratisnivåbudsjett: ~1.62B gratis tokens per måned som standard, opptil ~2.22B den første måneden med registreringskreditter, fra 34 dokumenterte gjentakende puljenøkler som dekker 486 katalogiserte oppføringer på gratisnivået bak ett endepunkt. Ærlig matematikk deduplisert etter pulje — hver delt pulje telles én gang, inkludert 17 gjentakende puljer med et publisert positivt månedlig tokenbudsjett, pluss fem Groq-grenser per modell; 12 leverandører er merket som bør unngås i katalogen over vilkårsrisiko, slik at du kan ta avgjørelsen. Budsjettlinjen inkluderer Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (fem grenser per modell) og mindre puljer, pluss registreringskreditter for den første måneden og leverandører som er permanent gratis uten tokenbegrensning, vist separat slik at de aldri blåser opp overskriften. Live brukt/gjenstående på /dashboard/free-tiers."/>
 
 > Animert sammendrag av den aktive siden `/dashboard/free-tiers`. Full metode (puljededuplisering, kredittnivåer, leverandørvilkår): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -74,7 +74,7 @@
 |                             |       v3.8.50        | **v3.8.51** |      `v3.8.53+`       |
 | --------------------------- | :------------------: | :---------: | :-------------------: |
 | 🌐 Leverandører             |         352          |   **358**   |          380          |
-| 🧠 Unike chatmodell-ID-er   |         1320         |  **1374**   |         1494          |
+| 🧠 Unike chatmodell-ID-er   |         1320         |  **1374**   |         1499          |
 | 🖼️ Modalitetsbro            | 🆕 syn + lyd + video |      ✓      |           ✓           |
 | 📡 Radars gratiskatalog     |      🆕 opt-in       |      ✓      |           ✓           |
 | ⚖️ Kvotebevisst planlegging |    🆕 Quota-Share    |      ✓      |           ✓           |
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Løftet — Ett endepunkt og 380 leverandører. Automatisk fallback fortsetter rutingen så lenge et annet friskt mål er tilgjengelig. Seks søyler: robust fallback på tvers av 380 leverandører · opptil 95 % tokensparing på kvalifiserte arbeidsmengder · 0 kr å starte med 150+ gratisnivåer og 52 gjentakende/nøkkelløse gratis-for-alltid-leverandører · 39 CLI/agent-integrasjoner gjennom én konfigurasjon · OpenAI, Claude, Gemini og Responses API-kompatibilitet på /v1 · produksjonskontroller inkludert circuit breakers, TLS stealth, MCP 110-verktøy, A2A, minne, guardrails, evals og 56 000+ statiske testdeklarasjoner på tvers av 7 800+ overvåkede testfiler."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Løftet — Ett endepunkt og 380 leverandører. Automatisk fallback fortsetter rutingen så lenge et annet friskt mål er tilgjengelig. Seks søyler: robust fallback på tvers av 380 leverandører · opptil 95 % tokensparing på kvalifiserte arbeidsmengder · 0 kr å starte med 150+ gratisnivåer og 54 gjentakende/nøkkelløse gratis-for-alltid-leverandører · 39 CLI/agent-integrasjoner gjennom én konfigurasjon · OpenAI, Claude, Gemini og Responses API-kompatibilitet på /v1 · produksjonskontroller inkludert circuit breakers, TLS stealth, MCP 110-verktøy, A2A, minne, guardrails, evals og 56 000+ statiske testdeklarasjoner på tvers av 7 800+ overvåkede testfiler."/>
 
 <br/>
 <br/>
@@ -702,7 +702,7 @@ av shell-historikken din. → [CLI-integrasjoner](docs/guides/CLI-INTEGRATIONS.m
 
 </div>
 
-> **380 registrerte leverandører** på tvers av de kanoniske samlingene for chat, media, søk, lokal, sky-agent og system, inkludert **156 med `hasFree: true` oppdagelsesmetadata**. Chatmodellregisteret dekker **241 leverandører / 3 109 distinkte leverandør-modell-par / 1 494 rå modell-IDer**; den separate gratis-budsjettkatalogen har **484 rader per modell**, **34 gjentakende puljer** og **52 gjentakende/nøkkelfrie gratis-for-alltid-leverandører**. Dette er ulike nevner med hensikt; definisjoner og pulje-dedupliserte beregninger finnes i [Leverandørreferanse](docs/reference/PROVIDER_REFERENCE.md) og [Gratisnivåer](docs/reference/FREE_TIERS.md).
+> **380 registrerte leverandører** på tvers av de kanoniske samlingene for chat, media, søk, lokal, sky-agent og system, inkludert **156 med `hasFree: true` oppdagelsesmetadata**. Chatmodellregisteret dekker **241 leverandører / 3 114 distinkte leverandør-modell-par / 1 499 rå modell-IDer**; den separate gratis-budsjettkatalogen har **486 rader per modell**, **34 gjentakende puljer** og **54 gjentakende/nøkkelfrie gratis-for-alltid-leverandører**. Dette er ulike nevner med hensikt; definisjoner og pulje-dedupliserte beregninger finnes i [Leverandørreferanse](docs/reference/PROVIDER_REFERENCE.md) og [Gratisnivåer](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1379,7 +1379,7 @@ Kanoniske måledata per 2026-10-18: **1.976 unike videoer** · **20.220.289 kjen
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Veiledning for robusthet</a></b></td><td>Kretsbrytere, nedkjølingsperioder, kø, beskyttelse mot stormløp, TLS-spoofing</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo-motor</a></b></td><td>Poengberegning basert på 16 faktorer, moduspakker, selvreparasjon</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Proxy-veiledning</a></b></td><td>Proxy-system på 3 nivåer, 1proxy-markedsplass, CRUD for registeret</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Gratisnivåer</a></b></td><td>Konsolidert katalog: 34 dokumenterte tilbakevendende samlinger / 484 katalogiserte oppføringer på gratisnivå</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Gratisnivåer</a></b></td><td>Konsolidert katalog: 34 dokumenterte tilbakevendende samlinger / 486 katalogiserte oppføringer på gratisnivå</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Funksjonsgalleri</a></b></td><td>Visuell gjennomgang av dashbordet med skjermbilder</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Dokumentasjon av kodebasen</a></b></td><td>Nybegynnervennlig gjennomgang av kodebasen</td></tr>
 </table>

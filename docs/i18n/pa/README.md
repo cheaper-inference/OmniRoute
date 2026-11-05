@@ -27,9 +27,9 @@
 
 > **ਆਪਣੇ provider ਖਾਤੇ ਖੁਦ ਲਿਆਓ।** ਇਹ ਵੱਖ-ਵੱਖ ਯੋਗ ਤੀਜੀ-ਧਿਰ ਦੇ ਮੁਫ਼ਤ ਪੱਧਰਾਂ ਦਾ ਅਨੁਮਾਨਿਤ ਕੁੱਲ ਹੈ, OmniRoute ਵੱਲੋਂ ਦਿੱਤਾ ਗਿਆ token grant ਨਹੀਂ। ਸਾਈਨ ਅੱਪ ਕਰੋ, ਜਿੱਥੇ ਲੋੜ ਹੋਵੇ ਉੱਥੇ credentials ਪ੍ਰਾਪਤ ਕਰੋ, ਅਤੇ ਜਿਨ੍ਹਾਂ providers ਦੀ ਵਰਤੋਂ ਕਰ ਸਕਦੇ ਹੋ ਉਨ੍ਹਾਂ ਨੂੰ ਕਨੈਕਟ ਕਰੋ; ਹਰ provider ਆਪਣੀਆਂ limits, availability ਅਤੇ terms ਨੂੰ ਨਿਯੰਤਰਿਤ ਕਰਦਾ ਹੈ।
 >
-> ਮੁਫ਼ਤ ਪੱਧਰਾਂ ਨੂੰ ਹੱਥੋਂ ਇਕੱਠਾ ਕਰਨਾ ਔਖਾ ਹੈ — ਦਰਜਨਾਂ SDKs, ਦਰਜਨਾਂ rate limits, ਅਤੇ ਇਹ ਜਾਣਨ ਦਾ ਕੋਈ ਤਰੀਕਾ ਨਹੀਂ ਕਿ ਤੁਹਾਡੇ ਕੋਲ ਅਸਲ ਵਿੱਚ ਕਿੰਨਾ ਉਪਲਬਧ ਹੈ। OmniRoute **34 recurring pool keys ਵਿੱਚ 484 free-tier entries** ਦੀ ਸੂਚੀ ਬਣਾਉਂਦਾ ਹੈ ਅਤੇ token headline ਦੀ ਗਣਨਾ **published positive monthly budget ਵਾਲੇ 17 pools ਅਤੇ ਪੰਜ per-model Groq caps** ਤੋਂ ਕਰਦਾ ਹੈ, ਜਿਨ੍ਹਾਂ ਨੂੰ shared pool ਦੇ ਆਧਾਰ ’ਤੇ deduplicate ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਜਿਹੜੇ quotas ਸਿਰਫ਼ regional identity check ਤੋਂ ਬਾਅਦ ਉਪਲਬਧ ਹੁੰਦੇ ਹਨ (ਅੱਜ: ModelScope), ਉਹ ਵੱਖਰੇ ਦਿਖਾਏ ਜਾਂਦੇ ਹਨ; regional identity verification ਦੇ ਪਿੱਛੇ +~6M ਹੁੰਦੇ ਹਨ ਅਤੇ headline ਵਿੱਚ ਕਦੇ ਵੀ ਜੋੜੇ ਨਹੀਂ ਜਾਂਦੇ। ਨਤੀਜਾ dashboard (`/dashboard/free-tiers`) ’ਤੇ ਦਿਖਾਈ ਦਿੰਦਾ ਰਹਿੰਦਾ ਹੈ।
+> ਮੁਫ਼ਤ ਪੱਧਰਾਂ ਨੂੰ ਹੱਥੋਂ ਇਕੱਠਾ ਕਰਨਾ ਔਖਾ ਹੈ — ਦਰਜਨਾਂ SDKs, ਦਰਜਨਾਂ rate limits, ਅਤੇ ਇਹ ਜਾਣਨ ਦਾ ਕੋਈ ਤਰੀਕਾ ਨਹੀਂ ਕਿ ਤੁਹਾਡੇ ਕੋਲ ਅਸਲ ਵਿੱਚ ਕਿੰਨਾ ਉਪਲਬਧ ਹੈ। OmniRoute **34 recurring pool keys ਵਿੱਚ 486 free-tier entries** ਦੀ ਸੂਚੀ ਬਣਾਉਂਦਾ ਹੈ ਅਤੇ token headline ਦੀ ਗਣਨਾ **published positive monthly budget ਵਾਲੇ 17 pools ਅਤੇ ਪੰਜ per-model Groq caps** ਤੋਂ ਕਰਦਾ ਹੈ, ਜਿਨ੍ਹਾਂ ਨੂੰ shared pool ਦੇ ਆਧਾਰ ’ਤੇ deduplicate ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਜਿਹੜੇ quotas ਸਿਰਫ਼ regional identity check ਤੋਂ ਬਾਅਦ ਉਪਲਬਧ ਹੁੰਦੇ ਹਨ (ਅੱਜ: ModelScope), ਉਹ ਵੱਖਰੇ ਦਿਖਾਏ ਜਾਂਦੇ ਹਨ; regional identity verification ਦੇ ਪਿੱਛੇ +~6M ਹੁੰਦੇ ਹਨ ਅਤੇ headline ਵਿੱਚ ਕਦੇ ਵੀ ਜੋੜੇ ਨਹੀਂ ਜਾਂਦੇ। ਨਤੀਜਾ dashboard (`/dashboard/free-tiers`) ’ਤੇ ਦਿਖਾਈ ਦਿੰਦਾ ਰਹਿੰਦਾ ਹੈ।
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute ਮੁਫ਼ਤ-ਪੱਧਰ ਬਜਟ ਕਾਰਡ: ਪ੍ਰਤੀ ਮਹੀਨਾ ਲਗਭਗ 1.62B ਮੁਫ਼ਤ ਟੋਕਨ ਸਥਿਰ ਤੌਰ ’ਤੇ, ਅਤੇ signup credits ਨਾਲ ਪਹਿਲੇ ਮਹੀਨੇ ਵਿੱਚ ਵੱਧ ਤੋਂ ਵੱਧ ਲਗਭਗ 2.22B, 34 documented recurring pool keys ਤੋਂ, ਜੋ ਇੱਕ endpoint ਦੇ ਪਿੱਛੇ cataloged 484 free-tier entries ਨੂੰ ਕਵਰ ਕਰਦੇ ਹਨ। ਇਮਾਨਦਾਰ pool-deduped ਗਣਨਾ — ਹਰ shared pool ਨੂੰ ਇੱਕ ਵਾਰ ਹੀ ਗਿਣਿਆ ਗਿਆ ਹੈ, ਜਿਸ ਵਿੱਚ published positive monthly token budget ਵਾਲੇ 17 recurring pools ਅਤੇ ਪੰਜ per-model Groq caps ਸ਼ਾਮਲ ਹਨ; terms-risk catalog ਵਿੱਚ 12 providers ਨੂੰ avoid ਵਜੋਂ ਨਿਸ਼ਾਨਜ਼ਦ ਕੀਤਾ ਗਿਆ ਹੈ ਤਾਂ ਜੋ ਫ਼ੈਸਲਾ ਤੁਸੀਂ ਕਰੋ। ਬਜਟ ਬਾਰ ਵਿੱਚ Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (ਪੰਜ per-model caps) ਅਤੇ ਛੋਟੇ pools ਸ਼ਾਮਲ ਹਨ, ਨਾਲ ਹੀ ਪਹਿਲੇ ਮਹੀਨੇ ਦੇ signup credits ਅਤੇ permanently-free no-token-cap providers ਵੱਖਰੇ ਦਿਖਾਏ ਜਾਂਦੇ ਹਨ ਤਾਂ ਜੋ ਉਹ headline ਨੂੰ ਕਦੇ ਵਧਾ-ਚੜ੍ਹਾ ਕੇ ਨਾ ਦਿਖਾਉਣ। /dashboard/free-tiers ’ਤੇ ਲਾਈਵ ਵਰਤੋਂ ਅਤੇ ਬਾਕੀ।"/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute ਮੁਫ਼ਤ-ਪੱਧਰ ਬਜਟ ਕਾਰਡ: ਪ੍ਰਤੀ ਮਹੀਨਾ ਲਗਭਗ 1.62B ਮੁਫ਼ਤ ਟੋਕਨ ਸਥਿਰ ਤੌਰ ’ਤੇ, ਅਤੇ signup credits ਨਾਲ ਪਹਿਲੇ ਮਹੀਨੇ ਵਿੱਚ ਵੱਧ ਤੋਂ ਵੱਧ ਲਗਭਗ 2.22B, 34 documented recurring pool keys ਤੋਂ, ਜੋ ਇੱਕ endpoint ਦੇ ਪਿੱਛੇ cataloged 486 free-tier entries ਨੂੰ ਕਵਰ ਕਰਦੇ ਹਨ। ਇਮਾਨਦਾਰ pool-deduped ਗਣਨਾ — ਹਰ shared pool ਨੂੰ ਇੱਕ ਵਾਰ ਹੀ ਗਿਣਿਆ ਗਿਆ ਹੈ, ਜਿਸ ਵਿੱਚ published positive monthly token budget ਵਾਲੇ 17 recurring pools ਅਤੇ ਪੰਜ per-model Groq caps ਸ਼ਾਮਲ ਹਨ; terms-risk catalog ਵਿੱਚ 12 providers ਨੂੰ avoid ਵਜੋਂ ਨਿਸ਼ਾਨਜ਼ਦ ਕੀਤਾ ਗਿਆ ਹੈ ਤਾਂ ਜੋ ਫ਼ੈਸਲਾ ਤੁਸੀਂ ਕਰੋ। ਬਜਟ ਬਾਰ ਵਿੱਚ Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (ਪੰਜ per-model caps) ਅਤੇ ਛੋਟੇ pools ਸ਼ਾਮਲ ਹਨ, ਨਾਲ ਹੀ ਪਹਿਲੇ ਮਹੀਨੇ ਦੇ signup credits ਅਤੇ permanently-free no-token-cap providers ਵੱਖਰੇ ਦਿਖਾਏ ਜਾਂਦੇ ਹਨ ਤਾਂ ਜੋ ਉਹ headline ਨੂੰ ਕਦੇ ਵਧਾ-ਚੜ੍ਹਾ ਕੇ ਨਾ ਦਿਖਾਉਣ। /dashboard/free-tiers ’ਤੇ ਲਾਈਵ ਵਰਤੋਂ ਅਤੇ ਬਾਕੀ।"/>
 
 > ਲਾਈਵ `/dashboard/free-tiers` ਪੰਨੇ ਦਾ animated ਸਾਰ। ਪੂਰੀ ਵਿਧੀ (pool dedupe, credit tiers, provider terms): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**।
 >
@@ -74,7 +74,7 @@
 |                          |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------ | :---------------------: | :---------: | :-------------------: |
 | 🌐 ਪ੍ਰਦਾਤਾ               |           352           |   **358**   |          380          |
-| 🧠 ਵਿਲੱਖਣ ਚੈਟ ਮਾਡਲ ID    |          1320           |  **1374**   |         1494          |
+| 🧠 ਵਿਲੱਖਣ ਚੈਟ ਮਾਡਲ ID    |          1320           |  **1374**   |         1499          |
 | 🖼️ ਮੋਡੈਲਿਟੀ ਬ੍ਰਿਜ        | 🆕 ਵਿਜ਼ਨ + ਆਡੀਓ + ਵੀਡੀਓ |      ✓      |           ✓           |
 | 📡 ਰਾਡਾਰ ਮੁਫ਼ਤ ਕੈਟਾਲਾਗ   |        🆕 ਚੋਣਵਾਂ        |      ✓      |           ✓           |
 | ⚖️ ਕੋਟਾ-ਜਾਗਰੂਕ ਸ਼ਡਿਊਲਿੰਗ |     🆕 Quota-Share      |      ✓      |           ✓           |
@@ -249,7 +249,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ਵਾਅਦਾ — ਇੱਕ ਐਂਡਪੌਇੰਟ ਅਤੇ 380 ਪ੍ਰੋਵਾਈਡਰ। ਆਟੋਮੈਟਿਕ ਫਾਲਬੈਕ ਰੂਟਿੰਗ ਜਾਰੀ ਰੱਖਦਾ ਹੈ ਜਦੋਂ ਤੱਕ ਹੋਰ ਕੋਈ ਸਿਹਤਮੰਦ ਟਾਰਗਟ ਉਪਲਬਧ ਹੈ। ਛੇ ਪਾਈਆਂ: 380 ਪ੍ਰੋਵਾਈਡਰਾਂ 'ਤੇ ਮਜ਼ਬੂਤ ਫਾਲਬੈਕ · ਯੋਗ ਵਰਕਲੋਡਾਂ 'ਤੇ 95% ਤੱਕ ਟੋਕਨ ਬਚਤ · 150+ ਮੁਫ਼ਤ ਟੀਅਰਾਂ ਅਤੇ 52 ਮੁੜ ਆਉਣ ਵਾਲੇ/ਕੀ-ਲੈੱਸ ਮੁਫ਼ਤ-ਹਮੇਸ਼ਾ ਪ੍ਰੋਵਾਈਡਰਾਂ ਨਾਲ $0 'ਤੇ ਸ਼ੁਰੂ ਕਰੋ · ਇੱਕ ਹੀ ਕਨਫਿਗ ਰਾਹੀਂ 39 CLI/ਏਜੰਟ ਇੰਟੀਗ੍ਰੇਸ਼ਨ · /v1 'ਤੇ OpenAI, Claude, Gemini ਅਤੇ Responses API ਅਨੁਕੂਲਤਾ · ਉਤਪਾਦਨ ਕੰਟਰੋਲ ਜਿਵੇਂ ਕਿ ਸਰਕਿਟ ਬ੍ਰੇਕਰ, TLS ਸਟੀਲਥ, MCP 110 ਟੂਲ, A2A, ਮੈਮੋਰੀ, ਗਾਰਡਰੇਲ, ਇਵੈਲ ਅਤੇ 7,800+ ਟਰੈਕ ਕੀਤੀਆਂ ਟੈਸਟ ਫਾਈਲਾਂ 'ਚ 56,000+ ਸਟੈਟਿਕ ਟੈਸਟ ਡਿਕਲੇਰੇਸ਼ਨ।"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ਵਾਅਦਾ — ਇੱਕ ਐਂਡਪੌਇੰਟ ਅਤੇ 380 ਪ੍ਰੋਵਾਈਡਰ। ਆਟੋਮੈਟਿਕ ਫਾਲਬੈਕ ਰੂਟਿੰਗ ਜਾਰੀ ਰੱਖਦਾ ਹੈ ਜਦੋਂ ਤੱਕ ਹੋਰ ਕੋਈ ਸਿਹਤਮੰਦ ਟਾਰਗਟ ਉਪਲਬਧ ਹੈ। ਛੇ ਪਾਈਆਂ: 380 ਪ੍ਰੋਵਾਈਡਰਾਂ 'ਤੇ ਮਜ਼ਬੂਤ ਫਾਲਬੈਕ · ਯੋਗ ਵਰਕਲੋਡਾਂ 'ਤੇ 95% ਤੱਕ ਟੋਕਨ ਬਚਤ · 150+ ਮੁਫ਼ਤ ਟੀਅਰਾਂ ਅਤੇ 54 ਮੁੜ ਆਉਣ ਵਾਲੇ/ਕੀ-ਲੈੱਸ ਮੁਫ਼ਤ-ਹਮੇਸ਼ਾ ਪ੍ਰੋਵਾਈਡਰਾਂ ਨਾਲ $0 'ਤੇ ਸ਼ੁਰੂ ਕਰੋ · ਇੱਕ ਹੀ ਕਨਫਿਗ ਰਾਹੀਂ 39 CLI/ਏਜੰਟ ਇੰਟੀਗ੍ਰੇਸ਼ਨ · /v1 'ਤੇ OpenAI, Claude, Gemini ਅਤੇ Responses API ਅਨੁਕੂਲਤਾ · ਉਤਪਾਦਨ ਕੰਟਰੋਲ ਜਿਵੇਂ ਕਿ ਸਰਕਿਟ ਬ੍ਰੇਕਰ, TLS ਸਟੀਲਥ, MCP 110 ਟੂਲ, A2A, ਮੈਮੋਰੀ, ਗਾਰਡਰੇਲ, ਇਵੈਲ ਅਤੇ 7,800+ ਟਰੈਕ ਕੀਤੀਆਂ ਟੈਸਟ ਫਾਈਲਾਂ 'ਚ 56,000+ ਸਟੈਟਿਕ ਟੈਸਟ ਡਿਕਲੇਰੇਸ਼ਨ।"/>
 
 <br/>
 <br/>
@@ -691,7 +691,7 @@ omniroute configure codex          # ਇਹ ਵੀ: claude opencode qwen aider g
 
 </div>
 
-> **380 ਰਜਿਸਟਰਡ ਪ੍ਰਦਾਤਾ** ਕੈਨੋਨਿਕਲ ਚੈਟ, ਮੀਡੀਆ, ਸਰਚ, ਲੋਕਲ, ਕਲਾਉਡ-ਏਜੰਟ ਅਤੇ ਸਿਸਟਮ ਕਲੈਕਸ਼ਨਾਂ ਵਿੱਚ, ਜਿਸ ਵਿੱਚੋਂ **156 ਕੋਲ `hasFree: true` ਖੋਜ ਮੈਟਾਡਾਟਾ ਹੈ**। ਚੈਟ ਮਾਡਲ ਰਜਿਸਟਰੀ ਵਿੱਚ **241 ਪ੍ਰਦਾਤਾ / 3,109 ਵੱਖ-ਵੱਖ ਪ੍ਰਦਾਤਾ-ਮਾਡਲ ਜੋੜੇ / 1,494 ਕੱਚੇ ਮਾਡਲ ਆਈਡੀਜ਼** ਸ਼ਾਮਲ ਹਨ; ਵੱਖਰੇ ਮੁਫ਼ਤ-ਬਜਟ ਕੈਟਾਲਾਗ ਵਿੱਚ **484 ਪ੍ਰਤੀ-ਮਾਡਲ ਕਤਾਰਾਂ**, **34 ਰਿਕਰਿੰਗ ਪੂਲ** ਅਤੇ **52 ਰਿਕਰਿੰਗ/ਕੀ-ਲੈੱਸ ਹਮੇਸ਼ਾ ਲਈ ਮੁਫ਼ਤ ਪ੍ਰਦਾਤਾ** ਹਨ। ਇਹ ਵੱਖ-ਵੱਖ ਪਰਿਭਾਸ਼ਾਵਾਂ ਜਾਣਬੂਝ ਕੇ ਹਨ; ਪਰਿਭਾਸ਼ਾਵਾਂ ਅਤੇ ਪੂਲ-ਡਿਡਿਊਪਡ ਗਣਨਾਵਾਂ [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) ਅਤੇ [Free Tiers](docs/reference/FREE_TIERS.md) ਵਿੱਚ ਹਨ।
+> **380 ਰਜਿਸਟਰਡ ਪ੍ਰਦਾਤਾ** ਕੈਨੋਨਿਕਲ ਚੈਟ, ਮੀਡੀਆ, ਸਰਚ, ਲੋਕਲ, ਕਲਾਉਡ-ਏਜੰਟ ਅਤੇ ਸਿਸਟਮ ਕਲੈਕਸ਼ਨਾਂ ਵਿੱਚ, ਜਿਸ ਵਿੱਚੋਂ **156 ਕੋਲ `hasFree: true` ਖੋਜ ਮੈਟਾਡਾਟਾ ਹੈ**। ਚੈਟ ਮਾਡਲ ਰਜਿਸਟਰੀ ਵਿੱਚ **241 ਪ੍ਰਦਾਤਾ / 3,114 ਵੱਖ-ਵੱਖ ਪ੍ਰਦਾਤਾ-ਮਾਡਲ ਜੋੜੇ / 1,499 ਕੱਚੇ ਮਾਡਲ ਆਈਡੀਜ਼** ਸ਼ਾਮਲ ਹਨ; ਵੱਖਰੇ ਮੁਫ਼ਤ-ਬਜਟ ਕੈਟਾਲਾਗ ਵਿੱਚ **486 ਪ੍ਰਤੀ-ਮਾਡਲ ਕਤਾਰਾਂ**, **34 ਰਿਕਰਿੰਗ ਪੂਲ** ਅਤੇ **54 ਰਿਕਰਿੰਗ/ਕੀ-ਲੈੱਸ ਹਮੇਸ਼ਾ ਲਈ ਮੁਫ਼ਤ ਪ੍ਰਦਾਤਾ** ਹਨ। ਇਹ ਵੱਖ-ਵੱਖ ਪਰਿਭਾਸ਼ਾਵਾਂ ਜਾਣਬੂਝ ਕੇ ਹਨ; ਪਰਿਭਾਸ਼ਾਵਾਂ ਅਤੇ ਪੂਲ-ਡਿਡਿਊਪਡ ਗਣਨਾਵਾਂ [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) ਅਤੇ [Free Tiers](docs/reference/FREE_TIERS.md) ਵਿੱਚ ਹਨ।
 
 <div align="center">
 
@@ -1370,7 +1370,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ਵੀ ਇਸਨ�
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Resilience ਗਾਈਡ</a></b></td><td>Circuit breakers, cooldowns, queue, anti-thundering herd, TLS spoofing</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo Engine</a></b></td><td>16-factor scoring, mode packs, self-healing</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Proxy ਗਾਈਡ</a></b></td><td>3-level proxy system, 1proxy marketplace, registry CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Free Tiers</a></b></td><td>ਸੰਯੁਕਤ directory: 34 documented recurring pools / 484 cataloged free-tier entries</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Free Tiers</a></b></td><td>ਸੰਯੁਕਤ directory: 34 documented recurring pools / 486 cataloged free-tier entries</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Features Gallery</a></b></td><td>screenshots ਸਮੇਤ visual dashboard tour</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Codebase Documentation</a></b></td><td>ਸ਼ੁਰੂਆਤੀ ਪੱਧਰ ਲਈ ਆਸਾਨ codebase walkthrough</td></tr>
 </table>

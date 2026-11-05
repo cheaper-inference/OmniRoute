@@ -6,7 +6,7 @@
 
 > `src/shared/constants/providers.ts` থেকে **স্বয়ংক্রিয়ভাবে তৈরি** — হাতে সম্পাদনা করবেন না।
 > পুনরায় তৈরি করুন: `npm run gen:provider-reference`
-> **সর্বশেষ তৈরি:** 2026-10-27
+> **সর্বশেষ তৈরি:** 2026-11-05
 
 মোট প্রোভাইডার: **380**। নিচে বিভাগভিত্তিক বিবরণ দেখুন।
 
@@ -466,7 +466,7 @@
 
 - ক্যাটালগ: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - রেজিস্ট্রি (প্রতি-মডেলের বিস্তারিত): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- এক্সিকিউটরসমূহ: [`open-sse/executors/`](../../open-sse/executors/) (158টি বাস্তবায়ন)
+- এক্সিকিউটরসমূহ: [`open-sse/executors/`](../../open-sse/executors/) (162টি বাস্তবায়ন)
 - ট্রান্সলেটরসমূহ: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## আরও দেখুন

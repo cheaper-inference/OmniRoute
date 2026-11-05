@@ -66,23 +66,13 @@ HAR idxalı JWT-nin bitmə vaxtını deşifrə edir və tokenin qalan etibarlıl
 
 ## Tokenin etibarlılıq müddəti və yenilənməsi
 
-`access_token` qısamüddətlidir (adətən **~75 dəqiqə**). Etibarlılıq müddəti bitdikdən sonra provayder
-bağlantı xətası bildirir və giriş məlumatını yenidən əldə etməlisiniz.
+`access_token` qısamüddətlidir (adətən **~ 75 dəqiqə** ). İstifadəyə yararlı yeniləmə nişanı olmadan, müddəti bitdikdən sonra etimadnaməni yenidən götürməlisiniz.
 
 ### `refreshToken` ilə avtomatik yenilənmə
 
-Əl ilə yenidən əldə etməyə ehtiyac qalmaması üçün Microsoft yeniləmə tokenini bağlantının
-**Advanced Settings → providerSpecificData** bölməsində saxlaya bilərsiniz:
+Microsoft 365 provayderində **Bağlantı əlavə edin** və ya **Bağlantını redaktə edin** dialoq, açın **Qabaqcıl Parametrlər → Yeniləmə nişanı (isteğe bağlı)** . `substrate.office.com/sydney` əhatə dairəsi üçün Microsoft OAuth yeniləmə nişanı yapışdırın və yadda saxlayın. Giriş maskalanır və heç vaxt saxlanılan işarə ilə doldurulmur. Redaktə edərkən, mövcud nişanı saxlamaq üçün onu boş buraxın; onu əvəz etmək üçün yeni nişan yapışdırın.
 
-| Sahə           | Təsvir                                                                           |
-| -------------- | -------------------------------------------------------------------------------- |
-| `refreshToken` | `substrate.office.com/sydney` əhatə dairəsi üçün Microsoft OAuth yeniləmə tokeni |
-| `tier`         | `individual` (standart), `edu` və ya `enterprise`                                |
-
-Yeniləmə tokenini `substrate.office.com/sydney` əhatə dairəsinə malik Microsoft cihaz kodu və ya avtorizasiya kodu axını vasitəsilə
-əldə edin. `refreshToken` təyin edildikdə OmniRoute hər sorğudan əvvəl
-`access_token` dəyərini öncədən yeniləyir, buna görə də hər ~75 dəqiqəlik etibarlılıq müddəti bitdikdən sonra
-onu yenidən əldə etməyinizə ehtiyac qalmır.
+Yeniləmə nişanını Microsoft cihaz kodundan və ya `substrate.office.com/sydney` əhatəsinə alınmış avtorizasiya kodu axınından əldə edin; tablosuna bunu sizin üçün əldə etmir. Konfiqurasiya edilmiş yeniləmə nişanı ilə OmniRoute sorğulardan əvvəl `access_token` yoxlayır və onu yalnız yeniləməyə ehtiyacı olduqda təzələyir. Müvəffəqiyyətli yeniləmə eyni zamanda fırlanan yeniləmə nişanını davam etdirir, təzələmə nişanı etibarlı qalarkən əl ilə yenidən ələ keçirməkdən qaçınır.
 
 `refreshToken` təyin edilməyibsə, hər etibarlılıq müddəti bitdikdən sonra WebSocket giriş məlumatını əl ilə
 yenidən əldə etməlisiniz.
@@ -95,8 +85,7 @@ yenidən əldə etməlisiniz.
 | `edu`        | `included`   | Təhsil üçün M365 Copilot |
 | `enterprise` | `work`       | İş üçün M365 Copilot     |
 
-Səviyyəni **Advanced Settings → providerSpecificData → tier** bölməsində təyin edin. Səviyyə
-BizChat marşrutlaşdırmasına və modelə girişə təsir göstərir.
+Səviyyəni daxil edin **Qabaqcıl Parametrlər → Copilot səviyyəsi** . Səviyyə BizChat marşrutlaşdırmasına və modelə girişə təsir göstərir.
 
 ## Təhlükəsizlik modeli
 
@@ -124,7 +113,7 @@ BizChat marşrutlaşdırmasına və modelə girişə təsir göstərir.
 Bu, gözlənilən davranışdır. `refreshToken` olmadan giriş tokeni qısamüddətlidir. Aşağıdakılardan birini edin:
 
 - Giriş məlumatını DevTools-dan yenidən əldə edin və ya
-- Avtomatik yeniləmə üçün Qabaqcıl Parametrlərdə `refreshToken` konfiqurasiya edin.
+- Konfiqurasiya edin **Qabaqcıl Parametrlər → Yeniləmə nişanı (istəyə görə)** avtomatik yeniləmə üçün əlaqə əlavə et və ya redaktə et dialoq qutusunda.
 
 ### Bağlantı testi uğurlu olur, lakin söhbət 401 xətası qaytarır
 

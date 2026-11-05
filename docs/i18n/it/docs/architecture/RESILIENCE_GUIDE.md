@@ -146,7 +146,7 @@ applicati (`open-sse/executors/kiro/reasoning.ts`).
 
 **Stati terminali (NON cooldown):**
 
-- `banned` — impostato dal rilevamento di parole chiave bannate / ban dell'account (vedi [BAN_DETECTION](../security/BAN_DETECTION.md)), e da tre rifiuti upstream consecutivi per richiesta (`request_rejected`, ad es. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); un singolo rifiuto si limita a raffreddare la connessione
+- `banned` — impostato dal rilevamento di parole chiave vietate/esclusione di account (vedere [BAN_DETECTION](../security/BAN_DETECTION.md) ). I rifiuti upstream per richiesta (`request_rejected`, ad esempio Anthropic OAuth 403 "Richiesta non consentita") non lo impostano mai: vengono conteggiati per connessione e modello e mettono quel modello fuori rotazione con un tempo di recupero crescente limitato a `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h), o raffreddano la connessione quando non è noto alcun modello — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (transita allo stato terminale dopo retry limitati — `EXPIRED_RETRY_MAX = 3` con backoff esponenziale — così gli errori OAuth transitori possono risolversi da sé prima che l'account venga disattivato permanentemente)
 - `credits_exhausted`
 

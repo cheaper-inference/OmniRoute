@@ -143,7 +143,7 @@ hutumika (`open-sse/executors/kiro/reasoning.ts`).
 
 **Hali za mwisho (SI kupooza):**
 
-- `banned` — huwekwa na utambuzi wa maneno-yaliyopigwa marufuku / kupigwa marufuku kwa akaunti (tazama [BAN_DETECTION](../security/BAN_DETECTION.md)), na kwa kukataliwa mara tatu mfululizo kutoka upstream kwa kila ombi (`request_rejected`, k.m. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); kukataliwa kwa mara moja kunapooza muunganisho tu
+- `banned` — iliyowekwa na ugunduzi-wa-msingi uliopigwa marufuku / ugunduzi-marufuku ya akaunti (ona [BAN_DETECTION](../security/BAN_DETECTION.md) ). Ukanushaji wa ombi la juu (`request_rejected`, mfano Anthropic OAuth 403 "Ombi haliruhusiwi") kamwe haujaiweka: huhesabiwa kwa kila muunganisho na modeli na huondoa kielelezo hicho nje ya mzunguko na hali ya baridi inayokua imefungwa kwa `REQUEST_REJECTED_MAX_COOLDOWN_MS` (saa 1), au tulize muunganisho wakati hakuna kielelezo kinachojulikana — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (hubadilika kuwa ya mwisho baada ya majaribio yenye kikomo — `EXPIRED_RETRY_MAX = 3` na kurudi nyuma kwa kiwango cha kiongezekaji — kwa hivyo hitilafu za muda za OAuth zinaweza kujiponya kabla akaunti kuzimwa kabisa)
 - `credits_exhausted`
 

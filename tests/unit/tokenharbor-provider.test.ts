@@ -45,6 +45,7 @@ test("Token Harbor is listed as an API-key aggregator with verified free-tier de
   assert.equal(AGGREGATOR_PROVIDER_IDS.has("tokenharbor"), true);
   assert.match(String(meta.apiHint), /https:\/\/tokenharbor\.ai\/v1/);
   assert.doesNotMatch(String(meta.freeNote), /claude-haiku-5\.5:free/);
+  assert.match(String(meta.freeNote), /https:\/\/tokenharbor\.ai\/models\?category=free/);
   assert.match(String(meta.freeNote), /campaigns can expire/i);
   assert.match(String(meta.freeNote), /base model IDs remain paid/i);
   assert.match(String(meta.freeNote), /rolling 7-day/i);
@@ -58,7 +59,10 @@ test("Token Harbor's ended campaign grants no free access or uncapped budget", (
   assert.ok(retired);
   assert.equal(retired.freeType, "discontinued");
   assert.equal(grantsFreeAccess(retired.freeType), false);
-  assert.equal(computeFreeModelTotals().uncappedProviders.includes("tokenharbor"), false);
+  assert.equal(
+    computeFreeModelTotals({ entries: [retired] }).uncappedProviders.includes("tokenharbor"),
+    false
+  );
 });
 
 test("retired Token Harbor IDs cannot be revived by a suffix, stale flags or zero prices", () => {
@@ -98,7 +102,7 @@ test("Token Harbor retains live free discovery with paid evidence taking precede
   ];
   assert.equal(providerHasFreeModels("tokenharbor"), true);
   for (const model of current) {
-    assert.equal(isCatalogFreeModel("tokenharbor", model.id), false);
+    assert.equal(isCatalogFreeModel("tokenharbor", model.id), true);
     assert.equal(isFreeModel("tokenharbor", model), true);
     assert.equal(isModelFreeBadge("tokenharbor", model), true);
   }
@@ -112,4 +116,19 @@ test("Token Harbor retains live free discovery with paid evidence taking precede
     current
   );
   assert.equal(isFreeModel("tokenharbor", { id: "claude-haiku-5.5" }), false);
+});
+
+test("Token Harbor sourced current routes grant free access while base IDs stay paid", () => {
+  const routes = FREE_MODEL_BUDGETS.filter(
+    (row) => row.provider === "tokenharbor" && grantsFreeAccess(row.freeType)
+  );
+  assert.deepEqual(routes.map((row) => row.modelId).sort(), [
+    "deepseek-v4.1-flash:free",
+    "mimo-v2.6-flash:free",
+  ]);
+  for (const route of routes) {
+    assert.equal(route.freeType, "recurring-uncapped");
+    assert.equal(isFreeModel("tokenharbor", { id: route.modelId }), true);
+    assert.equal(isFreeModel("tokenharbor", { id: route.modelId.slice(0, -5) }), false);
+  }
 });

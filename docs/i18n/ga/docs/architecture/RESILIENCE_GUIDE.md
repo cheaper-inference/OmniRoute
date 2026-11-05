@@ -119,7 +119,7 @@ Caomhnaíonn frámaí dénártha `reasoningContentEvent` de chuid Kiro le síni�
 
 **Stáid fhoirceanta (NÍ fuaruithe):**
 
-- `banned` — socraithe ag braiteadh eochairfhocal coiscthe / coisc cuntais (féach [BAN_DETECTION](../security/BAN_DETECTION.md)), agus ag trí dhiúltú as a chéile in aghaidh an iarratais ón sruthuas (`request_rejected`, m.sh. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); ní dhéanann diúltú aonair ach an ceangal a fhuarú
+- `banned` — socraithe trí bhrath toirmiscthe-eochairfhocal/cuntas-toirmeasc (féach [BAN_DETECTION](../security/BAN_DETECTION.md) ). Diúltuithe in aghaidh an tsrutha in aghaidh an iarratais (`request_rejected`, m.sh. Anthropic OAuth 403 "Ní cheadaítear an t-iarratas") riamh é a shocrú: déantar iad a chomhaireamh de réir nasc agus múnla agus tógtar an tsamhail sin as rothlú le fuarú méadaithe a bhfuil teorainn leis ag `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h), nó fuaraigh an nasc nuair nach bhfuil aon mhúnla ar eolas — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (aistríonn sé go foirceanta tar éis atriallacha teoranta — `EXPIRED_RETRY_MAX = 3` le cúlchoigeartú easpónantúil — ionas gur féidir le hearráidí sealadacha OAuth féin-leigheas sula ndíghníomhaítear an cuntas go buan)
 - `credits_exhausted`
 

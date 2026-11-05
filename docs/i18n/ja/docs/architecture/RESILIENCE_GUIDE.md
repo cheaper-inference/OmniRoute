@@ -104,7 +104,7 @@ OmniRoute には、個別ではあるものの相互に関連する3つのレジ
 
 **終端状態（クールダウンではない）:**
 
-- `banned` — 禁止キーワード / アカウントBAN検出（[BAN_DETECTION](../security/BAN_DETECTION.md) 参照）、および3回連続のアップストリームによるリクエスト単位の拒否（`request_rejected`、例: Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`）によって設定される。単一の拒否では接続のクールダウンのみ行われる
+- `banned` —禁止されたキーワード/アカウント禁止の検出によって設定されます ( [BAN_DETECTION](../security/BAN_DETECTION.md)参照)。アップストリームのリクエストごとの拒否 (`request_rejected`、例: Anthropic OAuth 403 "リクエストは許可されていません") は決して設定しません。これらは接続およびモデルごとにカウントされ、 `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 時間) を上限とする増加するクールダウンでそのモデルをローテーションから外します。または、モデルが不明な場合は接続を冷却します— `open-sse/services/requestRejectedStreak.ts`
 - `expired`（制限された回数のリトライ後に終端に遷移 — `EXPIRED_RETRY_MAX = 3`、指数バックオフ付き — これにより一時的なOAuthエラーはアカウントが永続的に非アクティブ化される前に自己修復できる）
 - `credits_exhausted`
 

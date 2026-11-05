@@ -57,18 +57,13 @@ OmniRoute HAR faile ieško Chathub WebSocket URL, išskiria `access_token` bei `
 
 ## Prieigos rakto galiojimo trukmė ir atnaujinimas
 
-`access_token` galioja trumpai (paprastai **~75 minutes**). Jam nustojus galioti, teikėjas praneša apie ryšio klaidą, todėl turite iš naujo gauti prisijungimo duomenis.
+`access_token` yra trumpalaikis (paprastai **~ 75 minutes** ). Neturėdami tinkamo atnaujinimo prieigos rakto, pasibaigus galiojimo laikui turite iš naujo užfiksuoti kredencialą.
 
 ### Automatinis atnaujinimas naudojant `refreshToken`
 
-Kad nereikėtų duomenų gauti iš naujo rankiniu būdu, Microsoft atnaujinimo raktą galite išsaugoti ryšio skiltyje **Advanced Settings → providerSpecificData**:
+Microsoft 365 tiekėjuje **Pridėti ryšį** arba **Redaguoti ryšį** dialogo langas, atidarykite **Išplėstiniai nustatymai → Atnaujinimo prieigos raktas (pasirenkama)** . Įklijuokite Microsoft OAuth atnaujinimo prieigos raktą `substrate.office.com/sydney` taikymo sričiai ir išsaugokite. Įvestis yra užmaskuota ir niekada neužpildoma saugomu prieigos raktu. Redaguodami palikite tuščią, kad išsaugotumėte esamą prieigos raktą; įklijuokite naują žetoną, kad jį pakeistumėte.
 
-| Laukas         | Aprašymas                                                                           |
-| -------------- | ----------------------------------------------------------------------------------- |
-| `refreshToken` | Microsoft OAuth atnaujinimo raktas, skirtas `substrate.office.com/sydney` aprėpčiai |
-| `tier`         | `individual` (numatytasis), `edu` arba `enterprise`                                 |
-
-Gaukite atnaujinimo raktą iš Microsoft įrenginio kodo arba autorizavimo kodo srauto, kurio aprėptis nustatyta į `substrate.office.com/sydney`. Nustačius `refreshToken`, OmniRoute prieš kiekvieną užklausą iš anksto atnaujina `access_token`, todėl nereikia iš naujo gauti duomenų kaskart pasibaigus ~75 minučių galiojimo laikui.
+Gaukite atnaujinimo prieigos raktą iš Microsoft įrenginio kodo arba prieigos kodo srauto, kurio apimtis yra `substrate.office.com/sydney`; prietaisų skydelis jo neįgyja už jus. Kai sukonfigūruotas atnaujinimo prieigos raktas, OmniRoute patikrina `access_token` prieš pateikdamas užklausas ir atnaujina jį tik tada, kai jį reikia atnaujinti. Sėkmingai atnaujinus, taip pat išsaugomas pasuktas atnaujinimo prieigos raktas, išvengiant rankinio pakartotinio fiksavimo, kol atnaujinimo prieigos raktas lieka galioti.
 
 Jei `refreshToken` nenustatytas, pasibaigus kiekvienam galiojimo laikotarpiui turite rankiniu būdu iš naujo gauti WebSocket prisijungimo duomenis.
 
@@ -80,7 +75,7 @@ Jei `refreshToken` nenustatytas, pasibaigus kiekvienam galiojimo laikotarpiui tu
 | `edu`        | `included`                 | Švietimui skirtas M365 Copilot   |
 | `enterprise` | `work`                     | M365 Copilot darbui              |
 
-Nustatykite lygį skiltyje **Advanced Settings → providerSpecificData → tier**. Lygis turi įtakos BizChat maršruto parinkimui ir prieigai prie modelių.
+Nustatykite pakopą **Išplėstiniai nustatymai → Copilot pakopa** . Pakopa turi įtakos BizChat maršruto parinkimui ir modelio prieigai.
 
 ## Saugumo modelis
 
@@ -108,7 +103,7 @@ Nustatykite lygį skiltyje **Advanced Settings → providerSpecificData → tier
 Tai normalu. Be `refreshToken` prieigos atpažinimo ženklas galioja trumpai. Galite:
 
 - Iš naujo gauti prisijungimo duomenis iš DevTools arba
-- Išplėstiniuose nustatymuose sukonfigūruoti `refreshToken`, kad jie būtų atnaujinami automatiškai.
+- Konfigūruoti **Išplėstiniai nustatymai → Atnaujinimo prieigos raktas (pasirenkama)** dialogo lange Pridėti arba redaguoti ryšį, kad būtų atnaujintas automatinis.
 
 ### Ryšio testas sėkmingas, tačiau pokalbis grąžina 401
 

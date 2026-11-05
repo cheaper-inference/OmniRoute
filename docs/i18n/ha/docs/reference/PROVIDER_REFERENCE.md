@@ -6,7 +6,7 @@
 
 > **An samar da shi ta atomatik** daga `src/shared/constants/providers.ts` — kada a gyara da hannu.
 > Sake samar da shi da: `npm run gen:provider-reference`
-> **Lokacin samarwa na ƙarshe:** 2026-10-27
+> **Lokacin samarwa na ƙarshe:** 2026-11-05
 
 Jimillar masu samarwa: **380**. Duba rarrabuwar rukuni a ƙasa.
 
@@ -466,7 +466,7 @@ Yi amfani da dashboard da ke `/dashboard/providers` don kunna, saita, da gwada k
 
 - Kundin bayanai: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Rijista (cikakkun bayanai na kowane samfuri): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Masu aiwatarwa: [`open-sse/executors/`](../../open-sse/executors/) (aiwatarwa guda 158)
+- Masu aiwatarwa: [`open-sse/executors/`](../../open-sse/executors/) (aiwatarwa guda 162)
 - Masu fassara: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Duba Kuma

@@ -6,7 +6,7 @@
 
 > **Được tạo tự động** từ `src/shared/constants/providers.ts` — không chỉnh sửa thủ công.
 > Tạo lại bằng: `npm run gen:provider-reference`
-> **Lần tạo gần nhất:** 2026-10-27
+> **Lần tạo gần nhất:** 2026-11-05
 
 Tổng số nhà cung cấp: **380**. Xem phân loại theo danh mục bên dưới.
 
@@ -466,7 +466,7 @@ Sử dụng bảng điều khiển tại `/dashboard/providers` để bật, c�
 
 - Danh mục: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Registry (chi tiết theo từng mô hình): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Trình thực thi: [`open-sse/executors/`](../../open-sse/executors/) (158 bản triển khai)
+- Trình thực thi: [`open-sse/executors/`](../../open-sse/executors/) (162 bản triển khai)
 - Trình chuyển đổi: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Xem thêm

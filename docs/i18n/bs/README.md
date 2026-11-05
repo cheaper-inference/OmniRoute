@@ -27,9 +27,9 @@
 
 > **Koristite vlastite naloge kod pružalaca.** Ovo je procijenjeni zbir kroz zasebno prihvatljive besplatne nivoe nezavisnih pružalaca, a ne dodjela tokena od strane OmniRoutea. Registrujte se, pribavite vjerodajnice gdje je to potrebno i povežite pružaoce koje možete koristiti; svaki pružalac kontroliše svoja ograničenja, dostupnost i uslove.
 >
-> Ručno kombinovanje besplatnih nivoa je naporno — deseci SDK-ova, deseci ograničenja brzine i bez uvida u to koliko zapravo imate. OmniRoute katalogizuje **484 stavke besplatnog nivoa kroz 34 ključa ponavljajućih grupa** i izračunava glavnu vrijednost iz **17 grupa s objavljenim pozitivnim mjesečnim budžetom, uz pet Groq ograničenja po modelu**, dedupliciranih prema zajedničkoj grupi. Kvote koje se otključavaju tek nakon regionalne provjere identiteta (danas: ModelScope) prikazane su odvojeno, +~6M nakon regionalne verifikacije identiteta, i nikada se ne sabiraju u glavnu vrijednost. Rezultat ostaje vidljiv na kontrolnoj tabli (`/dashboard/free-tiers`).
+> Ručno kombinovanje besplatnih nivoa je naporno — deseci SDK-ova, deseci ograničenja brzine i bez uvida u to koliko zapravo imate. OmniRoute katalogizuje **486 stavke besplatnog nivoa kroz 34 ključa ponavljajućih grupa** i izračunava glavnu vrijednost iz **17 grupa s objavljenim pozitivnim mjesečnim budžetom, uz pet Groq ograničenja po modelu**, dedupliciranih prema zajedničkoj grupi. Kvote koje se otključavaju tek nakon regionalne provjere identiteta (danas: ModelScope) prikazane su odvojeno, +~6M nakon regionalne verifikacije identiteta, i nikada se ne sabiraju u glavnu vrijednost. Rezultat ostaje vidljiv na kontrolnoj tabli (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Kartica budžeta besplatnog nivoa OmniRoutea: ~1.62B besplatnih tokena mjesečno stabilno, do ~2.22B u prvom mjesecu uz kredite za registraciju, iz 34 dokumentovana ključa ponavljajućih grupa koji obuhvataju 484 katalogizovane stavke besplatnog nivoa iza jedne krajnje tačke. Pošten obračun s dedupliciranjem grupa — svaka zajednička grupa računa se jednom, uključujući 17 ponavljajućih grupa s objavljenim pozitivnim mjesečnim budžetom tokena i pet Groq ograničenja po modelu; 12 pružalaca označeno je kao pružaoci koje treba izbjegavati u katalogu rizika uslova, tako da vi odlučujete. Traka budžeta uključuje Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (pet ograničenja po modelu) i manje grupe, uz kredite za registraciju u prvom mjesecu i pružaoce koji su trajno besplatni bez ograničenja broja tokena, prikazane odvojeno kako nikada ne bi uvećali glavnu vrijednost. Trenutno iskorišteno/preostalo na /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Kartica budžeta besplatnog nivoa OmniRoutea: ~1.62B besplatnih tokena mjesečno stabilno, do ~2.22B u prvom mjesecu uz kredite za registraciju, iz 34 dokumentovana ključa ponavljajućih grupa koji obuhvataju 486 katalogizovane stavke besplatnog nivoa iza jedne krajnje tačke. Pošten obračun s dedupliciranjem grupa — svaka zajednička grupa računa se jednom, uključujući 17 ponavljajućih grupa s objavljenim pozitivnim mjesečnim budžetom tokena i pet Groq ograničenja po modelu; 12 pružalaca označeno je kao pružaoci koje treba izbjegavati u katalogu rizika uslova, tako da vi odlučujete. Traka budžeta uključuje Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (pet ograničenja po modelu) i manje grupe, uz kredite za registraciju u prvom mjesecu i pružaoce koji su trajno besplatni bez ograničenja broja tokena, prikazane odvojeno kako nikada ne bi uvećali glavnu vrijednost. Trenutno iskorišteno/preostalo na /dashboard/free-tiers."/>
 
 > Animirani sažetak aktivne stranice `/dashboard/free-tiers`. Potpuna metodologija (dedupliciranje grupa, nivoi kredita, uslovi pružalaca): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -74,7 +74,7 @@
 |                                       |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------------------- | :-----------------------: | :---------: | :-------------------: |
 | 🌐 Pružatelji                         |            352            |   **358**   |          380          |
-| 🧠 Jedinstveni ID-ovi chat modela     |           1320            |  **1374**   |         1494          |
+| 🧠 Jedinstveni ID-ovi chat modela     |           1320            |  **1374**   |         1499          |
 | 🖼️ Most modaliteta                    | 🆕 vizija + audio + video |      ✓      |           ✓           |
 | 📡 Besplatni katalog Radara           |       🆕 uz prijavu       |      ✓      |           ✓           |
 | ⚖️ Raspoređivanje uz uvažavanje kvota |      🆕 Quota-Share       |      ✓      |           ✓           |
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obećanje — Jedan endpoint i 380 provajdera. Automatski fallback nastavlja rutiranje dok god postoji drugi zdrav cilj. Šest stubova: otporan fallback kroz 380 provajdera · do 95% uštede tokena na odgovarajućim zadacima · $0 za početak sa 150+ besplatnih tarifa i 52 ponavljajuća/provajdera bez ključa zauvijek besplatnih · 39 CLI/agent integracija kroz jednu konfiguraciju · Kompatibilnost sa OpenAI, Claude, Gemini i Responses API na /v1 · produkcijske kontrole uključujući circuit breakers, TLS stealth, MCP 110 alata, A2A, memoriju, guardrails, evaluacije i 56.000+ statičkih test deklaracija kroz 7.800+ praćenih test fajlova."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obećanje — Jedan endpoint i 380 provajdera. Automatski fallback nastavlja rutiranje dok god postoji drugi zdrav cilj. Šest stubova: otporan fallback kroz 380 provajdera · do 95% uštede tokena na odgovarajućim zadacima · $0 za početak sa 150+ besplatnih tarifa i 54 ponavljajuća/provajdera bez ključa zauvijek besplatnih · 39 CLI/agent integracija kroz jednu konfiguraciju · Kompatibilnost sa OpenAI, Claude, Gemini i Responses API na /v1 · produkcijske kontrole uključujući circuit breakers, TLS stealth, MCP 110 alata, A2A, memoriju, guardrails, evaluacije i 56.000+ statičkih test deklaracija kroz 7.800+ praćenih test fajlova."/>
 
 <br/>
 <br/>
@@ -701,7 +701,7 @@ izvan vaše shell historije. → [CLI Integracije](docs/guides/CLI-INTEGRATIONS.
 
 </div>
 
-> **380 registrovanih provajdera** u okviru kanonskih kolekcija za chat, medije, pretragu, lokalne, cloud-agent i sistemske servise, uključujući **156 sa `hasFree: true` metapodacima za otkrivanje**. Registar chat modela pokriva **241 provajdera / 3.109 različitih parova provajder-model / 1.494 sirovih ID-ova modela**; odvojeni katalog besplatnih budžeta ima **484 red po modelu**, **34 ponavljajuća fonda** i **52 provajdera koji su besplatni zauvijek bez ključa/ponavljanja**. Ovo su različiti nazivnici po dizajnu; definicije i proračuni bez duplikata fondova nalaze se u [Referenca provajdera](docs/reference/PROVIDER_REFERENCE.md) i [Besplatni nivoi](docs/reference/FREE_TIERS.md).
+> **380 registrovanih provajdera** u okviru kanonskih kolekcija za chat, medije, pretragu, lokalne, cloud-agent i sistemske servise, uključujući **156 sa `hasFree: true` metapodacima za otkrivanje**. Registar chat modela pokriva **241 provajdera / 3.114 različitih parova provajder-model / 1.499 sirovih ID-ova modela**; odvojeni katalog besplatnih budžeta ima **486 red po modelu**, **34 ponavljajuća fonda** i **54 provajdera koji su besplatni zauvijek bez ključa/ponavljanja**. Ovo su različiti nazivnici po dizajnu; definicije i proračuni bez duplikata fondova nalaze se u [Referenca provajdera](docs/reference/PROVIDER_REFERENCE.md) i [Besplatni nivoi](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1378,7 +1378,7 @@ Kanonske metrike na dan 2026-10-18: **1.976 jedinstvenih videozapisa** · **20.2
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Vodič za otpornost</a></b></td><td>Prekidači strujnog kola, periodi hlađenja, red čekanja, zaštita od navale zahtjeva, TLS lažiranje</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Mehanizam automatskih kombinacija</a></b></td><td>Bodovanje na osnovu 16 faktora, paketi režima, samostalno popravljanje</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Vodič za proxy</a></b></td><td>Proxy sistem sa 3 nivoa, 1proxy marketplace, CRUD operacije registra</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Besplatni nivoi</a></b></td><td>Konsolidovani direktorij: 34 dokumentovana periodična skupa / 484 katalogizovana unosa besplatnih nivoa</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Besplatni nivoi</a></b></td><td>Konsolidovani direktorij: 34 dokumentovana periodična skupa / 486 katalogizovana unosa besplatnih nivoa</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Galerija funkcija</a></b></td><td>Vizuelni obilazak dashboarda sa snimcima ekrana</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Dokumentacija baze koda</a></b></td><td>Vodič kroz bazu koda prilagođen početnicima</td></tr>
 </table>

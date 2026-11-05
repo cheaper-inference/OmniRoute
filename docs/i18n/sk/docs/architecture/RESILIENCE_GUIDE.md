@@ -133,7 +133,7 @@ klientom (`open-sse/executors/kiro/reasoning.ts`).
 
 **Terminálne stavy (NIE cooldowny):**
 
-- `banned` — nastavuje ho detekcia zakázaných kľúčových slov / zákazu účtu (pozri [BAN_DETECTION](../security/BAN_DETECTION.md)) a tri po sebe idúce odmietnutia jednotlivých požiadaviek z upstreamu (`request_rejected`, napr. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); jediné odmietnutie pripojenie len ochladí
+- `banned` — nastavená detekciou zakázaného kľúčového slova / účtu (pozri [BAN_DETECTION](../security/BAN_DETECTION.md) ). Odmietnutia na základe požiadavky (`request_rejected`, napr. Anthropic OAuth 403 „Požiadavka nie je povolená“) ju nikdy nenastavujú: počítajú sa na pripojenie a model a vyraďujú tento model z rotácie s rastúcim ochladzovaním obmedzeným na `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h), alebo ochladzujú pripojenie, keď nie je známy žiadny model — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (prechádza do terminálneho stavu po ohraničených opakovaniach — `EXPIRED_RETRY_MAX = 3` s exponenciálnym backoffom — takže prechodné chyby OAuth sa môžu samé zahojiť skôr, než je účet trvalo deaktivovaný)
 - `credits_exhausted`
 

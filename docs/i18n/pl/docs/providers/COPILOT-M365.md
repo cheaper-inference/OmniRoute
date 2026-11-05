@@ -67,23 +67,13 @@ Podczas importowania pliku HAR dekodowana jest data wygaśnięcia tokenu JWT i w
 
 ## Czas ważności tokenu i odświeżanie
 
-Token `access_token` jest krótkotrwały (zwykle **~75 minut**). Po jego wygaśnięciu dostawca
-zgłasza błąd połączenia i konieczne jest ponowne przechwycenie danych uwierzytelniających.
+`access_token` jest krótkotrwała (zwykle **~ 75 minut** ). Bez użytecznego tokena odświeżającego należy ponownie przechwycić dane uwierzytelniające po wygaśnięciu.
 
 ### Automatyczne odświeżanie za pomocą `refreshToken`
 
-Aby uniknąć ręcznego ponownego przechwytywania, możesz zapisać token odświeżania Microsoft w sekcji
-**Advanced Settings → providerSpecificData** danego połączenia:
+U dostawcy Microsoft 365 **Dodaj połączenie** Lub **Edytuj połączenie** okno dialogowe, otwórz **Ustawienia zaawansowane → Odśwież token (opcjonalnie)** . Wklej token odświeżania Microsoft OAuth dla zakresu `substrate.office.com/sydney` i zapisz. Dane wejściowe są maskowane i nigdy nie są wstępnie wypełniane przechowywanym tokenem. Podczas edycji pozostaw to pole puste, aby zachować istniejący token; wklej nowy token, aby go zastąpić.
 
-| Pole           | Opis                                                                        |
-| -------------- | --------------------------------------------------------------------------- |
-| `refreshToken` | Token odświeżania Microsoft OAuth dla zakresu `substrate.office.com/sydney` |
-| `tier`         | `individual` (domyślnie), `edu` lub `enterprise`                            |
-
-Uzyskaj token odświeżania za pomocą przepływu kodu urządzenia lub kodu autoryzacyjnego Microsoft
-z zakresem `substrate.office.com/sydney`. Po ustawieniu `refreshToken` OmniRoute
-zapobiegawczo odświeża `access_token` przed każdym żądaniem, dzięki czemu nie trzeba
-ponownie przechwytywać go po każdym wygaśnięciu po około 75 minutach.
+Uzyskaj token odświeżania z przepływu kodu urządzenia Microsoft lub kodu autoryzacji o zasięgu do `substrate.office.com/sydney`; deska rozdzielcza nie pozyska tego za Ciebie. Po skonfigurowaniu tokena odświeżania OmniRoute sprawdza `access_token` przed żądaniami i odświeża go tylko wtedy, gdy wymaga odświeżenia. Pomyślne odświeżenie powoduje również utrwalenie obróconego tokena odświeżania, co pozwala uniknąć ręcznego ponownego przechwytywania, dopóki token odświeżania pozostaje ważny.
 
 Jeśli `refreshToken` nie jest ustawiony, po każdym wygaśnięciu należy ręcznie
 ponownie przechwycić dane uwierzytelniające WebSocket.
@@ -96,8 +86,7 @@ ponownie przechwycić dane uwierzytelniające WebSocket.
 | `edu`        | `included`   | Edukacyjny M365 Copilot  |
 | `enterprise` | `work`       | M365 Copilot dla firm    |
 
-Ustaw poziom w sekcji **Advanced Settings → providerSpecificData → tier**. Poziom wpływa
-na trasowanie BizChat i dostęp do modeli.
+Ustaw poziom **Ustawienia zaawansowane → Copilot poziom** . Warstwa wpływa na routing BizChat i dostęp do modelu.
 
 ## Model bezpieczeństwa
 
@@ -118,7 +107,7 @@ na trasowanie BizChat i dostęp do modeli.
 Jest to oczekiwane zachowanie. Bez `refreshToken` token dostępu jest krótkotrwały. Możesz:
 
 - Ponownie przechwycić dane uwierzytelniające w DevTools albo
-- Skonfigurować `refreshToken` w ustawieniach zaawansowanych, aby umożliwić automatyczne odświeżanie.
+- Skonfiguruj **Ustawienia zaawansowane → Odśwież token (opcjonalnie)** w oknie dialogowym Dodaj lub edytuj połączenie w celu automatycznego odświeżania.
 
 ### Test połączenia kończy się powodzeniem, ale czat zwraca błąd 401
 

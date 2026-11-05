@@ -70,23 +70,13 @@ süresini gösterir.
 
 ## Belirteç kullanım süresi ve yenileme
 
-`access_token` kısa ömürlüdür (genellikle **~75 dakika**). Süresi dolduktan sonra sağlayıcı
-bir bağlantı hatası bildirir ve kimlik bilgisini yeniden almanız gerekir.
+`access_token` kısa ömürlüdür (tipik olarak **~ 75 dakika** ). Kullanılabilir bir yenileme belirteci olmadığında, süre sona erdikten sonra kimlik bilgilerini yeniden yakalamanız gerekir.
 
 ### `refreshToken` ile otomatik yenileme
 
-Elle yeniden alma gereksinimini önlemek için Microsoft yenileme belirtecini bağlantının
-**Advanced Settings → providerSpecificData** bölümünde saklayabilirsiniz:
+Microsoft 365 sağlayıcısının **Bağlantı ekle** veya **Bağlantıyı düzenle** iletişim kutusu, aç **Gelişmiş Ayarlar → Belirteci yenile (isteğe bağlı)** . `substrate.office.com/sydney` kapsamı için bir Microsoft OAuth yenileme jetonu yapıştırın ve kaydedin. Giriş maskelenir ve hiçbir zaman depolanan jetonla önceden doldurulmaz. Düzenleme yaparken mevcut jetonu korumak için boş bırakın; değiştirmek için yeni bir jeton yapıştırın.
 
-| Alan           | Açıklama                                                                      |
-| -------------- | ----------------------------------------------------------------------------- |
-| `refreshToken` | `substrate.office.com/sydney` kapsamı için Microsoft OAuth yenileme belirteci |
-| `tier`         | `individual` (varsayılan), `edu` veya `enterprise`                            |
-
-Yenileme belirtecini, `substrate.office.com/sydney` kapsamına sahip bir Microsoft
-cihaz kodu veya yetkilendirme kodu akışından edinin. `refreshToken` ayarlandığında
-OmniRoute, her istekten önce `access_token` değerini önceden yeniler; böylece her
-~75 dakikalık süre dolumundan sonra kimlik bilgisini yeniden almanız gerekmez.
+Yenileme belirtecini `substrate.office.com/sydney` kapsamına alınmış bir Microsoft cihaz kodundan veya yetkilendirme kodu akışından alın; kontrol paneli bunu sizin için edinmez. Yenileme belirteci yapılandırıldığında OmniRoute, isteklerden önce `access_token` kontrol eder ve yalnızca yenilenmesi gerektiğinde yeniler. Başarılı bir yenileme, döndürülen yenileme jetonunu da sürdürür ve yenileme jetonu geçerli kalırken manuel olarak yeniden yakalamayı önler.
 
 `refreshToken` ayarlanmamışsa her süre dolumundan sonra WebSocket kimlik bilgisini
 elle yeniden almanız gerekir.
@@ -99,8 +89,7 @@ elle yeniden almanız gerekir.
 | `edu`        | `included`     | Eğitim için M365 Copilot |
 | `enterprise` | `work`         | İş için M365 Copilot     |
 
-Katmanı **Advanced Settings → providerSpecificData → tier** bölümünde ayarlayın. Katman,
-BizChat yönlendirmesini ve model erişimini etkiler.
+Seviyeyi ayarlayın **Gelişmiş Ayarlar → Copilot katmanı** . Katman, BizChat yönlendirmesini ve model erişimini etkiler.
 
 ## Güvenlik modeli
 
@@ -129,7 +118,7 @@ BizChat yönlendirmesini ve model erişimini etkiler.
 Bu beklenen bir durumdur. `refreshToken` olmadan erişim belirteci kısa ömürlüdür. Şunlardan birini yapın:
 
 - Kimlik bilgisini DevTools'tan yeniden yakalayın veya
-- Otomatik yenileme için Gelişmiş Ayarlar'da bir `refreshToken` yapılandırın.
+- Yapılandır **Gelişmiş Ayarlar → Jetonu yenile (isteğe bağlı)** Otomatik yenileme için Bağlantı Ekle veya Düzenle iletişim kutusunda.
 
 ### Bağlantıyı Test Et başarılı oluyor ancak sohbet 401 döndürüyor
 

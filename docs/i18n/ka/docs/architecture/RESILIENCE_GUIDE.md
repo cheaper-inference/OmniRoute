@@ -104,7 +104,7 @@ Kiro-ს ორობითი `reasoningContentEvent` ფრეიმები 
 
 **საბოლოო მდგომარეობები (არა გაცივებები):**
 
-- `banned` — დგინდება აკრძალული საკვანძო სიტყვის / ანგარიშის ბანის ამოცნობით (იხ. [BAN_DETECTION](../security/BAN_DETECTION.md)), ასევე სამი თანმიმდევრული upstream-ის თითო-მოთხოვნის უარყოფით (`request_rejected`, მაგ. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); ერთი უარყოფა კავშირს მხოლოდ აცივებს
+- `banned` — დაყენებულია აკრძალული საკვანძო სიტყვით / ანგარიშის აკრძალვის გამოვლენით (იხ. [BAN_DETECTION](../security/BAN_DETECTION.md) ). ზემოთ დინებაში თითო მოთხოვნაზე უარი (`request_rejected`, მაგ. Anthropic OAuth 403 "მოთხოვნა დაუშვებელია") არასოდეს დააყენოთ: ისინი ითვლებიან თითო კავშირისა და მოდელის მიხედვით და ამოიღეთ ეს მოდელი როტაციიდან მზარდი გაგრილებით `REQUEST_REJECTED_MAX_COOLDOWN_MS` ზე (1 სთ), ან გააცივეთ კავშირი, როდესაც მოდელი არ არის ცნობილი — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (საბოლოო მდგომარეობაში გადადის შეზღუდული რაოდენობის ხელმეორე მცდელობების შემდეგ — `EXPIRED_RETRY_MAX = 3` ექსპონენციალური backoff-ით — რათა დროებითმა OAuth შეცდომებმა შეძლონ თვითგამოჯანმრთელება, სანამ ანგარიში სამუდამოდ გაითიშება)
 - `credits_exhausted`
 

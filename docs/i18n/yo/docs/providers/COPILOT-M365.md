@@ -66,23 +66,13 @@ HAR wọlé máa ń tú àkókò ìparí JWT, ó sì máa ń fi iye àkókò tó
 
 ## Àkókò ìwúlò token àti ìsọdọ̀tun
 
-`access_token` ní àkókò ìwúlò kúkúrú (ní àṣà, **~75 ìṣẹ́jú**). Lẹ́yìn tó bá parí, olùpèsè
-máa ń jìyìn àṣìṣe àsopọ̀, o sì gbọ́dọ̀ tún gba ẹ̀rí ìwọlé náà.
+`access_token` naa jẹ igba diẹ (ni deede **~ 75 iṣẹju** ). Laisi ami isọdọtun nkan elo, o gbọdọ tun gba iwe-ẹri lẹhin ipari.
 
 ### Ìsọdọ̀tun aládàáṣiṣẹ́ pẹ̀lú `refreshToken`
 
-Láti yẹra fún àtúngba ẹ̀rí ìwọlé lọ́wọ́, o lè fi Microsoft refresh token pamọ́ sínú
-**Advanced Settings → providerSpecificData** ti àsopọ̀ náà:
+Ni Microsoft 365 olupese ká **Fi asopọ kun** tabi **Ṣatunkọ asopọ** ajọṣọ, ìmọ **Eto to ti ni ilọsiwaju ami isọdọtun → (aṣayan)** . Lẹẹmọ ami isọdọtun OAuth Microsoft aaye `substrate.office.com/sydney` ki o fipamọ. Iṣawọle naa jẹ boju-boju ati pe ko ṣaju pẹlu ami ti o fipamọ. Nigbati o ba n ṣatunkọ, fi silẹ ni ofifo lati tọju ami ti o wa tẹlẹ; lẹẹmọ ami tuntun kan lati rọpo rẹ.
 
-| Ààyè           | Àpèjúwe                                                               |
-| -------------- | --------------------------------------------------------------------- |
-| `refreshToken` | Microsoft OAuth refresh token fún scope `substrate.office.com/sydney` |
-| `tier`         | `individual` (àiyípadà), `edu`, tàbí `enterprise`                     |
-
-Gba refresh token náà láti inú ìṣàn device-code tàbí authorization-code Microsoft
-tó ní scope `substrate.office.com/sydney`. Nígbà tí a bá ṣètò `refreshToken`, OmniRoute
-máa ń tún `access_token` ṣe ṣáájú ìbéèrè kọ̀ọ̀kan, nítorí náà o kò nílò láti
-tún gba ẹ̀rí ìwọlé lẹ́yìn gbogbo ìparí tó tó ~75 ìṣẹ́jú.
+Gba ami isọdọtun lati koodu ẹrọ Microsoft tabi sisan koodu-aṣẹ ti o dopin si `substrate.office.com/sydney`; Dasibodu naa ko gba fun ọ. Pẹlu atunto ami isọdọtun, OmniRoute ṣayẹwo `access_token` ṣaaju awọn ibeere ati tunu rẹ nikan nigbati o nilo itunra. Aṣeyọri isọdọtun tun duro ami isọdọtun yiyi, yago fun gbigba afọwọṣe nigba ti ami isọdọtun naa duro wulo.
 
 Tí a kò bá ṣètò `refreshToken`, o gbọ́dọ̀ tún gba ẹ̀rí ìwọlé WebSocket náà lọ́wọ́
 lẹ́yìn ìparí kọ̀ọ̀kan.
@@ -95,8 +85,7 @@ lẹ́yìn ìparí kọ̀ọ̀kan.
 | `edu`        | `included`    | M365 Copilot fún ẹ̀kọ́               |
 | `enterprise` | `work`        | M365 Copilot fún Iṣẹ́               |
 
-Ṣètò ìpele náà ní **Advanced Settings → providerSpecificData → tier**. Ìpele náà ní ipa lórí
-ìdarí ọ̀nà BizChat àti ààyè sí model.
+Ṣeto ipele sinu **To ti ni ilọsiwaju Eto → Copilot ipele** . Ipele naa ni ipa lori ipa ọna BizChat ati iraye si awoṣe.
 
 ## Àwòṣe ààbò
 
@@ -117,7 +106,7 @@ lẹ́yìn ìparí kọ̀ọ̀kan.
 Èyí ni a retí. Láìsí `refreshToken`, access token náà kì í pẹ́. Ṣe ọ̀kan nínú àwọn wọ̀nyí:
 
 - Tun gba ẹ̀rí ìwọlé náà láti DevTools, tàbí
-- Ṣètò `refreshToken` nínú Àwọn Ètò Ìlọsíwájú fún ìmúdójúìwọ̀n aládàáṣe.
+- Tunto **Eto to ti ni ilọsiwaju → Ami atuntu (aṣayan)** ni Fikun-un tabi Ṣatunkọ ajọṣọ fun isọdọtun aifọwọyi.
 
 ### Ìdánwò Ìsopọ̀ kọjá ṣùgbọ́n chat dá 401 padà
 

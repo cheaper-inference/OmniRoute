@@ -6,7 +6,7 @@
 
 > `src/shared/constants/providers.ts` இலிருந்து **தானாக உருவாக்கப்பட்டது** — கைமுறையாகத் திருத்த வேண்டாம்.
 > இதைப் பயன்படுத்தி மீண்டும் உருவாக்கவும்: `npm run gen:provider-reference`
-> **கடைசியாக உருவாக்கப்பட்டது:** 2026-10-27
+> **கடைசியாக உருவாக்கப்பட்டது:** 2026-11-05
 
 மொத்த வழங்குநர்கள்: **380**. கீழே உள்ள வகைப் பிரிப்பைக் காண்க.
 
@@ -466,7 +466,7 @@
 
 - பட்டியல்: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - பதிவகம் (ஒவ்வொரு மாடலுக்குமான விவரங்கள்): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- இயக்கிகள்: [`open-sse/executors/`](../../open-sse/executors/) (158 செயலாக்கங்கள்)
+- இயக்கிகள்: [`open-sse/executors/`](../../open-sse/executors/) (162 செயலாக்கங்கள்)
 - மொழிபெயர்ப்பிகள்: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## மேலும் காண்க

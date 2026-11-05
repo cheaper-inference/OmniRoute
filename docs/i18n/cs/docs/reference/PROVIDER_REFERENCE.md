@@ -6,7 +6,7 @@
 
 > **Automaticky vygenerováno** ze souboru `src/shared/constants/providers.ts` — neupravujte ručně.
 > Znovu vygenerujte pomocí: `npm run gen:provider-reference`
-> **Naposledy vygenerováno:** 2026-10-27
+> **Naposledy vygenerováno:** 2026-11-05
 
 Celkový počet poskytovatelů: **380**. Rozdělení podle kategorií najdete níže.
 
@@ -466,7 +466,7 @@ Pomocí řídicího panelu na adrese `/dashboard/providers` můžete jednotlivé
 
 - Katalog: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Registr (podrobnosti pro jednotlivé modely): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Exekutory: [`open-sse/executors/`](../../open-sse/executors/) (158 implementací)
+- Exekutory: [`open-sse/executors/`](../../open-sse/executors/) (162 implementací)
 - Překladače: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Viz také

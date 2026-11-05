@@ -6,7 +6,7 @@
 
 > `src/shared/constants/providers.ts` ରୁ **ସ୍ୱତଃ-ସୃଷ୍ଟ** — ହାତରେ ସମ୍ପାଦନା କରନ୍ତୁ ନାହିଁ।
 > ଏହା ସହିତ ପୁନଃ ସୃଷ୍ଟି କରନ୍ତୁ: `npm run gen:provider-reference`
-> **ଶେଷ ଥର ସୃଷ୍ଟି କରାଯାଇଛି:** 2026-10-27
+> **ଶେଷ ଥର ସୃଷ୍ଟି କରାଯାଇଛି:** 2026-11-05
 
 ମୋଟ ପ୍ରଦାନକାରୀ: **380**। ନିମ୍ନରେ ବର୍ଗ ଅନୁଯାୟୀ ବିବରଣୀ ଦେଖନ୍ତୁ।
 
@@ -466,7 +466,7 @@
 
 - କ୍ୟାଟାଲଗ୍: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - ରେଜିଷ୍ଟ୍ରି (ପ୍ରତି ମଡେଲ୍ର ବିବରଣୀ): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- ଏକ୍ସିକ୍ୟୁଟର୍ଗୁଡ଼ିକ: [`open-sse/executors/`](../../open-sse/executors/) (158ଟି ଇମ୍ପ୍ଲିମେଣ୍ଟେସନ୍)
+- ଏକ୍ସିକ୍ୟୁଟର୍ଗୁଡ଼ିକ: [`open-sse/executors/`](../../open-sse/executors/) (162ଟି ଇମ୍ପ୍ଲିମେଣ୍ଟେସନ୍)
 - ଟ୍ରାନ୍ସଲେଟର୍ଗୁଡ଼ିକ: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## ଏହା ମଧ୍ୟ ଦେଖନ୍ତୁ

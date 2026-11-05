@@ -66,23 +66,13 @@ HAR na-akọwa oge JWT ga-agwụ ma gosipụta oge token fọdụrụ.
 
 ## Ogologo ndụ token na imegharị ya
 
-`access_token` na-adịru obere oge (ọtụtụ mgbe **~75 nkeji**). Mgbe oge ya gwụchara, onye na-eweta ọrụ
-na-akọ njehie njikọ, ị ga-enwetakwa ozi njirimara ahụ ọzọ.
+`access_token` dị mkpụmkpụ (nke a **~ 75 nkeji** ). Na-enweghị ihe ngosi ume ọhụrụ enwere ike iji, ị ga-eweghachite nzere ahụ ka ọ gwụchara.
 
 ### Iji `refreshToken` mee ka imegharị bụrụ akpaka
 
-Iji zere iji aka nweta ya ọzọ, ị nwere ike ịchekwa Microsoft refresh token na
-**Advanced Settings → providerSpecificData** nke njikọ ahụ:
+Na Microsoft 365 ndị na-eweta **Tinye njikọ** ma ọ bụ **Dezie njikọ** dialog, meghere **Ntọala dị elu → nweta ume ọhụrụ (nhọrọ)** . Tapawa akara ume ọhụrụ Microsoft OAuth maka mpaghara `substrate.office.com/sydney` wee chekwaa. Ihe ndenye ahụ kpuchie ma ọ dịghị mgbe ọ bụla ejuju ya na akara echekwara. Mgbe ị na-edezi, hapụ ya oghere ka idobe akara dị adị; mado akara ọhụrụ iji dochie ya.
 
-| Mpaghara       | Nkọwa                                                                  |
-| -------------- | ---------------------------------------------------------------------- |
-| `refreshToken` | Microsoft OAuth refresh token maka scope `substrate.office.com/sydney` |
-| `tier`         | `individual` (ndabara), `edu`, ma ọ bụ `enterprise`                    |
-
-Nweta refresh token ahụ site na usoro Microsoft device-code ma ọ bụ authorization-code
-nke scope ya bụ `substrate.office.com/sydney`. Mgbe edobere `refreshToken`, OmniRoute
-na-emegharị `access_token` tupu arịrịọ ọ bụla, ka ị ghara ịdị mkpa
-ịnweta ya ọzọ mgbe oge nkeji ~75 ọ bụla gwụsịrị.
+Nweta akara ngosi ume ọhụrụ site na koodu ngwaọrụ Microsoft ma ọ bụ koodu ikike nke ruru `substrate.office.com/sydney`; dashboard anaghị enweta ya maka gị. Site na ahaziri akara ume ọhụrụ, OmniRoute na-enyocha `access_token` tupu arịọ ya wee mee ka ọ dị ọhụrụ naanị mgbe ọ chọrọ ume ọhụrụ. Ntughari ume na-aga nke ọma na-agakwa n'ihu akara ume ọhụrụ atụgharịgharịrị, na-ezere iweghachi akwụkwọ ntuziaka ka akara ume ọhụrụ ka na-adị irè.
 
 Ọ bụrụ na edoghị `refreshToken`, ị ga-eji aka nweta ozi njirimara WebSocket ọzọ
 mgbe ọ bụla oge ya gwụsịrị.
@@ -95,8 +85,7 @@ mgbe ọ bụla oge ya gwụsịrị.
 | `edu`        | `included`  | M365 Copilot maka agụmakwụkwọ |
 | `enterprise` | `work`      | M365 Copilot maka ọrụ         |
 
-Debe ọkwa ahụ na **Advanced Settings → providerSpecificData → tier**. Ọkwa ahụ na-emetụta
-ntụgharị ụzọ BizChat na ikike ịnweta model.
+Tọọ ọkwa n'ime **Ntọala di elu → Copilot tier** . Ọkwa ahụ na-emetụta ụzọ BizChat na ịnweta ụdị.
 
 ## Ụdị nchekwa
 
@@ -124,7 +113,7 @@ ntụgharị ụzọ BizChat na ikike ịnweta model.
 A na-atụ anya nke a. Enweghị `refreshToken`, access token ahụ na-adịru obere oge. Mee otu n'ime ihe ndị a:
 
 - Nweta ihe nzere ahụ ọzọ site na DevTools, ma ọ bụ
-- Hazie `refreshToken` na Advanced Settings ka ọ na-emegharị onwe ya na-akpaghị aka.
+- Hazie **Ntọala dị elu → nweta ume ọhụrụ (nhọrọ)** na Tinye ma ọ bụ dezie njikọ dialog maka ume ọhụrụ akpaka.
 
 ### Test Connection na-aga nke ọma mana nkata na-eweghachi 401
 

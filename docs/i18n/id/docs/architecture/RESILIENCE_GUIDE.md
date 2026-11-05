@@ -142,7 +142,7 @@ klien tetap berlaku (`open-sse/executors/kiro/reasoning.ts`).
 
 **Status terminal (BUKAN cooldown):**
 
-- `banned` — ditetapkan oleh deteksi kata kunci terlarang / pemblokiran akun (lihat [BAN_DETECTION](../security/BAN_DETECTION.md)), dan oleh tiga penolakan per-permintaan upstream berturut-turut (`request_rejected`, mis. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); satu penolakan hanya mendinginkan koneksi
+- `banned` — disetel oleh deteksi kata kunci yang dilarang / larangan akun (lihat [BAN_DETECTION](../security/BAN_DETECTION.md) ). Penolakan per permintaan hulu (`request_rejected`, misalnya Anthropic OAuth 403 "Permintaan tidak diizinkan") tidak pernah menyetelnya: penolakan tersebut dihitung per koneksi dan model dan mengeluarkan model tersebut dari rotasi dengan cooldown yang semakin meningkat dibatasi pada `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 jam), atau mendinginkan koneksi ketika tidak ada model yang diketahui — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (bertransisi ke terminal setelah percobaan ulang terbatas — `EXPIRED_RETRY_MAX = 3` dengan exponential backoff — sehingga error OAuth sementara dapat pulih sendiri sebelum akun dinonaktifkan secara permanen)
 - `credits_exhausted`
 

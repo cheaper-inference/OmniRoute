@@ -6,7 +6,7 @@
 
 > **Automatisch generiert** aus `src/shared/constants/providers.ts` — nicht manuell bearbeiten.
 > Neu generieren mit: `npm run gen:provider-reference`
-> **Zuletzt generiert:** 2026-10-27
+> **Zuletzt generiert:** 2026-11-05
 
 Anbieter insgesamt: **380**. Siehe Aufschlüsselung nach Kategorie unten.
 
@@ -466,7 +466,7 @@ Verwenden Sie das Dashboard unter `/dashboard/providers`, um die einzelnen Anbie
 
 - Katalog: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Registry (Details je Modell): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Executors: [`open-sse/executors/`](../../open-sse/executors/) (158 Implementierungen)
+- Executors: [`open-sse/executors/`](../../open-sse/executors/) (162 Implementierungen)
 - Translators: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Siehe auch

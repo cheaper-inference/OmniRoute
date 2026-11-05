@@ -6,7 +6,7 @@
 
 > **Dijana secara automatik** daripada `src/shared/constants/providers.ts` — jangan edit secara manual.
 > Jana semula dengan: `npm run gen:provider-reference`
-> **Kali terakhir dijana:** 2026-10-27
+> **Kali terakhir dijana:** 2026-11-05
 
 Jumlah penyedia: **380**. Lihat pecahan kategori di bawah.
 
@@ -466,7 +466,7 @@ Gunakan papan pemuka di `/dashboard/providers` untuk mendayakan, mengkonfigurasi
 
 - Katalog: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Daftar (butiran setiap model): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Pelaksana: [`open-sse/executors/`](../../open-sse/executors/) (158 pelaksanaan)
+- Pelaksana: [`open-sse/executors/`](../../open-sse/executors/) (162 pelaksanaan)
 - Penterjemah: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Lihat Juga

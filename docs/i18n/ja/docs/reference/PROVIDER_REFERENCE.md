@@ -6,7 +6,7 @@
 
 > **自動生成**: `src/shared/constants/providers.ts` から生成されています。手動で編集しないでください。
 > 再生成コマンド: `npm run gen:provider-reference`
-> **最終生成日:** 2026-10-27
+> **最終生成日:** 2026-11-05
 
 プロバイダー総数: **380**。以下のカテゴリ別内訳を参照してください。
 
@@ -466,7 +466,7 @@
 
 - カタログ：[`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - レジストリ（モデルごとの詳細）：[`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- エグゼキューター：[`open-sse/executors/`](../../open-sse/executors/)（158 実装）
+- エグゼキューター：[`open-sse/executors/`](../../open-sse/executors/)（162 実装）
 - トランスレーター：[`open-sse/translator/`](../../open-sse/translator/)
 
 ## 関連項目

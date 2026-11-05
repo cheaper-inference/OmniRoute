@@ -140,7 +140,7 @@ vedno veljata (`open-sse/executors/kiro/reasoning.ts`).
 
 **Končna stanja (NE premori):**
 
-- `banned` — nastavi jo zaznava prepovedane besede / prepovedi računa (glej [BAN_DETECTION](../security/BAN_DETECTION.md)) in tri zaporedne izvorne zavrnitve posamezne zahteve (`request_rejected`, npr. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); posamezna zavrnitev povezavo le ohladi
+- `banned` — nastavljen z zaznavanjem prepovedane ključne besede/prepovedi računa (glejte [BAN_DETECTION](../security/BAN_DETECTION.md) ). Zavrnitve navzgor na zahtevo (`request_rejected`, npr. Anthropic OAuth 403 "Zahteva ni dovoljena") je nikoli ne nastavijo: štejejo se na povezavo in model in vzamejo ta model iz rotacije z naraščajočim ohlajanjem, omejenim na `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h), ali ohladijo povezavo, ko model ni znan — `open-sse/services/requestRejectedStreak.ts`
 - `expired` (po omejenem številu ponovnih poskusov — `EXPIRED_RETRY_MAX = 3` z eksponentnim umikom — preide v končno stanje, da se lahko prehodne napake OAuth same odpravijo, preden je račun trajno deaktiviran)
 - `credits_exhausted`
 

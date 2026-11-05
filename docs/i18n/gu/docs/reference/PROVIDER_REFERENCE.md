@@ -6,7 +6,7 @@
 
 > `src/shared/constants/providers.ts`માંથી **સ્વતઃ જનરેટ કરેલું** — હાથેથી ફેરફાર કરશો નહીં.
 > આની મદદથી ફરીથી જનરેટ કરો: `npm run gen:provider-reference`
-> **છેલ્લે જનરેટ કરેલું:** 2026-10-27
+> **છેલ્લે જનરેટ કરેલું:** 2026-11-05
 
 કુલ પ્રદાતાઓ: **380**. નીચે શ્રેણીવાર વિભાજન જુઓ.
 
@@ -466,7 +466,7 @@
 
 - કેટલોગ: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - રજિસ્ટ્રી (દરેક મોડેલની વિગતો): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- એક્ઝિક્યુટર્સ: [`open-sse/executors/`](../../open-sse/executors/) (158 અમલીકરણો)
+- એક્ઝિક્યુટર્સ: [`open-sse/executors/`](../../open-sse/executors/) (162 અમલીકરણો)
 - ટ્રાન્સલેટર્સ: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## આ પણ જુઓ
