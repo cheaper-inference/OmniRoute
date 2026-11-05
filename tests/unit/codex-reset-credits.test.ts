@@ -99,8 +99,8 @@ function mockResetThenUsage(opts: {
           opts.usageBody ?? {
             plan_type: "plus",
             rate_limit: {
-              primary_window: { used_percent: 0 },
-              secondary_window: { used_percent: 0 },
+              primary_window: { used_percent: 0, limit_window_seconds: 18000 },
+              secondary_window: { used_percent: 0, limit_window_seconds: 604800 },
             },
           }
         ),
@@ -152,8 +152,8 @@ test("consumeCodexResetCredit fetches a credit id, posts it, then refreshes usag
         JSON.stringify({
           plan_type: "plus",
           rate_limit: {
-            primary_window: { used_percent: 0 },
-            secondary_window: { used_percent: 40 },
+            primary_window: { used_percent: 0, limit_window_seconds: 18000 },
+            secondary_window: { used_percent: 40, limit_window_seconds: 604800 },
           },
           rate_limit_reset_credits: { available_count: 1 },
         }),
@@ -198,7 +198,7 @@ test("consumeCodexResetCredit accepts alreadyRedeemed as success", async () => {
     if (String(url).includes("/backend-api/wham/usage")) {
       return new Response(
         JSON.stringify({
-          rate_limit: { primary_window: { used_percent: 5 } },
+          rate_limit: { primary_window: { used_percent: 5, limit_window_seconds: 18000 } },
         }),
         { status: 200, headers: { "content-type": "application/json" } }
       );
@@ -463,8 +463,8 @@ test("#12951 consumeCodexResetCredit alreadyRedeemed still needs healthy usage t
     usageBody: {
       plan_type: "plus",
       rate_limit: {
-        primary_window: { used_percent: 100 },
-        secondary_window: { used_percent: 100 },
+        primary_window: { used_percent: 100, limit_window_seconds: 18000 },
+        secondary_window: { used_percent: 100, limit_window_seconds: 604800 },
       },
     },
   });
@@ -560,8 +560,8 @@ test("#4305 consumeCodexResetCredit keeps model lockouts while refreshed usage i
     usageBody: {
       plan_type: "plus",
       rate_limit: {
-        primary_window: { used_percent: 100 },
-        secondary_window: { used_percent: 100 },
+        primary_window: { used_percent: 100, limit_window_seconds: 18000 },
+        secondary_window: { used_percent: 100, limit_window_seconds: 604800 },
       },
     },
   });

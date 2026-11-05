@@ -1590,6 +1590,8 @@ async function handleChatCoreInner({
         }
       );
       const mode = compressionPlan.mode as CompressionConfig["defaultMode"];
+      // Configured mode for analytics when a policy wrapped it (lite as a one-step stacked plan).
+      const reportedMode = mode === "stacked" ? compressionPlan.reportedMode : undefined;
       if (adaptiveTelemetry && adaptiveTelemetry.fit === false) {
         log?.warn?.(
           "COMPRESSION",
@@ -1736,6 +1738,7 @@ async function handleChatCoreInner({
               effectiveServiceTier,
               comboName,
               mode,
+              reportedMode,
               compressionComboId: config.compressionComboId,
               skillRequestId,
               cavemanOutputModeApplied,
@@ -1757,6 +1760,7 @@ async function handleChatCoreInner({
                 effectiveServiceTier,
                 comboName,
                 mode,
+                reportedMode,
                 compressionComboId: config.compressionComboId,
                 skillRequestId,
                 cavemanOutputModeApplied,
@@ -3076,9 +3080,11 @@ async function handleChatCoreInner({
             suffix: "trying other accounts",
           });
         } else if (errorType === PROVIDER_ERROR_TYPES.REQUEST_REJECTED) {
-          // Per-request refusal (#12859): growing cooldown, streak → banned.
+          // Per-request refusal (#12859): growing MODEL-scoped cooldown. Never a ban.
           await handleRequestRejectedFailure({
             connectionId: errorConnectionId,
+            provider,
+            targetModel,
             statusCode,
             message: persistentMessage,
           });
