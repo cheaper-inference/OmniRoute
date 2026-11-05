@@ -98,6 +98,9 @@
   --ci-color-success-bg: #e8f7f0;
   --ci-color-warning: #a05600;
   --ci-color-warning-bg: #fff3df;
+  /* Warning control outline: 3:1 or better against --ci-color-warning-bg and every
+     content surface. An alias, so each theme's warning ink carries over. */
+  --ci-color-warning-border: var(--ci-color-warning);
   --ci-color-danger: #bf3636;
   --ci-color-danger-bg: #ffeded;
   --ci-color-danger-foreground: var(--ci-neutral-0);
@@ -328,6 +331,9 @@
   --ci-z-toast: 1400;
 
   /* --- component aliases -------------------------------------------------- */
+  /* Badge tone="accent" text: the accent ink, except where it falls under 4.5:1 on the
+     translucent accent tint over the muted surface (Editions light darkens it). */
+  --ci-badge-accent-ink: var(--ci-color-accent-ink);
   --ci-button-primary-bg: var(--ci-color-surface-inverse);
   --ci-button-primary-fg: var(--ci-color-text-inverse);
   --ci-button-primary-hover: var(--ci-neutral-800);
