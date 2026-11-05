@@ -10,6 +10,7 @@ import { useTranslations } from "next-intl";
 import { CheckboxGroup } from "@omniroute/ui-kit/checkbox";
 import { matchesSearch } from "@/shared/utils/turkishText";
 import { cn } from "@/shared/utils/cn";
+import { brandTintStyle } from "@/shared/utils/brandTint";
 import Checkbox from "@/shared/components/Checkbox";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
 
@@ -248,8 +249,8 @@ export default function CopilotToolCard({
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <div
-                    className="size-6 rounded-full flex items-center justify-center text-xs font-semibold text-white"
-                    style={{ backgroundColor: tool.color }}
+                    className="size-6 rounded-full flex items-center justify-center text-xs font-semibold text-text-main"
+                    style={brandTintStyle(tool.color)}
                   >
                     1
                   </div>
@@ -274,8 +275,8 @@ export default function CopilotToolCard({
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <div
-                    className="size-6 rounded-full flex items-center justify-center text-xs font-semibold text-white"
-                    style={{ backgroundColor: tool.color }}
+                    className="size-6 rounded-full flex items-center justify-center text-xs font-semibold text-text-main"
+                    style={brandTintStyle(tool.color)}
                   >
                     {cloudEnabled && apiKeys?.length > 0 ? "2" : "1"}
                   </div>
@@ -380,8 +381,8 @@ export default function CopilotToolCard({
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <div
-                      className="size-6 rounded-full flex items-center justify-center text-xs font-semibold text-white"
-                      style={{ backgroundColor: tool.color }}
+                      className="size-6 rounded-full flex items-center justify-center text-xs font-semibold text-text-main"
+                      style={brandTintStyle(tool.color)}
                     >
                       {cloudEnabled && apiKeys?.length > 0 ? "3" : "2"}
                     </div>
