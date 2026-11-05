@@ -26,14 +26,22 @@ Object.assign(process.env, {
   OMNIROUTE_MIGRATIONS_DIR: fixture,
 });
 const sql = fs.readFileSync(
-  new URL("../../src/lib/db/migrations/225_daily_cached_input.sql", import.meta.url),
+  new URL("../../src/lib/db/migrations/226_daily_cached_input.sql", import.meta.url),
   "utf8"
 );
-fs.writeFileSync(path.join(fixture, "225_daily_cached_input.sql"), sql, "utf8");
+fs.writeFileSync(path.join(fixture, "226_daily_cached_input.sql"), sql, "utf8");
 fs.writeFileSync(
   path.join(fixture, "224_proxy_logs_egress_ip_families.sql"),
   fs.readFileSync(
     new URL("../../src/lib/db/migrations/224_proxy_logs_egress_ip_families.sql", import.meta.url),
+    "utf8"
+  ),
+  "utf8"
+);
+fs.writeFileSync(
+  path.join(fixture, "225_token_ledger_balance_indexes.sql"),
+  fs.readFileSync(
+    new URL("../../src/lib/db/migrations/225_token_ledger_balance_indexes.sql", import.meta.url),
     "utf8"
   ),
   "utf8"
@@ -59,6 +67,11 @@ const makeDb = () => {
   const db = createNodeSqliteAdapterFromDatabase(new DatabaseSync(":memory:"), ":memory:");
   db.exec(`CREATE TABLE proxy_logs (id TEXT PRIMARY KEY);
     INSERT INTO proxy_logs VALUES ('retained');
+    CREATE TABLE token_ledger (
+      id INTEGER PRIMARY KEY, from_api_key_id TEXT, to_api_key_id TEXT,
+      created_at TEXT, amount INTEGER
+    );
+    INSERT INTO token_ledger VALUES (1, 'from', 'to', 'fixture-created', 7);
     CREATE TABLE daily_usage_summary (id INTEGER PRIMARY KEY, total_input_tokens INTEGER);
     INSERT INTO daily_usage_summary VALUES (1,100);
     CREATE TABLE _omniroute_migrations (
@@ -78,7 +91,7 @@ test(
   "cached migration rehomes published ledgers and preserves unknown history",
   { timeout: 3000 },
   () => {
-    const publishedSlots = ["206", "213", "214", "215", "217", "218", "223", "224"];
+    const publishedSlots = ["206", "213", "214", "215", "217", "218", "223", "224", "225"];
     for (let mask = 0; mask < 1 << publishedSlots.length; mask++) {
       const versions = publishedSlots.filter((_, index) => mask & (1 << index));
       const db = makeDb();
@@ -92,7 +105,7 @@ test(
             "INSERT INTO _omniroute_migrations (version,name,applied_at) VALUES (?,?,?)"
           ).run(version, "daily_cached_input", "fixture-applied");
         }
-        assert.equal(runMigrations(db, { isNewDb: true }), versions.length ? 9 : 10);
+        assert.equal(runMigrations(db, { isNewDb: true }), versions.length ? 10 : 11);
         assert.deepEqual(db.prepare("SELECT * FROM proxy_logs").all(), [
           { id: "retained", egress_ip_v4: null, egress_ip_v6: null },
         ]);
@@ -108,7 +121,8 @@ test(
             { version: "218", name: "proxy_subscription_mirror_urls" },
             { version: "223", name: "call_logs_queue_wait_ms" },
             { version: "224", name: "proxy_logs_egress_ip_families" },
-            { version: "225", name: "daily_cached_input" },
+            { version: "225", name: "token_ledger_balance_indexes" },
+            { version: "226", name: "daily_cached_input" },
           ]
         );
         assert.deepEqual(db.prepare("SELECT * FROM daily_usage_summary").all(), [
@@ -118,7 +132,7 @@ test(
           assert.equal(
             (
               db
-                .prepare("SELECT applied_at FROM _omniroute_migrations WHERE version='225'")
+                .prepare("SELECT applied_at FROM _omniroute_migrations WHERE version='226'")
                 .get() as {
                 applied_at: string;
               }
@@ -134,6 +148,23 @@ test(
             `canonical migration ${version} must execute after cache ledger reconciliation`
           );
         }
+        assert.deepEqual(db.prepare("SELECT * FROM token_ledger").all(), [
+          {
+            id: 1,
+            from_api_key_id: "from",
+            to_api_key_id: "to",
+            created_at: "fixture-created",
+            amount: 7,
+          },
+        ]);
+        assert.deepEqual(
+          db
+            .prepare(
+              "SELECT name FROM sqlite_master WHERE type='index' AND name LIKE 'idx_token_ledger_%' ORDER BY name"
+            )
+            .all(),
+          [{ name: "idx_token_ledger_from_created" }, { name: "idx_token_ledger_to_created" }]
+        );
         assert.equal(runMigrations(db, { isNewDb: true }), 0);
       } finally {
         db.close();
@@ -165,7 +196,7 @@ test("cached migration preserves published 224 alongside canonical 223", { timeo
     );
     assert.equal(
       (
-        db.prepare("SELECT applied_at FROM _omniroute_migrations WHERE version='225'").get() as {
+        db.prepare("SELECT applied_at FROM _omniroute_migrations WHERE version='226'").get() as {
           applied_at: string;
         }
       ).applied_at,
@@ -178,6 +209,23 @@ test("cached migration preserves published 224 alongside canonical 223", { timeo
         }
       ).name,
       "call_logs_queue_wait_ms"
+    );
+    assert.deepEqual(db.prepare("SELECT * FROM token_ledger").all(), [
+      {
+        id: 1,
+        from_api_key_id: "from",
+        to_api_key_id: "to",
+        created_at: "fixture-created",
+        amount: 7,
+      },
+    ]);
+    assert.deepEqual(
+      db
+        .prepare(
+          "SELECT name FROM sqlite_master WHERE type='index' AND name LIKE 'idx_token_ledger_%' ORDER BY name"
+        )
+        .all(),
+      [{ name: "idx_token_ledger_from_created" }, { name: "idx_token_ledger_to_created" }]
     );
     assert.equal(runMigrations(db, { isNewDb: true }), 0);
   } finally {
@@ -193,10 +241,10 @@ test(
     try {
       db.exec(sql);
       db.exec(`INSERT INTO _omniroute_migrations (version,name) VALUES
-      ('206','daily_cached_input'),('225','unrelated_migration');
+      ('206','daily_cached_input'),('226','unrelated_migration');
       UPDATE daily_usage_summary SET total_cache_read_tokens=60;`);
       const before = db.prepare("SELECT * FROM _omniroute_migrations ORDER BY version").all();
-      assert.throws(() => runMigrations(db, { isNewDb: true }), /target version 225 is occupied/);
+      assert.throws(() => runMigrations(db, { isNewDb: true }), /target version 226 is occupied/);
       assert.deepEqual(
         db.prepare("SELECT * FROM _omniroute_migrations ORDER BY version").all(),
         before

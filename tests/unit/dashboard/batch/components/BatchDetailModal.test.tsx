@@ -7,9 +7,9 @@
  *  2. Render batch completed with outputFileId → shows Download Output link with download attr
  *  3. Render batch failed + errorFileId + requestCountsFailed > 0 → shows Download Errors + Retry
  *  4. Render batch failed (no errorFileId, no failures) → Cancel does NOT appear
- *  5. Click Cancel → window.confirm → cancel hook called → onClose called
+ *  5. Click Cancel → kit confirm dialog → cancel hook called → onClose called
  *  5b. Cancel confirm dismissed → cancel NOT called
- *  6. Click Retry → window.confirm → retry hook called → onClose if newBatchId returned
+ *  6. Click Retry → kit confirm dialog → retry hook called → onClose if newBatchId returned
  *  6b. Retry returns null → onClose NOT called
  *  7. actionError set → role="alert" shown in DOM
  *  8. Sanitization: error displayed via i18n key — never raw paths or stack traces
@@ -55,6 +55,19 @@ vi.mock("../../../../../src/app/(dashboard)/dashboard/batch/components/useBatchA
     error: hookState.error,
   })),
 }));
+
+// The kit confirm dialog (#19066) is portaled to document.body; the mocked `common` labels
+// are "confirmAction" / "cancel".
+async function answerConfirm(label: "confirmAction" | "cancel") {
+  const button = Array.from(
+    document.body.querySelectorAll<HTMLButtonElement>('[role="dialog"] button')
+  ).find((b) => b.textContent?.trim() === label);
+  expect(button, `expected the confirm dialog "${label}" button`).toBeTruthy();
+  await act(async () => {
+    button!.click();
+    await Promise.resolve();
+  });
+}
 
 // ── Import after mocks ─────────────────────────────────────────────────────────
 
@@ -251,7 +264,6 @@ describe("BatchDetailModal — action footer (F7)", () => {
   it("calls cancel hook then onClose after user confirms cancel", async () => {
     const onClose = vi.fn();
     mockCancel.mockResolvedValueOnce(undefined);
-    vi.spyOn(window, "confirm").mockReturnValueOnce(true);
 
     const { el } = renderModal({ status: "in_progress" }, onClose);
 
@@ -263,16 +275,17 @@ describe("BatchDetailModal — action footer (F7)", () => {
       await Promise.resolve();
     });
 
-    expect(window.confirm).toHaveBeenCalled();
+    // Nothing runs until the user confirms in the dialog.
+    expect(mockCancel).not.toHaveBeenCalled();
+    await answerConfirm("confirmAction");
     expect(mockCancel).toHaveBeenCalledWith("batch_abc123");
     expect(onClose).toHaveBeenCalled();
   });
 
   // 5b. Cancel confirm dismissed → cancel NOT called
   it("does not call cancel when user dismisses the confirm dialog", async () => {
-    vi.spyOn(window, "confirm").mockReturnValueOnce(false);
-
-    const { el } = renderModal({ status: "in_progress" });
+    const onClose = vi.fn();
+    const { el } = renderModal({ status: "in_progress" }, onClose);
 
     const cancelBtn = Array.from(el.querySelectorAll("button")).find((b) =>
       b.textContent?.includes("batchDetailActionCancel")
@@ -281,15 +294,16 @@ describe("BatchDetailModal — action footer (F7)", () => {
       cancelBtn.click();
       await Promise.resolve();
     });
+    await answerConfirm("cancel");
 
     expect(mockCancel).not.toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
   });
 
   // 6. Click Retry → confirm → retry called → onClose when newBatchId returned
   it("calls retry hook then onClose when retry returns a newBatchId", async () => {
     const onClose = vi.fn();
     mockRetry.mockResolvedValueOnce({ newBatchId: "batch_new_xyz" });
-    vi.spyOn(window, "confirm").mockReturnValueOnce(true);
 
     const { el } = renderModal(
       { status: "failed", errorFileId: "file_error_1", requestCountsFailed: 3 },
@@ -304,7 +318,8 @@ describe("BatchDetailModal — action footer (F7)", () => {
       await Promise.resolve();
     });
 
-    expect(window.confirm).toHaveBeenCalled();
+    expect(mockRetry).not.toHaveBeenCalled();
+    await answerConfirm("confirmAction");
     expect(mockRetry).toHaveBeenCalledWith({
       id: "batch_abc123",
       inputFileId: "file_input_1",
@@ -318,7 +333,6 @@ describe("BatchDetailModal — action footer (F7)", () => {
   it("does not call onClose when retry returns null", async () => {
     const onClose = vi.fn();
     mockRetry.mockResolvedValueOnce(null);
-    vi.spyOn(window, "confirm").mockReturnValueOnce(true);
 
     const { el } = renderModal(
       { status: "failed", errorFileId: "file_error_1", requestCountsFailed: 2 },
@@ -332,6 +346,7 @@ describe("BatchDetailModal — action footer (F7)", () => {
       retryBtn.click();
       await Promise.resolve();
     });
+    await answerConfirm("confirmAction");
 
     expect(mockRetry).toHaveBeenCalled();
     expect(onClose).not.toHaveBeenCalled();

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Badge as KitBadge } from "@omniroute/ui-kit/badge";
 import Icon from "@/shared/components/Icon";
+import { startVisiblePolling } from "@/shared/utils/visiblePolling";
 
 export default function DegradationBadge() {
   const [isDegraded, setDegraded] = useState(false);
@@ -23,9 +24,7 @@ export default function DegradationBadge() {
       }
     };
 
-    checkDegradation();
-    const interval = setInterval(checkDegradation, 60000);
-    return () => clearInterval(interval);
+    return startVisiblePolling(checkDegradation, 60000);
   }, []);
 
   if (!isDegraded) return null;

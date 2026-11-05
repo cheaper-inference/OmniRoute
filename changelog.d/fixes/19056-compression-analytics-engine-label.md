@@ -1,0 +1,1 @@
+- **fix(compression): keep the dispatched engine in analytics for multi-engine and skip rows**: the configured-mode label from #19012 now replaces the engine only when a single step ran. A combo that ran several engines, and the "no savings" skip rows, keep the engine the pipeline actually used.
