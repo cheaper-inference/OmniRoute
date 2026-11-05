@@ -35,7 +35,7 @@ function detectRange(task: A2ATask): string {
 
 async function costFetch(path: string, caller?: A2ACallerContext): Promise<AnalyticsRecord> {
   const url = `${OMNIROUTE_BASE_URL}${path}`;
-  const headers = buildSelfLoopHeaders(caller);
+  const headers = buildSelfLoopHeaders(caller, OMNIROUTE_BASE_URL);
   const response = await fetch(url, {
     headers,
     signal: AbortSignal.timeout(15000),

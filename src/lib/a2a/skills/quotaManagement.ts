@@ -14,7 +14,7 @@ const OMNIROUTE_BASE_URL = resolveOmniRouteBaseUrl();
 
 async function quotaFetch(path: string, caller?: A2ACallerContext): Promise<any> {
   const url = `${OMNIROUTE_BASE_URL}${path}`;
-  const headers = buildSelfLoopHeaders(caller);
+  const headers = buildSelfLoopHeaders(caller, OMNIROUTE_BASE_URL);
   const res = await fetch(url, {
     headers,
     signal: AbortSignal.timeout(10000),
