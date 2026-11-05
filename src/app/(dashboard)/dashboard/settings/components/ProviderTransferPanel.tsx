@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { buttonVariants } from "@omniroute/ui-kit/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
 import {
   Badge,
@@ -13,6 +12,7 @@ import {
   Select,
   TALL_MODAL_PROPS,
 } from "@/shared/components";
+import { FileInput } from "@/shared/components/FileInput";
 import Icon from "@/shared/components/Icon";
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
 import { matchesSearch } from "@/shared/utils/turkishText";
@@ -398,33 +398,9 @@ async function readTransferFile(file: File): Promise<unknown> {
   }
 }
 
-function FileChooser({
-  label,
-  onChange,
-}: {
-  label: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}) {
-  return (
-    // A styled <label> wrapping the hidden native file input: the kit has no file-picker
-    // control, and a <label> keeps the whole chip clickable/keyboard-reachable via the input.
-    <label
-      className={buttonVariants({
-        variant: "outline",
-        size: "sm",
-        className: "w-fit cursor-pointer focus-within:shadow-[var(--ci-ring-focus)]",
-      })}
-    >
-      <Icon name="upload_file" size={16} />
-      {label}
-      {/* kit-exception: hidden native file input inside the chip label (no kit file picker) */}
-      <input type="file" accept=".json" className="sr-only" onChange={onChange} />
-    </label>
-  );
-}
-
 function ImportView() {
   const t = useTranslations("providerTransfer");
+  const tc = useTranslations("common");
   const [bundle, setBundle] = useState<unknown>(null);
   const [fileName, setFileName] = useState("");
   const [passphrase, setPassphrase] = useState("");
@@ -432,9 +408,7 @@ function ImportView() {
   const [decisions, setDecisions] = useState<Record<string, ProviderTransferAction>>({});
   const { busy, status, setStatus, run } = useTransferRequest();
 
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = "";
+  const handleFile = async (file: File | undefined) => {
     setPlan(null);
     setDecisions({});
     setStatus({ type: "", message: "" });
@@ -473,7 +447,14 @@ function ImportView() {
 
   return (
     <div className="flex flex-col gap-3">
-      <FileChooser label={fileName || t("chooseFile")} onChange={handleFile} />
+      <FileInput
+        accept=".json"
+        chooseLabel={t("chooseFile")}
+        // The status line names the bundle only once it parsed; an invalid file shows the error.
+        selectedLabel={() => fileName || tc("fileInputEmpty")}
+        onFilesChange={(files) => void handleFile(files[0])}
+        onFilesRejected={(rejections) => void handleFile(rejections[0]?.file)}
+      />
       <Input
         type="password"
         autoComplete="off"
