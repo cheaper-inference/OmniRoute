@@ -376,43 +376,62 @@ async function handleGladiaTranscription(providerConfig, file, modelId, token) {
 
   while (Date.now() - start < maxWait) {
     await new Promise((r) => setTimeout(r, 2000));
+    const polled = await pollGladiaResultOnce(resultUrl, authHeaders);
+    if (polled instanceof Response) return polled;
+    if (!polled) continue;
 
-    let pollRes: Response;
-    try {
-      pollRes = await safeOutboundFetch(resultUrl, {
-        headers: authHeaders,
-        guard: "public-only",
-        pinDns: true,
-        timeoutMs: 15_000,
-      });
-    } catch (err) {
-      const code = err instanceof SafeOutboundFetchError ? err.code : "";
-      if (code === "REDIRECT_BLOCKED") {
-        return errorResponse(502, "Gladia result_url answered with a redirect");
-      }
-      if (code === "URL_GUARD_BLOCKED") {
-        return errorResponse(502, "Gladia result_url resolves to a blocked address");
-      }
-      continue;
-    }
-    if (!pollRes.ok) {
-      await pollRes.body?.cancel().catch(() => {});
-      continue;
-    }
-
-    const result = await pollRes.json();
-
-    if (result.status === "done") {
-      const text = result.result?.transcription?.full_transcript || "";
+    if (polled.status === "done") {
+      const text = polled.result?.transcription?.full_transcript || "";
       return Response.json({ text }, { headers: { ...CORS_HEADERS } });
     }
 
-    if (result.status === "error") {
-      return errorResponse(500, result.error_code || result.error || "Gladia transcription failed");
+    if (polled.status === "error") {
+      return errorResponse(500, polled.error_code || polled.error || "Gladia transcription failed");
     }
   }
 
   return errorResponse(504, "Gladia transcription timed out after 120s");
+}
+
+/**
+ * One Gladia result_url poll. Returns the JSON body on a successful HTTP response,
+ * an error Response when the URL redirects or resolves to a blocked address, or null
+ * when the attempt should be retried.
+ */
+type GladiaPollBody = {
+  status?: string;
+  error_code?: string;
+  error?: string;
+  result?: { transcription?: { full_transcript?: string } };
+};
+
+async function pollGladiaResultOnce(
+  resultUrl: string,
+  authHeaders: Record<string, string>
+): Promise<GladiaPollBody | Response | null> {
+  let pollRes: Response;
+  try {
+    pollRes = await safeOutboundFetch(resultUrl, {
+      headers: authHeaders,
+      guard: "public-only",
+      pinDns: true,
+      timeoutMs: 15_000,
+    });
+  } catch (err) {
+    const code = err instanceof SafeOutboundFetchError ? err.code : "";
+    if (code === "REDIRECT_BLOCKED") {
+      return errorResponse(502, "Gladia result_url answered with a redirect");
+    }
+    if (code === "URL_GUARD_BLOCKED") {
+      return errorResponse(502, "Gladia result_url resolves to a blocked address");
+    }
+    return null;
+  }
+  if (!pollRes.ok) {
+    await pollRes.body?.cancel().catch(() => {});
+    return null;
+  }
+  return (await pollRes.json()) as GladiaPollBody;
 }
 
 type SonioxToken = {

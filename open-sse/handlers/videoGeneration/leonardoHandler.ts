@@ -12,6 +12,7 @@ import {
   UPSTREAM_MEDIA_LIMITS,
   upstreamMediaErrorText,
 } from "@/shared/network/remoteImageFetch";
+import { sanitizeErrorMessage } from "../../utils/error.ts";
 import { abortedVideoResult, POLL_ABORTED, pollJsonAfter } from "./abort.ts";
 
 // Catalog id -> Leonardo `model` enum for POST /generations-text-to-video. `phoenix` was the
@@ -84,7 +85,7 @@ async function downloadLeonardoVideo(
     }
     return {
       status: 502,
-      error: `Leonardo video download failed: ${upstreamMediaErrorText(err)}`,
+      error: `Leonardo video download failed: ${sanitizeErrorMessage(upstreamMediaErrorText(err))}`,
     };
   }
 }
