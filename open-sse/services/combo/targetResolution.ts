@@ -759,7 +759,10 @@ async function applyPromptCacheStage(
     getStrategyTraits(strategy).promptCacheAffinityScope,
     deps.relayOptions?.sessionId
   );
-  if (!promptCacheAffinity.applied) return orderedTargets;
+  // Account expansion is meaningful even when affinity did not reorder targets
+  // (e.g. one eligible account). Returning the unbound originals here lets the
+  // later credential selector discard that resolved account identity.
+  if (!promptCacheAffinity.applied) return promptCacheAffinityTargets;
   const protectedOriginal =
     shouldProtectOriginalFirst(stickyStuck, autoUsedExplicitRouter, strategy) && orderedTargets[0];
   const nextTargets = protectFirstTarget(promptCacheAffinity.targets, protectedOriginal);
