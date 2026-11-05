@@ -135,6 +135,7 @@ jobs:
           PROMPTFOO_DISABLE_UPDATE_CHECK: "1"
         run: |
           python -m unittest discover -s tests/unit/build -p 'test_dast_toolchain.py'
+          python -m unittest discover -s tests/unit/build -p 'test_dast_body_size_contract.py'
           ./node_modules/.bin/promptfoo --version
           ./node_modules/.bin/promptfoo eval -c promptfooconfig.yaml --no-cache --help > /dev/null
       - name: Schemathesis smoke (high-risk endpoints, blocking)
@@ -146,7 +147,7 @@ jobs:
           # still right (operators need it); fuzzing it is not what this smoke is for.
           # /api/auth/login has brute-force rate limiting: repeated failed logins return 429,
           # which Schemathesis flags as rejection of schema-compliant requests.
-          schemathesis run docs/openapi.yaml --url http://localhost:20128 \
+          schemathesis --config-file config/quality/dast-smoke.toml run docs/openapi.yaml --url http://localhost:20128 \
             --include-path-regex '^/api/v1/(chat/completions|models)$|^/api/(auth|keys)' \
             --exclude-path-regex '^/api/auth/(oidc/|login)' \
             --max-examples 8 --workers 4 --checks all --max-response-time 30 \

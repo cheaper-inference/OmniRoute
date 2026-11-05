@@ -94,8 +94,11 @@ test("both DAST assertions remain blocking after a fail-closed readiness step", 
   assert.match(health.run, /kill -0/);
   assert.match(health.run, /failed readiness/);
   assert.match(health.run.trim(), /exit 1$/);
-  for (const pattern of ["schemathesis run", "promptfoo eval"]) {
-    const step = job.steps.find((candidate) => candidate.run?.includes(pattern));
+  for (const name of [
+    "Schemathesis smoke (high-risk endpoints, blocking)",
+    "promptfoo injection-guard (blocking)",
+  ]) {
+    const step = job.steps.find((candidate) => candidate.name === name);
     assert.ok(step);
     assert.equal(step["continue-on-error"], undefined);
     assert.equal(step.if, undefined);

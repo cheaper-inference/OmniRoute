@@ -1,4 +1,5 @@
 """Parse the actual workflow CLI with the installed, locked scanner. No HTTP calls."""
+from contextlib import chdir
 import importlib.metadata
 import json
 from pathlib import Path
@@ -29,9 +30,13 @@ class DastToolchain(unittest.TestCase):
     def test_real_schemathesis_arguments_parse_without_network_or_scanning(self):
         run = next(step["run"] for step in STEPS if step.get("name", "").startswith("Schemathesis smoke"))
         args = shlex.split(run.replace("\\\n", " "), comments=True)
-        self.assertEqual(args[:2], ["schemathesis", "run"])
-        with patch("socket.create_connection", side_effect=AssertionError("network forbidden")):
-            context = schemathesis.commands["run"].make_context("run", args[2:])
+        self.assertEqual(args[:4], ["schemathesis", "--config-file", "config/quality/dast-smoke.toml", "run"])
+        with chdir(ROOT), patch("socket.create_connection", side_effect=AssertionError("network forbidden")):
+            parent = schemathesis.make_context("schemathesis", args[1:4])
+            with parent:
+                parent.invoke(schemathesis.callback, **parent.params)
+            context = schemathesis.commands["run"].make_context("run", args[4:], parent=parent)
+        self.assertEqual(parent.obj.projects.default.hooks, "scripts/check/dast-body-size-contract.py")
         self.assertEqual(context.params["base_url"], "http://localhost:20128")
         self.assertEqual(context.params["generation_max_examples"], 8)
         self.assertEqual(context.params["workers"], 4)
