@@ -332,6 +332,41 @@ function settledResultHasLiveBody(result: unknown): boolean {
   return body != null && bodyUsed !== true;
 }
 
+/**
+ * A trusted caller may only shorten the provider's configured header deadline.
+ * Keep the provenance separate so a local 504 does not cool shared accounts.
+ */
+function resolveEffectiveResponseStartBudget(
+  executor: unknown,
+  provider: string,
+  model: string,
+  connectionTimeoutMs?: number,
+  requestTimeoutMs?: number
+): { timeoutMs: number; requestScoped: boolean } {
+  const configuredMs = getExecutorTimeoutMs(executor, provider, model, connectionTimeoutMs);
+  const validCap = typeof requestTimeoutMs === "number" &&
+    Number.isFinite(requestTimeoutMs) && requestTimeoutMs > 0;
+  if (!validCap) return { timeoutMs: configuredMs, requestScoped: false };
+  const capMs = Math.max(1, Math.floor(requestTimeoutMs!));
+  return {
+    timeoutMs: configuredMs > 0 ? Math.min(configuredMs, capMs) : capMs,
+    requestScoped: configuredMs <= 0 || capMs < configuredMs,
+  };
+}
+
+function createResponseStartDeadlineError(
+  timeoutMs: number,
+  provider: string,
+  model: string,
+  requestScoped: boolean
+): Error {
+  const error = createUpstreamStartTimeoutError(timeoutMs, provider, model);
+  if (requestScoped) {
+    (error as Error & { code?: string }).code = REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE;
+  }
+  return error;
+}
+
 export async function executeWithUpstreamStartTimeout<T>({
   executor,
   provider,
@@ -351,25 +386,15 @@ export async function executeWithUpstreamStartTimeout<T>({
   log?: { warn?: (tag: string, message: string) => void } | null;
   execute: (signal: AbortSignal) => Promise<T>;
 }): Promise<T> {
-  const configuredMs = getExecutorTimeoutMs(executor, provider, model, connectionTimeoutMs);
-  const requestCapMs =
-    typeof requestTimeoutMs === "number" && Number.isFinite(requestTimeoutMs) &&
-    requestTimeoutMs > 0
-      ? Math.max(1, Math.floor(requestTimeoutMs))
-      : undefined;
-  // Request hints may shorten the configured response-start budget, never extend it.
-  const timeoutMs = requestCapMs === undefined ? configuredMs :
-    configuredMs > 0 ? Math.min(configuredMs, requestCapMs) : requestCapMs;
+  const { timeoutMs, requestScoped } = resolveEffectiveResponseStartBudget(
+    executor, provider, model, connectionTimeoutMs, requestTimeoutMs
+  );
   if (timeoutMs <= 0) return execute(signal);
   if (signal.aborted) throw createAbortError(signal);
 
   const timeoutController = new AbortController();
   const combinedController = new AbortController();
-  const timeoutError = createUpstreamStartTimeoutError(timeoutMs, provider, model);
-  if (requestCapMs !== undefined && (configuredMs <= 0 || requestCapMs < configuredMs)) {
-    // A caller-imposed cap is not evidence of an unhealthy provider connection.
-    (timeoutError as Error & { code?: string }).code = REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE;
-  }
+  const timeoutError = createResponseStartDeadlineError(timeoutMs, provider, model, requestScoped);
 
   let timeoutId: ReturnType<typeof setTimeout> | null = null;
   let abortListener: (() => void) | null = null;
