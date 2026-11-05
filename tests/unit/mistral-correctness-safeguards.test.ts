@@ -1,3 +1,13 @@
+/**
+ * Unit test suite validating Mistral correctness safeguards:
+ * - toolNameMaxLength of 64 and unsupportedParams on mistralProvider
+ * - DefaultExecutor tool name length truncation and character aliasing
+ * - stripUnsupportedParams dropping parallel_tool_calls for Mistral
+ * - Dynamic reasoning_effort sanitization based on registry model capabilities
+ * - Dynamic supportsTools extraction from capabilities.function_calling in modelDiscovery
+ * - Dynamic provider listing in handleModeration error responses
+ */
+
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
