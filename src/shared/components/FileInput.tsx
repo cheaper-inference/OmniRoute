@@ -13,7 +13,6 @@ export type {
   FileDropZoneProps,
   FileInputProps,
   FileRejection,
-  FileRejectionReason,
 } from "@omniroute/ui-kit/file-input";
 
 /**
@@ -63,5 +62,3 @@ export const FileDropZone = forwardRef<HTMLInputElement, FileDropZoneProps>(func
     />
   );
 });
-
-export default FileInput;

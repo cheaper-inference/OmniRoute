@@ -398,9 +398,29 @@ async function readTransferFile(file: File): Promise<unknown> {
   }
 }
 
-function ImportView() {
+function BundleFilePicker({
+  fileName,
+  onFile,
+}: {
+  fileName: string;
+  onFile: (file: File | undefined) => void;
+}) {
   const t = useTranslations("providerTransfer");
   const tc = useTranslations("common");
+  return (
+    <FileInput
+      accept=".json"
+      chooseLabel={t("chooseFile")}
+      // The status line names the bundle only once it parsed; an invalid file shows the error.
+      selectedLabel={() => fileName || tc("fileInputEmpty")}
+      onFilesChange={(files) => onFile(files[0])}
+      onFilesRejected={(rejections) => onFile(rejections[0]?.file)}
+    />
+  );
+}
+
+function ImportView() {
+  const t = useTranslations("providerTransfer");
   const [bundle, setBundle] = useState<unknown>(null);
   const [fileName, setFileName] = useState("");
   const [passphrase, setPassphrase] = useState("");
@@ -447,14 +467,7 @@ function ImportView() {
 
   return (
     <div className="flex flex-col gap-3">
-      <FileInput
-        accept=".json"
-        chooseLabel={t("chooseFile")}
-        // The status line names the bundle only once it parsed; an invalid file shows the error.
-        selectedLabel={() => fileName || tc("fileInputEmpty")}
-        onFilesChange={(files) => void handleFile(files[0])}
-        onFilesRejected={(rejections) => void handleFile(rejections[0]?.file)}
-      />
+      <BundleFilePicker fileName={fileName} onFile={(file) => void handleFile(file)} />
       <Input
         type="password"
         autoComplete="off"
