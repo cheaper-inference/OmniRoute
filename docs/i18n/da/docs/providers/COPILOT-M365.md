@@ -64,38 +64,37 @@ afkoder JWT'ens udløbstidspunkt og viser tokens resterende levetid.
 > **Commit aldrig en rigtig HAR-eksport, adgangstoken eller opdateringstoken.** Test- og
 > dokumentationsværdier skal altid være pladsholdere.
 
-## Tokens levetid og opdatering
+## Tokenlevetid og opdatering
 
-`access_token` er kortlivet (typisk **~75 minutter**). Efter udløb rapporterer udbyderen
-en forbindelsesfejl, og du skal hente legitimationsoplysningerne igen.
+`access_token` er kortlivede (typisk **~75 minutter**). Uden et brugbart opdateringstoken
+skal du hente legitimationsoplysningerne igen efter udløb.
 
 ### Automatisk opdatering med `refreshToken`
 
-For at undgå manuel genhentning kan du gemme et Microsoft-opdateringstoken i forbindelsens
-**Advanced Settings → providerSpecificData**:
+I Microsoft 365-udbyderens dialogboks **Tilføj forbindelse** eller **Rediger forbindelse** skal du åbne
+**Avancerede indstillinger → Opdateringstoken (valgfrit)**. Indsæt et Microsoft OAuth-opdateringstoken
+for scopet `substrate.office.com/sydney`, og gem. Inputfeltet er maskeret og udfyldes aldrig
+på forhånd med det gemte token. Når du redigerer, skal du lade feltet stå tomt for at beholde det eksisterende token;
+indsæt et nyt token for at erstatte det.
 
-| Felt           | Beskrivelse                                                                 |
-| -------------- | --------------------------------------------------------------------------- |
-| `refreshToken` | Microsoft OAuth-opdateringstoken til omfanget `substrate.office.com/sydney` |
-| `tier`         | `individual` (standard), `edu` eller `enterprise`                           |
+Hent opdateringstokenet fra et Microsoft-enhedskode- eller autorisationskodeflow
+med scopet `substrate.office.com/sydney`; dashboardet henter det ikke for dig.
+Når et opdateringstoken er konfigureret, kontrollerer OmniRoute `access_token` før forespørgsler
+og opdaterer det kun, når det skal opdateres. En vellykket opdatering gemmer også det roterede opdateringstoken,
+så du undgår manuel genhentning, så længe opdateringstokenet stadig er gyldigt.
 
-Hent opdateringstokenet fra et Microsoft-enhedskode- eller godkendelseskodeflow
-med omfanget `substrate.office.com/sydney`. Når `refreshToken` er angivet, opdaterer OmniRoute
-`access_token` før hver anmodning, så du ikke behøver at hente legitimationsoplysningerne
-igen efter hvert udløb på cirka 75 minutter.
-
-Hvis `refreshToken` ikke er angivet, skal du manuelt hente WebSocket-legitimationsoplysningerne
-igen efter hvert udløb.
+Hvis `refreshToken` ikke er angivet, skal du manuelt hente WebSocket-legitimationsoplysningerne igen
+efter hvert udløb.
 
 ### Valg af niveau
 
-| Niveau       | Alias        | Brugerflade                    |
-| ------------ | ------------ | ------------------------------ |
-| `individual` | _(standard)_ | M365 Copilot til privatbrugere |
-| `edu`        | `included`   | M365 Copilot til uddannelse    |
-| `enterprise` | `work`       | M365 Copilot til arbejde       |
+| Niveau       | Alias        | Anvendelsesområde           |
+| ------------ | ------------ | --------------------------- |
+| `individual` | _(standard)_ | Forbruger-M365 Copilot      |
+| `edu`        | `included`   | M365 Copilot til uddannelse |
+| `enterprise` | `work`       | M365 Copilot til arbejde    |
 
-Angiv niveauet under **Advanced Settings → providerSpecificData → tier**. Niveauet påvirker
+Angiv niveauet under **Avancerede indstillinger → Copilot-niveau**. Niveauet påvirker
 BizChat-routing og modeladgang.
 
 ## Sikkerhedsmodel
@@ -111,30 +110,25 @@ BizChat-routing og modeladgang.
 
 ## Fejlfinding
 
-### Godkendelsen mislykkes med det samme
+### Godkendelse mislykkes med det samme
 
-- Kontrollér, at du kopierede fra **WebSocket-URL'en** og ikke fra en XHR/Fetch-anmodning.
-  Legitimationsoplysningen findes i forespørgselsparameteren `access_token` for Chathub WebSocket-
-  forbindelsen — ikke i en `Authorization: Bearer`-header.
-- Sørg for, at `chathubPath` indeholder hele `<oid>@<tenant>`-segmentet fra URL-
-  stien.
+- Kontrollér, at du kopierede fra **WebSocket-URL'en**, ikke fra en XHR/Fetch-anmodning. Oplysningen findes i forespørgselsparameteren `access_token` for Chathub-WebSocket-forbindelsen — ikke i en `Authorization: Bearer`-header.
+- Sørg for, at `chathubPath` indeholder hele segmentet `<oid>@<tenant>` fra URL-stien.
 
-### Tokenet udløber efter ~75 minutter
+### Token udløber efter ~75 minutter
 
-Dette er forventet. Uden et `refreshToken` er adgangstokenet kortlivet. Du kan enten:
+Dette er forventet. Uden en `refreshToken` har adgangstokenet en kort levetid. Du kan enten:
 
-- Hente legitimationsoplysningen igen fra DevTools eller
-- Konfigurere et `refreshToken` under Avancerede indstillinger for automatisk opdatering.
+- Optage legitimationsoplysningerne igen fra DevTools, eller
+- Konfigurere **Avancerede indstillinger → Opdateringstoken (valgfrit)** i dialogboksen Tilføj eller rediger forbindelse for automatisk opdatering.
 
-### Test forbindelsen lykkes, men chatten returnerer 401
+### Test forbindelse lykkes, men chat returnerer 401
 
-Tokenet kan være udløbet mellem valideringen og den første anmodning. Hent en
-ny legitimationsoplysning.
+Tokenet kan være udløbet mellem valideringen og den første anmodning. Optag en ny legitimationsoplysning igen.
 
-### Copilot vises ikke på udbyderlisten
+### Copilot vises ikke på listen over udbydere
 
-Sørg for, at `copilot-m365-web` er aktiveret under **Dashboard → Udbydere**. Udbyderen kan
-være skjult som standard i nogle niveauer.
+Sørg for, at `copilot-m365-web` er aktiveret under **Dashboard → Udbydere**. Udbyderen kan være skjult som standard i nogle abonnementstyper.
 
 ## Referencer
 
