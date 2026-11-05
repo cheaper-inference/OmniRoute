@@ -1,4 +1,4 @@
-// F-C4-02: provider dispatch follows redirects by hand. Every hop gets the SSRF string guard and
+// Provider dispatch follows redirects by hand. Every hop gets the SSRF string guard and
 // the connect-time guard, a cross-origin hop loses the credential headers, and a Location that
 // points at cloud metadata (or loopback in public-only mode) is never fetched.
 // No real network: loopback servers or a stubbed globalThis.fetch only.

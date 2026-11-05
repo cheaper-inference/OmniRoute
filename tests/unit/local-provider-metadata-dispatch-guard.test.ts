@@ -1,4 +1,4 @@
-// F-C4-09: the local / self-hosted provider exemption must not skip the cloud-metadata block.
+// The local / self-hosted provider exemption must not skip the cloud-metadata block.
 // The policy says cloud metadata stays blocked regardless; the dispatch guard returned before
 // checking it. Fetch is stubbed; no network.
 import test from "node:test";

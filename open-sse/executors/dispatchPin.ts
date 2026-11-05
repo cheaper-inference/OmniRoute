@@ -22,7 +22,7 @@ import {
 export function assertDispatchUrlAllowed(provider: string, url: string): void {
   if (!url) return;
   if (isLocalProvider(provider) || isSelfHostedChatProvider(provider)) {
-    // Exempt from public-host checks, never from the cloud-metadata block (F-C4-09).
+    // Exempt from public-host checks, never from the cloud-metadata block.
     parseAndValidateNonMetadataUrl(url);
     return;
   }
@@ -115,7 +115,7 @@ const MAX_REDIRECTS = 5;
 const CREDENTIAL_HEADER = /^(authorization|proxy-authorization|cookie)$|key|token|secret/i;
 
 /**
- * Follows redirects by hand (F-C4-02): an auto-followed redirect would reach a Location target
+ * Follows redirects by hand: an auto-followed redirect would reach a Location target
  * that neither guard above ever saw, and on 307/308 forward the POST body and the key to it.
  * Every hop gets the string guard and the connect-time guard; credential headers are dropped
  * when the origin changes; method rules follow the Fetch standard.
