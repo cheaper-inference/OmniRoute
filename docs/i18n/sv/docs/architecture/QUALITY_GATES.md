@@ -25,6 +25,8 @@ Båda arbetsflödena täcker PRs in i main/release grenar, push till `main`, man
 
 En vanlig PR kör det snabba urvalet. `full-code` och `full-code-e2e` -banorna i tillträdespolicyn (E2E, integration, paketartefakt, Electron smoke, Bun SQLite, ekosystem- och protokollklienter) körs endast på ett Mergify-köutkast eller på en fullständig körning: `gh workflow run ci.yml --ref <branch>`.
 
+Varje JSON kvitto identifierar utcheckad SHA, arbetsflödeskörning och försök. CLI n avvisar en checkout/event SHA felmatchning. Arbetsflödestester binder policymedlemskap till domsjobbets `needs` lista så att en ny eller borttagen fil inte kan försvinna tyst. Kvittona täcker deras eget arbetsflöde, inte publicering, distribution eller interna delar av en befintlig rådgivande skanner. Att aktivera båda kontrollnamnen i grenregler är en separat administrativ ändring; Att lägga till dessa jobb skyddar inte i sig en gren.
+
 ### Slå samman kö
 
 `queue` etiketten skickar en PR till Mergify-kön (`.mergify.yml`). Mergify öppnar ett utkast till PR på en `mergify/merge-queue/` -gren, CI kör hela markeringen där, och den ursprungliga PR smälter samman när `Gate / CI`, `Gate / Quality` och `Merge integrity (changelog + generated skills)` passerar.
@@ -32,8 +34,6 @@ En vanlig PR kör det snabba urvalet. `full-code` och `full-code-e2e` -banorna i
 Mergify skriver sin kösammanfattning i utkastets beskrivning, och andra appar kan också redigera den. En `pull_request` `edited` -händelse på ett sådant utkast tar sin egen samtidighetsgrupp (`-queue-edit-<run_id>`) så den kan inte avbryta utkastets riktiga körning, och den hoppar över grinden och matrisen. Endast `Merge integrity` körs fortfarande. Det överhoppade grindjobbet har ett annat kontrollnamn, eftersom Mergify läser en överhoppad `Gate / CI` som en misslyckad kontroll och ställer ut PR.
 
 Efter en dequeue, en push inte alltid återköa PR. Kommentera `@mergifyio queue` på det.
-
-Varje JSON kvitto identifierar utcheckad SHA, arbetsflödeskörning och försök. CLI n avvisar en checkout/event SHA felmatchning. Arbetsflödestester binder policymedlemskap till domsjobbets `needs` lista så att en ny eller borttagen fil inte kan försvinna tyst. Kvittona täcker deras eget arbetsflöde, inte publicering, distribution eller interna delar av en befintlig rådgivande skanner. Att aktivera båda kontrollnamnen i grenregler är en separat administrativ ändring; Att lägga till dessa jobb skyddar inte i sig en gren.
 
 ### Inventering av statisk skanning
 
@@ -106,7 +106,7 @@ Körs på varje PR till `main`. Block slås samman vid misslyckande.
 
 `tsconfig.build.json` ställer in `"strict": false`, så `noImplicitAny` är avstängd. Kärnkonfigurationen kompilerar en kurerad 27-filers godkännandelista med strängare alternativ och följer varje posts importgraf, så filer som aldrig visas i byggprogrammet kontrolleras fortfarande där.
 
-Konsekvensen har betydelse när man bedömer om en fil är maskinskriven:** noll diagnostik under `check:build-typecheck` betyder inte noll** . Att ta bort `@ts-nocheck` från 26 filer visade att 23 av dem var rena i byggprogrammet; 16 av dessa dök upp cirka 120 implicita fel i den strikta. Kontrollera båda innan du kallar en fil ren.
+Konsekvensen har betydelse när man bedömer om en fil är maskinskriven:** noll diagnostik under `check:build-typecheck` betyder inte noll** . Att ta bort `@ts-nocheck` från 26 filer visade att 23 av dem var rena i byggprogrammet; 16 av dessa visade cirka 120 implicita fel i den strikta. Kontrollera båda innan du kallar en fil ren.
 
 ### Jobb: `quality-gate`
 

@@ -25,6 +25,8 @@ Cả hai quy trình công việc đều bao gồm PRs thành các nhánh main/re
 
 Một PR bình thường chạy lựa chọn nhanh. Các làn `full-code` và `full-code-e2e` của chính sách tiếp nhận (E2E, tích hợp, tạo phẩm gói, Electron smoke, Bun SQLite, hệ sinh thái và giao thức khách hàng) chỉ chạy trên bản nháp hàng đợi Hợp nhất hoặc chạy đầy đủ: `gh workflow run ci.yml --ref <branch>`.
 
+Mỗi biên nhận JSON xác định SHA đã kiểm xuất, lần chạy và lần thử quy trình làm việc. CLI từ chối checkout/event SHA không khớp. Kiểm tra quy trình làm việc liên kết tư cách thành viên chính sách với danh sách `needs` của công việc phán quyết để làn đường mới hoặc làn đường bị xóa không thể biến mất một cách âm thầm. Biên nhận bao gồm quy trình làm việc của riêng họ, không phải xuất bản, triển khai hoặc nội bộ của máy quét tư vấn hiện có. Kích hoạt cả hai tên kiểm tra trong quy tắc chi nhánh là một thay đổi quản trị riêng biệt; việc thêm những công việc này bản thân nó không bảo vệ một chi nhánh.
+
 ### Hợp nhất hàng đợi
 
 Nhãn `queue` gửi PR đến hàng đợi Hợp nhất (`.mergify.yml`). Hợp nhất mở một bản nháp PR trên một nhánh `mergify/merge-queue/`, CI chạy toàn bộ lựa chọn ở đó và PR ban đầu hợp nhất khi `Gate / CI`, `Gate / Quality` và `Merge integrity (changelog + generated skills)` vượt qua.
@@ -32,8 +34,6 @@ Nhãn `queue` gửi PR đến hàng đợi Hợp nhất (`.mergify.yml`). Hợp 
 Hợp nhất ghi tóm tắt hàng đợi của nó vào mô tả của bản nháp và các ứng dụng khác cũng có thể chỉnh sửa nó. Sự kiện `pull_request` `edited` trên bản nháp như vậy có nhóm tương tranh riêng (`-queue-edit-<run_id>`) nên nó không thể hủy quá trình chạy thực sự của bản nháp và nó bỏ qua cổng và ma trận. Chỉ `Merge integrity` vẫn chạy. Công việc cổng bị bỏ qua mang một tên kiểm tra khác, vì Mergify đọc `Gate / CI` bị bỏ qua là kiểm tra không thành công và loại bỏ PR.
 
 Sau một lần dequeue, một lần đẩy không phải lúc nào cũng yêu cầu PR. Bình luận `@mergifyio queue` về nó.
-
-Mỗi biên nhận JSON xác định SHA đã kiểm xuất, lần chạy và lần thử quy trình làm việc. CLI từ chối checkout/event SHA không khớp. Kiểm tra quy trình làm việc liên kết tư cách thành viên chính sách với danh sách `needs` của công việc phán quyết để làn đường mới hoặc làn đường bị xóa không thể biến mất một cách âm thầm. Biên nhận bao gồm quy trình làm việc của riêng họ, không phải xuất bản, triển khai hoặc nội bộ của máy quét tư vấn hiện có. Kích hoạt cả hai tên kiểm tra trong quy tắc chi nhánh là một thay đổi quản trị riêng biệt; việc thêm những công việc này bản thân nó không bảo vệ một chi nhánh.
 
 ### Kiểm kê quét tĩnh
 
@@ -106,7 +106,7 @@ Chạy trên mọi PR đến `main`. Khối hợp nhất khi thất bại.
 
 `tsconfig.build.json` đặt `"strict": false`, vì vậy `noImplicitAny` bị tắt. Cấu hình lõi biên dịch danh sách cho phép gồm 27 tệp được tuyển chọn với các tùy chọn chặt chẽ hơn và tuân theo biểu đồ nhập của từng mục nhập, do đó, các tệp không bao giờ xuất hiện trong chương trình xây dựng vẫn được kiểm tra ở đó.
 
-Hậu quả quan trọng khi đánh giá liệu một tập tin có được gõ hay không:** chẩn đoán bằng không theo `check:build-typecheck` không có nghĩa là không** . Việc loại bỏ `@ts-nocheck` khỏi 26 tệp cho thấy 23 tệp trong số đó sạch trong chương trình xây dựng; 16 trong số đó nổi lên khoảng 120 lỗi tiềm ẩn trong lỗi nghiêm ngặt. Kiểm tra cả hai trước khi gọi một tập tin sạch.
+Hậu quả quan trọng khi đánh giá liệu một tập tin có được gõ hay không:** chẩn đoán bằng không theo `check:build-typecheck` không có nghĩa là không** . Việc loại bỏ `@ts-nocheck` khỏi 26 tệp cho thấy 23 tệp trong số đó sạch trong chương trình xây dựng; 16 trong số đó cho thấy có khoảng 120 lỗi tiềm ẩn trong lỗi nghiêm ngặt. Kiểm tra cả hai trước khi gọi một tập tin sạch.
 
 ### Công việc: `quality-gate`
 

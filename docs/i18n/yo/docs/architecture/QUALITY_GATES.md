@@ -25,6 +25,8 @@ Awọn ṣiṣan iṣẹ mejeeji bo PRs sinu awọn ẹka main/release, titari s
 
 Arinrin PR nṣiṣẹ awọn sare aṣayan. Awọn ọna `full-code` ati `full-code-e2e` ti eto imulo gbigba (E2E, isọpọ, artifact package, Electron èéfín, Bun SQLite, ilolupo eda ati awọn alabara ilana) ṣiṣẹ nikan lori apẹrẹ isinyi Mergify tabi lori ṣiṣe ni kikun: `gh workflow run ci.yml --ref <branch>`.
 
+Iwe-ẹri JSON kọọkan n ṣe idanimọ SHA ti a ṣayẹwo, ṣiṣe ṣiṣiṣẹ ati igbiyanju. CLI na kọ aiṣedeede checkout/event SHA kan. Awọn idanwo ṣiṣiṣẹsiṣẹpọ di ọmọ ẹgbẹ eto imulo si atokọ `needs` iṣẹ idajo nitorina ọna tuntun tabi yiyọ kuro ko le parẹ ni idakẹjẹ. Awọn owo-owo naa bo ṣiṣan iṣẹ tiwọn, kii ṣe titẹjade, imuṣiṣẹ, tabi awọn inu inu ẹrọ aṣayẹwo imọran ti o wa tẹlẹ. Ṣiṣẹ awọn orukọ ayẹwo mejeeji ni awọn ofin ẹka jẹ iyipada iṣakoso lọtọ; fifi awọn iṣẹ wọnyi kun ko ṣe aabo fun ẹka kan funrararẹ.
+
 ### Àkópọ̀ isinyi
 
 Aami `queue` nfi PR ranṣẹ si isinyi Mergify (`.mergify.yml`). Mergify ṣi PR osere kan lori ẹka `mergify/merge-queue/`, CI nṣiṣẹ yiyan ni kikun nibẹ, ati pe PR atilẹba dapọ nigbati `Gate / CI`, `Gate / Quality` ati `Merge integrity (changelog + generated skills)` kọja.
@@ -32,8 +34,6 @@ Aami `queue` nfi PR ranṣẹ si isinyi Mergify (`.mergify.yml`). Mergify ṣi P
 Mergify kọ akopọ isinyin rẹ sinu apejuwe yiyan, ati pe awọn ohun elo miiran le ṣatunkọ paapaa. Iṣẹlẹ `pull_request` `edited` kan lori iru apẹrẹ kan gba ẹgbẹ concurrency tirẹ (`-queue-edit-<run_id>`) nitori naa ko le fagilee ṣiṣe gidi ti osere naa, o si fo ẹnu-bode ati matrix naa. Nikan `Merge integrity` ṣi nṣiṣẹ. Iṣẹ ẹnu-ọna ti o fo naa n gbe orukọ ayẹwo ti o yatọ, nitori Mergify ka `Gate / CI` ti o fo silẹ gẹgẹbi ayẹwo ti o kuna ati pe o yọkuro PR naa.
 
 Lẹhin isọdi, titari ko ni beere nigbagbogbo PR. Ọrọìwòye `@mergifyio queue` lori rẹ.
-
-Iwe-ẹri JSON kọọkan n ṣe idanimọ SHA ti a ṣayẹwo, ṣiṣe ṣiṣiṣẹ ati igbiyanju. CLI na kọ aiṣedeede checkout/event SHA kan. Awọn idanwo ṣiṣiṣẹsiṣẹpọ di ọmọ ẹgbẹ eto imulo si atokọ `needs` iṣẹ idajo nitorina ọna tuntun tabi yiyọ kuro ko le parẹ ni idakẹjẹ. Awọn owo-owo naa bo ṣiṣan iṣẹ tiwọn, kii ṣe titẹjade, imuṣiṣẹ, tabi awọn inu inu ẹrọ aṣayẹwo imọran ti o wa tẹlẹ. Ṣiṣẹ awọn orukọ ayẹwo mejeeji ni awọn ofin ẹka jẹ iyipada iṣakoso lọtọ; fifi awọn iṣẹ wọnyi kun ko ṣe aabo fun ẹka kan funrararẹ.
 
 ### Iṣiro ọlọjẹ aimi
 
@@ -102,11 +102,11 @@ Nṣiṣẹ lori gbogbo PR si `main`. Awọn bulọọki dapọ lori ikuna.
 
 #### Awọn eto titẹ titẹ meji dahun oriṣiriṣi
 
-`typecheck:core` ati `check:build-typecheck` ṣe akojọpọ awọn eto oriṣiriṣi labẹ awọn aṣayan oriṣiriṣi, ati pe faili kanna le jẹ mimọ ni ọkan ati kun fun awọn aṣiṣe ni ekeji.
+`typecheck:core` ati `check:build-typecheck` ṣe akojọpọ awọn eto oriṣiriṣi labẹ awọn aṣayan oriṣiriṣi, ati pe faili kanna le jẹ mimọ ninu ọkan ati kun fun awọn aṣiṣe ni ekeji.
 
 `tsconfig.build.json` ṣeto `"strict": false`, nitorina `noImplicitAny` wa ni pipa. Atunto mojuto ṣe akopọ atokọ iyọọda faili 27 ti a ti sọ di mimọ pẹlu awọn aṣayan ti o muna ati tẹle awọnya agbewọle titẹ sii kọọkan, nitorinaa awọn faili ti ko han ninu eto kikọ naa tun ṣayẹwo nibẹ.
 
-Abajade naa ṣe pataki nigbati o ba ṣe idajọ boya ti tẹ faili kan:** Ayẹwo odo labẹ `check:build-typecheck` ko tumọ si odo** . Yiyọ `@ts-nocheck` lati awọn faili 26 fihan 23 ninu wọn ti o mọ ni eto kikọ; mẹrindilogun ti awon surfaced nipa 120 implicit-eyikeyi aṣiṣe ninu awọn ti o muna ọkan. Ṣayẹwo awọn mejeeji ṣaaju pipe faili ti o mọ.
+Abajade naa ṣe pataki nigbati o ba ṣe idajọ boya ti tẹ faili kan:** Ayẹwo odo labẹ `check:build-typecheck` ko tumọ si odo** . Yiyọ `@ts-nocheck` lati awọn faili 26 fihan 23 ninu wọn ni mimọ ninu eto kikọ; mẹrindilogun ti awon surfaced nipa 120 implicit-eyikeyi aṣiṣe ninu awọn ti o muna ọkan. Ṣayẹwo awọn mejeeji ṣaaju pipe faili ti o mọ.
 
 ### Job: `quality-gate`
 

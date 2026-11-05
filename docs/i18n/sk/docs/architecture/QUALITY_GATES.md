@@ -25,6 +25,8 @@ Oba pracovné postupy pokrývajú PRs do main/release vetiev, presuny do `main`,
 
 Bežný PR spúšťa rýchly výber. Dráhy `full-code` a `full-code-e2e` politiky prijatia (E2E, integrácia, artefakt balíka, Electron smoke, Bun SQLite, klienti ekosystému a protokolu) bežia len na koncepte frontu Mergify alebo na úplnom spustení: `gh workflow run ci.yml --ref <branch>`.
 
+Každý doklad JSON identifikuje odhlásený SHA, spustenie pracovného postupu a pokus. CLI odmietne nesúlad checkout/event SHA. Testy pracovného toku spájajú členstvo v politike so zoznamom `needs` úlohy verdiktu, takže nový alebo odstránený pruh nemôže ticho zmiznúť. Potvrdenia pokrývajú ich vlastný pracovný postup, nie publikáciu, nasadenie alebo interné prvky existujúceho poradenského skenera. Aktivácia oboch kontrolných názvov v pravidlách pobočky je samostatnou administratívnou zmenou; pridanie týchto pracovných miest samo o sebe nechráni pobočku.
+
 ### Zlúčiť front
 
 Označenie `queue` odošle PR do frontu Mergify (`.mergify.yml`). Mergify otvorí koncept PR na vetve `mergify/merge-queue/`, CI tam spustí úplný výber a pôvodný PR sa zlúči, keď prejdú `Gate / CI`, `Gate / Quality` a `Merge integrity (changelog + generated skills)`.
@@ -32,8 +34,6 @@ Označenie `queue` odošle PR do frontu Mergify (`.mergify.yml`). Mergify otvor�
 Mergify zapíše svoj súhrn frontu do popisu konceptu a ďalšie aplikácie ho môžu tiež upraviť. Udalosť `pull_request` `edited` na takomto návrhu má svoju vlastnú skupinu súbežnosti (`-queue-edit-<run_id>`), takže nemôže zrušiť skutočný priebeh návrhu a preskočí bránu a maticu. Stále beží iba `Merge integrity`. Úloha vynechanej brány nesie iný názov kontroly, pretože Mergify načíta vynechané `Gate / CI` ako neúspešnú kontrolu a odstráni PR.
 
 Po vyradení z frontu nemusí push vždy znova zaradiť PR. Komentujte to `@mergifyio queue`.
-
-Každý doklad JSON identifikuje odhlásený SHA, spustenie pracovného postupu a pokus. CLI odmietne nesúlad checkout/event SHA. Testy pracovného toku spájajú členstvo v politike so zoznamom `needs` úlohy verdiktu, takže nový alebo odstránený pruh nemôže ticho zmiznúť. Potvrdenia pokrývajú ich vlastný pracovný postup, nie publikáciu, nasadenie alebo interné prvky existujúceho poradenského skenera. Aktivácia oboch kontrolných názvov v pravidlách pobočky je samostatnou administratívnou zmenou; pridanie týchto pracovných miest samo o sebe nechráni pobočku.
 
 ### Inventár statického skenovania
 

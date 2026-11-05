@@ -25,6 +25,8 @@ Oba delovna toka zajemata PRs v veje main/release, potiske v `main`, ročno odpo
 
 Navadna PR izvaja hitro izbiro. Proga `full-code` in `full-code-e2e` politike sprejema (E2E, integracija, artefakt paketa, Electron smoke, Bun SQLite, odjemalci ekosistema in protokola) se izvajata samo na osnutku čakalne vrste Mergify ali v celotnem zagonu: `gh workflow run ci.yml --ref <branch>`.
 
+Vsako potrdilo JSON identificira odjavljeni SHA, zagon in poskus delovnega toka. CLI zavrne neujemanje checkout/event SHA. Preizkusi delovnega toka vežejo članstvo v pravilniku na seznam `needs` opravila sodbe, tako da nov ali odstranjen pas ne more tiho izginiti. Potrdila pokrivajo lasten potek dela, ne pa objave, uvajanja ali notranjosti obstoječega svetovalnega skenerja. Aktiviranje obeh imen preverjanja v pravilih veje je ločena administrativna sprememba; dodajanje teh opravil samo po sebi ne ščiti podružnice.
+
 ### Združi čakalno vrsto
 
 Oznaka `queue` pošlje PR v čakalno vrsto Mergify (`.mergify.yml`). Mergify odpre osnutek PR na veji `mergify/merge-queue/`, CI tam zažene celotno izbiro in izvirni PR se združi, ko `Gate / CI`, `Gate / Quality` in `Merge integrity (changelog + generated skills)` prehajajo.
@@ -32,8 +34,6 @@ Oznaka `queue` pošlje PR v čakalno vrsto Mergify (`.mergify.yml`). Mergify odp
 Mergify zapiše svoj povzetek čakalne vrste v opis osnutka, urejajo pa ga lahko tudi druge aplikacije. Dogodek `pull_request` `edited` na takem osnutku prevzame lastno sočasno skupino (`-queue-edit-<run_id>`), tako da ne more preklicati dejanskega izvajanja osnutka in preskoči vrata in matriko. Samo `Merge integrity` še deluje. Preskočeno opravilo vrat nosi drugačno ime preverjanja, ker Mergify prebere preskočeno `Gate / CI` kot neuspelo preverjanje in odstrani PR iz čakalne vrste.
 
 Po odstranitvi iz čakalne vrste potisni element PR ne postavi vedno znova v čakalno vrsto. Komentirajte `@mergifyio queue` o tem.
-
-Vsako potrdilo JSON identificira odjavljeni SHA, zagon in poskus delovnega toka. CLI zavrne neujemanje checkout/event SHA. Preizkusi delovnega toka vežejo članstvo v pravilniku na seznam `needs` opravila sodbe, tako da nov ali odstranjen pas ne more tiho izginiti. Potrdila pokrivajo lasten potek dela, ne pa objave, uvajanja ali notranjosti obstoječega svetovalnega skenerja. Aktiviranje obeh imen preverjanja v pravilih veje je ločena administrativna sprememba; dodajanje teh opravil samo po sebi ne ščiti podružnice.
 
 ### Inventar statičnega skeniranja
 

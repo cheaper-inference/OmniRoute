@@ -25,6 +25,8 @@ Ambele fluxuri de lucru acoperă PRs în ramuri main/release, împingeri către 
 
 Un PR obișnuit rulează selecția rapidă. Benzile `full-code` și `full-code-e2e` ale politicii de admitere (E2E, integrare, pachet artefact, Electron smoke, Bun SQLite, ecosistem și clienți de protocol) rulează numai pe o schiță de coadă Mergify sau pe o rulare completă: `gh workflow run ci.yml --ref <branch>`.
 
+Fiecare chitanță JSON identifică SHA extras, rularea fluxului de lucru și încercarea. CLI respinge o nepotrivire checkout/event SHA. Testele fluxului de lucru leagă calitatea de membru al politicii de lista `needs` a jobului de verdict, astfel încât o bandă nouă sau eliminată să nu poată dispărea în tăcere. Chitanțe acoperă propriul flux de lucru, nu publicarea, implementarea sau elementele interne ale unui scaner de consiliere existent. Activarea ambelor nume de cec în regulile de ramură este o modificare administrativă separată; adăugarea acestor locuri de muncă nu protejează în sine o sucursală.
+
 ### Coada de îmbinare
 
 Eticheta `queue` trimite un PR la coada Mergify (`.mergify.yml`). Mergify deschide o schiță PR pe o ramură `mergify/merge-queue/`, CI rulează selecția completă acolo, iar PR original fuzionează când `Gate / CI`, `Gate / Quality` și `Merge integrity (changelog + generated skills)` trec.
@@ -32,8 +34,6 @@ Eticheta `queue` trimite un PR la coada Mergify (`.mergify.yml`). Mergify deschi
 Mergify își scrie rezumatul cozii în descrierea schiței, iar alte aplicații îl pot edita și ele. Un eveniment `pull_request` `edited` pe un astfel de draft își ia propriul grup de concurență (`-queue-edit-<run_id>`), astfel încât nu poate anula rularea reală a draft-ului și omite poarta și matricea. Doar `Merge integrity` mai rulează. Lucrarea de poartă omisă poartă un nume de verificare diferit, deoarece Mergify citește un `Gate / CI` omis ca o verificare nereușită și scoate din coadă PR.
 
 După o scoatere din coadă, o apăsare nu reia întotdeauna PR. Comentează `@mergifyio queue` la el.
-
-Fiecare chitanță JSON identifică SHA extras, rularea fluxului de lucru și încercarea. CLI respinge o nepotrivire checkout/event SHA. Testele fluxului de lucru leagă calitatea de membru al politicii de lista `needs` a jobului de verdict, astfel încât o bandă nouă sau eliminată să nu poată dispărea în tăcere. Chitanțe acoperă propriul flux de lucru, nu publicarea, implementarea sau elementele interne ale unui scaner de consiliere existent. Activarea ambelor nume de cec în regulile de ramură este o modificare administrativă separată; adăugarea acestor locuri de muncă nu protejează în sine o sucursală.
 
 ### Inventar de scanare statică
 

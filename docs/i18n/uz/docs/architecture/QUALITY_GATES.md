@@ -26,6 +26,8 @@ Ikkala ish oqimi ham PRs main/release tarmoqlariga qamrab oladi, `main` ga suris
 
 Oddiy PR tezkor tanlovni boshqaradi. Qabul qilish siyosatining `full-code` va `full-code-e2e` qatorlari (E2E, integratsiya, paket artefakti, Electron smoke, Bun SQLite, ekotizim va protokol mijozlari) faqat Mergify navbat qoralamasida yoki to‘liq ishga tushiriladi: `gh workflow run ci.yml --ref <branch>`.
 
+Har bir JSON kvitansiyasi tekshirilgan SHA, ish jarayonining bajarilishini va urinishlarini aniqlaydi. CLI checkout/event SHA mos kelmasligini rad etadi. Ish jarayoni testlari siyosat a'zoligini hukm ishining `needs` ro'yxatiga bog'laydi, shuning uchun yangi yoki olib tashlangan qator jimgina yo'qolib qolmaydi. Kvitansiyalar nashr, tarqatish yoki mavjud maslahat skanerining ichki qismlarini emas, balki o'zlarining ish jarayonini qamrab oladi. Filial qoidalarida ikkala chek nomini faollashtirish alohida ma'muriy o'zgarish hisoblanadi; bu ishlarni qo'shishning o'zi filialni himoya qilmaydi.
+
 ### Navbatni birlashtirish
 
 `queue` yorlig'i birlashtirish navbatiga PR yuboradi (`.mergify.yml`). Birlashtirish `mergify/merge-queue/` filialida PR qoralamasini ochadi, CI u yerda to‘liq tanlovni ishga tushiradi va `Gate / CI`, `Gate / Quality` va `Merge integrity (changelog + generated skills)` o‘tganda asl PR birlashadi.
@@ -33,8 +35,6 @@ Oddiy PR tezkor tanlovni boshqaradi. Qabul qilish siyosatining `full-code` va `f
 Mergify o'zining navbat xulosasini qoralama tavsifiga yozadi va boshqa ilovalar ham uni tahrirlashi mumkin. Bunday qoralamadagi `pull_request` `edited` hodisasi oʻzining parallellik guruhini (`-queue-edit-<run_id>`) oladi, shuning uchun u qoralamaning haqiqiy ishini bekor qila olmaydi va u darvoza va matritsani oʻtkazib yuboradi. Faqat `Merge integrity` hali ham ishlaydi. O'tkazib yuborilgan darvoza vazifasi boshqa chek nomiga ega, chunki Mergify o'tkazib yuborilgan `Gate / CI` muvaffaqiyatsiz tekshiruv sifatida o'qiydi va PR navbatdan chiqaradi.
 
 O'chirishdan so'ng, surish har doim ham PR talab qilmaydi. Bunga `@mergifyio queue` izoh qoldiring.
-
-Har bir JSON kvitansiyasi tekshirilgan SHA, ish jarayonining bajarilishini va urinishlarini aniqlaydi. CLI checkout/event SHA mos kelmasligini rad etadi. Ish jarayoni testlari siyosat a'zoligini hukm ishining `needs` ro'yxatiga bog'laydi, shuning uchun yangi yoki olib tashlangan qator jimgina yo'qolib qolmaydi. Kvitansiyalar nashr, tarqatish yoki mavjud maslahat skanerining ichki qismlarini emas, balki o'zlarining ish jarayonini qamrab oladi. Filial qoidalarida ikkala chek nomini faollashtirish alohida ma'muriy o'zgarish hisoblanadi; bu ishlarni qo'shishning o'zi filialni himoya qilmaydi.
 
 ### Statik skanerlash inventar
 

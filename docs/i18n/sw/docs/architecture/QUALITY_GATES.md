@@ -25,6 +25,8 @@ Mitiririko yote miwili ya kazi hufunika PRs katika matawi ya main/release, inasu
 
 PR ya kawaida huendesha uteuzi wa haraka. Njia za `full-code` na `full-code-e2e` za sera ya uandikishaji (E2E, ushirikiano, vizalia vya programu vya kifurushi, moshi Electron, Bun SQLite, mfumo wa ikolojia na wateja wa itifaki) huendeshwa tu kwenye rasimu ya foleni ya Mergify au kwa kukimbia kamili: `gh workflow run ci.yml --ref <branch>`.
 
+Kila risiti ya JSON inabainisha SHA iliyoangaliwa, mtiririko wa kazi na jaribio. CLI inakataa kutolingana kwa checkout/event SHA. Majaribio ya mtiririko wa kazi hufunga uanachama wa sera kwenye orodha `needs` ya kazi ya uamuzi ili njia mpya au iliyoondolewa haiwezi kutoweka kimya kimya. Stakabadhi hufunika mtiririko wao wa kazi, si uchapishaji, utumaji, au mambo ya ndani ya kichanganuzi kilichopo cha ushauri. Kuamilisha majina ya hundi zote mbili katika sheria za tawi ni mabadiliko tofauti ya kiutawala; kuongeza kazi hizi yenyewe hailindi tawi.
+
 ### Unganisha foleni
 
 Lebo `queue` hutuma PR kwenye foleni ya Mergify (`.mergify.yml`). Mergify hufungua rasimu ya PR kwenye tawi la `mergify/merge-queue/`, CI huendesha uteuzi kamili hapo, na PR asili huunganishwa wakati `Gate / CI`, `Gate / Quality` na `Merge integrity (changelog + generated skills)` zinapita.
@@ -32,8 +34,6 @@ Lebo `queue` hutuma PR kwenye foleni ya Mergify (`.mergify.yml`). Mergify hufung
 Mergify huandika muhtasari wake wa foleni katika maelezo ya rasimu, na programu zingine pia zinaweza kuihariri. Tukio la `pull_request` `edited` kwenye rasimu kama hiyo huchukua kundi lake la sarafu (`-queue-edit-<run_id>`) kwa hivyo haliwezi kughairi utendakazi halisi wa rasimu, na linaruka lango na tumbo. Ni `Merge integrity` pekee bado inaendelea. Kazi ya lango iliyorukwa hubeba jina tofauti la hundi, kwa sababu Mergify husoma `Gate / CI` iliyoruka kama hundi iliyofeli na kupanga PR.
 
 Baada ya msururu, msukumo hauleti PR kila wakati. Toa maoni `@mergifyio queue` juu yake.
-
-Kila risiti ya JSON inabainisha SHA iliyoangaliwa, mtiririko wa kazi na jaribio. CLI inakataa kutolingana kwa checkout/event SHA. Majaribio ya mtiririko wa kazi hufunga uanachama wa sera kwenye orodha `needs` ya kazi ya uamuzi ili njia mpya au iliyoondolewa haiwezi kutoweka kimya kimya. Stakabadhi hufunika mtiririko wao wa kazi, si uchapishaji, utumaji, au mambo ya ndani ya kichanganuzi kilichopo cha ushauri. Kuamilisha majina ya hundi zote mbili katika sheria za tawi ni mabadiliko tofauti ya kiutawala; kuongeza kazi hizi yenyewe hailindi tawi.
 
 ### Orodha ya skanning tuli
 
