@@ -40,6 +40,8 @@ const ERRORS = {
   M365_THROTTLED: [429, "Microsoft 365 Copilot request throttled."],
   M365_OUT_OF_CREDITS: [429, "Microsoft 365 Copilot credits exhausted."],
   M365_FORBIDDEN: [403, "Microsoft 365 Copilot access denied."],
+  // Copilot refused the WebSocket upgrade itself: the sign-in is expired or revoked.
+  M365_UNAUTHORIZED: [401, "Microsoft 365 Copilot rejected the sign-in. Sign in again."],
   // A content-less turn Copilot dropped; the conversation it happened in tends to stay broken.
   M365_INTERNAL_ERROR: [502, "Microsoft 365 Copilot could not complete the turn."],
   // Its safety filter declined this request: a request-scoped provider safety stop.
@@ -249,6 +251,7 @@ class M365Turn {
       this.socket.on("close", this.onClose);
       this.socket.on("open", this.onOpen);
       this.socket.on("message", this.onMessage);
+      this.socket.on("unexpected-response", this.onUpgradeRefused);
       this.options.signal?.addEventListener("abort", this.onAbort, { once: true });
       this.resetIdle();
       this.total = setTimeout(() => this.finish("M365_TIMEOUT"), this.totalMs);
@@ -279,6 +282,7 @@ class M365Turn {
     this.options.signal?.removeEventListener("abort", this.onAbort);
     this.socket?.off("open", this.onOpen);
     this.socket?.off("message", this.onMessage);
+    this.socket?.off("unexpected-response", this.onUpgradeRefused);
     this.pending = "";
     if (!this.socket || this.socket.readyState === 3) {
       this.release();
@@ -331,6 +335,23 @@ class M365Turn {
     this.finish("M365_ABORTED");
   };
   private onError = () => this.finish("M365_SOCKET_ERROR");
+  /**
+   * The server answered the upgrade with an HTTP status instead of switching protocols. ws
+   * reports that as a generic error unless this event is handled, which hid an expired
+   * sign-in behind "connection failed". Only the status and Retry-After are read.
+   */
+  private onUpgradeRefused = (_request: unknown, response: unknown) => {
+    const res = record(response) ? response : {};
+    if (typeof res.resume === "function") (res.resume as () => void).call(response);
+    const status = typeof res.statusCode === "number" ? res.statusCode : 0;
+    if (status === 401 || status === 403) return this.finish("M365_UNAUTHORIZED");
+    if (status === 429) {
+      const headers = record(res.headers) ? res.headers : {};
+      const retry = Number(headers["retry-after"]);
+      return this.finish(new M365TurnError("M365_THROTTLED", { retryAfterSeconds: retry }));
+    }
+    this.finish("M365_HANDSHAKE_ERROR");
+  };
   private onClose = () => {
     this.finish("M365_SOCKET_CLOSED");
     this.release();

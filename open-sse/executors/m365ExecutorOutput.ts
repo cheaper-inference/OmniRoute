@@ -71,11 +71,13 @@ export function m365Failure(error: unknown, model: string) {
   const type =
     status === 400
       ? "invalid_request_error"
-      : status === 403
-        ? "permission_error"
-        : status === 429
-          ? "rate_limit_error"
-          : "upstream_error";
+      : status === 401
+        ? "authentication_error"
+        : status === 403
+          ? "permission_error"
+          : status === 429
+            ? "rate_limit_error"
+            : "upstream_error";
   const body: { error: JsonRecord } = {
     error: {
       message: sanitizeErrorMessage(typed.message),

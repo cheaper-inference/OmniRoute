@@ -159,6 +159,7 @@ const SAFE_PUBLIC_ERROR_IDENTIFIERS = new Set([
   "m365_throttled",
   "m365_throttle_hold",
   "m365_internal_error",
+  "m365_unauthorized",
   "m365_image_invalid",
   "m365_image_rejected",
   "m365_image_upload_failed",

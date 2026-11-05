@@ -221,6 +221,10 @@ standalone IDs follow the public [protocol catalog](https://github.com/cramt/m36
   requested. After content starts, failures are SSE error events, never a successful finish.
   An upstream rewrite that cannot be represented by append-only streaming is an explicit
   stream error; non-streaming and buffered tool responses retain the final text.
+- When Copilot refuses the connection itself, its answer is reported as it is: **401**
+  `m365_unauthorized` for a rejected or expired sign-in (sign in again), **429** with its
+  `Retry-After` for throttling, and a handshake failure otherwise, never a generic
+  connection failure.
 
 ## Image generation
 
