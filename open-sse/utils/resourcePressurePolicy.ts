@@ -278,6 +278,18 @@ export function classifyAdaptiveResourcePressure(
   return maxLevel(best, psiLevel(signals.psi?.fullAvg10 ?? null, thresholds, "psi_full"));
 }
 
+/**
+ * History-aware pressure classification, used by the sampled tracker. Applies the absolute heap
+ * fuse, the heap and cgroup ratios and the PSI levels like the stateless classifier, but a cgroup
+ * total above its `high` mark stays critical only with kernel proof of real throttling
+ * (memory.events counters rising since `previousEvents`, or PSI); without proof it is capped at
+ * high.
+ *
+ * @param signals - the current resource sample
+ * @param thresholds - effective thresholds; a null `heapAbsoluteThresholdMb` disables the fuse
+ * @param previousEvents - memory.events counters from the previous sample, or null on the first
+ * @returns the most severe level any signal reached, with its reason
+ */
 export function classifyAdaptiveResourcePressureWithHistory(
   signals: ResourceSignals,
   thresholds: ResourcePressureThresholds,
