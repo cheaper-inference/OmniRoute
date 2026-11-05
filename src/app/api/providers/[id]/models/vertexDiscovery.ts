@@ -239,6 +239,7 @@ export async function maybeHandleVertexModelDiscovery(
   const discovery = await discoverVertexModelsWithBearer({
     bearerToken: bearerToken as string,
     fetchImpl: vertexFetch(options.proxy),
+    region: toNonEmptyString(asRecord(options.connection?.providerSpecificData).region),
   });
 
   if (discovery.models.length > 0) {

@@ -1,5 +1,6 @@
 import { parseGeminiModelsList } from "@/lib/providerModels/geminiModelsParser";
 import { parseVertexPublisherModels } from "@/lib/providerModels/vertexPublisherModelsParser";
+import { getVertexHost } from "@omniroute/open-sse/config/vertexModels.ts";
 
 const GOOGLE_MODELS_URL = "https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000";
 const VERTEX_PUBLISHER_PAGE_SIZE = 300;
@@ -112,8 +113,10 @@ function readApiKeyConsumerProjectId(data: unknown): string | null {
 async function discoverVertexModels(options: {
   auth: DiscoveryAuth;
   fetchImpl: VertexModelDiscoveryFetch;
+  region?: string | null;
 }): Promise<VertexModelDiscoveryResult> {
   const { auth, fetchImpl } = options;
+  const publisherHost = getVertexHost(options.region);
   const models: unknown[] = [];
   let publisherFailureCount = 0;
 
@@ -145,7 +148,7 @@ async function discoverVertexModels(options: {
     VERTEX_MODEL_GARDEN_PUBLISHERS.map(async (publisher) => {
       const publisherModels: unknown[] = [];
       let pageUrl =
-        `https://aiplatform.googleapis.com/v1beta1/publishers/${publisher}/models` +
+        `https://${publisherHost}/v1beta1/publishers/${publisher}/models` +
         `?pageSize=${VERTEX_PUBLISHER_PAGE_SIZE}`;
       let pageCount = 0;
       const seenTokens = new Set<string>();
@@ -165,7 +168,7 @@ async function discoverVertexModels(options: {
           if (!nextPageToken || seenTokens.has(nextPageToken)) break;
           seenTokens.add(nextPageToken);
           pageUrl =
-            `https://aiplatform.googleapis.com/v1beta1/publishers/${publisher}/models` +
+            `https://${publisherHost}/v1beta1/publishers/${publisher}/models` +
             `?pageSize=${VERTEX_PUBLISHER_PAGE_SIZE}&pageToken=${encodeURIComponent(nextPageToken)}`;
         }
       } catch {
@@ -189,8 +192,11 @@ async function discoverVertexModels(options: {
 export function discoverVertexModelsWithBearer(options: {
   bearerToken: string;
   fetchImpl: VertexModelDiscoveryFetch;
+  /** Connection region; `eu` lists publishers on the EU regional host (#18790). */
+  region?: string | null;
 }): Promise<VertexModelDiscoveryResult> {
   return discoverVertexModels({
+    region: options.region,
     auth: {
       headers: {
         "Content-Type": "application/json",
