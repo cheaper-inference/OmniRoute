@@ -923,6 +923,8 @@
     "batchListTitle": "ब्याचहरू",
     "batchListCount": "{count} ब्याचहरू",
     "batchListRemovingCompleted": "हटाउँदै…",
+    "batchListRemoveCompletedPartial": "ठूलो सङ्ख्यामा ब्याचहरू हटाइयो। बाँकी हटाउन फेरि क्लिक गर्नुहोस्।",
+    "batchListRemoveCompletedFailed": "ब्याचहरू हटाउँदा त्रुटि भयो।",
     "batchListRemoveCompleted": "पूरा भएकाहरू हटाउनुहोस्",
     "batchListTableStatus": "स्थिति",
     "batchListTableId": "ID",

@@ -1000,6 +1000,8 @@
     "batchListTitle": "პაკეტები",
     "batchListCount": "{count} პაკეტი",
     "batchListRemovingCompleted": "მიმდინარეობს წაშლა…",
+    "batchListRemoveCompletedPartial": "პაკეტების დიდი რაოდენობა წაიშალა. დარჩენილების გასასუფთავებლად კვლავ დააწკაპუნეთ.",
+    "batchListRemoveCompletedFailed": "პაკეტების წაშლისას შეცდომა მოხდა.",
     "batchListRemoveCompleted": "დასრულებულების წაშლა",
     "batchListTableStatus": "სტატუსი",
     "batchListTableId": "ID",

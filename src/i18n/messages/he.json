@@ -923,6 +923,8 @@
     "batchListTitle": "אצוות",
     "batchListCount": "{count} אצוות",
     "batchListRemovingCompleted": "מסיר…",
+    "batchListRemoveCompletedPartial": "הוסרו מספר רב של אצוות. יש ללחוץ שוב כדי לנקות את השאר.",
+    "batchListRemoveCompletedFailed": "אירעה שגיאה בעת הסרת האצוות.",
     "batchListRemoveCompleted": "הסרת אצוות שהושלמו",
     "batchListTableStatus": "סטטוס",
     "batchListTableId": "מזהה",

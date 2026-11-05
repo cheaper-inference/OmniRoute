@@ -923,6 +923,8 @@
     "batchListTitle": "バッチ",
     "batchListCount": "{count}件のバッチ",
     "batchListRemovingCompleted": "削除中…",
+    "batchListRemoveCompletedPartial": "多数のバッチを削除しました。残りをクリアするには、もう一度クリックしてください。",
+    "batchListRemoveCompletedFailed": "バッチの削除中にエラーが発生しました。",
     "batchListRemoveCompleted": "完了済みを削除",
     "batchListTableStatus": "ステータス",
     "batchListTableId": "ID",

@@ -923,6 +923,8 @@
     "batchListTitle": "Serije",
     "batchListCount": "{count} serija",
     "batchListRemovingCompleted": "Uklanjanje…",
+    "batchListRemoveCompletedPartial": "Uklonjen je velik broj serija. Kliknite ponovno kako biste uklonili ostatak.",
+    "batchListRemoveCompletedFailed": "Došlo je do pogreške prilikom uklanjanja serija.",
     "batchListRemoveCompleted": "Ukloni završene",
     "batchListTableStatus": "Status",
     "batchListTableId": "ID",

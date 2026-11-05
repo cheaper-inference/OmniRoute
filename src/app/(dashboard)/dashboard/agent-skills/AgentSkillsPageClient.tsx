@@ -11,6 +11,7 @@ import Input from "@/shared/components/Input";
 import { SkillsConceptCard } from "@/shared/components/SkillsConceptCard";
 import { cn } from "@/shared/utils/cn";
 import { matchesSearch } from "@/shared/utils/turkishText";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { CoverageBar } from "./components/CoverageBar";
 import { McpA2aLinksBar } from "./components/McpA2aLinksBar";
 import { SkillCard } from "./components/SkillCard";
@@ -59,6 +60,7 @@ function CoverageBarSkeleton(): JSX.Element {
 export function AgentSkillsPageClient(): JSX.Element {
   const t = useTranslations("agentSkills");
   const tSidebar = useTranslations("sidebar");
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
 
   // State
   const [catalog, setCatalog] = useState<AgentSkill[]>([]);
@@ -150,7 +152,7 @@ export function AgentSkillsPageClient(): JSX.Element {
 
   // ── Generate missing skills ───────────────────────────────────────────────
   const handleGenerate = useCallback(async () => {
-    const confirmed = window.confirm(t("regenerateConfirm"));
+    const confirmed = await requestConfirm({ message: t("regenerateConfirm"), variant: "primary" });
     if (!confirmed) return;
     setGeneratingSkills(true);
     try {
@@ -172,7 +174,7 @@ export function AgentSkillsPageClient(): JSX.Element {
     } finally {
       setGeneratingSkills(false);
     }
-  }, [t]);
+  }, [t, requestConfirm]);
 
   // ── Filtering + search ────────────────────────────────────────────────────
   const localizedCatalog = useMemo(
@@ -323,6 +325,7 @@ export function AgentSkillsPageClient(): JSX.Element {
           />
         </div>
       </div>
+      {confirmDialog}
     </div>
   );
 }

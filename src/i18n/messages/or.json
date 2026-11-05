@@ -923,6 +923,8 @@
     "batchListTitle": "ବ୍ୟାଚ୍ଗୁଡ଼ିକ",
     "batchListCount": "{count}ଟି ବ୍ୟାଚ୍",
     "batchListRemovingCompleted": "ଅପସାରଣ କରାଯାଉଛି…",
+    "batchListRemoveCompletedPartial": "ବହୁ ସଂଖ୍ୟକ ବ୍ୟାଚ୍ ଅପସାରଣ କରାଯାଇଛି। ଅବଶିଷ୍ଟଗୁଡ଼ିକୁ ସଫା କରିବା ପାଇଁ ପୁଣି କ୍ଲିକ୍ କରନ୍ତୁ।",
+    "batchListRemoveCompletedFailed": "ବ୍ୟାଚ୍ଗୁଡ଼ିକୁ ଅପସାରଣ କରିବା ସମୟରେ ଏକ ତ୍ରୁଟି ଘଟିଛି।",
     "batchListRemoveCompleted": "ସମ୍ପୂର୍ଣ୍ଣ ହୋଇଥିବାଗୁଡ଼ିକୁ ଅପସାରଣ କରନ୍ତୁ",
     "batchListTableStatus": "ସ୍ଥିତି",
     "batchListTableId": "ID",

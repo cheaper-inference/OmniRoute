@@ -130,6 +130,7 @@ import { resolveServerErrorMessage } from "@/lib/api/serverErrorMessage";
 import { useTranslations } from "next-intl";
 import { cn } from "@/shared/utils/cn";
 import { strategyBadgeClass } from "./strategyPalette";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 
 const ModelSelectModal = dynamic(() => import("@/shared/components/ModelSelectModal"), {
   ssr: false,
@@ -883,6 +884,7 @@ function CombosPageContent() {
   const [testingCombo, setTestingCombo] = useState(null);
   const { copied, copy } = useCopyToClipboard();
   const notify = useNotificationStore();
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   const [proxyTargetCombo, setProxyTargetCombo] = useState(null);
   const [proxyConfig, setProxyConfig] = useState(null);
   const { comboProxyAssignedIds, fetchComboProxyAssignments } = useComboProxyAssignments();
@@ -1057,7 +1059,7 @@ function CombosPageContent() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm(t("deleteConfirm"))) return;
+    if (!(await requestConfirm(t("deleteConfirm")))) return;
     try {
       const res = await fetch(`/api/combos/${id}`, { method: "DELETE" });
       if (res.ok) {
@@ -1130,6 +1132,7 @@ function CombosPageContent() {
         setTestingCombo(null);
       },
       notify,
+      requestConfirm,
       t,
     });
 
@@ -1568,6 +1571,7 @@ function CombosPageContent() {
           levelLabel={proxyTargetCombo.name}
         />
       )}
+      {confirmDialog}
     </div>
   );
 }

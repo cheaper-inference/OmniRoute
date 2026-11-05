@@ -1000,6 +1000,8 @@
     "batchListTitle": "批处理",
     "batchListCount": "{count} 个批处理",
     "batchListRemovingCompleted": "移除中…",
+    "batchListRemoveCompletedPartial": "已移除大量批次。再次点击以清除其余批次。",
+    "batchListRemoveCompletedFailed": "移除批次时发生错误。",
     "batchListRemoveCompleted": "移除已完成",
     "batchListTableStatus": "状态",
     "batchListTableId": "ID",

@@ -923,6 +923,8 @@
     "batchListTitle": "Mga batch",
     "batchListCount": "{count} batch",
     "batchListRemovingCompleted": "Inaalis…",
+    "batchListRemoveCompletedPartial": "Maraming batch ang inalis. I-click muli upang alisin ang natitira.",
+    "batchListRemoveCompletedFailed": "Nagkaroon ng error habang nag-aalis ng mga batch.",
     "batchListRemoveCompleted": "Alisin ang mga nakumpleto",
     "batchListTableStatus": "Katayuan",
     "batchListTableId": "ID",

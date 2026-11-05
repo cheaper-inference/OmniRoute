@@ -1000,6 +1000,8 @@
     "batchListTitle": "Lotes",
     "batchListCount": "{count} lotes",
     "batchListRemovingCompleted": "A remover…",
+    "batchListRemoveCompletedPartial": "Foi removido um grande número de lotes. Clique novamente para limpar os restantes.",
+    "batchListRemoveCompletedFailed": "Ocorreu um erro ao remover os lotes.",
     "batchListRemoveCompleted": "Remover concluídos",
     "batchListTableStatus": "Estado",
     "batchListTableId": "ID",

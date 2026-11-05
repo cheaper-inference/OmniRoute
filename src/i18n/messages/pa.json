@@ -1000,6 +1000,8 @@
     "batchListTitle": "ਬੈਚ",
     "batchListCount": "{count} ਬੈਚ",
     "batchListRemovingCompleted": "ਹਟਾਇਆ ਜਾ ਰਿਹਾ ਹੈ…",
+    "batchListRemoveCompletedPartial": "ਵੱਡੀ ਗਿਣਤੀ ਵਿੱਚ ਬੈਚ ਹਟਾ ਦਿੱਤੇ ਗਏ ਹਨ। ਬਾਕੀ ਨੂੰ ਸਾਫ਼ ਕਰਨ ਲਈ ਦੁਬਾਰਾ ਕਲਿੱਕ ਕਰੋ।",
+    "batchListRemoveCompletedFailed": "ਬੈਚ ਹਟਾਉਂਦੇ ਸਮੇਂ ਇੱਕ ਗਲਤੀ ਆਈ।",
     "batchListRemoveCompleted": "ਪੂਰੇ ਹੋਏ ਬੈਚ ਹਟਾਓ",
     "batchListTableStatus": "ਸਥਿਤੀ",
     "batchListTableId": "ID",

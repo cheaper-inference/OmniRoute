@@ -923,6 +923,8 @@
     "batchListTitle": "बॅचेस",
     "batchListCount": "{count} बॅचेस",
     "batchListRemovingCompleted": "काढून टाकत आहे…",
+    "batchListRemoveCompletedPartial": "मोठ्या संख्येने बॅचेस काढून टाकल्या. उर्वरित बॅचेस साफ करण्यासाठी पुन्हा क्लिक करा.",
+    "batchListRemoveCompletedFailed": "बॅचेस काढून टाकताना एक त्रुटी आली.",
     "batchListRemoveCompleted": "पूर्ण झालेले काढून टाका",
     "batchListTableStatus": "स्थिती",
     "batchListTableId": "ID",
