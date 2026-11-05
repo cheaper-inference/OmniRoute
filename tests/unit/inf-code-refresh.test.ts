@@ -7,7 +7,7 @@ import path from "node:path";
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-inf-code-refresh-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
 
-const { refreshInfCodeToken } =
+const { refreshInfCodeToken, infCodeJwtExpiresIn } =
   await import("../../open-sse/services/tokenRefresh/providers/infcode.ts");
 const { extractOAuthErrorCode, isUnrecoverableRefreshError } =
   await import("../../open-sse/services/tokenRefresh/shared.ts");
@@ -91,6 +91,75 @@ test("refreshInfCodeToken treats transient 5xx as retryable (null, not unrecover
   } finally {
     globalThis.fetch = originalFetch;
   }
+});
+
+/** Build an unsigned JWT-shaped token (only the payload matters here). */
+function makeJwt(payload: Record<string, unknown>): string {
+  const part = (value: unknown) => Buffer.from(JSON.stringify(value)).toString("base64url");
+  return `${part({ alg: "HS256", typ: "JWT" })}.${part(payload)}.signature`;
+}
+
+test("derives expiresIn from the access-token JWT when the refresh response omits it", async () => {
+  // The live refresh endpoint answers with only { access_token, refresh_token };
+  // without the JWT fallback the stored expiry is never rewritten and Provider
+  // Limits shows a red "Token expired" badge on a live connection.
+  const originalFetch = globalThis.fetch;
+  const exp = Math.floor(Date.now() / 1000) + 7200;
+  globalThis.fetch = async () =>
+    makeResponse(200, {
+      access_token: makeJwt({ exp, client_id: "infcode" }),
+      refresh_token: "new-refresh",
+    });
+  try {
+    const result = await refreshInfCodeToken("old-refresh", noopLog);
+    assert.ok(result, "result must be returned");
+    assert.ok(
+      result.expiresIn > 7100 && result.expiresIn <= 7200,
+      `expiresIn should come from the JWT exp claim, got ${result.expiresIn}`
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("keeps an explicit expires_in when the token endpoint sends one", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () =>
+    makeResponse(200, {
+      access_token: makeJwt({ exp: Math.floor(Date.now() / 1000) + 60 }),
+      refresh_token: "new-refresh",
+      expires_in: "1800",
+    });
+  try {
+    const result = await refreshInfCodeToken("old-refresh", noopLog);
+    assert.equal(result.expiresIn, 1800);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("leaves expiresIn undefined for an opaque token with no expires_in", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () =>
+    makeResponse(200, { access_token: "opaque-token", refresh_token: "new-refresh" });
+  try {
+    const result = await refreshInfCodeToken("old-refresh", noopLog);
+    assert.equal(result.expiresIn, undefined);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("infCodeJwtExpiresIn reads the exp claim and rejects unusable tokens", () => {
+  const nowMs = 1_800_000_000_000; // fixed clock
+  const nowSeconds = nowMs / 1000;
+
+  assert.equal(infCodeJwtExpiresIn(makeJwt({ exp: nowSeconds + 7200 }), nowMs), 7200);
+  assert.equal(infCodeJwtExpiresIn(makeJwt({ exp: nowSeconds - 60 }), nowMs), undefined);
+  assert.equal(infCodeJwtExpiresIn(makeJwt({ sub: "no-exp" }), nowMs), undefined);
+  assert.equal(infCodeJwtExpiresIn("not-a-jwt", nowMs), undefined);
+  assert.equal(infCodeJwtExpiresIn("a.!!!not-base64!!!.c", nowMs), undefined);
+  assert.equal(infCodeJwtExpiresIn(undefined, nowMs), undefined);
 });
 
 test("extractOAuthErrorCode recognizes the InfCode 401 envelope shape", () => {

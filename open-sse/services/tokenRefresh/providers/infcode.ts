@@ -16,6 +16,54 @@ import { runWithProxyContext } from "../../../utils/proxyFetch.ts";
 import { extractOAuthErrorCode } from "../shared.ts";
 
 /**
+ * Remaining lifetime (seconds) of an InfCode access token, read from the JWT
+ * `exp` claim.
+ *
+ * The refresh endpoint answers with ONLY { access_token, refresh_token } — no
+ * `expires_in` (verified live 2026-11-05). The refresh writer
+ * (`src/lib/usage/providerLimits/credentialRefresh.ts`) only rewrites
+ * `expiresAt`/`tokenExpiresAt` when the result carries one of those, so
+ * without this the connection keeps the PREVIOUS expiry forever:
+ *
+ *   - Provider Limits renders a red "Token expired" badge on a live
+ *     connection (the badge is informational and reads the stored timestamp);
+ *   - `needsRefresh()` keeps seeing a past expiry, so every quota sync
+ *     refreshes again — rotating the single-use refresh token
+ *     (rotate_refresh: true) on every sync.
+ *
+ * Expiry comes from our own token, fetched over TLS from the provider, so the
+ * claim is metadata here — not an authorization decision — and does not need
+ * signature verification. Returns undefined for non-JWT or already-expired
+ * tokens so the caller keeps its previous behaviour.
+ */
+export function infCodeJwtExpiresIn(
+  accessToken: unknown,
+  nowMs: number = Date.now()
+): number | undefined {
+  if (typeof accessToken !== "string") return undefined;
+  const parts = accessToken.split(".");
+  if (parts.length < 2 || !parts[1]) return undefined;
+
+  try {
+    const payload = JSON.parse(Buffer.from(parts[1], "base64url").toString("utf8"));
+    const exp = Number((payload as { exp?: unknown } | null)?.exp);
+    if (!Number.isFinite(exp)) return undefined;
+    const remaining = Math.floor(exp - nowMs / 1000);
+    return remaining > 0 ? remaining : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** Positive whole seconds, or undefined for anything the token endpoint omits. */
+function normalizeExpiresIn(value: unknown): number | undefined {
+  const seconds = typeof value === "string" ? Number(value) : value;
+  return typeof seconds === "number" && Number.isFinite(seconds) && seconds > 0
+    ? Math.floor(seconds)
+    : undefined;
+}
+
+/**
  * Specialized refresh for InfCode OAuth tokens.
  */
 export async function refreshInfCodeToken(refreshToken, log, proxyConfig: unknown = null) {
@@ -65,16 +113,22 @@ export async function refreshInfCodeToken(refreshToken, log, proxyConfig: unknow
 
     const tokens = await response.json();
 
+    // The endpoint normally omits expires_in; fall back to the access token's
+    // own exp claim so the stored expiry tracks the credential (see
+    // infCodeJwtExpiresIn above).
+    const expiresIn =
+      normalizeExpiresIn(tokens.expires_in) ?? infCodeJwtExpiresIn(tokens.access_token);
+
     log?.info?.("TOKEN_REFRESH", "Successfully refreshed InfCode token", {
       hasNewAccessToken: !!tokens.access_token,
       hasNewRefreshToken: !!tokens.refresh_token,
-      expiresIn: tokens.expires_in,
+      expiresIn,
     });
 
     return {
       accessToken: tokens.access_token,
       refreshToken: tokens.refresh_token || refreshToken,
-      expiresIn: tokens.expires_in,
+      expiresIn,
     };
   } catch (error) {
     log?.error?.("TOKEN_REFRESH", `Network error refreshing InfCode token: ${error.message}`);
