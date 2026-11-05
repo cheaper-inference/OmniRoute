@@ -306,17 +306,19 @@ export default function ProviderLimits({
     };
   }, []);
 
-  const fetchConnections = useCallback(async () => {
+  const fetchConnections = useCallback(async (signal?: AbortSignal) => {
     try {
       const list = await fetchDashboardConnections(PROVIDER_LIMITS_FETCH_TIMEOUT_MS, {
         method: "GET",
         cache: "no-store",
+        signal,
       });
+      if (signal?.aborted) return null;
       setAuthRequired(false);
       setConnections(list);
       return list;
     } catch (error) {
-      setAuthRequired(error instanceof ConnectionsAuthError);
+      if (!signal?.aborted) setAuthRequired(error instanceof ConnectionsAuthError);
       return null;
     }
   }, []);
@@ -395,12 +397,13 @@ export default function ProviderLimits({
     []
   );
 
-  const fetchCachedProviderLimits = useCallback(async () => {
+  const fetchCachedProviderLimits = useCallback(async (signal?: AbortSignal) => {
     try {
       const response = await fetchWithTimeout("/api/usage/provider-limits", {
         timeoutMs: PROVIDER_LIMITS_FETCH_TIMEOUT_MS,
         method: "GET",
         cache: "no-store",
+        signal,
       });
       if (!response.ok) throw new Error("Failed");
       const data = await response.json();

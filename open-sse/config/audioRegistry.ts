@@ -84,6 +84,18 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
     ],
   },
 
+  mistral: {
+    id: "mistral",
+    baseUrl: "https://api.mistral.ai/v1/audio/transcriptions",
+    authType: "apikey",
+    authHeader: "bearer",
+    models: [
+      { id: "voxtral-mini-latest", name: "Voxtral Mini Transcribe 2" },
+      { id: "voxtral-mini-2602", name: "Voxtral Mini Transcribe 2" },
+      { id: "voxtral-mini-transcribe-3", name: "Voxtral Mini Transcribe 3" },
+    ],
+  },
+
   openrouter: {
     id: "openrouter",
     baseUrl: "https://openrouter.ai/api/v1/audio/transcriptions",
@@ -394,6 +406,10 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
       { id: "gpt-4o-mini-tts", name: "GPT-4o Mini TTS" },
     ],
   },
+
+  // Mistral is deliberately absent. Its /v1/audio/speech takes `voice_id` and answers
+  // JSON `{ "audio_data": "<base64>" }`, while the default path below sends `voice` and
+  // streams the body back as audio. Listing it needs a dedicated format handler.
 
   hyperbolic: {
     id: "hyperbolic",
