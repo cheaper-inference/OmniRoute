@@ -286,6 +286,8 @@ _By commits in `c754707d0e..c34370bc69`, author identities consolidated via `.ma
 
 ### 🐛 Bug Fixes
 
+- **test(codex):** drain asynchronous call-log writes before removing the reasoning-discovery test database directory, preventing teardown races without changing runtime behavior (#18849).
+
 - **test(compression):** align the safe Lite pipeline analytics assertion with the release's configured-mode reporting while preserving stacked execution coverage (#18849).
 
 - **fix(authz):** with login disabled (`requireLogin=false`, the mode `omniroute setup` and the onboarding "skip" write), `/api/cli-tools/apply`, `/api/cli-tools/guide-settings`, `/api/cli-tools/hermes-agent-settings`, `/api/cli-tools/backups`, every `/api/log-export` route and `/api/restart` were reachable without authentication, unlike their already-protected siblings (`/api/cli-tools/codex-profiles`, `/api/logs/export`, `/api/shutdown`). They rewrite the operator's host CLI config, send call logs to a configured destination, or restart the server, so they now require a dashboard session or a manage-scoped API key in every mode. ([#18276](https://github.com/cheaper-inference/OmniRoute/pull/18276))
