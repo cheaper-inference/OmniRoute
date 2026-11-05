@@ -4,3 +4,4 @@
 - Keep the Codex pipeline fingerprint regression aligned with native wire fidelity: explicitly supplied instructions/include retain their values and canonical order, while omitted fields stay absent. (@KiaroSama)
 - Keep Fal transport and compatibility helpers inside the engine, inject app-owned schema storage from routes, and translate the native controls across all supported locales. (@KiaroSama)
 - Make relay throttle tests deterministic at minute boundaries while retaining explicit coverage of the next-window reset. (@KiaroSama)
+- Preserve safe Lite pipeline and reported analytics-mode assertions when synchronizing updated release tests. (@KiaroSama)

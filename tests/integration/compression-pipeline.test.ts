@@ -45,6 +45,7 @@ describe("Full Compression Pipeline", () => {
     // Without a lossy opt-in, Lite resolves to a safe stacked pipeline (#18818).
     const plan = selectCompressionPlan(baseConfig, null, 100);
     assert.equal(plan.mode, "stacked");
+    assert.equal(plan.reportedMode, "lite");
     assert.deepEqual(plan.stackedPipeline, safeLitePipeline);
 
     // Step 2: Apply the resolved pipeline, including its safety options.
@@ -90,6 +91,7 @@ describe("Full Compression Pipeline", () => {
 
     const plan = selectCompressionPlan(config, "my-combo", 100);
     assert.equal(plan.mode, "stacked");
+    assert.equal(plan.reportedMode, "lite");
     assert.equal(plan.source, "routing-override");
     assert.deepEqual(plan.stackedPipeline, safeLitePipeline);
 
@@ -121,6 +123,7 @@ describe("Full Compression Pipeline", () => {
     assert.equal(mode2, "stacked");
     const plan = selectCompressionPlan(config, null, 100);
     assert.equal(plan.source, "auto-trigger");
+    assert.equal(plan.reportedMode, "lite");
     assert.deepEqual(plan.stackedPipeline, safeLitePipeline);
   });
 
