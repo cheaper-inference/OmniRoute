@@ -1112,7 +1112,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "在 OpenCode Zen/Go 请求中发送 OpenCode v2 CLI 客户端指纹：opencode/latest/<2.x>/cli User-Agent 和 x-opencode-client cli；在免费套餐请求中发送 v2 会话标头和 v2 CLI read/shell 工具架构，且不发送 tool_choice \"none\"。默认关闭：每个 OpenCode 请求均保持当前身份、标头和请求正文不变。",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "当自动组合的候选池在工具调用预筛选运行前已为空时（所有目标都因冷却、锁定或耗尽而被跳过），返回 503 no_eligible_targets，而不是旧版的 400“没有目标支持工具调用” capability_mismatch。默认关闭：候选池为空时仍返回旧版 400。",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "强制执行可信模型端点标签（由提供者目录声明、根据专用模型 ID 推断，或由运维人员设置）：对于发送到模型不支持的端点的请求，在分派前返回 HTTP 400 并拒绝，适用于 /v1/chat/completions、/v1/embeddings、/v1/rerank、/v1/images/generations、/v1/videos/generations、/v1/music/generations 和 /v1/audio/*；从 /v1/models 中隐藏其带标签端点没有 OmniRoute 适配器的模型；对于此类模型，控制面板模型测试返回 422。默认关闭：端点标签仍仅供参考，请求将与之前完全相同地分派。",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "对于普通的 Anthropic 兼容中继，将对话中途的 system 轮次保留在消息列表中，而不是将其移至顶层 system 提示词，这样缓存的提示词前缀就能在各轮次间保持稳定。仅当客户端自身发送了 mid-conversation-system-2026-04-07 beta 时适用。默认关闭：与之前完全相同，每个 system 轮次都会被移入 system 提示词，因为不支持该 beta 的中继会拒绝消息列表中的 system 轮次。",
   "featureFlagModelsDevEffortTiersEnabledDescription": "当运维方覆盖配置和提供者注册表均未声明推理强度层级时，使用 models.dev 发布的层级；仅保留已知的强度级别，并将声明的空层级列表视为“无层级”。默认关闭：模型目录和解析后的推理强度层级将与之前完全一致。",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "让 auto/* 请求使用已解析的模型能力（视觉、推理、思考）和观测到的质量评分构建候选池，这些数据通过一次批量读取获得。默认关闭：请求时的候选权重与之前完全相同。开启后：这些信号会计入快照权重，因此候选权重和选择可能发生变化。",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "允许凭据健康扫描重新测试由网关自动关闭的连接（每个连接最多每 6 小时测试一次，每轮扫描测试 5 个），并在重新测试通过后重新启用该连接。默认关闭：此类连接会保持关闭状态，直到操作员采取措施。操作员禁用和永久封禁的连接不会被重新测试。",
@@ -2016,7 +2015,16 @@
     "unpricedUsageModelStats": "{requests, plural, other {# 次请求}}，{keys, plural, other {# 个受限密钥}}",
     "unpricedUsageMore": "…另有 {count} 个",
     "unpricedUsageConfigure": "配置定价",
-    "unpricedUsageDismiss": "关闭"
+    "unpricedUsageDismiss": "关闭",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "分析",
@@ -6341,6 +6349,10 @@
     "allowCodexPaidCreditsDescription": "允许此账户在订阅配额达到上限后使用付费额度。要求 OpenAI 报告有可用额度；可能产生费用。Spark 限额和上游冷却仍然适用。即使配额预检关闭也会检查额度可用性，除非本地配额过滤完全关闭（配额预检和限额策略都关闭）。",
     "disableCoolingDescription": "跳过瞬态冷却，以便此连接在发生可恢复错误后仍符合条件（被禁/过期等终态仍适用）。",
     "disableCoolingLabel": "禁用此连接的冷却",
+    "keepMidConversationSystemDescription": "将对话中发送的系统消息保留在消息列表中，而不是将其移至顶级系统提示中，以便提示缓存不断命中。仅当该上游接受消息内的角色“system”时才启用（否则它会回答 400）。",
+    "keepMidConversationSystemLabel": "将对话中的系统消息保留在适当的位置",
+    "requireUserLastMessageDescription": "对于拒绝辅助预填充的上游：在发送之前删除尾随辅助轮（无工具使用）。该模型可能会重新生成其先前的答案。",
+    "requireUserLastMessageLabel": "要求对话以用户消息结束",
     "bulkPasteAdded": "{count, plural, one {已添加 1 个 key} other {已添加 # 个 key}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {已跳过 1 个重复项} other {已跳过 # 个重复项}}",
     "bulkPasteHint": "每行粘贴一个 API 密钥。空行会被忽略，重复密钥会被跳过。",
@@ -6440,6 +6452,9 @@
     "localProviders": "本地 Provider",
     "maxConcurrentWholeNumberError": "最大并发必须是整数",
     "m365TierLabel": "Copilot 层级",
+    "m365RefreshTokenLabel": "刷新令牌（可选）",
+    "m365RefreshTokenHint": "用于自动刷新Microsoft 365 访问令牌。",
+    "m365RefreshTokenEditHint": "留空以保留现有令牌。粘贴新令牌来替换它。",
     "m365TierHint": "选择此连接使用的 Microsoft 365 Copilot 界面。Individual 是默认的消费级 BizChat；Education 和 Enterprise (work) 会加入其租户界面。",
     "m365TierIndividualOption": "个人 (默认)",
     "m365TierEduOption": "教育",
@@ -7174,6 +7189,7 @@
     "proxySubTabsAria": "代理设置分区",
     "requestBodyLimitTitle": "请求体大小限制",
     "requestBodyLimitDescription": "解析请求体前允许的最大 API 载荷大小。专用上传路由仍至少保留其内置的 100 MB 限制。",
+    "requestBodyLimitChatHint": "在此保存限制之前，Chat Completions 和 Responses 最多接受 50 MB。保存的限制也适用于这两个 API，无论该限制更低还是更高。",
     "requestBodyLimitInputLabel": "请求体限制（MB）",
     "requestBodyLimitEmptyError": "请输入 MB 限制值",
     "requestBodyLimitWholeNumberError": "请使用整数",
@@ -12359,7 +12375,9 @@
       "failedTitle": "所有 {count} 次尝试均失败",
       "failed": "失败",
       "pinnedTitle": "通过上下文缓存会话固定选择的模型",
-      "pinned": "固定"
+      "pinned": "固定",
+      "recoveredAttemptsTitle": "请求经过 {count} 次尝试后恢复",
+      "latestOutcomeFailed": "最近一次请求结果失败"
     },
     "attempts": "尝试次数",
     "detail": {
@@ -12461,13 +12479,20 @@
       "continuesFromParent": "从父项继续",
       "continuesFrom": "从 {id} 继续",
       "viewConversation": "查看对话",
-      "openConversation": "打开对话 {id}"
+      "openConversation": "打开对话 {id}",
+      "omittedHttpAttempts": "未保留 {count} 次 HTTP 发送",
+      "noHttpResponse": "未观察到 HTTP 响应",
+      "transportError": "传输错误"
     },
     "tableLabel": "请求日志",
     "throughputPostFirstToken": "首个令牌后",
     "throughputEndToEnd": "端到端",
     "throughputRate": "{value} 个令牌/秒",
-    "throughputExplanation": "两种速率均使用输出令牌数和推理令牌数中的较大值。首个令牌后速率会排除有效的 TTFT；否则使用完整时长。端到端速率始终使用完整时长。缓冲响应可能具有较高的突发传输速率，但这并不意味着模型生成速度更快。"
+    "throughputExplanation": "两种速率均使用输出令牌数和推理令牌数中的较大值。首个令牌后速率会排除有效的 TTFT；否则使用完整时长。端到端速率始终使用完整时长。缓冲响应可能具有较高的突发传输速率，但这并不意味着模型生成速度更快。",
+    "omittedHttpAttempts": "未保留 {count} 次 HTTP 发送",
+    "upstreamStatus": "上游服务器 {status}",
+    "noHttpResponse": "未观察到 HTTP 响应",
+    "transportError": "传输错误"
   },
   "proxyLogger": {
     "filterAll": "全部",
@@ -14234,6 +14259,14 @@
         "label": "共享出口池排序",
         "description": "对按出口地址配额的提供者，把与近期被拒成员观测到相同出口地址的池成员排在健康成员之后。只调顺序，绝不排除。依赖 PROXY_SKIP_RECENTLY_FAILED 提供它读取的拒绝信号。默认关闭：选择顺序与纯轮换完全一致。"
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "模型范围的配额拒绝",
+        "description": "仅将opencode配额 429 应用于命中它的模型，因此同一出口继续为其他模型提供服务，并且仅在该模型成功时才清除它。没有模型（池轮换、停放和重播、管理员可见性、选择器触发器、健康扫描）的消费者仍然可以看到它。需要PROXY_SKIP_RECENTLY_FAILED，这会产生拒绝。默认关闭：一个型号的配额 429 为每个型号预留出口。"
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "代理获取：严格的POST重放",
+        "description": "对于非幂等请求（POST、 PUT、 PATCH、 DELETE），仅当错误证明未发送任何内容时，才会在传输错误（新鲜套接字、代理回退、本机回退）后重新发送： ECONNREFUSED、 ENOTFOUND、 EAI_AGAIN、 ENETUNREACH或连接超时。写入后的套接字错误可能意味着上游接受了请求，因此重新发送可能会生成两次并计费。默认关闭：在任何传输错误时都会重新发送一次可重播主体，这也会恢复陈旧的池化套接字。"
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "轮换归因日志",
         "description": "opencode 轮换记录由哪个账户服务或被跳过（仅脱敏 id，绝不记录完整账户 id），并把代理日志条目关联到其请求，便于运维区分被跳过的账户和未使用的账户。默认关闭：不写额外日志行，不写额外列。"
@@ -14285,6 +14318,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 池重选",
         "description": "对 OpenCode 多账户轮换，在环境池上下文下，无代理账户从按出口配额的提供者收到 429 后，向连接池请求另一个成员做下次尝试，而不是重试同一出口地址。只排序，不排除：池耗尽时保持现状。默认关闭：每个 429 都轮换到下一账户，与之前一致。"
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode免费层出口探测器",
+        "description": "对于OpenCode执行器，当代理请求被应答 403 或 451 FreeTierError并且观察到的工具重试失败或不适用时，通过不同的代理（另一个帐户代理或另一个池成员，从不直接连接）发送一次请求。仅当该探测回答 200 时，才是在代理拒绝存储器中预留的第一个出口，并提供探测响应；当双方都拒绝时，则返回最初的拒绝并且不记录任何内容。相同的拒绝文本涵盖了标记的出口IP和拒绝的请求形状，因此探测器通过证据将它们区分开。默认关闭：拒绝原样返回。"
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 客户端指纹",
@@ -14465,6 +14502,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "组合：遇内容策略拒绝即停",
         "description": "当组合目标返回精确的内容策略拒绝（code 或 type 为 cyber_policy / content_policy_violation）时，停止组合并返回该拒绝，即使剩余目标是不同模型，不再前进到下一目标。默认关闭：该拒绝不冷却账户也不触发提供者断路器，组合与之前一样前进到下一目标。"
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "响应：仅通过传输保持活动状态",
+        "description": "将响应 keepalives 作为空行而不是response.in_progress事件发送，因此合成快照永远无法替代官方SDK中的真实响应。空行不会调度SSE事件，因此仅在事件发生时重置的客户端看门狗在长时间静默阶段不会重置。默认关闭：计时器发送规范有效的response.in_progress事件。"
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "冷却重试：跳过 403/410 拒绝",

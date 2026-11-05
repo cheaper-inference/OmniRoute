@@ -1,3 +1,4 @@
+import type { HttpAttemptSelection } from "../../utils/providerHttpAttempts.ts";
 import {
   DEFAULT_STREAM_ACTIVE_TIMEOUT_MS,
   EXECUTOR_CONTRACT_VIOLATION_CODE,
@@ -274,6 +275,7 @@ export function normalizeExecutorResult(result: unknown): {
   /** Wire model id the executor actually sent upstream (undefined if unknown). */
   model?: unknown;
   upstreamDiagnostic?: Record<string, unknown>;
+  upstreamHttpSelection?: HttpAttemptSelection | null;
 } {
   if (isResponseLike(result)) {
     return { response: result, url: "", headers: {}, transformedBody: null };
@@ -294,6 +296,7 @@ export function normalizeExecutorResult(result: unknown): {
     transport?: string;
     model?: unknown;
     upstreamDiagnostic?: Record<string, unknown>;
+    upstreamHttpSelection?: HttpAttemptSelection | null;
   };
   return {
     response: normalized.response,
@@ -306,6 +309,7 @@ export function normalizeExecutorResult(result: unknown): {
     // describes so a later retry/recovery/fallback that replaces the response also
     // replaces (or clears) the diagnostic instead of mislabelling the new one.
     upstreamDiagnostic: normalized.upstreamDiagnostic,
+    upstreamHttpSelection: normalized.upstreamHttpSelection ?? null,
   };
 }
 

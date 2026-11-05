@@ -1035,7 +1035,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "Wysyłaj dane identyfikacyjne klienta OpenCode v2 CLI w żądaniach OpenCode Zen/Go: User-Agent opencode/latest/<2.x>/cli oraz x-opencode-client cli, a w żądaniach warstwy bezpłatnej — nagłówki sesji v2, schematy narzędzi read/shell interfejsu CLI v2 i bez tool_choice \"none\". Domyślnie wyłączone: każde żądanie OpenCode zachowuje obecną tożsamość, nagłówki i treść bez zmian.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Gdy pula kandydatów automatycznej kombinacji jest już pusta przed uruchomieniem filtra wstępnego wywoływania narzędzi (każdy cel został pominięty z powodu okresów karencji, blokad lub wyczerpania), zwróć 503 no_eligible_targets zamiast starszego błędu 400 „No target supports tool calling” capability_mismatch. Domyślnie wyłączone: w przypadku pustej puli nadal zwracany jest starszy błąd 400.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Wymuszaj zaufane tagi endpointów modeli (zadeklarowane w katalogu dostawcy, wywnioskowane na podstawie identyfikatora modelu specjalistycznego lub ustawione przez operatora): odrzucaj z kodem HTTP 400 przed przekazaniem żądania wysłane do endpointu, którego model nie obsługuje, na ścieżkach /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations i /v1/audio/*; ukrywaj w /v1/models modele, dla których otagowanych endpointów nie ma adaptera OmniRoute; oraz zwracaj kod 422 podczas testu modelu w panelu dla takich modeli. Domyślnie wyłączone: tagi endpointów pozostają wyłącznie informacyjne, a żądania są przekazywane dokładnie tak jak dotychczas.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "W przypadku zwykłych przekaźników zgodnych z anthropic zachowuj systemowe komunikaty w środku konwersacji na liście wiadomości, zamiast przenosić je do systemowego promptu najwyższego poziomu, dzięki czemu buforowany prefiks promptu pozostaje stabilny między turami. Ma zastosowanie tylko wtedy, gdy klient sam wysłał wersję beta mid-conversation-system-2026-04-07. Domyślnie wyłączone: każdy komunikat systemowy jest przenoszony do promptu systemowego dokładnie tak jak wcześniej, ponieważ przekaźniki bez tej wersji beta odrzucają komunikaty systemowe na liście wiadomości.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Używaj poziomów intensywności rozumowania publikowanych przez models.dev, gdy nie określono ich ani w nadpisaniu operatora, ani w rejestrze dostawcy. Zachowuj wyłącznie znane poziomy intensywności, a pustą zadeklarowaną listę poziomów traktuj jako „brak poziomów”. Domyślnie wyłączone: katalog modeli i wynikowe poziomy intensywności pozostają dokładnie takie jak wcześniej.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "Pozwala żądaniom auto/* budować pulę kandydatów z rozwiązanymi możliwościami modeli (wizja, rozumowanie, myślenie) i zaobserwowanymi ocenami jakości, wczytanymi jednym zbiorczym odczytem. Domyślnie wyłączone: wagi kandydatów w momencie żądania pozostają dokładnie takie jak wcześniej. Włączone: te sygnały trafiają do wag migawki, więc wagi kandydatów i wybór mogą się zmienić.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Zezwól, aby kontrola stanu danych uwierzytelniających ponownie testowała połączenia automatycznie wyłączone przez bramę (każde najwyżej raz na 6 godzin, po 5 w ramach jednej kontroli) i ponownie włączała połączenie, jeśli test zakończy się pomyślnie. Domyślnie wyłączone: takie połączenia pozostają wyłączone do czasu interwencji operatora. Połączenia wyłączone przez operatora i trwale zablokowane nigdy nie są ponownie testowane.",
@@ -1939,7 +1938,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# żądanie} few {# żądania} many {# żądań} other {# żądań}}, {keys, plural, one {# klucz z limitem} few {# klucze z limitem} many {# kluczy z limitem} other {# kluczy z limitem}}",
     "unpricedUsageMore": "…i jeszcze {count} więcej",
     "unpricedUsageConfigure": "Skonfiguruj ceny",
-    "unpricedUsageDismiss": "Zamknij"
+    "unpricedUsageDismiss": "Zamknij",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analityka",
@@ -6264,6 +6272,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Pomiń tymczasowy cooldown, aby to połączenie pozostało kwalifikowalne nawet po błędach podlegających naprawie (stany terminalne, takie jak banned/expired, nadal obowiązują).",
     "disableCoolingLabel": "Wyłącz cooldown dla tego połączenia",
+    "keepMidConversationSystemDescription": "Pozostaw wiadomości systemowe wysłane w trakcie rozmowy na liście wiadomości, zamiast przenosić je do monitu systemowego najwyższego poziomu, dzięki czemu pamięć podręczna podpowiedzi będzie trafiać na zmianę. Włącz tylko wtedy, gdy ten upstream akceptuje rolę „systemu” w wiadomościach (w przeciwnym razie odpowiada 400).",
+    "keepMidConversationSystemLabel": "Przechowuj wiadomości systemowe w trakcie rozmowy na swoim miejscu",
+    "requireUserLastMessageDescription": "W przypadku upstreamów, które odrzucają wstępne wypełnienie asystenta: upuść końcowe zwroty asystenta (bez użycia narzędzia) przed wysłaniem. Model może zregenerować swoją poprzednią odpowiedź.",
+    "requireUserLastMessageLabel": "Wymagaj, aby rozmowa kończyła się wiadomością dla użytkownika",
     "bulkPasteAdded": "{count, plural, one {Dodano 1 klucz} other {Dodano # kluczy}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Pominięto 1 duplikat} other {Pominięto # duplikatów}}",
     "bulkPasteHint": "Wklej jeden klucz API w wierszu. Puste linie są ignorowane, a zduplikowane klucze są pomijane.",
@@ -6363,6 +6375,9 @@
     "localProviders": "Dostawcy lokalni",
     "maxConcurrentWholeNumberError": "Błąd: maksymalna współbieżność musi być liczbą całkowitą",
     "m365TierLabel": "Klasa usług (tier) Copilot",
+    "m365RefreshTokenLabel": "Odśwież token (opcjonalnie)",
+    "m365RefreshTokenHint": "Służy do automatycznego odświeżania tokena dostępu Microsoft 365.",
+    "m365RefreshTokenEditHint": "Pozostaw puste, aby zachować istniejący token. Wklej nowy token, aby go zastąpić.",
     "m365TierHint": "Wybierz obszar (surface) Microsoft 365 Copilot, którego ma używać to połączenie. Individual to domyślny konsumencki BizChat; Education oraz Enterprise (work) wybierają obszary swoich dzierżaw (tenants).",
     "m365TierIndividualOption": "Individual (domyślny)",
     "m365TierEduOption": "Edukacja",
@@ -7097,6 +7112,7 @@
     "proxySubTabsAria": "Sekcje proxy",
     "requestBodyLimitTitle": "Limit treści żądania",
     "requestBodyLimitDescription": "Maksymalny rozmiar payload API akceptowany przed sparsowaniem request body. Dedykowane upload routes zachowują co najmniej swój wbudowany limit 100 MB.",
+    "requestBodyLimitChatHint": "Chat Completions i Responses przyjmują do 50 MB, dopóki nie zapiszesz tutaj limitu. Zapisany limit obowiązuje także dla nich, niezależnie od tego, czy jest niższy, czy wyższy.",
     "requestBodyLimitInputLabel": "Limit Request Body w MB",
     "requestBodyLimitEmptyError": "Wprowadź limit w MB",
     "requestBodyLimitWholeNumberError": "Wprowadź liczbę całkowitą",
@@ -12282,7 +12298,9 @@
       "failedTitle": "Wszystkie {count} próby nie powiodły się",
       "failed": "niepowodzenie",
       "pinnedTitle": "Model wybrany za pomocą przypinania sesji pamięci podręcznej kontekstu",
-      "pinned": "przypięty"
+      "pinned": "przypięty",
+      "recoveredAttemptsTitle": "Żądanie odzyskano po {count} próbach",
+      "latestOutcomeFailed": "Ostatni wynik żądania był nieudany"
     },
     "attempts": "próby",
     "detail": {
@@ -12384,13 +12402,20 @@
       "continuesFromParent": "kontynuuje z elementu nadrzędnego",
       "continuesFrom": "Kontynuuje od {id}",
       "viewConversation": "wyświetl rozmowę",
-      "openConversation": "Otwórz rozmowę {id}"
+      "openConversation": "Otwórz rozmowę {id}",
+      "omittedHttpAttempts": "Nie zachowano {count} wysłań HTTP",
+      "noHttpResponse": "Nie zaobserwowano odpowiedzi HTTP",
+      "transportError": "Błąd transportu"
     },
     "tableLabel": "Dzienniki żądań",
     "throughputPostFirstToken": "Po pierwszym tokenie",
     "throughputEndToEnd": "Od początku do końca",
     "throughputRate": "{value} tokenów/s",
-    "throughputExplanation": "Obie wartości tempa wykorzystują większą z liczb tokenów wyjściowych i tokenów rozumowania. Tempo po pierwszym tokenie pomija prawidłowy TTFT; w przeciwnym razie używa pełnego czasu trwania. Tempo od początku do końca zawsze używa pełnego czasu trwania. Buforowana odpowiedź może mieć wysokie chwilowe tempo dostarczania bez szybszego generowania przez model."
+    "throughputExplanation": "Obie wartości tempa wykorzystują większą z liczb tokenów wyjściowych i tokenów rozumowania. Tempo po pierwszym tokenie pomija prawidłowy TTFT; w przeciwnym razie używa pełnego czasu trwania. Tempo od początku do końca zawsze używa pełnego czasu trwania. Buforowana odpowiedź może mieć wysokie chwilowe tempo dostarczania bez szybszego generowania przez model.",
+    "omittedHttpAttempts": "Nie zachowano {count} wysłań HTTP",
+    "upstreamStatus": "Serwer nadrzędny {status}",
+    "noHttpResponse": "Nie zaobserwowano odpowiedzi HTTP",
+    "transportError": "Błąd transportu"
   },
   "proxyLogger": {
     "filterAll": "Wszystkie",
@@ -14157,6 +14182,14 @@
         "label": "Kolejność w puli współdzielonego egressu",
         "description": "W przypadku dostawców, których limit jest dzielony według adresu wyjściowego (egress), umieszcza członka puli współdzielącego zaobserwowany adres wyjściowy niedawno odrzuconego członka tuż za sprawnymi członkami. Wpływa tylko na kolejność, nigdy nie wyklucza. Wymaga PROXY_SKIP_RECENTLY_FAILED, który generuje odczytywany sygnał odmowy. Domyślnie wyłączone: kolejność wyboru jest dokładnie taka sama jak w zwykłej rotacji."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Odmowy przydziału kwot na poziomie modelu",
+        "description": "Zastosuj limit opencode 429 tylko do modelu, który go trafił, aby to samo wyjście nadal obsługiwało inne modele i wyczyść je tylko wtedy, gdy ten model się powiedzie. Konsumenci, którzy nie mają modelu (rotacja puli, parkowanie i odtwarzanie, widoczność dla administratora, wyzwalacz selektora, przeglądanie stanu zdrowia), nadal go widzą. Potrzebuje PROXY_SKIP_RECENTLY_FAILED, co powoduje odmowę. Domyślnie wyłączone: limit jednego modelu 429 ustawia wyjście dla każdego modelu."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Pobieranie proxy: ścisłe odtwarzanie POST",
+        "description": "W przypadku żądania nieidempotentnego (POST, PUT, PATCH, DELETE) wyślij ponownie po błędzie transportu (świeże gniazdo, powrót proxy, natywny powrót) tylko wtedy, gdy błąd udowodni, że nic nie zostało wysłane: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH lub przekroczenie limitu czasu połączenia. Błąd gniazda po zapisie może oznaczać, że serwer nadrzędny zaakceptował żądanie, więc ponowne wysłanie może wygenerować i obciążyć je dwukrotnie. Domyślnie wyłączone: treść odtwarzalna jest wysyłana ponownie w przypadku każdego błędu transportu, co powoduje również odzyskanie przestarzałego gniazda w puli."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Rejestrowanie atrybucji rotacji",
         "description": "Rotacja opencode rejestruje, które konto obsłużyło żądanie lub zostało pominięte (wyłącznie zamaskowane identyfikatory, nigdy pełne identyfikatory kont) i łączy wpisy w dzienniku proxy z ich żądaniem, dzięki czemu operator może odróżnić pominięte konta od nieużywanych. Domyślnie wyłączone: brak dodatkowych wierszy dziennika i brak zapisywanych dodatkowych kolumn."
@@ -14208,6 +14241,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "Ponowny wybór puli OpenCode przy 429",
         "description": "W przypadku rotacji wielu kont OpenCode, po otrzymaniu błędu 429 od dostawcy z limitami powiązanymi z adresem wyjściowym (egress-bucketed) na koncie bez serwera proxy w kontekście puli otoczenia (ambient pool), poproś pulę połączeń o inny element dla kolejnej próby, zamiast ponawiać ten sam adres wyjściowy. Ustala kolejność, nigdy nie wyklucza: wyczerpana pula zachowuje dotychczasowe działanie. Domyślnie wyłączone: każdy błąd 429 przełącza na następne konto, dokładnie tak jak wcześniej."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Sonda wyjścia swobodnego poziomu",
+        "description": "W przypadku modułu wykonującego OpenCode, gdy na żądanie proxy zostanie udzielona odpowiedź 403 lub 451 FreeTierError, a ponowna próba zaobserwowanych narzędzi nie powiodła się lub nie została zastosowana, wyślij żądanie raz przez inny serwer proxy (inny serwer proxy konta lub inny członek puli, nigdy bezpośrednie połączenie). Dopiero gdy sonda odpowie na 200, pierwszy sygnał wyjściowy zostanie zapisany w pamięci odmów proxy i obsłużona zostanie odpowiedź na sondę; jeśli obaj odmówią, pierwotna odmowa jest zwracana i nic nie jest rejestrowane. Ten sam tekst odmowy obejmuje oznaczony sygnał wyjściowy IP i kształt odrzuconego żądania, więc sonda odróżnia je na podstawie dowodów. Domyślnie wyłączone: odmowa jest zwracana bez zmian."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Odcisk palca klienta OpenCode v2",
@@ -14388,6 +14425,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: zatrzymanie przy odmowie z powodu zasad treści",
         "description": "Gdy cel combo odpowie dokładną odmową z powodu zasad dotyczących treści (kod lub typ cyber_policy / content_policy_violation), zatrzymaj combo i zwróć tę odmowę, nawet jeśli pozostałe cele to inne modele, zamiast przechodzić do następnego celu. Domyślnie wyłączone: odmowa nigdy nie nakłada na konto okresu karencji ani nie aktywuje wyłącznika awaryjnego dostawcy, a combo przechodzi do kolejnego celu dokładnie tak jak dotychczas."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Odpowiedzi: utrzymywanie kontaktu tylko w transporcie",
+        "description": "Wysyłaj odpowiedzi podtrzymujące jako pustą linię zamiast zdarzenia response.in_progress, więc syntetyczny zrzut ekranu nigdy nie zastąpi prawdziwej odpowiedzi w oficjalnym SDK. Pusta linia nie wywołuje żadnego zdarzenia SSE, więc watchdog klienta, który resetuje się tylko w przypadku zdarzeń, nie zostanie zresetowany podczas długiej fazy cichej. Domyślnie wyłączone: liczniki czasu wysyłają zdarzenie response.in_progress o określonej specyfikacji."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Ponawianie w okresie schładzania: pomijaj odmowy 403/410",

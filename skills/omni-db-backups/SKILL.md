@@ -34,6 +34,17 @@ curl -X POST http://localhost:20128/api/system/env/repair \
   -d '{}'
 ```
 
+### GET /api/system/metrics
+
+Host and OmniRoute process CPU and memory
+
+Management-tier (dashboard session or management API key) snapshot behind the home-page system metrics cards. CPU percentages are deltas since the previous call that was at least 400 ms earlier, so the first call after process start (and any call inside the 400 ms window) returns the last computed value, which is `0` before the first delta. Host values come from `os.cpus()` / `os.totalmem()` / `os.freemem()` and describe the host, not a container limit; the process CPU percentage is normalised by the host core count. Sent with `Cache-Control: no-store, no-cache, must-revalidate`.
+
+```bash
+curl http://localhost:20128/api/system/metrics \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
 ### GET /api/system/version
 
 GET system › version

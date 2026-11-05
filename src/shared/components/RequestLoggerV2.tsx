@@ -1,5 +1,7 @@
 "use client";
 
+import { classifyHttpLog, isHttpLogError, parseUpstreamHttp } from "@/shared/utils/upstreamHttp";
+import { requestGroupMetadata } from "./requestLoggerGroups";
 import Icon from "@/shared/components/Icon";
 
 import {
@@ -178,6 +180,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
     const [selectedApiKey, setSelectedApiKey] = useState("");
     const [sortBy, setSortBy] = useState("newest");
     const [selectedLog, setSelectedLog] = useState(null);
+    const [relatedRows, setRelatedRows] = useState<typeof logs>([]);
     const [correlationIdFilter, setCorrelationIdFilter] = useState(
       () => initialCorrelationId ?? ""
     );
@@ -472,7 +475,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
 
       // Status filter
       if (activeFilter === "error") {
-        arr = arr.filter((l) => l.status >= 400);
+        arr = arr.filter(isHttpLogError);
       } else if (activeFilter === "ok") {
         arr = arr.filter((l) => l.status >= 200 && l.status < 300);
       } else if (activeFilter === "combo") {
@@ -481,6 +484,8 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
 
       return arr;
     }, [logs, activeFilter]);
+
+    const correlationGroups = useMemo(() => requestGroupMetadata(filteredLogs), [filteredLogs]);
 
     // Grouped view: deduplicate by correlationId, keeping only the latest per group.
     // Rows without a correlationId are always shown.
@@ -497,7 +502,10 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
         const existing = byCid.get(cid);
         if (
           !existing ||
-          new Date(log.timestamp).getTime() > new Date(existing.timestamp).getTime()
+          new Date(log.timestamp).getTime() > new Date(existing.timestamp).getTime() ||
+          (log.timestamp === existing.timestamp &&
+            existing.requestType === "upstream_http_attempt" &&
+            log.requestType !== "upstream_http_attempt")
         ) {
           byCid.set(cid, log);
         }
@@ -544,30 +552,23 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
     // Group by correlationId: mark retries as children so they render indented
     // under the first request in each group. Compute group health:
     //   "healed"  — at least one failure followed by a success
-    //   "failed"  — all attempts failed
+    //   "failed"  — latest logical outcome failed
     //   null      — single request or all succeeded
     const groupedLogs = useMemo(() => {
-      const cidGroups = new Map();
-      for (const log of sortedLogs) {
-        const cid = log.correlationId;
-        if (cid) {
-          if (!cidGroups.has(cid)) cidGroups.set(cid, []);
-          cidGroups.get(cid).push(log);
-        }
-      }
+      const seen = new Set<string>();
       return sortedLogs.map((log) => {
         const cid = log.correlationId;
-        if (!cid) return { ...log, isRetry: false, groupSize: 1, groupStatus: null };
-        const group = cidGroups.get(cid);
-        if (!group || group.length <= 1)
-          return { ...log, isRetry: false, groupSize: 1, groupStatus: null };
-        const isFirst = group[0].id === log.id;
-        const hasFailure = group.some((g) => g.status >= 400 || g.active);
-        const hasSuccess = group.some((g) => g.status >= 200 && g.status < 300);
-        const groupStatus = hasFailure && hasSuccess ? "healed" : hasFailure ? "failed" : null;
-        return { ...log, isRetry: !isFirst, groupSize: group.length, groupStatus };
+        const metadata = correlationGroups.get(cid);
+        const isRetry = Boolean(cid && seen.has(cid));
+        if (cid) seen.add(cid);
+        return {
+          ...log,
+          isRetry,
+          groupSize: metadata?.groupSize ?? 1,
+          groupStatus: metadata?.groupStatus ?? null,
+        };
       });
-    }, [sortedLogs]);
+    }, [sortedLogs, correlationGroups]);
 
     // Fetch log detail from the persisted call-log endpoint. If a deep-linked
     // request is still being finalized, keep the modal open and poll this same
@@ -577,6 +578,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
     const closeDetail = useCallback(() => {
       detailRequestRef.current = "";
       setSelectedLog(null);
+      setRelatedRows([]);
       setDetailData(null);
       try {
         // remove id param when closing detail
@@ -741,11 +743,22 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
       };
     }, [selectedLog?.id, detailData?.detailState, selectedLog?.active, fetchLogs]);
 
+    useEffect(() => {
+      const cid = selectedLog?.correlationId;
+      if (!cid) return;
+      setRelatedRows((prev) =>
+        prev.some((row) => row.correlationId === cid)
+          ? prev
+          : logs.filter((row) => row.correlationId === cid)
+      );
+    }, [selectedLog?.correlationId, logs]);
+
     // Poll for related logs (same correlationId) while the detail modal is open.
     // This ensures newly completed retries appear without closing the modal.
     useEffect(() => {
       const cid = selectedLog?.correlationId;
       if (!selectedLog?.id || !cid) return;
+
       let cancelled = false;
       let inFlight = false;
       const interval = setInterval(async () => {
@@ -763,10 +776,10 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
           // The API matches correlation substrings; reconcile only this exact request.
           const cidLogs = snapshot.data.filter((log) => log.correlationId === cid);
           const byId = new Map(cidLogs.map((log) => [log.id, log]));
-          setLogs((prev) => {
+          setRelatedRows((prev) => {
             if (!isCurrent()) return prev;
             let changed = false;
-            const merged = prev.flatMap((log: any) => {
+            const merged = prev.flatMap((log) => {
               if (log.correlationId !== cid) return [log];
               const updated = byId.get(log.id);
               if (updated) {
@@ -780,7 +793,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
               }
               return [log];
             });
-            const ids = new Set(prev.map((log: any) => log.id));
+            const ids = new Set(prev.map((log) => log.id));
             for (const log of cidLogs) {
               if (!ids.has(log.id)) {
                 merged.push(log);
@@ -918,7 +931,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
       () => ({
         totalCount: filteredLogs.length,
         okCount: filteredLogs.filter((l) => l.status >= 200 && l.status < 300).length,
-        errorCount: filteredLogs.filter((l) => l.status >= 400).length,
+        errorCount: filteredLogs.filter(isHttpLogError).length,
         comboCount: logs.filter((l) => l.comboName).length,
         apiKeyCount: uniqueApiKeys.length,
         runningCount: filteredLogs.filter((l) => l.active === true).length,
@@ -1360,7 +1373,9 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                     label: compatLabel || (log.provider || "-").toUpperCase(),
                   };
                   const providerLabel = log.providerDisplay || compatLabel || providerColor.label;
-                  const isError = !isActive && log.status >= 400;
+                  const isError = isHttpLogError(log);
+                  const httpKind = classifyHttpLog(log);
+                  const upstreamHttp = parseUpstreamHttp(log.upstreamHttp);
                   const cacheSourceMeta = getCacheSourceMeta(log.cacheSource);
                   const isSemanticCache = cacheSourceMeta?.key === "semantic";
                   const accountLabel = maskAccount(log.account, emailsVisible);
@@ -1394,12 +1409,34 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                             <span className="inline-flex items-center gap-1">
                               <Badge
                                 size="sm"
-                                variant={httpStatusTone(log.status)}
+                                variant={
+                                  httpKind === "transport_error"
+                                    ? "error"
+                                    : httpStatusTone(log.status)
+                                }
                                 className="min-w-[36px] justify-center font-bold"
                               >
-                                {log.status || "..."}
+                                {httpKind === "transport_error"
+                                  ? t("transportError")
+                                  : httpKind === "no_response"
+                                    ? t("noHttpResponse")
+                                    : log.status || "..."}
                               </Badge>
-                              {log.groupStatus === "healed" &&
+                              {upstreamHttp?.send?.status &&
+                                upstreamHttp?.send?.status !== log.status && (
+                                  <span className="text-[10px] text-text-muted">
+                                    {t("upstreamStatus", {
+                                      status: upstreamHttp?.send?.status,
+                                    })}
+                                  </span>
+                                )}
+                              {upstreamHttp?.role === "logical" && upstreamHttp.omitted > 0 && (
+                                <span className="text-[10px] text-text-muted">
+                                  {t("omittedHttpAttempts", { count: upstreamHttp.omitted })}
+                                </span>
+                              )}
+                              {!isActive &&
+                                log.groupStatus === "healed" &&
                                 !log.isRetry &&
                                 log.status >= 400 && (
                                   <span
@@ -1464,18 +1501,18 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                         <TableCell className="px-3 py-2 font-mono text-[11px] font-medium text-primary">
                           <div className="flex items-center gap-1.5">
                             <span>{log.model}</span>
-                            {log.groupStatus === "healed" && !log.isRetry && (
+                            {!isActive && log.groupStatus === "healed" && !log.isRetry && (
                               <span
                                 className="inline-flex items-center gap-0.5 rounded border border-success/25 bg-success/15 px-1 py-0 text-[8px] font-bold text-success"
-                                title={t("status.healedTitle", { count: log.groupSize - 1 })}
+                                title={t("status.recoveredAttemptsTitle", { count: log.groupSize })}
                               >
                                 {t("status.healed")}
                               </span>
                             )}
-                            {log.groupStatus === "failed" && !log.isRetry && (
+                            {!isActive && log.groupStatus === "failed" && !log.isRetry && (
                               <span
                                 className="inline-flex items-center gap-0.5 rounded border border-error/25 bg-error/15 px-1 py-0 text-[8px] font-bold text-error"
-                                title={t("status.failedTitle", { count: log.groupSize })}
+                                title={t("status.latestOutcomeFailed")}
                               >
                                 {t("status.failed")}
                               </span>
@@ -1734,7 +1771,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
             onNext={handleNext}
             relatedLogs={
               selectedLog.correlationId
-                ? groupedLogs.filter((l) => l.correlationId === selectedLog.correlationId)
+                ? relatedRows.filter((l) => l.correlationId === selectedLog.correlationId)
                 : []
             }
             onSelectRelated={(r) => {
