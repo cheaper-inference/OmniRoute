@@ -78,6 +78,34 @@ describe("DataTable family adapters", () => {
     expect(onChange).toHaveBeenCalledWith("down");
   });
 
+  it("FilterPills render kit ToggleChips in a named group, with counts and single-select clicks", () => {
+    const onChange = vi.fn();
+    render(
+      <FilterPills
+        aria-label="Status"
+        value="ok"
+        onChange={onChange}
+        options={[
+          { value: "ok", label: "OK", count: 2, icon: "check" },
+          { value: "down", label: "Down" },
+        ]}
+      />
+    );
+    const group = screen.getByRole("group", { name: "Status" });
+    expect(group.className).toContain("flex-wrap");
+    const ok = screen.getByRole("button", { name: "OK 2" });
+    expect(ok.className).toContain("ci-toggle-chip");
+    expect(ok.getAttribute("data-size")).toBe("sm");
+    expect(ok.querySelector(".ci-toggle-chip__count")?.textContent).toBe("2");
+    expect(ok.querySelector(".ci-toggle-chip__icon svg")).not.toBeNull();
+    const down = screen.getByRole("button", { name: "Down" });
+    expect(down.getAttribute("aria-pressed")).toBe("false");
+    expect(down.querySelector(".ci-toggle-chip__count")).toBeNull();
+    // Clicking the active pill reports its own value again (it never toggles off).
+    fireEvent.click(ok);
+    expect(onChange).toHaveBeenLastCalledWith("ok");
+  });
+
   it("PresetSlider renders the kit slider with preset buttons", () => {
     const onChange = vi.fn();
     render(
