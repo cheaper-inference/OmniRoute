@@ -187,9 +187,11 @@ commands.
 Tested with OmniRoute 3.8.52: KiviDB 1.2.0 with its Lua image (`kividb/kividb:v1.2.0-lua`).
 The rate limiter (including a second process sharing the counters), auth cache, quota store,
 warmup circuit breaker, semantic cache store, and a `/v1/chat/completions` request through
-the chat handler all behave as on Redis 8.10.3. One difference: `INCRBYFLOAT` stores
-`0.1 + 0.2` as `0.30000000000000004` where Redis stores `0.3`. The quota store reads it
-with `parseFloat`, so totals are unchanged.
+the chat handler passed 18 of the 19 checks that pass on Redis 8.10.3. The one that differs:
+`INCRBYFLOAT` stores `0.1 + 0.2` as `0.30000000000000004` where Redis stores `0.3`
+([kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387)). The quota store parses
+both with `parseFloat`, but the two numbers differ in the last digits, so a comparison that
+falls exactly on a quota boundary can come out differently.
 ([setup](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md),
 [results](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat))
 
