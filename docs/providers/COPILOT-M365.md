@@ -277,8 +277,11 @@ This is expected. Without a `refreshToken`, the access token is short-lived. Eit
 
 ### Test Connection passes but chat returns 401
 
-The token may have expired between validation and the first request. Re-capture a
-fresh credential.
+Test Connection checks the credential's shape and, when the token carries an expiry, that
+the token the provider would use has not expired (the connection's stored token wins a stale
+paste; a refresh token counts as renewable). A token that is revoked before it expires
+still passes the test; chat then returns **401** `m365_unauthorized`. Use **Sign in with
+Microsoft** again, or re-capture a fresh credential.
 
 ### Copilot does not appear in the provider list
 
