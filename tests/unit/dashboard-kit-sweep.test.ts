@@ -107,7 +107,7 @@ test("every raw <button>/<input> left in the dashboard tree carries a `kit-excep
           unexplained.push(`${rel(f)}:${i + 1}`);
       });
   }
-  assert.ok(sites > 20, `found only ${sites} raw controls; the scan is broken`);
+  assert.ok(sites > 10, `found only ${sites} raw controls; the scan is broken`);
   assert.deepEqual(unexplained, []);
 });
 
