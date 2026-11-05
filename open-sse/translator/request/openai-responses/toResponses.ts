@@ -9,7 +9,10 @@ import {
   requiresReasoningContentPresence,
 } from "../../../utils/reasoningPlaceholder.ts";
 import { getReadableReasoningValue } from "../../../utils/reasoningFields.ts";
-import { coerceHistoricalToolCallArguments } from "../../helpers/toolArguments.ts";
+import {
+  coerceHistoricalToolCallArguments,
+  createToolHistoryError,
+} from "../../helpers/toolArguments.ts";
 import { requireResponsesCallId } from "../../helpers/responsesToolHistory.ts";
 import { chatStrictForResponses } from "../../helpers/toolStrict.ts";
 import {
@@ -414,13 +417,10 @@ export function openaiToOpenAIResponsesRequest(
       !knownCallIds.has(item.call_id) &&
       !hasPreviousResponse
     ) {
-      const error = new Error("Tool output does not match a local tool call") as Error & {
-        statusCode: number;
-        errorType: string;
-      };
-      error.statusCode = 400;
-      error.errorType = "invalid_tool_call_output";
-      throw error;
+      throw createToolHistoryError(
+        "Tool output does not match a local tool call",
+        "invalid_tool_call_output"
+      );
     }
   }
   // Preserve pending calls without inventing completion. The handler validates

@@ -10,6 +10,10 @@
 // This permissive helper also repairs streamed fragments for existing callers.
 // It is not historical request admission: replacing supplied arguments loses
 // execution history. Use the historical helper below at the Responses boundary.
+export function createToolHistoryError(message: string, errorType: string) {
+  return Object.assign(new Error(message), { statusCode: 400, errorType });
+}
+
 export function coerceToolCallArguments(value: unknown): string {
   if (value === undefined || value === null || value === "") return "{}";
   if (typeof value !== "string") {
@@ -43,12 +47,9 @@ export function coerceHistoricalToolCallArguments(value: unknown, _callId: strin
     JSON.parse(value);
     return value;
   } catch {
-    const error = new Error("Historical tool call has malformed arguments") as Error & {
-      statusCode: number;
-      errorType: string;
-    };
-    error.statusCode = 400;
-    error.errorType = "invalid_tool_call_arguments";
-    throw error;
+    throw createToolHistoryError(
+      "Historical tool call has malformed arguments",
+      "invalid_tool_call_arguments"
+    );
   }
 }

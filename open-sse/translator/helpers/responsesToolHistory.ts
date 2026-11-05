@@ -1,4 +1,4 @@
-import { coerceHistoricalToolCallArguments } from "./toolArguments.ts";
+import { coerceHistoricalToolCallArguments, createToolHistoryError } from "./toolArguments.ts";
 
 type JsonRecord = Record<string, unknown>;
 type ToolCallType = "function_call" | "custom_tool_call";
@@ -13,10 +13,7 @@ const CALL_TYPES = new Set<ToolCallType>(["function_call", "custom_tool_call"]);
 const OUTPUT_TYPES = new Set<ToolOutputType>(["function_call_output", "custom_tool_call_output"]);
 
 function invalid(message: string, errorType = "invalid_tool_call_output"): never {
-  const error = new Error(message) as Error & { statusCode: number; errorType: string };
-  error.statusCode = 400;
-  error.errorType = errorType;
-  throw error;
+  throw createToolHistoryError(message, errorType);
 }
 
 // IDs are opaque ownership tokens, not presentation text. Validate without
