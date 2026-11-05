@@ -119,17 +119,120 @@ const MAX_RETRY_AFTER_SECONDS = 3600;
 const MAX_BUFFERED_FRAME_BYTES = 1 << 20;
 
 /**
+ * SSE error-frame envelope used by the terminal-frame builders below. Mirrors the
+ * three conventions the wrappers know how to synthesize.
+ */
+type SseErrorFrameFormat = "anthropic" | "responses" | "chat";
+
+/** Mutable framing state: decoded-but-incomplete bytes + bytes already sent. */
+interface SseFrameState {
+  buffer: string;
+  bytesForwarded: number;
+}
+
+/** Everything the terminal-frame path needs that is fixed per wrapped stream. */
+interface SseTerminalContext {
+  format: SseErrorFrameFormat;
+  buildFrame: (format: SseErrorFrameFormat) => Uint8Array;
+  configuredErrorFrame: Uint8Array;
+  recordGeneratedFrame?: (frame: Uint8Array) => void;
+  /** Release the upstream reader (no orphaned socket after a mid-stream failure). */
+  cancelUpstream: () => void;
+}
+
+/** Index just past the first `\n\n` / `\r\n\r\n` at or after `from`, or -1 when none. */
+function nextFrameEnd(buffer: string, from: number): number {
+  const lf = buffer.indexOf("\n\n", from);
+  const crlf = buffer.indexOf("\r\n\r\n", from);
+  // `\r\n\r\n` holds no `\n\n`, so the two candidates never overlap in a way that
+  // matters; take whichever terminates first.
+  const lfEnd = lf === -1 ? Number.POSITIVE_INFINITY : lf + 2;
+  const crlfEnd = crlf === -1 ? Number.POSITIVE_INFINITY : crlf + 4;
+  const end = Math.min(lfEnd, crlfEnd);
+  return Number.isFinite(end) ? end : -1;
+}
+
+/** Split complete SSE frames (blank-line terminated) off the front of the buffer. */
+function takeCompleteFrames(state: SseFrameState): string[] {
+  const frames: string[] = [];
+  let from = 0; // absolute offset already scanned — never rescans the buffer
+  for (;;) {
+    const end = nextFrameEnd(state.buffer, from);
+    if (end === -1) break;
+    frames.push(state.buffer.slice(from, end));
+    from = end;
+  }
+  if (from > 0) state.buffer = state.buffer.slice(from);
+  return frames;
+}
+
+/** Release whole lines to a client when an unterminated frame exceeds the ceiling. */
+function releaseOverlongLines(
+  state: SseFrameState,
+  controller: ReadableStreamDefaultController<Uint8Array>
+): boolean {
+  if (state.buffer.length < MAX_BUFFERED_FRAME_BYTES) return false;
+  const lastNewline = state.buffer.lastIndexOf("\n");
+  // A single over-long line keeps accumulating: that is the upstream's framing bug.
+  if (lastNewline < 0) return false;
+  controller.enqueue(ENCODER.encode(state.buffer.slice(0, lastNewline + 1)));
+  state.buffer = state.buffer.slice(lastNewline + 1);
+  return true;
+}
+
+/** Forward the decoder's trailing bytes and close a healthy stream. */
+function finishHealthy(
+  state: SseFrameState,
+  decoder: TextDecoder,
+  controller: ReadableStreamDefaultController<Uint8Array>
+): void {
+  // Flush any multibyte sequence the decoder still holds, then forward the
+  // trailing bytes even without a terminal blank line (some upstreams end
+  // exactly at frame end without the final blank line observable as its own read).
+  state.buffer += decoder.decode();
+  if (state.buffer.length > 0) controller.enqueue(ENCODER.encode(state.buffer));
+  state.buffer = "";
+  controller.close();
+}
+
+/** Emit exactly one terminal frame and close, never throwing at the consumer. */
+function emitTerminalFrame(
+  state: SseFrameState,
+  controller: ReadableStreamDefaultController<Uint8Array>,
+  context: SseTerminalContext
+): void {
+  // Discard any buffered INCOMPLETE frame so the terminal frame's `data:` line
+  // cannot merge into a partial upstream event.
+  state.buffer = "";
+  // Nothing reached the client → the caller's configured frame verbatim (same
+  // contract as the slow path); otherwise the format-derived partial-content one.
+  const frame =
+    state.bytesForwarded === 0 ? context.configuredErrorFrame : context.buildFrame(context.format);
+  try {
+    controller.enqueue(frame);
+    context.recordGeneratedFrame?.(frame);
+  } catch {
+    /* consumer gone */
+  }
+  try {
+    controller.close();
+  } catch {
+    /* already closed */
+  }
+  context.cancelUpstream();
+}
+
+/**
  * Wrap a fast-path verbatim SSE body so a mid-flight upstream failure appends
  * ONE format-correct terminal error frame before the stream closes. Converts an
  * abrupt transport close (client sees "connection dropped mid-response") into a
  * deliberate, parseable failure event the client's retry logic can react to.
  *
  * Framing safety (CodeRabbit review 18948): bytes are buffered until they
- * complete an SSE frame (a blank line: `\n\n`, `\r\n\r\n`, or a frame already
- * spanning a previous buffer). Completed frames are forwarded unchanged; on
- * failure any buffered INCOMPLETE frame is discarded before the terminal error
- * frame, so the error's `data:` line can never merge into a partial upstream
- * event and corrupt the client's parser.
+ * complete an SSE frame (a blank line: `\n\n` or `\r\n\r\n`). Completed frames
+ * are forwarded unchanged; on failure any buffered INCOMPLETE frame is
+ * discarded before the terminal error frame, so the error's `data:` line can
+ * never merge into a partial upstream event and corrupt the client's parser.
  *
  * Zero-content failure (CodeRabbit 125): if the first read fails, the caller's
  * configured `errorFrame` is emitted verbatim (same contract as the slow
@@ -142,101 +245,49 @@ const MAX_BUFFERED_FRAME_BYTES = 1 << 20;
  */
 function wrapSseBodyWithMidStreamFailure(
   body: ReadableStream<Uint8Array>,
-  format: "anthropic" | "responses" | "chat",
-  buildFrame: (fmt: "anthropic" | "responses" | "chat") => Uint8Array,
+  format: SseErrorFrameFormat,
+  buildFrame: (format: SseErrorFrameFormat) => Uint8Array,
   configuredErrorFrame: Uint8Array,
   recordGeneratedFrame?: (frame: Uint8Array) => void
 ): ReadableStream<Uint8Array> {
   const reader = body.getReader();
   const decoder = new TextDecoder();
-  let buffer = ""; // decoded but not-yet-frame-complete upstream bytes
-  let bytesForwarded = 0;
-
-  /** Split complete SSE frames off the front of `buffer`. Returns them in order. */
-  const takeCompleteFrames = (): string[] => {
-    const frames: string[] = [];
-    let from = 0; // absolute offset scanned so far — avoids rescanning the buffer
-    for (;;) {
-      // SSE frame boundary: a blank line. Accept CRLF and LF framings.
-      const lf = buffer.indexOf("\n\n", from);
-      const crlf = buffer.indexOf("\r\n\r\n", from);
-      const lfEnd = lf === -1 ? Number.POSITIVE_INFINITY : lf + 2;
-      const crlfEnd = crlf === -1 ? Number.POSITIVE_INFINITY : crlf + 4;
-      const end = Math.min(lfEnd, crlfEnd);
-      if (!Number.isFinite(end)) break;
-      frames.push(buffer.slice(from, end));
-      from = end;
-    }
-    // Keep only the trailing incomplete frame.
-    if (from > 0) buffer = buffer.slice(from);
-    return frames;
+  const state: SseFrameState = { buffer: "", bytesForwarded: 0 };
+  const context: SseTerminalContext = {
+    format,
+    buildFrame,
+    configuredErrorFrame,
+    recordGeneratedFrame,
+    cancelUpstream: () => {
+      reader.cancel().catch(() => {});
+    },
   };
 
   return new ReadableStream<Uint8Array>({
     async pull(controller) {
       try {
-        // Loop until there is something to enqueue: a pull() that resolves
-        // without enqueuing stalls the pending read forever (the consumer is
-        // blocked on exactly this chunk), so holding back an incomplete frame
-        // must keep reading upstream instead of returning empty-handed.
+        // Keep reading until there is something to enqueue: a pull() that
+        // resolves without enqueuing leaves the pending read blocked forever,
+        // and SSE frames are not chunk-aligned, so holding one back must not
+        // return empty-handed.
         for (;;) {
           const { done, value } = await reader.read();
           if (done) {
-            // Flush any multibyte sequence the decoder still holds, then forward
-            // the trailing bytes even without a terminal blank line (some
-            // upstreams end exactly at frame end without the final blank line
-            // being observable as a separate read).
-            buffer += decoder.decode();
-            if (buffer.length > 0) {
-              controller.enqueue(ENCODER.encode(buffer));
-              buffer = "";
-            }
-            controller.close();
+            finishHealthy(state, decoder, controller);
             return;
           }
           if (!value || value.byteLength === 0) continue;
-
-          bytesForwarded += value.byteLength;
-          buffer += decoder.decode(value, { stream: true });
-          const frames = takeCompleteFrames();
+          state.bytesForwarded += value.byteLength;
+          state.buffer += decoder.decode(value, { stream: true });
+          const frames = takeCompleteFrames(state);
           if (frames.length > 0) {
             for (const frame of frames) controller.enqueue(ENCODER.encode(frame));
             return;
           }
-          // An upstream that never emits a blank line must not grow the buffer
-          // without bound. Release everything up to the last complete LINE (so
-          // SSE line framing stays valid and the terminal error frame still
-          // cannot merge into a partial line); a single over-long line keeps
-          // accumulating, which is the upstream's own framing bug.
-          if (buffer.length >= MAX_BUFFERED_FRAME_BYTES) {
-            const lastNewline = buffer.lastIndexOf("\n");
-            if (lastNewline >= 0) {
-              controller.enqueue(ENCODER.encode(buffer.slice(0, lastNewline + 1)));
-              buffer = buffer.slice(lastNewline + 1);
-              return;
-            }
-          }
+          if (releaseOverlongLines(state, controller)) return;
         }
       } catch {
-        // Upstream failed mid-flight. Discard any buffered INCOMPLETE frame so
-        // the terminal error's `data:` line cannot merge into it, then emit
-        // ONE terminal frame: the caller's configured errorFrame when nothing
-        // was forwarded (same contract as the slow path), otherwise the
-        // format-derived partial-content frame.
-        buffer = "";
-        const frame = bytesForwarded === 0 ? configuredErrorFrame : buildFrame(format);
-        try {
-          controller.enqueue(frame);
-          recordGeneratedFrame?.(frame);
-        } catch {
-          /* consumer gone */
-        }
-        try {
-          controller.close();
-        } catch {
-          /* already closed */
-        }
-        reader.cancel().catch(() => {});
+        emitTerminalFrame(state, controller, context);
       }
     },
     cancel(reason) {
@@ -247,11 +298,52 @@ function wrapSseBodyWithMidStreamFailure(
   });
 }
 
+
+
 /**
- * Seconds a client should wait before retrying, from the handler's error response:
- * `Retry-After` (delta-seconds or HTTP-date) first, then OmniRoute's
- * `x-omniroute-retry-after-seconds`. Clamped to 0..3600; null when neither is usable.
+ * Wrap a fast-path response whose body is an SSE stream, so a mid-flight failure
+ * appends one format-correct terminal frame. Returns null when the response is not
+ * an SSE stream, letting the caller pass the original through untouched.
+ *
+ * Healthy streams stay byte-identical (complete frames are re-emitted unchanged, only
+ * the chunk boundaries move); the wrapper adds no latency beyond holding back an
+ * incomplete trailing frame until its blank line arrives.
  */
+function wrapFastPathSseResponse(
+  response: Response,
+  context: Omit<SseTerminalContext, "cancelUpstream">
+): Response | null {
+  const contentType = (response.headers.get("content-type") || "").toLowerCase();
+  if (!response.body || !contentType.includes("text/event-stream")) return null;
+  const wrapped = new Response(
+    wrapSseBodyWithMidStreamFailure(
+      response.body,
+      context.format,
+      context.buildFrame,
+      context.configuredErrorFrame,
+      context.recordGeneratedFrame
+    ),
+    {
+      status: response.status,
+      statusText: response.statusText,
+      headers: response.headers,
+    }
+  );
+  // The Response constructor cannot take these, so re-attach them the same way
+  // tlsClient's adapter does: downstream consumers read `.url` for
+  // redirect/telemetry attribution.
+  if (response.url) {
+    Object.defineProperty(wrapped, "url", { value: response.url, configurable: true });
+  }
+  if (response.redirected !== undefined) {
+    Object.defineProperty(wrapped, "redirected", {
+      value: response.redirected,
+      configurable: true,
+    });
+  }
+  return wrapped;
+}
+
 function readRetryAfterSeconds(headers: Headers): number | null {
   for (const name of ["retry-after", "x-omniroute-retry-after-seconds"]) {
     const raw = headers.get(name)?.trim();
@@ -717,7 +809,6 @@ export async function withEarlyStreamKeepalive(
     const result = raced.result;
     if (result.status === "fulfilled") {
       const response = result.response;
-      const contentType = (response.headers.get("content-type") || "").toLowerCase();
       // A verbatim SSE body that fails mid-flight (ECONNRESET etc.) would
       // surface its raw error to the client as an abrupt transport close with
       // no terminal marker — the same disconnect-reporting gap the slow path
@@ -726,40 +817,13 @@ export async function withEarlyStreamKeepalive(
       // byte-identical (frames are re-emitted unchanged, only the chunk
       // boundaries move); the wrapper adds no latency beyond holding back an
       // incomplete trailing frame until its blank line arrives.
-      if (response.body && contentType.includes("text/event-stream")) {
-        const wrapped = new Response(
-          wrapSseBodyWithMidStreamFailure(
-            response.body,
-            errorFrameFormat,
-            buildPartialContentErrorFrame,
-            // Zero-content failure: the caller's configured frame verbatim,
-            // same contract as the slow path's zero-content branch.
-            errorFrame,
-            // Record only GENERATED frames (terminal error) so correlationId
-            // call logs include bytes actually sent; forwarded upstream bytes
-            // are already captured by the handler's reqLogger.
-            recordClientBytes
-          ),
-          {
-            status: response.status,
-            statusText: response.statusText,
-            headers: response.headers,
-          }
-        );
-        // The Response constructor cannot take these, so re-attach them the same
-        // way tlsClient's adapter does: downstream consumers read `.url` for
-        // redirect/telemetry attribution.
-        if (response.url) {
-          Object.defineProperty(wrapped, "url", { value: response.url, configurable: true });
-        }
-        if (response.redirected !== undefined) {
-          Object.defineProperty(wrapped, "redirected", {
-            value: response.redirected,
-            configurable: true,
-          });
-        }
-        return wrapped;
-      }
+      const wrapped = wrapFastPathSseResponse(response, {
+        format: errorFrameFormat,
+        buildFrame: buildPartialContentErrorFrame,
+        configuredErrorFrame: errorFrame,
+        recordGeneratedFrame: recordClientBytes,
+      });
+      if (wrapped) return wrapped;
       return response;
     }
     throw result.error;

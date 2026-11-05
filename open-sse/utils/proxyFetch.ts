@@ -164,23 +164,36 @@ function tagProxyUnreachable<T>(err: T): T {
  *   guarantees).
  */
 export function isTransportRetryableError(msg: string, errCode: unknown): boolean {
-  return (
-    msg.includes("fetch failed") ||
-    errCode === "ECONNREFUSED" ||
-    msg.includes("ECONNREFUSED") ||
-    errCode === "EAI_AGAIN" ||
-    msg.includes("EAI_AGAIN") ||
-    errCode === "ENOTFOUND" ||
-    msg.includes("ENOTFOUND") ||
-    errCode === "ETIMEDOUT" ||
-    msg.includes("ETIMEDOUT") ||
-    errCode === "ECONNRESET" ||
-    msg.includes("ECONNRESET") ||
-    errCode === "EPIPE" ||
-    msg.includes("EPIPE") ||
-    (typeof errCode === "string" && errCode.startsWith("UND_ERR")) ||
-    msg.includes("UND_ERR")
-  );
+  const tokenMatch = PRE_SEND_TRANSPORT_TOKENS.some((token) => msg.includes(token));
+  return tokenMatch || isCodeRetryable(errCode, msg);
+}
+
+/** Codes that fire before the upstream could have started any side effect. */
+const PRE_SEND_TRANSPORT_CODES: Record<string, true> = {
+  ECONNREFUSED: true,
+  EAI_AGAIN: true,
+  ENOTFOUND: true,
+  ETIMEDOUT: true,
+};
+
+/** Message tokens for the same pre-send failures (`fetch failed` is undici's wrapper). */
+const PRE_SEND_TRANSPORT_TOKENS = [
+  "fetch failed",
+  "ECONNREFUSED",
+  "EAI_AGAIN",
+  "ENOTFOUND",
+  "ETIMEDOUT",
+  "UND_ERR",
+] as const;
+
+/** Mid-connection resets — retryable only for idempotent methods (see above). */
+const MID_CONNECTION_RESET_CODES: Record<string, true> = { ECONNRESET: true, EPIPE: true };
+
+function isCodeRetryable(errCode: unknown, msg: string): boolean {
+  if (typeof errCode === "string") {
+    if (PRE_SEND_TRANSPORT_CODES[errCode] || errCode.startsWith("UND_ERR")) return true;
+  }
+  return isMidConnectionResetCode(msg, errCode);
 }
 
 /** Read `.code` off an unknown thrown value without fabricating a shape. */
@@ -195,12 +208,8 @@ function errorCodeOf(err: unknown): unknown {
  * false for every other code — those keep the legacy unconditional retry.
  */
 function isMidConnectionResetCode(msg: string, errCode: unknown): boolean {
-  return (
-    errCode === "ECONNRESET" ||
-    msg.includes("ECONNRESET") ||
-    errCode === "EPIPE" ||
-    msg.includes("EPIPE")
-  );
+  if (typeof errCode === "string" && MID_CONNECTION_RESET_CODES[errCode]) return true;
+  return Object.keys(MID_CONNECTION_RESET_CODES).some((code) => msg.includes(code));
 }
 
 /**
