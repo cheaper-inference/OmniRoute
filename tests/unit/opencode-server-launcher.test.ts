@@ -134,9 +134,9 @@ test("getOpencodeServerStatus reports a stopped server without starting it", asy
 
 test("start spawns the env binary with `serve --port --hostname` and stop terminates it", async () => {
   // A stand-in `opencode` that serves /global/health on the port it is given.
-  const bin = path.join(TEST_DATA_DIR, "fake-opencode-serve.mjs");
+  const script = path.join(TEST_DATA_DIR, "fake-opencode-serve.mjs");
   fs.writeFileSync(
-    bin,
+    script,
     [
       "#!/usr/bin/env node",
       'import http from "node:http";',
@@ -154,6 +154,14 @@ test("start spawns the env binary with `serve --port --hostname` and stop termin
     ].join("\n"),
     { mode: 0o755 }
   );
+  // POSIX execs the shebang script directly; Windows has no shebang exec, and a
+  // real npm-global install lands there as `opencode.cmd`, so the shim is the
+  // faithful stand-in (and covers the launcher's cmd.exe branch).
+  let bin = script;
+  if (process.platform === "win32") {
+    bin = path.join(TEST_DATA_DIR, "fake-opencode.cmd");
+    fs.writeFileSync(bin, `@"${process.execPath}" "${script}" %*\r\n`);
+  }
   const probe = http.createServer();
   await new Promise<void>((resolve) => probe.listen(0, "127.0.0.1", resolve));
   const { port } = probe.address() as AddressInfo;

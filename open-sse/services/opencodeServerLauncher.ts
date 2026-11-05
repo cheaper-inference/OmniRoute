@@ -133,19 +133,29 @@ async function spawnServer(url: string): Promise<OpencodeServerStatus> {
     );
   }
   const { stdoutFd, stderrFd } = openServerLogs();
+  const binary = resolveOpencodeBinary();
+  const serveArgs = [
+    "serve",
+    "--port",
+    parsed.port || "4096",
+    "--hostname",
+    parsed.hostname.replace(/^\[|\]$/g, "") || "127.0.0.1",
+  ];
+  // Windows cannot exec a .cmd/.bat shim directly (CVE-2024-27980) and an
+  // npm-global install only ships `opencode.cmd`, so that one goes through
+  // cmd.exe. Nothing here is request input: the binary is operator-configured
+  // and the argv is fixed apart from the loopback port/host parsed above.
+  const viaShim = process.platform === "win32" && /\.(?:cmd|bat)$/i.test(binary);
   const child = spawn(
-    resolveOpencodeBinary(),
-    [
-      "serve",
-      "--port",
-      parsed.port || "4096",
-      "--hostname",
-      parsed.hostname.replace(/^\[|\]$/g, "") || "127.0.0.1",
-    ],
+    viaShim ? process.env.ComSpec || "cmd.exe" : binary,
+    // cmd.exe needs `/s /c "<whole command>"`; windowsVerbatimArguments keeps
+    // Node from escaping it a second time.
+    viaShim ? ["/d", "/s", "/c", `""${binary}" ${serveArgs.join(" ")}"`] : serveArgs,
     {
       cwd: process.env.OPENCODE_SERVER_CWD || process.cwd(),
       detached: true,
       windowsHide: true,
+      windowsVerbatimArguments: viaShim,
       stdio: ["ignore", stdoutFd, stderrFd],
       env: buildServerEnv(),
     }
@@ -183,10 +193,19 @@ export async function stopOpencodeServer(): Promise<OpencodeServerStatus> {
   const url = await currentUrl();
   const pid = state.pid;
   if (pidAlive(pid)) {
-    try {
-      process.kill(pid as number, "SIGTERM");
-    } catch {
-      /* already gone */
+    // A cmd.exe shim owns the real node child on Windows, so terminate the
+    // whole tree; everywhere else the pid is the server itself.
+    if (process.platform === "win32") {
+      spawn("taskkill", ["/pid", String(pid), "/T", "/F"], {
+        windowsHide: true,
+        stdio: "ignore",
+      }).on("error", () => {});
+    } else {
+      try {
+        process.kill(pid as number, "SIGTERM");
+      } catch {
+        /* already gone */
+      }
     }
     // Give it a moment to release the port so the reported status is the real one.
     for (let i = 0; i < 15 && pidAlive(pid); i++) await sleep(200);

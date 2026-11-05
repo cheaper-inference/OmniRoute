@@ -4,7 +4,7 @@
 // Responses payloads and SSE frames. Nothing here does I/O, so every piece can be
 // tested without a fake server.
 import { randomUUID } from "node:crypto";
-import { join } from "node:path";
+import { posix, win32 } from "node:path";
 
 import type {
   EventLike,
@@ -96,13 +96,16 @@ export function opencodeBinaryCandidates(
   env: Record<string, string | undefined>
 ): { candidates: string[]; fallback: string } {
   const home = env.HOME || env.USERPROFILE || "";
+  // Explicit posix/win32 joins: the candidate list must not depend on the host
+  // the module happens to run on (a Windows dev box still reasons about linux
+  // install paths, and vice versa).
   if (platform === "win32") {
     const localAppData = env.LOCALAPPDATA || "";
     return {
       candidates: [
-        localAppData ? join(localAppData, "opencode", "bin", "opencode.exe") : "",
-        join(home, "AppData", "Roaming", "npm", "opencode.cmd"),
-        join(
+        localAppData ? win32.join(localAppData, "opencode", "bin", "opencode.exe") : "",
+        win32.join(home, "AppData", "Roaming", "npm", "opencode.cmd"),
+        win32.join(
           home,
           ".bun",
           "install",
@@ -112,14 +115,14 @@ export function opencodeBinaryCandidates(
           "bin",
           "opencode.exe"
         ),
-        join(home, ".bun", "bin", "opencode.exe"),
+        win32.join(home, ".bun", "bin", "opencode.exe"),
       ].filter(Boolean),
       fallback: "opencode.cmd",
     };
   }
   return {
     candidates: [
-      join(home, ".bun", "bin", "opencode"),
+      posix.join(home, ".bun", "bin", "opencode"),
       "/usr/local/bin/opencode",
       "/opt/homebrew/bin/opencode",
     ],
