@@ -49,6 +49,29 @@ interface PaletteItem {
   subgroupLabel?: string;
 }
 
+const SCORE_EXACT_LABEL = 4;
+const SCORE_LABEL_PREFIX = 3;
+const SCORE_LABEL_SUBSTRING = 2;
+const SCORE_OTHER_FIELD = 1;
+
+/** Relevance of one palette item for a lower-cased query; 0 means no match. */
+function matchScore(item: PaletteItem, q: string): number {
+  const label = item.label.toLowerCase();
+  if (label === q) return SCORE_EXACT_LABEL;
+  if (label.startsWith(q) || label.split(/\s+/).some((word) => word.startsWith(q))) {
+    return SCORE_LABEL_PREFIX;
+  }
+  if (label.includes(q)) return SCORE_LABEL_SUBSTRING;
+  if (
+    item.subtitle?.toLowerCase().includes(q) ||
+    item.sectionLabel.toLowerCase().includes(q) ||
+    item.subgroupLabel?.toLowerCase().includes(q)
+  ) {
+    return SCORE_OTHER_FIELD;
+  }
+  return 0;
+}
+
 interface PaletteSubgroup {
   subgroupId: string | null;
   subgroupLabel: string | null;
@@ -171,22 +194,29 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
     [hiddenItems, radarAdminUrl, safeTranslate, activePreset]
   );
 
-  const filtered = useMemo(() => {
+  // #17915: matches are ranked, not left in sidebar order, so a broad query such as "log"
+  // reaches the Logs page before "Log export" or the substring hit in "Radar Catalog".
+  // Ties keep the shorter label first (the closer match), then the sidebar order.
+  const ranked = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return allItems;
-    return allItems.filter(
-      (item) =>
-        item.label.toLowerCase().includes(q) ||
-        item.subtitle?.toLowerCase().includes(q) ||
-        item.sectionLabel.toLowerCase().includes(q) ||
-        item.subgroupLabel?.toLowerCase().includes(q)
-    );
+    return allItems
+      .map((item, index) => ({ item, index, score: matchScore(item, q) }))
+      .filter((entry) => entry.score > 0)
+      .sort(
+        (a, b) =>
+          b.score - a.score || a.item.label.length - b.item.label.length || a.index - b.index
+      )
+      .map((entry) => entry.item);
   }, [allItems, query]);
 
+  // Sections and subgroups appear in the order of their best match, and `filtered` (the
+  // list the keyboard walks) is the flattened display order, so arrow keys follow what
+  // is on screen even when one section's matches rank apart from each other.
   const grouped = useMemo<PaletteGroup[]>(() => {
     const groups: PaletteGroup[] = [];
     const sectionById = new Map<string, PaletteGroup>();
-    filtered.forEach((item, flatIndex) => {
+    ranked.forEach((item) => {
       // Look up the section/subgroup by id across the whole list, not just the
       // previous item — a section's children can interleave root items and
       // groups (e.g. "omni-proxy" has a trailing root item after its groups),
@@ -212,10 +242,24 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
         };
         section.subgroups.push(subgroup);
       }
-      subgroup.items.push({ item, flatIndex });
+      subgroup.items.push({ item, flatIndex: -1 });
     });
+    let flatIndex = 0;
+    for (const section of groups) {
+      for (const subgroup of section.subgroups) {
+        for (const entry of subgroup.items) entry.flatIndex = flatIndex++;
+      }
+    }
     return groups;
-  }, [filtered]);
+  }, [ranked]);
+
+  const filtered = useMemo(
+    () =>
+      grouped.flatMap((section) =>
+        section.subgroups.flatMap((subgroup) => subgroup.items.map((entry) => entry.item))
+      ),
+    [grouped]
+  );
 
   const handleNavigate = useCallback(
     (href: string, external: boolean) => {
