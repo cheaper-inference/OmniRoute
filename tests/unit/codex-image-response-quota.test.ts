@@ -69,6 +69,7 @@ test("single Codex hosted image uses its serving response; fanout omits quota", 
   const previousDataDir = process.env.DATA_DIR;
   const dir = mkdtempSync(join(tmpdir(), "omniroute-codex-quota-"));
   const originalFetch = globalThis.fetch;
+  const core = await import("../../src/lib/db/core.ts");
   process.env.DATA_DIR = dir;
   const sse =
     'event: response.output_item.done\ndata: ' +
@@ -104,6 +105,7 @@ test("single Codex hosted image uses its serving response; fanout omits quota", 
     assert.equal(sends, 3);
   } finally {
     globalThis.fetch = originalFetch;
+    core.resetDbInstance();
     if (previousDataDir === undefined) delete process.env.DATA_DIR;
     else process.env.DATA_DIR = previousDataDir;
     rmSync(dir, { recursive: true, force: true });
