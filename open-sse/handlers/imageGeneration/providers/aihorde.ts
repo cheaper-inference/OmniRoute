@@ -113,6 +113,9 @@ async function fetchHordeImageBytes(
     // providers' remote image URLs.
     const remote = await fetchRemoteImage(value, {
       guard: "public-only",
+      // Pin the connection to the address that passed the public-only check, so a DNS
+      // answer that changes between the check and the connect cannot reach a private host.
+      pinDns: true,
       timeoutMs: options.timeoutMs,
       signal: options.signal ?? undefined,
       maxBytes: MAX_HORDE_IMAGE_BYTES,

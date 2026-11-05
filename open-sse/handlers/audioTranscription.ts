@@ -24,6 +24,8 @@ import {
   type AudioProvider,
 } from "../config/audioRegistry.ts";
 import { buildAuthHeaders } from "../config/registryUtils.ts";
+import { SafeOutboundFetchError, safeOutboundFetch } from "@/shared/network/safeOutboundFetch";
+import { isSameOrigin } from "../utils/sameOrigin.ts";
 import { kieExecutor } from "../executors/kie.ts";
 import { vertexTranscribe } from "../executors/vertexMedia.ts";
 import {
@@ -361,6 +363,12 @@ async function handleGladiaTranscription(providerConfig, file, modelId, token) {
   if (!resultUrl) {
     return errorResponse(502, "Gladia did not return a result_url");
   }
+  // The poll sends x-gladia-key, so only poll Gladia's own API origin. fetch() drops
+  // Authorization on a cross-origin redirect but keeps custom headers, so redirects are
+  // refused rather than followed.
+  if (!isSameOrigin(resultUrl, providerConfig.baseUrl)) {
+    return errorResponse(502, "Gladia returned a result_url outside its API origin");
+  }
 
   // Step 3: Poll for completion (max 120s)
   const maxWait = 120_000;
@@ -369,8 +377,28 @@ async function handleGladiaTranscription(providerConfig, file, modelId, token) {
   while (Date.now() - start < maxWait) {
     await new Promise((r) => setTimeout(r, 2000));
 
-    const pollRes = await fetch(resultUrl, { headers: authHeaders });
-    if (!pollRes.ok) continue;
+    let pollRes: Response;
+    try {
+      pollRes = await safeOutboundFetch(resultUrl, {
+        headers: authHeaders,
+        guard: "public-only",
+        pinDns: true,
+        timeoutMs: 15_000,
+      });
+    } catch (err) {
+      const code = err instanceof SafeOutboundFetchError ? err.code : "";
+      if (code === "REDIRECT_BLOCKED") {
+        return errorResponse(502, "Gladia result_url answered with a redirect");
+      }
+      if (code === "URL_GUARD_BLOCKED") {
+        return errorResponse(502, "Gladia result_url resolves to a blocked address");
+      }
+      continue;
+    }
+    if (!pollRes.ok) {
+      await pollRes.body?.cancel().catch(() => {});
+      continue;
+    }
 
     const result = await pollRes.json();
 
