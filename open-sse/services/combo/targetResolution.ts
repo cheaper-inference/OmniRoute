@@ -367,11 +367,17 @@ function buildWeightedStepKeyMapper(
 ): (target: ResolvedComboTarget) => string | null {
   return (target: ResolvedComboTarget): string | null => {
     if (!weightedResolution?.orderedSteps) return null;
-    const step = weightedResolution.orderedSteps.find(
-      (entry) =>
-        target.executionKey === entry.executionKey ||
-        target.executionKey.startsWith(entry.executionKey + ">")
+    // Prefer an exact step match before checking nested and account-expanded
+    // execution keys. Prompt-cache expansion may append "@connectionId".
+    const exact = weightedResolution.orderedSteps.find(
+      (entry) => target.executionKey === entry.executionKey
     );
+    const step = exact ?? weightedResolution.orderedSteps
+      .filter((entry) =>
+        target.executionKey.startsWith(entry.executionKey + ">") ||
+        target.executionKey.startsWith(entry.executionKey + "@")
+      )
+      .sort((left, right) => right.executionKey.length - left.executionKey.length)[0];
     return step?.executionKey || null;
   };
 }
