@@ -207,6 +207,16 @@ standalone IDs follow the public [protocol catalog](https://github.com/cramt/m36
   fails again). Continuations are kept in process memory: a restart starts fresh conversations.
 - A turn has a 120-second idle deadline and a bounded overall deadline. Final-only answers,
   progress filtering and cancellation are handled by the native transport/composer.
+- Web-grounded answers keep their sources. Copilot marks a citation inline with private-use
+  control characters and sends the sources as `references`; each marker becomes a numbered
+  Markdown link (`[1](https://…)`, or the bare URL when Copilot used the marker as a link
+  target) with a matching `url_citation` annotation (`message.annotations`, or
+  `delta.annotations` on the chunk that carries the link). A source that never arrives is
+  dropped, so the markers never reach the client. When streaming, text after a citation waits
+  until its source has arrived.
+- Copilot's reasoning summary (`ChainOfThoughtSummary`), when the model sends one, is returned
+  as `reasoning_content`, never as part of the answer. A summary that rewrites itself stops
+  streaming without failing the turn.
 - Before any content, licence/throttle failures retain HTTP 403/429 even when streaming was
   requested. After content starts, failures are SSE error events, never a successful finish.
   An upstream rewrite that cannot be represented by append-only streaming is an explicit

@@ -103,7 +103,10 @@ async function scenario(
   }
 }
 function chunks(text: string): Array<{
-  choices?: Array<{ delta?: { content?: string }; finish_reason?: string }>;
+  choices?: Array<{
+    delta?: { content?: string; reasoning_content?: string; annotations?: unknown[] };
+    finish_reason?: string;
+  }>;
   error?: { code: string };
 }> {
   return text
@@ -587,6 +590,84 @@ for (const stream of [true, false]) {
     });
   });
 }
+test("native citations and reasoning reach the client in both modes, markers never", async () => {
+  const source = {
+    targetLink: "https://news.example/forecast",
+    displayData: {
+      content: JSON.stringify({
+        metadata: { referenceId: "turn1search1" },
+        Title: "Forecast",
+      }),
+    },
+  };
+  const raw = "Rain tomorrow.\uE200cite\uE202turn1search1\uE201";
+  const cited = "Rain tomorrow. [1](https://news.example/forecast)";
+  const frames: Frame[] = [
+    {
+      type: 1,
+      target: "update",
+      arguments: [
+        {
+          messages: [
+            {
+              author: "bot",
+              messageId: "cot",
+              messageType: "Progress",
+              contentOrigin: "ChainOfThoughtSummary",
+              addToChainOfThought: true,
+              text: "Checking the forecast",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      type: 1,
+      target: "update",
+      arguments: [
+        {
+          messages: [
+            { messageId: "a", author: "bot", text: raw, references: { "1-d07884": source } },
+          ],
+        },
+      ],
+    },
+  ];
+  const citation = {
+    type: "url_citation",
+    url_citation: {
+      url: "https://news.example/forecast",
+      title: "Forecast",
+      start_index: 15,
+      end_index: cited.length,
+    },
+  };
+  for (const stream of [true, false]) {
+    await scenario(frames, async () => {
+      const result = await new CopilotM365WebExecutor().execute(input(stream));
+      assert.equal(result.response.status, 200);
+      const body = await result.response.text();
+      assert.doesNotMatch(body, /[\uE200-\uE202]|turn1search1/);
+      if (stream) {
+        const deltas = chunks(body).map((c) => c.choices?.[0]?.delta ?? {});
+        assert.equal(deltas.map((d) => d.content ?? "").join(""), cited);
+        assert.equal(
+          deltas.map((d) => d.reasoning_content ?? "").join(""),
+          "Checking the forecast"
+        );
+        assert.deepEqual(
+          deltas.flatMap((d) => d.annotations ?? []),
+          [citation]
+        );
+      } else {
+        const message = JSON.parse(body).choices[0].message;
+        assert.equal(message.content, cited);
+        assert.equal(message.reasoning_content, "Checking the forecast");
+        assert.deepEqual(message.annotations, [citation]);
+      }
+    });
+  }
+});
 test("native final authoritative snapshot reports divergence only for plain streaming", async () => {
   for (const stream of [true, false]) {
     await scenario([update("draft"), success("authoritative final")], async () => {

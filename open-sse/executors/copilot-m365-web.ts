@@ -9,7 +9,11 @@ import {
   tokenNeedsRefresh,
 } from "./copilot-m365-connection.ts";
 import { buildChatInvocation, clientPlugins } from "./copilot-m365-frames.ts";
-import { M365TurnComposer, M365_MAX_TEXT_LENGTH } from "./m365Protocol/composer.ts";
+import {
+  M365TurnComposer,
+  M365_MAX_TEXT_LENGTH,
+  type M365ComposedUpdate,
+} from "./m365Protocol/composer.ts";
 import {
   m365Conversations,
   m365ReplyFingerprint,
@@ -24,12 +28,12 @@ import {
 import { resolveM365Profile, type M365ResolvedProfile } from "./m365Protocol/profile.ts";
 import { buildM365ToolInstructions, parseM365ToolOutput } from "./m365Protocol/tools.ts";
 import { runM365Turn, M365TurnError, type M365WebSocketConstructor } from "./m365Turn.ts";
-import type { M365ToolOutput } from "./m365Protocol/tools.ts";
 import {
   M365ExecutorError,
   m365ErrorResponse,
   m365Failure,
   m365Output,
+  type M365TurnOutput,
 } from "./m365ExecutorOutput.ts";
 
 type JsonRecord = Record<string, unknown>;
@@ -327,8 +331,8 @@ export class CopilotM365WebExecutor extends BaseExecutor {
       let published = false;
       const attempt = async (
         turn: ReturnType<typeof turnFor>,
-        onDelta?: (delta: string) => void
-      ): Promise<M365ToolOutput> => {
+        onUpdate?: (update: M365ComposedUpdate) => void
+      ): Promise<M365TurnOutput> => {
         const composer = new M365TurnComposer();
         const invocation = turn.invocation(await uploadImages(turn));
         input.log?.debug?.("M365_WS", `connecting ${DIAGNOSTIC_URL}`);
@@ -358,9 +362,9 @@ export class CopilotM365WebExecutor extends BaseExecutor {
                 controller.abort();
                 return;
               }
-              if (update.delta) {
+              if (update.delta || update.reasoningDelta) {
                 published = true;
-                onDelta?.(update.delta);
+                onUpdate?.(update);
               }
             },
           });
@@ -381,13 +385,21 @@ export class CopilotM365WebExecutor extends BaseExecutor {
             "m365_tool_constraint",
             "Microsoft 365 Copilot did not satisfy the requested tool contract."
           );
-        return parsed;
+        // Citation offsets index the composed answer; they hold only while it is returned as is.
+        const cited = !parsed.calls.length && parsed.text === composer.text;
+        return {
+          ...parsed,
+          annotations: cited ? composer.annotations : [],
+          reasoning: composer.reasoning,
+        };
       };
-      const run = async (onDelta?: (delta: string) => void): Promise<M365ToolOutput> => {
+      const run = async (
+        onUpdate?: (update: M365ComposedUpdate) => void
+      ): Promise<M365TurnOutput> => {
         let turn = turnFor(claimed && delta?.text ? claimed : null);
-        let parsed: M365ToolOutput;
+        let parsed: M365TurnOutput;
         try {
-          parsed = await attempt(turn, onDelta);
+          parsed = await attempt(turn, onUpdate);
         } catch (error) {
           // A content-less InternalError is a turn Copilot dropped, and the conversation it
           // happened in tends to stay broken: re-send the whole request once, in a fresh one.
@@ -403,7 +415,7 @@ export class CopilotM365WebExecutor extends BaseExecutor {
             "InternalError without content; retrying once in a fresh conversation"
           );
           turn = turnFor(null);
-          parsed = await attempt(turn, onDelta);
+          parsed = await attempt(turn, onUpdate);
         }
         if (scope)
           conversations.commit(scope, messages, turn.ids, m365ReplyFingerprint(parsed), turn.turns);
@@ -428,9 +440,22 @@ export class CopilotM365WebExecutor extends BaseExecutor {
       let cancelled = false;
       const stream = new ReadableStream<Uint8Array>({
         start(sink) {
-          void run((delta) => {
+          void run((update) => {
             if (cancelled) return;
-            sink.enqueue(encoder.encode(output.chunk({ content: delta })));
+            // Reasoning first: it describes the work behind the text that follows it.
+            if (update.reasoningDelta)
+              sink.enqueue(
+                encoder.encode(output.chunk({ reasoning_content: update.reasoningDelta }))
+              );
+            if (update.delta)
+              sink.enqueue(
+                encoder.encode(
+                  output.chunk({
+                    content: update.delta,
+                    ...(update.annotations.length ? { annotations: update.annotations } : {}),
+                  })
+                )
+              );
             ready();
           }).then(
             () => {

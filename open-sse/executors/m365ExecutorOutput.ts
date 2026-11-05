@@ -1,8 +1,16 @@
 import { sanitizeErrorMessage } from "../utils/error.ts";
 import { M365TurnError } from "./m365Turn.ts";
 import type { M365ToolOutput } from "./m365Protocol/tools.ts";
+import type { M365UrlCitation } from "./m365Protocol/citations.ts";
 
 type JsonRecord = Record<string, unknown>;
+/** One completed turn: the parsed answer plus what Copilot sent alongside it. */
+export interface M365TurnOutput extends M365ToolOutput {
+  /** Sources the answer cites; offsets index `text`. */
+  annotations?: M365UrlCitation[];
+  /** Copilot's reasoning summary for the turn. */
+  reasoning?: string;
+}
 export class M365ExecutorError extends Error {
   constructor(
     readonly status: number,
@@ -93,20 +101,24 @@ export function m365Output(model: string) {
       model,
       choices: [{ index: 0, delta, finish_reason: finish }],
     })}\n\n`;
-  const calls = (output: M365ToolOutput) =>
+  const calls = (output: M365TurnOutput) =>
     output.calls.map((call) => ({
       id: call.id,
       type: call.type,
       function: { name: call.name, arguments: call.arguments },
     }));
-  const message = (output: M365ToolOutput) => ({
+  const message = (output: M365TurnOutput) => ({
     role: "assistant",
     content: output.calls.length ? null : output.text,
+    ...(output.reasoning ? { reasoning_content: output.reasoning } : {}),
     ...(output.calls.length ? { tool_calls: calls(output) } : {}),
+    ...(!output.calls.length && output.annotations?.length
+      ? { annotations: output.annotations }
+      : {}),
   });
   return {
     chunk,
-    json: (output: M365ToolOutput) =>
+    json: (output: M365TurnOutput) =>
       new Response(
         JSON.stringify({
           id,
@@ -124,12 +136,13 @@ export function m365Output(model: string) {
         }),
         { headers: { "Content-Type": "application/json" } }
       ),
-    bufferedSse: (output: M365ToolOutput) =>
+    bufferedSse: (output: M365TurnOutput) =>
       chunk(
         output.calls.length
           ? {
               role: "assistant",
               content: null,
+              ...(output.reasoning ? { reasoning_content: output.reasoning } : {}),
               tool_calls: calls(output).map((call, index) => ({ index, ...call })),
             }
           : message(output)
