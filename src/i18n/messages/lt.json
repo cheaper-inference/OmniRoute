@@ -1035,7 +1035,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "Siųsti „OpenCode v2“ CLI kliento identifikavimo duomenis „OpenCode Zen/Go“ užklausose: opencode/latest/<2.x>/cli User-Agent ir x-opencode-client cli, o nemokamo plano užklausose – v2 seanso antraštes, v2 CLI read/shell įrankių schemas ir be tool_choice \"none\". Pagal numatytuosius nustatymus išjungta: kiekvienos „OpenCode“ užklausos dabartinė tapatybė, antraštės ir turinys lieka nepakeisti.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Kai automatinio derinio kandidatų telkinys būna tuščias dar prieš įrankių iškvietimo pirminį filtravimą (visi tikslai praleisti dėl laukimo laikotarpių, blokavimų arba išnaudojimo), vietoj ankstesnės 400 klaidos „Nė vienas tikslas nepalaiko įrankių iškvietimo“ capability_mismatch grąžinti 503 no_eligible_targets. Pagal numatytuosius nustatymus išjungta: esant tuščiam telkiniui paliekama ankstesnė 400 klaida.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Taikyti patikimas modelio galinio taško žymas (deklaruotas teikėjo kataloge, nustatytas pagal specializuoto modelio ID arba nustatytas operatoriaus): prieš persiunčiant užklausą atmesti su HTTP 400, jei ji išsiųsta į galinį tašką, kurio modelis neaptarnauja, keliuose /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations ir /v1/audio/*; nerodyti /v1/models modelių, kurių žymėtiems galiniams taškams nėra OmniRoute adapterio; ir į tokių modelių valdymo skydelio testą atsakyti kodu 422. Pagal numatytąsias nuostatas išjungta: galinio taško žymos lieka tik informacinės, o užklausos persiunčiamos lygiai taip pat kaip anksčiau.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "Įprastuose su Anthropic suderinamuose perdavimo serveriuose pokalbio viduryje esančius sistemos pranešimus palikite pranešimų sąraše, užuot perkėlę juos į aukščiausio lygio sistemos raginimą, kad podėlyje saugomas raginimo prefiksas išliktų stabilus visuose pokalbio etapuose. Taikoma tik tada, kai pats klientas išsiuntė mid-conversation-system-2026-04-07 beta versiją. Pagal numatytuosius nustatymus išjungta: kiekvienas sistemos pranešimas perkeliamas į sistemos raginimą lygiai taip pat kaip anksčiau, nes šios beta versijos nepalaikantys perdavimo serveriai atmeta pranešimų sąraše esančius sistemos pranešimus.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Kai nei operatoriaus perrašymas, nei teikėjo registras nenurodo samprotavimo pastangų lygių, naudokite models.dev skelbiamus lygius, palikdami tik žinomus pastangų lygius, o tuščią nurodytų lygių sąrašą laikykite reikšme „lygių nėra“. Pagal numatytuosius nustatymus išjungta: modelių katalogas ir nustatyti pastangų lygiai išlieka visiškai tokie patys kaip anksčiau.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "Leidžia auto/* užklausoms sudaryti kandidatų telkinį su išspręstomis modelių galimybėmis (regėjimas, samprotavimas, mąstymas) ir stebėtais kokybės balais, nuskaitytais vienu masiniu skaitymu. Pagal numatytuosius nustatymus išjungta: kandidatų svoriai užklausos metu lieka lygiai tokie patys kaip anksčiau. Įjungta: šie signalai patenka į momentinės kopijos svorius, todėl kandidatų svoriai ir pasirinkimas gali pasikeisti.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Leiskite prisijungimo duomenų būklės patikrai iš naujo išbandyti ryšius, kuriuos tinklų sietuvas išjungė automatiškai (kiekvieną ryšį ne dažniau kaip kartą per 6 valandas, po 5 per patikrą), ir vėl įjungti ryšį, jei pakartotinis bandymas sėkmingas. Pagal numatytuosius nustatymus išjungta: tokie ryšiai lieka išjungti, kol operatorius imasi veiksmų. Operatoriaus išjungti ir visam laikui užblokuoti ryšiai niekada pakartotinai nebandomi.",
@@ -1939,7 +1938,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# užklausa} few {# užklausos} many {# užklausų} other {# užklausų}}, {keys, plural, one {# ribotas raktas} few {# riboti raktai} many {# ribotų raktų} other {# ribotų raktų}}",
     "unpricedUsageMore": "…ir dar {count}",
     "unpricedUsageConfigure": "Nustatyti kainodarą",
-    "unpricedUsageDismiss": "Atmesti"
+    "unpricedUsageDismiss": "Atmesti",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analitika",
@@ -6264,6 +6272,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Praleisti laikiną atvėsimo laikotarpį, kad šį ryšį būtų galima naudoti net ir po klaidų, po kurių galima atkurti veikimą (galutinės būsenos, pvz., užblokavimas ar galiojimo pabaiga, vis tiek taikomos).",
     "disableCoolingLabel": "Išjungti šio ryšio atvėsimo laikotarpį",
+    "keepMidConversationSystemDescription": "Palikite sistemos pranešimus, išsiųstus pokalbio viduryje, pranešimų sąraše, o ne perkelkite juos į aukščiausio lygio sistemos raginimą, kad raginimo talpykla būtų rodoma visuose posūkiuose. Įjungti tik tuo atveju, jei ši prieš srovę priima „sistemos“ vaidmenį pranešimuose (kitaip atsako į 400).",
+    "keepMidConversationSystemLabel": "Laikykite pokalbio viduryje esančius sistemos pranešimus",
+    "requireUserLastMessageDescription": "Prieš srovę, kuri atmeta asistento išankstinį užpildymą: prieš siųsdami nuleiskite asistento posūkius (jokio įrankio_naudojimo). Modelis gali atkurti ankstesnį atsakymą.",
+    "requireUserLastMessageLabel": "Reikalauti, kad pokalbis baigtųsi vartotojo pranešimu",
     "bulkPasteAdded": "{count, plural, one {Pridėtas 1 raktas} other {Pridėta # raktų}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Praleistas 1 pasikartojantis raktas} other {Praleista # pasikartojančių raktų}}",
     "bulkPasteHint": "Įklijuokite po vieną API raktą kiekvienoje eilutėje. Tuščios eilutės ignoruojamos, o pasikartojantys raktai praleidžiami.",
@@ -7100,6 +7112,7 @@
     "proxySubTabsAria": "Įgaliotojo serverio skiltys",
     "requestBodyLimitTitle": "Užklausos turinio dydžio riba",
     "requestBodyLimitDescription": "Didžiausias priimamas API duomenų paketo dydis prieš analizuojant užklausos turinį. Specializuotuose įkėlimo maršrutuose išlaikoma bent jų integruota 100 MB riba.",
+    "requestBodyLimitChatHint": "Chat Completions ir Responses priima iki 50 MB, kol čia išsaugosite ribą. Išsaugota riba taikoma ir joms, nesvarbu, ar ji mažesnė, ar didesnė.",
     "requestBodyLimitInputLabel": "Užklausos turinio dydžio riba MB",
     "requestBodyLimitEmptyError": "Įveskite ribą MB",
     "requestBodyLimitWholeNumberError": "Naudokite sveikąjį skaičių",
@@ -14160,6 +14173,10 @@
         "label": "Bendro išvesties telkinio tvarka",
         "description": "Teikėjams, kurių kvota skirstoma pagal išvesties adresą, telkinio narį, turintį tą patį stebėtą išvesties adresą kaip ir neseniai atmestas narys, rikiuoti iškart po veikiančių narių. Tik rikiavimas, niekada neatmetama. Reikalingas PROXY_SKIP_RECENTLY_FAILED, kuris pateikia nuskaitomą atmetimo signalą. Pagal numatytuosius nustatymus išjungta: pasirinkimo tvarka yra visiškai tokia pati, kaip įprastos rotacijos."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotacijos priskyrimo žurnalizavimas",
         "description": "„opencode“ rotacija fiksuoja, kuri paskyra aptarnavo užklausą arba buvo praleista (tik užmaskuoti ID, niekada ne pilni paskyrų ID), ir susieja proxy žurnalo įrašus su jų užklausa, kad operatorius galėtų atskirti praleistas paskyras nuo nenaudotų. Pagal numatytuosius nustatymus išjungta: papildomų žurnalo eilučių ar stulpelių nerašoma."
@@ -14391,6 +14408,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: sustabdyti gavus turinio politikos atmetimą",
         "description": "Kai „combo“ taikinys atsako tiksliu turinio politikos atmetimu (kodas arba tipas cyber_policy / content_policy_violation), sustabdyti „combo“ ir grąžinti tą atmetimą net tada, kai likę taikiniai yra kitokie modeliai, užuot pereinant prie kito taikinio. Pagal numatytuosius nustatymus išjungta: atmetimas niekada neatvėsina paskyros ir nesuaktyvina teikėjo grandinės pertraukiklio, o „combo“ pereina prie kito taikinio lygiai taip pat, kaip anksčiau."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Atvėsimo pakartotinis bandymas: praleisti 403/410 atmetimus",

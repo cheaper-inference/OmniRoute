@@ -1035,7 +1035,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "OpenCode Zen/Go વિનંતીઓ પર OpenCode v2 CLI ક્લાયન્ટ ફિંગરપ્રિન્ટ મોકલો: opencode/latest/<2.x>/cli User-Agent અને x-opencode-client cli, તેમજ મફત-સ્તરની વિનંતીઓ પર v2 સત્ર હેડર્સ, v2 CLI read/shell ટૂલ સ્કીમા અને tool_choice \"none\" નહીં. ડિફૉલ્ટ રૂપે બંધ: દરેક OpenCode વિનંતી વર્તમાન ઓળખ, હેડર્સ અને બૉડીને યથાવત્ રાખે છે.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "જ્યારે ટૂલ-કૉલિંગ પ્રી-ફિલ્ટર ચાલે તે પહેલાં જ ઑટો કોમ્બોનો ઉમેદવાર પૂલ ખાલી હોય (કૂલડાઉન, લૉકઆઉટ અથવા ક્ષમતા ખૂટી જવાને કારણે દરેક ટાર્ગેટ છોડવામાં આવ્યો હોય), ત્યારે જૂના 400 \"કોઈ ટાર્ગેટ ટૂલ કૉલિંગને સપોર્ટ કરતું નથી\" capability_mismatch ને બદલે 503 no_eligible_targets જવાબ આપો. ડિફૉલ્ટ રૂપે બંધ: ખાલી પૂલ માટે જૂનો 400 જ રાખવામાં આવે છે.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "વિશ્વસનીય મોડેલ એન્ડપોઇન્ટ ટૅગ્સ (પ્રદાતા કેટલોગ દ્વારા જાહેર કરાયેલા, વિશિષ્ટ મોડેલ id પરથી અનુમાનિત, અથવા ઑપરેટર દ્વારા સેટ કરાયેલા) લાગુ કરો: મોડેલ જે એન્ડપોઇન્ટ પર સેવા આપતું નથી ત્યાં મોકલાયેલી વિનંતીને /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations અને /v1/audio/* પર ડિસ્પૅચ પહેલાં HTTP 400 સાથે નકારો; જેનાં ટૅગ કરેલા એન્ડપોઇન્ટ માટે કોઈ OmniRoute ઍડૅપ્ટર નથી તેવા મોડેલોને /v1/models માંથી છુપાવો; અને આવા મોડેલો માટે ડૅશબોર્ડ મોડેલ પરીક્ષણનો જવાબ 422 સાથે આપો. ડિફૉલ્ટ રૂપે બંધ: એન્ડપોઇન્ટ ટૅગ્સ માત્ર માહિતીપ્રદ રહે છે અને વિનંતીઓ પહેલાંની જેમ જ ડિસ્પૅચ થાય છે.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "સામાન્ય anthropic-સુસંગત રિલે પર, વાતચીતની વચ્ચે આવતા system turns ને ટોચ-સ્તરના system prompt માં ખસેડવાને બદલે message list માં જ રાખો, જેથી કૅશ કરાયેલ prompt prefix દરેક turn દરમિયાન સ્થિર રહે. આ ફક્ત ત્યારે લાગુ પડે છે જ્યારે ક્લાયન્ટે પોતે mid-conversation-system-2026-04-07 beta મોકલ્યું હોય. ડિફૉલ્ટ રૂપે બંધ: પહેલાની જેમ દરેક system turn ને ચોક્કસપણે system prompt માં ખસેડવામાં આવે છે, કારણ કે તે beta વિનાના રિલે message list માં system turns ને નકારે છે.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "જ્યારે ન તો ઑપરેટર ઓવરરાઇડ અને ન તો પ્રદાતા રજિસ્ટ્રી કોઈ રીઝનિંગ એફર્ટ ટિયર જાહેર કરે, ત્યારે models.dev દ્વારા પ્રકાશિત ટિયરનો ઉપયોગ કરો, માત્ર જાણીતા એફર્ટ લેવલ જ રાખો અને જાહેર કરેલી ખાલી ટિયર સૂચિને \"કોઈ ટિયર નથી\" તરીકે ગણો. ડિફૉલ્ટ રૂપે બંધ: મોડેલ કેટલોગ અને નિર્ધારિત એફર્ટ ટિયર પહેલાં જેવા હતા બરાબર તેવા જ રહે છે.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "auto/* વિનંતીઓને ઉકેલાયેલી મોડેલ ક્ષમતાઓ (વિઝન, રીઝનિંગ, થિંકિંગ) અને અવલોકિત ગુણવત્તા સ્કોર સાથે એક જ બલ્ક વાંચનમાં ઉમેદવાર પૂલ બનાવવા દે છે. ડિફોલ્ટ રીતે બંધ: વિનંતી સમયના ઉમેદવાર વજન બરાબર પહેલાં જેવા જ રહે છે. ચાલુ હોય ત્યારે: આ સંકેતો સ્નેપશોટ વજનમાં ઉમેરાય છે, તેથી ઉમેદવાર વજન અને પસંદગી બદલાઈ શકે છે.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "ક્રેડેન્શિયલ હેલ્થ સ્વીપને ગેટવેએ પોતાની મેળે બંધ કરેલાં કનેક્શનોનું ફરી પરીક્ષણ કરવા દો (દરેક કનેક્શનનું વધુમાં વધુ દર 6 કલાકે એક વાર, પ્રત્યેક સ્વીપમાં 5) અને ફરી પરીક્ષણ સફળ થાય ત્યારે તેને ફરી ચાલુ કરવા દો. ડિફૉલ્ટ રૂપે બંધ: ઑપરેટર કાર્યવાહી ન કરે ત્યાં સુધી આવાં કનેક્શનો બંધ જ રહે છે. ઑપરેટરે બંધ કરેલાં અને કાયમી રીતે પ્રતિબંધિત કનેક્શનોનું ફરી પરીક્ષણ ક્યારેય કરવામાં આવતું નથી.",
@@ -1939,7 +1938,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# વિનંતી} other {# વિનંતીઓ}}, {keys, plural, one {# મર્યાદિત કી} other {# મર્યાદિત કીઓ}}",
     "unpricedUsageMore": "…અને {count} વધુ",
     "unpricedUsageConfigure": "કિંમત સેટ કરો",
-    "unpricedUsageDismiss": "બંદ કરો"
+    "unpricedUsageDismiss": "બંદ કરો",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "વિશ્લેષણ",
@@ -6264,6 +6272,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "અસ્થાયી કૂલડાઉન છોડો જેથી પુનઃપ્રાપ્ત કરી શકાય તેવી ભૂલો પછી પણ આ કનેક્શન પાત્ર રહે (પ્રતિબંધિત/સમાપ્ત જેવી ટર્મિનલ સ્થિતિઓ હજુ પણ લાગુ પડે છે).",
     "disableCoolingLabel": "આ કનેક્શન માટે કૂલડાઉન અક્ષમ કરો",
+    "keepMidConversationSystemDescription": "સિસ્ટમ સંદેશાઓને ઉચ્ચ-સ્તરના સિસ્ટમ પ્રોમ્પ્ટમાં ખસેડવાને બદલે સંદેશ સૂચિની અંદર મધ્ય-વાતચીત મોકલવામાં આવે છે, તેથી પ્રોમ્પ્ટ કેશ સમગ્ર વળાંક પર અથડાતું રહે છે. જો આ અપસ્ટ્રીમ સંદેશાઓની અંદર ભૂમિકા \"સિસ્ટમ\" સ્વીકારે તો જ સક્ષમ કરો (અન્યથા તે 400 નો જવાબ આપે છે).",
+    "keepMidConversationSystemLabel": "મધ્ય-વાતચીત સિસ્ટમ સંદેશાઓને સ્થાને રાખો",
+    "requireUserLastMessageDescription": "સહાયક પ્રીફિલને નકારતા અપસ્ટ્રીમ્સ માટે: મોકલતા પહેલા પાછળના સહાયક વળાંક છોડો (કોઈ સાધન_ઉપયોગ નથી). મોડેલ તેના પહેલાના જવાબને ફરીથી બનાવી શકે છે.",
+    "requireUserLastMessageLabel": "વાતચીતને વપરાશકર્તા સંદેશ સાથે સમાપ્ત કરવાની જરૂર છે",
     "bulkPasteAdded": "{count, plural, one {1 કી ઉમેરાઈ} other {# કીઓ ઉમેરાઈ}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 ડુપ્લિકેટ અવગણાયું} other {# ડુપ્લિકેટ્સ અવગણાયા}}",
     "bulkPasteHint": "દરેક લાઇનમાં એક API કી પેસ્ટ કરો. ખાલી લાઇનો અવગણવામાં આવે છે અને ડુપ્લિકેટ કીઓ છોડવામાં આવે છે.",
@@ -7100,6 +7112,7 @@
     "proxySubTabsAria": "પ્રોક્સી વિભાગો",
     "requestBodyLimitTitle": "વિનંતી બોડી મર્યાદા",
     "requestBodyLimitDescription": "વિનંતી બોડીનું વિશ્લેષણ થાય તે પહેલાં સ્વીકારવામાં આવતી મહત્તમ API પેલોડ સાઇઝ. સમર્પિત અપલોડ રૂટ્સ માટે ઓછામાં ઓછી તેમની બિલ્ટ-ઇન 100 MB મર્યાદા જળવાઈ રહે છે.",
+    "requestBodyLimitChatHint": "તમે અહીં મર્યાદા સાચવો ત્યાં સુધી Chat Completions અને Responses મહત્તમ 50 MB સ્વીકારે છે. સાચવેલી મર્યાદા ઓછી કે વધુ હોય, તે તેમને પણ લાગુ પડે છે.",
     "requestBodyLimitInputLabel": "MBમાં વિનંતી બોડી મર્યાદા",
     "requestBodyLimitEmptyError": "MBમાં મર્યાદા દાખલ કરો",
     "requestBodyLimitWholeNumberError": "પૂર્ણાંકનો ઉપયોગ કરો",
@@ -14160,6 +14173,10 @@
         "label": "શેર્ડ એગ્રેસ પૂલ ક્રમ",
         "description": "જે પ્રોવાઇડર્સ માટે ક્વોટા એગ્રેસ એડ્રેસ દ્વારા બકેટ થયેલ છે, તેમના માટે તાજેતરમાં નકારાયેલ સભ્યનું ઓબ્ઝર્વ્ડ એગ્રેસ એડ્રેસ શેર કરતા પૂલ સભ્યને હેલ્ધી સભ્યોની તરત નીચે ક્રમાંકિત કરો. માત્ર ક્રમ, ક્યારેય બાકાત નહીં. PROXY_SKIP_RECENTLY_FAILED જરૂરી છે, જે તે વાંચે છે તે રિફ્યુઝલ સિગ્નલ ઉત્પન્ન કરે છે. ડિફૉલ્ટ રૂપે બંધ: પસંદગી ક્રમ બરાબર સામાન્ય રોટેશન જેવો જ છે."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "રોટેશન એટ્રિબ્યુશન લૉગિંગ",
         "description": "Opencode રોટેશન રેકોર્ડ કરે છે કે કયા એકાઉન્ટે સેવા આપી અથવા કયું અવગણવામાં આવ્યું (માત્ર માસ્ક કરેલ ids, ક્યારેય પૂર્ણ એકાઉન્ટ ids નહીં) અને પ્રોક્સી લૉગ એન્ટ્રીઓને તેમની વિનંતી સાથે લિંક કરે છે, જેથી ઑપરેટર અવગણવામાં આવેલા એકાઉન્ટ્સને વણવપરાયેલા એકાઉન્ટ્સથી અલગ ઓળખી શકે. ડિફૉલ્ટ રૂપે બંધ: કોઈ વધારાની લૉગ લાઇન્સ નહીં, કોઈ વધારાના કૉલમ લખાતા નથી."
@@ -14391,6 +14408,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "કોમ્બો: કન્ટેન્ટ-પોલિસી ઇનકાર પર અટકો",
         "description": "જ્યારે કોઈ કોમ્બો ટાર્ગેટ ચોક્કસ કન્ટેન્ટ-પોલિસી ઇનકાર (કોડ અથવા પ્રકાર cyber_policy / content_policy_violation) સાથે જવાબ આપે છે, ત્યારે આગળના ટાર્ગેટ પર જવાને બદલે, બાકીના ટાર્ગેટ અલગ મૉડલ હોય તો પણ કોમ્બોને અટકાવો અને તે ઇનકાર પરત કરો. ડિફૉલ્ટ રૂપે બંધ: આ ઇનકાર ક્યારેય એકાઉન્ટને કૂલ ડાઉન કરતો નથી અથવા પ્રોવાઇડર બ્રેકરને ટ્રિપ કરતો નથી, અને કોમ્બો પહેલાની જેમ જ તેના આગળના ટાર્ગેટ પર આગળ વધે છે."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "કૂલડાઉન પુનઃપ્રયાસ: 403/410 અસ્વીકારોને અવગણો",

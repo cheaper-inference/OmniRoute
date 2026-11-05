@@ -1035,7 +1035,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "OpenCode Zen/Go अनुरोधों पर OpenCode v2 CLI क्लाइंट फ़िंगरप्रिंट भेजें: opencode/latest/<2.x>/cli User-Agent और x-opencode-client cli, तथा फ़्री-टियर अनुरोधों पर v2 सेशन हेडर, v2 CLI read/shell टूल स्कीमा और कोई tool_choice \"none\" नहीं। डिफ़ॉल्ट रूप से बंद: प्रत्येक OpenCode अनुरोध की मौजूदा पहचान, हेडर और बॉडी अपरिवर्तित रहती है।",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "जब टूल-कॉलिंग प्री-फ़िल्टर चलने से पहले ही किसी ऑटो कॉम्बो का कैंडिडेट पूल खाली हो (कूलडाउन, लॉकआउट या समाप्ति के कारण प्रत्येक टार्गेट छोड़ दिया गया हो), तो पुराने 400 \"कोई भी टार्गेट टूल कॉलिंग का समर्थन नहीं करता\" capability_mismatch के बजाय 503 no_eligible_targets उत्तर दें। डिफ़ॉल्ट रूप से बंद: खाली पूल पुराने 400 को बनाए रखता है।",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "विश्वसनीय मॉडल एंडपॉइंट टैग लागू करें (प्रोवाइडर कैटलॉग द्वारा घोषित, किसी विशेष मॉडल id से अनुमानित, या ऑपरेटर द्वारा सेट): /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations और /v1/audio/* पर डिस्पैच से पहले, ऐसे एंडपॉइंट को भेजे गए अनुरोध को HTTP 400 के साथ अस्वीकार करें जिसे मॉडल सर्व नहीं करता; जिन मॉडल के टैग किए गए एंडपॉइंट के लिए कोई OmniRoute अडैप्टर नहीं है, उन्हें /v1/models से छिपाएँ; और ऐसे मॉडल के लिए डैशबोर्ड मॉडल परीक्षण का उत्तर 422 के साथ दें। डिफ़ॉल्ट रूप से बंद: एंडपॉइंट टैग केवल सूचनात्मक रहते हैं और अनुरोध पहले की तरह ही डिस्पैच किए जाते हैं।",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "सामान्य Anthropic-संगत रिले पर, बातचीत के बीच आने वाले सिस्टम टर्न को शीर्ष-स्तरीय सिस्टम प्रॉम्प्ट में ले जाने के बजाय संदेश सूची में ही रखें, ताकि कैश किया गया प्रॉम्प्ट प्रीफ़िक्स सभी टर्न में स्थिर रहे। यह केवल तभी लागू होता है, जब क्लाइंट ने स्वयं mid-conversation-system-2026-04-07 बीटा भेजा हो। डिफ़ॉल्ट रूप से बंद: प्रत्येक सिस्टम टर्न को पहले की तरह ही सिस्टम प्रॉम्प्ट में ले जाया जाता है, क्योंकि इस बीटा के बिना रिले संदेश सूची में सिस्टम टर्न को अस्वीकार कर देते हैं।",
   "featureFlagModelsDevEffortTiersEnabledDescription": "जब न तो कोई ऑपरेटर ओवरराइड और न ही प्रदाता रजिस्ट्री किसी स्तर की घोषणा करे, तब models.dev द्वारा प्रकाशित रीजनिंग प्रयास स्तरों का उपयोग करें, केवल ज्ञात प्रयास स्तरों को बनाए रखें, और घोषित स्तरों की खाली सूची को \"कोई स्तर नहीं\" मानें। यह डिफ़ॉल्ट रूप से बंद है: मॉडल कैटलॉग और निर्धारित प्रयास स्तर पहले जैसे ही बने रहते हैं।",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "auto/* अनुरोधों को हल की गई मॉडल क्षमताओं (विज़न, रीज़निंग, थिंकिंग) और देखे गए गुणवत्ता स्कोर के साथ, एक ही बल्क रीड में, उम्मीदवार पूल बनाने देता है। डिफ़ॉल्ट रूप से बंद: अनुरोध के समय उम्मीदवारों के वेट बिल्कुल पहले जैसे रहते हैं। चालू होने पर: ये संकेत स्नैपशॉट वेट में शामिल होते हैं, इसलिए उम्मीदवारों के वेट और चयन बदल सकते हैं।",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "क्रेडेंशियल हेल्थ स्वीप को उन कनेक्शनों का फिर से परीक्षण करने दें जिन्हें गेटवे ने स्वयं बंद किया था (प्रत्येक का अधिकतम हर 6 घंटे में एक बार, प्रति स्वीप 5) और पुनः परीक्षण सफल होने पर उन्हें फिर से चालू कर दें। डिफ़ॉल्ट रूप से बंद: ऐसे कनेक्शन तब तक बंद रहते हैं जब तक कोई ऑपरेटर कार्रवाई नहीं करता। ऑपरेटर द्वारा अक्षम और स्थायी रूप से प्रतिबंधित कनेक्शनों का कभी भी पुनः परीक्षण नहीं किया जाता।",
@@ -1939,7 +1938,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# अनुरोध} other {# अनुरोध}}, {keys, plural, one {# सीमित कुंजी} other {# सीमित कुंजियाँ}}",
     "unpricedUsageMore": "…और {count} और",
     "unpricedUsageConfigure": "मूल्य निर्धारण कॉन्फ़िगर करें",
-    "unpricedUsageDismiss": "खारिज करें"
+    "unpricedUsageDismiss": "खारिज करें",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "विश्लेषिकी",
@@ -6264,6 +6272,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "अस्थायी कूलडाउन को छोड़ें ताकि पुनर्प्राप्ति योग्य त्रुटियों के बाद भी यह कनेक्शन योग्य बना रहे (प्रतिबंधित/समाप्त जैसी अंतिम स्थितियां अभी भी लागू होती हैं)।",
     "disableCoolingLabel": "इस कनेक्शन के लिए कूलडाउन अक्षम करें",
+    "keepMidConversationSystemDescription": "भेजे गए सिस्टम संदेशों को शीर्ष-स्तरीय सिस्टम प्रॉम्प्ट में ले जाने के बजाय संदेश सूची के अंदर बातचीत के बीच में छोड़ दें, ताकि प्रॉम्प्ट कैश बारी-बारी से हिट होता रहे। केवल तभी सक्षम करें जब यह अपस्ट्रीम संदेशों के अंदर \"सिस्टम\" भूमिका स्वीकार करता है (अन्यथा यह 400 का उत्तर देता है)।",
+    "keepMidConversationSystemLabel": "बातचीत के बीच में सिस्टम संदेशों को यथास्थान रखें",
+    "requireUserLastMessageDescription": "उन अपस्ट्रीम के लिए जो सहायक प्रीफ़िल को अस्वीकार करते हैं: भेजने से पहले सहायक सहायक घुमावों को छोड़ दें (कोई टूल_उपयोग नहीं)। मॉडल अपने पिछले उत्तर को पुन: उत्पन्न कर सकता है।",
+    "requireUserLastMessageLabel": "उपयोगकर्ता संदेश के साथ बातचीत समाप्त करना आवश्यक है",
     "bulkPasteAdded": "{count, plural, one {1 कुंजी जोड़ी गई} other {# कुंजियाँ जोड़ी गईं}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 डुप्लिकेट छोड़ा गया} other {# डुप्लिकेट छोड़े गए}}",
     "bulkPasteHint": "प्रति पंक्ति एक API कुंजी पेस्ट करें। खाली पंक्तियों को अनदेखा किया जाता है और डुप्लिकेट कुंजियाँ छोड़ दी जाती हैं।",
@@ -7100,6 +7112,7 @@
     "proxySubTabsAria": "प्रॉक्सी अनुभाग",
     "requestBodyLimitTitle": "अनुरोध बॉडी सीमा",
     "requestBodyLimitDescription": "अनुरोध बॉडी को पार्स करने से पहले स्वीकृत अधिकतम API पेलोड आकार। समर्पित अपलोड रूट अपनी अंतर्निहित 100 MB की सीमा कम-से-कम बनाए रखते हैं।",
+    "requestBodyLimitChatHint": "यहाँ सीमा सहेजने तक Chat Completions और Responses अधिकतम 50 MB स्वीकार करते हैं। सहेजी गई सीमा कम हो या अधिक, वह उन पर भी लागू होती है।",
     "requestBodyLimitInputLabel": "अनुरोध बॉडी की सीमा MB में",
     "requestBodyLimitEmptyError": "MB में सीमा दर्ज करें",
     "requestBodyLimitWholeNumberError": "पूर्णांक का उपयोग करें",
@@ -14160,6 +14173,10 @@
         "label": "साझा इग्रेस पूल क्रम",
         "description": "उन प्रदाताओं के लिए जिनका कोटा इग्रेस पते के अनुसार विभाजित है, हाल ही में अस्वीकृत सदस्य के देखे गए इग्रेस पते को साझा करने वाले पूल सदस्य को स्वस्थ सदस्यों के ठीक नीचे रैंक करें। केवल क्रमबद्ध किया जाता है, कभी बाहर नहीं किया जाता। PROXY_SKIP_RECENTLY_FAILED की आवश्यकता होती है, जो इसके द्वारा पढ़े जाने वाले अस्वीकृति सिग्नल को उत्पन्न करता है। डिफ़ॉल्ट रूप से बंद: चयन क्रम बिल्कुल सामान्य रोटेशन जैसा होता है।"
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "रोटेशन एट्रिब्यूशन लॉगिंग",
         "description": "Opencode रोटेशन यह रिकॉर्ड करता है कि किस खाते ने सर्व किया या किसे छोड़ दिया गया (केवल मास्क्ड आईडी, कभी भी पूर्ण खाता आईडी नहीं) और प्रॉक्सी लॉग प्रविष्टियों को उनके अनुरोध से लिंक करता है, ताकि ऑपरेटर छोड़े गए खातों और अप्रयुक्त खातों में अंतर कर सके। डिफ़ॉल्ट रूप से बंद: कोई अतिरिक्त लॉग पंक्तियाँ नहीं, कोई अतिरिक्त कॉलम नहीं लिखे जाते।"
@@ -14391,6 +14408,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "कॉम्बो: कंटेंट-पॉलिसी रिफ़्यूज़ल पर रोकें",
         "description": "जब कोई कॉम्बो टार्गेट किसी सटीक कंटेंट-पॉलिसी रिफ़्यूज़ल (कोड या प्रकार cyber_policy / content_policy_violation) के साथ उत्तर देता है, तो अगले टार्गेट पर आगे बढ़ने के बजाय कॉम्बो को रोकें और वह रिफ़्यूज़ल लौटाएं, भले ही शेष टार्गेट्स अलग मॉडल हों। डिफ़ॉल्ट रूप से बंद: यह रिफ़्यूज़ल कभी भी अकाउंट को कूल नहीं करता है या प्रोवाइडर ब्रेकर को ट्रिप नहीं करता है, और कॉम्बो बिल्कुल पहले की तरह अपने अगले टार्गेट पर आगे बढ़ता है।"
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "कूलडाउन पुनः प्रयास: 403/410 अस्वीकृतियों को छोड़ें",

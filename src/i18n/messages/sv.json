@@ -1035,7 +1035,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "Skicka OpenCode v2 CLI-klientens fingeravtryck vid OpenCode Zen/Go-förfrågningar: User-Agent opencode/latest/<2.x>/cli och x-opencode-client cli, och vid förfrågningar på kostnadsfri nivå v2-sessionsrubrikerna, v2 CLI-verktygsschemana för read/shell och inget tool_choice \"none\". Av som standard: varje OpenCode-förfrågan behåller nuvarande identitet, rubriker och brödtext oförändrade.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "När kandidatpoolen för en automatisk kombination redan är tom innan förfiltret för verktygsanrop körs (alla mål har hoppats över på grund av vänteperioder, låsningar eller uttömning), returnera 503 no_eligible_targets i stället för det äldre 400-felet ”Inget mål stöder verktygsanrop” capability_mismatch. Inaktiverat som standard: om poolen är tom behålls det äldre 400-felet.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Framtvinga betrodda taggar för modellslutpunkter (deklarerade av leverantörskatalogen, härledda från ett specialiserat modell-id eller angivna av operatören): avvisa en begäran som skickas till en slutpunkt som modellen inte betjänar med HTTP 400 före vidarebefordran på /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations och /v1/audio/*; dölj modeller vars taggade slutpunkter saknar en OmniRoute-adapter från /v1/models; och besvara instrumentpanelens modelltest med 422 för sådana modeller. Av som standard: slutpunktstaggar förblir endast informativa och begäranden vidarebefordras precis som tidigare.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "På vanliga anthropic-kompatibla reläer behålls systemturer mitt i konversationen i meddelandelistan i stället för att flyttas till systemprompten på toppnivå, så att det cachade promptprefixet förblir stabilt mellan turerna. Gäller endast när klienten själv skickade betaversionen mid-conversation-system-2026-04-07. Av som standard: varje systemtur flyttas till systemprompten precis som tidigare, eftersom reläer utan den betaversionen avvisar systemturer i meddelandelistan.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Använd nivåerna för resonemangsinsats som models.dev publicerar när varken en operatörsåsidosättning eller leverantörsregistret anger några, behåll endast kända insatsnivåer och behandla en tom lista över angivna nivåer som \"inga nivåer\". Av som standard: modellkatalogen och de fastställda insatsnivåerna förblir exakt som tidigare.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "Låter auto/*-förfrågningar bygga kandidatpoolen med fastställda modellförmågor (vision, resonemang, tänkande) och observerade kvalitetspoäng, inlästa i en enda massläsning. Av som standard: kandidatvikterna vid förfrågningstillfället förblir exakt som tidigare. På: dessa signaler matas in i ögonblicksbildens vikter, så kandidatvikter och urval kan ändras.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Låt hälsokontrollen för autentiseringsuppgifter testa anslutningar som gatewayen själv har stängt av på nytt (högst en gång var sjätte timme per anslutning, fem per kontroll) och slå på en anslutning igen när omtestet lyckas. Av som standard: sådana anslutningar förblir avstängda tills en operatör ingriper. Anslutningar som har stängts av av en operatör eller blockerats permanent testas aldrig på nytt.",
@@ -1939,7 +1938,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# begäran} other {# begäranden}}, {keys, plural, one {# begränsad nyckel} other {# begränsade nycklar}}",
     "unpricedUsageMore": "…och {count} till",
     "unpricedUsageConfigure": "Konfigurera prissättning",
-    "unpricedUsageDismiss": "Stäng"
+    "unpricedUsageDismiss": "Stäng",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analys",
@@ -6264,6 +6272,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Hoppa över den tillfälliga cooldown-perioden så att denna anslutning förblir tillgänglig även efter återställningsbara fel (slutgiltiga tillstånd som banned/expired gäller fortfarande).",
     "disableCoolingLabel": "Inaktivera cooldown för denna anslutning",
+    "keepMidConversationSystemDescription": "Lämna systemmeddelanden som skickas mitt i konversationen i meddelandelistan istället för att flytta dem till systemprompten på översta nivån, så promptcachen fortsätter att slå över svängarna. Aktivera endast om denna uppströms accepterar rollen \"system\" i meddelanden (annars svarar den 400).",
+    "keepMidConversationSystemLabel": "Håll meddelanden i mitten av konversationen på plats",
+    "requireUserLastMessageDescription": "För uppströms som avvisar assistentförfyllning: släpp efterföljande assistentsvängar (ingen tool_use) innan du skickar. Modellen kan återskapa sitt tidigare svar.",
+    "requireUserLastMessageLabel": "Kräv att konversationen avslutas med ett användarmeddelande",
     "bulkPasteAdded": "{count, plural, one {1 nyckel tillagd} other {# nycklar tillagda}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 dubblett överhoppad} other {# dubbletter överhoppade}}",
     "bulkPasteHint": "Klistra in en API-nyckel per rad. Tomma rader ignoreras och dubblettnycklar hoppas över.",
@@ -7100,6 +7112,7 @@
     "proxySubTabsAria": "Proxysektioner",
     "requestBodyLimitTitle": "Gräns för begärandekropp",
     "requestBodyLimitDescription": "Den maximala storleken på API-nyttolasten som accepteras innan en begärandekropp tolkas. Dedikerade uppladdningsrutter behåller minst sin inbyggda gräns på 100 MB.",
+    "requestBodyLimitChatHint": "Chat Completions och Responses accepterar upp till 50 MB tills du sparar en gräns här. Den sparade gränsen gäller även för dem, oavsett om den är lägre eller högre.",
     "requestBodyLimitInputLabel": "Gräns för begärandekropp i MB",
     "requestBodyLimitEmptyError": "Ange en gräns i MB",
     "requestBodyLimitWholeNumberError": "Använd ett heltal",
@@ -14160,6 +14173,10 @@
         "label": "Delad utgängspools ordning",
         "description": "För leverantörer vars kvot bucketas efter utgångsadress, rangordna en poolmedlem som delar en nyligen avvisad medlems observerade utgångsadress direkt under friska medlemmar. Endast ordning, aldrig utesluten. Kräver PROXY_SKIP_RECENTLY_FAILED, som producerar avvisningssignalen den läser. Inaktiverad som standard: urvalsordningen är exakt den vanliga rotationen."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Loggning av rotationsattribuerings",
         "description": "Opencodes rotation registrerar vilket konto som serverade eller hoppades över (endast maskerade id:n, aldrig kompletta kontoid:n) och länkar proxyloggposter till deras begäran, så att operatören kan skilja hoppade konton från oanvända. Inaktiverad som standard: inga extra loggrader, inga extra kolumner skrivna."
@@ -14391,6 +14408,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Stoppa vid innehållspolitiskt avslag",
         "description": "När en combo-måltavla svarar med ett exakt innehållspolitiskt avslag (kod eller typ cyber_policy / content_policy_violation), stoppa combo:n och returnera det avslaget även när återstående måltavlor är olika modeller, istället för att avancera till nästa måltavla. Avstängt som standard: avslaget svalkar aldrig kontot eller triggar leverantörens brytare, och combo:n avancera till sin nästa måltavla exakt som tidigare."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Avsiktning vid återförsök: Hoppa över 403/410-avvisanden",

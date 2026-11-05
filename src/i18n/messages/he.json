@@ -1035,7 +1035,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "שליחת טביעת האצבע של לקוח ה-CLI של OpenCode v2 בבקשות OpenCode Zen/Go: ה-User-Agent ‏opencode/latest/<2.x>/cli והכותרת x-opencode-client cli, ובבקשות במסלול החינמי — כותרות ההפעלה של v2, סכמות כלי הקריאה/מעטפת של ה-CLI ב-v2 וללא tool_choice \"none\". האפשרות כבויה כברירת מחדל: כל בקשת OpenCode שומרת על הזהות, הכותרות וגוף הבקשה הנוכחיים ללא שינוי.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "כאשר מאגר המועמדים של קומבו אוטומטי כבר ריק לפני הפעלת הסינון המקדים של קריאות לכלים (כל היעדים דולגו עקב תקופות צינון, נעילות או מיצוי), יש להחזיר 503 no_eligible_targets במקום שגיאת 400 הישנה \"אין יעד שתומך בקריאות לכלים\" מסוג capability_mismatch. האפשרות מושבתת כברירת מחדל: כאשר המאגר ריק, ממשיכה להיות מוחזרת שגיאת 400 הישנה.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "אכיפת תגיות מהימנות של נקודות קצה למודלים (שהוצהרו בקטלוג הספק, הוסקו ממזהה של מודל ייעודי או הוגדרו על ידי המפעיל): דחיית בקשה שנשלחה לנקודת קצה שהמודל אינו מספק, עם HTTP 400 לפני הניתוב ב־/v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations ו־/v1/audio/*; הסתרת מודלים שלנקודות הקצה המתויגות שלהם אין מתאם OmniRoute מ־/v1/models; ומענה לבדיקת המודל בלוח הבקרה עם 422 עבור מודלים כאלה. מושבת כברירת מחדל: תגיות נקודות הקצה נשארות למטרות מידע, והבקשות מנותבות בדיוק כפי שנותבו קודם לכן.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "בממסרים רגילים התואמים ל-anthropic, יש להשאיר תורי מערכת באמצע השיחה בתוך רשימת ההודעות במקום להעביר אותם להנחיית המערכת ברמה העליונה, כך שקידומת ההנחיה שבמטמון תישאר יציבה בין התורים. חל רק כאשר הלקוח עצמו שלח את גרסת הבטא mid-conversation-system-2026-04-07. מושבת כברירת מחדל: כל תור מערכת מועבר להנחיית המערכת בדיוק כמו קודם, משום שממסרים ללא גרסת בטא זו דוחים תורי מערכת ברשימת ההודעות.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "השתמש ברמות מאמץ ההסקה שמפרסם models.dev כאשר לא הוגדרת רמה כלשהי בעקיפת מפעיל או במרשם הספק, תוך שמירה על רמות מאמץ מוכרות בלבד, והתייחס לרשימת רמות מוצהרת ריקה כאל \"ללא רמות\". האפשרות מושבתת כברירת מחדל: קטלוג המודלים ורמות המאמץ שנקבעו נשארים בדיוק כפי שהיו.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "מאפשר לבקשות auto/* לבנות את מאגר המועמדים עם יכולות מודל פתורות (ראייה, הסקה, חשיבה) וציוני איכות שנצפו, הנקראים בקריאה מרוכזת אחת. כבוי כברירת מחדל: משקלי המועמדים בזמן הבקשה נשארים בדיוק כמו קודם. מופעל: אותות אלה מוזנים למשקלי תמונת המצב, ולכן משקלי המועמדים והבחירה עשויים להשתנות.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "אפשרו לסריקת תקינות פרטי הכניסה לבדוק מחדש חיבורים שהשער השבית בעצמו (לכל היותר פעם אחת בכל 6 שעות לכל חיבור, 5 בכל סריקה) ולהפעיל מחדש חיבור כאשר הבדיקה החוזרת שלו מצליחה. מושבת כברירת מחדל: חיבורים כאלה נשארים מושבתים עד להתערבות מפעיל. חיבורים שהושבתו על ידי מפעיל וחיבורים שנחסמו לצמיתות לעולם אינם נבדקים מחדש.",
@@ -1939,7 +1938,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# בקשה} other {# בקשות}}, {keys, plural, one {# מפתח מוגבל} other {# מפתחות מוגבלים}}",
     "unpricedUsageMore": "…ועוד {count}",
     "unpricedUsageConfigure": "הגדר תמחור",
-    "unpricedUsageDismiss": "התעלם"
+    "unpricedUsageDismiss": "התעלם",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "אנליטיקס",
@@ -6264,6 +6272,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "דלג על תקופת הצינון הזמנית כדי שחיבור זה יישאר זמין גם לאחר שגיאות הניתנות לשחזור (מצבים סופיים כמו חסום/פג תוקף עדיין חלים).",
     "disableCoolingLabel": "השבת תקופת צינון עבור חיבור זה",
+    "keepMidConversationSystemDescription": "השאר הודעות מערכת שנשלחו באמצע השיחה בתוך רשימת ההודעות במקום להעביר אותן להנחיית המערכת ברמה העליונה, כך שמטמון ההנחיות ימשיך להכות על פני פניות. הפעל רק אם זה במעלה הזרם מקבל תפקיד \"מערכת\" בתוך הודעות (אחרת הוא עונה 400).",
+    "keepMidConversationSystemLabel": "שמור על הודעות מערכת באמצע השיחה במקום",
+    "requireUserLastMessageDescription": "במעלה הזרמים שדוחים מילוי מראש של עוזר: שחרר פניות של עוזר נגרר (ללא כלי_שימוש) לפני השליחה. המודל עשוי לשחזר את התשובה הקודמת שלו.",
+    "requireUserLastMessageLabel": "דרוש שהשיחה תסתיים בהודעת משתמש",
     "bulkPasteAdded": "{count, plural, one {נוסף מפתח אחד} other {נוספו # מפתחות}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {דילוג על כפילות אחת} other {דילוג על # כפילויות}}",
     "bulkPasteHint": "יש להדביק מפתח API אחד בכל שורה. המערכת מתעלמת משורות ריקות ומדלגת על מפתחות כפולים.",
@@ -7100,6 +7112,7 @@
     "proxySubTabsAria": "מקטעי פרוקסי",
     "requestBodyLimitTitle": "מגבלת גוף הבקשה",
     "requestBodyLimitDescription": "הגודל המרבי של מטען API שיתקבל לפני ניתוח גוף הבקשה. נתיבי העלאה ייעודיים שומרים לפחות על המגבלה המובנית שלהם, העומדת על 100 MB.",
+    "requestBodyLimitChatHint": "Chat Completions ו-Responses מקבלים עד 50 MB עד לשמירת מגבלה כאן. המגבלה שנשמרה חלה גם עליהם, בין שהיא נמוכה יותר ובין שהיא גבוהה יותר.",
     "requestBodyLimitInputLabel": "מגבלת גוף הבקשה ב-MB",
     "requestBodyLimitEmptyError": "יש להזין מגבלה ב-MB",
     "requestBodyLimitWholeNumberError": "יש להשתמש במספר שלם",
@@ -14160,6 +14173,10 @@
         "label": "סדר מאגר לפי כתובת יציאה משותפת",
         "description": "עבור ספקים שהמכסה שלהם מחולקת לפי כתובת יציאה, דרג חבר מאגר שחולק את כתובת היציאה הנצפית של חבר שנדחה לאחרונה מיד מתחת לחברים תקינים. שינוי סדר בלבד, לעולם לא מוחרג. דורש את PROXY_SKIP_RECENTLY_FAILED, המפיק את אות הדחייה שהוא קורא. מושבת כברירת מחדל: סדר הבחירה זהה בדיוק לרוטציה הרגילה."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "תיעוד שיוך ברוטציה",
         "description": "רוטציית opencode מתעדת איזה חשבון שירת או דולג (מזהים מוסווים בלבד, לעולם לא מזהי חשבון מלאים) ומקשרת רשומות יומן פרוקסי לבקשה שלהן, כך שהמפעיל יכול להבדיל בין חשבונות שדולגו לחשבונות שלא היו בשימוש. מושבת כברירת מחדל: לא נכתבות שורות יומן נוספות, ולא נכתבות עמודות נוספות."
@@ -14391,6 +14408,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: עצירה בעקבות סירוב של מדיניות תוכן",
         "description": "כאשר יעד combo משיב עם סירוב מדויק של מדיניות תוכן (קוד או סוג cyber_policy / content_policy_violation), עצור את ה-combo והחזר סירוב זה גם כאשר היעדים הנותרים הם מודלים שונים, במקום להתקדם ליעד הבא. מושבת כברירת מחדל: הסירוב לעולם אינו מכניס את החשבון לתקופת צינון ואינו מפעיל את ה-breaker של הספק, וה-combo ממשיך ליעד הבא שלו בדיוק כמו בעבר."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "ניסיון חוזר בתקופת צינון: דילוג על סירובי 403/410",
