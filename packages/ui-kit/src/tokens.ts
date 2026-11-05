@@ -44,7 +44,7 @@ export const ciTokens = {
     status: {
       live: "#cff331",
       success: "#087a4f",
-      warning: "#a75a00",
+      warning: "#a05600",
       danger: "#bf3636",
       info: "#2869d8",
     },
