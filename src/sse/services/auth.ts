@@ -2644,6 +2644,41 @@ export async function markAccountUnavailable(
       return { shouldFallback: true, cooldownMs: 0 };
     }
 
+    // Native M365 mixes model licences/budgets and per-account throttling. Honor
+    // the classified scope before generic auth/ban and passthrough quota handling.
+    if (provider === "copilot-m365-web" && fallbackResult.ruleScope) {
+      const cooldownMs = fallbackResult.cooldownMs;
+      if (fallbackResult.ruleScope === "model" && model) {
+        lockExactModel(
+          provider,
+          connectionId,
+          model,
+          fallbackResult.reason || "forbidden",
+          cooldownMs
+        );
+        await updateProviderConnection(connectionId, {
+          lastErrorType: fallbackResult.reason,
+          lastError:
+            status === 403 ? "M365 model not licensed" : "M365 model priority budget exhausted",
+          lastErrorAt: new Date().toISOString(),
+          errorCode: status,
+        });
+        return { shouldFallback: true, cooldownMs };
+      }
+      if (fallbackResult.ruleScope === "connection") {
+        await updateProviderConnection(connectionId, {
+          lastErrorType: fallbackResult.reason,
+          lastError: "M365 account throttled",
+          lastErrorAt: new Date().toISOString(),
+          errorCode: status,
+          rateLimitedUntil: getUnavailableUntil(cooldownMs),
+          backoffLevel: fallbackResult.newBackoffLevel ?? backoffLevel,
+          testStatus: "unavailable",
+        });
+        return { shouldFallback: true, cooldownMs };
+      }
+    }
+
     // #16824: a verified ModelScope model-access refusal does not invalidate
     // the credential. Probe isolation above takes precedence; real requests
     // lock only the rejected model and leave sibling models routable.

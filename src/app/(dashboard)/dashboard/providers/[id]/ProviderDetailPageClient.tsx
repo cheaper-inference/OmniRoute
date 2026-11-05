@@ -286,6 +286,7 @@ export default function ProviderDetailPageClient() {
   );
   const oauthProviderId = resolveProviderOAuthBackendId(providerId, providerInfo);
   const providerSupportsOAuth =
+    providerId === "copilot-m365-web" ||
     providerInfo?.toggleAuthType === "oauth" ||
     providerInfo?.toggleAuthType === "free" ||
     oauthProviderId !== providerId;

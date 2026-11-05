@@ -339,7 +339,7 @@ export function parseFencedToolCalls(
     // plain-text body (or {"command": ...}) into the canonical arguments object.
     if ((SHELL_TOOL_NAMES as readonly string[]).includes(name)) {
       const target = allowed.has(name) ? name : declaredShell;
-      if (!target) continue;
+      if (!target || !toolChoiceAllows(toolChoice, target)) continue;
       const args =
         parsed && typeof parsed === "object" && "command" in (parsed as JsonRecord)
           ? (parsed as JsonRecord)
@@ -353,7 +353,7 @@ export function parseFencedToolCalls(
       continue;
     }
     if (!allowed.has(name) || !toolChoiceAllows(toolChoice, name)) continue;
-    if (parsed == null || typeof parsed !== "object") continue;
+    if (parsed == null || typeof parsed !== "object" || Array.isArray(parsed)) continue;
     out.push({
       id: `call_${crypto.randomUUID()}`,
       type: "function",
@@ -381,7 +381,7 @@ function validCall(
   toolChoice: unknown
 ): M365ParsedToolCall | null {
   if (!name || !allowedName(tools, name) || !toolChoiceAllows(toolChoice, name)) return null;
-  if (!args || typeof args !== "object") return null;
+  if (!args || typeof args !== "object" || Array.isArray(args)) return null;
   return {
     id: `call_${crypto.randomUUID()}`,
     type: "function",
@@ -605,7 +605,9 @@ export function buildChatInvocation(opts: ChatInvocationOptions): Record<string,
 }
 
 /** True when the frame is a SignalR invocation/streamItem (`type:1`) update. */
-export function isUpdateFrame(frame: Record<string, unknown> | null): boolean {
+export function isUpdateFrame(
+  frame: Record<string, unknown> | null
+): frame is Record<string, unknown> & { type: 1; target: "update" } {
   return !!frame && frame.type === 1 && frame.target === "update";
 }
 
