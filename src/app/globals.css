@@ -171,22 +171,11 @@ html:root[data-ci-appearance="editions"] {
   --color-primary-ink: var(--ci-color-accent-active);
 }
 
-/* Warning text. The kit's light Editions warning #99631f reads only ≈ 4.1:1 on its own
-   --ci-color-warning-bg and ≈ 4.5:1 on the canvas, short of AA for small badge/button text, so
-   light Editions uses the same hue darkened (≈ 4.7:1 on the tinted background). Classic and both
-   dark palettes keep the kit value. Upstream fix requested; drop this when the kit ships it. */
+/* Warning text. Badges, warning buttons and `text-warning` read the warning ink through this alias.
+   Since kit 0.0.88 (upstream #155) the kit's own light Editions warning (#8c5a1b) reaches AA on its
+   tinted background, the canvas and the surface, so the alias is just the kit value. */
 :root {
   --color-warning-ink: var(--ci-color-warning);
-}
-html:root[data-ci-appearance="editions"]:not([data-theme="dark"]) {
-  --color-warning-ink: #8c5a1b;
-}
-/* Before the boot script runs (or without JS) <html> has no data-theme, and the kit then follows
-   the system preference: keep the kit's own (dark) warning ink there, as ci-editions.css does. */
-@media (prefers-color-scheme: dark) {
-  html:root[data-ci-appearance="editions"]:not([data-theme]) {
-    --color-warning-ink: var(--ci-color-warning);
-  }
 }
 
 /* Dark: the kit flips every --ci-* value on `data-theme="dark"` (themeStore sets it with the

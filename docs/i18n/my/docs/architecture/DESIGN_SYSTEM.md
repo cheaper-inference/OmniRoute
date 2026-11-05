@@ -16,88 +16,89 @@
 > Cyrillic၊ Greek နှင့် Vietnamese အတွက် Inter ကို အသုံးပြုပြီး `html[dir="rtl"]` အောက်တွင်သာ Arabic script အတွက် Vazirmatn ကို အသုံးပြုသည်။
 > icon အားလုံးသည် Lucide glyph များဖြစ်သည်။
 
-## 1. အရာများ တည်ရှိသည့်နေရာ
+## 1. အရာများ ရှိသည့်နေရာ
 
-- **Kit။** `packages/ui-kit/src` သည်
-  `packages/ui-kit/UPSTREAM.md` တွင် သတ်မှတ်ထားသော commit ရှိ မူရင်း upstream `src/` ကို byte တစ်ခုချင်းစီ အတိအကျ ကူးယူထားခြင်းဖြစ်သည် (`packages/ui-kit/UPSTREAM.md` တွင် လိုင်စင်ခွင့်ပြုချက်ကိုလည်း မှတ်တမ်းတင်ထားသည်)။ `PATCHES.md` တွင် local
-  patch များကို စာရင်းပြုစုထားသည် (လက်ရှိ မရှိပါ)။ ၎င်းကို build မလုပ်ဘဲ source အဖြစ် တိုက်ရိုက်အသုံးပြုသည်။ `next.config.mjs` က ၎င်းကို transpile လုပ်ပြီး
+- **Kit။** `packages/ui-kit/src` သည် `packages/ui-kit/UPSTREAM.md` တွင် pin လုပ်ထားသည့် commit ရှိ upstream `src/` ကို byte-for-byte ကူးယူထားခြင်းဖြစ်သည် (`packages/ui-kit/UPSTREAM.md` တွင် license authorization ကိုလည်း မှတ်တမ်းတင်ထားသည်)။ `PATCHES.md` တွင် local patch များကို စာရင်းပြုစုထားသည် (မရှိပါ)။ ၎င်းကို build မလုပ်ဘဲ source အဖြစ် တိုက်ရိုက်အသုံးပြုသည်။ `next.config.mjs` က ၎င်းကို transpile လုပ်ပြီး
   `tsconfig.json` က `@omniroute/ui-kit` → `packages/ui-kit/src` နှင့် `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` ဟု map လုပ်ထားသည် (`vitest.config.ts` နှင့် `vitest.mcp.config.ts` တွင်လည်း တူညီသော alias ရှိသည်)။ Kit component တစ်ခုကို ၎င်း၏ subpath (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…) မှ import လုပ်ပါ။ `@omniroute/ui-kit` barrel မှတစ်ဆင့် မည်သည့်အခါမျှ
-  import မလုပ်ပါနှင့်။ အဆိုပါ barrel သည် component အားလုံးကို (date picker အပါအဝင်)
-  importer တစ်ခုစီအတွင်း ထည့်သွင်းသွားသည်။ Kit stylesheet ကို `src/app/globals.css`
-  (`@import "../../packages/ui-kit/src/ci-styles.css"`, အပြည့်အစုံပါဝင်သော sheet ဖြစ်ပြီး အဓိက `ci-ui.css` နှင့် pattern family အားလုံး ပါဝင်သည်) မှတစ်ဆင့် ထည့်သွင်းသည်။
-- **Token များ။** `packages/ui-kit/src/ci-tokens.css` က `--ci-*` token များကို ကြေညာသတ်မှတ်သည်။ `src/app/globals.css`
+  `packages/ui-kit/src/*` ဟု map လုပ်ထားသည် (`vitest.config.ts` နှင့် `vitest.mcp.config.ts` တို့တွင်လည်း တူညီသော alias ရှိသည်)။ Kit component တစ်ခုကို ၎င်း၏ subpath (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…) မှတစ်ဆင့် import လုပ်ပါ။ `@omniroute/ui-kit` barrel မှတစ်ဆင့် မည်သည့်အခါမျှ import မလုပ်ပါနှင့်။ Barrel သည် component အားလုံးကို (date picker အပါအဝင်) importer တစ်ခုစီထဲသို့ ဆွဲသွင်းမည်ဖြစ်သည်။ Kit stylesheet ကို `src/app/globals.css`
+  (`@import "../../packages/ui-kit/src/ci-styles.css"`, ပြီးပြည့်စုံသော sheet ဖြစ်ပြီး core `ci-ui.css` နှင့် pattern family အားလုံး ပါဝင်သည်) မှတစ်ဆင့် ထည့်သွင်းထားသည်။
+- **Token များ။** `packages/ui-kit/src/ci-tokens.css` က `--ci-*` token များကို ကြေညာသည်။ `src/app/globals.css`
   က ၎င်းတို့ကို အဟောင်း OmniRoute အမည်များ (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`) နှင့် ချိတ်ဆက်ပေးသောကြောင့် လက်ရှိ `var(--color-*)` အသုံးပြုမှုများနှင့် Tailwind
-  utility များ ဆက်လက်အလုပ်လုပ်သည်။ Code အသစ်တွင် Tailwind utility များ (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) သို့မဟုတ် kit class များကို အသုံးပြုရမည် — hex value ကို မည်သည့်အခါမျှ
-  မသုံးရ (`tests/unit/design-kit-bridge.test.ts` က ဤချိတ်ဆက်မှုကို စစ်ဆေးအတည်ပြုသည်)။ `text-primary` သည်
-  `--text-color-primary` မှတစ်ဆင့် `--color-primary-ink` သို့ resolve လုပ်သောကြောင့် primary စာသားကို ဖတ်ရလွယ်ကူစေပြီး
+  `--table-*`, `--orch-status-*`, `--color-fd-*`) နှင့် ချိတ်ဆက်ပေးထားသောကြောင့် ရှိပြီးသား `var(--color-*)` ဖတ်ယူမှုများနှင့် Tailwind utility များ ဆက်လက်အလုပ်လုပ်သည်။ Code အသစ်များတွင် Tailwind utility များ (`bg-surface`, `text-text-muted`,
+  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) သို့မဟုတ် kit class များကို အသုံးပြုပြီး hex value ကို မည်သည့်အခါမျှ မသုံးပါနှင့်
+  (`tests/unit/design-kit-bridge.test.ts` က bridge ကို enforce လုပ်ထားသည်)။ `text-primary` သည်
+  `--text-color-primary` မှတစ်ဆင့် `--color-primary-ink` သို့ resolve လုပ်သောကြောင့် primary text ကို ဖတ်ရှုရလွယ်ကူစေပြီး
   `bg-primary`/`border-primary` က accent surface ကို ဆက်လက်ထိန်းသိမ်းထားသည်။ Editions အောက်တွင် ၎င်းသည် kit ၏
-  `--ci-color-accent-active` (light mode တွင် ကြေးနီရင့်ရောင် `#99562f`၊ dark mode တွင် ကြေးနီ accent) ဖြစ်သည်။ Classic အောက်တွင်
-  light mode ၌ lime-800 ဖြစ်ပြီး dark mode ၌ lime accent ဖြစ်သည်။ Chart series များတွင်
+  `--ci-color-accent-active` (light တွင် ကြေးနီရောင်ရင့် `#99562f`၊ dark တွင် ကြေးနီ accent) ဖြစ်ပြီး Classic အောက်တွင်မူ
+  light တွင် lime-800 နှင့် dark တွင် lime accent ဖြစ်သည်။ Chart series များသည်
   `--color-chart-1` … `--color-chart-5` ကို အသုံးပြုသည်။
-- **Theme များ။** `<html className="ci-theme">` (`src/app/layout.tsx`) က document ကို kit theme ထဲသို့ ထည့်သွင်းအသုံးပြုစေသည်။
+- **Theme များ။** `<html className="ci-theme">` (`src/app/layout.tsx`) က document ကို kit theme ထဲသို့ ထည့်သွင်းသည်။
   Preference သည် `light`, `dark` သို့မဟုတ် `system` ဖြစ်သည် (`src/shared/constants/appConfig.ts` ရှိ
-  `THEME_CONFIG.defaultTheme = "system"`; `system` သည် `prefers-color-scheme` ကို လိုက်နာသည်)။ `src/store/themeStore.ts` ရှိ `applyTheme()` က
-  (`src/app/layout.tsx` တွင် inline ထည့်သွင်းထားပြီး hydration မတိုင်မီ run သော `THEME_BOOT_SCRIPT` တွင်လည်း အလားတူလုပ်ဆောင်ထားသည်)
-  `data-theme="dark"|"light"` ကို သတ်မှတ်ကာ `<html>` ပေါ်ရှိ `.dark` class ကိုလည်း တစ်ပြိုင်နက် toggle လုပ်သည်။
-  Kit ၏ dark token set ကို `data-theme="dark"` ပေါ်မူတည်၍ သတ်မှတ်ထားသည် (`packages/ui-kit/src/ci-tokens.css`)။
+  `THEME_CONFIG.defaultTheme = "system"`၊ `system` သည် `prefers-color-scheme` ကို လိုက်နာသည်)။ `src/store/themeStore.ts` ရှိ
+  `applyTheme()` သည် (`src/app/layout.tsx` ထဲတွင် inline လုပ်ထားပြီး hydration မတိုင်မီ run သော `THEME_BOOT_SCRIPT` ကလည်း အလားတူလုပ်ဆောင်သည်)
+  `data-theme="dark"|"light"` ကို သတ်မှတ်ပြီး `<html>` ပေါ်ရှိ `.dark` class ကိုလည်း တစ်ပြိုင်နက် toggle လုပ်သည်။
+  Kit ၏ dark token set ကို `data-theme="dark"` အပေါ် အခြေခံထားသည် (`packages/ui-kit/src/ci-tokens.css`)။
   OmniRoute ၏ ကိုယ်ပိုင် dark override များ (`globals.css` ရှိ `.dark` block) နှင့် အဟောင်း Tailwind `dark:`
-  utility များသည် `.dark` class ပေါ်မူတည်သည်။ Accent color preset များ မရှိပါ။ Accent သည် အမြဲတမ်း
-  kit မှ ရရှိပြီး build အဟောင်းမှ persist လုပ်ထားသော preset ရှိပါက store load လုပ်ချိန်တွင် ဖယ်ရှားသည်။
-- **Palette များ။** Kit မှရသော palette နှစ်ခုရှိသည် (`src/shared/constants/appearancePalette.ts`) — default ဖြစ်သည့် `editions` နှင့်
+  utility များကို `.dark` class အပေါ် အခြေခံထားသည်။ Accent color preset များ မရှိပါ။ Accent သည် kit မှ အမြဲလာပြီး
+  အဟောင်း build တစ်ခုမှ persist လုပ်ထားသည့် preset ကို store load လုပ်သည့်အခါ ဖယ်ရှားသည်။
+- **Palette များ။** နှစ်ခုရှိပြီး နှစ်ခုစလုံး kit မှလာသည် (`src/shared/constants/appearancePalette.ts`)။ Default ဖြစ်သည့် `editions` နှင့်
   `classic` တို့ဖြစ်သည်။ Editions သည် `<html>` ပေါ်ရှိ kit ၏ `data-ci-appearance="editions"` attribute ဖြစ်ပြီး
-  `ci-editions.css` (`ci-ui.css` မှ import လုပ်ထားသည်) က ၎င်းကို `data-theme` နှင့် ပေါင်းစပ်အသုံးပြုသည်။ Classic သည် ထို attribute
-  မရှိသည့် အခြေအနေဖြစ်သည်။ Root layout က attribute ကို server-render လုပ်သောကြောင့် မည်သည့် setting မျှ သိမ်းထားခြင်းမရှိသော visitor (သို့မဟုတ် JS မရှိသူ) သည်
-  dashboard၊ login၊ `/status`၊ error page များ၊ `/docs` နှင့် PWA အပါအဝင် နေရာအားလုံးတွင်
-  Editions ကို ရရှိသည်။ ရွေးချယ်မှုကို တူညီသော `theme` store ထဲတွင် theme နှင့်အတူ persist လုပ်ထားပြီး (`src/store/themeStore.ts` ရှိ `palette`, `setPalette()`, `applyPalette()`)
-  paint မလုပ်မီ `THEME_BOOT_SCRIPT`
-  (`src/shared/utils/themeBootScript.ts`, layout ၏ `<head>` ထဲတွင် inline ထည့်သွင်းထားသည်) က အသုံးချသည်။ Stored palette သည် `"classic"` ဖြစ်မှသာ ၎င်းက attribute ကို ဖယ်ရှားသည်။
-  Root layout ပြင်ပရှိ `src/app/global-error.tsx` သည် တူညီသော store မှ ၎င်းကို အသုံးချသည်။ `data-ci-appearance` ကို အခြား element တစ်ခုခုတွင် မထည့်ပါနှင့်။ Kit က ၎င်းကို
-  `html:root:has([data-ci-appearance="editions"])` ဖြင့် match လုပ်သောကြောင့် descendant တစ်ခုတည်းတွင် ထည့်ထားရုံဖြင့် document တစ်ခုလုံး ပြောင်းသွားမည်။
+  `ci-editions.css` (`ci-ui.css` က import လုပ်ထားသည်) က ၎င်းကို `data-theme` နှင့် ပေါင်းစပ်အသုံးပြုသည်။ Classic သည် ထို attribute မရှိခြင်းဖြစ်သည်။
+  Root layout က attribute ကို server-render လုပ်သောကြောင့် သိမ်းဆည်းထားသည့်အရာမရှိသော visitor (သို့မဟုတ် JS မရှိသော visitor) သည်
+  dashboard၊ login၊ `/status`၊ error page များ၊ `/docs` နှင့် PWA အပါအဝင် surface အားလုံးတွင် Editions ကို ရရှိသည်။ ရွေးချယ်မှုကို
+  theme နှင့်အတူ တူညီသော `theme` store ထဲတွင် persist လုပ်ထားပြီး (`src/store/themeStore.ts` ရှိ `palette`, `setPalette()`, `applyPalette()`)
+  `THEME_BOOT_SCRIPT` က paint မတိုင်မီ အသုံးချသည်
+  (`src/shared/utils/themeBootScript.ts`၊ layout ၏ `<head>` ထဲတွင် inline လုပ်ထားသည်)။ သိမ်းဆည်းထားသော palette သည် `"classic"` ဖြစ်သည့်အခါမှသာ
+  attribute ကို ဖယ်ရှားသည်။ Root layout အပြင်ဘက်ရှိ `src/app/global-error.tsx` ကလည်း တူညီသော store မှ ၎င်းကို အသုံးချသည်။
+  `data-ci-appearance` ကို အခြားမည်သည့် element ပေါ်တွင်မျှ မထည့်ပါနှင့်။ Kit က ၎င်းကို
+  `html:root:has([data-ci-appearance="editions"])` ဖြင့် match လုပ်သောကြောင့် descendant တစ်ခုတည်းက document တစ်ခုလုံးကို ပြောင်းလဲစေမည်ဖြစ်သည်။
   Editions ၏ `data-ci-editions-variant="landing"` variant သည် marketing page များအတွက်ဖြစ်ပြီး dashboard အတွက် မဟုတ်ပါ။
-  Browser chrome (`viewport.themeColor`, web manifest) သည် CSS သို့မဟုတ် သိမ်းထားသောရွေးချယ်မှုကို မဖတ်နိုင်သောကြောင့်
-  default ကို လိုက်နာသည်။ `src/shared/constants/pwaThemeColors.ts` ရှိ `PWA_THEME_COLORS` သည်
-  Editions `--ci-color-background` (`#f3f1e9` / `#11120f`) ၏ တစ်ခုတည်းသော mirror ဖြစ်ပြီး
-  `tests/unit/pwa-theme-colors.test.ts` က ၎င်းကို `ci-editions.css` နှင့် တစ်သမတ်တည်းဖြစ်စေရန် စစ်ဆေးထားသည်။ Monaco က probe (`monacoKitTheme.ts`) မှ ၎င်း၏အရောင်များကို ဖတ်သည်။
-  Editions အောက်တွင် kit က Editions light/dark ကို root မှ resolve လုပ်သောကြောင့် probe ဖတ်ရှုမှုသည် synchronous pass တစ်ကြိမ်အတွက် root `data-theme` ကို ပြောင်းပြန်လှန်သည်။
-- **Component များ (adapter များ)။** `src/shared/components/index.tsx` က OmniRoute component API (တူညီသော
-  အမည်များ၊ default export များနှင့် prop များ) ကို ဆက်လက်ထိန်းသိမ်းထားပြီး ၎င်း၏နောက်ကွယ်ရှိ primitive များသည် kit အပေါ် တည်ဆောက်ထားသော adapter များဖြစ်သည် — form များ
+  Browser chrome အတွက် server က default ဖြစ်သည့် Editions ကို `viewport.themeColor` တွင် render လုပ်သည် (`prefers-color-scheme` တစ်ခုစီအတွက် tag တစ်ခု)၊ web manifest တွင်လည်း render လုပ်သည် — `src/shared/constants/pwaThemeColors.ts` ရှိ
+  `PWA_THEME_COLORS` သည် Editions ၏ `--ci-color-background`
+  (`#f3f1e9` / `#11120f`) ကို mirror လုပ်ထားသည့် တစ်ခုတည်းသောနေရာဖြစ်ပြီး `tests/unit/pwa-theme-colors.test.ts` က ၎င်းကို `ci-editions.css` နှင့် pin လုပ်ထားသည်။ ထို့နောက် live
+  `<meta name="theme-color">` သည် သိမ်းဆည်းထားသော palette နှင့် mode ကို လိုက်နာသည်။ `THEME_BOOT_SCRIPT` က paint မတိုင်မီ tag များကို ပြန်ရေးပြီး
+  theme store ၏ action များက ပြောင်းလဲမှုတိုင်းတွင် ထိုသို့လုပ်ဆောင်သည် (`src/shared/utils/themeColorMeta.ts` ရှိ `resolveThemeColor()` /
+  `applyThemeColor()`၊ kit ၏ `ciTokens` မှ `CLASSIC_PAGE_BACKGROUND` ကို ဖတ်ယူသည်)။ Light/dark theme ကို အတိအလင်း သတ်မှတ်ထားပါက tag အားလုံးကို ထို mode သို့ သတ်မှတ်သည်။ `system` သည်
+  scheme တစ်ခုစီအတွက် colour တစ်ခုစီကို ထိန်းသိမ်းထားသည်။ Manifest သည် Editions အဖြစ် ဆက်ရှိနေသည်။ ၎င်းကို install တစ်ခုလျှင် တစ်ကြိမ်သာ fetch လုပ်ပြီး
+  preference မပါဝင်ပါ။ Monaco သည် probe တစ်ခုမှ ၎င်း၏ colour များကို ဖတ်ယူသည် (`monacoKitTheme.ts`)။
+  Editions အောက်တွင် probe read က synchronous pass တစ်ကြိမ်အတွက် root `data-theme` ကို လှန်ပြောင်းသည်။ အကြောင်းမှာ kit က Editions light/dark ကို root မှ resolve လုပ်သောကြောင့်ဖြစ်သည်။
+- **Component များ (adapter များ)။** `src/shared/components/index.tsx` သည် OmniRoute component API ကို ထိန်းသိမ်းထားသည် (တူညီသော
+  အမည်များ၊ default export များနှင့် prop များ)။ ၎င်း၏နောက်ကွယ်ရှိ primitive များသည် kit အပေါ် တည်ဆောက်ထားသော adapter များဖြစ်သည် — form များ
   (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`)၊ overlay နှင့် feedback
   (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`)၊
   ဖွဲ့စည်းပုံ (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) နှင့် table များ
-  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`) ဖြစ်သည်။ Adapter တစ်ခုသည် kit
-  component ကို subpath မှ import လုပ်ပြီး အဟောင်း prop များကို ၎င်းနှင့် map လုပ်သည် — ဥပမာ `Button variant="primary"` သည် kit ၏ `default` button
-  (`--ci-button-primary-*` — light mode တွင် ပြောင်းပြန် surface၊ dark mode တွင် ၎င်း၏
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`)။ Adapter တစ်ခုသည် kit
+  component ကို subpath ဖြင့် import လုပ်ပြီး အဟောင်း prop များကို ၎င်းနှင့် map လုပ်သည်။ ဥပမာ `Button variant="primary"` သည်
+  kit ၏ `default` button (`--ci-button-primary-*` — light တွင် inverse surface၊ dark တွင် ၎င်း၏
   `--ci-color-accent-foreground` ink ပါသော accent) ဖြစ်သည်။ `danger` သည် `destructive` ဖြစ်ပြီး `warning` သည် `outline` နှင့်
-  `.ci-button--warning` extension ကို ပေါင်းထားခြင်းဖြစ်သည်။ `globals.css` ၏အဆုံးရှိ
-  `.ci-button--warning` နှင့် `.ci-badge[data-tone]` rule များ (`@layer components`) သည် kit class များအပေါ် ထပ်ဆင့်ထားသော OmniRoute extension များဖြစ်သည်။
-  `tests/unit/ui/adapters/*.test.tsx` က adapter တစ်ခုစီ၏ အပြုအမူကို စစ်ဆေးအတည်ပြုထားသည်။
-- **Shell။** `src/app/(dashboard)/layout.tsx` က `DashboardLayout` ကို render လုပ်ပြီး ၎င်းက
+  `.ci-button--warning` extension ကို ပေါင်းထားခြင်းဖြစ်သည်။ `globals.css` ၏အဆုံး (`@layer components`) ရှိ
+  `.ci-button--warning` နှင့် `.ci-badge[data-tone]` rule များသည် kit class များအပေါ် ထပ်တိုးထားသော OmniRoute extension များဖြစ်သည်။
+  `tests/unit/ui/adapters/*.test.tsx` က adapter တစ်ခုစီကို pin လုပ်ထားသည်။
+- **Shell။** `src/app/(dashboard)/layout.tsx` သည် `DashboardLayout` ကို render လုပ်ပြီး၊ ၎င်းက
   `src/shared/components/layouts/DashboardShell.tsx` ကို render လုပ်သည်။ ၎င်းတွင် kit ၏ `SidebarProvider` / `Sidebar` /
-  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`) နှင့် `src/shared/components/Sidebar.tsx` ရှိ OmniRoute ၏ navigation logic တို့ ပါဝင်သည်။
-  `#main-content` သို့ ချိတ်ထားသော "အဓိကအကြောင်းအရာသို့ ကျော်သွားရန်" link သည် ပထမဆုံး focus လုပ်နိုင်သော
+  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`) နှင့် OmniRoute ၏ navigation logic ကို
+  `src/shared/components/Sidebar.tsx` တွင် ထည့်သွင်းထားသည်။ `#main-content` သို့ ညွှန်သည့် "အကြောင်းအရာသို့ ကျော်သွားရန်" link သည် ပထမဆုံး focus လုပ်နိုင်သော
   element ဖြစ်သည်။ `src/shared/components/Header.tsx` တွင် kit ၏ `SidebarTrigger` (shell ၏ တစ်ခုတည်းသော sidebar
-  toggle)၊ Keak `ProductSwitcher` နှင့် command-palette opener တို့ ပါဝင်သည်။ `#main-content` ထဲတွင် kit `PageHeader` (`.ci-page-header`) မရှိသည့်အချိန်တွင်သာ route title ကို ပြသသောကြောင့်
-  ကိုယ်ပိုင် `PageHeader` ပါသော page တစ်ခုတွင် `h1` တစ်ခုတည်းသာ ရှိသည်။ `src/shared/components/CommandPalette.tsx` သည် kit `Dialog` ဖြစ်သည်။
-- **အိုင်ကွန်များ။** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) သည် အမည် (စခရင်များတွင် အသုံးပြုသည့်
-  Material Symbols ဝေါဟာရအစု) ကို `ICON_MAP` (`src/shared/constants/iconMap.ts`) မှတစ်ဆင့်
-  Lucide ဂလစ်ဖ်တစ်ခုအဖြစ် ဖြေရှင်းပေးသည်။ Material Symbols ဖောင့်နှင့် ပက်ကေ့ချ်ကို ဖယ်ရှားပြီးဖြစ်သည်။ မြေပုံတွင် မရှိသော အမည်တစ်ခုသည်
-  ကြားနေ အစားထိုးဂလစ်ဖ် (`data-icon-missing="true"`) ကို ပြသပြီး production ပြင်ပတွင် console သတိပေးချက်တစ်ခုကို မှတ်တမ်းတင်သည်။
-  `npm run gen:icon-map` သည် မြေပုံတွင် မရှိသေးသော လက်ရှိအသုံးပြုနေသည့် အမည်များကို ထုတ်ပြသည်
-  (Lucide အိုင်ကွန်မရှိသော မည်သည့်အမည်အတွက်မဆို `tests/unit/icon-map-coverage.test.ts` မအောင်မြင်ပါ။
-  ရှာဖွေမှု object များတွင် သိမ်းဆည်းထားသော အမည်များကို `tests/unit/icon-map-object-values.test.ts` က စစ်ဆေးသည်)။
+  toggle)၊ Keak `ProductSwitcher` နှင့် command-palette ဖွင့်ရန် control တို့ ပါဝင်သည်။ `#main-content` အတွင်းတွင် kit ၏ `PageHeader` (`.ci-page-header`) ကို mount မလုပ်ထားသည့်အချိန်၌သာ
+  route title ကို ပြသသဖြင့် ကိုယ်ပိုင်
+  `PageHeader` ပါသော page တစ်ခုတွင် `h1` တစ်ခုတည်းသာ ရှိသည်။ `src/shared/components/CommandPalette.tsx` သည် kit ၏ `Dialog` ဖြစ်သည်။
+- **အိုင်ကွန်များ။** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) သည် name (screen များတွင် အသုံးပြုသည့်
+  Material Symbols vocabulary) ကို `ICON_MAP` (`src/shared/constants/iconMap.ts`) မှတစ်ဆင့်
+  Lucide glyph တစ်ခုအဖြစ် ဖြေရှင်းပေးသည်။ Material Symbols font နှင့် package ကို ဖယ်ရှားပြီးဖြစ်သည်။ map တွင် မပါသော name တစ်ခုသည်
+  neutral placeholder glyph (`data-icon-missing="true"`) ကို render လုပ်ပြီး production ပြင်ပတွင် console warning တစ်ခုကို log လုပ်သည်။
+  `npm run gen:icon-map` သည် အသုံးပြုနေသော်လည်း map တွင် မပါသော name များကို print ထုတ်ပေးသည်
+  (Lucide icon မရှိသော name တစ်ခုခုအတွက် `tests/unit/icon-map-coverage.test.ts` မအောင်မြင်ပါ။
+  lookup object များတွင် သိမ်းဆည်းထားသော name များကို `tests/unit/icon-map-object-values.test.ts` က စမ်းသပ်သည်)။
   `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` သည် literal
   `<span className="material-symbols-outlined">` span များကို `<Icon>` အဖြစ် ပြန်လည်ရေးသားသည်။
-- **အမှတ်တံဆိပ်။** `src/shared/components/OmniRouteLogo.tsx` သည် kit ကို wrapper လုပ်ပေးသည်။ မူလ export ဖြစ်သော `OmniRouteLogo`
-  သည် `ProductIcon product="omniroute" variant="glyph"` (inline SVG၊ `basePath`-နှင့် လုံခြုံစွာ တွဲဖက်အသုံးပြုနိုင်) ကို ပြသပြီး
-  `OmniRouteLockup` သည် `ProductLockup product="omniroute"` (အသုံးပြုနိုင်မှုဆိုင်ရာ အမည် "Keak OmniRoute") ကို ပြသသည်၊ သို့မဟုတ်
-  white-label အော်ပရေတာများအတွက် ၎င်းတို့၏ ကိုယ်ပိုင် `name`/`logoSrc` ကို ပြသသည်။ Product-switcher ဦးတည်ရာများကို
+- **အမှတ်တံဆိပ်။** `src/shared/components/OmniRouteLogo.tsx` သည် kit ကို wrap လုပ်သည်။ default export ဖြစ်သော `OmniRouteLogo`
+  သည် `ProductIcon product="omniroute" variant="glyph"` (inline SVG၊ `basePath` နှင့် ကိုက်ညီမှုရှိသည်) ကို render လုပ်ပြီး
+  `OmniRouteLockup` သည် `ProductLockup product="omniroute"` (အသုံးပြုရလွယ်ကူစေရန် အမည်မှာ "Keak OmniRoute" ဖြစ်သည်) ကို render လုပ်သည်။ သို့မဟုတ်
+  white-label operator များအတွက် ၎င်းတို့၏ ကိုယ်ပိုင် `name`/`logoSrc` ကို render လုပ်သည်။ Product-switcher destination များကို
   `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`) တွင် ထားရှိသည်။ သီးခြား
-  စခရင်များဖြစ်သည့် `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
+  screen များဖြစ်သော `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
   `src/app/offline/page.tsx`, `src/app/not-found.tsx` နှင့် `src/shared/components/ErrorPageScaffold.tsx`
-  တို့တွင် lockup ကို ပြသပြီး `tests/unit/brand-pages-static.test.ts` က ၎င်းကို ကာကွယ်စစ်ဆေးသည်။
+  တို့သည် lockup ကို ပြသပြီး `tests/unit/brand-pages-static.test.ts` က ၎င်းကို ကာကွယ်စစ်ဆေးထားသည်။
 
 ## 2. စည်းကမ်းများ
 
