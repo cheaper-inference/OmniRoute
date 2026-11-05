@@ -26,8 +26,9 @@ const paid = (tone: string): M365ModelProfile => ({
 
 /** Full documented standalone catalog. Registration does not assert account entitlement. */
 export const M365_DOCUMENTED_MODELS: Readonly<Record<string, M365ModelProfile>> = Object.freeze({
-  "m365-copilot": included("magic"),
-  auto: included("magic"),
+  // The protocol tone literal is capitalized; lowercase "magic" is the stale shape (#11069).
+  "m365-copilot": included("Magic"),
+  auto: included("Magic"),
   quick: included("Gpt_5_5_Chat"),
   "think-deeper": included("Gpt_5_5_Reasoning"),
   claude: included("Claude_Sonnet"),

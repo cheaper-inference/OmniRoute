@@ -180,7 +180,11 @@ for (const code of [
     const before = Date.now();
     const verdict = fallback.checkFallbackError(429, body(code), 0, model, provider, headers);
     assert.equal(verdict.ruleScope, code === "priority_access_exhausted" ? "model" : "connection");
-    assert.equal(verdict.cooldownMs, 3600000);
+    // Two Date.now() reads separate the reset from the hint: allow the same tick as below.
+    assert.ok(
+      verdict.cooldownMs >= 3599000 && verdict.cooldownMs <= 3600000,
+      String(verdict.cooldownMs)
+    );
     await auth.markAccountUnavailable(conn.id, 429, body(code), provider, model, null, {
       headers,
       isCombo: true,
@@ -250,3 +254,15 @@ test("native selected credentials serialize an account, permit peers, and abort 
   release();
   (await queued)();
 });
+
+// A licence denial is recoverable (the model lock or connection cooldown above); it must never
+// classify as FORBIDDEN, which bans the connection permanently. Pinned so a change to this
+// provider's category or the classifier cannot silently start banning licensed accounts.
+for (const code of ["m365_account_not_licensed", "m365_model_not_licensed"]) {
+  test(`${code} never classifies as a permanent FORBIDDEN ban`, () => {
+    const denial = body(code);
+    for (const input of [denial, JSON.parse(denial), "Microsoft 365 Copilot access denied."]) {
+      assert.notEqual(classifyProviderError(403, input, provider), "forbidden");
+    }
+  });
+}

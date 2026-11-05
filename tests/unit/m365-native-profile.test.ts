@@ -61,8 +61,8 @@ test("explicit overrides win model and tier defaults independently; unknown name
 
 // Frozen documented mapping: no account-specific discovery or guessed version routing.
 const DOCUMENTED_TONES: Record<string, string> = {
-  "m365-copilot": "magic",
-  auto: "magic",
+  "m365-copilot": "Magic",
+  auto: "Magic",
   quick: "Gpt_5_5_Chat",
   "think-deeper": "Gpt_5_5_Reasoning",
   claude: "Claude_Sonnet",

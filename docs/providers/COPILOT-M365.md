@@ -128,9 +128,11 @@ after each expiry.
 | `edu`        | `included`  | Education M365 Copilot |
 | `enterprise` | `work`      | M365 Copilot for Work  |
 
-Set the tier in **Advanced Settings → Copilot tier**. The tier affects
-the legacy routing defaults. Documented model IDs select their own scenario and tone;
-changing the tier does not grant a model licence. Explicit advanced protocol overrides
+Set the tier in **Advanced Settings → Copilot tier**. Native sign-in does not set it, so a
+work account must select `enterprise` (alias `work`) and an education account `edu`, also when
+using documented model IDs: those select their own tone, scenario and licence type, but the
+agent and invocation options still come from the tier, and the individual defaults can fail on
+a work tenant. Changing the tier does not grant a model licence. Explicit advanced protocol overrides
 take precedence and should only be used when you know the required wire values.
 
 ## Models and routing
