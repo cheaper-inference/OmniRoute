@@ -1939,7 +1939,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# հարցում} other {# հարցումներ}}, {keys, plural, one {# սահմանափակ բանալի} other {# սահմանափակ բանալիներ}}",
     "unpricedUsageMore": "…և ևս {count}",
     "unpricedUsageConfigure": "Կարգավորել գները",
-    "unpricedUsageDismiss": "Փակել"
+    "unpricedUsageDismiss": "Փակել",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Վերլուծություն",
@@ -7097,6 +7106,7 @@
     "proxySubTabsAria": "Պրոքսիի բաժիններ",
     "requestBodyLimitTitle": "Հարցման մարմնի սահմանաչափ",
     "requestBodyLimitDescription": "API-ի օգտակար բեռի առավելագույն չափը, որն ընդունվում է նախքան հարցման մարմնի վերլուծումը։ Վերբեռնման հատուկ երթուղիները պահպանում են առնվազն իրենց ներկառուցված 100 MB սահմանաչափը։",
+    "requestBodyLimitChatHint": "Chat Completions-ը և Responses-ը ընդունում են մինչև 50 MB, մինչև այստեղ սահմանաչափ պահպանեք։ Պահպանված սահմանաչափը կիրառվում է նաև դրանց համար՝ անկախ նրանից՝ ավելի ցածր է, թե բարձր։",
     "requestBodyLimitInputLabel": "Հարցման մարմնի սահմանաչափը՝ MB-ով",
     "requestBodyLimitEmptyError": "Մուտքագրեք սահմանաչափը՝ MB-ով",
     "requestBodyLimitWholeNumberError": "Օգտագործեք ամբողջ թիվ",

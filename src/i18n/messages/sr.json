@@ -1939,7 +1939,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# захтев} few {# захтева} other {# захтева}}, {keys, plural, one {# ограничен кључ} few {# ограничена кључа} other {# ограничених кључева}}",
     "unpricedUsageMore": "…и још {count}",
     "unpricedUsageConfigure": "Конфигуриши цене",
-    "unpricedUsageDismiss": "Одбаци"
+    "unpricedUsageDismiss": "Одбаци",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Аналитика",
@@ -7097,6 +7106,7 @@
     "proxySubTabsAria": "Одељци проксија",
     "requestBodyLimitTitle": "Ограничење величине тела захтева",
     "requestBodyLimitDescription": "Максимална величина API пакета која се прихвата пре парсирања тела захтева. За наменске руте за отпремање и даље важи њихово уграђено ограничење од најмање 100 MB.",
+    "requestBodyLimitChatHint": "Chat Completions и Responses прихватају до 50 MB док овде не сачувате ограничење. Сачувано ограничење важи и за њих, било да је ниже или више.",
     "requestBodyLimitInputLabel": "Ограничење тела захтева у MB",
     "requestBodyLimitEmptyError": "Унесите ограничење у MB",
     "requestBodyLimitWholeNumberError": "Користите цео број",

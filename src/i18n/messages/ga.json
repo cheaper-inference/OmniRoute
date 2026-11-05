@@ -1939,7 +1939,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# iarratas} other {# iarratais}}, {keys, plural, one {# eochair theoranta} other {# eochracha theoranta}}",
     "unpricedUsageMore": "…agus {count} eile",
     "unpricedUsageConfigure": "Cumraigh praghsáil",
-    "unpricedUsageDismiss": "Dún"
+    "unpricedUsageDismiss": "Dún",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Anailísíocht",
@@ -7097,6 +7106,7 @@
     "proxySubTabsAria": "Rannóga seachfhreastalaí",
     "requestBodyLimitTitle": "Teorainn Chorp an Iarratais",
     "requestBodyLimitDescription": "An t-uasmhéid pálasta API a nglactar leis sula ndéantar corp iarratais a pharsáil. Coinníonn bealaí uaslódála tiomnaithe a dteorainn ionsuite 100 MB ar a laghad.",
+    "requestBodyLimitChatHint": "Glacann Chat Completions agus Responses le suas le 50 MB go dtí go sábhálfaidh tú teorainn anseo. Baineann an teorainn shábháilte leo freisin, bíodh sí níos ísle nó níos airde.",
     "requestBodyLimitInputLabel": "Teorainn chorp an iarratais in MB",
     "requestBodyLimitEmptyError": "Cuir isteach teorainn in MB",
     "requestBodyLimitWholeNumberError": "Úsáid slánuimhir",

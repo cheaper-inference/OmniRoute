@@ -1939,7 +1939,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# pieprasījums} other {# pieprasījumi}}, {keys, plural, one {# ierobežota atslēga} other {# ierobežotas atslēgas}}",
     "unpricedUsageMore": "…un vēl {count}",
     "unpricedUsageConfigure": "Konfigurēt cenas",
-    "unpricedUsageDismiss": "Aizvērt"
+    "unpricedUsageDismiss": "Aizvērt",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analītika",
@@ -7097,6 +7106,7 @@
     "proxySubTabsAria": "Starpniekservera sadaļas",
     "requestBodyLimitTitle": "Pieprasījuma pamatteksta ierobežojums",
     "requestBodyLimitDescription": "Maksimālais API datu apjoms, kas tiek pieņemts pirms pieprasījuma pamatteksta parsēšanas. Atsevišķajiem augšupielādes maršrutiem joprojām ir vismaz tajos iebūvētais 100 MB ierobežojums.",
+    "requestBodyLimitChatHint": "Chat Completions un Responses pieņem līdz 50 MB, līdz šeit saglabājat ierobežojumu. Saglabātais ierobežojums attiecas arī uz tām neatkarīgi no tā, vai tas ir mazāks vai lielāks.",
     "requestBodyLimitInputLabel": "Pieprasījuma pamatteksta ierobežojums (MB)",
     "requestBodyLimitEmptyError": "Ievadiet ierobežojumu MB",
     "requestBodyLimitWholeNumberError": "Izmantojiet veselu skaitli",

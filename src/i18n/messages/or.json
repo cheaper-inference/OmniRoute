@@ -1939,7 +1939,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# ନିବେଦନ} other {# ନିବେଦନ}}, {keys, plural, one {# ସୀମିତ କୀ} other {# ସୀମିତ କୀଗୁଡିକ}}",
     "unpricedUsageMore": "…ଏବଂ ଆଉ {count}ଟି",
     "unpricedUsageConfigure": "ମୂଲ୍ୟ ବିନ୍ୟାସ କରନ୍ତୁ",
-    "unpricedUsageDismiss": "ବାତିଲ୍ କରନ୍ତୁ"
+    "unpricedUsageDismiss": "ବାତିଲ୍ କରନ୍ତୁ",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "ବିଶ୍ଳେଷଣ",
@@ -7097,6 +7106,7 @@
     "proxySubTabsAria": "ପ୍ରକ୍ସି ବିଭାଗଗୁଡ଼ିକ",
     "requestBodyLimitTitle": "ଅନୁରୋଧ ବଡି ସୀମା",
     "requestBodyLimitDescription": "କୌଣସି ଅନୁରୋଧ ବଡିକୁ ପାର୍ସ କରାଯିବା ପୂର୍ବରୁ ଗ୍ରହଣ କରାଯାଉଥିବା ସର୍ବାଧିକ API ପେଲୋଡ୍ ଆକାର। ଉତ୍ସର୍ଗୀକୃତ ଅପଲୋଡ୍ ରୁଟ୍ଗୁଡ଼ିକ ଅତି କମରେ ସେମାନଙ୍କର ଅନ୍ତର୍ନିର୍ମିତ 100 MB ସୀମା ବଜାୟ ରଖନ୍ତି।",
+    "requestBodyLimitChatHint": "ଆପଣ ଏଠାରେ ଏକ ସୀମା ସଞ୍ଚୟ କରିବା ପର୍ଯ୍ୟନ୍ତ Chat Completions ଏବଂ Responses ସର୍ବାଧିକ 50 MB ଗ୍ରହଣ କରନ୍ତି। ସଞ୍ଚିତ ସୀମା କମ୍ କିମ୍ବା ଅଧିକ ହେଲେ ମଧ୍ୟ ସେମାନଙ୍କ ପାଇଁ ପ୍ରଯୁଜ୍ୟ।",
     "requestBodyLimitInputLabel": "MBରେ ଅନୁରୋଧ ବଡି ସୀମା",
     "requestBodyLimitEmptyError": "MBରେ ଏକ ସୀମା ପ୍ରବେଶ କରନ୍ତୁ",
     "requestBodyLimitWholeNumberError": "ଏକ ପୂର୍ଣ୍ଣ ସଂଖ୍ୟା ବ୍ୟବହାର କରନ୍ତୁ",

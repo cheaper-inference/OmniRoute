@@ -1939,7 +1939,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# pyyntö} other {# pyyntöä}}, {keys, plural, one {# rajoitettu API-avain} other {# rajoitettua API-avainta}}",
     "unpricedUsageMore": "…ja {count} lisää",
     "unpricedUsageConfigure": "Määritä hinnat",
-    "unpricedUsageDismiss": "Sulje"
+    "unpricedUsageDismiss": "Sulje",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analytiikka",
@@ -7097,6 +7106,7 @@
     "proxySubTabsAria": "Välityspalvelimen osiot",
     "requestBodyLimitTitle": "Pyyntörungon kokorajoitus",
     "requestBodyLimitDescription": "API-hyötykuorman enimmäiskoko, joka hyväksytään ennen pyyntörungon jäsentämistä. Erilliset latausreitit säilyttävät vähintään sisäänrakennetun 100 Mt:n rajoituksensa.",
+    "requestBodyLimitChatHint": "Chat Completions ja Responses hyväksyvät enintään 50 MB, kunnes tallennat rajan tässä. Tallennettu raja koskee myös niitä riippumatta siitä, onko se pienempi vai suurempi.",
     "requestBodyLimitInputLabel": "Pyyntörungon kokorajoitus megatavuina",
     "requestBodyLimitEmptyError": "Anna raja megatavuina",
     "requestBodyLimitWholeNumberError": "Käytä kokonaislukua",

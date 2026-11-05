@@ -1939,7 +1939,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# درخواست} other {# درخواست‌ها}}, {keys, plural, one {# کلید API محدود} other {# کلیدهای API محدود}}",
     "unpricedUsageMore": "…و {count} مورد دیگر",
     "unpricedUsageConfigure": "پیکربندی قیمت‌گذاری",
-    "unpricedUsageDismiss": "بستن"
+    "unpricedUsageDismiss": "بستن",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "تحلیلها",
@@ -7097,6 +7106,7 @@
     "proxySubTabsAria": "بخشهای پروکسی",
     "requestBodyLimitTitle": "محدودیت بدنه درخواست",
     "requestBodyLimitDescription": "حداکثر اندازهٔ محتوای API که پیش از تجزیهٔ بدنهٔ درخواست پذیرفته میشود. مسیرهای اختصاصی بارگذاری دستکم محدودیت داخلی 100 MB خود را حفظ میکنند.",
+    "requestBodyLimitChatHint": "Chat Completions و Responses تا زمانی که محدودیتی در اینجا ذخیره نکنید، تا 50 MB می‌پذیرند. محدودیت ذخیره‌شده، چه کمتر و چه بیشتر باشد، برای آن‌ها نیز اعمال می‌شود.",
     "requestBodyLimitInputLabel": "محدودیت بدنه درخواست بر حسب MB",
     "requestBodyLimitEmptyError": "محدودیتی بر حسب MB وارد کنید",
     "requestBodyLimitWholeNumberError": "از عدد صحیح استفاده کنید",

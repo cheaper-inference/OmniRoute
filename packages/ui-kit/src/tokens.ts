@@ -44,16 +44,58 @@ export const ciTokens = {
     status: {
       live: "#cff331",
       success: "#087a4f",
-      warning: "#a75a00",
+      warning: "#a05600",
       danger: "#bf3636",
       info: "#2869d8",
     },
+    accentInk: "#4d5c00",
     chart: {
-      1: "#9bb800",
+      1: "#728700",
       2: "#2869d8",
       3: "#7d4fc7",
       4: "#087a4f",
       5: "#c15588",
+      6: "#d2580f",
+      7: "#007f8c",
+      8: "#8f5a2a",
+    },
+    code: {
+      keyword: "#4d5c00",
+      string: "#027249",
+      number: "#9a5300",
+      function: "#1d5ecc",
+      property: "#8a3fb0",
+      comment: "#575f5f",
+    },
+    codeInverse: {
+      keyword: "#d8ff00",
+      string: "#a7e8c5",
+      number: "#f4cf8b",
+      function: "#b8d8ff",
+      property: "#e9c1ff",
+      comment: "#9ca39f",
+    },
+    /** Text-safe ink per chart colour (light theme values); 4.5:1 on content surfaces. */
+    chartInk: {
+      1: "#4d5c00",
+      2: "#1d5ecc",
+      3: "#7749c0",
+      4: "#027249",
+      5: "#a83e72",
+      6: "#ab4403",
+      7: "#066f7a",
+      8: "#8c5727",
+    },
+    /** Opaque chip/row tint per chart colour (light theme values); chart ink keeps 4.5:1 on it. */
+    chartSubtle: {
+      1: "#eef1e0",
+      2: "#e5edfa",
+      3: "#efeaf8",
+      4: "#e1efea",
+      5: "#f8ebf1",
+      6: "#faebe2",
+      7: "#e0f0f1",
+      8: "#f2ebe5",
     },
   },
   font: {
@@ -149,6 +191,16 @@ export const ciTokens = {
   },
 } as const;
 
+/**
+ * Recommended order for assigning categorical series to chart tokens. Adjacent
+ * pairs stay at least ΔE 8 apart (OKLab×100) under protanopia/deuteranopia and
+ * 15 for typical vision in the default light and dark themes. Past eight series,
+ * repeat the colours in this order and tell the repeats apart with a secondary
+ * encoding; `chartSeries(index)` switches the `LegendMarker` shape every cycle.
+ */
+export const ciChartSeriesOrder = [4, 3, 6, 7, 8, 2, 1, 5] as const;
+export type CiChartSlot = (typeof ciChartSeriesOrder)[number];
+
 /** CSS-variable references for component and application code. */
 export const ciTokenReferences = {
   color: {
@@ -159,6 +211,7 @@ export const ciTokenReferences = {
     muted: "var(--ci-color-text-muted)",
     border: "var(--ci-color-border)",
     accent: "var(--ci-color-accent)",
+    accentInk: "var(--ci-color-accent-ink)",
     live: "var(--ci-color-live)",
     focus: "var(--ci-color-focus)",
   },

@@ -2016,7 +2016,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# talba} other {# talbiet}}, {keys, plural, one {# ċavetta limitata} other {# ċwievet limitati}}",
     "unpricedUsageMore": "…u {count} aktar",
     "unpricedUsageConfigure": "Ikkonfigura prezzijiet",
-    "unpricedUsageDismiss": "Għalaq"
+    "unpricedUsageDismiss": "Għalaq",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analitika",
@@ -7174,6 +7183,7 @@
     "proxySubTabsAria": "Sezzjonijiet tal-proxy",
     "requestBodyLimitTitle": "Limitu tal-Korp tat-Talba",
     "requestBodyLimitDescription": "Id-daqs massimu tal-payload tal-API aċċettat qabel ma jiġi analizzat il-korp tat-talba. Ir-rotot dedikati għat-tlugħ tal-fajls iżommu mill-inqas il-limitu integrat tagħhom ta’ 100 MB.",
+    "requestBodyLimitChatHint": "Chat Completions u Responses jaċċettaw sa 50 MB sakemm issalva limitu hawn. Il-limitu salvat japplika għalihom ukoll, kemm jekk ikun aktar baxx kif ukoll jekk ikun ogħla.",
     "requestBodyLimitInputLabel": "Limitu tal-korp tat-talba f’MB",
     "requestBodyLimitEmptyError": "Daħħal limitu f’MB",
     "requestBodyLimitWholeNumberError": "Uża numru sħiħ",

@@ -1939,7 +1939,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# permintaan} other {# permintaan}}, {keys, plural, one {# kunci terhad} other {# kunci terhad}}",
     "unpricedUsageMore": "…dan {count} lagi",
     "unpricedUsageConfigure": "Konfigurasikan harga",
-    "unpricedUsageDismiss": "Tutup"
+    "unpricedUsageDismiss": "Tutup",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analitis",
@@ -7097,6 +7106,7 @@
     "proxySubTabsAria": "Bahagian proksi",
     "requestBodyLimitTitle": "Had Badan Permintaan",
     "requestBodyLimitDescription": "Saiz muatan API maksimum yang diterima sebelum badan permintaan dihuraikan. Laluan muat naik khusus mengekalkan sekurang-kurangnya had terbina dalam sebanyak 100 MB.",
+    "requestBodyLimitChatHint": "Chat Completions dan Responses menerima sehingga 50 MB sehingga anda menyimpan had di sini. Had yang disimpan juga terpakai kepada kedua-duanya, sama ada lebih rendah atau lebih tinggi.",
     "requestBodyLimitInputLabel": "Had badan permintaan dalam MB",
     "requestBodyLimitEmptyError": "Masukkan had dalam MB",
     "requestBodyLimitWholeNumberError": "Gunakan nombor bulat",

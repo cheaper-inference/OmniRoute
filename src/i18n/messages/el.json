@@ -1939,7 +1939,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# αίτημα} other {# αιτήματα}}, {keys, plural, one {# κλειδί με όριο} other {# κλειδιά με όριο}}",
     "unpricedUsageMore": "…και {count} ακόμη",
     "unpricedUsageConfigure": "Ρύθμιση τιμών",
-    "unpricedUsageDismiss": "Απόρριψη"
+    "unpricedUsageDismiss": "Απόρριψη",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Αναλυτικά στοιχεία",
@@ -7097,6 +7106,7 @@
     "proxySubTabsAria": "Ενότητες Proxy",
     "requestBodyLimitTitle": "Όριο σώματος αιτήματος",
     "requestBodyLimitDescription": "Μέγιστο μέγεθος ωφέλιμου φορτίου API που γίνεται δεκτό πριν αναλυθεί το σώμα του αιτήματος. Οι αποκλειστικές διαδρομές μεταφόρτωσης διατηρούν τουλάχιστον το ενσωματωμένο όριο των 100 MB.",
+    "requestBodyLimitChatHint": "Τα Chat Completions και Responses δέχονται έως 50 MB μέχρι να αποθηκεύσετε ένα όριο εδώ. Το αποθηκευμένο όριο ισχύει και για αυτά, είτε είναι χαμηλότερο είτε υψηλότερο.",
     "requestBodyLimitInputLabel": "Όριο σώματος αιτήματος σε MB",
     "requestBodyLimitEmptyError": "Εισάγετε ένα όριο σε MB",
     "requestBodyLimitWholeNumberError": "Χρησιμοποιήστε ακέραιο αριθμό",

@@ -1939,7 +1939,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# ombi} other {# maombi}}, {keys, plural, one {# ufunguo lenye kikomo} other {# funguo zenye kikomo}}",
     "unpricedUsageMore": "…na {count} zaidi",
     "unpricedUsageConfigure": "Sanidi bei",
-    "unpricedUsageDismiss": "Puuza"
+    "unpricedUsageDismiss": "Puuza",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Uchanganuzi",
@@ -7097,6 +7106,7 @@
     "proxySubTabsAria": "Sehemu za proksi",
     "requestBodyLimitTitle": "Kikomo cha Mwili wa Ombi",
     "requestBodyLimitDescription": "Ukubwa wa juu zaidi wa data ya API unaokubaliwa kabla ya mwili wa ombi kuchanganuliwa. Njia maalum za upakiaji huhifadhi angalau kikomo chao cha ndani cha MB 100.",
+    "requestBodyLimitChatHint": "Chat Completions na Responses zinakubali hadi 50 MB hadi utakapohifadhi kikomo hapa. Kikomo kilichohifadhiwa kinatumika pia kwao, kiwe cha chini au cha juu zaidi.",
     "requestBodyLimitInputLabel": "Kikomo cha mwili wa ombi kwa MB",
     "requestBodyLimitEmptyError": "Weka kikomo kwa MB",
     "requestBodyLimitWholeNumberError": "Tumia nambari kamili",

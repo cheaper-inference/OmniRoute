@@ -1939,7 +1939,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# ìbéèrè} other {# ìbéèrè}}, {keys, plural, one {# bọtini tí ó ní ìdínà} other {# bọtini tí ó ní ìdínà}}",
     "unpricedUsageMore": "… àti {count} míì",
     "unpricedUsageConfigure": "Ṣètò ìye",
-    "unpricedUsageDismiss": "Fagilé"
+    "unpricedUsageDismiss": "Fagilé",
+    "systemMetricsTitle": "Àwọn ìwọ̀n ètò",
+    "systemMetricsActive": "Àbojútó ń ṣiṣẹ́",
+    "systemMetricsLoading": "Ń kojọpọ̀...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Ìrántí",
+    "systemMetricsHost": "VPS / Agbàlejò",
+    "systemMetricsCpuCount": "{count} vCPU • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (ìṣiṣẹ́)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS Ìrántí / Òkìtì)"
   },
   "analytics": {
     "title": "Ìtúpalẹ̀",
@@ -7097,6 +7106,7 @@
     "proxySubTabsAria": "Àwọn abala Proxy",
     "requestBodyLimitTitle": "Ààlà Ara Ìbéèrè",
     "requestBodyLimitDescription": "Ìwọ̀n ẹrù API tó pọ̀ jù tí a lè gba kí a tó ṣe ìtúpalẹ̀ ara ìbéèrè. Àwọn ipa ọ̀nà ìṣàgbéwọlé fáìlì pàtó yóò ṣì ní ó kéré tán ààlà 100 MB tí a kọ sínú wọn.",
+    "requestBodyLimitChatHint": "Chat Completions àti Responses gba tó 50 MB títí tí o fi pamọ́ ààlà síbí. Ààlà tí a pamọ́ náà tún kan wọn, yálà ó kéré tàbí ó ga ju bẹ́ẹ̀ lọ.",
     "requestBodyLimitInputLabel": "Ààlà ara ìbéèrè ní MB",
     "requestBodyLimitEmptyError": "Tẹ ààlà kan ní MB",
     "requestBodyLimitWholeNumberError": "Lo odidi nọ́mbà",
