@@ -3,6 +3,7 @@ import {
   DEFAULT_STREAM_ACTIVE_TIMEOUT_MS,
   EXECUTOR_CONTRACT_VIOLATION_CODE,
   ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE,
+  REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE,
   FETCH_TIMEOUT_MS,
   HTTP_STATUS,
   MAX_REGISTERED_MODEL_TIMEOUT_MARGIN_MS,
@@ -365,6 +366,10 @@ export async function executeWithUpstreamStartTimeout<T>({
   const timeoutController = new AbortController();
   const combinedController = new AbortController();
   const timeoutError = createUpstreamStartTimeoutError(timeoutMs, provider, model);
+  if (requestCapMs !== undefined && (configuredMs <= 0 || requestCapMs < configuredMs)) {
+    // A caller-imposed cap is not evidence of an unhealthy provider connection.
+    (timeoutError as Error & { code?: string }).code = REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE;
+  }
 
   let timeoutId: ReturnType<typeof setTimeout> | null = null;
   let abortListener: (() => void) | null = null;

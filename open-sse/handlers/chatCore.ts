@@ -2540,7 +2540,10 @@ async function handleChatCoreInner({
   });
 
   const dedupRequestBody = { ...translatedBody, model: `${provider}/${model}`, stream };
-  const dedupEnabled = shouldDeduplicate(dedupRequestBody);
+  // A request-scoped deadline changes the executor contract. Do not let its
+  // in-flight work join or be joined by calls with a different deadline.
+  const dedupEnabled =
+    requestUpstreamStartTimeoutMs === undefined && shouldDeduplicate(dedupRequestBody);
   // Namespaced by the calling API key: dedup hands the SAME response object to
   // every joiner, so a shared hash across keys is a cross-principal response
   // leak (GHSA-6c7w-56xp-wpc6).
