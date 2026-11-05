@@ -196,6 +196,10 @@ function describeCachedPressure(params: {
   };
 }
 
+/**
+ * Logs critical local pressure and returns a branded 503 guard result with a retry hint
+ * for the supplied pressure reason and optional diagnostic details.
+ */
 function buildCriticalGuard(
   reason: PressureReason,
   detail: Record<string, number | string | null | undefined> = {}

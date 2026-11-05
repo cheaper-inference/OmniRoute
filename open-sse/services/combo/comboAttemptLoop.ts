@@ -213,6 +213,10 @@ export type DispatchWithCooldownRetryExtra = {
   compatRejectedTargets: ResolvedComboTarget[];
 };
 
+/**
+ * Dispatches ordered targets with bounded set and cooldown retries, returning the first
+ * success or terminal response, or an aggregate failure when eligible targets are exhausted.
+ */
 export async function dispatchWithCooldownRetry(opts: {
   state: AttemptLoopState;
   deps: AttemptLoopDeps;

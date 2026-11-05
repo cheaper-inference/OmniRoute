@@ -124,6 +124,10 @@ import {
 import { isEmptyStreamSiblingRecoveryEnabled } from "../streamRecovery.ts";
 import { waitForCooldownAwareRetry } from "../../../src/sse/services/cooldownAwareRetry.ts";
 
+/**
+ * Executes an admitted target with configured retries and response validation. Returns a
+ * success or terminal response, or a nonterminal result when the loop may try another target.
+ */
 export async function executeTargetAttempt(
   opts: ExecuteTargetAttemptOptions
 ): Promise<ExecuteTargetResult> {

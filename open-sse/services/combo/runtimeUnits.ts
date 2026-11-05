@@ -198,6 +198,10 @@ function orderUnitsForStrategy(strategy: string, units: ResolvedComboUnit[]): Re
   return units;
 }
 
+/**
+ * Runs strategy-ordered model and nested-combo units within the shared attempt budget.
+ * Returns the serving or terminal unit and response, or a final failure with no unit.
+ */
 export async function executeRuntimeUnitCombo(args: {
   body: Record<string, unknown>;
   combo: ComboLike;

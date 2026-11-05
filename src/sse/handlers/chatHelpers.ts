@@ -1192,6 +1192,10 @@ export async function safeLogEvents({
   } catch {}
 }
 
+/**
+ * Returns the response with a session ID header, or unchanged when no session ID is given.
+ * Immutable headers require a wrapper preserving trusted rate-limit and pressure markers.
+ */
 export function withSessionHeader(response: Response, sessionId: string | null): Response {
   if (!response || !sessionId) return response;
 
@@ -1212,6 +1216,10 @@ export function withSessionHeader(response: Response, sessionId: string | null):
   }
 }
 
+/**
+ * Returns the response with a correlation ID header, or unchanged when no ID is given.
+ * Immutable headers require a wrapper preserving trusted rate-limit and pressure markers.
+ */
 export function withCorrelationId(response: Response, correlationId: string | null): Response {
   if (!response || !correlationId) return response;
 

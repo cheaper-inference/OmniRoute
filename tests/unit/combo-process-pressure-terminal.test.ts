@@ -35,6 +35,7 @@ const { clearCooldownState, isProviderInCooldown } =
   await import("../../open-sse/services/providerCooldownTracker.ts");
 const semaphore = await import("../../open-sse/services/accountSemaphore.ts");
 
+/** Provides a no-op logger callback for offline routing fixtures. */
 const noop = () => {};
 const log = { info: noop, warn: noop, debug: noop, error: noop };
 const body = { messages: [{ role: "user", content: "offline pressure regression" }] };
@@ -47,7 +48,9 @@ const config = {
   setRetryDelayMs: 0,
   fallbackDelayMs: 0,
 };
+/** Returns a successful JSON chat response for healthy fallback controls. */
 const ok = () => Response.json({ choices: [{ message: { content: "healthy" } }] });
+/** Returns a branded local 503 for the requested pressure code with a custody receipt. */
 function pressure(code: string): Response {
   const response =
     code === "heap_pressure"
@@ -61,6 +64,7 @@ function pressure(code: string): Response {
   response.headers.set("X-Pressure-Receipt", "original-verdict");
   return response;
 }
+/** Returns a uniquely named two-target combo with the strategy and configuration overrides. */
 function combo(strategy: string, overrides: Record<string, unknown> = {}): ComboLike {
   return {
     name: `process-pressure-${sequence++}`,
@@ -69,6 +73,7 @@ function combo(strategy: string, overrides: Record<string, unknown> = {}): Combo
     config: { ...config, ...overrides },
   };
 }
+/** Runs the selected combo with the offline request, dispatcher, and optional nested combos. */
 function run(
   selected: ComboLike,
   handleSingleModel: HandleSingleModel,
@@ -83,6 +88,7 @@ function run(
     settings: {},
   });
 }
+/** Asserts original response identity, pressure headers, and unread body bytes, then consumes it. */
 async function assertOriginal(response: Response, original: Response, bytes: string) {
   assert.equal(response, original, "terminal pressure retains response identity and custody");
   assert.equal(response.status, 503);
@@ -433,6 +439,7 @@ test("internal header wrappers keep the local pressure brand when they must clon
   const frozen = new Response(shed.body, { status: 503, headers: shed.headers });
   Object.defineProperty(frozen, "headers", {
     value: new Proxy(new Headers(shed.headers), {
+      /** Rejects header mutations while binding all other header methods to their target. */
       get(target, prop) {
         if (prop === "set")
           return () => {
