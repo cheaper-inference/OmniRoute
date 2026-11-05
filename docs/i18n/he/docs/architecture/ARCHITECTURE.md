@@ -15,7 +15,7 @@ OmniRoute הוא שער ניתוב מקומי לבינה מלאכותית ולו
 
 יכולות ליבה:
 
-- ממשק API תואם OpenAI עבור כלי CLI וכלים אחרים (375 ספקים, 154 מודולי ביצוע)
+- ממשק API תואם OpenAI עבור כלי CLI וכלים אחרים (375 ספקים, 156 מודולי ביצוע)
 - תרגום בקשות/תגובות בין פורמטים של ספקים
 - מעבר לגיבוי באמצעות שילוב מודלים (רצף מרובה מודלים)
 - שלבים מובנים בשילוב (`provider + model + connection`) עם סדר ריצה לפי `compositeTiers`
@@ -31,7 +31,7 @@ OmniRoute הוא שער ניתוב מקומי לבינה מלאכותית ולו
 - חיפוש באינטרנט דרך `/v1/search` ‏(20 ספקים)
 - סינון תוכן דרך `/v1/moderations`
 - דירוג מחדש דרך `/v1/rerank`
-- ניתוח תגיות חשיבה (``) עבור מודלי הנמקה
+- ניתוח תגיות חשיבה (`<think>...</think>`) עבור מודלי הנמקה
 - טיהור תגובות לצורך תאימות קפדנית ל-OpenAI SDK
 - נרמול תפקידים (developer→system, system→user) לצורך תאימות בין ספקים
 - המרת פלט מובנה (json_schema → Gemini responseSchema)
@@ -1094,11 +1094,11 @@ flowchart LR
 - מיגרציות של סכמת SQLite ונקודות חיבור לשדרוג אוטומטי בעת ההפעלה
 - נתיב תאימות למיגרציה מ-JSON ישן ל-SQLite
 
-## 6) SSRF / מגן כתובות URL יוצאות
+## 6) SSRF / הגנה על כתובות URL יוצאות
 
-- `src/shared/network/outboundUrlGuard.ts` חוסם את כל כתובות ה-URL הפרטיות/loopback/link-local לפני שהן מגיעות למבצעי הבקשות של הספק
-- נתיבי גילוי ואימות המודלים של הספק משתמשים ב-`src/shared/network/safeOutboundFetch.ts`, שמחיל את המגן לפני כל בקשה יוצאת
-- שגיאות המגן מוצגות כ-`URL_GUARD_BLOCKED` עם HTTP 422 ונרשמות ביומן ביקורת התאימות באמצעות `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) מחיל את `src/shared/network/outboundUrlGuard.ts` על בקשות צ'אט שנשלחות דרך `BaseExecutor.execute()`. במצב ציבורי בלבד (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` כשהדגל הפרטי כבוי), הוא חוסם מארחים פרטיים ומארחי loopback, וכן את 169.254.0.0/16; בכל מצב אחר הוא חוסם מארחי מטא-נתונים של שירותי ענן. הוא בודק את שם המארח או את ליטרל כתובת ה-IP כפי שנכתב, לפני כל בדיקת DNS. ספקים מקומיים מובנים מדלגים עליו.
+- נתיבי גילוי ואימות המודלים של הספק משתמשים ב-`src/shared/network/safeOutboundFetch.ts`, שמחיל את ההגנה לפני כל בקשה יוצאת
+- שגיאות ההגנה מוצגות כ-`URL_GUARD_BLOCKED` עם HTTP 503 (`getSafeOutboundFetchErrorStatus`; נתיב גילוי המודלים מחזיר 400), וחסימות SSRF אמיתיות במהלך האימות נרשמות ביומן הביקורת כאירועי `provider.validation.ssrf_blocked`
 
 ## נראות ואותות תפעוליים
 
@@ -1149,7 +1149,7 @@ flowchart LR
 4. התנהגות הענן תלויה בהגדרה נכונה של `NEXT_PUBLIC_BASE_URL` ובנגישות של נקודת הקצה בענן.
 5. הספרייה `open-sse/` מפורסמת כחבילת **npm workspace** בשם `@omniroute/open-sse`. קוד המקור מייבא אותה באמצעות `@omniroute/open-sse/...` (נפתר על ידי `transpilePackages` של Next.js). נתיבי קבצים במסמך זה עדיין משתמשים בשם הספרייה `open-sse/` לשמירה על עקביות.
 6. תרשימים בלוח הבקרה משתמשים ב-**Recharts** (מבוסס SVG) להמחשות אנליטיות נגישות ואינטראקטיביות (תרשימי עמודות של שימוש במודלים, טבלאות פילוח לפי ספק עם שיעורי הצלחה).
-7. בדיקות E2E משתמשות ב-**Playwright** (`tests/e2e/`) ומופעלות באמצעות `npm run test:e2e`. בדיקות יחידה משתמשות ב-**Node.js test runner** (`tests/unit/`) ומופעלות באמצעות `npm run test:unit`. קוד המקור תחת `src/` הוא **TypeScript** (`.ts`/`.tsx`); סביבת העבודה `open-sse/` נשארת JavaScript (`.js`).
+7. בדיקות E2E משתמשות ב-**Playwright** (`tests/e2e/`) ומופעלות באמצעות `npm run test:e2e`. בדיקות יחידה משתמשות ב-**Node.js test runner** (`tests/unit/`) ומופעלות באמצעות `npm run test:unit`. קוד המקור תחת `src/` הוא **TypeScript** (`.ts`/`.tsx`); סביבת העבודה `open-sse/` נשארת TypeScript (`.ts`).
 8. דף ההגדרות מאורגן ב-7 לשוניות: כללי, מראה, AI, אבטחה, ניתוב, עמידות, מתקדם. דף העמידות מגדיר רק את תור הבקשות, זמן הצינון של החיבור, מנתק הספק והתנהגות ההמתנה לסיום זמן הצינון; מצב זמן הריצה החי של המנתק מוצג בדף הבריאות.
 9. אסטרטגיית **ממסר ההקשר** (`context-relay`) מפוצלת בין שתי שכבות: `combo.ts` מחליט אם יש ליצור העברת הקשר, ו-`chat.ts` מזריק את ההעברה לאחר פתרון החשבון. נתוני ההעברה נמצאים בטבלת SQLite בשם `context_handoffs`. הפיצול מכוון, מכיוון שרק `chat.ts` יודע אם החשבון בפועל השתנה.
 10. **אכיפת הפרוקסי** מקיפה כעת: `tokenHealthCheck.ts` פותר את הפרוקסי לכל חיבור, `/api/providers/validate` משתמש ב-`runWithProxyContext`, ו-`proxyFetch.ts` משתמש ב-`undici.fetch()` כדי לשמור על תאימות למנגנון השיגור ב-Node 22.

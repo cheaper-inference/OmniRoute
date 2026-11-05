@@ -106,7 +106,7 @@ OmniRoute/
 
 > **v3.8.26 හිදී root වෙතින් පිටතට ගෙන යන ලදී (අවුල් අවම කිරීම):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, සහ ජනනය කරන ලද `quality-metrics.json` (`.gitignore` කර ඇත). [`## config/`](#config--static-configs--quality-gate-state) බලන්න.
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, සහ ජනනය කරන ලද `quality-metrics.json` (`.gitignore` කර ඇත). [`## config/`](#config--ස්ථිතික-වින්යාස--තත්ත්ව-ද්වාර-තත්ත්වය) බලන්න.
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | උපනාමාවලිය            | අරමුණ                                                                                                                                                                                                                  |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | දේශීයකරණය කළ ලේඛන පරිවර්තන (භාෂා කලාප 41ක්)                                                                                                                                                                            |
+| `docs/i18n/`          | දේශීයකරණය කළ ලේඛන පරිවර්තන (භාෂා කලාප 66ක්)                                                                                                                                                                            |
 | `docs/screenshots/`   | මාර්ගෝපදේශ සඳහා රූප සම්පත්                                                                                                                                                                                             |
 | `_tasks/superpowers/` | superpowers වෙතින් සැලසුම්/පිරිවිතර (`writing-plans`/`brainstorming`) + පර්යේෂණ — හුදකලා කළ, වෙනම අනුවාදනය කරන ලද repo එකක් වන අතර ප්රධාන tree එකේ gitignore කර ඇත. CLAUDE.md → "Planning & Research Artifacts" බලන්න. |
 

@@ -18,36 +18,41 @@ OmniRoute သည် npm + Docker artifacts များကို ထုတ်ဝ
 
 image CVE ratchet သည် `docker-publish.yml` တွင် **အဆင့်နှစ်ဆင့်** ကို အသုံးပြုသည်- SARIF အဆင့် (`HIGH,CRITICAL`, `exit-code: 0`) သည် HIGH+CRITICAL ကို Security tab တွင် ပိတ်ဆို့ခြင်းမရှိဘဲ မြင်သာစေပြီး၊ _CRITICAL gate_ အဆင့် (`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`) သည် **ပြင်ဆင်ချက်ရရှိနိုင်သော** CRITICAL CVE တစ်ခုတွင် release ကို မအောင်မြင်စေသည်။ `ignore-unfixed` သည် upstream patch မရှိသော base-image CVE အတွက် release ကို ပိတ်ဆို့ခြင်းမှ ကာကွယ်ပေးသည်။
 
-## ⚠️ CVE Variance (osv/Trivy gates များကို ပိတ်ဆို့ခြင်း)
+## ⚠️ CVE ကွာခြားမှု (osv/Trivy gate များကို ပိတ်ဆို့ခြင်း)
 
-osv နှင့် Trivy တို့သည် မှီခိုမှုများကို **စဉ်ဆက်မပြတ် တိုးတက်နေသော** CVE ဒေတာဘေ့စ်များနှင့် နှိုင်းယှဉ်သည်။ **မည်သည့် မှီခိုမှုကိုမျှ မထိတွေ့သော** PR တစ်ခုသည် ရှိပြီးသား မှီခိုမှုတစ်ခုတွင် CVE အသစ်တစ်ခု ထုတ်ဖော်ခဲ့သောကြောင့် ရုတ်တရက် အနီရောင်ပြောင်းသွားနိုင်သည်။ (osv: တိုင်းတာထားသော `vulnCount` > baseline; Trivy: image တွင် ပြင်ဆင်နိုင်သော CRITICAL အသစ်တစ်ခု)။ **၎င်းသည် ပိတ်ဆို့သော CVE gate ၏ မျှော်လင့်ထားသော လုပ်ငန်းဆောင်ရွက်မှု အပြုအမူဖြစ်ပြီး ထုတ်ကုန် နောက်ပြန်ဆုတ်ခြင်း မဟုတ်ပါ။**
+osv နှင့် Trivy တို့သည် dependency များကို **စဉ်ဆက်မပြတ် တိုးပွားနေသော** CVE database များနှင့် နှိုင်းယှဉ်စစ်ဆေးသည်။ **dependency များကို လုံးဝမပြင်ဆင်ထားသော** PR တစ်ခုသည် လက်ရှိ dependency တစ်ခုတွင် CVE အသစ်ကို ထုတ်ဖော်ကြေညာလိုက်ခြင်းကြောင့် ရုတ်တရက် အနီရောင်ဖြစ်သွားနိုင်သည် (osv: တိုင်းတာရရှိသော `vulnCount` > baseline; Trivy: image ထဲတွင် ပြင်ဆင်နိုင်သော CRITICAL အသစ်တစ်ခု)။ **၎င်းသည် ပိတ်ဆို့တားဆီးသည့် CVE gate တစ်ခု၏ မျှော်မှန်းထားသော လုပ်ငန်းဆောင်ရွက်မှု အပြုအမူဖြစ်ပြီး၊ product regression မဟုတ်ပါ။**
 
-osv သို့မဟုတ် Trivy သည် အသစ်ထုတ်ဖော်ခဲ့သော CVE ကြောင့် အနီရောင်ပြောင်းသွားသောအခါ၊ ဖြေရှင်းနည်းမှာ-
+အသစ်ထုတ်ဖော်ကြေညာထားသော CVE တစ်ခုကြောင့် osv သို့မဟုတ် Trivy အနီရောင်ဖြစ်သွားပါက ဖြေရှင်းနည်းမှာ-
 
-1.  **ထိခိုက်သော မှီခိုမှုကို မြှင့်တင်ပါ** (ပိုနှစ်သက်သည်) — `package.json` `overrides` (transitive deps) မှတစ်ဆင့် ပြင်ဆင်ထားသော ဗားရှင်းသို့ အဆင့်မြှင့်တင်ပါ သို့မဟုတ် ပြင်ဆင်ထားသော base ပေါ်တွင် image ကို ပြန်လည်တည်ဆောက်ပါ။
-2.  **upstream fix မရှိပါက:**
-    - **osv:** `config/quality/quality-baseline.json` တွင် `metrics.vulnCount` ကို ပြန်လည်သတ်မှတ်ပါ (`npm run quality:ratchet -- --update` သည် သီးသန့် gates များကို အကျုံးမဝင်ပါ — တန်ဖိုးကို လက်ဖြင့် ပြင်ဆင်ပါ၊ `direction:down`) ကျိုးကြောင်းဆီလျော်မှု မှတ်စု + tracking issue ဖြင့်။
-    - **Trivy:** `.trivyignore` (တစ်ကြောင်းလျှင် CVE-ID) တွင် ကျိုးကြောင်းဆီလျော်မှု မှတ်ချက် + tracking issue ဖြင့် entry တစ်ခု ထည့်ပါ။ `ignore-unfixed: true` သည် patch မရှိသော CVE များကို အလိုအလျောက် အကျုံးဝင်ပြီးသားဖြစ်သည်။
+1. **သက်ရောက်မှုရှိသော dependency ကို version မြှင့်ပါ** (ဦးစားပေးနည်းလမ်း) — `package.json`
+   `overrides` (transitive dependency များ) မှတစ်ဆင့် patch ပြုလုပ်ထားသော version သို့ အဆင့်မြှင့်ပါ၊ သို့မဟုတ် patch ပြုလုပ်ထားသော base ပေါ်တွင် image ကို ပြန်လည် build လုပ်ပါ။
+2. **Upstream fix မရှိပါက-**
+   - **osv:** `config/quality/quality-baseline.json` ထဲရှိ `metrics.vulnCount` ကို baseline အသစ်ပြန်သတ်မှတ်ပါ
+     (`npm run quality:ratchet -- --update` သည် သီးခြား gate များကို မလွှမ်းခြုံပါ — တန်ဖိုးကို
+     ကိုယ်တိုင်ပြင်ဆင်ပြီး `direction:down` ဟု သတ်မှတ်ပါ)၊ ထို့နောက် အကြောင်းပြချက်မှတ်ချက်နှင့် tracking issue တစ်ခု ထည့်ပါ။
+   - **Trivy:** `.trivyignore` ထဲတွင် entry တစ်ခု (တစ်ကြောင်းလျှင် CVE-ID တစ်ခု) ကို အကြောင်းပြချက်
+     comment နှင့် tracking issue တို့နှင့်အတူ ထည့်ပါ။ `ignore-unfixed: true` သည် patch မရှိသော CVE များကို
+     အလိုအလျောက် လွှမ်းခြုံထားပြီးဖြစ်သည်။
 
-gates နှစ်ခုလုံးသည် tool မရှိခြင်း သို့မဟုတ် တိုင်းတာမှု မအောင်မြင်ခြင်း (osv-scanner သည် PATH တွင်မရှိခြင်း၊ osv.dev/network မရောက်နိုင်ခြင်း၊ invalid JSON) တို့တွင် **ချောမွေ့စွာ ကျော်သွားသည်** (exit 0) — **တိုင်းတာမှု** မအောင်မြင်ခြင်းသည် မည်သည့်အခါမျှ ပိတ်ဆို့ခြင်းမရှိဘဲ၊ **တိုင်းတာထားသော** နောက်ပြန်ဆုတ်မှုကသာ ပိတ်ဆို့သည်။
+မဖြစ်မနေလုပ်ဆောင်ရမည့် OSV execution များ (`check:vuln-ratchet -- --ratchet`) သည်
+scanner၊ report သို့မဟုတ် baseline ကို အတည်မပြုနိုင်သည့်အခါ `INCOMPLETE` နှင့် exit 2 ဖြင့် လုံခြုံရေးအတွက် ပိတ်ဆို့ကာ ကျရှုံးမည်။
+တိုင်းတာရရှိသော regression တစ်ခုသည် exit 1 ဖြင့် ထွက်မည်။ အကြံပြုသဘော execution သည် `SKIP` နှင့်
+exit 0 ကို ဆက်လက် report လုပ်နိုင်သော်လည်း၊ ၎င်းက dependency များသည် scan ကို အောင်မြင်ခဲ့ကြောင်း အတည်မပြုနိုင်ပါ။ ပိတ်ဆို့တားဆီးသည့်
+Trivy အဆင့်သည်လည်း အောင်မြင်သော တိုင်းတာမှုတစ်ခု လိုအပ်သည်- အသုံးမပြုနိုင်သော tool များ၊ မအောင်မြင်သော job များ
+နှင့် ပျောက်ဆုံးနေသော image အထောက်အထားများသည် image တစ်ခုကို ပြဿနာကင်းရှင်းကြောင်း အသိအမှတ်မပြုနိုင်ပါ။
 
-## လက်ခံထားပြီးသော အန္တရာယ်များ
+## ရပ်ဆိုင်းထားသော dependency ၏ အန္တရာယ်
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+ပင်မ lockfile တွင် pinned လုပ်ထားသော promptfoo development tool ကို အဆင့်မြှင့်တင်ပြီးနောက် `extract-zip` သို့မဟုတ် ၎င်းထံသို့ ဆက်သွယ်ထားသော dependency edge မပါဝင်တော့ပါ။ ထို့ကြောင့် #14482 တွင် ခြေရာခံထားပြီး ယခင်က လက်ခံထားခဲ့သော
+`promptfoo` → `@openai/codex-security` → `extract-zip` ကွင်းဆက်ကို ရပ်ဆိုင်းလိုက်ပါသည်။
+`tests/unit/extract-zip-14482-exposure.test.ts` ရှိ regression စစ်ဆေးမှုများသည် ၎င်းကို
+ပြန်လည်ထည့်သွင်းခြင်းအား ပယ်ချပြီး production code မှ import ပြုလုပ်ခြင်းကို တားမြစ်ထားမှုအား ဆက်လက်ထိန်းသိမ်းထားပါသည်။
 
-`extract-zip@2.0.1` တွင် ပြင်ဆင်မထားသော မြင့်မားသည့် ပြင်းထန်မှုရှိသော symlink-traversal အကြံပြုချက်နှစ်ခု ပါရှိသည်။
-အထက်ပါ CVE Variance ကုစားမှု၏ "upstream fix မရှိ" အကိုင်းအခက်အရ၊ ၎င်းသည် **လက်ခံထားသော အန္တရာယ်** ဖြစ်ပြီး၊ အဆင့်မြှင့်တင်ခြင်း မဟုတ်ပါ-
-
-- **ကွင်းဆက်:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`။
-  `package-lock.json` မှတစ်ဆင့် အတည်ပြုပြီးဖြစ်သည် — dependency tree တစ်ခုလုံးတွင် `extract-zip` ကို ကြေညာထားသည့် package တစ်ခုတည်းသာ (`@openai/codex-security`) ရှိပြီး၊ `@openai/codex-security` ကို ကြေညာထားသည့် package တစ်ခုတည်းသာ (`promptfoo`) ရှိသည်။
-- **ကွင်းဆက်တစ်ခုလုံးတွင် ပြင်ဆင်ပြီးသား ထုတ်ဝေမှု မရှိပါ။** `extract-zip@2.0.1` (2020 တွင် ထုတ်ဝေခဲ့သည်) သည် package ၏ နောက်ဆုံးထုတ်ဝေမှုဖြစ်သည် — ၎င်းကို ထိန်းသိမ်းထားခြင်း မရှိပါ။ `@openai/codex-security` ၏
-  လက်ရှိ npm-latest (`0.1.29`) သည် `extract-zip@2.0.1` ကို ဆက်လက်အသုံးပြုနေဆဲဖြစ်သည်။
-- **ထုတ်လုပ်မှုမှ လက်လှမ်းမမီနိုင်ပါ။** `promptfoo` သည် devDependency-only ဖြစ်သည် (`dependencies` အောက်တွင် ဘယ်တော့မှ စာရင်းမသွင်းပါ)၊ `src/`၊ `open-sse/` သို့မဟုတ် `bin/` အောက်ရှိ မည်သည့်ဖိုင်မှ `extract-zip` npm package ကို import မလုပ်ပါ။ OmniRoute ၏ ကိုယ်ပိုင် `extractZip()` helper
-  (`src/lib/versionManager/binaryManager.ts:93`) သည် native `unzip`/`tar` ကို အသုံးပြုပြီး ဆက်စပ်မှုမရှိပါ။ `@openai/codex-security` သည်လည်း extract-zip ၏ onEntry callback အပေါ်တွင် ၎င်း၏ကိုယ်ပိုင် symlink-traversal guard ကို ထည့်သွင်းထားသည်။
-- `package.json` `overrides` မှတစ်ဆင့် `extract-zip` ကို alias **မလုပ်ပါနှင့်** — တစ်ခုတည်းသော အသုံးပြုနိုင်သည့် drop-in အစားထိုးသည် Electron-org-internal ဖြစ်ပြီး `@openai/codex-security` ၏ ကိုယ်ပိုင် onEntry/defaultDirMode/defaultFileMode စစ်ဆေးမှုများနှင့် API-မကိုက်ညီပါ။ ၎င်းကို override လုပ်ပါက ထို package ၏ လုံခြုံရေးစစ်ဆေးမှုများကို တိတ်တဆိတ် ပျက်စီးစေမည်ဖြစ်သည်။
-- **အခြေခံ:** တိုင်းတာထားသော osv `vulnCount` (3) သည် အေးခဲထားသော `config/quality/quality-baseline.json` အခြေခံ (27) အောက်တွင် ကောင်းစွာရှိနေပြီးဖြစ်သည် — ratchet ပြောင်းလဲမှု မလိုအပ်ပါ။
-- **Regression guard:** `tests/unit/extract-zip-14482-exposure.test.ts` သည် အထက်ပါ ကွင်းဆက်နှင့် ထုတ်လုပ်မှု-import မရှိခြင်း invariant ကို အတည်ပြုသည်။ ၎င်းသည် မည်သည့်အရာမဆို ပျက်စီးသွားပါက (ဥပမာ- အနာဂတ် PR တစ်ခုက `extract-zip` ကို ထုတ်လုပ်မှုမှ လက်လှမ်းမီစေပါက) CI ကို ကျရှုံးစေမည်ဖြစ်သည်။
-- **ခြေရာခံခြင်း:** issue #14482။
+လက်ရှိ dependency ပြင်ဆင်မှုသည် compatibility override များကို Azure identity ၏
+MSAL client၊ get-uri ၏ FTP client နှင့် OpenCode v1 SDK ၏ Zod dependency တို့အတွက်သာ ကန့်သတ်ထားပါသည်။ Azure token
+ရယူခြင်းနှင့် FTP retrieval တို့ကို ထိန်းချုပ်ထားသော transport များဖြင့် စမ်းသပ်ထားပြီး OpenCode
+package နှစ်ခုစလုံးသည် ၎င်းတို့၏ကိုယ်ပိုင် build နှင့် test suite များကို လုပ်ဆောင်ပါသည်။ Registry advisory အရေအတွက်များသည်
+သတ်မှတ်အချိန်တစ်ခုရှိ တိုင်းတာချက်များဖြစ်ပြီး lockfile ကို commit လုပ်ပြီးနောက် ပြောင်းလဲနိုင်ပါသည်။
 
 ## Backlog: Scorecard အကြံပြုချက် → ပိတ်ဆို့ခြင်း
 

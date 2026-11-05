@@ -330,11 +330,11 @@ full-precision àyàfi tí a bá mú un ṣiṣẹ́ ní kedere.
 `setImmediate()` kí ó má bàa dá ìṣàn ìdáhùn dúró láéláé:
 
 - **Àwọn àpẹẹrẹ ààyò** → `MemoryType.FACTUAL`
-  (fún àpẹẹrẹ `Mo fẹ́ràn …`, `Mo fẹ́ràn … gan-an`, `èyí tí mo fẹ́ràn jù ni …`, `Mo kórìíra …`)
+  (fún àpẹẹrẹ `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
 - **Àwọn àpẹẹrẹ ìpinnu** → `MemoryType.EPISODIC`
-  (fún àpẹẹrẹ `Èmi yóò lo …`, `Mo yan …`, `Mo pinnu láti lo …`, `Èmi yóò bẹ̀rẹ̀ sí í lo …`)
+  (fún àpẹẹrẹ `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
 - **Àwọn àpẹẹrẹ ìṣe déédéé** → `MemoryType.FACTUAL`
-  (fún àpẹẹrẹ `Mo sábà máa ń …`, `Mo máa ń … ní gbogbo ìgbà`, `Mo ní àṣà láti …`)
+  (fún àpẹẹrẹ `I usually …`, `I always …`, `I tend to …`)
 
 A máa ń fọ gbogbo ohun tó bá bá mu mọ́ (`trim`, pípa àlàfo pọ̀, àti dídín in kù sí ohun tí kò ju àmì 500 lọ),
 a sì máa ń yọ àwọn àdáwòkọ kúrò nínú batch náà nípasẹ̀ `factKey(category, content)` tí kò yí padà, lẹ́yìn náà
@@ -698,11 +698,11 @@ Módùlù `extraction.ts` (`src/lib/memory/extraction.ts`) ń lo **ìbámu àp�
 
 ### Àwọn Ẹ̀ka Àpẹẹrẹ Àìyípadà
 
-| Ẹ̀ka                 | Àpẹẹrẹ àwòṣe                                                            | Ohun tí ó ń gbà mú               |
-| ------------------- | ----------------------------------------------------------------------- | -------------------------------- |
-| PREFERENCE_PATTERNS | `"Mo fẹ́ràn <X> jù"`, `"Mo fẹ́ràn <X>"`, `"Mo kórìíra <X>"`               | Àwọn ààyò aṣàmúlò                |
-| DECISION_PATTERNS   | `"Màá lo <X>"`, `"Mo pinnu láti <X>"`, `"Mo yan <X>"`                   | Àwọn ìpinnu aṣàmúlò (episodic)   |
-| PATTERN_PATTERNS    | `"Mo sábà máa <X>"`, `"Mo máa ń <X> nígbà gbogbo"`, `"Mi ò <X> láéláé"` | Àwọn àpẹẹrẹ ìhùwàsí tí ó dúró pẹ́ |
+| Ẹ̀ka                 | Àpẹẹrẹ àwòṣe                                                | Ohun tí ó ń gbà mú               |
+| ------------------- | ----------------------------------------------------------- | -------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Àwọn ààyò aṣàmúlò                |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Àwọn ìpinnu aṣàmúlò (episodic)   |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Àwọn àpẹẹrẹ ìhùwàsí tí ó dúró pẹ́ |
 
 ### Àwọn Àpẹẹrẹ Àwòṣe (Tí a Mú Rọrùn)
 
@@ -738,8 +738,9 @@ Nígbà tí aṣàmúlò kan bá sọ pé:
 
 Láti dènà yíyọ jáde tí kò ní ìṣàkóso, àwọn ààlà wọ̀nyí wà ní lílò:
 
-| Gígùn àkóónú tó kéré jù | àwọn àmì 3 |
-| Gígùn àkóónú tó pọ̀ jù | àwọn àmì 500 |
+| Gígùn àkóónú tó kéré jù | àwọn àmì 3   |
+| ----------------------- | ------------ |
+| Gígùn àkóónú tó pọ̀ jù   | àwọn àmì 500 |
 
 ### Ìgbà Tí Ó Yẹ Kí A Pa Yíyọ Jáde
 

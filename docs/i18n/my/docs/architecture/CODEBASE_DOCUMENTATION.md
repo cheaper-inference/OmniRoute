@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries၊ header profiles၊ identity၊ …
 ├── handlers/               Request handlers (chat၊ embeddings၊ audio၊ image၊ …)
-├── executors/              Provider executor modules 150 ခု (executor classes + provider တစ်ခုချင်းစီအတွက် helpers)
+├── executors/              Provider executor modules 156 ခု (executor classes + provider တစ်ခုချင်းစီအတွက် helpers)
 ├── translator/             Format ပြောင်းလဲခြင်း (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               Service modules 80+ ခု (combos၊ fallback၊ quotas၊ identity၊ …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-ထိပ်တန်းအဆင့် executor modules 150 ခု (`base.ts`၊ `index.ts` နှင့် tests မပါဝင်သည့် `*.ts` များ —
+ထိပ်တန်းအဆင့် executor modules 156 ခု (`base.ts`၊ `index.ts` နှင့် tests မပါဝင်သည့် `*.ts` များ —
 ဤအရေအတွက်ကို `npm run check:docs-counts` က တိုင်းတာသည်)။ Executor class တိုင်းသည် `BaseExecutor` (`base.ts`) ကို
 တိုက်ရိုက်ဖြစ်စေ၊ `DefaultExecutor` သို့မဟုတ် အခြား executor မှတစ်ဆင့်ဖြစ်စေ extends လုပ်သည်။ ကျန် modules များမှာ provider
 တစ်ခုချင်းစီအတွက် helpers (tool schemas၊ fetch/TTS adapters၊ ပုံမှန်မဟုတ်သော အပြုအမူများကို ကိုင်တွယ်သည့် handlers) ဖြစ်သည်။ Executors များတွင် အောက်ပါတို့ ပါဝင်သည်-
@@ -772,7 +772,7 @@ Client တောင်းဆိုမှု
    `open-sse/mcp-server/schemas/tools.ts` ကို တိုးချဲ့ပါ)။
 2. သင့်လျော်သော scope တစ်ခု သို့မဟုတ် အများအပြားကို `src/shared/constants/mcpScopes.ts` တွင် သတ်မှတ်ပါ။
 3. Tool ကို `open-sse/mcp-server/server.ts` တွင် မှတ်ပုံတင်ပါ။
-4. `open-sse/mcp-server/__tests__/` အောက်တွင် test များ ထည့်ပါ။
+4. `tests/unit/` အောက်တွင် test များ ထည့်ပါ။
 5. [MCP-SERVER.md](../frameworks/MCP-SERVER.md) ကို အပ်ဒိတ်လုပ်ပါ။
 
 ### A2A skill အသစ်တစ်ခု ထည့်သွင်းခြင်း
@@ -790,7 +790,7 @@ Client တောင်းဆိုမှု
 - **အမည်ပေးပုံ**: File များအတွက် `camelCase` သို့မဟုတ် `kebab-case`၊ component များအတွက် `PascalCase`၊
   constant များအတွက် `UPPER_SNAKE`။
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = နေရာတိုင်းတွင် `error`၊
-  `no-explicit-any` = `open-sse/` နှင့် `tests/` တွင် `warn`၊ အခြားနေရာများတွင် error။
+  `no-explicit-any` = `open-sse/**/*.ts` နှင့် `tests/**/*.ts` တွင် `error`။
 - **TypeScript**: `strict: false` (legacy အနေအထား)။ Module များကြား boundary များအတွက်
   inference ထက် explicit type များကို ဦးစားပေးပါ။
 - **Database**: Route သို့မဟုတ် handler များတွင် raw SQL ကို မည်သည့်အခါမျှ မရေးပါနှင့် — အမြဲတမ်း
@@ -817,8 +817,7 @@ Client တောင်းဆိုမှု
   `a2a`, `memory`, `skills` ဖြစ်သည်။
 - **Branch များ**: Prefix များမှာ `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/` ဖြစ်သည်။ `main` သို့ မည်သည့်အခါမျှ တိုက်ရိုက် commit မလုပ်ပါနှင့်။
-- **Husky**: pre-commit တွင် `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11` ကို run သည်၊ pre-push တွင် `check:any-budget:t11` + `check:tracked-artifacts` ကို run သည် (မြန်ဆန်သော gate များဖြစ်ပြီး `test:unit` မပါဝင်ပါ)။
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

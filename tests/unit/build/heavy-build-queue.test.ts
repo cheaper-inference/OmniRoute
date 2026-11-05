@@ -15,9 +15,15 @@ test("unrelated candidate builds cannot replace each other's pending concurrency
   assert.equal(workflow.jobs.build.concurrency["cancel-in-progress"], false);
 });
 
-test("superseded runs cancel only within the same workflow/ref", () => {
-  assert.equal(workflow.concurrency.group, "${{ github.workflow }}-${{ github.ref }}");
-  assert.equal(workflow.concurrency["cancel-in-progress"], true);
+test("candidate runs serialize while metadata edits cannot replace their pending slot", () => {
+  // ci-admission-events.test.mjs executes this expression for metadata edits,
+  // base retargets and candidate events. Keep this build-queue contract aligned:
+  // only edited events without a base change get an independent run_id group.
+  assert.equal(
+    workflow.concurrency.group,
+    "${{ github.workflow }}-${{ github.ref }}-${{ github.event.action == 'edited' && github.event.changes.base == null && github.run_id || 'candidate' }}"
+  );
+  assert.equal(workflow.concurrency["cancel-in-progress"], false);
 });
 
 test("no pull request or merge group Build reaches the self-hosted build slot", () => {
@@ -39,7 +45,7 @@ test("no pull request or merge group Build reaches the self-hosted build slot", 
     "github.event_name != 'pull_request'",
   ]);
   assert.doesNotMatch(runnerCondition, /\|\|/, "no exception may re-admit a PR event");
-  assert.match(runsOn, /\["self-hosted","omni-build"\]/);
+  assert.match(runsOn, /\["self-hosted","omni-build","omni-build-60gb"\]/);
   assert.match(runsOn, /\|\| 'ubuntu-latest' \}\}$/);
 });
 

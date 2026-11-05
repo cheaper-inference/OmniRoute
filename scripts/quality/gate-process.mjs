@@ -2,6 +2,108 @@ import { spawn } from "node:child_process";
 import { closeSync, mkdirSync, openSync, writeFileSync, writeSync } from "node:fs";
 import { dirname } from "node:path";
 import { StringDecoder } from "node:string_decoder";
+import { listProcessGroupMembers } from "../dev/resource-budget-process.mjs";
+
+function snapshotReceiptIdentity(value) {
+  if (value === undefined) return {};
+  const invalid = () => {
+    throw new TypeError("Invalid gate receipt identity");
+  };
+  const fields = (input, required, optional = []) => {
+    if (
+      !input ||
+      typeof input !== "object" ||
+      ![Object.prototype, null].includes(Object.getPrototypeOf(input))
+    )
+      invalid();
+    const descriptors = Object.getOwnPropertyDescriptors(input);
+    const keys = Reflect.ownKeys(descriptors);
+    if (
+      keys.some((key) => !required.includes(key) && !optional.includes(key)) ||
+      required.some((key) => !Object.hasOwn(descriptors, key))
+    )
+      invalid();
+    for (const key of keys) {
+      if (!Object.hasOwn(descriptors[key], "value") || !descriptors[key].enumerable) invalid();
+    }
+    return Object.fromEntries(keys.map((key) => [key, descriptors[key].value]));
+  };
+  const sha = (input) => typeof input === "string" && /^[0-9a-f]{40}$/.test(input);
+  const positiveInteger = (input) => Number.isSafeInteger(input) && input > 0;
+  const runNumber = (input) => typeof input === "string" && /^[1-9][0-9]*$/.test(input);
+  const identity = fields(
+    value,
+    ["invocationId"],
+    ["packPhase", "unitDiagnostics", "integrationDiagnostics"]
+  );
+  if (identity.unitDiagnostics && identity.integrationDiagnostics) invalid();
+  if (
+    typeof identity.invocationId !== "string" ||
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(
+      identity.invocationId
+    )
+  )
+    invalid();
+  if (Object.hasOwn(identity, "packPhase")) {
+    const phase = fields(identity.packPhase, [
+      "schemaVersion",
+      "laneId",
+      "phaseId",
+      "mode",
+      "budgetMs",
+      "preparationBudgetMs",
+      "invocationId",
+      "candidateSha",
+      "runId",
+      "runAttempt",
+      "workflowSha",
+    ]);
+    const local = [phase.runId, phase.runAttempt, phase.workflowSha].every(
+      (entry) => entry === null
+    );
+    if (
+      phase.schemaVersion !== 1 ||
+      phase.laneId !== "pack-artifact" ||
+      !["build-next", "build-cli", "stamp-build-sha", "validate-pack-artifact"].includes(
+        phase.phaseId
+      ) ||
+      !["shared", "independent-policy"].includes(phase.mode) ||
+      !positiveInteger(phase.budgetMs) ||
+      !positiveInteger(phase.preparationBudgetMs) ||
+      phase.invocationId !== identity.invocationId ||
+      !sha(phase.candidateSha) ||
+      (!local &&
+        (!runNumber(phase.runId) || !runNumber(phase.runAttempt) || !sha(phase.workflowSha)))
+    )
+      invalid();
+    identity.packPhase = phase;
+  }
+  for (const [key, directory] of [
+    ["unitDiagnostics", ".artifacts/unit-progress"],
+    ["integrationDiagnostics", ".artifacts/integration-progress"],
+  ]) {
+    if (!Object.hasOwn(identity, key)) continue;
+    const unit = fields(identity[key], [
+      "schemaVersion",
+      "evidenceState",
+      "invocationId",
+      "checkoutSha",
+      "directory",
+      "memberPattern",
+    ]);
+    if (
+      unit.schemaVersion !== 2 ||
+      unit.evidenceState !== "UNVALIDATED" ||
+      unit.invocationId !== identity.invocationId ||
+      (unit.checkoutSha !== null && !sha(unit.checkoutSha)) ||
+      unit.directory !== directory ||
+      unit.memberPattern !== `*-${identity.invocationId}-*.jsonl`
+    )
+      invalid();
+    identity[key] = unit;
+  }
+  return identity;
+}
 
 /** Run one gate without a shell; persist progress before computing its verdict. */
 export async function runGateProcess(command, args, options) {
@@ -15,7 +117,9 @@ export async function runGateProcess(command, args, options) {
     maxBuffer = 256 * 1024 * 1024,
     signal,
     onHeartbeat = () => {},
+    receiptIdentity: suppliedReceiptIdentity,
   } = options;
+  const receiptIdentity = snapshotReceiptIdentity(suppliedReceiptIdentity);
   if (!logPath || !Number.isFinite(timeout) || timeout <= 0) {
     throw new Error("Gate execution requires a log path and positive timeout");
   }
@@ -37,6 +141,7 @@ export async function runGateProcess(command, args, options) {
   let exitCode = null;
   let exitSignal = null;
   let cleanupError = null;
+  let processGroupObservation = null;
   let resolveDone;
   const done = new Promise((resolve) => {
     resolveDone = resolve;
@@ -116,10 +221,22 @@ export async function runGateProcess(command, args, options) {
         exitSignal = receivedSignal;
         if (process.platform !== "win32" && child.pid) {
           try {
-            process.kill(-child.pid, 0);
-            terminate("ORPHANED_DESCENDANTS");
+            if (process.platform === "linux") {
+              // kill(pgid, 0) also finds exited zombies awaiting the OS parent or
+              // subreaper. Inspect executable members; incomplete scans stay red.
+              const group = listProcessGroupMembers(child.pid, { includeDiagnostics: true });
+              processGroupObservation = group.diagnostics;
+              if (group.unknown) terminate("CLEANUP_ERROR");
+              else if (group.members.length > 0) terminate("ORPHANED_DESCENDANTS");
+            } else {
+              process.kill(-child.pid, 0);
+              terminate("ORPHANED_DESCENDANTS");
+            }
           } catch (error) {
-            if (error.code !== "ESRCH") terminate("CLEANUP_ERROR");
+            if (error.code !== "ESRCH") {
+              processGroupObservation = { status: "UNKNOWN", reasonCode: "PROCESS_SCAN_EXCEPTION" };
+              terminate("CLEANUP_ERROR");
+            }
           }
         }
       });
@@ -158,6 +275,7 @@ export async function runGateProcess(command, args, options) {
           ? exitCode
           : 1;
   const receipt = {
+    ...receiptIdentity,
     schemaVersion: 1,
     startedAt,
     completedAt: new Date().toISOString(),
@@ -169,6 +287,7 @@ export async function runGateProcess(command, args, options) {
     signal: exitSignal,
     spawnError,
     cleanupError,
+    processGroupObservation,
     logPath,
   };
   const receiptPath = `${logPath}.json`;

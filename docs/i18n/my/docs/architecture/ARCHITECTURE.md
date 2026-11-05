@@ -15,7 +15,7 @@ OmniRoute သည် Next.js ကို အခြေခံတည်ဆောက်
 
 အဓိကလုပ်ဆောင်နိုင်စွမ်းများ-
 
-- CLI/tool များအတွက် OpenAI နှင့် တွဲဖက်အသုံးပြုနိုင်သော API မျက်နှာပြင် (provider 375 ခု၊ executor module 154 ခု)
+- CLI/tool များအတွက် OpenAI နှင့် တွဲဖက်အသုံးပြုနိုင်သော API မျက်နှာပြင် (provider 375 ခု၊ executor module 156 ခု)
 - Provider format များအကြား request/response ဘာသာပြန်ပြောင်းလဲခြင်း
 - Model combo fallback (model များစွာကို အစဉ်လိုက်အသုံးပြုခြင်း)
 - `compositeTiers` အလိုက် runtime အစီအစဉ်သတ်မှတ်မှုပါရှိသော ဖွဲ့စည်းပုံကျ combo အဆင့်များ (`provider + model + connection`)
@@ -31,7 +31,7 @@ OmniRoute သည် Next.js ကို အခြေခံတည်ဆောက်
 - `/v1/search` မှတစ်ဆင့် web ရှာဖွေခြင်း (provider 20 ခု)
 - `/v1/moderations` မှတစ်ဆင့် အကြောင်းအရာစိစစ်ထိန်းချုပ်ခြင်း
 - `/v1/rerank` မှတစ်ဆင့် အဆင့်ပြန်လည်စီခြင်း
-- Reasoning model များအတွက် think tag ခွဲခြမ်းစိတ်ဖြာခြင်း (``)
+- Reasoning model များအတွက် think tag ခွဲခြမ်းစိတ်ဖြာခြင်း (`<think>...</think>`)
 - တင်းကျပ်သော OpenAI SDK တွဲဖက်အသုံးပြုနိုင်မှုအတွက် response သန့်စင်ခြင်း
 - Provider များအကြား တွဲဖက်အသုံးပြုနိုင်မှုအတွက် role ပုံမှန်ပြုလုပ်ခြင်း (developer→system၊ system→user)
 - ဖွဲ့စည်းပုံကျ output ပြောင်းလဲခြင်း (json_schema → Gemini responseSchema)
@@ -1081,11 +1081,11 @@ Bypass handler (`open-sse/utils/bypassHandler.ts`) သည် Claude CLI မှ�
 - startup တွင် SQLite schema migration များနှင့် အလိုအလျောက် upgrade hook များ
 - legacy JSON → SQLite migration နှင့် ကိုက်ညီမှုရှိသော လမ်းကြောင်း
 
-## 6) SSRF / Outbound URL ကာကွယ်မှု
+## 6) SSRF / အပြင်ဘက် URL ကာကွယ်မှု
 
-- `src/shared/network/outboundUrlGuard.ts` သည် provider executor များထံ မရောက်ရှိမီ private/loopback/link-local target URL အားလုံးကို ပိတ်ဆို့သည်
-- Provider model ရှာဖွေမှုနှင့် validation route များသည် outbound request တစ်ခုစီမတိုင်မီ guard ကို အသုံးပြုသည့် `src/shared/network/safeOutboundFetch.ts` ကို အသုံးပြုသည်
-- Guard error များကို HTTP 422 နှင့်အတူ `URL_GUARD_BLOCKED` အဖြစ် ဖော်ပြပေးပြီး `providerAudit.ts` မှတစ်ဆင့် compliance audit trail တွင် မှတ်တမ်းတင်သည်
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) သည် `BaseExecutor.execute()` မှတစ်ဆင့် ပေးပို့သည့် ချတ်တောင်းဆိုမှုများတွင် `src/shared/network/outboundUrlGuard.ts` ကို အသုံးပြုသည်။ အများသုံးသီးသန့်မုဒ် (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` ဖြစ်ပြီး private flag ကို ပိတ်ထားသည့်အခါ) တွင် private နှင့် loopback host များအပြင် 169.254.0.0/16 ကိုပါ ပိတ်ဆို့သည်။ အခြားမုဒ်အားလုံးတွင် cloud-metadata host များကို ပိတ်ဆို့သည်။ DNS ရှာဖွေမှုမပြုလုပ်မီ ရေးသားထားသည့်အတိုင်း hostname သို့မဟုတ် IP literal ကို စစ်ဆေးသည်။ ပါဝင်ပြီးသား local provider များအတွက် ဤစစ်ဆေးမှုကို ကျော်သွားသည်။
+- Provider model ရှာဖွေခြင်းနှင့် အတည်ပြုခြင်း route များသည် အပြင်ဘက်တောင်းဆိုမှုတိုင်းမပြုလုပ်မီ ကာကွယ်မှုကို အသုံးပြုသည့် `src/shared/network/safeOutboundFetch.ts` ကို အသုံးပြုသည်
+- ကာကွယ်မှုဆိုင်ရာ error များကို HTTP 503 နှင့်အတူ `URL_GUARD_BLOCKED` အဖြစ် ဖော်ပြသည် (`getSafeOutboundFetchErrorStatus`; model ရှာဖွေရေး route သည် 400 ကို ပြန်ပေးသည်)။ အတည်ပြုခြင်းအတွင်း အမှန်တကယ်ဖြစ်ပေါ်သော SSRF ပိတ်ဆို့မှုများကို audit trail တွင် `provider.validation.ssrf_blocked` event များအဖြစ် မှတ်တမ်းတင်သည်
 
 ## စောင့်ကြည့်နိုင်မှုနှင့် လုပ်ငန်းလည်ပတ်ရေး Signal များ
 
@@ -1136,7 +1136,7 @@ Runtime အခြေအနေကို မြင်နိုင်သည့် �
 4. Cloud လုပ်ဆောင်ပုံသည် မှန်ကန်သော `NEXT_PUBLIC_BASE_URL` နှင့် cloud endpoint သို့ ရောက်ရှိနိုင်မှုအပေါ် မူတည်သည်။
 5. `open-sse/` directory ကို `@omniroute/open-sse` **npm workspace package** အဖြစ် ဖြန့်ချိထားသည်။ Source code သည် ၎င်းကို `@omniroute/open-sse/...` မှတစ်ဆင့် import လုပ်သည် (Next.js `transpilePackages` က resolve လုပ်ပေးသည်)။ ဤစာတမ်းရှိ file path များတွင် တစ်သမတ်တည်းဖြစ်စေရန် directory အမည် `open-sse/` ကို ဆက်လက်အသုံးပြုထားသည်။
 6. Dashboard ရှိ chart များသည် အသုံးပြုရလွယ်ကူပြီး အပြန်အလှန်တုံ့ပြန်နိုင်သော analytics visualization များ (model အသုံးပြုမှု bar chart များ၊ အောင်မြင်မှုနှုန်းများပါဝင်သော provider ခွဲခြမ်းဇယားများ) အတွက် **Recharts** (SVG အခြေပြု) ကို အသုံးပြုသည်။
-7. E2E test များသည် **Playwright** (`tests/e2e/`) ကို အသုံးပြုပြီး `npm run test:e2e` မှတစ်ဆင့် run သည်။ Unit test များသည် **Node.js test runner** (`tests/unit/`) ကို အသုံးပြုပြီး `npm run test:unit` မှတစ်ဆင့် run သည်။ `src/` အောက်ရှိ source code သည် **TypeScript** (`.ts`/`.tsx`) ဖြစ်ပြီး `open-sse/` workspace သည် JavaScript (`.js`) အဖြစ် ဆက်လက်တည်ရှိသည်။
+7. E2E test များသည် **Playwright** (`tests/e2e/`) ကို အသုံးပြုပြီး `npm run test:e2e` မှတစ်ဆင့် run သည်။ Unit test များသည် **Node.js test runner** (`tests/unit/`) ကို အသုံးပြုပြီး `npm run test:unit` မှတစ်ဆင့် run သည်။ `src/` အောက်ရှိ source code သည် **TypeScript** (`.ts`/`.tsx`) ဖြစ်ပြီး `open-sse/` workspace သည် TypeScript (`.ts`) အဖြစ် ဆက်လက်တည်ရှိသည်။
 8. Settings page ကို tab 7 ခုအဖြစ် စီစဉ်ထားသည်- General, Appearance, AI, Security, Routing, Resilience, Advanced။ Resilience page သည် request queue၊ connection cooldown၊ provider breaker နှင့် wait-for-cooldown အပြုအမူတို့ကိုသာ configure လုပ်သည်။ လက်ရှိ breaker runtime state ကို Health page တွင် ပြသသည်။
 9. **Context Relay** မဟာဗျူဟာ (`context-relay`) ကို layer နှစ်ခုအဖြစ် ခွဲထားသည်- `combo.ts` က handoff တစ်ခု ထုတ်ပေးသင့်၊ မသင့် ဆုံးဖြတ်ပြီး `chat.ts` က account resolution ပြီးနောက် handoff ကို ထည့်သွင်းသည်။ Handoff data သည် `context_handoffs` SQLite table ထဲတွင် ရှိသည်။ အမှန်တကယ် account ပြောင်းသွားခြင်း ရှိ၊ မရှိကို `chat.ts` သာ သိရှိသောကြောင့် ဤသို့ခွဲထားခြင်းသည် ရည်ရွယ်ချက်ရှိရှိ ပြုလုပ်ထားခြင်းဖြစ်သည်။
 10. **Proxy enforcement** သည် ယခုအခါ အပြည့်အဝ အကျုံးဝင်သည်- `tokenHealthCheck.ts` က connection တစ်ခုချင်းစီအတွက် proxy ကို resolve လုပ်သည်၊ `/api/providers/validate` က `runWithProxyContext` ကို အသုံးပြုပြီး `proxyFetch.ts` က Node 22 တွင် dispatcher compatibility ကို ထိန်းသိမ်းရန် `undici.fetch()` ကို အသုံးပြုသည်။

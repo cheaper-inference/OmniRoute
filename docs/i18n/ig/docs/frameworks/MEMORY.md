@@ -342,11 +342,11 @@ Iwepụta ihe a dabere na **regex**, ọ bụghị na LLM — ọ na-arụ n'ime
 `setImmediate()` ka ọ ghara igbochi iyi nzaghachi:
 
 - **Ụkpụrụ mmasị** → `MemoryType.FACTUAL`
-  (dịka `M na-ahọrọ …`, `Ihe a na-amasị m nke ukwuu bụ …`, `ọkacha mmasị m bụ …`, `Akpọrọ m … asị`)
+  (dịka `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
 - **Ụkpụrụ mkpebi** → `MemoryType.EPISODIC`
-  (dịka `M ga-eji …`, `Ahọrọ m …`, `M họọrọ …`, `M ga-amalite iji …`)
+  (dịka `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
 - **Ụkpụrụ omume** → `MemoryType.FACTUAL`
-  (dịka `M na-emekarị …`, `M na-eme … mgbe niile`, `M na-enwekarị ike …`)
+  (dịka `I usually …`, `I always …`, `I tend to …`)
 
 A na-ehicha ndakọrịta ọ bụla (`trim`, ijikọ oghere ndị na-eso ibe ha, na ịkwụsị ya na mkpụrụedemede 500),
 na-ewepụkwa oyiri n'ime otu ìgwè ahụ site na `factKey(category, content)` kwụsiri ike, wee
@@ -709,11 +709,11 @@ Modul `extraction.ts` (`src/lib/memory/extraction.ts`) na-eji **ndakọrịta us
 
 ### Otu Usoro Ndabara
 
-| Otu                 | Ọmụmaatụ usoro                                                                 | Ihe ọ na-ejide                 |
-| ------------------- | ------------------------------------------------------------------------------ | ------------------------------ |
-| PREFERENCE_PATTERNS | `"Ihe <X> ka m na-ahọrọ"`, `"Ihe <X> na-amasị m"`, `"Akpọrọ m <X> asị"`        | Mmasị onye ọrụ                 |
-| DECISION_PATTERNS   | `"Aga m eji <X>"`, `"Ekpebiri m ime <X>"`, `"Ahọrọ m <X>"`                     | Mkpebi onye ọrụ (episodic)     |
-| PATTERN_PATTERNS    | `"M na-emekarị <X>"`, `"M na-eme <X> mgbe niile"`, `"Anaghị m eme <X> ma ọlị"` | Usoro omume na-adịgide adịgide |
+| Otu                 | Ọmụmaatụ usoro                                              | Ihe ọ na-ejide                 |
+| ------------------- | ----------------------------------------------------------- | ------------------------------ |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Mmasị onye ọrụ                 |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Mkpebi onye ọrụ (episodic)     |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Usoro omume na-adịgide adịgide |
 
 ### Ọmụmaatụ Usoro (E mere ka ha dị mfe)
 
@@ -749,7 +749,8 @@ Mgbe onye ọrụ kwuru:
 
 Iji gbochie nwepụta na-enweghị njedebe, oke ndị a na-emetụta ya:
 
-| Ogologo ọdịnaya kacha nta | mkpụrụedemede 3 |
+| Ogologo ọdịnaya kacha nta   | mkpụrụedemede 3   |
+| --------------------------- | ----------------- |
 | Ogologo ọdịnaya kacha ukwuu | mkpụrụedemede 500 |
 
 ### Mgbe A Ga-agbanyụ Nwepụta

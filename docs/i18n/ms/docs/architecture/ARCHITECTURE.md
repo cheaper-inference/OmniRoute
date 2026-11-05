@@ -15,7 +15,7 @@ Ia menyediakan satu titik akhir yang serasi dengan OpenAI (`/v1/*`) dan menghala
 
 Keupayaan teras:
 
-- Permukaan API yang serasi dengan OpenAI untuk CLI/alat (375 penyedia, 154 modul pelaksana)
+- Permukaan API yang serasi dengan OpenAI untuk CLI/alat (375 penyedia, 156 modul pelaksana)
 - Penterjemahan permintaan/respons merentasi format penyedia
 - Sandaran kombo model (jujukan berbilang model)
 - Langkah kombo berstruktur (`provider + model + connection`) dengan penyusunan masa jalan mengikut `compositeTiers`
@@ -31,7 +31,7 @@ Keupayaan teras:
 - Carian web melalui `/v1/search` (20 penyedia)
 - Penyederhanaan melalui `/v1/moderations`
 - Penyusunan semula kedudukan melalui `/v1/rerank`
-- Penghuraian tag pemikiran (``) untuk model penaakulan
+- Penghuraian tag pemikiran (`<think>...</think>`) untuk model penaakulan
 - Pensanitasian respons untuk keserasian ketat dengan OpenAI SDK
 - Penormalan peranan (developer→system, system→user) untuk keserasian merentas penyedia
 - Penukaran output berstruktur (json_schema → Gemini responseSchema)
@@ -1094,11 +1094,11 @@ keserasian legasi. Kontrak masa jalan semasa menggunakan:
 - migrasi skema SQLite dan cangkuk naik taraf automatik semasa permulaan
 - laluan keserasian migrasi JSON legasi → SQLite
 
-## 6) SSRF / Pengawal URL Keluar
+## 6) Pengawal SSRF / URL Keluar
 
-- `src/shared/network/outboundUrlGuard.ts` menyekat semua URL sasaran peribadi/gelung balik/pautan setempat sebelum URL tersebut sampai kepada pelaksana penyedia
-- Laluan penemuan dan pengesahan model penyedia menggunakan `src/shared/network/safeOutboundFetch.ts` yang menerapkan pengawal sebelum setiap permintaan keluar
-- Ralat pengawal dipaparkan sebagai `URL_GUARD_BLOCKED` dengan HTTP 422 dan direkodkan ke dalam jejak audit pematuhan melalui `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) menggunakan `src/shared/network/outboundUrlGuard.ts` pada permintaan sembang yang dihantar melalui `BaseExecutor.execute()`. Dalam mod awam sahaja (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` dengan bendera peribadi dimatikan), ia menyekat hos peribadi dan gelung balik serta 169.254.0.0/16; dalam setiap mod lain, ia menyekat hos metadata awan. Ia menyemak nama hos atau literal IP seperti yang ditulis, sebelum sebarang carian DNS. Penyedia tempatan terbina dalam dikecualikan daripadanya.
+- Laluan penemuan dan pengesahan model penyedia menggunakan `src/shared/network/safeOutboundFetch.ts` yang menggunakan pengawal sebelum setiap permintaan keluar
+- Ralat pengawal dipaparkan sebagai `URL_GUARD_BLOCKED` dengan HTTP 503 (`getSafeOutboundFetchErrorStatus`; laluan penemuan model mengembalikan 400), dan sekatan SSRF sebenar semasa pengesahan direkodkan dalam jejak audit sebagai peristiwa `provider.validation.ssrf_blocked`
 
 ## Kebolehcerapan dan Isyarat Operasi
 
@@ -1149,7 +1149,7 @@ Pemboleh ubah persekitaran yang digunakan secara aktif oleh kod:
 4. Tingkah laku awan bergantung pada `NEXT_PUBLIC_BASE_URL` yang betul dan kebolehcapaian titik akhir awan.
 5. Direktori `open-sse/` diterbitkan sebagai **pakej ruang kerja npm** `@omniroute/open-sse`. Kod sumber mengimportnya melalui `@omniroute/open-sse/...` (diselesaikan oleh `transpilePackages` Next.js). Laluan fail dalam dokumen ini masih menggunakan nama direktori `open-sse/` demi konsistensi.
 6. Carta dalam papan pemuka menggunakan **Recharts** (berasaskan SVG) untuk visualisasi analitik yang boleh dicapai dan interaktif (carta bar penggunaan model, jadual pecahan penyedia dengan kadar kejayaan).
-7. Ujian E2E menggunakan **Playwright** (`tests/e2e/`), dijalankan melalui `npm run test:e2e`. Ujian unit menggunakan **pelaksana ujian Node.js** (`tests/unit/`), dijalankan melalui `npm run test:unit`. Kod sumber di bawah `src/` ialah **TypeScript** (`.ts`/`.tsx`); ruang kerja `open-sse/` kekal sebagai JavaScript (`.js`).
+7. Ujian E2E menggunakan **Playwright** (`tests/e2e/`), dijalankan melalui `npm run test:e2e`. Ujian unit menggunakan **pelaksana ujian Node.js** (`tests/unit/`), dijalankan melalui `npm run test:unit`. Kod sumber di bawah `src/` ialah **TypeScript** (`.ts`/`.tsx`); ruang kerja `open-sse/` kekal sebagai TypeScript (`.ts`).
 8. Halaman tetapan disusun kepada 7 tab: Umum, Penampilan, AI, Keselamatan, Penghalaan, Daya Tahan, Lanjutan. Halaman Daya Tahan hanya mengkonfigurasikan baris gilir permintaan, tempoh bertenang sambungan, pemutus penyedia dan tingkah laku menunggu tempoh bertenang; keadaan masa jalan langsung pemutus ditunjukkan pada halaman Kesihatan.
 9. Strategi **Context Relay** (`context-relay`) dibahagikan kepada dua lapisan: `combo.ts` menentukan sama ada penyerahan perlu dijana, manakala `chat.ts` menyuntik penyerahan selepas penyelesaian akaun. Data penyerahan disimpan dalam jadual SQLite `context_handoffs`. Pembahagian ini disengajakan kerana hanya `chat.ts` mengetahui sama ada akaun sebenar telah berubah.
 10. **Penguatkuasaan proksi** kini menyeluruh: `tokenHealthCheck.ts` menentukan proksi bagi setiap sambungan, `/api/providers/validate` menggunakan `runWithProxyContext`, dan `proxyFetch.ts` menggunakan `undici.fetch()` untuk mengekalkan keserasian penghantar pada Node 22.

@@ -208,7 +208,7 @@ của route cha lưu token REST API của Obsidian. GHSA-62vw chỉ che phần t
 việc cấp thông tin xác thực vẫn nằm ở tầng cho phép khi lỗi (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()`
 ngoài ra còn từ chối vault nếu vault đó chính là thư mục dữ liệu, nằm bên trong hoặc chứa thư mục dữ liệu.
 
-#### Việc xuất thông tin xác thực chỉ dành cho người vận hành
+#### Xuất thông tin xác thực và khôi phục chỉ dành cho người vận hành
 
 Cấp ở trên chỉ quyết định liệu có yêu cầu _một loại_ thông tin xác thực nào đó hay không. Các route tải xuống
 thông tin xác thực đã lưu sẽ thực hiện bước kiểm tra thứ hai trong handler: `GET /api/settings/export-json` (các kết nối
@@ -219,22 +219,9 @@ một instance đã tắt đăng nhập, đồng thời trả về `403` đối 
 và `admin`) cũng như token truy cập `oma_`. Việc cấp token đồng bộ (`POST /api/sync/tokens`) sử dụng
 cùng helper này, cộng thêm token dịch vụ nội bộ loopback đáng tin cậy.
 
-#### Credential exports and restores are operator-only
+Các thao tác phá hủy tương ứng cũng tuân theo ranh giới đó: `POST /api/db-backups/import` (tệp `.sqlite` được tải lên, kể cả `dryRun=true`), `POST /api/db-backups` (khôi phục bản sao lưu đã lưu theo id) và `POST /api/settings/import-json` (khôi phục định dạng JSON cũ) thay thế cơ sở dữ liệu đang hoạt động hoặc toàn bộ tập hợp cài đặt, kết nối và khóa API. Vì vậy, thông tin xác thực của máy cũng không thể kích hoạt các thao tác này.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Việc xóa điểm khôi phục tuân theo cùng ranh giới: `DELETE /api/db-backups` (dọn dẹp — giữ N bản mới nhất hoặc xóa các bản cũ hơn D ngày) và `PATCH /api/db-backups` (cài đặt lưu giữ). Quy tắc đã lưu chính là quy tắc mà `cleanupDbBackups()` áp dụng sau mỗi lần sao lưu tự động (`src/lib/db/backup.ts`); nếu thông tin xác thực của máy có thể lưu `keepLatest: 1`, nó có thể xóa các điểm khôi phục trước đó ở lần chụp tiếp theo. Việc liệt kê và tạo bản sao lưu (`GET`/`PUT /api/db-backups`) vẫn dùng xác thực quản lý thông thường.
 
 ### Khởi tạo bản cài đặt mới chỉ dành cho loopback — theo peer thực, không phải `Host`
 

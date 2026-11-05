@@ -106,7 +106,7 @@ OmniRoute/
 
 > **v3.8.26 sürümünde kök dizinden taşındı (düzenleme):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` ve oluşturulan `quality-metrics.json` (gitignored). Bkz. [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` ve oluşturulan `quality-metrics.json` (gitignored). Bkz. [`## config/`](#config--statik-yapılandırmalar--kalite-geçidi-durumu).
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | Alt dizin             | Amaç                                                                                                                                                                                                                        |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Yerelleştirilmiş belge çevirileri (41 yerel ayar)                                                                                                                                                                           |
+| `docs/i18n/`          | Yerelleştirilmiş belge çevirileri (66 yerel ayar)                                                                                                                                                                           |
 | `docs/screenshots/`   | Kılavuzlar için görsel varlıkları                                                                                                                                                                                           |
 | `_tasks/superpowers/` | superpowers kaynaklı planlar/özellikler (`writing-plans`/`brainstorming`) + araştırmalar — yalıtılmış, ayrı sürümlendirilen depo; ana ağaçta git tarafından yok sayılır. Bkz. CLAUDE.md → "Planlama ve Araştırma Eserleri". |
 

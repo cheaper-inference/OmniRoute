@@ -3,6 +3,9 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { installOfflineCatalogNetwork } from "../_helpers/offlineCatalogNetwork.ts";
+
+const network = installOfflineCatalogNetwork();
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-combo-metadata-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -12,6 +15,7 @@ const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const combosDb = await import("../../src/lib/db/combos.ts");
 const modelsDb = await import("../../src/lib/db/models.ts");
+const settingsDb = await import("../../src/lib/db/settings.ts");
 const contextOverrides = await import("../../src/lib/db/modelContextOverrides.ts");
 const capabilityOverrides = await import("../../src/lib/db/modelCapabilityOverrides.ts");
 const overrideRoute = await import("../../src/app/api/model-capability-overrides/route.ts");
@@ -20,9 +24,26 @@ const { getComboBuilderOptions } = await import("../../src/lib/combos/builderOpt
 const { buildGlobalModelList, buildManualComboModelStep } =
   await import("../../src/lib/combos/builderDraft.ts");
 
-test.after(() => {
-  core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+network.activate();
+
+test.before(async () => {
+  // These contracts cover saved combos. Built-in auto/* synthesis also refreshes
+  // live provider quota APIs; it has separate coverage and is outside this fixture.
+  await settingsDb.updateSettings({ hideAutoCombos: true });
+});
+
+test.after(async () => {
+  try {
+    await catalog.__flushCatalogBackgroundRefreshForTest();
+    assert.deepEqual(network.unexpectedRequests, [], "catalog contracts must stay offline");
+  } finally {
+    try {
+      core.resetDbInstance();
+      fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    } finally {
+      await network.restore();
+    }
+  }
 });
 
 test("builder-saved provider-node combos preserve metadata with a public model prefix", async () => {
@@ -85,8 +106,8 @@ test("builder-saved provider-node combos preserve metadata with a public model p
     new Request("http://localhost/api/v1/models")
   );
   const body = (await response.json()) as { data: Array<Record<string, unknown>> };
+  assert.equal(response.status, 200, JSON.stringify(body));
   const direct = body.data.find((item) => item.id === `${prefix}/${modelId}`);
-  assert.equal(response.status, 200);
   assert.ok(direct);
   assert.ok(Number(direct.max_output_tokens) > 0);
   for (const suffix of ["global", "manual", "legacy"]) {

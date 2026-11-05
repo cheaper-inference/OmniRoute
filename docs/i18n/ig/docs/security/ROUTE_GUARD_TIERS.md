@@ -211,7 +211,7 @@ token Obsidian REST API. GHSA-62vw zoro naanị ngosipụta paswọọdụ `GET`
 ka nọkwa n’ọkwa fail-open (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` na-ajụkwa
 vault nke bụ data directory, nke dị n’ime ya, ma ọ bụ nke nwere ya n’ime onwe ya.
 
-#### Mbupụ nzere bụ naanị maka operator
+#### Mbupụ nzere na iweghachi ndabere bụ naanị maka onye na-ahụ maka sistemụ
 
 Ọkwa dị n'elu na-ekpebi naanị ma achọrọ _ụfọdụ_ nzere njirimara. Ụzọ ndị na-ebudata
 nzere njirimara echekwara na-agbakwụnye nyocha nke abụọ n'ime handler: `GET /api/settings/export-json` (njikọ
@@ -222,22 +222,9 @@ instance nke agbanyụrụ nbanye na ya, ma na-aza `403` nye API keys nke scope 
 na `admin`) nakwa `oma_` access tokens. Mwepụta sync token (`POST /api/sync/tokens`) na-eji otu
 helper ahụ, tinyere token internal-service loopback a tụkwasịrị obi.
 
-#### Credential exports and restores are operator-only
+Otu oke ahụ metụtara ọrụ ndị kwekọrọ na ha nke na-emebi data: `POST /api/db-backups/import` (faịlụ `.sqlite` ebugotere, gụnyere `dryRun=true`), `POST /api/db-backups` (iweghachi ndabere echekwara site na id ya) na `POST /api/settings/import-json` (iweghachi usoro JSON ochie) na-anọchi nchekwa data na-arụ ọrụ ma ọ bụ ntọala, njikọ na igodo API niile. Ya mere, nzere igwe enweghị ike ịmalite ọrụ ndị a kwa.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Ihichapụ ebe iweghachi data nwere otu oke ahụ: `DELETE /api/db-backups` (nhicha — debe N kachasị ọhụrụ ma ọ bụ hichapụ ndị gafere ụbọchị D) na `PATCH /api/db-backups` (ntọala idebe). Iwu echekwara bụ kpọmkwem ndị `cleanupDbBackups()` na-etinye mgbe ndabere akpaghị aka ọ bụla gasịrị (`src/lib/db/backup.ts`); ọ bụrụ na e kwere ka nzere igwe chekwaa `keepLatest: 1`, ọ ga-enwe ike ihichapụ ebe iweghachi data ndị gara aga na onyonyo ọnọdụ na-esote. Idepụta na ịmepụta ndabere (`GET`/`PUT /api/db-backups`) ka na-eji nkwenye njikwa nkịtị.
 
 ### Bootstrap nke nrụnye ọhụrụ bụ naanị maka loopback — dịka ezigbo peer si dị, ọ bụghị `Host`
 

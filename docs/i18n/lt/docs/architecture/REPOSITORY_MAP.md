@@ -106,7 +106,7 @@ OmniRoute/
 
 > **Pašalinta iš šakninio katalogo v3.8.26 versijoje (struktūrai supaprastinti):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` ir sugeneruotas `quality-metrics.json` (git ignoruojamas). Žr. [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` ir sugeneruotas `quality-metrics.json` (git ignoruojamas). Žr. [`## config/`](#config--statinės-konfigūracijos-ir-kokybės-patikros-būsena).
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | Pakatalogis           | Paskirtis                                                                                                                                                                                                                     |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Lokalizuoti dokumentacijos vertimai (41 lokalė)                                                                                                                                                                               |
+| `docs/i18n/`          | Lokalizuoti dokumentacijos vertimai (66 lokalė)                                                                                                                                                                               |
 | `docs/screenshots/`   | Vadovų vaizdų ištekliai                                                                                                                                                                                                       |
 | `_tasks/superpowers/` | Planai / specifikacijos iš superpowers (`writing-plans` / `brainstorming`) + tyrimai — izoliuota, atskirai versijuojama saugykla, pagrindiniame medyje ignoruojama per git. Žr. CLAUDE.md → „Planavimo ir tyrimų artefaktai“. |
 

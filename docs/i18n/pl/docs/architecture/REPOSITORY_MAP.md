@@ -1,15 +1,8 @@
-# Repository Map (Polski)
+# Mapa repozytorium (Polski)
 
 🌐 **Languages:** 🇺🇸 [English](../../../../architecture/REPOSITORY_MAP.md) · 🇪🇹 [am](../../../am/docs/architecture/REPOSITORY_MAP.md) · 🇸🇦 [ar](../../../ar/docs/architecture/REPOSITORY_MAP.md) · 🇦🇿 [az](../../../az/docs/architecture/REPOSITORY_MAP.md) · 🇧🇬 [bg](../../../bg/docs/architecture/REPOSITORY_MAP.md) · 🇧🇩 [bn](../../../bn/docs/architecture/REPOSITORY_MAP.md) · 🇧🇦 [bs](../../../bs/docs/architecture/REPOSITORY_MAP.md) · 🇨🇿 [cs](../../../cs/docs/architecture/REPOSITORY_MAP.md) · 🇩🇰 [da](../../../da/docs/architecture/REPOSITORY_MAP.md) · 🇩🇪 [de](../../../de/docs/architecture/REPOSITORY_MAP.md) · 🇬🇷 [el](../../../el/docs/architecture/REPOSITORY_MAP.md) · 🇪🇸 [es](../../../es/docs/architecture/REPOSITORY_MAP.md) · 🇪🇪 [et](../../../et/docs/architecture/REPOSITORY_MAP.md) · 🇮🇷 [fa](../../../fa/docs/architecture/REPOSITORY_MAP.md) · 🇫🇮 [fi](../../../fi/docs/architecture/REPOSITORY_MAP.md) · 🇫🇷 [fr](../../../fr/docs/architecture/REPOSITORY_MAP.md) · 🇮🇪 [ga](../../../ga/docs/architecture/REPOSITORY_MAP.md) · 🇮🇳 [gu](../../../gu/docs/architecture/REPOSITORY_MAP.md) · 🇳🇬 [ha](../../../ha/docs/architecture/REPOSITORY_MAP.md) · 🇮🇱 [he](../../../he/docs/architecture/REPOSITORY_MAP.md) · 🇮🇳 [hi](../../../hi/docs/architecture/REPOSITORY_MAP.md) · 🇭🇷 [hr](../../../hr/docs/architecture/REPOSITORY_MAP.md) · 🇭🇺 [hu](../../../hu/docs/architecture/REPOSITORY_MAP.md) · 🇦🇲 [hy](../../../hy/docs/architecture/REPOSITORY_MAP.md) · 🇮🇩 [id](../../../id/docs/architecture/REPOSITORY_MAP.md) · 🇳🇬 [ig](../../../ig/docs/architecture/REPOSITORY_MAP.md) · 🇮🇹 [it](../../../it/docs/architecture/REPOSITORY_MAP.md) · 🇯🇵 [ja](../../../ja/docs/architecture/REPOSITORY_MAP.md) · 🇬🇪 [ka](../../../ka/docs/architecture/REPOSITORY_MAP.md) · 🇰🇭 [km](../../../km/docs/architecture/REPOSITORY_MAP.md) · 🇮🇳 [kn](../../../kn/docs/architecture/REPOSITORY_MAP.md) · 🇰🇷 [ko](../../../ko/docs/architecture/REPOSITORY_MAP.md) · 🇱🇹 [lt](../../../lt/docs/architecture/REPOSITORY_MAP.md) · 🇱🇻 [lv](../../../lv/docs/architecture/REPOSITORY_MAP.md) · 🇮🇳 [ml](../../../ml/docs/architecture/REPOSITORY_MAP.md) · 🇮🇳 [mr](../../../mr/docs/architecture/REPOSITORY_MAP.md) · 🇲🇾 [ms](../../../ms/docs/architecture/REPOSITORY_MAP.md) · 🇲🇹 [mt](../../../mt/docs/architecture/REPOSITORY_MAP.md) · 🇲🇲 [my](../../../my/docs/architecture/REPOSITORY_MAP.md) · 🇳🇵 [ne](../../../ne/docs/architecture/REPOSITORY_MAP.md) · 🇳🇱 [nl](../../../nl/docs/architecture/REPOSITORY_MAP.md) · 🇳🇴 [no](../../../no/docs/architecture/REPOSITORY_MAP.md) · 🇮🇳 [or](../../../or/docs/architecture/REPOSITORY_MAP.md) · 🇮🇳 [pa](../../../pa/docs/architecture/REPOSITORY_MAP.md) · 🇵🇭 [phi](../../../phi/docs/architecture/REPOSITORY_MAP.md) · 🇵🇹 [pt](../../../pt/docs/architecture/REPOSITORY_MAP.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/architecture/REPOSITORY_MAP.md) · 🇷🇴 [ro](../../../ro/docs/architecture/REPOSITORY_MAP.md) · 🇷🇺 [ru](../../../ru/docs/architecture/REPOSITORY_MAP.md) · 🇱🇰 [si](../../../si/docs/architecture/REPOSITORY_MAP.md) · 🇸🇰 [sk](../../../sk/docs/architecture/REPOSITORY_MAP.md) · 🇸🇮 [sl](../../../sl/docs/architecture/REPOSITORY_MAP.md) · 🇷🇸 [sr](../../../sr/docs/architecture/REPOSITORY_MAP.md) · 🇸🇪 [sv](../../../sv/docs/architecture/REPOSITORY_MAP.md) · 🇰🇪 [sw](../../../sw/docs/architecture/REPOSITORY_MAP.md) · 🇮🇳 [ta](../../../ta/docs/architecture/REPOSITORY_MAP.md) · 🇮🇳 [te](../../../te/docs/architecture/REPOSITORY_MAP.md) · 🇹🇭 [th](../../../th/docs/architecture/REPOSITORY_MAP.md) · 🇹🇷 [tr](../../../tr/docs/architecture/REPOSITORY_MAP.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/architecture/REPOSITORY_MAP.md) · 🇵🇰 [ur](../../../ur/docs/architecture/REPOSITORY_MAP.md) · 🇺🇿 [uz](../../../uz/docs/architecture/REPOSITORY_MAP.md) · 🇻🇳 [vi](../../../vi/docs/architecture/REPOSITORY_MAP.md) · 🇳🇬 [yo](../../../yo/docs/architecture/REPOSITORY_MAP.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/architecture/REPOSITORY_MAP.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/architecture/REPOSITORY_MAP.md)
 
 ---
-
-title: "Mapa repozytorium"
-version: 3.8.40
-lastUpdated: 2026-06-28
----
-
-# Mapa repozytorium
 
 > **Jednowierszowy opis każdego katalogu i pliku w katalogu głównym.**
 > Ostatnia aktualizacja: 2026-06-28 — OmniRoute v3.8.40
@@ -113,7 +106,7 @@ OmniRoute/
 
 > **Przeniesione z katalogu głównego w v3.8.26 (porządkowanie):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` oraz wygenerowany `quality-metrics.json` (w .gitignore). Zobacz [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` oraz wygenerowany `quality-metrics.json` (w .gitignore). Zobacz [`## config/`](#config--statyczne-konfiguracje--stan-quality-gate).
 
 ---
 
@@ -453,7 +446,7 @@ open-sse/
 
 | Podkatalog            | Przeznaczenie                                                                                                                                                                                                                           |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Zlokalizowane tłumaczenia dokumentacji (41 wersji językowych)                                                                                                                                                                           |
+| `docs/i18n/`          | Zlokalizowane tłumaczenia dokumentacji (66 wersji językowych)                                                                                                                                                                           |
 | `docs/screenshots/`   | Zasoby graficzne do przewodników                                                                                                                                                                                                        |
 | `_tasks/superpowers/` | Plany/specyfikacje z superpowers (`writing-plans`/`brainstorming`) + materiały badawcze — odizolowane repozytorium z osobnym wersjonowaniem, ignorowane przez Git w głównym drzewie. Zobacz CLAUDE.md → „Artefakty planowania i badań”. |
 
@@ -461,13 +454,13 @@ open-sse/
 
 ## `tests/` — Zestawy testów
 
-| Podkatalog             | Typ                                         | Runner                                   |
-| ---------------------- | ------------------------------------------- | ---------------------------------------- |
-| `tests/unit/`          | Testy jednostkowe (~500 plików, najszybsze) | Natywny test runner Node                 |
-| `tests/integration/`   | Testy integracyjne multi-module + DB        | Natywny test runner Node (concurrency 1) |
-| `tests/e2e/`           | E2E UI + workflow                           | Playwright                               |
-| `tests/protocols-e2e/` | E2E real-client MCP + A2A                   | Własne klienty protokołów                |
-| `tests/ecosystem/`     | Integracja providerów (dotykająca sieci)    | Natywny test runner Node                 |
+| Podkatalog                           | Typ                                         | Runner                                   |
+| ------------------------------------ | ------------------------------------------- | ---------------------------------------- |
+| `tests/unit/`                        | Testy jednostkowe (~500 plików, najszybsze) | Natywny test runner Node                 |
+| `tests/integration/`                 | Testy integracyjne multi-module + DB        | Natywny test runner Node (concurrency 1) |
+| `tests/e2e/`                         | E2E UI + workflow                           | Playwright                               |
+| `tests/e2e/protocol-clients.test.ts` | E2E real-client MCP + A2A                   | Własne klienty protokołów                |
+| `tests/e2e/ecosystem.test.ts`        | Integracja providerów (dotykająca sieci)    | Natywny test runner Node                 |
 
 ---
 
@@ -507,7 +500,7 @@ Dostarczane szablony konfiguracji plus zacommitowane bazowe linie quality-gate
 | ---------------------------------- | -------------------------------------------------------------- |
 | `.github/workflows/`               | Workflowy CI/CD GitHub Actions (lint, test, coverage, release) |
 | `.github/ISSUE_TEMPLATE/`          | Szablony issue bug/feature                                     |
-| `.github/PULL_REQUEST_TEMPLATE.md` | Szablon PR                                                     |
+| `.github/pull_request_template.md` | Szablon PR                                                     |
 | `.github/dependabot.yml`           | Konfiguracja aktualizacji zależności                           |
 
 ---

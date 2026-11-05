@@ -205,7 +205,7 @@ tokeni ya API ya REST ya Obsidian. GHSA-62vw ilificha tu ufichuaji wa nenosiri w
 bado ulikuwa kwenye daraja linaloruhusu ufikiaji kinga inaposhindwa (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` pia
 hukataa vault ambayo ni saraka ya data, ipo ndani yake, au ina saraka hiyo.
 
-#### Usafirishaji wa vitambulisho ni kwa waendeshaji pekee
+#### Usafirishaji wa vitambulisho na urejeshaji ni kwa waendeshaji pekee
 
 Kiwango kilicho juu huamua tu ikiwa _kitambulisho fulani_ kinahitajika. Njia zinazopakua
 vitambulisho vilivyohifadhiwa huongeza ukaguzi wa pili katika kishughulikiaji: `GET /api/settings/export-json` (miunganisho ya
@@ -216,22 +216,9 @@ nakala ambayo kuingia kumezimwa, na hujibu `403` kwa funguo za API za wigo wowot
 na `admin`) na kwa tokeni za ufikiaji za `oma_`. Utoaji wa tokeni za ulandanishi (`POST /api/sync/tokens`) hutumia
 kisaidizi hicho hicho, pamoja na tokeni inayoaminika ya huduma ya ndani ya loopback.
 
-#### Credential exports and restores are operator-only
+Vitendo husika vya kuharibu data vina mpaka huo huo: `POST /api/db-backups/import` (faili ya `.sqlite` iliyopakiwa, pamoja na `dryRun=true`), `POST /api/db-backups` (kurejesha nakala iliyohifadhiwa kwa id yake) na `POST /api/settings/import-json` (urejeshaji wa muundo wa zamani wa JSON) hubadilisha hifadhidata inayotumika au mkusanyiko mzima wa mipangilio, miunganisho na funguo za API. Kwa hiyo kitambulisho cha mashine hakiwezi kuanzisha vitendo hivyo pia.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Kufuta sehemu za kurejeshea kuna mpaka huo huo: `DELETE /api/db-backups` (usafishaji — hifadhi N za karibuni au ondoa zilizo na umri wa zaidi ya siku D) na `PATCH /api/db-backups` (mipangilio ya uhifadhi). Kanuni zilizohifadhiwa ndizo zinazotumiwa na `cleanupDbBackups()` baada ya kila nakala ya kiotomatiki (`src/lib/db/backup.ts`); kitambulisho cha mashine kinachoweza kuhifadhi `keepLatest: 1` kingeweza kufuta sehemu za awali za kurejeshea katika picha ya hali inayofuata. Kuorodhesha na kuunda nakala (`GET`/`PUT /api/db-backups`) kunabaki na uthibitishaji wa kawaida wa usimamizi.
 
 ### Uanzishaji wa usakinishaji mpya ni wa loopback pekee — kwa rika halisi, si `Host`
 

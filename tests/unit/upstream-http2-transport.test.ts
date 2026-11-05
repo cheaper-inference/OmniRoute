@@ -23,6 +23,7 @@ const sockets = new Set<net.Socket>();
 const sessions = new Set<http2.ServerHttp2Session>();
 const dispatchers = new Set<Dispatcher>();
 const proxyProtocols: string[] = [];
+const proxyServernames: Array<string | false> = [];
 const proxyAuth = `Basic ${Buffer.from("test:password").toString("base64")}`;
 let upstream: http2.Http2SecureServer;
 let plainProxy: http.Server;
@@ -99,7 +100,15 @@ test.before(async () => {
   const pems = await selfsigned.generate([{ name: "commonName", value: "localhost" }], {
     keySize: 2048,
     algorithm: "sha256",
-    extensions: [{ name: "subjectAltName", altNames: [{ type: 7, ip: "127.0.0.1" }] }],
+    extensions: [
+      {
+        name: "subjectAltName",
+        altNames: [
+          { type: 7, ip: "127.0.0.1" },
+          { type: 2, value: "localhost" },
+        ],
+      },
+    ],
   });
   tls.setDefaultCACertificates([...originalCa, pems.cert]);
   upstream = http2.createSecureServer({ key: pems.private, cert: pems.cert, allowHTTP1: true });
@@ -121,7 +130,10 @@ test.before(async () => {
   upstreamUrl = `https://127.0.0.1:${await listen(upstream)}/upload`;
   plainProxy = http.createServer();
   secureProxy = https.createServer({ key: pems.private, cert: pems.cert });
-  secureProxy.on("secureConnection", (socket) => proxyProtocols.push(socket.alpnProtocol || ""));
+  secureProxy.on("secureConnection", (socket) => {
+    proxyProtocols.push(socket.alpnProtocol || "");
+    proxyServernames.push((socket as tls.TLSSocket & { servername: string | false }).servername);
+  });
   tunnel(plainProxy);
   tunnel(secureProxy);
   await listen(plainProxy);
@@ -181,6 +193,17 @@ test("HTTP and HTTPS proxies retain authentication and family pinning on initial
   }
   assert.ok(proxyProtocols.length >= 2);
   assert.ok(proxyProtocols.every((protocol) => protocol === "http/1.1"));
+  assert.ok(proxyServernames.every((servername) => servername === false));
+});
+
+test("HTTPS proxies with DNS hostnames retain SNI on initial and retry paths", async () => {
+  const url = `https://test:password@localhost:${(secureProxy.address() as net.AddressInfo).port}?family=ipv4`;
+  const before = proxyServernames.length;
+  await request(createProxyDispatcher(url));
+  await request(getProxyRetryDispatcher(url));
+  const names = proxyServernames.slice(before);
+  assert.ok(names.length >= 2);
+  assert.ok(names.every((servername) => servername === "localhost"));
 });
 
 test("relay pool and fresh-socket retry honor the startup opt-out", async () => {
@@ -243,6 +266,12 @@ test("opt-out does not disable TLS certificate validation", async () => {
       getDefaultDispatcher(),
       createProxyDispatcher(
         `http://test:password@127.0.0.1:${(plainProxy.address() as net.AddressInfo).port}`
+      ),
+      createProxyDispatcher(
+        `https://test:password@127.0.0.1:${(secureProxy.address() as net.AddressInfo).port}?family=ipv4`
+      ),
+      getProxyRetryDispatcher(
+        `https://test:password@127.0.0.1:${(secureProxy.address() as net.AddressInfo).port}?family=ipv4`
       ),
     ]) {
       dispatchers.add(dispatcher);

@@ -28,7 +28,7 @@ export async function readBudgetFailure(response: Response): Promise<BudgetError
     try {
       error = await response.clone().text();
     } catch {
-      // An unreadable body is not proof of context overflow.
+      // no-effect: an unreadable body cannot prove overflow; preserve status without error text.
     }
   }
   return { status: response.status, error };

@@ -1,0 +1,1 @@
+- Add a Linux local resource-budget ledger that reserves disk before worktree creation and safely supervises explicitly budgeted heavy commands.

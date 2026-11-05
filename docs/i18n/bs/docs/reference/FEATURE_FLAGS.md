@@ -4,8 +4,6 @@
 
 ---
 
-# Feature Flags
-
 > Runtime prekidači koji mijenjaju ponašanje OmniRoute-a **bez ponovnog raspoređivanja (redeploy)**.
 > Svaka zastavica navedena ovdje je definisana u
 > [`src/shared/constants/featureFlagDefinitions.ts`](../../src/shared/constants/featureFlagDefinitions.ts)
@@ -200,7 +198,7 @@ koja se koristi kada nisu prisutni ni zamjena iz baze podataka ni varijabla okru
 > [`ENVIRONMENT.md`](./ENVIRONMENT.md#4-security--authentication).
 
 > [!NOTE]
-> Kolona `Ponovno pokretanje` označava zastavice s `requiresRestart: true` — vrijednost se
+> Kolona Ponovno pokretanje (`Restart` u izvorniku) označava zastavice s `requiresRestart: true` — vrijednost se
 > odmah pohranjuje, ali stupa na snagu tek nakon ponovnog učitavanja procesa. Enum
 > zastavice odbijaju svaku vrijednost izvan njihovog dozvoljenog skupa (provjerava se na strani servera i u
 > `setFeatureFlagOverride()` i u REST `PUT` rukovaocu).

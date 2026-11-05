@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Udbyderregistre, headerprofiler, identitet, …
 ├── handlers/               Anmodningshåndteringer (chat, embeddings, lyd, billede, …)
-├── executors/              150 udbydereksekutormoduler (eksekutorklasser + hjælpere pr. udbyder)
+├── executors/              156 udbydereksekutormoduler (eksekutorklasser + hjælpere pr. udbyder)
 ├── translator/             Formatkonvertering (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions-streamtransformer
 ├── services/               80+ tjenestemoduler (kombinationer, fallback, kvoter, identitet, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 eksekutormoduler på topniveau (`*.ts` minus `base.ts`, `index.ts` og tests — antallet
+156 eksekutormoduler på topniveau (`*.ts` minus `base.ts`, `index.ts` og tests — antallet
 måles af `npm run check:docs-counts`). Hver eksekutorklasse udvider `BaseExecutor` (`base.ts`),
 direkte eller via `DefaultExecutor` eller en anden eksekutor; de resterende moduler er hjælpere
 for individuelle udbydere (værktøjsskemaer, fetch/TTS-adaptere, håndteringer af særheder). Eksekutorerne omfatter:
@@ -772,7 +772,7 @@ Se [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) og det dedikerede afsnit i
    `open-sse/mcp-server/schemas/tools.ts`).
 2. Tildel de relevante scopes i `src/shared/constants/mcpScopes.ts`.
 3. Registrer værktøjet i `open-sse/mcp-server/server.ts`.
-4. Tilføj tests under `open-sse/mcp-server/__tests__/`.
+4. Tilføj tests under `tests/unit/`.
 5. Opdater [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Tilføj en ny A2A-færdighed
@@ -790,7 +790,7 @@ Se [A2A-SERVER.md § Tilføjelse af en ny færdighed](../frameworks/A2A-SERVER.m
 - **Navngivning**: filer bruger `camelCase` eller `kebab-case`, komponenter bruger `PascalCase`,
   konstanter bruger `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` overalt;
-  `no-explicit-any` = `warn` i `open-sse/` og `tests/`, fejl andre steder.
+  `no-explicit-any` = `error` i `open-sse/**/*.ts` og `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (ældre praksis). Foretræk eksplicitte typer frem for
   inferens på tværs af modulgrænser.
 - **Database**: Skriv aldrig rå SQL i ruter eller handlers — gå altid gennem
@@ -820,8 +820,7 @@ Se [A2A-SERVER.md § Tilføjelse af en ny færdighed](../frameworks/A2A-SERVER.m
   `a2a`, `memory`, `skills`.
 - **Branches**: præfikserne `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Commit aldrig direkte til `main`.
-- **Husky**: pre-commit kører `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; pre-push kører `check:any-budget:t11` + `check:tracked-artifacts` (hurtige kontroller; ekskluderer `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

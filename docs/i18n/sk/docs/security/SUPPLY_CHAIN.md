@@ -18,49 +18,41 @@ OmniRoute publikuje npm + Docker artefakty. Tieto brány poskytujú provenienciu
 
 CVE ratchet pre obrazy používa **dva kroky** v `docker-publish.yml`: krok SARIF (`HIGH,CRITICAL`, `exit-code: 0`) udržiava HIGH+CRITICAL viditeľné na karte Bezpečnosť bez blokovania; krok _CRITICAL gate_ (`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`) zlyhá vydanie pri CRITICAL CVE **s dostupnou opravou**. `ignore-unfixed` zabraňuje blokovaniu vydania pre CVE základného obrazu bez upstreamovej opravy.
 
-## ⚠️ Variabilita CVE (blokujúce brány osv/Trivy)
+## ⚠️ Variabilita CVE (blokovanie kontrol osv/Trivy)
 
-osv a Trivy porovnávajú závislosti s databázami CVE, ktoré **nepretržite rastú**. PR, ktorý **nemodifikuje žiadne závislosti**, môže zrazu zčervenať, pretože bolo odhalené nové CVE v existujúcej závislosti (osv: namerané `vulnCount` > základná hodnota; Trivy: nové opraviteľné CRITICAL v obraze). **Toto je OČAKÁVANÉ prevádzkové správanie blokujúcej CVE brány, nie regresia produktu.**
+osv a Trivy porovnávajú závislosti s databázami CVE, ktoré **neustále rastú**. PR,
+ktorý **nemení žiadne závislosti**, môže náhle zlyhať, pretože bola zverejnená nová
+CVE v existujúcej závislosti (osv: nameraná hodnota `vulnCount` > východisková hodnota;
+Trivy: nová opraviteľná zraniteľnosť úrovne CRITICAL v obraze). **Ide o OČAKÁVANÉ
+prevádzkové správanie blokujúcej kontroly CVE, nie o regresiu produktu.**
 
-Keď osv alebo Trivy zčervenajú kvôli novo odhalenému CVE, riešenie je:
+Keď osv alebo Trivy zlyhá v dôsledku novo zverejnenej CVE, riešením je:
 
-1.  **Aktualizovať ovplyvnenú závislosť** (preferované) — aktualizovať na opravenú verziu prostredníctvom `package.json` `overrides` (tranzitívne závislosti) alebo prebudovať obraz na opravenom základe.
-2.  **Ak neexistuje upstreamová oprava:**
-    - **osv:** znovu nastaviť základnú hodnotu `metrics.vulnCount` v `config/quality/quality-baseline.json` (`npm run quality:ratchet -- --update` nepokrýva vyhradené brány — upravte hodnotu ručne, `direction:down`) s odôvodnením + sledovacím problémom.
-    - **Trivy:** pridať záznam do `.trivyignore` (CVE-ID na riadok) s odôvodňujúcim komentárom + sledovacím problémom. `ignore-unfixed: true` už automaticky pokrýva CVE bez opráv.
+1. **Aktualizovať dotknutú závislosť** (preferované) — prejsť na opravenú verziu
+   prostredníctvom `package.json` a `overrides` (tranzitívne závislosti) alebo znova
+   zostaviť obraz na opravenom základnom obraze.
+2. **Ak upstream neposkytuje opravu:**
+   - **osv:** znova nastaviť východiskovú hodnotu `metrics.vulnCount` v
+     `config/quality/quality-baseline.json` (`npm run quality:ratchet -- --update`
+     nepokrýva samostatné kontroly — upravte hodnotu ručne, `direction:down`) a pridať
+     poznámku s odôvodnením + sledovací problém.
+   - **Trivy:** pridať záznam do `.trivyignore` (jedno CVE-ID na riadok) s komentárom
+     obsahujúcim odôvodnenie + sledovací problém. `ignore-unfixed: true` už automaticky
+     pokrýva CVE bez dostupných opráv.
 
-Obe brány **elegantne PRESKOČIA** (exit 0), ak nástroj chýba alebo meranie zlyhá (osv-scanner nie je v PATH, osv.dev/sieť nedostupná, neplatný JSON) — zlyhanie **merania** nikdy neblokuje, blokuje iba **nameraná** regresia.
+Povinné spustenia OSV (`check:vuln-ratchet -- --ratchet`) zlyhajú bezpečným spôsobom
+so stavom `INCOMPLETE` a návratovým kódom 2, keď nie je možné overiť skener, správu
+alebo východiskovú hodnotu. Nameraná regresia skončí s návratovým kódom 1. Informatívne
+spustenie môže naďalej hlásiť `SKIP` s návratovým kódom 0, čo nepotvrdzuje, že závislosti
+úspešne prešli kontrolou. Blokujúci krok Trivy tiež vyžaduje úspešné meranie: nedostupné
+nástroje, neúspešné úlohy a chýbajúce dôkazy o obraze nemôžu potvrdiť, že obraz
+neobsahuje zraniteľnosti.
 
-## Známe akceptované riziká
+## Riziko vyradenej závislosti
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Koreňový lockfile po aktualizácii pripnutého vývojového nástroja promptfoo už neobsahuje `extract-zip` ani hranu závislosti, ktorá by k nemu viedla. Týmto sa vyraďuje predtým akceptovaný reťazec `promptfoo` → `@openai/codex-security` → `extract-zip` sledovaný v #14482. Regresné kontroly v `tests/unit/extract-zip-14482-exposure.test.ts` odmietajú jeho opätovné zavedenie a zachovávajú zákaz importov z produkčného kódu.
 
-`extract-zip@2.0.1` obsahuje dve neopravené upozornenia na symlink-traversal s vysokou závažnosťou.
-Podľa vetvy "žiadna oprava upstream" v rámci nápravy CVE Variance vyššie, ide o
-**akceptované riziko**, nie o zvýšenie verzie:
-
-- **Reťazec:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  Potvrdené cez `package-lock.json` — presne jeden balík v celom strome závislostí
-  (`@openai/codex-security`) deklaruje `extract-zip`, a presne jeden balík
-  (`promptfoo`) deklaruje `@openai/codex-security`.
-- **Neexistuje žiadne opravené vydanie nikde v reťazci.** `extract-zip@2.0.1` (vydané v roku 2020) je posledné vydanie balíka — nie je udržiavané. `@openai/codex-security`
-  aktuálny npm-latest (`0.1.29`) stále sťahuje `extract-zip@2.0.1`.
-- **Nedostupné z produkcie.** `promptfoo` je iba devDependency (nikdy nie je uvedené
-  pod `dependencies`), a žiadny súbor pod `src/`, `open-sse/`, alebo `bin/` neimportuje
-  npm balík `extract-zip` — vlastný pomocník OmniRoute `extractZip()`
-  (`src/lib/versionManager/binaryManager.ts:93`) používa natívne `unzip`/`tar`
-  a nesúvisí s tým. `@openai/codex-security` tiež dodáva vlastnú ochranu proti symlink-traversal
-  nad callbackom `onEntry` z `extract-zip`.
-- **Nealiasujte** `extract-zip` cez `package.json` `overrides` — jediná životaschopná
-  náhrada je interná pre Electron-org a API-nekompatibilná s
-  vlastnými kontrolami `onEntry`/`defaultDirMode`/`defaultFileMode` `@openai/codex-security`;
-  prepis by ticho narušil bezpečnostné kontroly tohto balíka.
-- **Základná úroveň:** nameraný `vulnCount` (3) z osv je už hlboko pod zmrazenou
-  základnou úrovňou `config/quality/quality-baseline.json` (27) — nie je potrebná žiadna zmena.
-- **Ochrana proti regresii:** `tests/unit/extract-zip-14482-exposure.test.ts` potvrdzuje
-  reťazec a vyššie uvedenú invariantu o neimportovaní do produkcie; zlyhá v CI, ak sa niekedy
-  poruší (napr. budúci PR sprístupní `extract-zip` z produkcie).
-- **Sledovanie:** problém #14482.
+Aktuálna oprava závislostí tiež obmedzuje prepísania kompatibility na klienta MSAL služby Azure Identity, klienta FTP balíka get-uri a závislosť Zod súpravy OpenCode v1 SDK. Získavanie tokenov Azure a načítavanie cez FTP sa testujú pomocou riadených transportov; oba balíky OpenCode spúšťajú vlastné zostavovacie a testovacie sady. Počty upozornení v registri predstavujú merania v konkrétnom časovom bode a po potvrdení lockfilu do repozitára sa môžu zmeniť.
 
 ## Backlog: Upozornenie Scorecard → blokovanie
 

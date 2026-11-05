@@ -88,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Mekanisme:** Menggunakan API OS untuk mengalihkan seluruh lalu lintas HTTP/HTTPS melalui listener HTTP_PROXY:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` dan pengaturan host/port HTTP/HTTPS
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Jangkauan:** Setiap aplikasi di mesin yang mematuhi pengaturan proxy sistem
   **Catatan:** `source` = `"system-proxy"`
 
 **Mekanisme keamanan:**
 
-- Timer penonaktifan otomatis (default 30 menit, dapat dikonfigurasi melalui `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- Status proxy sistem sebelumnya disimpan di DB dan dipulihkan saat dikembalikan
-- Dasbor menampilkan prompt "Mengembalikan proxy sistem" jika pengguna berpindah halaman saat proxy aktif
-- UI menampilkan badge `⚠ Tingkat Lanjut` + checkbox konfirmasi eksplisit
+- Penerapan proksi menjadwalkan pengatur waktu pemulihan yang lokal pada proses, dengan upaya terbaik tanpa jaminan (default 30 menit, dapat dikonfigurasi melalui `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`). Pengatur waktu tidak bertahan setelah proses server berakhir.
+- Status proksi sebelumnya disimpan dalam memori proses; penyimpanan status tangkapan ini tidak menyimpannya secara persisten ke basis data. Pemulihan mengembalikan pengaturan macOS/GNOME yang disimpan; pada Windows, tindakan ini mereset proksi WinHTTP alih-alih memulihkan konfigurasi sebelumnya.
+- Selama proksi dilaporkan telah diterapkan, pelepasan halaman mengirim permintaan pemulihan keepalive dengan upaya terbaik dan meminta konfirmasi bawaan yang teksnya dikendalikan browser. Pelepasan komponen inspector saat navigasi SPA juga mencoba pemulihan, tanpa dialog browser tersebut.
+- Bilah alat tangkapan menampilkan kontrol `System-wide` yang dilokalkan dengan ikon peringatan. Mengekliknya saat ini hanya mengubah status UI lokal; tidak menampilkan kotak centang konfirmasi atau menerapkan maupun memulihkan proksi sistem.
 
 ### Mode 5 — Dekripsi transparan TPROXY (Linux, root, keikutsertaan opsional)
 
@@ -113,13 +113,13 @@ Ini merupakan subsistem substansial dengan panduan operator khususnya sendiri �
 
 ### Perbandingan mode pengambilan
 
-| Mode               | Penyiapan                                   |           Sudo?           | Jangkauan                                     | Catatan                                                                                                                              |
-| ------------------ | ------------------------------------------- | :-----------------------: | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| 1. AgentBridge     | Otomatis                                    | Sekali (sertifikat+hosts) | 9 agen IDE                                    | Aktif secara default                                                                                                                 |
-| 2. Host Kustom     | Input per host                              |      Ya (file hosts)      | Semua aplikasi yang menggunakan host tersebut | Disimpan secara persisten di DB                                                                                                      |
-| 3. HTTP_PROXY      | `export HTTPS_PROXY=...`                    |           Tidak           | Aplikasi yang mematuhi env                    | Port 8080; HTTPS diteruskan melalui tunnel CONNECT (hanya metadata, tidak pernah didekripsi)                                         |
-| 4. Seluruh sistem  | Aktifkan/nonaktifkan + konfirmasi           |            Ya             | Semua aplikasi di mesin                       | Dinonaktifkan otomatis dalam 30 menit                                                                                                |
-| 5. Dekripsi TPROXY | Aktifkan/nonaktifkan (Linux + addon native) | Ya (root + instalasi CA)  | Semua host pada port target                   | Mendekripsi host apa pun; nonaktif secara default — lihat `docs/security/MITM-TPROXY-DECRYPT.md` (git; tidak dikompilasi ke `/docs`) |
+| Mode               | Penyiapan                                                      |           Sudo?           | Jangkauan                                     | Catatan                                                                                                                              |
+| ------------------ | -------------------------------------------------------------- | :-----------------------: | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| 1. AgentBridge     | Otomatis                                                       | Sekali (sertifikat+hosts) | 9 agen IDE                                    | Aktif secara default                                                                                                                 |
+| 2. Host Kustom     | Input per host                                                 |      Ya (file hosts)      | Semua aplikasi yang menggunakan host tersebut | Disimpan secara persisten di DB                                                                                                      |
+| 3. HTTP_PROXY      | `export HTTPS_PROXY=...`                                       |           Tidak           | Aplikasi yang mematuhi env                    | Port 8080; HTTPS diteruskan melalui tunnel CONNECT (hanya metadata, tidak pernah didekripsi)                                         |
+| 4. Seluruh sistem  | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |            Ya             | Semua aplikasi di mesin                       | Pengatur waktu pemulihan dengan upaya terbaik tanpa jaminan (default 30 menit)                                                       |
+| 5. Dekripsi TPROXY | Aktifkan/nonaktifkan (Linux + addon native)                    | Ya (root + instalasi CA)  | Semua host pada port target                   | Mendekripsi host apa pun; nonaktif secara default — lihat `docs/security/MITM-TPROXY-DECRYPT.md` (git; tidak dikompilasi ke `/docs`) |
 
 ---
 
@@ -314,7 +314,7 @@ akan ditambahkan kemudian).
 ### 5.1 Merekam sesi
 
 1. Klik **"● Rekam sesi"** di bilah alat → masukkan nama (opsional)
-2. Tail langsung berlanjut seperti biasa; indikator merah yang berkedip menampilkan `◉ REC · <nama> · 00:42 · 23 permintaan`
+2. Pemantauan langsung berlanjut seperti biasa; bilah perekaman menampilkan titik merah berdenyut, waktu berlalu, nama sesi jika tersedia, dan kontrol Berhenti yang dilokalkan.
 3. Klik **"⏹ Hentikan"** → snapshot sesi disimpan ke `inspector_sessions` + `inspector_session_requests`
 
 ### 5.2 Melihat sesi yang direkam
@@ -322,7 +322,7 @@ akan ditambahkan kemudian).
 Dropdown **Sesi** di bilah alat mencantumkan sesi yang tersimpan. Memilih salah satunya akan:
 
 - Memuat snapshot sesi (status dibekukan)
-- Menampilkan banner: `Melihat sesi rekaman "<nama>" — [Kembali ke langsung]`
+- Banner menampilkan label sesi rekaman yang dilokalkan dan nama sesi (atau teks pengganti yang dilokalkan untuk sesi tanpa judul), di samping tombol Kembali ke tampilan langsung yang dilokalkan.
 - Membuat tab Statistik tersedia dengan agregat Recharts
 
 ### 5.3 Format ekspor
@@ -346,7 +346,7 @@ Traffic Inspector menampilkan **semua lalu lintas HTTPS yang diintersepsi**, ter
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **LOCAL_ONLY**                           | Semua rute dan endpoint WebSocket hanya dapat diakses melalui loopback (diterapkan di `routeGuard.ts` sebelum autentikasi)                                                |
 | **Penyamaran rahasia**                   | Pemindai linear `maskSecret()` menyamarkan kredensial Bearer RFC 6750, kunci dengan prefiks penyedia, dan token opak yang panjang sebelum `TrafficBuffer.push()`          |
-| **Batas ukuran isi**                     | Isi > `INSPECTOR_MAX_BODY_KB` (default 1024 KB) dipotong dengan pemberitahuan `"(dipotong demi performa)"`                                                                |
+| **Batas ukuran isi**                     | Isi > `INSPECTOR_MAX_BODY_KB` (default 1024 KB) dipotong dengan pemberitahuan `"(truncated for performance)"`                                                             |
 | **Sanitasi header**                      | Nama diubah menjadi huruf kecil; header framing/hop-by-hop dan autentikasi proksi dihapus; cookie disamarkan sepenuhnya; nilai kredensial didelegasikan ke `maskSecret()` |
 | **CSP**                                  | Content Security Policy yang ketat pada halaman Traffic Inspector untuk mencegah XSS melalui isi respons yang disisipkan                                                  |
 | **Tidak ada persistensi secara default** | `TrafficBuffer` disimpan dalam memori dan hilang saat server dimulai ulang. Sesi hanya dipersistenkan ketika direkam secara eksplisit                                     |
@@ -414,7 +414,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-Dasbor juga akan menawarkan "Kembalikan proksi sistem" saat pemuatan berikutnya jika mendeteksi bahwa status DB menunjukkan proksi sebelumnya aktif.
+Status proksi yang disimpan hanya berada dalam proses server. Setelah crash atau mulai ulang, penyimpanan status tangkapan saat ini tidak dapat memulihkan snapshot tersebut dari basis data; gunakan perintah pemulihan platform di atas ketika pemulihan manual diperlukan.
 
 ### Buffer penuh
 

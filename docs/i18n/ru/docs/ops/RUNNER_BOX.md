@@ -11,13 +11,13 @@
 со сборкой webpack Release-Green и заданием lint; подкачка хоста (16 GB) компенсирует это, а поскольку сборки
 для pull request выполняются на размещённых раннерах, слот Turbopack большую часть времени простаивает:
 
-| раннер               | метка            | роль                                                                                                                                               | `MemoryHigh` / `MemoryMax`    | `CPUQuota`   |
-| -------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | ------------ |
-| `omniroute-113-5`    | `omni-build`     | сборки Turbopack: `ci.yml` `Build` (только push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, ночная сборка a11y | 56 GB / 60 GB (подкачка 0)    | 1600 %       |
-| `omniroute-113-6`    | `omni-release`   | Release-Green (`release-green` + `main-green`), сборка webpack                                                                                     | 20 GB / 24 GB (подкачка 4 GB) | 800 %        |
-| `omniroute-113-2`    | `omni-light`     | ночные задания (Schemathesis, promptfoo, garak, k6) и `quality.yml` `lint-guard`                                                                   | 12 GB / 16 GB (подкачка 4 GB) | 600 %        |
-| `omniroute-113`      | `omni-light`     | тот же пул, что и выше                                                                                                                             | 8 GB / 12 GB                  | 400 %        |
-| OmniHeuris, OmniMind | (их репозитории) | только Dependabot (пиковое потребление каждого — 155 MB, 2026-10-18)                                                                               | 4 GB / 6 GB                   | 200 % каждый |
+| раннер               | метка                           | роль                                                                                                                                               | `MemoryHigh` / `MemoryMax`    | `CPUQuota`   |
+| -------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | ------------ |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | сборки Turbopack: `ci.yml` `Build` (только push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, ночная сборка a11y | 56 GB / 60 GB (подкачка 0)    | 1600 %       |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), сборка webpack                                                                                     | 20 GB / 24 GB (подкачка 4 GB) | 800 %        |
+| `omniroute-113-2`    | `omni-light`                    | ночные задания (Schemathesis, promptfoo, garak, k6) и `quality.yml` `lint-guard`                                                                   | 12 GB / 16 GB (подкачка 4 GB) | 600 %        |
+| `omniroute-113`      | `omni-light`                    | тот же пул, что и выше                                                                                                                             | 8 GB / 12 GB                  | 400 %        |
+| OmniHeuris, OmniMind | (их репозитории)                | только Dependabot (пиковое потребление каждого — 155 MB, 2026-10-18)                                                                               | 4 GB / 6 GB                   | 200 % каждый |
 
 Измерено 2026-10-18:
 
@@ -86,7 +86,7 @@ tmpfs** и старше 24 ч на диске в `_work/_temp`; завершен
 ## Правила эксплуатации
 
 - **Одновременно выполняется только одна сборка Turbopack — ограничение обеспечивается меткой.** Каждая задача, запускающая полную сборку Turbopack
-  `next build`, нацелена на `[self-hosted, omni-build]`, и только **`omniroute-113-5`** имеет эту
+  `next build`, нацелена на `[self-hosted, omni-build, omni-build-60gb]`, и только **`omniroute-113-5`** имеет эту
   метку: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
   ночная сборка a11y (#16853) и **amd64** в `docker-publish.yml` (webpack внутри BuildKit —
   Turbopack аварийно завершился там, запуск 33253576569). Этап Docker для arm64 остаётся на `ubuntu-24.04-arm`.

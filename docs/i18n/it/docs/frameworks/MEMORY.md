@@ -349,11 +349,11 @@ L'estrazione è **basata su espressioni regolari**, non su LLM: viene eseguita n
 `setImmediate()`, quindi non blocca mai il flusso della risposta:
 
 - **Pattern di preferenza** → `MemoryType.FACTUAL`
-  (ad es. `Preferisco …`, `Mi piace molto …`, `il mio preferito è …`, `Odio …`)
+  (ad es. `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
 - **Pattern decisionali** → `MemoryType.EPISODIC`
-  (ad es. `Userò …`, `Ho scelto …`, `Ho optato per …`, `Adotterò …`)
+  (ad es. `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
 - **Pattern comportamentali** → `MemoryType.FACTUAL`
-  (ad es. `Di solito …`, `Faccio sempre …`, `Tendo a …`)
+  (ad es. `I usually …`, `I always …`, `I tend to …`)
 
 Ogni corrispondenza viene sanificata (`trim`, compressione degli spazi vuoti, limite di 500 caratteri),
 deduplicata all'interno del batch tramite una chiave stabile `factKey(category, content)` e
@@ -727,11 +727,11 @@ Il modulo `extraction.ts` (`src/lib/memory/extraction.ts`) utilizza la **corrisp
 
 ### Categorie di pattern predefinite
 
-| Categoria           | Pattern di esempio                                               | Dati acquisiti                      |
-| ------------------- | ---------------------------------------------------------------- | ----------------------------------- |
-| PREFERENCE_PATTERNS | `"Preferisco <X>"`, `"Mi piace <X>"`, `"Odio <X>"`               | Preferenze dell'utente              |
-| DECISION_PATTERNS   | `"Userò <X>"`, `"Ho deciso di <X>"`, `"Ho scelto <X>"`           | Decisioni dell'utente (episodiche)  |
-| PATTERN_PATTERNS    | `"Di solito <X>"`, `"Faccio sempre <X>"`, `"Non faccio mai <X>"` | Pattern comportamentali persistenti |
+| Categoria           | Pattern di esempio                                          | Dati acquisiti                      |
+| ------------------- | ----------------------------------------------------------- | ----------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Preferenze dell'utente              |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Decisioni dell'utente (episodiche)  |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Pattern comportamentali persistenti |
 
 ### Pattern di esempio (semplificati)
 
@@ -767,8 +767,9 @@ Quando un utente dice:
 
 Per evitare un'estrazione incontrollata, si applicano i seguenti limiti:
 
-| Lunghezza minima del contenuto | 3 caratteri |
-| Lunghezza massima del contenuto| 500 caratteri |
+| Lunghezza minima del contenuto  | 3 caratteri   |
+| ------------------------------- | ------------- |
+| Lunghezza massima del contenuto | 500 caratteri |
 
 ### Quando disabilitare l'estrazione
 

@@ -15,7 +15,7 @@ Nó cung cấp một endpoint duy nhất tương thích với OpenAI (`/v1/*`) v
 
 Các khả năng cốt lõi:
 
-- Bề mặt API tương thích với OpenAI dành cho CLI/công cụ (375 nhà cung cấp, 154 mô-đun thực thi)
+- Bề mặt API tương thích với OpenAI dành cho CLI/công cụ (375 nhà cung cấp, 156 mô-đun thực thi)
 - Chuyển đổi yêu cầu/phản hồi giữa các định dạng của nhà cung cấp
 - Dự phòng tổ hợp mô hình (chuỗi nhiều mô hình)
 - Các bước tổ hợp có cấu trúc (`provider + model + connection`) với thứ tự khi chạy dựa trên `compositeTiers`
@@ -31,7 +31,7 @@ Các khả năng cốt lõi:
 - Tìm kiếm web qua `/v1/search` (20 nhà cung cấp)
 - Kiểm duyệt qua `/v1/moderations`
 - Xếp hạng lại qua `/v1/rerank`
-- Phân tích thẻ suy luận (``) cho các mô hình lập luận
+- Phân tích thẻ suy luận (`<think>...</think>`) cho các mô hình lập luận
 - Làm sạch phản hồi để tương thích nghiêm ngặt với OpenAI SDK
 - Chuẩn hóa vai trò (developer→system, system→user) để tương thích giữa các nhà cung cấp
 - Chuyển đổi đầu ra có cấu trúc (json_schema → Gemini responseSchema)
@@ -1094,11 +1094,11 @@ tương thích với hệ thống cũ. Hợp đồng runtime hiện tại sử d
 - di chuyển lược đồ SQLite và các hook tự động nâng cấp khi khởi động
 - đường dẫn tương thích để di chuyển từ JSON cũ → SQLite
 
-## 6) Cơ chế bảo vệ URL gửi đi / SSRF
+## 6) Bảo vệ chống SSRF / URL gửi đi
 
-- `src/shared/network/outboundUrlGuard.ts` chặn tất cả URL đích riêng tư/loopback/link-local trước khi chúng đến các trình thực thi của nhà cung cấp
-- Các route khám phá và xác thực mô hình của nhà cung cấp sử dụng `src/shared/network/safeOutboundFetch.ts`, áp dụng cơ chế bảo vệ trước mỗi yêu cầu gửi đi
-- Lỗi từ cơ chế bảo vệ được hiển thị dưới dạng `URL_GUARD_BLOCKED` với HTTP 422 và được ghi vào dấu vết kiểm toán tuân thủ thông qua `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) áp dụng `src/shared/network/outboundUrlGuard.ts` cho các yêu cầu trò chuyện được gửi qua `BaseExecutor.execute()`. Ở chế độ chỉ công khai (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` khi cờ riêng tư bị tắt), cơ chế này chặn các máy chủ riêng tư, máy chủ loopback và dải 169.254.0.0/16; trong mọi chế độ khác, cơ chế này chặn các máy chủ siêu dữ liệu đám mây. Nó kiểm tra tên máy chủ hoặc địa chỉ IP dạng literal đúng như được ghi, trước khi thực hiện bất kỳ thao tác tra cứu DNS nào. Các nhà cung cấp cục bộ tích hợp sẵn sẽ bỏ qua bước kiểm tra này.
+- Các tuyến khám phá và xác thực mô hình của nhà cung cấp sử dụng `src/shared/network/safeOutboundFetch.ts`, áp dụng cơ chế bảo vệ trước mỗi yêu cầu gửi đi
+- Lỗi từ cơ chế bảo vệ được trả về dưới dạng `URL_GUARD_BLOCKED` với HTTP 503 (`getSafeOutboundFetchErrorStatus`; tuyến khám phá mô hình trả về 400), và các trường hợp chặn SSRF thực sự trong quá trình xác thực được ghi vào nhật ký kiểm tra dưới dạng sự kiện `provider.validation.ssrf_blocked`
 
 ## Khả năng quan sát và tín hiệu vận hành
 
@@ -1149,7 +1149,7 @@ Các biến môi trường được mã nguồn sử dụng trực tiếp:
 4. Hoạt động của đám mây phụ thuộc vào `NEXT_PUBLIC_BASE_URL` chính xác và khả năng truy cập endpoint đám mây.
 5. Thư mục `open-sse/` được phát hành dưới dạng **gói npm workspace** `@omniroute/open-sse`. Mã nguồn import gói này qua `@omniroute/open-sse/...` (được phân giải bởi `transpilePackages` của Next.js). Các đường dẫn tệp trong tài liệu này vẫn sử dụng tên thư mục `open-sse/` để đảm bảo tính nhất quán.
 6. Các biểu đồ trong bảng điều khiển sử dụng **Recharts** (dựa trên SVG) để cung cấp các hình ảnh trực quan phân tích có tính tương tác và khả năng truy cập (biểu đồ cột về mức sử dụng mô hình, bảng phân tích theo nhà cung cấp kèm tỷ lệ thành công).
-7. Các kiểm thử E2E sử dụng **Playwright** (`tests/e2e/`), chạy qua `npm run test:e2e`. Các kiểm thử đơn vị sử dụng **trình chạy kiểm thử Node.js** (`tests/unit/`), chạy qua `npm run test:unit`. Mã nguồn trong `src/` là **TypeScript** (`.ts`/`.tsx`); workspace `open-sse/` vẫn sử dụng JavaScript (`.js`).
+7. Các kiểm thử E2E sử dụng **Playwright** (`tests/e2e/`), chạy qua `npm run test:e2e`. Các kiểm thử đơn vị sử dụng **trình chạy kiểm thử Node.js** (`tests/unit/`), chạy qua `npm run test:unit`. Mã nguồn trong `src/` là **TypeScript** (`.ts`/`.tsx`); workspace `open-sse/` vẫn sử dụng TypeScript (`.ts`).
 8. Trang cài đặt được tổ chức thành 7 tab: Chung, Giao diện, AI, Bảo mật, Định tuyến, Khả năng phục hồi, Nâng cao. Trang Khả năng phục hồi chỉ cấu hình hàng đợi yêu cầu, thời gian chờ kết nối, bộ ngắt mạch nhà cung cấp và hành vi chờ hết thời gian chờ; trạng thái runtime trực tiếp của bộ ngắt mạch được hiển thị trên trang Tình trạng.
 9. Chiến lược **Chuyển tiếp Ngữ cảnh** (`context-relay`) được chia thành hai lớp: `combo.ts` quyết định có nên tạo một lượt bàn giao hay không, còn `chat.ts` chèn lượt bàn giao sau khi phân giải tài khoản. Dữ liệu bàn giao nằm trong bảng SQLite `context_handoffs`. Việc phân chia này là có chủ đích vì chỉ `chat.ts` biết liệu tài khoản thực tế có thay đổi hay không.
 10. **Thực thi proxy** hiện đã toàn diện: `tokenHealthCheck.ts` phân giải proxy cho từng kết nối, `/api/providers/validate` sử dụng `runWithProxyContext`, và `proxyFetch.ts` sử dụng `undici.fetch()` để duy trì khả năng tương thích với dispatcher trên Node 22.

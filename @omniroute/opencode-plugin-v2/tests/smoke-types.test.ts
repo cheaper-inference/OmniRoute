@@ -1,6 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import plugin from "../src/index.js";
+import { withEmptyEnrichment } from "./helpers/network-fixtures.js";
 
 describe("stable contract smoke", () => {
   it("default export has string id and function setup", () => {
@@ -42,19 +43,22 @@ describe("stable contract smoke", () => {
   });
   it("collectCatalog plus buildProviderPayload writes one provider and its models", async () => {
     const { buildProviderPayload, collectCatalog } = await import("../src/catalog.js");
-    const collected = await collectCatalog(
-      {
-        providerId: "omniroute",
-        baseURL: "https://gw.example.com",
-        apiKey: "k",
-        timeoutMs: 1000,
-        modelCacheTtlMs: 300000,
-        usableOnly: false,
-      },
-      {
-        models: async () => [{ id: "m1", context_length: 1000 }],
-        combos: async () => [],
-      }
+    const collected = await withEmptyEnrichment((enrichmentFetcher) =>
+      collectCatalog(
+        {
+          providerId: "omniroute",
+          baseURL: "https://gw.example.com",
+          apiKey: "k",
+          timeoutMs: 1000,
+          modelCacheTtlMs: 300000,
+          usableOnly: false,
+        },
+        {
+          enrichmentFetcher,
+          models: async () => [{ id: "m1", context_length: 1000 }],
+          combos: async () => [],
+        }
+      )
     );
     assert.equal(collected.counts.models, 1);
     const payload = buildProviderPayload(collected, {

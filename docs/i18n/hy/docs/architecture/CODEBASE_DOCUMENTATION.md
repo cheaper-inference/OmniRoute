@@ -446,7 +446,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Մատակարարների ռեեստրներ, վերնագրերի պրոֆիլներ, ինքնություն, …
 ├── handlers/               Հարցումների մշակիչներ (զրույց, ներդրումներ, աուդիո, պատկեր, …)
-├── executors/              Մատակարարների 150 կատարիչ մոդուլ (կատարիչ դասեր + յուրաքանչյուր մատակարարի օժանդակ միջոցներ)
+├── executors/              Մատակարարների 156 կատարիչ մոդուլ (կատարիչ դասեր + յուրաքանչյուր մատակարարի օժանդակ միջոցներ)
 ├── translator/             Ձևաչափի փոխակերպում (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions հոսքի փոխակերպիչ
 ├── services/               80+ ծառայության մոդուլ (համակցումներ, պահուստային անցում, քվոտաներ, ինքնություն, …)
@@ -476,7 +476,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-Վերին մակարդակի 150 կատարիչ մոդուլ (`*.ts`՝ առանց `base.ts`-ի, `index.ts`-ի և թեստերի. քանակը չափվում է `npm run check:docs-counts` հրամանով)։ Յուրաքանչյուր կատարիչ դաս ընդլայնում է `BaseExecutor`-ը (`base.ts`)՝ ուղղակիորեն կամ `DefaultExecutor`-ի կամ մեկ այլ կատարիչի միջոցով։ Մնացած մոդուլները յուրաքանչյուր մատակարարի համար նախատեսված օժանդակ միջոցներ են (գործիքների սխեմաներ, հարցումների/TTS ադապտերներ, առանձնահատկությունների մշակիչներ)։ Կատարիչների թվում են՝
+Վերին մակարդակի 156 կատարիչ մոդուլ (`*.ts`՝ առանց `base.ts`-ի, `index.ts`-ի և թեստերի. քանակը չափվում է `npm run check:docs-counts` հրամանով)։ Յուրաքանչյուր կատարիչ դաս ընդլայնում է `BaseExecutor`-ը (`base.ts`)՝ ուղղակիորեն կամ `DefaultExecutor`-ի կամ մեկ այլ կատարիչի միջոցով։ Մնացած մոդուլները յուրաքանչյուր մատակարարի համար նախատեսված օժանդակ միջոցներ են (գործիքների սխեմաներ, հարցումների/TTS ադապտերներ, առանձնահատկությունների մշակիչներ)։ Կատարիչների թվում են՝
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
@@ -768,7 +768,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts`-ը)։
 2. Նշանակեք համապատասխան շրջանակը կամ շրջանակները `src/shared/constants/mcpScopes.ts`-ում։
 3. Գրանցեք գործիքը `open-sse/mcp-server/server.ts`-ում։
-4. Ավելացրեք թեստեր `open-sse/mcp-server/__tests__/`-ում։
+4. Ավելացրեք թեստեր `tests/unit/`-ում։
 5. Թարմացրեք [MCP-SERVER.md](../frameworks/MCP-SERVER.md)-ը։
 
 ### Ավելացնել նոր A2A հմտություն
@@ -786,7 +786,7 @@ bin/
 - **Անվանումներ**: ֆայլերը՝ `camelCase` կամ `kebab-case`, բաղադրիչները՝ `PascalCase`,
   հաստատունները՝ `UPPER_SNAKE`։
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` ամենուրեք,
-  `no-explicit-any` = `warn`՝ `open-sse/`-ում և `tests/`-ում, իսկ այլուր՝ error։
+  `no-explicit-any` = `error`՝ `open-sse/**/*.ts`-ում և `tests/**/*.ts`-ում։
 - **TypeScript**: `strict: false` (ժառանգված մոտեցում)։ Մոդուլների սահմանների համար
   տիպերի ենթադրությունից գերադասեք բացահայտ տիպերը։
 - **Տվյալների բազա**: երբեք մի գրեք անմշակ SQL երթուղիներում կամ մշակողներում՝ միշտ աշխատեք
@@ -816,8 +816,7 @@ bin/
   `a2a`, `memory`, `skills`։
 - **Ճյուղեր**: նախածանցներ՝ `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`։ Երբեք commit մի կատարեք անմիջապես `main`-ում։
-- **Husky**: pre-commit-ը գործարկում է `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`, իսկ pre-push-ը՝ `check:any-budget:t11` + `check:tracked-artifacts` (արագ ստուգումներ՝ առանց `test:unit`-ի)։
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

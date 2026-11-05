@@ -11,13 +11,13 @@ OmniRoute แต่ละตัวมี **บทบาทเดียว** ป�
 webpack ของ Release-Green และงาน lint โดย swap ของโฮสต์ (16 GB) จะรองรับส่วนเกินนั้น และเนื่องจาก
 Build ของ pull request ทำงานบนรันเนอร์แบบ hosted สล็อต Turbopack จึงว่างเกือบตลอดเวลา:
 
-| รันเนอร์             | ป้ายกำกับ         | บทบาท                                                                                                                                             | `MemoryHigh` / `MemoryMax` | `CPUQuota`  |
-| -------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ----------- |
-| `omniroute-113-5`    | `omni-build`      | บิลด์ Turbopack: `ci.yml` `Build` (เฉพาะ push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact` และบิลด์ a11y รายคืน | 56 GB / 60 GB (swap 0)     | 1600 %      |
-| `omniroute-113-6`    | `omni-release`    | Release-Green (`release-green` + `main-green`), บิลด์ webpack                                                                                     | 20 GB / 24 GB (swap 4 GB)  | 800 %       |
-| `omniroute-113-2`    | `omni-light`      | งานรายคืน (Schemathesis, promptfoo, garak, k6) และ `quality.yml` `lint-guard`                                                                     | 12 GB / 16 GB (swap 4 GB)  | 600 %       |
-| `omniroute-113`      | `omni-light`      | พูลเดียวกับด้านบน                                                                                                                                 | 8 GB / 12 GB               | 400 %       |
-| OmniHeuris, OmniMind | (รีโพของแต่ละตัว) | เฉพาะ Dependabot (สูงสุดตัวละ 155 MB, 2026-10-18)                                                                                                 | 4 GB / 6 GB                | ตัวละ 200 % |
+| รันเนอร์             | ป้ายกำกับ                       | บทบาท                                                                                                                                             | `MemoryHigh` / `MemoryMax` | `CPUQuota`  |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ----------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | บิลด์ Turbopack: `ci.yml` `Build` (เฉพาะ push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact` และบิลด์ a11y รายคืน | 56 GB / 60 GB (swap 0)     | 1600 %      |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), บิลด์ webpack                                                                                     | 20 GB / 24 GB (swap 4 GB)  | 800 %       |
+| `omniroute-113-2`    | `omni-light`                    | งานรายคืน (Schemathesis, promptfoo, garak, k6) และ `quality.yml` `lint-guard`                                                                     | 12 GB / 16 GB (swap 4 GB)  | 600 %       |
+| `omniroute-113`      | `omni-light`                    | พูลเดียวกับด้านบน                                                                                                                                 | 8 GB / 12 GB               | 400 %       |
+| OmniHeuris, OmniMind | (รีโพของแต่ละตัว)               | เฉพาะ Dependabot (สูงสุดตัวละ 155 MB, 2026-10-18)                                                                                                 | 4 GB / 6 GB                | ตัวละ 200 % |
 
 วัดเมื่อ 2026-10-18:
 
@@ -79,7 +79,7 @@ CPU โดยไม่มีงานผูกอยู่ OmniRoute unit ทุ
 ## กฎการปฏิบัติงาน
 
 - **การบิลด์ Turbopack ครั้งละหนึ่งงาน — บังคับใช้ด้วยเลเบล** ทุกงานที่เรียกใช้ Turbopack แบบเต็มรูปแบบ
-  `next build` จะกำหนดเป้าหมายเป็น `[self-hosted, omni-build]` และมีเพียง **`omniroute-113-5`** เท่านั้นที่มี
+  `next build` จะกำหนดเป้าหมายเป็น `[self-hosted, omni-build, omni-build-60gb]` และมีเพียง **`omniroute-113-5`** เท่านั้นที่มี
   เลเบลนี้ ได้แก่ `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
   บิลด์ a11y รายคืน (#16853) และ **amd64** ของ `docker-publish.yml` (webpack ภายใน BuildKit —
   Turbopack เกิด panic ที่นั่นในรัน 33253576569) ส่วน Docker ฝั่ง arm64 ยังคงทำงานบน `ubuntu-24.04-arm`

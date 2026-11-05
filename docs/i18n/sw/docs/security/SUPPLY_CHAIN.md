@@ -18,34 +18,46 @@ OmniRoute huchapisha bidhaa za npm + Docker. Milango hii hutoa uthibitisho wa as
 
 Marekebisho ya CVE ya picha hutumia **hatua mbili** katika `docker-publish.yml`: hatua ya SARIF (`HIGH,CRITICAL`, `exit-code: 0`) huweka HIGH+CRITICAL ionekane kwenye kichupo cha Usalama bila kuzuia; hatua ya _lango la CRITICAL_ (`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`) hushindwa kutoa toleo kutokana na CVE ya CRITICAL **yenye suluhisho linalopatikana**. `ignore-unfixed` huzuia kuzuia toleo kwa CVE ya picha ya msingi isiyo na kiraka kutoka kwa chanzo kikuu.
 
-## ⚠️ Tofauti ya CVE (ikizuia milango ya osv/Trivy)
+## ⚠️ Tofauti za CVE (zinazuia vizuizi vya osv/Trivy)
 
-osv na Trivy hulinganisha vitegemezi dhidi ya hifadhidata za CVE ambazo **zinaendelea kukua**. PR ambayo **haigusi vitegemezi vyovyote** inaweza ghafla kugeuka nyekundu kwa sababu CVE mpya ilifichuliwa katika tegemezi lililopo (osv: `vulnCount` iliyopimwa > msingi; Trivy: CRITICAL mpya inayoweza kurekebishwa kwenye picha). **Huu ni tabia INAYOTARAJIWA ya uendeshaji wa lango la CVE linalozuia, si udhaifu wa bidhaa.**
+osv na Trivy hulinganisha vitegemezi na hifadhidata za CVE ambazo **hukua kila mara**. PR
+ambayo **haibadilishi vitegemezi vyovyote** inaweza ghafla kuonyesha hali nyekundu kwa sababu CVE mpya
+imefichuliwa katika kitegemezi kilichopo (osv: `vulnCount` iliyopimwa > kiwango cha msingi; Trivy: CVE mpya
+ya kiwango cha CRITICAL inayoweza kurekebishwa kwenye taswira). **Hii ni tabia ya kiutendaji INAYOTARAJIWA ya
+kizuizi cha CVE kinachozuia, wala si hitilafu mpya ya bidhaa.**
 
-Wakati osv au Trivy zinageuka nyekundu kutokana na CVE mpya iliyofichuliwa, suluhisho ni:
+osv au Trivy zinapoonyesha hali nyekundu kwa sababu ya CVE iliyofichuliwa hivi karibuni, suluhisho ni:
 
-1.  **Pandisha tegemezi lililoathirika** (inayopendelewa) — sasisha hadi toleo lililorekebishwa kupitia `package.json` `overrides` (vitegemezi vya mpito) au jenga upya picha kwenye msingi uliorekebishwa.
-2.  **Ikiwa hakuna suluhisho kutoka kwa chanzo kikuu:**
-    - **osv:** weka upya msingi wa `metrics.vulnCount` katika `config/quality/quality-baseline.json` (`npm run quality:ratchet -- --update` haijumuishi milango maalum — hariri thamani kwa mkono, `direction:down`) na noti ya uhalali + suala la kufuatilia.
-    - **Trivy:** ongeza kiingilio katika `.trivyignore` (CVE-ID kwa kila mstari) na maoni ya uhalali + suala la kufuatilia. `ignore-unfixed: true` tayari inashughulikia CVEs zisizo na viraka kiotomatiki.
+1. **Sasisha kitegemezi kilichoathiriwa** (inapendekezwa) — pandisha hadi toleo lenye kiraka kupitia `package.json`
+   `overrides` (vitegemezi visivyo vya moja kwa moja) au jenga upya taswira ukitumia msingi wenye kiraka.
+2. **Ikiwa hakuna suluhisho kutoka kwa chanzo cha kitegemezi:**
+   - **osv:** weka upya kiwango cha msingi cha `metrics.vulnCount` katika `config/quality/quality-baseline.json`
+     (`npm run quality:ratchet -- --update` haishughulikii vizuizi maalumu — hariri thamani
+     mwenyewe, `direction:down`) pamoja na maelezo ya kuhalalisha + suala la ufuatiliaji.
+   - **Trivy:** ongeza ingizo katika `.trivyignore` (CVE-ID moja kwa kila mstari) pamoja na maoni
+     ya kuhalalisha + suala la ufuatiliaji. `ignore-unfixed: true` tayari hushughulikia kiotomatiki CVE zisizo na
+     viraka.
 
-Milango yote miwili **huruka kwa upole** (exit 0) wakati zana haipo au kipimo kinashindwa (osv-scanner haipo kwenye PATH, osv.dev/network haipatikani, JSON batili) — kushindwa kwa **kipimo** hakuzuii kamwe, ni udhaifu **uliopimwa** tu ndio unaozuia.
+Utekelezaji unaohitajika wa OSV (`check:vuln-ratchet -- --ratchet`) hushindwa kwa hali iliyofungwa kwa
+`INCOMPLETE` na msimbo wa kutoka 2 wakati kichanganuzi, ripoti au kiwango cha msingi hakiwezi kuthibitishwa.
+Kuzorota kulikopimwa hutoka kwa msimbo 1. Utekelezaji wa ushauri bado unaweza kuripoti `SKIP` kwa
+msimbo wa kutoka 0, jambo ambalo halithibitishi kuwa vitegemezi vilifaulu uchanganuzi. Hatua inayozuia ya
+Trivy pia inahitaji kipimo kilichofaulu: zana zisizopatikana, kazi zilizoshindwa
+na ushahidi unaokosekana wa taswira haviwezi kuthibitisha kuwa taswira haina udhaifu.
 
-## Hatari Zinazojulikana na Kukubalika
+## Hatari ya utegemezi uliostaafishwa
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Faili ya msingi ya kufunga matoleo haijumuishi tena `extract-zip` wala kiungo cha utegemezi kwake baada ya
+kusasisha zana ya usanidi ya promptfoo yenye toleo lililobainishwa. Hatua hii inaondoa msururu uliokubaliwa hapo awali wa
+`promptfoo` → `@openai/codex-security` → `extract-zip` unaofuatiliwa katika #14482.
+Ukaguzi wa uregreshaji katika `tests/unit/extract-zip-14482-exposure.test.ts` unazuia
+kuanzishwa kwake tena na kuendeleza marufuku ya uingizaji kutoka kwenye msimbo wa uzalishaji.
 
-`extract-zip@2.0.1` ina ushauri mbili za usalama wa kiwango cha juu zisizorekebishwa kuhusu symlink-traversal.
-Kulingana na tawi la "hakuna marekebisho ya chanzo" la suluhisho la Tofauti ya CVE hapo juu, hii ni **hatari iliyokubalika**, si nyongeza:
-
-- **Mfuatano:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  Imethibitishwa kupitia `package-lock.json` — ni kifurushi kimoja tu katika mti mzima wa utegemezi (`@openai/codex-security`) kinachotangaza `extract-zip`, na ni kifurushi kimoja tu (`promptfoo`) kinachotangaza `@openai/codex-security`.
-- **Hakuna toleo lililorekebishwa lililopo popote kwenye mfuatano.** `extract-zip@2.0.1` (iliyochapishwa 2020) ni toleo la mwisho la kifurushi — halitunzwi. Toleo la sasa la npm-latest la `@openai/codex-security` (`0.1.29`) bado linatumia `extract-zip@2.0.1`.
-- **Haiwezi kufikiwa kutoka uzalishishaji.** `promptfoo` ni devDependency-only (haijawahi kuorodheshwa chini ya `dependencies`), na hakuna faili chini ya `src/`, `open-sse/`, au `bin/` inayoingiza kifurushi cha npm cha `extract-zip` — msaidizi wa OmniRoute mwenyewe `extractZip()` (`src/lib/versionManager/binaryManager.ts:93`) hutumia `unzip`/`tar` asilia na haihusiani. `@openai/codex-security` pia inajumuisha ulinzi wake wa symlink-traversal juu ya onEntry callback ya extract-zip.
-- **Usifanye** alias ya `extract-zip` kupitia `package.json` `overrides` — mbadala pekee unaofaa ni Electron-org-internal na haioani na API ya ukaguzi wa `@openai/codex-security` mwenyewe wa onEntry/defaultDirMode/defaultFileMode; kuibadilisha kungesababisha ukaguzi wa usalama wa kifurushi hicho kuvunjika kimya kimya.
-- **Msingi:** `vulnCount` (3) iliyopimwa ya osv tayari iko chini sana ya msingi uliogandishwa wa `config/quality/quality-baseline.json` (27) — hakuna mabadiliko ya ratchet yanayohitajika.
-- **Ulinzi wa Regression:** `tests/unit/extract-zip-14482-exposure.test.ts` inathibitisha mfuatano na invariant ya kutokuwa na import ya uzalishaji hapo juu; inashindwa CI ikiwa mojawapo itavunjika (k.m. PR ya baadaye inafanya `extract-zip` kufikiwa kutoka uzalishaji).
-- **Ufuatiliaji:** suala #14482.
+Urekebishaji wa sasa wa vitegemezi pia unaweka mipaka ya ubatilishaji wa uoanifu kwenye
+kiteja cha MSAL cha Azure identity, kiteja cha FTP cha get-uri, na kitegemezi cha Zod cha OpenCode v1 SDK. Upataji wa tokeni za
+Azure na urejeshaji kupitia FTP hujaribiwa kwa kutumia njia za usafirishaji zinazodhibitiwa; vifurushi vyote viwili vya OpenCode
+huendesha mifumo yao wenyewe ya uundaji na majaribio. Idadi ya tahadhari za sajili ni vipimo
+vya wakati fulani na inaweza kubadilika baada ya faili ya kufunga matoleo kuhifadhiwa kwenye hazina.
 
 ## Backlog: Ushauri wa Scorecard → kuzuia
 

@@ -446,7 +446,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 공급자 레지스트리, 헤더 프로필, ID, …
 ├── handlers/               요청 핸들러(채팅, 임베딩, 오디오, 이미지, …)
-├── executors/              150개의 공급자 실행기 모듈(실행기 클래스 + 공급자별 헬퍼)
+├── executors/              156개의 공급자 실행기 모듈(실행기 클래스 + 공급자별 헬퍼)
 ├── translator/             형식 변환(OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions 스트림 트랜스포머
 ├── services/               80개 이상의 서비스 모듈(콤보, 폴백, 할당량, ID, …)
@@ -476,7 +476,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-최상위 실행기 모듈은 150개입니다(`*.ts`에서 `base.ts`, `index.ts` 및 테스트 제외 — 이 수치는
+최상위 실행기 모듈은 156개입니다(`*.ts`에서 `base.ts`, `index.ts` 및 테스트 제외 — 이 수치는
 `npm run check:docs-counts`로 측정). 모든 실행기 클래스는 `BaseExecutor`(`base.ts`)를
 직접 상속하거나 `DefaultExecutor` 또는 다른 실행기를 통해 상속하며, 나머지 모듈은 공급자별
 헬퍼(도구 스키마, 페치/TTS 어댑터, 예외 동작 핸들러)입니다. 실행기는 다음과 같습니다.
@@ -771,7 +771,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts`를 확장).
 2. `src/shared/constants/mcpScopes.ts`에서 적절한 범위를 할당합니다.
 3. `open-sse/mcp-server/server.ts`에 도구를 등록합니다.
-4. `open-sse/mcp-server/__tests__/` 아래에 테스트를 추가합니다.
+4. `tests/unit/` 아래에 테스트를 추가합니다.
 5. [MCP-SERVER.md](../frameworks/MCP-SERVER.md)를 업데이트합니다.
 
 ### 새 A2A 스킬 추가
@@ -789,7 +789,7 @@ bin/
 - **명명**: 파일은 `camelCase` 또는 `kebab-case`, 컴포넌트는 `PascalCase`,
   상수는 `UPPER_SNAKE`를 사용합니다.
 - **ESLint**: 모든 곳에서 `no-eval`, `no-implied-eval`, `no-new-func` = `error`;
-  `open-sse/` 및 `tests/`에서는 `no-explicit-any` = `warn`, 그 외에서는 오류입니다.
+  `open-sse/**/*.ts` 및 `tests/**/*.ts`에서는 `no-explicit-any` = `error`.
 - **TypeScript**: `strict: false`(레거시 방침). 모듈 간 경계에서는 타입 추론보다
   명시적 타입을 선호합니다.
 - **데이터베이스**: 라우트나 핸들러에 원시 SQL을 절대 작성하지 말고, 항상
@@ -818,8 +818,7 @@ bin/
   `a2a`, `memory`, `skills`.
 - **브랜치**: 접두사 `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`를 사용합니다. `main`에 직접 커밋하지 않습니다.
-- **Husky**: pre-commit은 `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`을 실행하고, pre-push는 `check:any-budget:t11` + `check:tracked-artifacts`를 실행합니다(빠른 게이트이며 `test:unit`은 제외).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

@@ -15,7 +15,7 @@ Poskytuje jednotný koncový bod kompatibilní s OpenAI (`/v1/*`) a směruje pro
 
 Klíčové funkce:
 
-- Rozhraní API kompatibilní s OpenAI pro nástroje a CLI (375 poskytovatelů, 154 spouštěcích modulů)
+- Rozhraní API kompatibilní s OpenAI pro nástroje a CLI (375 poskytovatelů, 156 spouštěcích modulů)
 - Převod požadavků a odpovědí mezi formáty poskytovatelů
 - Záložní kombinace modelů (sekvence více modelů)
 - Strukturované kroky kombinací (`provider + model + connection`) s pořadím za běhu podle `compositeTiers`
@@ -31,7 +31,7 @@ Klíčové funkce:
 - Vyhledávání na webu prostřednictvím `/v1/search` (20 poskytovatelů)
 - Moderování prostřednictvím `/v1/moderations`
 - Změna pořadí výsledků podle relevance prostřednictvím `/v1/rerank`
-- Parsování značek pro myšlenkové pochody (``) u modelů s uvažováním
+- Parsování značek pro myšlenkové pochody (`<think>...</think>`) u modelů s uvažováním
 - Čištění odpovědí pro přísnou kompatibilitu se sadou OpenAI SDK
 - Normalizace rolí (developer→system, system→user) pro kompatibilitu mezi poskytovateli
 - Převod strukturovaného výstupu (json_schema → Gemini responseSchema)
@@ -1094,11 +1094,11 @@ zpětné kompatibilitě. Aktuální běhový kontrakt používá:
 - migrace schématu SQLite a mechanismy automatického upgradu při spuštění
 - cesta kompatibility pro migraci ze staršího formátu JSON → SQLite
 
-## 6) Ochrana před SSRF / odchozími URL
+## 6) Ochrana proti SSRF / odchozím URL
 
-- `src/shared/network/outboundUrlGuard.ts` blokuje všechny soukromé, loopback a link-local cílové adresy URL dříve, než se dostanou k vykonavatelům poskytovatele
-- trasy pro vyhledávání a ověřování modelů poskytovatelů používají `src/shared/network/safeOutboundFetch.ts`, který aplikuje ochranu před každým odchozím požadavkem
-- chyby ochrany jsou hlášeny jako `URL_GUARD_BLOCKED` s HTTP 422 a zaznamenávány do auditní stopy souladu prostřednictvím `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) aplikuje `src/shared/network/outboundUrlGuard.ts` na požadavky chatu odesílané prostřednictvím `BaseExecutor.execute()`. V režimu pouze pro veřejné adresy (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` s vypnutým příznakem soukromých adres) blokuje privátní hostitele, hostitele zpětné smyčky a rozsah 169.254.0.0/16; ve všech ostatních režimech blokuje hostitele cloudových metadat. Kontroluje název hostitele nebo IP literál v zadané podobě ještě před jakýmkoli vyhledáním DNS. Vestavění lokální poskytovatelé tuto kontrolu přeskakují.
+- Trasy pro zjišťování a ověřování modelů poskytovatelů používají `src/shared/network/safeOutboundFetch.ts`, který ochranu aplikuje před každým odchozím požadavkem.
+- Chyby ochrany se projeví jako `URL_GUARD_BLOCKED` se stavem HTTP 503 (`getSafeOutboundFetchErrorStatus`; trasa pro zjišťování modelů vrací 400) a skutečná blokování SSRF během ověřování se zaznamenávají do auditní stopy jako události `provider.validation.ssrf_blocked`.
 
 ## Pozorovatelnost a provozní signály
 
@@ -1149,7 +1149,7 @@ Proměnné prostředí aktivně používané kódem:
 4. Chování cloudu závisí na správné hodnotě `NEXT_PUBLIC_BASE_URL` a dostupnosti cloudového koncového bodu.
 5. Adresář `open-sse/` je publikován jako **balíček pracovního prostoru npm `@omniroute/open-sse`**. Zdrojový kód jej importuje prostřednictvím `@omniroute/open-sse/...` (překládaného pomocí `transpilePackages` v Next.js). Cesty k souborům v tomto dokumentu nadále kvůli konzistenci používají název adresáře `open-sse/`.
 6. Grafy v řídicím panelu používají **Recharts** (založené na SVG) pro přístupné interaktivní vizualizace analytických dat (sloupcové grafy využití modelů, tabulky rozdělení podle poskytovatelů s mírami úspěšnosti).
-7. E2E testy používají **Playwright** (`tests/e2e/`) a spouštějí se pomocí `npm run test:e2e`. Jednotkové testy používají **testovací nástroj Node.js** (`tests/unit/`) a spouštějí se pomocí `npm run test:unit`. Zdrojový kód v `src/` je v jazyce **TypeScript** (`.ts`/`.tsx`); pracovní prostor `open-sse/` zůstává v jazyce JavaScript (`.js`).
+7. E2E testy používají **Playwright** (`tests/e2e/`) a spouštějí se pomocí `npm run test:e2e`. Jednotkové testy používají **testovací nástroj Node.js** (`tests/unit/`) a spouštějí se pomocí `npm run test:unit`. Zdrojový kód v `src/` je v jazyce **TypeScript** (`.ts`/`.tsx`); pracovní prostor `open-sse/` zůstává v jazyce TypeScript (`.ts`).
 8. Stránka nastavení je uspořádána do 7 karet: Obecné, Vzhled, AI, Zabezpečení, Směrování, Odolnost, Pokročilé. Stránka Odolnost konfiguruje pouze frontu požadavků, dobu zklidnění připojení, pojistku poskytovatele a chování při čekání na ukončení doby zklidnění; aktuální běhový stav pojistky se zobrazuje na stránce Stav.
 9. Strategie **Context Relay** (`context-relay`) je rozdělena do dvou vrstev: `combo.ts` rozhoduje, zda má být vygenerováno předání, a `chat.ts` vloží předání po vyřešení účtu. Data předání jsou uložena v tabulce SQLite `context_handoffs`. Toto rozdělení je záměrné, protože pouze `chat.ts` ví, zda se skutečný účet změnil.
 10. **Vynucování proxy** je nyní komplexní: `tokenHealthCheck.ts` určuje proxy pro každé připojení, `/api/providers/validate` používá `runWithProxyContext` a `proxyFetch.ts` používá `undici.fetch()`, aby byla zachována kompatibilita dispečeru v Node 22.

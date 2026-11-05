@@ -487,7 +487,7 @@ metadata?}` → 封装 `createMemory()`。仅接受 4 种规范类型：
 - 重排序配置卡片（启用开关、提供者/模型选择器）。
 
 记忆和 Qdrant 设置也位于
-`/dashboard/settings → 记忆与技能`（`MemorySkillsTab.tsx`）下，
+`/dashboard/settings → 记忆与技能` (`/dashboard/settings → Memory & Skills`)（`MemorySkillsTab.tsx`）下，
 作为旧版/全局设置界面。
 
 ## 缓存
@@ -665,7 +665,8 @@ const PATTERN_PATTERNS = [/\bI\s+usually\s+([^.,\n]+)/gi, /\bI\s+always\s+([^.,\
 
 为防止提取失控，适用以下限制：
 
-| 最小内容长度 | 3 个字符 |
+| 最小内容长度 | 3 个字符   |
+| ------------ | ---------- |
 | 最大内容长度 | 500 个字符 |
 
 ### 何时禁用提取

@@ -88,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Utaratibu:** Hutumia API za OS kuelekeza upya trafiki yote ya HTTP/HTTPS kupitia kisikilizaji cha HTTP_PROXY:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` na mipangilio ya host/port ya HTTP/HTTPS
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Ufikivu:** Kila programu kwenye mashine inayoheshimu mipangilio ya proksi ya mfumo
   **Kumbuka:** `source` = `"system-proxy"`
 
 **Taratibu za usalama:**
 
-- Kipima muda cha kuzima kiotomatiki (chaguo-msingi ni dakika 30, kinaweza kusanidiwa kupitia `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- Hali ya awali ya proksi ya mfumo huhifadhiwa kwenye DB na kurejeshwa wakati wa kutengua
-- Dashibodi huonyesha kidokezo cha "Inatengua proksi ya mfumo" ikiwa mtumiaji anaondoka kwenye ukurasa wakati proksi inatumika
-- UI huonyesha beji ya `⚠ Kiwango cha juu` pamoja na kisanduku cha kuteua cha uthibitisho wa wazi
+- Kutumia proksi hupanga kipima muda cha kurejesha kilicho ndani ya mchakato pekee, kwa juhudi bora bila dhamana ya mafanikio (dakika 30 kwa chaguo-msingi, kinaweza kusanidiwa kupitia `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`). Kipima muda hakidumu baada ya mchakato wa seva kuisha.
+- Hali ya awali ya proksi huwekwa kwenye kumbukumbu ya mchakato; hifadhi hii ya hali ya kunasa haiihifadhi kwa kudumu katika hifadhidata. Kurejesha hurudisha mipangilio iliyohifadhiwa ya macOS/GNOME; kwenye Windows huweka upya proksi ya WinHTTP badala ya kurudisha usanidi wa awali.
+- Wakati proksi inaripotiwa kuwa imetumika, kuondolewa kwa ukurasa kwenye kumbukumbu hutuma ombi la kurejesha la keepalive kwa juhudi bora na kuomba uthibitisho asilia ambao maneno yake yanadhibitiwa na kivinjari. Kuondoa inspector wakati wa urambazaji wa SPA pia hujaribu kurejesha, bila kidokezo hicho cha kivinjari.
+- Upau wa kunasa huonyesha kidhibiti kilichotafsiriwa cha `System-wide` chenye ikoni ya onyo. Kukibofya kwa sasa hubadilisha hali ya UI ya ndani pekee; hakuonyeshi kisanduku cha uthibitisho wala kutumia au kurejesha proksi ya mfumo.
 
 ### Hali ya 5 — Usimbuaji wazi wa TPROXY (Linux, root, ya hiari)
 
@@ -113,13 +113,13 @@ Huu ni mfumo mkubwa wenye mwongozo wake maalum wa waendeshaji — angalia `docs/
 
 ### Ulinganisho wa hali za kunasa
 
-| Hali              | Usanidi                      |               Sudo?               | Ufikiaji                             | Maelezo                                                                                                                                |
-| ----------------- | ---------------------------- | :-------------------------------: | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge    | Kiotomatiki                  |      Mara moja (cert+hosts)       | Mawakala 9 wa IDE                    | Imewashwa kwa chaguo-msingi                                                                                                            |
-| 2. Custom Hosts   | Ingizo kwa kila host         |      Ndiyo (faili la hosts)       | Programu yoyote inayotumia host hiyo | Imehifadhiwa katika DB                                                                                                                 |
-| 3. HTTP_PROXY     | `export HTTPS_PROXY=...`     |              Hapana               | Programu zinazoheshimu env           | Port 8080; HTTPS hupitishwa kupitia handaki la CONNECT (metadata pekee, kamwe haisimbuliwi)                                            |
-| 4. System-wide    | Geuza + thibitisha           |               Ndiyo               | Programu zote kwenye mashine         | Hujizima kiotomatiki baada ya dakika 30                                                                                                |
-| 5. TPROXY decrypt | Geuza (Linux + native addon) | Ndiyo (root + usakinishaji wa CA) | Host yoyote kwenye port lengwa       | Husimbua hosts zozote; imezimwa kwa chaguo-msingi — tazama `docs/security/MITM-TPROXY-DECRYPT.md` (git; haijajumuishwa katika `/docs`) |
+| Hali              | Usanidi                                                        |               Sudo?               | Ufikiaji                             | Maelezo                                                                                                                                |
+| ----------------- | -------------------------------------------------------------- | :-------------------------------: | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge    | Kiotomatiki                                                    |      Mara moja (cert+hosts)       | Mawakala 9 wa IDE                    | Imewashwa kwa chaguo-msingi                                                                                                            |
+| 2. Custom Hosts   | Ingizo kwa kila host                                           |      Ndiyo (faili la hosts)       | Programu yoyote inayotumia host hiyo | Imehifadhiwa katika DB                                                                                                                 |
+| 3. HTTP_PROXY     | `export HTTPS_PROXY=...`                                       |              Hapana               | Programu zinazoheshimu env           | Port 8080; HTTPS hupitishwa kupitia handaki la CONNECT (metadata pekee, kamwe haisimbuliwi)                                            |
+| 4. System-wide    | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |               Ndiyo               | Programu zote kwenye mashine         | Kipima muda cha kurejesha kwa juhudi bora bila dhamana (dakika 30 kwa chaguo-msingi)                                                   |
+| 5. TPROXY decrypt | Geuza (Linux + native addon)                                   | Ndiyo (root + usakinishaji wa CA) | Host yoyote kwenye port lengwa       | Husimbua hosts zozote; imezimwa kwa chaguo-msingi — tazama `docs/security/MITM-TPROXY-DECRYPT.md` (git; haijajumuishwa katika `/docs`) |
 
 ---
 
@@ -314,7 +314,7 @@ utafuata baadaye).
 ### 5.1 Kurekodi kipindi
 
 1. Bofya **"● Rekodi kipindi"** kwenye upau wa zana → weka jina (si lazima)
-2. Ufuatiliaji mubashara unaendelea kama kawaida; kiashirio chekundu kinachodunda kinaonyesha `◉ REC · <jina> · 00:42 · maombi 23`
+2. Ufuatiliaji wa moja kwa moja unaendelea kama kawaida; upau wa kurekodi huonyesha nukta nyekundu inayodunda, muda uliopita, jina la kipindi linapopatikana, na kidhibiti cha kusimamisha kilichotafsiriwa.
 3. Bofya **"⏹ Simamisha"** → taswira ya kipindi inahifadhiwa kwenye `inspector_sessions` + `inspector_session_requests`
 
 ### 5.2 Kuangalia kipindi kilichorekodiwa
@@ -322,7 +322,7 @@ utafuata baadaye).
 Orodha kunjuzi ya **Vipindi** kwenye upau wa zana inaorodhesha vipindi vilivyohifadhiwa. Ukichagua kimoja:
 
 - Hupakia taswira ya kipindi (hali iliyogandishwa)
-- Bango linaonyesha: `Unaangalia kipindi kilichorekodiwa "<jina>" — [Rudi kwenye mubashara]`
+- Bango huonyesha lebo iliyotafsiriwa ya kipindi kilichorekodiwa na jina la kipindi (au maandishi mbadala yaliyotafsiriwa kwa kipindi kisicho na kichwa), pamoja na kitufe kilichotafsiriwa cha kurudi kwenye mwonekano wa moja kwa moja.
 - Kichupo cha Takwimu kinapatikana kikiwa na data iliyojumlishwa ya Recharts
 
 ### 5.3 Miundo ya uhamishaji
@@ -414,7 +414,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-Dashibodi pia itatoa chaguo la "Rejesha proksi ya mfumo" itakapopakiwa tena ikiwa itagundua kuwa hali ya DB inaonyesha proksi ilikuwa inatumika.
+Hali iliyohifadhiwa ya proksi ipo kwenye mchakato wa seva pekee. Baada ya hitilafu au kuanzisha upya, hifadhi ya sasa ya hali ya kunasa haiwezi kurudisha nakala hiyo kutoka kwenye hifadhidata; tumia amri za urejeshaji za jukwaa zilizo juu unapohitaji urejeshaji wa mikono.
 
 ### Baferi imejaa
 

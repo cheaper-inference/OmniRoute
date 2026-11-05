@@ -88,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Mexanizm:** Barcha HTTP/HTTPS trafikni HTTP_PROXY tinglovchisi orqali yoʻnaltirish uchun OT APIʼlaridan foydalanadi:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` va HTTP/HTTPS xost/port sozlamalari
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Qamrov:** Kompyuterdagi tizim proksi sozlamalarini hisobga oladigan har bir ilova
   **Eslatma:** `source` = `"system-proxy"`
 
 **Xavfsizlik mexanizmlari:**
 
-- Avtomatik oʻchirish taymeri (standart qiymat 30 daqiqa, `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES` orqali sozlanadi)
-- Tizim proksisining oldingi holati DBʼda saqlanadi va ortga qaytarishda tiklanadi
-- Foydalanuvchi faol holatda sahifani tark etsa, boshqaruv paneli "Tizim proksisi ortga qaytarilmoqda" soʻrovini koʻrsatadi
-- UI `⚠ Ilgʻor` nishoni va aniq tasdiqlash katakchasini koʻrsatadi
+- Proksini qo‘llash jarayon ichidagi, muvaffaqiyati kafolatlanmagan qaytarish taymerini rejalashtiradi (standart 30 daqiqa, `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES` orqali sozlanadi). Server jarayoni tugaganda taymer saqlanmaydi.
+- Proksining oldingi holati jarayon xotirasida saqlanadi; ushbu yozib olish holati ombori uni ma’lumotlar bazasida doimiy saqlamaydi. Qaytarish saqlangan macOS/GNOME sozlamalarini tiklaydi; Windows’da oldingi konfiguratsiyani tiklash o‘rniga WinHTTP proksisini asl holatiga qaytaradi.
+- Proksi qo‘llangan deb bildirilayotgan paytda sahifa yukdan chiqarilishi kafolatsiz keepalive qaytarish so‘rovini yuboradi va matnini brauzer belgilaydigan ichki tasdiq oynasini so‘raydi. SPA navigatsiyasida inspektorning ajratilishi ham ushbu brauzer oynasisiz qaytarishga urinadi.
+- Yozib olish asboblar paneli mahalliylashtirilgan `System-wide` boshqaruvini ogohlantirish belgisi bilan ko‘rsatadi. Hozir uni bosish faqat interfeysning mahalliy holatini o‘zgartiradi; tasdiqlash katagini ko‘rsatmaydi, tizim proksisini qo‘llamaydi va qaytarmaydi.
 
 ### 5-rejim — TPROXY shaffof shifrdan chiqarish (Linux, root, ixtiyoriy)
 
@@ -113,13 +113,13 @@ Bu oʻzining alohida operator qoʻllanmasiga ega boʻlgan salmoqli quyi tizimdir
 
 ### Yozib olish rejimlarini taqqoslash
 
-| Rejim                      | Sozlash                                |            Sudo?             | Qamrov                                            | Izohlar                                                                                                                                                                       |
-| -------------------------- | -------------------------------------- | :--------------------------: | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge             | Avtomatik                              | Bir marta (sertifikat+hosts) | 9 ta IDE agenti                                   | Standart holatda yoqilgan                                                                                                                                                     |
-| 2. Maxsus hostlar          | Har bir host uchun kiritish            |       Ha (hosts fayli)       | Shu hostdan foydalanadigan istalgan ilova         | DB’da saqlanadi                                                                                                                                                               |
-| 3. HTTP_PROXY              | `export HTTPS_PROXY=...`               |             Yo‘q             | Muhit o‘zgaruvchilarini hisobga oladigan ilovalar | Port 8080; HTTPS CONNECT orqali tunnellanadi (faqat metama’lumotlar, hech qachon shifrdan chiqarilmaydi)                                                                      |
-| 4. Butun tizim bo‘ylab     | Almashtirgich + tasdiqlash             |              Ha              | Kompyuterdagi barcha ilovalar                     | 30 daqiqadan keyin avtomatik o‘chiriladi                                                                                                                                      |
-| 5. TPROXY shifrini yechish | Almashtirgich (Linux + mahalliy addon) |   Ha (root + CA o‘rnatish)   | Maqsadli portdagi istalgan host                   | Istalgan hostlarning shifrini yechadi; standart holatda o‘chirilgan — `docs/security/MITM-TPROXY-DECRYPT.md` fayliga qarang (git’da; `/docs` ichiga kompilyatsiya qilinmagan) |
+| Rejim                      | Sozlash                                                        |            Sudo?             | Qamrov                                            | Izohlar                                                                                                                                                                       |
+| -------------------------- | -------------------------------------------------------------- | :--------------------------: | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge             | Avtomatik                                                      | Bir marta (sertifikat+hosts) | 9 ta IDE agenti                                   | Standart holatda yoqilgan                                                                                                                                                     |
+| 2. Maxsus hostlar          | Har bir host uchun kiritish                                    |       Ha (hosts fayli)       | Shu hostdan foydalanadigan istalgan ilova         | DB’da saqlanadi                                                                                                                                                               |
+| 3. HTTP_PROXY              | `export HTTPS_PROXY=...`                                       |             Yo‘q             | Muhit o‘zgaruvchilarini hisobga oladigan ilovalar | Port 8080; HTTPS CONNECT orqali tunnellanadi (faqat metama’lumotlar, hech qachon shifrdan chiqarilmaydi)                                                                      |
+| 4. Butun tizim bo‘ylab     | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |              Ha              | Kompyuterdagi barcha ilovalar                     | Muvaffaqiyati kafolatlanmagan qaytarish taymeri (standart 30 daqiqa)                                                                                                          |
+| 5. TPROXY shifrini yechish | Almashtirgich (Linux + mahalliy addon)                         |   Ha (root + CA o‘rnatish)   | Maqsadli portdagi istalgan host                   | Istalgan hostlarning shifrini yechadi; standart holatda o‘chirilgan — `docs/security/MITM-TPROXY-DECRYPT.md` fayliga qarang (git’da; `/docs` ichiga kompilyatsiya qilinmagan) |
 
 ---
 
@@ -314,7 +314,7 @@ qoʻllab-quvvatlashi keyinchalik qoʻshiladi).
 ### 5.1 Seansni yozib olish
 
 1. Asboblar panelidagi **"● Seansni yozib olish"** tugmasini bosing → nom kiriting (ixtiyoriy)
-2. Jonli oqim odatdagidek davom etadi; qizil miltillovchi indikator `◉ REC · <name> · 00:42 · 23 ta soʻrov` ko‘rinishida aks etadi
+2. Jonli kuzatish odatdagidek davom etadi; yozib olish paneli miltillovchi qizil nuqta, o‘tgan vaqt, mavjud bo‘lsa seans nomi va mahalliylashtirilgan To‘xtatish boshqaruvini ko‘rsatadi.
 3. **"⏹ Toʻxtatish"** tugmasini bosing → seans surati `inspector_sessions` + `inspector_session_requests` jadvallariga saqlanadi
 
 ### 5.2 Yozib olingan seansni ko‘rish
@@ -322,7 +322,7 @@ qoʻllab-quvvatlashi keyinchalik qoʻshiladi).
 Asboblar panelidagi **Seanslar** ochiladigan menyusida saqlangan seanslar ro‘yxati ko‘rsatiladi. Ulardan biri tanlanganda:
 
 - Seans surati yuklanadi (muzlatilgan holat)
-- Bannerda quyidagisi ko‘rsatiladi: `Yozib olingan "<name>" seansi koʻrilmoqda — [Jonli rejimga qaytish]`
+- Banner yozilgan seansning mahalliylashtirilgan yorlig‘i va seans nomini (yoki nomsiz seans uchun mahalliylashtirilgan o‘rinbosar matnni), jonli ko‘rinishga qaytishning mahalliylashtirilgan tugmasi yonida ko‘rsatadi.
 - Recharts agregatlari bilan Statistika ichki oynasi mavjud bo‘ladi
 
 ### 5.3 Eksport formatlari
@@ -346,7 +346,7 @@ Traffic Inspector **barcha tutib olingan HTTPS trafikni**, jumladan avtorizatsiy
 | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **LOCAL_ONLY**                 | Barcha marshrutlar va WebSocket yakuniy nuqtasiga faqat loopback orqali kirish mumkin (autentifikatsiyadan oldin `routeGuard.ts` ichida majburiy taʼminlanadi)                                                  |
 | **Sirlarni niqoblash**         | Chiziqli `maskSecret()` skaneri RFC 6750 Bearer hisob maʼlumotlari, provayder prefiksli kalitlar va uzun yopiq tokenlarni `TrafficBuffer.push()` dan oldin yashiradi                                            |
-| **Tana hajmi cheklovi**        | `INSPECTOR_MAX_BODY_KB` dan katta tanalar (standart qiymat 1024 KB) `"(unumdorlik uchun qisqartirildi)"` bildirishnomasi bilan qisqartiriladi                                                                   |
+| **Tana hajmi cheklovi**        | `INSPECTOR_MAX_BODY_KB` dan katta tanalar (standart qiymat 1024 KB) `"(truncated for performance)"` bildirishnomasi bilan qisqartiriladi                                                                        |
 | **Sarlavhalarni tozalash**     | Nomlar kichik harflarga oʻtkaziladi; freyming/hop-by-hop va proksi-autentifikatsiya sarlavhalari olib tashlanadi; cookie fayllari toʻliq yashiriladi; hisob maʼlumotlari qiymatlari `maskSecret()` ga uzatiladi |
 | **CSP**                        | Kiritilgan javob tanalari orqali XSS hujumlarining oldini olish uchun Traffic Inspector sahifalarida qatʼiy Content Security Policy qoʻllanadi                                                                  |
 | **Standart holda saqlanmaydi** | `TrafficBuffer` xotirada saqlanadi va server qayta ishga tushirilganda yoʻqoladi. Seanslar faqat aniq tarzda yozib olish yoqilgandagina doimiy saqlanadi                                                        |
@@ -414,7 +414,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-Agar boshqaruv paneli DB holatida proksi faol bo‘lganini aniqlasa, keyingi yuklanishda "Tizim proksisini asl holatiga qaytarish" variantini ham taklif qiladi.
+Saqlangan proksi holati faqat server jarayonida mavjud. Avariya yoki qayta ishga tushirishdan so‘ng joriy yozib olish holati ombori bu nusxani ma’lumotlar bazasidan tiklay olmaydi; qo‘lda tiklash kerak bo‘lsa, yuqoridagi platforma tiklash buyruqlaridan foydalaning.
 
 ### Bufer to‘lgan
 

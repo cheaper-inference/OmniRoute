@@ -31,19 +31,19 @@ function jobBlock(job: string): string {
   return next ? rest.slice(0, next.index) : rest;
 }
 
-test("lint-guard carries the quality-ratchet engine (collect → ratchet → require-tighten → codeql)", () => {
+test("lint-guard carries the quality-ratchet engine (collect → ratchet → require-tighten)", () => {
   const block = jobBlock("lint-guard");
   for (const needle of [
     "npm run quality:collect",
     "check-quality-ratchet.mjs --allow-missing",
     "--require-tighten",
-    "npm run check:codeql-ratchet",
   ]) {
     assert.ok(block.includes(needle), `lint-guard must run "${needle}"`);
   }
-  // The CodeQL ratchet reads open code-scanning alerts; without this permission
-  // the API call 403s and the gate silently self-skips forever.
-  assert.match(block, /security-events:\s*read/, "lint-guard needs security-events: read");
+  // CodeQL's producer → admission chain is covered by codeql-dag-contract.test.mjs.
+  // This numeric-ratchet job must not restore an early duplicate API poll or its permission.
+  assert.doesNotMatch(block, /check[:-]codeql-ratchet/, "CodeQL admission belongs to Gate / CI");
+  assert.doesNotMatch(block, /security-events:/, "lint-guard does not query code-scanning alerts");
 });
 
 test("fast-gates carries the deterministic ratchets and security scanners from the main rail", () => {

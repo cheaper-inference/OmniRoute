@@ -45,6 +45,17 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { normalizeLocaleText } from "./glossary-normalize.mjs";
 import { buildMirrorBar } from "./lib/language-bar.mjs";
 import { adoptState, mergeAdoptedState, refreshTargetHashes } from "./lib/translation-state.mjs";
+import { applyNumericSectionDelta } from "./lib/numeric-section-delta.mjs";
+import { linesOutsideFencedCode, looksUntranslated } from "./lib/untranslated-guard.mjs";
+import {
+  sectionCacheMatchesSnapshot,
+  sectionHashes,
+  splitSections,
+  stripFrontMatter,
+  stripTopHeading,
+} from "./lib/section-cache.mjs";
+
+export { looksUntranslated, sectionHashes, splitSections, stripTopHeading };
 
 // ----- .env loader --------------------------------------------------------
 // Loads variables from a local `.env` (gitignored) into process.env without
@@ -306,19 +317,9 @@ function targetPathFor(relSource, locale) {
 // H1 sits behind it, so the heading helpers look past the block: otherwise the
 // mirror gets the file name as its title and the front matter (plus a second
 // heading) is translated into its body.
-const FRONT_MATTER = /^---\r?\n[\s\S]*?\r?\n---\r?\n+/;
-
-function stripFrontMatter(markdown) {
-  return markdown.replace(FRONT_MATTER, "");
-}
-
 export function extractTopHeading(markdown) {
   const m = stripFrontMatter(markdown).match(/^# (.+)\r?\n/);
   return m ? m[1].trim() : null;
-}
-
-export function stripTopHeading(markdown) {
-  return stripFrontMatter(markdown).replace(/^# .+\r?\n+/, "");
 }
 
 // ----- Translator backend --------------------------------------------------
@@ -484,15 +485,37 @@ function protectThinkCode(source, output) {
   };
 }
 
+// Leading spaces can be an indented code block, not disposable whitespace.
+const trimChunk = (text) => text.replace(/^(?:[ \t]*\r?\n)+/, "").trimEnd();
+// The reasoning patterns also consume trailing whitespace. Keep indentation
+// after their last newline so removing a block cannot turn code into a heading.
+const stripThinkBlocks = (text, pattern) =>
+  text.replace(pattern, (block) => block.match(/\n([ \t]*)$/)?.[1] ?? "");
+
 function unwrapTranslationFence(source, text) {
   const unwrapped = !/^\s*```/.test(source) && text.match(WRAPPING_FENCE);
-  return unwrapped ? unwrapped[1].trim() : text;
+  return unwrapped ? trimChunk(unwrapped[1]) : text;
+}
+
+// Compare ATX heading structure, never translated titles. A fence closes only
+// with the same delimiter character, at least its opening length, and no info
+// string; shorter or mixed fences inside an example are still code.
+function headingLevels(markdown) {
+  const levels = [];
+  for (const line of linesOutsideFencedCode(markdown)) {
+    const heading = line.match(/^ {0,3}(#{1,6})(?:[ \t]+|$)/);
+    if (heading) levels.push(heading[1].length);
+  }
+  return levels;
 }
 
 export function validateTranslatedChunk(source, output) {
-  const candidate = unwrapTranslationFence(source, output.replace(LEADING_THINK_BLOCKS, "").trim());
+  const candidate = unwrapTranslationFence(
+    source,
+    trimChunk(stripThinkBlocks(output, LEADING_THINK_BLOCKS))
+  );
   const protectedOutput = protectThinkCode(source, candidate);
-  let text = protectedOutput.text.replace(THINK_BLOCK, "").trim();
+  let text = trimChunk(stripThinkBlocks(protectedOutput.text, THINK_BLOCK));
   text = unwrapTranslationFence(source, text);
   text = protectedOutput.restore(text);
   // Recheck after stripping/unwrapping: an outer leaked block can consume a
@@ -504,6 +527,10 @@ export function validateTranslatedChunk(source, output) {
   if (fences[0] !== fences[1]) problems.push(`code fences ${fences[1]}/${fences[0]}`);
   const rows = [countLines(/^\s*\|/, source), countLines(/^\s*\|/, text)];
   if (rows[0] !== rows[1]) problems.push(`table rows ${rows[1]}/${rows[0]}`);
+  const headings = [headingLevels(source), headingLevels(text)];
+  if (headings[0].join(",") !== headings[1].join(",")) {
+    problems.push(`heading levels [${headings[1]}]/[${headings[0]}]`);
+  }
   const meta = META_PROSE.filter((re) => countMatches(re, text) > countMatches(re, source));
   if (meta.length) problems.push(`meta-prose ${meta.map((re) => re.source).join(", ")}`);
   const lost = lostInlineCode(source, text);
@@ -563,8 +590,10 @@ export function chunkMarkdown(markdown, maxChars = 6000) {
   const sections = [];
   let buf = [];
   let size = 0;
+  let fence = null;
   for (const line of lines) {
-    if (line.startsWith("## ") && size > maxChars * 0.5) {
+    fence = fenceAfterLine(fence, line);
+    if (!fence && line.startsWith("## ") && size > maxChars * 0.5) {
       sections.push(buf.join("\n"));
       buf = [line];
       size = line.length;
@@ -581,6 +610,23 @@ export function chunkMarkdown(markdown, maxChars = 6000) {
 
 const FENCE_LINE = /^\s*(```|~~~)/;
 
+// A closing fence must use the opener's character, be at least as long and
+// contain only trailing whitespace. Other delimiter-shaped lines remain code.
+// Keep indentation conservative so fenced examples nested inside lists stay whole.
+function fenceAfterLine(fence, line) {
+  const match = line.replace(/\r$/, "").match(/^\s*(`{3,}|~{3,})(.*)$/);
+  if (fence) {
+    return match &&
+      match[1][0] === fence[0] &&
+      match[1].length >= fence.length &&
+      /^[ \t]*$/.test(match[2])
+      ? null
+      : fence;
+  }
+  // Backtick fences cannot contain a backtick in their info string.
+  return match && (match[1][0] === "~" || !match[2].includes("`")) ? match[1] : null;
+}
+
 // Groups a section into blocks — a whole fenced code block, a heading-led run,
 // or a paragraph ending at a blank line — and packs them greedily. A block that
 // is itself larger than maxChars stays whole: cutting mid-paragraph or inside a
@@ -588,22 +634,21 @@ const FENCE_LINE = /^\s*(```|~~~)/;
 function splitOversizedSection(section, maxChars) {
   const blocks = [];
   let block = [];
-  let inFence = false;
+  let fence = null;
   for (const line of section.split("\n")) {
-    const isFence = FENCE_LINE.test(line);
-    if (inFence) {
+    const previousFence = fence;
+    fence = fenceAfterLine(fence, line);
+    if (previousFence) {
       block.push(line);
-      if (isFence) {
-        inFence = false;
+      if (!fence) {
         blocks.push(block);
         block = [];
       }
       continue;
     }
-    if (isFence) {
+    if (fence) {
       if (block.length) blocks.push(block);
       block = [line];
-      inFence = true;
       continue;
     }
     if (/^##+ /.test(line) && block.length) {
@@ -685,9 +730,11 @@ export function joinTranslatedChunks(parts) {
       out = parts[i];
       continue;
     }
-    const nextFirst = parts[i].trimStart().split("\n")[0] ?? "";
+    // Strip blank lines at the seam, preserving indentation on the first content line.
+    const next = parts[i].replace(/^(?:[ \t]*\r?\n)+/, "");
+    const nextFirst = next.split("\n")[0] ?? "";
     const seam = endsInsideItemRun(out) && ITEM_LINE.test(nextFirst) ? "\n" : "\n\n";
-    out = out.trimEnd() + seam + parts[i].trimStart();
+    out = out.trimEnd() + seam + next;
   }
   return out;
 }
@@ -700,33 +747,27 @@ export function joinTranslatedChunks(parts) {
 // only — an inserted or removed section shifts everything after it and costs
 // a retranslation of the tail, which is acceptable.
 
-// Section 0 is the preamble (text before the first `## `); every other section
-// starts with its `## ` heading line. Joining with "\n\n" reproduces the body
-// modulo trailing whitespace. A `## ` inside a fenced code block never splits.
-export function splitSections(markdown) {
-  const sections = [[]];
-  let inFence = false;
-  for (const line of markdown.split("\n")) {
-    if (FENCE_LINE.test(line)) inFence = !inFence;
-    if (!inFence && /^## /.test(line) && sections.at(-1).length) sections.push([]);
-    sections.at(-1).push(line);
-  }
-  return sections.map((s) => s.join("\n").replace(/\s+$/, ""));
-}
-
-export function sectionHashes(sections) {
-  return sections.map((s) => sha256(Buffer.from(s.trim(), "utf8")).slice(0, 12));
-}
-
 // `null` means "no reuse possible — translate the whole body": no recorded
 // hashes, or the mirror on disk does not have the section count the hashes
-// were recorded for (a hand edit, or a mirror written by an older pipeline).
-export function planSectionReuse({ previousHashes, sections, mirrorSections }) {
+// were recorded for, or an exact source snapshot contradicts the cache.
+export function planSectionReuse({
+  previousHashes,
+  previousSections = null,
+  sections,
+  mirrorSections,
+}) {
   if (!Array.isArray(previousHashes) || previousHashes.length !== mirrorSections.length) {
     return null;
   }
   if (previousHashes.length !== sections.length) return null;
+  if (previousSections !== null && !sectionCacheMatchesSnapshot(previousHashes, previousSections)) {
+    return null;
+  }
   const now = sectionHashes(sections);
+  const verifiedPrevious =
+    Array.isArray(previousSections) && previousSections.length === sections.length
+      ? sectionHashes(previousSections)
+      : [];
   const reuse = new Map();
   const translate = [];
   now.forEach((h, i) => {
@@ -734,10 +775,25 @@ export function planSectionReuse({ previousHashes, sections, mirrorSections }) {
     // of the 36 pre-expansion locales were adopted as English, 2026-09-16 audit) — never reuse it.
     // Section 0 of a mirror that starts with a YAML block is the old extractor's leaked
     // frontmatter (24 newer locales, 2026-09-16) — always rebuild it.
-    const leakedFrontmatter = i === 0 && /^---\s*\n/.test(mirrorSections[i]);
-    const untranslated = looksUntranslated(mirrorSections[i], sections[i]);
-    if (h === previousHashes[i] && !untranslated && !leakedFrontmatter)
-      reuse.set(i, mirrorSections[i]);
+    const numericUpdate =
+      h !== previousHashes[i] &&
+      typeof verifiedPrevious[i] === "string" &&
+      verifiedPrevious[i] === previousHashes[i]
+        ? applyNumericSectionDelta(previousSections[i], sections[i], mirrorSections[i])
+        : null;
+    const candidate = numericUpdate ?? mirrorSections[i];
+    const leakedFrontmatter = i === 0 && /^---\s*\n/.test(candidate);
+    const untranslated = looksUntranslated(candidate, sections[i]);
+    // A matching source hash only describes what was requested. Older adopted
+    // mirrors may still omit rows or code literals; validate reused bytes too.
+    const checked = validateTranslatedChunk(sections[i], candidate);
+    if (
+      (h === previousHashes[i] || numericUpdate !== null) &&
+      !untranslated &&
+      !leakedFrontmatter &&
+      checked.problems.length === 0
+    )
+      reuse.set(i, checked.text);
     else translate.push(i);
   });
   return { reuse, translate };
@@ -752,32 +808,16 @@ export function planSectionReuse({ previousHashes, sections, mirrorSections }) {
  * locales were plain English copies adopted as translated. Both are invisible to the hash
  * comparison, so the task loop asks this before skipping an up-to-date pair.
  */
-/** Long prose lines (> 20 chars, not table/code/list scaffolding) of a markdown fragment. */
-function proseLines(text) {
-  return text
-    .split("\n")
-    .map((l) => l.trim())
-    .filter((l) => l.length > 20 && !/^[`|#\-*\d\s]+$/.test(l));
-}
-
-/**
- * True when a mirror fragment is still (mostly) the English source: byte-equal, or ≥ 80 % of
- * its prose lines appear verbatim in the source. Fragments with < 3 prose lines fall back to
- * byte equality (code-only sections are legitimately identical).
- */
-export function looksUntranslated(mirrorFragment, sourceFragment) {
-  if (mirrorFragment.trim() === sourceFragment.trim()) return /[A-Za-z]{3,}/.test(sourceFragment);
-  const mir = proseLines(mirrorFragment);
-  if (mir.length < 3) return false;
-  const src = new Set(proseLines(sourceFragment));
-  return mir.filter((l) => src.has(l)).length / mir.length >= 0.8;
-}
-
 export function mirrorNeedsRebuild(mirrorText, sourceText) {
   const body = extractMirrorBody(mirrorText);
   if (/^---\s*\n[\s\S]{0,600}?\n---\s*\n/.test(body)) return true; // leaked frontmatter
   const sourceBody = stripTopHeading(sourceText.replace(/^---\n[\s\S]*?\n---\n+/, ""));
-  return looksUntranslated(body, sourceBody); // still English
+  const checked = validateTranslatedChunk(sourceBody, body);
+  return (
+    looksUntranslated(body, sourceBody) ||
+    checked.problems.length > 0 ||
+    checked.text !== trimChunk(body)
+  );
 }
 
 export function extractMirrorBody(mirrorText) {
@@ -862,28 +902,55 @@ export function mirrorLastCommitDate(mirrorRel, { cwd = ROOT } = {}) {
   }
 }
 
-async function resolveSectionPlan({ task, state, opts, sections }) {
+const exactSourceSnapshots = new Map();
+
+export async function resolveSectionPlan({ task, state, opts, sections }) {
   if (task.missingTarget || opts.force) return null;
   const recorded = state.sources[task.rel]?.locales?.[task.locale];
   let previousHashes = recorded?.section_hashes;
+  let exactOldText = null;
+  if (recorded?.source_hash) {
+    const key = `${task.rel}:${recorded.source_hash}`;
+    if (!exactSourceSnapshots.has(key)) {
+      exactSourceSnapshots.set(key, findSourceTextByHash(task.rel, recorded.source_hash));
+    }
+    exactOldText = await exactSourceSnapshots.get(key);
+  }
   if (!previousHashes && recorded?.source_hash) {
-    let oldText = await findSourceTextByHash(task.rel, recorded.source_hash);
-    if (!oldText) {
+    let oldText = exactOldText;
+    if (oldText === null) {
       // `updated_at` is bumped by `--adopt`, so prefer the date of the last commit that
       // actually wrote the mirror (mirrors are only written by translation runs).
       const translatedAt =
         mirrorLastCommitDate(path.relative(ROOT, task.targetAbs)) || recorded.updated_at;
       if (translatedAt) oldText = findSourceTextBefore(task.rel, translatedAt);
     }
-    if (oldText) previousHashes = sectionHashes(splitSections(stripTopHeading(oldText)));
+    if (oldText !== null) previousHashes = sectionHashes(splitSections(stripTopHeading(oldText)));
   }
   if (!previousHashes) return null;
+  const exactPreviousSections =
+    exactOldText === null ? null : splitSections(stripTopHeading(exactOldText));
+  // Validate the cache even when mirror bytes are unverified: target_hash is
+  // required for numeric edits, but cannot authorize contradictory source metadata.
+  if (
+    exactPreviousSections !== null &&
+    !sectionCacheMatchesSnapshot(previousHashes, exactPreviousSections)
+  ) {
+    return null;
+  }
   const mirrorText = await fs.readFile(task.targetAbs, "utf8");
   const mirrorSections = splitSections(extractMirrorBody(mirrorText));
-  return planSectionReuse({ previousHashes, sections, mirrorSections });
+  // A timestamp fallback is not proof of the previous source. Numeric edits
+  // require both the exact source snapshot and the recorded mirror bytes.
+  const previousSections =
+    exactPreviousSections !== null &&
+    recorded?.target_hash === sha256(Buffer.from(mirrorText, "utf8"))
+      ? exactPreviousSections
+      : undefined;
+  return planSectionReuse({ previousHashes, previousSections, sections, mirrorSections });
 }
 
-async function translateBody(body, localeEntry, backend) {
+export async function translateBody(body, localeEntry, backend) {
   const englishName = localeEntry.english ?? localeEntry.name;
   const native = localeEntry.native ?? localeEntry.name;
   const system = SYSTEM_PROMPT(englishName, native);
@@ -901,6 +968,18 @@ async function translateBody(body, localeEntry, backend) {
       logWarn(
         `  chunk ${i + 1}/${chunks.length} rejected (attempt ${attempt}/${CHUNK_ATTEMPTS}): ${checked.problems.join("; ")}`
       );
+      if (attempt < CHUNK_ATTEMPTS) {
+        messages.push(
+          { role: "assistant", content: checked.text },
+          {
+            role: "user",
+            content:
+              `The previous translation failed validation: ${checked.problems.join("; ")}. ` +
+              "Return a complete corrected translation of the original source. " +
+              "Preserve every inline code literal exactly and return only the translated markdown.",
+          }
+        );
+      }
     }
     if (checked.problems.length > 0) {
       throw new Error(
@@ -1159,6 +1238,13 @@ async function main() {
           } else {
             translatedBody = await translateBody(body, localeEntry, backend);
           }
+          // Check the assembled document before writing content or advancing
+          // provenance, including sections that came from the reuse cache.
+          const checked = validateTranslatedChunk(body, translatedBody);
+          if (checked.problems.length) {
+            throw new Error(`assembled document failed validation: ${checked.problems.join("; ")}`);
+          }
+          translatedBody = checked.text;
         } catch (err) {
           stats.failed++;
           failures.push({ rel: task.rel, locale: task.locale, error: err.message });

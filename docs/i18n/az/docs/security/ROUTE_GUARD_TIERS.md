@@ -199,7 +199,7 @@ nasazlıq zamanı açıq qalan səviyyədə idi (GHSA-7pq4-8pvv-rx7r). `enableOb
 əlavə olaraq verilənlər qovluğu olan, onun daxilində yerləşən və ya onu ehtiva edən vault-u
 qəbul etmir.
 
-#### Etimadnamə ixracları yalnız operatorlar üçündür
+#### Etimadnamələrin ixracı və bərpa əməliyyatları yalnız operator üçündür
 
 Yuxarıdakı səviyyə yalnız _hər hansı_ etimad məlumatının tələb edilib-edilmədiyini müəyyənləşdirir. Saxlanılan
 etimad məlumatlarını endirən marşrutlar emalçıda ikinci yoxlama əlavə edir: `GET /api/settings/export-json` (şifrəsi açılmış
@@ -210,22 +210,9 @@ girişi deaktiv edilmiş instansı qəbul edir, istənilən əhatə dairəsinə 
 və `admin` daxil olmaqla) və `oma_` giriş tokenlərinə `403` cavabı verir. Sinxronizasiya tokeninin verilməsi (`POST /api/sync/tokens`) eyni
 köməkçi funksiyadan, həmçinin etibarlı dövrəvi daxili xidmət tokenindən istifadə edir.
 
-#### Credential exports and restores are operator-only
+Eyni sərhəd müvafiq dağıdıcı əməliyyatlara da aiddir: `POST /api/db-backups/import` (yüklənmiş `.sqlite` faylı, `dryRun=true` daxil olmaqla), `POST /api/db-backups` (saxlanmış ehtiyat nüsxənin id-si ilə bərpası) və `POST /api/settings/import-json` (köhnə JSON formatının bərpası) işlək verilənlər bazasını və ya bütün parametrlər, bağlantılar və API açarları dəstini əvəz edir. Buna görə maşın etimadnaməsi bu əməliyyatları da başlada bilməz.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Bərpa nöqtələrinin silinməsinə də eyni sərhəd tətbiq olunur: `DELETE /api/db-backups` (təmizləmə — son N nüsxəni saxlamaq və ya D gündən köhnələri silmək) və `PATCH /api/db-backups` (saxlama parametrləri). Saxlanmış qaydalar hər avtomatik ehtiyat nüsxədən sonra `cleanupDbBackups()` tərəfindən tətbiq edilir (`src/lib/db/backup.ts`); `keepLatest: 1` yaza bilən maşın etimadnaməsi növbəti anlıq nüsxədə əvvəlki bərpa nöqtələrini silə bilərdi. Ehtiyat nüsxələrin siyahılanması və yaradılması (`GET`/`PUT /api/db-backups`) adi idarəetmə autentifikasiyasını saxlayır.
 
 ### Təzə quraşdırmanın ilkin sazlanması yalnız dövrəvidir — `Host` əsasında deyil, real bərabərtərəf əsasında
 

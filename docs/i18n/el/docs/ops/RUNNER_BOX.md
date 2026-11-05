@@ -11,13 +11,13 @@ runner του OmniRoute έχει **έναν ρόλο**, μία ετικέτα κ
 του Release-Green και μια εργασία lint· το swap του host (16 GB) απορροφά αυτή την επιβάρυνση και, επειδή τα Builds των pull request εκτελούνται
 σε φιλοξενούμενους runners, η υποδοχή Turbopack παραμένει αδρανής τις περισσότερες φορές:
 
-| runner               | ετικέτα              | ρόλος                                                                                                                                                 | `MemoryHigh` / `MemoryMax` | `CPUQuota`   |
-| -------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------ |
-| `omniroute-113-5`    | `omni-build`         | Builds Turbopack: `ci.yml` `Build` (μόνο push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, το νυχτερινό build a11y | 56 GB / 60 GB (swap 0)     | 1600 %       |
-| `omniroute-113-6`    | `omni-release`       | Release-Green (`release-green` + `main-green`), build webpack                                                                                         | 20 GB / 24 GB (swap 4 GB)  | 800 %        |
-| `omniroute-113-2`    | `omni-light`         | νυχτερινές εργασίες (Schemathesis, promptfoo, garak, k6) και `quality.yml` `lint-guard`                                                               | 12 GB / 16 GB (swap 4 GB)  | 600 %        |
-| `omniroute-113`      | `omni-light`         | ίδιο pool με το παραπάνω                                                                                                                              | 8 GB / 12 GB               | 400 %        |
-| OmniHeuris, OmniMind | (τα αποθετήριά τους) | μόνο Dependabot (μέγιστη τιμή 155 MB έκαστο, 2026-10-18)                                                                                              | 4 GB / 6 GB                | 200 % έκαστο |
+| runner               | ετικέτα                         | ρόλος                                                                                                                                                 | `MemoryHigh` / `MemoryMax` | `CPUQuota`   |
+| -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------ |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Builds Turbopack: `ci.yml` `Build` (μόνο push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, το νυχτερινό build a11y | 56 GB / 60 GB (swap 0)     | 1600 %       |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), build webpack                                                                                         | 20 GB / 24 GB (swap 4 GB)  | 800 %        |
+| `omniroute-113-2`    | `omni-light`                    | νυχτερινές εργασίες (Schemathesis, promptfoo, garak, k6) και `quality.yml` `lint-guard`                                                               | 12 GB / 16 GB (swap 4 GB)  | 600 %        |
+| `omniroute-113`      | `omni-light`                    | ίδιο pool με το παραπάνω                                                                                                                              | 8 GB / 12 GB               | 400 %        |
+| OmniHeuris, OmniMind | (τα αποθετήριά τους)            | μόνο Dependabot (μέγιστη τιμή 155 MB έκαστο, 2026-10-18)                                                                                              | 4 GB / 6 GB                | 200 % έκαστο |
 
 Μετρήσεις στις 2026-10-18:
 
@@ -81,7 +81,7 @@ CPU χωρίς συνδεδεμένη εργασία. Κάθε μονάδα Omni
 ## Κανόνες λειτουργίας
 
 - **Μία μεταγλώττιση Turbopack κάθε φορά — επιβάλλεται μέσω ετικέτας.** Κάθε εργασία που εκτελεί ένα πλήρες
-  `next build` με Turbopack στοχεύει το `[self-hosted, omni-build]`, και μόνο το **`omniroute-113-5`** φέρει αυτήν
+  `next build` με Turbopack στοχεύει το `[self-hosted, omni-build, omni-build-60gb]`, και μόνο το **`omniroute-113-5`** φέρει αυτήν
   την ετικέτα: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
   η νυχτερινή μεταγλώττιση a11y (#16853) και το **amd64** του `docker-publish.yml` (webpack μέσα στο BuildKit —
   το Turbopack κατέρρευσε εκεί, εκτέλεση 33253576569). Το σκέλος arm64 του Docker παραμένει στο `ubuntu-24.04-arm`.

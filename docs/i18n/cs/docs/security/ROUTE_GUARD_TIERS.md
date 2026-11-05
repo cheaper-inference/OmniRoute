@@ -211,7 +211,7 @@ token REST API služby Obsidian. GHSA-62vw pouze skryla odhalení hesla prostře
 stále zůstávalo na úrovni, která při selhání povolovala přístup (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` navíc
 odmítne vault, který je datovým adresářem, nachází se v něm nebo jej obsahuje.
 
-#### Export přihlašovacích údajů je určen pouze pro operátory
+#### Export přihlašovacích údajů a obnovení jsou určeny pouze pro operátory
 
 Výše uvedená úroveň pouze rozhoduje, zda je vyžadován _nějaký_ přihlašovací údaj. Trasy, které stahují
 uložené přihlašovací údaje, provádějí v obslužné rutině druhou kontrolu: `GET /api/settings/export-json` (dešifrovaná
@@ -222,22 +222,9 @@ instanci s vypnutým přihlašováním a vrací odpověď `403` pro klíče API 
 a `admin`) a pro přístupové tokeny `oma_`. Vydávání synchronizačních tokenů (`POST /api/sync/tokens`) používá
 stejnou pomocnou funkci a navíc důvěryhodný token interní služby přes zpětnou smyčku.
 
-#### Credential exports and restores are operator-only
+Stejná hranice platí pro odpovídající destruktivní operace: `POST /api/db-backups/import` (nahraný soubor `.sqlite`, včetně `dryRun=true`), `POST /api/db-backups` (obnovení uložené zálohy podle jejího id) a `POST /api/settings/import-json` (obnovení staršího formátu JSON) nahrazují aktivní databázi nebo celou sadu nastavení, připojení a klíčů API. Strojové přihlašovací údaje je proto také nemohou spustit.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Stejná hranice platí pro ničení bodů obnovení: `DELETE /api/db-backups` (čištění — ponechat posledních N nebo odstranit starší než D dní) a `PATCH /api/db-backups` (nastavení uchovávání). Uložená pravidla jsou právě ta, která `cleanupDbBackups()` používá po každé automatické záloze (`src/lib/db/backup.ts`); strojový údaj schopný uložit `keepLatest: 1` by tak mohl při dalším snímku odstranit předchozí body obnovení. Výpis a vytváření záloh (`GET`/`PUT /api/db-backups`) nadále používají běžné ověřování pro správu.
 
 ### Inicializační zavedení po nové instalaci je dostupné pouze přes zpětnou smyčku — podle skutečného protějšku, nikoli podle `Host`
 

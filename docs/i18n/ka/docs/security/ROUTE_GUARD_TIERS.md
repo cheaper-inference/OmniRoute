@@ -210,7 +210,7 @@ Obsidian REST API ტოკენს ინახავს. GHSA-62vw-მ მხ
 კვლავ fail-open დონეზე რჩებოდა (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` დამატებით
 უარყოფს vault-ს, რომელიც მონაცემთა დირექტორიაა, მის შიგნით მდებარეობს ან მას შეიცავს.
 
-#### ავტორიზაციის მონაცემების ექსპორტი მხოლოდ ოპერატორისთვისაა
+#### ავტორიზაციის მონაცემების ექსპორტი და აღდგენა მხოლოდ ოპერატორისთვისაა
 
 ზემოთ მოცემული დონე მხოლოდ იმას განსაზღვრავს, საჭიროა თუ არა _რაიმე_ ავტორიზაციის მონაცემი. მარშრუტები, რომლებიც
 შენახულ ავტორიზაციის მონაცემებს ჩამოტვირთავს, დამმუშავებელში მეორე შემოწმებას ამატებს: `GET /api/settings/export-json` (გაშიფრული
@@ -221,22 +221,9 @@ Obsidian REST API ტოკენს ინახავს. GHSA-62vw-მ მხ
 და `admin`) და `oma_` წვდომის ტოკენებს პასუხობს `403`-ით. სინქრონიზაციის ტოკენის გაცემა (`POST /api/sync/tokens`) იყენებს
 იმავე დამხმარე ფუნქციას და დამატებით — სანდო loopback შიდა სერვისის ტოკენს.
 
-#### Credential exports and restores are operator-only
+იგივე ზღვარი ვრცელდება შესაბამის დამანგრეველ მოქმედებებზე: `POST /api/db-backups/import` (ატვირთული `.sqlite` ფაილი, მათ შორის `dryRun=true`), `POST /api/db-backups` (შენახული სარეზერვო ასლის აღდგენა მისი id-ით) და `POST /api/settings/import-json` (ძველი JSON ფორმატის აღდგენა) ცვლის მოქმედ მონაცემთა ბაზას ან პარამეტრების, კავშირებისა და API გასაღებების მთელ ნაკრებს. ამიტომ მანქანის ავტორიზაციის მონაცემებით მათი გაშვებაც შეუძლებელია.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+აღდგენის წერტილების წაშლაზეც იგივე ზღვარი მოქმედებს: `DELETE /api/db-backups` (გასუფთავება — ბოლო N-ის შენარჩუნება ან D დღეზე ძველების წაშლა) და `PATCH /api/db-backups` (შენახვის პარამეტრები). შენახულ წესებს `cleanupDbBackups()` იყენებს ყოველი ავტომატური სარეზერვო ასლის შემდეგ (`src/lib/db/backup.ts`); მანქანის მონაცემებს, რომლებსაც `keepLatest: 1`-ის შენახვა შეეძლებოდა, შემდეგი სნეპშოტისას წინა აღდგენის წერტილების წაშლაც შეეძლებოდა. ასლების ჩამოთვლა და შექმნა (`GET`/`PUT /api/db-backups`) ინარჩუნებს მართვის ჩვეულებრივ ავთენტიფიკაციას.
 
 ### ახალი ინსტალაციის საწყისი კონფიგურაცია მხოლოდ loopback-ითაა ხელმისაწვდომი — რეალური მეზობელი კვანძის მიხედვით და არა `Host`-ის
 

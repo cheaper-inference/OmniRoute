@@ -117,44 +117,75 @@ test("handleChat does not probe Claude Web repeatedly after an upstream 429", as
   assert.equal(completionCalls, 1);
 });
 
-test("handleChat waits for a short cooldown and retries once within the configured budget", async () => {
-  await seedConnection("openai", {
-    apiKey: "sk-openai-cooldown-short",
-    rateLimitedUntil: new Date(Date.now() + 950).toISOString(),
-    lastError: "short cooldown window",
-    errorCode: 429,
-  });
-  await settingsDb.updateSettings({
-    requestRetry: 1,
-    maxRetryIntervalSec: 1,
-  });
+test("handleChat waits for a short cooldown and retries once within the configured budget", async (t) => {
+  // Setup and runner scheduling must not consume the cooldown before the request starts.
+  const cooldownMs = 950;
+  const now = Date.now();
+  const realSetTimeout = globalThis.setTimeout;
+  const requestedWaits: number[] = [];
+  const pendingTimers = new Set<ReturnType<typeof setTimeout>>();
+  t.mock.timers.enable({ apis: ["Date"], now });
 
-  let fetchCalls = 0;
-  globalThis.fetch = async () => {
-    fetchCalls += 1;
-    return buildOpenAIResponse("recovered after cooldown");
-  };
+  try {
+    t.mock.method(globalThis, "setTimeout", (callback, delay, ...args) => {
+      if (delay === cooldownMs) {
+        requestedWaits.push(delay);
+        const timer = realSetTimeout(() => {
+          pendingTimers.delete(timer);
+          t.mock.timers.tick(delay);
+          callback(...args);
+        }, 0);
+        pendingTimers.add(timer);
+        return timer;
+      }
+      return realSetTimeout(callback, delay, ...args);
+    });
 
-  const startedAt = Date.now();
-  const response = await handleChat(
-    buildRequest({
-      body: {
-        model: "openai/gpt-4.1",
-        stream: false,
-        messages: [{ role: "user", content: "retry after short cooldown" }],
-      },
-    })
-  );
-  const elapsedMs = Date.now() - startedAt;
-  const body = (await response.json()) as unknown as {
-    choices: Array<{ message: { content: string } }>;
-    error: { message: string };
-  };
+    await seedConnection("openai", {
+      apiKey: "sk-openai-cooldown-short",
+      rateLimitedUntil: new Date(Date.now() + cooldownMs).toISOString(),
+      lastError: "short cooldown window",
+      errorCode: 429,
+    });
+    await settingsDb.updateSettings({
+      requestRetry: 1,
+      maxRetryIntervalSec: 1,
+    });
 
-  assert.equal(response.status, 200);
-  assert.equal(fetchCalls, 1);
-  assert.ok(elapsedMs >= 250, `expected cooldown-aware retry wait, got ${elapsedMs}ms`);
-  assert.equal(body.choices[0].message.content, "recovered after cooldown");
+    let fetchCalls = 0;
+    globalThis.fetch = async () => {
+      assert.deepEqual(requestedWaits, [cooldownMs]);
+      assert.equal(Date.now(), now + cooldownMs);
+      fetchCalls += 1;
+      return buildOpenAIResponse("recovered after cooldown");
+    };
+
+    const startedAt = Date.now();
+    const response = await handleChat(
+      buildRequest({
+        body: {
+          model: "openai/gpt-4.1",
+          stream: false,
+          messages: [{ role: "user", content: "retry after short cooldown" }],
+        },
+      })
+    );
+    const elapsedMs = Date.now() - startedAt;
+    const body = (await response.json()) as unknown as {
+      choices: Array<{ message: { content: string } }>;
+      error: { message: string };
+    };
+
+    assert.equal(response.status, 200);
+    assert.equal(fetchCalls, 1);
+    assert.deepEqual(requestedWaits, [cooldownMs]);
+    assert.ok(elapsedMs >= 250, `expected cooldown-aware retry wait, got ${elapsedMs}ms`);
+    assert.equal(body.choices[0].message.content, "recovered after cooldown");
+  } finally {
+    // Restore before the harness afterEach runs, including assertion/setup failures.
+    for (const timer of pendingTimers) clearTimeout(timer);
+    t.mock.reset();
+  }
 });
 
 test("handleChat recovers from a real 429 once the connection cooldown expires", async () => {

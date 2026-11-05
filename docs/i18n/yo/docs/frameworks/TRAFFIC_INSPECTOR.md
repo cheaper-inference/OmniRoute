@@ -88,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Ọ̀nà ìṣiṣẹ́:** Ó ń lo àwọn API OS láti darí gbogbo ìrìn-ọ̀nà dátà HTTP/HTTPS gba inú olùgbọ́ HTTP_PROXY:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` àti àwọn ètò host/port HTTP/HTTPS
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Ìbùdó tí ó dé:** Gbogbo ohun èlò lórí ẹ̀rọ náà tó ń tẹ̀lé àwọn ètò proxy ẹ̀rọ
   **Àkíyèsí:** `source` = `"system-proxy"`
 
 **Àwọn ìlànà ààbò:**
 
-- Aago pípa aládàáṣe (ìyẹn jẹ́ ìṣẹ́jú 30 ní àiyípadà, a lè ṣètò rẹ̀ nípasẹ̀ `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- A máa ń fi ipò proxy ẹ̀rọ tẹ́lẹ̀ pamọ́ sínú DB, a sì máa ń mú un padà nígbà ìpadàsí
-- Dashboard máa ń fi ìkìlọ̀ "Ń dá proxy ẹ̀rọ padà" hàn bí olumulo bá lọ kúrò ní ojú-ìwé nígbà tí ó ṣì ń ṣiṣẹ́
-- UI máa ń fi àmì `⚠ Ìpele gíga` hàn + checkbox ìmúdájú tó ṣe kedere
+- Lílo proxy ṣètò aago ìpadà tí ó wà nínú process nìkan, tí yóò gbìyànjú bí ó ti lè ṣe ṣùgbọ́n tí kò ṣe ìlérí àṣeyọrí (ìpìlẹ̀ jẹ́ ìṣẹ́jú 30, a lè ṣètò rẹ̀ pẹ̀lú `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`). Aago náà kò dúró lẹ́yìn tí process olupin bá parí.
+- Ipo proxy tẹ́lẹ̀ wà nínú ìrántí process; ibi ìpamọ́ ipo gbígbà yìí kò pa á mọ́ títí láé nínú database. Ìpadà ń mú àwọn ètò macOS/GNOME tí a fipamọ́ padà; lórí Windows ó ń ṣe reset proxy WinHTTP dípò mímú ètò tẹ́lẹ̀ padà.
+- Nígbà tí a ṣì ń ròyìn pé a ti lo proxy, yíyọ ojú ìwé kúrò nínú ìrántí ń fi ìbéèrè keepalive ìpadà ránṣẹ́ bí ó ti lè ṣe, ó sì ń béèrè ìmúdájú abínibí tí aṣàwákiri ń ṣàkóso ọ̀rọ̀ rẹ̀. Yíyọ inspector nígbà lílọ kiri SPA tún ń gbìyànjú ìpadà, láìsí ìbéèrè ìmúdájú aṣàwákiri yẹn.
+- Ọ̀pá irinṣẹ́ gbígbà ń fi ìdarí `System-wide` tí a túmọ̀ hàn pẹ̀lú àmì ìkìlọ̀. Títẹ̀ ẹ́ ní báyìí ń yí ipo UI agbègbè nìkan padà; kò fi àpótí ìmúdájú hàn, kò sì lo tàbí dá proxy ètò padà.
 
 ### Ìpo 5 — Ìtúpalẹ̀ ìparoko transparent TPROXY (Linux, root, yíyàn láti tan-an)
 
@@ -113,13 +113,13 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 
 ### Àfiwé àwọn ìpo ìgbàwọ́
 
-| Ìpo                  | Ìṣètò                          |              Sudo?              | Ìkápá                            | Àwọn àkíyèsí                                                                                                                             |
-| -------------------- | ------------------------------ | :-----------------------------: | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge       | Aládàáṣiṣẹ́                     |       Ẹ̀ẹ̀kan (cert+hosts)        | Àwọn aṣojú IDE 9                 | Ó wà ní títàn gẹ́gẹ́ bí àìrídìmú                                                                                                           |
-| 2. Àwọn Hosts Àkànṣe | Ìṣàtẹ̀wọlé fún host kọ̀ọ̀kan      |       Béẹ̀ni (fáìlì hosts)       | Èyíkéyìí app tó ń lo host yẹn    | A fi pamọ́ sínú DB                                                                                                                        |
-| 3. HTTP_PROXY        | `export HTTPS_PROXY=...`       |              Rárá               | Àwọn app tó ń tẹ̀lé env           | Port 8080; HTTPS ni a ń gbé gba CONNECT tunnel (metadata nìkan, a kì í tú ìpamọ́ rẹ̀ láé)                                                  |
-| 4. Gbogbo ètò        | Yí padà + fìdí rẹ̀ múlẹ̀         |              Béẹ̀ni              | Gbogbo app lórí ẹ̀rọ náà          | Yóò pa ara rẹ̀ láìfọwọ́sí lẹ́yìn ìṣẹ́jú 30                                                                                                   |
-| 5. Ìtú-ìpamọ́ TPROXY  | Yí padà (Linux + native addon) | Béẹ̀ni (root + fífi CA sori ẹrọ) | Èyíkéyìí host lórí port àfojúsùn | Ó ń tú ìpamọ́ àwọn host èyíkéyìí; ó wà ní pípa gẹ́gẹ́ bí àìrídìmú — wo `docs/security/MITM-TPROXY-DECRYPT.md` (git; a kò kó ọ sínú `/docs`) |
+| Ìpo                  | Ìṣètò                                                          |              Sudo?              | Ìkápá                            | Àwọn àkíyèsí                                                                                                                             |
+| -------------------- | -------------------------------------------------------------- | :-----------------------------: | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge       | Aládàáṣiṣẹ́                                                     |       Ẹ̀ẹ̀kan (cert+hosts)        | Àwọn aṣojú IDE 9                 | Ó wà ní títàn gẹ́gẹ́ bí àìrídìmú                                                                                                           |
+| 2. Àwọn Hosts Àkànṣe | Ìṣàtẹ̀wọlé fún host kọ̀ọ̀kan                                      |       Béẹ̀ni (fáìlì hosts)       | Èyíkéyìí app tó ń lo host yẹn    | A fi pamọ́ sínú DB                                                                                                                        |
+| 3. HTTP_PROXY        | `export HTTPS_PROXY=...`                                       |              Rárá               | Àwọn app tó ń tẹ̀lé env           | Port 8080; HTTPS ni a ń gbé gba CONNECT tunnel (metadata nìkan, a kì í tú ìpamọ́ rẹ̀ láé)                                                  |
+| 4. Gbogbo ètò        | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |              Béẹ̀ni              | Gbogbo app lórí ẹ̀rọ náà          | Aago ìpadà tí ń gbìyànjú bí ó ti lè ṣe, láìsí ìlérí àṣeyọrí (ìpìlẹ̀ ìṣẹ́jú 30)                                                             |
+| 5. Ìtú-ìpamọ́ TPROXY  | Yí padà (Linux + native addon)                                 | Béẹ̀ni (root + fífi CA sori ẹrọ) | Èyíkéyìí host lórí port àfojúsùn | Ó ń tú ìpamọ́ àwọn host èyíkéyìí; ó wà ní pípa gẹ́gẹ́ bí àìrídìmú — wo `docs/security/MITM-TPROXY-DECRYPT.md` (git; a kò kó ọ sínú `/docs`) |
 
 ---
 
@@ -312,7 +312,7 @@ jẹ́ iṣẹ́ tó máa tẹ̀lé).
 ### 5.1 Gígba sáẹ́ṣọ̀nù kan sílẹ̀
 
 1. Tẹ **"● Gba sáẹ́ṣọ̀nù sílẹ̀"** nínú pẹpẹ irinṣẹ́ → tẹ orúkọ kan sí i (kò pọn dandan)
-2. Ìṣàn aláàyè ń tẹ̀síwájú gẹ́gẹ́ bí ó ti yẹ; àmì pupa tí ń tàn-léraléra yóò fi `◉ REC · <name> · 00:42 · 23 reqs` hàn
+2. Ìṣàn aláàyè ń tẹ̀síwájú gẹ́gẹ́ bí ó ti yẹ; ọ̀pá ìgbàsílẹ̀ ń fi àmì pupa tí ń tàn-léraléra, àkókò tí ó ti kọjá, orúkọ ìpàdé bí ó bá wà, àti ìdarí ìdúró tí a túmọ̀ hàn.
 3. Tẹ **"⏹ Dúró"** → àwòrán-ipò sáẹ́ṣọ̀nù náà ni a ó fi pamọ́ sínú `inspector_sessions` + `inspector_session_requests`
 
 ### 5.2 Wíwo sáẹ́ṣọ̀nù tí a gbà sílẹ̀
@@ -320,7 +320,7 @@ jẹ́ iṣẹ́ tó máa tẹ̀lé).
 Àkojọ aṣàyàn **Àwọn Sáẹ́ṣọ̀nù** nínú pẹpẹ irinṣẹ́ ṣe àkójọ àwọn sáẹ́ṣọ̀nù tí a fi pamọ́. Nígbà tí o bá yan ọ̀kan:
 
 - Ó ń ṣàkójọpọ̀ àwòrán-ipò sáẹ́ṣọ̀nù náà (ipò tí a ti dì)
-- Àsíá kan yóò fi hàn: `Ń wo sáẹ́ṣọ̀nù tí a gbà sílẹ̀ "<name>" — [Padà sí ìṣàn aláàyè]`
+- Banner ń fi àkọlé ìpàdé tí a gbàsílẹ̀ tí a túmọ̀ àti orúkọ ìpàdé (tàbí ọ̀rọ̀ àropò tí a túmọ̀ fún ìpàdé tí kò ní àkọlé) hàn, lẹ́gbẹ̀ẹ́ bọ́tìnì tí a túmọ̀ fún pípadà sí ìwò aláàyè.
 - Táàbù Àwọn Ìṣirò yóò wà fún lílò pẹ̀lú àwọn àkójọpọ̀ Recharts
 
 ### 5.3 Àwọn ọ̀nà àgbéjáde
@@ -344,7 +344,7 @@ Traffic Inspector ń ṣàfihàn **gbogbo ìbánisọ̀rọ̀ HTTPS tí a dáw�
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **LOCAL_ONLY**                   | Gbogbo àwọn ipa-ọ̀nà àti ibi ìparí WebSocket jẹ́ fún loopback nìkan (a fipá mú un ṣiṣẹ́ nínú `routeGuard.ts` ṣáájú ìfàṣẹsí)                                                  |
 | **Ìbòjú bo àṣírí**               | Ẹ̀rọ àyẹ̀wò Linear `maskSecret()` ń pa àwọn ẹ̀rí Bearer RFC 6750, àwọn kọ́kọ́rọ́ tí ìpele olùpèsè wà níwájú wọn àti àwọn token aláìṣèdámọ̀ gígùn mọ́ ṣáájú `TrafficBuffer.push()` |
-| **Òpin ìwọ̀n ara**                | Àwọn ara > `INSPECTOR_MAX_BODY_KB` (àìyípadà 1024 KB) ni a ké kúrú pẹ̀lú àkíyèsí `"(a ké e kúrú fún ìṣiṣẹ́ tó dára)"`                                                       |
+| **Òpin ìwọ̀n ara**                | Àwọn ara > `INSPECTOR_MAX_BODY_KB` (àìyípadà 1024 KB) ni a ké kúrú pẹ̀lú àkíyèsí `"(truncated for performance)"`                                                           |
 | **Ìsọdimímọ́ àkọlé**              | A sọ àwọn orúkọ di lẹ́tà kékeré; a yọ àwọn àkọlé framing/hop-by-hop àti proxy-auth kúrò; a pa àwọn cookie mọ́ pátápátá; àwọn iye ẹ̀rí ń fi iṣẹ́ lé `maskSecret()` lọ́wọ́        |
 | **CSP**                          | Content Security Policy tó le lórí àwọn ojúewé Traffic Inspector láti dènà XSS nípasẹ̀ àwọn ara ìdáhùn tí a fi sínú rẹ̀                                                     |
 | **Kò sí ìtọ́jú pípẹ́ ní àìyípadà** | `TrafficBuffer` wà nínú ìrántí, ó sì máa ń sọnù nígbà tí olupin bá tún bẹ̀rẹ̀. A máa ń tọ́jú àwọn session sí ibi pípẹ́ nígbà tí a bá ṣe àkọsílẹ̀ wọn ní pàtó nìkan             |
@@ -412,7 +412,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-Dasibodu náà yóò tún fúnni ní "Dá aṣojú ẹ̀rọ padà" nígbà tí a bá tún gbé e lẹ́ẹ̀kan sí i, tí ó bá rí i pé ipò DB fi hàn pé aṣojú náà ń ṣiṣẹ́.
+Ipo proxy tí a fipamọ́ wà nínú process olupin nìkan. Lẹ́yìn ìṣubú tàbí ìbẹ̀rẹ̀ tuntun, ibi ìpamọ́ ipo gbígbà lọ́wọ́lọ́wọ́ kò lè mú ẹ̀dà ipo yẹn padà láti database; lo àwọn àṣẹ ìmúpadàbọ̀ pẹpẹ tí ó wà lókè bí ìmúpadàbọ̀ pẹ̀lú ọwọ́ bá ṣe pàtàkì.
 
 ### Búfà ti kún
 

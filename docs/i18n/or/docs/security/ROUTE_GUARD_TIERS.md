@@ -207,7 +207,7 @@ Obsidian REST API tokenକୁ ସଂରକ୍ଷଣ କରେ। GHSA-62vw କ�
 ତଥାପି fail-open ସ୍ତରରେ ଥିଲା (GHSA-7pq4-8pvv-rx7r)। `enableObsidianVaultSync()` ଅତିରିକ୍ତ ଭାବେ
 data directory ସହ ସମାନ, ତାହା ଭିତରେ ଥିବା, କିମ୍ବା ତାହାକୁ ଧାରଣ କରୁଥିବା vaultକୁ ପ୍ରତ୍ୟାଖ୍ୟାନ କରେ।
 
-#### Credential exportଗୁଡ଼ିକ କେବଳ operatorଙ୍କ ପାଇଁ
+#### ପ୍ରମାଣପତ୍ର ରପ୍ତାନି ଓ ପୁନରୁଦ୍ଧାର କେବଳ ଅପରେଟରଙ୍କ ପାଇଁ
 
 ଉପରୋକ୍ତ ସ୍ତରଟି କେବଳ _କୌଣସି_ ପ୍ରମାଣପତ୍ର ଆବଶ୍ୟକ କି ନାହିଁ ନିର୍ଣ୍ଣୟ କରେ। ସଂରକ୍ଷିତ ପ୍ରମାଣପତ୍ର
 ଡାଉନଲୋଡ୍ କରୁଥିବା ରୁଟ୍ଗୁଡ଼ିକ ହ୍ୟାଣ୍ଡଲର୍ରେ ଏକ ଦ୍ୱିତୀୟ ଯାଞ୍ଚ ଯୋଗ କରନ୍ତି: `GET /api/settings/export-json` (ଡିକ୍ରିପ୍ଟ କରାଯାଇଥିବା
@@ -218,22 +218,9 @@ data directory ସହ ସମାନ, ତାହା ଭିତରେ ଥିବା, �
 ଏବଂ `admin` ସମେତ) ଏବଂ `oma_` ଆକ୍ସେସ୍ ଟୋକନ୍ଗୁଡ଼ିକୁ `403` ଉତ୍ତର ଦିଏ। ସିଙ୍କ୍ ଟୋକନ୍ ଜାରିକରଣ (`POST /api/sync/tokens`) ସେହି
 ସହାୟକକୁ, ଏବଂ ତା’ ସହିତ ବିଶ୍ୱସ୍ତ ଲୁପ୍ବ୍ୟାକ୍ ଆଭ୍ୟନ୍ତରୀଣ-ସେବା ଟୋକନ୍କୁ ବ୍ୟବହାର କରେ।
 
-#### Credential exports and restores are operator-only
+ସମ୍ପର୍କିତ ବିନାଶକାରୀ କାର୍ଯ୍ୟଗୁଡ଼ିକ ପାଇଁ ମଧ୍ୟ ସେହି ସୀମା ରହିଛି: `POST /api/db-backups/import` (ଅପଲୋଡ୍ ହୋଇଥିବା `.sqlite` ଫାଇଲ୍, `dryRun=true` ସହିତ), `POST /api/db-backups` (ସଞ୍ଚିତ ବ୍ୟାକଅପ୍‌କୁ ତାହାର id ଦ୍ୱାରା ପୁନରୁଦ୍ଧାର) ଏବଂ `POST /api/settings/import-json` (ପୁରୁଣା JSON ଫର୍ମାଟ୍‌ର ପୁନରୁଦ୍ଧାର) ସକ୍ରିୟ ଡାଟାବେସ୍ କିମ୍ବା ସମସ୍ତ ସେଟିଂ, ସଂଯୋଗ ଓ API କୀର ସମୂହକୁ ବଦଳାଇଦିଏ। ତେଣୁ ମେସିନ୍ ପ୍ରମାଣପତ୍ର ଏହି କାର୍ଯ୍ୟଗୁଡ଼ିକୁ ମଧ୍ୟ ଆରମ୍ଭ କରିପାରେ ନାହିଁ।
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+ପୁନରୁଦ୍ଧାର ବିନ୍ଦୁଗୁଡ଼ିକୁ ହଟାଇବା ପାଇଁ ମଧ୍ୟ ସେହି ସୀମା ରହିଛି: `DELETE /api/db-backups` (ସଫା କରିବା — ସର୍ବଶେଷ Nଟି ରଖିବା କିମ୍ବା D ଦିନଠାରୁ ପୁରୁଣାଗୁଡ଼ିକୁ ହଟାଇବା) ଏବଂ `PATCH /api/db-backups` (ସଂରକ୍ଷଣ ସେଟିଂ)। ସଞ୍ଚିତ ନିୟମଗୁଡ଼ିକୁ ହିଁ `cleanupDbBackups()` ପ୍ରତ୍ୟେକ ସ୍ୱୟଂଚାଳିତ ବ୍ୟାକଅପ୍ ପରେ ଲାଗୁ କରେ (`src/lib/db/backup.ts`); ତେଣୁ `keepLatest: 1` ସଞ୍ଚୟ କରିପାରୁଥିବା ମେସିନ୍ ପ୍ରମାଣପତ୍ର ପରବର୍ତ୍ତୀ ସ୍ନାପଶଟ୍‌ରେ ପୂର୍ବ ପୁନରୁଦ୍ଧାର ବିନ୍ଦୁଗୁଡ଼ିକୁ ହଟାଇପାରନ୍ତା। ବ୍ୟାକଅପ୍ ତାଲିକା ଦେଖିବା ଓ ସୃଷ୍ଟି କରିବା (`GET`/`PUT /api/db-backups`) ସାଧାରଣ ପରିଚାଳନା ପ୍ରମାଣୀକରଣ ଅଧୀନରେ ରହେ।
 
 ### ନୂତନ-ଇନ୍ଷ୍ଟଲ୍ ବୁଟ୍ଷ୍ଟ୍ରାପ୍ କେବଳ ଲୁପ୍ବ୍ୟାକ୍ ପାଇଁ — `Host` ନୁହେଁ, ପ୍ରକୃତ ପିଅର୍ ଆଧାରରେ
 

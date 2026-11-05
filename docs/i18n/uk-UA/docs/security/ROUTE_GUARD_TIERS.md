@@ -207,7 +207,7 @@ Tunnel, Tailscale, Ngrok), перевірка loopback і надалі захи�
 `enableObsidianVaultSync()` додатково відхиляє сховище, яке є каталогом даних, розташоване всередині
 нього або містить його.
 
-#### Експорт облікових даних доступний лише оператору
+#### Експорт облікових даних і відновлення доступні лише оператору
 
 Рівень вище лише визначає, чи потрібні _якісь_ облікові дані. Маршрути, які завантажують
 збережені облікові дані, додають другу перевірку в обробнику: `GET /api/settings/export-json` (розшифровані
@@ -218,22 +218,9 @@ Tunnel, Tailscale, Ngrok), перевірка loopback і надалі захи�
 і `admin`), а також на токени доступу `oma_`. Видача токенів синхронізації (`POST /api/sync/tokens`) використовує
 той самий допоміжний метод, а також довірений токен внутрішньої служби через loopback.
 
-#### Credential exports and restores are operator-only
+Та сама межа діє для відповідних руйнівних операцій: `POST /api/db-backups/import` (завантажений файл `.sqlite`, зокрема з `dryRun=true`), `POST /api/db-backups` (відновлення збереженої копії за її id) та `POST /api/settings/import-json` (відновлення старого формату JSON) замінюють робочу базу даних або весь набір налаштувань, підключень і ключів API. Машинні облікові дані також не дозволяють запустити ці операції.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Та сама межа діє для знищення точок відновлення: `DELETE /api/db-backups` (очищення — залишити останні N або видалити старші за D днів) та `PATCH /api/db-backups` (налаштування зберігання). Збережені правила — саме ті, які `cleanupDbBackups()` застосовує після кожної автоматичної копії (`src/lib/db/backup.ts`); машинні облікові дані з можливістю записати `keepLatest: 1` дозволили б видалити попередні точки під час наступного знімка. Перегляд списку та створення копій (`GET`/`PUT /api/db-backups`) зберігають звичайну автентифікацію керування.
 
 ### Початкове налаштування нової інсталяції доступне лише через loopback — за реальною адресою вузла, а не `Host`
 

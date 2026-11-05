@@ -12,13 +12,13 @@ Turbopack-koonti osuu samanaikaisesti Release-Green-webpack-koonnin ja lint-työ
 sivutustila (16 GB) tasaa tilanteen. Koska pull request -koonnit suoritetaan ylläpidetyillä
 suorittajilla, Turbopack-paikka on suurimman osan ajasta käyttämättömänä:
 
-| suorittaja           | tunniste       | rooli                                                                                                                                                 | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
-| -------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------- |
-| `omniroute-113-5`    | `omni-build`   | Turbopack-koonnit: `ci.yml` `Build` (vain push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, yöaikainen a11y-koonti | 56 GB / 60 GB (swap 0)     | 1600 %         |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), webpack-koonti                                                                                        | 20 GB / 24 GB (swap 4 GB)  | 800 %          |
-| `omniroute-113-2`    | `omni-light`   | yöajot (Schemathesis, promptfoo, garak, k6) ja `quality.yml`-tiedoston `lint-guard`                                                                   | 12 GB / 16 GB (swap 4 GB)  | 600 %          |
-| `omniroute-113`      | `omni-light`   | sama pooli kuin yllä                                                                                                                                  | 8 GB / 12 GB               | 400 %          |
-| OmniHeuris, OmniMind | (omat repot)   | vain Dependabot (kummankin huippu 155 MB, 2026-10-18)                                                                                                 | 4 GB / 6 GB                | 200 % kumpikin |
+| suorittaja           | tunniste                        | rooli                                                                                                                                                 | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
+| -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack-koonnit: `ci.yml` `Build` (vain push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, yöaikainen a11y-koonti | 56 GB / 60 GB (swap 0)     | 1600 %         |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack-koonti                                                                                        | 20 GB / 24 GB (swap 4 GB)  | 800 %          |
+| `omniroute-113-2`    | `omni-light`                    | yöajot (Schemathesis, promptfoo, garak, k6) ja `quality.yml`-tiedoston `lint-guard`                                                                   | 12 GB / 16 GB (swap 4 GB)  | 600 %          |
+| `omniroute-113`      | `omni-light`                    | sama pooli kuin yllä                                                                                                                                  | 8 GB / 12 GB               | 400 %          |
+| OmniHeuris, OmniMind | (omat repot)                    | vain Dependabot (kummankin huippu 155 MB, 2026-10-18)                                                                                                 | 4 GB / 6 GB                | 200 % kumpikin |
 
 Mitattu 2026-10-18:
 
@@ -82,7 +82,7 @@ kerrallaan ja vain sen ollessa käyttämätön** siten, että käyttämättömyy
 ## Käyttösäännöt
 
 - **Vain yksi Turbopack-koonti kerrallaan — rajoitus toteutetaan tunnisteella.** Jokainen täydellisen Turbopack-
-  `next build` -komennon suorittava työ kohdistuu tunnisteisiin `[self-hosted, omni-build]`, ja vain **`omniroute-113-5`** sisältää tämän
+  `next build` -komennon suorittava työ kohdistuu tunnisteisiin `[self-hosted, omni-build, omni-build-60gb]`, ja vain **`omniroute-113-5`** sisältää tämän
   tunnisteen: `ci.yml`-tiedoston `Build`, `npm-publish.yml`-tiedoston `publish`, `nightly-v4-build`, `preview-artifact`,
   öinen a11y-koonti (#16853) ja `docker-publish.yml`-tiedoston **amd64** (webpack BuildKitin sisällä —
   Turbopack kaatui siellä paniikkivirheeseen, suoritus 33253576569). Dockerin arm64-osuus pysyy ympäristössä `ubuntu-24.04-arm`.

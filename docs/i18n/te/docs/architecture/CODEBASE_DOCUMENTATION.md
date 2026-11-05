@@ -446,7 +446,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 ప్రొవైడర్ రిజిస్ట్రీలు, హెడర్ ప్రొఫైల్లు, ఐడెంటిటీ, …
 ├── handlers/               అభ్యర్థన హ్యాండ్లర్లు (చాట్, ఎంబెడ్డింగ్లు, ఆడియో, చిత్రం, …)
-├── executors/              150 ప్రొవైడర్ ఎగ్జిక్యూటర్ మాడ్యూళ్లు (ఎగ్జిక్యూటర్ క్లాస్లు + ప్రతి ప్రొవైడర్కు సహాయకాలు)
+├── executors/              156 ప్రొవైడర్ ఎగ్జిక్యూటర్ మాడ్యూళ్లు (ఎగ్జిక్యూటర్ క్లాస్లు + ప్రతి ప్రొవైడర్కు సహాయకాలు)
 ├── translator/             ఫార్మాట్ మార్పిడి (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions స్ట్రీమ్ ట్రాన్స్ఫార్మర్
 ├── services/               80+ సేవా మాడ్యూళ్లు (కాంబోలు, ఫాల్బ్యాక్, కోటాలు, ఐడెంటిటీ, …)
@@ -476,7 +476,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 టాప్-లెవల్ ఎగ్జిక్యూటర్ మాడ్యూళ్లు (`*.ts` నుండి `base.ts`, `index.ts` మరియు పరీక్షలను మినహాయించి — ఈ సంఖ్యను
+156 టాప్-లెవల్ ఎగ్జిక్యూటర్ మాడ్యూళ్లు (`*.ts` నుండి `base.ts`, `index.ts` మరియు పరీక్షలను మినహాయించి — ఈ సంఖ్యను
 `npm run check:docs-counts` కొలుస్తుంది). ప్రతి ఎగ్జిక్యూటర్ క్లాస్ `BaseExecutor` (`base.ts`)ను,
 నేరుగా లేదా `DefaultExecutor` లేదా మరొక ఎగ్జిక్యూటర్ ద్వారా విస్తరిస్తుంది; మిగిలిన మాడ్యూళ్లు ప్రతి ప్రొవైడర్కు
 సంబంధించిన సహాయకాలు (టూల్ స్కీమాలు, ఫెచ్/TTS అడాప్టర్లు, ప్రత్యేక ప్రవర్తన హ్యాండ్లర్లు). ఎగ్జిక్యూటర్లలో ఇవి ఉన్నాయి:
@@ -771,7 +771,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts`ను విస్తరించండి).
 2. `src/shared/constants/mcpScopes.ts`లో తగిన scope(లు)ను కేటాయించండి.
 3. `open-sse/mcp-server/server.ts`లో toolను నమోదు చేయండి.
-4. `open-sse/mcp-server/__tests__/` కింద పరీక్షలను జోడించండి.
+4. `tests/unit/` కింద పరీక్షలను జోడించండి.
 5. [MCP-SERVER.md](../frameworks/MCP-SERVER.md)ను నవీకరించండి.
 
 ### కొత్త A2A skillను జోడించడం
@@ -789,7 +789,7 @@ bin/
 - **Naming**: files `camelCase` లేదా `kebab-case`, components `PascalCase`,
   constants `UPPER_SNAKE`.
 - **ESLint**: ప్రతిచోటా `no-eval`, `no-implied-eval`, `no-new-func` = `error`;
-  `open-sse/` మరియు `tests/`లో `no-explicit-any` = `warn`, మిగతా చోట్ల error.
+  `open-sse/**/*.ts` మరియు `tests/**/*.ts`లో `no-explicit-any` = `error`.
 - **TypeScript**: `strict: false` (legacy విధానం). Cross-module boundaries కోసం
   inference కంటే explicit typesకు ప్రాధాన్యం ఇవ్వండి.
 - **Database**: routes లేదా handlersలో raw SQLను ఎప్పుడూ రాయవద్దు — ఎల్లప్పుడూ
@@ -819,8 +819,7 @@ bin/
   `a2a`, `memory`, `skills`.
 - **Branches**: prefixes `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. `main`కు ఎప్పుడూ నేరుగా commit చేయవద్దు.
-- **Husky**: pre-commitలో `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11` అమలవుతాయి; pre-pushలో `check:any-budget:t11` + `check:tracked-artifacts` అమలవుతాయి (వేగవంతమైన gates; `test:unit`ను మినహాయిస్తాయి).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

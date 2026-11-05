@@ -88,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Működés:** Operációsrendszer-API-k segítségével az összes HTTP/HTTPS-forgalmat a HTTP_PROXY-figyelőn keresztül irányítja át:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` és a HTTP/HTTPS gazdagép-/portbeállítások
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Hatókör:** A gép minden olyan alkalmazása, amely figyelembe veszi a rendszer proxybeállításait
   **Megjegyzés:** `source` = `"system-proxy"`
 
 **Biztonsági mechanizmusok:**
 
-- Automatikus kikapcsolási időzítő (alapértelmezés szerint 30 perc, az `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES` változóval konfigurálható)
-- A rendszer korábbi proxyállapota az adatbázisba kerül, és visszaállításkor helyreáll
-- Ha a felhasználó aktív állapotban elnavigál, az irányítópulton megjelenik a „Rendszerproxy visszaállítása” üzenet
-- A felhasználói felületen megjelenik a `⚠ Haladó` jelvény és egy kifejezett megerősítő jelölőnégyzet
+- A proxy alkalmazása folyamathoz kötött, a visszaállítást garancia nélkül megkísérlő időzítőt ütemez (alapértelmezetten 30 perc, a `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES` változóval állítható). Az időzítő nem éli túl a szerverfolyamat leállását.
+- A proxy előző állapota a folyamat memóriájában marad; ez a rögzítésiállapot-tároló nem menti tartósan adatbázisba. A visszaállítás helyreállítja a mentett macOS/GNOME-beállításokat; Windowson alaphelyzetbe állítja a WinHTTP-proxyt az előző konfiguráció visszaállítása helyett.
+- Amíg a proxy alkalmazottként szerepel, az oldal eltávolításakor egy keepalive-kérés garancia nélkül próbál visszaállítani, és a böngésző saját megerősítését kéri, amelynek szövegét a böngésző határozza meg. Az inspektor leválasztása SPA-navigáció során szintén megpróbálja a visszaállítást, e böngészőablak nélkül.
+- A rögzítési eszköztár a honosított `System-wide` vezérlőt figyelmeztető ikonnal mutatja. A kattintás jelenleg csak a helyi felületi állapotot módosítja; nem jelenít meg megerősítő jelölőnégyzetet, és nem alkalmazza vagy állítja vissza a rendszerproxyt.
 
 ### 5. mód — TPROXY transzparens visszafejtés (Linux, root, külön bekapcsolható)
 
@@ -113,13 +113,13 @@ Ez egy jelentős alrendszer, amely saját, külön üzemeltetői útmutatóval r
 
 ### A rögzítési módok összehasonlítása
 
-| Mód                    | Beállítás                           |            Sudo?            | Hatókör                                              | Megjegyzések                                                                                                                                                   |
-| ---------------------- | ----------------------------------- | :-------------------------: | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge         | Automatikus                         | Egyszer (tanúsítvány+hosts) | 9 IDE-ügynök                                         | Alapértelmezés szerint bekapcsolva                                                                                                                             |
-| 2. Egyéni hostok       | Hostonkénti bevitel                 |      Igen (hosts fájl)      | Az adott hostot használó bármely alkalmazás          | Adatbázisban megőrizve                                                                                                                                         |
-| 3. HTTP_PROXY          | `export HTTPS_PROXY=...`            |             Nem             | A környezeti változókat figyelembe vevő alkalmazások | 8080-as port; a HTTPS CONNECT-alagúton halad (csak metaadatok, visszafejtés soha)                                                                              |
-| 4. Rendszerszintű      | Kapcsoló + megerősítés              |            Igen             | A gép összes alkalmazása                             | 30 perc elteltével automatikusan kikapcsol                                                                                                                     |
-| 5. TPROXY-visszafejtés | Kapcsoló (Linux + natív kiegészítő) | Igen (root + CA telepítése) | Bármely host a célporton                             | Tetszőleges hostokat fejt vissza; alapértelmezés szerint kikapcsolva — lásd: `docs/security/MITM-TPROXY-DECRYPT.md` (git; nincs beépítve a `/docs` könyvtárba) |
+| Mód                    | Beállítás                                                      |            Sudo?            | Hatókör                                              | Megjegyzések                                                                                                                                                   |
+| ---------------------- | -------------------------------------------------------------- | :-------------------------: | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge         | Automatikus                                                    | Egyszer (tanúsítvány+hosts) | 9 IDE-ügynök                                         | Alapértelmezés szerint bekapcsolva                                                                                                                             |
+| 2. Egyéni hostok       | Hostonkénti bevitel                                            |      Igen (hosts fájl)      | Az adott hostot használó bármely alkalmazás          | Adatbázisban megőrizve                                                                                                                                         |
+| 3. HTTP_PROXY          | `export HTTPS_PROXY=...`                                       |             Nem             | A környezeti változókat figyelembe vevő alkalmazások | 8080-as port; a HTTPS CONNECT-alagúton halad (csak metaadatok, visszafejtés soha)                                                                              |
+| 4. Rendszerszintű      | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |            Igen             | A gép összes alkalmazása                             | Visszaállítást garancia nélkül megkísérlő időzítő (alapértelmezetten 30 perc)                                                                                  |
+| 5. TPROXY-visszafejtés | Kapcsoló (Linux + natív kiegészítő)                            | Igen (root + CA telepítése) | Bármely host a célporton                             | Tetszőleges hostokat fejt vissza; alapértelmezés szerint kikapcsolva — lásd: `docs/security/MITM-TPROXY-DECRYPT.md` (git; nincs beépítve a `/docs` könyvtárba) |
 
 ---
 
@@ -314,7 +314,7 @@ támogatása egy későbbi feladat).
 ### 5.1 Munkamenet rögzítése
 
 1. Kattintson az eszköztár **„● Munkamenet rögzítése”** elemére → adjon meg egy nevet (nem kötelező)
-2. Az élő követés a megszokott módon folytatódik; egy pirosan pulzáló jelző ezt mutatja: `◉ FELVÉTEL · <név> · 00:42 · 23 kérés`
+2. Az élő követés a megszokott módon folytatódik; a felvételi sáv pulzáló piros pontot, az eltelt időt, a munkamenet nevét, ha elérhető, és egy honosított Leállítás vezérlőt jelenít meg.
 3. Kattintson a **„⏹ Leállítás”** elemre → a rendszer a munkamenet pillanatképét az `inspector_sessions` és az `inspector_session_requests` tárolókba menti
 
 ### 5.2 Rögzített munkamenet megtekintése
@@ -322,7 +322,7 @@ támogatása egy későbbi feladat).
 Az eszköztár **Munkamenetek** legördülő menüje felsorolja a mentett munkameneteket. Egy munkamenet kiválasztásakor:
 
 - Betöltődik a munkamenet pillanatképe (rögzített állapot)
-- Megjelenik egy szalaghirdetés: `A(z) „<név>” rögzített munkamenet megtekintése — [Vissza az élő nézethez]`
+- Egy sáv a rögzített munkamenet honosított címkéjét és a munkamenet nevét (vagy név nélküli munkamenet esetén honosított helyettesítő szöveget) mutatja, egy honosított Vissza az élő nézethez gomb mellett.
 - Elérhetővé válik a Statisztikák lap a Recharts összesítéseivel
 
 ### 5.3 Exportálási formátumok
@@ -346,7 +346,7 @@ A Traffic Inspector megjeleníti az **összes elfogott HTTPS-forgalmat**, beleé
 | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **LOCAL_ONLY**                                  | Minden útvonal és a WebSocket-végpont kizárólag loopback kapcsolaton érhető el (ezt a `routeGuard.ts` még a hitelesítés előtt kikényszeríti)                                                                           |
 | **Titkok maszkolása**                           | A lineáris `maskSecret()` vizsgáló kitakarja az RFC 6750 szerinti Bearer hitelesítő adatokat, a szolgáltatói előtaggal ellátott kulcsokat és a hosszú, átlátszatlan tokeneket a `TrafficBuffer.push()` meghívása előtt |
-| **Törzsméret korlátozása**                      | Az `INSPECTOR_MAX_BODY_KB` értéknél (alapértelmezés szerint 1024 KB) nagyobb törzsek csonkolva lesznek, és megjelenik a `"(teljesítménybeli okokból csonkolva)"` értesítés                                             |
+| **Törzsméret korlátozása**                      | Az `INSPECTOR_MAX_BODY_KB` értéknél (alapértelmezés szerint 1024 KB) nagyobb törzsek csonkolva lesznek, és megjelenik a `"(truncated for performance)"` értesítés                                                      |
 | **Fejlécek tisztítása**                         | A nevek kisbetűssé alakulnak; a keretezési, ugrásonkénti és proxyhitelesítési fejlécek el lesznek távolítva; a sütik teljesen ki lesznek takarva; a hitelesítőadat-értékek kezelését a `maskSecret()` végzi            |
 | **CSP**                                         | A Traffic Inspector oldalain szigorú Content Security Policy akadályozza meg a befecskendezett választörzseken keresztüli XSS-támadásokat                                                                              |
 | **Alapértelmezés szerint nincs tartós tárolás** | A `TrafficBuffer` memóriában tárolódik, és a kiszolgáló újraindításakor elveszik. A munkamenetek csak kifejezett rögzítés esetén lesznek tartósan tárolva                                                              |
@@ -414,7 +414,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-A vezérlőpult a következő betöltéskor felajánlja a „Rendszerproxy visszaállítása” lehetőséget is, ha az adatbázis állapota alapján azt észleli, hogy a proxy aktív volt.
+A proxy mentett állapota csak a szerverfolyamatban létezik. Összeomlás vagy újraindítás után a jelenlegi rögzítésiállapot-tároló nem tudja adatbázisból visszaállítani ezt a pillanatképet; ha kézi helyreállítás szükséges, használja a fenti, platformhoz tartozó helyreállítási parancsokat.
 
 ### Megtelt puffer
 

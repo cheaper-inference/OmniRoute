@@ -12,13 +12,13 @@ webpack build மற்றும் lint job உடன் ஒரே நேரத
 host swap (16 GB) அதைச் சமாளிக்கிறது, மேலும் pull-request Build-கள் hosted சூழலில் இயங்குவதால்
 Turbopack slot பெரும்பாலான நேரத்தில் செயலற்றே உள்ளது:
 
-| runner               | label                 | role                                                                                                                                                   | `MemoryHigh` / `MemoryMax` | `CPUQuota`        |
-| -------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | ----------------- |
-| `omniroute-113-5`    | `omni-build`          | Turbopack build-கள்: `ci.yml` `Build` (push/dispatch மட்டும்), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, இரவுநேர a11y build | 56 GB / 60 GB (swap 0)     | 1600 %            |
-| `omniroute-113-6`    | `omni-release`        | Release-Green (`release-green` + `main-green`), webpack build                                                                                          | 20 GB / 24 GB (swap 4 GB)  | 800 %             |
-| `omniroute-113-2`    | `omni-light`          | இரவுநேர job-கள் (Schemathesis, promptfoo, garak, k6) மற்றும் `quality.yml` `lint-guard`                                                                | 12 GB / 16 GB (swap 4 GB)  | 600 %             |
-| `omniroute-113`      | `omni-light`          | மேலே உள்ள அதே pool                                                                                                                                     | 8 GB / 12 GB               | 400 %             |
-| OmniHeuris, OmniMind | (அவற்றின் repo-க்கள்) | Dependabot மட்டும் (ஒவ்வொன்றும் உச்சமாக 155 MB, 2026-10-18)                                                                                            | 4 GB / 6 GB                | ஒவ்வொன்றும் 200 % |
+| runner               | label                           | role                                                                                                                                                   | `MemoryHigh` / `MemoryMax` | `CPUQuota`        |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | ----------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack build-கள்: `ci.yml` `Build` (push/dispatch மட்டும்), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, இரவுநேர a11y build | 56 GB / 60 GB (swap 0)     | 1600 %            |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack build                                                                                          | 20 GB / 24 GB (swap 4 GB)  | 800 %             |
+| `omniroute-113-2`    | `omni-light`                    | இரவுநேர job-கள் (Schemathesis, promptfoo, garak, k6) மற்றும் `quality.yml` `lint-guard`                                                                | 12 GB / 16 GB (swap 4 GB)  | 600 %             |
+| `omniroute-113`      | `omni-light`                    | மேலே உள்ள அதே pool                                                                                                                                     | 8 GB / 12 GB               | 400 %             |
+| OmniHeuris, OmniMind | (அவற்றின் repo-க்கள்)           | Dependabot மட்டும் (ஒவ்வொன்றும் உச்சமாக 155 MB, 2026-10-18)                                                                                            | 4 GB / 6 GB                | ஒவ்வொன்றும் 200 % |
 
 2026-10-18 அன்று அளவிடப்பட்டது:
 
@@ -91,7 +91,7 @@ Runner-இன் இயல்புநிலை `KillMode=process`, ஒரு un
 ## செயல்பாட்டு விதிகள்
 
 - **ஒரு நேரத்தில் ஒரே ஒரு Turbopack பில்ட் — லேபல் மூலம் கட்டாயப்படுத்தப்படுகிறது.** முழுமையான Turbopack
-  `next build`-ஐ இயக்கும் ஒவ்வொரு ஜாப்பும் `[self-hosted, omni-build]`-ஐ இலக்காகக் கொள்கிறது; மேலும்
+  `next build`-ஐ இயக்கும் ஒவ்வொரு ஜாப்பும் `[self-hosted, omni-build, omni-build-60gb]`-ஐ இலக்காகக் கொள்கிறது; மேலும்
   **`omniroute-113-5`** மட்டுமே அந்த லேபலைக் கொண்டுள்ளது: `ci.yml`-இன் `Build`, `npm-publish.yml`-இன்
   `publish`, `nightly-v4-build`, `preview-artifact`, இரவுநேர a11y பில்ட் (#16853), மற்றும்
   `docker-publish.yml`-இன் **amd64** (BuildKit-க்குள் webpack — அங்கே Turbopack செயலிழந்தது,

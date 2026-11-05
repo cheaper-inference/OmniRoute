@@ -4,46 +4,46 @@
 
 ---
 
-Mashhur ochiq kodli AI routerlari bilan funksiyalarning xolis taqqoslanishi.
+Ommabop ochiq kodli AI routerlarga nisbatan obyektiv xususiyatlar taqqoslanishi.
 
-> **Metodologiya**: Ochiq repozitoriylar 2026-yil 2-choragida tekshirildi. Versiyalar ko‘rsatilganidek.
-> Tuzatishlarni PR orqali yuboring — ma’lumotlar aniq bo‘lishini istaymiz.
+> **Metodologiya**: Ommaviy repozitoriyalar 2026-Q2 da tekshirildi. Versiyalar koʻrsatilganidek keltirilgan.
+> Tuzatishlarni PR orqali yuboring — bu jadval aniq boʻlishini xohlaymiz.
 
-| Funksiya                                                |                 OmniRoute 3.8                  |    LiteLLM 1.x     | OpenRouter (SaaS) |   Portkey   |
-| ------------------------------------------------------- | :--------------------------------------------: | :----------------: | :---------------: | :---------: |
-| **Provayderlar**                                        |                    **329**                     |        ~100        |        ~50        |     ~30     |
-| **Bepul/autentifikatsiyasiz katalog yozuvlari**         |                    **155**                     |        n/a         |     vositachi     |     n/a     |
-| **Mustaqil joylashtirish mumkin**                       |                       ✅                       |         ✅         |        ❌         |  ⚠ pullik   |
-| **OAuth katalog yozuvlari**                             |                     **23**                     |       qisman       |        ❌         |     ❌      |
-| **Avtomatik zaxiraga o‘tish kombinatsiyalari**          |               **19 strategiya**                | ustuvorlik asosida |  daraja asosida   | vaznlangan  |
-| **Fusion (parallel panel + hakam sintezi)**             |                       ✅                       |         ❌         |        ❌         |     ❌      |
-| **1/2/3-darajali zaxira (obuna→arzon→bepul)**           |                    ✅ + UI                     |       qo‘lda       |        n/a        |   qo‘lda    |
-| **Tokenlarni siqish**                                   | 12 dvigatelli stek (RTK + Caveman + LLMLingua) |        yo‘q        |       yo‘q        |    yo‘q     |
-| **Multimodal generatsiya (nutq/musiqa/video)**          |                       ✅                       |         ❌         |     vositachi     |     ❌      |
-| **Ichki MCP serveri**                                   |            ✅ 110 vosita, 33 qamrov            |         ❌         |        ❌         |     ❌      |
-| **A2A protokoli**                                       |                 ✅ 6 ko‘nikma                  |         ❌         |        ❌         |     ❌      |
-| **Xotira (FTS5 + vektor)**                              |                       ✅                       |         ❌         |        ❌         |     ❌      |
-| **Himoya cheklovlari (PII, inyeksiya, tasvir)**         |                       ✅                       |       qisman       |        ❌         |  ✅ pullik  |
-| **Bulutli agent integratsiyalari**                      |          Codex, Cursor, Devin, Jules           |         ❌         |        ❌         |     ❌      |
-| **Har bir provayder uchun circuit breaker**             |     ✅ 3 holatli, kechiktirilgan tiklanish     |       asosiy       |        ❌         |     ✅      |
-| **TLS fingerprint yashirinligi (JA3/JA4)**              |                   ✅ wreq-js                   |         ❌         |        ❌         |     ❌      |
-| **Baholash freymvorki**                                 |                    ✅ ichki                    |         ❌         |        ❌         |  ⚠ pullik   |
-| **MITM proksi (Cursor/Antigravity’ni tutib oladi)**     |               ✅ kross-platforma               |         ❌         |        ❌         |     ❌      |
-| **Tizim treyiga ega CLI (Electron’siz)**                |                       ✅                       |         ❌         |        n/a        |     n/a     |
-| **CLI mashina ID’si orqali avtomatik autentifikatsiya** |                       ✅                       |         ❌         |        n/a        |     n/a     |
-| **Boshqaruv paneli**                                    |                   Next.js 16                   |       asosiy       |    yopiq kodli    | yopiq kodli |
-| **i18n**                                                |                  **42 lokal**                  |         ❌         |        ❌         |      ⚠      |
-| **Ochiq agent ko‘nikmalari (SKILL.md)**                 |                     ✅ 45                      |         ❌         |        ❌         |     ❌      |
-| **Tunnel qo‘llovi (Cloudflared, Tailscale, Ngrok)**     |                       ✅                       |         ❌         |        n/a        |     n/a     |
-| **Litsenziya**                                          |                      MIT                       |        MIT         |    yopiq kodli    | yopiq kodli |
+| Xususiyat                                                     |                 OmniRoute 3.8                  |    LiteLLM 1.x     | OpenRouter (SaaS) |  Portkey  |
+| ------------------------------------------------------------- | :--------------------------------------------: | :----------------: | :---------------: | :-------: |
+| **Provayderlar**                                              |                    **329**                     |        ~100        |        ~50        |    ~30    |
+| **Bepul/avtorizatsiyasiz katalog yozuvlari**                  |                    **155**                     |        n/a         |     oʻtkazma      |    n/a    |
+| **Oʻz serverida joylashtirish**                               |                       ✅                       |         ✅         |        ❌         | ⚠ pullik  |
+| **OAuth katalog yozuvlari**                                   |                     **23**                     |       qisman       |        ❌         |    ❌     |
+| **Avtomatik fallback kombinatsiyalari**                       |               **20 strategiya**                | ustuvorlik asosida |  daraja asosida   |  vaznli   |
+| **Fusion (parallel panel + hakam sintezi)**                   |                       ✅                       |         ❌         |        ❌         |    ❌     |
+| **1/2/3-darajali fallback (obuna→arzon→bepul)**               |                    ✅ + UI                     |       qoʻlda       |        n/a        |  qoʻlda   |
+| **Tokenlarni siqish**                                         | 12 dvigatelli stek (RTK + Caveman + LLMLingua) |        yoʻq        |       yoʻq        |   yoʻq    |
+| **Multimodal generatsiya (nutq/musiqa/video)**                |                       ✅                       |         ❌         |     oʻtkazma      |    ❌     |
+| **Oʻrnatilgan MCP server**                                    |            ✅ 110 vosita, 33 qamrov            |         ❌         |        ❌         |    ❌     |
+| **A2A protokoli**                                             |                 ✅ 6 koʻnikma                  |         ❌         |        ❌         |    ❌     |
+| **Xotira (FTS5 + vektor)**                                    |                       ✅                       |         ❌         |        ❌         |    ❌     |
+| **Guardrails (PII, inyeksiya, vizion)**                       |                       ✅                       |       qisman       |        ❌         | ✅ pullik |
+| **Bulut agentlari integratsiyalari**                          |          Codex, Cursor, Devin, Jules           |         ❌         |        ❌         |    ❌     |
+| **Har bir provayder uchun circuit breaker**                   |      ✅ 3 holatli, kechiktirilgan tiklash      |       oddiy        |        ❌         |    ✅     |
+| **TLS barmoq izini yashirish (JA3/JA4)**                      |                   ✅ wreq-js                   |         ❌         |        ❌         |    ❌     |
+| **Baholash freymvorki**                                       |                 ✅ oʻrnatilgan                 |         ❌         |        ❌         | ⚠ pullik  |
+| **MITM proksi (Cursor/Antigravity ni ushlaydi)**              |               ✅ kross-platforma               |         ❌         |        ❌         |    ❌     |
+| **Tizim treyli CLI (Electronsiz)**                            |                       ✅                       |         ❌         |        n/a        |    n/a    |
+| **CLI machine-ID avto-avtorizatsiya**                         |                       ✅                       |         ❌         |        n/a        |    n/a    |
+| **Boshqaruv paneli**                                          |                   Next.js 16                   |       oddiy        |      mulkiy       |  mulkiy   |
+| **i18n**                                                      |                  **67 lokal**                  |         ❌         |        ❌         |     ⚠     |
+| **Ommaviy agent koʻnikmalari (SKILL.md)**                     |                     ✅ 45                      |         ❌         |        ❌         |    ❌     |
+| **Tunnel qo'llab-quvvatlash (Cloudflared, Tailscale, Ngrok)** |                       ✅                       |         ❌         |        n/a        |    n/a    |
+| **Litsenziya**                                                |                      MIT                       |        MIT         |      mulkiy       |  mulkiy   |
 
-## OmniRoute'ni qachon tanlash kerak
+## OmniRoute-ni qachon tanlash kerak
 
-- Oʻzingiz hosting qilasiz va **provayderlarning maksimal qamrovi** kerak (374 ta provayder, 155 ta bepul/autentifikatsiyasiz katalog yozuvi)
-- Sizga **ichki MCP serveri** kerak (LLM vositalari, xotira va koʻnikmalar vosita sifatida taqdim etiladi)
+- Self-host qilasiz va **maksimal provayder qamrovi** kerak (375 ta provayder, 155 ta bepul/avtorizatsiyasiz katalog yozuvlari)
+- **Ichki MCP serveri** kerak (vositalar sifatida taqdim etiladigan LLM vositalari, xotira, koʻnikmalar)
 - Agentlararo ish jarayonlari uchun **A2A protokoli** kerak
-- Yuqori oqimdagi CAPTCHA'lar tomonidan aniqlanishning oldini olish uchun **raqamli izni yashirish** (JA3/JA4) kerak
-- SaaS toʻlovisiz **korporativ funksiyalar** (himoya cheklovlari, baholashlar, audit jurnali) kerak
+- Upstream CAPTCHA'lar tomonidan aniqlanishdan qochish uchun **fingerprint yashirish** (JA3/JA4) kerak
+- SaaS toʻlovisiz **korporativ imkoniyatlar** (guardrails, evals, audit trail) kerak
 
 ## LiteLLM’ni qachon tanlash kerak
 

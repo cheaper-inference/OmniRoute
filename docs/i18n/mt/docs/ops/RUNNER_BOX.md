@@ -11,13 +11,13 @@ għall-quċċati mkejla tagħhom. Il-magna talloka żżejjed biss meta build ta�
 webpack ta’ Release-Green u job tal-lint; is-swap tal-host (16 GB) jassorbi dan, u billi l-Builds tal-pull requests
 jaħdmu fuq sistemi ospitati, is-slot ta’ Turbopack ikun inattiv ħafna mill-ħin:
 
-| runner               | tikketta                 | rwol                                                                                                                                                        | `MemoryHigh` / `MemoryMax` | `CPUQuota`        |
-| -------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ----------------- |
-| `omniroute-113-5`    | `omni-build`             | Builds ta’ Turbopack: `ci.yml` `Build` (push/dispatch biss), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, il-build a11y ta’ billejl | 56 GB / 60 GB (swap 0)     | 1600 %            |
-| `omniroute-113-6`    | `omni-release`           | Release-Green (`release-green` + `main-green`), build ta’ webpack                                                                                           | 20 GB / 24 GB (swap 4 GB)  | 800 %             |
-| `omniroute-113-2`    | `omni-light`             | jobs ta’ billejl (Schemathesis, promptfoo, garak, k6) u `quality.yml` `lint-guard`                                                                          | 12 GB / 16 GB (swap 4 GB)  | 600 %             |
-| `omniroute-113`      | `omni-light`             | l-istess pool bħal hawn fuq                                                                                                                                 | 8 GB / 12 GB               | 400 %             |
-| OmniHeuris, OmniMind | (ir-repożitorji tagħhom) | Dependabot biss (quċċata ta’ 155 MB kull wieħed, 2026-10-18)                                                                                                | 4 GB / 6 GB                | 200 % kull wieħed |
+| runner               | tikketta                        | rwol                                                                                                                                                        | `MemoryHigh` / `MemoryMax` | `CPUQuota`        |
+| -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ----------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Builds ta’ Turbopack: `ci.yml` `Build` (push/dispatch biss), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, il-build a11y ta’ billejl | 56 GB / 60 GB (swap 0)     | 1600 %            |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), build ta’ webpack                                                                                           | 20 GB / 24 GB (swap 4 GB)  | 800 %             |
+| `omniroute-113-2`    | `omni-light`                    | jobs ta’ billejl (Schemathesis, promptfoo, garak, k6) u `quality.yml` `lint-guard`                                                                          | 12 GB / 16 GB (swap 4 GB)  | 600 %             |
+| `omniroute-113`      | `omni-light`                    | l-istess pool bħal hawn fuq                                                                                                                                 | 8 GB / 12 GB               | 400 %             |
+| OmniHeuris, OmniMind | (ir-repożitorji tagħhom)        | Dependabot biss (quċċata ta’ 155 MB kull wieħed, 2026-10-18)                                                                                                | 4 GB / 6 GB                | 200 % kull wieħed |
 
 Kejl tal-2026-10-18:
 
@@ -58,7 +58,7 @@ Il-`KillMode=process` default tar-runner iħalli `Runner.Worker → npm → next
 ## Regoli operattivi
 
 - **Build wieħed ta’ Turbopack kull darba — infurzat permezz ta’ label.** Kull job li jħaddem
-  `next build` sħiħ ta’ Turbopack jimmira lejn `[self-hosted, omni-build]`, u **`omniroute-113-5`**
+  `next build` sħiħ ta’ Turbopack jimmira lejn `[self-hosted, omni-build, omni-build-60gb]`, u **`omniroute-113-5`**
   biss għandu dak il-label: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`,
   `preview-artifact`, il-build a11y ta’ billejl (#16853) u **amd64** ta’
   `docker-publish.yml` (webpack ġewwa BuildKit — Turbopack ikkrollja hemmhekk, run 33253576569).

@@ -16,12 +16,6 @@
     },
     {
       "file": "open-sse/services/combo.ts",
-      "snippet": "// keep default cost",
-      "count": 1,
-      "reason": "cost fallback to default pricing"
-    },
-    {
-      "file": "open-sse/services/combo.ts",
       "snippet": "log?.debug?.( \"COMBO\", `resolveTargetTimeoutMsForTarget connection lookup failed: ${ err instanceof Error ? err.message ",
       "count": 1,
       "reason": "logged at debug, undefined fallback"
@@ -97,24 +91,6 @@
       "snippet": "qualityClone = result;",
       "count": 1,
       "reason": "clone fallback to original response"
-    },
-    {
-      "file": "open-sse/services/combo/executeTargetAttempt.ts",
-      "snippet": "deps.log.warn( \"COMBO\", \"Failed to record Last Known Good Provider. This is non-fatal.\", { err, } );",
-      "count": 1,
-      "reason": "logged at warn, success-path best-effort LKGP persist (failure only loses a routing optimization)"
-    },
-    {
-      "file": "open-sse/services/combo/executeTargetAttempt.ts",
-      "snippet": "/* Clone parse failed */",
-      "count": 1,
-      "reason": "nested clone-parse fallback, error text preserved"
-    },
-    {
-      "file": "open-sse/services/combo/executeTargetAttempt.ts",
-      "snippet": "/* Clone failed */",
-      "count": 1,
-      "reason": "clone fallback, error parse skipped"
     },
     {
       "file": "open-sse/services/combo/executeTargetAttempt.ts",
@@ -226,12 +202,6 @@
     },
     {
       "file": "open-sse/services/combo/roundRobinCombo.ts",
-      "snippet": "return undefined;",
-      "count": 1,
-      "reason": "undefined fallback, quota path unaffected"
-    },
-    {
-      "file": "open-sse/services/combo/roundRobinCombo.ts",
       "snippet": "// best-effort only",
       "count": 1,
       "reason": "best-effort quota reserve only"
@@ -241,24 +211,6 @@
       "snippet": "rrClone = result;",
       "count": 1,
       "reason": "clone fallback to original"
-    },
-    {
-      "file": "open-sse/services/combo/roundRobinCombo.ts",
-      "snippet": "log.warn( \"COMBO-RR\", \"Failed to record Last Known Good Provider. This is non-fatal.\", { err, } );",
-      "count": 1,
-      "reason": "logged at warn, success-path best-effort LKGP persist (failure only loses a routing optimization)"
-    },
-    {
-      "file": "open-sse/services/combo/roundRobinCombo.ts",
-      "snippet": "/* Clone parse failed */",
-      "count": 1,
-      "reason": "clone-parse fallback, error text preserved"
-    },
-    {
-      "file": "open-sse/services/combo/roundRobinCombo.ts",
-      "snippet": "/* Clone failed */",
-      "count": 1,
-      "reason": "clone fallback, error parse skipped"
     },
     {
       "file": "open-sse/services/combo/roundRobinCombo.ts",

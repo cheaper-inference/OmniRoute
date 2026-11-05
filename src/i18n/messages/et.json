@@ -6600,7 +6600,7 @@
       "xai": "Ühenda xAI (Grok) API-võtmega.",
       "xiaomi-mimo": "Ühenda Xiaomi MiMo API-võtmega.",
       "yi": "Hangi API-võti aadressilt platform.lingyiwanwu.com",
-      "zai": "API-võti aadressilt https://open.bigmodel.cn/usercenter/apikeys",
+      "zai": "API-võti aadressilt https://z.ai/manage-apikey/apikey-list",
       "zenmux": "ZenMux pakub OpenAI-ga ühilduvat vestlusvastuste lõpp-punkti asukohas /api/v1/chat/completions ning Anthropic Messages (/api/anthropic/v1/messages) ja Google Gemini (/api/vertex-ai) protokolliliideseid. OmniRoute kasutab OpenAI protokolli.",
       "galadriel": "Ühenda Galadriel API-võtmega.",
       "predibase": "25 $ väärtuses tasuta proovikrediiti (kehtib 30 päeva)",

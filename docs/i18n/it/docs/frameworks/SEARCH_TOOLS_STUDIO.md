@@ -54,7 +54,7 @@ Nuova scheda per estrarre contenuti da un URL tramite `POST /v1/web/fetch` (crea
 - Input: URL + opzione pagina intera + selettore del formato (markdown / testo / HTML).
 - Invio → recupero → rendering di `ScrapeResult.tsx`.
 - `ScrapeResult` mostra l'anteprima markdown e un'opzione per visualizzare il contenuto non elaborato.
-- Limite: se il corpo della risposta supera **256 KB**, l'interfaccia mostra `(troncato, visualizza contenuto non elaborato)` e apre il contenuto non elaborato in una finestra modale Monaco (D21).
+- Limite: se il corpo della risposta supera **256 KB**, l'interfaccia mostra `View full raw content` e apre il contenuto non elaborato in una finestra modale (D21).
 - Pannello dei metadati: provider (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latenza, costo, dimensione della risposta, numero di link.
 - Utilizza l'hook `useScrapeFetch.ts`.
 

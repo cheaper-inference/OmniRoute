@@ -6607,7 +6607,7 @@
       "xai": "xAI (Grok) ਨੂੰ API ਕੁੰਜੀ ਨਾਲ ਕਨੈਕਟ ਕਰੋ।",
       "xiaomi-mimo": "Xiaomi MiMo ਨੂੰ API ਕੁੰਜੀ ਨਾਲ ਕਨੈਕਟ ਕਰੋ।",
       "yi": "API ਕੁੰਜੀ platform.lingyiwanwu.com ਤੋਂ ਪ੍ਰਾਪਤ ਕਰੋ",
-      "zai": "https://open.bigmodel.cn/usercenter/apikeys ਤੋਂ API ਕੁੰਜੀ",
+      "zai": "https://z.ai/manage-apikey/apikey-list ਤੋਂ API ਕੁੰਜੀ",
       "zenmux": "ZenMux /api/v1/chat/completions 'ਤੇ OpenAI-ਅਨੁਕੂਲ ਚੈਟ ਕੰਪਲੀਸ਼ਨਜ਼ ਐਂਡਪੌਇੰਟ ਦੇ ਨਾਲ-ਨਾਲ Anthropic Messages (/api/anthropic/v1/messages) ਅਤੇ Google Gemini (/api/vertex-ai) ਪ੍ਰੋਟੋਕੋਲ ਇੰਟਰਫੇਸ ਵੀ ਉਪਲਬਧ ਕਰਾਉਂਦਾ ਹੈ। OmniRoute OpenAI ਪ੍ਰੋਟੋਕੋਲ ਵਰਤਦਾ ਹੈ।",
       "galadriel": "Galadriel ਨੂੰ API ਕੁੰਜੀ ਨਾਲ ਕਨੈਕਟ ਕਰੋ।",
       "predibase": "$25 ਦੇ ਮੁਫ਼ਤ ਟ੍ਰਾਇਲ ਕ੍ਰੈਡਿਟ (30 ਦਿਨਾਂ ਦੀ ਵੈਧਤਾ)",

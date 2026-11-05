@@ -53,7 +53,7 @@ Search Tools Studio သည် `/dashboard/search-tools` ကို အခြေ�
 - ထည့်သွင်းမှု- URL + စာမျက်နှာအပြည့် ခလုတ် + ဖော်မတ်ရွေးချယ်ကိရိယာ (markdown / စာသား / HTML)။
 - တင်သွင်းခြင်း → ရယူခြင်း → `ScrapeResult.tsx` ကို ဖော်ပြခြင်း။
 - `ScrapeResult` သည် markdown အစမ်းကြည့်ရှုမှု + မူရင်းဒေတာ ခလုတ်ကို ဖော်ပြသည်။
-- ကန့်သတ်ချက်- တုံ့ပြန်မှု body သည် **256 KB** ထက် ကြီးပါက UI တွင် `(ဖြတ်တောက်ထားသည်၊ မူရင်းဒေတာကို ကြည့်ရန်)` ဟု ပြသပြီး မူရင်းဒေတာကို Monaco modal (D21) ဖြင့် ဖွင့်ပေးသည်။
+- ကန့်သတ်ချက်- တုံ့ပြန်မှု body သည် **256 KB** ထက် ကြီးပါက UI တွင် `View full raw content` ဟု ပြသပြီး မူရင်းဒေတာကို modal (D21) ဖြင့် ဖွင့်ပေးသည်။
 - မက်တာဒေတာအကန့်- ပံ့ပိုးသူ (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search)၊ ကြာချိန်၊ ကုန်ကျစရိတ်၊ တုံ့ပြန်မှုအရွယ်အစား၊ လင့်ခ်အရေအတွက်။
 - `useScrapeFetch.ts` hook ကို အသုံးပြုသည်။
 

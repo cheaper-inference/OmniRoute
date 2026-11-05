@@ -148,31 +148,31 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Tilgjengelige ferdigheter
 
-OmniRoute tilbyr 6 A2A-ferdigheter koblet til `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Hver ferdighetsmodul ligger i `src/lib/a2a/skills/`.
+OmniRoute eksponerer 6 A2A-ferdigheter konfigurert i `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Hver ferdighetsmodul ligger i `src/lib/a2a/skills/`.
 
-| Ferdighet            | ID                   | Beskrivelse                                                                                                                                                        | Tagger                           | Eksempler                                      |
-| :------------------- | :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------- | :--------------------------------------------- |
-| Smart ruting         | `smart-routing`      | Ruter en ledetekst gjennom den optimale leverandøren/kombinasjonen ved hjelp av OmniRoutes kombinasjonsmotor og poengberegning                                     | ruting, leverandører             | "Rut denne ledeteksten via den beste modellen" |
-| Kvotebehandling      | `quota-management`   | Rapporterer kvotestatus per leverandør og hjelper kallere med å avgjøre når de bør begrense hastigheten eller bytte                                                | kvote, leverandører              | "Sjekk kvoten for anthropic"                   |
-| Leverandøroppdagelse | `provider-discovery` | Viser installerte leverandører med funksjoner, gratisnivåmarkører og OAuth-status                                                                                  | leverandører, oppdagelse         | "Hvilke leverandører er tilgjengelige?"        |
-| Kostnadsanalyse      | `cost-analysis`      | Estimerer kostnaden for en forespørsel/samtale basert på katalogen og nylig bruk                                                                                   | kostnad, bruk                    | "Estimer kostnaden for denne samtalen"         |
-| Tilstandsrapport     | `health-report`      | Samler status for effektbryter, nedkjøling og utestenging per leverandør                                                                                           | tilstand, robusthet              | "Vis tilstandsstatus for alle leverandører"    |
-| Vis funksjoner       | `list-capabilities`  | Returnerer hele Agent Skills-katalogen med 45 oppføringer (23 API + 21 CLI + 1 konfigurasjon) som en markdown-tabell med rå SKILL.md-URL-er for kontekstinnsetting | katalog, oppdagelse, ferdigheter | "Vis alle OmniRoute-funksjoner"                |
+| Ferdighet            | ID                   | Beskrivelse                                                                                                                                                       | Tagger                     | Eksempler                              |
+| :------------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------- |
+| Smart ruting         | `smart-routing`      | Ruter en prompt gjennom optimal leverandør/kombinasjon ved hjelp av OmniRoutes kombinasjonsmotor + poengberegning                                                 | routing, providers         | "Route this prompt via the best model" |
+| Kvotestyring         | `quota-management`   | Rapporterer kvotestatus per leverandør, hjelper kallere med å avgjøre når de skal strupe/bytte                                                                    | quota, providers           | "Check quota for anthropic"            |
+| Leverandøroppdagelse | `provider-discovery` | Lister installerte leverandører med egenskaper, flagg for gratisnivå og OAuth-status                                                                              | providers, discovery       | "What providers are available?"        |
+| Kostnadsanalyse      | `cost-analysis`      | Estimerer kostnaden for en forespørsel/samtale gitt katalogen + nylig bruk                                                                                        | cost, usage                | "Estimate cost for this conversation"  |
+| Helse rapport        | `health-report`      | Samler status for circuit breaker, nedkjøling og utestenging per leverandør                                                                                       | health, resilience         | "Show health status of all providers"  |
+| List egenskaper      | `list-capabilities`  | Returnerer hele Agent Skills-katalogen med 45 oppføringer (23 API + 21 CLI + 1 konfigurasjon) som en markdown-tabell med rå SKILL.md-URL-er for kontekstinjeksjon | catalog, discovery, skills | "List all OmniRoute capabilities"      |
 
-> Agentkortet bør holdes synkronisert med den aktive katalogen med 374 leverandører. Leverandørantall og metadata om gratis bruk/ingen autentisering hentes fra kjøretidsregisteret.
+> Agent-kortet bør holdes i synk med den levende katalogen over 375 leverandører; antall leverandører og metadata om gratis/uten autentisering hentes fra kjøringsmiljøets register.
 
-### Detaljer om ferdigheten `list-capabilities`
+### Detaljer for ferdigheten `list-capabilities`
 
-Ferdigheten `list-capabilities` er spesielt nyttig for eksterne agenter som må finne ut hva OmniRoute tilbyr før de sender API-kall. Den returnerer en strukturert markdown-tabellartefakt:
+Ferdigheten `list-capabilities` er spesielt nyttig for eksterne agenter som trenger å oppdage hva OmniRoute eksponerer før de sender API-kall. Den returnerer en strukturert markdown-tabell som artefakt:
 
 ```
-| ID | Navn | Kategori | Område | Endepunkter/kommandoer | Rå-URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Autentisering og økter | api | autentisering | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Hver rad inneholder kolonnen `rawUrl`, slik at agenter umiddelbart kan hente hele SKILL.md. Feltet `metadata.totalSkills` gjenspeiler katalogstørrelsen (45 i dag). Implementasjon: `src/lib/a2a/skills/listCapabilities.ts`. Se også [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Hver rad inkluderer kolonnen `rawUrl` slik at agenter umiddelbart kan hente hele SKILL.md. Feltet `metadata.totalSkills` gjenspeiler katalogstørrelsen (45 i dag). Implementasjon: `src/lib/a2a/skills/listCapabilities.ts`. Se også [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 

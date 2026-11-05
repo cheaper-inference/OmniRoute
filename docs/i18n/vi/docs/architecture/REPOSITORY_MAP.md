@@ -106,7 +106,7 @@ OmniRoute/
 
 > **Đã chuyển khỏi thư mục gốc trong v3.8.26 (dọn dẹp):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` và `quality-metrics.json` được tạo tự động (được git bỏ qua). Xem [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` và `quality-metrics.json` được tạo tự động (được git bỏ qua). Xem [`## config/`](#config--cấu-hình-tĩnh--trạng-thái-cổng-chất-lượng).
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | Thư mục con           | Mục đích                                                                                                                                                                                                         |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Các bản dịch tài liệu đã bản địa hóa (41 ngôn ngữ)                                                                                                                                                               |
+| `docs/i18n/`          | Các bản dịch tài liệu đã bản địa hóa (66 ngôn ngữ)                                                                                                                                                               |
 | `docs/screenshots/`   | Tài nguyên hình ảnh dành cho các hướng dẫn                                                                                                                                                                       |
 | `_tasks/superpowers/` | Các kế hoạch/đặc tả từ superpowers (`writing-plans`/`brainstorming`) + nghiên cứu — repo biệt lập, được quản lý phiên bản riêng và bị cây chính bỏ qua bởi git. Xem CLAUDE.md → "Planning & Research Artifacts". |
 

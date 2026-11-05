@@ -12,28 +12,29 @@
 
 ## Mis see on
 
-OmniRoute registreerib 374 teenusepakkujat, sealhulgas 155 kataloogikirjet, mis on märgitud kui **tasuta/autentimiseta**
-(autentimiseta,
-tasuta taseme OAuth või tasuta taseme API-võti — vt
+OmniRoute registreerib 375 pakkujat, sealhulgas 155 kataloogikirjet, mis on märgistatud **tasuta/autentimiseta**
+(autentimiseta, tasuta taseme OAuth või tasuta taseme API-võti — vaata
 [Tasuta tasemete juhendit](../getting-started/FREE-TIERS-GUIDE.md) ja täielikku
-[tasuta tasemete kataloogi](../reference/FREE_TIERS.md)). Konks on selles, et tasuta teenusepakkujate mudelite kvaliteet
-varieerub suuresti. Autentimiseta teenusepakkuja, mis pakub tipptasemel mudelit, on palju kasulikum
-kui väikest pärandmudelit pakkuv teenusepakkuja.
+[Tasuta tasemete kataloogi](../reference/FREE_TIERS.md)). Konks on selles: tasuta pakkujate
+mudelite kvaliteet varieerub tohutult. Autentimiseta pakkuja, kes pakub tipptasemel mudelit, on palju kasulikum
+kui see, kes pakub väikest vananenud mudelit.
 
-**Tasuta teenusepakkujate pingerida** vastab küsimusele „**milline tasuta teenusepakkuja pakub mulle parimat mudelit?**“,
-ühendades iga tasuta teenusepakkuja kataloogi **ühisloome korras kogutud kvaliteediskooridega**
-**Arena AI edetabelist** (inimeelistustel põhinev ELO, sama põhimõte, millel põhineb LMArena
-vestlusrobotite areen). Seejärel järjestatakse teenusepakkujad nende **parima tasuta mudeli** võimekuse alusel.
+**Tasuta pakkujate edetabel** vastab küsimusele „**milline tasuta pakkuja annab mulle parima mudeli?**",
+ühendades iga tasuta pakkuja kataloogi **kogukonnast pärinevate kvaliteediskooridega**
+**Arena AI edetabelist** (inimeelistustel põhinev ELO — sama idee, mis LMArena
+chatbot-areeni taga). Seejärel järjestatakse pakkujad nende **parima tasuta mudeli**
+tugevuse järgi.
 
-Pingerida arvutatakse kolme tegeliku allika põhjal:
+Edetabel arvutatakse kolmest tegelikust allikast:
 
-1. Tasuta teenusepakkujate loendid — `NOAUTH_PROVIDERS` ning `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` kirjed, millel on lipp `hasFree`
+1. Tasuta pakkujate loendid — `NOAUTH_PROVIDERS`, pluss `OAUTH_PROVIDERS` /
+   `APIKEY_PROVIDERS` kirjed, mis on märgistatud `hasFree`
    (`src/shared/constants/providers.ts`).
-2. Iga teenusepakkuja mudelikataloog teenusepakkujate registrist
+2. Iga pakkuja mudelikataloog pakkujate registrist
    (`open-sse/config/providerRegistry.ts`).
-3. ELO-põhised ülesandesobivuse skoorid, mille Arena ELO sünkroonimismootor
-   (`src/lib/arenaEloSync.ts`) salvestab andmebaasi tabelisse `model_intelligence`.
+3. ELO-st tuletatud ülesande-sobivuse skoorid, mis on Arena ELO sünkroniseerimismootori
+   poolt salvestatud andmebaasitabelisse `model_intelligence`
+   (`src/lib/arenaEloSync.ts`).
 
 Ühendamisloogika asub failis `src/lib/freeProviderRankings.ts`.
 

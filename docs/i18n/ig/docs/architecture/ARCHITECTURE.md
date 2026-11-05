@@ -15,7 +15,7 @@ OmniRoute bụ ọnụ ụzọ ntụgharị AI mpaghara na dashboard e wuru n'el
 
 Ikike ndị bụ isi:
 
-- Elu API dakọtara na OpenAI maka CLI/ngwaọrụ (ndị na-eweta ọrụ 375, modul executor 154)
+- Elu API dakọtara na OpenAI maka CLI/ngwaọrụ (ndị na-eweta ọrụ 375, modul executor 156)
 - Ntughari request/response n'etiti usoro ndị na-eweta ọrụ
 - Fallback ngwakọta model (usoro ọtụtụ model)
 - Nzọụkwụ ngwakọta ahaziri ahazi (`provider + model + connection`) nwere nhazi oge runtime site na `compositeTiers`
@@ -31,7 +31,7 @@ Ikike ndị bụ isi:
 - Ọchụchọ webụ site na `/v1/search` (ndị na-eweta ọrụ 20)
 - Nnyocha ọdịnaya site na `/v1/moderations`
 - Nhazigharị ọkwa site na `/v1/rerank`
-- Ntụle mkpado echiche (``) maka model ndị na-atụgharị uche
+- Ntụle mkpado echiche (`<think>...</think>`) maka model ndị na-atụgharị uche
 - Nhicha response maka ndakọrịta siri ike na OpenAI SDK
 - Ịhazigharị role (developer→system, system→user) maka ndakọrịta n'etiti ndị na-eweta ọrụ
 - Ntughari output ahaziri ahazi (json_schema → Gemini responseSchema)
@@ -1094,11 +1094,11 @@ ndakọrịta na usoro ochie. Nkwekọrịta runtime dị ugbu a na-eji:
 - mbugharị schema SQLite na hook nkwalite akpaka mgbe mmalite
 - ụzọ ndakọrịta maka mbugharị JSON ochie → SQLite
 
-## 6) Ihe Nche SSRF / URL Na-apụ Apụ
+## 6) SSRF / Nchedo URL Na-apụ Apụ
 
-- `src/shared/network/outboundUrlGuard.ts` na-egbochi URL ebumnuche niile nkeonwe/loopback/link-local tupu ha erute ndị na-emezu ọrụ onye na-eweta ọrụ
-- Ụzọ nchọpụta na nkwado model nke onye na-eweta ọrụ na-eji `src/shared/network/safeOutboundFetch.ts`, nke na-etinye ihe nche ahụ n’ọrụ tupu arịrịọ ọ bụla na-apụ apụ
-- Njehie ihe nche na-apụta dịka `URL_GUARD_BLOCKED` nwere HTTP 422, a na-edekwa ha na ndekọ nyocha nrubeisi site na `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) na-etinye `src/shared/network/outboundUrlGuard.ts` n’arịrịọ nkata ndị e zigara site na `BaseExecutor.execute()`. N’ọnọdụ naanị-ọha (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` mgbe agbanyụrụ ọkọlọtọ nkeonwe), ọ na-egbochi ndị nnabata nkeonwe na loopback yana 169.254.0.0/16; n’ọnọdụ ọ bụla ọzọ, ọ na-egbochi ndị nnabata metadata igwe ojii. Ọ na-enyocha aha nnabata ma ọ bụ IP literal dịka e dere ya, tupu nchọgharị DNS ọ bụla. Ndị na-eweta ọrụ mpaghara arụnyere n’ime sistemụ anaghị eji ya.
+- Ụzọ nchọpụta na nkwado ụdị nke ndị na-eweta ọrụ na-eji `src/shared/network/safeOutboundFetch.ts`, nke na-etinye nchedo ahụ tupu arịrịọ ọ bụla na-apụ apụ
+- Njehie nchedo na-apụta dịka `URL_GUARD_BLOCKED` ya na HTTP 503 (`getSafeOutboundFetchErrorStatus`; ụzọ nchọpụta ụdị na-eweghachi 400), a na-edekwa ezigbo mgbochi SSRF ndị mere n’oge nkwado n’akwụkwọ ndekọ nyocha dịka ihe omume `provider.validation.ssrf_blocked`
 
 ## Nlele Ọrụ na Ihe Ngosi Arụmọrụ
 
@@ -1149,7 +1149,7 @@ Mgbanwe gburugburụ ndị koodu na-eji kpọmkwem:
 4. Omume cloud na-adabere na `NEXT_PUBLIC_BASE_URL` ziri ezi yana ike iru ebe njedebe cloud.
 5. A na-ebipụta ndekọ `open-sse/` dị ka **ngwugwu npm workspace** `@omniroute/open-sse`. Koodu isi mmalite na-ebubata ya site na `@omniroute/open-sse/...` (nke Next.js `transpilePackages` na-edozi). Ụzọ faịlụ dị n'akwụkwọ a ka na-eji aha ndekọ `open-sse/` iji nọgide na-enwe nkwekọrịta.
 6. Chaatị ndị dị na dashboard na-eji **Recharts** (nke dabere na SVG) maka ngosipụta nyocha data ndị dị mfe ịnweta ma na-emekọrịta ihe (chaatị ogwe ojiji model, tebụl nkọwa ndị na-eweta ọrụ nwere ọnụego ihe ịga nke ọma).
-7. Nnwale E2E na-eji **Playwright** (`tests/e2e/`), a na-agba ha site na `npm run test:e2e`. Nnwale unit na-eji **onye na-agba nnwale Node.js** (`tests/unit/`), a na-agba ha site na `npm run test:unit`. Koodu isi mmalite dị n'okpuru `src/` bụ **TypeScript** (`.ts`/`.tsx`); workspace `open-sse/` ka bụ JavaScript (`.js`).
+7. Nnwale E2E na-eji **Playwright** (`tests/e2e/`), a na-agba ha site na `npm run test:e2e`. Nnwale unit na-eji **onye na-agba nnwale Node.js** (`tests/unit/`), a na-agba ha site na `npm run test:unit`. Koodu isi mmalite dị n'okpuru `src/` bụ **TypeScript** (`.ts`/`.tsx`); workspace `open-sse/` ka bụ TypeScript (`.ts`).
 8. A haziri ibe Settings n'ime taabụ 7: General, Appearance, AI, Security, Routing, Resilience, Advanced. Ibe Resilience na-ahazi naanị kwụ arịrịọ, oge njikọ ga-anọ jụụ, breaker nke onye na-eweta ọrụ, na omume ichere ka oge ịdị jụụ gwụ; a na-egosi ọnọdụ runtime breaker dị ugbu a na ibe Health.
 9. E kewara atụmatụ **Context Relay** (`context-relay`) n'ígwé abụọ: `combo.ts` na-ekpebi ma a ga-emepụta handoff, `chat.ts` na-etinye handoff ahụ mgbe e dozichara akaụntụ. Data handoff dị na tebụl SQLite `context_handoffs`. Nkewa a bụ ụma n'ihi na ọ bụ naanị `chat.ts` maara ma akaụntụ e ji mee ihe ọ̀ gbanwere n'ezie.
 10. **Mmanye proxy** zuru oke ugbu a: `tokenHealthCheck.ts` na-edozi proxy maka njikọ ọ bụla, `/api/providers/validate` na-eji `runWithProxyContext`, ma `proxyFetch.ts` na-eji `undici.fetch()` iji jigide ndakọrịta dispatcher na Node 22.

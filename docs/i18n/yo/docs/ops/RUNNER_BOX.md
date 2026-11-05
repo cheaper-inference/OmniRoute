@@ -11,13 +11,13 @@ wọn fún wọn. Ẹ̀rọ náà máa ń ṣe overcommit nìkan nígbà tí bui
 webpack Release-Green àti iṣẹ́ lint kan; swap host (16 GB) ń gba èyí, àti nítorí pé àwọn Build pull-request ń ṣiṣẹ́
 lórí hosted runner, slot Turbopack kì í ṣiṣẹ́ ní ọ̀pọ̀ jù lọ àkókò:
 
-| runner               | label           | ipa                                                                                                                                               | `MemoryHigh` / `MemoryMax` | `CPUQuota`   |
-| -------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------ |
-| `omniroute-113-5`    | `omni-build`    | Àwọn build Turbopack: `ci.yml` `Build` (push/dispatch nìkan), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, build a11y alẹ́ | 56 GB / 60 GB (swap 0)     | 1600 %       |
-| `omniroute-113-6`    | `omni-release`  | Release-Green (`release-green` + `main-green`), build webpack                                                                                     | 20 GB / 24 GB (swap 4 GB)  | 800 %        |
-| `omniroute-113-2`    | `omni-light`    | àwọn iṣẹ́ alẹ́ (Schemathesis, promptfoo, garak, k6) àti `quality.yml` `lint-guard`                                                                  | 12 GB / 16 GB (swap 4 GB)  | 600 %        |
-| `omniroute-113`      | `omni-light`    | pool kan náà bí èyí tó wà lókè                                                                                                                    | 8 GB / 12 GB               | 400 %        |
-| OmniHeuris, OmniMind | (àwọn repo wọn) | Dependabot nìkan (peak 155 MB kọ̀ọ̀kan, 2026-10-18)                                                                                                 | 4 GB / 6 GB                | 200 % kọ̀ọ̀kan |
+| runner               | label                           | ipa                                                                                                                                               | `MemoryHigh` / `MemoryMax` | `CPUQuota`   |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------ |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Àwọn build Turbopack: `ci.yml` `Build` (push/dispatch nìkan), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, build a11y alẹ́ | 56 GB / 60 GB (swap 0)     | 1600 %       |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), build webpack                                                                                     | 20 GB / 24 GB (swap 4 GB)  | 800 %        |
+| `omniroute-113-2`    | `omni-light`                    | àwọn iṣẹ́ alẹ́ (Schemathesis, promptfoo, garak, k6) àti `quality.yml` `lint-guard`                                                                  | 12 GB / 16 GB (swap 4 GB)  | 600 %        |
+| `omniroute-113`      | `omni-light`                    | pool kan náà bí èyí tó wà lókè                                                                                                                    | 8 GB / 12 GB               | 400 %        |
+| OmniHeuris, OmniMind | (àwọn repo wọn)                 | Dependabot nìkan (peak 155 MB kọ̀ọ̀kan, 2026-10-18)                                                                                                 | 4 GB / 6 GB                | 200 % kọ̀ọ̀kan |
 
 A wọn ní 2026-10-18:
 
@@ -87,7 +87,7 @@ sí i — tún **runner kan ṣoṣo** bẹ̀rẹ̀ lẹ́ẹ̀kan, nígbà tí 
 ## Àwọn òfin ìṣiṣẹ́
 
 - **Ìkọ́ Turbopack kan ṣoṣo lẹ́ẹ̀kan — a fi àmì àkọlé mú un ṣẹ.** Gbogbo iṣẹ́ tó ń ṣiṣẹ́
-  `next build` Turbopack ní kíkún ni a darí sí `[self-hosted, omni-build]`, `omniroute-113-5`
+  `next build` Turbopack ní kíkún ni a darí sí `[self-hosted, omni-build, omni-build-60gb]`, `omniroute-113-5`
   **nìkan** sì ni ó ní àmì àkọlé yẹn: `ci.yml` `Build`, `npm-publish.yml` `publish`,
   `nightly-v4-build`, `preview-artifact`, ìkọ́ a11y alẹ́ (#16853) àti **amd64**
   `docker-publish.yml` (webpack nínú BuildKit — Turbopack kọlu níbẹ̀, ìṣiṣẹ́ 33253576569).

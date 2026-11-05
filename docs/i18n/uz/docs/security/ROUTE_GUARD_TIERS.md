@@ -213,7 +213,7 @@ yaratish esa hali ham xatoda ochiq qoladigan darajada edi (GHSA-7pq4-8pvv-rx7r).
 `enableObsidianVaultSync()` qo‘shimcha ravishda ma’lumotlar katalogining o‘zi
 bo‘lgan, uning ichida joylashgan yoki uni o‘z ichiga olgan omborni rad etadi.
 
-#### Hisob ma’lumotlarini eksport qilish faqat operatorlar uchun
+#### Hisob ma’lumotlarini eksport qilish va tiklash faqat operatorlar uchun
 
 Yuqoridagi daraja faqat _biror_ hisob ma’lumoti talab qilinishini belgilaydi. Saqlangan
 hisob ma’lumotlarini yuklab oladigan yo‘nalishlar ishlov beruvchida ikkinchi tekshiruvni qo‘shadi:
@@ -226,22 +226,9 @@ qabul qiladi hamda har qanday qamrovdagi API kalitlariga (`manage` va `admin` ha
 (`POST /api/sync/tokens`) xuddi shu yordamchi funksiyadan va qo‘shimcha ravishda ishonchli
 loopback ichki xizmat tokenidan foydalanadi.
 
-#### Credential exports and restores are operator-only
+Tegishli buzuvchi amallar ham shu chegaraga bo‘ysunadi: `POST /api/db-backups/import` (yuklangan `.sqlite` fayli, jumladan `dryRun=true`), `POST /api/db-backups` (saqlangan zaxira nusxasini uning id-si bo‘yicha tiklash) va `POST /api/settings/import-json` (eski JSON formatini tiklash) ishlayotgan ma’lumotlar bazasini yoki sozlamalar, ulanishlar va API kalitlarining butun to‘plamini almashtiradi. Shu sababli mashina hisob ma’lumotlari bu amallarni ham ishga tushira olmaydi.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Tiklash nuqtalarini o‘chirish ham shu chegaraga bo‘ysunadi: `DELETE /api/db-backups` (tozalash — oxirgi N tasini saqlash yoki D kundan eskilarini o‘chirish) va `PATCH /api/db-backups` (saqlash sozlamalari). Saqlangan qoidalar aynan `cleanupDbBackups()` har bir avtomatik zaxiralashdan keyin qo‘llaydigan qoidalardir (`src/lib/db/backup.ts`); `keepLatest: 1` qiymatini saqlay oladigan mashina hisob ma’lumoti keyingi holat nusxasida oldingi tiklash nuqtalarini o‘chira olardi. Zaxiralarni ro‘yxatlash va yaratish (`GET`/`PUT /api/db-backups`) odatiy boshqaruv autentifikatsiyasini saqlaydi.
 
 ### Yangi o‘rnatishdagi boshlang‘ich sozlash faqat loopback orqali — `Host` emas, haqiqiy tengdosh asosida
 

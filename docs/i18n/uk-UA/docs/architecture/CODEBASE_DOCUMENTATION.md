@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Реєстри провайдерів, профілі заголовків, ідентифікація, …
 ├── handlers/               Обробники запитів (чат, вбудовування, аудіо, зображення, …)
-├── executors/              150 модулів виконавців провайдерів (класи виконавців + допоміжні модулі для окремих провайдерів)
+├── executors/              156 модулів виконавців провайдерів (класи виконавців + допоміжні модулі для окремих провайдерів)
 ├── translator/             Перетворення форматів (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Трансформер потоку Responses API ↔ Chat Completions
 ├── services/               Понад 80 сервісних модулів (комбінації, резервування, квоти, ідентифікація, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 модулів виконавців верхнього рівня (`*.ts` за винятком `base.ts`, `index.ts` і тестів — цю кількість
+156 модулів виконавців верхнього рівня (`*.ts` за винятком `base.ts`, `index.ts` і тестів — цю кількість
 вимірює `npm run check:docs-counts`). Кожен клас виконавця розширює `BaseExecutor` (`base.ts`)
 безпосередньо або через `DefaultExecutor` чи інший виконавець; решта модулів є допоміжними
 засобами для окремих провайдерів (схеми інструментів, адаптери fetch/TTS, обробники особливостей). Виконавці включають:
@@ -772,7 +772,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts`).
 2. Призначте відповідні області доступу в `src/shared/constants/mcpScopes.ts`.
 3. Зареєструйте інструмент у `open-sse/mcp-server/server.ts`.
-4. Додайте тести до `open-sse/mcp-server/__tests__/`.
+4. Додайте тести до `tests/unit/`.
 5. Оновіть [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Додавання нової навички A2A
@@ -790,7 +790,7 @@ bin/
 - **Іменування**: файли — `camelCase` або `kebab-case`, компоненти — `PascalCase`,
   константи — `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` скрізь;
-  `no-explicit-any` = `warn` у `open-sse/` і `tests/`, в інших місцях — `error`.
+  `no-explicit-any` = `error` у `open-sse/**/*.ts` і `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (успадкований підхід). На межах між модулями віддавайте перевагу
   явним типам замість виведення типів.
 - **База даних**: ніколи не пишіть необроблений SQL у маршрутах або обробниках — завжди використовуйте
@@ -820,8 +820,7 @@ bin/
   `a2a`, `memory`, `skills`.
 - **Гілки**: префікси `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Ніколи не робіть коміти безпосередньо до `main`.
-- **Husky**: перед комітом запускаються `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; перед надсиланням змін запускаються `check:any-budget:t11` + `check:tracked-artifacts` (швидкі перевірки; без `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

@@ -88,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Tsari:** Yana amfani da APIs na OS don karkatar da duk zirga-zirgar HTTP/HTTPS ta mai sauraron HTTP_PROXY:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` da saitunan host/port na HTTP/HTTPS
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Iyakar aiki:** Kowane application da ke kan na'urar wanda ke bin saitunan system proxy
   **Lura:** `source` = `"system-proxy"`
 
 **Matakan kariya:**
 
-- Mai ƙidayar lokacin kashewa kai tsaye (minti 30 ta asali, ana iya saitawa ta `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- Ana adana yanayin system proxy na baya a DB kuma a dawo da shi yayin mayarwa
-- Dashboard yana nuna saƙon "Ana mayar da system proxy" idan mai amfani ya bar shafin yayin da yake aiki
-- UI yana nuna alamar `⚠ Na ƙwararru` + akwatin tabbatarwa a sarari
+- Sanya proxy yana tsara mai ƙidayar lokacin juyarwa da ke cikin process kawai, wanda yake ƙoƙari ba tare da tabbacin nasara ba (mintuna 30 a tsoho, ana saitawa da `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`). Mai ƙidayar ba ya ci gaba bayan process na sabar ya ƙare.
+- Ana ajiye tsohon yanayin proxy a ƙwaƙwalwar process; wannan ma'ajiyar yanayin kamawa ba ta adana shi dindindin a database. Juyarwa tana dawo da saitunan macOS/GNOME da aka ajiye; a Windows tana reset na proxy na WinHTTP maimakon dawo da tsohon tsarin saiti.
+- Matukar ana bayar da rahoton cewa an sanya proxy, lokacin fitar da shafi daga ƙwaƙwalwa ana aika buƙatar juyarwa ta keepalive da ƙoƙarin iyawa, sannan a nemi tabbatarwar asali wadda burauza ke tsara kalmominta. Cire inspector yayin kewayawar SPA ma yana ƙoƙarin juyarwa, ba tare da wannan saƙon burauza ba.
+- Sandar kayan kamawa tana nuna maɓallin `System-wide` da aka fassara tare da alamar gargaɗi. Dannawa yanzu tana canza yanayin UI na gida kawai; ba ta nuna akwatin tabbatarwa kuma ba ta sanya ko juyar da proxy na tsarin ba.
 
 ### Hanya ta 5 — TPROXY transparent decrypt (Linux, root, sai an zaɓa)
 
@@ -113,13 +113,13 @@ Wannan babban subsystem ne mai nasa keɓantaccen jagorar operator — duba `docs
 
 ### Kwatanta hanyoyin kama zirga-zirga
 
-| Yanayi            | Saitawa                            |          Sudo?           | Iya isa ga                                 | Bayanan kula                                                                                                                                           |
-| ----------------- | ---------------------------------- | :----------------------: | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1. AgentBridge    | Ta atomatik                        |  Sau ɗaya (cert+hosts)   | Wakilan IDE 9                              | A kunne ne ta tsohuwa                                                                                                                                  |
-| 2. Custom Hosts   | Shigarwa ga kowane host            |   I, (fayil ɗin hosts)   | Duk wata manhaja mai amfani da wannan host | An adana a DB                                                                                                                                          |
-| 3. HTTP_PROXY     | `export HTTPS_PROXY=...`           |           A'a            | Manhajojin da ke bin env                   | Port 8080; ana tura HTTPS ta ramin CONNECT (metadata kawai, ba a taɓa warware ɓoyewarsa ba)                                                            |
-| 4. System-wide    | Kunna/kashe + tabbatarwa           |            I,            | Duk manhajojin da ke kan na'urar           | Zai kashe kansa bayan minti 30                                                                                                                         |
-| 5. TPROXY decrypt | Kunna/kashe (Linux + native addon) | I, (root + shigar da CA) | Duk wani host a port ɗin da aka nufa       | Yana warware ɓoyewar hosts na daban-daban; a kashe yake ta tsohuwa — duba `docs/security/MITM-TPROXY-DECRYPT.md` (git; ba a haɗa shi cikin `/docs` ba) |
+| Yanayi            | Saitawa                                                        |          Sudo?           | Iya isa ga                                 | Bayanan kula                                                                                                                                           |
+| ----------------- | -------------------------------------------------------------- | :----------------------: | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1. AgentBridge    | Ta atomatik                                                    |  Sau ɗaya (cert+hosts)   | Wakilan IDE 9                              | A kunne ne ta tsohuwa                                                                                                                                  |
+| 2. Custom Hosts   | Shigarwa ga kowane host                                        |   I, (fayil ɗin hosts)   | Duk wata manhaja mai amfani da wannan host | An adana a DB                                                                                                                                          |
+| 3. HTTP_PROXY     | `export HTTPS_PROXY=...`                                       |           A'a            | Manhajojin da ke bin env                   | Port 8080; ana tura HTTPS ta ramin CONNECT (metadata kawai, ba a taɓa warware ɓoyewarsa ba)                                                            |
+| 4. System-wide    | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |            I,            | Duk manhajojin da ke kan na'urar           | Mai ƙidayar lokacin juyarwa da ƙoƙarin iyawa, ba tabbacin nasara ba (mintuna 30 a tsoho)                                                               |
+| 5. TPROXY decrypt | Kunna/kashe (Linux + native addon)                             | I, (root + shigar da CA) | Duk wani host a port ɗin da aka nufa       | Yana warware ɓoyewar hosts na daban-daban; a kashe yake ta tsohuwa — duba `docs/security/MITM-TPROXY-DECRYPT.md` (git; ba a haɗa shi cikin `/docs` ba) |
 
 ---
 
@@ -314,7 +314,7 @@ za a ƙara shi daga baya).
 ### 5.1 Yin rikodin zaman zama
 
 1. Danna **"● Yi rikodin zaman zama"** a maƙallan kayan aiki → shigar da suna (na zaɓi)
-2. Bibiyar kai-tsaye za ta ci gaba kamar yadda aka saba; alama ja mai walƙiya za ta nuna `◉ REC · <name> · 00:42 · 23 reqs`
+2. Bibiyar kai-tsaye tana ci gaba kamar yadda aka saba; sandar rikodi tana nuna ɗigo ja mai walƙiya, lokacin da ya wuce, sunan zaman idan yana samuwa, da maɓallin tsayawa da aka fassara.
 3. Danna **"⏹ Tsaya"** → za a adana hoton yanayin zaman zama zuwa `inspector_sessions` + `inspector_session_requests`
 
 ### 5.2 Duba zaman zama da aka yi rikodi
@@ -322,7 +322,7 @@ za a ƙara shi daga baya).
 Jerin zaɓen **Zaman zama** da ke maƙallan kayan aiki yana jera zaman zama da aka adana. Zaɓar ɗaya zai:
 
 - Loda hoton yanayin zaman zama (yanayi daskararre)
-- Nuna sanarwa: `Ana duba zaman zama da aka yi rikodi "<name>" — [Koma kai-tsaye]`
+- Banner yana nuna lakabin zaman da aka yi rikodi da aka fassara da sunan zaman (ko rubutun madadin da aka fassara don zaman da ba shi da suna), tare da maɓallin komawa ga kallon kai-tsaye da aka fassara.
 - Sa shafin Ƙididdiga ya zama mai samuwa tare da tarin bayanan Recharts
 
 ### 5.3 Tsare-tsaren fitarwa
@@ -346,7 +346,7 @@ Traffic Inspector yana nuna **duk zirga-zirgar HTTPS da aka kama**, ciki har da 
 | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **LOCAL_ONLY**              | Duk hanyoyi da endpoint na WebSocket suna karɓar haɗi ne kawai daga loopback (ana tilasta hakan a cikin `routeGuard.ts` kafin tantancewa)                                                    |
 | **Ɓoye sirrika**            | Na'urar binciken `maskSecret()` mai layi tana ɓoye bayanan shaidar Bearer na RFC 6750, maɓallan da ke da prefix na mai samarwa, da dogayen token marasa bayyana kafin `TrafficBuffer.push()` |
-| **Iyakar girman jiki**      | Ana taƙaita jikin da ya haura `INSPECTOR_MAX_BODY_KB` (tsoho 1024 KB) tare da sanarwar `"(an taƙaita saboda inganci)"`                                                                       |
+| **Iyakar girman jiki**      | Ana taƙaita jikin da ya haura `INSPECTOR_MAX_BODY_KB` (tsoho 1024 KB) tare da sanarwar `"(truncated for performance)"`                                                                       |
 | **Tsabtace kanun bayanai**  | Ana mayar da sunaye zuwa ƙananan haruffa; ana cire kanun framing/hop-by-hop da proxy-auth; ana ɓoye cookies gaba ɗaya; ana miƙa ƙimomin bayanan shaida zuwa `maskSecret()`                   |
 | **CSP**                     | Ana amfani da tsauraran Content Security Policy a shafukan Traffic Inspector don hana XSS ta hanyar jikin amsa da aka shigar                                                                 |
 | **Babu adanawa ta tsohuwa** | `TrafficBuffer` yana cikin ƙwaƙwalwar ajiya kuma yana ɓacewa idan aka sake kunna uwar garken. Ana adana zaman ne kawai idan an yi rikodinsu a fili                                           |
@@ -414,7 +414,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-Allon sarrafawa zai kuma ba da zaɓin "Mayar da wakilin tsarin yadda yake" a lodawa ta gaba idan ya gano cewa halin DB yana nuna wakilin yana aiki.
+Yanayin proxy da aka ajiye yana cikin process na sabar kawai. Bayan faduwa ko sake farawa, ma'ajiyar yanayin kamawa ta yanzu ba za ta iya dawo da wannan kwafin daga database ba; yi amfani da umarnin dawo da dandamali da ke sama idan ana buƙatar gyarawa da hannu.
 
 ### Ma’ajiyar wucin gadi ta cika
 

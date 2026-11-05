@@ -18,6 +18,11 @@ test("private writes replace permissive files without retaining the old inode", 
   const dir = fixture(t);
   const target = path.join(dir, "config.json");
   fs.writeFileSync(target, "old", { mode: 0o644 });
+  if (process.platform !== "win32") {
+    // The permissive fixture must not depend on the caller's umask.
+    fs.chmodSync(target, 0o644);
+    assert.equal(fs.statSync(target).mode & 0o777, 0o644);
+  }
   const oldInode = fs.statSync(target).ino;
   writePrivateConfigFile(target, "new");
   assert.equal(readPrivateConfigFile(target), "new");
@@ -34,6 +39,8 @@ test("private reads and writes reject final symlinks, including dangling ones", 
   const target = path.join(dir, "operator.json");
   const link = path.join(dir, "config.json");
   fs.writeFileSync(target, "operator-data", { mode: 0o644 });
+  fs.chmodSync(target, 0o644);
+  assert.equal(fs.statSync(target).mode & 0o777, 0o644);
   fs.symlinkSync(target, link);
   assert.throws(() => readPrivateConfigFile(link), /symbolic link/i);
   assert.throws(() => writePrivateConfigFile(link, "replacement"), /symbolic link/i);

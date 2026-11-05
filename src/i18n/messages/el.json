@@ -6600,7 +6600,7 @@
       "xai": "Συνδέστε το xAI (Grok) με ένα κλειδί API.",
       "xiaomi-mimo": "Συνδέστε το Xiaomi MiMo με ένα κλειδί API.",
       "yi": "Αποκτήστε κλειδί API στο platform.lingyiwanwu.com",
-      "zai": "Κλειδί API από το https://open.bigmodel.cn/usercenter/apikeys",
+      "zai": "Κλειδί API από το https://z.ai/manage-apikey/apikey-list",
       "zenmux": "Το ZenMux παρέχει ένα τελικό σημείο ολοκληρώσεων συνομιλίας συμβατό με OpenAI στη διεύθυνση /api/v1/chat/completions, καθώς και διεπαφές για τα πρωτόκολλα Anthropic Messages (/api/anthropic/v1/messages) και Google Gemini (/api/vertex-ai). Το OmniRoute χρησιμοποιεί το πρωτόκολλο OpenAI.",
       "galadriel": "Συνδέστε το Galadriel με ένα κλειδί API.",
       "predibase": "Δωρεάν πιστώσεις δοκιμής αξίας $25 (ισχύς 30 ημερών)",

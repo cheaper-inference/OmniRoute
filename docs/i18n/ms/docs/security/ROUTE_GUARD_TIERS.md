@@ -213,7 +213,7 @@ dan `POST` induk menyimpan token API REST Obsidian. GHSA-62vw hanya menyembunyik
 `enableObsidianVaultSync()` turut menolak bilik kebal yang merupakan, berada di dalam, atau mengandungi
 direktori data.
 
-#### Eksport kelayakan hanya untuk pengendali
+#### Eksport kelayakan dan pemulihan hanya untuk pengendali
 
 Tahap di atas hanya menentukan sama ada _sesuatu_ bukti kelayakan diperlukan. Laluan yang memuat turun
 bukti kelayakan tersimpan menambahkan pemeriksaan kedua dalam pengendali: `GET /api/settings/export-json` (sambungan
@@ -224,22 +224,9 @@ instans dengan log masuk dilumpuhkan, dan memberikan respons `403` kepada kunci 
 dan `admin`) serta token akses `oma_`. Pengeluaran token penyegerakan (`POST /api/sync/tokens`) menggunakan
 pembantu yang sama, di samping token perkhidmatan dalaman gelung balik yang dipercayai.
 
-#### Credential exports and restores are operator-only
+Tindakan pemusnah yang sepadan mematuhi sempadan yang sama: `POST /api/db-backups/import` (fail `.sqlite` yang dimuat naik, termasuk `dryRun=true`), `POST /api/db-backups` (memulihkan sandaran tersimpan mengikut id) dan `POST /api/settings/import-json` (pemulihan format JSON lama) menggantikan pangkalan data aktif atau seluruh set tetapan, sambungan dan kunci API. Oleh itu, kelayakan mesin juga tidak boleh mencetuskannya.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Memadam titik pemulihan mematuhi sempadan yang sama: `DELETE /api/db-backups` (pembersihan — simpan N terkini atau padam yang lebih lama daripada D hari) dan `PATCH /api/db-backups` (tetapan pengekalan). Peraturan tersimpan itulah yang digunakan oleh `cleanupDbBackups()` selepas setiap sandaran automatik (`src/lib/db/backup.ts`); kelayakan mesin yang boleh menyimpan `keepLatest: 1` boleh memadam titik pemulihan terdahulu pada petikan keadaan seterusnya. Menyenaraikan dan mencipta sandaran (`GET`/`PUT /api/db-backups`) mengekalkan pengesahan pengurusan biasa.
 
 ### Pemula pemasangan baharu adalah untuk gelung balik sahaja — berdasarkan rakan sebenar, bukan `Host`
 

@@ -307,11 +307,11 @@ La extracción está **basada en expresiones regulares**, no en un LLM; se ejecu
 `setImmediate()`, por lo que nunca bloquea el flujo de respuesta:
 
 - **Patrones de preferencias** → `MemoryType.FACTUAL`
-  (p. ej., `Prefiero …`, `Me gusta mucho …`, `mi favorito es …`, `Odio …`)
+  (p. ej., `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
 - **Patrones de decisiones** → `MemoryType.EPISODIC`
-  (p. ej., `Usaré …`, `Elegí …`, `Me decidí por …`, `Voy a adoptar …`)
+  (p. ej., `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
 - **Patrones de comportamiento** → `MemoryType.FACTUAL`
-  (p. ej., `Normalmente …`, `Siempre …`, `Suelo …`)
+  (p. ej., `I usually …`, `I always …`, `I tend to …`)
 
 Cada coincidencia se sanea (`trim`, reducción de espacios en blanco, límite de 500 caracteres),
 se deduplica dentro del lote mediante un `factKey(category, content)` estable y
@@ -686,11 +686,11 @@ El módulo `extraction.ts` (`src/lib/memory/extraction.ts`) utiliza **coincidenc
 
 ### Categorías de patrones predeterminadas
 
-| Categoría           | Patrón de ejemplo                                   | Captura                                 |
-| ------------------- | --------------------------------------------------- | --------------------------------------- |
-| PREFERENCE_PATTERNS | `"Prefiero <X>"`, `"Me gusta <X>"`, `"Odio <X>"`    | Preferencias del usuario                |
-| DECISION_PATTERNS   | `"Usaré <X>"`, `"Decidí <X>"`, `"Elegí <X>"`        | Decisiones del usuario (episódicas)     |
-| PATTERN_PATTERNS    | `"Normalmente <X>"`, `"Siempre <X>"`, `"Nunca <X>"` | Patrones de comportamiento persistentes |
+| Categoría           | Patrón de ejemplo                                           | Captura                                 |
+| ------------------- | ----------------------------------------------------------- | --------------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Preferencias del usuario                |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Decisiones del usuario (episódicas)     |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Patrones de comportamiento persistentes |
 
 ### Patrones de ejemplo (simplificados)
 
@@ -726,7 +726,8 @@ Cuando un usuario dice:
 
 Para evitar una extracción descontrolada, se aplican los siguientes límites:
 
-| Longitud mínima del contenido | 3 caracteres |
+| Longitud mínima del contenido | 3 caracteres   |
+| ----------------------------- | -------------- |
 | Longitud máxima del contenido | 500 caracteres |
 
 ### Cuándo desactivar la extracción

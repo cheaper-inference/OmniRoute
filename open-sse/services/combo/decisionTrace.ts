@@ -143,7 +143,7 @@ function bestEffortAutoEvaluationWrite(write: () => void): void {
     }
     write();
   } catch {
-    // Diagnostic tracing is deliberately fail-open and must never affect routing.
+    // no-effect: diagnostic tracing is fail-open and must never change routing decisions.
   }
 }
 

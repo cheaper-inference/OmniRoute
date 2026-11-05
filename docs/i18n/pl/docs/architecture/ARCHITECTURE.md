@@ -4,13 +4,6 @@
 
 ---
 
-title: "Architektura OmniRoute"
-version: 3.8.40
-lastUpdated: 2026-06-28
----
-
-# Architektura OmniRoute
-
 🌐 **Languages:** 🇺🇸 [English](../../../../architecture/ARCHITECTURE.md) · 🇪🇹 [am](../../../am/docs/architecture/ARCHITECTURE.md) · 🇸🇦 [ar](../../../ar/docs/architecture/ARCHITECTURE.md) · 🇦🇿 [az](../../../az/docs/architecture/ARCHITECTURE.md) · 🇧🇬 [bg](../../../bg/docs/architecture/ARCHITECTURE.md) · 🇧🇩 [bn](../../../bn/docs/architecture/ARCHITECTURE.md) · 🇧🇦 [bs](../../../bs/docs/architecture/ARCHITECTURE.md) · 🇨🇿 [cs](../../../cs/docs/architecture/ARCHITECTURE.md) · 🇩🇰 [da](../../../da/docs/architecture/ARCHITECTURE.md) · 🇩🇪 [de](../../../de/docs/architecture/ARCHITECTURE.md) · 🇬🇷 [el](../../../el/docs/architecture/ARCHITECTURE.md) · 🇪🇸 [es](../../../es/docs/architecture/ARCHITECTURE.md) · 🇪🇪 [et](../../../et/docs/architecture/ARCHITECTURE.md) · 🇮🇷 [fa](../../../fa/docs/architecture/ARCHITECTURE.md) · 🇫🇮 [fi](../../../fi/docs/architecture/ARCHITECTURE.md) · 🇫🇷 [fr](../../../fr/docs/architecture/ARCHITECTURE.md) · 🇮🇪 [ga](../../../ga/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [gu](../../../gu/docs/architecture/ARCHITECTURE.md) · 🇳🇬 [ha](../../../ha/docs/architecture/ARCHITECTURE.md) · 🇮🇱 [he](../../../he/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [hi](../../../hi/docs/architecture/ARCHITECTURE.md) · 🇭🇷 [hr](../../../hr/docs/architecture/ARCHITECTURE.md) · 🇭🇺 [hu](../../../hu/docs/architecture/ARCHITECTURE.md) · 🇦🇲 [hy](../../../hy/docs/architecture/ARCHITECTURE.md) · 🇮🇩 [id](../../../id/docs/architecture/ARCHITECTURE.md) · 🇳🇬 [ig](../../../ig/docs/architecture/ARCHITECTURE.md) · 🇮🇹 [it](../../../it/docs/architecture/ARCHITECTURE.md) · 🇯🇵 [ja](../../../ja/docs/architecture/ARCHITECTURE.md) · 🇬🇪 [ka](../../../ka/docs/architecture/ARCHITECTURE.md) · 🇰🇭 [km](../../../km/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [kn](../../../kn/docs/architecture/ARCHITECTURE.md) · 🇰🇷 [ko](../../../ko/docs/architecture/ARCHITECTURE.md) · 🇱🇹 [lt](../../../lt/docs/architecture/ARCHITECTURE.md) · 🇱🇻 [lv](../../../lv/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [ml](../../../ml/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [mr](../../../mr/docs/architecture/ARCHITECTURE.md) · 🇲🇾 [ms](../../../ms/docs/architecture/ARCHITECTURE.md) · 🇲🇹 [mt](../../../mt/docs/architecture/ARCHITECTURE.md) · 🇲🇲 [my](../../../my/docs/architecture/ARCHITECTURE.md) · 🇳🇵 [ne](../../../ne/docs/architecture/ARCHITECTURE.md) · 🇳🇱 [nl](../../../nl/docs/architecture/ARCHITECTURE.md) · 🇳🇴 [no](../../../no/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [or](../../../or/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [pa](../../../pa/docs/architecture/ARCHITECTURE.md) · 🇵🇭 [phi](../../../phi/docs/architecture/ARCHITECTURE.md) · 🇵🇹 [pt](../../../pt/docs/architecture/ARCHITECTURE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/architecture/ARCHITECTURE.md) · 🇷🇴 [ro](../../../ro/docs/architecture/ARCHITECTURE.md) · 🇷🇺 [ru](../../../ru/docs/architecture/ARCHITECTURE.md) · 🇱🇰 [si](../../../si/docs/architecture/ARCHITECTURE.md) · 🇸🇰 [sk](../../../sk/docs/architecture/ARCHITECTURE.md) · 🇸🇮 [sl](../../../sl/docs/architecture/ARCHITECTURE.md) · 🇷🇸 [sr](../../../sr/docs/architecture/ARCHITECTURE.md) · 🇸🇪 [sv](../../../sv/docs/architecture/ARCHITECTURE.md) · 🇰🇪 [sw](../../../sw/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [ta](../../../ta/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [te](../../../te/docs/architecture/ARCHITECTURE.md) · 🇹🇭 [th](../../../th/docs/architecture/ARCHITECTURE.md) · 🇹🇷 [tr](../../../tr/docs/architecture/ARCHITECTURE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/architecture/ARCHITECTURE.md) · 🇵🇰 [ur](../../../ur/docs/architecture/ARCHITECTURE.md) · 🇺🇿 [uz](../../../uz/docs/architecture/ARCHITECTURE.md) · 🇻🇳 [vi](../../../vi/docs/architecture/ARCHITECTURE.md) · 🇳🇬 [yo](../../../yo/docs/architecture/ARCHITECTURE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/architecture/ARCHITECTURE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/architecture/ARCHITECTURE.md)
 
 _Ostatnia aktualizacja: 2026-06-28_
@@ -22,7 +15,7 @@ Udostępnia pojedynczy punkt końcowy zgodny z OpenAI (`/v1/*`) i kieruje ruch d
 
 Kluczowe możliwości:
 
-- Interfejs API zgodny z OpenAI dla narzędzi CLI i innych narzędzi (375 dostawców, 154 moduły wykonawcze)
+- Interfejs API zgodny z OpenAI dla narzędzi CLI i innych narzędzi (375 dostawców, 156 moduły wykonawcze)
 - Translacja żądań i odpowiedzi między formatami dostawców
 - Awaryjne przełączanie kombinacji modeli (sekwencja wielu modeli)
 - Ustrukturyzowane kroki kombinacji (`provider + model + connection`) z porządkowaniem w czasie wykonywania według `compositeTiers`
@@ -38,7 +31,7 @@ Kluczowe możliwości:
 - Wyszukiwanie w internecie przez `/v1/search` (20 dostawców)
 - Moderowanie treści przez `/v1/moderations`
 - Ponowne ustalanie rankingu przez `/v1/rerank`
-- Parsowanie znaczników myślenia (``) dla modeli rozumujących
+- Parsowanie znaczników myślenia (`<think>...</think>`) dla modeli rozumujących
 - Oczyszczanie odpowiedzi w celu zapewnienia ścisłej zgodności z OpenAI SDK
 - Normalizacja ról (developer→system, system→user) w celu zapewnienia zgodności między dostawcami
 - Konwersja ustrukturyzowanych danych wyjściowych (json_schema → Gemini responseSchema)
@@ -520,27 +513,27 @@ Pełny podręcznik ukrywania aktywności i wskazówki operacyjne znajdują się 
   - Warstwa bazy danych: `src/lib/db/readCache.ts`
   - Punkt końcowy statystyk: `GET /api/cache/stats`, panel pod adresem `/dashboard/cache`
 
-## 3) Warstwa persystencji
+## 3) Warstwa trwałości danych
 
-Główna baza stanu (SQLite):
+Główna baza danych stanu (SQLite):
 
-- Infrastruktura rdzenia: `src/lib/db/core.ts` (better-sqlite3, migracje, WAL)
-- Fasada re-eksportu: `src/lib/localDb.ts` (cienka warstwa kompatybilności dla callerów)
-- plik: `${DATA_DIR}/storage.sqlite` (lub `$XDG_CONFIG_HOME/omniroute/storage.sqlite` gdy ustawione, w przeciwnym razie `~/.omniroute/storage.sqlite`)
-- encje (tabele + przestrzenie KV): providerConnections, providerNodes, modelAliases, combos, apiKeys, settings, pricing, **customModels**, **proxyConfig**, **ipFilter**, **thinkingBudget**, **systemPrompt**
+- Podstawowa infrastruktura: `src/lib/db/core.ts` (better-sqlite3, migracje, WAL)
+- Dostęp do bazy danych: importuj bezpośrednio określone moduły `src/lib/db/*` (stary moduł zbiorczy `localDb.ts` został usunięty)
+- Plik: `${DATA_DIR}/storage.sqlite` (lub `$XDG_CONFIG_HOME/omniroute/storage.sqlite`, gdy ustawiono, w przeciwnym razie `~/.omniroute/storage.sqlite`)
+- Encje (tabele i przestrzenie nazw KV): providerConnections, providerNodes, modelAliases, combos, apiKeys, settings, pricing, **customModels**, **proxyConfig**, **ipFilter**, **thinkingBudget**, **systemPrompt**
 
-Persystencja użycia:
+Trwałość danych użycia:
 
-- fasada: `src/lib/usageDb.ts` (zdekomponowane moduły w `src/lib/usage/*`)
+- Fasada: `src/lib/usageDb.ts` (moduły składowe w `src/lib/usage/*`)
 - Tabele SQLite w `storage.sqlite`: `usage_history`, `call_logs`, `proxy_logs`
-- opcjonalne artefakty plikowe pozostają dla kompatybilności/debug (`${DATA_DIR}/log.txt`, `${DATA_DIR}/call_logs/`, `<repo>/logs/...`)
-- legacy pliki JSON są migrowane do SQLite przez migracje startowe, gdy są obecne
+- Opcjonalne artefakty plikowe są zachowywane ze względu na zgodność i debugowanie (`${DATA_DIR}/log.txt`, `${DATA_DIR}/call_logs/`, `<repo>/logs/...`)
+- Starsze pliki JSON są migrowane do SQLite przez migracje uruchamiane przy starcie, jeśli są obecne
 
-DB stanu domeny (SQLite):
+Baza danych stanu domeny (SQLite):
 
-- `src/lib/db/domainState.ts` — operacje CRUD dla stanu domeny
+- `src/lib/db/domainState.ts` — operacje CRUD na stanie domeny
 - Tabele (tworzone w `src/lib/db/core.ts`): `domain_fallback_chains`, `domain_budgets`, `domain_cost_history`, `domain_lockout_state`, `domain_circuit_breakers`
-- Wzorzec cache write-through: in-memory Maps są autorytatywne w runtime; mutacje zapisywane synchronicznie do SQLite; stan przywracany z DB przy cold start
+- Wzorzec pamięci podręcznej z jednoczesnym zapisem: mapy przechowywane w pamięci są autorytatywnym źródłem w czasie działania; zmiany są zapisywane synchronicznie w SQLite; stan jest odtwarzany z bazy danych po zimnym starcie
 
 ## 4) Uwierzytelnianie i obszary zabezpieczeń
 
@@ -845,63 +838,63 @@ flowchart LR
     Next --> SyncCloud
 ```
 
-## Mapowanie modułów (krytyczne dla decyzji)
+## Mapowanie modułów (kluczowe dla podejmowania decyzji)
 
 ### Moduły tras i API
 
-- `src/app/api/v1/*`, `src/app/api/v1beta/*`: API kompatybilności
-- `src/app/api/v1/providers/[provider]/*`: dedykowane trasy per dostawca (chat, embeddings, images)
-- `src/app/api/providers*`: CRUD dostawców, walidacja, testowanie
-- `src/app/api/provider-nodes*`: zarządzanie niestandardowymi węzłami kompatybilnymi
-- `src/app/api/provider-models`: zarządzanie modelami niestandardowymi (CRUD)
+- `src/app/api/v1/*`, `src/app/api/v1beta/*`: interfejsy API zgodności
+- `src/app/api/v1/providers/[provider]/*`: dedykowane trasy dla poszczególnych dostawców (czat, osadzania, obrazy)
+- `src/app/api/providers*`: operacje CRUD, walidacja i testowanie dostawców
+- `src/app/api/provider-nodes*`: zarządzanie niestandardowymi zgodnymi węzłami
+- `src/app/api/provider-models`: zarządzanie niestandardowymi modelami (CRUD)
 - `src/app/api/models/route.ts`: API katalogu modeli (aliasy + modele niestandardowe)
-- `src/app/api/oauth/*`: przepływy OAuth/device-code
+- `src/app/api/oauth/*`: przepływy OAuth/kodu urządzenia
 - `src/app/api/keys*`: cykl życia lokalnych kluczy API
 - `src/app/api/models/alias`: zarządzanie aliasami
-- `src/app/api/combos*`: zarządzanie combo fallback
-- `src/app/api/pricing`: nadpisania cennika do kalkulacji kosztów
-- `src/app/api/settings/proxy`: konfiguracja proxy (GET/PUT/DELETE)
-- `src/app/api/settings/proxy/test`: test łączności outbound proxy (POST)
-- `src/app/api/usage/*`: API użycia i logów
-- `src/app/api/sync/*` + `src/app/api/cloud/*`: cloud sync i pomocnicze API chmurowe
-- `src/app/api/cli-tools/*`: lokalne writers/checkers konfiguracji CLI
-- `src/app/api/settings/ip-filter`: allowlista/blocklista IP (GET/PUT)
-- `src/app/api/settings/thinking-budget`: konfiguracja budżetu tokenów thinking (GET/PUT)
-- `src/app/api/settings/system-prompt`: globalny system prompt (GET/PUT)
+- `src/app/api/combos*`: zarządzanie kombinacjami awaryjnymi
+- `src/app/api/pricing`: nadpisywanie cen na potrzeby obliczania kosztów
+- `src/app/api/settings/proxy`: konfiguracja serwera proxy (GET/PUT/DELETE)
+- `src/app/api/settings/proxy/test`: test łączności wychodzącej przez serwer proxy (POST)
+- `src/app/api/usage/*`: interfejsy API użycia i dzienników
+- `src/app/api/sync/*` + `src/app/api/cloud/*`: synchronizacja z chmurą i funkcje pomocnicze przeznaczone dla chmury
+- `src/app/api/cli-tools/*`: lokalne moduły zapisujące i sprawdzające konfigurację CLI
+- `src/app/api/settings/ip-filter`: lista dozwolonych/zablokowanych adresów IP (GET/PUT)
+- `src/app/api/settings/thinking-budget`: konfiguracja budżetu tokenów rozumowania (GET/PUT)
+- `src/app/api/settings/system-prompt`: globalny prompt systemowy (GET/PUT)
 - `src/app/api/settings/compression`: globalne ustawienia kompresji (GET/PUT)
-- `src/app/api/compression/*`: preview kompresji, metadane reguł i language packs
+- `src/app/api/compression/*`: podgląd kompresji, metadane reguł i pakiety językowe
 - `src/app/api/context/caveman/config`: alias ustawień Caveman (GET/PUT)
-- `src/app/api/context/rtk/*`: konfiguracja RTK, katalog filtrów, endpoint testowy i odzyskiwanie raw-output
-- `src/app/api/context/combos*`: CRUD compression combo i przypisania routing-combo
+- `src/app/api/context/rtk/*`: konfiguracja RTK, katalog filtrów, testowy punkt końcowy i odzyskiwanie surowych danych wyjściowych
+- `src/app/api/context/combos*`: operacje CRUD kombinacji kompresji i przypisania kombinacji routingu
 - `src/app/api/context/analytics`: alias analityki kompresji
 - `src/app/api/sessions`: lista aktywnych sesji (GET)
-- `src/app/api/rate-limits`: status rate limit per konto (GET)
-- `src/app/api/sync/tokens`: CRUD tokenów sync (GET/POST)
-- `src/app/api/sync/tokens/[id]`: get/delete tokenu sync (GET/DELETE)
-- `src/app/api/sync/bundle`: pobieranie pakietu konfiguracji (GET, wersjonowanie ETag)
-- `src/app/api/v1/ws`: handler upgrade WebSocket dla klientów WS zgodnych z OpenAI
+- `src/app/api/rate-limits`: stan limitu żądań dla poszczególnych kont (GET)
+- `src/app/api/sync/tokens`: operacje CRUD tokenów synchronizacji (GET/POST)
+- `src/app/api/sync/tokens/[id]`: pobieranie/usuwanie tokenu synchronizacji (GET/DELETE)
+- `src/app/api/sync/bundle`: pobieranie pakietu konfiguracyjnego (GET, wersjonowanie ETag)
+- `src/app/api/v1/ws`: procedura obsługi uaktualnienia WebSocket dla klientów WS zgodnych z OpenAI
 
-### Rdzeń routingu i wykonania
+### Rdzeń routingu i wykonywania
 
-- `src/sse/handlers/chat.ts`: parse żądania, obsługa combo, pętla wyboru konta
-- `open-sse/handlers/chatCore.ts`: tłumaczenie, dispatch executora, obsługa retry/refresh, setup strumienia
-- `open-sse/executors/*`: zachowanie sieciowe i formatowe specyficzne dla dostawcy
+- `src/sse/handlers/chat.ts`: parsowanie żądania, obsługa kombinacji, pętla wyboru konta
+- `open-sse/handlers/chatCore.ts`: tłumaczenie, kierowanie do wykonawcy, obsługa ponownych prób/odświeżania, konfiguracja strumienia
+- `open-sse/executors/*`: specyficzne dla dostawców zachowanie sieciowe i obsługa formatów
 
-### Rejestr tłumaczeń i konwertery formatów
+### Rejestr translacji i konwertery formatów
 
-- `open-sse/translator/index.ts`: rejestr translatora i orkiestracja
+- `open-sse/translator/index.ts`: rejestr translatorów i orkiestracja
 - Translatory żądań: `open-sse/translator/request/*` (9 modułów — `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`, `gemini-to-openai`, `openai-responses`, `openai-to-claude`, `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`)
-- Translatory odpowiedzi: `open-sse/translator/response/*` (8 modułów — `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`, `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`)
-- Helpery: `open-sse/translator/helpers/*` (8 modułów — `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`, `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`)
+- Translatory odpowiedzi: `open-sse/translator/response/*` (11 modułów — `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`, `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`, `openai-to-gemini`, `openai-to-gemini-sse`, `responsesToolItem`)
+- Funkcje pomocnicze: `open-sse/translator/helpers/*` (12 modułów — `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `jsonUtil`, `markdownBoundary`, `maxTokensHelper`, `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `strictSystemHoist`, `toolCallHelper`, `toolCallShim`)
 - Stałe formatów: `open-sse/translator/formats.ts`
-- Bootstrap i rejestr: `open-sse/translator/bootstrap.ts`, `open-sse/translator/registry.ts`
-- Helpery formatu obrazów: `open-sse/translator/image/`
+- Inicjalizacja i rejestr: `open-sse/translator/bootstrap.ts`, `open-sse/translator/registry.ts`
+- Funkcje pomocnicze formatów obrazów: `open-sse/translator/image/`
 
-### Persystencja
+### Trwałość danych
 
-- `src/lib/db/*`: trwała konfiguracja/stan i persystencja domeny na SQLite
-- `src/lib/localDb.ts`: re-eksport kompatybilności dla modułów DB
-- `src/lib/usageDb.ts`: fasada historii użycia/call logs nad tabelami SQLite
+- `src/lib/db/*`: trwała konfiguracja/stan oraz utrwalanie danych domenowych w SQLite
+- `src/lib/db/*`: importuj konkretne moduły bezpośrednio — bez modułu zbiorczego (stara warstwa reeksportu `localDb.ts` została usunięta)
+- `src/lib/usageDb.ts`: fasada historii użycia/dzienników wywołań oparta na tabelach SQLite
 
 ## Pokrycie executorów dostawców (Strategy Pattern)
 
@@ -1101,11 +1094,11 @@ kompatybilności legacy. Aktualny kontrakt runtime używa:
 - migracje schematu SQLite i hooki auto-upgrade przy starcie
 - ścieżka kompatybilności migracji legacy JSON → SQLite
 
-## 6) Guard SSRF / URL outbound
+## 6) SSRF / ochrona wychodzących adresów URL
 
-- `src/shared/network/outboundUrlGuard.ts` blokuje wszystkie prywatne/loopback/link-local docelowe URL zanim dotrą do executorów dostawców
-- Trasy discovery i walidacji modeli dostawców używają `src/shared/network/safeOutboundFetch.ts`, który stosuje guard przed każdym żądaniem outbound
-- Błędy guarda pojawiają się jako `URL_GUARD_BLOCKED` z HTTP 422 i są logowane do ścieżki audytu compliance przez `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) stosuje `src/shared/network/outboundUrlGuard.ts` do żądań czatu wysyłanych za pośrednictwem `BaseExecutor.execute()`. W trybie wyłącznie publicznym (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` przy wyłączonej fladze prywatnej) blokuje hosty prywatne i zwrotne oraz zakres 169.254.0.0/16; w każdym innym trybie blokuje hosty metadanych chmurowych. Sprawdza nazwę hosta lub literał adresu IP w zapisanej postaci przed wykonaniem jakiegokolwiek zapytania DNS. Wbudowani dostawcy lokalni pomijają tę kontrolę.
+- Trasy wykrywania i walidacji modeli dostawców używają `src/shared/network/safeOutboundFetch.ts`, który stosuje ochronę przed każdym żądaniem wychodzącym
+- Błędy ochrony są zwracane jako `URL_GUARD_BLOCKED` ze statusem HTTP 503 (`getSafeOutboundFetchErrorStatus`; trasa wykrywania modeli zwraca 400), a rzeczywiste blokady SSRF podczas walidacji są rejestrowane w ścieżce audytu jako zdarzenia `provider.validation.ssrf_blocked`
 
 ## Obserwowalność i sygnały operacyjne
 
@@ -1140,7 +1133,6 @@ Zmienne środowiskowe aktywnie używane w kodzie:
 
 - App/auth: `JWT_SECRET`, `INITIAL_PASSWORD`
 - Magazyn: `DATA_DIR`
-- Zachowanie węzłów kompatybilnych: `ALLOW_MULTI_CONNECTIONS_PER_COMPAT_NODE`
 - Opcjonalne nadpisanie bazy magazynu (Linux/macOS gdy `DATA_DIR` nieustawione): `XDG_CONFIG_HOME`
 - Hashowanie bezpieczeństwa: `API_KEY_SECRET`, `MACHINE_ID_SALT`
 - Logowanie: `APP_LOG_TO_FILE`, `APP_LOG_RETENTION_DAYS`, `CALL_LOG_RETENTION_DAYS`
@@ -1157,7 +1149,7 @@ Zmienne środowiskowe aktywnie używane w kodzie:
 4. Zachowanie chmury zależy od poprawnego `NEXT_PUBLIC_BASE_URL` i osiągalności endpointu chmury.
 5. Katalog `open-sse/` jest publikowany jako **pakiet npm workspace** `@omniroute/open-sse`. Kod źródłowy importuje go przez `@omniroute/open-sse/...` (rozwiązywane przez Next.js `transpilePackages`). Ścieżki plików w tym dokumencie nadal używają nazwy katalogu `open-sse/` dla spójności.
 6. Wykresy w dashboardzie używają **Recharts** (oparte na SVG) dla dostępnych, interaktywnych wizualizacji analitycznych (wykresy słupkowe użycia modeli, tabele breakdown dostawców ze wskaźnikami sukcesu).
-7. Testy E2E używają **Playwright** (`tests/e2e/`), uruchamiane przez `npm run test:e2e`. Testy jednostkowe używają **Node.js test runner** (`tests/unit/`), uruchamiane przez `npm run test:unit`. Kod źródłowy w `src/` to **TypeScript** (`.ts`/`.tsx`); workspace `open-sse/` pozostaje JavaScript (`.js`).
+7. Testy E2E używają **Playwright** (`tests/e2e/`), uruchamiane przez `npm run test:e2e`. Testy jednostkowe używają **Node.js test runner** (`tests/unit/`), uruchamiane przez `npm run test:unit`. Kod źródłowy w `src/` to **TypeScript** (`.ts`/`.tsx`); workspace `open-sse/` pozostaje TypeScript (`.ts`).
 8. Strona ustawień jest zorganizowana w 7 zakładek: General, Appearance, AI, Security, Routing, Resilience, Advanced. Strona Resilience konfiguruje tylko kolejkę żądań, cooldown połączenia, provider breaker i zachowanie wait-for-cooldown; żywy stan runtime breakerów jest pokazywany na stronie Health.
 9. Strategia **Context Relay** (`context-relay`) jest podzielona na dwie warstwy: `combo.ts` decyduje, czy handoff ma być wygenerowany, `chat.ts` wstrzykuje handoff po rozwiązaniu konta. Dane handoff żyją w tabeli SQLite `context_handoffs`. Ten podział jest zamierzony, ponieważ tylko `chat.ts` wie, czy faktyczne konto się zmieniło.
 10. **Egzekwowanie proxy** jest teraz kompleksowe: `tokenHealthCheck.ts` rozwiązuje proxy per połączenie, `/api/providers/validate` używa `runWithProxyContext`, a `proxyFetch.ts` używa `undici.fetch()`, aby utrzymać kompatybilność dispatchera na Node 22.

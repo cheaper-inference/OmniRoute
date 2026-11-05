@@ -108,15 +108,15 @@ test("#8497 localized quick starts do not retain the remote-unsafe recipe", () =
   const localizedReadmes = [
     {
       path: "docs/i18n/zh-CN/README.md",
-      localOnly: /仅限 Linux \+ 本地无根 Podman/,
+      localOnly: /仅(?:限|适用于)\s*Linux\s*\+\s*本地无根\s+Podman/,
     },
     {
       path: "docs/i18n/zh-TW/README.md",
-      localOnly: /僅限 Linux \+ 本機 rootless Podman/,
+      localOnly: /僅(?:限|適用於)\s*Linux\s*\+\s*本機(?:\s+rootless|\s*無\s*root\s*的)\s+Podman/,
     },
     {
       path: "docs/i18n/pl/README.md",
-      localOnly: /Tylko Linux \+ lokalny Podman bez roota/,
+      localOnly: /Tylko\s+Linux\s*\+\s*lokalny\s+Podman\s+(?:bez\s+roota|w\s+trybie\s+rootless)/,
     },
   ];
 
@@ -124,6 +124,15 @@ test("#8497 localized quick starts do not retain the remote-unsafe recipe", () =
     const content = read(localized.path);
     assert.doesNotMatch(content, /mkdir -p data && podman unshare/);
     assert.match(content, localized.localOnly);
+    // The equivalent translated restriction must guard the actual command,
+    // rather than merely appear somewhere else in the document.
+    assert.match(
+      content,
+      new RegExp(
+        `^#[^\\r\\n]*${localized.localOnly.source}[^\\r\\n]*\\r?\\npodman unshare chown 1000:1000 \\.\\/data`,
+        "m"
+      )
+    );
     assert.match(content, /Podman Machine/);
     assert.match(content, /contrib\/podman\/README\.md#data-directory-permissions-by-topology/);
   }

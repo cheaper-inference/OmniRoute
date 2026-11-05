@@ -446,7 +446,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Rijistocin masu samarwa, bayanan martabar kanun bayanai, shaida, …
 ├── handlers/               Masu sarrafa buƙatu (taɗi, embeddings, sauti, hoto, …)
-├── executors/              Modulan masu aiwatarwa na masu samarwa guda 150 (azuzuwan masu aiwatarwa + mataimaka na kowane mai samarwa)
+├── executors/              Modulan masu aiwatarwa na masu samarwa guda 156 (azuzuwan masu aiwatarwa + mataimaka na kowane mai samarwa)
 ├── translator/             Sauya tsari (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Mai sauya yawo na Chat Completions
 ├── services/               Modulan ayyuka sama da 80 (haɗe-haɗe, madadin, ƙa'idojin amfani, shaida, …)
@@ -476,7 +476,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-Modulan masu aiwatarwa na matakin sama guda 150 (`*.ts` ban da `base.ts`, `index.ts` da gwaje-gwaje — wannan ne adadin da
+Modulan masu aiwatarwa na matakin sama guda 156 (`*.ts` ban da `base.ts`, `index.ts` da gwaje-gwaje — wannan ne adadin da
 `npm run check:docs-counts` ke aunawa). Kowane ajin mai aiwatarwa yana faɗaɗa `BaseExecutor` (`base.ts`),
 kai tsaye ko ta hanyar `DefaultExecutor` ko wani mai aiwatarwa; sauran modulan kuwa mataimaka ne na kowane mai samarwa
 (tsare-tsaren kayan aiki, adaftocin fetch/TTS, masu sarrafa halaye na musamman). Masu aiwatarwa sun haɗa da:
@@ -771,7 +771,7 @@ Duba [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) da kuma sashen da aka keɓe a 
    `open-sse/mcp-server/schemas/tools.ts`).
 2. Sanya scope(s) da suka dace a `src/shared/constants/mcpScopes.ts`.
 3. Yi rajistar kayan aikin a `open-sse/mcp-server/server.ts`.
-4. Ƙara gwaje-gwaje a ƙarƙashin `open-sse/mcp-server/__tests__/`.
+4. Ƙara gwaje-gwaje a ƙarƙashin `tests/unit/`.
 5. Sabunta [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Ƙara sabuwar ƙwarewar A2A
@@ -789,7 +789,7 @@ Duba [A2A-SERVER.md § Ƙara Sabuwar Ƙwarewa](../frameworks/A2A-SERVER.md). Ƙw
 - **Sanya suna**: files su kasance `camelCase` ko `kebab-case`, components su kasance `PascalCase`,
   constants su kasance `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` a ko'ina;
-  `no-explicit-any` = `warn` a `open-sse/` da `tests/`, error a sauran wurare.
+  `no-explicit-any` = `error` a `open-sse/**/*.ts` da `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (tsarin legacy). Fi son bayyanannun types maimakon
   inference a iyakokin tsakanin modules.
 - **Database**: kada a taɓa rubuta raw SQL a routes ko handlers — koyaushe a bi ta
@@ -819,8 +819,7 @@ Duba [A2A-SERVER.md § Ƙara Sabuwar Ƙwarewa](../frameworks/A2A-SERVER.md). Ƙw
   `a2a`, `memory`, `skills`.
 - **Branches**: prefixes `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Kada a taɓa yin commit kai tsaye zuwa `main`.
-- **Husky**: pre-commit yana gudanar da `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; pre-push yana gudanar da `check:any-budget:t11` + `check:tracked-artifacts` (fast gates; baya haɗa `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

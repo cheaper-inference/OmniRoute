@@ -4,46 +4,46 @@
 
 ---
 
-Comparáid oibiachtúil gnéithe le ródairí AI foinse oscailte a bhfuil tóir orthu.
+Comparáid oibiachtúil gnéithe le ródairí AI foinse oscailte coitianta.
 
-> **Modheolaíocht**: Iniúchadh déanta ar stórtha poiblí in 2026-R2. Leaganacha mar atá liostaithe.
+> **Modheolaíocht**: Stórtha poiblí iniúchta 2026-Q2. Leaganacha mar atá liostaithe.
 > Cuir ceartúcháin isteach trí PR — ba mhaith linn go mbeadh sé seo cruinn.
 
-| Gné                                                         |                 OmniRoute 3.8                 |      LiteLLM 1.x       |  OpenRouter (SaaS)  |    Portkey    |
-| ----------------------------------------------------------- | :-------------------------------------------: | :--------------------: | :-----------------: | :-----------: |
-| **Soláthraithe**                                            |                    **329**                    |          ~100          |         ~50         |      ~30      |
-| **Iontrálacha catalóige saor/inneall fíordheimhnithe**      |                    **155**                    |          n/b           |     seach-chur      |      n/b      |
-| **Féinstóstáilte**                                          |                      ✅                       |           ✅           |         ❌          |   ⚠ íoctha    |
-| **Iontrálacha catalóige OAuth**                             |                    **23**                     |       páirteach        |         ❌          |      ❌       |
-| **Teaglamaí uath-chúltaca**                                 |               **19 straitéis**                | bunaithe ar thosaíocht | bunaithe ar shraith |   ualaithe    |
-| **Cumasc (painéal comhthreomhar + sintéis bhreithimh)**     |                      ✅                       |           ❌           |         ❌          |      ❌       |
-| **Cúltaca Shraith 1/2/3 (síntiús→saor→saor in aisce)**      |                    ✅ + UI                    |        de láimh        |         n/b         |   de láimh    |
-| **Comhbhrú comharthaí**                                     | Cruach 12 inneall (RTK + Caveman + LLMLingua) |     ceann ar bith      |    ceann ar bith    | ceann ar bith |
-| **Giniúint ilmhódach (caint/ceol/físeán)**                  |                      ✅                       |           ❌           |     seach-chur      |      ❌       |
-| **Freastalaí MCP ionsuite**                                 |            ✅ 110 uirlis, 33 scóip            |           ❌           |         ❌          |      ❌       |
-| **Prótacal A2A**                                            |                   ✅ 6 scil                   |           ❌           |         ❌          |      ❌       |
-| **Cuimhne (FTS5 + veicteoir)**                              |                      ✅                       |           ❌           |         ❌          |      ❌       |
-| **Ráillí cosanta (PII, instealladh, fís)**                  |                      ✅                       |       páirteach        |         ❌          |   ✅ íoctha   |
-| **Comhtháthuithe néalghníomhairí**                          |          Codex, Cursor, Devin, Jules          |           ❌           |         ❌          |      ❌       |
-| **Scoradán ciorcaid in aghaidh an tsoláthraí**              |        ✅ 3 staid, athshlánú leisciúil        |        bunúsach        |         ❌          |      ✅       |
-| **Ceilt méarloirg TLS (JA3/JA4)**                           |                  ✅ wreq-js                   |           ❌           |         ❌          |      ❌       |
-| **Creat meastóireachta**                                    |                  ✅ ionsuite                  |           ❌           |         ❌          |   ⚠ íoctha    |
-| **Seachfhreastalaí MITM (idircheapann Cursor/Antigravity)** |               ✅ tras-ardánach                |           ❌           |         ❌          |      ❌       |
-| **CLI le tráidire córais (gan Electron)**                   |                      ✅                       |           ❌           |         n/b         |      n/b      |
-| **Uathfhíordheimhniú CLI le haitheantas meaisín**           |                      ✅                       |           ❌           |         n/b         |      n/b      |
-| **Deais**                                                   |                  Next.js 16                   |        bunúsach        |      dílsithe       |   dílsithe    |
-| **i18n**                                                    |             **42 logchaighdeán**              |           ❌           |         ❌          |       ⚠       |
-| **Scileanna poiblí gníomhairí (SKILL.md)**                  |                     ✅ 45                     |           ❌           |         ❌          |      ❌       |
-| **Tacaíocht tolláin (Cloudflared, Tailscale, Ngrok)**       |                      ✅                       |           ❌           |         n/b         |      n/b      |
-| **Ceadúnas**                                                |                      MIT                      |          MIT           |      dílsithe       |   dílsithe    |
+| Gné                                                               |                 OmniRoute 3.8                 |      LiteLLM 1.x       |  OpenRouter (SaaS)   |  Portkey  |
+| ----------------------------------------------------------------- | :-------------------------------------------: | :--------------------: | :------------------: | :-------: |
+| **Soláthraithe**                                                  |                    **329**                    |          ~100          |         ~50          |    ~30    |
+| **Iontrálacha catalóige saor in aisce/gan údarú**                 |                    **155**                    |          n/a           |       dul tríd       |    n/a    |
+| **In-fhéinóstáilte**                                              |                      ✅                       |           ✅           |          ❌          | ⚠ íoctha  |
+| **Iontrálacha catalóige OAuth**                                   |                    **23**                     |       páirteach        |          ❌          |    ❌     |
+| **Teaglamaí uath-aisphillte**                                     |               **20 straitéis**                | bunaithe ar thosaíocht | bunaithe ar leibhéil | ualaithe  |
+| **Cumasc (painéal comhthreomhar + sintéis bhreithimh)**           |                      ✅                       |           ❌           |          ❌          |    ❌     |
+| **Aisphilleadh leibhéal 1/2/3 (síntiús→saor→saor in aisce)**      |                    ✅ + UI                    |         láimhe         |         n/a          |  láimhe   |
+| **Comhbhrú comharthaí**                                           | cruach 12-inneall (RTK + Caveman + LLMLingua) |          dada          |         dada         |   dada    |
+| **Giniúint ilmódach (urlabhra/ceol/físe)**                        |                      ✅                       |           ❌           |       dul tríd       |    ❌     |
+| **Freastalaí ionsuite MCP**                                       |        ✅ 110 uirlis, 33 raon feidhme         |           ❌           |          ❌          |    ❌     |
+| **Prótacal A2A**                                                  |                ✅ 6 scileanna                 |           ❌           |          ❌          |    ❌     |
+| **Cuimhne (FTS5 + veicteoir)**                                    |                      ✅                       |           ❌           |          ❌          |    ❌     |
+| **Railingí cosanta (PII, instealladh, fisic)**                    |                      ✅                       |       páirteach        |          ❌          | ✅ íoctha |
+| **Comhtháthuithe gníomhairí néil**                                |          Codex, Cursor, Devin, Jules          |           ❌           |          ❌          |    ❌     |
+| **Bristeoir ciorcaid in aghaidh an tsoláthraí**                   |       ✅ 3-stát, aisghabháil leisciúil        |        bunúsach        |          ❌          |    ✅     |
+| **Folachán méarlorga TLS (JA3/JA4)**                              |                  ✅ wreq-js                   |           ❌           |          ❌          |    ❌     |
+| **Creat measúnaithe**                                             |                  ✅ ionsuite                  |           ❌           |          ❌          | ⚠ íoctha  |
+| **Seachfhreastalaí MITM (idircheaptálann sé Cursor/Antigravity)** |                 ✅ tras-ardán                 |           ❌           |          ❌          |    ❌     |
+| **CLI le tráidire córais (gan Electron)**                         |                      ✅                       |           ❌           |         n/a          |    n/a    |
+| **Uathúdarú uathoibríoch ID meaisíne CLI**                        |                      ✅                       |           ❌           |         n/a          |    n/a    |
+| **Deais**                                                         |                  Next.js 16                   |        bunúsach        |       dílsithe       | dílsithe  |
+| **i18n**                                                          |               **67 áitiúlacht**               |           ❌           |          ❌          |     ⚠     |
+| **Scileanna poiblí gníomhaire (SKILL.md)**                        |                     ✅ 45                     |           ❌           |          ❌          |    ❌     |
+| **Tacaíocht tolláin (Cloudflared, Tailscale, Ngrok)**             |                      ✅                       |           ❌           |         n/a          |    n/a    |
+| **Ceadúnas**                                                      |                      MIT                      |          MIT           |       dílsithe       | dílsithe  |
 
-## Cathain OmniRoute a roghnú
+## Cathain ar chóir OmniRoute a roghnú
 
-- Déanann tú féinóstáil agus teastaíonn **an clúdach is leithne ar sholáthraithe** uait (374 soláthraí, 155 iontráil saor in aisce/gan fíordheimhniú sa chatalóg)
-- Teastaíonn **freastalaí MCP ionsuite** uait (uirlisí LLM, cuimhne agus scileanna nochta mar uirlisí)
-- Teastaíonn **prótacal A2A** uait le haghaidh sreafaí oibre ó ghníomhaire go gníomhaire
-- Teastaíonn **ceilteacht méarloirg** (JA3/JA4) uait chun brath ag CAPTCHAanna réamhtheachtacha a sheachaint
-- Teastaíonn **gnéithe fiontraíochta** uait (srianta cosanta, meastóireachtaí, rian iniúchóireachta) gan bille SaaS
+- Déanann tú féinóstáil agus teastaíonn uait **uaschumhdach soláthraithe** (375 soláthraí, 155 iontráil catalaige saor in aisce/gan údarú)
+- Teastaíonn uait **freastalaí MCP ionsuite** (uirlisí LLM, cuimhne, scileanna nochta mar uirlisí)
+- Teastaíonn uait **prótacal A2A** do shreafaí oibre gníomhaire-go-gníomhaire
+- Teastaíonn uait **folach méarloirge** (JA3/JA4) chun braiteadh ó CAPTCHAs thuas an tsruth a sheachaint
+- Teastaíonn uait **gnéithe fiontraíochta** (cosaintí, meastóireachtaí, cosán iniúchta) gan bille SaaS
 
 ## Cathain LiteLLM a roghnú
 

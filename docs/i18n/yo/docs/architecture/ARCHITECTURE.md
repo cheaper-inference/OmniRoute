@@ -15,7 +15,7 @@ OmniRoute jẹ́ ẹnu-ọ̀nà ìdarí AI abẹ́lẹ̀ àti pátákó ìdarí 
 
 Àwọn agbára pàtàkì:
 
-- Ojú API tó bá OpenAI mu fún CLI/àwọn irinṣẹ́ (olùpèsè 375, àwọn module executor 154)
+- Ojú API tó bá OpenAI mu fún CLI/àwọn irinṣẹ́ (olùpèsè 375, àwọn module executor 156)
 - Ìtumọ̀ ìbéèrè/ìdáhùn láàárín àwọn ọ̀nà-kíkó olùpèsè
 - Ìyípadà combo model sí àṣàyàn mìíràn (ọ̀wọ̀ọ̀wọ́ model púpọ̀)
 - Àwọn ìgbésẹ̀ combo tó ní ètò (`provider + model + connection`) pẹ̀lú ìṣètò ní àkókò ìṣiṣẹ́ nípasẹ̀ `compositeTiers`
@@ -31,7 +31,7 @@ OmniRoute jẹ́ ẹnu-ọ̀nà ìdarí AI abẹ́lẹ̀ àti pátákó ìdarí 
 - Ìṣàwárí wẹ́ẹ̀bù nípasẹ̀ `/v1/search` (olùpèsè 20)
 - Àyẹ̀wò àkóónú nípasẹ̀ `/v1/moderations`
 - Àtúntò ipò nípasẹ̀ `/v1/rerank`
-- Ṣíṣe àyẹ̀wò àmì ìrònú (``) fún àwọn model ìrònú
+- Ṣíṣe àyẹ̀wò àmì ìrònú (`<think>...</think>`) fún àwọn model ìrònú
 - Ìwẹ̀nùmọ́ ìdáhùn fún ìbámu tó muna pẹ̀lú OpenAI SDK
 - Ìṣọ̀kan role (developer→system, system→user) fún ìbámu láàárín àwọn olùpèsè
 - Ìyípadà àbájáde tó ní ètò (json_schema → Gemini responseSchema)
@@ -1093,11 +1093,11 @@ A pa olùkọ̀sílẹ̀ ìbéèrè onífáìlì ti àtijọ́ (`open-sse/utils/
 - àwọn ìṣílọ schema SQLite àti àwọn hook ìmúdójúìwọ̀n aládàáṣiṣẹ́ nígbà ìbẹ̀rẹ̀
 - ipa ọ̀nà ìbámu ìṣílọ JSON àtijọ́ → SQLite
 
-## 6) Ààbò SSRF / URL Tí Ń Jáde
+## 6) SSRF / Ààbò URL Tí ń Jáde
 
-- `src/shared/network/outboundUrlGuard.ts` ń dí gbogbo URL ibi-àfojúsùn private/loopback/link-local kí wọ́n tó dé ọ̀dọ̀ àwọn olùṣe olùpèsè
-- Àwọn ipa ọ̀nà ìṣàwárí àti ìfìdímúlẹ̀ awoṣe olùpèsè ń lo `src/shared/network/safeOutboundFetch.ts`, èyí tí ń lo ààbò náà ṣáájú gbogbo ìbéèrè tó ń jáde
-- Àwọn àṣìṣe ààbò máa ń farahàn gẹ́gẹ́ bí `URL_GUARD_BLOCKED` pẹ̀lú HTTP 422, a sì máa ń kọ wọ́n sínú àkọsílẹ̀ àyẹ̀wò ìbámu nípasẹ̀ `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) ń lo `src/shared/network/outboundUrlGuard.ts` sí àwọn ìbéèrè ìfọ̀rọ̀wérọ̀ tí a fi ránṣẹ́ nípasẹ̀ `BaseExecutor.execute()`. Ní ipò ti gbogbo ènìyàn nìkan (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` pẹ̀lú àsìá àdáni tí a pa), ó ń dí àwọn olùgbàlejò àdáni àti loopback, àti 169.254.0.0/16; ní gbogbo ipò mìíràn, ó ń dí àwọn olùgbàlejò metadata àwọsánmà. Ó ń ṣàyẹ̀wò orúkọ olùgbàlejò tàbí IP gẹ́gẹ́ bí a ṣe kọ ọ́, ṣáájú ìṣàwárí DNS èyíkéyìí. Àwọn olupèsè agbègbè tí a fi sínú ètò máa ń foju kọ ọ́.
+- Ìṣàwárí àti àwọn ipa-ọ̀nà ìfàṣẹsí àwòṣe olupèsè ń lo `src/shared/network/safeOutboundFetch.ts`, èyí tí ń lo ààbò náà ṣáájú gbogbo ìbéèrè tí ń jáde
+- Àwọn àṣìṣe ààbò máa ń hàn gẹ́gẹ́ bí `URL_GUARD_BLOCKED` pẹ̀lú HTTP 503 (`getSafeOutboundFetchErrorStatus`; ipa-ọ̀nà ìṣàwárí àwòṣe máa ń dá 400 padà), a sì máa ń ṣe àkọsílẹ̀ àwọn ìdènà SSRF gidi nígbà ìfàṣẹsí sínú àkọsílẹ̀ àyẹ̀wò gẹ́gẹ́ bí àwọn ìṣẹ̀lẹ̀ `provider.validation.ssrf_blocked`
 
 ## Àkíyèsí àti Àwọn Àmì Ìṣiṣẹ́
 
@@ -1148,7 +1148,7 @@ A pa olùkọ̀sílẹ̀ ìbéèrè onífáìlì ti àtijọ́ (`open-sse/utils/
 4. Ìhùwàsí awọsánmà gbára lé `NEXT_PUBLIC_BASE_URL` tó péye àti bí a ṣe lè dé endpoint awọsánmà.
 5. A tẹ ìtọ́kasí `open-sse/` jáde gẹ́gẹ́ bí **npm workspace package** `@omniroute/open-sse`. Kóòdù orísun ń ṣàgbéwọlé rẹ̀ nípasẹ̀ `@omniroute/open-sse/...` (tí Next.js `transpilePackages` ń yanjú). Àwọn ipa ọ̀nà fáìlì nínú ìwé yìí ṣì ń lo orúkọ ìtọ́kasí `open-sse/` fún ìṣọ̀kan.
 6. Àwọn àwòrán ìṣirò nínú dashboard ń lo **Recharts** (tó dá lórí SVG) fún àfihàn ìtúpalẹ̀ dátà tó ṣeé ráyè lò, tí ó sì ń dáhùn sí ìbáṣepọ̀ (àwọn àwòrán ọ̀pá lílo model, àwọn tábìlì pípín olùpèsè pẹ̀lú ìwọ̀n àṣeyọrí).
-7. Àwọn ìdánwò E2E ń lo **Playwright** (`tests/e2e/`), a sì ń ṣiṣẹ́ wọn nípasẹ̀ `npm run test:e2e`. Àwọn ìdánwò unit ń lo **Node.js test runner** (`tests/unit/`), a sì ń ṣiṣẹ́ wọn nípasẹ̀ `npm run test:unit`. Kóòdù orísun lábẹ́ `src/` jẹ́ **TypeScript** (`.ts`/`.tsx`); workspace `open-sse/` ṣì jẹ́ JavaScript (`.js`).
+7. Àwọn ìdánwò E2E ń lo **Playwright** (`tests/e2e/`), a sì ń ṣiṣẹ́ wọn nípasẹ̀ `npm run test:e2e`. Àwọn ìdánwò unit ń lo **Node.js test runner** (`tests/unit/`), a sì ń ṣiṣẹ́ wọn nípasẹ̀ `npm run test:unit`. Kóòdù orísun lábẹ́ `src/` jẹ́ **TypeScript** (`.ts`/`.tsx`); workspace `open-sse/` ṣì jẹ́ TypeScript (`.ts`).
 8. A ṣètò ojú-ewé àtúnṣe sí tabù 7: Gbogbogbò, Ìrísí, AI, Ààbò, Ìtọ́sọ́nà, Ìfaradà, Onípele-gíga. Ojú-ewé Ìfaradà ń ṣètò ìlà ìdúró ìbéèrè, àsìkò ìtutù àsopọ̀, olùdánudúró olùpèsè, àti ìhùwàsí dídúró-de-ìtutù nìkan; ipò àkókò-ìṣiṣẹ́ olùdánudúró lọ́wọ́lọ́wọ́ ni a fihàn lójú-ewé Ìlera.
 9. A pín ọgbọ́n **Context Relay** (`context-relay`) sí ìpele méjì: `combo.ts` ń pinnu bóyá ó yẹ kí a ṣẹ̀dá ìfìránṣẹ́ ìgbàlódé, `chat.ts` sì ń fi ìfìránṣẹ́ náà sínú rẹ̀ lẹ́yìn yíyan àkọọ́lẹ̀. Dátà ìfìránṣẹ́ náà wà nínú tábìlì SQLite `context_handoffs`. Ìpín yìí jẹ́ àfọ̀mọ́ nítorí pé `chat.ts` nìkan ló mọ̀ bóyá àkọọ́lẹ̀ gangan ti yí padà.
 10. **Ìfipámúlò proxy** ti pé ní gbogbo ọ̀nà báyìí: `tokenHealthCheck.ts` ń yanjú proxy fún àsopọ̀ kọ̀ọ̀kan, `/api/providers/validate` ń lo `runWithProxyContext`, `proxyFetch.ts` sì ń lo `undici.fetch()` láti pa ìbámu dispatcher mọ́ lórí Node 22.

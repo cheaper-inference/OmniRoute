@@ -582,28 +582,28 @@ post_install() {
 
 ### Keskkonnamuutujad
 
-| Muutuja                                 | Vaikeväärtus                         | Kirjeldus                                                                                                                                                        |
-| --------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT allkirjastamise saladus (**muutke tootmiskeskkonnas**)                                                                                                       |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Esimese sisselogimise parool                                                                                                                                     |
-| `DATA_DIR`                              | `~/.omniroute`                       | Andmekataloog (andmebaas, kasutus, logid)                                                                                                                        |
-| `PORT`                                  | raamistiku vaikeväärtus              | Teenuse port (näidetes `20128`)                                                                                                                                  |
-| `HOSTNAME`                              | raamistiku vaikeväärtus              | Sidumise host (Dockeri vaikeväärtus on `0.0.0.0`)                                                                                                                |
-| `NODE_ENV`                              | käitusaja vaikeväärtus               | Määra `production` juurutamiseks                                                                                                                                 |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Avalik baas-URL, mida näidatakse juhtpaneelis ja mis avaldatakse serverile (asendab vana `BASE_URL`)                                                             |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Pilvesünkroonimise lõpp-punkti baas-URL (asendab vana `CLOUD_URL`)                                                                                               |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | HMAC saladus loodud API võtmete jaoks                                                                                                                            |
-| `REQUIRE_API_KEY`                       | `false`                              | Nõua Bearer API võtit teel `/v1/*`                                                                                                                               |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Luba autenditud juhtpaneeli kasutajatel nõudmisel näidata salvestatud API võtme täisväärtusi                                                                     |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Serveripoolne värskendamise sagedus vahemällu salvestatud Provider Limits andmete jaoks; kasutajaliidese värskendusnupud käivitavad ikkagi käsitsi sünkroonimise |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Keela automaatsed SQLite hetktõmmised enne kirjutamist/importi/taastamist; käsitsi varundamine töötab jätkuvalt                                                  |
-| `APP_LOG_TO_FILE`                       | `true`                               | Lubab rakenduse ja auditilogide väljundi kettale                                                                                                                 |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Sunni `Secure` autentimisküpsis (HTTPS pöördproksi taga)                                                                                                         |
-| `CLOUDFLARED_BIN`                       | määramata                            | Kasuta olemasolevat `cloudflared` binaari halduva allalaadimise asemel                                                                                           |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Transport hallatavatele Quick Tunnels'idele (`http2`, `quic` või `auto`)                                                                                         |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js hunniku (heap) piirang MB-des                                                                                                                            |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Vahemälu (prompt cache) kirjete maksimaalne arv                                                                                                                  |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Semantilise vahemälu kirjete maksimaalne arv                                                                                                                     |
+| Muutuja                                 | Vaikeväärtus             | Kirjeldus                                                                                                                                                                |
+| --------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `JWT_SECRET`                            | _(automaatselt loodud)_  | JWT allkirjastamise saladus — luuakse esimesel käivitamisel automaatselt ja talletatakse püsivalt faili `server.env`; määrake see eraldi, kui andmekataloog on ajutine   |
+| `INITIAL_PASSWORD`                      | _(määramata)_            | Esimese sisselogimise parool. npm-/lähtekoodi paigaldused algavad väärtusega `CHANGEME`: asendage see. Määramata: esmase seadistuse viisard                              |
+| `DATA_DIR`                              | `~/.omniroute`           | Andmekataloog (andmebaas, kasutus, logid)                                                                                                                                |
+| `PORT`                                  | raamistiku vaikeväärtus  | Teenuse port (näidetes `20128`)                                                                                                                                          |
+| `HOSTNAME`                              | raamistiku vaikeväärtus  | Sidumise host (Dockeri vaikeväärtus on `0.0.0.0`)                                                                                                                        |
+| `NODE_ENV`                              | käitusaja vaikeväärtus   | Määra `production` juurutamiseks                                                                                                                                         |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | Avalik baas-URL, mida näidatakse juhtpaneelis ja mis avaldatakse serverile (asendab vana `BASE_URL`)                                                                     |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | Pilvesünkroonimise lõpp-punkti baas-URL (asendab vana `CLOUD_URL`)                                                                                                       |
+| `API_KEY_SECRET`                        | _(automaatselt loodud)_  | Masinaga seotud API võtmete kontrollsumma saladus — käivituse bootstrap loob selle määramata väärtuse korral automaatselt ja salvestab kirjutatavasse faili `server.env` |
+| `REQUIRE_API_KEY`                       | `false`                  | Nõua Bearer API võtit teel `/v1/*`                                                                                                                                       |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | Luba autenditud juhtpaneeli kasutajatel nõudmisel näidata salvestatud API võtme täisväärtusi                                                                             |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | Serveripoolne värskendamise sagedus vahemällu salvestatud Provider Limits andmete jaoks; kasutajaliidese värskendusnupud käivitavad ikkagi käsitsi sünkroonimise         |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | Keela automaatsed SQLite hetktõmmised enne kirjutamist/importi/taastamist; käsitsi varundamine töötab jätkuvalt                                                          |
+| `APP_LOG_TO_FILE`                       | `true`                   | Lubab rakenduse ja auditilogide väljundi kettale                                                                                                                         |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | Sunni `Secure` autentimisküpsis (HTTPS pöördproksi taga)                                                                                                                 |
+| `CLOUDFLARED_BIN`                       | määramata                | Kasuta olemasolevat `cloudflared` binaari halduva allalaadimise asemel                                                                                                   |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | Transport hallatavatele Quick Tunnels'idele (`http2`, `quic` või `auto`)                                                                                                 |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | Node.js hunniku (heap) piirang MB-des                                                                                                                                    |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | Vahemälu (prompt cache) kirjete maksimaalne arv                                                                                                                          |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | Semantilise vahemälu kirjete maksimaalne arv                                                                                                                             |
 
 Täieliku keskkonnamuutujate loendi leiate [README](../README.md) failist.
 
@@ -917,7 +917,7 @@ Allpool on näidismustrid mitme teenusepakkuja kombineerimiseks ja nende vahel m
 
 Ideaalne programmeerimisagentidele (OpenCode, Claude Code, Cursor, Cline). Marsruudib algselt tipptasemel arutlusmudelitele ning limiidi ammendumisel või tõrgete korral kasutab varuvariandina kiireid programmeerimismudeleid.
 
-- **Töölaud**: Kombinatsioonid → Uus kombinatsioon → Nimi: `agent-coding` → Strateegia: `Prioriteet`
+- **Töölaud**: Kombinatsioonid → Uus kombinatsioon → Nimi: `agent-coding` → Strateegia: `Priority`
 - **Mudelid**:
   1. `claude/claude-sonnet-4-6` (Peamine programmeerimisagent)
   2. `openai/gpt-4o` (Teisene suure võimekusega varuvariant)

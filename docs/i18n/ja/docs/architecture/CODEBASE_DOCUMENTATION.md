@@ -445,7 +445,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 プロバイダーレジストリ、ヘッダープロファイル、ID など
 ├── handlers/               リクエストハンドラー（チャット、埋め込み、音声、画像など）
-├── executors/              150 個のプロバイダーエグゼキューターモジュール（エグゼキュータークラス + プロバイダーごとのヘルパー）
+├── executors/              156 個のプロバイダーエグゼキューターモジュール（エグゼキュータークラス + プロバイダーごとのヘルパー）
 ├── translator/             形式変換（OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro）
 ├── transformer/            Responses API ↔ Chat Completions ストリームトランスフォーマー
 ├── services/               80 以上のサービスモジュール（コンボ、フォールバック、クォータ、ID など）
@@ -475,7 +475,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-トップレベルのエグゼキューターモジュールは 150 個です（`*.ts` から `base.ts`、`index.ts`、およびテストを除外した数であり、`npm run check:docs-counts` で計測されます）。各エグゼキュータークラスは、直接、または `DefaultExecutor` や別のエグゼキューターを介して `BaseExecutor`（`base.ts`）を継承します。残りのモジュールは、プロバイダーごとのヘルパー（ツールスキーマ、フェッチ/TTS アダプター、特殊挙動のハンドラー）です。エグゼキューターには以下が含まれます。
+トップレベルのエグゼキューターモジュールは 156 個です（`*.ts` から `base.ts`、`index.ts`、およびテストを除外した数であり、`npm run check:docs-counts` で計測されます）。各エグゼキュータークラスは、直接、または `DefaultExecutor` や別のエグゼキューターを介して `BaseExecutor`（`base.ts`）を継承します。残りのモジュールは、プロバイダーごとのヘルパー（ツールスキーマ、フェッチ/TTS アダプター、特殊挙動のハンドラー）です。エグゼキューターには以下が含まれます。
 
 `antigravity`、`azure-openai`、`blackbox-web`、`cliproxyapi`、
 `chatgpt-web-codex`、`cloudflare-ai`、`codex`、`commandCode`、`cursor`、`default`、`devin-cli`、
@@ -767,7 +767,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts` を拡張します）。
 2. `src/shared/constants/mcpScopes.ts` で適切な scope を割り当てます。
 3. `open-sse/mcp-server/server.ts` にツールを登録します。
-4. `open-sse/mcp-server/__tests__/` 配下にテストを追加します。
+4. `tests/unit/` 配下にテストを追加します。
 5. [MCP-SERVER.md](../frameworks/MCP-SERVER.md) を更新します。
 
 ### 新しい A2A スキルを追加する
@@ -785,7 +785,7 @@ bin/
 - **命名**: ファイルは `camelCase` または `kebab-case`、コンポーネントは `PascalCase`、
   定数は `UPPER_SNAKE`。
 - **ESLint**: `no-eval`、`no-implied-eval`、`no-new-func` は全体で `error`。
-  `no-explicit-any` は `open-sse/` と `tests/` では `warn`、それ以外では `error`。
+  `no-explicit-any` は `open-sse/**/*.ts` と `tests/**/*.ts` では `error`。
 - **TypeScript**: `strict: false`（レガシーな方針）。モジュール間の境界では、
   型推論より明示的な型を優先します。
 - **データベース**: ルートや handler に生の SQL を記述せず、必ず
@@ -814,8 +814,7 @@ bin/
   `a2a`、`memory`、`skills`。
 - **ブランチ**: prefix は `feat/`、`fix/`、`refactor/`、`docs/`、`test/`、
   `chore/`。`main` へ直接コミットしてはいけません。
-- **Husky**: pre-commit では `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11` を実行します。pre-push では `check:any-budget:t11` + `check:tracked-artifacts` を実行します（高速な gate。`test:unit` は除外されます）。
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

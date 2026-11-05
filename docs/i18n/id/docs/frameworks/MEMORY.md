@@ -338,11 +338,11 @@ Ekstraksi **berbasis regex**, bukan berbasis LLM — proses ini berjalan secara 
 `setImmediate()` sehingga tidak pernah memblokir aliran respons:
 
 - **Pola preferensi** → `MemoryType.FACTUAL`
-  (misalnya `Saya lebih suka …`, `Saya sangat menyukai …`, `favorit saya adalah …`, `Saya membenci …`)
+  (misalnya `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
 - **Pola keputusan** → `MemoryType.EPISODIC`
-  (misalnya `Saya akan menggunakan …`, `Saya memilih …`, `Saya memutuskan memakai …`, `Saya akan mengadopsi …`)
+  (misalnya `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
 - **Pola kebiasaan** → `MemoryType.FACTUAL`
-  (misalnya `Saya biasanya …`, `Saya selalu …`, `Saya cenderung …`)
+  (misalnya `I usually …`, `I always …`, `I tend to …`)
 
 Setiap kecocokan disanitasi (`trim`, penciutan spasi kosong, dibatasi hingga 500 karakter),
 dideduplikasi dalam batch melalui `factKey(category, content)` yang stabil, dan
@@ -745,7 +745,8 @@ Ketika pengguna mengatakan:
 
 Untuk mencegah ekstraksi yang tidak terkendali, batas berikut diterapkan:
 
-| Panjang konten minimum | 3 karakter |
+| Panjang konten minimum  | 3 karakter   |
+| ----------------------- | ------------ |
 | Panjang konten maksimum | 500 karakter |
 
 ### Kapan Harus Menonaktifkan Ekstraksi

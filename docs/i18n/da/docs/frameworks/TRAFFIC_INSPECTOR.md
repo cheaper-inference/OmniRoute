@@ -88,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Mekanisme:** Bruger operativsystemets API'er til at omdirigere al HTTP/HTTPS-trafik gennem HTTP_PROXY-lytteren:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` og HTTP/HTTPS-indstillingerne for vært/port
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Rækkevidde:** Alle applikationer på maskinen, der respekterer systemets proxyindstillinger
   **Bemærk:** `source` = `"system-proxy"`
 
 **Sikkerhedsmekanismer:**
 
-- Timer til automatisk deaktivering (som standard 30 min., kan konfigureres via `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- Den tidligere systemproxytilstand gemmes i databasen og gendannes ved tilbagerulning
-- Dashboardet viser dialogboksen "Tilbageruller systemproxy", hvis brugeren navigerer væk, mens den er aktiv
-- Brugergrænsefladen viser mærket `⚠ Avanceret` + et eksplicit bekræftelsesafkrydsningsfelt
+- Anvendelse af proxyen planlægger en proceslokal timer, der forsøger at tilbageføre uden garanti (som standard 30 min, konfigurerbar via `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`). Timeren overlever ikke, at serverprocessen afsluttes.
+- Proxyens tidligere tilstand opbevares i processens hukommelse; dette lager for optagelsestilstand gemmer den ikke i en database. Tilbageførsel gendanner de gemte macOS/GNOME-indstillinger; på Windows nulstilles WinHTTP-proxyen i stedet for at gendanne den tidligere konfiguration.
+- Mens proxyen rapporteres som anvendt, sender det at forlade siden (unload) et keepalive-tilbageførselskald uden garanti og anmoder om en indbygget bekræftelse, hvis ordlyd styres af browseren. Afmontering af inspektøren under SPA-navigation forsøger også tilbageførsel, uden denne browserdialog.
+- Optagelsesværktøjslinjen viser den lokaliserede `System-wide`-kontrol med et advarselsikon. Et klik ændrer i øjeblikket kun den lokale UI-tilstand; det viser ikke et bekræftelsesfelt og anvender eller tilbagefører ikke systemproxyen.
 
 ### Tilstand 5 — TPROXY-transparent dekryptering (Linux, root, kræver tilvalg)
 
@@ -113,13 +113,13 @@ Dette er et omfattende undersystem med sin egen dedikerede driftsvejledning — 
 
 ### Sammenligning af optagelsestilstande
 
-| Tilstand                  | Opsætning                                        |            Sudo?            | Rækkevidde                      | Bemærkninger                                                                                                                        |
-| ------------------------- | ------------------------------------------------ | :-------------------------: | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge            | Automatisk                                       | Én gang (certifikat+hosts)  | 9 IDE-agenter                   | Aktiveret som standard                                                                                                              |
-| 2. Brugerdefinerede hosts | Input pr. host                                   |       Ja (hosts-fil)        | Enhver app, der bruger den host | Gemt i DB                                                                                                                           |
-| 3. HTTP_PROXY             | `export HTTPS_PROXY=...`                         |             Nej             | Apps, der respekterer miljøet   | Port 8080; HTTPS tunneleres via CONNECT (kun metadata, dekrypteres aldrig)                                                          |
-| 4. Hele systemet          | Slå til/fra + bekræft                            |             Ja              | Alle apps på maskinen           | Deaktiveres automatisk efter 30 min                                                                                                 |
-| 5. TPROXY-dekryptering    | Slå til/fra (Linux + indbygget tilføjelsesmodul) | Ja (root + CA-installation) | Enhver host på målporten        | Dekrypterer vilkårlige hosts; deaktiveret som standard — se `docs/security/MITM-TPROXY-DECRYPT.md` (git; ikke kompileret i `/docs`) |
+| Tilstand                  | Opsætning                                                      |            Sudo?            | Rækkevidde                      | Bemærkninger                                                                                                                        |
+| ------------------------- | -------------------------------------------------------------- | :-------------------------: | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge            | Automatisk                                                     | Én gang (certifikat+hosts)  | 9 IDE-agenter                   | Aktiveret som standard                                                                                                              |
+| 2. Brugerdefinerede hosts | Input pr. host                                                 |       Ja (hosts-fil)        | Enhver app, der bruger den host | Gemt i DB                                                                                                                           |
+| 3. HTTP_PROXY             | `export HTTPS_PROXY=...`                                       |             Nej             | Apps, der respekterer miljøet   | Port 8080; HTTPS tunneleres via CONNECT (kun metadata, dekrypteres aldrig)                                                          |
+| 4. Hele systemet          | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |             Ja              | Alle apps på maskinen           | Timer til tilbageførsel uden garanti (som standard 30 min)                                                                          |
+| 5. TPROXY-dekryptering    | Slå til/fra (Linux + indbygget tilføjelsesmodul)               | Ja (root + CA-installation) | Enhver host på målporten        | Dekrypterer vilkårlige hosts; deaktiveret som standard — se `docs/security/MITM-TPROXY-DECRYPT.md` (git; ikke kompileret i `/docs`) |
 
 ---
 
@@ -315,7 +315,7 @@ er en opfølgende opgave).
 ### 5.1 Optagelse af en session
 
 1. Klik på **"● Optag session"** på værktøjslinjen → indtast et navn (valgfrit)
-2. Live-visningen fortsætter som normalt; en rød pulserende indikator viser `◉ OPT · <navn> · 00:42 · 23 anmodninger`
+2. Live-visningen fortsætter som normalt; optagelseslinjen viser en pulserende rød prik, den forløbne tid, sessionsnavnet når det er tilgængeligt, og en lokaliseret Stop-kontrol.
 3. Klik på **"⏹ Stop"** → sessionsøjebliksbilledet gemmes i `inspector_sessions` + `inspector_session_requests`
 
 ### 5.2 Visning af en optaget session
@@ -323,7 +323,7 @@ er en opfølgende opgave).
 Rullemenuen **Sessioner** på værktøjslinjen viser gemte sessioner. Når du vælger en:
 
 - Indlæses sessionens øjebliksbillede (frosset tilstand)
-- Et banner viser: `Viser den optagede session "<navn>" — [Tilbage til livevisning]`
+- Et banner viser en lokaliseret etiket for en optaget session og sessionsnavnet (eller en lokaliseret reservetekst for en session uden titel) sammen med en lokaliseret Tilbage til live-knap.
 - Fanen Statistik bliver tilgængelig med aggregeringer fra Recharts
 
 ### 5.3 Eksportformater
@@ -347,7 +347,7 @@ Traffic Inspector viser **al opsnappet HTTPS-trafik**, herunder autorisationshea
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **LOCAL_ONLY**                    | Alle ruter og WebSocket-slutpunktet er begrænset til loopback (håndhæves i `routeGuard.ts` før godkendelse)                                                                           |
 | **Maskering af hemmeligheder**    | Den lineære `maskSecret()`-scanner bortredigerer RFC 6750 Bearer-legitimationsoplysninger, udbyderpræfikserede nøgler og lange uigennemsigtige tokens før `TrafficBuffer.push()`      |
-| **Grænse for tekststørrelse**     | Tekster > `INSPECTOR_MAX_BODY_KB` (standardværdi 1024 KB) afkortes med meddelelsen `"(afkortet af hensyn til ydeevnen)"`                                                              |
+| **Grænse for tekststørrelse**     | Tekster > `INSPECTOR_MAX_BODY_KB` (standardværdi 1024 KB) afkortes med meddelelsen `"(truncated for performance)"`                                                                    |
 | **Sanitering af headere**         | Navne konverteres til små bogstaver; framing-, hop-by-hop- og proxygodkendelsesheadere fjernes; cookies bortredigeres fuldstændigt; legitimationsværdier delegeres til `maskSecret()` |
 | **CSP**                           | Streng Content Security Policy på Traffic Inspector-sider for at forhindre XSS via injicerede svartekster                                                                             |
 | **Ingen persistens som standard** | `TrafficBuffer` ligger i hukommelsen og går tabt, når serveren genstartes. Sessioner gemmes kun permanent, når de optages eksplicit                                                   |
@@ -415,7 +415,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-Dashboardet vil også tilbyde "Nulstil systemproxy" ved næste indlæsning, hvis det registrerer, at databasens tilstand angiver, at proxyen var aktiv.
+Den gemte proxytilstand findes kun i serverprocessen. Efter et nedbrud eller en genstart kan det aktuelle lager for optagelsestilstand ikke gendanne dette øjebliksbillede fra en database; brug platformens gendannelseskommandoer ovenfor, når manuel gendannelse er nødvendig.
 
 ### Bufferen er fuld
 

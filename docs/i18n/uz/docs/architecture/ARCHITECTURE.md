@@ -15,7 +15,7 @@ U yagona OpenAI-mos keluvchi soʻnggi nuqtani (`/v1/*`) taqdim etadi hamda tarji
 
 Asosiy imkoniyatlar:
 
-- CLI/vositalar uchun OpenAI-mos keluvchi API interfeysi (375 ta provayder, 154 ta ijrochi modul)
+- CLI/vositalar uchun OpenAI-mos keluvchi API interfeysi (375 ta provayder, 156 ta ijrochi modul)
 - Provayder formatlari oʻrtasida soʻrov/javob tarjimasi
 - Modellar kombinatsiyasi boʻyicha zaxira variantiga oʻtish (koʻp modelli ketma-ketlik)
 - `compositeTiers` asosida bajarilish vaqtida tartiblanadigan tuzilmali kombinatsiya bosqichlari (`provider + model + connection`)
@@ -31,7 +31,7 @@ Asosiy imkoniyatlar:
 - `/v1/search` orqali veb-qidiruv (20 ta provayder)
 - `/v1/moderations` orqali moderatsiya
 - `/v1/rerank` orqali qayta saralash
-- Mantiqiy tahlil modellari uchun think teglarini tahlil qilish (``)
+- Mantiqiy tahlil modellari uchun think teglarini tahlil qilish (`<think>...</think>`)
 - Qatʼiy OpenAI SDK mosligi uchun javoblarni sanitizatsiya qilish
 - Provayderlararo moslik uchun rollarni meʼyorlashtirish (developer→system, system→user)
 - Tuzilmali chiqishni oʻzgartirish (json_schema → Gemini responseSchema)
@@ -1080,11 +1080,11 @@ eski versiyalar bilan moslik uchun saqlab qolingan. Joriy bajarilish muhiti shar
 - SQLite sxemasi migratsiyalari va ishga tushirish paytidagi avtomatik yangilash ilgaklari
 - eski JSON → SQLite migratsiyasi uchun moslik yoʻli
 
-## 6) SSRF / chiquvchi URL himoyasi
+## 6) SSRF / Chiquvchi URL himoyasi
 
-- `src/shared/network/outboundUrlGuard.ts` barcha xususiy/qayta yoʻnaltiruvchi/mahalliy havola maqsadli URL’larni provayder ijrochilariga yetib borishidan oldin bloklaydi
-- Provayder modellarini aniqlash va tekshirish yoʻnalishlari har bir chiquvchi soʻrov oldidan himoyani qoʻllaydigan `src/shared/network/safeOutboundFetch.ts` faylidan foydalanadi
-- Himoya xatolari HTTP 422 bilan `URL_GUARD_BLOCKED` sifatida koʻrsatiladi va `providerAudit.ts` orqali muvofiqlik auditi jurnaliga yoziladi
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) `BaseExecutor.execute()` orqali yuborilgan chat soʻrovlariga `src/shared/network/outboundUrlGuard.ts` himoyasini qoʻllaydi. Faqat ommaviy rejimda (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false`, private bayroq oʻchirilgan holda) u private va loopback hostlarni hamda 169.254.0.0/16 diapazonini bloklaydi; boshqa barcha rejimlarda esa bulut metamaʼlumotlari hostlarini bloklaydi. U DNS qidiruvidan oldin hostname yoki IP literalini aynan yozilgan shaklda tekshiradi. Ichki mahalliy provayderlar bu tekshiruvni chetlab oʻtadi.
+- Provayder modellarini aniqlash va validatsiya marshrutlari har bir chiquvchi soʻrovdan oldin himoyani qoʻllaydigan `src/shared/network/safeOutboundFetch.ts` dan foydalanadi
+- Himoya xatolari HTTP 503 bilan `URL_GUARD_BLOCKED` sifatida qaytariladi (`getSafeOutboundFetchErrorStatus`; modelni aniqlash marshruti 400 qaytaradi), validatsiya paytidagi haqiqiy SSRF bloklashlari esa audit jurnaliga `provider.validation.ssrf_blocked` hodisalari sifatida yoziladi
 
 ## Kuzatuvchanlik va operatsion signallar
 
@@ -1135,7 +1135,7 @@ Kod tomonidan faol ishlatiladigan muhit oʻzgaruvchilari:
 4. Bulut bilan ishlash `NEXT_PUBLIC_BASE_URL` toʻgʻri sozlanishi va bulut yakuniy nuqtasining mavjudligiga bogʻliq.
 5. `open-sse/` katalogi `@omniroute/open-sse` **npm ish maydoni paketi** sifatida eʼlon qilinadi. Manba kodi uni `@omniroute/open-sse/...` orqali import qiladi (Next.js `transpilePackages` tomonidan aniqlanadi). Muvofiqlikni saqlash uchun ushbu hujjatdagi fayl yoʻllarida hamon `open-sse/` katalog nomi ishlatiladi.
 6. Boshqaruv panelidagi diagrammalar qulay foydalaniladigan, interaktiv tahliliy vizualizatsiyalar (modeldan foydalanish ustunli diagrammalari, muvaffaqiyat ko‘rsatkichlariga ega provayderlar taqsimoti jadvallari) uchun **Recharts** (SVG asosidagi) kutubxonasidan foydalanadi.
-7. E2E testlari **Playwright** (`tests/e2e/`) dan foydalanadi va `npm run test:e2e` orqali ishga tushiriladi. Modul testlari **Node.js test ishga tushirgichi** (`tests/unit/`) dan foydalanadi va `npm run test:unit` orqali ishga tushiriladi. `src/` ichidagi manba kod **TypeScript** (`.ts`/`.tsx`) tilida yozilgan; `open-sse/` ish maydoni JavaScript (`.js`) boʻlib qoladi.
+7. E2E testlari **Playwright** (`tests/e2e/`) dan foydalanadi va `npm run test:e2e` orqali ishga tushiriladi. Modul testlari **Node.js test ishga tushirgichi** (`tests/unit/`) dan foydalanadi va `npm run test:unit` orqali ishga tushiriladi. `src/` ichidagi manba kod **TypeScript** (`.ts`/`.tsx`) tilida yozilgan; `open-sse/` ish maydoni TypeScript (`.ts`) boʻlib qoladi.
 8. Sozlamalar sahifasi 7 ta ichki oynaga ajratilgan: Umumiy, Tashqi koʻrinish, AI, Xavfsizlik, Yoʻnaltirish, Bardoshlilik, Kengaytirilgan. Bardoshlilik sahifasi faqat soʻrovlar navbati, ulanishni sovitish davri, provayder uzgichi va sovitish davrini kutish xatti-harakatini sozlaydi; uzgichning joriy ish holati Salomatlik sahifasida koʻrsatiladi.
 9. **Context Relay** strategiyasi (`context-relay`) ikki qatlamga boʻlingan: `combo.ts` topshirish yaratilishi kerakligini aniqlaydi, `chat.ts` esa hisob aniqlanganidan keyin topshirishni kiritadi. Topshirish maʼlumotlari `context_handoffs` SQLite jadvalida saqlanadi. Bu ajratish ataylab qilingan, chunki amaldagi hisob oʻzgargan yoki oʻzgarmaganini faqat `chat.ts` biladi.
 10. **Proksini majburiy qoʻllash** endi keng qamrovli: `tokenHealthCheck.ts` har bir ulanish uchun proksini aniqlaydi, `/api/providers/validate` `runWithProxyContext` dan foydalanadi, `proxyFetch.ts` esa Node 22 da dispatcher bilan moslikni saqlash uchun `undici.fetch()` dan foydalanadi.

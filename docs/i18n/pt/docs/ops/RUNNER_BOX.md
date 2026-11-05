@@ -11,13 +11,13 @@ picos medidos. A máquina só fica com recursos sobrealocados quando uma compila
 webpack do Release-Green e uma tarefa de lint; a swap do anfitrião (16 GB) absorve essa carga e, como as compilações de pull requests são executadas
 em infraestrutura alojada, o slot do Turbopack está inativo na maior parte do tempo:
 
-| runner               | etiqueta                     | função                                                                                                                                                            | `MemoryHigh` / `MemoryMax` | `CPUQuota` |
-| -------------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------- |
-| `omniroute-113-5`    | `omni-build`                 | compilações Turbopack: `ci.yml` `Build` (apenas push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, a compilação noturna de a11y | 56 GB / 60 GB (swap 0)     | 1600 %     |
-| `omniroute-113-6`    | `omni-release`               | Release-Green (`release-green` + `main-green`), compilação webpack                                                                                                | 20 GB / 24 GB (swap 4 GB)  | 800 %      |
-| `omniroute-113-2`    | `omni-light`                 | execuções noturnas (Schemathesis, promptfoo, garak, k6) e `quality.yml` `lint-guard`                                                                              | 12 GB / 16 GB (swap 4 GB)  | 600 %      |
-| `omniroute-113`      | `omni-light`                 | o mesmo pool acima                                                                                                                                                | 8 GB / 12 GB               | 400 %      |
-| OmniHeuris, OmniMind | (os respetivos repositórios) | apenas Dependabot (pico de 155 MB cada, 2026-10-18)                                                                                                               | 4 GB / 6 GB                | 200 % cada |
+| runner               | etiqueta                        | função                                                                                                                                                            | `MemoryHigh` / `MemoryMax` | `CPUQuota` |
+| -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | compilações Turbopack: `ci.yml` `Build` (apenas push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, a compilação noturna de a11y | 56 GB / 60 GB (swap 0)     | 1600 %     |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), compilação webpack                                                                                                | 20 GB / 24 GB (swap 4 GB)  | 800 %      |
+| `omniroute-113-2`    | `omni-light`                    | execuções noturnas (Schemathesis, promptfoo, garak, k6) e `quality.yml` `lint-guard`                                                                              | 12 GB / 16 GB (swap 4 GB)  | 600 %      |
+| `omniroute-113`      | `omni-light`                    | o mesmo pool acima                                                                                                                                                | 8 GB / 12 GB               | 400 %      |
+| OmniHeuris, OmniMind | (os respetivos repositórios)    | apenas Dependabot (pico de 155 MB cada, 2026-10-18)                                                                                                               | 4 GB / 6 GB                | 200 % cada |
 
 Medições de 2026-10-18:
 
@@ -58,7 +58,7 @@ O `KillMode=process` predefinido do runner deixa `Runner.Worker → npm → next
 ## Regras de operação
 
 - **Uma compilação Turbopack de cada vez — imposto por etiqueta.** Todos os jobs que executam um
-  `next build` completo com Turbopack visam `[self-hosted, omni-build]`, e apenas **`omniroute-113-5`**
+  `next build` completo com Turbopack visam `[self-hosted, omni-build, omni-build-60gb]`, e apenas **`omniroute-113-5`**
   tem essa etiqueta: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`,
   `preview-artifact`, a compilação noturna de a11y (#16853) e **amd64** de `docker-publish.yml`
   (webpack dentro do BuildKit — o Turbopack entrou em pânico aí, execução 33253576569). A etapa

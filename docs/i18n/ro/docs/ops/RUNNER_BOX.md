@@ -11,13 +11,13 @@ vârfurile lor măsurate. Serverul face overcommit doar atunci când o compilare
 webpack Release-Green și cu un job de lint; swap-ul gazdei (16 GB) absoarbe acest surplus și, deoarece compilările pentru pull request-uri rulează
 pe infrastructură găzduită, slotul Turbopack este inactiv în cea mai mare parte a timpului:
 
-| runner               | etichetă         | rol                                                                                                                                                       | `MemoryHigh` / `MemoryMax` | `CPUQuota`    |
-| -------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------- |
-| `omniroute-113-5`    | `omni-build`     | Compilări Turbopack: `ci.yml` `Build` (doar push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, compilarea a11y nocturnă | 56 GB / 60 GB (swap 0)     | 1600 %        |
-| `omniroute-113-6`    | `omni-release`   | Release-Green (`release-green` + `main-green`), compilare webpack                                                                                         | 20 GB / 24 GB (swap 4 GB)  | 800 %         |
-| `omniroute-113-2`    | `omni-light`     | joburi nocturne (Schemathesis, promptfoo, garak, k6) și `quality.yml` `lint-guard`                                                                        | 12 GB / 16 GB (swap 4 GB)  | 600 %         |
-| `omniroute-113`      | `omni-light`     | același pool ca mai sus                                                                                                                                   | 8 GB / 12 GB               | 400 %         |
-| OmniHeuris, OmniMind | (repo-urile lor) | doar Dependabot (vârf de 155 MB fiecare, 2026-10-18)                                                                                                      | 4 GB / 6 GB                | 200 % fiecare |
+| runner               | etichetă                        | rol                                                                                                                                                       | `MemoryHigh` / `MemoryMax` | `CPUQuota`    |
+| -------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Compilări Turbopack: `ci.yml` `Build` (doar push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, compilarea a11y nocturnă | 56 GB / 60 GB (swap 0)     | 1600 %        |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), compilare webpack                                                                                         | 20 GB / 24 GB (swap 4 GB)  | 800 %         |
+| `omniroute-113-2`    | `omni-light`                    | joburi nocturne (Schemathesis, promptfoo, garak, k6) și `quality.yml` `lint-guard`                                                                        | 12 GB / 16 GB (swap 4 GB)  | 600 %         |
+| `omniroute-113`      | `omni-light`                    | același pool ca mai sus                                                                                                                                   | 8 GB / 12 GB               | 400 %         |
+| OmniHeuris, OmniMind | (repo-urile lor)                | doar Dependabot (vârf de 155 MB fiecare, 2026-10-18)                                                                                                      | 4 GB / 6 GB                | 200 % fiecare |
 
 Măsurători din 2026-10-18:
 
@@ -58,7 +58,7 @@ Valoarea implicită `KillMode=process` a runnerului lasă procesele `Runner.Work
 ## Reguli de operare
 
 - **O singură compilare Turbopack simultan — impusă prin etichetă.** Fiecare job care rulează un
-  `next build` complet cu Turbopack vizează `[self-hosted, omni-build]`, iar numai
+  `next build` complet cu Turbopack vizează `[self-hosted, omni-build, omni-build-60gb]`, iar numai
   **`omniroute-113-5`** are această etichetă: `ci.yml` `Build`, `npm-publish.yml` `publish`,
   `nightly-v4-build`, `preview-artifact`, compilarea a11y nocturnă (#16853) și
   `docker-publish.yml` **amd64** (webpack în BuildKit — Turbopack a intrat în panică acolo,

@@ -446,7 +446,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 የአቅራቢ መዝገቦች፣ የራስጌ መገለጫዎች፣ ማንነት፣ …
 ├── handlers/               የጥያቄ ተቆጣጣሪዎች (ውይይት፣ embeddings፣ ድምፅ፣ ምስል፣ …)
-├── executors/              150 የአቅራቢ አስፈጻሚ ሞጁሎች (የአስፈጻሚ ክፍሎች + የእያንዳንዱ አቅራቢ አጋዥ ክፍሎች)
+├── executors/              156 የአቅራቢ አስፈጻሚ ሞጁሎች (የአስፈጻሚ ክፍሎች + የእያንዳንዱ አቅራቢ አጋዥ ክፍሎች)
 ├── translator/             የቅርጸት ልወጣ (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions የዥረት ቀያሪ
 ├── services/               80+ የአገልግሎት ሞጁሎች (ጥምረቶች፣ ተተኪ፣ ኮታዎች፣ ማንነት፣ …)
@@ -476,7 +476,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 ከፍተኛ ደረጃ የአስፈጻሚ ሞጁሎች (`*.ts`፣ `base.ts`፣ `index.ts` እና ሙከራዎችን ሳይጨምር — ብዛቱን
+156 ከፍተኛ ደረጃ የአስፈጻሚ ሞጁሎች (`*.ts`፣ `base.ts`፣ `index.ts` እና ሙከራዎችን ሳይጨምር — ብዛቱን
 `npm run check:docs-counts` ይለካል)። እያንዳንዱ የአስፈጻሚ ክፍል `BaseExecutor` (`base.ts`)ን፣
 በቀጥታ ወይም በ`DefaultExecutor` ወይም በሌላ አስፈጻሚ በኩል ይወርሳል፤ የቀሩት ሞጁሎች ለእያንዳንዱ አቅራቢ
 የተዘጋጁ አጋዥ ክፍሎች ናቸው (የመሣሪያ ንድፎች፣ fetch/TTS አስማሚዎች፣ ያልተለመዱ ባህሪያት ተቆጣጣሪዎች)። አስፈጻሚዎቹ የሚከተሉትን ያካትታሉ፦
@@ -771,7 +771,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts`ን ያስፋፉ)።
 2. ተገቢውን scope(ዎች) በ`src/shared/constants/mcpScopes.ts` ውስጥ ይመድቡ።
 3. toolውን በ`open-sse/mcp-server/server.ts` ውስጥ ይመዝግቡ።
-4. በ`open-sse/mcp-server/__tests__/` ስር ሙከራዎችን ያክሉ።
+4. በ`tests/unit/` ስር ሙከራዎችን ያክሉ።
 5. [MCP-SERVER.md](../frameworks/MCP-SERVER.md)ን ያዘምኑ።
 
 ### አዲስ A2A skill ማከል
@@ -789,7 +789,7 @@ bin/
 - **ስያሜ**፦ files `camelCase` ወይም `kebab-case`፣ components `PascalCase`፣
   constants `UPPER_SNAKE`።
 - **ESLint**፦ `no-eval`፣ `no-implied-eval`፣ `no-new-func` = `error` በሁሉም ቦታ፤
-  `no-explicit-any` = `warn` በ`open-sse/` እና `tests/` ውስጥ፣ በሌሎች ቦታዎች error።
+  `no-explicit-any` = `error` በ`open-sse/**/*.ts` እና `tests/**/*.ts` ውስጥ።
 - **TypeScript**፦ `strict: false` (የቆየ አቋም)። በmodule ወሰኖች መካከል
   inferenceን ከመጠቀም ይልቅ explicit typesን ይምረጡ።
 - **Database**፦ በroutes ወይም handlers ውስጥ raw SQLን በፍጹም አይጻፉ — ሁልጊዜ
@@ -818,8 +818,7 @@ bin/
   `a2a`, `memory`, `skills`።
 - **Branches**፦ prefixes `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`። በቀጥታ ወደ `main` commit በፍጹም አያድርጉ።
-- **Husky**፦ pre-commit `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`ን ያስኬዳል፤ pre-push `check:any-budget:t11` + `check:tracked-artifacts`ን ያስኬዳል (ፈጣን gates፤ `test:unit`ን አያካትትም)።
+- **Husky**፦ [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

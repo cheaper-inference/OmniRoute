@@ -21,17 +21,16 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const WORKFLOW_PATH = path.resolve(
-  __dirname,
-  "../../../.github/workflows/electron-release.yml"
-);
+const WORKFLOW_PATH = path.resolve(__dirname, "../../../.github/workflows/electron-release.yml");
 
 function readWorkflow(): string {
   return fs.readFileSync(WORKFLOW_PATH, "utf8");
 }
 
 function extractStep(yaml: string, stepName: string): string {
-  const stepHeaderRe = new RegExp(`- name: ${stepName}\\n([\\s\\S]*?)(?=\\n\\s{6}- name:|\\n  [a-zA-Z_-]+:\\n)`);
+  const stepHeaderRe = new RegExp(
+    `- name: ${stepName}\\n([\\s\\S]*?)(?=\\n\\s{6}- name:|\\n  [a-zA-Z_-]+:\\n)`
+  );
   const m = yaml.match(stepHeaderRe);
   assert.ok(m, `could not locate step "${stepName}" in ${WORKFLOW_PATH}`);
   return m![1];
@@ -46,8 +45,7 @@ test("electron-release.yml: 'Collect installers' step stages latest*.yml manifes
   // into release-assets/, the GitHub Release never gets latest.yml and
   // electron-updater's autoUpdater fails with:
   //   "Cannot find latest.yml in the latest release artifacts"
-  const stagesYmlManifests =
-    /\*\.yml/.test(collectStep) || /latest.*\.yml/.test(collectStep);
+  const stagesYmlManifests = /\*\.yml/.test(collectStep) || /latest.*\.yml/.test(collectStep);
 
   assert.ok(
     stagesYmlManifests,
@@ -59,20 +57,16 @@ test("electron-release.yml: 'Collect installers' step stages latest*.yml manifes
   );
 });
 
-test("electron-release.yml: 'Create Release' files: list publishes the *.yml update manifests", () => {
+test("electron-release.yml: Create Release delegates updater manifest uploads to the tested helper", () => {
   const yaml = readWorkflow();
   const createReleaseIdx = yaml.indexOf("name: Create Release");
-  assert.ok(createReleaseIdx !== -1, "could not locate 'Create Release' step");
-  const filesBlockIdx = yaml.indexOf("files: |", createReleaseIdx);
-  assert.ok(filesBlockIdx !== -1, "could not locate files: block in 'Create Release' step");
-  const nextStepOrEnvIdx = yaml.indexOf("\n        env:", filesBlockIdx);
-  const filesBlock = yaml.slice(filesBlockIdx, nextStepOrEnvIdx === -1 ? undefined : nextStepOrEnvIdx);
-
-  assert.ok(
-    /release-assets\/\*\.yml/.test(filesBlock),
-    "BUG REPRODUCED: 'Create Release' files: glob list does not include " +
-      "release-assets/*.yml, so even if the manifests were staged they would " +
-      "not be attached to the GitHub Release (issue #6766).\n\nActual files: block:\n" +
-      filesBlock
+  assert.ok(createReleaseIdx !== -1, "could not locate Create Release step");
+  const block = yaml.slice(
+    createReleaseIdx,
+    yaml.indexOf("\n  verify-desktop-assets:", createReleaseIdx)
   );
+  assert.match(block, /run: node scripts\/release\/upload-desktop-assets\.mjs/);
+  assert.match(block, /VERSION: \$\{\{ needs\.validate\.outputs\.version \}\}/);
+  // upload-desktop-assets.test.mjs executes the helper against all three updater
+  // manifests and verifies the gh upload argv, including preservation of notes.
 });

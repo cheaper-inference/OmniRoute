@@ -106,7 +106,7 @@ OmniRoute/
 
 > **v3.8.26 ರಲ್ಲಿ ರೂಟ್ನಿಂದ ಹೊರಗೆ ಸರಿಸಲಾಗಿದೆ (ಅವ್ಯವಸ್ಥೆ ನಿವಾರಣೆ):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, ಮತ್ತು ರಚಿಸಲಾದ `quality-metrics.json` (gitignored). [`## config/`](#config--static-configs--quality-gate-state) ನೋಡಿ.
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, ಮತ್ತು ರಚಿಸಲಾದ `quality-metrics.json` (gitignored). [`## config/`](#config--ಸ್ಥಿರ-ಕಾನ್ಫಿಗ್ಗಳು--ಗುಣಮಟ್ಟ-ಗೇಟ್-ಸ್ಥಿತಿ) ನೋಡಿ.
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | ಉಪಡೈರೆಕ್ಟರಿ           | ಉದ್ದೇಶ                                                                                                                                                                                                                         |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `docs/i18n/`          | ಸ್ಥಳೀಕರಿಸಿದ ದಾಖಲೆ ಅನುವಾದಗಳು (41 ಲೊಕೇಲ್ಗಳು)                                                                                                                                                                                     |
+| `docs/i18n/`          | ಸ್ಥಳೀಕರಿಸಿದ ದಾಖಲೆ ಅನುವಾದಗಳು (66 ಲೊಕೇಲ್ಗಳು)                                                                                                                                                                                     |
 | `docs/screenshots/`   | ಮಾರ್ಗದರ್ಶಿಗಳಿಗಾಗಿ ಚಿತ್ರ ಸಂಪನ್ಮೂಲಗಳು                                                                                                                                                                                            |
 | `_tasks/superpowers/` | superpowers (`writing-plans`/`brainstorming`) ನಿಂದ ಯೋಜನೆಗಳು/ವಿಶೇಷಣಗಳು + ಸಂಶೋಧನೆ — ಪ್ರತ್ಯೇಕಿಸಲಾದ, ಪ್ರತ್ಯೇಕವಾಗಿ ಆವೃತ್ತಿಗೊಳಿಸಲಾದ ರೆಪೊಸಿಟರಿ, ಮುಖ್ಯ ಟ್ರೀಯಿಂದ gitignore ಮಾಡಲಾಗಿದೆ. CLAUDE.md → "Planning & Research Artifacts" ನೋಡಿ. |
 

@@ -106,7 +106,7 @@ OmniRoute/
 
 > **Pārvietots ārpus saknes direktorija versijā v3.8.26 (sakārtošana):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` un ģenerētais `quality-metrics.json` (git ignorēts). Skatiet [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` un ģenerētais `quality-metrics.json` (git ignorēts). Skatiet [`## config/`](#config--statiskās-konfigurācijas-un-kvalitātes-vārtejas-stāvoklis).
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | Apakšdirektorijs      | Mērķis                                                                                                                                                                                                                           |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Lokalizēti dokumentācijas tulkojumi (41 lokalizācija)                                                                                                                                                                            |
+| `docs/i18n/`          | Lokalizēti dokumentācijas tulkojumi (66 lokalizācija)                                                                                                                                                                            |
 | `docs/screenshots/`   | Attēlu resursi rokasgrāmatām                                                                                                                                                                                                     |
 | `_tasks/superpowers/` | Plāni/specifikācijas no superpowers (`writing-plans`/`brainstorming`) + izpēte — izolēts repozitorijs ar atsevišķu versiju pārvaldību, kuru galvenais koks ignorē ar git. Skatiet CLAUDE.md → "Plānošanas un izpētes artefakti". |
 

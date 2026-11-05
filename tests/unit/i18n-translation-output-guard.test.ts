@@ -34,6 +34,125 @@ test("a faithful translation passes unchanged", () => {
   assert.equal(r.text, GOOD);
 });
 
+test("rejects an extra translated H1 in the chunk body", () => {
+  const output = "# Referenca za Quality Gates\n\n" + GOOD;
+  const result = validateTranslatedChunk(SOURCE, output);
+  assert.ok(result.problems.some((problem) => problem.startsWith("heading levels")));
+  assert.equal(result.text, output, "a structural failure must not silently rewrite the body");
+});
+
+test("preserves indented code at the start of a translated chunk", () => {
+  const source = "    # Example comment\n    npm ci";
+  const output = "    ### Comentário traduzido\n    npm ci";
+  assert.deepEqual(validateTranslatedChunk(source, output), { text: output, problems: [] });
+});
+
+const HEADING_SOURCE = "## Setup\n\n### Install\n\n## Verify";
+for (const [name, output] of [
+  ["missing heading", "## Configurar\n\nInstalar\n\n## Verificar"],
+  ["changed heading level", "## Configurar\n\n# Instalar\n\n## Verificar"],
+  ["reordered heading levels", "### Instalar\n\n## Configurar\n\n## Verificar"],
+]) {
+  test(`rejects ${name} even when no code or table is lost`, () => {
+    assert.ok(
+      validateTranslatedChunk(HEADING_SOURCE, output).problems.some((problem) =>
+        problem.startsWith("heading levels")
+      )
+    );
+  });
+}
+
+test("accepts translated titles at all six levels with valid ATX spacing", () => {
+  const source = "# One\n\n## Two\n\n### Three\n\n#### Four\n\n##### Five\n\n###### Six";
+  const output = " # Um\n\n  ## Dois ##\n\n   ### Três\n\n####\tQuatro\n\n#####\n\n###### Seis";
+  assert.deepEqual(validateTranslatedChunk(source, output), { text: output, problems: [] });
+});
+
+test("ignores inline examples, escaped hashes and indented code as headings", () => {
+  const source = [
+    "## Examples",
+    "",
+    "Keep `# example` and ``## example``.",
+    "",
+    "\\# Escaped example",
+    "",
+    "    ### Indented example",
+    "\t#### Tab-indented example",
+    "",
+    "####### Seven hashes are text",
+    "#NoSpace",
+  ].join("\n");
+  const output = [
+    "## Exemplos",
+    "",
+    "Mantenha `# example` e ``## example``.",
+    "",
+    "\\### Exemplo escapado",
+    "",
+    "    # Exemplo indentado",
+    "\t## Exemplo indentado com tab",
+    "",
+    "####### Sete hashes são texto",
+    "#SemEspaço",
+  ].join("\n");
+  assert.deepEqual(validateTranslatedChunk(source, output), { text: output, problems: [] });
+});
+
+for (const [name, code] of [
+  ["backtick fence", "```md\n# Example\n```"],
+  ["tilde fence", "~~~md\n# Example\n~~~"],
+  ["longer closing fence", "```md\n# Example\n`````"],
+  ["shorter nested fence", "````md\n```\n# Example\n````"],
+  ["different nested delimiter", "```md\n~~~\n# Example\n```"],
+  ["closing delimiter with an info string", "~~~md\n~~~still-code\n# Example\n~~~"],
+  ["indented fence", "   ~~~~md\n   ~~~\n# Example\n   ~~~~"],
+  ["unclosed fence", "~~~md\n# Example"],
+]) {
+  test(`ignores heading-shaped code inside a ${name}`, () => {
+    const source = "## Examples\n\n" + code;
+    const output = "## Exemplos\n\n" + code.replace("# Example", "### Exemplo\n# Outro exemplo");
+    assert.deepEqual(validateTranslatedChunk(source, output), { text: output, problems: [] });
+    const extra = "# Título extra\n\n" + output;
+    assert.ok(
+      validateTranslatedChunk(source, extra).problems.some((problem) =>
+        problem.startsWith("heading levels")
+      )
+    );
+  });
+}
+
+test("detects a real heading after a matching fence closes", () => {
+  const source = "## Examples\n\n~~~~md\n# Example\n~~~~~\n\n### Continue";
+  const output = "## Exemplos\n\n~~~~md\n# Example\n~~~~~\n\n#### Continuar";
+  assert.ok(
+    validateTranslatedChunk(source, output).problems.some((problem) =>
+      problem.startsWith("heading levels")
+    )
+  );
+});
+
+test("preserves initial code indentation inside a wrapping translation fence", () => {
+  const source = "    # Example\n    npm ci";
+  const output = "    ### Exemplo\n    npm ci";
+  assert.deepEqual(validateTranslatedChunk(source, "```markdown\n" + output + "\n```"), {
+    text: output,
+    problems: [],
+  });
+});
+
+test("stripping leaked reasoning preserves the following indented code", () => {
+  const source = "    # Example\n    npm ci";
+  const output = "    ### Exemplo\n    npm ci";
+  for (const prefix of ["", "## Examples\n\n"]) {
+    const translatedPrefix = prefix.replace("Examples", "Exemplos");
+    const result = validateTranslatedChunk(
+      prefix + source,
+      translatedPrefix + "<think>Private reasoning</think>\n\n" + output
+    );
+    assert.deepEqual(result, { text: translatedPrefix + output, problems: [] });
+  }
+});
+
 test("strips a leaked <think> block (refresh-5: 41 mirrors shipped one)", () => {
   const leaked = [
     "<think>",

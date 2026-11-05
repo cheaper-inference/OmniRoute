@@ -25,60 +25,46 @@ utan att blockera; _CRITICAL-grindsteget_ (`severity: CRITICAL`, `ignore-unfixed
 `exit-code: 1`) underkänner releasen vid en CRITICAL CVE **där en fix finns tillgänglig**. `ignore-unfixed`
 förhindrar att releasen blockeras för en basavbildnings-CVE utan uppströmsfix.
 
-## ⚠️ CVE-avvikelse (blockerande osv-/Trivy-grindar)
+## ⚠️ CVE-variation (blockerar osv-/Trivy-kontroller)
 
-osv och Trivy jämför beroenden mot CVE-databaser som **kontinuerligt växer**. En PR
-som **inte berör några beroenden** kan plötsligt bli röd eftersom en ny CVE har
-offentliggjorts i ett befintligt beroende (osv: uppmätt `vulnCount` > baslinje; Trivy: en ny
-åtgärdningsbar CRITICAL i avbildningen). **Detta är FÖRVÄNTAT operationellt beteende för en blockerande
-CVE-grind, inte en produktregression.**
+osv och Trivy jämför beroenden mot CVE-databaser som **växer kontinuerligt**. En PR
+som **inte ändrar några beroenden** kan plötsligt bli röd eftersom en ny CVE har
+offentliggjorts i ett befintligt beroende (osv: uppmätt `vulnCount` > baslinjen; Trivy: en ny
+åtgärdbar CRITICAL i avbildningen). **Detta är FÖRVÄNTAT operativt beteende för en blockerande
+CVE-kontroll, inte en produktregression.**
 
 När osv eller Trivy blir röda på grund av en nyligen offentliggjord CVE är åtgärden:
 
-1. **Uppdatera det berörda beroendet** (föredras) – uppgradera till den fixade versionen via `package.json`
-   `overrides` (transitiva beroenden) eller bygg om avbildningen på en fixad bas.
-2. **Om det inte finns någon uppströmsfix:**
+1. **Uppgradera det berörda beroendet** (föredras) — uppgradera till den korrigerade versionen via `package.json`
+   `overrides` (transitiva beroenden) eller bygg om avbildningen med en korrigerad basavbildning.
+2. **Om det inte finns någon korrigering uppströms:**
    - **osv:** uppdatera baslinjen för `metrics.vulnCount` i `config/quality/quality-baseline.json`
-     (`npm run quality:ratchet -- --update` täcker inte dedikerade grindar – redigera värdet
-     manuellt, `direction:down`) med en motivering + spårningsärende.
-   - **Trivy:** lägg till en post i `.trivyignore` (CVE-ID per rad) med en
-     motiveringskommentar + spårningsärende. `ignore-unfixed: true` täcker redan CVE:er utan
-     patchar automatiskt.
+     (`npm run quality:ratchet -- --update` omfattar inte dedikerade kontroller — redigera värdet
+     manuellt, `direction:down`) med en motiverande kommentar + ett spårningsärende.
+   - **Trivy:** lägg till en post i `.trivyignore` (CVE-ID per rad) med en motiverande
+     kommentar + ett spårningsärende. `ignore-unfixed: true` omfattar redan automatiskt CVE:er utan
+     korrigeringar.
 
-Båda grindarna **Hoppar graciöst över** (avslutar med 0) när verktyget saknas eller mätningen
-misslyckas (osv-scanner finns inte i PATH, osv.dev/nätverket är o nåbart, ogiltig JSON) – ett
-**mätningsfel** blockerar aldrig, endast en **uppmätt** regression blockerar.
+Obligatoriska OSV-körningar (`check:vuln-ratchet -- --ratchet`) misslyckas på ett säkert sätt med
+`INCOMPLETE` och avslutningskod 2 när skannern, rapporten eller baslinjen inte kan valideras.
+En uppmätt regression ger avslutningskod 1. En rådgivande körning kan fortfarande rapportera `SKIP` med
+avslutningskod 0, vilket inte fastställer att beroendena klarade skanningen. Det blockerande
+Trivy-steget kräver också en lyckad mätning: otillgängliga verktyg, misslyckade jobb
+och saknade belägg för avbildningen kan inte intyga att en avbildning är ren.
 
-## Kända accepterade risker
+## Risk med utfasat beroende
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Rotens låsfil inkluderar inte längre `extract-zip` eller en beroendekoppling till det efter
+uppgraderingen av det låsta utvecklingsverktyget promptfoo. Detta avvecklar den tidigare accepterade
+kedjan `promptfoo` → `@openai/codex-security` → `extract-zip` som spåras i #14482.
+Regressionstesterna i `tests/unit/extract-zip-14482-exposure.test.ts` förhindrar att den
+återinförs och behåller förbudet mot importer från produktionskod.
 
-`extract-zip@2.0.1` innehåller två opatchade symlink-traversal-rådgivningar med hög allvarlighetsgrad.
-Enligt "ingen uppströmsfix"-grenen av CVE Variance-åtgärden ovan är detta en
-**accepterad risk**, inte en bump:
-
-- **Kedja:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  Bekräftat via `package-lock.json` — exakt ett paket i hela beroendeträdet
-  (`@openai/codex-security`) deklarerar `extract-zip`, och exakt ett paket
-  (`promptfoo`) deklarerar `@openai/codex-security`.
-- **Ingen fixad version existerar någonstans i kedjan.** `extract-zip@2.0.1` (publicerad 2020) är paketets sista version — det underhålls inte. `@openai/codex-security`s
-  nuvarande npm-latest (`0.1.29`) drar fortfarande `extract-zip@2.0.1`.
-- **Oåtkomlig från produktion.** `promptfoo` är endast devDependency (aldrig listad
-  under `dependencies`), och ingen fil under `src/`, `open-sse/`, eller `bin/` importerar
-  npm-paketet `extract-zip` — OmniRoutes egen `extractZip()`-hjälpare
-  (`src/lib/versionManager/binaryManager.ts:93`) anropar native `unzip`/`tar`
-  och är orelaterad. `@openai/codex-security` levererar också sitt eget symlink-traversal-skydd
-  ovanpå extract-zips onEntry-callback.
-- **Aliasera inte** `extract-zip` via `package.json` `overrides` — den enda gångbara
-  drop-in-ersättningen är Electron-org-intern och API-inkompatibel med
-  `@openai/codex-security`s egna onEntry/defaultDirMode/defaultFileMode-kontroller;
-  att åsidosätta den skulle tyst bryta paketets säkerhetskontroller.
-- **Baslinje:** uppmätt osv `vulnCount` (3) är redan väl under den frysta
-  `config/quality/quality-baseline.json`-baslinjen (27) — ingen spärrförändring behövs.
-- **Regressionsskydd:** `tests/unit/extract-zip-14482-exposure.test.ts` bekräftar
-  kedjan och den ovanstående invarianten för ingen-produktionsimport; den misslyckas i CI om någon av dem
-  någonsin bryts (t.ex. en framtida PR gör `extract-zip` åtkomlig från produktion).
-- **Spårning:** ärende #14482.
+Den aktuella beroendekorrigeringen begränsar även kompatibilitetsåsidosättningar till Azure Identitys
+MSAL-klient, get-uris FTP-klient och Zod-beroendet i OpenCode v1 SDK. Azure-tokenhämtning
+och FTP-hämtning testas med kontrollerade transporter; båda OpenCode-paketen
+kör sina egna bygg- och testsviter. Antalet säkerhetsmeddelanden i registret är ögonblicksbilder
+och kan ändras efter att låsfilen har checkats in.
 
 ## Eftersläpning: Scorecard-rådgivning → blockering
 

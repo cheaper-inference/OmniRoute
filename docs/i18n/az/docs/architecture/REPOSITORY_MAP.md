@@ -106,7 +106,7 @@ OmniRoute/
 
 > **v3.8.26 versiyasında kök qovluqdan köçürülüb (səliqələşdirmə):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` və yaradılan `quality-metrics.json` (git tərəfindən nəzərə alınmır). Baxın: [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` və yaradılan `quality-metrics.json` (git tərəfindən nəzərə alınmır). Baxın: [`## config/`](#config--statik-konfiqurasiyalar--keyfiyyət-keçidi-vəziyyəti).
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | Alt qovluq            | Məqsəd                                                                                                                                                                                                                                                              |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Lokallaşdırılmış sənəd tərcümələri (41 lokal)                                                                                                                                                                                                                       |
+| `docs/i18n/`          | Lokallaşdırılmış sənəd tərcümələri (66 lokal)                                                                                                                                                                                                                       |
 | `docs/screenshots/`   | Təlimatlar üçün şəkil resursları                                                                                                                                                                                                                                    |
 | `_tasks/superpowers/` | superpowers-dən (`writing-plans`/`brainstorming`) planlar/spesifikasiyalar + araşdırmalar — təcrid olunmuş, ayrıca versiyalaşdırılan repozitoriya; əsas ağacda git tərəfindən nəzərə alınmır. CLAUDE.md → "Planlaşdırma və Araşdırma Artefaktları" bölməsinə baxın. |
 

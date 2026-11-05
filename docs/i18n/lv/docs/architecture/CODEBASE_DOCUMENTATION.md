@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Pakalpojumu sniedzēju reģistri, galveņu profili, identitāte, …
 ├── handlers/               Pieprasījumu apstrādātāji (tērzēšana, iegultnes, audio, attēli, …)
-├── executors/              150 pakalpojumu sniedzēju izpildītāju moduļi (izpildītāju klases + katra pakalpojumu sniedzēja palīgmoduļi)
+├── executors/              156 pakalpojumu sniedzēju izpildītāju moduļi (izpildītāju klases + katra pakalpojumu sniedzēja palīgmoduļi)
 ├── translator/             Formātu konvertēšana (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions straumes transformators
 ├── services/               Vairāk nekā 80 pakalpojumu moduļi (kombinācijas, atkāpšanās mehānismi, kvotas, identitāte, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 augstākā līmeņa izpildītāju moduļi (`*.ts`, neietverot `base.ts`, `index.ts` un testus — šo skaitu
+156 augstākā līmeņa izpildītāju moduļi (`*.ts`, neietverot `base.ts`, `index.ts` un testus — šo skaitu
 nosaka `npm run check:docs-counts`). Katra izpildītāja klase paplašina `BaseExecutor` (`base.ts`)
 tieši vai ar `DefaultExecutor` vai cita izpildītāja starpniecību; pārējie moduļi ir katram pakalpojumu sniedzējam
 paredzēti palīgmoduļi (rīku shēmas, fetch/TTS adapteri, īpatnību apstrādātāji). Izpildītāji ietver:
@@ -772,7 +772,7 @@ Skatiet [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) un tam veltīto sadaļu
    `open-sse/mcp-server/schemas/tools.ts`).
 2. Piešķiriet atbilstošo tvērumu vai tvērumus failā `src/shared/constants/mcpScopes.ts`.
 3. Reģistrējiet rīku failā `open-sse/mcp-server/server.ts`.
-4. Pievienojiet testus direktorijā `open-sse/mcp-server/__tests__/`.
+4. Pievienojiet testus direktorijā `tests/unit/`.
 5. Atjauniniet [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Jaunas A2A prasmes pievienošana
@@ -790,7 +790,7 @@ direktorijā `src/lib/a2a/skills/` un tiek reģistrētas, izmantojot A2A uzdevum
 - **Nosaukumu piešķiršana**: faili — `camelCase` vai `kebab-case`, komponenti — `PascalCase`,
   konstantes — `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` visur;
-  `no-explicit-any` = `warn` direktorijās `open-sse/` un `tests/`, bet citur — `error`.
+  `no-explicit-any` = `error` direktorijās `open-sse/**/*.ts` un `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (mantotā pieeja). Starpmoduļu robežām dodiet priekšroku skaidri norādītiem tipiem,
   nevis tipu izsecināšanai.
 - **Datubāze**: nekad nerakstiet neapstrādātu SQL maršrutos vai apstrādātājos — vienmēr izmantojiet
@@ -819,8 +819,7 @@ direktorijā `src/lib/a2a/skills/` un tiek reģistrētas, izmantojot A2A uzdevum
   `a2a`, `memory`, `skills`.
 - **Zari**: prefiksi `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Nekad neveiciet komitu tieši zarā `main`.
-- **Husky**: pirms komita tiek izpildīti `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; pirms nosūtīšanas tiek izpildīti `check:any-budget:t11` + `check:tracked-artifacts` (ātras pārbaudes; neietver `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

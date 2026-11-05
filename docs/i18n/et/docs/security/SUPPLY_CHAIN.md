@@ -18,48 +18,38 @@ OmniRoute avaldab npm + Docker artefakte. Need väravad pakuvad päritolu, varud
 
 Kujutise CVE kohandamine kasutab `docker-publish.yml` failis **kahte sammu**: SARIF-samm (`HIGH,CRITICAL`, `exit-code: 0`) hoiab HIGH+CRITICAL nähtavana turvalisuse vahekaardil blokeerimata; _KRIITILISE värava_ samm (`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`) nurjab väljalaske KRIITILISE CVE korral, **millele on parandus saadaval**. `ignore-unfixed` takistab väljalaske blokeerimist baaskujutise CVE tõttu, millel puudub ülesvoolu parandus.
 
-## ⚠️ CVE varieeruvus (blokeerivad osv/Trivy väravad)
+## ⚠️ CVE varieeruvus (blokeerivad osv/Trivy kontrollid)
 
-osv ja Trivy võrdlevad sõltuvusi CVE andmebaasidega, mis **pidevalt kasvavad**. PR, mis **ei puuduta ühtegi sõltuvust**, võib ootamatult punaseks minna, sest olemasolevas sõltuvuses avastati uus CVE (osv: mõõdetud `vulnCount` > baasjoon; Trivy: uus parandatav KRIITILINE kujutises). **See on blokeeriva CVE värava OODATUD operatiivne käitumine, mitte toote regressioon.**
+osv ja Trivy võrdlevad sõltuvusi CVE-andmebaasidega, mis **kasvavad pidevalt**. PR,
+mis **ei muuda ühtegi sõltuvust**, võib äkitselt punaseks muutuda, sest olemasolevas
+sõltuvuses avalikustati uus CVE (osv: mõõdetud `vulnCount` > lähtetase; Trivy: tõmmises
+on uus parandatav CRITICAL). **See on blokeeriva CVE-kontrolli OODATUD töökäitumine,
+mitte toote regressioon.**
 
-Kui osv või Trivy lähevad äsja avaldatud CVE tõttu punaseks, on lahendus:
+Kui osv või Trivy muutub äsja avalikustatud CVE tõttu punaseks, tuleb teha järgmist:
 
-1.  **Uuenda mõjutatud sõltuvust** (eelistatud) — uuenda parandatud versioonile `package.json` `overrides` kaudu (transitiivsed sõltuvused) või ehita kujutis uuesti parandatud baasil.
-2.  **Kui ülesvoolu parandust pole:**
-    - **osv:** määra `metrics.vulnCount` uuesti baasjooneks failis `config/quality/quality-baseline.json` (`npm run quality:ratchet -- --update` ei hõlma spetsiaalseid väravaid — muuda väärtust käsitsi, `direction:down`) koos põhjenduse märkuse + jälgimisprobleemiga.
-    - **Trivy:** lisa kirje faili `.trivyignore` (CVE-ID rea kohta) koos põhjenduse kommentaari + jälgimisprobleemiga. `ignore-unfixed: true` katab juba automaatselt CVE-d ilma parandusteta.
+1. **Uuenda mõjutatud sõltuvust** (eelistatud) — võta parandatud versioon kasutusele faili `package.json`
+   jaotise `overrides` kaudu (transitiivsed sõltuvused) või loo tõmmis uuesti parandatud baastõmmise põhjal.
+2. **Kui ülesvoolus pole parandust:**
+   - **osv:** määra failis `config/quality/quality-baseline.json` väärtusele `metrics.vulnCount` uus lähtetase
+     (`npm run quality:ratchet -- --update` ei hõlma eraldiseisvaid kontrolle — muuda väärtust
+     käsitsi, `direction:down`) ning lisa põhjendus ja jälgimisülesanne.
+   - **Trivy:** lisa faili `.trivyignore` kirje (üks CVE-ID rea kohta) koos põhjendava
+     kommentaari ja jälgimisülesandega. `ignore-unfixed: true` hõlmab juba automaatselt
+     parandusteta CVE-sid.
 
-Mõlemad väravad **jätavad sujuvalt vahele** (exit 0), kui tööriist puudub või mõõtmine ebaõnnestub (osv-scanner pole PATH-is, osv.dev/võrk kättesaamatu, vigane JSON) — **mõõtmise** ebaõnnestumine ei blokeeri kunagi, ainult **mõõdetud** regressioon blokeerib.
+Nõutavad OSV käivitused (`check:vuln-ratchet -- --ratchet`) nurjuvad turvaliselt
+olekuga `INCOMPLETE` ja väljumiskoodiga 2, kui skannerit, aruannet või lähtetaset ei saa valideerida.
+Mõõdetud regressiooni korral on väljumiskood 1. Nõuandev käivitus võib endiselt teatada olekust `SKIP`
+ja lõppeda väljumiskoodiga 0, kuid see ei kinnita, et sõltuvused läbisid skannimise. Blokeeriv
+Trivy etapp nõuab samuti edukat mõõtmist: kättesaamatud tööriistad, nurjunud tööd
+ja puuduvad tõmmise tõendid ei võimalda tõendada, et tõmmis on puhas.
 
-## Teadaolevad aktsepteeritud riskid
+## Eemaldatud sõltuvuse risk
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Juurkataloogi lukufail ei sisalda pärast fikseeritud versiooniga promptfoo arendustööriista uuendamist enam `extract-zip`-i ega sellele viivat sõltuvusseost. Sellega eemaldatakse varem heaks kiidetud ahel `promptfoo` → `@openai/codex-security` → `extract-zip`, mida jälgiti juhtumis #14482. Regressioonikontrollid failis `tests/unit/extract-zip-14482-exposure.test.ts` takistavad selle uuesti lisamist ja säilitavad keelu importida seda tootmiskoodist.
 
-`extract-zip@2.0.1` sisaldab kahte parandamata kõrge riskitasemega sümlingi-läbimise nõrkust.
-Vastavalt ülaltoodud CVE variandi lahenduse "ülesvoolu parandust pole" harule on see **aktsepteeritud risk**, mitte uuendus:
-
-- **Ahel:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  Kinnitatud `package-lock.json` kaudu — täpselt üks pakett kogu sõltuvuspuus
-  (`@openai/codex-security`) deklareerib `extract-zip`, ja täpselt üks pakett
-  (`promptfoo`) deklareerib `@openai/codex-security`.
-- **Ahelas ei eksisteeri ühtegi parandatud versiooni.** `extract-zip@2.0.1` (avaldatud 2020) on paketi viimane väljalase — seda ei hooldata. `@openai/codex-security`
-  praegune npm-latest (`0.1.29`) tõmbab endiselt `extract-zip@2.0.1`.
-- **Tootmises kättesaamatu.** `promptfoo` on ainult arendussõltuvus (pole kunagi loetletud
-  `dependencies` all), ja ükski fail `src/`, `open-sse/` või `bin/` all ei impordi
-  `extract-zip` npm paketti — OmniRoute'i enda `extractZip()` abifunktsioon
-  (`src/lib/versionManager/binaryManager.ts:93`) kasutab natiivseid `unzip`/`tar`
-  käske ja on seega mitteseotud. `@openai/codex-security` sisaldab ka oma sümlingi-läbimise
-  kaitset lisaks extract-zip'i onEntry tagasihelistamisele.
-- **Ärge** looge `extract-zip` jaoks aliast `package.json` `overrides` kaudu — ainus elujõuline
-  asendus on Electron-org-internal ja see on API-ga kokkusobimatu
-  `@openai/codex-security` enda onEntry/defaultDirMode/defaultFileMode kontrollidega;
-  selle ülekirjutamine rikuks vaikselt selle paketi turvakontrollid.
-- **Algväärtus:** mõõdetud osv `vulnCount` (3) on juba tunduvalt allpool külmutatud
-  `config/quality/quality-baseline.json` algväärtusest (27) — hammasratta muutust pole vaja.
-- **Regressioonikaitse:** `tests/unit/extract-zip-14482-exposure.test.ts` kinnitab
-  ülaltoodud ahela ja tootmisesse mitteimportimise invariandi; see ebaõnnestub CI-s,
-  kui kumbki neist kunagi katkeb (nt tulevane PR muudab `extract-zip` tootmises kättesaadavaks).
-- **Jälgimine:** probleem #14482.
+Praegune sõltuvuste parandus piirab ühilduvuse alistused ka Azure Identity MSAL-i kliendi, get-uri FTP-kliendi ja OpenCode v1 SDK Zodi sõltuvusega. Azure'i tõendi hankimist ja FTP kaudu allalaadimist testitakse kontrollitud transpordikihtidega; mõlemad OpenCode'i paketid käitavad omaenda koostamis- ja testikomplekte. Registri turvanõuannete arvud on kindla ajahetke mõõtmistulemused ja võivad pärast lukufaili sissekandmist muutuda.
 
 ## Tööjärjekord: Scorecard'i nõuanne → blokeerimine
 

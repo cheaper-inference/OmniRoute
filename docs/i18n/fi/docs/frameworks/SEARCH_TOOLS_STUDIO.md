@@ -54,7 +54,7 @@ Uusi välilehti sisällön poimimiseen URL-osoitteesta `POST /v1/web/fetch` -raj
 - Syöte: URL + koko sivun valintakytkin + muodon valitsin (markdown / teksti / HTML).
 - Lähetä → nouda → hahmonna `ScrapeResult.tsx`.
 - `ScrapeResult` näyttää markdown-esikatselun ja raakamuodon valintakytkimen.
-- Rajoitus: jos vastauksen runko on yli **256 KB**, käyttöliittymä näyttää tekstin `(katkaistu, näytä raakamuoto)` ja avaa raakamuodon Monaco-modaali-ikkunassa (D21).
+- Rajoitus: jos vastauksen runko on yli **256 KB**, käyttöliittymä näyttää tekstin `View full raw content` ja avaa raakamuodon modaali-ikkunassa (D21).
 - Metatietopaneeli: palveluntarjoaja (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), viive, kustannus, vastauksen koko, linkkien määrä.
 - Käyttää `useScrapeFetch.ts`-hookia.
 

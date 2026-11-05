@@ -190,26 +190,13 @@ Obsidian REST API token එක ගබඩා කරයි. GHSA-62vw මඟින
 තවමත් fail-open ස්තරයේ පැවතිණි (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` අමතරව
 data directory එකම වන, එය තුළ පිහිටන, හෝ එය අඩංගු කරන vault එකක් ප්රතික්ෂේප කරයි.
 
-#### Credential exports operator සඳහා පමණි
+#### අක්තපත්‍ර අපනයනය සහ ප්‍රතිසාධනය ක්‍රියාකරුට පමණි
 
 ඉහත ස්තරය තීරණය කරන්නේ _යම්_ අක්තපත්රයක් අවශ්යද යන්න පමණි. ගබඩා කළ අක්තපත්ර බාගත කරන මාර්ග, හසුරුවනය තුළ දෙවන පරීක්ෂාවක් එක් කරයි: `GET /api/settings/export-json` (විකේතනය කළ සැපයුම්කරු සම්බන්ධතා සහ අමු API යතුරු), `GET /api/db-backups/export` (SQLite ගොනුව) සහ `GET /api/db-backups/exportAll` (සම්පූර්ණ සංරක්ෂිතය) විසින් `requireOperatorCredential()` (`src/lib/api/operatorCredential.ts`) ඇමතුම් කරයි. එය ඩෑෂ්බෝඩ් සැසියක්, දේශීය CLI subject එකක්, හෝ පිවිසීම අක්රිය කර ඇති instance එකක් පිළිගන්නා අතර, ඕනෑම scope එකක (`manage` සහ `admin` ඇතුළුව) API යතුරු සහ `oma_` ප්රවේශ ටෝකන සඳහා `403` ප්රතිචාර දෙයි. සමමුහුර්තකරණ ටෝකන නිකුත් කිරීම (`POST /api/sync/tokens`) ද විශ්වාසදායක loopback අභ්යන්තර-සේවා ටෝකනයට අමතරව එම helper එකම භාවිත කරයි.
 
-#### Credential exports and restores are operator-only
+අදාළ විනාශකාරී ක්‍රියාවලටද එම සීමාවම අදාළ වේ: `POST /api/db-backups/import` (උඩුගත කළ `.sqlite` ගොනුව, `dryRun=true` ද ඇතුළුව), `POST /api/db-backups` (සුරැකි උපස්ථය එහි id අනුව ප්‍රතිසාධනය කිරීම) සහ `POST /api/settings/import-json` (පැරණි JSON ආකෘතියෙන් ප්‍රතිසාධනය) ක්‍රියාත්මක දත්ත ගබඩාව හෝ සැකසුම්, සම්බන්ධතා සහ API යතුරු මුළු කට්ටලයම ප්‍රතිස්ථාපනය කරයි. එබැවින් යන්ත්‍ර අක්තපත්‍රයකින් මෙම ක්‍රියාද ආරම්භ කළ නොහැක.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+ප්‍රතිසාධන ස්ථාන මකා දැමීමටද එම සීමාවම අදාළය: `DELETE /api/db-backups` (පිරිසිදු කිරීම — අලුත්ම N තබා ගැනීම හෝ D දිනකට වඩා පැරණි ඒවා ඉවත් කිරීම) සහ `PATCH /api/db-backups` (රඳවා ගැනීමේ සැකසුම්). සුරැකි නීතිම `cleanupDbBackups()` එක් එක් ස්වයංක්‍රීය උපස්ථයෙන් පසු යොදයි (`src/lib/db/backup.ts`); ඒ නිසා `keepLatest: 1` සුරැකිය හැකි යන්ත්‍ර අක්තපත්‍රයකට ඊළඟ තත්ත්ව පිටපතේදී පෙර ප්‍රතිසාධන ස්ථාන මකා දැමිය හැක. උපස්ථ ලැයිස්තුගත කිරීම සහ සෑදීම (`GET`/`PUT /api/db-backups`) සාමාන්‍ය කළමනාකරණ සත්‍යාපනය යටතේ පවතී.
 
 ### නව ස්ථාපන bootstrap එක සැබෑ peer අනුව loopback සඳහා පමණි — `Host` අනුව නොවේ
 

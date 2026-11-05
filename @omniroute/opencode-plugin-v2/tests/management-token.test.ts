@@ -2,6 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import plugin from "../src/index.js";
 import { collectCatalog } from "../src/catalog.js";
+import { withEmptyEnrichment } from "./helpers/network-fixtures.js";
 
 const MODELS_URL = "https://gw.example.com/v1/models";
 const COMBOS_URL = "https://gw.example.com/api/combos";
@@ -130,26 +131,29 @@ describe("plugin-v2 managementReadToken wiring (F1)", () => {
 
   it("collectCatalog routes combosFetcher to managementReadToken, models to apiKey", async () => {
     const calls: Array<[string, string]> = [];
-    const collected = await collectCatalog(
-      {
-        providerId: "omniroute",
-        baseURL: "https://gw.example.com",
-        apiKey: "chat-key",
-        managementReadToken: "mgmt-key",
-        timeoutMs: 1000,
-        modelCacheTtlMs: 300000,
-        usableOnly: false,
-      },
-      {
-        fetcher: async (_baseURL, token) => {
-          calls.push(["models", token]);
-          return [{ id: "m1", capabilities: { tool_calling: true } }];
+    const collected = await withEmptyEnrichment((enrichmentFetcher) =>
+      collectCatalog(
+        {
+          providerId: "omniroute",
+          baseURL: "https://gw.example.com",
+          apiKey: "chat-key",
+          managementReadToken: "mgmt-key",
+          timeoutMs: 1000,
+          modelCacheTtlMs: 300000,
+          usableOnly: false,
         },
-        combosFetcher: async (_baseURL, token) => {
-          calls.push(["combos", token]);
-          return [];
-        },
-      }
+        {
+          enrichmentFetcher,
+          fetcher: async (_baseURL, token) => {
+            calls.push(["models", token]);
+            return [{ id: "m1", capabilities: { tool_calling: true } }];
+          },
+          combosFetcher: async (_baseURL, token) => {
+            calls.push(["combos", token]);
+            return [];
+          },
+        }
+      )
     );
     const res = collected.counts;
     assert.deepEqual(res, { models: 1, combos: 0 });

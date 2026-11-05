@@ -106,7 +106,7 @@ OmniRoute/
 
 > **v3.8.26-ում տեղափոխվել է արմատային պանակից դուրս (կարգի բերում).**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` և գեներացված `quality-metrics.json` (անտեսվում է git-ի կողմից)։ Տե՛ս [`## config/`](#config--static-configs--quality-gate-state)։
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` և գեներացված `quality-metrics.json` (անտեսվում է git-ի կողմից)։ Տե՛ս [`## config/`](#config--ստատիկ-կազմաձևեր--որակի-շեմի-վիճակ)։
 
 ---
 
@@ -444,7 +444,7 @@ open-sse/
 
 | Ենթապանակ             | Նպատակ                                                                                                                                                                                                                                        |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Փաստաթղթերի տեղայնացված թարգմանություններ (41 տեղայնացում)                                                                                                                                                                                    |
+| `docs/i18n/`          | Փաստաթղթերի տեղայնացված թարգմանություններ (66 տեղայնացում)                                                                                                                                                                                    |
 | `docs/screenshots/`   | Ուղեցույցների պատկերային ռեսուրսներ                                                                                                                                                                                                           |
 | `_tasks/superpowers/` | Պլաններ/մասնագրեր՝ superpowers-ից (`writing-plans`/`brainstorming`) + հետազոտություններ․ մեկուսացված, առանձին տարբերակավորվող շտեմարան, որը հիմնական ծառում անտեսվում է git-ի կողմից։ Տե՛ս CLAUDE.md → «Պլանավորման և հետազոտության նյութեր»։ |
 

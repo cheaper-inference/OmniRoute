@@ -211,7 +211,7 @@ Obsidian REST API pilnvaru. GHSA-62vw tikai maskēja paroles atklāšanu ar `GET
 joprojām atradās kļūmes gadījumā piekļuvi atļaujošajā līmenī (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` papildus
 noraida glabātuvi, kas ir datu direktorijs, atrodas tajā vai satur to.
 
-#### Akreditācijas datu eksportēšana ir paredzēta tikai operatoriem
+#### Akreditācijas datu eksportēšana un atjaunošana ir paredzēta tikai operatoriem
 
 Iepriekšējais līmenis nosaka tikai to, vai ir nepieciešami _kādi_ akreditācijas dati. Maršruti, kas lejupielādē
 saglabātos akreditācijas datus, apstrādātājā veic otru pārbaudi: `GET /api/settings/export-json` (atšifrēti
@@ -222,22 +222,9 @@ instanci ar atspējotu pieteikšanos un atbild ar `403` jebkura tvēruma API ats
 un `admin`), kā arī `oma_` piekļuves pilnvarām. Sinhronizācijas pilnvaru izsniegšana (`POST /api/sync/tokens`) izmanto to
 pašu palīgfunkciju, kā arī uzticamo atgriezeniskās cilpas iekšējā pakalpojuma pilnvaru.
 
-#### Credential exports and restores are operator-only
+Tā pati robeža attiecas uz atbilstošajām destruktīvajām darbībām: `POST /api/db-backups/import` (augšupielādēts `.sqlite` fails, arī ar `dryRun=true`), `POST /api/db-backups` (saglabātas rezerves kopijas atjaunošana pēc tās id) un `POST /api/settings/import-json` (vecākā JSON formāta atjaunošana) aizstāj aktīvo datubāzi vai visu iestatījumu, savienojumu un API atslēgu kopumu. Tādēļ arī tās nevar ierosināt ar mašīnas akreditācijas datiem.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Tā pati robeža attiecas uz atjaunošanas punktu dzēšanu: `DELETE /api/db-backups` (tīrīšana — saglabāt jaunākos N vai dzēst tos, kas vecāki par D dienām) un `PATCH /api/db-backups` (glabāšanas iestatījumi). Saglabātos noteikumus `cleanupDbBackups()` piemēro pēc katras automātiskās rezerves kopijas (`src/lib/db/backup.ts`); mašīnas akreditācijas dati, ar kuriem varētu saglabāt `keepLatest: 1`, nākamajā momentuzņēmumā varētu izdzēst iepriekšējos atjaunošanas punktus. Kopiju uzskaitīšana un veidošana (`GET`/`PUT /api/db-backups`) saglabā parasto pārvaldības autentifikāciju.
 
 ### Svaigas instalācijas sāknēšana ir pieejama tikai atgriezeniskajā cilpā — pēc reālā vienranga mezgla, nevis `Host`
 

@@ -4,46 +4,46 @@
 
 ---
 
-Objectieve functievergelijking met populaire opensource-AI-routers.
+Objectieve functievergelijking versus populaire open-source AI-routers.
 
-> **Methodologie**: Openbare repositories gecontroleerd in 2026-Q2. Versies zoals vermeld.
-> Dien correcties in via een PR — we willen dat dit nauwkeurig is.
+> **Methodologie**: publieke repo's geaudit in 2026-Q2. Versies zoals vermeld.
+> Dien correcties in via een PR — we willen dat dit accuraat is.
 
-| Functie                                                 |                OmniRoute 3.8                |       LiteLLM 1.x       |  OpenRouter (SaaS)   |   Portkey   |
-| ------------------------------------------------------- | :-----------------------------------------: | :---------------------: | :------------------: | :---------: |
-| **Providers**                                           |                   **329**                   |          ~100           |         ~50          |     ~30     |
-| **Gratis catalogusitems/zonder authenticatie**          |                   **155**                   |         n.v.t.          |       doorvoer       |   n.v.t.    |
-| **Zelf te hosten**                                      |                     ✅                      |           ✅            |          ❌          |  ⚠ betaald  |
-| **OAuth-catalogusitems**                                |                   **23**                    |      gedeeltelijk       |          ❌          |     ❌      |
-| **Automatische fallback-combinaties**                   |             **19 strategieën**              | op prioriteit gebaseerd | op niveaus gebaseerd |   gewogen   |
-| **Fusie (parallel panel + synthese door beoordelaar)**  |                     ✅                      |           ❌            |          ❌          |     ❌      |
-| **Niveau 1/2/3-fallback (abonnement→goedkoop→gratis)**  |                   ✅ + UI                   |        handmatig        |        n.v.t.        |  handmatig  |
-| **Tokencompressie**                                     | 12-engine-stack (RTK + Caveman + LLMLingua) |          geen           |         geen         |    geen     |
-| **Multimodale generatie (spraak/muziek/video)**         |                     ✅                      |           ❌            |       doorvoer       |     ❌      |
-| **Ingebouwde MCP-server**                               |           ✅ 110 tools, 33 scopes           |           ❌            |          ❌          |     ❌      |
-| **A2A-protocol**                                        |              ✅ 6 vaardigheden              |           ❌            |          ❌          |     ❌      |
-| **Geheugen (FTS5 + vector)**                            |                     ✅                      |           ❌            |          ❌          |     ❌      |
-| **Beveiligingsrails (PII, injectie, beeld)**            |                     ✅                      |      gedeeltelijk       |          ❌          | ✅ betaald  |
-| **Integraties met cloudagents**                         |         Codex, Cursor, Devin, Jules         |           ❌            |          ❌          |     ❌      |
-| **Circuit breaker per provider**                        |        ✅ 3 toestanden, lui herstel         |          basis          |          ❌          |     ✅      |
-| **TLS-fingerprintverhulling (JA3/JA4)**                 |                 ✅ wreq-js                  |           ❌            |          ❌          |     ❌      |
-| **Evaluatieframework**                                  |                ✅ ingebouwd                 |           ❌            |          ❌          |  ⚠ betaald  |
-| **MITM-proxy (onderschept Cursor/Antigravity)**         |          ✅ platformonafhankelijk           |           ❌            |          ❌          |     ❌      |
-| **CLI met systeemvak (geen Electron)**                  |                     ✅                      |           ❌            |        n.v.t.        |   n.v.t.    |
-| **Automatische CLI-authenticatie via machine-ID**       |                     ✅                      |           ❌            |        n.v.t.        |   n.v.t.    |
-| **Dashboard**                                           |                 Next.js 16                  |          basis          |     propriëtair      | propriëtair |
-| **i18n**                                                |           **42 landinstellingen**           |           ❌            |          ❌          |      ⚠      |
-| **Openbare agentvaardigheden (SKILL.md)**               |                    ✅ 45                    |           ❌            |          ❌          |     ❌      |
-| **Tunnelondersteuning (Cloudflared, Tailscale, Ngrok)** |                     ✅                      |           ❌            |        n.v.t.        |   n.v.t.    |
-| **Licentie**                                            |                     MIT                     |           MIT           |     propriëtair      | propriëtair |
+| Functie                                                 |                  OmniRoute 3.8                   |       LiteLLM 1.x       |  OpenRouter (SaaS)  |   Portkey   |
+| ------------------------------------------------------- | :----------------------------------------------: | :---------------------: | :-----------------: | :---------: |
+| **Providers**                                           |                     **329**                      |          ~100           |         ~50         |     ~30     |
+| **Gratis/no-auth-catalogusitems**                       |                     **155**                      |         n.v.t.          |     passthrough     |   n.v.t.    |
+| **Zelf te hosten**                                      |                        ✅                        |           ✅            |         ❌          |  ⚠ betaald  |
+| **OAuth-catalogusitems**                                |                      **23**                      |      gedeeltelijk       |         ❌          |     ❌      |
+| **Automatische fallback-combinaties**                   |                **20 strategieën**                | op prioriteit gebaseerd | op niveau gebaseerd |   gewogen   |
+| **Fusie (parallel panel + beoordelaarssynthese)**       |                        ✅                        |           ❌            |         ❌          |     ❌      |
+| **Niveau 1/2/3-fallback (abonnement→goedkoop→gratis)**  |                     ✅ + UI                      |        handmatig        |       n.v.t.        |  handmatig  |
+| **Tokencompressie**                                     | stack van 12 engines (RTK + Caveman + LLMLingua) |          geen           |        geen         |    geen     |
+| **Multimodale generatie (spraak/muziek/video)**         |                        ✅                        |           ❌            |     passthrough     |     ❌      |
+| **Ingebouwde MCP-server**                               |             ✅ 110 tools, 33 scopes              |           ❌            |         ❌          |     ❌      |
+| **A2A-protocol**                                        |                   ✅ 6 skills                    |           ❌            |         ❌          |     ❌      |
+| **Geheugen (FTS5 + vector)**                            |                        ✅                        |           ❌            |         ❌          |     ❌      |
+| **Guardrails (PII, injectie, vision)**                  |                        ✅                        |      gedeeltelijk       |         ❌          | ✅ betaald  |
+| **Cloud-agentintegraties**                              |           Codex, Cursor, Devin, Jules            |           ❌            |         ❌          |     ❌      |
+| **Circuit breaker per provider**                        |          ✅ 3 toestanden, lazy recovery          |          basis          |         ❌          |     ✅      |
+| **TLS-fingerprint-stealth (JA3/JA4)**                   |                    ✅ wreq-js                    |           ❌            |         ❌          |     ❌      |
+| **Evaluatieframework**                                  |                   ✅ ingebouwd                   |           ❌            |         ❌          |  ⚠ betaald  |
+| **MITM-proxy (onderschept Cursor/Antigravity)**         |                ✅ cross-platform                 |           ❌            |         ❌          |     ❌      |
+| **CLI met systeemvak (geen Electron)**                  |                        ✅                        |           ❌            |       n.v.t.        |   n.v.t.    |
+| **CLI auto-auth via machine-ID**                        |                        ✅                        |           ❌            |       n.v.t.        |   n.v.t.    |
+| **Dashboard**                                           |                    Next.js 16                    |          basis          |     propriëtair     | propriëtair |
+| **i18n**                                                |                  **67 locales**                  |           ❌            |         ❌          |      ⚠      |
+| **Openbare agent-skills (SKILL.md)**                    |                      ✅ 45                       |           ❌            |         ❌          |     ❌      |
+| **Tunnelondersteuning (Cloudflared, Tailscale, Ngrok)** |                        ✅                        |           ❌            |       n.v.t.        |   n.v.t.    |
+| **Licentie**                                            |                       MIT                        |           MIT           |     propriëtair     | propriëtair |
 
-## Wanneer u voor OmniRoute kiest
+## Wanneer kiezen voor OmniRoute
 
-- U host zelf en wilt **maximale providerdekking** (374 providers, 155 gratis catalogusitems zonder authenticatie)
-- U hebt een **ingebouwde MCP-server** nodig (LLM-tools, geheugen en vaardigheden beschikbaar als tools)
-- U hebt het **A2A-protocol** nodig voor workflows tussen agents
-- U wilt **vingerafdrukverberging** (JA3/JA4) om detectie door CAPTCHA's van upstreamproviders te voorkomen
-- U hebt **bedrijfsfuncties** nodig (vangrails, evaluaties, audittrail) zonder kosten voor een SaaS-abonnement
+- Je host zelf en wilt **maximale providerdekking** (375 providers, 155 gratis catalogusvermeldingen zonder authenticatie)
+- Je hebt een **ingebouwde MCP-server** nodig (LLM-tools, geheugen en skills die als tools worden aangeboden)
+- Je hebt het **A2A-protocol** nodig voor agent-to-agent-workflows
+- Je wilt **fingerprint-stealth** (JA3/JA4) om detectie door upstream-CAPTCHA's te voorkomen
+- Je hebt **enterprise-functies** nodig (guardrails, evals, audittrail) zonder SaaS-rekening
 
 ## Wanneer kies je voor LiteLLM?
 

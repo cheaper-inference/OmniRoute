@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 ਪ੍ਰਦਾਤਾ ਰਜਿਸਟਰੀਆਂ, ਹੈਡਰ ਪ੍ਰੋਫ਼ਾਈਲ, ਪਛਾਣ, …
 ├── handlers/               ਬੇਨਤੀ ਹੈਂਡਲਰ (ਚੈਟ, ਐਂਬੈਡਿੰਗ, ਆਡੀਓ, ਚਿੱਤਰ, …)
-├── executors/              150 ਪ੍ਰਦਾਤਾ ਐਗਜ਼ਿਕਿਊਟਰ ਮੋਡੀਊਲ (ਐਗਜ਼ਿਕਿਊਟਰ ਕਲਾਸਾਂ + ਪ੍ਰਤੀ-ਪ੍ਰਦਾਤਾ ਸਹਾਇਕ)
+├── executors/              156 ਪ੍ਰਦਾਤਾ ਐਗਜ਼ਿਕਿਊਟਰ ਮੋਡੀਊਲ (ਐਗਜ਼ਿਕਿਊਟਰ ਕਲਾਸਾਂ + ਪ੍ਰਤੀ-ਪ੍ਰਦਾਤਾ ਸਹਾਇਕ)
 ├── translator/             ਫਾਰਮੈਟ ਰੂਪਾਂਤਰਨ (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions ਸਟ੍ਰੀਮ ਟ੍ਰਾਂਸਫਾਰਮਰ
 ├── services/               80+ ਸੇਵਾ ਮੋਡੀਊਲ (ਕੌਂਬੋ, ਫਾਲਬੈਕ, ਕੋਟੇ, ਪਛਾਣ, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 ਸਿਖਰਲੇ-ਪੱਧਰ ਦੇ ਐਗਜ਼ਿਕਿਊਟਰ ਮੋਡੀਊਲ (`*.ts` ਵਿੱਚੋਂ `base.ts`, `index.ts` ਅਤੇ ਟੈਸਟਾਂ ਨੂੰ ਛੱਡ ਕੇ — ਇਹ ਗਿਣਤੀ
+156 ਸਿਖਰਲੇ-ਪੱਧਰ ਦੇ ਐਗਜ਼ਿਕਿਊਟਰ ਮੋਡੀਊਲ (`*.ts` ਵਿੱਚੋਂ `base.ts`, `index.ts` ਅਤੇ ਟੈਸਟਾਂ ਨੂੰ ਛੱਡ ਕੇ — ਇਹ ਗਿਣਤੀ
 `npm run check:docs-counts` ਮਾਪਦਾ ਹੈ)। ਹਰ ਐਗਜ਼ਿਕਿਊਟਰ ਕਲਾਸ ਸਿੱਧੇ ਤੌਰ 'ਤੇ ਜਾਂ `DefaultExecutor`
 ਜਾਂ ਕਿਸੇ ਹੋਰ ਐਗਜ਼ਿਕਿਊਟਰ ਰਾਹੀਂ `BaseExecutor` (`base.ts`) ਨੂੰ ਐਕਸਟੈਂਡ ਕਰਦੀ ਹੈ; ਬਾਕੀ ਮੋਡੀਊਲ ਪ੍ਰਤੀ-ਪ੍ਰਦਾਤਾ
 ਸਹਾਇਕ ਹਨ (ਟੂਲ ਸਕੀਮਾ, ਫੈਚ/TTS ਅਡੈਪਟਰ, ਵਿਸ਼ੇਸ਼ਤਾ ਹੈਂਡਲਰ)। ਐਗਜ਼ਿਕਿਊਟਰਾਂ ਵਿੱਚ ਸ਼ਾਮਲ ਹਨ:
@@ -772,7 +772,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts` ਨੂੰ ਵਿਸਤਾਰ ਦਿਓ)।
 2. `src/shared/constants/mcpScopes.ts` ਵਿੱਚ ਢੁਕਵੇਂ ਸਕੋਪ ਨਿਰਧਾਰਤ ਕਰੋ।
 3. ਟੂਲ ਨੂੰ `open-sse/mcp-server/server.ts` ਵਿੱਚ ਰਜਿਸਟਰ ਕਰੋ।
-4. `open-sse/mcp-server/__tests__/` ਹੇਠ ਟੈਸਟ ਸ਼ਾਮਲ ਕਰੋ।
+4. `tests/unit/` ਹੇਠ ਟੈਸਟ ਸ਼ਾਮਲ ਕਰੋ।
 5. [MCP-SERVER.md](../frameworks/MCP-SERVER.md) ਨੂੰ ਅੱਪਡੇਟ ਕਰੋ।
 
 ### ਨਵਾਂ A2A ਹੁਨਰ ਸ਼ਾਮਲ ਕਰੋ
@@ -790,7 +790,7 @@ bin/
 - **ਨਾਮਕਰਨ**: ਫਾਈਲਾਂ `camelCase` ਜਾਂ `kebab-case`, ਕੰਪੋਨੈਂਟ `PascalCase`,
   ਕਾਂਸਟੈਂਟ `UPPER_SNAKE`।
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = ਹਰ ਥਾਂ `error`;
-  `no-explicit-any` = `open-sse/` ਅਤੇ `tests/` ਵਿੱਚ `warn`, ਹੋਰ ਥਾਵਾਂ 'ਤੇ error।
+  `no-explicit-any` = `open-sse/**/*.ts` ਅਤੇ `tests/**/*.ts` ਵਿੱਚ `error`।
 - **TypeScript**: `strict: false` (ਵਿਰਾਸਤੀ ਰੁਖ਼)। ਕ੍ਰਾਸ-ਮੋਡੀਊਲ ਸੀਮਾਵਾਂ ਲਈ
   ਇਨਫਰੈਂਸ ਦੀ ਬਜਾਏ ਸਪਸ਼ਟ ਟਾਈਪਾਂ ਨੂੰ ਤਰਜੀਹ ਦਿਓ।
 - **ਡਾਟਾਬੇਸ**: ਰੂਟਾਂ ਜਾਂ ਹੈਂਡਲਰਾਂ ਵਿੱਚ ਕਦੇ ਵੀ ਕੱਚੀ SQL ਨਾ ਲਿਖੋ — ਹਮੇਸ਼ਾ
@@ -819,8 +819,7 @@ bin/
   `a2a`, `memory`, `skills`।
 - **ਬ੍ਰਾਂਚਾਂ**: ਪ੍ਰੀਫਿਕਸ `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`। ਕਦੇ ਵੀ ਸਿੱਧਾ `main` ਵਿੱਚ ਕਮਿਟ ਨਾ ਕਰੋ।
-- **Husky**: pre-commit `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11` ਚਲਾਉਂਦਾ ਹੈ; pre-push `check:any-budget:t11` + `check:tracked-artifacts` ਚਲਾਉਂਦਾ ਹੈ (ਤੇਜ਼ ਗੇਟ; `test:unit` ਨੂੰ ਸ਼ਾਮਲ ਨਹੀਂ ਕਰਦਾ)।
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

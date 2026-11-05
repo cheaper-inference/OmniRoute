@@ -106,7 +106,7 @@ OmniRoute/
 
 > **Premaknjeno iz korenskega imenika v različici v3.8.26 (pospravljanje):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` in ustvarjena datoteka `quality-metrics.json` (git jo prezre). Glejte [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` in ustvarjena datoteka `quality-metrics.json` (git jo prezre). Glejte [`## config/`](#config--statične-konfiguracije-in-stanje-preverjanj-kakovosti).
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | Podimenik             | Namen                                                                                                                                                                                                                           |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Lokalizirani prevodi dokumentacije (41 jezikovnih različic)                                                                                                                                                                     |
+| `docs/i18n/`          | Lokalizirani prevodi dokumentacije (66 jezikovnih različic)                                                                                                                                                                     |
 | `docs/screenshots/`   | Slikovna gradiva za vodnike                                                                                                                                                                                                     |
 | `_tasks/superpowers/` | Načrti/specifikacije iz superpowers (`writing-plans`/`brainstorming`) + raziskave — izoliran repozitorij z ločenim različicanjem, ki ga glavno drevo ignorira prek git. Glejte CLAUDE.md → »Artefakti načrtovanja in raziskav«. |
 

@@ -340,11 +340,11 @@ Pengekstrakan adalah **berasaskan regex**, bukannya berasaskan LLM — ia dijala
 `setImmediate()` supaya tidak sekali-kali menyekat aliran respons:
 
 - **Pola keutamaan** → `MemoryType.FACTUAL`
-  (cth. `Saya lebih suka …`, `Saya sangat menyukai …`, `kegemaran saya ialah …`, `Saya benci …`)
+  (cth. `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
 - **Pola keputusan** → `MemoryType.EPISODIC`
-  (cth. `Saya akan menggunakan …`, `Saya memilih …`, `Saya membuat keputusan untuk menggunakan …`, `Saya akan menerima pakai …`)
+  (cth. `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
 - **Pola tabiat** → `MemoryType.FACTUAL`
-  (cth. `Saya biasanya …`, `Saya sentiasa …`, `Saya cenderung untuk …`)
+  (cth. `I usually …`, `I always …`, `I tend to …`)
 
 Setiap padanan disanitasi (`trim`, merapatkan ruang kosong, dihadkan kepada 500 aksara),
 dinyahduplikasi dalam kelompok melalui `factKey(category, content)` yang stabil, dan
@@ -716,11 +716,11 @@ Modul `extraction.ts` (`src/lib/memory/extraction.ts`) menggunakan **padanan cor
 
 ### Kategori Corak Lalai
 
-| Kategori            | Contoh corak                                                                       | Yang ditangkap                |
-| ------------------- | ---------------------------------------------------------------------------------- | ----------------------------- |
-| PREFERENCE_PATTERNS | `"Saya lebih suka <X>"`, `"Saya suka <X>"`, `"Saya benci <X>"`                     | Keutamaan pengguna            |
-| DECISION_PATTERNS   | `"Saya akan menggunakan <X>"`, `"Saya memutuskan untuk <X>"`, `"Saya memilih <X>"` | Keputusan pengguna (episodik) |
-| PATTERN_PATTERNS    | `"Saya biasanya <X>"`, `"Saya sentiasa <X>"`, `"Saya tidak pernah <X>"`            | Corak tingkah laku berterusan |
+| Kategori            | Contoh corak                                                | Yang ditangkap                |
+| ------------------- | ----------------------------------------------------------- | ----------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Keutamaan pengguna            |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Keputusan pengguna (episodik) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Corak tingkah laku berterusan |
 
 ### Contoh Corak (Dipermudah)
 
@@ -756,7 +756,8 @@ Apabila pengguna berkata:
 
 Untuk mengelakkan pengekstrakan tanpa kawalan, had berikut dikenakan:
 
-| Panjang kandungan minimum | 3 aksara |
+| Panjang kandungan minimum  | 3 aksara   |
+| -------------------------- | ---------- |
 | Panjang kandungan maksimum | 500 aksara |
 
 ### Masa untuk Menyahdayakan Pengekstrakan

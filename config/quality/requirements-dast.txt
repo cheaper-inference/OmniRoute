@@ -1,0 +1,29 @@
+# DAST runner: Python 3.12 on ubuntu-latest. Exact resolved versions, 2026-10-30.
+# Upgrade as a reviewed set and rerun the offline CLI contract and real DAST.
+anyio==4.15.1
+certifi==2026.10.23
+charset-normalizer==3.5.2
+click==8.5.0
+graphql-core==3.3.1
+harfile==0.6.0
+hypothesis==6.170.14
+hypothesis-graphql==0.13.6
+idna==3.20
+iniconfig==2.3.1
+jsonschema_rs==0.60.3
+markdown-it-py==4.2.0
+MarkupSafe==3.0.4
+mdurl==0.1.2
+packaging==26.3
+pluggy==1.7.0
+Pygments==2.21.0
+pyrate-limiter==4.5.1
+pytest==9.2.0
+PyYAML==6.0.3
+requests==2.34.2
+rich==15.0.0
+schemathesis==4.32.7
+sortedcontainers==2.4.0
+typing_extensions==4.16.0
+urllib3==2.8.0
+Werkzeug==3.1.9

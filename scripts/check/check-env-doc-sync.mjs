@@ -49,10 +49,24 @@ const IGNORE_FROM_CODE = new Set([
   "LC_MESSAGES",
   "CI",
   "GITHUB_ACTIONS",
+  // Desktop release uploader context supplied by electron-release.yml (#18165).
+  // GITHUB_REPOSITORY is runner-owned; VERSION is the validated release tag.
+  // Neither is OmniRoute application configuration or belongs in a user's .env.
+  "GITHUB_REPOSITORY",
+  "VERSION",
+  // #17267: immutable GitHub event context consumed by the CHANGELOG comparison
+  // helper in quality.yml. These are CI inputs, never server/user configuration.
+  "CHANGELOG_EVENT_NAME",
+  "CHANGELOG_CANDIDATE_SHA",
+  "CHANGELOG_PR_BASE_SHA",
+  "CHANGELOG_MERGE_GROUP_BASE_SHA",
+  "CHANGELOG_PUSH_BEFORE_SHA",
   "RUNNER_OS",
   // Quality-gate harness knobs (optional cache/report paths for CI scripts — not product config).
   "ESLINT_RESULTS_JSON",
   "COMPLEXITY_ESLINT_REPORT",
+  // #18345: CI build-provenance guard; never a server/user configuration option.
+  "OMNIROUTE_REQUIRE_PREBUILT_NEXT",
   // Agent environment / system execution paths.
   "PROJECT_ROOT",
   "ARTIFACTS_DIR",
@@ -119,6 +133,9 @@ const IGNORE_FROM_CODE = new Set([
   "GITHUB_RUN_ATTEMPT",
   "GITHUB_RUN_ID",
   "GITHUB_SHA",
+  // #18345: Actions runner-owned workflow-file commit identity used by
+  // build-provenance/admission checks; never an application .env setting.
+  "GITHUB_WORKFLOW_SHA",
   "NEEDS_JSON",
   // Set by the Actions runner; the ts7 ratchet appends its job summary there
   // (scripts/check/check-ts7-diagnostics-ratchet.mjs) — never OmniRoute runtime config (#9985).

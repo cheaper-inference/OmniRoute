@@ -106,7 +106,7 @@ OmniRoute/
 
 > **v3.8.26-ൽ റൂട്ടിൽ നിന്ന് മാറ്റിയത് (അലങ്കോലാവസ്ഥ കുറയ്ക്കൽ):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, കൂടാതെ സൃഷ്ടിക്കപ്പെടുന്ന `quality-metrics.json` (gitignored). [`## config/`](#config--static-configs--quality-gate-state) കാണുക.
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, കൂടാതെ സൃഷ്ടിക്കപ്പെടുന്ന `quality-metrics.json` (gitignored). [`## config/`](#config--സ്റ്റാറ്റിക്-കോൺഫിഗറേഷനുകൾ--ക്വാളിറ്റി-ഗേറ്റ്-നില) കാണുക.
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | ഉപഡയറക്ടറി            | ഉദ്ദേശ്യം                                                                                                                                                                                                                                                              |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | പ്രാദേശികവൽക്കരിച്ച ഡോക്യുമെന്റ് വിവർത്തനങ്ങൾ (41 ലോക്കേലുകൾ)                                                                                                                                                                                                          |
+| `docs/i18n/`          | പ്രാദേശികവൽക്കരിച്ച ഡോക്യുമെന്റ് വിവർത്തനങ്ങൾ (66 ലോക്കേലുകൾ)                                                                                                                                                                                                          |
 | `docs/screenshots/`   | ഗൈഡുകൾക്കായുള്ള ഇമേജ് അസറ്റുകൾ                                                                                                                                                                                                                                         |
 | `_tasks/superpowers/` | superpowers-ൽ നിന്നുള്ള പ്ലാനുകൾ/സ്പെസിഫിക്കേഷനുകൾ (`writing-plans`/`brainstorming`) + ഗവേഷണം — ഒറ്റപ്പെടുത്തിയതും പ്രത്യേകം പതിപ്പുനിയന്ത്രിക്കുന്നതുമായ റിപ്പോസിറ്ററി; പ്രധാന ട്രീയിൽ gitignore ചെയ്തിരിക്കുന്നു. CLAUDE.md → "Planning & Research Artifacts" കാണുക. |
 

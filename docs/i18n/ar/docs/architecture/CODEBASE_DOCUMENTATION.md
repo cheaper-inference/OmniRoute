@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 سجلات المزوّدين، وملفات تعريف الترويسات، والهوية، …
 ├── handlers/               معالجات الطلبات (الدردشة، والتضمينات، والصوت، والصور، …)
-├── executors/              150 وحدة تنفيذ للمزوّدين (فئات المنفّذات + أدوات مساعدة خاصة بكل مزوّد)
+├── executors/              156 وحدة تنفيذ للمزوّدين (فئات المنفّذات + أدوات مساعدة خاصة بكل مزوّد)
 ├── translator/             تحويل التنسيقات (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            محوّل تدفق Responses API ↔ Chat Completions
 ├── services/               أكثر من 80 وحدة خدمة (التركيبات، والبدائل، والحصص، والهوية، …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 وحدة تنفيذ من المستوى الأعلى (`*.ts` باستثناء `base.ts` و`index.ts` والاختبارات — وهو العدد
+156 وحدة تنفيذ من المستوى الأعلى (`*.ts` باستثناء `base.ts` و`index.ts` والاختبارات — وهو العدد
 الذي يقيسه `npm run check:docs-counts`). توسّع كل فئة منفّذ `BaseExecutor` (`base.ts`)،
 مباشرةً أو عبر `DefaultExecutor` أو منفّذ آخر؛ أما الوحدات المتبقية فهي أدوات مساعدة خاصة بكل مزوّد
 (مخططات الأدوات، ومهايئات الجلب/TTS، ومعالجات السلوكيات الخاصة). تشمل المنفّذات:
@@ -772,7 +772,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts`).
 2. عيّن النطاق أو النطاقات المناسبة في `src/shared/constants/mcpScopes.ts`.
 3. سجّل الأداة في `open-sse/mcp-server/server.ts`.
-4. أضف الاختبارات ضمن `open-sse/mcp-server/__tests__/`.
+4. أضف الاختبارات ضمن `tests/unit/`.
 5. حدّث [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### إضافة مهارة A2A جديدة
@@ -790,7 +790,7 @@ bin/
 - **التسمية**: الملفات بصيغة `camelCase` أو `kebab-case`، والمكوّنات بصيغة `PascalCase`،
   والثوابت بصيغة `UPPER_SNAKE`.
 - **ESLint**: القواعد `no-eval` و`no-implied-eval` و`no-new-func` = `error` في كل مكان؛
-  والقاعدة `no-explicit-any` = `warn` في `open-sse/` و`tests/`، و`error` في الأماكن الأخرى.
+  والقاعدة `no-explicit-any` = `error` في `open-sse/**/*.ts` و`tests/**/*.ts`.
 - **TypeScript**: ‏`strict: false` (نهج متوارث). فضّل الأنواع الصريحة على
   الاستدلال عند الحدود بين الوحدات.
 - **قاعدة البيانات**: لا تكتب SQL خامًا مطلقًا في المسارات أو المعالجات — استخدم دائمًا
@@ -820,8 +820,7 @@ bin/
   و`a2a`، و`memory`، و`skills`.
 - **الفروع**: البادئات `feat/`، و`fix/`، و`refactor/`، و`docs/`، و`test/`،
   و`chore/`. لا تُجرِ إيداعًا مباشرًا إلى `main` مطلقًا.
-- **Husky**: يشغّل خطاف ما قبل الإيداع `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`؛ ويشغّل خطاف ما قبل الدفع `check:any-budget:t11` + `check:tracked-artifacts` (بوابات سريعة؛ تستثني `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

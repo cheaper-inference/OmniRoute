@@ -11,13 +11,13 @@ izmērītajām maksimālajām slodzēm. Servera resursi tiek pārdalīti virs to
 webpack būvējumu un lint darbu; servera mijmaiņas apgabals (16 GB) to absorbē, un, tā kā izvilkšanas pieprasījumu būvējumi darbojas
 mitinātā vidē, Turbopack slots lielāko daļu laika ir dīkstāvē:
 
-| izpildītājs          | etiķete           | loma                                                                                                                                                 | `MemoryHigh` / `MemoryMax`    | `CPUQuota`   |
-| -------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | ------------ |
-| `omniroute-113-5`    | `omni-build`      | Turbopack būvējumi: `ci.yml` `Build` (tikai push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, nakts a11y būvējums | 56 GB / 60 GB (mijmaiņa 0)    | 1600 %       |
-| `omniroute-113-6`    | `omni-release`    | Release-Green (`release-green` + `main-green`), webpack būvējums                                                                                     | 20 GB / 24 GB (mijmaiņa 4 GB) | 800 %        |
-| `omniroute-113-2`    | `omni-light`      | nakts darbi (Schemathesis, promptfoo, garak, k6) un `quality.yml` `lint-guard`                                                                       | 12 GB / 16 GB (mijmaiņa 4 GB) | 600 %        |
-| `omniroute-113`      | `omni-light`      | tas pats pūls, kas norādīts iepriekš                                                                                                                 | 8 GB / 12 GB                  | 400 %        |
-| OmniHeuris, OmniMind | (to repozitoriji) | tikai Dependabot (maksimums 155 MB katram, 2026-10-18)                                                                                               | 4 GB / 6 GB                   | 200 % katram |
+| izpildītājs          | etiķete                         | loma                                                                                                                                                 | `MemoryHigh` / `MemoryMax`    | `CPUQuota`   |
+| -------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | ------------ |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack būvējumi: `ci.yml` `Build` (tikai push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, nakts a11y būvējums | 56 GB / 60 GB (mijmaiņa 0)    | 1600 %       |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack būvējums                                                                                     | 20 GB / 24 GB (mijmaiņa 4 GB) | 800 %        |
+| `omniroute-113-2`    | `omni-light`                    | nakts darbi (Schemathesis, promptfoo, garak, k6) un `quality.yml` `lint-guard`                                                                       | 12 GB / 16 GB (mijmaiņa 4 GB) | 600 %        |
+| `omniroute-113`      | `omni-light`                    | tas pats pūls, kas norādīts iepriekš                                                                                                                 | 8 GB / 12 GB                  | 400 %        |
+| OmniHeuris, OmniMind | (to repozitoriji)               | tikai Dependabot (maksimums 155 MB katram, 2026-10-18)                                                                                               | 4 GB / 6 GB                   | 200 % katram |
 
 Mērīts 2026-10-18:
 
@@ -86,7 +86,7 @@ restartēšanu izpildot vienā komandā.
 ## Darbības noteikumi
 
 - **Vienlaikus tikai viens Turbopack būvējums — to nodrošina etiķete.** Katrs darbs, kas izpilda pilnu Turbopack
-  `next build`, izmanto `[self-hosted, omni-build]`, un tikai **`omniroute-113-5`** ir piešķirta šī
+  `next build`, izmanto `[self-hosted, omni-build, omni-build-60gb]`, un tikai **`omniroute-113-5`** ir piešķirta šī
   etiķete: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
   nakts a11y būvējums (#16853) un `docker-publish.yml` **amd64** (webpack BuildKit iekšienē —
   Turbopack tur avarēja, izpilde 33253576569). arm64 Docker posms joprojām darbojas uz `ubuntu-24.04-arm`.

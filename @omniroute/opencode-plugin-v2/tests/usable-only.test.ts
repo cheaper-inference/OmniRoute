@@ -2,6 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { publishCatalog } from "../src/catalog.js";
 import { parsePluginOptions } from "../src/options.js";
+import { withEmptyEnrichment } from "./helpers/network-fixtures.js";
 type BetaDraft = {
   provider: {
     list?: () => unknown[];
@@ -92,17 +93,20 @@ describe("catalog usableOnly gating", () => {
   it("usableOnly=false performs zero providers fetches", async () => {
     const { draft, models } = fakeDraft();
     let providersCalls = 0;
-    const res = await publishCatalog(
-      draft,
-      { ...baseOpts, usableOnly: false },
-      {
-        fetcher: stubModels,
-        combosFetcher: async () => [],
-        providersFetcher: async () => {
-          providersCalls += 1;
-          return [];
-        },
-      }
+    const res = await withEmptyEnrichment((enrichmentFetcher) =>
+      publishCatalog(
+        draft,
+        { ...baseOpts, usableOnly: false },
+        {
+          enrichmentFetcher,
+          fetcher: stubModels,
+          combosFetcher: async () => [],
+          providersFetcher: async () => {
+            providersCalls += 1;
+            return [];
+          },
+        }
+      )
     );
     assert.equal(providersCalls, 0);
     assert.equal(res.models, 3);
@@ -136,16 +140,19 @@ describe("catalog usableOnly gating", () => {
 
   it("usableOnly=true with providers soft-fail keeps the full catalog", async () => {
     const { draft, models } = fakeDraft();
-    const res = await publishCatalog(
-      draft,
-      { ...baseOpts, usableOnly: true },
-      {
-        fetcher: stubModels,
-        combosFetcher: async () => [],
-        providersFetcher: async () => {
-          throw new Error("down");
-        },
-      }
+    const res = await withEmptyEnrichment((enrichmentFetcher) =>
+      publishCatalog(
+        draft,
+        { ...baseOpts, usableOnly: true },
+        {
+          enrichmentFetcher,
+          fetcher: stubModels,
+          combosFetcher: async () => [],
+          providersFetcher: async () => {
+            throw new Error("down");
+          },
+        }
+      )
     );
     assert.equal(res.models, 3);
     assert.ok(models.has("omniroute/dead/drop-me"));

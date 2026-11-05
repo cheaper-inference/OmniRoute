@@ -15,7 +15,7 @@ OmniRoute គឺជា gateway សម្រាប់បញ្ជូនសំណ�
 
 សមត្ថភាពស្នូល៖
 
-- ផ្ទៃ API ដែលឆបគ្នាជាមួយ OpenAI សម្រាប់ CLI/tools (375 providers, 154 executor modules)
+- ផ្ទៃ API ដែលឆបគ្នាជាមួយ OpenAI សម្រាប់ CLI/tools (375 providers, 156 executor modules)
 - ការបម្លែង request/response រវាងទម្រង់របស់ provider ផ្សេងៗ
 - Model combo fallback (លំដាប់ multi-model)
 - ជំហាន combo ដែលមានរចនាសម្ព័ន្ធ (`provider + model + connection`) ជាមួយការរៀបលំដាប់នៅពេលដំណើរការដោយ `compositeTiers`
@@ -31,7 +31,7 @@ OmniRoute គឺជា gateway សម្រាប់បញ្ជូនសំណ�
 - ការស្វែងរកលើបណ្ដាញតាមរយៈ `/v1/search` (20 providers)
 - ការត្រួតពិនិត្យខ្លឹមសារតាមរយៈ `/v1/moderations`
 - ការរៀបចំណាត់ថ្នាក់ឡើងវិញតាមរយៈ `/v1/rerank`
-- ការញែក think tag (``) សម្រាប់ reasoning models
+- ការញែក think tag (`<think>...</think>`) សម្រាប់ reasoning models
 - ការសម្អាត response ដើម្បីឱ្យឆបគ្នាយ៉ាងតឹងរ៉ឹងជាមួយ OpenAI SDK
 - ការធ្វើ role normalization (developer→system, system→user) ដើម្បីឱ្យឆបគ្នារវាង providers
 - ការបម្លែង structured output (json_schema → Gemini responseSchema)
@@ -1094,11 +1094,11 @@ Provider នីមួយៗមាន executor ឯកទេសមួយដែល�
 - migration របស់ schema SQLite និង hook ដំឡើងកំណែដោយស្វ័យប្រវត្តិនៅពេលចាប់ផ្តើម
 - ផ្លូវភាពឆបគ្នាសម្រាប់ migration ពី JSON ចាស់ → SQLite
 
-## 6) របាំង SSRF / URL ចេញក្រៅ
+## 6) ការការពារ SSRF / URL ចេញក្រៅ
 
-- `src/shared/network/outboundUrlGuard.ts` រារាំង URL គោលដៅ private/loopback/link-local ទាំងអស់ មុនពេលពួកវាទៅដល់ executor របស់អ្នកផ្តល់សេវា
-- route សម្រាប់ការស្វែងរក និងផ្ទៀងផ្ទាត់ model របស់អ្នកផ្តល់សេវា ប្រើ `src/shared/network/safeOutboundFetch.ts` ដែលអនុវត្ត guard មុនរាល់សំណើចេញក្រៅ
-- កំហុស guard ត្រូវបានបង្ហាញជា `URL_GUARD_BLOCKED` ជាមួយ HTTP 422 ហើយត្រូវបានកត់ត្រាទៅក្នុងប្រវត្តិសវនកម្មអនុលោមភាពតាមរយៈ `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) អនុវត្ត `src/shared/network/outboundUrlGuard.ts` ចំពោះសំណើជជែកដែលត្រូវបានបញ្ជូនតាមរយៈ `BaseExecutor.execute()`។ នៅក្នុងរបៀបសាធារណៈតែប៉ុណ្ណោះ (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` ដោយបិទទង់ឯកជន) វាទប់ស្កាត់ម៉ាស៊ីនមេឯកជន ម៉ាស៊ីនមេ loopback និង 169.254.0.0/16; នៅក្នុងរបៀបផ្សេងទៀតទាំងអស់ វាទប់ស្កាត់ម៉ាស៊ីនមេ cloud-metadata។ វាពិនិត្យឈ្មោះម៉ាស៊ីនមេ ឬ IP literal តាមដែលបានសរសេរ មុនពេលធ្វើការស្វែងរក DNS ណាមួយ។ អ្នកផ្តល់សេវាមូលដ្ឋានដែលមានស្រាប់នឹងរំលងការពារនេះ។
+- ផ្លូវសម្រាប់ការស្វែងរក និងផ្ទៀងផ្ទាត់ម៉ូដែលរបស់អ្នកផ្តល់សេវា ប្រើ `src/shared/network/safeOutboundFetch.ts` ដែលអនុវត្តការការពារមុនពេលសំណើចេញក្រៅនីមួយៗ
+- កំហុសនៃការការពារត្រូវបានបង្ហាញជា `URL_GUARD_BLOCKED` ជាមួយ HTTP 503 (`getSafeOutboundFetchErrorStatus`; ផ្លូវស្វែងរកម៉ូដែលត្រឡប់ 400) ហើយការទប់ស្កាត់ SSRF ពិតប្រាកដក្នុងអំឡុងពេលផ្ទៀងផ្ទាត់ ត្រូវបានកត់ត្រាទៅក្នុងកំណត់ហេតុសវនកម្មជា event `provider.validation.ssrf_blocked`
 
 ## ភាពអាចសង្កេតបាន និងសញ្ញាប្រតិបត្តិការ
 
@@ -1149,7 +1149,7 @@ Provider នីមួយៗមាន executor ឯកទេសមួយដែល�
 4. ឥរិយាបថរបស់ cloud ពឹងផ្អែកលើ `NEXT_PUBLIC_BASE_URL` ដែលត្រឹមត្រូវ និងលទ្ធភាពចូលដំណើរការចំណុចបញ្ចប់របស់ cloud។
 5. ថត `open-sse/` ត្រូវបានបោះផ្សាយជា **npm workspace package** `@omniroute/open-sse`។ កូដប្រភព import វាតាមរយៈ `@omniroute/open-sse/...` (ដោះស្រាយដោយ `transpilePackages` របស់ Next.js)។ ផ្លូវឯកសារក្នុងឯកសារនេះនៅតែប្រើឈ្មោះថត `open-sse/` ដើម្បីរក្សាភាពស៊ីសង្វាក់គ្នា។
 6. គំនូសតាងក្នុង dashboard ប្រើ **Recharts** (ផ្អែកលើ SVG) សម្រាប់ការមើលឃើញទិន្នន័យវិភាគដែលអាចចូលប្រើបាន និងអន្តរកម្ម (គំនូសតាងបារនៃការប្រើប្រាស់ model និងតារាងបែងចែកតាមអ្នកផ្តល់សេវា ជាមួយអត្រាជោគជ័យ)។
-7. ការធ្វើតេស្ត E2E ប្រើ **Playwright** (`tests/e2e/`) និងដំណើរការតាមរយៈ `npm run test:e2e`។ ការធ្វើតេស្ត unit ប្រើ **Node.js test runner** (`tests/unit/`) និងដំណើរការតាមរយៈ `npm run test:unit`។ កូដប្រភពនៅក្រោម `src/` គឺជា **TypeScript** (`.ts`/`.tsx`) ខណៈដែល workspace `open-sse/` នៅតែជា JavaScript (`.js`)។
+7. ការធ្វើតេស្ត E2E ប្រើ **Playwright** (`tests/e2e/`) និងដំណើរការតាមរយៈ `npm run test:e2e`។ ការធ្វើតេស្ត unit ប្រើ **Node.js test runner** (`tests/unit/`) និងដំណើរការតាមរយៈ `npm run test:unit`។ កូដប្រភពនៅក្រោម `src/` គឺជា **TypeScript** (`.ts`/`.tsx`) ខណៈដែល workspace `open-sse/` នៅតែជា TypeScript (`.ts`)។
 8. ទំព័រការកំណត់ត្រូវបានរៀបចំជា 7 ផ្ទាំង៖ ទូទៅ, រូបរាង, AI, សុវត្ថិភាព, ការកំណត់ផ្លូវ, ភាពធន់ និងកម្រិតខ្ពស់។ ទំព័រភាពធន់ កំណត់រចនាសម្ព័ន្ធតែជួរសំណើ រយៈពេលរង់ចាំនៃការតភ្ជាប់ ឧបករណ៍ផ្តាច់សៀគ្វីរបស់អ្នកផ្តល់សេវា និងឥរិយាបថរង់ចាំរហូតដល់ផុតរយៈពេលរង់ចាំប៉ុណ្ណោះ។ ស្ថានភាព runtime ផ្ទាល់របស់ឧបករណ៍ផ្តាច់សៀគ្វី ត្រូវបានបង្ហាញនៅលើទំព័រសុខភាព។
 9. យុទ្ធសាស្ត្រ **Context Relay** (`context-relay`) ត្រូវបានបែងចែកជាពីរស្រទាប់៖ `combo.ts` សម្រេចថាតើគួរបង្កើត handoff ឬអត់ ហើយ `chat.ts` បញ្ចូល handoff បន្ទាប់ពីដោះស្រាយគណនីរួច។ ទិន្នន័យ handoff ស្ថិតនៅក្នុងតារាង SQLite `context_handoffs`។ ការបែងចែកនេះគឺដោយចេតនា ព្រោះមានតែ `chat.ts` ប៉ុណ្ណោះដែលដឹងថាតើគណនីជាក់ស្តែងបានផ្លាស់ប្តូរឬអត់។
 10. **ការអនុវត្ត Proxy ជាកំហិត** ឥឡូវនេះមានភាពគ្រប់ជ្រុងជ្រោយ៖ `tokenHealthCheck.ts` ដោះស្រាយ proxy សម្រាប់ការតភ្ជាប់នីមួយៗ, `/api/providers/validate` ប្រើ `runWithProxyContext` ហើយ `proxyFetch.ts` ប្រើ `undici.fetch()` ដើម្បីរក្សាភាពឆបគ្នាជាមួយ dispatcher នៅលើ Node 22។

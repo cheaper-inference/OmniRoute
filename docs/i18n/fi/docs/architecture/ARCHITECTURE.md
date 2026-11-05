@@ -15,7 +15,7 @@ Se tarjoaa yhden OpenAI-yhteensopivan päätepisteen (`/v1/*`) ja reitittää li
 
 Keskeiset ominaisuudet:
 
-- OpenAI-yhteensopiva API-pinta komentorivityökaluille ja muille työkaluille (375 palveluntarjoajaa, 154 suoritusmoduulia)
+- OpenAI-yhteensopiva API-pinta komentorivityökaluille ja muille työkaluille (375 palveluntarjoajaa, 156 suoritusmoduulia)
 - Pyyntöjen ja vastausten muuntaminen palveluntarjoajien eri muotojen välillä
 - Malliyhdistelmien varajärjestely (usean mallin sarja)
 - Rakenteiset yhdistelmävaiheet (`provider + model + connection`) ja ajonaikainen järjestäminen `compositeTiers`-arvon perusteella
@@ -31,7 +31,7 @@ Keskeiset ominaisuudet:
 - Verkkohaku `/v1/search`-päätepisteen kautta (20 palveluntarjoajaa)
 - Sisällön moderointi `/v1/moderations`-päätepisteen kautta
 - Uudelleenjärjestely `/v1/rerank`-päätepisteen kautta
-- Think-tunnisteiden jäsennys (``) päättelymalleille
+- Think-tunnisteiden jäsennys (`<think>...</think>`) päättelymalleille
 - Vastausten puhdistus tiukan OpenAI SDK -yhteensopivuuden varmistamiseksi
 - Roolien normalisointi (developer→system, system→user) eri palveluntarjoajien välisen yhteensopivuuden takaamiseksi
 - Rakenteisen tulosteen muuntaminen (json_schema → Gemini responseSchema)
@@ -1094,11 +1094,11 @@ taaksepäin yhteensopivuutta varten. Nykyinen ajonaikainen sopimus käyttää se
 - SQLite-skeeman migraatiot ja automaattisen päivityksen kytkennät käynnistyksen yhteydessä
 - vanhan JSON → SQLite -migraation yhteensopivuuspolku
 
-## 6) SSRF / lähtevien URL-osoitteiden suojaus
+## 6) SSRF / Lähtevien URL-osoitteiden suojaus
 
-- `src/shared/network/outboundUrlGuard.ts` estää kaikki yksityiset, loopback- ja link-local-kohde-URL-osoitteet ennen kuin ne saavuttavat palveluntarjoajien suorittimet
-- palveluntarjoajien mallien etsintä- ja validointireitit käyttävät tiedostoa `src/shared/network/safeOutboundFetch.ts`, joka suorittaa suojauksen ennen jokaista lähtevää pyyntöä
-- suojausvirheet näytetään virheenä `URL_GUARD_BLOCKED` ja HTTP-tilakoodilla 422 sekä kirjataan vaatimustenmukaisuuden auditointijälkeen `providerAudit.ts`-tiedoston kautta
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) soveltaa tiedoston `src/shared/network/outboundUrlGuard.ts` suojausta `BaseExecutor.execute()`-metodin kautta lähetettäviin keskustelupyyntöihin. Vain julkiset osoitteet sallivassa tilassa (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false`, kun yksityinen valitsin ei ole käytössä) se estää yksityiset osoitteet, loopback-isännät ja osoitealueen 169.254.0.0/16; kaikissa muissa tiloissa se estää pilvipalvelujen metatietoisännät. Se tarkistaa isäntänimen tai IP-literaalin kirjoitetussa muodossa ennen DNS-hakua. Sisäänrakennetut paikalliset palveluntarjoajat ohittavat tarkistuksen.
+- Palveluntarjoajien mallien etsintä- ja validointireitit käyttävät tiedostoa `src/shared/network/safeOutboundFetch.ts`, joka soveltaa suojausta ennen jokaista lähtevää pyyntöä
+- Suojauksen virheet näkyvät virheenä `URL_GUARD_BLOCKED`, jonka HTTP-tilakoodi on 503 (`getSafeOutboundFetchErrorStatus`; mallien etsintäreitti palauttaa tilakoodin 400), ja aidot validoinnin aikana estetyt SSRF-yritykset kirjataan auditointilokiin tapahtumina `provider.validation.ssrf_blocked`
 
 ## Havainnoitavuus ja operatiiviset signaalit
 
@@ -1149,7 +1149,7 @@ Koodin aktiivisesti käyttämät ympäristömuuttujat:
 4. Pilvitoiminta riippuu `NEXT_PUBLIC_BASE_URL`-muuttujan oikeasta arvosta ja pilvipäätepisteen saavutettavuudesta.
 5. `open-sse/`-hakemisto julkaistaan `@omniroute/open-sse`-**npm-työtilapakettina**. Lähdekoodi tuo sen polulla `@omniroute/open-sse/...` (Next.jsin `transpilePackages` ratkaisee sen). Tämän asiakirjan tiedostopoluissa käytetään edelleen johdonmukaisuuden vuoksi hakemiston nimeä `open-sse/`.
 6. Hallintapaneelin kaaviot käyttävät **Recharts**-kirjastoa (SVG-pohjainen) saavutettaviin ja vuorovaikutteisiin analytiikan visualisointeihin (mallien käytön pylväskaaviot, palveluntarjoajakohtaiset taulukot onnistumisasteineen).
-7. E2E-testit käyttävät **Playwright**-työkalua (`tests/e2e/`), ja ne suoritetaan komennolla `npm run test:e2e`. Yksikkötestit käyttävät **Node.jsin testiajuria** (`tests/unit/`), ja ne suoritetaan komennolla `npm run test:unit`. Hakemiston `src/` lähdekoodi on **TypeScriptiä** (`.ts`/`.tsx`); `open-sse/`-työtila säilyy JavaScriptinä (`.js`).
+7. E2E-testit käyttävät **Playwright**-työkalua (`tests/e2e/`), ja ne suoritetaan komennolla `npm run test:e2e`. Yksikkötestit käyttävät **Node.jsin testiajuria** (`tests/unit/`), ja ne suoritetaan komennolla `npm run test:unit`. Hakemiston `src/` lähdekoodi on **TypeScriptiä** (`.ts`/`.tsx`); `open-sse/`-työtila säilyy TypeScriptinä (`.ts`).
 8. Asetussivu on jaettu seitsemään välilehteen: Yleiset, Ulkoasu, Tekoäly, Tietoturva, Reititys, Vikasietoisuus ja Lisäasetukset. Vikasietoisuus-sivulla määritetään vain pyyntöjono, yhteyden jäähdytysaika, palveluntarjoajan katkaisija ja jäähdytysajan odotuskäyttäytyminen; katkaisijan reaaliaikainen ajonaikainen tila näkyy Terveys-sivulla.
 9. **Context Relay** -strategia (`context-relay`) on jaettu kahteen tasoon: `combo.ts` päättää, tuleeko siirto luoda, ja `chat.ts` lisää siirron tilin ratkaisemisen jälkeen. Siirtotiedot sijaitsevat SQLiten `context_handoffs`-taulussa. Jako on tarkoituksellinen, koska vain `chat.ts` tietää, vaihtuiko tosiasiallisesti käytetty tili.
 10. **Välityspalvelimen pakotus** on nyt kattava: `tokenHealthCheck.ts` ratkaisee välityspalvelimen yhteyskohtaisesti, `/api/providers/validate` käyttää `runWithProxyContext`-toimintoa, ja `proxyFetch.ts` käyttää `undici.fetch()`-toimintoa säilyttääkseen lähettäjän yhteensopivuuden Node 22:ssa.

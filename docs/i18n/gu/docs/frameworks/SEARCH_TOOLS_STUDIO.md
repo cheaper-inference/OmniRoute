@@ -54,7 +54,7 @@ Search Tools Studio `/dashboard/search-tools` ને મૂળભૂત સર�
 - ઇનપુટ: URL + સંપૂર્ણ-પેજ ટૉગલ + ફોર્મેટ પસંદગીકાર (markdown / text / HTML).
 - સબમિટ → ફેચ → `ScrapeResult.tsx` રેન્ડર કરો.
 - `ScrapeResult` markdown પૂર્વાવલોકન + રૉ ટૉગલ રેન્ડર કરે છે.
-- મર્યાદા: જો પ્રતિસાદ બૉડી **256 KB** કરતાં મોટી હોય, તો UI `(કાપવામાં આવ્યું છે, રૉ જુઓ)` દર્શાવે છે અને રૉ સામગ્રીને Monaco મોડલમાં ખોલે છે (D21).
+- મર્યાદા: જો પ્રતિસાદ બૉડી **256 KB** કરતાં મોટી હોય, તો UI `View full raw content` દર્શાવે છે અને રૉ સામગ્રીને મોડલમાં ખોલે છે (D21).
 - મેટાડેટા પેનલ: પ્રદાતા (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), વિલંબતા, ખર્ચ, પ્રતિસાદનું કદ, લિંક્સની સંખ્યા.
 - `useScrapeFetch.ts` હૂકનો ઉપયોગ કરે છે.
 

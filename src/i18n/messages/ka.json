@@ -6607,7 +6607,7 @@
       "xai": "დააკავშირეთ xAI (Grok) API გასაღებით.",
       "xiaomi-mimo": "დააკავშირეთ Xiaomi MiMo API გასაღებით.",
       "yi": "მიიღეთ API გასაღები მისამართზე platform.lingyiwanwu.com",
-      "zai": "API გასაღები მისამართიდან https://open.bigmodel.cn/usercenter/apikeys",
+      "zai": "API გასაღები მისამართიდან https://z.ai/manage-apikey/apikey-list",
       "zenmux": "ZenMux გთავაზობთ OpenAI-თან თავსებად ჩატის დასრულების ენდპოინტს მისამართზე /api/v1/chat/completions, ასევე Anthropic Messages (/api/anthropic/v1/messages) და Google Gemini (/api/vertex-ai) პროტოკოლურ ინტერფეისებს. OmniRoute იყენებს OpenAI პროტოკოლს.",
       "galadriel": "დააკავშირეთ Galadriel API გასაღებით.",
       "predibase": "$25-ის უფასო საცდელი კრედიტები (მოქმედების ვადა — 30 დღე)",

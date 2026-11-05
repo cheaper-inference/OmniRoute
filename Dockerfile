@@ -48,9 +48,9 @@ RUN --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-apt-cache,targe
 #                   isLinkLocal / NAT64 local-use SSRF advisories fixed in 10.5.1
 #   tar             7.5.19 (needs >= 7.5.21)  GHSA-r292-9mhp-454m
 #   undici          6.27.0 (needs >= 6.28.0)  CVE-2026-16729/-16728/-15157
-# No published npm release carries patched copies, so `npm install -g npm@latest`
-# alone was pure build time for zero CVEs — it is kept only to land on a known,
-# current npm tree, and the patched copies are overlaid on top below.
+# Pin npm 12.2.1, whose declared engines include this Node 26 base.
+# This makes the npm bootstrap repeatable; the patched copies remain overlaid
+# below. The version assertion does not replace a scan of the resulting image.
 #
 # Deleting npm from the runner stages is NOT an option: the application shells
 # out to npm at runtime (src/lib/services/installers/utils.ts::runNpm for the
@@ -64,7 +64,7 @@ RUN --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-apt-cache,targe
 # --install-strategy=nested makes each replacement self-contained, so it cannot
 # perturb the versions the rest of npm's flat tree resolves.
 RUN set -eux; \
-  npm install -g npm@latest; \
+  npm install -g npm@12.2.1; \
   npm install --prefix /tmp/npm-cve-patch --no-audit --no-fund --ignore-scripts \
     --install-strategy=nested \
     brace-expansion@5.0.12 ip-address@10.7.3 postcss-selector-parser@7.1.6 tar@7.5.22 undici@6.29.0; \
@@ -76,7 +76,7 @@ RUN set -eux; \
   done; \
   rm -rf /tmp/npm-cve-patch; \
   node -e "for (const p of ['brace-expansion','ip-address','postcss-selector-parser','tar','undici']) console.log(p, require('/usr/local/lib/node_modules/npm/node_modules/'+p+'/package.json').version);"; \
-  npm --version; \
+  test "$(npm --version)" = "12.2.1"; \
   npm cache clean --force
 
 # ── Builder ────────────────────────────────────────────────────────────────

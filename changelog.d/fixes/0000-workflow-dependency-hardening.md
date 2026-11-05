@@ -1,0 +1,1 @@
+- **fix(ci):** Pin GitHub Actions and the Semgrep image to verified immutable references, remove credential persistence and release cache reuse, and scope issue permissions to reporting jobs. Desktop uploads use the runner GitHub CLI and preserve curated release notes.

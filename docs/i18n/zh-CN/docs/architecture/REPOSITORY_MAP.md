@@ -106,7 +106,7 @@ OmniRoute/
 
 > **已在 v3.8.26 中移出根目录（精简整理）：**
 >
-> - **→ `config/quality/`：** `quality-baseline.json`、`complexity-baseline.json`、`duplication-baseline.json`、`file-size-baseline.json`、`test-discovery-baseline.json`、`dependency-allowlist.json`、`.license-allowlist.json`，以及生成的 `quality-metrics.json`（已被 git 忽略）。请参阅 [`## config/`](#config--static-configs--quality-gate-state)。
+> - **→ `config/quality/`：** `quality-baseline.json`、`complexity-baseline.json`、`duplication-baseline.json`、`file-size-baseline.json`、`test-discovery-baseline.json`、`dependency-allowlist.json`、`.license-allowlist.json`，以及生成的 `quality-metrics.json`（已被 git 忽略）。请参阅 [`## config/`](#config--静态配置--质量门禁状态)。
 
 ---
 
@@ -444,7 +444,7 @@ open-sse/
 
 | 子目录                | 用途                                                                                                                                                                      |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | 本地化文档翻译（41 种语言区域）                                                                                                                                           |
+| `docs/i18n/`          | 本地化文档翻译（66 种语言区域）                                                                                                                                           |
 | `docs/screenshots/`   | 指南所用的图像资源                                                                                                                                                        |
 | `_tasks/superpowers/` | 来自 superpowers（`writing-plans`/`brainstorming`）的计划/规范及研究资料——独立存放、单独进行版本控制的仓库，已被主工作树的 git 忽略。请参阅 CLAUDE.md →“规划与研究产物”。 |
 

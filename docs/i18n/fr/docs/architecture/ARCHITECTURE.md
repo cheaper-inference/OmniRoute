@@ -15,7 +15,7 @@ Il fournit un point de terminaison unique compatible avec OpenAI (`/v1/*`) et ac
 
 Fonctionnalités principales :
 
-- Surface d’API compatible avec OpenAI pour les CLI/outils (375 fournisseurs, 154 modules d’exécution)
+- Surface d’API compatible avec OpenAI pour les CLI/outils (375 fournisseurs, 156 modules d’exécution)
 - Traduction des requêtes/réponses entre les formats des fournisseurs
 - Repli par combinaison de modèles (séquence multimodèle)
 - Étapes de combinaison structurées (`provider + model + connection`) avec ordonnancement à l’exécution selon `compositeTiers`
@@ -31,7 +31,7 @@ Fonctionnalités principales :
 - Recherche Web via `/v1/search` (20 fournisseurs)
 - Modération via `/v1/moderations`
 - Reclassement via `/v1/rerank`
-- Analyse des balises de réflexion (``) pour les modèles de raisonnement
+- Analyse des balises de réflexion (`<think>...</think>`) pour les modèles de raisonnement
 - Assainissement des réponses pour une compatibilité stricte avec le SDK OpenAI
 - Normalisation des rôles (developer→system, system→user) pour assurer la compatibilité entre fournisseurs
 - Conversion des sorties structurées (json_schema → Gemini responseSchema)
@@ -1093,11 +1093,11 @@ L’ancien journaliseur de requêtes basé sur des fichiers (`open-sse/utils/req
 - migrations du schéma SQLite et mécanismes de mise à niveau automatique au démarrage
 - chemin de compatibilité pour la migration de l’ancien format JSON vers SQLite
 
-## 6) Protection contre les SSRF et contrôle des URL sortantes
+## 6) Protection contre les SSRF / URL sortantes
 
-- `src/shared/network/outboundUrlGuard.ts` bloque toutes les URL cibles privées, de bouclage ou locales au lien avant qu’elles n’atteignent les exécuteurs des fournisseurs
-- les routes de découverte et de validation des modèles des fournisseurs utilisent `src/shared/network/safeOutboundFetch.ts`, qui applique le contrôle avant chaque requête sortante
-- les erreurs du contrôle sont signalées sous la forme `URL_GUARD_BLOCKED` avec le code HTTP 422 et sont consignées dans la piste d’audit de conformité via `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) applique `src/shared/network/outboundUrlGuard.ts` aux requêtes de chat envoyées via `BaseExecutor.execute()`. En mode public uniquement (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` avec l’option d’autorisation des adresses privées désactivée), il bloque les hôtes privés et de bouclage ainsi que 169.254.0.0/16 ; dans tous les autres modes, il bloque les hôtes de métadonnées cloud. Il vérifie le nom d’hôte ou l’adresse IP littérale tel qu’il est écrit, avant toute résolution DNS. Les fournisseurs locaux intégrés ne sont pas soumis à cette vérification.
+- Les routes de découverte et de validation des modèles de fournisseurs utilisent `src/shared/network/safeOutboundFetch.ts`, qui applique la protection avant chaque requête sortante
+- Les erreurs de protection sont signalées par `URL_GUARD_BLOCKED` avec le code HTTP 503 (`getSafeOutboundFetchErrorStatus` ; la route de découverte des modèles renvoie 400), et les véritables blocages SSRF lors de la validation sont consignés dans la piste d’audit sous forme d’événements `provider.validation.ssrf_blocked`
 
 ## Observabilité et signaux opérationnels
 
@@ -1148,7 +1148,7 @@ Variables d’environnement activement utilisées par le code :
 4. Le comportement du cloud dépend de la configuration correcte de `NEXT_PUBLIC_BASE_URL` et de l’accessibilité du point de terminaison cloud.
 5. Le répertoire `open-sse/` est publié en tant que **package d’espace de travail npm** `@omniroute/open-sse`. Le code source l’importe via `@omniroute/open-sse/...` (résolu par `transpilePackages` de Next.js). Les chemins de fichiers de ce document continuent d’utiliser le nom de répertoire `open-sse/` par souci de cohérence.
 6. Les graphiques du tableau de bord utilisent **Recharts** (basé sur SVG) pour fournir des visualisations analytiques accessibles et interactives (histogrammes d’utilisation des modèles, tableaux de répartition par fournisseur avec taux de réussite).
-7. Les tests E2E utilisent **Playwright** (`tests/e2e/`) et sont exécutés via `npm run test:e2e`. Les tests unitaires utilisent le **moteur de test de Node.js** (`tests/unit/`) et sont exécutés via `npm run test:unit`. Le code source sous `src/` est en **TypeScript** (`.ts`/`.tsx`) ; l’espace de travail `open-sse/` reste en JavaScript (`.js`).
+7. Les tests E2E utilisent **Playwright** (`tests/e2e/`) et sont exécutés via `npm run test:e2e`. Les tests unitaires utilisent le **moteur de test de Node.js** (`tests/unit/`) et sont exécutés via `npm run test:unit`. Le code source sous `src/` est en **TypeScript** (`.ts`/`.tsx`) ; l’espace de travail `open-sse/` reste en TypeScript (`.ts`).
 8. La page des paramètres est organisée en 7 onglets : Général, Apparence, IA, Sécurité, Routage, Résilience, Avancé. La page Résilience configure uniquement la file d’attente des requêtes, le délai de récupération des connexions, le disjoncteur des fournisseurs et le comportement d’attente du délai de récupération ; l’état d’exécution en direct des disjoncteurs est affiché sur la page Santé.
 9. La stratégie **Context Relay** (`context-relay`) est répartie sur deux couches : `combo.ts` détermine si un transfert doit être généré, tandis que `chat.ts` injecte le transfert après la résolution du compte. Les données de transfert résident dans la table SQLite `context_handoffs`. Cette séparation est intentionnelle, car seul `chat.ts` sait si le compte réellement utilisé a changé.
 10. **L’application du proxy** est désormais complète : `tokenHealthCheck.ts` résout le proxy pour chaque connexion, `/api/providers/validate` utilise `runWithProxyContext`, et `proxyFetch.ts` utilise `undici.fetch()` afin de maintenir la compatibilité du répartiteur avec Node 22.

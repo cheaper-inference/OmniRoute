@@ -11,13 +11,13 @@ efter sina uppmätta toppar. Maskinen överallokerar endast när ett Turbopack-b
 Release-Green-webpack-bygge och ett lint-jobb; värdens swap (16 GB) absorberar detta, och eftersom byggen för
 pull requests körs hostat är Turbopack-platsen inaktiv för det mesta:
 
-| runner               | etikett        | roll                                                                                                                                                     | `MemoryHigh` / `MemoryMax` | `CPUQuota`    |
-| -------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------- |
-| `omniroute-113-5`    | `omni-build`   | Turbopack-byggen: `ci.yml` `Build` (endast push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, det nattliga a11y-bygget | 56 GB / 60 GB (swap 0)     | 1600 %        |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), webpack-bygge                                                                                            | 20 GB / 24 GB (swap 4 GB)  | 800 %         |
-| `omniroute-113-2`    | `omni-light`   | nattliga jobb (Schemathesis, promptfoo, garak, k6) och `quality.yml` `lint-guard`                                                                        | 12 GB / 16 GB (swap 4 GB)  | 600 %         |
-| `omniroute-113`      | `omni-light`   | samma pool som ovan                                                                                                                                      | 8 GB / 12 GB               | 400 %         |
-| OmniHeuris, OmniMind | (deras repos)  | endast Dependabot (topp på 155 MB vardera, 2026-10-18)                                                                                                   | 4 GB / 6 GB                | 200 % vardera |
+| runner               | etikett                         | roll                                                                                                                                                     | `MemoryHigh` / `MemoryMax` | `CPUQuota`    |
+| -------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack-byggen: `ci.yml` `Build` (endast push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, det nattliga a11y-bygget | 56 GB / 60 GB (swap 0)     | 1600 %        |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack-bygge                                                                                            | 20 GB / 24 GB (swap 4 GB)  | 800 %         |
+| `omniroute-113-2`    | `omni-light`                    | nattliga jobb (Schemathesis, promptfoo, garak, k6) och `quality.yml` `lint-guard`                                                                        | 12 GB / 16 GB (swap 4 GB)  | 600 %         |
+| `omniroute-113`      | `omni-light`                    | samma pool som ovan                                                                                                                                      | 8 GB / 12 GB               | 400 %         |
+| OmniHeuris, OmniMind | (deras repos)                   | endast Dependabot (topp på 155 MB vardera, 2026-10-18)                                                                                                   | 4 GB / 6 GB                | 200 % vardera |
 
 Uppmätt 2026-10-18:
 
@@ -81,7 +81,7 @@ taget, endast när den är inaktiv**, med inaktivitetskontrollen och omstarten i
 ## Driftregler
 
 - **Ett Turbopack-bygge åt gången — framtvingat med etikett.** Varje jobb som kör ett fullständigt Turbopack-
-  `next build` riktas mot `[self-hosted, omni-build]`, och endast **`omniroute-113-5`** har den
+  `next build` riktas mot `[self-hosted, omni-build, omni-build-60gb]`, och endast **`omniroute-113-5`** har den
   etiketten: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
   det nattliga a11y-bygget (#16853) och `docker-publish.yml` **amd64** (webpack inuti BuildKit —
   Turbopack fick panik där, körning 33253576569). Docker-steget för arm64 ligger kvar på `ubuntu-24.04-arm`.

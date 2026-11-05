@@ -12,13 +12,13 @@ OmniRoute রানারের **একটি ভূমিকা**, একট�
 একটি lint জব একই সময়ে চলে; হোস্ট সোয়াপ (16 GB) সেটি সামাল দেয়, এবং pull-request বিল্ডগুলো
 হোস্টেড পরিবেশে চলার কারণে Turbopack স্লটটি অধিকাংশ সময় নিষ্ক্রিয় থাকে:
 
-| রানার                | লেবেল             | ভূমিকা                                                                                                                                        | `MemoryHigh` / `MemoryMax`  | `CPUQuota`          |
-| -------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- | ------------------- |
-| `omniroute-113-5`    | `omni-build`      | Turbopack বিল্ড: `ci.yml` `Build` (শুধু push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, রাতের a11y বিল্ড | 56 GB / 60 GB (সোয়াপ 0)    | 1600 %              |
-| `omniroute-113-6`    | `omni-release`    | Release-Green (`release-green` + `main-green`), webpack বিল্ড                                                                                 | 20 GB / 24 GB (সোয়াপ 4 GB) | 800 %               |
-| `omniroute-113-2`    | `omni-light`      | রাতের জবগুলো (Schemathesis, promptfoo, garak, k6) এবং `quality.yml` `lint-guard`                                                              | 12 GB / 16 GB (সোয়াপ 4 GB) | 600 %               |
-| `omniroute-113`      | `omni-light`      | উপরের একই পুল                                                                                                                                 | 8 GB / 12 GB                | 400 %               |
-| OmniHeuris, OmniMind | (তাদের রিপোজিটরি) | শুধু Dependabot (প্রতিটির সর্বোচ্চ ব্যবহার 155 MB, 2026-10-18)                                                                                | 4 GB / 6 GB                 | প্রতিটির জন্য 200 % |
+| রানার                | লেবেল                           | ভূমিকা                                                                                                                                        | `MemoryHigh` / `MemoryMax`  | `CPUQuota`          |
+| -------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- | ------------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack বিল্ড: `ci.yml` `Build` (শুধু push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, রাতের a11y বিল্ড | 56 GB / 60 GB (সোয়াপ 0)    | 1600 %              |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack বিল্ড                                                                                 | 20 GB / 24 GB (সোয়াপ 4 GB) | 800 %               |
+| `omniroute-113-2`    | `omni-light`                    | রাতের জবগুলো (Schemathesis, promptfoo, garak, k6) এবং `quality.yml` `lint-guard`                                                              | 12 GB / 16 GB (সোয়াপ 4 GB) | 600 %               |
+| `omniroute-113`      | `omni-light`                    | উপরের একই পুল                                                                                                                                 | 8 GB / 12 GB                | 400 %               |
+| OmniHeuris, OmniMind | (তাদের রিপোজিটরি)               | শুধু Dependabot (প্রতিটির সর্বোচ্চ ব্যবহার 155 MB, 2026-10-18)                                                                                | 4 GB / 6 GB                 | প্রতিটির জন্য 200 % |
 
 2026-10-18-এ পরিমাপ করা হয়েছে:
 
@@ -87,7 +87,7 @@ check এবং restart একই command-এ রাখুন।
 ## পরিচালনার নিয়মাবলি
 
 - **একবারে একটি Turbopack build — label দ্বারা বলবৎ।** পূর্ণ Turbopack
-  `next build` চালানো প্রতিটি job `[self-hosted, omni-build]`-কে target করে, এবং কেবল **`omniroute-113-5`**-এরই ওই
+  `next build` চালানো প্রতিটি job `[self-hosted, omni-build, omni-build-60gb]`-কে target করে, এবং কেবল **`omniroute-113-5`**-এরই ওই
   label রয়েছে: `ci.yml`-এর `Build`, `npm-publish.yml`-এর `publish`, `nightly-v4-build`, `preview-artifact`,
   nightly a11y build (#16853) এবং `docker-publish.yml`-এর **amd64** (BuildKit-এর ভেতরে webpack —
   সেখানে Turbopack panic করেছিল, run 33253576569)। arm64 Docker leg-টি `ubuntu-24.04-arm`-এই থাকে।

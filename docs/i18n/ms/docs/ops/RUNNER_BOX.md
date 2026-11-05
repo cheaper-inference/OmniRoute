@@ -11,13 +11,13 @@ puncak penggunaan yang diukur. Mesin ini hanya terlebih komit apabila binaan Tur
 Release-Green dan tugas lint; swap hos (16 GB) menampung keadaan itu, dan oleh sebab binaan pull request dijalankan
 secara dihoskan, slot Turbopack melahu pada kebanyakan masa:
 
-| runner               | label          | peranan                                                                                                                                                  | `MemoryHigh` / `MemoryMax` | `CPUQuota`        |
-| -------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ----------------- |
-| `omniroute-113-5`    | `omni-build`   | Binaan Turbopack: `ci.yml` `Build` (push/dispatch sahaja), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, binaan a11y setiap malam | 56 GB / 60 GB (swap 0)     | 1600 %            |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), binaan webpack                                                                                           | 20 GB / 24 GB (swap 4 GB)  | 800 %             |
-| `omniroute-113-2`    | `omni-light`   | tugas setiap malam (Schemathesis, promptfoo, garak, k6) dan `quality.yml` `lint-guard`                                                                   | 12 GB / 16 GB (swap 4 GB)  | 600 %             |
-| `omniroute-113`      | `omni-light`   | kumpulan yang sama seperti di atas                                                                                                                       | 8 GB / 12 GB               | 400 %             |
-| OmniHeuris, OmniMind | (repo mereka)  | Dependabot sahaja (puncak 155 MB setiap satu, 2026-10-18)                                                                                                | 4 GB / 6 GB                | 200 % setiap satu |
+| runner               | label                           | peranan                                                                                                                                                  | `MemoryHigh` / `MemoryMax` | `CPUQuota`        |
+| -------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ----------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Binaan Turbopack: `ci.yml` `Build` (push/dispatch sahaja), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, binaan a11y setiap malam | 56 GB / 60 GB (swap 0)     | 1600 %            |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), binaan webpack                                                                                           | 20 GB / 24 GB (swap 4 GB)  | 800 %             |
+| `omniroute-113-2`    | `omni-light`                    | tugas setiap malam (Schemathesis, promptfoo, garak, k6) dan `quality.yml` `lint-guard`                                                                   | 12 GB / 16 GB (swap 4 GB)  | 600 %             |
+| `omniroute-113`      | `omni-light`                    | kumpulan yang sama seperti di atas                                                                                                                       | 8 GB / 12 GB               | 400 %             |
+| OmniHeuris, OmniMind | (repo mereka)                   | Dependabot sahaja (puncak 155 MB setiap satu, 2026-10-18)                                                                                                | 4 GB / 6 GB                | 200 % setiap satu |
 
 Diukur pada 2026-10-18:
 
@@ -81,7 +81,7 @@ satu-satu masa, hanya apabila tidak aktif**, dengan semakan tidak aktif dan mula
 ## Peraturan operasi
 
 - **Satu binaan Turbopack pada satu-satu masa — dikuatkuasakan melalui label.** Setiap tugas yang menjalankan
-  `next build` Turbopack penuh menyasarkan `[self-hosted, omni-build]`, dan hanya **`omniroute-113-5`**
+  `next build` Turbopack penuh menyasarkan `[self-hosted, omni-build, omni-build-60gb]`, dan hanya **`omniroute-113-5`**
   mempunyai label tersebut: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`,
   `preview-artifact`, binaan a11y setiap malam (#16853) dan **amd64** `docker-publish.yml` (webpack
   dalam BuildKit — Turbopack mengalami panik di situ, larian 33253576569). Bahagian Docker arm64

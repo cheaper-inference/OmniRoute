@@ -11,13 +11,13 @@ runner של OmniRoute יש **תפקיד אחד**, תווית אחת ותקציב
 Release-Green ולמשימת lint; זיכרון ה־swap של המארח (16 GB) סופג זאת, ומכיוון שבניות של בקשות משיכה
 רצות על תשתית מתארחת, משבצת Turbopack אינה פעילה רוב הזמן:
 
-| runner               | תווית          | תפקיד                                                                                                                                                     | `MemoryHigh` / `MemoryMax`    | `CPUQuota`    |
-| -------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | ------------- |
-| `omniroute-113-5`    | `omni-build`   | בניות Turbopack:‏ `ci.yml` `Build` (עבור push/dispatch בלבד), Docker amd64,‏ `npm-publish`,‏ `nightly-v4-build`,‏ `preview-artifact`, בניית ה־a11y הלילית | 56 GB / 60 GB (ללא swap)      | 1600 %        |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), בניית webpack                                                                                             | 20 GB / 24 GB (‏swap של 4 GB) | 800 %         |
-| `omniroute-113-2`    | `omni-light`   | משימות ליליות (Schemathesis,‏ promptfoo,‏ garak,‏ k6) ו־`quality.yml` `lint-guard`                                                                        | 12 GB / 16 GB (‏swap של 4 GB) | 600 %         |
-| `omniroute-113`      | `omni-light`   | אותו מאגר כמו לעיל                                                                                                                                        | 8 GB / 12 GB                  | 400 %         |
-| OmniHeuris, OmniMind | (המאגרים שלהם) | Dependabot בלבד (שיא של 155 MB לכל אחד, 2026-10-18)                                                                                                       | 4 GB / 6 GB                   | 200 % לכל אחד |
+| runner               | תווית                           | תפקיד                                                                                                                                                     | `MemoryHigh` / `MemoryMax`    | `CPUQuota`    |
+| -------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | ------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | בניות Turbopack:‏ `ci.yml` `Build` (עבור push/dispatch בלבד), Docker amd64,‏ `npm-publish`,‏ `nightly-v4-build`,‏ `preview-artifact`, בניית ה־a11y הלילית | 56 GB / 60 GB (ללא swap)      | 1600 %        |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), בניית webpack                                                                                             | 20 GB / 24 GB (‏swap של 4 GB) | 800 %         |
+| `omniroute-113-2`    | `omni-light`                    | משימות ליליות (Schemathesis,‏ promptfoo,‏ garak,‏ k6) ו־`quality.yml` `lint-guard`                                                                        | 12 GB / 16 GB (‏swap של 4 GB) | 600 %         |
+| `omniroute-113`      | `omni-light`                    | אותו מאגר כמו לעיל                                                                                                                                        | 8 GB / 12 GB                  | 400 %         |
+| OmniHeuris, OmniMind | (המאגרים שלהם)                  | Dependabot בלבד (שיא של 155 MB לכל אחד, 2026-10-18)                                                                                                       | 4 GB / 6 GB                   | 200 % לכל אחד |
 
 נמדד ב־2026-10-18:
 
@@ -81,7 +81,7 @@ worker מדווח שהמשימה בוטלה, וה-listener חוזר למצב מ�
 ## כללי תפעול
 
 - **בניית Turbopack אחת בכל רגע — נאכף באמצעות label.** כל job שמריץ
-  `next build` מלא עם Turbopack מכוון אל `[self-hosted, omni-build]`, ורק **`omniroute-113-5`**
+  `next build` מלא עם Turbopack מכוון אל `[self-hosted, omni-build, omni-build-60gb]`, ורק **`omniroute-113-5`**
   נושא את ה-label הזה: `ci.yml` `Build`,‏ `npm-publish.yml` `publish`,‏ `nightly-v4-build`,‏
   `preview-artifact`, בניית ה-a11y הלילית (#16853) ו-**amd64** של `docker-publish.yml`
   (webpack בתוך BuildKit —‏ Turbopack קרס שם, ריצה 33253576569). שלב ה-Docker של arm64 נשאר על

@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Sağlayıcı kayıtları, başlık profilleri, kimlik, …
 ├── handlers/               İstek işleyicileri (sohbet, gömmeler, ses, görüntü, …)
-├── executors/              150 sağlayıcı yürütücü modülü (yürütücü sınıfları + sağlayıcı başına yardımcılar)
+├── executors/              156 sağlayıcı yürütücü modülü (yürütücü sınıfları + sağlayıcı başına yardımcılar)
 ├── translator/             Biçim dönüştürme (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions akış dönüştürücüsü
 ├── services/               80+ servis modülü (kombolar, geri dönüş, kotalar, kimlik, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 üst düzey yürütücü modülü (`*.ts` eksi `base.ts`, `index.ts` ve testler — bu sayı
+156 üst düzey yürütücü modülü (`*.ts` eksi `base.ts`, `index.ts` ve testler — bu sayı
 `npm run check:docs-counts` tarafından ölçülür). Her yürütücü sınıfı, doğrudan veya
 `DefaultExecutor` ya da başka bir yürütücü aracılığıyla `BaseExecutor` (`base.ts`) sınıfını genişletir;
 kalan modüller sağlayıcı başına yardımcılardır (araç şemaları, fetch/TTS adaptörleri, özel durum işleyicileri).
@@ -774,7 +774,7 @@ Bkz. [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) ve
    `open-sse/mcp-server/schemas/tools.ts` dosyasını genişletin).
 2. `src/shared/constants/mcpScopes.ts` içinde uygun kapsamları atayın.
 3. Aracı `open-sse/mcp-server/server.ts` içinde kaydedin.
-4. Testleri `open-sse/mcp-server/__tests__/` altına ekleyin.
+4. Testleri `tests/unit/` altına ekleyin.
 5. [MCP-SERVER.md](../frameworks/MCP-SERVER.md) dosyasını güncelleyin.
 
 ### Yeni bir A2A becerisi ekleme
@@ -792,7 +792,7 @@ Bkz. [A2A-SERVER.md § Yeni Bir Beceri Ekleme](../frameworks/A2A-SERVER.md). Bec
 - **Adlandırma**: dosyalar `camelCase` veya `kebab-case`, bileşenler `PascalCase`,
   sabitler `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = her yerde `error`;
-  `no-explicit-any` = `open-sse/` ve `tests/` içinde `warn`, diğer yerlerde `error`.
+  `no-explicit-any` = `open-sse/**/*.ts` ve `tests/**/*.ts` içinde `error`.
 - **TypeScript**: `strict: false` (eski yaklaşım). Modüller arası sınırlarda
   çıkarım yerine açık türleri tercih edin.
 - **Veritabanı**: rotalarda veya işleyicilerde asla ham SQL yazmayın — her zaman
@@ -821,8 +821,7 @@ Bkz. [A2A-SERVER.md § Yeni Bir Beceri Ekleme](../frameworks/A2A-SERVER.md). Bec
   `a2a`, `memory`, `skills`.
 - **Dallar**: `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/` önekleri. Asla doğrudan `main` dalına commit göndermeyin.
-- **Husky**: pre-commit, `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11` çalıştırır; pre-push, `check:any-budget:t11` + `check:tracked-artifacts` çalıştırır (hızlı denetimler; `test:unit` hariç).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

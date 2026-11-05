@@ -106,7 +106,7 @@ OmniRoute/
 
 > **v3.8.26에서 루트 외부로 이동됨(정리):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` 및 생성된 `quality-metrics.json`(gitignored). [`## config/`](#config--static-configs--quality-gate-state)을 참조하세요.
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` 및 생성된 `quality-metrics.json`(gitignored). [`## config/`](#config--정적-구성--품질-게이트-상태)을 참조하세요.
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | 하위 디렉터리         | 용도                                                                                                                                                                                                  |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | 현지화된 문서 번역(41개 로케일)                                                                                                                                                                       |
+| `docs/i18n/`          | 현지화된 문서 번역(66개 로케일)                                                                                                                                                                       |
 | `docs/screenshots/`   | 가이드용 이미지 리소스                                                                                                                                                                                |
 | `_tasks/superpowers/` | superpowers(`writing-plans`/`brainstorming`)의 계획/사양 + 연구 자료 — 격리된 별도 버전 관리 저장소이며 기본 트리의 gitignore에 포함됩니다. CLAUDE.md → "Planning & Research Artifacts"를 참조하세요. |
 

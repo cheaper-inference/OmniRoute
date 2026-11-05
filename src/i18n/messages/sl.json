@@ -6600,7 +6600,7 @@
       "xai": "Povežite xAI (Grok) s ključem API.",
       "xiaomi-mimo": "Povežite Xiaomi MiMo s ključem API.",
       "yi": "Pridobite ključ API na platform.lingyiwanwu.com",
-      "zai": "Ključ API s spletnega mesta https://open.bigmodel.cn/usercenter/apikeys",
+      "zai": "Ključ API s spletnega mesta https://z.ai/manage-apikey/apikey-list",
       "zenmux": "ZenMux ponuja končno točko za dokončevanje klepeta, združljivo z OpenAI, na /api/v1/chat/completions ter podporo za protokola Anthropic Messages (/api/anthropic/v1/messages) in Google Gemini (/api/vertex-ai). OmniRoute uporablja protokol OpenAI.",
       "galadriel": "Povežite Galadriel s ključem API.",
       "predibase": "Brezplačno dobroimetje za preizkus v višini 25 USD (veljavnost 30 dni)",

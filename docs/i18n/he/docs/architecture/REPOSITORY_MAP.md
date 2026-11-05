@@ -106,7 +106,7 @@ OmniRoute/
 
 > **הועבר משורש הפרויקט ב-v3.8.26 (לצמצום העומס):**
 >
-> - **← `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, וכן `quality-metrics.json` שנוצר אוטומטית (אינו מנוהל ב-git). ראו [`## config/`](#config--static-configs--quality-gate-state).
+> - **← `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, וכן `quality-metrics.json` שנוצר אוטומטית (אינו מנוהל ב-git). ראו [`## config/`](#config--תצורות-סטטיות--מצב-שער-האיכות).
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | תיקיית משנה           | מטרה                                                                                                                                                                                                |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | תרגומים מקומיים של התיעוד (41 אזורים)                                                                                                                                                               |
+| `docs/i18n/`          | תרגומים מקומיים של התיעוד (66 אזורים)                                                                                                                                                               |
 | `docs/screenshots/`   | נכסי תמונה עבור מדריכים                                                                                                                                                                             |
 | `_tasks/superpowers/` | תוכניות/מפרטים מ-superpowers‏ (`writing-plans`/`brainstorming`) + מחקר — מאגר מבודד עם ניהול גרסאות נפרד, שהעץ הראשי מתעלם ממנו באמצעות gitignore. ראו CLAUDE.md ← "Planning & Research Artifacts". |
 

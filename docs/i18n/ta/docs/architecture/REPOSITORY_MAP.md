@@ -106,7 +106,7 @@ OmniRoute/
 
 > **v3.8.26-இல் மூலக் கோப்பகத்திலிருந்து வெளியே நகர்த்தப்பட்டது (ஒழுங்குபடுத்தல்):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, மற்றும் உருவாக்கப்பட்ட `quality-metrics.json` (gitignored). [`## config/`](#config--static-configs--quality-gate-state)-ஐப் பார்க்கவும்.
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, மற்றும் உருவாக்கப்பட்ட `quality-metrics.json` (gitignored). [`## config/`](#config--நிலையான-உள்ளமைவுகள்--தர-வாயில்-நிலை)-ஐப் பார்க்கவும்.
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | துணைக் கோப்பகம்       | நோக்கம்                                                                                                                                                                                                                                                                                        |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | உள்ளூர்மயமாக்கப்பட்ட ஆவண மொழிபெயர்ப்புகள் (41 மொழிப்பிராந்தியங்கள்)                                                                                                                                                                                                                            |
+| `docs/i18n/`          | உள்ளூர்மயமாக்கப்பட்ட ஆவண மொழிபெயர்ப்புகள் (66 மொழிப்பிராந்தியங்கள்)                                                                                                                                                                                                                            |
 | `docs/screenshots/`   | வழிகாட்டிகளுக்கான பட ஆதாரங்கள்                                                                                                                                                                                                                                                                 |
 | `_tasks/superpowers/` | superpowers-இலிருந்து திட்டங்கள்/விவரக்குறிப்புகள் (`writing-plans`/`brainstorming`) + ஆராய்ச்சி — தனிமைப்படுத்தப்பட்ட, தனியாகப் பதிப்புக் கட்டுப்பாடு செய்யப்படும் repo; முதன்மை tree-இல் gitignore செய்யப்பட்டது. CLAUDE.md → "திட்டமிடல் மற்றும் ஆராய்ச்சி ஆதாரங்கள்" என்பதைப் பார்க்கவும். |
 

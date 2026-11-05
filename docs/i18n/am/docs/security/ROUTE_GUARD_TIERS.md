@@ -215,7 +215,7 @@ caller ወደመረጠው root ይጠቁማል እና አዲስ የተፈጠሩ 
 በfail-open tier ላይ ነበር (GHSA-7pq4-8pvv-rx7r)። `enableObsidianVaultSync()` በተጨማሪ
 data directoryው የሆነ፣ በውስጡ የሚገኝ፣ ወይም የያዘ vaultን አይቀበልም።
 
-#### የማረጋገጫ መረጃ exports ለoperator ብቻ ናቸው
+#### የማረጋገጫ መረጃ መላክና መመለስ ለኦፕሬተሩ ብቻ ናቸው
 
 ከላይ ያለው ደረጃ የሚወስነው _የሆነ_ ማረጋገጫ መረጃ ያስፈልግ እንደሆነ ብቻ ነው። የተቀመጡ
 የማረጋገጫ መረጃዎችን የሚያወርዱ መስመሮች በተቆጣጣሪው ውስጥ ሁለተኛ ፍተሻ ይጨምራሉ፦ `GET /api/settings/export-json` (ዲክሪፕት የተደረጉ
@@ -226,22 +226,9 @@ data directoryው የሆነ፣ በውስጡ የሚገኝ፣ ወይም የያዘ 
 እና `admin`ን ጨምሮ) እና ለ`oma_` የመዳረሻ ቶከኖች `403` ይመልሳል። የማመሳሰያ ቶከን መስጠት (`POST /api/sync/tokens`)
 ተመሳሳዩን አጋዥ ከታመነው የloopback ውስጣዊ-አገልግሎት ቶከን ጋር ይጠቀማል።
 
-#### Credential exports and restores are operator-only
+ተዛማጅ አጥፊ ድርጊቶችም ተመሳሳይ ወሰን አላቸው፦ `POST /api/db-backups/import` (የተጫነ `.sqlite` ፋይል፣ `dryRun=true`ንም ጨምሮ)፣ `POST /api/db-backups` (የተቀመጠ ምትኬን በid መመለስ) እና `POST /api/settings/import-json` (ከቀድሞው JSON ቅርጸት መመለስ) እየሠራ ያለውን የውሂብ ጎታ ወይም ሙሉ የቅንብሮች፣ ግንኙነቶችና API ቁልፎች ስብስብ ይተካሉ። ስለዚህ የማሽን ማረጋገጫ መረጃ እነዚህንም ማስጀመር አይችልም።
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+የመመለሻ ነጥቦችን ማጥፋትም ተመሳሳይ ወሰን አለው፦ `DELETE /api/db-backups` (ማጽዳት — የቅርብ ጊዜ N ቅጂዎችን ማቆየት ወይም ከD ቀናት በላይ የቆዩትን ማስወገድ) እና `PATCH /api/db-backups` (የማቆያ ቅንብሮች)። የተቀመጡት ደንቦች `cleanupDbBackups()` ከእያንዳንዱ ራስ-ሰር ምትኬ በኋላ የሚተገብራቸው ናቸው (`src/lib/db/backup.ts`)፤ ስለዚህ `keepLatest: 1`ን ማስቀመጥ የሚችል የማሽን ማረጋገጫ መረጃ በሚቀጥለው ቅጽበታዊ ቅጂ ጊዜ የቀድሞ መመለሻ ነጥቦችን ሊያጠፋ ይችላል። ምትኬዎችን መዘርዘርና መፍጠር (`GET`/`PUT /api/db-backups`) የተለመደውን የአስተዳደር ማረጋገጫ ይጠቀማሉ።
 
 ### የአዲስ-ጭነት bootstrap ለloopback ብቻ ነው — በእውነተኛ አቻ እንጂ በ`Host` አይደለም
 

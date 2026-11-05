@@ -764,7 +764,7 @@ export class DefaultExecutor extends BaseExecutor {
       if (typeof sys.content === "string") {
         sys.content = `${sys.content}\n\n${prompt}`;
       } else if (Array.isArray(sys.content)) {
-        sys.content.push({ type: "text", text: `\n\n${prompt}` });
+        sys.content = [...sys.content, { type: "text", text: `\n\n${prompt}` }];
       }
     } else {
       messages.unshift({ role: "system", content: prompt });

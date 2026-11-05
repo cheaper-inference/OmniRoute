@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 პროვაიდერთა რეესტრები, სათაურების პროფილები, იდენტობა, …
 ├── handlers/               მოთხოვნების დამმუშავებლები (ჩატი, ემბედინგები, აუდიო, სურათი, …)
-├── executors/              პროვაიდერის 150 შემსრულებელი მოდული (შემსრულებელი კლასები + თითოეული პროვაიდერის დამხმარეები)
+├── executors/              პროვაიდერის 156 შემსრულებელი მოდული (შემსრულებელი კლასები + თითოეული პროვაიდერის დამხმარეები)
 ├── translator/             ფორმატის გარდაქმნა (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions ნაკადის ტრანსფორმერი
 ├── services/               80-ზე მეტი სერვისის მოდული (კომბინაციები, სარეზერვო გადართვა, კვოტები, იდენტობა, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-ზედა დონის 150 შემსრულებელი მოდული (`*.ts`, გარდა `base.ts`, `index.ts` და ტესტებისა — რაოდენობას
+ზედა დონის 156 შემსრულებელი მოდული (`*.ts`, გარდა `base.ts`, `index.ts` და ტესტებისა — რაოდენობას
 `npm run check:docs-counts` ზომავს). ყოველი შემსრულებელი კლასი აფართოებს `BaseExecutor`-ს (`base.ts`),
 პირდაპირ ან `DefaultExecutor`-ის ან სხვა შემსრულებლის გავლით; დარჩენილი მოდულები თითოეული პროვაიდერისთვის
 განკუთვნილი დამხმარეებია (ხელსაწყოების სქემები, fetch/TTS ადაპტერები, თავისებურებების დამმუშავებლები). შემსრულებლები მოიცავს:
@@ -772,7 +772,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts`).
 2. მიანიჭეთ შესაბამისი მოქმედების არე(ები) `src/shared/constants/mcpScopes.ts`-ში.
 3. დაარეგისტრირეთ ინსტრუმენტი `open-sse/mcp-server/server.ts`-ში.
-4. დაამატეთ ტესტები `open-sse/mcp-server/__tests__/`-ში.
+4. დაამატეთ ტესტები `tests/unit/`-ში.
 5. განაახლეთ [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### ახალი A2A უნარის დამატება
@@ -790,7 +790,7 @@ bin/
 - **დასახელება**: ფაილები — `camelCase` ან `kebab-case`, კომპონენტები — `PascalCase`,
   მუდმივები — `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` ყველგან;
-  `no-explicit-any` = `warn` `open-sse/`-სა და `tests/`-ში, ხოლო სხვაგან — შეცდომა.
+  `no-explicit-any` = `error` `open-sse/**/*.ts`-სა და `tests/**/*.ts`-ში.
 - **TypeScript**: `strict: false` (მემკვიდრეობითი მიდგომა). მოდულთაშორის საზღვრებზე
   ტიპების გამოტანას მიანიჭეთ უპირატესობა აშკარა ტიპებს.
 - **მონაცემთა ბაზა**: არასოდეს დაწეროთ დაუმუშავებელი SQL მარშრუტებსა ან დამმუშავებლებში — ყოველთვის გამოიყენეთ
@@ -819,8 +819,7 @@ bin/
   `a2a`, `memory`, `skills`.
 - **ტოტები**: პრეფიქსები `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. არასოდეს შეიტანოთ კომიტი პირდაპირ `main`-ში.
-- **Husky**: pre-commit უშვებს `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; pre-push უშვებს `check:any-budget:t11` + `check:tracked-artifacts` (სწრაფი შემოწმებები; არ მოიცავს `test:unit`-ს).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

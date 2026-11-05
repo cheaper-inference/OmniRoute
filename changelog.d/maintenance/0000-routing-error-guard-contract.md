@@ -1,0 +1,1 @@
+- **Routing error guard:** Document the existing routing fallbacks and remove ten obsolete exceptions. Regression checks preserve unreadable-response handling, malformed tool-argument rejection, and existing quota limits after a connection lookup failure.

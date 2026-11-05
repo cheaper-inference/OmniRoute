@@ -55,7 +55,7 @@ Nieuw tabblad voor het extraheren van inhoud van een URL via `POST /v1/web/fetch
 - Invoer: URL + schakelaar voor volledige pagina + indelingskiezer (markdown / tekst / HTML).
 - Verzenden → ophalen → `ScrapeResult.tsx` renderen.
 - `ScrapeResult` rendert een markdownvoorbeeld + schakelaar voor onbewerkte weergave.
-- Limiet: als de responsbody groter is dan **256 KB**, toont de UI `(afgekapt, onbewerkt bekijken)` en opent deze de onbewerkte inhoud in een Monaco-modal (D21).
+- Limiet: als de responsbody groter is dan **256 KB**, toont de UI `View full raw content` en opent deze de onbewerkte inhoud in een modal (D21).
 - Metagegevenspaneel: provider (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latentie, kosten, responsgrootte, aantal links.
 - Gebruikt de hook `useScrapeFetch.ts`.
 

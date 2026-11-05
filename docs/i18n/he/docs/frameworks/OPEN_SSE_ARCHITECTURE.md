@@ -165,14 +165,14 @@ needsTranslation(source, target): boolean
 
 ---
 
-## ניתוח מעמיק של קובצי מפתח
+## צלילה מעמיקה לקבצי מפתח
 
 ### chatCore.ts (5977 שורות)
 
-**מטפל הבקשות הראשי**. למרות גודלו, יש לו מבנה ברור:
+ה**מטפל הראשי בבקשות**. למרות גודלו, המבנה שלו ברור:
 
 ```ts
-// מבנה מדומה של chatCore.ts
+// מבנה-על (pseudo) של chatCore.ts
 export async function handleChat(request: NextRequest) {
   // 1. אימות + CORS
   await authenticateRequest(request);
@@ -188,7 +188,7 @@ export async function handleChat(request: NextRequest) {
     body = translateRequest(body, sourceFormat, targetFormat);
   }
 
-  // 4. ניתוב קומבו
+  // 4. ניתוב Combo
   const targets = await resolveComboTargets(comboId, body);
   for (const target of targets) {
     try {
@@ -196,20 +196,20 @@ export async function handleChat(request: NextRequest) {
       await recordUsage(result);
       return result;
     } catch (err) {
-      // המשך ליעד הבא
+      // ממשיכים ליעד הבא
     }
   }
 
-  // 5. חלופת חירום
+  // 5. מנגנון גיבוי לחירום
   return await emergencyFallback(body);
 }
 ```
 
-למרות שמדובר בפונקציה ענקית אחת, היא מאורגנת ב**מקטעים עם הערות** התואמים לצינור העיבוד בן 5 השלבים.
+למרות שמדובר בפונקציה ענקית אחת, היא מאורגנת ב**מקטעים עם הערות** הממופים ל-pipeline בן 5 השלבים.
 
-### combo.ts (4456 שורות קוד)
+### combo.ts (4456 LOC)
 
-**מנוע הניתוב** שמתרגם קומבו לרשימת יעדים מסודרת.
+מנוע ה**ניתוב** שממיר combo לרשימת יעדים מסודרת.
 
 ```ts
 // services/combo.ts
@@ -219,140 +219,143 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
     try {
       return await handleSingleModel(target, body);
     } catch (err) {
-      log.warn("היעד נכשל, מנסה את הבא", { target, err });
+      log.warn("target failed, trying next", { target, err });
     }
   }
-  throw new ComboExhaustedError("כל היעדים נכשלו");
+  throw new ComboExhaustedError("All targets failed");
 }
 ```
 
-תומך ב**19 אסטרטגיות ניתוב** (ראו `src/shared/constants/routingStrategies.ts`):
+תומך ב**20 אסטרטגיות ניתוב** (ראו `src/shared/constants/routingStrategies.ts`):
 
-| אסטרטגיה            | התנהגות                                                         |
-| ------------------- | --------------------------------------------------------------- |
-| `priority`          | רשימה מסודרת שבה היעד הראשון מקבל עדיפות                        |
-| `weighted`          | בחירה הסתברותית לפי המשקל של כל יעד                             |
-| `round-robin`       | מעבר מחזורי בין היעדים לפי הסדר                                 |
-| `context-relay`     | העברת ההקשר בין יעדים                                           |
-| `fill-first`        | מילוי המכסה לפני מעבר ליעד הבא                                  |
-| `p2c`               | בחירה מבין שתי אפשרויות                                         |
-| `random`            | בחירה אקראית אחידה                                              |
-| `least-used`        | בחירת היעד עם מספר השימושים האחרונים הנמוך ביותר                |
-| `cost-optimized`    | היעד התקין הזול ביותר תחילה                                     |
-| `reset-aware`       | התחשבות בחלונות האיפוס של הספק                                  |
-| `reset-window`      | ניתוב המבוסס על חלון האיפוס                                     |
-| `headroom`          | היעד עם מרווח המכסה הנותר הגדול ביותר תחילה                     |
-| `strict-random`     | אחידות אמיתית (ללא שקלול איכות)                                 |
-| `auto`              | שימוש בניקוד המבוסס על 16 גורמים (`autoCombo/`)                 |
-| `lkgp`              | הספק התקין האחרון הידוע תחילה                                   |
-| `context-optimized` | המתאים ביותר לבקשות בעלות הקשר ארוך                             |
-| `fusion`            | פיזור במקביל לפאנל, ולאחר מכן סינתזה באמצעות שופט (`fusion.ts`) |
+| אסטרטגיה            | התנהגות                                                                     |
+| ------------------- | --------------------------------------------------------------------------- |
+| `priority`          | רשימה מסודרת — היעד הראשון קודם                                             |
+| `weighted`          | הסתברותי, לפי משקל לכל יעד                                                  |
+| `round-robin`       | מעבר מחזורי על היעדים לפי הסדר                                              |
+| `context-relay`     | העברת ההקשר בין יעדים                                                       |
+| `fill-first`        | מילוי המכסה לפני המעבר ליעד הבא                                             |
+| `p2c`               | Power of two choices (בחירת הטוב מבין שתי אפשרויות)                         |
+| `random`            | אקראי אחיד                                                                  |
+| `least-used`        | בחירת היעד עם הכי מעט שימושים אחרונים                                       |
+| `cost-optimized`    | היעד התקין והזול ביותר קודם                                                 |
+| `reset-aware`       | מודע לחלונות האיפוס של הספק                                                 |
+| `reset-window`      | ניתוב מבוסס חלון איפוס                                                      |
+| `headroom`          | המרווח הגדול ביותר שנותר במכסה קודם                                         |
+| `quota-weighted`    | דילוג על חשבונות שמוצו, ואז הגרלה לפי מכסה שנותרה ÷ עומס פעיל (in-flight)   |
+| `strict-random`     | אחיד באמת (ללא שקלול איכות)                                                 |
+| `auto`              | שימוש בניקוד מבוסס 16 גורמים (`autoCombo/`)                                 |
+| `lkgp`              | הספק התקין הידוע האחרון קודם                                                |
+| `context-optimized` | המתאים ביותר לבקשות עם הקשר ארוך                                            |
+| `cache-optimized`   | הצמדת כל קידומת פרומפט הניתנת לשימוש חוזר לאותו חשבון (פגיעות prompt-cache) |
+| `fusion`            | פיזור מקבילי לפאנל, ואז סינתזה באמצעות שופט (`fusion.ts`)                   |
+| `pipeline`          | שרשור שלבים — הפלט של כל יעד מוזן לבא אחריו                                 |
 
-### base.ts (1170 שורות קוד)
+### base.ts (1170 LOC)
 
-**המבצע המופשט** שכל מחלקת מבצע מרחיבה (ישירות או דרך `DefaultExecutor` ותתי־מחלקות אחרות). הוא מכיל:
+ה**מבצע (executor) המופשט** שממנו יורשת כל מחלקת executor (ישירות או דרך `DefaultExecutor` ותת-מחלקות נוספות). הוא מכיל:
 
-- `buildUrl()` — בניית כתובת URL כברירת מחדל (תתי־מחלקות דורסות אותה לצורך התאמה אישית)
-- `buildHeaders()` — כותרות ברירת מחדל (אימות, סוג תוכן)
-- `transformRequest()` — העברה ללא שינוי כברירת מחדל
-- `execute()` — לולאת ה-HTTP הראשית עם ניסיון חוזר/השהיה מדורגת/מפסק
+- `buildUrl()` — בניית URL כברירת מחדל (תת-מחלקות דורסות זאת להתאמה אישית)
+- `buildHeaders()` — כותרות ברירת מחדל (אימות, content-type)
+- `transformRequest()` — העברה ישירה (pass-through) כברירת מחדל
+- `execute()` — לולאת ה-HTTP הראשית עם retry/backoff/breaker
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
   // מטפל בכל הספקים התואמים ל-OpenAI/Anthropic
-  // הספקים רושמים תצורות (כתובת URL, אימות, כותרות), אך חולקים לוגיקת ביצוע
+  // ספקים רושמים תצורות (URL, אימות, כותרות) אך חולקים את לוגיקת ה-executor
 }
 ```
 
-התנהגות ייחודית לספק (כותרות אימות, כתובת URL בסיסית, כותרות גרסה) מוגדרת באמצעות מרשם הספקים, ולא במחלקות מבצע נפרדות.
+התנהגות ייחודית לספק (כותרות אימות, base URL, כותרות גרסה) מוגדרת דרך רישום הספקים (provider registry), ולא באמצעות מחלקות executor נפרדות.
 
 ````
 
 ---
 
-## שירותים (117 מודולים)
+## Services (117 מודולים)
 
-שירותים הם **מודולים ממוקדים ובעלי מטרה יחידה** שמטפלים מרכיבים יחד. הקטגוריות העיקריות:
+Services הם **מודולים ממוקדים וחד-מטרתיים** שה-handlers מרכיבים יחד. הקטגוריות העיקריות:
 
-### ניתוב ושילוב
+### ניתוב ו-Combo
 
-- `combo.ts` — נקודת כניסה לבקשות המנותבות בשילוב
-- `services/autoCombo/` — ניקוד המבוסס על 16 גורמים, 8 אסטרטגיות ניתוב אוטומטיות
-- `wildcardRouter.ts` — התאמת נתיבים עם תווים כלליים (`gpt-*`)
-- `modelFamilyFallback.ts` — מעבר חלופי בתוך משפחת T5
+- `combo.ts` — נקודת כניסה לבקשות המנותבות דרך combo
+- `services/autoCombo/` — ניקוד מבוסס 16 גורמים, 8 אסטרטגיות ניתוב אוטומטי
+- `wildcardRouter.ts` — התאמת נתיבי wildcard (כגון `gpt-*`)
+- `modelFamilyFallback.ts` — fallback תוך-משפחתי מסוג T5
 
 ### הגבלת קצב ומכסה
 
-- `rateLimitManager.ts` — דלי אסימונים לכל מפתח+ספק
+- `rateLimitManager.ts` — token bucket לכל שילוב מפתח+ספק
 - `usage.ts` — רישום שימוש
 - `quotaCache.ts` — תמונות מצב של מכסות בזיכרון
 
-### חשבון ואסימון
+### חשבון ו-Token
 
-- `tokenRefresh.ts` — רענון OAuth בעת 401
+- `tokenRefresh.ts` — רענון OAuth בעת קבלת 401
 - `accountFallback.ts` — מעבר לחשבון חלופי
-- `sessionManager.ts` — מצב הפעלה מרובת סבבים
+- `sessionManager.ts` — מצב סשן רב-סיבובי (multi-turn)
 
 ### אינטליגנציה
 
 - `intentClassifier.ts` — סיווג כוונת הבקשה
-- `taskAwareRouter.ts` — ניתוב לפי סוג משימה
-- `thinkingBudget.ts` — הקצאת אסימוני חשיבה
+- `taskAwareRouter.ts` — ניתוב לפי סוג המשימה
+- `thinkingBudget.ts` — הקצאת טוקני חשיבה
 - `contextManager.ts` — הזרקת הקשר ניתוב
 
-### עמידות
+### חוסן (Resilience)
 
-- `resilience.ts` — תזמור ניסיונות חוזרים, השהיה מדורגת ומפסק
-- `emergencyFallback.ts` — חלופה כמוצא אחרון
-- `modelDeprecation.ts` — ניתוב אוטומטי למודלים ממשיכים
+- `resilience.ts` — תזמור של retry, backoff ו-breaker
+- `emergencyFallback.ts` — fallback כמוצא אחרון
+- `modelDeprecation.ts` — ניתוב אוטומטי למודלים יורשים
 
-### מצב
+### מצב (State)
 
-- `signatureCache.ts` — מניעת כפילויות לפי חתימת בקשה
-- `volumeDetector.ts` — הפחתת עומס
-- `contextHandoff.ts` — סריאליזציה של הפעלה
+- `signatureCache.ts` — ביטול כפילויות לפי חתימת הבקשה
+- `volumeDetector.ts` — הפחתת עומס (load shedding)
+- `contextHandoff.ts` — סריאליזציה של סשן
 
-### דחיסה
+### דחיסה (Compression)
 
-- `compression/` (תת-ספרייה) — צינור עיבוד מלא לדחיסה
-- 39 קבצים המכסים מנועים, חבילות כללים ומתאמים
+- `compression/` (תת-תיקייה) — צינור דחיסה מלא (pipeline)
+- 39 קבצים המכסים מנועים, חבילות כללים ומתאמים (adapters)
 
-### מיומנויות
+### כישורים (Skills)
 
-- (מתואר ב-[SKILLS.md](./SKILLS.md))
+- (מכוסה ב-[SKILLS.md](./SKILLS.md))
 
-### זיכרון
+### זיכרון (Memory)
 
-- (מתואר ב-[MEMORY.md](./MEMORY.md))
+- (מכוסה ב-[MEMORY.md](./MEMORY.md))
 
 ---
 
-## מבצעים (150 מודולים)
+## Executors (150 מודולים)
 
-ברוב המקרים יש קובץ אחד לכל ספק. כל מחלקות המבצעים מרחיבות את `BaseExecutor` ודורסות את מה ששונה; המודולים האחרים הם כלי עזר ייעודיים לכל ספק (סכמות כלים, מתאמי אחזור/TTS ומטפלים בהתנהגויות חריגות).
+לרוב קובץ אחד לכל ספק. כל מחלקות ה-executor יורשות מ-`BaseExecutor` ודורסות את מה ששונה; שאר המודולים הם עוזרים ייעודיים לספק (סכימות של כלים, מתאמי fetch/TTS, מטפלי quirks).
 
 ### דפוסים נפוצים
 
-ספקים נפתרים באמצעות `getExecutor(providerId)`, שמחזירה את המבצע המוגדר. ספקים התואמים ל-OpenAI/Anthropic משתמשים ב-`DefaultExecutor` (`executors/default.ts`). התנהגות ייעודית לספק (כתובת URL בסיסית, כותרות אימות, גרסת API) מוגדרת ב-`open-sse/config/providers/`, בעוד שהמרות גוף הבקשה מטופלות ב-`open-sse/translator/`.
+ספקים נשלפים באמצעות `getExecutor(providerId)`, שמחזירה את ה-executor המוגדר. ספקים תואמי OpenAI/Anthropic משתמשים ב-`DefaultExecutor` (`executors/default.ts`). התנהגות ייחודית לספק (base URL, כותרות אימות, גרסת API) מוגדרת ב-`open-sse/config/providers/`, ואילו טרנספורמציות של גוף הבקשה מטופלות ב-`open-sse/translator/`.
 
-**כתובת URL מותאמת אישית** מוגדרת באמצעות תצורת הספק:
+**URL מותאם אישית** מוגדר דרך קונפיגורציית הספק:
 
 ```ts
-// תצורת ספק ב-open-sse/config/providers/
+// קונפיגורציית ספק ב-open-sse/config/providers/
 export default {
   id: "together",
   baseURL: "https://api.together.xyz/v1/chat/completions",
 }
 ````
 
-**אימות מותאם אישית** מטופל באמצעות תצורת האימות של מרשם הספקים (מפתח API,‏ OAuth, פרופילי כותרות).
+**אימות מותאם אישית** מטופל דרך קונפיגורציית האימות של רישום הספקים (מפתח API, OAuth, פרופילי כותרות).
 
-המרות **גוף בקשה מותאם אישית** (לדוגמה, ההפרדה של Anthropic בין `system` ל-`messages`) נרשמות עבור כל ספק ב-`open-sse/translator/`.
+טרנספורמציות של **גוף בקשה מותאם אישית** (לדוגמה, Anthropic שמפרידה בין `system` ל-`messages`) נרשמות לכל ספק ב-`open-sse/translator/`.
 
 ````
 
-### מפעל המבצעים
+### מפעל ה-Executors
 
 `executors/index.ts` מייצא את `getExecutor(providerId)`:
 
@@ -366,7 +369,7 @@ const result = await executor.execute({
 });
 ````
 
-הפתרון מתבצע דרך `ExecutorRegistry` (`executors/registry.ts`): כל מבצע ייעודי מוצהר בטבלה המובנית של `executors/index.ts` ונרשם באמצעות `registerExecutor(alias, instance)` בעת טעינת המודול; `getExecutor()` בודקת את המרשם וחוזרת ל-`DefaultExecutor` שנשמר במטמון עבור כל ספק שאין לו רשומה ייעודית. מיפוי הכינוי ← מבצע המלא מאופיין באמצעות בדיקת הזהב `tests/unit/executor-map-golden.test.ts`.
+הפענוח מתבצע דרך ה-`ExecutorRegistry` (`executors/registry.ts`): כל executor מתמחה מוצהר בטבלה המובנית של `executors/index.ts` ונרשם באמצעות `registerExecutor(alias, instance)` בעת טעינת המודול; `getExecutor()` פונה לרישום ומבצעת fallback ל-`DefaultExecutor` עם memoization עבור כל ספק שאין לו רשומה מתמחה. המיפוי המלא של alias ← executor מאופיין על ידי ה-golden test `tests/unit/executor-map-golden.test.ts`.
 
 ---
 
@@ -481,17 +484,17 @@ createResponsesApiTransformStream(): TransformStream
 
 ## תצורה
 
-`open-sse/config/` מכילה את שכבת התצורה:
+`open-sse/config/` מכיל את שכבת התצורה:
 
-| קובץ                          | מטרה                                            |
-| ----------------------------- | ----------------------------------------------- |
-| `providerRegistry.ts`         | מאגר מודלי צ'אט המבוסס על קטלוג הכולל 374 ספקים |
-| `providerModels.ts`           | כינויים למודלים, מיפוי פורמטים                  |
-| `constants.ts`                | זמני המתנה, מגבלות, קודי מצב                    |
-| `defaultThinkingSignature.ts` | חתימת החשיבה המוגדרת כברירת מחדל של Claude      |
-| `modelStrip.ts` (בשירותים)    | הסרת שדות לפי ספק                               |
+| קובץ                          | מטרה                                       |
+| ----------------------------- | ------------------------------------------ |
+| `providerRegistry.ts`         | רישום מודלי צ'אט מעל קטלוג של 375 ספקים    |
+| `providerModels.ts`           | כינויי מודלים, מיפוי פורמטים               |
+| `constants.ts`                | פסקי זמן, מגבלות, קודי סטטוס               |
+| `defaultThinkingSignature.ts` | חתימת החשיבה המוגדרת כברירת מחדל של Claude |
+| `modelStrip.ts` (ב-services)  | הסרת שדות לפי ספק                          |
 
-### סכמת מאגר הספקים
+### סכימת רישום הספקים
 
 ```ts
 interface ProviderConfig {
@@ -506,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-אימות באמצעות Zod בעת טעינת המודול מבטיח שכל תצורות הספקים תקינות.
+אימות Zod בזמן טעינת המודול מבטיח שכל תצורות הספקים תקינות.
 
 ---
 

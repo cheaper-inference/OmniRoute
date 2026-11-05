@@ -446,7 +446,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Ndebanye ndị na-eweta ọrụ, profaịlụ nkụnye isi, njirimara, …
 ├── handlers/               Ndị njikwa arịrịọ (nkata, embeddings, ọdịyo, onyonyo, …)
-├── executors/              Modul mmebe 150 (klaasị mmebe + ndị enyemaka maka onye na-eweta ọrụ ọ bụla)
+├── executors/              Modul mmebe 156 (klaasị mmebe + ndị enyemaka maka onye na-eweta ọrụ ọ bụla)
 ├── translator/             Ntughari usoro (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Onye ngbanwe nkwanye Chat Completions
 ├── services/               Modul ọrụ 80+ (ngwakọta, ndabere, oke ojiji, njirimara, …)
@@ -476,7 +476,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-Modul mmebe ọkwa-elu 150 (`*.ts` ma e wepụ `base.ts`, `index.ts` na ule — ọnụọgụ nke
+Modul mmebe ọkwa-elu 156 (`*.ts` ma e wepụ `base.ts`, `index.ts` na ule — ọnụọgụ nke
 `npm run check:docs-counts` na-atụ). Klaasị mmebe ọ bụla na-agbatị `BaseExecutor` (`base.ts`),
 ozugbo ma ọ bụ site na `DefaultExecutor` ma ọ bụ mmebe ọzọ; modul ndị fọdụrụ bụ ndị enyemaka
 maka onye na-eweta ọrụ ọ bụla (usoro ngwaọrụ, ihe nkwụnye fetch/TTS, ndị njikwa agwa pụrụ iche). Ndị mmebe gụnyere:
@@ -771,7 +771,7 @@ Lee [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) na ngalaba pụrụ iche dị n
    `open-sse/mcp-server/schemas/tools.ts`).
 2. Kenye scope kwesịrị ekwesị n'ime `src/shared/constants/mcpScopes.ts`.
 3. Debanye ngwa ahụ na `open-sse/mcp-server/server.ts`.
-4. Tinye ule n'okpuru `open-sse/mcp-server/__tests__/`.
+4. Tinye ule n'okpuru `tests/unit/`.
 5. Melite [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Tinye nka A2A ọhụrụ
@@ -789,7 +789,7 @@ Lee [A2A-SERVER.md § Ịtinye Nka Ọhụrụ](../frameworks/A2A-SERVER.md). Nk
 - **Ịkpọ aha**: faịlụ `camelCase` ma ọ bụ `kebab-case`, components `PascalCase`,
   constants `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` n'ebe niile;
-  `no-explicit-any` = `warn` na `open-sse/` na `tests/`, ma bụrụ error n'ebe ndị ọzọ.
+  `no-explicit-any` = `error` na `open-sse/**/*.ts` na `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (ọnọdụ e ketara n'usoro ochie). Họrọ ụdị akọwapụtara nke ọma karịa
   inference maka oke dị n'etiti modul.
 - **Database**: edela raw SQL ozugbo n'ime routes ma ọ bụ handlers — gafee
@@ -819,8 +819,7 @@ Lee [A2A-SERVER.md § Ịtinye Nka Ọhụrụ](../frameworks/A2A-SERVER.md). Nk
   `a2a`, `memory`, `skills`.
 - **Branches**: prefixes `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Etinyela commit ozugbo na `main`.
-- **Husky**: pre-commit na-agba `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; pre-push na-agba `check:any-budget:t11` + `check:tracked-artifacts` (nnyocha ngwa ngwa; ọ naghị agụnye `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Регистри добављача, профили заглавља, идентитет, …
 ├── handlers/               Обрађивачи захтева (ћаскање, угнежђивања, аудио, слике, …)
-├── executors/              150 модула извршилаца добављача (класе извршилаца + помоћни модули по добављачу)
+├── executors/              156 модула извршилаца добављача (класе извршилаца + помоћни модули по добављачу)
 ├── translator/             Конверзија формата (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Трансформатор тока Responses API ↔ Chat Completions
 ├── services/               Више од 80 сервисних модула (комбинације, резервни механизам, квоте, идентитет, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 модула извршилаца највишег нивоа (`*.ts` без `base.ts`, `index.ts` и тестова — тај број
+156 модула извршилаца највишег нивоа (`*.ts` без `base.ts`, `index.ts` и тестова — тај број
 мери `npm run check:docs-counts`). Свака класа извршиоца проширује `BaseExecutor` (`base.ts`),
 директно или преко `DefaultExecutor` или другог извршиоца; преостали модули су помоћни модули
 по добављачу (шеме алата, fetch/TTS адаптери, обрађивачи специфичности). Извршиоци укључују:
@@ -772,7 +772,7 @@ Pogledajte [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) i posebni odeljak u
    `open-sse/mcp-server/schemas/tools.ts`).
 2. Dodelite odgovarajući opseg (scope) u `src/shared/constants/mcpScopes.ts`.
 3. Registrujte alat u `open-sse/mcp-server/server.ts`.
-4. Dodajte testove pod `open-sse/mcp-server/__tests__/`.
+4. Dodajte testove pod `tests/unit/`.
 5. Ažurirajte [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Dodavanje nove A2A veštine
@@ -790,7 +790,7 @@ Pogledajte [A2A-SERVER.md § Adding a New Skill](../frameworks/A2A-SERVER.md). V
 - **Nazivi**: fajlovi u `camelCase` ili `kebab-case`, komponente u `PascalCase`,
   konstante u `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` svuda;
-  `no-explicit-any` = `warn` u `open-sse/` i `tests/`, greška svuda ostalo.
+  `no-explicit-any` = `error` u `open-sse/**/*.ts` i `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (nasleđeni pristup). Preferirajte eksplicitne tipove u odnosu na
   inferenciju za granice između modula.
 - **Baza podataka**: nikada nemojte pisati sirovi SQL u rutama ili handlerima — uvek idite kroz
@@ -820,8 +820,7 @@ Pogledajte [A2A-SERVER.md § Adding a New Skill](../frameworks/A2A-SERVER.md). V
   `a2a`, `memory`, `skills`.
 - **Grane**: prefiksi `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Nikada nemojte direktno komitovati u `main`.
-- **Husky**: pre-commit pokreće `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; pre-push pokreće `check:any-budget:t11` + `check:tracked-artifacts` (brze provere; isključuje `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

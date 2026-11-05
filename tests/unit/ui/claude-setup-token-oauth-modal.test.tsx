@@ -14,12 +14,12 @@ const MESSAGES = vi.hoisted<Record<string, string>>(() => ({
   cancel: "Cancel",
 }));
 
-vi.mock("next-intl", () => ({
-  useTranslations: () =>
-    Object.assign((key: string) => MESSAGES[key] ?? key, {
-      rich: (key: string) => MESSAGES[key] ?? key,
-    }),
-}));
+vi.mock("next-intl", () => {
+  const translate = Object.assign((key: string) => MESSAGES[key] ?? key, {
+    rich: (key: string) => MESSAGES[key] ?? key,
+  });
+  return { useTranslations: () => translate };
+});
 
 const { default: OAuthModal } = await import("@/shared/components/OAuthModal");
 

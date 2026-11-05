@@ -194,7 +194,7 @@ Obsidian REST API token-ஐச் சேமிக்கிறது. GHSA-62vw, 
 இன்னமும் fail-open அடுக்கிலேயே இருந்தது (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` கூடுதலாக,
 data directory-ஆக இருக்கும், அதற்குள் அமைந்திருக்கும் அல்லது அதை உள்ளடக்கும் vault-ஐ மறுக்கிறது.
 
-#### Credential export-கள் operator-களுக்கு மட்டுமே
+#### சான்றுத் தகவல் ஏற்றுமதியும் மீட்டமைப்பும் ஆபரேட்டர்களுக்கு மட்டுமே
 
 மேலுள்ள அடுக்கு _ஏதேனும்_ ஒரு நற்சான்று தேவையா என்பதை மட்டுமே தீர்மானிக்கிறது. சேமிக்கப்பட்ட
 நற்சான்றுகளைப் பதிவிறக்கும் வழித்தடங்கள் handler-இல் இரண்டாவது சரிபார்ப்பைச் சேர்க்கின்றன:
@@ -207,22 +207,9 @@ data directory-ஆக இருக்கும், அதற்குள் அ�
 பதிலளிக்கிறது. Sync token வழங்கல் (`POST /api/sync/tokens`) அதே helper-ஐயும், கூடுதலாக
 நம்பகமான loopback internal-service token-ஐயும் பயன்படுத்துகிறது.
 
-#### Credential exports and restores are operator-only
+தொடர்புடைய அழிவை ஏற்படுத்தும் செயல்களுக்கும் இதே வரம்பு பொருந்தும்: `POST /api/db-backups/import` (பதிவேற்றிய `.sqlite` கோப்பு, `dryRun=true` உட்பட), `POST /api/db-backups` (சேமித்த காப்புப்பிரதியை அதன் id மூலம் மீட்டமைத்தல்), `POST /api/settings/import-json` (பழைய JSON வடிவத்தை மீட்டமைத்தல்) ஆகியவை இயங்கும் தரவுத்தளத்தை அல்லது அமைப்புகள், இணைப்புகள், API விசைகள் அடங்கிய முழுத் தொகுப்பை மாற்றுகின்றன. எனவே இயந்திரச் சான்றுத் தகவல்களால் இச்செயல்களையும் தொடங்க முடியாது.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+மீட்டமைப்புப் புள்ளிகளை அழிப்பதற்கும் இதே வரம்பு பொருந்தும்: `DELETE /api/db-backups` (சுத்தப்படுத்தல் — சமீபத்திய N பிரதிகளை வைத்தல் அல்லது D நாட்களுக்கு முந்தையவற்றை நீக்குதல்), `PATCH /api/db-backups` (தக்கவைப்பு அமைப்புகள்). சேமித்த விதிகளையே ஒவ்வொரு தானியங்கிக் காப்புப்பிரதிக்குப் பிறகும் `cleanupDbBackups()` பயன்படுத்துகிறது (`src/lib/db/backup.ts`); எனவே `keepLatest: 1` என்பதைச் சேமிக்க முடியும் இயந்திரச் சான்றுத் தகவல், அடுத்த நிலைப்படத்தில் முந்தைய மீட்டமைப்புப் புள்ளிகளை அழிக்கக்கூடும். காப்புப்பிரதிகளைப் பட்டியலிடுவதும் உருவாக்குவதும் (`GET`/`PUT /api/db-backups`) வழக்கமான நிர்வாக அங்கீகாரத்தையே தொடர்கின்றன.
 
 ### புதிய நிறுவலின் bootstrap loopback-க்கு மட்டுமே — `Host` மூலம் அல்ல, உண்மையான peer மூலம்
 

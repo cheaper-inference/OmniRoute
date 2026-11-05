@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Palveluntarjoajarekisterit, otsakeprofiilit, identiteetti, …
 ├── handlers/               Pyyntökäsittelijät (keskustelu, upotukset, ääni, kuva, …)
-├── executors/              150 palveluntarjoajan suoritinmoduulia (suoritinluokat + palveluntarjoajakohtaiset apurit)
+├── executors/              156 palveluntarjoajan suoritinmoduulia (suoritinluokat + palveluntarjoajakohtaiset apurit)
 ├── translator/             Muotomuunnokset (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions -suoratoistotransformaattori
 ├── services/               Yli 80 palvelumoduulia (yhdistelmät, varajärjestelyt, kiintiöt, identiteetti, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 ylätason suoritinmoduulia (`*.ts`, pois lukien `base.ts`, `index.ts` ja testit — lukumäärän
+156 ylätason suoritinmoduulia (`*.ts`, pois lukien `base.ts`, `index.ts` ja testit — lukumäärän
 mittaa `npm run check:docs-counts`). Jokainen suoritinluokka laajentaa `BaseExecutor`-luokkaa (`base.ts`)
 joko suoraan tai `DefaultExecutor`-luokan tai muun suorittimen kautta; loput moduulit ovat palveluntarjoajakohtaisia
 apureita (työkaluskeemat, haku-/TTS-sovittimet ja erityispiirteiden käsittelijät). Suorittimiin kuuluvat:
@@ -772,7 +772,7 @@ Katso [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) ja erillinen osio tiedostossa
    tiedostoa `open-sse/mcp-server/schemas/tools.ts`).
 2. Määritä asianmukaiset käyttöoikeusalueet tiedostossa `src/shared/constants/mcpScopes.ts`.
 3. Rekisteröi työkalu tiedostossa `open-sse/mcp-server/server.ts`.
-4. Lisää testit hakemistoon `open-sse/mcp-server/__tests__/`.
+4. Lisää testit hakemistoon `tests/unit/`.
 5. Päivitä [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Uuden A2A-taidon lisääminen
@@ -790,7 +790,7 @@ hakemistossa `src/lib/a2a/skills/`, ja ne rekisteröidään A2A-tehtävähallinn
 - **Nimeäminen**: tiedostot `camelCase`- tai `kebab-case`-muodossa, komponentit `PascalCase`-muodossa,
   vakiot `UPPER_SNAKE`-muodossa.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` kaikkialla;
-  `no-explicit-any` = `warn` hakemistoissa `open-sse/` ja `tests/`, muualla `error`.
+  `no-explicit-any` = `error` hakemistoissa `open-sse/**/*.ts` ja `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (perintöjärjestelmän käytäntö). Suosi eksplisiittisiä tyyppejä
   päättelyn sijaan moduulirajoilla.
 - **Tietokanta**: älä koskaan kirjoita raakaa SQL:ää reitteihin tai käsittelijöihin — käytä aina
@@ -820,8 +820,7 @@ hakemistossa `src/lib/a2a/skills/`, ja ne rekisteröidään A2A-tehtävähallinn
   `a2a`, `memory`, `skills`.
 - **Haarat**: etuliitteet `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Älä koskaan commitoi suoraan `main`-haaraan.
-- **Husky**: pre-commit suorittaa `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; pre-push suorittaa `check:any-budget:t11` + `check:tracked-artifacts` (nopeat tarkistukset; `test:unit` ei sisälly).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

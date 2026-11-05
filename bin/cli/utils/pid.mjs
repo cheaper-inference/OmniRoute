@@ -331,7 +331,8 @@ async function pollHealthOnce(port, probeTimeoutMs = INITIAL_PROBE_TIMEOUT_MS) {
   const results = await Promise.all(
     hosts.map(async (host) => {
       try {
-        const res = await fetch(`http://${host}:${port}/api/monitoring/health`, {
+        const urlHost = host.includes(":") ? `[${host}]` : host;
+        const res = await fetch(`http://${urlHost}:${port}/api/monitoring/health`, {
           signal: AbortSignal.timeout(probeTimeoutMs),
         });
         return { host, outcome: res.ok ? "ready" : "fast-reject" };

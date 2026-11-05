@@ -308,11 +308,11 @@ Quá trình trích xuất **dựa trên biểu thức chính quy**, không dựa
 `setImmediate()` nên không bao giờ chặn luồng phản hồi:
 
 - **Các mẫu sở thích** → `MemoryType.FACTUAL`
-  (ví dụ: `Tôi thích …`, `Tôi thực sự thích …`, `món yêu thích của tôi là …`, `Tôi ghét …`)
+  (ví dụ: `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
 - **Các mẫu quyết định** → `MemoryType.EPISODIC`
-  (ví dụ: `Tôi sẽ dùng …`, `Tôi đã chọn …`, `Tôi quyết định dùng …`, `Tôi sẽ áp dụng …`)
+  (ví dụ: `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
 - **Các mẫu hành vi** → `MemoryType.FACTUAL`
-  (ví dụ: `Tôi thường …`, `Tôi luôn …`, `Tôi có xu hướng …`)
+  (ví dụ: `I usually …`, `I always …`, `I tend to …`)
 
 Mỗi kết quả khớp được làm sạch (`trim`, thu gọn khoảng trắng, giới hạn ở 500 ký tự),
 được loại bỏ trùng lặp trong lô thông qua `factKey(category, content)` ổn định, và
@@ -674,11 +674,11 @@ Mô-đun `extraction.ts` (`src/lib/memory/extraction.ts`) sử dụng **đối s
 
 ### Các danh mục mẫu mặc định
 
-| Danh mục            | Mẫu ví dụ                                                        | Nội dung thu thập                     |
-| ------------------- | ---------------------------------------------------------------- | ------------------------------------- |
-| PREFERENCE_PATTERNS | `"Tôi thích <X> hơn"`, `"Tôi thích <X>"`, `"Tôi ghét <X>"`       | Sở thích của người dùng               |
-| DECISION_PATTERNS   | `"Tôi sẽ dùng <X>"`, `"Tôi đã quyết định <X>"`, `"Tôi chọn <X>"` | Quyết định của người dùng (tình tiết) |
-| PATTERN_PATTERNS    | `"Tôi thường <X>"`, `"Tôi luôn <X>"`, `"Tôi không bao giờ <X>"`  | Các mẫu hành vi lâu dài               |
+| Danh mục            | Mẫu ví dụ                                                   | Nội dung thu thập                     |
+| ------------------- | ----------------------------------------------------------- | ------------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Sở thích của người dùng               |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Quyết định của người dùng (tình tiết) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Các mẫu hành vi lâu dài               |
 
 ### Các mẫu ví dụ (Đã đơn giản hóa)
 
@@ -714,8 +714,9 @@ Khi người dùng nói:
 
 Để ngăn việc trích xuất mất kiểm soát, các giới hạn sau được áp dụng:
 
-| Độ dài nội dung tối thiểu | 3 ký tự |
-| Độ dài nội dung tối đa | 500 ký tự |
+| Độ dài nội dung tối thiểu | 3 ký tự   |
+| ------------------------- | --------- |
+| Độ dài nội dung tối đa    | 500 ký tự |
 
 ### Khi nào nên tắt tính năng trích xuất
 

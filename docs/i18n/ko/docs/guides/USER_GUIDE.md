@@ -580,28 +580,28 @@ post_install() {
 
 ### 환경 변수
 
-| 변수                                    | 기본값                               | 설명                                                                                      |
-| --------------------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT 서명 시크릿(**프로덕션 환경에서는 변경**)                                             |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | 최초 로그인 비밀번호                                                                      |
-| `DATA_DIR`                              | `~/.omniroute`                       | 데이터 디렉터리(db, 사용량, 로그)                                                         |
-| `PORT`                                  | 프레임워크 기본값                    | 서비스 포트(예시에서는 `20128`)                                                           |
-| `HOSTNAME`                              | 프레임워크 기본값                    | 바인딩 호스트(Docker 기본값은 `0.0.0.0`)                                                  |
-| `NODE_ENV`                              | 런타임 기본값                        | 배포 시 `production`으로 설정                                                             |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | 대시보드에 표시되고 서버에 노출되는 공개 기본 URL(기존 `BASE_URL` 대체)                   |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | 클라우드 동기화 엔드포인트 기본 URL(기존 `CLOUD_URL` 대체)                                |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | 생성된 API 키의 HMAC 시크릿                                                               |
-| `REQUIRE_API_KEY`                       | `false`                              | `/v1/*`에서 Bearer API 키 사용 강제                                                       |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | 인증된 대시보드 사용자가 요청 시 저장된 API 키 전체 값을 표시할 수 있도록 허용            |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | 캐시된 Provider Limits 데이터의 서버 측 갱신 주기. UI 새로 고침 버튼으로 수동 동기화 가능 |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | 쓰기/가져오기/복원 전 자동 SQLite 스냅샷 비활성화. 수동 백업은 계속 사용 가능             |
-| `APP_LOG_TO_FILE`                       | `true`                               | 애플리케이션 및 감사 로그를 디스크에 출력하도록 설정                                      |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | `Secure` 인증 쿠키 강제 적용(HTTPS 리버스 프록시 사용 시)                                 |
-| `CLOUDFLARED_BIN`                       | 설정되지 않음                        | 관리형 다운로드 대신 기존 `cloudflared` 바이너리 사용                                     |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | 관리형 Quick Tunnels용 전송 프로토콜(`http2`, `quic` 또는 `auto`)                         |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js 힙 제한(MB)                                                                       |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | 최대 프롬프트 캐시 항목 수                                                                |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | 최대 시맨틱 캐시 항목 수                                                                  |
+| 변수                                    | 기본값                   | 설명                                                                                                                                   |
+| --------------------------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(자동 생성)_            | JWT 서명 시크릿 — 처음 실행할 때 자동으로 생성되어 `server.env`에 영구 저장됩니다. 데이터 디렉터리가 임시인 경우 명시적으로 설정하세요 |
+| `INITIAL_PASSWORD`                      | _(설정되지 않음)_        | 최초 로그인 비밀번호. npm/소스 설치는 `CHANGEME`로 시작하므로 변경하세요. 설정되지 않은 경우: 온보딩 마법사                            |
+| `DATA_DIR`                              | `~/.omniroute`           | 데이터 디렉터리(db, 사용량, 로그)                                                                                                      |
+| `PORT`                                  | 프레임워크 기본값        | 서비스 포트(예시에서는 `20128`)                                                                                                        |
+| `HOSTNAME`                              | 프레임워크 기본값        | 바인딩 호스트(Docker 기본값은 `0.0.0.0`)                                                                                               |
+| `NODE_ENV`                              | 런타임 기본값            | 배포 시 `production`으로 설정                                                                                                          |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | 대시보드에 표시되고 서버에 노출되는 공개 기본 URL(기존 `BASE_URL` 대체)                                                                |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | 클라우드 동기화 엔드포인트 기본 URL(기존 `CLOUD_URL` 대체)                                                                             |
+| `API_KEY_SECRET`                        | _(자동 생성)_            | 머신에 바인딩된 API 키의 체크섬 시크릿 — 설정되지 않은 경우 시작 bootstrap이 자동으로 생성하여 쓰기 가능한 `server.env`에 저장합니다   |
+| `REQUIRE_API_KEY`                       | `false`                  | `/v1/*`에서 Bearer API 키 사용 강제                                                                                                    |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | 인증된 대시보드 사용자가 요청 시 저장된 API 키 전체 값을 표시할 수 있도록 허용                                                         |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | 캐시된 Provider Limits 데이터의 서버 측 갱신 주기. UI 새로 고침 버튼으로 수동 동기화 가능                                              |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | 쓰기/가져오기/복원 전 자동 SQLite 스냅샷 비활성화. 수동 백업은 계속 사용 가능                                                          |
+| `APP_LOG_TO_FILE`                       | `true`                   | 애플리케이션 및 감사 로그를 디스크에 출력하도록 설정                                                                                   |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | `Secure` 인증 쿠키 강제 적용(HTTPS 리버스 프록시 사용 시)                                                                              |
+| `CLOUDFLARED_BIN`                       | 설정되지 않음            | 관리형 다운로드 대신 기존 `cloudflared` 바이너리 사용                                                                                  |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | 관리형 Quick Tunnels용 전송 프로토콜(`http2`, `quic` 또는 `auto`)                                                                      |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | Node.js 힙 제한(MB)                                                                                                                    |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | 최대 프롬프트 캐시 항목 수                                                                                                             |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | 최대 시맨틱 캐시 항목 수                                                                                                               |
 
 전체 환경 변수 참조는 [README](../README.md)를 확인하세요.
 

@@ -106,7 +106,7 @@ OmniRoute/
 
 > **已於 v3.8.26 移出根目錄（整理結構）：**
 >
-> - **→ `config/quality/`：**`quality-baseline.json`、`complexity-baseline.json`、`duplication-baseline.json`、`file-size-baseline.json`、`test-discovery-baseline.json`、`dependency-allowlist.json`、`.license-allowlist.json`，以及產生的 `quality-metrics.json`（已被 git 忽略）。請參閱 [`## config/`](#config--static-configs--quality-gate-state)。
+> - **→ `config/quality/`：**`quality-baseline.json`、`complexity-baseline.json`、`duplication-baseline.json`、`file-size-baseline.json`、`test-discovery-baseline.json`、`dependency-allowlist.json`、`.license-allowlist.json`，以及產生的 `quality-metrics.json`（已被 git 忽略）。請參閱 [`## config/`](#config--靜態設定--品質閘門狀態)。
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | 子目錄                | 用途                                                                                                                                                                        |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | 在地化文件翻譯（41 個地區設定）                                                                                                                                             |
+| `docs/i18n/`          | 在地化文件翻譯（66 個地區設定）                                                                                                                                             |
 | `docs/screenshots/`   | 指南所用的圖片資源                                                                                                                                                          |
 | `_tasks/superpowers/` | 來自 superpowers 的計畫／規格（`writing-plans`/`brainstorming`）+ 研究資料——獨立且分開進行版本控制的儲存庫，並由主目錄樹的 git 忽略。請參閱 CLAUDE.md →「規劃與研究產物」。 |
 

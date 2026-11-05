@@ -88,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Mekanismi:** Ohjaa kaiken HTTP/HTTPS-liikenteen HTTP_PROXY-kuuntelijan kautta käyttöjärjestelmän ohjelmointirajapintojen avulla:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` ja HTTP/HTTPS-palvelin- ja porttiasetukset
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Kattavuus:** Kaikki koneen sovellukset, jotka noudattavat järjestelmän välityspalvelinasetuksia
   **Huomautus:** `source` = `"system-proxy"`
 
 **Turvamekanismit:**
 
-- Automaattisen käytöstäpoiston ajastin (oletuksena 30 min, määritettävissä `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`-ympäristömuuttujalla)
-- Järjestelmän aiempi välityspalvelintila tallennetaan tietokantaan ja palautetaan peruutettaessa
-- Hallintapaneeli näyttää kehotteen "Palautetaan järjestelmän välityspalvelinta", jos käyttäjä siirtyy pois sen ollessa aktiivinen
-- Käyttöliittymä näyttää `⚠ Edistynyt` -tunnuksen ja erillisen vahvistusvalintaruudun
+- Välityspalvelimen käyttöönotto ajastaa prosessikohtaisen palautuksen, jonka onnistumista ei taata (oletuksena 30 min, määritettävissä muuttujalla `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`). Ajastin ei säily palvelinprosessin päättyessä.
+- Välityspalvelimen aiempi tila pidetään prosessin muistissa; tämä kaappaustilan säilö ei tallenna sitä pysyvästi tietokantaan. Palautus palauttaa tallennetut macOS/GNOME-asetukset; Windowsissa se nollaa WinHTTP-välityspalvelimen aiemman määrityksen palauttamisen sijaan.
+- Kun välityspalvelin ilmoitetaan käyttöön otetuksi, sivun purkaminen lähettää keepalive-palautuspyynnön ilman onnistumistakuuta ja pyytää selaimen omaa vahvistusta, jonka sanamuodon selain määrää. Myös tarkastimen irrottaminen SPA-navigoinnissa yrittää palautusta ilman tätä selainkehotetta.
+- Kaappaustyökalurivillä näkyy lokalisoitu `System-wide`-ohjain ja varoituskuvake. Napsautus muuttaa tällä hetkellä vain paikallista käyttöliittymätilaa; se ei näytä vahvistusvalintaruutua eikä ota järjestelmän välityspalvelinta käyttöön tai palauta sitä.
 
 ### Tila 5 — Läpinäkyvä TPROXY-salauksen purku (Linux, root, erikseen käyttöönotettava)
 
@@ -113,13 +113,13 @@ Tämä on merkittävä alijärjestelmä, jolla on oma erillinen ylläpitäjän o
 
 ### Kaappaustilojen vertailu
 
-| Tila                      | Määritys                         |           Sudo?           | Kattavuus                                    | Huomautukset                                                                                                                                                              |
-| ------------------------- | -------------------------------- | :-----------------------: | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge            | Automaattinen                    |  Kerran (varmenne+hosts)  | 9 IDE-agenttia                               | Oletusarvoisesti käytössä                                                                                                                                                 |
-| 2. Mukautetut hostit      | Syöttö hostikohtaisesti          |  Kyllä (hosts-tiedosto)   | Kaikki kyseistä hostia käyttävät sovellukset | Tallennetaan tietokantaan                                                                                                                                                 |
-| 3. HTTP_PROXY             | `export HTTPS_PROXY=...`         |            Ei             | Ympäristömuuttujaa noudattavat sovellukset   | Portti 8080; HTTPS tunneloidaan CONNECT-menetelmällä (vain metatiedot, sisältöä ei koskaan pureta)                                                                        |
-| 4. Järjestelmänlaajuinen  | Kytkin + vahvistus               |           Kyllä           | Kaikki koneen sovellukset                    | Poistetaan käytöstä automaattisesti 30 minuutin kuluttua                                                                                                                  |
-| 5. TPROXY-salauksen purku | Kytkin (Linux + natiivi lisäosa) | Kyllä (root + CA-asennus) | Kaikki kohdeportin hostit                    | Purkaa mielivaltaisten hostien salauksen; oletusarvoisesti pois käytöstä — katso `docs/security/MITM-TPROXY-DECRYPT.md` (git; ei sisälly käännettynä hakemistoon `/docs`) |
+| Tila                      | Määritys                                                       |           Sudo?           | Kattavuus                                    | Huomautukset                                                                                                                                                              |
+| ------------------------- | -------------------------------------------------------------- | :-----------------------: | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge            | Automaattinen                                                  |  Kerran (varmenne+hosts)  | 9 IDE-agenttia                               | Oletusarvoisesti käytössä                                                                                                                                                 |
+| 2. Mukautetut hostit      | Syöttö hostikohtaisesti                                        |  Kyllä (hosts-tiedosto)   | Kaikki kyseistä hostia käyttävät sovellukset | Tallennetaan tietokantaan                                                                                                                                                 |
+| 3. HTTP_PROXY             | `export HTTPS_PROXY=...`                                       |            Ei             | Ympäristömuuttujaa noudattavat sovellukset   | Portti 8080; HTTPS tunneloidaan CONNECT-menetelmällä (vain metatiedot, sisältöä ei koskaan pureta)                                                                        |
+| 4. Järjestelmänlaajuinen  | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |           Kyllä           | Kaikki koneen sovellukset                    | Palautusajastin ilman onnistumistakuuta (oletuksena 30 min)                                                                                                               |
+| 5. TPROXY-salauksen purku | Kytkin (Linux + natiivi lisäosa)                               | Kyllä (root + CA-asennus) | Kaikki kohdeportin hostit                    | Purkaa mielivaltaisten hostien salauksen; oletusarvoisesti pois käytöstä — katso `docs/security/MITM-TPROXY-DECRYPT.md` (git; ei sisälly käännettynä hakemistoon `/docs`) |
 
 ---
 
@@ -315,7 +315,7 @@ lisätään myöhemmin).
 ### 5.1 Istunnon tallentaminen
 
 1. Napsauta työkalupalkissa **"● Tallenna istunto"** → anna nimi (valinnainen)
-2. Reaaliaikainen seuranta jatkuu normaalisti; punainen sykkivä ilmaisin näyttää `◉ REC · <name> · 00:42 · 23 pyyntöä`
+2. Reaaliaikainen seuranta jatkuu normaalisti; tallennuspalkki näyttää sykkivän punaisen pisteen, kuluneen ajan, istunnon nimen, jos se on saatavilla, sekä lokalisoidun Pysäytä-ohjaimen.
 3. Napsauta **"⏹ Pysäytä"** → istunnon tilannevedos tallennetaan tauluihin `inspector_sessions` + `inspector_session_requests`
 
 ### 5.2 Tallennetun istunnon tarkasteleminen
@@ -323,7 +323,7 @@ lisätään myöhemmin).
 Työkalupalkin **Istunnot**-pudotusvalikossa näkyvät tallennetut istunnot. Kun istunto valitaan:
 
 - Istunnon tilannevedos ladataan (jäädytetty tila)
-- Palkissa näkyy: `Tarkastellaan tallennettua istuntoa "<name>" — [Takaisin reaaliaikaiseen näkymään]`
+- Banneri näyttää tallennetun istunnon lokalisoidun nimikkeen ja istunnon nimen (tai lokalisoidun varatekstin nimettömälle istunnolle) sekä lokalisoidun Takaisin reaaliaikaiseen näkymään -painikkeen.
 - Tilastot-välilehti ja sen Recharts-koosteet tulevat käyttöön
 
 ### 5.3 Vientimuodot
@@ -347,7 +347,7 @@ Traffic Inspector näyttää **kaiken siepatun HTTPS-liikenteen**, mukaan lukien
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **LOCAL_ONLY**                   | Kaikki reitit ja WebSocket-päätepiste ovat käytettävissä vain loopback-liitännän kautta (pakotetaan tiedostossa `routeGuard.ts` ennen todennusta)                                                          |
 | **Salaisuuksien peittäminen**    | Lineaarinen `maskSecret()`-tarkistin peittää RFC 6750 Bearer -tunnistetiedot, palveluntarjoajan etuliitteellä varustetut avaimet ja pitkät läpinäkymättömät tunnisteet ennen `TrafficBuffer.push()`-kutsua |
-| **Rungon kokorajoitus**          | Rungot, joiden koko on yli `INSPECTOR_MAX_BODY_KB` (oletusarvo 1024 KB), katkaistaan ja niihin lisätään ilmoitus `"(katkaistu suorituskyvyn vuoksi)"`                                                      |
+| **Rungon kokorajoitus**          | Rungot, joiden koko on yli `INSPECTOR_MAX_BODY_KB` (oletusarvo 1024 KB), katkaistaan ja niihin lisätään ilmoitus `"(truncated for performance)"`                                                           |
 | **Otsakkeiden puhdistus**        | Nimet muunnetaan pieniksi kirjaimiksi; kehystys-, hop-by-hop- ja välityspalvelimen todennusotsakkeet poistetaan; evästeet peitetään kokonaan; tunnistetietoarvot käsittelee `maskSecret()`                 |
 | **CSP**                          | Traffic Inspector -sivuilla käytetään tiukkaa Content Security Policy -käytäntöä, joka estää lisättyjen vastausrunkojen kautta tehtävät XSS-hyökkäykset                                                    |
 | **Ei oletusarvoista pysyvyyttä** | `TrafficBuffer` säilytetään muistissa, ja se menetetään palvelimen uudelleenkäynnistyksen yhteydessä. Istunnot tallennetaan pysyvästi vain, kun ne nimenomaisesti nauhoitetaan                             |
@@ -415,7 +415,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-Hallintapaneeli tarjoaa seuraavalla latauskerralla myös toiminnon "Palauta järjestelmän välityspalvelinasetukset", jos se havaitsee tietokannan tilan osoittavan välityspalvelimen olleen aktiivinen.
+Välityspalvelimen tallennettu tila on vain palvelinprosessissa. Kaatumisen tai uudelleenkäynnistyksen jälkeen nykyinen kaappaustilan säilö ei voi palauttaa tätä tilannekuvaa tietokannasta; käytä edellä olevia alustakohtaisia palautuskomentoja, kun manuaalista palautusta tarvitaan.
 
 ### Puskuri täynnä
 

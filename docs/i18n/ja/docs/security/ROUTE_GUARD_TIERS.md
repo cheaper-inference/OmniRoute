@@ -177,26 +177,13 @@ Basic 認証情報をレスポンスに含めます。`DELETE` はその認証�
 `enableObsidianVaultSync()` はさらに、データディレクトリそのもの、データディレクトリ内、
 またはデータディレクトリを内包する vault を拒否します。
 
-#### 認証情報のエクスポートはオペレーター専用
+#### 認証情報のエクスポートと復元はオペレーター専用
 
 上記の階層では、_何らかの_認証情報が必要かどうかだけを決定します。保存済みの認証情報をダウンロードするルートでは、ハンドラー内でさらに2段階目のチェックが行われます。`GET /api/settings/export-json`（復号されたプロバイダー接続情報と未加工の API キー）、`GET /api/db-backups/export`（SQLite ファイル）、および `GET /api/db-backups/exportAll`（完全なアーカイブ）は、`requireOperatorCredential()`（`src/lib/api/operatorCredential.ts`）を呼び出します。これは、ダッシュボードセッション、ローカル CLI サブジェクト、またはログインが無効化されているインスタンスを受け入れますが、あらゆるスコープ（`manage` および `admin` を含む）の API キーと、`oma_` アクセストークンに対しては `403` を返します。同期トークンの発行（`POST /api/sync/tokens`）では、同じヘルパーに加えて、信頼されたループバック内部サービストークンを使用します。
 
-#### Credential exports and restores are operator-only
+対応する破壊的操作にも同じ制限があります。`POST /api/db-backups/import`（アップロードされた `.sqlite` ファイル。`dryRun=true` の場合も含む）、`POST /api/db-backups`（id を指定した保存済みバックアップの復元）、`POST /api/settings/import-json`（従来の JSON 形式からの復元）は、稼働中のデータベース、または設定・接続・API キーの一式を置き換えます。したがって、マシン用認証情報ではこれらも実行できません。
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+復元ポイントの削除にも同じ制限があります。対象は `DELETE /api/db-backups`（クリーンアップ。最新 N 件を保持するか、D 日より古いものを削除）と `PATCH /api/db-backups`（保持設定）です。保存した保持設定は、各自動バックアップの後に `cleanupDbBackups()` が適用する設定そのものです（`src/lib/db/backup.ts`）。そのため、マシン用認証情報で `keepLatest: 1` を保存できると、次のスナップショット時に以前の復元ポイントを削除できてしまいます。バックアップの一覧表示と作成（`GET`/`PUT /api/db-backups`）には、引き続き通常の管理用認証が適用されます。
 
 ### 新規インストール時のブートストラップはループバック限定 — `Host` ではなく実際のピアに基づく
 

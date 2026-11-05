@@ -721,11 +721,11 @@ Modul `extraction.ts` (`src/lib/memory/extraction.ts`) koristi **podudaranje obr
 
 ### Zadane kategorije obrazaca
 
-| Kategorija          | Primjer obrasca                                               | Izdvaja                        |
-| ------------------- | ------------------------------------------------------------- | ------------------------------ |
-| PREFERENCE_PATTERNS | `"Preferiram <X>"`, `"Sviđa mi se <X>"`, `"Mrzim <X>"`        | Korisničke preferencije        |
-| DECISION_PATTERNS   | `"Koristit ću <X>"`, `"Odlučio sam <X>"`, `"Odabrao sam <X>"` | Korisničke odluke (epizodičke) |
-| PATTERN_PATTERNS    | `"Obično <X>"`, `"Uvijek <X>"`, `"Nikad <X>"`                 | Trajni obrasci ponašanja       |
+| Kategorija          | Primjer obrasca                                             | Izdvaja                        |
+| ------------------- | ----------------------------------------------------------- | ------------------------------ |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Korisničke preferencije        |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Korisničke odluke (epizodičke) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Trajni obrasci ponašanja       |
 
 ### Primjeri obrazaca (pojednostavljeno)
 
@@ -761,7 +761,8 @@ Kada korisnik kaže:
 
 Kako bi se spriječilo nekontrolirano izdvajanje, primjenjuju se sljedeća ograničenja:
 
-| Minimalna duljina sadržaja | 3 znaka |
+| Minimalna duljina sadržaja  | 3 znaka     |
+| --------------------------- | ----------- |
 | Maksimalna duljina sadržaja | 500 znakova |
 
 ### Kada onemogućiti izdvajanje

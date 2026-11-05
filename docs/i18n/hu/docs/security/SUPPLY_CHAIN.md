@@ -18,49 +18,38 @@ Az OmniRoute npm + Docker műtermékeket tesz közzé. Ezek a kapuk származási
 
 A kép CVE szigorítás **két lépést** használ a `docker-publish.yml` fájlban: a SARIF lépés (`HIGH,CRITICAL`, `exit-code: 0`) láthatóvá teszi a HIGH+CRITICAL sebezhetőségeket a Biztonság lapon anélkül, hogy blokkolná a kiadást; a _CRITICAL kapu_ lépés (`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`) meghiúsítja a kiadást, ha egy KRITIKUS CVE **elérhető javítással** rendelkezik. Az `ignore-unfixed` megakadályozza a kiadás blokkolását egy alapképen lévő CVE miatt, amelyhez nincs upstream javítás.
 
-## ⚠️ CVE eltérés (blokkoló osv/Trivy kapuk)
+## ⚠️ CVE-ingadozás (blokkoló osv/Trivy ellenőrzések)
 
-Az osv és a Trivy a függőségeket olyan CVE adatbázisokkal hasonlítja össze, amelyek **folyamatosan bővülnek**. Egy olyan PR, amely **nem érint függőségeket**, hirtelen pirosra válthat, mert egy új CVE-t fedeztek fel egy meglévő függőségben (osv: mért `vulnCount` > alapérték; Trivy: új, javítható KRITIKUS sebezhetőség a képben). **Ez egy blokkoló CVE kapu ELVÁRT működési viselkedése, nem termékhiba.**
+Az osv és a Trivy a függőségeket **folyamatosan bővülő** CVE-adatbázisokkal veti össze. Egy olyan PR,
+amely **nem módosít függőségeket**, hirtelen pirosra válthat, mert egy meglévő függőségben
+új CVE-t tettek közzé (osv: a mért `vulnCount` > alapérték; Trivy: új,
+javítható CRITICAL az image-ben). **Ez egy blokkoló CVE-ellenőrzés ELVÁRT működési
+viselkedése, nem termékregresszió.**
 
-Ha az osv vagy a Trivy pirosra vált egy újonnan felfedezett CVE miatt, a megoldás a következő:
+Ha az osv vagy a Trivy egy újonnan közzétett CVE miatt pirosra vált, a megoldás:
 
-1.  **Frissítse az érintett függőséget** (előnyben részesített) — frissítsen a javított verzióra a `package.json` `overrides` (tranzitív függőségek) segítségével, vagy építse újra a képet egy javított alapra.
-2.  **Ha nincs upstream javítás:**
-    - **osv:** állítsa vissza az `metrics.vulnCount` alapértékét a `config/quality/quality-baseline.json` fájlban (`npm run quality:ratchet -- --update` nem fedi le a dedikált kapukat — szerkessze az értéket kézzel, `direction:down`) indoklással + nyomon követési hibajeggyel.
-    - **Trivy:** adjon hozzá egy bejegyzést a `.trivyignore` fájlhoz (CVE-azonosító soronként) indoklással + nyomon követési hibajeggyel. Az `ignore-unfixed: true` már automatikusan kezeli a javítás nélküli CVE-ket.
+1. **Frissítse az érintett függőséget** (előnyben részesített) — frissítsen a javított verzióra a `package.json`
+   `overrides` mezőjén keresztül (tranzitív függőségek esetén), vagy építse újra az image-et egy javított alapra.
+2. **Ha nem érhető el upstream javítás:**
+   - **osv:** állítsa be újra a `metrics.vulnCount` alapértékét a `config/quality/quality-baseline.json`
+     fájlban (az `npm run quality:ratchet -- --update` nem terjed ki a dedikált ellenőrzésekre — az értéket
+     kézzel módosítsa, `direction:down`), indoklással és nyomon követési hibajeggyel együtt.
+   - **Trivy:** adjon hozzá egy bejegyzést a `.trivyignore` fájlhoz (soronként egy CVE-ID), indokló
+     megjegyzéssel és nyomon követési hibajeggyel együtt. Az `ignore-unfixed: true` már automatikusan
+     kezeli a javítással nem rendelkező CVE-ket.
 
-Mindkét kapu **elegánsan ÁTUGRJA** (exit 0) a lépést, ha az eszköz hiányzik, vagy a mérés sikertelen (osv-scanner nincs a PATH-ban, osv.dev/hálózat elérhetetlen, érvénytelen JSON) — egy **mérési** hiba soha nem blokkol, csak egy **mért** regresszió blokkol.
+A kötelező OSV-futtatások (`check:vuln-ratchet -- --ratchet`) zárt hibakezeléssel
+`INCOMPLETE` állapotot és 2-es kilépési kódot adnak, ha a szkenner, a jelentés vagy az alapérték nem ellenőrizhető.
+A mért regresszió 1-es kilépési kódot eredményez. A tájékoztató jellegű futtatás továbbra is jelenthet `SKIP` állapotot
+0-s kilépési kóddal, ami nem igazolja, hogy a függőségek átmentek a vizsgálaton. A blokkoló
+Trivy-lépéshez is sikeres mérés szükséges: a nem elérhető eszközök, a sikertelen feladatok
+és a hiányzó image-bizonyítékok alapján az image nem minősíthető tisztának.
 
-## Ismert elfogadott kockázatok
+## Kivezetett függőség kockázata
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+A rögzített promptfoo fejlesztői eszköz frissítése után a gyökérszintű lockfile már nem tartalmazza az `extract-zip` csomagot, sem hozzá vezető függőségi élt. Ezzel megszűnik a #14482-ben nyomon követett, korábban elfogadott `promptfoo` → `@openai/codex-security` → `extract-zip` lánc. A `tests/unit/extract-zip-14482-exposure.test.ts` regressziós ellenőrzései megakadályozzák annak újbóli bevezetését, és továbbra is tiltják a produkciós kódból történő importálását.
 
-Az `extract-zip@2.0.1` két, nem javított, magas súlyosságú szimbolikus link bejárási tanácsot tartalmaz.
-A fenti CVE Variance orvoslás "nincs upstream javítás" ága szerint ez egy
-**elfogadott kockázat**, nem pedig frissítés:
-
-- **Lánc:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  Megerősítve a `package-lock.json` fájlon keresztül — a teljes függőségi
-  fában pontosan egy csomag (`@openai/codex-security`) deklarálja az `extract-zip`-et,
-  és pontosan egy csomag (`promptfoo`) deklarálja az `@openai/codex-security`-t.
-- **Nincs javított kiadás a láncban.** Az `extract-zip@2.0.1` (2020-ban publikálva) a csomag utolsó kiadása — nem karbantartott. Az `@openai/codex-security`
-  jelenlegi npm-latest (`0.1.29`) továbbra is az `extract-zip@2.0.1`-et húzza be.
-- **Elérhetetlen a produkcióból.** A `promptfoo` csak devDependency (soha nincs felsorolva
-  a `dependencies` alatt), és a `src/`, `open-sse/` vagy `bin/` alatt egyetlen fájl sem importálja az
-  `extract-zip` npm csomagot — az OmniRoute saját `extractZip()` segédje
-  (`src/lib/versionManager/binaryManager.ts:93`) natív `unzip`/`tar`
-  parancsokat használ, és nem kapcsolódik ehhez. Az `@openai/codex-security` emellett saját szimbolikus link bejárási
-  védelmet is tartalmaz az extract-zip `onEntry` callback-je felett.
-- **Ne** aliasolja az `extract-zip`-et a `package.json` `overrides` segítségével — az egyetlen életképes
-  helyettesítő az Electron-org-internal, és API-kompatibilis az
-  `@openai/codex-security` saját `onEntry`/`defaultDirMode`/`defaultFileMode` ellenőrzéseivel;
-  felülírása csendesen megszakítaná a csomag biztonsági ellenőrzéseit.
-- **Alapvonal:** a mért osv `vulnCount` (3) már jóval az
-  `config/quality/quality-baseline.json` rögzített alapvonal (27) alatt van — nincs szükség alapvonal változtatásra.
-- **Regresszióvédelem:** a `tests/unit/extract-zip-14482-exposure.test.ts` ellenőrzi a
-  láncot és a fenti, produkcióból való importálhatatlansági invariánst; meghiúsítja a CI-t, ha bármelyik
-  megszakad (pl. egy jövőbeli PR elérhetővé teszi az `extract-zip`-et a produkcióból).
-- **Nyomon követés:** issue #14482.
+A jelenlegi függőségjavítás a kompatibilitási felülbírálásokat az Azure identity MSAL-kliensére, a get-uri FTP-kliensére és az OpenCode v1 SDK Zod-függőségére is korlátozza. Az Azure-tokenek beszerzését és az FTP-lekérést ellenőrzött átviteli rétegekkel tesztelik; mindkét OpenCode-csomag a saját build- és tesztcsomagját futtatja. A registry biztonsági figyelmeztetéseinek száma egy adott időpontban végzett mérés eredménye, és a lockfile commitolása után megváltozhat.
 
 ## Hátralék: Scorecard tanács → blokkoló
 

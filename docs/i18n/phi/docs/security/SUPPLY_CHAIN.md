@@ -19,49 +19,33 @@ Posisyong **Advisory-first** — nagre-report sila ngayon, at nagiging blocking 
 
 Ang image CVE ratchet ay gumagamit ng **dalawang hakbang** sa `docker-publish.yml`: ang hakbang ng SARIF (`HIGH,CRITICAL`, `exit-code: 0`) ay nagpapanatili ng HIGH+CRITICAL na makikita sa tab ng Security nang hindi nagba-block; ang hakbang ng _CRITICAL gate_ (`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`) ay nagpapabigo sa paglabas dahil sa isang CRITICAL CVE **na may available na fix**. Pinipigilan ng `ignore-unfixed` ang pag-block sa paglabas para sa isang base-image CVE na walang upstream patch.
 
-## ⚠️ Pagkakaiba-iba ng CVE (nagba-block na osv/Trivy gates)
+## ⚠️ Pagkakaiba-iba ng CVE (hinaharangan ang mga gate ng osv/Trivy)
 
-Kinukumpara ng osv at Trivy ang mga dependency laban sa mga database ng CVE na **patuloy na lumalaki**. Ang isang PR na **hindi gumagalaw ng anumang dependency** ay maaaring biglang maging pula dahil sa isang bagong CVE na naibunyag sa isang kasalukuyang dependency (osv: nasukat na `vulnCount` > baseline; Trivy: isang bagong fixable CRITICAL sa image). **Ito ay INAASAHANG operational behavior ng isang blocking CVE gate, hindi isang product regression.**
+Inihahambing ng osv at Trivy ang mga dependency sa mga database ng CVE na **patuloy na lumalaki**. Ang isang PR na **walang binabagong dependency** ay maaaring biglang pumalya dahil may bagong CVE na isiniwalat sa isang umiiral na dependency (osv: ang nasukat na `vulnCount` ay mas mataas sa baseline; Trivy: isang bagong naaayos na CRITICAL sa image). **Ito ay INAASAHANG gawi sa operasyon ng isang humaharang na CVE gate, hindi isang regression ng produkto.**
 
-Kapag naging pula ang osv o Trivy dahil sa isang bagong naibunyag na CVE, ang solusyon ay:
+Kapag pumalya ang osv o Trivy dahil sa isang bagong isiniwalat na CVE, ang solusyon ay:
 
-1.  **I-bump ang apektadong dep** (mas gusto) — i-upgrade sa patched na bersyon sa pamamagitan ng `package.json` `overrides` (transitive deps) o muling buuin ang image sa isang patched na base.
-2.  **Kung walang upstream fix:**
-    - **osv:** i-re-baseline ang `metrics.vulnCount` sa `config/quality/quality-baseline.json` (`npm run quality:ratchet -- --update` ay hindi sumasaklaw sa mga dedicated gate — i-edit ang halaga nang mano-mano, `direction:down`) na may tala ng pagbibigay-katwiran + tracking issue.
-    - **Trivy:** magdagdag ng entry sa `.trivyignore` (CVE-ID bawat linya) na may komento ng pagbibigay-katwiran + tracking issue. Awtomatikong sinasaklaw na ng `ignore-unfixed: true` ang mga CVE na walang patch.
+1. **I-update ang apektadong dependency** (inirerekomenda) — mag-upgrade sa na-patch na bersyon sa pamamagitan ng `package.json` `overrides` (mga transitive dependency) o muling buuin ang image gamit ang na-patch na base.
+2. **Kung walang upstream na pag-aayos:**
+   - **osv:** muling itakda ang baseline ng `metrics.vulnCount` sa `config/quality/quality-baseline.json` (`npm run quality:ratchet -- --update` ay hindi sumasaklaw sa mga nakalaang gate — manu-manong i-edit ang value, `direction:down`) kasama ang tala ng katwiran + tracking issue.
+   - **Trivy:** magdagdag ng entry sa `.trivyignore` (isang CVE-ID bawat linya) kasama ang komentong nagpapaliwanag ng katwiran + tracking issue. Awtomatikong sinasaklaw na ng `ignore-unfixed: true` ang mga CVE na walang mga patch.
 
-Parehong gate ay **gracefully SKIP** (exit 0) kapag wala ang tool o nabigo ang pagsukat (osv-scanner wala sa PATH, osv.dev/network hindi maabot, invalid JSON) — ang pagkabigo sa **pagsukat** ay hindi kailanman nagba-block, tanging ang **nasukat** na regression lang ang nagba-block.
+Ang mga kinakailangang pagpapatakbo ng OSV (`check:vuln-ratchet -- --ratchet`) ay pumapalya nang sarado gamit ang `INCOMPLETE` at exit 2 kapag hindi ma-validate ang scanner, ulat, o baseline. Ang nasukat na regression ay nagbabalik ng exit 1. Maaari pa ring mag-ulat ang advisory na pagpapatakbo ng `SKIP` na may exit 0, ngunit hindi nito pinatutunayang nakapasa ang mga dependency sa pag-scan. Nangangailangan din ang humaharang na hakbang ng Trivy ng matagumpay na pagsukat: hindi mapatutunayang malinis ang isang image kapag hindi available ang mga tool, pumalya ang mga job, o nawawala ang ebidensya ng image.
 
-## Mga Kilalang Tinanggap na Panganib
+## Panganib mula sa itinigil na dependency
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Hindi na kasama sa root lockfile ang `extract-zip` o ang dependency edge patungo rito matapos
+i-upgrade ang naka-pin na promptfoo development tool. Inaalis nito ang dati nang tinanggap na
+chain na `promptfoo` → `@openai/codex-security` → `extract-zip` na sinusubaybayan sa #14482.
+Tinatanggihan ng mga regression check sa `tests/unit/extract-zip-14482-exposure.test.ts` ang
+muling pagpapakilala nito at pinananatili ang pagbabawal sa mga import mula sa production code.
 
-Ang `extract-zip@2.0.1` ay may dalawang hindi pa naayos na high-severity symlink-traversal advisories.
-Ayon sa sangay ng "walang upstream fix" ng CVE Variance remedy sa itaas, ito ay isang
-**tinanggap na panganib**, hindi isang pagtaas:
-
-- **Chain:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  Kinumpirma sa pamamagitan ng `package-lock.json` — eksaktong isang package sa buong dependency
-  tree (`@openai/codex-security`) ang nagdedeklara ng `extract-zip`, at eksaktong isang package
-  (`promptfoo`) ang nagdedeklara ng `@openai/codex-security`.
-- **Walang naayos na release na umiiral saanman sa chain.** Ang `extract-zip@2.0.1` (inilathala noong 2020) ang huling release ng package — hindi ito pinapanatili. Ang
-  kasalukuyang npm-latest (`0.1.29`) ng `@openai/codex-security` ay humihila pa rin ng `extract-zip@2.0.1`.
-- **Hindi maabot mula sa production.** Ang `promptfoo` ay devDependency-only (hindi kailanman nakalista
-  sa ilalim ng `dependencies`), at walang file sa ilalim ng `src/`, `open-sse/`, o `bin/` ang nag-i-import ng
-  `extract-zip` npm package — ang sariling `extractZip()` helper ng OmniRoute
-  (`src/lib/versionManager/binaryManager.ts:93`) ay gumagamit ng native na `unzip`/`tar`
-  at hindi nauugnay. Ang `@openai/codex-security` ay mayroon ding sariling symlink-traversal
-  guard bukod pa sa onEntry callback ng extract-zip.
-- **Huwag** i-alias ang `extract-zip` sa pamamagitan ng `package.json` `overrides` — ang tanging posibleng
-  kapalit ay Electron-org-internal at API-incompatible sa sariling
-  onEntry/defaultDirMode/defaultFileMode checks ng `@openai/codex-security`; ang
-  pag-override nito ay tahimik na sisira sa mga security check ng package na iyon.
-- **Baseline:** ang nasukat na osv `vulnCount` (3) ay nasa ilalim na ng frozen
-  `config/quality/quality-baseline.json` baseline (27) — walang kinakailangang pagbabago sa ratchet.
-- **Regression guard:** Ang `tests/unit/extract-zip-14482-exposure.test.ts` ay nagpapatunay sa
-  chain at sa no-production-import invariant sa itaas; ito ay magpapabagsak sa CI kung sakaling
-  masira ang alinman (hal. isang future PR ang magpapahintulot na maabot ang `extract-zip` mula sa production).
-- **Pagsubaybay:** isyu #14482.
+Nililimitahan din ng kasalukuyang pag-aayos sa dependency ang mga compatibility override sa
+MSAL client ng Azure identity, FTP client ng get-uri, at Zod dependency ng OpenCode v1 SDK. Ang
+pagkuha ng Azure token at FTP retrieval ay sinusubukan gamit ang mga kontroladong transport;
+pinapatakbo ng dalawang OpenCode package ang sarili nilang mga build at test suite. Ang mga
+bilang ng registry advisory ay mga pagsukat sa isang partikular na oras at maaaring magbago
+pagkatapos ma-commit ang lockfile.
 
 ## Backlog: Scorecard advisory → pagharang
 

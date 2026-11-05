@@ -4,8 +4,6 @@
 
 ---
 
-# agentrouter.org WAF (Web Application Firewall)
-
 `agentrouter` upstream gateway pokreće filter sadržaja zasnovan na ključnim riječima nad `messages[].content`. Filter je djelimično deterministički (uvijek blokira određene fraze) i djelimično probabilistički (osjetljiv na nalete — postaje agresivniji nakon brzih zahtjeva, oporavlja se nakon perioda hlađenja).
 
 Kada WAF blokira zahtjev, vraća:

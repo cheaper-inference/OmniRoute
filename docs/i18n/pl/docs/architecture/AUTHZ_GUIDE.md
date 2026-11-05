@@ -99,24 +99,48 @@ Udana polityka zwraca `AuthSubject` z `kind ∈ { client_api_key, dashboard_sess
 
 `src/shared/constants/publicApiRoutes.ts` to jawna allowlista:
 
+Lista jest podzielona według **postaci ścieżek**, a ten podział ma kluczowe znaczenie (GHSA-74g9-q8f6-793h): prefiks jest
+dopasowywany przez `startsWith()`, więc pasuje również do każdej sąsiedniej ścieżki o tych samych początkowych znakach.
+`/api/usage/om-usage` użyte jako prefiks oznaczało `/api/usage/om-usage<anything>` jako PUBLIC, a Next kieruje
+taki adres do `/api/usage/[connectionId]` — handlera bez własnego uwierzytelniania.
+
 ```ts
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
+  "/api/auth/oidc/",
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
+  "/api/oauth/",
+  "/api/codex/connect/",
+  "/api/telegram/",
+  "/api/cursor-cli/",
+];
+
+// Single routes, matched EXACTLY (with or without a trailing slash).
+PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
   "/api/init",
-  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
-  "/api/cloud/",
   "/api/sync/bundle",
-  "/api/oauth/",
+  "/api/cli/connect",
+  "/api/usage/om-usage",
+  "/api/skills/collect/chaos",
+]);
+
+// Read-only single routes that also take the CORS origin relaxation.
+PUBLIC_READONLY_CORS_API_ROUTES = [
+  "/api/health/ping",
+  "/api/monitoring/health",
+  "/api/settings/require-login",
 ];
 
-PUBLIC_READONLY_API_ROUTE_PREFIXES = ["/api/monitoring/health", "/api/settings/require-login"];
+// Read-only single route WITHOUT the CORS relaxation.
+PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Prefiksy tylko do odczytu są publiczne **wyłącznie** dla bezpiecznych metod. Uwaga: `classifyRoute()` wyklucza `/api/v1/*` i `/api/v1beta/*` z fall-through PUBLIC — te trasy są zawsze `CLIENT_API`, więc polityka klucza Bearer nadal obowiązuje.
+Trasy tylko do odczytu są publiczne **wyłącznie** dla bezpiecznych metod. Uwaga: `classifyRoute()` wyklucza `/api/v1/*` i `/api/v1beta/*` z fall-through PUBLIC — te trasy są zawsze `CLIENT_API`, więc polityka klucza Bearer nadal obowiązuje.
 
 ## Dodawanie nowej trasy
 
@@ -159,7 +183,7 @@ export async function POST(request: Request) {
 
 ### Wzorzec 3 — Dodanie do publicznej allowlisty
 
-Dodaj prefiks do `PUBLIC_API_ROUTE_PREFIXES` (lub `PUBLIC_READONLY_API_ROUTE_PREFIXES` dla GET-only). Zaktualizuj testy jednostkowe w `tests/unit/public-api-routes.test.ts` i `tests/unit/authz/classify.test.ts`.
+Wybierz zbiór według postaci ścieżki, a nie dla wygody. Pojedyncza trasa trafia do `PUBLIC_API_ROUTES_EXACT` (lub `PUBLIC_READONLY_CORS_API_ROUTES` dla tras tylko GET); do `PUBLIC_API_ROUTE_PREFIXES` trafia wyłącznie rzeczywiste poddrzewo, które **musi kończyć się na `/`**. Umieszczenie pojedynczej trasy na liście prefiksów udostępnia również każdą sąsiednią ścieżkę o tych samych początkowych znakach — w tym dodane później sąsiednie trasy z segmentami dynamicznymi (GHSA-74g9-q8f6-793h). Zaktualizuj testy jednostkowe w `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` i `tests/unit/authz/classify.test.ts`.
 
 ## Zakresy
 

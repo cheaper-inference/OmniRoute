@@ -18,48 +18,46 @@ OmniRoute publică artefacte npm + Docker. Aceste porți oferă proveniență, i
 
 Mecanismul de ajustare CVE al imaginii utilizează **doi pași** în `docker-publish.yml`: pasul SARIF (`HIGH,CRITICAL`, `exit-code: 0`) menține vulnerabilitățile HIGH+CRITICAL vizibile în fila Securitate fără a bloca; pasul _porții CRITICAL_ (`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`) eșuează lansarea la o vulnerabilitate CVE CRITICAL **cu o soluție disponibilă**. `ignore-unfixed` previne blocarea lansării pentru o vulnerabilitate CVE a imaginii de bază fără un patch upstream.
 
-## ⚠️ Variația CVE (porți de blocare osv/Trivy)
+## ⚠️ Variația CVE (blochează porțile osv/Trivy)
 
-osv și Trivy compară dependențele cu baze de date CVE care **cresc continuu**. Un PR care **nu modifică dependențe** poate deveni brusc roșu deoarece o nouă vulnerabilitate CVE a fost dezvăluită într-o dependență existentă (osv: `vulnCount` măsurat > linie de bază; Trivy: o nouă vulnerabilitate CRITICAL remediabilă în imagine). **Acesta este un comportament operațional AȘTEPTAT al unei porți CVE de blocare, nu o regresie a produsului.**
+osv și Trivy compară dependențele cu baze de date CVE care **cresc continuu**. Un PR
+care **nu modifică nicio dependență** poate deveni brusc roșu deoarece a fost
+dezvăluit un CVE nou într-o dependență existentă (osv: `vulnCount` măsurat > valoarea de referință; Trivy: un nou
+CRITICAL remediabil în imagine). **Acesta este comportamentul operațional AȘTEPTAT al unei porți
+CVE blocante, nu o regresie a produsului.**
 
-Când osv sau Trivy devin roșii din cauza unei vulnerabilități CVE nou dezvăluite, soluția este:
+Când osv sau Trivy devin roșii din cauza unui CVE nou dezvăluit, soluția este:
 
-1.  **Actualizați dependența afectată** (preferat) — actualizați la versiunea patch-uită prin `overrides` din `package.json` (dependențe tranzitive) sau reconstruiți imaginea pe o bază patch-uită.
-2.  **Dacă nu există o soluție upstream:**
-    - **osv:** re-stabiliți linia de bază pentru `metrics.vulnCount` în `config/quality/quality-baseline.json` (`npm run quality:ratchet -- --update` nu acoperă porțile dedicate — editați valoarea manual, `direction:down`) cu o notă de justificare + un tichet de urmărire.
-    - **Trivy:** adăugați o intrare în `.trivyignore` (CVE-ID pe linie) cu un comentariu de justificare + un tichet de urmărire. `ignore-unfixed: true` acoperă deja automat vulnerabilitățile CVE fără patch-uri.
+1. **Actualizați dependența afectată** (de preferat) — faceți upgrade la versiunea corectată prin `package.json`
+   `overrides` (dependențe tranzitive) sau reconstruiți imaginea pe o bază corectată.
+2. **Dacă nu există nicio remediere în amonte:**
+   - **osv:** restabiliți valoarea de referință pentru `metrics.vulnCount` în `config/quality/quality-baseline.json`
+     (`npm run quality:ratchet -- --update` nu acoperă porțile dedicate — editați valoarea
+     manual, `direction:down`) cu o notă justificativă + un tichet de urmărire.
+   - **Trivy:** adăugați o intrare în `.trivyignore` (câte un ID CVE pe linie) cu un comentariu
+     justificativ + un tichet de urmărire. `ignore-unfixed: true` acoperă deja automat CVE-urile fără
+     corecții.
 
-Ambele porți **SAR automat** (exit 0) atunci când instrumentul lipsește sau măsurarea eșuează (osv-scanner nu este în PATH, osv.dev/rețea inaccesibilă, JSON invalid) — un eșec de **măsurare** nu blochează niciodată, doar o regresie **măsurată** blochează.
+Execuțiile OSV obligatorii (`check:vuln-ratchet -- --ratchet`) eșuează în mod închis cu
+`INCOMPLETE` și codul de ieșire 2 atunci când scanerul, raportul sau valoarea de referință nu pot fi validate.
+O regresie măsurată returnează codul de ieșire 1. Execuția consultativă poate raporta în continuare `SKIP` cu
+codul de ieșire 0, ceea ce nu confirmă faptul că dependențele au trecut scanarea. Pasul Trivy
+blocant necesită, de asemenea, o măsurare reușită: instrumentele indisponibile, joburile eșuate
+și lipsa dovezilor privind imaginea nu pot certifica o imagine drept curată.
 
-## Riscuri cunoscute și acceptate
+## Riscul asociat unei dependențe retrase
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Fișierul lock rădăcină nu mai include `extract-zip` și nici o relație de dependență către acesta după
+actualizarea instrumentului de dezvoltare promptfoo cu versiune fixată. Astfel este retras lanțul
+`promptfoo` → `@openai/codex-security` → `extract-zip`, acceptat anterior și urmărit în #14482.
+Verificările de regresie din `tests/unit/extract-zip-14482-exposure.test.ts` resping
+reintroducerea acestuia și mențin interdicția importurilor din codul de producție.
 
-`extract-zip@2.0.1` conține două avertismente de severitate ridicată, necorectate, de tip symlink-traversal.
-Conform ramurii "no upstream fix" a soluției CVE Variance de mai sus, acesta este un
-**risc acceptat**, nu o actualizare:
-
-- **Lanț:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  Confirmat prin `package-lock.json` — exact un pachet din întregul arbore de dependențe
-  (`@openai/codex-security`) declară `extract-zip`, și exact un pachet
-  (`promptfoo`) declară `@openai/codex-security`.
-- **Nu există nicio versiune fixă nicăieri în lanț.** `extract-zip@2.0.1` (publicat în 2020) este versiunea finală a pachetului — nu este menținut. `@openai/codex-security`'s
-  versiunea curentă npm-latest (`0.1.29`) încă utilizează `extract-zip@2.0.1`.
-- **Inaccesibil din producție.** `promptfoo` este doar devDependency (nu este niciodată listat
-  sub `dependencies`), și niciun fișier din `src/`, `open-sse/`, sau `bin/` nu importă
-  pachetul npm `extract-zip` — propriul helper `extractZip()` al OmniRoute
-  (`src/lib/versionManager/binaryManager.ts:93`) apelează `unzip`/`tar` nativ
-  și este fără legătură. `@openai/codex-security` include, de asemenea, propria sa
-  protecție symlink-traversal pe lângă callback-ul onEntry al extract-zip.
-- **Nu** aliasați `extract-zip` prin `package.json` `overrides` — singura înlocuire viabilă
-  este Electron-org-internal și este incompatibilă API cu propriile verificări onEntry/defaultDirMode/defaultFileMode ale `@openai/codex-security`;
-  suprascrierea ar anula în tăcere verificările de securitate ale acelui pachet.
-- **Linie de bază:** `vulnCount` (3) măsurat de osv este deja mult sub linia de bază înghețată
-  `config/quality/quality-baseline.json` (27) — nu este necesară nicio modificare a pragului.
-- **Protecție împotriva regresiei:** `tests/unit/extract-zip-14482-exposure.test.ts` afirmă
-  lanțul și invariantul de non-import din producție de mai sus; eșuează CI dacă oricare
-  dintre acestea se încalcă vreodată (de exemplu, un PR viitor face `extract-zip` accesibil din producție).
-- **Urmărire:** problema #14482.
+Remedierea actuală a dependențelor limitează, de asemenea, suprascrierile de compatibilitate la clientul
+MSAL al Azure identity, clientul FTP al get-uri și dependența Zod a SDK-ului OpenCode v1. Obținerea
+tokenurilor Azure și preluarea prin FTP sunt testate folosind transporturi controlate; ambele pachete OpenCode
+rulează propriile suite de compilare și testare. Numărul avertismentelor din registru reprezintă măsurători
+la un moment dat și se poate modifica după ce fișierul lock este inclus în commit.
 
 ## Restanțe: Avertisment Scorecard → blocare
 

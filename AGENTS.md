@@ -211,7 +211,7 @@ For any non-trivial change, read the matching deep-dive first:
 - API reference + OpenAPI — `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` · Provider catalog (auto-generated) — `docs/reference/PROVIDER_REFERENCE.md`
 - Tunnels — `docs/ops/TUNNELS_GUIDE.md` · Release flow — `docs/ops/RELEASE_CHECKLIST.md` · Worktree protocol — `docs/ops/WORKTREE_ISOLATION.md` · Hard Rules detail — `docs/ops/HARD_RULES_DETAIL.md` · Build warnings + Bun troubleshooting — `docs/ops/BUILD_WARNINGS.md`
 - Electron desktop app — `docs/guides/ELECTRON_GUIDE.md` · VS Code Copilot Chat (OmniCopilot extension) — `docs/guides/VSCODE-COPILOT.md`
-- Embedded services — `docs/frameworks/EMBEDDED-SERVICES.md` · Quality gates (~90 scripts, allowlist policy) — `docs/architecture/QUALITY_GATES.md`
+- Embedded services — `docs/frameworks/EMBEDDED-SERVICES.md` · Quality gates (inventory, execution profiles, allowlist policy) — `docs/architecture/QUALITY_GATES.md`
 
 ---
 
@@ -352,7 +352,11 @@ This checkout is a fork of `diegosouzapw/OmniRoute`. Keep fork-only deployment a
 
 ## Quality Gates & Ratchets
 
-OmniRoute has **~90 quality-gate scripts** (`scripts/check/` + `scripts/quality/`) wired across **9 gate-running jobs** in `.github/workflows/ci.yml`, plus the `quality.yml` fast-gates job (PR→`release/**`) and 5 quality nightly workflows. Full inventory, per-job breakdown, and operational procedures: [`docs/architecture/QUALITY_GATES.md`](docs/architecture/QUALITY_GATES.md).
+For the quality-gate inventory, execution profiles and operational procedures, read
+[`docs/architecture/QUALITY_GATES.md`](docs/architecture/QUALITY_GATES.md).
+`config/quality/gate-manifest.json` records validation-related npm aliases and exact commands;
+workflow files define jobs and event triggers. Measure aliases, script files, jobs and matrix
+instances as separate units at the candidate SHA.
 
 **Quick reference:**
 

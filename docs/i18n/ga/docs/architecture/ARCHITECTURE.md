@@ -15,7 +15,7 @@ Soláthraíonn sé críochphointe aonair atá comhoiriúnach le OpenAI (`/v1/*`)
 
 Príomhchumais:
 
-- Dromchla API atá comhoiriúnach le OpenAI le haghaidh CLI/uirlisí (375 soláthraí, 154 modúl feidhmithe)
+- Dromchla API atá comhoiriúnach le OpenAI le haghaidh CLI/uirlisí (375 soláthraí, 156 modúl feidhmithe)
 - Aistriú iarrataí/freagraí idir formáidí soláthraithe
 - Cúltaca teaglama samhlacha (seicheamh ilsamhla)
 - Céimeanna struchtúrtha teaglama (`provider + model + connection`) le hordú ag am rite de réir `compositeTiers`
@@ -31,7 +31,7 @@ Príomhchumais:
 - Cuardach gréasáin trí `/v1/search` (20 soláthraí)
 - Modhnóireacht trí `/v1/moderations`
 - Athrangú trí `/v1/rerank`
-- Parsáil clibeanna smaointeoireachta (``) le haghaidh samhlacha réasúnaíochta
+- Parsáil clibeanna smaointeoireachta (`<think>...</think>`) le haghaidh samhlacha réasúnaíochta
 - Sláintiú freagraí ar mhaithe le dian-chomhoiriúnacht le OpenAI SDK
 - Normalú ról (developer→system, system→user) ar mhaithe le comhoiriúnacht tras-soláthraí
 - Tiontú aschuir struchtúrtha (json_schema → Gemini responseSchema)
@@ -1094,11 +1094,11 @@ comhoiriúnacht leagáide amháin. Úsáideann an conradh reatha ama rite:
 - ascnaimh scéimre SQLite agus crúcaí uathuasghrádaithe ag an am tosaithe
 - conair chomhoiriúnachta ascnaimh ó JSON leagáide → SQLite
 
-## 6) Garda SSRF / URL Amach
+## 6) SSRF / Cosaint URLanna Amach
 
-- cuireann `src/shared/network/outboundUrlGuard.ts` bac ar gach sprioc-URL príobháideach/aischasta/nasc-áitiúil sula sroicheann siad seiceadóirí soláthraí
-- úsáideann bealaí aimsithe agus bailíochtaithe samhlacha soláthraí `src/shared/network/safeOutboundFetch.ts`, a chuireann an garda i bhfeidhm roimh gach iarratas amach
-- taispeántar earráidí garda mar `URL_GUARD_BLOCKED` le HTTP 422 agus logáiltear iad sa rian iniúchta comhlíontachta trí `providerAudit.ts`
+- Cuireann `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) `src/shared/network/outboundUrlGuard.ts` i bhfeidhm ar iarratais chomhrá a sheoltar trí `BaseExecutor.execute()`. Sa mhód poiblí amháin (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` agus an bhratach phríobháideach múchta), blocálann sé óstaigh phríobháideacha agus aisfhillteacha, chomh maith le 169.254.0.0/16; i ngach mód eile, blocálann sé óstaigh mheiteashonraí néil. Seiceálann sé an t-óstainm nó an seoladh IP litriúil mar atá scríofa, roimh aon chuardach DNS. Scipeálann soláthraithe áitiúla ionsuite é.
+- Úsáideann bealaí aimsithe agus bailíochtaithe samhlacha soláthraithe `src/shared/network/safeOutboundFetch.ts`, a chuireann an chosaint i bhfeidhm roimh gach iarratas amach
+- Taispeántar earráidí cosanta mar `URL_GUARD_BLOCKED` le HTTP 503 (`getSafeOutboundFetchErrorStatus`; filleann an bealach aimsithe samhlacha 400), agus logáiltear fíorbhlocálacha SSRF le linn bailíochtaithe sa rian iniúchta mar theagmhais `provider.validation.ssrf_blocked`
 
 ## Inbhraiteacht agus Comharthaí Oibríochtúla
 
@@ -1149,7 +1149,7 @@ Athróga timpeallachta a úsáideann an cód go gníomhach:
 4. Braitheann iompar néil ar `NEXT_PUBLIC_BASE_URL` ceart agus ar inrochtaineacht chríochphointe an néil.
 5. Foilsítear an chomhadlann `open-sse/` mar **phacáiste spáis oibre npm** `@omniroute/open-sse`. Iompórtálann an cód foinse í trí `@omniroute/open-sse/...` (arna réiteach ag `transpilePackages` Next.js). Úsáideann conairí comhaid sa doiciméad seo ainm na comhadlainne `open-sse/` fós ar mhaithe le comhsheasmhacht.
 6. Úsáideann cairteacha sa deais **Recharts** (bunaithe ar SVG) le haghaidh léirshamhluithe anailísíochta inrochtana, idirghníomhacha (barrachairteacha úsáide samhlacha, táblaí miondealaithe soláthraithe le rátaí ratha).
-7. Úsáideann tástálacha E2E **Playwright** (`tests/e2e/`), agus ritear iad trí `npm run test:e2e`. Úsáideann tástálacha aonaid **reathaí tástála Node.js** (`tests/unit/`), agus ritear iad trí `npm run test:unit`. Is **TypeScript** (`.ts`/`.tsx`) é an cód foinse faoi `src/`; fanann spás oibre `open-sse/` mar JavaScript (`.js`).
+7. Úsáideann tástálacha E2E **Playwright** (`tests/e2e/`), agus ritear iad trí `npm run test:e2e`. Úsáideann tástálacha aonaid **reathaí tástála Node.js** (`tests/unit/`), agus ritear iad trí `npm run test:unit`. Is **TypeScript** (`.ts`/`.tsx`) é an cód foinse faoi `src/`; fanann spás oibre `open-sse/` mar TypeScript (`.ts`).
 8. Tá leathanach na socruithe eagraithe ina 7 gcluaisín: Ginearálta, Cuma, IS, Slándáil, Ródú, Athléimneacht, Ardroghanna. Ní chumraíonn an leathanach Athléimneachta ach scuaine na n-iarratas, tréimhse shuaimhnithe na gceangal, scoradán an tsoláthraí, agus iompar feithimh don tréimhse shuaimhnithe; taispeántar staid bheo am rite an scoradáin ar an leathanach Sláinte.
 9. Tá straitéis **Athsheachadadh Comhthéacs** (`context-relay`) roinnte thar dhá shraith: cinneann `combo.ts` ar cheart aistriú a ghiniúint, agus insteallann `chat.ts` an t-aistriú tar éis réiteach an chuntais. Tá sonraí aistrithe i dtábla SQLite `context_handoffs`. Tá an deighilt seo d'aon ghnó mar ní bhíonn a fhios ach ag `chat.ts` ar athraigh an cuntas iarbhír.
 10. Tá **forfheidhmiú seachfhreastalaí** cuimsitheach anois: réitíonn `tokenHealthCheck.ts` an seachfhreastalaí do gach ceangal, úsáideann `/api/providers/validate` `runWithProxyContext`, agus úsáideann `proxyFetch.ts` `undici.fetch()` chun comhoiriúnacht seoltóra a choinneáil ar Node 22.

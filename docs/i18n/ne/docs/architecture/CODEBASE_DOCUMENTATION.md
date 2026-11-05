@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 प्रदायक रजिस्ट्रीहरू, हेडर प्रोफाइलहरू, पहिचान, …
 ├── handlers/               अनुरोध ह्यान्डलरहरू (च्याट, एम्बेडिङ, अडियो, छवि, …)
-├── executors/              150 प्रदायक एक्जिक्युटर मोड्युलहरू (एक्जिक्युटर क्लासहरू + प्रत्येक प्रदायकका सहायकहरू)
+├── executors/              156 प्रदायक एक्जिक्युटर मोड्युलहरू (एक्जिक्युटर क्लासहरू + प्रत्येक प्रदायकका सहायकहरू)
 ├── translator/             ढाँचा रूपान्तरण (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions स्ट्रिम ट्रान्सफर्मर
 ├── services/               80+ सेवा मोड्युलहरू (कम्बोहरू, फलब्याक, कोटाहरू, पहिचान, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 शीर्ष-स्तरीय एक्जिक्युटर मोड्युलहरू (`*.ts` बाट `base.ts`, `index.ts` र परीक्षणहरू घटाएर — यो सङ्ख्या
+156 शीर्ष-स्तरीय एक्जिक्युटर मोड्युलहरू (`*.ts` बाट `base.ts`, `index.ts` र परीक्षणहरू घटाएर — यो सङ्ख्या
 `npm run check:docs-counts` ले मापन गर्छ)। प्रत्येक एक्जिक्युटर क्लासले `BaseExecutor` (`base.ts`) विस्तार गर्छ,
 प्रत्यक्ष रूपमा वा `DefaultExecutor` अथवा अर्को एक्जिक्युटरमार्फत; बाँकी मोड्युलहरू प्रत्येक प्रदायकका
 सहायकहरू हुन् (उपकरण स्किमाहरू, फेच/TTS एडाप्टरहरू, विशिष्ट व्यवहार ह्यान्डलरहरू)। एक्जिक्युटरहरूमा यी समावेश छन्:
@@ -772,7 +772,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts` विस्तार गर्नुहोस्)।
 2. `src/shared/constants/mcpScopes.ts` मा उपयुक्त scope(s) तोक्नुहोस्।
 3. `open-sse/mcp-server/server.ts` मा tool दर्ता गर्नुहोस्।
-4. `open-sse/mcp-server/__tests__/` अन्तर्गत परीक्षणहरू थप्नुहोस्।
+4. `tests/unit/` अन्तर्गत परीक्षणहरू थप्नुहोस्।
 5. [MCP-SERVER.md](../frameworks/MCP-SERVER.md) अद्यावधिक गर्नुहोस्।
 
 ### नयाँ A2A skill थप्ने
@@ -790,7 +790,7 @@ bin/
 - **Naming**: files `camelCase` वा `kebab-case`, components `PascalCase`,
   constants `UPPER_SNAKE`।
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = सबै ठाउँमा `error`;
-  `no-explicit-any` = `open-sse/` र `tests/` मा `warn`, अन्यत्र error।
+  `no-explicit-any` = `open-sse/**/*.ts` र `tests/**/*.ts` मा `error`।
 - **TypeScript**: `strict: false` (legacy posture)। Cross-module boundaries का लागि
   inference भन्दा explicit types लाई प्राथमिकता दिनुहोस्।
 - **Database**: routes वा handlers मा कहिल्यै raw SQL नलेख्नुहोस् — सधैं
@@ -819,8 +819,7 @@ bin/
   `a2a`, `memory`, `skills`।
 - **Branches**: prefixes `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`। `main` मा कहिल्यै प्रत्यक्ष commit नगर्नुहोस्।
-- **Husky**: pre-commit ले `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11` चलाउँछ; pre-push ले `check:any-budget:t11` + `check:tracked-artifacts` चलाउँछ (छिटो gates; `test:unit` समावेश हुँदैन)।
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

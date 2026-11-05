@@ -6607,7 +6607,7 @@
       "xai": "xAI (Grok) ကို API ကီးဖြင့် ချိတ်ဆက်ပါ။",
       "xiaomi-mimo": "Xiaomi MiMo ကို API ကီးဖြင့် ချိတ်ဆက်ပါ။",
       "yi": "platform.lingyiwanwu.com တွင် API ကီး ရယူပါ",
-      "zai": "https://open.bigmodel.cn/usercenter/apikeys မှ API ကီး",
+      "zai": "https://z.ai/manage-apikey/apikey-list မှ API ကီး",
       "zenmux": "ZenMux သည် /api/v1/chat/completions တွင် OpenAI-compatible chat completions endpoint အပြင် Anthropic Messages (/api/anthropic/v1/messages) နှင့် Google Gemini (/api/vertex-ai) protocol interfaces များကိုပါ ပံ့ပိုးပေးသည်။ OmniRoute သည် OpenAI protocol ကို အသုံးပြုသည်။",
       "galadriel": "Galadriel ကို API ကီးဖြင့် ချိတ်ဆက်ပါ။",
       "predibase": "$25 အခမဲ့ စမ်းသုံးခရက်ဒစ် (သက်တမ်း 30 ရက်)",

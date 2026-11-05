@@ -476,7 +476,7 @@ Le haghaidh mód comhtháthaithe óstach le binréidh CLI, féach an rannán Doc
 
 ### Void Linux (xbps-src)
 
-Is féidir le húsáideoirí Void Linux OmniRoute a phacáistiú agus a shuiteáil go dúchasach ag baint úsáide as an chreat traschomhshóite `xbps-src`. Léiríonn sé seo an t-ábhar stand-alone Node.js in éineacht le ceangail dhúchasacha `better-sqlite3" atá de dhíth.
+Is féidir le húsáideoirí Void Linux OmniRoute a phacáistiú agus a shuiteáil go dúchasach ag baint úsáide as an chreat traschomhshóite `xbps-src`. Léiríonn sé seo an t-ábhar stand-alone Node.js in éineacht le ceangail dhúchasacha `better-sqlite3` atá de dhíth.
 
 <details>
 <summary><b>Féach samhail xbps-src</b></summary>
@@ -576,28 +576,28 @@ post_install() {
 
 ### Athróga Timpeallachta
 
-| Athróg                                  | Réamhshocrú                          | Cur Síos                                                                                                                                          |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Rúndacht síniú JWT (**athrú i bhforbairt**)                                                                                                       |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Pasfhocal logála isteach den chéad uair                                                                                                           |
-| `DATA_DIR`                              | `~/.omniroute`                       | Eolaire sonraí (bunachar sonraí, úsáid, logaí)                                                                                                    |
-| `PORT`                                  | réamhshocrú fréamhchórais            | Port seirbhíse (`20128` san fholláin                                                                                                              |
-| `HOSTNAME`                              | réamhshocrú fréamhchórais            | Ceangal óstach (réamhshocrú Docker `0.0.0.0`)                                                                                                     |
-| `NODE_ENV`                              | réamhshocrú rithime                  | Socraigh `production` le haghaidh imscartha                                                                                                       |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | URL bonn poiblí a thaispeántar don deais agus a nochtar don fhreastalaí (athraíonn `BASE_URL` seanmhod)                                           |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | URL bonn críochphointe sioncronú scamall (athraíonn `CLOUD_URL` seanmhod)                                                                         |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Rúndacht HMAC le haghaidh eochracha API ginte                                                                                                     |
-| `REQUIRE_API_KEY`                       | `false`                              | Éileamh eochair API Bearer ar `/v1/*`                                                                                                             |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Ceadaigh d'úsáideoirí deise deimhnithe na luachanna iomlán eochair API stóráilte a nochtadh ar éileamh                                            |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Rith tuisceana freastalaí le haghaidh sonraí Teorainneacha Soláthraí stóráilte; cuirfidh cnaipí athnuachana an deais fós sioncronú láimhe ar siúl |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Díchumasigh ceapacha SQLite uathoibríoch roimh scríbh/Iompórtáil/athchóiriú; oibríonn cóipeanna cúltaca láimhe fós                                |
-| `APP_LOG_TO_FILE`                       | `true`                               | Cumasaigh aschur logaí iarratais agus iniúchta ar diosca                                                                                          |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Fórsaigh fíorordú `Secure` (taobh thiar de seirbhíse frithbheochana HTTPS)                                                                        |
-| `CLOUDFLARED_BIN`                       | gan socraigh                         | Úsáid bineár `cloudflared` atá ann cheana in ionad íoslódáil bhainistithe                                                                         |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Iompar le haghaidh Tunnealla Tapa Bainistithe (`http2`, `quic`, nó `auto`)                                                                        |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Teorainn cuimhne Node.js i MB                                                                                                                     |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Méid uasta iontrálacha taisce luaslaíochta                                                                                                        |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Méid uasta iontrálacha taisce séimeantacha                                                                                                        |
+| Athróg                                  | Réamhshocrú                | Cur Síos                                                                                                                                                                                         |
+| --------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `JWT_SECRET`                            | _(ginte go huathoibríoch)_ | Rúndacht sínithe JWT — gintear go huathoibríoch í ar an gcéad tosú agus coinnítear í in `server.env`; socraigh go sainráite í nuair atá an chomhadlann sonraí sealadach                          |
+| `INITIAL_PASSWORD`                      | _(gan socrú)_              | Pasfhocal don chéad logáil isteach. Tosaíonn suiteálacha npm/foinse le `CHANGEME`: cuir ceann eile ina áit. Gan socrú: draoi ionduchtaithe                                                       |
+| `DATA_DIR`                              | `~/.omniroute`             | Eolaire sonraí (bunachar sonraí, úsáid, logaí)                                                                                                                                                   |
+| `PORT`                                  | réamhshocrú fréamhchórais  | Port seirbhíse (`20128` san fholláin                                                                                                                                                             |
+| `HOSTNAME`                              | réamhshocrú fréamhchórais  | Ceangal óstach (réamhshocrú Docker `0.0.0.0`)                                                                                                                                                    |
+| `NODE_ENV`                              | réamhshocrú rithime        | Socraigh `production` le haghaidh imscartha                                                                                                                                                      |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`   | URL bonn poiblí a thaispeántar don deais agus a nochtar don fhreastalaí (athraíonn `BASE_URL` seanmhod)                                                                                          |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`    | URL bonn críochphointe sioncronú scamall (athraíonn `CLOUD_URL` seanmhod)                                                                                                                        |
+| `API_KEY_SECRET`                        | _(ginte go huathoibríoch)_ | Rúndacht suim sheiceála d’eochracha API atá ceangailte leis an meaisín — gineann bootstrap an tosaithe í go huathoibríoch mura bhfuil sí socraithe agus sábhálann sé í in `server.env` inscríofa |
+| `REQUIRE_API_KEY`                       | `false`                    | Éileamh eochair API Bearer ar `/v1/*`                                                                                                                                                            |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                    | Ceadaigh d'úsáideoirí deise deimhnithe na luachanna iomlán eochair API stóráilte a nochtadh ar éileamh                                                                                           |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                       | Rith tuisceana freastalaí le haghaidh sonraí Teorainneacha Soláthraí stóráilte; cuirfidh cnaipí athnuachana an deais fós sioncronú láimhe ar siúl                                                |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                    | Díchumasigh ceapacha SQLite uathoibríoch roimh scríbh/Iompórtáil/athchóiriú; oibríonn cóipeanna cúltaca láimhe fós                                                                               |
+| `APP_LOG_TO_FILE`                       | `true`                     | Cumasaigh aschur logaí iarratais agus iniúchta ar diosca                                                                                                                                         |
+| `AUTH_COOKIE_SECURE`                    | `false`                    | Fórsaigh fíorordú `Secure` (taobh thiar de seirbhíse frithbheochana HTTPS)                                                                                                                       |
+| `CLOUDFLARED_BIN`                       | gan socraigh               | Úsáid bineár `cloudflared` atá ann cheana in ionad íoslódáil bhainistithe                                                                                                                        |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                    | Iompar le haghaidh Tunnealla Tapa Bainistithe (`http2`, `quic`, nó `auto`)                                                                                                                       |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                      | Teorainn cuimhne Node.js i MB                                                                                                                                                                    |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                       | Méid uasta iontrálacha taisce luaslaíochta                                                                                                                                                       |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                      | Méid uasta iontrálacha taisce séimeantacha                                                                                                                                                       |
 
 Le haghaidh an tagarmharc iomlán athróga timpeallachta, féach an [README](../README.md).
 
@@ -656,7 +656,7 @@ Le haghaidh an tagarmharc iomlán athróga timpeallachta, féach an [README](../
 
 **Soláthraithe comhoiriúnacha eile** (roghnaithe): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (tríd an `aws-bedrock`), `azure-ai`, `openrouter` (catalóg pas-tríd), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Coinníonn gach ceann acu a liosta samhlacha féin i `providerRegistry.ts` agus is féidir é a shioncronú go huathoibríoch nuair a nochtlann an soláthraí pointe deiridh `/models`.
 
-**Nóta ar aitheantais samhlacha:** Úsáideann OmniRoute aitheantais nádúrtha soláthraí (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Tá leaganacha ponctuála i roinnt aitheantais toisc go dteastaíonn siad mar sin ón API upstream. Mura bhfuil samhail ar an liosta thuas, rith `omniroute models --search <téarma>` nó glac `GET /api/models/catalog` chun infhaighteacht a dheimhniú.
+**Nóta ar aitheantais samhlacha:** Úsáideann OmniRoute aitheantais nádúrtha soláthraí (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Tá leaganacha ponctuála i roinnt aitheantais toisc go dteastaíonn siad mar sin ón API upstream. Mura bhfuil samhail ar an liosta thuas, rith `omniroute models --search <term>` nó glac `GET /api/models/catalog` chun infhaighteacht a dheimhniú.
 
 </details>
 
@@ -1322,7 +1322,7 @@ Féach [API_REFERENCE.md](../reference/API_REFERENCE.md) le haghaidh an catalóg
 
 ## 💧 CLI Inmheánach
 
-Seolann OmniRoute CLI inmheánach (`omniroute …') le haghaidh socraithe, diagnóise agus rialaithe rith. Tá seo **leithleasc ón leathanach "Uirlisí CLI" sa deasc**, a chumraítear le haghaidh CLI tríú páirtí (Claude Code, Cursor, Codex, Cline, …) ionas gur féidir leo labhairt le OmniRoute.
+Seolann OmniRoute CLI inmheánach (`omniroute …`) le haghaidh socraithe, diagnóise agus rialaithe rith. Tá seo **leithleasc ón leathanach "Uirlisí CLI" sa deasc**, a chumraítear le haghaidh CLI tríú páirtí (Claude Code, Cursor, Codex, Cline, …) ionas gur féidir leo labhairt le OmniRoute.
 
 ```bash
 omniroute setup                    # Treoraí idirghníomhach (pasfhocal, soláthraithe, combos)

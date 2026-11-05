@@ -88,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Mehānisms:** Izmanto operētājsistēmas API, lai visu HTTP/HTTPS datplūsmu novirzītu caur HTTP_PROXY klausītāju:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` un HTTP/HTTPS resursdatora/porta iestatījumi
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Tvērums:** Visas datorā esošās lietotnes, kas ievēro sistēmas starpniekservera iestatījumus
   **Piezīme:** `source` = `"system-proxy"`
 
 **Drošības mehānismi:**
 
-- Automātiskās atspējošanas taimeris (pēc noklusējuma 30 min, konfigurējams ar `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- Iepriekšējais sistēmas starpniekservera stāvoklis tiek saglabāts DB un atjaunots, veicot atsaukšanu
-- Ja lietotājs dodas prom, kamēr šis režīms ir aktīvs, informācijas panelī tiek rādīts aicinājums „Notiek sistēmas starpniekservera iestatījumu atsaukšana”
-- Lietotāja saskarnē tiek rādīta emblēma `⚠ Papildu` un nepārprotama apstiprinājuma izvēles rūtiņa
+- Starpniekservera lietošana ieplāno procesam lokālu atjaunošanas taimeri bez izdošanās garantijas (pēc noklusējuma 30 min, konfigurējams ar `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`). Taimeris nesaglabājas pēc servera procesa beigām.
+- Iepriekšējais starpniekservera stāvoklis glabājas procesa atmiņā; šī tveršanas stāvokļa krātuve to pastāvīgi nesaglabā datubāzē. Atjaunošana atgriež saglabātos macOS/GNOME iestatījumus; Windows vidē atiestata WinHTTP starpniekserveri, nevis atjauno iepriekšējo konfigurāciju.
+- Kamēr starpniekserveris tiek ziņots kā lietots, lapas izlāde nosūta keepalive atjaunošanas pieprasījumu bez garantijas un pieprasa pārlūka iebūvētu apstiprinājumu, kura tekstu nosaka pārlūks. Inspektora atmontēšana SPA navigācijas laikā arī mēģina atjaunot, bez šī pārlūka dialoga.
+- Tveršanas rīkjoslā redzama lokalizētā vadīkla `System-wide` ar brīdinājuma ikonu. Klikšķis pašlaik maina tikai lokālo saskarnes stāvokli; tas nerāda apstiprinājuma izvēles rūtiņu un nelieto vai neatjauno sistēmas starpniekserveri.
 
 ### 5. režīms — TPROXY caurspīdīgā atšifrēšana (Linux, root, pēc izvēles)
 
@@ -113,13 +113,13 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 
 ### Tveršanas režīmu salīdzinājums
 
-| Režīms                | Iestatīšana                               |           Sudo?            | Tvērums                                | Piezīmes                                                                                                                        |
-| --------------------- | ----------------------------------------- | :------------------------: | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge        | Automātiska                               |   Vienreiz (sert.+hosts)   | 9 IDE aģenti                           | Ieslēgts pēc noklusējuma                                                                                                        |
-| 2. Pielāgoti hosts    | Ievade katram hosts                       |      Jā (hosts fails)      | Jebkura lietotne, kas izmanto šo hosts | Saglabāts DB                                                                                                                    |
-| 3. HTTP_PROXY         | `export HTTPS_PROXY=...`                  |             Nē             | Lietotnes, kas ievēro vidi             | Ports 8080; HTTPS tiek tunelēts ar CONNECT (tikai metadati, nekad netiek atšifrēts)                                             |
-| 4. Visai sistēmai     | Slēdzis + apstiprinājums                  |             Jā             | Visas lietotnes ierīcē                 | Automātiska atspējošana pēc 30 min                                                                                              |
-| 5. TPROXY atšifrēšana | Slēdzis (Linux + vietējais papildinājums) | Jā (root + CA instalēšana) | Jebkurš hosts mērķa portā              | Atšifrē patvaļīgus hosts; pēc noklusējuma izslēgts — skatiet `docs/security/MITM-TPROXY-DECRYPT.md` (git; nav iekļauts `/docs`) |
+| Režīms                | Iestatīšana                                                    |           Sudo?            | Tvērums                                | Piezīmes                                                                                                                        |
+| --------------------- | -------------------------------------------------------------- | :------------------------: | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge        | Automātiska                                                    |   Vienreiz (sert.+hosts)   | 9 IDE aģenti                           | Ieslēgts pēc noklusējuma                                                                                                        |
+| 2. Pielāgoti hosts    | Ievade katram hosts                                            |      Jā (hosts fails)      | Jebkura lietotne, kas izmanto šo hosts | Saglabāts DB                                                                                                                    |
+| 3. HTTP_PROXY         | `export HTTPS_PROXY=...`                                       |             Nē             | Lietotnes, kas ievēro vidi             | Ports 8080; HTTPS tiek tunelēts ar CONNECT (tikai metadati, nekad netiek atšifrēts)                                             |
+| 4. Visai sistēmai     | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |             Jā             | Visas lietotnes ierīcē                 | Atjaunošanas taimeris bez izdošanās garantijas (pēc noklusējuma 30 min)                                                         |
+| 5. TPROXY atšifrēšana | Slēdzis (Linux + vietējais papildinājums)                      | Jā (root + CA instalēšana) | Jebkurš hosts mērķa portā              | Atšifrē patvaļīgus hosts; pēc noklusējuma izslēgts — skatiet `docs/security/MITM-TPROXY-DECRYPT.md` (git; nav iekļauts `/docs`) |
 
 ---
 
@@ -318,7 +318,7 @@ atbalsts tiks pievienots turpmāk).
 ### 5.1 Sesijas ierakstīšana
 
 1. Rīkjoslā noklikšķiniet uz **"● Ierakstīt sesiju"** → ievadiet nosaukumu (neobligāti)
-2. Reāllaika plūsma turpinās kā parasti; sarkans pulsējošs indikators rāda `◉ IER. · <nosaukums> · 00:42 · 23 piepr.`
+2. Reāllaika novērošana turpinās kā parasti; ierakstīšanas joslā redzams pulsējošs sarkans punkts, pagājušais laiks, sesijas nosaukums, ja tas ir pieejams, un lokalizēta apturēšanas vadīkla.
 3. Noklikšķiniet uz **"⏹ Apturēt"** → sesijas momentuzņēmums tiek saglabāts tabulās `inspector_sessions` + `inspector_session_requests`
 
 ### 5.2 Ierakstītas sesijas skatīšana
@@ -326,7 +326,7 @@ atbalsts tiks pievienots turpmāk).
 Rīkjoslas nolaižamajā izvēlnē **Sesijas** ir uzskaitītas saglabātās sesijas. Atlasot kādu no tām:
 
 - Tiek ielādēts sesijas momentuzņēmums (fiksēts stāvoklis)
-- Reklāmkarogā tiek parādīts: `Tiek skatīta ierakstītā sesija "<nosaukums>" — [Atgriezties tiešraides režīmā]`
+- Joslā redzama lokalizēta ierakstītās sesijas etiķete un sesijas nosaukums (vai lokalizēts aizstājējteksts sesijai bez nosaukuma) līdzās lokalizētai pogai, lai atgrieztos reāllaika skatā.
 - Kļūst pieejama cilne Statistika ar Recharts apkopojumiem
 
 ### 5.3 Eksporta formāti
@@ -350,7 +350,7 @@ Traffic Inspector rāda **visu pārtverto HTTPS datplūsmu**, tostarp autorizāc
 | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **LOCAL_ONLY**                                | Visi maršruti un WebSocket galapunkts ir pieejami tikai lokālajā atgriezeniskajā saskarnē (tas tiek nodrošināts failā `routeGuard.ts` pirms autentifikācijas)                                                                 |
 | **Noslēpumu maskēšana**                       | Lineārais `maskSecret()` skeneris pirms `TrafficBuffer.push()` aizklāj RFC 6750 Bearer akreditācijas datus, ar pakalpojumu sniedzēja prefiksu apzīmētas atslēgas un garus necaurspīdīgus marķierus                            |
-| **Pamatteksta izmēra ierobežojums**           | Pamatteksti, kuru izmērs pārsniedz `INSPECTOR_MAX_BODY_KB` (pēc noklusējuma 1024 KB), tiek saīsināti, pievienojot paziņojumu `"(saīsināts veiktspējas dēļ)"`                                                                  |
+| **Pamatteksta izmēra ierobežojums**           | Pamatteksti, kuru izmērs pārsniedz `INSPECTOR_MAX_BODY_KB` (pēc noklusējuma 1024 KB), tiek saīsināti, pievienojot paziņojumu `"(truncated for performance)"`                                                                  |
 | **Galveņu sanitizēšana**                      | Nosaukumi tiek pārveidoti par mazajiem burtiem; kadrēšanas, posmu līmeņa un starpniekservera autentifikācijas galvenes tiek atmestas; sīkfaili tiek pilnībā aizklāti; akreditācijas datu vērtības tiek nodotas `maskSecret()` |
 | **CSP**                                       | Traffic Inspector lapās tiek izmantota stingra satura drošības politika, lai novērstu XSS, ko var izraisīt ievadīti atbilžu pamatteksti                                                                                       |
 | **Pēc noklusējuma bez pastāvīgas glabāšanas** | `TrafficBuffer` tiek glabāts atmiņā un zaudēts pēc servera restartēšanas. Sesijas tiek pastāvīgi saglabātas tikai tad, ja tās tiek nepārprotami ierakstītas                                                                   |
@@ -418,7 +418,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-Nākamajā ielādes reizē informācijas panelis piedāvās arī opciju "Atjaunot sistēmas starpniekservera iestatījumus", ja tas konstatēs, ka DB stāvoklis norāda uz iepriekš aktīvu starpniekserveri.
+Saglabātais starpniekservera stāvoklis pastāv tikai servera procesā. Pēc avārijas vai restartēšanas pašreizējā tveršanas stāvokļa krātuve nevar atjaunot šo momentuzņēmumu no datubāzes; ja vajadzīga manuāla atjaunošana, izmantojiet iepriekš norādītās platformas atjaunošanas komandas.
 
 ### Buferis ir pilns
 

@@ -579,13 +579,13 @@ Is **Stiúideo 3 chluaisín** anois é `src/app/(dashboard)/dashboard/memory/pag
 - Cárta cumraíochta athrangaithe (lasc cumasaithe, roghnóir soláthraí/samhla).
 
 Tá socruithe Cuimhne agus Qdrant ar fáil freisin faoi
-`/dashboard/settings → Cuimhne & Scileanna` (`MemorySkillsTab.tsx`) don
+`/dashboard/settings → Cuimhne & Scileanna` (`/dashboard/settings → Memory & Skills`) (`MemorySkillsTab.tsx`) don
 chomhéadan socruithe oidhreachta/domhandaithe.
 
 ## Taisceadh
 
 Coinníonn `src/lib/memory/store.ts` taisce ar nós LRU laistigh den phróiseas
-(`MEMORY_CACHE_TTL = 1 nóim`, `MEMORY_MAX_CACHE_SIZE = 500`, agus díshealbhú
+(`MEMORY_CACHE_TTL = 1 min`, `MEMORY_MAX_CACHE_SIZE = 500`, agus díshealbhú
 an 20 % is sine) do léamha `getMemory(id)`, chomh maith le sraith ghinearálta
 eochrach/luacha `memoryCache` (`src/lib/memory/cache.ts`) ina bhfuil modhanna
 `get`/`set`/`invalidate`, a úsáideann glaoiteoirí ar mian leo a dtaisce
@@ -724,11 +724,11 @@ Tagarmharc ar ghnáthfhreastalaí x86 4 chroí (téacsanna ~100 comhartha an cea
 
 ### Catagóirí Réamhshocraithe Patrún
 
-| Catagóir            | Patrún samplach                                                                | A ngabhann sé                    |
-| ------------------- | ------------------------------------------------------------------------------ | -------------------------------- |
-| PREFERENCE_PATTERNS | `"Is fearr liom <X>"`, `"Is maith liom <X>"`, `"Is fuath liom <X>"`            | Sainroghanna úsáideora           |
-| DECISION_PATTERNS   | `"Úsáidfidh mé <X>"`, `"Chinn mé <X> a dhéanamh"`, `"Roghnaigh mé <X>"`        | Cinntí úsáideora (eipeasóideach) |
-| PATTERN_PATTERNS    | `"De ghnáth déanaim <X>"`, `"Déanaim <X> i gcónaí"`, `"Ní dhéanaim <X> riamh"` | Patrúin iompraíochta bhuana      |
+| Catagóir            | Patrún samplach                                             | A ngabhann sé                    |
+| ------------------- | ----------------------------------------------------------- | -------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Sainroghanna úsáideora           |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Cinntí úsáideora (eipeasóideach) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Patrúin iompraíochta bhuana      |
 
 ### Patrúin Shamplacha (Simplithe)
 
@@ -764,7 +764,8 @@ Nuair a deir úsáideoir:
 
 Chun eastóscadh gan srian a chosc, tá feidhm ag na teorainneacha seo a leanas:
 
-| Íosfhad ábhair | 3 charachtar |
+| Íosfhad ábhair | 3 charachtar  |
+| -------------- | ------------- |
 | Uasfhad ábhair | 500 carachtar |
 
 ### Cathain is Ceart Eastóscadh a Dhíchumasú

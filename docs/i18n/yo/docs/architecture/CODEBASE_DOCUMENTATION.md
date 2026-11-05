@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Àwọn àkọsílẹ̀ olùpèsè, àwọn prófáìlì àkọlé, ìdánimọ̀, …
 ├── handlers/               Àwọn olùṣàkóso ìbéèrè (ìfọ̀rọ̀wérọ̀, embeddings, ohun, àwòrán, …)
-├── executors/              Módùlù olùṣiṣẹ́ olùpèsè 150 (àwọn kíláàsì olùṣiṣẹ́ + àwọn olùrànlọ́wọ́ fún olùpèsè kọ̀ọ̀kan)
+├── executors/              Módùlù olùṣiṣẹ́ olùpèsè 156 (àwọn kíláàsì olùṣiṣẹ́ + àwọn olùrànlọ́wọ́ fún olùpèsè kọ̀ọ̀kan)
 ├── translator/             Ìyípadà àgbékalẹ̀ (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Olùyípadà ìṣàn Chat Completions
 ├── services/               Àwọn módùlù iṣẹ́ 80+ (àkópọ̀, ìpadàsẹ́yìn, àwọn ìpín, ìdánimọ̀, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-Àwọn módùlù olùṣiṣẹ́ ipele-òkè 150 (`*.ts` láìka `base.ts`, `index.ts` àti àwọn ìdánwò — iye tí
+Àwọn módùlù olùṣiṣẹ́ ipele-òkè 156 (`*.ts` láìka `base.ts`, `index.ts` àti àwọn ìdánwò — iye tí
 `npm run check:docs-counts` ń díwọ̀n). Gbogbo kíláàsì olùṣiṣẹ́ ló jogún `BaseExecutor` (`base.ts`),
 ní tààràtà tàbí nípasẹ̀ `DefaultExecutor` tàbí olùṣiṣẹ́ mìíràn; àwọn módùlù tó kù jẹ́
 àwọn olùrànlọ́wọ́ fún olùpèsè kọ̀ọ̀kan (àwọn schema irinṣẹ́, àwọn adapter fetch/TTS, àwọn olùṣàkóso àrà ọ̀tọ̀). Àwọn olùṣiṣẹ́ ní:
@@ -772,7 +772,7 @@ Wo [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) àti abala tí a yà sọ́tọ�
    `open-sse/mcp-server/schemas/tools.ts` gùn).
 2. Yan scope tó yẹ (tàbí àwọn scope tó yẹ) nínú `src/shared/constants/mcpScopes.ts`.
 3. Forúkọsílẹ̀ irinṣẹ́ náà nínú `open-sse/mcp-server/server.ts`.
-4. Ṣàfikún àwọn àdánwò lábẹ́ `open-sse/mcp-server/__tests__/`.
+4. Ṣàfikún àwọn àdánwò lábẹ́ `tests/unit/`.
 5. Ṣe àfikún sí [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Ṣàfikún ọgbọ́n A2A tuntun
@@ -790,7 +790,7 @@ Wo [A2A-SERVER.md § Ṣíṣàfikún Ọgbọ́n Tuntun](../frameworks/A2A-SERV
 - **Ìsọrúkọ**: àwọn file `camelCase` tàbí `kebab-case`, àwọn component `PascalCase`,
   àwọn constant `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` níbi gbogbo;
-  `no-explicit-any` = `warn` nínú `open-sse/` àti `tests/`, error ní àwọn ibòmíràn.
+  `no-explicit-any` = `error` nínú `open-sse/**/*.ts` àti `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (ìdúró àtijọ́). Yan àwọn type tó ṣe kedere dípò
   inference fún àwọn ààlà tó kọjá láàárín módùlù.
 - **Database**: má ṣe kọ SQL tààrà nínú àwọn route tàbí handler — lo àwọn módùlù
@@ -820,8 +820,7 @@ Wo [A2A-SERVER.md § Ṣíṣàfikún Ọgbọ́n Tuntun](../frameworks/A2A-SERV
   `a2a`, `memory`, `skills`.
 - **Àwọn branch**: prefix `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Má ṣe commit sí `main` ní tààrà láéláé.
-- **Husky**: pre-commit máa ń ṣiṣẹ́ `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; pre-push máa ń ṣiṣẹ́ `check:any-budget:t11` + `check:tracked-artifacts` (àwọn ìdánwò yíyára; kò fi `test:unit` sínú).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

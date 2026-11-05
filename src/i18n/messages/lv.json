@@ -6600,7 +6600,7 @@
       "xai": "Savienojiet xAI (Grok) ar API atslēgu.",
       "xiaomi-mimo": "Savienojiet Xiaomi MiMo ar API atslēgu.",
       "yi": "Iegūstiet API atslēgu vietnē platform.lingyiwanwu.com",
-      "zai": "API atslēga no https://open.bigmodel.cn/usercenter/apikeys",
+      "zai": "API atslēga no https://z.ai/manage-apikey/apikey-list",
       "zenmux": "ZenMux piedāvā ar OpenAI saderīgu chat completions galapunktu adresē /api/v1/chat/completions, kā arī Anthropic Messages (/api/anthropic/v1/messages) un Google Gemini (/api/vertex-ai) protokolu saskarnes. OmniRoute izmanto OpenAI protokolu.",
       "galadriel": "Savienojiet Galadriel ar API atslēgu.",
       "predibase": "25 ASV dolāru bezmaksas izmēģinājuma kredīti (30 dienu derīgums)",

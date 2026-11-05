@@ -203,26 +203,13 @@ oluşturma işlemi hâlâ hata durumunda erişime izin veren katmandaydı
 (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` ayrıca veri dizininin kendisi olan,
 veri dizininin içinde bulunan veya veri dizinini içeren bir kasayı reddeder.
 
-#### Kimlik bilgisi dışa aktarımları yalnızca operatörler içindir
+#### Kimlik bilgisi dışa aktarımları ve geri yüklemeler yalnızca operatörler içindir
 
 Yukarıdaki katman yalnızca _herhangi bir_ kimlik bilgisinin gerekli olup olmadığına karar verir. Saklanan kimlik bilgilerini indiren rotalar, işleyicide ikinci bir denetim uygular: `GET /api/settings/export-json` (şifresi çözülmüş sağlayıcı bağlantıları ve ham API anahtarları), `GET /api/db-backups/export` (SQLite dosyası) ve `GET /api/db-backups/exportAll` (tam arşiv), `requireOperatorCredential()` işlevini (`src/lib/api/operatorCredential.ts`) çağırır. Bu işlev bir dashboard oturumunu, yerel CLI öznesini veya oturum açmanın devre dışı bırakıldığı bir örneği kabul eder; kapsamı ne olursa olsun (`manage` ve `admin` dâhil) API anahtarlarına ve `oma_` erişim belirteçlerine `403` yanıtı verir. Senkronizasyon belirteci oluşturma (`POST /api/sync/tokens`) aynı yardımcı işlevi ve buna ek olarak güvenilir geri döngü dahili hizmet belirtecini kullanır.
 
-#### Credential exports and restores are operator-only
+İlgili yıkıcı işlemler de aynı sınıra tabidir: `POST /api/db-backups/import` (yüklenen `.sqlite` dosyası, `dryRun=true` dahil), `POST /api/db-backups` (saklanan yedeği id ile geri yükleme) ve `POST /api/settings/import-json` (eski JSON biçimini geri yükleme), çalışan veritabanını veya ayarların, bağlantıların ve API anahtarlarının tamamını değiştirir. Dolayısıyla makine kimlik bilgileri bu işlemleri de başlatamaz.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Geri yükleme noktalarını yok etmek de aynı sınıra tabidir: `DELETE /api/db-backups` (temizleme — son N taneyi tutma veya D günden eski olanları silme) ve `PATCH /api/db-backups` (saklama ayarları). Saklanan kurallar, `cleanupDbBackups()` işlevinin her otomatik yedekten sonra uyguladığı kurallardır (`src/lib/db/backup.ts`); `keepLatest: 1` kaydedebilen bir makine kimlik bilgisi, sonraki anlık görüntüde önceki geri yükleme noktalarını silebilirdi. Yedekleri listeleme ve oluşturma (`GET`/`PUT /api/db-backups`) normal yönetim kimlik doğrulamasını korur.
 
 ### Yeni kurulum önyüklemesi yalnızca geri döngüyle sınırlıdır — `Host` ile değil, gerçek eşle belirlenir
 

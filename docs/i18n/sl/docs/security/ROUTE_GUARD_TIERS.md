@@ -214,7 +214,7 @@ gesla prek `GET`; izdajanje je še vedno ostalo na ravni, ki ob napaki dovoli do
 (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` dodatno zavrne trezor, ki je
 podatkovni imenik, je v njem ali ga vsebuje.
 
-#### Izvozi poverilnic so namenjeni samo upravljavcem
+#### Izvoz poverilnic in obnovitve so namenjeni samo upravljavcem
 
 Zgornja raven odloča le o tem, ali je zahtevana _kakršna koli_ poverilnica. Poti, ki prenašajo
 shranjene poverilnice, v obdelovalniku izvedejo dodatno preverjanje: `GET /api/settings/export-json` (dešifrirane
@@ -225,22 +225,9 @@ primerek z onemogočeno prijavo, na ključe API katerega koli obsega (vključno 
 in `admin`) ter na dostopne žetone `oma_` pa odgovori s `403`. Izdajanje žetonov za sinhronizacijo (`POST /api/sync/tokens`) uporablja
 isti pomožni program in dodatno še zaupanja vreden žeton notranje storitve prek povratne zanke.
 
-#### Credential exports and restores are operator-only
+Enaka meja velja za ustrezna uničevalna dejanja: `POST /api/db-backups/import` (naložena datoteka `.sqlite`, tudi z `dryRun=true`), `POST /api/db-backups` (obnovitev shranjene varnostne kopije po njenem id) in `POST /api/settings/import-json` (obnovitev starejšega zapisa JSON) zamenjajo dejavno zbirko podatkov ali celoten nabor nastavitev, povezav in ključev API. Tudi teh dejanj zato ni mogoče sprožiti s strojno poverilnico.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Enaka meja velja za uničenje obnovitvenih točk: `DELETE /api/db-backups` (čiščenje — obdrži zadnjih N ali odstrani starejše od D dni) in `PATCH /api/db-backups` (nastavitve hranjenja). Shranjena pravila so natančno tista, ki jih `cleanupDbBackups()` uporablja po vsaki samodejni varnostni kopiji (`src/lib/db/backup.ts`); strojna poverilnica, ki bi lahko shranila `keepLatest: 1`, bi tako ob naslednjem posnetku odstranila prejšnje obnovitvene točke. Izpis in ustvarjanje kopij (`GET`/`PUT /api/db-backups`) ohranita običajno upravljavsko avtentikacijo.
 
 ### Začetna nastavitev sveže namestitve je omejena na povratno zanko — glede na dejanskega odjemalca, ne `Host`
 

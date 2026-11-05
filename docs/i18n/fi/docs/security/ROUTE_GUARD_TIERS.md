@@ -208,7 +208,7 @@ Obsidianin REST API -tunnuksen. GHSA-62vw peitti vain salasanan paljastumisen `G
 oli edelleen oletusarvoisesti sallivalla tasolla (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` lisäksi
 hylkää holvin, joka on datahakemisto, sijaitsee sen sisällä tai sisältää sen.
 
-#### Tunnistetietojen vienti on sallittu vain ylläpitäjälle
+#### Tunnistetietojen vienti ja palautukset on sallittu vain ylläpitäjälle
 
 Ylempi taso päättää vain, vaaditaanko _jokin_ tunnistetieto. Tallennettuja tunnistetietoja lataavat
 reitit tekevät käsittelijässä toisen tarkistuksen: `GET /api/settings/export-json` (salauksen purun
@@ -219,22 +219,9 @@ esiintymän, jossa kirjautuminen on poistettu käytöstä, ja vastaa koodilla `4
 ja `admin`) sekä `oma_`-käyttötunnuksille. Synkronointitunnusten myöntäminen (`POST /api/sync/tokens`) käyttää
 samaa apufunktiota sekä luotettua sisäisen palvelun loopback-tunnusta.
 
-#### Credential exports and restores are operator-only
+Sama käyttöoikeusraja koskee vastaavia tuhoavia toimintoja: `POST /api/db-backups/import` (ladattu `.sqlite`-tiedosto, myös `dryRun=true`), `POST /api/db-backups` (tallennetun varmuuskopion palautus tunnisteen perusteella) ja `POST /api/settings/import-json` (vanhan JSON-muodon palautus) korvaavat käytössä olevan tietokannan tai kaikki asetukset, yhteydet ja API-avaimet. Koneen tunnistetiedoilla ei siis voi käynnistää niitäkään.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Sama raja koskee palautuspisteiden poistamista: `DELETE /api/db-backups` (siivous — säilytä uusimmat N tai poista yli D päivää vanhat) ja `PATCH /api/db-backups` (säilytysasetukset). Juuri tallennettuja säilytysasetuksia käyttää `cleanupDbBackups()` jokaisen automaattisen varmuuskopion jälkeen (`src/lib/db/backup.ts`); koneen tunnistetieto, jolla voisi tallentaa arvon `keepLatest: 1`, voisi siten poistaa aiemmat palautuspisteet seuraavan tilannekuvan yhteydessä. Varmuuskopioiden luettelointi ja luonti (`GET`/`PUT /api/db-backups`) käyttävät edelleen tavallista hallinnan tunnistautumista.
 
 ### Uuden asennuksen alustaminen on sallittu vain loopback-yhteydestä — todellisen vastapään, ei `Host`-otsakkeen perusteella
 

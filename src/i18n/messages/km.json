@@ -6607,7 +6607,7 @@
       "xai": "ភ្ជាប់ xAI (Grok) ដោយប្រើ API key។",
       "xiaomi-mimo": "ភ្ជាប់ Xiaomi MiMo ដោយប្រើ API key។",
       "yi": "ទទួលបាន API key នៅ platform.lingyiwanwu.com",
-      "zai": "API key ពី https://open.bigmodel.cn/usercenter/apikeys",
+      "zai": "API key ពី https://z.ai/manage-apikey/apikey-list",
       "zenmux": "ZenMux ផ្តល់ endpoint សម្រាប់ chat completions ដែលឆបគ្នាជាមួយ OpenAI នៅ /api/v1/chat/completions ព្រមទាំងចំណុចប្រទាក់ពិធីការ Anthropic Messages (/api/anthropic/v1/messages) និង Google Gemini (/api/vertex-ai)។ OmniRoute ប្រើពិធីការ OpenAI។",
       "galadriel": "ភ្ជាប់ Galadriel ដោយប្រើ API key។",
       "predibase": "ក្រេឌីតសាកល្បងឥតគិតថ្លៃ $25 (មានសុពលភាព 30 ថ្ងៃ)",

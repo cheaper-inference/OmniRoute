@@ -4,46 +4,46 @@
 
 ---
 
-Objektiv sammenligning af funktioner med populære open source-AI-routere.
+Objektiv funktionssammenligning med populære open source AI-routere.
 
-> **Metode**: Offentlige repositories gennemgået i 2026-Q2. Versioner som angivet.
+> **Metodologi**: Offentlige repositories gennemgået 2026-Q2. Versioner som anført.
 > Indsend rettelser via PR — vi ønsker, at dette er nøjagtigt.
 
-| Funktion                                                 |                 OmniRoute 3.8                 |    LiteLLM 1.x    | OpenRouter (SaaS) |     Portkey     |
-| -------------------------------------------------------- | :-------------------------------------------: | :---------------: | :---------------: | :-------------: |
-| **Udbydere**                                             |                    **329**                    |       ~100        |        ~50        |       ~30       |
-| **Gratis katalogposter/uden godkendelse**                |                    **155**                    |        i/t        |  videresendelse   |       i/t       |
-| **Kan hostes selv**                                      |                      ✅                       |        ✅         |        ❌         | ⚠ mod betaling  |
-| **OAuth-katalogposter**                                  |                    **23**                     |      delvist      |        ❌         |       ❌        |
-| **Kombinationer med automatisk fallback**                |               **19 strategier**               | prioritetsbaseret |   niveaubaseret   |     vægtet      |
-| **Fusion (parallelt panel + dommersyntese)**             |                      ✅                       |        ❌         |        ❌         |       ❌        |
-| **Niveau 1/2/3-fallback (abonnement→billig→gratis)**     |                    ✅ + UI                    |      manuelt      |        i/t        |     manuelt     |
-| **Tokenkomprimering**                                    | 12-motorers stack (RTK + Caveman + LLMLingua) |       ingen       |       ingen       |      ingen      |
-| **Multimodal generering (tale/musik/video)**             |                      ✅                       |        ❌         |  videresendelse   |       ❌        |
-| **Indbygget MCP-server**                                 |          ✅ 110 værktøjer, 33 scopes          |        ❌         |        ❌         |       ❌        |
-| **A2A-protokol**                                         |               ✅ 6 færdigheder                |        ❌         |        ❌         |       ❌        |
-| **Hukommelse (FTS5 + vektor)**                           |                      ✅                       |        ❌         |        ❌         |       ❌        |
-| **Sikkerhedsbarrierer (PII, injektion, vision)**         |                      ✅                       |      delvist      |        ❌         | ✅ mod betaling |
-| **Integrationer med cloud-agenter**                      |          Codex, Cursor, Devin, Jules          |        ❌         |        ❌         |       ❌        |
-| **Circuit breaker pr. udbyder**                          |  ✅ 3 tilstande, behovsbaseret genoprettelse  |       basal       |        ❌         |       ✅        |
-| **Skjult TLS-fingeraftryk (JA3/JA4)**                    |                  ✅ wreq-js                   |        ❌         |        ❌         |       ❌        |
-| **Evalueringsframework**                                 |                 ✅ indbygget                  |        ❌         |        ❌         | ⚠ mod betaling  |
-| **MITM-proxy (opfanger Cursor/Antigravity)**             |           ✅ på tværs af platforme            |        ❌         |        ❌         |       ❌        |
-| **CLI med systembakke (uden Electron)**                  |                      ✅                       |        ❌         |        i/t        |       i/t       |
-| **Automatisk CLI-godkendelse via maskin-id**             |                      ✅                       |        ❌         |        i/t        |       i/t       |
-| **Dashboard**                                            |                  Next.js 16                   |      basalt       |    proprietært    |   proprietært   |
-| **i18n**                                                 |            **42 landestandarder**             |        ❌         |        ❌         |        ⚠        |
-| **Offentlige agentfærdigheder (SKILL.md)**               |                     ✅ 45                     |        ❌         |        ❌         |       ❌        |
-| **Tunnelunderstøttelse (Cloudflared, Tailscale, Ngrok)** |                      ✅                       |        ❌         |        i/t        |       i/t       |
-| **Licens**                                               |                      MIT                      |        MIT        |    proprietær     |   proprietær    |
+| Funktion                                                 |               OmniRoute 3.8                |    LiteLLM 1.x    | OpenRouter (SaaS) |  Portkey   |
+| -------------------------------------------------------- | :----------------------------------------: | :---------------: | :---------------: | :--------: |
+| **Udbydere**                                             |                  **329**                   |       ~100        |        ~50        |    ~30     |
+| **Gratis katalogposter uden autentificering**            |                  **155**                   |        n/a        |    passthrough    |    n/a     |
+| **Selvhostbar**                                          |                     ✅                     |        ✅         |        ❌         |  ⚠ betalt  |
+| **OAuth-katalogposter**                                  |                   **23**                   |      delvis       |        ❌         |     ❌     |
+| **Automatiske fallback-kombinationer**                   |             **20 strategier**              | prioritetsbaseret |   niveaubaseret   |   vægtet   |
+| **Fusion (parallelt panel + dommersyntese)**             |                     ✅                     |        ❌         |        ❌         |     ❌     |
+| **Niveau 1/2/3-fallback (abonnement→billig→gratis)**     |                  ✅ + UI                   |      manuel       |        n/a        |   manuel   |
+| **Token-komprimering**                                   | 12-motors stak (RTK + Caveman + LLMLingua) |       ingen       |       ingen       |   ingen    |
+| **Multimodal generering (tale/musik/video)**             |                     ✅                     |        ❌         |    passthrough    |     ❌     |
+| **Indbygget MCP-server**                                 |        ✅ 110 værktøjer, 33 scopes         |        ❌         |        ❌         |     ❌     |
+| **A2A-protokol**                                         |              ✅ 6 færdigheder              |        ❌         |        ❌         |     ❌     |
+| **Hukommelse (FTS5 + vektor)**                           |                     ✅                     |        ❌         |        ❌         |     ❌     |
+| **Guardrails (PII, injektion, vision)**                  |                     ✅                     |      delvis       |        ❌         | ✅ betalt  |
+| **Cloud-agentintegrationer**                             |        Codex, Cursor, Devin, Jules         |        ❌         |        ❌         |     ❌     |
+| **Circuit breaker pr. udbyder**                          |    ✅ 3 tilstande, doven genoprettelse     |   grundlæggende   |        ❌         |     ✅     |
+| **TLS-fingeraftryk-stealth (JA3/JA4)**                   |                 ✅ wreq-js                 |        ❌         |        ❌         |     ❌     |
+| **Evalueringsframework**                                 |                ✅ indbygget                |        ❌         |        ❌         |  ⚠ betalt  |
+| **MITM-proxy (opsnapper Cursor/Antigravity)**            |          ✅ på tværs af platforme          |        ❌         |        ❌         |     ❌     |
+| **CLI med systembakke (ingen Electron)**                 |                     ✅                     |        ❌         |        n/a        |    n/a     |
+| **CLI automatisk autentificering med maskin-ID**         |                     ✅                     |        ❌         |        n/a        |    n/a     |
+| **Dashboard**                                            |                 Next.js 16                 |   grundlæggende   |    proprietær     | proprietær |
+| **i18n**                                                 |                **67 sprog**                |        ❌         |        ❌         |     ⚠      |
+| **Offentlige agentfærdigheder (SKILL.md)**               |                   ✅ 45                    |        ❌         |        ❌         |     ❌     |
+| **Tunnelunderstøttelse (Cloudflared, Tailscale, Ngrok)** |                     ✅                     |        ❌         |        n/a        |    n/a     |
+| **Licens**                                               |                    MIT                     |        MIT        |    proprietær     | proprietær |
 
 ## Hvornår du bør vælge OmniRoute
 
-- Du hoster selv og ønsker **maksimal udbyderdækning** (374 udbydere, 155 gratis katalogposter uden godkendelse)
+- Du hoster selv og ønsker **maksimal udbyderdækning** (375 udbydere, 155 gratis katalogposter uden autentificering)
 - Du har brug for en **indbygget MCP-server** (LLM-værktøjer, hukommelse og færdigheder eksponeret som værktøjer)
-- Du har brug for **A2A-protokollen** til arbejdsgange mellem agenter
-- Du ønsker **fingeraftryksmaskering** (JA3/JA4) for at undgå registrering af upstream-CAPTCHA'er
-- Du har brug for **virksomhedsfunktioner** (sikkerhedsregler, evalueringer og revisionsspor) uden en SaaS-regning
+- Du har brug for **A2A-protokollen** til agent-til-agent-arbejdsgange
+- Du ønsker **fingeraftryks-stealth** (JA3/JA4) for at undgå at blive opdaget af upstream-CAPTCHA'er
+- Du har brug for **enterprise-funktioner** (guardrails, evalueringer, revisionsspor) uden en SaaS-regning
 
 ## Hvornår du bør vælge LiteLLM
 

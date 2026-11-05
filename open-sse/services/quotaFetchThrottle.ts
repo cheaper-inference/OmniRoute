@@ -14,18 +14,21 @@
  * `minIntervalMs = 0` disables throttling entirely (byte-identical to before).
  */
 
+import { performance } from "node:perf_hooks";
+
 const DEFAULT_MIN_INTERVAL_MS = 250;
 const MAX_MIN_INTERVAL_MS = 60_000;
 const DEFAULT_JITTER_MS = 120;
 const MAX_JITTER_MS = 60_000;
 
 export interface ThrottleClock {
+  /** Monotonic milliseconds used to measure spacing inside this process. */
   now: () => number;
   sleep: (ms: number) => Promise<void>;
 }
 
 const realClock: ThrottleClock = {
-  now: () => Date.now(),
+  now: () => performance.now(),
   sleep: (ms: number) => new Promise((resolve) => setTimeout(resolve, ms)),
 };
 
@@ -75,9 +78,18 @@ export class MinIntervalThrottle {
         this.lastStart === null
           ? now
           : Math.max(now, this.lastStart + this.minIntervalMs + this.nextJitter());
-      this.lastStart = startAt;
-      const wait = startAt - now;
-      if (wait > 0) await this.clock.sleep(wait);
+      let remaining = startAt - now;
+      while (remaining > 0) {
+        // Timers may quantize a fractional delay or wake slightly early. Round
+        // up and recheck the monotonic deadline before releasing the caller;
+        // every iteration still awaits a positive sleep, so this never spins.
+        await this.clock.sleep(Math.max(1, Math.ceil(remaining)));
+        remaining = startAt - this.clock.now();
+      }
+      // Anchor the next interval to the actual release time, not the scheduled
+      // deadline. If the event loop wakes this timer late, retaining startAt
+      // would let the already-queued callers consume the elapsed lag and burst.
+      this.lastStart = this.clock.now();
     } finally {
       release();
     }

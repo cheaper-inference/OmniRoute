@@ -19,19 +19,19 @@
 
 <div align="center">
 
-## 💰 サードパーティーの無料枠全体で月間約1.62Bトークン
+## 💰 サードパーティの無料枠を合計して月間約1.62Bトークン
 
 </div>
 
-> **ご自身のプロバイダーアカウントをご用意ください。** これは、個別に利用資格が設定されたサードパーティー無料枠の推定合計であり、OmniRouteが付与するトークンではありません。登録し、必要に応じて認証情報を取得して、利用可能なプロバイダーを接続してください。各プロバイダーが、それぞれの上限、可用性、利用条件を管理しています。
+> **ご自身のプロバイダーアカウントをご用意ください。** これは、個別に利用資格を得られるサードパーティの無料枠を集計した推定値であり、OmniRouteが付与するトークンではありません。サインアップし、必要に応じて認証情報を取得して、利用可能なプロバイダーを接続してください。各プロバイダーがそれぞれの上限、可用性、利用条件を管理しています。
 >
-> 無料枠を手作業でまとめて使うのは大変です。何十ものSDK、何十ものレート制限があり、実際にどれだけ利用できるのかも分かりません。OmniRouteは、**34個の定期プールキーにわたる467件の無料枠エントリ**をカタログ化し、共有プールごとに重複を除外したうえで、**公開されている月間予算が正の値である17個のプールと、モデルごとに設定された5個のGroq上限**から、見出しに表示するトークン数を算出します。地域ごとの本人確認後にのみ利用可能になるクォータ（現時点ではModelScope）は別枠で表示され、地域別の本人確認を条件とする約6M分は見出しの数値には一切加算されません。この結果はダッシュボード（`/dashboard/free-tiers`）で常に確認できます。
+> 無料枠を手作業で組み合わせるのは大変です。何十ものSDK、何十ものレート制限があり、実際にどれほど利用できるのかも分かりません。OmniRouteは、**34個の継続的なプールキーにまたがる467件の無料枠エントリ**をカタログ化し、**公開されている月間予算が正の値である17個のプールと、モデルごとに設定された5つのGroq上限**から、共有プール単位で重複を排除してトークン総量を算出します。地域別の本人確認を完了した後にのみ利用可能になるクォータ（現時点ではModelScope）は別枠で表示され、地域別本人確認後に利用できる約6Mは総量に一切加算されません。結果はダッシュボード（`/dashboard/free-tiers`）で常に確認できます。
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute無料枠予算カード：毎月安定して約1.62Bの無料トークン、登録クレジットを含めると初月は最大約2.22B。単一のエンドポイントから利用できる、カタログ化された467件の無料枠エントリを網羅する34個の定期プールキーに基づきます。共有プールごとに重複を除外した正確な計算で、公開されている月間トークン予算が正の値である17個の定期プールと、モデルごとに設定された5個のGroq上限を含め、各共有プールを1回だけ集計します。利用条件リスクカタログでは12のプロバイダーが「回避」としてマークされているため、利用するかどうかはご自身で判断できます。予算バーにはMistral 1B、Nara 210M、LLM7 150M、xKiro 150M、Groq 30M（モデルごとの5つの上限）および小規模なプールが含まれます。また、初月の登録クレジットと、トークン上限のない永続無料プロバイダーは個別に表示されるため、見出しの数値が水増しされることはありません。使用量と残量は/dashboard/free-tiers/でリアルタイムに確認できます。"/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRouteの無料枠予算カード：通常は月間約1.62Bの無料トークン、サインアップクレジットを含む初月は最大約2.22B。1つのエンドポイントを通じて、34個の文書化された継続的なプールキーに含まれる467件のカタログ化済み無料枠エントリを利用できます。共有プールごとに重複を排除した正確な計算で、公開されている月間トークン予算が正の値である17個の継続的なプールと、モデルごとに設定された5つのGroq上限を含め、各共有プールを1回だけ集計します。利用条件のリスクカタログでは12のプロバイダーが回避推奨として示され、利用するかどうかはユーザー自身が判断できます。予算バーにはMistral 1B、Nara 210M、LLM7 150M、xKiro 150M、Groq 30M（モデルごとの5つの上限）および小規模なプールが含まれます。また、初月のサインアップクレジットと、トークン上限のない恒久無料プロバイダーは別枠で表示されるため、総量が水増しされることはありません。使用量と残量は/dashboard/free-tiers/でリアルタイムに確認できます。"/>
 
-> リアルタイムの`/dashboard/free-tiers`ページをまとめたアニメーションです。完全な算出方法（プールの重複排除、クレジット階層、プロバイダーの利用条件）：**[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**。
+> ライブの`/dashboard/free-tiers`ページをまとめたアニメーション。完全な算出方法（プールの重複排除、クレジット階層、プロバイダーの利用条件）：**[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**。
 >
-> <sub>これらの数値は、稼働中のカタログに照らして2週間ごとに再監査され、**増減の両方が発生します**。プロバイダーが無料枠を終了すれば数値は下がり、新しい無料枠が追加されれば上がります。切り上げた最良ケースではなく、カタログが実際に算出した値を公開しています。</sub>
+> <sub>これらの数値は、ライブカタログと照合して2週間ごとに再監査され、**増減の両方が発生します**。プロバイダーが無料枠を終了すれば数値は減少し、新しい無料枠が追加されれば増加します。切り上げた最良ケースではなく、カタログが実際に算出した値を公開しています。</sub>
 
 <br/>
 
@@ -39,13 +39,13 @@
 
 <h3>
 
-⭐ OMNIROUTEがコスト削減や作業の効率化に役立ったなら、リポジトリにスターを付けてください。
+⭐ OMNIROUTEがコスト削減と作業効率化に役立ったら、リポジトリにStarを付けてください。
 
 </h3>
 
-[![スター](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
+[![Star数](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![スター履歴ランキング](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Star履歴ランキング](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 コミュニティに参加
@@ -57,8 +57,8 @@
 
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
 [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsAppグローバル](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsAppブラジル](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
+[![WhatsApp グローバル](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
+[![WhatsApp ブラジル](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
 [![ウェブサイト](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
 
 **質問、プロバイダー情報、ロードマップ、サポート → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 グローバル](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 ブラジル](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [ポータル](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
@@ -222,11 +222,11 @@
 
 <a id="first-run"></a>
 
-## 🆓 インストールし、プロバイダーを接続して、1つのエンドポイント経由でルーティング
+## 🆓 インストールしてプロバイダーを接続し、1つのエンドポイント経由でルーティング
 
 </div>
 
-<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="3つのステップ：OmniRouteをインストールして起動し、自分のアカウントまたはAPIキーを使用して対象プロバイダーを接続した後、OmniRoute APIキーとモデルautoを使用してツールの接続先をlocalhost:20128/v1に設定します。ルーティングは、利用可能な対象接続とプロバイダーの制限によって異なります。"/>
+<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="3つのステップ：OmniRouteをインストールして起動し、自分のアカウントまたはAPIキーで対象プロバイダーに接続した後、OmniRoute APIキーとモデルautoを使用してツールの接続先をlocalhost:20128/v1に設定します。ルーティングは、利用可能な対象接続とプロバイダーの制限に依存します。"/>
 
 ```bash
 # プロバイダーを接続した後、Dashboard → EndpointsからOmniRouteキーをコピーします：
@@ -236,7 +236,7 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model":"auto","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-<sub>`auto`には対象となるルートが必要です。新規インストール直後は、対象となるキーレス接続先が存在しない場合があり、キーレスプロバイダーがサードパーティ製クライアントを拒否することもあります。Kiroを含む`tos: avoid`とマークされたプロバイダーは、デフォルトでは自動ルーティングから除外されます。アカウントを接続しても、この設定は上書きされません。プロバイダーを選択する前に、[無料枠ガイド](docs/getting-started/FREE-TIERS-GUIDE.md)を参照してください。</sub>
+<sub>`auto`には対象となるルートが必要です。新規インストールでは、対象となるキーレス接続先が存在しない場合があり、キーレスプロバイダーがサードパーティ製クライアントを拒否することもあります。Kiroを含め、`tos: avoid`とマークされたプロバイダーは、デフォルトでは自動ルーティングから除外されます。アカウントを接続しても、この設定は上書きされません。プロバイダーを選択する前に、[無料枠ガイド](docs/getting-started/FREE-TIERS-GUIDE.md)を参照してください。</sub>
 
 <sub>📦 **Python、Node.js、PHP、cURL**向けのコピー＆ペースト可能なクイックスタートスクリプト → [`examples/quickstart/`](examples/quickstart/)</sub>
 
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="お約束 — 1つのエンドポイントと375のプロバイダー。別の正常な接続先が利用可能な間は、自動フォールバックによってルーティングを継続します。6つの柱：375のプロバイダーにわたる堅牢なフォールバック · 対象ワークロードで最大95%のトークン節約 · 150以上の無料枠と、継続利用可能またはキーレスで永久無料の52プロバイダーにより$0から開始 · 1つの設定で37のCLI/エージェント統合 · /v1でOpenAI、Claude、Gemini、Responses APIとの互換性 · サーキットブレーカー、TLSステルス、MCPの110ツール、A2A、メモリ、ガードレール、評価、7,800以上の追跡対象テストファイルにわたる56,000以上の静的テスト宣言を含む本番環境向け制御。"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="お約束 — 1つのエンドポイントと375のプロバイダー。別の正常な接続先が利用可能な限り、自動フォールバックによってルーティングが継続されます。6つの柱：375のプロバイダーにわたる堅牢なフォールバック · 対象ワークロードで最大95%のトークンを節約 · 150以上の無料枠と、定期提供またはキーレスで永久無料の51プロバイダーにより$0から開始 · 1つの設定で37のCLI/エージェントを統合 · /v1でOpenAI、Claude、Gemini、Responses APIとの互換性を提供 · サーキットブレーカー、TLSステルス、MCPの110ツール、A2A、メモリ、ガードレール、評価、および追跡対象の7,800以上のテストファイルにわたる56,000以上の静的テスト宣言を含む本番環境向け制御。"/>
 
 <br/>
 <br/>
@@ -259,11 +259,11 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="OmniRouteを選ぶ理由 — 10個ものダッシュボード、使えないAPIキー、予想外の請求を管理する苦労から解放されます。日常的な10の課題と解決策：未使用のまま期限切れになるクォータ → サブスクリプションを最大限に活用；コーディング中のレート制限 → 4層の自動フォールバック（サブスクリプション → API → 低価格 → 無料）；ツール出力によるトークン浪費 → RTK + Caveman圧縮（15～95%）；高額なAPI → コスト最適化ルーティング；ツールごとに異なるセットアップ → 1つのエンドポイント、1つのダッシュボード；AIへのアクセス遮断 → 3段階プロキシ + TLSステルス；使えないキー → 3層の耐障害性（サーキットブレーカー、キーのクールダウン、モデルのロックアウト）；チームで1つのサブスクリプションを共有 → 公平配分クォータ付きキープール；プロンプトが他者のクラウドを経由 → ローカルファーストとAES-256-GCMで暗号化されたキー；支出の可視性がない → リアルタイム分析（使用量、クォータ、節約額、p95レイテンシ）。"/>
+<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="OmniRouteを選ぶ理由 — 10個ものダッシュボード、無効なAPIキー、予想外の請求に悩まされるのはもう終わりです。日常的な10の課題と解決策：クォータを使い切れないまま期限切れ → サブスクリプションを最大限活用；コーディング中のレート制限 → 4層の自動フォールバック（サブスクリプション → API → 低コスト → 無料）；ツール出力によるトークンの浪費 → RTK + Caveman圧縮（15～95%）；高額なAPI → コスト最適化ルーティング；ツールごとに個別のセットアップ → 1つのエンドポイント、1つのダッシュボード；AIへのアクセスがブロック → 3段階プロキシ + TLSステルス；無効なキー → 3層の耐障害性（サーキットブレーカー、キーのクールダウン、モデルのロックアウト）；チームで1つのサブスクリプションを共有 → 公平配分クォータ付きキープール；プロンプトが他者のクラウドを経由 → AES-256-GCMで暗号化されたキーを使用するローカルファースト設計；支出の可視性がない → リアルタイム分析（使用量、クォータ、節約額、p95レイテンシ）。"/>
 
 <div align="center">
 
-<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRouteのリクエストフロー：IDEまたはCLI（Claude Code、Cursor、Clineなど）が1つのローカルエンドポイント（http://localhost:20128/v1）を呼び出します。OmniRoute Smart Router（RTK + Caveman圧縮、20種類のルーティング戦略、サーキットブレーカー、TLSステルス、MCP、A2A、ガードレール）は、対象となる正常な接続先が残っている間、4つのプロバイダー層をまたいでフォールバックできます — Tier 1 サブスクリプション、Tier 2 APIキー、Tier 3 低価格、Tier 4 無料。"/>
+<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRouteのリクエストフロー：IDEまたはCLI（Claude Code、Cursor、Clineなど）が1つのローカルエンドポイント（http://localhost:20128/v1）を呼び出します。OmniRoute Smart Router（RTK + Caveman圧縮、20のルーティング戦略、サーキットブレーカー、TLSステルス、MCP、A2A、ガードレール）は、対象となる正常な接続先が残っている限り、4つのプロバイダー階層間でフォールバックできます — Tier 1：サブスクリプション、Tier 2：APIキー、Tier 3：低コスト、Tier 4：無料。"/>
 
 </div>
 
@@ -687,15 +687,15 @@ omniroute configure codex          # 次も利用可能：claude opencode qwen a
 
 <div align="center">
 
-## 🌐 375のAIプロバイダー — 153がカタログで無料と明記
+## 🌐 375 の AI プロバイダー — 153 がカタログ上で無料と明記
 
 </div>
 
-> 正式なチャット、メディア、検索、ローカル、クラウドエージェント、システムの各コレクション全体で**375のプロバイダーが登録**されており、そのうち**153には検索用メタデータとして `hasFree: true` が付与**されています。チャットモデルレジストリには、**239プロバイダー / 3,059の一意なプロバイダー・モデルの組み合わせ / 1,475の未加工モデルID**が含まれています。これとは別の無料枠カタログには、**モデル別の467行**、**34の定期更新プール**、および**52の定期更新型またはキー不要の永久無料プロバイダー**があります。これらは意図的に異なる分母を使用しています。定義とプールの重複を除外した計算については、[プロバイダーリファレンス](docs/reference/PROVIDER_REFERENCE.md)および[無料枠](docs/reference/FREE_TIERS.md)をご覧ください。
+> **375 の登録済みプロバイダー**を、標準のチャット、メディア、検索、ローカル、クラウドエージェント、システムの各コレクションにわたって収録しており、そのうち **153 に `hasFree: true` の検出用メタデータ**が付与されています。チャットモデルレジストリには **239 プロバイダー / 3,059 の個別プロバイダー・モデルペア / 1,475 の生モデル ID** が含まれています。別個の無料枠カタログには、**467 のモデル別行**、**34 の定期更新プール**、および **51 の定期更新型またはキーレスの永久無料プロバイダー**があります。これらは設計上、分母が異なります。定義およびプールの重複を除外した計算については、[プロバイダーリファレンス](docs/reference/PROVIDER_REFERENCE.md)および[無料枠](docs/reference/FREE_TIERS.md)を参照してください。
 
 <div align="center">
 
-### 🏢 主要なラボすべてに、1つのエンドポイントからアクセス
+### 🏢 すべての主要ラボへ — 1 つのエンドポイントから
 
 <table>
   <tr>
@@ -724,7 +724,7 @@ omniroute configure codex          # 次も利用可能：claude opencode qwen a
   </tr>
 </table>
 
-<sub>…さらに350以上 — すべてのアイコンは、ダッシュボードのプロバイダーカタログからリアルタイムで取得されます。📖 [プロバイダーリファレンス](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>…さらに 350 以上 — すべてのアイコンは、ダッシュボードのプロバイダーカタログからリアルタイムで取得されます。📖 [プロバイダーリファレンス](docs/reference/PROVIDER_REFERENCE.md)</sub>
 
 <br/>
 
@@ -732,24 +732,24 @@ omniroute configure codex          # 次も利用可能：claude opencode qwen a
 
 <table>
   <tr>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4、Nemotron 3<br/>トークン上限なし</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4, Nemotron 3<br/>トークン上限なし</sub></td>
     <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>自動ルーター、Tencent Hy3<br/>永久無料</sub></td>
-    <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B、Nemotron<br/>永久無料</sub></td>
+    <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B, Nemotron<br/>永久無料</sub></td>
     <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>無料枠</sub></td>
     <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>永久無料</sub></td>
     <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>永久無料</sub></td>
   </tr>
   <tr>
-    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max、Kimi-K2<br/>無制限で無料</sub></td>
-    <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT、Llama、Claude<br/>キー不要</sub></td>
+    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max, Kimi-K2<br/>無制限で無料</sub></td>
+    <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT, Llama, Claude<br/>キー不要</sub></td>
     <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>50以上のモデル<br/>1日あたり10Kニューロン</sub></td>
-    <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM、MiniMax<br/>無料で約40 RPM</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7、GPT-OSS<br/>1回限りの$5クレジット（カード必須）</sub></td>
-    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:freeモデル<br/>+$10 → RPM上限引き上げ</sub></td>
+    <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>無料で約40 RPM</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>1回限りの$5クレジット、カード必須</sub></td>
+    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:freeモデル<br/>+$10 → RPM上限を引き上げ</sub></td>
   </tr>
 </table>
 
-📖 完全な機械可読カタログ → [`docs/reference/PROVIDER_REFERENCE.md`](docs/reference/PROVIDER_REFERENCE.md)
+📖 機械可読な完全版カタログ → [`docs/reference/PROVIDER_REFERENCE.md`](docs/reference/PROVIDER_REFERENCE.md)
 
 <br/>
 </div>
@@ -928,9 +928,9 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
 
 ### 📖 仕組み — パイプライン、アーキテクチャ、削減率の計算
 
-<img src="./docs/diagrams/compression-pipeline.svg" width="100%" alt="OmniRoute圧縮パイプライン：10,000トークンのクライアントリクエストが、Session-Dedup、CCR、Lite、RTK、Responses Tool Output、Headroom、Relevance、Caveman、Aggressive、LLMLingua-2、Ultra、OmniGlyphという12個の組み合わせ可能なエンジンを通過し、文書化されたスタック例では約1,080トークンでプロバイダーに到達する様子を示しています。構造化コンテンツは保持ガードと各ステップの忠実度ゲートによって保護されます。明示的に指定された非可逆モードまたは実験的モードでは、対象となるコンテンツが変換される場合があります。"/>
+<img src="./docs/diagrams/compression-pipeline.svg" width="100%" alt="OmniRoute圧縮パイプライン：10,000トークンのクライアントリクエストが、組み合わせ可能な12個のエンジン（Session-Dedup、CCR、Lite、RTK、Responses Tool Output、Headroom、Relevance、Caveman、Aggressive、LLMLingua-2、Ultra、OmniGlyph）を通過し、文書化されたスタック構成例では約1,080トークンでプロバイダーに到達する様子を示しています。構造化コンテンツは保持ガードと各ステップの忠実度ゲートによって保護されます。明示的な非可逆モードまたは実験的モードでは、対象コンテンツが変換される場合があります。"/>
 
-デフォルトのスタック構成では、`RTK → Caveman`を実行します。両方が同じツール／コンテキストペイロードに作用する場合、削減効果は複合されます：
+デフォルトのスタック構成では`RTK → Caveman`を実行します。両方が同じツール／コンテキストペイロードに作用する場合、削減効果は複利的に積み重なります。
 
 ```txt
 combined = 1 − (1 − RTK) × (1 − Caveman_input)
@@ -938,53 +938,53 @@ average  = 1 − (1 − 0.80) × (1 − 0.46) = 89.2%
 range    = 78.4 – 94.6%
 ```
 
-コードブロック、URL、JSON、構造化データは、保持エンジンによって**常に保護**されます。
+コードブロック、URL、JSON、構造化データは、保持エンジンによって**常に保護されます**。
 
-> **少ないトークンで十分なら、なぜ多くのトークンを使うのでしょうか？** すべてのリクエストは、クライアント側の変更なしで、OmniRouteの圧縮パイプラインを**透過的に**通過します。現在では、順番に実行され、ルーティング構成ごとに自由に組み合わせられる**12個の組み合わせ可能なエンジンのスタック**になっています。[RTK](https://github.com/rtk-ai/rtk)、[Caveman](https://github.com/JuliusBrussee/caveman)（⭐ 90K+）、[LLMLingua-2](https://github.com/microsoft/LLMLingua)、[Troglodita](https://github.com/leninejunior/troglodita)（PT-BR）のアイデアを基盤としています。
+> **少ないトークンで十分なのに、なぜ多くのトークンを使うのでしょうか？** すべてのリクエストは、クライアント側を変更することなく、OmniRouteの圧縮パイプラインを**透過的に**通過します。現在は、ルーティングの組み合わせごとに自由に組み合わせて順番に実行できる、**12個の構成可能なエンジンのスタック**になっています。[RTK](https://github.com/rtk-ai/rtk)、[Caveman](https://github.com/JuliusBrussee/caveman)（⭐ 90K+）、[LLMLingua-2](https://github.com/microsoft/LLMLingua)、[Troglodita](https://github.com/leninejunior/troglodita)（PT-BR）のアイデアを基盤としています。
 
 ### 🧱 12エンジンのスタック
 
-エンジンはパイプライン順に実行され、それぞれを構成ごとに個別に有効化／無効化および設定できます：
+エンジンはパイプライン順に実行されます。各エンジンは、組み合わせごとに個別に切り替え、設定できます。
 
 <table>
   <tr><th align="center">#</th><th align="left">エンジン</th><th align="left">機能</th></tr>
-  <tr><td align="center" nowrap>1</td><td align="left" nowrap><b>Session-Dedup</b></td><td align="left">ターン間で繰り返されるコンテンツを除去（コンテンツアドレス方式、ターン横断）</td></tr>
+  <tr><td align="center" nowrap>1</td><td align="left" nowrap><b>Session-Dedup</b></td><td align="left">ターンをまたいで繰り返されるコンテンツを除去（コンテンツアドレス方式、ターン間）</td></tr>
   <tr><td align="center" nowrap>2</td><td align="left" nowrap><b>CCR</b></td><td align="left">大きなブロックを取得マーカーの背後にアーカイブし、必要に応じて取得</td></tr>
-  <tr><td align="center" nowrap>3</td><td align="left" nowrap><b>Lite</b></td><td align="left">空白文字と画像URLのトリミング（低レイテンシーのベースライン）</td></tr>
-  <tr><td align="center" nowrap>4</td><td align="left" nowrap><b>RTK</b></td><td align="left">ツール結果のスマートなフィルタリング、重複排除、切り詰め（コマンド認識）</td></tr>
-  <tr><td align="center" nowrap>5</td><td align="left" nowrap><b>Responses Tool Output</b></td><td align="left">シェル／パッチ／検索／ビルド出力向けの、ロスレス優先のJSON処理と上限付き診断圧縮（Responses API）</td></tr>
-  <tr><td align="center" nowrap>6</td><td align="left" nowrap><b>Headroom</b></td><td align="left">同梱された<b>GCF</b>コーデックによる、JSON配列のロスレスな表形式圧縮（約30%）</td></tr>
-  <tr><td align="center" nowrap>7</td><td align="left" nowrap><b>Relevance</b></td><td align="left">直近のユーザークエリに対する抽出的な文スコアリング</td></tr>
-  <tr><td align="center" nowrap>8</td><td align="left" nowrap><b>Caveman</b></td><td align="left">ルールベースの文章圧縮（出力で約65～75%）</td></tr>
-  <tr><td align="center" nowrap>9</td><td align="left" nowrap><b>Aggressive</b></td><td align="left">要約と古いターンの段階的なエイジング</td></tr>
-  <tr><td align="center" nowrap>10</td><td align="left" nowrap><b>LLMLingua-2</b></td><td align="left">MobileBERT ONNXによるMLセマンティック枝刈り — コードセーフ、非同期</td></tr>
-  <tr><td align="center" nowrap>11</td><td align="left" nowrap><b>Ultra</b></td><td align="left">オプションの小規模モデル（SLM）階層を備えた、ヒューリスティックなトークン枝刈り</td></tr>
-  <tr><td align="center" nowrap>12</td><td align="left" nowrap><b>OmniGlyph</b></td><td align="left">Anthropicへの直接接続上で計測済みのClaude Fable 5向け、実験的なコンテキスト画像化エンコーディング。GPT 5.6トランスフォーマーについては、プロバイダーの受領確認が得られるまでフェイルクローズを維持。4つの圧縮プロファイル（デフォルトのaggressive、balanced、coding-safe、passthrough）（最も積極的、オプトイン）</td></tr>
+  <tr><td align="center" nowrap>3</td><td align="left" nowrap><b>Lite</b></td><td align="left">空白と画像URLを削減（低レイテンシのベースライン）</td></tr>
+  <tr><td align="center" nowrap>4</td><td align="left" nowrap><b>RTK</b></td><td align="left">ツール結果をスマートにフィルタリング、重複排除、切り詰め（コマンド認識）</td></tr>
+  <tr><td align="center" nowrap>5</td><td align="left" nowrap><b>Responses Tool Output</b></td><td align="left">シェル／パッチ／検索／ビルド出力向けの、可逆性を優先したJSON圧縮と範囲制限付き診断圧縮（Responses API）</td></tr>
+  <tr><td align="center" nowrap>6</td><td align="left" nowrap><b>Headroom</b></td><td align="left">同梱された<b>GCF</b>コーデックによるJSON配列の可逆な表形式圧縮（約30%）</td></tr>
+  <tr><td align="center" nowrap>7</td><td align="left" nowrap><b>Relevance</b></td><td align="left">直近のユーザークエリに照らして文を抽出式でスコアリング</td></tr>
+  <tr><td align="center" nowrap>8</td><td align="left" nowrap><b>Caveman</b></td><td align="left">ルールベースの文章圧縮（出力を約65～75%削減）</td></tr>
+  <tr><td align="center" nowrap>9</td><td align="left" nowrap><b>Aggressive</b></td><td align="left">古いターンの要約と段階的なエージング</td></tr>
+  <tr><td align="center" nowrap>10</td><td align="left" nowrap><b>LLMLingua-2</b></td><td align="left">MobileBERT ONNXによるMLセマンティックプルーニング — コードセーフ、非同期</td></tr>
+  <tr><td align="center" nowrap>11</td><td align="left" nowrap><b>Ultra</b></td><td align="left">オプションの小規模モデル（SLM）レイヤーを備えたヒューリスティックなトークンプルーニング</td></tr>
+  <tr><td align="center" nowrap>12</td><td align="left" nowrap><b>OmniGlyph</b></td><td align="left">Anthropicへの直接接続で実測されたClaude Fable 5向けの、実験的なコンテキスト画像化エンコーディング。GPT 5.6 transformersは、プロバイダーの確認情報が得られるまでフェイルクローズを維持。4つの圧縮プロファイル（デフォルトのaggressive、balanced、coding-safe、passthrough）（最も積極的、オプトイン）</td></tr>
 </table>
 
-コードブロック、URL、構造化データは、**常にバイト単位で完全に保持**されます。**ワンクリックプリセット**で各エンジンを組み合わせられます：
+コードブロック、URL、構造化データは、**常に**バイト単位で完全に保持されます。**ワンクリックプリセット**で複数のエンジンを組み合わせられます。
 
 <table>
   <tr><th align="left">モード</th><th align="left">削減率</th><th align="left">最適な用途</th></tr>
   <tr><td align="left" nowrap>🪶 <b>Lite</b></td><td align="left" nowrap>約15%</td><td align="left">常時有効にできる安全なデフォルト</td></tr>
-  <tr><td align="left" nowrap>🪨 <b>Standard (Caveman)</b></td><td align="left" nowrap>約30%</td><td align="left">日常的なコーディング</td></tr>
-  <tr><td align="left" nowrap>⚡ <b>Aggressive</b></td><td align="left" nowrap>約50%</td><td align="left">ツール使用の多い長時間セッション</td></tr>
+  <tr><td align="left" nowrap>🪨 <b>Standard（Caveman）</b></td><td align="left" nowrap>約30%</td><td align="left">日常的なコーディング</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Aggressive</b></td><td align="left" nowrap>約50%</td><td align="left">ツールを多用する長時間のセッション</td></tr>
   <tr><td align="left" nowrap>🔥 <b>Ultra</b></td><td align="left" nowrap>約75%</td><td align="left">最大限の削減</td></tr>
   <tr><td align="left" nowrap>🧰 <b>RTK</b></td><td align="left" nowrap>60～90%</td><td align="left">シェル／テスト／ビルド／gitの出力</td></tr>
-  <tr><td align="left" nowrap>🔗 <b>Stacked (RTK → Caveman)</b></td><td align="left" nowrap><b>78～95%</b></td><td align="left">プロンプトとツールログが混在する場合</td></tr>
+  <tr><td align="left" nowrap>🔗 <b>Stacked（RTK → Caveman）</b></td><td align="left" nowrap><b>78～95%</b></td><td align="left">プロンプトとツールログが混在する場合</td></tr>
 </table>
 
 **実例 — Standardモード：**
 
-> **圧縮前（69トークン）：** _「Reactコンポーネントが再レンダリングされるのは、各レンダリングサイクルで新しいオブジェクト参照を作成していることが原因と考えられます。インラインオブジェクトをpropとして渡すと、Reactの浅い比較では毎回異なるオブジェクトと見なされ、再レンダリングが発生します。useMemoを使ってオブジェクトをメモ化することをお勧めします。」_
+> **圧縮前（69トークン）：** _「Reactコンポーネントが再レンダリングされる理由は、各レンダリングサイクルで新しいオブジェクト参照を作成しているためである可能性が高いです。インラインオブジェクトをpropとして渡すと、Reactの浅い比較では毎回異なるオブジェクトとして認識されるため、再レンダリングが発生します。useMemoを使用してオブジェクトをメモ化することをおすすめします。」_
 >
-> **圧縮後（19トークン）：** _「レンダリングごとに新しいオブジェクト参照。インラインオブジェクトprop = 新規参照 = 再レンダリング。useMemoでラップ。」_
+> **圧縮後（19トークン）：** _「レンダリングごとに新しいオブジェクト参照。インラインオブジェクトprop = 新しい参照 = 再レンダリング。useMemoでラップ。」_
 >
-> **答えは同じ。トークンを72%削減。精度低下ゼロ。** ✅
+> **同じ回答。トークンを72%削減。精度低下ゼロ。** ✅
 
 **PT-BRの例 — [Troglodita](https://github.com/leninejunior/troglodita)モード：**
 
-> **変更前（42トークン）：** _「問題は、レンダリングのたびに新しいオブジェクト参照が作成されるため、コンポーネントが再レンダリングされていることです。`useMemo`の使用をお勧めします。」_
+> **変更前（42トークン）：** _「問題は、レンダリングのたびに新しいオブジェクト参照が作成されるため、コンポーネントが再レンダリングされていることです。useMemoの使用を推奨します。」_
 >
 > **変更後（12トークン）：** _「再レンダリング：毎回新規参照（インラインオブジェクトを再作成）。`useMemo`を使用。」_
 >
@@ -994,16 +994,16 @@ range    = 78.4 – 94.6%
 
 ### 🎚️ エンジンの先へ — 出力スタイル、適応型ダイヤル、リクエスト単位の制御
 
-上記の12個のエンジンは、**入力されるもの**を圧縮します。さらに3つのレイヤーが、**どのように**、**いつ**、そして何が**出力されるか**を調整します。
+上記12個のエンジンは、**入力**を圧縮します。さらに3つのレイヤーが、**どのように**、**いつ**、そして何を**出力**するかを決定します。
 
-- **🪄 出力スタイル** _(出力軸の制御)_ — 決定論的でキャッシュセーフな応答整形指示を注入します。組み合わせ可能で、それぞれ `lite` / `full` / `ultra` の強度を選択できます。スタイルの追加は、レジストリに1行加えるだけです。
-  - **簡潔な文章** — 冗長表現、冠詞、曖昧な言い回しを削除し、技術的な内容は正確に維持します。
-  - **少ないコード** — 「怠惰なシニア開発者」式のYAGNI：動作する最小限の変更にとどめ、要求されていない足場は作りません。
-  - **ポニーテール（怠惰なシニア開発者）** — YAGNIの段階を上り、根本原因を修正し、動作する最小限の差分にします。
-  - **ADHDです（行動優先）** — 次のアクションを先に示し、手順には番号を付け、具体的な次の一歩を1つ提示し、前置きは省きます。
-  - **簡潔なCJK（文言）** — 漢文調の極めて簡潔なスタイル（ロケールが `zh` の場合のみ）。
-- **🎯 適応型コンテキスト予算** _(ダイヤル)_ — 単一のオン／オフ式トークンしきい値の代わりに、モデルのコンテキストウィンドウに**収まる**まで、最も低コストで損失の少ないエンジンだけを必要な範囲で段階的に適用します。ポリシー：`reserve-output`（デフォルト、モデル対応）· `percentage` · `absolute`。モード：`floor`（収まることを保証）· `replace-autotrigger`（明示した選択を優先）· `off`（従来のしきい値）。
-- **🎛️ 圧縮の決定箇所** _(優先順位、高 → 低)_ — リクエスト単位の `x-omniroute-compression` ヘッダー › ルーティングコンボのオーバーライド › 有効な名前付きプロファイル › 適応型／自動トリガー › パネルのデフォルト › オフ。適用されたプランは、`X-OmniRoute-Compression: <mode>; source=<source>` レスポンスヘッダーで返されます。
+- **🪄 出力スタイル** _（出力軸の制御）_ — 決定的でキャッシュセーフな応答整形指示を注入します。組み合わせ可能で、それぞれ `lite` / `full` / `ultra` の強度を選択できます。スタイルの追加は、レジストリへの1行の追加だけです。
+  - **簡潔な文章** — 冗長表現、冠詞、曖昧表現を省き、技術的な内容を正確に維持します。
+  - **コードを少なく** — 「怠惰なシニア開発者」流のYAGNI：動作する最小限の変更に留め、要求されていない土台作りは行いません。
+  - **ポニーテール（怠惰なシニア開発者）** — YAGNIの梯子を上り、根本原因を修正し、動作する最小限の差分に留めます。
+  - **ADHDです（アクション優先）** — 次のアクションを最初に示し、手順に番号を付け、具体的な次の一歩を1つ提示し、前置きは省きます。
+  - **簡潔なCJK（文言）** — 漢文調の超簡潔なスタイル（ロケールが `zh` の場合のみ）。
+- **🎯 適応型コンテキスト予算** _（ダイヤル）_ — 単一のオン／オフ式トークンしきい値ではなく、**モデルのコンテキストウィンドウに収める**ために必要な範囲だけ、最も低コストで損失の少ないエンジンを段階的に適用します。ポリシー：`reserve-output`（デフォルト、モデル対応）· `percentage` · `absolute`。モード：`floor`（収まることを保証）· `replace-autotrigger`（明示的な選択を優先）· `off`（従来のしきい値）。
+- **🎛️ 圧縮の決定箇所** _（優先順位、高 → 低）_ — リクエスト単位の `x-omniroute-compression` ヘッダー › ルーティングコンボのオーバーライド › 有効な名前付きプロファイル › 適応型／自動トリガー › パネルのデフォルト › オフ。適用されたプランは、`X-OmniRoute-Compression: <mode>; source=<source>` レスポンスヘッダーにも反映されます。
 
 トークンしきい値による自動トリガー、適応型ダイヤルの有効化、名前付きプロファイルの固定、リクエスト単位の一時設定、ルーティングコンボ単位のパイプライン割り当てなど、ワークロードに合う方法を選べます。オプトイン式のオフライン**評価ハーネス**（`npm run eval:compression`）では、変更を昇格させる前に、固定コーパス上で忠実度と削減量を評価できます。
 
@@ -1017,7 +1017,7 @@ range    = 78.4 – 94.6%
 
 </div>
 
-**1）インストールして実行**
+**1) インストールして実行**
 
 ```bash
 npm install -g omniroute
@@ -1025,7 +1025,7 @@ omniroute
 ```
 
 > 💡 `npm warn ERESOLVE` やpeer dependencyの警告が表示されますか？[問題ありません](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated)。
-> **npm 11以降を使用していますか？** npmでは、許可されていないパッケージライフサイクルスクリプトがブロックされる場合があります。OmniRouteの `postinstall`（`node scripts/build/postinstall.mjs`）は、ネイティブランタイムファイルの準備に必要です。グローバルインストール時に、npmの警告に記載されたパッケージを許可してください。OmniRoute 3.8.51で報告されるパッケージセットの場合：
+> **npm 11以降を使用していますか？** npmでは、許可されていないパッケージライフサイクルスクリプトがブロックされる場合があります。OmniRouteの `postinstall`（`node scripts/build/postinstall.mjs`）は、ネイティブランタイムファイルを準備するために必要です。グローバルインストール時にnpmの警告に表示されたパッケージを許可してください。OmniRoute 3.8.52で報告されるパッケージセットの場合：
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1038,46 +1038,46 @@ omniroute
 > npm install -g omniroute
 > ```
 >
-> 依存関係の一覧はリリース間で変更される場合があります。npmが異なる一覧を報告した場合は、その警告に記載されたパッケージ名を使用してください。パッケージを許可すると、そのインストールスクリプトの実行が許可されます。
-> **Gemini Webや別のWeb Cookieプロバイダーを使用していますか？** npmパッケージには
+> 依存関係の一覧はリリースごとに変更される可能性があります。npmが異なる一覧を報告した場合は、その警告に記載されたパッケージ名を使用してください。パッケージを許可すると、そのインストールスクリプトの実行が許可されます。
+> **Gemini Webまたは別のWeb Cookieプロバイダーを使用していますか？** npmパッケージには
 > Playwrightが含まれていますが、Chromiumバイナリは含まれていません。最初のWebプロバイダーリクエストを行う前に、
 > [Playwright Chromiumのセットアップ](docs/guides/TROUBLESHOOTING.md#gemini-web-and-playwright-chromium)
 > に関する注意事項を確認してください。
 
-ダッシュボード：`http://localhost:20128` · API：`http://localhost:20128/v1`
+ダッシュボードは `http://localhost:20128` · APIは `http://localhost:20128/v1`。
 
-**2）自分のアカウントを使用して、利用資格のあるプロバイダーに接続**
+**2) 自分のアカウントを使用して、利用可能なプロバイダーに接続**
 
-ダッシュボード → **プロバイダー** → 現在の利用規約とクォータが用途に合うプロバイダーを選択 → APIキーを追加するか、アカウント連携フローを完了します。無料枠では、登録、承認、または支払い方法が必要になる場合があります。[無料枠ガイド](docs/getting-started/FREE-TIERS-GUIDE.md)を確認してください。キー不要での利用は保証されず、`tos: avoid` と記されたプロバイダーはデフォルトで `auto` から除外されます。
+ダッシュボード → **プロバイダー** → 現在の利用規約とクォータが用途に合うプロバイダーを選択 → APIキーを追加するか、アカウント接続フローを完了します。無料枠の利用には、登録、承認、または支払い方法が必要な場合があります。[無料枠ガイド](docs/getting-started/FREE-TIERS-GUIDE.md)を確認してください。キーなしでの利用は保証されず、`tos: avoid` と記されたプロバイダーはデフォルトで `auto` から除外されます。
 
-**3）コーディングツールの接続先を設定**
+**3) コーディングツールを接続**
 
 ```txt
-ベースURL： http://localhost:20128/v1
-APIキー：   [ダッシュボード → エンドポイントからコピー]
-モデル：    auto            （利用可能な接続間でルーティング。プロバイダー／モデルの指定も可能）
+Base URL: http://localhost:20128/v1
+API Key:  [copy from Dashboard → Endpoints]
+Model:    auto            (routes among eligible connections — or choose provider/model)
 ```
 
-**4）動作を確認**
+**4) 動作を確認**
 
 ```bash
 curl http://localhost:20128/v1/models -H "Authorization: Bearer YOUR_KEY"
 ```
 
-接続済みモデルの一覧が表示されれば完了です。🎉 これでコーディングを開始できます。OmniRouteが自動的にルーティングし、必要に応じてフォールバックします。
+接続済みモデルの一覧が表示されれば成功です。🎉 これで完了です。コーディングを始めれば、OmniRouteが自動的にルーティングとフォールバックを行います。
 
-クライアントがカスタムヘッダーを送信できない場合、OmniRouteはトークン付きの互換エイリアスも公開しています。
+クライアントがカスタムヘッダーを送信できない場合、OmniRouteはトークンを含む互換性エイリアスも提供します。
 
 ```txt
-OpenAIカタログ：    http://localhost:20128/vscode/YOUR_KEY/
-OpenAIモデル：      http://localhost:20128/vscode/YOUR_KEY/models
-OpenAIチャット：    http://localhost:20128/vscode/YOUR_KEY/chat/completions
-OpenAIレスポンス：  http://localhost:20128/vscode/YOUR_KEY/responses
-Ollamaチャット：    http://localhost:20128/vscode/YOUR_KEY/api/chat
-Ollamaタグ：        http://localhost:20128/vscode/YOUR_KEY/api/tags
+OpenAI catalog:   http://localhost:20128/vscode/YOUR_KEY/
+OpenAI models:    http://localhost:20128/vscode/YOUR_KEY/models
+OpenAI chat:      http://localhost:20128/vscode/YOUR_KEY/chat/completions
+OpenAI responses: http://localhost:20128/vscode/YOUR_KEY/responses
+Ollama chat:      http://localhost:20128/vscode/YOUR_KEY/api/chat
+Ollama tags:      http://localhost:20128/vscode/YOUR_KEY/api/tags
 ```
 
-これらは、`Authorization: Bearer ...` を付与できないクライアントでのみ使用してください。引き続きヘッダー認証が推奨方式です。
+これらは、`Authorization: Bearer ...` を付加できないクライアントでのみ使用してください。引き続き、ヘッダー認証が推奨される方式です。
 
 <br/>
 
@@ -1090,13 +1090,13 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
 ```
 
-`:latest` は、**公開済み**の安定版 SemVer のうち最も高いバージョンを指します。git の `main` は追跡しません。GitOps では `:X.Y.Z` に固定してください。[Docker リリースチャンネル](docs/guides/DOCKER_GUIDE.md#release-channels)を参照してください。このイメージでは **`OMNIROUTE_MEMORY_MB=1024`** に固定されています。これはダッシュボードと軽量なチャットには十分です。**コーディングエージェント**（Claude Code、Codex、Grok などからの `POST /v1/responses`）には、はるかに大きな V8 ヒープが必要です。そうでない場合、2 つの長いコンテキストが重複すると約 12 GiB でプロセスが `FATAL ERROR` になります。ネイティブバッファは V8 の外部に配置されるため、コンテナのサイズはヒープより大きく設定してください。
+`:latest` は、**公開済み**の安定版 SemVer のうち最も高いバージョンを指します。git の `main` は追跡しません。GitOps では `:X.Y.Z` に固定してください。[Docker リリースチャンネル](docs/guides/DOCKER_GUIDE.md#release-channels)を参照してください。イメージでは **`OMNIROUTE_MEMORY_MB=1024`** に固定されています。これはダッシュボードや軽量なチャットには十分です。**コーディングエージェント**（Claude Code、Codex、Grok などからの `POST /v1/responses`）では、より大きな V8 ヒープが必要です。そうしないと、長いコンテキストが 2 つ重複した際に約 12 GiB でプロセスが `FATAL ERROR` になります。ネイティブバッファは V8 の外部に配置されるため、コンテナのサイズはヒープより大きくしてください。
 
-| ワークロード                               | ヒープ（`-e OMNIROUTE_MEMORY_MB`） | コンテナ（`--memory`） |
-| ------------------------------------------ | ---------------------------------- | ---------------------- |
-| ダッシュボード／軽量なチャット             | `1024`（イメージのデフォルト）     | ≥2 g                   |
-| 1 つのコーディングエージェント             | `8192`                             | ≥10 g                  |
-| 2 つの長時間実行される同時 `/v1/responses` | `10240`–`12288`                    | ≥12–16 g               |
+| ワークロード                          | ヒープ（`-e OMNIROUTE_MEMORY_MB`） | コンテナ（`--memory`） |
+| ------------------------------------- | ---------------------------------- | ---------------------- |
+| ダッシュボード／軽量なチャット        | `1024`（イメージのデフォルト）     | 2 g 以上               |
+| 1 つのコーディングエージェント        | `8192`                             | 10 g 以上              |
+| 2 つの長い `/v1/responses` の同時実行 | `10240`–`12288`                    | 12～16 g 以上          |
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
@@ -1107,9 +1107,9 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 完全な表：[Docker ガイド — ランタイム RAM](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents)。
 
 > **プレリリース Docker チャンネル：** `diegosouzapw/omniroute:next` と
-> `diegosouzapw/omniroute:next-web` は、現在のデフォルトの `release/v*`
-> ブランチを追跡します。これらの可変タグは、未リリースの修正をテストする目的にのみ使用するものであり、
-> **本番環境ではサポートされません**。詳しくは
+> `diegosouzapw/omniroute:next-web` は、現在デフォルトの `release/v*`
+> ブランチを追跡します。これらの可変タグは未リリースの修正をテストするためだけのものであり、
+> **本番環境ではサポートされません**。詳細は
 > [Docker リリースチャンネル](docs/guides/DOCKER_GUIDE.md#release-channels)を参照してください。
 
 **🥟 Bun**
@@ -1117,7 +1117,7 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 Bun ランタイムの検出により、標準の `bun install` とグローバルインストール（`bun install -g omniroute`）がサポートされています。
 
 - **組み込みの `bun:sqlite`**：OmniRoute は Bun 上で実行されている場合、Bun 組み込みの `bun:sqlite` ドライバーを使用し、Node.js では `better-sqlite3` または `sql.js` にフォールバックします。
-- **開発時の Webpack バンドラー自動選択**：開発環境（`bun run dev`）では Bun を自動的に検出し、ネイティブ V8 バインディングの非互換性を防ぐため、Turbopack を無効にして Webpack を使用します。本番ビルド（`bun run build`）では、Node とまったく同様に `OMNIROUTE_USE_TURBOPACK` に従います。デフォルトでは Turbopack を使用し、`OMNIROUTE_USE_TURBOPACK=0` を指定すると Webpack でビルドします（`Dockerfile.bun` では `--build-arg` として公開されています）。
+- **開発時の Webpack バンドラー自動選択**：開発環境（`bun run dev`）では Bun を自動検出し、ネイティブ V8 バインディングの非互換性を防ぐために Turbopack を無効化して Webpack を使用します。本番ビルド（`bun run build`）では Node とまったく同様に `OMNIROUTE_USE_TURBOPACK` に従います。デフォルトは Turbopack で、Webpack を使用してビルドするには `OMNIROUTE_USE_TURBOPACK=0` を指定します（`Dockerfile.bun` では `--build-arg` として公開されています）。
 - **専用の Bun Dockerfile**：ネイティブ Bun 本番デプロイ用のマルチステージ `Dockerfile.bun`（`docker build -f Dockerfile.bun -t omniroute:bun .`）。
 
 ```bash
@@ -1164,16 +1164,16 @@ devbox run npm run dev
 # 1. バインドマウントするデータディレクトリを準備
 mkdir -p data
 
-# 2. Linux + ローカルのルートレス Podman のみ（リモートの Podman Machine クライアントでは決して実行しないでください）：
+# 2. Linux + ローカルの rootless Podman のみ（リモート Podman Machine クライアントでは決して実行しないでください）：
 podman unshare chown 1000:1000 ./data
 
-# 3. ランタイムヒントを設定し、ローカルの Compose イメージをビルドして起動
+# 3. ランタイムのヒントを設定し、ローカルの Compose イメージをビルドして起動
 echo "CONTAINER_HOST=podman" >> .env
 podman compose --profile base up -d --build
 ```
 
-macOS または Windows では、Podman はリモートの Podman Machine を使用します。`podman unshare` を省略し、
-[トポロジー別のデータディレクトリに関するガイダンス](contrib/podman/README.md#data-directory-permissions-by-topology)に従ってください。
+macOS または Windows では、Podman はリモートの Podman Machine を使用します。`podman unshare` は省略し、
+[トポロジー固有のデータディレクトリに関するガイダンス](contrib/podman/README.md#data-directory-permissions-by-topology)に従ってください。
 
 📖 [Podman ガイド](contrib/podman/README.md) — Compose ビルド、Podman Machine、および
 Linux/systemd Quadlet のセットアップ。
@@ -1181,20 +1181,22 @@ Linux/systemd Quadlet のセットアップ。
 **⚡ より高速／軽量なインストール（ネイティブビルドを省略）**
 
 ネイティブ SQLite エンジン（`better-sqlite3`）は**オプション**の依存関係であるため、グローバル
-インストールがソースからのコンパイルでブロックされることはありません。プラットフォーム／Node に適合する
-ビルド済みバイナリがある場合はそれを使用し、ない場合は透過的に純粋な JS エンジン
-（Node 22+ では `node:sqlite`、それ以外では同梱の `sql.js` WASM）にフォールバックします。ビルドツールは不要です。
+インストールがソースからのコンパイルで停止することはありません。プラットフォーム／Node に一致する
+ビルド済みバイナリがある場合はそれを使用し、それ以外の場合は Pure JS エンジン
+（Node 22 以降では `node:sqlite`、それ以外では同梱の `sql.js` WASM）に透過的にフォールバックするため、ビルドツールは不要です。
 
-インストール後のネイティブウォームアップを完全に省略するには（CI、ヘッドレス環境、または低速なマシン）：
+インストール後の**ネイティブウォームアップ**を完全に省略するには、次のようにします（CI、ヘッドレス環境、または低速なマシン向け）。
+注：これによって省略されるのはネイティブ SQLite のウォームアップ手順（`scripts/postinstall.mjs`）のみです。
+バイナリのコピー／修復フック（`scripts/build/postinstall.mjs`）は通常どおり実行されます。
 
 ```bash
 OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 でも省略されます
 ```
 
-最速でインストールするには、**pnpm**（コンテンツアドレス方式のストア + ハードリンク — 上記参照）を推奨します。
+最速のインストールには **pnpm** を推奨します（コンテンツアドレスストア + ハードリンク — 上記を参照）。
 ダッシュボードを使用しないヘッドレスランタイムには、Docker の `base` プロファイル（上記）または
 [Termux ガイド](docs/guides/TERMUX_GUIDE.md)を使用してください。CLI と Web ダッシュボードは同じプロセスから
-1 つのポートで提供されるため、現時点では CLI 専用パッケージはありません。
+1 つのポートで提供されるため、現時点では CLI 専用のパッケージはありません。
 
 <br/>
 
@@ -1301,22 +1303,22 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 でも省略さ�
 </div>
 
 <table>
-  <tr><th align="left">レイヤー</th><th align="left">技術</th></tr>
+  <tr><th align="left">レイヤー</th><th align="left">テクノロジー</th></tr>
   <tr><td nowrap><b>ランタイム</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>言語</b></td><td>TypeScript 6.0 — <code>src/</code>および<code>open-sse/</code>全体で<b>100% TypeScript</b>（v2.0以降、コアでの<code>any</code>使用はゼロ）</td></tr>
+  <tr><td nowrap><b>言語</b></td><td>TypeScript 6.0 — <code>src/</code>および<code>open-sse/</code>の全域で<b>100% TypeScript</b>（v2.0以降、コアでの<code>any</code>の使用はゼロ）</td></tr>
   <tr><td nowrap><b>フレームワーク</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
   <tr><td nowrap><b>データベース</b></td><td>better-sqlite3（SQLite、WALジャーナリング）+ LowDB（従来のJSON）— 147個のドメインモジュール、209件のマイグレーション</td></tr>
   <tr><td nowrap><b>メモリ</b></td><td>SQLite FTS5全文検索 + int8量子化ベクトル埋め込み、型付き減衰</td></tr>
-  <tr><td nowrap><b>スキーマ</b></td><td>Zod 4 — MCPツールのI/O検証 + API契約</td></tr>
+  <tr><td nowrap><b>スキーマ</b></td><td>Zod 4 — MCPツールのI/O検証 + APIコントラクト</td></tr>
   <tr><td nowrap><b>プロトコル</b></td><td>MCP（stdio / HTTP / SSE）+ A2A v0.3（JSON-RPC 2.0 + SSE）</td></tr>
   <tr><td nowrap><b>ストリーミング</b></td><td>Server-Sent Events（SSE）+ WebSocketブリッジ（<code>/v1/ws</code>）</td></tr>
   <tr><td nowrap><b>圧縮</b></td><td>12エンジンのパイプライン — RTK、Caveman、LLMLingua-2（MobileBERT ONNX）、GCF、OmniGlyph</td></tr>
   <tr><td nowrap><b>認証とセキュリティ</b></td><td>OAuth 2.0（PKCE）+ JWT + APIキー + MCPスコープ認証 · 保存時のAES-256-GCM暗号化 · DOMPurify</td></tr>
-  <tr><td nowrap><b>ステルス</b></td><td>wreq-js — JA3 / JA4 TLSフィンガープリント偽装、3段階プロキシ</td></tr>
-  <tr><td nowrap><b>回復性</b></td><td>サーキットブレーカー、指数バックオフ、サンダリングハード対策、自動コンボ自己修復</td></tr>
+  <tr><td nowrap><b>ステルス</b></td><td>wreq-js — JA3 / JA4 TLSフィンガープリント偽装、3レベルプロキシ</td></tr>
+  <tr><td nowrap><b>耐障害性</b></td><td>サーキットブレーカー、指数バックオフ、サンダリングハード対策、auto-combo自己修復</td></tr>
   <tr><td nowrap><b>ロギング</b></td><td>pino — リクエストコンテキストを含む構造化JSONログ</td></tr>
-  <tr><td nowrap><b>テスト</b></td><td>Node.jsテストランナー + Vitest — 追跡対象の7,800以上のテストファイルにわたる<b>56,000以上の静的テスト宣言</b>（ユニット、統合、E2E、セキュリティ、エコシステム）</td></tr>
-  <tr><td nowrap><b>プラットフォーム</b></td><td>デスクトップ（Electron）· Android（Termux）· PWA（任意のブラウザー）</td></tr>
+  <tr><td nowrap><b>テスト</b></td><td>Node.jsテストランナー + Vitest — 追跡対象の7,800以上のテストファイルにわたる<b>56,000以上の静的テスト宣言</b>（単体、統合、E2E、セキュリティ、エコシステム）</td></tr>
+  <tr><td nowrap><b>プラットフォーム</b></td><td>デスクトップ（Electron）· Android（Termux）· PWA（任意のブラウザ）</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — リリース時にnpmおよびDocker Hubへ自動公開</td></tr>
   <tr><td nowrap><b>リンク</b></td><td><a href="https://omniroute.online">ウェブサイト</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
@@ -1333,26 +1335,26 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 でも省略さ�
 
 <table>
   <tr><th align="left">ドキュメント</th><th align="left">説明</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">ユーザーガイド</a></b></td><td>プロバイダー、コンボ、CLI 統合、デプロイ</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">ユーザーガイド</a></b></td><td>プロバイダー、コンボ、CLI 連携、デプロイ</td></tr>
   <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">セットアップガイド</a></b></td><td>すべてのインストール方法、CLI ツール設定、プロトコル設定、タイムアウト調整</td></tr>
   <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI ツールガイド</a></b></td><td>Claude Code、Codex、Cursor、Cline、OpenClaw、Kilo、Copilot のツール別セットアップ</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">リモートモード</a></b></td><td>スコープ付きアクセストークンを使用して、ノート PC の CLI からリモート OmniRoute（VPS）を操作</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code 設定</a></b></td><td><code>launch</code> とモデル別プロファイルを使用して、Claude Code を OmniRoute（ローカル／リモート）に接続</td></tr>
-  <tr><td nowrap><b><a href="README.md#-quick-start">クイックスタート</a></b></td><td>インストール → 接続 → 設定の 3 ステップ</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">リモートモード</a></b></td><td>スコープ付きアクセストークンを使用し、ノート PC の CLI からリモートの OmniRoute（VPS）を操作</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code の設定</a></b></td><td><code>launch</code> とモデル別プロファイルを使用して、Claude Code を OmniRoute（ローカル／リモート）に接続</td></tr>
+  <tr><td nowrap><b><a href="README.md#-quick-start">クイックスタート</a></b></td><td>3 ステップ：インストール → 接続 → 設定</td></tr>
 </table>
 
 ### 🔧 運用とデプロイ
 
 <table>
   <tr><th align="left">ドキュメント</th><th align="left">説明</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker ガイド</a></b></td><td>Docker の実行、Compose プロファイル、Caddy HTTPS、トンネル、イメージタグ</td></tr>
-  <tr><td nowrap><b><a href="contrib/podman/README.md">Podman ガイド</a></b></td><td>Quadlet systemd 統合、podman-compose、SELinux</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker ガイド</a></b></td><td>Docker run、Compose プロファイル、Caddy HTTPS、トンネル、イメージタグ</td></tr>
+  <tr><td nowrap><b><a href="contrib/podman/README.md">Podman ガイド</a></b></td><td>Quadlet systemd 連携、podman-compose、SELinux</td></tr>
   <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">VM デプロイ</a></b></td><td>完全ガイド：VM + nginx + Cloudflare のセットアップ</td></tr>
   <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io デプロイ</a></b></td><td>永続ストレージを使用して Fly.io にデプロイ</td></tr>
   <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termux ガイド</a></b></td><td>Termux を介して Android 上で OmniRoute を実行</td></tr>
   <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA ガイド</a></b></td><td>プログレッシブウェブアプリのインストール、キャッシュ、アーキテクチャ</td></tr>
   <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">アンインストールガイド</a></b></td><td>すべてのインストール方法に対応した完全な削除</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">環境設定</a></b></td><td><code>.env</code> 変数とリファレンスの完全な一覧</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">環境設定</a></b></td><td><code>.env</code> の全変数とリファレンス</td></tr>
 </table>
 
 ### 🧠 機能とアーキテクチャ
@@ -1360,17 +1362,17 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 でも省略さ�
 <table>
   <tr><th align="left">ドキュメント</th><th align="left">説明</th></tr>
   <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">アーキテクチャ</a></b></td><td>システムアーキテクチャ、データフロー、内部構造</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">圧縮ガイド</a></b></td><td>7 つのオプションを備えたパイプライン：オフ／軽量／標準／強力／超強力／RTK／スタック</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">圧縮ガイド</a></b></td><td>7 オプションのパイプライン：オフ／軽量／標準／強力／超強力／RTK／スタック</td></tr>
   <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK 圧縮</a></b></td><td>コマンド出力の圧縮、フィルター、信頼、検証、生出力の復元</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">圧縮エンジン</a></b></td><td>Caveman、RTK、スタック型パイプライン、ダッシュボード／API／MCP インターフェース</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">圧縮ルール形式</a></b></td><td>Caveman および RTK フィルター用の JSON ルールパックスキーマ</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">圧縮エンジン</a></b></td><td>Caveman、RTK、スタックパイプライン、ダッシュボード／API／MCP サーフェス</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">圧縮ルール形式</a></b></td><td>Caveman および RTK フィルター用 JSON ルールパックのスキーマ</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">圧縮言語パック</a></b></td><td>言語検出と Caveman ルールパックの作成</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">耐障害性ガイド</a></b></td><td>サーキットブレーカー、クールダウン、キュー、サンダリングハード対策、TLS スプーフィング</td></tr>
-  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo エンジン</a></b></td><td>16 要素のスコアリング、モードパック、自己修復</td></tr>
+  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">自動コンボエンジン</a></b></td><td>16 要素のスコアリング、モードパック、自己修復</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">プロキシガイド</a></b></td><td>3 レベルのプロキシシステム、1proxy マーケットプレイス、レジストリ CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">無料枠</a></b></td><td>統合ディレクトリ：文書化された 34 の定期提供プール／カタログ化された 467 件の無料枠エントリ</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">無料枠</a></b></td><td>統合ディレクトリ：文書化済みの定期プール 34 件／カタログ登録済みの無料枠エントリ 467 件</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">機能ギャラリー</a></b></td><td>スクリーンショットで見るダッシュボードツアー</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">コードベースドキュメント</a></b></td><td>初心者向けのコードベース解説</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">コードベースのドキュメント</a></b></td><td>初心者向けのコードベース解説</td></tr>
 </table>
 
 ### 🤖 プロトコルと API
@@ -1393,9 +1395,9 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 でも省略さ�
   <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">ブランチおよびリリースモデル</a></b></td><td>PR のマージ先（<code>release/*</code>）と、<code>main</code> およびタグの意味</td></tr>
   <tr><td nowrap><b><a href="CHANGELOG.md">変更履歴</a></b></td><td>バージョンごとの完全なリリース履歴</td></tr>
   <tr><td nowrap><b><a href="SECURITY.md">セキュリティポリシー</a></b></td><td>脆弱性の報告方法とセキュリティ対策</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n ガイド</a></b></td><td>67 言語のサポート、翻訳ワークフロー、RTL</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n ガイド</a></b></td><td>67言語のサポート、翻訳ワークフロー、RTL</td></tr>
   <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">リリースチェックリスト</a></b></td><td>リリース前の検証手順</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">カバレッジ計画</a></b></td><td>追跡対象の 7,800 以上のテストファイルに含まれる 56,000 以上の静的テスト宣言に対するテストカバレッジ戦略</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">カバレッジ計画</a></b></td><td>追跡対象の7,800以上のテストファイルにわたる56,000以上の静的テスト宣言を対象としたテストカバレッジ戦略</td></tr>
 </table>
 
 <br/>
@@ -1404,12 +1406,12 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 でも省略さ�
 
 # ⭐ トップコントリビューター
 
-> OmniRoute は、情熱あふれるオープンソースコミュニティによって形作られています。以下の方々は、プロジェクトの品質、安定性、普及に直接影響を与える多大な貢献をしてくださいました。**ありがとうございます。**
+> OmniRoute は、情熱的なオープンソースコミュニティによって形作られています。以下の方々は、プロジェクトの品質、安定性、普及に直接影響を与える多大な貢献をしてきました。**ありがとうございます。**
 
-### マージされたプルリクエスト数による外部コントリビューターのランキング
+### マージされたプルリクエスト数による外部コントリビューター
 
 <table>
-  <tr><th align="center">順位</th><th align="left">コントリビューター</th><th align="center">マージ済み PR 数</th><th align="right">変更行数（概算）</th></tr>
+  <tr><th align="center">順位</th><th align="left">コントリビューター</th><th align="center">マージ済み PR</th><th align="right">変更行数（概算）</th></tr>
   <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
   <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
   <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
@@ -1432,7 +1434,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 でも省略さ�
   <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>この集計は、2026-10-18 15:09:09 UTC 時点の最新の <code>release/v3.8.52</code> の先端コミット <code>656f01cb43</code> を使用して実施しました。ページネーションされた GitHub GraphQL の集計には、マージ済み PR が 9,191 件含まれています。その内訳は、リポジトリ所有者によるものが 3,834 件、Dependabot によるものが 229 件、その他のボット／アプリによるものが 6 件、そして<b>外部のコントリビューター 835 名による PR が 5,122 件</b>です。「変更行数」は GitHub 上の追加行数と削除行数の合計であり、生成ファイル、ロックファイル、カタログ、翻訳、ドキュメントを含みます。これは変更量であり、作成したコードの行数ではありません。49 件の PR では、GitHub 上の差分が 500,000 行を超えています（たとえば #13399 は単一プロバイダーの追加ですが、変更ファイル数は 2,347 と表示されます）。そのため、上記のいくつかの合計値が大きく膨らんでいます。同数の場合は同順位としています。</sub>
+<sub>集計は、2026-10-18 15:09:09 UTC 時点の最新の <code>release/v3.8.52</code> の先頭コミット <code>656f01cb43</code> に基づいています。ページ分割された GitHub GraphQL の集計には、マージ済み PR が9,191件含まれています。その内訳は、リポジトリ所有者によるものが3,834件、Dependabot によるものが229件、その他のボット／アプリによるものが6件、そして<b>835人の異なるコントリビューターによる外部 PR が5,122件</b>です。「変更行数」は GitHub の追加行数と削除行数の合計であり、生成ファイル、ロックファイル、カタログ、翻訳、ドキュメントを含みます。これは変更量を示すものであり、作成された LOC ではありません。49件の PR では GitHub の差分が500,000行を超えて報告されています（たとえば、単一のプロバイダーを追加した #13399 では、変更されたファイルが2,347件と記録されています）。そのため、上記のいくつかの合計値が膨らんでいます。同数の場合は同順位です。</sub>
 
 ### GitHub に帰属するコミット
 
@@ -1443,42 +1445,42 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 でも省略さ�
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 GitHubに帰属するコミット 367件</sub>
+      <sub>🥇 GitHub に帰属するコミット 367 件</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 GitHubに帰属するコミット 269件</sub>
+      <sub>🥈 GitHub に帰属するコミット 269 件</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
         <img src="https://github.com/oyi77.png" width="40" style="border-radius:50%" alt="Paijo"/><br/>
         <b>Paijo</b>
       </a><br/>
-      <sub>🥉 GitHubに帰属するコミット 229件</sub>
+      <sub>🥉 GitHub に帰属するコミット 229 件</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
       </a><br/>
-      <sub>🏅 GitHubに帰属するコミット 202件</sub>
+      <sub>🏅 GitHub に帰属するコミット 202 件</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/pacocartones">
         <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
         <b>Paco Cartones</b>
       </a><br/>
-      <sub>🏅 GitHubに帰属するコミット 174件</sub>
+      <sub>🏅 GitHub に帰属するコミット 174 件</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
         <b>Ravi Tharuma</b>
       </a><br/>
-      <sub>🏅 GitHubに帰属するコミット 126件</sub>
+      <sub>🏅 GitHub に帰属するコミット 126 件</sub>
     </td>
   </tr>
   <tr>
@@ -1487,42 +1489,42 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 でも省略さ�
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 GitHubに帰属するコミット 114件</sub>
+      <sub>🏅 GitHub に帰属するコミット 114 件</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
         <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
         <b>Randi</b>
       </a><br/>
-      <sub>🏅 GitHubに帰属するコミット 108件</sub>
+      <sub>🏅 GitHub に帰属するコミット 108 件</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/JxnLexn">
         <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
         <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 GitHubに帰属するコミット 87件</sub>
+      <sub>🏅 GitHub に帰属するコミット 87 件</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
-      <sub>🏅 GitHubに帰属するコミット 70件</sub>
+      <sub>🏅 GitHub に帰属するコミット 70 件</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
         <img src="https://github.com/KooshaPari.png" width="40" style="border-radius:50%" alt="Koosha Paridehpour"/><br/>
         <b>Koosha Paridehpour</b>
       </a><br/>
-      <sub>🏅 GitHubに帰属するコミット 68件</sub>
+      <sub>🏅 GitHub に帰属するコミット 68 件</sub>
     </td>
   </tr>
 </table>
 
-<sub>2026-10-18 14:44:45 UTCに再確認：デフォルトブランチ<code>release/v3.8.52</code>について、リポジトリのContributors APIが報告したGitHubに帰属するコミット。APIは849件のID（ユーザー429件、ボット2件、匿名418件）を返しました。この表ではメンテナー、ボット、匿名のIDを除外し、同順位はそのまま残しています。上記のマージ済みPRランキング、および下記のGitメタデータ調査のいずれとも異なります。</sub>
+<sub>2026-10-18 14:44:45 UTC に再確認：デフォルトブランチ <code>release/v3.8.52</code> について、リポジトリの Contributors API が報告した GitHub に帰属するコミットです。API は 849 のアイデンティティ（ユーザー 429、ボット 2、匿名 418）を返しました。この表ではメンテナー、ボット、匿名のアイデンティティを除外し、同順位は維持しています。上記のマージ済み PR ランキングとも、下記の Git メタデータ集計とも異なります。</sub>
 
-> 🙏 これらのコントリビューターによる機能追加、バグ修正、インフラストラクチャの改善は、OmniRouteの信頼性と豊富な機能を支える**中核的な要素**です。すべてのプルリクエスト、すべてのテストケース、すべてのi18n翻訳ファイルに意味があります。オープンソースは、このような人々によって築かれています。
+> 🙏 これらのコントリビューターによる機能、バグ修正、インフラストラクチャの改善は、OmniRoute の信頼性と豊富な機能を支える**中核的な要素**です。すべてのプルリクエスト、すべてのテストケース、すべての i18n 翻訳ファイルが重要です。オープンソースは、このような人々によって築かれています。
 
 </div>
 

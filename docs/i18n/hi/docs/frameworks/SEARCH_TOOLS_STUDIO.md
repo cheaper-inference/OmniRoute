@@ -54,7 +54,7 @@ Search Tools Studio, `/dashboard/search-tools` को एक सामान्�
 - इनपुट: URL + पूर्ण-पृष्ठ टॉगल + प्रारूप चयनकर्ता (मार्कडाउन / टेक्स्ट / HTML)।
 - सबमिट → फ़ेच → `ScrapeResult.tsx` रेंडर करें।
 - `ScrapeResult` मार्कडाउन पूर्वावलोकन + रॉ टॉगल रेंडर करता है।
-- सीमा: यदि प्रतिक्रिया बॉडी > **256 KB** है, तो UI `(संक्षिप्त किया गया, रॉ देखें)` दिखाता है और रॉ सामग्री को Monaco मोडल (D21) में खोलता है।
+- सीमा: यदि प्रतिक्रिया बॉडी > **256 KB** है, तो UI `View full raw content` दिखाता है और रॉ सामग्री को मोडल (D21) में खोलता है।
 - मेटाडेटा पैनल: प्रदाता (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), विलंबता, लागत, प्रतिक्रिया आकार, लिंक की संख्या।
 - `useScrapeFetch.ts` हुक का उपयोग करता है।
 

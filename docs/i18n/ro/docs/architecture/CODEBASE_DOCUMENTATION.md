@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Registre de furnizori, profiluri de anteturi, identitate, …
 ├── handlers/               Gestionare cereri (chat, încorporări, audio, imagini, …)
-├── executors/              150 de module de execuție pentru furnizori (clase de execuție + utilitare per furnizor)
+├── executors/              156 de module de execuție pentru furnizori (clase de execuție + utilitare per furnizor)
 ├── translator/             Conversia formatelor (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformator de flux Responses API ↔ Chat Completions
 ├── services/               Peste 80 de module de servicii (combinații, soluții de rezervă, cote, identitate, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 de module de execuție de nivel superior (`*.ts` fără `base.ts`, `index.ts` și teste — numărul
+156 de module de execuție de nivel superior (`*.ts` fără `base.ts`, `index.ts` și teste — numărul
 este măsurat de `npm run check:docs-counts`). Fiecare clasă de execuție extinde `BaseExecutor` (`base.ts`),
 direct sau prin `DefaultExecutor` ori printr-un alt executant; modulele rămase sunt utilitare specifice
 fiecărui furnizor (scheme pentru instrumente, adaptoare de preluare/TTS, gestionare a particularităților). Executanții includ:
@@ -772,7 +772,7 @@ Consultați [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) și secțiunea dedicat�
    `open-sse/mcp-server/schemas/tools.ts`).
 2. Atribuiți domeniul sau domeniile corespunzătoare în `src/shared/constants/mcpScopes.ts`.
 3. Înregistrați instrumentul în `open-sse/mcp-server/server.ts`.
-4. Adăugați teste în `open-sse/mcp-server/__tests__/`.
+4. Adăugați teste în `tests/unit/`.
 5. Actualizați [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Adăugarea unei abilități A2A noi
@@ -790,7 +790,7 @@ Consultați [A2A-SERVER.md § Adăugarea unei abilități noi](../frameworks/A2A
 - **Denumire**: fișierele folosesc `camelCase` sau `kebab-case`, componentele `PascalCase`,
   constantele `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` peste tot;
-  `no-explicit-any` = `warn` în `open-sse/` și `tests/`, eroare în rest.
+  `no-explicit-any` = `error` în `open-sse/**/*.ts` și `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (abordare moștenită). Preferați tipurile explicite în locul
   inferenței la limitele dintre module.
 - **Baza de date**: nu scrieți niciodată SQL brut în rute sau handlere — utilizați întotdeauna
@@ -820,8 +820,7 @@ Consultați [A2A-SERVER.md § Adăugarea unei abilități noi](../frameworks/A2A
   `a2a`, `memory`, `skills`.
 - **Ramuri**: prefixe `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Nu faceți niciodată commit direct în `main`.
-- **Husky**: înainte de commit se rulează `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; înainte de push se rulează `check:any-budget:t11` + `check:tracked-artifacts` (verificări rapide; exclude `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

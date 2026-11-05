@@ -9,17 +9,17 @@ permissions:
 
 jobs:
   promptfoo-guard:
-    if: ${{ github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute' }}
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
     name: promptfoo — injection guard (block mode, no secret)
     # #11965: this job runs a backend-only `next build`; the hosted 7 GB runner cannot build
     # release/v3.8.51 (VM shutdown ~7 min in), so it targets the box's light pool (`omni-light`:
     # two listeners, jobs ≤ ~6 GB). Falls back to hosted when USE_VPS_RUNNER is off.
     runs-on: ${{ (vars.USE_VPS_RUNNER == 'true' && fromJSON('["self-hosted","omni-light"]')) || 'ubuntu-latest' }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with: { node-version: "24", cache: npm }
       # Fresh runtime state per run (same contract as nightly-schemathesis.yml). The
       # omni-light runner keeps a persistent $HOME, so the server used to boot on
@@ -62,33 +62,22 @@ jobs:
         run: |
           node dist/server.js > server.log 2>&1 &
           echo $! > server.pid
-          for i in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl -sf http://localhost:21778/api/monitoring/health >/dev/null; then echo up; exit 0; fi
             sleep 2
           done
           echo "::error::Test server did not come up on 21778 in 120s — see server.log. Refusing to run the guard eval against an unknown target."
           tail -40 server.log || true
           exit 1
-      # Pinned, network-isolated promptfoo. Two constraints, both verified on this box:
-      # (1) never `promptfoo@latest`: promptfoo >= 0.123.1 (promptfoo/promptfoo#10866) throws
-      #     `result?.error?.includes is not a function` inside its rate-limit classifier when
-      #     the https provider hands it the parsed 4xx JSON body the guard answers in block
-      #     mode, so every blocked request became an eval ERROR, not a PASS (run 39007982929);
-      # (2) never the lockfile install (`npx --no-install`): #17017 — the lock nests js-yaml
-      #     4.3.2 under @apidevtools/json-schema-ref-parser, so the in-repo promptfoo dies at
-      #     import on `binaryTag` (run 39084298931). `npx --yes promptfoo@<exact>` installs its
-      #     own tree in the npx cache — when run from a directory without that package
-      #     (see the step's working-directory). The version mirrors the devDependency pin in
-      #     package.json; tests/unit/build/llm-security-nightly-promptfoo-pin.test.ts keeps
-      #     the two equal and off the releases proven broken.
-      # `working-directory` OUTSIDE the checkout is load-bearing: npx resolves a package from
-      # the nearest node_modules first, and since #17005 the repo's own promptfoo satisfies
-      # the `@0.123.0` spec, so run from the workspace it picked node_modules/promptfoo and
-      # died on the nested js-yaml again (#17017, run 39095530088). From $RUNNER_TEMP there is
-      # no local install to shadow the npx cache tree.
+      # Pin the CLI to the lockfile version and execute outside the checkout so
+      # npx cannot select a conflicting local dependency tree (#17017).
+      # 0.125.1 still treats object.error as a scheduler failure (#10866); the
+      # config requires HTTP 400 and serializes the complete JSON body before
+      # assertions inspect SECURITY_001. The offline HTTP fixture verifies both
+      # accepted blocks and rejected wrong-code/status responses.
       - name: promptfoo guard-validation
         working-directory: ${{ runner.temp }}
-        run: npx --yes promptfoo@0.123.0 eval -c "$GITHUB_WORKSPACE/promptfooconfig.yaml" --no-cache
+        run: npx --yes promptfoo@0.125.1 eval -c "$GITHUB_WORKSPACE/promptfooconfig.yaml" --no-cache
         env:
           OMNIROUTE_URL: http://localhost:21778
           OMNIROUTE_API_KEY: not-needed-blocked-before-upstream
@@ -97,7 +86,7 @@ jobs:
         run: kill "$(cat server.pid)" || true
 
   garak:
-    if: ${{ github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute' }}
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
     name: garak probes (skip without provider secret)
     # #11965: this job runs a backend-only `next build`; the hosted 7 GB runner cannot build
     # release/v3.8.51 (VM shutdown ~7 min in), so it targets the box's light pool (`omni-light`:
@@ -119,11 +108,11 @@ jobs:
             echo "run=false" >> "$GITHUB_OUTPUT"
             echo "::notice::PROMPTFOO_PROVIDER_KEY not set — skipping garak probes (advisory)."
           fi
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
         if: steps.gate.outputs.run == 'true'
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         if: steps.gate.outputs.run == 'true'
         with: { node-version: "24", cache: npm }
       # Same isolation as the promptfoo job above: a fresh DATA_DIR per run, never the
@@ -161,14 +150,14 @@ jobs:
         run: |
           node dist/server.js > server.log 2>&1 &
           echo $! > server.pid
-          for i in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl -sf http://localhost:21779/api/monitoring/health >/dev/null; then echo up; exit 0; fi
             sleep 2
           done
           echo "::error::Test server did not come up on 21779 in 120s — see server.log."
           tail -40 server.log || true
           exit 1
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         if: steps.gate.outputs.run == 'true'
         with: { python-version: "3.12" }
       - run: pip install garak

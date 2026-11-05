@@ -205,26 +205,13 @@ eltárolja az Obsidian REST API-tokenjét. A GHSA-62vw csak a jelszó `GET` ált
 továbbra is a hibánál nyitott szinten maradt (GHSA-7pq4-8pvv-rx7r). Az `enableObsidianVaultSync()` ezenfelül
 elutasítja az olyan vaultot, amely maga az adatkönyvtár, azon belül található, vagy azt tartalmazza.
 
-#### A hitelesítőadat-exportok csak operátorok számára érhetők el
+#### A hitelesítőadatok exportálása és a visszaállítás csak operátoroknak engedélyezett
 
 A fenti szint csak azt dönti el, hogy szükség van-e _valamilyen_ hitelesítő adatra. A tárolt hitelesítő adatokat letöltő útvonalak egy második ellenőrzést is végeznek a kezelőben: a `GET /api/settings/export-json` (visszafejtett szolgáltatói kapcsolatok és nyers API-kulcsok), a `GET /api/db-backups/export` (az SQLite-fájl) és a `GET /api/db-backups/exportAll` (a teljes archívum) meghívja a `requireOperatorCredential()` függvényt (`src/lib/api/operatorCredential.ts`). Ez elfogad egy irányítópult-munkamenetet, a helyi CLI-alanyt vagy egy olyan példányt, amelyen a bejelentkezés le van tiltva, és `403` választ ad bármilyen hatókörű API-kulcsra (beleértve a `manage` és az `admin` hatókört is), valamint az `oma_` hozzáférési tokenekre. A szinkronizálási tokenek kibocsátása (`POST /api/sync/tokens`) ugyanezt a segédfüggvényt használja, kiegészítve a megbízható visszacsatolási belsőszolgáltatás-token támogatásával.
 
-#### Credential exports and restores are operator-only
+Ugyanez a határ érvényes a megfelelő romboló műveletekre: a `POST /api/db-backups/import` (feltöltött `.sqlite`-fájl, beleértve a `dryRun=true` esetét), a `POST /api/db-backups` (mentett biztonsági másolat visszaállítása azonosító alapján) és a `POST /api/settings/import-json` (a régi JSON-formátum visszaállítása) lecseréli az élő adatbázist vagy a beállítások, kapcsolatok és API-kulcsok teljes készletét. Gépi hitelesítőadat ezért ezeket sem indíthatja el.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+A visszaállítási pontok törlésére ugyanez a határ vonatkozik: `DELETE /api/db-backups` (takarítás — a legutóbbi N megtartása vagy a D napnál régebbiek törlése) és `PATCH /api/db-backups` (megőrzési beállítások). A mentett szabályokat alkalmazza a `cleanupDbBackups()` minden automatikus mentés után (`src/lib/db/backup.ts`); egy `keepLatest: 1` értéket menteni képes gépi hitelesítőadat így a következő pillanatképnél eltávolíthatná a korábbi visszaállítási pontokat. A mentések listázása és létrehozása (`GET`/`PUT /api/db-backups`) továbbra is szokásos felügyeleti hitelesítést használ.
 
 ### A friss telepítés kezdeti beállítása kizárólag visszacsatolási kapcsolaton érhető el — a tényleges partner, nem a `Host` alapján
 

@@ -6600,7 +6600,7 @@
       "xai": "Qabbad xAI (Grok) b'ċavetta API.",
       "xiaomi-mimo": "Qabbad Xiaomi MiMo b'ċavetta API.",
       "yi": "Ikseb ċavetta API minn platform.lingyiwanwu.com",
-      "zai": "Ċavetta API minn https://open.bigmodel.cn/usercenter/apikeys",
+      "zai": "Ċavetta API minn https://z.ai/manage-apikey/apikey-list",
       "zenmux": "ZenMux jipprovdi endpoint ta' chat completions kompatibbli ma' OpenAI fuq /api/v1/chat/completions, flimkien ma' interfaċċi tal-protokolli Anthropic Messages (/api/anthropic/v1/messages) u Google Gemini (/api/vertex-ai). OmniRoute juża l-protokoll OpenAI.",
       "galadriel": "Qabbad Galadriel b'ċavetta API.",
       "predibase": "$25 fi krediti ta' prova bla ħlas (validità ta' 30 jum)",

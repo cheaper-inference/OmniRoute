@@ -11,13 +11,13 @@ OmniRoute-ի յուրաքանչյուր runner ունի **մեկ դեր**, մե�
 webpack build-ի և lint job-ի հետ․ host-ի swap-ը (16 GB) կլանում է այդ ծանրաբեռնվածությունը, իսկ քանի որ pull request-ների Build-երն աշխատում են
 հոսթավորված միջավայրում, Turbopack-ի slot-ը ժամանակի մեծ մասում անգործուն է․
 
-| runner               | պիտակ                   | դեր                                                                                                                                                   | `MemoryHigh` / `MemoryMax` | `CPUQuota`            |
-| -------------------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | --------------------- |
-| `omniroute-113-5`    | `omni-build`            | Turbopack build-եր՝ `ci.yml` `Build` (միայն push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, գիշերային a11y build | 56 GB / 60 GB (swap 0)     | 1600 %                |
-| `omniroute-113-6`    | `omni-release`          | Release-Green (`release-green` + `main-green`), webpack build                                                                                         | 20 GB / 24 GB (swap 4 GB)  | 800 %                 |
-| `omniroute-113-2`    | `omni-light`            | գիշերային job-եր (Schemathesis, promptfoo, garak, k6) և `quality.yml`-ի `lint-guard`                                                                  | 12 GB / 16 GB (swap 4 GB)  | 600 %                 |
-| `omniroute-113`      | `omni-light`            | նույն pool-ը, ինչ վերևում                                                                                                                             | 8 GB / 12 GB               | 400 %                 |
-| OmniHeuris, OmniMind | (իրենց repository-ները) | միայն Dependabot (յուրաքանչյուրը՝ առավելագույնը 155 MB, 2026-10-18)                                                                                   | 4 GB / 6 GB                | յուրաքանչյուրը՝ 200 % |
+| runner               | պիտակ                           | դեր                                                                                                                                                   | `MemoryHigh` / `MemoryMax` | `CPUQuota`            |
+| -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | --------------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack build-եր՝ `ci.yml` `Build` (միայն push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, գիշերային a11y build | 56 GB / 60 GB (swap 0)     | 1600 %                |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack build                                                                                         | 20 GB / 24 GB (swap 4 GB)  | 800 %                 |
+| `omniroute-113-2`    | `omni-light`                    | գիշերային job-եր (Schemathesis, promptfoo, garak, k6) և `quality.yml`-ի `lint-guard`                                                                  | 12 GB / 16 GB (swap 4 GB)  | 600 %                 |
+| `omniroute-113`      | `omni-light`                    | նույն pool-ը, ինչ վերևում                                                                                                                             | 8 GB / 12 GB               | 400 %                 |
+| OmniHeuris, OmniMind | (իրենց repository-ները)         | միայն Dependabot (յուրաքանչյուրը՝ առավելագույնը 155 MB, 2026-10-18)                                                                                   | 4 GB / 6 GB                | յուրաքանչյուրը՝ 200 % |
 
 Չափվել է 2026-10-18-ին․
 
@@ -58,7 +58,7 @@ Runner-ի լռելյայն `KillMode=process`-ը unit-ի կանգնեցման կ
 ## Շահագործման կանոններ
 
 - **Միաժամանակ միայն մեկ Turbopack կառուցում՝ պարտադրված պիտակի միջոցով։** Լիարժեք Turbopack
-  `next build` գործարկող յուրաքանչյուր առաջադրանք թիրախավորում է `[self-hosted, omni-build]`, և միայն **`omniroute-113-5`**-ն ունի այդ
+  `next build` գործարկող յուրաքանչյուր առաջադրանք թիրախավորում է `[self-hosted, omni-build, omni-build-60gb]`, և միայն **`omniroute-113-5`**-ն ունի այդ
   պիտակը՝ `ci.yml`-ի `Build`, `npm-publish.yml`-ի `publish`, `nightly-v4-build`, `preview-artifact`,
   գիշերային a11y կառուցումը (#16853) և `docker-publish.yml`-ի **amd64**-ը (webpack՝ BuildKit-ի ներսում․
   Turbopack-ն այնտեղ խափանվեց՝ գործարկում 33253576569)։ arm64 Docker ճյուղը մնում է `ubuntu-24.04-arm`-ում։

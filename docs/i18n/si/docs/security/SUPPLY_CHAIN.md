@@ -18,33 +18,45 @@ OmniRoute මඟින් npm + Docker artifacts ප්රකාශයට පත
 
 image CVE ratchet එක `docker-publish.yml` හි **පියවර දෙකක්** භාවිතා කරයි: SARIF පියවර (`HIGH,CRITICAL`, `exit-code: 0`) මඟින් HIGH+CRITICAL Security tab එකේ අවහිර කිරීමකින් තොරව දෘශ්යමාන කරයි; _CRITICAL gate_ පියවර (`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`) මඟින් **නිවැරදි කිරීමක් සහිත** CRITICAL CVE එකකදී නිකුතුව අසාර්ථක කරයි. `ignore-unfixed` මඟින් upstream patch එකක් නොමැති base-image CVE එකක් සඳහා නිකුතුව අවහිර කිරීම වළක්වයි.
 
-## ⚠️ CVE විචලනය (osv/Trivy ගේට්ටු අවහිර කිරීම)
+## ⚠️ CVE විචලනය (osv/Trivy ද්වාර අවහිර කිරීම)
 
-osv සහ Trivy මඟින් deps, **නිරන්තරයෙන් වර්ධනය වන** CVE දත්ත සමුදායන්ට එරෙහිව සංසන්දනය කරයි. **කිසිදු dependency එකක් ස්පර්ශ නොකරන** PR එකක්, පවතින dep එකක නව CVE එකක් හෙළිදරව් වීම නිසා හදිසියේම රතු විය හැක (osv: මනින ලද `vulnCount` > baseline; Trivy: image එකේ නව නිවැරදි කළ හැකි CRITICAL එකක්). **මෙය අවහිර කරන CVE ගේට්ටුවක අපේක්ෂිත මෙහෙයුම් හැසිරීමක් මිස, නිෂ්පාදන පසුබෑමක් නොවේ.**
+osv සහ Trivy, **අඛණ්ඩව වර්ධනය වන** CVE දත්ත සමුදායන්ට එරෙහිව පරායත්තතා සසඳයි. **කිසිදු පරායත්තතාවක් වෙනස් නොකරන** PR එකක් පවා, පවතින පරායත්තතාවක නව CVE එකක්
+අනාවරණය වීම නිසා හදිසියේම අසාර්ථක විය හැකිය (osv: මනින ලද `vulnCount` > මූලික අගය; Trivy: image එකෙහි නිවැරදි කළ හැකි නව
+CRITICAL එකක්). **මෙය අවහිර කරන CVE ද්වාරයක අපේක්ෂිත මෙහෙයුම් හැසිරීම මිස,
+නිෂ්පාදන ප්රතිගමනයක් නොවේ.**
 
-අලුතින් හෙළිදරව් වූ CVE එකක් නිසා osv හෝ Trivy රතු වූ විට, පිළියම වන්නේ:
+අලුතින් අනාවරණය වූ CVE එකක් නිසා osv හෝ Trivy අසාර්ථක වූ විට, පිළියම වන්නේ:
 
-1.  **බලපෑමට ලක් වූ dep එක වැඩි දියුණු කරන්න** (වඩාත් සුදුසු) — `package.json` `overrides` (transitive deps) හරහා පැච් කරන ලද අනුවාදයට උත්ශ්රේණි කරන්න හෝ පැච් කරන ලද base එකක් මත image එක නැවත ගොඩනඟන්න.
-2.  **upstream fix එකක් නොමැති නම්:**
-    - **osv:** `config/quality/quality-baseline.json` හි `metrics.vulnCount` නැවත baseline කරන්න (`npm run quality:ratchet -- --update` මඟින් කැපවූ ගේට්ටු ආවරණය නොකරයි — අගය අතින් සංස්කරණය කරන්න, `direction:down`) සාධාරණීකරණ සටහනක් + tracking issue එකක් සමඟ.
-    - **Trivy:** `.trivyignore` හි (එක් පේළියකට CVE-ID) සාධාරණීකරණ අදහසක් + tracking issue එකක් සමඟ ඇතුළත් කිරීමක් එක් කරන්න. `ignore-unfixed: true` මඟින් patches නොමැති CVEs ස්වයංක්රීයව ආවරණය කරයි.
+1. **බලපෑමට ලක් වූ පරායත්තතාවේ අනුවාදය ඉහළ නංවන්න** (වඩාත් සුදුසුයි) — `package.json`
+   `overrides` (සංක්රාමී පරායත්තතා) හරහා නිවැරදි කළ අනුවාදයට උත්ශ්රේණි කරන්න, නැතහොත් නිවැරදි කළ base එකක් මත image එක නැවත ගොඩනඟන්න.
+2. **upstream නිවැරදි කිරීමක් නොමැති නම්:**
+   - **osv:** `config/quality/quality-baseline.json` තුළ `metrics.vulnCount` සඳහා නැවත මූලික අගයක් සකසන්න
+     (`npm run quality:ratchet -- --update` මඟින් වෙන්වූ ද්වාර ආවරණය නොවේ — සාධාරණීකරණ සටහනක් + ලුහුබැඳීමේ issue එකක් සමඟ,
+     `direction:down` අගය අතින් සංස්කරණය කරන්න).
+   - **Trivy:** සාධාරණීකරණ
+     comment එකක් + ලුහුබැඳීමේ issue එකක් සමඟ `.trivyignore` වෙත ප්රවේශයක් එක් කරන්න (පේළියකට CVE-ID එකක්).
+     `ignore-unfixed: true` මඟින් patches නොමැති CVE දැනටමත් ස්වයංක්රීයව ආවරණය කරයි.
 
-මෙවලම නොමැති විට හෝ මිනුම් අසාර්ථක වූ විට (PATH හි osv-scanner නොමැති වීම, osv.dev/network වෙත ළඟා විය නොහැකි වීම, වලංගු නොවන JSON) ගේට්ටු දෙකම **සුමටව මඟ හරියි** (exit 0) — **මිනුම්** අසාර්ථක වීමක් කිසි විටෙක අවහිර නොකරයි, **මනින ලද** පසුබෑමක් පමණක් අවහිර කරයි.
+අවශ්ය OSV ක්රියාත්මක කිරීම් (`check:vuln-ratchet -- --ratchet`), scanner එක, report එක හෝ baseline එක සත්යාපනය කළ නොහැකි විට
+`INCOMPLETE` සමඟ සංවෘත ලෙස අසාර්ථක වී exit 2 ලබා දෙයි.
+මනින ලද ප්රතිගමනයක් exit 1 ලබා දෙයි. උපදේශන ක්රියාත්මක කිරීමකට තවමත් exit 0 සමඟ `SKIP` වාර්තා කළ හැකි නමුත්,
+එයින් පරායත්තතා scan එක සමත් වූ බව තහවුරු නොවේ. අවහිර කරන
+Trivy පියවරටද සාර්ථක මිනුමක් අවශ්ය වේ: ලබා ගත නොහැකි tools, අසාර්ථක jobs
+සහ අස්ථානගත image සාක්ෂි මඟින් image එකක් පිරිසිදු බව සහතික කළ නොහැක.
 
-## දැනට පිළිගත් අවදානම්
+## ඉවත් කළ පරායත්තතා අවදානම
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+ස්ථාවර කළ promptfoo සංවර්ධන මෙවලම උත්ශ්රේණි කිරීමෙන් පසු, මූල lockfile එකෙහි තවදුරටත් `extract-zip` හෝ එයට යොමු වන පරායත්තතා සම්බන්ධතාවක් ඇතුළත් නොවේ.
+මෙමඟින් #14482 හි නිරීක්ෂණය කළ, මීට පෙර පිළිගත්
+`promptfoo` → `@openai/codex-security` → `extract-zip` දාමය ඉවත් කෙරේ.
+`tests/unit/extract-zip-14482-exposure.test.ts` හි ඇති ප්රතිගමන පරීක්ෂණ එය
+නැවත හඳුන්වා දීම ප්රතික්ෂේප කරන අතර නිෂ්පාදන කේතයෙන් ආයාත කිරීමේ තහනමද පවත්වාගෙන යයි.
 
-`extract-zip@2.0.1` හි පැච් නොකළ ඉහළ-තීව්රතාවයකින් යුත් symlink-traversal උපදෙස් දෙකක් අඩංගු වේ.
-ඉහත සඳහන් CVE Variance පිළියමේ "no upstream fix" ශාඛාවට අනුව, මෙය **පිළිගත් අවදානමක්** මිස වැඩිදියුණු කිරීමක් නොවේ:
-
-- **දාමය:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`. `package-lock.json` හරහා තහවුරු කර ඇත — සමස්ත dependency tree එකේ (`@openai/codex-security`) `extract-zip` ප්රකාශ කරන එක් පැකේජයක් පමණක් ඇති අතර, `promptfoo` ප්රකාශ කරන එක් පැකේජයක් පමණක් `@openai/codex-security` ප්රකාශ කරයි.
-- **දාමයේ කිසිදු තැනක ස්ථාවර නිකුතුවක් නොමැත.** `extract-zip@2.0.1` (2020 දී ප්රකාශයට පත් කරන ලදී) යනු පැකේජයේ අවසාන නිකුතුවයි — එය නඩත්තු නොකෙරේ. `@openai/codex-security` හි වත්මන් npm-latest (`0.1.29`) තවමත් `extract-zip@2.0.1` භාවිතා කරයි.
-- **නිෂ්පාදනයෙන් ළඟා විය නොහැක.** `promptfoo` යනු devDependency-only (කිසි විටෙක `dependencies` යටතේ ලැයිස්තුගත කර නැත), සහ `src/`, `open-sse/`, හෝ `bin/` යටතේ ඇති කිසිදු ගොනුවක් `extract-zip` npm පැකේජය ආයාත නොකරයි — OmniRoute හිම `extractZip()` helper (`src/lib/versionManager/binaryManager.ts:93`) දේශීය `unzip`/`tar` වෙත යොමු වන අතර එය අදාළ නොවේ. `@openai/codex-security` ද extract-zip හි onEntry callback මත තමන්ගේම symlink-traversal ආරක්ෂාවක් සපයයි.
-- **`package.json` `overrides` හරහා `extract-zip` අන්වර්ථ නාම නොකරන්න** — එකම ශක්ය ආදේශකය වන්නේ Electron-org-internal වන අතර `@openai/codex-security` හිම onEntry/defaultDirMode/defaultFileMode පරීක්ෂාවන් සමඟ API-අනුකූල නොවේ; එය අභිබවා යාමෙන් එම පැකේජයේ ආරක්ෂක පරීක්ෂාවන් නිහඬව බිඳ වැටෙනු ඇත.
-- **මූලික මට්ටම:** මනින ලද osv `vulnCount` (3) දැනටමත් ශීත කළ `config/quality/quality-baseline.json` මූලික මට්ටමට (27) වඩා බෙහෙවින් අඩුය — ratchet වෙනසක් අවශ්ය නොවේ.
-- **ප්රතිගාමී ආරක්ෂාව:** `tests/unit/extract-zip-14482-exposure.test.ts` ඉහත දාමය සහ නිෂ්පාදන-ආයාත නොවන invariant තහවුරු කරයි; එය කිසියම් අවස්ථාවක බිඳ වැටුණහොත් (උදා: අනාගත PR එකක් `extract-zip` නිෂ්පාදනයෙන් ළඟා විය හැකි නම්) CI අසාර්ථක වේ.
-- **හඹා යාම:** ගැටලුව #14482.
+වත්මන් පරායත්තතා අලුත්වැඩියාව, ගැළපුම් අතික්රමණ Azure identity හි
+MSAL සේවාලාභියාට, get-uri හි FTP සේවාලාභියාට සහ OpenCode v1 SDK හි Zod පරායත්තතාවට පමණක් සීමා කරයි. Azure token
+ලබාගැනීම සහ FTP ලබාගැනීම පාලිත ප්රවාහන සමඟ පරීක්ෂා කර ඇත; OpenCode
+පැකේජ දෙකම තමන්ගේම ගොඩනැගීම් සහ පරීක්ෂණ කට්ටල ධාවනය කරයි. Registry උපදේශන ගණන් යනු
+නිශ්චිත මොහොතක සිදු කළ මිනුම් වන අතර lockfile එක commit කිරීමෙන් පසු වෙනස් විය හැක.
 
 ## Backlog: Scorecard උපදේශනය → අවහිර කිරීම
 

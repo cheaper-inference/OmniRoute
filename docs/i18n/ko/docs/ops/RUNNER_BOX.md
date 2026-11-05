@@ -11,13 +11,13 @@ OmniRoute 러너에는 **하나의 역할**과 하나의 레이블이 할당되�
 webpack 빌드 및 lint 작업과 동시에 실행될 때만 박스가 리소스를 초과 할당합니다. 이때 호스트 스왑(16 GB)이 이를 흡수하며, 풀 리퀘스트 Build는
 호스팅 러너에서 실행되므로 Turbopack 슬롯은 대부분 유휴 상태입니다.
 
-| 러너                 | 레이블          | 역할                                                                                                                                      | `MemoryHigh` / `MemoryMax` | `CPUQuota` |
-| -------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------- |
-| `omniroute-113-5`    | `omni-build`    | Turbopack 빌드: `ci.yml` `Build`(push/dispatch 전용), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, 야간 a11y 빌드 | 56 GB / 60 GB (스왑 0)     | 1600 %     |
-| `omniroute-113-6`    | `omni-release`  | Release-Green(`release-green` + `main-green`), webpack 빌드                                                                               | 20 GB / 24 GB (스왑 4 GB)  | 800 %      |
-| `omniroute-113-2`    | `omni-light`    | 야간 작업(Schemathesis, promptfoo, garak, k6) 및 `quality.yml` `lint-guard`                                                               | 12 GB / 16 GB (스왑 4 GB)  | 600 %      |
-| `omniroute-113`      | `omni-light`    | 위와 동일한 풀                                                                                                                            | 8 GB / 12 GB               | 400 %      |
-| OmniHeuris, OmniMind | (각 리포지토리) | Dependabot 전용(각각 최대 155 MB, 2026-10-18)                                                                                             | 4 GB / 6 GB                | 각각 200 % |
+| 러너                 | 레이블                          | 역할                                                                                                                                      | `MemoryHigh` / `MemoryMax` | `CPUQuota` |
+| -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack 빌드: `ci.yml` `Build`(push/dispatch 전용), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, 야간 a11y 빌드 | 56 GB / 60 GB (스왑 0)     | 1600 %     |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green(`release-green` + `main-green`), webpack 빌드                                                                               | 20 GB / 24 GB (스왑 4 GB)  | 800 %      |
+| `omniroute-113-2`    | `omni-light`                    | 야간 작업(Schemathesis, promptfoo, garak, k6) 및 `quality.yml` `lint-guard`                                                               | 12 GB / 16 GB (스왑 4 GB)  | 600 %      |
+| `omniroute-113`      | `omni-light`                    | 위와 동일한 풀                                                                                                                            | 8 GB / 12 GB               | 400 %      |
+| OmniHeuris, OmniMind | (각 리포지토리)                 | Dependabot 전용(각각 최대 155 MB, 2026-10-18)                                                                                             | 4 GB / 6 GB                | 각각 200 % |
 
 2026-10-18 측정 결과:
 
@@ -85,7 +85,7 @@ runner 하나만, 유휴 상태일 때에만** 재시작하고, 유휴 상태 �
 ## 운영 규칙
 
 - **한 번에 하나의 Turbopack 빌드만 실행 — 레이블로 강제.** 전체 Turbopack
-  `next build`를 실행하는 모든 작업은 `[self-hosted, omni-build]`를 대상으로 하며, 해당
+  `next build`를 실행하는 모든 작업은 `[self-hosted, omni-build, omni-build-60gb]`를 대상으로 하며, 해당
   레이블은 **`omniroute-113-5`**에만 지정되어 있다: `ci.yml`의 `Build`, `npm-publish.yml`의
   `publish`, `nightly-v4-build`, `preview-artifact`, 야간 a11y 빌드(#16853), 그리고
   `docker-publish.yml`의 **amd64**(BuildKit 내부에서는 webpack 사용 — Turbopack이 거기서

@@ -88,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Mechanizmus:** Pomocou rozhraní API operačného systému presmeruje všetku prevádzku HTTP/HTTPS cez listener HTTP_PROXY:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` a nastavenia hostiteľa/portu HTTP/HTTPS
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Dosah:** Každá aplikácia v zariadení, ktorá rešpektuje systémové nastavenia proxy servera
   **Poznámka:** `source` = `"system-proxy"`
 
 **Bezpečnostné mechanizmy:**
 
-- Časovač automatického vypnutia (predvolene 30 minút, konfigurovateľné prostredníctvom `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- Predchádzajúci stav systémového proxy servera sa uloží do databázy a pri návrate sa obnoví
-- Ak používateľ opustí stránku, kým je proxy server aktívny, ovládací panel zobrazí výzvu „Obnovuje sa systémový proxy server“
-- Používateľské rozhranie zobrazuje odznak `⚠ Pokročilé` a explicitné potvrdzovacie začiarkavacie políčko
+- Použitie proxy naplánuje časovač návratu bez záruky, lokálny pre proces (predvolene 30 min, nastaviteľný cez `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`). Časovač neprežije ukončenie serverového procesu.
+- Predchádzajúci stav proxy zostáva v pamäti procesu; toto úložisko stavu zachytávania ho neukladá trvalo do databázy. Návrat obnoví uložené nastavenia macOS/GNOME; vo Windowse resetuje proxy WinHTTP namiesto obnovenia predchádzajúcej konfigurácie.
+- Kým sa proxy hlási ako použitá, uvoľnenie stránky odošle požiadavku keepalive na návrat bez záruky a vyžiada natívne potvrdenie, ktorého text určuje prehliadač. Odpojenie inšpektora počas navigácie SPA sa tiež pokúsi o návrat, bez tohto dialógu prehliadača.
+- Panel zachytávania zobrazuje lokalizovaný ovládací prvok `System-wide` s výstražnou ikonou. Kliknutie teraz mení iba miestny stav rozhrania; nezobrazuje potvrdzovacie políčko ani nepoužíva či nevracia systémovú proxy.
 
 ### Režim 5 — Transparentné dešifrovanie TPROXY (Linux, root, voliteľné)
 
@@ -113,13 +113,13 @@ Ide o rozsiahly subsystém s vlastnou špecializovanou príručkou pre operátor
 
 ### Porovnanie režimov zachytávania
 
-| Režim                  | Nastavenie                         |           Sudo?            | Dosah                                 | Poznámky                                                                                                                           |
-| ---------------------- | ---------------------------------- | :------------------------: | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge         | Automatické                        |   Raz (certifikát+hosts)   | 9 agentov IDE                         | Predvolene zapnuté                                                                                                                 |
-| 2. Vlastné hosty       | Zadanie pre každý host             |     Áno (súbor hosts)      | Každá aplikácia používajúca daný host | Uložené v DB                                                                                                                       |
-| 3. HTTP_PROXY          | `export HTTPS_PROXY=...`           |            Nie             | Aplikácie rešpektujúce prostredie     | Port 8080; HTTPS je tunelované cez CONNECT (iba metadáta, nikdy sa nedešifruje)                                                    |
-| 4. Celosystémový       | Prepínač + potvrdenie              |            Áno             | Všetky aplikácie v počítači           | Automaticky sa vypne o 30 minút                                                                                                    |
-| 5. Dešifrovanie TPROXY | Prepínač (Linux + natívny doplnok) | Áno (root + inštalácia CA) | Ľubovoľný host na cieľovom porte      | Dešifruje ľubovoľné hosty; predvolene vypnuté — pozrite si `docs/security/MITM-TPROXY-DECRYPT.md` (git; nekompiluje sa do `/docs`) |
+| Režim                  | Nastavenie                                                     |           Sudo?            | Dosah                                 | Poznámky                                                                                                                           |
+| ---------------------- | -------------------------------------------------------------- | :------------------------: | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge         | Automatické                                                    |   Raz (certifikát+hosts)   | 9 agentov IDE                         | Predvolene zapnuté                                                                                                                 |
+| 2. Vlastné hosty       | Zadanie pre každý host                                         |     Áno (súbor hosts)      | Každá aplikácia používajúca daný host | Uložené v DB                                                                                                                       |
+| 3. HTTP_PROXY          | `export HTTPS_PROXY=...`                                       |            Nie             | Aplikácie rešpektujúce prostredie     | Port 8080; HTTPS je tunelované cez CONNECT (iba metadáta, nikdy sa nedešifruje)                                                    |
+| 4. Celosystémový       | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |            Áno             | Všetky aplikácie v počítači           | Časovač návratu bez záruky (predvolene 30 min)                                                                                     |
+| 5. Dešifrovanie TPROXY | Prepínač (Linux + natívny doplnok)                             | Áno (root + inštalácia CA) | Ľubovoľný host na cieľovom porte      | Dešifruje ľubovoľné hosty; predvolene vypnuté — pozrite si `docs/security/MITM-TPROXY-DECRYPT.md` (git; nekompiluje sa do `/docs`) |
 
 ---
 
@@ -314,7 +314,7 @@ bude doplnená neskôr).
 ### 5.1 Nahrávanie relácie
 
 1. Kliknite na **„● Nahrať reláciu“** na paneli nástrojov → zadajte názov (voliteľné)
-2. Živý výpis pokračuje normálne; červený pulzujúci indikátor zobrazuje `◉ NAHRÁVANIE · <názov> · 00:42 · 23 požiadaviek`
+2. Živý výpis pokračuje normálne; panel nahrávania zobrazuje pulzujúcu červenú bodku, uplynulý čas, názov relácie, ak je dostupný, a lokalizovaný ovládací prvok na zastavenie.
 3. Kliknite na **„⏹ Zastaviť“** → snímka relácie sa uloží do `inspector_sessions` + `inspector_session_requests`
 
 ### 5.2 Zobrazenie nahranej relácie
@@ -322,7 +322,7 @@ bude doplnená neskôr).
 Rozbaľovacia ponuka **Relácie** na paneli nástrojov obsahuje uložené relácie. Výberom relácie:
 
 - Sa načíta snímka relácie (zmrazený stav)
-- Zobrazí sa banner: `Zobrazuje sa nahraná relácia „<názov>“ — [Späť na živé zobrazenie]`
+- Banner zobrazuje lokalizovaný popis nahranej relácie a jej názov (alebo lokalizovaný náhradný text pre reláciu bez názvu) vedľa lokalizovaného tlačidla na návrat k živému zobrazeniu.
 - Sprístupní sa karta Štatistiky s agregáciami Recharts
 
 ### 5.3 Formáty exportu
@@ -346,7 +346,7 @@ Traffic Inspector zobrazuje **všetku zachytenú komunikáciu HTTPS** vrátane a
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **LOCAL_ONLY**                | Všetky trasy a koncový bod WebSocket sú dostupné iba cez rozhranie loopback (vynucuje sa v `routeGuard.ts` pred autentifikáciou)                                                                 |
 | **Maskovanie tajných údajov** | Lineárny skener `maskSecret()` rediguje prihlasovacie údaje Bearer podľa RFC 6750, kľúče s prefixom poskytovateľa a dlhé nepriehľadné tokeny pred volaním `TrafficBuffer.push()`                 |
-| **Limit veľkosti tela**       | Telá väčšie ako `INSPECTOR_MAX_BODY_KB` (predvolená hodnota 1024 KB) sa skrátia a doplnia upozornením `"(skrátené z dôvodu výkonu)"`                                                             |
+| **Limit veľkosti tela**       | Telá väčšie ako `INSPECTOR_MAX_BODY_KB` (predvolená hodnota 1024 KB) sa skrátia a doplnia upozornením `"(truncated for performance)"`                                                            |
 | **Sanitizácia hlavičiek**     | Názvy sa konvertujú na malé písmená; hlavičky rámcovania, hop-by-hop a autentifikácie proxy sa odstránia; súbory cookie sa úplne redigujú; hodnoty prihlasovacích údajov spracuje `maskSecret()` |
 | **CSP**                       | Striktná politika Content Security Policy na stránkach Traffic Inspector zabraňuje XSS prostredníctvom vložených tiel odpovedí                                                                   |
 | **Predvolene bez ukladania**  | `TrafficBuffer` sa uchováva v pamäti a pri reštarte servera sa stratí. Relácie sa uložia iba vtedy, keď sa ich zaznamenávanie výslovne spustí                                                    |
@@ -414,7 +414,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-Ak riadiaci panel pri ďalšom načítaní zistí, že stav v DB uvádza aktívny proxy server, ponúkne aj možnosť „Obnoviť systémový proxy server“.
+Uložený stav proxy existuje iba v serverovom procese. Po páde alebo reštarte súčasné úložisko stavu zachytávania nedokáže obnoviť tento snímok z databázy; ak je potrebná ručná obnova, použite vyššie uvedené príkazy na obnovu danej platformy.
 
 ### Plná vyrovnávacia pamäť
 

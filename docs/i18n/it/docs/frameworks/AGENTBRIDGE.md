@@ -14,36 +14,36 @@ AgentBridge è il proxy MITM (Man-in-the-Middle) di OmniRoute che intercetta il 
 
 ## §1 Panoramica
 
-### Cos'è AgentBridge?
+### Che cos'è AgentBridge?
 
-Quando un agente IDE (ad esempio GitHub Copilot, Cursor, Claude Code) effettua una chiamata API, si connette direttamente al provider di IA upstream (OpenAI, Anthropic, ecc.). AgentBridge intercetta tale connessione in modo trasparente a livello TLS, senza richiedere alcuna modifica alla configurazione dell'agente, e riscrive la richiesta tramite OmniRoute.
+Quando un agente IDE (ad esempio GitHub Copilot, Cursor, Claude Code) effettua una chiamata API, si connette direttamente al provider AI upstream (OpenAI, Anthropic, ecc.). AgentBridge intercetta tale connessione in modo trasparente a livello TLS — senza richiedere alcuna modifica alla configurazione dell'agente — e riscrive la richiesta attraverso OmniRoute.
 
-Ciò consente di:
+Questo significa che puoi:
 
-- **Reindirizzare qualsiasi agente verso qualsiasi provider**: Copilot comunica con OpenAI? Reindirizzalo verso Anthropic Claude, Gemini o uno qualsiasi dei 374 provider di OmniRoute.
+- **Reindirizzare qualsiasi agente verso qualsiasi provider**: Copilot che comunica con OpenAI? Reindirizzalo ad Anthropic Claude, Gemini o a uno qualsiasi dei 375 provider di OmniRoute.
 - **Applicare mappature dei modelli**: `gemini-3-flash` → `claude-sonnet-4.7` in modo trasparente a livello di handler.
 - **Osservare tutto il traffico degli agenti**: ogni richiesta intercettata viene pubblicata nel [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
-- **Applicare la resilienza di OmniRoute**: il routing combinato, i circuit breaker, i fallback e il monitoraggio dei costi funzionano anche per il traffico degli agenti IDE.
+- **Applicare la resilienza di OmniRoute**: combo routing, circuit breaker, fallback e tracciamento dei costi funzionano anche per il traffico degli agenti IDE.
 
 ### Posizionamento rispetto al mercato
 
-| Funzionalità            | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ----------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity             |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot          |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)              |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex            |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE              |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries          |    —    |    ✓     |        —        |             ✓             |
-| Claude Code             |    —    |    —     |        ✓        |             ✓             |
-| Open Code               |    —    |    —     |        ✓        |             ✓             |
-| Trae                    |    —    |    —     |        —        |        🔍 In esame        |
-| Interfaccia dashboard   |    ✓    |    ✗     |        ✗        |             ✓             |
-| Traffic Inspector       |    ✗    |    ✗     |        ✓        |             ✓             |
-| Routing OmniRoute       |    ✗    |    ✗     |        ✗        |             ✓             |
-| UI di mappatura modelli |    ✗    |    ✗     |        ✗        |             ✓             |
-| Elenco di bypass        |    ✗    |    ✗     |        ✓        |             ✓             |
-| Certificato CA upstream |    ✗    |    ✗     |        ✓        |             ✓             |
+| Funzionalità                  | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
+| ----------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
+| Antigravity                   |    ✓    |    ✓     |        —        |             ✓             |
+| GitHub Copilot                |    ✓    |    ✓     |        —        |             ✓             |
+| Kiro (AWS)                    |    ✓    |    ✓     |        —        |             ✓             |
+| OpenAI Codex                  |    —    |    ✓     |        —        |             ✓             |
+| Cursor IDE                    |    ✓    |    ✓     |        —        |             ✓             |
+| Zed Industries                |    —    |    ✓     |        —        |             ✓             |
+| Claude Code                   |    —    |    —     |        ✓        |             ✓             |
+| Open Code                     |    —    |    —     |        ✓        |             ✓             |
+| Trae                          |    —    |    —     |        —        |   🔍 In fase di analisi   |
+| Interfaccia dashboard         |    ✓    |    ✗     |        ✗        |             ✓             |
+| Traffic Inspector             |    ✗    |    ✗     |        ✓        |             ✓             |
+| Routing OmniRoute             |    ✗    |    ✗     |        ✗        |             ✓             |
+| Interfaccia mappatura modelli |    ✗    |    ✗     |        ✗        |             ✓             |
+| Lista di bypass               |    ✗    |    ✗     |        ✓        |             ✓             |
+| Certificato CA upstream       |    ✗    |    ✗     |        ✓        |             ✓             |
 
 ---
 
@@ -555,7 +555,7 @@ Trae è un assistente di programmazione basato sull'IA relativamente nuovo. Prim
 3. Determinare il meccanismo di autenticazione
 4. Valutare se procedere o meno in base ai TOS e alla possibilità di individuare le API
 
-Fino al completamento dell'indagine, la scheda Trae nella dashboard mostra un badge "In fase di indagine" con un link "Segnala fattibilità". Lo stub dell'handler in `src/mitm/handlers/trae.ts` genera un errore strutturato `Non ancora implementato`.
+Fino al completamento dell'indagine, la scheda Trae nella dashboard mostra un badge "In fase di indagine" con un link "Segnala fattibilità". Lo stub dell'handler in `src/mitm/handlers/trae.ts` genera un errore strutturato `Not yet implemented`.
 
 ### Agenti nel backlog (MITM obbligatorio — nessun supporto per URL di base personalizzati)
 

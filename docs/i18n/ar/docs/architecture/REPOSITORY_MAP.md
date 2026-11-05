@@ -106,7 +106,7 @@ OmniRoute/
 
 > **نُقلت من الجذر في v3.8.26 (لتقليل الفوضى):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json` و`complexity-baseline.json` و`duplication-baseline.json` و`file-size-baseline.json` و`test-discovery-baseline.json` و`dependency-allowlist.json` و`.license-allowlist.json`، بالإضافة إلى الملف المُنشأ `quality-metrics.json` (يتجاهله Git). راجع [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json` و`complexity-baseline.json` و`duplication-baseline.json` و`file-size-baseline.json` و`test-discovery-baseline.json` و`dependency-allowlist.json` و`.license-allowlist.json`، بالإضافة إلى الملف المُنشأ `quality-metrics.json` (يتجاهله Git). راجع [`## config/`](#config--الإعدادات-الثابتة--حالة-بوابة-الجودة).
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | الدليل الفرعي         | الغرض                                                                                                                                                                                                       |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | ترجمات محلية للوثائق (41 لغة محلية)                                                                                                                                                                         |
+| `docs/i18n/`          | ترجمات محلية للوثائق (66 لغة محلية)                                                                                                                                                                         |
 | `docs/screenshots/`   | أصول الصور المستخدمة في الأدلة                                                                                                                                                                              |
 | `_tasks/superpowers/` | الخطط/المواصفات من superpowers ‏(`writing-plans`/`brainstorming`) + الأبحاث — مستودع معزول بإصدارات مستقلة، ومتجاهَل بواسطة شجرة المشروع الرئيسية في git. راجع CLAUDE.md ← "Planning & Research Artifacts". |
 

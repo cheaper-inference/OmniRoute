@@ -106,7 +106,7 @@ OmniRoute/
 
 > **v3.8.26ରେ ରୁଟ୍ରୁ ସ୍ଥାନାନ୍ତରିତ (ଅବ୍ୟବସ୍ଥା ହ୍ରାସ):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, ଏବଂ ସୃଷ୍ଟି ହୋଇଥିବା `quality-metrics.json` (gitignored)। [`## config/`](#config--static-configs--quality-gate-state) ଦେଖନ୍ତୁ।
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, ଏବଂ ସୃଷ୍ଟି ହୋଇଥିବା `quality-metrics.json` (gitignored)। [`## config/`](#config--ସ୍ଥିର-କନଫିଗ୍--ଗୁଣବତ୍ତା-ଗେଟ୍-ସ୍ଥିତି) ଦେଖନ୍ତୁ।
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | ଉପଡିରେକ୍ଟୋରୀ          | ଉଦ୍ଦେଶ୍ୟ                                                                                                                                                                                                                                  |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | ସ୍ଥାନୀୟକୃତ ଡକ୍ୟୁମେଣ୍ଟ୍ ଅନୁବାଦଗୁଡ଼ିକ (୪୧ଟି ଲୋକେଲ୍)                                                                                                                                                                                         |
+| `docs/i18n/`          | ସ୍ଥାନୀୟକୃତ ଡକ୍ୟୁମେଣ୍ଟ୍ ଅନୁବାଦଗୁଡ଼ିକ (୬୬ଟି ଲୋକେଲ୍)                                                                                                                                                                                         |
 | `docs/screenshots/`   | ଗାଇଡ୍ଗୁଡ଼ିକ ପାଇଁ ଛବି ଆସେଟ୍                                                                                                                                                                                                                |
 | `_tasks/superpowers/` | superpowers (`writing-plans`/`brainstorming`)ରୁ ଯୋଜନା/ନିର୍ଦ୍ଦିଷ୍ଟକରଣ + ଗବେଷଣା — ପୃଥକ୍ ରଖାଯାଇଥିବା, ସ୍ୱତନ୍ତ୍ର ଭାବେ ସଂସ୍କରଣ-ନିୟନ୍ତ୍ରିତ ରିପୋ, ମୁଖ୍ୟ ଟ୍ରି ଦ୍ୱାରା gitignore କରାଯାଇଛି। CLAUDE.md → "ଯୋଜନା ଓ ଗବେଷଣା ଆର୍ଟିଫ୍ୟାକ୍ଟ୍ଗୁଡ଼ିକ" ଦେଖନ୍ତୁ। |
 

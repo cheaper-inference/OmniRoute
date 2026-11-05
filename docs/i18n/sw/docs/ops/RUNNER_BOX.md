@@ -11,13 +11,13 @@ viwango vyao vya juu vilivyopimwa. Seva huzidisha mgao wa rasilimali pale tu amb
 pamoja na kazi ya lint; swap ya seva mwenyeji (16 GB) hufidia hali hiyo, na kwa sababu Builds za pull-request zinaendeshwa
 kwenye miundombinu inayohostiwa, nafasi ya Turbopack huwa haitumiki wakati mwingi:
 
-| runner               | lebo           | jukumu                                                                                                                                                       | `MemoryHigh` / `MemoryMax` | `CPUQuota`      |
-| -------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | --------------- |
-| `omniroute-113-5`    | `omni-build`   | Build za Turbopack: `ci.yml` `Build` (push/dispatch pekee), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, build ya kila usiku ya a11y | 56 GB / 60 GB (swap 0)     | 1600 %          |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), build ya webpack                                                                                             | 20 GB / 24 GB (swap 4 GB)  | 800 %           |
-| `omniroute-113-2`    | `omni-light`   | kazi za kila usiku (Schemathesis, promptfoo, garak, k6) na `quality.yml` `lint-guard`                                                                        | 12 GB / 16 GB (swap 4 GB)  | 600 %           |
-| `omniroute-113`      | `omni-light`   | bwawa lilelile kama hapo juu                                                                                                                                 | 8 GB / 12 GB               | 400 %           |
-| OmniHeuris, OmniMind | (repo zao)     | Dependabot pekee (kiwango cha juu cha 155 MB kila moja, 2026-10-18)                                                                                          | 4 GB / 6 GB                | 200 % kila moja |
+| runner               | lebo                            | jukumu                                                                                                                                                       | `MemoryHigh` / `MemoryMax` | `CPUQuota`      |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | --------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Build za Turbopack: `ci.yml` `Build` (push/dispatch pekee), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, build ya kila usiku ya a11y | 56 GB / 60 GB (swap 0)     | 1600 %          |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), build ya webpack                                                                                             | 20 GB / 24 GB (swap 4 GB)  | 800 %           |
+| `omniroute-113-2`    | `omni-light`                    | kazi za kila usiku (Schemathesis, promptfoo, garak, k6) na `quality.yml` `lint-guard`                                                                        | 12 GB / 16 GB (swap 4 GB)  | 600 %           |
+| `omniroute-113`      | `omni-light`                    | bwawa lilelile kama hapo juu                                                                                                                                 | 8 GB / 12 GB               | 400 %           |
+| OmniHeuris, OmniMind | (repo zao)                      | Dependabot pekee (kiwango cha juu cha 155 MB kila moja, 2026-10-18)                                                                                          | 4 GB / 6 GB                | 200 % kila moja |
 
 Vipimo vya 2026-10-18:
 
@@ -81,7 +81,7 @@ wakati mmoja, wakati tu haitumiki**, huku ukaguzi wa kutotumika na uanzishaji up
 ## Kanuni za uendeshaji
 
 - **Build moja ya Turbopack kwa wakati mmoja — inadhibitiwa kwa lebo.** Kila job inayoendesha
-  `next build` kamili ya Turbopack inalenga `[self-hosted, omni-build]`, na ni **`omniroute-113-5`**
+  `next build` kamili ya Turbopack inalenga `[self-hosted, omni-build, omni-build-60gb]`, na ni **`omniroute-113-5`**
   pekee iliyo na lebo hiyo: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`,
   `preview-artifact`, build ya kila usiku ya a11y (#16853) na **amd64** ya `docker-publish.yml`
   (webpack ndani ya BuildKit — Turbopack ilipata panic humo, run 33253576569). Sehemu ya Docker ya

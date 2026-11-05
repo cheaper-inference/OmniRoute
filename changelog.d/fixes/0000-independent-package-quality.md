@@ -1,0 +1,1 @@
+- **fix(ci):** Audit all five independent lockfiles with explicit incomplete results, reject missing/invalid OSV measurements, align OpenCode CI with supported Node releases, and reproduce plugin installs from their lockfiles.

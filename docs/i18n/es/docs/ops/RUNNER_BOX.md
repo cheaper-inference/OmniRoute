@@ -11,13 +11,13 @@ picos medidos. El equipo solo sobreasigna recursos cuando una compilación de Tu
 webpack de Release-Green y un trabajo de lint; el swap del host (16 GB) absorbe esa carga y, dado que las compilaciones de pull requests se ejecutan
 en runners alojados, el slot de Turbopack permanece inactivo la mayor parte del tiempo:
 
-| runner               | etiqueta       | rol                                                                                                                                                                     | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
-| -------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------- |
-| `omniroute-113-5`    | `omni-build`   | Compilaciones de Turbopack: `ci.yml` `Build` (solo push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, la compilación nocturna de a11y | 56 GB / 60 GB (swap 0)     | 1600 %         |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), compilación webpack                                                                                                     | 20 GB / 24 GB (swap 4 GB)  | 800 %          |
-| `omniroute-113-2`    | `omni-light`   | trabajos nocturnos (Schemathesis, promptfoo, garak, k6) y `quality.yml` `lint-guard`                                                                                    | 12 GB / 16 GB (swap 4 GB)  | 600 %          |
-| `omniroute-113`      | `omni-light`   | el mismo pool que el anterior                                                                                                                                           | 8 GB / 12 GB               | 400 %          |
-| OmniHeuris, OmniMind | (sus repos)    | Solo Dependabot (pico de 155 MB cada uno, 2026-10-18)                                                                                                                   | 4 GB / 6 GB                | 200 % cada uno |
+| runner               | etiqueta                        | rol                                                                                                                                                                     | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
+| -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Compilaciones de Turbopack: `ci.yml` `Build` (solo push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, la compilación nocturna de a11y | 56 GB / 60 GB (swap 0)     | 1600 %         |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), compilación webpack                                                                                                     | 20 GB / 24 GB (swap 4 GB)  | 800 %          |
+| `omniroute-113-2`    | `omni-light`                    | trabajos nocturnos (Schemathesis, promptfoo, garak, k6) y `quality.yml` `lint-guard`                                                                                    | 12 GB / 16 GB (swap 4 GB)  | 600 %          |
+| `omniroute-113`      | `omni-light`                    | el mismo pool que el anterior                                                                                                                                           | 8 GB / 12 GB               | 400 %          |
+| OmniHeuris, OmniMind | (sus repos)                     | Solo Dependabot (pico de 155 MB cada uno, 2026-10-18)                                                                                                                   | 4 GB / 6 GB                | 200 % cada uno |
 
 Mediciones del 2026-10-18:
 
@@ -81,7 +81,7 @@ la vez, solo cuando esté inactivo**, con la comprobación de inactividad y el r
 ## Reglas operativas
 
 - **Una compilación de Turbopack a la vez — aplicada mediante una etiqueta.** Cada job que ejecuta un
-  `next build` completo con Turbopack se dirige a `[self-hosted, omni-build]`, y solo
+  `next build` completo con Turbopack se dirige a `[self-hosted, omni-build, omni-build-60gb]`, y solo
   **`omniroute-113-5`** tiene esa etiqueta: `ci.yml` `Build`, `npm-publish.yml` `publish`,
   `nightly-v4-build`, `preview-artifact`, la compilación nocturna de a11y (#16853) y
   `docker-publish.yml` **amd64** (webpack dentro de BuildKit — Turbopack entró en pánico allí,

@@ -53,7 +53,7 @@ Search Tools Studio මඟින් `/dashboard/search-tools`, මූලික �
 - ආදානය: URL + සම්පූර්ණ පිටු ටොගලය + ආකෘති තේරීම (markdown / පෙළ / HTML).
 - ඉදිරිපත් කිරීම → ලබාගැනීම → `ScrapeResult.tsx` විදැහුම් කිරීම.
 - `ScrapeResult` මගින් markdown පෙරදසුනක් + අමු දත්ත ටොගලයක් විදැහුම් කරයි.
-- සීමාව: ප්රතිචාර බඳ > **256 KB** නම්, UI එක `(කප්පාදු කරන ලදී, අමු දත්ත බලන්න)` පෙන්වා අමු දත්ත Monaco මෝඩලයක විවෘත කරයි (D21).
+- සීමාව: ප්රතිචාර බඳ > **256 KB** නම්, UI එක `View full raw content` පෙන්වා අමු දත්ත මෝඩලයක විවෘත කරයි (D21).
 - පාරදත්ත පැනලය: සැපයුම්කරු (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), ප්රමාදය, පිරිවැය, ප්රතිචාර ප්රමාණය, සබැඳි ගණන.
 - `useScrapeFetch.ts` හුක් එක භාවිත කරයි.
 

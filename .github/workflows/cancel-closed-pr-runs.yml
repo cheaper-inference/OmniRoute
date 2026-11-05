@@ -1,0 +1,43 @@
+name: Cancel runs of closed PRs
+
+# CI and Quality intentionally use `cancel-in-progress: false`: the running candidate
+# completes and GitHub retains only the newest pending candidate. Closing a PR creates no
+# successor, so this API-only job removes active work that can no longer merge. It checks
+# out only this script from the trusted default branch and never runs PR code.
+# `pull_request` (not `_target`): the job restricts its `actions: write` token to
+# same-repository heads; fork PRs are skipped and retain GitHub's normal restrictions.
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: read
+
+jobs:
+  cancel:
+    name: Cancel queued runs of this PR
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: write
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+          sparse-checkout: scripts/ci/cancel-closed-pr-runs.mjs
+          sparse-checkout-cone-mode: false
+      - name: Cancel this PR's queued and running workflow runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          SELF_RUN_ID: ${{ github.run_id }}
+        run: node scripts/ci/cancel-closed-pr-runs.mjs
