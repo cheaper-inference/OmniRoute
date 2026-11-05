@@ -737,7 +737,9 @@
       "tests/unit/combo-precontent-transport-recovery.test.ts",
       "tests/unit/boundary-engine-feature-flags.test.ts",
       "tests/unit/upstream-http-attempt-rows.test.ts",
-      "tests/unit/upstream-http-edge-selection.test.ts"
+      "tests/unit/upstream-http-edge-selection.test.ts",
+      "tests/unit/issue-18600-muse-request-dispatch.test.ts",
+      "tests/unit/issue-18600-muse-followup-isolation.test.ts"
     ],
     "nodeArgs": [
       "--import",
