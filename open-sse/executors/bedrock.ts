@@ -15,6 +15,9 @@ import { PROVIDERS } from "../config/constants.ts";
 import { buildBedrockNativeConverseUrl, resolveBedrockRegion } from "../config/bedrock.ts";
 import * as prl from "../utils/providerRequestLogging.ts";
 import { appendToolCallArgumentDelta } from "../utils/toolCallArguments.ts";
+import { normalizeClaudeAdaptiveThinking } from "../services/claudeAdaptiveThinking.ts";
+import { claudeThinkingFromOpenAIRequest } from "../translator/request/openai-to-claude/thinkingConfig.ts";
+import { fitThinkingToMaxTokens } from "../translator/request/openai-to-claude/thinkingBudget.ts";
 
 const encoder = new TextEncoder();
 
@@ -47,6 +50,28 @@ function stripDataUrlPrefix(value) {
 
 function decodeBase64(value) {
   return Uint8Array.from(Buffer.from(value, "base64"));
+}
+
+// Converse prompt caching works only at explicit `cachePoint` blocks, and only on
+// model families that support it; other models reject the block.
+const BEDROCK_CACHE_POINT_MODEL = /anthropic\.claude|amazon\.nova/i;
+const BEDROCK_CLAUDE_MODEL = /anthropic\.claude/i;
+// Converse accepts at most 4 cache points per request.
+const BEDROCK_MAX_CACHE_POINTS = 4;
+
+function cachePointFor(cacheControl) {
+  if (!cacheControl || typeof cacheControl !== "object") return null;
+  const ttl = cacheControl.ttl;
+  return { cachePoint: { type: "default", ...(ttl === "5m" || ttl === "1h" ? { ttl } : {}) } };
+}
+
+function isCachePointBlock(block) {
+  return Boolean(block?.cachePoint);
+}
+
+function firstPartCacheControl(content) {
+  if (!Array.isArray(content)) return undefined;
+  return content.map((part) => asRecord(part).cache_control).find(Boolean);
 }
 
 function normalizeRole(role) {
@@ -120,6 +145,7 @@ function textBlocksFromContent(
     normalizeId?: (id: string) => string;
     skipToolUseIds?: ReadonlySet<unknown>;
     answeredToolUseIds?: ReadonlySet<unknown>;
+    cachePoints?: boolean;
   } = {}
 ) {
   if (typeof content === "string") return content.trim() ? [{ text: content }] : [];
@@ -127,16 +153,16 @@ function textBlocksFromContent(
 
   const normalizeId = options.normalizeId || normalizeToolUseId;
   const blocks = [];
-  for (const part of content) {
+  const pushPart = (part) => {
     if (typeof part === "string") {
       if (part.trim()) blocks.push({ text: part });
-      continue;
+      return;
     }
     const p = asRecord(part);
     const type = typeof p.type === "string" ? p.type : "";
     if ((type === "text" || type === "input_text") && typeof p.text === "string") {
       if (p.text.trim()) blocks.push({ text: p.text });
-      continue;
+      return;
     }
     if (type === "image_url" || type === "input_image") {
       const url = typeof p.image_url === "string" ? p.image_url : p.image_url?.url || p.image_url;
@@ -146,13 +172,13 @@ function textBlocksFromContent(
           image: { format: image.format, source: { bytes: decodeBase64(image.data) } },
         });
       }
-      continue;
+      return;
     }
     if (type === "tool_use" && typeof p.id === "string" && typeof p.name === "string") {
       const rawId = normalizeId(p.id);
-      if (!rawId) continue;
-      if (options.skipToolUseIds?.has(rawId)) continue;
-      if (!options.answeredToolUseIds?.has(rawId)) continue;
+      if (!rawId) return;
+      if (options.skipToolUseIds?.has(rawId)) return;
+      if (!options.answeredToolUseIds?.has(rawId)) return;
       blocks.push({
         toolUse: {
           toolUseId: rawId,
@@ -160,11 +186,11 @@ function textBlocksFromContent(
           input: asRecord(p.input),
         },
       });
-      continue;
+      return;
     }
     if (type === "tool_result" && typeof p.tool_use_id === "string") {
       const toolUseId = normalizeId(p.tool_use_id);
-      if (!toolUseId) continue;
+      if (!toolUseId) return;
       blocks.push({
         toolResult: {
           toolUseId,
@@ -173,12 +199,20 @@ function textBlocksFromContent(
         },
       });
     }
-  }
+  };
 
+  for (const part of content) {
+    const before = blocks.length;
+    pushPart(part);
+    // A cache_control marker becomes a Converse cache point right after the block
+    // it marks; a part that produced no block has nothing to mark.
+    const cachePoint = options.cachePoints ? cachePointFor(asRecord(part).cache_control) : null;
+    if (cachePoint && blocks.length > before) blocks.push(cachePoint);
+  }
   return blocks;
 }
 
-function systemBlocksFromOpenAI(messages) {
+function systemBlocksFromOpenAI(messages, cachePoints = false) {
   const blocks = [];
   for (const message of messages) {
     const role = message?.role;
@@ -187,7 +221,14 @@ function systemBlocksFromOpenAI(messages) {
       .map((block) => (typeof block.text === "string" ? block.text : ""))
       .filter(Boolean)
       .join("\n");
-    if (text.trim()) blocks.push({ text });
+    if (!text.trim()) continue;
+    blocks.push({ text });
+    // The parts of one system message are joined into a single block, so a marker
+    // on any of them caches through the end of that message.
+    const cachePoint = cachePoints
+      ? cachePointFor(message.cache_control || firstPartCacheControl(message.content))
+      : null;
+    if (cachePoint) blocks.push(cachePoint);
   }
   return blocks;
 }
@@ -330,7 +371,37 @@ function sanitizeBedrockToolPairs(messages) {
   return normalized;
 }
 
-function messagesFromOpenAI(messages) {
+// A cache point must follow the block it marks. Dropping a tool block (pairing
+// sanitizer) can leave one leading a turn or doubled up; remove those.
+function dropStrayCachePoints(messages) {
+  for (const message of messages) {
+    if (!Array.isArray(message?.content)) continue;
+    message.content = message.content.filter(
+      (block, i, all) => !isCachePointBlock(block) || (i > 0 && !isCachePointBlock(all[i - 1]))
+    );
+    ensureNonEmptyContent(message);
+  }
+  return messages;
+}
+
+// Keep the LAST cache points: later ones cover a longer prefix (the same rule as
+// enforceCacheControlBlockLimit for the Claude path).
+function enforceCachePointLimit(system, messages) {
+  const lists = [system, ...messages.map((message) => message.content)];
+  let total = lists.reduce((sum, list) => sum + list.filter(isCachePointBlock).length, 0);
+  for (const list of lists) {
+    for (let i = 0; i < list.length && total > BEDROCK_MAX_CACHE_POINTS;) {
+      if (isCachePointBlock(list[i])) {
+        list.splice(i, 1);
+        total--;
+      } else {
+        i++;
+      }
+    }
+  }
+}
+
+function messagesFromOpenAI(messages, cachePoints = false) {
   const converted = [];
   const pendingToolUseIds = new Set();
   const normalizeId = createToolUseIdNormalizer(messages);
@@ -344,18 +415,21 @@ function messagesFromOpenAI(messages) {
       const toolUseId = normalizeId(message.tool_call_id) || `toolu_${randomUUID()}`;
       pendingToolUseIds.delete(toolUseId);
       answeredToolUseIds.add(toolUseId);
-      converted.push({
-        role: "user",
-        content: [
-          {
-            toolResult: {
-              toolUseId,
-              content: toolResultContentFromMessage(message),
-              status: "success",
-            },
+      const content: Record<string, unknown>[] = [
+        {
+          toolResult: {
+            toolUseId,
+            content: toolResultContentFromMessage(message),
+            status: "success",
           },
-        ],
-      });
+        },
+      ];
+      // Converse has no cache point inside a tool result; it goes right after it.
+      const cachePoint = cachePoints
+        ? cachePointFor(message.cache_control || firstPartCacheControl(message.content))
+        : null;
+      if (cachePoint) content.push(cachePoint);
+      converted.push({ role: "user", content });
       continue;
     }
 
@@ -367,6 +441,7 @@ function messagesFromOpenAI(messages) {
       skipToolUseIds: toolCallIds,
       answeredToolUseIds,
       normalizeId,
+      cachePoints,
     });
     for (const call of toolCalls) {
       const fn = asRecord(call.function);
@@ -401,7 +476,7 @@ function messagesFromOpenAI(messages) {
     converted.push({ role: "user", content: [{ text: " " }] });
   }
 
-  return sanitizeBedrockToolPairs(converted);
+  return dropStrayCachePoints(sanitizeBedrockToolPairs(converted));
 }
 
 function toolConfigFromOpenAI(tools, toolChoice): ToolConfiguration | undefined {
@@ -436,6 +511,29 @@ function toolConfigFromOpenAI(tools, toolChoice): ToolConfiguration | undefined 
   return config;
 }
 
+// Claude on Bedrock takes extended thinking in additionalModelRequestFields, in the
+// same shape as the Anthropic Messages API, so reuse the OpenAI to Claude mapping.
+function claudeThinkingFields(model, request, inferenceConfig) {
+  if (!BEDROCK_CLAUDE_MODEL.test(String(model))) return null;
+  const mapped = claudeThinkingFromOpenAIRequest(request, model);
+  if (!mapped.thinking || mapped.thinking.type === "disabled") return null;
+  const { thinking } = normalizeClaudeAdaptiveThinking({ thinking: mapped.thinking }, model);
+  const fitted = fitThinkingToMaxTokens(
+    model,
+    Number(inferenceConfig.maxTokens) || 0,
+    thinking,
+    "bedrock"
+  );
+  if (!fitted.thinking) return null;
+  if (fitted.thinking.budget_tokens) inferenceConfig.maxTokens = fitted.maxTokens;
+  // Claude rejects a non-default temperature while extended thinking is on.
+  delete inferenceConfig.temperature;
+  return {
+    thinking: fitted.thinking,
+    ...(mapped.effort ? { output_config: { effort: mapped.effort } } : {}),
+  };
+}
+
 export function openAIToBedrockConverse(model, body) {
   const request = asRecord(body);
   const messages = Array.isArray(request.messages) ? request.messages : [];
@@ -451,6 +549,9 @@ export function openAIToBedrockConverse(model, body) {
 
   // A concrete shape, not a Record: the result is handed to ConverseCommand, whose
   // input type requires modelId.
+  const thinkingFields = claudeThinkingFields(model, request, inferenceConfig);
+  const cachePoints = BEDROCK_CACHE_POINT_MODEL.test(String(model));
+
   const payload: {
     modelId: string;
     messages: Message[];
@@ -460,10 +561,11 @@ export function openAIToBedrockConverse(model, body) {
     additionalModelRequestFields?: ConverseStreamCommandInput["additionalModelRequestFields"];
   } = {
     modelId: model,
-    messages: messagesFromOpenAI(messages),
+    messages: messagesFromOpenAI(messages, cachePoints),
   };
 
-  const system = systemBlocksFromOpenAI(messages);
+  const system = systemBlocksFromOpenAI(messages, cachePoints);
+  if (cachePoints) enforceCachePointLimit(system, payload.messages);
   if (system.length > 0) payload.system = system;
   if (Object.keys(inferenceConfig).length > 0) payload.inferenceConfig = inferenceConfig;
 
@@ -472,6 +574,8 @@ export function openAIToBedrockConverse(model, body) {
 
   if (request.additionalModelRequestFields !== undefined) {
     payload.additionalModelRequestFields = request.additionalModelRequestFields;
+  } else if (thinkingFields) {
+    payload.additionalModelRequestFields = thinkingFields;
   }
 
   return payload;
