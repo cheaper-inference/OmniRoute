@@ -1,6 +1,7 @@
 import type { CredentialSelectionOptions } from "./credentialSelectionOptions";
 export type { CredentialSelectionOptions } from "./credentialSelectionOptions";
 import { qoderSupportsCallerTools } from "@omniroute/open-sse/services/qoderCapabilities";
+import { isCodexFreePlan } from "@omniroute/open-sse/executors/codex/tools.ts";
 import { randomUUID } from "crypto";
 import { getProviderSearchPool } from "@omniroute/open-sse/services/providerConnectionPool.ts";
 import { hydrateConnectionProviderSpecificData } from "./compatibleNodeBaseUrl.ts"; // #13452
@@ -1286,6 +1287,10 @@ export async function getProviderCredentials(
     let availableConnections = connections.filter((c) => {
       if (excludedConnectionIds.has(c.id)) {
         connectionFilterStatus.set(c.id, "excluded");
+        return false;
+      }
+      if (provider === "codex" && options.requirePaidCodexPlan && isCodexFreePlan(c.providerSpecificData)) {
+        connectionFilterStatus.set(c.id, "freePlan");
         return false;
       }
       if (requestedModel && isModelExcludedByConnection(requestedModel, c.providerSpecificData)) {

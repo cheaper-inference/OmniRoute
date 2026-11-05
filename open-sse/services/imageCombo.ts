@@ -16,6 +16,7 @@ import {
   clearRecoveredProviderState,
 } from "@/sse/services/auth";
 import { isAllRateLimitedCredentials } from "@/app/api/v1/_shared/rateLimit";
+import { imageQuotaPreflightOptions } from "@/sse/services/imageQuotaSelectionPolicy";
 import {
   isKeyScopeBlockedCredentials,
   scopeComboTargetsForKey,
@@ -214,7 +215,8 @@ function resolveImageTargetCredentials(
     provider,
     null,
     narrowMediaConnectionScope(allowedConnections, pinnedConnectionIds(target)),
-    parseImageModel(target.modelStr).model
+    parseImageModel(target.modelStr).model,
+    imageQuotaPreflightOptions(provider)
   );
 }
 

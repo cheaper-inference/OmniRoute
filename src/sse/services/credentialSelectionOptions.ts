@@ -9,6 +9,8 @@ export interface CredentialSelectionOptions {
   allowSuppressedConnections?: boolean;
   allowRateLimitedConnections?: boolean;
   bypassQuotaPolicy?: boolean;
+  /** Image operations on Codex require a paid workspace; do not choose a free plan first. */
+  requirePaidCodexPlan?: boolean;
   forcedConnectionId?: string | null;
   /** API-key-scoped ordered preference. Only ranks connections that survived eligibility gates. */
   preferredConnectionIds?: string[] | null;

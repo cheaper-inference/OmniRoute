@@ -4,6 +4,9 @@
  * before its provider receives the request. All connection-scope, auth,
  * terminal-state, and model eligibility gates remain in force.
  */
-export function imageQuotaPreflightOptions(provider: string): { bypassQuotaPolicy?: true } {
-  return provider === "codex" ? { bypassQuotaPolicy: true } : {};
+export function imageQuotaPreflightOptions(provider: string): {
+  bypassQuotaPolicy?: true;
+  requirePaidCodexPlan?: true;
+} {
+  return provider === "codex" ? { bypassQuotaPolicy: true, requirePaidCodexPlan: true } : {};
 }
