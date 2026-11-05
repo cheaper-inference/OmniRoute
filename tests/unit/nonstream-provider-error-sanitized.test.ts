@@ -2,6 +2,7 @@
 // never as the raw upstream Response (body fields, internal paths, Set-Cookie, other headers).
 import assert from "node:assert/strict";
 import test from "node:test";
+import { createErrorResult } from "../../open-sse/utils/error.ts";
 import { createChatPipelineHarness } from "../integration/_chatPipelineHarness.ts";
 
 const h = await createChatPipelineHarness("nonstream-provider-error-sanitized");
@@ -80,3 +81,24 @@ test("stream=false: upstream Retry-After still reaches the client on a 429", asy
   assert.equal(res.status, 429);
   assert.ok(res.headers.get("retry-after"), "Retry-After hint was dropped");
 });
+
+// Combo routing reads the code from this same sanitized body, so a code missing from the
+// public vocabulary turns into a generic `bad_request` and silently changes the fallback.
+for (const code of [
+  "context_length_exceeded",
+  "context_window_exceeded",
+  "upstream_empty_response",
+  "upstream_response_failed",
+  "upstream_request_cancelled",
+  "billing_hard_limit_reached",
+  "credits_exhausted",
+  "insufficient_quota",
+  "quota_exhausted",
+  "authz_insufficient_balance",
+]) {
+  test(`the sanitized body keeps the routing code ${code}`, async () => {
+    const { response } = createErrorResult(400, "Bad Request", null, code);
+    const body = (await response.json()) as { error: { code: string } };
+    assert.equal(body.error.code, code);
+  });
+}
