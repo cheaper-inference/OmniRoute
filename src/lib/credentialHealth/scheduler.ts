@@ -31,6 +31,7 @@ import {
 } from "@/lib/credentialHealth/probePolicy";
 import { isInRefreshBackoff } from "@/lib/tokenRefreshCircuit";
 import { emit } from "@/lib/events/eventBus";
+import { isBackgroundServicesDisabled } from "@/lib/env/backgroundServices";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
 import { SEARCH_VALIDATOR_CONFIGS } from "@/lib/providers/validation/searchProviders";
 
@@ -83,6 +84,7 @@ function isBuildProcess(): boolean {
 
 function isCredentialHealthCheckDisabled(): boolean {
   if (isBuildProcess() || isAutomatedTestProcess()) return true;
+  if (isBackgroundServicesDisabled()) return true;
   const val = process.env.OMNIROUTE_DISABLE_CREDENTIAL_HEALTH_CHECK;
   return val ? TRUE_ENV_VALUES.has(val.trim().toLowerCase()) : false;
 }

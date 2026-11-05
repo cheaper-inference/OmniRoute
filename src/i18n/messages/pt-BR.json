@@ -1035,7 +1035,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "Envie a impressão digital do cliente CLI OpenCode v2 nas solicitações do OpenCode Zen/Go: o User-Agent opencode/latest/<2.x>/cli e x-opencode-client cli e, nas solicitações do nível gratuito, os cabeçalhos de sessão v2, os esquemas das ferramentas read/shell da CLI v2 e nenhum tool_choice \"none\". Desativado por padrão: todas as solicitações do OpenCode mantêm a identidade, os cabeçalhos e o corpo atuais inalterados.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Quando o conjunto de candidatos de uma combinação automática já estiver vazio antes da execução do pré-filtro de chamadas de ferramentas (todos os destinos ignorados devido a períodos de espera, bloqueios ou esgotamento), responder com 503 no_eligible_targets em vez do 400 legado \"Nenhum destino oferece suporte a chamadas de ferramentas\" capability_mismatch. Desativado por padrão: o conjunto vazio mantém o 400 legado.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Imponha tags confiáveis de endpoint de modelo (declaradas pelo catálogo do provedor, inferidas a partir do ID de um modelo especializado ou definidas pelo operador): rejeite com HTTP 400, antes do encaminhamento, uma solicitação enviada a um endpoint que não é atendido pelo modelo em /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations e /v1/audio/*; oculte de /v1/models os modelos cujos endpoints marcados não tenham um adaptador do OmniRoute; e responda ao teste de modelo do painel com 422 para esses modelos. Desativado por padrão: as tags de endpoint permanecem informativas e as solicitações são encaminhadas exatamente como antes.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "Em retransmissores simples compatíveis com a Anthropic, mantenha as mensagens de sistema no meio da conversa dentro da lista de mensagens, em vez de movê-las para o prompt de sistema de nível superior, para que o prefixo do prompt armazenado em cache permaneça estável entre as interações. Aplica-se somente quando o próprio cliente tiver enviado a versão beta mid-conversation-system-2026-04-07. Desativado por padrão: todas as mensagens de sistema são movidas para o prompt de sistema exatamente como antes, pois retransmissores sem essa versão beta rejeitam mensagens de sistema na lista de mensagens.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Use os níveis de esforço de raciocínio publicados pelo models.dev quando nem uma substituição do operador nem o registro do provedor declarar algum, mantendo apenas os níveis de esforço conhecidos e tratando uma lista vazia de níveis declarados como \"sem níveis\". Desativado por padrão: o catálogo de modelos e os níveis de esforço resolvidos permanecem exatamente como antes.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "Permite que as requisições auto/* montem o pool de candidatos com as capacidades de modelo resolvidas (visão, raciocínio, pensamento) e as pontuações de qualidade observadas, lidas em uma única leitura em lote. Desativado por padrão: os pesos dos candidatos no momento da requisição permanecem exatamente como antes. Ativado: esses sinais alimentam os pesos do snapshot, então os pesos dos candidatos e a seleção podem mudar.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Permita que a verificação de integridade das credenciais teste novamente as conexões que o gateway desativou automaticamente (no máximo uma vez a cada 6 horas por conexão, 5 por verificação) e reative uma delas quando o novo teste for bem-sucedido. Desativado por padrão: essas conexões permanecem desativadas até que um operador tome uma ação. Conexões desativadas por um operador e conexões banidas permanentemente nunca são testadas novamente.",
@@ -1939,7 +1938,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# requisição} other {# requisições}}, {keys, plural, one {# chave limitada} other {# chaves limitadas}}",
     "unpricedUsageMore": "…e mais {count}",
     "unpricedUsageConfigure": "Configurar preços",
-    "unpricedUsageDismiss": "Fechar"
+    "unpricedUsageDismiss": "Fechar",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Análises",
@@ -6264,6 +6272,10 @@
     "allowCodexPaidCreditsDescription": "Permite que esta conta use créditos pagos depois que a cota da assinatura atingir o limite de corte. Requer créditos disponíveis informados pela OpenAI; pode gerar cobranças. Os limites do Spark e os cooldowns do upstream continuam se aplicando. A disponibilidade de créditos é verificada mesmo se o preflight de cota estiver desabilitado.",
     "disableCoolingDescription": "Ignore o tempo de espera transitório para que esta conexão permaneça elegível mesmo após erros recuperáveis (estados terminais como banido/expirado ainda se aplicam).",
     "disableCoolingLabel": "Desativar o tempo de espera para esta conexão",
+    "keepMidConversationSystemDescription": "Deixe as mensagens do sistema enviadas no meio da conversa dentro da lista de mensagens em vez de movê-las para o prompt de nível superior do sistema, para que o cache de prompts continue atingindo os turnos. Habilite apenas se este upstream aceitar a função \"sistema\" dentro das mensagens (caso contrário, ele responderá 400).",
+    "keepMidConversationSystemLabel": "Mantenha as mensagens do sistema no meio da conversa em vigor",
+    "requireUserLastMessageDescription": "Para upstreams que rejeitam o pré-preenchimento do assistente: elimine as voltas finais do assistente (sem tool_use) antes de enviar. O modelo pode regenerar sua resposta anterior.",
+    "requireUserLastMessageLabel": "Exigir que a conversa termine com uma mensagem do usuário",
     "bulkPasteAdded": "{count, plural, one {1 chave adicionada} other {# chaves adicionadas}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplicata ignorada} other {# duplicatas ignoradas}}",
     "bulkPasteHint": "Cole uma chave de API por linha. Linhas vazias são ignoradas e chaves duplicadas são puladas.",
@@ -6363,6 +6375,9 @@
     "localProviders": "Local / Self-Hosted",
     "maxConcurrentWholeNumberError": "Max concurrent deve ser um número inteiro maior ou igual a 0.",
     "m365TierLabel": "Nível do Copilot",
+    "m365RefreshTokenLabel": "Token de atualização (opcional)",
+    "m365RefreshTokenHint": "Usado para atualizar automaticamente o token de acesso do Microsoft 365.",
+    "m365RefreshTokenEditHint": "Deixe em branco para manter o token existente. Cole um novo token para substituí-lo.",
     "m365TierHint": "Escolha qual superfície do Microsoft 365 Copilot esta conexão usa. Individual é o BizChat padrão para consumidores; Educação e Empresarial (trabalho) usam as superfícies do respectivo tenant.",
     "m365TierIndividualOption": "Individual (padrão)",
     "m365TierEduOption": "Educação",
@@ -7097,6 +7112,7 @@
     "proxySubTabsAria": "Seções de proxy",
     "requestBodyLimitTitle": "Limite do corpo da solicitação",
     "requestBodyLimitDescription": "Tamanho máximo da carga útil da API aceito antes que o corpo da solicitação seja analisado. As rotas dedicadas de upload mantêm pelo menos o limite integrado de 100 MB.",
+    "requestBodyLimitChatHint": "Chat Completions e Responses aceitam até 50 MB até você salvar um limite aqui. O limite salvo também se aplica a essas APIs, seja menor ou maior.",
     "requestBodyLimitInputLabel": "Limite do corpo da solicitação em MB",
     "requestBodyLimitEmptyError": "Insira um limite em MB",
     "requestBodyLimitWholeNumberError": "Use um número inteiro",
@@ -12282,7 +12298,9 @@
       "failedTitle": "Todas as {count} tentativas falharam",
       "failed": "falhou",
       "pinnedTitle": "Modelo selecionado via fixação de sessão do cache de contexto",
-      "pinned": "fixado"
+      "pinned": "fixado",
+      "recoveredAttemptsTitle": "Solicitação recuperada após {count} tentativas",
+      "latestOutcomeFailed": "O resultado mais recente da solicitação falhou"
     },
     "attempts": "tentativas",
     "detail": {
@@ -12384,13 +12402,20 @@
       "continuesFromParent": "continua da requisição pai",
       "continuesFrom": "Continua de {id}",
       "viewConversation": "ver conversa",
-      "openConversation": "Abrir conversa {id}"
+      "openConversation": "Abrir conversa {id}",
+      "omittedHttpAttempts": "{count} envios HTTP não foram retidos",
+      "noHttpResponse": "Nenhuma resposta HTTP foi observada",
+      "transportError": "Erro de transporte"
     },
     "tableLabel": "Logs de requisições",
     "throughputPostFirstToken": "Pós-primeiro token",
     "throughputEndToEnd": "Ponta a ponta",
     "throughputRate": "{value} tokens/s",
-    "throughputExplanation": "Ambas as taxas usam o maior valor entre as contagens de tokens de saída e de raciocínio. A taxa pós-primeiro token exclui um TTFT válido; caso contrário, usa a duração total. A taxa ponta a ponta sempre usa a duração total. Uma resposta em buffer pode ter uma alta taxa de entrega em rajada sem uma geração mais rápida pelo modelo."
+    "throughputExplanation": "Ambas as taxas usam o maior valor entre as contagens de tokens de saída e de raciocínio. A taxa pós-primeiro token exclui um TTFT válido; caso contrário, usa a duração total. A taxa ponta a ponta sempre usa a duração total. Uma resposta em buffer pode ter uma alta taxa de entrega em rajada sem uma geração mais rápida pelo modelo.",
+    "omittedHttpAttempts": "{count} envios HTTP não foram retidos",
+    "upstreamStatus": "Servidor de origem {status}",
+    "noHttpResponse": "Nenhuma resposta HTTP foi observada",
+    "transportError": "Erro de transporte"
   },
   "proxyLogger": {
     "filterAll": "Todos",
@@ -14157,6 +14182,14 @@
         "label": "Ordem do pool por saída compartilhada",
         "description": "Para provedores cuja cota é agrupada por endereço de saída, classifica um membro do pool que compartilha o endereço de saída observado de um membro recusado recentemente logo abaixo dos membros saudáveis. Apenas ordenação, nunca exclusão. Requer PROXY_SKIP_RECENTLY_FAILED, que produz o sinal de recusa que ele lê. Desativado por padrão: a ordem de seleção é exatamente a rotação comum."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Recusas de cotas no escopo do modelo",
+        "description": "Aplique uma cota opencode 429 apenas ao modelo que a atingiu, para que a mesma saída continue servindo outros modelos e limpe-a somente quando esse modelo for bem-sucedido. Os consumidores que não possuem modelo (rotação de pool, estacionamento e repetição, visibilidade do administrador, acionador de seletor, varredura de integridade) ainda o verão. Precisa de PROXY_SKIP_RECENTLY_FAILED, que produz a recusa. Desativado por padrão: a cota 429 de um modelo reserva a saída para cada modelo."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Busca de proxy: reprodução POST estrita",
+        "description": "Para uma solicitação não idempotente (POST, PUT, PATCH, DELETE), reenvie após um erro de transporte (soquete novo, substituto de proxy, substituto nativo) somente quando o erro provar que nada foi enviado: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH ou um tempo limite de conexão. Um erro de soquete após a gravação pode significar que o upstream aceitou a solicitação, portanto, um reenvio pode gerar e cobrar duas vezes. Desativado por padrão: um corpo reproduzível é reenviado uma vez em qualquer erro de transporte, o que também recupera um soquete em pool obsoleto."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Log de atribuição de rotação",
         "description": "A rotação do Opencode registra qual conta atendeu ou foi ignorada (apenas IDs mascarados, nunca IDs de conta completos) e vincula as entradas de log do proxy à sua requisição, para que o operador possa diferenciar contas ignoradas de contas não utilizadas. Desativado por padrão: nenhuma linha extra de log, nenhuma coluna extra gravada."
@@ -14208,6 +14241,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "Resseleção de Pool em 429 do OpenCode",
         "description": "Para a rotação multicontas do OpenCode, após um 429 de um provedor agrupado por saída em uma conta sem proxy sob um contexto de pool ambiente, solicita ao pool de conexões outro membro para a próxima tentativa em vez de tentar novamente o mesmo endereço de saída. Ordena, nunca exclui: um pool esgotado mantém o comportamento atual. Desativado por padrão: cada 429 rotaciona para a próxima conta exatamente como antes."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "Sondagem de Saída do Free Tier do OpenCode",
+        "description": "Para o executor do OpenCode, quando uma requisição via proxy recebe 403 ou 451 FreeTierError e a nova tentativa com ferramentas observadas falhou ou não se aplicou, envia a requisição uma vez por outro proxy (proxy de outra conta ou outro membro do pool, nunca uma conexão direta). Somente quando essa sondagem responde 200 a primeira saída é posta de lado na memória de recusa de proxy e a resposta da sondagem é servida; quando ambas recusam, a recusa original é devolvida e nada é registrado. O mesmo texto de recusa cobre um IP de saída sinalizado e um formato de requisição recusado, então a sondagem os distingue por evidência. Desligado por padrão: a recusa é devolvida sem alteração."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Fingerprint de cliente do OpenCode v2",
@@ -14388,6 +14425,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Parar na Recusa por Política de Conteúdo",
         "description": "Quando um alvo do combo responder com uma recusa exata por política de conteúdo (código ou tipo cyber_policy / content_policy_violation), para o combo e retorna essa recusa mesmo quando os alvos restantes forem modelos diferentes, em vez de avançar para o próximo alvo. Desativado por padrão: a recusa nunca aplica resfriamento à conta nem desarma o disjuntor do provedor, e o combo avança para o próximo alvo exatamente como antes."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Respostas: keepalive apenas no transporte",
+        "description": "Envie manutenções de atividade de respostas como uma linha em branco em vez de um evento response.in_progress, para que um instantâneo sintético nunca possa substituir a resposta real no SDK oficial. Uma linha em branco não despacha nenhum evento SSE, portanto, um watchdog do cliente que reinicializa apenas em eventos não seria reinicializado durante uma longa fase silenciosa. Desativado por padrão: os temporizadores enviam o evento response.in_progress com especificação válida."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Nova tentativa de cooldown: ignorar recusas 403/410",
