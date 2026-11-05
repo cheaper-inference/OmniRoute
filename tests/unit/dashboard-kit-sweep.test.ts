@@ -131,9 +131,6 @@ test("hard-coded palette hues and dark: variants only where the exception is doc
   const DARK_ALLOWED: Record<string, number> = {
     // Typography plugin colours flip with prose-invert (no kit prose).
     "src/app/(dashboard)/dashboard/agent-skills/components/SkillPreviewPane.tsx": 1,
-    // Partner brand inks (Kimi, Cheaper Inference): dark brand hex on a dark surface (lote 2b).
-    "src/app/(dashboard)/dashboard/combos/KimiComboPresetCard.tsx": 1,
-    "src/app/(dashboard)/dashboard/providers/components/ProviderCard.tsx": 2,
   };
   assert.deepEqual(countBy(DASHBOARD, /(?<=["'`\s])dark:[a-z]/g), DARK_ALLOWED);
 });

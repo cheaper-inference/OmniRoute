@@ -3,6 +3,12 @@
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { JsonTree as KitJsonTree, type JsonTreeProps } from "@omniroute/ui-kit/json-tree";
+import { copyToClipboard } from "@/shared/utils/clipboard";
+
+// The dashboard is often opened by LAN IP over plain HTTP, where navigator.clipboard is missing.
+async function copyText(text: string) {
+  if (!(await copyToClipboard(text))) throw new Error("clipboard copy failed");
+}
 
 /**
  * The kit `JsonTree` with its labels from i18n. Long strings stay whole: payloads are read here.
@@ -29,5 +35,12 @@ export default function JsonTree(props: JsonTreeProps) {
     [t, tCommon, tInspector, tProviders]
   );
 
-  return <KitJsonTree labels={labels} maxStringLength={Number.POSITIVE_INFINITY} {...props} />;
+  return (
+    <KitJsonTree
+      labels={labels}
+      maxStringLength={Number.POSITIVE_INFINITY}
+      copyText={copyText}
+      {...props}
+    />
+  );
 }

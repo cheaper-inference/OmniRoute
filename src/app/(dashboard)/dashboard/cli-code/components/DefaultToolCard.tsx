@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import type { CSSProperties } from "react";
 import Icon from "@/shared/components/Icon";
 import { Card, Button, ModelSelectModal } from "@/shared/components";
 import Input from "@/shared/components/Input";
@@ -12,7 +13,7 @@ import { useTheme } from "@/shared/hooks/useTheme";
 import { DEFAULT_DISPLAY_BASE_URL } from "@/shared/hooks";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import { cn } from "@/shared/utils/cn";
-import { brandTintStyle } from "@/shared/utils/brandTint";
+import { brandTintVars } from "@omniroute/ui-kit/brand-tint";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
 
 export default function DefaultToolCard({
@@ -540,8 +541,8 @@ export default function DefaultToolCard({
           tool.guideSteps.map((item) => (
             <div key={item.step} className="flex items-start gap-4">
               <div
-                className="size-8 rounded-full flex items-center justify-center shrink-0 text-sm font-semibold text-text-main"
-                style={brandTintStyle(tool.color)}
+                className="ci-brand-tint bg-[var(--ci-brand-subtle)] size-8 rounded-full flex items-center justify-center shrink-0 text-sm font-semibold text-text-main"
+                style={brandTintVars(tool.color) as CSSProperties}
               >
                 {item.step}
               </div>
