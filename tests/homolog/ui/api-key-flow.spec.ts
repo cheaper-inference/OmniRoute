@@ -7,13 +7,11 @@ import { test, expect } from "@playwright/test";
 //  - <Input placeholder={t("keyNamePlaceholder")}> = "e.g. Production Key"
 //  - após criar, abre o "Created Key Modal" (t("keyCreated")) — fechar pelo botão t("done")="Done"
 //  - cada key vira uma linha div.grid-cols-12; o botão de deletar tem title={t("deleteKey")}="Delete key"
-//  - handleDeleteKey usa window.confirm(t("deleteConfirm")) — não é modal de UI,
-//    precisa do listener page.on("dialog", ...).
+//  - handleDeleteKey pede confirmação no ConfirmModal do kit (#19066): o botão "Delete"
+//    do diálogo confirma a revogação.
 const KEY_NAME = `homolog-ui-${Date.now()}`;
 
 test("cria e revoga uma API key pela UI", async ({ page }) => {
-  page.on("dialog", (dialog) => dialog.accept());
-
   await page.goto("/dashboard/api-manager");
   await page.getByRole("button", { name: "Create API Key" }).first().click();
   await page.getByPlaceholder("e.g. Production Key").fill(KEY_NAME);
@@ -27,5 +25,6 @@ test("cria e revoga uma API key pela UI", async ({ page }) => {
 
   // revoga a mesma key (cleanup — a suíte não deixa lixo na VPS)
   await row.getByTitle("Delete key").click();
+  await page.getByRole("dialog").getByRole("button", { name: "Delete" }).click();
   await expect(page.locator("div.grid-cols-12", { hasText: KEY_NAME })).toHaveCount(0);
 });

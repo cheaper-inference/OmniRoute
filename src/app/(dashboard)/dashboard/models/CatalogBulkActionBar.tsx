@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Progress } from "@omniroute/ui-kit/progress";
 import { Button } from "@/shared/components";
 import type { ProgressState } from "./useCatalogTestRunner";
 
@@ -21,18 +22,13 @@ function CatalogBulkProgress({ running, progress }: { running: boolean; progress
   if (running) {
     return (
       <div className="flex items-center gap-3">
-        <div className="h-2 w-32 overflow-hidden rounded-full bg-border sm:w-48">
-          <div
-            className="h-full bg-primary transition-all duration-300"
-            style={{ width: `${percent}%` }}
-            role="progressbar"
-            aria-label={t("bulkTestProgress")}
-            aria-valuenow={percent}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuetext={progressText}
-          />
-        </div>
+        <Progress
+          className="w-32 sm:w-48"
+          aria-label={t("bulkTestProgress")}
+          aria-valuetext={progressText}
+          value={percent}
+          animate={false}
+        />
         <span className="text-xs font-medium text-text-muted" aria-hidden="true">
           {progressText}
         </span>

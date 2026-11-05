@@ -18,6 +18,8 @@ import Card from "@/shared/components/Card";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
 import { matchesSearch } from "@/shared/utils/turkishText";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
+import { useNotificationStore } from "@/store/notificationStore";
 import BatchDetailModal from "./BatchDetailModal";
 import ExpirationBadge from "./components/ExpirationBadge";
 import ProgressBarBicolor from "./components/ProgressBarBicolor";
@@ -191,6 +193,7 @@ function BatchRowActions({
 }>) {
   const t = useTranslations("common");
   const actions = useBatchActions({ onRefresh, t });
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
 
   const isTerminal = ["completed", "failed", "cancelled", "expired"].includes(batch.status);
   const canCancel = ["validating", "in_progress", "finalizing"].includes(batch.status);
@@ -204,7 +207,7 @@ function BatchRowActions({
           variant="ghost"
           size="icon-sm"
           onClick={async () => {
-            if (window.confirm(t("batchDetailCancelConfirm"))) {
+            if (await requestConfirm(t("batchDetailCancelConfirm"))) {
               await actions.cancel(batch.id);
             }
           }}
@@ -259,7 +262,12 @@ function BatchRowActions({
           variant="ghost"
           size="icon-sm"
           onClick={async () => {
-            if (window.confirm(t("batchActionRetryConfirm", { n: batch.requestCountsFailed }))) {
+            if (
+              await requestConfirm({
+                message: t("batchActionRetryConfirm", { n: batch.requestCountsFailed }),
+                variant: "primary",
+              })
+            ) {
               await actions.retry({
                 id: batch.id,
                 inputFileId: batch.inputFileId,
@@ -310,6 +318,7 @@ function BatchRowActions({
           <Icon name={deletingId === batch.id ? "hourglass_empty" : "delete"} size={13} />
         </Button>
       )}
+      {confirmDialog}
     </div>
   );
 }
@@ -324,6 +333,7 @@ export default function BatchListTab({
   onRefresh,
 }: Readonly<BatchListTabProps>) {
   const t = useTranslations("common");
+  const notify = useNotificationStore();
   const [selectedBatch, setSelectedBatch] = useState<BatchRecord | null>(null);
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -353,11 +363,11 @@ export default function BatchListTab({
 
       // Surface the notice if the chunk ceiling was hit
       if (hasMore) {
-        window.alert("Removed a large number of batches. Click again to clear the rest.");
+        notify.warning(t("batchListRemoveCompletedPartial"));
       }
     } catch (error) {
       console.error("An error occurred while removing batches:", error);
-      window.alert("An error occurred while removing batches.");
+      notify.error(t("batchListRemoveCompletedFailed"));
     } finally {
       setRemovingCompleted(false);
       onRefresh?.(); // Uses your component's actual refresh prop

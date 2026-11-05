@@ -91,10 +91,10 @@ vi.mock(
 
 const fetchMock = vi.fn();
 vi.stubGlobal("fetch", fetchMock);
-vi.stubGlobal(
-  "confirm",
-  vi.fn(() => true)
-);
+
+// The delete asks through the kit confirm dialog (#19066); the mocked `common` labels are
+// "confirmAction" / "cancel". Each test sets how the user answers it.
+let confirmAnswer: "confirmAction" | "cancel" = "confirmAction";
 
 const { default: QuotaSharePageClient } =
   await import("../../../src/app/(dashboard)/dashboard/costs/quota-share/QuotaSharePageClient");
@@ -124,6 +124,13 @@ async function clickDelete() {
   await act(async () => {
     btn.click();
   });
+  const answer = [
+    ...document.body.querySelectorAll<HTMLButtonElement>('[role="dialog"] button'),
+  ].find((b) => b.textContent?.trim() === confirmAnswer);
+  if (!answer) throw new Error("confirm dialog not rendered");
+  await act(async () => {
+    answer.click();
+  });
   // let the awaited fetch + state update flush
   await act(async () => {
     await Promise.resolve();
@@ -139,7 +146,7 @@ describe("quota-share — deleting a pool", { timeout: 15000 }, () => {
       error: null,
       mutate: mockMutate,
     });
-    (globalThis.confirm as ReturnType<typeof vi.fn>).mockReturnValue(true);
+    confirmAnswer = "confirmAction";
   });
 
   afterEach(() => {
@@ -190,7 +197,7 @@ describe("quota-share — deleting a pool", { timeout: 15000 }, () => {
   });
 
   it("does not call the API at all when the confirmation is dismissed", async () => {
-    (globalThis.confirm as ReturnType<typeof vi.fn>).mockReturnValue(false);
+    confirmAnswer = "cancel";
 
     await renderComponent();
     await clickDelete();
