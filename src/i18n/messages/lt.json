@@ -14238,6 +14238,10 @@
         "label": "OpenCode 429 telkinio pakartotinis pasirinkimas",
         "description": "„OpenCode“ kelių paskyrų rotacijai: gavus 429 iš tiekėjo, ribojančio pagal egress srautą, paskyroje be tarpinio serverio (proxy-less) bendro telkinio kontekste, kitam bandymui paprašyti ryšių telkinio kito nario, užuot bandžius vėl su tuo pačiu egress adresu. Rūšiuoja, bet niekada neatmeta: išsekus telkiniui, išlaikomas dabartinis elgesys. Pagal numatytuosius nustatymus išjungta: kiekvienas 429 perjungia į kitą paskyrą lygiai taip pat, kaip ir anksčiau."
       },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress Probe",
+        "description": "OpenCode vykdytojui, kai į įgaliotąjį užklausą atsakoma 403 arba 451 FreeTierError, o stebimų įrankių pakartotinis bandymas nepavyko arba nepritaikytas, vieną kartą išsiųskite užklausą per kitą tarpinį serverį (kitą paskyros tarpinį serverį arba kitą telkinio narį, niekada tiesioginio ryšio). Tik tada, kai šis zondas atsako 200, tarpinio serverio atsisakymo atmintyje atidedamas pirmasis išėjimas ir pateikiamas zondo atsakymas; abiem atsisakius, grąžinamas pirminis atsisakymas ir nieko neužfiksuojama. Tas pats atsisakymo tekstas apima pažymėtą išėjimo IP ir atmesto prašymo formą, todėl zondas juos atskiria įrodymais. Išjungta pagal numatytuosius nustatymus: atsisakymas grąžinamas nepakeistas."
+      },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 kliento pirštų atspaudas",
         "description": "Siųsti OpenCode v2 CLI kliento pirštų atspaudą OpenCode Zen/Go užklausose (#16571): User-Agent opencode/latest/<2.x>/cli ir x-opencode-client cli, kliento User-Agent paliekamas tik tada, kai tai yra 2.x OpenCode klientas, o ribotose nemokamo plano užklausose nesiunčiama x-opencode-request, sesija dubliuojama į x-opencode-session-id/x-session-affinity/x-session-id, v2 CLI read/shell schemos įterptuose vietos rezervavimo įrankiuose, o tool_choice reikšmė \"none\" pašalinama. Pagal numatytuosius nustatymus išjungta: kiekviena OpenCode užklausa baitas į baitą išlaiko esamą tapatybę, antraštes ir kūną."

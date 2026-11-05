@@ -14238,6 +14238,10 @@
         "label": "OpenCode 429 pūla atkārtota atlase",
         "description": "OpenCode vairāku kontu rotācijā pēc 429 kļūdas saņemšanas no pakalpojumu sniedzēja ar izejošās plūsmas sadalījumu grozos kontā bez starpniekservera apkārtējā pūla kontekstā, nākamajam mēģinājumam pieprasīt savienojumu pūlam citu dalībnieku, nevis atkārtot to pašu izejošo adresi. Sakārto, nekad neizslēdz: izsmelts pūls saglabā pašreizējo darbību. Pēc noklusējuma izslēgts: katra 429 kļūda rotē uz nākamo kontu tieši tāpat kā iepriekš."
       },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress Probe",
+        "description": "OpenCode izpildītājam, ja uz starpniekservera pieprasījumu tiek atbildēts 403 vai 451 FreeTierError un novēroto rīku atkārtots mēģinājums neizdevās vai netika lietots, nosūtiet pieprasījumu vienreiz, izmantojot citu starpniekserveri (citu konta starpniekserveri vai citu kopas dalībnieku, nekad nav tieša savienojuma). Tikai tad, kad šī zonde atbild uz 200, starpniekservera atteikuma atmiņā tiek atstāta pirmā izeja un tiek apkalpota zondes atbilde; kad abi atsakās, tiek atgriezts sākotnējais atteikums un nekas netiek ierakstīts. Tas pats atteikuma teksts aptver atzīmētu izejas IP un atteikta pieprasījuma formu, tāpēc zonde tos atšķir ar pierādījumiem. Pēc noklusējuma izslēgts: atteikums tiek atgriezts nemainīts."
+      },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 klienta ciparospiedums",
         "description": "Nosūtīt OpenCode v2 CLI klienta ciparospiedumu OpenCode Zen/Go pieprasījumos (#16571): User-Agent opencode/latest/<2.x>/cli un x-opencode-client cli, klienta User-Agent tiek saglabāts tikai tad, ja tas ir 2.x OpenCode klients, un ierobežotajos bezmaksas līmeņa pieprasījumos netiek iekļauts x-opencode-request, sesija tiek spoguļota uz x-opencode-session-id/x-session-affinity/x-session-id, v2 CLI read/shell shēmas ievietotajos vietturu rīkos un tool_choice \"none\" tiek atmests. Pēc noklusējuma izslēgts: katrs OpenCode pieprasījums saglabā pašreizējo identitāti, galvenes un pamattekstu baits pret baitu."

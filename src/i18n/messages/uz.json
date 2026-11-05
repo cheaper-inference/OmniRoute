@@ -14238,6 +14238,10 @@
         "label": "OpenCode 429 O‘rta Qayta Tanlash",
         "description": "OpenCode ko‘p hisob aylanishi uchun, proxy-siz hisobda, muhit o‘rta kontekstida, chiqish-savati bo‘yicha yetkazib beruvchidan 429 kelganda, xuddi shu chiqish manzilini takrorlash o‘rniga keyingi urinish uchun ulanish o‘rtasidan boshqa a‘zoning so‘raving. Tartib saqlanadi, hech qachon taqiq qilinmaydi: to‘liq o‘rta joriy xatti-harakatni saqlaydi. Standart holatda o‘chiq: har bir 429 avvalgidagidek keyingi hisobga aylanadi."
       },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress Probe",
+        "description": "OpenCode ijrochisi uchun proksilangan so‘rovga 403 yoki 451 FreeTierError javob berilsa va kuzatilgan asboblarni qayta urinish muvaffaqiyatsiz tugadi yoki qo‘llanilmasa, so‘rovni boshqa proksi-server orqali bir marta yuboring (boshqa proksi-server yoki boshqa hovuz a’zosi, hech qachon to‘g‘ridan-to‘g‘ri ulanish emas). Bu prob 200 ga javob bergandagina proksi-serverni rad etish xotirasida birinchi chiqish ajratiladi va tekshiruv javobi xizmat qiladi; ikkalasi ham rad etganda, rad etishning asl nusxasi qaytariladi va hech narsa yozilmaydi. Xuddi shu rad etish matni bayroqli chiqish IP va rad etilgan so'rov shaklini qamrab oladi, shuning uchun tekshiruv ularni dalillar bilan ajratib turadi. Sukut bo'yicha o'chirilgan: rad etish o'zgarishsiz qaytariladi."
+      },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 Mijoz Kiyim Izini",
         "description": "OpenCode Zen/Go so'rovlari uchun OpenCode v2 CLI mijoz kiyim izini yuborish (#16571): User-Agent opencode/latest/<2.x>/cli va x-opencode-client cli, 2.x OpenCode mijozi bo'lgan miqdorlarda saqlanadigan mijoz User-Agent, shuningdek, chidlangan bepul darajali so'rovlarda x-opencode-request yo'q, sessiya x-opencode-session-id/x-session-affinity/x-session-id'ga ko'chiriladi, ayniqsa yuborilgan placeholder asboblar ustida v2 CLI o'qish/qobiq sxemalari va tool_choice \"none\" tashlanadi. Standart sozlamada o'chiq: har bir OpenCode so'rovi joriy identifikatsiya, sarlavhalar va tana baytlarini aniq saqlab qoladi."

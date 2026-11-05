@@ -14238,6 +14238,10 @@
         "label": "Nhọrọ Ọzọ nke Pool OpenCode 429",
         "description": "Maka ntụgharị ọtụtụ akaụntụ OpenCode, mgbe 429 sitere na onye na-eweta ya nwere egress-bucketed na akaụntụ na-enweghị proxy n'okpuru ọnọdụ ambient pool, rịọ connection pool maka onye òtù ọzọ maka mbọ na-esote kama ịnwale otu adreesị egress ahụ ọzọ. Na-ahazi, ọ naghị ewepụ: pool agwụchara na-ejigide omume dị ugbu a. Gbanyụrụ na ndabere: 429 ọ bụla na-atụgharị gaa na akaụntụ na-esote kpọmkwem dịka ọ dị na mbụ."
       },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress",
+        "description": "Maka onye na-eme OpenCode, mgbe azara arịrịọ proxied 403 ma ọ bụ 451 FreeTierError na ngwaọrụ achọpụtara megharịa ma ọ bụ etinyeghị ya, ziga arịrịọ ahụ otu ugboro site na proxy dị iche (proxy akaụntụ ọzọ ma ọ bụ onye otu ọdọ mmiri, ọ nweghị njikọ kpọmkwem). Naanị mgbe nyocha ahụ zara 200 bụ nke mbụ egress ewepụtara na ebe nchekwa ọjụjụ proxy na nzaghachi nyocha na-eje ozi; mgbe ha abụọ jụrụ, a na-eweghachi ọjụjụ mbụ ma ọ nweghị ihe edekọ. Otu ederede ọjụjụ ahụ na-ekpuchi egress IP ọkọlọtọ na ọdịdị arịrịọ jụrụ, yabụ nyocha ahụ na-eji ihe akaebe na-ekewapụ ha. Gbanyụọ na ndabara: eweghachite ọjụjụ ahụ agbanweghị."
+      },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Akara Mkpịsị Aka Onye Ahịa OpenCode v2",
         "description": "Ziga akara mkpịsị aka onye ahịa OpenCode v2 CLI na arịrịọ OpenCode Zen/Go (#16571): User-Agent opencode/latest/<2.x>/cli na x-opencode-client cli, User-Agent onye ahịa a na-edobe naanị mgbe ọ bụ onye ahịa OpenCode 2.x, na na arịrịọ ọkwa n'efu nwere mgbochi enweghị x-opencode-request, a na-egosipụta nnọkọ ahụ na x-opencode-session-id/x-session-affinity/x-session-id, atụmatụ ọgụgụ/shell v2 CLI na ngwaọrụ placeholder agbakwunyere na tool_choice nke \"none\" wepụrụ. Agbanyụrụ na ndabara: arịrịọ OpenCode ọ bụla na-edobe njirimara ugbu a, headers na body kpọmkwem byte maka byte."
