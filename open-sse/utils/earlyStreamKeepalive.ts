@@ -933,6 +933,13 @@ export async function withEarlyStreamKeepalive(
                 // The last forwarded bytes may end inside an SSE frame. Fail the
                 // transport instead of appending invalid SSE or reporting clean EOF.
                 // Never expose the upstream exception, its stack, or its cause.
+                //
+                // Deliberate asymmetry with the fast path (#17292): here the bytes
+                // already left this process un-buffered, so a half-written `data:`
+                // line cannot be withdrawn and a terminal frame would merge into it.
+                // Rejecting the read is the only outcome that cannot be mistaken
+                // for a clean EOF; the fast path buffers whole frames, so it can
+                // discard the incomplete one and append a parseable terminal event.
                 streamErrored = true;
                 controller.error(new Error("Upstream stream failed before completion."));
               }
