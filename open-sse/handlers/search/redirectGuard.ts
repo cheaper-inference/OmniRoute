@@ -10,9 +10,9 @@
  * actually uses. The first hop gets that dispatcher only when its origin
  * (scheme, host and port) differs from the provider's registry base URL, i.e.
  * for an operator or caller base URL; the fixed registry origin keeps the
- * pooled dispatcher and its retry, as with dispatchGuarded() for executors. Loopback and LAN hops stay allowed, as they
- * are for the base URL, so a self-hosted SearXNG behind a redirect keeps
- * working.
+ * pooled dispatcher and its retry, as with dispatchGuarded() for executors.
+ * Loopback and LAN hops stay allowed, as they are for the base URL, so a
+ * self-hosted SearXNG behind a redirect keeps working.
  *
  * Behind a proxy the proxy resolves the name, so only the name check applies.
  * Under Bun (not a supported runtime) getGuardedDispatcher() throws, so a hop
@@ -29,7 +29,16 @@ export const MAX_SEARCH_REDIRECTS = 5;
 /** The statuses fetch() follows; any other 3xx is returned as is. */
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
 
-const CROSS_ORIGIN_DROPPED_HEADERS = ["authorization", "cookie", "proxy-authorization"];
+// fetch() drops Authorization/Cookie/Proxy-Authorization on a cross-origin
+// redirect. Search providers also send x-api-key and x-subscription-token, which
+// fetch() would keep; drop those here too so a keyed hop cannot leak the key.
+const CROSS_ORIGIN_DROPPED_HEADERS = [
+  "authorization",
+  "cookie",
+  "proxy-authorization",
+  "x-api-key",
+  "x-subscription-token",
+];
 const BODY_HEADERS = ["content-type", "content-length", "content-encoding", "content-language"];
 
 /** Request for the next hop, following the fetch spec's method and header rules. */

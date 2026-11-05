@@ -341,6 +341,37 @@ test("credentials dropped on a cross-origin hop stay dropped on a later same-ori
   );
 });
 
+test("a cross-origin hop also drops x-api-key and x-subscription-token", async () => {
+  // fetch() keeps these custom key headers across origins; search providers use both.
+  const sent: Headers[] = [];
+  globalThis.fetch = (async (input: string | URL | Request, init: RequestInit = {}) => {
+    sent.push(new Headers(init.headers));
+    return String(input) === "http://a.search-redirect.test/s"
+      ? new Response(null, {
+          status: 302,
+          headers: { location: "http://b.search-redirect.test/1" },
+        })
+      : Response.json({});
+  }) as typeof fetch;
+
+  const response = await fetchWithCheckedRedirects("http://a.search-redirect.test/s", {
+    headers: {
+      authorization: "Bearer k",
+      "x-api-key": "provider-key",
+      "x-subscription-token": "sub-token",
+    },
+  });
+
+  assert.equal(response.status, 200);
+  assert.equal(sent.length, 2);
+  assert.equal(sent[0].get("authorization"), "Bearer k");
+  assert.equal(sent[0].get("x-api-key"), "provider-key");
+  assert.equal(sent[0].get("x-subscription-token"), "sub-token");
+  assert.equal(sent[1].get("authorization"), null);
+  assert.equal(sent[1].get("x-api-key"), null);
+  assert.equal(sent[1].get("x-subscription-token"), null);
+});
+
 test("a redirect chain is checked on every hop, not only the first", async () => {
   await assert.rejects(
     fetchWithCheckedRedirects(`${origin}/two-hop-metadata`, {}),
