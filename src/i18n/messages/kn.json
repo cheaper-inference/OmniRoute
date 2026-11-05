@@ -1035,7 +1035,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "OpenCode Zen/Go ವಿನಂತಿಗಳಲ್ಲಿ OpenCode v2 CLI ಕ್ಲೈಂಟ್ ಫಿಂಗರ್ಪ್ರಿಂಟ್ ಅನ್ನು ಕಳುಹಿಸಿ: opencode/latest/<2.x>/cli User-Agent ಮತ್ತು x-opencode-client cli; ಹಾಗೆಯೇ ಉಚಿತ-ಶ್ರೇಣಿಯ ವಿನಂತಿಗಳಲ್ಲಿ v2 ಸೆಷನ್ ಹೆಡರ್ಗಳು, v2 CLI read/shell ಟೂಲ್ ಸ್ಕೀಮಾಗಳು ಮತ್ತು tool_choice \"none\" ಇಲ್ಲದೆ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ಪ್ರತಿಯೊಂದು OpenCode ವಿನಂತಿಯೂ ಪ್ರಸ್ತುತ ಗುರುತು, ಹೆಡರ್ಗಳು ಮತ್ತು ಬಾಡಿಯನ್ನು ಬದಲಾವಣೆ ಇಲ್ಲದೆ ಉಳಿಸಿಕೊಳ್ಳುತ್ತದೆ.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "ಟೂಲ್-ಕಾಲಿಂಗ್ ಪ್ರೀ-ಫಿಲ್ಟರ್ ಚಾಲನೆಯಾಗುವ ಮೊದಲೇ ಆಟೋ ಕಾಂಬೋದ ಅಭ್ಯರ್ಥಿ ಪೂಲ್ ಖಾಲಿಯಾಗಿದ್ದರೆ (ಕೂಲ್ಡೌನ್ಗಳು, ಲಾಕ್ಔಟ್ಗಳು ಅಥವಾ ಬಳಲಿ ಮುಗಿದಿರುವುದರಿಂದ ಪ್ರತಿಯೊಂದು ಟಾರ್ಗೆಟ್ ಅನ್ನು ಬಿಟ್ಟುಬಿಟ್ಟಿದ್ದರೆ), ಹಳೆಯ 400 \"ಯಾವುದೇ ಟಾರ್ಗೆಟ್ ಟೂಲ್ ಕಾಲಿಂಗ್ ಅನ್ನು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ\" capability_mismatch ಬದಲಿಗೆ 503 no_eligible_targets ಅನ್ನು ಉತ್ತರಿಸಿ. ಡೀಫಾಲ್ಟ್ ಆಗಿ ಆಫ್: ಖಾಲಿ ಪೂಲ್ ಹಳೆಯ 400 ಅನ್ನು ಉಳಿಸಿಕೊಳ್ಳುತ್ತದೆ.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "ವಿಶ್ವಾಸಾರ್ಹ ಮಾದರಿ ಎಂಡ್ಪಾಯಿಂಟ್ ಟ್ಯಾಗ್ಗಳನ್ನು (ಪೂರೈಕೆದಾರರ ಕ್ಯಾಟಲಾಗ್ನಿಂದ ಘೋಷಿಸಲಾದ, ವಿಶೇಷ ಮಾದರಿ id ಯಿಂದ ಊಹಿಸಲಾದ, ಅಥವಾ ನಿರ್ವಾಹಕರು ಹೊಂದಿಸಿದ) ಕಡ್ಡಾಯಗೊಳಿಸಿ: /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations ಮತ್ತು /v1/audio/* ನಲ್ಲಿ ಮಾದರಿಯು ಸೇವೆ ನೀಡದ ಎಂಡ್ಪಾಯಿಂಟ್ಗೆ ಕಳುಹಿಸಲಾದ ವಿನಂತಿಯನ್ನು ರವಾನಿಸುವ ಮೊದಲು HTTP 400 ನೊಂದಿಗೆ ತಿರಸ್ಕರಿಸಿ; ಟ್ಯಾಗ್ ಮಾಡಲಾದ ಎಂಡ್ಪಾಯಿಂಟ್ಗಳಿಗೆ OmniRoute ಅಡಾಪ್ಟರ್ ಇಲ್ಲದ ಮಾದರಿಗಳನ್ನು /v1/models ನಿಂದ ಮರೆಮಾಡಿ; ಮತ್ತು ಅಂತಹ ಮಾದರಿಗಳ ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಮಾದರಿ ಪರೀಕ್ಷೆಗೆ 422 ನೊಂದಿಗೆ ಪ್ರತಿಕ್ರಿಯಿಸಿ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್: ಎಂಡ್ಪಾಯಿಂಟ್ ಟ್ಯಾಗ್ಗಳು ಮಾಹಿತಿಗಾಗಿ ಮಾತ್ರ ಉಳಿಯುತ್ತವೆ ಮತ್ತು ವಿನಂತಿಗಳನ್ನು ಹಿಂದಿನಂತೆಯೇ ರವಾನಿಸಲಾಗುತ್ತದೆ.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "ಸರಳ anthropic-ಹೊಂದಾಣಿಕೆಯ ರಿಲೇಗಳಲ್ಲಿ, ಸಂಭಾಷಣೆಯ ಮಧ್ಯದ ಸಿಸ್ಟಮ್ ಟರ್ನ್ಗಳನ್ನು ಉನ್ನತ-ಮಟ್ಟದ ಸಿಸ್ಟಮ್ ಪ್ರಾಂಪ್ಟ್ಗೆ ಸ್ಥಳಾಂತರಿಸುವ ಬದಲು ಸಂದೇಶಗಳ ಪಟ್ಟಿಯಲ್ಲೇ ಇರಿಸಿ, ಇದರಿಂದ ಕ್ಯಾಶ್ ಮಾಡಲಾದ ಪ್ರಾಂಪ್ಟ್ ಪೂರ್ವಪ್ರತ್ಯಯವು ಟರ್ನ್ಗಳಾದ್ಯಂತ ಸ್ಥಿರವಾಗಿರುತ್ತದೆ. ಕ್ಲೈಂಟ್ ಸ್ವತಃ mid-conversation-system-2026-04-07 ಬೀಟಾವನ್ನು ಕಳುಹಿಸಿದಾಗ ಮಾತ್ರ ಇದು ಅನ್ವಯಿಸುತ್ತದೆ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ಆ ಬೀಟಾ ಇಲ್ಲದ ರಿಲೇಗಳು ಸಂದೇಶಗಳ ಪಟ್ಟಿಯಲ್ಲಿರುವ ಸಿಸ್ಟಮ್ ಟರ್ನ್ಗಳನ್ನು ತಿರಸ್ಕರಿಸುವುದರಿಂದ, ಮೊದಲಿನಂತೆಯೇ ಪ್ರತಿಯೊಂದು ಸಿಸ್ಟಮ್ ಟರ್ನ್ ಅನ್ನು ನಿಖರವಾಗಿ ಸಿಸ್ಟಮ್ ಪ್ರಾಂಪ್ಟ್ಗೆ ಸ್ಥಳಾಂತರಿಸಲಾಗುತ್ತದೆ.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "ಆಪರೇಟರ್ ಓವರ್ರೈಡ್ ಅಥವಾ ಪೂರೈಕೆದಾರರ ರಿಜಿಸ್ಟ್ರಿ ಯಾವುದನ್ನೂ ಘೋಷಿಸದಿದ್ದಾಗ models.dev ಪ್ರಕಟಿಸುವ ತಾರ್ಕಿಕ ಪ್ರಯತ್ನದ ಹಂತಗಳನ್ನು ಬಳಸಿ, ತಿಳಿದಿರುವ ಪ್ರಯತ್ನದ ಮಟ್ಟಗಳನ್ನು ಮಾತ್ರ ಉಳಿಸಿಕೊಳ್ಳಿ ಮತ್ತು ಘೋಷಿಸಲಾದ ಹಂತಗಳ ಪಟ್ಟಿ ಖಾಲಿಯಾಗಿದ್ದರೆ ಅದನ್ನು \"ಯಾವುದೇ ಹಂತಗಳಿಲ್ಲ\" ಎಂದು ಪರಿಗಣಿಸಿ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ಮಾದರಿ ಕ್ಯಾಟಲಾಗ್ ಮತ್ತು ನಿರ್ಧರಿಸಲಾದ ಪ್ರಯತ್ನದ ಹಂತಗಳು ಮೊದಲಿನಂತೆಯೇ ಇರುತ್ತವೆ.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "auto/* ವಿನಂತಿಗಳಿಗೆ ಪರಿಹರಿಸಿದ ಮಾದರಿ ಸಾಮರ್ಥ್ಯಗಳು (ವಿಷನ್, ರೀಸನಿಂಗ್, ಥಿಂಕಿಂಗ್) ಮತ್ತು ಗಮನಿಸಿದ ಗುಣಮಟ್ಟದ ಅಂಕಗಳೊಂದಿಗೆ, ಒಂದೇ ಬಲ್ಕ್ ಓದಿನಲ್ಲಿ, ಅಭ್ಯರ್ಥಿ ಪೂಲ್ ನಿರ್ಮಿಸಲು ಅನುಮತಿಸುತ್ತದೆ. ಡೀಫಾಲ್ಟ್ ಆಗಿ ಆಫ್: ವಿನಂತಿ ಸಮಯದ ಅಭ್ಯರ್ಥಿ ತೂಕಗಳು ಹಿಂದಿನಂತೆಯೇ ಇರುತ್ತವೆ. ಆನ್ ಆಗಿದ್ದಾಗ: ಈ ಸಂಕೇತಗಳು ಸ್ನ್ಯಾಪ್‌ಶಾಟ್ ತೂಕಗಳಿಗೆ ಸೇರುತ್ತವೆ, ಆದ್ದರಿಂದ ಅಭ್ಯರ್ಥಿ ತೂಕಗಳು ಮತ್ತು ಆಯ್ಕೆ ಬದಲಾಗಬಹುದು.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "ಗೇಟ್ವೇ ಸ್ವಯಂ ಆಫ್ ಮಾಡಿದ ಸಂಪರ್ಕಗಳನ್ನು ಕ್ರೆಡೆನ್ಶಿಯಲ್ ಆರೋಗ್ಯ ಪರಿಶೀಲನೆಯು ಮರುಪರೀಕ್ಷಿಸಲು (ಪ್ರತಿಯೊಂದನ್ನು ಹೆಚ್ಚೆಂದರೆ ಪ್ರತಿ 6 ಗಂಟೆಗಳಿಗೊಮ್ಮೆ, ಪ್ರತಿ ಪರಿಶೀಲನೆಯಲ್ಲಿ 5) ಮತ್ತು ಮರುಪರೀಕ್ಷೆಯಲ್ಲಿ ಯಶಸ್ವಿಯಾದಾಗ ಒಂದನ್ನು ಮತ್ತೆ ಆನ್ ಮಾಡಲು ಅನುಮತಿಸಿ. ಡೀಫಾಲ್ಟ್ ಆಗಿ ಆಫ್: ಆಪರೇಟರ್ ಕ್ರಮ ಕೈಗೊಳ್ಳುವವರೆಗೆ ಅಂತಹ ಸಂಪರ್ಕಗಳು ಆಫ್ ಆಗಿಯೇ ಇರುತ್ತವೆ. ಆಪರೇಟರ್ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿದ ಮತ್ತು ಶಾಶ್ವತವಾಗಿ ನಿಷೇಧಿಸಿದ ಸಂಪರ್ಕಗಳನ್ನು ಎಂದಿಗೂ ಮರುಪರೀಕ್ಷಿಸಲಾಗುವುದಿಲ್ಲ.",
@@ -1939,7 +1938,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# ವಿನಂತಿ} other {# ವಿನಂತಿಗಳು}}, {keys, plural, one {# ಮಿತಿ ಇರುವ API ಕೀ} other {# ಮಿತಿ ಇರುವ API ಕೀಗಳು}}",
     "unpricedUsageMore": "…ಮತ್ತು {count} ಇನ್ನಷ್ಟು",
     "unpricedUsageConfigure": "ಬೆಲೆ ಸಂರಚಿಸಿ",
-    "unpricedUsageDismiss": "ರದ್ದು ಮಾಡಿ"
+    "unpricedUsageDismiss": "ರದ್ದು ಮಾಡಿ",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "ವಿಶ್ಲೇಷಣೆ",
@@ -6264,6 +6272,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "ತಾತ್ಕಾಲಿಕ ಕೂಲ್ಡೌನ್ ಅನ್ನು ಬಿಟ್ಟುಬಿಡಿ, ಇದರಿಂದ ಮರುಪಡೆಯಬಹುದಾದ ದೋಷಗಳ ನಂತರವೂ ಈ ಸಂಪರ್ಕವು ಅರ್ಹವಾಗಿರುತ್ತದೆ (ನಿಷೇಧಿತ/ಅವಧಿ ಮುಗಿದಂತಹ ಅಂತಿಮ ಸ್ಥಿತಿಗಳು ಇನ್ನೂ ಅನ್ವಯಿಸುತ್ತವೆ).",
     "disableCoolingLabel": "ಈ ಸಂಪರ್ಕಕ್ಕಾಗಿ ಕೂಲ್ಡೌನ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ",
+    "keepMidConversationSystemDescription": "ಸಿಸ್ಟಂ ಸಂದೇಶಗಳನ್ನು ಉನ್ನತ ಮಟ್ಟದ ಸಿಸ್ಟಂ ಪ್ರಾಂಪ್ಟ್ಗೆ ಸರಿಸುವ ಬದಲು ಸಂದೇಶ ಪಟ್ಟಿಯೊಳಗೆ ಮಧ್ಯ-ಸಂಭಾಷಣೆಯನ್ನು ಬಿಡಿ, ಆದ್ದರಿಂದ ಪ್ರಾಂಪ್ಟ್ ಸಂಗ್ರಹವು ತಿರುವುಗಳಲ್ಲಿ ಹೊಡೆಯುತ್ತಲೇ ಇರುತ್ತದೆ. ಈ ಅಪ್ಸ್ಟ್ರೀಮ್ ಸಂದೇಶಗಳ ಒಳಗೆ ಪಾತ್ರ \"ಸಿಸ್ಟಮ್\" ಅನ್ನು ಸ್ವೀಕರಿಸಿದರೆ ಮಾತ್ರ ಸಕ್ರಿಯಗೊಳಿಸಿ (ಇಲ್ಲದಿದ್ದರೆ ಅದು 400 ಗೆ ಉತ್ತರಿಸುತ್ತದೆ).",
+    "keepMidConversationSystemLabel": "ಮಧ್ಯ-ಸಂಭಾಷಣಾ ವ್ಯವಸ್ಥೆಯ ಸಂದೇಶಗಳನ್ನು ಸ್ಥಳದಲ್ಲಿ ಇರಿಸಿ",
+    "requireUserLastMessageDescription": "ಅಸಿಸ್ಟೆಂಟ್ ಪ್ರಿಫಿಲ್ ಅನ್ನು ತಿರಸ್ಕರಿಸುವ ಅಪ್ಸ್ಟ್ರೀಮ್ಗಳಿಗಾಗಿ: ಕಳುಹಿಸುವ ಮೊದಲು ಟ್ರೇಲಿಂಗ್ ಅಸಿಸ್ಟೆಂಟ್ ಟರ್ನ್ಗಳನ್ನು ಬಿಡಿ (ಟೂಲ್_ಯೂಸ್ ಇಲ್ಲ). ಮಾದರಿಯು ಅದರ ಹಿಂದಿನ ಉತ್ತರವನ್ನು ಪುನರುತ್ಪಾದಿಸಬಹುದು.",
+    "requireUserLastMessageLabel": "ಬಳಕೆದಾರರ ಸಂದೇಶದೊಂದಿಗೆ ಕೊನೆಗೊಳ್ಳಲು ಸಂಭಾಷಣೆಯ ಅಗತ್ಯವಿದೆ",
     "bulkPasteAdded": "{count, plural, one {1 ಕೀ ಸೇರಿಸಲಾಗಿದೆ} other {# ಕೀಗಳನ್ನು ಸೇರಿಸಲಾಗಿದೆ}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 ನಕಲನ್ನು ಬಿಟ್ಟುಬಿಡಲಾಗಿದೆ} other {# ನಕಲುಗಳನ್ನು ಬಿಟ್ಟುಬಿಡಲಾಗಿದೆ}}",
     "bulkPasteHint": "ಪ್ರತಿ ಸಾಲಿಗೆ ಒಂದು API ಕೀಯನ್ನು ಅಂಟಿಸಿ. ಖಾಲಿ ಸಾಲುಗಳನ್ನು ನಿರ್ಲಕ್ಷಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ನಕಲಿ ಕೀಗಳನ್ನು ಬಿಟ್ಟುಬಿಡಲಾಗುತ್ತದೆ.",
@@ -7097,6 +7109,7 @@
     "proxySubTabsAria": "ಪ್ರಾಕ್ಸಿ ವಿಭಾಗಗಳು",
     "requestBodyLimitTitle": "ವಿನಂತಿ ಬಾಡಿ ಮಿತಿ",
     "requestBodyLimitDescription": "ವಿನಂತಿ ಬಾಡಿಯನ್ನು ಪಾರ್ಸ್ ಮಾಡುವ ಮೊದಲು ಸ್ವೀಕರಿಸಲಾಗುವ ಗರಿಷ್ಠ API ಪೇಲೋಡ್ ಗಾತ್ರ. ಮೀಸಲಾದ ಅಪ್ಲೋಡ್ ಮಾರ್ಗಗಳು ತಮ್ಮ ಅಂತರ್ನಿರ್ಮಿತ 100 MB ಮಿತಿಯನ್ನು ಕನಿಷ್ಠ ಮಟ್ಟವಾಗಿ ಉಳಿಸಿಕೊಳ್ಳುತ್ತವೆ.",
+    "requestBodyLimitChatHint": "ನೀವು ಇಲ್ಲಿ ಮಿತಿಯನ್ನು ಉಳಿಸುವವರೆಗೆ Chat Completions ಮತ್ತು Responses ಗರಿಷ್ಠ 50 MB ಸ್ವೀಕರಿಸುತ್ತವೆ. ಉಳಿಸಿದ ಮಿತಿ ಕಡಿಮೆಯಾಗಿರಲಿ ಅಥವಾ ಹೆಚ್ಚಾಗಿರಲಿ, ಅವುಗಳಿಗೂ ಅನ್ವಯಿಸುತ್ತದೆ.",
     "requestBodyLimitInputLabel": "MB ಯಲ್ಲಿ ವಿನಂತಿ ಬಾಡಿಯ ಮಿತಿ",
     "requestBodyLimitEmptyError": "MB ಯಲ್ಲಿ ಮಿತಿಯನ್ನು ನಮೂದಿಸಿ",
     "requestBodyLimitWholeNumberError": "ಪೂರ್ಣ ಸಂಖ್ಯೆಯನ್ನು ಬಳಸಿ",
@@ -14157,6 +14170,10 @@
         "label": "ಹಂಚಿಕೆಯಾದ ಎಗ್ರೆಸ್ ಪೂಲ್ ಕ್ರಮ",
         "description": "ಎಗ್ರೆಸ್ ವಿಳಾಸದ ಆಧಾರದಲ್ಲಿ ಕೋಟಾವನ್ನು ವಿಂಗಡಿಸಲಾದ ಪ್ರೊವೈಡರ್‌ಗಳಿಗಾಗಿ, ಇತ್ತೀಚೆಗೆ ನಿರಾಕರಿಸಲಾದ ಸದಸ್ಯರ ವೀಕ್ಷಿಸಲಾದ ಎಗ್ರೆಸ್ ವಿಳಾಸವನ್ನು ಹಂಚಿಕೊಳ್ಳುವ ಪೂಲ್ ಸದಸ್ಯರಿಗೆ ಆರೋಗ್ಯಕರ ಸದಸ್ಯರ ನೇರವಾಗಿ ಕೆಳಗೆ ಶ್ರೇಯಾಂಕ ನೀಡಿ. ಕೇವಲ ಕ್ರಮ ಮಾತ್ರ, ಎಂದಿಗೂ ಹೊರಗಿಡಲಾಗುವುದಿಲ್ಲ. ಇದಕ್ಕೆ PROXY_SKIP_RECENTLY_FAILED ಅಗತ್ಯವಿದೆ, ಇದು ತಾನು ಓದುವ ನಿರಾಕರಣೆ ಸಿಗ್ನಲ್ ಅನ್ನು ಉತ್ಪಾದಿಸುತ್ತದೆ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿದೆ: ಆಯ್ಕೆಯ ಕ್ರಮವು ನಿಖರವಾಗಿ ಸಾಮಾನ್ಯ ರೊಟೇಶನ್ ಆಗಿದೆ."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "ರೊಟೇಶನ್ ಅಟ್ರಿಬ್ಯೂಷನ್ ಲಾಗಿಂಗ್",
         "description": "Opencode ರೊಟೇಶನ್ ಯಾವ ಖಾತೆಯು ಸೇವೆ ಸಲ್ಲಿಸಿದೆ ಅಥವಾ ಸ್ಕಿಪ್ ಮಾಡಲಾಗಿದೆ ಎಂಬುದನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡುತ್ತದೆ (ಮರೆಮಾಡಲಾದ id ಗಳು ಮಾತ್ರ, ಎಂದಿಗೂ ಪೂರ್ಣ ಖಾತೆ id ಗಳಲ್ಲ) ಮತ್ತು ಪ್ರಾಕ್ಸಿ ಲಾಗ್ ನಮೂದುಗಳನ್ನು ಅವುಗಳ ವಿನಂತಿಗೆ ಲಿಂಕ್ ಮಾಡುತ್ತದೆ, ಇದರಿಂದ ಆಪರೇಟರ್ ಸ್ಕಿಪ್ ಮಾಡಲಾದ ಖಾತೆಗಳನ್ನು ಬಳಸದ ಖಾತೆಗಳಿಂದ ಪ್ರತ್ಯೇಕಿಸಿ ತಿಳಿಯಬಹುದು. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿದೆ: ಯಾವುದೇ ಹೆಚ್ಚುವರಿ ಲಾಗ್ ಸಾಲುಗಳಿಲ್ಲ, ಯಾವುದೇ ಹೆಚ್ಚುವರಿ ಕಾಲಮ್‌ಗಳನ್ನು ಬರೆಯಲಾಗುವುದಿಲ್ಲ."
@@ -14388,6 +14405,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "ಕಾಂಬೋ: ಕಂಟೆಂಟ್-ಪಾಲಿಸಿ ತಿರಸ್ಕಾರದಲ್ಲಿ ನಿಲ್ಲಿಸಿ",
         "description": "ಕಾಂಬೋ ಗುರಿಯು ನಿಖರವಾದ ಕಂಟೆಂಟ್-ಪಾಲಿಸಿ ತಿರಸ್ಕಾರದೊಂದಿಗೆ (ಕೋಡ್ ಅಥವಾ ಪ್ರಕಾರ cyber_policy / content_policy_violation) ಉತ್ತರಿಸಿದಾಗ, ಮುಂದಿನ ಗುರಿಗೆ ಮುನ್ನಡೆಯುವ ಬದಲು, ಉಳಿದ ಗುರಿಗಳು ವಿಭಿನ್ನ ಮಾಡೆಲ್‌ಗಳಾಗಿದ್ದರೂ ಸಹ ಕಾಂಬೋವನ್ನು ನಿಲ್ಲಿಸಿ ಮತ್ತು ಆ ತಿರಸ್ಕಾರವನ್ನು ಹಿಂತಿರುಗಿಸಿ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ತಿರಸ್ಕಾರವು ಎಂದಿಗೂ ಖಾತೆಯನ್ನು ಕೂಲ್ ಮಾಡುವುದಿಲ್ಲ ಅಥವಾ ಪ್ರೊವೈಡರ್ ಬ್ರೇಕರ್ ಅನ್ನು ಟ್ರಿಪ್ ಮಾಡುವುದಿಲ್ಲ, ಮತ್ತು ಕಾಂಬೋ ಮೊದಲಿನಂತೆಯೇ ತನ್ನ ಮುಂದಿನ ಗುರಿಗೆ ಮುನ್ನಡೆಯುತ್ತದೆ."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "ಕೂಲ್‌ಡೌನ್ ಮರುಪ್ರಯತ್ನ: 403/410 ನಿರಾಕರಣೆಗಳನ್ನು ಬಿಟ್ಟುಬಿಡಿ",

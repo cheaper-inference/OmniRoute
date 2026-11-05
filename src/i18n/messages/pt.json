@@ -1112,7 +1112,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "Enviar a identificação do cliente CLI OpenCode v2 nos pedidos OpenCode Zen/Go: o User-Agent opencode/latest/<2.x>/cli e x-opencode-client cli e, nos pedidos do nível gratuito, os cabeçalhos de sessão v2, os esquemas das ferramentas read/shell da CLI v2 e sem tool_choice \"none\". Desativado por predefinição: todos os pedidos OpenCode mantêm a identidade, os cabeçalhos e o corpo atuais inalterados.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Quando o conjunto de candidatos de uma combinação automática já estiver vazio antes da execução do pré-filtro de chamada de ferramentas (todos os destinos foram ignorados devido a períodos de espera, bloqueios ou esgotamento), devolver 503 no_eligible_targets em vez do erro 400 legado «No target supports tool calling» capability_mismatch. Desativado por predefinição: o conjunto vazio mantém o erro 400 legado.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Aplicar as etiquetas de endpoints de modelos fidedignas (declaradas pelo catálogo do fornecedor, inferidas a partir do ID de um modelo especializado ou definidas pelo operador): rejeitar, com HTTP 400 e antes do encaminhamento, um pedido enviado para um endpoint que o modelo não disponibiliza em /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations e /v1/audio/*; ocultar de /v1/models os modelos cujos endpoints etiquetados não tenham um adaptador OmniRoute; e responder ao teste de modelo do painel com 422 para esses modelos. Desativado por predefinição: as etiquetas de endpoints permanecem informativas e os pedidos são encaminhados exatamente como antes.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "Em relays simples compatíveis com a Anthropic, mantenha as mensagens de sistema a meio da conversa na lista de mensagens, em vez de as mover para o prompt de sistema de nível superior, para que o prefixo do prompt em cache permaneça estável entre interações. Aplica-se apenas quando o próprio cliente tiver enviado a beta mid-conversation-system-2026-04-07. Desativado por predefinição: todas as mensagens de sistema são movidas para o prompt de sistema exatamente como antes, porque os relays sem essa beta rejeitam mensagens de sistema na lista de mensagens.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Utilize os níveis de esforço de raciocínio publicados por models.dev quando nem uma substituição do operador nem o registo do fornecedor declararem quaisquer níveis, mantendo apenas os níveis de esforço conhecidos e tratando uma lista de níveis declarada vazia como \"sem níveis\". Desativado por predefinição: o catálogo de modelos e os níveis de esforço determinados permanecem exatamente como antes.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "Permite que os pedidos auto/* construam o conjunto de candidatos com as capacidades de modelo resolvidas (visão, raciocínio, pensamento) e as pontuações de qualidade observadas, lidas numa única leitura em lote. Desativado por predefinição: os pesos dos candidatos no momento do pedido mantêm-se exatamente como antes. Ativado: esses sinais alimentam os pesos do instantâneo, pelo que os pesos dos candidatos e a seleção podem mudar.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Permitir que a verificação do estado das credenciais volte a testar as ligações que o gateway desativou automaticamente (no máximo uma vez a cada 6 horas por ligação, 5 por verificação) e reative uma ligação quando o novo teste for bem-sucedido. Desativado por predefinição: essas ligações permanecem desativadas até que um operador intervenha. As ligações desativadas por um operador e as ligações permanentemente banidas nunca são testadas novamente.",
@@ -2016,7 +2015,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# pedido} other {# pedidos}}, {keys, plural, one {# chave limitada} other {# chaves limitadas}}",
     "unpricedUsageMore": "…e mais {count}",
     "unpricedUsageConfigure": "Configurar preços",
-    "unpricedUsageDismiss": "Fechar"
+    "unpricedUsageDismiss": "Fechar",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Análise",
@@ -6341,6 +6349,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Ignorar o cooldown transitório para que esta ligação permaneça elegível mesmo após erros recuperáveis (estados terminais como banido/expirado continuam a aplicar-se).",
     "disableCoolingLabel": "Desativar cooldown para esta ligação",
+    "keepMidConversationSystemDescription": "Deixe as mensagens do sistema enviadas no meio da conversa dentro da lista de mensagens em vez de as mover para o prompt de nível superior do sistema, para que a cache de prompts continue a atingir os turnos. Active apenas se este upstream aceitar a função \"system\" dentro das mensagens (caso contrário, responderá 400).",
+    "keepMidConversationSystemLabel": "Mantenha as mensagens do sistema no meio da conversação em vigor",
+    "requireUserLastMessageDescription": "Para upstreams que rejeitam o pré-preenchimento do assistente: elimine as voltas finais do assistente (sem tool_use) antes de enviar. O modelo pode regenerar a sua resposta anterior.",
+    "requireUserLastMessageLabel": "Exigir que a conversa termine com uma mensagem do utilizador",
     "bulkPasteAdded": "{count, plural, one {1 chave adicionada} other {# chaves adicionadas}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplicado ignorado} other {# duplicados ignorados}}",
     "bulkPasteHint": "Cola uma chave de API por linha. Linhas vazias são ignoradas e chaves duplicadas são ignoradas.",
@@ -7174,6 +7186,7 @@
     "proxySubTabsAria": "Secções de proxy",
     "requestBodyLimitTitle": "Limite do Corpo do Pedido",
     "requestBodyLimitDescription": "Tamanho máximo de payload de API aceite antes de o corpo do pedido ser analisado. As rotas de upload dedicadas mantêm pelo menos o seu próprio limite.",
+    "requestBodyLimitChatHint": "Chat Completions e Responses aceitam até 50 MB enquanto não guardar um limite aqui. O limite guardado também se aplica a estas APIs, seja inferior ou superior.",
     "requestBodyLimitInputLabel": "Limite do corpo do pedido em MB",
     "requestBodyLimitEmptyError": "Introduz um limite em MB",
     "requestBodyLimitWholeNumberError": "Usa um número inteiro",
@@ -14234,6 +14247,10 @@
         "label": "Ordem de Pool com Egress Partilhado",
         "description": "Para fornecedores cuja quota é agrupada por endereço de egress, classifica um membro da pool que partilhe o endereço de egress observado de um membro recentemente recusado logo abaixo dos membros saudáveis. Apenas ordenação, nunca exclusão. Requer PROXY_SKIP_RECENTLY_FAILED, que produz o sinal de recusa por ele lido. Desativado por predefinição: a ordem de seleção é exatamente a rotação simples."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Registo de Atribuição de Rotação",
         "description": "A rotação do opencode regista que conta respondeu ou foi ignorada (apenas IDs mascarados, nunca IDs de conta completos) e associa as entradas do registo de proxies ao respetivo pedido, para que o operador possa distinguir contas ignoradas de contas não utilizadas. Desativado por predefinição: sem linhas de registo adicionais, sem colunas adicionais gravadas."
@@ -14465,6 +14482,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Parar em Caso de Recusa por Política de Conteúdo",
         "description": "Quando um destino do combo responder com uma recusa exata por política de conteúdo (código ou tipo cyber_policy / content_policy_violation), para o combo e devolve essa recusa, mesmo quando os restantes destinos forem modelos diferentes, em vez de avançar para o destino seguinte. Desativado por predefinição: a recusa nunca arrefece a conta nem aciona o disjuntor do fornecedor, e o combo avança para o destino seguinte exatamente como antes."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Nova tentativa em arrefecimento: ignorar recusas 403/410",

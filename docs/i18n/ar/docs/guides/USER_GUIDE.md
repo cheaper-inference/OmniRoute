@@ -618,17 +618,17 @@ post_install() {
 <details>
 <summary><b>عرض جميع النماذج المتاحة</b></summary>
 
-> القائمة أدناه منتقاة من `open-sse/config/providerRegistry.ts` للإصدار v3.8.0. تتم مزامنة كتالوجات السحابة (Gemini وOpenRouter وغيرهما) ديناميكيًا — للحصول على الكتالوج المباشر الكامل، افتح **لوحة المعلومات → المزوّدون → [المزوّد] → النماذج المتاحة** أو استدعِ `GET /api/models/catalog`.
+> القائمة أدناه منتقاة من `open-sse/config/providerRegistry.ts` للإصدار v3.8.0. تتم مزامنة كتالوجات السحابة (Gemini وOpenRouter وغيرهما) ديناميكيًا — للوصول إلى الكتالوج المباشر الكامل، افتح **Dashboard → Providers → [provider] → Available Models** أو استدعِ `GET /api/models/catalog`.
 >
-> إذا حدث اختلاف في القائمة المضمّنة لأحد المزوّدين، فاستخدم **الاستيراد من /models** في تلك الصفحة (أو فعّل **المزامنة التلقائية**) لجلب كتالوج المصدر الرئيسي المباشر. تم التحقق من ذلك في الإصدار v3.8.50 لخدمتي LLM7.io (`gemini-3.1-flash-lite`) وUncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)؛ بينما ظل الوصول المجهول إلى Pollinations مقيّدًا من جهة المصدر الرئيسي خلال جولة الاختبار نفسها.
+> إذا كانت القائمة المضمّنة لموفّر ما قديمة، فاستخدم **Import from /models** في تلك الصفحة (أو فعّل **Auto-Sync**) لجلب كتالوج المصدر المباشر. تم التحقق من ذلك في v3.8.50 لكلٍّ من LLM7.io (`gemini-3.1-flash-lite`) وUncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)؛ بينما ظل الوصول المجهول إلى Pollinations مقيّدًا من جهة المصدر خلال جولة الاختبار نفسها.
 
 **Claude Code (`cc/`)** — مصادقة OAuth لخطي Pro/Max: `cc/claude-opus-4-8`، `cc/claude-opus-4-7`، `cc/claude-opus-4-6`، `cc/claude-opus-4-5-20251101`، `cc/claude-sonnet-4-6`، `cc/claude-sonnet-4-5-20250929`، `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — مصادقة OAuth لخطي Plus/Pro: `cx/gpt-5.5` (بالإضافة إلى مستويات الجهد: `gpt-5.5-xhigh`، `gpt-5.5-high`، `gpt-5.5-medium`، `gpt-5.5-low`)، `cx/gpt-5.4`، `cx/gpt-5.4-mini`، `cx/gpt-5.3-codex`، `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — مصادقة OAuth لخطي Plus/Pro: `cx/gpt-5.5` (+ مستويات الجهد: `gpt-5.5-xhigh`، `gpt-5.5-high`، `gpt-5.5-medium`، `gpt-5.5-low`)، `cx/gpt-5.4`، `cx/gpt-5.4-mini`، `cx/gpt-5.3-codex`، `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — مصادقة OAuth: `gh/gpt-5.5`، `gh/gpt-5.4`، `gh/gpt-5.4-mini`، `gh/gpt-5-mini`، `gh/gpt-5.3-codex`، `gh/claude-opus-4.7`، `gh/claude-opus-4.6`، `gh/claude-opus-4-5-20251101`، `gh/claude-sonnet-4.6`، `gh/claude-sonnet-4.5`، `gh/claude-haiku-4.5`، `gh/gemini-3.1-pro-preview`، `gh/gemini-3-flash-preview`، `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — مصادقة OAuth مجانية: استخدم الكتالوج المباشر الظاهر ضمن **لوحة المعلومات → المزوّدون → Kiro → النماذج المتاحة**. يعتمد التوفر على الحساب والخطة.
+**Kiro (`kr/`)** — مصادقة OAuth مجانية: استخدم الكتالوج المباشر الظاهر ضمن **Dashboard → Providers → Kiro → Available Models**. يعتمد التوفر على الحساب والخطة.
 
 **Qoder (`if/`)** — مصادقة OAuth مجانية: `if/qwen3.8-max-preview`، `if/qwen3.7-max`، `if/qwen3.7-plus`، `if/kimi-k3`، `if/kimi-k2.7-code`، `if/glm-5.2`، `if/deepseek-v4-pro`، `if/deepseek-v4-flash`، `if/minimax-m3`
 
@@ -636,7 +636,7 @@ post_install() {
 
 **MiniMax (`minimax/`، `minimax-cn/`)** — ‏$0.2/1M: `minimax/MiniMax-M2.7`، `minimax/MiniMax-M2.7-highspeed`، `minimax/MiniMax-M2.5`، `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`، `kimi-coding/`، `kimi-coding-apikey/`)** — ‏$9 شهريًا بسعر ثابت أو حسب الاستخدام: `kimi/kimi-k2.6`، `kimi/kimi-k2.5`
+**Kimi (`kimi/`، `kimi-coding/`، `kimi-coding-apikey/`)** — ‏$9/شهريًا بسعر ثابت أو حسب الاستخدام: `kimi/kimi-k2.6`، `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — مفتاح API: `ds/deepseek-v4-pro`، `ds/deepseek-v4-flash`
 
@@ -652,21 +652,21 @@ post_install() {
 
 **Fireworks AI (`fireworks/`)** — استدلال سريع: `fireworks/accounts/fireworks/models/kimi-k2p6`، `fireworks/accounts/fireworks/models/minimax-m2p7`، `fireworks/accounts/fireworks/models/qwen3p6-plus`، `fireworks/accounts/fireworks/models/glm-5p1`، `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — على مستوى الرقاقة: `cerebras/zai-glm-4.7`، `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — على نطاق الرقاقة: `cerebras/zai-glm-4.7`، `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — يركّز على RAG: `cohere/command-a-reasoning-08-2025`، `cohere/command-a-vision-07-2025`، `cohere/command-a-03-2025`، `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — للمؤسسات: `nvidia/z-ai/glm-5.1`، `nvidia/minimaxai/minimax-m2.7`، `nvidia/google/gemma-4-31b-it`، `nvidia/mistralai/mistral-small-4-119b-2603`، `nvidia/mistralai/mistral-large-3-675b-instruct-2512`، `nvidia/qwen/qwen3.5-397b-a17b`، `nvidia/deepseek-ai/deepseek-v4-pro`، `nvidia/openai/gpt-oss-120b`، `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — للمؤسسات: `nvidia/google/gemma-4-31b-it`، `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`، `nvidia/nvidia/nemotron-3-ultra-550b-a55b`، `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`، `qianfan/ernie-5.0-thinking-latest`، `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`، `ollama-cloud/deepseek-v4-flash`، `ollama-cloud/kimi-k2.6`، `ollama-cloud/glm-5.1`، `ollama-cloud/minimax-m2.7`، `ollama-cloud/gemma4:31b`، `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: تتم المزامنة مباشرةً لكل مفتاح API من Google — لا توجد قائمة ثابتة. صِل مفتاحًا ضمن **لوحة المعلومات → المزوّدون**، ثم استخدم **النماذج المتاحة** لاستيراد الكتالوج الحالي (مثل `gemini/gemini-3-pro`، `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: تتم المزامنة مباشرةً لكل مفتاح API من Google — لا توجد قائمة ثابتة. صِل مفتاحًا في **Dashboard → Providers** ثم استخدم **Available Models** لاستيراد الكتالوج الحالي (مثلًا `gemini/gemini-3-pro`، `gemini/gemini-3-flash`).
 
-**المزوّدون الآخرون المتوافقون** (مجموعة مختارة): `cohere`، `databricks`، `snowflake`، `together`، `vertex`، `alibaba`، `alibaba-cn`، `bedrock` (عبر `aws-bedrock`)، `azure-ai`، `openrouter` (كتالوج تمرير مباشر)، `siliconflow`، `hyperbolic`، `huggingface`، `featherless-ai`، `cloudflare-ai`، `scaleway`، `deepinfra`، `vercel-ai-gateway`، `bazaarlink`، `friendliai`، `nous-research`، `reka`، `volcengine`، `ai21`، `gigachat`. يحتفظ كل منها بقائمة النماذج الخاصة به في `providerRegistry.ts`، ويمكن مزامنته تلقائيًا عندما يوفّر المزوّد نقطة نهاية `/models`.
+**الموفّرون الآخرون المتوافقون** (مختارون): `cohere`، `databricks`، `snowflake`، `together`، `vertex`، `alibaba`، `alibaba-cn`، `bedrock` (عبر `aws-bedrock`)، `azure-ai`، `openrouter` (كتالوج تمرير مباشر)، `siliconflow`، `hyperbolic`، `huggingface`، `featherless-ai`، `cloudflare-ai`، `scaleway`، `deepinfra`، `vercel-ai-gateway`، `bazaarlink`، `friendliai`، `nous-research`، `reka`، `volcengine`، `ai21`، `gigachat`. يحتفظ كل منها بقائمة النماذج الخاصة به في `providerRegistry.ts`، ويمكن مزامنته تلقائيًا عندما يوفّر الموفّر نقطة نهاية `/models`.
 
-**ملاحظة حول معرّفات النماذج:** يستخدم OmniRoute معرّفات أصلية للمزوّدين (`claude-opus-4-8`، `gpt-5.5`، `glm-5.1`، `MiniMax-M2.7`، `kimi-k2.5`، `grok-4.20-0309-reasoning`). تتضمن بعض المعرّفات إصدارات منقوطة لأن واجهة API المصدر الرئيسي تتوقعها بهذه الصيغة. إذا لم يكن أحد النماذج مدرجًا أعلاه، فنفّذ `omniroute models --search <term>` أو استدعِ `GET /api/models/catalog` لتأكيد التوفر.
+**ملاحظة حول معرّفات النماذج:** يستخدم OmniRoute معرّفات أصلية للموفّرين (`claude-opus-4-8`، `gpt-5.5`، `glm-5.1`، `MiniMax-M2.7`، `kimi-k2.5`، `grok-4.20-0309-reasoning`). تتضمن بعض المعرّفات إصدارات منقوطة لأن واجهة API المصدر تتوقعها بهذه الصيغة. إذا لم يكن النموذج مدرجًا أعلاه، فشغّل `omniroute models --search <term>` أو استدعِ `GET /api/models/catalog` للتحقق من التوفر.
 
 </details>
 

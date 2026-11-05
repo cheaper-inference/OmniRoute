@@ -93,7 +93,12 @@ export function downgradeUnrequestedLossy(
 
   // A scoped step overrides global Lite settings without changing the stored config.
   if (plan.mode === "lite") {
-    return { ...plan, mode: "stacked", stackedPipeline: [LOSSLESS_LITE_STEP] };
+    return {
+      ...plan,
+      mode: "stacked",
+      stackedPipeline: [LOSSLESS_LITE_STEP],
+      reportedMode: "lite",
+    };
   }
 
   if (LOSSY_SINGLE_MODES.has(plan.mode)) {
