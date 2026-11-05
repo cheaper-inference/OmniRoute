@@ -52,6 +52,12 @@ function connectionIdOf(credentials: any): string | null {
     : null;
 }
 
+function isOutsideImageKeyScope(credentials: any, allowedConnections: string[] | null): boolean {
+  if (!Array.isArray(allowedConnections)) return false;
+  const connectionId = connectionIdOf(credentials);
+  return !connectionId || !allowedConnections.includes(connectionId);
+}
+
 function isCredentialSentinel(credentials: any): boolean {
   // Includes the key-scope sentinel (blockedByKeyPolicy): it carries no secret
   // and must never be dispatched.
@@ -129,10 +135,7 @@ export async function executeImageWithCredentialFallback({
     const connectionId = connectionIdOf(currentCredentials);
     // Defense in depth: selectors and test hooks must never bypass the caller
     // API key's connection allowlist, even during image credential rotation.
-    if (
-      Array.isArray(allowedConnections) &&
-      (!connectionId || !allowedConnections.includes(connectionId))
-    ) {
+    if (isOutsideImageKeyScope(currentCredentials, allowedConnections)) {
       return {
         credentials: currentCredentials,
         result: {
@@ -164,11 +167,7 @@ export async function executeImageWithCredentialFallback({
     }
 
     // A refresh must not silently substitute a different or unscoped account.
-    const refreshedId = connectionIdOf(currentCredentials);
-    if (
-      Array.isArray(allowedConnections) &&
-      (!refreshedId || !allowedConnections.includes(refreshedId))
-    ) {
+    if (isOutsideImageKeyScope(currentCredentials, allowedConnections)) {
       return {
         credentials: currentCredentials,
         result: {
