@@ -1173,8 +1173,10 @@ async function main() {
         });
       } else {
         announce(bootLabel);
+        // Packs and installs the real tarball, so it scales with the package: the translated
+        // docs mirrors (#18869) added 8,885 files, and 15 minutes stopped being enough.
         const { code, out } = await runAsync(npmCmd, ["run", "check:pack-boot"], {
-          timeout: 15 * 60 * 1000,
+          timeout: 40 * 60 * 1000,
         });
         saveGateLog("pack-boot", out);
         record({
