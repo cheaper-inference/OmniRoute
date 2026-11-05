@@ -102,6 +102,29 @@ test("writes the analytics row with mapped tokens/engine and resolves", async ()
   assert.equal(row!.vf, 0);
 });
 
+test("a wrapped plan records the configured mode as mode and engine", async () => {
+  // Lite dispatched as a one-step stacked pipeline (lossy-request policy) must still show up as
+  // lite in analytics, not as the stacked wrapper.
+  await writeCompressionAnalytics({
+    ...baseOpts("ca-req-reported", { engine: "stacked" }),
+    mode: "stacked",
+    reportedMode: "lite",
+  });
+  const row = analyticsRow("ca-req-reported");
+  assert.equal(row!.mode, "lite");
+  assert.equal(row!.engine, "lite");
+});
+
+test("without reportedMode the dispatched mode and engine are recorded as before", async () => {
+  await writeCompressionAnalytics({
+    ...baseOpts("ca-req-stacked", { engine: "stacked" }),
+    mode: "stacked",
+  });
+  const row = analyticsRow("ca-req-stacked");
+  assert.equal(row!.mode, "stacked");
+  assert.equal(row!.engine, "stacked");
+});
+
 test("validation_fallback is 1 when the stats flagged a fallback", async () => {
   await writeCompressionAnalytics(baseOpts("ca-req-2", { fallbackApplied: true }));
   const row = analyticsRow("ca-req-2");
