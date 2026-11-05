@@ -192,7 +192,7 @@ After building and starting with a persistent data directory:
 ## See also
 
 - [ENVIRONMENT.md](../reference/ENVIRONMENT.md) — `OMNIROUTE_HEADLESS` and
-  `OMNIROUTE_DISABLE_BACKGROUND_SERVICES` (a separate switch that stops background schedulers
-  but keeps the dashboard).
+  `OMNIROUTE_DISABLE_BACKGROUND_SERVICES` (a separate switch that stops background schedulers,
+  including connection recovery, retention cleanup and scheduled VACUUM, but keeps the dashboard).
 - [REMOTE-MODE.md](REMOTE-MODE.md) — drive a remote (for example, headless) OmniRoute from
   your laptop with the `omniroute` CLI.

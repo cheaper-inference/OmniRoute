@@ -17,9 +17,14 @@ export interface DataTableShellProps
   /** Cross-axis alignment for filter fields with different content heights. */
   filterAlignment?: "start" | "end";
   resultCount?: number;
-  resultLabel?: ReactNode | ((count: number) => ReactNode);
+  /** A function receives the raw count and the count formatted with `locale`. */
+  resultLabel?: ReactNode | ((count: number, formattedCount: string) => ReactNode);
+  /** Locale for formatting `resultCount`. Defaults to "en-US". */
+  locale?: Intl.LocalesArgument;
   /** Optional actions aligned to the end of the toolbar, separate from filters. */
   toolbarActions?: ReactNode;
+  /** Accessible name of the toolbar actions group. Defaults to "Table actions". */
+  toolbarActionsLabel?: string;
   children: ReactNode;
   pagination?: ReactNode;
 }
@@ -37,7 +42,9 @@ export function DataTableShell({
   filterAlignment = "end",
   resultCount,
   resultLabel,
+  locale = "en-US",
   toolbarActions,
+  toolbarActionsLabel = "Table actions",
   children,
   pagination,
   className,
@@ -45,14 +52,15 @@ export function DataTableShell({
 }: DataTableShellProps) {
   const hasToolbarActions =
     toolbarActions !== undefined && toolbarActions !== null;
+  const formattedCount = resultCount?.toLocaleString(locale) ?? "";
   const resolvedResultLabel =
     resultCount === undefined
       ? null
       : typeof resultLabel === "function"
-        ? resultLabel(resultCount)
+        ? resultLabel(resultCount, formattedCount)
         : resultLabel ?? (
             <>
-              {resultCount.toLocaleString("en-US")} {resultCount === 1 ? "result" : "results"}
+              {formattedCount} {resultCount === 1 ? "result" : "results"}
             </>
           );
 
@@ -83,7 +91,7 @@ export function DataTableShell({
                 data-slot="data-table-toolbar-actions"
                 className="ci-data-table-shell__toolbar-actions"
                 role="group"
-                aria-label="Table actions"
+                aria-label={toolbarActionsLabel}
               >
                 {toolbarActions}
               </div>
