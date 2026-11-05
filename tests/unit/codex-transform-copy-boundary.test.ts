@@ -6,6 +6,13 @@ import { copyCodexRequestForMutation } from "../../open-sse/executors/codex/requ
 
 test("Codex copy boundary shares untouched history but isolates mutable tool definitions", () => {
   const history = [{ type: "message", role: "system", content: [{ type: "input_text", text: "x".repeat(1024) }] }];
+  // A deep clone would visit this property and throw; the copy must leave input untouched.
+  Object.defineProperty(history[0], "expensive", {
+    enumerable: true,
+    get() {
+      throw new Error("Codex copy must not traverse input history");
+    },
+  });
   const source = {
     model: "gpt-6.1-sol",
     input: history,
