@@ -322,6 +322,17 @@ export async function registerQuotaFetchers(): Promise<void> {
   }
   registerOpenrouterQuotaFetcher();
   registerOpencodeQuotaFetcher();
+  // OpenCode free-tier Bun relay: self-gated on OPENCODE_FREE_TIER_RELAY_URL, never fatal.
+  void import("@/lib/opencodeFreeRelay")
+    .then(async (m) => {
+      const result = await m.startOpencodeFreeRelay();
+      if (result.status !== "disabled")
+        console.log(`[STARTUP] OpenCode free relay: ${result.status} ${result.detail ?? ""}`);
+    })
+    .catch((err: unknown) => {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn("[STARTUP] OpenCode free relay failed to start (non-fatal):", msg);
+    });
   registerGrokWebQuotaFetcher();
   registerGenericQuotaFetchers();
 

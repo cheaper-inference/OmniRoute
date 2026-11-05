@@ -91,6 +91,7 @@ COPY --from=builder /app/.build/next/standalone ./
 ENV OMNIROUTE_MIGRATIONS_DIR=/app/migrations
 
 COPY --from=builder /app/scripts/dev/healthcheck.mjs ./healthcheck.mjs
+COPY --from=builder /app/scripts/opencode-free-relay.ts ./scripts/opencode-free-relay.ts
 
 # Bun uses bun:sqlite. Remove every standalone/vendor copy of the Node-only
 # addon so no traced chunk can dlopen it and abort the process before fallback.

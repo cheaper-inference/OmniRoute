@@ -44,6 +44,7 @@ import {
 } from "./opencodeToolObservation.ts";
 import { isOpencodeFreeTierRefusal } from "./opencodeGeoBlock.ts";
 import { sanitizeToolChoice, v2PlaceholderTool } from "../utils/opencodeFingerprintSchemas.ts";
+import { OPENCODE_CLI_PROMPT_TEMPLATE, OPENCODE_CLI_TOOLS } from "./opencodeCliPrompt.ts";
 import {
   forgetAttempt,
   planShape,
@@ -87,6 +88,11 @@ export interface FreeTierContractAttempt {
    * `borrowed` means it came from the observation store.
    */
   readonly injectedPlaceholders?: boolean;
+  /**
+   * Names of OpenCode CLI tools this layer declared that the caller had not: a model call to
+   * one of them is dropped from the response (see `opencodeInjectedToolFilter.ts`).
+   */
+  readonly injectedToolNames?: readonly string[];
 }
 
 /**
@@ -292,6 +298,24 @@ export function resolveGatedCredential(
 ): string | undefined {
   if (!freeTier || freeTier.mode === "key") return operatorKey();
   return freeTier.mode === "literal" ? freeTier.value : undefined;
+}
+
+/**
+ * Base URL of the Bun relay (`scripts/opencode-free-relay.ts`), from
+ * `OPENCODE_FREE_TIER_RELAY_URL`; `null` when unset or not an http(s) URL. Read per call.
+ *
+ * Measured 2026-11-05: the free models answer 429 FreeUsageLimitError to any request not sent
+ * by Bun's native fetch, so gated requests are sent through a Bun process when one is set up.
+ */
+export function freeTierRelayUrl(): string | null {
+  const raw = (process.env.OPENCODE_FREE_TIER_RELAY_URL || "").trim().replace(/\/+$/, "");
+  if (!raw) return null;
+  try {
+    const url = new URL(raw);
+    return url.protocol === "http:" || url.protocol === "https:" ? raw : null;
+  } catch {
+    return null;
+  }
 }
 
 /** Tell the surfaces apart by registry `baseUrl`, so provider ids and aliases stay out. */
@@ -625,6 +649,42 @@ function isTrackable(value: unknown): value is object {
   return typeof value === "object" && value !== null;
 }
 
+/** The OpenCode CLI build-agent prompt for `model`, with a neutral environment block. */
+export function canonicalOpencodeSystemPrompt(model: string, now: Date = new Date()): string {
+  return OPENCODE_CLI_PROMPT_TEMPLATE.split("{{MODEL}}")
+    .join(model.replace(/^opencode[^/]*\//, ""))
+    .split("{{DATE}}")
+    .join(now.toDateString());
+}
+
+/**
+ * Relay mode body: the upstream answers a free model only when messages[0] is the genuine
+ * OpenCode system prompt and the CLI's full tool set is declared (anything shorter is 429).
+ * The caller's own system messages follow the canonical one and its tools keep their shape;
+ * only CLI tools it did not declare are added, and those are recorded as injected.
+ */
+function applyCanonicalRelayContract(
+  body: unknown,
+  model: string
+): { body: unknown; injected: string[] } | null {
+  if (!body || typeof body !== "object" || Array.isArray(body)) return null;
+  const record = body as Record<string, unknown>;
+  if (!Array.isArray(record.messages)) return null;
+  const canonical = canonicalOpencodeSystemPrompt(model);
+  const first = record.messages[0] as { role?: unknown; content?: unknown } | undefined;
+  const already = first?.role === "system" && first.content === canonical;
+  const messages = already
+    ? record.messages
+    : [{ role: "system", content: canonical }, ...record.messages];
+  const have = new Set(clientToolsOf(record).names);
+  const missing = OPENCODE_CLI_TOOLS.filter((tool) => !have.has(tool.function.name));
+  const tools = [...(Array.isArray(record.tools) ? record.tools : []), ...missing];
+  return {
+    body: { ...record, stream: true, messages, tools },
+    injected: missing.map((tool) => tool.function.name),
+  };
+}
+
 export function prepareFreeTierRequest<T>(
   body: T,
   requestFormat: string | null,
@@ -640,6 +700,21 @@ export function prepareFreeTierRequest<T>(
   if (!requiresFreeTierRequestContract(surface, provider, model)) {
     if (isTrackable(origin)) forgetAttempt(origin);
     return { body, attempt: null };
+  }
+  if (freeTierRelayUrl() && (requestFormat === "openai" || requestFormat === null)) {
+    const canonical = applyCanonicalRelayContract(body, model);
+    if (canonical) {
+      const attempt: FreeTierContractAttempt = {
+        provider,
+        model,
+        session,
+        borrowed: false,
+        clientToolNames,
+        injectedToolNames: canonical.injected,
+      };
+      if (isTrackable(origin)) rememberAttempt(origin, attempt);
+      return { body: canonical.body as T, attempt };
+    }
   }
   const eligible = isTrackable(origin) && clientToolNames.length === 0;
   const key = eligible ? shapeKeyOf(provider, model, body) : "";
