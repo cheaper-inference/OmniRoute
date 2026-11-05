@@ -510,7 +510,7 @@ strategy **20** ခုလုံးကို ကွန်ဘိုအဆင့်
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute ကို ထူးခြားစေသောအချက်များ — 9router, OpenRouter, CLIProxyAPI နှင့် LiteLLM တို့နှင့် ၁၃ မျိုးသောစွမ်းရည်များအပေါ် အချိန်နှင့်တပြေးညီ feature snapshot တစ်ခု။ OmniRoute: 380 providers, 150+ free tiers built in, 20 routing strategies, 12-engine token compression, built-in MCP server with 110 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA နှင့် 67 i18n UI locales ပါဝင်သည်။ OmniRoute သည် MIT-licensed ဖြစ်ပြီး ကိုယ်တိုင်တပ်ဆင်နိုင်သည်။ ယှဉ်ပြိုင်သူများ၏စွမ်းရည်နှင့်အရေအတွက်များသည် ပြောင်းလဲနိုင်သည်။ ဆက်စပ် methodology ကို အောက်ပါလင့်ခ်တွင်ကြည့်ပါ။"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute ကို ထူးခြားစေသောအချက်များ — 9router, OpenRouter, CLIProxyAPI နှင့် LiteLLM တို့နှင့် ၁၃ မျိုးသောစွမ်းရည်များအပေါ် အချိန်နှင့်တပြေးညီ feature snapshot တစ်ခု။ OmniRoute: 380 providers, 150+ free tiers built in, 20 routing strategies, 12-engine token compression, built-in MCP server with 129 tools, A2A agent protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, Desktop/Termux/PWA နှင့် 67 i18n UI locales ပါဝင်သည်။ OmniRoute သည် MIT-licensed ဖြစ်ပြီး ကိုယ်တိုင်တပ်ဆင်နိုင်သည်။ ယှဉ်ပြိုင်သူများ၏စွမ်းရည်နှင့်အရေအတွက်များသည် ပြောင်းလဲနိုင်သည်။ ဆက်စပ် methodology ကို အောက်ပါလင့်ခ်တွင်ကြည့်ပါ။"/>
 
 <sub>📊 9router, OpenRouter, CLIProxyAPI နှင့် LiteLLM တို့နှင့် methodology အပြည့်အစုံနှင့် feature တစ်ခုချင်းစီ၏အသေးစိတ် → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 

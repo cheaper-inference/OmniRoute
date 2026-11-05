@@ -13444,7 +13444,7 @@
       },
       "omni-mcp": {
         "name": "Server MCP",
-        "description": "Conectează-te la serverul MCP OmniRoute (110 de instrumente, 3 transporturi: SSE/stdio/HTTP). Acoperă rutarea, memoria cache, compresia, memoria, abilitățile, furnizorii și instrumentele de audit în 33 scopuri de permisiuni."
+        "description": "Conectează-te la serverul MCP OmniRoute (129 de instrumente, 3 transporturi: SSE/stdio/HTTP). Acoperă rutarea, memoria cache, compresia, memoria, abilitățile, furnizorii și instrumentele de audit în 34 scopuri de permisiuni."
       },
       "omni-agents-a2a": {
         "name": "Agenți & Protocol A2A",

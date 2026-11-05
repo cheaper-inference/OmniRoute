@@ -13444,7 +13444,7 @@
       },
       "omni-mcp": {
         "name": "MCP 서버",
-        "description": "OmniRoute MCP 서버(110개 도구, 3개 전송: SSE/stdio/HTTP)에 연결합니다. 33개 권한 범위에 걸쳐 라우팅, 캐시, 압축, 메모리, 스킬, 제공업체 및 감사 도구를 다룹니다."
+        "description": "OmniRoute MCP 서버(129개 도구, 3개 전송: SSE/stdio/HTTP)에 연결합니다. 34개 권한 범위에 걸쳐 라우팅, 캐시, 압축, 메모리, 스킬, 제공업체 및 감사 도구를 다룹니다."
       },
       "omni-agents-a2a": {
         "name": "에이전트 및 A2A 프로토콜",

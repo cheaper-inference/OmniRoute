@@ -499,7 +499,7 @@ ozugbo ma ọ bụ site na `DefaultExecutor` ma ọ bụ executor ọzọ; modul
 (enyi na-enye aka maka njirimara nke a na-ekekọrịta) na `index.ts` (ndebanye aha).
 
 > Rịba ama: ndị na-enye ọrụ a na-edepụtaghị ebe a na-enweta ọrụ site na `default.ts` nke na-eji
-> executor OpenAI-compatible izugbe. Katalọgụ zuru ezu nke ndị na-enye ọrụ (380 providers) dị na
+> executor OpenAI-compatible izugbe. Katalọgụ zuru ezu nke ndị na-enye ọrụ (381 providers) dị na
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

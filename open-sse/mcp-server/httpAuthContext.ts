@@ -1,6 +1,7 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 
 type McpHttpAuthContext = {
+  peerLocality?: string;
   authorization?: string;
   cookie?: string;
   xApiKey?: string;
@@ -21,6 +22,16 @@ export type McpCallerAuthInfo = {
 };
 
 const mcpHttpAuthContext = new AsyncLocalStorage<McpHttpAuthContext>();
+const mcpPeerLocalities = new WeakMap<Request, string>();
+
+/**
+ * Record the trusted peer verdict for one MCP request. The route computes it because the engine
+ * must not import the app's peer classifier; an unmarked request has no locality, so
+ * locality-gated tools refuse it.
+ */
+export function markMcpPeerLocality(request: Request, peerLocality: string): void {
+  mcpPeerLocalities.set(request, peerLocality);
+}
 
 function headerValue(request: Request, name: string): string | undefined {
   const value = request.headers.get(name);
@@ -48,6 +59,10 @@ export function getMcpHttpAuthHeadersForInternalFetch(): Record<string, string> 
  * which scope it is in — that is the only way to make the env key a *stdio-only*
  * fallback instead of a silent substitute for a missing HTTP caller identity.
  */
+export function getMcpHttpPeerLocality(): string | undefined {
+  return mcpHttpAuthContext.getStore()?.peerLocality;
+}
+
 export function hasMcpHttpAuthContext(): boolean {
   return mcpHttpAuthContext.getStore() !== undefined;
 }
@@ -100,6 +115,7 @@ export async function withMcpHttpAuthContext<T>(
 ): Promise<T> {
   return mcpHttpAuthContext.run(
     {
+      peerLocality: mcpPeerLocalities.get(request),
       authorization: headerValue(request, "authorization"),
       cookie: headerValue(request, "cookie"),
       xApiKey: headerValue(request, "x-api-key"),

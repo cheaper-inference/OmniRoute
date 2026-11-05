@@ -281,7 +281,7 @@ BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 
 | Suite            | Validates                                                | Blocking                                                                                                             |
 | ---------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `test:vitest`    | MCP server (110 tools), autoCombo, cache — vitest runner | ହଁ                                                                                                                   |
+| `test:vitest`    | MCP server (129 tools), autoCombo, cache — vitest runner | ହଁ                                                                                                                   |
 | `test:vitest:ui` | UI component tests — vitest runner                       | **Blocking** — `vitest.config.ts` ରେ ପୂର୍ବରୁ ଥିବା ବିଫଳତାଗୁଡ଼ିକୁ ସ୍ପଷ୍ଟ ଭାବରେ ବାଦ ଦିଆଯାଇଛି; ନୂଆ ବିଫଳତା ଜବ୍କୁ ବିଫଳ କରେ |
 
 ### ରାତ୍ରିକାଳୀନ workflows (ନିର୍ଦ୍ଧାରିତ, advisory)

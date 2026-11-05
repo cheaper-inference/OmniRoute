@@ -502,7 +502,7 @@ helpers (tool schemas، fetch/TTS adapters، quirk handlers) ہیں۔ Executors 
 (مشترکہ identity helper) اور `index.ts` (registry)۔
 
 > نوٹ: یہاں درج نہ کیے گئے providers کو `default.ts` کے ذریعے generic
-> OpenAI-compatible executor فراہم کرتا ہے۔ مکمل provider catalog (380 providers) میں
+> OpenAI-compatible executor فراہم کرتا ہے۔ مکمل provider catalog (381 providers) میں
 > `src/shared/constants/providers.ts` موجود ہے۔
 
 ### 4.3 `open-sse/translator/`

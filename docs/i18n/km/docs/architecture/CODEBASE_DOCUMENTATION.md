@@ -499,7 +499,7 @@ open-sse/
 (ជំនួយការអត្តសញ្ញាណដែលប្រើរួម) និង `index.ts` (បញ្ជីឈ្មោះ)។
 
 > ចំណាំ៖ provider ដែលមិនមានរាយនៅទីនេះ ត្រូវបានបម្រើដោយ `default.ts` ដោយប្រើ generic
-> OpenAI-compatible executor។ កាតាឡុក provider ពេញលេញ (380 providers) ស្ថិតនៅក្នុង
+> OpenAI-compatible executor។ កាតាឡុក provider ពេញលេញ (381 providers) ស្ថិតនៅក្នុង
 > `src/shared/constants/providers.ts`។
 
 ### 4.3 `open-sse/translator/`

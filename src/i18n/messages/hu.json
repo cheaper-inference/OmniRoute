@@ -13444,7 +13444,7 @@
       },
       "omni-mcp": {
         "name": "MCP-szerver",
-        "description": "Csatlakozás az OmniRoute MCP-szerverhez (110 eszköz, 3 transzport: SSE/stdio/HTTP). Lefedi az útvonalválasztást, a gyorsítótárat, a tömörítést, a memóriát, a képességeket, a szolgáltatókat és az audit eszközöket 33 jogosultsági körben."
+        "description": "Csatlakozás az OmniRoute MCP-szerverhez (129 eszköz, 3 transzport: SSE/stdio/HTTP). Lefedi az útvonalválasztást, a gyorsítótárat, a tömörítést, a memóriát, a képességeket, a szolgáltatókat és az audit eszközöket 34 jogosultsági körben."
       },
       "omni-agents-a2a": {
         "name": "Ágensek és A2A protokoll",

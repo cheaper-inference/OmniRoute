@@ -290,7 +290,7 @@ Pull request-களில் மட்டும் இயங்கும்.
 
 | Suite            | Validates                                                | Blocking                                                                                                                                  |
 | ---------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `test:vitest`    | MCP server (110 tools), autoCombo, cache — vitest runner | Yes                                                                                                                                       |
+| `test:vitest`    | MCP server (129 tools), autoCombo, cache — vitest runner | Yes                                                                                                                                       |
 | `test:vitest:ui` | UI component tests — vitest runner                       | **Blocking** — ஏற்கனவே இருந்த failures `vitest.config.ts`-ல் வெளிப்படையாக விலக்கப்பட்டுள்ளன; புதிய failures job-ஐத் தோல்வியடையச் செய்யும் |
 
 ### Nightly workflows (scheduled, advisory)

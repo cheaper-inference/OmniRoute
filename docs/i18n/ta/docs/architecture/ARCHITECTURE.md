@@ -15,7 +15,7 @@ OmniRoute என்பது Next.js அடிப்படையில் உர
 
 முக்கிய திறன்கள்:
 
-- CLI/tools க்கான OpenAI-இணக்கமான API surface (380 providers, 159 executor modules)
+- CLI/tools க்கான OpenAI-இணக்கமான API surface (381 providers, 159 executor modules)
 - Provider வடிவங்களுக்கு இடையிலான request/response translation
 - Model combo fallback (பல மாதிரிகளைக் கொண்ட sequence)
 - Structured combo steps (`provider + model + connection`), `compositeTiers` மூலம் runtime ordering
@@ -56,7 +56,7 @@ OmniRoute என்பது Next.js அடிப்படையில் உர
 - API key ஒன்றுக்கு opt-out வசதியுடன் compliance audit logging
 - LLM quality assurance க்கான Eval framework
 - நிகழ்நேர provider circuit breaker status உடன் health dashboard
-- 3 transports (stdio/SSE/Streamable HTTP) கொண்ட MCP Server (110 tools)
+- 3 transports (stdio/SSE/Streamable HTTP) கொண்ட MCP Server (129 tools)
 - Skills மற்றும் task lifecycle உடன் A2A Server (JSON-RPC 2.0 + SSE)
 - Memory system (extraction, injection, retrieval, summarization)
 - Skills system (registry, executor, sandbox, built-in skills)

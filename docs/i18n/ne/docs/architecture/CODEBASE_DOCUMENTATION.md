@@ -500,7 +500,7 @@ open-sse/
 `claudeIdentity.ts` (साझा identity helper) र `index.ts` (registry)।
 
 > नोट: यहाँ सूचीबद्ध नगरिएका प्रदायकहरू generic
-> OpenAI-compatible executor प्रयोग गर्ने `default.ts` मार्फत सेवा दिइन्छन्। पूर्ण provider catalog (380 providers)
+> OpenAI-compatible executor प्रयोग गर्ने `default.ts` मार्फत सेवा दिइन्छन्। पूर्ण provider catalog (381 providers)
 > `src/shared/constants/providers.ts` मा रहेको छ।
 
 ### ४.३ `open-sse/translator/`

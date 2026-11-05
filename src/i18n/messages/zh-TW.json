@@ -13444,7 +13444,7 @@
       },
       "omni-mcp": {
         "name": "MCP 伺服器",
-        "description": "連線至 OmniRoute MCP 伺服器（110 個工具、3 種傳輸方式：SSE/stdio/HTTP）。涵蓋 33 個權限範圍內的路由、快取、壓縮、記憶體、技能、提供者和稽核工具。"
+        "description": "連線至 OmniRoute MCP 伺服器（129 個工具、3 種傳輸方式：SSE/stdio/HTTP）。涵蓋 34 個權限範圍內的路由、快取、壓縮、記憶體、技能、提供者和稽核工具。"
       },
       "omni-agents-a2a": {
         "name": "代理程式與 A2A 協定",

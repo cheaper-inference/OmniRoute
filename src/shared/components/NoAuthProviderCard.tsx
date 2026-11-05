@@ -23,10 +23,10 @@ export function resolveNoAuthBannerDescription(
     providerId && providerId in NOAUTH_PROVIDERS
       ? NOAUTH_PROVIDERS[providerId as keyof typeof NOAUTH_PROVIDERS]
       : undefined;
-  const requirement =
-    provider && "notice" in provider && typeof provider.notice?.text === "string"
-      ? provider.notice.text.trim()
-      : undefined;
+  // Not every no-auth provider declares a notice.
+  const notice =
+    provider && "notice" in provider ? (provider.notice as { text?: unknown }) : undefined;
+  const requirement = typeof notice?.text === "string" ? notice.text.trim() : undefined;
   return requirement ? `${fallback} ${requirement}` : fallback;
 }
 

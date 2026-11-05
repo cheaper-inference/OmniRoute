@@ -288,7 +288,7 @@ Chạy sau `build`. Chặn việc merge nếu thất bại.
 
 | Suite            | Kiểm tra                                                 | Chặn                                                                                                           |
 | ---------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `test:vitest`    | MCP server (110 tools), autoCombo, cache — vitest runner | Có                                                                                                             |
+| `test:vitest`    | MCP server (129 tools), autoCombo, cache — vitest runner | Có                                                                                                             |
 | `test:vitest:ui` | Test component UI — vitest runner                        | **Chặn** — các lỗi có sẵn từ trước được loại trừ rõ ràng trong `vitest.config.ts`; lỗi mới sẽ làm job thất bại |
 
 ### Các workflow chạy hằng đêm (theo lịch, mang tính tham khảo)

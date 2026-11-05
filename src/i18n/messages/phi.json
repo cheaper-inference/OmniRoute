@@ -13444,7 +13444,7 @@
       },
       "omni-mcp": {
         "name": "Server ng MCP",
-        "description": "Kumonekta sa OmniRoute MCP server (110 tool, 3 transport: SSE/stdio/HTTP). Saklaw nito ang routing, cache, compression, memory, skills, providers, at mga audit tool sa 33 saklaw ng pahintulot."
+        "description": "Kumonekta sa OmniRoute MCP server (129 tool, 3 transport: SSE/stdio/HTTP). Saklaw nito ang routing, cache, compression, memory, skills, providers, at mga audit tool sa 34 saklaw ng pahintulot."
       },
       "omni-agents-a2a": {
         "name": "Mga Agent at A2A Protocol",

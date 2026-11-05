@@ -276,7 +276,7 @@ Base catalog পড়া না গেলে (base ref ছাড়া shallow 
 
 | Suite            | Validates                                                | Blocking                                                                                                                    |
 | ---------------- | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `test:vitest`    | MCP server (110 tools), autoCombo, cache — vitest runner | Yes                                                                                                                         |
+| `test:vitest`    | MCP server (129 tools), autoCombo, cache — vitest runner | Yes                                                                                                                         |
 | `test:vitest:ui` | UI component tests — vitest runner                       | **Blocking** — `vitest.config.ts`-এ পূর্ব-বিদ্যমান ব্যর্থতাগুলো স্পষ্টভাবে বাদ দেওয়া হয়েছে; নতুন ব্যর্থতা job ব্যর্থ করবে |
 
 ### Nightly workflows (scheduled, advisory)

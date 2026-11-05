@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Janji — Satu endpoint dan 380 penyedia. Fallback otomatis menjaga perutean selama masih ada target sehat yang tersedia. Enam pilar: fallback tangguh di 380 penyedia · hemat token hingga 95% pada beban kerja yang memenuhi syarat · Rp0 untuk mulai dengan 150+ free tier dan 53 penyedia gratis selamanya (tanpa kunci/berulang) · 39 integrasi CLI/agen lewat satu konfigurasi · kompatibel dengan OpenAI, Claude, Gemini dan Responses API di /v1 · kontrol produksi termasuk circuit breaker, TLS stealth, MCP 110 tools, A2A, memori, guardrails, eval, dan 56.000+ deklarasi pengujian statis di 7.800+ file pengujian yang dipantau."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Janji — Satu endpoint dan 380 penyedia. Fallback otomatis menjaga perutean selama masih ada target sehat yang tersedia. Enam pilar: fallback tangguh di 380 penyedia · hemat token hingga 95% pada beban kerja yang memenuhi syarat · Rp0 untuk mulai dengan 150+ free tier dan 53 penyedia gratis selamanya (tanpa kunci/berulang) · 39 integrasi CLI/agen lewat satu konfigurasi · kompatibel dengan OpenAI, Claude, Gemini dan Responses API di /v1 · kontrol produksi termasuk circuit breaker, TLS stealth, MCP 129 tools, A2A, memori, guardrails, eval, dan 56.000+ deklarasi pengujian statis di 7.800+ file pengujian yang dipantau."/>
 
 <br/>
 <br/>
@@ -510,7 +510,7 @@ Seluruh **20** strategi — padukan sesuai kebutuhan pada setiap langkah combo:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Apa yang membuat OmniRoute berbeda — snapshot fitur terkini vs 9router, OpenRouter, CLIProxyAPI dan LiteLLM di 13 kapabilitas. OmniRoute: 380 penyedia, 150+ free tier bawaan, 20 strategi routing, kompresi token 12-engine, server MCP bawaan dengan 110 tools, protokol agen A2A, memori persisten, guardrails, cloud agents, stealth fingerprint TLS, Desktop/Termux/PWA dan 67 lokal UI i18n. OmniRoute berlisensi MIT dan dapat di-host sendiri. Kapabilitas dan jumlah pesaing dapat berubah; lihat metodologi yang ditautkan."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Apa yang membuat OmniRoute berbeda — snapshot fitur terkini vs 9router, OpenRouter, CLIProxyAPI dan LiteLLM di 13 kapabilitas. OmniRoute: 380 penyedia, 150+ free tier bawaan, 20 strategi routing, kompresi token 12-engine, server MCP bawaan dengan 129 tools, protokol agen A2A, memori persisten, guardrails, cloud agents, stealth fingerprint TLS, Desktop/Termux/PWA dan 67 lokal UI i18n. OmniRoute berlisensi MIT dan dapat di-host sendiri. Kapabilitas dan jumlah pesaing dapat berubah; lihat metodologi yang ditautkan."/>
 
 <sub>📊 Metodologi lengkap &amp; detail per fitur vs 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 

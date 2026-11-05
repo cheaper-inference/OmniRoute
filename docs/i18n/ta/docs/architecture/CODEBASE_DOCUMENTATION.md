@@ -501,7 +501,7 @@ open-sse/
 (பகிரப்பட்ட identity helper) மற்றும் `index.ts` (registry).
 
 > குறிப்பு: இங்கே பட்டியலிடப்படாத providers, பொதுவான
-> OpenAI-compatible executor-ஐப் பயன்படுத்தும் `default.ts` மூலம் வழங்கப்படுகின்றன. முழுமையான provider catalog (380 providers)
+> OpenAI-compatible executor-ஐப் பயன்படுத்தும் `default.ts` மூலம் வழங்கப்படுகின்றன. முழுமையான provider catalog (381 providers)
 > `src/shared/constants/providers.ts`-இல் உள்ளது.
 
 ### 4.3 `open-sse/translator/`

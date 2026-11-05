@@ -285,7 +285,7 @@ Tumatakbo pagkatapos ng `build`. Nagba-block sa merge kapag nabigo.
 
 | Suite            | Pinapatunayan                                            | Nagba-block                                                                                                                              |
 | ---------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `test:vitest`    | MCP server (110 tools), autoCombo, cache — vitest runner | Oo                                                                                                                                       |
+| `test:vitest`    | MCP server (129 tools), autoCombo, cache — vitest runner | Oo                                                                                                                                       |
 | `test:vitest:ui` | Mga test ng UI component — vitest runner                 | **Nagba-block** — tahasang hindi isinama ang mga dati nang failure sa `vitest.config.ts`; ang mga bagong failure ay magpapabagsak sa job |
 
 ### Mga nightly workflow (naka-iskedyul, nagbibigay-payo lamang)

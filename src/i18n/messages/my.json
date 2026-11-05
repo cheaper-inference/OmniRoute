@@ -13521,7 +13521,7 @@
       },
       "omni-mcp": {
         "name": "MCP ဆာဗာ",
-        "description": "OmniRoute MCP ဆာဗာ (ကိရိယာ 110 ခု၊ သယ်ယူပို့ဆောင်မှု 3 မျိုး- SSE/stdio/HTTP) သို့ ချိတ်ဆက်ပါ။ ခွင့်ပြုချက်နယ်ပယ် 33 ခုတစ်လျှောက် routing၊ cache၊ compression၊ memory၊ skills၊ providers နှင့် audit tools များ ပါဝင်သည်။"
+        "description": "OmniRoute MCP ဆာဗာ (ကိရိယာ 129 ခု၊ သယ်ယူပို့ဆောင်မှု 3 မျိုး- SSE/stdio/HTTP) သို့ ချိတ်ဆက်ပါ။ ခွင့်ပြုချက်နယ်ပယ် 34 ခုတစ်လျှောက် routing၊ cache၊ compression၊ memory၊ skills၊ providers နှင့် audit tools များ ပါဝင်သည်။"
       },
       "omni-agents-a2a": {
         "name": "Agent များနှင့် A2A Protocol",

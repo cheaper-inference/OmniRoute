@@ -501,7 +501,7 @@ adapters, quirk handlers). Executors मध्ये हे समाविष�
 `claudeIdentity.ts` (सामायिक identity helper) आणि `index.ts` (registry).
 
 > टीप: येथे सूचीबद्ध नसलेले providers generic
-> OpenAI-compatible executor वापरून `default.ts` द्वारे सेवा दिले जातात. संपूर्ण provider catalog (380 providers) येथे आहे:
+> OpenAI-compatible executor वापरून `default.ts` द्वारे सेवा दिले जातात. संपूर्ण provider catalog (381 providers) येथे आहे:
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

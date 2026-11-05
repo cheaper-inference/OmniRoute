@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="คำมั่นสัญญา — Endpoint เดียวและ 380 ผู้ให้บริการ การ fallback อัตโนมัติช่วยให้กำหนดเส้นทางต่อเมื่อยังมีเป้าหมายที่พร้อมใช้งาน เสาหลักหกประการ: fallback ที่ยืดหยุ่นข้าม 380 ผู้ให้บริการ · ประหยัดโทเคนสูงสุด 95% สำหรับงานที่เข้าเงื่อนไข · เริ่มต้นฟรี $0 ด้วย free tier กว่า 150 รายการและผู้ให้บริการฟรีตลอดชีพแบบ recurring/keyless 53 ราย · ผสานรวม CLI/agent 39 รายการผ่าน config เดียว · รองรับ OpenAI, Claude, Gemini และ Responses API ที่ /v1 · ควบคุมการใช้งานระดับ production รวมถึง circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals และ static test declarations กว่า 56,000 รายการในไฟล์ทดสอบที่ติดตามกว่า 7,800 ไฟล์"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="คำมั่นสัญญา — Endpoint เดียวและ 380 ผู้ให้บริการ การ fallback อัตโนมัติช่วยให้กำหนดเส้นทางต่อเมื่อยังมีเป้าหมายที่พร้อมใช้งาน เสาหลักหกประการ: fallback ที่ยืดหยุ่นข้าม 380 ผู้ให้บริการ · ประหยัดโทเคนสูงสุด 95% สำหรับงานที่เข้าเงื่อนไข · เริ่มต้นฟรี $0 ด้วย free tier กว่า 150 รายการและผู้ให้บริการฟรีตลอดชีพแบบ recurring/keyless 53 ราย · ผสานรวม CLI/agent 39 รายการผ่าน config เดียว · รองรับ OpenAI, Claude, Gemini และ Responses API ที่ /v1 · ควบคุมการใช้งานระดับ production รวมถึง circuit breakers, TLS stealth, MCP 129 tools, A2A, memory, guardrails, evals และ static test declarations กว่า 56,000 รายการในไฟล์ทดสอบที่ติดตามกว่า 7,800 ไฟล์"/>
 
 <br/>
 <br/>

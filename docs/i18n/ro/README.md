@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Promisiunea — Un singur endpoint și 380 de provideri. Fallback-ul automat continuă rutarea cât timp există o țintă sănătoasă disponibilă. Șase piloni: fallback rezilient între 380 de provideri · până la 95% economii de tokeni pe workload-uri eligibile · $0 la început cu peste 150 de free tiers și 53 de provideri recurenți/fără cheie, mereu gratuiți · 39 de integrări CLI/agent printr-o singură configurare · compatibilitate OpenAI, Claude, Gemini și Responses API la /v1 · controale de producție inclusiv circuit breakers, TLS stealth, MCP 110 tools, A2A, memorie, guardrails, evals și peste 56.000 de declarații de test statice în peste 7.800 de fișiere de test urmărite."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Promisiunea — Un singur endpoint și 380 de provideri. Fallback-ul automat continuă rutarea cât timp există o țintă sănătoasă disponibilă. Șase piloni: fallback rezilient între 380 de provideri · până la 95% economii de tokeni pe workload-uri eligibile · $0 la început cu peste 150 de free tiers și 53 de provideri recurenți/fără cheie, mereu gratuiți · 39 de integrări CLI/agent printr-o singură configurare · compatibilitate OpenAI, Claude, Gemini și Responses API la /v1 · controale de producție inclusiv circuit breakers, TLS stealth, MCP 129 tools, A2A, memorie, guardrails, evals și peste 56.000 de declarații de test statice în peste 7.800 de fișiere de test urmărite."/>
 
 <br/>
 <br/>

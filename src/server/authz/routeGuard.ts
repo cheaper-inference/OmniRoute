@@ -32,6 +32,8 @@ import { VNC_ROUTE_PREFIX } from "@/lib/vncSession/manifest";
 const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
 
 export const LOCAL_ONLY_API_PREFIXES: ReadonlyArray<string> = [
+  "/api/rosebud/", // Official local CLI process execution and account authorization.
+
   "/api/mcp/",
   "/api/cli-tools/runtime/",
   "/api/cli-tools/omp-settings", // spawns `which omp` to detect the CLI install (Hard Rules #15 + #17, #6318)

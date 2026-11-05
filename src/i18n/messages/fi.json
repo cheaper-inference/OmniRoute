@@ -13444,7 +13444,7 @@
       },
       "omni-mcp": {
         "name": "MCP-palvelin",
-        "description": "Yhdistä OmniRouten MCP-palvelimeen (110 työkalua, 3 siirtotietä: SSE/stdio/HTTP). Kattaa reitityksen, välimuistin, pakkauksen, muistin, taidot, tarjoajat ja auditointityökalut 33 käyttöoikeusalueella."
+        "description": "Yhdistä OmniRouten MCP-palvelimeen (129 työkalua, 3 siirtotietä: SSE/stdio/HTTP). Kattaa reitityksen, välimuistin, pakkauksen, muistin, taidot, tarjoajat ja auditointityökalut 34 käyttöoikeusalueella."
       },
       "omni-agents-a2a": {
         "name": "Agentit ja A2A-protokolla",

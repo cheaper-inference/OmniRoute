@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Alkawari — Mashiga guda ɗaya da masu samarwa 380. Faduwar atomatik yana ci gaba da ratsa yayin da akwai wani manufa mai lafiya. Ginshiƙai shida: faduwar da ba ya yankewa a tsakanin masu samarwa 380 · har zuwa 95% ajiyar token a kan ayyuka masu dacewa · $0 don farawa da fiye da 150 free tiers da 53 masu samarwa masu maimaitawa/mara key har abada · haɗin CLI/agent 39 ta hanyar saitin guda · Dacewa da OpenAI, Claude, Gemini da Responses API a /v1 · sarrafa samarwa ciki har da circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals da fiye da 56,000 static test declarations a cikin fiye da 7,800 fayilolin gwaji da ake bibiyarsu."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Alkawari — Mashiga guda ɗaya da masu samarwa 380. Faduwar atomatik yana ci gaba da ratsa yayin da akwai wani manufa mai lafiya. Ginshiƙai shida: faduwar da ba ya yankewa a tsakanin masu samarwa 380 · har zuwa 95% ajiyar token a kan ayyuka masu dacewa · $0 don farawa da fiye da 150 free tiers da 53 masu samarwa masu maimaitawa/mara key har abada · haɗin CLI/agent 39 ta hanyar saitin guda · Dacewa da OpenAI, Claude, Gemini da Responses API a /v1 · sarrafa samarwa ciki har da circuit breakers, TLS stealth, MCP 129 tools, A2A, memory, guardrails, evals da fiye da 56,000 static test declarations a cikin fiye da 7,800 fayilolin gwaji da ake bibiyarsu."/>
 
 <br/>
 <br/>

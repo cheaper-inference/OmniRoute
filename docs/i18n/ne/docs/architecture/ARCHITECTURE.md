@@ -56,7 +56,7 @@ OmniRoute Next.js मा निर्मित स्थानीय AI रु�
 - प्रति API key opt-out सहित compliance audit logging
 - LLM quality assurance का लागि eval framework
 - Real-time provider circuit breaker status सहित health dashboard
-- 3 transports (stdio/SSE/Streamable HTTP) सहित MCP Server (110 tools)
+- 3 transports (stdio/SSE/Streamable HTTP) सहित MCP Server (129 tools)
 - Skills र task lifecycle सहित A2A Server (JSON-RPC 2.0 + SSE)
 - Memory system (extraction, injection, retrieval, summarization)
 - Skills system (registry, executor, sandbox, built-in skills)

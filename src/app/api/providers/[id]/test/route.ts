@@ -1,3 +1,5 @@
+import { requireRosebudAccess } from "@/lib/rosebud/authorization";
+import { testRosebudAccount } from "./rosebudConnectionTest";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
@@ -1004,6 +1006,18 @@ export async function testSingleConnection(
       latencyMs: 0,
     };
   }
+  if (provider === "rosebud" && options.allowLocalSpawn === false) {
+    // A refused remote test says nothing about the account, so it records no health state.
+    const error = "Local Rosebud access required";
+    return {
+      valid: false,
+      error,
+      diagnosis: makeDiagnosis("validation_error", "local", error, "local_access_required"),
+      latencyMs: 0,
+      statusCode: 403,
+      testedAt: null,
+    };
+  }
   retirement.assertProviderAvailable(provider);
 
   let proxyInfo: any = null;
@@ -1034,6 +1048,8 @@ export async function testSingleConnection(
       refreshed: false,
       diagnosis: (runtime as any).diagnosis,
     };
+  } else if (provider === "rosebud") {
+    result = await testRosebudAccount(connectionId);
   } else if (appServerResult) {
     result = await runWithProxyContext(proxyInfo?.proxy || null, () =>
       Promise.resolve(appServerResult)
@@ -1209,6 +1225,11 @@ export async function testSingleConnection(
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
+    const target = await getCachedProviderConnectionById(id);
+    if (target?.provider === "rosebud") {
+      const denied = await requireRosebudAccess(request, id);
+      if (denied) return denied;
+    }
 
     let rawBody: unknown = {};
     try {

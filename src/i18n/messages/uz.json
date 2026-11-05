@@ -13444,7 +13444,7 @@
       },
       "omni-mcp": {
         "name": "MCP serveri",
-        "description": "OmniRoute MCP serveriga ulaning (110 ta vosita, 3 ta transport: SSE/stdio/HTTP). 33 ta ruxsat doirasida marshrutlash, kesh, siqish, xotira, ko‘nikmalar, provayderlar va audit vositalarini qamrab oladi."
+        "description": "OmniRoute MCP serveriga ulaning (129 ta vosita, 3 ta transport: SSE/stdio/HTTP). 34 ta ruxsat doirasida marshrutlash, kesh, siqish, xotira, ko‘nikmalar, provayderlar va audit vositalarini qamrab oladi."
       },
       "omni-agents-a2a": {
         "name": "Agentlar va A2A protokoli",
