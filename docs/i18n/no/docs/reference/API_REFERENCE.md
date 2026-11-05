@@ -4,46 +4,48 @@
 
 ---
 
-🌐 **Språk:** 🇺🇸 [Engelsk](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
+🌐 **Språk:** 🇺🇸 [English](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
 
 Kjernereferanse for OmniRoute API-et. Den dekker det offentlige `/v1`-grensesnittet og de mest brukte administrasjonsendepunktene; den maskinlesbare [`docs/openapi.yaml`](../openapi.yaml) og rutetreet under `src/app/api/` er de uttømmende kildene.
 
 For den fokuserte OpenAI-kompatible protokollen og matrisen over leverandørfunksjoner, se
 [`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md).
 
+Hver distribusjon leverer sin egen kopi av spesifikasjonen på `/openapi.yaml`, generert fra `docs/openapi.yaml` under byggingen. Den inneholder byggets versjon og en relativ server-URL (`./`), slik at forespørsler forblir på verten som leverte dokumentet. Et verktøy som importerer den nedlastede filen, har ingen slik vert og trenger at basis-URL-en angis manuelt.
+
 ---
 
 ## Innholdsfortegnelse
 
-- [Chat Completions](#chat-completions)
-- [Exclusive Managed Session Leases](#exclusive-managed-session-leases)
-- [Embeddings](#embeddings)
-- [Image Generation](#image-generation)
-- [Document OCR](#document-ocr)
-- [List Models](#list-models)
-- [Provider Plugin Manifest](#provider-plugin-manifest)
-- [Compatibility Endpoints](#compatibility-endpoints)
-- [Files API](#files-api)
-- [Batches API](#batches-api)
-- [Search API](#search-api)
-- [WebSocket Streaming](#websocket-streaming)
-- [Quotas & Issues Reporting](#quotas--issues-reporting)
-- [Semantic Cache](#semantic-cache)
-- [CLIProxyAPI Management Compatibility](#cliproxyapi-management-compatibility)
-- [Dashboard & Management](#dashboard--management)
-- [Combo Management](#combo-management)
+- [Chat Completion](#chat-completions)
+- [Eksklusive leieavtaler for administrerte økter](#exclusive-managed-session-leases)
+- [Embeddinger](#embeddings)
+- [Bildegenerering](#image-generation)
+- [Dokument-OCR](#document-ocr)
+- [Liste over modeller](#list-models)
+- [Manifest for leverandørplugin](#provider-plugin-manifest)
+- [Kompatibilitetsendepunkter](#compatibility-endpoints)
+- [Fil-API](#files-api)
+- [Batch-API](#batches-api)
+- [Søke-API](#search-api)
+- [WebSocket-strømming](#websocket-streaming)
+- [Kvoter og rapportering av problemer](#quotas--issues-reporting)
+- [Semantisk hurtigbuffer](#semantic-cache)
+- [CLIProxyAPI-kompatibilitet for administrasjon](#cliproxyapi-management-compatibility)
+- [Kontrollpanel og administrasjon](#dashboard--management)
+- [Combo-administrasjon](#combo-management)
 - [Webhooks](#webhooks)
-- [Registered Keys (Auto-Management)](#registered-keys-auto-management)
-- [Agents Protocol](#agents-protocol)
-- [Management Proxies](#management-proxies)
-- [Resilience (extended)](#resilience-extended)
-- [Skills](#skills)
-- [Memory](#memory)
-- [MCP Server](#mcp-server)
-- [A2A Server](#a2a-server)
-- [Cloud, Evals & Assess](#cloud-evals--assess)
-- [Request Processing](#request-processing)
-- [Authentication](#authentication)
+- [Registrerte nøkler (automatisk administrasjon)](#registered-keys-auto-management)
+- [Agentprotokoll](#agents-protocol)
+- [Administrasjonsproxyer](#management-proxies)
+- [Robusthet (utvidet)](#resilience-extended)
+- [Ferdigheter](#skills)
+- [Minne](#memory)
+- [MCP-server](#mcp-server)
+- [A2A-server](#a2a-server)
+- [Cloud, evalueringer og vurdering](#cloud-evals--assess)
+- [Behandling av forespørsler](#request-processing)
+- [Autentisering](#authentication)
 
 ---
 
@@ -1599,9 +1601,9 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Transkriber lydfiler ved hjelp av en konfigurert STT-leverandør. Det første bane-
-segmentet velger den opprinnelige leverandøren (`openai/…`, `deepgram/…`). Gatewayer som
-eksporterer en annen leverandørs modell på nytt, bruker en kvalifisert id
+Transkriber lydfiler ved hjelp av en konfigurert STT-leverandør. Det første
+baneanet velger den opprinnelige leverandøren (`openai/…`, `deepgram/…`). Gatewayer som
+videredistribuerer en annen leverandørs modell, bruker en kvalifisert id
 (`openrouter/deepgram/nova-3`).
 
 **Forespørsel:**
@@ -1624,12 +1626,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Eksempel på modell-ID-er:** `openai/whisper-1` (krever en OpenAI-nøkkel),
+**Eksempler på modell-ider:** `openai/whisper-1` (krever en OpenAI-nøkkel),
 `openrouter/deepgram/nova-3` (krever en OpenRouter-nøkkel),
-`deepgram/nova-3` (krever en opprinnelig Deepgram-nøkkel). En forespørsel med bare
-`deepgram/nova-3` bruker **ikke** OpenRouter.
+`deepgram/nova-3` (krever en opprinnelig Deepgram-nøkkel). En ren
+`deepgram/nova-3`-forespørsel bruker **ikke** OpenRouter.
 
 **Støttede formater:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** filmodus-transkripsjon over Gemini Live
+WebSocket (krever en Gemini API-nøkkel). Opplastingen konverteres til 16 kHz mono PCM med `ffmpeg`
+(`PATH` må inneholde dette, med mindre filen allerede er en 16 kHz mono PCM WAV), strømmes til økten, og
+den ferdigstilte teksten returneres som `{ "text": "..." }`. Valgfrie `language`- og `prompt`-skjemafelt
+videresendes. Begrensninger: opplastinger på over 25 MiB eller dekodet lyd som varer lenger enn 10 minutter, gir
+`413`; en konvertering som varer lenger enn 60 s, avsluttes og gir `504`. API-nøkkelen sendes
+bare i `x-goog-api-key`-headeren, aldri i WebSocket-URL-en.
 
 ---
 

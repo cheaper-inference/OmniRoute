@@ -1035,7 +1035,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "OpenCode Zen/Go so‘rovlarida OpenCode v2 CLI mijoz fingerprintini yuborish: opencode/latest/<2.x>/cli User-Agent va x-opencode-client cli, bepul tarifdagi so‘rovlarda esa v2 sessiya sarlavhalari, v2 CLI read/shell vosita sxemalari hamda tool_choice \"none\" bo‘lmasin. Sukut bo‘yicha o‘chiq: har bir OpenCode so‘rovida joriy identifikatsiya, sarlavhalar va tana o‘zgarmay qoladi.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Avtomatik kombinatsiyaning nomzodlar puli vosita chaqiruvini dastlabki filtrlash ishga tushishidan oldin bo‘sh bo‘lsa (barcha nishonlar kutish muddatlari, blokirovkalar yoki limit tugashi sababli o‘tkazib yuborilgan bo‘lsa), eski 400 \"Hech bir nishon vosita chaqiruvini qo‘llab-quvvatlamaydi\" capability_mismatch o‘rniga 503 no_eligible_targets javobini qaytaring. Sukut bo‘yicha o‘chirilgan: bo‘sh pul uchun eski 400 javobi saqlanadi.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Ishonchli model endpoint teglariga rioya qilishni majburiy eting (provayder katalogida e’lon qilingan, maxsus model identifikatoridan aniqlangan yoki operator tomonidan belgilangan): model xizmat ko‘rsatmaydigan endpointga yuborilgan so‘rovni /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations va /v1/audio/* yo‘nalishlarida jo‘natishdan oldin HTTP 400 bilan rad eting; teg bilan belgilangan endpointlari uchun OmniRoute adapteri mavjud bo‘lmagan modellarni /v1/models ro‘yxatidan yashiring; bunday modellar uchun boshqaruv panelidagi model sinoviga 422 bilan javob bering. Odatiy holatda o‘chirilgan: endpoint teglari faqat axborot uchun qoladi va so‘rovlar avvalgidek jo‘natiladi.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "Oddiy Anthropic bilan mos retranslyatorlarda suhbat o‘rtasidagi system navbatlarini yuqori darajadagi system promptiga ko‘chirish o‘rniga xabarlar ro‘yxatida saqlang, shunda keshlangan prompt prefiksi navbatlar davomida barqaror qoladi. Bu faqat mijozning o‘zi mid-conversation-system-2026-04-07 beta-versiyasini yuborganida qo‘llanadi. Sukut bo‘yicha o‘chiq: ushbu beta-versiyani qo‘llab-quvvatlamaydigan retranslyatorlar xabarlar ro‘yxatidagi system navbatlarini rad etgani sababli, har bir system navbati avvalgidek system promptiga ko‘chiriladi.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Operator tomonidan qayta belgilash ham, provayder reyestri ham hech qanday darajani eʼlon qilmaganida models.dev eʼlon qilgan fikrlash sarfi darajalaridan foydalaning, bunda faqat maʼlum sarf darajalarini saqlab qoling va eʼlon qilingan darajalar roʻyxati boʻsh boʻlsa, uni «darajalar yoʻq» deb hisoblang. Sukut boʻyicha oʻchiq: model katalogi va aniqlangan sarf darajalari avvalgidek qoladi.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "auto/* so‘rovlariga nomzodlar havzasini hal qilingan model imkoniyatlari (ko‘rish, mulohaza, fikrlash) va kuzatilgan sifat ballari bilan, bitta ommaviy o‘qishda, tuzish imkonini beradi. Standart holatda o‘chirilgan: so‘rov vaqtidagi nomzod vaznlari aynan avvalgidek qoladi. Yoqilganda: bu signallar snapshot vaznlariga kiradi, shuning uchun nomzod vaznlari va tanlov o‘zgarishi mumkin.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Hisob ma’lumotlari holatini tekshirish jarayoniga shlyuz o‘zi o‘chirgan ulanishlarni qayta sinashga (har birini ko‘pi bilan 6 soatda bir marta, har bir tekshiruvda 5 tadan) va qayta sinovdan muvaffaqiyatli o‘tgan ulanishni yana yoqishga ruxsat bering. Odatiy holatda o‘chiq: bunday ulanishlar operator chora ko‘rmaguncha o‘chiq qoladi. Operator o‘chirgan va doimiy ravishda taqiqlangan ulanishlar hech qachon qayta sinalmaydi.",
@@ -1939,7 +1938,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# ta so’rov} other {# ta so’rov}}, {keys, plural, one {# ta cheklangan kalit} other {# ta cheklangan kalit}}",
     "unpricedUsageMore": "…va yana {count} ta",
     "unpricedUsageConfigure": "Narxlarni sozlash",
-    "unpricedUsageDismiss": "Yopish"
+    "unpricedUsageDismiss": "Yopish",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Tahlil",
@@ -3626,6 +3634,8 @@
     "testStepRunning": "Sinalmoqda…",
     "testStepNotTestable": "Faqat bitta modelli qadamlarni sinash mumkin",
     "saving": "Saqlanmoqda...",
+    "liveAccountLabel": "akt: {id}",
+    "liveAccountTooltip": "Hisob: {id}",
     "liveNoProviders": "Hali hech qanday provayder kuzatilmadi.",
     "liveFleetDataHint": "Infratuzilma maʼlumotlari jonli combo hodisalari orqali keladi.",
     "liveActiveCount": "Faol ({count})",
@@ -5314,6 +5324,10 @@
       "disableAutoScroll": "Avtomatik aylantirishni o‘chirish",
       "enableAutoScroll": "Avtomatik aylantirishni yoqish",
       "autoScroll": "Avtomatik aylantirish",
+      "pauseLogs": "Yangilanishlarni pauza qilish",
+      "resumeLogs": "Yangilanishlarni davom ettiring",
+      "paused": "Pauza qilingan",
+      "scanLimited": "Skanerlash chegarasiga yetdi",
       "entryCount": "{count, plural, one {# ta yozuv} other {# ta yozuv}}",
       "lastHour": "So‘nggi 1 soat",
       "updatedAt": "{time}da yangilandi",
@@ -6258,6 +6272,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Vaqtinchalik kutish davrini chetlab o‘tadi, shunda ushbu ulanish tiklanadigan xatolardan keyin ham foydalanish uchun yaroqli bo‘lib qoladi (bloklangan yoki muddati tugagan kabi yakuniy holatlar baribir amal qiladi).",
     "disableCoolingLabel": "Ushbu ulanish uchun kutish davrini o‘chirish",
+    "keepMidConversationSystemDescription": "Suhbat o‘rtasida yuborilgan tizim xabarlarini yuqori darajadagi tizim so‘roviga o‘tkazish o‘rniga xabarlar ro‘yxati ichida qoldiring, shunda so‘rov keshi burilishlar bo‘ylab tegib turadi. Agar bu yuqori oqim xabarlar ichidagi rol \"tizim\" ni qabul qilsa, yoqing (aks holda u 400 ga javob beradi).",
+    "keepMidConversationSystemLabel": "Suhbat o'rtasida tizim xabarlarini joyida saqlang",
+    "requireUserLastMessageDescription": "Yordamchini oldindan toʻldirishni rad etuvchi yuqori oqimlar uchun: joʻnatishdan oldin keyingi yordamchi burilishni tashlab qoʻying (asbobdan foydalanishsiz). Model avvalgi javobini qayta tiklashi mumkin.",
+    "requireUserLastMessageLabel": "Suhbatni foydalanuvchi xabari bilan yakunlashni talab qiling",
     "bulkPasteAdded": "{count, plural, one {1 ta kalit qo‘shildi} other {# ta kalit qo‘shildi}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 ta takroriy kalit o‘tkazib yuborildi} other {# ta takroriy kalit o‘tkazib yuborildi}}",
     "bulkPasteHint": "Har bir qatorga bittadan API kalitini joylang. Bo‘sh qatorlar e’tiborga olinmaydi va takroriy kalitlar o‘tkazib yuboriladi.",
@@ -6357,6 +6375,9 @@
     "localProviders": "Mahalliy provayderlar",
     "maxConcurrentWholeNumberError": "Maksimal bir vaqtdagi qiymat butun son boʻlishi kerak",
     "m365TierLabel": "Copilot tarifi",
+    "m365RefreshTokenLabel": "Tokenni yangilash (ixtiyoriy)",
+    "m365RefreshTokenHint": "Microsoft 365 kirish tokenini avtomatik ravishda yangilash uchun foydalaniladi.",
+    "m365RefreshTokenEditHint": "Mavjud tokenni saqlash uchun bo'sh qoldiring. Uni almashtirish uchun yangi tokenni joylashtiring.",
     "m365TierHint": "Bu ulanish qaysi Microsoft 365 Copilot interfeysidan foydalanishini tanlang. Individual — standart iste’molchi BizChat interfeysi; Education va Enterprise (ish) esa tegishli tashkilot interfeyslarini yoqadi.",
     "m365TierIndividualOption": "Individual (standart)",
     "m365TierEduOption": "Ta’lim",
@@ -7091,6 +7112,7 @@
     "proxySubTabsAria": "Proksi boʻlimlari",
     "requestBodyLimitTitle": "Soʻrov tanasi cheklovi",
     "requestBodyLimitDescription": "Soʻrov tanasi tahlil qilinishidan oldin qabul qilinadigan API maʼlumotlarining maksimal hajmi. Maxsus yuklash marshrutlari kamida oʻzlarining ichki 100 MB cheklovini saqlab qoladi.",
+    "requestBodyLimitChatHint": "Bu yerda chegara saqlamaguningizcha Chat Completions va Responses 50 MB gacha qabul qiladi. Saqlangan chegara pastroq yoki yuqoriroq boʻlishidan qatʼi nazar, ularga ham qoʻllanadi.",
     "requestBodyLimitInputLabel": "Soʻrov tanasi cheklovi (MB)",
     "requestBodyLimitEmptyError": "MB hisobida cheklovni kiriting",
     "requestBodyLimitWholeNumberError": "Butun sondan foydalaning",
@@ -7276,6 +7298,13 @@
     "themeLight": "Yorug‘",
     "themeDark": "Qorong‘i",
     "themeSystem": "Tizim",
+    "paletteTitle": "Ranglar palitrasi",
+    "paletteDesc": "Editions — standart ko‘rinish. Classic avvalgi laym rangli aksentni qaytaradi.",
+    "paletteSelectionAria": "Ranglar palitrasini tanlash",
+    "paletteEditions": "Editions",
+    "paletteEditionsDesc": "Mis rangli aksentga ega iliq neytral ranglar",
+    "paletteClassic": "Classic",
+    "paletteClassicDesc": "Laym rangli aksentga ega sovuq neytral ranglar",
     "endpointTunnelVisibility": "Endpoint tunnelining ko‘rinishi",
     "endpointTunnelVisibilityDesc": "Tunnel holatini o‘zgartirmasdan Endpoint sahifasidagi tunnel boshqaruvlarini yashiring.",
     "showCloudflareTunnel": "Cloudflare Quick Tunnel",
@@ -9101,6 +9130,17 @@
     "resilienceTokenRefreshScopeConnection": "Ulanish (har bir hisobning o'z uzgichi bor)",
     "resilienceTokenRefreshThreshold": "To'xtatishdan oldingi xatolar",
     "resilienceTokenRefreshCooldown": "Ishga tushgach pauza",
+    "mfaTitle": "Ikki bosqichli autentifikatsiya",
+    "mfaDesc": "Boshqaruv paneliga kirish yoki CLI’ni ulash uchun paroldan tashqari autentifikator ilovasidagi kodni talab qilish.",
+    "mfaScanQr": "Ushbu QR kodni autentifikator ilovangiz bilan skanerlang (yoki sozlash kalitini qo‘lda kiriting), so‘ng ko‘rsatilgan 6 xonali kodni yozing.",
+    "mfaManualKey": "Sozlash kaliti",
+    "mfaCodeLabel": "Tasdiqlash kodi",
+    "mfaBackupCodesTitle": "Tiklash kodlaringizni saqlang",
+    "mfaBackupCodesDesc": "Autentifikatorga kirish imkonini yo‘qotsangiz, har bir kod sizni bir marta tizimga kiritadi. Ular qayta ko‘rsatilmaydi.",
+    "mfaBackupCodesRemaining": "Qolgan tiklash kodlari: {count}",
+    "mfaDisableDesc": "Ikki bosqichli autentifikatsiyani o‘chirish uchun parolingiz va joriy kodni (yoki tiklash kodini) kiriting.",
+    "mfaRecoveryHint": "Yo‘qolgan qurilmani tiklash: serverni OMNIROUTE_DISABLE_MFA=true bilan ishga tushiring va to‘g‘ridan-to‘g‘ri xostdan kiring.",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA o‘rnatilgan: bu xostdan kirishlar ikkinchi bosqichni o‘tkazib yuboradi. Qayta kirganingizdan so‘ng uni olib tashlang.",
     "piiMasking": {
       "title": "Shaxsiy ma'lumotlarni niqoblash",
       "description": "Qaysi turdagi shaxsiy ma'lumotlar niqoblanishini tanlang va o'z andozalaringizni qo'shing. Quyida ko'rsatilgan funksiya bayroqlarini yoqmaguningizcha niqoblash o'chiq turadi.",
@@ -10786,7 +10826,11 @@
     "deleteAndRelaunch": "O‘chirish",
     "settingsJson": "settings.json",
     "fromDataDir": "ma’lumotlar katalogidan",
-    "relaunchApp": "OmniRoute ish stoli ilovasini qayta ishga tushiring"
+    "relaunchApp": "OmniRoute ish stoli ilovasini qayta ishga tushiring",
+    "mfaPrompt": "Autentifikator ilovangizdagi kodni kiriting",
+    "mfaCodeLabel": "Tasdiqlash kodi",
+    "mfaCodePlaceholder": "6 xonali kod yoki tiklash kodi",
+    "mfaBackupCodeHint": "Qurilmangizni yo‘qotdingizmi? O‘rniga tiklash kodlaringizdan birini kiriting."
   },
   "landing": {
     "brandName": "OmniRoute",
@@ -14129,6 +14173,10 @@
         "label": "Umumiy chiqish havuzi tartibi",
         "description": "Kvota chiqish manzili bo'yicha to'plamga ajratilgan provayderlar uchun, so'nggi rad etilgan a'zo tomon kuzatilgan chiqish manzili bilan umumlashuvchi havuz a'zolarini sog'lom a'zolar darajada kamroq qatnashish uchun tartiblang. Faqat tartib, hech qachon rad etilmaydi. Rad etish signalini o'qiydigan PROXY_SKIP_RECENTLY_FAILED talab qiladi. Standart holatda o'chiq: tanlov tartibi faqat oddiy rotatsiya bilan o'zgarmaydi."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotatsiya atib etib loglash",
         "description": "Opencode rotatsiyasi qaysi hisob xizmat ko'rsatgan yoki o'tkazib yuborilganini yozadi (faqat maskalangan identifikatorlar, hech qachon to'liq hisob identifikatorlari yozilmaydi) va proksi log yozuvlarini so'rovga bog'laydi, shunda operator o'tkazib yuborilgan hisoblarni ishlatilmaganlarni farqlash uchun. Standart holatda o'chiq: qo'shimcha log qatorlari yoki ustunlar yozilmaydi."
@@ -14360,6 +14408,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Kombinatsiya: Kontent Siyosati Rad Etishda To‘xtash",
         "description": "Kombinatsiya maqsadi aniq kontent siyosati rad etish bilan javob qaytarganda (kod yoki tur cyber_policy / content_policy_violation), kombinatsiyani to‘xtating va bu rad etishni qaytaring, garchi qolgan maqsadlar boshqa modellarda bo‘lsa ham, keyingi maqsadga o‘tmasdan. Standart holatda o‘chiq: bu rad etish hech qachon hisobni sovuq tushirmaydi yoki provayder circuit breaker’ini ishlamasdan qoldirmaydi, va kombinatsiya xuddi avvalgidec keyingi maqsadga o‘tadi."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Poxatona takrorlash: 403/410 radlarini oʻtkazib yuborish",

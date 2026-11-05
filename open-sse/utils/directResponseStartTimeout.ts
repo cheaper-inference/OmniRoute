@@ -52,6 +52,46 @@ function resolveLocalDirectHeadersFloorMs(
   return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 0;
 }
 
+// Volume-aware probe-window tier. Prefill scales with input size: a large
+// context legitimately sits silent well past the 30s default before the first
+// byte, with no reasoning selector in the body for the ceiling above to key
+// on — so the flat floor cut healthy slow-prefill upstreams at exactly the
+// floor. Tiers: ≤512KB unchanged (a small body overrunning the probe still
+// smells like a dead connection), >512KB ×2, >2MB ×3, capped at 180s.
+// OMNIROUTE_DIRECT_HEADERS_VOLUME_ADAPTIVE=0/false/off pins the flat behavior.
+const LARGE_BODY_TIER_BYTES = 512 * 1024;
+const HUGE_BODY_TIER_BYTES = 2 * 1024 * 1024;
+const VOLUME_AWARE_WINDOW_CAP_MS = 180_000;
+
+function isVolumeAdaptiveDirectHeadersEnabled(
+  env: Record<string, string | undefined> = process.env
+): boolean {
+  const raw = env.OMNIROUTE_DIRECT_HEADERS_VOLUME_ADAPTIVE;
+  if (raw == null || raw.trim() === "") return true;
+  return !["0", "false", "off"].includes(raw.trim().toLowerCase());
+}
+
+function bodyByteLength(body: string | null | undefined): number {
+  if (!body) return 0;
+  return new TextEncoder().encode(body).length;
+}
+
+export function resolveVolumeAwareDirectHeadersTimeoutMs(
+  baseMs: number,
+  bodyBytes: number,
+  env: Record<string, string | undefined> = process.env
+): number {
+  if (!(baseMs > 0) || !(bodyBytes > 0)) return baseMs;
+  if (!isVolumeAdaptiveDirectHeadersEnabled(env)) return baseMs;
+  let factor = 1;
+  if (bodyBytes > HUGE_BODY_TIER_BYTES) factor = 3;
+  else if (bodyBytes > LARGE_BODY_TIER_BYTES) factor = 2;
+  if (factor === 1) return baseMs;
+  // Raise-only: the ceiling must never pull the window below an
+  // already-higher floor (operator override or the local/LAN floor).
+  return Math.max(baseMs, Math.min(baseMs * factor, VOLUME_AWARE_WINDOW_CAP_MS));
+}
+
 function resolveFlatDirectHeadersFloorMs(
   env: Record<string, string | undefined>,
   body?: string | null,
@@ -72,7 +112,9 @@ function resolveFlatDirectHeadersFloorMs(
   if (isLocalDirectTarget(targetUrl)) {
     base = Math.max(base, resolveLocalDirectHeadersFloorMs(env));
   }
-  return base;
+  // Volume tier applies last with raise-only semantics, so it composes with
+  // the effort/local raises above without order dependence.
+  return resolveVolumeAwareDirectHeadersTimeoutMs(base, bodyByteLength(body), env);
 }
 
 // #13703: `attempt` 0 is the pooled dispatcher (flat floor, #10214's

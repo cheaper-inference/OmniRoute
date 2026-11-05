@@ -4,7 +4,7 @@ import {
   injectMemoryAndSkills,
   mergeInjectedFallbackOwnerNames,
 } from "./chatCore/memorySkillsInjection.ts";
-import { resolveChatCoreRequestSetup } from "./chatCore/requestSetup.ts";
+import { resolveChatCoreRequestSetup, resolveClientEchoModel } from "./chatCore/requestSetup.ts";
 import { shouldSkipNativeCodexReactiveCompaction } from "./chatCore/nativeCodexCompaction.ts";
 import {
   normalizeOpenAICompatibleTools,
@@ -27,7 +27,10 @@ export {
   relocateDirectiveOnlyMessages,
 } from "./chatCore/claudeSystemRole.ts";
 import { checkIdempotencyCache } from "./chatCore/idempotency.ts";
-import { acquireTurnExecution, createTurnInProgressResult } from "./chatCore/turnExecutionGuard.ts";
+import {
+  acquireTurnExecutionWithWait,
+  createTurnInProgressResult,
+} from "./chatCore/turnExecutionGuard.ts";
 import { checkSemanticCache, isSemanticCacheEnabled } from "./chatCore/semanticCache.ts";
 import { checkLifecycle, resolveLifecycle } from "./chatCore/modelLifecyclePolicy.ts";
 import {
@@ -583,7 +586,11 @@ async function handleChatCoreInner({
     return idempotencyHit;
   }
 
-  const turnExecution = acquireTurnExecution(idempotencyKey);
+  const turnExecution = await acquireTurnExecutionWithWait(idempotencyKey, {
+    log,
+    traceId,
+    signal: clientRawRequest?.signal ?? null,
+  });
   if (turnExecution.acquired === false) {
     const duplicate = createTurnInProgressResult(turnExecution.retryCount);
     log?.warn?.(
@@ -867,11 +874,12 @@ async function handleChatCoreInner({
   // `opencode-zen/nemotron-3-ultra-free`) is not recognized by the client on `--resume`.
   const isClaudeCodeClient = isClaudeCodeOriginatedHeaders(clientRawRequest?.headers);
 
+  const clientEchoModel = resolveClientEchoModel(clientRawRequest?.body, requestedModel);
   let echoModel =
     (settings.echoRequestedModelName === true || isCodexResponsesEcho || isClaudeCodeClient) &&
-    typeof requestedModel === "string" &&
-    requestedModel
-      ? requestedModel
+    typeof clientEchoModel === "string" &&
+    clientEchoModel
+      ? clientEchoModel
       : null;
   // Auto-echo the listing-valid form for bare requests to noAuth catalog
   // providers so clients validating response.model against /v1/models don't warn.
@@ -1582,6 +1590,8 @@ async function handleChatCoreInner({
         }
       );
       const mode = compressionPlan.mode as CompressionConfig["defaultMode"];
+      // Configured mode for analytics when a policy wrapped it (lite as a one-step stacked plan).
+      const reportedMode = mode === "stacked" ? compressionPlan.reportedMode : undefined;
       if (adaptiveTelemetry && adaptiveTelemetry.fit === false) {
         log?.warn?.(
           "COMPRESSION",
@@ -1728,6 +1738,7 @@ async function handleChatCoreInner({
               effectiveServiceTier,
               comboName,
               mode,
+              reportedMode,
               compressionComboId: config.compressionComboId,
               skillRequestId,
               cavemanOutputModeApplied,
@@ -1749,6 +1760,7 @@ async function handleChatCoreInner({
                 effectiveServiceTier,
                 comboName,
                 mode,
+                reportedMode,
                 compressionComboId: config.compressionComboId,
                 skillRequestId,
                 cavemanOutputModeApplied,
@@ -2155,13 +2167,8 @@ async function handleChatCoreInner({
         ...options,
         provider,
         sourceFormat,
-        // #16236: in-place mid-conversation system turns are opt-in AND need the client's beta.
-        clientAnthropicBeta: getHeaderValueCaseInsensitive(
-          clientRawRequest?.headers ?? null,
-          "anthropic-beta"
-        ),
-        isMidConversationSystemEnabled: () =>
-          isFeatureFlagEnabled("ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM"),
+        // #16236: in-place mid-conversation system turns are a per-connection opt-in.
+        providerSpecificData: credentials?.providerSpecificData,
       },
       log
     );
@@ -3068,9 +3075,11 @@ async function handleChatCoreInner({
             suffix: "trying other accounts",
           });
         } else if (errorType === PROVIDER_ERROR_TYPES.REQUEST_REJECTED) {
-          // Per-request refusal (#12859): growing cooldown, streak → banned.
+          // Per-request refusal (#12859): growing MODEL-scoped cooldown. Never a ban.
           await handleRequestRejectedFailure({
             connectionId: errorConnectionId,
+            provider,
+            targetModel,
             statusCode,
             message: persistentMessage,
           });

@@ -8,17 +8,25 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## Fejlesztői környezet beállítása
+## Fejlesztői beállítás
 
 ### Előfeltételek
 
 - **Node.js** `>=22.22.2 <23`, vagy `>=24.0.0 <27` (ajánlott: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ felhasználók (Node 24+):** Az `npm install` futtatása után ellenőrizze, hogy a natív modulok telepítve lettek-e:
-> `node -e "require('better-sqlite3')"`. Ha `MODULE_NOT_FOUND` hibával meghiúsul,
-> futtassa az `npm approve-scripts better-sqlite3 && npm install` parancsot. Lásd:
-> [Hibaelhárítás](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **Windows Node 24-gyel:** használja a jelenlegi 24 LTS javítókiadását (legalább 24.20.0).
+> A korábbi kiadások sikeres tesztek után is leállhatnak, amikor a `--test-force-exit` bezárja a
+> folyamatot. A Node [Windows libuv-javítása](https://github.com/nodejs/node/pull/61999) kezeli
+> ezt a futásidejű összeomlást; hagyja engedélyezve a teszt-ellenőrzéseket és a futtató kilépési
+> ellenőrzéseit.
+
+> **npm v11+ felhasználók (Node 24+):** Az `npm install` után ellenőrizze, hogy a natív modulok
+> telepítve lettek-e:
+> `node -e "require('better-sqlite3')"`. Ha a parancs `MODULE_NOT_FOUND` hibával sikertelen,
+> futtassa a `npm approve-scripts better-sqlite3 && npm install` parancsot. Lásd a
+> [Hibaelhárítás](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)
+> oldalt.
 
 - **Git**
 
@@ -36,88 +44,91 @@ npm install
 # Hozza létre a .env fájlt a sablonból
 cp .env.example .env
 
-# Hozza létre a szükséges titkos értékeket
+# Generálja a szükséges titkos kulcsokat
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-A fejlesztés legfontosabb változói:
+A fejlesztéshez fontos változók:
 
-| Változó                | Fejlesztési alapérték    | Leírás                           |
-| ---------------------- | ------------------------ | -------------------------------- |
-| `PORT`                 | `20128`                  | A kiszolgáló portja              |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | A frontend alap URL-je           |
-| `JWT_SECRET`           | (létrehozása fent)       | JWT-aláírási titkos kulcs        |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | Az első bejelentkezés jelszava   |
-| `APP_LOG_LEVEL`        | `info`                   | A naplózás részletességi szintje |
+| Változó                | Alapértelmezett fejlesztési érték | Leírás                           |
+| ---------------------- | --------------------------------- | -------------------------------- |
+| `PORT`                 | `20128`                           | A szerver portja                 |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`          | A frontend alap-URL-je           |
+| `JWT_SECRET`           | (a fentiek szerint generálandó)   | A JWT-aláírás titkos kulcsa      |
+| `INITIAL_PASSWORD`     | `CHANGEME`                        | Az első bejelentkezési jelszó    |
+| `APP_LOG_LEVEL`        | `info`                            | A naplózás részletességi szintje |
 
-### A vezérlőpult beállításai
+### Irányítópult beállításai
 
-A vezérlőpult felületi kapcsolókat biztosít olyan funkciókhoz, amelyek környezeti változókkal is konfigurálhatók:
+Az irányítópult felhasználói felületi kapcsolókat biztosít az olyan funkciókhoz, amelyek
+környezeti változókon keresztül is beállíthatók:
 
-| Beállítás helye         | Kapcsoló             | Leírás                                             |
-| ----------------------- | -------------------- | -------------------------------------------------- |
-| Beállítások → Speciális | Hibakeresési mód     | A hibakeresési kérésnaplók engedélyezése (felület) |
-| Beállítások → Általános | Oldalsáv láthatósága | Az oldalsáv szakaszainak megjelenítése/elrejtése   |
+| Beállítás helye     | Kapcsoló           | Leírás                                           |
+| ------------------- | ------------------ | ------------------------------------------------ |
+| Settings → Advanced | Debug Mode         | Hibakeresési kérésnaplók engedélyezése (UI)      |
+| Settings → General  | Sidebar Visibility | Az oldalsáv szakaszainak megjelenítése/elrejtése |
 
-Ezeket a beállításokat az adatbázis tárolja, így újraindítások után is megmaradnak, és beállításuk esetén felülírják a környezeti változók alapértékeit.
+Ezek a beállítások az adatbázisban tárolódnak, és újraindítások között is megmaradnak,
+ha be vannak állítva, felülírva a környezeti változók alapértelmezett értékeit.
 
 ### Helyi futtatás
 
 ```bash
-# Fejlesztői mód (automatikus újratöltés)
+# Fejlesztési mód (gyors újratöltés)
 npm run dev
 
-# Éles összeállítás
-npm run build    # next build → .build/next/, majd assembleStandalone → dist/
+# Éles build
+npm run build    # next build → .build/next/ majd assembleStandalone → dist/
 npm run start
 
-# Gyors, csak háttérrendszer/API-fordítás a közreműködők módosításaihoz
+# Gyors, csak backend/API fordítás a közreműködői módosításokhoz
 npm run build:contributor
 
-# Kiadási összeállítás (tiszta újraépítés + HEAD-ellenőrzőjel — kötelező a telepítéshez)
-npm run build:release   # rm -rf .build dist, majd összeállítás + a dist/BUILD_SHA kiírása
+# Kiadási build (tiszta újrafordítás + HEAD-jelző — telepítéshez kötelező)
+npm run build:release   # rm -rf .build dist && build + létrehozza a dist/BUILD_SHA fájlt
 
-# Gyakori portkonfiguráció
+# Gyakori portbeállítás
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-A közreműködői összeállítás csak fordítási ellenőrzést végez: nem állítja össze az önálló
-disztribúciót, és nem készíti el az opcionális natív csomagolási összetevőket. Használja a szokásos éles összeállítást,
-ha a szállítható csomagot kell ellenőriznie.
+A közreműködői build csak fordítási ellenőrzést hajt végre: nem állítja össze az önálló
+disztribúciót, és nem építi fel az opcionális natív csomagolási eszközöket. Használja a
+hagyományos éles buildet, amikor a telepíthető csomagot szeretné ellenőrizni.
 
-### Az összeállítás kimeneti elrendezése
+### A build kimenetének felépítése
 
-| Könyvtár  | Tartalom                                                                                            | Verziókövetett |
-| --------- | --------------------------------------------------------------------------------------------------- | -------------- |
-| `src/`    | Az alkalmazás forráskódja (TypeScript / TSX)                                                        | Igen           |
-| `.build/` | Köztes fájlok — a `next build` kimenete (git által figyelmen kívül hagyva, `distDir = .build/next`) | Nem            |
-| `dist/`   | Szállítható csomag — az `assembleStandalone` állítja össze (git által figyelmen kívül hagyva)       | Nem            |
+| Könyvtár  | Tartalom                                                                      | Követett |
+| --------- | ----------------------------------------------------------------------------- | -------- |
+| `src/`    | Az alkalmazás forráskódja (TypeScript / TSX)                                  | Igen     |
+| `.build/` | Köztes fájlok — a `next build` kimenete (gitignored, `distDir = .build/next`) | Nem      |
+| `dist/`   | Telepíthető csomag — az `assembleStandalone` állítja össze (gitignored)       | Nem      |
 
-Az összeállítási folyamat egyetlen menetből áll:
+A buildfolyamat egyetlen lépésből áll:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js-kimenet)
-  └─ assembleStandalone()                 (átmásolja az önálló csomagot, valamint a static, public és natív összetevőket)
+  └─ next build → .build/next/standalone  (Next.js kimenet)
+  └─ assembleStandalone()                 (az önálló csomagot + statikus + nyilvános + natív eszközöket másolja)
        └─ kimenet: dist/                  (server.js, .next/static/, public/, node_modules/)
 ```
 
-Az `npm run build:release` ezenfelül először mindkét könyvtárat megtisztítja, majd
-telepítési integritást ellenőrző jelként kiírja a `dist/BUILD_SHA` fájlt (= `git rev-parse --short HEAD`).
+Az `npm run build:release` ezenfelül először törli mindkét könyvtár tartalmát, majd létrehozza a
+`dist/BUILD_SHA` fájlt (= `git rev-parse --short HEAD`) telepítési integritási jelzőként.
 
-Az `npm run build:contributor` a csak háttérrendszeres összeállítási profilt használja. Az összeállítás során ideiglenesen helyettesíti
-a vezérlőpult felületének fájljait, megtartja az API-útvonalkezelőket, majd az összeállítás után visszaállítja az eredeti fájlokat.
-A vezérlőpult felületét érintő módosításokhoz vagy a kiadás teljes körű ellenőrzéséhez használja az `npm run build` parancsot;
-a közreműködői profil nem helyettesíti a kiadási összeállítást.
+Az `npm run build:contributor` a csak backendhez használható buildprofilt alkalmazza. A build
+során ideiglenesen helyettesíti az irányítópult felhasználói felületének fájljait, megtartja
+az API-útvonalak kezelőit, majd a build után visszaállítja az eredeti fájlokat. Az
+irányítópult felhasználói felületét érintő módosításokhoz vagy a teljes kiadási ellenőrzéshez
+használja az `npm run build` parancsot; a közreműködői profil nem helyettesíti a kiadási buildet.
 
-> **Megjegyzés VPS-re történő telepítéshez:** a távoli lemezkép `/usr/lib/node_modules/omniroute/app/`
-> könyvtára változatlan marad. A telepítési eljárások a `dist/` tartalmát szinkronizálják bele az rsync segítségével.
-> Csak a repozitóriumon belüli összeállítási kimenet elérési útja változott (`app/` → `dist/`).
+> **VPS-telepítési megjegyzés:** a távoli `/usr/lib/node_modules/omniroute/app/` képfájl-könyvtár
+> változatlan marad. A telepítési készségek a `dist/` tartalmát rsync segítségével másolják bele.
+> Csak a repozitóriumon belüli buildkimenet útvonala változott (`app/` → `dist/`).
 
 Alapértelmezett URL-ek:
 
-- **Vezérlőpult**: `http://localhost:20128/dashboard`
+- **Irányítópult**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
