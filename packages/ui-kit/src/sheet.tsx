@@ -22,6 +22,8 @@ export const SheetTrigger = forwardRef<HTMLButtonElement, SheetTriggerProps>(fun
 export interface SheetContentProps extends Omit<ComponentProps<typeof DialogPrimitive.Content>, "asChild"> {
   side?: SheetSide;
   showClose?: boolean;
+  /** Accessible name of the built-in close button. Defaults to "Close panel". */
+  closeLabel?: string;
   overlayClassName?: string;
 }
 
@@ -29,6 +31,7 @@ export const SheetContent = forwardRef<HTMLDivElement, SheetContentProps>(functi
   className,
   side = "right",
   showClose = true,
+  closeLabel = "Close panel",
   overlayClassName,
   forceMount,
   children,
@@ -51,7 +54,7 @@ export const SheetContent = forwardRef<HTMLDivElement, SheetContentProps>(functi
       >
         {children}
         {showClose ? (
-          <DialogPrimitive.Close className="ci-sheet__close" aria-label="Close panel">
+          <DialogPrimitive.Close className="ci-sheet__close" aria-label={closeLabel}>
             <X aria-hidden="true" />
           </DialogPrimitive.Close>
         ) : null}

@@ -632,9 +632,9 @@ Mühit dəyişənlərinin tam siyahısı üçün [README](../README.md) faylına
 <details>
 <summary><b>Bütün mövcud modellərə baxın</b></summary>
 
-> Aşağıdakı siyahı v3.8.0 üçün `open-sse/config/providerRegistry.ts` faylından seçilib. Bulud kataloqları (Gemini, OpenRouter və s.) dinamik şəkildə sinxronlaşdırılır — tam canlı kataloqu açmaq üçün **Dashboard → Providers → [provider] → Available Models** bölməsinə keçin və ya `GET /api/models/catalog` çağırışını edin.
+> Aşağıdakı siyahı v3.8.0 üçün `open-sse/config/providerRegistry.ts` faylından tərtib edilib. Bulud kataloqları (Gemini, OpenRouter və s.) dinamik şəkildə sinxronlaşdırılır — tam canlı kataloqu açmaq üçün **Dashboard → Providers → [provider] → Available Models** bölməsinə keçin və ya `GET /api/models/catalog` çağırışından istifadə edin.
 >
-> Provayderin daxili siyahısı aktuallığını itiribsə, canlı yuxarı axın kataloqunu əldə etmək üçün həmin səhifədə **Import from /models** seçimindən istifadə edin (və ya **Auto-Sync** funksiyasını aktivləşdirin). Bu, v3.8.50 versiyasında LLM7.io (`gemini-3.1-flash-lite`) və UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) üçün təsdiqlənib; eyni sınaq mərhələsində Pollinations anonim girişinin yuxarı axın məhdudiyyətləri qüvvədə qalıb.
+> Provayderin daxili siyahısı köhnəlibsə, canlı yuxarı axın kataloqunu əldə etmək üçün həmin səhifədə **Import from /models** seçimindən istifadə edin (və ya **Auto-Sync** funksiyasını aktivləşdirin). Bu, v3.8.50 versiyasında LLM7.io (`gemini-3.1-flash-lite`) və UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) üçün yoxlanılıb; eyni sınaq mərhələsində Pollinations-a anonim giriş yuxarı axınla məhdud olaraq qalıb.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -650,7 +650,7 @@ Mühit dəyişənlərinin tam siyahısı üçün [README](../README.md) faylına
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — aylıq $9 və ya istifadəyə görə: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — ayda $9 sabit ödəniş və ya istifadəyə görə: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API açarı: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
@@ -666,21 +666,21 @@ Mühit dəyişənlərinin tam siyahısı üçün [README](../README.md) faylına
 
 **Fireworks AI (`fireworks/`)** — Sürətli inferens: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Vafersəviyyəli: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Vafli miqyaslı: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG-yönümlü: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — RAG yönümlü: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Müəssisələr üçün: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Korporativ: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: API açarına əsasən Google-dan canlı şəkildə sinxronlaşdırılır — statik siyahı yoxdur. **Dashboard → Providers** bölməsində açarı qoşun, sonra cari kataloqu idxal etmək üçün **Available Models** seçimindən istifadə edin (məsələn, `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Google tərəfindən API açarı əsasında canlı sinxronlaşdırılır — statik siyahı yoxdur. **Dashboard → Providers** bölməsində açar qoşun, sonra cari kataloqu idxal etmək üçün **Available Models** seçimindən istifadə edin (məsələn, `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Digər uyğun provayderlər** (seçilmiş): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` vasitəsilə), `azure-ai`, `openrouter` (kataloq ötürməsi), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Hər biri `providerRegistry.ts` faylında öz model siyahısını saxlayır və provayder `/models` son nöqtəsini təqdim etdikdə avtomatik sinxronlaşdırıla bilər.
+**Digər uyğun provayderlər** (seçilmiş): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` vasitəsilə), `azure-ai`, `openrouter` (keçid kataloqu), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Hər biri öz model siyahısını `providerRegistry.ts` faylında saxlayır və provayder `/models` endpoint-i təqdim etdikdə avtomatik sinxronlaşdırıla bilər.
 
-**Model identifikatorları haqqında qeyd:** OmniRoute provayderin doğma identifikatorlarından istifadə edir (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Bəzi identifikatorlarda nöqtəli versiyalar var, çünki yuxarı axın API-si onları bu formatda gözləyir. Model yuxarıda siyahıda yoxdursa, mövcudluğu təsdiqləmək üçün `omniroute models --search <term>` əmrini icra edin və ya `GET /api/models/catalog` sorğusuna müraciət edin.
+**Model ID-ləri haqqında qeyd:** OmniRoute provayderin doğma ID-lərindən istifadə edir (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Bəzi ID-lərdə nöqtə ilə ayrılmış versiyalar var, çünki yuxarı axın API-si onları bu formada gözləyir. Model yuxarıdakı siyahıda yoxdursa, mövcudluğu təsdiqləmək üçün `omniroute models --search <term>` əmrini icra edin və ya `GET /api/models/catalog` çağırışından istifadə edin.
 
 </details>
 
