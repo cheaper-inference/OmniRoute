@@ -157,6 +157,7 @@ import {
 import {
   getCodexChildCooldown,
   isCodexChildUnavailable,
+  isCodexTextQuotaPreflightCooldown,
   persistCodexChildCooldown,
 } from "@omniroute/open-sse/services/codexAccount/index.ts";
 import {
@@ -1048,7 +1049,10 @@ export async function getProviderCredentials(
     const isCodexScopeUnavailable = (
       connection: ProviderConnectionView,
       model: string | null
-    ): boolean => provider === "codex" && isCodexChildUnavailable(connection, model);
+    ): boolean =>
+      provider === "codex" &&
+      isCodexChildUnavailable(connection, model) &&
+      !(options.requirePaidCodexPlan && isCodexTextQuotaPreflightCooldown(connection, model));
 
     // Only Redis needs a snapshot for synchronous consumers; SQLite reads in place.
     const affinityStore = getSessionAffinityStore();
@@ -1070,6 +1074,7 @@ export async function getProviderCredentials(
           isTerminalConnectionStatus,
           isCodexScopeUnavailable,
           isQuotaPolicyBlocked: (c) =>
+            !bypassQuotaPolicy &&
             evaluateQuotaLimitPolicy(provider, c as ProviderConnectionView, requestedModel).blocked,
         }) ?? forcedConnectionId;
     }
@@ -1090,6 +1095,7 @@ export async function getProviderCredentials(
         allowRateLimitedConnections,
         bypassQuotaPolicy,
         isQuotaExhausted: (connectionId) => {
+          if (bypassQuotaPolicy) return false;
           const conn = connections.find((candidate) => candidate.id === connectionId);
           return isQuotaExhaustedForRequest(
             connectionId,
@@ -1099,6 +1105,7 @@ export async function getProviderCredentials(
           );
         },
         isQuotaPolicyBlocked: (connection) =>
+          !bypassQuotaPolicy &&
           evaluateQuotaLimitPolicy(provider, connection as ProviderConnectionView, requestedModel)
             .blocked,
       });
@@ -1318,7 +1325,7 @@ export async function getProviderCredentials(
           connectionFilterStatus.set(c.id, "terminalStatus");
           return false;
         }
-        if (provider === "codex" && isCodexScopeUnavailable(c, requestedModel)) {
+        if (isCodexScopeUnavailable(c, requestedModel)) {
           connectionFilterStatus.set(c.id, "codexScopeLimited");
           return false;
         }
@@ -1420,7 +1427,9 @@ export async function getProviderCredentials(
       const cooldownStates: CooldownInspectionState[] = connections.map((connection) => {
         const connectionCooldownMs = parseFutureDateMs(connection.rateLimitedUntil);
         const codexScopeCooldownMs =
-          provider === "codex"
+          provider === "codex" &&
+          !(options.requirePaidCodexPlan &&
+            isCodexTextQuotaPreflightCooldown(connection, requestedModel))
             ? parseFutureDateMs(getCodexChildCooldown(connection, requestedModel))
             : null;
         const modelLockout = requestedModel
@@ -1630,12 +1639,14 @@ export async function getProviderCredentials(
     const withQuota: typeof policyEligibleConnections = [];
     const exhaustedQuota: typeof policyEligibleConnections = [];
     for (const c of policyEligibleConnections) {
-      const exhausted = isQuotaExhaustedForRequest(
-        c.id,
-        provider,
-        requestedModel,
-        c.providerSpecificData
-      );
+      // Hosted image requests have independent eligibility; cached text quota
+      // exhaustion cannot veto them or penalize their candidate ranking.
+      const exhausted = bypassQuotaPolicy
+        ? false
+        : isQuotaExhaustedForRequest(c.id, provider, requestedModel, c.providerSpecificData);
+      if (bypassQuotaPolicy) {
+        quotaResults.set(c.id, { blocked: false, exhausted: false });
+      }
       const existing = quotaResults.get(c.id);
       if (existing) existing.exhausted = exhausted;
       if (!exhausted) {
