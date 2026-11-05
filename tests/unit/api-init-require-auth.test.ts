@@ -72,6 +72,13 @@ test("/api/init is not a public route", () => {
 test("requireLogin=true: anonymous GET /api/init is 401 and starts nothing", async (t) => {
   // Let initialization run in this test process, so a broken gate would show.
   process.env.OMNIROUTE_ENABLE_RUNTIME_BACKGROUND_TASKS = "1";
+  // With this set in the shell the init is skipped and the case proves nothing.
+  const disableBefore = process.env.OMNIROUTE_DISABLE_BACKGROUND_SERVICES;
+  delete process.env.OMNIROUTE_DISABLE_BACKGROUND_SERVICES;
+  t.after(() => {
+    if (disableBefore !== undefined)
+      process.env.OMNIROUTE_DISABLE_BACKGROUND_SERVICES = disableBefore;
+  });
   const registry = getJobRegistry();
   const register = t.mock.method(registry, "register");
   const start = t.mock.method(registry, "start");
