@@ -191,6 +191,13 @@ html:root[data-ci-appearance="editions"] {
   --color-primary-ink: var(--ci-color-accent-active);
 }
 
+/* Inside a brand tint the kit moves secondary text to the brand ink, the only ink it guarantees on
+   an arbitrary tint. The alias above resolved on .ci-theme and would keep the neutral, so
+   `text-text-muted` is pointed back at the tinted value here. */
+.ci-brand-tint {
+  --color-text-muted: var(--ci-color-text-muted);
+}
+
 /* Warning text. Badges, warning buttons and `text-warning` read the warning ink through this alias.
    Since kit 0.0.88 (upstream #155) the kit's own light Editions warning (#8c5a1b) reaches AA on its
    tinted background, the canvas and the surface, so the alias is just the kit value. */
