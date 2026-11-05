@@ -1,7 +1,7 @@
 ---
 title: "Redis Production Configuration Guide"
 version: 3.8.50
-lastUpdated: 2026-08-06
+lastUpdated: 2026-11-05
 ---
 
 # Redis Production Configuration Guide
@@ -174,6 +174,24 @@ Key metrics to watch:
 - **Evicted keys / sec** — if persistently non-zero, increase `maxmemory`
 - **Blocked clients** — non-zero suggests slow Lua scripts or high contention
 - **Rejected connections** — connection limit hit; rare at 20 connections
+
+### 6. Redis-Compatible Servers
+
+Any server used here must run Lua scripts: the rate limiter is one `EVAL`. On a server
+without Lua, `checkRateLimit()` logs `[RATE_LIMITER] Redis eval failed, falling back to
+in-memory rate limiting` and counts per process, so each replica enforces the limit on its
+own. The other workloads use plain commands (`SET ... EX`, `GET`, `DEL`, `MGET`,
+`INCRBYFLOAT`, hashes and sets), and the semantic cache's Redis backend sends no `FT.*`
+commands.
+
+Tested with OmniRoute 3.8.52: KiviDB 1.2.0 with its Lua image (`kividb/kividb:v1.2.0-lua`).
+The rate limiter (including a second process sharing the counters), auth cache, quota store,
+warmup circuit breaker, semantic cache store, and a `/v1/chat/completions` request through
+the chat handler all behave as on Redis 8.10.3. One difference: `INCRBYFLOAT` stores
+`0.1 + 0.2` as `0.30000000000000004` where Redis stores `0.3`. The quota store reads it
+with `parseFloat`, so totals are unchanged.
+([setup](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md),
+[results](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat))
 
 ---
 
