@@ -245,3 +245,59 @@ test("executeImageWithCredentialFallback handles 401 and retryable flags correct
   assert.equal(result400Retryable.result.success, true);
   assert.deepEqual(executedAccounts, ["conn-1", "conn-2"]);
 });
+
+test("image fallback must reject a selector returning an account outside the caller's API-key scope", async () => {
+  const executed: string[] = [];
+  let selectedScope: string[] | null = null;
+  const first: MockImageCredentials = { connectionId: "allowed-1", accessToken: "first" };
+  const forbidden: MockImageCredentials = { connectionId: "forbidden-2", accessToken: "second" };
+  const result = await executeImageWithCredentialFallback({
+    provider: "codex",
+    requestedModel: "gpt-image-2",
+    credentials: first,
+    allowedConnections: ["allowed-1"],
+    execute: async (credentials: MockImageCredentials): Promise<MockImageResult> => {
+      executed.push(credentials.connectionId);
+      return { success: false, status: 401, error: "expired token" };
+    },
+    selectNextCredentials: async (_provider, _model, _excluded, allowed) => {
+      selectedScope = allowed;
+      return forbidden;
+    },
+  });
+  assert.deepEqual(selectedScope, ["allowed-1"]);
+  assert.deepEqual(executed, ["allowed-1"]);
+  assert.equal(result.result.status, 403);
+});
+
+test("image generation fails closed before sending on a disallowed initial credential", async () => {
+  let executed = false;
+  const result = await executeImageWithCredentialFallback({
+    provider: "codex",
+    requestedModel: "gpt-image-2",
+    credentials: { connectionId: "forbidden", accessToken: "test" },
+    allowedConnections: ["allowed"],
+    execute: async (): Promise<MockImageResult> => {
+      executed = true;
+      return { success: true, status: 200 };
+    },
+  });
+  assert.equal(executed, false);
+  assert.equal(result.result.status, 403);
+});
+
+test("an empty API-key allowlist is not equivalent to an unscoped image request", async () => {
+  let executions = 0;
+  const result = await executeImageWithCredentialFallback({
+    provider: "codex",
+    requestedModel: "gpt-image-2",
+    credentials: { connectionId: "some-account", accessToken: "test" },
+    allowedConnections: [],
+    execute: async (): Promise<MockImageResult> => {
+      executions++;
+      return { success: true, status: 200 };
+    },
+  });
+  assert.equal(executions, 0);
+  assert.equal(result.result.status, 403);
+});
