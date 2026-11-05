@@ -1331,7 +1331,8 @@ export default function EvalsTab() {
             >
               <Icon name="upload_file" size={18} />
               {t("importSuite")}
-              {/* kit-exception: Hidden native file picker inside the label (the adapters have no file input). */}
+              {/* kit-exception: Hidden picker in a toolbar import button; the pick imports at once, so the
+                  kit FileInput status line would only add noise beside Run all / New suite. */}
               <input
                 type="file"
                 accept="application/json,.json"
