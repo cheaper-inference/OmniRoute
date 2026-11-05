@@ -162,3 +162,68 @@ test("a model only the agy accounts list (Gemini 4 Argon) skips the antigravity-
   assert.equal(idOf(first), agy.id, "only the agy account advertises Argon");
   assert.notEqual(idOf(first), proAccount);
 });
+
+test("an inactive or deleted account's leftover synced row does not empty the pool", async () => {
+  await resetStorage();
+  const active = await account("active-pro", 1, OLD);
+  // A disabled Ultra account keeps its synced row after being switched off.
+  const disabled = (await providersDb.createProviderConnection({
+    provider: PROVIDER,
+    authType: "oauth",
+    name: "disabled-ultra",
+    accessToken: "token-disabled-ultra",
+    priority: 2,
+    isActive: false,
+  })) as { id: string };
+  await modelsDb.replaceSyncedAvailableModelsForConnection(
+    PROVIDER,
+    disabled.id,
+    ULTRA.map((id) => ({ id, name: id }))
+  );
+  // A row whose account no longer exists (removed from the pool).
+  await modelsDb.replaceSyncedAvailableModelsForConnection(
+    "agy",
+    "removed-ultra-connection",
+    ULTRA.map((id) => ({ id, name: id }))
+  );
+
+  const selected = await auth.getProviderCredentials(PROVIDER, null, null, OPUS55);
+  assert.equal(
+    idOf(selected),
+    active,
+    "only active pool accounts decide whether some account lists the model (fail open otherwise)"
+  );
+});
+
+test("a combo pin on an antigravity account still sees the agy inventory for an agy-only model", async () => {
+  await resetStorage();
+  const ARGON = "gemini-4-argon-low";
+  const proAccount = await account("pro", 1, OLD);
+  const agy = (await providersDb.createProviderConnection({
+    provider: "agy",
+    authType: "oauth",
+    name: "ultra-agy",
+    accessToken: "token-ultra-agy",
+    priority: 2,
+    isActive: true,
+  })) as { id: string };
+  await modelsDb.replaceSyncedAvailableModelsForConnection("agy", agy.id, [
+    { id: ARGON, name: ARGON },
+    ...OLD.map((id) => ({ id, name: id })),
+  ]);
+
+  const comboTarget = await auth.getProviderCredentials(PROVIDER, null, null, ARGON, {
+    forcedConnectionId: proAccount,
+  });
+  assert.equal(
+    idOf(comboTarget),
+    null,
+    "the agy account lists Argon, so a combo step pinned to the antigravity account is skipped"
+  );
+
+  const operatorPinned = await auth.getProviderCredentials(PROVIDER, null, null, ARGON, {
+    forcedConnectionId: proAccount,
+    explicitConnectionPin: true,
+  });
+  assert.equal(idOf(operatorPinned), proAccount, "an operator pin is still tried as asked");
+});
