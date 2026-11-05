@@ -1,6 +1,7 @@
 "use client";
 
 import { useContext, useRef, useState, type ComponentProps, type CSSProperties, type ReactNode } from "react";
+import { CircleHelp, Info, TriangleAlert, X } from "lucide-react";
 import { cn } from "./lib/utils";
 import { MetricMotionContext } from "./metric-motion";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
@@ -102,22 +103,57 @@ export function MetricDonut({ data, label, totalLabel = "total", className, ...p
   </MetricChartFrame>;
 }
 
-export interface StatusMatrixItem { id: string; label: string; enabled: boolean }
+export type StatusMatrixTone = "success" | "warning" | "danger" | "info" | "neutral";
+export const statusMatrixToneOrder: readonly StatusMatrixTone[] = ["success", "warning", "danger", "info", "neutral"];
+export const defaultStatusMatrixToneLabels: Readonly<Record<StatusMatrixTone, string>> = {
+  success: "Healthy",
+  warning: "Degraded",
+  danger: "Down",
+  info: "Informational",
+  neutral: "Unknown",
+};
+
+export interface StatusMatrixItem {
+  id: string;
+  label: string;
+  /** Two-state matrices (Enabled/Off). Ignored when `tone` is set. */
+  enabled?: boolean;
+  /** Multi-state matrices: one of five semantic tones. */
+  tone?: StatusMatrixTone;
+  /** Per-item status text, e.g. "Degraded · 3 failures". Defaults to the tone label. */
+  statusLabel?: string;
+}
 export interface StatusMatrixProps extends Omit<MetricChartFrameProps, "children"> {
   label: string;
   items: StatusMatrixItem[];
   note?: ReactNode;
   enabledLabel?: string;
   disabledLabel?: string;
+  /** Labels for the tones (legend, accessible names). Defaults to English. */
+  toneLabels?: Partial<Record<StatusMatrixTone, string>>;
+  /** Drill-down: a click/Enter/tap opens the caller's detail view. Never use it to change a setting. */
+  onItemSelect?: (item: StatusMatrixItem) => void;
 }
-function StatusBlock({ item, index, label }: { item: StatusMatrixItem; index: number; label: string }) {
+
+// Every tone except success carries an icon, so status is never conveyed by color alone.
+const toneGlyph: Partial<Record<StatusMatrixTone, ReactNode>> = {
+  warning: <TriangleAlert />,
+  danger: <X />,
+  info: <Info />,
+  neutral: <CircleHelp />,
+};
+
+function StatusBlock({ item, index, label, tone, onSelect }: { item: StatusMatrixItem; index: number; label: string; tone?: StatusMatrixTone; onSelect?: (item: StatusMatrixItem) => void }) {
   const [open, setOpen] = useState(false);
   // Touch focus can open the tooltip between pointerup and click. Toggle
   // from the state before the gesture so the first tap still reveals it.
   const openBeforePointer = useRef<boolean | null>(null);
   const replay = useContext(MetricMotionContext);
+  const filled = tone ? tone !== "neutral" : item.enabled;
+  // Inside the fill, a filled tone's icon is revealed by the same clip-path sweep as its color.
+  const glyph = tone && toneGlyph[tone] ? <span aria-hidden className="ci-status-matrix__glyph">{toneGlyph[tone]}</span> : null;
   return <Tooltip className="ci-status-matrix__tooltip" open={open} onOpenChange={setOpen} delayDuration={150}>
-    <TooltipTrigger type="button" className="ci-status-matrix__cell" data-enabled={item.enabled || undefined} aria-label={label}
+    <TooltipTrigger type="button" className="ci-status-matrix__cell" data-enabled={(!tone && item.enabled) || undefined} data-tone={tone} data-selectable={onSelect ? true : undefined} aria-label={label}
       onPointerDown={(event) => { openBeforePointer.current = event.pointerType === "touch" ? open : null; }}
       onPointerCancel={() => { openBeforePointer.current = null; }}
       onKeyDown={() => { openBeforePointer.current = null; }}
@@ -125,25 +161,37 @@ function StatusBlock({ item, index, label }: { item: StatusMatrixItem; index: nu
         event.preventDefault();
         const previous = openBeforePointer.current;
         openBeforePointer.current = null;
+        if (onSelect) { setOpen(false); onSelect(item); return; }
         setOpen((value) => !(previous ?? value));
       }}>
-      {item.enabled && <span key={replay} aria-hidden className="ci-status-matrix__fill" style={{ animationDelay: `${index * 45}ms` }} />}
+      {filled && <span key={replay} aria-hidden className="ci-status-matrix__fill" style={{ animationDelay: `${index * 45}ms` }}>{glyph}</span>}
+      {!filled && glyph}
     </TooltipTrigger>
     <TooltipContent>{label}</TooltipContent>
   </Tooltip>;
 }
 
-/** Read-only status overview; blocks reveal labels, never toggle settings. */
-export function StatusMatrix({ label, items, note, enabledLabel = "Enabled", disabledLabel = "Off", className, ...props }: StatusMatrixProps) {
+/** Read-only status overview; blocks reveal labels and, with onItemSelect, open a detail view. Never toggle settings. */
+export function StatusMatrix({ label, items, note, enabledLabel = "Enabled", disabledLabel = "Off", toneLabels, onItemSelect, className, ...props }: StatusMatrixProps) {
+  const labels = { ...defaultStatusMatrixToneLabels, ...toneLabels };
+  // Any toned item switches the whole matrix to tone mode; untoned items map enabled -> success, else neutral.
+  const toned = items.some((item) => item.tone);
+  const toneOf = (item: StatusMatrixItem): StatusMatrixTone | undefined => toned ? item.tone ?? (item.enabled ? "success" : "neutral") : undefined;
+  const statusOf = (item: StatusMatrixItem) => {
+    const tone = toneOf(item);
+    return tone ? item.statusLabel ?? labels[tone] : item.enabled ? enabledLabel : disabledLabel;
+  };
+  const legendTones = statusMatrixToneOrder.filter((tone) => items.some((item) => toneOf(item) === tone));
   return <MetricChartFrame {...props} className={cn("ci-status-matrix", className)} aria-label={label}>
     <ul className="ci-status-matrix__grid">
       {items.map((item, index) => <li key={item.id}>
-        <StatusBlock item={item} index={index} label={`${item.label}: ${item.enabled ? enabledLabel : disabledLabel}`} />
+        <StatusBlock item={item} index={index} label={`${item.label}: ${statusOf(item)}`} tone={toneOf(item)} onSelect={onItemSelect} />
       </li>)}
     </ul>
     <figcaption className="ci-status-matrix__legend">
-      <span><i data-enabled aria-hidden /> {enabledLabel}</span>
-      <span><i aria-hidden /> {disabledLabel}</span>
+      {toned
+        ? legendTones.map((tone) => <span key={tone}><i data-tone={tone} aria-hidden /> {labels[tone]}</span>)
+        : <><span><i data-enabled aria-hidden /> {enabledLabel}</span><span><i aria-hidden /> {disabledLabel}</span></>}
     </figcaption>
     {note && <p className="ci-metric-chart__note">{note}</p>}
   </MetricChartFrame>;
