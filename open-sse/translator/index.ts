@@ -344,7 +344,10 @@ const OPENAI_INCOMPATIBLE_ECHO_FIELDS = [
   "cache_control",
 ];
 
-/** Translate request formats and enforce attachment preservation for CI dispatch. */
+/**
+ * Translate a request between protocols, applying target-specific compatibility rules and
+ * enforcing attachment preservation for CI dispatch.
+ */
 export function translateRequest(
   sourceFormat,
   targetFormat,

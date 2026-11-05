@@ -21,11 +21,13 @@ test("historical arguments reject unserializable supplied values without private
     circular,
     BigInt(1),
     {
+      /** Simulate a serializer that fails with private details. */
       toJSON() {
         throw new Error("private_argument");
       },
     },
     {
+      /** Simulate a value whose serializer produces no JSON. */
       toJSON() {
         return undefined;
       },
@@ -53,6 +55,7 @@ test("historical zero-argument compatibility and serializable values remain supp
 
 type ToolFn = { name: string; arguments?: unknown };
 
+/** Normalize a Chat tool-call fixture and return its argument payload. */
 function normalizeArgs(value: unknown, includeArguments = true): unknown {
   const fn: ToolFn = { name: "probe_tool" };
   if (includeArguments) fn.arguments = value;
@@ -110,6 +113,7 @@ test("ensureToolCallIds: does not fabricate a missing function object", () => {
   assert.equal((body.messages[0].tool_calls[0] as { function?: unknown }).function, undefined);
 });
 
+/** Build a complete Responses function-call history with supplied arguments. */
 function responsesInput(args: unknown) {
   return {
     model: "gpt-4o",
@@ -121,6 +125,7 @@ function responsesInput(args: unknown) {
   };
 }
 
+/** Translate a Responses fixture and extract its Chat tool arguments. */
 function translatedToolArgs(args: unknown): unknown {
   const result = translateRequest(
     "openai-responses",
@@ -146,6 +151,7 @@ test("Responses→Chat: valid JSON preserved, object serialized", () => {
   assert.equal(translatedToolArgs({ city: "SF" }), '{"city":"SF"}');
 });
 
+/** Build a complete Chat tool-call history with optional assistant fields. */
 function chatBody(args: unknown, extra: Record<string, unknown> = {}) {
   return {
     model: "gpt-4o",
@@ -164,6 +170,7 @@ function chatBody(args: unknown, extra: Record<string, unknown> = {}) {
   };
 }
 
+/** Translate Chat history and select its Responses function-call items. */
 function responsesFunctionCalls(body: unknown): Array<{ arguments: unknown }> {
   const result = translateRequest(
     "openai",

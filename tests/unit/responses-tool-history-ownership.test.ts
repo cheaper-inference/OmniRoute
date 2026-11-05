@@ -5,22 +5,27 @@ import { validateResponsesToolHistory } from "../../open-sse/translator/helpers/
 
 type Item = Record<string, unknown>;
 
+/** Validate fixture history with optional stored-response ownership. */
 function validate(input: Item[], previous_response_id?: string): void {
   validateResponsesToolHistory({ input, previous_response_id });
 }
 
+/** Build a function-call fixture with valid JSON arguments. */
 function functionCall(call_id: unknown, name = "lookup"): Item {
   return { type: "function_call", call_id, name, arguments: "{}" };
 }
 
+/** Build a custom-tool call fixture with opaque input text. */
 function customCall(call_id: unknown, input = "raw text; not JSON"): Item {
   return { type: "custom_tool_call", call_id, name: "apply_patch", input };
 }
 
+/** Build a function-output fixture for the supplied ownership token. */
 function functionOutput(call_id: unknown): Item {
   return { type: "function_call_output", call_id, output: "ok" };
 }
 
+/** Build a custom-tool output fixture for the supplied ownership token. */
 function customOutput(call_id: unknown): Item {
   return { type: "custom_tool_call_output", call_id, output: "ok" };
 }

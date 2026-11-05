@@ -361,6 +361,7 @@ export async function handleChatCore(args: Parameters<typeof handleChatCoreInner
   return withResilienceActionsContext([args], (forwarded) => handleChatCoreInner(forwarded));
 }
 
+/** Process a chat request through admission, translation, dispatch, and response handling. */
 async function handleChatCoreInner({
   body,
   modelInfo,

@@ -12,12 +12,14 @@ type ToolItem = {
 const CALL_TYPES = new Set<ToolCallType>(["function_call", "custom_tool_call"]);
 const OUTPUT_TYPES = new Set<ToolOutputType>(["function_call_output", "custom_tool_call_output"]);
 
+/** Throw a tool-history admission error with the requested classification. */
 function invalid(message: string, errorType = "invalid_tool_call_output"): never {
   throw createToolHistoryError(message, errorType);
 }
 
 // IDs are opaque ownership tokens, not presentation text. Validate without
 // trimming, truncating or generating a replacement that could match another call.
+/** Validate an opaque call ID without rewriting its ownership bytes. */
 export function requireResponsesCallId(value: unknown): string {
   if (
     typeof value !== "string" ||
@@ -32,6 +34,7 @@ export function requireResponsesCallId(value: unknown): string {
   return value;
 }
 
+/** Return the output item type required by the supplied tool call type. */
 function expectedOutputType(callType: ToolCallType): ToolOutputType {
   return callType === "custom_tool_call" ? "custom_tool_call_output" : "function_call_output";
 }

@@ -12,6 +12,7 @@ const { handleChat, buildRequest, resetStorage, seedConnection, settingsDb } = h
 const malformedArguments = "{private_argument:do-not-echo}";
 const privateCallId = "call_private_do_not_echo";
 
+/** Submit native history and count any forbidden upstream attempts. */
 async function post(input: unknown[], stream: boolean) {
   await seedConnection("codex", {
     apiKey: "synthetic-codex-token",
@@ -32,6 +33,7 @@ async function post(input: unknown[], stream: boolean) {
   return { response, text, upstreamAttempts };
 }
 
+/** Submit continuation-owned output and capture its effective upstream body. */
 async function postContinuation(stream: boolean) {
   await settingsDb.updateSettings({ responsesPreviousResponseIdMode: "preserve" });
   await seedConnection("codex", {
@@ -204,6 +206,7 @@ for (const stream of [false, true]) {
   });
 }
 
+/** Build Chat history with independently selectable call and output identities. */
 function chatPair(callId = privateCallId, outputId = callId, args: unknown = "{}") {
   return [
     { role: "user", content: "synthetic request" },
@@ -216,6 +219,7 @@ function chatPair(callId = privateCallId, outputId = callId, args: unknown = "{}
   ];
 }
 
+/** Assert local refusal without transport attempts, leaked pending state, or private details. */
 async function refused(body: Record<string, unknown>, native = false, provider = "codex") {
   await seedConnection(provider, {
     apiKey: "synthetic-integrity-key",

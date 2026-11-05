@@ -141,6 +141,7 @@ function buildResponsesTextParts(content: unknown): unknown[] {
   return [{ type: "input_text", text: "" }];
 }
 
+/** Encode Chat history as Responses input without fabricating tool completion or ownership. */
 export function openaiToOpenAIResponsesRequest(
   model: unknown,
   body: unknown,

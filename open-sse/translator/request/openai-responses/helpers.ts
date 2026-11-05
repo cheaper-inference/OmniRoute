@@ -38,6 +38,7 @@ export function toRecord(value: unknown): JsonRecord {
 // for historical request admission: clamping can merge distinct ownership IDs.
 // Chat/Responses history uses requireResponsesCallId instead.
 export const MAX_CALL_ID_LEN = 64;
+/** Clamp a legacy call ID to the Responses length limit; not suitable for history admission. */
 export function clampCallId(id: string): string {
   return id.length > MAX_CALL_ID_LEN ? id.slice(0, MAX_CALL_ID_LEN) : id;
 }

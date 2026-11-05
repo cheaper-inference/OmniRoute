@@ -40,6 +40,7 @@ function assertRejectedBeforeDispatch(result: { input: InputItem[] }): void {
   );
 }
 
+/** Translate a Chat fixture to Responses input for pre-dispatch assertions. */
 function translate(body: unknown): { input: InputItem[] } {
   return openaiToOpenAIResponsesRequest("gpt-4", body, true, {}) as { input: InputItem[] };
 }

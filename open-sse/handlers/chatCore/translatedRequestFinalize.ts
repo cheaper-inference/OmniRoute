@@ -34,6 +34,7 @@ type KiroToolCarrier = {
   };
 };
 
+/** Finalize provider metadata and continuation policy, rejecting invalid effective tool history. */
 export function finalizeTranslatedRequest({
   translatedBody: translatedBodyInput,
   body,
