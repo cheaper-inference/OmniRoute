@@ -157,11 +157,10 @@ function tagProxyUnreachable<T>(err: T): T {
  *   have started.
  * - ECONNRESET/EPIPE are the codes most likely to fire AFTER the upstream
  *   accepted the request, so replaying a non-idempotent POST could repeat the
- *   upstream side effect. They are only retryable when the caller confirms
- *   idempotency via `isIdempotentMethod` (GET/HEAD/PUT/DELETE/OPTIONS —
- *   matching RFC 9110 §9.2.2; note PUT/DELETE's idempotency is conditional on
- *   the same request being replayed, which the one-attempt-fresh-socket retry
- *   guarantees).
+ *   upstream side effect. They are only retryable when
+ *   `isAmbiguousFailureReplaySafe` confirms a body-less idempotent method
+ *   (GET/HEAD/OPTIONS, RFC 9110 §9.2.2) — the same predicate the strict
+ *   post-replay policy already uses.
  */
 export function isTransportRetryableError(msg: string, errCode: unknown): boolean {
   const tokenMatch = PRE_SEND_TRANSPORT_TOKENS.some((token) => msg.includes(token));
@@ -213,43 +212,20 @@ function isMidConnectionResetCode(msg: string, errCode: unknown): boolean {
 }
 
 /**
- * RFC 9110 §9.2.2 idempotent methods. SSE chat requests are POST and are NOT
- * retryable on ECONNRESET/EPIPE here — their mid-stream recovery is handled by
- * streamRecovery (which replays via the executor loop with holdback/continuation
- * semantics), not by socket-level retry.
+ * Whether a transport failure may be retried on a fresh socket. Pre-send codes
+ * (ECONNREFUSED, ENOTFOUND, ...) always qualify; ECONNRESET/EPIPE can fire after
+ * the upstream accepted the request, so they qualify only when replaying the same
+ * request is provably side-effect-free (body-less GET/HEAD/OPTIONS).
  */
-function isIdempotentMethod(method: string | null | undefined): boolean {
-  if (!method) return false;
-  const normalized = method.trim().toUpperCase();
-  return (
-    normalized === "GET" ||
-    normalized === "HEAD" ||
-    normalized === "PUT" ||
-    normalized === "DELETE" ||
-    normalized === "OPTIONS"
-  );
-}
-
-/**
- * Resolve the effective HTTP method for the idempotency gate.
- *
- * `options.method` wins over the input: `proxyFetch(url, { method: "POST" })` is
- * a POST even though a string/URL input would otherwise imply GET (CodeRabbit
- * review 18948). Then a `Request` object's own method, then the GET default.
- */
-function methodOfRequest(
-  input: unknown,
-  options?: { method?: unknown } | null
-): string | null {
-  const optionMethod = options?.method;
-  if (typeof optionMethod === "string" && optionMethod.trim() !== "") return optionMethod;
-  if (typeof Request !== "undefined" && input instanceof Request) {
-    return typeof input.method === "string" ? input.method : null;
-  }
-  if (typeof input === "string" || (typeof URL !== "undefined" && input instanceof URL)) {
-    return "GET"; // Request-constructed default for URL inputs
-  }
-  return null;
+function isRetryableTransportFailure(
+  input: RequestInfo | URL,
+  options: FetchWithDispatcherOptions,
+  msg: string,
+  errCode: unknown
+): boolean {
+  if (!isTransportRetryableError(msg, errCode)) return false;
+  if (!isMidConnectionResetCode(msg, errCode)) return true;
+  return isAmbiguousFailureReplaySafe(input, options);
 }
 
 /** Per-request TLS identity and success telemetry. */
@@ -1060,12 +1036,7 @@ async function patchedFetchUnrecorded(
         const canResend = canResendAfterTransportError(input, options, dispatcherError);
         // Retry/fallback only for connection errors, never HTTP errors.
         tagProxyUnreachable(dispatcherError);
-        // CodeRabbit 18948: ECONNRESET/EPIPE can fire after the upstream
-        // accepted the request — only retry them for idempotent methods.
-        const midConnectionReset = isMidConnectionResetCode(msg, errCode);
-        const retryable =
-          isTransportRetryableError(msg, errCode) &&
-          (!midConnectionReset || isIdempotentMethod(methodOfRequest(input, options)));
+        const retryable = isRetryableTransportFailure(input, options, msg, errCode);
         if (retryable) {
           if (attempt === 0 && canResend) {
             // Retry after a short fixed backoff on a fresh socket.
@@ -1230,12 +1201,7 @@ async function patchedFetchUnrecorded(
         if (isCallerAbort(relayError, options?.signal)) throw relayError;
         const msg = relayError instanceof Error ? relayError.message : String(relayError);
         const errCode = errorCodeOf(relayError);
-        // CodeRabbit 18948: same idempotency gate as the direct path —
-        // ECONNRESET/EPIPE only retry for idempotent methods.
-        const midConnectionReset = isMidConnectionResetCode(msg, errCode);
-        const isTransportFailure =
-          isTransportRetryableError(msg, errCode) &&
-          (!midConnectionReset || isIdempotentMethod(methodOfRequest(input, options)));
+        const isTransportFailure = isRetryableTransportFailure(input, options, msg, errCode);
         if (
           attempt === 0 &&
           maxRelayAttempts > 1 &&

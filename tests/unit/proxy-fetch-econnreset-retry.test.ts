@@ -132,6 +132,27 @@ for (const route of ["direct", "relay"] as const) {
     assert.equal(dispatches, 1);
   });
 
+  test(`${route}: EPIPE does NOT retry a PUT with a body`, async () => {
+    // RFC 9110 calls PUT idempotent, but a mid-connection reset does not prove the
+    // upstream didn't apply it; the shared predicate requires a body-less
+    // GET/HEAD/OPTIONS, so a PUT (which OI always sends with a body) is not replayed.
+    const { dispatches } = await dispatchCount(
+      route,
+      { method: "PUT", body: JSON.stringify({ value: 1 }) },
+      codeOnly("read EPIPE", "EPIPE")
+    );
+    assert.equal(dispatches, 1);
+  });
+
+  test(`${route}: ECONNRESET retries a body-less GET with no method in options`, async () => {
+    const { dispatches } = await dispatchCount(
+      route,
+      {},
+      codeOnly("socket closed by peer", "ECONNRESET")
+    );
+    assert.equal(dispatches, 2, "an implicit GET is still side-effect-free");
+  });
+
   test(`${route}: legacy pre-send codes still retry a POST`, async () => {
     const { dispatches } = await dispatchCount(
       route,

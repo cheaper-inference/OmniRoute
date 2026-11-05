@@ -807,26 +807,20 @@ export async function withEarlyStreamKeepalive(
     if (deadlineTimer) clearTimeout(deadlineTimer);
     releaseDeadlineController(deadlineController);
     const result = raced.result;
-    if (result.status === "fulfilled") {
-      const response = result.response;
-      // A verbatim SSE body that fails mid-flight (ECONNRESET etc.) would
-      // surface its raw error to the client as an abrupt transport close with
-      // no terminal marker — the same disconnect-reporting gap the slow path
-      // guards against. Wrap the body so a mid-flight failure appends one
-      // format-correct terminal error frame. Healthy streams stay
-      // byte-identical (frames are re-emitted unchanged, only the chunk
-      // boundaries move); the wrapper adds no latency beyond holding back an
-      // incomplete trailing frame until its blank line arrives.
-      const wrapped = wrapFastPathSseResponse(response, {
-        format: errorFrameFormat,
-        buildFrame: buildPartialContentErrorFrame,
-        configuredErrorFrame: errorFrame,
-        recordGeneratedFrame: recordClientBytes,
-      });
-      if (wrapped) return wrapped;
-      return response;
-    }
-    throw result.error;
+    if (result.status !== "fulfilled") throw result.error;
+    const response = result.response;
+    // A verbatim SSE body that fails mid-flight (ECONNRESET etc.) would surface
+    // its raw error to the client as an abrupt transport close with no terminal
+    // marker — the same disconnect-reporting gap the slow path guards against.
+    // Wrap it so a mid-flight failure appends one format-correct terminal frame.
+    // Healthy streams stay byte-identical (frames are re-emitted unchanged, only
+    // the chunk boundaries move).
+    return wrapFastPathSseResponse(response, {
+      format: errorFrameFormat,
+      buildFrame: buildPartialContentErrorFrame,
+      configuredErrorFrame: errorFrame,
+      recordGeneratedFrame: recordClientBytes,
+    }) ?? response;
   }
 
   // Slow path — open the SSE stream now and keep it warm until the handler resolves.
