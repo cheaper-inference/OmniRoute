@@ -14,6 +14,7 @@ import {
   REASONING_EFFORT_ORDER,
 } from "../../services/learnedReasoningEffortCaps.ts";
 import { isBasetenReasoningModel, mapBasetenReasoningParams } from "./basetenReasoning.ts";
+import { isK31MappableEffort, isKimiK31Model } from "../../utils/kimiK31.ts";
 
 /**
  * Sanitize reasoning_effort for providers that don't accept all values.
@@ -205,7 +206,7 @@ export function supportsMaxEffortForProvider(provider: string, model: string): b
     supportsClaudeMaxEffort(resolvedModelId);
   const isOpencodeGo = isOpencodeGoProvider(provider);
   const isOllamaCloud = isOllamaCloudProvider(provider);
-  const isMoonshotK3 = /^kimi-k3(?:$|-)/i.test(resolvedModelId);
+  const isMoonshotK3 = /^kimi-k3(?:$|[.-])/i.test(resolvedModelId);
   const isCommandCode = isCommandCodeProvider(provider);
   const isMaxTierModel =
     MAX_TIER_REASONING_MODEL_PATTERN.test(resolvedModelId) ||
@@ -268,6 +269,18 @@ function readEffortCarriers(b: Record<string, unknown>): EffortCarriers {
     hasOutputConfigEffort,
     effort,
   };
+}
+
+const K31_NATIVE_PROVIDERS = new Set(["moonshot", "kimi", "kimi-coding", "kimi-coding-apikey"]);
+
+/**
+ * K3.1 rejects off-thinking and unknown effort values, so preserve them for
+ * the upstream 400 instead of silently clamping to an accepted tier. Only the
+ * mappable tiers fall through to the regular clamp.
+ */
+function shouldPreserveK31Effort(provider: string, model: string, effort: string): boolean {
+  if (!K31_NATIVE_PROVIDERS.has(provider) || !isKimiK31Model(model)) return false;
+  return !isK31MappableEffort(effort);
 }
 
 /** Write a normalized effort value back to every carrier that was present.
@@ -374,6 +387,8 @@ export function sanitizeReasoningEffortForProvider(
   if (c.effort === undefined) return working;
   const effortStr = typeof c.effort === "string" ? c.effort.toLowerCase() : "";
   const modelStr = model || "";
+
+  if (shouldPreserveK31Effort(provider, modelStr, effortStr)) return working;
 
   // ── o1-preview: does not accept reasoning_effort parameter at all ─────────
   if (O1_PREVIEW_PATTERN.test(modelStr)) {

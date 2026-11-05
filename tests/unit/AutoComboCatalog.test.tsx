@@ -24,6 +24,18 @@ vi.mock("next/link", () => ({
 
 const cleanupCallbacks: Array<() => void> = [];
 
+// The duplicate action asks through the kit confirm dialog (mocked labels: "confirmAction",
+// "cancel"); answer it the way a user would.
+async function answerConfirm(label: "confirmAction" | "cancel") {
+  const button = [
+    ...document.body.querySelectorAll<HTMLButtonElement>('[role="dialog"] button'),
+  ].find((b) => b.textContent?.trim() === label);
+  expect(button, `expected the confirm dialog "${label}" button`).toBeTruthy();
+  await act(async () => {
+    button!.click();
+  });
+}
+
 function makeContainer(): HTMLElement {
   const container = document.createElement("div");
   document.body.appendChild(container);
@@ -294,9 +306,6 @@ describe("AutoComboCatalog", { timeout: 60_000 }, () => {
 
   it("duplicates non-template auto combos with the auto strategy", async () => {
     const onComboCreated = vi.fn();
-    const confirmSpy = vi.fn(() => true);
-    vi.stubGlobal("confirm", confirmSpy);
-    vi.stubGlobal("alert", vi.fn());
 
     const container = makeContainer();
     const root = createRoot(container);
@@ -312,6 +321,7 @@ describe("AutoComboCatalog", { timeout: 60_000 }, () => {
     await act(async () => {
       copyButton?.click();
     });
+    await answerConfirm("confirmAction");
 
     const duplicateCall = vi
       .mocked(globalThis.fetch)
@@ -323,12 +333,6 @@ describe("AutoComboCatalog", { timeout: 60_000 }, () => {
   });
 
   it("duplicates curated templates with their authored strategy", async () => {
-    vi.stubGlobal(
-      "confirm",
-      vi.fn(() => true)
-    );
-    vi.stubGlobal("alert", vi.fn());
-
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -344,11 +348,36 @@ describe("AutoComboCatalog", { timeout: 60_000 }, () => {
     await act(async () => {
       copyButton?.click();
     });
+    await answerConfirm("confirmAction");
 
     const duplicateCall = vi
       .mocked(globalThis.fetch)
       .mock.calls.find(([input]) => String(input).includes("/api/combos/duplicate"));
     const body = JSON.parse(String((duplicateCall?.[1] as RequestInit | undefined)?.body));
     expect(body).toEqual({ name: tpl.name, strategy: tpl.strategy });
+  });
+
+  it("does not duplicate when the confirmation is cancelled", async () => {
+    const onComboCreated = vi.fn();
+    const container = makeContainer();
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(<AutoComboCatalog onComboCreated={onComboCreated} />);
+    });
+    await expand(container);
+
+    const copyButton = findCard(container, "auto/gemini")?.querySelector(
+      'button[title="duplicateAutoComboTitle"]'
+    ) as HTMLButtonElement | null;
+    await act(async () => {
+      copyButton?.click();
+    });
+    await answerConfirm("cancel");
+
+    const duplicateCall = vi
+      .mocked(globalThis.fetch)
+      .mock.calls.find(([input]) => String(input).includes("/api/combos/duplicate"));
+    expect(duplicateCall).toBeUndefined();
+    expect(onComboCreated).not.toHaveBeenCalled();
   });
 });

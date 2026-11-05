@@ -353,7 +353,7 @@ _By commits in `c754707d0e..c34370bc69`, author identities consolidated via `.ma
 - **fix(cache):** Version exact-cache identities and canonicalize response controls so changed token caps, reasoning settings, or tool policy cannot reuse an incompatible response ([#17161](https://github.com/diegosouzapw/OmniRoute/pull/17161)). — thanks @mikeng-io
 - **fix(cursor):** Preserve structured model-entitlement refusal titles and guidance across Connect and JSON error paths, and keep explicit weekly-usage model restrictions scoped to the selected connection/model instead of treating them as account-wide failures ([#17182](https://github.com/diegosouzapw/OmniRoute/pull/17182)) — thanks @xiaoyaner0201
 - Contain two malformed-upstream payloads as request-scoped failures instead of provider outages: a Responses stream that aborts with a bare error frame (and never settles on a terminal or completed snapshot) now reports `status: "failed"` with that error rather than collapsing to an empty success, and non-object or unparseable tool-call arguments now raise a typed `SyntaxError` instead of escaping the non-streaming translator. Empty, missing or `null` tool-call arguments still translate to an empty `input: {}`. ([#17198](https://github.com/cheaper-inference/OmniRoute/pull/17198)) — thanks @aldoeliacim
-- **fix(sse):** stop injecting `outputDimensionality` into Gemini embedding requests sent to the OpenAI-compatible endpoint — sized requests failed with a 400 "Unknown name outputDimensionality"; `dimensions` is now forwarded untouched, the combo-level override still works and the native `embedContent` path keeps mapping it through `geminiRequestExtras` ([#17208](https://github.com/diegosouzapw/OmniRoute/pull/17208), fixes [#17158](https://github.com/diegosouzapw/OmniRoute/issues/17158)) — thanks @rafacpti23
+- **fix(sse):** stop injecting `outputDimensionality` into Gemini embedding requests sent to the OpenAI-compatible endpoint — sized requests failed with a 400 "Unknown name outputDimensionality"; `dimensions` is now forwarded untouched, the combo-level override still works and the native `embedContent` path keeps mapping it through `geminiRequestExtras` ([#17208](https://github.com/diegosouzapw/OmniRoute/pull/17208), fixes [#17158](https://github.com/diegosouzapw/OmniRoute/issues/17158)) — thanks @rafacpti23 / @PrinceThummar011
 - **fix(executors):** Preserve caller-supplied `reasoning.context` on Codex HTTP and WebSocket Responses requests while continuing to remove unsupported OpenRouter reasoning keys. App-server and chatgpt-web-codex transports are unchanged. (#17210 — thanks @seathatflowsinourveins)
 - **fix(batch):** Reject array-valued Anthropic `params` during JSONL validation and exclude invalid lines from the preview ([#17211](https://github.com/diegosouzapw/OmniRoute/pull/17211)) — thanks @pacocartones
 - **fix(electron):** resync `electron/package-lock.json` with its `package.json` — the v3.8.52 tag's lockfile lacked the `electron-builder-squirrel-windows`, `electron-winstaller`, `@electron/windows-sign` and `postject` subtrees, so `npm ci` failed the Windows and Linux desktop builds of the release; regenerated with `--package-lock-only` (195 lines added, 0 removed, no version changes) and the desktop assets were rebuilt from the repaired line ([#17212](https://github.com/diegosouzapw/OmniRoute/pull/17212))
@@ -1113,6 +1113,7 @@ _By commits in `c754707d0e..c34370bc69`, author identities consolidated via `.ma
 - **docs(i18n):** re-record target_hash for the 3 MCP-SERVER mirrors edited without a re-hash (release prep) ([#18807](https://github.com/cheaper-inference/OmniRoute/pull/18807))
 - **deps:** 11 Dependabot bumps — bump follow-redirects from 1.16.0 to 1.16.1 ([#17314](https://github.com/cheaper-inference/OmniRoute/pull/17314)); bump hono from 4.13.7 to 4.13.13 ([#17316](https://github.com/cheaper-inference/OmniRoute/pull/17316)); bump @modelcontextprotocol/server from 2.0.0 to 2.3.1 ([#17352](https://github.com/cheaper-inference/OmniRoute/pull/17352)); chore(deps): bump github/codeql-action/analyze from 4.38.3 to 4.39.1 ([#18029](https://github.com/cheaper-inference/OmniRoute/pull/18029)); chore(deps): bump github/codeql-action from 4.38.3 to 4.39.1 ([#18030](https://github.com/cheaper-inference/OmniRoute/pull/18030)); chore(deps): bump github/codeql-action/init from 4.38.3 to 4.39.1 ([#18031](https://github.com/cheaper-inference/OmniRoute/pull/18031)); bump undici to 8.12.3, 7.30.1 and 6.29.1 ([#18087](https://github.com/cheaper-inference/OmniRoute/pull/18087)); bump electron 44.9.1, fast-uri 3.1.9 and undici 7.30.1 in /electron ([#18088](https://github.com/cheaper-inference/OmniRoute/pull/18088)); bump body-parser from 2.3.0 to 2.4.0 ([#18091](https://github.com/cheaper-inference/OmniRoute/pull/18091)); bump zod from 4.6.5 to 4.6.7 ([#18093](https://github.com/cheaper-inference/OmniRoute/pull/18093)); bump follow-redirects from 1.16.1 to 1.16.2 ([#18654](https://github.com/cheaper-inference/OmniRoute/pull/18654))
 
+
 ### 🙌 Contributors
 
 Thanks to everyone whose work landed in v3.8.53:
@@ -1234,7 +1235,7 @@ Thanks to everyone whose work landed in v3.8.53:
 | [@PauloFH](https://github.com/PauloFH) | #12400 |
 | [@phoriah](https://github.com/phoriah) | #17328 |
 | [@PranavD2905](https://github.com/PranavD2905) | #15336 |
-| [@PrinceThummar011](https://github.com/PrinceThummar011) | #17047, #17234, #17243 |
+| [@PrinceThummar011](https://github.com/PrinceThummar011) | #17047, #17158, #17234, #17243 |
 | [@qwer2003tw](https://github.com/qwer2003tw) | #16869 |
 | [@r2jaff](https://github.com/r2jaff) | #17321 |
 | [@rafacpti23](https://github.com/rafacpti23) | #14142, #17158, #17214, #17216, #17217 |
@@ -1284,6 +1285,7 @@ Thanks to everyone whose work landed in v3.8.53:
 | [@diegosouzapw](https://github.com/diegosouzapw) | maintainer |
 
 ---
+
 ## [3.8.52] — 2026-10-19
 
 _Living section — reconciled 2026-10-19 from all cycle commits (`2f42a9ac19` → `0a1265ea81`, 1,386 non-merge commits). Bullets carry the merged PR and its author; direct pushes are listed with their commit hash. Regenerated at each `/generate-release` phase._

@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
+import net from "node:net";
 import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "undici";
 import { makeManagementSessionRequest } from "../helpers/managementSession.ts";
 
@@ -11,6 +12,11 @@ const dataDir = fs.mkdtempSync(path.join(fixtureRoot, "db-"));
 const originalEnv = { ...process.env };
 const originalFetch = globalThis.fetch;
 const originalDispatcher = getGlobalDispatcher();
+let socketAttempts = 0;
+const socketGuard = test.mock.method(net.Socket.prototype, "connect", () => {
+  socketAttempts++;
+  throw new Error("External connections are forbidden in this fixture");
+});
 const network = new MockAgent();
 network.disableNetConnect();
 network
@@ -28,12 +34,27 @@ process.env.API_KEY_SECRET = "synthetic-proxy-api-key-secret";
 delete process.env.INITIAL_PASSWORD;
 // Only the automatic credential probe is stubbed; validation, auth, settings,
 // HTTP handlers and SQLite persistence below are the real production modules.
-globalThis.fetch = async () => Response.json({ data: [], models: [] });
+const probeAuthorizations: string[] = [];
+const validationFetch: typeof fetch = async (input, init) => {
+  const request = new Request(input, init);
+  assert.equal(request.url, "https://api.openai.com/v1/models");
+  assert.equal(request.method, "GET");
+  const authorization = request.headers.get("authorization");
+  assert.ok(authorization?.startsWith("Bearer sk-synthetic-"));
+  probeAuthorizations.push(authorization);
+  return Response.json({ data: [], models: [] });
+};
+globalThis.fetch = validationFetch;
 
 const core = await import("../../src/lib/db/core.ts");
 const settings = await import("../../src/lib/db/settings.ts");
 const providers = await import("../../src/lib/db/providers.ts");
 const route = await import("../../src/app/api/providers/route.ts");
+const { flushProxyLogsSync } = await import("../../src/lib/proxyLogger.ts");
+// The route imports the proxy interceptor, which replaces global fetch. Restore
+// this fixture's transport after initialization so environment-proxy dispatchers
+// cannot bypass MockAgent and send synthetic credentials to a real provider.
+globalThis.fetch = validationFetch;
 const createdIds: string[] = [];
 
 test.after(async () => {
@@ -52,11 +73,19 @@ test.after(async () => {
     }
     assert.ok(complete, "all automatic fixture probes must finish before cleanup");
     await new Promise((resolve) => setImmediate(resolve));
+    assert.equal(socketAttempts, 0, "automatic fixture probes must never reach the network");
+    assert.deepEqual(probeAuthorizations.toSorted(), [
+      "Bearer sk-synthetic-false-true",
+      "Bearer sk-synthetic-false-undefined",
+      "Bearer sk-synthetic-true-false",
+    ]);
   } finally {
+    flushProxyLogsSync();
     core.resetDbInstance();
     await network.close();
     setGlobalDispatcher(originalDispatcher);
     globalThis.fetch = originalFetch;
+    socketGuard.mock.restore();
     fs.rmSync(dataDir, { recursive: true, force: true });
     for (const key of Object.keys(process.env)) if (!(key in originalEnv)) delete process.env[key];
     Object.assign(process.env, originalEnv);

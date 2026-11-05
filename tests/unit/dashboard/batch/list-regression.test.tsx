@@ -154,7 +154,6 @@ beforeEach(() => {
     "fetch",
     vi.fn().mockResolvedValue({ ok: true, json: async () => ({}), text: async () => "" })
   );
-  vi.stubGlobal("confirm", vi.fn().mockReturnValue(false)); // don't confirm dialogs
 });
 
 afterEach(() => {
@@ -372,7 +371,6 @@ describe("BatchListTab — rendering", () => {
     });
 
     vi.stubGlobal("fetch", fetchMock);
-    vi.stubGlobal("alert", vi.fn()); // Mock window.alert to prevent blocking
 
     const onRefresh = vi.fn();
     const batches = [makeBatch({ id: "batch-multi", status: "completed" })];
