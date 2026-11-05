@@ -88,6 +88,11 @@ import {
   evictSessionAccountAffinityForConnectionAsync as evictSessionAccountAffinityForConnection,
 } from "@/lib/db/sessionAccountAffinity";
 import { dispatchChatWithAffinityEviction } from "./chatDispatch";
+import { antigravityHealth, isAntigravityAdaptiveHealthEnabled } from "@omniroute/open-sse/services/antigravityHealth.ts";
+import {
+  bindAntigravityHealthAttempt,
+  holdAntigravityHealthThroughResponse,
+} from "../services/antigravityHealthLifecycle";
 import { getCachedSettings, getCombosCacheVersion } from "@/lib/db/readCache";
 import { isManagedComboUnsupported } from "./chat/managedComboSupport.ts";
 import * as muse from "./chat/museOwnership.ts";
@@ -2142,6 +2147,25 @@ async function handleSingleModelChat(
         reselectPoolMember?: () => Promise<unknown>;
       } = { proxy: null };
       const proxyStartTime = Date.now();
+      const healthTicket = isAntigravityAdaptiveHealthEnabled(provider) && credentials.connectionId
+        ? antigravityHealth.begin(
+            credentials.connectionId,
+            effectiveModel,
+            hasForcedConnection || credentials.antigravityHealthFallback === true
+          )
+        : undefined;
+      if (healthTicket === null) {
+        releaseOAuthSession();
+        agyLease.release(leaseId);
+        if (hasForcedConnection) {
+          return errorResponse(503, "Antigravity model recovery probe already in flight");
+        }
+        excludedConnectionIds.add(credentials.connectionId);
+        continue;
+      }
+      const antigravityHealthAttempt = healthTicket
+        ? bindAntigravityHealthAttempt(healthTicket, requestSignal)
+        : undefined;
       // 4. Execute chat via core after breaker gate checks (with optional TLS tracking)
       if (telemetry) telemetry.startPhase("connect");
       let execution: Awaited<ReturnType<typeof dispatchChatWithAffinityEviction>>;
@@ -2197,16 +2221,36 @@ async function handleSingleModelChat(
           runtimeOptions
         );
       } catch (error) {
+        antigravityHealthAttempt?.finish("ignored");
         releaseOAuthSession();
         agyLease.release(leaseId);
         throw error;
       }
       if (telemetry) telemetry.endPhase();
       if ("localResourcePressureResult" in execution) {
+        antigravityHealthAttempt?.finish("ignored");
         agyLease.release(leaseId);
         return execution.localResourcePressureResult.response;
       }
       const { result, tlsFingerprintUsed, wasProviderProbe } = execution;
+      if (antigravityHealthAttempt) {
+        if (requestSignal?.aborted || result.status === 499) {
+          antigravityHealthAttempt.finish("ignored");
+        } else if (result.success && requestBody.stream === true) {
+          result.response = holdAntigravityHealthThroughResponse(result.response, antigravityHealthAttempt);
+        } else if (result.success) {
+          antigravityHealthAttempt.finish("success");
+        } else {
+          // Real HTTP 504 alone does not prove a local header deadline expired.
+          antigravityHealthAttempt.finish(
+            result.status === 504 &&
+              result.errorType === "upstream_timeout" &&
+              result.errorCode === ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE
+              ? "timeout"
+              : result.status === 502 || result.status === 503 ? "transport" : "ignored"
+          );
+        }
+      }
       if (!result.success) releaseOAuthSession();
       if (result.success && agyLease.isStreamingAntigravityResponse(result.response))
         result.response = inheritProviderProbeResponse(
