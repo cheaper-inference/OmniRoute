@@ -58,11 +58,11 @@ test("native catalog registers only documented IDs and pre-existing native IDs w
   assert.equal(ids.length, DOCUMENTED_IDS.length + 4);
   assert.equal(provider.modelsUrl, undefined, "native WS has no remote models endpoint");
 });
-test("catalog capabilities expose emulated tools without unsupported vision or performance claims", () => {
+test("catalog capabilities expose emulated tools and image input without performance claims", () => {
   assert.equal(provider.toolCalling, "emulated");
   for (const model of provider.models) {
     assert.equal(model.toolCalling, true, model.id);
-    assert.equal(model.supportsVision, false, model.id);
+    assert.equal(model.supportsVision, true, model.id);
     assert.doesNotMatch(model.name, /BizChat|benchmark|\d+\/30|available to all/i);
   }
 });

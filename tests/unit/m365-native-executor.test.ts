@@ -8,6 +8,7 @@ import {
   __setCopilotM365WebSocketForTesting,
 } from "../../open-sse/executors/copilot-m365-web.ts";
 import { encodeFrame } from "../../open-sse/executors/copilot-m365-frames.ts";
+import { __setM365UploadFetchForTesting } from "../../open-sse/executors/m365Protocol/images.ts";
 
 type Frame = Record<string, unknown>;
 class NativeSocket extends EventEmitter {
@@ -229,7 +230,7 @@ test("native profile wins tier-derived defaults, memory disabled, conversation h
       assert.ok(invocation.includes(text));
   });
 });
-test("native preabort and unsupported image fail without a socket", async () => {
+test("native preabort and unsupported content fail without a socket", async () => {
   await scenario([], async () => {
     const controller = new AbortController();
     controller.abort();
@@ -242,14 +243,74 @@ test("native preabort and unsupported image fail without a socket", async () => 
     request.body.messages = [
       {
         role: "user",
-        content: [{ type: "image_url", image_url: { url: "https://private/image" } }],
+        content: [{ type: "input_audio", input_audio: { data: "AAAA", format: "wav" } }],
       },
     ];
-    const image = await new CopilotM365WebExecutor().execute(request);
-    assert.equal(image.response.status, 400);
-    assert.match(await image.response.text(), /image|vision/i);
+    const audio = await new CopilotM365WebExecutor().execute(request);
+    assert.equal(audio.response.status, 400);
+    assert.match(await audio.response.text(), /text and image parts only/);
     assert.equal(NativeSocket.instances.length, 0);
   });
+});
+
+const PNG_DATA_URL =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
+/** A request whose user message carries text and one image. */
+function imageInput() {
+  const request = input();
+  request.body.messages = [
+    {
+      role: "user",
+      content: [
+        { type: "text", text: "what is in this picture?" },
+        { type: "image_url", image_url: { url: PNG_DATA_URL } },
+      ],
+    },
+  ];
+  return request;
+}
+
+test("an image is uploaded into the turn's conversation and attached to its message", async () => {
+  const uploads: URLSearchParams[] = [];
+  const restore = __setM365UploadFetchForTesting(async (_url, init) => {
+    uploads.push(new URLSearchParams(String(init?.body)));
+    return Response.json({ docId: "doc-7" });
+  });
+  try {
+    await scenario([update("a red dot")], async () => {
+      const result = await new CopilotM365WebExecutor().execute(imageInput());
+      assert.equal(result.response.status, 200);
+      const [socket] = NativeSocket.instances;
+      const conversationId = new URL(socket.url).searchParams.get("ConversationId");
+      assert.equal(uploads.length, 1);
+      assert.equal(uploads[0].get("conversationId"), conversationId);
+      const message = (socket.sent.find((f) => f.type === 4)!.arguments as Frame[])[0].message as {
+        text: string;
+        messageAnnotations: Frame[];
+      };
+      assert.match(message.text, /what is in this picture\?\n\[image 1\]/);
+      assert.deepEqual(
+        message.messageAnnotations.map((a) => [a.id, a.messageAnnotationType]),
+        [["doc-7", "ImageFile"]]
+      );
+    });
+  } finally {
+    restore();
+  }
+});
+
+test("a failed image upload fails the request before any socket opens", async () => {
+  const restore = __setM365UploadFetchForTesting(async () => new Response("", { status: 500 }));
+  try {
+    await scenario([update("never")], async () => {
+      const result = await new CopilotM365WebExecutor().execute(imageInput());
+      assert.equal(result.response.status, 502);
+      assert.match(await result.response.text(), /m365_image_upload_failed/);
+      assert.equal(NativeSocket.instances.length, 0);
+    });
+  } finally {
+    restore();
+  }
 });
 test("native stream cancellation sends Stop and releases abort listener", async () => {
   await scenario(

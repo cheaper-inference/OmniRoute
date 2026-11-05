@@ -15,6 +15,12 @@ import {
   m365ReplyFingerprint,
   type M365ConversationClaim,
 } from "./m365Protocol/conversations.ts";
+import {
+  M365ImageResolver,
+  m365ImagePartRef,
+  uploadM365Image,
+  type M365ImageAnnotation,
+} from "./m365Protocol/images.ts";
 import { resolveM365Profile, type M365ResolvedProfile } from "./m365Protocol/profile.ts";
 import { buildM365ToolInstructions, parseM365ToolOutput } from "./m365Protocol/tools.ts";
 import { runM365Turn, M365TurnError, type M365WebSocketConstructor } from "./m365Turn.ts";
@@ -39,27 +45,41 @@ export function __setCopilotM365WebSocketForTesting(ctor: typeof WebSocket): () 
 const record = (value: unknown): JsonRecord =>
   value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
 
+/** A turn's text and the images it carries, in the order their markers appear in the text. */
+interface M365TurnInput {
+  text: string;
+  imageRefs: string[];
+}
+
+/** One content part as turn text; an image part becomes a numbered marker and is collected. */
+function partText(rawPart: unknown, imageRefs: string[]): string {
+  const imageRef = m365ImagePartRef(rawPart);
+  if (imageRef !== null) {
+    imageRefs.push(imageRef);
+    return `[image ${imageRefs.length}]`;
+  }
+  const part = record(rawPart);
+  if (part.type !== "text" || typeof part.text !== "string")
+    throw new M365ExecutorError(
+      400,
+      "unsupported_content",
+      "Microsoft 365 Copilot accepts text and image parts only."
+    );
+  return part.text;
+}
+
 /** Format messages as turn text. A fresh conversation sends the entire history, including
- * unabridged tool results; a continued one sends only the messages after our last reply. */
-function historyPrompt(messages: readonly unknown[]): string {
+ * unabridged tool results and every image; a continued one sends only the messages after our
+ * last reply. */
+function historyPrompt(messages: readonly unknown[]): M365TurnInput {
   const parts: string[] = [];
+  const imageRefs: string[] = [];
   let size = 0;
   for (const raw of messages) {
     const message = record(raw);
     let content = typeof message.content === "string" ? message.content : "";
     if (Array.isArray(message.content)) {
-      content = message.content
-        .map((rawPart) => {
-          const part = record(rawPart);
-          if (part.type !== "text" || typeof part.text !== "string")
-            throw new M365ExecutorError(
-              400,
-              "unsupported_content",
-              "Microsoft 365 Copilot image/vision and non-text parts are not supported."
-            );
-          return part.text;
-        })
-        .join("\n");
+      content = message.content.map((rawPart) => partText(rawPart, imageRefs)).join("\n");
     }
     const role = typeof message.role === "string" ? message.role : "user";
     const item =
@@ -76,7 +96,7 @@ function historyPrompt(messages: readonly unknown[]): string {
       );
     if (content || Array.isArray(message.tool_calls)) parts.push(item);
   }
-  return parts.join("\n\n");
+  return { text: parts.join("\n\n"), imageRefs };
 }
 /**
  * Which conversations a request may continue: same connection (Copilot keeps conversations per
@@ -170,12 +190,12 @@ export class CopilotM365WebExecutor extends BaseExecutor {
       if (input.signal?.aborted) throw new M365TurnError("M365_ABORTED");
       const messages: readonly unknown[] = Array.isArray(body.messages) ? body.messages : [];
       const history = historyPrompt(messages);
-      if (!history)
+      if (!history.text)
         throw new M365ExecutorError(400, "invalid_request", "No user message provided.");
       const { tools, toolChoice } = extractToolSpec(body);
       const toolOptions = { toolChoice, parallelToolCalls: body.parallel_tool_calls !== false };
       const instructions = buildM365ToolInstructions(tools, toolOptions);
-      const prompt = [instructions, history].filter(Boolean).join("\n\n");
+      const prompt = [instructions, history.text].filter(Boolean).join("\n\n");
       if (prompt.length > M365_MAX_TEXT_LENGTH)
         throw new M365ExecutorError(
           400,
@@ -226,7 +246,8 @@ export class CopilotM365WebExecutor extends BaseExecutor {
       const conversations = m365Conversations();
       const scope = conversationScope(input.credentials, profile, tools);
       const claimed = scope ? conversations.claim(scope, messages) : null;
-      const deltaText = claimed ? historyPrompt(claimed.delta) : "";
+      const delta = claimed ? historyPrompt(claimed.delta) : null;
+      const images = new M365ImageResolver(input.signal ?? undefined);
       // One upstream turn: continue `resume` with only the new messages, or open a fresh
       // conversation with the whole history.
       const turnFor = (resume: M365ConversationClaim | null) => {
@@ -246,19 +267,39 @@ export class CopilotM365WebExecutor extends BaseExecutor {
           conversationId: url.searchParams.get("ConversationId")!,
           sessionId: url.searchParams.get("X-SessionId")!,
         };
-        const invocation = buildChatInvocation({
-          ...profile,
-          text: resume ? deltaText : prompt,
-          traceId: crypto.randomUUID(),
-          sessionId: ids.sessionId,
-          requestId: url.searchParams.get("chatsessionid")!,
-          conversationId: ids.conversationId,
-          isStartOfSession: !resume,
-          ...(instructions
-            ? { plugins: clientPlugins(tools), toolChoice, customInstructions: instructions }
-            : {}),
-        });
-        return { url, ids, invocation, turns: (resume?.turns ?? 0) + 1 };
+        const invocation = (messageAnnotations: readonly M365ImageAnnotation[]) =>
+          buildChatInvocation({
+            ...profile,
+            text: resume ? (delta?.text ?? "") : prompt,
+            traceId: crypto.randomUUID(),
+            sessionId: ids.sessionId,
+            requestId: url.searchParams.get("chatsessionid")!,
+            conversationId: ids.conversationId,
+            isStartOfSession: !resume,
+            messageAnnotations,
+            ...(instructions
+              ? { plugins: clientPlugins(tools), toolChoice, customInstructions: instructions }
+              : {}),
+          });
+        const imageRefs = resume ? (delta?.imageRefs ?? []) : history.imageRefs;
+        return { url, ids, imageRefs, invocation, turns: (resume?.turns ?? 0) + 1 };
+      };
+      // Uploads are keyed to the conversation, so each turn uploads its own images: all of
+      // them for a fresh conversation, only the new messages' for a continued one.
+      const uploadImages = async (turn: ReturnType<typeof turnFor>) => {
+        const annotations: M365ImageAnnotation[] = [];
+        for (const image of await images.resolve(turn.imageRefs)) {
+          annotations.push(
+            await uploadM365Image({
+              host: params.host,
+              accessToken: params.accessToken,
+              conversationId: turn.ids.conversationId,
+              image,
+              signal,
+            })
+          );
+        }
+        return annotations;
       };
       const output = m365Output(model);
       const buffered = input.stream === false || instructions.length > 0;
@@ -273,11 +314,12 @@ export class CopilotM365WebExecutor extends BaseExecutor {
         onDelta?: (delta: string) => void
       ): Promise<M365ToolOutput> => {
         const composer = new M365TurnComposer();
+        const invocation = turn.invocation(await uploadImages(turn));
         input.log?.debug?.("M365_WS", `connecting ${DIAGNOSTIC_URL}`);
         try {
           await runM365Turn({
             url: turn.url.toString(),
-            invocation: turn.invocation,
+            invocation,
             signal,
             WebSocketCtor: WebSocketCtor as unknown as M365WebSocketConstructor,
             onFrame(frame) {
@@ -326,7 +368,7 @@ export class CopilotM365WebExecutor extends BaseExecutor {
         return parsed;
       };
       const run = async (onDelta?: (delta: string) => void): Promise<M365ToolOutput> => {
-        let turn = turnFor(claimed && deltaText ? claimed : null);
+        let turn = turnFor(claimed && delta?.text ? claimed : null);
         let parsed: M365ToolOutput;
         try {
           parsed = await attempt(turn, onDelta);

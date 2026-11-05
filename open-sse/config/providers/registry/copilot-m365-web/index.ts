@@ -48,31 +48,31 @@ export const copilot_m365_webProvider: RegistryEntry = {
   authHeader: "cookie",
   toolCalling: "emulated",
   models: [
-    { id: "copilot-m365", name: "Auto (Legacy)", toolCalling: true, supportsVision: false },
+    { id: "copilot-m365", name: "Auto (Legacy)", toolCalling: true, supportsVision: true },
     {
       id: "copilot-m365-claude-opus",
       name: "Claude Opus (Legacy)",
       toolCalling: true,
-      supportsVision: false,
+      supportsVision: true,
     },
     {
       id: "copilot-m365-gpt-5-6-reasoning",
       name: "GPT 5.6 Reasoning (Legacy)",
       toolCalling: true,
-      supportsVision: false,
+      supportsVision: true,
     },
     {
       id: "copilot-m365-gpt-5-5-chat",
       name: "GPT 5.5 Chat (Legacy)",
       toolCalling: true,
-      supportsVision: false,
+      supportsVision: true,
     },
     // Static documented routes, available to list for every account. Microsoft decides entitlement.
     ...Object.keys(M365_DOCUMENTED_MODELS).map((id) => ({
       id,
       name: MODEL_DISPLAY_NAMES[id],
       toolCalling: true,
-      supportsVision: false,
+      supportsVision: true,
     })),
   ],
 };

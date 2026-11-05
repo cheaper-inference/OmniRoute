@@ -249,6 +249,11 @@ export interface ChatInvocationOptions {
   timeZoneOffset?: number;
   /** Whether this is the first turn of the conversation. */
   isStartOfSession?: boolean;
+  /**
+   * Message annotations, e.g. the `ImageFile` annotations of images uploaded into this
+   * conversation (`m365Protocol/images.ts`). Omitted from the message when empty.
+   */
+  messageAnnotations?: readonly unknown[];
   /** Tier-specific option flags; defaults to {@link M365_DEFAULT_OPTION_SETS}. */
   optionsSets?: string[];
   tone?: string;
@@ -577,6 +582,9 @@ export function buildChatInvocation(opts: ChatInvocationOptions): Record<string,
           messageType: "Chat",
           requestId: opts.requestId,
           text: opts.text,
+          ...(opts.messageAnnotations?.length
+            ? { messageAnnotations: [...opts.messageAnnotations] }
+            : {}),
         },
         isSbsSupported: true,
         options: {},

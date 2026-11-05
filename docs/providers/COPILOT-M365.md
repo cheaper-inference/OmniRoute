@@ -185,9 +185,17 @@ standalone IDs follow the public [protocol catalog](https://github.com/cramt/m36
   Only declared tools with valid supported argument shapes are returned as calls.
 - A long structured answer with a single trailing example is preserved as prose. This is a
   heuristic, not proof of intent; applications must still enforce their own tool permissions.
-- This native integration is **text-only**. Images and other non-text message parts are
-  rejected explicitly, not silently dropped. Image upload in the separate proxy is not a
-  capability of this provider.
+- Image input works the way the web client sends it. Each image part (`image_url` as a data
+  URL or a public HTTPS URL, or a Responses `input_image`) is uploaded to
+  `/m365Copilot/UploadFile` into the turn's conversation with the chat token, and the message
+  points at it with an `ImageFile` annotation; the text marks where it sat (`[image 1]`, …).
+  A fresh conversation uploads every image in the history, a continued one only the new
+  messages' images. Up to 10 PNG, JPEG, GIF or WebP images of at most 10 MiB each (40 MiB per
+  request); the format is read from the bytes. HTTPS URLs are fetched through the public-only,
+  DNS-pinned remote image guard. A failed upload fails the request (**502**
+  `m365_image_upload_failed`, **400** `m365_image_rejected` or `m365_image_invalid`); a turn
+  never goes ahead without an image it was given. Other non-text parts (audio, files) are
+  rejected explicitly, not silently dropped.
 - A follow-up request continues the same upstream conversation and sends only the messages
   after the previous reply. It must extend that reply exactly: same connection, model profile
   and tool set; an unchanged history (a sha256 chain over every message); and the reply's

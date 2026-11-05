@@ -8,6 +8,7 @@ import {
 } from "../../open-sse/executors/copilot-m365-web.ts";
 import { encodeFrame } from "../../open-sse/executors/copilot-m365-frames.ts";
 import { __resetM365ConversationsForTesting } from "../../open-sse/executors/m365Protocol/conversations.ts";
+import { __setM365UploadFetchForTesting } from "../../open-sse/executors/m365Protocol/images.ts";
 
 // Copilot keeps each conversation server-side. Starting a new one per request re-sends the whole
 // history and opens a new thread every turn; Copilot throttles accounts that open many threads.
@@ -247,5 +248,67 @@ test("an InternalError after streamed content is not retried: the client already
     assert.match(body, /partial/);
     assert.match(body, /m365_internal_error/);
     assert.equal(sockets.length, 1);
+  });
+});
+
+const PNG_DATA_URL =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
+/** A user message with text and one image part. */
+const userWithImage = (text: string) => ({
+  role: "user",
+  content: [
+    { type: "text", text },
+    { type: "image_url", image_url: { url: PNG_DATA_URL } },
+  ],
+});
+/** Run `fn` with image uploads answered by sequential docIds, recording each conversation id. */
+async function withUploads(fn: (conversations: string[]) => Promise<void>) {
+  const conversations: string[] = [];
+  const restore = __setM365UploadFetchForTesting(async (_url, init) => {
+    conversations.push(new URLSearchParams(String(init?.body)).get("conversationId") ?? "");
+    return Response.json({ docId: `doc-${conversations.length}` });
+  });
+  try {
+    await fn(conversations);
+  } finally {
+    restore();
+  }
+}
+
+test("a follow-up uploads only its new image, into the continued conversation", async () => {
+  await withUploads(async (uploads) => {
+    await run([ok("answer one"), ok("answer two")], async (exec) => {
+      await (await exec.execute(request([user("open the task")]))).response.text();
+      const second = await exec.execute(
+        request([user("open the task"), assistant("answer one"), userWithImage("look at this")])
+      );
+      assert.equal(second.response.status, 200);
+      const [a, b] = sockets;
+      assert.equal(b.args.isStartOfSession, false);
+      assert.deepEqual(uploads, [a.args.conversationId]);
+      const message = b.args.message as { text: string; messageAnnotations: Frame[] };
+      assert.match(message.text, /look at this\n\[image 1\]/);
+      assert.deepEqual(
+        message.messageAnnotations.map((x) => x.id),
+        ["doc-1"]
+      );
+    });
+  });
+});
+
+test("a fresh-conversation retry uploads the images again into the new conversation", async () => {
+  await withUploads(async (uploads) => {
+    await run([internalError, ok("recovered")], async (exec) => {
+      const result = await exec.execute(request([userWithImage("describe")]));
+      assert.equal(result.response.status, 200);
+      const [a, b] = sockets;
+      assert.notEqual(b.args.conversationId, a.args.conversationId);
+      assert.deepEqual(uploads, [a.args.conversationId, b.args.conversationId]);
+      const message = b.args.message as { messageAnnotations: Frame[] };
+      assert.deepEqual(
+        message.messageAnnotations.map((x) => x.id),
+        ["doc-2"]
+      );
+    });
   });
 });
