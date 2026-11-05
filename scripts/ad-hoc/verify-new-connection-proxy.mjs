@@ -1,8 +1,8 @@
 /**
  * PR #18828 isolated component/handler/SQLite browser acceptance.
  * Run from the worktree: node --import tsx/esm --import ./tests/_setup/isolateDataDir.ts
- *   --import ./open-sse/utils/setupPolyfill.ts scripts/ad-hoc/verify-new-connection-proxy.mjs
- * Requires installed locked dependencies and Chromium (CHROMIUM_PATH or /usr/bin/chromium).
+ *   --import ./open-sse/utils/setupPolyfill.ts scripts/ad-hoc/verify-new-connection-proxy.mjs [path/to/chromium]
+ * Requires installed locked dependencies and Chromium (optional positional path or /usr/bin/chromium).
  * Account creation is programmatic through the production bulk handler, not UI-driven.
  * This does not exercise full Next.js navigation/middleware or installed packaging.
  */
@@ -219,7 +219,7 @@ createRoot(document.getElementById('root')).render(<NextIntlClientProvider local
   const address = server.httpServer.address();
   const origin = `http://127.0.0.1:${address.port}`;
   browser = await chromium.launch({
-    executablePath: process.env.CHROMIUM_PATH || "/usr/bin/chromium",
+    executablePath: process.argv[2] || "/usr/bin/chromium",
     headless: true,
     args: ["--no-sandbox"],
   });
