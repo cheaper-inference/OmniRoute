@@ -113,6 +113,32 @@ function dispatchOnce(
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
 const MAX_REDIRECTS = 5;
 const CREDENTIAL_HEADER = /^(authorization|proxy-authorization|cookie)$|key|token|secret/i;
+const BODY_HEADERS = ["content-type", "content-length", "content-encoding", "content-language"];
+
+/** Request options for the next hop: drops credentials across origins, applies Fetch method rules. */
+function redirectHopOptions(
+  options: RequestInit,
+  status: number,
+  fromUrl: string,
+  toUrl: string
+): RequestInit {
+  const headers = new Headers(options.headers);
+  if (new URL(toUrl).origin !== new URL(fromUrl).origin) {
+    for (const name of [...headers.keys()]) {
+      if (CREDENTIAL_HEADER.test(name)) headers.delete(name);
+    }
+  }
+  const method = (options.method || "GET").toUpperCase();
+  const switchesToGet = status === 303 ? method !== "HEAD" : status <= 302 && method === "POST";
+  if (!switchesToGet) return { ...options, headers: Object.fromEntries(headers.entries()) };
+  for (const name of BODY_HEADERS) headers.delete(name);
+  return {
+    ...options,
+    method: "GET",
+    body: undefined,
+    headers: Object.fromEntries(headers.entries()),
+  };
+}
 
 /**
  * Follows redirects by hand: an auto-followed redirect would reach a Location target
@@ -138,25 +164,7 @@ async function dispatchFollowingRedirects(
     }
     const nextUrl = new URL(location, currentUrl).toString();
     assertDispatchUrlAllowed(provider, nextUrl);
-    const headers = new Headers(options.headers);
-    if (new URL(nextUrl).origin !== new URL(currentUrl).origin) {
-      for (const name of [...headers.keys()]) {
-        if (CREDENTIAL_HEADER.test(name)) headers.delete(name);
-      }
-    }
-    const method = (options.method || "GET").toUpperCase();
-    if (response.status === 303 ? method !== "HEAD" : response.status <= 302 && method === "POST") {
-      options = { ...options, method: "GET", body: undefined };
-      for (const name of [
-        "content-type",
-        "content-length",
-        "content-encoding",
-        "content-language",
-      ]) {
-        headers.delete(name);
-      }
-    }
-    options = { ...options, headers: Object.fromEntries(headers.entries()) };
+    options = redirectHopOptions(options, response.status, currentUrl, nextUrl);
     currentUrl = nextUrl;
   }
 }
