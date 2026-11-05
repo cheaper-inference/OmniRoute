@@ -10,7 +10,37 @@
  * dropped.
  */
 
-/** Rewrite one SSE `data:` JSON chunk in place; returns false when the chunk becomes empty. */
+/** Decide one tool-call delta entry; returns the deltas to emit (held ones first), or none. */
+function routeToolCall(
+  raw: unknown,
+  injected: ReadonlySet<string>,
+  nameByIndex: Map<number, string>,
+  keptIndexes: Set<number>,
+  pending: Map<number, unknown[]>
+): unknown[] {
+  const call = raw as { index?: number; function?: { name?: string } };
+  const index = typeof call.index === "number" ? call.index : 0;
+  const name = call.function?.name;
+  if (typeof name === "string" && name) nameByIndex.set(index, name);
+  const known = nameByIndex.get(index);
+  if (!known) {
+    // No function name yet: hold the delta until the name decides whether it is ours.
+    const held = pending.get(index) ?? [];
+    held.push(raw);
+    pending.set(index, held);
+    return [];
+  }
+  if (injected.has(known)) {
+    pending.delete(index);
+    return [];
+  }
+  keptIndexes.add(index);
+  const held = pending.get(index) ?? [];
+  pending.delete(index);
+  return [...held, raw];
+}
+
+/** Rewrite one SSE `data:` JSON chunk in place. */
 function filterChunk(
   chunk: Record<string, unknown>,
   injected: ReadonlySet<string>,
@@ -23,36 +53,12 @@ function filterChunk(
     : [];
   for (const choice of choices) {
     const delta = choice.delta as Record<string, unknown> | undefined;
-    const calls = delta && Array.isArray(delta.tool_calls) ? (delta.tool_calls as unknown[]) : null;
-    if (calls) {
-      const kept: unknown[] = [];
-      for (const raw of calls) {
-        const call = raw as { index?: number; function?: { name?: string } };
-        const index = typeof call.index === "number" ? call.index : 0;
-        const name = call.function?.name;
-        if (typeof name === "string" && name) nameByIndex.set(index, name);
-        const known = nameByIndex.get(index);
-        if (!known) {
-          // No function name yet: hold the delta until the name decides whether it is ours.
-          const held = pending.get(index) ?? [];
-          held.push(raw);
-          pending.set(index, held);
-          continue;
-        }
-        if (injected.has(known)) {
-          pending.delete(index);
-          continue;
-        }
-        keptIndexes.add(index);
-        const held = pending.get(index);
-        if (held) {
-          kept.push(...held);
-          pending.delete(index);
-        }
-        kept.push(raw);
-      }
-      if (kept.length > 0) (delta as Record<string, unknown>).tool_calls = kept;
-      else delete (delta as Record<string, unknown>).tool_calls;
+    if (delta && Array.isArray(delta.tool_calls)) {
+      const kept = (delta.tool_calls as unknown[]).flatMap((raw) =>
+        routeToolCall(raw, injected, nameByIndex, keptIndexes, pending)
+      );
+      if (kept.length > 0) delta.tool_calls = kept;
+      else delete delta.tool_calls;
     }
     if (choice.finish_reason === "tool_calls" && keptIndexes.size === 0) {
       choice.finish_reason = "stop";

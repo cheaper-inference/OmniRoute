@@ -376,6 +376,24 @@ export {
   normalizeMuseSparkFinishReason,
 } from "./opencodeMuseSpark.ts";
 
+/**
+ * Relay mode: the relay runs outside this process's proxy plumbing, so the egress proxy
+ * that would apply to the real upstream rides along in a header it consumes (loopback is
+ * always direct, so the ambient proxy would otherwise be lost).
+ */
+function applyRelayHeaders(headers: Record<string, string>): void {
+  if (!freeTierRelayUrl()) return;
+  try {
+    const route = resolveProxyForRequest(FREE_TIER_INFERENCE_BASE_URL);
+    if (route.proxyUrl) headers["x-opencode-relay-proxy"] = route.proxyUrl;
+  } catch {
+    // unresolvable proxy config: relay goes direct, same as an unproxied request
+  }
+  // A relay bound to a non-loopback address requires this shared secret.
+  const relayToken = (process.env.OPENCODE_FREE_RELAY_TOKEN || "").trim();
+  if (relayToken) headers["x-opencode-relay-auth"] = relayToken;
+}
+
 export class OpencodeExecutor extends BaseExecutor {
   /** Delegates to `isPremiumOpencodeModel`. Exported for testability. */
   static isPremiumModel(model: string, provider: string): boolean {
@@ -1676,20 +1694,7 @@ export class OpencodeExecutor extends BaseExecutor {
       });
     }
 
-    // Relay mode: the relay runs outside this process's proxy plumbing, so the egress proxy
-    // that would apply to the real upstream rides along in a header it consumes (loopback is
-    // always direct, so the ambient proxy would otherwise be lost).
-    if (gatedScope && freeTierRelayUrl()) {
-      try {
-        const route = resolveProxyForRequest(FREE_TIER_INFERENCE_BASE_URL);
-        if (route.proxyUrl) headers["x-opencode-relay-proxy"] = route.proxyUrl;
-      } catch {
-        // unresolvable proxy config: relay goes direct, same as an unproxied request
-      }
-      // A relay bound to a non-loopback address requires this shared secret.
-      const relayToken = (process.env.OPENCODE_FREE_RELAY_TOKEN || "").trim();
-      if (relayToken) headers["x-opencode-relay-auth"] = relayToken;
-    }
+    if (gatedScope) applyRelayHeaders(headers);
 
     // The Muse Responses workaround that forced a UUID session here is gone: the shape it
     // produced is exactly what the upstream now refuses, and the canonical session it used

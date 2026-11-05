@@ -697,6 +697,29 @@ function applyCanonicalRelayContract(
   };
 }
 
+function prepareRelayRequest<T>(
+  body: T,
+  requestFormat: string | null,
+  provider: string,
+  model: string,
+  session: string | undefined,
+  origin: object | undefined
+): { body: T; attempt: FreeTierContractAttempt } | null {
+  if (!freeTierRelayUrl() || (requestFormat !== "openai" && requestFormat !== null)) return null;
+  const canonical = applyCanonicalRelayContract(body, model);
+  if (!canonical) return null;
+  const attempt: FreeTierContractAttempt = {
+    provider,
+    model,
+    session,
+    borrowed: false,
+    clientToolNames: clientToolsOf(body).names,
+    injectedToolNames: canonical.injected,
+  };
+  if (isTrackable(origin)) rememberAttempt(origin, attempt);
+  return { body: canonical.body as T, attempt };
+}
+
 export function prepareFreeTierRequest<T>(
   body: T,
   requestFormat: string | null,
@@ -713,21 +736,8 @@ export function prepareFreeTierRequest<T>(
     if (isTrackable(origin)) forgetAttempt(origin);
     return { body, attempt: null };
   }
-  if (freeTierRelayUrl() && (requestFormat === "openai" || requestFormat === null)) {
-    const canonical = applyCanonicalRelayContract(body, model);
-    if (canonical) {
-      const attempt: FreeTierContractAttempt = {
-        provider,
-        model,
-        session,
-        borrowed: false,
-        clientToolNames,
-        injectedToolNames: canonical.injected,
-      };
-      if (isTrackable(origin)) rememberAttempt(origin, attempt);
-      return { body: canonical.body as T, attempt };
-    }
-  }
+  const relayed = prepareRelayRequest(body, requestFormat, provider, model, session, origin);
+  if (relayed) return relayed;
   const eligible = isTrackable(origin) && clientToolNames.length === 0;
   const key = eligible ? shapeKeyOf(provider, model, body) : "";
   const plan =

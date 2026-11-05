@@ -179,6 +179,8 @@ export const PACK_ARTIFACT_ROOT_ALLOWED_EXACT_PATHS: string[] = [
   // shipped via package.json "files", so it must be allowed in the tarball.
   "open-sse/utils/setupPolyfill.ts",
   "package.json",
+  // OpenCode free-tier Bun relay, spawned by src/lib/opencodeFreeRelay.ts; shipped via package.json "files".
+  "scripts/opencode-free-relay.ts",
   "scripts/build/assembleStandalone.mjs",
   "scripts/build/publicOpenApi.mjs",
   "scripts/build/backendOnlyPages.mjs",
