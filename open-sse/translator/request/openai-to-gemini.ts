@@ -125,8 +125,11 @@ function resolveNativeGeminiThinkingLevel(
   if (!supported?.length) return null;
   // The operator's explicit Gemini 3 thinkingLevel takes precedence over
   // a translated OpenAI effort or the model default.
-  if (explicitThinkingLevel && supported.includes(explicitThinkingLevel as GeminiThinkingLevel)) {
-    return { level: explicitThinkingLevel as GeminiThinkingLevel, includeThoughts: true };
+  const explicitLevel = explicitThinkingLevel?.trim().toLowerCase() as
+    | GeminiThinkingLevel
+    | undefined;
+  if (explicitLevel && supported.includes(explicitLevel)) {
+    return { level: explicitLevel, includeThoughts: true };
   }
 
   const reasoning =
