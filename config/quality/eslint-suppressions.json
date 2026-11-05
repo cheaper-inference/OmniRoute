@@ -768,11 +768,6 @@
       "count": 1
     }
   },
-  "src/app/(dashboard)/dashboard/search-tools/components/SearchHistory.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "src/app/(dashboard)/dashboard/search-tools/components/tabs/CompareTab.tsx": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
