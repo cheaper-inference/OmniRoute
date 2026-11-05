@@ -7,12 +7,24 @@ import { createReadStream } from "node:fs";
 import path from "path";
 import os from "os";
 import { execFile } from "node:child_process";
-import { promisify } from "node:util";
 import {
   CREDENTIAL_EXPORT_FORBIDDEN_MESSAGE,
   requireOperatorCredential,
 } from "@/lib/api/operatorCredential";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
+
+/**
+ * Run `tar` without blocking the event loop. `execFile` is looked up through the
+ * property access at call time (not captured once) so tests can substitute it.
+ */
+function runTar(args: string[], options: { cwd: string; timeout: number }): Promise<void> {
+  const { promise, resolve, reject } = Promise.withResolvers<void>();
+  execFile("tar", args, options, (error) => {
+    if (error) reject(error);
+    else resolve();
+  });
+  return promise;
+}
 
 /**
  * GET /api/db-backups/exportAll
@@ -95,9 +107,7 @@ async function buildFullExportResponse(request: NextRequest): Promise<Response> 
       // remote archive. The exclusive work directory also isolates concurrent exports.
       // Async exec: execFileSync blocked the shared event loop for the whole
       // tar run (up to the 30s timeout), freezing the LLM proxy and the UI.
-      // Promisified per call (not at module scope) so the child_process export
-      // stays mockable in tests.
-      await promisify(execFile)("tar", ["-czf", archiveName, path.basename(payloadDir)], {
+      await runTar(["-czf", archiveName, path.basename(payloadDir)], {
         cwd: workDir,
         timeout: 30000,
       });
