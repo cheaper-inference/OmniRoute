@@ -265,8 +265,12 @@ export async function maybeHandleVertexModelDiscovery(
   const fallback = options.buildDiscoveryFallbackResponse({
     cacheWarning: "Vertex model catalogs unavailable — using cached catalog",
     localWarning: "Vertex model catalogs unavailable — using local catalog",
-    // The live catalog answered with nothing usable.
-    failure: { code: "EMPTY_CATALOG" },
+    // A publisher list that failed with an HTTP status reports that status (a 403 from an
+    // endpoint-pinning org policy is not an empty catalog); otherwise the live catalog answered
+    // with nothing usable.
+    failure: discovery.failureStatus
+      ? { status: discovery.failureStatus }
+      : { code: "EMPTY_CATALOG" },
   });
   if (fallback) return fallback;
   return options.buildResponse({

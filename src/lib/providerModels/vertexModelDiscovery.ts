@@ -119,6 +119,7 @@ async function discoverVertexModels(options: {
   const publisherHost = getVertexHost(options.region);
   const models: unknown[] = [];
   let publisherFailureCount = 0;
+  let publisherFailureStatus: number | undefined;
 
   try {
     let pageUrl = GOOGLE_MODELS_URL;
@@ -159,6 +160,7 @@ async function discoverVertexModels(options: {
           const response = await fetchImpl(pageUrl, { method: "GET", headers: auth.headers });
           if (!response.ok) {
             publisherFailureCount += 1;
+            publisherFailureStatus ??= response.status;
             break;
           }
 
@@ -184,6 +186,11 @@ async function discoverVertexModels(options: {
     models: mergeDiscoveryModelsById(models),
     ...(publisherFailureCount > 0 && models.length > 0
       ? { warning: "Some Vertex catalogs were unavailable — imported available models" }
+      : {}),
+    // Nothing was discovered and a publisher list answered with an HTTP error (for example a 403
+    // from an endpoint-pinning org policy): report that status instead of an empty catalog.
+    ...(models.length === 0 && publisherFailureStatus !== undefined
+      ? { failureStatus: publisherFailureStatus }
       : {}),
   };
 }
