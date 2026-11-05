@@ -4,6 +4,7 @@ import { exportAllSummaryRows } from "@/lib/db/backup";
 import { getCallLogsDir } from "@/lib/usage/callLogArtifacts";
 import fs from "fs";
 import { createReadStream } from "node:fs";
+import { Readable } from "node:stream";
 import path from "path";
 import os from "os";
 import { execFile } from "node:child_process";
@@ -81,6 +82,10 @@ function writeExportSidecars(payloadDir: string): void {
 /**
  * Stream the finished archive and remove the work directory once the response
  * has consumed it (or the client aborts).
+ *
+ * `Readable.toWeb` pulls from the file only as the client drains the response,
+ * so a slow client applies backpressure instead of buffering the archive in
+ * the queue. The `close` event covers normal end, errors and destruction.
  */
 function streamArchive(
   tarPath: string,
@@ -101,25 +106,12 @@ function streamArchive(
     }
   };
   request.signal.addEventListener("abort", cleanup, { once: true });
+  archiveStream.once("close", cleanup);
 
-  const webStream = new ReadableStream({
-    start(controller) {
-      archiveStream.on("data", (chunk) => controller.enqueue(chunk));
-      archiveStream.on("end", () => {
-        controller.close();
-        cleanup();
-      });
-      archiveStream.on("error", (err) => {
-        controller.error(err);
-        cleanup();
-      });
-    },
-    cancel() {
-      cleanup();
-    },
+  return new Response(Readable.toWeb(archiveStream) as ReadableStream<Uint8Array>, {
+    status: 200,
+    headers,
   });
-
-  return new Response(webStream, { status: 200, headers });
 }
 
 async function buildFullExportResponse(request: NextRequest): Promise<Response> {

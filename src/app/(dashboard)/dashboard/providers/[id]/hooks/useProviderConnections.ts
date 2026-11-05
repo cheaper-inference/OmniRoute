@@ -113,7 +113,7 @@ async function loadProxyConfigData(): Promise<{ config: any } | null> {
   }
 }
 
-/** Cap matching the API's `?resolveIds=` limit. */
+/** Cap matching the API's `?resolveIds=` limit; larger lists are batched. */
 const MAX_RESOLVE_IDS = 200;
 
 /**
@@ -121,24 +121,20 @@ const MAX_RESOLVE_IDS = 200;
  * when that connection resolves to no proxy.
  */
 const resolvedProxiesSchema = z.object({
-  results: z.record(
-    z.string(),
-    z.object({ proxy: z.unknown(), level: z.string() }).nullable()
-  ),
+  results: z.record(z.string(), z.object({ proxy: z.unknown(), level: z.string() }).nullable()),
 });
 type ResolvedConnectionProxy = { proxy: unknown; level: string } | null;
 
-async function resolveConnectionProxies(
-  conns: { id?: string }[]
-): Promise<Record<string, ResolvedConnectionProxy> | null> {
-  const ids = [...new Set(conns.map((c) => c.id).filter((id): id is string => Boolean(id)))].slice(
-    0,
-    MAX_RESOLVE_IDS
-  );
-  if (ids.length === 0) return {};
+function chunk<T>(items: T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let index = 0; index < items.length; index += size)
+    out.push(items.slice(index, index + size));
+  return out;
+}
 
-  // One request for every connection: a request per connection was an O(n)
-  // burst against the same process that serves the LLM proxy.
+async function resolveProxyChunk(
+  ids: string[]
+): Promise<Record<string, ResolvedConnectionProxy> | null> {
   try {
     const res = await fetch(`/api/settings/proxy?resolveIds=${encodeURIComponent(ids.join(","))}`, {
       cache: "no-store",
@@ -156,6 +152,20 @@ async function resolveConnectionProxies(
   } catch {
     return null;
   }
+}
+
+async function resolveConnectionProxies(
+  conns: { id?: string }[]
+): Promise<Record<string, ResolvedConnectionProxy> | null> {
+  const ids = [...new Set(conns.map((c) => c.id).filter((id): id is string => Boolean(id)))];
+  if (ids.length === 0) return {};
+
+  // One request per 200 connections: a request per connection was an O(n)
+  // burst against the same process that serves the LLM proxy. Batching keeps
+  // every connection covered, so no row is left without its proxy badge.
+  const chunks = await Promise.all(chunk(ids, MAX_RESOLVE_IDS).map(resolveProxyChunk));
+  if (chunks.some((result) => result === null)) return null;
+  return Object.assign({}, ...chunks);
 }
 
 // ──── types ─────────────────────────────────────────────────────────────────
