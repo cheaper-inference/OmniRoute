@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE } from "../../open-sse/config/constants.ts";
 import { AntigravityTimingTracker, withAntigravityTiming, hasAntigravityMeaningfulDelta } from "../../open-sse/services/antigravityTiming.ts";
 
 const text = 'data: {"response":{"candidates":[{"content":{"parts":[{"text":"fixture"}]}}]}}\n\n';
@@ -106,14 +107,14 @@ test("unread upstream errors close timing immediately and keep original bodies u
   let now = 100;
   const tracker = new AntigravityTimingTracker(() => now);
   const events: Record<string, unknown>[] = [];
-  const run = (status: number, body: Response) => withAntigravityTiming({
+  const run = (body: Response) => withAntigravityTiming({
     enabled: true, connectionId: "retry-account", model: "gemini-3.8-flash-tiered",
     emit: (event) => events.push(event),
   }, () => tracker.fetch(async () => { now += 10; return body; }));
 
   for (const status of [403, 429, 503]) {
     const original = new Response(new ReadableStream<Uint8Array>(), { status });
-    const returned = await run(status, original);
+    const returned = await run(original);
     assert.equal(returned, original, "error bodies must remain untouched for retries");
     assert.equal(returned.bodyUsed, false);
     assert.equal(events.findLast((event) => event.phase === "headers")!.concurrentInflight, 1);
@@ -164,6 +165,38 @@ test("request abort and failed fetch release per-account timing slots exactly on
   assert.equal(events.filter((event) => event.phase === "fetch_failed").length, 1);
   await run(async () => new Response(null, { status: 204 }));
   assert.equal(events.filter((event) => event.phase === "headers").at(-1)!.concurrentInflight, 1);
+});
+
+test("a pre-response abort reports its own phase before the fetch rejection", async () => {
+  const controller = new AbortController();
+  const tracker = new AntigravityTimingTracker();
+  const events: Record<string, unknown>[] = [];
+  const timeout = Object.assign(new Error("request header timeout"), {
+    name: "TimeoutError",
+    code: ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE,
+  });
+  const running = withAntigravityTiming({
+    enabled: true, connectionId: "timeout-account", model: "gemini-3.8-flash",
+    emit: (event) => events.push(event),
+  }, () => tracker.fetch(() => new Promise<Response>((_resolve, reject) => {
+    controller.signal.addEventListener("abort", () => reject(timeout), { once: true });
+  }), controller.signal));
+  controller.abort(timeout);
+  await assert.rejects(running);
+  assert.equal(events.filter((event) => event.phase === "pre_response_timeout").length, 1);
+  assert.equal(events.filter((event) => event.phase === "upstream_deadline").length, 0);
+});
+
+test("timing events retain the request id and physical retry ordinal", async () => {
+  const events: Record<string, unknown>[] = [];
+  const tracker = new AntigravityTimingTracker();
+  await withAntigravityTiming({
+    enabled: true, connectionId: "retry-account", model: "gemini-3.8-flash",
+    correlationId: requestId, physicalSendOrdinal: 4,
+    emit: (event) => events.push(event),
+  }, () => tracker.fetch(async () => new Response(null, { status: 204 })));
+  assert.equal(events[0].requestId, requestId);
+  assert.equal(events[0].physicalSend, 4);
 });
 
 test("Antigravity physical fetch opt-in wraps actual transport; default stays unchanged", async () => {
