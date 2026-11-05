@@ -24,6 +24,7 @@
     ".env.example",
     "config/i18n.json",
     ".npmrc",
+    "scripts/opencode-free-relay.ts",
     "scripts/build/postinstall.mjs",
     "scripts/build/betterSqlitePrebuildTarget.mjs",
     "scripts/build/fixPlaywrightAndroid.mjs",

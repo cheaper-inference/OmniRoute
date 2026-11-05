@@ -1787,7 +1787,7 @@ export class OpencodeExecutor extends BaseExecutor {
       this.provider,
       model,
       this._clientSession,
-      body,
+      body as object,
       isOpencodeV2ClientFingerprintEnabled()
     );
     modifiedBody = prepared.body;
