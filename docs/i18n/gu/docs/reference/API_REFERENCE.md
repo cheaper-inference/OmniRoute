@@ -6,10 +6,12 @@
 
 🌐 **ભાષાઓ:** 🇺🇸 [English](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
 
-OmniRoute API માટેનો મુખ્ય સંદર્ભ. તેમાં જાહેર `/v1` સપાટી અને સૌથી વધુ ઉપયોગમાં લેવાતા મેનેજમેન્ટ એન્ડપૉઇન્ટ્સ આવરી લેવામાં આવ્યા છે; મશીન-વાંચનીય [`docs/openapi.yaml`](../openapi.yaml) અને `src/app/api/` હેઠળનું રૂટ ટ્રી સંપૂર્ણ સ્ત્રોતો છે.
+OmniRoute API માટેનો મુખ્ય સંદર્ભ. તેમાં સાર્વજનિક `/v1` સપાટી અને સૌથી વધુ ઉપયોગમાં લેવાતા મેનેજમેન્ટ એન્ડપૉઇન્ટ્સ આવરી લેવામાં આવ્યા છે; મશીન-વાંચનીય [`docs/openapi.yaml`](../openapi.yaml) અને `src/app/api/` હેઠળનું રૂટ ટ્રી સંપૂર્ણ સ્ત્રોતો છે.
 
-OpenAI-સુસંગત પ્રોટોકોલ અને પ્રોવાઇડર ક્ષમતાઓના કેન્દ્રિત મૅટ્રિક્સ માટે જુઓ
+કેન્દ્રિત OpenAI-સુસંગત પ્રોટોકોલ અને પ્રદાતા ક્ષમતા મેટ્રિક્સ માટે, જુઓ
 [`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md).
+
+દરેક ડિપ્લોયમેન્ટ સ્પષ્ટીકરણની પોતાની નકલ `/openapi.yaml` પર ઉપલબ્ધ કરાવે છે, જે બિલ્ડ દરમિયાન `docs/openapi.yaml`માંથી જનરેટ થાય છે. તેમાં બિલ્ડનું વર્ઝન અને સંબંધિત સર્વર URL (`./`) હોય છે, તેથી વિનંતીઓ દસ્તાવેજ પૂરો પાડનાર હોસ્ટ પર જ રહે છે. ડાઉનલોડ કરેલી ફાઇલ આયાત કરનાર ટૂલ પાસે એવો કોઈ હોસ્ટ હોતો નથી, તેથી બેઝ URL હાથથી સેટ કરવો જરૂરી છે.
 
 ---
 
@@ -1624,7 +1626,9 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-રૂપરેખાંકિત કોઈપણ STT પ્રદાતાનો ઉપયોગ કરીને ઑડિયો ફાઇલોનું ટ્રાન્સક્રિપ્શન કરો. પ્રથમ પાથ સેગમેન્ટ મૂળ પ્રદાતાને પસંદ કરે છે (`openai/…`, `deepgram/…`). અન્ય વિક્રેતાના મોડેલને ફરીથી નિકાસ કરતા ગેટવેઝ ક્વૉલિફાઇડ idનો ઉપયોગ કરે છે
+કોઈપણ ગોઠવાયેલા STT પ્રદાતાનો ઉપયોગ કરીને ઑડિયો ફાઇલોનું ટ્રાન્સક્રિપ્શન કરો. પ્રથમ પાથ
+સેગમેન્ટ મૂળ પ્રદાતા પસંદ કરે છે (`openai/…`, `deepgram/…`). અન્ય વેન્ડરના મોડલને
+ફરીથી નિકાસ કરતા ગેટવે ક્વૉલિફાઇડ ID નો ઉપયોગ કરે છે
 (`openrouter/deepgram/nova-3`).
 
 **વિનંતી:**
@@ -1636,7 +1640,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -F "model=openai/whisper-1"
 ```
 
-**પ્રતિસાદ:**
+**પ્રતિભાવ:**
 
 ```json
 {
@@ -1647,14 +1651,22 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**ઉદાહરણ મોડેલ ids:** `openai/whisper-1` (OpenAI કીની જરૂર છે),
-`openrouter/deepgram/nova-3` (OpenRouter કીની જરૂર છે),
-`deepgram/nova-3` (મૂળ Deepgram કીની જરૂર છે). એકદમ
-`deepgram/nova-3` વિનંતી OpenRouterનો ઉપયોગ કરતી નથી.
+**ઉદાહરણ મોડલ IDs:** `openai/whisper-1` (OpenAI કી જરૂરી છે),
+`openrouter/deepgram/nova-3` (OpenRouter કી જરૂરી છે),
+`deepgram/nova-3` (મૂળ Deepgram કી જરૂરી છે). માત્ર
+`deepgram/nova-3` માટેની વિનંતી **OpenRouter નો ઉપયોગ કરતી નથી**.
 
 **સમર્થિત ફોર્મેટ્સ:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
 
----
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** Gemini Live
+WebSocket મારફતે ફાઇલ-મોડ ટ્રાન્સક્રિપ્શન (Gemini API કી જરૂરી છે). અપલોડને `ffmpeg`
+સાથે 16 kHz મોનો PCM માં રૂપાંતરિત કરવામાં આવે છે
+(ફાઇલ પહેલેથી જ 16 kHz મોનો PCM WAV હોય તો સિવાય, `PATH` પર ઉપલબ્ધ હોવું આવશ્યક છે), સેશનમાં
+સ્ટ્રીમ કરવામાં આવે છે અને અંતિમ ટેક્સ્ટ `{ "text": "..." }` તરીકે પરત કરવામાં આવે છે. વૈકલ્પિક
+`language` અને `prompt` ફોર્મ ફીલ્ડ્સ આગળ મોકલવામાં આવે છે. મર્યાદાઓ: 25 MiB કરતાં મોટા અપલોડ્સ અથવા
+10 મિનિટ કરતાં લાંબો ડિકોડ કરાયેલ ઑડિયો `413` પ્રતિભાવ આપે છે; 60 સેકન્ડ કરતાં વધુ સમય ચાલતું
+રૂપાંતરણ બંધ કરવામાં આવે છે અને `504` પ્રતિભાવ આપે છે. API કી ફક્ત
+`x-goog-api-key` હેડરમાં મોકલવામાં આવે છે, WebSocket URL માં ક્યારેય નહીં.
 
 ## Ollama સુસંગતતા
 

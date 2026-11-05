@@ -21,19 +21,19 @@
 
 <div align="center">
 
-## 💰 ~၁.၆၂ ဘီလီယံ တိုကင် / လ အနေနဲ့ တတိယပါတီ အခမဲ့အဆင့်များမှ
+## 💰 တတိယပါတီ အခမဲ့အဆင့်များတစ်လျှောက် တစ်လလျှင် တိုကင် ~1.62B
 
 </div>
 
-> **သင့်ကိုယ်ပိုင် ပရိုဗိုင်းဒါ အကောင့်များ အသုံးပြုပါ။** ဤသည်မှာ OmniRoute မှ တိုကင်အဖြစ်ပေးအပ်သည့်အရာမဟုတ်ဘဲ၊ သီးခြားအရည်အချင်းပြည့်မီသော တတိယပါတီ အခမဲ့အဆင့်များကို စုစုပေါင်း ခန့်မှန်းခြေတစ်ခုဖြစ်သည်။ စာရင်းသွင်းပါ၊ လိုအပ်သည့်နေရာတွင် အထောက်အထားရယူပါ၊ သင့်အသုံးပြုနိုင်သော ပရိုဗိုင်းဒါများ ချိတ်ဆက်ပါ။ ပရိုဗိုင်းဒါတစ်ခုချင်းစီသည် ၎င်း၏ ကန့်သတ်ချက်များ၊ ရရှိနိုင်မှုနှင့် စည်းမျဉ်းများကို ထိန်းချုပ်သည်။
+> **သင့်ကိုယ်ပိုင် provider အကောင့်များကို ယူဆောင်အသုံးပြုပါ။** ဤသည်မှာ သီးခြားအသုံးပြုခွင့်ရှိသော တတိယပါတီ အခမဲ့အဆင့်များ၏ စုစုပေါင်းခန့်မှန်းချက်ဖြစ်ပြီး OmniRoute မှ ပေးအပ်သော တိုကင်ထောက်ပံ့မှု မဟုတ်ပါ။ လိုအပ်ပါက စာရင်းသွင်းပြီး အထောက်အထားများရယူကာ သင်အသုံးပြုနိုင်သော provider များကို ချိတ်ဆက်ပါ။ Provider တစ်ခုချင်းစီသည် ၎င်း၏ ကန့်သတ်ချက်များ၊ အသုံးပြုနိုင်မှုနှင့် စည်းကမ်းချက်များကို ကိုယ်တိုင်ထိန်းချုပ်ပါသည်။
 >
-> အခမဲ့အဆင့်များကို ကိုယ်တိုင် စုစည်းအသုံးပြုရခြင်းသည် အလွန်ခက်ခဲသည် — SDK များ ဒေါင်းစီ၊ အမြန်နှုန်းကန့်သတ်ချက်များ ဒေါင်းစီ၊ တကယ် ဘယ်လောက်ရှိသလဲဆိုတာ မသိနိုင်။ OmniRoute သည် **၃၄ ခုသော ပြန်လည်အသုံးပြုနိုင်သော pool key များအနက် ၄၈၅ ခုသော အခမဲ့အဆင့် စာရင်းသွင်းမှုများ** ကို စုစည်းထားပြီး၊ **လစဉ်အတွက် အပေါ်သတ်မှတ်ထားသော ဘတ်ဂျက်ရှိသော pool ၁၇ ခုနှင့် တစ်မော်ဒယ်ချင်းစီ Groq cap ၅ ခု** မှ တိုကင်အရေအတွက်ကို တွက်ချက်ပေးသည်။ တူညီသော pool များကို တစ်ကြိမ်သာတွက်ချက်သည်။ တိုင်းပြည်အလိုက် အထောက်အထားစစ်ဆေးပြီးမှသာ ဖွင့်ပေးသော ကွိုတာများ (ယနေ့ ModelScope) ကို သီးခြားပြသထားပြီး၊ တိုင်းပြည်အထောက်အထားစစ်ဆေးပြီးမှ ~၆ သန်းခန့် ထပ်မံရရှိနိုင်သော်လည်း အပေါ်ဆုံးအရေအတွက်တွင် မထည့်တွက်ပါ။ ရလဒ်ကို dashboard (`/dashboard/free-tiers`) တွင် အမြဲမြင်နိုင်သည်။
+> အခမဲ့အဆင့်များကို ကိုယ်တိုင် စုပေါင်းအသုံးပြုရခြင်းမှာ ခက်ခဲပါသည် — SDK များ ဒါဇင်ပေါင်းများစွာ၊ rate limit များ ဒါဇင်ပေါင်းများစွာနှင့် သင်အမှန်တကယ် ရရှိထားသည့်ပမာဏကို မသိနိုင်ခြင်းတို့ ဖြစ်ပါသည်။ OmniRoute သည် **ထပ်တလဲလဲအသုံးပြုသည့် pool key 34 ခုအတွင်း အခမဲ့အဆင့်စာရင်း 484 ခု** ကို စုစည်းထားပြီး၊ မျှဝေထားသော pool များကို ထပ်မတွက်ဘဲ ထုတ်ပြန်ထားသော အပြုသဘောဆောင်သည့် လစဉ်ဘတ်ဂျက်ရှိသော pool 17 ခုနှင့် model တစ်ခုချင်းစီအလိုက် Groq ကန့်သတ်ချက် 5 ခုမှ တိုကင်စုစုပေါင်းကို တွက်ချက်ပေးပါသည်။ ဒေသဆိုင်ရာ အထောက်အထားစစ်ဆေးမှု ပြီးမှသာ ဖွင့်လှစ်သည့် quota များ (ယနေ့တွင် ModelScope) ကို သီးခြားဖော်ပြထားပြီး၊ ဒေသဆိုင်ရာ အထောက်အထားအတည်ပြုမှုနောက်တွင် +~6M ရှိသော်လည်း အဓိကစုစုပေါင်းထဲတွင် မထည့်သွင်းထားပါ။ ရလဒ်ကို dashboard (`/dashboard/free-tiers`) တွင် ဆက်လက်ကြည့်ရှုနိုင်ပါသည်။
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute free-tier budget card: ~1.62B free tokens per month steady, up to ~2.22B in the first month with signup credits, from 34 documented recurring pool keys covering 485 cataloged free-tier entries behind one endpoint. Honest pool-deduped math — each shared pool counted once, including 17 recurring pools with a published positive monthly token budget plus five per-model Groq caps; 12 providers are marked avoid in the terms-risk catalog so you decide. Budget bar includes Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (five per-model caps) and smaller pools, plus first-month signup credits and permanently-free no-token-cap providers surfaced separately so they never inflate the headline. Live used/remaining on /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute အခမဲ့အဆင့်ဘတ်ဂျက်ကတ် — လစဉ် အခမဲ့တိုကင် ~1.62B ကို တည်ငြိမ်စွာရရှိနိုင်ပြီး၊ signup credit များပါဝင်သည့် ပထမလတွင် ~2.22B အထိ ရရှိနိုင်သည်။ မှတ်တမ်းတင်ထားသော ထပ်တလဲလဲအသုံးပြုသည့် pool key 34 ခုမှ အခမဲ့အဆင့်စာရင်း 484 ခုကို endpoint တစ်ခုတည်းနောက်ကွယ်တွင် ဖုံးလွှမ်းထားသည်။ မျှဝေထားသော pool တစ်ခုစီကို တစ်ကြိမ်သာရေတွက်သည့် ရိုးသားသော pool-deduped တွက်ချက်မှုဖြစ်ပြီး၊ ထုတ်ပြန်ထားသော အပြုသဘောဆောင်သည့် လစဉ်တိုကင်ဘတ်ဂျက်ရှိသော ထပ်တလဲလဲ pool 17 ခုနှင့် model တစ်ခုချင်းစီအလိုက် Groq ကန့်သတ်ချက် 5 ခုပါဝင်သည်။ Provider 12 ခုကို terms-risk catalog တွင် ရှောင်ရန်ဟု အမှတ်အသားပြုထားသဖြင့် သင်ကိုယ်တိုင် ဆုံးဖြတ်နိုင်သည်။ ဘတ်ဂျက်ဘားတွင် Mistral 1B၊ Nara 210M၊ LLM7 150M၊ xKiro 150M၊ Groq 30M (model တစ်ခုချင်းစီအလိုက် ကန့်သတ်ချက် 5 ခု) နှင့် ပိုမိုသေးငယ်သော pool များအပြင် ပထမလ signup credit များနှင့် အမြဲတမ်းအခမဲ့ဖြစ်ပြီး တိုကင်ကန့်သတ်ချက်မရှိသော provider များကို သီးခြားဖော်ပြထားသည်။ ထို့ကြောင့် ၎င်းတို့သည် အဓိကစုစုပေါင်းကို မတိုးစေပါ။ /dashboard/free-tiers တွင် လက်ရှိအသုံးပြုပြီး/ကျန်ရှိနေသည့်ပမာဏကို ကြည့်ရှုနိုင်သည်။"/>
 
-> `/dashboard/free-tiers` စာမျက်နှာ၏ တိုတောင်းသော အကျဉ်းချုပ် အနုပညာပုံ။ နည်းလမ်းအပြည့်အစုံ (pool dedupe, credit tiers, provider terms): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**။
+> လက်ရှိ `/dashboard/free-tiers` စာမျက်နှာ၏ လှုပ်ရှားသည့် အကျဉ်းချုပ်။ နည်းလမ်းအပြည့်အစုံ (pool dedupe၊ credit အဆင့်များ၊ provider စည်းကမ်းချက်များ) ကို **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)** တွင် ကြည့်ရှုနိုင်ပါသည်။
 >
-> <sub>ဤအရေအတွက်များကို တစ်ပတ်နှစ်ပတ်တိုင်း live catalog နှင့် ပြန်လည်စစ်ဆေးသည်။ **တက်နိုင်သလို ကျနိုင်သည်** — ပရိုဗိုင်းဒါတစ်ခု အခမဲ့အဆင့် ရပ်လိုက်လျှင် နံပါတ်ကျသွားသည်၊ အသစ်တစ်ခု ရောက်လာလျှင် တက်လာသည်။ catalog တွင် တကယ်တွက်ချက်ထားသည့်အတိုင်းသာ ထုတ်ပြန်သည်၊ အမြဲတမ်း အကောင်းဆုံးအဖြစ် မပေါင်းတင်ပါ။</sub>
+> <sub>ဤကိန်းဂဏန်းများကို လက်ရှိ catalog နှင့် နှိုင်းယှဉ်၍ နှစ်ပတ်တစ်ကြိမ် ပြန်လည်စစ်ဆေးထားပြီး **နှစ်ဖက်စလုံးသို့ ပြောင်းလဲနိုင်သည်** — provider တစ်ခုက အခမဲ့အဆင့်ကို ရပ်ဆိုင်းပါက ကိန်းဂဏန်း လျော့ကျမည်၊ အသစ်တစ်ခု ထည့်သွင်းပါက တိုးလာမည်။ အပေါ်ဘက်သို့ လုံးဝန်းတင်ထားသော အကောင်းဆုံးအခြေအနေကို မဟုတ်ဘဲ catalog မှ အမှန်တကယ်တွက်ချက်ထားသည့်အတိုင်းသာ ထုတ်ပြန်ပါသည်။</sub>
 
 <br/>
 
@@ -41,7 +41,7 @@
 
 <h3>
 
-⭐ OMNIROUTE က သင့်ကို ငွေချွေတာစေပြီး အလုပ်လွယ်ကူစေခဲ့ရင် repo ကို star တစ်ခု ပေးလိုက်ပါ။
+⭐ OMNIROUTE သည် သင့်ကုန်ကျစရိတ်ကို လျှော့ချပြီး အလုပ်ကို ပိုမိုလွယ်ကူစေရန် ကူညီပေးခဲ့ပါက repo ကို Star ပေးပါ။
 
 </h3>
 
@@ -50,9 +50,9 @@
 [![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
-### 💬 အသိုင်းအဝိုင်းထဲ ဝင်ရောက်ပါ
+### 💬 Community တွင် ပါဝင်ပါ
 
-**👋 Maintainer ကို Follow လုပ်ပြီး — ပရိုဗိုင်းဒါအသစ်များ၊ release များနဲ့ အကြံပြုချက်အသစ်များကို အရင်ဆုံး သိရှိပါ:**
+**👋 Maintainer ကို Follow လုပ်ပါ — provider အသစ်များ၊ release များနှင့် အကြံပြုချက်များကို အရင်ဆုံးရယူပါ။**
 
 [![Follow Diego on LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
 [![Follow @diegosouzapw on GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
@@ -63,7 +63,7 @@
 [![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
 [![Website](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
 
-**မေးခွန်းများ၊ ပရိုဗိုင်းဒါအကြံပြုချက်များ၊ လမ်းကြောင်းပြမြေပုံနှင့် အထောက်အပံ့ → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**မေးခွန်းများ၊ provider အကြံပြုချက်များ၊ roadmap နှင့် အကူအညီ → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
@@ -1288,28 +1288,28 @@ port တစ်ခုတည်းရှိ process တစ်ခုတည်းက
 <br/>
 <div align="center">
 
-## 🛠️ နည်းပညာအစုအဖွဲ့
+## 🛠️ နည်းပညာအစု
 
 </div>
 
 <table>
   <tr><th align="left">အလွှာ</th><th align="left">နည်းပညာ</th></tr>
-  <tr><td nowrap><b>လုပ်ဆောင်မှုပတ်ဝန်းကျင်</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>ဘာသာစကား</b></td><td>TypeScript 6.0 — <code>src/</code> နှင့် <code>open-sse/</code> တစ်လျှောက် <b>100% TypeScript</b> (v2.0 မှစ၍ core တွင် <code>any</code> လုံးဝမရှိ)</td></tr>
-  <tr><td nowrap><b>ဖရိမ်ဝပ်</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ဒေတာဘေ့စ်</b></td><td>better-sqlite3 (SQLite၊ WAL journaling) + LowDB (JSON အဟောင်းစနစ်) — domain module 147 ခု၊ migration 221 ခု</td></tr>
+  <tr><td nowrap><b>လုပ်ဆောင်ချိန်ပတ်ဝန်းကျင်</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>ဘာသာစကား</b></td><td>TypeScript 6.0 — <code>src/</code> နှင့် <code>open-sse/</code> တစ်လျှောက် <b>TypeScript 100%</b> (v2.0 မှစ၍ core တွင် <code>any</code> လုံးဝမပါ)</td></tr>
+  <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>ဒေတာဘေ့စ်</b></td><td>better-sqlite3 (SQLite၊ WAL journaling) + LowDB (JSON legacy) — domain module 147 ခု၊ migration 222 ခု</td></tr>
   <tr><td nowrap><b>မှတ်ဉာဏ်</b></td><td>SQLite FTS5 full-text + int8-quantized vector embeddings၊ typed decay</td></tr>
-  <tr><td nowrap><b>Schema များ</b></td><td>Zod 4 — MCP tool I/O validation + API contracts</td></tr>
+  <tr><td nowrap><b>Schema များ</b></td><td>Zod 4 — MCP tool I/O validation + API စာချုပ်များ</td></tr>
   <tr><td nowrap><b>ပရိုတိုကောများ</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>ဒေတာစီးဆင်းမှု</b></td><td>Server-Sent Events (SSE) + WebSocket bridge (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>ချုံ့ခြင်း</b></td><td>12-engine pipeline — RTK၊ Caveman၊ LLMLingua-2 (MobileBERT ONNX)၊ GCF၊ OmniGlyph</td></tr>
-  <tr><td nowrap><b>အထောက်အထားပြခြင်းနှင့် လုံခြုံရေး</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP scoped auth · AES-256-GCM at rest · DOMPurify</td></tr>
-  <tr><td nowrap><b>ကိုယ်ပျောက်စနစ်</b></td><td>wreq-js — JA3 / JA4 TLS fingerprint impersonation၊ 3-level proxy</td></tr>
+  <tr><td nowrap><b>ချုံ့မှု</b></td><td>အင်ဂျင် 12 ခုပါ pipeline — RTK၊ Caveman၊ LLMLingua-2 (MobileBERT ONNX)၊ GCF၊ OmniGlyph</td></tr>
+  <tr><td nowrap><b>အထောက်အထားနှင့် လုံခြုံရေး</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP scoped auth · သိမ်းဆည်းထားသောဒေတာအတွက် AES-256-GCM · DOMPurify</td></tr>
+  <tr><td nowrap><b>ဖုံးကွယ်မှု</b></td><td>wreq-js — JA3 / JA4 TLS fingerprint impersonation၊ အဆင့် 3 ဆင့် proxy</td></tr>
   <tr><td nowrap><b>ခံနိုင်ရည်</b></td><td>Circuit breaker၊ exponential backoff၊ anti-thundering-herd၊ auto-combo self-healing</td></tr>
   <tr><td nowrap><b>မှတ်တမ်းတင်ခြင်း</b></td><td>pino — request context ပါဝင်သော structured JSON logs</td></tr>
-  <tr><td nowrap><b>စမ်းသပ်ခြင်း</b></td><td>Node.js test runner + Vitest — စောင့်ကြည့်ထားသော test file 8,400+ ခုအတွင်း <b>static test declaration 60,000+</b> ခု (unit၊ integration၊ E2E၊ security၊ ecosystem)</td></tr>
-  <tr><td nowrap><b>ပလက်ဖောင်းများ</b></td><td>Desktop (Electron) · Android (Termux) · PWA (ဘရောက်ဇာမဆို)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — release ပြုလုပ်ချိန်တွင် npm publish + Docker Hub သို့ အလိုအလျောက်တင်ခြင်း</td></tr>
+  <tr><td nowrap><b>စမ်းသပ်ခြင်း</b></td><td>Node.js test runner + Vitest — လိုက်လံမှတ်တမ်းတင်ထားသော test file 8,400 ကျော်တွင် <b>static test declaration 60,000 ကျော်</b> (unit၊ integration၊ E2E၊ security၊ ecosystem)</td></tr>
+  <tr><td nowrap><b>ပလက်ဖောင်းများ</b></td><td>Desktop (Electron) · Android (Termux) · PWA (မည်သည့် browser မဆို)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — release ပြုလုပ်ချိန်တွင် npm publish အလိုအလျောက်ပြုလုပ်ခြင်း + Docker Hub</td></tr>
   <tr><td nowrap><b>လင့်ခ်များ</b></td><td><a href="https://omniroute.online">ဝဘ်ဆိုက်</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
@@ -1317,62 +1317,62 @@ port တစ်ခုတည်းရှိ process တစ်ခုတည်းက
 
 <br/>
 
-## 📖 စာတမ်းများ
+## 📖 စာရွက်စာတမ်းများ
 
 </div>
 
 ### 📘 စတင်အသုံးပြုခြင်း
 
 <table>
-  <tr><th align="left">စာတမ်း</th><th align="left">ဖော်ပြချက်</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">အသုံးပြုသူလမ်းညွှန်</a></b></td><td>Provider များ၊ combo များ၊ CLI ပေါင်းစည်းမှု၊ deployment</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">တပ်ဆင်သတ်မှတ်ခြင်းလမ်းညွှန်</a></b></td><td>တပ်ဆင်နည်းလမ်းအပြည့်အစုံ၊ CLI tool configuration များ၊ protocol setup၊ timeout ချိန်ညှိခြင်း</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI Tools လမ်းညွှန်</a></b></td><td>Claude Code၊ Codex၊ Cursor၊ Cline၊ OpenClaw၊ Kilo၊ Copilot တို့အတွက် tool တစ်ခုချင်းစီ၏ setup</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Remote Mode</a></b></td><td>သတ်မှတ်ထားသော access token များကို အသုံးပြု၍ laptop CLI မှ remote OmniRoute (VPS) ကို ထိန်းချုပ်ခြင်း</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code Configuration</a></b></td><td><code>launch</code> နှင့် model တစ်ခုချင်းစီအတွက် profile များကို အသုံးပြု၍ Claude Code ကို OmniRoute (local/remote) သို့ ချိတ်ဆက်သတ်မှတ်ခြင်း</td></tr>
-  <tr><td nowrap><b><a href="README.md#-quick-start">အမြန်စတင်ခြင်း</a></b></td><td>အဆင့် ၃ ဆင့်ဖြင့် တပ်ဆင်ခြင်း → ချိတ်ဆက်ခြင်း → သတ်မှတ်ခြင်း</td></tr>
+  <tr><th align="left">စာရွက်စာတမ်း</th><th align="left">ဖော်ပြချက်</th></tr>
+  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">အသုံးပြုသူလမ်းညွှန်</a></b></td><td>Provider များ၊ combo များ၊ CLI ပေါင်းစည်းမှု၊ ဖြန့်ချိခြင်း</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">တပ်ဆင်မှုလမ်းညွှန်</a></b></td><td>တပ်ဆင်နည်းလမ်းအပြည့်အစုံ၊ CLI tool ပြင်ဆင်သတ်မှတ်မှုများ၊ protocol တပ်ဆင်မှု၊ timeout ချိန်ညှိခြင်း</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI Tools လမ်းညွှန်</a></b></td><td>Claude Code၊ Codex၊ Cursor၊ Cline၊ OpenClaw၊ Kilo၊ Copilot တစ်ခုချင်းစီအတွက် တပ်ဆင်မှု</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">အဝေးမှအသုံးပြုမှု</a></b></td><td>ကန့်သတ်ထားသော access token များဖြင့် laptop CLI မှ အဝေးရှိ OmniRoute (VPS) ကို ထိန်းချုပ်ခြင်း</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code ပြင်ဆင်သတ်မှတ်မှု</a></b></td><td><code>launch</code> နှင့် model တစ်ခုချင်းစီအတွက် profile များကို အသုံးပြု၍ Claude Code ကို OmniRoute (local/remote) သို့ ချိတ်ဆက်ခြင်း</td></tr>
+  <tr><td nowrap><b><a href="README.md#-quick-start">အမြန်စတင်ခြင်း</a></b></td><td>အဆင့် 3 ဆင့်ဖြင့် တပ်ဆင်ခြင်း → ချိတ်ဆက်ခြင်း → ပြင်ဆင်သတ်မှတ်ခြင်း</td></tr>
 </table>
 
-### 🔧 လုပ်ငန်းလည်ပတ်မှုနှင့် Deployment
+### 🔧 လုပ်ငန်းလည်ပတ်မှုနှင့် ဖြန့်ချိခြင်း
 
 <table>
-  <tr><th align="left">စာတမ်း</th><th align="left">ဖော်ပြချက်</th></tr>
+  <tr><th align="left">စာရွက်စာတမ်း</th><th align="left">ဖော်ပြချက်</th></tr>
   <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker လမ်းညွှန်</a></b></td><td>Docker run၊ Compose profile များ၊ Caddy HTTPS၊ tunnel များ၊ image tag များ</td></tr>
   <tr><td nowrap><b><a href="contrib/podman/README.md">Podman လမ်းညွှန်</a></b></td><td>Quadlet systemd ပေါင်းစည်းမှု၊ podman-compose၊ SELinux</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">VM Deployment</a></b></td><td>လမ်းညွှန်အပြည့်အစုံ - VM + nginx + Cloudflare setup</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io Deployment</a></b></td><td>အမြဲတမ်းသိမ်းဆည်းမှုဖြင့် Fly.io သို့ deploy လုပ်ခြင်း</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termux လမ်းညွှန်</a></b></td><td>Termux မှတစ်ဆင့် Android ပေါ်တွင် OmniRoute ကို run လုပ်ခြင်း</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA လမ်းညွှန်</a></b></td><td>Progressive Web App တပ်ဆင်ခြင်း၊ caching၊ architecture</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">ဖြုတ်ချခြင်းလမ်းညွှန်</a></b></td><td>တပ်ဆင်နည်းလမ်းအားလုံးအတွက် အကြွင်းအကျန်မရှိ ဖြုတ်ချခြင်း</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Environment Configuration</a></b></td><td><code>.env</code> variable များနှင့် reference များ အပြည့်အစုံ</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">VM ဖြန့်ချိခြင်း</a></b></td><td>လမ်းညွှန်အပြည့်အစုံ - VM + nginx + Cloudflare တပ်ဆင်မှု</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io ဖြန့်ချိခြင်း</a></b></td><td>အမြဲတမ်းသိမ်းဆည်းမှုဖြင့် Fly.io သို့ ဖြန့်ချိခြင်း</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termux လမ်းညွှန်</a></b></td><td>Termux မှတစ်ဆင့် Android ပေါ်တွင် OmniRoute ကို အသုံးပြုခြင်း</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA လမ်းညွှန်</a></b></td><td>Progressive Web App တပ်ဆင်ခြင်း၊ caching၊ ဖွဲ့စည်းပုံ</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">ဖယ်ရှားမှုလမ်းညွှန်</a></b></td><td>တပ်ဆင်နည်းလမ်းအားလုံးအတွက် အကြွင်းအကျန်မရှိ ဖယ်ရှားခြင်း</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Environment ပြင်ဆင်သတ်မှတ်မှု</a></b></td><td><code>.env</code> variable များနှင့် ကိုးကားချက်များ အပြည့်အစုံ</td></tr>
 </table>
 
-### 🧠 အင်္ဂါရပ်များနှင့် Architecture
+### 🧠 လုပ်ဆောင်ချက်များနှင့် ဖွဲ့စည်းပုံ
 
 <table>
-  <tr><th align="left">စာတမ်း</th><th align="left">ဖော်ပြချက်</th></tr>
-  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Architecture</a></b></td><td>စနစ် architecture၊ data flow နှင့် အတွင်းပိုင်းလုပ်ဆောင်ပုံ</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Compression လမ်းညွှန်</a></b></td><td>ရွေးချယ်စရာ ၇ မျိုးပါ pipeline - off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK Compression</a></b></td><td>Command output compression၊ filter များ၊ ယုံကြည်စိတ်ချရမှု၊ verify၊ raw output ပြန်လည်ရယူခြင်း</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Compression Engine များ</a></b></td><td>Caveman၊ RTK၊ stacked pipeline များ၊ dashboard/API/MCP မျက်နှာပြင်များ</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Compression Rules Format</a></b></td><td>Caveman နှင့် RTK filter များအတွက် JSON rule-pack schema များ</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Compression Language Pack များ</a></b></td><td>ဘာသာစကားရှာဖွေခြင်းနှင့် Caveman rule-pack ရေးသားခြင်း</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Resilience လမ်းညွှန်</a></b></td><td>Circuit breaker များ၊ cooldown များ၊ queue၊ thundering herd ကာကွယ်ခြင်း၊ TLS spoofing</td></tr>
-  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo Engine</a></b></td><td>အချက် ၁၆ ချက်အပေါ် အခြေခံသည့် scoring၊ mode pack များ၊ ကိုယ်တိုင်ပြန်လည်ပြုပြင်ခြင်း</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Proxy လမ်းညွှန်</a></b></td><td>အဆင့် ၃ ဆင့်ပါ proxy စနစ်၊ 1proxy marketplace၊ registry CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">အခမဲ့ Tier များ</a></b></td><td>စုစည်းထားသော directory - မှတ်တမ်းတင်ထားသည့် ထပ်တလဲလဲအသုံးပြုနိုင်သော pool ၃၄ ခု / catalog ပြုလုပ်ထားသည့် free-tier entry ၄၈၅ ခု</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">အင်္ဂါရပ်များပြခန်း</a></b></td><td>Screenshot များဖြင့် visual dashboard လေ့လာခြင်း</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Codebase စာတမ်း</a></b></td><td>စတင်လေ့လာသူများအတွက် နားလည်လွယ်သော codebase လမ်းညွှန်</td></tr>
+  <tr><th align="left">စာရွက်စာတမ်း</th><th align="left">ဖော်ပြချက်</th></tr>
+  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">ဖွဲ့စည်းပုံ</a></b></td><td>စနစ်ဖွဲ့စည်းပုံ၊ data flow နှင့် အတွင်းပိုင်းလုပ်ဆောင်ချက်များ</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">ချုံ့ခြင်းလမ်းညွှန်</a></b></td><td>ရွေးချယ်စရာ 7 မျိုးပါ pipeline - off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK ချုံ့ခြင်း</a></b></td><td>Command output ချုံ့ခြင်း၊ filter များ၊ ယုံကြည်စိတ်ချရမှု၊ verify၊ raw output ပြန်လည်ရယူခြင်း</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">ချုံ့ခြင်း engine များ</a></b></td><td>Caveman၊ RTK၊ stacked pipeline များ၊ dashboard/API/MCP မျက်နှာပြင်များ</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">ချုံ့ခြင်း စည်းမျဉ်းဖော်မတ်</a></b></td><td>Caveman နှင့် RTK filter များအတွက် JSON rule-pack schema များ</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">ချုံ့ခြင်း ဘာသာစကား pack များ</a></b></td><td>ဘာသာစကားရှာဖွေသတ်မှတ်ခြင်းနှင့် Caveman rule-pack ရေးသားခြင်း</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">ခံနိုင်ရည်ရှိမှုလမ်းညွှန်</a></b></td><td>Circuit breaker များ၊ cooldown များ၊ queue၊ anti-thundering herd၊ TLS spoofing</td></tr>
+  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo engine</a></b></td><td>အချက် 16 ချက်အပေါ် အမှတ်ပေးခြင်း၊ mode pack များ၊ ကိုယ်တိုင်ပြန်လည်ပြုပြင်ခြင်း</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Proxy လမ်းညွှန်</a></b></td><td>အဆင့် 3 ဆင့်ပါ proxy စနစ်၊ 1proxy marketplace၊ registry CRUD</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">အခမဲ့အဆင့်များ</a></b></td><td>စုစည်းထားသော လမ်းညွှန် - မှတ်တမ်းတင်ထားသည့် ထပ်တလဲလဲအသုံးပြုနိုင်သော pool 34 ခု / catalog ပြုလုပ်ထားသည့် အခမဲ့အဆင့် entry 484 ခု</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">လုပ်ဆောင်ချက်ပြခန်း</a></b></td><td>Screenshot များဖြင့် dashboard ကို အမြင်ဖြင့် လေ့လာခြင်း</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Codebase စာရွက်စာတမ်း</a></b></td><td>အစပြုသူများအတွက် နားလည်လွယ်သော codebase လေ့လာရှင်းလင်းချက်</td></tr>
 </table>
 
 ### 🤖 Protocol များနှင့် API များ
 
 <table>
-  <tr><th align="left">စာတမ်း</th><th align="left">ဖော်ပြချက်</th></tr>
-  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">API Reference</a></b></td><td>ဥပမာများနှင့်အတူ endpoint အားလုံး</td></tr>
-  <tr><td nowrap><b><a href="docs/openapi.yaml">OpenAPI Spec</a></b></td><td>OpenAPI 3.0 specification</td></tr>
-  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP Server</a></b></td><td>MCP tool ၁၁၀ ခု၊ IDE configuration များ၊ Python/TS/Go client များ</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCP Server လမ်းညွှန်</a></b></td><td>MCP တပ်ဆင်ခြင်း၊ transport များနှင့် tool reference</td></tr>
+  <tr><th align="left">စာရွက်စာတမ်း</th><th align="left">ဖော်ပြချက်</th></tr>
+  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">API ကိုးကားချက်</a></b></td><td>Endpoint အားလုံးနှင့် ဥပမာများ</td></tr>
+  <tr><td nowrap><b><a href="docs/openapi.yaml">OpenAPI သတ်မှတ်ချက်</a></b></td><td>OpenAPI 3.0 သတ်မှတ်ချက်</td></tr>
+  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP Server</a></b></td><td>MCP tool 110 ခု၊ IDE ပြင်ဆင်သတ်မှတ်မှုများ၊ Python/TS/Go client များ</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCP Server လမ်းညွှန်</a></b></td><td>MCP တပ်ဆင်ခြင်း၊ transport များနှင့် tool ကိုးကားချက်</td></tr>
   <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A Server</a></b></td><td>JSON-RPC 2.0 protocol၊ skill များ၊ streaming၊ task စီမံခန့်ခွဲမှု</td></tr>
   <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">A2A Server လမ်းညွှန်</a></b></td><td>A2A agent card၊ task များ၊ skill များနှင့် streaming</td></tr>
 </table>
@@ -1380,13 +1380,13 @@ port တစ်ခုတည်းရှိ process တစ်ခုတည်းက
 ### 📋 ပရောဂျက်နှင့် အရည်အသွေး
 
 <table>
-  <tr><th align="left">စာရွက်စာတမ်း</th><th align="left">ဖော်ပြချက်</th></tr>
-  <tr><td nowrap><b><a href="CONTRIBUTING.md">ပံ့ပိုးကူညီခြင်း</a></b></td><td>ဖွံ့ဖြိုးရေးစနစ်တပ်ဆင်မှုနှင့် လမ်းညွှန်ချက်များ</td></tr>
+  <tr><th align="left">စာတမ်း</th><th align="left">ဖော်ပြချက်</th></tr>
+  <tr><td nowrap><b><a href="CONTRIBUTING.md">ပံ့ပိုးခြင်း</a></b></td><td>ဖွံ့ဖြိုးတိုးတက်မှု စနစ်ထည့်သွင်းခြင်းနှင့် လမ်းညွှန်ချက်များ</td></tr>
   <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Branching & Release Model</a></b></td><td>PR များကို မည်သည့်နေရာသို့ ဦးတည်ရမည် (<code>release/*</code>)၊ <code>main</code> နှင့် tag များ၏ အဓိပ္ပာယ်</td></tr>
-  <tr><td nowrap><b><a href="CHANGELOG.md">ပြောင်းလဲမှုမှတ်တမ်း</a></b></td><td>ဗားရှင်းတစ်ခုချင်းစီအလိုက် ထုတ်ဝေမှုမှတ်တမ်း အပြည့်အစုံ</td></tr>
-  <tr><td nowrap><b><a href="SECURITY.md">လုံခြုံရေးမူဝါဒ</a></b></td><td>အားနည်းချက်များ အစီရင်ခံခြင်းနှင့် လုံခြုံရေးကျင့်ထုံးများ</td></tr>
+  <tr><td nowrap><b><a href="CHANGELOG.md">ပြောင်းလဲမှုမှတ်တမ်း</a></b></td><td>ဗားရှင်းတစ်ခုချင်းစီအလိုက် ထုတ်ပြန်မှုမှတ်တမ်း အပြည့်အစုံ</td></tr>
+  <tr><td nowrap><b><a href="SECURITY.md">လုံခြုံရေးမူဝါဒ</a></b></td><td>အားနည်းချက်များ အစီရင်ခံခြင်းနှင့် လုံခြုံရေးဆိုင်ရာ လုပ်ထုံးလုပ်နည်းများ</td></tr>
   <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n လမ်းညွှန်</a></b></td><td>ဘာသာစကား 67 မျိုး ပံ့ပိုးမှု၊ ဘာသာပြန်လုပ်ငန်းစဉ်၊ RTL</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">ထုတ်ဝေမှု စစ်ဆေးရန်စာရင်း</a></b></td><td>ထုတ်ဝေမှုမတိုင်မီ အတည်ပြုစစ်ဆေးရမည့် အဆင့်များ</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">ထုတ်ပြန်မှု စစ်ဆေးရန်စာရင်း</a></b></td><td>ထုတ်ပြန်မှုမတိုင်မီ အတည်ပြုစစ်ဆေးရမည့် အဆင့်များ</td></tr>
   <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Coverage အစီအစဉ်</a></b></td><td>ခြေရာခံထားသော test ဖိုင် 8,400 ကျော်အတွင်းရှိ static test ကြေညာချက် 60,000 ကျော်အတွက် test coverage မဟာဗျူဟာ</td></tr>
 </table>
 
@@ -1394,14 +1394,14 @@ port တစ်ခုတည်းရှိ process တစ်ခုတည်းက
 
 <div align="center">
 
-# ⭐ ထိပ်တန်း ပံ့ပိုးကူညီသူများ
+# ⭐ ထိပ်တန်းပံ့ပိုးသူများ
 
-> OmniRoute ကို စိတ်အားထက်သန်သော open-source အသိုင်းအဝိုင်းက ပုံဖော်ပေးထားပါသည်။ ဤပုဂ္ဂိုလ်များသည် ပရောဂျက်၏ အရည်အသွေး၊ တည်ငြိမ်မှုနှင့် ရောက်ရှိနိုင်မှုတို့အပေါ် တိုက်ရိုက်သက်ရောက်စေသော ထူးခြားသည့် ပံ့ပိုးမှုများကို ပြုလုပ်ခဲ့ကြပါသည်။ **ကျေးဇူးတင်ပါသည်။**
+> OmniRoute ကို စိတ်အားထက်သန်သော open-source အသိုင်းအဝိုင်းက ပုံဖော်ထားပါသည်။ ဤပုဂ္ဂိုလ်များသည် ပရောဂျက်၏ အရည်အသွေး၊ တည်ငြိမ်မှုနှင့် ရောက်ရှိနိုင်မှုတို့ကို တိုက်ရိုက်အကျိုးသက်ရောက်စေသော ထူးခြားသည့် ပံ့ပိုးမှုများ ပြုလုပ်ခဲ့ကြပါသည်။ **ကျေးဇူးတင်ပါသည်။**
 
-### ပေါင်းစည်းပြီးသော pull request အရေအတွက်အလိုက် ပြင်ပပံ့ပိုးကူညီသူများ
+### ပေါင်းစည်းပြီးသော pull request များအလိုက် ပြင်ပပံ့ပိုးသူများ
 
 <table>
-  <tr><th align="center">အဆင့်</th><th align="left">ပံ့ပိုးကူညီသူ</th><th align="center">ပေါင်းစည်းပြီးသော PR များ</th><th align="right">~ပြောင်းလဲထားသော စာကြောင်းများ</th></tr>
+  <tr><th align="center">အဆင့်</th><th align="left">ပံ့ပိုးသူ</th><th align="center">ပေါင်းစည်းပြီးသော PR များ</th><th align="right">~ပြောင်းလဲထားသော လိုင်းများ</th></tr>
   <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
   <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
   <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
@@ -1424,9 +1424,9 @@ port တစ်ခုတည်းရှိ process တစ်ခုတည်းက
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
 </table>
 
-<sub>2026-11-03 03:01:19 UTC တွင် တိုက်ရိုက် <code>release/v3.8.53</code> tip <code>05bc048d6c</code> ဖြင့် ကောက်ယူထားသော စာရင်းဖြစ်ပါသည်။ စာမျက်နှာခွဲထားသည့် GitHub GraphQL စာရင်းတွင် ပေါင်းစည်းပြီးသော PR စုစုပေါင်း 9,947 ခု ပါဝင်ပြီး၊ repository ပိုင်ရှင်က 4,130 ခု၊ Dependabot က 240 ခု၊ အခြား bot/app များက 6 ခုနှင့် <b>ထူးခြားသည့် ပံ့ပိုးကူညီသူ 883 ဦးထံမှ ပြင်ပ PR 5,571 ခု</b> ပါဝင်ပါသည်။ “ပြောင်းလဲထားသော စာကြောင်းများ” သည် GitHub additions + deletions ဖြစ်ပြီး generated ဖိုင်များ၊ lockfiles၊ catalogs၊ ဘာသာပြန်များနှင့် documentation များလည်း ပါဝင်ပါသည်။ ၎င်းသည် ရေးသားသူ၏ LOC မဟုတ်ဘဲ ပြောင်းလဲမှုအတိုင်းအတာ ဖြစ်ပါသည်။ PR 53 ခုတွင် GitHub diff များသည် စာကြောင်း 500,000 ထက်ကျော်လွန်ကြောင်း ဖော်ပြထားပြီး (ဥပမာ #13399 တွင် provider တစ်ခုတည်း ထည့်သွင်းမှုဖြစ်သော်လည်း ပြောင်းလဲထားသော ဖိုင် 2,347 ခုကို စာရင်းပြုထားသည်)၊ ထို့ကြောင့် အထက်ပါ စုစုပေါင်းအချို့မှာ ပိုမိုကြီးမားလာပါသည်။ အဆင့်တူသူများကို အတူတူအဆင့်သတ်မှတ်ထားပါသည်။</sub>
+<sub>အချက်အလက်ကောက်ယူချိန်မှာ 2026-11-03 03:01:19 UTC ဖြစ်ပြီး live <code>release/v3.8.53</code> tip <code>05bc048d6c</code> ကို အသုံးပြုထားပါသည်။ စာမျက်နှာခွဲထားသော GitHub GraphQL census တွင် ပေါင်းစည်းပြီးသော PR စုစုပေါင်း 9,947 ခု ပါဝင်သည် — repository ပိုင်ရှင်က 4,130 ခု၊ Dependabot က 240 ခု၊ အခြား bot/app များက 6 ခုနှင့် <b>ကွဲပြားသော ပံ့ပိုးသူ 883 ဦးထံမှ ပြင်ပ PR 5,571 ခု</b> ဖြစ်ပါသည်။ “ပြောင်းလဲထားသော လိုင်းများ” သည် GitHub ၏ additions + deletions ဖြစ်ပြီး generated ဖိုင်များ၊ lockfiles၊ catalogs၊ ဘာသာပြန်များနှင့် documentation များ ပါဝင်သည်။ ၎င်းသည် churn ဖြစ်ပြီး ရေးသားသူ၏ LOC မဟုတ်ပါ။ PR 53 ခုတွင် GitHub diff များသည် လိုင်း 500,000 အထက်ရှိကြောင်း ဖော်ပြထားသည် (ဥပမာ #13399 တွင် provider တစ်ခုတည်း ထည့်သွင်းမှုဖြစ်သော်လည်း ပြောင်းလဲထားသော ဖိုင် 2,347 ခု ရှိသည်)။ ထို့ကြောင့် အထက်ပါ စုစုပေါင်းအချို့မှာ မြင့်တက်နေပါသည်။ အဆင့်တူသူများကို အတူတကွ အဆင့်သတ်မှတ်ထားပါသည်။</sub>
 
-### GitHub က သတ်မှတ်ပေးထားသော commits
+### GitHub မှ သတ်မှတ်ထားသော commits
 
 <table>
   <tr>
@@ -1435,42 +1435,42 @@ port တစ်ခုတည်းရှိ process တစ်ခုတည်းက
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 GitHub မှ သတ်မှတ်ဖော်ပြထားသော commit ၄၁၈ ခု</sub>
+      <sub>🥇 GitHub မှ သတ်မှတ်ပေးထားသော commit 418 ခု</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 GitHub မှ သတ်မှတ်ဖော်ပြထားသော commit ၂၉၄ ခု</sub>
+      <sub>🥈 GitHub မှ သတ်မှတ်ပေးထားသော commit 294 ခု</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
         <img src="https://github.com/oyi77.png" width="40" style="border-radius:50%" alt="Paijo"/><br/>
         <b>Paijo</b>
       </a><br/>
-      <sub>🥉 GitHub မှ သတ်မှတ်ဖော်ပြထားသော commit ၂၂၉ ခု</sub>
+      <sub>🥉 GitHub မှ သတ်မှတ်ပေးထားသော commit 229 ခု</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/pacocartones">
         <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
         <b>Paco Cartones</b>
       </a><br/>
-      <sub>🏅 GitHub မှ သတ်မှတ်ဖော်ပြထားသော commit ၂၂၂ ခု</sub>
+      <sub>🏅 GitHub မှ သတ်မှတ်ပေးထားသော commit 222 ခု</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
       </a><br/>
-      <sub>🏅 GitHub မှ သတ်မှတ်ဖော်ပြထားသော commit ၂၀၂ ခု</sub>
+      <sub>🏅 GitHub မှ သတ်မှတ်ပေးထားသော commit 202 ခု</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/JxnLexn">
         <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
         <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 GitHub မှ သတ်မှတ်ဖော်ပြထားသော commit ၁၃၄ ခု</sub>
+      <sub>🏅 GitHub မှ သတ်မှတ်ပေးထားသော commit 134 ခု</sub>
     </td>
   </tr>
   <tr>
@@ -1479,49 +1479,49 @@ port တစ်ခုတည်းရှိ process တစ်ခုတည်းက
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
         <b>Ravi Tharuma</b>
       </a><br/>
-      <sub>🏅 GitHub မှ သတ်မှတ်ဖော်ပြထားသော commit ၁၂၆ ခု</sub>
+      <sub>🏅 GitHub မှ သတ်မှတ်ပေးထားသော commit 126 ခု</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 GitHub မှ သတ်မှတ်ဖော်ပြထားသော commit ၁၁၅ ခု</sub>
+      <sub>🏅 GitHub မှ သတ်မှတ်ပေးထားသော commit 115 ခု</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
         <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
         <b>Randi</b>
       </a><br/>
-      <sub>🏅 GitHub မှ သတ်မှတ်ဖော်ပြထားသော commit ၁၀၈ ခု</sub>
+      <sub>🏅 GitHub မှ သတ်မှတ်ပေးထားသော commit 108 ခု</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
-      <sub>🏅 GitHub မှ သတ်မှတ်ဖော်ပြထားသော commit ၇၀ ခု</sub>
+      <sub>🏅 GitHub မှ သတ်မှတ်ပေးထားသော commit 70 ခု</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/jonlwheat2-gif">
         <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
         <b>WebPerson</b>
       </a><br/>
-      <sub>🏅 GitHub မှ သတ်မှတ်ဖော်ပြထားသော commit ၆၈ ခု</sub>
+      <sub>🏅 GitHub မှ သတ်မှတ်ပေးထားသော commit 68 ခု</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
         <img src="https://github.com/KooshaPari.png" width="40" style="border-radius:50%" alt="Koosha Paridehpour"/><br/>
         <b>Koosha Paridehpour</b>
       </a><br/>
-      <sub>🏅 GitHub မှ သတ်မှတ်ဖော်ပြထားသော commit ၆၈ ခု</sub>
+      <sub>🏅 GitHub မှ သတ်မှတ်ပေးထားသော commit 68 ခု</sub>
     </td>
   </tr>
 </table>
 
-<sub>၂၀၂၆-၁၁-၀၃ ၀၂:၀၉:၁၆ UTC တွင် ပြန်လည်စစ်ဆေးထားသည်။ <code>release/v3.8.53</code> မူရင်း branch အတွက် repository Contributors API က ဖော်ပြထားသော GitHub မှ သတ်မှတ်ဖော်ပြထားသည့် commit များ ဖြစ်သည်။ API မှ identity ၉၀၃ ခု (အသုံးပြုသူ ၄၂၉ ဦး၊ bot ၂ ခု၊ အမည်မဖော်ပြထားသူ ၄၇၂ ဦး) ကို ပြန်လည်ပေးပို့ခဲ့သည်။ ဤဇယားတွင် maintainer၊ bot များနှင့် အမည်မဖော်ပြထားသော identity များကို ဖယ်ထုတ်ထားပြီး အဆင့်တူသူများကို ထည့်သွင်းထားသည်။ ဤဇယားသည် အထက်ပါ ပေါင်းစည်းပြီးသော PR အဆင့်သတ်မှတ်ချက်နှင့် အောက်ပါ Git metadata စာရင်းကောက်ယူမှုတို့နှင့် သီးခြားဖြစ်သည်။</sub>
+<sub>2026-11-03 02:09:16 UTC တွင် ပြန်လည်စစ်ဆေးထားသည်။ GitHub မှ သတ်မှတ်ပေးထားသော commit များကို <code>release/v3.8.53</code> မူလ branch အတွက် repository Contributors API က အစီရင်ခံထားခြင်း ဖြစ်သည်။ API က identity 903 ခု (အသုံးပြုသူ 429 ဦး၊ bot 2 ခု၊ အမည်မဖော်ပြထားသူ 472 ဦး) ကို ပြန်လည်ပေးခဲ့သည်။ ဤဇယားတွင် maintainer၊ bot များနှင့် အမည်မဖော်ပြထားသူများကို ချန်လှပ်ထားပြီး အဆင့်တူသူများကို ဆက်လက်ထည့်သွင်းထားသည်။ ၎င်းသည် အထက်ရှိ merged-PR အဆင့်သတ်မှတ်ချက်နှင့် အောက်ရှိ Git-metadata စာရင်းကောက်ယူမှု နှစ်ခုစလုံးနှင့် သီးခြားဖြစ်သည်။</sub>
 
-> 🙏 ဤ contributor များ၏ feature များ၊ bug ပြင်ဆင်မှုများနှင့် infrastructure ပိုမိုကောင်းမွန်အောင် ပြုလုပ်မှုများသည် OmniRoute ကို ယုံကြည်စိတ်ချရပြီး feature ကြွယ်ဝစေသည့်အရာ၏ **အဓိကအစိတ်အပိုင်း** ဖြစ်သည်။ pull request တစ်ခုချင်းစီ၊ test case တစ်ခုချင်းစီနှင့် i18n ဘာသာပြန်ဖိုင်တစ်ခုချင်းစီသည် အရေးကြီးသည်။ Open source ကို ၎င်းတို့ကဲ့သို့သောသူများက တည်ဆောက်ကြသည်။
+> 🙏 ဤ contributor များ၏ feature များ၊ bug ပြင်ဆင်မှုများနှင့် infrastructure တိုးတက်ကောင်းမွန်မှုများသည် OmniRoute ကို ယုံကြည်စိတ်ချရပြီး feature ကြွယ်ဝစေသည့် **အဓိကအစိတ်အပိုင်း** ဖြစ်သည်။ pull request တစ်ခုချင်းစီ၊ test case တစ်ခုချင်းစီနှင့် i18n ဘာသာပြန်ဖိုင်တစ်ခုချင်းစီသည် အရေးကြီးသည်။ Open source ကို ၎င်းတို့ကဲ့သို့သော လူများက တည်ဆောက်ကြသည်။
 
 </div>
 

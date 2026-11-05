@@ -1,0 +1,1 @@
+- **fix(dashboard):** the browser bar / installed-PWA title bar (`<meta name="theme-color">`) now follows the Classic palette when it is picked in Settings → Appearance, in light and dark, from the first paint and on every live switch; the server default and the web manifest stay Editions, since the manifest is fetched once per install without the preference

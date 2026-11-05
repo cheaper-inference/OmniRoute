@@ -1,0 +1,1 @@
+- **fix(providers):** Kiro tool calls with no input (no-parameter tools, or optional parameters the model left out) now stream `function.arguments: "{}"` instead of `""`, so strict OpenAI clients no longer drop the call ([#18780](https://github.com/cheaper-inference/OmniRoute/pull/18780), closes #18718) — thanks @gaurav0107
