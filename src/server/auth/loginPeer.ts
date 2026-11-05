@@ -1,24 +1,32 @@
 /**
  * Where a login attempt comes from, judged from the socket peer the authz pipeline stamps
- * on the request. X-Forwarded-For, X-Real-IP and CF-Connecting-IP are chosen by the caller,
- * so they may end up in the audit log but never decide a lockout key or a locality gate.
+ * on the request. Per-client limits use the client address validated by the pipeline;
+ * locality gates still use the socket peer. Raw forwarding headers never decide either.
  */
 import { classifyIpScope, type IpScope } from "@/lib/ipUtils";
-import { AUTHZ_HEADER_TRUSTED_PEER_IP } from "@/server/authz/headers";
+import {
+  AUTHZ_HEADER_TRUSTED_CLIENT_IP,
+  AUTHZ_HEADER_TRUSTED_PEER_IP,
+} from "@/server/authz/headers";
 import { classifyHostLocality } from "@/server/authz/routeGuard";
 import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
 
 const UNKNOWN_PEER_KEY = "__unknown_peer__";
 
 /**
- * Key for the failed-attempt lockout: the stamped socket peer. When this process stamps
- * peers but the request carries none, every such request shares one key instead of
- * falling back to a forwarded address that can be rotated for a fresh attempt budget.
- * Without a stamping server (direct handler calls) the forwarded address is all there is.
+ * Key failed attempts by the pipeline-validated client so visitors behind one proxy
+ * retain separate budgets. The pipeline strips caller-supplied trusted headers and
+ * validates the server's client stamp before adding this address. If it is absent,
+ * fall back to the validated socket peer or one fail-closed unknown bucket; never
+ * fall back to raw forwarding headers while peer stamping is enabled.
  */
 export function getLoginLockoutKey(request: Request, forwardedIp: string | null): string | null {
   if (!process.env.OMNIROUTE_PEER_STAMP_TOKEN) return forwardedIp;
-  return request.headers.get(AUTHZ_HEADER_TRUSTED_PEER_IP) || UNKNOWN_PEER_KEY;
+  return (
+    request.headers.get(AUTHZ_HEADER_TRUSTED_CLIENT_IP) ||
+    request.headers.get(AUTHZ_HEADER_TRUSTED_PEER_IP) ||
+    UNKNOWN_PEER_KEY
+  );
 }
 
 /** Origin tag for audit rows, from the stamped peer rather than a forwarded address. */
