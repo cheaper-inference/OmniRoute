@@ -46,6 +46,8 @@
   --ci-color-accent-surface-strong: rgb(229 172 130 / .22);
   --ci-color-accent-surface-range: rgb(229 172 130 / .18);
   --ci-color-accent-ink: #8f4d26;
+  /* Same hue, darker: 4.5:1 on the accent tint over every content surface, muted included. */
+  --ci-badge-accent-ink: #894a24;
   --ci-color-control-active-bg: #e5ac82;
   --ci-color-control-active-fg: #241b15;
   --ci-color-control-thumb: #626459;
@@ -158,6 +160,7 @@
   --ci-color-text-subtle: #93958a;
   --ci-color-accent-active: #e5ac82;
   --ci-color-accent-ink: #e5ac82;
+  --ci-badge-accent-ink: var(--ci-color-accent-ink);
   --ci-color-control-thumb: #a5a69b;
   --ci-color-border-subtle: rgb(242 240 232 / .13);
   --ci-color-border: rgb(242 240 232 / .22);
@@ -225,6 +228,7 @@
     --ci-color-text-subtle: #93958a;
     --ci-color-accent-active: #e5ac82;
     --ci-color-accent-ink: #e5ac82;
+    --ci-badge-accent-ink: var(--ci-color-accent-ink);
     --ci-color-control-thumb: #a5a69b;
     --ci-color-border-subtle: rgb(242 240 232 / .13);
     --ci-color-border: rgb(242 240 232 / .22);

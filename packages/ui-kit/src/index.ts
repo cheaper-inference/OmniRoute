@@ -17,7 +17,8 @@ export {
 
 export { Button, buttonVariants, type ButtonProps, type ButtonSize, type ButtonVariant } from "./button";
 export { GuardedAction, type GuardedActionProps } from "./guarded-action";
-export { Badge, badgeVariants, type BadgeProps, type BadgeShape, type BadgeVariant } from "./badge";
+export { Badge, badgeVariants, type BadgeProps, type BadgeShape, type BadgeTone, type BadgeVariant } from "./badge";
+export { Kbd, KbdGroup, type KbdGroupProps, type KbdProps, type KbdSize } from "./kbd";
 export { Tile, type TileLayout, type TileProps } from "./tile";
 export { ToggleChip, type ToggleChipProps, type ToggleChipSize } from "./toggle-chip";
 export { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, type CardFooterAlign, type CardFooterProps, type CardProps } from "./card";
@@ -61,6 +62,7 @@ export {
   type SelectSize,
   type SelectVariant,
 } from "./select";
+export { NativeSelect, type NativeSelectProps, type NativeSelectSize } from "./native-select";
 export {
   Field,
   FieldGroup,
@@ -121,6 +123,7 @@ export {
   type StatTone,
 } from "./stat";
 export { Progress, type ProgressProps, type ProgressTone, type ProgressSegment } from "./progress";
+export { Spinner, type SpinnerProps, type SpinnerSize } from "./spinner";
 export {
   Chart,
   type ChartDatum,

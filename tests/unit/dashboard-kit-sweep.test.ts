@@ -47,8 +47,6 @@ test("no Material Symbols ligature span is left in the app tree", () => {
 
 test("no raw <select>, <textarea> or <table> outside the adapters (dashboard + shared)", () => {
   const hits = countBy(DASHBOARD, /<(select|textarea|table)\b/g);
-  // The Select adapter renders the native <select class="ci-select-native"> branch.
-  delete hits["src/shared/components/Select.tsx"];
   // Comment-only mentions of "<select>" (no JSX): ModelSelectField, StudioConfigPane.
   for (const f of Object.keys(hits)) {
     const jsx = fs
