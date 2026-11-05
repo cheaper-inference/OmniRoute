@@ -39,41 +39,57 @@ function expectedOutputType(callType: ToolCallType): ToolOutputType {
   return callType === "custom_tool_call" ? "custom_tool_call_output" : "function_call_output";
 }
 
-/** Validate a Responses input history before routing or executor repair can alter it. */
-export function validateResponsesToolHistory(body: Record<string, unknown>): void {
-  if (!Array.isArray(body.input)) return;
+/** A tool call or tool output item of a Responses input, or null for any other item. */
+function asToolItem(value: unknown): (JsonRecord & { type: ToolCallType | ToolOutputType }) | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const type = (value as JsonRecord).type;
+  if (!CALL_TYPES.has(type as ToolCallType) && !OUTPUT_TYPES.has(type as ToolOutputType)) {
+    return null;
+  }
+  return value as JsonRecord & { type: ToolCallType | ToolOutputType };
+}
 
+/**
+ * Index the tool calls and tool outputs of a Responses input by call_id, rejecting invalid or
+ * duplicate ids and unparseable function_call arguments.
+ */
+function collectToolItems(input: unknown[]): {
+  calls: Map<string, ToolItem>;
+  outputs: Map<string, ToolItem>;
+} {
   const calls = new Map<string, ToolItem>();
   const outputs = new Map<string, ToolItem>();
-  for (const [index, value] of body.input.entries()) {
-    if (!value || typeof value !== "object" || Array.isArray(value)) continue;
-    const item = value as JsonRecord;
-    const type = item.type;
-    if (!CALL_TYPES.has(type as ToolCallType) && !OUTPUT_TYPES.has(type as ToolOutputType)) {
-      continue;
-    }
-
+  for (const [index, value] of input.entries()) {
+    const item = asToolItem(value);
+    if (!item) continue;
     const callId = requireResponsesCallId(item.call_id);
-    if (CALL_TYPES.has(type as ToolCallType)) {
+    if (CALL_TYPES.has(item.type as ToolCallType)) {
       if (calls.has(callId)) invalid("Duplicate tool call_id in Responses input");
-      if (type === "function_call") {
+      if (item.type === "function_call") {
         coerceHistoricalToolCallArguments(item.arguments, "");
       }
-      calls.set(callId, { index, type: type as ToolCallType });
+      calls.set(callId, { index, type: item.type });
     } else {
       if (outputs.has(callId)) invalid("Duplicate tool output call_id in Responses input");
-      outputs.set(callId, { index, type: type as ToolOutputType });
+      outputs.set(callId, { index, type: item.type });
     }
   }
+  return { calls, outputs };
+}
 
-  const hasPreviousResponse =
-    typeof body.previous_response_id === "string" && body.previous_response_id.trim() !== "";
+/**
+ * Every output must answer a local call of the matching type that precedes it. An output with
+ * no local call is accepted only when the history continues a stored previous response.
+ */
+function requireOutputsMatchCalls(
+  calls: Map<string, ToolItem>,
+  outputs: Map<string, ToolItem>,
+  hasPreviousResponse: boolean
+): void {
   for (const [callId, output] of outputs) {
     const call = calls.get(callId);
     if (!call) {
-      if (!hasPreviousResponse) {
-        invalid("Tool output does not match a local tool call");
-      }
+      if (!hasPreviousResponse) invalid("Tool output does not match a local tool call");
       continue;
     }
     if (output.type !== expectedOutputType(call.type as ToolCallType)) {
@@ -83,9 +99,17 @@ export function validateResponsesToolHistory(body: Record<string, unknown>): voi
       invalid("Tool output must follow its local tool call");
     }
   }
+}
+
+/** Validate a Responses input history before routing or executor repair can alter it. */
+export function validateResponsesToolHistory(body: Record<string, unknown>): void {
+  if (!Array.isArray(body.input)) return;
+
+  const { calls, outputs } = collectToolItems(body.input);
+  const hasPreviousResponse =
+    typeof body.previous_response_id === "string" && body.previous_response_id.trim() !== "";
+  requireOutputsMatchCalls(calls, outputs, hasPreviousResponse);
   for (const callId of calls.keys()) {
-    if (!outputs.has(callId)) {
-      invalid("Historical tool call is missing its output");
-    }
+    if (!outputs.has(callId)) invalid("Historical tool call is missing its output");
   }
 }

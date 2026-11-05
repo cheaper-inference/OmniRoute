@@ -16,13 +16,29 @@ import assert from "node:assert/strict";
 
 const { openaiToOpenAIResponsesRequest } =
   await import("../../open-sse/translator/request/openai-responses.ts");
+const { validateResponsesToolHistory } =
+  await import("../../open-sse/translator/helpers/responsesToolHistory.ts");
 
 type InputItem = {
   type?: string;
   call_id?: string;
+  name?: string;
+  arguments?: string;
   output?: unknown;
   status?: string;
 };
+
+/** The pre-dispatch validator refuses a history whose call has no output, as a 400. */
+function assertRejectedBeforeDispatch(result: { input: InputItem[] }): void {
+  assert.throws(
+    () => validateResponsesToolHistory(result as unknown as Record<string, unknown>),
+    (error: Error & { statusCode?: number; errorType?: string }) =>
+      error.statusCode === 400 &&
+      error.errorType === "invalid_tool_call_output" &&
+      /missing its output/.test(error.message),
+    "incomplete history is rejected before dispatch instead of being repaired"
+  );
+}
 
 function translate(body: unknown): { input: InputItem[] } {
   return openaiToOpenAIResponsesRequest("gpt-4", body, true, {}) as { input: InputItem[] };
@@ -53,9 +69,16 @@ test("#15216: trailing unpaired function_call is repaired with a synthesized emp
 
   assert.equal(calls.length, 1, "the orphan call itself must survive");
   assert.equal(calls[0].call_id, "call_orphan_livecheck");
+  assert.equal(calls[0].name, "probe", "the pending call keeps its tool name");
+  assert.equal(
+    calls[0].arguments,
+    '{"q":"alpha"}',
+    "the pending call keeps its arguments verbatim"
+  );
   assert.equal(outputs.length, 0, "no successful output may be fabricated");
   const callIdx = result.input.findIndex((item) => item.type === "function_call");
   assert.equal(callIdx, result.input.length - 1, "the pending call retains its original position");
+  assertRejectedBeforeDispatch(result);
 });
 
 test("#15216: a properly paired call keeps its real output untouched", () => {
@@ -81,6 +104,10 @@ test("#15216: a properly paired call keeps its real output untouched", () => {
   assert.equal(outputs.length, 1, "no synthesized output may be added next to a real one");
   assert.equal(outputs[0].call_id, "call_real");
   assert.equal(outputs[0].output, "real result");
+  assert.doesNotThrow(
+    () => validateResponsesToolHistory(result as unknown as Record<string, unknown>),
+    "a complete history passes the pre-dispatch validator"
+  );
 });
 
 test("#15216: mid-history unpaired call is paired in place without disturbing later items", () => {
@@ -109,8 +136,10 @@ test("#15216: mid-history unpaired call is paired in place without disturbing la
   assert.ok(callIdx >= 0, "orphan call must survive translation");
   assert.equal(outputIdx, -1, "no result may be invented for the mid-history call");
   assert.equal(result.input[callIdx].call_id, "call_lost");
+  assert.equal(result.input[callIdx].arguments, "{}", "the pending call keeps its arguments");
   const continueIdx = types.lastIndexOf("message");
   assert.equal(continueIdx, callIdx + 1, "the trailing user message follows the pending call");
+  assertRejectedBeforeDispatch(result);
 });
 
 test("#15216: mixed turn — only the call missing its output is synthesized", () => {
@@ -137,9 +166,14 @@ test("#15216: mixed turn — only the call missing its output is synthesized", (
     "both calls retain their identity and order"
   );
 
+  const orphanCall = result.input.find(
+    (item) => item.type === "function_call" && item.call_id === "call_orphan"
+  );
+  assert.equal(orphanCall?.name, "a", "the pending call keeps its tool name");
   const orphanOutput = outputs.find((item) => item.call_id === "call_orphan");
   const realOutput = outputs.find((item) => item.call_id === "call_paired");
   assert.equal(orphanOutput, undefined, "the pending call must not gain a fabricated output");
   assert.ok(realOutput, "the paired call keeps its output");
   assert.equal(realOutput.output, "b result");
+  assertRejectedBeforeDispatch(result);
 });
