@@ -18,6 +18,7 @@
 
 import { hasOllamaPurchasedCredits } from "@omniroute/open-sse/services/ollamaPurchasedCredits.ts";
 import { getCachedProviderConnectionById } from "@/lib/db/readCache";
+import { isCompleteUsageReading } from "@/lib/usage/usageReading";
 import { resolveProxyForConnection } from "@/lib/db/settings";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
 import { safePercentage } from "@/shared/utils/formatting";
@@ -64,7 +65,10 @@ import {
 } from "./quotaCacheState";
 import { isCodexPaidCreditsEnabled } from "@/lib/providers/codexPaidCredits";
 import { updateQuotaBurnMetrics } from "./quotaBurnMetrics";
-import { persistQuotaWindowSnapshots } from "./quotaSnapshotPersistence";
+import {
+  persistQuotaWindowSnapshots,
+  retireUnreportedQuotaWindows,
+} from "./quotaSnapshotPersistence";
 
 // Keep markQuotaHealthy's public import path; the remaining leaf state stays internal.
 export { markQuotaHealthy } from "./quotaCacheState";
@@ -333,6 +337,35 @@ function remainingPercent(usage: unknown, limit: unknown): number | null {
   return clampPercent(((total - used) / total) * 100);
 }
 
+/**
+ * Each persisted window carries its own observation time; the state's top-level time belongs to
+ * its newest window and would make an older, omitted window look fresh.
+ */
+function persistedWindowObservedAt(
+  quotaState: CodexPersistedQuotaState,
+  window: "5h" | "7d",
+  fallback: number
+): number {
+  const own = quotaState.observedAtByWindow?.[window];
+  return (own ? parseDate(own) : null) ?? fallback;
+}
+
+/** The cache already holds newer evidence about this window than the persisted fact. */
+function persistedWindowSuperseded(
+  entry: QuotaCacheEntry,
+  prior: QuotaInfo | undefined,
+  windowObservedAt: number
+): boolean {
+  // A newer unknown fraction is not competing evidence against a reported observation.
+  if (prior) {
+    return (
+      prior.fractionReported !== false && (prior.observedAt ?? entry.fetchedAt) >= windowObservedAt
+    );
+  }
+  // A newer complete reading without this window means the plan no longer has it.
+  return entry.completeAt !== undefined && entry.completeAt >= windowObservedAt;
+}
+
 function mergeCodexPersistedQuota(
   entry: QuotaCacheEntry,
   scope: "codex" | "spark",
@@ -350,18 +383,12 @@ function mergeCodexPersistedQuota(
     [weeklyKey, weeklyRemaining, quotaState.resetAt7d, "7d"],
   ] as const) {
     if (remaining === null) continue;
-    const prior = entry.quotas[key];
-    // A newer unknown fraction is not competing evidence against a reported observation.
-    if (
-      prior &&
-      prior.fractionReported !== false &&
-      (prior.observedAt ?? entry.fetchedAt) >= observedAt
-    )
-      continue;
+    const windowObservedAt = persistedWindowObservedAt(quotaState, window, observedAt);
+    if (persistedWindowSuperseded(entry, entry.quotas[key], windowObservedAt)) continue;
     entry.quotas[key] = {
       remainingPercentage: exhaustedWindow === window ? 0 : remaining,
       resetAt: resetAt ?? null,
-      observedAt,
+      observedAt: windowObservedAt,
     };
     changed = true;
   }
@@ -821,11 +848,17 @@ function isTelemetryOnlyRefresh(
   );
 }
 
+/**
+ * Record a usage reading. `complete` marks fresh evidence of every window the account has now
+ * (`isCompleteUsageReading`): windows known earlier but absent from it are retired, in memory
+ * and in the snapshots a restart rehydrates. Other readings only update the windows they carry.
+ */
 export function setQuotaCache(
   connectionId: string,
   provider: string,
   reportedQuotas: Record<string, unknown>,
-  rawModelQuotas: Record<string, unknown> = {}
+  rawModelQuotas: Record<string, unknown> = {},
+  options: { complete?: boolean } = {}
 ) {
   // Display-only Codex windows (reserve pool) must never drive routing/exhaustion.
   const rawQuotas =
@@ -873,6 +906,21 @@ export function setQuotaCache(
       retainedCodexWindows
     );
   }
+  recordCompleteReading(entry, prior, options.complete === true);
+}
+
+/**
+ * An attested-complete reading lists every window the account has: date it, so older persisted
+ * facts about windows it omits cannot come back, and retire those windows' snapshots.
+ */
+function recordCompleteReading(
+  entry: QuotaCacheEntry,
+  prior: QuotaCacheEntry | null,
+  complete: boolean
+): void {
+  if (!complete) return;
+  entry.completeAt = entry.fetchedAt;
+  retireUnreportedQuotaWindows(entry.connectionId, entry.provider, entry.quotas, prior);
 }
 /**
  * Get cached quota entry (returns null if not cached).
@@ -1183,7 +1231,8 @@ async function refreshEntry(entry: QuotaCacheEntry) {
         entry.connectionId,
         entry.provider,
         usage.quotas,
-        usage.modelQuotas && typeof usage.modelQuotas === "object" ? usage.modelQuotas : {}
+        usage.modelQuotas && typeof usage.modelQuotas === "object" ? usage.modelQuotas : {},
+        { complete: isCompleteUsageReading(usage) }
       );
     }
   } catch (err) {
