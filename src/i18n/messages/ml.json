@@ -6350,6 +6350,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "താൽക്കാലിക കൂൾഡൗൺ ഒഴിവാക്കുക, അതുവഴി വീണ്ടെടുക്കാവുന്ന പിശകുകൾക്ക് ശേഷവും ഈ കണക്ഷൻ യോഗ്യമായി തുടരും (നിരോധിച്ചത്/കാലഹരണപ്പെട്ടത് പോലുള്ള അന്തിമ നിലകൾ തുടർന്നും ബാധകമാണ്).",
     "disableCoolingLabel": "ഈ കണക്ഷന്റെ കൂൾഡൗൺ പ്രവർത്തനരഹിതമാക്കുക",
+    "requireUserLastMessageDescription": "അസിസ്റ്റൻ്റ് പ്രീഫിൽ നിരസിക്കുന്ന അപ്സ്ട്രീമുകൾക്ക്: അയയ്ക്കുന്നതിന് മുമ്പ് ട്രെയിലിംഗ് അസിസ്റ്റൻ്റ് ടേണുകൾ (ടൂൾ_ഉപയോഗമില്ല) ഡ്രോപ്പ് ചെയ്യുക. മോഡൽ അതിൻ്റെ മുമ്പത്തെ ഉത്തരം പുനർനിർമ്മിച്ചേക്കാം.",
+    "requireUserLastMessageLabel": "ഒരു ഉപയോക്തൃ സന്ദേശത്തിൽ സംഭാഷണം അവസാനിപ്പിക്കേണ്ടതുണ്ട്",
     "bulkPasteAdded": "{count, plural, one {1 കീ ചേർത്തു} other {# കീകൾ ചേർത്തു}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 തനിപ്പകർപ്പ് ഒഴിവാക്കി} other {# തനിപ്പകർപ്പുകൾ ഒഴിവാക്കി}}",
     "bulkPasteHint": "ഓരോ വരിയിലും ഒരു API കീ വീതം ഒട്ടിക്കുക. ശൂന്യമായ വരികൾ അവഗണിക്കുകയും തനിപ്പകർപ്പ് കീകൾ ഒഴിവാക്കുകയും ചെയ്യും.",

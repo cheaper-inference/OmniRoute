@@ -6273,6 +6273,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Mafee oge nkwụsị nwa oge ka njikọ a nọgide bụrụ nke a pụrụ iji ọbụna mgbe njehie ndị a pụrụ idozi mere (ọnọdụ njedebe dịka amachibidoro/agwụla ka na-emetụta ya).",
     "disableCoolingLabel": "Gbanyụọ oge nkwụsị maka njikọ a",
+    "requireUserLastMessageDescription": "Maka elu mmiri na-ajụ prefill inyeaka: dobe trailing assistant turns (enweghị tool_use) tupu izipu. Ụdị ahụ nwere ike megharịa azịza ya gara aga.",
+    "requireUserLastMessageLabel": "Chọrọ ka mkparịta ụka kwụsị na ozi onye ọrụ",
     "bulkPasteAdded": "{count, plural, one {Agbakwunyere igodo 1} other {Agbakwunyere igodo #}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Amafere oyiri 1} other {Amafere oyiri #}}",
     "bulkPasteHint": "Tapawa otu igodo API n'ahịrị ọ bụla. A na-eleghara ahịrị efu anya ma na-amafe igodo ndị bụ oyiri.",

@@ -6273,6 +6273,8 @@
     "allowCodexPaidCreditsDescription": "Permite que esta conta use créditos pagos depois que a cota da assinatura atingir o limite de corte. Requer créditos disponíveis informados pela OpenAI; pode gerar cobranças. Os limites do Spark e os cooldowns do upstream continuam se aplicando. A disponibilidade de créditos é verificada mesmo se o preflight de cota estiver desabilitado.",
     "disableCoolingDescription": "Ignore o tempo de espera transitório para que esta conexão permaneça elegível mesmo após erros recuperáveis (estados terminais como banido/expirado ainda se aplicam).",
     "disableCoolingLabel": "Desativar o tempo de espera para esta conexão",
+    "requireUserLastMessageDescription": "Para upstreams que rejeitam o pré-preenchimento do assistente: elimine as voltas finais do assistente (sem tool_use) antes de enviar. O modelo pode regenerar sua resposta anterior.",
+    "requireUserLastMessageLabel": "Exigir que a conversa termine com uma mensagem do usuário",
     "bulkPasteAdded": "{count, plural, one {1 chave adicionada} other {# chaves adicionadas}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplicata ignorada} other {# duplicatas ignoradas}}",
     "bulkPasteHint": "Cole uma chave de API por linha. Linhas vazias são ignoradas e chaves duplicadas são puladas.",

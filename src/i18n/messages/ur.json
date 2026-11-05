@@ -6273,6 +6273,8 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "عارضی کول ڈاؤن کو چھوڑیں تاکہ یہ کنکشن قابلِ بحالی غلطیوں کے بعد بھی اہل رہے (حتمی حالتیں جیسے banned/expired اب بھی لاگو ہوں گی)۔",
     "disableCoolingLabel": "اس کنکشن کے لیے کول ڈاؤن غیر فعال کریں",
+    "requireUserLastMessageDescription": "اسسٹنٹ پری فل کو مسترد کرنے والے اپ اسٹریمز کے لیے: بھیجنے سے پہلے پیچھے آنے والے اسسٹنٹ موڑ (کوئی ٹول_استعمال نہیں) چھوڑ دیں۔ ماڈل اپنے پچھلے جواب کو دوبارہ تخلیق کر سکتا ہے۔",
+    "requireUserLastMessageLabel": "بات چیت کو صارف کے پیغام کے ساتھ ختم کرنے کی ضرورت ہے۔",
     "bulkPasteAdded": "{count, plural, one {1 کلید شامل کی گئی} other {# کلیدیں شامل کی گئیں}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 تکراری کلید چھوڑ دی گئی} other {# تکراری کلیدیں چھوڑ دی گئیں}}",
     "bulkPasteHint": "ہر سطر میں ایک API کلید چسپاں کریں۔ خالی سطروں کو نظر انداز کیا جاتا ہے اور تکراری کلیدیں چھوڑ دی جاتی ہیں۔",
