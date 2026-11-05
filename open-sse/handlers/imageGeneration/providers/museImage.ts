@@ -1,4 +1,5 @@
-import { MUSE_CODE_INFERENCE_USER_AGENT, normalizeMuseBaseUrl } from "../../../config/museCode.ts";
+import { normalizeMuseBaseUrl } from "../../../config/museCode.ts";
+import { museCodeClientHeaders } from "../../../executors/museCodeIdentity.ts";
 import { sanitizeErrorMessage } from "../../../utils/error.ts";
 import { toBlobBytes } from "../../imageUpscale/shared.ts";
 
@@ -190,7 +191,7 @@ function buildMuseRequest(
   const headers: Record<string, string> = {
     Authorization: `Bearer ${token}`,
     Accept: "application/json",
-    "User-Agent": MUSE_CODE_INFERENCE_USER_AGENT,
+    ...museCodeClientHeaders(),
   };
   if (parts.length > 0) {
     return {
