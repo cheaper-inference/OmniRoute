@@ -14170,6 +14170,10 @@
         "label": "Thứ tự Pool Egress Chung",
         "description": "Đối với các nhà cung cấp có hạn mức được chia theo địa chỉ egress, xếp hạng thành viên pool chia sẻ địa chỉ egress quan sát được của thành viên vừa bị từ chối ngay dưới các thành viên đang khỏe mạnh. Chỉ thay đổi thứ tự, không bao giờ loại trừ. Cần PROXY_SKIP_RECENTLY_FAILED, vì tính năng này tạo ra tín hiệu từ chối để đọc. Tắt theo mặc định: thứ tự chọn chỉ đơn thuần là xoay vòng thường."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Proxy Fetch: Giới hạn gửi lại POST",
+        "description": "Với yêu cầu không lũy đẳng (POST, PUT, PATCH, DELETE), chỉ gửi lại sau lỗi truyền tải (socket mới, proxy dự phòng, native fallback) khi lỗi chứng minh chưa có gì được gửi: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH hoặc hết thời gian kết nối. Lỗi socket sau khi ghi có thể nghĩa là upstream đã nhận yêu cầu, nên gửi lại có thể tạo và tính phí hai lần. Tắt theo mặc định: nội dung có thể phát lại được gửi lại một lần với mọi lỗi truyền tải, cũng là cách khôi phục socket pool đã cũ."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Ghi Log Truy Xuất Nguồn Xoay Vòng",
         "description": "Xoay vòng opencode ghi nhận tài khoản nào đã phục vụ hoặc bị bỏ qua (chỉ ID che, không bao giờ là ID tài khoản đầy đủ) và liên kết các mục nhật ký proxy với yêu cầu tương ứng, giúp người vận hành phân biệt được các tài khoản bị bỏ qua với các tài khoản chưa được sử dụng. Tắt theo mặc định: không có dòng nhật ký bổ sung, không có cột dữ liệu bổ sung được ghi."
@@ -14401,6 +14405,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Dừng Khi Bị Từ Chối Do Chính Sách Nội Dung",
         "description": "Khi một đích của combo trả lời bằng một lệnh từ chối chính sách nội dung chính xác (mã hoặc loại cyber_policy / content_policy_violation), hãy dừng combo và trả về lệnh từ chối đó ngay cả khi các đích còn lại là các mô hình khác nhau, thay vì tiếp tục chuyển sang đích tiếp theo. Tắt theo mặc định: lệnh từ chối sẽ không bao giờ làm giảm hiệu lực tài khoản hoặc kích hoạt cơ chế ngắt mạch của nhà cung cấp, và combo sẽ tiếp tục chuyển sang đích tiếp theo như trước."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Responses: Keepalive chỉ ở tầng truyền tải",
+        "description": "Gửi keepalive của Responses dưới dạng dòng trống thay vì sự kiện response.in_progress, để ảnh chụp tổng hợp không bao giờ thay thế phản hồi thật trong SDK chính thức. Dòng trống không phát sinh sự kiện SSE, nên watchdog phía client chỉ đặt lại theo sự kiện sẽ không được đặt lại trong giai đoạn im lặng dài. Tắt theo mặc định: bộ hẹn giờ gửi sự kiện response.in_progress đúng chuẩn."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Chờ thử lại: Bỏ qua các từ chối 403/410",
