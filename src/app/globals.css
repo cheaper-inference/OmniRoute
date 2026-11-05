@@ -305,9 +305,8 @@ body.electron-macos {
   }
 }
 
-/* Selection — with fallback for browsers that don't support color-mix() */
+/* Selection — accent tint (color-mix() is baseline in every supported browser) */
 ::selection {
-  background-color: rgba(229, 77, 94, 0.22);
   background-color: color-mix(in srgb, var(--color-primary) 22%, transparent);
   color: var(--color-primary-ink);
 }
@@ -451,50 +450,6 @@ body.electron-macos {
 
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes border-glow {
-  0%,
-  100% {
-    box-shadow:
-      0 0 5px rgba(229, 77, 94, 0.3),
-      0 0 10px rgba(229, 77, 94, 0.2);
-    border-color: rgba(229, 77, 94, 0.5);
-  }
-  50% {
-    box-shadow:
-      0 0 10px rgba(229, 77, 94, 0.5),
-      0 0 20px rgba(229, 77, 94, 0.3);
-    border-color: rgba(229, 77, 94, 0.8);
-  }
-}
-
-.animate-border-glow {
-  animation: border-glow 2s ease-in-out infinite;
-}
-
-/* macOS Vibrancy/Blur Effect */
-.bg-vibrancy {
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  background: rgba(255, 255, 255, 0.72);
-}
-
-.dark .bg-vibrancy {
-  background: rgba(16, 20, 30, 0.72);
-}
-
-/* ── Mobile Layout Fixes (Issue #659) ── */
-@media (max-width: 768px) {
-  .ant-table-wrapper {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    max-width: 100vw;
-  }
-
-  .ant-table {
-    min-width: 600px; /* Prevent columns from crushing together */
-  }
 }
 
 /* Fix for native dropdown options visibility in dark mode */
