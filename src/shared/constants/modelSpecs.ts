@@ -59,6 +59,9 @@ export interface ModelSpec {
   // priority #3 and the wiring's modelDefaultAuto branch were unreachable
   // except by a test constructing the body literal directly.
   defaultReasoningEffort?: "none" | "low" | "medium" | "high" | "auto";
+  /** Native Gemini 3.x enum, rather than the legacy numeric thinkingBudget. */
+  geminiThinkingLevels?: Array<"minimal" | "low" | "medium" | "high">;
+  defaultGeminiThinkingLevel?: "minimal" | "low" | "medium" | "high";
 }
 
 const BEDROCK_CLAUDE_ALIASES = (...modelIds: string[]) => [
@@ -245,6 +248,18 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     supportsThinking: false,
     supportsTools: true,
     supportsVision: true,
+  },
+
+  // Gemini 3.5 Flash-Lite uses native enum thinking levels and rejects
+  // deprecated numeric thinkingBudget on the Gemini 3 API.
+  "gemini-3.5-flash-lite": {
+    maxOutputTokens: 65536,
+    contextWindow: 1048576,
+    supportsThinking: true,
+    supportsTools: true,
+    supportsVision: true,
+    geminiThinkingLevels: ["minimal", "low", "medium", "high"],
+    defaultGeminiThinkingLevel: "minimal",
   },
 
   // Gemini 3.7 Flash tiers: high 24.5k, medium 8k, low 1k thinking tokens.
