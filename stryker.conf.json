@@ -55,13 +55,16 @@
       "tests/unit/cursor-execute-error-stream.test.ts",
       "tests/unit/anthropic-fallback-policy-16406.test.ts",
       "tests/unit/combo-cooldown-wait-opt-out.test.ts",
+      "tests/unit/combo-authorized-retry-cooldown-18257.test.ts",
       "tests/unit/combo-family-selected-connection-16223.test.ts",
       "tests/unit/combo-safety-stop.test.ts",
       "tests/unit/combo-live-connection-id-18374.test.ts",
+      "tests/unit/combo-authorized-retry-cooldown-18257.test.ts",
       "tests/unit/model-family-fallback-eligibility.test.ts",
       "tests/unit/noauth-autocombo-lockout-7623.test.ts",
       "tests/unit/auth-opencode-zen-noauth-fallback.test.ts",
       "tests/unit/codex-account-catalog-routing.test.ts",
+      "tests/unit/antigravity-plan-aware-model-routing.test.ts",
       "tests/unit/provider-transfer.test.ts",
       "tests/unit/credential-scope-diagnostics-15889.test.ts",
       "tests/unit/account-weighted-runtime-16459.test.ts",
@@ -715,7 +718,9 @@
       "tests/unit/antigravity-argon-404.test.ts",
       "tests/unit/combo/combo-resilience-no-provider-state.test.ts",
       "tests/unit/combo/hedge-cancel-streaming-leg.test.ts",
-      "tests/unit/singbox-routes-local-only.test.ts"
+      "tests/unit/singbox-routes-local-only.test.ts",
+      "tests/unit/combo-precontent-transport-recovery-routing.test.ts",
+      "tests/unit/combo-precontent-transport-recovery.test.ts"
     ],
     "nodeArgs": [
       "--import",
