@@ -27,6 +27,10 @@ type WriteOpts = {
   effectiveServiceTier: string | undefined;
   comboName: string | null | undefined;
   mode: string;
+  /** The mode the user configured, when the dispatched plan wraps it (lite run as a one-step
+   *  stacked pipeline by the lossy-request policy). Recorded as mode and engine so analytics
+   *  keeps reporting what was configured, not the wrapper. */
+  reportedMode?: string;
   compressionComboId: string | null | undefined;
   skillRequestId: string;
   cavemanOutputModeApplied: boolean;
@@ -66,8 +70,8 @@ function buildAnalyticsRow(
     timestamp: new Date().toISOString(),
     combo_id: opts.comboName ?? null,
     provider: opts.provider ?? null,
-    mode: opts.mode,
-    engine: stats.engine ?? opts.mode,
+    mode: opts.reportedMode ?? opts.mode,
+    engine: opts.reportedMode ?? stats.engine ?? opts.mode,
     compression_combo_id: stats.compressionComboId ?? opts.compressionComboId ?? null,
     original_tokens: stats.originalTokens,
     compressed_tokens: stats.compressedTokens,
@@ -110,8 +114,8 @@ export function writeCompressionSkip(opts: WriteOpts, skipReason: string): Promi
         timestamp: new Date().toISOString(),
         combo_id: opts.comboName ?? null,
         provider: opts.provider ?? null,
-        mode: opts.mode,
-        engine: stats.engine ?? opts.mode,
+        mode: opts.reportedMode ?? opts.mode,
+        engine: opts.reportedMode ?? stats.engine ?? opts.mode,
         compression_combo_id: stats.compressionComboId ?? opts.compressionComboId ?? null,
         original_tokens: stats.originalTokens,
         compressed_tokens: stats.compressedTokens,
