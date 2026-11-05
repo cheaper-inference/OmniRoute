@@ -1086,7 +1086,7 @@
   "disabled": "പ്രവർത്തനരഹിതമാക്കി",
   "featureFlagOmnirouteEmergencyFallbackDescription": "ബജറ്റ് തീർന്ന അഭ്യർത്ഥനകൾ അടിയന്തര സൗജന്യ ഫാൾബാക്ക് പ്രൊവൈഡർ/മോഡലിലേക്ക് റൂട്ട് ചെയ്യുക.",
   "featureFlagArenaEloSyncEnabledDescription": "മോഡൽ ഇന്റലിജൻസ് റാങ്കിങ്ങുകൾക്കായി Arena AI ലീഡർബോർഡ് ELO ആനുകാലികമായി സമന്വയിപ്പിക്കുന്നത് പ്രവർത്തനക്ഷമമാക്കുക.",
-  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
+  "featureFlagUsageDailyRollupEnabledDescription": "നിലനിർത്തുന്നതിന് മുമ്പ് അടച്ച ഉപയോഗ ദിനങ്ങൾ usage_daily_summary എന്നതിലേക്ക് പ്രസിദ്ധീകരിക്കുക, അങ്ങനെ ദൈർഘ്യമേറിയ അനലിറ്റിക്സ് വിൻഡോകൾ അസംസ്കൃത വരികൾക്ക് പകരം പ്രതിദിന മൊത്തങ്ങൾ വായിക്കുന്നു. ഡിഫോൾട്ടായി ഓഫാണ്: പ്രസിദ്ധീകരിച്ച ദിവസങ്ങൾക്ക് അവയുടെ ഓരോ കണക്ഷനും ഓരോ API-കീയും അനലിറ്റിക്സിലെ വിജയവും ലേറ്റൻസി വിശദാംശങ്ങളും നഷ്ടപ്പെടും, പ്രസിദ്ധീകരിക്കുമ്പോൾ അവയുടെ വില നിലനിൽക്കും.",
   "featureFlagUniversalContextHandoffEnabledDescription": "കോംബോ റൂട്ടിങ് മോഡലുകൾ മാറുമ്പോൾ സംഭാഷണ സംഗ്രഹങ്ങൾ സൃഷ്ടിച്ച് ഉൾപ്പെടുത്തുക. മോഡൽ മാറ്റങ്ങളെ സ്വതന്ത്രമായി പരിഗണിക്കാനും നിലവിലുള്ളതും ഭാവിയിലുള്ളതുമായ എല്ലാ കോംബോകൾക്കുമുള്ള പശ്ചാത്തല കൈമാറ്റ അഭ്യർത്ഥനകൾ തടയാനും ഇത് പ്രവർത്തനരഹിതമാക്കുക.",
   "featureFlagReasoningReplayEnabledDescription": "Cache and replay model reasoning across multi-turn conversations. Disable to stop storing and re-injecting reasoning.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Claude Code ഗേറ്റ്വേ മോഡൽ കണ്ടെത്തലിൽ Claude ഇതര മോഡലുകൾ പട്ടികപ്പെടുത്തുന്നതിനായി /v1/models-ൽ claude/&lt;provider&gt;/&lt;model&gt; മിറർ ഐഡികൾ പ്രസിദ്ധപ്പെടുത്തുക. മുന്നറിയിപ്പ്: ആഗോളതലത്തിൽ പ്രവർത്തനക്ഷമമാക്കുമ്പോൾ എല്ലാ ക്ലയന്റുകൾക്കുമുള്ള കാറ്റലോഗ് എൻട്രികളുടെ എണ്ണം ഇരട്ടിയാകും.",
@@ -3380,12 +3380,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "പൈ പ്രവർത്തിക്കുന്ന മെഷീനിൽ നിന്ന് എത്തിച്ചേരാവുന്ന URL ഉപയോഗിക്കുക. OpenAI-അനുയോജ്യമായ /v1 എൻഡ്പോയിൻ്റ് സ്വയമേവ ചേർക്കുന്നു.",
     "piManualMergeHint": "പ്രിവ്യൂ മാത്രം. ഈ providers.omniroute എൻട്രി models.json യിലേക്ക് ലയിപ്പിക്കുക, അതുവഴി നിങ്ങളുടെ മറ്റ് ദാതാക്കളും ക്രമീകരണങ്ങളും കേടുകൂടാതെയിരിക്കും.",
-    "removeMapping": "മാപ്പിംഗ് നീക്കംചെയ്യുക",
     "customUrl": "കസ്റ്റം URL",
     "customEndpointAria": "കസ്റ്റം എൻഡ്പോയിന്റ്",
     "useDefaultKey": "OmniRoute-ന്റെ ഡീഫോൾട്ട് കീ ഉപയോഗിക്കുക",
     "mainModelAria": "പ്രധാന മോഡൽ",
-    "manualConfigTitle": "Grok Build ഉപയോക്താവ് ക്രമീകരണം"
+    "manualConfigTitle": "Grok Build ഉപയോക്താവ് ക്രമീകരണം",
+    "removeMapping": "മാപ്പിംഗ് നീക്കംചെയ്യുക"
   },
   "modelCatalog": {
     "title": "മോഡലുകളും കോംബോകളും",
@@ -9175,9 +9175,9 @@
         "financial": "സാമ്പത്തികം",
         "brazilian": "ബ്രസീലിയൻ",
         "usa": "യുഎസ്എ",
-        "full": "പൂർണ്ണം",
         "gdpr": "GDPR (EU)",
-        "popia": "POPIA (ദക്ഷിണാഫ്രിക്ക)"
+        "popia": "POPIA (ദക്ഷിണാഫ്രിക്ക)",
+        "full": "പൂർണ്ണം"
       },
       "builtinTypes": "ബിൽറ്റ്-ഇൻ തരങ്ങൾ",
       "types": {

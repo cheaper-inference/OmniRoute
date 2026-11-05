@@ -1086,7 +1086,7 @@
   "disabled": "Disabilitato",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Indirizza le richieste con budget esaurito al provider/modello di fallback gratuito di emergenza.",
   "featureFlagArenaEloSyncEnabledDescription": "Abilita la sincronizzazione periodica dell'ELO della classifica Arena AI per le graduatorie di intelligenza dei modelli.",
-  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
+  "featureFlagUsageDailyRollupEnabledDescription": "Pubblica i giorni di utilizzo chiusi in usage_daily_summary prima della conservazione, in modo che le finestre di analisi lunghe leggano i totali giornalieri anziché le righe non elaborate. Disattivato per impostazione predefinita: i giorni pubblicati perdono i dettagli per connessione, per chiave API, successo e latenza nelle analisi e il relativo costo rimane quello stabilito al momento della pubblicazione.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Genera e inserisce riepiloghi delle conversazioni quando il routing combinato cambia modello. Disabilita questa opzione per gestire i cambi di modello in modo indipendente e impedire richieste di passaggio in background per tutte le combinazioni esistenti e future.",
   "featureFlagReasoningReplayEnabledDescription": "Memorizza in cache e riproduce il ragionamento del modello nelle conversazioni a più turni. Disattiva per interrompere archiviazione e reimmissione del ragionamento.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Mostra gli id specchio claude/&lt;provider&gt;/&lt;model&gt; su /v1/models in modo che la scoperta dei modelli gateway di Claude Code elenchi i modelli non-Claude. Attenzione: raddoppia le voci nel catalogo per tutti i client quando abilitato globalmente.",
@@ -3380,12 +3380,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Utilizza URL raggiungibile dalla macchina che esegue Pi. L'endpoint /v1 compatibile con OpenAI viene aggiunto automaticamente.",
     "piManualMergeHint": "Solo anteprima. Unisci questa voce providers.omniroute in models.json in modo che gli altri provider e le impostazioni rimangano intatti.",
-    "removeMapping": "Rimuovi mappatura",
     "customUrl": "URL personalizzata",
     "customEndpointAria": "Endpoint personalizzato",
     "useDefaultKey": "Utilizza la chiave predefinita di OmniRoute",
     "mainModelAria": "Modello principale",
-    "manualConfigTitle": "Configurazione manuale di Grok Build"
+    "manualConfigTitle": "Configurazione manuale di Grok Build",
+    "removeMapping": "Rimuovi mappatura"
   },
   "modelCatalog": {
     "title": "Modelli e combo",
@@ -9175,9 +9175,9 @@
         "financial": "Finanziario",
         "brazilian": "Brasiliano",
         "usa": "USA",
-        "full": "Completo",
         "gdpr": "GDPR (UE)",
-        "popia": "POPIA (Sudafrica)"
+        "popia": "POPIA (Sudafrica)",
+        "full": "Completo"
       },
       "builtinTypes": "Tipi integrati",
       "types": {
@@ -10113,6 +10113,10 @@
     "healthExtraUsageBypass": "Quota esaurita; l’utilizzo aggiuntivo è consentito, quindi il servizio continua.",
     "healthPaidCreditsBypass": "Quota esaurita; i crediti a pagamento disponibili consentono di continuare il servizio.",
     "healthFilteringBypass": "Quota esaurita; il filtro locale delle quote è disattivato, quindi il servizio continua.",
+    "codexPaidCreditsLabel": "Crediti a pagamento Codex",
+    "codexPaidCreditsAvailable": "Disponibili (saldo non riportato)",
+    "codexPaidCreditsUnavailable": "Non disponibili o limite di spesa raggiunto",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Utilizzo",
     "grokExtraUsageCredits": "Crediti Aggiuntivi di Utilizzo",
     "grokAutoTopUp": "Ricarica Automatica",
@@ -10569,10 +10573,6 @@
     "confirmRedeemClaudeResetCredit": "Il riscatto ripristina immediatamente i limiti di utilizzo di Claude idonei e consuma permanentemente questo credito.",
     "claudeResetCreditsModalTitle": "Crediti di ripristino Claude",
     "claudeResetCreditsModalExplainer": "Crediti di ripristino Claude disponibili e ripristini settimanali delle sessioni per questo account.",
-    "codexPaidCreditsLabel": "Crediti a pagamento Codex",
-    "codexPaidCreditsAvailable": "Disponibili (saldo non riportato)",
-    "codexPaidCreditsUnavailable": "Non disponibili o limite di spesa raggiunto",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "healthAccountHint": "Basato sulle osservazioni recenti, non su un test in tempo reale. Seleziona un account per i dettagli.",
     "healthRecovery": "Ripristino previsto",
     "healthAvailable": "Disponibile",
