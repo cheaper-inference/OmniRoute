@@ -1,5 +1,6 @@
 import { isNoAuthProviderKey } from "@/shared/utils/noAuthProviders";
 import { isOpencodeFreeTierRefusalForProvider } from "../../executors/opencodeGeoBlock.ts";
+import { isMusePolicyRefusal } from "../../services/musePolicyRefusal.ts";
 import { isProviderSafetyRefusalBody } from "../../utils/providerSafety.ts";
 
 /**
@@ -25,6 +26,8 @@ export async function shouldSkipCredentialRefresh(
     .text()
     .catch(() => null); // an unreadable body cannot carry a safety code; keep the refresh
   if (bodyText !== null && isProviderSafetyRefusalBody(response.status, bodyText)) return true;
+  if (provider.toLowerCase() === "muse-code" && isMusePolicyRefusal(response.status, bodyText))
+    return true;
   if (!provider.toLowerCase().startsWith("opencode")) return false;
   return isOpencodeFreeTierRefusalForProvider(provider, response.status, bodyText);
 }

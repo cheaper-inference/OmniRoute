@@ -9,6 +9,7 @@ import { isCooldownRetrySkipRefusalsEnabled } from "./cooldownAwareRetry.ts";
 import { isPerAccountCatalogProvider } from "./perAccountCatalogFilter.ts";
 import { describeUpstreamFailure } from "@/shared/utils/upstreamError";
 import { isRequestScopedMisalignmentRefusal } from "@omniroute/open-sse/utils/providerSafety.ts";
+import { isMusePolicyRefusal } from "@omniroute/open-sse/services/musePolicyRefusal.ts";
 import { buildAllExpiredCredentials } from "./authExpiredCredentials.ts";
 import { pickExpiryFirstConnection } from "./expiryFirstAccountSelection.ts";
 import { isModelScopedFailure, isQuotaExhaustedSignal } from "./modelScopedQuotaFailure.ts"; // #13548
@@ -2443,6 +2444,9 @@ export async function markAccountUnavailable(
     structuredError?: { code?: string | null; type?: string | null } | null;
   } = {}
 ) {
+  if (provider === "muse-code" && isMusePolicyRefusal(status, errorText)) {
+    return { shouldFallback: true, cooldownMs: 0 };
+  }
   const currentMutex = markMutexes.get(connectionId) || Promise.resolve();
   let resolveMutex: (() => void) | undefined;
   markMutexes.set(
