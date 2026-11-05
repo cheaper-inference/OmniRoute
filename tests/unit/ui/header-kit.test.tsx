@@ -69,16 +69,16 @@ describe("Header on the kit shell", () => {
     expect(keys.map((key) => key.textContent)).toEqual(["Ctrl", "K"]);
   });
 
-  it("names the Mac ⌘ key in the visitor's language", () => {
+  it("shows the Mac ⌘ key instead of Ctrl", () => {
     const platform = vi.spyOn(navigator, "platform", "get").mockReturnValue("MacIntel");
     render(
       <SidebarProvider>
         <Header onOpenCommandPalette={vi.fn()} />
       </SidebarProvider>
     );
-    const command = document.querySelector<HTMLElement>('[data-slot="kbd"][title="Command"]')!;
-    expect(command.querySelector('[aria-hidden="true"]')?.textContent).toBe("⌘");
-    expect(command.querySelector(".ci-sr-only")?.textContent).toBe("Command");
+    const keys = [...document.querySelectorAll('[data-slot="kbd"]')].map((key) => key.textContent);
+    expect(keys).toContain("⌘");
+    expect(keys).not.toContain("Ctrl");
     platform.mockRestore();
   });
 

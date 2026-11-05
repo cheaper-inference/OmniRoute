@@ -228,7 +228,6 @@ export default function Header({ onOpenCommandPalette }: HeaderProps) {
   const t = useTranslations("header");
   const tc = useTranslations("common");
   const ts = useTranslations("sidebar");
-  const tk = useTranslations("cloudAgents.activityTypes"); // "command" names the ⌘ key
   const { isMobile, open, openMobile } = useSidebar();
   const triggerLabel = isMobile
     ? openMobile
@@ -304,7 +303,7 @@ export default function Header({ onOpenCommandPalette }: HeaderProps) {
           >
             <span className="text-xs">{t("quickNavigation")}</span>
             <KbdGroup className="hidden lg:inline-flex">
-              {isMac ? <Kbd label={tk("command")}>⌘</Kbd> : <Kbd>Ctrl</Kbd>}
+              <Kbd>{isMac ? "⌘" : "Ctrl"}</Kbd>
               <Kbd>K</Kbd>
             </KbdGroup>
           </Button>
