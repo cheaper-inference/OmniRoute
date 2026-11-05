@@ -30,6 +30,7 @@
  * and the way back: the forced stream is rebuilt into a JSON body for a caller that asked
  * for JSON, reusing the shared event-stream parsers.
  */
+import { isLoopbackHostname } from "../utils/urlHost.ts";
 import { parseSSEToOpenAIResponse, parseSSEToResponsesOutput } from "../handlers/sseParser.ts";
 import { readSyncedOpencodeFamilyModelIds } from "@/lib/db/models";
 import { getModelCatalogCacheVersion } from "@/lib/db/readCache";
@@ -302,7 +303,8 @@ export function resolveGatedCredential(
 
 /**
  * Base URL of the Bun relay (`scripts/opencode-free-relay.ts`), from
- * `OPENCODE_FREE_TIER_RELAY_URL`; `null` when unset or not an http(s) URL. Read per call.
+ * `OPENCODE_FREE_TIER_RELAY_URL`; `null` when unset or not an http(s) URL. Throws when the
+ * URL is plaintext `http://` on a non-loopback host. Read per call.
  *
  * Measured 2026-11-05: the free models answer 429 FreeUsageLimitError to any request not sent
  * by Bun's native fetch, so gated requests are sent through a Bun process when one is set up.
@@ -310,12 +312,22 @@ export function resolveGatedCredential(
 export function freeTierRelayUrl(): string | null {
   const raw = (process.env.OPENCODE_FREE_TIER_RELAY_URL || "").trim().replace(/\/+$/, "");
   if (!raw) return null;
+  let url: URL;
   try {
-    const url = new URL(raw);
-    return url.protocol === "http:" || url.protocol === "https:" ? raw : null;
+    url = new URL(raw);
   } catch {
     return null;
   }
+  if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+  // The relay request carries the upstream authorization header and the egress proxy
+  // credentials, so plaintext HTTP is only acceptable on a loopback host.
+  if (url.protocol === "http:" && !isLoopbackHostname(url.hostname)) {
+    throw new Error(
+      "OPENCODE_FREE_TIER_RELAY_URL must use https:// unless the relay host is loopback " +
+        "(localhost, 127.0.0.0/8 or ::1)"
+    );
+  }
+  return raw;
 }
 
 /** Tell the surfaces apart by registry `baseUrl`, so provider ids and aliases stay out. */

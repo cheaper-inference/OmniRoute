@@ -91,10 +91,11 @@ export function filterInjectedToolCalls(
   const transform = new TransformStream<Uint8Array, Uint8Array>({
     transform(part, controller) {
       buffer += decoder.decode(part, { stream: true });
-      let cut: number;
-      while ((cut = buffer.indexOf("\n\n")) >= 0) {
-        const event = buffer.slice(0, cut);
-        buffer = buffer.slice(cut + 2);
+      let boundary: RegExpExecArray | null;
+      // An SSE event ends at a blank line: LF LF, CRLF CRLF or a mix of the two.
+      while ((boundary = /\r\n\r\n|\n\n|\r\n\n|\n\r\n/.exec(buffer))) {
+        const event = buffer.slice(0, boundary.index).replace(/\r\n/g, "\n");
+        buffer = buffer.slice(boundary.index + boundary[0].length);
         const rewritten = processEvent(event);
         if (rewritten.trim().length > 0) controller.enqueue(encoder.encode(`${rewritten}\n\n`));
       }

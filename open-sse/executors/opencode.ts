@@ -564,16 +564,6 @@ export class OpencodeExecutor extends BaseExecutor {
     }
   }
 
-  /**
-   * Rewrite muse-spark's bogus `finish_reason:"length"` (see the
-   * normalizeMuseSparkFinishReason note) to `"stop"` on both streaming and
-   * non-streaming success responses. Non-muse-spark models pass through
-   * untouched.
-   */
-  /**
-   * Hand a JSON caller a JSON body even though the free-tier contract forced the upstream
-   * request to stream. A streaming caller, a refusal and an already-JSON body pass through.
-   */
   /** Remove model calls to OpenCode CLI tools the caller never declared (relay mode). */
   private dropInjectedToolCalls(
     input: ExecuteInput,
@@ -587,6 +577,10 @@ export class OpencodeExecutor extends BaseExecutor {
     return filtered === result.response ? result : { ...result, response: filtered };
   }
 
+  /**
+   * Hand a JSON caller a JSON body even though the free-tier contract forced the upstream
+   * request to stream. A streaming caller, a refusal and an already-JSON body pass through.
+   */
   private finalizeForcedStream(
     input: ExecuteInput,
     result: ExecutorExecuteResult
@@ -1580,10 +1574,11 @@ export class OpencodeExecutor extends BaseExecutor {
     const gated = Boolean(model) && isGatedFreeTierRequest(this._surface(), this.provider, model);
     // Gated free-tier requests go through the Bun relay when one is configured: the upstream
     // answers 429 to any other HTTP client. The relay keeps the path and forwards it to
-    // https://opencode.ai, so the base is the relay origin plus the inference path.
+    // https://opencode.ai, so the base is the relay origin plus the inference path (a path
+    // configured on the relay URL is ignored, otherwise it would prefix the upstream path).
     const relay = gated ? freeTierRelayUrl() : null;
     const base = relay
-      ? `${relay}${new URL(FREE_TIER_INFERENCE_BASE_URL).pathname}`
+      ? `${new URL(relay).origin}${new URL(FREE_TIER_INFERENCE_BASE_URL).pathname}`
       : gated
         ? FREE_TIER_INFERENCE_BASE_URL
         : (getPublishedBaseUrl(this.provider) ?? this.config.baseUrl);
@@ -1691,6 +1686,9 @@ export class OpencodeExecutor extends BaseExecutor {
       } catch {
         // unresolvable proxy config: relay goes direct, same as an unproxied request
       }
+      // A relay bound to a non-loopback address requires this shared secret.
+      const relayToken = (process.env.OPENCODE_FREE_RELAY_TOKEN || "").trim();
+      if (relayToken) headers["x-opencode-relay-auth"] = relayToken;
     }
 
     // The Muse Responses workaround that forced a UUID session here is gone: the shape it
