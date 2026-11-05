@@ -123,6 +123,26 @@
   --color-chart-3: var(--ci-chart-3);
   --color-chart-4: var(--ci-chart-4);
   --color-chart-5: var(--ci-chart-5);
+  --color-chart-6: var(--ci-chart-6);
+  --color-chart-7: var(--ci-chart-7);
+  --color-chart-8: var(--ci-chart-8);
+  /* Text-safe ink and opaque chip tint per chart token (the kit flips both in dark). */
+  --color-chart-1-ink: var(--ci-chart-1-ink);
+  --color-chart-2-ink: var(--ci-chart-2-ink);
+  --color-chart-3-ink: var(--ci-chart-3-ink);
+  --color-chart-4-ink: var(--ci-chart-4-ink);
+  --color-chart-5-ink: var(--ci-chart-5-ink);
+  --color-chart-6-ink: var(--ci-chart-6-ink);
+  --color-chart-7-ink: var(--ci-chart-7-ink);
+  --color-chart-8-ink: var(--ci-chart-8-ink);
+  --color-chart-1-subtle: var(--ci-chart-1-subtle);
+  --color-chart-2-subtle: var(--ci-chart-2-subtle);
+  --color-chart-3-subtle: var(--ci-chart-3-subtle);
+  --color-chart-4-subtle: var(--ci-chart-4-subtle);
+  --color-chart-5-subtle: var(--ci-chart-5-subtle);
+  --color-chart-6-subtle: var(--ci-chart-6-subtle);
+  --color-chart-7-subtle: var(--ci-chart-7-subtle);
+  --color-chart-8-subtle: var(--ci-chart-8-subtle);
 
   /* Fumadocs (/docs) */
   --color-fd-background: var(--ci-color-background);
@@ -220,6 +240,25 @@ html:root[data-ci-appearance="editions"] {
   --color-chart-3: var(--color-chart-3);
   --color-chart-4: var(--color-chart-4);
   --color-chart-5: var(--color-chart-5);
+  --color-chart-6: var(--color-chart-6);
+  --color-chart-7: var(--color-chart-7);
+  --color-chart-8: var(--color-chart-8);
+  --color-chart-1-ink: var(--color-chart-1-ink);
+  --color-chart-2-ink: var(--color-chart-2-ink);
+  --color-chart-3-ink: var(--color-chart-3-ink);
+  --color-chart-4-ink: var(--color-chart-4-ink);
+  --color-chart-5-ink: var(--color-chart-5-ink);
+  --color-chart-6-ink: var(--color-chart-6-ink);
+  --color-chart-7-ink: var(--color-chart-7-ink);
+  --color-chart-8-ink: var(--color-chart-8-ink);
+  --color-chart-1-subtle: var(--color-chart-1-subtle);
+  --color-chart-2-subtle: var(--color-chart-2-subtle);
+  --color-chart-3-subtle: var(--color-chart-3-subtle);
+  --color-chart-4-subtle: var(--color-chart-4-subtle);
+  --color-chart-5-subtle: var(--color-chart-5-subtle);
+  --color-chart-6-subtle: var(--color-chart-6-subtle);
+  --color-chart-7-subtle: var(--color-chart-7-subtle);
+  --color-chart-8-subtle: var(--color-chart-8-subtle);
 
   /* Auto-switch colors (use CSS variables from :root/.dark) */
   --color-bg: var(--color-bg);
