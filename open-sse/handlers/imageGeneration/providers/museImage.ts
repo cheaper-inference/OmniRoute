@@ -180,6 +180,7 @@ function buildEditsForm(
   return form;
 }
 
+/** Builds an authenticated Muse image generation or multipart edit request with client identity. */
 function buildMuseRequest(
   base: string,
   token: string,

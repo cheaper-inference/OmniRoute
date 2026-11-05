@@ -7,6 +7,7 @@ type JsonRecord = Record<string, unknown>;
 const FOREIGN_CLIENT_HEADER =
   /^(x-opencode-.+|x-session-id|x-session-affinity|x-title|http-referer)$/i;
 
+/** Returns a non-array object as a JSON record, or null for other values. */
 function asRecord(value: unknown): JsonRecord | null {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
 }

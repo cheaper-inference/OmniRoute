@@ -23,6 +23,7 @@ const SESSION_HEADERS = [
 ];
 const credentials = { accessToken: "test-inference-key" };
 
+/** Builds inference headers with optional client session metadata and fixture credentials. */
 function headersFor(clientHeaders: Record<string, string> | null = null, body?: unknown) {
   return new MuseCodeExecutor().buildHeaders(
     credentials,

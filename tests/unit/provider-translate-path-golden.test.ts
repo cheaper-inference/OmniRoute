@@ -48,6 +48,7 @@ const APP_VERSION =
 const APP_VERSION_ENV =
   (typeof process !== "undefined" ? process.env.npm_package_version : "") || "";
 
+/** Redacts credentials and normalizes runtime-dependent headers for stable golden snapshots. */
 function sanitize(headers: Record<string, unknown>): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(headers)) {

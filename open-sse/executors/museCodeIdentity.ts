@@ -22,6 +22,7 @@ export function uuidV7(now: number = Date.now()): string {
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
 
+/** Reuses a live client session, refreshing its TTL and evicting the oldest excess entries. */
 function sessionFor(clientSession: string | undefined, now: number): string {
   if (!clientSession) return uuidV7(now);
   const known = sessions.get(clientSession);
@@ -57,6 +58,7 @@ export function museCodeClientHeaders(
   };
 }
 
+/** Clears cached client sessions so tests start without retained identities. */
 export function __resetMuseCodeSessionsForTesting(): void {
   sessions.clear();
 }
