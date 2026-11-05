@@ -208,6 +208,34 @@ test("no hand-rolled role=dialog outside the Modal adapter", () => {
   assert.deepEqual(hits, {});
 });
 
+// A spun <Icon> kept turning under reduced motion and exposed no status. Spinners go through the
+// Spinner adapter in Loading.tsx: the kit arc, a labelled status unless `decorative`.
+test("animate-spin stays within its budget: new spinners use the Spinner adapter", () => {
+  const hits = countBy(APP, /\banimate-spin\b/g);
+  // Another front owns this file; its one spun icon goes with that work.
+  delete hits["src/shared/components/ConsoleLogViewer.tsx"];
+  const SPIN_ALLOWED: Record<string, number> = {
+    // Spun refresh/progress icons in files that draw charts, which the chart work owns.
+    "src/app/(dashboard)/dashboard/analytics/CompressionAnalyticsTab.tsx": 1,
+    "src/app/(dashboard)/dashboard/health/TelemetryCard.tsx": 1,
+    // Hand-made CSS rings, not icons: bordered spans and divs, some tinted to a status badge.
+    "src/app/(dashboard)/dashboard/analytics/components/DiversityScoreCard.tsx": 1,
+    "src/app/(dashboard)/dashboard/conversations/page.tsx": 1,
+    "src/app/(dashboard)/dashboard/health/page.tsx": 1,
+    "src/app/(dashboard)/dashboard/models/CatalogTestBadge.tsx": 1,
+    "src/app/(dashboard)/dashboard/tools/traffic-inspector/components/chat/MessageContent.tsx": 1,
+    "src/shared/components/RequestLoggerDetail.tsx": 1,
+    "src/shared/components/RequestLoggerV2.tsx": 1,
+  };
+  assert.deepEqual(hits, SPIN_ALLOWED);
+});
+
+test("no raw <kbd> outside the kit Kbd", () => {
+  const hits = countBy(APP, /<kbd\b/g);
+  delete hits["src/shared/components/CommandPalette.tsx"]; // moves with the kit Command palette
+  assert.deepEqual(hits, {});
+});
+
 test("the dead shared Footer stays removed (landing renders its own)", () => {
   // Rendered nowhere since the kit shell (track G); removal approved for F4.
   assert.ok(!fs.existsSync(path.join(ROOT, "src/shared/components/Footer.tsx")));

@@ -56,6 +56,32 @@ describe("Header on the kit shell", () => {
     }
   );
 
+  it("shows the quick navigation shortcut as kit keys, hidden below lg", () => {
+    render(
+      <SidebarProvider>
+        <Header onOpenCommandPalette={vi.fn()} />
+      </SidebarProvider>
+    );
+    const group = document.querySelector<HTMLElement>('[data-slot="kbd-group"]')!;
+    expect(group.className).toContain("hidden");
+    expect(group.className).toContain("lg:inline-flex");
+    const keys = Array.from(group.querySelectorAll('[data-slot="kbd"]'));
+    expect(keys.map((key) => key.textContent)).toEqual(["Ctrl", "K"]);
+  });
+
+  it("names the Mac ⌘ key in the visitor's language", () => {
+    const platform = vi.spyOn(navigator, "platform", "get").mockReturnValue("MacIntel");
+    render(
+      <SidebarProvider>
+        <Header onOpenCommandPalette={vi.fn()} />
+      </SidebarProvider>
+    );
+    const command = document.querySelector<HTMLElement>('[data-slot="kbd"][title="Command"]')!;
+    expect(command.querySelector('[aria-hidden="true"]')?.textContent).toBe("⌘");
+    expect(command.querySelector(".ci-sr-only")?.textContent).toBe("Command");
+    platform.mockRestore();
+  });
+
   // F4 (wave-1 checkpoint, api-manager/endpoint): 67+ dashboard pages render a kit PageHeader
   // (its own h1), so the shell title repeated it ("API Keys" × "API Key Management") and the
   // page carried two h1s. The shell drops its title while a PageHeader is mounted (removed from

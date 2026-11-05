@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import type { CSSProperties } from "react";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { Card, Button, ModelSelectModal } from "@/shared/components";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
@@ -481,8 +482,8 @@ export default function DefaultToolCard({
     return (
       <div className="flex flex-col gap-4">
         {checkingRuntime && (
-          <div className="flex items-center gap-2 text-text-muted text-sm">
-            <Icon name="progress_activity" size={16} className="animate-spin" />
+          <div role="status" className="flex items-center gap-2 text-text-muted text-sm">
+            <Spinner decorative size="sm" />
             <span>{t("checkingRuntime")}</span>
           </div>
         )}

@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 
 import {
   useState,
@@ -2074,11 +2075,7 @@ function ComboCardInner({
               title={t("testCombo")}
               aria-label={t("testCombo")}
             >
-              <Icon
-                name={testing ? "progress_activity" : "play_arrow"}
-                size={16}
-                className={cn(testing && "animate-spin")}
-              />
+              {testing ? <Spinner decorative size="sm" /> : <Icon name="play_arrow" size={16} />}
             </Button>
             <Button
               variant="ghost"

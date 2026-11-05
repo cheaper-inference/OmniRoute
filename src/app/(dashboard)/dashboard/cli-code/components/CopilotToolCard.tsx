@@ -4,6 +4,7 @@ import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-
 import { useState, useEffect } from "react";
 import type { CSSProperties } from "react";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { Card, Button } from "@/shared/components";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
@@ -311,8 +312,8 @@ export default function CopilotToolCard({
               </div>
 
               {!modelsLoaded && allModels.length === 0 ? (
-                <div className="flex items-center gap-2 p-3 text-text-muted text-sm">
-                  <Icon name="progress_activity" size={16} className="animate-spin" />
+                <div role="status" className="flex items-center gap-2 p-3 text-text-muted text-sm">
+                  <Spinner decorative size="sm" />
                   <span>{t("loadingModels")}</span>
                 </div>
               ) : availableModels.length === 0 && allModels.length === 0 ? (
