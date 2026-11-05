@@ -43,6 +43,85 @@ export async function GET(request: NextRequest) {
   return buildFullExportResponse(request);
 }
 
+const ARCHIVE_CONTENTS = [
+  "storage.sqlite - Full database",
+  "settings.json - Key-value settings",
+  "combos.json - Combo configurations",
+  "providers.json - Provider connections (no credentials)",
+  "api-keys.json - API key metadata (masked)",
+  "reasoning-routing-rules.json - Reasoning routing policies",
+  "call_logs/ - Detailed call log artifacts",
+];
+
+/** Stage the JSON sidecars of the export payload (steps 2–7). */
+function writeExportSidecars(payloadDir: string): void {
+  const { settings, combos, providers, apiKeys, reasoningRoutingRules } = exportAllSummaryRows();
+  const write = (name: string, value: unknown) =>
+    fs.writeFileSync(path.join(payloadDir, name), JSON.stringify(value, null, 2));
+
+  write("settings.json", settings);
+  write("combos.json", combos);
+  write("providers.json", providers);
+  write("api-keys.json", apiKeys);
+  write("reasoning-routing-rules.json", reasoningRoutingRules);
+
+  const callLogsDir = getCallLogsDir();
+  if (callLogsDir && fs.existsSync(callLogsDir)) {
+    fs.cpSync(callLogsDir, path.join(payloadDir, "call_logs"), { recursive: true });
+  }
+
+  write("metadata.json", {
+    exportedAt: new Date().toISOString(),
+    version: process.env.npm_package_version || "unknown",
+    format: "omniroute-full-backup-v1",
+    contents: ARCHIVE_CONTENTS,
+  });
+}
+
+/**
+ * Stream the finished archive and remove the work directory once the response
+ * has consumed it (or the client aborts).
+ */
+function streamArchive(
+  tarPath: string,
+  workDir: string,
+  request: NextRequest,
+  headers: Record<string, string>
+): Response {
+  const archiveStream = createReadStream(tarPath);
+  let cleaned = false;
+  const cleanup = () => {
+    if (cleaned) return;
+    cleaned = true;
+    archiveStream.destroy();
+    try {
+      fs.rmSync(workDir, { recursive: true, force: true });
+    } catch {
+      // Cleanup must not replace a successful response.
+    }
+  };
+  request.signal.addEventListener("abort", cleanup, { once: true });
+
+  const webStream = new ReadableStream({
+    start(controller) {
+      archiveStream.on("data", (chunk) => controller.enqueue(chunk));
+      archiveStream.on("end", () => {
+        controller.close();
+        cleanup();
+      });
+      archiveStream.on("error", (err) => {
+        controller.error(err);
+        cleanup();
+      });
+    },
+    cancel() {
+      cleanup();
+    },
+  });
+
+  return new Response(webStream, { status: 200, headers });
+}
+
 async function buildFullExportResponse(request: NextRequest): Promise<Response> {
   try {
     if (!SQLITE_FILE) {
@@ -65,43 +144,10 @@ async function buildFullExportResponse(request: NextRequest): Promise<Response> 
     try {
       fs.mkdirSync(payloadDir);
       // 1. Export database using native backup API
-      const dbBackupPath = path.join(payloadDir, "storage.sqlite");
-      await db.backup(dbBackupPath);
+      await db.backup(path.join(payloadDir, "storage.sqlite"));
 
-      // 2–5. Export settings, combos, provider connections, API keys (via db module)
-      const { settings, combos, providers, apiKeys, reasoningRoutingRules } =
-        exportAllSummaryRows();
-      fs.writeFileSync(path.join(payloadDir, "settings.json"), JSON.stringify(settings, null, 2));
-      fs.writeFileSync(path.join(payloadDir, "combos.json"), JSON.stringify(combos, null, 2));
-      fs.writeFileSync(path.join(payloadDir, "providers.json"), JSON.stringify(providers, null, 2));
-      fs.writeFileSync(path.join(payloadDir, "api-keys.json"), JSON.stringify(apiKeys, null, 2));
-      fs.writeFileSync(
-        path.join(payloadDir, "reasoning-routing-rules.json"),
-        JSON.stringify(reasoningRoutingRules, null, 2)
-      );
-
-      // 6. Export call log artifacts directory
-      const callLogsDir = getCallLogsDir();
-      if (callLogsDir && fs.existsSync(callLogsDir)) {
-        fs.cpSync(callLogsDir, path.join(payloadDir, "call_logs"), { recursive: true });
-      }
-
-      // 7. Export metadata
-      const metadata = {
-        exportedAt: new Date().toISOString(),
-        version: process.env.npm_package_version || "unknown",
-        format: "omniroute-full-backup-v1",
-        contents: [
-          "storage.sqlite - Full database",
-          "settings.json - Key-value settings",
-          "combos.json - Combo configurations",
-          "providers.json - Provider connections (no credentials)",
-          "api-keys.json - API key metadata (masked)",
-          "reasoning-routing-rules.json - Reasoning routing policies",
-          "call_logs/ - Detailed call log artifacts",
-        ],
-      };
-      fs.writeFileSync(path.join(payloadDir, "metadata.json"), JSON.stringify(metadata, null, 2));
+      // 2–7. JSON sidecars, call-log artifacts and metadata
+      writeExportSidecars(payloadDir);
 
       // A bare filename avoids GNU tar interpreting a Windows drive colon as a
       // remote archive. The exclusive work directory also isolates concurrent exports.
@@ -112,51 +158,12 @@ async function buildFullExportResponse(request: NextRequest): Promise<Response> 
         timeout: 30000,
       });
 
-      // Size for Content-Length, then stream: reading the archive into the
-      // heap sized the response buffer at the whole backup and blocked the
-      // loop for the copy.
+      // Size for Content-Length without buffering the archive in the heap.
       const { size: archiveSize } = await fs.promises.stat(tarPath);
-      const archiveStream = createReadStream(tarPath);
-
-      // The work dir holds the payload too, so it may only be removed once the
-      // response has consumed the archive.
-      let cleaned = false;
-      const cleanup = () => {
-        if (cleaned) return;
-        cleaned = true;
-        archiveStream.destroy();
-        try {
-          fs.rmSync(workDir, { recursive: true, force: true });
-        } catch {
-          // Cleanup must not replace a successful response.
-        }
-      };
-      request.signal.addEventListener("abort", cleanup, { once: true });
-
-      const webStream = new ReadableStream({
-        start(controller) {
-          archiveStream.on("data", (chunk) => controller.enqueue(chunk));
-          archiveStream.on("end", () => {
-            controller.close();
-            cleanup();
-          });
-          archiveStream.on("error", (err) => {
-            controller.error(err);
-            cleanup();
-          });
-        },
-        cancel() {
-          cleanup();
-        },
-      });
-
-      return new Response(webStream, {
-        status: 200,
-        headers: {
-          "Content-Type": "application/gzip",
-          "Content-Disposition": `attachment; filename="omniroute-full-backup-${timestamp}.tar.gz"`,
-          "Content-Length": String(archiveSize),
-        },
+      return streamArchive(tarPath, workDir, request, {
+        "Content-Type": "application/gzip",
+        "Content-Disposition": `attachment; filename="${archiveName}"`,
+        "Content-Length": String(archiveSize),
       });
     } catch (error) {
       // Nothing is streaming on the failure path: drop the work directory now.

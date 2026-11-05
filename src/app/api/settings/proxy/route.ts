@@ -163,9 +163,31 @@ const MAX_RESOLVE_IDS = 200;
  */
 function parseResolveIds(raw: string | null): string[] | null {
   if (!raw) return null;
-  const ids = [...new Set(raw.split(",").map((value) => value.trim()).filter(Boolean))];
+  const ids = [
+    ...new Set(
+      raw
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean)
+    ),
+  ];
   if (ids.length === 0) return null;
   return ids.slice(0, MAX_RESOLVE_IDS);
+}
+
+/** Resolve every requested connection, mapping failures to `null`. */
+async function resolveProxyBatch(ids: string[]): Promise<Response> {
+  const results = await Promise.all(
+    ids.map(async (connectionId) => {
+      try {
+        const resolved = await resolveProxyForConnection(connectionId);
+        return [connectionId, resolved?.proxy ? resolved : null] as const;
+      } catch {
+        return [connectionId, null] as const;
+      }
+    })
+  );
+  return Response.json({ results: Object.fromEntries(results) });
 }
 
 /**
@@ -178,29 +200,22 @@ export async function GET(request: Request) {
   const authError = await requireManagementAuth(request);
   if (authError) return authError;
 
+  // Batch resolution runs before the config path so the dashboard can refresh
+  // every connection's badge in one request instead of one request per
+  // connection (that burst slowed both the UI and the shared proxy process).
+  const resolveIds = parseResolveIds(new URL(request.url).searchParams.get("resolveIds"));
+  if (resolveIds) return resolveProxyBatch(resolveIds);
+
+  return readProxyConfig(request);
+}
+
+/** Single-resolve, level-scoped and full-config reads. */
+async function readProxyConfig(request: Request): Promise<Response> {
   try {
     const { searchParams } = new URL(request.url);
     const level = searchParams.get("level");
     const id = searchParams.get("id");
     const resolveId = searchParams.get("resolve");
-    const resolveIds = parseResolveIds(searchParams.get("resolveIds"));
-
-    // Resolve many connections in one request. The dashboard used to fire one
-    // HTTP request per connection here, and with many connections that burst
-    // slowed both the UI and the shared proxy process.
-    if (resolveIds) {
-      const results = await Promise.all(
-        resolveIds.map(async (connectionId) => {
-          try {
-            const resolved = await resolveProxyForConnection(connectionId);
-            return [connectionId, resolved?.proxy ? resolved : null] as const;
-          } catch {
-            return [connectionId, null] as const;
-          }
-        })
-      );
-      return Response.json({ results: Object.fromEntries(results) });
-    }
 
     // Resolve effective proxy for a connection
     if (resolveId) {
