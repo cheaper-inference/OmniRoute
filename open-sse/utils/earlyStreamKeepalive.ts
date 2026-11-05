@@ -688,12 +688,13 @@ export async function withEarlyStreamKeepalive(
       // A verbatim SSE body that fails mid-flight (ECONNRESET etc.) would
       // surface its raw error to the client as an abrupt transport close with
       // no terminal marker — the same disconnect-reporting gap the slow path
-      // guards against. Wrap the body so a mid-flight failure appends a
-      // format-correct terminal error frame; bytes that already crossed are
-      // untouched, and healthy streams stay byte-identical (zero-copy passthrough
-      // until an error actually occurs).
+      // guards against. Wrap the body so a mid-flight failure appends one
+      // format-correct terminal error frame. Healthy streams stay
+      // byte-identical (frames are re-emitted unchanged, only the chunk
+      // boundaries move); the wrapper adds no latency beyond holding back an
+      // incomplete trailing frame until its blank line arrives.
       if (response.body && contentType.includes("text/event-stream")) {
-        return new Response(
+        const wrapped = new Response(
           wrapSseBodyWithMidStreamFailure(
             response.body,
             errorFrameFormat,
@@ -712,6 +713,19 @@ export async function withEarlyStreamKeepalive(
             headers: response.headers,
           }
         );
+        // The Response constructor cannot take these, so re-attach them the same
+        // way tlsClient's adapter does: downstream consumers read `.url` for
+        // redirect/telemetry attribution.
+        if (response.url) {
+          Object.defineProperty(wrapped, "url", { value: response.url, configurable: true });
+        }
+        if (response.redirected !== undefined) {
+          Object.defineProperty(wrapped, "redirected", {
+            value: response.redirected,
+            configurable: true,
+          });
+        }
+        return wrapped;
       }
       return response;
     }

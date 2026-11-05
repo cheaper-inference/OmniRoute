@@ -96,6 +96,39 @@ test("fast SSE handler preserves status/headers; healthy body stays byte-identic
   assert.equal(await result.text(), "data: hi\n\n", "healthy SSE body must stay byte-identical");
 });
 
+// #18948: the fast path now wraps SSE bodies to append a terminal error frame on
+// a mid-stream drop. The wrap decodes and re-chunks, so pin that (a) the emitted
+// bytes are still identical when frames are split across upstream chunks and
+// (b) the Response metadata the constructor cannot take (`url`, `redirected`)
+// survives, since downstream telemetry reads it.
+test("fast SSE wrapper re-frames split chunks identically and keeps url/redirected (#18948)", async () => {
+  const encoder = new TextEncoder();
+  const body = new ReadableStream<Uint8Array>({
+    start(controller) {
+      for (const chunk of ["data: a\n", "\ndata: b\n\n", "event: ping\ndata: {}\n\n"]) {
+        controller.enqueue(encoder.encode(chunk));
+      }
+      controller.close();
+    },
+  });
+  const original = new Response(body, {
+    status: 200,
+    headers: { "Content-Type": "text/event-stream" },
+  });
+  Object.defineProperty(original, "url", { value: "https://upstream.example/v1/messages" });
+  Object.defineProperty(original, "redirected", { value: false });
+
+  const result = await withEarlyStreamKeepalive(Promise.resolve(original), { thresholdMs: 1000 });
+
+  assert.equal(result.url, "https://upstream.example/v1/messages");
+  assert.equal(result.redirected, false);
+  assert.equal(
+    await result.text(),
+    "data: a\n\ndata: b\n\nevent: ping\ndata: {}\n\n",
+    "frame boundaries must move, not the bytes"
+  );
+});
+
 // #2544: when the handler is slow to produce its first byte (slow upstream / reasoning
 // model), the wrapper must open the SSE response early, emit keepalive comments to keep
 // strict clients (Codex's reqwest) from idle-timing-out, then forward the real body.
