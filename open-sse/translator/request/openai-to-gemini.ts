@@ -110,6 +110,11 @@ type GeminiRequest = {
 type GeminiThinkingLevel = "minimal" | "low" | "medium" | "high";
 type ResolvedGeminiThinking = { level: GeminiThinkingLevel; includeThoughts: boolean };
 
+/**
+ * Convert OpenAI/Claude controls to the native Gemini 3 thinking enum only
+ * for models whose specs explicitly opt in. Keep the summary opt-out distinct
+ * from the always-available minimal reasoning level.
+ */
 function resolveNativeGeminiThinkingLevel(
   model: string,
   body: Record<string, unknown>,
@@ -124,8 +129,10 @@ function resolveNativeGeminiThinkingLevel(
     return { level: explicitThinkingLevel as GeminiThinkingLevel, includeThoughts: true };
   }
 
-  const reasoning = body.reasoning && typeof body.reasoning === "object" && !Array.isArray(body.reasoning)
-    ? (body.reasoning as Record<string, unknown>) : {};
+  const reasoning =
+    body.reasoning && typeof body.reasoning === "object" && !Array.isArray(body.reasoning)
+      ? (body.reasoning as Record<string, unknown>)
+      : {};
   const rawEffort = body.reasoning_effort ?? reasoning.effort;
   if (typeof rawEffort === "string") {
     const effort = rawEffort.trim().toLowerCase();
@@ -142,8 +149,10 @@ function resolveNativeGeminiThinkingLevel(
     }
   }
 
-  const thinking = body.thinking && typeof body.thinking === "object" && !Array.isArray(body.thinking)
-    ? (body.thinking as Record<string, unknown>) : {};
+  const thinking =
+    body.thinking && typeof body.thinking === "object" && !Array.isArray(body.thinking)
+      ? (body.thinking as Record<string, unknown>)
+      : {};
   if (body.thinking === false || thinking.type === "disabled") {
     const level = supported.includes("minimal") ? "minimal" : spec?.defaultGeminiThinkingLevel;
     return level && supported.includes(level) ? { level, includeThoughts: false } : null;
