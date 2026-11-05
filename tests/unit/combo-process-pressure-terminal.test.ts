@@ -25,6 +25,8 @@ const { getLKGP, setLKGP } = await import("../../src/lib/db/settings/lkgp.ts");
 const { applySessionStickiness, recordStickyBinding, peekStickyConnectionId } =
   await import("../../open-sse/services/combo/sessionStickiness.ts");
 const { checkHeapPressureGuard } = await import("../../open-sse/utils/heapPressure.ts");
+const { markLocalProcessPressureResponse } =
+  await import("../../open-sse/utils/localPressureResponse.ts");
 const { resetAllCircuitBreakers, getCircuitBreaker } =
   await import("../../src/shared/utils/circuitBreaker.ts");
 const { getAllModelLockouts, clearAllModelLockouts } =
@@ -50,9 +52,11 @@ function pressure(code: string): Response {
   const response =
     code === "heap_pressure"
       ? checkHeapPressureGuard(2, 1)!.response
-      : Response.json(
-          { error: { code, type: "server_error", message: "Local process pressure" } },
-          { status: 503, headers: { "Retry-After": "7" } }
+      : markLocalProcessPressureResponse(
+          Response.json(
+            { error: { code, type: "server_error", message: "Local process pressure" } },
+            { status: 503, headers: { "Retry-After": "7" } }
+          )
         );
   response.headers.set("X-Pressure-Receipt", "original-verdict");
   return response;
@@ -392,6 +396,20 @@ for (const strategy of ["priority", "round-robin"]) {
       ),
     () => Response.json({ error: { code: "resource_pressure" } }, { status: 502 }),
     () => new Response("heap_pressure", { status: 503 }),
+    // A chained upstream (another gateway) can return the very same pressure bodies; only a
+    // response this process shed itself is terminal.
+    () =>
+      Response.json(
+        {
+          error: { code: "resource_pressure", type: "server_error", message: "Upstream pressure" },
+        },
+        { status: 503, headers: { "Retry-After": "7" } }
+      ),
+    () =>
+      Response.json(
+        { error: { code: "heap_pressure", type: "server_error", message: "Upstream pressure" } },
+        { status: 503, headers: { "Retry-After": "5" } }
+      ),
   ]) {
     test(`${strategy} preserves ordinary fallback control ${failure.toString()}`, async () => {
       const calls: string[] = [];
@@ -404,3 +422,29 @@ for (const strategy of ["priority", "round-robin"]) {
     });
   }
 }
+
+test("internal header wrappers keep the local pressure brand when they must clone", async () => {
+  const { withSelectedConnectionHeader } =
+    await import("../../src/sse/handlers/chat/selectedConnectionHeader.ts");
+  const { isMarkedLocalProcessPressureResponse } =
+    await import("../../open-sse/utils/localPressureResponse.ts");
+  const shed = pressure("resource_pressure");
+  // Immutable headers force the wrapper down its clone path.
+  const frozen = new Response(shed.body, { status: 503, headers: shed.headers });
+  Object.defineProperty(frozen, "headers", {
+    value: new Proxy(new Headers(shed.headers), {
+      get(target, prop) {
+        if (prop === "set")
+          return () => {
+            throw new TypeError("immutable");
+          };
+        const value = Reflect.get(target, prop);
+        return typeof value === "function" ? value.bind(target) : value;
+      },
+    }),
+  });
+  markLocalProcessPressureResponse(frozen);
+  const wrapped = withSelectedConnectionHeader(frozen, "conn-1");
+  assert.notEqual(wrapped, frozen);
+  assert.equal(isMarkedLocalProcessPressureResponse(wrapped), true);
+});

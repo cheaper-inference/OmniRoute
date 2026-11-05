@@ -6,6 +6,7 @@
  * predicates are re-exported from combo.ts for backward compatibility.
  */
 
+import { isMarkedLocalProcessPressureResponse } from "../../utils/localPressureResponse.ts";
 import {
   EXECUTOR_CONTRACT_VIOLATION_CODE,
   LOCAL_CONFIGURATION_ERROR_CODES,
@@ -400,9 +401,11 @@ export function isAccountSemaphoreCapacityFailure(error?: {
   );
 }
 
-/** Process-wide shedding cannot recover by retrying another combo target. */
+/** Process-wide shedding cannot recover by retrying another combo target. Only a shed this
+ * process created is terminal: an upstream can return the same 503 body and keeps fallback. */
 export function isLocalProcessPressureResponse(response: Response, body: unknown): boolean {
-  if (response.status !== 503 || !body || typeof body !== "object") return false;
+  if (response.status !== 503 || !isMarkedLocalProcessPressureResponse(response)) return false;
+  if (!body || typeof body !== "object") return false;
   const error = (body as Record<string, unknown>).error;
   if (!error || typeof error !== "object") return false;
   const code = (error as Record<string, unknown>).code;

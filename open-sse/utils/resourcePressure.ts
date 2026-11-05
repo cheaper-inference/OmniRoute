@@ -1,3 +1,4 @@
+import { markLocalProcessPressureResponse } from "./localPressureResponse.ts";
 import { checkHeapPressureGuard, HEAP_PRESSURE_THRESHOLD_MB } from "./heapPressure.ts";
 import { buildErrorBody } from "./error.ts";
 import {
@@ -207,17 +208,19 @@ function buildCriticalGuard(
     success: false,
     status: 503,
     error: PRESSURE_MESSAGE,
-    response: new Response(
-      JSON.stringify(
-        buildErrorBody(503, PRESSURE_MESSAGE, undefined, {
-          type: "server_error",
-          code: "resource_pressure",
-        })
-      ),
-      {
-        status: 503,
-        headers: { "Content-Type": "application/json", "Retry-After": RETRY_AFTER_SECONDS },
-      }
+    response: markLocalProcessPressureResponse(
+      new Response(
+        JSON.stringify(
+          buildErrorBody(503, PRESSURE_MESSAGE, undefined, {
+            type: "server_error",
+            code: "resource_pressure",
+          })
+        ),
+        {
+          status: 503,
+          headers: { "Content-Type": "application/json", "Retry-After": RETRY_AFTER_SECONDS },
+        }
+      )
     ),
   };
 }
