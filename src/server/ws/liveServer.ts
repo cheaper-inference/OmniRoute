@@ -523,6 +523,31 @@ async function seedLatestCompressionRunFromDb(): Promise<void> {
 // ── Heartbeat ─────────────────────────────────────────────────────────────
 
 /**
+ * Begin a heartbeat credential re-check. Returns false when one is already in
+ * flight for this client, so overlapping heartbeats do not stack authorize calls.
+ */
+export function beginClientRevalidation(client: { revalidating: boolean }): boolean {
+  if (client.revalidating) return false;
+  client.revalidating = true;
+  return true;
+}
+
+/**
+ * True when a finished re-check should close this client. Skip when the
+ * credential still passes, or when the map entry for `clientId` was removed or
+ * replaced while the check was in flight (closing the old socket would then
+ * hit the wrong connection).
+ */
+export function shouldCloseClientAfterRevalidation<T extends object>(
+  authorized: boolean,
+  clientId: string,
+  client: T,
+  map: Map<string, T>
+): boolean {
+  return !authorized && map.get(clientId) === client;
+}
+
+/**
  * Re-run the upgrade-time authorization for an open connection. The credential is
  * otherwise only checked once, so a key revoked, disabled, expired, deleted or cut
  * below `manage` — or a dashboard session ended by sign-out or a password change —
@@ -531,12 +556,11 @@ async function seedLatestCompressionRunFromDb(): Promise<void> {
  * does a check that fails because the database cannot be read (fail closed).
  */
 function revalidateClient(clientId: string, client: ClientState): void {
-  if (client.revalidating) return;
-  client.revalidating = true;
+  if (!beginClientRevalidation(client)) return;
   authorizeConnection(client.request)
     .catch((): WsAuthResult => ({ authorized: false, sessionId: clientId }))
     .then((auth) => {
-      if (auth.authorized || clients.get(clientId) !== client) return;
+      if (!shouldCloseClientAfterRevalidation(auth.authorized, clientId, client, clients)) return;
       clients.delete(clientId);
       sendTo(client.ws, {
         type: "error",

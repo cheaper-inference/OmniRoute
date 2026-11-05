@@ -406,7 +406,16 @@ describe("LiveWS heartbeat re-check: timing and failures", () => {
       holder.exec("ROLLBACK");
       holder.close();
     }
-    assert.equal(lastUsed(), usedAtConnect, "last_used_at written through the lock");
+    // A blocked UPDATE either waits for the holder to roll back (busy_timeout) or
+    // throws, and a thrown one is not recorded, so the next lookup retries it. Both
+    // paths end with the usage recorded, which is the promise this asserts: the
+    // bookkeeping write is never silently lost.
+    assert.equal(await apiKeysDb.validateApiKey(key.key, { bypassCache: true }), true);
+    assert.notEqual(
+      lastUsed(),
+      usedAtConnect,
+      "last_used_at never recorded after the write lock cleared"
+    );
 
     // The failed write did not start the throttle: the next re-check writes it.
     mock.timers.tick(HEARTBEAT_MS);
