@@ -1,0 +1,1 @@
+- **chore(dashboard):** the vendored Keak CI UI Kit moves to 0.0.95, and the warning `Button`, the status `Badge` tones and the native `Select` branch use the kit instead of local rules in `globals.css` ([#19066](https://github.com/cheaper-inference/OmniRoute/issues/19066))
