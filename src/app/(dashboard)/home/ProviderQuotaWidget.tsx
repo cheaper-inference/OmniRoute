@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import Card from "@/shared/components/Card";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import { supportsProviderQuota } from "@/shared/utils/providerQuotaVisibility";
@@ -297,11 +298,11 @@ export default function ProviderQuotaWidget({
           disabled={loading || refreshingAll}
           className="gap-1.5 text-xs"
         >
-          <Icon
-            name={autoRefreshIntervalMs > 0 ? "schedule" : "refresh"}
-            size={16}
-            className={refreshingAll ? "animate-spin" : undefined}
-          />
+          {refreshingAll ? (
+            <Spinner decorative size="sm" />
+          ) : (
+            <Icon name={autoRefreshIntervalMs > 0 ? "schedule" : "refresh"} size={16} />
+          )}
           {refreshingAll
             ? tr("refreshing", "Refreshing")
             : autoRefreshIntervalMs > 0
@@ -313,8 +314,8 @@ export default function ProviderQuotaWidget({
       </div>
 
       {loading ? (
-        <div className="flex items-center gap-2 px-4 py-8 text-sm text-text-muted">
-          <Icon name="progress_activity" size={16} className="animate-spin" />
+        <div role="status" className="flex items-center gap-2 px-4 py-8 text-sm text-text-muted">
+          <Spinner decorative size="sm" />
           {tr("loadingQuotas", "Loading...")}
         </div>
       ) : providerGroups.length === 0 ? (
