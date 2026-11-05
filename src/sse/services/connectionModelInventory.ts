@@ -50,7 +50,18 @@ type InventoryAccumulator = {
   // so their inventories are merged and judged together before the fail-open rule applies.
   perAccountInventory: Map<string, Set<string>>;
   perAccountMalformed: boolean;
+  // Accounts of the active shared pool (before any pin narrows it). A synced row left behind by
+  // a disabled or deleted account must not decide that "some account lists the model".
+  perAccountPoolIds: Set<string>;
 };
+
+function recordPerAccountInventory(
+  connectionId: string,
+  ids: Set<string>,
+  acc: InventoryAccumulator
+): void {
+  if (acc.perAccountPoolIds.has(connectionId)) acc.perAccountInventory.set(connectionId, ids);
+}
 
 /** Unreadable or malformed persisted rows: a per-account catalog can no longer be trusted. */
 function markPerAccountMalformed(providerId: string, acc: InventoryAccumulator): void {
@@ -80,7 +91,7 @@ function recordConnectionInventories(
   for (const [connectionId, models] of Object.entries(byConnection)) {
     if (!Array.isArray(models) || models.length === 0) continue;
     const ids = new Set(models.map((m) => m.id));
-    if (isPerAccountCatalogProvider(providerId)) acc.perAccountInventory.set(connectionId, ids);
+    if (isPerAccountCatalogProvider(providerId)) recordPerAccountInventory(connectionId, ids, acc);
     else acc.advertised.set(connectionId, ids);
   }
 }
@@ -112,6 +123,33 @@ async function collectProviderInventory(
   recordConnectionInventories(providerId, byConnection, acc);
 }
 
+function isRowInventoryProvider(provider: unknown, requestedModel: string): provider is string {
+  return (
+    typeof provider === "string" &&
+    (isSelfHostedChatProvider(provider) ||
+      (provider === "codex" && !isCodexImageModel(requestedModel)))
+  );
+}
+
+/**
+ * Providers whose synced inventory must be read. Per-account catalogs (antigravity/agy) come
+ * from the whole active pool so a pin on one of them still sees the other's inventory.
+ */
+function collectInventoryProviders(
+  connections: ProviderConnectionView[],
+  poolConnections: ProviderConnectionView[],
+  requestedModel: string
+): Set<string> {
+  const providers = new Set<string>();
+  for (const { provider } of connections) {
+    if (isRowInventoryProvider(provider, requestedModel)) providers.add(provider);
+  }
+  for (const { provider } of [...connections, ...poolConnections]) {
+    if (isPerAccountCatalogProvider(provider)) providers.add(provider as string);
+  }
+  return providers;
+}
+
 /**
  * Self-hosted hosts, Codex subscription accounts and Antigravity/agy accounts (plans list
  * different models) can advertise different inventories. For Codex, once an account inventory advertises the requested
@@ -126,25 +164,22 @@ async function collectProviderInventory(
  *
  * Antigravity and agy share one pool and one per-account catalog: accounts whose synced
  * inventory does not list the requested model are skipped, failing open when no account
- * lists it (see perAccountCatalogFilter.ts).
+ * lists it (see perAccountCatalogFilter.ts). That decision is taken over `poolConnections`,
+ * the active pool BEFORE a pin narrowed `connections`: a pinned `antigravity` account must
+ * still see the `agy` inventory, and rows of accounts outside the active pool are ignored.
  */
 export async function loadAdvertisedModelsForConnections(
   connections: ProviderConnectionView[],
-  requestedModel: string | null
+  requestedModel: string | null,
+  poolConnections: ProviderConnectionView[] = connections
 ): Promise<Map<string, Set<string>>> {
   const advertised = new Map<string, Set<string>>();
   if (!requestedModel) return advertised;
 
-  const inventoryProviders = new Set(
-    connections
-      .map((c) => c.provider)
-      .filter(
-        (p): p is string =>
-          typeof p === "string" &&
-          (isSelfHostedChatProvider(p) ||
-            (p === "codex" && !isCodexImageModel(requestedModel)) ||
-            isPerAccountCatalogProvider(p))
-      )
+  const inventoryProviders = collectInventoryProviders(
+    connections,
+    poolConnections,
+    requestedModel
   );
   if (inventoryProviders.size === 0) return advertised;
 
@@ -152,6 +187,7 @@ export async function loadAdvertisedModelsForConnections(
     advertised,
     perAccountInventory: new Map<string, Set<string>>(),
     perAccountMalformed: false,
+    perAccountPoolIds: new Set([...poolConnections, ...connections].map((c) => c.id)),
   };
 
   await Promise.all(
