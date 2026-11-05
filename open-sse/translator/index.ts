@@ -436,13 +436,17 @@ export function translateRequest(
   });
   const preserveResponsesReasoning = sourceFormat === FORMATS.OPENAI_RESPONSES && isReasoner;
 
-  // Reordering a displaced tool result next to its call invents nothing: every format.
-  repairDisplacedToolResults(result);
   // Responses history is validated by its translator; do not normalize malformed arguments
-  // or synthesize successful empty outputs before that boundary.
+  // or synthesize successful empty outputs before that boundary. Reordering a displaced tool
+  // result next to its call invents nothing, so it still applies there.
   if (targetFormat !== FORMATS.OPENAI_RESPONSES) {
+    // Ensure tool_calls have id; optionally normalize to 9-char for providers like Mistral
     ensureToolCallIds(result, { use9CharId });
+    // Fix missing tool responses (insert empty tool_result if needed)
+    repairDisplacedToolResults(result);
     fixMissingToolResponses(result);
+  } else {
+    repairDisplacedToolResults(result);
   }
 
   // Claude reconciliation preserves orphaned tool output as labelled user text.
