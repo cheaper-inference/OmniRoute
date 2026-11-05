@@ -463,6 +463,9 @@ export function openaiToOpenAIResponsesRequest(
           parameters: fn.parameters,
           // Omitted strict is non-strict on Chat but strict-normalized on Responses.
           strict: chatStrictForResponses(fn),
+          ...(credentialRecord._provider === "codex" && typeof fn.defer_loading === "boolean"
+            ? { defer_loading: fn.defer_loading }
+            : {}),
         };
       }
       return toolValue;
@@ -522,6 +525,11 @@ export function openaiToOpenAIResponsesRequest(
         },
       ];
     }
+  }
+  // Only Codex accepts this Responses extension; direct Zed translation shares this helper.
+  const summaryDelivery = toRecord(root.stream_options).reasoning_summary_delivery;
+  if (credentialRecord._provider === "codex" && summaryDelivery !== undefined) {
+    result.stream_options = { reasoning_summary_delivery: summaryDelivery };
   }
   if (root.service_tier !== undefined) result.service_tier = root.service_tier;
   if (root.temperature !== undefined) result.temperature = root.temperature;
