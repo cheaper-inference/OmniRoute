@@ -2,6 +2,8 @@
 import * as log from "../utils/logger";
 import * as passive from "@omniroute/open-sse/services/tokenRefresh/passiveCodex.ts";
 import { stripTrailingSlashes } from "@omniroute/open-sse/utils/urlSanitize.ts";
+import { isMuseDcaToken } from "@omniroute/open-sse/config/museCode.ts";
+import { isTransientRefreshError } from "@omniroute/open-sse/services/tokenRefresh/transientError.ts";
 import { registerCredentialRefresher } from "@omniroute/open-sse/utils/registeredCredentialRefresher.ts";
 import { updateProviderConnection } from "@/lib/db/providers";
 import { parseTokenExpiryMs } from "@/lib/tokenHealthCheckExpiry";
@@ -212,6 +214,9 @@ export async function updateProviderCredentials(connectionId: string, newCredent
     } else if (newCredentials.expiresAt) {
       updates.expiresAt = newCredentials.expiresAt;
       updates.tokenExpiresAt = newCredentials.expiresAt;
+    } else if (newCredentials.accessToken && newCredentials.expiresAt === null) {
+      updates.expiresAt = null;
+      updates.tokenExpiresAt = null;
     }
     if (newCredentials.providerSpecificData) {
       updates.providerSpecificData = newCredentials.providerSpecificData;
@@ -291,7 +296,22 @@ export async function checkAndRefreshToken(provider: string, credentials: any) {
           }
         : undefined;
 
-      const newCredentials = await getAccessToken(provider, updatedCredentials, persistCallback);
+      let newCredentials;
+      try {
+        newCredentials = await getAccessToken(provider, updatedCredentials, persistCallback);
+      } catch (error) {
+        const accessToken = credentials.accessToken;
+        if (
+          provider !== "muse-code" ||
+          typeof accessToken !== "string" ||
+          !accessToken.trim() ||
+          isMuseDcaToken(accessToken) ||
+          !isTransientRefreshError(error)
+        ) {
+          throw error;
+        }
+        return { ...credentials };
+      }
 
       if (newCredentials && newCredentials.accessToken) {
         // For the no-connectionId path (no mutex, no onPersist), persist here as before.
@@ -308,7 +328,9 @@ export async function checkAndRefreshToken(provider: string, credentials: any) {
             ? newCredentials.expiresAt
             : newCredentials.expiresIn
               ? new Date(Date.now() + newCredentials.expiresIn * 1000).toISOString()
-              : updatedCredentials.expiresAt,
+              : newCredentials.expiresAt === null
+                ? null
+                : updatedCredentials.expiresAt,
         };
       }
     }
