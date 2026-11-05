@@ -1,0 +1,1 @@
+- **refactor(dashboard):** the dashboard's hand-made tiles, `<details>`/disclosure headers, filter pills and progress bars now use the kit `Tile`, `Disclosure`, `ToggleChip` and `Progress` (tones and stacked segments), with the same accessible names, toggle state and open/closed defaults as before ([#19074](https://github.com/cheaper-inference/OmniRoute/pull/19074))
