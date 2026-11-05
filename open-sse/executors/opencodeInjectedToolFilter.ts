@@ -5,7 +5,9 @@
  * caller never declared those tools, so a call to one of them must not reach the caller: the
  * Chat Completions event stream is rewritten here, removing the `tool_calls` deltas of the
  * injected names and turning a `tool_calls` finish into `stop` when nothing else was called.
- * Calls to tools the caller declared pass through untouched.
+ * Calls to tools the caller declared pass through untouched. A tool-call delta that arrives
+ * before its function name is held until the name is known; a call that never gets a name is
+ * dropped.
  */
 
 /** Rewrite one SSE `data:` JSON chunk in place; returns false when the chunk becomes empty. */
@@ -13,7 +15,8 @@ function filterChunk(
   chunk: Record<string, unknown>,
   injected: ReadonlySet<string>,
   nameByIndex: Map<number, string>,
-  keptIndexes: Set<number>
+  keptIndexes: Set<number>,
+  pending: Map<number, unknown[]>
 ): void {
   const choices = Array.isArray(chunk.choices)
     ? (chunk.choices as Array<Record<string, unknown>>)
@@ -29,8 +32,23 @@ function filterChunk(
         const name = call.function?.name;
         if (typeof name === "string" && name) nameByIndex.set(index, name);
         const known = nameByIndex.get(index);
-        if (known && injected.has(known)) continue;
+        if (!known) {
+          // No function name yet: hold the delta until the name decides whether it is ours.
+          const held = pending.get(index) ?? [];
+          held.push(raw);
+          pending.set(index, held);
+          continue;
+        }
+        if (injected.has(known)) {
+          pending.delete(index);
+          continue;
+        }
         keptIndexes.add(index);
+        const held = pending.get(index);
+        if (held) {
+          kept.push(...held);
+          pending.delete(index);
+        }
         kept.push(raw);
       }
       if (kept.length > 0) (delta as Record<string, unknown>).tool_calls = kept;
@@ -51,6 +69,7 @@ export function filterInjectedToolCalls(
   const injected = new Set(injectedNames);
   const nameByIndex = new Map<number, string>();
   const keptIndexes = new Set<number>();
+  const pending = new Map<number, unknown[]>();
   const decoder = new TextDecoder();
   const encoder = new TextEncoder();
   let buffer = "";
@@ -70,7 +89,7 @@ export function filterInjectedToolCalls(
       }
       try {
         const parsed = JSON.parse(payload) as Record<string, unknown>;
-        filterChunk(parsed, injected, nameByIndex, keptIndexes);
+        filterChunk(parsed, injected, nameByIndex, keptIndexes, pending);
         const choices = Array.isArray(parsed.choices)
           ? (parsed.choices as Array<Record<string, unknown>>)
           : [];

@@ -13,7 +13,13 @@ import { filterInjectedToolCalls } from "../../open-sse/executors/opencodeInject
 import { isLoopbackHostname } from "../../open-sse/utils/urlHost.ts";
 import { createRequestLogger } from "../../open-sse/utils/requestLogger.ts";
 import { resolveRelayScript } from "../../src/lib/opencodeFreeRelay.ts";
-import { assertSafeBind, createHandler, guardFromEnv } from "../../scripts/opencode-free-relay.ts";
+import {
+  assertSafeBind,
+  assertSafeUpstream,
+  createHandler,
+  guardFromEnv,
+} from "../../scripts/opencode-free-relay.ts";
+import { OPENCODE_SESSION_PATTERN } from "../../open-sse/utils/opencodeHeaders.ts";
 
 const FREE = "deepseek-v4.1-flash-free";
 const RELAY = "http://127.0.0.1:20199";
@@ -190,4 +196,88 @@ test("relay guard: non-loopback bind needs a token, checks it per request, allow
     403
   );
   assert.equal((await handler(new Request("http://relay/health"))).status, 200);
+});
+
+test("relay: upstream must be https unless it is a loopback test origin", () => {
+  assert.doesNotThrow(() => assertSafeUpstream("https://opencode.ai"));
+  assert.doesNotThrow(() => assertSafeUpstream("http://127.0.0.1:9999"));
+  assert.throws(() => assertSafeUpstream("http://opencode.ai"), /https/);
+  assert.throws(() => assertSafeUpstream("http://127.example.com"), /https/);
+});
+
+test("relay: direct egress disables the proxy explicitly, a supplied proxy is passed through", async () => {
+  const realFetch = globalThis.fetch;
+  const seen: Array<Record<string, unknown>> = [];
+  globalThis.fetch = (async (_url: unknown, init?: Record<string, unknown>) => {
+    seen.push(init ?? {});
+    return new Response("{}", { status: 200 });
+  }) as typeof fetch;
+  try {
+    const handler = createHandler(guardFromEnv({}));
+    const post = (headers: Record<string, string>) =>
+      handler(
+        new Request("http://relay/inference/v1/chat/completions", {
+          method: "POST",
+          headers,
+          body: "{}",
+        })
+      );
+    await post({});
+    await post({ "x-opencode-relay-proxy": "http://proxy.example.com:8080" });
+    assert.equal(seen[0].proxy, false);
+    assert.equal(seen[1].proxy, "http://proxy.example.com:8080");
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});
+
+test("filterInjectedToolCalls: a nameless first delta is held until the name decides", async () => {
+  const chunk = (delta: unknown, finish: string | null = null) => ({
+    choices: [{ index: 0, delta, finish_reason: finish }],
+  });
+  const run = async (name: string) => {
+    const events = [
+      chunk({
+        tool_calls: [{ index: 0, id: "a", type: "function", function: { arguments: '{"x"' } }],
+      }),
+      chunk({ tool_calls: [{ index: 0, function: { name, arguments: ":1}" } }] }),
+      chunk({}, "tool_calls"),
+    ];
+    const body = events.map((e) => `data: ${JSON.stringify(e)}\n\n`).join("");
+    const res = new Response(body, {
+      status: 200,
+      headers: { "content-type": "text/event-stream" },
+    });
+    return filterInjectedToolCalls(res, ["bash"]).text();
+  };
+  const dropped = await run("bash");
+  assert.doesNotMatch(dropped, /"x"|bash|:1\}/);
+  assert.match(dropped, /"finish_reason":"stop"/);
+  const kept = await run("get_weather");
+  assert.match(kept, /\{\\"x\\"/);
+  assert.match(kept, /get_weather/);
+  assert.match(kept, /"finish_reason":"tool_calls"/);
+});
+
+function sessionAged(days: number): string {
+  const ts = (BigInt(Date.now()) - BigInt(days) * 86_400_000n) & 0xfffffffffn;
+  const value = ~((ts << 12n) | 1n) & 0xffffffffffffn;
+  return `ses_${value.toString(16).padStart(12, "0")}abcdefghijklmn`;
+}
+
+test("buildHeaders: relay mode re-mints a valid caller session older than 17 days, keeps a recent one", () => {
+  const zen = new OpencodeExecutor("opencode-zen");
+  const body = { model: FREE, messages: [{ role: "user", content: "hi" }] };
+  const build = (session: string) =>
+    withRelay(RELAY, () =>
+      zen.buildHeaders(null, true, { "x-opencode-session": session }, FREE, undefined, body)
+    )["x-opencode-session"];
+  const old = sessionAged(30);
+  assert.match(old, OPENCODE_SESSION_PATTERN);
+  const reminted = build(old);
+  assert.notEqual(reminted, old);
+  assert.match(reminted, OPENCODE_SESSION_PATTERN);
+  assert.equal(build(old), reminted, "stable per conversation");
+  const recent = sessionAged(2);
+  assert.equal(build(recent), recent);
 });

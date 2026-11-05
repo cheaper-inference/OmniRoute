@@ -88,6 +88,16 @@ export function guardFromEnv(env: Record<string, string | undefined>): RelayGuar
   };
 }
 
+/** Throws when the upstream would receive the caller's credentials over plaintext http to a remote host. */
+export function assertSafeUpstream(upstream: string): void {
+  const url = new URL(upstream);
+  if (url.protocol === "https:") return;
+  if (url.protocol === "http:" && isLoopbackHost(url.hostname)) return;
+  throw new Error(
+    "OPENCODE_FREE_RELAY_UPSTREAM must be https:// (http:// is accepted for loopback test origins only)"
+  );
+}
+
 /** Throws when the guard would leave a non-loopback relay open to any caller. */
 export function assertSafeBind(guard: RelayGuard): void {
   if (guard.exposed && !guard.token) {
@@ -155,7 +165,9 @@ async function handleWith(req: Request, guard: RelayGuard): Promise<Response> {
       headers,
       body: await req.arrayBuffer(),
       signal: req.signal,
-      ...(proxy ? { proxy } : {}),
+      // `proxy: false` connects directly regardless of HTTP(S)_PROXY in the environment (Bun
+      // fetch docs), so direct egress never falls back to an inherited proxy.
+      proxy: proxy ?? false,
     } as RequestInit);
   } catch (err) {
     return json(502, { error: `relay upstream failure: ${(err as Error).message}` });
@@ -169,6 +181,7 @@ async function handleWith(req: Request, guard: RelayGuard): Promise<Response> {
 
 if (typeof Bun !== "undefined" && (import.meta as { main?: boolean }).main) {
   assertSafeBind(guardFromEnv(process.env));
+  assertSafeUpstream(UPSTREAM);
   const server = Bun.serve({ port: PORT, hostname: HOST, idleTimeout: 255, fetch: handle });
   console.log(`[opencode-free-relay] listening on http://${HOST}:${server.port} -> ${UPSTREAM}`);
 }

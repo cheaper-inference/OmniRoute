@@ -457,6 +457,17 @@ function keepsClientUserAgent(
   return keepAgentUserAgent && !isGenericClientUserAgent(userAgent);
 }
 
+/** Relay mode: the upstream refuses a session whose decoded timestamp is older than 17 days. */
+const RELAY_SESSION_MAX_AGE_MS = 17n * 86_400_000n;
+
+function isRecentSessionValue(session: string): boolean {
+  const decoded = ~BigInt(`0x${session.slice(4, 16)}`) & OPENCODE_SESSION_MASK_48;
+  const ts = decoded >> 12n;
+  const now = BigInt(Date.now()) & OPENCODE_SESSION_TS_MAX;
+  const age = (now - ts + (OPENCODE_SESSION_TS_MAX + 1n)) & OPENCODE_SESSION_TS_MAX;
+  return age < RELAY_SESSION_MAX_AGE_MS;
+}
+
 function applyCliDefaults(
   headers: Record<string, string>,
   cliDefaults: { userAgent: string; client: string; project: string },
@@ -487,12 +498,17 @@ function applyCliDefaults(
   // compliant encoding). The ungated surfaces (opencode-go, #15311) keep the client's
   // session untouched, so the value check applies only when `reencodeSession` is set.
   const clientSessionId = headers["x-opencode-session"]?.trim();
-  const canonicalClientSession = reencodeSession
+  const recentSession = reencodeSession && !!process.env.OPENCODE_FREE_TIER_RELAY_URL?.trim();
+  const validClientSession = reencodeSession
     ? isValidOpencodeSessionValue(clientSessionId)
+    : undefined;
+  const canonicalClientSession = reencodeSession
+    ? validClientSession && (!recentSession || isRecentSessionValue(validClientSession))
+      ? validClientSession
+      : undefined
     : clientSessionId && OPENCODE_SESSION_PATTERN.test(clientSessionId)
       ? clientSessionId
       : undefined;
-  const recentSession = reencodeSession && !!process.env.OPENCODE_FREE_TIER_RELAY_URL?.trim();
   const session = clientSessionId
     ? (canonicalClientSession ?? canonicalId("ses_", clientSessionId, recentSession))
     : canonicalId("ses_", generateSessionId(sessionBody ?? null) ?? undefined, recentSession);
