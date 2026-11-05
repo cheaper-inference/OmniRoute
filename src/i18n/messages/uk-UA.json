@@ -7106,6 +7106,7 @@
     "proxySubTabsAria": "Розділи проксі",
     "requestBodyLimitTitle": "Обмеження розміру тіла запиту",
     "requestBodyLimitDescription": "Максимальний розмір корисного навантаження API, який приймається до розбору тіла запиту. Для спеціалізованих маршрутів завантаження зберігається щонайменше вбудоване обмеження у 100 МБ.",
+    "requestBodyLimitChatHint": "Chat Completions і Responses приймають до 50 MB, доки ви не збережете тут ліміт. Збережений ліміт діє й для них — як менший, так і більший.",
     "requestBodyLimitInputLabel": "Обмеження розміру тіла запиту в МБ",
     "requestBodyLimitEmptyError": "Введіть обмеження в МБ",
     "requestBodyLimitWholeNumberError": "Використовуйте ціле число",

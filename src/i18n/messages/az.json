@@ -7183,6 +7183,7 @@
     "proxySubTabsAria": "Proksi bölmələri",
     "requestBodyLimitTitle": "Sorğu gövdəsi limiti",
     "requestBodyLimitDescription": "Sorğu gövdəsi təhlil edilməzdən əvvəl qəbul edilən maksimum API faydalı yük ölçüsü. Ayrılmış yükləmə marşrutları ən azı daxili 100 MB limitini saxlayır.",
+    "requestBodyLimitChatHint": "Burada limit saxlayana qədər Chat Completions və Responses 50 MB-a qədər qəbul edir. Saxlanmış limit daha aşağı və ya yüksək olmasından asılı olmayaraq onlara da tətbiq edilir.",
     "requestBodyLimitInputLabel": "Sorğu gövdəsi limiti, MB ilə",
     "requestBodyLimitEmptyError": "MB ilə limit daxil edin",
     "requestBodyLimitWholeNumberError": "Tam ədəd istifadə edin",

@@ -7106,6 +7106,7 @@
     "proxySubTabsAria": "Įgaliotojo serverio skiltys",
     "requestBodyLimitTitle": "Užklausos turinio dydžio riba",
     "requestBodyLimitDescription": "Didžiausias priimamas API duomenų paketo dydis prieš analizuojant užklausos turinį. Specializuotuose įkėlimo maršrutuose išlaikoma bent jų integruota 100 MB riba.",
+    "requestBodyLimitChatHint": "Chat Completions ir Responses priima iki 50 MB, kol čia išsaugosite ribą. Išsaugota riba taikoma ir joms, nesvarbu, ar ji mažesnė, ar didesnė.",
     "requestBodyLimitInputLabel": "Užklausos turinio dydžio riba MB",
     "requestBodyLimitEmptyError": "Įveskite ribą MB",
     "requestBodyLimitWholeNumberError": "Naudokite sveikąjį skaičių",

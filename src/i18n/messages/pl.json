@@ -7106,6 +7106,7 @@
     "proxySubTabsAria": "Sekcje proxy",
     "requestBodyLimitTitle": "Limit treści żądania",
     "requestBodyLimitDescription": "Maksymalny rozmiar payload API akceptowany przed sparsowaniem request body. Dedykowane upload routes zachowują co najmniej swój wbudowany limit 100 MB.",
+    "requestBodyLimitChatHint": "Chat Completions i Responses przyjmują do 50 MB, dopóki nie zapiszesz tutaj limitu. Zapisany limit obowiązuje także dla nich, niezależnie od tego, czy jest niższy, czy wyższy.",
     "requestBodyLimitInputLabel": "Limit Request Body w MB",
     "requestBodyLimitEmptyError": "Wprowadź limit w MB",
     "requestBodyLimitWholeNumberError": "Wprowadź liczbę całkowitą",
