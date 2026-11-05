@@ -127,6 +127,21 @@ export async function executeImageWithCredentialFallback({
 
   while (currentCredentials && !isCredentialSentinel(currentCredentials)) {
     const connectionId = connectionIdOf(currentCredentials);
+    // Defense in depth: selectors and test hooks must never bypass the caller
+    // API key's connection allowlist, even during image credential rotation.
+    if (
+      Array.isArray(allowedConnections) &&
+      (!connectionId || !allowedConnections.includes(connectionId))
+    ) {
+      return {
+        credentials: currentCredentials,
+        result: {
+          success: false,
+          status: 403,
+          error: "Image credential is outside the API key's allowed connections",
+        },
+      };
+    }
     if (connectionId && excludedConnectionIds.has(connectionId)) break;
     if (connectionId) excludedConnectionIds.add(connectionId);
 
@@ -148,6 +163,21 @@ export async function executeImageWithCredentialFallback({
       continue;
     }
 
+    // A refresh must not silently substitute a different or unscoped account.
+    const refreshedId = connectionIdOf(currentCredentials);
+    if (
+      Array.isArray(allowedConnections) &&
+      (!refreshedId || !allowedConnections.includes(refreshedId))
+    ) {
+      return {
+        credentials: currentCredentials,
+        result: {
+          success: false,
+          status: 403,
+          error: "Refreshed image credential is outside the API key's allowed connections",
+        },
+      };
+    }
     lastCredentials = currentCredentials;
     lastResult = await execute(currentCredentials);
     const shouldTryAnotherAccount =
