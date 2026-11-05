@@ -569,8 +569,12 @@ export async function executeChatWithBreaker({
             },
             onRequestSuccess: async () => {
               if (isShadowTraffic) return;
-              // Only a real success ends the per-request refusal streak (#12859).
-              if (credentials.connectionId) clearRequestRejectedStreak(credentials.connectionId);
+              // Only a real success ends the per-request refusal streak (#12859), and only for
+              // the model that succeeded: a sibling model's success must not reset another
+              // model's refusal count (the streak is keyed by connection + model).
+              if (credentials.connectionId) {
+                clearRequestRejectedStreak(credentials.connectionId, model);
+              }
               await clearAccountError(credentials.connectionId, credentials);
               await clearAntigravityVerificationUrl(
                 provider,

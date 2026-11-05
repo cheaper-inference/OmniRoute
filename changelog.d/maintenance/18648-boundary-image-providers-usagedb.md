@@ -1,0 +1,1 @@
+- **fix(release):** 14 image provider adapters and the upscale helper take `saveCallLog` from `open-sse/handlers/imageResult.ts` instead of importing `@/lib/usageDb` each, removing 15 open-sse → src edges; a new test pins the funnel ([#18648](https://github.com/diegosouzapw/OmniRoute/pull/18648)) — thanks @AndresDiagoM

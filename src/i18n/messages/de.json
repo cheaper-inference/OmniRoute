@@ -784,6 +784,13 @@
     "batchDetailWindow": "Fenster",
     "batchDetailCreated": "Erstellt",
     "providerTopologyEmpty": "Es sind noch keine Anbieter verbunden",
+    "topologyModels": "Modelle",
+    "topologyModelsOn": "Ein",
+    "topologyModelsOnHint": "Modelle mit laufenden oder kürzlichen Anfragen anzeigen",
+    "topologyModelsAuto": "Automatisch",
+    "topologyModelsAutoHint": "Nur Modelle mit laufender Anfrage anzeigen",
+    "topologyModelsOff": "Aus",
+    "topologyModelsOffHint": "Modellknoten ausblenden",
     "badgeToastUnlocked": "Abzeichen freigeschaltet!",
     "batchListSearchPlaceholder": "Suche nach ID, Endpunkt, Modell…",
     "batchListDeleteAllCompletedTitle": "Löschen Sie alle abgeschlossenen Chargen",
@@ -1028,7 +1035,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "Den Fingerabdruck des OpenCode-v2-CLI-Clients bei OpenCode-Zen/Go-Anfragen senden: den User-Agent opencode/latest/<2.x>/cli und x-opencode-client cli sowie bei Free-Tier-Anfragen die v2-Sitzungsheader, die v2-CLI-Read/Shell-Tool-Schemas und kein tool_choice \"none\". Standardmäßig deaktiviert: Jede OpenCode-Anfrage behält die aktuelle Identität, die Header und den Body unverändert bei.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Wenn der Kandidatenpool einer Auto-Kombination bereits leer ist, bevor der Tool-Calling-Vorfilter ausgeführt wird (alle Ziele wurden aufgrund von Abklingzeiten, Sperren oder Erschöpfung übersprungen), antworte mit 503 no_eligible_targets statt mit dem bisherigen 400-Fehler „No target supports tool calling“ capability_mismatch. Standardmäßig deaktiviert: Bei leerem Pool wird weiterhin der bisherige 400-Fehler zurückgegeben.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Vertrauenswürdige Modell-Endpunkt-Tags erzwingen (vom Anbieterkatalog deklariert, aus einer spezialisierten Modell-ID abgeleitet oder vom Betreiber festgelegt): Eine an einen Endpunkt gesendete Anfrage, den das Modell nicht unterstützt, wird vor der Weiterleitung an /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations und /v1/audio/* mit HTTP 400 abgelehnt; Modelle, für deren markierte Endpunkte kein OmniRoute-Adapter vorhanden ist, werden aus /v1/models ausgeblendet; und der Modelltest im Dashboard antwortet für solche Modelle mit 422. Standardmäßig deaktiviert: Endpunkt-Tags bleiben rein informativ und Anfragen werden genau wie zuvor weitergeleitet.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "Bei einfachen anthropic-kompatiblen Relays bleiben System-Turns innerhalb einer laufenden Konversation in der Nachrichtenliste, anstatt in den System-Prompt auf oberster Ebene verschoben zu werden, sodass das zwischengespeicherte Prompt-Präfix über mehrere Turns hinweg stabil bleibt. Dies gilt nur, wenn der Client selbst die Beta mid-conversation-system-2026-04-07 gesendet hat. Standardmäßig deaktiviert: Jeder System-Turn wird genau wie zuvor in den System-Prompt verschoben, da Relays ohne diese Beta System-Turns in der Nachrichtenliste ablehnen.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Verwende die von models.dev veröffentlichten Stufen für den Reasoning-Aufwand, wenn weder ein Betreiber-Override noch das Anbieterregister welche deklariert. Behalte dabei nur bekannte Aufwandsstufen bei und behandle eine leere Liste deklarierter Stufen als „keine Stufen“. Standardmäßig deaktiviert: Der Modellkatalog und die ermittelten Aufwandsstufen bleiben exakt wie bisher.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "Lässt auto/*-Anfragen den Kandidatenpool mit aufgelösten Modellfähigkeiten (Vision, Reasoning, Thinking) und beobachteten Qualitätswerten aufbauen, die in einem einzigen Sammellesevorgang geladen werden. Standardmäßig aus: Die Kandidatengewichte zur Anfragezeit bleiben exakt wie bisher. An: Diese Signale fließen in die Snapshot-Gewichte ein, sodass sich Kandidatengewichte und Auswahl ändern können.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Lassen Sie die Überprüfung des Anmeldedatenstatus Verbindungen erneut testen, die das Gateway selbst deaktiviert hat (jeweils höchstens einmal alle 6 Stunden, 5 pro Überprüfung), und sie wieder aktivieren, wenn der erneute Test erfolgreich ist. Standardmäßig deaktiviert: Solche Verbindungen bleiben ausgeschaltet, bis ein Operator eingreift. Von einem Operator deaktivierte und dauerhaft gesperrte Verbindungen werden nie erneut getestet.",
@@ -1932,7 +1938,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# Anfrage} other {# Anfragen}}, {keys, plural, one {# begrenzter Schlüssel} other {# begrenzte Schlüssel}}",
     "unpricedUsageMore": "…und {count} weitere",
     "unpricedUsageConfigure": "Preise konfigurieren",
-    "unpricedUsageDismiss": "Schließen"
+    "unpricedUsageDismiss": "Schließen",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analytik",
@@ -3619,6 +3634,8 @@
     "testStepRunning": "Wird getestet…",
     "testStepNotTestable": "Nur Schritte mit einem einzelnen Modell können getestet werden",
     "saving": "Sparen...",
+    "liveAccountLabel": "Konto: {id}",
+    "liveAccountTooltip": "Konto: {id}",
     "liveNoProviders": "Noch keine Provider beobachtet.",
     "liveFleetDataHint": "Fleet-Daten treffen über Live-Combo-Events ein.",
     "liveActiveCount": "Aktiv ({count})",
@@ -5307,6 +5324,10 @@
       "disableAutoScroll": "Automatisches Scrollen deaktivieren",
       "enableAutoScroll": "Automatisches Scrollen aktivieren",
       "autoScroll": "Automatisches Scrollen",
+      "pauseLogs": "Updates anhalten",
+      "resumeLogs": "Aktualisierungen fortsetzen",
+      "paused": "Angehalten",
+      "scanLimited": "Scanlimit erreicht",
       "entryCount": "{count, plural, one {# Eintrag} other {# Einträge}}",
       "lastHour": "Letzte 1 Std.",
       "updatedAt": "Aktualisiert {time}",
@@ -6203,6 +6224,10 @@
     "hideEmails": "Alle E-Mail-Adressen ausblenden",
     "a": "A",
     "accountConcurrencyCapHint": "Account Concurrency Cap Hint",
+    "aiCreditsLimit": "AI-Credits-Limit pro Abrechnungszeitraum",
+    "aiCreditsLimitPlaceholder": "Kein lokales Limit",
+    "aiCreditsLimitHint": "Überspringt diese Verbindung, sobald die von GitHub gemeldeten AI Credits diesen Wert erreichen, sodass das Routing auf Ihre anderen Verbindungen ausweicht. Leer deaktiviert es; 0 überspringt sie immer. Ein fehlender oder veralteter Nutzungswert blockiert nie — dies ist keine garantierte Ausgabenobergrenze.",
+    "aiCreditsLimitInvalid": "Das AI-Credits-Limit muss eine nicht negative Zahl sein oder leer bleiben, um es zu deaktivieren.",
     "accountConcurrencyCapLabel": "Account Concurrency Cap Label",
     "accountIdHint": "Account Id Hint",
     "accountIdLabel": "Account Id Label",
@@ -6247,6 +6272,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Vorübergehende Abklingzeit überspringen, damit diese Verbindung auch nach behebbaren Fehlern verfügbar bleibt (endgültige Zustände wie gesperrt/abgelaufen gelten weiterhin).",
     "disableCoolingLabel": "Abklingzeit für diese Verbindung deaktivieren",
+    "keepMidConversationSystemDescription": "Lassen Sie Systemnachrichten, die während der Konversation gesendet werden, in der Nachrichtenliste, anstatt sie in die Systemaufforderung der obersten Ebene zu verschieben, damit der Eingabeaufforderungscache weiterhin über alle Runden hinweg zutrifft. Nur aktivieren, wenn dieser Upstream die Rolle „System“ in Nachrichten akzeptiert (andernfalls antwortet er mit 400).",
+    "keepMidConversationSystemLabel": "Behalten Sie die Systemnachrichten während des Gesprächs bei",
+    "requireUserLastMessageDescription": "Für Upstreams, die das Vorausfüllen des Assistenten ablehnen: Löschen Sie nachgestellte Assistentenumdrehungen (kein Tool_Use) vor dem Senden. Das Modell generiert möglicherweise seine vorherige Antwort neu.",
+    "requireUserLastMessageLabel": "Konversation muss mit einer Benutzernachricht enden",
     "bulkPasteAdded": "{count, plural, one {1 Schlüssel hinzugefügt} other {# Schlüssel hinzugefügt}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 Duplikat übersprungen} other {# Duplikate übersprungen}}",
     "bulkPasteHint": "Fügen Sie pro Zeile einen API-Schlüssel ein. Leere Zeilen werden ignoriert und doppelte Schlüssel übersprungen.",
@@ -6283,6 +6312,8 @@
     "newApiUserIdLabel": "New-API-Benutzer-ID",
     "newApiUserIdPlaceholder": "z. B. 12345",
     "newApiUserIdHint": "Wert des New-Api-User-Headers von AgentRouter, zusammen mit dem Konsolen-API-Schlüssel verwendet, um das Kontingentguthaben abzurufen.",
+    "tokenrouterManagementKeyLabel": "Verwaltungsschlüssel (optional)",
+    "tokenrouterManagementKeyHint": "Kontoschlüssel aus dem TokenRouter-Dashboard (Settings → Management Key). Wird nur zum Lesen von Kontingent und Guthaben verwendet, nie für Anfragen. Der gespeicherte Schlüssel wird nicht angezeigt; leer lassen, um ihn beizubehalten.",
     "newApiAggregatorToggleLabel": "Aggregator-Gateway",
     "newApiAggregatorToggleHint": "Aktivieren Sie die Saldenüberwachung für New-API / One-API / Sub2API-Aggregator-Knoten. Das Dashboard zeigt das Saldenabzeichen an und die Quoten-Vorabprüfung wird erschöpfte Konten überspringen.",
     "newApiAggregatorConsoleApiKeyHint": "Systemzugangstoken für den Endpunkt /api/user/self des Aggregators. Nicht den Routing-API-Schlüssel.",
@@ -6296,6 +6327,8 @@
     "customUserAgentLabel": "Benutzerdefinierter User-Agent",
     "huggingfaceBillToHint": "Optional. Die Kennung deines Hugging Face-Abrechnungskontos, die zur Kostenzuordnung als X-HF-Bill-To-Header gesendet wird.",
     "huggingfaceBillToLabel": "Hugging Face Bill-To-Konto",
+    "commandCodeZdrLabel": "Zero Data Retention (ZDR) erzwingen",
+    "commandCodeZdrHint": "Sendet x-cmd-zdr: 1 bei jeder Anfrage mit diesem API-Schlüssel. Modelle ohne ZDR-fähigen Upstream sind möglicherweise nicht verfügbar.",
     "databricksBaseUrlHint": "Hinweis zur Databricks-Basis-URL",
     "defaultThinkingStrengthHint": "Wird verwendet, wenn in einer Anfrage kein Denkaufwand angegeben ist.",
     "defaultThinkingStrengthLabel": "Standardmäßige Denkintensität",
@@ -6342,6 +6375,9 @@
     "localProviders": "Lokale Anbieter",
     "maxConcurrentWholeNumberError": "Fehler: Maximale Parallelität muss eine ganze Zahl sein",
     "m365TierLabel": "Copilot-Stufe",
+    "m365RefreshTokenLabel": "Aktualisierungstoken (optional)",
+    "m365RefreshTokenHint": "Wird verwendet, um das Microsoft 365-Zugriffstoken automatisch zu aktualisieren.",
+    "m365RefreshTokenEditHint": "Lassen Sie das Feld leer, um das vorhandene Token beizubehalten. Fügen Sie ein neues Token ein, um es zu ersetzen.",
     "m365TierHint": "Wählen Sie, welche Microsoft 365 Copilot-Oberfläche diese Verbindung verwendet. Individual ist der standardmäßige Consumer-BizChat; Education und Enterprise (Work) nutzen deren jeweilige Mandanten-Oberflächen.",
     "m365TierIndividualOption": "Individual (Standard)",
     "m365TierEduOption": "Bildung",
@@ -7076,6 +7112,7 @@
     "proxySubTabsAria": "Proxy-Bereiche",
     "requestBodyLimitTitle": "Limit für Anfragekörper",
     "requestBodyLimitDescription": "Maximale Größe der akzeptierten API-Nutzlast, bevor ein Anfragekörper geparst wird. Spezielle Upload-Routen behalten mindestens ihr integriertes Limit von 100 MB bei.",
+    "requestBodyLimitChatHint": "Chat Completions und Responses akzeptieren bis zu 50 MB, bis Sie hier ein Limit speichern. Das gespeicherte Limit gilt auch für sie, egal ob es niedriger oder höher ist.",
     "requestBodyLimitInputLabel": "Limit für Anfragekörper in MB",
     "requestBodyLimitEmptyError": "Limit in MB eingeben",
     "requestBodyLimitWholeNumberError": "Geben Sie eine ganze Zahl ein",
@@ -7261,6 +7298,13 @@
     "themeLight": "Licht",
     "themeDark": "Dunkel",
     "themeSystem": "System",
+    "paletteTitle": "Farbpalette",
+    "paletteDesc": "Editions ist das Standarddesign. Classic bringt den bisherigen Limetten-Akzent zurück.",
+    "paletteSelectionAria": "Auswahl der Farbpalette",
+    "paletteEditions": "Editions",
+    "paletteEditionsDesc": "Warme neutrale Farben mit einem Kupferakzent",
+    "paletteClassic": "Classic",
+    "paletteClassicDesc": "Kühle neutrale Farben mit einem Limetten-Akzent",
     "endpointTunnelVisibility": "Sichtbarkeit des Endpunkttunnels",
     "endpointTunnelVisibilityDesc": "Blenden Sie Tunnelsteuerelemente auf der Seite „Endpunkt“ aus, ohne den Tunnelstatus zu ändern.",
     "showCloudflareTunnel": "Cloudflare-Schnelltunnel",
@@ -9086,6 +9130,17 @@
     "resilienceTokenRefreshScopeConnection": "Verbindung (jedes Konto hat eigenen Schutzschalter)",
     "resilienceTokenRefreshThreshold": "Fehler vor der Pause",
     "resilienceTokenRefreshCooldown": "Pause nach Auslösung",
+    "mfaTitle": "Zwei-Faktor-Authentifizierung",
+    "mfaDesc": "Zusätzlich zum Passwort einen Code aus einer Authenticator-App verlangen, um sich am Dashboard anzumelden oder die CLI zu verbinden.",
+    "mfaScanQr": "Scannen Sie diesen QR-Code mit Ihrer Authenticator-App (oder geben Sie den Einrichtungsschlüssel manuell ein) und tippen Sie dann den angezeigten 6-stelligen Code ein.",
+    "mfaManualKey": "Einrichtungsschlüssel",
+    "mfaCodeLabel": "Bestätigungscode",
+    "mfaBackupCodesTitle": "Speichern Sie Ihre Wiederherstellungscodes",
+    "mfaBackupCodesDesc": "Jeder Code ermöglicht eine einmalige Anmeldung, falls Sie den Zugriff auf Ihren Authenticator verlieren. Sie werden nicht erneut angezeigt.",
+    "mfaBackupCodesRemaining": "Verbleibende Wiederherstellungscodes: {count}",
+    "mfaDisableDesc": "Geben Sie Ihr Passwort und einen aktuellen Code (oder einen Wiederherstellungscode) ein, um die Zwei-Faktor-Authentifizierung zu deaktivieren.",
+    "mfaRecoveryHint": "Wiederherstellung bei verlorenem Gerät: Starten Sie den Server mit OMNIROUTE_DISABLE_MFA=true und melden Sie sich direkt am Host an.",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA ist gesetzt: Anmeldungen von diesem Host überspringen den zweiten Faktor. Entfernen Sie die Variable, sobald Sie wieder Zugriff haben.",
     "piiMasking": {
       "title": "PII-Maskierung",
       "description": "Wählen Sie, welche Arten personenbezogener Daten maskiert werden, und fügen Sie eigene Muster hinzu. Die Maskierung bleibt aus, bis Sie die unten angezeigten Feature-Flags aktivieren.",
@@ -10257,6 +10312,7 @@
     "purchaseOauthFree": "OAuth kostenlos",
     "purchaseApiKey": "API-Schlüssel",
     "creditsLabel": "Guthaben",
+    "aiCreditsUsed": "{count} AI Credits verbraucht",
     "creditBalanceHint": "Restguthaben",
     "unlimitedLabel": "Unbegrenzt",
     "refreshing": "Wird aktualisiert",
@@ -10770,7 +10826,11 @@
     "deleteAndRelaunch": "Löschen",
     "settingsJson": "settings.json",
     "fromDataDir": "aus dem Datenverzeichnis",
-    "relaunchApp": "Starten Sie die OmniRoute-Desktopanwendung neu"
+    "relaunchApp": "Starten Sie die OmniRoute-Desktopanwendung neu",
+    "mfaPrompt": "Geben Sie den Code aus Ihrer Authenticator-App ein",
+    "mfaCodeLabel": "Bestätigungscode",
+    "mfaCodePlaceholder": "6-stelliger Code oder Wiederherstellungscode",
+    "mfaBackupCodeHint": "Gerät verloren? Geben Sie stattdessen einen Ihrer Wiederherstellungscodes ein."
   },
   "landing": {
     "brandName": "OmniRoute",
@@ -12238,7 +12298,9 @@
       "failedTitle": "Alle {count} Versuche sind fehlgeschlagen",
       "failed": "fehlgeschlagen",
       "pinnedTitle": "Modell über Kontext-Cache-Sitzungs-Pinning ausgewählt",
-      "pinned": "angeheftet"
+      "pinned": "angeheftet",
+      "recoveredAttemptsTitle": "Anfrage nach {count} Versuchen wiederhergestellt",
+      "latestOutcomeFailed": "Das letzte Anfrageergebnis war ein Fehler"
     },
     "attempts": "versuche",
     "detail": {
@@ -12340,13 +12402,20 @@
       "continuesFromParent": "wird vom übergeordneten Element fortgesetzt",
       "continuesFrom": "Wird von {id} fortgesetzt",
       "viewConversation": "Konversation anzeigen",
-      "openConversation": "Konversation {id} öffnen"
+      "openConversation": "Konversation {id} öffnen",
+      "omittedHttpAttempts": "{count} HTTP-Sendungen nicht gespeichert",
+      "noHttpResponse": "Keine HTTP-Antwort beobachtet",
+      "transportError": "Transportfehler"
     },
     "tableLabel": "Anfrageprotokolle",
     "throughputPostFirstToken": "Nach erstem Token",
     "throughputEndToEnd": "End-to-End",
     "throughputRate": "{value} Tokens/Sek.",
-    "throughputExplanation": "Beide Raten verwenden den größeren der Token-Zählwerte für Ausgabe und Reasoning. „Nach erstem Token“ schließt eine gültige TTFT aus; andernfalls wird die volle Dauer verwendet. End-to-End verwendet immer die volle Dauer. Eine gepufferte Antwort kann eine hohe Burst-Lieferrate aufweisen, ohne dass das Modell schneller generiert."
+    "throughputExplanation": "Beide Raten verwenden den größeren der Token-Zählwerte für Ausgabe und Reasoning. „Nach erstem Token“ schließt eine gültige TTFT aus; andernfalls wird die volle Dauer verwendet. End-to-End verwendet immer die volle Dauer. Eine gepufferte Antwort kann eine hohe Burst-Lieferrate aufweisen, ohne dass das Modell schneller generiert.",
+    "omittedHttpAttempts": "{count} HTTP-Sendungen nicht gespeichert",
+    "upstreamStatus": "Vorgelagerter Server {status}",
+    "noHttpResponse": "Keine HTTP-Antwort beobachtet",
+    "transportError": "Transportfehler"
   },
   "proxyLogger": {
     "filterAll": "Alle",
@@ -14113,6 +14182,14 @@
         "label": "Pool-Reihenfolge bei geteiltem Egress",
         "description": "Ordnet bei Anbietern, deren Kontingente nach Egress-Adresse aufgeteilt sind, ein Pool-Mitglied mit derselben beobachteten Egress-Adresse wie ein kürzlich abgewiesenes Mitglied direkt hinter intakten Mitgliedern ein. Nur Sortierung, niemals Ausschluss. Erfordert PROXY_SKIP_RECENTLY_FAILED, welches das gelesene Ablehnungssignal erzeugt. Standardmäßig deaktiviert: Die Auswahlreihenfolge entspricht exakt der einfachen Rotation."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Protokollierung der Rotationszuordnung",
         "description": "Die opencode-Rotation zeichnet auf, welcher Account Anfragen bedient hat oder übersprungen wurde (nur maskierte IDs, niemals vollständige Account-IDs), und verknüpft Proxy-Log-Einträge mit ihrer Anfrage, sodass Betreiber übersprungene von ungenutzten Accounts unterscheiden können. Standardmäßig deaktiviert: Es werden keine zusätzlichen Log-Zeilen oder Spalten geschrieben."
@@ -14164,6 +14241,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429: Pool-Neuauswahl",
         "description": "Für die OpenCode-Multi-Account-Rotation: Fragt nach einem 429 von einem Provider mit Egress-Bucketing auf einem Account ohne Proxy in einem Ambient-Pool-Kontext den Verbindungspool nach einem anderen Mitglied für den nächsten Versuch, anstatt dieselbe Egress-Adresse erneut zu verwenden. Sortiert, schließt niemals aus: Ein erschöpfter Pool behält das bisherige Verhalten bei. Standardmäßig deaktiviert: Jeder 429 rotiert genau wie bisher zum nächsten Account."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier-Egress-Probe",
+        "description": "Wenn für den OpenCode Executor eine Proxy-Anfrage mit 403 oder 451 FreeTierError beantwortet wird und der Wiederholungsversuch der beobachteten Tools fehlgeschlagen ist oder nicht angewendet wurde, senden Sie die Anfrage einmal über einen anderen Proxy (einen anderen Konto-Proxy oder ein anderes Poolmitglied, niemals eine direkte Verbindung). Nur wenn diese Probe mit 200 antwortet, wird der erste Egress im Proxy-Ablehnungsspeicher beiseitegelegt und die Probe-Antwort ausgeliefert; lehnen beide ab, wird die ursprüngliche Ablehnung zurückgegeben und nichts aufgezeichnet. Derselbe Ablehnungstext deckt sowohl eine markierte Egress-IP als auch eine abgelehnte Anfrageform ab, daher unterscheidet die Probe beides anhand von Belegen. Standardmäßig aus: Die Ablehnung wird unverändert zurückgegeben."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2-Client-Fingerprint",
@@ -14344,6 +14425,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Stopp bei Content-Policy-Verweigerung",
         "description": "Wenn ein Combo-Ziel mit einer exakten Content-Policy-Verweigerung antwortet (Code oder Typ cyber_policy / content_policy_violation), die Combo stoppen und diese Verweigerung zurückgeben, selbst wenn die verbleibenden Ziele andere Modelle sind, anstatt zum nächsten Ziel überzugehen. Standardmäßig deaktiviert: Die Verweigerung versetzt das Konto niemals in einen Cooldown oder löst den Provider-Breaker aus, und die Combo geht genau wie zuvor zum nächsten Ziel über."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown-Wiederholung: 403/410-Ablehnungen überspringen",

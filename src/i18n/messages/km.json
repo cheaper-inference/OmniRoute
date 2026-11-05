@@ -861,6 +861,13 @@
     "batchDetailWindow": "រយៈពេល",
     "batchDetailCreated": "បានបង្កើត",
     "providerTopologyEmpty": "មិនទាន់មានអ្នកផ្តល់សេវាណាមួយត្រូវបានភ្ជាប់ទេ",
+    "topologyModels": "ម៉ូដែល",
+    "topologyModelsOn": "បើក",
+    "topologyModelsOnHint": "បង្ហាញម៉ូដែលដែលមានសំណើផ្ទាល់ ឬថ្មីៗ",
+    "topologyModelsAuto": "ស្វ័យប្រវត្តិ",
+    "topologyModelsAutoHint": "បង្ហាញតែម៉ូដែលដែលមានសំណើកំពុងដំណើរការ",
+    "topologyModelsOff": "បិទ",
+    "topologyModelsOffHint": "លាក់ថ្នាំងម៉ូដែល",
     "badgeToastUnlocked": "បានដោះសោផ្លាកសញ្ញា!",
     "batchListSearchPlaceholder": "ស្វែងរកតាម ID, endpoint, ម៉ូដែល…",
     "batchListDeleteAllCompletedTitle": "លុបបាច់ដែលបានបញ្ចប់ទាំងអស់",
@@ -1105,7 +1112,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "ផ្ញើស្នាមសម្គាល់របស់កម្មវិធី CLI OpenCode v2 នៅលើសំណើ OpenCode Zen/Go៖ User-Agent opencode/latest/<2.x>/cli និង x-opencode-client cli ហើយនៅលើសំណើកម្រិតឥតគិតថ្លៃ សូមផ្ញើបឋមកថាសម័យ v2 គ្រោងការណ៍ឧបករណ៍អាន/shell របស់ CLI v2 និងមិនប្រើ tool_choice \"none\"។ តាមលំនាំដើម វាត្រូវបានបិទ៖ រាល់សំណើ OpenCode រក្សាអត្តសញ្ញាណ បឋមកថា និងខ្លឹមសារសំណើបច្ចុប្បន្នឱ្យនៅដដែល។",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "នៅពេលបញ្ជីបេក្ខជនរបស់ auto combo ទទេរួចហើយ មុនពេល pre-filter សម្រាប់ tool-calling ដំណើរការ (រាល់ target ត្រូវបានរំលងដោយសារ cooldowns, lockouts ឬ exhaustion) សូមឆ្លើយតបដោយ 503 no_eligible_targets ជំនួសឱ្យ 400 \"គ្មាន target ណាមួយគាំទ្រ tool calling ទេ\" capability_mismatch បែបចាស់។ បិទតាមលំនាំដើម៖ បញ្ជីទទេនឹងបន្តប្រើ 400 បែបចាស់។",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "អនុវត្តស្លាក endpoint ម៉ូដែលដែលទុកចិត្តបាន (ដែលបានប្រកាសដោយកាតាឡុកអ្នកផ្តល់សេវា, បានសន្និដ្ឋានពី ID ម៉ូដែលឯកទេស ឬកំណត់ដោយប្រតិបត្តិករ)៖ បដិសេធសំណើដែលបានផ្ញើទៅ endpoint ដែលម៉ូដែលមិនផ្តល់សេវា ដោយប្រើ HTTP 400 មុនពេលបញ្ជូនបន្តនៅលើ /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations និង /v1/audio/*; លាក់ម៉ូដែលដែល endpoint មានស្លាករបស់វាមិនមានអាដាប់ទ័រ OmniRoute ពី /v1/models; និងឆ្លើយតបការធ្វើតេស្តម៉ូដែលនៅលើផ្ទាំងគ្រប់គ្រងដោយ 422 សម្រាប់ម៉ូដែលបែបនេះ។ បិទតាមលំនាំដើម៖ ស្លាក endpoint នៅតែសម្រាប់ផ្តល់ព័ត៌មាន ហើយសំណើត្រូវបានបញ្ជូនបន្តដូចមុនទាំងស្រុង។",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "នៅលើ relay ដែលឆបគ្នាជាមួយ Anthropic ធម្មតា សូមរក្សា system turn នៅកណ្ដាលការសន្ទនាទុកក្នុងបញ្ជីសារ ជំនួសឱ្យការផ្លាស់ទីវាទៅកាន់ system prompt កម្រិតកំពូល ដើម្បីឱ្យបុព្វបទ prompt ដែលបានរក្សាទុកក្នុងឃ្លាំងសម្ងាត់មានស្ថិរភាពនៅគ្រប់ turn។ វាអនុវត្តតែនៅពេល client ខ្លួនឯងបានផ្ញើ beta mid-conversation-system-2026-04-07 ប៉ុណ្ណោះ។ តាមលំនាំដើម វាត្រូវបានបិទ៖ រាល់ system turn ត្រូវបានផ្លាស់ទីទៅក្នុង system prompt ដូចពីមុន ព្រោះ relay ដែលគ្មាន beta នោះនឹងបដិសេធ system turn នៅក្នុងបញ្ជីសារ។",
   "featureFlagModelsDevEffortTiersEnabledDescription": "ប្រើកម្រិតនៃកិច្ចខិតខំប្រឹងប្រែងក្នុងការវែកញែកដែល models.dev បោះពុម្ពផ្សាយ នៅពេលដែលទាំងការកំណត់ជំនួសរបស់ប្រតិបត្តិករ និងបញ្ជីចុះឈ្មោះរបស់អ្នកផ្តល់សេវា មិនបានប្រកាសកម្រិតណាមួយ ដោយរក្សាទុកតែកម្រិតកិច្ចខិតខំប្រឹងប្រែងដែលស្គាល់ប៉ុណ្ណោះ ហើយចាត់ទុកបញ្ជីកម្រិតដែលបានប្រកាសទទេថាជា \"គ្មានកម្រិត\"។ បានបិទតាមលំនាំដើម៖ កាតាឡុកម៉ូដែល និងកម្រិតកិច្ចខិតខំប្រឹងប្រែងដែលបានដោះស្រាយ នឹងនៅដដែលដូចពីមុន។",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "អនុញ្ញាតឱ្យសំណើ auto/* បង្កើតក្រុមបេក្ខជនដោយប្រើសមត្ថភាពម៉ូដែលដែលបានដោះស្រាយ (ចក្ខុវិស័យ ការវែកញែក ការគិត) និងពិន្ទុគុណភាពដែលបានសង្កេត ដែលអានក្នុងការអានជាដុំតែមួយ។ បិទតាមលំនាំដើម៖ ទម្ងន់បេក្ខជននៅពេលសំណើនៅដដែលដូចមុនទាំងស្រុង។ បើក៖ សញ្ញាទាំងនោះបញ្ចូលទៅក្នុងទម្ងន់ snapshot ដូច្នេះទម្ងន់បេក្ខជន និងការជ្រើសរើសអាចផ្លាស់ប្តូរ។",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "អនុញ្ញាតឱ្យការស្កេនសុខភាពព័ត៌មានសម្ងាត់សាកល្បងការតភ្ជាប់ឡើងវិញ ដែល gateway បានបិទដោយស្វ័យប្រវត្តិ (ការតភ្ជាប់នីមួយៗច្រើនបំផុតម្តងរៀងរាល់ 6 ម៉ោង និង 5 ការតភ្ជាប់ក្នុងមួយការស្កេន) ហើយបើកការតភ្ជាប់ណាមួយឡើងវិញ នៅពេលការសាកល្បងឡើងវិញរបស់វាជោគជ័យ។ តាមលំនាំដើម វាត្រូវបានបិទ៖ ការតភ្ជាប់បែបនេះនៅតែបិទ រហូតដល់ប្រតិបត្តិករចាត់វិធានការ។ ការតភ្ជាប់ដែលត្រូវបានបិទដោយប្រតិបត្តិករ និងការតភ្ជាប់ដែលត្រូវបានហាមឃាត់ជាអចិន្ត្រៃយ៍ មិនត្រូវបានសាកល្បងឡើងវិញឡើយ។",
@@ -2009,7 +2015,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# សំណើ} other {# សំណើ}}, {keys, plural, one {# កូនសោដែលមានដែនកំណត់} other {# កូនសោដែលមានដែនកំណត់}}",
     "unpricedUsageMore": "… និង {count} ផ្សេងទៀត",
     "unpricedUsageConfigure": "កំណត់តម្លៃ",
-    "unpricedUsageDismiss": "បិទ"
+    "unpricedUsageDismiss": "បិទ",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "ការវិភាគ",
@@ -3696,6 +3711,8 @@
     "testStepRunning": "កំពុងសាកល្បង…",
     "testStepNotTestable": "អាចសាកល្បងបានតែជំហានដែលមានម៉ូដែលតែមួយប៉ុណ្ណោះ",
     "saving": "កំពុងរក្សាទុក...",
+    "liveAccountLabel": "acct: {id}",
+    "liveAccountTooltip": "គណនី៖ {id}",
     "liveNoProviders": "មិនទាន់មានអ្នកផ្តល់សេវាណាមួយត្រូវបានរកឃើញទេ។",
     "liveFleetDataHint": "ទិន្នន័យក្រុមម៉ូដែលត្រូវបានទទួលតាមរយៈព្រឹត្តិការណ៍បន្សំផ្ទាល់។",
     "liveActiveCount": "សកម្ម ({count})",
@@ -5384,6 +5401,10 @@
       "disableAutoScroll": "បិទការរំកិលដោយស្វ័យប្រវត្តិ",
       "enableAutoScroll": "បើកការរំកិលដោយស្វ័យប្រវត្តិ",
       "autoScroll": "រំកិលដោយស្វ័យប្រវត្តិ",
+      "pauseLogs": "ផ្អាកការធ្វើបច្ចុប្បន្នភាព",
+      "resumeLogs": "បន្តធ្វើបច្ចុប្បន្នភាព",
+      "paused": "ផ្អាក",
+      "scanLimited": "ឈានដល់ដែនកំណត់ស្កេន",
       "entryCount": "{count, plural, one {# ធាតុ} other {# ធាតុ}}",
       "lastHour": "1 ម៉ោងចុងក្រោយ",
       "updatedAt": "បានធ្វើបច្ចុប្បន្នភាពនៅ {time}",
@@ -6280,6 +6301,10 @@
     "hideEmails": "លាក់អ៊ីមែលទាំងអស់",
     "a": "A",
     "accountConcurrencyCapHint": "ចំនួនសំណើព្រមគ្នាអតិបរមាដែលការតភ្ជាប់/គណនីនេះអាចដោះស្រាយបាន។ ជាធម្មតា គណនីជាវអនុញ្ញាតត្រឹមតែពីរបីប៉ុណ្ណោះ (1–3) — ការលើសកម្រិតនឹងបង្កឱ្យមានកំហុស 429 និងរយៈពេលរង់ចាំ។ ទុកឱ្យទទេដើម្បីប្រើតម្លៃលំនាំដើម។",
+    "aiCreditsLimit": "ដែនកំណត់ AI Credits ក្នុងមួយរយៈពេលចេញវិក្កយបត្រ",
+    "aiCreditsLimitPlaceholder": "គ្មានដែនកំណត់មូលដ្ឋាន",
+    "aiCreditsLimitHint": "រំលងការតភ្ជាប់នេះ នៅពេល AI Credits ដែល GitHub រាយការណ៍ឈានដល់តម្លៃនេះ ដើម្បីឱ្យការបញ្ជូនផ្លូវប្ដូរទៅការតភ្ជាប់ផ្សេងទៀតរបស់អ្នក។ ទុកទទេដើម្បីបិទ; 0 រំលងជានិច្ច។ ការអានការប្រើប្រាស់ដែលបាត់ ឬហួសសម័យ មិនដែលរារាំងឡើយ — នេះមិនមែនជាពិដានចំណាយដែលធានាទេ។",
+    "aiCreditsLimitInvalid": "ដែនកំណត់ AI Credits ត្រូវតែជាលេខមិនអវិជ្ជមាន ឬទុកទទេដើម្បីបិទ។",
     "accountConcurrencyCapLabel": "កម្រិតអតិបរមានៃសំណើព្រមគ្នារបស់គណនី",
     "accountIdHint": "តម្រូវដោយអ្នកផ្តល់សេវាមួយចំនួន (ឧ. Cloudflare Workers AI) រួមជាមួយ API token។",
     "accountIdLabel": "លេខសម្គាល់គណនី",
@@ -6324,6 +6349,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "រំលងរយៈពេលរង់ចាំបណ្តោះអាសន្ន ដើម្បីឱ្យការតភ្ជាប់នេះនៅតែអាចប្រើបាន សូម្បីតែបន្ទាប់ពីមានកំហុសដែលអាចស្ដារឡើងវិញបានក៏ដោយ (ស្ថានភាពបញ្ចប់ដូចជា ត្រូវបានហាមឃាត់/ផុតកំណត់ នៅតែអនុវត្ត)។",
     "disableCoolingLabel": "បិទរយៈពេលរង់ចាំសម្រាប់ការតភ្ជាប់នេះ",
+    "keepMidConversationSystemDescription": "ទុកសារប្រព័ន្ធដែលបានផ្ញើការសន្ទនាពាក់កណ្តាលនៅក្នុងបញ្ជីសារ ជំនួសឱ្យការផ្លាស់ទីពួកវាទៅក្នុងប្រអប់បញ្ចូលប្រព័ន្ធកម្រិតកំពូល ដូច្នេះឃ្លាំងសម្ងាត់ភ្លាមៗនៅតែបន្តឆ្លងកាត់។ បើកដំណើរការបានលុះត្រាតែប្រភពខាងលើទទួលយកតួនាទី \"ប្រព័ន្ធ\" នៅក្នុងសារ (បើមិនដូច្នេះទេ វាឆ្លើយ 400)។",
+    "keepMidConversationSystemLabel": "រក្សាសារប្រព័ន្ធសន្ទនាពាក់កណ្តាលនៅនឹងកន្លែង",
+    "requireUserLastMessageDescription": "សម្រាប់ការបញ្ជូនបន្តដែលបដិសេធការបញ្ចូលជំនួយជាមុន៖ ទម្លាក់ការបង្វិលជំនួយការដែលនៅពីក្រោយ (គ្មាន tool_use) មុនពេលផ្ញើ។ គំរូអាចបង្កើតចម្លើយពីមុនរបស់វាឡើងវិញ។",
+    "requireUserLastMessageLabel": "ទាមទារការសន្ទនាដើម្បីបញ្ចប់ដោយសារអ្នកប្រើប្រាស់",
     "bulkPasteAdded": "{count, plural, one {បានបន្ថែមសោ 1} other {បានបន្ថែមសោ #}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {បានរំលងសោស្ទួន 1} other {បានរំលងសោស្ទួន #}}",
     "bulkPasteHint": "បិទភ្ជាប់ API key មួយក្នុងមួយបន្ទាត់។ បន្ទាត់ទទេនឹងមិនត្រូវបានអើពើ ហើយសោស្ទួននឹងត្រូវបានរំលង។",
@@ -6360,6 +6389,8 @@
     "newApiUserIdLabel": "ID អ្នកប្រើប្រាស់ New-API",
     "newApiUserIdPlaceholder": "ឧ. 12345",
     "newApiUserIdHint": "តម្លៃ AgentRouter New-Api-User header ដែលប្រើរួមជាមួយ console API key ដើម្បីទាញយកសមតុល្យកូតា។",
+    "tokenrouterManagementKeyLabel": "សោគ្រប់គ្រង (ស្រេចចិត្ត)",
+    "tokenrouterManagementKeyHint": "សោគណនីពីផ្ទាំងគ្រប់គ្រង TokenRouter (Settings → Management Key)។ ប្រើសម្រាប់តែអានកូតា និងសមតុល្យប៉ុណ្ណោះ មិនដែលប្រើសម្រាប់សំណើទេ។ សោដែលបានរក្សាទុកមិនត្រូវបានបង្ហាញទេ; ទុកឱ្យទទេដើម្បីរក្សាវាទុក។",
     "newApiAggregatorToggleLabel": "ច្រកទ្វារប្រមូលផ្ដុំ",
     "newApiAggregatorToggleHint": "បើកការរកឃើញសមតុល្យសម្រាប់ថ្នាំងប្រមូលផ្តុំ New-API / One-API / Sub2API។ ផ្ទាំងគ្រប់គ្រងនឹងបង្ហាញស្លាកសមតុល្យ ហើយការកំណត់ផ្លូវដោយពិនិត្យកូតាជាមុននឹងរំលងគណនីដែលអស់សមតុល្យ។",
     "newApiAggregatorConsoleApiKeyHint": "ថូខឹនចូលប្រើប្រព័ន្ធសម្រាប់ចំណុចបញ្ចប់ /api/user/self របស់កម្មវិធីប្រមូលផ្តុំ។ មិនមែនជាសោ API សម្រាប់កំណត់ផ្លូវទេ។",
@@ -6373,6 +6404,8 @@
     "customUserAgentLabel": "ស្លាក User Agent ផ្ទាល់ខ្លួន",
     "huggingfaceBillToHint": "ជាជម្រើស។ ឧបករណ៍កំណត់អត្តសញ្ញាណគណនីចេញវិក្កយបត្រ Hugging Face របស់អ្នក ដែលត្រូវបានផ្ញើជាបឋមកថា X-HF-Bill-To សម្រាប់ការកំណត់ថ្លៃចំណាយ។",
     "huggingfaceBillToLabel": "គណនី Hugging Face Bill-To",
+    "commandCodeZdrLabel": "តម្រូវឱ្យមានការរក្សាទុកទិន្នន័យសូន្យ (ZDR)",
+    "commandCodeZdrHint": "ផ្ញើ x-cmd-zdr: 1 ជាមួយសំណើនីមួយៗដែលធ្វើឡើងដោយសោ API នេះ។ ម៉ូដែលដែលគ្មាន upstream ZDR ប្រហែលជាមិនអាចប្រើបាន។",
     "databricksBaseUrlHint": "ព័ត៌មានណែនាំអំពី URL មូលដ្ឋានរបស់ Databricks",
     "defaultThinkingStrengthHint": "ប្រើនៅពេលសំណើមិនបានបញ្ជាក់កម្រិតនៃកិច្ចខិតខំប្រឹងប្រែងក្នុងការវែកញែក។",
     "defaultThinkingStrengthLabel": "កម្រិតនៃការគិតលំនាំដើម",
@@ -6419,6 +6452,9 @@
     "localProviders": "អ្នកផ្តល់សេវាមូលដ្ឋាន",
     "maxConcurrentWholeNumberError": "កំហុស៖ ចំនួនអតិបរមាដែលដំណើរការព្រមគ្នាត្រូវតែជាចំនួនគត់",
     "m365TierLabel": "កម្រិត Copilot",
+    "m365RefreshTokenLabel": "ផ្ទុកសញ្ញាសម្ងាត់ឡើងវិញ (ជាជម្រើស)",
+    "m365RefreshTokenHint": "ប្រើដើម្បីធ្វើឱ្យស្រស់សញ្ញាចូលប្រើ Microsoft 365 ដោយស្វ័យប្រវត្តិ។",
+    "m365RefreshTokenEditHint": "ទុកទទេដើម្បីរក្សាសញ្ញាសម្ងាត់ដែលមានស្រាប់។ បិទភ្ជាប់និមិត្តសញ្ញាថ្មីដើម្បីជំនួសវា។",
     "m365TierHint": "ជ្រើសរើសថាតើការតភ្ជាប់នេះប្រើផ្ទៃ Microsoft 365 Copilot មួយណា។ បុគ្គល គឺជា BizChat លំនាំដើមសម្រាប់អ្នកប្រើប្រាស់ទូទៅ។ ការអប់រំ និងសហគ្រាស (ការងារ) អនុញ្ញាតឱ្យប្រើផ្ទៃ tenant រៀងៗខ្លួន។",
     "m365TierIndividualOption": "បុគ្គល (លំនាំដើម)",
     "m365TierEduOption": "ការអប់រំ",
@@ -7153,6 +7189,7 @@
     "proxySubTabsAria": "ផ្នែកប្រូកស៊ី",
     "requestBodyLimitTitle": "ដែនកំណត់ទំហំតួសំណើ",
     "requestBodyLimitDescription": "ទំហំអតិបរមានៃបន្ទុកទិន្នន័យ API ដែលទទួលយក មុនពេលតួសំណើត្រូវបានញែក។ ផ្លូវផ្ទុកឡើងជាក់លាក់រក្សាដែនកំណត់ដែលភ្ជាប់មកជាមួយយ៉ាងហោចណាស់ 100 MB។",
+    "requestBodyLimitChatHint": "Chat Completions និង Responses ទទួលយករហូតដល់ 50 MB រហូតដល់អ្នករក្សាទុកដែនកំណត់នៅទីនេះ។ ដែនកំណត់ដែលបានរក្សាទុកក៏អនុវត្តចំពោះវាដែរ ទោះបីទាបជាងឬខ្ពស់ជាងក៏ដោយ។",
     "requestBodyLimitInputLabel": "ដែនកំណត់តួសំណើជា MB",
     "requestBodyLimitEmptyError": "បញ្ចូលដែនកំណត់ជា MB",
     "requestBodyLimitWholeNumberError": "ប្រើចំនួនគត់",
@@ -7338,6 +7375,13 @@
     "themeLight": "ភ្លឺ",
     "themeDark": "ងងឹត",
     "themeSystem": "ប្រព័ន្ធ",
+    "paletteTitle": "ក្ដារលាយពណ៌",
+    "paletteDesc": "Editions គឺជារូបរាងលំនាំដើម។ Classic នាំពណ៌រំលេចបៃតងក្រូចឆ្មាពីមុនត្រឡប់មកវិញ។",
+    "paletteSelectionAria": "ការជ្រើសរើសក្ដារលាយពណ៌",
+    "paletteEditions": "Editions",
+    "paletteEditionsDesc": "ពណ៌អព្យាក្រឹតបែបកក់ក្តៅ ជាមួយពណ៌រំលេចទង់ដែង",
+    "paletteClassic": "Classic",
+    "paletteClassicDesc": "ពណ៌អព្យាក្រឹតបែបត្រជាក់ ជាមួយពណ៌រំលេចបៃតងក្រូចឆ្មា",
     "endpointTunnelVisibility": "ភាពមើលឃើញនៃ tunnel របស់ Endpoint",
     "endpointTunnelVisibilityDesc": "លាក់វត្ថុបញ្ជា tunnel ពីទំព័រ Endpoint ដោយមិនផ្លាស់ប្ដូរស្ថានភាព tunnel។",
     "showCloudflareTunnel": "ផ្លូវរូងរហ័ស Cloudflare",
@@ -9163,6 +9207,17 @@
     "resilienceTokenRefreshScopeConnection": "ការតភ្ជាប់ (គណនីនីមួយៗមានឧបករណ៍ផ្ទុះផ្ទាល់ខ្លួន)",
     "resilienceTokenRefreshThreshold": "ការបរាជ័យមុនពេលផ្អាក",
     "resilienceTokenRefreshCooldown": "ផ្អាកបន្ទាប់ពីដំណើរការ",
+    "mfaTitle": "ការផ្ទៀងផ្ទាត់ពីរកត្តា",
+    "mfaDesc": "តម្រូវឱ្យមានលេខកូដពីកម្មវិធីផ្ទៀងផ្ទាត់ បន្ថែមលើពាក្យសម្ងាត់ ដើម្បីចូលផ្ទាំងគ្រប់គ្រង ឬភ្ជាប់ CLI។",
+    "mfaScanQr": "ស្កេនកូដ QR នេះជាមួយកម្មវិធីផ្ទៀងផ្ទាត់របស់អ្នក (ឬបញ្ចូលសោរៀបចំដោយដៃ) រួចវាយលេខកូដ 6 ខ្ទង់ដែលវាបង្ហាញ។",
+    "mfaManualKey": "សោរៀបចំ",
+    "mfaCodeLabel": "លេខកូដផ្ទៀងផ្ទាត់",
+    "mfaBackupCodesTitle": "រក្សាទុកលេខកូដស្ដាររបស់អ្នក",
+    "mfaBackupCodesDesc": "លេខកូដនីមួយៗអនុញ្ញាតឱ្យអ្នកចូលម្ដង ប្រសិនបើអ្នកបាត់សិទ្ធិចូលកម្មវិធីផ្ទៀងផ្ទាត់។ ពួកវានឹងមិនបង្ហាញម្ដងទៀតទេ។",
+    "mfaBackupCodesRemaining": "លេខកូដស្ដារដែលនៅសល់៖ {count}",
+    "mfaDisableDesc": "បញ្ចូលពាក្យសម្ងាត់ និងលេខកូដបច្ចុប្បន្ន (ឬលេខកូដស្ដារ) ដើម្បីបិទការផ្ទៀងផ្ទាត់ពីរកត្តា។",
+    "mfaRecoveryHint": "ការស្ដារឧបករណ៍ដែលបាត់៖ ចាប់ផ្ដើមម៉ាស៊ីនមេជាមួយ OMNIROUTE_DISABLE_MFA=true ហើយចូលពីម៉ាស៊ីនផ្ទាល់។",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA ត្រូវបានកំណត់៖ ការចូលពីម៉ាស៊ីននេះរំលងកត្តាទីពីរ។ សូមលុបវាចេញនៅពេលអ្នកចូលវិញបាន។",
     "piiMasking": {
       "title": "ការលាក់ទិន្នន័យផ្ទាល់ខ្លួន",
       "description": "ជ្រើសរើសប្រភេទទិន្នន័យផ្ទាល់ខ្លួនដែលត្រូវលាក់ ហើយបន្ថែមលំនាំផ្ទាល់ខ្លួនរបស់អ្នក។ ការលាក់នៅតែបិទ រហូតដល់អ្នកបើកទង់មុខងារដែលបង្ហាញខាងក្រោម។",
@@ -10338,6 +10393,7 @@
     "purchaseOauthFree": "OAuth ឥតគិតថ្លៃ",
     "purchaseApiKey": "សោ API",
     "creditsLabel": "ក្រេឌីត",
+    "aiCreditsUsed": "បានប្រើ AI Credits {count}",
     "creditBalanceHint": "សមតុល្យនៅសល់",
     "unlimitedLabel": "គ្មានដែនកំណត់",
     "refreshing": "កំពុងផ្ទុកឡើងវិញ",
@@ -10847,7 +10903,11 @@
     "deleteAndRelaunch": "លុប",
     "settingsJson": "settings.json",
     "fromDataDir": "ចេញពីថតទិន្នន័យ",
-    "relaunchApp": "បើកកម្មវិធី OmniRoute លើកុំព្យូទ័រឡើងវិញ"
+    "relaunchApp": "បើកកម្មវិធី OmniRoute លើកុំព្យូទ័រឡើងវិញ",
+    "mfaPrompt": "បញ្ចូលលេខកូដពីកម្មវិធីផ្ទៀងផ្ទាត់របស់អ្នក",
+    "mfaCodeLabel": "លេខកូដផ្ទៀងផ្ទាត់",
+    "mfaCodePlaceholder": "លេខកូដ 6 ខ្ទង់ ឬលេខកូដស្ដារ",
+    "mfaBackupCodeHint": "បាត់ឧបករណ៍? បញ្ចូលលេខកូដស្ដារមួយរបស់អ្នកជំនួសវិញ។"
   },
   "landing": {
     "brandName": "OmniRoute",
@@ -12315,7 +12375,9 @@
       "failedTitle": "ការព្យាយាមទាំង {count} ដងបានបរាជ័យ",
       "failed": "បានបរាជ័យ",
       "pinnedTitle": "ម៉ូដែលត្រូវបានជ្រើសរើសតាមរយៈការខ្ទាស់សម័យ context-cache",
-      "pinned": "បានខ្ទាស់"
+      "pinned": "បានខ្ទាស់",
+      "recoveredAttemptsTitle": "សំណើត្រូវបានស្ដារឡើងវិញបន្ទាប់ពីព្យាយាម {count} ដង",
+      "latestOutcomeFailed": "លទ្ធផលសំណើចុងក្រោយបានបរាជ័យ"
     },
     "attempts": "ការព្យាយាម",
     "detail": {
@@ -12417,13 +12479,20 @@
       "continuesFromParent": "បន្តពីធាតុមេ",
       "continuesFrom": "បន្តពី {id}",
       "viewConversation": "មើលការសន្ទនា",
-      "openConversation": "បើកការសន្ទនា {id}"
+      "openConversation": "បើកការសន្ទនា {id}",
+      "omittedHttpAttempts": "ការផ្ញើ HTTP ចំនួន {count} មិនត្រូវបានរក្សាទុកទេ",
+      "noHttpResponse": "មិនបានសង្កេតឃើញការឆ្លើយតប HTTP ទេ",
+      "transportError": "កំហុសការដឹកជញ្ជូន"
     },
     "tableLabel": "កំណត់ហេតុសំណើ",
     "throughputPostFirstToken": "ក្រោយតូខេនដំបូង",
     "throughputEndToEnd": "ពីដើមដល់ចប់",
     "throughputRate": "{value} តូខេន/វិនាទី",
-    "throughputExplanation": "អត្រាទាំងពីរប្រើចំនួនតូខេនធំជាងរវាងចំនួនតូខេនលទ្ធផល និងចំនួនតូខេនហេតុផល។ ក្រោយតូខេនដំបូងមិនរាប់បញ្ចូល TTFT ដែលត្រឹមត្រូវទេ; បើមិនដូច្នេះទេ វាប្រើរយៈពេលពេញលេញ។ ពីដើមដល់ចប់តែងតែប្រើរយៈពេលពេញលេញ។ ការឆ្លើយតបដែលបានស្តុកទុកអាចមានអត្រាបញ្ជូនផ្ទុះខ្ពស់ ដោយមិនមានការបង្កើតម៉ូដែលលឿនជាង។"
+    "throughputExplanation": "អត្រាទាំងពីរប្រើចំនួនតូខេនធំជាងរវាងចំនួនតូខេនលទ្ធផល និងចំនួនតូខេនហេតុផល។ ក្រោយតូខេនដំបូងមិនរាប់បញ្ចូល TTFT ដែលត្រឹមត្រូវទេ; បើមិនដូច្នេះទេ វាប្រើរយៈពេលពេញលេញ។ ពីដើមដល់ចប់តែងតែប្រើរយៈពេលពេញលេញ។ ការឆ្លើយតបដែលបានស្តុកទុកអាចមានអត្រាបញ្ជូនផ្ទុះខ្ពស់ ដោយមិនមានការបង្កើតម៉ូដែលលឿនជាង។",
+    "omittedHttpAttempts": "ការផ្ញើ HTTP ចំនួន {count} មិនត្រូវបានរក្សាទុកទេ",
+    "upstreamStatus": "ម៉ាស៊ីនមេខាងលើ {status}",
+    "noHttpResponse": "មិនបានសង្កេតឃើញការឆ្លើយតប HTTP ទេ",
+    "transportError": "កំហុសការដឹកជញ្ជូន"
   },
   "proxyLogger": {
     "filterAll": "ទាំងអស់",
@@ -14190,6 +14259,14 @@
         "label": "លំដាប់អាង Egress រួមគ្នា",
         "description": "សម្រាប់ក្រុមហ៊ុនផ្ដល់សេវាដែលកូតារបស់ពួកគេត្រូវបានបែងចែកតាមអាសយដ្ឋាន egress ចាត់ថ្នាក់សមាជិកអាងដែលចែករំលែកអាសយដ្ឋាន egress ដែលបានសង្កេតឃើញរបស់សមាជិកដែលទើបតែត្រូវបានបដិសេធ ឱ្យស្ថិតនៅខាងក្រោមកម្រិតសមាជិកដែលមានសុខភាពល្អ។ ប្តូរតែលំដាប់ប៉ុណ្ណោះ មិនដែលដកចេញឡើយ។ ត្រូវការ PROXY_SKIP_RECENTLY_FAILED ដែលបង្កើតសញ្ញាបដិសេធដែលវាអាន។ បិទតាមលំនាំដើម៖ លំដាប់នៃការជ្រើសរើសគឺដូចគ្នាបេះបិទទៅនឹងការបង្វិលធម្មតា។"
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "ការកត់ត្រាកំណត់ហេតុបញ្ជាក់ការបង្វិល",
         "description": "ការបង្វិលរបស់ Opencode កត់ត្រាថាគណនីណាបានបម្រើការ ឬត្រូវបានរំលង (លេខសម្គាល់ដែលបានបិទបាំងប៉ុណ្ណោះ មិនដែលមានលេខសម្គាល់គណនីពេញលេញឡើយ) និងភ្ជាប់ធាតុចូលកំណត់ហេតុប្រូកស៊ីទៅនឹងសំណើរបស់ពួកគេ ដូច្នេះប្រតិបត្តិករអាចបែងចែកគណនីដែលត្រូវបានរំលងចេញពីគណនីដែលមិនបានប្រើប្រាស់។ បិទតាមលំនាំដើម៖ គ្មានបន្ទាត់កំណត់ហេតុបន្ថែម និងគ្មានជួរឈរបន្ថែមត្រូវបានកត់ត្រាឡើយ។"
@@ -14241,6 +14318,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "ការជ្រើសរើស Pool ឡើងវិញចំពោះ 429 របស់ OpenCode",
         "description": "សម្រាប់ការបង្វិលគណនីច្រើនរបស់ OpenCode បន្ទាប់ពីទទួលបាន 429 ពីអ្នកផ្តល់សេវា egress-bucketed លើគណនីគ្មានប្រូកស៊ី (proxy-less) ក្រោមបរិបទ ambient pool សូមស្នើសុំសមាជិកផ្សេងទៀតពី connection pool សម្រាប់ការសាកល្បងលើកក្រោយ ជាជាងព្យាយាមម្តងទៀតលើអាសយដ្ឋាន egress ដដែល។ តម្រៀបលំដាប់ មិនដែលដកចេញឡើយ៖ pool ដែលអស់ជម្រើសនៅតែរក្សាឥរិយាបថបច្ចុប្បន្ន។ បិទតាមលំនាំដើម៖ រាល់ 429 នឹងបង្វិលទៅគណនីបន្ទាប់ដូចកាលពីមុនបេះបិទ។"
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress Probe",
+        "description": "សម្រាប់ប្រតិបត្តិករ OpenCode នៅពេលដែលសំណើប្រូកស៊ីត្រូវបានឆ្លើយតប 403 ឬ 451 FreeTierError ហើយការព្យាយាមម្តងទៀតរបស់ឧបករណ៍សង្កេតបានបរាជ័យ ឬមិនបានអនុវត្ត សូមផ្ញើសំណើម្តងតាមរយៈប្រូកស៊ីផ្សេង (ប្រូកស៊ីគណនីផ្សេងទៀត ឬសមាជិកក្រុមផ្សេងទៀត មិនដែលភ្ជាប់ដោយផ្ទាល់ទេ)។ លុះត្រាតែការស៊ើបអង្កេតនោះឆ្លើយ 200 គឺជាការចេញដំណើរដំបូងដែលដាក់ក្នុងអង្គចងចាំបដិសេធប្រូកស៊ី ហើយការឆ្លើយតបការស៊ើបអង្កេតត្រូវបានបម្រើ។ នៅពេលដែលទាំងពីរបដិសេធ ការបដិសេធដើមត្រូវបានប្រគល់មកវិញ ហើយគ្មានអ្វីត្រូវបានកត់ត្រាទេ។ អត្ថបទបដិសេធដូចគ្នាគ្របដណ្តប់ IP egress ដែលមានទង់ និងទម្រង់សំណើដែលបានបដិសេធ ដូច្នេះការស៊ើបអង្កេតប្រាប់ពួកគេដាច់ដោយឡែកពីគ្នាដោយភស្តុតាង។ បិទតាមលំនាំដើម៖ ការបដិសេធមិនផ្លាស់ប្តូរទេ។"
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "ស្នាមម្រាមដៃម៉ាស៊ីនភ្ញៀវ OpenCode v2",
@@ -14421,6 +14502,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo៖ បញ្ឈប់នៅពេលមានការបដិសេធគោលការណ៍ខ្លឹមសារ",
         "description": "នៅពេលគោលដៅ combo ឆ្លើយតបមកវិញនូវការបដិសេធគោលការណ៍ខ្លឹមសារជាក់លាក់ (code ឬ type cyber_policy / content_policy_violation) សូមបញ្ឈប់ combo ហើយប្រគល់ការបដិសេធនោះត្រឡប់មកវិញ ទោះបីជាគោលដៅដែលនៅសល់ជាម៉ូដែលផ្សេងគ្នាក៏ដោយ ជាជាងបន្តទៅកាន់គោលដៅបន្ទាប់។ បិទតាមលំនាំដើម៖ ការបដិសេធមិនដែលធ្វើឱ្យគណនីផ្អាក ឬកាត់ផ្តាច់ provider breaker ឡើយ ហើយ combo នឹងបន្តទៅកាន់គោលដៅបន្ទាប់របស់វាដូចពីមុនទាំងស្រុង។"
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown Retry: រំលងការបដិសេធ 403/410",

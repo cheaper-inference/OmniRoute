@@ -38,6 +38,7 @@ import {
 } from "@omniroute/open-sse/services/claudeResetCreditCount.ts";
 import { cooldownUntilMs } from "@omniroute/open-sse/services/accountFallback.ts";
 import { rotationGroupFor } from "@omniroute/open-sse/services/refreshSerializer.ts";
+import { readStoredVerificationUrl } from "@omniroute/open-sse/services/antigravityVerification.ts";
 import {
   extractCodeAssistOnboardTierId,
   extractCodeAssistSubscriptionTier,
@@ -597,6 +598,10 @@ export async function maybeClearRecoveredQuotaState(
 ): Promise<ProviderConnectionLike> {
   if (!hasUsableQuota(usage)) return connection;
   if (isTerminalStatusForQuotaRecovery(connection.testStatus)) return connection;
+  // Google keeps reporting Antigravity quota for an account blocked by 403 VALIDATION_REQUIRED,
+  // so usable quota says nothing about that block: keep the error until a passing connection
+  // test drops the stored verification link.
+  if (readStoredVerificationUrl(connection.providerSpecificData)) return connection;
   let verifiedResetRecovery = false;
   if (hasActiveCooldown(connection)) {
     // A future rateLimitedUntil written from a real upstream signal is a hard
@@ -1193,6 +1198,14 @@ async function fetchLiveProviderLimitsWithOptions(
   };
 }
 
+function cacheReadObservedAt(
+  connection: ProviderConnectionLike,
+  usage: JsonRecord,
+  readStartedAt: string
+): string | undefined {
+  return connection.provider === "codex" && usage._stale !== true ? readStartedAt : undefined;
+}
+
 export async function fetchAndPersistProviderLimits(
   connectionId: string,
   source: SyncSource = "manual",
@@ -1202,12 +1215,19 @@ export async function fetchAndPersistProviderLimits(
   usage: JsonRecord;
   cache: ProviderLimitsCacheEntry;
 }> {
+  // Conservative observation ordering: a slow usage poll must not outrank
+  // inference evidence accepted while that poll was in flight.
+  const readStartedAt = new Date().toISOString();
   const { connection, usage } = await fetchLiveProviderLimitsWithOptions(connectionId, {
     forceRefresh: source === "manual",
     allowRotatingRefresh: opts.allowRotatingRefresh,
     includeResetCredits: opts.includeResetCredits,
   });
-  const newCache = toProviderLimitsCacheEntry(usage, source);
+  const newCache = toProviderLimitsCacheEntry(
+    usage,
+    source,
+    cacheReadObservedAt(connection, usage, readStartedAt)
+  );
   const previous = getProviderLimitsCache(connectionId);
   const cache = mergeProviderLimitsCacheEntry(connection.provider, newCache, previous);
 
@@ -1248,7 +1268,31 @@ export async function fetchAndPersistProviderLimits(
     ...(cache.billing ? { billing: cache.billing } : {}),
   };
   setProviderLimitsCache(connectionId, cache);
+  if (connection.provider === "codex") {
+    const current = getProviderLimitsCache(connectionId) ?? cache;
+    return {
+      connection,
+      usage: { ...mergedUsage, quotas: current.quotas, fetchedAt: current.fetchedAt },
+      cache: current,
+    };
+  }
   return { connection, usage: mergedUsage, cache };
+}
+
+async function fetchUsageCacheForSync(connection: ProviderConnectionLike, source: SyncSource) {
+  const existingCache = getProviderLimitsCache(connection.id);
+  await refreshLiveModelIds(connection.provider);
+  const forceRefresh =
+    source === "manual" || shouldRefreshProviderLimitsCache(connection, existingCache || undefined);
+  const readStartedAt = new Date().toISOString();
+  const { usage } = await fetchLiveProviderLimitsWithOptions(connection.id, { forceRefresh });
+  const nextCache = toProviderLimitsCacheEntry(
+    usage,
+    source,
+    cacheReadObservedAt(connection, usage, readStartedAt)
+  );
+  const cache = mergeProviderLimitsCacheEntry(connection.provider, nextCache, existingCache);
+  return { connectionId: connection.id, cache };
 }
 
 export async function syncAllProviderLimits(
@@ -1291,19 +1335,8 @@ export async function syncAllProviderLimits(
     errors[connectionId] = reason?.message || "Failed to refresh provider limits";
   };
 
-  const fetchOne = async (connection: ProviderConnectionLike) => {
-    const existingCache = getProviderLimitsCache(connection.id);
-    await refreshLiveModelIds(connection.provider);
-    const forceRefresh =
-      source === "manual" ||
-      shouldRefreshProviderLimitsCache(connection, existingCache || undefined);
-    const { usage } = await fetchLiveProviderLimitsWithOptions(connection.id, {
-      forceRefresh,
-    });
-    const nextCache = toProviderLimitsCacheEntry(usage, source);
-    const cache = mergeProviderLimitsCacheEntry(connection.provider, nextCache, existingCache);
-    return { connectionId: connection.id, cache };
-  };
+  const fetchOne = (connection: ProviderConnectionLike) =>
+    fetchUsageCacheForSync(connection, source);
 
   // OAuth connections are processed STRICTLY SEQUENTIALLY (chunk size 1) with a
   // spacing gap so a single host never bursts simultaneous usage/refresh

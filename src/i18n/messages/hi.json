@@ -784,6 +784,13 @@
     "batchDetailWindow": "खिड़की",
     "batchDetailCreated": "बनाया गया",
     "providerTopologyEmpty": "अभी तक कोई प्रदाता कनेक्ट नहीं हुआ है",
+    "topologyModels": "मॉडल",
+    "topologyModelsOn": "चालू",
+    "topologyModelsOnHint": "लाइव या हाल के अनुरोधों वाले मॉडल दिखाएँ",
+    "topologyModelsAuto": "स्वचालित",
+    "topologyModelsAutoHint": "केवल चल रहे अनुरोध वाले मॉडल दिखाएँ",
+    "topologyModelsOff": "बंद",
+    "topologyModelsOffHint": "मॉडल नोड छिपाएँ",
     "badgeToastUnlocked": "बैज अनलॉक!",
     "batchListSearchPlaceholder": "आईडी, समापन बिंदु, मॉडल के आधार पर खोजें...",
     "batchListDeleteAllCompletedTitle": "सभी पूर्ण बैच हटाएँ",
@@ -1028,7 +1035,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "OpenCode Zen/Go अनुरोधों पर OpenCode v2 CLI क्लाइंट फ़िंगरप्रिंट भेजें: opencode/latest/<2.x>/cli User-Agent और x-opencode-client cli, तथा फ़्री-टियर अनुरोधों पर v2 सेशन हेडर, v2 CLI read/shell टूल स्कीमा और कोई tool_choice \"none\" नहीं। डिफ़ॉल्ट रूप से बंद: प्रत्येक OpenCode अनुरोध की मौजूदा पहचान, हेडर और बॉडी अपरिवर्तित रहती है।",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "जब टूल-कॉलिंग प्री-फ़िल्टर चलने से पहले ही किसी ऑटो कॉम्बो का कैंडिडेट पूल खाली हो (कूलडाउन, लॉकआउट या समाप्ति के कारण प्रत्येक टार्गेट छोड़ दिया गया हो), तो पुराने 400 \"कोई भी टार्गेट टूल कॉलिंग का समर्थन नहीं करता\" capability_mismatch के बजाय 503 no_eligible_targets उत्तर दें। डिफ़ॉल्ट रूप से बंद: खाली पूल पुराने 400 को बनाए रखता है।",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "विश्वसनीय मॉडल एंडपॉइंट टैग लागू करें (प्रोवाइडर कैटलॉग द्वारा घोषित, किसी विशेष मॉडल id से अनुमानित, या ऑपरेटर द्वारा सेट): /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations और /v1/audio/* पर डिस्पैच से पहले, ऐसे एंडपॉइंट को भेजे गए अनुरोध को HTTP 400 के साथ अस्वीकार करें जिसे मॉडल सर्व नहीं करता; जिन मॉडल के टैग किए गए एंडपॉइंट के लिए कोई OmniRoute अडैप्टर नहीं है, उन्हें /v1/models से छिपाएँ; और ऐसे मॉडल के लिए डैशबोर्ड मॉडल परीक्षण का उत्तर 422 के साथ दें। डिफ़ॉल्ट रूप से बंद: एंडपॉइंट टैग केवल सूचनात्मक रहते हैं और अनुरोध पहले की तरह ही डिस्पैच किए जाते हैं।",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "सामान्य Anthropic-संगत रिले पर, बातचीत के बीच आने वाले सिस्टम टर्न को शीर्ष-स्तरीय सिस्टम प्रॉम्प्ट में ले जाने के बजाय संदेश सूची में ही रखें, ताकि कैश किया गया प्रॉम्प्ट प्रीफ़िक्स सभी टर्न में स्थिर रहे। यह केवल तभी लागू होता है, जब क्लाइंट ने स्वयं mid-conversation-system-2026-04-07 बीटा भेजा हो। डिफ़ॉल्ट रूप से बंद: प्रत्येक सिस्टम टर्न को पहले की तरह ही सिस्टम प्रॉम्प्ट में ले जाया जाता है, क्योंकि इस बीटा के बिना रिले संदेश सूची में सिस्टम टर्न को अस्वीकार कर देते हैं।",
   "featureFlagModelsDevEffortTiersEnabledDescription": "जब न तो कोई ऑपरेटर ओवरराइड और न ही प्रदाता रजिस्ट्री किसी स्तर की घोषणा करे, तब models.dev द्वारा प्रकाशित रीजनिंग प्रयास स्तरों का उपयोग करें, केवल ज्ञात प्रयास स्तरों को बनाए रखें, और घोषित स्तरों की खाली सूची को \"कोई स्तर नहीं\" मानें। यह डिफ़ॉल्ट रूप से बंद है: मॉडल कैटलॉग और निर्धारित प्रयास स्तर पहले जैसे ही बने रहते हैं।",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "auto/* अनुरोधों को हल की गई मॉडल क्षमताओं (विज़न, रीज़निंग, थिंकिंग) और देखे गए गुणवत्ता स्कोर के साथ, एक ही बल्क रीड में, उम्मीदवार पूल बनाने देता है। डिफ़ॉल्ट रूप से बंद: अनुरोध के समय उम्मीदवारों के वेट बिल्कुल पहले जैसे रहते हैं। चालू होने पर: ये संकेत स्नैपशॉट वेट में शामिल होते हैं, इसलिए उम्मीदवारों के वेट और चयन बदल सकते हैं।",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "क्रेडेंशियल हेल्थ स्वीप को उन कनेक्शनों का फिर से परीक्षण करने दें जिन्हें गेटवे ने स्वयं बंद किया था (प्रत्येक का अधिकतम हर 6 घंटे में एक बार, प्रति स्वीप 5) और पुनः परीक्षण सफल होने पर उन्हें फिर से चालू कर दें। डिफ़ॉल्ट रूप से बंद: ऐसे कनेक्शन तब तक बंद रहते हैं जब तक कोई ऑपरेटर कार्रवाई नहीं करता। ऑपरेटर द्वारा अक्षम और स्थायी रूप से प्रतिबंधित कनेक्शनों का कभी भी पुनः परीक्षण नहीं किया जाता।",
@@ -1932,7 +1938,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# अनुरोध} other {# अनुरोध}}, {keys, plural, one {# सीमित कुंजी} other {# सीमित कुंजियाँ}}",
     "unpricedUsageMore": "…और {count} और",
     "unpricedUsageConfigure": "मूल्य निर्धारण कॉन्फ़िगर करें",
-    "unpricedUsageDismiss": "खारिज करें"
+    "unpricedUsageDismiss": "खारिज करें",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "विश्लेषिकी",
@@ -3619,6 +3634,8 @@
     "testStepRunning": "परीक्षण हो रहा है…",
     "testStepNotTestable": "केवल एकल-मॉडल चरणों का ही परीक्षण किया जा सकता है",
     "saving": "सहेजा जा रहा है...",
+    "liveAccountLabel": "अधिनियम: {id}",
+    "liveAccountTooltip": "खाता: {id}",
     "liveNoProviders": "अभी तक कोई प्रदाता नहीं देखा गया।",
     "liveFleetDataHint": "फ़्लीट डेटा लाइव कॉम्बो इवेंट्स के माध्यम से आता है।",
     "liveActiveCount": "सक्रिय ({count})",
@@ -5307,6 +5324,10 @@
       "disableAutoScroll": "ऑटो-स्क्रॉल अक्षम करें",
       "enableAutoScroll": "ऑटो-स्क्रॉल सक्षम करें",
       "autoScroll": "ऑटो-स्क्रॉल",
+      "pauseLogs": "अपडेट रोकें",
+      "resumeLogs": "अपडेट फिर से शुरू करें",
+      "paused": "रुका हुआ",
+      "scanLimited": "स्कैन की सीमा पूरी हो गई",
       "entryCount": "{count, plural, one {# प्रविष्टि} other {# प्रविष्टियाँ}}",
       "lastHour": "पिछला 1 घंटा",
       "updatedAt": "{time} को अपडेट किया गया",
@@ -6203,6 +6224,10 @@
     "hideEmails": "सभी ईमेल छिपाएँ",
     "a": "A",
     "accountConcurrencyCapHint": "Account Concurrency Cap Hint",
+    "aiCreditsLimit": "प्रति बिलिंग अवधि AI Credits सीमा",
+    "aiCreditsLimitPlaceholder": "कोई स्थानीय सीमा नहीं",
+    "aiCreditsLimitHint": "GitHub द्वारा रिपोर्ट किए गए AI Credits इस मान तक पहुँचने पर यह कनेक्शन छोड़ दिया जाता है, ताकि रूटिंग आपके अन्य कनेक्शनों पर चली जाए। खाली रखने पर यह बंद रहता है; 0 इसे हमेशा छोड़ देता है। अनुपलब्ध या पुराना उपयोग डेटा कभी ब्लॉक नहीं करता — यह गारंटीकृत खर्च सीमा नहीं है।",
+    "aiCreditsLimitInvalid": "AI Credits सीमा एक गैर-ऋणात्मक संख्या होनी चाहिए, या बंद करने के लिए खाली छोड़ें।",
     "accountConcurrencyCapLabel": "Account Concurrency Cap Label",
     "accountIdHint": "Account Id Hint",
     "accountIdLabel": "Account Id Label",
@@ -6247,6 +6272,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "अस्थायी कूलडाउन को छोड़ें ताकि पुनर्प्राप्ति योग्य त्रुटियों के बाद भी यह कनेक्शन योग्य बना रहे (प्रतिबंधित/समाप्त जैसी अंतिम स्थितियां अभी भी लागू होती हैं)।",
     "disableCoolingLabel": "इस कनेक्शन के लिए कूलडाउन अक्षम करें",
+    "keepMidConversationSystemDescription": "भेजे गए सिस्टम संदेशों को शीर्ष-स्तरीय सिस्टम प्रॉम्प्ट में ले जाने के बजाय संदेश सूची के अंदर बातचीत के बीच में छोड़ दें, ताकि प्रॉम्प्ट कैश बारी-बारी से हिट होता रहे। केवल तभी सक्षम करें जब यह अपस्ट्रीम संदेशों के अंदर \"सिस्टम\" भूमिका स्वीकार करता है (अन्यथा यह 400 का उत्तर देता है)।",
+    "keepMidConversationSystemLabel": "बातचीत के बीच में सिस्टम संदेशों को यथास्थान रखें",
+    "requireUserLastMessageDescription": "उन अपस्ट्रीम के लिए जो सहायक प्रीफ़िल को अस्वीकार करते हैं: भेजने से पहले सहायक सहायक घुमावों को छोड़ दें (कोई टूल_उपयोग नहीं)। मॉडल अपने पिछले उत्तर को पुन: उत्पन्न कर सकता है।",
+    "requireUserLastMessageLabel": "उपयोगकर्ता संदेश के साथ बातचीत समाप्त करना आवश्यक है",
     "bulkPasteAdded": "{count, plural, one {1 कुंजी जोड़ी गई} other {# कुंजियाँ जोड़ी गईं}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 डुप्लिकेट छोड़ा गया} other {# डुप्लिकेट छोड़े गए}}",
     "bulkPasteHint": "प्रति पंक्ति एक API कुंजी पेस्ट करें। खाली पंक्तियों को अनदेखा किया जाता है और डुप्लिकेट कुंजियाँ छोड़ दी जाती हैं।",
@@ -6283,6 +6312,8 @@
     "newApiUserIdLabel": "New-API उपयोगकर्ता आईडी",
     "newApiUserIdPlaceholder": "जैसे 12345",
     "newApiUserIdHint": "AgentRouter का New-Api-User हेडर मान, कोटा शेष प्राप्त करने के लिए कंसोल API कुंजी के साथ उपयोग किया जाता है।",
+    "tokenrouterManagementKeyLabel": "मैनेजमेंट कुंजी (वैकल्पिक)",
+    "tokenrouterManagementKeyHint": "TokenRouter डैशबोर्ड से खाता कुंजी (Settings → Management Key)। केवल कोटा और बैलेंस पढ़ने के लिए उपयोग होती है, अनुरोधों के लिए कभी नहीं। सहेजी गई कुंजी दिखाई नहीं जाती; इसे बनाए रखने के लिए खाली छोड़ें।",
     "newApiAggregatorToggleLabel": "एग्रीगेटर गेटवे",
     "newApiAggregatorToggleHint": "New-API / One-API / Sub2API एग्रीगेटर नोड्स के लिए बैलेंस डिटेक्शन सक्षम करें। डैशबोर्ड बैलेंस बैज दिखाएगा और कोटा-प्रेफ्लाइट रूटिंग समाप्त खातों को छोड़ देगी।",
     "newApiAggregatorConsoleApiKeyHint": "एग्रीगेटर के /api/user/self एंडपॉइंट के लिए सिस्टम एक्सेस टोकन। राउटिंग एपीआई कुंजी नहीं।",
@@ -6296,6 +6327,8 @@
     "customUserAgentLabel": "कस्टम यूज़र एजेंट लेबल",
     "huggingfaceBillToHint": "वैकल्पिक। आपका Hugging Face बिलिंग खाता पहचानकर्ता, जिसे लागत आवंटन के लिए X-HF-Bill-To हेडर के रूप में भेजा जाता है।",
     "huggingfaceBillToLabel": "Hugging Face Bill-To खाता",
+    "commandCodeZdrLabel": "शून्य डेटा प्रतिधारण (ZDR) आवश्यक करें",
+    "commandCodeZdrHint": "इस API कुंजी से किए गए हर अनुरोध के साथ x-cmd-zdr: 1 भेजता है। ZDR upstream के बिना मॉडल अनुपलब्ध हो सकते हैं।",
     "databricksBaseUrlHint": "Databricks बेस URL संकेत",
     "defaultThinkingStrengthHint": "जब किसी अनुरोध में रीजनिंग प्रयास निर्दिष्ट नहीं होता, तब इसका उपयोग किया जाता है।",
     "defaultThinkingStrengthLabel": "डिफ़ॉल्ट चिंतन क्षमता",
@@ -6342,6 +6375,9 @@
     "localProviders": "स्थानीय प्रदाता",
     "maxConcurrentWholeNumberError": "अधिकतम समवर्ती मान एक पूर्णांक होना चाहिए",
     "m365TierLabel": "Copilot टियर",
+    "m365RefreshTokenLabel": "टोकन ताज़ा करें (वैकल्पिक)",
+    "m365RefreshTokenHint": "Microsoft 365 एक्सेस टोकन को स्वचालित रूप से रीफ्रेश करने के लिए उपयोग किया जाता है।",
+    "m365RefreshTokenEditHint": "मौजूदा टोकन रखने के लिए खाली छोड़ दें. इसे बदलने के लिए एक नया टोकन चिपकाएँ।",
     "m365TierHint": "चुनें कि यह कनेक्शन किस Microsoft 365 Copilot सरफ़ेस का उपयोग करता है। Individual डिफ़ॉल्ट उपभोक्ता BizChat है; Education और Enterprise (कार्य) अपने टेनेंट सरफ़ेस का विकल्प चुनते हैं।",
     "m365TierIndividualOption": "Individual (डिफ़ॉल्ट)",
     "m365TierEduOption": "शिक्षा",
@@ -7076,6 +7112,7 @@
     "proxySubTabsAria": "प्रॉक्सी अनुभाग",
     "requestBodyLimitTitle": "अनुरोध बॉडी सीमा",
     "requestBodyLimitDescription": "अनुरोध बॉडी को पार्स करने से पहले स्वीकृत अधिकतम API पेलोड आकार। समर्पित अपलोड रूट अपनी अंतर्निहित 100 MB की सीमा कम-से-कम बनाए रखते हैं।",
+    "requestBodyLimitChatHint": "यहाँ सीमा सहेजने तक Chat Completions और Responses अधिकतम 50 MB स्वीकार करते हैं। सहेजी गई सीमा कम हो या अधिक, वह उन पर भी लागू होती है।",
     "requestBodyLimitInputLabel": "अनुरोध बॉडी की सीमा MB में",
     "requestBodyLimitEmptyError": "MB में सीमा दर्ज करें",
     "requestBodyLimitWholeNumberError": "पूर्णांक का उपयोग करें",
@@ -7261,6 +7298,13 @@
     "themeLight": "रोशनी",
     "themeDark": "अंधेरा",
     "themeSystem": "सिस्टम",
+    "paletteTitle": "रंग पैलेट",
+    "paletteDesc": "Editions डिफ़ॉल्ट रूप है। Classic पिछले लाइम एक्सेंट को वापस लाता है।",
+    "paletteSelectionAria": "रंग पैलेट चयन",
+    "paletteEditions": "Editions",
+    "paletteEditionsDesc": "तांबे के एक्सेंट के साथ गर्म तटस्थ रंग",
+    "paletteClassic": "Classic",
+    "paletteClassicDesc": "लाइम एक्सेंट के साथ ठंडे तटस्थ रंग",
     "endpointTunnelVisibility": "समापन बिंदु सुरंग दृश्यता",
     "endpointTunnelVisibilityDesc": "सुरंग स्थिति को बदले बिना समापन बिंदु पृष्ठ से सुरंग नियंत्रण छिपाएँ।",
     "showCloudflareTunnel": "क्लाउडफ्लेयर क्विक टनल",
@@ -9086,6 +9130,17 @@
     "resilienceTokenRefreshScopeConnection": "कनेक्शन (प्रत्येक खाते का अपना ब्रेकर है)",
     "resilienceTokenRefreshThreshold": "रोकने से पहले विफलताएँ",
     "resilienceTokenRefreshCooldown": "ट्रिप होने के बाद विराम",
+    "mfaTitle": "दो-चरणीय प्रमाणीकरण",
+    "mfaDesc": "डैशबोर्ड में साइन इन करने या CLI कनेक्ट करने के लिए पासवर्ड के अलावा ऑथेंटिकेटर ऐप का कोड आवश्यक करें।",
+    "mfaScanQr": "इस QR कोड को अपने ऑथेंटिकेटर ऐप से स्कैन करें (या सेटअप कुंजी मैन्युअल रूप से दर्ज करें), फिर दिखाया गया 6-अंकों का कोड टाइप करें।",
+    "mfaManualKey": "सेटअप कुंजी",
+    "mfaCodeLabel": "सत्यापन कोड",
+    "mfaBackupCodesTitle": "अपने रिकवरी कोड सहेजें",
+    "mfaBackupCodesDesc": "ऑथेंटिकेटर तक पहुंच खोने पर हर कोड आपको एक बार साइन इन कराता है। ये दोबारा नहीं दिखाए जाएंगे।",
+    "mfaBackupCodesRemaining": "शेष रिकवरी कोड: {count}",
+    "mfaDisableDesc": "दो-चरणीय प्रमाणीकरण बंद करने के लिए अपना पासवर्ड और एक वर्तमान कोड (या रिकवरी कोड) दर्ज करें।",
+    "mfaRecoveryHint": "खोए डिवाइस की रिकवरी: सर्वर को OMNIROUTE_DISABLE_MFA=true के साथ शुरू करें और होस्ट से ही साइन इन करें।",
+    "mfaRecoverySwitchActive": "OMNIROUTE_DISABLE_MFA सेट है: इस होस्ट से साइन-इन दूसरे चरण को छोड़ देते हैं। दोबारा पहुंच मिलने के बाद इसे हटा दें।",
     "piiMasking": {
       "title": "व्यक्तिगत डेटा मास्किंग",
       "description": "चुनें कि किस प्रकार का व्यक्तिगत डेटा मास्क किया जाए और अपने पैटर्न जोड़ें। जब तक आप नीचे दिखाए गए फ़ीचर फ़्लैग चालू नहीं करते, मास्किंग बंद रहती है।",
@@ -10257,6 +10312,7 @@
     "purchaseOauthFree": "OAuth फ्री",
     "purchaseApiKey": "API कुंजी",
     "creditsLabel": "क्रेडिट",
+    "aiCreditsUsed": "{count} AI Credits उपयोग किए गए",
     "creditBalanceHint": "शेष राशि",
     "unlimitedLabel": "असीमित",
     "refreshing": "रिफ्रेश किया जा रहा है",
@@ -10770,7 +10826,11 @@
     "deleteAndRelaunch": "हटाएँ",
     "settingsJson": "settings.json",
     "fromDataDir": "डेटा निर्देशिका से",
-    "relaunchApp": "OmniRoute डेस्कटॉप ऐप को फिर से लॉन्च करें"
+    "relaunchApp": "OmniRoute डेस्कटॉप ऐप को फिर से लॉन्च करें",
+    "mfaPrompt": "अपने ऑथेंटिकेटर ऐप से कोड दर्ज करें",
+    "mfaCodeLabel": "सत्यापन कोड",
+    "mfaCodePlaceholder": "6-अंकों का कोड या रिकवरी कोड",
+    "mfaBackupCodeHint": "डिवाइस खो गया? इसके बजाय अपने रिकवरी कोड में से एक दर्ज करें।"
   },
   "landing": {
     "brandName": "ओम्निरूट",
@@ -12238,7 +12298,9 @@
       "failedTitle": "सभी {count} प्रयास विफल हो गए",
       "failed": "विफल",
       "pinnedTitle": "संदर्भ-कैश सत्र पिनिंग के माध्यम से मॉडल चुना गया",
-      "pinned": "पिन किया गया"
+      "pinned": "पिन किया गया",
+      "recoveredAttemptsTitle": "{count} प्रयासों के बाद अनुरोध बहाल हुआ",
+      "latestOutcomeFailed": "नवीनतम अनुरोध का परिणाम विफल रहा"
     },
     "attempts": "प्रयास",
     "detail": {
@@ -12340,13 +12402,20 @@
       "continuesFromParent": "पैरेंट से जारी है",
       "continuesFrom": "{id} से जारी है",
       "viewConversation": "बातचीत देखें",
-      "openConversation": "बातचीत {id} खोलें"
+      "openConversation": "बातचीत {id} खोलें",
+      "omittedHttpAttempts": "{count} HTTP प्रेषण सहेजे नहीं गए",
+      "noHttpResponse": "कोई HTTP प्रतिक्रिया देखी नहीं गई",
+      "transportError": "परिवहन त्रुटि"
     },
     "tableLabel": "अनुरोध लॉग",
     "throughputPostFirstToken": "पहले टोकन के बाद",
     "throughputEndToEnd": "एंड-टू-एंड",
     "throughputRate": "{value} टोकन/सेकंड",
-    "throughputExplanation": "दोनों दरें आउटपुट और रीज़निंग टोकन गणनाओं में से बड़ी का उपयोग करती हैं। पहले टोकन के बाद की दर किसी वैध TTFT को शामिल नहीं करती; अन्यथा यह पूरी अवधि का उपयोग करती है। एंड-टू-एंड हमेशा पूरी अवधि का उपयोग करता है। बफ़र की गई प्रतिक्रिया की बर्स्ट डिलीवरी दर ऊँची हो सकती है, भले ही मॉडल जनरेशन तेज़ न हो।"
+    "throughputExplanation": "दोनों दरें आउटपुट और रीज़निंग टोकन गणनाओं में से बड़ी का उपयोग करती हैं। पहले टोकन के बाद की दर किसी वैध TTFT को शामिल नहीं करती; अन्यथा यह पूरी अवधि का उपयोग करती है। एंड-टू-एंड हमेशा पूरी अवधि का उपयोग करता है। बफ़र की गई प्रतिक्रिया की बर्स्ट डिलीवरी दर ऊँची हो सकती है, भले ही मॉडल जनरेशन तेज़ न हो।",
+    "omittedHttpAttempts": "{count} HTTP प्रेषण सहेजे नहीं गए",
+    "upstreamStatus": "अपस्ट्रीम सर्वर {status}",
+    "noHttpResponse": "कोई HTTP प्रतिक्रिया देखी नहीं गई",
+    "transportError": "परिवहन त्रुटि"
   },
   "proxyLogger": {
     "filterAll": "सभी",
@@ -14113,6 +14182,14 @@
         "label": "साझा इग्रेस पूल क्रम",
         "description": "उन प्रदाताओं के लिए जिनका कोटा इग्रेस पते के अनुसार विभाजित है, हाल ही में अस्वीकृत सदस्य के देखे गए इग्रेस पते को साझा करने वाले पूल सदस्य को स्वस्थ सदस्यों के ठीक नीचे रैंक करें। केवल क्रमबद्ध किया जाता है, कभी बाहर नहीं किया जाता। PROXY_SKIP_RECENTLY_FAILED की आवश्यकता होती है, जो इसके द्वारा पढ़े जाने वाले अस्वीकृति सिग्नल को उत्पन्न करता है। डिफ़ॉल्ट रूप से बंद: चयन क्रम बिल्कुल सामान्य रोटेशन जैसा होता है।"
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "रोटेशन एट्रिब्यूशन लॉगिंग",
         "description": "Opencode रोटेशन यह रिकॉर्ड करता है कि किस खाते ने सर्व किया या किसे छोड़ दिया गया (केवल मास्क्ड आईडी, कभी भी पूर्ण खाता आईडी नहीं) और प्रॉक्सी लॉग प्रविष्टियों को उनके अनुरोध से लिंक करता है, ताकि ऑपरेटर छोड़े गए खातों और अप्रयुक्त खातों में अंतर कर सके। डिफ़ॉल्ट रूप से बंद: कोई अतिरिक्त लॉग पंक्तियाँ नहीं, कोई अतिरिक्त कॉलम नहीं लिखे जाते।"
@@ -14164,6 +14241,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 पूल पुनः चयन",
         "description": "OpenCode मल्टी-अकाउंट रोटेशन के लिए, एम्बिएंट पूल संदर्भ के तहत प्रॉक्सी-रहित खाते पर इग्रेस-बकेटेड प्रदाता से 429 मिलने के बाद, उसी इग्रेस पते पर पुनः प्रयास करने के बजाय अगले प्रयास के लिए कनेक्शन पूल से किसी अन्य सदस्य का अनुरोध करें। क्रमबद्ध करता है, कभी बाहर नहीं करता: समाप्त हो चुका पूल वर्तमान व्यवहार को बनाए रखता है। डिफ़ॉल्ट रूप से बंद: बिल्कुल पहले की तरह प्रत्येक 429 अगले खाते पर रोटेट होता है।"
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode फ्री-टियर इग्रेशन जांच",
+        "description": "OpenCode निष्पादक के लिए, जब एक प्रॉक्सी अनुरोध का उत्तर 403 या 451 FreeTierError दिया जाता है और अवलोकन-उपकरण पुनः प्रयास विफल हो जाता है या लागू नहीं होता है, तो अनुरोध को एक अलग प्रॉक्सी (कोई अन्य खाता प्रॉक्सी या कोई अन्य पूल सदस्य, कभी भी सीधा कनेक्शन नहीं) के माध्यम से भेजें। केवल जब वह जांच 200 का उत्तर देती है, तो प्रॉक्सी इनकार मेमोरी में पहला निकास अलग रखा जाता है और जांच प्रतिक्रिया दी जाती है; जब दोनों इनकार करते हैं, तो मूल इनकार वापस कर दिया जाता है और कुछ भी दर्ज नहीं किया जाता है। वही इनकार पाठ एक ध्वजांकित निकास IP और एक अस्वीकृत अनुरोध आकार को कवर करता है, इसलिए जांच उन्हें साक्ष्य के आधार पर अलग बताती है। डिफ़ॉल्ट रूप से बंद: इनकार अपरिवर्तित लौटाया जाता है।"
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 क्लाइंट फ़िंगरप्रिंट",
@@ -14344,6 +14425,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "कॉम्बो: कंटेंट-पॉलिसी रिफ़्यूज़ल पर रोकें",
         "description": "जब कोई कॉम्बो टार्गेट किसी सटीक कंटेंट-पॉलिसी रिफ़्यूज़ल (कोड या प्रकार cyber_policy / content_policy_violation) के साथ उत्तर देता है, तो अगले टार्गेट पर आगे बढ़ने के बजाय कॉम्बो को रोकें और वह रिफ़्यूज़ल लौटाएं, भले ही शेष टार्गेट्स अलग मॉडल हों। डिफ़ॉल्ट रूप से बंद: यह रिफ़्यूज़ल कभी भी अकाउंट को कूल नहीं करता है या प्रोवाइडर ब्रेकर को ट्रिप नहीं करता है, और कॉम्बो बिल्कुल पहले की तरह अपने अगले टार्गेट पर आगे बढ़ता है।"
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "कूलडाउन पुनः प्रयास: 403/410 अस्वीकृतियों को छोड़ें",
