@@ -40,6 +40,8 @@ const ERRORS = {
   M365_THROTTLED: [429, "Microsoft 365 Copilot request throttled."],
   M365_OUT_OF_CREDITS: [429, "Microsoft 365 Copilot credits exhausted."],
   M365_FORBIDDEN: [403, "Microsoft 365 Copilot access denied."],
+  // A content-less turn Copilot dropped; the conversation it happened in tends to stay broken.
+  M365_INTERNAL_ERROR: [502, "Microsoft 365 Copilot could not complete the turn."],
   // Its safety filter declined this request: a request-scoped provider safety stop.
   M365_DISENGAGED: [400, "Microsoft 365 Copilot declined this request."],
   M365_IDLE_TIMEOUT: [504, "Microsoft 365 Copilot turn idle timeout."],
@@ -170,6 +172,8 @@ function finalResultError(
       return new M365TurnError("M365_FORBIDDEN", { upstreamErrorCode: result.value });
     case "Disengaged":
       return "M365_DISENGAGED";
+    case "InternalError":
+      return "M365_INTERNAL_ERROR";
   }
   if (result.error || result.value !== "Success") return "M365_PROTOCOL_ERROR";
 }

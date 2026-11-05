@@ -10,9 +10,15 @@ import {
 } from "./copilot-m365-connection.ts";
 import { buildChatInvocation, clientPlugins } from "./copilot-m365-frames.ts";
 import { M365TurnComposer, M365_MAX_TEXT_LENGTH } from "./m365Protocol/composer.ts";
-import { resolveM365Profile } from "./m365Protocol/profile.ts";
+import {
+  m365Conversations,
+  m365ReplyFingerprint,
+  type M365ConversationClaim,
+} from "./m365Protocol/conversations.ts";
+import { resolveM365Profile, type M365ResolvedProfile } from "./m365Protocol/profile.ts";
 import { buildM365ToolInstructions, parseM365ToolOutput } from "./m365Protocol/tools.ts";
 import { runM365Turn, M365TurnError, type M365WebSocketConstructor } from "./m365Turn.ts";
+import type { M365ToolOutput } from "./m365Protocol/tools.ts";
 import {
   M365ExecutorError,
   m365ErrorResponse,
@@ -33,9 +39,9 @@ export function __setCopilotM365WebSocketForTesting(ctor: typeof WebSocket): () 
 const record = (value: unknown): JsonRecord =>
   value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
 
-/** Fresh conversations require entire history, including unabridged tool results. */
-function historyPrompt(body: JsonRecord): string {
-  const messages = Array.isArray(body.messages) ? body.messages : [];
+/** Format messages as turn text. A fresh conversation sends the entire history, including
+ * unabridged tool results; a continued one sends only the messages after our last reply. */
+function historyPrompt(messages: readonly unknown[]): string {
   const parts: string[] = [];
   let size = 0;
   for (const raw of messages) {
@@ -72,6 +78,29 @@ function historyPrompt(body: JsonRecord): string {
   }
   return parts.join("\n\n");
 }
+/**
+ * Which conversations a request may continue: same connection (Copilot keeps conversations per
+ * account), same model profile and same tool set. Null without a connection identity, so the
+ * request stays stateless.
+ */
+function conversationScope(
+  credentials: unknown,
+  profile: M365ResolvedProfile,
+  tools: ReadonlyArray<{ name: string }>
+): string | null {
+  const connectionId = record(credentials).connectionId;
+  if (typeof connectionId !== "string" || !connectionId) return null;
+  const names = tools.map((tool) => tool.name).sort();
+  return [
+    connectionId,
+    profile.tone,
+    profile.scenario,
+    profile.licenseType,
+    profile.agent,
+    names.join(","),
+  ].join("|");
+}
+
 export class CopilotM365WebExecutor extends BaseExecutor {
   constructor() {
     super("copilot-m365-web", { id: "copilot-m365-web", baseUrl: "wss://substrate.office.com" });
@@ -139,7 +168,8 @@ export class CopilotM365WebExecutor extends BaseExecutor {
     });
     try {
       if (input.signal?.aborted) throw new M365TurnError("M365_ABORTED");
-      const history = historyPrompt(body);
+      const messages: readonly unknown[] = Array.isArray(body.messages) ? body.messages : [];
+      const history = historyPrompt(messages);
       if (!history)
         throw new M365ExecutorError(400, "invalid_request", "No user message provided.");
       const { tools, toolChoice } = extractToolSpec(body);
@@ -193,28 +223,43 @@ export class CopilotM365WebExecutor extends BaseExecutor {
         licenseType: override("licenseType"),
         agent: override("agent"),
       });
-      const url = new URL(
-        buildWsUrl({
-          ...params,
-          scenario: profile.scenario,
-          licenseType: profile.licenseType,
-          agent: profile.agent,
-        })
-      );
-      url.searchParams.set("disableMemory", "1");
-      const invocation = buildChatInvocation({
-        ...profile,
-        text: prompt,
-        traceId: crypto.randomUUID(),
-        sessionId: url.searchParams.get("X-SessionId")!,
-        requestId: url.searchParams.get("chatsessionid")!,
-        conversationId: url.searchParams.get("ConversationId")!,
-        isStartOfSession: true,
-        ...(instructions
-          ? { plugins: clientPlugins(tools), toolChoice, customInstructions: instructions }
-          : {}),
-      });
-      const composer = new M365TurnComposer();
+      const conversations = m365Conversations();
+      const scope = conversationScope(input.credentials, profile, tools);
+      const claimed = scope ? conversations.claim(scope, messages) : null;
+      const deltaText = claimed ? historyPrompt(claimed.delta) : "";
+      // One upstream turn: continue `resume` with only the new messages, or open a fresh
+      // conversation with the whole history.
+      const turnFor = (resume: M365ConversationClaim | null) => {
+        const url = new URL(
+          buildWsUrl(
+            {
+              ...params,
+              scenario: profile.scenario,
+              licenseType: profile.licenseType,
+              agent: profile.agent,
+            },
+            resume?.ids
+          )
+        );
+        url.searchParams.set("disableMemory", "1");
+        const ids = {
+          conversationId: url.searchParams.get("ConversationId")!,
+          sessionId: url.searchParams.get("X-SessionId")!,
+        };
+        const invocation = buildChatInvocation({
+          ...profile,
+          text: resume ? deltaText : prompt,
+          traceId: crypto.randomUUID(),
+          sessionId: ids.sessionId,
+          requestId: url.searchParams.get("chatsessionid")!,
+          conversationId: ids.conversationId,
+          isStartOfSession: !resume,
+          ...(instructions
+            ? { plugins: clientPlugins(tools), toolChoice, customInstructions: instructions }
+            : {}),
+        });
+        return { url, ids, invocation, turns: (resume?.turns ?? 0) + 1 };
+      };
       const output = m365Output(model);
       const buffered = input.stream === false || instructions.length > 0;
       const controller = new AbortController();
@@ -222,56 +267,90 @@ export class CopilotM365WebExecutor extends BaseExecutor {
         ? AbortSignal.any([input.signal, controller.signal])
         : controller.signal;
       let streamRewriteError: M365ExecutorError | undefined;
-      input.log?.debug?.("M365_WS", `connecting ${DIAGNOSTIC_URL}`);
-      const run = (onDelta?: (delta: string) => void) =>
-        runM365Turn({
-          url: url.toString(),
-          invocation,
-          signal,
-          WebSocketCtor: WebSocketCtor as unknown as M365WebSocketConstructor,
-          onFrame(frame) {
-            // Only protocol enums are diagnostics; frame text, IDs and raw URLs stay private.
-            if (frame.type === undefined) input.log?.debug?.("M365_WS", "handshake complete");
-            else
-              input.log?.debug?.(
-                "M365_WS",
-                `frame type=${Number(frame.type)} target=${frame.target === "update" ? "update" : "other"}`
-              );
-            const update = composer.push(frame);
-            if (!buffered && update.streamingDiverged) {
-              streamRewriteError = new M365ExecutorError(
-                502,
-                "m365_stream_rewritten",
-                "Microsoft 365 Copilot rewrote content already published in this stream. Retry without streaming."
-              );
-              // Abort owns transport cleanup; callback exceptions are deliberately sanitized
-              // by the transport, so retain this local typed failure at the executor boundary.
-              controller.abort();
-              return;
-            }
-            if (update.delta) onDelta?.(update.delta);
-          },
-        })
-          .catch((error: unknown) => {
-            throw streamRewriteError ?? error;
-          })
-          .then(() => {
-            if (streamRewriteError) throw streamRewriteError;
-            if (!composer.text)
-              throw new M365ExecutorError(
-                502,
-                "m365_empty_response",
-                "Microsoft 365 Copilot turn completed with no content in any known frame shape."
-              );
-            const parsed = parseM365ToolOutput(composer.text, tools, toolOptions);
-            if (parsed.constraintViolation)
-              throw new M365ExecutorError(
-                502,
-                "m365_tool_constraint",
-                "Microsoft 365 Copilot did not satisfy the requested tool contract."
-              );
-            return parsed;
+      let published = false;
+      const attempt = async (
+        turn: ReturnType<typeof turnFor>,
+        onDelta?: (delta: string) => void
+      ): Promise<M365ToolOutput> => {
+        const composer = new M365TurnComposer();
+        input.log?.debug?.("M365_WS", `connecting ${DIAGNOSTIC_URL}`);
+        try {
+          await runM365Turn({
+            url: turn.url.toString(),
+            invocation: turn.invocation,
+            signal,
+            WebSocketCtor: WebSocketCtor as unknown as M365WebSocketConstructor,
+            onFrame(frame) {
+              // Only protocol enums are diagnostics; frame text, IDs and raw URLs stay private.
+              if (frame.type === undefined) input.log?.debug?.("M365_WS", "handshake complete");
+              else
+                input.log?.debug?.(
+                  "M365_WS",
+                  `frame type=${Number(frame.type)} target=${frame.target === "update" ? "update" : "other"}`
+                );
+              const update = composer.push(frame);
+              if (!buffered && update.streamingDiverged) {
+                streamRewriteError = new M365ExecutorError(
+                  502,
+                  "m365_stream_rewritten",
+                  "Microsoft 365 Copilot rewrote content already published in this stream. Retry without streaming."
+                );
+                // Abort owns transport cleanup; callback exceptions are deliberately sanitized
+                // by the transport, so retain this local typed failure at the executor boundary.
+                controller.abort();
+                return;
+              }
+              if (update.delta) {
+                published = true;
+                onDelta?.(update.delta);
+              }
+            },
           });
+        } catch (error) {
+          throw streamRewriteError ?? error;
+        }
+        if (streamRewriteError) throw streamRewriteError;
+        if (!composer.text)
+          throw new M365ExecutorError(
+            502,
+            "m365_empty_response",
+            "Microsoft 365 Copilot turn completed with no content in any known frame shape."
+          );
+        const parsed = parseM365ToolOutput(composer.text, tools, toolOptions);
+        if (parsed.constraintViolation)
+          throw new M365ExecutorError(
+            502,
+            "m365_tool_constraint",
+            "Microsoft 365 Copilot did not satisfy the requested tool contract."
+          );
+        return parsed;
+      };
+      const run = async (onDelta?: (delta: string) => void): Promise<M365ToolOutput> => {
+        let turn = turnFor(claimed && deltaText ? claimed : null);
+        let parsed: M365ToolOutput;
+        try {
+          parsed = await attempt(turn, onDelta);
+        } catch (error) {
+          // A content-less InternalError is a turn Copilot dropped, and the conversation it
+          // happened in tends to stay broken: re-send the whole request once, in a fresh one.
+          // A failed conversation is never committed back, so later requests start fresh too.
+          if (
+            !(error instanceof M365TurnError) ||
+            error.code !== "M365_INTERNAL_ERROR" ||
+            published
+          )
+            throw error;
+          input.log?.info?.(
+            "M365",
+            "InternalError without content; retrying once in a fresh conversation"
+          );
+          turn = turnFor(null);
+          parsed = await attempt(turn, onDelta);
+        }
+        if (scope)
+          conversations.commit(scope, messages, turn.ids, m365ReplyFingerprint(parsed), turn.turns);
+        return parsed;
+      };
       if (buffered) {
         const parsed = await run();
         return wrap(

@@ -188,10 +188,15 @@ standalone IDs follow the public [protocol catalog](https://github.com/cramt/m36
 - This native integration is **text-only**. Images and other non-text message parts are
   rejected explicitly, not silently dropped. Image upload in the separate proxy is not a
   capability of this provider.
-- Each request starts a fresh upstream conversation and replays the supplied message history.
-  There is no cache keyed on the first user message, which could mix independent callers.
-  This consumes more upstream conversation starts than a persistent-thread integration;
-  avoid rapid fan-out or long unattended tool loops on constrained accounts.
+- A follow-up request continues the same upstream conversation and sends only the messages
+  after the previous reply. It must extend that reply exactly: same connection, model profile
+  and tool set; an unchanged history (a sha256 chain over every message); and the reply's
+  tool-call ids, or its text up to whitespace. Anything else (an edited history, another
+  session with the same first message, a different reply, a conversation idle for 30 minutes
+  or close to Copilot's 600-message cap, a connection without an id) starts a fresh
+  conversation with the whole history. A failed turn is never resumed, and a content-less
+  `InternalError` is re-sent once in a fresh conversation (**502** `m365_internal_error` if it
+  fails again). Continuations are kept in process memory: a restart starts fresh conversations.
 - A turn has a 120-second idle deadline and a bounded overall deadline. Final-only answers,
   progress filtering and cancellation are handled by the native transport/composer.
 - Before any content, licence/throttle failures retain HTTP 403/429 even when streaming was

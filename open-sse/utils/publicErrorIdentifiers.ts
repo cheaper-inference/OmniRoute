@@ -158,6 +158,7 @@ const SAFE_PUBLIC_ERROR_IDENTIFIERS = new Set([
   "m365_account_not_licensed",
   "m365_throttled",
   "m365_throttle_hold",
+  "m365_internal_error",
   "priority_access_exhausted",
   "message_limit",
   "meta_ai_empty_response",

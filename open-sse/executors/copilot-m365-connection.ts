@@ -196,16 +196,20 @@ function resolveTierOverrides(
 /**
  * Build the BizChat WebSocket URL. The access_token rides in the query string
  * (per the protocol), so callers must never log the returned URL verbatim — use
- * redactWsUrl() for any logging.
+ * redactWsUrl() for any logging. Pass `conversation` to continue an existing
+ * conversation; otherwise new conversation and session ids are minted.
  */
-export function buildWsUrl(params: M365ConnectionParams): string {
+export function buildWsUrl(
+  params: M365ConnectionParams,
+  conversation?: { conversationId: string; sessionId: string }
+): string {
   const sessionKey = newChatSessionId();
   const query = new URLSearchParams({
     chatsessionid: sessionKey,
     XRoutingParameterSessionKey: sessionKey,
     clientrequestid: sessionKey,
-    "X-SessionId": randomUUID(),
-    ConversationId: randomUUID(),
+    "X-SessionId": conversation?.sessionId ?? randomUUID(),
+    ConversationId: conversation?.conversationId ?? randomUUID(),
     access_token: params.accessToken,
     variants: params.variants ?? M365_DEFAULT_VARIANTS.join(","),
     source: M365_INDIVIDUAL_DEFAULTS.source,

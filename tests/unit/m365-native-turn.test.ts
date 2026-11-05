@@ -172,7 +172,7 @@ for (const [value, status, code] of [
   ["OutOfCredits", 429, "M365_OUT_OF_CREDITS"],
   ["ForbiddenRequest", 403, "M365_FORBIDDEN"],
   ["InvalidCopilotLicense", 403, "M365_FORBIDDEN"],
-  ["InternalError", 502, "M365_PROTOCOL_ERROR"],
+  ["InternalError", 502, "M365_INTERNAL_ERROR"],
   ["Disengaged", 400, "M365_DISENGAGED"],
 ] as const) {
   test(`type2 ${value} fails before composer can publish a success`, async () => {
