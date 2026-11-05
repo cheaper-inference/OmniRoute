@@ -75,7 +75,7 @@ test("single Codex hosted image uses its serving response; fanout omits quota", 
     'event: response.output_item.done\ndata: ' +
     JSON.stringify({
       type: "response.output_item.done",
-      item: { type: "image_generation_call", id: "img_1", result: "YWJj" },
+      item: { type: "image_generation_call", id: "img_1", status: "completed", result: "YWJj" },
     }) +
     "\n\n";
   let sends = 0;
@@ -88,7 +88,7 @@ test("single Codex hosted image uses its serving response; fanout omits quota", 
       await import("../../open-sse/handlers/imageGeneration.ts");
     const credentials = { accessToken: "test-token", connectionId: "private-account-id" };
     const single = await handleImageGeneration({
-      body: { model: "codex/gpt-5.6-terra-image", prompt: "one cat", n: 1 },
+      body: { model: "codex/gpt-5.6-sol", prompt: "one cat", n: 1 },
       credentials,
       log: null,
     });
@@ -96,7 +96,7 @@ test("single Codex hosted image uses its serving response; fanout omits quota", 
     assert.equal(single.telemetry?.codexQuota?.fiveHourRemainingPercent, 60);
     assert.equal(sends, 1);
     const parallel = await handleImageGeneration({
-      body: { model: "codex/gpt-5.6-terra-image", prompt: "two cats", n: 2 },
+      body: { model: "codex/gpt-5.6-sol", prompt: "two cats", n: 2 },
       credentials,
       log: null,
     });
