@@ -336,6 +336,7 @@ export async function executeWithUpstreamStartTimeout<T>({
   provider,
   model,
   connectionTimeoutMs,
+  requestTimeoutMs,
   signal,
   log,
   execute,
@@ -344,11 +345,20 @@ export async function executeWithUpstreamStartTimeout<T>({
   provider: string;
   model: string;
   connectionTimeoutMs?: number;
+  requestTimeoutMs?: number;
   signal: AbortSignal;
   log?: { warn?: (tag: string, message: string) => void } | null;
   execute: (signal: AbortSignal) => Promise<T>;
 }): Promise<T> {
-  const timeoutMs = getExecutorTimeoutMs(executor, provider, model, connectionTimeoutMs);
+  const configuredMs = getExecutorTimeoutMs(executor, provider, model, connectionTimeoutMs);
+  const requestCapMs =
+    typeof requestTimeoutMs === "number" && Number.isFinite(requestTimeoutMs) &&
+    requestTimeoutMs > 0
+      ? Math.max(1, Math.floor(requestTimeoutMs))
+      : undefined;
+  // Request hints may shorten the configured response-start budget, never extend it.
+  const timeoutMs = requestCapMs === undefined ? configuredMs :
+    configuredMs > 0 ? Math.min(configuredMs, requestCapMs) : requestCapMs;
   if (timeoutMs <= 0) return execute(signal);
   if (signal.aborted) throw createAbortError(signal);
 

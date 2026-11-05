@@ -402,6 +402,7 @@ async function handleChatCoreInner({
   // the model-bound `body` itself is never touched.
   videoBridgeLog = undefined,
   fallbackAttempts = undefined,
+  requestUpstreamStartTimeoutMs = undefined,
   forcedConnectionId = null, // #14116: caller's pinned/requested connection, vs credentials.connectionId below
   allowedConnections = null, // routing allowlist; in-request account rotation must stay inside it
   previousResponseResumed = undefined, // rehydrated-continuation flag from chat.ts; noted below, no semantics.
@@ -2581,6 +2582,7 @@ async function handleChatCoreInner({
     resilienceSettings,
     settings,
     skipUpstreamRetry,
+    requestUpstreamStartTimeoutMs,
     stream,
     streamController,
     targetFormat,

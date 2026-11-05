@@ -94,6 +94,7 @@ import * as muse from "./chat/museOwnership.ts";
 import { comboCheckProvider, ghComboGate } from "./chat/githubLiveCatalogFilter.ts";
 import { markEmergencyFallback } from "./emergencyFallbackHeader.ts";
 import { resolveEmergencyFallbackDecision } from "./emergencyFallbackHeader.ts";
+import { resolveInternalUpstreamStartTimeoutMs } from "../services/internalUpstreamStartTimeout";
 import { evaluateComboTargetPreflight } from "./chat/comboTargetKeyPolicy.ts";
 import * as resolvedPolicy from "./chat/resolvedModelPolicy.ts";
 import { recordGateRejection, recordQuotaParkedSkip } from "./quotaParkedSkipUsage";
@@ -1522,6 +1523,8 @@ async function handleSingleModelChat(
   comboStrategy: string | null = null,
   isCombo: boolean = false
 ): Promise<Response> {
+  const requestUpstreamStartTimeoutMs = resolveInternalUpstreamStartTimeoutMs(request);
+
   // 1. Resolve model → provider/model
   const resolved = await resolveModelOrError(
     modelStr,
@@ -2189,6 +2192,7 @@ async function handleSingleModelChat(
             videoBridgeLog: runtimeOptions.videoBridgeLog,
             previousResponseResumed: runtimeOptions.previousResponseResumed,
             fallbackAttempts: runtimeOptions.fallbackAttempts,
+            requestUpstreamStartTimeoutMs,
             beforeUpstreamAttempt:
               museOwner && muse.museBeforeUpstreamAttempt(museOwner, credentials),
             forcedConnectionId: hasForcedConnection ? forcedConnectionId : null, // #14116
