@@ -39,7 +39,13 @@ const log = { debug() {}, info() {}, warn() {}, error() {} };
 
 type Captured = { url: string; method?: string; headers: Record<string, string>; body: unknown };
 
-async function invoke(body: Record<string, unknown>, endpointPath: string, accept: string) {
+async function invoke(
+  body: Record<string, unknown>,
+  endpointPath: string,
+  accept: string,
+  reply: unknown = { data: { answer: "Business says hi" } },
+  options: Record<string, unknown> = {}
+) {
   const calls: Captured[] = [];
   globalThis.fetch = (async (url: string | URL, init: RequestInit = {}) => {
     calls.push({
@@ -48,7 +54,7 @@ async function invoke(body: Record<string, unknown>, endpointPath: string, accep
       headers: Object.fromEntries(new Headers(init.headers).entries()),
       body: init.body ? JSON.parse(String(init.body)) : null,
     });
-    return Response.json({ data: { answer: "Business says hi" } });
+    return Response.json(reply);
   }) as typeof fetch;
   try {
     const result = (await handleChatCore({
@@ -63,6 +69,7 @@ async function invoke(body: Record<string, unknown>, endpointPath: string, accep
       },
       connectionId: credentials.connectionId,
       userAgent: "unit-test",
+      ...options,
     } as Parameters<typeof handleChatCore>[0])) as { success: boolean; response: Response };
     return { result, calls };
   } finally {
@@ -141,4 +148,27 @@ test("Anthropic Messages client: the reply is translated to a Claude message", a
   };
   assert.equal(json.type, "message");
   assert.equal(json.content.find((part) => part.type === "text")?.text, "Business says hi");
+});
+
+test("FLUSH_EMPTY_RETRY_ENABLED never replays an empty streamed business reply", async () => {
+  const previous = process.env.FLUSH_EMPTY_RETRY_ENABLED;
+  process.env.FLUSH_EMPTY_RETRY_ENABLED = "true";
+  try {
+    const { result, calls } = await invoke(
+      {
+        model: "biz/assistant-v1",
+        messages: [{ role: "user", content: "Hello there" }],
+        stream: true,
+      },
+      "/v1/chat/completions",
+      "text/event-stream",
+      { data: { answer: "" } },
+      { forcedConnectionId: credentials.connectionId }
+    );
+    await result.response.text();
+    assertSingleBusinessCall(calls);
+  } finally {
+    if (previous === undefined) delete process.env.FLUSH_EMPTY_RETRY_ENABLED;
+    else process.env.FLUSH_EMPTY_RETRY_ENABLED = previous;
+  }
 });
