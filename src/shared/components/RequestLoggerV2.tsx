@@ -37,7 +37,7 @@ import Select from "./Select";
 import RequestLoggerDetail from "./RequestLoggerDetail";
 import RequestLogThroughput from "./RequestLogThroughput";
 import { copyToClipboard } from "@/shared/utils/clipboard";
-import { PROVIDER_COLORS, getProtocolColor } from "@/shared/constants/colors";
+import { PROVIDER_COLORS, getProtocolColor, neutralBadge } from "@/shared/constants/colors";
 import {
   formatTime,
   formatDuration,
@@ -1267,12 +1267,8 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
             {/* Dynamic Provider Quick Filters (from data) */}
             {loadedProviders.map((p) => {
               const compatLabel = getProviderDisplayLabel(p, providerNodes);
-              // Provider identity colours (brand palette in constants/colors), not status tones.
-              const pc = PROVIDER_COLORS[p] || {
-                bg: "#374151",
-                text: "#fff",
-                label: compatLabel || p.toUpperCase(),
-              };
+              // Provider identity tones (kit chart tokens in constants/colors), not status tones.
+              const pc = PROVIDER_COLORS[p] || neutralBadge(compatLabel || p.toUpperCase());
               const displayLabel = compatLabel || pc.label;
               const isActive = selectedProvider === p;
               return (
@@ -1286,11 +1282,13 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                     "h-7 min-h-7 rounded-full border px-3 text-xs font-bold uppercase",
                     isActive
                       ? "border-border-strong ring-1 ring-border-strong"
-                      : "border-transparent opacity-70 hover:opacity-100"
+                      : "border-transparent hover:bg-bg-subtle"
                   )}
+                  // Active: tint + ink + hue border; inactive: the ink alone (AA on the page).
                   style={{
-                    backgroundColor: isActive ? pc.bg : `${pc.bg}33`,
-                    color: isActive ? pc.text : pc.bg,
+                    backgroundColor: isActive ? pc.bg : undefined,
+                    borderColor: isActive ? pc.border : undefined,
+                    color: pc.text,
                   }}
                 >
                   {displayLabel}
@@ -1367,11 +1365,9 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                   const protocolKey = isActive ? null : log.sourceFormat || log.provider;
                   const protocol = protocolKey ? getProtocolColor(protocolKey, log.provider) : null;
                   const compatLabel = getProviderDisplayLabel(log.provider, providerNodes);
-                  const providerColor = PROVIDER_COLORS[log.provider] || {
-                    bg: "#374151",
-                    text: "#fff",
-                    label: compatLabel || (log.provider || "-").toUpperCase(),
-                  };
+                  const providerColor =
+                    PROVIDER_COLORS[log.provider] ||
+                    neutralBadge(compatLabel || (log.provider || "-").toUpperCase());
                   const providerLabel = log.providerDisplay || compatLabel || providerColor.label;
                   const isError = isHttpLogError(log);
                   const httpKind = classifyHttpLog(log);
@@ -1579,7 +1575,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                       )}
                       {visibleColumns.provider && (
                         <TableCell className="px-3 py-2">
-                          {/* Provider identity colours (brand palette), not a status tone. */}
+                          {/* Provider identity tone (kit chart token), not a status tone. */}
                           <span
                             className="inline-block rounded px-2 py-0.5 text-[9px] font-bold uppercase"
                             style={{

@@ -139,6 +139,27 @@ describe("DataTable family adapters", () => {
     expect(onToggle).toHaveBeenCalledWith("status");
   });
 
+  it("ColumnToggle is the kit DataTableColumnsMenu: trigger, scrollable menu, stays open", async () => {
+    const onToggle = vi.fn();
+    render(<ColumnToggle columns={columns} visible={{ status: false }} onToggle={onToggle} />);
+    const trigger = screen.getByRole("button", { name: "Toggle columns" });
+    expect(trigger.getAttribute("title")).toBe("Toggle columns");
+    expect(trigger.textContent).toBe("Columns");
+    expect(trigger.querySelector("svg.lucide-columns-3")).not.toBeNull();
+
+    fireEvent.pointerDown(trigger, { button: 0, ctrlKey: false });
+    fireEvent.click(trigger);
+    expect((await screen.findByRole("menu")).className).toContain("ci-menu--scrollable");
+
+    const items = screen.getAllByRole("menuitemcheckbox");
+    // A column missing from `visible` counts as visible.
+    expect(items.map((i) => i.getAttribute("aria-checked"))).toEqual(["true", "false"]);
+    fireEvent.click(items[0]);
+    fireEvent.click(items[1]);
+    expect(onToggle.mock.calls).toEqual([["name"], ["status"]]);
+    expect(screen.getByRole("menu")).not.toBeNull();
+  });
+
   it("FilterBar searches, filters through selects and clears everything", () => {
     const onSearchChange = vi.fn();
     const onFilterChange = vi.fn();

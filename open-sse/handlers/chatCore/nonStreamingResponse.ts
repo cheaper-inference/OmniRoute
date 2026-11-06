@@ -116,6 +116,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     finalBody: _finalBody,
     geminiPromptCacheMode,
     finalizePendingScope,
+    forcedConnectionId,
     getCurrentConnectionId,
     getManagedLeaseFenceErrorCode,
     getModelNormalizeToolCallId,
@@ -346,7 +347,11 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       expectedConnectionId: managedLease
         ? String(getCurrentConnectionId() || connectionId || "") || undefined
         : undefined,
-      allowAccountRotation: !managedLease && comboStrategy !== "context-relay",
+      // The connection pin is strict (API_REFERENCE: "used exclusively", cooldown on
+      // failure, no sibling rotation). The outer retry loop honours it; the in-pipeline
+      // account rotation must too, or a pinned 429 is silently answered by another account.
+      allowAccountRotation:
+        !managedLease && comboStrategy !== "context-relay" && !forcedConnectionId,
       allowModelFallback: true,
       hasApiKeyMetadata: Boolean(apiKeyInfo),
       executeProviderRequest: (modelToCall, allowDedup, policy, rejection) =>

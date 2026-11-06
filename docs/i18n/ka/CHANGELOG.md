@@ -94,67 +94,67 @@
 - **feat(cli):** run `omniroute serve --tray` as a detached desktop process after server and tray readiness, with graphical login auto-start support.
 - **feat(routing):** add client-, provider-, and model-neutral exclusive managed session connection leases with API-key-bound generation fencing, durable SQLite ownership, explicit allowlist policy, and bounded 429 capacity retry semantics.
 
-## [3.8.53] — TBD
+## [3.8.53] — 2026-11-06
 
-_Living section — reconciled 2026-11-03 from all cycle commits (`c754707d0e` → `c34370bc69`, 934 non-merge commits). Bullets carry the merged PR and its author; direct pushes are listed with their commit hash. Regenerated at each `/generate-release` phase._
+_Living section — reconciled 2026-11-06 from all cycle commits (`c754707d0e` → `616801a2b6`, 1,162 non-merge commits). Bullets carry the merged PR and its author; direct pushes are listed with their commit hash. Regenerated at each `/generate-release` phase._
 
 ### 📊 Release by the numbers
 
 | | |
 | --- | ---: |
-| 👥 People who contributed | **175** |
-| 📝 Commits in the cycle | **934** |
-| 🔀 Pull requests referenced | **616** |
-| 📋 Changelog entries | **948** |
-| 🙌 Contributors credited in entries | **174** |
+| 👥 People who contributed | **222** |
+| 📝 Commits in the cycle | **1,162** |
+| 🔀 Pull requests referenced | **847** |
+| 📋 Changelog entries | **1,189** |
+| 🙌 Contributors credited in entries | **221** |
 | 🤖 Automated dependency commits | 11 |
 
 **Entries by type**
 
 | Type | Count |
 | --- | ---: |
-| 🐛 Fixes | 420 |
-| ♻️ Refactor | 201 |
-| ✨ Features | 130 |
-| 🧪 Tests | 82 |
-| 📚 Docs | 41 |
-| 🧹 Chore | 40 |
-| ⚙️ CI | 17 |
-| ⚡ Performance | 8 |
+| 🐛 Fixes | 588 |
+| ♻️ Refactor | 204 |
+| ✨ Features | 146 |
+| 🧪 Tests | 93 |
+| 📚 Docs | 70 |
+| 🧹 Chore | 51 |
+| ⚙️ CI | 18 |
+| ⚡ Performance | 10 |
 | 📦 Dependencies | 7 |
 | 🏗️ Build | 2 |
 
 ### 🏆 Top 25 contributors this cycle
 
-_By commits in `c754707d0e..c34370bc69`, author identities consolidated via `.mailmap` and the merged PR's GitHub login. Bots excluded._
+_By commits in `c754707d0e..616801a2b6`, author identities consolidated via `.mailmap` and the merged PR's GitHub login. Bots excluded._
 
 | # | Contributor | Commits |
 | ---: | --- | ---: |
-| 🥇 | diegosouzapw | 522 |
+| 🥇 | diegosouzapw | 607 |
 | 🥈 | Jan Leon (@JxnLexn) | 47 |
-| 🥉 | Dizzle (@maxmad64bis) | 40 |
-| 4 | Paco Cartones (@pacocartones) | 39 |
-| 5 | Bob.Hou (@HouMinXi) | 24 |
-| 6 | Sean Ford (@seanford) | 15 |
-| 7 | Fabio Junior Gruchovski (@fabioKoruja00) | 14 |
-| 8 | Ai Captain 357 (@AiCaptain357) | 12 |
-| 9 | 小妍儿 ✨ (@xiaoyaner0201) | 12 |
-| 10 | Andres Felipe Diago Matta (@AndresDiagoM) | 11 |
-| 11 | Praveen K Palaniswamy (@yourspraveen) | 11 |
-| 12 | Junior-HJ | 7 |
-| 13 | opensource-elearning | 7 |
-| 14 | Bl0ck (@Bl0ck154) | 6 |
-| 15 | Aldo (@aldoeliacim) | 5 |
-| 16 | Calvin Chen (@DarknessKiller) | 5 |
-| 17 | Rafa Martins (@rafacpti23) | 5 |
-| 18 | skygunner | 5 |
-| 19 | Fouad Salkini (@fouadSalkini) | 4 |
-| 20 | Bezrabotnyi (@megamen32) | 4 |
-| 21 | serenity (@serenity-X) | 4 |
-| 22 | Davy Massoneto (@DavyMassoneto) | 3 |
-| 23 | Edo Sulai (@edosulai) | 3 |
-| 24 | Innokentiy Solntsev (@insoln) | 3 |
-| 25 | Kiaro-Sama (@KiaroSama) | 3 |
+| 🥉 | Dizzle (@maxmad64bis) | 44 |
+| 4 | Minxi Hou (@HouMinXi) | 40 |
+| 5 | Paco Cartones (@pacocartones) | 39 |
+| 6 | Ai Captain 357 (@AiCaptain357) | 27 |
+| 7 | Andres Felipe Diago Matta (@AndresDiagoM) | 17 |
+| 8 | Sean Ford (@seanford) | 16 |
+| 9 | Fabio Junior Gruchovski (@fabioKoruja00) | 15 |
+| 10 | Praveen K Palaniswamy (@yourspraveen) | 14 |
+| 11 | 小妍儿 ✨ (@xiaoyaner0201) | 13 |
+| 12 | Aldo (@aldoeliacim) | 11 |
+| 13 | Junior-HJ | 9 |
+| 14 | shin (@jjxyxsjr) | 8 |
+| 15 | serenity (@serenity-X) | 8 |
+| 16 | shevar0 | 8 |
+| 17 | Bl0ck (@Bl0ck154) | 7 |
+| 18 | opensource-elearning | 7 |
+| 19 | Rafa Martins (@rafacpti23) | 7 |
+| 20 | skygunner | 7 |
+| 21 | trespassmk | 7 |
+| 22 | Innokentiy Solntsev (@insoln) | 6 |
+| 23 | Calvin Chen (@DarknessKiller) | 5 |
+| 24 | Fouad Salkini (@fouadSalkini) | 5 |
+| 25 | Kiaro-Sama (@KiaroSama) | 4 |
 
 ### ✨ New Features
 
@@ -287,6 +287,22 @@ _By commits in `c754707d0e..c34370bc69`, author identities consolidated via `.ma
 - **feat(electron):** low-frequency health watchdog with auto-restart ([#17015](https://github.com/cheaper-inference/OmniRoute/pull/17015)) — thanks @for-the-zero
 - **feat(i18n):** structure-safe Google Translate engine for the docs pipeline + ENVIRONMENT re-sync ([#18429](https://github.com/cheaper-inference/OmniRoute/pull/18429))
 - **feat(i18n):** Google fallback and quota circuit breaker for every translation entry point ([#18461](https://github.com/cheaper-inference/OmniRoute/pull/18461))
+- **feat(audio):** Gemini Live file-mode transcription — `gemini/gemini-3.5-transcribe-live` on `/v1/audio/transcriptions` converts the upload to 16 kHz PCM with a hardened `ffmpeg` (no stdin, pipe-only protocol whitelist, 25 MiB / 10 min caps, 60 s kill timeout) and transcribes it over the Gemini Live WebSocket, authenticating by header only ([#15776](https://github.com/cheaper-inference/OmniRoute/pull/15776) — thanks @ggdayup)
+- **feat(auth):** opt-in TOTP two-factor authentication with single-use recovery codes for dashboard login; while it is on, `/api/cli/connect` also requires the code (`omniroute connect --totp`), and `OMNIROUTE_DISABLE_MFA=true` gives a host-only recovery path ([#16619](https://github.com/diegosouzapw/OmniRoute/pull/16619)) — thanks @tugrultamerc
+- **feat(github):** Track GitHub Copilot AI Credits (`credits_used`) on the Provider Limits card and add an optional per-connection AI Credits limit that skips the account once the reported usage reaches it (fail-open on missing or stale readings; a local safeguard, not a guaranteed spending ceiling). ([#16688](https://github.com/diegosouzapw/OmniRoute/pull/16688)) — thanks @Primexz
+- **feat(dashboard):** the home Provider Topology now shows live per-model sub-nodes with an On/Auto/Off toolbar (Auto, the default, draws only in-flight models) ([#16739](https://github.com/diegosouzapw/OmniRoute/pull/16739)) — thanks @maulinul
+- **feat(command-code):** per-connection Zero Data Retention toggle for Command Code API keys — when on, every upstream call and the key-validation probe send `x-cmd-zdr: 1` ([#16751](https://github.com/diegosouzapw/OmniRoute/pull/16751)) — thanks @ZeroOttantotto
+- **feat(usage):** TokenRouter quota tracker via an optional Management Key — wallet balance plus per-key quota on Provider Limits; the key is set in the connection modal ([#16837](https://github.com/diegosouzapw/OmniRoute/pull/16837)) — thanks @dasepmoch
+- **feat(oauth):** Devin Desktop browser sign-in (Devin CLI PKCE login, fixed 127.0.0.1:59653 callback with paste-URL fallback) and live per-account model discovery via GetCliModelConfigs with a curated-catalog fallback ([#16843](https://github.com/diegosouzapw/OmniRoute/pull/16843)) — thanks @fadlee @kl3inIT
+- **feat(audio):** support Gemini 3.8 TTS style metadata (`instructions`, `style`, `delivery`, `prompt`), pacing via `speed`, clean audio normalization (C2PA trailer strip and single WAV framing), and `response_format: "pcm"` ([#17265](https://github.com/diegosouzapw/OmniRoute/pull/17265)) — thanks @dkmscc
+- **feat(sse):** add Kimi K3.1 Pro and Highspeed support across Moonshot and Kimi Coding, including 1M context/output, multimodal capabilities, and low/high/max reasoning-effort normalization ([#18038](https://github.com/cheaper-inference/OmniRoute/pull/18038)) — thanks @ysntony
+- **feat(dashboard):** the home page gets two cards with host and OmniRoute process CPU and memory, served by the new management-tier `GET /api/system/metrics`; the cards poll every 3.5 s and pause while the tab is hidden ([#18393](https://github.com/cheaper-inference/OmniRoute/pull/18393)) — thanks @rafacpti23
+- **feat(sse):** A combo can pin an OpenAI tier with `config.service_tier` (or `serviceTier`). It reaches `openai`, `azure-openai` and `codex` targets on every attempt, replacing the client's tier there, and other targets get the request as the client sent it. API writes reject values outside `auto`, `default`, `flex`, `priority` and `scale`. ([#18553](https://github.com/cheaper-inference/OmniRoute/pull/18553)) — thanks @dankarization
+- **feat(docs):** npm and Docker installs now serve the translated `/docs` pages. The npm package (under `dist/docs/i18n/`) and the Docker image ship the 8,885 page mirrors the docs route can read, without the README/CHANGELOG/agent-guide mirrors or the operator-internal security pages, and `jsdom`, which renders them, is now a runtime dependency. The npm tarball grows from about 112 MB to 191 MB ([#18869](https://github.com/cheaper-inference/OmniRoute/pull/18869))
+- **feat(dashboard):** the CI UI Kit's Editions palette (warm neutrals, copper accent) is now the default look in light and dark, across the dashboard, login, `/status`, error pages, `/docs` and the PWA; Settings → Appearance → Color palette keeps the previous lime look as Classic, and the README diagrams use the Editions palette ([#18901](https://github.com/cheaper-inference/OmniRoute/pull/18901))
+- **feat(ci):** choose the docker-publish amd64 runner with DOCKER_AMD64_RUNNER ([#18858](https://github.com/cheaper-inference/OmniRoute/pull/18858))
+- **feat(ci):** run docker-publish's prepare and merge jobs on Blacksmith too ([#18882](https://github.com/cheaper-inference/OmniRoute/pull/18882))
+- **feat(ci):** fall back to hosted when the Blacksmith monthly minutes run out ([#18893](https://github.com/cheaper-inference/OmniRoute/pull/18893))
 
 ### 🐛 Bug Fixes
 
@@ -710,6 +726,173 @@ _By commits in `c754707d0e..c34370bc69`, author identities consolidated via `.ma
 - **fix(cloud-agent):** keep Jules creation timestamps consistent ([#18681](https://github.com/cheaper-inference/OmniRoute/pull/18681)) — thanks @HouMinXi
 - **fix(ci):** run main-green's suites on hosted runners ([#18776](https://github.com/cheaper-inference/OmniRoute/pull/18776))
 - **fix(ci):** raise the Release-Green package lane ceiling to 60 min ([#18794](https://github.com/cheaper-inference/OmniRoute/pull/18794))
+- **fix(dashboard):** the browser bar / installed-PWA title bar (`<meta name="theme-color">`) now follows the Classic palette when it is picked in Settings → Appearance, in light and dark, from the first paint and on every live switch; the server default and the web manifest stay Editions, since the manifest is fetched once per install without the preference ([#19011](https://github.com/cheaper-inference/OmniRoute/pull/19011))
+- **fix(combo):** Priority and round-robin fallback waits now stop immediately when the client has already disconnected and release abort listeners when the wait completes. ([#18569](https://github.com/cheaper-inference/OmniRoute/pull/18569)) — thanks @AiCaptain357
+- **fix(sse):** Combo set retries now return 499 immediately when the request is already cancelled and release abort listeners when retry delays expire. Zero-delay retries still yield before dispatching again. ([#18549](https://github.com/cheaper-inference/OmniRoute/pull/18549)) — thanks @AiCaptain357
+- **fix(providers):** Preserve the original caller's local CLI restriction during Cursor model sync and carry trusted locality into the in-process fallback. ([#18629](https://github.com/cheaper-inference/OmniRoute/pull/18629)) — thanks @AiCaptain357
+- **fix(dashboard):** Show the Kimi provider name in quota cards, overview groups and the provider filter instead of its internal moonshot identifier. ([#18571](https://github.com/cheaper-inference/OmniRoute/pull/18571)) — thanks @AiCaptain357
+- Deduplicate completed previews against their exact saved rows in the filtered result; keep genuine retries separate and cached details accessible through the saved ID while the linked preview remains available. ([#18491](https://github.com/cheaper-inference/OmniRoute/pull/18491)) — thanks @AiCaptain357
+- **fix(logging):** run source call-log artifact workers with native Node.js TypeScript support so idle shutdown and forced termination do not leave esbuild zombies. ([#18511](https://github.com/cheaper-inference/OmniRoute/pull/18511)) — thanks @AiCaptain357
+- **fix(providers):** Check Cloudflare Workers AI credentials with account-scoped model metadata instead of inference; support explicitly configured Global API Key headers and keep ambiguous 403/429 probes neutral. ([#18447](https://github.com/cheaper-inference/OmniRoute/pull/18447)) — thanks @chernistry
+- **fix(sse):** identical in-flight requests pinned to different provider connections are no longer answered by one shared upstream call; each connection now gets its own call while same-connection dedup still applies. ([#19099](https://github.com/cheaper-inference/OmniRoute/pull/19099))
+- **fix(sse):** Local and self-hosted providers can no longer dispatch to cloud-metadata addresses; loopback and LAN base URLs still work. ([#19096](https://github.com/cheaper-inference/OmniRoute/pull/19096))
+- **fix(sse):** non-streaming failures no longer relay the raw upstream error response to the client; the sanitized error body is sent and upstream headers like `Set-Cookie` are dropped while the `Retry-After` hint is kept. ([#19097](https://github.com/cheaper-inference/OmniRoute/pull/19097))
+- **fix(sse):** A request pinned to one connection with `x-omniroute-connection` is no longer retried on a sibling account by the in-pipeline rotation (Codex 429, Antigravity 422). The pin is strict, as the API reference documents. ([#19099](https://github.com/cheaper-inference/OmniRoute/pull/19099))
+- **fix(sse):** Provider requests that get a redirect now check the SSRF guard on every hop, and the API key is not sent to a different origin. ([#19096](https://github.com/cheaper-inference/OmniRoute/pull/19096))
+- **fix(guardrails):** the Vision Bridge auto-router could pick a vision model on a no-auth provider that was disabled via `blockedProviders`; dispatch then refused the provider and the request failed with a misleading `401 provider_not_configured`. Bridge credential checks now treat a blocked no-auth provider as unusable (synthetic and stored-row paths alike, on fresh scans and cached picks; the audio bridge shares this credential gate) and the router skips it before per-model selection, so image requests reroute to an enabled describer. Keyed providers are unaffected: dispatch never consults `blockedProviders` for them. ([#18730](https://github.com/cheaper-inference/OmniRoute/pull/18730)) — thanks @woodsonl
+- **fix(images):** admit the explicit Codex GPT-6.1 Sol image model and preserve original reference bytes on its edit path instead of applying legacy reference downscaling; reject unsupported masks before dispatch while retaining existing validation and legacy model behavior ([#17184](https://github.com/diegosouzapw/OmniRoute/pull/17184)) — thanks @KiaroSama
+- **fix(usage):** Preserve pending-request byte accounting across module reloads, including retained state created before the shared counter was added (related to #17283). ([#18267](https://github.com/cheaper-inference/OmniRoute/pull/18267)) — thanks @AiCaptain357
+- **fix(egress):** record the observed egress address of each address family ([#17326](https://github.com/diegosouzapw/OmniRoute/pull/17326)) — thanks @maxmad64bis (with thanks to @adevwithpurpose for the dual-target proposal in #9694)
+- **db:** index `token_ledger` (migration 225) and collapse the gamification `getBalance` read to a single statement with two indexed subqueries, removing the full-table scans from the write-transaction path of `transferTokens` (#17908, thanks @oyi77)
+- **fix(auth):** record bounded, coalesced audit events for successful API-key metadata and discovery reads (client IP and user-agent only with the new opt-in `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` flag, off by default) while honoring no-log keys, trusted-proxy attribution, multi-credential identity, application-log retention, and credential redaction; repeat touches inside the 60 s refresh window are absorbed in memory without touching SQLite and the audit schema is ensured once per database, so hot polls do not hit the database per request ([#17982](https://github.com/diegosouzapw/OmniRoute/pull/17982)) - thanks @seanford
+- **fix(devin):** an unset `DEVIN_AGENTIC_HOME` now fails the Devin agentic bridge (`dva/...`) with a 503 `devin_bridge_not_configured` error that names the variable, instead of a 500 that read as a temporary server fault; a set but unsafe value keeps `unsafe_devin_home` (also 503). Both are treated as local configuration errors: no connection cooldown, no provider circuit breaker trip, no same-account retry, and no fallback wait before the next combo target ([#18019](https://github.com/diegosouzapw/OmniRoute/issues/18019)) ([#18433](https://github.com/cheaper-inference/OmniRoute/pull/18433)) — thanks @HouMinXi
+- **fix(plugin):** refresh the served catalog on the configured TTL instead of publishing once at install ([#18235](https://github.com/cheaper-inference/OmniRoute/pull/18235)) — thanks @maxmad64bis
+- **fix(combo):** Preserve an authorized same-target retry across a short transient connection cooldown, within existing wait limits and cancellation deadlines (#18257). ([#18258](https://github.com/cheaper-inference/OmniRoute/pull/18258)) — thanks @AiCaptain357
+- **fix(vision-bridge):** lock the rejected provider/connection/model after a model-scoped 400 so later selections skip it while fallback continues ([#18271](https://github.com/cheaper-inference/OmniRoute/pull/18271)) — thanks @RaviTharuma
+- **fix(executors):** Codex requests now reach the upstream as the client sent them: native passthrough gets no placeholder `instructions` or unrequested `reasoning.summary`/`include`, translated clients get neutral instructions instead of the Codex CLI persona, and `session_id` (HTTP and WebSocket) carries the client's own session instead of the account-wide workspace id that merged every conversation into one session, and a Chat client's explicit `parallel_tool_calls` reaches the Codex request ([#18274](https://github.com/diegosouzapw/OmniRoute/pull/18274)) — thanks @aldoeliacim
+- **fix(compression):** Headerless lossy defaults and auto-triggers now retain configured lossless engines while lossy steps remain opt-in ([#18279](https://github.com/cheaper-inference/OmniRoute/pull/18279)) — thanks @jackyfan01 / @trespassmk
+- **fix(combo):** the combo fallback rate is now the share of requests that skipped at least one target (bounded 0-100%) instead of skipped targets divided by requests, which could pass 100%; the old figure is exposed as `skipsPerRequest` and the combo card shows both with a translated label. Combo health thresholds in the control center now read the bounded rate ([#18284](https://github.com/cheaper-inference/OmniRoute/pull/18284)) — thanks @HouMinXi
+- **fix(claude):** opt-in `CLAUDE_CACHE_TAIL_TTL_1H` feature flag caches the conversation tail with the same 1h TTL as system/tools (Vertex keeps 5m); default off keeps the 5m tail unchanged ([#18286](https://github.com/cheaper-inference/OmniRoute/pull/18286)) — thanks @tmaarcxs
+- **fix(api):** `/v1/messages` and `/v1/messages/count_tokens` now return 401s in Anthropic's error envelope (`{"type":"error","error":{"type":"authentication_error","message":…}}`), so Claude Code shows the auth failure; clients that parsed `error.code` on that route should read `error.type`. Other routes keep their 401 body. ([#18299](https://github.com/cheaper-inference/OmniRoute/pull/18299)) — thanks @omar-nahhas
+- **fix(sse):** A native Claude quota 429 on one model (e.g. the Fable weekly allotment) no longer takes the whole OAuth connection out of routing when fresh usage telemetry shows the session and weekly windows still have quota left — only that model is locked (bounded by `maxCooldownMs`), other Claude models keep routing ([#18301](https://github.com/diegosouzapw/OmniRoute/pull/18301)) — thanks @awci; fixes #18296.
+- **fix(providers):** an explicit provider safety stop (e.g. Codex 403 `misalignment_policy_violation`, `content_policy_violation`) is classified as a request-scoped `provider_safety_refusal` instead of `forbidden`, so one refused request no longer marks a healthy account `banned` and disables it permanently, repeated refusals never count toward the refusal-streak ban, and a safety refusal no longer triggers a credential refresh that re-sent the refused request ([#18307](https://github.com/diegosouzapw/OmniRoute/pull/18307)) — thanks @aldoeliacim
+- **fix(sse):** Classify Codex overloads only from real error declarations, preserve SSE framing around heartbeats, retain response identity on interrupted streams, preserve partial-output status and text whitespace, and separate native Anthropic accounting from client usage projection. Two opt-in flags, both off by default: `PROXY_STRICT_POST_REPLAY_ENABLED` resends a non-idempotent request only after a provably pre-send connection error, and `RESPONSES_TRANSPORT_KEEPALIVE_ENABLED` sends Responses keepalives as a blank line ([#18312](https://github.com/cheaper-inference/OmniRoute/pull/18312)) — thanks @shevar0.
+- **fix(dashboard):** the combo model picker lists the live models of Zed Hosted and other live-only catalog providers ([#18315](https://github.com/cheaper-inference/OmniRoute/pull/18315)) — thanks @haidarmy
+- **fix(codex):** Preserve nonnegative safe-integer reasoning budgets (including zero), model-defined effort spelling, explicit Responses summary delivery, and boolean `defer_loading` when normalizing requests. Keep forced/suffix effort precedence, compact/WebSocket field removal, `strict: null`, and tool-schema repairs unchanged. ([#18329](https://github.com/cheaper-inference/OmniRoute/pull/18329)) — thanks @shevar0
+- Honor Codex session and weekly tracking toggles consistently in cached routing and live quota preflight, including explicit cutoffs, while retaining unknown-window exhaustion and paid-credit controls (#18330). ([#18334](https://github.com/cheaper-inference/OmniRoute/pull/18334)) — thanks @shevar0
+- fix(providers): classify Codex quota windows by their reported duration so weekly-only Pro quota enforces weekly cutoffs and agrees across usage badges and account pools; preserve unknown durations without inventing 5h availability (#18326, #18330). ([#18334](https://github.com/cheaper-inference/OmniRoute/pull/18334)) — thanks @shevar0
+- fix(api): regenerate the public OpenAPI spec with the build version and deployment-relative server URL. Builds generate it, and `npm run gen:public-openapi` refreshes the committed copy (#18331). ([#18349](https://github.com/cheaper-inference/OmniRoute/pull/18349))
+- **fix(sse):** an upstream `400 "This model does not support assistant message prefill"` is now classified as a request-shape error instead of "model unavailable", so it no longer locks a healthy model for 1h on every combo target; plain `anthropic-compatible-*` connections gain an opt-in `requireUserLastMessage` setting that drops trailing assistant turns (no structured `tool_use`) before sending ([#18332](https://github.com/cheaper-inference/OmniRoute/pull/18332)) — thanks @MikeTuev
+- **fix(codex):** Omit unsupported optional `web_search_call.action` history without replacing the search or dropping its item/encrypted content; retain valid search/open/find actions and compaction replay behavior. ([#18333](https://github.com/cheaper-inference/OmniRoute/pull/18333)) — thanks @shevar0
+- **fix(codex):** Parse official primary/secondary quota headers, keep malformed usage unknown instead of inventing healthy zero-percent windows, validate reset units, and preserve independent Codex/Spark evidence and explicit quota denial. ([#18334](https://github.com/cheaper-inference/OmniRoute/pull/18334)) — thanks @shevar0
+- **fix(sse):** the in-place mid-conversation system turns for plain `anthropic-compatible-*` relays are now a per-connection setting (`providerSpecificData.keepMidConversationSystem`, toggle in the edit-connection modal) instead of the global `ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM` feature flag, and no longer require the client to send the `mid-conversation-system-2026-04-07` beta — Claude Code builds that keep such turns without negotiating the beta were hoisted again and re-wrote ~110K tokens of cache on every turn. The beta is still forwarded when the client sends it, never invented ([#18341](https://github.com/cheaper-inference/OmniRoute/pull/18341)) — thanks @MikeTuev
+- **fix(combo):** When every combo target fails authentication, the terminal diagnostics now report `authentication_rejected` with a `switch-combo` recovery action that tells the user to reconnect the account in /dashboard/providers, instead of the transient "retry" hint. Quota exhaustion keeps precedence, and mixed or empty outcomes are unchanged ([#18360](https://github.com/diegosouzapw/OmniRoute/issues/18360)) ([#18366](https://github.com/cheaper-inference/OmniRoute/pull/18366)) — thanks @HouMinXi
+- **fix(types):** cache-detection context and Gemini usage fallbacks stay within the API Route Typecheck contract ([#18368](https://github.com/diegosouzapw/OmniRoute/pull/18368)) — thanks @RaviTharuma
+- **fix(combo):** protected priority now falls back to the next target on structured context-window overflow without rewriting the original messages ([#18368](https://github.com/diegosouzapw/OmniRoute/pull/18368)) — thanks @RaviTharuma
+- **fix(sse):** a non-streaming request no longer fails with a 502 `invalid_sse` when a forced-streaming upstream answers with one complete JSON response document (chat completion, Responses object, Claude message or structured error) labelled `text/event-stream`, even with `data: [DONE]` glued after it; the document is used as the response, so a combo no longer skips that target. Corrupt event streams still return the 502 ([#18377](https://github.com/cheaper-inference/OmniRoute/pull/18377)) — thanks @cristianob
+- **fix(resilience):** Settings > Resilience > Request Queue can be saved again. The settings API rejected `requestQueue.globalConcurrentRequests`, which the card always sends, and `waitForCooldown.budgetMs`, which the runtime already reads; both are now accepted within the normalizer bounds (0 to 100000 and 0 to 300000 ms), and the legacy `defaults.globalConcurrentRequests` key is applied instead of being dropped ([#18390](https://github.com/cheaper-inference/OmniRoute/issues/18390), [#18401](https://github.com/cheaper-inference/OmniRoute/pull/18401)) — thanks @HouMinXi
+- **fix(sse):** the direct response-start window now scales with request payload size (>512 KB ×2, >2 MB ×3, capped at 180 s; `OMNIROUTE_DIRECT_HEADERS_VOLUME_ADAPTIVE=0` pins the flat window) ([#18404](https://github.com/cheaper-inference/OmniRoute/pull/18404)) — thanks @jjxyxsjr
+- **fix(executors):** a 400 advertising a `max_tokens` ceiling ("expected a value <= N") is now parsed, clamped (squeezing an over-cap thinking budget), retried once, and learned so future requests pre-clamp ([#18407](https://github.com/cheaper-inference/OmniRoute/pull/18407)) — thanks @jjxyxsjr
+- **fix(autoCombo):** `auto/<family>` pools (for example `auto/claude-sonnet`) no longer route to the Devin CLI Agentic Bridge on hosts where the Devin CLI is not installed or not logged in. Family pools still bypass the curated no-auth allowlist (#6453, #8183), but the local CLI readiness gate from #15446 now applies to every pool instead of being skipped along with the allowlist ([#18417](https://github.com/diegosouzapw/OmniRoute/issues/18417)) ([#18428](https://github.com/cheaper-inference/OmniRoute/pull/18428)) — thanks @HouMinXi
+- **fix(nvidia):** drop `openai/gpt-oss-120b`, `moonshotai/kimi-k3`, `deepseek-ai/deepseek-v4-pro-0813` and `deepseek-ai/deepseek-v4-flash-0731` from the NVIDIA catalog, because NVIDIA retired their free endpoints and every request now gets a 410 end of life answer. The budget exhaustion emergency fallback, which defaulted to `nvidia` + `openai/gpt-oss-120b` and so always failed, now defaults to `nvidia` + `nvidia/nemotron-3.5-super-vl-120b-a12b`, a model on NVIDIA's free endpoint that OmniRoute already lists as free, with a zero-price row so USD-limited API keys are not failed closed after a fallback ([#18418](https://github.com/diegosouzapw/OmniRoute/issues/18418)) ([#18443](https://github.com/cheaper-inference/OmniRoute/pull/18443)) — thanks @HouMinXi
+- **fix(sse):** web_fetch interception works for Anthropic Messages clients again. The injected `omniroute_web_fetch` tool and a forced `tool_choice` are now built in the client's format before translation, as the web_search fallback already does, so a Claude to Claude request no longer gets a 400 for a nested function tool and a Claude to OpenAI request no longer loses the tool. A forced Anthropic choice `{ type: "tool", name: "web_fetch" }` now points at the injected tool, and an OpenAI Chat client on a Responses target keeps the tool name ([#18421](https://github.com/diegosouzapw/OmniRoute/issues/18421)) ([#18427](https://github.com/cheaper-inference/OmniRoute/pull/18427)) — thanks @HouMinXi
+- **fix(sse):** Opt-in `OPENCODE_FREE_TIER_EGRESS_PROBE` (default off): after an OpenCode `403 FreeTierError` through a proxy, probe the request once through another account proxy or pool member (never a direct connection) and set the first egress aside only when that probe answers 200 ([#18423](https://github.com/cheaper-inference/OmniRoute/pull/18423)) — thanks @yxxrn
+- **fix(translator):** the system-role fold (GLM 4.x/5.0 family) no longer flattens the first user message to text — images and other structured parts survive with the system instructions prepended as a leading text part ([#18437](https://github.com/cheaper-inference/OmniRoute/pull/18437)) — thanks @jjxyxsjr
+- **fix(usage):** oversized image data URLs in persisted chat-log payloads now collapse into an `_omniroute_image_ref` record (mime, byte count, sha256 fingerprint, head) instead of a corrupt half-image ([#18438](https://github.com/cheaper-inference/OmniRoute/pull/18438)) — thanks @jjxyxsjr
+- **fix(auto-combo):** account-semaphore capacity errors (`SEMAPHORE_TIMEOUT`/`SEMAPHORE_QUEUE_FULL`, type `account_semaphore_capacity`) are now request-scoped: no model lockout, no provider cooldown, no connection blame. The combo still retries the same target and falls through to the next one ([#18442](https://github.com/cheaper-inference/OmniRoute/pull/18442)) — thanks @jjxyxsjr
+- **fix(pricing):** add zero-price rows for the seven NVIDIA catalog models that had none (`meta/muse-glimmer-30b`, `poolside/laguna-xs-2.1`, `google/gemma-4-31b-it`, `google/diffusiongemma-26b-a4b-it`, `nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nemotron-3.5-lightning-30b-a3b`, `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning`). They run on NVIDIA's free hosted endpoint, which has no per-token price listed, but without a row their usage was unpriced and an API key with a USD limit failed closed after one request ([#18464](https://github.com/diegosouzapw/OmniRoute/issues/18464)) ([#18470](https://github.com/cheaper-inference/OmniRoute/pull/18470)) — thanks @HouMinXi
+- **fix(api):** the leaderboard SSE stream (`/api/gamification/stream`) and the embedded-service log tail (`/api/services/[name]/logs`) now release their timers and ring-buffer subscription when the response body is cancelled or a write fails, not only when the request signal aborts. A half-open peer (tunnel drop, network change) never aborts the signal, so these streams used to keep polling and queueing for the life of the process. The leaderboard stream also closes immediately when the client disconnected before auth finished. ([#18465](https://github.com/cheaper-inference/OmniRoute/pull/18465)) — thanks @Abelo9996
+- **fix(api):** also bound live SSE queues to 256 KiB, prevent overlapping leaderboard polls, and sanitize error events. Large log snapshots retain their complete event payload and Unicode while encoding in 32 KiB chunks on demand; cancellation releases the retained snapshot and live queue (Refs #18445). ([#18465](https://github.com/cheaper-inference/OmniRoute/pull/18465)) — thanks @Abelo9996
+- **fix(api-keys):** a non-default API key selected in the dashboard playground no longer fails every request with "API key model policy unavailable". The resolved-model check in the chat handler now uses the same key the entry policy loaded, which also makes a Vision Bridge self-loop check its caller's key instead of the unrestricted self-loop bearer ([#18471](https://github.com/diegosouzapw/OmniRoute/issues/18471)) ([#18481](https://github.com/cheaper-inference/OmniRoute/pull/18481)) — thanks @HouMinXi
+- **fix(embeddings):** the embedding combo family guard compares the pinned `dimensions` (client body first, then the combo's) instead of each target's registry default, so a combo can fail over between providers of the same model, e.g. `gemini/gemini-embedding-001` → `openrouter/google/gemini-embedding-001` at 768 dimensions ([#18483](https://github.com/diegosouzapw/OmniRoute/issues/18483), [#18484](https://github.com/diegosouzapw/OmniRoute/pull/18484)) — thanks @TheViniAlmeida
+- **fix(dashboard):** Add an optional masked Microsoft 365 refresh-token field to connection Advanced Settings, safely persist replacements, and preserve stored credentials when left blank ([#18492](https://github.com/cheaper-inference/OmniRoute/pull/18492)) — thanks @trespassmk
+- **fix(sse):** the response-model echo (`echoRequestedModelName`, Codex CLI, Claude Code) now returns the model the client requested instead of the combo leaf target ([#18495](https://github.com/cheaper-inference/OmniRoute/pull/18495), closes [#18494](https://github.com/cheaper-inference/OmniRoute/issues/18494)) — thanks @xiaoyaner0201 / @skygunner
+- **fix(dashboard):** Stop the dashboard from looking up client versions (Codex and Zed on the GitHub API; Claude Code, Copilot, Gemini, Qwen, CodeBuddy, Kimi and OpenCode on npm) from the viewer's browser on every page load. Next.js gives browser bundles a `process` object, so the `typeof process` guards never stopped them; they spent the per-IP GitHub API budget the server needs and surfaced as "403 rate limit exceeded" in the console. A failed Codex release lookup now also waits 15 minutes before retrying instead of retrying on every call ([#18503](https://github.com/cheaper-inference/OmniRoute/pull/18503)) — thanks @ikkadecibel-blip
+- **fix(providers):** Stop the Copilot, Claude Code, Gemini, Qwen, CodeBuddy, Kimi and Zed client-version getters from repeating their npm/GitHub lookup on every call when the registry answers the pinned version (their cache only kept newer versions), and stop all of them, OpenCode included, from retrying a failed lookup on every request: an answer now counts as checked for the existing 6-hour TTL, and a failure is retried after 15 minutes ([#18507](https://github.com/diegosouzapw/OmniRoute/pull/18507)) — thanks @ikkadecibel-blip
+- **fix(discovery):** Mistral API models discovered via `/v1/models` now map `max_context_length` to the real 256K / 1M context windows instead of defaulting to 128K, parse boolean `capabilities` to stamp operation-specific endpoints (`audio-transcriptions`, `audio-speech`, `ocr`) so Voxtral and Mistral OCR models are not misclassified as chat models, and preserve uncapped output limits when upstream publishes no separate output limit. ([#18510](https://github.com/cheaper-inference/OmniRoute/pull/18510)) — thanks @RayJW
+- **fix(api):** the "Expose in Claude Code" provider toggle now takes effect for OpenAI-compatible providers. The dashboard stores the setting under the provider's node id while `/v1/models` and the request-time `claude/<prefix>/<model>` resolver read it by the node's prefix, so no mirror was listed or routed ([#18522](https://github.com/cheaper-inference/OmniRoute/pull/18522), fixes [#18517](https://github.com/cheaper-inference/OmniRoute/issues/18517)) — thanks @yourspraveen
+- **fix(api):** a saved request body limit now also governs `/v1/chat/completions` and `/v1/responses`, for the header check and for the bytes actually read, including chunked bodies. **Upgrade note:** a limit saved earlier now applies to these two routes, so an install with a saved limit below 50 MB starts getting `413` (`PAYLOAD_TOO_LARGE`) on chat bodies above it. To raise it, save a higher value at `/dashboard/settings/advanced` or `PATCH /api/settings` with `maxBodySizeMb`; 50 restores the previous chat limit. Installs that never saved one keep the 50 MB default, and `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` keeps working and also caps a saved limit ([#18527](https://github.com/cheaper-inference/OmniRoute/pull/18527)) — thanks @shevar0
+- **fix(dashboard):** Show no-auth providers (Cloudflare AI Playground and the other key-less providers) in the Home "Provider Topology" and count their traffic in `/api/provider-metrics` and the free-provider rankings: both call-log queries only counted providers with a `provider_connections` row and the topology only kept providers with an active connection, so a no-auth provider never appeared even while it served requests. Blocked no-auth providers stay hidden, and a deleted provider still does not resurface from old logs (#10714) ([#18530](https://github.com/diegosouzapw/OmniRoute/pull/18530)) — thanks @ikkadecibel-blip
+- **fix(providers):** Preserve DeepSeek Web error hints, return HTTP 429 for explicit upstream rate-limit rejections, and fail rejected streams without reporting a successful completion. ([#18534](https://github.com/cheaper-inference/OmniRoute/pull/18534)), thanks @Hector-Ha.
+- **fix(dashboard):** Keep Codex quota panels in sync with accepted upstream response observations using local cached reads. Preserve separate Codex/Spark windows, partial observations and their ages; prevent delayed usage refreshes from hiding newer inference quota. Pause automatic cached reads in hidden tabs without adding upstream calls or blocking generation. ([#18535](https://github.com/cheaper-inference/OmniRoute/pull/18535)) — thanks @shevar0
+- **fix(routing):** `expiry-first` account selection on direct model requests now picks the account whose quota is closest to being lost again. A 5h session reset no longer outranks a longer window's deadline in the metric-aware score, an evicted in-memory quota entry is read back from `quota_snapshots` instead of scoring the account as "no telemetry", and the `$60 / month` window that opencode-go and opencode-zen store as `mcp_monthly` counts as the monthly deadline, while GLM's `mcp_monthly` MCP tool allowance stays out of the ranking ([#18548](https://github.com/cheaper-inference/OmniRoute/pull/18548)) — thanks @HouMinXi
+- **fix(authz):** `REQUIRE_API_KEY` is now read the same way by the request gate and by both startup exposure warnings (Next server and `omniroute serve`): `true`, `1` and `yes` turn it on regardless of case or surrounding whitespace. Before, a value such as `TRUE`, `True`, `YES` or `" true"` left the gate off, so `/v1` served requests without a key, while both warnings treated the value as on and printed nothing. Deployments that set one of those spellings now actually require a key, and clients without one get `401`. Any other value, including `on`, still means off. ([#18550](https://github.com/cheaper-inference/OmniRoute/pull/18550)) — thanks @HouMinXi
+- **fix(mcp):** `omniroute --mcp` no longer exits silently when the install path contains a space (or `%`, `#`, non-ASCII, or a symlinked install) — the direct-run guard compares real filesystem paths instead of a percent-encoded `file:` URL against the raw `argv[1]`, so the stdio transport starts and answers `initialize` (#18556) ([#18634](https://github.com/cheaper-inference/OmniRoute/pull/18634)) — thanks @skygunner / @serdarucel
+- **fix(combo):** with `zeroLatencyOptimizationsEnabled` + `hedging` racing targets, a superseded hedge loser is no longer logged as a 499 "Request aborted" call. The winner path now cancels sibling targets with the hedge-cancel abort reason, the per-target runner forwards the parent's actual reason (client disconnects stay bare aborts instead of being stamped as hedge cancellations), and the streaming leg short-circuits on that reason — teardown only, no attempt row, status-599 `hedge_cancelled` sentinel result — so 499/error dashboards count real client disconnects, not internal supersessions. ([#18559](https://github.com/cheaper-inference/OmniRoute/pull/18559)) — thanks @jjxyxsjr
+- **fix(providers):** Route `gpt-6-astra`, `gpt-6.1-sol`, and `gpt-5.6-sol` through AgentRouter's Responses endpoint by default while preserving explicit connection protocol settings ([#18560](https://github.com/cheaper-inference/OmniRoute/pull/18560)) — thanks @trespassmk
+- **fix(codex):** Codex accounts with the paid-credits opt-in are used only after every other account's 5h/weekly subscription quota for the request is spent, instead of competing with accounts that still have free quota; and an OAuth re-login no longer silently switches the opt-in off ([#18561](https://github.com/cheaper-inference/OmniRoute/pull/18561) — thanks @feci).
+- **fix(sse):** a Qoder queue throttle (`503 upstream_busy`, upstream code `10605`) no longer parks the whole connection. Qoder multiplexes every model behind one connection, and `qoder` was missing from the `hasPerModelQuota()` allowlist, so one queued model put the account into a connection-wide cooldown and every sibling model looked dead until it expired. The queued model now takes the cooldown alone and its siblings stay routable. ([#18572](https://github.com/cheaper-inference/OmniRoute/pull/18572)) — thanks @Junior-HJ
+- **fix(sse):** an Anthropic OAuth `403 "Request not allowed"` (`REQUEST_REJECTED`) no longer deactivates the whole connection. The refusal was accumulating on a connection-wide streak, so a single upstream rejection disabled every account behind that provider; it is now scoped to the model that was refused, and the sibling models on the same connection stay routable. The streak still escalates to a longer cooldown for the refused model, and a success clears it. ([#18574](https://github.com/cheaper-inference/OmniRoute/pull/18574)) — thanks @Junior-HJ
+- **fix(catalog):** replace the stale Token Harbor `claude-haiku-5.5:free` route with the `deepseek-v4.1-flash:free` and `mimo-v2.6-flash:free` routes listed on the public Free catalog, with per-model evidence records (#18579) — thanks @Petrusreno
+- **fix(ci):** Verify the actual Node runtime in pushed base and web Docker images on both architectures before publishing multi-arch manifests, rejecting versions below the Node 26.12.1 security floor for CVE-2026-111497 ([#18585](https://github.com/cheaper-inference/OmniRoute/pull/18585)) — thanks @alirezariahi.
+- **fix(routing):** Apply exact context-window overrides to direct-request input checks and advertised input limits while preserving explicit input ceilings ([#18588](https://github.com/cheaper-inference/OmniRoute/pull/18588), fixes #18582) — thanks @alirezariahi. — thanks @K007-K
+- **fix(routing):** Preserve unreported quota reset telemetry without treating unknown fractions as exhausted or letting short sessions inflate expiry-first account scores ([#18588](https://github.com/cheaper-inference/OmniRoute/pull/18588), fixes #18552) — thanks @alirezariahi. — thanks @K007-K
+- **fix(providers):** Classify the two active NVIDIA free endpoints as rate-limited recurring access with per-model evidence and API-key requirements ([#18588](https://github.com/cheaper-inference/OmniRoute/pull/18588), fixes #18499) — thanks @alirezariahi. — thanks @K007-K
+- **fix(cli):** on Windows, `serve` now repoints a Startup `OmniRoute.vbs` that still launches an older, removed or unreadable installed copy (pnpm keeps each version in its own directory, so autostart kept booting the pre-upgrade version); only the CLI path changes, the node binary and flags are kept, and it never repoints at an older version or an `npx` cache copy (#18605) — thanks @AndresDiagoM
+- **fix(sse):** replay server-restored Claude signed thinking at its original content index — the continuity store kept a flat list and `openai-to-claude` pushed every block to the front of each assistant fragment that owned any of the turn's `tool_use` ids, so `[thinking, text, tool_use, thinking, tool_use]` was reordered and a turn the client split into several messages replayed the blocks twice; the store now records which `tool_use` each run preceded and the translator puts each run back directly before that `tool_use`, once (Refs [#18607](https://github.com/cheaper-inference/OmniRoute/issues/18607)) ([#18616](https://github.com/cheaper-inference/OmniRoute/pull/18616)) — thanks @serenity-X
+- Honor enabled stream recovery for structured transport read failures before usable combo output, with bounded retries and client cancellation cleanup. First-output inspection limits conservatively prevent a new transport retry. ([#18610](https://github.com/cheaper-inference/OmniRoute/pull/18610)) — thanks @AiCaptain357
+- **fix(docs):** the docs layout no longer mounts the Fumadocs next-themes provider, whose `theme` storage key collided with the root theme store; a light/dark switch bound to the root theme store (and the `d` hotkey) replaces the Fumadocs one, so `/docs` follows the dashboard theme (#18612, refs #18078) — thanks @mihsanalam
+- **fix(api):** A combo member listed by a connection's synced catalog but carrying no limit evidence (no registry row, static spec, synced capability, or persisted override) no longer pulls the combo's advertised `max_input_tokens` down to its provider's `defaultContextLength`; confirmed sibling caps still bound the combo (#18609). ([#18618](https://github.com/cheaper-inference/OmniRoute/pull/18618)) — thanks @serenity-X
+- **fix(sse):** recognize Gemini `finishReason` terminal markers in `streamRecovery` holdback and `throughputWatchdog` so completed Gemini SSE streams under 750ms are not misclassified as `TruncatedStreamError` and replayed 4x ([#18624](https://github.com/diegosouzapw/OmniRoute/pull/18624) — thanks @fidelix)
+- **fix(security):** the input sanitizer now honors dashboard Feature Flags overrides — `INPUT_SANITIZER_ENABLED` and `PII_REDACTION_ENABLED` resolve DB override first with the env var as fallback (the same pattern as `INJECTION_GUARD_MODE`), so toggling them in the Feature Flags UI takes effect without an env edit or restart (#18632) ([#18635](https://github.com/cheaper-inference/OmniRoute/pull/18635)) — thanks @skygunner
+- **fix(antigravity):** the OpenAI → Antigravity/Gemini stream translator forwards the trailing usage-only chunk (`choices: []`, sent after the finish chunk by `include_usage` upstreams) as `usageMetadata` instead of dropping it, without double-counting when usage already rode on the finish chunk ([#18643](https://github.com/diegosouzapw/OmniRoute/pull/18643)) — thanks @AndresDiagoM
+- **fix(pricing):** OpenCode Go requests are priced from LiteLLM-synced pricing again; LiteLLM's `opencode_go` bucket was stored under a key no cost lookup reads, so every `opencode-go` request booked as unpriced $0 ([#18644](https://github.com/cheaper-inference/OmniRoute/pull/18644)) — thanks @yourspraveen
+- **fix(compression):** a legacy install with the master switch on, no stored `engines` row and `defaultMode: "stacked"` no longer runs a stacked pipeline while the dashboard shows every engine off. When the backfilled engines map has zero enabled engines, dispatch now resolves to `off` — matching the panel; legacy installs whose backfill still enables an engine (e.g. caveman on) keep their stacked dispatch. ([#18637](https://github.com/diegosouzapw/OmniRoute/issues/18637)) ([#18650](https://github.com/cheaper-inference/OmniRoute/pull/18650)) — thanks @serenity-X
+- **fix(combo):** A 403 without a quota signal in the body now locks the exact provider/connection/model tuple instead of the whole quota family, so a restricted key, forbidden route, or unauthorized model no longer parks sibling models of the same connection for the cooldown. A 403 that carries a quota proof still locks the family. ([#18652](https://github.com/cheaper-inference/OmniRoute/pull/18652)) — thanks @maxmad64bis
+- **fix(antigravity):** Store the Google verify-account link from the raw `403 VALIDATION_REQUIRED` (executor and connection test) so the Verify account button finally appears, mask the link in the probe log, and keep a still-blocked account in error instead of letting the quota poll, token refresh or recovery tick flip it back to active ([#18661](https://github.com/cheaper-inference/OmniRoute/pull/18661)) — thanks @bufftop25
+- **fix(auth):** a short model lockout on the last healthy account is no longer reported as "all accounts have exhausted their quota" with another account's multi-day reset. When that lockout ends before the earliest quota reset, the request gets a model-scoped 429 with the lockout's retry time, so clients retry in seconds instead of giving up (#18664). ([#18814](https://github.com/cheaper-inference/OmniRoute/pull/18814)) — thanks @DongwonTTuna
+- **fix(antigravity):** Route each request to an Antigravity/agy account whose synced model list includes the requested model, so Claude 5.5 and Gemini 4 Argon requests no longer start on or fail over to accounts whose plan lacks them; fails open when no account lists the model, keeps never-synced accounts eligible, and lets an operator-pinned account through (a combo step pinned to an account whose plan lacks the model is skipped while another account lists it) ([#18665](https://github.com/cheaper-inference/OmniRoute/pull/18665)) — thanks @bufftop25
+- **fix(sse):** Leonardo image and video generation work again; image requests sent the catalog id (`phoenix`, `sdxl`) where Leonardo expects a platform-model UUID and got HTTP 500 "internal error", and video posted an image body to the image endpoint (400 "Unexpected variable num_frames"); video now uses `/generations-text-to-video` with Motion 2.0 / Motion 2.0 Fast and returns the mp4 instead of the thumbnail; an image `size` such as `576x1024` is now honoured instead of always 1024x1024, and the mp4 download stops on client abort, times out, and reports a failed download as an upstream error ([#18670](https://github.com/cheaper-inference/OmniRoute/pull/18670)) — thanks @yourspraveen
+- **fix(sse):** Add content-free native-stream diagnostics at empty-response rejection boundaries. Explicit failed, cancelled and incomplete Responses statuses cannot authorize a successful empty turn. Diagnostics distinguish terminal evidence, streamed text/tool counters and observer gaps without logging generated content, tool inputs or provider errors. Retry budgets and account routing are unchanged. (#18685) — thanks @fouadSalkini
+- **fix(sse):** opt-in `PROXY_REFUSAL_MODEL_SCOPE` (default off) scopes an opencode quota 429 to the model that hit it, so the same egress keeps serving other models. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see the refusal, and a model-less recovery ends every model's entry ([#18686](https://github.com/cheaper-inference/OmniRoute/pull/18686)) — thanks @maxmad64bis
+- **fix(providers):** Codex `gpt-6.1-sol` is registered as a Codex hosted-tool image model (`codex/gpt-6.1-sol-image` in the image catalog), so image combos keep `cx/gpt-6.1-sol` as a target instead of dropping it, and `/v1/images/edits` accepts it instead of returning 400 ([#18687](https://github.com/cheaper-inference/OmniRoute/issues/18687)) ([#18826](https://github.com/cheaper-inference/OmniRoute/pull/18826)) — thanks @anhtahaylove
+- **fix(claude-thinking):** skip the signed-thinking restore for assistant turns whose tool_call id appears more than once in the client history (a retried turn re-sends the same id for a different generation), which made Anthropic answer 400 "thinking or redacted_thinking blocks in the latest assistant message cannot be modified" (#18688). — thanks @AbdullahPesteli
+- **fix(sse):** the JSON-schema fallback for opencode-zen's DeepSeek models now builds its instruction with real newlines instead of a literal backslash-n, so the schema, its code fence and the system-prompt separator reach the model as line breaks (follow-up to #18241) (#18691). — thanks @AndresDiagoM
+- **fix(translator):** Preserve Responses developer instructions when translating requests to Gemini and Antigravity ([#18704](https://github.com/diegosouzapw/OmniRoute/pull/18704)) — thanks @AiCaptain357
+- **fix(antigravity):** Keep default Antigravity and agy generation requests on the daily consumer endpoint instead of falling back to the regular host ([#18706](https://github.com/cheaper-inference/OmniRoute/pull/18706)) — thanks @AiCaptain357
+- fix(sse): a combo can opt out of the cooldown wait with `config.comboCooldownWaitEnabled: false`, so it fails fast instead of waiting out a model lock; the global `comboCooldownWait` setting still has to be enabled for any combo to wait. (#18708) — thanks @stanleytejakusuma
+- **fix(db):** Preserve unknown backup-directory formats instead of deleting them as orphans; retain `.sqlite.zst` archives and their dated preservation receipts as one count/age-retention family, while keeping detached receipts. ([#18712](https://github.com/cheaper-inference/OmniRoute/pull/18712)) — thanks @aldoeliacim
+- **fix(sse):** `muse-code` Responses requests no longer reach Muse with the wrong tool when a client tool — or a `function_call` already in the turn history — shares a name with one of its eight reserved builtins (`read_file`, `write_file`, `edit_file`, `bash`, `web_search`, `tool_search`, `subagent_send_message`, `subagent_cancel`): only on that provider/format pair those names are aliased to a deterministic `muse_<name>_<sha256>` wire name and the client originals are restored on every reply path (JSON, streaming, passthrough tail, completion summaries, server-owned follow-up turns), with native namespace identities kept in their own ledger and no other provider or endpoint affected ([#18720](https://github.com/cheaper-inference/OmniRoute/pull/18720), refs [#18600](https://github.com/cheaper-inference/OmniRoute/issues/18600)) - thanks @trespassmk
+- **fix(codex):** cached quota exhaustion no longer rejects accounts with positive remaining quota at the shared 99% safety threshold; configurable early cutoffs and genuine exhaustion remain enforced ([#18735](https://github.com/cheaper-inference/OmniRoute/pull/18735) — thanks @insoln).
+- Logs now show intermediate chat HTTP sends from the shared HTTP executor and Antigravity as related request rows. Final rows retain their logical outcome and usage, while safe HTTP metadata keeps earlier failures visible without duplicating logical request counts or cost. The Errors filter now classifies rows in one place: a row with HTTP status 400 or above, or a non-empty error even on a 2xx status, is an error; an in-flight row is pending; a retained attempt without an HTTP response is a transport error ([#18736](https://github.com/cheaper-inference/OmniRoute/pull/18736), fixes [#18724](https://github.com/cheaper-inference/OmniRoute/issues/18724)) — thanks @AiCaptain357
+- **perf(quota):** Scope availability read views to single accounts and prioritize in-memory usage over repeated SQLite snapshot queries to eliminate 14-21s event loop stalls on instances with many connections; the dashboard availability view now prefers fresh provider-limits usage over a stale persisted snapshot, which is only read when no usage is available ([#18741](https://github.com/cheaper-inference/OmniRoute/pull/18741)) — thanks @bufftop25
+- **fix(sse):** Codex quota windows older than five minutes now count as unknown instead of exhausted, so an account that ChatGPT reset outside OmniRoute becomes routable again without waiting for a manual refresh. This applies by default, whatever `QUOTA_WINDOW_BOUNDED_PARK` is set to ([#18742](https://github.com/cheaper-inference/OmniRoute/pull/18742)) — thanks @stanleytejakusuma
+- **fix(copilot):** `gpt-6.x` and `gpt-5.5+` ids (and codex ids) on GitHub Copilot and GitHub Enterprise Copilot now go to `/responses` even when a synced catalog row carries no endpoint metadata, instead of failing with HTTP 400 on `/chat/completions`. A synced `gpt-6-*` row that lists no chat endpoint now defaults to Responses (it stayed on Chat Completions since #15337); rows that declare a chat endpoint are unchanged. GitHub Enterprise Copilot also drops `temperature` for the same family and lists the `gpt-6*` models in its static registry (#18743). — thanks @nareshh74
+- **fix(docker):** a published image tag now always holds both `linux/amd64` and `linux/arm64`. The publish workflow checks every flavor in both registries, skips a version only when the mandatory Node and Web images are complete, and publishes the best-effort Bun images all-or-nothing, so a failing Bun build can no longer block the supported images or leave a single-architecture `-bun` tag (#18749). — thanks @rqzbeh
+- **fix(providers):** Dashboard Test Message accepts Cloudflare Workers AI model IDs beginning with `@cf/` ([#18752](https://github.com/cheaper-inference/OmniRoute/pull/18752)) — thanks @trespassmk
+- **fix(capabilities):** Restrict the GLM-5.3 vision heuristic to Flash so text-only base/effort variants no longer inherit image support ([#18758](https://github.com/cheaper-inference/OmniRoute/pull/18758)) — thanks @insoln.
+- **fix(sse):** with `PROVIDER_SAFETY_STOPS_TERMINAL` on, a provider safety stop that arrives inside a stream now ends priority, round-robin and nested combos instead of re-sending the conversation to a sibling model, reaches `/v1/responses` clients after the early keepalive as a terminal `response.failed` with its code (Codex CLI had treated the old `error` frame as a disconnect and retried five times), an error-only first frame is classified at stream readiness instead of being retried as an early EOF, and a specific rejection frame is no longer masked by a later generic `response.failed` ([#18760](https://github.com/diegosouzapw/OmniRoute/pull/18760)) — thanks @aldoeliacim
+- **fix(compression):** the default safe pipeline no longer truncates earlier tool results to the lite cap without a request opt-in, and the `replace-autotrigger` context-budget dial brings truncation back (then further ladder stages) only for a request that does not fit the model window; named and routing-assigned combos are never replaced ([#18761](https://github.com/diegosouzapw/OmniRoute/pull/18761)) — thanks @aldoeliacim
+- **fix(openai):** a 429 whose body carries only `error.code: credit_balance_exhausted` is now classified as terminal credit exhaustion instead of a retryable rate limit. That is the code OpenAI returns once an eligible ChatGPT Pro or Business subscription's monthly API grant is spent, and it cannot clear until someone buys credits — so the account is parked instead of being re-selected on a short backoff on every request. ([#18770](https://github.com/cheaper-inference/OmniRoute/pull/18770)) — thanks @HouMinXi
+- **fix(sse):** a request's own retries, account rotations and combo legs now reuse the turn-execution slot the request already holds instead of failing with a local `turn_in_progress` 409 that read downstream as an account rate limit and cooled healthy accounts; a genuinely concurrent duplicate with the same idempotency key now waits up to 60 s for the in-flight turn before falling back to that 409 (#18778, refs #18716). — thanks @hongkongkiwi
+- **fix(providers):** Kiro tool calls with no input (no-parameter tools, or optional parameters the model left out) now stream `function.arguments: "{}"` instead of `""`, so strict OpenAI clients no longer drop the call ([#18780](https://github.com/cheaper-inference/OmniRoute/pull/18780), closes #18718) — thanks @gaurav0107
+- **fix(sse):** Preserve explicit Claude reasoning effort when routing to Codex, without allowing connection defaults to override it ([#18788](https://github.com/cheaper-inference/OmniRoute/pull/18788)) — thanks @trespassmk
+- **fix(providers):** The Mistral model list no longer offers the retired `devstral-latest` (Devstral 2, retired by Mistral on 2026-07-31), and the user guide no longer lists it ([#18792](https://github.com/cheaper-inference/OmniRoute/pull/18792), closes #18755) — thanks @costajohnt
+- **fix(translator):** Sanitize client tool schemas on the Responses → Chat path so deep-truncated schemas (`"enum": "[MaxDepth]"`, index-keyed objects) no longer reach strict OpenAI-compatible upstreams such as Ollama Cloud, which rejected them with `cannot unmarshal string into Go struct field ToolProperty.enum`. Fixes #18679 ([#18806](https://github.com/cheaper-inference/OmniRoute/pull/18806)) — thanks @gaurav0107
+- **fix(providers):** Kiro no longer rejects calls to a client-declared tool named `tool_call` (OpenClaw, Hermes Agent deferred-tool bridges) as a malformed MCP wrapper; those calls now pass through with their arguments unchanged. Fixes #18675 ([#18823](https://github.com/cheaper-inference/OmniRoute/pull/18823)) — thanks @gaurav0107.
+- **fix(authz):** With `OMNIROUTE_TRUST_PROXY=private`, a private-network client reaching OmniRoute through a private reverse proxy (e.g. a Tailscale or LAN nginx) can open LOCAL_ONLY dashboard surfaces such as Discovery again, instead of getting `403 LOCAL_ONLY` ([#18871](https://github.com/cheaper-inference/OmniRoute/pull/18871)). The proxied request counts as LAN only when the chain names a private, non-loopback client and did not enter through a Cloudflare tunnel; the default, public proxies and the loopback-only CLI-token gate are unchanged — thanks @aldoeliacim
+- **fix(cli):** Usage analytics now shows prompt and completion tokens returned by the current API, while retaining compatibility with older server field names ([#18900](https://github.com/cheaper-inference/OmniRoute/pull/18900)) — thanks @fabioKoruja00
+- **fix(dashboard): readable warning text in the light Editions palette**: warning badges, warning buttons and `text-warning` use a darker copper (`#8c5a1b`) in light Editions. They reach WCAG AA on the tinted background (4.74:1), the canvas and surfaces, where the kit's `#99631f` was 4.09:1. Classic and dark keep the kit colour. ([#18919](https://github.com/cheaper-inference/OmniRoute/pull/18919))
+- **fix(dashboard): keep dark warning ink before the theme script runs**: without `data-theme` (before the boot script, or with JavaScript off) the kit follows the system preference, so a dark system no longer gets the light-only `#8c5a1b` warning ink on the dark Editions background. ([#18945](https://github.com/cheaper-inference/OmniRoute/pull/18945))
+- **fix(dashboard):** The `/landing` page follows the active colour palette (Editions or Classic, light or dark) instead of painting a fixed dark page with its own colours: every hex, `rgb()`, Tailwind palette and white/black colour now comes from the vendored CI UI Kit tokens (surfaces, text, accent, the kit chart slots for the feature cards and provider chips, the code tokens for the terminal), with text at 4.5:1 or more in all four combinations, and `tests/unit/dashboard-kit-sweep.test.ts` fails if a literal colour comes back ([#19010](https://github.com/cheaper-inference/OmniRoute/pull/19010))
+- **fix(compression): analytics reports lite again when lite runs as a scoped stacked step**: since #18818 the lossy-request policy runs a configured `lite` as a one-step stacked pipeline. Compression analytics then recorded `stacked` as both mode and engine, so the dashboard's mode and engine breakdowns no longer showed lite. The plan now carries `reportedMode: "lite"`, and the analytics row records that; dispatch is unchanged. ([#19012](https://github.com/cheaper-inference/OmniRoute/pull/19012))
+- **fix(compression): keep the dispatched engine in analytics for multi-engine and skip rows**: the configured-mode label from #19012 now replaces the engine only when a single step ran. A combo that ran several engines, and the "no savings" skip rows, keep the engine the pipeline actually used. ([#19056](https://github.com/cheaper-inference/OmniRoute/pull/19056))
+- **fix(providers):** Use the global startup timeout for Antigravity response headers instead of the shorter SSE-readiness timeout. ([#18705](https://github.com/cheaper-inference/OmniRoute/pull/18705)) — thanks @AiCaptain357
+- **fix(claude):** a Claude Team connection now shows the seat's own tier (`user_rate_limit_tier`, e.g. `default_claude_max_5x`) instead of the organization's base tier (`organization_rate_limit_tier`, e.g. `default_raven`) in the usage plan label, the quota plan and the dashboard, and stores the seat (`seat_tier`) from the bootstrap, the token exchange and the auth-file import. The import reads the nested `oauth_account` bootstrap and keeps one account's connections in two organizations apart. A member with no seat assigned, whom every OAuth call refuses with `oauth_not_allowed_for_organization`, gets a usage message that names it instead of a bare HTTP 403. ([#18763](https://github.com/cheaper-inference/OmniRoute/pull/18763)) — thanks @shipsfromrio
+- **fix(dashboard):** The dashboard no longer opens the browser's native `confirm()` / `alert()` dialogs. The 34 confirmations (API key delete and regenerate, pricing reset, batch cancel and retry, combo and pool deletes, and more) now use the kit `ConfirmModal` through a new `useConfirmDialog()` hook, and the 8 alerts now show as toasts. The action still runs only after Confirm, and Cancel does nothing. A guard test keeps native dialogs out of `src/app` and `src/shared` ([#19066](https://github.com/cheaper-inference/OmniRoute/issues/19066)) ([#19069](https://github.com/cheaper-inference/OmniRoute/pull/19069))
+- **fix(usage):** Provider Limits now reads the Kimi Coding subscription name when refreshing quotas, while keeping quota and billing data available if the optional profile request fails. ([#18578](https://github.com/cheaper-inference/OmniRoute/pull/18578)) — thanks @AiCaptain357
+- **fix(oauth):** importing a token (for example a Claude setup-token) now verifies it through the proxy assigned to the provider, as the OAuth code exchange already did, instead of calling the provider directly ([#19007](https://github.com/cheaper-inference/OmniRoute/pull/19007))
+- **fix(sse):** Preserve the captured outgoing request when streaming provider execution fails, and leave provider-request diagnostics absent when no outgoing request was captured. ([#18703](https://github.com/cheaper-inference/OmniRoute/pull/18703)) — thanks @AiCaptain357
+- Keep explicit `misalignment_policy_violation` responses request-scoped instead of treating them as account failures, and preserve OpenRouter stream errors with populated choices as failed Responses events. ([#18805](https://github.com/cheaper-inference/OmniRoute/pull/18805)) — thanks @w0wl0lxd
+- **fix(authz):** changing the global system prompt now requires an `admin` access token; a `write` token can still read it ([#18963](https://github.com/cheaper-inference/OmniRoute/pull/18963))
+- **fix(translator):** Responses to Chat translation re-sends only the newest tool-output images (16 images, 20 MB by default, set with `OMNIROUTE_TOOL_OUTPUT_IMAGE_MAX_COUNT` / `OMNIROUTE_TOOL_OUTPUT_IMAGE_MAX_BYTES`). Each older image becomes a text placeholder with its `tool_call_id`, so a long Codex session no longer grows the request until the upstream rejects the body ([#18684](https://github.com/cheaper-inference/OmniRoute/issues/18684)) ([#18784](https://github.com/cheaper-inference/OmniRoute/pull/18784)) — thanks @MannXo
+- **fix(dashboard):** Log, proxy and conversation badges (provider, protocol, proxy type, level, HTTP status) use the kit chart and status tones instead of a parallel hex palette, so their text reaches 4.5:1 in Classic and Editions, light and dark (white on `#10B981` was 2.54:1). Provider and CLI tool brand colours are no longer text or a fill under white text: the provider header links use the primary ink, the rankings and CLI step avatars use a brand tint with body text, the onboarding provider tiles and the batch wizard's done steps use the kit tint + ink ([#19066](https://github.com/cheaper-inference/OmniRoute/issues/19066)) ([#19094](https://github.com/cheaper-inference/OmniRoute/pull/19094))
+- **test(dashboard):** The kit colour guard now covers the public routes (`landing`, `docs`, `login`, `status`, `connect`, `forbidden`) and `src/shared/constants/*.ts`, catches arbitrary-hex classes, `rgba()`/`hsl()` and literal colours in `style={{ … }}`, and rejects `kit-exception:` reasons that say the kit lacks a component it now ships (FileInput/FileDropZone, Tile, Disclosure, ToggleChip, HoverCard, DateRangePicker, Progress tones, LegendMarker). Current sites are listed with a reason and may only shrink ([#19066](https://github.com/cheaper-inference/OmniRoute/issues/19066)) ([#19093](https://github.com/cheaper-inference/OmniRoute/pull/19093))
+- **fix(dashboard):** With a stored palette or an explicit light/dark theme the page no longer ends up with 4 `theme-color` tags instead of 2: the pre-paint script now parks the server tags behind a copy instead of rewriting them, so React adopts them at hydration and the store removes the copies. The route progress bar glow uses the kit accent instead of the old indigo/coral, and the orphan `border-glow`, `.bg-vibrancy`, `.ant-table` and coral `::selection` fallback rules are gone from `globals.css` ([#19066](https://github.com/cheaper-inference/OmniRoute/issues/19066)) ([#19092](https://github.com/cheaper-inference/OmniRoute/pull/19092))
+- **fix(ci):** main-green companion — 12 GB build heap + hosted-suite validator (#17350/#17851) and byte-pinned mirror tests (#17250) ([#18252](https://github.com/cheaper-inference/OmniRoute/pull/18252))
+- **fix(api):** override stop_reason to tool_use when tool_calls arrive with finish_reason stop (#18270) ([#18280](https://github.com/cheaper-inference/OmniRoute/pull/18280)) — thanks @herjarsa
+- **fix(responses):** include excluded cache writes in context usage ([#18361](https://github.com/cheaper-inference/OmniRoute/pull/18361)) — thanks @amirimatin
+- **fix(dashboard):** display account/connection id in combo live studio cascade nodes ([#18374](https://github.com/cheaper-inference/OmniRoute/pull/18374)) — thanks @afonsoft
+- **fix(api):** accept dashboard sessions on preset item routes ([#18386](https://github.com/cheaper-inference/OmniRoute/pull/18386)) — thanks @insoln
+- **fix(sse):** prevent abandoned submissions from blocking the rate-limit queue ([#18526](https://github.com/cheaper-inference/OmniRoute/pull/18526)) — thanks @shevar0
+- **fix(dashboard):** retain console history and pause updates for copying ([#18528](https://github.com/cheaper-inference/OmniRoute/pull/18528)) — thanks @shevar0
+- **fix(translator):** hoist displaced tool results into their assistant turn ([#18709](https://github.com/cheaper-inference/OmniRoute/pull/18709)) — thanks @hongkongkiwi
+- **fix(ci):** free hosted runner disk before the unit shards ([#18808](https://github.com/cheaper-inference/OmniRoute/pull/18808))
+- **fix(dashboard):** keep the retry-delay select from squeezing its description ([#18830](https://github.com/cheaper-inference/OmniRoute/pull/18830)) — thanks @zhiru
+- **fix(ci):** free hosted runner disk before the coverage merge ([#18845](https://github.com/cheaper-inference/OmniRoute/pull/18845))
+- **fix(ci):** keep CodeRabbit path filters exclusion-only ([#18853](https://github.com/cheaper-inference/OmniRoute/pull/18853))
+- **fix(i18n):** record the source hash when every mirror already carries it ([#18854](https://github.com/cheaper-inference/OmniRoute/pull/18854))
+- **fix(ci):** check out docker-publish shallow and list tags with ls-remote ([#18884](https://github.com/cheaper-inference/OmniRoute/pull/18884))
+- **fix(release):** clear the v3.8.53 tip reds (ui-kit recharts 3 type, Antigravity failover test) ([#18885](https://github.com/cheaper-inference/OmniRoute/pull/18885))
+- **fix(ci):** publish docker manifests when runner-preflight is skipped ([#18887](https://github.com/cheaper-inference/OmniRoute/pull/18887))
+- **fix(sse):** support foreign Undici Request brands in deadline wrapper ([#18890](https://github.com/cheaper-inference/OmniRoute/pull/18890)) — thanks @Bl0ck154
+- **fix(test):** run the Antigravity silent-body failover watchdog on a virtual clock ([#18906](https://github.com/cheaper-inference/OmniRoute/pull/18906))
+- **fix(i18n):** re-record hand-edited mirrors in the scheduled refresh ([#18951](https://github.com/cheaper-inference/OmniRoute/pull/18951))
+- **fix(ci):** stop description edits on Mergify drafts from cancelling the queue run ([#18961](https://github.com/cheaper-inference/OmniRoute/pull/18961))
+- **fix(routing):** consolidate portable multimodal transport and cooldown fixes ([#19032](https://github.com/cheaper-inference/OmniRoute/pull/19032)) — thanks @KeakReleaseBot
+- **fix(combo):** drop the duplicate waitForCooldownAwareRetry import on the v3.8.53 tip ([#19062](https://github.com/cheaper-inference/OmniRoute/pull/19062))
+- **fix(ci):** count only jobs a runner took in the Blacksmith budget ([#19155](https://github.com/cheaper-inference/OmniRoute/pull/19155))
+- **fix(ci):** keep CodeRabbit off the vendored kit and train validation PRs ([#19159](https://github.com/cheaper-inference/OmniRoute/pull/19159))
 
 ### 📝 Maintenance
 
@@ -1112,7 +1295,64 @@ _By commits in `c754707d0e..c34370bc69`, author identities consolidated via `.ma
 - **docs(i18n):** re-sync the 25 documents that drifted during the week of 2026-10-26 (66 locales; Kimi then Google fallback, references restored) ([#18789](https://github.com/cheaper-inference/OmniRoute/pull/18789))
 - **docs(i18n):** re-record target_hash for the 3 MCP-SERVER mirrors edited without a re-hash (release prep) ([#18807](https://github.com/cheaper-inference/OmniRoute/pull/18807))
 - **deps:** 11 Dependabot bumps — bump follow-redirects from 1.16.0 to 1.16.1 ([#17314](https://github.com/cheaper-inference/OmniRoute/pull/17314)); bump hono from 4.13.7 to 4.13.13 ([#17316](https://github.com/cheaper-inference/OmniRoute/pull/17316)); bump @modelcontextprotocol/server from 2.0.0 to 2.3.1 ([#17352](https://github.com/cheaper-inference/OmniRoute/pull/17352)); chore(deps): bump github/codeql-action/analyze from 4.38.3 to 4.39.1 ([#18029](https://github.com/cheaper-inference/OmniRoute/pull/18029)); chore(deps): bump github/codeql-action from 4.38.3 to 4.39.1 ([#18030](https://github.com/cheaper-inference/OmniRoute/pull/18030)); chore(deps): bump github/codeql-action/init from 4.38.3 to 4.39.1 ([#18031](https://github.com/cheaper-inference/OmniRoute/pull/18031)); bump undici to 8.12.3, 7.30.1 and 6.29.1 ([#18087](https://github.com/cheaper-inference/OmniRoute/pull/18087)); bump electron 44.9.1, fast-uri 3.1.9 and undici 7.30.1 in /electron ([#18088](https://github.com/cheaper-inference/OmniRoute/pull/18088)); bump body-parser from 2.3.0 to 2.4.0 ([#18091](https://github.com/cheaper-inference/OmniRoute/pull/18091)); bump zod from 4.6.5 to 4.6.7 ([#18093](https://github.com/cheaper-inference/OmniRoute/pull/18093)); bump follow-redirects from 1.16.1 to 1.16.2 ([#18654](https://github.com/cheaper-inference/OmniRoute/pull/18654))
-
+- **chore(dashboard):** the vendored Keak CI UI Kit moves to 0.0.87 (`packages/ui-kit`, upstream `681cdb1`). ([#18914](https://github.com/cheaper-inference/OmniRoute/pull/18914))
+- **chore(dashboard):** the vendored Keak CI UI Kit moves to 0.0.89 (`packages/ui-kit`, upstream `7fb92ac`). ([#18957](https://github.com/cheaper-inference/OmniRoute/pull/18957))
+- **ci(dashboard):** the `UI Kit upstream watch` workflow now runs daily and keeps one sync PR open against the highest release branch while the vendored Keak CI UI Kit is behind (`scripts/ci/ui-kit-sync-pr.sh`). It never merges, holds while that release is frozen, doesn't overwrite commits pushed by hand, and leaves a PR that a maintainer closed unmerged closed until a newer release. A tracking issue says why when no PR can be opened. Opening the PR needs the new `UI_KIT_SYNC_PR_TOKEN` secret; without it only the branch is pushed ([#18769](https://github.com/cheaper-inference/OmniRoute/pull/18769))
+- **perf(runtime):** `OMNIROUTE_DISABLE_BACKGROUND_SERVICES` now also stops credential health checks, scheduled VACUUM, retention cleanup and the settings hot-reload poll; dashboard badges stop polling from a hidden tab and refresh when it returns; the English UI catalog is no longer merged with itself on every request; new Windows launchers for production, light and headless use ([#18396](https://github.com/cheaper-inference/OmniRoute/pull/18396)) — thanks @rafacpti23
+- **chore(typecheck):** a new blocking gate, `check:build-typecheck`, holds the production TypeScript surface against frozen per-file baselines (453 → 254 diagnostics, 10 `@ts-nocheck` directives removed), and the API-route gate now shares the same guarded ratchet machinery. Along the way: the Cursor login poll route now passes the machine id to `syncToCloud()` (it used to sync to `/sync/undefined`), and the Inner.ai model discovery request now actually carries the provider outbound guard (it was passed as an ignored third argument). (#18603 — thanks @HouMinXi)
+- **fix(release):** eleven open-sse files read their default-off feature flags through `open-sse/utils/registeredFeatureFlag.ts` instead of `src/shared/utils/featureFlags.ts`, removing 11 open-sse → src edges; three `featureFlags.ts` wrappers left without a caller are removed, and a new test fails if any flag read through the engine helper defaults to on ([#18628](https://github.com/diegosouzapw/OmniRoute/pull/18628)) — thanks @AndresDiagoM
+- **fix(release):** 14 image provider adapters and the upscale helper take `saveCallLog` from `open-sse/handlers/imageResult.ts` instead of importing `@/lib/usageDb` each, removing 15 open-sse → src edges; a new test pins the funnel ([#18648](https://github.com/diegosouzapw/OmniRoute/pull/18648)) — thanks @AndresDiagoM
+- **docs(readme):** the twelve generated README diagrams move to the UI kit's current Switzer type. Switzer's licence forbids embedding a subset, so a new shared step (`scripts/docs/readme-outline.mjs`) draws it as vector outlines, with the arrows and geometric symbols it lacks drawn on its own metrics. Every string stays in the file as invisible text for `check:docs-counts`, and real code keeps the embedded IBM Plex Mono subset. No diagram falls back to a system font any more. ([#18767](https://github.com/cheaper-inference/OmniRoute/pull/18767))
+- **chore(dashboard): sync the vendored CI UI Kit to 0.0.84**: picks up the kit's chat, docked rail, metric card, scope chip, usage drilldown and reporting chart components, plus size options on `Switch` and `Tabs`, and the import-order fix for `ci-ui.css`. The dashboard doesn't use the new APIs yet, so nothing changes on screen. ([#18812](https://github.com/cheaper-inference/OmniRoute/pull/18812))
+- **test(setup):** an opt-in egress guard in `tests/_setup/egressGuard.ts` makes `child_process`, raw sockets, TLS, HTTP/2, WebSocket and the `wreq-js` native client throw while a test runs, with a self-test, and a #16631 test drives the Claude OAuth step on a deep-frozen body under it (#18819). — thanks @AndresDiagoM
+- **test(sse): make the qodercli ACP abort test independent of timing**: the fake agent now holds `session/new` until the test has aborted, so "a session that finishes setup after the client aborted" no longer depends on how fast the runner is. It failed the scheduled Release-Green run on a loaded host. ([#18852](https://github.com/cheaper-inference/OmniRoute/pull/18852))
+- **test(integration): align the Codex fingerprint test with the client-faithful wire format (#18274)**: native passthrough no longer gets injected `instructions` or `include`, so the test checks the fields the client sent in the canonical order and asserts that `instructions` is not injected. ([#18852](https://github.com/cheaper-inference/OmniRoute/pull/18852))
+- **fix(i18n):** the Google docs-mirror engine now keeps GitHub issue references (`#15281`) verbatim and maps the Odia danda it answers as `|` back to `।`; `validateTranslatedChunk()` rejects a chunk whose issue references, table cell count or escaped pipes changed, so a corrupted row falls back instead of shipping (related to #18795) (#18857).
+- **chore(dashboard):** the vendored Keak CI UI Kit moves to 0.0.104, and the dashboard adopts its `AlertDialog`, `Command`, `JsonTree`, `DataTableColumnsMenu`, `Spinner`, `Kbd`, log inks, colour scales, chart theme and brand tints ([#19066](https://github.com/cheaper-inference/OmniRoute/issues/19066)) ([#19174](https://github.com/cheaper-inference/OmniRoute/pull/19174))
+- **chore(dashboard):** the vendored Keak CI UI Kit moves to 0.0.95, and the warning `Button`, the status `Badge` tones and the native `Select` branch use the kit instead of local rules in `globals.css` ([#19066](https://github.com/cheaper-inference/OmniRoute/issues/19066)) ([#19174](https://github.com/cheaper-inference/OmniRoute/pull/19174))
+- **refactor(dashboard):** adopt the kit FileInput/FileDropZone (new translated adapter; batch upload and wizard drop zones, provider transfer, RTK TOML import and Omni Skills install pickers) and render Toggle xs/sm as the kit Switch size="sm", dropping the `.ci-switch--compact` and hit-target workarounds from globals.css ([#19068](https://github.com/cheaper-inference/OmniRoute/pull/19068))
+- **refactor(dashboard):** bridge the kit chart tokens 6-8 with their `-ink`/`-subtle` pairs, move the categorical palette (provider categories, routing strategies, compression layers) to the kit's eight-token series order, render the provider category dot with the kit `LegendMarker` and the `/costs` spend headlines with the kit `MetricCard` ([#19070](https://github.com/cheaper-inference/OmniRoute/pull/19070))
+- **refactor(dashboard):** the dashboard's hand-made tiles, `<details>`/disclosure headers, filter pills and progress bars now use the kit `Tile`, `Disclosure`, `ToggleChip` and `Progress` (tones and stacked segments), with the same accessible names, toggle state and open/closed defaults as before ([#19074](https://github.com/cheaper-inference/OmniRoute/pull/19074))
+- **chore(release): raise the Release-Green tarball boot-smoke limit and align the lite pipeline tests**: `check:pack-boot` gets the same 40-minute limit as the package lane, because the translated docs mirrors (#18869) added 8,885 files to the tarball. `tests/integration/compression-pipeline.test.ts` now expects lite as a scoped stacked step (#18818) reporting `lite`. ([#19088](https://github.com/cheaper-inference/OmniRoute/pull/19088))
+- **test(api): keep the rate limiter's Redis fallback test inside one fixed window**: each failed Redis call takes about 0.7 s, so the two requests could straddle a minute boundary, and the second landed in a fresh window and was allowed. The test now freezes the clock. ([#19140](https://github.com/cheaper-inference/OmniRoute/pull/19140))
+- **chore(release): raise the Release-Green package lane limit to 90 minutes**: `build:cli` now takes about 52 minutes and `check:pack-artifact` about 8, and they share one deadline, so a run hit the 60-minute limit mid-pack and the green run before it passed by 40 seconds. ([#19177](https://github.com/cheaper-inference/OmniRoute/pull/19177))
+- **docs(changelog):** fragments for the Keak CI UI Kit migration and the legacy UI removal (KEA-7886) (direct commit `86982558d3`)
+- **docs:** sync AGENTS.md counts with source (db + services) ([#17309](https://github.com/cheaper-inference/OmniRoute/pull/17309)) — thanks @mayankjaiswal1707-spec
+- **docs(providers):** document what the claude OAuth route does to client system prompts ([#18640](https://github.com/cheaper-inference/OmniRoute/pull/18640)) — thanks @serenity-X
+- **docs(i18n):** fix typos and broken tables in Uzbek README ([#18659](https://github.com/cheaper-inference/OmniRoute/pull/18659)) — thanks @barkhayot
+- **test:** repair Windows CLI, permission and bundle fixtures ([#18660](https://github.com/cheaper-inference/OmniRoute/pull/18660)) — thanks @CompleteDotTech
+- Api only lite ([#18710](https://github.com/cheaper-inference/OmniRoute/pull/18710)) — thanks @maxXkiller09
+- **test:** isolate daily quota clocks and VS Code catalog discovery ([#18748](https://github.com/cheaper-inference/OmniRoute/pull/18748)) — thanks @HouMinXi
+- **test(chat):** assert cooldown wait independently of setup time ([#18751](https://github.com/cheaper-inference/OmniRoute/pull/18751)) — thanks @HouMinXi
+- **docs(i18n):** re-sync ENVIRONMENT and 7 stale documents after the 2026-11-02 merges (structure-safe engine) ([#18815](https://github.com/cheaper-inference/OmniRoute/pull/18815))
+- **docs(release):** reconcile v3.8.53 — CHANGELOG, contributor credit and README numbers ([#18816](https://github.com/cheaper-inference/OmniRoute/pull/18816))
+- **docs(i18n):** re-translate the README mirrors after the week's README changes (66 locales) ([#18817](https://github.com/cheaper-inference/OmniRoute/pull/18817))
+- **docs(i18n):** retouch the locales the structure-safe engine could not restore (9 documents, 36 mirrors) ([#18821](https://github.com/cheaper-inference/OmniRoute/pull/18821))
+- **docs(i18n):** re-sync the API_REFERENCE mirrors after the 2026-10/11 API changes (66 locales) ([#18822](https://github.com/cheaper-inference/OmniRoute/pull/18822))
+- **docs(i18n):** re-sync QUALITY_GATES and DESIGN_SYSTEM mirrors after the 2026-11-03 source changes ([#18824](https://github.com/cheaper-inference/OmniRoute/pull/18824))
+- **docs:** add the creator credit (KEA-6307) and courtesy credit for #17183 ([#18843](https://github.com/cheaper-inference/OmniRoute/pull/18843))
+- **docs(i18n):** re-sync the Bosnian AGENTS.md mirror (owner-approved agent-instruction surface) ([#18868](https://github.com/cheaper-inference/OmniRoute/pull/18868))
+- **docs(i18n):** re-sync README, QUALITY_GATES, COMPRESSION_GUIDE, FEATURE_FLAGS and COMPLIANCE mirrors after the 2026-11-03 merges ([#18872](https://github.com/cheaper-inference/OmniRoute/pull/18872))
+- **docs(i18n):** re-sync RESILIENCE_GUIDE and USER_GUIDE mirrors after the 2026-11-03 evening merges ([#18897](https://github.com/cheaper-inference/OmniRoute/pull/18897))
+- **docs(i18n):** re-sync ARCHITECTURE, CODEBASE_DOCUMENTATION, USER_GUIDE and API_REFERENCE mirrors after the 2026-11-03/04 merges ([#18907](https://github.com/cheaper-inference/OmniRoute/pull/18907))
+- **chore(release):** v3.8.53 train integration fixups ([#18911](https://github.com/cheaper-inference/OmniRoute/pull/18911))
+- **docs(i18n):** re-sync CONTRIBUTING, USER_GUIDE, API_REFERENCE mirrors after the 2026-11-04 merges ([#18950](https://github.com/cheaper-inference/OmniRoute/pull/18950))
+- **docs(i18n):** re-sync README, AUTHZ_GUIDE, REMOTE-MODE, ENVIRONMENT and FEATURE_FLAGS mirrors after the 2026-11-04 morning merges ([#18953](https://github.com/cheaper-inference/OmniRoute/pull/18953))
+- **docs(i18n):** re-sync the Bosnian AGENTS.md mirror (standing operator authorization, 2026-11-04) ([#18959](https://github.com/cheaper-inference/OmniRoute/pull/18959))
+- **chore(release):** v3.8.53 train v3 integration fixups ([#19014](https://github.com/cheaper-inference/OmniRoute/pull/19014))
+- **docs(i18n):** re-sync README mirrors after the 2026-11-04 midday merges ([#19017](https://github.com/cheaper-inference/OmniRoute/pull/19017))
+- **docs(i18n):** sync ENVIRONMENT mirrors with the base (second half of the locales, parallel to wave 1104d) ([#19040](https://github.com/cheaper-inference/OmniRoute/pull/19040))
+- **test(e2e):** fix the Codex CLI-version card spec ([#19041](https://github.com/cheaper-inference/OmniRoute/pull/19041))
+- **docs(i18n):** sync ENVIRONMENT mirrors with the base (first half of the locales) ([#19044](https://github.com/cheaper-inference/OmniRoute/pull/19044))
+- **docs(i18n):** sync ENVIRONMENT mirrors after the v3.8.53 fix train (second half of the locales) ([#19085](https://github.com/cheaper-inference/OmniRoute/pull/19085))
+- **docs(i18n):** sync ENVIRONMENT mirrors after the v3.8.53 fix train (first half of the locales) ([#19086](https://github.com/cheaper-inference/OmniRoute/pull/19086))
+- **docs(i18n):** re-sync README mirrors after the v3.8.53 fix train ([#19087](https://github.com/cheaper-inference/OmniRoute/pull/19087))
+- **docs(i18n):** re-sync TROUBLESHOOTING, FREE_TIERS and COPILOT-M365 mirrors after the v3.8.53 fix train ([#19091](https://github.com/cheaper-inference/OmniRoute/pull/19091))
+- **docs(i18n):** sync the Slovenian ENVIRONMENT mirror after the v3.8.53 fix train ([#19100](https://github.com/cheaper-inference/OmniRoute/pull/19100))
+- **docs(i18n):** re-sync RESILIENCE_GUIDE and FEATURE_FLAGS mirrors after the v3.8.53 fix train ([#19102](https://github.com/cheaper-inference/OmniRoute/pull/19102))
+- **test(rate-limit):** give the queue-wait regression test a real budget ([#19156](https://github.com/cheaper-inference/OmniRoute/pull/19156))
+- **docs(i18n):** sync ENVIRONMENT mirrors with the media-tool section ([#19187](https://github.com/cheaper-inference/OmniRoute/pull/19187))
+- **test(usage):** time the #15172 pacing test at the throttle grant instead of at the fetch; the per-connection proxy lookup between them varies per call and failed the release CI. — thanks @diegosouzapw
 
 ### 🙌 Contributors
 
@@ -1122,80 +1362,104 @@ Thanks to everyone whose work landed in v3.8.53:
 | --- | --- |
 | [@0xLittleDream](https://github.com/0xLittleDream) | #17162 |
 | [@70nyIT](https://github.com/70nyIT) | #17294 |
-| [@AbdullahPesteli](https://github.com/AbdullahPesteli) | #18099 |
-| [@Abelo9996](https://github.com/Abelo9996) | #17966, #17967 |
+| [@AbdullahPesteli](https://github.com/AbdullahPesteli) | #18099, #18688 |
+| [@Abelo9996](https://github.com/Abelo9996) | #17966, #17967, #18465 |
 | [@Abhishekchhetri020](https://github.com/Abhishekchhetri020) | #12499 |
 | [@abhisheksharma2411](https://github.com/abhisheksharma2411) | #14074 |
 | [@adevwithpurpose](https://github.com/adevwithpurpose) | #14736, #17942 |
 | [@adivekar-utexas](https://github.com/adivekar-utexas) | #14817 |
 | [@adrian-cancio](https://github.com/adrian-cancio) | #17827, #17926 |
-| [@afonsoft](https://github.com/afonsoft) | #17271, #17272 |
+| [@afonsoft](https://github.com/afonsoft) | #17271, #17272, #18374 |
 | [@ahmedgo17390](https://github.com/ahmedgo17390) | #17955 |
-| [@AiCaptain357](https://github.com/AiCaptain357) | #17880, #17885, #17888, #17891, #17894, #17900, #17949, #18187, #18188, #18228, #18234, #18358, #18380, #18424 |
+| [@AiCaptain357](https://github.com/AiCaptain357) | #17880, #17885, #17888, #17891, #17894, #17900, #17949, #18187, #18188, #18228, #18234, #18258, #18267, #18358, #18380, #18424, #18491, #18511, #18549, #18569, #18571, #18578, #18610, #18629, #18703, #18704, #18705, #18706, #18724 |
 | [@ailuvu-art](https://github.com/ailuvu-art) | #17398, #17400 |
-| [@aldoeliacim](https://github.com/aldoeliacim) | #17114, #17115, #17198, #18124, #18304 |
+| [@aldoeliacim](https://github.com/aldoeliacim) | #17114, #17115, #17198, #18124, #18274, #18304, #18307, #18712, #18760, #18761, #18871 |
 | [@alfep](https://github.com/alfep) | #18294 |
 | [@alican532](https://github.com/alican532) | #18150 |
+| [@alirezariahi](https://github.com/alirezariahi) | #18499, #18552, #18582, #18585 |
 | [@aminHZDEV](https://github.com/aminHZDEV) | #17260, #17261 |
-| [@AndresDiagoM](https://github.com/AndresDiagoM) | #17119, #17125, #17835, #17842, #17844, #17938, #18241, #18627, #18645, #18646, #18647 |
+| [@amirimatin](https://github.com/amirimatin) | #18361 |
+| [@AndresDiagoM](https://github.com/AndresDiagoM) | #17119, #17125, #17835, #17842, #17844, #17938, #18241, #18605, #18627, #18628, #18643, #18645, #18646, #18647, #18648, #18691, #18819 |
+| [@anhtahaylove](https://github.com/anhtahaylove) | #18826 |
 | [@AppleVibe](https://github.com/AppleVibe) | #18273, #18285, #18378 |
 | [@apr3ndi5](https://github.com/apr3ndi5) | #18285 |
 | [@arashashrafii](https://github.com/arashashrafii) | #14948, #16381 |
 | [@askidmobile](https://github.com/askidmobile) | #18321 |
 | [@asterxsk](https://github.com/asterxsk) | #18354 |
 | [@AStupidBear](https://github.com/AStupidBear) | #17916 |
+| [@awci](https://github.com/awci) | #18301 |
 | [@azhnan-dev](https://github.com/azhnan-dev) | #18151 |
+| [@barkhayot](https://github.com/barkhayot) | #18659 |
 | [@BenjaminAronsson](https://github.com/BenjaminAronsson) | #14665 |
 | [@berthojoris](https://github.com/berthojoris) | #16737, #18292 |
-| [@Bl0ck154](https://github.com/Bl0ck154) | #13102, #18040, #18052, #18096, #18100, #18259 |
+| [@Bl0ck154](https://github.com/Bl0ck154) | #13102, #18040, #18052, #18096, #18100, #18259, #18890 |
+| [@bufftop25](https://github.com/bufftop25) | #18661, #18665, #18741 |
 | [@caniko](https://github.com/caniko) | #15521 |
+| [@chernistry](https://github.com/chernistry) | #18447 |
 | [@Chewji9875](https://github.com/Chewji9875) | #15521 |
 | [@claytontavaresdan](https://github.com/claytontavaresdan) | #18262, #18265, #18266, #18277, #18300 |
+| [@CompleteDotTech](https://github.com/CompleteDotTech) | #18660 |
+| [@costajohnt](https://github.com/costajohnt) | #18755 |
 | [@cris005](https://github.com/cris005) | #18255 |
-| [@cristianob](https://github.com/cristianob) | #18295 |
+| [@cristianob](https://github.com/cristianob) | #18295, #18377 |
 | [@DaDecky](https://github.com/DaDecky) | #18264 |
-| [@dankarization](https://github.com/dankarization) | #17252 |
+| [@dankarization](https://github.com/dankarization) | #17252, #18553 |
 | [@DarknessKiller](https://github.com/DarknessKiller) | #17258, #17310, #18107, #18138, #18139 |
+| [@dasepmoch](https://github.com/dasepmoch) | #16837 |
 | [@DavyMassoneto](https://github.com/DavyMassoneto) | #17110, #18036, #18064 |
 | [@DeadY2J](https://github.com/DeadY2J) | #17868, #17928 |
+| [@dkmscc](https://github.com/dkmscc) | #17265 |
+| [@DongwonTTuna](https://github.com/DongwonTTuna) | #18814 |
 | [@dongwook-chan](https://github.com/dongwook-chan) | #14981 |
 | [@doramirdor](https://github.com/doramirdor) | #18028 |
 | [@edosulai](https://github.com/edosulai) | #17232, #17256, #17901 |
 | [@erSpell](https://github.com/erSpell) | #18035 |
 | [@F0Rextasy](https://github.com/F0Rextasy) | #18340 |
-| [@fabioKoruja00](https://github.com/fabioKoruja00) | #17107, #17231, #17234, #17235, #17369, #17375, #18184, #18221, #18231, #18243, #18245, #18246, #18501, #18502, #18525 |
+| [@fabioKoruja00](https://github.com/fabioKoruja00) | #17107, #17231, #17234, #17235, #17369, #17375, #18184, #18221, #18231, #18243, #18245, #18246, #18501, #18502, #18525, #18900 |
+| [@fadlee](https://github.com/fadlee) | #16843 |
 | [@farshadasadpour](https://github.com/farshadasadpour) | #16307 |
 | [@fathonix](https://github.com/fathonix) | #18147 |
+| [@feci](https://github.com/feci) | #18561 |
 | [@felipemarques](https://github.com/felipemarques) | #17287 |
-| [@fidelix](https://github.com/fidelix) | #17386, #17388, #17947 |
+| [@fidelix](https://github.com/fidelix) | #17386, #17388, #17947, #18624 |
 | [@floydous](https://github.com/floydous) | #18109 |
 | [@for-the-zero](https://github.com/for-the-zero) | #17015 |
-| [@fouadSalkini](https://github.com/fouadSalkini) | #14728, #14890, #17259, #17296 |
+| [@fouadSalkini](https://github.com/fouadSalkini) | #14728, #14890, #17259, #17296, #18685 |
+| [@gaurav0107](https://github.com/gaurav0107) | #18718, #18806, #18823 |
 | [@gebclogic](https://github.com/gebclogic) | #18314 |
-| [@ggdayup](https://github.com/ggdayup) | #15775 |
+| [@ggdayup](https://github.com/ggdayup) | #15775, #15776 |
 | [@Grapescreations](https://github.com/Grapescreations) | #18455 |
 | [@guiguan](https://github.com/guiguan) | #17136, #18009 |
+| [@haidarmy](https://github.com/haidarmy) | #18315 |
 | [@hartmark](https://github.com/hartmark) | #10409, #17927 |
+| [@Hector-Ha](https://github.com/Hector-Ha) | #18534 |
+| [@herjarsa](https://github.com/herjarsa) | #18280 |
 | [@heydryft](https://github.com/heydryft) | #18061, #18112 |
-| [@HouMinXi](https://github.com/HouMinXi) | #17273, #17317, #17793, #17822, #17838, #17869, #17958, #17960, #17987, #17996, #18002, #18004, #18046, #18056, #18136, #18141, #18183, #18232, #18367, #18475, #18512, #18538, #18540, #18658, #18663, #18681, #18750 |
+| [@hongkongkiwi](https://github.com/hongkongkiwi) | #18709, #18716 |
+| [@HouMinXi](https://github.com/HouMinXi) | #17273, #17317, #17793, #17822, #17838, #17869, #17958, #17960, #17987, #17996, #18002, #18004, #18046, #18056, #18136, #18141, #18183, #18232, #18284, #18366, #18367, #18401, #18427, #18428, #18433, #18443, #18470, #18475, #18481, #18512, #18538, #18540, #18548, #18550, #18603, #18658, #18663, #18681, #18748, #18750, #18751, #18770 |
 | [@huangyoudashi](https://github.com/huangyoudashi) | #17327 |
 | [@hugoaimlapi](https://github.com/hugoaimlapi) | #18161 |
 | [@hummern](https://github.com/hummern) | #17282, #17405 |
 | [@ifauzeee](https://github.com/ifauzeee) | #18316 |
-| [@insoln](https://github.com/insoln) | #12400, #15569, #17884, #18001 |
+| [@ikkadecibel-blip](https://github.com/ikkadecibel-blip) | #18503, #18507, #18530 |
+| [@insoln](https://github.com/insoln) | #12400, #15569, #17884, #18001, #18386, #18735, #18758 |
 | [@itseasy21](https://github.com/itseasy21) | #18317 |
+| [@jackyfan01](https://github.com/jackyfan01) | #18279 |
 | [@james-martinez](https://github.com/james-martinez) | #17312 |
 | [@jbovard2016](https://github.com/jbovard2016) | #12775 |
-| [@jjxyxsjr](https://github.com/jjxyxsjr) | #18402, #18446 |
+| [@jjxyxsjr](https://github.com/jjxyxsjr) | #18402, #18404, #18407, #18437, #18438, #18442, #18446, #18559 |
 | [@jktan0504](https://github.com/jktan0504) | #18003 |
 | [@Jordannst](https://github.com/Jordannst) | #18297 |
 | [@JulesLecuir](https://github.com/JulesLecuir) | #18120 |
-| [@Junior-HJ](https://github.com/Junior-HJ) | #16352, #16553, #17080, #17298, #17855, #17913, #18018 |
+| [@Junior-HJ](https://github.com/Junior-HJ) | #16352, #16553, #17080, #17298, #17855, #17913, #18018, #18572, #18574 |
 | [@JxnLexn](https://github.com/JxnLexn) | #17354, #17357, #17358, #17359, #17360, #17361, #17362, #17363, #17364, #17365, #17366, #17367, #17368, #17370, #17371, #17372, #17373, #17374, #17376, #17377, #17378, #17379, #17380, #17381, #17382, #17383, #17384, #17387, #17389, #17390, #17391, #17392, #17417, #17418, #17421, #17424, #17431, #17432, #17438, #17442, #17443, #17444, #17447, #17450, #17457, #17789, #17790 |
+| [@K007-K](https://github.com/K007-K) | #18499, #18552, #18582 |
 | [@kalpakprod](https://github.com/kalpakprod) | #15521 |
+| [@KeakReleaseBot](https://github.com/KeakReleaseBot) | #19032 |
 | [@kenny000666](https://github.com/kenny000666) | #14736 |
-| [@KiaroSama](https://github.com/KiaroSama) | #16450, #16795, #17550 |
+| [@KiaroSama](https://github.com/KiaroSama) | #16450, #16795, #17184, #17550 |
 | [@Kizuno18](https://github.com/Kizuno18) | #15305 |
+| [@kl3inIT](https://github.com/kl3inIT) | #16843 |
 | [@KSonny4](https://github.com/KSonny4) | #15521 |
 | [@LazyGatto](https://github.com/LazyGatto) | #17269 |
 | [@leoplife](https://github.com/leoplife) | #17345 |
@@ -1206,14 +1470,19 @@ Thanks to everyone whose work landed in v3.8.53:
 | [@lorenzozanee](https://github.com/lorenzozanee) | #18020 |
 | [@m4tinbeigi-official](https://github.com/m4tinbeigi-official) | #18355 |
 | [@manjughosa](https://github.com/manjughosa) | #17953 |
+| [@MannXo](https://github.com/MannXo) | #18784 |
 | [@marian-paun](https://github.com/marian-paun) | #17342, #17346 |
 | [@mario03690](https://github.com/mario03690) | #13862 |
-| [@maxmad64bis](https://github.com/maxmad64bis) | #16165, #16224, #16247, #16253, #16385, #16421, #16435, #16439, #16800, #17105, #17106, #17112, #17116, #17120, #17123, #17135, #17152, #17227, #17277, #17280, #17342, #17346, #17347, #17864, #18094, #18095, #18113, #18114, #18115, #18116, #18117, #18121, #18126, #18127, #18130, #18131, #18133, #18135, #18690 |
-| [@mayankjaiswal1707-spec](https://github.com/mayankjaiswal1707-spec) | #17304, #17306, #17340 |
+| [@maulinul](https://github.com/maulinul) | #16739 |
+| [@maxmad64bis](https://github.com/maxmad64bis) | #16165, #16224, #16247, #16253, #16385, #16421, #16435, #16439, #16800, #17105, #17106, #17112, #17116, #17120, #17123, #17135, #17152, #17227, #17277, #17280, #17326, #17342, #17346, #17347, #17864, #18094, #18095, #18113, #18114, #18115, #18116, #18117, #18121, #18126, #18127, #18130, #18131, #18133, #18135, #18235, #18652, #18686, #18690 |
+| [@maxXkiller09](https://github.com/maxXkiller09) | #18710 |
+| [@mayankjaiswal1707-spec](https://github.com/mayankjaiswal1707-spec) | #17304, #17306, #17309, #17340 |
 | [@mdc2122](https://github.com/mdc2122) | #15521 |
 | [@megamen32](https://github.com/megamen32) | #17828, #18118, #18134, #18190 |
 | [@mertcandrks](https://github.com/mertcandrks) | #15746 |
+| [@mihsanalam](https://github.com/mihsanalam) | #18078 |
 | [@mikeng-io](https://github.com/mikeng-io) | #17161 |
+| [@MikeTuev](https://github.com/MikeTuev) | #18332, #18341 |
 | [@minhlongs](https://github.com/minhlongs) | #17229 |
 | [@MiRHaDi](https://github.com/MiRHaDi) | #18323 |
 | [@mj10612](https://github.com/mj10612) | #18327, #18378 |
@@ -1224,68 +1493,83 @@ Thanks to everyone whose work landed in v3.8.53:
 | [@MuhammadUsamaMX](https://github.com/MuhammadUsamaMX) | #16741, #16745, #16749 |
 | [@MumuTW](https://github.com/MumuTW) | #17953, #17956, #17959 |
 | [@NabiBukhsh-AI](https://github.com/NabiBukhsh-AI) | #18224 |
+| [@nareshh74](https://github.com/nareshh74) | #18743 |
 | [@netarz](https://github.com/netarz) | #18112 |
 | [@Neuron-Mr-White](https://github.com/Neuron-Mr-White) | #16348, #17994 |
 | [@nitsuah](https://github.com/nitsuah) | #16861 |
 | [@ntdatt812](https://github.com/ntdatt812) | #16844 |
 | [@octo-patch](https://github.com/octo-patch) | #18110 |
+| [@omar-nahhas](https://github.com/omar-nahhas) | #18299 |
 | [@opensource-elearning](https://github.com/opensource-elearning) | #16318, #17074, #17147, #17149, #17153, #17155 |
+| [@oyi77](https://github.com/oyi77) | #17908 |
 | [@pacocartones](https://github.com/pacocartones) | #17172, #17173, #17174, #17175, #17176, #17189, #17190, #17191, #17192, #17193, #17194, #17199, #17200, #17201, #17202, #17203, #17204, #17205, #17206, #17207, #17211, #17213, #17220, #17221, #17222, #17224, #17226, #17238, #17239, #17240, #17241, #17242, #17244, #17245, #17246, #17248, #17249, #17251, #17253 |
 | [@patrykkopycinski](https://github.com/patrykkopycinski) | #13954, #17257, #18102 |
 | [@PauloFH](https://github.com/PauloFH) | #12400 |
+| [@Petrusreno](https://github.com/Petrusreno) | #18579 |
 | [@phoriah](https://github.com/phoriah) | #17328 |
 | [@PranavD2905](https://github.com/PranavD2905) | #15336 |
+| [@Primexz](https://github.com/Primexz) | #16688 |
 | [@PrinceThummar011](https://github.com/PrinceThummar011) | #17047, #17158, #17234, #17243 |
 | [@qwer2003tw](https://github.com/qwer2003tw) | #16869 |
 | [@r2jaff](https://github.com/r2jaff) | #17321 |
-| [@rafacpti23](https://github.com/rafacpti23) | #14142, #17158, #17214, #17216, #17217 |
+| [@rafacpti23](https://github.com/rafacpti23) | #14142, #17158, #17214, #17216, #17217, #18393, #18396 |
 | [@raheemuddin786](https://github.com/raheemuddin786) | #16298 |
 | [@rahmaangriawan](https://github.com/rahmaangriawan) | #18146 |
+| [@RaviTharuma](https://github.com/RaviTharuma) | #18271, #18368 |
+| [@RayJW](https://github.com/RayJW) | #18510 |
 | [@razakiau](https://github.com/razakiau) | #18531 |
 | [@rbansal42](https://github.com/rbansal42) | #17999, #18000 |
-| [@rqzbeh](https://github.com/rqzbeh) | #12953 |
+| [@rqzbeh](https://github.com/rqzbeh) | #12953, #18749 |
 | [@SaebAmini](https://github.com/SaebAmini) | #17140 |
 | [@SammySN-car](https://github.com/SammySN-car) | #17178 |
 | [@ScottyAmr](https://github.com/ScottyAmr) | #12833 |
-| [@seanford](https://github.com/seanford) | #17972, #17973, #17974, #17975, #17976, #17977, #17978, #17979, #17981, #17983, #17984, #17985, #17986, #17988, #17989 |
+| [@seanford](https://github.com/seanford) | #17972, #17973, #17974, #17975, #17976, #17977, #17978, #17979, #17981, #17982, #17983, #17984, #17985, #17986, #17988, #17989 |
 | [@seathatflowsinourveins](https://github.com/seathatflowsinourveins) | #17210 |
 | [@Seizethewind](https://github.com/Seizethewind) | #18656 |
-| [@serenity-X](https://github.com/serenity-X) | #18611, #18617, #18639, #18649 |
+| [@serdarucel](https://github.com/serdarucel) | #18634 |
+| [@serenity-X](https://github.com/serenity-X) | #18611, #18616, #18617, #18618, #18639, #18640, #18649, #18650 |
 | [@shatinz](https://github.com/shatinz) | #18148 |
+| [@shevar0](https://github.com/shevar0) | #18312, #18329, #18333, #18334, #18526, #18527, #18528, #18535 |
+| [@shipsfromrio](https://github.com/shipsfromrio) | #18763 |
 | [@SIGTERM-015](https://github.com/SIGTERM-015) | #15521 |
-| [@skygunner](https://github.com/skygunner) | #17774, #17788, #17791, #17840, #17842, #17844, #17940, #18811 |
+| [@skygunner](https://github.com/skygunner) | #17774, #17788, #17791, #17840, #17842, #17844, #17940, #18494, #18634, #18635, #18811 |
 | [@skymanbj](https://github.com/skymanbj) | #14944 |
 | [@smserwan](https://github.com/smserwan) | #16748 |
 | [@snower](https://github.com/snower) | #16846 |
-| [@stanleytejakusuma](https://github.com/stanleytejakusuma) | #17905 |
+| [@stanleytejakusuma](https://github.com/stanleytejakusuma) | #17905, #18708, #18742 |
 | [@starxjys](https://github.com/starxjys) | #18193 |
 | [@Szqub](https://github.com/Szqub) | #18027 |
-| [@TheViniAlmeida](https://github.com/TheViniAlmeida) | #18044 |
+| [@TheViniAlmeida](https://github.com/TheViniAlmeida) | #18044, #18484 |
 | [@ThongAccount](https://github.com/ThongAccount) | #17120 |
 | [@tiagovilasboas](https://github.com/tiagovilasboas) | #15923 |
+| [@tmaarcxs](https://github.com/tmaarcxs) | #18286 |
 | [@TomSeestern](https://github.com/TomSeestern) | #18289 |
-| [@trespassmk](https://github.com/trespassmk) | #18182 |
+| [@trespassmk](https://github.com/trespassmk) | #18182, #18279, #18492, #18560, #18600, #18752, #18788 |
 | [@tuandinh0801](https://github.com/tuandinh0801) | #13125, #16159 |
+| [@tugrultamerc](https://github.com/tugrultamerc) | #16619 |
 | [@turbolego](https://github.com/turbolego) | #16315, #17282, #17405 |
 | [@Vaishnavi220506](https://github.com/Vaishnavi220506) | #17144 |
 | [@vianhanif](https://github.com/vianhanif) | #16747, #16861 |
+| [@w0wl0lxd](https://github.com/w0wl0lxd) | #18805 |
 | [@WendeelMarinho](https://github.com/WendeelMarinho) | #17231 |
 | [@Witroch4](https://github.com/Witroch4) | #18140 |
-| [@woodsonl](https://github.com/woodsonl) | #17334 |
+| [@woodsonl](https://github.com/woodsonl) | #17334, #18730 |
 | [@wray-lee](https://github.com/wray-lee) | #16365 |
 | [@xc0derx](https://github.com/xc0derx) | #18104, #18105 |
 | [@XcubeJava](https://github.com/XcubeJava) | #17848 |
-| [@xiaoyaner0201](https://github.com/xiaoyaner0201) | #10409, #14604, #16458, #16569, #16577, #16664, #17026, #17182, #17934, #17936, #17939, #18050 |
+| [@xiaoyaner0201](https://github.com/xiaoyaner0201) | #10409, #14604, #16458, #16569, #16577, #16664, #17026, #17182, #17934, #17936, #17939, #18050, #18494 |
 | [@yaman0786](https://github.com/yaman0786) | #17134 |
-| [@yourspraveen](https://github.com/yourspraveen) | #14292, #17218, #17394, #17396, #17902, #17903, #17904, #17965, #18109, #18678, #18682 |
+| [@yourspraveen](https://github.com/yourspraveen) | #14292, #17218, #17394, #17396, #17902, #17903, #17904, #17965, #18109, #18517, #18644, #18670, #18678, #18682 |
+| [@ysntony](https://github.com/ysntony) | #18038 |
 | [@yunaremaia](https://github.com/yunaremaia) | #18265 |
+| [@yxxrn](https://github.com/yxxrn) | #18423 |
 | [@z3ncv](https://github.com/z3ncv) | #18324 |
+| [@ZeroOttantotto](https://github.com/ZeroOttantotto) | #16751 |
 | [@zerotraceio](https://github.com/zerotraceio) | #16461 |
-| [@zhiru](https://github.com/zhiru) | #14091 |
+| [@zhiru](https://github.com/zhiru) | #14091, #18830 |
 | [@diegosouzapw](https://github.com/diegosouzapw) | maintainer |
 
 ---
-
 ## [3.8.52] — 2026-10-19
 
 _Living section — reconciled 2026-10-19 from all cycle commits (`2f42a9ac19` → `0a1265ea81`, 1,386 non-merge commits). Bullets carry the merged PR and its author; direct pushes are listed with their commit hash. Regenerated at each `/generate-release` phase._
