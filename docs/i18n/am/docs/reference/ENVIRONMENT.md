@@ -1357,9 +1357,9 @@ STREAM_HISTORY_MAX=10
 
 ለአንድ ወር ሙሉ ነቅቶ የተቀመጠ አገልግሎት 744 ሰአታት ያህል ይጠቀማል፣ ስለዚህ አሁን ካለው የነጻ ደረጃ አበል አንጻር ያረጋግጡት።
 
-## የማሰማሪያ ሁኔታዎች
+## የማሰማራት ሁኔታዎች
 
-ለrelay backend SRE መመሪያዎች (ts/bifrost/auto ባህሪ፣ 9router እና CLIProxyAPI አቀማመጥ፣ እንዲሁም ከፍተኛ-የትራፊክ የመጠባበቂያ ስትራቴጂ)፣ [Relay Backend Strategy](/docs/reference/RELAY_BACKEND_STRATEGY.md)ን ይመልከቱ።
+ስለ relay backend SRE መመሪያ (ts/bifrost/auto ባህሪ፣ 9router እና CLIProxyAPI አቀማመጥ፣ እንዲሁም ከፍተኛ የትራፊክ መጠን ያለው የመጠባበቂያ ስትራቴጂ)፣ [Relay Backend Strategy](/docs/reference/RELAY_BACKEND_STRATEGY.md)ን ይመልከቱ።
 
 ### አነስተኛ የአካባቢ ልማት
 
@@ -1401,7 +1401,7 @@ OMNIROUTE_DISABLE_BACKGROUND_SERVICES=true
 APP_LOG_TO_FILE=false
 ```
 
-### VPS ከተቃራኒ ፕሮክሲ (nginx + Cloudflare) ጋር
+### VPS ከተገላቢጦሽ ፕሮክሲ ጋር (nginx + Cloudflare)
 
 ```bash
 JWT_SECRET=<generated>
@@ -1863,3 +1863,14 @@ Globale Defaults für den headless Browser እና den ausgehenden Tool-Tunnel።
 | ተለዋዋጭ                          | ነባሪ | ምንጭ ፋይል                                      | መግለጫ                                                                                                                                                                |
 | ------------------------------ | --- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0` | `src/lib/providerModels/modelSyncTimings.ts` | የምዕራፍ ጊዜን ለመመዝገብ ወደ `1` አቀናብር፣ በአምሳያ ማመሳሰል ወቅት የመነጨ ጥያቄ ID እና የደረጃ success/error ውጤቶችን። ለሁሉም ሌሎች እሴቶች ተሰናክሏል። የምዝግብ ማስታወሻዎች ጥያቄን፣ መለያን፣ ካታሎግን እና የስህተት ጭነቶችን ይተዉታል። |
+
+## Local OpenCode የሚዲያ-ትንተና መሣሪያ
+
+በ`scripts/cli/omniroute-media-mcp.mjs` ይጠቀማል። እነዚህን በአካባቢያዊ መሣሪያ ሂደት አካባቢ ያቀናብሩ።
+
+| ተለዋዋጭ                      | ነባሪ                                                                                | መግለጫ                                                              |
+| -------------------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (ወይም `~/.config/opencode/opencode.json`) | በሚዲያ መሣሪያው እና በጫኚው የሚነበብ የOpenCode ውቅር።                           |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                        | በOpenCode ውቅር ውስጥ በሚዲያ መሣሪያው የሚነበብ የአቅራቢ ግቤት።                     |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                             | በሚዲያ መሣሪያው የሚላክ ሞዴል። አቅራቢው የተጠየቁትን የሚዲያ ዓይነቶች መደገፍ አለበት።          |
+| `OMNIROUTE_MEDIA_API_KEY`  | የተዋቀረው የአቅራቢ API ቁልፍ ወይም የአካባቢ ማጣቀሻው                                               | አማራጭ የማረጋገጫ መረጃ መተኪያ። በአካባቢያዊ ሂደት አካባቢ ውስጥ ያቆዩት፤ በፍጹም ኮሚት አያድርጉት። |

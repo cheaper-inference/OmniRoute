@@ -540,16 +540,16 @@ test("managed request surfaces are fenced centrally or rejected before independe
   );
   const rotationPolicySites = [
     ...nonStreamingLeg.matchAll(
-      /allowAccountRotation: !managedLease && comboStrategy !== "context-relay"/g
+      /allowAccountRotation:\s*!managedLease && comboStrategy !== "context-relay" && !forcedConnectionId/g
     ),
     ...streamingLeg.matchAll(
-      /allowAccountRotation: !managedLease && comboStrategy !== "context-relay"/g
+      /allowAccountRotation:\s*!managedLease && comboStrategy !== "context-relay" && !forcedConnectionId/g
     ),
   ];
   assert.equal(
     rotationPolicySites?.length,
     2,
-    "both the streaming and the non-streaming leg must derive account rotation from !managedLease"
+    "both the streaming and the non-streaming leg must derive account rotation from !managedLease and the connection pin"
   );
   assert.match(pipeline, /const canRotateAccount = policy\.allowAccountRotation && !isolateProbe;/);
   assert.match(pipeline, /canRotateAccount &&\s*target\.provider === "codex"/);

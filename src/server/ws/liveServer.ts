@@ -64,6 +64,46 @@ const MAX_CLIENTS = 500;
 const MAX_EVENTS_PER_SECOND = 100;
 const MAX_PENDING_MESSAGES_PER_CLIENT = 32;
 const MAX_PENDING_MESSAGE_BYTES = 16_384;
+/**
+ * Outbound bytes a connection may have queued (ws userland buffer plus the socket's
+ * write queue, i.e. `ws.bufferedAmount`) before it is dropped. A dashboard that reads
+ * normally stays far below this; a client that stopped reading, or that keeps sending
+ * "subscribe" to replay the backlog, reaches it and is closed instead of growing the
+ * server's memory. Dropping (not skipping frames) tells the client it is out of date
+ * instead of leaving it to miss frames silently. On reconnect it gets the welcome backlog
+ * again: the newest events that fit in MAX_WELCOME_BACKLOG_BYTES, at most BACKLOG_MAX. That
+ * can repeat events the client already had, and it can still miss events that were queued
+ * but never read if larger events after them filled the byte limit.
+ */
+const MAX_BUFFERED_BYTES_PER_CLIENT = 4 * 1024 * 1024;
+/**
+ * Serialized size of the backlog replayed in one welcome frame. The newest events are
+ * kept. Without a bound, one welcome could be larger than MAX_BUFFERED_BYTES_PER_CLIENT,
+ * and a client on a slow link would be dropped before it ever received a full welcome.
+ */
+const MAX_WELCOME_BACKLOG_BYTES = 1024 * 1024;
+let slowClientDrops = 0;
+
+/** Whether a connection with this much queued output is dropped (exported for tests). */
+export function isOverOutboundLimit(bufferedAmount: number): boolean {
+  return bufferedAmount > MAX_BUFFERED_BYTES_PER_CLIENT;
+}
+
+/**
+ * The newest entries whose JSON fits in maxBytes, oldest first (exported for tests).
+ * Stops at the first entry that does not fit, so the result has no gaps. If the newest
+ * entry alone is larger than maxBytes, the result is empty.
+ */
+export function newestWithinBytes<T>(entries: T[], maxBytes = MAX_WELCOME_BACKLOG_BYTES): T[] {
+  let total = 0;
+  let start = entries.length;
+  while (start > 0) {
+    total += Buffer.byteLength(JSON.stringify(entries[start - 1]));
+    if (total > maxBytes) break;
+    start--;
+  }
+  return entries.slice(start);
+}
 
 const ALLOWED_ORIGINS = buildAllowedOrigins();
 const ALLOWED_HOSTS = buildAllowedHosts();
@@ -317,31 +357,44 @@ function handleMessage(clientId: string, raw: string): void {
     return;
   }
 
-  client.lastActivity = now;
-
+  // Inbound messages do not count as liveness: a client can keep writing while it has
+  // stopped reading. Only a protocol pong refreshes lastActivity (see startHeartbeat).
   switch (msg.type) {
     case "subscribe": {
-      client.subscribedChannels = new Set(msg.channels);
+      // Keep only known channel names: the welcome echoes them, so a client-supplied
+      // array would otherwise make the welcome as large as the inbound frame.
+      const requested: unknown[] = Array.isArray(msg.channels) ? msg.channels : [];
+      const channels = [
+        ...new Set(
+          requested.filter(
+            (c): c is DashboardChannel => typeof c === "string" && Object.hasOwn(CHANNEL_EVENTS, c)
+          )
+        ),
+      ];
+      client.subscribedChannels = new Set(channels);
 
       // Send buffered events that match subscribed channels
       const relevantHistory = eventHistoryBacklog.filter((h) => {
         const ch = getChannelForEvent(h.event as DashboardEventName);
-        return ch && msg.channels.includes(ch);
+        return ch && channels.includes(ch);
       });
+      const replay = newestWithinBytes(
+        relevantHistory.map((h) => ({
+          event: h.event,
+          channel: getChannelForEvent(h.event as DashboardEventName),
+          data: h.payload,
+          timestamp: h.timestamp,
+        }))
+      );
 
       sendTo(client.ws, {
         type: "welcome",
         version: "1.0.0",
         sessionId: client.sessionId,
         serverTime: now,
-        channels: msg.channels,
-        backlog: relevantHistory.length,
-        data: relevantHistory.map((h) => ({
-          event: h.event,
-          channel: getChannelForEvent(h.event as DashboardEventName),
-          data: h.payload,
-          timestamp: h.timestamp,
-        })),
+        channels,
+        backlog: replay.length,
+        data: replay,
       } as any);
       break;
     }
@@ -355,9 +408,27 @@ function handleMessage(clientId: string, raw: string): void {
 // ── Send ──────────────────────────────────────────────────────────────────
 
 function sendTo(ws: WebSocket, msg: WsServerMessage | Record<string, unknown>): void {
-  if (ws.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify(msg));
+  if (ws.readyState !== WebSocket.OPEN) return;
+  // Every outbound frame, including the subscribe replay in the welcome, passes here,
+  // so this one check bounds both a slow reader and replay amplification. terminate()
+  // fires "close", which removes the client from the map.
+  if (isOverOutboundLimit(ws.bufferedAmount)) {
+    slowClientDrops++;
+    let clientId = "unauthenticated";
+    for (const [id, client] of clients) {
+      if (client.ws === ws) clientId = id;
+    }
+    // One line per dropped connection: after terminate() readyState is no longer OPEN.
+    console.warn(
+      "[LiveWS] Dropping slow client %s: %d bytes queued [%d dropped since start]",
+      clientId,
+      ws.bufferedAmount,
+      slowClientDrops
+    );
+    ws.terminate();
+    return;
   }
+  ws.send(JSON.stringify(msg));
 }
 
 // ── Event Bus → WebSocket Bridge ──────────────────────────────────────────
