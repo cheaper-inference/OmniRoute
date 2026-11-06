@@ -3,18 +3,19 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { writeNodeCliFixture } from "../helpers/nodeCliFixture.ts";
 
 import type { ExecuteInput } from "@omniroute/open-sse/executors/base";
 
-const { AuggieExecutor, __resetAuggieModels } = await import(
-  "@omniroute/open-sse/executors/auggie"
-);
+const { AuggieExecutor, __resetAuggieModels } =
+  await import("@omniroute/open-sse/executors/auggie");
 
 function makeFakeAuggieBin(dir: string, stderrLine: string): string {
-  const fakeBin = path.join(dir, "fake-auggie.sh");
-  fs.writeFileSync(fakeBin, `#!/bin/sh\necho "${stderrLine}" 1>&2\nexit 1\n`);
-  fs.chmodSync(fakeBin, 0o755);
-  return fakeBin;
+  return writeNodeCliFixture(
+    dir,
+    "fake-auggie",
+    `process.stderr.write(${JSON.stringify(stderrLine + "\n")}); process.exitCode = 1;`
+  );
 }
 
 async function withFakeAuggieBin<T>(
