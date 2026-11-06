@@ -171,6 +171,14 @@ describe("#16161 observation validation", () => {
     });
   });
 
+  it("A06 counts a percentage-only window from the server's projection as observed", async () => {
+    const session = { used: 0, total: 0, isPercentageOnly: true, remainingPercentage: 70 };
+    respond(Response.json({ quotas: { session, weekly: { used: 40, total: 100 } } }));
+    await mount();
+    await act(async () => current.refreshConnection("account/a"));
+    expect(current.refreshStates["account/a"]).toEqual({ status: "fresh" });
+  });
+
   it("A03 displays a stale fallback without local cache using only its real timestamp", async () => {
     const fetch = respond(
       Response.json({

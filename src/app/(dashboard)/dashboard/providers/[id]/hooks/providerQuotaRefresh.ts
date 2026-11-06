@@ -10,16 +10,17 @@ function record(value: unknown): Record<string, unknown> | null {
     : null;
 }
 
+function finiteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
 function validWindow(value: unknown): boolean {
   const window = record(value);
+  if (!window) return false;
+  // The server's projection reports windows seen on inference responses as a percentage only.
+  if (window.isPercentageOnly === true) return finiteNumber(window.remainingPercentage);
   return (
-    !!window &&
-    typeof window.used === "number" &&
-    Number.isFinite(window.used) &&
-    window.used >= 0 &&
-    typeof window.total === "number" &&
-    Number.isFinite(window.total) &&
-    window.total > 0
+    finiteNumber(window.used) && window.used >= 0 && finiteNumber(window.total) && window.total > 0
   );
 }
 
