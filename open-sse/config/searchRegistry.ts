@@ -10,6 +10,7 @@
  * perplexity-search reuses credentials from the "perplexity" chat provider.
  */
 
+import { parseAndValidateNonMetadataUrl } from "@/shared/network/outboundUrlGuard";
 import { isProviderBlockedByIdOrAlias } from "@/shared/utils/noAuthProviders";
 
 export interface SearchProviderConfig {
@@ -585,8 +586,9 @@ export function isUnconfiguredLoopbackSearchProvider(
  * with `primaryWhenConfigured` and the operator's stored connection names a real base URL
  * (not the catalog default). A self-hosted SearXNG configured that way is a $0 engine the
  * operator chose, so it ranks by cost with the keyed providers instead of only after them.
- * A connection whose stored token would cross the network over plain http:// is excluded.
- * Without such a connection it stays fallback-only (#9543, #10976).
+ * A base URL the search handler would refuse, or a stored token that would cross the network
+ * over plain http://, is excluded. Without such a connection it stays fallback-only
+ * (#9543, #10976).
  */
 export function isOperatorConfiguredPrimary(
   provider: SearchProviderConfig | null | undefined,
@@ -600,13 +602,28 @@ export function isOperatorConfiguredPrimary(
       ? String((psd as Record<string, unknown>).baseUrl).trim()
       : "";
   if (!baseUrl || isUnconfiguredLoopbackSearchProvider({ ...provider, baseUrl })) return false;
-  // Auto-select must not widen where a stored token travels in cleartext: a connection that
+  if (!isAcceptedBaseUrl(baseUrl)) return false;
+  // Ranking must not widen where a stored token travels in cleartext: a connection that
   // carries one (sent as `Authorization: Bearer`) over plain http:// to a non-loopback host
-  // stays reachable only by explicit selection. Tokenless http:// (cluster-internal
-  // deployments) and loopback http:// never put a secret on the wire.
+  // is never ranked or used as a failover, and stays a last resort or an explicit choice.
+  // Tokenless http:// (cluster-internal deployments) and loopback http:// never put a secret
+  // on the wire.
   const c = credentials as { apiKey?: unknown; accessToken?: unknown };
   const hasToken = Boolean(c.apiKey || c.accessToken);
   return !(hasToken && isRemoteCleartextUrl(baseUrl));
+}
+
+/**
+ * The check resolveSearchBaseUrl applies. It throws outside any failover, so a URL it refuses
+ * must never become the pick: one bad stored value would fail every auto-selected search.
+ */
+function isAcceptedBaseUrl(raw: string): boolean {
+  try {
+    parseAndValidateNonMetadataUrl(raw);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /** http:// to anything but loopback (localhost, 127.0.0.0/8, ::1). Unparsable → treated as remote. */

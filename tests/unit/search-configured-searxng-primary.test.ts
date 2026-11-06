@@ -17,6 +17,7 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
+const settingsDb = await import("../../src/lib/db/settings.ts");
 const searchRoute = await import("../../src/app/api/v1/search/route.ts");
 const { executeWebSearch } = await import("../../src/lib/search/executeWebSearch.ts");
 
@@ -50,7 +51,7 @@ async function seed(
 const seedSearxng = (baseUrl: string, apiKey: string | null = null) =>
   seed("searxng-search", { authType: "none", apiKey, providerSpecificData: { baseUrl } });
 
-function mockFetch(searxngStatus = 200, searxngBase = SEARXNG_URL) {
+function mockFetch(searxngStatus = 200, searxngBase = SEARXNG_URL, braveStatus = 200) {
   const calls: string[] = [];
   const original = globalThis.fetch;
   globalThis.fetch = async (url) => {
@@ -66,6 +67,7 @@ function mockFetch(searxngStatus = 200, searxngBase = SEARXNG_URL) {
       );
     }
     if (u.includes("api.search.brave.com")) {
+      if (braveStatus !== 200) return new Response("upstream down", { status: braveStatus });
       return new Response(
         JSON.stringify({
           web: {
@@ -80,12 +82,12 @@ function mockFetch(searxngStatus = 200, searxngBase = SEARXNG_URL) {
   return { calls, restore: () => (globalThis.fetch = original) };
 }
 
-async function routeSearch(query: string) {
+async function routeSearch(query: string, extra: Record<string, unknown> = {}) {
   const response = await searchRoute.POST(
     new Request("http://localhost/api/v1/search", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query, search_type: "web" }),
+      body: JSON.stringify({ query, search_type: "web", ...extra }),
     })
   );
   return { status: response.status, body: (await response.json()) as { provider?: string } };
@@ -252,5 +254,121 @@ test("a tokenless SearXNG on a cluster-internal HTTP address is auto-selected", 
     assert.equal((await routeSearch("cluster internal http")).body.provider, "searxng-search");
   } finally {
     f.restore();
+  }
+});
+
+test("a SearXNG blocked by policy is neither the pick nor the failover of auto-select", async () => {
+  await seed("brave-search");
+  await seedSearxng(SEARXNG_URL);
+  await settingsDb.updateSettings({ blockedProviders: ["searxng-search"] });
+
+  const healthy = mockFetch();
+  try {
+    assert.equal((await routeSearch("blocked route pick")).body.provider, "brave-search");
+    assert.equal(
+      (await executeWebSearch({ query: "blocked tool pick" })).data.provider,
+      "brave-search"
+    );
+    assert.ok(!healthy.calls.some((u) => u.startsWith(SEARXNG_URL)), "blocked SearXNG not called");
+  } finally {
+    healthy.restore();
+  }
+
+  const braveDown = mockFetch(200, SEARXNG_URL, 503);
+  try {
+    assert.notEqual((await routeSearch("blocked route failover")).body.provider, "searxng-search");
+    await executeWebSearch({ query: "blocked tool failover" }).catch(() => null);
+    assert.ok(
+      !braveDown.calls.some((u) => u.startsWith(SEARXNG_URL)),
+      "blocked SearXNG not used as failover"
+    );
+  } finally {
+    braveDown.restore();
+  }
+});
+
+test("a stored base URL the search handler refuses is not auto-selected", async () => {
+  for (const base of [
+    "http://169.254.169.254/",
+    "not a url",
+    "searxng.internal:8080",
+    "ftp://searxng.internal/",
+    "http://user:pass@searxng.internal:8080",
+  ]) {
+    await resetStorage();
+    await seed("brave-search");
+    await seedSearxng(base);
+    const f = mockFetch();
+    try {
+      const { status, body } = await routeSearch(`refused base url ${base}`);
+      assert.equal(status, 200, base);
+      assert.equal(body.provider, "brave-search", base);
+      assert.equal(
+        (await executeWebSearch({ query: `tool refused base url ${base}` })).data.provider,
+        "brave-search",
+        base
+      );
+    } finally {
+      f.restore();
+    }
+  }
+});
+
+test("an auto-selected SearXNG fails over on every 4xx the handler treats as final", async () => {
+  await seed("brave-search");
+  await seedSearxng(SEARXNG_URL);
+  for (const status of [400, 401, 403, 404]) {
+    const f = mockFetch(status);
+    try {
+      const routed = await routeSearch(`searxng ${status} route`);
+      assert.equal(routed.status, 200, String(status));
+      assert.equal(routed.body.provider, "brave-search", String(status));
+      assert.equal(
+        (await executeWebSearch({ query: `searxng ${status} tool` })).data.provider,
+        "brave-search",
+        String(status)
+      );
+    } finally {
+      f.restore();
+    }
+  }
+});
+
+test("a SearXNG requested by name still reports its own 4xx instead of failing over", async () => {
+  await seed("brave-search");
+  await seedSearxng(SEARXNG_URL);
+  const f = mockFetch(403);
+  try {
+    const { status } = await routeSearch("explicit searxng 403", { provider: "searxng-search" });
+    assert.equal(status, 403);
+    await assert.rejects(
+      executeWebSearch({ query: "explicit searxng 403 tool", provider: "searxng-search" }),
+      /returned 403/
+    );
+    assert.ok(
+      f.calls.every((u) => u.startsWith(SEARXNG_URL)),
+      "no keyed provider called"
+    );
+  } finally {
+    f.restore();
+  }
+});
+
+test("a keyed primary keeps treating a 403 as final", async () => {
+  // serper is the cheaper of the two, so it is the pick and brave would be its failover.
+  await seed("serper-search");
+  await seed("brave-search");
+  const calls: string[] = [];
+  const original = globalThis.fetch;
+  globalThis.fetch = async (url) => {
+    calls.push(String(url));
+    return new Response("forbidden", { status: 403 });
+  };
+  try {
+    const { status } = await routeSearch("keyed 403 stays final");
+    assert.equal(status, 403);
+    assert.equal(calls.length, 1, "no failover after a keyed 403");
+  } finally {
+    globalThis.fetch = original;
   }
 });

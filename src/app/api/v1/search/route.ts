@@ -316,11 +316,9 @@ async function postHandler(request: Request, context: unknown) {
       );
     }
 
-    // Find alternate for failover — must bind credentials to the matched provider.
-    // Exclude fallback-only providers; they are only used by the last-resort step.
-    const otherIds = autoSearchCandidates(body.search_type)
-      .map((p) => p.id)
-      .filter((id) => id !== providerConfig.id);
+    // Find alternate for failover — must bind credentials to the matched provider. It comes
+    // from the same unblocked candidates; the other fallback-only providers stay last-resort.
+    const otherIds = sortedIds.filter((id) => id !== providerConfig.id);
 
     for (const pid of otherIds) {
       const altConfig = getSearchProvider(pid);
