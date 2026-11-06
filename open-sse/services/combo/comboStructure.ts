@@ -23,6 +23,12 @@ import {
 import { getProviderByAlias, getProviderById } from "../../../src/shared/constants/providers.ts";
 import { estimateTokens } from "../contextManager.ts";
 import { containsMediaKind } from "../../utils/mediaParts.ts";
+import {
+  requestMediaRequirements,
+  nonImageMediaFailures,
+  hasMediaRequirements,
+  type MediaRequirements,
+} from "./mediaCompatibility.ts";
 import { getResolvedModelCapabilities } from "../modelCapabilities.ts";
 import { parseModel, stripContextWindowSuffix } from "../model.ts";
 import { dedupeTargetsByExecutionKey, isRecord } from "./comboData.ts";
@@ -458,7 +464,7 @@ export function getModelContextLimitForModelString(modelStr: string) {
   return getModelContextLimit(provider, model);
 }
 
-export type RequestCompatibilityRequirements = {
+export type RequestCompatibilityRequirements = MediaRequirements & {
   requiresTools: boolean;
   requiresVision: boolean;
   requiresStructuredOutput: boolean;
@@ -513,6 +519,7 @@ export function deriveRequestCompatibilityRequirements(
   );
   return {
     requiresTools: requestRequiresTools(body),
+    ...requestMediaRequirements(body),
     requiresVision: valueContainsImagePart(body.messages) || valueContainsImagePart(body.input),
     requiresStructuredOutput: requestRequiresStructuredOutput(body),
     estimatedInputTokens,
@@ -571,7 +578,16 @@ function isNearBoundaryOverrideReject(
   return requirements.requiredContextTokens <= override * OVERRIDE_REJECT_TRUST_MARGIN;
 }
 
-const HARD_COMPAT_REASONS = new Set(["tools", "vision", "structured_output", "output_tokens"]);
+const HARD_COMPAT_REASONS = new Set([
+  "tools",
+  "vision",
+  "audio",
+  "video",
+  "pdf",
+  "file",
+  "structured_output",
+  "output_tokens",
+]);
 
 /**
  * #8332: rejected fallback tiers must never resurrect a target whose vision
@@ -582,9 +598,10 @@ const HARD_COMPAT_REASONS = new Set(["tools", "vision", "structured_output", "ou
  * panel (dispatchPrelude.ts), which still requires confirmed vision.
  */
 export function isVisionIncompatibleTarget(
-  target: ResolvedComboTarget,
+  target: Pick<ResolvedComboTarget, "provider" | "providerId" | "modelStr" | "connectionId">,
   requirements: RequestCompatibilityRequirements
 ): boolean {
+  if (nonImageMediaFailures(target, requirements).length > 0) return true;
   if (!requirements.requiresVision) return false;
   const capabilities = getResolvedModelCapabilities({
     provider: target.providerId || target.provider || null,
@@ -610,6 +627,7 @@ export function computeCompatRejectedTargets(
   );
 }
 
+/** Collect capability mismatches for a target, including required media inputs. */
 function getTargetCompatibilityFailures(
   target: ResolvedComboTarget,
   requirements: RequestCompatibilityRequirements
@@ -618,7 +636,7 @@ function getTargetCompatibilityFailures(
     provider: target.providerId || target.provider || null,
     model: target.modelStr,
   });
-  const failures: string[] = [];
+  const failures: string[] = nonImageMediaFailures(target, requirements);
 
   if (
     requirements.requiresTools &&
@@ -822,6 +840,7 @@ function preferConfirmedVisionTargets(
   return partitionConfirmedVisionTargets(targets, requirements).targets;
 }
 
+/** Filter incompatible targets without restoring unsupported media through fail-open routing. */
 export function filterTargetsByRequestCompatibility(
   targets: ResolvedComboTarget[],
   body: Record<string, unknown>,
@@ -836,7 +855,7 @@ export function filterTargetsByRequestCompatibility(
   const requirements = deriveRequestCompatibilityRequirements(body);
   const needsFiltering =
     requirements.requiresTools ||
-    requirements.requiresVision ||
+    hasMediaRequirements(requirements) ||
     requirements.requiresStructuredOutput ||
     requirements.requiredContextTokens > 0;
   if (!needsFiltering) return targets;
@@ -932,7 +951,7 @@ export function filterTargetsByRequestCompatibility(
     );
 
     // #8332: vision is never safe to guess — never resurrect vision-rejected targets.
-    if (requirements.requiresVision) {
+    if (hasMediaRequirements(requirements)) {
       const visionSafe = targets.filter(
         (target) => !isVisionIncompatibleTarget(target, requirements)
       );
@@ -981,7 +1000,7 @@ export function filterTargetsByRequestCompatibility(
     (targetReasons.get(compatible[0]) || []).includes("context_window")
   ) {
     // #8332: never restore a confirmed-non-vision target onto an image request.
-    const restored = requirements.requiresVision
+    const restored = hasMediaRequirements(requirements)
       ? targets.filter((target) => !isVisionIncompatibleTarget(target, requirements))
       : targets;
     if (restored.length > compatible.length) {

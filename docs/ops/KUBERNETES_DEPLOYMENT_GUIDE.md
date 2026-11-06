@@ -248,7 +248,8 @@ in the overlay's `resources:` and set both hosts.
 The body-size annotation matters on the API Ingress specifically: it must not
 sit below `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` (50 MB default), or nginx returns
 413 for requests the application would have accepted — and the app's own 413
-response, which tells the client to compact and retry, never runs.
+response, which tells the client to compact and retry, never runs. Saving a
+`maxBodySizeMb` above 50 MB in the dashboard needs this annotation raised as well.
 
 ### k3s: Traefik timeouts
 

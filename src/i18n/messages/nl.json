@@ -923,6 +923,8 @@
     "batchListTitle": "Batches",
     "batchListCount": "{count} batches",
     "batchListRemovingCompleted": "Verwijderen…",
+    "batchListRemoveCompletedPartial": "Een groot aantal batches is verwijderd. Klik opnieuw om de rest te wissen.",
+    "batchListRemoveCompletedFailed": "Er is een fout opgetreden bij het verwijderen van batches.",
     "batchListRemoveCompleted": "Voltooide batches verwijderen",
     "batchListTableStatus": "Status",
     "batchListTableId": "ID",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "Bezig met vernieuwen…",
     "batchListRefresh": "Vernieuwen",
     "uploadFileModalRemove": "Verwijderen",
+    "fileInputChoose": "Bestand kiezen",
+    "fileInputChooseMultiple": "Bestanden kiezen",
+    "fileInputEmpty": "Geen bestand gekozen",
+    "fileInputSelectedCount": "{count, plural, one {# bestand geselecteerd} other {# bestanden geselecteerd}}",
+    "fileDropLabel": "Sleep hier een bestand naartoe of kies er een",
+    "fileDropLabelMultiple": "Sleep hier bestanden naartoe of kies bestanden",
     "uploadFileModalUploading": "Bezig met uploaden…",
     "wizardInputReading": "Bestand wordt gelezen…",
     "wizardInputReady": "Gereed",
@@ -1035,7 +1043,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "Stuur de fingerprint van de OpenCode v2 CLI-client mee bij OpenCode Zen/Go-verzoeken: de User-Agent opencode/latest/<2.x>/cli en x-opencode-client cli, en bij verzoeken binnen de gratis laag de v2-sessieheaders, de v2 CLI-schema's voor de read/shell-tools en geen tool_choice \"none\". Standaard uitgeschakeld: elk OpenCode-verzoek behoudt ongewijzigd de huidige identiteit, headers en body.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Wanneer de kandidatenpool van een automatische combinatie al leeg is voordat het voorfilter voor toolaanroepen wordt uitgevoerd (elk doel is overgeslagen vanwege afkoelperiodes, blokkeringen of uitputting), antwoord dan met 503 no_eligible_targets in plaats van de verouderde 400-fout \"Geen enkel doel ondersteunt toolaanroepen\" capability_mismatch. Standaard uitgeschakeld: bij een lege pool blijft de verouderde 400-fout behouden.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Dwing vertrouwde modeleindpunttags af (gedeclareerd door de providercatalogus, afgeleid uit een gespecialiseerd model-ID of ingesteld door de operator): weiger een verzoek dat wordt verzonden naar een eindpunt dat niet door het model wordt aangeboden vóór verzending met HTTP 400 op /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations en /v1/audio/*; verberg modellen waarvan de getagde eindpunten geen OmniRoute-adapter hebben in /v1/models; en beantwoord de modeltest van het dashboard met 422 voor dergelijke modellen. Standaard uitgeschakeld: eindpunttags blijven informatief en verzoeken worden exact zoals voorheen verzonden.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "Bij gewone Anthropic-compatibele relays blijven systeembeurten halverwege het gesprek in de berichtenlijst staan in plaats van ze naar de systeemprompt op het hoogste niveau te verplaatsen, zodat het in de cache opgeslagen promptvoorvoegsel tussen beurten stabiel blijft. Dit is alleen van toepassing wanneer de client zelf de bèta mid-conversation-system-2026-04-07 heeft verzonden. Standaard uitgeschakeld: elke systeembeurt wordt precies zoals voorheen naar de systeemprompt verplaatst, omdat relays zonder die bèta systeembeurten in de berichtenlijst weigeren.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Gebruik de niveaus voor redeneerinspanning die models.dev publiceert wanneer noch een operatoroverride, noch het providerregister niveaus opgeeft. Behoud alleen bekende inspanningsniveaus en behandel een lege lijst met opgegeven niveaus als \"geen niveaus\". Standaard uitgeschakeld: de modelcatalogus en de vastgestelde inspanningsniveaus blijven precies zoals voorheen.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "Laat auto/*-verzoeken de kandidatenpool opbouwen met opgeloste modelmogelijkheden (vision, redeneren, denken) en waargenomen kwaliteitsscores, ingelezen in één bulkleesactie. Standaard uit: kandidaatgewichten op het moment van het verzoek blijven precies zoals voorheen. Aan: deze signalen voeden de snapshotgewichten, zodat kandidaatgewichten en selectie kunnen veranderen.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Laat de controle van de status van inloggegevens verbindingen opnieuw testen die de gateway zelf heeft uitgeschakeld (elk maximaal één keer per 6 uur, 5 per controle) en schakel een verbinding weer in wanneer deze de hertest doorstaat. Standaard uitgeschakeld: zulke verbindingen blijven uitgeschakeld totdat een operator ingrijpt. Door een operator uitgeschakelde en permanent geblokkeerde verbindingen worden nooit opnieuw getest.",
@@ -1939,7 +1946,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# verzoek} other {# verzoeken}}, {keys, plural, one {# beperkte API-sleutel} other {# beperkte API-sleutels}}",
     "unpricedUsageMore": "…en nog {count} meer",
     "unpricedUsageConfigure": "Prijzen configureren",
-    "unpricedUsageDismiss": "Sluiten"
+    "unpricedUsageDismiss": "Sluiten",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analyses",
@@ -6264,6 +6280,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Sla de tijdelijke afkoelperiode over, zodat deze verbinding in aanmerking blijft komen, zelfs na herstelbare fouten (definitieve statussen zoals verbannen/verlopen zijn nog steeds van toepassing).",
     "disableCoolingLabel": "Afkoelperiode uitschakelen voor deze verbinding",
+    "keepMidConversationSystemDescription": "Laat systeemberichten die tijdens een gesprek zijn verzonden in de berichtenlijst staan in plaats van ze naar de systeemprompt op het hoogste niveau te verplaatsen, zodat de promptcache afwisselend blijft. Alleen inschakelen als deze upstream de rol \"systeem\" in berichten accepteert (anders antwoordt hij 400).",
+    "keepMidConversationSystemLabel": "Houd de berichten in het midden van het gesprekssysteem op hun plaats",
+    "requireUserLastMessageDescription": "Voor upstreams die het vooraf invullen van de assistent afwijzen: laat de achterliggende assistent-beurten vallen (geen tool_use) voordat u deze verzendt. Het model kan het eerdere antwoord regenereren.",
+    "requireUserLastMessageLabel": "Vereisen dat het gesprek eindigt met een gebruikersbericht",
     "bulkPasteAdded": "{count, plural, one {1 sleutel toegevoegd} other {# sleutels toegevoegd}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplicaat overgeslagen} other {# duplicaten overgeslagen}}",
     "bulkPasteHint": "Plak één API-sleutel per regel. Lege regels worden genegeerd en dubbele sleutels worden overgeslagen.",
@@ -6363,6 +6383,9 @@
     "localProviders": "Lokale providers",
     "maxConcurrentWholeNumberError": "Fout: maximum aantal gelijktijdige aanvragen moet een geheel getal zijn",
     "m365TierLabel": "Copilot-tier",
+    "m365RefreshTokenLabel": "Vernieuwingstoken (optioneel)",
+    "m365RefreshTokenHint": "Wordt gebruikt om het Microsoft 365-toegangstoken automatisch te vernieuwen.",
+    "m365RefreshTokenEditHint": "Laat dit leeg om het bestaande token te behouden. Plak een nieuw token om het te vervangen.",
     "m365TierHint": "Kies welke Microsoft 365 Copilot-omgeving deze verbinding gebruikt. Individueel is de standaard consumenten-BizChat; Onderwijs en Enterprise (werk) kiezen voor hun tenant-omgevingen.",
     "m365TierIndividualOption": "Individueel (standaard)",
     "m365TierEduOption": "Onderwijs",
@@ -7097,6 +7120,7 @@
     "proxySubTabsAria": "Proxysecties",
     "requestBodyLimitTitle": "Limiet voor aanvraagbody",
     "requestBodyLimitDescription": "Maximale grootte van de API-payload die wordt geaccepteerd voordat een aanvraagbody wordt geparseerd. Speciale uploadroutes behouden ten minste hun ingebouwde limiet van 100 MB.",
+    "requestBodyLimitChatHint": "Chat Completions en Responses accepteren tot 50 MB totdat je hier een limiet opslaat. De opgeslagen limiet geldt ook voor deze API’s, ongeacht of die lager of hoger is.",
     "requestBodyLimitInputLabel": "Limiet voor aanvraagbody in MB",
     "requestBodyLimitEmptyError": "Voer een limiet in MB in",
     "requestBodyLimitWholeNumberError": "Gebruik een geheel getal",
@@ -12282,7 +12306,9 @@
       "failedTitle": "Alle {count} pogingen zijn mislukt",
       "failed": "mislukt",
       "pinnedTitle": "Model geselecteerd via context-cache sessiepinnen",
-      "pinned": "vastgezet"
+      "pinned": "vastgezet",
+      "recoveredAttemptsTitle": "Verzoek hersteld na {count} pogingen",
+      "latestOutcomeFailed": "Het laatste verzoekresultaat is mislukt"
     },
     "attempts": "pogingen",
     "detail": {
@@ -12384,13 +12410,20 @@
       "continuesFromParent": "gaat verder vanaf bovenliggend item",
       "continuesFrom": "Gaat verder vanaf {id}",
       "viewConversation": "gesprek bekijken",
-      "openConversation": "Gesprek {id} openen"
+      "openConversation": "Gesprek {id} openen",
+      "omittedHttpAttempts": "{count} HTTP-verzendingen niet bewaard",
+      "noHttpResponse": "Geen HTTP-antwoord waargenomen",
+      "transportError": "Transportfout"
     },
     "tableLabel": "Aanvraaglogboeken",
     "throughputPostFirstToken": "Na eerste token",
     "throughputEndToEnd": "End-to-end",
     "throughputRate": "{value} tokens/sec",
-    "throughputExplanation": "Beide snelheden gebruiken het hoogste van de output- en reasoning-tokentellingen. Na eerste token sluit een geldige TTFT uit; anders wordt de volledige duur gebruikt. End-to-end gebruikt altijd de volledige duur. Een gebufferde respons kan een hoge piekleveringssnelheid hebben zonder dat het model sneller genereert."
+    "throughputExplanation": "Beide snelheden gebruiken het hoogste van de output- en reasoning-tokentellingen. Na eerste token sluit een geldige TTFT uit; anders wordt de volledige duur gebruikt. End-to-end gebruikt altijd de volledige duur. Een gebufferde respons kan een hoge piekleveringssnelheid hebben zonder dat het model sneller genereert.",
+    "omittedHttpAttempts": "{count} HTTP-verzendingen niet bewaard",
+    "upstreamStatus": "Upstreamserver {status}",
+    "noHttpResponse": "Geen HTTP-antwoord waargenomen",
+    "transportError": "Transportfout"
   },
   "proxyLogger": {
     "filterAll": "Alles",
@@ -14157,6 +14190,14 @@
         "label": "Volgorde voor gedeelde egress-pools",
         "description": "Voor providers waarvan het quotum is gegroepeerd op egress-adres: rangschik een pool-lid dat het waargenomen egress-adres deelt met een recent geweigerd lid net onder gezonde leden. Alleen volgorde, nooit uitgesloten. Vereist PROXY_SKIP_RECENTLY_FAILED, dat het weigeringssignaal genereert dat het uitleest. Standaard uitgeschakeld: selectievolgorde is exact de standaardrotatie."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Op modellen gerichte quotaweigeringen",
+        "description": "Pas een opencode quotum 429 alleen toe op het model dat het heeft geraakt, zodat dezelfde uitgang andere modellen blijft bedienen, en maak het alleen vrij als dat model slaagt. Consumenten die geen model hebben (poolrotatie, parkeren en opnieuw afspelen, beheerderszichtbaarheid, selectortrigger, gezondheidsonderzoek) zien het nog steeds. Heeft PROXY_SKIP_RECENTLY_FAILED nodig, wat de weigering oplevert. Standaard uitgeschakeld: het quotum 429 van één model zet het uitgaande verkeer voor elk model opzij."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Proxy ophalen: strikte POST -herhaling",
+        "description": "Voor een niet-idempotent verzoek (POST, PUT, PATCH, DELETE), verzendt u het opnieuw na een transportfout (verse socket, proxy fallback, native fallback) alleen wanneer de fout bewijst dat er niets is verzonden: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH of een connect time-out. Een socketfout na het schrijven kan betekenen dat de upstream het verzoek heeft geaccepteerd, dus een nieuwe verzending kan het verzoek twee keer genereren en factureren. Standaard uitgeschakeld: een herspeelbaar lichaam wordt één keer opnieuw verzonden bij elke transportfout, waardoor ook een verouderde gepoolde socket wordt hersteld."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotatie-attributielogging",
         "description": "Opencode-rotatie registreert welk account heeft gediend of is overgeslagen (alleen gemaskeerde id's, nooit volledige account-id's) en koppelt proxylogregels aan hun verzoek, zodat de beheerder overgeslagen accounts kan onderscheiden van ongebruikte accounts. Standaard uitgeschakeld: er worden geen extra logregels of kolommen weggeschreven."
@@ -14208,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 pool-herselectie",
         "description": "Voor de OpenCode multi-account-rotatie: vraag na een 429 van een provider met egress-bucketing op een proxy-loos account binnen een ambient pool-context de verbindingspool om een ander lid voor de volgende poging, in plaats van hetzelfde egress-adres opnieuw te proberen. Rangschikt, sluit nooit uit: een uitgeputte pool behoudt het huidige gedrag. Standaard uitgeschakeld: elke 429 roteert precies zoals voorheen naar het volgende account."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress-sonde",
+        "description": "Voor de OpenCode uitvoerder: wanneer een proxyverzoek wordt beantwoord met 403 of 451 FreeTierError en de nieuwe poging van de waargenomen tools mislukt of niet van toepassing is, verzendt u het verzoek één keer via een andere proxy (een andere accountproxy of een ander poollid, nooit een directe verbinding). Alleen wanneer die sonde 200 antwoordt, wordt de eerste uitgang gereserveerd in het proxyweigeringsgeheugen en wordt het sondeantwoord geserveerd; wanneer beiden weigeren, wordt de oorspronkelijke weigering geretourneerd en wordt er niets geregistreerd. Dezelfde weigeringstekst omvat een gemarkeerde uitgaande IP en een geweigerde verzoekvorm, dus de sonde onderscheidt ze door bewijsmateriaal. Standaard uitgeschakeld: de weigering wordt ongewijzigd geretourneerd."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2-clientfingerprint",
@@ -14388,6 +14433,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: stoppen bij content-policy-weigering",
         "description": "Wanneer een combo-doel antwoordt met een exacte content-policy-weigering (code of type cyber_policy / content_policy_violation), stop dan de combo en retourneer die weigering zelfs wanneer de resterende doelen andere modellen zijn, in plaats van door te gaan naar het volgende doel. Standaard uitgeschakeld: de weigering plaatst het account nooit in een cooldown en activeert de provider-breaker niet, en de combo gaat precies zoals voorheen door naar het volgende doel."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Reacties: alleen over het transport blijven",
+        "description": "Stuur reacties keepalives als een lege regel in plaats van een response.in_progress gebeurtenis, dus een synthetische momentopname kan nooit het echte antwoord in de officiële SDK vervangen. Een lege regel verzendt geen SSE -gebeurtenis, dus een client-watchdog die alleen reset bij gebeurtenissen, wordt niet gereset tijdens een lange stille fase. Standaard uitgeschakeld: timers verzenden de spec-geldige response.in_progress gebeurtenis."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown-retry: 403/410-weigeringen overslaan",

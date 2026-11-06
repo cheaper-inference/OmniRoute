@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { isAuthenticated } from "@/shared/utils/apiAuth";
+import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import {
   FEATURE_FLAG_DEFINITIONS,
   type FeatureFlagDefinition,
 } from "@/shared/constants/featureFlagDefinitions";
+import { isProtectedFeatureFlag } from "@/shared/constants/protectedFeatureFlags";
 import {
   ADAPTIVE_VIRTUAL_LANES_FLAG_KEY,
   resolveAdaptiveVirtualLanesFlag,
@@ -109,6 +111,38 @@ const putFeatureFlagSchema = z.object({
 });
 
 /**
+ * Protected flags keep needing a credential when login is disabled: isAuthenticated
+ * is true for everyone then, and a DB override beats the env value immediately.
+ * Returns the refusal response, or null when the caller may write.
+ */
+async function authorizeProtectedFeatureFlagWrite(
+  request: NextRequest,
+  keys: readonly string[]
+): Promise<Response | null> {
+  if (!keys.some((key) => isProtectedFeatureFlag(key))) return null;
+  return requireManagementAuth(request, { alwaysRequireAuth: true });
+}
+
+/**
+ * Rejects an out-of-range enum value. Split out of the handler so the write path
+ * keeps one flat shape instead of nesting the type/enum checks.
+ */
+function rejectInvalidEnumValue(
+  definition: FeatureFlagDefinition,
+  key: string,
+  value: string | undefined
+): NextResponse | null {
+  if (value === undefined || definition.type !== "enum" || !definition.enumValues) return null;
+  if (definition.enumValues.includes(value)) return null;
+  return NextResponse.json(
+    {
+      error: `Invalid value "${value}" for enum flag ${key}. Allowed: ${definition.enumValues.join(", ")}`,
+    },
+    { status: 400 }
+  );
+}
+
+/**
  * PUT /api/settings/feature-flags
  * Set or remove a feature flag override.
  * Body: { key: string; value?: string }
@@ -139,17 +173,11 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: `Unknown feature flag key: ${key}` }, { status: 400 });
   }
 
-  // Validate enum values
-  if (value !== undefined && definition.type === "enum" && definition.enumValues) {
-    if (!definition.enumValues.includes(value)) {
-      return NextResponse.json(
-        {
-          error: `Invalid value "${value}" for enum flag ${key}. Allowed: ${definition.enumValues.join(", ")}`,
-        },
-        { status: 400 }
-      );
-    }
-  }
+  const authError = await authorizeProtectedFeatureFlagWrite(request, [key]);
+  if (authError) return authError;
+
+  const enumError = rejectInvalidEnumValue(definition, key, value);
+  if (enumError) return enumError;
 
   try {
     // Capture previous state before modifying
@@ -215,6 +243,10 @@ export async function DELETE(request: NextRequest) {
   try {
     const overrides = getFeatureFlagOverrides();
     const count = Object.keys(overrides).length;
+
+    // Clearing all overrides also drops any security flag the operator set here.
+    const authError = await authorizeProtectedFeatureFlagWrite(request, Object.keys(overrides));
+    if (authError) return authError;
 
     clearAllFeatureFlagOverrides();
 
