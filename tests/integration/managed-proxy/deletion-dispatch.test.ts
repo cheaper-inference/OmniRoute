@@ -5,62 +5,11 @@ import path from "node:path";
 import { once } from "node:events";
 import { pathToFileURL } from "node:url";
 import test from "node:test";
-import { build } from "esbuild";
+import { buildManagedProxyHttpBundle } from "../../_setup/managedProxyHttpBundle";
 import { assertManagedFixture } from "../../_setup/managedProxyFixture.mjs";
 
 const sandbox = assertManagedFixture();
 const project = process.cwd();
-
-// Next routes the HTTP requests itself. Only state, credentials and native lifecycle are fake.
-const adapters: Record<string, string> = {
-  "src/lib/db/readCache": "export async function getCachedSettings(){return {};}",
-  "src/lib/gracefulShutdown": "export function isDraining(){return false;}",
-  "src/lib/config/runtimeSettings":
-    "export function getAuthzBypassSnapshot(){return {enabled:false,prefixes:[]};}",
-  "src/shared/utils/apiAuth": `
-    export async function isAuthRequired(){return true;}
-    export async function isDashboardSessionAuthenticated(){return false;}`,
-  "src/lib/machineToken": `
-    export function getMachineTokenSync(){return "synthetic-cli-token";}
-    export function getLegacyCliTokenSync(){return "";}`,
-  "src/shared/services/modelSyncScheduler":
-    "export function isModelSyncInternalRequest(){return false;}",
-  "src/lib/db/apiKeys": `
-    export async function getApiKeyMetadata(){return {id:"fixture",scopes:["manage"]};}
-    export async function validateApiKey(key){return key==="synthetic-management-key";}`,
-  "src/lib/db/ssoIdentities": `
-    export function getSsoShadowSecret(){throw new Error("Unexpected fixture SSO lookup");}
-    export function provisionSsoIdentity(){throw new Error("Unexpected fixture SSO provisioning");}`,
-  "src/lib/db/apiKeyGroups": `
-    export function filterExistingActiveKeyGroupIds(){throw new Error("Unexpected fixture SSO groups");}`,
-  "src/sse/services/auth": `
-    export function extractApiKey(request){return request.headers.get("authorization")?.slice(7)||null;}
-    export async function isValidApiKey(key){return key==="synthetic-management-key";}
-    export function readNonEmptyUrlToken(){return null;}`,
-  "src/lib/db/accessTokens": `
-    export function verifyAccessToken(token){return token==="oma_fixture_write"
-      ? {id:"fixture",name:"fixture",scope:"write"}:null;}`,
-  "src/lib/api/internalServiceAuth": `
-    export function isInternalServiceRequest(){return false;}
-    export function isTrustedLoopbackInternalServiceRequest(){return false;}`,
-  "src/lib/middleware/cliTokenAuth": "export async function isCliTokenAuthValid(){return false;}",
-  "open-sse/services/ipFilter": "export function checkRequestIP(){return {allowed:true};}",
-  // Auth-touch persistence is outside the deletion contract; keep its DB out of the bundle.
-  "src/lib/compliance/index": "export function recordApiKeyAuthTouch(){}",
-  "src/shared/utils/featureFlags": `
-    export function isRequireApiKeyEnabled(){return true;}
-    export function isFeatureFlagEnabled(){return false;}`,
-  "open-sse/utils/proxyDispatcher": "export function clearDispatcherCache(){}",
-  "src/lib/db/proxies": `
-    export async function getProxyById(id){return id==="missing"?null:{id,notes:
-      id.startsWith("managed")?JSON.stringify({managedProxyId:id,managedCore:"singbox"}):null};}
-    export async function deleteProxyById(id){return id!=="missing";}`,
-  "src/lib/services/managedProxy/remove": `
-    export async function removeManagedProxy(core,id,commit){
-      if(core!=="singbox"||!id.startsWith("managed"))throw new Error("Invalid fixture removal");
-      return commit();
-    }`,
-};
 
 for (const basePath of ["", "/omniroute"]) {
   test(
@@ -72,55 +21,9 @@ for (const basePath of ["", "/omniroute"]) {
       let child: ChildProcess | undefined;
       let closed: Promise<unknown[]> | undefined;
       try {
-        const result = await build({
-          stdin: {
-            contents: `
-            export {runAuthzPipeline} from "./src/server/authz/pipeline";
-            export {DELETE,POST} from "./src/app/api/services/managed-proxy/registry-delete/route";
-            export {handleProxyDelete} from "./src/lib/api/proxyDeletionHandlers";
-            export {POST as batchDelete} from "./src/app/api/settings/proxies/batch-delete/route";`,
-            resolveDir: project,
-          },
-          outfile: bundle,
-          bundle: true,
-          metafile: true,
-          platform: "node",
-          format: "cjs",
-          packages: "external",
-          tsconfig: path.join(project, "tsconfig.json"),
-          plugins: [
-            {
-              name: "isolated-managed-state",
-              setup(builder) {
-                builder.onResolve({ filter: /.*/ }, (args) => {
-                  let resolved: string | undefined;
-                  if (args.path.startsWith("@/")) resolved = `src/${args.path.slice(2)}`;
-                  else if (args.path.startsWith("@omniroute/open-sse/"))
-                    resolved = `open-sse/${args.path.slice("@omniroute/open-sse/".length)}`;
-                  else if (args.path.startsWith("."))
-                    resolved = path
-                      .relative(project, path.resolve(args.resolveDir, args.path))
-                      .replaceAll("\\", "/");
-                  const key = resolved?.replace(/\.(?:ts|tsx)$/, "");
-                  if (key === "open-sse/utils/error")
-                    return { path: path.join(project, "open-sse/utils/errorSanitization.ts") };
-                  return key && key in adapters ? { path: key, namespace: "fixture" } : undefined;
-                });
-                builder.onLoad({ filter: /.*/, namespace: "fixture" }, (args) => ({
-                  contents: adapters[args.path],
-                  loader: "js",
-                }));
-              },
-            },
-          ],
-        });
-        assert.deepEqual(
-          Object.keys(result.metafile!.inputs).filter(
-            (file) => !file.startsWith("fixture:") && /(?:^|\/)src\/lib\/db\//.test(file)
-          ),
-          [],
-          "HTTP fixture must not bundle real database modules"
-        );
+        const result = await buildManagedProxyHttpBundle(project, bundle);
+        assert.equal(result.outputFiles.length, 1);
+        fs.writeFileSync(bundle, result.outputFiles[0].contents);
         const write = (name: string, text: string) => {
           const target = path.join(root, name);
           fs.mkdirSync(path.dirname(target), { recursive: true });

@@ -18,6 +18,7 @@ on:
       - "tests/unit/managed-proxy-*.test.tsx"
       - "vitest.managed-proxy.config.ts"
       - "tests/_setup/managedProxyFixture.mjs"
+      - "tests/_setup/managedProxyHttpBundle.ts"
       - "tests/fixtures/managedProxyChild.mjs"
       - "scripts/test/*managed-proxy*.mjs"
       - "scripts/test/check-managed-proxy-native.ts"
