@@ -381,8 +381,15 @@ function isStreamLikeBody(body: unknown): boolean {
 }
 
 /** Dedicated Codex Images calls are slow, chargeable, and must never be replayed. */
-function isDedicatedCodexImageRequest(targetUrl: string, options: FetchWithDispatcherOptions): boolean {
-  if ((options.method ?? "GET").toUpperCase() !== "POST") return false;
+function isDedicatedCodexImageRequest(
+  input: RequestInfo | URL,
+  targetUrl: string,
+  options: FetchWithDispatcherOptions
+): boolean {
+  const method =
+    options.method ??
+    (typeof Request !== "undefined" && input instanceof Request ? input.method : "GET");
+  if (method.toUpperCase() !== "POST") return false;
   try {
     const url = new URL(targetUrl);
     return (
@@ -836,7 +843,7 @@ async function patchedFetchUnrecorded(
   }
 
   const targetUrl = getTargetUrl(input);
-  const dedicatedCodexImageRequest = isDedicatedCodexImageRequest(targetUrl, options);
+  const dedicatedCodexImageRequest = isDedicatedCodexImageRequest(input, targetUrl, options);
   let resolved;
   try {
     resolved = resolveProxyForRequest(targetUrl);
@@ -904,8 +911,7 @@ async function patchedFetchUnrecorded(
     // Direct undici path: bound response-start, fresh-socket retry, and body guard.
     const directOptions = { ...options, signal: getEffectiveSignal(input, options) };
     const hasNonReplayableBody = requestHasNonReplayableBody(input, options);
-    // Only replay ambiguous response-start timeouts for safe methods.
-    // For POST/stream requests, defer to the caller deadline instead.
+    // Method gating covers response-start ambiguity; connection-error retries remain below.
     const canReplayResponseStartTimeout = isAmbiguousFailureReplaySafe(input, options);
     // Never replay image generation: the first request may still complete upstream.
     const maxAttempts = hasNonReplayableBody || dedicatedCodexImageRequest ? 1 : 2;
@@ -929,9 +935,7 @@ async function patchedFetchUnrecorded(
 
     let lastDispatcherError: unknown = null;
     const timeoutFor = directHeadersTimeoutResolver(directOptions, targetUrl);
-    const directHeadersTimeoutMs = dedicatedCodexImageRequest
-      ? codexImageResponseStartTimeoutMs()
-      : timeoutFor(0);
+    const codexImageTimeoutMs = dedicatedCodexImageRequest ? codexImageResponseStartTimeoutMs() : 0;
     let targetHostForLogs = "";
     try {
       targetHostForLogs = new URL(targetUrl).host;
@@ -948,16 +952,16 @@ async function patchedFetchUnrecorded(
           input,
           {
             ...directOptions,
-            // Start paid image generation on a fresh socket rather than risking a stale pooled socket.
+            // A stale pooled socket must not cost a paid image its only attempt.
             dispatcher: dedicatedCodexImageRequest
-              ? getDedicatedCodexImageDispatcher(directHeadersTimeoutMs)
+              ? getDedicatedCodexImageDispatcher(codexImageTimeoutMs)
               : attempt === 0
                 ? getDefaultDispatcher(hostnameForDispatcher)
                 : getRetryDispatcher(hostnameForDispatcher),
           },
           _undiciDirect,
           dedicatedCodexImageRequest
-            ? directHeadersTimeoutMs
+            ? codexImageTimeoutMs
             : timeoutFor(attempt === 0 && canReplayResponseStartTimeout ? 0 : 1)
         );
       } catch (dispatcherError) {
@@ -1017,7 +1021,7 @@ async function patchedFetchUnrecorded(
                 : "request may already have been delivered";
             const detail = describeFallbackFailure(
               describeFetchCause(dispatcherError),
-              "skipped: " + reason
+              `skipped: ${reason}`
             );
             console.warn(`[ProxyFetch] skipping native fetch fallback, ${reason}: ${detail}`);
             if (dispatcherError instanceof Error) {
@@ -1127,7 +1131,7 @@ async function patchedFetchUnrecorded(
     const _undiciRelay =
       deps.undiciFetch ?? (undiciFetch as unknown as (...args: unknown[]) => Promise<Response>);
     const hasNonReplayableRelayBody = requestHasNonReplayableBody(input, options);
-    const maxRelayAttempts = hasNonReplayableRelayBody ? 1 : 2;
+    const maxRelayAttempts = hasNonReplayableRelayBody || dedicatedCodexImageRequest ? 1 : 2;
     const relayUrl = `https://${vc.host}`;
     let lastRelayError: unknown = null;
     for (let attempt = 0; attempt < maxRelayAttempts; attempt++) {

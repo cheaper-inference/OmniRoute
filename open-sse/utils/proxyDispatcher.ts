@@ -278,6 +278,7 @@ export function getRetryDispatcher(hostname?: string): Dispatcher {
  * Its undici transport limits must exceed the image-specific response-start watchdog:
  * generic model routes on this host deliberately use far shorter timeouts.
  * Use a fresh-socket configuration; never replay an image generation POST.
+ * Keyed by timeout: the deadline comes from one env value, so this holds a single Agent.
  */
 const dedicatedCodexImageDispatchers = new Map<number, Dispatcher>();
 export function getDedicatedCodexImageDispatcher(responseStartTimeoutMs: number): Dispatcher {
@@ -292,8 +293,10 @@ export function getDedicatedCodexImageDispatcher(responseStartTimeoutMs: number)
       keepAliveTimeout: 1,
       keepAliveMaxTimeout: 1,
       pipelining: 0,
-      // HTTP/2 multiplexes POSTs even with pipelining disabled.
+      // HTTP/2 multiplexes POSTs even with pipelining disabled. undici's Pool lets
+      // connect.allowH2 override the top-level option, so both must be pinned.
       allowH2: false,
+      connect: { ...defaults.connect, allowH2: false },
     });
     dedicatedCodexImageDispatchers.set(timeoutMs, dispatcher);
   }
