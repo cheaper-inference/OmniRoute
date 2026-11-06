@@ -46,7 +46,10 @@ const realSqlite3 = hasSqlite3
   : "";
 
 function sqlite(db: string, sql: string, env: Record<string, string> = {}): string {
-  const r = spawnSync("sqlite3", ["-bail", db], {
+  // Same flags as ops_sqlite: the fixtures and read-backs must not depend on a
+  // developer's ~/.sqliterc. The rcEnv probe below runs without them on purpose.
+  const args = ["-init", "/dev/null", "-batch", "-noheader", "-list", "-bail", db];
+  const r = spawnSync("sqlite3", args, {
     input: sql,
     encoding: "utf8",
     env: { ...process.env, ...env },
