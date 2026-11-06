@@ -59,6 +59,7 @@ export interface DecisionPreviewDeps {
   now?: () => number;
 }
 
+/** Build the decision menu and generated descriptions for a combo; with `input.prompt`, also run one live decision call (never throws for upstream failures, which land in `test`). */
 export async function buildDecisionPreview(
   input: DecisionPreviewInput,
   deps: DecisionPreviewDeps

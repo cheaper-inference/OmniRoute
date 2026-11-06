@@ -20,10 +20,12 @@ export interface DecisionModelDraft {
 
 type JsonRecord = Record<string, unknown>;
 
+/** True for plain objects (not arrays or null). */
 function isRecord(value: unknown): value is JsonRecord {
   return !!value && typeof value === "object" && !Array.isArray(value);
 }
 
+/** True when `strategy` is one of the decision-router strategy IDs. */
 export function isDecisionRouterStrategy(strategy: unknown): boolean {
   return typeof strategy === "string" && DECISION_ROUTER_STRATEGIES.includes(strategy as never);
 }
@@ -35,8 +37,10 @@ export function decisionEnvPrefix(strategy: string): string {
     : "OMNIROUTE_OPENAI_DECISION";
 }
 
+/** Read `config.decisionModel` into an editable draft, ignoring fields of the wrong type. */
 export function readDecisionModelDraft(config: unknown): DecisionModelDraft {
   const raw = isRecord(config) && isRecord(config.decisionModel) ? config.decisionModel : {};
+  /** String values only; anything else reads as unset. */
   const text = (value: unknown) => (typeof value === "string" ? value : undefined);
   const timeoutMs = Number(raw.timeoutMs);
   const descriptions = isRecord(raw.descriptions)

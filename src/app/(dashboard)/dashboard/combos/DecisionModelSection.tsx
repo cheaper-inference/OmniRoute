@@ -19,6 +19,7 @@ import {
 } from "@/lib/combos/decisionModelDraft";
 import type { DecisionPreviewResult, DecisionPreviewTest } from "@/lib/combos/decisionPreview";
 
+/** Translate `key` when the message exists; otherwise (or on ICU errors) return `fallback`. */
 function getI18nOrFallback(
   t: any,
   key: string,
@@ -33,6 +34,7 @@ function getI18nOrFallback(
   return fallback;
 }
 
+/** POST the draft to `/api/combos/decision-preview`; rejects on any non-2xx status. */
 async function postPreview(body: Record<string, unknown>): Promise<DecisionPreviewResult> {
   const response = await fetch("/api/combos/decision-preview", {
     method: "POST",
@@ -43,10 +45,12 @@ async function postPreview(body: Record<string, unknown>): Promise<DecisionPrevi
   return response.json();
 }
 
+/** Score rounded to three decimals for display; an en dash when absent. */
 function formatScore(value: number | undefined): string {
   return value === undefined ? "–" : String(Number(value.toFixed(3)));
 }
 
+/** Outcome of the "Test decision" call: skipped/failed reason, or the chosen model with scores. */
 function TestResult({ t, result }: { t: any; result: DecisionPreviewTest }) {
   if (result.status === "skipped" || result.status === "failed") {
     return (
@@ -94,6 +98,7 @@ function TestResult({ t, result }: { t: any; result: DecisionPreviewTest }) {
   );
 }
 
+/** Combo-builder section for decision-router settings: endpoint, key, timeout, choice descriptions and a live test. */
 export default function DecisionModelSection({
   t,
   strategy,
@@ -139,20 +144,24 @@ export default function DecisionModelSection({
 
   const rows = decisionDescriptionRows(preview?.menu ?? [], draft.descriptions, pendingKeys);
   const descriptionCount = Object.keys(draft.descriptions ?? {}).length;
+  /** Merge a partial draft into the combo config. */
   const update = (patch: Partial<DecisionModelDraft>) =>
     onChange(patchDecisionModelDraft(draft, patch));
 
+  /** Add a description row for a model ID not yet in the menu. */
   const addKey = () => {
     const key = newKey.trim();
     if (!key || rows.some((row) => row.key === key)) return;
     setPendingKeys((keys) => [...keys, key]);
     setNewKey("");
   };
+  /** Drop a pending row and clear its description. */
   const removeKey = (key: string) => {
     setPendingKeys((keys) => keys.filter((entry) => entry !== key));
     onChange(setDecisionDescription(draft, key, ""));
   };
 
+  /** Run the live decision test for the entered prompt. */
   const runTest = async () => {
     setTesting(true);
     setTestError(false);

@@ -55,9 +55,11 @@ class DecisionRequestError extends Error {
   }
 }
 
+/** Trimmed non-empty string, or `undefined` for anything else. */
 function readString(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
+/** Validated http(s) base URL without credentials/query/fragment; `undefined` when unusable. */
 function normalizeBaseUrl(value: string): string | undefined {
   try {
     const url = new URL(value.trim());
@@ -74,6 +76,7 @@ function normalizeBaseUrl(value: string): string | undefined {
     return undefined;
   }
 }
+/** Request timeout in ms: positive finite values capped at `MAX_TIMEOUT_MS`, otherwise the default. */
 function timeout(value: number | undefined): number {
   return typeof value === "number" && Number.isFinite(value) && value > 0
     ? Math.min(MAX_TIMEOUT_MS, value)
@@ -94,6 +97,7 @@ export function resolveDecisionModelRoutingConfig(
     descriptions: resolveDescriptions(record.descriptions),
   };
 }
+/** Operator-written choice descriptions keyed by model ID; blank keys/values are dropped. */
 function resolveDescriptions(raw: unknown): Record<string, string> | undefined {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
   const entries = Object.entries(raw as Record<string, unknown>).flatMap(([key, value]) => {
@@ -152,9 +156,11 @@ export interface DecisionAnswer {
   /** Backend model that answered, truncated for logging. */
   backendModel?: string;
 }
+/** The value when it is a finite number, otherwise `undefined`. */
 function finiteNumber(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
+/** Score rounded to four decimals for log output; `undefined` stays `undefined`. */
 function formatScore(value: number | undefined): string | undefined {
   return value === undefined ? undefined : String(Number(value.toFixed(4)));
 }
@@ -227,6 +233,7 @@ export function describeDecisionFailure(error: unknown, timeoutMs: number): stri
   if (error.kind === "invalid_json") return "invalid JSON response";
   return "network error";
 }
+/** Text of the last user message (string or text parts), or `null` when there is none. */
 export function extractDecisionModelLastUserText(messages: unknown): string | null {
   if (!Array.isArray(messages)) return null;
   for (let i = messages.length - 1; i >= 0; i -= 1) {
@@ -253,6 +260,7 @@ export function extractDecisionModelLastUserText(messages: unknown): string | nu
 export function buildDecisionMenu(candidates: Pick<ProviderCandidate, "model">[]): string[] {
   return [...new Set(candidates.map((item) => item.model))].slice(0, MAX_MENU_ITEMS);
 }
+/** Wire request for the decision service: OpenAI-style `questions` body or the System One variant. */
 function buildBody(
   format: Format,
   prompt: string,
@@ -287,6 +295,7 @@ function buildBody(
     },
   };
 }
+/** Default transport: SSRF-guarded outbound fetch with retries disabled. */
 const defaultTransport: DecisionModelTransport = async (url, init) => {
   const [{ safeOutboundFetch }, { getProviderOutboundGuard }] = await Promise.all([
     import("@/shared/network/safeOutboundFetch"),
