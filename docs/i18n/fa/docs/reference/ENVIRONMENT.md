@@ -1361,7 +1361,7 @@ STREAM_HISTORY_MAX=10
 
 ## سناریوهای استقرار
 
-برای راهنمایی SRE مربوط به بکاند رله (رفتار ts/bifrost/auto، محل قرارگیری 9router در برابر CLIProxyAPI، و راهبرد بازگشت برای توان عملیاتی بالا)، به [راهبرد بکاند رله](/docs/reference/RELAY_BACKEND_STRATEGY.md) مراجعه کنید.
+برای راهنمایی SRE مربوط به backend رله (رفتار ts/bifrost/auto، محل قرارگیری 9router در برابر CLIProxyAPI، و راهبرد fallback با توان عملیاتی بالا)، به [راهبرد Backend رله](/docs/reference/RELAY_BACKEND_STRATEGY.md) مراجعه کنید.
 
 ### توسعه محلی حداقلی
 
@@ -1373,7 +1373,7 @@ PORT=20128
 NODE_ENV=development
 ```
 
-### محیط تولید Docker
+### Docker در محیط Production
 
 ```bash
 JWT_SECRET=<generated>
@@ -1392,7 +1392,7 @@ OMNIROUTE_MEMORY_MB=8192
 CORS_ORIGIN=https://your-frontend.example.com
 ```
 
-### ایزوله از شبکه / CI
+### محیط ایزوله از شبکه / CI
 
 ```bash
 JWT_SECRET=test-jwt-secret-for-ci
@@ -1403,7 +1403,7 @@ OMNIROUTE_DISABLE_BACKGROUND_SERVICES=true
 APP_LOG_TO_FILE=false
 ```
 
-### VPS با پراکسی معکوس (nginx + Cloudflare)
+### VPS با Reverse Proxy (nginx + Cloudflare)
 
 ```bash
 JWT_SECRET=<generated>
@@ -1865,3 +1865,14 @@ Chromium+VNC کانتینری که برای دریافت تعاملی اعتبا
 | متغیر                          | پیش فرض | فایل منبع                                    | توضیحات                                                                                                                                                                                                           |
 | ------------------------------ | ------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`     | `src/lib/providerModels/modelSyncTimings.ts` | برای ثبت زمان بندی فاز، یک درخواست ایجاد شده ID و نتایج فاز success/error در طول همگام سازی مدل، روی `1` تنظیم کنید. برای همه مقادیر دیگر غیرفعال است. گزارشها بارهای درخواست، حساب، کاتالوگ و خطا را حذف میکنند. |
+
+## ابزار تحلیل رسانهای محلی OpenCode
+
+مورد استفاده توسط `scripts/cli/omniroute-media-mcp.mjs`. این موارد را در محیط فرایند ابزار محلی تنظیم کنید.
+
+| متغیر                      | پیشفرض                                                                            | توضیحات                                                                                               |
+| -------------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (یا `~/.config/opencode/opencode.json`) | پیکربندی OpenCode که توسط ابزار رسانهای و نصبکننده خوانده میشود.                                      |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                       | ورودی ارائهدهندهای که ابزار رسانهای از پیکربندی OpenCode میخواند.                                     |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                            | مدلی که توسط ابزار رسانهای ارسال میشود. ارائهدهندهٔ آن باید از انواع رسانهای درخواستشده پشتیبانی کند. |
+| `OMNIROUTE_MEDIA_API_KEY`  | کلید API ارائهدهندهٔ پیکربندیشده یا مرجع محیطی آن                                 | بازنویسی اختیاری اعتبارنامه. آن را در محیط فرایند محلی نگه دارید؛ هرگز آن را commit نکنید.            |
