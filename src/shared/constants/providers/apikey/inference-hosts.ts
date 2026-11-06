@@ -215,6 +215,20 @@ export const APIKEY_PROVIDERS_INFERENCE = {
     hasFree: true,
     freeNote: "Open models are free with your GitHub account",
   },
+  // Pareto Inference (https://paretoinference.com) — OpenAI-compatible, own GPUs,
+  // prepaid credits, streaming-only API. No free tier.
+  pareto: {
+    id: "pareto",
+    serviceKinds: ["llm"],
+    alias: "pareto",
+    name: "Pareto Inference",
+    icon: "speed",
+    color: "#11110f",
+    textIcon: "PI",
+    website: "https://paretoinference.com",
+    authHint:
+      "Create an API key at https://paretoinference.com/dashboard and buy prepaid credits. OpenAI-compatible base URL: https://api.paretoinference.com/v1. The API is streaming-only; OmniRoute streams upstream and returns JSON to non-streaming clients.",
+  },
   sambanova: {
     id: "sambanova",
     serviceKinds: ["llm"],
