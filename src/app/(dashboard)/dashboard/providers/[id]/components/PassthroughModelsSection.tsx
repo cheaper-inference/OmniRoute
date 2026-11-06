@@ -50,6 +50,8 @@ export type ModelCompatSavePatchPassthrough = {
 export interface PassthroughModelsSectionProps {
   providerAlias: string;
   modelAliases: Record<string, string>;
+  /** model id → combo names that reference it, for the "used in combo" badge. */
+  comboUsage?: Record<string, string[]>;
   catalogModels?: CompatModelRow[];
   availableModels?: CompatModelRow[];
   syncedCatalogAuthoritative?: boolean;
@@ -98,6 +100,7 @@ function getDefaultModelAlias(model: CompatModelRow): string | null {
 export default function PassthroughModelsSection({
   providerAlias,
   modelAliases,
+  comboUsage,
   catalogModels = [],
   availableModels = [],
   syncedCatalogAuthoritative = false,
@@ -373,7 +376,7 @@ export default function PassthroughModelsSection({
     // that would otherwise collapse to the same last-segment alias (e.g.
     // enx/gpt-5.5 vs enx/codebuddy/gpt-5.5 → both "gpt-5.5").
     if (Object.values(modelAliases).includes(modelId)) {
-      alert(t("aliasExistsAlert", { alias: modelId }));
+      notify.warning(t("aliasExistsAlert", { alias: modelId }));
       return;
     }
     const defaultAlias = generateUniqueModelAlias(modelId, modelAliases);
@@ -475,6 +478,7 @@ export default function PassthroughModelsSection({
                 source={source}
                 isFree={isFree}
                 isHidden={isHidden}
+                combos={comboUsage?.[modelId]}
                 copied={copied}
                 onCopy={onCopy}
                 onDeleteAlias={source === "alias" && alias ? () => onDeleteAlias(alias) : undefined}

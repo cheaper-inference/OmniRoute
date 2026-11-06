@@ -163,7 +163,7 @@ OmniRoute odhaľuje 6 zručností A2A zapojených v `src/lib/a2a/taskExecution.t
 | Správa o zdraví         | `health-report`      | Súhrnný istič, chladenie, stav blokovania podľa poskytovateľa                                                                                                  | zdravie, odolnosť          | "Zobraziť zdravotný stav všetkých poskytovateľov" |
 | Zoznam schopností       | `list-capabilities`  | Vráti úplný katalóg zručností agenta so 45 položkami (konfigurácia 23 API + 21 CLI + 1) ako tabuľka značiek s nespracovaným SKILL.md URLs na vloženie kontextu | katalóg, objav, zručnosti  | "Vypísať všetky schopnosti OmniRoute "            |
 
-> Karta agenta by mala byť zarovnaná s aktuálnym katalógom poskytovateľov 377; počty poskytovateľov a metaúdaje free/no-auth sa získavajú z registra runtime.
+> Karta agenta by mala byť zarovnaná s aktuálnym katalógom poskytovateľov 380; počty poskytovateľov a metaúdaje free/no-auth sa získavajú z registra runtime.
 
 ### `list-capabilities` Detail zručnosti
 
@@ -199,15 +199,15 @@ Koncový bod JSON-RPC `/a2a` je štandardným vstupným bodom A2A. Nižšie uved
 
 ## Pridanie novej zručnosti
 
-1. **Vytvorte súbor zručnosti:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Vytvorte súbor zručností:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Exportujte asynchrónnu funkciu `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Dodržte štruktúru existujúcich zručností, napríklad `smartRouting.ts`.
+   Exportujte asynchrónnu funkciu `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Postupujte podľa tvaru existujúcich zručností, ako je `smartRouting.ts`.
 
-2. **Zaregistrujte obslužnú funkciu:** v súbore `src/lib/a2a/taskExecution.ts` pridajte položku do `A2A_SKILL_HANDLERS`:
+2. **Spracovateľ registrácie:** v `src/lib/a2a/taskExecution.ts` pridajte záznam do `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...existujúce zručnosti
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,7 +215,7 @@ Koncový bod JSON-RPC `/a2a` je štandardným vstupným bodom A2A. Nižšie uved
    };
    ```
 
-3. **Sprístupnite ju na karte agenta:** v súbore `src/app/.well-known/agent.json/route.ts` ju pridajte do poľa `skills`:
+3. **Vystaviť na karte agenta:** v `src/lib/a2a/agentCardMetadata.ts` (zdieľané `/.well-known/agent.json` a `/.well-known/agent-card.json`), pripojte do poľa `skills` :
 
    ```json
    {
@@ -227,9 +227,9 @@ Koncový bod JSON-RPC `/a2a` je štandardným vstupným bodom A2A. Nižšie uved
    }
    ```
 
-4. **Napíšte testy:** `tests/unit/a2a-<your-skill>.test.ts`. Pokryte úspešný priebeh aj chybový scenár.
+4. **Napíšte testy:** `tests/unit/a2a-<your-skill>.test.ts`. Pokryť šťastnú cestu + chybová cesta.
 
-5. **Zdokumentujte** novú zručnosť v tabuľke `Available Skills` v tomto súbore.
+5. **Dokument** nová zručnosť v tabuľke `Available Skills` tohto súboru.
 
 ---
 
