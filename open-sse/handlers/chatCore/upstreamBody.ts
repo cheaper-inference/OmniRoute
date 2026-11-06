@@ -377,7 +377,16 @@ function normalizeAttemptBody(opts: PrepareUpstreamBodyOptions): Body {
     translatedBody.reasoning !== undefined ||
     translatedBody.thinking !== undefined ||
     hasExplicitTemplateReasoning;
-  let bodyToSend: Body = { ...structuredClone(translatedBody), model: modelToCall };
+  // Codex's Responses transform normalizes input into new item records before
+  // mutation and independently copies its mutable tools/reasoning fields.
+  // Keep the potentially huge input history shared until that boundary: the
+  // no-rule payload path is also a no-op. All other targets retain full
+  // isolation until their executor mutation paths can be audited separately.
+  const attemptSource =
+    provider === "codex" && targetFormat === FORMATS.OPENAI_RESPONSES
+      ? translatedBody
+      : structuredClone(translatedBody);
+  let bodyToSend: Body = { ...attemptSource, model: modelToCall };
   bodyToSend = normalizeThinkingForModel(bodyToSend, modelToCall);
   bodyToSend = normalizeClaudeAdaptiveThinking(bodyToSend, modelToCall);
   bodyToSend = normalizeClaudeDisabledThinkingEffort(bodyToSend, modelToCall, provider);
