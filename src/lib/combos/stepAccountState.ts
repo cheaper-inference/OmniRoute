@@ -22,16 +22,25 @@ function trimId(value: unknown): string | null {
   return trimmed.length > 0 ? trimmed : null;
 }
 
+const FINGERPRINT_SEPARATOR = "|fp|";
+
 function baseConnectionId(connectionId: string): string {
-  return connectionId.split("|fp|")[0];
+  return connectionId.split(FINGERPRINT_SEPARATOR)[0];
 }
 
-/** A pinned id matches a live row directly or through one of its fingerprints. */
+/**
+ * Whether two ids name the same account: they are equal, or one is a row id and
+ * the other a fingerprint of that row. Two different fingerprints of a row are
+ * different accounts even though they share the row id.
+ */
+function idsMatch(a: string, b: string): boolean {
+  if (a === b) return true;
+  if (a.includes(FINGERPRINT_SEPARATOR) === b.includes(FINGERPRINT_SEPARATOR)) return false;
+  return baseConnectionId(a) === baseConnectionId(b);
+}
+
 function idIsLive(connectionId: string, liveConnectionIds: readonly string[]): boolean {
-  const base = baseConnectionId(connectionId);
-  return liveConnectionIds.some(
-    (liveId) => liveId === connectionId || baseConnectionId(liveId) === base
-  );
+  return liveConnectionIds.some((liveId) => idsMatch(connectionId, liveId));
 }
 
 /**
@@ -74,9 +83,10 @@ export function resolveLiveConnectionIds({
 }
 
 /**
- * Account label of the connection a step pins, matching fingerprint-expanded
- * ids (`<rowId>|fp|<fp>`) against the row they came from, so a fingerprint pin
- * keeps its label instead of falling back to a truncated id.
+ * Account label of the connection a step pins. An exact id wins; otherwise a
+ * fingerprint-expanded id (`<rowId>|fp|<fp>`) falls back to the row it came
+ * from, so it keeps its label instead of a truncated id. A row pin that matches
+ * several fingerprints has no single account to name, so it gets no label.
  */
 export function findComboStepConnectionLabel(
   connections: unknown,
@@ -85,14 +95,15 @@ export function findComboStepConnectionLabel(
   const id = trimId(connectionId);
   if (!id || !Array.isArray(connections)) return null;
 
-  const base = baseConnectionId(id);
-  const match = connections.find((connection) => {
+  const matches = connections.filter((connection) => {
     if (!connection || typeof connection !== "object") return false;
     const candidateId = (connection as { id?: unknown }).id;
-    if (typeof candidateId !== "string") return false;
-    return candidateId === id || baseConnectionId(candidateId) === base;
-  }) as { label?: unknown } | undefined;
+    return typeof candidateId === "string" && idsMatch(id, candidateId);
+  }) as { id: string; label?: unknown }[];
 
+  const match =
+    matches.find((connection) => connection.id === id) ??
+    (matches.length === 1 ? matches[0] : undefined);
   const label = match && typeof match.label === "string" ? match.label.trim() : "";
   return label.length > 0 ? label : null;
 }

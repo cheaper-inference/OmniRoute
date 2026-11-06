@@ -33,6 +33,37 @@ describe("resolveComboStepAccountState", () => {
     );
   });
 
+  it("does not let a sibling fingerprint keep a removed fingerprint pin alive", () => {
+    const expanded = ["11111111-aaaa|fp|one", "11111111-aaaa|fp|two"];
+    assert.equal(
+      resolveComboStepAccountState({ connectionId: "11111111-aaaa|fp|two" }, expanded),
+      "pinned"
+    );
+    assert.equal(
+      resolveComboStepAccountState({ connectionId: "11111111-aaaa|fp|gone" }, expanded),
+      "deleted"
+    );
+  });
+
+  it("reports pinned for a row pin whose row now lists fingerprints", () => {
+    assert.equal(
+      resolveComboStepAccountState({ connectionId: "11111111-aaaa" }, [
+        "11111111-aaaa|fp|one",
+        "11111111-aaaa|fp|two",
+      ]),
+      "pinned"
+    );
+  });
+
+  it("reports unroutable when the scope names only removed fingerprints of a live row", () => {
+    assert.equal(
+      resolveComboStepAccountState({ allowedConnectionIds: ["11111111-aaaa|fp|gone"] }, [
+        "11111111-aaaa|fp|one",
+      ]),
+      "unroutable"
+    );
+  });
+
   it("reports deleted when the pinned account is gone", () => {
     assert.equal(resolveComboStepAccountState({ connectionId: "deadbeef-cccc" }, LIVE), "deleted");
   });
@@ -186,6 +217,34 @@ describe("findComboStepConnectionLabel", () => {
   it("matches a fingerprint pin against the row it came from", () => {
     assert.equal(findComboStepConnectionLabel(CONNECTIONS, "11111111-aaaa|fp|other"), "me@x");
     assert.equal(findComboStepConnectionLabel(CONNECTIONS, "22222222-bbbb|fp|fpx"), "fp@x");
+  });
+
+  it("labels each fingerprint of one row with its own account", () => {
+    const siblings = [
+      { id: "11111111-aaaa|fp|one", label: "Account 1" },
+      { id: "11111111-aaaa|fp|two", label: "Account 2" },
+      { id: "11111111-aaaa|fp|three", label: "Account 3" },
+    ];
+    assert.equal(findComboStepConnectionLabel(siblings, "11111111-aaaa|fp|one"), "Account 1");
+    assert.equal(findComboStepConnectionLabel(siblings, "11111111-aaaa|fp|two"), "Account 2");
+    assert.equal(findComboStepConnectionLabel(siblings, "11111111-aaaa|fp|three"), "Account 3");
+  });
+
+  it("gives a removed fingerprint no label from its siblings", () => {
+    const siblings = [
+      { id: "11111111-aaaa|fp|one", label: "Account 1" },
+      { id: "11111111-aaaa|fp|two", label: "Account 2" },
+    ];
+    assert.equal(findComboStepConnectionLabel(siblings, "11111111-aaaa|fp|gone"), null);
+  });
+
+  it("does not name one fingerprint for a row pin that covers several", () => {
+    const siblings = [
+      { id: "11111111-aaaa|fp|one", label: "Account 1" },
+      { id: "11111111-aaaa|fp|two", label: "Account 2" },
+    ];
+    assert.equal(findComboStepConnectionLabel(siblings, "11111111-aaaa"), null);
+    assert.equal(findComboStepConnectionLabel(siblings.slice(0, 1), "11111111-aaaa"), "Account 1");
   });
 
   it("returns null when the pinned connection is gone or has no label", () => {
