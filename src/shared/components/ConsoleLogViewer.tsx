@@ -31,25 +31,27 @@ interface LogEntry {
   [key: string]: unknown;
 }
 
-// The terminal pane stays dark in both themes (DESIGN_SYSTEM: intentional terminal hex), so the
-// level colours are the GitHub-dark terminal palette, not theme tokens.
+// The terminal pane stays dark in both themes, on the kit's log inks and their tints.
 const LEVEL_COLORS: Record<string, string> = {
-  debug: "text-[#8b949e]",
-  trace: "text-[#6e7681]",
-  info: "text-[#39c5cf]",
-  warn: "text-[#e3b341]",
-  error: "text-[#ff7b72]",
-  fatal: "text-[#f778ba]",
+  debug: "text-[var(--ci-log-debug)]",
+  trace: "text-[var(--ci-log-trace)]",
+  info: "text-[var(--ci-log-info)]",
+  warn: "text-[var(--ci-log-warn)]",
+  error: "text-[var(--ci-log-error)]",
+  fatal: "text-[var(--ci-log-fatal)]",
 };
 
-const LEVEL_BG: Record<string, string> = {
-  debug: "bg-[#8b949e]/10 border-[#8b949e]/20",
-  trace: "bg-[#8b949e]/10 border-[#8b949e]/20",
-  info: "bg-[#39c5cf]/10 border-[#39c5cf]/20",
-  warn: "bg-[#e3b341]/10 border-[#e3b341]/20",
-  error: "bg-[#ff7b72]/10 border-[#ff7b72]/20",
-  fatal: "bg-[#f778ba]/10 border-[#f778ba]/20",
+const LEVEL_TINTS: Record<string, string> = {
+  debug: "bg-[var(--ci-log-debug-subtle)]",
+  trace: "bg-[var(--ci-log-trace-subtle)]",
+  info: "bg-[var(--ci-log-info-subtle)]",
+  warn: "bg-[var(--ci-log-warn-subtle)]",
+  error: "bg-[var(--ci-log-error-subtle)]",
+  fatal: "bg-[var(--ci-log-fatal-subtle)]",
 };
+
+// These levels tint their whole row. The kit's tints do not stack, so their badge stays clear.
+const ROW_TINT_LEVELS = new Set(["error", "fatal"]);
 
 const POLL_INTERVAL = 5000; // 5 seconds
 const PAGE_LIMIT = 2000;
@@ -201,38 +203,48 @@ function LogRow({
   const tc = useTranslations("common");
   const level = stringifyValue(entry.level || "info").toLowerCase();
   const colorClass = LEVEL_COLORS[level] || LEVEL_COLORS.info;
-  const bgClass = LEVEL_BG[level] || "";
+  const tintClass = LEVEL_TINTS[level] || "";
+  const rowTinted = ROW_TINT_LEVELS.has(level);
   const comp = getComponent(entry);
   const msg = getText(entry);
   const correlationId = getCorrelationId(entry);
 
   return (
     <div
-      className={`group flex flex-wrap sm:flex-nowrap items-start gap-2 px-2 py-1 rounded hover:bg-white/5 transition-colors ${
-        level === "error" || level === "fatal" ? "bg-[#ff7b72]/5" : ""
-      }`}
+      className={cn(
+        "group flex flex-wrap sm:flex-nowrap items-start gap-2 px-2 py-1 rounded transition-colors",
+        rowTinted ? tintClass : "hover:bg-white/5"
+      )}
     >
       {/* Timestamp */}
-      <span className="text-[#8b949e] whitespace-nowrap shrink-0 select-none">
+      <span className="text-[var(--ci-log-trace)] whitespace-nowrap shrink-0 select-none">
         {formatLogTime(entry.timestamp, locale, range)}
       </span>
 
       {/* Level badge */}
       <span
-        className={`inline-block px-1.5 py-0 rounded text-[10px] font-semibold uppercase border shrink-0 ${colorClass} ${bgClass}`}
+        className={cn(
+          "inline-block px-1.5 py-0 rounded text-[10px] font-semibold uppercase border border-current/20 shrink-0",
+          colorClass,
+          !rowTinted && tintClass
+        )}
       >
         {level.padEnd(5)}
       </span>
 
       {/* Component */}
-      {comp && <span className="text-[#d2a8ff]/80 max-w-full break-all sm:shrink-0">[{comp}]</span>}
+      {comp && (
+        <span className="text-[var(--ci-code-inverse-property)]/80 max-w-full break-all sm:shrink-0">
+          [{comp}]
+        </span>
+      )}
 
       {/* Message */}
-      <span className="text-[#c9d1d9] flex-1 min-w-0 basis-full order-last sm:basis-auto sm:order-none break-all">
+      <span className="text-[var(--ci-color-text-inverse)] flex-1 min-w-0 basis-full order-last sm:basis-auto sm:order-none break-all">
         {msg}
         {/* Extra meta */}
         {correlationId && (
-          <span className="text-[#8b949e] ml-2">cid:{correlationId.slice(0, 8)}</span>
+          <span className="text-[var(--ci-log-trace)] ml-2">cid:{correlationId.slice(0, 8)}</span>
         )}
       </span>
 
@@ -243,7 +255,7 @@ function LogRow({
         onClick={() => onCopy(entry, idx)}
         title={tv("copyLogEntry")}
         aria-label={tv("copyLogEntry")}
-        className="size-6 min-h-6 shrink-0 text-[#8b949e] opacity-0 transition-opacity hover:bg-white/10 hover:text-white group-hover:opacity-100 focus-visible:opacity-100"
+        className="size-6 min-h-6 shrink-0 text-[var(--ci-log-trace)] opacity-0 transition-opacity hover:bg-white/10 hover:text-white group-hover:opacity-100 focus-visible:opacity-100"
       >
         <Icon name={copied ? "check" : "content_copy"} size={14} />
       </Button>
@@ -549,18 +561,18 @@ export default function ConsoleLogViewer() {
         onScroll={() => {
           followTailRef.current = isPinnedToBottom(scrollRef.current);
         }}
-        className="rounded-xl border border-border bg-[#0d1117] overflow-auto font-mono text-xs leading-relaxed"
+        className="rounded-xl border border-border bg-[var(--ci-color-surface-inverse)] overflow-auto font-mono text-xs leading-relaxed"
         style={{ maxHeight: "calc(100vh - 340px)", minHeight: "400px" }}
         role="log"
         aria-label={tv("consoleAria")}
         aria-live={paused || viewingHistory ? "off" : "polite"}
       >
         {/* Header bar */}
-        <div className="sticky top-0 z-10 px-4 py-2 bg-[#161b22] border-b border-[#30363d] flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-[#FF5F56]" />
-          <div className="w-3 h-3 rounded-full bg-[#FFBD2E]" />
-          <div className="w-3 h-3 rounded-full bg-[#27C93F]" />
-          <span className="ml-3 text-[#8b949e] text-[11px]">
+        <div className="sticky top-0 z-10 px-4 py-2 bg-[var(--ci-color-surface-inverse)] border-b border-white/15 flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-[var(--ci-log-error)]" />
+          <div className="w-3 h-3 rounded-full bg-[var(--ci-log-warn)]" />
+          <div className="w-3 h-3 rounded-full bg-[var(--ci-code-inverse-string)]" />
+          <span className="ml-3 text-[var(--ci-log-trace)] text-[11px]">
             OmniRoute — {tv("applicationConsole")}
           </span>
         </div>
@@ -568,7 +580,7 @@ export default function ConsoleLogViewer() {
         {/* Log entries */}
         <div className="p-3 space-y-px">
           {filteredLogs.length === 0 && !loading ? (
-            <div className="text-[#8b949e] text-center py-12">
+            <div className="text-[var(--ci-log-trace)] text-center py-12">
               <Icon name="terminal" size={40} className="block mb-2 opacity-30" />
               <p>{t("noLogEntries")}</p>
               <p className="text-[10px] mt-1">{tv("emptyFileLoggingHint")}</p>
@@ -588,7 +600,7 @@ export default function ConsoleLogViewer() {
           )}
 
           {loading && filteredLogs.length === 0 && (
-            <div className="text-[#8b949e] text-center py-12">
+            <div className="text-[var(--ci-log-trace)] text-center py-12">
               <Icon name="progress_activity" size={24} className="animate-spin block mb-2" />
               {t("loadingLogs")}
             </div>

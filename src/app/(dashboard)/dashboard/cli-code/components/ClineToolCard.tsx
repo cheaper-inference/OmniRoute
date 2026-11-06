@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, useId } from "react";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { Card, Button, ModelSelectModal, ManualConfigModal } from "@/shared/components";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
@@ -281,8 +282,8 @@ export default function ClineToolCard({
       {isExpanded && (
         <div className="mt-6 pt-6 border-t border-border">
           {checkingCline && (
-            <div className="flex items-center gap-2 text-text-muted text-sm">
-              <Icon name="progress_activity" size={16} className="animate-spin" />
+            <div role="status" className="flex items-center gap-2 text-text-muted text-sm">
+              <Spinner decorative size="sm" />
               <span>{t("checkingCli", { tool: "Cline" })}</span>
             </div>
           )}
