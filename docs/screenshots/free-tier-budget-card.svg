@@ -102,6 +102,6 @@
 <text x="84" y="466" fill="#7ee787" font-size="11.5" text-anchor="middle">hyperbolic 5M</text>
 <rect x="32" y="492" width="836" height="48" rx="8" fill="#1c2230" stroke="#30363d"/>
 <text x="46" y="506" fill="#7d8590" font-size="12">Pool-deduped, honest counting — no inflated rate-limit ceilings. Some terms suggest personal-use only; we flag them so you decide.</text>
-<text x="46" y="520" fill="#7d8590" font-size="11.5">+ 17 permanently-free, no-cap providers (e.g. agnes, agnes-cn, ainative) · OpenRouter $10 → +24M/mo.</text>
+<text x="46" y="520" fill="#7d8590" font-size="11.5">+ 18 permanently-free, no-cap providers (e.g. agnes, agnes-cn, ainative) · OpenRouter $10 → +24M/mo.</text>
 <text x="46" y="534" fill="#d29922" font-size="11.5">+ ~6M behind regional identity verification (modelscope) — real quota, never in the headline.</text>
 </svg>

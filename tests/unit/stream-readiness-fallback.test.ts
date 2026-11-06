@@ -19,6 +19,8 @@ process.env[FLAG] = "true";
 const core = await import("../../src/lib/db/core.ts");
 const { handleChatCore } = await import("../../open-sse/handlers/chatCore.ts");
 
+const { getCallLogs, waitForCallLogSaves, closeCallLogSaves } =
+  await import("../../src/lib/usage/callLogs.ts");
 const originalFetch = globalThis.fetch;
 
 const contentChunk = (content: string) =>
@@ -83,8 +85,9 @@ test.afterEach(() => {
   globalThis.fetch = originalFetch;
 });
 
-test.after(() => {
+test.after(async () => {
   globalThis.fetch = originalFetch;
+  await closeCallLogSaves();
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
@@ -124,7 +127,10 @@ test("two stalled bodies report the second failure with its own code", async () 
   }) as typeof fetch;
   const log = noopLog();
 
-  const result = (await handleChatCore(chatArgs(requestBody, log))) as {
+  const result = (await handleChatCore({
+    ...chatArgs(requestBody, log),
+    correlationId: "readiness-second-outcome",
+  })) as {
     success: boolean;
     status?: number;
     errorType?: string;
@@ -138,6 +144,17 @@ test("two stalled bodies report the second failure with its own code", async () 
     assert.equal(result.status, 502);
     assert.equal(result.errorType, "stream_early_eof");
     assert.equal(result.errorCode, "STREAM_EARLY_EOF");
+    assert.equal(await waitForCallLogSaves(20_000), true);
+    const saved = await getCallLogs({ correlationId: "readiness-second-outcome" });
+    assert.equal(saved.length, 2);
+    assert.equal(
+      saved.find((row) => row.requestType !== "upstream_http_attempt")?.upstreamHttp?.send?.ordinal,
+      2
+    );
+    assert.equal(
+      saved.find((row) => row.requestType === "upstream_http_attempt")?.upstreamHttp?.send?.ordinal,
+      1
+    );
     assert.ok(
       log.warnLines.some((line) => line.includes("retrying once")),
       `expected a fallback warn line, got: ${log.warnLines.join(" | ")}`
@@ -360,5 +377,40 @@ test("a single-account request retries at most once and never loops", async () =
     assert.equal(result.status, 502);
   } finally {
     await result.response?.body?.cancel().catch(() => {});
+  }
+});
+
+test("an in-stream provider safety stop issues no stall-retry request (#17049)", async () => {
+  const previous = process.env.PROVIDER_SAFETY_STOPS_TERMINAL;
+  process.env.PROVIDER_SAFETY_STOPS_TERMINAL = "true";
+  let calls = 0;
+  globalThis.fetch = (async () => {
+    calls += 1;
+    if (calls > 1) return goodStreamResponse();
+    const error = {
+      message:
+        "This request was blocked by our safety systems. Reason: Potentially unintended activity.",
+      type: "invalid_request_error",
+      code: "misalignment_policy_violation",
+    };
+    return new Response(`data: ${JSON.stringify({ error })}\n\n`, {
+      status: 200,
+      headers: { "content-type": "text/event-stream" },
+    });
+  }) as typeof fetch;
+  const log = noopLog();
+  try {
+    const result = (await handleChatCore(chatArgs(requestBody, log))) as {
+      success: boolean;
+      status?: number;
+      errorCode?: string;
+    };
+    assert.equal(calls, 1, "the stopped conversation must not be re-sent");
+    assert.equal(result.success, false);
+    assert.equal(result.status, 403);
+    assert.equal(result.errorCode, "misalignment_policy_violation");
+  } finally {
+    if (previous === undefined) delete process.env.PROVIDER_SAFETY_STOPS_TERMINAL;
+    else process.env.PROVIDER_SAFETY_STOPS_TERMINAL = previous;
   }
 });

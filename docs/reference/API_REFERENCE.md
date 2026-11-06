@@ -13,6 +13,8 @@ Core reference for the OmniRoute API. It covers the public `/v1` surface and the
 For the focused OpenAI-compatible protocol and provider capability matrix, see
 [`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md).
 
+Each deployment serves its own copy of the spec at `/openapi.yaml`, generated from `docs/openapi.yaml` during the build. It carries the build's version and a relative server URL (`./`), so requests stay on the host that served the document. A tool that imports the downloaded file has no such host, and needs the base URL set by hand.
+
 ---
 
 ## Table of Contents
@@ -1294,6 +1296,12 @@ values in `modelOutputOverrides`, including models without a custom-model row. T
 uses the runtime `max_output_tokens` capability and survives a model re-sync. The OpenAI-compatible
 provider page offers the same edit/clear controls and marks models with explicit vision support.
 
+On a compatible provider node, the write paths (`POST`, `PUT`, `PATCH`, `DELETE` and
+`/api/provider-models/validate-and-add`) store the model id as the bare upstream id: an id
+pasted from a prefixed listing has any leading stack of the node's own prefix collapsed, and
+responses echo the stored id. Canonical providers' slashed ids (e.g. `nvidia/nemotron-…`) are
+stored verbatim. `/v1/models` never emits a stacked `<prefix>/<prefix>/<model>` id.
+
 Custom Chat Completions nodes adapt explicit reasoning opt-outs to the upstream backend. A
 successful connection test automatically selects chat-template controls for each exact model ID
 whose `/models` entry proves a recognized `owned_by` value: `vllm`, `sglang`, or `llamacpp`.
@@ -1679,6 +1687,14 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 `deepgram/nova-3` request does **not** use OpenRouter.
 
 **Supported formats:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** file-mode transcription over the Gemini Live
+WebSocket (requires a Gemini API key). The upload is converted to 16 kHz mono PCM with `ffmpeg`
+(must be on `PATH`, unless the file is already a 16 kHz mono PCM WAV), streamed to the session and
+the finalized text is returned as `{ "text": "..." }`. Optional `language` and `prompt` form fields
+are forwarded. Limits: uploads above 25 MiB or decoded audio longer than 10 minutes answer
+`413`; a conversion that runs longer than 60 s is killed and answers `504`. The API key is sent
+in the `x-goog-api-key` header only, never in the WebSocket URL.
 
 ---
 
