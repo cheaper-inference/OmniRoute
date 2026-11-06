@@ -26,6 +26,7 @@ import {
 } from "../config/providerErrorRules.ts";
 import * as rot from "./rotationConfig.ts";
 import { isContentPolicyRefusal } from "../utils/contentPolicyError.ts";
+import { isRequestScopedMisalignmentRefusal } from "../utils/providerSafety.ts";
 import { isRegistryPassthroughProvider } from "./passthroughRegistry.ts";
 import { getProviderCategory, isLocalProvider } from "../config/providerRegistry.ts";
 import {
@@ -38,6 +39,7 @@ import {
   getCircuitBreaker,
 } from "../../src/shared/utils/circuitBreaker";
 import { MODEL_ACCESS_DENIED_PATTERNS, isModelScoped400 } from "./modelAccessDenied.ts";
+import { isAssistantPrefillUnsupportedError } from "./assistantPrefillError.ts";
 import {
   connectionCircuitBreakerName,
   failureCircuitBreakerName,
@@ -120,15 +122,12 @@ import { isCreditsExhaustedWithSharedWallet } from "./accountFallback/sharedWall
 import { CREDITS_EXHAUSTED_SIGNALS } from "./accountFallback/creditExhaustionSignals.ts";
 export { CREDITS_EXHAUSTED_SIGNALS } from "./accountFallback/creditExhaustionSignals.ts";
 import { isMistralAmbiguous401 } from "./accountFallback/mistralAmbiguousAuth.ts";
-import {
-  isFeatureFlagEnabled,
-  isMistralAmbiguous401SoftLockoutEnabled,
-} from "@/shared/utils/featureFlags";
+import { isRegisteredFeatureFlagEnabled } from "../utils/registeredFeatureFlag.ts";
 import { boundedMap } from "@/lib/quota/boundedMap";
 // #16797: providerErrorRules.ts stays free of src/ imports; its opt-in flags
 // (OpenCode Zen egress-IP lock, full-text rule bodies) read the flag store through
 // this injected reader. Not registered = flags off (release default).
-setProviderErrorRuleFlagReader(isFeatureFlagEnabled);
+setProviderErrorRuleFlagReader(isRegisteredFeatureFlagEnabled);
 
 export type ProviderProfile = {
   baseCooldownMs: number;
@@ -425,6 +424,8 @@ const PROVIDER_MODEL_UNSUPPORTED_PATTERNS = [
 export function isProviderModelUnsupported400(status: number, errorText: string): boolean {
   if (status !== HTTP_STATUS.BAD_REQUEST) return false;
   if (AUTH_CREDENTIAL_ERROR_PATTERNS.some((p) => p.test(errorText))) return false;
+  // Prefill rejection ("model does not support assistant message prefill") is request-shape.
+  if (isAssistantPrefillUnsupportedError(errorText)) return false;
   return PROVIDER_MODEL_UNSUPPORTED_PATTERNS.some((p) => p.test(errorText));
 }
 
@@ -433,6 +434,9 @@ export const MALFORMED_REQUEST_PATTERNS = [
   /\binvalid.*message.*format/i,
   /\bmessages must alternate\b/i,
   /\bempty (message|content)\b/i,
+  // Assistant prefill rejected: the body must end with a user turn (request shape).
+  /\bdoes\s+not\s+support\s+assistant\s+message\s+prefill\b/i,
+  /\bconversation\s+must\s+end\s+with\s+a\s+user\s+message\b/i,
   // Tool call function name errors
   /\bfunction'?s? name (?:can't|can not|is|has) (?:blank|empty|missing)/i,
   /function.*name.*(?:blank|empty|missing)/i,
@@ -966,6 +970,11 @@ export function hasPerModelQuota(
   if (getCanonicalLockProvider(canonicalId) === "codex") return true;
   if (canonicalId === "gemini" || canonicalId === "github") return true;
   if (canonicalId === "antigravity" || canonicalId === "agy") return true;
+  // #18572: Qoder multiplexes every model behind one connection and answers a queued
+  // request with `503 upstream_busy` naming the model that was queued. Treating that as a
+  // connection cooldown parks every sibling model of the account, so it belongs on the
+  // per-model allowlist instead.
+  if (canonicalId === "qoder") return true;
   // #11071: getPassthroughProviders() reads the open-sse REGISTRY. A provider can declare
   // passthroughModels:true in the SHARED registry (src/shared/constants/providers/) and be
   // absent from that set — 40 of them are, and they are neither local nor self-hosted, so the
@@ -1021,10 +1030,39 @@ export function shouldMarkAccountExhaustedFrom429(
   );
 }
 
-export function classifyLockoutReason(status: number): string {
+export function classifyLockoutReason(status: number, errorText?: string): string {
   if (status === 429) return "rate_limit";
-  if (status === 403) return "quota_exhausted";
+  if (status === 403) {
+    // Check if errorText contains quota exhaustion signal
+    if (errorText && looksLikeQuotaExhausted(errorText)) {
+      return "quota_exhausted";
+    }
+    return "auth_error";
+  }
   return "unknown";
+}
+
+/**
+ * Lockout SCOPE override for a 403 that carries no quota proof.
+ *
+ * `resolveLockoutScope(status)` maps every 403 to the quota-family key, which
+ * parks every sibling model of the connection for the cooldown. That is the
+ * right scope when the body proves the account's quota is exhausted, but a 403
+ * without that proof (restricted key, forbidden route, unauthorized model) is
+ * about one model endpoint, not the account's quota — it should lock the exact
+ * provider/connection/model tuple only. This returns `"exact"` in that case and
+ * `undefined` otherwise, leaving the default status-based scope untouched.
+ *
+ * Mirrors `classifyLockoutReason`: the same quota-proof signal (`looksLikeQuotaExhausted`)
+ * that decides between `quota_exhausted` and `auth_error` decides the scope.
+ */
+export function classifyLockoutScope(
+  status: number,
+  errorText?: string
+): exactModelLock.LockoutScope | undefined {
+  if (status !== 403) return undefined;
+  if (errorText && looksLikeQuotaExhausted(errorText)) return undefined;
+  return "exact";
 }
 
 export type DecayResult = { cleared: boolean; newFailureCount: number };
@@ -1769,7 +1807,10 @@ export function checkFallbackError(
   }
   // A policy refusal belongs to this input, even when relayed with a 403/5xx.
   // Preserve the refusal; rotating accounts or cooling them down cannot repair it.
-  if (isContentPolicyRefusal(structuredError)) {
+  if (
+    isContentPolicyRefusal(structuredError) ||
+    isRequestScopedMisalignmentRefusal({ status, code: structuredError?.code })
+  ) {
     return {
       shouldFallback: false,
       cooldownMs: 0,
@@ -2276,7 +2317,7 @@ export function checkFallbackError(
       status === HTTP_STATUS.UNAUTHORIZED &&
       !providerMatch &&
       isMistralAmbiguous401(provider, errorStr) &&
-      isMistralAmbiguous401SoftLockoutEnabled()
+      isRegisteredFeatureFlagEnabled("MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT")
     ) {
       return { ...buildRetryableFallback(RateLimitReason.UNKNOWN), ambiguousAuth: true };
     }
@@ -2340,7 +2381,9 @@ export function checkFallbackError(
       p.test(errorStr)
     );
     const matchesModelAccessPattern =
-      !looksLikeAuthCredentialError && MODEL_ACCESS_DENIED_PATTERNS.some((p) => p.test(errorStr));
+      !looksLikeAuthCredentialError &&
+      !isAssistantPrefillUnsupportedError(errorStr) &&
+      MODEL_ACCESS_DENIED_PATTERNS.some((p) => p.test(errorStr));
 
     const isModelAccessDeniedStructured =
       !!structuredError &&

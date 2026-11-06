@@ -13,6 +13,8 @@ Core reference for the OmniRoute API. It covers the public `/v1` surface and the
 For the focused OpenAI-compatible protocol and provider capability matrix, see
 [`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md).
 
+Each deployment serves its own copy of the spec at `/openapi.yaml`, generated from `docs/openapi.yaml` during the build. It carries the build's version and a relative server URL (`./`), so requests stay on the host that served the document. A tool that imports the downloaded file has no such host, and needs the base URL set by hand.
+
 ---
 
 ## Table of Contents

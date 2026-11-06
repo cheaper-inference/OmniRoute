@@ -20,7 +20,7 @@ export interface FieldProps extends ComponentProps<"div"> {
   error?: ReactNode;
   /** Success message (or `true` for green styling with no copy). Error wins. */
   success?: ReactNode;
-  /** Appends a red asterisk to the label. */
+  /** Appends a red asterisk to the label (hidden from assistive technology — also set `required` on the control). */
   required?: boolean;
   /** Span every column when inside a <FieldGroup columns={2}>. */
   full?: boolean;
@@ -60,7 +60,8 @@ export function Field({
       )}
       {...props}
     >
-      {label != null && (labelAside != null ? <div className="ci-field__label-row"><Label htmlFor={htmlFor}>{label}{required && <span className="ci-field__required">*</span>}</Label>{labelAside}</div> : <Label htmlFor={htmlFor}>{label}{required && <span className="ci-field__required">*</span>}</Label>)}
+      {/* The asterisk is visual only: the control's native `required` carries the semantics. */}
+      {label != null && (labelAside != null ? <div className="ci-field__label-row"><Label htmlFor={htmlFor}>{label}{required && <span className="ci-field__required" aria-hidden="true">*</span>}</Label>{labelAside}</div> : <Label htmlFor={htmlFor}>{label}{required && <span className="ci-field__required" aria-hidden="true">*</span>}</Label>)}
       {children}
       {message != null && (
         <div

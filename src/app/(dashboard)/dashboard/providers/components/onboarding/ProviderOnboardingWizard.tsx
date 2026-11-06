@@ -138,8 +138,14 @@ function StepPill({ active, done, label }: { active: boolean; done: boolean; lab
   );
 }
 
+// Kit chart tint + its AA ink (never white on the solid chart hue: 2.4–3.5:1 in dark).
 function getProviderIconClass(providerId: string): string {
-  const classes = ["bg-chart-2", "bg-chart-3", "bg-chart-4", "bg-chart-5"];
+  const classes = [
+    "bg-[var(--ci-chart-2-subtle)] text-[var(--ci-chart-2-ink)]",
+    "bg-[var(--ci-chart-3-subtle)] text-[var(--ci-chart-3-ink)]",
+    "bg-[var(--ci-chart-4-subtle)] text-[var(--ci-chart-4-ink)]",
+    "bg-[var(--ci-chart-5-subtle)] text-[var(--ci-chart-5-ink)]",
+  ];
   const index = [...providerId].reduce((sum, char) => sum + char.charCodeAt(0), 0) % classes.length;
   return classes[index];
 }
@@ -167,7 +173,7 @@ function ProviderOptionCard({
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <div
-            className={`flex size-10 items-center justify-center rounded-lg text-white ${getProviderIconClass(
+            className={`flex size-10 items-center justify-center rounded-lg ${getProviderIconClass(
               option.id
             )}`}
           >
