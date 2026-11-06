@@ -166,45 +166,7 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toVersion: "081",
     toName: "inspector_custom_hosts",
   },
-  // PR #10409 circulated through these draft slots before the current release
-  // claimed them. The name guard is mandatory: canonical migrations using the
-  // same numbers must never be rehomed as Team state.
-  {
-    fromVersion: "153",
-    fromName: "team_cost_centers",
-    toVersion: "215",
-    toName: "team_cost_centers",
-  },
-  {
-    fromVersion: "154",
-    fromName: "team_cost_centers",
-    toVersion: "215",
-    toName: "team_cost_centers",
-  },
-  {
-    fromVersion: "155",
-    fromName: "team_cost_centers",
-    toVersion: "215",
-    toName: "team_cost_centers",
-  },
-  {
-    fromVersion: "161",
-    fromName: "team_cost_centers",
-    toVersion: "215",
-    toName: "team_cost_centers",
-  },
-  {
-    fromVersion: "163",
-    fromName: "team_cost_centers",
-    toVersion: "215",
-    toName: "team_cost_centers",
-  },
-  {
-    fromVersion: "164",
-    fromName: "team_cost_centers",
-    toVersion: "215",
-    toName: "team_cost_centers",
-  },
+  // Vacate feature slot 215 before Team history is rehomed there.
   {
     // Earlier traffic candidates occupied slots now owned by release migrations.
     fromVersion: "206",
@@ -265,6 +227,45 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     fromName: "proxy_payload_traffic",
     toVersion: "226",
     toName: "proxy_payload_traffic",
+  },
+  // PR #10409 circulated through these draft slots before the current release
+  // claimed them. The name guard is mandatory: canonical migrations using the
+  // same numbers must never be rehomed as Team state.
+  {
+    fromVersion: "153",
+    fromName: "team_cost_centers",
+    toVersion: "215",
+    toName: "team_cost_centers",
+  },
+  {
+    fromVersion: "154",
+    fromName: "team_cost_centers",
+    toVersion: "215",
+    toName: "team_cost_centers",
+  },
+  {
+    fromVersion: "155",
+    fromName: "team_cost_centers",
+    toVersion: "215",
+    toName: "team_cost_centers",
+  },
+  {
+    fromVersion: "161",
+    fromName: "team_cost_centers",
+    toVersion: "215",
+    toName: "team_cost_centers",
+  },
+  {
+    fromVersion: "163",
+    fromName: "team_cost_centers",
+    toVersion: "215",
+    toName: "team_cost_centers",
+  },
+  {
+    fromVersion: "164",
+    fromName: "team_cost_centers",
+    toVersion: "215",
+    toName: "team_cost_centers",
   },
   {
     fromVersion: "134",

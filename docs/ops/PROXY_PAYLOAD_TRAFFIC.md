@@ -50,11 +50,13 @@ direct; automatic fallback proxy sends use the actual fallback identity.
 - Redirects and retries hidden inside a fetch implementation are not distinct invocations at this
   seam. Transports that bypass this fetch layer (for example independent WebSocket/browser transports)
   are not measured. The panel is not complete machine-wide traffic accounting.
-- Totals are additive in `proxy_payload_traffic`, created by migration 225, and survive process
-  restart. Previously applied traffic migrations 206, 207, 213, 214, 215, 217, 218, 223 and 224 are
-  reconciled to 225 without changing counters, freeing those slots for the upstream migrations.
-  The previously published 225 marker and counters remain intact. An unrelated migration already
-  recorded at 225 stops reconciliation rather than overwriting history.
+- Totals are additive in `proxy_payload_traffic`, created by migration 226, and survive process
+  restart. Previously applied traffic migrations 206, 207, 213, 214, 215, 217, 218, 223, 224 and 225 are
+  reconciled to 226 without changing counters, freeing those slots for the upstream migrations.
+  Traffic history is reconciled before Team history so a published traffic row at 215 vacates
+  that slot before an older Team row moves into it. Team history remains ahead of Radar history.
+  Existing traffic counters and ledger timestamps remain intact. An unrelated migration already
+  recorded at 226 stops reconciliation of known traffic history rather than overwriting it.
   Totals start when this version begins observing traffic; historical traffic is not inferred.
   Chunk counts accumulate in memory per route and are written in one upsert when a download
   settles (complete, cancelled, errored or failed send), within about one second otherwise, before
