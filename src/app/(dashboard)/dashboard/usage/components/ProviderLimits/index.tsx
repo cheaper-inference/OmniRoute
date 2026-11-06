@@ -17,6 +17,7 @@ import {
 } from "./utils";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import Card from "@/shared/components/Card";
 import Select from "@/shared/components/Select";
 import { CardSkeleton } from "@/shared/components/Loading";
@@ -871,11 +872,11 @@ export default function ProviderLimits({
               autoRefreshIntervalMs > 0 ? tr("autoRefreshing", "Auto-refreshing") : t("refreshAll")
             }
           >
-            <Icon
-              name={autoRefreshIntervalMs > 0 ? "schedule" : "refresh"}
-              size={16}
-              className={refreshingAll ? "animate-spin" : undefined}
-            />
+            {refreshingAll ? (
+              <Spinner decorative size="sm" />
+            ) : (
+              <Icon name={autoRefreshIntervalMs > 0 ? "schedule" : "refresh"} size={16} />
+            )}
             {refreshingAll
               ? tr("refreshing", "Refreshing")
               : autoRefreshIntervalMs > 0

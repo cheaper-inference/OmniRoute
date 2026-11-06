@@ -474,12 +474,15 @@ export async function runNonStreamingProviderLeg(
               outcome.result.status,
               formatted,
               undefined,
-              null,
+              // Keep the upstream retry hint on the sanitized response.
+              outcome.result.response ? parseRetryAfterMs(outcome.result.response) : null,
               outcome.result.errorCode,
               outcome.result.errorType,
               { passthrough: input.sourceFormat === "claude" }
             ),
-            response: outcome.result.response,
+            // Never relay the raw upstream Response (body, Set-Cookie, other headers) to the
+            // client: legError() above built the sanitized one. Upstream headers stay on
+            // `upstreamHeaders` for server-side classification only.
             rawMessage: outcome.result.rawMessage || outcome.result.error,
             upstreamErrorBody: outcome.result.upstreamErrorBody,
             upstreamHeaders: outcome.result.upstreamHeaders ?? outcome.result.response?.headers,

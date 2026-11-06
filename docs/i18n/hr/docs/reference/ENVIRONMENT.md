@@ -1361,7 +1361,7 @@ Usluga koja je budna cijeli mjesec koristi oko 744 sata instance, pa provjerite 
 
 ## Scenariji implementacije
 
-Za SRE smjernice za pozadinski sustav releja (ponašanje ts/bifrost/auto, smještaj 9routera u odnosu na CLIProxyAPI i strategiju rezervnog rješenja za veliki protok), pogledajte [Strategija pozadinskog sustava releja](/docs/reference/RELAY_BACKEND_STRATEGY.md).
+Za SRE smjernice za pozadinsku uslugu releja (ponašanje `ts/bifrost/auto`, smještaj 9routera u odnosu na CLIProxyAPI te strategiju pričuvnog rada s velikom propusnošću) pogledajte [Strategija pozadinske usluge releja](/docs/reference/RELAY_BACKEND_STRATEGY.md).
 
 ### Minimalni lokalni razvoj
 
@@ -1403,7 +1403,7 @@ OMNIROUTE_DISABLE_BACKGROUND_SERVICES=true
 APP_LOG_TO_FILE=false
 ```
 
-### VPS s obrnutim proxyjem (nginx + Cloudflare)
+### VPS s reverznim proxyjem (nginx + Cloudflare)
 
 ```bash
 JWT_SECRET=<generated>
@@ -1865,3 +1865,14 @@ Koriste ga `open-sse/services/combo.ts` i `src/lib/quota/quotaScheduler.ts` za p
 | Varijabilna                    | Zadano | Izvorna datoteka                             | Opis                                                                                                                                                                                                                                              |
 | ------------------------------ | ------ | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`    | `src/lib/providerModels/modelSyncTimings.ts` | Postavite na `1` da biste zabilježili vrijeme faze, generirani zahtjev ID i ishode faze success/error tijekom sinkronizacije modela. Onemogućeno za sve ostale vrijednosti. Dnevnici izostavljaju sadržaj zahtjeva, računa, kataloga i pogrešaka. |
+
+## Lokalni alat OpenCode za analizu medija
+
+Koristi ga `scripts/cli/omniroute-media-mcp.mjs`. Postavite ove varijable u okruženju lokalnog procesa alata.
+
+| Varijabla                  | Zadano                                                                                | Opis                                                                                                                |
+| -------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (ili `~/.config/opencode/opencode.json`)    | Konfiguracija OpenCodea koju čitaju alat za medije i instalacijski program.                                         |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                           | Unos davatelja usluge koji alat za medije čita iz konfiguracije OpenCodea.                                          |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                                | Model koji alat za medije šalje. Njegov davatelj mora podržavati zatražene vrste medija.                            |
+| `OMNIROUTE_MEDIA_API_KEY`  | Konfigurirani API ključ davatelja usluge ili njegova referenca na varijablu okruženja | Neobavezna zamjena vjerodajnice. Zadržite je u okruženju lokalnog procesa; nikada je nemojte predati u repozitorij. |

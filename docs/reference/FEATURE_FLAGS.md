@@ -250,6 +250,18 @@ All operations go through a single route:
 [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
 Every method requires an authenticated dashboard session (`401` otherwise).
 
+With login disabled (`requireLogin=false`) the route is open, except for the
+protected flags: every flag in the Security category plus
+`OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`,
+`MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` and
+`SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` in
+`protectedFeatureFlags.ts`). A `PUT` on one of them, and a `DELETE` while
+one of them has a DB override, still needs a dashboard session, a
+`manage`-scope API key, an `oma_` access token with write scope or higher, or
+the CLI token or internal-service token sent from loopback. That set is wider
+than with login on, where the route accepts only a session or a `manage`-scope
+key.
+
 #### `GET /api/settings/feature-flags`
 
 Returns every flag with its effective value, source, and a summary.
