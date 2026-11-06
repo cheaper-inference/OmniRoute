@@ -59,6 +59,21 @@ test("client namespace that is not a provider resolves to the combo by its bare 
   assert.equal(viaForModel?.name, "lordx.1");
 });
 
+test("#18523 namespaced combo resolution uses getComboByName without throwing", async () => {
+  // Regression for the missing getComboByName import: the client-namespace path
+  // calls getComboByName(baseName) after stripping a non-provider prefix. Before
+  // the import was restored this threw ReferenceError at runtime.
+  await seedCombo("lordx.1");
+
+  await assert.doesNotReject(
+    async () => sseModelService.getCombo("my-client/lordx.1"),
+    /getComboByName is not defined|ReferenceError/
+  );
+
+  const resolved = (await sseModelService.getCombo("my-client/lordx.1")) as ComboLike | null;
+  assert.equal(resolved?.name, "lordx.1");
+});
+
 test("multi-segment client namespace resolves using the segment after the last slash", async () => {
   await seedCombo("my-combo");
 
