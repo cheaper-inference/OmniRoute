@@ -16,7 +16,7 @@ const { readPublishedCutoffDate } = await import("../../src/lib/db/usageAnalytic
 // install loses everything retention already moved out of usage_history.
 const MARKER = "-- History retention already rolled up lives only in daily_usage_summary";
 const migration = fs.readFileSync(
-  new URL("../../src/lib/db/migrations/224_usage_daily_summary.sql", import.meta.url),
+  new URL("../../src/lib/db/migrations/226_usage_daily_summary.sql", import.meta.url),
   "utf8"
 );
 

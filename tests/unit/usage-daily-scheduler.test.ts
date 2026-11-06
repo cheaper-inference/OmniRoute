@@ -300,7 +300,7 @@ test("coordination migration initializes its counter above legacy dirty revision
   );
   const sql = fs.readFileSync(
     new URL(
-      "../../src/lib/db/migrations/228_usage_daily_publication_coordination.sql",
+      "../../src/lib/db/migrations/230_usage_daily_publication_coordination.sql",
       import.meta.url
     ),
     "utf8"
