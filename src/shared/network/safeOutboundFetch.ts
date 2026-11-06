@@ -4,6 +4,11 @@ import {
   getOriginalFetch,
   resolveProxyForRequest,
 } from "@omniroute/open-sse/utils/proxyFetch.ts";
+import { canGuardDirectConnection } from "@omniroute/open-sse/executors/dispatchPin.ts";
+import {
+  CONNECT_GUARD_BLOCKED_CODE,
+  getGuardedDispatcher,
+} from "@omniroute/open-sse/utils/connectGuardDispatcher.ts";
 import { FetchTimeoutError, fetchWithTimeout } from "@/shared/utils/fetchTimeout";
 import {
   bareHostname,
@@ -55,10 +60,10 @@ export interface SafeOutboundFetchOptions extends RequestInit {
    *  fetch directly. Use when a provider endpoint has compatibility issues
    *  with the undici dispatcher layer. */
   bypassProxyPatch?: boolean;
-  /** With `guard: "public-only"`, connect to the address that was checked instead of resolving the
-   *  name again. Skipped when the request goes through a proxy or follows redirects. */
+  /** With a checking guard, connect to the address that was checked instead of resolving the name
+   *  again. Skipped when the request goes through a proxy or follows redirects. */
   pinDns?: boolean;
-  /** Resolver used by the `public-only` host check; tests inject a fake one. */
+  /** Resolver used by the host check; tests inject a fake one. */
   dnsLookup?: DnsLookup;
 }
 
@@ -220,8 +225,8 @@ export function setSafeOutboundPinnedFetchTestOverride(factory: PinnedFetchFacto
   pinnedFetchTestOverride = factory;
 }
 
-/** Upper bound for the `public-only` host lookup; the request's own timeout applies when shorter. */
-const PUBLIC_HOST_LOOKUP_TIMEOUT_MS = 5000;
+/** Upper bound for the host lookup; the request's own timeout applies when shorter. */
+const HOST_LOOKUP_TIMEOUT_MS = 5000;
 
 /** Run a lookup that gives up after `timeoutMs` or when `signal` aborts, whichever comes first. */
 function lookupWithDeadline(
@@ -254,12 +259,23 @@ function lookupWithDeadline(
   });
 }
 
+/** Apply the guard to one resolved address, the same way it applies to a literal host. */
+function assertResolvedAddressAllowed(
+  targetUrl: URL,
+  address: string,
+  guard: SafeOutboundFetchGuard
+): void {
+  const url = `${targetUrl.protocol}//${address.includes(":") ? `[${address}]` : address}/`;
+  if (guard === "block-metadata") parseAndValidateNonMetadataUrl(url);
+  else parseAndValidatePublicUrl(url);
+}
+
 /**
- * `public-only` judges the URL's host name, and a name can point at a private address. Resolve it
- * and refuse it when any answer is private, so an attacker-owned name that resolves to loopback,
- * the LAN or a metadata address does not get past a check that only reads the spelling.
+ * The URL guard judges the host name, and a name can point anywhere. Resolve it and refuse it when
+ * any answer is one the guard blocks: `public-only` refuses private, loopback and metadata
+ * addresses; `block-metadata` refuses metadata addresses only, so a name on the LAN keeps working.
  *
- * The lookup is bounded (the request timeout, at most PUBLIC_HOST_LOOKUP_TIMEOUT_MS) and follows
+ * The lookup is bounded (the request timeout, at most HOST_LOOKUP_TIMEOUT_MS) and follows
  * the caller's abort signal, so it never holds a request longer than the request itself would
  * run. When it fails or times out:
  * - with `failClosed` (the connection was going to be pinned to the checked address) the request
@@ -267,10 +283,11 @@ function lookupWithDeadline(
  *   returns — the very answer the check exists to judge;
  * - otherwise the request goes ahead and fails (or not) the way it would have without the check.
  */
-async function resolvePublicHost(
+async function resolveCheckedHost(
   targetUrl: URL,
   method: string,
   options: {
+    guard: SafeOutboundFetchGuard;
     lookup?: DnsLookup;
     timeoutMs?: number;
     signal?: AbortSignal | null;
@@ -282,8 +299,8 @@ async function resolvePublicHost(
 
   const deadline =
     typeof options.timeoutMs === "number" && options.timeoutMs > 0
-      ? Math.min(options.timeoutMs, PUBLIC_HOST_LOOKUP_TIMEOUT_MS)
-      : PUBLIC_HOST_LOOKUP_TIMEOUT_MS;
+      ? Math.min(options.timeoutMs, HOST_LOOKUP_TIMEOUT_MS)
+      : HOST_LOOKUP_TIMEOUT_MS;
 
   let addresses: DnsLookupResult[];
   try {
@@ -302,12 +319,10 @@ async function resolvePublicHost(
 
   for (const { address } of addresses) {
     try {
-      parseAndValidatePublicUrl(
-        `${targetUrl.protocol}//${address.includes(":") ? `[${address}]` : address}/`
-      );
+      assertResolvedAddressAllowed(targetUrl, address, options.guard);
     } catch (error) {
       if (error instanceof OutboundUrlGuardError) {
-        throw new SafeOutboundFetchError(`Host "${host}" resolves to a private or local address`, {
+        throw new SafeOutboundFetchError(`Host "${host}" resolves to a blocked address`, {
           code: "URL_GUARD_BLOCKED",
           url: targetUrl.toString(),
           method,
@@ -395,6 +410,17 @@ function normalizeFetchFailure(
   const message = error instanceof Error ? error.message : String(error);
   const code = error && typeof error === "object" ? (error as { code?: string }).code : undefined;
 
+  if ((error as { cause?: { code?: string } } | null)?.cause?.code === CONNECT_GUARD_BLOCKED_CODE) {
+    return new SafeOutboundFetchError(`Host of ${targetUrl} resolves to a blocked address`, {
+      code: "URL_GUARD_BLOCKED",
+      url: targetUrl,
+      method,
+      attempts,
+      isRetryable: false,
+      cause: error,
+    });
+  }
+
   return new SafeOutboundFetchError(message || `Outbound request failed for ${targetUrl}`, {
     code: "NETWORK_ERROR",
     url: targetUrl,
@@ -403,6 +429,21 @@ function normalizeFetchFailure(
     isRetryable: code !== "PROXY_UNREACHABLE",
     cause: error,
   });
+}
+
+/**
+ * `block-metadata` covers callers that do not pin: the connection re-checks its own lookup, so a
+ * name cannot answer differently for the check above and for the connect. Only the ordinary direct
+ * route can carry this dispatcher; a proxy resolves the name itself.
+ */
+function connectGuardInit(
+  guard: SafeOutboundFetchGuard,
+  targetUrl: URL,
+  skip: boolean
+): { dispatcher?: unknown } {
+  if (guard !== "block-metadata" || skip) return {};
+  if (!canGuardDirectConnection("", targetUrl.toString())) return {};
+  return { dispatcher: getGuardedDispatcher(guard) };
 }
 
 export async function safeOutboundFetch(url: string | URL, options: SafeOutboundFetchOptions = {}) {
@@ -425,14 +466,15 @@ export async function safeOutboundFetch(url: string | URL, options: SafeOutbound
   // A proxy resolves the name itself and a followed redirect leaves the checked host, so the
   // connection is only pinned to the checked address for a direct request to that one host.
   const pinsConnection =
-    guard === "public-only" &&
+    guard !== "none" &&
     pinDns &&
     !allowRedirect &&
     !proxyConfig &&
     resolveProxyForRequest(targetUrl.toString()).source === "direct";
   const checkedAddresses =
-    guard === "public-only"
-      ? await resolvePublicHost(targetUrl, method, {
+    guard !== "none"
+      ? await resolveCheckedHost(targetUrl, method, {
+          guard,
           lookup: dnsLookup,
           timeoutMs,
           signal,
@@ -446,12 +488,18 @@ export async function safeOutboundFetch(url: string | URL, options: SafeOutbound
     pinsConnection && checkedAddresses?.length
       ? (checkedAddresses.find((entry) => entry.family === 4) ?? checkedAddresses[0])
       : null;
+  const connectGuard = connectGuardInit(
+    guard,
+    targetUrl,
+    Boolean(pinTo || proxyConfig || bypassProxyPatch)
+  );
 
   for (let attempt = 1; attempt <= retryConfig.attempts; attempt++) {
     try {
       const executeFetch = () =>
         fetchWithTimeout(targetUrl.toString(), {
           ...fetchOptions,
+          ...connectGuard,
           method,
           redirect,
           signal,
