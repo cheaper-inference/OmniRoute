@@ -9,7 +9,11 @@ import {
   type OperatorProviderErrorDefault,
   type OperatorProviderErrorRule,
 } from "../../open-sse/config/providerErrorRules.ts";
-import { checkFallbackError, classifyError } from "../../open-sse/services/accountFallback.ts";
+import {
+  checkFallbackError,
+  classifyError,
+  getProviderProfile,
+} from "../../open-sse/services/accountFallback.ts";
 import { updateSettingsSchema } from "../../src/shared/validation/settingsSchemas.ts";
 
 describe("operator error rules", () => {
@@ -382,6 +386,18 @@ describe("operator error rules", () => {
           const result = checkFallbackError(status, "boom", 0, null, "acme", {
             "retry-after": "30",
           });
+          assert.equal(result.cooldownMs, 1_800_000, `status ${status}`);
+        }
+      });
+
+      // Owner decision (2026-10-28): the hint only joins the comparison when the profile
+      // honors upstream retry hints (on for API keys, off for OAuth).
+      it("ignores a longer Retry-After when the profile has upstream hints off", () => {
+        setOperatorProviderErrorDefaults(defaults);
+        const hintsOff = { ...getProviderProfile("acme"), useUpstreamRetryHints: false };
+        const headers = { "retry-after": "3600" };
+        for (const status of [429, 402, 403, 503]) {
+          const result = checkFallbackError(status, "boom", 0, null, "acme", headers, hintsOff);
           assert.equal(result.cooldownMs, 1_800_000, `status ${status}`);
         }
       });
