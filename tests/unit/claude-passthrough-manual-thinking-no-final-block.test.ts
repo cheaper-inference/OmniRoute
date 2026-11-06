@@ -59,6 +59,33 @@ test("passthrough: adaptive thinking stays on without a block", () => {
   assert.deepEqual(out.thinking, { type: "adaptive" });
 });
 
+test("passthrough: anthropic API-key provider gets the same first-party passthrough hygiene as claude", () => {
+  const out = buildClaudePassthroughBody({
+    body: bodyWith({ type: "enabled", budget_tokens: 4096 }),
+    provider: "anthropic",
+    clientHeaders: null,
+    isClaudeCodeSemanticPassthrough: true,
+    effectiveModel: "claude-opus-4-8",
+    targetFormat: "claude",
+    preserveCacheControl: true,
+    normalizeClaudeUpstreamMessages: () => {},
+    applyReasoningRuleDirective: (b) => b,
+    log: null,
+  }) as {
+    thinking?: unknown;
+    messages: Array<{
+      role: string;
+      content: Array<{ type: string; cache_control?: unknown }>;
+    }>;
+  };
+  assert.deepEqual(
+    out.messages[1].content.map((b) => b.type),
+    ["tool_use"]
+  );
+  assert.equal(out.thinking, undefined);
+  assert.deepEqual(out.messages[2].content[0].cache_control, { type: "ephemeral" });
+});
+
 test("signature 400 recovery covers every signature-validating Anthropic upstream", () => {
   const message = "messages.1.content.0: Invalid `signature` in `thinking` block";
   const hit = (provider: string, model?: string) =>

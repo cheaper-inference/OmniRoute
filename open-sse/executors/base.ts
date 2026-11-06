@@ -1420,7 +1420,8 @@ export class BaseExecutor {
             // (tool_result must be in immediately next message).
             // Only apply for Claude/Claude-compatible — OpenAI allows results
             // spread across multiple subsequent messages.
-            const isClaude = this.provider === "claude" || usesClaudeCodeProtocol;
+            const isClaude =
+              this.provider === "claude" || this.provider === "anthropic" || usesClaudeCodeProtocol;
             // For Claude, fixToolAdjacency may strip tool_use blocks whose
             // tool_result isn't in the next message; re-run fixToolPairs to
             // drop any tool_result orphaned by that strip (discussion #2410).
@@ -1453,7 +1454,7 @@ export class BaseExecutor {
         // at this final dispatch point — the single chokepoint every Claude
         // routing mode (grouped/raw/combo) and the native passthrough share,
         // before fingerprinting and CCH signing serialize the body.
-        if (this.provider === "claude" || usesClaudeCodeProtocol) {
+        if (this.provider === "claude" || this.provider === "anthropic" || usesClaudeCodeProtocol) {
           finalizeClaudeBodyConstraints(transformedBody as Record<string, unknown>);
         }
 
