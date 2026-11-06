@@ -276,6 +276,21 @@ test("block-metadata with pinDns connects to the checked address, not to a secon
   }
 });
 
+test("a name that answers differently for the connection is refused without a pin", async () => {
+  // The guard's own lookup says private; the lookup the connection makes says metadata.
+  for (const guard of ["block-metadata", "public-only"] as const) {
+    const code = await blockedBy(
+      safeOutboundFetch("http://metadata.alias.test:18999/", {
+        guard,
+        retry: false,
+        timeoutMs: 800,
+        dnsLookup: async () => [{ address: "93.184.216.34", family: 4 }],
+      })
+    );
+    assert.equal(code, "URL_GUARD_BLOCKED", guard);
+  }
+});
+
 test("with pinDns the request connects to the address that was checked, not to a second answer", async () => {
   await withListener(async (port, hits) => {
     // The guard's lookup says public; the resolver the connection would use says loopback (a
