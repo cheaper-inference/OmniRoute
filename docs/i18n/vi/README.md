@@ -21,19 +21,19 @@
 
 <div align="center">
 
-## 💰 ~1,62 tỷ token / tháng từ các gói miễn phí của bên thứ ba
+## 💰 ~1,62B token / tháng trên các gói miễn phí của bên thứ ba
 
 </div>
 
-> **Tự sử dụng tài khoản nhà cung cấp của bạn.** Đây là tổng ước tính trên các gói miễn phí của bên thứ ba đủ điều kiện riêng biệt, không phải khoản cấp token từ OmniRoute. Hãy đăng ký, lấy thông tin xác thực khi được yêu cầu và kết nối các nhà cung cấp mà bạn có thể sử dụng; mỗi nhà cung cấp tự kiểm soát giới hạn, tính khả dụng và điều khoản của mình.
+> **Tự sử dụng tài khoản nhà cung cấp của bạn.** Đây là tổng ước tính trên các gói miễn phí của bên thứ ba đủ điều kiện riêng biệt, không phải số token được OmniRoute cấp. Hãy đăng ký, lấy thông tin xác thực khi được yêu cầu và kết nối các nhà cung cấp mà bạn có thể sử dụng; mỗi nhà cung cấp tự kiểm soát hạn mức, khả dụng và điều khoản của mình.
 >
-> Việc tự cộng dồn các gói miễn phí rất rắc rối — hàng chục SDK, hàng chục giới hạn tốc độ và không biết thực tế bạn có bao nhiêu. OmniRoute lập danh mục **485 mục gói miễn phí trên 34 khóa nhóm dùng chung định kỳ** và tính con số tổng token từ **17 nhóm có ngân sách hàng tháng dương được công bố, cùng năm giới hạn Groq theo từng mô hình**, loại trùng theo nhóm dùng chung. Các hạn ngạch chỉ mở sau khi xác minh danh tính theo khu vực (hiện tại: ModelScope) được hiển thị riêng, cộng thêm khoảng 6 triệu token sau khi xác minh danh tính theo khu vực, và không bao giờ được cộng vào con số tổng. Kết quả luôn hiển thị trên bảng điều khiển (`/dashboard/free-tiers`).
+> Tự xếp chồng các gói miễn phí rất khó — hàng chục SDK, hàng chục giới hạn tốc độ và không biết thực tế bạn có bao nhiêu. OmniRoute lập danh mục **485 mục gói miễn phí trên 34 khóa nhóm định kỳ** và tính tổng token nổi bật từ **17 nhóm có ngân sách hàng tháng dương được công bố, cộng với năm hạn mức Groq theo từng mô hình**, loại trùng dựa trên nhóm dùng chung. Các hạn mức chỉ mở sau khi xác minh danh tính theo khu vực (hiện nay: ModelScope) được hiển thị riêng, +~6M sau khi xác minh danh tính theo khu vực và không bao giờ được cộng vào tổng nổi bật. Kết quả vẫn hiển thị trên bảng điều khiển (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Thẻ ngân sách gói miễn phí của OmniRoute: khoảng 1,62 tỷ token miễn phí mỗi tháng một cách ổn định, tối đa khoảng 2,22 tỷ trong tháng đầu tiên với tín dụng đăng ký, từ 34 khóa nhóm dùng chung định kỳ được ghi nhận, bao phủ 485 mục gói miễn phí trong danh mục thông qua một endpoint. Phép tính trung thực, loại trùng theo nhóm — mỗi nhóm dùng chung chỉ được tính một lần, bao gồm 17 nhóm định kỳ có ngân sách token hàng tháng dương được công bố cùng năm giới hạn Groq theo từng mô hình; 12 nhà cung cấp được đánh dấu là nên tránh trong danh mục rủi ro điều khoản để bạn tự quyết định. Thanh ngân sách bao gồm Mistral 1 tỷ, Nara 210 triệu, LLM7 150 triệu, xKiro 150 triệu, Groq 30 triệu (năm giới hạn theo từng mô hình) và các nhóm nhỏ hơn, cùng tín dụng đăng ký tháng đầu tiên và các nhà cung cấp miễn phí vĩnh viễn không giới hạn token được hiển thị riêng để chúng không bao giờ làm tăng con số tổng. Lượng đã dùng/còn lại theo thời gian thực trên /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Thẻ ngân sách gói miễn phí của OmniRoute: ~1,62B token miễn phí mỗi tháng một cách ổn định, lên đến ~2,22B trong tháng đầu tiên với tín dụng đăng ký, từ 34 khóa nhóm định kỳ được ghi nhận, bao phủ 485 mục gói miễn phí được lập danh mục phía sau một endpoint. Phép tính trung thực, loại trùng theo nhóm — mỗi nhóm dùng chung chỉ được tính một lần, bao gồm 17 nhóm định kỳ có ngân sách token hàng tháng dương được công bố cộng với năm hạn mức Groq theo từng mô hình; 12 nhà cung cấp được đánh dấu là cần tránh trong danh mục rủi ro điều khoản để bạn tự quyết định. Thanh ngân sách bao gồm Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (năm hạn mức theo từng mô hình) và các nhóm nhỏ hơn, cùng với tín dụng đăng ký tháng đầu tiên và các nhà cung cấp miễn phí vĩnh viễn không giới hạn token được hiển thị riêng để chúng không bao giờ làm tăng tổng nổi bật. Số liệu đã dùng/còn lại theo thời gian thực trên /dashboard/free-tiers."/>
 
-> Tóm tắt động của trang `/dashboard/free-tiers` theo thời gian thực. Phương pháp đầy đủ (loại trùng nhóm, các bậc tín dụng, điều khoản nhà cung cấp): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+> Tóm tắt động về trang `/dashboard/free-tiers` theo thời gian thực. Toàn bộ phương pháp luận (loại trùng nhóm, các cấp tín dụng, điều khoản nhà cung cấp): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
-> <sub>Các số liệu này được kiểm tra lại hai tuần một lần dựa trên danh mục trực tiếp và **có thể tăng hoặc giảm** — một nhà cung cấp kết thúc gói miễn phí thì con số giảm; một nhà cung cấp mới xuất hiện thì con số tăng. Chúng tôi công bố đúng những gì danh mục thực tế tính toán, không bao giờ làm tròn lên theo kịch bản tốt nhất.</sub>
+> <sub>Các số liệu này được kiểm tra lại hai tuần một lần dựa trên danh mục trực tiếp và **có thể tăng hoặc giảm** — một nhà cung cấp kết thúc gói miễn phí thì con số giảm; một nhà cung cấp mới xuất hiện thì con số tăng. Chúng tôi công bố kết quả thực tế mà danh mục tính toán, không bao giờ làm tròn tăng theo kịch bản tốt nhất.</sub>
 
 <br/>
 
@@ -41,29 +41,29 @@
 
 <h3>
 
-⭐ Hãy star repo nếu OMNIROUTE đã giúp bạn tiết kiệm tiền và làm công việc dễ dàng hơn.
+⭐ Hãy đánh dấu sao cho repo nếu OMNIROUTE giúp bạn tiết kiệm tiền và làm công việc dễ dàng hơn.
 
 </h3>
 
 [![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Xếp hạng lịch sử star](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Xếp hạng lịch sử đánh dấu sao](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 Tham gia cộng đồng
 
-**👋 Theo dõi maintainer — nhận thông tin về nhà cung cấp mới, bản phát hành và mẹo hữu ích đầu tiên:**
+**👋 Theo dõi người duy trì — nhận thông tin về nhà cung cấp mới, bản phát hành và mẹo hữu ích trước tiên:**
 
 [![Theo dõi Diego trên LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
 [![Theo dõi @diegosouzapw trên GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
 
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
 [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsApp Toàn cầu](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
+[![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
 [![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
 [![Website](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
 
-**Câu hỏi, mẹo về nhà cung cấp, lộ trình phát triển và hỗ trợ → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Toàn cầu](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Cổng thông tin](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**Câu hỏi, mẹo về nhà cung cấp, lộ trình & hỗ trợ → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Toàn cầu](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Cổng thông tin](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
@@ -224,23 +224,23 @@
 
 <a id="first-run"></a>
 
-## 🆓 Cài đặt, kết nối một nhà cung cấp, sau đó định tuyến qua một endpoint
+## 🆓 Cài đặt, kết nối một nhà cung cấp, rồi định tuyến qua một endpoint
 
 </div>
 
-<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Ba bước: cài đặt và khởi động OmniRoute, kết nối một nhà cung cấp đủ điều kiện bằng tài khoản hoặc API key của riêng bạn, sau đó trỏ công cụ của bạn đến localhost:20128/v1 bằng API key OmniRoute và model auto. Việc định tuyến phụ thuộc vào các kết nối đủ điều kiện hiện có và giới hạn của nhà cung cấp."/>
+<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Ba bước: cài đặt và khởi động OmniRoute, kết nối một nhà cung cấp đủ điều kiện bằng tài khoản hoặc khóa API của bạn, sau đó trỏ công cụ của bạn đến localhost:20128/v1 bằng khóa API OmniRoute và model auto. Việc định tuyến phụ thuộc vào các kết nối đủ điều kiện hiện có và giới hạn của nhà cung cấp."/>
 
 ```bash
-# Sau khi kết nối một nhà cung cấp, sao chép key OmniRoute của bạn từ Dashboard → Endpoints:
+# Sau khi kết nối một nhà cung cấp, sao chép khóa OmniRoute của bạn từ Dashboard → Endpoints:
 curl http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer YOUR_OMNIROUTE_KEY" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-<sub>`auto` cần một route đủ điều kiện. Bản cài đặt mới có thể không có target nào đủ điều kiện và không cần key, đồng thời một nhà cung cấp không cần key có thể từ chối các client bên thứ ba. Các nhà cung cấp được đánh dấu `tos: avoid`, bao gồm Kiro, mặc định sẽ bị loại khỏi việc định tuyến tự động; việc kết nối tài khoản không ghi đè cài đặt đó. Hãy xem [Hướng dẫn các gói miễn phí](docs/getting-started/FREE-TIERS-GUIDE.md) trước khi chọn nhà cung cấp.</sub>
+<sub>`auto` cần một route đủ điều kiện. Bản cài đặt mới có thể không có mục tiêu nào không cần khóa đủ điều kiện, và một nhà cung cấp không cần khóa có thể từ chối các client bên thứ ba. Các nhà cung cấp được đánh dấu `tos: avoid`, bao gồm Kiro, sẽ bị loại khỏi việc định tuyến tự động theo mặc định; việc kết nối tài khoản không ghi đè cài đặt đó. Hãy xem [Hướng dẫn về các gói miễn phí](docs/getting-started/FREE-TIERS-GUIDE.md) trước khi chọn nhà cung cấp.</sub>
 
-<sub>📦 Các script quickstart có thể sao chép-dán cho **Python, Node.js, PHP và cURL** → [`examples/quickstart/`](examples/quickstart/)</sub>
+<sub>📦 Các script khởi động nhanh để sao chép và dán cho **Python, Node.js, PHP và cURL** → [`examples/quickstart/`](examples/quickstart/)</sub>
 
 <br/>
 
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lời hứa — Một endpoint và 380 nhà cung cấp. Cơ chế dự phòng tự động giúp duy trì định tuyến khi vẫn còn một target khác đang hoạt động bình thường. Sáu trụ cột: dự phòng linh hoạt trên 380 nhà cung cấp · tiết kiệm tới 95% token cho các workload đủ điều kiện · bắt đầu với $0 cùng hơn 150 gói miễn phí và 53 nhà cung cấp miễn phí vĩnh viễn định kỳ/không cần key · 39 tích hợp CLI/agent thông qua một cấu hình · tương thích với OpenAI, Claude, Gemini và Responses API tại /v1 · các tính năng kiểm soát cho môi trường production, bao gồm circuit breaker, TLS stealth, MCP với 110 công cụ, A2A, memory, guardrail, eval và hơn 56.000 khai báo kiểm thử tĩnh trên hơn 7.800 tệp kiểm thử được theo dõi."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lời hứa — Một endpoint và 380 nhà cung cấp. Tự động chuyển dự phòng giúp duy trì việc định tuyến khi vẫn còn một mục tiêu khác hoạt động ổn định. Sáu trụ cột: chuyển dự phòng linh hoạt trên 380 nhà cung cấp · tiết kiệm đến 95% token trên các workload đủ điều kiện · bắt đầu với $0 cùng hơn 150 gói miễn phí và 54 nhà cung cấp miễn phí vĩnh viễn định kỳ/không cần khóa · 39 tích hợp CLI/agent thông qua một cấu hình · tương thích với OpenAI, Claude, Gemini và Responses API tại /v1 · các tính năng kiểm soát cho môi trường production, bao gồm circuit breaker, TLS stealth, MCP với 110 công cụ, A2A, memory, guardrails, evals và hơn 56.000 khai báo kiểm thử tĩnh trên hơn 7.800 tệp kiểm thử được theo dõi."/>
 
 <br/>
 <br/>
@@ -261,11 +261,11 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Tại sao là OmniRoute — không còn phải xoay xở với 10 dashboard, các API key đã chết và những hóa đơn bất ngờ. Mười vấn đề hằng ngày và cách khắc phục: quota hết hạn mà không được sử dụng → tối đa hóa các gói đăng ký; rate limit giữa lúc lập trình → dự phòng tự động 4 tầng (Subscription → API → Cheap → Free); đầu ra của công cụ ngốn token → nén RTK + Caveman (15–95%); API đắt đỏ → định tuyến tối ưu chi phí; mỗi công cụ có một thiết lập riêng → một endpoint, một dashboard; AI bị chặn → proxy 3 cấp + TLS stealth; key đã chết → khả năng chống chịu 3 lớp (circuit breaker, thời gian cooldown cho key, khóa model); cả nhóm dùng chung một gói đăng ký → các pool key với quota chia sẻ công bằng; prompt đi qua cloud của người khác → ưu tiên local với key được mã hóa bằng AES-256-GCM; không thấy được chi tiêu → phân tích trực tiếp (mức sử dụng, quota, khoản tiết kiệm, độ trễ p95)."/>
+<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Tại sao là OmniRoute — không còn phải xoay xở với 10 dashboard, các khóa API đã hết hiệu lực và những hóa đơn bất ngờ. Mười vấn đề hằng ngày và cách khắc phục: quota hết hạn khi chưa dùng → tận dụng tối đa các gói đăng ký; giới hạn tốc độ giữa lúc lập trình → tự động chuyển dự phòng 4 tầng (Subscription → API → Cheap → Free); đầu ra của công cụ tiêu tốn token → nén RTK + Caveman (15–95%); API đắt đỏ → định tuyến tối ưu chi phí; mỗi công cụ có một thiết lập riêng → một endpoint, một dashboard; AI bị chặn → proxy 3 cấp + TLS stealth; khóa hỏng → khả năng chống chịu 3 lớp (circuit breaker, thời gian chờ khóa, khóa model); cả nhóm dùng chung một gói đăng ký → các pool khóa với quota chia sẻ công bằng; prompt đi qua cloud của người khác → ưu tiên cục bộ với các khóa được mã hóa bằng AES-256-GCM; không thấy được chi phí → phân tích trực tiếp (mức sử dụng, quota, khoản tiết kiệm, độ trễ p95)."/>
 
 <div align="center">
 
-<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="Luồng request của OmniRoute: IDE hoặc CLI của bạn (Claude Code, Cursor, Cline…) gọi một endpoint cục bộ (http://localhost:20128/v1); OmniRoute Smart Router (nén RTK + Caveman, 20 chiến lược định tuyến, circuit breaker, TLS stealth, MCP, A2A, guardrail) có thể dự phòng qua 4 tầng nhà cung cấp miễn là vẫn còn một target đủ điều kiện đang hoạt động bình thường — Tầng 1 Subscription, Tầng 2 API Key, Tầng 3 Cheap và Tầng 4 Free."/>
+<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="Luồng yêu cầu OmniRoute: IDE hoặc CLI của bạn (Claude Code, Cursor, Cline…) gọi một endpoint cục bộ (http://localhost:20128/v1); OmniRoute Smart Router (nén RTK + Caveman, 20 chiến lược định tuyến, circuit breaker, TLS stealth, MCP, A2A, guardrails) có thể chuyển dự phòng qua 4 tầng nhà cung cấp khi vẫn còn một mục tiêu đủ điều kiện và hoạt động ổn định — Tầng 1 Subscription, Tầng 2 API Key, Tầng 3 Cheap và Tầng 4 Free."/>
 
 </div>
 
@@ -693,11 +693,11 @@ khỏi lịch sử shell của bạn. → [Tích hợp CLI](docs/guides/CLI-INTE
 
 </div>
 
-> **380 nhà cung cấp đã đăng ký** trên các bộ sưu tập chuẩn về trò chuyện, phương tiện, tìm kiếm, cục bộ, tác nhân đám mây và hệ thống, trong đó **153 nhà cung cấp có siêu dữ liệu khám phá `hasFree: true`**. Danh mục mô hình trò chuyện bao phủ **239 nhà cung cấp / 3,059 cặp nhà cung cấp-mô hình riêng biệt / 1,475 ID mô hình thô**; danh mục ngân sách miễn phí riêng biệt có **471 hàng cho từng mô hình**, **34 nhóm định kỳ** và **53 nhà cung cấp miễn phí vĩnh viễn định kỳ/không cần khóa API**. Các mẫu số này khác nhau theo thiết kế; định nghĩa và các phép tính đã loại trùng theo nhóm nằm trong [Tài liệu tham khảo nhà cung cấp](docs/reference/PROVIDER_REFERENCE.md) và [Các gói miễn phí](docs/reference/FREE_TIERS.md).
+> **380 nhà cung cấp đã đăng ký** trên các bộ sưu tập chuẩn về trò chuyện, media, tìm kiếm, cục bộ, tác nhân đám mây và hệ thống, trong đó **153 nhà cung cấp có metadata khám phá `hasFree: true`**. Registry mô hình trò chuyện bao phủ **239 nhà cung cấp / 3,059 cặp nhà cung cấp-mô hình riêng biệt / 1,475 ID mô hình thô**; danh mục ngân sách miễn phí riêng biệt có **471 dòng cho từng mô hình**, **34 pool định kỳ** và **54 nhà cung cấp miễn phí vĩnh viễn định kỳ/không cần khóa**. Đây là các mẫu số khác nhau theo chủ đích; định nghĩa và các phép tính đã loại trùng theo pool nằm trong [Tài liệu tham khảo về nhà cung cấp](docs/reference/PROVIDER_REFERENCE.md) và [Các gói miễn phí](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
-### 🏢 Mọi phòng thí nghiệm lớn — thông qua một endpoint
+### 🏢 Mọi phòng thí nghiệm lớn — thông qua một endpoint duy nhất
 
 <table>
   <tr>
@@ -726,28 +726,28 @@ khỏi lịch sử shell của bạn. → [Tích hợp CLI](docs/guides/CLI-INTE
   </tr>
 </table>
 
-<sub>…và hơn 350 nhà cung cấp khác — mọi biểu tượng đều được tải trực tiếp từ danh mục nhà cung cấp của bảng điều khiển. 📖 [Tài liệu tham khảo nhà cung cấp](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>…và hơn 350 nhà cung cấp khác — mọi biểu tượng đều được tải trực tiếp từ danh mục nhà cung cấp của dashboard. 📖 [Tài liệu tham khảo về nhà cung cấp](docs/reference/PROVIDER_REFERENCE.md)</sub>
 
 <br/>
 
-### 🆓 Miễn phí vĩnh viễn — $0, không cần thẻ thanh toán
+### 🆓 Miễn phí vĩnh viễn — $0, không cần thẻ
 
 <table>
   <tr>
     <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4, Nemotron 3<br/>Không giới hạn token</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>Bộ định tuyến tự động, Tencent Hy3<br/>Miễn phí mãi mãi</sub></td>
-    <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B, Nemotron<br/>Miễn phí mãi mãi</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>Bộ định tuyến tự động, Tencent Hy3<br/>Miễn phí vĩnh viễn</sub></td>
+    <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B, Nemotron<br/>Miễn phí vĩnh viễn</sub></td>
     <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>Gói miễn phí</sub></td>
-    <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>Miễn phí mãi mãi</sub></td>
-    <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>Miễn phí mãi mãi</sub></td>
+    <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>Miễn phí vĩnh viễn</sub></td>
+    <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>Miễn phí vĩnh viễn</sub></td>
   </tr>
   <tr>
     <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max, Kimi-K2<br/>MIỄN PHÍ không giới hạn</sub></td>
     <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT, Llama, Claude<br/>Không cần khóa</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>Hơn 50 model<br/>10K neuron/ngày</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>Hơn 50 mô hình<br/>10K neuron/ngày</sub></td>
     <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>~40 RPM miễn phí</sub></td>
     <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>Tín dụng $5 dùng một lần; yêu cầu thẻ</sub></td>
-    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:free models<br/>+$10 → RPM cao hơn</sub></td>
+    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>Các mô hình :free<br/>+$10 → RPM cao hơn</sub></td>
   </tr>
 </table>
 
@@ -1322,9 +1322,9 @@ Số liệu chuẩn vào 2026-10-18: **1.976 video duy nhất** · **20.220.289 
   <tr><th align="left">Tài liệu</th><th align="left">Mô tả</th></tr>
   <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">Hướng dẫn sử dụng</a></b></td><td>Provider, tổ hợp, tích hợp CLI, triển khai</td></tr>
   <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">Hướng dẫn thiết lập</a></b></td><td>Các phương thức cài đặt đầy đủ, cấu hình công cụ CLI, thiết lập giao thức, tinh chỉnh thời gian chờ</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">Hướng dẫn công cụ CLI</a></b></td><td>Thiết lập cho từng công cụ Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Chế độ từ xa</a></b></td><td>Điều khiển OmniRoute từ xa (VPS) từ CLI trên laptop thông qua access token có phạm vi</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Cấu hình Claude Code</a></b></td><td>Trỏ Claude Code đến OmniRoute (cục bộ/từ xa) bằng <code>launch</code> + các profile cho từng model</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">Hướng dẫn công cụ CLI</a></b></td><td>Thiết lập riêng cho từng công cụ: Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Chế độ từ xa</a></b></td><td>Điều khiển OmniRoute từ xa (VPS) bằng CLI trên máy tính xách tay thông qua các access token có phạm vi giới hạn</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Cấu hình Claude Code</a></b></td><td>Trỏ Claude Code đến OmniRoute (cục bộ/từ xa) bằng <code>launch</code> + profile cho từng model</td></tr>
   <tr><td nowrap><b><a href="README.md#-quick-start">Bắt đầu nhanh</a></b></td><td>Cài đặt → kết nối → cấu hình trong 3 bước</td></tr>
 </table>
 
@@ -1332,13 +1332,13 @@ Số liệu chuẩn vào 2026-10-18: **1.976 video duy nhất** · **20.220.289 
 
 <table>
   <tr><th align="left">Tài liệu</th><th align="left">Mô tả</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Hướng dẫn Docker</a></b></td><td>Chạy Docker, profile Compose, HTTPS Caddy, tunnel, thẻ image</td></tr>
-  <tr><td nowrap><b><a href="contrib/podman/README.md">Hướng dẫn Podman</a></b></td><td>Tích hợp systemd với Quadlet, podman-compose, SELinux</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Hướng dẫn Docker</a></b></td><td>Chạy Docker, profile Compose, Caddy HTTPS, tunnel, thẻ image</td></tr>
+  <tr><td nowrap><b><a href="contrib/podman/README.md">Hướng dẫn Podman</a></b></td><td>Tích hợp Quadlet systemd, podman-compose, SELinux</td></tr>
   <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">Triển khai VM</a></b></td><td>Hướng dẫn đầy đủ: thiết lập VM + nginx + Cloudflare</td></tr>
   <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Triển khai Fly.io</a></b></td><td>Triển khai lên Fly.io với bộ nhớ lưu trữ liên tục</td></tr>
   <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Hướng dẫn Termux</a></b></td><td>Chạy OmniRoute trên Android thông qua Termux</td></tr>
   <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">Hướng dẫn PWA</a></b></td><td>Cài đặt, bộ nhớ đệm và kiến trúc Progressive Web App</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">Hướng dẫn gỡ cài đặt</a></b></td><td>Xóa sạch cho mọi phương thức cài đặt</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">Hướng dẫn gỡ cài đặt</a></b></td><td>Gỡ bỏ sạch cho mọi phương thức cài đặt</td></tr>
   <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Cấu hình môi trường</a></b></td><td>Các biến và tham chiếu <code>.env</code> đầy đủ</td></tr>
 </table>
 
@@ -1346,18 +1346,18 @@ Số liệu chuẩn vào 2026-10-18: **1.976 video duy nhất** · **20.220.289 
 
 <table>
   <tr><th align="left">Tài liệu</th><th align="left">Mô tả</th></tr>
-  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Kiến trúc</a></b></td><td>Kiến trúc hệ thống, luồng dữ liệu và các thành phần bên trong</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Hướng dẫn nén</a></b></td><td>Pipeline gồm 7 tùy chọn: off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">Nén RTK</a></b></td><td>Nén đầu ra lệnh, bộ lọc, mức độ tin cậy, xác minh, khôi phục đầu ra thô</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Kiến trúc</a></b></td><td>Kiến trúc hệ thống, luồng dữ liệu và nội bộ</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Hướng dẫn nén</a></b></td><td>Pipeline 7 tùy chọn: off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">Nén RTK</a></b></td><td>Nén đầu ra lệnh, bộ lọc, độ tin cậy, xác minh, khôi phục đầu ra thô</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Engine nén</a></b></td><td>Caveman, RTK, pipeline stacked, các giao diện dashboard/API/MCP</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Định dạng quy tắc nén</a></b></td><td>Schema gói quy tắc JSON cho bộ lọc Caveman và RTK</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Gói ngôn ngữ nén</a></b></td><td>Phát hiện ngôn ngữ và biên soạn gói quy tắc Caveman</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Hướng dẫn khả năng chống chịu</a></b></td><td>Circuit breaker, thời gian hạ nhiệt, hàng đợi, chống hiện tượng đàn thundering herd, giả mạo TLS</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Gói ngôn ngữ nén</a></b></td><td>Nhận diện ngôn ngữ và biên soạn gói quy tắc Caveman</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Hướng dẫn khả năng phục hồi</a></b></td><td>Circuit breaker, thời gian cooldown, hàng đợi, chống hiệu ứng đàn gia súc, giả mạo TLS</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Engine Auto-Combo</a></b></td><td>Chấm điểm theo 16 yếu tố, gói chế độ, tự khắc phục</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Hướng dẫn proxy</a></b></td><td>Hệ thống proxy 3 cấp, marketplace 1proxy, CRUD registry</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Gói miễn phí</a></b></td><td>Danh mục hợp nhất: 34 pool định kỳ được lập tài liệu / 485 mục gói miễn phí đã lập danh mục</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Tổng quan tính năng</a></b></td><td>Tham quan dashboard trực quan với ảnh chụp màn hình</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Tài liệu codebase</a></b></td><td>Hướng dẫn codebase dành cho người mới bắt đầu</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Gói miễn phí</a></b></td><td>Danh mục hợp nhất: 34 pool định kỳ được ghi chép / 485 mục trong gói miễn phí được lập danh mục</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Thư viện tính năng</a></b></td><td>Tham quan dashboard trực quan với ảnh chụp màn hình</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Tài liệu codebase</a></b></td><td>Tổng quan codebase thân thiện với người mới bắt đầu</td></tr>
 </table>
 
 ### 🤖 Giao thức & API
@@ -1367,9 +1367,9 @@ Số liệu chuẩn vào 2026-10-18: **1.976 video duy nhất** · **20.220.289 
   <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">Tài liệu tham chiếu API</a></b></td><td>Tất cả endpoint kèm ví dụ</td></tr>
   <tr><td nowrap><b><a href="docs/openapi.yaml">Đặc tả OpenAPI</a></b></td><td>Đặc tả OpenAPI 3.0</td></tr>
   <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP Server</a></b></td><td>110 công cụ MCP, cấu hình IDE, client Python/TS/Go</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">Hướng dẫn MCP Server</a></b></td><td>Cài đặt MCP, các phương thức truyền tải và tài liệu tham chiếu công cụ</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">Hướng dẫn MCP Server</a></b></td><td>Cài đặt MCP, phương thức truyền tải và tài liệu tham chiếu công cụ</td></tr>
   <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A Server</a></b></td><td>Giao thức JSON-RPC 2.0, skill, streaming, quản lý tác vụ</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">Hướng dẫn A2A Server</a></b></td><td>Agent card, tác vụ, skill và streaming A2A</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">Hướng dẫn A2A Server</a></b></td><td>Agent card, tác vụ, skill và streaming của A2A</td></tr>
 </table>
 
 ### 📋 Dự án & Chất lượng
@@ -1377,9 +1377,9 @@ Số liệu chuẩn vào 2026-10-18: **1.976 video duy nhất** · **20.220.289 
 <table>
   <tr><th align="left">Tài liệu</th><th align="left">Mô tả</th></tr>
   <tr><td nowrap><b><a href="CONTRIBUTING.md">Đóng góp</a></b></td><td>Thiết lập môi trường phát triển và hướng dẫn</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Mô hình nhánh & phát hành</a></b></td><td>Các PR nhắm đến đâu (<code>release/*</code>), ý nghĩa của <code>main</code> và các thẻ</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Mô hình nhánh và phát hành</a></b></td><td>Các PR hướng đến đâu (<code>release/*</code>), ý nghĩa của <code>main</code> và các thẻ</td></tr>
   <tr><td nowrap><b><a href="CHANGELOG.md">Nhật ký thay đổi</a></b></td><td>Lịch sử phát hành đầy đủ theo từng phiên bản</td></tr>
-  <tr><td nowrap><b><a href="SECURITY.md">Chính sách bảo mật</a></b></td><td>Báo cáo lỗ hổng và các biện pháp bảo mật</td></tr>
+  <tr><td nowrap><b><a href="SECURITY.md">Chính sách bảo mật</a></b></td><td>Báo cáo lỗ hổng và các phương pháp bảo mật</td></tr>
   <tr><td nowrap><b><a href="docs/guides/I18N.md">Hướng dẫn i18n</a></b></td><td>Hỗ trợ 67 ngôn ngữ, quy trình dịch, RTL</td></tr>
   <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Danh sách kiểm tra phát hành</a></b></td><td>Các bước xác thực trước khi phát hành</td></tr>
   <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Kế hoạch độ bao phủ</a></b></td><td>Chiến lược độ bao phủ kiểm thử cho hơn 60.000 khai báo kiểm thử tĩnh trên hơn 8.400 tệp kiểm thử được theo dõi</td></tr>
@@ -1391,7 +1391,7 @@ Số liệu chuẩn vào 2026-10-18: **1.976 video duy nhất** · **20.220.289 
 
 # ⭐ Những người đóng góp hàng đầu
 
-> OmniRoute được định hình bởi một cộng đồng nguồn mở đầy nhiệt huyết. Những cá nhân này đã có những đóng góp đặc biệt, tác động trực tiếp đến chất lượng, độ ổn định và phạm vi tiếp cận của dự án. **Xin cảm ơn.**
+> OmniRoute được định hình bởi một cộng đồng nguồn mở đầy nhiệt huyết. Những cá nhân này đã có các đóng góp xuất sắc, tác động trực tiếp đến chất lượng, độ ổn định và phạm vi tiếp cận của dự án. **Xin cảm ơn.**
 
 ### Những người đóng góp bên ngoài theo số lượng pull request đã hợp nhất
 
@@ -1419,9 +1419,9 @@ Số liệu chuẩn vào 2026-10-18: **1.976 video duy nhất** · **20.220.289 
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
 </table>
 
-<sub>Điều tra dân số được thực hiện vào 2026-11-03 03:01:19 UTC với mã nguồn mới nhất của <code>release/v3.8.53</code> là <code>05bc048d6c</code>. Điều tra GitHub GraphQL được phân trang chứa 9.947 PR đã hợp nhất: 4.130 PR do chủ sở hữu kho lưu trữ thực hiện, 240 PR do Dependabot thực hiện, 6 PR do các bot/ứng dụng khác thực hiện và <b>5.571 PR bên ngoài từ 883 người đóng góp riêng biệt</b>. “Dòng đã thay đổi” là tổng số dòng được thêm + xóa trên GitHub và bao gồm các tệp được tạo tự động, tệp khóa, danh mục, bản dịch và tài liệu; đây là mức độ biến động, không phải LOC do tác giả viết. 53 PR báo cáo diff trên GitHub lớn hơn 500.000 dòng (ví dụ #13399, một lần bổ sung nhà cung cấp duy nhất, liệt kê 2.347 tệp đã thay đổi), làm tăng tổng số ở trên. Các trường hợp bằng điểm được xếp cùng hạng.</sub>
+<sub>Thống kê được thực hiện vào 2026-11-03 03:01:19 UTC với tip trực tiếp <code>release/v3.8.53</code> <code>05bc048d6c</code>. Thống kê GitHub GraphQL được phân trang bao gồm 9.947 PR đã hợp nhất: 4.130 PR do chủ sở hữu kho lưu trữ thực hiện, 240 PR do Dependabot thực hiện, 6 PR do các bot/ứng dụng khác thực hiện và <b>5.571 PR bên ngoài từ 883 người đóng góp riêng biệt</b>. “Dòng đã thay đổi” là tổng số dòng được GitHub thêm vào + xóa đi, bao gồm các tệp được tạo tự động, tệp khóa, danh mục, bản dịch và tài liệu; đây là mức độ biến động, không phải LOC do tác giả viết. 53 PR báo cáo phần khác biệt GitHub trên 500.000 dòng (ví dụ #13399, một lần bổ sung nhà cung cấp duy nhất, liệt kê 2.347 tệp đã thay đổi), làm tăng đáng kể một số tổng số ở trên. Các trường hợp hòa được xếp cùng hạng.</sub>
 
-### Các commit được GitHub quy cho người dùng
+### Các commit được GitHub ghi nhận
 
 <table>
   <tr>
@@ -1514,9 +1514,9 @@ Số liệu chuẩn vào 2026-10-18: **1.976 video duy nhất** · **20.220.289 
   </tr>
 </table>
 
-<sub>Được kiểm tra lại vào 2026-11-03 02:09:16 UTC: các lượt commit được GitHub ghi nhận do Contributors API của repository báo cáo cho nhánh mặc định <code>release/v3.8.53</code>. API trả về 903 danh tính (429 người dùng, 2 bot, 472 ẩn danh); bảng này loại trừ maintainer, bot và các danh tính ẩn danh, đồng thời giữ lại các trường hợp đồng hạng. Bảng này khác với cả xếp hạng PR đã hợp nhất ở trên và thống kê dữ liệu Git bên dưới.</sub>
+<sub>Được kiểm tra lại vào 2026-11-03 02:09:16 UTC: các lượt commit được GitHub ghi nhận do Contributors API của repository báo cáo cho nhánh mặc định <code>release/v3.8.53</code>. API đã trả về 903 danh tính (429 người dùng, 2 bot, 472 ẩn danh); bảng này loại trừ maintainer, bot và các danh tính ẩn danh, đồng thời giữ nguyên các trường hợp đồng hạng. Bảng này khác với cả bảng xếp hạng PR đã được merge ở trên và cuộc thống kê siêu dữ liệu Git bên dưới.</sub>
 
-> 🙏 Các tính năng, bản sửa lỗi và cải tiến cơ sở hạ tầng của những người đóng góp này là **một phần cốt lõi** giúp OmniRoute trở nên đáng tin cậy và giàu tính năng. Mỗi pull request, mỗi trường hợp kiểm thử và mỗi tệp bản dịch i18n đều quan trọng. Phần mềm nguồn mở được xây dựng bởi những người như họ.
+> 🙏 Các tính năng, bản sửa lỗi và cải tiến hạ tầng của những contributor này là **một phần cốt lõi** làm nên độ tin cậy và sự phong phú về tính năng của OmniRoute. Mỗi pull request, mỗi trường hợp kiểm thử và mỗi tệp bản dịch i18n đều quan trọng. Mã nguồn mở được xây dựng bởi những người như họ.
 
 </div>
 

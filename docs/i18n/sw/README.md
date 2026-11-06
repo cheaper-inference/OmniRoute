@@ -21,19 +21,19 @@
 
 <div align="center">
 
-## 💰 ~1.62B Tokeni / Mwezi Kupitia Viwango Bure vya Watoa Huduma wa Watu Wengine
+## 💰 ~1.62B Tokeni / Mwezi Kote Kwenye Viwango vya Bure vya Watoa Huduma Wengine
 
 </div>
 
-> **Leta akaunti zako za watoa huduma.** Hii ni makadirio ya jumla kupitia viwango bure tofauti vya watoa huduma wa watu wengine, siyo mgao wa tokeni kutoka OmniRoute. Jisajili, pata sifa zinazohitajika, na unganisha watoa huduma unaoweza kutumia; kila mtoa huduma hudhibiti mipaka yake, upatikanaji, na masharti yake.
+> **Tumia akaunti zako za watoa huduma.** Haya ni makadirio ya jumla kutoka kwenye viwango vya bure vya watoa huduma wengine vinavyostahiki kimoja kimoja, si mgao wa tokeni kutoka OmniRoute. Jisajili, pata vitambulisho pale vinapohitajika, na uunganishe watoa huduma unaoweza kutumia; kila mtoa huduma hudhibiti vikomo, upatikanaji na masharti yake.
 >
-> Kuunganisha viwango bure mwenyewe ni kazi ngumu — SDK nyingi, mipaka mingi ya kiwango, na huna uhakika kiasi gani bado unacho. OmniRoute inaorodhesha **viingilio 485 vya viwango bure katika funguo 34 za bwawa la kurudiwa** na inakokotoa jumla ya tokeni kutoka kwa **mabwawa 17 yenye bajeti ya kila mwezi iliyochapishwa na chanya pamoja na vikomo vitano vya Groq kwa kila mfano**, vikiwa vimeondolewa marudio kwa bwawa linaloshirikiwa. Mgao unaofunguka tu baada ya ukaguzi wa utambulisho wa kikanda (leo: ModelScope) unaonyeshwa kando, +~6M nyuma ya uthibitisho wa utambulisho wa kikanda, na haujumuishwi kamwe kwenye jumla kuu. Matokeo yanaendelea kuonekana kwenye dashibodi (`/dashboard/free-tiers`).
+> Kukusanya viwango vya bure wewe mwenyewe ni kazi ngumu — SDK nyingi, vikomo vingi vya kasi, na hakuna njia ya kujua una kiasi gani hasa. OmniRoute inaorodhesha **maingizo 485 ya viwango vya bure katika funguo 34 za marudio za pool** na huhesabu kichwa cha tokeni kutoka kwenye **pool 17 zenye bajeti chanya ya kila mwezi iliyochapishwa pamoja na vikomo vitano vya Groq kwa kila modeli**, vikiondolewa marudio kulingana na pool zinazoshirikiwa. Kiwango kinachofunguka tu baada ya ukaguzi wa utambulisho wa eneo (kwa sasa: ModelScope) huonyeshwa kando, +~6M baada ya uthibitishaji wa utambulisho wa eneo, na hakijumuishwi kamwe kwenye kichwa cha jumla. Matokeo yanaendelea kuonekana kwenye dashibodi (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Kadi ya bajeti ya kiwango bure ya OmniRoute: ~1.62B tokeni bure kwa mwezi kila mara, hadi ~2.22B mwezi wa kwanza na mikopo ya usajili, kutoka kwa funguo 34 za bwawa la kurudiwa zilizothibitishwa zikifunika viingilio 485 vya viwango bure vilivyoorodheshwa nyuma ya mwisho mmoja. Hisabati ya kweli isiyo na marudio ya bwawa — kila bwawa linaloshirikiwa linahesabiwa mara moja, ikijumuisha mabwawa 17 ya kurudiwa yenye bajeti ya tokeni ya kila mwezi iliyochapishwa pamoja na vikomo vitano vya Groq kwa kila mfano; watoa huduma 12 wamewekwa alama ya kuepukwa kwenye orodha ya hatari ya masharti ili uamue. Upau wa bajeti unajumuisha Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (vikomo vitano kwa kila mfano) na mabwawa madogo, pamoja na mikopo ya usajili ya mwezi wa kwanza na watoa huduma wasio na kikomo cha tokeni waliotajwa kando ili wasiongeze jumla kuu. Matumizi ya moja kwa moja/yaliyobaki kwenye /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Kadi ya bajeti ya viwango vya bure ya OmniRoute: ~1.62B tokeni za bure kwa mwezi kwa uthabiti, hadi ~2.22B katika mwezi wa kwanza kwa mikopo ya kujisajili, kutoka kwenye funguo 34 za pool za marudio zilizoandikwa zinazojumuisha maingizo 485 ya viwango vya bure yaliyoorodheshwa kupitia endpoint moja. Hesabu ya uaminifu iliyopunguzwa kwa pool — kila pool inayoshirikiwa imehesabiwa mara moja, ikijumuisha pool 17 za marudio zenye bajeti chanya ya tokeni kwa mwezi iliyochapishwa pamoja na vikomo vitano vya Groq kwa kila modeli; watoa huduma 12 wamewekewa alama ya kuepukwa katika katalogi ya hatari za masharti ili uamue. Upau wa bajeti unajumuisha Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (vikomo vitano kwa kila modeli) na pool ndogo zaidi, pamoja na mikopo ya kujisajili ya mwezi wa kwanza na watoa huduma wasiolipishwa kabisa bila kikomo cha tokeni wanaoonyeshwa kando ili wasiongeze kichwa cha jumla. Kiasi kilichotumika/kilichosalia moja kwa moja kwenye /dashboard/free-tiers."/>
 
-> Muhtasari unaoonyesha ukurasa wa moja kwa moja wa `/dashboard/free-tiers`. Mbinu kamili (kuondoa marudio ya bwawa, viwango vya mkopo, masharti ya watoa huduma): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+> Muhtasari wa uhuishaji wa ukurasa wa moja kwa moja wa `/dashboard/free-tiers`. Mbinu kamili (uondoaji wa marudio ya pool, viwango vya mikopo, masharti ya watoa huduma): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
-> <sub>Viashiria hivi vinakaguliwa upya kila wiki mbili dhidi ya orodha ya moja kwa moja na **hubadilika pande zote mbili** — mtoa huduma akimaliza kiwango bure idadi inashuka; mpya akiongezwa inapaa. Tunachapisha kile ambacho orodha inakokotoa, kamwe siyo makadirio yaliyopandishwa.</sub>
+> <sub>Takwimu hizi hukaguliwa upya kila baada ya wiki mbili dhidi ya katalogi ya moja kwa moja na **hubadilika kuelekea pande zote mbili** — mtoa huduma anamaliza kiwango cha bure na idadi hupungua; mpya anaongezwa na inapanda. Tunachapisha kile katalogi inachokokotoa hasa, si makadirio yaliyozungushwa juu kama hali bora zaidi.</sub>
 
 <br/>
 
@@ -41,29 +41,29 @@
 
 <h3>
 
-⭐ Iweke nyota repo ikiwa OMNIROUTE imekusaidia kuokoa pesa na kurahisisha kazi yako.
+⭐ Ipe repo nyota ikiwa OMNIROUTE ilikusaidia kuokoa pesa na kurahisisha kazi yako.
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
+[![Nyota](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Cheo cha Historia ya Nyota](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
-### 💬 Jiunge na jamii
+### 💬 Jiunge na jumuiya
 
-**👋 Mfuate msimamizi — pata watoa huduma wapya, matoleo & vidokezo kwanza:**
+**👋 Mfuate msimamizi — pata watoa huduma wapya, matoleo na vidokezo kwanza:**
 
-[![Follow Diego on LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![Follow @diegosouzapw on GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![Mfuate Diego kwenye LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
+[![Mfuate @diegosouzapw kwenye GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
 
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
 [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
 [![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
 [![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![Website](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![Tovuti](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
 
-**Maswali, vidokezo vya watoa huduma, ramani ya njia & msaada → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**Maswali, vidokezo kuhusu watoa huduma, ramani ya maendeleo na usaidizi → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
@@ -224,23 +224,23 @@
 
 <a id="first-run"></a>
 
-## 🆓 Sakinisha, unganisha mtoa huduma, kisha elekeza kupitia njia moja
+## 🆓 Sakinisha, unganisha mtoa huduma, kisha elekeza kupitia endpoint moja
 
 </div>
 
-<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Hatua tatu: sakinisha na anzisha OmniRoute, unganisha mtoa huduma anayefaa kwa akaunti yako au API key yako, kisha elekeza zana yako kwa localhost:20128/v1 ukitumia OmniRoute API key na model auto. Uelekezaji unategemea miunganisho inayopatikana na mipaka ya mtoa huduma."/>
+<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Hatua tatu: sakinisha na uanzishe OmniRoute, unganisha mtoa huduma anayestahiki kwa kutumia akaunti yako au ufunguo wako wa API, kisha elekeza zana yako kwenye localhost:20128/v1 ukitumia ufunguo wa API wa OmniRoute na model auto. Uelekezaji hutegemea miunganisho inayopatikana na inayostahiki pamoja na vikomo vya mtoa huduma."/>
 
 ```bash
-# Baada ya kuunganisha mtoa huduma, nakili OmniRoute key yako kutoka Dashboard → Endpoints:
+# Baada ya kuunganisha mtoa huduma, nakili ufunguo wako wa OmniRoute kutoka Dashboard → Endpoints:
 curl http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer YOUR_OMNIROUTE_KEY" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-<sub>`auto` inahitaji njia inayofaa. Usakinishaji mpya unaweza kukosa malengo yanayofaa bila ufunguo, na mtoa huduma asiyehitaji ufunguo anaweza kukataa wateja wa watu wengine. Watoa huduma waliowekwa alama `tos: avoid`, wakiwemo Kiro, wameondolewa kwenye uelekezaji wa moja kwa moja kwa chaguo-msingi; kuunganisha akaunti hakubadilishi mpangilio huo. Tazama [Mwongozo wa Free Tiers](docs/getting-started/FREE-TIERS-GUIDE.md) kabla ya kuchagua mtoa huduma.</sub>
+<sub>`auto` inahitaji njia inayostahiki. Usakinishaji mpya unaweza kutokuwa na walengwa wowote wanaostahiki wasiohitaji ufunguo, na mtoa huduma asiyehitaji ufunguo anaweza kukataa wateja wa wahusika wengine. Watoa huduma waliowekwa alama `tos: avoid`, wakiwemo Kiro, huondolewa kwenye uelekezaji wa kiotomatiki kwa chaguomsingi; kuunganisha akaunti hakubatilishi mpangilio huo. Tazama [Mwongozo wa Viwango vya Bure](docs/getting-started/FREE-TIERS-GUIDE.md) kabla ya kuchagua mtoa huduma.</sub>
 
-<sub>📦 Nakili na bandika script za kuanza haraka kwa **Python, Node.js, PHP, na cURL** → [`examples/quickstart/`](examples/quickstart/)</sub>
+<sub>📦 Nakili-bandika hati za kuanza haraka za **Python, Node.js, PHP, na cURL** → [`examples/quickstart/`](examples/quickstart/)</sub>
 
 <br/>
 
@@ -250,22 +250,22 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Ahadi — Njia moja na watoa huduma 380. Uelekezaji wa kiotomatiki unaendelea wakati kuna lengo lingine lenye afya. Nguzo sita: uelekezaji wa akiba kwa watoa huduma 380 · hadi 95% ya akiba ya tokeni kwenye kazi zinazofaa · $0 kuanza na zaidi ya free tiers 150 na watoa huduma 53 wa bure milele bila ufunguo · miunganisho 39 ya CLI/agent kupitia mpangilio mmoja · Ulinganifu wa OpenAI, Claude, Gemini na Responses API kwenye /v1 · udhibiti wa uzalishaji ukiwemo circuit breakers, TLS stealth, MCP zana 110, A2A, memory, guardrails, evals na zaidi ya tamko la majaribio 56,000+ kwenye faili za majaribio 7,800+ zinazofuatiliwa."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Ahadi — Endpoint moja na watoa huduma 380. Njia mbadala ya kiotomatiki huendeleza uelekezaji mradi walengwa wengine wenye afya wapatikane. Nguzo sita: njia mbadala thabiti kwenye watoa huduma 380 · hadi 95% ya uokoaji wa tokeni kwenye kazi zinazostahiki · $0 kuanza na viwango vya bure 150+ pamoja na watoa huduma 54 wa bure milele wanaorudiwa/wasiohitaji ufunguo · miunganisho 39 ya CLI/agent kupitia usanidi mmoja · uoanifu na OpenAI, Claude, Gemini na Responses API kwenye /v1 · vidhibiti vya uzalishaji vinavyojumuisha vivunja-mzunguko, ujifichaji wa TLS, zana 110 za MCP, A2A, kumbukumbu, vidhibiti vya ulinzi, tathmini na matamko ya majaribio tuli 56,000+ kwenye faili za majaribio 7,800+ zinazofuatiliwa."/>
 
 <br/>
 <br/>
 
 <div align="center">
 
-# 🤔 Kwa Nini OmniRoute?
+# 🤔 Kwa nini OmniRoute?
 
 </div>
 
-<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Kwa Nini OmniRoute — acha kuhangaika na dashibodi 10, API keys zilizokufa na bili za kushtukiza. Maumivu kumi ya kila siku dhidi ya suluhisho: quota inaisha bila kutumika → ongeza matumizi ya usajili; mipaka ya kiwango katikati ya kuandika msimbo → uelekezaji wa kiotomatiki wa ngazi 4 (Subscription → API → Cheap → Free); matokeo ya zana yanateketeza tokeni → RTK + Caveman compression (15–95%); API ghali → uelekezaji wa gharama nafuu; kila zana na mpangilio wake → njia moja, dashibodi moja; AI imezuiwa → proxy ya ngazi 3 + TLS stealth; funguo zilizokufa → uimara wa ngazi 3 (circuit breakers, key cooldown, model lockout); timu inashiriki usajili mmoja → pool za funguo na mgao wa haki; maombi kupitia wingu la mtu mwingine → local-first na funguo zilizofichwa kwa AES-256-GCM; hakuna mwonekano wa matumizi → takwimu za moja kwa moja (matumizi, quota, akiba, latency ya p95)."/>
+<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Kwa nini OmniRoute — acha kushughulikia dashibodi 10, funguo za API zilizokufa na bili za kushtukiza. Maumivu 10 ya kila siku dhidi ya suluhisho: muda wa matumizi wa kiwango kuisha bila kutumika → boresha matumizi ya usajili; vikomo vya kasi katikati ya uandishi wa msimbo → njia mbadala ya kiotomatiki ya viwango 4 (Usajili → API → Nafuu → Bure); matokeo ya zana kutumia tokeni → mbano wa RTK + Caveman (15–95%); API za gharama kubwa → uelekezaji ulioboreshwa kwa gharama; kila zana kuwa na usanidi wake → endpoint moja, dashibodi moja; AI kuzuiwa → proksi ya viwango 3 + ujifichaji wa TLS; funguo zilizokufa → ustahimilivu wa tabaka 3 (vivunja-mzunguko, kupooza kwa ufunguo, kuzuia modeli); timu kushiriki usajili mmoja → makundi ya funguo yenye viwango vya matumizi vya mgao wa haki; vidokezo kupitia wingu la mtu mwingine → kipaumbele cha ndani chenye funguo zilizosimbwa kwa AES-256-GCM; kutokuwa na mwonekano wa matumizi → uchanganuzi wa moja kwa moja (matumizi, kiwango, akiba, ucheleweshaji wa p95)."/>
 
 <div align="center">
 
-<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="Mtiririko wa ombi la OmniRoute: IDE au CLI yako (Claude Code, Cursor, Cline…) inaita njia moja ya ndani (http://localhost:20128/v1); OmniRoute Smart Router (RTK + Caveman compression, mikakati 20 ya uelekezaji, circuit breakers, TLS stealth, MCP, A2A, guardrails) inaweza kurudi nyuma kwenye ngazi 4 za watoa huduma wakati bado kuna lengo lenye afya — Ngazi ya 1 Usajili, Ngazi ya 2 API Key, Ngazi ya 3 Cheap na Ngazi ya 4 Free."/>
+<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="Mtiririko wa ombi la OmniRoute: IDE au CLI yako (Claude Code, Cursor, Cline…) hupiga endpoint moja ya ndani (http://localhost:20128/v1); Kielekezaji Mahiri cha OmniRoute (mbano wa RTK + Caveman, mikakati 20 ya uelekezaji, vivunja-mzunguko, ujifichaji wa TLS, MCP, A2A, vidhibiti vya ulinzi) kinaweza kuhamia kwenye viwango 4 vya watoa huduma mradi walengwa anayestahiki na mwenye afya apatikane — Kiwango cha 1 Usajili, Kiwango cha 2 Ufunguo wa API, Kiwango cha 3 Nafuu na Kiwango cha 4 Bure."/>
 
 </div>
 
@@ -622,15 +622,15 @@ ya historia ya shell yako. → [Muunganiko wa CLI](docs/guides/CLI-INTEGRATIONS.
 
 <div align="center">
 
-## 🌐 Watoa Huduma 380 wa AI — 153 Wamewekwa Alama ya Bure kwenye Katalogi
+## 🌐 Watoa huduma 380 wa AI — 153 Waliowekwa Alama kuwa Bure kwenye Katalogi
 
 </div>
 
-> **Watoa huduma 380 waliosajiliwa** katika makusanyo ya kawaida ya mazungumzo, media, utafutaji, ndani ya eneo, mawakala wa wingu na mifumo, ikiwa ni pamoja na **153 wenye metadata ya ugunduzi ya `hasFree: true`**. Usajili wa mifano ya mazungumzo unajumuisha **watoa huduma 239 / jozi 3,059 za mtoa huduma-mtindo tofauti / vitambulisho vya mifano ghafi 1,475**; katalogi tofauti ya bajeti ya bure ina **mistari 471 kwa kila mfano**, **vikundi 34 vinavyojirudia** na **watoa huduma 53 wa bure milele bila ufunguo/wa mara kwa mara**. Hizi ni viwango tofauti kwa makusudi; ufafanuzi na hesabu zilizojumlishwa kwa vikundi zinapatikana kwenye [Marejeleo ya Watoa Huduma](docs/reference/PROVIDER_REFERENCE.md) na [Viwango Bure](docs/reference/FREE_TIERS.md).
+> **Watoa huduma 380 waliosajiliwa** katika mikusanyo rasmi ya mazungumzo, midia, utafutaji, ya ndani, mawakala wa wingu na mfumo, wakiwemo **153 wenye metadata ya ugunduzi ya `hasFree: true`**. Rejista ya miundo ya mazungumzo inajumuisha **watoa huduma 239 / jozi 3,059 tofauti za mtoa huduma na modeli / vitambulisho 1,475 ghafi vya miundo**; katalogi tofauti ya bajeti ya bure ina **mistari 471 kwa kila modeli**, **madimbwi 34 yanayojirudia** na **watoa huduma 54 wa bure milele wanaojirudia/wasiohitaji ufunguo**. Hizi ni vigawanyo tofauti kwa makusudi; ufafanuzi na hesabu zilizoondoa marudio ya madimbwi zinapatikana katika [Marejeleo ya Watoa Huduma](docs/reference/PROVIDER_REFERENCE.md) na [Viwango vya Bure](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
-### 🏢 Maabara Kila Moja Kubwa — kupitia kiolesura kimoja
+### 🏢 Maabara zote kuu — kupitia endpoint moja
 
 <table>
   <tr>
@@ -659,7 +659,7 @@ ya historia ya shell yako. → [Muunganiko wa CLI](docs/guides/CLI-INTEGRATIONS.
   </tr>
 </table>
 
-<sub>…na zaidi ya 350 wengine — kila ikoni inaonekana moja kwa moja kutoka kwenye katalogi ya watoa huduma ya dashibodi. 📖 [Marejeleo ya Watoa Huduma](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>…na wengine zaidi ya 350 — kila ikoni hupatikana moja kwa moja kutoka kwenye katalogi ya watoa huduma ya dashibodi. 📖 [Marejeleo ya Watoa Huduma](docs/reference/PROVIDER_REFERENCE.md)</sub>
 
 <br/>
 
@@ -668,23 +668,23 @@ ya historia ya shell yako. → [Muunganiko wa CLI](docs/guides/CLI-INTEGRATIONS.
 <table>
   <tr>
     <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4, Nemotron 3<br/>Hakuna kikomo cha tokeni</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>Auto-router, Tencent Hy3<br/>Bure milele</sub></td>
-    <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B, Nemotron<br/>Bure milele</sub></td>
-    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>Kiwango cha bure</sub></td>
-    <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>Bure milele</sub></td>
-    <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>Bure milele</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>Uelekezaji wa kiotomatiki, Tencent Hy3<br/>Bila malipo milele</sub></td>
+    <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B, Nemotron<br/>Bila malipo milele</sub></td>
+    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>Kiwango cha bila malipo</sub></td>
+    <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>Bila malipo milele</sub></td>
+    <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>Bila malipo milele</sub></td>
   </tr>
   <tr>
-    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max, Kimi-K2<br/>BURE bila kikomo</sub></td>
+    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max, Kimi-K2<br>BILA MALIPO bila kikomo</sub></td>
     <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT, Llama, Claude<br/>Hakuna ufunguo unaohitajika</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>Zaidi ya modeli 50<br/>Neuroni 10K/siku</sub></td>
-    <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>~40 RPM bure</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>Mkopo wa $5 mara moja; kadi inahitajika</sub></td>
-    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:modeli za bure<br/>+$10 → RPM ya juu zaidi</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>Miundo 50+<br/>Neuroni 10K kwa siku</sub></td>
+    <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>Takriban RPM 40 bila malipo</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>Salio la $5 la mara moja; kadi inahitajika</sub></td>
+    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>Miundo ya :free<br/>+$10 → RPM ya juu zaidi</sub></td>
   </tr>
 </table>
 
-📖 Katalogi kamili inayosomeka na mashine → [`docs/reference/PROVIDER_REFERENCE.md`](docs/reference/PROVIDER_REFERENCE.md)
+📖 Katalogi kamili inayoweza kusomeka na mashine → [`docs/reference/PROVIDER_REFERENCE.md`](docs/reference/PROVIDER_REFERENCE.md)
 
 <br/>
 </div>
@@ -1255,84 +1255,84 @@ Vipimo kanoniki mnamo 2026-10-18: **video 1.976 za kipekee** · **mara 20.220.28
 ### 📘 Kuanza
 
 <table>
-  <tr><th align="left">Nyaraka</th><th align="left">Maelezo</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">Mwongozo wa Mtumiaji</a></b></td><td>Watoa huduma, mchanganyiko, muunganisho wa CLI, uwekaji</td></tr>
+  <tr><th align="left">Hati</th><th align="left">Maelezo</th></tr>
+  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">Mwongozo wa Mtumiaji</a></b></td><td>Watoa huduma, mchanganyiko, ujumuishaji wa CLI, upelekaji</td></tr>
   <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">Mwongozo wa Usanidi</a></b></td><td>Mbinu kamili za usakinishaji, usanidi wa zana za CLI, usanidi wa itifaki, urekebishaji wa muda wa kuisha</td></tr>
   <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">Mwongozo wa Zana za CLI</a></b></td><td>Usanidi wa kila zana kwa Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Hali ya Mbali</a></b></td><td>Endesha OmniRoute ya mbali (VPS) kutoka kwa CLI ya kompyuta yako mpakato ukitumia tokeni za ufikiaji zenye mipaka</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Usanidi wa Claude Code</a></b></td><td>Elekeza Claude Code kwenye OmniRoute (ya ndani/ya mbali) ukitumia <code>launch</code> + wasifu kwa kila modeli</td></tr>
-  <tr><td nowrap><b><a href="README.md#-quick-start">Kuanza Haraka</a></b></td><td>Usakinishaji wa hatua 3 → kuunganisha → kusanidi</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Hali ya Mbali</a></b></td><td>Endesha OmniRoute ya mbali (VPS) kutoka CLI ya kompyuta yako ya mkononi kwa kutumia tokeni za ufikiaji zenye upeo</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Usanidi wa Claude Code</a></b></td><td>Elekeza Claude Code kwenye OmniRoute (ya ndani/ya mbali) kwa <code>launch</code> + wasifu maalum kwa kila modeli</td></tr>
+  <tr><td nowrap><b><a href="README.md#-quick-start">Kuanza Haraka</a></b></td><td>Usakinishaji wa hatua 3 → unganisha → sanidi</td></tr>
 </table>
 
-### 🔧 Uendeshaji na Uwekaji
+### 🔧 Uendeshaji na Upelekaji
 
 <table>
-  <tr><th align="left">Nyaraka</th><th align="left">Maelezo</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Mwongozo wa Docker</a></b></td><td>Uendeshaji wa Docker, wasifu wa Compose, HTTPS ya Caddy, vichuguu, tagi za picha</td></tr>
-  <tr><td nowrap><b><a href="contrib/podman/README.md">Mwongozo wa Podman</a></b></td><td>Muunganisho wa Quadlet systemd, podman-compose, SELinux</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">Uwekaji wa VM</a></b></td><td>Mwongozo kamili: usanidi wa VM + nginx + Cloudflare</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Uwekaji wa Fly.io</a></b></td><td>Weka kwenye Fly.io ukitumia hifadhi endelevu</td></tr>
+  <tr><th align="left">Hati</th><th align="left">Maelezo</th></tr>
+  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Mwongozo wa Docker</a></b></td><td>Uendeshaji wa Docker, wasifu wa Compose, HTTPS ya Caddy, tunnel, lebo za image</td></tr>
+  <tr><td nowrap><b><a href="contrib/podman/README.md">Mwongozo wa Podman</a></b></td><td>Ujumuishaji wa Quadlet na systemd, podman-compose, SELinux</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">Upelekaji wa VM</a></b></td><td>Mwongozo kamili: usanidi wa VM + nginx + Cloudflare</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Upelekaji wa Fly.io</a></b></td><td>Weka kwenye Fly.io ukiwa na hifadhi endelevu</td></tr>
   <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Mwongozo wa Termux</a></b></td><td>Endesha OmniRoute kwenye Android kupitia Termux</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">Mwongozo wa PWA</a></b></td><td>Usakinishaji wa Progressive Web App, uhifadhi wa akiba, usanifu</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">Mwongozo wa PWA</a></b></td><td>Usakinishaji wa Progressive Web App, uhifadhi wa muda, usanifu</td></tr>
   <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">Mwongozo wa Kuondoa</a></b></td><td>Uondoaji safi kwa mbinu zote za usakinishaji</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Usanidi wa Mazingira</a></b></td><td>Vigezo na marejeo kamili ya <code>.env</code></td></tr>
+  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Usanidi wa Mazingira</a></b></td><td>Vigezo na marejeleo kamili vya <code>.env</code></td></tr>
 </table>
 
 ### 🧠 Vipengele na Usanifu
 
 <table>
-  <tr><th align="left">Nyaraka</th><th align="left">Maelezo</th></tr>
-  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Usanifu</a></b></td><td>Usanifu wa mfumo, mtiririko wa data na vipengele vya ndani</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Mwongozo wa Ukandamizaji</a></b></td><td>Mchakato wa chaguo 7: off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
+  <tr><th align="left">Hati</th><th align="left">Maelezo</th></tr>
+  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Usanifu</a></b></td><td>Usanifu wa mfumo, mtiririko wa data, na mambo ya ndani</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Mwongozo wa Ukandamizaji</a></b></td><td>Pipeline yenye chaguo 7: off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
   <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">Ukandamizaji wa RTK</a></b></td><td>Ukandamizaji wa matokeo ya amri, vichujio, uaminifu, uthibitishaji, urejeshaji wa matokeo ghafi</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Injini za Ukandamizaji</a></b></td><td>Caveman, RTK, michakato iliyopangwa kwa tabaka, miingiliano ya dashboard/API/MCP</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Muundo wa Sheria za Ukandamizaji</a></b></td><td>Miundo ya vifurushi vya sheria za JSON kwa vichujio vya Caveman na RTK</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Vifurushi vya Lugha za Ukandamizaji</a></b></td><td>Ugunduzi wa lugha na uandishi wa vifurushi vya sheria za Caveman</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Injini za Ukandamizaji</a></b></td><td>Caveman, RTK, pipeline zilizopangwa kwa tabaka, nyuso za dashboard/API/MCP</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Muundo wa Kanuni za Ukandamizaji</a></b></td><td>Miundo ya JSON ya vifurushi vya kanuni kwa vichujio vya Caveman na RTK</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Vifurushi vya Lugha vya Ukandamizaji</a></b></td><td>Utambuzi wa lugha na uandishi wa vifurushi vya kanuni vya Caveman</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Mwongozo wa Ustahimilivu</a></b></td><td>Vivunja mzunguko, vipindi vya kupoa, foleni, kuzuia msongamano wa ghafla, udanganyifu wa TLS</td></tr>
-  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Injini ya Auto-Combo</a></b></td><td>Uwekaji alama wa vipengele 16, vifurushi vya hali, kujiponya</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Mwongozo wa Proksi</a></b></td><td>Mfumo wa proksi wa viwango 3, soko la 1proxy, CRUD ya sajili</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Viwango vya Bure</a></b></td><td>Saraka iliyounganishwa: hifadhi 34 za mara kwa mara zilizoandikwa / maingizo 485 ya viwango vya bure yaliyowekwa kwenye katalogi</td></tr>
+  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Injini ya Auto-Combo</a></b></td><td>Upimaji wa vipengele 16, vifurushi vya hali, kujiponya</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Mwongozo wa Proxy</a></b></td><td>Mfumo wa proxy wa viwango 3, soko la 1proxy, CRUD ya sajili</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Viwango vya Bure</a></b></td><td>Saraka iliyounganishwa: mabwawa 34 ya mara kwa mara yaliyoandikwa / maingizo 485 ya viwango vya bure yaliyowekwa kwenye katalogi</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Mkusanyiko wa Vipengele</a></b></td><td>Ziara ya kuona ya dashboard yenye picha za skrini</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Nyaraka za Codebase</a></b></td><td>Mafunzo ya codebase yaliyo rahisi kwa wanaoanza</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Nyaraka za Codebase</a></b></td><td>Maelezo ya codebase yanayofaa wanaoanza</td></tr>
 </table>
 
 ### 🤖 Itifaki na API
 
 <table>
-  <tr><th align="left">Nyaraka</th><th align="left">Maelezo</th></tr>
-  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">Marejeo ya API</a></b></td><td>Endpoints zote zikiwa na mifano</td></tr>
-  <tr><td nowrap><b><a href="docs/openapi.yaml">Spec ya OpenAPI</a></b></td><td>Spec ya OpenAPI 3.0</td></tr>
+  <tr><th align="left">Hati</th><th align="left">Maelezo</th></tr>
+  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">Marejeo ya API</a></b></td><td>Endpoint zote zikiwa na mifano</td></tr>
+  <tr><td nowrap><b><a href="docs/openapi.yaml">Vipimo vya OpenAPI</a></b></td><td>Vipimo vya OpenAPI 3.0</td></tr>
   <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">Seva ya MCP</a></b></td><td>Zana 110 za MCP, usanidi wa IDE, wateja wa Python/TS/Go</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">Mwongozo wa Seva ya MCP</a></b></td><td>Usakinishaji wa MCP, usafirishaji na marejeo ya zana</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">Mwongozo wa Seva ya MCP</a></b></td><td>Usakinishaji wa MCP, usafirishaji, na marejeo ya zana</td></tr>
   <tr><td nowrap><b><a href="src/lib/a2a/README.md">Seva ya A2A</a></b></td><td>Itifaki ya JSON-RPC 2.0, ujuzi, utiririshaji, usimamizi wa majukumu</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">Mwongozo wa Seva ya A2A</a></b></td><td>Kadi ya wakala ya A2A, majukumu, ujuzi na utiririshaji</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">Mwongozo wa Seva ya A2A</a></b></td><td>Kadi ya wakala ya A2A, majukumu, ujuzi, na utiririshaji</td></tr>
 </table>
 
 ### 📋 Mradi na Ubora
 
 <table>
   <tr><th align="left">Hati</th><th align="left">Maelezo</th></tr>
-  <tr><td nowrap><b><a href="CONTRIBUTING.md">Kuchangia</a></b></td><td>Usanidi na miongozo ya uundaji</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Muundo wa Matawi na Matoleo</a></b></td><td>PRs zinalenga wapi (<code>release/*</code>), maana ya <code>main</code> na lebo</td></tr>
+  <tr><td nowrap><b><a href="CONTRIBUTING.md">Kuchangia</a></b></td><td>Usanidi wa uundaji na miongozo</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Muundo wa Matawi na Utoaji</a></b></td><td>Mahali PRs zinalenga (<code>release/*</code>), maana ya <code>main</code> na tagi</td></tr>
   <tr><td nowrap><b><a href="CHANGELOG.md">Kumbukumbu ya Mabadiliko</a></b></td><td>Historia kamili ya matoleo kwa kila toleo</td></tr>
-  <tr><td nowrap><b><a href="SECURITY.md">Sera ya Usalama</a></b></td><td>Kuripoti udhaifu na taratibu za usalama</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/I18N.md">Mwongozo wa i18n</a></b></td><td>Msaada wa lugha 67, mtiririko wa tafsiri, RTL</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Orodha Hakiki ya Toleo</a></b></td><td>Hatua za uthibitishaji kabla ya toleo</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Mpango wa Ufunikaji</a></b></td><td>Mbinu ya ufunikaji wa majaribio kwa matamko ya majaribio tuli zaidi ya 60,000 katika faili za majaribio zinazofuatiliwa zaidi ya 8,400</td></tr>
+  <tr><td nowrap><b><a href="SECURITY.md">Sera ya Usalama</a></b></td><td>Kuripoti udhaifu na mbinu za usalama</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/I18N.md">Mwongozo wa i18n</a></b></td><td>Msaada wa lugha 67, mtiririko wa kazi wa tafsiri, RTL</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Orodha Hakiki ya Utoaji</a></b></td><td>Hatua za uthibitishaji kabla ya utoaji</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Mpango wa Ufunikaji</a></b></td><td>Mbinu ya ufunikaji wa majaribio kwa matamko tuli ya majaribio zaidi ya 60,000 katika faili za majaribio zaidi ya 8,400 zinazofuatiliwa</td></tr>
 </table>
 
 <br/>
 
 <div align="center">
 
-# ⭐ Wachangiaji Wakuu
+# ⭐ Wachangiaji Bora
 
 > OmniRoute imeundwa na jumuiya yenye shauku ya programu huria. Watu hawa wametoa michango ya kipekee inayoathiri moja kwa moja ubora, uthabiti na ufikiaji wa mradi. **Asanteni.**
 
-### Wachangiaji wa nje kwa pull requests zilizounganishwa
+### Wachangiaji wa nje kwa kuzingatia pull requests zilizounganishwa
 
 <table>
-  <tr><th align="center">Nafasi</th><th align="left">Mchangiaji</th><th align="center">PR zilizounganishwa</th><th align="right">Mistari iliyobadilishwa ~</th></tr>
+  <tr><th align="center">Nafasi</th><th align="left">Mchangiaji</th><th align="center">PRs zilizounganishwa</th><th align="right">Mistari iliyobadilishwa ~</th></tr>
   <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
   <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
   <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
@@ -1355,9 +1355,9 @@ Vipimo kanoniki mnamo 2026-10-18: **video 1.976 za kipekee** · **mara 20.220.28
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
 </table>
 
-<sub>Sensa ilifanywa 2026-11-03 03:01:19 UTC kwa kutumia kilele cha moja kwa moja cha <code>release/v3.8.53</code> <code>05bc048d6c</code>. Sensa ya GitHub GraphQL yenye kurasa ina PR 9,947 zilizounganishwa: 4,130 zikiwa za mmiliki wa hazina, 240 zikiwa za Dependabot, 6 zikiwa za roboti/programu nyingine, na <b>PR 5,571 za nje kutoka kwa wachangiaji 883 tofauti</b>. “Mistari iliyobadilishwa” ni jumla ya nyongeza + ufutaji wa GitHub na inajumuisha faili zilizozalishwa, lockfiles, katalogi, tafsiri na nyaraka; ni mabadiliko ya mara kwa mara, si LOC iliyoandikwa. PR 53 zinaripoti tofauti za GitHub zilizo na zaidi ya mistari 500,000 (kwa mfano #13399, nyongeza moja ya mtoa huduma, inaorodhesha faili 2,347 zilizobadilishwa), jambo linaloongeza baadhi ya jumla zilizo hapo juu. Nafasi zinazolingana zimepewa nafasi moja.</sub>
+<sub>Sensa ilifanywa 2026-11-03 03:01:19 UTC kwa kutumia ncha hai ya <code>release/v3.8.53</code> <code>05bc048d6c</code>. Sensa ya GitHub GraphQL yenye kurasa ina PRs zilizounganishwa 9,947: 4,130 zilifanywa na mmiliki wa hifadhi, 240 na Dependabot, 6 na roboti/programu nyingine, na <b>PRs 5,571 za nje kutoka kwa wachangiaji 883 tofauti</b>. “Mistari iliyobadilishwa” ni jumla ya nyongeza + ufutaji kutoka GitHub na inajumuisha faili zilizozalishwa, lockfiles, katalogi, tafsiri na nyaraka; ni mabadiliko ya jumla, si LOC iliyoandikwa na mwandishi. PRs 53 zinaripoti tofauti za GitHub zenye zaidi ya mistari 500,000 (kwa mfano #13399, nyongeza moja ya mtoa huduma, inaorodhesha faili 2,347 zilizobadilishwa), jambo linaloongeza jumla kadhaa hapo juu. Nafasi zinazolingana zimewekwa pamoja.</sub>
 
-### Michango iliyohusishwa na GitHub
+### Mihusisho iliyopewa sifa na GitHub
 
 <table>
   <tr>
@@ -1366,42 +1366,42 @@ Vipimo kanoniki mnamo 2026-10-18: **video 1.976 za kipekee** · **mara 20.220.28
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 418 commits zilizohusishwa na GitHub</sub>
+      <sub>🥇 Michango 418 iliyohusishwa na GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 294 commits zilizohusishwa na GitHub</sub>
+      <sub>🥈 Michango 294 iliyohusishwa na GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
         <img src="https://github.com/oyi77.png" width="40" style="border-radius:50%" alt="Paijo"/><br/>
         <b>Paijo</b>
       </a><br/>
-      <sub>🥉 229 commits zilizohusishwa na GitHub</sub>
+      <sub>🥉 Michango 229 iliyohusishwa na GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/pacocartones">
         <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
         <b>Paco Cartones</b>
       </a><br/>
-      <sub>🏅 222 commits zilizohusishwa na GitHub</sub>
+      <sub>🏅 Michango 222 iliyohusishwa na GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
       </a><br/>
-      <sub>🏅 202 commits zilizohusishwa na GitHub</sub>
+      <sub>🏅 Michango 202 iliyohusishwa na GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/JxnLexn">
         <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
         <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 134 commits zilizohusishwa na GitHub</sub>
+      <sub>🏅 Michango 134 iliyohusishwa na GitHub</sub>
     </td>
   </tr>
   <tr>
@@ -1410,49 +1410,49 @@ Vipimo kanoniki mnamo 2026-10-18: **video 1.976 za kipekee** · **mara 20.220.28
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
         <b>Ravi Tharuma</b>
       </a><br/>
-      <sub>🏅 126 commits zilizohusishwa na GitHub</sub>
+      <sub>🏅 Michango 126 iliyohusishwa na GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 115 commits zilizohusishwa na GitHub</sub>
+      <sub>🏅 Michango 115 iliyohusishwa na GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
         <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
         <b>Randi</b>
       </a><br/>
-      <sub>🏅 108 commits zilizohusishwa na GitHub</sub>
+      <sub>🏅 Michango 108 iliyohusishwa na GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
-      <sub>🏅 70 commits zilizohusishwa na GitHub</sub>
+      <sub>🏅 Michango 70 iliyohusishwa na GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/jonlwheat2-gif">
         <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
         <b>WebPerson</b>
       </a><br/>
-      <sub>🏅 68 commits zilizohusishwa na GitHub</sub>
+      <sub>🏅 Michango 68 iliyohusishwa na GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
         <img src="https://github.com/KooshaPari.png" width="40" style="border-radius:50%" alt="Koosha Paridehpour"/><br/>
         <b>Koosha Paridehpour</b>
       </a><br/>
-      <sub>🏅 68 commits zilizohusishwa na GitHub</sub>
+      <sub>🏅 Michango 68 iliyohusishwa na GitHub</sub>
     </td>
   </tr>
 </table>
 
-<sub>Ilikaguliwa tena tarehe 2026-11-03 02:09:16 UTC: commits zilizohusishwa na GitHub zilizoripotiwa na Contributors API ya hazina kwa tawi chaguo-msingi la <code>release/v3.8.53</code>. API ilirejesha utambulisho 903 (watumiaji 429, roboti 2, wasiojulikana 472); jedwali hili linawaondoa maintainer, roboti na utambulisho usiojulikana, na linahifadhi sare za ushindani. Linatofautiana na viwango vya PR zilizounganishwa vilivyo hapo juu na pia sensa ya metadata ya Git iliyo hapa chini.</sub>
+<sub>Ilikaguliwa tena tarehe 2026-11-03 02:09:16 UTC: Michango iliyohusishwa na GitHub iliyoripotiwa na Contributors API ya hazina kwa tawi chaguomsingi la <code>release/v3.8.53</code>. API ilirejesha vitambulisho 903 (watumiaji 429, roboti 2, visivyojulikana 472); jedwali hili linawaondoa msimamizi, roboti na vitambulisho visivyojulikana, na linahifadhi nafasi zinazolingana. Linatofautiana na orodha ya viwango ya PR zilizounganishwa hapo juu pamoja na sensa ya metadata ya Git iliyo hapa chini.</sub>
 
-> 🙏 Vipengele, marekebisho ya hitilafu na maboresho ya miundombinu ya wachangiaji hawa ni **sehemu kuu** ya kinachofanya OmniRoute iwe thabiti na yenye vipengele vingi. Kila ombi la kuvuta, kila kisa cha majaribio na kila faili ya tafsiri ya i18n ni muhimu. Chanzo huria hujengwa na watu kama wao.
+> 🙏 Vipengele, marekebisho ya hitilafu na maboresho ya miundombinu ya wachangiaji hawa ni **sehemu kuu** ya kinachoifanya OmniRoute iwe ya kutegemewa na yenye vipengele vingi. Kila ombi la kuvuta, kila kisa cha majaribio na kila faili ya tafsiri ya i18n ni muhimu. Programu huria hujengwa na watu kama wao.
 
 </div>
 

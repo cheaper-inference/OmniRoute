@@ -11,10 +11,13 @@ const read = (p: string) => fs.readFileSync(path.join(ROOT, p), "utf8");
 
 test("console log timestamps and ids use the terminal's readable gray (§6.3, 17 contrast nodes)", () => {
   const src = read("src/shared/components/ConsoleLogViewer.tsx");
-  assert.doesNotMatch(src, /#484f58/i); // 2.4:1 on #0d1117; #8b949e is ≈ 6:1
+  assert.doesNotMatch(src, /#484f58/i); // 2.4:1 on the panel; the kit's log inks keep 4.5:1
   // Positive pins (review M-6): timestamp and correlation-id spans carry the readable gray.
-  assert.match(src, /<span className="text-\[#8b949e\] whitespace-nowrap shrink-0 select-none">/);
-  assert.match(src, /<span className="text-\[#8b949e\] ml-2">cid:/);
+  assert.match(
+    src,
+    /<span className="text-\[var\(--ci-log-trace\)\] whitespace-nowrap shrink-0 select-none">/
+  );
+  assert.match(src, /<span className="text-\[var\(--ci-log-trace\)\] ml-2">cid:/);
   assert.doesNotMatch(src, /mt-1 opacity-60">\{tv\("emptyFileLoggingHint"\)/);
 });
 
