@@ -19,7 +19,10 @@ export function isAccountDeactivatedMessage(text: string): boolean {
   const normalized = (text || "").toLowerCase();
   return (
     normalized.includes("account_deactivated") ||
-    (normalized.includes("deactivat") && normalized.includes("account"))
+    (normalized.includes("deactivat") && normalized.includes("account")) ||
+    normalized.includes("tos_violation") ||
+    normalized.includes("disabled in this account for violation") ||
+    (normalized.includes("disabled in this account") && normalized.includes("terms of service"))
   );
 }
 

@@ -1,23 +1,28 @@
 /**
- * Antigravity / Google Cloud Code "verify your account" challenge links.
+ * Antigravity / Google Cloud Code "verify your account" challenge & appeal links.
  *
  * Google answers some Antigravity requests with `403 VALIDATION_REQUIRED`
- * ("Verify your account to continue") and ships the URL that unlocks the
- * account in the error body — `error.details[].metadata.validation_url`,
+ * ("Verify your account to continue") or `403 PERMISSION_DENIED (TOS_VIOLATION)`
+ * ("This service has been disabled in this account for violation of Terms of Service")
+ * and ships the URL that unlocks or appeals the account in the error body —
+ * `error.details[].metadata.validation_url`, `error.details[].metadata.appeal_url`,
  * `error.details[].links[].url`, `ineligibleTiers[].validationUrl` or free text.
- * errorClassifier.ts already keeps that 403 recoverable; this module only finds
- * the link so the dashboard can offer it to the operator.
+ * errorClassifier.ts already handles classification; this module extracts the
+ * URL so the dashboard can offer it to the operator.
  *
- * Pure (no DB, no logging): the URL carries a continuation token, so callers
+ * Pure (no DB, no logging): the URL may carry a continuation token, so callers
  * must never log it or echo it into a client-facing error body.
  */
 
 type JsonRecord = Record<string, unknown>;
 
 const GOOGLE_ACCOUNTS_HOST = "accounts.google.com";
-const VERIFICATION_WORDING = /validation|verif|appeal/i;
+const GOOGLE_FORMS_HOST = "forms.gle";
+const GOOGLE_DOCS_HOST = "docs.google.com";
+const VERIFICATION_WORDING = /validation|verif|appeal|tos_violation|violation of terms/i;
 // Bounded quantifier keeps the scan linear on untrusted upstream text.
-const FREE_TEXT_URL = /https:\/\/accounts\.google\.com\/[^\s"'\\<>]{1,2048}/;
+const FREE_TEXT_URL =
+  /https:\/\/(?:accounts\.google\.com|forms\.gle|docs\.google\.com\/forms\/)[^\s"'\\<>]{1,2048}/;
 
 function asRecord(value: unknown): JsonRecord | null {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
@@ -27,12 +32,19 @@ function asArray(value: unknown): unknown[] {
   return Array.isArray(value) ? value : [];
 }
 
-/** Only `https://accounts.google.com/...` is ever surfaced as a link. */
+/** Only Google account verification or official Google appeal forms are ever surfaced as a link. */
 export function isGoogleVerificationUrl(candidate: unknown): candidate is string {
   if (typeof candidate !== "string" || candidate.length === 0) return false;
   try {
     const parsed = new URL(candidate);
-    return parsed.protocol === "https:" && parsed.hostname === GOOGLE_ACCOUNTS_HOST;
+    if (parsed.protocol !== "https:") return false;
+    if (parsed.hostname === GOOGLE_ACCOUNTS_HOST || parsed.hostname === GOOGLE_FORMS_HOST) {
+      return true;
+    }
+    if (parsed.hostname === GOOGLE_DOCS_HOST && parsed.pathname.startsWith("/forms/")) {
+      return true;
+    }
+    return false;
   } catch {
     return false;
   }
@@ -99,11 +111,12 @@ export function extractVerificationUrl(payload: unknown): string | null {
   return null;
 }
 
-const ANY_ACCOUNTS_URL = /https:\/\/accounts\.google\.com\/[^\s"'\\<>]{1,2048}/g;
+const ANY_ACCOUNTS_OR_APPEAL_URL =
+  /https:\/\/(?:accounts\.google\.com|forms\.gle|docs\.google\.com\/forms\/)[^\s"'\\<>]{1,2048}/g;
 
-/** Masks every accounts.google.com link so a raw upstream body can be logged safely. */
+/** Masks every accounts.google.com and appeal link so a raw upstream body can be logged safely. */
 export function redactVerificationUrls(text: string): string {
-  return text.replace(ANY_ACCOUNTS_URL, "[verification-url]");
+  return text.replace(ANY_ACCOUNTS_OR_APPEAL_URL, "[verification-url]");
 }
 
 /** Reads the persisted link from a connection's providerSpecificData (validated). */

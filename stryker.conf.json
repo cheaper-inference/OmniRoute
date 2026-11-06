@@ -73,6 +73,7 @@
       "tests/unit/auth-opencode-zen-noauth-fallback.test.ts",
       "tests/unit/codex-account-catalog-routing.test.ts",
       "tests/unit/antigravity-plan-aware-model-routing.test.ts",
+      "tests/unit/antigravity-tos-violation-appeal.test.ts",
       "tests/unit/provider-transfer.test.ts",
       "tests/unit/credential-scope-diagnostics-15889.test.ts",
       "tests/unit/account-weighted-runtime-16459.test.ts",

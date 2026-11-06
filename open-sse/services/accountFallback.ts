@@ -227,6 +227,7 @@ export const ACCOUNT_DEACTIVATED_SIGNALS = [
   // a ban (operator-actionable) — see ACCOUNT_VERIFICATION_REQUIRED_SIGNALS in errorClassifier.ts.
   "this service has been disabled in this account for violation",
   "this service has been disabled in this account",
+  "tos_violation",
 ];
 
 // Custom banned signals — loaded from DB settings at runtime.

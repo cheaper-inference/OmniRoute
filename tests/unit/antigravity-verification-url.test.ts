@@ -105,3 +105,39 @@ test("isGoogleVerificationUrl / readStoredVerificationUrl validate strictly", ()
   assert.equal(readStoredVerificationUrl({ verificationUrl: "https://evil.com/" }), null);
   assert.equal(readStoredVerificationUrl(undefined), null);
 });
+
+test("extracts appeal_url on Google TOS_VIOLATION (forms.gle link)", () => {
+  const APPEAL_LINK = "https://forms.gle/hGzM9MEUv2azZsrb9";
+  const body = {
+    error: {
+      code: 403,
+      message:
+        "This service has been disabled in this account for violation of Terms of Service. Please submit an appeal to continue using this product.",
+      status: "PERMISSION_DENIED",
+      details: [
+        {
+          "@type": "type.googleapis.com/google.rpc.ErrorInfo",
+          reason: "TOS_VIOLATION",
+          domain: "cloudcode-pa.googleapis.com",
+          metadata: {
+            uiMessage: "true",
+            appeal_url: APPEAL_LINK,
+            appeal_url_link_text: "Submit Appeal",
+          },
+        },
+      ],
+    },
+  };
+
+  assert.equal(extractVerificationUrl(body), APPEAL_LINK);
+  assert.equal(isGoogleVerificationUrl(APPEAL_LINK), true);
+  assert.equal(readStoredVerificationUrl({ verificationUrl: APPEAL_LINK }), APPEAL_LINK);
+});
+
+test("isGoogleVerificationUrl accepts docs.google.com/forms links but rejects other docs links", () => {
+  assert.equal(
+    isGoogleVerificationUrl("https://docs.google.com/forms/d/e/1FAIpQLSc_test/viewform"),
+    true
+  );
+  assert.equal(isGoogleVerificationUrl("https://docs.google.com/document/d/123/edit"), false);
+});
