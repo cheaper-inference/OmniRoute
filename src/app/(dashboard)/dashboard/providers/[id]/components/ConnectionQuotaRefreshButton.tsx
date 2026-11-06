@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { Button } from "@/shared/components";
 import type { QuotaRefreshState } from "../hooks/providerQuotaRefresh";
 
@@ -33,7 +34,7 @@ export default function ConnectionQuotaRefreshButton({ refreshing, state, onRefr
         title={t("quotaRefreshCurrentHint")}
         className="h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs text-text-muted hover:text-primary disabled:cursor-wait disabled:opacity-60"
       >
-        <Icon name="refresh" size={13} className={refreshing ? "animate-spin" : undefined} />
+        {refreshing ? <Spinner decorative size="xs" /> : <Icon name="refresh" size={13} />}
         {t(refreshing ? "quotaRefreshing" : "quotaRefreshCurrent")}
       </Button>
       {state && (
