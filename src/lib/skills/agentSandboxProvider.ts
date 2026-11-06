@@ -21,8 +21,8 @@
  *   SKILLS_AGENT_SANDBOX_CONTAINER      container name in the sandbox pod (default "main")
  *   SKILLS_AGENT_SANDBOX_CLAIM_TIMEOUT_S  seconds to wait for a claim to become Ready (default 60)
  *
- * The kubeconfig only needs, in that namespace: sandboxclaims create/get/delete/watch,
- * pods get and pods/exec create.
+ * The kubeconfig only needs, in that namespace: sandboxclaims create/get/list/watch/delete
+ * (`kubectl wait` lists as well as watches), pods get and pods/exec create.
  */
 
 import { createRequire } from "module";
@@ -46,31 +46,30 @@ const K8S_NAME = /^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$/;
  * so nothing user-controlled is ever interpolated into the script text.
  *   $1 kubectl  $2 namespace  $3 claim name  $4 claim manifest (JSON)
  *   $5 container  $6 ready timeout (s)  $7 kubeconfig ("" = default)  $8.. command
- * On SIGTERM/SIGINT it stops the exec, deletes the claim, then re-raises the
- * signal so the caller still observes a signal exit (exit code null).
+ * On SIGTERM/SIGINT it stops the running wait or exec, deletes the claim, then
+ * re-raises the signal so the caller still observes a signal exit (exit code null).
  */
 export const AGENT_SANDBOX_DRIVER = [
   "KB=$1 NS=$2 CLAIM=$3 MANIFEST=$4 CTR=$5 WAIT=$6 KC=$7",
   "shift 7",
   'k() { if [ -n "$KC" ]; then "$KB" --kubeconfig "$KC" -n "$NS" "$@"; else "$KB" -n "$NS" "$@"; fi; }',
+  // sh defers a trapped signal until a foreground command returns, so the calls
+  // that can block for long run in the background and the shell waits on them.
+  // The & sits on kubectl, not on a call to k(): a backgrounded function runs in
+  // a subshell, so $! would not be kubectl itself and killing it would leave
+  // kubectl holding stdout open.
+  'kbg() { if [ -n "$KC" ]; then "$KB" --kubeconfig "$KC" -n "$NS" "$@" & else "$KB" -n "$NS" "$@" & fi; pid=$!; wait "$pid"; rc=$?; pid=; return "$rc"; }',
   "pid=",
   'cleanup() { if [ -n "$pid" ]; then kill "$pid" 2>/dev/null; fi; k delete sandboxclaim "$CLAIM" --ignore-not-found --wait=false >/dev/null 2>&1; }',
   "trap 'cleanup; trap - EXIT TERM; kill -TERM $$' TERM",
   "trap 'cleanup; trap - EXIT INT; kill -INT $$' INT",
   "trap cleanup EXIT",
   'printf %s "$MANIFEST" | k create -f - >/dev/null || { echo "agent-sandbox: failed to create claim $CLAIM" >&2; exit 125; }',
-  'k wait --for=condition=Ready "sandboxclaim/$CLAIM" --timeout="${WAIT}s" >/dev/null || { echo "agent-sandbox: claim $CLAIM not Ready within ${WAIT}s" >&2; exit 125; }',
+  'kbg wait --for=condition=Ready "sandboxclaim/$CLAIM" --timeout="${WAIT}s" >/dev/null || { echo "agent-sandbox: claim $CLAIM not Ready within ${WAIT}s" >&2; exit 125; }',
   "POD=$(k get sandboxclaim \"$CLAIM\" -o 'jsonpath={.status.sandbox.name}')",
   '[ -n "$POD" ] || { echo "agent-sandbox: claim $CLAIM has no sandbox" >&2; exit 125; }',
-  // Not via k(): a backgrounded function runs in a subshell, so $! would not be
-  // kubectl itself and killing it would leave kubectl holding stdout open.
-  'if [ -n "$KC" ]; then "$KB" --kubeconfig "$KC" -n "$NS" exec "$POD" -c "$CTR" -- "$@" &',
-  'else "$KB" -n "$NS" exec "$POD" -c "$CTR" -- "$@" & fi',
-  "pid=$!",
-  'wait "$pid"',
-  "rc=$?",
-  "pid=",
-  'exit "$rc"',
+  'kbg exec "$POD" -c "$CTR" -- "$@"',
+  'exit "$?"',
 ].join("\n");
 
 function env(name: string, fallback = ""): string {

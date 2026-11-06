@@ -62,7 +62,8 @@ function makeFakeKubectl() {
       'for a in "$@"; do',
       '  case "$a" in',
       `    create) cat > '${dir}/manifest.json'; exit 0 ;;`,
-      '    wait) exit "${FAKE_WAIT_RC:-0}" ;;',
+      '    wait) [ -z "$FAKE_WAIT_SLEEP_S" ] || exec sleep "$FAKE_WAIT_SLEEP_S"',
+      '      exit "${FAKE_WAIT_RC:-0}" ;;',
       "    get) printf %s sandbox-pod-1; exit 0 ;;",
       "    delete) exit 0 ;;",
       "    exec) break ;;",
@@ -86,7 +87,7 @@ function makeFakeKubectl() {
 function run(
   resolved: { command: string; args: string[] },
   extraEnv: Record<string, string> = {},
-  killAfterMs?: number
+  killAfter?: number | (() => boolean)
 ): Promise<{ code: number | null; signal: string | null; stdout: string; stderr: string }> {
   return new Promise((resolve) => {
     const proc = spawn(resolved.command, resolved.args, {
@@ -97,8 +98,20 @@ function run(
     let stderr = "";
     proc.stdout.on("data", (d) => (stdout += d));
     proc.stderr.on("data", (d) => (stderr += d));
-    if (killAfterMs !== undefined) setTimeout(() => proc.kill("SIGTERM"), killAfterMs);
-    proc.on("close", (code, signal) => resolve({ code, signal, stdout, stderr }));
+    let poll: NodeJS.Timeout | undefined;
+    if (typeof killAfter === "number") {
+      setTimeout(() => proc.kill("SIGTERM"), killAfter);
+    } else if (killAfter) {
+      poll = setInterval(() => {
+        if (!killAfter()) return;
+        clearInterval(poll);
+        proc.kill("SIGTERM");
+      }, 20);
+    }
+    proc.on("close", (code, signal) => {
+      clearInterval(poll);
+      resolve({ code, signal, stdout, stderr });
+    });
   });
 }
 
@@ -288,6 +301,55 @@ test("agent-sandbox driver releases the claim and reports a signal exit on SIGTE
     );
   } finally {
     fake.cleanup();
+  }
+});
+
+test("agent-sandbox driver reacts to SIGTERM while the claim is still waiting for Ready", async (t) => {
+  if (process.platform === "win32") return t.skip("POSIX sh driver");
+  const fake = makeFakeKubectl();
+  try {
+    await withEnv(
+      {
+        SKILLS_AGENT_SANDBOX_POOL: "py-pool",
+        SKILLS_AGENT_SANDBOX_KUBECTL: fake.bin,
+        SKILLS_AGENT_SANDBOX_KUBECONFIG: "/etc/omniroute/kubeconfig",
+      },
+      async () => {
+        const mod = await importFresh("src/lib/skills/agentSandboxProvider.ts");
+        const resolved = new mod.AgentSandboxProvider().buildRun(
+          "img",
+          ["true"],
+          "pending",
+          CONFIG
+        );
+        const started = Date.now();
+        const r = await run(resolved, { FAKE_WAIT_SLEEP_S: "20" }, () =>
+          fake.calls().some((c) => c.includes(" wait --for=condition=Ready "))
+        );
+        assert.ok(Date.now() - started < 10_000, "the kill must not sit behind kubectl wait");
+        assert.equal(r.code, null, "SandboxRunner treats a null exit code as killed");
+        assert.equal(r.signal, "SIGTERM");
+        const calls = fake.calls();
+        assert.ok(!calls.some((c) => / exec /.test(c)), "must not exec after the kill");
+        assert.match(
+          calls.at(-1)!,
+          /^--kubeconfig \/etc\/omniroute\/kubeconfig -n default delete sandboxclaim omniroute-pending /
+        );
+      }
+    );
+  } finally {
+    fake.cleanup();
+  }
+});
+
+test("documented agent-sandbox RBAC includes the list verb kubectl wait needs", () => {
+  for (const file of [
+    ".env.example",
+    "docs/reference/ENVIRONMENT.md",
+    "src/lib/skills/agentSandboxProvider.ts",
+  ]) {
+    const text = fs.readFileSync(file, "utf8");
+    assert.ok(text.includes("sandboxclaims create/get/list/watch/delete"), file);
   }
 });
 
