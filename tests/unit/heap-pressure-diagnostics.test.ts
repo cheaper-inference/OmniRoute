@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  resetEventLoopStallStatsForTests,
   startEventLoopStallRecorder,
   stopEventLoopStallRecorder,
   tickEventLoopStallRecorderForTests,
@@ -47,6 +48,68 @@ test("heap diagnostics are opt-in, thresholded, and limited to one sample per mi
     assert.equal(logs.length, 2);
   } finally {
     stopEventLoopStallRecorder();
+    if (originalEnabled === undefined) delete process.env.OMNIROUTE_HEAP_DIAGNOSTICS_ENABLED;
+    else process.env.OMNIROUTE_HEAP_DIAGNOSTICS_ENABLED = originalEnabled;
+    if (originalThreshold === undefined) delete process.env.OMNIROUTE_HEAP_DIAGNOSTICS_THRESHOLD_MB;
+    else process.env.OMNIROUTE_HEAP_DIAGNOSTICS_THRESHOLD_MB = originalThreshold;
+  }
+});
+
+test("the stats reset also clears the heap diagnostic throttle", () => {
+  const originalEnabled = process.env.OMNIROUTE_HEAP_DIAGNOSTICS_ENABLED;
+  const originalThreshold = process.env.OMNIROUTE_HEAP_DIAGNOSTICS_THRESHOLD_MB;
+  let timeMs = 1_000;
+  const logs: string[] = [];
+  const start = () =>
+    startEventLoopStallRecorder({
+      now: () => timeMs,
+      thresholdMs: 100_000,
+      sampler: () => 0,
+      log: (message) => logs.push(message),
+    });
+  try {
+    process.env.OMNIROUTE_HEAP_DIAGNOSTICS_ENABLED = "1";
+    process.env.OMNIROUTE_HEAP_DIAGNOSTICS_THRESHOLD_MB = "1";
+    resetEventLoopStallStatsForTests();
+    start();
+    timeMs += 1_000;
+    tickEventLoopStallRecorderForTests();
+    assert.equal(logs.length, 1);
+
+    stopEventLoopStallRecorder();
+    resetEventLoopStallStatsForTests();
+    start();
+    timeMs += 1_000;
+    tickEventLoopStallRecorderForTests();
+    assert.equal(logs.length, 2, "a reset must not leave the previous sample's throttle armed");
+  } finally {
+    stopEventLoopStallRecorder();
+    resetEventLoopStallStatsForTests();
+    if (originalEnabled === undefined) delete process.env.OMNIROUTE_HEAP_DIAGNOSTICS_ENABLED;
+    else process.env.OMNIROUTE_HEAP_DIAGNOSTICS_ENABLED = originalEnabled;
+    if (originalThreshold === undefined) delete process.env.OMNIROUTE_HEAP_DIAGNOSTICS_THRESHOLD_MB;
+    else process.env.OMNIROUTE_HEAP_DIAGNOSTICS_THRESHOLD_MB = originalThreshold;
+  }
+});
+
+test("a stall threshold of 0 also disables the heap diagnostic", () => {
+  const originalEnabled = process.env.OMNIROUTE_HEAP_DIAGNOSTICS_ENABLED;
+  const originalThreshold = process.env.OMNIROUTE_HEAP_DIAGNOSTICS_THRESHOLD_MB;
+  const logs: string[] = [];
+  try {
+    process.env.OMNIROUTE_HEAP_DIAGNOSTICS_ENABLED = "1";
+    process.env.OMNIROUTE_HEAP_DIAGNOSTICS_THRESHOLD_MB = "1";
+    resetEventLoopStallStatsForTests();
+    startEventLoopStallRecorder({
+      now: () => 1_000,
+      thresholdMs: 0,
+      log: (message) => logs.push(message),
+    });
+    tickEventLoopStallRecorderForTests();
+    assert.equal(logs.length, 0, "the sampler runs inside the stall recorder tick");
+  } finally {
+    stopEventLoopStallRecorder();
+    resetEventLoopStallStatsForTests();
     if (originalEnabled === undefined) delete process.env.OMNIROUTE_HEAP_DIAGNOSTICS_ENABLED;
     else process.env.OMNIROUTE_HEAP_DIAGNOSTICS_ENABLED = originalEnabled;
     if (originalThreshold === undefined) delete process.env.OMNIROUTE_HEAP_DIAGNOSTICS_THRESHOLD_MB;

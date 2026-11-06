@@ -79,9 +79,10 @@ function maybeRecordHighHeap(
   if (process.env.OMNIROUTE_HEAP_DIAGNOSTICS_ENABLED !== "1") return;
   if (nowMs - lastHeapDiagnosticAt < HEAP_DIAGNOSTIC_INTERVAL_MS) return;
   const rawThreshold = Number(process.env.OMNIROUTE_HEAP_DIAGNOSTICS_THRESHOLD_MB);
-  const thresholdMb = Number.isFinite(rawThreshold) && rawThreshold > 0
-    ? rawThreshold
-    : DEFAULT_HEAP_DIAGNOSTIC_THRESHOLD_MB;
+  const thresholdMb =
+    Number.isFinite(rawThreshold) && rawThreshold > 0
+      ? rawThreshold
+      : DEFAULT_HEAP_DIAGNOSTIC_THRESHOLD_MB;
   const memory = process.memoryUsage();
   if (memory.heapUsed < thresholdMb * MiB) return;
   lastHeapDiagnosticAt = nowMs;
@@ -97,7 +98,6 @@ function maybeRecordHighHeap(
       `inflight=${readInflightSample(sampler, log)}`
   );
 }
-
 
 function resolveEventLoopStallThresholdMs(explicit?: number): number {
   if (explicit !== undefined) {
@@ -193,6 +193,7 @@ export function resetEventLoopStallStatsForTests(): void {
   stallCount = 0;
   stallMaxMs = 0;
   stallWarnedSampler = false;
+  lastHeapDiagnosticAt = Number.NEGATIVE_INFINITY;
 }
 
 export function getEventLoopStallStats(): EventLoopStallStats {
