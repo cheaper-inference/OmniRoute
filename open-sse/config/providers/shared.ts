@@ -6,7 +6,10 @@
  * is auto-generated from this registry.
  */
 
-import { ANTIGRAVITY_RUNTIME_BASE_URLS } from "../antigravityUpstream.ts";
+import {
+  ANTIGRAVITY_GENERATION_BASE_URLS,
+  ANTIGRAVITY_RUNTIME_BASE_URLS,
+} from "../antigravityUpstream.ts";
 import { ANTIGRAVITY_PUBLIC_MODELS } from "../antigravityModelAliases.ts";
 import { AGY_PUBLIC_MODELS } from "../agyModels.ts";
 import {
@@ -897,6 +900,7 @@ export function mapStainlessArch() {
 // ── Registry ──────────────────────────────────────────────────────────────
 
 export {
+  ANTIGRAVITY_GENERATION_BASE_URLS,
   ANTIGRAVITY_RUNTIME_BASE_URLS,
   ANTIGRAVITY_PUBLIC_MODELS,
   AGY_PUBLIC_MODELS,

@@ -2,7 +2,8 @@
 
 // global-error replaces the root layout and does not inherit its global styles, fonts or
 // theme (Next.js docs): the kit lockup and button need the stylesheet imported here, and the
-// theme is applied below from the same `theme` store the layout's pre-hydration script reads.
+// theme and palette are applied below from the same `theme` store the layout's pre-hydration
+// script reads.
 import "./globals.css";
 import { NextIntlClientProvider, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
@@ -10,6 +11,12 @@ import { useEffect, useState } from "react";
 import { Button, buttonVariants } from "@omniroute/ui-kit/button";
 import { DEFAULT_LOCALE, LOCALES, LOCALE_COOKIE } from "@/i18n/config";
 import { OmniRouteLockup } from "@/shared/components/OmniRouteLogo";
+import {
+  DEFAULT_APPEARANCE_PALETTE,
+  EDITIONS_APPEARANCE_VALUE,
+  normalizeAppearancePalette,
+  type AppearancePalette,
+} from "@/shared/constants/appearancePalette";
 
 /**
  * Global Error Page — FASE-04 Error Handling
@@ -58,18 +65,20 @@ function getCookieLocale() {
   return LOCALES.includes(locale) ? locale : DEFAULT_LOCALE;
 }
 
-/** Same resolution as the pre-hydration script in layout.tsx (persisted store → system). */
-function getStoredDark() {
+/** Same resolution as THEME_BOOT_SCRIPT (persisted store → system; palette → Editions). */
+function getStoredAppearance(): { dark: boolean; palette: AppearancePalette } {
   try {
     const stored = localStorage.getItem("theme");
     const parsed = stored ? JSON.parse(stored) : null;
     const theme = parsed?.state?.theme || "system";
-    return (
-      theme === "dark" ||
-      (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)
-    );
+    return {
+      dark:
+        theme === "dark" ||
+        (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches),
+      palette: normalizeAppearancePalette(parsed?.state?.palette),
+    };
   } catch {
-    return false;
+    return { dark: false, palette: DEFAULT_APPEARANCE_PALETTE };
   }
 }
 
@@ -145,11 +154,14 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
   const [locale, setLocale] = useState<string>(DEFAULT_LOCALE);
   const [messages, setMessages] = useState<Record<string, unknown>>(FALLBACK_EN_MESSAGES);
   const [dark, setDark] = useState(false);
+  const [palette, setPalette] = useState<AppearancePalette>(DEFAULT_APPEARANCE_PALETTE);
 
   useEffect(() => {
     void (async () => {
       await Promise.resolve();
-      setDark(getStoredDark());
+      const appearance = getStoredAppearance();
+      setDark(appearance.dark);
+      setPalette(appearance.palette);
       const nextLocale = getCookieLocale();
       setLocale(nextLocale);
       if (nextLocale === DEFAULT_LOCALE) return;
@@ -167,6 +179,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
       lang={locale}
       className={dark ? "ci-theme dark" : "ci-theme"}
       data-theme={dark ? "dark" : "light"}
+      data-ci-appearance={palette === "classic" ? undefined : EDITIONS_APPEARANCE_VALUE}
       style={{ colorScheme: dark ? "dark" : "light" }}
       suppressHydrationWarning
     >

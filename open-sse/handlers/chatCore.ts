@@ -1,10 +1,14 @@
+import type {
+  HttpAttemptSelection,
+  HttpAttemptRejectionSlot,
+} from "../utils/providerHttpAttempts.ts";
 import { finalizeTranslatedRequest } from "./chatCore/translatedRequestFinalize.ts";
 import { isPassiveCodex } from "../services/tokenRefresh/passiveCodex.ts";
 import {
   injectMemoryAndSkills,
   mergeInjectedFallbackOwnerNames,
 } from "./chatCore/memorySkillsInjection.ts";
-import { resolveChatCoreRequestSetup } from "./chatCore/requestSetup.ts";
+import { resolveChatCoreRequestSetup, resolveClientEchoModel } from "./chatCore/requestSetup.ts";
 import { shouldSkipNativeCodexReactiveCompaction } from "./chatCore/nativeCodexCompaction.ts";
 import {
   normalizeOpenAICompatibleTools,
@@ -27,7 +31,10 @@ export {
   relocateDirectiveOnlyMessages,
 } from "./chatCore/claudeSystemRole.ts";
 import { checkIdempotencyCache } from "./chatCore/idempotency.ts";
-import { acquireTurnExecution, createTurnInProgressResult } from "./chatCore/turnExecutionGuard.ts";
+import {
+  acquireTurnExecutionWithWait,
+  createTurnInProgressResult,
+} from "./chatCore/turnExecutionGuard.ts";
 import { checkSemanticCache, isSemanticCacheEnabled } from "./chatCore/semanticCache.ts";
 import { checkLifecycle, resolveLifecycle } from "./chatCore/modelLifecyclePolicy.ts";
 import {
@@ -173,9 +180,11 @@ import { buildCacheUsageLogMeta } from "./chatCore/cacheUsageMeta.ts";
 
 import { resolveExecutionCredentials as resolveExecutionCredentialsFor } from "./chatCore/executionCredentials.ts";
 import { createExecutorResolver } from "./chatCore/executorProxy.ts";
+import { resolveChatExecutor } from "./chatCore/searchProviderRejection.ts";
 import { normalizeClaudeUpstreamMessages as normalizeClaudeUpstreamMessagesFor } from "./chatCore/claudeUpstreamMessages.ts";
 import {
   persistAttemptLogs as persistAttemptLogsFor,
+  drainUpstreamHttpAttempts,
   type PersistAttemptLogsArgs,
 } from "./chatCore/attemptLogging.ts";
 import { stageTrace } from "./chatCore/stageTrace.ts";
@@ -202,6 +211,7 @@ import {
   appendRequestLog,
   capturePendingRequestOwner,
 } from "@/lib/usageDb";
+import { getPendingById } from "@/lib/usage/usageHistory";
 import {
   finalizePendingScope,
   initialPendingBody,
@@ -218,6 +228,7 @@ import { isCompressionExcluded } from "../services/compression/exclusions.ts";
 import {
   defaultComboForRequest,
   isBuiltinStackedPipeline,
+  shouldRunResolvedPipeline,
   type RuntimeCompressionCombo,
 } from "./chatCore/compressionComboPredicates.ts";
 import { mergeCompressionComboIntoConfig } from "./chatCore/compressionComboConfig.ts";
@@ -512,6 +523,7 @@ async function handleChatCoreInner({
     payload?: unknown,
     maxDepth = 3
   ): EffectiveServiceTier | null => resolveReportedServiceTierFor(provider, payload, maxDepth);
+  let upstreamHttpSelection: HttpAttemptSelection | null = null;
   let providerResponse;
   // Failure usage record building extracted to chatCore/failureUsage.ts (#3501); the handler keeps
   // the fire-and-forget save + computes latencyMs, so the call sites stay byte-identical.
@@ -580,7 +592,11 @@ async function handleChatCoreInner({
     return idempotencyHit;
   }
 
-  const turnExecution = acquireTurnExecution(idempotencyKey);
+  const turnExecution = await acquireTurnExecutionWithWait(idempotencyKey, {
+    log,
+    traceId,
+    signal: clientRawRequest?.signal ?? null,
+  });
   if (turnExecution.acquired === false) {
     const duplicate = createTurnInProgressResult(turnExecution.retryCount);
     log?.warn?.(
@@ -591,6 +607,7 @@ async function handleChatCoreInner({
   }
   const releaseTurnExecution = turnExecution.release;
   let turnExecutionHandedOffToStream = false;
+  let drainUnpersistedHttpAttempts = () => {};
 
   // Preserve chatCore's canonical formatting while the guarded body remains byte-stable.
   // prettier-ignore
@@ -761,6 +778,8 @@ async function handleChatCoreInner({
       correlationId,
       sessionTag: conversationId || null,
     }) || generateRequestId();
+  // Capture before any await: retries can reuse the public preview ID.
+  const pendingRequestGeneration = getPendingById().get(pendingRequestId)?.attemptGeneration;
   const pendingRequestOwner = pendingConnId
     ? capturePendingRequestOwner(pendingRequestId)
     : undefined;
@@ -862,11 +881,12 @@ async function handleChatCoreInner({
   // `opencode-zen/nemotron-3-ultra-free`) is not recognized by the client on `--resume`.
   const isClaudeCodeClient = isClaudeCodeOriginatedHeaders(clientRawRequest?.headers);
 
+  const clientEchoModel = resolveClientEchoModel(clientRawRequest?.body, requestedModel);
   let echoModel =
     (settings.echoRequestedModelName === true || isCodexResponsesEcho || isClaudeCodeClient) &&
-    typeof requestedModel === "string" &&
-    requestedModel
-      ? requestedModel
+    typeof clientEchoModel === "string" &&
+    clientEchoModel
+      ? clientEchoModel
       : null;
   // Auto-echo the listing-valid form for bare requests to noAuth catalog
   // providers so clients validating response.model against /v1/models don't warn.
@@ -923,6 +943,7 @@ async function handleChatCoreInner({
     }
     return persistAttemptLogsFor(args, {
       traceId,
+      httpAttempts: providerRequestCapture.httpAttempts,
       provider,
       connectionId,
       model,
@@ -930,6 +951,7 @@ async function handleChatCoreInner({
       detailedLoggingEnabled,
       reqLogger,
       pendingRequestId,
+      pendingRequestGeneration,
       clientRawRequest,
       requestedModel,
       credentials,
@@ -1077,6 +1099,14 @@ async function handleChatCoreInner({
     videoTranscriptSensitive: videoBridgeObserved,
   };
   const providerRequestCapture = createPreparedRequestLogger(reqLogger, pendingScope);
+  drainUnpersistedHttpAttempts = drainUpstreamHttpAttempts.bind(null, {
+    httpAttempts: providerRequestCapture.httpAttempts,
+    correlationId,
+    traceId,
+    noLogEnabled: Boolean(noLogEnabled),
+    apiKeyInfo: apiKeyInfo ? { id: apiKeyInfo.id, name: apiKeyInfo.name } : null,
+    comboName: typeof comboName === "string" ? comboName : null,
+  });
   // 0. Log client raw request (before format conversion) — redacts video transcript
   // cues in the logged copy only; see videoBridgeSnapshotRedaction.ts.
   logClientRawRequestRedacted(reqLogger, clientRawRequest, videoBridgeObserved);
@@ -1319,6 +1349,7 @@ async function handleChatCoreInner({
       }
       let compressionComboKey = comboName ?? null;
       let compressionComboApplied = false;
+      let defaultCompressionComboApplied = false;
       // Combo → config merge extracted to chatCore/compressionComboConfig.ts (chatCore slice 2).
       const applyCompressionComboConfig = (
         compressionCombo: RuntimeCompressionCombo | null,
@@ -1475,6 +1506,7 @@ async function handleChatCoreInner({
             { config, header: compressionHeader, combos: namedCombos }
           );
           if (applyCompressionComboConfig(defaultCompressionCombo)) {
+            defaultCompressionComboApplied = true;
             log?.debug?.(
               "COMPRESSION",
               `Default compression combo applied: ${defaultCompressionCombo?.id}`
@@ -1574,6 +1606,8 @@ async function handleChatCoreInner({
         }
       );
       const mode = compressionPlan.mode as CompressionConfig["defaultMode"];
+      // Configured mode for analytics when a policy wrapped it (lite as a one-step stacked plan).
+      const reportedMode = mode === "stacked" ? compressionPlan.reportedMode : undefined;
       if (adaptiveTelemetry && adaptiveTelemetry.fit === false) {
         log?.warn?.(
           "COMPRESSION",
@@ -1588,8 +1622,13 @@ async function handleChatCoreInner({
       if (
         mode === "stacked" &&
         compressionPlan.stackedPipeline.length > 0 &&
-        !compressionComboApplied &&
-        !config.compressionComboId
+        shouldRunResolvedPipeline({
+          comboApplied: compressionComboApplied,
+          comboIsDefault: defaultCompressionComboApplied,
+          comboIdConfigured: Boolean(config.compressionComboId),
+          adaptiveStagesApplied:
+            (adaptiveTelemetry as { stagesApplied: string[] } | null)?.stagesApplied.length ?? 0,
+        })
       ) {
         config = {
           ...config,
@@ -1715,6 +1754,7 @@ async function handleChatCoreInner({
               effectiveServiceTier,
               comboName,
               mode,
+              reportedMode,
               compressionComboId: config.compressionComboId,
               skillRequestId,
               cavemanOutputModeApplied,
@@ -1736,6 +1776,7 @@ async function handleChatCoreInner({
                 effectiveServiceTier,
                 comboName,
                 mode,
+                reportedMode,
                 compressionComboId: config.compressionComboId,
                 skillRequestId,
                 cavemanOutputModeApplied,
@@ -1756,6 +1797,7 @@ async function handleChatCoreInner({
               mode,
               stats: result.stats,
               connectionCacheOverride,
+              isFeatureFlagEnabled,
               log,
             });
             log?.info?.(
@@ -2141,13 +2183,8 @@ async function handleChatCoreInner({
         ...options,
         provider,
         sourceFormat,
-        // #16236: in-place mid-conversation system turns are opt-in AND need the client's beta.
-        clientAnthropicBeta: getHeaderValueCaseInsensitive(
-          clientRawRequest?.headers ?? null,
-          "anthropic-beta"
-        ),
-        isMidConversationSystemEnabled: () =>
-          isFeatureFlagEnabled("ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM"),
+        // #16236: in-place mid-conversation system turns are a per-connection opt-in.
+        providerSpecificData: credentials?.providerSpecificData,
       },
       log
     );
@@ -2416,14 +2453,8 @@ async function handleChatCoreInner({
     log,
   });
 
-  // Resolve executor with optional upstream proxy (CLIProxyAPI) routing.
-  // mode="native" (default): returns the native executor unchanged.
-  // mode="cliproxyapi": returns the CLIProxyAPI executor instead.
-  // mode="fallback": returns a wrapper that tries native first, falls back to CLIProxyAPI on 5xx/network errors.
-
-  // #6339: pass the resolved connection's providerSpecificData so a per-connection
-  // cliproxyapiMode="claude-native" override can deep-route this single connection
-  // through CLIProxyAPI regardless of the provider-level upstream_proxy_config mode.
+  // Resolve executor with optional upstream proxy routing. The native / cliproxyapi / dario /
+  // fallback modes and the #6339 per-connection override live in chatCore/executorProxy.ts.
   const resolveExecutorWithProxy = createExecutorResolver(log, credentials, validationExecutorFence);
 
   // === Quota Share enforcement PRE-hook (B/F7) + G2 combo soft penalty ===
@@ -2457,8 +2488,12 @@ async function handleChatCoreInner({
       return createErrorResult(400, msg, null, fit.terminalReason, "invalid_request_error");
     }
   }
-  // Get executor for this provider (with optional upstream proxy routing)
-  const executor = await resolveExecutorWithProxy(provider);
+  // Get the executor; a search-only provider gets the typed 400 on every chat route (#17858)
+  const { executor, rejected } = await resolveChatExecutor(resolveExecutorWithProxy, provider, log);
+  if (rejected) {
+    trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
+    return rejected;
+  }
   const getExecutionCredentials = () => {
     const executionCredentials = withApiKeyCodexServiceMode(
       provider,
@@ -2505,11 +2540,21 @@ async function handleChatCoreInner({
 
   const dedupRequestBody = { ...translatedBody, model: `${provider}/${model}`, stream };
   const dedupEnabled = shouldDeduplicate(dedupRequestBody);
-  // Namespaced by the calling API key: dedup hands the SAME response object to
-  // every joiner, so a shared hash across keys is a cross-principal response
-  // leak (GHSA-6c7w-56xp-wpc6).
+  // Namespaced by the calling API key AND the selected provider connection: dedup
+  // hands the SAME response object to every joiner, so a shared hash across keys
+  // is a cross-principal response leak (GHSA-6c7w-56xp-wpc6), and a shared hash
+  // across connections serves the request from an account the caller did not
+  // select — a pin on another account would silently be ignored while its
+  // response header still named the pinned one. Keyless installs keep dedup
+  // within a connection: identical requests that select the same connection
+  // still join. The hash is computed once, before dispatch; rotation inside the
+  // pipeline is handled by `allowDedup` (first attempt only), not here.
   const dedupHash = dedupEnabled
-    ? computeRequestHash(dedupRequestBody, apiKeyInfo?.id, trustedEffortContext)
+    ? computeRequestHash(
+        dedupRequestBody,
+        `${apiKeyInfo?.id ?? ""}:${getCurrentConnectionId() ?? ""}`,
+        trustedEffortContext
+      )
     : null;
 
   const toolDisclosure = resolveToolDisclosureConfig(settings);
@@ -2569,8 +2614,10 @@ async function handleChatCoreInner({
   };
   const executeProviderRequest = (
     modelToCall: string = effectiveModel,
-    allowDedup: boolean = false
-  ) => executeProviderRequestLeaf(executeProviderRequestDeps, modelToCall, allowDedup);
+    allowDedup: boolean = false,
+    _policy?: { allowAccountRotation?: boolean },
+    rejection?: HttpAttemptRejectionSlot
+  ) => executeProviderRequestLeaf(executeProviderRequestDeps, modelToCall, allowDedup, rejection);
 
   // Snapshot + message count helpers extracted to chatCore/providerRequestRegistration.ts
   // (chatCore slice 2).
@@ -3056,9 +3103,11 @@ async function handleChatCoreInner({
             suffix: "trying other accounts",
           });
         } else if (errorType === PROVIDER_ERROR_TYPES.REQUEST_REJECTED) {
-          // Per-request refusal (#12859): growing cooldown, streak → banned.
+          // Per-request refusal (#12859): growing MODEL-scoped cooldown. Never a ban.
           await handleRequestRejectedFailure({
             connectionId: errorConnectionId,
+            provider,
+            targetModel,
             statusCode,
             message: persistentMessage,
           });
@@ -3155,6 +3204,7 @@ async function handleChatCoreInner({
       credentials,
       effectiveModel,
       executeRefreshCredentials,
+      forcedConnectionId,
       executor,
       getCurrentConnectionId,
       getExecutionCredentials,
@@ -3206,6 +3256,7 @@ async function handleChatCoreInner({
       pipelineRecovered = streamingOutcome.carry.pipelineRecovered;
       providerHeaders = streamingOutcome.carry.providerHeaders;
       providerResponse = streamingOutcome.carry.providerResponse;
+      upstreamHttpSelection = streamingOutcome.carry.upstreamHttpSelection;
       providerUrl = streamingOutcome.carry.providerUrl;
     }
     if (streamingOutcome && streamingOutcome.response) return streamingOutcome.response;
@@ -3221,6 +3272,7 @@ async function handleChatCoreInner({
       apiKeyInfo,
       allowedConnections,
       appendRequestLog,
+      forcedConnectionId,
       applyProviderFailureClassification,
       assertManagedLeaseFence,
       attachCompressionUsageReceiptAfterAnalytics,
@@ -3356,6 +3408,7 @@ async function handleChatCoreInner({
   }
 
   const streamingTailOutcome = await runStreamingTail({
+    upstreamHttpSelection,
     geminiPromptCacheMode,
     isScopedGeminiCacheTarget,
     tokensCompressed,
@@ -3442,6 +3495,9 @@ async function handleChatCoreInner({
   return streamingTailOutcome.result;
   } finally {
     if (!turnExecutionHandedOffToStream) {
+      try {
+        drainUnpersistedHttpAttempts();
+      } catch {}
       releaseTurnExecution();
     }
   }
