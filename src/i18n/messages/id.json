@@ -923,6 +923,8 @@
     "batchListTitle": "Batch",
     "batchListCount": "{count} batch",
     "batchListRemovingCompleted": "Menghapus…",
+    "batchListRemoveCompletedPartial": "Sejumlah besar batch telah dihapus. Klik lagi untuk menghapus sisanya.",
+    "batchListRemoveCompletedFailed": "Terjadi kesalahan saat menghapus batch.",
     "batchListRemoveCompleted": "Hapus yang selesai",
     "batchListTableStatus": "Status",
     "batchListTableId": "ID",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "Memuat ulang…",
     "batchListRefresh": "Muat ulang",
     "uploadFileModalRemove": "Hapus",
+    "fileInputChoose": "Pilih file",
+    "fileInputChooseMultiple": "Pilih file",
+    "fileInputEmpty": "Tidak ada file yang dipilih",
+    "fileInputSelectedCount": "{count, plural, one {# file dipilih} other {# file dipilih}}",
+    "fileDropLabel": "Letakkan file di sini atau pilih satu file",
+    "fileDropLabelMultiple": "Letakkan file di sini atau pilih file",
     "uploadFileModalUploading": "Mengunggah…",
     "wizardInputReading": "Membaca file…",
     "wizardInputReady": "Siap",
@@ -1035,7 +1043,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "Kirim sidik jari klien CLI OpenCode v2 pada permintaan OpenCode Zen/Go: User-Agent opencode/latest/<2.x>/cli dan x-opencode-client cli, serta pada permintaan tingkat gratis, header sesi v2, skema alat baca/shell CLI v2, dan tanpa tool_choice \"none\". Dinonaktifkan secara default: setiap permintaan OpenCode mempertahankan identitas, header, dan isi saat ini tanpa perubahan.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Ketika kumpulan kandidat kombo otomatis sudah kosong sebelum pra-filter pemanggilan alat dijalankan (setiap target dilewati karena cooldown, penguncian, atau kehabisan), berikan respons 503 no_eligible_targets, bukan respons lama 400 \"No target supports tool calling\" capability_mismatch. Nonaktif secara default: kumpulan yang kosong tetap memberikan respons lama 400.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Terapkan tag endpoint model tepercaya (dideklarasikan oleh katalog penyedia, disimpulkan dari ID model khusus, atau ditetapkan oleh operator): tolak permintaan yang dikirim ke endpoint yang tidak dilayani model dengan HTTP 400 sebelum diteruskan pada /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations, dan /v1/audio/*; sembunyikan model yang endpoint bertagnya tidak memiliki adaptor OmniRoute dari /v1/models; dan respons pengujian model dasbor dengan 422 untuk model tersebut. Nonaktif secara default: tag endpoint tetap bersifat informatif dan permintaan diteruskan persis seperti sebelumnya.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "Pada relay biasa yang kompatibel dengan anthropic, pertahankan giliran sistem di tengah percakapan dalam daftar pesan alih-alih memindahkannya ke prompt sistem tingkat atas, sehingga prefiks prompt yang di-cache tetap stabil di setiap giliran. Hanya berlaku jika klien itu sendiri mengirimkan beta mid-conversation-system-2026-04-07. Dinonaktifkan secara default: setiap giliran sistem dipindahkan ke prompt sistem persis seperti sebelumnya, karena relay tanpa beta tersebut menolak giliran sistem dalam daftar pesan.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Gunakan tingkat upaya penalaran yang dipublikasikan oleh models.dev ketika tidak ada penggantian oleh operator maupun deklarasi dari registri penyedia, dengan hanya mempertahankan tingkat upaya yang dikenal, dan perlakukan daftar tingkat yang dideklarasikan tetapi kosong sebagai \"tanpa tingkat\". Dinonaktifkan secara default: katalog model dan tingkat upaya yang telah ditentukan tetap sama persis seperti sebelumnya.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "Memungkinkan permintaan auto/* menyusun kumpulan kandidat dengan kapabilitas model yang telah di-resolve (vision, reasoning, thinking) dan skor kualitas yang teramati, dibaca dalam satu pembacaan massal. Nonaktif secara default: bobot kandidat saat permintaan tetap persis seperti sebelumnya. Aktif: sinyal-sinyal tersebut masuk ke bobot snapshot, sehingga bobot kandidat dan pemilihan dapat berubah.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Izinkan pemindaian kesehatan kredensial menguji ulang koneksi yang dinonaktifkan sendiri oleh gateway (maksimal sekali setiap 6 jam untuk tiap koneksi, 5 koneksi per pemindaian) dan mengaktifkan kembali koneksi saat pengujian ulangnya berhasil. Secara default dinonaktifkan: koneksi tersebut tetap nonaktif hingga operator mengambil tindakan. Koneksi yang dinonaktifkan oleh operator dan diblokir secara permanen tidak pernah diuji ulang.",
@@ -1939,7 +1946,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# permintaan} other {# permintaan}}, {keys, plural, one {# kunci terbatas} other {# kunci terbatas}}",
     "unpricedUsageMore": "…dan {count} lagi",
     "unpricedUsageConfigure": "Konfigurasikan harga",
-    "unpricedUsageDismiss": "Tutup"
+    "unpricedUsageDismiss": "Tutup",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analisis",
@@ -6264,6 +6280,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Lewati cooldown transien agar koneksi ini tetap memenuhi syarat bahkan setelah kesalahan yang dapat dipulihkan (status terminal seperti diblokir/kedaluwarsa tetap berlaku).",
     "disableCoolingLabel": "Nonaktifkan cooldown untuk koneksi ini",
+    "keepMidConversationSystemDescription": "Biarkan pesan sistem terkirim di tengah percakapan di dalam daftar pesan alih-alih memindahkannya ke prompt sistem tingkat atas, sehingga cache prompt terus muncul secara bergantian. Aktifkan hanya jika upstream ini menerima peran \"sistem\" di dalam pesan (jika tidak maka akan menjawab 400).",
+    "keepMidConversationSystemLabel": "Pertahankan pesan sistem di tengah percakapan",
+    "requireUserLastMessageDescription": "Untuk upstream yang menolak pra-pengisian asisten: hilangkan putaran asisten di akhir (tanpa penggunaan_alat) sebelum mengirim. Model tersebut mungkin menghasilkan kembali jawaban sebelumnya.",
+    "requireUserLastMessageLabel": "Mengharuskan percakapan diakhiri dengan pesan pengguna",
     "bulkPasteAdded": "{count, plural, one {1 kunci ditambahkan} other {# kunci ditambahkan}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplikat dilewati} other {# duplikat dilewati}}",
     "bulkPasteHint": "Tempelkan satu kunci API per baris. Baris kosong akan diabaikan dan kunci duplikat akan dilewati.",
@@ -6363,6 +6383,9 @@
     "localProviders": "Penyedia Lokal",
     "maxConcurrentWholeNumberError": "Jumlah Maksimum Proses Bersamaan Harus Berupa Bilangan Bulat",
     "m365TierLabel": "Tingkat Copilot",
+    "m365RefreshTokenLabel": "Segarkan token (opsional)",
+    "m365RefreshTokenHint": "Digunakan untuk menyegarkan token akses Microsoft 365 secara otomatis.",
+    "m365RefreshTokenEditHint": "Biarkan kosong untuk menyimpan token yang ada. Tempelkan token baru untuk menggantikannya.",
     "m365TierHint": "Pilih antarmuka Microsoft 365 Copilot mana yang digunakan koneksi ini. Individual adalah BizChat konsumen default; Pendidikan dan Perusahaan (kerja) memilih antarmuka penyewa mereka.",
     "m365TierIndividualOption": "Individu (bawaan)",
     "m365TierEduOption": "Pendidikan",
@@ -7097,6 +7120,7 @@
     "proxySubTabsAria": "Bagian proksi",
     "requestBodyLimitTitle": "Batas Isi Permintaan",
     "requestBodyLimitDescription": "Ukuran maksimum payload API yang diterima sebelum isi permintaan diuraikan. Rute unggahan khusus tetap memiliki setidaknya batas bawaan sebesar 100 MB.",
+    "requestBodyLimitChatHint": "Chat Completions dan Responses menerima hingga 50 MB sampai Anda menyimpan batas di sini. Batas yang disimpan juga berlaku untuk keduanya, baik lebih rendah maupun lebih tinggi.",
     "requestBodyLimitInputLabel": "Batas ukuran isi permintaan dalam MB",
     "requestBodyLimitEmptyError": "Masukkan batas dalam MB",
     "requestBodyLimitWholeNumberError": "Gunakan bilangan bulat",
@@ -12282,7 +12306,9 @@
       "failedTitle": "Semua {count} percobaan gagal",
       "failed": "gagal",
       "pinnedTitle": "Model yang dipilih melalui pinning sesi cache konteks",
-      "pinned": "tersemat"
+      "pinned": "tersemat",
+      "recoveredAttemptsTitle": "Permintaan pulih setelah {count} percobaan",
+      "latestOutcomeFailed": "Hasil permintaan terakhir gagal"
     },
     "attempts": "upaya",
     "detail": {
@@ -12384,13 +12410,20 @@
       "continuesFromParent": "berlanjut dari induk",
       "continuesFrom": "Berlanjut dari {id}",
       "viewConversation": "lihat percakapan",
-      "openConversation": "Buka percakapan {id}"
+      "openConversation": "Buka percakapan {id}",
+      "omittedHttpAttempts": "{count} pengiriman HTTP tidak disimpan",
+      "noHttpResponse": "Tidak ada respons HTTP yang teramati",
+      "transportError": "Kesalahan transportasi"
     },
     "tableLabel": "Log permintaan",
     "throughputPostFirstToken": "Setelah token pertama",
     "throughputEndToEnd": "Ujung-ke-ujung",
     "throughputRate": "{value} token/detik",
-    "throughputExplanation": "Kedua laju menggunakan jumlah token output dan reasoning yang lebih besar. Laju setelah token pertama tidak menyertakan TTFT yang valid; jika tidak, laju tersebut menggunakan durasi penuh. Laju ujung-ke-ujung selalu menggunakan durasi penuh. Respons yang di-buffer dapat memiliki laju pengiriman burst yang tinggi tanpa pembuatan model yang lebih cepat."
+    "throughputExplanation": "Kedua laju menggunakan jumlah token output dan reasoning yang lebih besar. Laju setelah token pertama tidak menyertakan TTFT yang valid; jika tidak, laju tersebut menggunakan durasi penuh. Laju ujung-ke-ujung selalu menggunakan durasi penuh. Respons yang di-buffer dapat memiliki laju pengiriman burst yang tinggi tanpa pembuatan model yang lebih cepat.",
+    "omittedHttpAttempts": "{count} pengiriman HTTP tidak disimpan",
+    "upstreamStatus": "Server hulu {status}",
+    "noHttpResponse": "Tidak ada respons HTTP yang teramati",
+    "transportError": "Kesalahan transportasi"
   },
   "proxyLogger": {
     "filterAll": "Semua",
@@ -14157,6 +14190,14 @@
         "label": "Urutan Pool Egress Bersama",
         "description": "Untuk penyedia yang kuotanya dikelompokkan berdasarkan alamat egress, urutkan anggota pool yang berbagi alamat egress teramati dari anggota yang baru saja ditolak tepat di bawah anggota yang sehat. Hanya urutan, tidak pernah dikecualikan. Memerlukan PROXY_SKIP_RECENTLY_FAILED, yang menghasilkan sinyal penolakan yang dibacanya. Nonaktif secara default: urutan pemilihan sama persis dengan rotasi biasa."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Penolakan kuota berdasarkan model",
+        "description": "Terapkan kuota opencode 429 hanya pada model yang mencapainya, sehingga jalan keluar yang sama tetap melayani model lain, dan menghapusnya hanya jika model tersebut berhasil. Konsumen yang tidak memiliki model (rotasi kumpulan, parkir dan putar ulang, visibilitas admin, pemicu pemilih, sapuan kesehatan) masih melihatnya. Membutuhkan PROXY_SKIP_RECENTLY_FAILED, yang menghasilkan penolakan. Nonaktif secara default: kuota 429 pada satu model menyisihkan jalan keluar untuk setiap model."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Pengambilan proxy: pemutaran ulang POST yang ketat",
+        "description": "Untuk permintaan non-idempoten (POST, PUT, PATCH, DELETE), kirim ulang setelah kesalahan transportasi (soket baru, proksi fallback, fallback asli) hanya ketika kesalahan membuktikan tidak ada yang terkirim: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH atau batas waktu koneksi habis. Kesalahan soket setelah penulisan dapat berarti upstream menerima permintaan tersebut, sehingga pengiriman ulang dapat menghasilkan dan menagihnya dua kali. Nonaktif secara default: isi yang dapat diputar ulang dikirim ulang satu kali jika terjadi kesalahan pengangkutan, yang juga memulihkan soket gabungan yang sudah basi."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Pencatatan Log Atribusi Rotasi",
         "description": "Rotasi opencode mencatat akun mana yang melayani atau dilewati (hanya ID tersamar, tidak pernah ID akun lengkap) dan menautkan entri log proksi ke permintaannya, sehingga operator dapat membedakan akun yang dilewati dari yang tidak digunakan. Nonaktif secara default: tidak ada baris log tambahan, tidak ada kolom tambahan yang ditulis."
@@ -14208,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "Pemilihan Ulang Pool 429 OpenCode",
         "description": "Untuk rotasi multi-akun OpenCode, setelah menerima 429 dari penyedia dengan bucket per egress pada akun tanpa proksi di bawah konteks pool ambien, minta anggota lain dari connection pool untuk percobaan berikutnya alih-alih mencoba kembali alamat egress yang sama. Mengurutkan, tidak pernah mengecualikan: pool yang habis tetap mempertahankan perilaku saat ini. Nonaktif secara default: setiap 429 berotasi ke akun berikutnya persis seperti sebelumnya."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Pemeriksaan Jalan Keluar Tingkat Bebas",
+        "description": "Untuk pelaksana OpenCode, ketika permintaan proksi dijawab 403 atau 451 FreeTierError dan percobaan ulang alat yang diamati gagal atau tidak berlaku, kirim permintaan sekali melalui proksi yang berbeda (proksi akun lain atau anggota kumpulan lain, tidak pernah koneksi langsung). Hanya ketika penyelidikan itu menjawab 200, jalan keluar pertama disisihkan dalam memori penolakan proksi dan respons penyelidikan disajikan; ketika keduanya menolak, penolakan awal dikembalikan dan tidak ada yang dicatat. Teks penolakan yang sama mencakup IP jalan keluar yang ditandai dan formulir permintaan yang ditolak, sehingga penyelidikan membedakan keduanya berdasarkan bukti. Nonaktif secara default: penolakan dikembalikan tanpa perubahan."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Sidik Jari Klien OpenCode v2",
@@ -14388,6 +14433,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Berhenti saat Penolakan Kebijakan Konten",
         "description": "Ketika target combo merespons dengan penolakan kebijakan konten yang persis (kode atau jenis cyber_policy / content_policy_violation), hentikan combo dan kembalikan penolakan tersebut meskipun target yang tersisa adalah model yang berbeda, alih-alih beralih ke target berikutnya. Nonaktif secara default: penolakan tersebut tidak pernah menerapkan cooldown pada akun atau memicu breaker penyedia, dan combo beralih ke target berikutnya persis seperti sebelumnya."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Tanggapan: tetap hidup melalui transportasi saja",
+        "description": "Kirim Respons tetap hidup sebagai baris kosong, bukan peristiwa response.in_progress, jadi snapshot sintetis tidak akan pernah bisa menggantikan respons sebenarnya di SDK resmi. Baris kosong tidak mengirimkan peristiwa SSE, sehingga pengawas klien yang mengatur ulang hanya pada peristiwa tidak akan diatur ulang selama fase diam yang panjang. Nonaktif secara default: pengatur waktu mengirimkan peristiwa response.in_progress yang valid dengan spesifikasi."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Coba Ulang Cooldown: Lewati Penolakan 403/410",
