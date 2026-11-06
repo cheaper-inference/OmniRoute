@@ -1361,7 +1361,7 @@ Egy egész hónapon át ébren tartott szolgáltatás körülbelül 744 példán
 
 ## Telepítési forgatókönyvek
 
-A relay backend SRE-útmutatásáért (a ts/bifrost/auto működéséért, a 9router és a CLIProxyAPI elhelyezéséért, valamint a nagy áteresztőképességű tartalékstratégiáért) lásd a [Relay Backend Strategy](/docs/reference/RELAY_BACKEND_STRATEGY.md) dokumentumot.
+A relay backend SRE-útmutatásért (a ts/bifrost/auto viselkedése, a 9router és a CLIProxyAPI elhelyezése, valamint a nagy áteresztőképességű tartalékstratégia) lásd a [Relay Backend Strategy](/docs/reference/RELAY_BACKEND_STRATEGY.md) oldalt.
 
 ### Minimális helyi fejlesztés
 
@@ -1865,3 +1865,14 @@ Hosszú élettartamú SSE fogyasztó, amely OmniConductor hub feladatokat tükr�
 | Változó                        | Alapértelmezett | Forrásfájl                                   | Leírás                                                                                                                                                                                                                                               |
 | ------------------------------ | --------------- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`             | `src/lib/providerModels/modelSyncTimings.ts` | Állítsa `1` értékre a fázisidőzítés, a generált ID kérés és a fázis success/error kimeneteleinek naplózásához a modell szinkronizálása során. Az összes többi értéknél letiltva. A naplók kihagyják a kéréseket, fiókokat, katalógusokat és hibákat. |
+
+## Helyi OpenCode médiaelemző eszköz
+
+A `scripts/cli/omniroute-media-mcp.mjs` használja. Ezeket a helyi eszköz folyamatának környezetében kell beállítani.
+
+| Változó                    | Alapértelmezett érték                                                                | Leírás                                                                                             |
+| -------------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (vagy `~/.config/opencode/opencode.json`)  | Az OpenCode konfigurációja, amelyet a médiaeszköz és a telepítő olvas be.                          |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                          | A médiaeszköz által az OpenCode konfigurációjából beolvasott szolgáltatói bejegyzés.               |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                               | A médiaeszköz által elküldött modell. A szolgáltatójának támogatnia kell a kért médiatípusokat.    |
+| `OMNIROUTE_MEDIA_API_KEY`  | Beállított szolgáltatói API-kulcs vagy annak környezeti változóra mutató hivatkozása | Opcionális hitelesítési felülbírálás. Tartsa a helyi folyamat környezetében; soha ne véglegesítse. |

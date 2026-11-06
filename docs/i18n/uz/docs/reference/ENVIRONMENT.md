@@ -1364,7 +1364,7 @@ Bir oy davomida hushyor turgan xizmat taxminan 744 soat vaqt sarflaydi, shuning 
 
 ## Joylashtirish ssenariylari
 
-Relay backend SRE yo‘riqnomasi (ts/bifrost/auto xatti-harakati, 9router va CLIProxyAPI joylashuvi hamda yuqori o‘tkazuvchanlikdagi zaxira strategiyasi) uchun [Relay Backend strategiyasi](/docs/reference/RELAY_BACKEND_STRATEGY.md) bo‘limiga qarang.
+Relay backend SRE yo‘riqnomasi (ts/bifrost/auto xatti-harakati, 9router va CLIProxyAPI joylashuvi hamda yuqori o‘tkazuvchanlikdagi zaxira strategiyasi) uchun [Relay backend strategiyasi](/docs/reference/RELAY_BACKEND_STRATEGY.md) ga qarang.
 
 ### Minimal mahalliy ishlab chiqish
 
@@ -1406,7 +1406,7 @@ OMNIROUTE_DISABLE_BACKGROUND_SERVICES=true
 APP_LOG_TO_FILE=false
 ```
 
-### Reverse proxy bilan VPS (nginx + Cloudflare)
+### Teskari proksi bilan VPS (nginx + Cloudflare)
 
 ```bash
 JWT_SECRET=<generated>
@@ -1868,3 +1868,14 @@ OmniConductor hub vazifalarini mahalliy A2A TaskManager (`src/lib/conductor/`) g
 | O'zgaruvchan                   | Standart | Manba fayl                                   | Tavsif                                                                                                                                                                                                                                                              |
 | ------------------------------ | -------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`      | `src/lib/providerModels/modelSyncTimings.ts` | Model sinxronizatsiyasi vaqtida faza vaqtini, yaratilgan ID so‘rovini va faza success/error natijalarini jurnalga kiritish uchun `1` ga o‘rnating. Boshqa barcha qiymatlar uchun o'chirilgan. Jurnallar so'rov, hisob, katalog va xato yuklarini o'tkazib yuboradi. |
+
+## OpenCode media tahlili vositasi
+
+`scripts/cli/omniroute-media-mcp.mjs` tomonidan foydalaniladi. Ularni mahalliy vosita jarayoni muhitida sozlang.
+
+| O‘zgaruvchi                | Standart qiymat                                                                     | Tavsif                                                                                                                |
+| -------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (yoki `~/.config/opencode/opencode.json`) | Media vositasi va o‘rnatuvchi tomonidan o‘qiladigan OpenCode konfiguratsiyasi.                                        |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                         | Media vositasi tomonidan OpenCode konfiguratsiyasidan o‘qiladigan provayder yozuvi.                                   |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                              | Media vositasi tomonidan yuboriladigan model. Uning provayderi so‘ralgan media turlarini qo‘llab-quvvatlashi kerak.   |
+| `OMNIROUTE_MEDIA_API_KEY`  | Sozlangan provayder API kaliti yoki uning muhitdagi havolasi                        | Ixtiyoriy hisob ma’lumotlari ustuvorligi. Uni mahalliy jarayon muhitida saqlang; hech qachon repozitoriyga yubormang. |

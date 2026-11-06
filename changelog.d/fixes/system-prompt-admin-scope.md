@@ -1,1 +1,0 @@
-- **fix(authz):** changing the global system prompt now requires an `admin` access token; a `write` token can still read it

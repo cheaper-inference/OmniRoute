@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                     |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
+|                                     |         v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | ----------------------------------- | :----------------------: | :---------: | :-------------------: |
 | 🌐 Poskytovatelia                   |           352            |   **358**   |          380          |
 | 🧠 Jedinečné ID chatovacích modelov |           1320           |  **1374**   |         1491          |
@@ -580,7 +580,7 @@ Radar je voliteľný a používa iba požiadavky GET. Klient OmniRoute neodosiel
 
 </div>
 
-> Najnovšie novinky z **v3.8.20 → v3.8.53**. Kompletná história v [`CHANGELOG.md`](CHANGELOG.md).
+> Najnovšie novinky z **v3.8.20 → v3.8.54**. Kompletná história v [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ `quota-weighted` smerovanie** — 20. kombinovaná stratégia preskakuje vyčerpané účty a potom vyberá medzi zvyšnými v pomere zostávajúcej kvóty ÷ aktuálneho zaťaženia, pričom existujúce konverzácie zostávajú pripnuté. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Headless režim** — `omniroute serve --headless` (alebo `OMNIROUTE_HEADLESS=1`) spúšťa iba `/v1/*` proxy engine, s vypnutým dashboardom a subsystémami určenými len pre dashboard. → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1015,7 +1015,7 @@ omniroute
 ```
 
 > 💡 Zobrazuje sa `npm warn ERESOLVE` alebo upozornenie na partnerské závislosti? [Sú neškodné](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Používate npm 11 alebo novšiu verziu?** npm môže blokovať skripty životného cyklu balíkov, ak nie sú povolené. Skript `postinstall` (`node scripts/build/postinstall.mjs`) nástroja OmniRoute je potrebný na prípravu jeho natívnych runtime súborov. Pri globálnej inštalácii povoľte balíky uvedené v upozornení npm. Pre množinu balíkov hlásenú nástrojom OmniRoute 3.8.53:
+> **Používate npm 11 alebo novšiu verziu?** npm môže blokovať skripty životného cyklu balíkov, ak nie sú povolené. Skript `postinstall` (`node scripts/build/postinstall.mjs`) nástroja OmniRoute je potrebný na prípravu jeho natívnych runtime súborov. Pri globálnej inštalácii povoľte balíky uvedené v upozornení npm. Pre množinu balíkov hlásenú nástrojom OmniRoute 3.8.54:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1294,7 +1294,7 @@ Kanonické metriky k 2026-10-18: **1.976 jedinečných videí** · **20.220.289 
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Jazyk</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> v <code>src/</code> a <code>open-sse/</code> (v jadre od v2.0 žiadne <code>any</code>)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Databáza</b></td><td>better-sqlite3 (SQLite, žurnálovanie WAL) + LowDB (starší JSON) — 147 doménových modulov, 222 migrácií</td></tr>
+  <tr><td nowrap><b>Databáza</b></td><td>better-sqlite3 (SQLite, žurnálovanie WAL) + LowDB (starší JSON) — 147 doménových modulov, 223 migrácií</td></tr>
   <tr><td nowrap><b>Pamäť</b></td><td>Fulltextové vyhľadávanie SQLite FTS5 + vektorové embeddingy kvantizované na int8, typovaný útlm</td></tr>
   <tr><td nowrap><b>Schémy</b></td><td>Zod 4 — validácia I/O nástrojov MCP + kontrakty API</td></tr>
   <tr><td nowrap><b>Protokoly</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1807,7 +1807,7 @@ Licencia MIT – podrobnosti nájdete v [LICENSE](LICENSE).
 
 **[⬆ Späť na začiatok](#-omniroute)** · Vytvorené ❤️ pre komunitu open-source AI.
 
-<sub>Vytvoril <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Licencia MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Vytvoril <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · Licencia MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions sú povolené na komunitné otázky a odpovede -->
