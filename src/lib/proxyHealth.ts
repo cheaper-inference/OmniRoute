@@ -12,6 +12,7 @@
 import { createConnection } from "node:net";
 import { stripIpv6Brackets } from "@omniroute/open-sse/utils/proxyFamily";
 import {
+  describeEgressForLog,
   hasProxyRefusals,
   noteProxyRecovered,
   noteProxyRefusal,
@@ -33,24 +34,86 @@ interface ProxyHealthEntry {
   ttlMs: number;
 }
 
+/**
+ * Outcome of a TCP reachability probe. `reachable` (connection accepted) and
+ * `unreachable` (frank refusal — ECONNREFUSED/ENOTFOUND/EHOSTUNREACH) are
+ * DEFINITIVE verdicts; `timeout` is INDETERMINATE — the host may simply be busy
+ * or briefly stalled. Non-definitive outcomes must never be memoized as a
+ * permanent failure (oh-my-openagent #12378): a single timeout would otherwise
+ * set the proxy aside for 60s and escalate to 600s, i.e. one network hiccup
+ * disables routing until the streak expires.
+ */
+export type ProxyTcpOutcome = "reachable" | "unreachable" | "timeout";
+
 // In-memory cache: proxyUrl → health entry
 const proxyHealthCache = new Map<string, ProxyHealthEntry>();
 const proxyHealthInflight = new Map<string, Promise<boolean>>();
 
-type TcpCheck = (host: string, port: number, timeoutMs: number) => Promise<boolean>;
+// The injected probe may return the legacy boolean (true → reachable,
+// false → unreachable) or the explicit tri-state outcome, so existing test
+// doubles that return booleans keep working unchanged.
+type TcpCheck = (
+  host: string,
+  port: number,
+  timeoutMs: number
+) => Promise<boolean | ProxyTcpOutcome>;
 let tcpCheckImpl: TcpCheck = tcpCheck;
 
-// Feed a real probe verdict to proxy selection (PROXY_SKIP_RECENTLY_FAILED, default on): a proxy
-// that refused the TCP connection is set aside by pools and account rotation, and taken back
-// as soon as it answers again. With the flag off nothing is ever written.
-function noteProbeVerdict(proxyUrl: string, healthy: boolean): void {
-  if (healthy) {
+function normalizeTcpOutcome(raw: boolean | ProxyTcpOutcome): ProxyTcpOutcome {
+  if (raw === true) return "reachable";
+  if (raw === false) return "unreachable";
+  return raw;
+}
+
+// Feed a DEFINITIVE probe verdict to proxy selection (PROXY_SKIP_RECENTLY_FAILED,
+// default on): a proxy that refused the TCP connection is set aside by pools and
+// account rotation, and taken back as soon as it answers again. A `timeout` is
+// not definitive — it neither sets the proxy aside nor clears a prior set-aside,
+// so a transient hiccup can never be memoized as a permanent failure. With the
+// flag off nothing is ever written.
+function noteProbeVerdict(proxyUrl: string, outcome: ProxyTcpOutcome): void {
+  if (outcome === "timeout") return;
+  if (outcome === "reachable") {
     if (hasProxyRefusals()) noteProxyRecovered(proxyEgressKey(proxyUrl), "proxy_unreachable");
     return;
   }
   if (isProxySkipRecentlyFailedEnabled()) {
     noteProxyRefusal(proxyEgressKey(proxyUrl), "proxy_unreachable");
   }
+}
+
+// Last DEFINITIVE state observed per proxy, so a degraded→restored transition
+// is logged exactly once per change instead of on every probe. Keyed by proxy
+// URL; never touched by an indeterminate (timeout) probe.
+const lastDefinitiveState = new Map<string, "healthy" | "degraded">();
+
+/**
+ * Log a proxy's degraded→restored (or healthy→degraded) transition ONCE per
+ * state change. A `timeout` is indeterminate and must not be treated as a
+ * transition: a single stalled probe neither marks the proxy degraded nor
+ * restored. The first definitive verdict only records the baseline silently —
+ * transitions require a prior observed state to compare against.
+ */
+function logHealthTransition(proxyUrl: string, outcome: ProxyTcpOutcome): void {
+  if (outcome === "timeout") return;
+  const next: "healthy" | "degraded" = outcome === "reachable" ? "healthy" : "degraded";
+  const prev = lastDefinitiveState.get(proxyUrl);
+  if (prev === next) return;
+  lastDefinitiveState.set(proxyUrl, next);
+  if (prev === undefined) return;
+  const egressKey = proxyEgressKey(proxyUrl);
+  // Never log the raw URL: it may carry credentials. Fall back to a generic label.
+  const label = egressKey === null ? "(proxy)" : describeEgressForLog(egressKey);
+  if (next === "degraded") {
+    console.warn(`[ProxyHealth] ${label} degraded: TCP probe refused (unreachable).`);
+  } else {
+    console.log(`[ProxyHealth] ${label} restored: TCP probe reachable again.`);
+  }
+}
+
+/** Test-only: forget the transition baselines so each test starts clean. */
+export function __resetProxyHealthTransitionsForTesting(): void {
+  lastDefinitiveState.clear();
 }
 
 /**
@@ -102,15 +165,22 @@ export async function isProxyReachable(
     return existingProbe;
   }
 
-  const probe = tcpCheckImpl(host, port, timeoutMs).then((healthy) => {
-    // Before the cache write, so the verdict's TTL starts after the (flag-gated) note.
-    noteProbeVerdict(proxyUrl, healthy);
+  const probe = tcpCheckImpl(host, port, timeoutMs).then((raw) => {
+    const outcome = normalizeTcpOutcome(raw);
+    // Feed the (flag-gated) verdict to proxy selection, then memoize only
+    // DEFINITIVE verdicts. A timeout is returned to the caller as unreachable
+    // for this attempt but is NOT cached and does NOT set the proxy aside, so
+    // the next isProxyReachable re-probes instead of inheriting a permanent
+    // "down" verdict from one transient hiccup (#12378).
+    noteProbeVerdict(proxyUrl, outcome);
+    logHealthTransition(proxyUrl, outcome);
+    if (outcome === "timeout") return false;
     proxyHealthCache.set(proxyUrl, {
-      healthy,
+      healthy: outcome === "reachable",
       checkedAt: Date.now(),
-      ttlMs: healthy ? cacheTtlMs : Math.min(cacheTtlMs, UNHEALTHY_CACHE_TTL_MS),
+      ttlMs: outcome === "reachable" ? cacheTtlMs : Math.min(cacheTtlMs, UNHEALTHY_CACHE_TTL_MS),
     });
-    return healthy;
+    return outcome === "reachable";
   });
 
   proxyHealthInflight.set(proxyUrl, probe);
@@ -180,17 +250,19 @@ function defaultPortForScheme(protocol: string): string {
   }
 }
 
-function tcpCheck(host: string, port: number, timeoutMs: number): Promise<boolean> {
-  return new Promise<boolean>((resolve) => {
+function tcpCheck(host: string, port: number, timeoutMs: number): Promise<ProxyTcpOutcome> {
+  return new Promise<ProxyTcpOutcome>((resolve) => {
     const socket = createConnection({ host, port }, () => {
       socket.destroy();
-      resolve(true);
+      resolve("reachable");
     });
     socket.setTimeout(timeoutMs);
-    socket.on("error", () => resolve(false));
+    // A refused/unresolvable host is a DEFINITIVE verdict.
+    socket.on("error", () => resolve("unreachable"));
+    // Our own deadline fired: the host may simply be busy. INDETERMINATE.
     socket.on("timeout", () => {
       socket.destroy();
-      resolve(false);
+      resolve("timeout");
     });
   });
 }
