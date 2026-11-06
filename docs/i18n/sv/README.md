@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                 |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
+|                                 |         v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | ------------------------------- | :----------------------: | :---------: | :-------------------: |
 | 🌐 Leverantörer                 |           352            |   **358**   |          380          |
 | 🧠 Unika ID:n för chattmodeller |           1320           |  **1374**   |         1491          |
@@ -588,7 +588,7 @@ den aktuella katalogen på **[radar.omniroute.online/planos](https://radar.omnir
 
 </div>
 
-> Senaste höjdpunkterna från **v3.8.20 → v3.8.53**. Fullständig historik i [`CHANGELOG.md`](CHANGELOG.md).
+> Senaste höjdpunkterna från **v3.8.20 → v3.8.54**. Fullständig historik i [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ `quota-weighted`-routning** — den 20:e kombinationsstrategin hoppar över uttömda konton och väljer sedan bland de återstående i proportion till kvarvarande kvot ÷ pågående belastning, och håller befintliga konversationer fastnålade. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Headless-läge** — `omniroute serve --headless` (eller `OMNIROUTE_HEADLESS=1`) kör endast `/v1/*` proxy-motorn, med dashboard och dashboard-exklusiva delsystem avstängda. → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1023,7 +1023,7 @@ omniroute
 ```
 
 > 💡 Ser du `npm warn ERESOLVE` eller peer-dep-varningar? [De är ofarliga](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Använder du npm 11 eller senare?** npm kan blockera paketets lifecycle-skript om de inte är tillåtna. OmniRoutes `postinstall` (`node scripts/build/postinstall.mjs`) krävs för att förbereda dess inbyggda runtime-filer. Tillåt paketen som anges i npms varning när du installerar globalt. För den paketuppsättning som rapporteras av OmniRoute 3.8.53:
+> **Använder du npm 11 eller senare?** npm kan blockera paketets lifecycle-skript om de inte är tillåtna. OmniRoutes `postinstall` (`node scripts/build/postinstall.mjs`) krävs för att förbereda dess inbyggda runtime-filer. Tillåt paketen som anges i npms varning när du installerar globalt. För den paketuppsättning som rapporteras av OmniRoute 3.8.54:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1816,7 +1816,7 @@ MIT-licens – se [LICENSE](LICENSE) för mer information.
 
 **[⬆ Tillbaka till toppen](#-omniroute)** · Byggt med ❤️ för open source-AI-communityn.
 
-<sub>Skapad av <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT-licens · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Skapad av <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT-licens · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions är aktiverat för frågor och svar från communityn -->
