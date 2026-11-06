@@ -29,7 +29,6 @@ const NATIVE_PROTOCOLS = {
     "shadowtls",
     "naive",
     "ssh",
-    "tor",
     "tailcat",
   ]),
   xray: new Set([
@@ -95,7 +94,7 @@ function rejectUnsafe(value: unknown, depth = 0): void {
       throw new Error("TLS verification cannot be disabled");
     }
     if (
-      /(_path|Path)$/.test(key) ||
+      /(_path|Path|_file|File|_dir|_directory|Directory)$/.test(key) ||
       [
         "detour",
         "proxySettings",
@@ -105,6 +104,8 @@ function rejectUnsafe(value: unknown, depth = 0): void {
         "routing_mark",
         "plugin",
         "plugin_opts",
+        "extra_args",
+        "torrc",
       ].includes(key)
     ) {
       throw new Error(`Unsupported local option: ${key}`);

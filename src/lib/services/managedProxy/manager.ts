@@ -12,6 +12,7 @@ import {
   type ManagedListener,
 } from "./config";
 import { installManagedCore } from "./install";
+import { ensureManagedDirectory } from "./directories";
 import type { allocatePort, checkNative, startManaged, stopManaged } from "./runtime";
 
 const EntrySchema = z
@@ -30,18 +31,6 @@ const locks = new Map<string, Promise<unknown>>();
 
 export function managedRoot(): string {
   return path.join(resolveDataDir(), "services", "managed-proxy");
-}
-
-function ensureDirectory(root: string): void {
-  fs.mkdirSync(root, { recursive: true, mode: 0o700 });
-  let current = path.resolve(root);
-  while (true) {
-    if (fs.lstatSync(current).isSymbolicLink())
-      throw new Error("Managed directory ancestors must not be links");
-    const parent = path.dirname(current);
-    if (parent === current) break;
-    current = parent;
-  }
 }
 
 function readOptional(file: string): string | null {
@@ -84,6 +73,7 @@ export async function withManagedLock<T>(
 }
 
 export function managedEntries(core: ManagedCore, root = managedRoot()) {
+  ensureManagedDirectory(path.join(root, core));
   return readManagedManifest(readOptional(path.join(root, core, "sources.json"))).map(
     ({ id, name, port }) => ({ id, name, core, port })
   );
@@ -171,9 +161,9 @@ export async function saveManagedProxy<T>(
     throw new Error("Managed proxy source encryption failed");
   const deps = dependencies || (await runtimeDependencies());
   return withManagedLock(input.core, root, async () => {
-    ensureDirectory(root);
+    ensureManagedDirectory(root);
     const directory = path.join(root, input.core);
-    ensureDirectory(directory);
+    ensureManagedDirectory(directory);
     const manifestPath = path.join(directory, "sources.json");
     const configPath = path.join(directory, "config.json");
     const oldManifest = readOptional(manifestPath);
@@ -241,8 +231,8 @@ export async function saveManagedProxy<T>(
 export async function stopManagedProxyCore(core: ManagedCore, root = managedRoot()): Promise<void> {
   const { stop } = await runtimeDependencies();
   await withManagedLock(core, root, async () => {
+    ensureManagedDirectory(path.join(root, core));
     await stop(core);
-    ensureDirectory(path.join(root, core));
     writePrivateConfigFile(
       path.join(root, core, "activation.json"),
       JSON.stringify({ enabled: false })
@@ -256,6 +246,7 @@ export async function startManagedProxyCore(
   restoreOnly = false
 ): Promise<void> {
   await withManagedLock(core, root, async () => {
+    ensureManagedDirectory(path.join(root, core));
     const entries = readManagedManifest(readOptional(path.join(root, core, "sources.json")));
     if (!entries.length) throw new Error("Save a managed proxy before starting its core");
     const active = managedListeners(core, entries);

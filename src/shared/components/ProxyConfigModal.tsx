@@ -314,7 +314,7 @@ export default function ProxyConfigModal({
         }
       } else if (isManagedProxySource(host)) {
         if (!managedCore) {
-          setFormError("Select sing-box or Xray before saving this tunnel");
+          setFormError(t("errorSelectManagedCore"));
           return;
         }
         res = await saveManagedSource(

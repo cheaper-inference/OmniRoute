@@ -976,7 +976,7 @@ export default function ComboHealthTab() {
         <div className="flex flex-col gap-4">
           {autopilotData ? <ComboAutopilotPanel report={autopilotData} /> : null}
           <div className="flex items-center gap-2 text-sm text-text-muted">
-            <Spinner size="sm" className="text-primary [&_.oi-icon]:size-4" />
+            <Spinner size="sm" />
             {t("comboHealthTracking", { count: combos.length, range })}
           </div>
           {combos.map((combo) => (

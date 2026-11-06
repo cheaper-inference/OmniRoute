@@ -120,16 +120,16 @@ Combo: "openclaw-free"
 
 ## 📖 Ρύθμιση παρόχων
 
-Για μαζική προσθήκη συνδέσεων κλειδιών API από αρχείο CSV ή JSON, χρησιμοποιήστε τη διαδρομή **Πίνακας ελέγχου → Πάροχοι → Εισαγωγή από αρχείο**. Οι στήλες είναι ταξινομημένες κατά θέση (`provider,name,apiKey,baseUrl,priority`)· το `provider` πρέπει να υπάρχει ήδη ως διαχειριζόμενος πάροχος ή συμβατός κόμβος. Δείτε την ενότητα [Εισαγωγή παρόχων από αρχείο CSV ή JSON](../providers/CSV-IMPORT.md).
+Για μαζική προσθήκη συνδέσεων με κλειδί API από αρχείο CSV ή JSON, χρησιμοποιήστε **Πίνακας ελέγχου → Πάροχοι → Εισαγωγή από αρχείο**. Οι στήλες είναι τοποθετημένες με συγκεκριμένη σειρά (`provider,name,apiKey,baseUrl,priority`)· το `provider` πρέπει να υπάρχει ήδη ως διαχειριζόμενος πάροχος ή συμβατός κόμβος. Δείτε την ενότητα [Εισαγωγή παρόχων από αρχείο CSV ή JSON](../providers/CSV-IMPORT.md).
 
-### 🔐 Συνδρομητικοί πάροχοι
+### 🔐 Πάροχοι συνδρομών
 
 #### Claude Code (Pro/Max)
 
 ```bash
 Πίνακας ελέγχου → Πάροχοι → Σύνδεση Claude Code
-→ Σύνδεση μέσω OAuth → Αυτόματη ανανέωση token
-→ Παρακολούθηση ορίου 5 ωρών + εβδομαδιαίου ορίου
+→ Σύνδεση OAuth → Αυτόματη ανανέωση token
+→ Παρακολούθηση ορίων 5 ωρών + εβδομαδιαίου ορίου
 
 Μοντέλα:
   cc/claude-opus-4-7
@@ -137,18 +137,20 @@ Combo: "openclaw-free"
   cc/claude-haiku-4-5-20251001
 ```
 
-**Επαγγελματική συμβουλή:** Χρησιμοποιήστε το Opus για σύνθετες εργασίες και το Sonnet για ταχύτητα. Το OmniRoute παρακολουθεί το όριο ανά μοντέλο!
+**Χρήσιμη συμβουλή:** Χρησιμοποιήστε το Opus για σύνθετες εργασίες και το Sonnet για ταχύτητα. Το OmniRoute παρακολουθεί το όριο ανά μοντέλο!
 
-Δεν υπάρχει πρόγραμμα περιήγησης στον κεντρικό υπολογιστή του OmniRoute; Εκτελέστε το `claude setup-token` οπουδήποτε είναι συνδεδεμένο το Claude Code και επικολλήστε το token διάρκειας ενός έτους στην καρτέλα **Setup Token**. Δείτε την ενότητα [Claude Code με setup token](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Δεν υπάρχει πρόγραμμα περιήγησης στον υπολογιστή όπου φιλοξενείται το OmniRoute; Εκτελέστε την εντολή `claude setup-token` οπουδήποτε είναι συνδεδεμένο το Claude Code και επικολλήστε το token διάρκειας ενός έτους στην καρτέλα **Token ρύθμισης**. Δείτε την ενότητα [Claude Code με token ρύθμισης](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Οι διαδρομές που είναι συμβατές με Claude και Claude Code διατηρούν την προσπάθεια συλλογισμού `max` για τα μοντέλα Opus και Sonnet. Τα μοντέλα Haiku δεν αποδέχονται το επίπεδο προσπάθειας `max`, επομένως το OmniRoute υποβαθμίζει αυτό το αίτημα σε υψηλό προϋπολογισμό συλλογισμού πριν το στείλει στον upstream πάροχο.
+Οι διαδρομές που είναι συμβατές με Claude και Claude Code διατηρούν την προσπάθεια σκέψης `max` για τα
+μοντέλα Opus και Sonnet. Τα μοντέλα Haiku δεν αποδέχονται το επίπεδο προσπάθειας `max`, επομένως το OmniRoute υποβαθμίζει αυτό
+το αίτημα σε υψηλό προϋπολογισμό σκέψης πριν το αποστείλει upstream.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
 Πίνακας ελέγχου → Πάροχοι → Σύνδεση Codex
-→ Σύνδεση μέσω OAuth (θύρα 1455)
-→ Επαναφορά ανά 5 ώρες + εβδομαδιαία επαναφορά
+→ Σύνδεση OAuth (θύρα 1455)
+→ Επαναφορά κάθε 5 ώρες + εβδομαδιαία επαναφορά
 
 Μοντέλα:
   cx/gpt-5.5
@@ -162,7 +164,7 @@ Combo: "openclaw-free"
 ```bash
 Πίνακας ελέγχου → Πάροχοι → Σύνδεση GitHub
 → OAuth μέσω GitHub
-→ Μηνιαία επαναφορά (την 1η κάθε μήνα)
+→ Μηνιαία επαναφορά (1η ημέρα του μήνα)
 
 Μοντέλα:
   gh/gpt-5.5
@@ -172,46 +174,64 @@ Combo: "openclaw-free"
   gh/gemini-3.1-pro-preview
 ```
 
+**AI Credits (χρέωση βάσει token).** Όταν το GitHub αναφέρει `credits_used` για τον
+λογαριασμό, η κάρτα ορίων παρόχου εμφανίζει μια γραμμή **AI Credits** με τις μονάδες
+που καταναλώθηκαν κατά την τρέχουσα περίοδο χρέωσης, ακόμη και σε απεριόριστα
+προγράμματα οργανισμών.
+
+**Τοπικό όριο AI Credits.** Επεξεργαστείτε μια σύνδεση GitHub και ορίστε το **Όριο AI Credits ανά
+περίοδο χρέωσης** (`providerSpecificData.githubCreditLimit`). Το κενό πεδίο το απενεργοποιεί· η τιμή `0`
+παρακάμπτει πάντα τη σύνδεση. Όταν η τελευταία μέτρηση χρήσης είναι ίση ή μεγαλύτερη από το όριο,
+η επιλογή λογαριασμού παρακάμπτει αυτήν τη σύνδεση και η δρομολόγηση επιστρέφει στις άλλες
+συνδέσεις σας, όπως ακριβώς συμβαίνει με μια διακοπή βάσει πολιτικής ορίου. Ο έλεγχος χρησιμοποιεί τη χρήση
+που συλλέγει ήδη η περιοδική ανανέωση ορίων — δεν καλεί ποτέ το GitHub κατά τη διαδρομή του αιτήματος —
+και λειτουργεί με ανοχή σε αποτυχίες: μια μέτρηση που λείπει ή είναι παλιά (παλαιότερη από 15 λεπτά ή από
+περίοδο χρέωσης που έχει ήδη επαναφερθεί) δεν αποκλείει τη σύνδεση. Πρόκειται για τοπική δικλείδα ασφαλείας,
+**όχι για εγγυημένο ανώτατο όριο δαπανών**: καθυστερήσεις στην αναφορά του GitHub, το διάστημα
+ανανέωσης, αιτήματα σε εξέλιξη και χρήση εκτός OmniRoute μπορούν να προκαλέσουν υπέρβαση. Για
+αυστηρό όριο, χρησιμοποιήστε τα ίδια τα εργαλεία ελέγχου δαπανών του GitHub.
+
 ### 💰 Οικονομικοί πάροχοι
 
-#### GLM-4.7 (Καθημερινή επαναφορά, $0.6/1M)
+#### GLM-4.7 (καθημερινή επαναφορά, $0.6/1M)
 
 1. Εγγραφείτε: [Zhipu AI](https://open.bigmodel.cn)
 2. Αποκτήστε κλειδί API από το Coding Plan
 3. Πίνακας ελέγχου → Προσθήκη κλειδιού API: Πάροχος: `glm`, Κλειδί API: `your-key`
 
-**Χρήση:** `glm/glm-4.7` — **Επαγγελματική συμβουλή:** Το Coding Plan προσφέρει 3× μεγαλύτερο όριο με το 1/7 του κόστους! Καθημερινή επαναφορά στις 10:00 π.μ.
+**Χρήση:** `glm/glm-4.7` — **Χρήσιμη συμβουλή:** Το Coding Plan προσφέρει 3× μεγαλύτερο όριο με το 1/7 του κόστους! Καθημερινή επαναφορά στις 10:00 π.μ.
 
-#### MiniMax M2.1 (Επαναφορά ανά 5 ώρες, $0.20/1M)
+#### MiniMax M2.1 (επαναφορά ανά 5 ώρες, $0.20/1M)
 
 1. Εγγραφείτε: [MiniMax](https://www.minimax.io)
 2. Αποκτήστε κλειδί API → Πίνακας ελέγχου → Προσθήκη κλειδιού API
 
-**Χρήση:** `minimax/MiniMax-M2.1` — **Επαγγελματική συμβουλή:** Η φθηνότερη επιλογή για μεγάλο context (1M tokens)!
+**Χρήση:** `minimax/MiniMax-M2.1` — **Χρήσιμη συμβουλή:** Η οικονομικότερη επιλογή για μεγάλο περιβάλλον συμφραζομένων (1M tokens)!
 
-#### Kimi K2 ($9/μήνα σταθερά)
+#### Kimi K2 ($9/μήνα σταθερή χρέωση)
 
-1. Εγγραφείτε σε συνδρομή: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
+1. Εγγραφείτε: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
 2. Αποκτήστε κλειδί API → Πίνακας ελέγχου → Προσθήκη κλειδιού API
 
-**Χρήση:** `kimi/kimi-k2.5` — **Επαγγελματική συμβουλή:** Σταθερό κόστος $9/μήνα για 10M tokens = πραγματικό κόστος $0.90/1M!
+**Χρήση:** `kimi/kimi-k2.5` — **Χρήσιμη συμβουλή:** Σταθερά $9/μήνα για 10M tokens = αποτελεσματικό κόστος $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Εγγραφείτε: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
 2. Δημιουργήστε ένα κλειδί API Qianfan → Πίνακας ελέγχου → Προσθήκη κλειδιού API: Πάροχος: `qianfan`
 
-**Χρήση:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` ή άλλο αναγνωριστικό μοντέλου Qianfan συμβατού με OpenAI.
+**Χρήση:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` ή οποιοδήποτε άλλο αναγνωριστικό μοντέλου συμβατό με Qianfan OpenAI.
 
 ### 🆓 ΔΩΡΕΑΝ πάροχοι
 
-Οι δωρεάν πάροχοι χωρίς έλεγχο ταυτότητας διαθέτουν έναν διακόπτη δίπλα στην επιλογή **Δεν απαιτείται έλεγχος ταυτότητας** στη σελίδα του παρόχου τους.
-Η απενεργοποίησή του απενεργοποιεί τον συγκεκριμένο πάροχο, τον αφαιρεί από τις διαμορφωμένες/συμπτυγμένες προβολές των Παρόχων και αφαιρεί τα μοντέλα του από το `/v1/models`.
+Οι δωρεάν πάροχοι χωρίς έλεγχο ταυτότητας διαθέτουν έναν διακόπτη δίπλα στην επιλογή **Δεν απαιτείται έλεγχος ταυτότητας** στη σελίδα του παρόχου.
+Η απενεργοποίησή του απενεργοποιεί τον συγκεκριμένο πάροχο, τον αφαιρεί από τις προβολές «Ρυθμισμένοι πάροχοι»/συμπτυγμένη προβολή και
+αφαιρεί τα μοντέλα του από το `/v1/models`.
 
 #### Qoder (9 ΔΩΡΕΑΝ μοντέλα)
 
 ```bash
-Πίνακας ελέγχου → Σύνδεση Qoder → Σύνδεση μέσω OAuth → Η πρόσβαση υπόκειται στα τρέχοντα όρια του παρόχου
+Πίνακας ελέγχου → Σύνδεση Qoder → Σύνδεση OAuth → Η πρόσβαση υπόκειται στα τρέχοντα όρια του παρόχου
 
 Μοντέλα: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -219,7 +239,7 @@ Combo: "openclaw-free"
 #### Kiro (Claude ΔΩΡΕΑΝ)
 
 ```bash
-Πίνακας ελέγχου → Σύνδεση Kiro → AWS Builder ID ή Google/GitHub → ~50 πιστώσεις/μήνα
+Πίνακας ελέγχου → Σύνδεση Kiro → AWS Builder ID ή Google/GitHub → ~50 μονάδες/μήνα
 
 Μοντέλα: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -606,60 +626,60 @@ post_install() {
 
 ---
 
-## 📊 διαθέσιμα μοντέλα
+## 📊 Διαθέσιμα μοντέλα
 
 <details>
-<summary><b>Δείτε όλα τα διαθέσιμα μοντέλα</b></summary>
+<summary><b>Προβολή όλων των διαθέσιμων μοντέλων</b></summary>
 
-> Η παρακάτω λίστα έχει επιμεληθεί από `open-sse/config/providerRegistry.ts` για την έκδοση 3.8.0. Οι κατάλογοι cloud (Gemini, OpenRouter, κ.λπ.) συγχρονίζονται δυναμικά — για τον πλήρη ζωντανό κατάλογο ανοιχτό** Dashboard → Providers → [provider] → Διαθέσιμα μοντέλα** ή καλέστε `GET /api/models/catalog`.
+> Η παρακάτω λίστα επιμελείται από το `open-sse/config/providerRegistry.ts` για την έκδοση v3.8.0. Οι κατάλογοι cloud (Gemini, OpenRouter κ.λπ.) συγχρονίζονται δυναμικά — για τον πλήρη τρέχοντα κατάλογο ανοίξτε **Πίνακας ελέγχου → Πάροχοι → [πάροχος] → Διαθέσιμα μοντέλα** ή καλέστε το `GET /api/models/catalog`.
 >
-> Εάν η ενσωματωμένη λίστα ενός παρόχου έχει παρασυρθεί, χρησιμοποιήστε το** Εισαγωγή από /models** σε αυτήν τη σελίδα (ή ενεργοποιήστε** Αυτόματος συγχρονισμός** ) για να τραβήξετε τον ζωντανό κατάλογο ανάντη. Αυτό επαληθεύτηκε στην έκδοση 3.8.50 για LLM7.io (`gemini-3.1-flash-lite`) και UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`). Η ανώνυμη πρόσβαση επικονιασμών παρέμεινε περιορισμένη κατά τη διάρκεια της ίδιας δοκιμαστικής επιτυχίας.
+> Αν η ενσωματωμένη λίστα ενός παρόχου έχει αποκλίνει, χρησιμοποιήστε την επιλογή **Εισαγωγή από /models** σε αυτήν τη σελίδα (ή ενεργοποιήστε τον **Αυτόματο συγχρονισμό**) για να ανακτήσετε τον τρέχοντα κατάλογο από την upstream υπηρεσία. Αυτό επαληθεύτηκε στην έκδοση v3.8.50 για το LLM7.io (`gemini-3.1-flash-lite`) και το UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)· η ανώνυμη πρόσβαση στο Pollinations παρέμεινε περιορισμένη από την upstream υπηρεσία κατά τον ίδιο κύκλο δοκιμών.
 
-**Κωδικός Claude (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ βαθμίδες προσπάθειας: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ επίπεδα effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — FREE OAuth: χρησιμοποιήστε τον ζωντανό κατάλογο που εμφανίζεται παρακάτω** Ταμπλό → Providers → Kiro → Διαθέσιμα μοντέλα** . Η διαθεσιμότητα εξαρτάται από τον λογαριασμό και το σχέδιο.
+**Kiro (`kr/`)** — ΔΩΡΕΑΝ OAuth: χρησιμοποιήστε τον τρέχοντα κατάλογο που εμφανίζεται στην ενότητα **Πίνακας ελέγχου → Πάροχοι → Kiro → Διαθέσιμα μοντέλα**. Η διαθεσιμότητα εξαρτάται από τον λογαριασμό και το πρόγραμμα.
 
-**Qoder (`if/`)** — FREE OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — ΔΩΡΕΑΝ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
 **GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mo επίπεδη ή ανά χρήση: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/μήνα σταθερά ή ανά χρήση: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — κλειδί API : `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — Κλειδί API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
 **Groq (`groq/`)** — Εξαιρετικά γρήγορο: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok native: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Εγγενές Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
 **Mistral (`mistral/`)** — Φιλοξενείται στην ΕΕ: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Αμηχανία (`pplx/`)** — Αναζήτηση-αυξημένη: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Ενισχυμένο με αναζήτηση: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Ανοιχτού κώδικα: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (δωρεάν), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — Γρήγορη εξαγωγή συμπερασμάτων: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Κλίμακα γκοφρέτας: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Κλίμακα wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG-focused: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Εστιασμένο σε RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Enterprise: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Για επιχειρήσεις: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
-**Ollama Cloud (`ollama-cloud/`)** : `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
+**Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)** : Συγχρονίστηκε ζωντανά ανά κλειδί API από Google — χωρίς στατική λίστα. Συνδέστε ένα κλειδί** Πίνακας εργαλείων → Providers** στη συνέχεια χρησιμοποιήστε** Διαθέσιμα μοντέλα** για να εισαγάγετε τον τρέχοντα κατάλογο (π.χ. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Συγχρονίζεται ζωντανά ανά κλειδί API από την Google — δεν υπάρχει στατική λίστα. Συνδέστε ένα κλειδί στον **Πίνακα ελέγχου → Πάροχοι** και, στη συνέχεια, χρησιμοποιήστε τα **Διαθέσιμα μοντέλα** για να εισαγάγετε τον τρέχοντα κατάλογο (π.χ. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Άλλοι συμβατοί πάροχοι** (επιλεγμένα): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (μέσω `aws-bedrock`), `azure-ai`, `openrouter` (κατάλογος διέλευσης), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai` `reka` `nous-research`, `volcengine`, `ai21` `gigachat` Κάθε ένα διατηρεί τη δική του λίστα μοντέλων στο `providerRegistry.ts` και μπορεί να συγχρονιστεί αυτόματα όταν ο πάροχος εκθέτει ένα τελικό σημείο `/models`.
+**Άλλοι συμβατοί πάροχοι** (επιλεγμένοι): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (μέσω `aws-bedrock`), `azure-ai`, `openrouter` (κατάλογος passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Ο καθένας διατηρεί τη δική του λίστα μοντέλων στο `providerRegistry.ts` και μπορεί να συγχρονίζεται αυτόματα όταν ο πάροχος εκθέτει ένα endpoint `/models`.
 
-**Σημείωση για το μοντέλο IDs:** OmniRoute χρησιμοποιεί IDs εγγενή παρόχου (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Ορισμένα IDs περιλαμβάνουν εκδόσεις με κουκκίδες επειδή έτσι τις περιμένει το upstream API. Εάν ένα μοντέλο δεν αναφέρεται παραπάνω, εκτελέστε `omniroute models --search <term>` ή πατήστε `GET /api/models/catalog` για να επιβεβαιώσετε τη διαθεσιμότητα.
+**Σημείωση για τα αναγνωριστικά μοντέλων:** Το OmniRoute χρησιμοποιεί εγγενή αναγνωριστικά παρόχων (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Ορισμένα αναγνωριστικά περιλαμβάνουν εκδόσεις με τελείες, επειδή έτσι τα αναμένει το upstream API. Αν ένα μοντέλο δεν αναφέρεται παραπάνω, εκτελέστε το `omniroute models --search <term>` ή καλέστε το `GET /api/models/catalog` για να επιβεβαιώσετε τη διαθεσιμότητα.
 
 </details>
 

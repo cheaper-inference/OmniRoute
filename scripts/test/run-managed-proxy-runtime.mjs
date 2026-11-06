@@ -69,7 +69,7 @@ async function sweepFixtureChildren() {
               [
                 "-NoProfile",
                 "-Command",
-                "$p=Get-CimInstance Win32_Process -Filter ('ProcessId=' + $env.FIXTURE_PID); if($p){ $p.CommandLine; $p.CreationDate.ToUniversalTime().ToString('o') }",
+                "$p=Get-CimInstance Win32_Process -Filter ('ProcessId=' + $env:FIXTURE_PID); if($p){ $p.CommandLine; $p.CreationDate.ToUniversalTime().ToString('o') }",
               ],
               {
                 env: { ...env, FIXTURE_PID: String(record.pid) },
@@ -173,7 +173,7 @@ async function run(args, wallMs = 120000) {
 
 try {
   const nodeFiles = fs
-    .readdirSync(path.join(project, "tests/unit"))
+    .readdirSync(path.join(project, "tests/integration/managed-proxy"))
     .filter((name) => /^managedProxy.*\.test\.ts$/.test(name))
     .sort();
   assert.deepEqual(nodeFiles, [
@@ -187,10 +187,10 @@ try {
     "--test",
     "--test-concurrency=1",
     "--test-timeout=20000",
-    ...nodeFiles.map((name) => `tests/unit/${name}`),
+    ...nodeFiles.map((name) => `tests/integration/managed-proxy/${name}`),
   ]);
   const uiFiles = fs
-    .readdirSync(path.join(project, "tests/unit"))
+    .readdirSync(path.join(project, "tests/integration/managed-proxy"))
     .filter((name) => /^managedProxy.*\.test\.tsx$/.test(name))
     .sort();
   assert.deepEqual(uiFiles, [
@@ -205,8 +205,8 @@ try {
     "node_modules/vitest/vitest.mjs",
     "run",
     "--config",
-    "vitest.config.ts",
-    ...uiFiles.map((name) => `tests/unit/${name}`),
+    "vitest.managed-proxy.config.ts",
+    ...uiFiles.map((name) => `tests/integration/managed-proxy/${name}`),
     "--maxWorkers=1",
     "--maxConcurrency=1",
     "--no-file-parallelism",

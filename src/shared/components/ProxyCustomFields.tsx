@@ -79,19 +79,16 @@ export default function ProxyCustomFields(p: Props) {
       {managed ? (
         <div>
           <Select
-            label="Proxy core"
+            label={t("managedCore")}
             id="proxy-managed-core"
             value={p.core}
             onChange={(e) => p.setCore(e.target.value)}
           >
-            <option value="">Select a core</option>
+            <option value="">{t("managedSelectCore")}</option>
             <option value="singbox">sing-box</option>
             <option value="xray">Xray</option>
           </Select>
-          <p className="text-xs text-text-muted mt-2">
-            Save downloads and verifies the official core if needed, checks the configuration, then
-            activates this proxy. Typing does not install anything.
-          </p>
+          <p className="text-xs text-text-muted mt-2">{t("managedSaveHint")}</p>
         </div>
       ) : (
         <ProxyAuthFields p={p} />

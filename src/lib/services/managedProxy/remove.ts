@@ -5,6 +5,21 @@ import { renderManagedConfig, type ManagedCore } from "./config";
 import { managedRoot, withManagedLock, readManagedManifest, managedListeners } from "./manager";
 import { checkNative, startManaged, stopManaged, isManagedRunning } from "./runtime";
 import { installManagedCore } from "./install";
+import { ensureManagedDirectory } from "./directories";
+
+function readOptional(file: string): string | null {
+  try {
+    return readPrivateConfigFile(file);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
+    throw error;
+  }
+}
+
+function restoreFile(file: string, contents: string | null): void {
+  if (contents === null) fs.rmSync(file, { force: true });
+  else writePrivateConfigFile(file, contents);
+}
 
 async function restoreRemovedCore(
   core: ManagedCore,
@@ -32,13 +47,14 @@ export async function removeManagedProxy<T>(
 ): Promise<T> {
   return withManagedLock(core, root, async () => {
     const directory = path.join(root, core);
+    ensureManagedDirectory(directory);
     const manifestPath = path.join(directory, "sources.json");
     const configPath = path.join(directory, "config.json");
-    const oldManifest = readPrivateConfigFile(manifestPath);
-    const oldConfig = readPrivateConfigFile(configPath);
+    const oldManifest = readOptional(manifestPath);
+    const oldConfig = readOptional(configPath);
     const entries = readManagedManifest(oldManifest);
     const remaining = entries.filter((entry) => entry.id !== id);
-    if (remaining.length === entries.length) throw new Error("Managed proxy source not found");
+    // An orphan still may own a live listener. Always stop/rebuild before deleting its row.
     const wasRunning = isManagedRunning(core);
     const executable =
       wasRunning && remaining.length ? await installManagedCore(core, root, false) : "";
@@ -56,14 +72,16 @@ export async function removeManagedProxy<T>(
         writePrivateConfigFile(configPath, readPrivateConfigFile(candidate));
         if (wasRunning)
           await startManaged(core, executable, configPath, managedListeners(core, remaining));
-      } else fs.rmSync(configPath);
+      } else fs.rmSync(configPath, { force: true });
       writePrivateConfigFile(manifestPath, JSON.stringify({ version: 1, entries: remaining }));
       return await commit();
     } catch (error) {
       await stopManaged(core);
-      writePrivateConfigFile(manifestPath, oldManifest);
-      writePrivateConfigFile(configPath, oldConfig);
-      if (wasRunning) await restoreRemovedCore(core, root, executable, configPath, entries);
+      restoreFile(manifestPath, oldManifest);
+      restoreFile(configPath, oldConfig);
+      // Without both persisted sources and config, restarting could resurrect orphan listeners.
+      if (wasRunning && entries.length && oldConfig)
+        await restoreRemovedCore(core, root, executable, configPath, entries);
       throw error;
     } finally {
       fs.rmSync(candidate, { force: true });
