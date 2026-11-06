@@ -338,7 +338,10 @@ test("handleComboChat context-relay respects handoffProviders and skips generati
   assert.equal(result.ok, true);
   assert.equal(usageCalls, 0);
   assert.equal(summaryCalls, 0);
-  assert.equal(handoffDb.getHandoff(sessionId, "relay-disabled-provider"), null);
+  assert.equal(
+    handoffDb.getHandoff(scopeHandoffSessionId(sessionId, null)!, "relay-disabled-provider"),
+    null
+  );
 });
 
 test("handleComboChat context-relay treats explicit empty handoffProviders as disabled", async () => {
@@ -386,7 +389,10 @@ test("handleComboChat context-relay treats explicit empty handoffProviders as di
   await new Promise((resolve) => setTimeout(resolve, 50));
   assert.equal(result.ok, true);
   assert.equal(usageCalls, 0);
-  assert.equal(handoffDb.getHandoff(sessionId, "relay-empty-providers"), null);
+  assert.equal(
+    handoffDb.getHandoff(scopeHandoffSessionId(sessionId, null)!, "relay-empty-providers"),
+    null
+  );
 });
 
 test("getLastSessionModel uses latest id as deterministic tie-breaker", async () => {

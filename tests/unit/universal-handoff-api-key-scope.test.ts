@@ -28,14 +28,8 @@ const {
   seedConnection,
 } = h;
 const handoffDb = await import("../../src/lib/db/contextHandoffs.ts");
-// Imported loosely so the behavioral cases still run where the helper is absent.
-const scopeModule: {
-  scopeHandoffSessionId?: (
-    sessionId: string | null | undefined,
-    apiKeyId: string | null | undefined
-  ) => string | null;
-} = await import("../../open-sse/services/combo/handoffSessionScope.ts").catch(() => ({}));
-const scope = scopeModule.scopeHandoffSessionId;
+const { scopeHandoffSessionId: scope } =
+  await import("../../open-sse/services/combo/handoffSessionScope.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const { getComboFailureCount, recordComboFailure } =
   await import("../../open-sse/services/combo/failureTracker.ts");
