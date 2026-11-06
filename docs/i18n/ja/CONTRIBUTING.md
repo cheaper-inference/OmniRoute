@@ -12,13 +12,17 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### 前提条件
 
-- **Node.js** `>=22.22.2 <23`、または `>=24.0.0 <27`（推奨: 24 LTS）
-- **npm** 10+
+- **Node.js** `>=22.22.2 <23` または `>=24.0.0 <27`（推奨: 24 LTS）
+- **npm** 10 以降
 
-> **npm v11+ ユーザー（Node 24+）:** `npm install` の実行後、ネイティブモジュールがインストールされていることを確認してください:
-> `node -e "require('better-sqlite3')"`。`MODULE_NOT_FOUND` で失敗する場合は、
-> `npm approve-scripts better-sqlite3 && npm install` を実行してください。詳細は
-> [トラブルシューティング](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)を参照してください。
+> **Node 24 を使用する Windows の場合:** 現行の 24 LTS パッチリリース（少なくとも 24.20.0）を使用してください。
+> それ以前のリリースでは、`--test-force-exit` がプロセスを終了すると、テストが成功した後に
+> 異常終了することがあります。Node の [Windows libuv 修正](https://github.com/nodejs/node/pull/61999) により
+> このランタイムクラッシュが解消されます。テストのアサーションとランナーの終了チェックは有効なままにしてください。
+
+> **npm v11 以降のユーザー（Node 24 以降）:** `npm install` の後、ネイティブモジュールがインストールされていることを確認してください:
+> `node -e "require('better-sqlite3')"`. `MODULE_NOT_FOUND` で失敗する場合は、
+> `npm approve-scripts better-sqlite3 && npm install` を実行してください。[トラブルシューティング](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)を参照してください。
 
 - **Git**
 
@@ -36,31 +40,31 @@ npm install
 # テンプレートから .env を作成
 cp .env.example .env
 
-# 必要なシークレットを生成
+# 必須のシークレットを生成
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-開発用の主要な変数:
+開発における主要な変数:
 
-| 変数                   | 開発環境のデフォルト値   | 説明                       |
+| 変数                   | 開発時のデフォルト値     | 説明                       |
 | ---------------------- | ------------------------ | -------------------------- |
 | `PORT`                 | `20128`                  | サーバーポート             |
 | `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | フロントエンドのベース URL |
-| `JWT_SECRET`           | （上記で生成）           | JWT 署名用シークレット     |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | 初回ログイン用パスワード   |
-| `APP_LOG_LEVEL`        | `info`                   | ログの詳細レベル           |
+| `JWT_SECRET`           | (上記で生成)             | JWT 署名用シークレット     |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | 初回ログインパスワード     |
+| `APP_LOG_LEVEL`        | `info`                   | ログの詳細度               |
 
 ### ダッシュボード設定
 
-ダッシュボードには、環境変数からも設定できる機能の UI トグルが用意されています:
+ダッシュボードには、環境変数でも設定できる機能の UI 切り替えがあります:
 
-| 設定場所        | トグル               | 説明                                   |
-| --------------- | -------------------- | -------------------------------------- |
-| 設定 → 詳細設定 | デバッグモード       | デバッグ用リクエストログを有効化（UI） |
-| 設定 → 一般     | サイドバーの表示設定 | サイドバーのセクションを表示／非表示   |
+| 設定場所            | 切り替え項目     | 説明                                 |
+| ------------------- | ---------------- | ------------------------------------ |
+| Settings → Advanced | デバッグモード   | デバッグリクエストログを有効化（UI） |
+| Settings → General  | サイドバーの表示 | サイドバーのセクションを表示/非表示  |
 
-これらの設定はデータベースに保存され、再起動後も維持されます。設定されている場合は、環境変数のデフォルト値より優先されます。
+これらの設定はデータベースに保存され、再起動後も保持されます。設定されている場合は、環境変数のデフォルト値より優先されます。
 
 ### ローカルでの実行
 
@@ -69,51 +73,51 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 npm run dev
 
 # 本番ビルド
-npm run build    # next build → .build/next/、その後 assembleStandalone → dist/
+npm run build    # next build → .build/next/ で実行し、その後 assembleStandalone → dist/
 npm run start
 
-# コントリビューターによる変更向けの高速なバックエンド／API 専用コンパイル
+# コントリビューターによる変更向けの高速なバックエンド/API 専用コンパイル
 npm run build:contributor
 
-# リリースビルド（クリーンビルド + HEAD センチネル — デプロイに必須）
-npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA を書き込み
+# リリースビルド（クリーンな再ビルド + HEAD センチネル — デプロイに必須）
+npm run build:release   # rm -rf .build dist を実行してからビルドし、dist/BUILD_SHA を書き込む
 
 # 一般的なポート設定
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-コントリビュータービルドでは、コンパイルのみの検証を実行します。スタンドアロン
-ディストリビューションの組み立てや、オプションのネイティブパッケージングアセットのビルドは行いません。配布可能な
-バンドルを検証する必要がある場合は、通常の本番ビルドを使用してください。
+コントリビュータービルドでは、コンパイルのみの検証が行われます。スタンドアロン
+ディストリビューションの組み立てや、オプションのネイティブパッケージングアセットの
+ビルドは行われません。出荷可能なバンドルを検証する必要がある場合は、通常の本番ビルドを使用してください。
 
 ### ビルド出力の構成
 
-| ディレクトリ | 内容                                                                        | 追跡対象 |
+| ディレクトリ | 内容                                                                        | Git 管理 |
 | ------------ | --------------------------------------------------------------------------- | -------- |
-| `src/`       | アプリケーションのソース（TypeScript / TSX）                                | はい     |
-| `.build/`    | 中間生成物 — `next build` の出力（Git 管理対象外、`distDir = .build/next`） | いいえ   |
-| `dist/`      | 配布可能なバンドル — `assembleStandalone` により組み立て（Git 管理対象外）  | いいえ   |
+| `src/`       | アプリケーションソース（TypeScript / TSX）                                  | あり     |
+| `.build/`    | 中間生成物 — `next build` の出力（gitignore 対象、`distDir = .build/next`） | なし     |
+| `dist/`      | 出荷可能なバンドル — `assembleStandalone` により組み立て（gitignore 対象）  | なし     |
 
-ビルドパイプラインは単一パスです:
+ビルドパイプラインは単一のパスで実行されます:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  （Next.js の出力）
-  └─ assembleStandalone()                 （スタンドアロン + static + public + ネイティブアセットをコピー）
-       └─ 出力: dist/                      （server.js、.next/static/、public/、node_modules/）
+  └─ next build → .build/next/standalone  (Next.js の出力)
+  └─ assembleStandalone()                 (standalone + static + public + native assets をコピー)
+       └─ 出力: dist/                    (server.js、.next/static/、public/、node_modules/)
 ```
 
-`npm run build:release` はさらに、最初に両方のディレクトリをクリーンアップし、
-デプロイの整合性を確認するセンチネルとして `dist/BUILD_SHA`（= `git rev-parse --short HEAD`）を書き込みます。
+`npm run build:release` では、最初に両方のディレクトリをクリーンアップし、デプロイ整合性センチネルとして
+`dist/BUILD_SHA`（= `git rev-parse --short HEAD`）を追加で書き込みます。
 
-`npm run build:contributor` は、バックエンド専用のビルドプロファイルを使用します。ビルド中は一時的に
-ダッシュボード UI ファイルをスタブ化し、API ルートハンドラーを維持したうえで、ビルド後に元のファイルを
-復元します。ダッシュボード UI に影響する変更や、完全なリリース検証には `npm run build` を使用してください。
-コントリビュータープロファイルは、リリースビルドの代替ではありません。
+`npm run build:contributor` はバックエンド専用のビルドプロファイルを使用します。ビルド中に
+ダッシュボード UI ファイルを一時的にスタブ化し、API ルートハンドラーを維持したうえで、
+ビルド後に元のファイルを復元します。ダッシュボード UI に影響する変更や完全なリリース検証には
+`npm run build` を使用してください。コントリビュータープロファイルはリリースビルドの代替ではありません。
 
-> **VPS デプロイに関する注記:** リモートイメージのディレクトリ `/usr/lib/node_modules/omniroute/app/`
-> に変更はありません。デプロイスキルは、`dist/` の内容をこのディレクトリへ rsync します。
-> 変更されたのは、リポジトリ内のビルド出力パスのみです（`app/` → `dist/`）。
+> **VPS デプロイに関する注意:** リモートのイメージディレクトリ `/usr/lib/node_modules/omniroute/app/`
+> は変更されません。デプロイ用スキルは `dist/` の内容をそこに rsync します。
+> リポジトリ内でのビルド出力パスのみが移動しました（`app/` → `dist/`）。
 
 デフォルト URL:
 

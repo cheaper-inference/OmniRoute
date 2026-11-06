@@ -20,6 +20,8 @@ import type { QuotaBurnMetrics } from "./quotaBurnMetrics.ts";
 export interface QuotaInfo {
   remainingPercentage: number;
   resetAt: string | null;
+  // Codex observations are dated per window: refreshing a sibling scope must not renew this one.
+  observedAt?: number;
   // #10095 — upstream explicitly told us it did NOT report this window's
   // fraction (e.g. a fresh Antigravity account or a newly-launched
   // -tiered model id Google hasn't wired quota telemetry for yet).
@@ -30,6 +32,8 @@ export interface QuotaInfo {
   displayName?: string;
   windowSeconds?: number | null;
   claudeQuota?: ClaudeQuotaMetadata;
+  /** GitHub Copilot AI Credits consumed (telemetry for the local credit cutoff). */
+  creditsUsed?: number;
 }
 
 export interface QuotaCacheEntry {
@@ -46,6 +50,13 @@ export interface QuotaCacheEntry {
 
 // #14359 — a park is trusted at most EXHAUSTED_MAX_PARK_MS past its observation; a far weekly-window reset must not block for days.
 export const EXHAUSTED_MAX_PARK_MS = 30 * 60 * 1000;
+
+export const ACTIVE_TTL_MS = 5 * 60 * 1000; // 5 minutes for active accounts
+
+export function parseDate(value: string): number | null {
+  const ms = new Date(value).getTime();
+  return Number.isNaN(ms) ? null : ms;
+}
 
 // ─── State ──────────────────────────────────────────────────────────────────
 //

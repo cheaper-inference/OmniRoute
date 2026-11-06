@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@omniroute/ui-kit/table";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { Card, Badge, Button, Input, Select, Modal } from "@/shared/components";
 import EmptyState from "@/shared/components/EmptyState";
 import InfoTooltip from "@/shared/components/InfoTooltip";
@@ -310,7 +311,7 @@ export default function MemoriesTab() {
         aria-label={t("loading")}
         className="flex items-center justify-center h-32"
       >
-        <Icon name="progress_activity" size={32} className="animate-spin text-primary" />
+        <Spinner decorative size="lg" className="text-primary" />
       </div>
     );
   }
@@ -341,7 +342,8 @@ export default function MemoriesTab() {
           </Button>
         </div>
         <div className="flex gap-2 flex-wrap">
-          {/* kit-exception: Native file picker for Import (driven by the Import button; adapters have none). */}
+          {/* kit-exception: Hidden picker behind the toolbar Import button, which also shows the import's
+              loading state; the pick imports at once, so a kit FileInput status line has no role here. */}
           <input
             type="file"
             ref={fileInputRef}

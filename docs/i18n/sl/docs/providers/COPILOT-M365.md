@@ -65,38 +65,36 @@ uvozu HAR se dekodira čas poteka JWT-ja in prikaže preostali čas veljavnosti 
 > **Nikoli ne objavite ali vključite pravega izvoza HAR, žetona za dostop ali žetona za osvežitev v sistem za upravljanje izvorne kode.** Vrednosti za preizkušanje in
 > dokumentacijo morajo biti vedno označbe mest.
 
-## Veljavnost in osveževanje žetona
+## Življenjska doba žetona in osveževanje
 
-`access_token` je kratkotrajen (običajno **~75 minut**). Po poteku veljavnosti ponudnik
-sporoči napako povezave, zato morate poverilnico znova pridobiti.
+`access_token` je kratkotrajnega značaja (običajno **~75 minut**). Brez uporabnega žetona
+za osveževanje morate po poteku znova zajeti poverilnico.
 
 ### Samodejno osveževanje z `refreshToken`
 
-Da se izognete ročnemu ponovnemu pridobivanju, lahko Microsoftov žeton za osvežitev shranite v
-**Advanced Settings → providerSpecificData** povezave:
+V pogovornem oknu ponudnika Microsoft 365 **Add connection** ali **Edit connection** odprite
+**Advanced Settings → Refresh token (optional)**. Prilepite Microsoftov žeton za osveževanje OAuth
+za obseg `substrate.office.com/sydney` in shranite. Vnos je zakrit in shranjeni žeton se nikoli
+ne izpolni vnaprej. Pri urejanju pustite polje prazno, če želite obdržati obstoječi žeton;
+prilepite nov žeton, če ga želite zamenjati.
 
-| Polje          | Opis                                                                        |
-| -------------- | --------------------------------------------------------------------------- |
-| `refreshToken` | Microsoftov žeton za osvežitev OAuth za obseg `substrate.office.com/sydney` |
-| `tier`         | `individual` (privzeto), `edu` ali `enterprise`                             |
+Žeton za osveževanje pridobite s tokom Microsoft device-code ali authorization-code,
+omejenim na obseg `substrate.office.com/sydney`; nadzorna plošča ga ne pridobi namesto vas.
+Če je žeton za osveževanje konfiguriran, OmniRoute pred zahtevami preveri `access_token`
+in ga osveži samo, ko ga je treba osvežiti. Uspešno osveževanje prav tako shrani rotirani žeton
+za osveževanje, zato se izognete ročnemu ponovnemu zajemu, dokler žeton za osveževanje ostane veljaven.
 
-Žeton za osvežitev pridobite z Microsoftovim tokom kode naprave ali avtorizacijske kode
-z obsegom `substrate.office.com/sydney`. Ko je nastavljen `refreshToken`, OmniRoute
-pred vsako zahtevo vnaprej osveži `access_token`, zato vam poverilnice ni treba
-znova pridobiti po vsakem poteku veljavnosti po približno 75 minutah.
-
-Če `refreshToken` ni nastavljen, morate po vsakem poteku veljavnosti ročno
-znova pridobiti poverilnico WebSocket.
+Če `refreshToken` ni nastavljen, morate po vsakem poteku ročno znova zajeti poverilnico WebSocket.
 
 ### Izbira ravni
 
-| Raven        | Vzdevek      | Okolje                     |
-| ------------ | ------------ | -------------------------- |
-| `individual` | _(privzeto)_ | Potrošniški M365 Copilot   |
-| `edu`        | `included`   | Izobraževalni M365 Copilot |
-| `enterprise` | `work`       | M365 Copilot za delo       |
+| Tier         | Alias       | Surface                |
+| ------------ | ----------- | ---------------------- |
+| `individual` | _(default)_ | Consumer M365 Copilot  |
+| `edu`        | `included`  | Education M365 Copilot |
+| `enterprise` | `work`      | M365 Copilot for Work  |
 
-Raven nastavite v **Advanced Settings → providerSpecificData → tier**. Raven vpliva
+Raven nastavite v **Advanced Settings → Copilot tier**. Raven vpliva
 na usmerjanje BizChat in dostop do modelov.
 
 ## Varnostni model
@@ -112,30 +110,25 @@ na usmerjanje BizChat in dostop do modelov.
 
 ## Odpravljanje težav
 
-### Preverjanje pristnosti takoj ne uspe
+### Preverjanje pristnosti takoj spodleti
 
-- Preverite, ali ste poverilnico kopirali iz **URL-ja WebSocket** in ne iz zahteve XHR/Fetch.
-  Poverilnica je v poizvedbenem parametru `access_token` povezave Chathub WebSocket
-  — ne v glavi `Authorization: Bearer`.
-- Prepričajte se, da `chathubPath` vključuje celoten segment `<oid>@<tenant>` iz poti
-  URL-ja.
+- Preverite, ali ste kopirali iz **URL-ja WebSocket**, in ne iz zahteve XHR/Fetch. Poverilnica je v poizvedbenem parametru `access_token` povezave Chathub WebSocket — ne v glavi `Authorization: Bearer`.
+- Prepričajte se, da `chathubPath` vključuje celoten segment `<oid>@<tenant>` iz poti URL-ja.
 
 ### Žeton poteče po približno 75 minutah
 
-To je pričakovano. Brez `refreshToken` je žeton za dostop kratkoživ. Izberite eno od možnosti:
+To je pričakovano. Brez `refreshToken` je žeton za dostop kratko veljaven. Izvedite eno od naslednjih možnosti:
 
-- Znova zajemite poverilnico v orodjih DevTools ali
-- Konfigurirajte `refreshToken` v naprednih nastavitvah za samodejno osveževanje.
+- Znova zajemite poverilnico iz orodij DevTools ali
+- V pogovornem oknu za dodajanje ali urejanje povezave konfigurirajte **Napredne nastavitve → Žeton za osveževanje (izbirno)** za samodejno osveževanje.
 
 ### Preizkus povezave uspe, vendar klepet vrne 401
 
-Žeton je morda potekel med preverjanjem veljavnosti in prvo zahtevo. Znova zajemite
-svežo poverilnico.
+Žeton je morda potekel med preverjanjem in prvo zahtevo. Znova zajemite svežo poverilnico.
 
 ### Copilot ni prikazan na seznamu ponudnikov
 
-Prepričajte se, da je `copilot-m365-web` omogočen v razdelku **Nadzorna plošča → Ponudniki**. Ponudnik je lahko
-v nekaterih paketih privzeto skrit.
+Prepričajte se, da je `copilot-m365-web` omogočen v razdelku **Nadzorna plošča → Ponudniki**. Ponudnik je lahko v nekaterih paketih privzeto skrit.
 
 ## Viri
 

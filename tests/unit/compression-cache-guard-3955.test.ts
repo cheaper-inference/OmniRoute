@@ -20,6 +20,7 @@ import {
   detectCachingContext,
   getCacheAwareStrategy,
 } from "../../open-sse/services/compression/cachingAware.ts";
+import type { CachingDetectionContext } from "../../open-sse/services/compression/cachingAware.ts";
 import { resolveCacheAwareConfig } from "../../open-sse/services/compression/strategySelector.ts";
 import type { CompressionConfig } from "../../open-sse/services/compression/types.ts";
 
@@ -179,5 +180,40 @@ describe("#3955 automatic-cache prefix protection (no explicit cache_control)", 
     const result = getCacheAwareStrategy("aggressive", ctx);
     assert.equal(result.skipSystemPrompt, true);
     assert.equal(result.strategy, "standard");
+  });
+});
+
+describe("CachingDetectionContext — chatCore construction shape", () => {
+  it("accepts the typed cacheCtx object chatCore builds before resolveCacheAwareConfig", () => {
+    const cacheCtx: CachingDetectionContext = {
+      provider: "google",
+      targetFormat: "gemini",
+      model: "gemini-2.5-flash",
+      geminiPromptCacheMode: "implicit",
+      connectionCacheOverride: null,
+    };
+    const out = resolveCacheAwareConfig(
+      cfg({ preserveSystemPrompt: false }),
+      autoCacheBody("gemini-2.5-flash"),
+      cacheCtx
+    );
+    assert.equal(typeof out.preserveSystemPrompt, "boolean");
+    assert.equal(out.defaultMode, "aggressive");
+  });
+
+  it("keeps an explicit off mode inside the supported literal union", () => {
+    const cacheCtx: CachingDetectionContext = {
+      provider: "google",
+      targetFormat: "gemini",
+      model: "gemini-2.5-flash",
+      geminiPromptCacheMode: "off",
+      connectionCacheOverride: null,
+    };
+    const out = resolveCacheAwareConfig(
+      cfg({ preserveSystemPrompt: false }),
+      autoCacheBody("gemini-2.5-flash"),
+      cacheCtx
+    );
+    assert.equal(typeof out.preserveSystemPrompt, "boolean");
   });
 });
