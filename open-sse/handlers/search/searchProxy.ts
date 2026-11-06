@@ -23,6 +23,10 @@ import {
   type SearchUsage,
 } from "./reportedCost.ts";
 
+export function saveSearchCallLog(entry: Record<string, unknown>): Promise<void> {
+  return saveCallLog(entry);
+}
+
 export const SEARCH_COOLDOWN_STATUSES = new Set([
   HTTP_STATUS.PAYMENT_REQUIRED,
   HTTP_STATUS.REQUEST_TIMEOUT,
@@ -43,6 +47,21 @@ export function shouldCoolDownSearchConnection(status: number, errorText: string
   const lower = errorText.toLowerCase();
   if (SEARCH_CREDIT_EXHAUSTION_PHRASES.some((phrase) => lower.includes(phrase))) return true;
   return isSubscriptionQuotaText(lower);
+}
+
+/** Post-dispatch state cleanup shared by JSON and SSE search providers. */
+export async function clearSearchConnectionError(connectionId?: string): Promise<void> {
+  if (!connectionId) return;
+  try {
+    const { getProviderConnectionById } = await import("@/lib/db/providers");
+    const current = await getProviderConnectionById(connectionId);
+    if (current) {
+      const { clearAccountError } = await import("@/sse/services/auth.ts");
+      await clearAccountError(connectionId, current as never);
+    }
+  } catch {
+    /* non-critical - clearing stale error state must not break the search response */
+  }
 }
 
 /** Resolved proxy binding for a single provider attempt. */
@@ -292,18 +311,7 @@ export async function executeProviderFetch(
     // any recorded error (stale failed test, elapsed cooldown) so the dashboard
     // stops painting a serving connection red. clearAccountError() is a no-op
     // when the row is already clean.
-    if (connectionId) {
-      try {
-        const { getProviderConnectionById } = await import("@/lib/db/providers");
-        const current = await getProviderConnectionById(connectionId);
-        if (current) {
-          const { clearAccountError } = await import("@/sse/services/auth.ts");
-          await clearAccountError(connectionId, current as never);
-        }
-      } catch {
-        /* non-critical - clearing stale error state must not break the search response */
-      }
-    }
+    await clearSearchConnectionError(connectionId);
 
     return {
       success: true,

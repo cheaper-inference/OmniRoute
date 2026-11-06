@@ -1,0 +1,86 @@
+event: response.created
+data: {"type":"response.created","response":{"id":"resp_00000000000000000000000000000000000000000000000001","object":"response","created_at":1792652376,"status":"in_progress","access_programs":null,"background":false,"completed_at":null,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":"You are a web search backend. Use the web_search tool, then output ONLY JSON: {\"results\":[{\"title\":str,\"url\":str,\"description\":str}]} with up to 5 results, best first. Use only URLs you actually found while searching. description = 1-2 factual sentences from the page.","max_output_tokens":null,"max_tool_calls":null,"model":"gpt-6-luna","moderation":null,"output":[],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":"00000000-0000-0000-0000-000000000000","prompt_cache_retention":"24h","reasoning":{"context":"all_turns","effort":"low","mode":"standard","summary":null},"safety_identifier":"0000-000000000000000000000000","service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tool_usage":{"image_gen":{"input_tokens":0,"input_tokens_details":{"image_tokens":0,"text_tokens":0},"output_tokens":0,"output_tokens_details":{"image_tokens":0,"text_tokens":0},"total_tokens":0},"web_search":{"num_requests":0}},"tools":[{"type":"web_search","return_token_budget":"default","search_content_types":["text"],"search_context_size":"medium","user_location":{"type":"approximate","city":null,"country":"US","region":null,"timezone":null}}],"top_logprobs":0,"top_p":0.98,"truncation":"disabled","usage":null,"user":null,"metadata":{}},"sequence_number":0}
+
+event: response.in_progress
+data: {"type":"response.in_progress","response":{"id":"resp_00000000000000000000000000000000000000000000000001","object":"response","created_at":1792652376,"status":"in_progress","access_programs":null,"background":false,"completed_at":null,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":"You are a web search backend. Use the web_search tool, then output ONLY JSON: {\"results\":[{\"title\":str,\"url\":str,\"description\":str}]} with up to 5 results, best first. Use only URLs you actually found while searching. description = 1-2 factual sentences from the page.","max_output_tokens":null,"max_tool_calls":null,"model":"gpt-6-luna","moderation":null,"output":[],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":"00000000-0000-0000-0000-000000000000","prompt_cache_retention":"24h","reasoning":{"context":"all_turns","effort":"low","mode":"standard","summary":null},"safety_identifier":"0000-000000000000000000000000","service_tier":"auto","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tool_usage":{"image_gen":{"input_tokens":0,"input_tokens_details":{"image_tokens":0,"text_tokens":0},"output_tokens":0,"output_tokens_details":{"image_tokens":0,"text_tokens":0},"total_tokens":0},"web_search":{"num_requests":0}},"tools":[{"type":"web_search","return_token_budget":"default","search_content_types":["text"],"search_context_size":"medium","user_location":{"type":"approximate","city":null,"country":"US","region":null,"timezone":null}}],"top_logprobs":0,"top_p":0.98,"truncation":"disabled","usage":null,"user":null,"metadata":{}},"sequence_number":1}
+
+event: response.output_item.added
+data: {"type":"response.output_item.added","item":{"id":"ws_00000000000000000000000000000000000000000000000002","type":"web_search_call","status":"in_progress"},"output_index":0,"sequence_number":2}
+
+event: response.web_search_call.in_progress
+data: {"type":"response.web_search_call.in_progress","item_id":"ws_00000000000000000000000000000000000000000000000002","output_index":0,"sequence_number":3}
+
+event: response.web_search_call.searching
+data: {"type":"response.web_search_call.searching","item_id":"ws_00000000000000000000000000000000000000000000000002","output_index":0,"sequence_number":4}
+
+event: response.web_search_call.completed
+data: {"type":"response.web_search_call.completed","item_id":"ws_00000000000000000000000000000000000000000000000002","output_index":0,"sequence_number":5}
+
+event: response.output_item.done
+data: {"type":"response.output_item.done","item":{"id":"ws_00000000000000000000000000000000000000000000000002","type":"web_search_call","status":"completed","action":{"type":"search","queries":["Hermes Agent NousResearch latest release GitHub releases","site:github.com/NousResearch/hermes-agent/releases Hermes Agent release"],"query":"Hermes Agent NousResearch latest release GitHub releases","sources":[{"type":"url","url":"https://github.com/NousResearch/hermes-agent/releases"},{"type":"url","url":"https://github.com/NousResearch/hermes-agent/releases?ref=blockainews.com"},{"type":"url","url":"https://github.com/bsmr/NousResearch---hermes-agent/blob/main/RELEASE_v0.11.0.md"},{"type":"url","url":"https://github.com/kanjseok/NousResearch-hermes-agent/blob/main/RELEASE_v0.6.0.md"},{"type":"url","url":"https://github.com/NousResearch/hermes-agent/blob/main/website/docs/developer-guide/stable-releases.md"},{"type":"url","url":"https://github.dongbeiw.com/NousResearch/hermes-agent/releases"},{"type":"url","url":"https://github.com/hermes-agent-org/hermes/releases"},{"type":"url","url":"https://github.com/NousResearch/hermes-agent/diffs/51?name=main&sha1=abf1e98f6253f6984479fe03d1098173a9b065a7&sha2=b699d27a4a8ca0d886d5c51c7d46861c571ebb9c&short_path=9e1ee05&w=false"},{"type":"url","url":"https://github.com/NousResearch/hermes-agent/diffs/52?name=main&sha1=abf1e98f6253f6984479fe03d1098173a9b065a7&sha2=b699d27a4a8ca0d886d5c51c7d46861c571ebb9c&short_path=4f95061&w=false"},{"type":"url","url":"https://www.reddit.com/r/hermesagent/comments/1tqfrgq/hermes_agent_v0150_the_velocity_release/"},{"type":"url","url":"https://github.com/NethServer/ns8-hermes-agent/blob/main/HERMES_RESOURCE_MAP.md"},{"type":"url","url":"https://github.com/nousresearch/hermes-agent/blob/main/website/docs/user-guide/windows-native.md"},{"type":"url","url":"https://github.com/NousResearch/hermes-agent/diffs/42?name=main&sha1=abf1e98f6253f6984479fe03d1098173a9b065a7&sha2=5af899c7ca753a56a4daeb6fa6ff3cbb113234b8&short_path=ec72ec3&w=false"},{"type":"url","url":"https://www.reddit.com/r/hermesagent/comments/1uap7n6/hermes_agent_v0170_the_reach_release/"},{"type":"url","url":"https://www.reddit.com/r/hermesagent/comments/1w3ptz2/hermes_agent_v0210_the_pantheon_release_is_out/"},{"type":"url","url":"https://www.reddit.com/r/hermesagent/comments/1t0brs8/hermes_v0120_release_curator_spotifygoogle_meet/"},{"type":"url","url":"https://www.reddit.com/r/hermesagent/comments/1vekzja/hermes_agent_v0200_the_herald_release_is_live/"},{"type":"url","url":"https://www.reddit.com/r/hermesagent/comments/1wa82iq/hermes_release_v0211_sept_7_patch_release_rollup/"},{"type":"url","url":"https://www.reddit.com/r/hermesagent/comments/1v1vey8/release_hermes_agent_v0190_2026720_the/"},{"type":"url","url":"https://www.reddit.com/r/hermesagent/comments/1tr897u/hotfix_repackage_hermes_agent_v0152_loopback_fix/"},{"type":"url","url":"https://www.reddit.com/r/hermesagent/comments/1uaelgk/the_reach_release_hermes_agent_v0170/"},{"type":"url","url":"https://www.reddit.com/r/hermesagent/comments/1scjpro/hermes_update_v07/"},{"type":"url","url":"https://www.reddit.com/r/AIGuild/comments/1t0dka1/hermes_agent_got_a_big_selfmaintaining_agent/"},{"type":"url","url":"https://www.reddit.com/r/hermesagent/comments/1vehl5x/upgrading_hermes_agent_to_latest_breaks_the_webui/"},{"type":"url","url":"https://en.wikipedia.org/wiki/Hermes_Agent"}]}},"output_index":0,"sequence_number":6}
+
+event: response.output_item.added
+data: {"type":"response.output_item.added","item":{"id":"ws_00000000000000000000000000000000000000000000000003","type":"web_search_call","status":"in_progress"},"output_index":1,"sequence_number":7}
+
+event: response.web_search_call.in_progress
+data: {"type":"response.web_search_call.in_progress","item_id":"ws_00000000000000000000000000000000000000000000000003","output_index":1,"sequence_number":8}
+
+event: response.web_search_call.searching
+data: {"type":"response.web_search_call.searching","item_id":"ws_00000000000000000000000000000000000000000000000003","output_index":1,"sequence_number":9}
+
+event: response.web_search_call.completed
+data: {"type":"response.web_search_call.completed","item_id":"ws_00000000000000000000000000000000000000000000000003","output_index":1,"sequence_number":10}
+
+event: response.output_item.done
+data: {"type":"response.output_item.done","item":{"id":"ws_00000000000000000000000000000000000000000000000003","type":"web_search_call","status":"completed","action":{"type":"open_page","url":"https://github.com/NousResearch/hermes-agent/releases"}},"output_index":1,"sequence_number":11}
+
+event: response.output_item.added
+data: {"type":"response.output_item.added","item":{"id":"msg_00000000000000000000000000000000000000000000000004","type":"message","status":"in_progress","content":[],"phase":"final_answer","role":"assistant"},"output_index":2,"sequence_number":12}
+
+event: response.content_part.added
+data: {"type":"response.content_part.added","content_index":0,"item_id":"msg_00000000000000000000000000000000000000000000000004","output_index":2,"part":{"type":"output_text","annotations":[],"logprobs":[],"text":""},"sequence_number":13}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"{\"results\":[{\"title\":\"Hermes","item_id":"msg_00000000000000000000000000000000000000000000000004","logprobs":[],"obfuscation":"ACMz","output_index":2,"sequence_number":14}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":" Agent v0.22.4 — latest release\",\"url\":\"","item_id":"msg_00000000000000000000000000000000000000000000000004","logprobs":[],"obfuscation":"xYVY3P1U","output_index":2,"sequence_number":15}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"https://github.com/Nous","item_id":"msg_00000000000000000000000000000000000000000000000004","logprobs":[],"obfuscation":"g1zao5Nsv","output_index":2,"sequence_number":16}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"Research/hermes-agent/releases\",\"description\":\"The latest listed release","item_id":"msg_00000000000000000000000000000000000000000000000004","logprobs":[],"obfuscation":"D1OpFIUI","output_index":2,"sequence_number":17}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":" of NousResearch’s","item_id":"msg_00000000000000000000000000000000000000000000000004","logprobs":[],"obfuscation":"QHJt6hUnAh8EIz","output_index":2,"sequence_number":18}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":" Hermes Agent is v0.","item_id":"msg_00000000000000000000000000000000000000000000000004","logprobs":[],"obfuscation":"dXgxHt4jqOyp","output_index":2,"sequence_number":19}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"22.4","item_id":"msg_00000000000000000000000000000000000000000000000004","logprobs":[],"obfuscation":"Dv2h4aQ1OKft","output_index":2,"sequence_number":20}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":", released October ","item_id":"msg_00000000000000000000000000000000000000000000000004","logprobs":[],"obfuscation":"BnYxPTwPOo3Mz","output_index":2,"sequence_number":21}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"21, 202","item_id":"msg_00000000000000000000000000000000000000000000000004","logprobs":[],"obfuscation":"2bF1cuEm3","output_index":2,"sequence_number":22}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","content_index":0,"delta":"6.\"}]}","item_id":"msg_00000000000000000000000000000000000000000000000004","logprobs":[],"obfuscation":"yPdkQr14iT","output_index":2,"sequence_number":23}
+
+event: response.metadata
+data: {"type":"response.metadata","response_id":"resp_00000000000000000000000000000000000000000000000001","sequence_number":24,"metadata":{"openai_chatgpt_moderation_metadata":{"prompt":{"omnimod":{"protection_type":"omnimod","outputs":[{"results":[{"category_flags":{"A1":false,"A2":false,"A3":false,"C1":false,"C11":false,"C2":false,"E1":false,"E2":false,"E3":false,"H1":false,"H2":false,"H3":false,"JB1":false,"K1":false,"K2":false,"K3":false,"K4":false,"P1":false,"P2":false,"P3":false,"P4":false,"PD1":false,"PD4":false,"S1":false,"S3+":false,"S4":false,"SH":false,"TXT-C3":false,"TXT-C4":false,"V1":false,"V2+":false,"V4+":false,"REFUSED":false,"CBRN-B1+":false,"IMG-C1":false,"IMG-C11":false,"IMG-C2":false,"IMG-S1":false,"IMG-SH":false,"IMG-V1":false,"IMG-V2+":false,"IMG-V4+":false}}],"is_blocked":false}]}},"generation":{},"tool_call":{},"tool_response":{}}}}
+
+event: response.output_text.done
+data: {"type":"response.output_text.done","content_index":0,"item_id":"msg_00000000000000000000000000000000000000000000000004","logprobs":[],"output_index":2,"sequence_number":25,"text":"{\"results\":[{\"title\":\"Hermes Agent v0.22.4 — latest release\",\"url\":\"https://github.com/NousResearch/hermes-agent/releases\",\"description\":\"The latest listed release of NousResearch’s Hermes Agent is v0.22.4, released October 21, 2026.\"}]}"}
+
+event: response.content_part.done
+data: {"type":"response.content_part.done","content_index":0,"item_id":"msg_00000000000000000000000000000000000000000000000004","output_index":2,"part":{"type":"output_text","annotations":[],"logprobs":[],"text":"{\"results\":[{\"title\":\"Hermes Agent v0.22.4 — latest release\",\"url\":\"https://github.com/NousResearch/hermes-agent/releases\",\"description\":\"The latest listed release of NousResearch’s Hermes Agent is v0.22.4, released October 21, 2026.\"}]}"},"sequence_number":26}
+
+event: response.output_item.done
+data: {"type":"response.output_item.done","item":{"id":"msg_00000000000000000000000000000000000000000000000004","type":"message","status":"completed","content":[{"type":"output_text","annotations":[],"logprobs":[],"text":"{\"results\":[{\"title\":\"Hermes Agent v0.22.4 — latest release\",\"url\":\"https://github.com/NousResearch/hermes-agent/releases\",\"description\":\"The latest listed release of NousResearch’s Hermes Agent is v0.22.4, released October 21, 2026.\"}]}"}],"phase":"final_answer","role":"assistant"},"output_index":2,"sequence_number":27}
+
+event: response.completed
+data: {"type":"response.completed","response":{"id":"resp_00000000000000000000000000000000000000000000000001","object":"response","created_at":1792652376,"status":"completed","access_programs":null,"background":false,"completed_at":1792652384,"error":null,"frequency_penalty":0.0,"incomplete_details":null,"instructions":"You are a web search backend. Use the web_search tool, then output ONLY JSON: {\"results\":[{\"title\":str,\"url\":str,\"description\":str}]} with up to 5 results, best first. Use only URLs you actually found while searching. description = 1-2 factual sentences from the page.","max_output_tokens":null,"max_tool_calls":null,"model":"gpt-6-luna","moderation":null,"output":[],"parallel_tool_calls":true,"presence_penalty":0.0,"previous_response_id":null,"prompt_cache_key":"00000000-0000-0000-0000-000000000000","prompt_cache_retention":"24h","reasoning":{"context":"all_turns","effort":"low","mode":"standard","summary":null},"safety_identifier":"0000-000000000000000000000000","service_tier":"default","store":false,"temperature":1.0,"text":{"format":{"type":"text"},"verbosity":"medium"},"tool_choice":"auto","tool_usage":{"image_gen":{"input_tokens":0,"input_tokens_details":{"image_tokens":0,"text_tokens":0},"output_tokens":0,"output_tokens_details":{"image_tokens":0,"text_tokens":0},"total_tokens":0},"web_search":{"num_requests":1}},"tools":[{"type":"web_search","return_token_budget":"default","search_content_types":["text"],"search_context_size":"medium","user_location":{"type":"approximate","city":null,"country":"US","region":null,"timezone":null}}],"top_logprobs":0,"top_p":0.98,"truncation":"disabled","usage":{"input_tokens":12879,"input_tokens_details":{"cache_write_tokens":0,"cached_tokens":4096},"output_tokens":145,"output_tokens_details":{"reasoning_tokens":77},"total_tokens":13024},"user":null,"metadata":{}},"sequence_number":28}

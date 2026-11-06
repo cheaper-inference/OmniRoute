@@ -1,0 +1,8 @@
+{
+  "error": {
+    "message": "The following tools cannot be used with reasoning.effort 'minimal': web_search.",
+    "type": "invalid_request_error",
+    "param": "tools",
+    "code": null
+  }
+}
