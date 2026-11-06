@@ -394,12 +394,12 @@ export function mergeClientAnthropicBeta(
  * third-party upstream did not advertise. A merge that survives to nothing leaves
  * the header unset instead of emitting an empty one.
  *
- * Same seeded path: with ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM on and the beta
- * negotiated by the client, chatCore keeps mid-conversation system turns inside messages[]
- * for these relays (open-sse/services/claudeMidConversationSystem.ts), so the client's own
- * `mid-conversation-system-2026-04-07` token is forwarded too — never invented, and only
- * while such a turn is still in the body (with the flag off every turn is hoisted first,
- * so the header stays exactly as before).
+ * Same seeded path: when a connection opts into keepMidConversationSystem, chatCore keeps
+ * mid-conversation system turns inside messages[] for these relays
+ * (open-sse/services/claudeMidConversationSystem.ts), so the client's own
+ * `mid-conversation-system-2026-04-07` token is forwarded too when the client sent it —
+ * never invented, and only while such a turn is still in the body (with the opt-in off every
+ * turn is hoisted first, so the header stays exactly as before).
  */
 export function applyClientAnthropicBeta(
   headers: Record<string, string>,

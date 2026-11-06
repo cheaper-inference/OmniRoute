@@ -23,6 +23,8 @@ export type SelectOption =
       value: string;
       disabled?: boolean;
       description?: ReactNode;
+      /** Decorative menu icon; excluded from the selected label and accessible name. */
+      icon?: ReactNode;
     };
 export interface SelectOptionGroup {
   label: ReactNode;
@@ -118,6 +120,7 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(function Select(
         value={item.value}
         disabled={item.disabled}
         description={item.description}
+        icon={"icon" in item ? item.icon : undefined}
       >
         {item.label}
       </SelectItem>
@@ -277,10 +280,11 @@ export interface SelectItemProps extends Omit<
   "asChild"
 > {
   description?: ReactNode;
+  icon?: ReactNode;
 }
 
 export const SelectItem = forwardRef<HTMLDivElement, SelectItemProps>(
-  function SelectItem({ className, children, description, ...props }, ref) {
+  function SelectItem({ className, children, description, icon, ...props }, ref) {
     const descriptionId = useId();
     return (
       <SelectPrimitive.Item
@@ -291,6 +295,7 @@ export const SelectItem = forwardRef<HTMLDivElement, SelectItemProps>(
         className={cn("ci-select__item", className)}
         {...props}
       >
+        {icon != null && <span className="ci-select__item-icon" aria-hidden="true">{icon}</span>}
         <span className="ci-select__item-copy">
           <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
           {description != null ? (

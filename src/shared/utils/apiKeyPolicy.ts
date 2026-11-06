@@ -13,6 +13,7 @@ import { resolveClientApiKey } from "@/sse/services/clientApiKeyResolver";
 import { getApiKeyMetadata, isModelAllowedForKey, getApiKeyById } from "@/lib/db/apiKeys";
 import { getCachedComboByName, getCachedComboForModel } from "@/lib/db/readCache";
 import { isDashboardSessionAuthenticated } from "./apiAuth";
+import { isAnthropicMessagesRequest } from "./anthropicErrorEnvelope";
 import { checkBudget } from "@/domain/costRules";
 import { checkKeyQuota } from "@/domain/keyQuota";
 import { checkTokenLimits } from "@omniroute/open-sse/services/tokenLimitCounter.ts";
@@ -23,6 +24,8 @@ import {
 } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import * as log from "@/sse/utils/logger";
+import { getSsoShadowSecret } from "@/lib/db/ssoIdentities";
+import { AUTHZ_HEADER_AUTH_ID, AUTHZ_HEADER_AUTH_KIND } from "@/server/authz/headers";
 import { checkRateLimit, RateLimitRule } from "./rateLimiter";
 import {
   resolveCanonicalEndpointPath,
@@ -222,17 +225,6 @@ export function isComboNameAllowedForKey(
   if (!comboName) return false;
   // In the catalog the requested model IS the combo id, so both arguments match.
   return allowedCombos.some((rule) => matchesComboAccessRule(comboName, comboName, rule));
-}
-
-function isAnthropicMessagesRequest(request: Request): boolean {
-  if (request.headers.has("anthropic-version")) return true;
-
-  try {
-    const url = new URL(request.url);
-    return url.pathname.endsWith("/v1/messages");
-  } catch {
-    return false;
-  }
 }
 
 function policyErrorResponse(
@@ -879,6 +871,33 @@ function extractUngatedClientApiKey(request: Request): string | null {
 }
 
 /**
+ * Resolve an SSO-authenticated request onto its shadow API key, using the
+ * subject the auth layer already verified and stamped. The stamps are
+ * trustworthy because the pipeline strips any client-supplied copy before
+ * classification (src/server/authz/pipeline.ts).
+ *
+ * MUST be consulted before extractApiKey()/extractUngatedClientApiKey(): Claude
+ * Code sends an apiKeyHelper credential in BOTH `Authorization: Bearer` and
+ * `x-api-key`, so both extractors would return the raw Entra JWT, which hashes
+ * to no key and silently drops the user's entire policy — the same
+ * auth-vs-policy divergence as GHSA-2phc-xp22-9f56 above.
+ */
+function resolveSsoApiKeySecret(request: Request): string | null {
+  const kind = request.headers.get(AUTHZ_HEADER_AUTH_KIND);
+  if (kind !== "sso_user") return null;
+
+  const oid = request.headers.get(AUTHZ_HEADER_AUTH_ID);
+  if (!oid || !oid.trim()) return null;
+
+  try {
+    return getSsoShadowSecret(oid.trim());
+  } catch (error) {
+    log.error("API_POLICY", "Failed to resolve SSO shadow key", { error });
+    return null;
+  }
+}
+
+/**
  * The API key the policy layer evaluates for a request. The credential that
  * actually validated wins (a stale Bearer sent next to a valid x-api-key must
  * not hide that key's policy); then a real bearer key; then a bare
@@ -887,6 +906,9 @@ function extractUngatedClientApiKey(request: Request): string | null {
  * policy by id (resolved server-side, secret never sent).
  */
 export async function resolvePolicyApiKey(request: Request): Promise<string | null> {
+  // SSO first: its bearer is a JWT, not a key, and must map to the shadow key.
+  const ssoSecret = resolveSsoApiKeySecret(request);
+  if (ssoSecret) return ssoSecret;
   const resolved = await resolveClientApiKey(request);
   return (
     (resolved.valid ? resolved.apiKey : null) ||

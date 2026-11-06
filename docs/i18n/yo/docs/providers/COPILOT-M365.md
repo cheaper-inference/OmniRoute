@@ -64,39 +64,38 @@ HAR wọlé máa ń tú àkókò ìparí JWT, ó sì máa ń fi iye àkókò tó
 > **Má ṣe fi àgbéjáde HAR gidi, access token, tàbí refresh token sí ibi ìpamọ́ kóòdù láéláé.** Àwọn iye ìdánwò àti
 > àkọsílẹ̀ gbọ́dọ̀ jẹ́ àwọn iye àfidípò ní gbogbo ìgbà.
 
-## Àkókò ìwúlò token àti ìsọdọ̀tun
+## Ìgbà-aye àmi àti ìtúnṣe
 
-`access_token` ní àkókò ìwúlò kúkúrú (ní àṣà, **~75 ìṣẹ́jú**). Lẹ́yìn tó bá parí, olùpèsè
-máa ń jìyìn àṣìṣe àsopọ̀, o sì gbọ́dọ̀ tún gba ẹ̀rí ìwọlé náà.
+`access_token` kéré ní ìgbà-aye (ó máa ń jẹ́ **~75 ìṣẹ́jú** ní ọ̀pọ̀ ìgbà). Láìsí
+àmi ìtúnṣe tí ó ṣeé lò, o gbọ́dọ̀ tún gba ẹ̀rí wọlé lẹ́ẹ̀kan sí i lẹ́yìn tí ó bá parí.
 
-### Ìsọdọ̀tun aládàáṣiṣẹ́ pẹ̀lú `refreshToken`
+### Ìtúnṣe aláìfọwọ́ṣe pẹ̀lú `refreshToken`
 
-Láti yẹra fún àtúngba ẹ̀rí ìwọlé lọ́wọ́, o lè fi Microsoft refresh token pamọ́ sínú
-**Advanced Settings → providerSpecificData** ti àsopọ̀ náà:
+Nínú ìjíròrò **Àfikún ìsopọ̀** tàbí **Ṣàtúnṣe ìsopọ̀** ti olùpèsè Microsoft 365, ṣí
+**Àwọn ètò ìlọsíwájú → Àmi ìtúnṣe (àṣàyàn)**. Lẹ̀ẹ̀ mọ́ àmi ìtúnṣe OAuth Microsoft kan
+fún àyè `substrate.office.com/sydney`, kí o sì fi pamọ́. A máa fi ohun tí o tẹ̀ sínú pápá náà pamọ́, a kò sì
+kún un sílẹ̀ ṣáájú pẹ̀lú àmi tí a ti fipamọ́. Nígbà tí o bá ń ṣàtúnṣe, fi sílẹ̀ ní òfo láti pa àmi tí ó wà tẹ́lẹ̀ mọ́;
+lẹ̀ẹ̀ mọ́ àmi tuntun láti rọ́pò ó.
 
-| Ààyè           | Àpèjúwe                                                               |
-| -------------- | --------------------------------------------------------------------- |
-| `refreshToken` | Microsoft OAuth refresh token fún scope `substrate.office.com/sydney` |
-| `tier`         | `individual` (àiyípadà), `edu`, tàbí `enterprise`                     |
+Gba àmi ìtúnṣe náà láti inú ìṣàn kóòdù-ẹ̀rọ Microsoft tàbí ìṣàn kóòdù àṣẹ
+tí a pín sí àyè `substrate.office.com/sydney`; dasibodu kò gba a fún ọ.
+Pẹ̀lú àmi ìtúnṣe tí a ti ṣètò, OmniRoute máa ń ṣàyẹ̀wò `access_token` kí ó tó ṣe àwọn ìbéèrè
+ó sì máa ń tún un ṣe kìkì nígbà tí ó bá nílò ìtúnṣe. Ìtúnṣe tí ó ṣàṣeyọrí tún máa ń fipamọ́ àmi ìtúnṣe tí a yí padà,
+èyí sì ń yọ àìní fún gbígba ẹ̀rí wọlé lọ́wọ́ lẹ́ẹ̀kan sí i nígbà tí àmi ìtúnṣe náà bá ṣì wà ní ìmúlò.
 
-Gba refresh token náà láti inú ìṣàn device-code tàbí authorization-code Microsoft
-tó ní scope `substrate.office.com/sydney`. Nígbà tí a bá ṣètò `refreshToken`, OmniRoute
-máa ń tún `access_token` ṣe ṣáájú ìbéèrè kọ̀ọ̀kan, nítorí náà o kò nílò láti
-tún gba ẹ̀rí ìwọlé lẹ́yìn gbogbo ìparí tó tó ~75 ìṣẹ́jú.
+Tí a kò bá ṣètò `refreshToken`, o gbọ́dọ̀ tún gba ẹ̀rí WebSocket náà pẹ̀lú ọwọ́
+lẹ́yìn ìgbà tí ó bá parí kálẹ̀.
 
-Tí a kò bá ṣètò `refreshToken`, o gbọ́dọ̀ tún gba ẹ̀rí ìwọlé WebSocket náà lọ́wọ́
-lẹ́yìn ìparí kọ̀ọ̀kan.
+### Yíyan ipele
 
-### Yíyan ìpele
+| Ipele        | Àpèjẹ      | Ibùdó                 |
+| ------------ | ---------- | --------------------- |
+| `individual` | _(àìpẹ̀yà)_ | Copilot M365 oníbàárà |
+| `edu`        | `included` | Copilot M365 ẹ̀kọ́      |
+| `enterprise` | `work`     | Copilot M365 fún iṣẹ́  |
 
-| Ìpele        | Orúkọ àpèjúwe | Ojú-iṣẹ́                            |
-| ------------ | ------------- | ---------------------------------- |
-| `individual` | _(àiyípadà)_  | M365 Copilot fún olùmúlò gbogbogbò |
-| `edu`        | `included`    | M365 Copilot fún ẹ̀kọ́               |
-| `enterprise` | `work`        | M365 Copilot fún Iṣẹ́               |
-
-Ṣètò ìpele náà ní **Advanced Settings → providerSpecificData → tier**. Ìpele náà ní ipa lórí
-ìdarí ọ̀nà BizChat àti ààyè sí model.
+Ṣètò ipele náà nínú **Àwọn ètò ìlọsíwájú → Ipele Copilot**. Ipele náà ń ní ipa lórí
+ìtọ́sọ́nà BizChat àti àyè sí àwọn àwòṣe.
 
 ## Àwòṣe ààbò
 
@@ -105,27 +104,27 @@ lẹ́yìn ìparí kọ̀ọ̀kan.
 - Access token náà jẹ́ JWT aláìpẹ́. Ṣe é bí ọ̀rọ̀ aṣínà: má ṣe commit rẹ̀, má ṣe kọ ọ́ sínú log, má sì ṣe pín in.
 - Refresh token náà ń fúnni ní ààyè ìwọlé pípẹ́ sí ojú-iṣẹ́ BizChat. Tọ́jú rẹ̀ pẹ̀lú ìṣọ́ra kan náà bí API key.
 
-## Yíyanjú ìṣòro
+## Ìṣòro-ṣíṣe
 
-### Ìfàṣẹsí kùnà lẹ́sẹ̀kẹsẹ̀
+### Ìfàṣẹsí kuna lẹ́sẹ̀kẹsẹ̀
 
-- Ṣàyẹ̀wò pé o daakọ láti inú **WebSocket URL**, kì í ṣe láti inú ìbéèrè XHR/Fetch. Ẹ̀rí ìwọlé náà wà nínú query parameter `access_token` ti ìsopọ̀ Chathub WebSocket — kì í ṣe nínú header `Authorization: Bearer`.
-- Rí i dájú pé `chathubPath` ní gbogbo apá `<oid>@<tenant>` láti inú ipa-ọ̀nà URL.
+- Ṣàyẹ̀wò pé o daakọ láti inú **URL WebSocket**, kì í ṣe láti inú ìbéèrè XHR/Fetch. Ìwé-ẹ̀rí náà wà nínú paramita ìbéèrè `access_token` ti ìsopọ̀ Chathub WebSocket — kì í ṣe nínú àkọsílẹ̀ `Authorization: Bearer`.
+- Rí i dájú pé `chathubPath` ní apá `<oid>@<tenant>` kíkún láti inú ọ̀nà URL.
 
-### Token parí lẹ́yìn ~75 ìṣẹ́jú
+### Àmì àṣẹ máa ń parí lẹ́yìn ìṣẹ́jú 75
 
-Èyí ni a retí. Láìsí `refreshToken`, access token náà kì í pẹ́. Ṣe ọ̀kan nínú àwọn wọ̀nyí:
+Èyí jẹ́ ohun tí a retí. Láìsí `refreshToken`, àmì àṣẹ ìwọlé máa ń wà fún àkókò kúkúrú. Ṣe ọ̀kan nínú àwọn wọ̀nyí:
 
-- Tun gba ẹ̀rí ìwọlé náà láti DevTools, tàbí
-- Ṣètò `refreshToken` nínú Àwọn Ètò Ìlọsíwájú fún ìmúdójúìwọ̀n aládàáṣe.
+- Ya ìwé-ẹ̀rí náà padà láti inú DevTools, tàbí
+- Ṣètò **Àwọn Ètò Ìlọsíwájú → Àmì àṣẹ ìtúnṣe (àṣàyàn)** nínú ìjíròrò Fikun-un tàbí Ṣatunkọ ìsopọ̀ fún ìtúnṣe aládàáṣiṣẹ́.
 
-### Ìdánwò Ìsopọ̀ kọjá ṣùgbọ́n chat dá 401 padà
+### Ìdánwò Ìsopọ̀ kọjá ṣùgbọ́n ìjíròrò padà 401
 
-Ó ṣeé ṣe kí token náà ti parí láàárín àkókò ìfìdímúlẹ̀ àti ìbéèrè àkọ́kọ́. Tun gba ẹ̀rí ìwọlé tuntun.
+Ó ṣeé ṣe kí àmì àṣẹ náà ti parí láàárín ìmúdájú àti ìbéèrè àkọ́kọ́. Ya ìwé-ẹ̀rí tuntun padà.
 
-### Copilot kò farahàn nínú àkójọ àwọn olùpèsè
+### Copilot kò hàn nínú àtòjọ àwọn pèsè
 
-Rí i dájú pé `copilot-m365-web` ti ṣiṣẹ́ nínú **Dashboard → Providers**. Olùpèsè náà lè jẹ́ fífipamọ́ gẹ́gẹ́ bí àtẹ̀jáde àìyípadà nínú àwọn ipele kan.
+Rí i dájú pé `copilot-m365-web` ti ṣiṣẹ́ nínú **Pẹpẹ Ìṣàkóso → Àwọn Pèsè**. Pèsè náà lè farasin ní àìpé nínú àwọn ipele kan.
 
 ## Àwọn ìtọ́kasí
 
