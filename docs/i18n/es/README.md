@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                        |          v3.8.50          | **v3.8.51** |        `v3.8.53+`         |
+|                                        |          v3.8.50          | **v3.8.51** |        `v3.8.54+`         |
 | -------------------------------------- | :-----------------------: | :---------: | :-----------------------: |
 | 🌐 Proveedores                         |            352            |   **358**   |            380            |
 | 🧠 ID de modelos de chat únicos        |           1320            |  **1374**   |           1491            |
@@ -580,7 +580,7 @@ Radar es opcional y solo utiliza GET. El cliente de OmniRoute no carga prompts, 
 
 </div>
 
-> Destacados recientes de **v3.8.20 → v3.8.53**. Historial completo en [`CHANGELOG.md`](CHANGELOG.md).
+> Destacados recientes de **v3.8.20 → v3.8.54**. Historial completo en [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ Enrutamiento `quota-weighted`** — la estrategia combinada número 20 omite cuentas agotadas y luego selecciona entre las restantes en proporción a la cuota restante ÷ carga en curso, manteniendo las conversaciones existentes fijadas. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Modo sin interfaz** — `omniroute serve --headless` (o `OMNIROUTE_HEADLESS=1`) ejecuta solo el motor proxy `/v1/*`, con el panel y subsistemas exclusivos del panel desactivados. → [Modo Headless](docs/guides/HEADLESS.md)
@@ -1015,7 +1015,7 @@ omniroute
 ```
 
 > 💡 ¿Ves `npm warn ERESOLVE` o advertencias de peer-dep? [Son inofensivas](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **¿Usas npm 11 o posterior?** npm puede bloquear los scripts de ciclo de vida de los paquetes a menos que estén permitidos. El `postinstall` de OmniRoute (`node scripts/build/postinstall.mjs`) es necesario para preparar sus archivos de runtime nativos. Permite los paquetes nombrados en la advertencia de npm al instalar globalmente. Para el conjunto de paquetes reportado por OmniRoute 3.8.53:
+> **¿Usas npm 11 o posterior?** npm puede bloquear los scripts de ciclo de vida de los paquetes a menos que estén permitidos. El `postinstall` de OmniRoute (`node scripts/build/postinstall.mjs`) es necesario para preparar sus archivos de runtime nativos. Permite los paquetes nombrados en la advertencia de npm al instalar globalmente. Para el conjunto de paquetes reportado por OmniRoute 3.8.54:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1808,7 +1808,7 @@ Licencia MIT - consulta [LICENSE](LICENSE) para obtener más información.
 
 **[⬆ Volver al principio](#-omniroute)** · Creado con ❤️ para la comunidad de IA de código abierto.
 
-<sub>Creado por <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Licencia MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Creado por <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · Licencia MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Debates de GitHub habilitados para preguntas y respuestas de la comunidad -->

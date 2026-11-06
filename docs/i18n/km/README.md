@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                 |            v3.8.50             | **v3.8.51** |      `v3.8.53+`       |
+|                                 |            v3.8.50             | **v3.8.51** |      `v3.8.54+`       |
 | ------------------------------- | :----------------------------: | :---------: | :-------------------: |
 | 🌐 អ្នកផ្តល់សេវា                |              352               |   **358**   |          380          |
 | 🧠 លេខសម្គាល់ម៉ូដែលជជែកតែមួយគត់ |              1320              |  **1374**   |         1491          |
@@ -579,7 +579,7 @@ Radar គឺជាមុខងារដែលត្រូវជ្រើសរ�
 
 </div>
 
-> សេចក្តីពិសេសថ្មីៗពី **v3.8.20 → v3.8.53**។ ប្រវត្តិពេញលេញសូមមើលក្នុង [`CHANGELOG.md`](CHANGELOG.md)។
+> សេចក្តីពិសេសថ្មីៗពី **v3.8.20 → v3.8.54**។ ប្រវត្តិពេញលេញសូមមើលក្នុង [`CHANGELOG.md`](CHANGELOG.md)។
 
 - **⚖️ `quota-weighted` routing** — យុទ្ធសាស្ត្ររួមលេខ ២០ នេះរំលងគណនីដែលបានប្រើអស់ហើយ បន្ទាប់មកជ្រើសរើសចេញពីគណនីនៅសល់ដោយសមាមាត្រទៅនឹង quota នៅសល់ ÷ បន្ទុកកំពុងដំណើរការ ដើម្បីរក្សា threads ការសន្ទនាដែលមានស្រាប់ឲ្យនៅដដែល។ → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 របៀប Headless** — `omniroute serve --headless` (ឬ `OMNIROUTE_HEADLESS=1`) ដំណើរការតែម៉ាស៊ីនភ្លើង proxy `/v1/*` ប៉ុណ្ណោះ ដោយ dashboard និងប្រព័ន្ធដែលមានតែ dashboard ត្រូវបានបិទ។ → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1013,7 +1013,7 @@ omniroute
 ```
 
 > 💡 ឃើញ `npm warn ERESOLVE` ឬការព្រមាន peer-dep? [ពួកវាគ្មានគ្រោះថ្នាក់ទេ](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated)។
-> **ប្រើ npm 11 ឬថ្មីជាងនេះ?** npm អាចរាំងខ្ទប់ script វដ្តជីវិតរបស់ package លើកលែងតែពួកវាត្រូវបានអនុញ្ញាត។ `postinstall` របស់ OmniRoute (`node scripts/build/postinstall.mjs`) ចាំបាច់ដើម្បីរៀបចំឯកសារ runtime ដើមរបស់វា។ អនុញ្ញាត package ដែលមានឈ្មោះក្នុងការព្រមានរបស់ npm នៅពេលដំឡើងជាសកល។ សម្រាប់សំណុំ package ដែលបានរាយការណ៍ដោយ OmniRoute 3.8.53៖
+> **ប្រើ npm 11 ឬថ្មីជាងនេះ?** npm អាចរាំងខ្ទប់ script វដ្តជីវិតរបស់ package លើកលែងតែពួកវាត្រូវបានអនុញ្ញាត។ `postinstall` របស់ OmniRoute (`node scripts/build/postinstall.mjs`) ចាំបាច់ដើម្បីរៀបចំឯកសារ runtime ដើមរបស់វា។ អនុញ្ញាត package ដែលមានឈ្មោះក្នុងការព្រមានរបស់ npm នៅពេលដំឡើងជាសកល។ សម្រាប់សំណុំ package ដែលបានរាយការណ៍ដោយ OmniRoute 3.8.54៖
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1806,7 +1806,7 @@ OmniRoute ឈរលើស្នាដៃរបស់អ្នកជំនាន�
 
 **[⬆ ត្រឡប់ទៅកំពូល](#-omniroute)** · បង្កើតដោយ ❤️ សម្រាប់សហគមន៍ AI ប្រភពបើកចំហ។
 
-<sub>បង្កើតដោយ <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · អាជ្ញាប័ណ្ណ MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>បង្កើតដោយ <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · អាជ្ញាប័ណ្ណ MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- បានបើក GitHub Discussions សម្រាប់ការសួរ-ឆ្លើយរបស់សហគមន៍ -->

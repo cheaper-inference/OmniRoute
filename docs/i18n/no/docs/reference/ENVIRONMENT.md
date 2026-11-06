@@ -1365,7 +1365,7 @@ En tjeneste som holdes våken i en hel måned bruker omtrent 744 forekomsttimer,
 
 ## Distribusjonsscenarier
 
-For SRE-veiledning for relay-backend (ts/bifrost/auto-atferd, plassering av 9router kontra CLIProxyAPI og strategi for fallback ved høy gjennomstrømning), se [Strategi for relay-backend](/docs/reference/RELAY_BACKEND_STRATEGY.md).
+For SRE-veiledning for relay-backend (ts/bifrost/auto-atferd, plassering av 9router kontra CLIProxyAPI og strategi for reservekapasitet med høy gjennomstrømning), se [Strategi for relay-backend](/docs/reference/RELAY_BACKEND_STRATEGY.md).
 
 ### Minimal lokal utvikling
 
@@ -1377,7 +1377,7 @@ PORT=20128
 NODE_ENV=development
 ```
 
-### Docker i produksjon
+### Docker-produksjon
 
 ```bash
 JWT_SECRET=<generated>
@@ -1407,7 +1407,7 @@ OMNIROUTE_DISABLE_BACKGROUND_SERVICES=true
 APP_LOG_TO_FILE=false
 ```
 
-### VPS med reverse proxy (nginx + Cloudflare)
+### VPS med omvendt proxy (nginx + Cloudflare)
 
 ```bash
 JWT_SECRET=<generated>
@@ -1869,3 +1869,14 @@ Brukes av `open-sse/services/combo.ts` og `src/lib/quota/quotaScheduler.ts` for 
 | Variabel                       | Misligholde | Kildefil                                     | Beskrivelse                                                                                                                                                                                                                     |
 | ------------------------------ | ----------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`         | `src/lib/providerModels/modelSyncTimings.ts` | Sett til `1` for å logge fasetiming, en generert forespørsel ID og fase success/error -utfall under modellsynkronisering. Deaktivert for alle andre verdier. Logger utelater nyttelast for forespørsel, konto, katalog og feil. |
+
+## OpenCode-verktøy for lokal medieanalyse
+
+Brukes av `scripts/cli/omniroute-media-mcp.mjs`. Angi disse i miljøet til den lokale verktøyprosessen.
+
+| Variabel                   | Standardverdi                                                                        | Beskrivelse                                                                                                                    |
+| -------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (eller `~/.config/opencode/opencode.json`) | OpenCode-konfigurasjon som leses av medieverktøyet og installasjonsprogrammet.                                                 |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                          | Leverandøroppføring som medieverktøyet leser fra OpenCode-konfigurasjonen.                                                     |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                               | Modell som sendes inn av medieverktøyet. Leverandøren må støtte de forespurte medietypene.                                     |
+| `OMNIROUTE_MEDIA_API_KEY`  | Konfigurert API-nøkkel for leverandøren eller miljøreferansen til den                | Valgfri overstyring av legitimasjon. Oppbevar den i miljøet til den lokale prosessen; legg den aldri inn i versjonskontrollen. |

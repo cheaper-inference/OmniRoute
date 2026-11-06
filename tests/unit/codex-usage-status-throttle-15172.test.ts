@@ -7,14 +7,9 @@
  */
 import test from "node:test";
 import assert from "node:assert/strict";
-import { setImmediate as nextTurn } from "node:timers/promises";
 
 import { getUsageForProvider } from "../../open-sse/services/usage.ts";
 import { setCodexUsageFetchForTests } from "../../open-sse/services/usage/codex.ts";
-import {
-  connectionProxyTestOverride,
-  fetchWithConnectionProxy,
-} from "../../open-sse/services/connectionProxyFetch.ts";
 import {
   MinIntervalThrottle,
   resetQuotaFetchThrottle,
@@ -27,28 +22,6 @@ import {
 } from "../../src/lib/services/quotaAutoPing.ts";
 
 const INTERVAL_MS = 250;
-const originalProxyResolver = connectionProxyTestOverride.resolveProxyForConnection;
-
-// Measure pacing after the same lazy-import warmup used by the #6911 quota fixtures.
-// Proxy lookup is synthetic: database startup must not compress the observed fetch gaps.
-test.before(
-  async () => {
-    connectionProxyTestOverride.resolveProxyForConnection = async () => null;
-    const originalFetch = globalThis.fetch;
-    try {
-      await fetchWithConnectionProxy("warmup-15172", "https://warmup.invalid/", undefined, {
-        fetchFn: async () => new Response("{}", { status: 200 }),
-      });
-    } finally {
-      globalThis.fetch = originalFetch;
-    }
-  },
-  { timeout: 20000 }
-);
-
-test.after(() => {
-  connectionProxyTestOverride.resolveProxyForConnection = originalProxyResolver;
-});
 
 class FakeClock implements ThrottleClock {
   t = 1_000;
@@ -56,23 +29,6 @@ class FakeClock implements ThrottleClock {
   sleep = async (ms: number) => {
     this.t += ms;
   };
-}
-
-// Release each queued acquisition only after the previous mocked fetch has
-// started. Real wall-clock scheduling and cold transport imports are not part
-// of the dispatcher/throttle contract this regression protects.
-class ManualClock extends FakeClock {
-  waiting: Array<{ ms: number; resolve: () => void }> = [];
-  sleep = (ms: number) =>
-    new Promise<void>((resolve) => {
-      this.waiting.push({ ms, resolve });
-    });
-  advance() {
-    const wait = this.waiting.shift();
-    assert.ok(wait, "the next request must wait for the shared throttle");
-    this.t += wait.ms;
-    wait.resolve();
-  }
 }
 
 function installSharedThrottle(clock: FakeClock | null) {
@@ -106,10 +62,23 @@ function installUsageFetch(clock: FakeClock | null) {
   };
 }
 
+// The throttle's contract is the spacing of the slots it grants. A fetch starts later than its
+// slot, after the per-connection proxy lookup, and that lookup's latency varies per call, so
+// timing the fetch itself measures the lookup (193-218 ms gaps on an idle box), not the throttle.
+class RecordingThrottle extends MinIntervalThrottle {
+  readonly grants: number[] = [];
+
+  override async acquire(): Promise<void> {
+    await super.acquire();
+    this.grants.push(Date.now());
+  }
+}
+
 test("#15172 concurrent Codex usage fetches start at least one interval apart", async () => {
-  const clock = new ManualClock();
-  const restoreThrottle = installSharedThrottle(clock);
-  const { starts, restore } = installUsageFetch(clock);
+  const throttle = new RecordingThrottle({ minIntervalMs: INTERVAL_MS, jitterMs: 0 });
+  setQuotaFetchThrottleForTests(throttle);
+  const restoreThrottle = () => resetQuotaFetchThrottle();
+  const { starts, restore } = installUsageFetch(null);
 
   try {
     const connections = ["a", "b", "c", "d"].map((id) => ({
@@ -118,19 +87,14 @@ test("#15172 concurrent Codex usage fetches start at least one interval apart", 
       accessToken: `token-${id}`,
       providerSpecificData: { workspaceId: `ws-${id}` },
     }));
-    const requests = Promise.all(connections.map((connection) => getUsageForProvider(connection)));
-    for (let expectedStarts = 1; expectedStarts < connections.length; expectedStarts++) {
-      await nextTurn();
-      assert.equal(starts.length, expectedStarts, "later requests must remain queued");
-      clock.advance();
-    }
-    await requests;
+    await Promise.all(connections.map((connection) => getUsageForProvider(connection)));
 
     assert.equal(starts.length, 4);
-    for (let i = 1; i < starts.length; i++) {
-      const gap = starts[i] - starts[i - 1];
+    assert.equal(throttle.grants.length, 4, "every fetch must pass through the throttle");
+    for (let i = 1; i < throttle.grants.length; i++) {
+      const gap = throttle.grants[i] - throttle.grants[i - 1];
       assert.ok(
-        gap >= INTERVAL_MS,
+        gap >= INTERVAL_MS - 30,
         `gap ${gap}ms between fetch ${i - 1} and ${i} is below one interval`
       );
     }

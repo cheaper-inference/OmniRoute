@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                            |          v3.8.50          | **v3.8.51** |        `v3.8.53+`         |
+|                                            |          v3.8.50          | **v3.8.51** |        `v3.8.54+`         |
 | ------------------------------------------ | :-----------------------: | :---------: | :-----------------------: |
 | 🌐 Mga provider                            |            352            |   **358**   |            380            |
 | 🧠 Mga natatanging ID ng modelo ng chat    |           1320            |  **1374**   |           1491            |
@@ -580,7 +580,7 @@ Ang Radar ay opt-in at GET-only. Hindi nag-a-upload ang OmniRoute client ng mga 
 
 </div>
 
-> Mga kamakailang highlight mula **v3.8.20 → v3.8.53**. Kumpletong kasaysayan sa [`CHANGELOG.md`](CHANGELOG.md).
+> Mga kamakailang highlight mula **v3.8.20 → v3.8.54**. Kumpletong kasaysayan sa [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ `quota-weighted` routing** — ang ika-20 na combo strategy ay nilalaktawan ang mga ubos na account, pagkatapos ay pumipili sa natitira batay sa natitirang quota ÷ kasalukuyang load, habang pinananatili ang mga kasalukuyang pag-uusap na naka-pin. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Headless mode** — `omniroute serve --headless` (o `OMNIROUTE_HEADLESS=1`) ay nagpapatakbo lamang ng `/v1/*` proxy engine, naka-off ang dashboard at mga subsystem na para lang sa dashboard. → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1015,7 +1015,7 @@ omniroute
 ```
 
 > 💡 Nakikita mo ang `npm warn ERESOLVE` o peer-dep warnings? [Hindi sila mapanganib](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Gumagamit ng npm 11 o mas bago?** Maaaring harangin ng npm ang mga package lifecycle script maliban kung pinapayagan ang mga ito. Kinakailangan ang `postinstall` ng OmniRoute (`node scripts/build/postinstall.mjs`) para ihanda ang mga native runtime file nito. Payagan ang mga package na pinangalanan sa warning ng npm kapag nag-i-install nang global. Para sa package set na iniulat ng OmniRoute 3.8.53:
+> **Gumagamit ng npm 11 o mas bago?** Maaaring harangin ng npm ang mga package lifecycle script maliban kung pinapayagan ang mga ito. Kinakailangan ang `postinstall` ng OmniRoute (`node scripts/build/postinstall.mjs`) para ihanda ang mga native runtime file nito. Payagan ang mga package na pinangalanan sa warning ng npm kapag nag-i-install nang global. Para sa package set na iniulat ng OmniRoute 3.8.54:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1805,7 +1805,7 @@ MIT License - tingnan ang [LICENSE](LICENSE) para sa mga detalye.
 
 **[⬆ Bumalik sa itaas](#-omniroute)** · Ginawa nang may ❤️ para sa open-source AI community.
 
-<sub>Ginawa ni <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Ginawa ni <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Pinagana ang GitHub Discussions para sa Q&A ng komunidad -->

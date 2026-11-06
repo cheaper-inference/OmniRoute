@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                                 |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
+|                                                 |         v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | ----------------------------------------------- | :----------------------: | :---------: | :-------------------: |
 | 🌐 Watoa huduma                                 |           352            |   **358**   |          380          |
 | 🧠 Vitambulisho vya kipekee vya miundo ya gumzo |           1320           |  **1374**   |         1491          |
@@ -513,7 +513,7 @@ Radar ni ya kujiunga kwa hiari na hutumia GET pekee. Kiteja cha OmniRoute hakipa
 
 </div>
 
-> Mambo muhimu ya hivi karibuni kutoka **v3.8.20 → v3.8.53**. Historia kamili ipo kwenye [`CHANGELOG.md`](CHANGELOG.md).
+> Mambo muhimu ya hivi karibuni kutoka **v3.8.20 → v3.8.54**. Historia kamili ipo kwenye [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ Uelekezaji wa `quota-weighted`** — mkakati wa 20 wa mchanganyiko huruka akaunti zilizochoka, kisha huchagua kati ya zilizobaki kulingana na mgao uliosalia ÷ mzigo unaoendelea, huku mazungumzo yaliyopo yakibaki yamefungwa. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Hali ya Headless** — `omniroute serve --headless` (au `OMNIROUTE_HEADLESS=1`) inaendesha injini ya wakala `/v1/*` pekee, bila dashibodi na mifumo ya dashibodi pekee. → [Headless Mode](docs/guides/HEADLESS.md)
@@ -948,7 +948,7 @@ omniroute
 ```
 
 > 💡 Unaona `npm warn ERESOLVE` au maonyo ya utegemezi rika? [Hayana madhara](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Unatumia npm 11 au toleo jipya zaidi?** npm inaweza kuzuia hati za mzunguko wa maisha wa kifurushi isipokuwa ziruhusiwe. `postinstall` ya OmniRoute (`node scripts/build/postinstall.mjs`) inahitajika ili kuandaa faili zake asilia za mazingira ya utekelezaji. Ruhusu vifurushi vilivyotajwa katika onyo la npm unaposakinisha kwa mfumo mzima. Kwa seti ya vifurushi iliyoripotiwa na OmniRoute 3.8.53:
+> **Unatumia npm 11 au toleo jipya zaidi?** npm inaweza kuzuia hati za mzunguko wa maisha wa kifurushi isipokuwa ziruhusiwe. `postinstall` ya OmniRoute (`node scripts/build/postinstall.mjs`) inahitajika ili kuandaa faili zake asilia za mazingira ya utekelezaji. Ruhusu vifurushi vilivyotajwa katika onyo la npm unaposakinisha kwa mfumo mzima. Kwa seti ya vifurushi iliyoripotiwa na OmniRoute 3.8.54:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1741,7 +1741,7 @@ Leseni ya MIT - tazama [LICENSE](LICENSE) kwa maelezo zaidi.
 
 **[⬆ Rudi juu](#-omniroute)** · Imejengwa kwa ❤️ kwa ajili ya jumuiya ya AI ya chanzo huria.
 
-<sub>Iliundwa na <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Leseni ya MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Iliundwa na <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · Leseni ya MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Majadiliano ya GitHub yamewezeshwa kwa Maswali na Majibu ya jumuiya -->

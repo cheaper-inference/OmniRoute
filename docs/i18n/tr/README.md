@@ -71,7 +71,7 @@ OMNIROUTE para biriktirmenize ve işinizi kolaylaştırmanıza yardımcı olduys
 
 <div align="center">
 
-|                                      |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
+|                                      |         v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | ------------------------------------ | :----------------------: | :---------: | :-------------------: |
 | 🌐 Sağlayıcılar                      |           352            |   **358**   |          380          |
 | 🧠 Benzersiz sohbet model kimlikleri |           1320           |  **1374**   |         1491          |
@@ -580,7 +580,7 @@ Radar isteğe bağlıdır ve yalnızca GET kullanır. OmniRoute istemcisi isteml
 
 </div>
 
-> **v3.8.20 → v3.8.53** arasındaki son gelişmeler. Tüm geçmiş için [`CHANGELOG.md`](CHANGELOG.md) dosyasına bakınız.
+> **v3.8.20 → v3.8.54** arasındaki son gelişmeler. Tüm geçmiş için [`CHANGELOG.md`](CHANGELOG.md) dosyasına bakınız.
 
 - **⚖️ `quota-weighted` yönlendirme** — 20. kombinasyon stratejisi, kotası tükenmiş hesapları atlar, ardından kalanlar arasında kalan kota ÷ anlık yük oranında seçim yapar, mevcut konuşmaları sabit tutar. → [Otomatik Kombinasyon](docs/routing/AUTO-COMBO.md)
 - **🧰 Başsız mod** — `omniroute serve --headless` (veya `OMNIROUTE_HEADLESS=1`) yalnızca `/v1/*` proxy motorunu çalıştırır, gösterge paneli ve sadece gösterge paneline özel alt sistemler kapalıdır. → [Başsız Mod](docs/guides/HEADLESS.md)
@@ -1015,7 +1015,7 @@ omniroute
 ```
 
 > 💡 `npm warn ERESOLVE` veya eş bağımlılık uyarıları mı görüyorsunuz? [Bunlar zararsızdır](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **npm 11 veya sonraki bir sürümünü mü kullanıyorsunuz?** npm, izin verilmedikçe paket yaşam döngüsü betiklerini engelleyebilir. OmniRoute'un `postinstall` betiği (`node scripts/build/postinstall.mjs`), yerel çalışma zamanı dosyalarını hazırlamak için gereklidir. Genel kurulum sırasında npm uyarısında adı geçen paketlere izin verin. OmniRoute 3.8.53 tarafından bildirilen paket kümesi için:
+> **npm 11 veya sonraki bir sürümünü mü kullanıyorsunuz?** npm, izin verilmedikçe paket yaşam döngüsü betiklerini engelleyebilir. OmniRoute'un `postinstall` betiği (`node scripts/build/postinstall.mjs`), yerel çalışma zamanı dosyalarını hazırlamak için gereklidir. Genel kurulum sırasında npm uyarısında adı geçen paketlere izin verin. OmniRoute 3.8.54 tarafından bildirilen paket kümesi için:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1807,7 +1807,7 @@ MIT Lisansı - ayrıntılar için [LICENSE](LICENSE) dosyasına bakın.
 
 **[⬆ Başa dön](#-omniroute)** · Açık kaynaklı yapay zekâ topluluğu için ❤️ ile geliştirildi.
 
-<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> tarafından oluşturuldu · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT Lisansı · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> tarafından oluşturuldu · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT Lisansı · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Topluluk soru-cevapları için GitHub Discussions etkinleştirildi -->

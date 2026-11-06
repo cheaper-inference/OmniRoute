@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                 |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
+|                                 |         v3.8.50         | **v3.8.51** |      `v3.8.54+`       |
 | ------------------------------- | :---------------------: | :---------: | :-------------------: |
 | 🌐 ارائهدهندگان                 |           352           |   **358**   |          380          |
 | 🧠 شناسههای یکتای مدلهای گفتوگو |          1320           |  **1374**   |         1491          |
@@ -580,7 +580,7 @@ OmniRoute دارای مجوز MIT است و بهصورت عمومی نگهدار
 
 </div>
 
-> نکات برجسته اخیر از **v3.8.20 → v3.8.53**. تاریخچه کامل در [`CHANGELOG.md`](CHANGELOG.md).
+> نکات برجسته اخیر از **v3.8.20 → v3.8.54**. تاریخچه کامل در [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ مسیریابی `quota-weighted`** — استراتژی ترکیبی بیستم حسابهای تمامشده را رد میکند، سپس بین بقیه به نسبت سهمیه باقیمانده ÷ بار جاری انتخاب میکند و مکالمات موجود را ثابت نگه میدارد. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 حالت بدون رابط کاربری (Headless mode)** — اجرای `omniroute serve --headless` (یا `OMNIROUTE_HEADLESS=1`) فقط موتور پراکسی `/v1/*` را اجرا میکند و داشبورد و زیرسیستمهای فقط داشبورد را خاموش میکند. → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1015,7 +1015,7 @@ omniroute
 ```
 
 > 💡 خطای `npm warn ERESOLVE` یا هشدارهای peer-dep را میبینید؟ [بیخطر هستند](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **از npm 11 یا جدیدتر استفاده میکنید؟** npm ممکن است اسکریپتهای چرخه عمر بستهها را مسدود کند مگر اینکه مجاز شوند. `postinstall` در OmniRoute (`node scripts/build/postinstall.mjs`) برای آمادهسازی فایلهای زماناجرای بومی آن لازم است. هنگام نصب سراسری، بستههایی را که در هشدار npm نام برده شدهاند مجاز کنید. برای مجموعه بستهای که OmniRoute 3.8.53 گزارش میدهد:
+> **از npm 11 یا جدیدتر استفاده میکنید؟** npm ممکن است اسکریپتهای چرخه عمر بستهها را مسدود کند مگر اینکه مجاز شوند. `postinstall` در OmniRoute (`node scripts/build/postinstall.mjs`) برای آمادهسازی فایلهای زماناجرای بومی آن لازم است. هنگام نصب سراسری، بستههایی را که در هشدار npm نام برده شدهاند مجاز کنید. برای مجموعه بستهای که OmniRoute 3.8.54 گزارش میدهد:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1805,7 +1805,7 @@ OmniRoute بر شانههای غولها ایستاده است. این پروژ�
 
 **[⬆ بازگشت به بالا](#-omniroute)** · با ❤️ برای جامعهٔ هوش مصنوعی متنباز ساخته شده است.
 
-<sub>ایجادشده توسط <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · مجوز MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>ایجادشده توسط <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · مجوز MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- گفتوگوهای GitHub برای پرسشوپاسخ جامعه فعال هستند -->
