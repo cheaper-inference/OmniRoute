@@ -80,10 +80,8 @@ export function buildNodeAliasModels(
  * provider catalog) can put hundreds of candidates behind a single click.
  * Above this threshold the caller must confirm before batch-adding (#8526).
  *
- * A native `confirm()` — not a bespoke modal — matches the existing bulk /
- * destructive-action pattern already used in this codebase (e.g.
- * `ReasoningRoutingRules.tsx::deleteConfirm`, `combos/page.tsx::deleteConfirm`),
- * so no new UI primitive is needed for this one interaction.
+ * The confirmation goes through `useConfirmDialog()` (the kit `ConfirmModal`),
+ * like every other bulk / destructive action in the dashboard (#19066).
  */
 export const SELECT_ALL_CONFIRM_THRESHOLD = 20;
 

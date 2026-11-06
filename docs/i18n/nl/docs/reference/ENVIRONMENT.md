@@ -1368,7 +1368,7 @@ Een service die een hele maand actief blijft, gebruikt ongeveer 744 instantie-ur
 
 ## Implementatiescenario's
 
-Raadpleeg voor SRE-richtlijnen voor de relay-backend (ts/bifrost/auto-gedrag, plaatsing van 9router versus CLIProxyAPI en strategie voor fallback bij hoge doorvoer) [Strategie voor de relay-backend](/docs/reference/RELAY_BACKEND_STRATEGY.md).
+Raadpleeg voor SRE-richtlijnen voor de relay-backend (gedrag van ts/bifrost/auto, plaatsing van 9router versus CLIProxyAPI en fallbackstrategie voor hoge doorvoer) [Relay-backendstrategie](/docs/reference/RELAY_BACKEND_STRATEGY.md).
 
 ### Minimale lokale ontwikkeling
 
@@ -1380,7 +1380,7 @@ PORT=20128
 NODE_ENV=development
 ```
 
-### Docker in productie
+### Docker-productie
 
 ```bash
 JWT_SECRET=<generated>
@@ -1872,3 +1872,14 @@ Gebruikt door `open-sse/services/combo.ts` en `src/lib/quota/quotaScheduler.ts` 
 | Variabel                       | Standaard | Bronbestand                                  | Beschrijving                                                                                                                                                                                                                                              |
 | ------------------------------ | --------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`       | `src/lib/providerModels/modelSyncTimings.ts` | Stel deze in op `1` om fasetiming, een gegenereerd verzoek ID en fase success/error -resultaten tijdens modelsynchronisatie te loggen. Uitgeschakeld voor alle andere waarden. Logboeken laten verzoek-, account-, catalogus- en foutpayloads achterwege. |
+
+## Lokale OpenCode-tool voor media-analyse
+
+Gebruikt door `scripts/cli/omniroute-media-mcp.mjs`. Stel deze variabelen in de omgeving van het lokale toolproces in.
+
+| Variabele                  | Standaardwaarde                                                                   | Beschrijving                                                                                                     |
+| -------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (of `~/.config/opencode/opencode.json`) | OpenCode-configuratie die door de mediatool en het installatieprogramma wordt gelezen.                           |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                       | Provider-item dat door de mediatool uit de OpenCode-configuratie wordt gelezen.                                  |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                            | Model dat door de mediatool wordt ingediend. De provider ervan moet de aangevraagde mediatypen ondersteunen.     |
+| `OMNIROUTE_MEDIA_API_KEY`  | Geconfigureerde API-sleutel van de provider of de omgevingsreferentie daarvan     | Optionele overschrijving van de referentie. Behoud deze in de omgeving van het lokale proces; commit deze nooit. |
