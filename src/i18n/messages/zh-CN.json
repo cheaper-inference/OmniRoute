@@ -6327,7 +6327,7 @@
     "apiRegionChina": "中国大陆",
     "apiRegionHint": "选择用于 API 访问和配额跟踪的端点区域。",
     "apiRegionInternational": "国际",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionLabel": "API 区域",
     "apikey": "API 密钥",
     "audio": "音频",
     "audioProvidersHeading": "音频 Provider",
