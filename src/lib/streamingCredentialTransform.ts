@@ -670,5 +670,10 @@ export function createCredentialSseTransform(
     return appendAndDrain(state, store, field, index, text, isStopSignal);
   };
 
-  return createSseTextTransform(processor, onFlush, undefined, { processToolArgs: true });
+  return createSseTextTransform(processor, onFlush, undefined, {
+    processToolArgs: true,
+    // Only after a Responses lane is drained: dropping the buffer also drops its
+    // WeakMap-backed overflow continuation state without recycling identities.
+    releaseResponsesLane: (index) => store.buffers.delete(index),
+  });
 }
