@@ -27,6 +27,7 @@ import { signAwsRequest } from "@omniroute/open-sse/utils/awsSigV4.ts";
 import { resolveAlibabaProviderBaseUrl } from "@/shared/constants/alibabaProviderRegions";
 import { resolveAzureSpeechVoicesUrl } from "@omniroute/open-sse/executors/azureSpeechTts.ts";
 
+/** Validate an Azure Speech key against the connection's regional voices endpoint. */
 export async function validateAzureSpeechProvider({ apiKey, providerSpecificData = {} }: any) {
   const url = resolveAzureSpeechVoicesUrl({ providerSpecificData });
   if (!url) {

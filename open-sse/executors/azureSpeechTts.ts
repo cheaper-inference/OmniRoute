@@ -3,6 +3,7 @@ import {
   audioStreamResponse,
   upstreamErrorResponse,
 } from "../utils/audioResponse.ts";
+import { FETCH_TIMEOUT_MS } from "../config/constants.ts";
 import { stripTrailingSlashes } from "../utils/urlSanitize.ts";
 
 const AZURE_SPEECH_FORMATS = {
@@ -13,10 +14,12 @@ const AZURE_SPEECH_FORMATS = {
   ogg: "ogg-24khz-16bit-mono-opus",
 } as const;
 
+/** Return a trimmed non-empty string, or null for every other input. */
 function stringValue(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
+/** Escape text and attribute values before interpolating them into Azure SSML. */
 function escapeXml(value: string): string {
   return value
     .replaceAll("&", "&amp;")
@@ -26,6 +29,7 @@ function escapeXml(value: string): string {
     .replaceAll("'", "&apos;");
 }
 
+/** Normalize a supported Azure Speech resource URL to its synthesis endpoint. */
 function normalizeAzureSpeechBaseUrl(baseUrl: string): string | null {
   try {
     const parsed = new URL(baseUrl);
@@ -47,7 +51,13 @@ function normalizeAzureSpeechBaseUrl(baseUrl: string): string | null {
     const path = parsed.pathname.replace(/\/+$/, "");
     if (/\/(?:tts\/)?cognitiveservices\/v1$/i.test(path)) return normalized;
     if (path && path !== "/") return normalized;
-    if (parsed.hostname.toLowerCase().endsWith(".cognitiveservices.azure.com")) {
+    if (
+      [
+        ".cognitiveservices.azure.com",
+        ".cognitiveservices.azure.us",
+        ".cognitiveservices.azure.cn",
+      ].some((suffix) => hostname.endsWith(suffix))
+    ) {
       return `${normalized}/tts/cognitiveservices/v1`;
     }
     return `${normalized}/cognitiveservices/v1`;
@@ -56,6 +66,7 @@ function normalizeAzureSpeechBaseUrl(baseUrl: string): string | null {
   }
 }
 
+/** Resolve the configured Azure Speech connection to a synthesis endpoint. */
 export function resolveAzureSpeechSynthesisUrl(credentials: unknown): string | null {
   const record = credentials && typeof credentials === "object" ? credentials : {};
   const providerSpecificData =
@@ -73,16 +84,19 @@ export function resolveAzureSpeechSynthesisUrl(credentials: unknown): string | n
   return `https://${region.toLowerCase()}.tts.speech.microsoft.com/cognitiveservices/v1`;
 }
 
+/** Resolve the Azure Speech voices endpoint used for connection validation. */
 export function resolveAzureSpeechVoicesUrl(credentials: unknown): string | null {
   const synthesisUrl = resolveAzureSpeechSynthesisUrl(credentials);
   if (!synthesisUrl) return null;
   return synthesisUrl.replace(/\/cognitiveservices\/v1$/i, "/cognitiveservices/voices/list");
 }
 
+/** Derive the SSML language tag from an Azure neural voice name. */
 function resolveLanguage(voice: string): string {
   return voice.match(/^([a-z]{2,3}-[A-Z]{2})(?:-|$)/)?.[1] || "en-US";
 }
 
+/** Convert an OpenAI-compatible speed multiplier to an Azure SSML rate. */
 function resolveProsodyRate(speed: unknown): string | null {
   if (typeof speed !== "number" || !Number.isFinite(speed) || speed === 1) return null;
   const clamped = Math.min(4, Math.max(0.25, speed));
@@ -90,6 +104,7 @@ function resolveProsodyRate(speed: unknown): string | null {
   return `${percentage >= 0 ? "+" : ""}${percentage}%`;
 }
 
+/** Execute an Azure Speech synthesis request and return the canonical audio response. */
 export async function handleAzureSpeechTts(body, token: string, credentials): Promise<Response> {
   const endpoint = resolveAzureSpeechSynthesisUrl(credentials);
   if (!endpoint) {
@@ -126,6 +141,7 @@ export async function handleAzureSpeechTts(body, token: string, credentials): Pr
       "User-Agent": "OmniRoute",
     },
     body: ssml,
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
 
   if (!response.ok) return upstreamErrorResponse(response, await response.text());

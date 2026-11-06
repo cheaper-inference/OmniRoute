@@ -928,7 +928,7 @@ export async function handleAudioSpeech({
     }
 
     if (providerConfig.format === "azure-speech-tts") {
-      return handleAzureSpeechTts(body, token, credentials);
+      return await handleAzureSpeechTts(body, token, credentials);
     }
 
     if (providerConfig.format === "uc-tts") {

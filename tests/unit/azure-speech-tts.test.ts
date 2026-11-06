@@ -184,3 +184,67 @@ test("Azure Speech keeps the custom-resource TTS prefix for voice validation", (
     null
   );
 });
+
+test("Azure Speech keeps the TTS prefix for sovereign-cloud resource endpoints", () => {
+  for (const suffix of ["azure.us", "azure.cn"]) {
+    assert.equal(
+      resolveAzureSpeechVoicesUrl({
+        providerSpecificData: {
+          baseUrl: `https://my-speech-resource.cognitiveservices.${suffix}`,
+        },
+      }),
+      `https://my-speech-resource.cognitiveservices.${suffix}/tts/cognitiveservices/voices/list`
+    );
+  }
+});
+
+test("Azure Speech synthesis uses a bounded abort signal", async () => {
+  const originalFetch = globalThis.fetch;
+  let capturedSignal: AbortSignal | null | undefined;
+  globalThis.fetch = async (_url, init = {}) => {
+    capturedSignal = init.signal;
+    return new Response(new Uint8Array([1]), {
+      status: 200,
+      headers: { "content-type": "audio/mpeg" },
+    });
+  };
+
+  try {
+    const response = await handleAudioSpeech({
+      body: { model: "azure-speech/neural", input: "Ciao" },
+      credentials: {
+        apiKey: "azure-speech-key",
+        providerSpecificData: { region: "westeurope" },
+      },
+    });
+
+    assert.equal(response.status, 200);
+    assert.ok(capturedSignal instanceof AbortSignal);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("Azure Speech network failures use the sanitized CORS audio error response", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => {
+    throw new Error("request failed at C:\\secret\\azure-key.txt");
+  };
+
+  try {
+    const response = await handleAudioSpeech({
+      body: { model: "azure-speech/neural", input: "Ciao" },
+      credentials: {
+        apiKey: "azure-speech-key",
+        providerSpecificData: { region: "westeurope" },
+      },
+    });
+    const payload = await response.json();
+
+    assert.equal(response.status, 500);
+    assert.match(response.headers.get("access-control-allow-methods") || "", /POST/);
+    assert.doesNotMatch(payload.error.message, /secret|azure-key/i);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

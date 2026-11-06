@@ -16,6 +16,7 @@ import {
 } from "@/shared/constants/xiaomiTokenPlanRegions";
 import { providerText } from "../../providerPageHelpers";
 
+/** Return the region-field defaults and visibility rules for regional providers. */
 export function getProviderRegionConfig(provider?: string) {
   const isAlibabaRegional = isAlibabaRegionalProvider(provider);
   const isXiaomiTokenPlan = isXiaomiTokenPlanProvider(provider);
