@@ -145,6 +145,21 @@ for (const stream of [false, true]) {
   });
 }
 
+test("every turn, fresh or continued, runs in temporary chat, as the executor declares", async () => {
+  await run([ok("answer one"), ok("answer two")], async (exec) => {
+    assert.equal(exec.chatProbeIsolation, "temporary-chat");
+    await (await exec.execute(request([user("open the task")]))).response.text();
+    await (
+      await exec.execute(
+        request([user("open the task"), assistant("answer one"), user("next step")])
+      )
+    ).response.text();
+    assert.equal(sockets.length, 2);
+    assert.equal(sockets[1].args.isStartOfSession, false);
+    for (const socket of sockets) assert.equal(socket.query.get("disableMemory"), "1");
+  });
+});
+
 test("an edited history starts a fresh conversation with the whole history", async () => {
   await run([ok("answer one"), ok("answer two")], async (exec) => {
     await (await exec.execute(request([user("open")]))).response.text();

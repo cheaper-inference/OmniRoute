@@ -215,6 +215,13 @@ export async function prepareM365Credentials(input: M365CredentialInput): Promis
 }
 
 export class CopilotM365WebExecutor extends BaseExecutor {
+  /**
+   * Every turn, fresh or continued, carries `disableMemory=1`, Copilot's temporary chat:
+   * the conversation keeps its context while it runs and never appears in the account's
+   * history. Automated chat probes (model tests, combo tests) may therefore reach it.
+   */
+  readonly chatProbeIsolation = "temporary-chat" as const;
+
   constructor() {
     super("copilot-m365-web", { id: "copilot-m365-web", baseUrl: "wss://substrate.office.com" });
   }

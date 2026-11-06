@@ -205,6 +205,9 @@ standalone IDs follow the public [protocol catalog](https://github.com/cramt/m36
   conversation with the whole history. A failed turn is never resumed, and a content-less
   `InternalError` is re-sent once in a fresh conversation (**502** `m365_internal_error` if it
   fails again). Continuations are kept in process memory: a restart starts fresh conversations.
+- Every turn runs in Copilot's temporary chat (`disableMemory=1`): the conversation keeps its
+  context while it runs and never appears in the account's chat history. Model tests, Test
+  All and combo tests may therefore probe this provider without leaving conversations behind.
 - A turn has a 120-second idle deadline and a bounded overall deadline. Final-only answers,
   progress filtering and cancellation are handled by the native transport/composer.
 - Web-grounded answers keep their sources. Copilot marks a citation inline with private-use
