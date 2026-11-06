@@ -7,6 +7,7 @@
  * @module inputSanitizer
  */
 
+import { getFeatureFlagOverride } from "@/lib/db/featureFlags";
 import { parseEnvBoolean } from "@/shared/utils/envBoolean";
 import { resolveBlockThreshold, shouldBlockDetections } from "@/shared/utils/injectionSeverity";
 import { PII_REQUEST_TYPE_ALIASES } from "@/shared/constants/piiTypes";
@@ -165,15 +166,37 @@ const PII_PATTERNS = [
 // ─── Configuration ────────────────────────────────────────────────────
 
 /**
- * Get sanitizer configuration from environment.
+ * Get sanitizer configuration. Dashboard-set DB overrides win over the env vars
+ * so the Feature Flags UI actually controls these flags (DB > ENV > default,
+ * matching resolveFeatureFlag and the INJECTION_GUARD_MODE reader in
+ * promptInjection.ts). DB-only reads here preserve the env fallback chain and
+ * defaults when no override is stored; an unavailable flag store falls back to
+ * the env-based behavior.
  * @returns {{ enabled: boolean, mode: string, piiRedaction: boolean }}
  */
 function getConfig() {
+  let overrides: Record<string, string | undefined> = {};
+  try {
+    overrides = {
+      enabled: getFeatureFlagOverride("INPUT_SANITIZER_ENABLED"),
+      piiRedaction: getFeatureFlagOverride("PII_REDACTION_ENABLED"),
+    };
+  } catch {
+    overrides = {};
+  }
   return {
     // Default ON (opt-out). Truthy/falsy parsing accepts true/1/yes/on and false/0/no/off.
-    enabled: parseEnvBoolean(process.env.INPUT_SANITIZER_ENABLED, true),
+    enabled:
+      overrides.enabled !== undefined
+        ? parseEnvBoolean(overrides.enabled, true)
+        : parseEnvBoolean(process.env.INPUT_SANITIZER_ENABLED, true),
+    // INPUT_SANITIZER_MODE has no registered flag (the dashboard cannot set it),
+    // so it stays env-only. It is reserved for prompt-injection policy.
     mode: process.env.INPUT_SANITIZER_MODE || "warn", // "warn" | "block" | "redact"
-    piiRedaction: parseEnvBoolean(process.env.PII_REDACTION_ENABLED, false),
+    piiRedaction:
+      overrides.piiRedaction !== undefined
+        ? parseEnvBoolean(overrides.piiRedaction, false)
+        : parseEnvBoolean(process.env.PII_REDACTION_ENABLED, false),
     blockThreshold: resolveBlockThreshold(),
   };
 }
