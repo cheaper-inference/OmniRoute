@@ -1,0 +1,1 @@
+- **chore(dashboard):** the vendored Keak CI UI Kit moves to 0.0.104, and the dashboard adopts its `AlertDialog`, `Command`, `JsonTree`, `DataTableColumnsMenu`, `Spinner`, `Kbd`, log inks, colour scales, chart theme and brand tints ([#19066](https://github.com/cheaper-inference/OmniRoute/issues/19066))

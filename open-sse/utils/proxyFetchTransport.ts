@@ -16,6 +16,7 @@ import { dispatchDirectFetch } from "./proxyFetchDirectTransport.ts";
 import { tryTlsSend, isTlsSendEligible } from "./proxyFetchTlsTransport.ts";
 import {
   getEffectiveSignal,
+  canResendAfterTransportError,
   requestHasNonReplayableBody,
   tagProxyUnreachable,
   RELAY_POOL_AGENT,
@@ -155,6 +156,7 @@ async function sendRelay(
       });
     } catch (error) {
       validateRelayRetry(error, controller.signal, options.signal, request.url, attempt, max);
+      if (!canResendAfterTransportError(input, options, error)) throw error;
       lastError = error;
       await new Promise((resolve) => setTimeout(resolve, RETRY_BACKOFF_MS));
     } finally {
@@ -222,7 +224,12 @@ async function sendProxy(
       return response;
     } catch (error) {
       if (getEffectiveSignal(input, options)?.aborted) throw error;
-      if (attempt !== 0 || max <= 1 || !isProxyTransportFailure(error))
+      if (
+        attempt !== 0 ||
+        max <= 1 ||
+        !isProxyTransportFailure(error) ||
+        !canResendAfterTransportError(input, options, error)
+      )
         throw finalProxyError(error, proxyUrl, target, source);
       lastError = error;
       await new Promise((resolve) => setTimeout(resolve, RETRY_BACKOFF_MS));

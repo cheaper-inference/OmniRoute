@@ -1,6 +1,7 @@
 import { Agent } from "undici";
 import tlsClient, { type TlsFetchOptions } from "./tlsClient.ts";
 import { isUpstreamHttp2Enabled } from "./proxyDispatcher.ts";
+import { isRegisteredFeatureFlagEnabled } from "./registeredFeatureFlag.ts";
 export type FetchWithDispatcherOptions = RequestInit & { dispatcher?: unknown };
 export type FetchWithDispatcher = (
   input: RequestInfo | URL,
@@ -239,6 +240,36 @@ export function isAmbiguousFailureReplaySafe(
     (method === "GET" || method === "HEAD" || method === "OPTIONS") &&
     !requestHasNonReplayableBody(input, options)
   );
+}
+
+// These connection failures prove no request byte was sent. ETIMEDOUT can happen after a write.
+const PRE_SEND_ERROR_CODES = new Set([
+  "ECONNREFUSED",
+  "ENOTFOUND",
+  "EAI_AGAIN",
+  "ENETUNREACH",
+  "UND_ERR_CONNECT_TIMEOUT",
+]);
+
+function isPreSendConnectionError(error: unknown): boolean {
+  let current = error;
+  for (let depth = 0; depth < 4 && current && typeof current === "object"; depth++) {
+    const { code, cause } = current as { code?: unknown; cause?: unknown };
+    if (typeof code === "string" && PRE_SEND_ERROR_CODES.has(code)) return true;
+    current = cause;
+  }
+  return false;
+}
+
+/** Retain the upstream opt-in replay policy across each extracted transport. */
+export function canResendAfterTransportError(
+  input: RequestInfo | URL,
+  options: FetchWithDispatcherOptions,
+  error: unknown
+): boolean {
+  if (requestHasNonReplayableBody(input, options)) return false;
+  if (!isRegisteredFeatureFlagEnabled("PROXY_STRICT_POST_REPLAY_ENABLED")) return true;
+  return isAmbiguousFailureReplaySafe(input, options) || isPreSendConnectionError(error);
 }
 
 export function getEffectiveSignal(

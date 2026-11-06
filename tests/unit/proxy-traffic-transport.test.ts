@@ -259,3 +259,78 @@ test(
     setTlsClientForTest(null);
   }
 );
+
+// Exercise the merged upstream replay policy without opening a listener or making network calls.
+for (const route of ["direct", "relay", "proxy"] as const) {
+  for (const scenario of [
+    { name: "strict ambiguous POST", strict: true, code: "UND_ERR_SOCKET", expected: 1 },
+    { name: "strict pre-send POST", strict: true, code: "ECONNREFUSED", expected: 2 },
+    { name: "legacy ambiguous POST", strict: false, code: "UND_ERR_SOCKET", expected: 2 },
+    { name: "strict established timeout", strict: true, code: "ETIMEDOUT", expected: 1 },
+  ]) {
+    test(`${route} traffic preserves ${scenario.name} resend policy`, async () => {
+      const flag = "PROXY_STRICT_POST_REPLAY_ENABLED";
+      const originalFlag = process.env[flag];
+      process.env[flag] = String(scenario.strict);
+      let sends = 0;
+      let nativeCalls = 0;
+      const deltas: Array<Record<string, number>> = [];
+      const context = new AsyncLocalStorage<unknown>();
+      const proxy =
+        route === "relay"
+          ? { type: "vercel", host: "fixture.invalid", relayAuth: "synthetic-test-only" }
+          : { type: "http", host: "fixture.invalid", port: 8080 };
+      const native = async () => {
+        nativeCalls++;
+        return new Response("unexpected native fallback");
+      };
+      const runtime = {
+        originalFetch: native as typeof fetch,
+        originalFetchWithDispatcher: native,
+        proxyContext: context,
+        tlsFingerprintContext: new AsyncLocalStorage<{ used: boolean }>(),
+        resolveProxyForRequest: () => ({
+          source: route === "direct" ? "direct" : "context",
+          proxyUrl: route === "direct" ? null : "http://fixture.invalid:8080",
+        }),
+      };
+      try {
+        const request = context.run(route === "direct" ? null : proxy, () =>
+          dispatchProxyFetch(
+            "https://upstream.invalid/fixture",
+            { method: "POST", body: "é" },
+            {
+              undiciFetch: async () => {
+                if (++sends === 1)
+                  throw Object.assign(new Error("fetch failed"), { code: scenario.code });
+                return new Response("ok");
+              },
+              nativeFetch: native,
+              recordTraffic: (_proxy, delta) => deltas.push(delta),
+            },
+            runtime
+          )
+        );
+        if (scenario.expected === 1) await assert.rejects(request);
+        else assert.equal(await (await request).text(), "ok");
+        assert.equal(sends, scenario.expected);
+        assert.equal(nativeCalls, 0);
+        assert.equal(
+          deltas.reduce((sum, delta) => sum + (delta.attempts ?? 0), 0),
+          sends
+        );
+        assert.equal(
+          deltas.reduce((sum, delta) => sum + (delta.uploadBytes ?? 0), 0),
+          sends * 2
+        );
+        assert.equal(
+          deltas.reduce((sum, delta) => sum + (delta.failedAttempts ?? 0), 0),
+          1
+        );
+      } finally {
+        if (originalFlag === undefined) delete process.env[flag];
+        else process.env[flag] = originalFlag;
+      }
+    });
+  }
+}

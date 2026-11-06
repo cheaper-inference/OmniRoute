@@ -16,6 +16,7 @@ import {
 } from "./directResponseStartTimeout.ts";
 import {
   getEffectiveSignal,
+  canResendAfterTransportError,
   isAmbiguousFailureReplaySafe,
   requestHasNonReplayableBody,
   tagProxyUnreachable,
@@ -92,12 +93,12 @@ function validateDirectFailure(error: unknown, signal: AbortSignal | null | unde
   if (!isDirectTransportFailure(error)) throw error;
 }
 
-function refuseNonReplayable(error: unknown): never {
-  const detail = describeFallbackFailure(
-    describeFetchCause(error),
-    "skipped: non-replayable request body"
-  );
-  console.warn(`[ProxyFetch] skipping native fetch fallback for non-replayable body: ${detail}`);
+function refuseResend(error: unknown, nonReplayable: boolean): never {
+  const reason = nonReplayable
+    ? "non-replayable request body"
+    : "request may already have been delivered";
+  const detail = describeFallbackFailure(describeFetchCause(error), `skipped: ${reason}`);
+  console.warn(`[ProxyFetch] skipping native fetch fallback, ${reason}: ${detail}`);
   if (error instanceof Error)
     (error as Error & { proxyFetchDetail?: string }).proxyFetchDetail = detail;
   throw tagProxyUnreachable(error);
@@ -132,13 +133,15 @@ async function sendDirectWithRetry(
         timeoutFor(attempt === 0 && replayTimeout ? 0 : 1)
       );
     } catch (error) {
+      // Validation tags errors, so inspect the original connection code first.
+      const canResend = canResendAfterTransportError(input, options, error);
       validateDirectFailure(error, directOptions.signal);
-      if (retryDirectFailure(error, attempt, max, replayTimeout, timeoutFor, target)) {
+      if (retryDirectFailure(error, attempt, max, replayTimeout, timeoutFor, target, canResend)) {
         await directRetryBackoff(error);
         lastError = error;
         continue;
       }
-      if (nonReplayable) refuseNonReplayable(error);
+      if (!canResend) refuseResend(error, nonReplayable);
       return exhaustedDirect(input, options, deps, native, raw, target, source, tlsFallback, error);
     }
   }
@@ -156,9 +159,10 @@ function retryDirectFailure(
   max: number,
   replayTimeout: boolean,
   timeoutFor: (attempt: number) => number,
-  target: string
+  target: string,
+  canResend: boolean
 ): boolean {
-  if (!isDirectResponseStartTimeout(error)) return attempt === 0 && max > 1;
+  if (!isDirectResponseStartTimeout(error)) return attempt === 0 && canResend;
   if (attempt !== 0 || max <= 1 || !replayTimeout) throw error;
   console.warn(
     `[ProxyFetch] Direct response-start timeout (${timeoutFor(0)}ms) on pooled dispatcher — retrying on fresh no-keep-alive dispatcher: ${targetPart(target, "host")}`

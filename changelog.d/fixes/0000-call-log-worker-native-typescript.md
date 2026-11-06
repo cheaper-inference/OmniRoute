@@ -1,0 +1,1 @@
+- **fix(logging):** run source call-log artifact workers with native Node.js TypeScript support so idle shutdown and forced termination do not leave esbuild zombies.

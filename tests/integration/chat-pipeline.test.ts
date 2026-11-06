@@ -25,7 +25,8 @@ const { handleChat } = await import("../../src/sse/handlers/chat.ts");
 const providerNodeRoute = await import("../../src/app/api/provider-nodes/[id]/route.ts");
 const { initTranslators } = await import("../../open-sse/translator/index.ts");
 const { clearInflight } = await import("../../open-sse/services/requestDedup.ts");
-const { setCliCompatProviders } = await import("../../open-sse/config/cliFingerprints.ts");
+const { setCliCompatProviders, CLI_FINGERPRINTS } =
+  await import("../../open-sse/config/cliFingerprints.ts");
 const { BaseExecutor } = await import("../../open-sse/executors/base.ts");
 const { getCodexClientVersion } = await import("../../open-sse/config/codexClient.ts");
 const { getCircuitBreaker, resetAllCircuitBreakers } =
@@ -772,9 +773,8 @@ test("chat pipeline applies Codex CLI fingerprint to OAuth responses requests", 
         model: "codex/gpt-5.5-low",
         stream: false,
         conversation_id: "conv_codex_fingerprint",
-        // Native Responses passthrough preserves optional fields rather than
-        // injecting them. Supply both to exercise their canonical wire order.
-        instructions: "Reply with the requested fingerprint confirmation.",
+        // Sent by the client so the body-order check below still covers `include` (#4584): since
+        // #18274 the executor no longer injects an `include` the client didn't ask for.
         include: ["reasoning.encrypted_content"],
         input: [
           {
@@ -823,14 +823,18 @@ test("chat pipeline applies Codex CLI fingerprint to OAuth responses requests", 
   // …reasoning, prompt_cache_key, …, include — i.e. prompt_cache_key precedes include.
   // (#4584 inadvertently flipped these two; fast-gates skip integration tests so it only
   // surfaced on the release PR full CI.)
+  // Since #18274 a native passthrough reaches upstream as the client sent it: no placeholder
+  // `instructions`, so the fields present are checked in the canonical order.
+  assert.equal("instructions" in call.body, false);
+  const canonical = CLI_FINGERPRINTS.codex.bodyFieldOrder.filter((field) => field in call.body);
   assert.deepEqual(
-    bodyOrder.slice(0, 8),
-    "model stream input instructions store reasoning prompt_cache_key include".split(" ")
+    canonical,
+    "model stream input store reasoning prompt_cache_key include client_metadata".split(" ")
   );
+  assert.deepEqual(bodyOrder.slice(0, canonical.length), canonical);
+  assert.deepEqual(call.body.include, ["reasoning.encrypted_content"]);
   assert.equal(call.body.model, "gpt-5.5");
   assert.equal(call.body.store, false);
-  assert.equal(call.body.instructions, "Reply with the requested fingerprint confirmation.");
-  assert.deepEqual(call.body.include, ["reasoning.encrypted_content"]);
   assert.equal(
     call.body.client_metadata["x-codex-installation-id"],
     "11111111-1111-4111-a111-111111111111"

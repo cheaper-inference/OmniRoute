@@ -23,6 +23,9 @@ test(
     const steps = workflow.jobs["test-unit"].steps;
     const index = steps.findIndex((step) => step.uses === "./.github/actions/prepare-unit-storage");
     assert.ok(index > steps.findIndex((step) => step.uses?.startsWith("actions/setup-node@")));
+    for (const earlierStep of steps.slice(0, index)) {
+      assert.doesNotMatch(earlierStep.run ?? "", /\/usr\/local\/lib\/android/);
+    }
     const action = load(read(".github/actions/prepare-unit-storage/action.yml")) as {
       runs: { using: string; steps: Step[] };
     };

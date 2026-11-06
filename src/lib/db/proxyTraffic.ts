@@ -1,5 +1,6 @@
 import { createHmac, randomBytes } from "node:crypto";
 import { getDbInstance } from "./core";
+import { getExistingDbInstance } from "./singleton";
 import type { SqliteAdapter } from "./adapters/types";
 import type { PayloadDelta } from "@omniroute/open-sse/utils/proxyPayloadMetering";
 
@@ -232,7 +233,10 @@ export function payloadTrafficRecorder(
   let route: TrafficRoute;
   let db: SqliteAdapter;
   try {
-    db = dbOverride ?? getDbInstance();
+    // Fetch-only child processes must not open or migrate an operator database.
+    const existing = dbOverride ?? getExistingDbInstance();
+    if (!existing) return () => {};
+    db = existing;
     route = trafficRoute(proxy, db);
   } catch {
     warn();
