@@ -195,6 +195,7 @@
       "tests/unit/opencode-400-model-unavailable.test.ts",
       "tests/unit/opencode-endpoint-unavailable.test.ts",
       "tests/unit/quota-window-label.test.ts",
+      "tests/unit/quota-window-retirement.test.ts",
       "tests/unit/quota-availability-family-pools.test.ts",
       "tests/unit/quota-availability-router-filters.test.ts",
       "tests/unit/quota-availability-saved-family.test.ts",
