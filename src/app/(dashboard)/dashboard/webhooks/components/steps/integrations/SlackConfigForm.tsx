@@ -1,5 +1,6 @@
 "use client";
 
+import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-kit/disclosure";
 import { useEffect, useState } from "react";
 import Input from "@/shared/components/Input";
 
@@ -75,19 +76,20 @@ export function SlackConfigForm({ value, onChange, t }: SlackConfigFormProps) {
           </>
         }
       />
-      <details className="rounded-lg border border-border bg-bg-subtle p-3">
-        <summary className="cursor-pointer text-xs font-medium text-text-muted hover:text-text-main">
-          {t("slack.tutorial")}
-        </summary>
-        <ol className="mt-3 space-y-1.5 text-xs text-text-muted">
-          {[1, 2, 3, 4].map((n) => (
-            <li key={n} className="flex gap-2">
-              <span className="font-bold text-primary">{n}.</span>
-              {t(`slack.tutorialStep${n}`)}
-            </li>
-          ))}
-        </ol>
-      </details>
+      <Disclosure className="rounded-lg border border-border bg-bg-subtle">
+        <DisclosureTrigger>{t("slack.tutorial")}</DisclosureTrigger>
+        {/* keepMounted: the steps stay mounted while closed, as in a native details element. */}
+        <DisclosureContent keepMounted className="px-3 pb-3">
+          <ol className="space-y-1.5 text-xs text-text-muted">
+            {[1, 2, 3, 4].map((n) => (
+              <li key={n} className="flex gap-2">
+                <span className="font-bold text-primary">{n}.</span>
+                {t(`slack.tutorialStep${n}`)}
+              </li>
+            ))}
+          </ol>
+        </DisclosureContent>
+      </Disclosure>
     </div>
   );
 }
