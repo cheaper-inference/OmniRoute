@@ -58,10 +58,10 @@ The regression checks in `tests/unit/extract-zip-14482-exposure.test.ts` reject 
 reintroduction and retain the prohibition on imports from production code.
 
 The current dependency repair also scopes compatibility overrides to Azure identity's
-MSAL client, get-uri's FTP client, and the OpenCode v1 SDK's Zod dependency. Azure token
-acquisition and FTP retrieval are tested with controlled transports; both OpenCode
-packages run their own build and test suites. Registry advisory counts are measurements
-at a point in time and can change after the lockfile is committed.
+MSAL client and get-uri's FTP client. Azure token acquisition and FTP retrieval are
+tested with controlled transports; both OpenCode packages run their own build and test
+suites. Registry advisory counts are measurements at a point in time and can change
+after the lockfile is committed.
 
 ## Backlog: Scorecard advisory → blocking
 

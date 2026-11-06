@@ -4,6 +4,9 @@ import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import CacheSettingsTab from "@/app/(dashboard)/dashboard/settings/components/CacheSettingsTab";
 import zh from "@/i18n/messages/zh-CN.json";
+// The shared Select renders the kit (Radix) Select for `options` since KEA-7886: no DOM
+// <select>/<option>; the helpers read the menu items (data-value) and the controlled value.
+import { kitSelectOptions } from "../../helpers/kitSelect";
 
 const model = {
   id: "openai/text-embedding-3-small",
@@ -69,13 +72,14 @@ describe("cache settings with real Chinese catalogs", () => {
       "ariaChecked",
       "false"
     );
-    expect(screen.getByRole("option", { name: "OpenAI（已配置）" })).toHaveProperty(
-      "value",
+    const providerOptions = kitSelectOptions(document.getElementById("sem-provider")!);
+    expect(providerOptions.find((option) => option.label === "OpenAI（已配置）")?.value).toBe(
       "openai"
     );
+    const modelOptions = kitSelectOptions(document.getElementById("sem-model")!);
     expect(
-      screen.getByRole("option", { name: "text-embedding-3-small（1,536 维）" })
-    ).toHaveProperty("value", model.rawId);
+      modelOptions.find((option) => option.label === "text-embedding-3-small（1,536 维）")?.value
+    ).toBe(model.rawId);
     expect(screen.getByText("使用已配置的连接（默认 URL）")).toBeTruthy();
     expect(screen.getByText("维度：1,536")).toBeTruthy();
     expect(screen.getByText("词元上限：8,191")).toBeTruthy();

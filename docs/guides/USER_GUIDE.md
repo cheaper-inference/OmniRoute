@@ -176,6 +176,22 @@ Models:
   gh/gemini-3.1-pro-preview
 ```
 
+**AI Credits (token-based billing).** When GitHub reports `credits_used` for the
+account, the Provider Limits card shows an **AI Credits** row with the credits
+consumed in the current billing period, including on unlimited organization plans.
+
+**Local AI Credits limit.** Edit a GitHub connection and set **AI Credits limit per
+billing period** (`providerSpecificData.githubCreditLimit`). Blank disables it; `0`
+always skips the connection. When the last usage reading is at or above the limit,
+account selection skips that connection and routing falls back to your other
+connections, the same way a quota-policy cutoff does. The check reads the usage that
+the periodic quota refresh already collects — it never calls GitHub on the request
+path — and it fails open: a missing or stale reading (older than 15 minutes, or from
+a billing period that already reset) does not block the connection. This is a local
+safeguard, **not a guaranteed spending ceiling**: GitHub reporting delays, the refresh
+interval, in-flight requests and usage outside OmniRoute can exceed it. Use GitHub's
+own spending controls for a hard cap.
+
 ### 💰 Cheap Providers
 
 #### GLM-4.7 (Daily reset, $0.6/1M)
@@ -642,7 +658,7 @@ For the full environment variable reference, see the [README](../README.md).
 
 **xAI (`xai/`)** — Grok native: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU-hosted: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU-hosted: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
 **Perplexity (`pplx/`)** — Search-augmented: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
@@ -654,7 +670,7 @@ For the full environment variable reference, see the [README](../README.md).
 
 **Cohere (`cohere/`)** — RAG-focused: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Enterprise: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Enterprise: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
@@ -729,6 +745,31 @@ Pick a distinct prefix (`mygw`, `acme-proxy`). If requests to a custom node fail
 error that names a built-in provider or its credentials, check whether the node's prefix is
 reserved: nodes saved before this rule existed are still stored, but their prefix routes to
 the built-in provider. Edit the node and give it a new prefix.
+
+#### Per-connection gateway options
+
+These keys go in a connection's `providerSpecificData` (for example via
+`PUT /api/providers/{id}`):
+
+- `toolNameMaxLength` (integer, 1–1024) — for OpenAI chat-format compatible connections whose
+  gateway rejects long tool names. Longer names are sent as short aliases and restored in the
+  response.
+- `quotaEndpoint` — the gateway's quota/credits endpoint, read for the dashboard quota strip and
+  quota-aware routing. Works on both OpenAI- and Anthropic-compatible connections; the full shape
+  is documented in `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
 
 ### Chaining OmniRoute Peers
 

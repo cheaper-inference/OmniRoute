@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+// KEA-7886: icons are Lucide <svg class="oi-icon" data-icon="<material name>"> via <Icon>.
 import React from "react";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
@@ -11,13 +12,7 @@ vi.mock("next-intl", () => ({
 
 // Card stub
 vi.mock("@/shared/components", () => ({
-  Card: ({
-    children,
-    className,
-  }: {
-    children: React.ReactNode;
-    className?: string;
-  }) => (
+  Card: ({ children, className }: { children: React.ReactNode; className?: string }) => (
     <div data-testid="card" className={className}>
       {children}
     </div>
@@ -46,16 +41,14 @@ describe("AdvancedSection", () => {
   });
 
   it("exports a default function component", async () => {
-    const mod = await import(
-      "@/app/(dashboard)/dashboard/translator/components/advanced/AdvancedSection"
-    );
+    const mod =
+      await import("@/app/(dashboard)/dashboard/translator/components/advanced/AdvancedSection");
     expect(typeof mod.default).toBe("function");
   });
 
   it("renders the card with header icon and title", async () => {
-    const { default: AdvancedSection } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/advanced/AdvancedSection"
-    );
+    const { default: AdvancedSection } =
+      await import("@/app/(dashboard)/dashboard/translator/components/advanced/AdvancedSection");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -64,8 +57,8 @@ describe("AdvancedSection", () => {
     // Card should be in DOM
     expect(container.querySelector("[data-testid='card']")).toBeTruthy();
     // Header icon
-    const icons = container.querySelectorAll(".material-symbols-outlined");
-    const iconTexts = Array.from(icons).map((el) => el.textContent?.trim());
+    const icons = container.querySelectorAll("svg.oi-icon");
+    const iconTexts = Array.from(icons).map((el) => el.getAttribute("data-icon"));
     expect(iconTexts).toContain("tune");
     // h3 heading present
     const h3 = container.querySelector("h3");
@@ -73,16 +66,15 @@ describe("AdvancedSection", () => {
   });
 
   it("renders children passed to it", async () => {
-    const { default: AdvancedSection } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/advanced/AdvancedSection"
-    );
+    const { default: AdvancedSection } =
+      await import("@/app/(dashboard)/dashboard/translator/components/advanced/AdvancedSection");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
       root.render(
         <AdvancedSection>
           <div data-testid="child-accordion">child</div>
-        </AdvancedSection>,
+        </AdvancedSection>
       );
     });
     expect(container.querySelector("[data-testid='child-accordion']")).toBeTruthy();
@@ -90,9 +82,8 @@ describe("AdvancedSection", () => {
   });
 
   it("renders accordion container with data-slug attribute reflecting forceOpenSlug", async () => {
-    const { default: AdvancedSection } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/advanced/AdvancedSection"
-    );
+    const { default: AdvancedSection } =
+      await import("@/app/(dashboard)/dashboard/translator/components/advanced/AdvancedSection");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -104,9 +95,8 @@ describe("AdvancedSection", () => {
   });
 
   it("renders data-slug=none when forceOpenSlug is null", async () => {
-    const { default: AdvancedSection } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/advanced/AdvancedSection"
-    );
+    const { default: AdvancedSection } =
+      await import("@/app/(dashboard)/dashboard/translator/components/advanced/AdvancedSection");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -117,9 +107,8 @@ describe("AdvancedSection", () => {
   });
 
   it("renders data-slug=none when forceOpenSlug is undefined", async () => {
-    const { default: AdvancedSection } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/advanced/AdvancedSection"
-    );
+    const { default: AdvancedSection } =
+      await import("@/app/(dashboard)/dashboard/translator/components/advanced/AdvancedSection");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -130,9 +119,8 @@ describe("AdvancedSection", () => {
   });
 
   it("renders subtitle text using i18n fallback", async () => {
-    const { default: AdvancedSection } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/advanced/AdvancedSection"
-    );
+    const { default: AdvancedSection } =
+      await import("@/app/(dashboard)/dashboard/translator/components/advanced/AdvancedSection");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -145,9 +133,8 @@ describe("AdvancedSection", () => {
   });
 
   it("renders multiple children", async () => {
-    const { default: AdvancedSection } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/advanced/AdvancedSection"
-    );
+    const { default: AdvancedSection } =
+      await import("@/app/(dashboard)/dashboard/translator/components/advanced/AdvancedSection");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -156,7 +143,7 @@ describe("AdvancedSection", () => {
           <div data-testid="accordion-1">RawJson</div>
           <div data-testid="accordion-2">Pipeline</div>
           <div data-testid="accordion-3">Stream</div>
-        </AdvancedSection>,
+        </AdvancedSection>
       );
     });
     expect(container.querySelector("[data-testid='accordion-1']")).toBeTruthy();

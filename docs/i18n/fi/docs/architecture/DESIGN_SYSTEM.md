@@ -4,228 +4,88 @@
 
 ---
 
-> **Tila:** viite — tässä kuvattu standardointi on **toteutettu** (vaiheet 1–6: ruudukkotaustakuva, peruskomponentit, tilavärien keskittäminen, monospace-token, DataTable-tokenien migraatio, kohdistusrengas → korostusväri, Checkbox/Textarea-peruskomponentit, `cn()` → tailwind-merge, ruudukko jokaisessa itsenäisessä näkymässä, mukautuva 4K-sisältökehys, läpinäkymättömät datataulupinnat). Tämä dokumentti on ensisijainen kuvaus hallintapaneelin suunnittelutokeneista, komponenteista ja käytännöistä. Alla oleva vaiheistus on säilytetty kunkin päätöksen perusteluna.
-> **Laajuus:** OmniRoute-hallintapaneeli (`src/`) ja markkinointisivusto (`_mono_repo/omnirouteSite/`) jakavat **yhden visuaalisen identiteetin** — saman millimetripaperimaisen ruudukkotaustan (32px), samat väritokenit ja standardoidut komponentit.
->
-> Käytännön huomioita ylläpitäjille:
->
-> - Useat jäljellä olevat kovakoodatut heksadesimaaliarvot ovat **tarkoituksellisia** (aina tumma konsolipääte, ReactFlow-SVG-viivat), eikä niitä **SAA** siirtää tokeneiksi.
-> - Käynnissä olevassa instanssissa näkyvä ”suurempi” ruudukko johtuu vanhentuneesta koontiversiosta, ei koodista — ruudukon koko on 32px eli sama kuin sivustolla.
-> - Tumman teeman `--table-*`-arvot ovat tavutasolla identtisiä migraatiota edeltäneiden kovakoodattujen rgba-arvojen kanssa. Vaalea teema korjattiin (se oli virheellisesti aina tumma toimimattomien `var()`-varmistusarvojen vuoksi).
+> **Status:** kojelauta on rakennettu** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), toimitetaan työtilana `packages/ui-kit` (`@omniroute/ui-kit`; alkuvirran tilannekuva on kiinnitetty `packages/ui-kit/UPSTREAM.md` ään ja sitä suojaa `npm run check:ui-kit-snapshot`). Valo on kanoninen teema; oletusasetus on `system`. Oletuspaletti on sarjan paletti** versiot** ulkonäkö (lämmin paperi neutraalit ja kupari aksentti `#e5ac82`, `packages/ui-kit/src/ci-editions.css`); Asetukset → Ulkoasu → Väripaletti tarjoaa** Klassinen** , sarjan perusmerkit lime-korostuksella. Switzer on yksi UI, näyttö- ja kooditekstiperhe (`--ci-font-ui`; `--ci-font-display` ja `--ci-font-mono` ratkaisevat sen), itse isännöi itse sarja (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css`:n tuoma). Scripts Switzeristä puuttuu kaatuminen glyfi kerrallaan (`src/app/globals.css`): Inter kyrilliselle, kreikalle ja vietnam ja vain `html[dir="rtl"]` alla, Vazirmatn arabialle. Jokainen kuvake on Luciden merkki.
 
----
+## 1. Missä asiat elävät
 
-## 1. Tarkoitus
+- **Pakki.** `packages/ui-kit/src` on tavukohtainen kopio ylävirran `src/` `packages/ui-kit/UPSTREAM.md` ssä kiinnitetyssä sitoumuksessa (joka myös tallentaa lisenssin valtuutuksen); `PATCHES.md` listaa paikalliset korjaustiedostot (ei mitään). Sitä käytetään lähteenä ilman rakennusta: `next.config.mjs` siirtää sen ja `tsconfig.json` kartoittaa `@omniroute/ui-kit` → `packages/ui-kit/src` ja `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` ja `vitest.mcp.config.ts` kantavat saman aliaksen). Tuo sarjakomponentti sen alipolun (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…) mukaan, älä koskaan `@omniroute/ui-kit` tynnyrin kautta: tynnyri vetää jokaisen komponentin (mukaan lukien päivämäärän poimijan) jokaiseen maahantuojaan. Sarjan tyylisivu tulee `src/app/globals.css` kautta (`@import "../../packages/ui-kit/src/ci-styles.css"`, koko arkki: ydin `ci-ui.css` plus jokainen kuvioperhe).
+- **Tokenit.** `packages/ui-kit/src/ci-tokens.css` ilmoittaa `--ci-*` -merkit; `src/app/globals.css` yhdistää ne vanhoihin OmniRoute nimiin (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), joten nykyiset `var(--color-*)` lukuohjelmat ja Tailwind -apuohjelmat jatkavat toimintaansa. Uusi koodi käyttää Tailwind -apuohjelmia (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) tai kit-luokkia — ei koskaan hex-arvoa (`tests/unit/design-kit-bridge.test.ts` pakottaa sillan). `text-primary` muuttuu `--color-primary-ink` :ksi `--text-color-primary` kautta, joten ensisijainen teksti pysyy luettavissa, kun taas `bg-primary`/`border-primary` säilyttää korostuspinnan: Editionsissa se on sarjan `--ci-color-accent-active` (syvä kupari `#99562f` valossa, kupari aksentti pimeässä); Classic alla, lime-800 vaaleassa ja lime aksentti pimeässä. Kaaviosarjassa käytetään `--color-chart-1` … `--color-chart-8`, joista jokaisessa on tekstiturvallinen `--color-chart-N-ink` ja läpinäkymätön `--color-chart-N-subtle` sirun sävy, jotka on määritetty sarjasarjan järjestyksessä (`ciChartSeriesOrder`).
+- **Teemat.** `<html className="ci-theme">` (`src/app/layout.tsx`) valitsee asiakirjan sarjan teemaksi. Etusija on `light`, `dark` tai `system` (`THEME_CONFIG.defaultTheme = "system"` in `src/shared/constants/appConfig.ts`; `system` seuraa `prefers-color-scheme`). `applyTheme()` in `src/store/themeStore.ts` (peilataan `THEME_BOOT_SCRIPT` llä, rivillä `src/app/layout.tsx`, joka suoritetaan ennen hydraatiota) asettaa `data-theme="dark"|"light"` ja vaihtaa `.dark` -luokan `<html>` ssä yhdessä. Sarjan tumma merkkisarja on näppäilty `data-theme="dark"` :lla (`packages/ui-kit/src/ci-tokens.css`); OmniRoute:n omat pimeät ohitukset ( `.dark` -lohko `globals.css` ssa) ja vanha Tailwind `dark:` -apuohjelmaavain `.dark` -luokassa. Korostusvärien esiasetuksia ei ole: korostus tulee aina sarjasta, ja vanhan koontiversion säilynyt esiasetus jätetään pois, kun kauppa latautuu.
+- **Paletit.** Kaksi, molemmat sarjasta (`src/shared/constants/appearancePalette.ts`): `editions`, oletusarvo ja `classic`. Editions on pakkauksen `data-ci-appearance="editions"` attribuutti `<html>` ssä, jonka `ci-editions.css` ( `ci-ui.css` n tuoma) yhdistää `data-theme` kanssa; Classic on attribuutin puuttuminen. Juuriasettelun palvelin renderöi attribuutin, joten vierailija, jolla ei ole mitään tallennettua (tai ei JS), saa versiot jokaiselle pinnalle — dashboard, login, `/status`, virhesivut, `/docs` ja PWA. Valinta säilyy teeman vieressä samassa `theme` -kaupassa (`palette`, `setPalette()`, `applyPalette()` in `src/store/themeStore.ts`) ja sitä käytetään ennen maalia `THEME_BOOT_SCRIPT` :lla (`src/shared/utils/themeBootScript.ts`, upotettu asettelun `<head>`), joka poistaa määritteen vain, kun tallennettu paletti on `"classic"`; `src/app/global-error.tsx`, juuriasettelun ulkopuolella, käyttää sitä samasta kaupasta. Älä laita `data-ci-appearance` ää mihinkään muuhun elementtiin: sarja vastaa sen kanssa `html:root:has([data-ci-appearance="editions"])`, joten yksi jälkeläinen vaihtaisi koko asiakirjan. Editions `data-ci-editions-variant="landing"` -versio on tarkoitettu markkinointisivuille, ei kojelautaan. Selaimen kromi: palvelin näyttää oletusversion Editionsin `viewport.themeColor` :ssa (yksi tagi per `prefers-color-scheme`) ja verkkoluettelon — `PWA_THEME_COLORS` in `src/shared/constants/pwaThemeColors.ts`, Editionsin `--ci-color-background` (`#f3f1e9` / `#11120f`) peili, jonka `tests/unit/pwa-theme-colors.test.ts` on kiinnittänyt `ci-editions.css`. Live `<meta name="theme-color">` seuraa sitten tallennettua palettia ja tilaa: `THEME_BOOT_SCRIPT` kirjoittaa tagit uudelleen ennen maalia ja teemakaupan toiminnot tekevät sen jokaisen muutoksen yhteydessä (`resolveThemeColor()` / `applyThemeColor()` in `src/shared/utils/themeColorMeta.ts`, jossa `CLASSIC_PAGE_BACKGROUND` luetaan pakkauksen `ciTokens` sta ). Eksplisiittinen light/dark teema asettaa jokaisen tagin tähän tilaan; `system` säilyttää yhden värin mallia kohden. Luettelo pysyy versioina: se haetaan kerran asennusta kohden ilman etusijaa. Monaco lukee sen värit anturista (`monacoKitTheme.ts`); Editions-kohdassa koetinluku kääntää `data-theme` juuren yhden synkronisen kierroksen aikana, koska sarja ratkaisee Editions light/dark juurista.
+- **Komponentit (sovittimet).** `src/shared/components/index.tsx` säilyttää OmniRoute -komponentin API (samat nimet, oletusvienti ja rekvisiitta), ja sen takana olevat primitiivit ovat sovittimia sarjan yli: lomakkeet (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`),`Modal`/`ConfirmModal` z (qm /z feedback) `Tooltip`,`InfoTooltip`, `NotificationToast`, `EmptyState` `Loading`, rakenne (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) ja taulukot (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Sovitin tuo sarjakomponentin alipolun mukaan ja kartoittaa siihen vanhat rekvisiitta — esimerkiksi `Button variant="primary"` on pakkauksen `default` painike (`--ci-button-primary-*`: käänteispinta valossa, korostus `--ci-color-accent-foreground` -musteella pimeässä), `danger` on `destructive` ja `warning` on sarja `warning`. `Badge` -tilamuunnelmat ovat kit-ääniä, ja `Select` jossa on `<option>` lapsia, tekee kitistä `NativeSelect`. `tests/unit/ui/adapters/*.test.tsx` pin jokainen sovitin.
+- **Kuori.** `src/app/(dashboard)/layout.tsx` hahmontaa `DashboardLayout`, joka hahmontaa `src/shared/components/layouts/DashboardShell.tsx`: sarjan `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), OmniRoute:n navigointilogiikalla `src/shared/components/Sidebar.tsx` ssä. "Siirry sisältöön" -linkki `#main-content` :hen on ensimmäinen tarkennettavissa oleva elementti. `src/shared/components/Header.tsx` sisältää sarjan `SidebarTrigger` (suorituksen ainoa sivupalkin kytkin), Keak `ProductSwitcher` ja komentopaletin avaajan; se näyttää vain reitin otsikon, kun `#main-content` sisään ei ole asennettu sarjaa `PageHeader` (`.ci-page-header`), joten sivulla, jolla on oma `PageHeader` on yksi `h1`. `src/shared/components/CommandPalette.tsx` on `Dialog` sarja.
+- **Kuvakkeet.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) ratkaisee nimen (ruutujen käyttämä materiaalisymbolien sanasto) `ICON_MAP` :n (`src/shared/constants/iconMap.ts`) kautta Luciden glyfiksi. Materiaalisymbolit -kirjasin ja -paketti ovat poissa: kartalta puuttuva nimi tekee neutraalin paikkamerkkimerkinnän (`data-icon-missing="true"`) ja kirjaa konsolivaroituksen tuotannon ulkopuolella. `npm run gen:icon-map` tulostaa käytössä olevat nimet, jotka puuttuvat kartasta (`tests/unit/icon-map-coverage.test.ts` epäonnistuu kaikissa nimissä ilman Lucide-kuvaketta; `tests/unit/icon-map-object-values.test.ts` kattaa hakuobjekteihin tallennetut nimet); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` kirjoittaa uudelleen kirjaimellisen `<span className="material-symbols-outlined">` alueen `<Icon>`:ksi.
+- **Merkki.** `src/shared/components/OmniRouteLogo.tsx` kääri pakkauksen: oletusvienti `OmniRouteLogo` hahmontaa `ProductIcon product="omniroute" variant="glyph"` (inline SVG, `basePath` -safe) ja `OmniRouteLockup` `ProductLockup product="omniroute"` (saatava nimi "Keak OmniRoute") tai white-label-operaattoreille oman `name`/`logoSrc`. Tuotteenvaihtokohteet sijaitsevat `src/shared/constants/keakProducts.ts` ssä (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Erilliset näytöt — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` ja `src/shared/components/ErrorPageScaffold.tsx` — näyttävät lukituksen; `tests/unit/brand-pages-static.test.ts` suojelee sitä.
 
-Markkinointisivuston (`viral.omniroute.online`, `why.omniroute.online`, `omniroute.online`) ja tuotteen hallintapaneelin tulisi näyttää **yhdeltä tuotteelta**. Sivusto lainasi jo väripalettinsa hallintapaneelista — sen `css/tokens.css` jopa toteaa _”Väripaletti vastaa OmniRoute-hallintapaneelia (src/app/globals.css)”_. Ne ovat siis jo väritasolla noin 80-prosenttisesti yhdenmukaisia. Hallintapaneelista puuttuvat:
+## 2. Säännöt
 
-1. **Millimetripaperimainen ruudukkotaustakuva**, jota sivusto käyttää jokaisella sivulla.
-2. Muutama sivuston käyttämä **yhteinen suunnittelutoken**, joka hallintapaneelista puuttuu (kulmanpyöristyksen asteikko, brändiliukuväri, `surface-2`, monospace-fontti).
-3. **Komponenttitason yhdenmukaisuus** — useat hallintapaneelin komponentit ohittavat teematokenit kovakoodatuilla hex-/rgba-arvoilla.
+1. Tokenit, ei koskaan kirjaimet. Tarkoituksenmukaisesti pidetyt poikkeukset: aina tumma konsolipääte ja `STATUS_HEX` (`src/shared/constants/statusColors.ts`), setin tilapaletin resoluutioinen hex-peili soittajille, jotka tarvitsevat kirjaimellisen heksan. Kategoriset paletit eivät ole enää poikkeus: ne kulkevat sarjan kahdeksalla kaaviotunnuksella (`--color-chart-1..8`, plus `-ink`/`-subtle`), sarjan järjestyksessä `src/shared/utils/categoricalPalette.ts` kautta ja reititysstrategioiden osalta `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow reunat ja orkestrointikangas lukevat teematietoisia `--orch-status-*` muuttujia (`src/shared/components/flow/edgeStyles.ts`).
+2. Älä koskaan korjaa `packages/ui-kit/src` käsin: synkronoi `scripts/dev/sync-ui-kit.sh <commit>` kanssa; pre-commit portti `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) epäonnistuu missä tahansa tavussa, joka eroaa kiinnitetystä ylävirran vahvistuksesta (se ohittaa varoituksen kanssa, kun ylävirran klooni, `UI_KIT_CLONE` tai `_references/cheaper-inference-ui-kit`, puuttuu). Kun sarjasta puuttuu jotain, kierrä se sovittimessa tai näytössä ja pyydä sitä alkupäässä.
+3. Kitin tekstin oletusasetukset ovat englanninkieliset (`label = "Loading"`, `loadingLabel = "Loading table"`…) — välittää käännetyt merkkijonot `useTranslations(...)` aina, kun pakkauksen komponentti hahmontaa tekstiä.
+4. Tailwind -apuohjelmat voittaa sarjan komponenttiluokat (sarja ilmoittaa `@layer theme, base, components, utilities` ja sen säännöt elävät `components`:ssä) — käyttävät apuohjelmia välityksiin ja asetteluihin, eivät sarjan komponenttien värjäämiseen.
+5. Otsikot: `.ci-heading` sivujen ja osien otsikoille; `.ci-dashboard-display` vain suurelle, harvoille näyttöteksteille, kuten virhesivun tilakoodille. Molemmat käyttävät Switzeriä.
+6. `tests/unit/dashboard-kit-sweep.test.ts` suojelee sarjan käyttöönottoa: ei materiaalin ligatuuriväliä `src/app` tai `src/shared/components` alla; kojelautapuussa (`src/app/(dashboard)` ja `src/shared/components`) ei raaka- `<select>`, `<textarea>` tai `<table>` eikä käsin rullattu `role="dialog"` lueteltujen poikkeusten ulkopuolella ( `Select` sovittimen alkuperäinen haara, `RequestLoggerDetail`); jokainen raaka `<button>` tai `<input>` tarvitsee kommentin, joka sisältää `kit-exception:` (syyn kanssa), joka päättyy enintään 3 riviä sen yläpuolelle; paletin sävyjä ja `dark:` -variantteja vain testiluetteloissa olevissa tiedostoissa.
+7. Tarkista molemmat teemat ja 390 pikselin näkymä ennen PR (kuvakaappaukset); `tests/e2e/a11y.spec.ts` juoksee kirveen.
 
-Tämä dokumentti sisältää analyysin ja suunnitelman.
+## 3. Näytön lisääminen
 
----
+1. Aloita sivu kitin `PageHeader`-komponentilla (`@omniroute/ui-kit/page-header`, `compact` dashboardin
+   sisällä) — otsikko, kuvaus ja `actions`. Kehyksen ylätunniste jättää tällöin oman otsikkonsa pois.
+2. Rakenna kontrollit `@/shared/components`-komponenteista (adapterit) ja käytä kit-komponentteja alipolun kautta siellä, missä
+   adapteria ei ole (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`,
+   `Slider`…).
+3. Kuvakkeet: `<Icon name="…" />`. Uusi nimi lisätään `ICON_MAP`-karttaan semanttisesti vastaavan Lucide-komponentin
+   kanssa; `npm run gen:icon-map` listaa vielä puuttuvat nimet.
+4. Värit: semanttiset apuluokat (`text-success`, `bg-warning-bg`, `border-border`…) ja
+   `var(--color-chart-N)` kaaviosarjoille; ei heksa-arvoja eikä `dark:`-variantteja, jotka vain toistavat värin.
+5. Teksti: jokainen merkkijono, mukaan lukien kit-komponenteille välittämäsi labelit, tulee `useTranslations`-funktiosta. Uudet
+   avaimet lisätään tiedostoihin `src/i18n/messages/en.json`, `pt-BR.json` ja `vi.json` (vietnamin pariteettitesti
+   kiinnittää jokaisen englanninkielisen avaimen); muut kielet täytetään i18n-synkronoinnilla.
+6. Aja vartijat ennen PR:ää: `tests/unit/dashboard-kit-sweep.test.ts`,
+   `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+   `npm run check:dashboard-typecheck` (ainoa tarkistus, joka havaitsee päällekkäisen importin `iconMap.ts`-tiedostossa),
+   `npm run check:ui-icu` ja näytön omat testit.
 
-## 2. Periaatteet
+## 4. Sovittimen lisääminen tai muuttaminen
 
-- **Ainoa totuuden lähde = `src/app/globals.css`.** Sivusto seuraa hallintapaneelia, ei koskaan päinvastoin. Uudet tokenit lisätään ensin tiedostoon `globals.css`.
-- **Tokeneita, ei koskaan literaaliarvoja.** Komponentit käyttävät semanttisia tokeneita (`bg-surface`, `text-primary`, `border-border`), eivät koskaan raakoja `#hex`-arvoja.
-- **Hillitty, ei räikeä.** Ruudukko on hienovarainen taustakuva sisällön takana — se ei saa koskaan heikentää tekstin kontrastia tai kilpailla käyttöliittymän kanssa.
-- **Teematietoinen.** Kaikki toimii sekä `.dark`-teemassa (tuotteen tunnusomainen ulkoasu) että vaaleassa teemassa.
-- **Hallittu käyttöönotto.** Julkaise ensin ruudukko ja tokenit (pieni riski, suuri näkyvyys), minkä jälkeen komponentit siistitään vaiheittain.
+1. Pidä tiedoston `src/shared/components/index.tsx` julkinen API ennallaan: samat vientinimet, oletusviennit ja hyväksytyt propsit. Kuvaa legacy-propsit kit-vastineille sovittimen sisällä (ks. `Button.tsx`: `VARIANT_TO_KIT`, `SIZE_TO_KIT`).
+2. Tuo kit alipolun kautta (`@omniroute/ui-kit/<component>`).
+3. Kitin puutteiden kiertotavat sijaitsevat sovittimessa (tai tiedoston `globals.css` osassa `@layer components`, kun korjaus on tyylillinen), ei koskaan hakemistossa `packages/ui-kit/src`.
+4. Lisää tai päivitä `tests/unit/ui/adapters/<name>.test.tsx`. Jos sovittimella on monia kutsujia, vertaile renderöityä HTML:ää ennen muutosta ja sen jälkeen — täyte- tai wrapper-muutokset leviävät jokaiseen näkymään.
 
----
+## 5. Sarjan päivittäminen
 
-## 3. Nykytila — mikä on jo yhdenmukaista ja mikä ei
+`npm run check:ui-kit-upstream` vertaa `packages/ui-kit/UPSTREAM.md` kiinnitettyä versiota ylävirran repon uusimpaan `v*` tunnisteeseen ja tulostaa synkronointikomennon, kun julkaisu on julkaistu.
 
-### 3.1 Värit — jo yhtenäistetty ✅
+Päivittäinen `UI Kit upstream watch` -työnkulku (`.github/workflows/ui-kit-upstream-watch.yml`) suorittaa saman tarkistuksen. Kun tappi on takana, `scripts/ci/ui-kit-sync-pr.sh` pitää yhden synkronoinnin PR auki korkeinta `release/vX.Y.Z` haaraa vasten, vierivällä haaralla `chore/ui-kit-sync-latest`. Se ei koskaan sulaudu yhteen: jokainen sarjan julkaisu vaatii silti visuaalisen tarkistuksen paikallisessa VPS ssä. Haara rakennetaan uudelleen, kun uudempi julkaisu on julkaistu ja jätetään muuten yksin. Avoin PR jossa on käsin työnnetty sitoumus, ei kirjoiteta päälle, ja PR versiolle, jonka ylläpitäjä sulki yhdistämättä, pysyy suljettuna uudempaan julkaisuun asti.
 
-Jokainen brändiväri ja pinta vastaa jo sivustoa **arvoltaan** (vain nimet eroavat — hallintapaneelissa käytetään `--color-`-etuliitettä). Vahvistettu tiedostossa `src/app/globals.css:30-128`:
+Kun PR ei voida avata (kohdejulkaisu on jäädytetty, PR on sitoumuksia työnnetty käsin, PR on suljettu tai PR -tunnusta ei ole asetettu), työnkulku pitää yhden seurantaongelman auki, mikä kertoo miksi.
 
-| Käsite                          | Sivuston token (`tokens.css`)               | Hallintapaneelin token (`globals.css`) | Vastaavuus             |
-| ------------------------------- | ------------------------------------------- | -------------------------------------- | ---------------------- |
-| ensisijainen                    | `--primary #e54d5e`                         | `--color-primary #e54d5e`              | ✅                     |
-| ensisijainen osoitettaessa      | `--primary-hover #c93d4e`                   | `--color-primary-hover #c93d4e`        | ✅                     |
-| korostus                        | `--accent #6366f1`                          | `--color-accent #6366f1`               | ✅                     |
-| korostus 2                      | `--accent-2 #8b5cf6`                        | `--color-accent-hover #8b5cf6`         | ✅ (nimetty uudelleen) |
-| korostus 3                      | `--accent-3 #a855f7`                        | `--color-accent-light #a855f7`         | ✅ (nimetty uudelleen) |
-| onnistuminen / varoitus / virhe | `#22c55e / #f59e0b / #ef4444`               | identtinen                             | ✅                     |
-| liikennevalot                   | `#ff5f56 / #ffbd2e / #27c93f`               | identtinen                             | ✅                     |
-| tumma tausta / pinta / reunus   | `#0b0e14 / #161b22 / rgba(255,255,255,.08)` | identtinen                             | ✅                     |
-| vaalea tausta / pinta / teksti  | `#f9f9fb / #fff / #1a1a2e`                  | identtinen                             | ✅                     |
+Työnkulku käyttää kahta salaisuutta:
 
-**Johtopäätös:** värejä ei tarvitse migroida. Visuaalinen identiteetti on jo yhteinen; me _viimeistelemme_ sen, emme rakenna sitä uudelleen.
+- `secrets.UI_KIT_READ_TOKEN`: vain luku -token yksityiselle ylävirran repolle. Kun työnkulku ei pysty lukemaan ylävirtaa (ei merkkiä, merkkiä, joka lakkasi toimimasta, tai GitHub ei ole tavoitettavissa), ajo pysyy vihreänä, mutta kirjoittaa varoituksen ja pitää yhden erillisen ongelman auki, joka sulkeutuu, kun myöhempi ajo voi lukea vastavirtaan uudelleen.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: hienojakoinen merkki tässä arkiston Sisältö- ja Pull-pyynnöillä kirjoitusoikeuksilla. Oletusarvoinen `GITHUB_TOKEN` ei voi luoda PRs tähän, ja sen avaama PR ei laukaisi CI. Ilman tätä merkkiä työnkulku vain työntää haaraa.
 
-### 3.2 Puutteet — mitä hallintapaneelista puuttuu
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopioi ylävirran `src/` kyseisessä vahvistuksessa (`latest` = uusin `v*` tunniste) `packages/ui-kit/src` ksi, käyttää yksittäistä sallittua muunnosta (poistaa `.js` liitteen suhteellisista tuonnista) ja asettaa työtilan version `packages/ui-kit/package.json` :ssa ja `package-lock.json` ssä ylävirran versioksi. Sitten: tarkista `git diff packages/ui-kit`, tee visuaalinen välitys palveluntarjoajille, asetuksille, yhdistelmälle, käytölle ja päätepisteelle molemmissa teemoissa, suorita `npm run check:ui-kit-snapshot` ja `npm run test:vitest:ui` ja avaa PR ylävirran muutoslokin avulla.
 
-| Puute                         | Sivustolla käytössä                                                                 | Hallintapaneeli                                                             | Toimenpide                |
-| ----------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | ------------------------- |
-| **Ruudukkotaustakuva**        | `body::before`-millimetripaperi, `--grid-line`, `--grid-size 32px`, `--section-alt` | **✅ lisätty (vaihe 1)**                                                    | **Osa A**                 |
-| **Kulmien pyöristysasteikko** | `--radius 14px`, `--radius-sm 9px`                                                  | `--radius 14px` lisätty; `-sm` + komponenttien uudelleenkohdistus odottavat | **Osa B / vaihe 2**       |
-| **Brändiliukuväri**           | `--grad-brand 135deg primary→accent-3`                                              | **✅ tunniste lisätty (vaihe 1)**; otetaan käyttöön vaiheessa 2             | **Osa B**                 |
-| **Sisäkkäinen pinta**         | `--surface-2 #1c2230`                                                               | **✅ lisätty (vaihe 1)**                                                    | **Osa B**                 |
-| **Tasalevyinen fontti**       | `--font-mono` (ui-monospace-fonttipino)                                             | odottaa (vaihe 4, yhdessä käyttökohteiden kanssa)                           | **Osa B**                 |
-| **`text-muted` (tumma)**      | `#8b8b9e`                                                                           | `#a1a1aa` (zinc-400)                                                        | yhdenmukaista — **Osa B** |
+## 6. README kaaviot
 
-### 3.3 Teemoituksen toimintaperiaatteet (jotta emme riko mitään)
+Kaksitoista kaaviota, jotka juuren `README.md` upottaa (`docs/diagrams/*.svg`) ovat staattiseen kuvaan sovellettavia sarjoja, ja ne luodaan, ei piirretty käsin: 13 generaattoritiedostoa `scripts/docs/gen-readme-*.mjs` ssä (kaksitoista kaaviota plus `gen-readme-diagrams.mjs` -ohjain) ja 12 vanhentumistestiä osoitteessa `tests/unit/docs/readme-*-svg.test.ts`, yksi kaaviota kohden, jokainen tavufzs-tiedosto generoi tuotoksen `test-unit`.
 
-- **Tailwind v4, CSS ensin** (ei `tailwind.config.*`-tiedostoa). Tunnisteet määritellään kohdissa `:root`/`.dark` ja tuodaan apuluokkien käyttöön `@theme inline` -määrityksellä (`globals.css:130-179`).
-- **Tumma tila `.dark`-luokan avulla** `<html>`-elementissä (`@custom-variant dark` kohdassa `globals.css:22`), ja sitä vaihdetaan mukautetulla Zustand-säilöllä (`src/store/themeStore.ts`); oletusteema = `system` (`src/shared/constants/appConfig.ts:11`). Sivusto käyttää sen sijaan määritystä `html[data-theme="light"]` — **mekanismit eroavat toisistaan, mutta eivät koskaan kohtaa** (eri alkuperät), joten ristiriitaa ei synny. Säilytämme hallintapaneelin `.dark`-mekanismin.
-- **Ensisijaisen värin ajonaikainen ohitus** on käytössä (`themeStore.ts:85-97`, esiasetukset kohdassa `COLOR_THEMES`) — käyttäjät voivat vaihtaa arvon `--color-primary`. Kaikki uudet tunnisteet (liukuvärit jne.), jotka viittaavat arvoon `--color-primary`, perivät nämä ohitukset automaattisesti. ✅
-- **Tailwind v4:n varatut pyöristyssäteiden nimet:** `--radius-sm/md/lg/...` toimivat `rounded-*`-apuluokkien taustalla. Niiden uudelleenmäärittely muuttaa takautuvasti jokaista olemassa olevaa `rounded-*`-käyttökohdetta (esimerkiksi `rounded-sm` on käytössä 12 tiedostossa). Siksi pienen pyöristyssäteen arvo ja komponenttien uudelleenkohdistus on tarkoituksella siirretty vaiheeseen 2, jossa käyttökohteet muutetaan samalla kertaa.
+- **Tokenit.** `scripts/docs/readme-diagram-theme.mjs` kopioi Editions-paletin (oletusulkoasu) `packages/ui-kit/src/ci-editions.css` stä (kiinnitetty kyseiseen tiedostoon `tests/unit/docs/readme-diagram-theme.test.ts`:llä, joka myös tarkistaa WCAG AA jokaiselle tekstin värille molemmissa malleissa; yksi poikkeus, vaalea `warn`, on sarjan varoitus tummennettu 10 %, koska sarjan arvo on 4.46:1 kankaalla tekstin tyypissä ja ss:n rooli.`ci-tokens.css`): Switzer sarjan painoilla (400/500/600, näyttö 500) ja seuranta kaikelle paitsi koodirooleille (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`), jotka ovat IBM Plex Mono ja ovat vain komentoja, screenstifi URLs. Vaaleat arvot sijaitsevat tiedoston sisällä kohdassa `:root`, tummat arvot `prefers-color-scheme: dark` takana, joten jokainen kuva noudattaa katsojan kaavaa GitHub ssä.
+- **Fontit.** GitHub Markdown ei sisällä CSS ja camo-välityspalvelin estää jokaisen ulkoisen haun, joten sarjatyypin on kuljetettava tiedoston sisällä. `scripts/docs/readme-outline.mjs`, jokaisen generaattorin viimeinen vaihe, muotoilee Switzerin roolit HarfBuzz llä ja piirtää ne vektorikuviksi (`<defs>` paths ja `<use>`) ja Switzeriltä puuttuvat nuolet ja geometriset symbolit piirrettyinä omilla mittareilla. Ääriviivat, ei koskaan upotettua fonttia: Sveitsin lisenssi (`packages/ui-kit/src/fonts/FFL.txt`) kieltää osajoukkojen ja muotojen muuntamisen ilman kirjallista lupaa ja sallii vektoripiirrokset, joten älä ota uudelleen käyttöön Switzer `@font-face` tai `data:` URI. Yksi tiedostoon jätetty fontti on OFL IBM Plex Mono -alijoukko sille, mikä pysyy todellisena kooditekstinä (`scripts/docs/readme-fonts.mjs`), joka on rakennettu näistä merkeistä; mikä tahansa kuvio, johon se ei voi upottaa heittoja.
+- **Luo uudelleen.** `npm run docs:readme-diagrams` kirjoittaa uudelleen kaikki kaksitoista README järjestyksessä ja tulostaa yhden rivin tiedostoa kohden sen koossa. Yksi generaattori toimii myös yksinään (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` tarvitsee `node --import tsx/esm` koska sen luvut tulevat `open-sse/config/freeModelCatalog.ts`:n live-luettelolatausohjelmasta; luettelon muutoksen CI seuraus on `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Yhdistä generaattori ja SVG yhdessä.
+- **Todiste.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renderöi tiedoston tavalla, jolla GitHub palvelee sitä ( `<img>` -tunniste, camon `Content-Security-Policy`, `image/svg+xml`), kaappaa vaalean ja tumman kehyksen ja raportoi ulkoisen kirjasimen pyynnöt tehdystä sivusta (täytyy olla 0).
+- **Budjetti.** Alle 200 KB tiedostoa kohden (jokainen vanhentumistesti vahvistaa sen); 500 KB on minkä tahansa README kuvan kova yläraja ( SVG studio validaattorin sääntö).
+- **Kopio muuttumattomana, laskee portista.** Rebrändi muutti tyyppiä ja palettia, ei sanoja: jokainen generaattori kuljettaa kaavion kopion `*_COPY` -vakiossa (tai rakentaa sen live-luettelosta), joka on sekä piirretty teksti että ääriviivavaiheen syöttö. Kanoniset luvut pysyvät `<text>` solmuissa (näkymättömät kerran ääriviivattuna, `fill-opacity:0`), luetaan `check:docs-counts` :llä (`scripts/check/check-docs-counts-sync.mjs`); portin lukemien kaavioiden vanhentumistestit suorittavat myös validaattorinsa luodulle tiedostolle, joten koodista ajautunut luku epäonnistuu testissä — korjaa portin lukema lähde, ei koskaan generaattorin numero.
 
----
+## 7. Viiteindeksi
 
-## 4. Osa A — Ruutupaperitausta (pääasiallinen pyyntö) — TOTEUTETTU (vaihe 1)
-
-### 4.1 Mikä se on
-
-Sivuston tarkka toteutustapa (`_mono_repo/omnirouteSite/css/base.css`): **kiinteä, koko näkymän kattava pseudoelementti**, joka piirtää kaksi 1px:n viivaliukuväriä ja sijaitsee kaiken sisällön takana tasolla `z-index:-1`.
-
-```css
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
-```
-
-**Miksi tämä toimii, vaikka `body`-elementillä on peittävä `background-color`:** `::before`, jonka `z-index` on `-1`, piirretään _elementin oman taustan yläpuolelle_ mutta _sen normaalissa asettelussa olevan sisällön alapuolelle_. Näin ollen `--color-bg` toimii pohjavärinä, ruudukko kerrostetaan sen päälle ja sovellus renderöidään ruudukon yläpuolelle.
-
-### 4.2 Koodikannassa jo oleva esimerkki
-
-`src/app/landing/page.tsx:16-26` **toteuttaa jo saman ruudukon sivukohtaisesti** — mutta **punaisilla** viivoilla (`#E54D5E`, peittävyys `0.06`) ja **50px:n** koolla sekä animoiduilla valopalloilla. Malli on siis jo todettu toimivaksi tuotteessa; tässä työssä siitä tehdään **globaali ja teeman huomioiva** taustakuva.
-
-### 4.3 Lisätyt tokenit (tiedostossa `globals.css`)
-
-```css
-:root {
-  /* vaalea — ruudukon peittävyyttä kasvatettu sivuston arvosta 0.045, jotta taustakuva
-     todella näkyy tiiviissä hallintanäkymässä (kortit ja käyttöliittymäkehys peittävät suurimman osan näkymästä) */
-  --grid-line: rgba(0, 0, 0, 0.07);
-  --grid-size: 32px;
-  --section-alt: rgba(0, 0, 0, 0.022);
-}
-.dark {
-  /* tumma — kasvatettu arvosta 0.035 samasta syystä */
-  --grid-line: rgba(255, 255, 255, 0.06);
-  --section-alt: rgba(255, 255, 255, 0.018);
-}
-```
-
-### 4.4 Ainoa este — poistettu
-
-Ruudukko on rakenteeltaan globaali (se kattaa paneelin, `auth`/`login`-näkymät ja virhesivut — kaikki reitit — yhdellä kertaa). Täsmälleen **yksi** elementti peitti sen paneelin sisällä:
-
-- `src/shared/components/layouts/DashboardLayout.tsx` — uloin kääre piirsi peittävän `bg-bg`-taustan. Kaikki sen alapuolella on jo läpinäkyvää (`<main>`, vierityssäiliö ja sisempi `max-w-7xl`), joten **`bg-bg`:n poistaminen** päästää bodyn ruudukon näkymään sisältöalueen läpi (bodyn `--color-bg` säilyy pohjavärinä).
-
-  ```diff
-  - <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-bg">
-  + <div className="flex h-dvh min-h-0 w-full overflow-hidden">
-  ```
-
-### 4.5 Käyttöliittymäkehyksen toiminta (sivupalkki / ylätunniste)
-
-- `Header` (`Header.tsx:207`, `bg-bg`) ja `Sidebar` (`Sidebar.tsx:430`, `bg-sidebar`) pysyvät **peittävinä** → ruudukko näkyy **vain sisältöalueella**, ja yhtenäinen käyttöliittymäkehys ympäröi sitä. Rauhallinen oletusratkaisu, joka vastaa tapaa, jolla sivusto erottaa käyttöliittymäkehyksen sisältöalueesta (päätös D3 = yhtenäinen).
-
-### 4.6 Kirjautumis-, tunnistautumis- ja virhesivut
-
-Nämä renderöidään suoraan `<body>`-elementin alle (ilman paneelin käyttöliittymäkehystä), joten globaalin ruudukon pitäisi näkyä niiden takana automaattisesti. **Vaihe 5 — VALMIS:** erillisten koko näytön näkymien kääreet olivatkin peittäviä (`min-h-screen … bg-bg`, jossa `bg-bg` on sama yhtenäinen pohjaväri kuin `<body>`-elementillä), mikä piilotti ruudukon kaikissa muissa kuin hallintanäkymissä — ei vain kirjautumissivulla. Ne kaikki ovat nyt läpinäkyviä, joten yhteinen taustakuva näkyy niiden läpi: `login`, `forgot-password`, `callback`, `maintenance`, `offline`, `status`, `terms`, `privacy`, `onboarding` ja `ErrorPageScaffold` (kattaa virheet `400`/`401`). Tämä viimeistelee **D4**:n (laajennettu pelkästä kirjautumisnäkymästä kaikkiin erillisiin näkymiin). Toiminta varmistetaan testillä `tests/unit/design-grid-background.test.ts`.
-
-### 4.7 Aloitussivu
-
-`landing/page.tsx` säilyttää monipuolisemman animoidun taustansa (valopallot + vinjetti) — oman markkinointiin tarkoitetun aloitusnäkymänsä (päätös D5 = jätetään ennalleen).
-
----
-
-## 5. Osa B — Tokenien yhtenäistäminen
-
-Vaihe 1 lisää passiiviset, törmäyksettömät identiteettitokenit (`--surface-2`/`--color-surface-2`, `--grad-brand`, `--radius`). Vaihe 2 kytkee sädeasteikon Tailwindiin ja kohdistaa komponentit uudelleen; vaihe 4 lisää `--font-mono`-tokenin ja sen käyttäjät.
-
-| Token                      | Miksi                                                                                       | Vaihe                                        |
-| -------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| `--radius` / `--radius-sm` | Yksi sädeasteikko (14/9) tilapäisten 6/8/12-arvojen sijaan                                  | 1 (arvo) / 2 (kytkentä + uudelleenkohdistus) |
-| `--grad-brand`             | Brändiliukuväri ensisijaisille toimintakehotteille (punainen→violetti), sivuston mukaisesti | 1 (token) / 2 (Button)                       |
-| `--surface-2`              | Sisäkkäiset paneelit / taulukko-otsikot / sisennetyt rivit                                  | 1                                            |
-| `--font-mono`              | Koodilohkot, pääte, tunnukset, päätepisteet                                                 | 4                                            |
-| `--text-muted`-yhtenäistys | Valitse yksi arvo sivustolle ja paneelille (`#a1a1aa` suositeltu)                           | 2                                            |
-
-**D2 (text-muted):** sivuston `#8b8b9e` vs. hallintapaneelin `#a1a1aa`. Suositus on säilyttää **hallintapaneelin `#a1a1aa`** ja päivittää _sivusto_ vastaamaan sitä. Kosmeettinen.
-
----
-
-## 6. Osa C — Komponenttien standardointi (vaiheet 2–4)
-
-Mukautetut komponentit (ei shadcn/Radixia), Tailwind v4, semanttiset tokenit **pääosin** käytössä (195 tiedostoa tuo jaetun koontimoduulin). Työssä poistetaan **ohitukset**. Sijainti: `src/shared/components/`.
-
-| #   | Kohde                                                | Tiedosto(t)                                                                                                                  | Ongelma → Tavoite                                                                                                                                        | Vaihe |
-| --- | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
-| C1  | **Säteiden yhtenäistäminen**                         | `Button.tsx:14-18`, `Card.tsx:39`, `Modal.tsx`, `Input.tsx`, `Select.tsx`                                                    | sekaisin 6/8/12px → `--radius`/`--radius-sm` (14/9)                                                                                                      | 2     |
-| C2  | **Painikkeen liukuväri + `accent`-variantti**        | `Button.tsx:5-12`                                                                                                            | ensisijainen on tasainen punainen→punainen; yhdenmukaista `--grad-brand`-tokenin kanssa; lisää puuttuva `accent`-variantti. ~195 tuojaa — näkyvin muutos | 2     |
-| C3  | **Taulukot**                                         | `DataTable.tsx:122-176`, `logTableStyles.ts`, `globals.css:405-414`                                                          | 100 % rivinsisäisiä kovakoodattuja rgba-arvoja + olemattomia muuttujia; siirrä tokeneihin ja poista poikkeavat tyylit                                    | 3     |
-| C4  | **Tilavärien keskittäminen**                         | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `ProviderCascadeNode.tsx`, `Badge.tsx` + 5 apumoduulia | 6+ kopiota samoista heksadesimaaliarvoista → yksi moduuli, joka perustuu `--color-success/warning/error`-tokeneihin                                      | 3     |
-| C5  | **Kortin reunus**                                    | `Card.tsx:39`                                                                                                                | `border-white/5` → brändiväri `/8`                                                                                                                       | 2     |
-| C6  | **Kohdistusrenkaan yhtenäistäminen** ✅ VALMIS       | `globals.css`-tiedoston `--focus-ring` (accent) vs. lomakeohjainten `ring-primary/30`                                        | yhtenäistetty **accent-väriin (violetti)** vastaamaan yleistä rengasta ja erottumaan punaisesta virherenkaasta; virhe pysyy punaisena                    | 4     |
-| C7  | **Lisää `Checkbox` + `Textarea`**                    | käsittelemättömät `<input>`/`<textarea>`-elementit rivinsisäisellä `accentColor:#6366f1`-tyylillä                            | tokenpohjaiset peruskomponentit                                                                                                                          | 4     |
-| C8  | **Kovakoodattujen heksadesimaaliarvojen läpikäynti** | `ConsoleLogViewer.tsx:240`, `ComboLiveStudio.tsx:306`, modaalin pisteet, ~14 kaaviotiedostoa                                 | literaalit → tokenit                                                                                                                                     | 4     |
-| C9  | **`cn()` → clsx + tailwind-merge**                   | `src/shared/utils/cn.ts`                                                                                                     | ristiriitaiset luokat kasautuvat; tarvitaan C1:n ohituksiin                                                                                              | 2     |
-
-**Jo brändin mukaiset (tokenpohjaiset, tarvitsevat vain säteen):** `Badge`, `Toggle`, `SegmentedControl`, `Input`, `Select`.
-
----
-
-## 7. Julkaisusuunnitelma
-
-- **Vaihe 1 — Ruudukko + identiteettitunnisteet (TÄMÄ PR).** `globals.css`-ruudukko + `--surface-2`-/`--grad-brand`-/`--radius`-tunnisteet; `body::before`-taustakuva; poistetaan estävä `bg-bg`; staattinen suojatesti. Pieni riski, peruttavissa yhdellä commitilla.
-- **Vaihe 2 — Peruskomponentit (C1, C2, C5) — VALMIS tässä PR:ssä.** Semanttiset sädeapuohjelmat `rounded-card` (14px) / `rounded-control` (9px) lisätty `@theme`:n kautta (mukautetut nimet, joten oletusarvoiset `rounded-sm/md/lg/xl` säilyvät koskemattomina — ei 400 tiedostoon ulottuvaa muutosta); Card/Modal → 14px, Button/Input/Select → 9px; Button primary → `--grad-brand` (punainen→violetti) + uusi `accent`-variantti; Card-reunukset → `border-border`-tunniste (0.08). **Lykätty:** `cn()`→tailwind-merge (C9) vaatii uusia riippuvuuksia; tapauskohtainen `rounded-lg`-läpikäynti (326 tiedostoa) jätetään ennalleen, koska peruskomponentit kattavat suurimman osan pinnoista.
-- **Vaihe 3 — Tilavärit + taulukot (C3, C4) — VALMIS tässä PR:ssä.** ✅ **C4** (`src/shared/constants/statusColors.ts` — `STATUS_HEX` ainoana lähteenä; `flow/edgeStyles.ts` + `TokenHealthBadge` ohjattu käyttämään sitä, täsmällisesti/sama hex-arvo). ✅ **`--font-mono`**-tunniste. ✅ **C3 (DataTable)** — jokainen rivinsisäinen rgba-arvo sekä toimimattomat `var(--bg-table-header)`- / `var(--text-secondary)`-varmistukset korvattiin `--table-*`-tunnistejoukolla (`--table-header-bg/-row-zebra/-row-hover/-cell-border/-row-selected`), jonka **tummat arvot vastaavat täsmälleen aiempia kovakoodattuja rgba-arvoja** (tumma tila tavu tavulta identtinen) ja jonka vaaleat arvot korjaavat aiemmin aina tummana näkyneen vaalean teeman. Otsakkeen reunus → `--color-border`, toissijainen teksti → `--color-text-muted`. **Vaatii visuaalisen tarkistuksen ennen yhdistämistä.** (Ei muutettu: `logTableStyles.ts` ja vanhat Ant `.ant-table`-säännöt — erillisiä, matalamman prioriteetin kohteita.)
-- **Vaihe 4 — Siivous (C6, C7, C9 valmiit; C8 kesken).** ✅ **C9** `cn()` → `twMerge(clsx(...))` (clsx + tailwind-merge lisätty riippuvuuksiksi) — kutsujan `className` nyt korvaa oikein peruskomponentin ristiriitaisen luokan niiden pinoamisen sijaan. ✅ **C7** uudet `Checkbox`- + `Textarea`-peruskomponentit (tunnisteohjatut, viety barrel-tiedostosta; lisäys ei riko aiempaa — 32 raaka-checkboxin / 41 raaka-textarean käyttöönotto voidaan tehdä asteittain). ✅ **C6** kohdistusrenkaan yhtenäistäminen — lomakekontrollit (`Input`/`Select`/`Textarea`/`Toggle`/`Checkbox`) käyttävät nyt kohdistuksessa **accent-väristä (violettia)** rengasta, jotta se vastaa globaalia `--focus-ring`-arvoa eikä enää törmää punaisen virherenkaan kanssa; punainen virhetila säilyy ennallaan. ⏳ **C8:n hex-läpikäynti EI ole sokea etsi/korvaa-toiminto** — vahvistetut kohteet, jotka ovat _tarkoituksellisia_ ja jotka on säilytettävä: `ConsoleLogViewer.tsx:240` (aina tumma pääte), `TokenHealthBadge`-ponnahdusikkuna, ReactFlow-SVG-viivat. Siirrä vain sellaiset hex-arvot, joiden on aidosti tarkoitus mukautua teemaan.
-
-Jokaisessa vaiheessa: `npm run lint` + `npm run typecheck:core` + visuaalinen tarkistus.
-
----
-
-## 8. Avoimet päätökset (suositukset)
-
-- **D1 — Button primary:** säilytetäänkö punainen→punainen vai vaihdetaanko **punainen→violetti `--grad-brand`**? Suositus: **punainen→violetti** (vaihe 2).
-- **D2 — Ruudukkoviivan väri:** **neutraali** (sivuston tyyli) — valittu — verrattuna brändin punaiseen. Koko **32px** (pienennetty omistajan palautteen perusteella noin 30 % alkuperäisestä 46px:stä — 46px:n solut näyttivät liian suurilta hallintapaneelin asettelussa).
-- **D3 — Käyttöliittymäkehyksen eloisuus:** sivupalkki/ylätunniste **yksivärinen** — valittu.
-- **D4 — Todennuksen/kirjautumisen ruudukko:** ✅ **VALMIS (vaihe 5)** — läpinäkymätön `bg-bg` poistettu jokaisesta erillisestä koko näytön käärintäelementistä (ei vain kirjautumisesta), joten ruudukko näkyy kaikilla näytöillä. Katso §4.6.
-- **D5 — Aloitussivu:** jätetään animoitu aloitusnäkymä ennalleen. Valittu.
-- **D6 — 14/9-säde koko tuotteessa:** Suositus: kyllä (vaihe 2).
-- **D7 — Vaihe 1 julkaistaan ensin:** Valittu.
-- **D8 — Asettelun leveys (vaihe 5):** hallintapaneelin sisältökuoren enimmäisleveydeksi oli rajattu `max-w-7xl` (1280px), mikä keskitti sen ja jätti suurilla näytöillä leveät tyhjät sivumarginaalit. ✅ **VALMIS** — nostettu joustavaan `max-w-[3840px]`-arvoon (todellinen 4K): sisältö seuraa nyt näkymän leveyttä noin 4K:hon asti ja keskitetään vasta sitä leveämmissä näkymissä (`DashboardLayout.tsx`). Tarkoituksella kapeat sivut pysyvät suunnitellusti kapeina (`ProviderOnboardingWizard` max-w-5xl, `Rtk`/`CavemanContextPageClient` max-w-6xl).
-- **D9 — Läpinäkymättömät datataulukot (vaihe 6):** kun hallintapaneelin sisältöalue on nyt läpinäkyvä (jotta ruudukkotaustakuva näkyy sen läpi, vaihe 5), datataulukoissa, joiden säilö _ei_ ollut läpinäkymätön pinta, ruudukko näkyi läpinäkyvien parillisten rivien / matalan alpha-arvon seepraraidoituksen läpi. ✅ **VALMIS** — jokainen ilman Card-komponenttia oleva taulukko käyttää nyt `bg-surface`-taustaa (tai `<DataTable>`-peruskomponentin tapauksessa sen vierityssäilössä arvoa `background: var(--color-surface)`). Korjattu: `DataTable` (peruskomponentti), `ProxyLogger`/`RequestLoggerV2` (niiden `<Card>`-komponentin `bg-black/5 dark:bg-black/20`-sävytys syrjäytti Card-komponentin `bg-surface`-arvon tailwind-mergen kautta → noin 95-prosenttisesti läpinäkyvä), `BatchListTab`/`FilesListTab`/`CacheEntriesTab`/`ReasoningCacheTab`/`cache page`/`FreePoolTab`/`ModelMappingTable`/`HeaderTable` sekä kaksi CSS-ruudukkopohjaista "taulukkoa" välimuistinäkymissä (`bg-surface/35` → `bg-surface`). Jo `<Card>`-/Modal-komponentin sisällä olevien taulukoiden läpinäkymättömyys tarkistettiin, ja ne jätettiin tarkoituksella koskemattomiksi (bg-surface olisi niissä tarpeeton no-op). Itse ruudukko **ei vaatinut muutoksia** — hallintapaneelin `body::before` on tavu tavulta identtinen sivuston kanssa (`--grid-size: 32px`); käynnissä olevassa instanssissa näkyvä mahdollinen "suurempi ruudukko" johtuu vanhentuneesta, ennen `#4143`:a tehdystä koontiversiosta, ei koodista. Suojattu testillä `tests/unit/design-grid-background.test.ts` (vaiheen 6 lohko).
-
----
-
-## 9. Rajauksen ulkopuolella / riskit
-
-- **Ei muutoksia väripalettiin** — värit ovat jo yhtenevät; lisäämme vain puuttuvat tokenit. Tuotteen värityksen muuttumisen riski on olematon.
-- **Ei muutoksia teemamoottoriin** — säilytetään `.dark` + Zustand-kauppa.
-- **Kulmasäteen muutos (vaihe 2) on laaja** — vaikuttaa jokaiseen korttiin, painikkeeseen ja syötekenttään; tarkista silmämääräisesti tiheät näkymät (taulukot, modaalit) ennen yhdistämistä.
-- **Taulukot (C3)** sisältävät eniten kovakoodattuja tyylejä ja muodostavat suurimman regressioriskin — eristä ne omaan PR:ään.
-
----
-
-## 10. Viitehakemisto
-
-| Alue                                           | Polku                                                                                                                |
-| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Kojelaudan tokenit                             | `src/app/globals.css` (`:root`, `.dark`, `@theme inline`, `body`, `body::before`)                                    |
-| Teemakauppa                                    | `src/store/themeStore.ts`, `src/shared/components/ThemeProvider.tsx`, `src/shared/constants/appConfig.ts:9-11`       |
-| Paneelikehys (ruudukko otetaan käyttöön tässä) | `src/shared/components/layouts/DashboardLayout.tsx`                                                                  |
-| Käyttöliittymäkehys                            | `src/shared/components/Header.tsx:207`, `src/shared/components/Sidebar.tsx:430`                                      |
-| Ruudukon vertailukohta                         | `src/app/landing/page.tsx:16-26`                                                                                     |
-| Peruskomponentit                               | `src/shared/components/{Button,Card,Input,Select,Badge,Modal,Toggle,SegmentedControl,Loading,Tooltip,DataTable}.tsx` |
-| Tilavärien lähteet                             | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `logTableStyles.ts`                            |
-| `cn`-apuohjelma                                | `src/shared/utils/cn.ts`                                                                                             |
-| Vaiheen 1 suojaustesti                         | `tests/unit/design-grid-background.test.ts`                                                                          |
-| Sivuston vertailulähde                         | `_mono_repo/omnirouteSite/css/tokens.css`, `css/base.css`                                                            |
+- `src/app/globals.css` — token bridge, `.dark` ohitukset, OmniRoute `@layer components` laajennukset
+- `packages/ui-kit/UPSTREAM.md` — kiinnitetty alkupään sitoutumis- ja lisenssivaltuutus; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-editions.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` ja sen vieressä olevat sovittimet; `src/shared/components/layouts/DashboardShell.tsx`, `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`, `scripts/dev/codemod-material-icons.mjs`
+- `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
+- `src/store/themeStore.ts`, `src/shared/utils/themeBootScript.ts`, `src/shared/constants/appearancePalette.ts`, `src/shared/constants/pwaThemeColors.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

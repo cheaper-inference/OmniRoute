@@ -5,12 +5,19 @@
  * @changes
  * - [2026-07-24] [Composer] - Skip execute-mode units at concurrency cap before dispatch
  */
+import { cloneForQuality } from "./preContentTransportFailure.ts";
 import { errorResponse } from "../../utils/error.ts";
+import { resolveResilienceSettings } from "../../../src/lib/resilience/settings";
+import { waitForCooldownAwareRetry } from "../../../src/sse/services/cooldownAwareRetry.ts";
 import { buildContextBudgetResponse, readBudgetFailure } from "./budgetExhaustion.ts";
 import type { ComboDiagnostics } from "../../utils/error.ts";
 import { recordComboRequest } from "../comboMetrics.ts";
 import { resolveDelayMs, requestScopedReplayKey } from "./comboPredicates.ts";
-import { qualityValidationFailure } from "./executeTargetClassify.ts";
+import {
+  isProviderSafetyStreamFailure,
+  qualityValidationFailure,
+} from "./executeTargetClassify.ts";
+import { isSafetyRejection } from "./safetyStopLatch.ts";
 import { isRuntimeUnitAtConcurrencyCap } from "./runtimeUnitCapacity.ts";
 import { isQuotaExhaustionResponse, withQuotaExhaustionClassification } from "./quotaExhaustion.ts";
 import {
@@ -211,6 +218,16 @@ export async function executeRuntimeUnitCombo(args: {
   // model, so later units of that model are skipped rather than replayed.
   const rejectedModelKeys = new Set<string>();
   const clientRequestedStream = args.body?.stream === true;
+  const preContentTransportRecovery =
+    clientRequestedStream &&
+    resolveResilienceSettings(args.settings).streamRecovery.enabled === true;
+  const guardedHandleSingleModel: HandleSingleModel = preContentTransportRecovery
+    ? async (...dispatchArgs) =>
+        args.signal?.aborted
+          ? errorResponse(499, "Client disconnected")
+          : args.handleSingleModel(...dispatchArgs)
+    : args.handleSingleModel;
+  let encounteredTransportReadFailure = false;
   const startTime = Date.now();
   const effectiveStrategy = args.effectiveComboStrategy ?? args.strategy;
   const { honorsFallbackOnlyTargets } = getStrategyTraits(effectiveStrategy);
@@ -259,14 +276,15 @@ export async function executeRuntimeUnitCombo(args: {
       fallbackCount += 1;
       continue;
     }
-    if (
-      await isRuntimeUnitAtConcurrencyCap(
-        unit,
-        args.allCombos,
-        undefined,
-        args.hiddenModelsByProvider
-      )
-    ) {
+    const atCapacity = await isRuntimeUnitAtConcurrencyCap(
+      unit,
+      args.allCombos,
+      undefined,
+      args.hiddenModelsByProvider
+    );
+    if (preContentTransportRecovery && args.signal?.aborted)
+      return { response: errorResponse(499, "Client disconnected"), unit };
+    if (atCapacity) {
       args.log.info(
         "COMBO",
         `Skipping ${unit.kind} ${unitDisplayName(unit)} — concurrency cap reached`
@@ -280,6 +298,8 @@ export async function executeRuntimeUnitCombo(args: {
 
     for (let retry = 0; retry <= maxRetries; retry += 1) {
       if (args.signal?.aborted) {
+        if (preContentTransportRecovery)
+          return { response: errorResponse(499, "Client disconnected"), unit };
         lastResponse = errorResponse(499, "Client disconnected");
         await observeFailure(lastResponse, unit);
         return { response: finalFailure(lastResponse), unit };
@@ -295,7 +315,11 @@ export async function executeRuntimeUnitCombo(args: {
         return { response: finalFailure(lastResponse), unit };
       }
       if (retry > 0) {
-        await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+        if (encounteredTransportReadFailure) {
+          await waitForCooldownAwareRetry(retryDelayMs, args.signal);
+          if (args.signal?.aborted)
+            return { response: errorResponse(499, "Client disconnected"), unit };
+        } else await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
       }
       attemptedUnits.push({
         provider: unit.kind === "model" ? unit.provider : "combo-ref",
@@ -310,7 +334,7 @@ export async function executeRuntimeUnitCombo(args: {
         body: args.body,
         unit,
         allCombos: args.allCombos,
-        handleSingleModel: args.handleSingleModel,
+        handleSingleModel: guardedHandleSingleModel,
         isModelAvailable: args.isModelAvailable,
         runCombo: args.runCombo,
         baseOptions: args.baseOptions,
@@ -319,6 +343,22 @@ export async function executeRuntimeUnitCombo(args: {
         effectiveComboStrategy: effectiveStrategy,
         fallbackAttempts: fallbackCount,
       });
+      if (preContentTransportRecovery && args.signal?.aborted) {
+        releaseRejectedQualityResponse(response, response);
+        return { response: errorResponse(499, "Client disconnected"), unit };
+      }
+      // #17049: a nested child combo already ended on a provider safety stop (HTTP-level or
+      // classified in-stream); the parent must not replace it with a sibling unit.
+      if (unit.kind === "combo-ref" && (await isSafetyRejection(response))) {
+        recordComboRequest(args.combo.name, null, {
+          success: false,
+          latencyMs: Date.now() - startTime,
+          fallbackCount,
+          strategy: effectiveStrategy,
+          target: { executionKey: unit.executionKey, stepId: unit.stepId, label: unit.label },
+        });
+        return { response, unit };
+      }
       lastResponse = response;
       if (response.ok) {
         if (unit.kind === "combo-ref") {
@@ -331,12 +371,7 @@ export async function executeRuntimeUnitCombo(args: {
           });
           return { response, unit };
         }
-        let unitClone: Response;
-        try {
-          unitClone = response.clone();
-        } catch {
-          unitClone = response;
-        }
+        const unitClone = cloneForQuality(response);
         const quality = await validateResponseQuality(
           unitClone,
           clientRequestedStream,
@@ -344,9 +379,16 @@ export async function executeRuntimeUnitCombo(args: {
           args.config.responseValidation as ResponseValidationConfig | undefined,
           args.signal,
           unit.kind === "model" &&
-            (await isTrustedEmptyTurn(unit.provider, response, unit.connectionId))
+            (await isTrustedEmptyTurn(unit.provider, response, unit.connectionId)),
+          preContentTransportRecovery
         );
         releaseQualityClone(unitClone, response, quality);
+        if (preContentTransportRecovery && args.signal?.aborted) {
+          void quality.clonedResponse?.body?.cancel().catch(() => {});
+          releaseRejectedQualityResponse(unitClone, response);
+          return { response: errorResponse(499, "Client disconnected"), unit };
+        }
+        encounteredTransportReadFailure ||= quality.upstreamFailure?.transportReadFailure === true;
         if (quality.valid) {
           recordComboRequest(args.combo.name, unit.modelStr, {
             success: true,
@@ -358,6 +400,17 @@ export async function executeRuntimeUnitCombo(args: {
           return { response, unit };
         }
         releaseRejectedQualityResponse(unitClone, response);
+        // #17049: an in-stream provider safety stop ends the nested combo immediately.
+        if (isProviderSafetyStreamFailure(quality)) {
+          recordComboRequest(args.combo.name, unit.modelStr, {
+            success: false,
+            latencyMs: Date.now() - startTime,
+            fallbackCount,
+            strategy: effectiveStrategy,
+            target: { executionKey: unit.executionKey, stepId: unit.stepId, label: unit.label },
+          });
+          return { response: qualityValidationFailure(quality).response, unit };
+        }
         qualityRetryable = quality.upstreamFailure?.retryable ?? false;
         if (quality.upstreamFailure?.requestScoped)
           rejectedModelKeys.add(requestScopedReplayKey(unit.modelStr));

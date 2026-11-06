@@ -1,8 +1,19 @@
 // @vitest-environment jsdom
+// KEA-7886: icons are Lucide <svg class="oi-icon" data-icon="<material name>"> via <Icon>.
 import React from "react";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi, beforeAll } from "vitest";
+
+// The kit Table (KEA-7886) mounts a persistent horizontal scrollbar that measures the table
+// with ResizeObserver, which jsdom does not implement.
+beforeAll(() => {
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+});
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
@@ -36,9 +47,7 @@ vi.mock("@/shared/components", () => ({
       {children}
     </button>
   ),
-  Card: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="card">{children}</div>
-  ),
+  Card: ({ children }: { children: React.ReactNode }) => <div data-testid="card">{children}</div>,
 }));
 
 vi.mock("@/shared/utils/clipboard", () => ({
@@ -72,9 +81,8 @@ function findButtonByLabel(container: HTMLElement, label: string): HTMLButtonEle
 async function renderAccordion(
   props: { forceOpen?: boolean; onOpenChange?: (open: boolean) => void } = {}
 ): Promise<HTMLElement> {
-  const { default: StreamTransformerAccordion } = await import(
-    "@/app/(dashboard)/dashboard/translator/components/advanced/StreamTransformerAccordion"
-  );
+  const { default: StreamTransformerAccordion } =
+    await import("@/app/(dashboard)/dashboard/translator/components/advanced/StreamTransformerAccordion");
   const container = makeContainer();
   const root = createRoot(container);
   await act(async () => {
@@ -107,16 +115,15 @@ describe("StreamTransformerAccordion", () => {
   // ── 1. Smoke render ────────────────────────────────────────────────────────
 
   it("exports a default function component", async () => {
-    const mod = await import(
-      "@/app/(dashboard)/dashboard/translator/components/advanced/StreamTransformerAccordion"
-    );
+    const mod =
+      await import("@/app/(dashboard)/dashboard/translator/components/advanced/StreamTransformerAccordion");
     expect(typeof mod.default).toBe("function");
   });
 
   it("renders the collapsible header with swap_horiz icon", async () => {
     const container = await renderAccordion();
-    const icons = container.querySelectorAll(".material-symbols-outlined");
-    const iconTexts = Array.from(icons).map((el) => el.textContent?.trim());
+    const icons = container.querySelectorAll("svg.oi-icon");
+    const iconTexts = Array.from(icons).map((el) => el.getAttribute("data-icon"));
     expect(iconTexts).toContain("swap_horiz");
   });
 
@@ -165,11 +172,15 @@ describe("StreamTransformerAccordion", () => {
     const toggleBtn = container.querySelector("button[aria-expanded]") as HTMLButtonElement | null;
 
     // Open
-    await act(async () => { toggleBtn?.click(); });
+    await act(async () => {
+      toggleBtn?.click();
+    });
     expect(container.querySelector("[data-testid='raw-sse-input']")).toBeTruthy();
 
     // Close
-    await act(async () => { toggleBtn?.click(); });
+    await act(async () => {
+      toggleBtn?.click();
+    });
     expect(toggleBtn?.getAttribute("aria-expanded")).toBe("false");
     // Content still in DOM (hidden class applied, not unmounted).
     expect(container.querySelector(".hidden")).toBeTruthy();
@@ -191,7 +202,9 @@ describe("StreamTransformerAccordion", () => {
     const container = await renderAccordion({ onOpenChange });
     const toggleBtn = container.querySelector("button[aria-expanded]") as HTMLButtonElement | null;
 
-    await act(async () => { toggleBtn?.click(); });
+    await act(async () => {
+      toggleBtn?.click();
+    });
 
     expect(onOpenChange).toHaveBeenCalledWith(true);
   });
@@ -201,7 +214,9 @@ describe("StreamTransformerAccordion", () => {
     const container = await renderAccordion({ forceOpen: true, onOpenChange });
     const toggleBtn = container.querySelector("button[aria-expanded]") as HTMLButtonElement | null;
 
-    await act(async () => { toggleBtn?.click(); });
+    await act(async () => {
+      toggleBtn?.click();
+    });
 
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
@@ -216,7 +231,9 @@ describe("StreamTransformerAccordion", () => {
     const loadTextBtn = findButtonByLabel(container, "Load text sample");
     expect(loadTextBtn).toBeTruthy();
 
-    await act(async () => { loadTextBtn?.click(); });
+    await act(async () => {
+      loadTextBtn?.click();
+    });
 
     const textarea = container.querySelector(
       "[data-testid='raw-sse-input']"
@@ -232,7 +249,9 @@ describe("StreamTransformerAccordion", () => {
     const loadToolBtn = findButtonByLabel(container, "Load tool-call sample");
     expect(loadToolBtn).toBeTruthy();
 
-    await act(async () => { loadToolBtn?.click(); });
+    await act(async () => {
+      loadToolBtn?.click();
+    });
 
     const textarea = container.querySelector(
       "[data-testid='raw-sse-input']"
@@ -255,7 +274,9 @@ describe("StreamTransformerAccordion", () => {
     const transformBtn = findButtonByLabel(container, "Transform to Responses");
     expect(transformBtn).toBeTruthy();
 
-    await act(async () => { transformBtn?.click(); });
+    await act(async () => {
+      transformBtn?.click();
+    });
 
     expect(mockFetch).toHaveBeenCalledOnce();
     const [url, options] = mockFetch.mock.calls[0] as [string, RequestInit];
@@ -270,7 +291,7 @@ describe("StreamTransformerAccordion", () => {
 
   it("renders the transformed output in the pre element on success", async () => {
     const transformedPayload =
-      "data: {\"type\":\"response.output_text.delta\",\"delta\":\"Hello\"}\n\ndata: [DONE]\n";
+      'data: {"type":"response.output_text.delta","delta":"Hello"}\n\ndata: [DONE]\n';
 
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
@@ -283,7 +304,9 @@ describe("StreamTransformerAccordion", () => {
     const transformBtn = findButtonByLabel(container, "Transform to Responses");
     expect(transformBtn).toBeTruthy();
 
-    await act(async () => { transformBtn?.click(); });
+    await act(async () => {
+      transformBtn?.click();
+    });
 
     const output = container.querySelector("[data-testid='transformed-output']");
     expect(output).toBeTruthy();
@@ -305,7 +328,9 @@ describe("StreamTransformerAccordion", () => {
     const transformBtn = findButtonByLabel(container, "Transform to Responses");
     expect(transformBtn).toBeTruthy();
 
-    await act(async () => { transformBtn?.click(); });
+    await act(async () => {
+      transformBtn?.click();
+    });
 
     const errorEl = container.querySelector("[data-testid='error-display']");
     expect(errorEl).toBeTruthy();
@@ -331,7 +356,9 @@ describe("StreamTransformerAccordion", () => {
     const transformBtn = findButtonByLabel(container, "Transform to Responses");
     expect(transformBtn).toBeTruthy();
 
-    await act(async () => { transformBtn?.click(); });
+    await act(async () => {
+      transformBtn?.click();
+    });
 
     const errorEl = container.querySelector("[data-testid='error-display']");
     expect(errorEl).toBeTruthy();
@@ -355,7 +382,9 @@ describe("StreamTransformerAccordion", () => {
     const container = await renderAccordion({ forceOpen: true });
 
     const transformBtn = findButtonByLabel(container, "Transform to Responses");
-    await act(async () => { transformBtn?.click(); });
+    await act(async () => {
+      transformBtn?.click();
+    });
 
     // Timeline table should contain "done" in the event-type column.
     const cells = container.querySelectorAll("td.font-mono");
@@ -364,7 +393,7 @@ describe("StreamTransformerAccordion", () => {
   });
 
   it("parseSseFrames handles malformed JSON in data frames gracefully", async () => {
-    const weirdPayload = "data: not-json\n\ndata: {\"valid\":true}\n";
+    const weirdPayload = 'data: not-json\n\ndata: {"valid":true}\n';
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ success: true, transformed: weirdPayload }),
@@ -377,7 +406,9 @@ describe("StreamTransformerAccordion", () => {
 
     // Should NOT throw.
     await expect(
-      act(async () => { transformBtn?.click(); })
+      act(async () => {
+        transformBtn?.click();
+      })
     ).resolves.not.toThrow();
 
     // Some frames should appear in the timeline (not empty).

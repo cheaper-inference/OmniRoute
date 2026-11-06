@@ -16,7 +16,13 @@ const { __setTlsFetchOverrideForTesting } =
   await import("../../open-sse/services/perplexityTlsClient.ts");
 const { handleChatCore } = await import("../../open-sse/handlers/chatCore.ts");
 
-type StreamFailure = { status: number; message: string; code?: string; type?: string };
+type StreamFailure = {
+  status: number;
+  message: string;
+  code?: string;
+  type?: string;
+  outputEmitted?: boolean;
+};
 
 function createPerplexityStream(
   events: Array<Record<string, unknown>>
@@ -322,6 +328,11 @@ test("partial content is preserved before a terminal error and the failed sessio
   assert.ok(finalizedFailure, "the downstream pipeline must finalize the stream failure");
   assert.equal(finalizedFailure.status, 502);
   assert.equal(finalizedFailure.message, "Perplexity upstream stream failed");
+  assert.equal(
+    finalizedFailure.outputEmitted,
+    true,
+    "the failure must retain emitted-output state"
+  );
   const persistedFailure = await waitForPersistedStreamFailure(requestStartedAt);
   assert.ok(persistedFailure, "the handler must persist the terminal stream failure");
 
@@ -415,7 +426,9 @@ test("same-packet content and error preserve the prefix across repeated readines
 
 test("a delayed success hook cannot erase same-packet content before terminal failure", async () => {
   const partialAnswer = "prefix must survive delayed success bookkeeping";
-  const model = "pplx-auto-delayed-success-proof";
+  // A mapped model other than pplx-auto keeps the persisted-failure lookup below
+  // separate from the earlier pplx-auto test. Unmapped names get a local 404 (#17822).
+  const model = "pplx-sonar";
   const requestStartedAt = new Date(Date.now() - 1_000);
   let finalizedFailure: StreamFailure | null = null;
   const result = await executeThroughChatCore(

@@ -1,7 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Card, Button } from "@/shared/components";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import Icon from "@/shared/components/Icon";
+import { KIMI_BRAND_COLOR } from "../providers/featuredProviders";
 
 /**
  * Kimi Coding combo preset (2026-07 partnership) — card UI. See
@@ -28,17 +31,18 @@ export default function KimiComboPresetCard({
 
   if (alreadyCreated) return null;
 
+  // Kimi partner-brand blue on purpose: a brand tint, not a semantic colour. The kit derives the
+  // border and the bolt's ink, which hold AA on the tint in every look.
   return (
     <Card
       padding="sm"
-      className="border-2 border-[#1783FF]/70 bg-[#1783FF]/[0.04] shadow-[0_2px_10px_-4px_rgba(23,131,255,0.45)]"
+      brandColor={KIMI_BRAND_COLOR}
+      className="border-2 shadow-[0_2px_10px_-4px_color-mix(in_srgb,var(--ci-brand)_45%,transparent)]"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#1783FF]/10">
-            <span className="material-symbols-outlined text-[20px] text-[#1067CC] dark:text-[#7CB8FF]">
-              bolt
-            </span>
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-surface">
+            <Icon name="bolt" size={20} className="text-[var(--ci-brand-ink)]" />
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-text-main">{t("kimiPresetTitle")}</p>

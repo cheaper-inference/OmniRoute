@@ -22,6 +22,17 @@ export async function readFetchErrorMessage(res: Response, fallback: string): Pr
   return fallback;
 }
 
+function firstValidationDetailMessage(details: unknown): string | null {
+  const first = Array.isArray(details) ? (details[0] as unknown) : null;
+  if (!first || typeof first !== "object") return null;
+  const detailMessage = (first as { message?: unknown }).message;
+  const field = (first as { field?: unknown }).field;
+  if (typeof detailMessage !== "string" || !detailMessage.trim()) return null;
+  return typeof field === "string" && field.trim()
+    ? `${field.trim()}: ${detailMessage.trim()}`
+    : detailMessage.trim();
+}
+
 /** Same extraction as {@link readFetchErrorMessage} for a body that has already been parsed. */
 export function errorMessageFromBody(body: unknown, fallback: string): string {
   const err = (body as { error?: unknown } | null)?.error;
@@ -31,17 +42,8 @@ export function errorMessageFromBody(body: unknown, fallback: string): string {
     // generic "Invalid request" in `message` and the actual reason in
     // `details`, e.g. a reserved compatible-node prefix (#13939). Prefer the
     // first detail so the UI names the offending field instead.
-    const details = (err as { details?: unknown }).details;
-    const first = Array.isArray(details) ? (details[0] as unknown) : null;
-    if (first && typeof first === "object") {
-      const detailMessage = (first as { message?: unknown }).message;
-      const field = (first as { field?: unknown }).field;
-      if (typeof detailMessage === "string" && detailMessage.trim()) {
-        return typeof field === "string" && field.trim()
-          ? `${field.trim()}: ${detailMessage.trim()}`
-          : detailMessage.trim();
-      }
-    }
+    const detail = firstValidationDetailMessage((err as { details?: unknown }).details);
+    if (detail !== null) return detail;
     const message = (err as { message?: unknown }).message;
     if (typeof message === "string" && message.trim()) return message.trim();
   }

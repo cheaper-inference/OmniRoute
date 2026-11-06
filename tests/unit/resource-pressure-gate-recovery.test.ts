@@ -1,4 +1,4 @@
-// Regression for https://github.com/diegosouzapw/OmniRoute/issues/13821.
+// Regression for https://github.com/cheaper-inference/OmniRoute/issues/13821.
 //
 // The structural admission gate (chatBodyAdmission.ts, admitChatRequest) is
 // the FIRST caller in the request path to consult pressure severity, ahead of

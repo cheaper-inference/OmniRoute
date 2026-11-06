@@ -65,39 +65,38 @@ HAR-import decodeert de vervaldatum van de JWT en toont de resterende levensduur
 > **Commit nooit een echte HAR-export, een toegangstoken of een vernieuwingstoken.** Waarden voor tests en
 > documentatie moeten altijd tijdelijke aanduidingen zijn.
 
-## Levensduur en vernieuwing van tokens
+## Levensduur van tokens en vernieuwen
 
-Het `access_token` is kortlevend (doorgaans **~75 minuten**). Na het verlopen meldt de provider
-een verbindingsfout en moet u de referentie opnieuw vastleggen.
+De `access_token` heeft een korte levensduur (doorgaans **~75 minuten**). Zonder een bruikbaar
+vernieuwingstoken moet u de referentie na het verlopen opnieuw vastleggen.
 
-### Automatische vernieuwing met `refreshToken`
+### Automatisch vernieuwen met `refreshToken`
 
-Om te voorkomen dat u de referentie handmatig opnieuw moet vastleggen, kunt u een Microsoft-vernieuwingstoken opslaan in de
-**Advanced Settings → providerSpecificData** van de verbinding:
+Open in het dialoogvenster **Verbinding toevoegen** of **Verbinding bewerken** van de Microsoft 365-provider
+**Geavanceerde instellingen → Vernieuwingstoken (optioneel)**. Plak een Microsoft OAuth-vernieuwingstoken
+voor het bereik `substrate.office.com/sydney` en sla het op. De invoer wordt gemaskeerd en nooit vooraf ingevuld
+met het opgeslagen token. Laat het veld bij het bewerken leeg om het bestaande token te behouden;
+plak een nieuw token om het te vervangen.
 
-| Veld           | Beschrijving                                                                    |
-| -------------- | ------------------------------------------------------------------------------- |
-| `refreshToken` | Microsoft OAuth-vernieuwingstoken voor het bereik `substrate.office.com/sydney` |
-| `tier`         | `individual` (standaard), `edu` of `enterprise`                                 |
+Verkrijg het vernieuwingstoken via een Microsoft-apparaatcode- of autorisatiecodeflow
+met het bereik `substrate.office.com/sydney`; het dashboard verkrijgt dit niet voor u.
+Als er een vernieuwingstoken is geconfigureerd, controleert OmniRoute de `access_token` vóór aanvragen
+en vernieuwt het token alleen wanneer dit nodig is. Bij een geslaagde vernieuwing wordt het geroteerde vernieuwingstoken
+ook opgeslagen, zodat u het niet handmatig opnieuw hoeft vast te leggen zolang het vernieuwingstoken geldig blijft.
 
-Verkrijg het vernieuwingstoken via een Microsoft device-code- of authorization-code-flow
-met het bereik `substrate.office.com/sydney`. Wanneer `refreshToken` is ingesteld, vernieuwt OmniRoute
-het `access_token` voorafgaand aan elk verzoek, zodat u het niet
-na elke vervalperiode van ~75 minuten opnieuw hoeft vast te leggen.
-
-Als `refreshToken` niet is ingesteld, moet u de WebSocket-referentie handmatig opnieuw vastleggen
-nadat deze is verlopen.
+Als `refreshToken` niet is ingesteld, moet u de WebSocket-referentie
+na elke vervaldatum handmatig opnieuw vastleggen.
 
 ### Tierselectie
 
-| Tier         | Alias         | Omgeving                      |
-| ------------ | ------------- | ----------------------------- |
-| `individual` | _(standaard)_ | M365 Copilot voor consumenten |
-| `edu`        | `included`    | M365 Copilot voor onderwijs   |
-| `enterprise` | `work`        | M365 Copilot voor werk        |
+| Tier         | Alias         | Oppervlak                   |
+| ------------ | ------------- | --------------------------- |
+| `individual` | _(standaard)_ | Consumenten-M365 Copilot    |
+| `edu`        | `included`    | M365 Copilot voor onderwijs |
+| `enterprise` | `work`        | M365 Copilot voor werk      |
 
-Stel de tier in via **Advanced Settings → providerSpecificData → tier**. De tier beïnvloedt
-de BizChat-routering en modeltoegang.
+Stel de tier in via **Geavanceerde instellingen → Copilot-tier**. De tier beïnvloedt
+de BizChat-routering en de toegang tot modellen.
 
 ## Beveiligingsmodel
 
@@ -108,25 +107,27 @@ de BizChat-routering en modeltoegang.
 
 ## Probleemoplossing
 
-### Authenticatie mislukt onmiddellijk
+### Verificatie mislukt onmiddellijk
 
-- Controleer of u de waarde uit de **WebSocket-URL** hebt gekopieerd en niet uit een XHR/Fetch-verzoek. De referentie bevindt zich in de queryparameter `access_token` van de Chathub WebSocket-verbinding — niet in een `Authorization: Bearer`-header.
+- Controleer of u hebt gekopieerd uit de **WebSocket-URL**, en niet uit een XHR/Fetch-aanvraag. De
+  aanmeldingsgegevens staan in de queryparameter `access_token` van de Chathub WebSocket-
+  verbinding — niet in een `Authorization: Bearer`-header.
 - Zorg ervoor dat `chathubPath` het volledige segment `<oid>@<tenant>` uit het URL-pad bevat.
 
 ### Token verloopt na ongeveer 75 minuten
 
-Dit is normaal. Zonder een `refreshToken` is het toegangstoken kortlevend. U kunt:
+Dit is verwacht gedrag. Zonder een `refreshToken` is het access token kort geldig. U kunt:
 
-- De referentie opnieuw vastleggen via DevTools, of
-- Een `refreshToken` configureren in Geavanceerde instellingen om het token automatisch te vernieuwen.
+- De aanmeldingsgegevens opnieuw vastleggen via DevTools, of
+- **Geavanceerde instellingen → Vernieuwingstoken (optioneel)** configureren in het dialoogvenster voor het toevoegen of bewerken van een verbinding, zodat het token automatisch wordt vernieuwd.
 
 ### Verbinding testen slaagt, maar chat retourneert 401
 
-Het token is mogelijk verlopen tussen de validatie en het eerste verzoek. Leg opnieuw een actuele referentie vast.
+Het token is mogelijk verlopen tussen de validatie en de eerste aanvraag. Leg nieuwe aanmeldingsgegevens vast.
 
-### Copilot wordt niet weergegeven in de providerlijst
+### Copilot wordt niet weergegeven in de lijst met providers
 
-Zorg ervoor dat `copilot-m365-web` is ingeschakeld onder **Dashboard → Providers**. De provider kan in sommige abonnementsniveaus standaard verborgen zijn.
+Zorg ervoor dat `copilot-m365-web` is ingeschakeld in **Dashboard → Providers**. De provider kan in sommige abonnementen standaard verborgen zijn.
 
 ## Referenties
 

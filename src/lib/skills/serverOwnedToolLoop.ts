@@ -133,6 +133,7 @@ export async function runServerOwnedToolLoop(
     code = "internal_error"
   ) => ({
     kind: "error",
+    upstreamHttpSelection: null,
     errorResult: createErrorResult(status, msg, null, code) as unknown as ChatCoreErrorResult,
     cumulativeUsage: aggregateUsageOrNull(usages),
     totalCostUsd,
@@ -163,6 +164,7 @@ export async function runServerOwnedToolLoop(
       const termination = clientNative.length > 0 ? "client_tools" : "completed";
       return {
         kind: "ok",
+        upstreamHttpSelection: currentLeg.upstreamHttpSelection ?? null,
         response: currentLeg.kind === "ok" ? currentLeg.response : undefined,
         responseForMemoryExtraction:
           currentLeg.kind === "ok" ? currentLeg.responseForMemoryExtraction : undefined,
@@ -182,6 +184,7 @@ export async function runServerOwnedToolLoop(
       if (options.abortSignal?.aborted) {
         return {
           kind: "error",
+          upstreamHttpSelection: null,
           errorResult: createErrorResult(
             499,
             "Client closed request",
@@ -221,6 +224,7 @@ export async function runServerOwnedToolLoop(
 
       return {
         kind: "ok",
+        upstreamHttpSelection: currentLeg.upstreamHttpSelection ?? null,
         response: formatted,
         responseForMemoryExtraction:
           currentLeg.kind === "ok" ? currentLeg.responseForMemoryExtraction : undefined,
@@ -238,6 +242,7 @@ export async function runServerOwnedToolLoop(
     if (options.abortSignal?.aborted) {
       return {
         kind: "error",
+        upstreamHttpSelection: null,
         errorResult: createErrorResult(
           499,
           "Client closed request",
@@ -269,6 +274,7 @@ export async function runServerOwnedToolLoop(
         const termination = termMap[err.code] ?? "execution_error";
         return {
           kind: "error",
+          upstreamHttpSelection: null,
           errorResult: mapExecutionError(err),
           cumulativeUsage: aggregateUsageOrNull(usages),
           totalCostUsd,
@@ -298,89 +304,51 @@ export async function runServerOwnedToolLoop(
       }
     }
 
-    // Check budget exhaustion — any truncated result terminates
+    const finishBoundary = (
+      termination: "tool_output_budget" | "max_followups" | "deadline"
+    ): ServerOwnedToolLoopResult => {
+      const formatted = formatEscapeHatchResponse(
+        response,
+        serverOwned,
+        execResults,
+        [],
+        options.sourceFormat,
+        serMap
+      );
+
+      return {
+        kind: "ok",
+        upstreamHttpSelection: currentLeg.upstreamHttpSelection ?? null,
+        response: formatted,
+        responseForMemoryExtraction:
+          currentLeg.kind === "ok" ? currentLeg.responseForMemoryExtraction : undefined,
+        finalProviderBody: currentLeg.kind === "ok" ? currentLeg.providerBody : undefined,
+        finalProviderRequest: currentLeg.kind === "ok" ? currentLeg.providerRequest : undefined,
+        cumulativeUsage: aggregateUsageOrNull(usages),
+        totalCostUsd,
+        receipts,
+        followUps,
+        termination,
+      };
+    };
+
+    // Preserve boundary precedence and avoid reading the clock for earlier limits.
     if (anyTruncated || cumulativeOutputBytes >= maxTotalResultBytes) {
-      const formatted = formatEscapeHatchResponse(
-        response,
-        serverOwned,
-        execResults,
-        [],
-        options.sourceFormat,
-        serMap
-      );
-
-      return {
-        kind: "ok",
-        response: formatted,
-        responseForMemoryExtraction:
-          currentLeg.kind === "ok" ? currentLeg.responseForMemoryExtraction : undefined,
-        finalProviderBody: currentLeg.kind === "ok" ? currentLeg.providerBody : undefined,
-        finalProviderRequest: currentLeg.kind === "ok" ? currentLeg.providerRequest : undefined,
-        cumulativeUsage: aggregateUsageOrNull(usages),
-        totalCostUsd,
-        receipts,
-        followUps,
-        termination: "tool_output_budget",
-      };
+      return finishBoundary("tool_output_budget");
     }
-
-    // Check follow-up limit
     if (followUps >= maxFollowUps) {
-      const formatted = formatEscapeHatchResponse(
-        response,
-        serverOwned,
-        execResults,
-        [],
-        options.sourceFormat,
-        serMap
-      );
-
-      return {
-        kind: "ok",
-        response: formatted,
-        responseForMemoryExtraction:
-          currentLeg.kind === "ok" ? currentLeg.responseForMemoryExtraction : undefined,
-        finalProviderBody: currentLeg.kind === "ok" ? currentLeg.providerBody : undefined,
-        finalProviderRequest: currentLeg.kind === "ok" ? currentLeg.providerRequest : undefined,
-        cumulativeUsage: aggregateUsageOrNull(usages),
-        totalCostUsd,
-        receipts,
-        followUps,
-        termination: "max_followups",
-      };
+      return finishBoundary("max_followups");
     }
-
-    // Check deadline before resume
     const remainingMs = loopDeadlineAtMs - now();
     if (remainingMs < MIN_REMAINING_FOR_FOLLOW_UP_MS) {
-      const formatted = formatEscapeHatchResponse(
-        response,
-        serverOwned,
-        execResults,
-        [],
-        options.sourceFormat,
-        serMap
-      );
-
-      return {
-        kind: "ok",
-        response: formatted,
-        responseForMemoryExtraction:
-          currentLeg.kind === "ok" ? currentLeg.responseForMemoryExtraction : undefined,
-        finalProviderBody: currentLeg.kind === "ok" ? currentLeg.providerBody : undefined,
-        finalProviderRequest: currentLeg.kind === "ok" ? currentLeg.providerRequest : undefined,
-        cumulativeUsage: aggregateUsageOrNull(usages),
-        totalCostUsd,
-        receipts,
-        followUps,
-        termination: "deadline",
-      };
+      return finishBoundary("deadline");
     }
 
     // Check abort before resume
     if (options.abortSignal?.aborted) {
       return {
         kind: "error",
+        upstreamHttpSelection: null,
         errorResult: createErrorResult(
           499,
           "Client closed request",
@@ -423,6 +391,7 @@ export async function runServerOwnedToolLoop(
 
       return {
         kind: "error",
+        upstreamHttpSelection: nextLeg.upstreamHttpSelection ?? null,
         errorResult: nextLeg.result,
         cumulativeUsage: aggregateUsageOrNull(usages),
         totalCostUsd,
@@ -440,6 +409,7 @@ export async function runServerOwnedToolLoop(
 
       return {
         kind: "error",
+        upstreamHttpSelection: null,
         errorResult: createErrorResult(
           409,
           "Follow-up connection does not match initial connection",

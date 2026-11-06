@@ -333,7 +333,12 @@ export const routeRequestInput = z.object({
       })
     )
     .describe("Chat messages in OpenAI format"),
-  combo: z.string().optional().describe("Specific combo to route through"),
+  combo: z
+    .string()
+    .trim()
+    .min(1)
+    .optional()
+    .describe("Optional combo name or ID; takes precedence over model during routing"),
   budget: z.number().optional().describe("Maximum cost in USD for this request"),
   role: z
     .enum(["coding", "review", "planning", "analysis"])

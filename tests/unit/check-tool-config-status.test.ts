@@ -109,6 +109,24 @@ test("hermes: returns 'not_configured' when config points elsewhere", async () =
   assert.equal(result, "not_configured");
 });
 
+test("whycodes: returns 'configured' when providers.omniroute has a base_url", async () => {
+  const configPath = await writeTempFile(
+    "whycodes.toml",
+    `[providers.omniroute]\nname = "omniroute"\nbase_url = "http://localhost:20128/v1"\napi_key = "sk-x"\n`
+  );
+  const result = await checkToolConfigStatus("whycodes", configPath);
+  assert.equal(result, "configured");
+});
+
+test("whycodes: returns 'not_configured' without an omniroute provider", async () => {
+  const configPath = await writeTempFile(
+    "whycodes.toml",
+    `[providers.openai]\nbase_url = "https://api.openai.com/v1"\n`
+  );
+  const result = await checkToolConfigStatus("whycodes", configPath);
+  assert.equal(result, "not_configured");
+});
+
 // ── Oh My Pi (omp) tests ──────────────────────────────────────────────────
 
 test("omp: returns 'configured' when models.yml contains OmniRoute provider", async () => {
@@ -229,6 +247,77 @@ test("qwen: does not misclassify an unrelated custom OpenAI endpoint", async () 
     })
   );
   assert.equal(await checkToolConfigStatus("qwen", configPath), "not_configured");
+});
+
+// ── Pi tests ─────────────────────────────────────────────────────────────────
+
+/** Fresh temp agent dir; checkToolConfigStatus reads PI_CODING_AGENT_DIR. */
+async function makePiAgentDir(): Promise<string> {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "omniroute-pi-check-"));
+  process.env.PI_CODING_AGENT_DIR = tmpDir;
+  return tmpDir;
+}
+
+test("pi: returns 'not_configured' when models.json has no omniroute provider", async () => {
+  const dir = await makePiAgentDir();
+  assert.equal(await checkToolConfigStatus("pi", path.join(dir, "models.json")), "not_configured");
+});
+
+test("pi: returns 'configured' when an OmniRoute-owned provider exists", async () => {
+  const dir = await makePiAgentDir();
+  await fs.writeFile(
+    path.join(dir, "models.json"),
+    JSON.stringify({
+      providers: {
+        omniroute: {
+          baseUrl: "http://127.0.0.1:20128/v1",
+          api: "openai-completions",
+          apiKey: "sk",
+          omnirouteManaged: true,
+          models: [{ id: "auto/best-coding" }],
+        },
+      },
+    }),
+    "utf-8"
+  );
+  assert.equal(await checkToolConfigStatus("pi", path.join(dir, "models.json")), "configured");
+});
+
+test("pi: reports a hand-edited local omniroute entry as configured", async () => {
+  const dir = await makePiAgentDir();
+  await fs.writeFile(
+    path.join(dir, "models.json"),
+    JSON.stringify({
+      providers: {
+        omniroute: {
+          baseUrl: "http://localhost:20128/v1",
+          api: "openai-completions",
+          piGuiCustomEndpoint: true,
+          models: [{ id: "direct-model-combo" }],
+        },
+      },
+    }),
+    "utf-8"
+  );
+  assert.equal(await checkToolConfigStatus("pi", path.join(dir, "models.json")), "configured");
+});
+
+test("pi: a remote omniroute-named endpoint on another port is not ours", async () => {
+  const dir = await makePiAgentDir();
+  await fs.writeFile(
+    path.join(dir, "models.json"),
+    JSON.stringify({
+      providers: {
+        omniroute: {
+          baseUrl: "https://omniroute.example.com:9443/v1",
+          api: "openai-completions",
+          models: [{ id: "auto/best-coding" }],
+        },
+      },
+    }),
+    "utf-8"
+  );
+  assert.equal(await checkToolConfigStatus("pi", path.join(dir, "models.json")), "not_configured");
 });
 
 // ── Edge cases ────────────────────────────────────────────────────────────────
