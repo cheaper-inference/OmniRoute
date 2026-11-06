@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getCachedSettings } from "../../lib/db/readCache";
+import { getCachedBodySizeSettings } from "../../lib/db/readCache";
 import { isDraining } from "../../lib/gracefulShutdown";
 import { checkBodySize, getBodySizeLimit } from "../../shared/middleware/bodySizeGuard";
 import {
@@ -248,7 +248,7 @@ function stampRouteResponse(
 
 async function getBodySizeSettings(): Promise<Record<string, unknown> | undefined> {
   try {
-    return await getCachedSettings();
+    return await getCachedBodySizeSettings();
   } catch (error) {
     console.warn(
       "[Authz] Failed to load request body limit settings:",
