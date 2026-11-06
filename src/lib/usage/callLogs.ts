@@ -496,8 +496,6 @@ type PreparedCallLogRow = {
   logEntry: Record<string, unknown>;
   insertParams: Record<string, unknown>;
   hasResilienceColumn: boolean;
-  detailState: CallLogDetailState;
-  responseId: string | null;
   /** Builds the artifact from the row's FINAL id; null when no detail is expected. */
   buildDetailArtifact: (() => ReturnType<typeof buildArtifact>) | null;
 };
@@ -763,8 +761,6 @@ async function buildCallLogRow(entry: any, metadataOnly = false): Promise<Prepar
     logEntry,
     insertParams,
     hasResilienceColumn,
-    detailState,
-    responseId: typeof logEntry.responseId === "string" ? logEntry.responseId : null,
     buildDetailArtifact: detailExpected
       ? () =>
           buildArtifact(
