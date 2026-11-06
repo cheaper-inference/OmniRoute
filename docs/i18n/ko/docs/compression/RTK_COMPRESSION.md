@@ -25,12 +25,12 @@ Caveman 입력:   46% 절감
 
 ## 압축 대상
 
-현재 기본 제공 카탈로그에는 다음 카테고리에 걸쳐 49개의 필터가 포함되어 있습니다.
+내장 카탈로그는 현재 다음 카테고리에 걸쳐 56개의 필터를 제공합니다:
 
 | 카테고리  | 예시                                                          |
 | --------- | ------------------------------------------------------------- |
 | `git`     | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`    | Vitest, Jest, Pytest, Playwright, Go 테스트, Cargo 테스트     |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo 테스트   |
 | `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
 | `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
 | `shell`   | `ls`, `find`, `grep`, 일반 셸 로그                            |
@@ -38,7 +38,9 @@ Caveman 입력:   46% 절감
 | `infra`   | Terraform, OpenTofu, `systemctl status`                       |
 | `generic` | JSON 출력, 스택 트레이스, 일반 출력 폴백                      |
 
-`open-sse/services/compression/engines/rtk/commandDetector.ts`의 감지기는 필터를 선택하기 전에 출력을 분류합니다. 명령어 클래스만으로 충분하지 않은 경우 필터는 명령어 패턴 또는 출력 정규식으로도 일치시킬 수 있습니다.
+`open-sse/services/compression/engines/rtk/commandDetector.ts`의 감지기는 필터를 선택하기 전에
+출력을 분류합니다. 명령어 클래스만으로는 충분하지 않은 경우, 필터가 명령어 패턴이나 출력 정규식으로도
+매칭될 수 있습니다.
 
 ## 필터 해석
 
@@ -343,56 +345,56 @@ node --import tsx/esm --test \
 
 ## 강도 수준 (v3.8.16+)
 
-RTK는 **압축의 공격성**과 **안전성** 사이에서 균형을 조절하는 **3가지 강도 수준**을 지원합니다. 수준은 엔진 구성의 `config.intensity`를 통해 설정합니다.
+RTK는 **압축 공격성**과 **안전성** 사이의 트레이드오프를 제공하는 **3가지 강도 수준**을 지원합니다. 이 수준은 엔진 설정의 `config.intensity`로 지정합니다.
 
 ### 3가지 수준
 
-| 수준                | 잘라내기 임계값 | 토큰 절감률 | 위험도    | 적합한 용도                     |
-| ------------------- | --------------- | ----------- | --------- | ------------------------------- |
-| `minimal`           | 섹션당 24줄     | ~20-40%     | 매우 낮음 | 중요한 컨텍스트가 있는 프로덕션 |
-| `standard` (기본값) | 섹션당 24줄     | ~50-70%     | 낮음      | 일상적인 코딩 세션              |
-| `aggressive`        | 섹션당 16줄     | ~70-90%     | 중간      | 긴 세션, 최대 절감              |
+| 수준                | 절단 임계값 | 토큰 절감 | 위험도    | 적합한 용도                       |
+| ------------------- | ----------- | --------- | --------- | --------------------------------- |
+| `minimal`           | 섹션당 24줄 | ~20-40%   | 매우 낮음 | 중요한 컨텍스트가 필요한 프로덕션 |
+| `standard` (기본값) | 섹션당 24줄 | ~50-70%   | 낮음      | 일상적인 코딩 세션                |
+| `aggressive`        | 섹션당 16줄 | ~70-90%   | 중간      | 긴 세션, 최대 절감                |
 
-### 잘라내기가 발생하는 위치
+### 절단이 발생하는 위치
 
-잘라내기 임계값은 `lineFilter.ts`에 영향을 줍니다.
+절단 임계값은 `lineFilter.ts`에 영향을 줍니다:
 
 ```ts
-// open-sse/services/compression/engines/rtk/index.ts:329-330에서 발췌
+// 출처: open-sse/services/compression/engines/rtk/index.ts:329-330
 config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-각 섹션의 **앞부분**과 **뒷부분**은 모두 보존되며, 잘라내기가 시작되면 중간 콘텐츠가 제거됩니다.
+각 섹션의 **앞부분(head)**과 **뒷부분(tail)**은 모두 보존되며, 절단이 적용되면 중간 내용이 삭제됩니다.
 
-### 유지되는 항목과 잘리는 항목
+### 유지되는 내용과 삭제되는 내용
 
-| 콘텐츠                 | minimal | standard | aggressive |
-| ---------------------- | ------- | -------- | ---------- |
-| 오류 / 스택 추적       | ✅ 보존 | ✅ 보존  | ✅ 보존    |
-| 테스트 실패            | ✅ 보존 | ✅ 보존  | ✅ 보존    |
-| 빌드 오류              | ✅ 보존 | ✅ 보존  | ✅ 보존    |
-| 테스트 통과(상세 출력) | ✅ 보존 | 🟡 축약  | 🟡 축약    |
-| 일반 출력(정보 로그)   | 🟡 축약 | 🟡 축약  | ❌ 제거    |
-| 진행률 표시줄          | 🟡 축약 | ❌ 제거  | ❌ 제거    |
-| 배너 / ASCII 아트      | 🟡 축약 | ❌ 제거  | ❌ 제거    |
+| 내용                    | minimal   | standard  | aggressive |
+| ----------------------- | --------- | --------- | ---------- |
+| 오류 / 스택 트레이스    | ✅ 보존됨 | ✅ 보존됨 | ✅ 보존됨  |
+| 테스트 실패             | ✅ 보존됨 | ✅ 보존됨 | ✅ 보존됨  |
+| 빌드 오류               | ✅ 보존됨 | ✅ 보존됨 | ✅ 보존됨  |
+| 테스트 통과 (상세 출력) | ✅ 보존됨 | 🟡 축약됨 | 🟡 축약됨  |
+| 일상적 출력 (info 로그) | 🟡 축약됨 | 🟡 축약됨 | ❌ 삭제됨  |
+| 진행률 표시줄           | 🟡 축약됨 | ❌ 삭제됨 | ❌ 삭제됨  |
+| 배너 / ASCII 아트       | 🟡 축약됨 | ❌ 삭제됨 | ❌ 삭제됨  |
 
-### 적절한 강도 선택
+### 적절한 강도 선택하기
 
 ```
-                  컨텍스트 손실이 치명적인가?
+                  컨텍스트 손실이 치명적인가요?
                   │
       ┌───────────┼───────────┐
       │           │           │
-     예          아니요      확실하지 않음
+     예         아니오      잘 모르겠음
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      처리량이 얼마나   먼저 `standard` 시도
-      │      중요한가?        (사례의 80%에서
-      │           │          효과적)
+      │      처리량이 얼마나    먼저 `standard`를
+      │      중요한가요?       시도해 보세요
+      │           │          (80%의 경우에 적합)
       │      ┌────┴────┐
       │      │         │
       │     낮음       높음
@@ -403,9 +405,9 @@ config.intensity === "aggressive" ? 16 : 24,
       └──────┴─────────┘
 ```
 
-### 강도 구성
+### 강도 설정하기
 
-**콤보별**(콤보 구성 내):
+**콤보 단위** (콤보 설정에서):
 
 ```json
 {
@@ -420,9 +422,9 @@ config.intensity === "aggressive" ? 16 : 24,
 
 **프로그래밍 방식**:
 
-`rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`)은
-`CompressionEngine`이며 `updateConfig` 메서드가 없습니다. 대신 레지스트리 헬퍼를 통해
-엔진 구성을 업데이트하세요.
+`rtkEngine`(`@omniroute/open-sse/services/compression/engines/rtk`)은
+`CompressionEngine`이며 `updateConfig` 메서드가 없습니다. 대신
+레지스트리 헬퍼를 통해 엔진 설정을 업데이트하세요:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -430,16 +432,16 @@ import { updateEngineConfig } from "@omniroute/open-sse/services/compression/eng
 updateEngineConfig("rtk", { intensity: "aggressive" });
 ```
 
-### 효과 검증
+### 효과 확인하기
 
-**검증 게이트**(아래 참조)를 사용하여 선택한 강도에서 필터가 안전한지 확인하세요.
+**Verify Gate**(아래 참조)를 사용하여 선택한 강도에서 필터가 안전한지 확인하세요:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("공격적 강도에서 필터 실패");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 

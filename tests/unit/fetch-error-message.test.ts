@@ -6,6 +6,45 @@ import { throwIfResilienceSaveFailed } from "../../src/app/(dashboard)/dashboard
 
 const FALLBACK = "An error occurred";
 
+test("validation detail selection only considers the first item and trims both fields", () => {
+  for (const first of [null, "invalid", {}, { message: "   " }, { message: 7 }]) {
+    assert.equal(
+      errorMessageFromBody(
+        {
+          error: {
+            message: " generic ",
+            details: [first, { message: "later" }],
+          },
+        },
+        FALLBACK
+      ),
+      "generic"
+    );
+  }
+  assert.equal(
+    errorMessageFromBody(
+      {
+        error: {
+          details: [{ field: " name ", message: " required " }],
+        },
+      },
+      FALLBACK
+    ),
+    "name: required"
+  );
+  assert.equal(
+    errorMessageFromBody(
+      {
+        error: {
+          details: [{ field: 42, message: " required " }],
+        },
+      },
+      FALLBACK
+    ),
+    "required"
+  );
+});
+
 function jsonResponse(body: unknown, status = 500) {
   return new Response(JSON.stringify(body), {
     status,

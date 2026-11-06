@@ -11,76 +11,76 @@ _Aġġornat l-aħħar: 2026-06-28_
 ## Sommarju Eżekuttiv
 
 OmniRoute huwa gateway lokali għar-routing tal-AI u dashboard mibni fuq Next.js.
-Jipprovdi endpoint wieħed kompatibbli ma’ OpenAI (`/v1/*`) u jidderieġi t-traffiku bejn diversi fornituri upstream bi traduzzjoni, fallback, tiġdid tat-token, u traċċar tal-użu.
+Jipprovdi endpoint wieħed kompatibbli ma’ OpenAI (`/v1/*`) u jidderieġi t-traffiku bejn diversi fornituri upstream bi traduzzjoni, fallback, tiġdid tat-tokens, u traċċar tal-użu.
 
 Kapaċitajiet ewlenin:
 
-- Wiċċ API kompatibbli ma’ OpenAI għal CLI/għodod (375 fornitur, 154 modulu ta’ eżekuzzjoni)
-- Traduzzjoni tat-talbiet/tweġibiet bejn il-formati tal-fornituri
+- Wiċċ API kompatibbli ma’ OpenAI għal CLI/għodod (380 fornitur, 159-il modulu tal-eżekuzzjoni)
+- Traduzzjoni ta’ talbiet/tweġibiet bejn il-formati tal-fornituri
 - Fallback ta’ kombinazzjonijiet ta’ mudelli (sekwenza b’diversi mudelli)
-- Passi strutturati tal-kombinazzjonijiet (`provider + model + connection`) b’ordni waqt l-eżekuzzjoni skont `compositeTiers`
+- Passi strutturati ta’ kombinazzjonijiet (`provider + model + connection`) b’ordni runtime minn `compositeTiers`
 - Fallback fil-livell tal-kont (diversi kontijiet għal kull fornitur)
-- Verifika preliminari tal-kwota u għażla tal-kont P2C konxja mill-kwota fil-fluss ewlieni taċ-chat
-- Ġestjoni tal-konnessjonijiet mal-fornituri permezz ta’ OAuth + API key (27 modulu ta’ fornituri OAuth)
+- Preflight tal-kwota u għażla tal-kont P2C konxja mill-kwota fil-perkors ewlieni taċ-chat
+- Ġestjoni tal-konnessjonijiet tal-fornituri OAuth + API key (27-il modulu ta’ fornituri OAuth)
 - Ġenerazzjoni ta’ embeddings permezz ta’ `/v1/embeddings` (18-il fornitur)
-- Ġenerazzjoni ta’ immaġnijiet permezz ta’ `/v1/images/generations` (10+ fornituri, 20+ mudell)
+- Ġenerazzjoni ta’ immaġini permezz ta’ `/v1/images/generations` (10+ fornituri, 20+ mudell)
 - Traskrizzjoni tal-awdjo permezz ta’ `/v1/audio/transcriptions` (18-il fornitur)
 - Konverżjoni minn test għal diskors permezz ta’ `/v1/audio/speech` (24 fornitur integrat)
 - Ġenerazzjoni ta’ vidjows permezz ta’ `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Ġenerazzjoni ta’ mużika permezz ta’ `/v1/music/generations` (ComfyUI)
 - Tiftix fuq il-web permezz ta’ `/v1/search` (20 fornitur)
 - Moderazzjonijiet permezz ta’ `/v1/moderations`
-- Klassifikazzjoni mill-ġdid permezz ta’ `/v1/rerank`
-- Analiżi tat-tikketti tal-ħsieb (``) għal mudelli ta’ raġunament
-- Sanitizzazzjoni tat-tweġibiet għal kompatibbiltà stretta mal-OpenAI SDK
+- Reranking permezz ta’ `/v1/rerank`
+- Parsing tat-tags Think (`<think>...</think>`) għal mudelli ta’ raġunament
+- Sanitizzazzjoni tat-tweġibiet għal kompatibbiltà stretta ma’ OpenAI SDK
 - Normalizzazzjoni tar-rwoli (developer→system, system→user) għal kompatibbiltà bejn il-fornituri
-- Konverżjoni ta’ output strutturat (json_schema → Gemini responseSchema)
-- Persistenza lokali għall-fornituri, keys, aliases, kombinazzjonijiet, settings, u prezzijiet (122 modulu DB)
-- Traċċar tal-użu/tal-ispejjeż u reġistrazzjoni tat-talbiet
-- Sinkronizzazzjoni fakultattiva mal-cloud għal sinkronizzazzjoni bejn diversi apparati/tal-istat
+- Konverżjoni tal-output strutturat (json_schema → Gemini responseSchema)
+- Persistenza lokali għall-fornituri, ċwievet, psewdonimi, kombinazzjonijiet, settings, u prezzijiet (122-il modulu DB)
+- Traċċar tal-użu/l-ispiża u reġistrazzjoni tat-talbiet
+- Sinkronizzazzjoni fakultattiva mal-cloud għal sinkronizzazzjoni bejn diversi apparati/stati
 - Allowlist/blocklist tal-IP għall-kontroll tal-aċċess għall-API
-- Ġestjoni tal-baġit tal-ħsieb (passthrough/awtomatiku/personalizzat/adattiv)
-- Injezzjoni globali tal-prompt tas-sistema
-- Traċċar tas-sessjonijiet u teħid tal-marki tas-swaba’
-- Limitazzjoni mtejba tar-rata għal kull kont bi profili speċifiċi għall-fornitur
+- Ġestjoni tal-baġit tal-ħsieb (passthrough/auto/custom/adaptive)
+- Injezzjoni globali ta’ system prompt
+- Traċċar tas-sessjonijiet u fingerprinting
+- Rate limiting imtejjeb għal kull kont bi profili speċifiċi għall-fornitur
 - Mudell ta’ circuit breaker għar-reżiljenza tal-fornituri
-- Protezzjoni kontra t-thundering herd permezz ta’ mutex locking
-- Cache għad-deduplikazzjoni tat-talbiet ibbażat fuq il-firma
-- Saff tad-domain: regoli tal-ispejjeż, politika tal-fallback, politika tal-lockout
-- Context Relay: sommarji tat-trasferiment tas-sessjoni għall-kontinwità waqt ir-rotazzjoni tal-kontijiet
-- Persistenza tal-istat tad-domain (cache write-through ta’ SQLite għall-fallbacks, baġits, lockouts, u circuit breakers)
-- Magna tal-politiki għall-evalwazzjoni ċentralizzata tat-talbiet (lockout → baġit → fallback)
-- Telemetrija tat-talbiet b’aggregazzjoni tal-latenza p50/p95/p99
+- Protezzjoni kontra l-anti-thundering herd permezz tal-illokkjar bil-mutex
+- Cache ta’ deduplikazzjoni tat-talbiet ibbażata fuq il-firma
+- Saff tad-dominju: regoli tal-ispejjeż, politika tal-fallback, politika tal-illokkjar
+- Context Relay: sommarji ta’ trasferiment tas-sessjoni għall-kontinwità waqt ir-rotazzjoni tal-kontijiet
+- Persistenza tal-istat tad-dominju (cache write-through SQLite għall-fallbacks, baġits, illokkjar, u circuit breakers)
+- Magna tal-politiki għall-evalwazzjoni ċentralizzata tat-talbiet (illokkjar → baġit → fallback)
+- Telemetrija tat-talbiet b’aggregazzjoni tal-latency p50/p95/p99
 - Telemetrija tal-miri tal-kombinazzjonijiet u saħħa storika tal-miri tal-kombinazzjonijiet permezz ta’ `combo_execution_key` / `combo_step_id`
 - ID ta’ korrelazzjoni (X-Request-Id) għat-traċċar minn tarf sa tarf
-- Reġistrazzjoni tal-awditjar tal-konformità b’opt-out għal kull API key
-- Qafas ta’ evalwazzjoni għall-assigurazzjoni tal-kwalità tal-LLM
-- Dashboard tas-saħħa bi status f’ħin reali tas-circuit breakers tal-fornituri
+- Reġistrazzjoni tal-awditjar tal-konformità b’għażla ta’ tħassir għal kull API key
+- Qafas Eval għall-assigurazzjoni tal-kwalità tal-LLM
+- Dashboard tas-saħħa bl-istatus f’ħin reali tal-circuit breakers tal-fornituri
 - MCP Server (110 għodda) bi 3 trasporti (stdio/SSE/Streamable HTTP)
-- A2A Server (JSON-RPC 2.0 + SSE) b’ħiliet u ċiklu tal-ħajja tal-kompiti
-- Sistema tal-memorja (estrazzjoni, injezzjoni, irkupru, ġbir fil-qosor)
+- A2A Server (JSON-RPC 2.0 + SSE) b’kapaċitajiet u ċiklu tal-ħajja tal-kompiti
+- Sistema tal-memorja (estrazzjoni, injezzjoni, irkupru, sommarizzazzjoni)
 - Sistema tal-ħiliet (reġistru, eżekutur, sandbox, ħiliet integrati)
 - Proxy MITM b’ġestjoni taċ-ċertifikati u trattament tad-DNS
-- Middleware ta’ protezzjoni kontra l-injezzjoni tal-prompt
-- Pipeline għall-kompressjoni tal-prompt b’Caveman, RTK, pipelines f’munzell, kombinazzjonijiet ta’ kompressjoni, pakketti lingwistiċi, u analitika
+- Middleware ta’ protezzjoni kontra l-prompt injection
+- Pipeline ta’ kompressjoni tal-prompts b’Caveman, RTK, pipelines sovrapposti, kombinazzjonijiet ta’ kompressjoni, pakketti tal-lingwi, u analitika
 - Reġistru ACP (Agent Communication Protocol)
 - Fornituri OAuth modulari (22 modulu individwali taħt `src/lib/oauth/providers/`)
-- Scripts għad-diżinstallazzjoni/diżinstallazzjoni sħiħa
-- Azzjoni għat-tiswija tal-ambjent OAuth
+- Skripts ta’ uninstall/full-uninstall
+- Azzjoni ta’ tiswija tal-ambjent OAuth
 - Bridge WebSocket għal klijenti WS kompatibbli ma’ OpenAI (`/v1/ws`)
-- Ġestjoni tat-tokens tas-sinkronizzazzjoni (ħruġ/revoka, tniżżil tal-pakkett tal-konfigurazzjoni bil-verżjonijiet ETag)
-- Preset ta’ fornitur tal-ewwel klassi għal GLM Thinking (`glmt`)
-- Għadd ibridu tat-tokens (`/messages/count_tokens` min-naħa tal-fornitur b’fallback għall-istima)
-- Auto-seeding tal-aliases tal-mudelli (30+ normalizzazzjoni ta’ djaletti bejn proxies waqt l-istartjar)
-- Fetch sigur ’il barra bi protezzjoni SSRF, imblukkar ta’ URLs privati, u tentattivi mill-ġdid konfigurabbli
-- Tentattivi mill-ġdid taċ-chat konxji mill-cooldown b’`requestRetry` u `maxRetryIntervalSec` konfigurabbli
-- Validazzjoni tal-ambjent waqt l-eżekuzzjoni permezz ta’ Zod waqt l-istartjar
-- Awditjar tal-konformità v2 b’paġinazzjoni, avvenimenti CRUD tal-fornituri, u reġistrazzjoni tal-validazzjoni mblukkata mill-SSRF
+- Ġestjoni tat-tokens tas-sinkronizzazzjoni (ħruġ/revoka, tniżżil ta’ pakkett ta’ konfigurazzjoni b’verżjoni ETag)
+- Preset tal-fornitur GLM Thinking (`glmt`) bħala fornitur tal-ewwel klassi
+- Għadd ibridu tat-tokens (`/messages/count_tokens` fuq in-naħa tal-fornitur b’fallback ta’ stima)
+- Tħawwil awtomatiku tal-psewdonimi tal-mudelli (30+ normalizzazzjoni ta’ djaletti bejn proxies waqt l-istartjar)
+- Fetch sigur ’il barra b’protezzjoni SSRF, imblukkar ta’ URLs privati, u retry konfigurabbli
+- Retries taċ-chat konxji mill-cooldown b’`requestRetry` u `maxRetryIntervalSec` konfigurabbli
+- Validazzjoni tal-ambjent tar-runtime b’Zod waqt l-istartjar
+- Awditjar tal-konformità v2 b’paginazzjoni, avvenimenti CRUD tal-fornituri, u reġistrazzjoni tal-validazzjoni mblukkata minn SSRF
 
-Mudell ewlieni waqt l-eżekuzzjoni:
+Mudell primarju tar-runtime:
 
-- Ir-routes tal-app Next.js taħt `src/app/api/*` jimplimentaw kemm l-APIs tad-dashboard kif ukoll l-APIs tal-kompatibbiltà
-- Core kondiviż ta’ SSE/routing f’`src/sse/*` + `open-sse/*` jittratta l-eżekuzzjoni tal-fornitur, it-traduzzjoni, l-istreaming, il-fallback, u l-użu
+- Ir-rotot tal-app Next.js taħt `src/app/api/*` jimplimentaw kemm APIs tad-dashboard kif ukoll APIs ta’ kompatibbiltà
+- Qalba kondiviża ta’ SSE/routing f’`src/sse/*` + `open-sse/*` tieħu ħsieb l-eżekuzzjoni tal-fornituri, it-traduzzjoni, l-istreaming, il-fallback, u l-użu
 
 ## Diqaġni tal-Referenza
 
@@ -114,43 +114,51 @@ l-oħrajn huma marbuta mill-gwidi speċifiċi tad-doma tagħhom.
 - SLA/kontroll tal-fornitur barra mill-proċess lokali
 - Binaries tal-CLI esterni (Claude CLI, Codex CLI, eċċ.)
 
-## Superfiċja tal-Dashboard (Attwali)
+## Paġni tad-Dashboard (Attwali)
 
-Paġni ewlenin taħt `src/app/(dashboard)/dashboard/`:
+Il-paġni ewlenin taħt `src/app/(dashboard)/dashboard/`:
 
-- `/dashboard` — bidu malajr + ġabra tal-fornitur
-- `/dashboard/endpoint` — proxy tal-endpoint + MCP + A2A + tabs tal-endpoint API
-- `/dashboard/providers` — konnessjonijiet tal-fornitur u kredenzjali
-- `/dashboard/combos` — strateġiji tal-combo, templates, bini bbażat fuq passi, regoli tar-rutting tal-mudell, ordinarja maħżuna manwalment
-- `/dashboard/auto-combo` — Magna tal-Auto Combo: piżijiet tal-punteġġ, pakketti tal-modalità, presets tal-fabbrika virtwali, telemetrija
-- `/dashboard/costs` — aggregazzjoni tal-ispejċ u viżibbiltà tal-prezzijiet
-- `/dashboard/analytics` — analitika tal-użu, evalwazzjonijiet, saħħa tal-mira tal-combo
-- `/dashboard/limits` — kontrolli tal-kwota/rata
-- `/dashboard/cli-tools` — onboarding tal-CLI, identifikazzjoni tal-runtime, ġenerazzjoni tal-konfigurazzjoni
-- `/dashboard/agents` — aġenti ACP identifikati + reġistrazzjoni ta' aġenti custom
-- `/dashboard/cloud-agents` — xogħlijiet tal-aġenti ospitati fil-cloud (Codex Cloud, Devin, Jules) u l-ċiklu tal-ħajja tax-xogħol
-- `/dashboard/skills` — reġistru tal-ħiliet A2A, twettiq tas-sandbox, katalgu tal-ħiliet integrati
-- `/dashboard/memory` — spezzjoni u retrieves tal-memorja konversazzjonali reżistenti
-- `/dashboard/webhooks` — abbonamenti tal-webhook outbound, rotazzjoni tal-isigri, statistika tal-ħdid mill-ġdid
-- `/dashboard/batch` — sottomissjoni tal-impjiegi tal-batch u progress
-- `/dashboard/cache` — statistika tal-cache read-through u r-raġunar, kontrolli tal-evikament
-- `/dashboard/playground` — playground interattiv tal-chat kontra kwalunkwe combo/mudell konfigurat
-- `/dashboard/changelog` — viżitur tal-changelog fl-app (jirrend `CHANGELOG.md`)
-- `/dashboard/system` — dijanjostika tal-runtime, informazzjoni tal-verżjoni, superfiċja tal-validazzjoni tal-ambjent
-- `/dashboard/onboarding` — wizzard tal-installazzjoni għal installazzjonijiet ġodda
-- `/dashboard/media` — playground tal-vidjow/mużika/immaġini
-- `/dashboard/search-tools` — testjar tal-fornitur tat-tiftix u storja
-- `/dashboard/health` — uptime, circuit breakers, limiti tal-rata, sessions immonitorjati bil-kwota
-- `/dashboard/logs` — logs tal-ħtiġijiet/proxy/awditjar/konsoll
-- `/dashboard/settings` — tabs tal-impostazzjonijiet tas-sistema (ġenerali, rutting, defaults tal-combo, eċċ.)
-- `/dashboard/context/caveman` — regoli tal-kompressjoni tal-Caveman, pakketti tal-lingwa, preview, u modalità ta' output
-- `/dashboard/context/rtk` — filtri RTK tal-kmand-output, preview, u impostazzjonijiet tas-sigurtà tal-runtime
-- `/dashboard/context/combos` — xbieki ta' kompressjoni b'isem assenjati għal combo tal-rutting
-- `/dashboard/translator` — spezzjoni tal-isifier u preview tal-konverżjoni tal-format tal-ħtiġijiet
-- `/dashboard/audit` — browser tal-log tal-awditjar tal-konformità bil-paġinazzjoni u metadata strutturata
-- `/dashboard/usage` — browser tal-użu għal kull ħtiġijiet marbut ma' `usage_history`
-- `/dashboard/compression` — analitika tal-kompressjoni, statistika, u assenjazzjoni tal-pipeline
-- `/dashboard/api-manager` — ċiklu tal-ħajja tal-kw-API u permessi tal-mudell
+- `/dashboard` — bidu rapidu + ħarsa ġenerali lejn il-fornituri
+- `/dashboard/endpoint` — proxy tal-endpoint + tabs tal-endpoints MCP + A2A + API
+- `/dashboard/providers` — konnessjonijiet u kredenzjali tal-fornituri
+- `/dashboard/combos` — strateġiji ta’ kombinazzjoni, mudelli, bennej ibbażat fuq passi, regoli tar-routing tal-mudelli, ordni manwali persistenti
+- `/dashboard/auto-combo` — Magna tal-Kombinazzjonijiet Awtomatiċi: piżijiet tal-punteġġ, pakketti tal-modi, presets tal-fabbrika virtwali, telemetrija
+- `/dashboard/costs` — aggregazzjoni tal-ispejjeż u viżibbiltà tal-ipprezzar
+- `/dashboard/analytics` — analitika tal-użu, evalwazzjonijiet, stat tal-miri tal-kombinazzjonijiet
+- `/dashboard/limits` — kontrolli tal-kwoti/rati
+- `/dashboard/cli-tools` — introduzzjoni għas-CLI, individwazzjoni tar-runtime, ġenerazzjoni tal-konfigurazzjoni
+- `/dashboard/agents` — aġenti ACP individwati + reġistrazzjoni ta’ aġenti personalizzati
+- `/dashboard/cloud-agents` — kompiti ta’ aġenti ospitati fil-cloud (Codex Cloud, Devin, Jules) u ċ-ċiklu tal-ħajja tal-kompiti
+- `/dashboard/skills` — reġistru tal-ħiliet A2A, eżekuzzjoni f’sandbox, katalgu ta’ ħiliet integrati
+- `/dashboard/memory` — spezzjoni u rkupru tal-memorja persistenti tal-konverżazzjonijiet
+- `/dashboard/webhooks` — abbonamenti għal webhooks ħerġin, rotazzjoni tas-sigrieti, statistika tat-tentattivi mill-ġdid
+- `/dashboard/batch` — sottomissjoni ta’ xogħlijiet f’lottijiet u progress
+- `/dashboard/cache` — statistika tal-cache read-through u tar-raġunament, kontrolli tat-tneħħija
+- `/dashboard/playground` — spazju interattiv taċ-chat għal kwalunkwe kombinazzjoni/mudell ikkonfigurat
+- `/dashboard/changelog` — viżwalizzatur tar-reġistru tal-bidliet fl-app (jirrendi `CHANGELOG.md`)
+- `/dashboard/system` — dijanjostika tar-runtime, informazzjoni dwar il-verżjoni, interfaċċa tal-validazzjoni tal-ambjent
+- `/dashboard/onboarding` — assistent tal-konfigurazzjoni għall-ewwel tħaddim għal installazzjonijiet ġodda
+- `/dashboard/media` — spazju għall-esperimentazzjoni bl-immaġnijiet/vidjows/mużika
+- `/dashboard/search-tools` — ittestjar tal-fornituri tat-tiftix u storja
+- `/dashboard/health` — uptime, circuit breakers, limiti tar-rata, sessjonijiet immonitorjati għall-kwoti
+- `/dashboard/logs` — logs tat-talbiet/proxy/verifika/console
+- `/dashboard/settings` — tabs tas-settings tas-sistema (ġenerali, routing, valuri predefiniti tal-kombinazzjonijiet, eċċ.)
+- `/dashboard/context/caveman` — regoli tal-kompressjoni Caveman, pakketti tal-lingwi, previżjoni, u modalità tal-output
+- `/dashboard/context/rtk` — filtri tal-output tal-kmandi RTK, previżjoni, u settings tas-sikurezza tar-runtime
+- `/dashboard/context/combos` — pipelines tal-kompressjoni b’isem assenjati lil kombinazzjonijiet tar-routing
+- `/dashboard/translator` — spezzjoni tat-traduttur u previżjoni tal-konverżjoni tal-format tat-talbiet
+- `/dashboard/audit` — browser tal-log tal-verifika tal-konformità b’paġinazzjoni u metadata strutturata
+- `/dashboard/usage` — browser tal-użu għal kull talba marbut ma’ `usage_history`
+- `/dashboard/compression` — analitika tal-kompressjoni, statistika, u assenjazzjoni tal-pipelines
+- `/dashboard/api-manager` — ċiklu tal-ħajja taċ-ċwievet API u permessi tal-mudelli
+
+Saff tal-UI: kull paġna tiġi rrendjata fi ħdan shell wieħed — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (il-
+`SidebarProvider`/`SidebarInset` tal-kit, u `Sidebar.tsx` u `Header.tsx` ta’ OmniRoute). Il-paġni jimportaw il-
+building blocks tagħhom minn `@/shared/components` (adapters għall-Keak CI UI Kit inkluż fil-proġett fi
+`packages/ui-kit`) jew minn subpaths tal-komponenti tal-kit (`@omniroute/ui-kit/table`, `…/page-header`), u
+l-ikoni permezz ta’ `<Icon>` (`ICON_MAP` → Lucide). It-tema (`system` b’mod predefinit, ċara/skura) u t-tokens jiġu
+mill-kit permezz tal-bridge f’`src/app/globals.css`. Dettalji: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ## Kontest tal-Isistema fil-Livell Għoli
 
@@ -350,169 +358,124 @@ Livelli ta' l-arkitettura:
 
 Għal tagħrif aktar fond: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-## Subsistemi Ewlenin (v3.8.0)
+## Sottosistemi Maġġuri (v3.8.0)
 
-### A. Magna tal-Auto Combo
+### A. Magna Auto Combo
 
-Auto Combo jikkalkula punteġġi b'mod dinamiku u jagħżel il-miri tar-routing fil-ħin tat-talba, minflok
-ma jiddependi fuq definizzjoni statika ta' combo. Dan iħaddem il-familja ta' prefissi tal-mudelli `auto/*`.
+Auto Combo b'mod dinamiku punteġġi u jiġbor il-miri tar-rotot fil-ħin tat-talba, aktar milli tiddependi fuq definizzjoni combo statika. Jissaħħaħ il-familja tal-prefiss tal-mudell `auto/*`.
 
-- Punt tad-dħul tal-magna: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
-  `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Resolver: `src/domain/comboResolver.ts` (detezzjoni awtomatika tal-prefiss `auto/`)
+- Dħul tal-magna: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
+- Resolver: `src/domain/comboResolver.ts` (l-iskoperta awtomatika tal-prefiss `auto/` )
 - Dashboard: `/dashboard/auto-combo`
-- Telemetrija: it-tabella SQLite `auto_combo_decisions`
+- Telemetrija: tabella `auto_combo_decisions` SQLite
 
 Kapaċitajiet ewlenin:
 
-- **20 strateġija tar-routing** (prijorità, ponderata, imla-l-ewwel, round-robin, P2C, każwali,
-  l-inqas użata, ottimizzata għall-ispejjeż, konxja mir-reset, tieqa tar-reset, marġni disponibbli, ponderata skont il-kwota,
-  strettament każwali, **awtomatika**, lkgp, ottimizzata għall-kuntest, ottimizzata għall-cache, relay tal-kuntest, **fużjoni**,
-  pipeline) —
-  l-istrateġija awtomatika hija ż-żieda ewlenija f'v3.8.0; `fusion` (fan-out tal-panel + sinteżi mill-ġudikatur,
-  `open-sse/services/fusion.ts`) hija ġdida f'v3.8.36.
-- **Kalkolu tal-punteġġ ibbażat fuq 16-il fattur**: kwota, stat tas-sistema, spiża inversa, latenza inversa, adattament għall-kompitu u
-  għaxra oħra. It-tabella kanonika tal-fatturi u l-piżijiet predefiniti tagħhom tinsab f'
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — jekk nerġgħu niddikjarawha hawn
-  noħolqu post ieħor fejn tista' ssir skaduta.
-- **Fabbrika virtwali** timmaterjalizza combos effimeri meta ma jkun jeżisti ebda combo msemmi li jaqbel,
-  billi tiġbor kandidati minn konnessjonijiet attivi u f'saħħithom tal-fornituri.
-- **Prefissi awtomatiċi**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
-  `auto/smart`, `auto/lkgp` — kull wieħed appoġġjat minn profil ta' piżijiet irfinat.
-- **6 pakketti ta' modi**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
-  `reliability-first` u `chaos-mode` — konfigurazzjonijiet issettjati minn qabel tal-piżijiet li jistgħu jissejħu mid-
-  dashboard. (Dawn m'għandhomx jitħalltu mal-prefissi `auto/*` ta' hawn fuq, li huma
-  varjanti applikati fil-ħin tat-talba.)
+- **20 strateġija ta' rotta** (prijoritarju, peżat, jimla l-ewwel, round-robin, P2C, każwali, l-inqas użat, ottimizzat għall-ispiża, konxju mill-irrisettjar, tieqa mill-ġdid, spazju għar-ras, peżat skont il-kwota, strettament każwali,** auto** , lkgp, context-optimized, cache-optimized, context-relay,** fużjoni** , pipeline) — auto hija ż-żieda ewlenija f'v3.8.0; `fusion` (panel fan-out + judge synthesis, `open-sse/services/fusion.ts`) hija ġdida f'v3.8.36.
+- **Skor ta’ 16-il fattur** : kwota, saħħa, spiża inversa, latenza inversa, kompitu tajbin u għaxar oħra. It-tabella kanonika tal-fatturi u l-piżijiet awtomatiċi tagħhom tgħix [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — billi terġa' tgħidha hawn tagħtiha t-tieni post biex tmur rasa.
+- **Fabbrika virtwali** jimmaterjalizza combos effimeri meta ma teżisti l-ebda kombinazzjoni msemmija tqabbil, li jakkwista kandidati minn konnessjonijiet b'saħħithom tal-fornitur attivi.
+- **Prefissi awtomatiċi** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — kull wieħed appoġġjat minn profil ta 'piż sintonizzat.
+- **6 pakketti ta 'modalità** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` u `chaos-mode` — konfigurazzjonijiet tal-piż issettjati minn qabel li jistgħu jissejħu mid-dashboard. (M'għandux jiġi konfuż mal-prefissi `auto/*` hawn fuq, li huma varjanti fil-ħin tat-talba.)
 
-Għad-dettalji algoritmiċi kollha (formuli tal-fatturi, irfinar tal-piżijiet), ara
-[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
+Għal dettall algoritmiku sħiħ (formuli tal-fatturi, irfinar tal-piż), ara [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
 
 ### B. Aġenti tal-Cloud
 
-Cloud Agents jiġbor pjattaformi ospitati ta' aġenti tal-kodiċi minn partijiet terzi (Codex Cloud, Devin,
-Jules) wara ċiklu tal-ħajja uniformi tal-kompiti sostnut minn DB. L-endpoints kollha għall-ħolqien/spezzjoni
-tal-kompiti jeħtieġu awtentikazzjoni ta' ġestjoni.
+Cloud Agents jgħaqqad pjattaformi ta' aġent ta' kodiċi ospitati minn partijiet terzi (Codex Cloud, Devin, Jules) wara ċiklu ta' ħajja ta' kompitu uniformi appoġġjat minn DB. L-endpoints kollha tal-kompitu creation/inspection jeħtieġu awtentikazzjoni tal-ġestjoni.
 
-- Għerq tal-modulu: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts`, flimkien ma' subdirettorji għal kull aġent taħt `agents/`)
+- Għerq tal-modulu: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`, `types.ts`, `db.ts`, flimkien ma' subdirettorji għal kull aġent taħt `agents/`)
 - Implimentazzjonijiet għal kull aġent: `agents/codex/`, `agents/devin/`, `agents/jules/`
-- Endpoints pubbliċi: `/api/v1/agents/tasks/*` (elenka/oħloq/ikseb/ikkanċella)
-- Endpoints ta' ġestjoni: `/api/cloud/*` (proviżjonament, status, batch)
+- Punti finali pubbliċi: `/api/v1/agents/tasks/*` (list/create/get/cancel)
+- Punti finali tal-ġestjoni: `/api/cloud/*` (provvista, status, lott)
 - Dashboard: `/dashboard/cloud-agents`
-- Ħażna: it-tabella `cloud_agent_tasks`
+- Ħażna: tabella `cloud_agent_tasks`
 
-Għad-dettalji tal-proviżjonament u ta' OAuth għal kull aġent, ara
-[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
+Għal provvediment għal kull aġent u speċifikazzjonijiet OAuth, ara [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
 
 ### C. Guardrails
 
-Il-modulu tal-guardrails huwa saff ta' middleware li jista' jerġa' jitgħabba mingħajr waqfien u li jispezzjona t-talbiet
-u t-tweġibiet għal PII, injezzjoni fil-prompt, u kontenut viżiv mhux sikur. Il-ksur
-iwaqqaf it-talba minnufih b'HTTP **503** flimkien ma' kodiċi strutturat tal-iżball, biex
-min jagħmel sejħiet downstream ikun jista' jerġa' jipprova jew jaqleb għal fergħa oħra.
+Il-modulu tal-guardrails huwa saff ta 'middleware li jista' jerġa 'jiċċarġja bis-sħana li jispezzjona talbiet u tweġibiet għal PII, injezzjoni fil-pront, u kontenut ta' viżjoni mhux sigur. Vjolazzjonijiet short-circuit it-talba ma HTTP** 503** flimkien ma' kodiċi ta' żball strutturat, li jippermetti lil min iċempel downstream jerġgħu jippruvaw jew fergħa.
 
-- Għerq tal-modulu: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
-  `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- Tgħabbija mill-ġdid mingħajr waqfien: ir-reġistru jimmonitorja l-bidliet fil-konfigurazzjoni u jerġa' jibni l-katina fil-post
-- Punti ta' integrazzjoni: id-dħul tal-handler taċ-chat, il-handler tal-ġenerazzjoni tal-immaġnijiet, is-sanitizzatur tat-tweġibiet
-- Kuntratt HTTP: il-ksur jidher bħala `503` b'`error.code = "GUARDRAIL_VIOLATION"`
+- Għerq tal-modulu: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
+- Hot reload: reġistru arloġġi għall-konfigurazzjoni bidliet u jerġa 'jibni l-katina fil-post
+- Wire-in punti: dħul ta 'chat handler, handler ta' ġenerazzjoni ta 'immaġni, sanitizer ta' rispons
+- HTTP kuntratt: vjolazzjonijiet wiċċ bħala `503` ma `error.code = "GUARDRAIL_VIOLATION"`
 
-Għall-awturar tas-settijiet ta' regoli u l-irfinar tal-limiti, ara
-[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
+Għall-awtur ta' sett ta' regoli u rfinar ta' limitu, ara [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
 
 ### D. Saff tad-Dominju
 
-L-ispazju tal-ismijiet `src/domain/` jiċċentralizza d-deċiżjonijiet tal-politika biex il-handlers tar-rotot ma jkollhomx
-għalfejn jikkomponu huma stess il-loġika tal-lockout/baġit/fallback.
+L-ispazju tal-isem `src/domain/` jiċċentralizza d-deċiżjonijiet tal-politika sabiex dawk li jieħdu ħsieb ir-rotot ma jkollhomx għalfejn jiġbru l-loġika lockout/budget/fallback huma stess.
 
-- Magna tal-politika: `src/domain/policyEngine.ts` — punt tad-dħul uniku għall-
-  evalwazzjoni qabel l-eżekuzzjoni (ordni lockout → baġit → fallback)
-- Regoli tal-ispejjeż: `src/domain/costRules.ts`
-- Politika ta' fallback: `src/domain/fallbackPolicy.ts`
+- Magna tal-politika: `src/domain/policyEngine.ts` — punt ta' dħul uniku għall-evalwazzjoni ta' qabel l-eżekuzzjoni (lockout → budget → fallback ordering)
+- Regoli tal-ispiża: `src/domain/costRules.ts`
+- Politika ta' riżerva: `src/domain/fallbackPolicy.ts`
 - Politika ta' lockout: `src/domain/lockoutPolicy.ts`
-- Routing ibbażat fuq tags: `src/domain/tagRouter.ts`
-- Resolver tal-combo: `src/domain/comboResolver.ts` — jirriżolvi ismijiet ta' combos, prefissi auto/\*,
-  u miri wildcard tal-mudelli fi pjanijiet konkreti ta' eżekuzzjoni
-- Joiner tar-regoli tal-konnessjoni/mudell: `src/domain/connectionModelRules.ts`
-- Snapshots tad-disponibbiltà tal-mudelli: `src/domain/modelAvailability.ts`
-- Traċċar tal-iskadenza tal-fornituri: `src/domain/providerExpiration.ts`
-- Cache tal-kwota: `src/domain/quotaCache.ts`
+- Rotot ibbażat fuq tag: `src/domain/tagRouter.ts`
+- Combo resolver: `src/domain/comboResolver.ts` — isolvi l-ismijiet tal-combo, il-prefissi awtomatiċi/\*, u l-miri tal-mudell wildcard għal pjanijiet ta’ eżekuzzjoni konkreti
+- Connection/model rule joiner: `src/domain/connectionModelRules.ts`
+- Snapshots tad-disponibbiltà tal-mudell: `src/domain/modelAvailability.ts`
+- It-traċċar tal-iskadenza tal-fornitur: `src/domain/providerExpiration.ts`
+- Quota cache: `src/domain/quotaCache.ts`
 - Stat ta' degradazzjoni: `src/domain/degradation.ts`
-- Awditu tal-konfigurazzjoni: `src/domain/configAudit.ts`
-- Bennej tal-metadata tat-tweġiba OmniRoute: `src/domain/omnirouteResponseMeta.ts`
-- Subsistema ta' valutazzjoni: `src/domain/assessment/` — kompiti ta' evalwazzjoni perjodika
+- Verifika tal-konfigurazzjoni: `src/domain/configAudit.ts`
+- bennej tal-metadata tar-rispons OmniRoute : `src/domain/omnirouteResponseMeta.ts`
+- Subsistema ta’ valutazzjoni: `src/domain/assessment/` — impjiegi ta’ evalwazzjoni perjodika
 
-### E. Pipeline tal-Awtorizzazzjoni
+### E. Pipeline ta' Awtorizzazzjoni
 
-Il-pipeline tal-awtorizzazzjoni jikklassifika kull talba li tidħol u japplika l-
-katina xierqa ta' politiki qabel id-dispaċċ.
+Il-pipeline tal-awtorizzazzjoni jikklassifika kull talba li tidħol u japplika l-katina tal-politika xierqa qabel id-dispaċċ.
 
-- Punt tad-dħul tal-pipeline: `src/server/authz/pipeline.ts`
-- Klassifikatur tat-talbiet: `src/server/authz/classify.ts` — jiddistingwi rotot pubbliċi
-  ta' kompatibbiltà minn rotot ta' ġestjoni
-- Inventarju tar-rotot pubbliċi: `src/shared/constants/publicApiRoutes.ts`
-- Politiki: `src/server/authz/policies/` — predikati kompożibbli
-  (`requireApiKey`, `requireManagement`, `requireFreshAuth`, eċċ.)
-- Utilitajiet tal-headers: `src/server/authz/headers.ts`
-- Helper tal-asserzjoni: `src/server/authz/assertAuth.ts`
+- Dħul fil-pipeline: `src/server/authz/pipeline.ts`
+- Klassifikatur tat-talba: `src/server/authz/classify.ts` — jiddistingwi r-rotot ta' kompatibilità pubbliċi minn rotot ta' ġestjoni
+- Inventarju tar-rotta pubblika: `src/shared/constants/publicApiRoutes.ts`
+- Politiki: `src/server/authz/policies/` — predikati komposti (`requireApiKey`, `requireManagement`, `requireFreshAuth`, eċċ.)
+- Utilitajiet header: `src/server/authz/headers.ts`
+- Assertion helper: `src/server/authz/assertAuth.ts`
 - Kuntest tat-talba: `src/server/authz/context.ts`
 
-Ir-rotot pubbliċi u dawk ta' ġestjoni huma separati b'konfini stretti: l-APIs tal-aġenti/cooldown u
-l-modifiki tal-fornituri jeħtieġu awtentikazzjoni ta' ġestjoni (HTTP 401 jekk tkun nieqsa).
+Ir-rotot pubbliċi vs ġestjoni huma konfini iebsa: agent/cooldown APIs u mutazzjonijiet tal-fornitur jeħtieġu awtorizzazzjoni tal-ġestjoni (HTTP 401 jekk nieqes).
 
-Għar-regoli kollha tal-klassifikazzjoni tar-rotot, ara
-[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
+Għar-regoli sħaħ tal-klassifikazzjoni tar-rotta, ara [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
 
-### F. FSM tal-Fluss tax-Xogħol u Router Konxju tal-Kompiti
+### F. Workflow FSM u Task-Aware Router
 
-Router immexxi minn magna bi stati finiti, imqiegħed fuq is-selezzjoni tal-combo biex jidderieġi
-t-traffiku abbażi tal-istadju identifikat tal-fluss tax-xogħol (ippjanar, eżekuzzjoni,
-reviżjoni) u l-affinità mal-kompiti fl-isfond.
+Router immexxi minn magna fi stat finit imqiegħed fuq għażla kombinata biex jidderieġi t-traffiku bbażat fuq l-istadju tal-fluss tax-xogħol misjub (ppjanar, eżekuzzjoni, reviżjoni) u affinità tal-kompitu fl-isfond.
 
-- FSM tal-fluss tax-xogħol: `open-sse/services/workflowFSM.ts`
+- Workflow FSM: `open-sse/services/workflowFSM.ts`
 - Router konxju tal-kompitu: `open-sse/services/taskAwareRouter.ts`
-- Detettur tal-kompiti fl-isfond: `open-sse/services/backgroundTaskDetector.ts`
+- Sfond kompitu detector: `open-sse/services/backgroundTaskDetector.ts`
 - Klassifikatur tal-intenzjoni: `open-sse/services/intentClassifier.ts`
 
-It-tranżizzjonijiet tal-FSM jikkontribwixxu għall-punteġġ ta' Auto Combo, billi jxaqilbu lejn mudelli orħos
-għal kompiti fl-isfond/ta' awtomazzjoni u lejn mudelli aktar b'saħħithom għal ċikli interattivi
-ta' ppjanar/reviżjoni.
+It-tranżizzjonijiet FSM jiddaħħlu fil-punteġġ ta 'Auto Combo, biasing lejn mudelli orħos għal kompiti background/automation u lejn mudelli aktar b'saħħithom għal dawriet planning/review interattivi.
 
 ### G. Reżiljenza Speċifika għall-Fornitur
 
-Diversi fornituri jipprovdu moduli ddedikati għar-reżiljenza u l-modalità diskreta li joperaw fuq
-is-saffi globali tas-circuit breaker / il-perjodu ta' stennija tal-konnessjoni / l-imblukkar tal-mudell:
+Diversi fornituri jibagħtu moduli ddedikati ta’ reżiljenza u stealth li jpoġġu lura fuq is-saffi globali tal-interruttur taċ-ċirkwit / tat-tkessiħ tal-konnessjoni / tas-saffi tal-mudell:
 
-- Magna 429 ta' Antigravity: `open-sse/services/antigravity429Engine.ts` (talterna
-  l-identità, tnaddaf l-headers tar-rispons, timmaniġġja t-traċċar tal-krediti/verżjoni permezz ta'
-  `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
-  `antigravityIdentity.ts`, `antigravityVersion.ts`)
-- Politika tal-kwota ta' ModelScope: `open-sse/services/modelscopePolicy.ts`
-- CCH (Compatibility Channel Handshake) ta' Claude Code: `open-sse/services/claudeCodeCCH.ts`,
-  flimkien ma' `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
-  `claudeCodeToolRemapper.ts`
-- Konfigurazzjoni tal-marki tas-swaba' ta' Claude Code: `open-sse/services/claudeCodeFingerprint.ts`
-- Oskurament ta' Claude Code: `open-sse/services/claudeCodeObfuscation.ts`
+- Magna Antigravity 429: `open-sse/services/antigravity429Engine.ts` (iddawwar l-identità, Scrubs headers tar-rispons, isuq credits/version tracking permezz `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (budget għal kull talba ta' 429s upstream madwar l-hosts kollha, `ANTIGRAVITY_MAX_429_ATTEMPTS`; re-send identiku ta' korp rifjutat jitwieġeb lokalment; `src/sse/handlers/chat.ts` ma jerġax jibda tali talba permezz tar-riprova konxju ta' cooldown)
+- ModelScope quota policy: `open-sse/services/modelscopePolicy.ts`
+- Claude Kodiċi CCH (Compatibility Channel Handshake): `open-sse/services/claudeCodeCCH.ts`, flimkien ma `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
+- Claude Kodiċi iffurmar tal-marki tas-swaba': `open-sse/services/claudeCodeFingerprint.ts`
+- Claude Obfuscation tal-kodiċi: `open-sse/services/claudeCodeObfuscation.ts`
 
-Għall-manwal operattiv sħiħ tal-modalità diskreta u l-gwida operazzjonali, ara
-`docs/security/STEALTH_GUIDE.md` (git; mhux ikkompilat f'`/docs`).
+Għall-playbook sħiħ stealth u gwida operattiva, ara `docs/security/STEALTH_GUIDE.md` (git; mhux miġbura `/docs`).
 
-### H. Webhooks, Cache tar-Raġunament, Cache tal-Qari
+### H. Webhooks, Cache tar-Raġunament, Cache Aqra
 
-- **Webhooks** — distribuzzjoni 'l barra għal avvenimenti tal-fornitur/kont/kompitu.
-  - Distributur: `src/lib/webhookDispatcher.ts`
-  - Ħażna: tabella SQLite `webhooks` (permezz ta' `src/lib/db/webhooks.ts`)
-  - Dashboard: `/dashboard/webhooks` (abbonamenti, sigrieti, storja tat-tentattivi mill-ġdid)
-  - Għat-tassonomija tal-avvenimenti u s-semantika tat-tentattivi mill-ġdid, ara [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
-- **Cache tar-Raġunament** — blokki ta' raġunament li jistgħu jerġgħu jintwerew għal fornituri li jiġġeneraw
-  tokens tal-ħsieb (Claude, GLMT, eċċ.) sabiex ċikli konsekuttivi jkunu jistgħu jaqbżu l-ħsieb mill-ġdid.
-  - Saff tad-DB: `src/lib/db/reasoningCache.ts`
+- **Webhooks** — outbound dispatch għal avvenimenti provider/account/task.
+  - Dispatcher: `src/lib/webhookDispatcher.ts`
+  - Ħażna: tabella `webhooks` SQLite (permezz `src/lib/db/webhooks.ts`)
+  - Dashboard: `/dashboard/webhooks` (abbonamenti, sigrieti, istorja mill-ġdid)
+  - Għat-tassonomija tal-avvenimenti u s-semantika mill-ġdid, ara [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
+- **Cache tar-raġunament** — blokki ta' raġunament replayable għal fornituri li jarmu tokens tal-ħsieb (Claude, GLMT, eċċ.) sabiex dawriet konsekuttivi jkunu jistgħu jaqbżu mill-ġdid il-ħsieb.
+  - DB saff: `src/lib/db/reasoningCache.ts`
   - Saff tas-servizz: `open-sse/services/reasoningCache.ts`
-  - Għas-semantika tar-riproduzzjoni, ara [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
-- **Cache tal-Qari** — cache għal żmien qasir tar-rispons, indiċjat bil-firma u użat biex
-  jiġbor flimkien tentattivi mill-ġdid identiċi minn SDKs upstream difettużi.
-  - Saff tad-DB: `src/lib/db/readCache.ts`
-  - Endpoint tal-istatistika: `GET /api/cache/stats`, dashboard fuq `/dashboard/cache`
+  - Għal semantika ta' replay, ara [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
+- **Aqra Cache** — cache ta' rispons għal żmien qasir immarkat bil-firma u użat biex jikkollassa tentattivi identiċi minn SDKs upstream miksur.
+  - DB saff: `src/lib/db/readCache.ts`
+  - Stats endpoint: `GET /api/cache/stats`, dashboard fi `/dashboard/cache`
 
 ## 3) Saffa tal-Persistenza
 

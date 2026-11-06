@@ -20,15 +20,20 @@ import { stripTrailingSlashes } from "../utils/urlSanitize.ts";
 import { getSpeechProvider, parseSpeechModel } from "../config/audioRegistry.ts";
 import { buildAuthHeaders } from "../config/registryUtils.ts";
 import { kieExecutor } from "../executors/kie.ts";
-import { vertexGenerateSpeech } from "../executors/vertexMedia.ts";
+import { extractSpeechInstruction, vertexGenerateSpeech } from "../executors/vertexMedia.ts";
 import { handleGeminiTtsSpeech } from "../executors/geminiTts.ts";
 import { handleAwsPollySpeech } from "../executors/awsPollyTts.ts";
 import { GttsUpstreamError, normalizeGttsLang, synthesizeGtts } from "../executors/gtts.ts";
 import { handleFishAudioSpeech } from "../executors/fishAudioTts.ts";
 import { handleDashscopeTtsSpeech } from "../executors/dashscopeTts.ts";
 import { errorResponse } from "../utils/error.ts";
+import { handleGrokSpeech } from "./grokMedia.ts";
 import { resolveElevenLabsVoiceId } from "./elevenLabsVoiceMap.ts";
-import { audioStreamResponse, upstreamErrorResponse } from "../utils/audioResponse.ts";
+import {
+  audioErrorResponse,
+  audioStreamResponse,
+  upstreamErrorResponse,
+} from "../utils/audioResponse.ts";
 import { handleSyntxSpeech } from "./syntxAudio.ts";
 import {
   getKieCallbackUrl,
@@ -868,6 +873,19 @@ async function handleGttsSpeech(body) {
   }
 }
 
+/** Style / pace / output-format options shared by the AI Studio and Vertex Gemini TTS paths. */
+function googleSpeechStyleOptions(body: Record<string, unknown>): {
+  instructions?: string;
+  speed?: number;
+  response_format?: string;
+} {
+  return {
+    instructions: extractSpeechInstruction(body),
+    speed: typeof body.speed === "number" ? body.speed : undefined,
+    response_format: typeof body.response_format === "string" ? body.response_format : undefined,
+  };
+}
+
 /**
  * Handle audio speech (TTS) request
  *
@@ -917,6 +935,10 @@ export async function handleAudioSpeech({
 
   try {
     // Route to provider-specific handler
+    if (providerConfig.format === "grok-tts") {
+      return handleGrokSpeech(providerConfig, body, credentials);
+    }
+
     if (providerConfig.format === "uc-tts") {
       const { handleUcTextToSpeech } = await import("./uc/ucTts.ts");
       const result = await handleUcTextToSpeech({
@@ -939,6 +961,7 @@ export async function handleAudioSpeech({
         model: modelId,
         input: body.input,
         voice: body.voice,
+        ...googleSpeechStyleOptions(body),
       });
       return new Response(audio, {
         status: 200,
@@ -950,6 +973,7 @@ export async function handleAudioSpeech({
         model: modelId,
         text: body.input,
         voice: body.voice,
+        ...googleSpeechStyleOptions(body),
       });
     }
 
@@ -1055,6 +1079,6 @@ export async function handleAudioSpeech({
 
     return audioStreamResponse(res);
   } catch (err) {
-    return errorResponse(500, `Speech request failed: ${err.message}`);
+    return audioErrorResponse(500, `Speech request failed: ${err.message}`);
   }
 }

@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Card, Collapsible, Toggle } from "@/shared/components";
 import { useTranslations } from "next-intl";
+import { Checkbox, CheckboxGroup } from "@omniroute/ui-kit/checkbox";
+import { Card, Collapsible, Toggle } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
 import {
   CLAUDE_FAST_MODE_DEFAULT_MODELS,
   getClaudeFastModeSupportedModels,
@@ -91,28 +93,23 @@ export default function ClaudeFastModeTab() {
   };
 
   return (
-    <Card>
-      <div className="flex items-center gap-3 mb-3">
-        <div className="p-2 rounded-lg bg-sky-500/10 text-sky-500">
-          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-            bolt
-          </span>
-        </div>
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold">{t("claudeFastModeTitle")}</h3>
-          <p className="text-sm text-text-muted">{t("claudeFastModeDesc")}</p>
-        </div>
+    <Card
+      icon="bolt"
+      title={t("claudeFastModeTitle")}
+      subtitle={t("claudeFastModeDesc")}
+      action={
         <div className="flex items-center gap-3">
           {status === "saved" && (
-            <span className="text-xs font-medium text-emerald-500 flex items-center gap-1">
-              <span className="material-symbols-outlined text-[14px]">check_circle</span>{" "}
-              {t("saved")}
+            <span
+              role="status"
+              className="text-xs font-medium text-success flex items-center gap-1"
+            >
+              <Icon name="check_circle" size={14} /> {t("saved")}
             </span>
           )}
           {status === "error" && (
-            <span className="text-xs font-medium text-rose-500 flex items-center gap-1">
-              <span className="material-symbols-outlined text-[14px]">error</span>{" "}
-              {t("claudeFastModeSaveError")}
+            <span role="alert" className="text-xs font-medium text-error flex items-center gap-1">
+              <Icon name="error" size={14} /> {t("claudeFastModeSaveError")}
             </span>
           )}
           <Toggle
@@ -122,8 +119,8 @@ export default function ClaudeFastModeTab() {
             ariaLabel={t("claudeFastModeTitle")}
           />
         </div>
-      </div>
-
+      }
+    >
       {enabled && (
         <div className="mb-3">
           <Collapsible
@@ -132,33 +129,24 @@ export default function ClaudeFastModeTab() {
             icon="checklist"
             variant="inline"
           >
-            <div className="flex flex-col gap-2">
-              {SUPPORTED_MODEL_CHOICES.map((modelId) => {
-                const checked = selectedModels.includes(modelId);
-                return (
-                  <label
-                    key={modelId}
-                    className="flex items-center gap-2 text-sm cursor-pointer select-none"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={(e) => toggleModel(modelId, e.target.checked)}
-                      disabled={loading || saving}
-                      className="h-4 w-4 rounded border-black/20 dark:border-white/20"
-                      aria-label={t("claudeFastModeModelCheckbox", { model: modelId })}
-                    />
-                    <span className="font-mono text-xs">{modelId}</span>
-                  </label>
-                );
-              })}
-            </div>
+            <CheckboxGroup>
+              {SUPPORTED_MODEL_CHOICES.map((modelId) => (
+                <Checkbox
+                  key={modelId}
+                  checked={selectedModels.includes(modelId)}
+                  onChange={(e) => toggleModel(modelId, e.target.checked)}
+                  disabled={loading || saving}
+                  aria-label={t("claudeFastModeModelCheckbox", { model: modelId })}
+                  label={<span className="font-mono text-xs">{modelId}</span>}
+                />
+              ))}
+            </CheckboxGroup>
           </Collapsible>
         </div>
       )}
 
-      <p className="text-xs text-text-muted/80 flex items-start gap-1.5 leading-relaxed">
-        <span className="material-symbols-outlined text-[14px] mt-0.5">info</span>
+      <p className="text-xs text-text-muted flex items-start gap-1.5 leading-relaxed">
+        <Icon name="info" size={14} className="mt-0.5" />
         <span>{t("claudeFastModeHint")}</span>
       </p>
     </Card>

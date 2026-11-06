@@ -2,6 +2,10 @@
 
 import { useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
+import { Button as KitButton } from "@omniroute/ui-kit/button";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import Icon from "@/shared/components/Icon";
 
 // Marketplace listing is the primary CTA; Open VSX (Cursor/Windsurf/VSCodium/etc.)
 // is called out via secondaryNote instead of a second button, to keep this banner
@@ -10,6 +14,9 @@ import { useTranslations } from "next-intl";
 // metrics, but that domain no longer resolves after the move to omniskill.online.
 const MARKETPLACE_URL =
   "https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot";
+
+// VS Code's brand blue, the banner's tint.
+const VSCODE_BRAND_COLOR = "#007ACC";
 
 const DISMISS_STORAGE_KEY = "omniroute-vscode-copilot-banner-dismissed-v1";
 // Same-tab signal for the dismiss button, since writing localStorage doesn't
@@ -58,17 +65,20 @@ export default function VscodeCopilotBanner() {
     window.dispatchEvent(new Event(DISMISS_EVENT));
   };
 
+  // The partner brand is the Card's tint, never the text or the CTA fill: the kit derives an AA
+  // ink and border for it in every look. The note uses full-strength text-muted at 12px — the old
+  // 9px at 70% opacity was the last axe color-contrast node on /dashboard (KEA-7886 P7).
   return (
-    <div
+    <Card
+      padding="none"
+      brandColor={VSCODE_BRAND_COLOR}
       role="complementary"
       aria-label={t("title")}
-      className="mb-4 flex flex-col gap-3 rounded-lg border border-[#007ACC]/30 bg-[#007ACC]/5 px-4 py-3 dark:bg-[#007ACC]/10 sm:flex-row sm:items-center sm:justify-between"
+      className="mb-4 flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
     >
       <div className="flex min-w-0 items-start gap-3">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#007ACC]/10">
-          <span className="material-symbols-outlined text-[22px] text-[#007ACC]" aria-hidden="true">
-            extension
-          </span>
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-surface">
+          <Icon name="extension" size={22} className="text-[var(--ci-brand-ink)]" />
         </div>
         <div className="min-w-0">
           <p className="text-sm font-semibold text-text-main">{t("title")}</p>
@@ -78,28 +88,28 @@ export default function VscodeCopilotBanner() {
 
       <div className="flex shrink-0 items-center gap-3 self-end sm:self-auto">
         <div className="flex flex-col items-end gap-0.5">
-          <a
-            href={MARKETPLACE_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-[#007ACC] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:brightness-110"
-          >
-            {t("cta")}
-            <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-              open_in_new
-            </span>
-          </a>
-          <span className="text-[9px] text-text-muted/70">{t("secondaryNote")}</span>
+          <KitButton asChild size="sm">
+            <a
+              href={MARKETPLACE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="whitespace-nowrap"
+            >
+              {t("cta")}
+              <Icon name="open_in_new" size={14} />
+            </a>
+          </KitButton>
+          <span className="text-xs text-text-muted">{t("secondaryNote")}</span>
         </div>
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          icon="close"
           onClick={dismiss}
           aria-label={t("dismissAriaLabel")}
-          className="text-text-muted transition-colors hover:text-text-main"
-        >
-          <span className="material-symbols-outlined text-[18px]">close</span>
-        </button>
+          className="text-text-muted hover:text-text-main"
+        />
       </div>
-    </div>
+    </Card>
   );
 }

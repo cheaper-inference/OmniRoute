@@ -183,7 +183,10 @@ export function resolveDisplayBaseUrl(
   envValue?: string,
   browserOrigin?: string,
   browserPathname?: string,
-  envBasePath?: string
+  envBasePath?: string,
+  runtimePort: string | undefined = typeof process !== "undefined"
+    ? process.env.NEXT_PUBLIC_PORT || process.env.PORT
+    : undefined
 ): string {
   const configuredUrl = normalizeUrl(envValue);
   const currentOrigin = normalizeUrl(browserOrigin);
@@ -209,10 +212,7 @@ export function resolveDisplayBaseUrl(
     return joinOriginAndBasePath(configuredUrl, basePath);
   }
 
-  const portFallback =
-    typeof process !== "undefined" && (process.env.NEXT_PUBLIC_PORT || process.env.PORT)
-      ? `http://localhost:${process.env.NEXT_PUBLIC_PORT || process.env.PORT}`
-      : DEFAULT_DISPLAY_BASE_URL;
+  const portFallback = runtimePort ? `http://localhost:${runtimePort}` : DEFAULT_DISPLAY_BASE_URL;
   const fallback = currentOrigin ?? configuredUrl ?? portFallback;
   return joinOriginAndBasePath(fallback, basePath);
 }
@@ -237,8 +237,19 @@ export function useDisplayBaseUrl(): string {
     process.env.NEXT_PUBLIC_OMNIROUTE_BASE_PATH || process.env.OMNIROUTE_BASE_PATH
   );
 
+  // The pre-mount value is rendered by SSR and by the client's hydration pass, so it may only
+  // read values both bundles share: NEXT_PUBLIC_* is inlined into the client, PORT is not
+  // (server-only), and a PORT-based fallback made the SSR text differ — React #418 on
+  // /dashboard/relay (F4). The effect below swaps in the live browser origin after mount.
   const [url, setUrl] = useState<string>(() =>
-    resolveDisplayBaseUrl(envValue ?? undefined, undefined, undefined, envBasePath || undefined)
+    resolveDisplayBaseUrl(
+      envValue ?? undefined,
+      undefined,
+      undefined,
+      envBasePath || undefined,
+      // `|| ""`, not undefined: undefined would re-enable the PORT default parameter.
+      process.env.NEXT_PUBLIC_PORT || ""
+    )
   );
 
   useEffect(() => {

@@ -40,4 +40,31 @@ describe("RTK smart truncate", () => {
     assert.equal(result.truncated, true);
     assert.ok(result.text.length <= 10);
   });
+
+  // Char cap cut whole lines only, and the marker must name what was really dropped: a
+  // `[rtk:truncated 0 lines]` next to a halved grep result is worse than no marker at all.
+  it("reports the real dropped count and never cuts a line in half when maxChars binds", () => {
+    const lines = Array.from(
+      { length: 400 },
+      (_, i) => `src/lib/queue${i}.ts:${i * 3}:export function fn${i}(wid: string): Result`
+    );
+    const result = smartTruncate(lines.join("\n"), {
+      maxLines: 300,
+      maxChars: 12000,
+      preserveHead: 200,
+      preserveTail: 100,
+      priorityPatterns: [/export/], // matches every line: must not claim 0 dropped
+    });
+    const out = result.text.split("\n");
+
+    assert.equal(result.truncated, true);
+    assert.ok(result.text.length <= 12000);
+    for (const line of out) {
+      if (line === "" || line.startsWith("[rtk:")) continue;
+      assert.ok(lines.includes(line), `partial line survived the cut: ${JSON.stringify(line)}`);
+    }
+    assert.match(result.text, /\[rtk:truncated/);
+    assert.doesNotMatch(result.text, /truncated 0 lines/);
+    assert.ok(result.droppedLines > 100, `claims ${result.droppedLines} dropped lines`);
+  });
 });

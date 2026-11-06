@@ -4,25 +4,25 @@
 
 ---
 
-Il-fornituri tal-Web Cookie jippermettu lil OmniRoute juża servizz tal-IA permezz tas-sessjoni eżistenti tal-browser tiegħek minflok API key. Dawn huma utli meta diġà għandek aċċess għal servizz permezz tas-sit web tiegħu u trid li OmniRoute juża l-istess sessjoni awtentikata.
+Il-fornituri Web Cookie jippermettu lil OmniRoute juża servizz tal-IA permezz tas-sessjoni eżistenti tal-brawżer tiegħek minflok API key. Huma utli meta diġà jkollok aċċess għal servizz permezz tas-sit web tiegħu u tkun trid li OmniRoute juża l-istess sessjoni awtentikata.
 
-B'differenza mill-fornituri li jużaw API key, il-fornituri tal-Web Cookie jawtentikaw billi jużaw il-kredenzjali li l-browser tiegħek jibgħat lis-sit web.
+B’differenza mill-fornituri b’API key, il-fornituri Web Cookie jawtentikaw billi jużaw il-kredenzjali li l-brawżer tiegħek jibgħat lis-sit web.
 
 ---
 
 # Qabel Tibda
 
-> **Importanti:** Dejjem ikkopja l-kredenzjali minn **talba attiva tan-network**, u **mhux** mill-ħażna tal-cookies tal-browser tiegħek.
+> **Importanti:** Dejjem ikkopja l-kredenzjali minn **talba attiva tan-network**, u **mhux** mill-ħażna tal-cookies tal-brawżer tiegħek.
 
-Ħafna problemi ta' awtentikazzjoni jiġu kkawżati mill-ikkupjar tal-cookies minn post ħażin.
+Ħafna problemi ta’ awtentikazzjoni jiġu kkawżati mill-ikkupjar tal-cookies mill-post żbaljat.
 
-## Tikkupjax mill-Ħażna tal-Cookies
+## Tikkopjax mill-Ħażna tal-Cookies
 
-Il-biċċa l-kbira tal-browsers juru l-cookies maħżuna permezz ta':
+Il-biċċa l-kbira tal-brawżers juru l-cookies maħżuna permezz ta’:
 
 ```
 DevTools
-→ Application (jew Storage)
+→ Applikazzjoni (jew Ħażna)
 → Cookies
 ```
 
@@ -30,9 +30,9 @@ Għalkemm dawn il-cookies jidhru korretti, jistgħu jkunu:
 
 - skaduti
 - mhux kompluti
-- neqsin minn cookies li jintbagħtu biss ma' talbiet awtentikati
+- neqsin minn cookies li jintbagħtu biss ma’ talbiet awtentikati
 
-L-użu ta' dawn il-valuri jista' jikkawża fallimenti fl-awtentikazzjoni anki jekk jidhru validi.
+L-użu ta’ dawn il-valuri jista’ jikkawża fallimenti fl-awtentikazzjoni anke jekk jidhru validi.
 
 ## Ikkopja minn Talba Attiva
 
@@ -42,32 +42,32 @@ Minflok, uża l-cookies minn talba li rnexxiet:
 DevTools
 → Network
 → Aġġorna l-paġna
-→ Iftaħ talba ta' chat jew konverżazzjoni
-→ Request Headers
+→ Iftaħ talba ta’ chat jew konverżazzjoni
+→ Headers tat-Talba
 → Cookie
 ```
 
-L-header tat-talba `Cookie` fih l-informazzjoni eżatta tal-awtentikazzjoni li l-browser tiegħek uża b'suċċess.
+Il-header tat-talba `Cookie` fih l-informazzjoni eżatta tal-awtentikazzjoni li l-brawżer tiegħek uża b’suċċess.
 
-Għall-biċċa l-kbira tal-fornituri tal-Web Cookie, dan huwa l-valur li għandu jitwaħħal f'OmniRoute.
+Għall-biċċa l-kbira tal-fornituri Web Cookie, dan huwa l-valur li għandu jitwaħħal f’OmniRoute.
 
 ---
 
 # Konfigurazzjoni Ġenerali
 
-Il-proċess ta' konfigurazzjoni huwa l-istess għall-biċċa l-kbira tal-fornituri tal-Web Cookie.
+Il-proċess ta’ konfigurazzjoni huwa l-istess għall-biċċa l-kbira tal-fornituri Web Cookie.
 
 1. Idħol fis-sit web tal-fornitur.
-2. Iftaħ l-Għodod għall-Iżviluppaturi tal-browser.
+2. Iftaħ l-Għodod tal-Iżviluppatur tal-brawżer.
 3. Iftaħ it-tab **Network**.
 4. Aġġorna l-paġna.
-5. Iftaħ talba awtentikata ta' chat jew konverżazzjoni.
-6. Ikkopja l-kredenzjali tal-awtentikazzjoni meħtieġa.
+5. Iftaħ talba awtentikata ta’ chat jew konverżazzjoni.
+6. Ikkopja l-kredenzjali ta’ awtentikazzjoni meħtieġa.
 7. Iftaħ OmniRoute.
-8. Mur f'**Providers → Add Provider**.
-9. Agħżel il-fornitur tal-Web Cookie tiegħek.
+8. Mur f’**Fornituri → Żid Fornitur**.
+9. Agħżel il-fornitur Web Cookie tiegħek.
 10. Waħħal il-kredenzjali.
-11. Ikklikkja **Test Connection**.
+11. Ikklikkja **Ittestja l-Konnessjoni**.
 12. Issejvja l-fornitur.
 
 Il-kredenzjali eżatti meħtieġa jiddependu mill-fornitur.
@@ -76,73 +76,73 @@ Il-kredenzjali eżatti meħtieġa jiddependu mill-fornitur.
 
 # Formati tal-Kredenzjali tal-Fornituri
 
-Siti web differenti jaħżnu l-awtentikazzjoni b'modi differenti. Xi wħud jeħtieġu biss cookies, filwaqt li oħrajn jistgħu jeħtieġu headers jew tokens addizzjonali.
+Siti web differenti jaħżnu l-awtentikazzjoni b’modi differenti. Xi wħud jeħtieġu biss cookies, filwaqt li oħrajn jistgħu jeħtieġu headers jew tokens addizzjonali.
 
 | Fornitur                        | Format tal-Kredenzjali        | Gwida tal-Fornitur               |
 | ------------------------------- | ----------------------------- | -------------------------------- |
 | Claude Web                      | Header sħiħ tat-talba Cookie  | `docs/providers/CLAUDE_WEB.md`   |
-| ChatGPT Web (Codex)             | Header Cookie sħiħ            | `docs/providers/CHATGPT_WEB.md`  |
+| ChatGPT Web (Codex)             | Header sħiħ Cookie            | `docs/providers/CHATGPT_WEB.md`  |
 | Gemini Web                      | _(ivverifika)_                |                                  |
 | Copilot Web                     | _(ivverifika)_                | `docs/providers/COPILOT-M365.md` |
 | Microsoft 365 Copilot (BizChat) | WS access_token + chathubPath | `docs/providers/COPILOT-M365.md` |
 | Grok Web                        | _(ivverifika)_                |                                  |
 | ...                             | ...                           | ...                              |
 
-> Aġġorna din it-tabella hekk kif jiżdiedu fornituri ġodda tal-Web Cookie jew il-fornituri eżistenti jibdlu r-rekwiżiti tal-awtentikazzjoni tagħhom.
+> Aġġorna din it-tabella hekk kif jiżdiedu fornituri Web Cookie ġodda jew il-fornituri eżistenti jibdlu r-rekwiżiti tal-awtentikazzjoni tagħhom.
 
 ## NoTrack (notrack-web)
 
-NoTrack ([notrack.ai](https://notrack.ai)) hija pjattaforma taċ-chat bla ħlas għall-konsumaturi li ma teħtieġx reġistrazzjoni — is-sessjoni tinħoloq b’mod anonimu mal-ewwel żjara u tippersisti permezz ta’ tliet cookies: `uid`, `si_usr_id`, u `si_ses_id`. OmniRoute jagħmel proxy tal-istess endpoint `/api/dispatch` permezz ta’ id wieħed tal-mudell (`notrack-c`, alias `ntw`).
+NoTrack ([notrack.ai](https://notrack.ai)) hija pjattaforma taċ-chat bla ħlas għall-konsumaturi li ma teħtieġx reġistrazzjoni — is-sessjoni tinħoloq b’mod anonimu fl-ewwel żjara u tinżamm permezz ta’ tliet cookies: `uid`, `si_usr_id`, u `si_ses_id`. OmniRoute jipprokura l-istess endpoint `/api/dispatch` permezz ta’ ID wieħed tal-mudell (`notrack-c`, alias `ntw`).
 
-### Passi għall-konnessjoni
+### Passi biex tikkonnettja
 
 1. Iftaħ [notrack.ai](https://notrack.ai) fil-browser tiegħek u ħalli l-cookie tas-sessjoni anonima tiġi ssettjata.
 2. Iftaħ **DevTools → Network**, aġġorna l-paġna, u kklikkja kwalunkwe talba `/api`.
 3. F’**Request Headers**, ikkopja l-valur sħiħ tal-header `Cookie`.
-4. F’OmniRoute, mur **Providers → Add Provider → NoTrack Web (Free)**.
+4. F’OmniRoute, mur f’**Providers → Add Provider → NoTrack Web (Bla Ħlas)**.
 5. Waħħal is-sekwenza tal-cookie fil-field `apiKey` u agħfas **Save**.
 
-OmniRoute jiġbed `uid`, `si_usr_id`, u `si_ses_id` mis-sekwenza mwaħħla u jerġa’ jibni header `Cookie` nadif li jkun fih dawk il-pari biss — flimkien ma’ `nt_session` (it-token `ntk_…` issettjat għall-kontijiet illoggjati) meta jkun preżenti. Jekk xi wieħed mit-tlieta jkun nieqes, is-sekwenza mhux mibdula li tkun twaħħlet tintbagħat kif inhi sabiex l-operaturi jkunu jistgħu jesperimentaw b’forom alternattivi.
+OmniRoute jestratta `uid`, `si_usr_id`, u `si_ses_id` mis-sekwenza mwaħħla u jerġa’ jibni header `Cookie` nadif b’dawk il-pari biss — flimkien ma’ `nt_session` (it-token `ntk_…` issettjat għall-kontijiet illoggjati) meta jkun preżenti. Jekk xi wieħed mit-tlieta jkun nieqes, is-sekwenza mhux ipproċessata li tkun twaħħlet tintbagħat mingħajr tibdil sabiex l-operaturi jkunu jistgħu jesperimentaw b’formati alternattivi.
 
 ### IDs tal-mudelli
 
-| ID tal-mudell | Isem muri | Noti                                                                    |
-| ------------- | --------- | ----------------------------------------------------------------------- |
-| `notrack-c`   | NoTrack C | Predefinit — il-mudell tad-dispatch upstream `C`.                       |
-| `C`           | NoTrack C | Alias għal `notrack-c` (kodiċi tad-dispatch upstream mhux ipproċessat). |
-| `notrack`     | NoTrack C | Alias għal `notrack-c`.                                                 |
-| `ntw`         | NoTrack C | Alias qasir għal `notrack-c`.                                           |
+| ID tal-mudell | Isem muri | Noti                                                       |
+| ------------- | --------- | ---------------------------------------------------------- |
+| `notrack-c`   | NoTrack C | Default — il-mudell tad-dispaċċ upstream `C`.              |
+| `C`           | NoTrack C | Alias għal `notrack-c` (kodiċi mhux ipproċessat upstream). |
+| `notrack`     | NoTrack C | Alias għal `notrack-c`.                                    |
+| `ntw`         | NoTrack C | Alias qasir għal `notrack-c`.                              |
 
-L-erba’ IDs tal-mudelli kollha jikkorrispondu għall-istess mudell tad-dispatch upstream (`C`).
+L-erba’ IDs tal-mudelli kollha jimmappjaw għall-istess mudell tad-dispaċċ upstream (`C`).
 
 ### Għażliet tat-talba
 
 L-eżekutur jaċċetta dawn il-fields fakultattivi fil-body tat-talba:
 
-| Field tal-body        | Predefinit | Għan                                                                            |
-| --------------------- | ---------- | ------------------------------------------------------------------------------- |
-| `notrack_mode`        | `usual`    | Modalità tad-dispatch (sekwenza b’forma libera; l-upstream jaċċetta `usual`, …) |
-| `notrack_max_turns`   | `6`        | Għadd ta’ dawriet interni li l-upstream jista’ jieħu qabel iwieġeb.             |
-| `notrack_chat_id`     | `null`     | Kompli chat upstream eżistenti (ħallih barra għal chat ġdid).                   |
-| `notrack_attachments` | `[]`       | Array li jgħaddi kif inhu ta’ deskritturi tal-annessi upstream.                 |
-| `notrack_regenerate`  | `false`    | Issettja `true` biex titlob tweġiba ġġenerata mill-ġdid għad-dawra preċedenti.  |
+| Field tal-body        | Default | Għan                                                                            |
+| --------------------- | ------- | ------------------------------------------------------------------------------- |
+| `notrack_mode`        | `usual` | Modalità tad-dispaċċ (sekwenza b’format liberu; l-upstream jaċċetta `usual`, …) |
+| `notrack_max_turns`   | `6`     | Għadd ta’ dawriet interni li l-upstream jista’ jagħmel qabel iwieġeb.           |
+| `notrack_chat_id`     | `null`  | Kompli chat upstream eżistenti (ħallih barra għal chat ġdid).                   |
+| `notrack_attachments` | `[]`    | Array li jgħaddi direttament id-deskritturi tal-annessi upstream.               |
+| `notrack_regenerate`  | `false` | Issettja `true` biex titlob tweġiba ġġenerata mill-ġdid għad-dawra preċedenti.  |
 
 ### Kapaċitajiet
 
-- Kompletamenti taċ-chat **bi streaming u mingħajr streaming**.
-- **Sejħiet tal-għodod** — issettja `tools: [...]` fit-talba; l-eżekutur jiserjalizzahom f’kuntratt ta’ envelope għal sejħiet tal-għodod u jipproċessa t-tweġibiet tal-mudell lura f’`tool_calls` ta’ OpenAI.
-- **`response_format`** — `json_object` u `json_schema` huma appoġġjati. L-eżekutur jiġbed l-ewwel oġġett JSON mit-tweġiba tal-mudell u jikkonvertih f’sekwenza qabel jirritornah.
-- **Ħjiel dwar ir-raġunament** — l-eżekutur joħroġ delta `reasoning` meta l-upstream jibgħat avveniment `thinking`.
+- **Kompletamenti taċ-chat bi streaming u mingħajru**.
+- **Sejħiet tal-għodod** — issettja `tools: [...]` fit-talba; l-eżekutur jisserjalizzahom f’kuntratt envelope għas-sejħiet tal-għodod u jipparsja t-tweġibiet tal-mudell lura f’`tool_calls` ta’ OpenAI.
+- **`response_format`** — `json_object` u `json_schema` huma appoġġjati. L-eżekutur jestratta l-ewwel oġġett JSON mit-tweġiba tal-mudell u jikkonvertih f’sekwenza qabel jirritornah.
+- **Ħjiel tar-raġunament** — l-eżekutur joħroġ delta `reasoning` meta l-upstream jibgħat event `thinking`.
 
 ### Limitazzjonijiet
 
-- L-upstream jimponi kwoti ta’ użu anonimu — meta dawn jinqabżu, l-eżekutur jirritorna 429 b’messaġġ faċli biex jinftiehem.
-- L-IDs kollha tal-mudelli jirriżolvu għall-istess mudell tad-dispatch upstream; m’hemm l-ebda swiċċ għal kull mudell.
-- L-eżekutur ma jsejjaħx l-endpoint `/api/chats` tal-upstream, għalhekk l-istorja taċ-chat / is-sessjonijiet ma jiġux immaniġġjati awtomatikament. Uża `notrack_chat_id` biex tkompli chat upstream eżistenti.
+- L-upstream jinforza kwoti għall-użu anonimu — meta dawn jinqabżu, l-eżekutur jirritorna 429 b’messaġġ ċar.
+- L-IDs kollha tal-mudelli jirriżolvu għall-istess mudell tad-dispaċċ upstream; ma hemm l-ebda swiċċ għal kull mudell.
+- L-eżekutur ma jsejjaħx l-endpoint `/api/chats` tal-upstream, għalhekk l-istorja taċ-chat / is-sessjonijiet ma jiġux ġestiti awtomatikament. Uża `notrack_chat_id` biex tkompli chat upstream eżistenti.
 
 ---
 
-# X’Jistgħu u Ma Jistgħux Jagħmlu l-Fornituri tal-Web Cookies
+# X’Jistgħu u X’Ma Jistgħux Jagħmlu l-Fornituri tal-Web Cookies
 
 Il-fornituri tal-Web Cookies jerġgħu jużaw l-interfaċċa taċ-chat ta’ sit web. Huma **ma** jipprovdux l-istess kapaċitajiet bħall-APIs uffiċjali.
 
@@ -150,30 +150,30 @@ Il-fornituri tal-Web Cookies jerġgħu jużaw l-interfaċċa taċ-chat ta’ sit
 
 - Awtentika billi tuża s-sessjoni eżistenti tal-browser tiegħek
 - Aċċessa l-mudelli disponibbli permezz tal-kont tiegħek
-- Irċievi t-tweġibiet taċ-chat bħala stream
-- Ma hija meħtieġa l-ebda API key
+- Irċievi t-tweġibiet taċ-chat b'mod kontinwu
+- Ebda ċavetta tal-API mhi meħtieġa
 
 ## Mhux Appoġġjat
 
-- Sejħiet ta’ funzjonijiet
-- Sejħiet ta’ għodod
+- Sejħiet ta' funzjonijiet
+- Sejħiet ta' għodod
 - Editjar awtomatiku tal-fajls
-- Flussi tax-xogħol aġentiċi fl-IDE
-- Funzjonalitajiet disponibbli biss permezz tal-API
+- Flussi tax-xogħol aġentiċi tal-IDE
+- Karatteristiċi disponibbli biss permezz tal-API
 
 Din hija mġiba mistennija u **mhijiex** bug.
 
-Jekk teħtieġ l-eżekuzzjoni ta’ għodod, editjar awtomatiku tal-fajls, jew flussi tax-xogħol aġentiċi oħra, uża **fornitur b’API key** minflok fornitur Web Cookie.
+Jekk teħtieġ l-eżekuzzjoni ta' għodod, l-editjar awtomatiku tal-fajls, jew flussi tax-xogħol aġentiċi oħra, uża **fornitur b'ċavetta tal-API** minflok fornitur tal-Web Cookie.
 
 ---
 
-# Limitazzjoni tal-Validazzjoni
+# Riżerva dwar il-Validazzjoni
 
-**Test Connection** li jirnexxi jew validazzjoni b’suċċess tal-cookie jivverifikaw biss li l-kredenzjali pprovduti jidhru li huma fil-format mistenni.
+**Test Connection** li jirnexxi jew validazzjoni tal-cookie li tirnexxi jivverifikaw biss li l-kredenzjali pprovduti jidhru li huma fil-format mistenni.
 
-Sakemm tiġi solvuta Issue #7857, validazzjoni b’suċċess **ma tiggarantixxix** li l-fornitur se jawtentika b’suċċess.
+Sakemm tissolva l-Issue #7857, validazzjoni li tirnexxi **ma tiggarantix** li l-fornitur se jawtentika b'suċċess.
 
-Jekk l-awtentikazzjoni xorta tfalli, ivverifika li kkupjajt il-kredenzjali minn talba tan-network attiva u mhux mill-ħażna tal-cookies tal-browser.
+Jekk l-awtentikazzjoni tibqa' tfalli, ivverifika li kkupjajt il-kredenzjali minn talba attiva tan-network u mhux mill-ħażna tal-cookies tal-browser.
 
 ---
 
@@ -198,44 +198,57 @@ Application
 
 ---
 
-## Il-Cookie Taħdem fil-Browser iżda Mhux f’OmniRoute
+## Il-Cookie Taħdem fil-Browser iżda Mhux f'OmniRoute
 
 Xi fornituri jinkludu cookies li jintbagħtu biss waqt talbiet awtentikati.
 
-Erġa’ kkopja l-kredenzjali minn talba ġdida tan-network wara li tiftaħ konverżazzjoni b’suċċess.
+Erġa' kkopja l-kredenzjali minn talba ġdida tan-network wara li tkun ftaħt konverżazzjoni b'suċċess.
 
 ---
 
 ## Is-Sessjoni Skadiet
 
-Il-fornituri Web Cookie jużaw is-sessjoni eżistenti tal-browser tiegħek.
+Il-fornituri tal-Web Cookie jużaw is-sessjoni eżistenti tal-browser tiegħek.
 
-Jekk is-sessjoni tal-browser tiegħek tiskadi jew toħroġ mill-kont, trid tikkopja sett ġdid ta’ kredenzjali. Biex tawtomatizza t-tiġdid tal-cookie għal fornituri tal-web appoġġjati, ara l-għodda anċillari [Browser Session Sync Extension](../guides/SESSION-SYNC-EXTENSION.md).
-
----
-
-## Test Connection Jgħaddi iżda t-Talbiet Ifallu
-
-Sakemm tiġi solvuta Issue #7857, il-fatt li l-validazzjoni tgħaddi ma jiggarantixxix li t-talba ta’ awtentikazzjoni se tirnexxi.
-
-Erġa’ kkopja l-kredenzjali tiegħek minn talba awtentikata ġdida qabel tkompli ssolvi l-problemi.
+Jekk is-sessjoni tal-browser tiegħek tiskadi jew toħroġ mill-kont, trid tikkopja sett ġdid ta' kredenzjali. Biex tawtomatizza t-tiġdid tal-cookie għal fornituri tal-web appoġġjati, ara l-għodda anċillari [Browser Session Sync Extension](../guides/SESSION-SYNC-EXTENSION.md).
 
 ---
 
-# Eżempju ta’ Fornitur
+## Test Connection Jirnexxi iżda t-Talbiet Ifallu
+
+Sakemm tissolva l-Issue #7857, validazzjoni li tirnexxi ma tiggarantix li t-talba ta' awtentikazzjoni se tirnexxi.
+
+Erġa' kkopja l-kredenzjali tiegħek minn talba awtentikata ġdida qabel tkompli ssolvi l-problemi.
+
+---
+
+## ChatGPT Web Ifalli B' "Unsupported ChatGPT integrity dependency"
+
+```
+[502] ChatGPT Web first-party bridge module failed to load:
+pageerror: Unsupported ChatGPT integrity dependency: DD
+```
+
+Il-kredenzjali huma tajbin — dak l-iżball ġej mill-bridge, mhux mis-sessjoni. chatgpt.com jassenja l-IDs tal-moduli tiegħu għal kull deployment, u l-bridge kien jiffissa l-ID tal-helper Sentinel li joħloq, għalhekk rebuild ta' chatgpt.com li biddel l-isem tal-helper kisser kull tentattiv filwaqt li l-cookie baqgħet valida. L-awtorizzazzjoni mill-ġdid tal-konnessjoni ma tistax issolviha.
+
+Builds li jirriżolvu l-modulu permezz tar-runtime tal-paġna stess ma jiffissaw l-ebda ID u ma jiltaqgħux ma' din il-problema. Jekk tara l-iżball, aġġorna OmniRoute u erġa' wettaq il-verifika tal-konnessjoni.
+
+---
+
+# Eżempju ta' Fornitur
 
 Għal gwida kompluta speċifika għal fornitur, ara:
 
 - **Claude Web** — `docs/providers/CLAUDE_WEB.md`
 
-Il-gwida ta’ Claude Web turi l-proċess sħiħ ta’ konfigurazzjoni għal fornitur Web Cookie u sservi bħala l-implimentazzjoni ta’ referenza.
+Il-gwida ta' Claude Web turi l-proċess sħiħ tal-konfigurazzjoni għal fornitur tal-Web Cookie u sservi bħala l-implimentazzjoni ta' referenza.
 
 ---
 
 # L-Aħjar Prattiki
 
 - Ikkopja l-kredenzjali minn talba awtentikata ġdida.
-- Evita li terġa’ tuża cookies qodma.
-- Żomm is-sessjoni tal-browser tiegħek attiva waqt li tuża fornituri Web Cookie.
+- Evita li terġa' tuża cookies qodma.
+- Żomm is-sessjoni tal-browser tiegħek attiva waqt li tuża fornituri tal-Web Cookie.
 - Ittratta l-cookies ikkupjati bħala kredenzjali sensittivi.
-- Uża fornituri b’API key meta teħtieġ sejħiet ta’ funzjonijiet jew flussi tax-xogħol aġentiċi.
+- Uża fornituri b'ċavetta tal-API meta jkollok bżonn sejħiet ta' funzjonijiet jew flussi tax-xogħol aġentiċi.

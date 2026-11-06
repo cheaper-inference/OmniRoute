@@ -15,8 +15,13 @@ Thank you for your interest in contributing! This guide covers everything you ne
 - **Node.js** `>=22.22.2 <23`, atau `>=24.0.0 <27` (disyorkan: 24 LTS)
 - **npm** 10+
 
-> **Pengguna npm v11+ (Node 24+):** Selepas `npm install`, sahkan bahawa modul natif telah dipasang:
-> `node -e "require('better-sqlite3')"`. Jika arahan tersebut gagal dengan `MODULE_NOT_FOUND`,
+> **Windows dengan Node 24:** gunakan keluaran tampalan 24 LTS semasa (sekurang-kurangnya 24.20.0).
+> Keluaran terdahulu boleh berhenti selepas ujian berjaya apabila `--test-force-exit` menutup
+> proses. [Pembetulan libuv Windows](https://github.com/nodejs/node/pull/61999) Node menangani
+> ranap masa jalan ini; kekalkan penegasan ujian dan pemeriksaan keluar pelaksana didayakan.
+
+> **Pengguna npm v11+ (Node 24+):** Selepas `npm install`, sahkan modul natif telah dipasang:
+> `node -e "require('better-sqlite3')"`. Jika gagal dengan `MODULE_NOT_FOUND`,
 > jalankan `npm approve-scripts better-sqlite3 && npm install`. Lihat
 > [Penyelesaian Masalah](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
@@ -43,81 +48,81 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 Pemboleh ubah utama untuk pembangunan:
 
-| Pemboleh Ubah          | Lalai Pembangunan        | Penerangan                      |
-| ---------------------- | ------------------------ | ------------------------------- |
-| `PORT`                 | `20128`                  | Port pelayan                    |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | URL asas untuk bahagian hadapan |
-| `JWT_SECRET`           | (jana di atas)           | Rahsia penandatanganan JWT      |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | Kata laluan log masuk pertama   |
-| `APP_LOG_LEVEL`        | `info`                   | Tahap keterperincian log        |
+| Pemboleh ubah          | Lalai Pembangunan        | Perihalan                     |
+| ---------------------- | ------------------------ | ----------------------------- |
+| `PORT`                 | `20128`                  | Port pelayan                  |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | URL asas untuk frontend       |
+| `JWT_SECRET`           | (jana di atas)           | Rahsia penandatanganan JWT    |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Kata laluan log masuk pertama |
+| `APP_LOG_LEVEL`        | `info`                   | Tahap keterperincian log      |
 
 ### Tetapan Papan Pemuka
 
 Papan pemuka menyediakan togol UI untuk ciri yang juga boleh dikonfigurasikan melalui pemboleh ubah persekitaran:
 
-| Lokasi Tetapan     | Togol                 | Penerangan                              |
-| ------------------ | --------------------- | --------------------------------------- |
-| Tetapan → Lanjutan | Mod Nyahpepijat       | Dayakan log permintaan nyahpepijat (UI) |
-| Tetapan → Umum     | Keterlihatan Bar Sisi | Tunjukkan/sembunyikan bahagian bar sisi |
+| Lokasi Tetapan      | Togol              | Perihalan                               |
+| ------------------- | ------------------ | --------------------------------------- |
+| Settings → Advanced | Debug Mode         | Dayakan log permintaan nyahpepijat (UI) |
+| Settings → General  | Sidebar Visibility | Tunjukkan/sembunyikan bahagian bar sisi |
 
-Tetapan ini disimpan dalam pangkalan data dan dikekalkan selepas mula semula, serta mengatasi nilai lalai pemboleh ubah persekitaran apabila ditetapkan.
+Tetapan ini disimpan dalam pangkalan data dan kekal selepas mula semula, mengatasi lalai pemboleh ubah persekitaran apabila ditetapkan.
 
-### Menjalankan Secara Setempat
+### Menjalankan Secara Tempatan
 
 ```bash
-# Mod pembangunan (muat semula segera)
+# Mod pembangunan (muat semula panas)
 npm run dev
 
 # Binaan pengeluaran
 npm run build    # next build → .build/next/ kemudian assembleStandalone → dist/
 npm run start
 
-# Kompilasi pantas bahagian belakang/API sahaja untuk perubahan penyumbang
+# Kompilasi backend/API sahaja yang pantas untuk perubahan penyumbang
 npm run build:contributor
 
-# Binaan keluaran (binaan semula bersih + penanda sentinel HEAD — diperlukan untuk penggunaan)
-npm run build:release   # rm -rf .build dist && bina + tulis dist/BUILD_SHA
+# Binaan keluaran (binaan semula bersih + sentinel HEAD — diperlukan untuk penggunaan)
+npm run build:release   # rm -rf .build dist kemudian bina + tulis dist/BUILD_SHA
 
-# Konfigurasi port lazim
+# Konfigurasi port biasa
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Binaan penyumbang melakukan pengesahan kompilasi sahaja: ia tidak menghimpunkan
-pengedaran kendiri atau membina aset pembungkusan natif pilihan. Gunakan binaan pengeluaran biasa apabila
-anda perlu mengesahkan berkas yang boleh dihantar.
+Binaan penyumbang melaksanakan pengesahan kompilasi sahaja: ia tidak memasang edaran kendiri
+atau membina aset pembungkusan natif pilihan. Gunakan binaan pengeluaran biasa apabila
+anda perlu mengesahkan pakej yang sedia dihantar.
 
 ### Susun Atur Output Binaan
 
-| Direktori | Kandungan                                                                     | Dijejaki |
-| --------- | ----------------------------------------------------------------------------- | -------- |
-| `src/`    | Sumber aplikasi (TypeScript / TSX)                                            | Ya       |
-| `.build/` | Perantaraan — output `next build` (diabaikan Git, `distDir = .build/next`)    | Tidak    |
-| `dist/`   | Berkas boleh dihantar — dihimpunkan oleh `assembleStandalone` (diabaikan Git) | Tidak    |
+| Direktori | Kandungan                                                               | Dijejaki |
+| --------- | ----------------------------------------------------------------------- | -------- |
+| `src/`    | Sumber aplikasi (TypeScript / TSX)                                      | Ya       |
+| `.build/` | Perantaraan — output `next build` (gitignored, `distDir = .build/next`) | Tidak    |
+| `dist/`   | Pakej sedia dihantar — dipasang oleh `assembleStandalone` (gitignored)  | Tidak    |
 
 Saluran binaan ialah satu laluan:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (output Next.js)
-  └─ assembleStandalone()                 (menyalin aset kendiri + statik + awam + natif)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
 `npm run build:release` turut membersihkan kedua-dua direktori terlebih dahulu dan menulis
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) sebagai penanda sentinel integriti penggunaan.
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) sebagai sentinel integriti penggunaan.
 
-`npm run build:contributor` menggunakan profil binaan bahagian belakang sahaja. Ia menggantikan sementara
-fail UI papan pemuka dengan stub semasa pembinaan, mengekalkan pengendali laluan API dan memulihkan fail asal
-selepas binaan selesai. Gunakan `npm run build` untuk perubahan yang mempengaruhi UI papan pemuka atau bagi
-pengesahan keluaran penuh; profil penyumbang bukan pengganti kepada binaan keluaran.
+`npm run build:contributor` menggunakan profil binaan backend sahaja. Ia mengstup fail UI
+papan pemuka buat sementara semasa membina, mengekalkan pengendali laluan API, dan memulihkan fail asal
+selepas binaan. Gunakan `npm run build` untuk perubahan yang mempengaruhi UI papan pemuka atau untuk
+pengesahan keluaran penuh; profil penyumbang bukan pengganti binaan keluaran.
 
 > **Nota penggunaan VPS:** direktori imej jauh `/usr/lib/node_modules/omniroute/app/`
-> tidak berubah. Kemahiran penggunaan menggunakan rsync untuk menyalin kandungan `dist/` ke dalamnya.
-> Hanya laluan output binaan dalam repositori yang berubah (`app/` → `dist/`).
+> tidak berubah. Kemahiran penggunaan menyegerakkan kandungan `dist/` ke dalamnya.
+> Hanya laluan output binaan dalam repositori berubah (`app/` → `dist/`).
 
 URL lalai:
 
-- **Papan Pemuka**: `http://localhost:20128/dashboard`
+- **Papan pemuka**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -173,15 +178,15 @@ Skop (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `m
 # Semua ujian (unit + vitest + ekosistem + e2e)
 npm run test:all
 
-# Satu fail ujian (pelaksana ujian asli Node.js — kebanyakan ujian menggunakan ini)
+# Fail ujian tunggal (pelaksana ujian asli Node.js — kebanyakan ujian menggunakan ini)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
 # Hanya ujian unit yang terjejas oleh perubahan anda (pemilih TIA yang sama seperti get CI, #8084)
 npm run test:scoped            # perubahan dalam komit terakhir (atau pepohon kerja)
-npm run test:scoped:staged     # perubahan berperingkat sahaja — sesuai digandingkan dengan pelaksanaan pra-komit
+npm run test:scoped:staged     # perubahan yang dipentaskan sahaja — sesuai digandingkan dengan pelaksanaan prakomit
 npm run test:scoped:full       # bina semula peta graf import terlebih dahulu (selepas menambah/mengalihkan fail)
-# Keluar 1 + "run the full suite" bermaksud fail hab (tsconfig, package.json, …) atau sumber
-# yang tidak dipetakan telah berubah — pemilih gagal secara selamat, ia tidak pernah melangkau secara senyap.
+# Keluar dengan 1 + "jalankan seluruh suit" bermaksud fail hab (tsconfig, package.json, …) atau sumber
+# yang tidak dipetakan telah berubah — pemilih gagal secara selamat dan tidak pernah melangkau secara senyap.
 
 # Vitest (pelayan MCP, autoCombo, cache)
 npm run test:vitest
@@ -204,42 +209,43 @@ npm run lint
 npm run check
 
 # Ujian ringkas kombo huluan sebenar berpagar (memerlukan akses VPS + kredit penyedia sebenar)
-# Mengakses penyedia SEBENAR — melibatkan sedikit kos. TIDAK PERNAH dijalankan dalam CI. Dilangkau dengan sempurna tanpa get.
+# Mengakses penyedia SEBENAR — melibatkan sedikit kos. TIDAK PERNAH dijalankan dalam CI. Dilangkau dengan lancar tanpa get.
 # Memerlukan: akses ssh root@192.168.0.15 (mendapatkan petikan DB baca sahaja daripada VPS).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Ujian ringkas langsung VPS fasa 3 — skrip Node ESM biasa, mengakses terus pelayan .15 yang aktif.
+# Ujian ringkas langsung VPS fasa 3 — skrip ESM Node biasa, mengakses pelayan .15 langsung.
 # Memerlukan: akses ssh root@192.168.0.15 (kombo dicipta/dihapuskan melalui SSH sqlite).
-# Mengakses penyedia SEBENAR (kos kecil). Mencipta/memadam hanya kombo __live_test__*. TIDAK PERNAH dijalankan dalam CI.
-# REQUIRE_API_KEY=false pada .15, jadi kunci API tidak diperlukan, tetapi mematuhi COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY jika ditetapkan.
+# Mengakses penyedia SEBENAR (kos kecil). Mencipta/memadamkan kombo __live_test__* sahaja. TIDAK PERNAH dijalankan dalam CI.
+# REQUIRE_API_KEY=false pada .15, jadi kunci API tidak diperlukan, tetapi menghormati COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY jika ditetapkan.
 npm run test:combo:live:vps              # 7 senario HTTP (keutamaan/round-robin/berwajaran/kos/gabungan/auto + kesihatan)
-npm run test:combo:live:vps:failover     # menambahkan senario failover merentas penyedia sebenar (jumlah 8)
+npm run test:combo:live:vps:failover     # menambah senario failover rentas penyedia sebenar (jumlah 8)
 ```
 
-Catatan liputan:
+Nota liputan:
 
-- `npm run test:coverage` mengukur liputan sumber untuk suite ujian unit utama, mengecualikan `tests/**`, dan menyertakan `open-sse/**`
-- Permintaan tarik mesti mengekalkan get liputan pada **60%+** pernyataan/baris/fungsi/cabang
-- Jika PR mengubah kod pengeluaran dalam `src/`, `open-sse/`, `electron/`, atau `bin/`, ia mesti menambah atau mengemas kini ujian automatik dalam PR yang sama
+- `npm run test:coverage` mengukur liputan sumber bagi suit ujian unit utama, mengecualikan `tests/**`, dan menyertakan `open-sse/**`
+- Pull request mesti mengekalkan get liputan pada **60%+** bagi pernyataan/baris/fungsi/cabang
+- Jika PR mengubah kod produksi dalam `src/`, `open-sse/`, `electron/`, atau `bin/`, PR yang sama mesti menambah atau mengemas kini ujian automatik
 - `npm run coverage:report` mencetak laporan terperinci fail demi fail daripada pelaksanaan liputan terkini
 - `npm run test:coverage:legacy` mengekalkan metrik lama untuk perbandingan sejarah
 - Lihat `docs/ops/COVERAGE_PLAN.md` untuk pelan hala tuju peningkatan liputan berfasa
 
-### Keperluan Permintaan Tarik
+### Keperluan Pull Request
 
 Sebelum membuka PR, gunakan
-[Laluan Emas Sumbangan](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) untuk menjalankan gelung terfokus bagi
-perkara yang anda ubah. Suite unit penuh (4 serpihan CI), Vitest, get liputan **60%+**, dan
-binaan pengeluaran ialah tanggungjawab CI — menjalankannya secara setempat tidak memberikan sebarang isyarat yang belum
-akan diberikan oleh semakan PR, dan pada mesin yang lebih kecil, ia boleh menepukan hos (#8084):
+[Laluan Emas Sumbangan](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) untuk menjalankan gelung berfokus bagi
+perkara yang anda ubah. Suit unit penuh (4 serpihan CI), Vitest, get liputan **60%+**, dan
+binaan produksi merupakan tanggungjawab CI — menjalankannya secara setempat tidak memberikan sebarang maklumat tambahan yang belum
+diberikan oleh semakan PR, dan pada mesin yang lebih kecil, tindakan ini boleh menepukan hos (#8084):
 
 - Jalankan fail ujian yang meliputi perubahan anda: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Jalankan `npm run lint`
-- Sertakan atau kemas kini ujian automatik dalam PR yang sama apabila kod pengeluaran berubah
-- Sertakan fail ujian yang diubah atau ditambah dalam perihalan PR apabila kod pengeluaran berubah
+- Sertakan atau kemas kini ujian automatik dalam PR yang sama apabila kod produksi berubah
+- Dalam fail `node:test`, letakkan setiap `await` peringkat teratas (seperti `await import(...)`) sebelum `test()` / `describe()` yang pertama: di bawah `--test-force-exit`, ujian yang didaftarkan selepasnya mungkin tidak akan dijalankan secara senyap (#18045; dikuatkuasakan oleh `npm run check:test-tla-order`)
+- Sertakan fail ujian yang diubah atau ditambah dalam perihalan PR apabila kod produksi berubah
 - Semak hasil SonarQube pada PR apabila rahsia projek dikonfigurasikan dalam CI
 
-Status ujian semasa: **122 fail ujian unit** yang merangkumi:
+Status ujian semasa: **122 fail ujian unit** yang meliputi:
 
 - Penterjemah penyedia dan penukaran format
 - Pengehadan kadar, pemutus litar, dan daya tahan

@@ -49,6 +49,50 @@ test("large arrays are capped and explicitly marked as clipped", () => {
   assert.match(result, /clipped=true/);
 });
 
+test("counts mixed chat delta parts and clips tool calls independently", () => {
+  const result = buildMalformedResponseDiagnostic(
+    "no_terminal",
+    {
+      response: {
+        choices: [
+          {
+            delta: {
+              content: [{ type: "text", text: "abc" }, { type: "refusal", refusal: "no" }, null],
+              refusal: "stop",
+              tool_calls: Array(33).fill({ name: "PRIVATE" }),
+            },
+          },
+        ],
+      },
+    },
+    { content: [{ type: "tool_use" }, { type: "text", text: "xy" }] }
+  );
+  assert.equal(
+    result,
+    "malformed_translated_response:no_terminal upstream{kind=chat,textChars=3,refusalChars=6,tools=32,other=1,clipped=true} translated{kind=claude,textChars=2,refusalChars=0,tools=1,other=0,clipped=false}"
+  );
+});
+
+test("Responses takes precedence over choices and counts function and unknown output", () => {
+  const result = buildMalformedResponseDiagnostic(
+    "empty",
+    {
+      object: "response",
+      choices: [{ message: { content: "ignored" } }],
+      output: [
+        { type: "function_call" },
+        null,
+        { type: "message", content: [{ type: "output_text", text: "abc" }, { type: "tool_use" }] },
+      ],
+    },
+    { choices: [{ message: {}, delta: { content: "ignored" } }] }
+  );
+  assert.equal(
+    result,
+    "malformed_translated_response:empty upstream{kind=responses,textChars=3,refusalChars=0,tools=2,other=1,clipped=false} translated{kind=chat,textChars=0,refusalChars=0,tools=0,other=0,clipped=false}"
+  );
+});
+
 test("handler persists shape diagnostics separately from truncated payload artifacts", () => {
   const source = readFileSync(
     new URL("../../open-sse/handlers/chatCore/nonStreamingResponse.ts", import.meta.url),

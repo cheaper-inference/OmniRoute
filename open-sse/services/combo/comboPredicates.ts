@@ -6,7 +6,10 @@
  * predicates are re-exported from combo.ts for backward compatibility.
  */
 
-import { EXECUTOR_CONTRACT_VIOLATION_CODE } from "../../config/constants.ts";
+import {
+  EXECUTOR_CONTRACT_VIOLATION_CODE,
+  LOCAL_CONFIGURATION_ERROR_CODES,
+} from "../../config/constants.ts";
 import { finitePercentUsed, remainingPercentFromQuotaWindows } from "../antigravityQuotaFamily.ts";
 import { errorResponse } from "../../utils/error.ts";
 import { isContentPolicyRefusal } from "../../utils/contentPolicyError.ts";
@@ -18,19 +21,24 @@ import {
   isModelCapacityOverloadError,
 } from "@/shared/utils/circuitBreaker";
 import {
-  CONTEXT_OVERFLOW_PATTERNS,
+  isContextOverflowText,
+  isTokenRateLimitWording,
   PARAM_VALIDATION_PATTERNS,
   RATE_LIMIT_TEXT_PATTERNS,
   AUTH_CREDENTIAL_ERROR_PATTERNS,
   isProviderModelUnsupported400,
   cooldownUntilMs,
 } from "../accountFallback.ts";
+import { isModelNotFound404 } from "../accountFallback/perModelFailureScope.ts";
 import { isRequestScoped400 } from "../accountFallback/requestScoped400.ts";
+import { isAssistantPrefillUnsupported400 } from "../assistantPrefillError.ts";
 import { isResourceNotFoundResponse } from "../errorClassifier.ts";
 import { isOpencodeFreeTierRefusal } from "../../executors/opencodeGeoBlock.ts";
+import { isChatGptWebBridgeFailure } from "../../utils/chatgptWebBridgeFailure.ts";
 import { getTrustedLocalRateLimitResponse } from "../rateLimitManager/errors.ts";
 import { TRANSLATION_FAILURE_CODE } from "../../handlers/chatCore/translationFailure.ts";
 import { isLocalModelPolicyResponse } from "../resolvedModelAccess.ts";
+import { isInstanceDraining as isDraining } from "../../utils/drainStatus.ts";
 import type { ResolvedComboTarget } from "./types.ts";
 import {
   classifyComboOutcome,
@@ -144,7 +152,7 @@ export function hasIdenticalModelErrorStreak(
   if (comboErrors.length < streak) return false;
   const tail = comboErrors.slice(-streak);
   const [first, ...rest] = tail;
-  if (first.kind !== "model") return false;
+  if (first.kind !== "model" || first.status !== 400) return false;
   return rest.every(
     (e) => e.kind === first.kind && e.status === first.status && e.error === first.error
   );
@@ -282,12 +290,26 @@ const REQUEST_SCOPED_UPSTREAM_ERROR_CODES: Record<string, true> = {
   context_window_exceeded: true,
   upstream_empty_response: true,
   upstream_response_failed: true,
+  // The upstream cancelled THIS attempt (the request itself was fine, the
+  // provider is healthy — other requests to the same provider succeed in
+  // parallel). The ZCode app-server reports it as `model_request_cancelled`
+  // / "Model request was cancelled."; the executor re-tags it as
+  // `upstream_request_cancelled` so every resilience consumer below sees one
+  // request-scoped marker: no model lockout, no provider circuit-breaker
+  // failure, no provider cooldown, and no same-connection target skip.
+  upstream_request_cancelled: true,
   // Local combo per-target timer (targetTimeoutRunner) — not a connection health signal.
   combo_target_timeout: true,
+  // A hedge loser superseded by a sibling target (streamingResponse sentinel) —
+  // no failure of the provider or the connection.
+  hedge_cancelled: true,
   // Local limiter queue-capacity codes — not a provider/connection health signal.
   rate_limit_queue_timeout: true,
   rate_limit_queue_full: true,
   rate_limit_queue_wedged: true,
+  // Local account-semaphore capacity — same verdict, different gate.
+  semaphore_timeout: true,
+  semaphore_queue_full: true,
   token_limit_exceeded: true,
   // #10360: our own executor-result contract violation. An internal defect, not
   // a provider/account fault — it must never cool a connection or trip a breaker.
@@ -298,6 +320,14 @@ const REQUEST_SCOPED_UPSTREAM_ERROR_CODES: Record<string, true> = {
   // connection health signal and must never feed lockout/cooldown/disable.
   resource_pressure: true,
   heap_pressure: true,
+  // #17132: Quota Share absolute-cap block — OUR OWN per-API-key policy decision,
+  // emitted by the chatCore quota-share pre-hook. The shared connection is healthy
+  // and keeps serving the other pool keys, so this code must never feed
+  // markAccountUnavailable, the provider breaker, or the #1731/#1731v2 combo
+  // skip-marking — in a combo it only skips this one target.
+  quota_share_blocked: true,
+  // #18019: missing/unsafe local executor config (see LOCAL_CONFIGURATION_ERROR_CODES).
+  ...Object.fromEntries([...LOCAL_CONFIGURATION_ERROR_CODES].map((code) => [code, true])),
 };
 
 /** Request/model-specific failures must not poison provider-wide resilience state. */
@@ -327,10 +357,46 @@ export function isRequestScopedUpstreamFailure(error?: {
     type === "invalid_request_error" ||
     type === "context_length_exceeded" ||
     type === "local_queue_capacity" ||
+    type === "account_semaphore_capacity" ||
     // #14313: OpenCode free-tier refusal (FreeTierError) — same verdict on every
     // account for the same request; never a connection/model health signal.
     type === "freetiererror" ||
     code === "freetiererror"
+  );
+}
+
+/**
+ * The status-599 `hedge_cancelled` sentinel a hedge loser returns once a
+ * sibling target has resolved the combo. It is not a failure: the combo loop
+ * must neither record it nor advance fallback state because of it.
+ */
+export function isHedgeCancelledSentinel(
+  status: number,
+  error?: { code?: string | null } | null
+): boolean {
+  return (
+    status === 599 &&
+    typeof error?.code === "string" &&
+    error.code.toLowerCase() === "hedge_cancelled"
+  );
+}
+
+/**
+ * A full per-account concurrency gate. It stays request-scoped (no lockout, no
+ * cooldown, no connection blame), but unlike the other request-scoped failures
+ * it is momentary, so the combo keeps its same-target retry for it: a slot can
+ * free up while the retry waits.
+ */
+export function isAccountSemaphoreCapacityFailure(error?: {
+  code?: string | null;
+  type?: string | null;
+}): boolean {
+  const code = typeof error?.code === "string" ? error.code.toLowerCase() : "";
+  const type = typeof error?.type === "string" ? error.type.toLowerCase() : "";
+  return (
+    code === "semaphore_timeout" ||
+    code === "semaphore_queue_full" ||
+    type === "account_semaphore_capacity"
   );
 }
 
@@ -348,11 +414,18 @@ export function isComboTargetTimeoutFailure(error?: {
  * lock that model so the next request does not spend another gate wait on it.
  * Other request-scoped failures (context length, local queue) stay unlocked.
  * The provider breaker still uses the request-scoped flag and does not see this.
+ * While the instance is draining (graceful shutdown), no failure is recorded as
+ * a model lockout at all — a self-inflicted teardown is not a model-health signal.
  */
 export function shouldRecordModelLockoutForComboFailure(
   requestScopedFailure: boolean,
   error?: { code?: string | null; type?: string | null }
 ): boolean {
+  // A graceful shutdown tears down provider clients while requests are still in
+  // flight. The resulting failure is evidence about OUR shutdown, not about the
+  // model's health, so it must never lock the model out of every later combo.
+  // The drain flag is read live on every call — it never latches.
+  if (isDraining()) return false;
   if (!requestScopedFailure) return true;
   return isComboTargetTimeoutFailure(error);
 }
@@ -369,7 +442,9 @@ export function isComboRequestScopedFailure(
     isRequestScopedUpstreamFailure(error) ||
     (response.status === 404 && isResourceNotFoundResponse(errorText)) ||
     // #14313: body-only free-tier refusals (relayed sentence, no error.type kept).
-    isOpencodeFreeTierRefusal(response.status, errorText)
+    isOpencodeFreeTierRefusal(response.status, errorText) ||
+    // Prefill ban: the body's shape, not the model/connection — even without error.type.
+    isAssistantPrefillUnsupported400(response.status, errorText)
   );
 }
 
@@ -400,7 +475,7 @@ export function isInputBoundRequestFailure(error?: {
 }): boolean {
   const code = typeof error?.code === "string" ? error.code.toLowerCase() : "";
   const type = typeof error?.type === "string" ? error.type.toLowerCase() : "";
-  return INPUT_BOUND_ERROR_CODES.has(code) || type === "context_length_exceeded";
+  return INPUT_BOUND_ERROR_CODES.has(code) || INPUT_BOUND_ERROR_CODES.has(type);
 }
 
 /**
@@ -458,6 +533,9 @@ export function shouldSkipConnDisable(
         result.errorType === "context_length_exceeded"));
 
   return (
+    // Local turn deduplication is not an account or provider failure.
+    (result.status === 409 &&
+      (result.errorCode === "turn_in_progress" || result.errorType === "turn_in_progress")) ||
     result.status === 499 ||
     result.errorCode === "client_disconnected" ||
     result.errorType === "client_disconnected" ||
@@ -471,8 +549,14 @@ export function shouldSkipConnDisable(
     // #14815: translation fails locally on the client's body — no account is at fault.
     result.errorCode === TRANSLATION_FAILURE_CODE ||
     (is401 && hasExtraKeys) ||
-    isRequestScopedUpstreamFailure({ code: result.errorCode, type: result.errorType }) ||
+    // Cursor's typed model-unavailable 404 is not a malformed request. Reuse
+    // the same model attribution predicate as failure persistence; ordinary
+    // invalid_request_error (including 400) remains request-scoped.
+    (isRequestScopedUpstreamFailure({ code: result.errorCode, type: result.errorType }) &&
+      !(provider === "cursor" && isModelNotFound404(result.status, errorText))) ||
     isSelfInflictedUpstreamTimeout(result.status, result.errorType, provider) ||
+    // #14948: a ChatGPT Web browser-bridge failure is local, not an account failure.
+    isChatGptWebBridgeFailure(provider, result.error) ||
     isReqScoped400
   );
 }
@@ -787,12 +871,21 @@ export async function resolvePersistedConnectionCooldownSkipReason(
 export function isContextOverflow400(errorText: string | null | undefined): boolean {
   const text = String(errorText || "");
   if (!text) return false;
+  if (isTokenRateLimitWording(text)) return false;
   return (
     /\bcontext.*(?:length_exceeded|too long|overflow|exceeded|window|limit)\b/i.test(text) ||
     /exceeds.*context/i.test(text) ||
+    /input exceeds maximum input tokens(?:\s*[,.]|$)/i.test(text) ||
     /your input exceeds/i.test(text) ||
-    CONTEXT_OVERFLOW_PATTERNS.some((p) => p.test(text))
+    isContextOverflowText(text)
   );
+}
+
+export function isContextOverflowFailure(
+  errorText: string | null | undefined,
+  error?: { code?: string | null; type?: string | null }
+): boolean {
+  return isInputBoundRequestFailure(error) || isContextOverflow400(errorText);
 }
 
 /** @param {string} errorText */

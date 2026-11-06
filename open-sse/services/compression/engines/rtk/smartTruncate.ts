@@ -25,10 +25,16 @@ export function smartTruncate(
 
   const preserveHead = Math.max(0, Math.floor(options.preserveHead ?? 20));
   const preserveTail = Math.max(0, Math.floor(options.preserveTail ?? 20));
-  const priorityPatterns = options.priorityPatterns ?? [];
-  const priorityLines = priorityPatterns.length
-    ? lines.filter((line) => priorityPatterns.some((pattern) => pattern.test(line)))
-    : [];
+  // A priority pattern that matches most lines (e.g. shell-grep's summaryPatterns, which match
+  // every grep line) would put the whole result in `selected` and report 0 dropped lines while
+  // the char pass below actually cut the middle out. Same half-the-lines rule that pass uses.
+  const priorityPatterns = (options.priorityPatterns ?? []).filter((pattern) => {
+    const hits = lines.filter((line) => pattern.test(line)).length;
+    return hits > 0 && hits * 2 <= lines.length;
+  });
+  const priorityLines = lines.filter((line) =>
+    priorityPatterns.some((pattern) => pattern.test(line))
+  );
 
   const head = lines.slice(0, preserveHead);
   const tail = preserveTail > 0 ? lines.slice(-preserveTail) : [];
@@ -42,7 +48,8 @@ export function smartTruncate(
     if (originalIndex >= preserveHead && !selected.includes(line)) selected.push(line);
   });
 
-  const droppedLines = Math.max(0, lines.length - selected.length);
+  const sourceLineCount = lines.length;
+  let droppedLines = Math.max(0, sourceLineCount - selected.length);
   let result = [
     ...selected.slice(0, head.length),
     `[rtk:truncated ${droppedLines} lines]`,
@@ -93,14 +100,23 @@ export function smartTruncate(
     const rest = Math.max(0, budget - forcedLength);
     const headChars = Math.ceil(rest * 0.55);
     const tailChars = Math.max(0, rest - headChars);
-    const headText = rest > 0 ? result.slice(0, headChars) : "";
-    const tailText = tailChars > 0 ? result.slice(-tailChars) : "";
+    const headRaw = rest > 0 ? result.slice(0, headChars) : "";
+    // Cut on line boundaries: a blind slice leaves a half line (a partial anchor or a partial
+    // grep hit) that still reads like a real result to the agent.
+    const headBreak = headRaw.lastIndexOf("\n");
+    const headText = headBreak === -1 ? headRaw : headRaw.slice(0, headBreak + 1);
+    const tailRaw = tailChars > 0 ? result.slice(-tailChars) : "";
+    const tailBreak = tailRaw.indexOf("\n");
+    const tailText = tailChars > 0 && tailBreak !== -1 ? tailRaw.slice(tailBreak + 1) : tailRaw;
     // Drop forced lines already present in a slice so nothing is duplicated.
     const forcedText = forced
       .filter((line) => !headText.includes(line) && !tailText.includes(line))
       .join("\n");
     result = `${headText}${marker}${forcedText ? `${forcedText}\n` : ""}${tailText}`;
     if (result.length > maxChars) result = result.slice(0, maxChars);
+    // Report what the caller actually lost, markers excluded.
+    const kept = result.split(/\r?\n/).filter((line) => !line.startsWith("[rtk:")).length;
+    droppedLines = Math.max(0, sourceLineCount - kept);
   }
 
   return { text: result, truncated: true, droppedLines };

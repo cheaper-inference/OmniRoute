@@ -10,7 +10,7 @@ export default function ProviderTosNotice({ providerId }: { providerId: string }
   if (FREE_TIER_TOS[providerId] !== "avoid") return null;
 
   return (
-    <aside className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm">
+    <aside className="rounded-lg border border-warning/30 bg-warning/10 p-4 text-sm">
       <p className="font-medium text-text-main">{t("tosAvoidNoticeTitle")}</p>
       <p className="mt-1 text-text-muted">{t("tosAvoidNoticeDescription")}</p>
       <Link

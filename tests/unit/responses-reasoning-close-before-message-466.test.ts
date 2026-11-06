@@ -8,12 +8,10 @@ import assert from "node:assert/strict";
 // stream. After the fix, reasoning is closed at the top of the content/
 // tool_calls handlers and the message is routed to `reasoningIndex + 1`.
 
-const { createResponsesApiTransformStream } = await import(
-  "../../open-sse/transformer/responsesTransformer.ts"
-);
-const { openaiToOpenAIResponsesResponse } = await import(
-  "../../open-sse/translator/response/openai-responses.ts"
-);
+const { createResponsesApiTransformStream } =
+  await import("../../open-sse/transformer/responsesTransformer.ts");
+const { openaiToOpenAIResponsesResponse } =
+  await import("../../open-sse/translator/response/openai-responses.ts");
 const { initState } = await import("../../open-sse/translator/index.ts");
 const { FORMATS } = await import("../../open-sse/translator/formats.ts");
 
@@ -155,4 +153,82 @@ test("translator: native reasoning is closed before message content and uses a d
 
   assert.equal(reasoningIndex, 0);
   assert.equal(messageIndex, reasoningIndex + 1);
+});
+
+test("transformer: a textual reasoning chunk does not swallow its tool call", async () => {
+  const output = await runTransformStream([
+    'data: {"id":"chatcmpl-mixed","model":"deepseek-ai/DeepSeek-R1","choices":[{"index":0,"delta":{"content":"<think>plan before calling","tool_calls":[{"index":0,"id":"call_mixed","function":{"name":"lookup","arguments":"{\\"q\\":\\"x\\"}"}}]},"finish_reason":"tool_calls"}]}' +
+      "\n\n",
+    "data: [DONE]\n\n",
+  ]);
+
+  const events = parseSseOutput(output).map((event) => ({
+    event: event.event,
+    data: event.data && event.data !== "[DONE]" ? JSON.parse(event.data) : event.data,
+  }));
+  const addedToolCall = events.find(
+    (event) =>
+      event.event === "response.output_item.added" && event.data?.item?.type === "function_call"
+  );
+  const completed = events.find((event) => event.event === "response.completed");
+
+  assert.ok(addedToolCall, "tool call must be emitted from the mixed chunk");
+  assert.equal(addedToolCall.data.item.call_id, "call_mixed");
+  assert.equal(addedToolCall.data.item.name, "lookup");
+  assert.ok(completed, "the terminal marker must still complete the response");
+  assert.ok(
+    completed.data.response.output.some((item) => item.type === "reasoning"),
+    "the reasoning item must remain in the completed response"
+  );
+  assert.equal(
+    completed.data.response.output.find((item) => item.type === "function_call")?.call_id,
+    "call_mixed"
+  );
+});
+
+test("translator: a textual reasoning chunk does not swallow its tool call", () => {
+  const state = initState(FORMATS.OPENAI_RESPONSES);
+  const mixedChunk = {
+    id: "chatcmpl-mixed",
+    model: "deepseek-ai/DeepSeek-R1",
+    choices: [
+      {
+        index: 0,
+        delta: {
+          content: "<think>plan before calling",
+          tool_calls: [
+            {
+              index: 0,
+              id: "call_mixed",
+              function: { name: "lookup", arguments: '{"q":"x"}' },
+            },
+          ],
+        },
+        finish_reason: "tool_calls",
+      },
+    ],
+  };
+  const events = [
+    ...openaiToOpenAIResponsesResponse(mixedChunk, state),
+    ...openaiToOpenAIResponsesResponse(null, state),
+  ];
+
+  const addedToolCall = events.find(
+    (event) =>
+      event.event === "response.output_item.added" && event.data?.item?.type === "function_call"
+  );
+  const completed = events.find((event) => event.event === "response.completed");
+
+  assert.ok(addedToolCall, "tool call must be emitted from the mixed chunk");
+  assert.equal(addedToolCall.data.item.call_id, "call_mixed");
+  assert.equal(addedToolCall.data.item.name, "lookup");
+  assert.ok(completed, "the translator flush must complete the response");
+  assert.ok(
+    completed.data.response.output.some((item) => item.type === "reasoning"),
+    "the reasoning item must remain in the completed response"
+  );
+  assert.equal(
+    completed.data.response.output.find((item) => item.type === "function_call")?.call_id,
+    "call_mixed"
+  );
 });

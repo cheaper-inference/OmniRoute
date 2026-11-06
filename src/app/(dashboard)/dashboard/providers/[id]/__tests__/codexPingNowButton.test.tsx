@@ -102,7 +102,7 @@ describe("Codex Ping now button", () => {
     expect(fetchMock).toHaveBeenCalledWith("/api/providers/conn-1/ping", { method: "POST" });
     const status = document.querySelector('[role="status"]');
     expect(status?.textContent).toBe("Ping completed.");
-    expect(status?.className).toContain("text-emerald-600");
+    expect(status?.className).toContain("text-success");
   });
 
   it("shows a skipped reason without implying the ping was sent", async () => {
@@ -113,7 +113,7 @@ describe("Codex Ping now button", () => {
     });
     const status = document.querySelector('[role="status"]');
     expect(status?.textContent).toBe("Quota exhausted; no request sent.");
-    expect(status?.className).toContain("text-amber-600");
+    expect(status?.className).toContain("text-warning");
   });
 
   it("falls back to a generic failure on an error response or network error", async () => {
@@ -135,6 +135,6 @@ describe("Codex Ping now button", () => {
     });
     const status = document.querySelector('[role="status"]');
     expect(status?.textContent).toBe("Ping failed.");
-    expect(status?.className).toContain("text-red-600");
+    expect(status?.className).toContain("text-error");
   });
 });

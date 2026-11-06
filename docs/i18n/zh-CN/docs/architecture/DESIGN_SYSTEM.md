@@ -4,228 +4,88 @@
 
 ---
 
-> **状态：** 参考文档 — 此处描述的标准化工作已**完成实施**（阶段 1–6：网格壁纸、基础组件、状态颜色集中管理、等宽字体 token、DataTable token 迁移、焦点环 → 强调色、Checkbox/Textarea 基础组件、`cn()` → tailwind-merge、每个独立页面均使用网格、流式 4K 内容外壳、不透明的数据表格表面）。本文档是仪表板设计 token、组件和约定的规范说明；下文的阶段划分保留用于说明每项决策的理由。
-> **范围：** OmniRoute 仪表板（`src/`）和营销网站（`_mono_repo/omnirouteSite/`）共享**同一套视觉形象** — 相同的方格纸网格背景（32px）、相同的颜色 token、标准化组件。
->
-> 给维护人员的实用说明：
->
-> - 剩余的若干硬编码十六进制值是**有意保留的**（始终采用深色主题的控制台终端、ReactFlow SVG 描边），**不得**将其批量替换为 token。
-> - 运行中实例上出现“更大”的网格是旧构建所致，而不是代码问题 — 网格尺寸为 32px，与网站完全相同。
-> - 深色主题的 `--table-*` 值与迁移前硬编码的 rgba 在字节层面完全一致；浅色主题的问题已修复（此前因无效的 `var()` 回退而错误地始终显示为深色）。
+> **地位：**仪表板是建立在**Keak CI UI套件**(`@keak/cheaper-inference-ui-kit`)，作为工作区`packages/ui-kit` (`@omniroute/ui-kit`；上游快照固定在`packages/ui-kit/UPSTREAM.md`中并由`npm run check:ui-kit-snapshot`保护) 提供。光是典型的主题；默认首选项是`system`。默认调色板是套件的**版本**外观（暖色纸质和铜色`#e5ac82`、 `packages/ui-kit/src/ci-editions.css`）；设置→外观→调色板提供**经典的**，该套件的带有石灰口音的基本标记。 Switzer 是UI的单一系列，显示和编码文本（`--ci-font-ui`； `--ci-font-display`和`--ci-font-mono`解析为它），由套件本身自托管（`packages/ui-kit/src/ci-fonts.css`，由`ci-tokens.css`导入）。瑞士脚本缺乏逐个字形的下降（`src/app/globals.css`）：Inter 用于西里尔文、希腊文和越南文，仅在`html[dir="rtl"]`下，Vazirmatn 用于阿拉伯文脚本。每个图标都是 Lucide 字形。
 
----
+## 1. 事物存在的地方
 
-## 1. 目的
+- **成套工具。** `packages/ui-kit/src`是`packages/ui-kit/UPSTREAM.md`中固定的提交处上游`src/`的逐字节副本（也记录许可证授权）； `PATCHES.md`列出本地补丁（无）。它作为源使用，无需构建： `next.config.mjs`对其进行转译， `tsconfig.json`映射`@omniroute/ui-kit` → `packages/ui-kit/src`和`@omniroute/ui-kit/*` → `packages/ui-kit/src/*` （`vitest.config.ts`和`vitest.mcp.config.ts`具有相同的别名）。通过其子路径（`@omniroute/ui-kit/table`、 `@omniroute/ui-kit/page-header`...）导入套件组件，而不是通过`@omniroute/ui-kit`桶：桶将每个组件（包括日期选择器）拉入每个导入器。套件样式表通过`src/app/globals.css` （`@import "../../packages/ui-kit/src/ci-styles.css"`，完整的表：核心`ci-ui.css`加上每个模式系列）进入。
+- **代币。** `packages/ui-kit/src/ci-tokens.css`声明`--ci-*`代币； `src/app/globals.css`将它们桥接到旧的OmniRoute名称（`--color-*`、 `--radius-*`、 `--font-sans`/`--font-mono`、 `--table-*`、 `--orch-status-*`、 `--color-fd-*`），因此现有的`var(--color-*)`读取和Tailwind实用程序继续工作。新代码使用Tailwind实用程序（`bg-surface`、 `text-text-muted`、 `border-border`、 `text-success`、 `bg-success-bg`、 `bg-chart-1`…）或套件类—从不使用十六进制值（`tests/unit/design-kit-bridge.test.ts`强制桥接）。 `text-primary`通过`--text-color-primary`解析为`--color-primary-ink` ，因此主要文本保持可读，而`bg-primary`/`border-primary`保留重音表面：在版本下，它是套件的`--ci-color-accent-active` （浅色深铜`#99562f` ，深色铜重音）；在经典下， lime-800在浅色下，石灰口音在深色下。图表系列使用`--color-chart-1`... `--color-chart-8`，每个都有一个文本安全的`--color-chart-N-ink`和一个不透明的`--color-chart-N-subtle`芯片色调，按套件系列顺序（`ciChartSeriesOrder`）分配。
+- **主题。** `<html className="ci-theme">` (`src/app/layout.tsx`) 将文档选择为套件主题。优选的是`light`、 `dark`或`system` （`THEME_CONFIG.defaultTheme = "system"`位于`src/shared/constants/appConfig.ts`中； `system`跟随`prefers-color-scheme`）。 `src/store/themeStore.ts`中的`applyTheme()` （由`THEME_BOOT_SCRIPT`镜像，内联在`src/app/layout.tsx`中，在水合之前运行）设置`data-theme="dark"|"light"`并一起切换`<html>`上的`.dark`类。该套件的暗令牌集以`data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`) 为密钥； OmniRoute自己的暗覆盖（ `globals.css`中的`.dark`块）和`.dark`类上的旧Tailwind `dark:`实用程序键。没有强调色预设：强调色始终来自套件，并且在商店加载时会删除旧版本中保留的预设。
+- **调色板。**两个，均来自套件 (`src/shared/constants/appearancePalette.ts`)：默认值`editions`和`classic`。 Editions 是`<html>`上套件的`data-ci-appearance="editions"`属性， `ci-editions.css` （由`ci-ui.css`导入）与`data-theme`组合；经典就是该属性的缺失。根布局服务器渲染属性，因此没有存储任何内容（或没有JS）的访问者在每个表面—仪表板、登录、 `/status`、错误页面、 `/docs`和PWA上获得版本。该选择将保留在同一个`theme`存储中的主题旁边（`palette`、 `setPalette()`、 `src/store/themeStore.ts`中的`applyPalette()` ），并在`THEME_BOOT_SCRIPT`绘制之前应用（`src/shared/utils/themeBootScript.ts`，内联在布局的`<head>`中），仅当存储的调色板为`"classic"`时才会删除该属性； `src/app/global-error.tsx`位于根布局之外，从同一存储应用它。不要将`data-ci-appearance`放在任何其他元素上：该套件将其与`html:root:has([data-ci-appearance="editions"])`匹配，因此一个后代将切换整个文档。 Editions `data-ci-editions-variant="landing"`变体适用于营销页面，而不是仪表板。浏览器 chrome：服务器在`viewport.themeColor`中呈现默认版本（每个`prefers-color-scheme`一个标签），并在`src/shared/constants/pwaThemeColors.ts`中呈现 Web 清单— `PWA_THEME_COLORS` ，这是版本`--ci-color-background` (`#f3f1e9` / `#11120f`) 的一个镜像，由`tests/unit/pwa-theme-colors.test.ts`固定到`ci-editions.css` 。然后，实时`<meta name="theme-color">`遵循存储的调色板和模式： `THEME_BOOT_SCRIPT`在绘制之前重写标签，主题商店的操作在每次更改时执行此操作（ `src/shared/utils/themeColorMeta.ts`中的`resolveThemeColor()` / `applyThemeColor()` ，其中`CLASSIC_PAGE_BACKGROUND`从套件的`ciTokens`读取）。明确的light/dark主题将每个标签设置为该模式； `system`为每个方案保留一种颜色。清单保留版本：每次安装都会获取一次，没有首选项。摩纳哥从探针（`monacoKitTheme.ts`）读取颜色；在版本下，探针读取会翻转一次同步传递的根`data-theme` ，因为该套件从根解析版本light/dark 。
+- **组件（适配器）。** `src/shared/components/index.tsx`保留OmniRoute组件API （相同的名称、默认导出和 props），其背后的原语是套件上的适配器：表单（`Button`、 `Input`、 `Textarea`、 `Checkbox`、 `Select`、 `Toggle`、 `Badge`、 `Card`）、覆盖和反馈（`Modal`/`ConfirmModal`、 `Tooltip`/`InfoTooltip`、 `NotificationToast`、 `EmptyState`、 `Loading`），结构（`Collapsible`、 `CollapsibleSection`、 `SegmentedControl`、 `Breadcrumbs`、 `Avatar`）和表（`DataTable`、 `FilterBar`、 `ColumnToggle`、 `FilterPills`、 `PresetSlider`）。适配器通过子路径导入 kit 组件，并将旧版 props 映射到它—上，例如`Button variant="primary"`是 kit `default`按钮（`--ci-button-primary-*`：亮色下的反面，暗色下带有`--ci-color-accent-foreground`墨水的重音）， `danger`是`destructive`， `warning`是 kit `warning`按钮。 `Badge`状态变体是套件音调，带有`<option>`子项的`Select`呈现套件`NativeSelect`。 `tests/unit/ui/adapters/*.test.tsx`固定每个适配器。
+- **壳。** `src/app/(dashboard)/layout.tsx`呈现`DashboardLayout`，后者呈现`src/shared/components/layouts/DashboardShell.tsx`：套件`SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`)， OmniRoute的导航逻辑位于`src/shared/components/Sidebar.tsx`中。指向`#main-content` “跳到内容”链接是第一个可聚焦元素。 `src/shared/components/Header.tsx`包含`SidebarTrigger`套件（shell 唯一的侧边栏切换开关）、Keak `ProductSwitcher`和命令面板打开器；它仅在`#main-content`内没有安装套件`PageHeader` (`.ci-page-header`) 时显示路由标题，因此具有自己的`PageHeader`页面有一个`h1`。 `src/shared/components/CommandPalette.tsx`是`Dialog`一个套件。
+- **图标。** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) 通过`ICON_MAP` (`src/shared/constants/iconMap.ts`) 将名称（屏幕使用的材质符号词汇表）解析为 Lucide 字形。材质符号字体和包消失了：地图中缺少的名称会呈现中性占位符字形 (`data-icon-missing="true"`) 并在生产之外记录控制台警告。 `npm run gen:icon-map`打印地图中缺少的正在使用的名称（`tests/unit/icon-map-coverage.test.ts`在没有 Lucide 图标的任何名称上失败； `tests/unit/icon-map-object-values.test.ts`涵盖存储在查找对象中的名称）； `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]`将文字`<span className="material-symbols-outlined">` spans 重写为`<Icon>`。
+- **品牌。** `src/shared/components/OmniRouteLogo.tsx`包装套件：默认导出`OmniRouteLogo`呈现`ProductIcon product="omniroute" variant="glyph"` （内联SVG、 `basePath` -safe）， `OmniRouteLockup`呈现`ProductLockup product="omniroute"` （可访问名称“Keak OmniRoute”），或者，对于白标签运营商，他们自己的`name`/`logoSrc`。产品切换器目标位于`src/shared/constants/keakProducts.ts` （`KEAK_PRODUCT_LINKS`、 `KEAK_ACTIVE_PRODUCT`）中。独立屏幕— `src/app/login/page.tsx`、 `src/app/status/page.tsx`、 `src/app/maintenance/page.tsx`、 `src/app/offline/page.tsx`、 `src/app/not-found.tsx`和`src/shared/components/ErrorPageScaffold.tsx` —显示锁定； `tests/unit/brand-pages-static.test.ts`守护着它。
 
-营销网站（`viral.omniroute.online`、`why.omniroute.online`、`omniroute.online`）和产品仪表板应该看起来像**同一个产品**。网站已经从仪表板借用了其调色板 — 其 `css/tokens.css` 甚至写着 _“调色板与 OmniRoute 仪表板（src/app/globals.css）保持一致”_。因此，两者在颜色层面已经约有 80% 保持一致。仪表板目前缺少的是：
+## 2. 规则
 
-1. 网站在每个页面中使用的**方格纸网格壁纸**。
-2. 网站已具备但仪表板缺少的一些**共享设计 token**（圆角比例、品牌渐变、`surface-2`、等宽字体）。
-3. **组件级一致性** — 一些仪表板组件使用硬编码的十六进制值/rgba，绕过了主题 token。
+1. 令牌，绝不是字面意思。特意保留的例外：始终黑暗的控制台终端和`STATUS_HEX` (`src/shared/constants/statusColors.ts`)，工具包状态调色板的解析十六进制镜像，供需要文字十六进制的调用者使用。分类调色板不再例外：它们依赖于套件的八个图表标记（`--color-chart-1..8`，加上`-ink`/`-subtle`），按照套件系列顺序，通过`src/shared/utils/categoricalPalette.ts` ，以及用于路由策略的`src/app/(dashboard)/dashboard/combos/strategyPalette.ts`； ReactFlow边缘和编排画布读取主题感知的`--orch-status-*`变量 (`src/shared/components/flow/edgeStyles.ts`)。
+2. 切勿手动修补`packages/ui-kit/src` ：与`scripts/dev/sync-ui-kit.sh <commit>`同步；预提交门`npm run check:ui-kit-snapshot` (`.husky/pre-commit`) 在与固定的上游提交不同的任何字节上失败（当上游克隆`UI_KIT_CLONE`或`_references/cheaper-inference-ui-kit`不存在时，它会跳过并发出警告）。当套件缺少某些内容时，请在适配器或屏幕中解决它并向上游询问。
+3. 套件文本默认为英语（`label = "Loading"`、 `loadingLabel = "Loading table"`...） 每当套件组件呈现文本时， —都会传递来自`useTranslations(...)`的翻译字符串。
+4. Tailwind实用程序胜过套件组件类（套件声明`@layer theme, base, components, utilities`及其规则位于`components`中） —使用实用程序进行间距和布局，而不是重新着色套件组件。
+5. 标题： `.ci-heading`用于页面和章节标题； `.ci-dashboard-display`仅适用于大而稀疏的显示文本，例如错误页面状态代码。两者都使用瑞士语。
+6. `tests/unit/dashboard-kit-sweep.test.ts`保护套件采用： `src/app`或`src/shared/components`下没有材料结扎跨度；在仪表板树（`src/app/(dashboard)`和`src/shared/components`）中，没有原始`<select>`、 `<textarea>`或`<table>` ，并且在列出的例外之外没有手工制作的`role="dialog"` （ `Select`适配器的本机分支`RequestLoggerDetail`）；每个原始`<button>`或`<input>`都需要一个包含`kit-exception:` （带有原因）的注释，最多在其上方 3 行结束；调色板色调和`dark:`变体仅在测试列出的文件中。
+7. 在PR之前验证两个主题和 390 px 视口（屏幕截图）； `tests/e2e/a11y.spec.ts`运行斧头。
 
-本文档包含相关分析和实施计划。
+## 3. 添加页面
 
----
+1. 页面以 kit 的 `PageHeader`（`@omniroute/ui-kit/page-header`，在
+   dashboard 内使用 `compact`）开头——包含标题、描述和 `actions`。这样外壳（shell）头部就会去掉它自己的标题。
+2. 使用 `@/shared/components`（适配器）构建控件；在没有适配器的地方，通过子路径使用 kit
+   组件（`Table`/`TableScrollArea`/`DataTableShell`、`Field`、`Alert`、`Tabs`、`RadioGroup`、
+   `Slider`……）。
+3. 图标：`<Icon name="…" />`。新名称要加入 `ICON_MAP`，并配上语义匹配的 Lucide
+   组件；`npm run gen:icon-map` 会列出仍缺失的名称。
+4. 颜色：使用语义化工具类（`text-success`、`bg-warning-bg`、`border-border`……），图表系列使用
+   `var(--color-chart-N)`；不使用 hex 值，也不使用只是重复同一颜色的 `dark:` 变体。
+5. 文本：所有字符串，包括传给 kit 组件的标签，都来自 `useTranslations`。新
+   键要加入 `src/i18n/messages/en.json`、`pt-BR.json` 和 `vi.json`（越南语一致性测试会锁定
+   每一个英文键）；其他语言由 i18n 同步填充。
+6. 在提交 PR 前运行这些守护检查：`tests/unit/dashboard-kit-sweep.test.ts`、
+   `tests/unit/icon-map-coverage.test.ts`、`tests/unit/icon-map-object-values.test.ts`、
+   `npm run check:dashboard-typecheck`（唯一能捕获 `iconMap.ts` 中重复导入的检查）、
+   `npm run check:ui-icu`，以及页面自身的测试。
 
-## 2. 原则
+## 4. 添加或修改适配器
 
-- **唯一事实来源 = `src/app/globals.css`。** 网站应与仪表板保持同步，绝不能反过来。新 token 必须首先添加到 `globals.css`。
-- **只用 token，不用字面量。** 组件使用语义化 token（`bg-surface`、`text-primary`、`border-border`），绝不直接使用原始 `#hex`。
-- **低调，而非张扬。** 网格是位于内容背后的淡化壁纸 — 它绝不能降低文本对比度，也不能干扰 UI。
-- **感知主题。** 所有内容在 `.dark`（产品的标志性外观）和浅色主题下均可正常使用。
-- **渐进式发布。** 先发布网格和 token（低风险、高可见度），然后分批清理组件。
+1. 保持 `src/shared/components/index.tsx` 的公共 API 不变：相同的导出名、默认导出以及所接收的 props。在适配器内部将旧版 props 映射到 kit 上（参见 `Button.tsx`：`VARIANT_TO_KIT`、`SIZE_TO_KIT`）。
+2. 通过子路径导入 kit（`@omniroute/ui-kit/<component>`）。
+3. 针对 kit 缺陷的变通方案放在适配器中（如果修复的是样式，则放在 `globals.css` 的 `@layer components` 中），绝不放在 `packages/ui-kit/src` 中。
+4. 添加或更新 `tests/unit/ui/adapters/<name>.test.tsx`。对于调用方众多的适配器，要比较变更前后渲染出的标记——内边距或包裹元素的变化会扩散到每个界面。
 
----
+## 5. 更新套件
 
-## 3. 当前状态 — 已经对齐与尚未对齐的部分
+`npm run check:ui-kit-upstream`将`packages/ui-kit/UPSTREAM.md`中固定的版本与上游存储库的最新`v*`标签进行比较，并在发布时打印同步命令。
 
-### 3.1 颜色 — 已统一 ✅
+每日`UI Kit upstream watch`工作流程 (`.github/workflows/ui-kit-upstream-watch.yml`) 运行相同的检查。当 pin 位于后面时， `scripts/ci/ui-kit-sync-pr.sh`会在滚动分支`chore/ui-kit-sync-latest`上针对最高`release/vX.Y.Z`分支保持一个同步PR打开。它永远不会合并：每个套件版本仍然需要对本地VPS进行目视检查。当新版本发布时，分支会被重建，否则就不会发生。手动提交的开放PR不会被覆盖，并且维护者关闭未合并的版本的PR将保持关闭状态，直到新版本发布。
 
-每种品牌颜色和表面颜色在**值层面**均已与网站匹配（只有名称不同 — 仪表板使用 `--color-` 前缀）。已在 `src/app/globals.css:30-128` 中验证：
+当无法打开PR时（目标版本被冻结、 PR已手动提交、 PR已关闭或未设置PR令牌），工作流会保持一个跟踪问题处于打开状态，并说明原因。
 
-| 概念                   | 网站 token（`tokens.css`）                  | 仪表板 token（`globals.css`）   | 匹配情况       |
-| ---------------------- | ------------------------------------------- | ------------------------------- | -------------- |
-| 主色                   | `--primary #e54d5e`                         | `--color-primary #e54d5e`       | ✅             |
-| 主色悬停态             | `--primary-hover #c93d4e`                   | `--color-primary-hover #c93d4e` | ✅             |
-| 强调色                 | `--accent #6366f1`                          | `--color-accent #6366f1`        | ✅             |
-| 强调色 2               | `--accent-2 #8b5cf6`                        | `--color-accent-hover #8b5cf6`  | ✅（已重命名） |
-| 强调色 3               | `--accent-3 #a855f7`                        | `--color-accent-light #a855f7`  | ✅（已重命名） |
-| 成功 / 警告 / 错误     | `#22c55e / #f59e0b / #ef4444`               | 完全相同                        | ✅             |
-| 交通灯                 | `#ff5f56 / #ffbd2e / #27c93f`               | 完全相同                        | ✅             |
-| 深色背景 / 表面 / 边框 | `#0b0e14 / #161b22 / rgba(255,255,255,.08)` | 完全相同                        | ✅             |
-| 浅色背景 / 表面 / 文本 | `#f9f9fb / #fff / #1a1a2e`                  | 完全相同                        | ✅             |
+该工作流程使用两个秘密：
 
-**结论：** 无需进行颜色迁移。视觉形象已经统一；我们是在对其进行_完善_，而不是重新构建。
+- `secrets.UI_KIT_READ_TOKEN`：私有上游存储库的只读令牌。当工作流无法读取上游（没有令牌、令牌停止工作或GitHub无法访问）时，运行将保持绿色，但会写入一条警告并保持一个单独的问题处于打开状态，一旦稍后的运行可以再次读取上游，该问题就会自行关闭。
+- `secrets.UI_KIT_SYNC_PR_TOKEN`：此存储库上的细粒度令牌，具有内容和拉取请求写入权限。默认的`GITHUB_TOKEN`不能在这里创建PRs ，并且它打开的PR不会触发CI。如果没有此令牌，工作流只会推送分支。
 
-### 3.2 差距 — 仪表板缺少的内容
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]`将该提交处的上游`src/` （`latest` =最新的`v*`标记）复制到`packages/ui-kit/src`中，应用单个允许的转换（它从相对导入中删除`.js`后缀），并将`packages/ui-kit/package.json`和`package-lock.json`中的工作区版本设置为上游版本。然后：查看`git diff packages/ui-kit`，对两个主题中的提供程序、设置、组合、用法和端点进行可视化传递，运行`npm run check:ui-kit-snapshot`和`npm run test:vitest:ui`，并使用上游变更日志打开PR 。
 
-| 差异                     | 站点现状                                                                      | 仪表盘现状                                         | 操作                  |
-| ------------------------ | ----------------------------------------------------------------------------- | -------------------------------------------------- | --------------------- |
-| **网格壁纸**             | `body::before` 方格纸效果、`--grid-line`、`--grid-size 32px`、`--section-alt` | **✅ 已添加（Phase 1）**                           | **Part A**            |
-| **圆角尺度**             | `--radius 14px`、`--radius-sm 9px`                                            | 已添加 `--radius 14px`；`-sm` + 组件重新映射待完成 | **Part B / Phase 2**  |
-| **品牌渐变**             | `--grad-brand 135deg primary→accent-3`                                        | **✅ 已添加令牌（Phase 1）**；将在 Phase 2 中使用  | **Part B**            |
-| **嵌套表面**             | `--surface-2 #1c2230`                                                         | **✅ 已添加（Phase 1）**                           | **Part B**            |
-| **等宽字体**             | `--font-mono`（ui-monospace 字体栈）                                          | 待完成（Phase 4，与使用方一并处理）                | **Part B**            |
-| **`text-muted`（深色）** | `#8b8b9e`                                                                     | `#a1a1aa`（zinc-400）                              | 协调统一 — **Part B** |
+## README图
 
-### 3.3 主题机制（确保不破坏任何功能）
+根`README.md`嵌入的 12 个图表 (`docs/diagrams/*.svg`) 是应用于静态图像的套件，它们是生成的，而不是手工绘制的： `scripts/docs/gen-readme-*.mjs`上的 13 个生成器文件（12 个图表加上`gen-readme-diagrams.mjs`驱动程序）和`tests/unit/docs/readme-*-svg.test.ts`上的 12 个过时测试，每个图表一个，每个字节将提交的文件与其生成器的输出（作业`test-unit`）进行比较。
 
-- **Tailwind v4，CSS 优先**（无 `tailwind.config.*`）。令牌在 `:root`/`.dark` 中定义，并通过 `@theme inline` 暴露给工具类（`globals.css:130-179`）。
-- **通过 `<html>` 上的 `.dark` 类启用深色模式**（`globals.css:22` 中的 `@custom-variant dark`），由自定义 Zustand store（`src/store/themeStore.ts`）切换，默认主题 = `system`（`src/shared/constants/appConfig.ts:11`）。站点改用 `html[data-theme="light"]`——**两种机制不同，但彼此不会相交**（来源相互独立），因此不存在冲突。我们保留仪表盘的 `.dark` 机制。
-- **支持运行时覆盖主色**（`themeStore.ts:85-97`，预设位于 `COLOR_THEMES`）——用户可以替换 `--color-primary`。任何引用 `--color-primary` 的新令牌（渐变等）都会自动继承这些覆盖。✅
-- **Tailwind v4 保留的圆角名称：**`--radius-sm/md/lg/...` 是 `rounded-*` 工具类的底层变量。重新定义它们会追溯性地改变所有现有的 `rounded-*`（例如，`rounded-sm` 在 12 个文件中使用）。因此，小圆角值和组件重新映射有意推迟到 Phase 2，届时会与使用方一起修改。
+- **代币。** `scripts/docs/readme-diagram-theme.mjs` copies the Editions palette (the default look) from `packages/ui-kit/src/ci-editions.css` (pinned against that file by `tests/unit/docs/readme-diagram-theme.test.ts`, which also checks WCAG AA for every text colour on every surface in both schemes; the one exception, light `warn`, is the kit warning darkened 10 % because the kit value is 4.46:1 on the canvas) and defines the text roles on the kit's type scale (`ci-tokens.css`): Switzer at the kit's weights (400/500/600, display at 500) and tracking for everything, except the code roles (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`), which are IBM Plex Mono and are only for commands, URLs, identifiers and terminal screens.文件内的亮值位于`:root`上，暗值位于`prefers-color-scheme: dark`后面，因此每个图像都遵循查看者在GitHub上的方案。
+- **字体。** GitHub Markdown 不携带CSS ，并且迷彩代理会阻止每个外部获取，因此套件类型必须在文件内传输。 `scripts/docs/readme-outline.mjs`是每个生成器的最后一步，它使用HarfBuzz塑造 Switzer 角色，并将它们绘制为矢量轮廓（`<defs>`路径和`<use>`），并使用 Switzer 缺乏的根据其自己的度量绘制的箭头和几何符号。轮廓，绝不是嵌入字体：Switzer 的许可证 (`packages/ui-kit/src/fonts/FFL.txt`) 禁止在未经书面同意的情况下进行子集化和格式转换，并允许矢量图形，因此不要重新引入 Switzer `@font-face`或`data:` URI。文件中留下的一种字体是OFL IBM Plex Mono 子集，用于保留真实代码文本 (`scripts/docs/readme-fonts.mjs`)，由这些字符构建；任何不能嵌入的字形都会抛出异常。
+- **再生。** `npm run docs:readme-diagrams`按README顺序重写所有 12 个文件，并为每个文件打印一行及其大小。单个生成器也可以独立运行（`node scripts/docs/gen-readme-<name>.mjs`； `free-tier-budget`需要`node --import tsx/esm`因为它的数据来自`open-sse/config/freeModelCatalog.ts`中的实时目录加载器；目录更改的CI结果位于`docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`中）。将生成器和SVG一起提交。
+- **证明。** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>`以GitHub服务的方式渲染文件（ `<img>`标签、camo 的`Content-Security-Policy`、 `image/svg+xml`），捕获浅色和深色框架并报告页面发出的外部字体请求（必须为 0）。
+- **预算。**每个文件低于 200 个KB （每个过时测试都断言这一点）； 500 KB是任何README镜像的硬上限（ SVG studio 验证器的规则）。
+- **复制不变，从门开始计数。**品牌重塑改变了类型和调色板，而不是单词：每个生成器在`*_COPY`常量中携带其图表的副本（或从实时目录构建它），该常量既是绘制的文本也是大纲步骤的输入。规范图形保留在`<text>`节点中（轮廓一旦勾勒就不可见， `fill-opacity:0`），由`check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) 读取；门读取的图表的陈旧性测试也在生成的文件上运行其验证器，因此与代码漂移的数字无法通过测试—修复门读取的源，而不是生成器中的数字。
 
----
+## 七、参考指标
 
-## 4. A 部分 — 方格纸网格背景（核心诉求）— 已实现（阶段 1）
-
-### 4.1 它是什么
-
-来自网站（`_mono_repo/omnirouteSite/css/base.css`）的完整实现方案：一个**固定、覆盖整个视口的伪元素**，绘制两个 1px 线性渐变，并以 `z-index:-1` 位于所有内容之后。
-
-```css
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
-```
-
-**为什么即使 `body` 设置了不透明的 `background-color`，这种方式仍然有效：**带有 `z-index:-1` 的 `::before` 会绘制在元素自身背景的_上方_，但位于其正常文档流内容的_下方_。因此，`--color-bg` 作为基础填充色，网格叠加在其上，而应用内容则渲染在网格上方。
-
-### 4.2 代码库中已有的先例
-
-`src/app/landing/page.tsx:16-26` **已经在单个页面中实现了相同的网格**——但使用的是**红色**线条（`#E54D5E`，不透明度 `0.06`），网格尺寸为 **50px**，并带有动态光球。因此，这种模式已经在产品中得到验证；本项工作会将其提升为**全局、主题感知**的壁纸。
-
-### 4.3 新增的令牌（位于 `globals.css`）
-
-```css
-:root {
-  /* 浅色主题——相较网站使用的 0.045，提高了网格不透明度，从而确保壁纸
-     在内容密集的仪表板中确实可见（卡片和界面框架覆盖了视口的大部分区域） */
-  --grid-line: rgba(0, 0, 0, 0.07);
-  --grid-size: 32px;
-  --section-alt: rgba(0, 0, 0, 0.022);
-}
-.dark {
-  /* 深色主题——出于相同原因，从 0.035 调高 */
-  --grid-line: rgba(255, 255, 255, 0.06);
-  --section-alt: rgba(255, 255, 255, 0.018);
-}
-```
-
-### 4.4 唯一的阻碍——已移除
-
-该网格天然是全局的（它会一次性覆盖面板、`auth`/`login`、错误页面——即所有路由）。面板中恰好有**一个**元素遮住了它：
-
-- `src/shared/components/layouts/DashboardLayout.tsx`——最外层包装器绘制了不透明的 `bg-bg`。其下方的所有元素本来就已经是透明的（`<main>`、滚动容器、内部的 `max-w-7xl`），因此**移除 `bg-bg`** 后，body 网格便可透过内容区域显示出来（body 的 `--color-bg` 仍作为基础填充色）。
-
-  ```diff
-  - <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-bg">
-  + <div className="flex h-dvh min-h-0 w-full overflow-hidden">
-  ```
-
-### 4.5 界面框架交互（侧边栏 / 顶栏）
-
-- `Header`（`Header.tsx:207`，`bg-bg`）和 `Sidebar`（`Sidebar.tsx:430`，`bg-sidebar`）保持**不透明** → 网格仅显示在**内容区域**中，并由纯色界面框架包围。默认效果克制沉稳，与网站将界面框架和画布分隔开的方式一致（决策 D3 = 纯色）。
-
-### 4.6 登录 / 身份验证 / 错误页面
-
-这些页面直接渲染在 `<body>` 下（没有面板界面框架），因此全局网格应自动显示在它们后面。**阶段 5 — 已完成：**这些独立的全屏包装器实际上是不透明的（`min-h-screen … bg-bg`，其中 `bg-bg` 与 `<body>` 使用相同的纯色填充），这会遮住所有非仪表板页面上的网格，而不只是登录页面。现在它们全部改为透明，以便显示共享壁纸：`login`、`forgot-password`、`callback`、`maintenance`、`offline`、`status`、`terms`、`privacy`、`onboarding` 和 `ErrorPageScaffold`（覆盖 `400`/`401`）。这完成了 **D4**（从仅限登录页面扩展到所有独立页面）。由 `tests/unit/design-grid-background.test.ts` 提供保障。
-
-### 4.7 落地页
-
-`landing/page.tsx` 保留其更丰富的动态背景（光球 + 暗角）——这是其专属的营销展示效果（决策 D5 = 保持不变）。
-
----
-
-## 5. B 部分 — Token 统一
-
-阶段 1 添加惰性的、无冲突的标识 Token（`--surface-2`/`--color-surface-2`、`--grad-brand`、`--radius`）。阶段 2 将圆角尺度接入 Tailwind 并重新指向组件；阶段 4 添加 `--font-mono` 及其使用方。
-
-| Token                      | 原因                                              | 阶段                          |
-| -------------------------- | ------------------------------------------------- | ----------------------------- |
-| `--radius` / `--radius-sm` | 使用统一的圆角尺度（14/9），而不是临时混用 6/8/12 | 1（值）/ 2（接入 + 重新指向） |
-| `--grad-brand`             | 用于主要 CTA 的品牌渐变（红→紫），与站点保持一致  | 1（Token）/ 2（Button）       |
-| `--surface-2`              | 嵌套面板 / 表头 / 内嵌行                          | 1                             |
-| `--font-mono`              | 代码块、终端、ID、端点                            | 4                             |
-| `--text-muted` 协调        | 在站点↔面板之间选择一个值（推荐 `#a1a1aa`）       | 2                             |
-
-**D2（text-muted）：**站点为 `#8b8b9e`，仪表板为 `#a1a1aa`。建议保留**仪表板的 `#a1a1aa`**，并更新_站点_以保持一致。这属于外观调整。
-
----
-
-## 6. C 部分 — 组件标准化（阶段 2–4）
-
-自定义组件（不使用 shadcn/Radix）、Tailwind v4，语义化 Token **大部分**已采用（195 个文件导入共享桶文件）。工作重点是移除**绕过机制**。组件目录：`src/shared/components/`。
-
-| #   | 项目                               | 文件                                                                                                                        | 问题 → 目标                                                                                          | 阶段 |
-| --- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ---- |
-| C1  | **圆角对齐**                       | `Button.tsx:14-18`、`Card.tsx:39`、`Modal.tsx`、`Input.tsx`、`Select.tsx`                                                   | 混用 6/8/12px → `--radius`/`--radius-sm`（14/9）                                                     | 2    |
-| C2  | **按钮渐变 + `accent` 变体**       | `Button.tsx:5-12`                                                                                                           | 主要按钮是纯红→红；改为与 `--grad-brand` 对齐；添加缺失的 `accent` 变体。约 195 个导入方——可见度最高 | 2    |
-| C3  | **表格**                           | `DataTable.tsx:122-176`、`logTableStyles.ts`、`globals.css:405-414`                                                         | 100% 使用内联硬编码 rgba + 不存在的变量；迁移到 Token，并淘汰不一致的样式                            | 3    |
-| C4  | **集中管理状态颜色**               | `flow/edgeStyles.ts`、`TokenHealthBadge.tsx`、`DegradationBadge.tsx`、`ProviderCascadeNode.tsx`、`Badge.tsx` + 5 个辅助模块 | 同一十六进制颜色有 6+ 份副本 → 基于 `--color-success/warning/error` 的单一模块                       | 3    |
-| C5  | **卡片边框**                       | `Card.tsx:39`                                                                                                               | `border-white/5` → 品牌色 `/8`                                                                       | 2    |
-| C6  | **协调焦点环** ✅ 已完成           | `globals.css` 中的 `--focus-ring`（强调色）与表单控件的 `ring-primary/30`                                                   | 统一为**强调色（紫色）**，以匹配全局焦点环，并与红色错误环明确区分；错误状态仍为红色                 | 4    |
-| C7  | **添加 `Checkbox` + `Textarea`**   | 带有内联 `accentColor:#6366f1` 的原始 `<input>`/`<textarea>`                                                                | Token 驱动的基础组件                                                                                 | 4    |
-| C8  | **清理硬编码十六进制颜色**         | `ConsoleLogViewer.tsx:240`、`ComboLiveStudio.tsx:306`、Modal 圆点、约 14 个图表文件                                         | 字面值 → Token                                                                                       | 4    |
-| C9  | **`cn()` → clsx + tailwind-merge** | `src/shared/utils/cn.ts`                                                                                                    | 冲突类会叠加；C1 覆盖需要此项                                                                        | 2    |
-
-**已符合品牌规范（由 Token 驱动，仅需调整圆角）：**`Badge`、`Toggle`、`SegmentedControl`、`Input`、`Select`。
-
----
-
-## 7. 发布计划
-
-- **阶段 1 — 网格 + 品牌标识令牌（本 PR）。** `globals.css` 网格 + `--surface-2`/`--grad-brand`/`--radius` 令牌；`body::before` 壁纸；移除 `bg-bg` 阻碍项；静态防护测试。风险低，可通过一个提交回滚。
-- **阶段 2 — 基础组件（C1、C2、C5）— 已在本 PR 中完成。** 通过 `@theme` 添加语义化圆角工具类 `rounded-card` (14px) / `rounded-control` (9px)（使用自定义名称，因此默认的 `rounded-sm/md/lg/xl` 保持不变——不会引发波及 400 个文件的大规模修改）；Card/Modal → 14px，Button/Input/Select → 9px；Button 主按钮 → `--grad-brand`（红色→紫色）+ 新增 `accent` 变体；Card 边框 → `border-border` 令牌 (0.08)。**已推迟：** `cn()`→tailwind-merge (C9) 需要新增依赖；临时性的 `rounded-lg` 全面清理（326 个文件）维持原状，因为基础组件已覆盖大部分界面。
-- **阶段 3 — 状态颜色 + 表格（C3、C4）— 已在本 PR 中完成。** ✅ **C4**（`src/shared/constants/statusColors.ts` — 以 `STATUS_HEX` 作为单一来源；`flow/edgeStyles.ts` + `TokenHealthBadge` 已改为引用它，表现一致/十六进制值相同）。✅ **`--font-mono`** 令牌。✅ **C3 (DataTable)** — 使用一组 `--table-*` 令牌（`--table-header-bg/-row-zebra/-row-hover/-cell-border/-row-selected`）替换了所有内联 rgba，以及无效的 `var(--bg-table-header)` / `var(--text-secondary)` 回退值；其**深色模式值与旧的硬编码 rgba 完全相同**（深色模式逐字节一致），而浅色模式值修复了此前始终呈现深色的问题。表头边框 → `--color-border`，次要文本 → `--color-text-muted`。**合并前需要进行一次视觉检查。**（未触及：`logTableStyles.ts` 和旧版 Ant `.ant-table` 规则——这些将单独处理，优先级较低。）
-- **阶段 4 — 清理（C6、C7、C9 已完成；C8 待完成）。** ✅ **C9** `cn()` → `twMerge(clsx(...))`（已将 clsx + tailwind-merge 添加为依赖）——调用方的 `className` 现在会正确地_替换_基础组件中冲突的类，而不是将它们叠加。✅ **C7** 新增 `Checkbox` + `Textarea` 基础组件（由令牌驱动，并从桶文件导出；属于增量添加——后续可逐步采用，以替换 32 个原生复选框 / 41 个原生文本区域）。✅ **C6** 焦点环协调——表单控件（`Input`/`Select`/`Textarea`/`Toggle`/`Checkbox`）现在聚焦时使用**强调色（紫色）**焦点环，以匹配全局 `--focus-ring`，并避免与红色错误环冲突；红色错误状态保持不变。⏳ **C8 十六进制颜色清理并非盲目的查找/替换**——已确认以下问题项是_有意如此_且必须保留：`ConsoleLogViewer.tsx:240`（始终为深色的终端）、`TokenHealthBadge` 弹出框、ReactFlow SVG 描边。仅迁移确实需要感知主题的十六进制颜色。
-
-每个阶段：`npm run lint` + `npm run typecheck:core` + 一次视觉检查。
-
----
-
-## 8. 待定事项（建议）
-
-- **D1 — Button 主按钮：** 保持红色→红色，还是切换为**红色→紫色 `--grad-brand`**？建议：**红色→紫色**（阶段 2）。
-- **D2 — 网格线颜色：****中性色**（站点风格）——已选定——而非品牌红色。尺寸为 **32px**（根据负责人的反馈，相较原始的 46px 缩小约 30%——46px 的网格单元在仪表盘布局中显得过大）。
-- **D3 — 界面框架鲜艳度：** 侧边栏/页眉使用**纯色**——已选定。
-- **D4 — 认证/登录网格：** ✅ **已完成（阶段 5）**——已从每个独立的全屏包装器中移除不透明的 `bg-bg`（而不只是登录页），因此所有屏幕上都能显示网格。参见 §4.6。
-- **D5 — 落地页：** 保持动画启动画面不变。已选定。
-- **D6 — 全产品统一使用 14/9 圆角：** 建议：是（阶段 2）。
-- **D7 — 阶段 1 优先发布：** 已选定。
-- **D8 — 布局宽度（阶段 5）：** 仪表盘内容外壳此前限制为 `max-w-7xl` (1280px)，导致其在大型显示器上居中显示，两侧留有较宽的空白边距。✅ **已完成**——已提升为流式 `max-w-[3840px]`（真正的 4K）：内容现在会随视口扩展至约 4K，仅在超过该宽度后居中（`DashboardLayout.tsx`）。有意保持较窄的页面仍按设计维持窄幅（`ProviderOnboardingWizard` max-w-5xl，`Rtk`/`CavemanContextPageClient` max-w-6xl）。
-- **D9 — 不透明数据表格（阶段 6）：** 仪表盘内容区域现已透明（因此网格壁纸可以透出，阶段 5），但若数据表格的容器不是不透明表面，网格就会透过其透明偶数行 / 低透明度斑马纹显示出来。✅ **已完成**——现在所有不在卡片内的表格都会绘制 `bg-surface`（对于 `<DataTable>` 基础组件，则在其滚动容器上设置 `background: var(--color-surface)`）。已修复：`DataTable`（基础组件）、`ProxyLogger`/`RequestLoggerV2`（其 `<Card>` 的 `bg-black/5 dark:bg-black/20` 色调通过 tailwind-merge 覆盖了 Card 的 `bg-surface` → 约 95% 透明）、`BatchListTab`/`FilesListTab`/`CacheEntriesTab`/`ReasoningCacheTab`/`cache page`/`FreePoolTab`/`ModelMappingTable`/`HeaderTable`，以及缓存视图中的两个 CSS 网格“表格”（`bg-surface/35` → `bg-surface`）。经验证，已位于 `<Card>`/Modal 内的表格是不透明的，因此有意保持不变（在这些位置添加 bg-surface 只是无实际作用的冗余操作）。网格本身**无需更改**——仪表盘的 `body::before` 与站点逐字节一致（`--grid-size: 32px`）；运行实例中出现的任何“更大网格”都是 `#4143` 之前的陈旧构建，而非代码问题。由 `tests/unit/design-grid-background.test.ts` 提供防护（阶段 6 区块）。
-
----
-
-## 9. 范围外事项 / 风险
-
-- **不更改调色板** — 现有颜色已匹配；我们只补充缺失的令牌。产品不会出现重新着色的风险。
-- **不更改主题引擎** — 保留 `.dark` + Zustand store。
-- **圆角调整（阶段 2）影响范围广** — 会涉及每个卡片/按钮/输入框；合并前需目视检查内容繁多的界面（表格、模态框）。
-- **表格（C3）**包含最多的硬编码样式，回归风险范围也最大 — 应放在独立的 PR 中处理。
-
----
-
-## 10. 参考索引
-
-| 区域                         | 路径                                                                                                                 |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| 仪表板令牌                   | `src/app/globals.css`（`:root`、`.dark`、`@theme inline`、`body`、`body::before`）                                   |
-| 主题 store                   | `src/store/themeStore.ts`、`src/shared/components/ThemeProvider.tsx`、`src/shared/constants/appConfig.ts:9-11`       |
-| 面板外壳（在此解除网格阻塞） | `src/shared/components/layouts/DashboardLayout.tsx`                                                                  |
-| 框架 UI                      | `src/shared/components/Header.tsx:207`、`src/shared/components/Sidebar.tsx:430`                                      |
-| 网格先例                     | `src/app/landing/page.tsx:16-26`                                                                                     |
-| 基础组件                     | `src/shared/components/{Button,Card,Input,Select,Badge,Modal,Toggle,SegmentedControl,Loading,Tooltip,DataTable}.tsx` |
-| 状态颜色来源                 | `flow/edgeStyles.ts`、`TokenHealthBadge.tsx`、`DegradationBadge.tsx`、`logTableStyles.ts`                            |
-| `cn` 工具                    | `src/shared/utils/cn.ts`                                                                                             |
-| 阶段 1 防护测试              | `tests/unit/design-grid-background.test.ts`                                                                          |
-| 站点参考                     | `_mono_repo/omnirouteSite/css/tokens.css`、`css/base.css`                                                            |
+- `src/app/globals.css` —令牌桥、 `.dark`覆盖、 OmniRoute `@layer components`扩展
+- `packages/ui-kit/UPSTREAM.md` —固定上游提交和许可证授权； `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-editions.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx`及其旁边的适配器； , , , , , `src/shared/components/Header.tsx` `src/shared/components/Sidebar.tsx` `src/shared/components/layouts/DashboardShell.tsx`, , , , , `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`, `scripts/dev/codemod-material-icons.mjs`
+- `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
+- `src/store/themeStore.ts`, `src/shared/utils/themeBootScript.ts`, `src/shared/constants/appearancePalette.ts`, `src/shared/constants/pwaThemeColors.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

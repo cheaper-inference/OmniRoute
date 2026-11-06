@@ -16,6 +16,25 @@ test("hasThinkTags detects opening tags and ignores empty input", () => {
   assert.equal(hasThinkTags(""), false);
 });
 
+test("streaming parser preserves text across every pair of chunk boundaries", () => {
+  const text = "before<think>reasoning</think>after";
+  for (let first = 0; first <= text.length; first++) {
+    for (let second = first; second <= text.length; second++) {
+      const ctx = { buffer: "", insideThink: false };
+      let content = "";
+      let reasoning = "";
+      for (const chunk of [text.slice(0, first), text.slice(first, second), text.slice(second)]) {
+        const result = processStreamingThinkDelta(chunk, ctx);
+        content += result.contentDelta || "";
+        reasoning += result.reasoningDelta || "";
+      }
+      const flushed = flushThinkBuffer(ctx);
+      assert.equal(content + (flushed.contentDelta || ""), "beforeafter");
+      assert.equal(reasoning + (flushed.reasoningDelta || ""), "reasoning");
+    }
+  }
+});
+
 test("extractThinkTags returns reasoning and cleaned content", () => {
   const result = extractThinkTags("Hello <think>step 1</think> world");
 

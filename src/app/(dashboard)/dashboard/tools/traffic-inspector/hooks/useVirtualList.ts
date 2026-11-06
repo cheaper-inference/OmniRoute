@@ -35,34 +35,37 @@ export function useVirtualList<T>(items: T[], containerHeight: number): VirtualL
     };
   }, []);
 
-  const rowRef = useCallback((index: number) => (el: HTMLDivElement | null) => {
-    const observers = observersRef.current;
-    if (el) {
-      const existing = observers.get(index);
-      if (existing) existing.disconnect();
-      const ro = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          const h = entry.contentRect.height;
-          if (h > 0) {
-            setHeights((prev) => {
-              if (prev.get(index) === h) return prev;
-              const next = new Map(prev);
-              next.set(index, h);
-              return next;
-            });
+  const rowRef = useCallback(
+    (index: number) => (el: HTMLDivElement | null) => {
+      const observers = observersRef.current;
+      if (el) {
+        const existing = observers.get(index);
+        if (existing) existing.disconnect();
+        const ro = new ResizeObserver((entries) => {
+          for (const entry of entries) {
+            const h = entry.contentRect.height;
+            if (h > 0) {
+              setHeights((prev) => {
+                if (prev.get(index) === h) return prev;
+                const next = new Map(prev);
+                next.set(index, h);
+                return next;
+              });
+            }
           }
+        });
+        ro.observe(el);
+        observers.set(index, ro);
+      } else {
+        const existing = observers.get(index);
+        if (existing) {
+          existing.disconnect();
+          observers.delete(index);
         }
-      });
-      ro.observe(el);
-      observers.set(index, ro);
-    } else {
-      const existing = observers.get(index);
-      if (existing) {
-        existing.disconnect();
-        observers.delete(index);
       }
-    }
-  }, []);
+    },
+    []
+  );
 
   // Compute cumulative offsets — reads heights from state (not a ref)
   const offsets: number[] = [];

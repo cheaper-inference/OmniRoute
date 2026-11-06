@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Card, Button } from "@/shared/components";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import Icon from "@/shared/components/Icon";
 
 interface PlaygroundResult {
   data: unknown;
@@ -63,7 +65,7 @@ export function PlaygroundCard({
       {/* Header row */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-[18px] text-text-muted">labs</span>
+          <Icon name="labs" size={18} className="text-text-muted" />
           <h3 className="text-sm font-semibold">
             {t("exampleLabel")} · {kindLabel}
           </h3>
@@ -72,7 +74,7 @@ export function PlaygroundCard({
 
       {/* Endpoint display */}
       <div className="mb-3">
-        <label className="block text-xs text-text-muted mb-1">{t("endpoint")}</label>
+        <span className="block text-xs text-text-muted mb-1">{t("endpoint")}</span>
         <code className="block text-xs font-mono bg-bg-subtle rounded px-2 py-1.5 border border-border text-text-main truncate">
           {apiEndpoint}
         </code>
@@ -83,14 +85,9 @@ export function PlaygroundCard({
 
       {/* Action row */}
       <div className="mt-4 flex items-center justify-between gap-2">
-        <button
-          type="button"
-          onClick={handleCopyCurl}
-          className="inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-text-primary transition-colors"
-        >
-          <span className="material-symbols-outlined text-[14px]">content_copy</span>
+        <Button variant="ghost" size="sm" icon="content_copy" onClick={handleCopyCurl}>
           {curlCopied ? t("copied") : t("copyCurl")}
-        </button>
+        </Button>
         <Button size="sm" onClick={() => void onRun()} disabled={running} loading={running}>
           {running ? t("running") : `▶ ${t("run")}`}
         </Button>
@@ -101,13 +98,9 @@ export function PlaygroundCard({
         <div className="mt-3">
           <div className="flex items-center justify-between mb-1">
             <span className="text-xs text-text-muted font-mono">cURL</span>
-            <button
-              type="button"
-              onClick={() => setKeyRevealed((v) => !v)}
-              className="text-xs text-text-muted hover:text-text-primary"
-            >
+            <Button variant="ghost" size="sm" onClick={() => setKeyRevealed((v) => !v)}>
               {keyRevealed ? t("hideKey") : t("revealKey")}
-            </button>
+            </Button>
           </div>
           <pre className="text-xs bg-bg-subtle border border-border rounded p-2 overflow-x-auto whitespace-pre-wrap break-all">
             {displayedCurl}
@@ -117,9 +110,9 @@ export function PlaygroundCard({
 
       {/* Error display */}
       {error && (
-        <div className="mt-3 flex items-start gap-2 rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2">
-          <span className="material-symbols-outlined text-[16px] text-red-400 shrink-0">error</span>
-          <p className="text-xs text-red-400">{error}</p>
+        <div className="mt-3 flex items-start gap-2 rounded-lg bg-error-bg border border-error/30 px-3 py-2">
+          <Icon name="error" size={16} className="text-error" />
+          <p className="text-xs text-error">{error}</p>
         </div>
       )}
 
@@ -129,7 +122,7 @@ export function PlaygroundCard({
           <div className="flex items-center gap-2 mb-2">
             <span className="text-xs font-medium text-text-muted">{t("response")}</span>
             <span className="flex items-center gap-0.5 text-xs text-text-muted">
-              <span className="material-symbols-outlined text-[13px]">bolt</span>
+              <Icon name="bolt" size={13} />
               {t("latency", { ms: Math.round(result.latencyMs) })}
             </span>
           </div>
