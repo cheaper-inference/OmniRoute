@@ -923,6 +923,8 @@
     "batchListTitle": "Dávky",
     "batchListCount": "Počet dávok: {count}",
     "batchListRemovingCompleted": "Odstraňuje sa…",
+    "batchListRemoveCompletedPartial": "Odstránil sa veľký počet dávok. Kliknutím znova vymažete zvyšné.",
+    "batchListRemoveCompletedFailed": "Pri odstraňovaní dávok sa vyskytla chyba.",
     "batchListRemoveCompleted": "Odstrániť dokončené",
     "batchListTableStatus": "Stav",
     "batchListTableId": "ID",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "Obnovuje sa…",
     "batchListRefresh": "Obnoviť",
     "uploadFileModalRemove": "Odstrániť",
+    "fileInputChoose": "Vybrať súbor",
+    "fileInputChooseMultiple": "Vybrať súbory",
+    "fileInputEmpty": "Nie je vybraný žiadny súbor",
+    "fileInputSelectedCount": "{count, plural, one {Vybraný # súbor} few {Vybrané # súbory} other {Vybraných # súborov}}",
+    "fileDropLabel": "Presuňte sem súbor alebo ho vyberte",
+    "fileDropLabelMultiple": "Presuňte sem súbory alebo ich vyberte",
     "uploadFileModalUploading": "Nahráva sa…",
     "wizardInputReading": "Číta sa súbor…",
     "wizardInputReady": "Pripravené",
@@ -1035,7 +1043,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "Odosielať odtlačok klienta OpenCode v2 CLI v požiadavkách OpenCode Zen/Go: User-Agent opencode/latest/<2.x>/cli a x-opencode-client cli a pri požiadavkách bezplatnej úrovne hlavičky relácie v2, schémy nástrojov read/shell rozhrania v2 CLI a bez tool_choice \"none\". Predvolene vypnuté: každá požiadavka OpenCode si zachová aktuálnu identitu, hlavičky a telo bez zmien.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Keď je množina kandidátov automatickej kombinácie prázdna už pred spustením predfiltra volania nástrojov (každý cieľ je preskočený z dôvodu čakacej lehoty, uzamknutia alebo vyčerpania), vráti sa odpoveď 503 no_eligible_targets namiesto pôvodnej odpovede 400 „Žiadny cieľ nepodporuje volanie nástrojov“ capability_mismatch. Predvolene je táto možnosť vypnutá: pri prázdnej množine sa zachová pôvodná odpoveď 400.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Vynútiť dôveryhodné značky koncových bodov modelu (deklarované katalógom poskytovateľa, odvodené z ID špecializovaného modelu alebo nastavené operátorom): odmietnuť požiadavku odoslanú na koncový bod, ktorý model neobsluhuje, s chybou HTTP 400 ešte pred jej odoslaním na /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations a /v1/audio/*; skryť z /v1/models modely, ktorých označené koncové body nemajú adaptér OmniRoute; a pri teste modelu na ovládacom paneli vrátiť pre takéto modely stav 422. Predvolene vypnuté: značky koncových bodov zostávajú iba informatívne a požiadavky sa odosielajú presne ako predtým.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "Pri bežných relayoch kompatibilných s Anthropic ponechajte systémové vstupy uprostred konverzácie v zozname správ namiesto ich presúvania do systémovej výzvy najvyššej úrovne, aby prefix výzvy uložený vo vyrovnávacej pamäti zostal medzi jednotlivými vstupmi stabilný. Platí to iba vtedy, keď samotný klient odoslal beta príznak mid-conversation-system-2026-04-07. Predvolene je táto možnosť vypnutá: každý systémový vstup sa presunie do systémovej výzvy presne ako predtým, pretože relaye bez tohto beta príznaku odmietajú systémové vstupy v zozname správ.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Použiť úrovne úsilia pri uvažovaní, ktoré zverejňuje models.dev, ak žiadne neurčuje ani prepísanie operátorom, ani register poskytovateľa; ponechať iba známe úrovne úsilia a prázdny zoznam deklarovaných úrovní považovať za „žiadne úrovne“. Predvolene vypnuté: katalóg modelov a výsledné úrovne úsilia zostanú presne také ako predtým.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "Umožňuje požiadavkám auto/* zostaviť skupinu kandidátov s vyriešenými schopnosťami modelov (videnie, uvažovanie, premýšľanie) a pozorovaným skóre kvality, načítanými jedným hromadným čítaním. Predvolene vypnuté: váhy kandidátov v čase požiadavky zostávajú presne ako predtým. Zapnuté: tieto signály vstupujú do váh snímky, takže váhy kandidátov a výber sa môžu zmeniť.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Povoľte kontrole stavu poverení opätovne testovať pripojenia, ktoré brána sama vypla (každé najviac raz za 6 hodín, 5 na jednu kontrolu), a znova zapnúť pripojenie, keď úspešne prejde opätovným testom. Predvolene je táto možnosť vypnutá: takéto pripojenia zostanú vypnuté, kým nezasiahne operátor. Pripojenia vypnuté operátorom a natrvalo zakázané pripojenia sa nikdy opätovne netestujú.",
@@ -1939,7 +1946,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# požiadavka} few {# požiadavky} other {# požiadaviek}}, {keys, plural, one {# obmedzený kľúč} few {# obmedzené kľúče} other {# obmedzených kľúčov}}",
     "unpricedUsageMore": "…a {count} ďalších",
     "unpricedUsageConfigure": "Nastaviť ceny",
-    "unpricedUsageDismiss": "Zatvoriť"
+    "unpricedUsageDismiss": "Zatvoriť",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analytika",
@@ -6264,6 +6280,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Preskočiť prechodný cooldown (doba chladnutia), aby toto pripojenie zostalo oprávnené aj po odstrániteľných chybách (konečné stavy ako zablokované/vypršané stále platia).",
     "disableCoolingLabel": "Zakázať cooldown pre toto pripojenie",
+    "keepMidConversationSystemDescription": "Systémové správy odoslané počas konverzácie ponechajte v zozname správ namiesto toho, aby ste ich presunuli do systémového príkazu najvyššej úrovne, takže vyrovnávacia pamäť výziev neustále naráža na všetky ťahy. Povoliť iba vtedy, ak tento upstream akceptuje rolu \"systém\" vo vnútri správ (inak odpovie 400).",
+    "keepMidConversationSystemLabel": "Udržujte systémové správy uprostred konverzácie na mieste",
+    "requireUserLastMessageDescription": "Pre upstreamy, ktoré odmietajú predvyplnenie asistenta: pred odoslaním zhoďte koncové otáčky asistenta (bez použitia nástroja). Model môže obnoviť svoju predchádzajúcu odpoveď.",
+    "requireUserLastMessageLabel": "Vyžadovať ukončenie konverzácie používateľskou správou",
     "bulkPasteAdded": "{count, plural, one {Pridaný 1 kľúč} few {Pridané # kľúče} other {Pridaných # kľúčov}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Preskočený 1 duplikát} few {Preskočené # duplikáty} other {Preskočených # duplikátov}}",
     "bulkPasteHint": "Vložte jeden kľúč API na každý riadok. Prázdne riadky sa ignorujú a duplicitné kľúče sa preskočia.",
@@ -6363,6 +6383,9 @@
     "localProviders": "Lokálni poskytovatelia",
     "maxConcurrentWholeNumberError": "Maximálny počet súbežných požiadaviek musí byť celé číslo",
     "m365TierLabel": "Úroveň Copilot",
+    "m365RefreshTokenLabel": "Obnoviť token (voliteľné)",
+    "m365RefreshTokenHint": "Používa sa na automatické obnovenie prístupového tokenu Microsoft 365.",
+    "m365RefreshTokenEditHint": "Ak chcete zachovať existujúci token, nechajte pole prázdne. Nahraďte ho vložením nového tokenu.",
     "m365TierHint": "Vyberte, ktoré rozhranie Microsoft 365 Copilot toto pripojenie používa. Individual je predvolený spotrebiteľský BizChat; Education a Enterprise (pracovné) sa prihlasujú do rozhraní svojich tenantov.",
     "m365TierIndividualOption": "Individual (predvolené)",
     "m365TierEduOption": "Vzdelávanie",
@@ -7097,6 +7120,7 @@
     "proxySubTabsAria": "Sekcie proxy",
     "requestBodyLimitTitle": "Limit tela požiadavky",
     "requestBodyLimitDescription": "Maximálna veľkosť obsahu API akceptovaná pred spracovaním tela požiadavky. Vyhradené trasy nahrávania si zachovávajú minimálne svoj vstavaný limit 100 MB.",
+    "requestBodyLimitChatHint": "Chat Completions a Responses prijímajú až 50 MB, kým tu neuložíte limit. Uložený limit sa vzťahuje aj na ne, či už je nižší, alebo vyšší.",
     "requestBodyLimitInputLabel": "Limit tela požiadavky v MB",
     "requestBodyLimitEmptyError": "Zadajte limit v MB",
     "requestBodyLimitWholeNumberError": "Použite celé číslo",
@@ -12282,7 +12306,9 @@
       "failedTitle": "Všetkých {count} pokusov zlyhalo",
       "failed": "zlyhalo",
       "pinnedTitle": "Model vybraný prostredníctvom prichytávania relácie cache kontextu",
-      "pinned": "pripnuté"
+      "pinned": "pripnuté",
+      "recoveredAttemptsTitle": "Požiadavka bola obnovená po {count} pokusoch",
+      "latestOutcomeFailed": "Výsledok poslednej požiadavky bol neúspešný"
     },
     "attempts": "pokusy",
     "detail": {
@@ -12384,13 +12410,20 @@
       "continuesFromParent": "pokračuje z nadradenej konverzácie",
       "continuesFrom": "Pokračuje z {id}",
       "viewConversation": "zobraziť konverzáciu",
-      "openConversation": "Otvoriť konverzáciu {id}"
+      "openConversation": "Otvoriť konverzáciu {id}",
+      "omittedHttpAttempts": "{count} odoslaní HTTP nebolo uchovaných",
+      "noHttpResponse": "Nebola zaznamenaná žiadna odpoveď HTTP",
+      "transportError": "Chyba prenosu"
     },
     "tableLabel": "Záznamy požiadaviek",
     "throughputPostFirstToken": "Po prvom tokene",
     "throughputEndToEnd": "Od začiatku do konca",
     "throughputRate": "{value} tokenov/s",
-    "throughputExplanation": "Obe rýchlosti používajú väčší z počtov výstupných tokenov a tokenov uvažovania. Hodnota Po prvom tokene nezahŕňa platný TTFT; inak používa celkové trvanie. Hodnota Od začiatku do konca vždy používa celkové trvanie. Odpoveď vo vyrovnávacej pamäti môže mať vysokú rýchlosť doručenia v dávke bez toho, aby model generoval rýchlejšie."
+    "throughputExplanation": "Obe rýchlosti používajú väčší z počtov výstupných tokenov a tokenov uvažovania. Hodnota Po prvom tokene nezahŕňa platný TTFT; inak používa celkové trvanie. Hodnota Od začiatku do konca vždy používa celkové trvanie. Odpoveď vo vyrovnávacej pamäti môže mať vysokú rýchlosť doručenia v dávke bez toho, aby model generoval rýchlejšie.",
+    "omittedHttpAttempts": "{count} odoslaní HTTP nebolo uchovaných",
+    "upstreamStatus": "Nadradený server {status}",
+    "noHttpResponse": "Nebola zaznamenaná žiadna odpoveď HTTP",
+    "transportError": "Chyba prenosu"
   },
   "proxyLogger": {
     "filterAll": "Všetko",
@@ -14157,6 +14190,14 @@
         "label": "Poradie zdieľaného odchozího poolu",
         "description": "Pre poskytovateľov, ktorých kvóta je rozdelená podľa odchozej adresy, zoradte člena poolu, ktorý zdieľa pozorovanú odchozú adresu nedávno odmietnutého člena, tesne pod zdravými členmi. Iba poradie, nikdy sa nevylučuje. Vyžaduje PROXY_SKIP_RECENTLY_FAILED, ktorý produkuje signál odmietnutia, ktorý sa číta. V predvolenom nastavení vypnuté: poradie výberu je presne rotácia v čistom tvare."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Modelové odmietnutia kvót",
+        "description": "Aplikujte kvótu opencode 429 iba na model, ktorý ju zasiahol, takže rovnaký výstup bude slúžiť iným modelom a zrušte ho iba vtedy, keď tento model uspeje. Spotrebitelia, ktorí nemajú žiadny model (rotácia bazéna, zaparkovanie a prehratie, viditeľnosť správcu, spúšť voliča, kontrola stavu), ho stále vidia. Potrebuje PROXY_SKIP_RECENTLY_FAILED, čo vedie k odmietnutiu. Predvolene vypnuté: kvóta jedného modelu 429 vyhradí výstup pre každý model."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Načítanie proxy: prísne prehrávanie POST",
+        "description": "V prípade neidempotentnej požiadavky (POST, PUT, PATCH, DELETE) odošlite znova po chybe prenosu (čerstvý soket, záložný server proxy, natívny záložný zdroj) iba vtedy, keď chyba preukáže, že nebolo odoslané nič: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH alebo časový limit pripojenia. Chyba soketu po zápise môže znamenať, že upstream prijal požiadavku, takže opätovné odoslanie by ju mohlo vygenerovať a účtovať dvakrát. Predvolene vypnuté: znovu sa odošle telo, ktoré možno prehrať, pri akejkoľvek chybe prenosu, čím sa obnoví aj zastaraný spoločný soket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Logovanie atribúcie rotácie",
         "description": "Rotácia opencode zaznamenáva, ktorý účet slúžil alebo bol preskočený (iba maskované ID, nikdy celé ID účtu) a spája položky proxy denníka so svojou žiadosťou, takže operátor vie rozlíšiť preskočené účty od nepoužitých. V predvolenom nastavení vypnuté: žiadne dodatočné riadky v logu, žiadne dodatočné stĺpce nie sú zapisované."
@@ -14208,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 opätovný výber bazéna",
         "description": "Pre viacúčtovú rotáciu OpenCode, po 429 od providera s egress bucketovaním na účte bez proxie v prostredí bazénového kontextu, požiadať konekčný bazén o iného člena pre ďalší pokus namiesto opakovania tej istej egress adresy. Poradia, nikdy nevylučujú: vyčerpaný bazén zachováva aktuálne správanie. Štandardne vypnuté: každé 429 rotuje na ďalší účet presne ako predtým."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Voľná výstupná sonda",
+        "description": "V prípade spúšťača OpenCode, keď sa na žiadosť cez proxy odpovie 403 alebo 451 FreeTierError a opakovaný pokus sledovaných nástrojov zlyhal alebo sa nepoužil, odošlite požiadavku raz cez iný proxy (iný proxy účtu alebo iný člen fondu, nikdy nie priame pripojenie). Len keď táto sonda odpovie 200, je prvý výstup odložený v proxy odmietnutej pamäti a odošle sa odpoveď sondy; keď obaja odmietnu, vráti sa pôvodné odmietnutie a nič sa nezaznamená. Rovnaký text odmietnutia zahŕňa označený výstup IP a tvar zamietnutej žiadosti, takže sonda ich rozlíši podľa dôkazov. Štandardne vypnuté: odmietnutie sa vráti nezmenené."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Otvorené vloženie klientov OpenCode v2",
@@ -14388,6 +14433,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Zastavenie pri odmietení politikou obsahu",
         "description": "Keď cieľ combo odpovie presným odmietnutím politiky obsahu (kód alebo typ cyber_policy / content_policy_violation), zastaviť combo a vrátiť toto odmietnutie aj vtedy, ak zvyšné ciele sú iné modely, namiesto pokračovania na ďalší cieľ. V prednastavenom stave je vypnuté: toto odmietnutie nikdy nezchladí účet ani nespadne predmetový spínač, a combo pokračuje na svoj ďalší cieľ presne ako predtým."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Odpovede: Udržujte nažive iba počas prepravy",
+        "description": "Pošlite odozvy udržiavacie ako prázdny riadok namiesto udalosti response.in_progress, takže syntetická snímka nikdy nemôže nahradiť skutočnú odpoveď v oficiálnom SDK. Prázdny riadok neodošle žiadnu udalosť SSE, takže klientsky strážny pes, ktorý sa resetuje iba pri udalostiach, by sa počas dlhej tichej fázy neresetoval. Predvolene vypnuté: časovače odosielajú udalosť response.in_progress s platnou špecifikáciou."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown Retry: Skip 403/410 Odmietnutia",

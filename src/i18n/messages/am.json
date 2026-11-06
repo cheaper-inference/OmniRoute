@@ -1000,6 +1000,8 @@
     "batchListTitle": "ባችዎች",
     "batchListCount": "{count} ባችዎች",
     "batchListRemovingCompleted": "በማስወገድ ላይ…",
+    "batchListRemoveCompletedPartial": "ብዙ ባችዎች ተወግደዋል። የቀሩትን ለማጽዳት እንደገና ጠቅ ያድርጉ።",
+    "batchListRemoveCompletedFailed": "ባችዎችን በማስወገድ ላይ ሳለ ስህተት ተከስቷል።",
     "batchListRemoveCompleted": "የተጠናቀቁትን አስወግድ",
     "batchListTableStatus": "ሁኔታ",
     "batchListTableId": "ID",
@@ -1038,6 +1040,12 @@
     "batchListRefreshing": "በማደስ ላይ…",
     "batchListRefresh": "አድስ",
     "uploadFileModalRemove": "አስወግድ",
+    "fileInputChoose": "ፋይል ይምረጡ",
+    "fileInputChooseMultiple": "ፋይሎችን ይምረጡ",
+    "fileInputEmpty": "ምንም ፋይል አልተመረጠም",
+    "fileInputSelectedCount": "{count, plural, one {# ፋይል ተመርጧል} other {# ፋይሎች ተመርጠዋል}}",
+    "fileDropLabel": "ፋይል እዚህ ይጣሉ ወይም አንድ ይምረጡ",
+    "fileDropLabelMultiple": "ፋይሎችን እዚህ ይጣሉ ወይም ፋይሎችን ይምረጡ",
     "uploadFileModalUploading": "በመስቀል ላይ…",
     "wizardInputReading": "ፋይሉን በማንበብ ላይ…",
     "wizardInputReady": "ዝግጁ",
@@ -1112,7 +1120,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "በOpenCode Zen/Go ጥያቄዎች ላይ የOpenCode v2 CLI ደንበኛ አሻራን ይላኩ፦ opencode/latest/<2.x>/cli User-Agent እና x-opencode-client cli፤ እንዲሁም በነፃ ዕቅድ ጥያቄዎች ላይ የv2 ክፍለ-ጊዜ ራስጌዎችን፣ የv2 CLI read/shell መሣሪያ መርሃግብሮችን እና tool_choice \"none\" እንዳይኖር ያድርጉ። በነባሪነት ጠፍቷል፦ እያንዳንዱ የOpenCode ጥያቄ አሁን ያለውን ማንነት፣ ራስጌዎች እና የጥያቄ አካል ሳይለውጥ ይጠብቃል።",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "የauto combo የዕጩዎች ስብስብ የመሣሪያ ጥሪ ቅድመ-ማጣሪያው ከመስራቱ በፊት ባዶ ከሆነ (ሁሉም ዒላማዎች በcooldowns፣ lockouts ወይም exhaustion ምክንያት ሲዘለሉ)፣ ከቀድሞው 400 \"ምንም ዒላማ የመሣሪያ ጥሪን አይደግፍም\" capability_mismatch ይልቅ 503 no_eligible_targets ይመልሳል። በነባሪነት ጠፍቷል፦ ባዶው ስብስብ ቀድሞውን 400 ይዞ ይቆያል።",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "የታመኑ የሞዴል መጨረሻ ነጥብ መለያዎችን (በአቅራቢው ካታሎግ የተገለጹ፣ ከልዩ ሞዴል መታወቂያ የተገመቱ፣ ወይም በኦፕሬተሩ የተዘጋጁ) በግዴታ ተግብር፦ ሞዴሉ ወደማያገለግለው መጨረሻ ነጥብ የተላከን ጥያቄ ወደ /v1/chat/completions፣ /v1/embeddings፣ /v1/rerank፣ /v1/images/generations፣ /v1/videos/generations፣ /v1/music/generations እና /v1/audio/* ከማሰራጨት በፊት በHTTP 400 ውድቅ አድርግ፤ መለያ የተሰጣቸው መጨረሻ ነጥቦች የOmniRoute አስማሚ የሌላቸውን ሞዴሎች ከ/v1/models ደብቅ፤ እና ለእነዚህ ሞዴሎች የዳሽቦርድ ሞዴል ሙከራን በ422 መልስ። በነባሪ ጠፍቷል፦ የመጨረሻ ነጥብ መለያዎች ለመረጃ ብቻ ሆነው ይቆያሉ፣ እና ጥያቄዎች ልክ እንደበፊቱ ይሰራጫሉ።",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "በመደበኛ anthropic-ተኳሃኝ ሪሌዎች ላይ፣ የተሸጎጠው የፕሮምፕት ቅድመ ቅጥያ በየተራው የተረጋጋ ሆኖ እንዲቆይ፣ በውይይት መካከል ያሉ የስርዓት ተራዎችን ወደ ከፍተኛ ደረጃው የስርዓት ፕሮምፕት ከማዛወር ይልቅ በመልዕክት ዝርዝሩ ውስጥ ያቆዩ። ይህ የሚሠራው ደንበኛው ራሱ mid-conversation-system-2026-04-07 ቤታን ሲልክ ብቻ ነው። በነባሪነት ጠፍቷል፦ ያ ቤታ የሌላቸው ሪሌዎች በመልዕክት ዝርዝሩ ውስጥ ያሉ የስርዓት ተራዎችን ስለማይቀበሉ፣ እያንዳንዱ የስርዓት ተራ ልክ እንደበፊቱ ወደ የስርዓት ፕሮምፕቱ ይዛወራል።",
   "featureFlagModelsDevEffortTiersEnabledDescription": "ኦፕሬተር መሻርም ሆነ የአቅራቢው መዝገብ ምንም ደረጃዎችን ባላወጀበት ጊዜ models.dev የሚያትማቸውን የማመዛዘን ጥረት ደረጃዎች ይጠቀሙ፤ የታወቁ የጥረት ደረጃዎችን ብቻ ያስቀሩ፣ እና ባዶ የታወጀ የደረጃዎች ዝርዝርን \"ምንም ደረጃዎች የሉም\" ብለው ይቁጠሩ። በነባሪ ጠፍቷል፦ የሞዴል ካታሎጉ እና በመጨረሻ የተወሰኑት የጥረት ደረጃዎች ልክ እንደበፊቱ ይቆያሉ።",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "auto/* ጥያቄዎች የእጩ ስብስቡን በተፈቱ የሞዴል ችሎታዎች (ራዕይ፣ ምክንያታዊነት፣ አስተሳሰብ) እና በተስተዋሉ የጥራት ውጤቶች በአንድ የጅምላ ንባብ እንዲገነቡ ያስችላል። በነባሪ ጠፍቷል፦ በጥያቄ ጊዜ የእጩዎች ክብደቶች ልክ እንደበፊቱ ይቆያሉ። ሲበራ፦ እነዚህ ምልክቶች የቅጽበታዊ ክብደቶችን ይመግባሉ፣ ስለዚህ የእጩዎች ክብደቶች እና ምርጫ ሊቀየሩ ይችላሉ።",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "የምስክርነት መረጃ ጤንነት ቅኝቱ፣ ጌትዌዩ በራሱ ያጠፋቸውን ግንኙነቶች (እያንዳንዳቸውን ቢበዛ በየ6 ሰዓቱ አንድ ጊዜ፣ በእያንዳንዱ ቅኝት 5) እንደገና እንዲፈትሽ እና ዳግም ፍተሻቸውን ሲያልፉ መልሶ እንዲያበራቸው ፍቀድ። በነባሪነት ጠፍቷል፦ እንዲህ ያሉ ግንኙነቶች ኦፕሬተር እርምጃ እስኪወስድ ድረስ ጠፍተው ይቆያሉ። በኦፕሬተር የተሰናከሉ እና በቋሚነት የታገዱ ግንኙነቶች ፈጽሞ ዳግም አይፈተሹም።",
@@ -2016,7 +2023,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# ጥያቄ} other {# ጥያቄዎች}}, {keys, plural, one {# የጥቅም ገደብ ያለ ቁልፍ} other {# የጥቅም ገደብ ያሉ ቁልፎች}}",
     "unpricedUsageMore": "…እና {count} ተጨማሪ",
     "unpricedUsageConfigure": "ዋጋን ያቀናብሩ",
-    "unpricedUsageDismiss": "ዝጋ"
+    "unpricedUsageDismiss": "ዝጋ",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "ትንታኔ",
@@ -6341,6 +6357,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "ይህ ግንኙነት ሊታረሙ ከሚችሉ ስህተቶች በኋላም ብቁ ሆኖ እንዲቆይ ጊዜያዊውን የማቀዝቀዝ ጊዜ ይዝለሉ (እንደ የታገደ/ጊዜው ያለፈ ያሉ የመጨረሻ ሁኔታዎች አሁንም ተፈጻሚ ናቸው)።",
     "disableCoolingLabel": "ለዚህ ግንኙነት የማቀዝቀዝ ጊዜን አሰናክል",
+    "keepMidConversationSystemDescription": "ወደ ከፍተኛ ደረጃ የስርዓት መጠየቂያ ከማስገባት ይልቅ በመልእክት ዝርዝሩ ውስጥ የተላኩትን የስርዓት መልእክቶች መካከለኛ ውይይት ውስጥ ይተው፣ ስለዚህ የጥያቄው መሸጎጫ ተራ በተራ መምታቱን ይቀጥላል። ይህ የላይኛው ዥረት በመልእክቶች ውስጥ ሚና \"ስርዓት\" የሚቀበል ከሆነ ብቻ ያንቁ (አለበለዚያ 400 ይመልሳል)።",
+    "keepMidConversationSystemLabel": "የመሃል የውይይት ስርዓት መልዕክቶችን በቦታቸው ያቆዩ",
+    "requireUserLastMessageDescription": "ለላይ ዥረቶች የረዳት ቅድመ ሙሌትን አይቀበሉም፡ ከመላክዎ በፊት ተከታይ ረዳት ተራዎችን ጣል (የመሳሪያ_አጠቃቀም የለም)። ሞዴሉ የቀደመውን መልስ ሊያድስ ይችላል።",
+    "requireUserLastMessageLabel": "በተጠቃሚ መልእክት ለመጨረስ ውይይት ጠይቅ",
     "bulkPasteAdded": "{count, plural, one {1 ቁልፍ ታክሏል} other {# ቁልፎች ታክለዋል}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 የተደገመ ቁልፍ ታልፏል} other {# የተደገሙ ቁልፎች ታልፈዋል}}",
     "bulkPasteHint": "በእያንዳንዱ መስመር አንድ API ቁልፍ ይለጥፉ። ባዶ መስመሮች ችላ ይባላሉ፣ የተደገሙ ቁልፎችም ይዘለላሉ።",
@@ -6440,6 +6460,9 @@
     "localProviders": "አካባቢያዊ አቅራቢዎች",
     "maxConcurrentWholeNumberError": "ከፍተኛው በአንድ ጊዜ የሚከናወን ብዛት ሙሉ ቁጥር መሆን አለበት",
     "m365TierLabel": "የCopilot ደረጃ",
+    "m365RefreshTokenLabel": "አድስ ማስመሰያ (አማራጭ)",
+    "m365RefreshTokenHint": "የ Microsoft 365 መዳረሻ ማስመሰያ በራስ ሰር ለማደስ ስራ ላይ ይውላል።",
+    "m365RefreshTokenEditHint": "ያለውን ማስመሰያ ለማቆየት ባዶ ይተውት። እሱን ለመተካት አዲስ ማስመሰያ ይለጥፉ።",
     "m365TierHint": "ይህ ግንኙነት የትኛውን Microsoft 365 Copilot በይነገጽ እንደሚጠቀም ይምረጡ። ግለሰብ ነባሪው የተጠቃሚ BizChat ነው፤ ትምህርት እና ድርጅት (ሥራ) የየተከራያቸውን በይነገጾች ያነቃሉ።",
     "m365TierIndividualOption": "ግለሰብ (ነባሪ)",
     "m365TierEduOption": "ትምህርት",
@@ -7174,6 +7197,7 @@
     "proxySubTabsAria": "የፕሮክሲ ክፍሎች",
     "requestBodyLimitTitle": "የጥያቄ ይዘት ገደብ",
     "requestBodyLimitDescription": "የጥያቄው ይዘት ከመተንተኑ በፊት ተቀባይነት የሚያገኘው ከፍተኛው የAPI ጭነት መጠን። ልዩ የሰቀላ መስመሮች ቢያንስ አብሮገነብ የ100 MB ገደባቸውን ይይዛሉ።",
+    "requestBodyLimitChatHint": "እዚህ ገደብ እስኪያስቀምጡ ድረስ Chat Completions እና Responses እስከ 50 MB ይቀበላሉ። ያስቀመጡት ገደብ ዝቅተኛም ሆነ ከፍተኛ ለእነሱም ይተገበራል።",
     "requestBodyLimitInputLabel": "የጥያቄ ይዘት ገደብ በMB",
     "requestBodyLimitEmptyError": "ገደቡን በMB ያስገቡ",
     "requestBodyLimitWholeNumberError": "ሙሉ ቁጥር ይጠቀሙ",
@@ -12359,7 +12383,9 @@
       "failedTitle": "ሁሉም {count} ሙከራዎች አልተሳኩም",
       "failed": "አልተሳካም",
       "pinnedTitle": "ሞዴሉ በcontext-cache ክፍለ ጊዜ ማጣበቅ ተመርጧል",
-      "pinned": "ተያይዟል"
+      "pinned": "ተያይዟል",
+      "recoveredAttemptsTitle": "ጥያቄው በ{count} ሙከራዎች ተሳክቷል",
+      "latestOutcomeFailed": "የመጨረሻው ጥያቄ ውጤት አልተሳካም"
     },
     "attempts": "ሙከራዎች",
     "detail": {
@@ -12461,13 +12487,20 @@
       "continuesFromParent": "ከወላጅ ይቀጥላል",
       "continuesFrom": "ከ{id} ይቀጥላል",
       "viewConversation": "ውይይቱን ይመልከቱ",
-      "openConversation": "ውይይት {id}ን ይክፈቱ"
+      "openConversation": "ውይይት {id}ን ይክፈቱ",
+      "omittedHttpAttempts": "{count} የHTTP መላኪያዎች አልተቀመጡም",
+      "noHttpResponse": "የHTTP ምላሽ አልታየም",
+      "transportError": "የማጓጓዣ ስህተት"
     },
     "tableLabel": "የጥያቄ ምዝግብ ማስታወሻዎች",
     "throughputPostFirstToken": "ከመጀመሪያው ቶከን በኋላ",
     "throughputEndToEnd": "ከጫፍ እስከ ጫፍ",
     "throughputRate": "በሰከንድ {value} ቶከኖች",
-    "throughputExplanation": "ሁለቱም ፍጥነቶች ከውጤት እና ከምክንያታዊ ትንተና ቶከኖች ብዛት የሚበልጠውን ይጠቀማሉ። ከመጀመሪያው ቶከን በኋላ ያለው ፍጥነት ትክክለኛ TTFTን አያካትትም፤ ካልሆነ ግን ሙሉውን ቆይታ ይጠቀማል። ከጫፍ እስከ ጫፍ ሁልጊዜ ሙሉውን ቆይታ ይጠቀማል። በቋት የተያዘ ምላሽ የሞዴሉ ማመንጨት ሳይፈጥን ከፍተኛ የፈጣን ማድረስ ፍጥነት ሊኖረው ይችላል።"
+    "throughputExplanation": "ሁለቱም ፍጥነቶች ከውጤት እና ከምክንያታዊ ትንተና ቶከኖች ብዛት የሚበልጠውን ይጠቀማሉ። ከመጀመሪያው ቶከን በኋላ ያለው ፍጥነት ትክክለኛ TTFTን አያካትትም፤ ካልሆነ ግን ሙሉውን ቆይታ ይጠቀማል። ከጫፍ እስከ ጫፍ ሁልጊዜ ሙሉውን ቆይታ ይጠቀማል። በቋት የተያዘ ምላሽ የሞዴሉ ማመንጨት ሳይፈጥን ከፍተኛ የፈጣን ማድረስ ፍጥነት ሊኖረው ይችላል።",
+    "omittedHttpAttempts": "{count} የHTTP መላኪያዎች አልተቀመጡም",
+    "upstreamStatus": "የላይኛው አገልጋይ {status}",
+    "noHttpResponse": "የHTTP ምላሽ አልታየም",
+    "transportError": "የማጓጓዣ ስህተት"
   },
   "proxyLogger": {
     "filterAll": "ሁሉም",
@@ -14234,6 +14267,14 @@
         "label": "የጋራ መውጫ ስብስብ ቅደም ተከተል",
         "description": "ኮታቸው በመውጫ አድራሻ ለተከፋፈለ አቅራቢዎች፣ በቅርቡ ውድቅ የተደረገውን አባል የታየበትን የመውጫ አድራሻ የሚጋራ የስብስብ አባልን ከጤናማ አባላት በታች ደረጃ ይስጡ። ቅደም ተከተል ብቻ ነው፣ በጭራሽ አይገለልም። የሚያነበውን የውድቅ ማድረጊያ ምልክት የሚያመነጨውን PROXY_SKIP_RECENTLY_FAILED ይፈልጋል። በነባሪነት ጠፍቷል፦ የመምረጫ ቅደም ተከተል ልክ እንደ መደበኛው ዝውውር ነው።"
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "በሞዴል የተቀመጡ የኮታ ውድቀቶች",
+        "description": "opencode ኮታ 429ን ለተመታው ሞዴል ብቻ ይተግብሩ፣ ስለዚህ ያው ኢግሬስ ሌሎች ሞዴሎችን ማገልገሉን ይቀጥላል እና ያ ሞዴል ሲሳካ ብቻ ያፅዱት። ምንም ሞዴል የሌላቸው ሸማቾች (የገንዳ ማሽከርከር፣ ፓርክ እና መልሶ ማጫወት፣ የአስተዳዳሪ ታይነት፣ የመራጭ ቀስቃሽ፣ የጤና ጠረግ) አሁንም ያዩታል። እምቢታውን የሚያመጣው PROXY_SKIP_RECENTLY_FAILED ያስፈልገዋል. በነባሪ ጠፍቷል፡ የአንድ ሞዴል ኮታ 429 ለእያንዳንዱ ሞዴል መውጣቱን ያስቀምጣል።"
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "ተኪ ማምጣት፡ ጥብቅ POST እንደገና መጫወት",
+        "description": "ጥንካሬ ላልሆነ ጥያቄ (POST, PUT, PATCH, DELETE) ከትራንስፖርት ስህተት በኋላ እንደገና ላክ (ትኩስ ሶኬት፣ ተኪ ውድቀት፣ ቤተኛ መውደቅ) ስህተቱ ምንም እንዳልተላከ ሲያረጋግጥ ብቻ ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH ወይም የግንኙነት ጊዜ ማብቂያ። ከጽሁፉ በኋላ የተፈጠረ የሶኬት ስህተት ወደላይ ያለው ሰው ጥያቄውን ተቀብሏል፣ ስለዚህ እንደገና መላክ ሁለት ጊዜ ማመንጨት እና ማስከፈል ይችላል። በነባሪነት ጠፍቷል፡ በማንኛውም የትራንስፖርት ስህተት ዳግም ሊጫወት የሚችል አካል አንድ ጊዜ ይናደዳል፣ ይህ ደግሞ የቆየ የተጠቀለለ ሶኬት ይመልሳል።"
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "የዝውውር አበርክቶ ምዝገባ",
         "description": "የOpencode ዝውውር የትኛው መለያ እንዳገለገለ ወይም እንደተዘለለ ይመዘግባል (የተሸፈኑ መታወቂያዎች ብቻ፣ በጭራሽ ሙሉ የመለያ መታወቂያዎች አይደሉም) እና ኦፕሬተሩ የተዘለሉ መለያዎችን ካልተጠቀሙባቸው ለይቶ ማወቅ እንዲችል የፕሮክሲ ምዝግብ ግቤቶችን ከጥያቄያቸው ጋር ያገናኛል። በነባሪነት ጠፍቷል፦ ምንም ተጨማሪ የምዝግብ መስመሮች፣ ምንም ተጨማሪ አምዶች አይጻፉም።"
@@ -14285,6 +14326,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 የፑል ድጋሚ ምርጫ",
         "description": "ለOpenCode ባለብዙ መለያ ቅብብሎሽ፣ በአካባቢ ፑል (ambient pool) አውድ ስር ፕሮክሲ በሌለው መለያ ላይ ከ egress-bucketed አቅራቢ 429 ከተቀበለ በኋላ፣ ተመሳሳዩን የ egress አድራሻ እንደገና ከመሞከር ይልቅ ለቀጣዩ ሙከራ የግንኙነት ፑሉን ሌላ አባል ይጠይቁ። ቅደም ተከተል ያስይዛል እንጂ በጭራሽ አያገልልም፦ የተሟጠጠ ፑል አሁን ያለውን ባህሪ ጠብቆ ያቆያል። በነባሪ ጠፍቷል፡ እያንዳንዱ 429 ልክ እንደበፊቱ ወደ ቀጣዩ መለያ ይሽከረከራል።"
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode ነፃ-ደረጃ ኢግረስ ምርመራ",
+        "description": "ለ OpenCode ፈጻሚ፣ የተኪ ጥያቄ 403 ወይም 451 FreeTierError ሲመለስ እና የተስተዋሉ መሳሪያዎች ድጋሚ ሲሞክሩ ወይም ሳይተገበሩ ሲቀሩ፣ ጥያቄውን አንድ ጊዜ በተለያየ ፕሮክሲ በኩል ይላኩ (ሌላ የመለያ ፕሮክሲ ወይም ሌላ ገንዳ አባል፣ በጭራሽ ቀጥተኛ ግንኙነት)። ያ ፍተሻ 200 ሲመልስ ብቻ በፕሮክሲ እምቢታ ማህደረ ትውስታ ውስጥ የተቀመጠው የመጀመሪያው መውጣት እና የፍተሻ ምላሹ አገልግሎት ይሰጣል። ሁለቱም እምቢ ሲሉ, ዋናው እምቢታ ይመለሳል እና ምንም ነገር አይመዘገብም. ተመሳሳዩ የእምቢታ ጽሑፍ ባንዲራ የተደረገ egress IP እና ውድቅ የተደረገ የጥያቄ ቅርፅን ይሸፍናል፣ ስለዚህ መርማሪው በማስረጃ ይለያቸዋል። በነባሪ ጠፍቷል፡ እምቢታው ሳይለወጥ ይመለሳል።"
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "የOpenCode v2 ደንበኛ የጣት አሻራ",
@@ -14465,6 +14510,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo፦ የይዘት ፖሊሲ እምቢታ ሲያጋጥም አቁም",
         "description": "አንድ የ Combo ዒላማ በትክክለኛ የይዘት ፖሊሲ እምቢታ (ኮድ ወይም ዓይነት cyber_policy / content_policy_violation) ምላሽ ሲሰጥ፣ ወደ ቀጣዩ ዒላማ ከማለፍ ይልቅ የቀሩት ዒላማዎች የተለያዩ ሞዴሎች ቢሆኑም እንኳ Comboውን ያቁሙ እና ያንን እምቢታ ይመልሱ። በነባሪነት ጠፍቷል፦ እምቢታው መለያውን በፍጹም cooldown ውስጥ አያስገባም ወይም provider breakerን አያስነሳም፣ እንዲሁም Comboው ልክ እንደቀድሞው ወደ ቀጣዩ ዒላማው ያልፋል።"
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "ምላሾች፡- በትራንስፖርት ላይ ብቻ ይኑር",
+        "description": "ምላሾችን ጠባቂዎችን ከ response.in_progress ክስተት ይልቅ እንደ ባዶ መስመር ይላኩ፣ ስለዚህ ሰው ሰራሽ የሆነ ቅጽበተ-ፎቶ በይፋዊው SDK ውስጥ ትክክለኛውን ምላሽ በጭራሽ ሊተካ አይችልም። ባዶ መስመር ምንም SSE ክስተት አይልክም፣ ስለዚህ በክስተቶች ላይ ብቻ ዳግም የሚያስጀምር የደንበኛ ጠባቂ በፀጥታ ረጅም ጊዜ ውስጥ ዳግም አይጀምርም። በነባሪ ጠፍቷል፡ የሰዓት ቆጣሪዎች ልዩ የሆነውን response.in_progress ክስተት ይልካሉ።"
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "የ Cooldown ዳግም ሙከራ፦ የ 403/410 እምቢታዎችን ዝለል",

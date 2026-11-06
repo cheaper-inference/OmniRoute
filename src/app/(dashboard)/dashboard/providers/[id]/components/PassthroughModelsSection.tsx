@@ -376,7 +376,7 @@ export default function PassthroughModelsSection({
     // that would otherwise collapse to the same last-segment alias (e.g.
     // enx/gpt-5.5 vs enx/codebuddy/gpt-5.5 → both "gpt-5.5").
     if (Object.values(modelAliases).includes(modelId)) {
-      alert(t("aliasExistsAlert", { alias: modelId }));
+      notify.warning(t("aliasExistsAlert", { alias: modelId }));
       return;
     }
     const defaultAlias = generateUniqueModelAlias(modelId, modelAliases);

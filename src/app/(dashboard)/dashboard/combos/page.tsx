@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 
 import {
   useState,
@@ -22,6 +23,7 @@ import { Field } from "@omniroute/ui-kit/field";
 import { Input as KitInput } from "@omniroute/ui-kit/input";
 import { ChoiceCard } from "@omniroute/ui-kit/onboarding-patterns";
 import { RadioGroup } from "@omniroute/ui-kit/radio-group";
+import { Tile } from "@omniroute/ui-kit/tile";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import GlobalModelSearchPanel from "./GlobalModelSearchPanel";
@@ -129,6 +131,7 @@ import { resolveServerErrorMessage } from "@/lib/api/serverErrorMessage";
 import { useTranslations } from "next-intl";
 import { cn } from "@/shared/utils/cn";
 import { strategyBadgeClass } from "./strategyPalette";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 
 const ModelSelectModal = dynamic(() => import("@/shared/components/ModelSelectModal"), {
   ssr: false,
@@ -882,6 +885,7 @@ function CombosPageContent() {
   const [testingCombo, setTestingCombo] = useState(null);
   const { copied, copy } = useCopyToClipboard();
   const notify = useNotificationStore();
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   const [proxyTargetCombo, setProxyTargetCombo] = useState(null);
   const [proxyConfig, setProxyConfig] = useState(null);
   const { comboProxyAssignedIds, fetchComboProxyAssignments } = useComboProxyAssignments();
@@ -1056,7 +1060,7 @@ function CombosPageContent() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm(t("deleteConfirm"))) return;
+    if (!(await requestConfirm(t("deleteConfirm")))) return;
     try {
       const res = await fetch(`/api/combos/${id}`, { method: "DELETE" });
       if (res.ok) {
@@ -1129,6 +1133,7 @@ function CombosPageContent() {
         setTestingCombo(null);
       },
       notify,
+      requestConfirm,
       t,
     });
 
@@ -1567,6 +1572,7 @@ function CombosPageContent() {
           levelLabel={proxyTargetCombo.name}
         />
       )}
+      {confirmDialog}
     </div>
   );
 }
@@ -2043,7 +2049,7 @@ function ComboCardInner({
               <ComboCompressionModeSelect
                 combo={combo}
                 title={t("compressionOverride")}
-                className="text-xs py-1 px-2 rounded border border-border bg-surface text-text-main focus:border-primary focus:outline-none transition-colors disabled:opacity-50 max-w-[130px] md:max-w-none"
+                className="text-xs max-w-[130px] md:max-w-none"
               />
             )}
             <Link
@@ -2069,11 +2075,7 @@ function ComboCardInner({
               title={t("testCombo")}
               aria-label={t("testCombo")}
             >
-              <Icon
-                name={testing ? "progress_activity" : "play_arrow"}
-                size={16}
-                className={cn(testing && "animate-spin")}
-              />
+              {testing ? <Spinner decorative size="sm" /> : <Icon name="play_arrow" size={16} />}
             </Button>
             <Button
               variant="ghost"
@@ -3548,48 +3550,35 @@ function ComboFormModal({
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
                     {COMBO_TEMPLATES.map((template) => (
-                      // kit-exception: a multi-line template tile (icon, title, description,
-                      // CTA). The kit Button is a single-line pill control; the tile keeps the
-                      // kit tokens and the global :focus-visible ring.
-                      <button
-                        type="button"
+                      // Kit Tile (a plain action): the featured template keeps its FREE badge.
+                      <Tile
                         key={template.id}
                         onClick={() => applyTemplate(template)}
                         data-testid={`combo-template-${template.id}`}
-                        className={`text-start rounded-md border px-3 py-2 transition-all ${
-                          template.isFeatured
-                            ? "border-success/50 bg-success/5 hover:border-success/80 hover:bg-success/10 ring-1 ring-success/20"
-                            : "border-border bg-surface hover:border-primary/40 hover:bg-primary/5"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2">
+                        className="px-3 py-2"
+                        icon={
                           <Icon
                             name={template.icon}
                             size={16}
                             className={template.isFeatured ? "text-success" : "text-primary"}
                           />
-                          <span className="text-[12px] font-semibold text-text-main">
-                            {getI18nOrFallback(t, template.titleKey, template.fallbackTitle)}
-                          </span>
-                          {template.isFeatured && (
-                            <Badge
-                              size="sm"
-                              variant="success"
-                              className="ms-auto font-bold uppercase tracking-wide"
-                            >
+                        }
+                        title={getI18nOrFallback(t, template.titleKey, template.fallbackTitle)}
+                        meta={
+                          template.isFeatured ? (
+                            <Badge size="sm" variant="success" className="uppercase tracking-wide">
                               FREE
                             </Badge>
-                          )}
-                        </div>
-                        <p className="text-[10px] text-text-muted mt-1.5 leading-[1.5]">
-                          {getI18nOrFallback(t, template.descKey, template.fallbackDesc)}
-                        </p>
-                        <p
-                          className={`text-[10px] mt-1.5 font-medium ${template.isFeatured ? "text-success" : "text-primary"}`}
+                          ) : undefined
+                        }
+                        description={getI18nOrFallback(t, template.descKey, template.fallbackDesc)}
+                      >
+                        <span
+                          className={`text-xs font-medium ${template.isFeatured ? "text-success" : "text-primary"}`}
                         >
                           {getI18nOrFallback(t, "templateApply", COMBO_TEMPLATE_FALLBACK.apply)} →
-                        </p>
-                      </button>
+                        </span>
+                      </Tile>
                     ))}
                   </div>
                 </div>
@@ -3773,7 +3762,7 @@ function ComboFormModal({
                 {builderSelectionMode === "step" && (
                   <>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3">
-                      {/* Native-mode Select adapter (`ci-select-native`): long dynamic lists, and
+                      {/* Native-mode Select adapter (kit NativeSelect): long dynamic lists, and
                           the builder e2e specs drive these three with selectOption(). */}
                       <Select
                         label={`1. ${getI18nOrFallback(t, "builderProvider", "Provider")}`}

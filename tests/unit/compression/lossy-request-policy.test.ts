@@ -89,8 +89,19 @@ test("lite mode is scoped to a tool-preserving Lite step on the default path", (
     ...lite,
     mode: "stacked",
     stackedPipeline: [LOSSLESS_LITE],
+    // Analytics keeps reporting the configured mode, not the stacked wrapper.
+    reportedMode: "lite",
   });
   assert.equal(applyLossyRequestPolicy(lite, "allow-lossy"), lite);
+});
+
+test("only the lite wrapper carries a reportedMode", () => {
+  const stacked: DerivedPlan = {
+    mode: "stacked",
+    source: "default",
+    stackedPipeline: [{ engine: "session-dedup" }],
+  };
+  assert.equal("reportedMode" in applyLossyRequestPolicy(stacked, null), false);
 });
 
 test("allow-lossy keeps lite tool-result truncation as configured", () => {
