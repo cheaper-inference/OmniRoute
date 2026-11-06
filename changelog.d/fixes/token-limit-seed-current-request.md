@@ -1,0 +1,1 @@
+- **fix(usage):** The first request in a new token-limit window is no longer counted twice. The cold-window seed from `usage_history` now only counts rows written before the request started, because the request's own row is already there when the counter increment runs ([#18898](https://github.com/cheaper-inference/OmniRoute/issues/18898))
