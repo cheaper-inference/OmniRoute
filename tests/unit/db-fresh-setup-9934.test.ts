@@ -47,12 +47,16 @@ async function importFresh(modulePath: string) {
 function withNonTestEnvironment<R>(fn: () => R): R {
   const originalNodeEnv = process.env.NODE_ENV;
   const originalVitest = process.env.VITEST;
+  const originalTestContext = process.env.NODE_TEST_CONTEXT;
+  const originalJestWorker = process.env.JEST_WORKER_ID;
   const originalDisableAutoBackup = process.env.DISABLE_SQLITE_AUTO_BACKUP;
   const originalArgv = [...process.argv];
   const originalExecArgv = [...process.execArgv];
 
   delete process.env.NODE_ENV;
   delete process.env.VITEST;
+  delete process.env.NODE_TEST_CONTEXT;
+  delete process.env.JEST_WORKER_ID;
   delete process.env.DISABLE_SQLITE_AUTO_BACKUP;
   process.argv = process.argv.filter((arg) => !arg.includes("test"));
   process.execArgv = process.execArgv.filter((arg) => !arg.includes("test"));
@@ -66,6 +70,10 @@ function withNonTestEnvironment<R>(fn: () => R): R {
     else process.env.NODE_ENV = originalNodeEnv;
     if (originalVitest === undefined) delete process.env.VITEST;
     else process.env.VITEST = originalVitest;
+    if (originalTestContext === undefined) delete process.env.NODE_TEST_CONTEXT;
+    else process.env.NODE_TEST_CONTEXT = originalTestContext;
+    if (originalJestWorker === undefined) delete process.env.JEST_WORKER_ID;
+    else process.env.JEST_WORKER_ID = originalJestWorker;
     if (originalDisableAutoBackup === undefined) delete process.env.DISABLE_SQLITE_AUTO_BACKUP;
     else process.env.DISABLE_SQLITE_AUTO_BACKUP = originalDisableAutoBackup;
   }
