@@ -1999,3 +1999,14 @@ Used by `open-sse/services/combo.ts` and `src/lib/quota/quotaScheduler.ts` for p
 | Variable | Default | Source File | Description |
 | --- | --- | --- | --- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0` | `src/lib/providerModels/modelSyncTimings.ts` | Set to `1` to log phase timing, a generated request ID and phase success/error outcomes during model synchronization. Disabled for all other values. Logs omit request, account, catalog and error payloads. |
+
+## Local OpenCode media-analysis tool
+
+Used by `scripts/cli/omniroute-media-mcp.mjs`. Set these in the local tool process environment.
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `OMNIROUTE_MEDIA_CONFIG` | `$XDG_CONFIG_HOME/opencode/opencode.json` (or `~/.config/opencode/opencode.json`) | OpenCode configuration read by the media tool and installer. |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute` | Provider entry read from the OpenCode configuration by the media tool. |
+| `OMNIROUTE_MEDIA_MODEL` | `auto` | Model submitted by the media tool. Its provider must support the requested media types. |
+| `OMNIROUTE_MEDIA_API_KEY` | Configured provider API key or its environment reference | Optional credential override. Keep it in the local process environment; never commit it. |
