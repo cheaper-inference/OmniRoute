@@ -5,6 +5,10 @@ import { memoryBuiltinHandlers, MEMORY_BUILTIN_TOOL_NAMES } from "./memoryBuilti
 import { detectProvider, decodeSkillToolName } from "./injection";
 import { OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME } from "@omniroute/open-sse/services/webSearchFallback.ts";
 import { OMNIROUTE_WEB_FETCH_FALLBACK_TOOL_NAME } from "@omniroute/open-sse/services/webFetchInterception.ts";
+import {
+  toClaudeWebSearchResults,
+  type ClaudeWebSearchResult,
+} from "@omniroute/open-sse/translator/helpers/claudeServerWebSearch.ts";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/errorSanitization.ts";
 import { runWithServerToolFence } from "./toolExecutionFence";
 import type { ExecutedToolResult, ToolCall, ExecutionContext } from "./toolLoopTypes";
@@ -333,6 +337,44 @@ export function buildWebSearchCallItem(
   };
 }
 
+/**
+ * Build the Anthropic `server_tool_use` + `web_search_tool_result` block pair
+ * for one handled `omniroute_web_search` result. Claude Code's built-in
+ * WebSearch only parses these blocks — a text block carrying the JSON reads as
+ * an empty search. Mirrors the Gemini/Antigravity lanes, which already emit
+ * this pair via the shared helper. Returns null when the result is not a
+ * successful search payload.
+ */
+function buildAnthropicWebSearchBlocks(
+  call: ToolCall,
+  result: unknown
+): Record<string, unknown>[] | null {
+  if (call.name !== OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME) return null;
+  const record = result && typeof result === "object" ? (result as Record<string, unknown>) : null;
+  if (!record || record.success !== true) return null;
+
+  const query = typeof record.query === "string" ? record.query : "";
+  const rawItems = Array.isArray(record.results) ? record.results : [];
+  const webResults: ClaudeWebSearchResult[] = toClaudeWebSearchResults(
+    rawItems as Array<{ url?: unknown; title?: unknown }>
+  );
+  const id = `srvtoolu_${call.id}`;
+
+  return [
+    {
+      type: "server_tool_use",
+      id,
+      name: "web_search",
+      input: { query },
+    },
+    {
+      type: "web_search_tool_result",
+      tool_use_id: id,
+      content: webResults,
+    },
+  ];
+}
+
 export async function handleToolCallExecution(
   response: any,
   modelId: string,
@@ -416,7 +458,9 @@ export async function handleToolCallExecution(
       // server-side skill result as tool_result here. Keep client-native tool_use
       // blocks untouched, remove the OmniRoute-handled tool_use blocks, and expose
       // their results as plain assistant text instead of corrupting history with
-      // assistant-side tool_result blocks. See #2815.
+      // assistant-side tool_result blocks. See #2815. The one exception is
+      // omniroute_web_search, which becomes a server_tool_use +
+      // web_search_tool_result pair (both valid in assistant content). See #19046.
       //
       // When no client-native tool_use blocks remain (all were handled here), the
       // upstream stop_reason "tool_use" is stale and would make clients wait for
@@ -425,13 +469,26 @@ export async function handleToolCallExecution(
       // stop_reason because real native tool_use blocks still need the client.
       const handledToolCallIds = new Set(results.map((r) => r.id));
       const toolNamesById = new Map(toolCalls.map((call) => [call.id, call.name]));
+      const callById = new Map(toolCalls.map((call) => [call.id, call]));
       const remainingContent = (Array.isArray(response.content) ? response.content : []).filter(
         (block: any) => !(block?.type === "tool_use" && handledToolCallIds.has(block.id))
       );
-      const resultTextBlocks = results.map((r) => ({
-        type: "text",
-        text: `[Skill result: ${toolNamesById.get(r.id) || r.id}]\n${JSON.stringify(r.result)}`,
-      }));
+      // Claude Code's WebSearch only reads server_tool_use + web_search_tool_result
+      // blocks, so handled omniroute_web_search results get that structured pair.
+      // Every other handled result keeps the text shape below (#2815 rationale).
+      const resultBlocks: Array<Record<string, unknown>> = [];
+      for (const r of results) {
+        const call = callById.get(r.id);
+        const searchBlocks = call ? buildAnthropicWebSearchBlocks(call, r.result) : null;
+        if (searchBlocks) {
+          resultBlocks.push(...searchBlocks);
+        } else {
+          resultBlocks.push({
+            type: "text",
+            text: `[Skill result: ${toolNamesById.get(r.id) || r.id}]\n${JSON.stringify(r.result)}`,
+          });
+        }
+      }
       const firstRemainingToolUseIndex = remainingContent.findIndex(
         (block: any) => block?.type === "tool_use"
       );
@@ -439,7 +496,7 @@ export async function handleToolCallExecution(
       if (firstRemainingToolUseIndex === -1) {
         return {
           ...response,
-          content: [...remainingContent, ...resultTextBlocks],
+          content: [...remainingContent, ...resultBlocks],
           stop_reason: "end_turn",
           stop_sequence: null,
         };
@@ -449,7 +506,7 @@ export async function handleToolCallExecution(
         ...response,
         content: [
           ...remainingContent.slice(0, firstRemainingToolUseIndex),
-          ...resultTextBlocks,
+          ...resultBlocks,
           ...remainingContent.slice(firstRemainingToolUseIndex),
         ],
       };
