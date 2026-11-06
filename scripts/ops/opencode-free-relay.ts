@@ -1,5 +1,5 @@
 /**
- * OpenCode free-tier relay — run with Bun: `bun scripts/opencode-free-relay.ts`.
+ * OpenCode free-tier relay — run with Bun: `bun scripts/ops/opencode-free-relay.ts`.
  *
  * The OpenCode free models answer 429 FreeUsageLimitError to any HTTP client other than Bun's
  * native fetch (measured: the identical request from Node fetch/undici and curl is refused,
@@ -108,6 +108,11 @@ export function assertSafeBind(guard: RelayGuard): void {
   }
 }
 
+function redactedDetail(err: unknown): string {
+  const detail = err instanceof Error ? err.message : String(err);
+  return detail.replace(/\/\/\S*@/g, "//[redacted]@");
+}
+
 function sameSecret(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
   let diff = 0;
@@ -170,7 +175,9 @@ async function handleWith(req: Request, guard: RelayGuard): Promise<Response> {
       proxy: proxy ?? false,
     } as RequestInit);
   } catch (err) {
-    return json(502, { error: `relay upstream failure: ${(err as Error).message}` });
+    // Transport errors can quote the proxy URL, credentials included: the detail stays here.
+    console.warn(`[opencode-free-relay] upstream failure: ${redactedDetail(err)}`);
+    return json(502, { error: "relay upstream failure" });
   }
   const out = new Headers();
   for (const [name, value] of upstream.headers) {

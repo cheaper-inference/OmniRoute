@@ -5,17 +5,22 @@
  * caller never declared those tools, so a call to one of them must not reach the caller: the
  * Chat Completions event stream is rewritten here, removing the `tool_calls` deltas of the
  * injected names and turning a `tool_calls` finish into `stop` when nothing else was called.
- * Calls to tools the caller declared pass through untouched. A tool-call delta that arrives
- * before its function name is held until the name is known; a call that never gets a name is
- * dropped.
+ * Calls to tools the caller declared keep their content and are renumbered from 0 in arrival
+ * order. A tool-call delta that arrives before its function name is held until the name is
+ * known; a call that never gets a name is dropped.
  */
+import type { ExecutorExecuteResult } from "./base.ts";
 
-/** Decide one tool-call delta entry; returns the deltas to emit (held ones first), or none. */
+/**
+ * Decide one tool-call delta entry; returns the deltas to emit (held ones first), or none.
+ * `keptIndexes` maps an upstream index to the one the caller sees: dropping an injected call
+ * must not leave a gap, because a client that accumulates by index would get a sparse array.
+ */
 function routeToolCall(
   raw: unknown,
   injected: ReadonlySet<string>,
   nameByIndex: Map<number, string>,
-  keptIndexes: Set<number>,
+  keptIndexes: Map<number, number>,
   pending: Map<number, unknown[]>
 ): unknown[] {
   const call = raw as { index?: number; function?: { name?: string } };
@@ -34,10 +39,11 @@ function routeToolCall(
     pending.delete(index);
     return [];
   }
-  keptIndexes.add(index);
+  const outIndex = keptIndexes.get(index) ?? keptIndexes.size;
+  keptIndexes.set(index, outIndex);
   const held = pending.get(index) ?? [];
   pending.delete(index);
-  return [...held, raw];
+  return [...held, raw].map((entry) => ({ ...(entry as object), index: outIndex }));
 }
 
 /** Rewrite one SSE `data:` JSON chunk in place. */
@@ -45,7 +51,7 @@ function filterChunk(
   chunk: Record<string, unknown>,
   injected: ReadonlySet<string>,
   nameByIndex: Map<number, string>,
-  keptIndexes: Set<number>,
+  keptIndexes: Map<number, number>,
   pending: Map<number, unknown[]>
 ): void {
   const choices = Array.isArray(chunk.choices)
@@ -74,7 +80,7 @@ export function filterInjectedToolCalls(
   if (!(response.headers.get("content-type") || "").includes("text/event-stream")) return response;
   const injected = new Set(injectedNames);
   const nameByIndex = new Map<number, string>();
-  const keptIndexes = new Set<number>();
+  const keptIndexes = new Map<number, number>();
   const pending = new Map<number, unknown[]>();
   const decoder = new TextDecoder();
   const encoder = new TextEncoder();
@@ -137,4 +143,16 @@ export function filterInjectedToolCalls(
     statusText: response.statusText,
     headers,
   });
+}
+
+/** Remove model calls to OpenCode CLI tools the caller never declared. */
+export function dropInjectedToolCalls(
+  result: ExecutorExecuteResult,
+  names: readonly string[] | undefined
+): ExecutorExecuteResult {
+  if (!names || names.length === 0) return result;
+  if (result instanceof Response) return filterInjectedToolCalls(result, names);
+  if (!("response" in result) || !result.response) return result;
+  const filtered = filterInjectedToolCalls(result.response, names);
+  return filtered === result.response ? result : { ...result, response: filtered };
 }

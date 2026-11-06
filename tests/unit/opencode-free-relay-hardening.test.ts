@@ -18,7 +18,7 @@ import {
   assertSafeUpstream,
   createHandler,
   guardFromEnv,
-} from "../../scripts/opencode-free-relay.ts";
+} from "../../scripts/ops/opencode-free-relay.ts";
 import { OPENCODE_SESSION_PATTERN } from "../../open-sse/utils/opencodeHeaders.ts";
 
 const FREE = "deepseek-v4.1-flash-free";
@@ -144,7 +144,10 @@ test("resolveRelayScript: from the module's package root, not the cwd; override 
     const resolved = withEnv("OPENCODE_FREE_RELAY_SCRIPT", undefined, () =>
       resolveRelayScript(moduleUrl)
     );
-    assert.equal(path.resolve(resolved), path.join(root, "scripts", "opencode-free-relay.ts"));
+    assert.equal(
+      path.resolve(resolved),
+      path.join(root, "scripts", "ops", "opencode-free-relay.ts")
+    );
     assert.ok(fs.existsSync(resolved));
     assert.equal(
       withEnv("OPENCODE_FREE_RELAY_SCRIPT", "/x/relay.ts", () => resolveRelayScript(moduleUrl)),

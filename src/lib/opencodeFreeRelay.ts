@@ -1,10 +1,11 @@
 /**
- * Lifecycle of the OpenCode free-tier Bun relay (`scripts/opencode-free-relay.ts`).
+ * Lifecycle of the OpenCode free-tier Bun relay (`scripts/ops/opencode-free-relay.ts`).
  *
  * Armed only when OPENCODE_FREE_TIER_RELAY_URL points at a loopback address. If something
  * already answers /health there (an externally managed sidecar), nothing is spawned.
  * Otherwise the relay is spawned with Bun — the current runtime when it is Bun, else `bun`
- * from PATH (or OPENCODE_FREE_RELAY_BUN) — and stopped with the server. Never fatal.
+ * from PATH (or OPENCODE_FREE_RELAY_BUN) — and killed when the server process exits. Never
+ * fatal.
  */
 import { spawn, type ChildProcess } from "node:child_process";
 import fs from "node:fs";
@@ -15,10 +16,10 @@ import { freeTierRelayUrl } from "@omniroute/open-sse/executors/opencodeFreeTier
 
 let child: ChildProcess | null = null;
 
-const RELAY_SCRIPT = path.join("scripts", "opencode-free-relay.ts");
+const RELAY_SCRIPT = path.join("scripts", "ops", "opencode-free-relay.ts");
 
 /**
- * Relay script location: `OPENCODE_FREE_RELAY_SCRIPT`, else `scripts/opencode-free-relay.ts`
+ * Relay script location: `OPENCODE_FREE_RELAY_SCRIPT`, else `scripts/ops/opencode-free-relay.ts`
  * under the nearest ancestor of this module (the package root of an installed package or a
  * checkout), else under the working directory (container layouts that copy it next to the
  * server). Falls back to the working-directory path when none exists so the caller can report it.
@@ -96,9 +97,4 @@ export async function startOpencodeFreeRelay(): Promise<RelayStartResult> {
   } catch (err) {
     return { status: "failed", detail: err instanceof Error ? err.message : String(err) };
   }
-}
-
-export function stopOpencodeFreeRelay(): void {
-  child?.kill();
-  child = null;
 }

@@ -5,7 +5,8 @@ import {
   type ProviderCredentials,
 } from "./base.ts";
 import { PROVIDERS } from "../config/constants.ts";
-import { filterInjectedToolCalls } from "./opencodeInjectedToolFilter.ts";
+import { dropInjectedToolCalls } from "./opencodeInjectedToolFilter.ts";
+import { applyRelayHeaders, freeTierDispatchBase, relayEgressUrl } from "./opencodeRelay.ts";
 import { getModelTargetFormat, stripOpencodeModelPrefix } from "../config/providerModels.ts";
 import {
   injectReasoningContentForThinkingModel,
@@ -61,8 +62,6 @@ import {
   isOpencodeUserBlocked,
 } from "./opencodeGeoBlock.ts";
 import {
-  FREE_TIER_INFERENCE_BASE_URL,
-  freeTierRelayUrl,
   attemptFor,
   isGatedFreeTierRequest,
   isPremiumOpencodeModel,
@@ -376,24 +375,6 @@ export {
   normalizeMuseSparkFinishReason,
 } from "./opencodeMuseSpark.ts";
 
-/**
- * Relay mode: the relay runs outside this process's proxy plumbing, so the egress proxy
- * that would apply to the real upstream rides along in a header it consumes (loopback is
- * always direct, so the ambient proxy would otherwise be lost).
- */
-function applyRelayHeaders(headers: Record<string, string>): void {
-  if (!freeTierRelayUrl()) return;
-  try {
-    const route = resolveProxyForRequest(FREE_TIER_INFERENCE_BASE_URL);
-    if (route.proxyUrl) headers["x-opencode-relay-proxy"] = route.proxyUrl;
-  } catch {
-    // unresolvable proxy config: relay goes direct, same as an unproxied request
-  }
-  // A relay bound to a non-loopback address requires this shared secret.
-  const relayToken = (process.env.OPENCODE_FREE_RELAY_TOKEN || "").trim();
-  if (relayToken) headers["x-opencode-relay-auth"] = relayToken;
-}
-
 export class OpencodeExecutor extends BaseExecutor {
   /** Delegates to `isPremiumOpencodeModel`. Exported for testability. */
   static isPremiumModel(model: string, provider: string): boolean {
@@ -582,19 +563,6 @@ export class OpencodeExecutor extends BaseExecutor {
     }
   }
 
-  /** Remove model calls to OpenCode CLI tools the caller never declared (relay mode). */
-  private dropInjectedToolCalls(
-    input: ExecuteInput,
-    result: ExecutorExecuteResult
-  ): ExecutorExecuteResult {
-    const names = attemptFor(input.body)?.injectedToolNames;
-    if (!names || names.length === 0) return result;
-    if (result instanceof Response) return filterInjectedToolCalls(result, names);
-    if (!("response" in result) || !result.response) return result;
-    const filtered = filterInjectedToolCalls(result.response, names);
-    return filtered === result.response ? result : { ...result, response: filtered };
-  }
-
   /**
    * Hand a JSON caller a JSON body even though the free-tier contract forced the upstream
    * request to stream. A streaming caller, a refusal and an already-JSON body pass through.
@@ -604,7 +572,7 @@ export class OpencodeExecutor extends BaseExecutor {
     result: ExecutorExecuteResult
   ): ExecutorExecuteResult {
     this.noteForcedStreamOutcome(input, result);
-    result = this.dropInjectedToolCalls(input, result);
+    result = dropInjectedToolCalls(result, attemptFor(input.body)?.injectedToolNames);
     if (input.stream) return result;
     if (!(result instanceof Response)) {
       if (!("response" in result) || !result.response) return result;
@@ -896,7 +864,7 @@ export class OpencodeExecutor extends BaseExecutor {
         // Opt-in: a FreeTierError through a pool member probes one other member (never direct).
         const singleEgress = freeTierEgressProbeOn
           ? egressPacing.createAppliedEgressTracker(
-              this.buildUrl(String(input.model ?? ""), Boolean(input.stream)),
+              relayEgressUrl(this.buildUrl(String(input.model ?? ""), Boolean(input.stream))),
               resolveProxyForRequest
             )
           : null;
@@ -1038,7 +1006,7 @@ export class OpencodeExecutor extends BaseExecutor {
         return elapsed;
       };
       const appliedEgress = egressPacing.createAppliedEgressTracker(
-        this.buildUrl(String(input.model ?? ""), Boolean(input.stream)),
+        relayEgressUrl(this.buildUrl(String(input.model ?? ""), Boolean(input.stream))),
         resolveProxyForRequest,
         refusalModel
       );
@@ -1589,16 +1557,9 @@ export class OpencodeExecutor extends BaseExecutor {
 
     // Off, unpublished or invalid: the registered base URL. A gated free-tier request keeps
     // the inference contract's constant and never consults the catalog.
-    const gated = Boolean(model) && isGatedFreeTierRequest(this._surface(), this.provider, model);
-    // Gated free-tier requests go through the Bun relay when one is configured: the upstream
-    // answers 429 to any other HTTP client. The relay keeps the path and forwards it to
-    // https://opencode.ai, so the base is the relay origin plus the inference path (a path
-    // configured on the relay URL is ignored, otherwise it would prefix the upstream path).
-    const relay = gated ? freeTierRelayUrl() : null;
-    const base = relay
-      ? `${new URL(relay).origin}${new URL(FREE_TIER_INFERENCE_BASE_URL).pathname}`
-      : gated
-        ? FREE_TIER_INFERENCE_BASE_URL
+    const base =
+      Boolean(model) && isGatedFreeTierRequest(this._surface(), this.provider, model)
+        ? freeTierDispatchBase()
         : (getPublishedBaseUrl(this.provider) ?? this.config.baseUrl);
     switch (this._requestFormat) {
       case "claude":

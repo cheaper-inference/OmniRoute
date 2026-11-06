@@ -302,7 +302,7 @@ export function resolveGatedCredential(
 }
 
 /**
- * Base URL of the Bun relay (`scripts/opencode-free-relay.ts`), from
+ * Base URL of the Bun relay (`scripts/ops/opencode-free-relay.ts`), from
  * `OPENCODE_FREE_TIER_RELAY_URL`; `null` when unset or not an http(s) URL. Throws when the
  * URL is plaintext `http://` on a non-loopback host. Read per call.
  *
@@ -708,12 +708,14 @@ function prepareRelayRequest<T>(
   if (!freeTierRelayUrl() || (requestFormat !== "openai" && requestFormat !== null)) return null;
   const canonical = applyCanonicalRelayContract(body, model);
   if (!canonical) return null;
+  const clientTools = clientToolsOf(body);
   const attempt: FreeTierContractAttempt = {
     provider,
     model,
     session,
     borrowed: false,
-    clientToolNames: clientToolsOf(body).names,
+    clientToolNames: clientTools.names,
+    clientParameters: clientTools.parameters,
     injectedToolNames: canonical.injected,
   };
   if (isTrackable(origin)) rememberAttempt(origin, attempt);
