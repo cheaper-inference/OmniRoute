@@ -6250,7 +6250,7 @@
     "apiRegionChina": "China Continental",
     "apiRegionHint": "Selecione a região do endpoint usada para acesso à API e rastreamento de cota.",
     "apiRegionInternational": "Internacional",
-    "apiRegionLabel": "Região da API",
+    "apiRegionLabel": "__MISSING__:API Region",
     "apikey": "Chave de API",
     "audio": "Áudio",
     "audioProvidersHeading": "Provedores de Áudio",
