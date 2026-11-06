@@ -8,7 +8,7 @@ import dns from "node:dns";
 import http from "node:http";
 import type { AddressInfo } from "node:net";
 
-const { safeOutboundFetch, SafeOutboundFetchError } =
+const { safeOutboundFetch, SafeOutboundFetchError, setSafeOutboundPinnedFetchTestOverride } =
   await import("../../src/shared/network/safeOutboundFetch.ts");
 
 const ALIASES: Record<string, string> = {
@@ -253,18 +253,27 @@ test("block-metadata with pinDns connects to the address that was checked", asyn
   });
 });
 
-test("block-metadata re-checks the answer the connection itself gets", async () => {
-  // The first lookup says private, the one made for the connection says metadata: a name that
-  // changes its answer between the two.
-  const code = await blockedBy(
-    safeOutboundFetch("http://metadata.alias.test:18999/", {
+test("block-metadata with pinDns connects to the checked address, not to a second answer", async () => {
+  // The guard's lookup says private; the resolver the connection would use says metadata (a
+  // name that changes its answer between the two lookups).
+  const seen: string[] = [];
+  setSafeOutboundPinnedFetchTestOverride((address) => {
+    seen.push(address);
+    return async () => new Response("ok");
+  });
+  try {
+    const response = await safeOutboundFetch("http://metadata.alias.test:18999/", {
       guard: "block-metadata",
+      pinDns: true,
       retry: false,
       timeoutMs: 800,
       dnsLookup: async () => [{ address: "10.1.2.3", family: 4 }],
-    })
-  );
-  assert.equal(code, "URL_GUARD_BLOCKED");
+    });
+    assert.equal(response.status, 200);
+    assert.deepEqual(seen, ["10.1.2.3"]);
+  } finally {
+    setSafeOutboundPinnedFetchTestOverride(undefined);
+  }
 });
 
 test("with pinDns the request connects to the address that was checked, not to a second answer", async () => {

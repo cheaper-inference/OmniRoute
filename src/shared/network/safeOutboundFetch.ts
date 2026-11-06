@@ -4,11 +4,6 @@ import {
   getOriginalFetch,
   resolveProxyForRequest,
 } from "@omniroute/open-sse/utils/proxyFetch.ts";
-import { canGuardDirectConnection } from "@omniroute/open-sse/executors/dispatchPin.ts";
-import {
-  CONNECT_GUARD_BLOCKED_CODE,
-  getGuardedDispatcher,
-} from "@omniroute/open-sse/utils/connectGuardDispatcher.ts";
 import { FetchTimeoutError, fetchWithTimeout } from "@/shared/utils/fetchTimeout";
 import {
   bareHostname,
@@ -410,17 +405,6 @@ function normalizeFetchFailure(
   const message = error instanceof Error ? error.message : String(error);
   const code = error && typeof error === "object" ? (error as { code?: string }).code : undefined;
 
-  if ((error as { cause?: { code?: string } } | null)?.cause?.code === CONNECT_GUARD_BLOCKED_CODE) {
-    return new SafeOutboundFetchError(`Host of ${targetUrl} resolves to a blocked address`, {
-      code: "URL_GUARD_BLOCKED",
-      url: targetUrl,
-      method,
-      attempts,
-      isRetryable: false,
-      cause: error,
-    });
-  }
-
   return new SafeOutboundFetchError(message || `Outbound request failed for ${targetUrl}`, {
     code: "NETWORK_ERROR",
     url: targetUrl,
@@ -429,21 +413,6 @@ function normalizeFetchFailure(
     isRetryable: code !== "PROXY_UNREACHABLE",
     cause: error,
   });
-}
-
-/**
- * `block-metadata` covers callers that do not pin: the connection re-checks its own lookup, so a
- * name cannot answer differently for the check above and for the connect. Only the ordinary direct
- * route can carry this dispatcher; a proxy resolves the name itself.
- */
-function connectGuardInit(
-  guard: SafeOutboundFetchGuard,
-  targetUrl: URL,
-  skip: boolean
-): { dispatcher?: unknown } {
-  if (guard !== "block-metadata" || skip) return {};
-  if (!canGuardDirectConnection("", targetUrl.toString())) return {};
-  return { dispatcher: getGuardedDispatcher(guard) };
 }
 
 export async function safeOutboundFetch(url: string | URL, options: SafeOutboundFetchOptions = {}) {
@@ -488,18 +457,12 @@ export async function safeOutboundFetch(url: string | URL, options: SafeOutbound
     pinsConnection && checkedAddresses?.length
       ? (checkedAddresses.find((entry) => entry.family === 4) ?? checkedAddresses[0])
       : null;
-  const connectGuard = connectGuardInit(
-    guard,
-    targetUrl,
-    Boolean(pinTo || proxyConfig || bypassProxyPatch)
-  );
 
   for (let attempt = 1; attempt <= retryConfig.attempts; attempt++) {
     try {
       const executeFetch = () =>
         fetchWithTimeout(targetUrl.toString(), {
           ...fetchOptions,
-          ...connectGuard,
           method,
           redirect,
           signal,
