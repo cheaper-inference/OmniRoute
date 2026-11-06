@@ -6,6 +6,7 @@ import {
 } from "@omniroute/open-sse/services/mediaComboFallback.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { getComboByName, getCombos } from "@/lib/db/combos";
+import { getSettings } from "@/lib/db/settings";
 import { createComboTargetKeyGate } from "@/sse/services/keyConnectionScope";
 import * as log from "@/sse/utils/logger";
 import type { ApiKeyPolicyResult } from "@/shared/utils/apiKeyPolicy";
@@ -26,6 +27,7 @@ interface ModelEndpointComboOptions {
   ) => Promise<Response>;
 }
 
+/** Adapt a persisted combo record to the runtime combo contract. */
 function asCombo(record: Record<string, unknown>): ComboLike {
   return {
     ...record,
@@ -34,6 +36,7 @@ function asCombo(record: Record<string, unknown>): ComboLike {
   };
 }
 
+/** Execute a non-web endpoint combo with policy and account scope preserved. */
 export async function runModelEndpointCombo(options: ModelEndpointComboOptions): Promise<Response> {
   try {
     const record = await getComboByName(options.name);
@@ -44,7 +47,8 @@ export async function runModelEndpointCombo(options: ModelEndpointComboOptions):
       combo: asCombo(record),
       endpointCapability: options.endpoint,
       allCombos: (await getCombos()).map(asCombo),
-      settings: options.settings,
+      settings:
+        options.settings ?? ((await getSettings().catch(() => ({}))) as Record<string, unknown>),
       log,
       signal: options.request.signal,
       apiKeyAllowedConnections: options.allowedConnections,

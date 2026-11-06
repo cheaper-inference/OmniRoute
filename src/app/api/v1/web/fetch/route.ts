@@ -339,6 +339,7 @@ export async function POST(request: Request) {
   return executeWebFetchBody(body, scope.allowedConnections);
 }
 
+/** Execute a validated page-fetch body through a direct provider or named combo. */
 async function executeWebFetchBody(
   body: z.infer<typeof v1WebFetchSchema>,
   allowedConnections: string[] | null

@@ -115,3 +115,47 @@ test("PUT persists capability routes and widens an existing provider restriction
   assert.equal(stored.routes?.search?.strategy, "round-robin");
   assert.equal(stored.routes?.search?.models?.[0]?.providerId, "tavily-search");
 });
+
+test("PUT keeps an existing routes.chat mirror synchronized with top-level Chat updates", async () => {
+  const combo = await combosDb.createCombo({
+    name: "chat-sync-combo",
+    strategy: "priority",
+    config: { maxRetries: 1 },
+    models: [{ provider: "openai", model: "gpt-4o" }],
+    routes: {
+      chat: {
+        strategy: "priority",
+        config: { maxRetries: 1 },
+        models: [{ provider: "openai", model: "gpt-4o" }],
+      },
+      music: {
+        strategy: "priority",
+        models: [{ provider: "elevenlabs", model: "music_v1" }],
+      },
+    },
+  });
+  assert.ok(combo?.id);
+
+  const response = await comboRoute.PUT(
+    put(combo.id, {
+      strategy: "round-robin",
+      config: { maxRetries: 2 },
+      models: [{ provider: "openai", model: "gpt-4o-mini" }],
+    }),
+    { params: Promise.resolve({ id: combo.id }) }
+  );
+  assert.equal(response.status, 200, await response.clone().text());
+
+  const stored = (await combosDb.getComboById(combo.id)) as {
+    models?: Array<{ model?: string }>;
+    routes?: Record<
+      string,
+      { strategy?: string; config?: { maxRetries?: number }; models?: Array<{ model?: string }> }
+    >;
+  };
+  assert.equal(stored.models?.[0]?.model, "openai/gpt-4o-mini");
+  assert.equal(stored.routes?.chat?.models?.[0]?.model, "openai/gpt-4o-mini");
+  assert.equal(stored.routes?.chat?.strategy, "round-robin");
+  assert.equal(stored.routes?.chat?.config?.maxRetries, 2);
+  assert.equal(stored.routes?.music?.models?.[0]?.model, "music_v1");
+});

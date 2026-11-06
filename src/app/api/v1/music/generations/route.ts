@@ -45,6 +45,7 @@ export async function GET(request?: Request) {
   );
 }
 
+/** Dispatch one resolved combo target through the provider's music executor. */
 async function dispatchMusicModel(
   request: Request,
   body: Record<string, unknown> & { model: string; duration?: number },
@@ -104,6 +105,7 @@ async function dispatchMusicModel(
 /**
  * POST /v1/music/generations — generate music
  */
+/** Validate and execute the OpenAI-compatible music generation request. */
 async function postHandler(request, context) {
   const parsed = await readMediaGenerationBody(request, log, "MUSIC");
   if (parsed.state === "invalid") {

@@ -70,6 +70,7 @@ export async function OPTIONS() {
   });
 }
 
+/** Dispatch one resolved combo target through the matching OCR provider. */
 async function dispatchOcrModel(
   body: Record<string, unknown> & { model: string },
   allowedConnections: string[] | null
@@ -105,6 +106,7 @@ async function dispatchOcrModel(
  * POST /v1/ocr — document OCR
  * Mistral OCR API compatible.
  */
+/** Validate and execute an OCR request, including named combo routing. */
 async function postHandler(request, context) {
   let rawBody;
   try {

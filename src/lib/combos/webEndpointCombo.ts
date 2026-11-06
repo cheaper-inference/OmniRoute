@@ -27,6 +27,7 @@ interface WebComboOptions {
   ) => Promise<Response>;
 }
 
+/** Adapt a persisted combo record to the runtime combo contract. */
 function asCombo(record: Record<string, unknown>): ComboLike {
   return {
     ...record,
@@ -35,6 +36,7 @@ function asCombo(record: Record<string, unknown>): ComboLike {
   };
 }
 
+/** Execute a search or fetch combo through its native endpoint dispatcher. */
 export async function runWebEndpointCombo(options: WebComboOptions): Promise<Response> {
   try {
     const record = await getComboByName(options.name);

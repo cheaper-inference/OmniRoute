@@ -44,6 +44,9 @@ test("capability matching uses registries rather than a model name containing se
   assert.equal(targetSupportsEndpoint("elevenlabs/music_v1", "music"), true);
   assert.equal(targetSupportsEndpoint("elevenlabs/music_v1", "chat"), false);
   assert.equal(targetSupportsEndpoint("elevenlabs/not-a-music-model", "music"), false);
+  assert.equal(targetSupportsEndpoint("vertex/gemini-2.5-flash", "chat"), true);
+  assert.equal(targetSupportsEndpoint("vertex/gemini-2.5-pro", "chat"), true);
+  assert.equal(targetSupportsEndpoint("codex/gpt-5.6-sol", "chat"), true);
 });
 
 test("nested combo projection preserves step identity, account pins and priority", () => {
@@ -115,6 +118,30 @@ test("a capability route overrides the legacy chat plan without mutating the com
   );
   assert.deepEqual(music.combo.config, { maxRetries: 0 });
   assert.equal(JSON.stringify(combo), snapshot);
+});
+
+test("the top-level Chat plan stays authoritative over a stale routes.chat mirror", () => {
+  const combo = {
+    name: "chat-sync",
+    strategy: "priority",
+    models: ["openai/gpt-4o-mini"],
+    config: { maxRetries: 1 },
+    routes: {
+      chat: {
+        strategy: "round-robin",
+        models: ["openai/removed-model"],
+        config: { maxRetries: 9 },
+      },
+    },
+  };
+
+  const projected = projectComboForEndpoint(combo, [combo], "chat");
+  assert.equal(projected.combo.strategy, "priority");
+  assert.deepEqual(
+    projected.combo.models.map((step) => step.model),
+    ["openai/gpt-4o-mini"]
+  );
+  assert.deepEqual(projected.combo.config, { maxRetries: 1 });
 });
 
 test("nested combos select their own route for the requested capability", () => {

@@ -4,7 +4,8 @@ import {
   SEARCH_PROVIDERS,
 } from "@omniroute/open-sse/config/searchRegistry.ts";
 import { WEB_FETCH_PROVIDERS } from "@omniroute/open-sse/config/webFetchProviders.ts";
-import { getImageModelEntry } from "@omniroute/open-sse/config/imageRegistry.ts";
+import { getImageModelEntry, isImageOnlyModel } from "@omniroute/open-sse/config/imageRegistry.ts";
+import { getModelsByProviderId } from "@omniroute/open-sse/config/providerModels.ts";
 import { getVideoProvider } from "@omniroute/open-sse/config/videoRegistry.ts";
 import { getMusicProvider } from "@omniroute/open-sse/config/musicRegistry.ts";
 import { getOcrProvider } from "@omniroute/open-sse/config/ocrRegistry.ts";
@@ -32,6 +33,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 /** Resolve an endpoint-specific plan while keeping legacy combos byte-compatible. */
 export function comboForEndpoint(combo: ComboLike, endpoint: ComboEndpoint): ComboLike {
+  // The top-level fields remain the canonical Chat plan for legacy clients and
+  // partial updates. routes.chat is a persistence mirror, never a second source
+  // of truth that can retain targets removed from the top-level plan.
+  if (endpoint === "chat") return combo;
   const routes = isRecord(combo.routes) ? combo.routes : null;
   const route = routes && isRecord(routes[endpoint]) ? (routes[endpoint] as CapabilityRoute) : null;
   if (!route) return combo;
@@ -44,6 +49,7 @@ export function comboForEndpoint(combo: ComboLike, endpoint: ComboEndpoint): Com
   };
 }
 
+/** Resolve aliases to the provider id used by capability registries. */
 export function targetProvider(modelStr: string, hint?: string | null): string {
   const raw = hint || modelStr.split("/")[0];
   return (
@@ -51,6 +57,7 @@ export function targetProvider(modelStr: string, hint?: string | null): string {
   );
 }
 
+/** Check whether a provider/model target can serve the requested endpoint. */
 export function targetSupportsEndpoint(
   modelStr: string,
   endpoint: ComboEndpoint,
@@ -80,20 +87,25 @@ export function targetSupportsEndpoint(
     return hasModel(getTranscriptionProvider(provider)) ?? true;
   }
   if (endpoint === "audio-generation") return provider === "elevenlabs";
-  const recognizedModalTarget = [
-    hasModel(getVideoProvider(provider)),
-    hasModel(getMusicProvider(provider)),
-    hasModel(getOcrProvider(provider)),
-    hasModel(getSpeechProvider(provider)),
-    hasModel(getTranscriptionProvider(provider)),
-    getImageModelEntry(modelStr) ? true : null,
-  ].some((supported) => supported === true);
+  const chatCatalogHasModel = getModelsByProviderId(provider).some(
+    (model) => model.id === modelId || model.id === modelStr
+  );
+  const recognizedModalTarget =
+    [
+      hasModel(getVideoProvider(provider)),
+      hasModel(getMusicProvider(provider)),
+      hasModel(getOcrProvider(provider)),
+      hasModel(getSpeechProvider(provider)),
+      hasModel(getTranscriptionProvider(provider)),
+      getImageModelEntry(modelStr) && isImageOnlyModel(modelStr) ? true : null,
+    ].some((supported) => supported === true) && !chatCatalogHasModel;
   if (endpoint === "chat" && recognizedModalTarget) return false;
   // Keep existing non-web endpoint guards and opt-in modality bridges authoritative.
   // Unknown/custom models cannot be rejected solely because a static catalog lacks them.
   return true;
 }
 
+/** Project a combo DAG onto one endpoint and prune empty nested branches. */
 export function projectComboForEndpoint(
   combo: ComboLike,
   allCombos: ComboCollectionLike,

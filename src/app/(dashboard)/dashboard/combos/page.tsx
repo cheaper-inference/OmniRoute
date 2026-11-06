@@ -79,6 +79,7 @@ import {
   parseQualifiedModel,
   resolveComboBuilderProviderId,
 } from "@/lib/combos/builderDraft";
+import { buildDuplicateComboPayload } from "@/lib/combos/duplicatePayload";
 import { normalizeComboConfigMode } from "@/shared/constants/comboConfigMode";
 import AutoComboCatalog from "./AutoComboCatalog";
 import {
@@ -166,6 +167,7 @@ const COMBO_ENDPOINT_MODEL_TAGS: Record<ComboEndpoint, string[]> = {
   "audio-generation": ["audio-generation", "sound-generation"],
 };
 
+/** Check whether a picker model advertises support for a capability tab. */
 function modelSupportsComboEndpoint(model: unknown, endpoint: ComboEndpoint): boolean {
   const candidate =
     model && typeof model === "object" ? (model as { supportedEndpoints?: unknown }) : null;
@@ -1096,12 +1098,11 @@ function CombosPageContent() {
       newName = `${baseName}-copy-${counter}`;
     }
 
-    const data = {
-      name: newName,
-      models: combo.models,
-      strategy: combo.strategy || "priority",
-      config: sanitizeComboRuntimeConfig(combo.config),
-    };
+    const data = buildDuplicateComboPayload(
+      combo,
+      newName,
+      sanitizeComboRuntimeConfig(combo.config)
+    );
 
     await handleCreate(data);
   };
@@ -2290,7 +2291,13 @@ function ComboFormModal({
   const notify = useNotificationStore();
   const isExpertMode = normalizeComboConfigMode(comboConfigMode) === "expert";
   const createDraftStateRef = useRef<CreateDraftSnapshot>(getEmptyCreateDraftSnapshot());
-  const initialChatRoute = combo?.routes?.chat;
+  const initialChatRoute = combo
+    ? {
+        models: combo.models,
+        strategy: combo.strategy,
+        config: combo.config,
+      }
+    : undefined;
   const [name, setName] = useState(combo?.name || "");
   const [description, setDescription] = useState<string>(combo?.description || "");
   const [models, setModels] = useState(() => {
@@ -2424,7 +2431,7 @@ function ComboFormModal({
           config: sanitizeComboRuntimeConfig(route.config),
         };
       }
-      const nextChat = nextDrafts.chat || {
+      const nextChat = {
         models: (nextCombo?.models || []).map((entry) => normalizeModelEntry(entry)),
         strategy: nextCombo?.strategy || comboDefaults?.strategy || "priority",
         config: sanitizeComboRuntimeConfig(nextCombo?.config),

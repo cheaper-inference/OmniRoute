@@ -193,6 +193,7 @@ async function postHandler(request: Request, context: unknown) {
   return executeSearchBody(body, policy, allowedConnections);
 }
 
+/** Execute a validated search body through a direct provider or named combo. */
 async function executeSearchBody(
   body: z.infer<typeof v1SearchSchema>,
   policy: ApiKeyPolicyResult,

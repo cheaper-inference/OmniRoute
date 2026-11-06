@@ -31,6 +31,7 @@ type ComboRowShape = {
   config?: unknown;
   models?: unknown;
   strategy?: string;
+  routes?: Record<string, unknown>;
   isActive?: boolean;
   allowedProviders?: string[];
   system_message?: string;
@@ -167,6 +168,49 @@ export async function PUT(request, { params }) {
           }),
         }
       : normalizedUpdate;
+
+    const currentRoutes =
+      currentCombo.routes &&
+      typeof currentCombo.routes === "object" &&
+      !Array.isArray(currentCombo.routes)
+        ? currentCombo.routes
+        : {};
+    const bodyRoutes =
+      body.routes && typeof body.routes === "object" && !Array.isArray(body.routes)
+        ? (body.routes as Record<string, unknown>)
+        : {};
+    const explicitChat =
+      bodyRoutes.chat && typeof bodyRoutes.chat === "object" && !Array.isArray(bodyRoutes.chat)
+        ? (bodyRoutes.chat as Record<string, unknown>)
+        : null;
+    if (explicitChat) {
+      // routes.chat is accepted for schema compatibility, but the top-level
+      // fields remain the canonical Chat plan for legacy clients and runtime.
+      body.models = explicitChat.models as typeof body.models;
+      body.strategy = explicitChat.strategy as typeof body.strategy;
+      body.config = (explicitChat.config ?? {}) as typeof body.config;
+    } else {
+      const storedChat =
+        currentRoutes.chat &&
+        typeof currentRoutes.chat === "object" &&
+        !Array.isArray(currentRoutes.chat)
+          ? (currentRoutes.chat as Record<string, unknown>)
+          : null;
+      const updatesChatPlan =
+        body.models !== undefined || body.strategy !== undefined || body.config !== undefined;
+      if (storedChat && updatesChatPlan) {
+        body.routes = {
+          ...currentRoutes,
+          ...bodyRoutes,
+          chat: {
+            ...storedChat,
+            ...(body.models !== undefined ? { models: body.models } : {}),
+            ...(body.strategy !== undefined ? { strategy: body.strategy } : {}),
+            ...(body.config !== undefined ? { config: body.config } : {}),
+          },
+        } as typeof body.routes;
+      }
+    }
 
     if (body.overrideAllowedProviders === true) {
       delete body.overrideAllowedProviders;

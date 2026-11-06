@@ -14,6 +14,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value && typeof value === "object" && !Array.isArray(value));
 }
 
+/** Normalize persisted endpoint plans into the same model-step shape as Chat. */
 export function normalizeComboCapabilityRoutes(
   routes: unknown,
   options: { comboName: string; allCombos: never }

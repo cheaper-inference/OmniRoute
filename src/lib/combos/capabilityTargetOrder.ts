@@ -4,6 +4,7 @@ const MAX_STATE_ENTRIES = 2048;
 const roundRobinCounters = new Map<string, number>();
 const targetUseCounts = new Map<string, number>();
 
+/** Store bounded process-local routing state without unbounded key growth. */
 function boundedSet(map: Map<string, number>, key: string, value: number): void {
   if (!map.has(key) && map.size >= MAX_STATE_ENTRIES) {
     const oldest = map.keys().next().value;
@@ -12,6 +13,7 @@ function boundedSet(map: Map<string, number>, key: string, value: number): void 
   map.set(key, value);
 }
 
+/** Rotate a target list while preserving every fallback candidate. */
 function rotate<T>(targets: readonly T[], index: number): T[] {
   if (targets.length < 2) return [...targets];
   const offset = ((index % targets.length) + targets.length) % targets.length;
@@ -87,6 +89,7 @@ export function orderCapabilityTargets<T extends CapabilityOrderTarget>(options:
   return [...targets];
 }
 
+/** Clear process-local ordering state between deterministic unit tests. */
 export function resetCapabilityTargetOrderForTests(): void {
   roundRobinCounters.clear();
   targetUseCounts.clear();

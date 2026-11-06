@@ -51,6 +51,7 @@ function visibleImageProviders(): Record<string, ImageProviderConfig> {
 
 type ResolvedImageModelAlias = { provider: string; model: string };
 
+/** Resolve an exact image-model alias without applying provider-prefix fallbacks. */
 function resolveImageModelAlias(modelStr: string): ResolvedImageModelAlias | null {
   const alias = IMAGE_MODEL_ALIASES[modelStr];
   return alias ? { provider: alias.provider, model: alias.model } : null;
@@ -62,6 +63,7 @@ function resolveImageModelAlias(modelStr: string): ResolvedImageModelAlias | nul
 // must NOT override an explicit prefix — #9982 removed the unconditional bare
 // fallback because `fal-ai/flux-2-max` was being hijacked to black-forest-labs
 // by the bare `flux-2-max` alias.
+/** Resolve a bare alias only when it remains on the explicitly selected provider. */
 function resolveSameProviderBareAlias(
   providerId: string,
   model: string
@@ -70,6 +72,7 @@ function resolveSameProviderBareAlias(
   return aliased && aliased.provider === providerId ? aliased : null;
 }
 
+/** Find a provider model by callable id or catalog id. */
 function findImageModelConfig(providerId: string, modelId: string): ImageModelEntry | null {
   const provider = visibleImageProviders()[providerId];
   if (!provider) return null;
@@ -78,6 +81,7 @@ function findImageModelConfig(providerId: string, modelId: string): ImageModelEn
   );
 }
 
+/** Convert an image catalog id to the provider's callable model id. */
 function resolveImageProviderModelId(providerId: string, modelId: string): string {
   return findImageModelConfig(providerId, modelId)?.id || modelId;
 }
@@ -85,6 +89,7 @@ function resolveImageProviderModelId(providerId: string, modelId: string): strin
 // Kept out of getImageModelEntry() (which sits at the complexity-ratchet cap) — an
 // alias can override imageRequired directly, else it falls back to its target
 // model's own flag. Consumers coerce the result with Boolean(), so no `?? false`.
+/** Resolve whether an alias target requires an image input. */
 function resolveAliasImageRequired(
   alias: ImageModelAliasEntry,
   modelConfig: ImageModelEntry | null
