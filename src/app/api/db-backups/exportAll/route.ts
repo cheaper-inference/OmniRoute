@@ -85,7 +85,8 @@ function writeExportSidecars(payloadDir: string): void {
  *
  * `Readable.toWeb` pulls from the file only as the client drains the response,
  * so a slow client applies backpressure instead of buffering the archive in
- * the queue. The `close` event covers normal end, errors and destruction.
+ * the queue. The `close` event covers normal end, errors and destruction; an
+ * abort only destroys the stream and lets `close` do the cleanup.
  */
 function streamArchive(
   tarPath: string,
@@ -94,19 +95,21 @@ function streamArchive(
   headers: Record<string, string>
 ): Response {
   const archiveStream = createReadStream(tarPath);
-  let cleaned = false;
-  const cleanup = () => {
-    if (cleaned) return;
-    cleaned = true;
-    archiveStream.destroy();
+  // `close` fires only after the descriptor is released, so the directory is
+  // removed from here alone: Windows can refuse to remove a file still open.
+  archiveStream.once("close", () => {
     try {
       fs.rmSync(workDir, { recursive: true, force: true });
     } catch {
       // Cleanup must not replace a successful response.
     }
-  };
-  request.signal.addEventListener("abort", cleanup, { once: true });
-  archiveStream.once("close", cleanup);
+  });
+
+  // A client that left during the backup or tar has already fired `abort`, and
+  // Next drops such a response without reading or cancelling its body.
+  const abort = () => archiveStream.destroy();
+  if (request.signal.aborted) abort();
+  else request.signal.addEventListener("abort", abort, { once: true });
 
   return new Response(Readable.toWeb(archiveStream) as ReadableStream<Uint8Array>, {
     status: 200,

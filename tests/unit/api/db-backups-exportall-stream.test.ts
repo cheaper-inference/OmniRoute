@@ -104,3 +104,81 @@ test("the archive is produced asynchronously and streamed to the response", asyn
     "the work directory is removed once the response consumed the archive"
   );
 });
+
+/**
+ * Fake `tar` writing an archive far larger than the stream buffer, so the read
+ * stream cannot drain on its own: only an explicit teardown can release it.
+ */
+function stubLargeTar(onArchiveWritten: () => void): void {
+  mock.method(
+    childProcess,
+    "execFile",
+    (
+      _command: string,
+      args: string[],
+      options: { cwd: string; timeout: number },
+      callback: (error: Error | null, stdout?: string, stderr?: string) => void
+    ) => {
+      fs.writeFileSync(path.resolve(options.cwd, args[1]), Buffer.alloc(8 * 1024 * 1024));
+      onArchiveWritten();
+      callback(null, "", "");
+    }
+  );
+  syncBuiltinESMExports();
+}
+
+/** Record whether the archive descriptor was released before the work directory went away. */
+function traceTeardownOrder(): string[] {
+  const events: string[] = [];
+  const realClose = fs.close;
+  const realRmSync = fs.rmSync;
+  mock.method(fs, "close", (fd: number, callback: (error: Error | null) => void) => {
+    realClose(fd, (error) => {
+      events.push("fd-closed");
+      callback(error);
+    });
+  });
+  mock.method(fs, "rmSync", (target: fs.PathLike, options?: fs.RmOptions) => {
+    if (String(target).startsWith(workRoot)) events.push("work-dir-removed");
+    realRmSync(target, options);
+  });
+  return events;
+}
+
+async function waitForEmptyWorkRoot(): Promise<void> {
+  const deadline = Date.now() + 2000;
+  while (fs.readdirSync(workRoot).length > 0 && Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, 20));
+  }
+}
+
+// Next's pipeToNodeResponse returns without reading or cancelling the body when
+// the client is already gone, so these responses are deliberately never consumed.
+for (const moment of ["while tar is running", "after the response is built"]) {
+  test(`a client that disconnects ${moment} leaves no database copy behind`, async () => {
+    const client = new AbortController();
+    stubLargeTar(() => {
+      if (moment === "while tar is running") client.abort();
+    });
+    const events = traceTeardownOrder();
+
+    try {
+      const response = await route.GET(
+        new Request("http://localhost/api/db-backups/exportAll", { signal: client.signal })
+      );
+      assert.equal(response.status, 200);
+      client.abort();
+      await waitForEmptyWorkRoot();
+    } finally {
+      mock.restoreAll();
+      syncBuiltinESMExports();
+    }
+
+    assert.deepEqual(fs.readdirSync(workRoot), [], "the work directory must not outlive the abort");
+    assert.deepEqual(
+      events,
+      ["fd-closed", "work-dir-removed"],
+      "the descriptor is released before the directory is removed"
+    );
+  });
+}
