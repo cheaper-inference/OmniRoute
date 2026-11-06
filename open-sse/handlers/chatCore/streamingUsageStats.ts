@@ -3,11 +3,12 @@
  * decomposition, #3501).
  *
  * Extracted from handleChatCore's onStreamComplete: records per-request usage analytics for a
- * completed streaming response — the fire-and-forget `saveRequestUsage` row and the per-api-key
- * billable-token counter (only on a 200 stream). Side-effect only (no handler state is mutated,
- * nothing is returned); best-effort, every write swallows its own errors. The per-request context
- * is threaded via `ctx` so the call site stays byte-identical; behaviour is unchanged. The
- * compression usage-receipt attach stays in the handler (it is a handler-bound closure).
+ * finished streaming response — the fire-and-forget `saveRequestUsage` row when `usage` is known,
+ * the per-api-key rpm/tpm quota counters for every stream that counts as a client request (aborted
+ * and failed ones included, from their partial usage), and the model-level token limit only on a
+ * 200 stream. Side-effect only (no handler state is mutated, nothing is returned); best-effort,
+ * every write swallows its own errors. The compression usage-receipt attach stays in the handler
+ * (it is a handler-bound closure).
  */
 
 import { saveRequestUsage } from "@/lib/usageDb";
@@ -32,6 +33,8 @@ export type RecordStreamingUsageStatsContext = {
   cpaAuthIndex?: string | null | undefined;
   /** Tokens generated before a 499 / mid-stream failure (usage is null then). */
   partialUsage?: unknown;
+  /** Whether the stream carried output, so a combo cannot have failed over from it. */
+  emittedOutput?: boolean;
 };
 
 function persistStreamingUsageRow(usage: object, ctx: RecordStreamingUsageStatsContext): void {
@@ -89,6 +92,10 @@ export function recordStreamingUsageStats(
   // The failure finalizer already writes the 499/5xx usage row from partialUsage,
   // so only a real `usage` persists a row here; the counters take either.
   if (isObject(usage)) persistStreamingUsageRow(usage, ctx);
+  // A combo reads each target's stream and fails over from a rejected one, and that attempt
+  // ends here too. With no usage and no output it may be one: the target that answers counts
+  // the client's request, so counting this attempt as well would use up the key's rpm early.
+  if (ctx.isCombo && !isObject(usage) && !ctx.emittedOutput) return;
   const counted = isObject(usage) ? usage : isObject(ctx.partialUsage) ? ctx.partialUsage : null;
   recordStreamingBillableTokens(counted, ctx);
 }

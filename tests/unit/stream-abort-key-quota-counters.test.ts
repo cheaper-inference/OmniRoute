@@ -16,6 +16,8 @@ const { recordStreamingUsageStats } =
   await import("../../open-sse/handlers/chatCore/streamingUsageStats.ts");
 const { getKeyQuotaCounters } = await import("../../src/lib/db/keyQuota.ts");
 
+type QuotaCounters = ReturnType<typeof getKeyQuotaCounters>;
+
 const h = await createChatPipelineHarness("stream-abort-quota");
 
 test("aborted stream (status 499, partial usage) still advances rpm/tpm counters", () => {
@@ -81,6 +83,61 @@ test("200 stream with real usage is unchanged", () => {
   assert.equal(c.tpmUsed, 5020);
 });
 
+// A combo reads each target's stream and fails over from a rejected one, so that attempt
+// finishes here too. The client sent one request: only the target that answered counts it.
+function recordComboAttempt(
+  keyId: string,
+  usage: unknown,
+  attempt: { streamStatus: number; emittedOutput: boolean; partialUsage?: unknown }
+) {
+  recordStreamingUsageStats(usage, {
+    provider: "openai",
+    model: "gpt-4o-mini",
+    startTime: Date.now(),
+    ttft: 0,
+    streamErrorCode: null,
+    connectionId: "conn-1",
+    apiKeyInfo: { id: keyId, name: "k" },
+    effectiveServiceTier: undefined,
+    isCombo: true,
+    comboStrategy: "priority",
+    ...attempt,
+  });
+  return getKeyQuotaCounters(keyId);
+}
+
+test("combo attempt rejected before any output is not a request", () => {
+  const failed = recordComboAttempt("key-combo-502", null, {
+    streamStatus: 502,
+    emittedOutput: false,
+  });
+  assert.deepEqual([failed.rpmUsed, failed.tpmUsed], [0, 0]);
+
+  // A truncated target finishes its stream as 200 with no usage.
+  const truncated = recordComboAttempt("key-combo-200", null, {
+    streamStatus: 200,
+    emittedOutput: false,
+  });
+  assert.deepEqual([truncated.rpmUsed, truncated.tpmUsed], [0, 0]);
+
+  // An early usage frame leaves partial usage, but the attempt is still discarded.
+  const withUsageFrame = recordComboAttempt("key-combo-usage", null, {
+    streamStatus: 502,
+    emittedOutput: false,
+    partialUsage: { prompt_tokens: 40, completion_tokens: 0, total_tokens: 40 },
+  });
+  assert.deepEqual([withUsageFrame.rpmUsed, withUsageFrame.tpmUsed], [0, 0]);
+});
+
+test("combo attempt that sent output and then ended early is counted", () => {
+  const c = recordComboAttempt("key-combo-abort", null, {
+    streamStatus: 499,
+    emittedOutput: true,
+    partialUsage: { prompt_tokens: 97, completion_tokens: 4, total_tokens: 101, estimated: true },
+  });
+  assert.deepEqual([c.rpmUsed, c.tpmUsed], [1, 101]);
+});
+
 // End-to-end: the real pipeline, a stubbed upstream (no network), a client that
 // aborts after the first token. The completed-stream control proves the counters
 // move at all in this harness.
@@ -123,16 +180,33 @@ function upstream(slowTail: boolean): Response {
   );
 }
 
-async function runPipeline(abortAfterFirstChunk: boolean, keyId: string, keyHash: string) {
+/** Reset first: seeding the key afterwards keeps it alive for the whole run. */
+async function seedKey(...providers: string[]) {
   await h.resetStorage();
-  await h.seedConnection("openai", { name: "stream-abort-quota", apiKey: "test-key" });
-  globalThis.fetch = (async () => upstream(abortAfterFirstChunk)) as typeof fetch;
+  for (const provider of providers) {
+    await h.seedConnection(provider, { name: "stream-abort-quota", apiKey: "test-key" });
+  }
+  return h.seedApiKey({});
+}
+
+/** Polls until the counters pass `ready`, then returns them either way. */
+async function settledCounters(keyId: string, ready: (c: QuotaCounters) => boolean) {
+  await h.waitFor(() => ready(getKeyQuotaCounters(keyId)), 5000);
+  return getKeyQuotaCounters(keyId);
+}
+
+async function runPipeline(
+  abortAfterFirstChunk: boolean,
+  keyId: string,
+  keyHash: string,
+  model = "openai/gpt-4o-mini"
+) {
   const ac = new AbortController();
   const req = new Request("http://localhost/v1/chat/completions", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${keyHash}` },
     body: JSON.stringify({
-      model: "openai/gpt-4o-mini",
+      model,
       stream: true,
       messages: [{ role: "user", content: `q ${crypto.randomUUID()}` }],
     }),
@@ -152,20 +226,87 @@ async function runPipeline(abortAfterFirstChunk: boolean, keyId: string, keyHash
       break;
     }
   }
-  await new Promise((r) => setTimeout(r, 300));
-  return getKeyQuotaCounters(keyId);
+  return settledCounters(keyId, (c) => c.rpmUsed >= 1 && c.tpmUsed >= 1);
 }
 
 test("pipeline: completed stream is counted (control)", async () => {
-  const key = await h.seedApiKey({});
+  const key = await seedKey("openai");
+  globalThis.fetch = (async () => upstream(false)) as typeof fetch;
   const c = await runPipeline(false, key.id, key.key);
   assert.ok(c.rpmUsed >= 1 && c.tpmUsed >= 5000, `rpm=${c.rpmUsed} tpm=${c.tpmUsed}`);
 });
 
 test("pipeline: client abort after first token still reaches rpm/tpm counters", async () => {
-  const key = await h.seedApiKey({});
+  const key = await seedKey("openai");
+  globalThis.fetch = (async () => upstream(true)) as typeof fetch;
   const c = await runPipeline(true, key.id, key.key);
   assert.ok(c.rpmUsed >= 1, `rpm=${c.rpmUsed} tpm=${c.tpmUsed}`);
+  assert.ok(c.tpmUsed >= 1, `rpm=${c.rpmUsed} tpm=${c.tpmUsed}`);
+});
+
+// Combo failover: the first target passes stream readiness, then the combo rejects it.
+const roleFrame = frame({
+  ...base,
+  choices: [{ index: 0, delta: { role: "assistant" }, finish_reason: null }],
+});
+const errorFrame = frame({ error: { message: "upstream boom", type: "server_error" } });
+
+function sse(frames: Uint8Array[]): Response {
+  return new Response(
+    new ReadableStream({
+      async start(c) {
+        for (const f of frames) {
+          c.enqueue(f);
+          await new Promise((r) => setTimeout(r, 5));
+        }
+        c.close();
+      },
+    }),
+    { headers: { "Content-Type": "text/event-stream" } }
+  );
+}
+
+async function seedFailoverCombo(first: () => Response, second: () => Response) {
+  const key = await seedKey("openai", "groq");
+  const name = `quota-combo-${crypto.randomUUID().slice(0, 8)}`;
+  await h.combosDb.createCombo({
+    name,
+    strategy: "priority",
+    config: { maxRetries: 0, retryDelayMs: 0, fallbackDelayMs: 0 },
+    models: ["openai/gpt-4o-mini", "groq/llama-3.3-70b-versatile"],
+  });
+  const calls: string[] = [];
+  globalThis.fetch = (async (url: string | URL | Request) => {
+    const host = new URL(String(url)).host;
+    calls.push(host);
+    return host === "api.openai.com" ? first() : second();
+  }) as typeof fetch;
+  return { key, name, calls };
+}
+
+for (const [label, rejected] of [
+  ["upstream error", [roleFrame, errorFrame]],
+  ["truncated stream", [roleFrame]],
+] as const) {
+  test(`pipeline: combo failover after ${label} counts one request`, async () => {
+    const { key, name, calls } = await seedFailoverCombo(
+      () => sse([...rejected]),
+      () => upstream(false)
+    );
+    const c = await runPipeline(false, key.id, key.key, name);
+    assert.deepEqual(calls, ["api.openai.com", "api.groq.com"]);
+    assert.equal(c.rpmUsed, 1, `rpm=${c.rpmUsed} tpm=${c.tpmUsed}`);
+    assert.equal(c.tpmUsed, 5020, `rpm=${c.rpmUsed} tpm=${c.tpmUsed}`);
+  });
+}
+
+test("pipeline: client abort on a combo target still reaches rpm/tpm counters", async () => {
+  const { key, name } = await seedFailoverCombo(
+    () => upstream(true),
+    () => upstream(false)
+  );
+  const c = await runPipeline(true, key.id, key.key, name);
+  assert.equal(c.rpmUsed, 1, `rpm=${c.rpmUsed} tpm=${c.tpmUsed}`);
   assert.ok(c.tpmUsed >= 1, `rpm=${c.rpmUsed} tpm=${c.tpmUsed}`);
 });
 
