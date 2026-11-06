@@ -121,6 +121,8 @@ export const USAGE_FETCHER_PROVIDERS = [
   "cpl",
   // Cloudflare Workers AI daily neurons (GraphQL Analytics aiInferenceAdaptiveGroups)
   "cloudflare-ai",
+  // xKiro daily free-token quota only, never the paid wallet (GET /v1/usage)
+  "xkiro",
 ] as const;
 
 export type UsageFetcherProvider = (typeof USAGE_FETCHER_PROVIDERS)[number];
