@@ -142,12 +142,18 @@ const AUTOMATIC_PREFIX_CACHING_PROVIDERS = new Set(["openai", "codex", "azure"])
 // #18787: these provider lanes contain both caching and non-caching upstream models.
 // Enable the implicit-cache guard only for a verified model, or a per-connection
 // explicit automatic-cache override; otherwise avoid suppressing useful compression.
-const OPENCODE_LANES = new Set(["opencode", "opencode-go"]);
-const OPENCODE_PREFIX_CACHED_MODEL = /^deepseek-v4\.1-flash(?:[-:.][a-z0-9]+)*$/;
+// `opencode` is the routing alias; chatCore sees its `opencode-zen` registry id.
+const OPENCODE_LANES = new Set(["opencode", "opencode-zen", "opencode-go"]);
+// `deepseek-flash` is the Go registry's alias of DeepSeek V4.1 Flash.
+const OPENCODE_PREFIX_CACHED_MODEL = /^deepseek-(?:v4\.1-)?flash(?:[-:.][a-z0-9]+)*$/;
+
+export function isOpenCodeLane(provider: string | null | undefined): boolean {
+  return !!provider && OPENCODE_LANES.has(provider.toLowerCase());
+}
 
 /** Restrict OpenCode's cache-aligned lane to models verified to use automatic prefixes. */
 function isOpenCodeCacheableModel(provider: string, model?: string | null): boolean {
-  if (!OPENCODE_LANES.has(provider.toLowerCase()) || !model) return false;
+  if (!isOpenCodeLane(provider) || !model) return false;
   const modelId = model.toLowerCase().split("/").filter(Boolean).at(-1) ?? "";
   return OPENCODE_PREFIX_CACHED_MODEL.test(modelId);
 }
@@ -239,17 +245,17 @@ export function isClaudeCodeClient(userAgent: string | null | undefined): boolea
   return false;
 }
 
+/** Recognize the Claude protocol regardless of casing. */
+function isClaudeTargetFormat(targetFormat?: string | null): boolean {
+  return targetFormat?.toLowerCase() === "claude";
+}
+
 /**
  * Check if a provider supports prompt caching
  * Supports caching if:
  * 1. Provider is in the known caching providers list, OR
  * 2. Provider uses Claude protocol (detected via targetFormat)
  */
-/** Recognize the Claude protocol regardless of casing. */
-function isClaudeTargetFormat(targetFormat?: string | null): boolean {
-  return targetFormat?.toLowerCase() === "claude";
-}
-
 export function providerSupportsCaching(
   provider: string | null | undefined,
   targetFormat?: string | null,
@@ -301,9 +307,12 @@ export function providerUsesAutomaticPrefixCaching(
   }
   if (!provider) return false;
   const providerId = provider.toLowerCase();
-  if (OPENCODE_LANES.has(providerId)) {
+  if (isOpenCodeLane(providerId)) {
     // OpenCode uses implicit prefixes unless a marker passthrough format was selected.
-    return connectionCacheOverride?.supportsPromptCaching === true || isOpenCodeCacheableModel(providerId, model);
+    return (
+      connectionCacheOverride?.supportsPromptCaching === true ||
+      isOpenCodeCacheableModel(providerId, model)
+    );
   }
   return AUTOMATIC_PREFIX_CACHING_PROVIDERS.has(providerId);
 }

@@ -29,6 +29,13 @@ const config = {
   enabled: true,
   defaultMode: "stacked",
   autoTriggerTokens: 0,
+  // #18650: a legacy stacked config resolves to off unless an engine is enabled.
+  engines: {
+    "session-dedup": { enabled: true },
+    lite: { enabled: true },
+    ccr: { enabled: true },
+    headroom: { enabled: true },
+  },
   stackedPipeline: [
     { engine: "session-dedup" },
     { engine: "lite" },
@@ -55,14 +62,20 @@ const firstBody = { model: `opencode-go/${model}`, messages: baseMessages };
 beforeEach(resetLiveZoneCache);
 
 test("#18787: OpenCode providers use implicit prefix caching, not explicit cache_control", () => {
-  for (const providerId of ["opencode", "opencode-go"]) {
+  for (const providerId of ["opencode", "opencode-zen", "opencode-go"]) {
     assert.equal(providerSupportsCaching(providerId, "openai", null, model), true);
     assert.equal(providerUsesAutomaticPrefixCaching(providerId, null, model), true);
     assert.equal(providerHonorsOpenAIFormatCacheControl(providerId), false);
     assert.equal(providerSupportsCaching(providerId, "openai", null, "uncached-model"), false);
     assert.equal(providerUsesAutomaticPrefixCaching(providerId, null, "uncached-model"), false);
-    assert.equal(providerUsesAutomaticPrefixCaching(providerId, null, "deepseek-v4.1-flash:free"), true);
-    assert.equal(providerUsesAutomaticPrefixCaching(providerId, null, "deepseek-v4.1-flash-preview-0820"), true);
+    assert.equal(
+      providerUsesAutomaticPrefixCaching(providerId, null, "deepseek-v4.1-flash:free"),
+      true
+    );
+    assert.equal(
+      providerUsesAutomaticPrefixCaching(providerId, null, "deepseek-v4.1-flash-preview-0820"),
+      true
+    );
     assert.equal(
       providerUsesAutomaticPrefixCaching(
         providerId,
@@ -72,7 +85,11 @@ test("#18787: OpenCode providers use implicit prefix caching, not explicit cache
       true
     );
     assert.equal(
-      providerUsesAutomaticPrefixCaching(providerId, { supportsPromptCaching: true }, "uncached-model"),
+      providerUsesAutomaticPrefixCaching(
+        providerId,
+        { supportsPromptCaching: true },
+        "uncached-model"
+      ),
       true,
       "OpenCode cache opt-in without marker passthrough uses automatic prefix caching"
     );
@@ -85,10 +102,45 @@ test("#18787: OpenCode providers use implicit prefix caching, not explicit cache
       false
     );
     assert.equal(
-      providerUsesAutomaticPrefixCaching(providerId, { cacheControlPassthrough: "openai-format" }, model),
+      providerUsesAutomaticPrefixCaching(
+        providerId,
+        { cacheControlPassthrough: "openai-format" },
+        model
+      ),
       false
     );
   }
+});
+
+test("#18787: the guard covers the Zen registry id and the Go alias of the same model", () => {
+  const zenModel = "deepseek-v4.1-flash-free";
+  // `opencode/` resolves to the opencode-zen registry id before chatCore sees the provider.
+  assert.equal(
+    mustKeepOpenCodeHistoryVerbatim(
+      { model: zenModel },
+      { provider: "opencode-zen", model: zenModel }
+    ),
+    true
+  );
+  // The Go registry documents deepseek-flash as an alias of DeepSeek V4.1 Flash.
+  assert.equal(
+    mustKeepOpenCodeHistoryVerbatim(
+      { model: "deepseek-flash" },
+      { provider, model: "deepseek-flash" }
+    ),
+    true
+  );
+  // DeepSeek V4 Flash is a different model and stays outside the verified family.
+  for (const providerId of ["opencode-zen", "opencode-go"]) {
+    assert.equal(providerUsesAutomaticPrefixCaching(providerId, null, "deepseek-v4-flash"), false);
+  }
+  assert.equal(
+    mustKeepOpenCodeHistoryVerbatim(
+      { model: "deepseek-flash" },
+      { provider: "deepseek", model: "deepseek-flash" }
+    ),
+    false
+  );
 });
 
 test("#18787: automatic cache detection preserves system prompt and retains selected mode", () => {
@@ -105,7 +157,10 @@ test("#18787: automatic cache detection preserves system prompt and retains sele
   assert.equal(detectCachingContext(firstBody).isCachingProvider, true);
   assert.equal(detectCachingContext(firstBody).usesAutomaticPrefixCaching, true);
   // Do not globally disable the compression plan: only the live-zone prefix is frozen.
-  assert.equal(selectCompressionPlan(config, null, 4096, firstBody, { provider, model }).mode, "stacked");
+  assert.equal(
+    selectCompressionPlan(config, null, 4096, firstBody, { provider, model }).mode,
+    "stacked"
+  );
 });
 
 test("#18787: a cold request sends the original history, then only new tool output is transformed", async () => {
@@ -143,10 +198,7 @@ test("#18787: a cold request sends the original history, then only new tool outp
   };
   const third = await applyLiveZoneCompression(thirdBody, options, compress);
   assert.equal(calls, 1, "a turn without new tools must not recompress the frozen prefix");
-  assert.deepEqual(
-    (third.body.messages as unknown[]).slice(0, warmMessages.length),
-    warmMessages
-  );
+  assert.deepEqual((third.body.messages as unknown[]).slice(0, warmMessages.length), warmMessages);
   assert.deepEqual((third.body.messages as unknown[]).at(-1), thirdBody.messages.at(-1));
 });
 
@@ -171,7 +223,11 @@ test("#18787: an over-2 MiB raw prefix remains cacheable without retaining its p
   assert.ok(getLiveZoneCacheStats().bytes < 2 * 1024 * 1024);
 
   const assistant = { role: "assistant", content: "Calling tool" };
-  const tool = { role: "tool", tool_call_id: "large-prefix-call-1", content: "tool output ".repeat(250) };
+  const tool = {
+    role: "tool",
+    tool_call_id: "large-prefix-call-1",
+    content: "tool output ".repeat(250),
+  };
   const warmBody = { ...coldBody, messages: [...history, assistant, tool] };
   const warm = await applyLiveZoneCompression(warmBody, localOptions, compress);
   const warmItems = warm.body.messages as Array<Record<string, unknown>>;
@@ -181,7 +237,10 @@ test("#18787: an over-2 MiB raw prefix remains cacheable without retaining its p
   assert.equal(warm.stats?.liveZone?.cacheHit, true);
   assert.ok(getLiveZoneCacheStats().bytes < 2 * 1024 * 1024);
 
-  const thirdBody = { ...coldBody, messages: [...warmBody.messages, { role: "user", content: "Next step" }] };
+  const thirdBody = {
+    ...coldBody,
+    messages: [...warmBody.messages, { role: "user", content: "Next step" }],
+  };
   const third = await applyLiveZoneCompression(thirdBody, localOptions, compress);
   assert.equal(calls, 1, "previously compressed tools should be replayed from sparse patches");
   assert.deepEqual((third.body.messages as unknown[]).slice(0, 4), warmItems);

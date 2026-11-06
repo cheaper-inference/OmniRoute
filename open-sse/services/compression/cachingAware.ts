@@ -7,6 +7,7 @@
  */
 
 import {
+  isOpenCodeLane,
   providerSupportsCaching,
   providerUsesAutomaticPrefixCaching,
   type ConnectionCacheOverride,
@@ -124,13 +125,6 @@ export function detectCachingContext(
 }
 
 /**
- * Get a cache-aware strategy based on the given strategy and caching context.
- *
- * @param strategy - The initial strategy (e.g., "aggressive", "ultra", etc.)
- * @param ctx - The caching context
- * @returns A CacheAwareStrategy object
- */
-/**
  * OpenCode's upstream automatic-prefix cache and retroactive history compression
  * cannot safely run together: stacked lite/session-dedup steps may rewrite
  * previously sent tool results, invalidating the prefix on the next turn.
@@ -143,12 +137,16 @@ export function mustKeepOpenCodeHistoryVerbatim(
   context: CachingDetectionContext = {}
 ): boolean {
   const caching = detectCachingContext(body, context);
-  return (
-    caching.usesAutomaticPrefixCaching &&
-    (caching.provider === "opencode" || caching.provider === "opencode-go")
-  );
+  return caching.usesAutomaticPrefixCaching && isOpenCodeLane(caching.provider);
 }
 
+/**
+ * Get a cache-aware strategy based on the given strategy and caching context.
+ *
+ * @param strategy - The initial strategy (e.g., "aggressive", "ultra", etc.)
+ * @param ctx - The caching context
+ * @returns A CacheAwareStrategy object
+ */
 export function getCacheAwareStrategy(strategy: string, ctx: CachingContext): CacheAwareStrategy {
   // #3955: a caching provider is enough on its own to protect the cacheable prefix.
   // OpenAI / Codex (and other automatic-prefix-cache providers) carry NO explicit

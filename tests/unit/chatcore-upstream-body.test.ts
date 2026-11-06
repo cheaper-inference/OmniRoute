@@ -854,6 +854,43 @@ test("never injects prompt_cache_key when the target format is not OpenAI", asyn
   assert.equal(out.prompt_cache_key, undefined);
 });
 
+test("#18787: OpenCode's implicit cache signal never adds prompt_cache_key on its own", async () => {
+  for (const [provider, model] of [
+    ["opencode-go", "deepseek-v4.1-flash"],
+    ["opencode-go", "deepseek-flash"],
+    ["opencode-zen", "deepseek-v4.1-flash-free"],
+  ]) {
+    const out = await prepareUpstreamBody({
+      translatedBody: { model, messages: [{ role: "user", content: "hi" }] },
+      modelToCall: model,
+      provider,
+      targetFormat: "openai",
+      credentials: { apiKey: "test-key" },
+    });
+    assert.equal(out.prompt_cache_key, undefined, `${provider}/${model}`);
+  }
+});
+
+test("#18787: an explicit OpenCode cache opt-in keeps its prompt_cache_key", async () => {
+  const out = await prepareUpstreamBody({
+    translatedBody: {
+      model: "kimi-k2.6",
+      messages: [
+        { role: "system", content: "coding instructions" },
+        { role: "user", content: "fix this" },
+      ],
+    },
+    modelToCall: "kimi-k2.6",
+    provider: "opencode-go",
+    targetFormat: "openai",
+    credentials: {
+      apiKey: "test-key",
+      providerSpecificData: { cache: { supportsPromptCaching: true } },
+    },
+  });
+  assert.match(String(out.prompt_cache_key), /^omni-[0-9a-f]{32}$/);
+});
+
 test("injects prompt_cache_key for Kimi Code's OpenAI protocol", async () => {
   const out = await prepareUpstreamBody({
     translatedBody: {

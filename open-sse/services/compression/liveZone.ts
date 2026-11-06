@@ -485,8 +485,7 @@ async function reuseLiveZoneEntry(
   compress: (body: Record<string, unknown>) => Promise<CompressionResult>,
   preserveRawPrefixOnMiss = false
 ): Promise<CompressionResult> {
-  const fallback = () =>
-    preserveRawPrefixOnMiss ? storeRawPrefix(body, context) : compress(body);
+  const fallback = () => (preserveRawPrefixOnMiss ? storeRawPrefix(body, context) : compress(body));
   entries.delete(context.key);
   previous.lastAccess = context.now;
   entries.set(context.key, previous);
@@ -546,7 +545,9 @@ export async function applyLiveZoneCompression(
   if (hasGlobalHardBudget(options.variant)) return compress(body);
   const context = resolveLiveZoneContext(body, options);
   if (!context) {
-    return options.preserveRawPrefixOnMiss ? { body, compressed: false, stats: null } : compress(body);
+    return options.preserveRawPrefixOnMiss
+      ? { body, compressed: false, stats: null }
+      : compress(body);
   }
   prune(context.now);
   const previous = entries.get(context.key);
