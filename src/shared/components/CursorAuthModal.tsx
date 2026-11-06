@@ -3,7 +3,7 @@
 import { useState, useEffect, useId, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { Field } from "@omniroute/ui-kit/field";
-import Icon from "./Icon";
+import { Spinner } from "./Loading";
 import Modal from "./Modal";
 import Button from "./Button";
 import Input from "./Input";
@@ -259,7 +259,7 @@ export default function CursorAuthModal({
             {loginPolling && (
               <div className="text-center py-4">
                 <div className="size-12 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Icon name="progress_activity" size={24} className="text-primary animate-spin" />
+                  <Spinner size="md" label={t("waitingApproval")} />
                 </div>
                 <p className="text-sm font-medium">{t("waitingApproval")}</p>
                 {loginUrl && (

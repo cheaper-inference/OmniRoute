@@ -73,7 +73,8 @@ export function isKimiCodingBaseUrl(baseUrl: string | null | undefined): boolean
     return false;
   }
   if (url.protocol !== "https:" && url.protocol !== "http:") return false;
-  if (url.hostname.toLowerCase() !== "api.kimi.com") return false;
+  const host = url.hostname.toLowerCase();
+  if (host !== "api.kimi.com" && host !== "api.kimi.ai") return false;
   return url.pathname === "/coding" || url.pathname.startsWith("/coding/");
 }
 

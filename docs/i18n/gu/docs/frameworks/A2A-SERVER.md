@@ -162,7 +162,7 @@ OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` માં વાય
 | આરોગ્ય અહેવાલ     | `health-report`      | પ્રદાતા દીઠ એકંદર સર્કિટ બ્રેકર, કૂલડાઉન, લોકઆઉટ સ્થિતિ                                                                                              | આરોગ્ય, સ્થિતિસ્થાપકતા | "તમામ પ્રદાતાઓની આરોગ્ય સ્થિતિ બતાવો"        |
 | સૂચિ ક્ષમતાઓ      | `list-capabilities`  | સંદર્ભ ઇન્જેક્શન માટે કાચા SKILL.md URLs સાથે માર્કડાઉન ટેબલ તરીકે સંપૂર્ણ 45-એન્ટ્રી એજન્ટ સ્કિલ્સ કૅટેલોગ (23 API + 21 CLI + 1 રૂપરેખા) પરત કરે છે | સૂચિ, શોધ, કુશળતા      | "બધી OmniRoute ક્ષમતાઓની સૂચિ બનાવો"         |
 
-> એજન્ટ કાર્ડને લાઇવ 377-પ્રદાતા કેટેલોગ સાથે સંરેખિત રાખવું જોઈએ; પ્રદાતાની ગણતરીઓ અને free/no-auth મેટાડેટા રનટાઇમ રજિસ્ટ્રીમાંથી મેળવવામાં આવે છે.
+> એજન્ટ કાર્ડને લાઇવ 380-પ્રદાતા કેટેલોગ સાથે સંરેખિત રાખવું જોઈએ; પ્રદાતાની ગણતરીઓ અને free/no-auth મેટાડેટા રનટાઇમ રજિસ્ટ્રીમાંથી મેળવવામાં આવે છે.
 
 ### `list-capabilities` કૌશલ્ય વિગતો
 
@@ -196,17 +196,17 @@ JSON-RPC એન્ડપોઇન્ટ `/a2a` પ્રમાણભૂત A2A �
 
 ---
 
-## નવી સ્કિલ ઉમેરવી
+## નવું કૌશલ્ય ઉમેરવું
 
-1. **સ્કિલ ફાઇલ બનાવો:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **કુશળતા ફાઇલ બનાવો:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   `(task: A2ATask) => Promise<{ artifacts, metadata }>` અસિંક ફંક્શન એક્સપોર્ટ કરો. `smartRouting.ts` જેવી હાલની સ્કિલ્સનું માળખું અનુસરો.
+   async ફંક્શન `(task: A2ATask) => Promise<{ artifacts, metadata }>` નિકાસ કરો. `smartRouting.ts` જેવી હાલની કુશળતાના આકારને અનુસરો.
 
-2. **હૅન્ડલર નોંધાવો:** `src/lib/a2a/taskExecution.ts` માં, `A2A_SKILL_HANDLERS` માં એક એન્ટ્રી ઉમેરો:
+2. **નોંધણી હેન્ડલર:** `src/lib/a2a/taskExecution.ts` માં, `A2A_SKILL_HANDLERS` માં એન્ટ્રી ઉમેરો:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...હાલની સ્કિલ્સ
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -214,7 +214,7 @@ JSON-RPC એન્ડપોઇન્ટ `/a2a` પ્રમાણભૂત A2A �
    };
    ```
 
-3. **Agent Card માં પ્રદર્શિત કરો:** `src/app/.well-known/agent.json/route.ts` માં, `skills` ઍરેમાં ઉમેરો:
+3. **એજન્ટ કાર્ડમાં એક્સપોઝ કરો:** `src/lib/a2a/agentCardMetadata.ts` માં ( `/.well-known/agent.json` અને `/.well-known/agent-card.json` દ્વારા વહેંચાયેલ), `skills` એરેમાં જોડો:
 
    ```json
    {
@@ -226,9 +226,9 @@ JSON-RPC એન્ડપોઇન્ટ `/a2a` પ્રમાણભૂત A2A �
    }
    ```
 
-4. **ટેસ્ટ્સ લખો:** `tests/unit/a2a-<your-skill>.test.ts`. સફળ માર્ગ + ભૂલ માર્ગ આવરી લો.
+4. **પરીક્ષણો લખો:** `tests/unit/a2a-<your-skill>.test.ts` કવર હેપી પાથ + એરર પાથ.
 
-5. આ ફાઇલના `Available Skills` કોષ્ટકમાં નવી સ્કિલનું **દસ્તાવેજીકરણ કરો**.
+5. **દસ્તાવેજ** આ ફાઇલના `Available Skills` ટેબલમાં નવી કુશળતા.
 
 ---
 

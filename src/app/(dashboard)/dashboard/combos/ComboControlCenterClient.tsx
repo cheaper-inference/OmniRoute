@@ -15,6 +15,7 @@ import {
   extractComboRuntimeConfig,
   getComboControlCenterTargets,
   getResolvedComboControlCenterTargets,
+  getVirtualComboResolvedTargets,
   summarizeComboControlCenter,
   type ComboControlCenterCombo,
   type ComboControlCenterHealth,
@@ -140,6 +141,15 @@ function healthReasonLabel(reason: string, t: ReturnType<typeof useTranslations>
 function targetHealthTone(target: ComboControlCenterTarget | ComboControlCenterTargetHealth) {
   const health = "health" in target ? target.health : target;
   if (!health) return "border-border bg-surface text-text-muted";
+  // Virtual-combo resolved rows carry no measured health — stay neutral
+  // instead of implying a green signal the data doesn't back.
+  const hasMetrics =
+    health.requests != null ||
+    health.successRate != null ||
+    health.avgLatencyMs != null ||
+    health.quotaRemainingPct != null ||
+    health.lastStatus != null;
+  if (!hasMetrics) return "border-border bg-surface text-text-muted";
   if (health.lastStatus === "error" || health.quotaIsExhausted) {
     return "border-error/20 bg-error/10 text-error";
   }
@@ -251,6 +261,43 @@ function RecentLogRow({ log }: { log: CallLogEntry }) {
   );
 }
 
+function RuntimeConfigValue({ value }: { value: unknown }) {
+  // Records and arrays render as wrapped chips — a single truncated
+  // JSON.stringify turns settings like the auto-combo weights/candidatePool
+  // into an unreadable blob.
+  if (Array.isArray(value)) {
+    if (value.length === 0) return <code className="text-xs text-text-muted">—</code>;
+    const visible = value.slice(0, 12);
+    return (
+      <div className="flex max-w-md flex-wrap justify-end gap-1">
+        {visible.map((item, i) => (
+          <code key={i} className="rounded bg-bg-subtle px-1.5 py-0.5 text-[11px] text-text-main">
+            {item !== null && typeof item === "object" ? JSON.stringify(item) : String(item)}
+          </code>
+        ))}
+        {value.length > visible.length && (
+          <code className="rounded bg-bg-subtle px-1.5 py-0.5 text-[11px] text-text-muted">
+            +{value.length - visible.length}
+          </code>
+        )}
+      </div>
+    );
+  }
+  if (value !== null && typeof value === "object") {
+    const entries = Object.entries(value as Record<string, unknown>);
+    return (
+      <div className="flex max-w-md flex-wrap justify-end gap-1">
+        {entries.map(([k, v]) => (
+          <code key={k} className="rounded bg-bg-subtle px-1.5 py-0.5 text-[11px] text-text-main">
+            {k}={v !== null && typeof v === "object" ? JSON.stringify(v) : String(v)}
+          </code>
+        ))}
+      </div>
+    );
+  }
+  return <code className="max-w-45 truncate text-xs text-text-main">{String(value)}</code>;
+}
+
 export default function ComboControlCenterClient({ comboId }: { comboId: string }) {
   const t = useTranslations("comboControl");
   const [combo, setCombo] = useState<ComboControlCenterCombo | null>(null);
@@ -261,14 +308,15 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Built-in auto combos (auto, auto/*) are virtual — no persisted row/UUID.
+  // They materialize through /api/combos/auto?id= which returns the same
+  // combo shape; the UUID-keyed combo-health endpoint can't serve them, so
+  // the health lookup is skipped (it would only 400 anyway).
+  const isVirtualAutoCombo = comboId === "auto" || comboId.startsWith("auto/");
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      // Built-in auto combos (auto, auto/*) are virtual — no persisted row/UUID.
-      // They materialize through /api/combos/auto?id= which returns the same
-      // combo shape; the UUID-keyed combo-health endpoint can't serve them, so
-      // the health lookup is skipped (it would only 400 anyway).
-      const isVirtualAutoCombo = comboId === "auto" || comboId.startsWith("auto/");
       const comboData = await fetchJson<ComboControlCenterCombo>(
         isVirtualAutoCombo
           ? `/api/combos/auto?id=${encodeURIComponent(comboId)}`
@@ -300,7 +348,7 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
     } finally {
       setLoading(false);
     }
-  }, [comboId, range, t]);
+  }, [comboId, isVirtualAutoCombo, range, t]);
 
   useEffect(() => {
     // Async continuation — see react-hooks/set-state-in-effect.
@@ -317,7 +365,16 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
     () => (combo ? getComboControlCenterTargets(combo, health, combo.connectionLabels) : []),
     [combo, health]
   );
-  const resolvedTargets = useMemo(() => getResolvedComboControlCenterTargets(health), [health]);
+  const resolvedTargets = useMemo(
+    () =>
+      isVirtualAutoCombo && combo
+        ? // Virtual combos resolve candidates at materialization time — the
+          // models list IS the resolved set; combo-health is UUID-keyed and
+          // can't serve them.
+          getVirtualComboResolvedTargets(combo)
+        : getResolvedComboControlCenterTargets(health),
+    [isVirtualAutoCombo, combo, health]
+  );
   const runtimeConfig = useMemo(() => (combo ? extractComboRuntimeConfig(combo) : {}), [combo]);
 
   if (loading && !combo) {
@@ -471,9 +528,7 @@ export default function ComboControlCenterClient({ comboId }: { comboId: string 
                   className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface px-3 py-2"
                 >
                   <span className="text-sm text-text-muted">{key}</span>
-                  <code className="max-w-45 truncate text-xs text-text-main">
-                    {typeof value === "object" ? JSON.stringify(value) : String(value)}
-                  </code>
+                  <RuntimeConfigValue value={value} />
                 </div>
               ))
             )}

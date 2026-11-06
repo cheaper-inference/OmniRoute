@@ -5,6 +5,11 @@ import { getProviderModels, supportsClaudeMaxEffort } from "../../../config/prov
 export type JsonRecord = Record<string, unknown>;
 export const RESPONSES_STORE_MARKER = "_omnirouteResponsesStore";
 export const COPILOT_REASONING_SUMMARY_MARKER = "_omnirouteCopilotReasoningSummary";
+// Set by the Chat -> Responses translator when it skipped the defaulted reasoning
+// summary for a safety-block model (#18124). Only the Codex executor consumes it
+// (so a Chat-translated request stays effort-only on the wire); translateRequest()
+// drops it for every other provider.
+export const REASONING_SUMMARY_OPT_OUT_MARKER = "_omnirouteSkipReasoningSummaryDefault";
 
 // Forward-compatible regex: matches web_search, web_search_20250305, and future versioned names.
 export const WEB_SEARCH_TOOL_TYPES = /^web_search/;

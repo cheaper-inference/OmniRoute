@@ -163,7 +163,7 @@ OmniRoute inafichua ujuzi wa A2A 6 unaotumia waya katika `src/lib/a2a/taskExecut
 | Ripoti ya Afya          | `health-report`      | Hukusanya kikatiza mzunguko, hali tulivu, hali ya kufunga kwa kila mtoa huduma                                                                                        | afya, uvumilivu           | "Onyesha hali ya afya ya watoa huduma wote"      |
 | Orodha ya Uwezo         | `list-capabilities`  | Hurejesha katalogi kamili ya Ujuzi wa Wakala yenye viingilio 45 (23 API + 21 CLI + 1 usanidi) kama jedwali la alama iliyo na SKILL.md URLs ghafi ya kudunga muktadha. | katalogi, ugunduzi, ujuzi | "Orodhesha uwezo wote OmniRoute "                |
 
-> Kadi ya Wakala inapaswa kuwekwa kulingana na orodha ya moja kwa moja ya watoa huduma 377; hesabu za watoa huduma na metadata free/no-auth hutolewa kutoka kwa sajili ya wakati wa utekelezaji.
+> Kadi ya Wakala inapaswa kuwekwa kulingana na orodha ya moja kwa moja ya watoa huduma 380; hesabu za watoa huduma na metadata free/no-auth hutolewa kutoka kwa sajili ya wakati wa utekelezaji.
 
 ### `list-capabilities` Maelezo ya Ujuzi
 
@@ -197,17 +197,17 @@ Endpointi ya JSON-RPC `/a2a` ndiyo sehemu rasmi ya kuingilia ya A2A. Endpointi z
 
 ---
 
-## Kuongeza Ujuzi Mpya
+## Kuongeza Ustadi Mpya
 
-1. **Unda faili la ujuzi:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Unda faili ya ujuzi:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Hamisha nje fungsi ya async `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Fuata muundo wa ujuzi uliopo kama vile `smartRouting.ts`.
+   Hamisha kitendakazi cha async `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Fuata umbo la ujuzi uliopo kama vile `smartRouting.ts`.
 
-2. **Sajili kishughulikiaji:** katika `src/lib/a2a/taskExecution.ts`, ongeza ingizo kwenye `A2A_SKILL_HANDLERS`:
+2. **Kidhibiti cha usajili:** katika `src/lib/a2a/taskExecution.ts`, ongeza kiingilio kwa `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...ujuzi uliopo
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,7 +215,7 @@ Endpointi ya JSON-RPC `/a2a` ndiyo sehemu rasmi ya kuingilia ya A2A. Endpointi z
    };
    ```
 
-3. **Onyesha kwenye Kadi ya Wakala:** katika `src/app/.well-known/agent.json/route.ts`, ongeza kwenye mwisho wa safu ya `skills`:
+3. **Onyesha katika Kadi ya Wakala:** katika `src/lib/a2a/agentCardMetadata.ts` (iliyoshirikiwa na `/.well-known/agent.json` na `/.well-known/agent-card.json`), weka safu `skills` :
 
    ```json
    {
@@ -227,9 +227,9 @@ Endpointi ya JSON-RPC `/a2a` ndiyo sehemu rasmi ya kuingilia ya A2A. Endpointi z
    }
    ```
 
-4. **Andika majaribio:** `tests/unit/a2a-<your-skill>.test.ts`. Jumuisha njia ya mafanikio + njia ya hitilafu.
+4. **Andika majaribio:** `tests/unit/a2a-<your-skill>.test.ts`. Funika njia ya kufurahisha + njia ya makosa.
 
-5. **Andika nyaraka** za ujuzi mpya katika jedwali la `Available Skills` la faili hili.
+5. **Hati** ujuzi mpya katika jedwali `Available Skills` la faili hii.
 
 ---
 
