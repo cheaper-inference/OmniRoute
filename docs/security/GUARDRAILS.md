@@ -729,7 +729,11 @@ The settings live in the `key_value` table (namespace `pii_settings`,
 | `POST` | `/api/settings/pii/test` | Dry-run one pattern against a sample of at most 8 KB; nothing is stored |
 
 All three require management auth and validate the body with Zod
-(`src/shared/validation/schemas/piiSettings.ts`).
+(`src/shared/validation/schemas/piiSettings.ts`). With login disabled
+(`requireLogin=false`) `GET` and the test endpoint are open, but `PUT` still
+needs a dashboard session, a `manage`-scope API key, an `oma_` access token
+with write scope or higher, or the CLI token or internal-service token sent
+from loopback.
 
 #### GDPR (EU) and POPIA (South Africa) identifiers
 

@@ -20,14 +20,20 @@ kapsamı ve uzlaştırma adımlarıyla eşleştirir.
 - **Node.js** `>=22.22.2 <23` veya `>=24.0.0 <27` (önerilen: 24 LTS)
 - **npm** 10+
 
+> **Node 24 ile Windows:** güncel 24 LTS yama sürümünü kullanın (en az 24.20.0).
+> Önceki sürümler, `--test-force-exit` işlemi kapattığında başarılı testlerden sonra işlemi
+> sonlandırabilir. Node'un [Windows libuv düzeltmesi](https://github.com/nodejs/node/pull/61999) bu
+> çalışma zamanı çökmesini giderir; test doğrulamalarını ve çalıştırıcı çıkış denetimlerini etkin
+> tutun.
+
 > **npm v11+ kullanıcıları (Node 24+):** `npm install` sonrasında yerel modüllerin yüklendiğini doğrulayın:
-> `node -e "require('better-sqlite3')"`. Komut `MODULE_NOT_FOUND` hatasıyla başarısız olursa
+> `node -e "require('better-sqlite3')"`. Bu komut `MODULE_NOT_FOUND` ile başarısız olursa,
 > `npm approve-scripts better-sqlite3 && npm install` komutunu çalıştırın. Bkz.
 > [Sorun Giderme](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Klonlama ve Yükleme
+### Klonlama ve Kurulum
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -50,22 +56,22 @@ Geliştirme için temel değişkenler:
 
 | Değişken               | Geliştirme Varsayılanı   | Açıklama                    |
 | ---------------------- | ------------------------ | --------------------------- |
-| `PORT`                 | `20128`                  | Sunucu portu                |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Ön yüz için temel URL       |
+| `PORT`                 | `20128`                  | Sunucu bağlantı noktası     |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Ön yüz temel URL'si         |
 | `JWT_SECRET`           | (yukarıda oluşturun)     | JWT imzalama gizli anahtarı |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | İlk oturum açma parolası    |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | İlk giriş parolası          |
 | `APP_LOG_LEVEL`        | `info`                   | Günlük ayrıntı düzeyi       |
 
-### Pano Ayarları
+### Kontrol Paneli Ayarları
 
-Pano, ortam değişkenleri aracılığıyla da yapılandırılabilen özellikler için kullanıcı arayüzü anahtarları sağlar:
+Kontrol paneli, ortam değişkenleri aracılığıyla da yapılandırılabilen özellikler için kullanıcı arayüzü geçişleri sağlar:
 
-| Ayar Konumu        | Anahtar                  | Açıklama                                            |
-| ------------------ | ------------------------ | --------------------------------------------------- |
-| Ayarlar → Gelişmiş | Hata Ayıklama Modu       | Hata ayıklama istek günlüklerini etkinleştirir (UI) |
-| Ayarlar → Genel    | Kenar Çubuğu Görünürlüğü | Kenar çubuğu bölümlerini gösterir/gizler            |
+| Ayar Konumu         | Geçiş              | Açıklama                                          |
+| ------------------- | ------------------ | ------------------------------------------------- |
+| Settings → Advanced | Debug Mode         | Hata ayıklama istek günlüklerini etkinleştir (UI) |
+| Settings → General  | Sidebar Visibility | Kenar çubuğu bölümlerini göster/gizle             |
 
-Bu ayarlar veritabanında saklanır, yeniden başlatmalar arasında korunur ve ayarlandıklarında ortam değişkeni varsayılanlarını geçersiz kılar.
+Bu ayarlar veritabanında saklanır ve yeniden başlatmalar arasında korunur; ayarlandıklarında ortam değişkeni varsayılanlarının üzerine yazılır.
 
 ### Yerel Olarak Çalıştırma
 
@@ -74,56 +80,56 @@ Bu ayarlar veritabanında saklanır, yeniden başlatmalar arasında korunur ve a
 npm run dev
 
 # Üretim derlemesi
-npm run build    # next build → .build/next/, ardından assembleStandalone → dist/
+npm run build    # next build → .build/next/ ardından assembleStandalone → dist/
 npm run start
 
-# Katkıda bulunanların değişiklikleri için hızlı, yalnızca arka uç/API derlemesi
+# Katkıda bulunanların değişiklikleri için hızlı yalnızca arka uç/API derlemesi
 npm run build:contributor
 
-# Sürüm derlemesi (temiz yeniden derleme + HEAD doğrulama işareti — dağıtım için gereklidir)
-npm run build:release   # rm -rf .build dist && derleme + dist/BUILD_SHA dosyasını yazar
+# Sürüm derlemesi (temiz yeniden derleme + HEAD sentinel — dağıtım için gereklidir)
+npm run build:release   # rm -rf .build dist ve ardından derleme + dist/BUILD_SHA yazma
 
-# Yaygın port yapılandırması
+# Yaygın bağlantı noktası yapılandırması
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Katkıda bulunanlara yönelik derleme yalnızca derleme doğrulaması gerçekleştirir: bağımsız
-dağıtımı bir araya getirmez veya isteğe bağlı yerel paketleme varlıklarını derlemez. Dağıtılabilir
-paketi doğrulamanız gerektiğinde normal üretim derlemesini kullanın.
+Katkıda bulunan derlemesi yalnızca derleme doğrulaması gerçekleştirir: bağımsız dağıtımı birleştirmez
+ve isteğe bağlı yerel paketleme varlıklarını derlemez. Dağıtılabilir paketi doğrulamanız gerektiğinde
+normal üretim derlemesini kullanın.
 
 ### Derleme Çıktısı Düzeni
 
-| Dizin     | İçerik                                                                                           | İzleniyor |
-| --------- | ------------------------------------------------------------------------------------------------ | --------- |
-| `src/`    | Uygulama kaynak kodu (TypeScript / TSX)                                                          | Evet      |
-| `.build/` | Ara çıktılar — `next build` çıktısı (git tarafından yok sayılır, `distDir = .build/next`)        | Hayır     |
-| `dist/`   | Dağıtılabilir paket — `assembleStandalone` tarafından birleştirilir (git tarafından yok sayılır) | Hayır     |
+| Dizin     | İçerik                                                                           | İzleniyor |
+| --------- | -------------------------------------------------------------------------------- | --------- |
+| `src/`    | Uygulama kaynak kodu (TypeScript / TSX)                                          | Evet      |
+| `.build/` | Ara dosyalar — `next build` çıktısı (gitignored, `distDir = .build/next`)        | Hayır     |
+| `dist/`   | Dağıtılabilir paket — `assembleStandalone` tarafından birleştirilir (gitignored) | Hayır     |
 
 Derleme işlem hattı tek geçişten oluşur:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js çıktısı)
-  └─ assembleStandalone()                 (bağımsız çıktıyı + statik dosyaları + public içeriğini + yerel varlıkları kopyalar)
-       └─ çıktı: dist/                    (server.js, .next/static/, public/, node_modules/)
+  └─ assembleStandalone()                 (standalone + static + public + native assets kopyalanır)
+       └─ çıktı: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` ayrıca önce her iki dizini de temizler ve dağıtım bütünlüğü doğrulama
-işareti olarak `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) dosyasını yazar.
+`npm run build:release` ayrıca önce her iki dizini temizler ve dağıtım bütünlüğü için
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) dosyasını yazar.
 
 `npm run build:contributor`, yalnızca arka uca yönelik derleme profilini kullanır. Derleme sırasında
-pano kullanıcı arayüzü dosyalarını geçici olarak geçersiz içeriklerle değiştirir, API rota işleyicilerini
-korur ve derlemeden sonra özgün dosyaları geri yükler. Pano kullanıcı arayüzünü etkileyen değişiklikler
-veya tam sürüm doğrulaması için `npm run build` kullanın; katkıda bulunan profili, sürüm derlemesinin
-yerine geçmez.
+kontrol paneli kullanıcı arayüzü dosyalarını geçici olarak stublar, API rota işleyicilerini korur ve
+derlemeden sonra özgün dosyaları geri yükler. Kontrol paneli kullanıcı arayüzünü etkileyen
+değişiklikler veya tam sürüm doğrulaması için `npm run build` kullanın; katkıda bulunan profili,
+sürüm derlemesinin yerine geçmez.
 
-> **VPS dağıtım notu:** uzak görüntü dizini `/usr/lib/node_modules/omniroute/app/`
-> değişmemiştir. Dağıtım araçları, `dist/` içeriğini rsync ile bu dizine aktarır.
-> Yalnızca depo içindeki derleme çıktısı yolu değişmiştir (`app/` → `dist/`).
+> **VPS dağıtım notu:** uzak imaj dizini `/usr/lib/node_modules/omniroute/app/`
+> değişmeden kalır. Dağıtım becerileri `dist/` içeriğini bu dizine rsync ile aktarır.
+> Yalnızca depo içindeki derleme çıktı yolu değişti (`app/` → `dist/`).
 
 Varsayılan URL'ler:
 
-- **Pano**: `http://localhost:20128/dashboard`
+- **Kontrol Paneli**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
