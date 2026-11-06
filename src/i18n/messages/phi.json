@@ -923,6 +923,8 @@
     "batchListTitle": "Mga batch",
     "batchListCount": "{count} batch",
     "batchListRemovingCompleted": "Inaalis…",
+    "batchListRemoveCompletedPartial": "Maraming batch ang inalis. I-click muli upang alisin ang natitira.",
+    "batchListRemoveCompletedFailed": "Nagkaroon ng error habang nag-aalis ng mga batch.",
     "batchListRemoveCompleted": "Alisin ang mga nakumpleto",
     "batchListTableStatus": "Katayuan",
     "batchListTableId": "ID",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "Nire-refresh…",
     "batchListRefresh": "I-refresh",
     "uploadFileModalRemove": "Alisin",
+    "fileInputChoose": "Pumili ng file",
+    "fileInputChooseMultiple": "Pumili ng mga file",
+    "fileInputEmpty": "Walang napiling file",
+    "fileInputSelectedCount": "{count, plural, one {# file ang napili} other {# file ang napili}}",
+    "fileDropLabel": "Mag-drop ng file dito o pumili ng isa",
+    "fileDropLabelMultiple": "Mag-drop ng mga file dito o pumili ng mga file",
     "uploadFileModalUploading": "Ina-upload…",
     "wizardInputReading": "Binabasa ang file…",
     "wizardInputReady": "Handa na",
@@ -1035,7 +1043,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "Ipadala ang fingerprint ng OpenCode v2 CLI client sa mga request ng OpenCode Zen/Go: ang opencode/latest/<2.x>/cli User-Agent at x-opencode-client cli, at sa mga free-tier na request, ang mga v2 session header, ang mga v2 CLI read/shell tool schema, at walang tool_choice na \"none\". Naka-off bilang default: pinananatili ng bawat request ng OpenCode na hindi nababago ang kasalukuyang identity, mga header, at body.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Kapag wala nang laman ang pool ng mga kandidato ng isang awtomatikong combo bago tumakbo ang pre-filter para sa pagtawag sa tool (nilaktawan ang bawat target dahil sa mga cooldown, lockout, o pagkaubos), ibalik ang 503 no_eligible_targets sa halip na ang dating 400 \"Walang target na sumusuporta sa pagtawag sa tool\" capability_mismatch. Naka-off bilang default: pananatilihin ng walang-lamang pool ang dating 400.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Ipatupad ang mga pinagkakatiwalaang tag ng endpoint ng modelo (idineklara ng catalog ng provider, natukoy mula sa isang specialty model id, o itinakda ng operator): tanggihan nang may HTTP 400 bago ang dispatch ang kahilingang ipinadala sa endpoint na hindi sinusuportahan ng modelo sa /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations at /v1/audio/*; itago sa /v1/models ang mga modelong ang mga naka-tag na endpoint ay walang OmniRoute adapter; at sagutin nang may 422 ang pagsubok ng modelo sa dashboard para sa mga naturang modelo. Naka-off bilang default: mananatiling pang-impormasyon ang mga tag ng endpoint at idi-dispatch ang mga kahilingan gaya ng dati.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "Sa mga karaniwang anthropic-compatible relay, panatilihin ang mga system turn sa gitna ng pag-uusap sa loob ng listahan ng mensahe sa halip na ilipat ang mga ito sa top-level na system prompt, upang manatiling hindi nagbabago ang naka-cache na prompt prefix sa bawat turn. Nalalapat lang ito kapag ang client mismo ang nagpadala ng mid-conversation-system-2026-04-07 beta. Naka-off bilang default: inililipat ang bawat system turn sa system prompt gaya mismo ng dati, dahil tinatanggihan ng mga relay na walang beta na iyon ang mga system turn sa listahan ng mensahe.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Gamitin ang mga antas ng reasoning effort na inilalathala ng models.dev kapag walang idinedeklarang anuman ang override ng operator o ang registry ng provider, panatilihin lamang ang mga kilalang antas ng effort, at ituring ang walang lamang listahan ng mga idineklarang antas bilang \"walang mga antas\". Naka-off bilang default: mananatiling eksaktong gaya ng dati ang catalog ng modelo at mga nalutas na antas ng effort.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "Pinapayagan ang mga auto/* request na buuin ang pool ng mga kandidato gamit ang na-resolve na kakayahan ng modelo (vision, reasoning, thinking) at ang naobserbahang quality score, na binabasa sa iisang bulk na pagbasa. Naka-off bilang default: ang timbang ng mga kandidato sa oras ng request ay nananatiling eksaktong tulad ng dati. Naka-on: pumapasok ang mga signal na ito sa timbang ng snapshot, kaya maaaring magbago ang timbang ng mga kandidato at ang pagpili.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Payagan ang pagsusuri sa kalagayan ng kredensyal na muling subukan ang mga koneksiyong awtomatikong pinatay ng gateway (hindi hihigit sa isang beses bawat 6 na oras para sa bawat isa, 5 sa bawat pagsusuri) at muling buksan ang isang koneksiyon kapag pumasa ito sa muling pagsubok. Naka-off bilang default: mananatiling naka-off ang mga naturang koneksiyon hanggang sa kumilos ang isang operator. Hindi kailanman muling sinusubukan ang mga koneksiyong pinatay ng operator at ang mga permanenteng naka-ban.",
@@ -1939,7 +1946,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# kahilingan} other {# mga kahilingan}}, {keys, plural, one {# limitadong key} other {# mga limitadong key}}",
     "unpricedUsageMore": "…at {count} pa",
     "unpricedUsageConfigure": "I-configure ang pagpepresyo",
-    "unpricedUsageDismiss": "Isara"
+    "unpricedUsageDismiss": "Isara",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analitika",
@@ -6264,6 +6280,10 @@
     "allowCodexPaidCreditsDescription": "Payagan ang account na ito na gumamit ng mga bayad na kredito kapag umabot na sa itinakdang cutoff ang quota ng subscription nito. Kailangan ng mga magagamit na kredito ayon sa ulat ng OpenAI; maaaring may singil. Nalalapat pa rin ang mga limitasyon ng Spark at ang mga cooldown ng upstream. Sinusuri ang pagkakaroon ng mga kredito kahit hindi pinagana ang paunang pagsusuri ng quota, maliban kung ganap na naka-off ang lokal na pag-filter ng quota (parehong hindi pinagana ang paunang pagsusuri ng quota at ang patakaran sa limitasyon).",
     "disableCoolingDescription": "Laktawan ang transient cooldown para manatiling kwalipikado ang koneksyong ito kahit pagkatapos ng mga error na maaaring ma-recover (nalalapat pa rin ang mga terminal state tulad ng banned/expired).",
     "disableCoolingLabel": "I-disable ang cooldown para sa koneksyong ito",
+    "keepMidConversationSystemDescription": "Iwanan ang mga mensahe ng system na ipinadala sa kalagitnaan ng pag-uusap sa loob ng listahan ng mensahe sa halip na ilipat ang mga ito sa top-level na prompt ng system, kaya ang prompt cache ay patuloy na tumatama sa mga liko. Paganahin lamang kung ang upstream na ito ay tumatanggap ng papel na \"system\" sa loob ng mga mensahe (kung hindi, ito ay sumasagot ng 400).",
+    "keepMidConversationSystemLabel": "Panatilihing nasa lugar ang mga mensahe ng system sa kalagitnaan ng pag-uusap",
+    "requireUserLastMessageDescription": "Para sa mga upstream na tinatanggihan ang prefill ng assistant: i-drop ang mga sumusunod na assistant turn (walang tool_use) bago ipadala. Maaaring i-regenerate ng modelo ang dati nitong sagot.",
+    "requireUserLastMessageLabel": "Atasan ang pag-uusap upang tapusin sa isang mensahe ng user",
     "bulkPasteAdded": "{count, plural, one {1 key ang naidagdag} other {# key ang naidagdag}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplicate ang nilaktawan} other {# duplicate ang nilaktawan}}",
     "bulkPasteHint": "Mag-paste ng isang API key sa bawat linya. Binabalewala ang mga walang lamang linya at nilalaktawan ang mga duplicate na key.",
@@ -6363,6 +6383,9 @@
     "localProviders": "Mga Lokal na Provider",
     "maxConcurrentWholeNumberError": "Dapat buong numero ang maximum na bilang ng magkakasabay",
     "m365TierLabel": "Tier ng Copilot",
+    "m365RefreshTokenLabel": "I-refresh ang token (opsyonal)",
+    "m365RefreshTokenHint": "Ginagamit upang awtomatikong i-refresh ang Microsoft 365 access token.",
+    "m365RefreshTokenEditHint": "Iwanang blangko upang mapanatili ang umiiral na token. Mag-paste ng bagong token para palitan ito.",
     "m365TierHint": "Piliin kung aling Microsoft 365 Copilot surface ang gagamitin ng koneksyong ito. Ang Individual ang default na consumer BizChat; ang Education at Enterprise (work) ay nag-o-opt in sa kanilang mga tenant surface.",
     "m365TierIndividualOption": "Indibidwal (default)",
     "m365TierEduOption": "Edukasyon",
@@ -7097,6 +7120,7 @@
     "proxySubTabsAria": "Mga seksyon ng proxy",
     "requestBodyLimitTitle": "Limitasyon sa Laki ng Katawan ng Request",
     "requestBodyLimitDescription": "Pinakamalaking laki ng API payload na tatanggapin bago i-parse ang katawan ng request. Pananatilihin ng mga nakalaang route sa pag-upload ang hindi bababa sa built-in nilang limitasyong 100 MB.",
+    "requestBodyLimitChatHint": "Tumatanggap ang Chat Completions at Responses ng hanggang 50 MB hangga’t hindi ka nagse-save ng limitasyon dito. Ilalapat din sa mga ito ang na-save na limitasyon, mas mababa man o mas mataas.",
     "requestBodyLimitInputLabel": "Limitasyon sa katawan ng request sa MB",
     "requestBodyLimitEmptyError": "Maglagay ng limitasyon sa MB",
     "requestBodyLimitWholeNumberError": "Gumamit ng buong numero",
@@ -12282,7 +12306,9 @@
       "failedTitle": "Lahat ng {count} pagtatangkang nabigo",
       "failed": "nabigo",
       "pinnedTitle": "Napiling modelo sa pamamagitan ng context-cache session pinning",
-      "pinned": "na-pin'{\" \"}'"
+      "pinned": "na-pin'{\" \"}'",
+      "recoveredAttemptsTitle": "Naibalik ang kahilingan matapos ang {count} pagtatangka",
+      "latestOutcomeFailed": "Nabigo ang pinakahuling resulta ng kahilingan"
     },
     "attempts": "mga pagtatangkang",
     "detail": {
@@ -12384,13 +12410,20 @@
       "continuesFromParent": "nagpapatuloy mula sa parent",
       "continuesFrom": "Nagpapatuloy mula sa {id}",
       "viewConversation": "tingnan ang pag-uusap",
-      "openConversation": "Buksan ang pag-uusap na {id}"
+      "openConversation": "Buksan ang pag-uusap na {id}",
+      "omittedHttpAttempts": "Hindi napanatili ang {count} pagpapadala ng HTTP",
+      "noHttpResponse": "Walang naobserbahang tugon sa HTTP",
+      "transportError": "Error sa transportasyon"
     },
     "tableLabel": "Mga log ng request",
     "throughputPostFirstToken": "Pagkatapos ng unang token",
     "throughputEndToEnd": "Mula simula hanggang dulo",
     "throughputRate": "{value} token/seg",
-    "throughputExplanation": "Parehong rate ay gumagamit ng mas malaki sa bilang ng output at reasoning token. Ang pagkatapos ng unang token ay hindi kasama ang valid na TTFT; kung hindi, ginagamit nito ang buong tagal. Ang mula simula hanggang dulo ay palaging gumagamit ng buong tagal. Ang isang naka-buffer na tugon ay maaaring may mataas na burst delivery rate nang walang mas mabilis na henerasyon ng modelo."
+    "throughputExplanation": "Parehong rate ay gumagamit ng mas malaki sa bilang ng output at reasoning token. Ang pagkatapos ng unang token ay hindi kasama ang valid na TTFT; kung hindi, ginagamit nito ang buong tagal. Ang mula simula hanggang dulo ay palaging gumagamit ng buong tagal. Ang isang naka-buffer na tugon ay maaaring may mataas na burst delivery rate nang walang mas mabilis na henerasyon ng modelo.",
+    "omittedHttpAttempts": "Hindi napanatili ang {count} pagpapadala ng HTTP",
+    "upstreamStatus": "Upstream na server {status}",
+    "noHttpResponse": "Walang naobserbahang tugon sa HTTP",
+    "transportError": "Error sa transportasyon"
   },
   "proxyLogger": {
     "filterAll": "Lahat",
@@ -14157,6 +14190,14 @@
         "label": "Pagkakasunud-sunod ng Shared Egress Pool",
         "description": "Para sa mga provider na ang quota ay naka-bucket ayon sa egress address, iranggo ang miyembro ng pool na may parehong naobserbahang egress address ng isang kamakailang tinanggihang miyembro sa ilalim lamang ng maayos na mga miyembro. Pagkakasunud-sunod lamang, hindi kailanman ibinubukod. Nangangailangan ng PROXY_SKIP_RECENTLY_FAILED, na siyang gumagawa ng refusal signal na binabasa nito. Naka-off bilang default: ang pagkakasunud-sunod ng pagpili ay eksaktong karaniwang rotation."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Mga pagtanggi sa quota na saklaw ng modelo",
+        "description": "Maglapat lang ng opencode quota 429 sa modelong tumama dito, kaya ang parehong labasan ay patuloy na nagsisilbi sa iba pang mga modelo, at i-clear lang ito kapag nagtagumpay ang modelong iyon. Nakikita pa rin ito ng mga consumer na walang modelo (pag-ikot ng pool, park at replay, visibility ng admin, selector trigger, health sweep). Nangangailangan PROXY_SKIP_RECENTLY_FAILED, na nagbubunga ng pagtanggi. Naka-off bilang default: itinatabi ng quota ng isang modelo na 429 ang paglabas para sa bawat modelo."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Proxy fetch: mahigpit na POST replay",
+        "description": "Para sa isang hindi-idempotent na kahilingan (POST, PUT, PATCH, DELETE), muling ipadala pagkatapos ng transport error (fresh socket, proxy fallback, native fallback) kapag napatunayang walang naipadala ang error: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH o isang connect timeout. Ang isang error sa socket pagkatapos ng pagsulat ay maaaring mangahulugan na tinanggap ng upstream ang kahilingan, kaya ang muling pagpapadala ay maaaring bumuo at masingil ito ng dalawang beses. Naka-off bilang default: ang isang replayable na katawan ay muling ipinadala nang isang beses sa anumang error sa transportasyon, na nagre-recover din ng isang stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Pag-log ng Attribution ng Rotation",
         "description": "Itinatala ng rotation ng opencode kung aling account ang nag-serve o nilaktawan (mga naka-mask na ID lamang, hindi kailanman buong account ID) at iniuugnay ang mga entry sa log ng proxy sa kanilang kahilingan, upang maipagkaiba ng operator ang mga nilaktawang account mula sa mga hindi nagamit. Naka-off bilang default: walang karagdagang linya ng log, walang karagdagang column na isinusulat."
@@ -14208,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "Muling Pagpili ng Pool para sa OpenCode 429",
         "description": "Para sa multi-account rotation ng OpenCode, pagkatapos ng 429 mula sa isang egress-bucketed na provider sa isang account na walang proxy sa ilalim ng konteksto ng ambient pool, humiling sa connection pool ng isa pang miyembro para sa susunod na pagtatangka sa halip na subukang muli ang parehong egress address. Nag-aayos, hindi nagbubukod kailanman: pinapanatili ng isang naubos na pool ang kasalukuyang gawi. Naka-off bilang default: ang bawat 429 ay umiikot sa susunod na account eksakto tulad ng dati."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress Probe",
+        "description": "Para sa OpenCode executor, kapag ang isang proxied request ay sinagot 403 o 451 FreeTierError at ang observed-tools retry ay nabigo o hindi nalapat, ipadala ang kahilingan nang isang beses sa pamamagitan ng ibang proxy (isa pang account proxy o ibang miyembro ng pool, hindi kailanman direktang koneksyon). Kapag sumagot lamang ang probe na iyon ng 200 ay ang unang egress na itabi sa memorya ng pagtanggi ng proxy at ang tugon ng probe ay naihatid; kapag kapwa tumanggi, ibabalik ang orihinal na pagtanggi at walang naitala. Ang parehong teksto ng pagtanggi ay sumasaklaw sa isang naka-flag na egress IP at isang tinanggihang hugis ng kahilingan, kaya ang pagsisiyasat ay nagsasabi sa kanila na magkahiwalay sa pamamagitan ng ebidensya. Naka-off bilang default: ibinalik ang pagtanggi nang hindi nabago."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Client Fingerprint ng OpenCode v2",
@@ -14388,6 +14433,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Huminto sa Pagtanggi sa Content-Policy",
         "description": "Kapag sumagot ang isang target ng combo ng isang eksaktong pagtanggi sa content-policy (code o uri na cyber_policy / content_policy_violation), ihinto ang combo at ibalik ang pagtangging iyon kahit na magkakaibang modelo ang mga natitirang target, sa halip na magpatuloy sa susunod na target. Naka-off bilang default: hindi kailanman pinapalamig ng pagtanggi ang account o pinapagana ang provider breaker, at uusad ang combo sa susunod nitong target eksakto tulad ng dati."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Mga tugon: keepalive over the transport only",
+        "description": "Magpadala ng Mga Tugon na keepalive bilang isang blangkong linya sa halip na isang response.in_progress na kaganapan, kaya hindi kailanman mapapalitan ng isang synthetic na snapshot ang tunay na tugon sa opisyal SDK. Ang isang blangkong linya ay hindi nagpapadala SSE na kaganapan, kaya ang isang client watchdog na nagre-reset lamang sa mga kaganapan ay hindi mare-reset sa mahabang yugto ng tahimik. Naka-off bilang default: ipinapadala ng mga timer ang spec-valid response.in_progress na kaganapan."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown Retry: Laktawan ang mga Pagtangging 403/410",

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Badge as KitBadge } from "@omniroute/ui-kit/badge";
 import Icon from "@/shared/components/Icon";
+import { startVisiblePolling } from "@/shared/utils/visiblePolling";
 
 export default function DegradationBadge() {
   const [isDegraded, setDegraded] = useState(false);
@@ -23,21 +24,19 @@ export default function DegradationBadge() {
       }
     };
 
-    checkDegradation();
-    const interval = setInterval(checkDegradation, 60000);
-    return () => clearInterval(interval);
+    return startVisiblePolling(checkDegradation, 60000);
   }, []);
 
   if (!isDegraded) return null;
 
-  // Warning tone of the kit badge (`.ci-badge[data-tone="warning"]` in globals.css), rendered
-  // as the link itself so the whole pill stays one focusable target.
+  // Warning tone of the kit badge, rendered as the link itself so the whole pill stays one
+  // focusable target.
   return (
     <KitBadge
       asChild
-      variant="outline"
+      variant="secondary"
       shape="pill"
-      data-tone="warning"
+      tone="warning"
       icon={<Icon name="healing" size={14} />}
       className="whitespace-nowrap no-underline"
     >

@@ -923,6 +923,8 @@
     "batchListTitle": "Baisceanna",
     "batchListCount": "{count} baisceanna",
     "batchListRemovingCompleted": "Ag baint…",
+    "batchListRemoveCompletedPartial": "Baineadh líon mór baisceanna. Cliceáil arís chun an chuid eile a ghlanadh.",
+    "batchListRemoveCompletedFailed": "Tharla earráid agus baisceanna á mbaint.",
     "batchListRemoveCompleted": "Bain na cinn chríochnaithe",
     "batchListTableStatus": "Stádas",
     "batchListTableId": "ID",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "Ag athnuachan…",
     "batchListRefresh": "Athnuaigh",
     "uploadFileModalRemove": "Bain",
+    "fileInputChoose": "Roghnaigh comhad",
+    "fileInputChooseMultiple": "Roghnaigh comhaid",
+    "fileInputEmpty": "Níor roghnaíodh aon chomhad",
+    "fileInputSelectedCount": "{count, plural, one {# chomhad roghnaithe} other {# comhad roghnaithe}}",
+    "fileDropLabel": "Scaoil comhad anseo nó roghnaigh ceann",
+    "fileDropLabelMultiple": "Scaoil comhaid anseo nó roghnaigh comhaid",
     "uploadFileModalUploading": "Ag uaslódáil…",
     "wizardInputReading": "Ag léamh comhaid…",
     "wizardInputReady": "Réidh",
@@ -1035,7 +1043,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "Seol méarlorg cliant CLI OpenCode v2 ar iarratais OpenCode Zen/Go: an User-Agent opencode/latest/<2.x>/cli agus x-opencode-client cli, agus ar iarratais sraithe saor in aisce, ceanntásca seisiúin v2, scéimeanna uirlisí read/shell CLI v2 agus gan tool_choice \"none\". Díchumasaithe de réir réamhshocraithe: coimeádann gach iarratas OpenCode an t-aitheantas, na ceanntásca agus an corp reatha gan athrú.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Nuair atá linn iarrthóirí teaglaim uathoibríoch folamh cheana féin sula ritear réamhscagaire ghlaoch na huirlise (gach sprioc scipeáilte mar gheall ar thréimhsí athshocraithe, frithdhúntaí nó ídiú), tabhair freagra 503 no_eligible_targets in ionad an fhreagra oidhreachta 400 \"Ní thacaíonn aon sprioc le glaoch uirlise\" capability_mismatch. Díchumasaithe de réir réamhshocraithe: coinníonn an linn fholamh an freagra oidhreachta 400.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Cuir clibeanna iontaofa chríochphointí na samhla i bhfeidhm (arna ndearbhú i gcatalóg an tsoláthraí, arna dtátal ó aitheantas sainmhodhla, nó arna socrú ag an oibreoir): diúltaigh, le HTTP 400 roimh sheoladh, d’iarratas a seoladh chuig críochphointe nach bhfreastalaíonn an tsamhail air ar /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations agus /v1/audio/*; folaigh ó /v1/models samhlacha nach bhfuil aon chuibheoir OmniRoute ann dá gcríochphointí clibeáilte; agus freagair tástáil samhla an deais le 422 i gcás samhlacha den sórt sin. Díchumasaithe de réir réamhshocraithe: fanann clibeanna críochphointí mar fhaisnéis amháin agus seoltar iarratais díreach mar a seoladh roimhe seo iad.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "Ar athsheachadáin shimplí atá comhoiriúnach le Anthropic, coinnigh sealanna córais i lár an chomhrá laistigh den liosta teachtaireachtaí seachas iad a bhogadh isteach sa leid chórais ardleibhéil, ionas go bhfanfaidh réimír na leide taiscthe cobhsaí ó sheal go seal. Ní bhaineann sé seo ach le cásanna inar sheol an cliant féin an béite mid-conversation-system-2026-04-07. Díchumasaithe de réir réamhshocraithe: bogtar gach seal córais isteach sa leid chórais díreach mar a rinneadh roimhe seo, toisc go ndiúltaíonn athsheachadáin nach bhfuil an béite sin acu do shealanna córais sa liosta teachtaireachtaí.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Úsáid na sraitheanna iarrachta réasúnaíochta a fhoilsíonn models.dev nuair nach ndearbhaíonn sárú oibreora ná clárlann an tsoláthraí aon cheann, agus ná coinnigh ach leibhéil iarrachta aitheanta; caith le liosta folamh de shraitheanna dearbhaithe mar \"gan sraitheanna\". Díchumasaithe de réir réamhshocraithe: fanann catalóg na samhlacha agus na sraitheanna iarrachta réitithe díreach mar a bhí roimhe seo.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "Ligeann sé d'iarratais auto/* an linn iarrthóirí a thógáil le cumais réitithe múnla (fís, réasúnaíocht, smaointeoireacht) agus scóir cháilíochta breathnaithe, léite in aon léamh mórchóir amháin. As de réir réamhshocraithe: fanann meáchain na n-iarrthóirí ag am an iarratais díreach mar a bhí. Ar siúl: cuireann na comharthaí sin le meáchain an ghrianghraif, mar sin is féidir le meáchain na n-iarrthóirí agus an rogha athrú.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Lig do scuabadh sláinte na ndintiúr naisc a mhúch an geata leis féin a atástáil (uair amháin ar a mhéad gach 6 huaire an chloig do gach ceann acu, 5 cinn in aghaidh an scuabtha) agus ceann acu a chur ar siúl arís nuair a éiríonn leis an atástáil. Díchumasaithe de réir réamhshocraithe: fanann naisc den sórt sin múchta go dtí go ndéanann oibreoir beart. Ní dhéantar naisc atá díchumasaithe ag oibreoir ná naisc atá coiscthe go buan a atástáil riamh.",
@@ -1939,7 +1946,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# iarratas} other {# iarratais}}, {keys, plural, one {# eochair theoranta} other {# eochracha theoranta}}",
     "unpricedUsageMore": "…agus {count} eile",
     "unpricedUsageConfigure": "Cumraigh praghsáil",
-    "unpricedUsageDismiss": "Dún"
+    "unpricedUsageDismiss": "Dún",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Anailísíocht",
@@ -6264,6 +6280,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Scipeáil an tréimhse fhuaraithe neamhbhuan ionas go bhfanann an ceangal seo incháilithe fiú tar éis earráidí in-aisghabhála (tá feidhm fós ag stáit chríochacha amhail toirmiscthe/éagtha).",
     "disableCoolingLabel": "Díchumasaigh an tréimhse fhuaraithe don cheangal seo",
+    "keepMidConversationSystemDescription": "Fág teachtaireachtaí córais a sheoltar i lár an chomhrá taobh istigh den liosta teachtaireachtaí seachas iad a bhogadh isteach sa chóras barrleibhéil leid, mar sin coinníonn an taisce pras ag bualadh trasna sealaíochta. Ná cumasaigh ach amháin má ghlacann an réamhtheachtacha seo le \"córas\" ról laistigh de theachtaireachtaí (ar shlí eile freagraíonn sé 400).",
+    "keepMidConversationSystemLabel": "Coinnigh teachtaireachtaí córais lárchomhrá i bhfeidhm",
+    "requireUserLastMessageDescription": "Maidir le sruthanna in aghaidh srutha a dhiúltaíonn réamhlíonadh an chúntóra: buail amach casadh an chúntóra rianaigh (gan tool_use) roimh é a sheoladh. Féadfaidh an tsamhail an freagra a bhí air roimhe seo a athghiniúint.",
+    "requireUserLastMessageLabel": "Éilíonn an comhrá chun deireadh a chur le teachtaireacht úsáideora",
     "bulkPasteAdded": "{count, plural, one {1 eochair curtha leis} other {# eochracha curtha leis}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 dúblach scipeáilte} other {# dúblacha scipeáilte}}",
     "bulkPasteHint": "Greamaigh eochair API amháin in aghaidh an líne. Déantar neamhaird ar línte folmha agus scipeáiltear eochracha dúblacha.",
@@ -6363,6 +6383,9 @@
     "localProviders": "Soláthraithe áitiúla",
     "maxConcurrentWholeNumberError": "Earráid: Ní mór don uaslíon comhthráthach a bheith ina shlánuimhir.",
     "m365TierLabel": "Leibhéal Copilot",
+    "m365RefreshTokenLabel": "Comhartha athnuachana (roghnach)",
+    "m365RefreshTokenHint": "Úsáidtear é chun an comhartha rochtana Microsoft 365 a athnuachan go huathoibríoch.",
+    "m365RefreshTokenEditHint": "Fág bán chun an comhartha reatha a choinneáil. Greamaigh comhartha nua chun é a athsholáthar.",
     "m365TierHint": "Roghnaigh cén dromchla Microsoft 365 Copilot a úsáideann an nasc seo. Is é Individual an BizChat tomhaltóra réamhshocraithe; le Education agus Enterprise (obair), úsáidtear dromchlaí an tionónta lena mbaineann.",
     "m365TierIndividualOption": "Aonair (réamhshocraithe)",
     "m365TierEduOption": "Oideachas",
@@ -7097,6 +7120,7 @@
     "proxySubTabsAria": "Rannóga seachfhreastalaí",
     "requestBodyLimitTitle": "Teorainn Chorp an Iarratais",
     "requestBodyLimitDescription": "An t-uasmhéid pálasta API a nglactar leis sula ndéantar corp iarratais a pharsáil. Coinníonn bealaí uaslódála tiomnaithe a dteorainn ionsuite 100 MB ar a laghad.",
+    "requestBodyLimitChatHint": "Glacann Chat Completions agus Responses le suas le 50 MB go dtí go sábhálfaidh tú teorainn anseo. Baineann an teorainn shábháilte leo freisin, bíodh sí níos ísle nó níos airde.",
     "requestBodyLimitInputLabel": "Teorainn chorp an iarratais in MB",
     "requestBodyLimitEmptyError": "Cuir isteach teorainn in MB",
     "requestBodyLimitWholeNumberError": "Úsáid slánuimhir",
@@ -12282,7 +12306,9 @@
       "failedTitle": "Theip ar gach {count} iarracht",
       "failed": "teipthe",
       "pinnedTitle": "Samhail roghnaithe trí phionnáil seisiúin taisce comhthéacs",
-      "pinned": "pionnáilte"
+      "pinned": "pionnáilte",
+      "recoveredAttemptsTitle": "Aisghabhadh an t-iarratas tar éis {count} iarracht",
+      "latestOutcomeFailed": "Theip ar thoradh an iarratais is déanaí"
     },
     "attempts": "iarrachtaí",
     "detail": {
@@ -12384,13 +12410,20 @@
       "continuesFromParent": "leanann ón máthair",
       "continuesFrom": "Leanann ó {id}",
       "viewConversation": "féach ar an gcomhrá",
-      "openConversation": "Oscail comhrá {id}"
+      "openConversation": "Oscail comhrá {id}",
+      "omittedHttpAttempts": "Níor coinníodh {count} seoladh HTTP",
+      "noHttpResponse": "Níor breathnaíodh aon fhreagra HTTP",
+      "transportError": "Earráid iompair"
     },
     "tableLabel": "Logaí iarratais",
     "throughputPostFirstToken": "Tar éis an chéad token",
     "throughputEndToEnd": "Ó cheann go ceann",
     "throughputRate": "{value} token in aghaidh an tsoicind",
-    "throughputExplanation": "Úsáideann an dá ráta an ceann is mó de líon na dtoken aschuir agus réasúnaíochta. Fágann an ráta tar éis an chéad token TTFT bailí as an áireamh; murach sin úsáideann sé an fhad iomlán. Úsáideann ó cheann go ceann an fhad iomlán i gcónaí. Is féidir le freagra maolánach ráta seachadta pléasctha ard a bheith aige gan giniúint samhail níos tapúla."
+    "throughputExplanation": "Úsáideann an dá ráta an ceann is mó de líon na dtoken aschuir agus réasúnaíochta. Fágann an ráta tar éis an chéad token TTFT bailí as an áireamh; murach sin úsáideann sé an fhad iomlán. Úsáideann ó cheann go ceann an fhad iomlán i gcónaí. Is féidir le freagra maolánach ráta seachadta pléasctha ard a bheith aige gan giniúint samhail níos tapúla.",
+    "omittedHttpAttempts": "Níor coinníodh {count} seoladh HTTP",
+    "upstreamStatus": "Freastalaí réamhtheachtach {status}",
+    "noHttpResponse": "Níor breathnaíodh aon fhreagra HTTP",
+    "transportError": "Earráid iompair"
   },
   "proxyLogger": {
     "filterAll": "Go léir",
@@ -14157,6 +14190,14 @@
         "label": "Ord Linne d'Aschur Comhroinnte",
         "description": "I gcás soláthraithe a ndéantar a gcuóta a bhuicéadú de réir seoladh aschuir, rangaigh ball linne a roinneann seoladh aschuir breathnaithe de chuid ball ar diúltaíodh dó le déanaí díreach faoi bhun ball folláin. Ord amháin, ní eisiatar riamh é. Teastaíonn PROXY_SKIP_RECENTLY_FAILED uaidh, rud a tháirgeann an comhartha diúltaithe a léann sé. Múchta de réir réamhshocraithe: is ionann ord an roghnaithe agus an ghnáthuainíocht go díreach."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Diúltuithe cuóta scóipe múnla",
+        "description": "Cuir cuóta opencode 429 i bhfeidhm ach amháin ar an múnla a bhuaileann é, mar sin coinníonn an bealach amach céanna ag freastal ar mhúnlaí eile, agus é a ghlanadh ach amháin nuair a éiríonn leis an tsamhail sin. Feiceann tomhaltóirí nach bhfuil aon mhúnla acu (uainíocht linnte, páirceáil agus athimirt, infheictheacht riaracháin, truicear roghnóir, scuabadh sláinte) é fós. Riachtanais PROXY_SKIP_RECENTLY_FAILED, a tháirgeann an diúltú. As de réir réamhshocraithe: cuireann cuóta 429 samhail amháin an bealach amach ar leataobh do gach samhail."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Beir seachfhreastalaí: replay POST",
+        "description": "Le hiarratas neamhchinnte (POST, PUT, PATCH, DELETE), athsheol tar éis earráid iompair (soicéad úr, seachfhreastalaí, cúl-tuilleamh dúchais) ach amháin nuair a chruthaíonn an earráid nár seoladh aon rud: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH nó teorainn ama ceangail. D'fhéadfadh earráid soicéad tar éis an scríobh a chiallaíonn gur ghlac an t-iarratas in aghaidh an tsrutha, agus mar sin d'fhéadfadh athsheoladh é a ghiniúint agus a bhilleáil faoi dhó. As de réir réamhshocraithe: déantar doicheall ar chorp inathimeartha uair amháin ar aon earráid iompair, rud a aisghabhann soicéad sean-chomhthiomsaithe freisin."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Logáil Sannacháin Uainíochta",
         "description": "Taifeadann uainíocht opencode cén cuntas a d'fhreastail nó a scipeáladh (aitheantais mhascaithe amháin, gan aitheantais iomlána cuntais riamh) agus nascann sí iontrálacha loga seachfhreastalaí lena n-iarratas, ionas gur féidir leis an oibreoir cuntais a scipeáladh a idirdhealú ó chuntais nár úsáideadh. Múchta de réir réamhshocraithe: ní scríobhtar aon línte loga breise ná colúin bhreise."
@@ -14208,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "Athroghnú Linne 429 OpenCode",
         "description": "Le haghaidh rothlú ilchuntas OpenCode, tar éis 429 ó sholáthraí atá buicéadaithe de réir eisithe ar chuntas gan seachfhreastalaí faoi chomhthéacs linne comhthimpeallaí, iarr ball eile ar an linn nasc don chéad iarracht eile in ionad an seoladh eisithe céanna a atriail. Ordaíonn sé, ní eisiatar riamh: coinníonn linn ídithe an t-iompar reatha. Díchumasaithe de réir réamhshocraithe: rothlaíonn gach 429 go dtí an chéad chuntas eile díreach mar a bhí roimhe seo."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Scrúdú Bealach Saorshraith",
+        "description": "Maidir leis an seiceadóir OpenCode, nuair a fhreagraítear iarratas seachfhreastalaí 403 nó 451 FreeTierError agus gur theip ar atriail na n-uirlisí breathnaithe nó nár cuireadh i bhfeidhm é, seol an t-iarratas uair amháin trí sheachvótálaí eile (seachfhreastalaí cuntais eile nó ball comhthiomsaithe eile, gan nasc díreach riamh). Is nuair a fhreagraíonn an taiscéalaí sin 200 amháin a chuirtear an chéad bhealach amach i leataobh sa chuimhne diúltaithe seachfhreastalaí agus an freagra taiscéalaithe a sheirbheáiltear; nuair a dhiúltaíonn an bheirt acu, cuirtear an diúltú bunaidh ar ais agus ní thaifeadtar aon rud. Clúdaíonn an téacs diúltaithe céanna bealach amach suaitheanta IP agus cruth iarratais diúltaithe, mar sin cuireann an taiscéalaí a chéile iad le fianaise. As de réir réamhshocraithe: cuirtear an diúltú ar ais gan athrú."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Méarlorg Cliaint OpenCode v2",
@@ -14388,6 +14433,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Teaglaim: Stop ar Dhiúltú Pholasaí Ábhair",
         "description": "Nuair a fhreagraíonn sprioc theaglaime le diúltú beacht pholasaí ábhair (cód nó cineál cyber_policy / content_policy_violation), stop an teaglaim agus seol an diúltú sin ar ais fiú nuair is samhlacha difriúla iad na spriocanna atá fágtha, in ionad dul ar aghaidh go dtí an chéad sprioc eile. Múchta de réir réamhshocraithe: ní chuireann an diúltú fuarú ar an gcuntas riamh ná ní thuraisíonn sé scoradán an tsoláthraí, agus téann an teaglaim ar aghaidh go dtí an chéad sprioc eile díreach mar a bhí roimhe seo."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Freagraí: coimeád beo ar an iompar amháin",
+        "description": "Seol Freagraí slán mar líne bhán in ionad imeacht response.in_progress, mar sin ní féidir le pictiúr sintéiseach choíche ionad an fhreagra iarbhír sa SDK oifigiúil . Ní sheolann líne bán aon imeacht SSE, mar sin ní athshocródh faire cliant a athshocraíonn ach ar imeachtaí le linn tréimhse fhada chiúin. Múchta de réir réamhshocraithe: seolann amadóirí an t-imeacht response.in_progress spec-valid."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Atriail Tréimhse Fuaraigh: Scipeáil Diúltuithe 403/410",
