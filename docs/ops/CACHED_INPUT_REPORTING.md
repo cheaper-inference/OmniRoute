@@ -29,13 +29,15 @@ page, API-key-filtered cache measurements similarly remain incomplete when relev
 key identity; those tokens are never assigned to a guessed key. Pricing queries keep their previous
 cache-cost columns; the nullable reporting column does not change historical billing fallback.
 
-Migration `225_daily_cached_input.sql` adds the nullable archive count. Startup reconciles the
+Migration `226_daily_cached_input.sql` adds the nullable archive count. Startup reconciles the
 previously published `206_daily_cached_input`, `213_daily_cached_input`, `214_daily_cached_input`,
-`215_daily_cached_input`, `217_daily_cached_input`, `218_daily_cached_input`, `223_daily_cached_input`
-and `224_daily_cached_input` ledger entries to 225 without replaying the archive change, allowing
-the upstream migrations occupying those slots to run.
+`215_daily_cached_input`, `217_daily_cached_input`, `218_daily_cached_input`, `223_daily_cached_input`,
+`224_daily_cached_input` and `225_daily_cached_input` ledger entries to 226 without replaying
+the archive change, allowing the upstream migrations occupying those slots to run. Cache history is reconciled before
+Team history so a published cache row at 215 vacates that slot before an older Team row
+moves into it. Team history remains ahead of Radar history in the same reconciliation pass.
 Existing measurements and unknown historical counts are retained; an unrelated migration occupying
-the target slot fails closed.
+the target slot fails closed when reconciliation of a known cache history is required.
 This standalone contribution does not reserve migration numbers across other unmerged PRs.
 
 The existing ingestion convention records zero when raw cache-read metadata is absent; this change
