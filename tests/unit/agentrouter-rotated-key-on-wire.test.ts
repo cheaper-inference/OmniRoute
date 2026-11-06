@@ -66,5 +66,6 @@ test("the x-api-key on the wire is the rotated key, request after request", asyn
 test("an empty primary key with extra keys never sends an empty x-api-key", async () => {
   const sent = stubFetch();
   for (let i = 0; i < 2; i++) await send("agentrouter-rot-2", "");
+  assert.equal(sent.length, 2, "both requests must reach the fetch stub");
   for (const key of sent) assert.match(key, /^KEY-EXTRA-/);
 });
