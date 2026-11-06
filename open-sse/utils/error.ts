@@ -945,7 +945,8 @@ export function explainCredentialRefusal(input: CredentialRefusalExplanation): s
   let msg = `${cause} [${safeDetails.join(" | ")}]`;
   if (detail) {
     const sanitized = sanitizeUpstreamDetails(detail);
-    if (sanitized && !msg.includes(sanitized)) msg += ` — ${sanitized}`;
+    const sanitizedText = typeof sanitized === "string" ? sanitized : "";
+    if (sanitizedText && !msg.includes(sanitizedText)) msg += ` — ${sanitizedText}`;
   }
   return msg;
 }

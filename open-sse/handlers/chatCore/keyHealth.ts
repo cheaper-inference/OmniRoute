@@ -28,7 +28,6 @@
  */
 
 import {
-  recordKeyFailure,
   recordKeySuccess,
   recordKeyTerminal,
   recordKeyCooldown,
@@ -100,11 +99,14 @@ function isNonCredentialRefusal(
   return NON_CREDENTIAL_403_TYPES.includes(classified);
 }
 
-export const _isNonCredentialRefusal = isNonCredentialRefusal;
-
-function isCredentialFailure(status: number, failureDetail: string): boolean {
+function isCredentialFailure(
+  status: number,
+  failureDetail: string,
+  provider: string | null | undefined = null
+): boolean {
   if (status !== 401 && status !== 403) return false;
   if (isModelCapabilityFailure(status, failureDetail)) return false;
+  if (isNonCredentialRefusal(status, failureDetail, provider)) return false;
   if (status === 401) return true;
   return CREDENTIAL_FAILURE_PATTERNS.some((pattern) => pattern.test(failureDetail));
 }
@@ -147,14 +149,36 @@ export function recordKeyHealthStatus(
       "AUTH",
       `${status} on env ${errMsg} — validation errors must mention the source var name (e.g. OPENAI_API_KEY)`
     );
+    // D2: an `env:<VAR>` connectionId is a synthetic sentinel with no backing
+    // provider_connections row — the DB write below would fail or, worse,
+    // create a stray row. Record the health state in-memory only so the
+    // rotator still stops selecting the refused env key, then stop.
+    if (
+      isCredentialFailure(
+        status,
+        failureDetail,
+        typeof creds.provider === "string" ? creds.provider : null
+      )
+    ) {
+      recordKeyTerminal(connId, currentKeyId);
+    }
     return;
   }
 
-  if (isCredentialFailure(status, failureDetail)) {
-    const updatedHealth = recordKeyFailure(connId, currentKeyId);
+  if (
+    isCredentialFailure(
+      status,
+      failureDetail,
+      typeof creds.provider === "string" ? creds.provider : null
+    )
+  ) {
+    // D3: a definitive credential rejection never recovers mid-session — the
+    // same key would just be refused again. Terminalize in one shot (the
+    // ambiguous-403 case already returned above via isNonCredentialRefusal).
+    const updatedHealth = recordKeyTerminal(connId, currentKeyId);
     log?.warn?.(
       "AUTH",
-      `${status} on connection ${connId.slice(0, 8)} - key marked as failed (failure #${updatedHealth.failures})`
+      `${status} on connection ${connId.slice(0, 8)} - key ${currentKeyId} marked invalid (credential rejected)`
     );
 
     // Persist health status to DB on every failure (not just invalid transitions)

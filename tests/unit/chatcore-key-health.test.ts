@@ -32,24 +32,24 @@ test("missing connectionId is a no-op (no health entry created)", () => {
   assert.equal(Object.keys(getAllKeyHealth()).length, before);
 });
 
-test("401 marks the selected key as failed → warning after the first failure", () => {
-  const conn = "kh-401-warning";
+test("401 terminalizes the key in one shot (HAC-116 D3 — a definitive credential rejection never recovers mid-session)", () => {
+  const conn = "kh-401-terminal";
   recordKeyHealthStatus(401, creds(conn), noopLog);
   const h = getAllKeyHealth()[`${conn}:primary`];
-  assert.equal(h?.failures, 1);
-  assert.equal(h?.status, "warning");
-});
-
-test("401 reaches invalid at the failure threshold (2 consecutive)", () => {
-  const conn = "kh-401-invalid";
-  recordKeyHealthStatus(401, creds(conn), noopLog);
-  recordKeyHealthStatus(401, creds(conn), noopLog);
-  const h = getAllKeyHealth()[`${conn}:primary`];
-  assert.equal(h?.failures, 2);
   assert.equal(h?.status, "invalid");
+  assert.ok((h?.failures ?? 0) >= 2, "terminalized in one shot, not at a threshold");
 });
 
-test("genuine 403 credential failures warn then invalidate only the rejected key", () => {
+test("401 stays terminal on repeat — no threshold climbing", () => {
+  const conn = "kh-401-terminal-repeat";
+  recordKeyHealthStatus(401, creds(conn), noopLog);
+  recordKeyHealthStatus(401, creds(conn), noopLog);
+  const h = getAllKeyHealth()[`${conn}:primary`];
+  assert.equal(h?.status, "invalid");
+  assert.ok((h?.failures ?? 0) >= 2, "already terminal; failures only ratchet, never reset");
+});
+
+test("genuine 403 credential failures terminalize only the rejected key in one shot", () => {
   const conn = "kh-403-credential";
   const failure = JSON.stringify({
     error: { code: "invalid_api_key", message: "Invalid API key" },
@@ -63,8 +63,8 @@ test("genuine 403 credential failures warn then invalidate only the rejected key
     failure
   );
   let all = getAllKeyHealth();
-  assert.equal(all[`${conn}:extra_0`]?.status, "warning");
-  assert.equal(all[`${conn}:extra_0`]?.failures, 1);
+  assert.equal(all[`${conn}:extra_0`]?.status, "invalid");
+  assert.ok((all[`${conn}:extra_0`]?.failures ?? 0) >= 2);
   assert.equal(all[`${conn}:primary`], undefined);
 
   recordKeyHealthStatus(
@@ -76,7 +76,7 @@ test("genuine 403 credential failures warn then invalidate only the rejected key
   );
   all = getAllKeyHealth();
   assert.equal(all[`${conn}:extra_0`]?.status, "invalid");
-  assert.equal(all[`${conn}:extra_0`]?.failures, 2);
+  assert.ok((all[`${conn}:extra_0`]?.failures ?? 0) >= 2);
   assert.equal(all[`${conn}:primary`], undefined);
 });
 
@@ -100,18 +100,18 @@ test("model capability failures and model-sync conflicts do not touch credential
 
 test("2xx after a failure resets the key to active with 0 failures", () => {
   const conn = "kh-2xx-recover";
-  recordKeyHealthStatus(401, creds(conn), noopLog);
+  recordKeyHealthStatus(500, creds(conn), noopLog);
   recordKeyHealthStatus(204, creds(conn), noopLog);
   const h = getAllKeyHealth()[`${conn}:primary`];
   assert.equal(h?.failures, 0);
   assert.equal(h?.status, "active");
 });
 
-test("honors selectedKeyId — scopes the update to the active extra key, not primary", () => {
+test("honors selectedKeyId — scopes the terminal update to the active extra key, not primary", () => {
   const conn = "kh-selected-key";
   recordKeyHealthStatus(401, creds(conn, { selectedKeyId: "extra_1" }), noopLog);
   const all = getAllKeyHealth();
-  assert.equal(all[`${conn}:extra_1`]?.status, "warning");
+  assert.equal(all[`${conn}:extra_1`]?.status, "invalid");
   assert.equal(all[`${conn}:primary`], undefined);
 });
 
@@ -121,8 +121,8 @@ test("success on another key cannot clear the affected key", () => {
   recordKeyHealthStatus(204, creds(conn, { selectedKeyId: "extra_0" }), noopLog);
 
   const all = getAllKeyHealth();
-  assert.equal(all[`${conn}:primary`]?.status, "warning");
-  assert.equal(all[`${conn}:primary`]?.failures, 1);
+  assert.equal(all[`${conn}:primary`]?.status, "invalid");
+  assert.ok((all[`${conn}:primary`]?.failures ?? 0) >= 2);
   assert.equal(all[`${conn}:extra_0`]?.status, "active");
   assert.equal(all[`${conn}:extra_0`]?.failures, 0);
 });
