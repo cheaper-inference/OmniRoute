@@ -278,8 +278,8 @@ function openaiToGeminiBase(
   // Mirrors the same guard in claude-to-gemini.ts. Port of the thinkingConfig
   // guard half of decolua/9router#2480 (the signature-replay half of that PR
   // is out of scope and not ported here).
-  // Do not attach thinkingConfig to image, TTS or transcription models:
-  // they reject the entire field, including a native thinkingLevel.
+  // Models without thinking support (TTS, transcription, gemini-2.5-flash-image)
+  // 400 on ANY thinkingConfig, so every path below skips them (#16928).
   const rejectsThinkingConfig = geminiModelRejectsThinkingConfig(model);
   const nativeThinking = rejectsThinkingConfig ? null : resolveNativeGeminiThinking(model, body);
   if (nativeThinking !== null) {
