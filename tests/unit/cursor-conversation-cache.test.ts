@@ -257,6 +257,43 @@ test("buildCursorUsage records the estimate it reported for the next segment", (
   });
 });
 
+test("an intermediate tool-resumed segment without turn_ended attributes the prior segment prompt as cached", () => {
+  const seg1Body = {
+    messages: [
+      { role: "user" as const, content: " inspect the repository structure and run tests" },
+    ],
+  };
+  const ctx1 = newStreamCtx("claude-opus-5-5-high", () => {});
+  processFrame(buildTextDeltaPayload("calling first tool"), ctx1, new Set());
+  const seg1Usage = buildCursorUsage(ctx1, seg1Body) as Record<string, number>;
+  assert.ok(seg1Usage.prompt_tokens > 0);
+  assert.equal(ctx1.reportedUsage?.cached, 0);
+
+  const seg2Body = {
+    messages: [
+      ...seg1Body.messages,
+      { role: "assistant" as const, content: "calling first tool" },
+      { role: "user" as const, content: "tool output: 42 passing tests in 3 suites" },
+    ],
+  };
+  const ctx2 = newStreamCtx("claude-opus-5-5-high", () => {});
+  ctx2.priorReportedUsage = {
+    prompt: ctx1.reportedUsage!.prompt,
+    completion: ctx1.reportedUsage!.completion,
+    cached: ctx1.reportedUsage!.cached,
+    lastPrompt: ctx1.reportedUsage!.prompt,
+  };
+  processFrame(buildTextDeltaPayload("calling second tool"), ctx2, new Set());
+
+  const usage2 = buildCursorUsage(ctx2, seg2Body) as Record<string, unknown>;
+  assert.equal(usage2.estimated, true);
+  assert.ok((usage2.prompt_tokens as number) > seg1Usage.prompt_tokens);
+  assert.deepEqual(usage2.prompt_tokens_details, {
+    cached_tokens: ctx1.reportedUsage!.prompt,
+  });
+  assert.equal(ctx2.reportedUsage?.cached, ctx1.reportedUsage!.prompt);
+});
+
 test("a malformed or input-less TurnEndedUpdate still ends the turn", () => {
   // Truncated length-delimited field inside turn_ended.
   const broken = lenPrefixed(1, lenPrefixed(14, Buffer.from([0x0a, 0x7f])));
