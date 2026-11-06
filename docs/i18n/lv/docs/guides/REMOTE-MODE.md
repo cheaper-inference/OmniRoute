@@ -50,20 +50,25 @@ jūsu klēpjdators                         attālais OmniRoute (VPS)
 
 ```bash
 omniroute connect 192.168.0.15
-# Pārvaldības parole serverim http://192.168.0.15:20128: ********
-# ✔ Savienots ar http://192.168.0.15:20128 — konteksts '192.168.0.15' (tvērums: admin)
+# Pārvaldības parole vietnei http://192.168.0.15:20128: ********
+# ✔ Izveidots savienojums ar http://192.168.0.15:20128 — konteksts '192.168.0.15' (tvērums: admin)
 ```
 
-Paroles plūsma pēc noklusējuma izveido **admin** pilnvaru (jums ir parole, tātad
-jums jau ir pilna kontrole). Samaziniet tvērumu ar `--scope`:
+Paroles plūsma pēc noklusējuma izveido **admin** pilnvaru (jums ir parole, tāpēc
+jums jau ir pilna kontrole). Ierobežojiet tvērumu ar `--scope`:
 
 ```bash
 omniroute connect 192.168.0.15 --scope write
 ```
 
-Opcijas: `--port <p>` (ja resursdatoram nav norādīts ports), `--name <ctx>` (konteksta nosaukums),
-`--scope read|write|admin`. Pilns URL tiek izmantots tieši tā, kā norādīts:
+Opcijas: `--port <p>` (ja resursdatoram tā nav), `--name <ctx>` (konteksta nosaukums),
+`--scope read|write|admin`. Pilns URL tiek izmantots, kā norādīts:
 `omniroute connect https://omni.example.com`.
+
+Ja serverī ir iespējota informācijas paneļa divu faktoru autentifikācija (Iestatījumi →
+Drošība), ar paroli vien nepietiek: CLI pēc tam pieprasa kodu no
+autentifikatora lietotnes (vai atkopšanas kodu). Nenoteiktai lietošanai nododiet to iepriekš
+ar `--totp <code>`.
 
 ### Ar iepriekš ģenerētu pilnvaru
 
@@ -74,7 +79,7 @@ ielīmējiet to — parole nav nepieciešama:
 omniroute connect 192.168.0.15 --key oma_live_xxxxxxxx
 ```
 
-CLI to pārbauda, izmantojot `GET /api/cli/whoami`, un saglabā kā aktīvo kontekstu.
+CLI validē to, izmantojot `GET /api/cli/whoami`, un saglabā to kā aktīvo kontekstu.
 
 ---
 
@@ -439,12 +444,12 @@ omniroute contexts remove 192-168-0-15 --yes   # noņem lokālo kontekstu (pat j
 
 ## API galapunkti (uzziņai)
 
-| Metode | Maršruts              | Autentifikācija    | Tvērums                            |
-| ------ | --------------------- | ------------------ | ---------------------------------- |
-| POST   | `/api/cli/connect`    | pārvaldības parole | — (publisks, aizsargāts ar paroli) |
-| GET    | `/api/cli/whoami`     | piekļuves tokens   | lasīšana                           |
-| GET    | `/api/cli/tokens`     | piekļuves tokens   | administrēšana                     |
-| POST   | `/api/cli/tokens`     | piekļuves tokens   | administrēšana                     |
-| DELETE | `/api/cli/tokens/:id` | piekļuves tokens   | administrēšana                     |
+| Metode | Maršruts              | Autentifikācija           | Tvērums                            |
+| ------ | --------------------- | ------------------------- | ---------------------------------- |
+| POST   | `/api/cli/connect`    | parole; 2FA, ja iespējota | — (publisks, aizsargāts ar paroli) |
+| GET    | `/api/cli/whoami`     | piekļuves pilnvara        | read                               |
+| GET    | `/api/cli/tokens`     | piekļuves pilnvara        | admin                              |
+| POST   | `/api/cli/tokens`     | piekļuves pilnvara        | admin                              |
+| DELETE | `/api/cli/tokens/:id` | piekļuves pilnvara        | admin                              |
 
 Pilnas shēmas skatiet failā [openapi.yaml](../openapi.yaml).

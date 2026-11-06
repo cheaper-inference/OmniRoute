@@ -4,6 +4,9 @@
 // protocol-level ping (RFC 6455 §5.5.2) that conformant clients auto-answer, which
 // separates a client that stopped reading frames (simulated below by pausing the
 // underlying socket) from one that is alive but silent at the application level.
+// A client that stopped reading but kept sending application pings used to
+// refresh its liveness with every message and was never reaped; only a protocol pong
+// counts now.
 //
 // Uses the real server harness from tests/integration/live-ws-startup.test.ts (serial,
 // --test-concurrency=1 integration runner — needs a ~50s window to cross the server's
@@ -113,7 +116,7 @@ test(
     try {
       await waitForStartup(child, () => output);
 
-      type ConnectMode = "appHeartbeat" | "quiet" | "deadSocket";
+      type ConnectMode = "appHeartbeat" | "quiet" | "deadSocket" | "deadSocketAppHeartbeat";
 
       const connect = (mode: ConnectMode) => {
         const ws = new WebSocket(`ws://127.0.0.1:${port}/live-ws`, {
@@ -128,12 +131,15 @@ test(
 
           ws.once("open", () => {
             ws.send(JSON.stringify({ type: "subscribe", channels: ["requests"] }));
-            if (mode === "appHeartbeat") {
-              heartbeat = setInterval(() => {
-                if (ws.readyState === WebSocket.OPEN) {
-                  ws.send(JSON.stringify({ type: "ping" }));
-                }
-              }, 10_000);
+            if (mode === "appHeartbeat" || mode === "deadSocketAppHeartbeat") {
+              heartbeat = setInterval(
+                () => {
+                  if (ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({ type: "ping" }));
+                  }
+                },
+                mode === "appHeartbeat" ? 10_000 : 5_000
+              );
             }
           });
 
@@ -145,7 +151,8 @@ test(
               // "deadSocket": pause the underlying TCP socket so the `ws` receiver never
               // sees (and auto-answers) the server's ping. It also cannot observe its own
               // closure, so the assertion checks the server's disconnect log instead.
-              if (mode === "deadSocket") {
+              // "deadSocketAppHeartbeat" keeps writing pings while not reading.
+              if (mode === "deadSocket" || mode === "deadSocketAppHeartbeat") {
                 (ws as unknown as { _socket: import("net").Socket })._socket.pause();
               }
               resolve(sessionId as string);
@@ -164,10 +171,12 @@ test(
       const deadSocket = connect("deadSocket");
       const quiet = connect("quiet");
       const appHeartbeat = connect("appHeartbeat");
-      const [deadSocketId] = await Promise.all([
+      const deadWriter = connect("deadSocketAppHeartbeat");
+      const [deadSocketId, , , deadWriterId] = await Promise.all([
         deadSocket.welcome,
         quiet.welcome,
         appHeartbeat.welcome,
+        deadWriter.welcome,
       ]);
 
       // Wait past HEARTBEAT_TIMEOUT_MS (35s) plus one heartbeat interval (15s).
@@ -177,6 +186,11 @@ test(
         output.includes(`Client disconnected: ${deadSocketId}`),
         `Server never disconnected the socket that stopped reading frames — protocol ` +
           `ping/pong must not mask a truly half-open connection (#10452). Output:\n${output}`
+      );
+      assert.ok(
+        output.includes(`Client disconnected: ${deadWriterId}`),
+        `Server never disconnected a socket that stopped reading but kept sending ` +
+          `application pings — inbound messages must not count as liveness. Output:\n${output}`
       );
       assert.notEqual(
         quiet.ws.readyState,
@@ -193,6 +207,8 @@ test(
       deadSocket.stop();
       quiet.stop();
       appHeartbeat.stop();
+      deadWriter.stop();
+      deadWriter.ws.terminate();
       quiet.ws.close();
       appHeartbeat.ws.close();
       deadSocket.ws.terminate();
