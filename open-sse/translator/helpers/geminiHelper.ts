@@ -199,28 +199,31 @@ function normalizeAudioMimeType(format: unknown): string {
   return `audio/${normalized}`;
 }
 
-// Convert OpenAI content to Gemini parts
+const GEMINI_MEDIA_RESOLUTIONS = new Set([
+  "MEDIA_RESOLUTION_UNSPECIFIED",
+  "MEDIA_RESOLUTION_LOW",
+  "MEDIA_RESOLUTION_MEDIUM",
+  "MEDIA_RESOLUTION_HIGH",
+  "MEDIA_RESOLUTION_ULTRA_HIGH",
+]);
+
 function normalizeGeminiMediaResolution(...values: unknown[]): JsonRecord | undefined {
-  const allowed = new Set([
-    "MEDIA_RESOLUTION_UNSPECIFIED",
-    "MEDIA_RESOLUTION_LOW",
-    "MEDIA_RESOLUTION_MEDIUM",
-    "MEDIA_RESOLUTION_HIGH",
-    "MEDIA_RESOLUTION_ULTRA_HIGH",
-  ]);
   for (const value of values) {
     if (typeof value !== "string" || !value.trim()) continue;
-    let normalized = value.trim().toUpperCase().replace(/[\s-]+/g, "_");
+    let normalized = value
+      .trim()
+      .toUpperCase()
+      .replace(/[\s-]+/g, "_");
     if (!normalized.startsWith("MEDIA_RESOLUTION_")) {
       normalized = `MEDIA_RESOLUTION_${normalized}`;
     }
-    if (allowed.has(normalized)) return { level: normalized };
+    if (GEMINI_MEDIA_RESOLUTIONS.has(normalized)) return { level: normalized };
   }
   return undefined;
 }
 
+// Convert OpenAI content to Gemini parts
 /** Translate OpenAI content to Gemini parts while retaining typed media carriers. */
-
 export function convertOpenAIContentToParts(content: unknown): JsonRecord[] {
   const parts: JsonRecord[] = [];
 
