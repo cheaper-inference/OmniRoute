@@ -192,7 +192,8 @@ function truncateLogString(value: string, maxLength = getChatLogTextLimit()): st
   // adding the marker produced a result longer than maxLength, so re-bounding an already
   // bounded string truncated it a second time and the function was not idempotent.
   const marker = `\n[...truncated ${value.length - maxLength} chars...]\n`;
-  const keep = Math.max(0, maxLength - marker.length);
+  if (marker.length >= maxLength) return slicePrefixWithoutSplitSurrogate(marker, maxLength);
+  const keep = maxLength - marker.length;
   const head = slicePrefixWithoutSplitSurrogate(value, Math.floor(keep / 2));
   const tail = sliceSuffixWithoutSplitSurrogate(value, Math.ceil(keep / 2));
   // Flatten the bounded string before it is retained anywhere (call-log details,

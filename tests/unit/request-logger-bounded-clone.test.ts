@@ -145,3 +145,17 @@ test("cloneBoundedForLog: honors a raised CHAT_LOG_MAX_OBJECT_KEYS", () => {
     assert.deepEqual(result.properties, properties);
   });
 });
+
+test("cloneBoundedForLog: a small CHAT_LOG_TEXT_LIMIT also bounds the truncation marker", () => {
+  const previous = process.env.CHAT_LOG_TEXT_LIMIT;
+  try {
+    for (const limit of [1, 10]) {
+      process.env.CHAT_LOG_TEXT_LIMIT = String(limit);
+      const result = cloneBoundedForLog("x".repeat(500)) as string;
+      assert.ok(result.length <= limit, `${result.length} exceeds limit ${limit}`);
+    }
+  } finally {
+    if (previous === undefined) delete process.env.CHAT_LOG_TEXT_LIMIT;
+    else process.env.CHAT_LOG_TEXT_LIMIT = previous;
+  }
+});
