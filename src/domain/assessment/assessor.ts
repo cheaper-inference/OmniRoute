@@ -16,6 +16,12 @@ import type {
   AssessmentScope,
   AssessmentTrigger,
 } from "./types";
+import {
+  ASSESSMENT_PROBE_MARK,
+  CHAT_PROBE_NOT_ISOLATED_MESSAGE,
+  chatProbeLeavesNoConversation,
+  isChatProbeRefusal,
+} from "@/lib/providers/chatProbePolicy";
 import { DEFAULT_ASSESSMENT_CONFIG, PROBE_MESSAGES, PROBE_MAX_TOKENS } from "./types";
 
 interface ProbeResult {
@@ -24,6 +30,51 @@ interface ProbeResult {
   error?: string;
   supportsStreaming?: boolean;
   content?: string;
+}
+
+/** Not assessed, rather than broken, when the probe policy keeps it off a signed-in account. */
+const NOT_ASSESSED: ProbeResult = {
+  status: "unknown",
+  latencyMs: 0,
+  error: CHAT_PROBE_NOT_ISOLATED_MESSAGE,
+};
+
+/** The assessment status a probe response stands for. */
+async function readProbeResponse(response: Response, latencyMs: number): Promise<ProbeResult> {
+  if (response.status === 401 || response.status === 403) {
+    return { status: "auth_error", latencyMs, error: `Auth failed: ${response.status}` };
+  }
+
+  if (response.status === 429) {
+    return { status: "rate_limited", latencyMs, error: "Rate limited" };
+  }
+
+  if (response.status === 400) {
+    const body = await response.text();
+    return { status: "broken", latencyMs, error: `Bad request: ${body.slice(0, 200)}` };
+  }
+
+  if (
+    response.status === 422 &&
+    isChatProbeRefusal(
+      await response
+        .clone()
+        .json()
+        .catch(() => null)
+    )
+  ) {
+    return NOT_ASSESSED;
+  }
+
+  if (!response.ok) {
+    return { status: "broken", latencyMs, error: `HTTP ${response.status}` };
+  }
+
+  const data = await response.json();
+  const content = data.choices?.[0]?.message?.content?.trim() ?? "";
+  const supportsStreaming = data.usage?.completion_tokens > 0;
+
+  return { status: "working", latencyMs, content, supportsStreaming };
 }
 
 export class Assessor {
@@ -49,6 +100,9 @@ export class Assessor {
     modelId: string,
     level: ProbeLevel = "quick"
   ): Promise<ProbeResult> {
+    // An assessment is an automated probe: it must not leave a conversation on a signed-in
+    // account (#14780).
+    if (!(await chatProbeLeavesNoConversation(providerId))) return NOT_ASSESSED;
     const messages = PROBE_MESSAGES[level];
     const maxTokens = PROBE_MAX_TOKENS[level];
     const controller = new AbortController();
@@ -61,6 +115,8 @@ export class Assessor {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${this.apiKey}`,
+          // Lets the chat pipeline gate every target this probe reaches, e.g. inside a combo.
+          "X-Internal-Test": ASSESSMENT_PROBE_MARK,
         },
         body: JSON.stringify({
           model: `${providerId}/${modelId}`,
@@ -71,30 +127,7 @@ export class Assessor {
         signal: controller.signal,
       });
 
-      const latencyMs = Date.now() - start;
-
-      if (response.status === 401 || response.status === 403) {
-        return { status: "auth_error", latencyMs, error: `Auth failed: ${response.status}` };
-      }
-
-      if (response.status === 429) {
-        return { status: "rate_limited", latencyMs, error: "Rate limited" };
-      }
-
-      if (response.status === 400) {
-        const body = await response.text();
-        return { status: "broken", latencyMs, error: `Bad request: ${body.slice(0, 200)}` };
-      }
-
-      if (!response.ok) {
-        return { status: "broken", latencyMs, error: `HTTP ${response.status}` };
-      }
-
-      const data = await response.json();
-      const content = data.choices?.[0]?.message?.content?.trim() ?? "";
-      const supportsStreaming = data.usage?.completion_tokens > 0;
-
-      return { status: "working", latencyMs, content, supportsStreaming };
+      return await readProbeResponse(response, Date.now() - start);
     } catch (err) {
       if (err.name === "AbortError") {
         return {

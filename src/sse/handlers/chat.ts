@@ -38,6 +38,7 @@ import { getCombo, getComboForModel, getModelInfo } from "../services/model";
 import { stripContextWindowSuffix } from "@omniroute/open-sse/services/model.ts";
 import { resolveBareModelToConnectionDefault } from "@omniroute/open-sse/services/model.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
+import { ASSESSMENT_PROBE_MARK, refuseUnisolatedChatProbe } from "@/lib/providers/chatProbePolicy";
 import { getImageModelEntry, isImageOnlyModel } from "@omniroute/open-sse/config/imageRegistry.ts";
 import { acceptHeaderForcesStream } from "@omniroute/open-sse/utils/aiSdkCompat.ts";
 import {
@@ -655,7 +656,11 @@ async function handleChatImplementation(
     return internalUsageCommandResponse;
   }
 
-  const isComboLiveTest = request.headers?.get?.("x-internal-test") === "combo-health-check";
+  const internalTestMark = request.headers?.get?.("x-internal-test");
+  const isComboLiveTest = internalTestMark === "combo-health-check";
+  // Every automated probe, a live test or an assessment, is gated against leaving a conversation
+  // on a signed-in account; only the live test also bypasses breakers, cooldowns and quota policy.
+  const isAutomatedProbe = isComboLiveTest || internalTestMark === ASSESSMENT_PROBE_MARK;
 
   if (!modelStr) {
     log.warn("CHAT", "Missing model");
@@ -1240,6 +1245,7 @@ async function handleChatImplementation(
             sessionId,
             sessionAffinityKey,
             forceLiveComboTest: isComboLiveTest,
+            automatedProbe: isAutomatedProbe,
             ...resolvedPolicy.comboAuthorizationOptions(apiKeyInfo, resolvedModelStr),
             forcedConnectionId: target?.connectionId ?? null,
             allowedConnectionIds: target?.allowedConnectionIds ?? null,
@@ -1336,6 +1342,7 @@ async function handleChatImplementation(
                 sessionAffinityKey,
                 emergencyFallbackTried: true,
                 forceLiveComboTest: isComboLiveTest,
+                automatedProbe: isAutomatedProbe,
                 conversationId,
                 managedLease,
                 videoBridgeLog,
@@ -1426,6 +1433,7 @@ async function handleChatImplementation(
       sessionId,
       sessionAffinityKey,
       forceLiveComboTest: isComboLiveTest,
+      automatedProbe: isAutomatedProbe,
       forcedConnectionId: requestedConnectionId,
       correlationId: reqId,
       conversationId,
@@ -1480,6 +1488,8 @@ async function handleSingleModelChat(
   runtimeOptions: {
     emergencyFallbackTried?: boolean;
     forceLiveComboTest?: boolean;
+    /** An automated probe (live test or assessment): must not leave an account conversation. */
+    automatedProbe?: boolean;
     sessionId?: string | null;
     sessionAffinityKey?: string | null;
     forcedConnectionId?: string | null;
@@ -1576,6 +1586,8 @@ async function handleSingleModelChat(
           {
             sessionId: "", // safety-net redirect doesn't have session context
             forceLiveComboTest: false,
+            // A probe stays a probe through the redirect, so each target is gated as one.
+            automatedProbe: runtimeOptions.automatedProbe === true,
             authorizationContextModel: runtimeOptions.authorizationContextModel ?? modelStr,
             forcedConnectionId: runtimeOptions?.forcedConnectionId ?? null,
             allowedConnectionIds: null,
@@ -1641,6 +1653,12 @@ async function handleSingleModelChat(
   const modelPolicyRejection = await resolvedModelGate([`${provider}/${model}`]);
   if (modelPolicyRejection) return modelPolicyRejection;
   const forceLiveComboTest = runtimeOptions.forceLiveComboTest === true;
+  // #14780: a probe must not leave a conversation on a signed-in account. Decided here,
+  // once the target's provider is final, so every probe path and combo target is covered.
+  const probeRefusal = runtimeOptions.automatedProbe
+    ? await refuseUnisolatedChatProbe(provider)
+    : null;
+  if (probeRefusal) return probeRefusal;
   const budgetRejection = rejectIfMeteredBudgetExceeded(apiKeyInfo?.id, provider, modelStr);
   if (budgetRejection) return budgetRejection;
   const bypassProviderQuotaPolicy = hasProviderQuotaBypassScope(apiKeyInfo?.scopes);
