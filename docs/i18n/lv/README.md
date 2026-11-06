@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                  |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
+|                                  |         v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | -------------------------------- | :----------------------: | :---------: | :-------------------: |
 | 🌐 Pakalpojumu sniedzēji         |           352            |   **358**   |          380          |
 | 🧠 Unikālie tērzēšanas modeļu ID |           1320           |  **1374**   |         1491          |
@@ -580,7 +580,7 @@ Radar ir jāiespējo brīvprātīgi, un tas izmanto tikai GET pieprasījumus. Om
 
 </div>
 
-> Jaunākie notikumi no **v3.8.20 → v3.8.53**. Pilna vēsture [`CHANGELOG.md`](CHANGELOG.md).
+> Jaunākie notikumi no **v3.8.20 → v3.8.54**. Pilna vēsture [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ `quota-weighted` maršrutēšana** — 20. kombinētā stratēģija izlaiž izsmeltos kontus, pēc tam izvēlas starp pārējiem proporcionāli atlikušajai kvotai ÷ aktīvajai slodzei, saglabājot esošās sarunas piespraustas. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Bezgalvas režīms** — `omniroute serve --headless` (vai `OMNIROUTE_HEADLESS=1`) darbojas tikai ar `/v1/*` starpniekservera dzinēju, izslēdzot informācijas paneli un tikai informācijas paneļa apakšsistēmas. → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1014,7 +1014,7 @@ omniroute
 ```
 
 > 💡 Redzat `npm warn ERESOLVE` vai peer-dep brīdinājumus? [Tie ir nekaitīgi](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Vai izmantojat npm 11 vai jaunāku versiju?** npm var bloķēt pakotņu dzīves cikla skriptus, ja vien tie nav atļauti. OmniRoute `postinstall` (`node scripts/build/postinstall.mjs`) ir nepieciešams, lai sagatavotu tā natīvos izpildlaika failus. Globāli instalējot, atļaujiet npm brīdinājumā minētās pakotnes. Pakotņu kopai, ko norāda OmniRoute 3.8.53:
+> **Vai izmantojat npm 11 vai jaunāku versiju?** npm var bloķēt pakotņu dzīves cikla skriptus, ja vien tie nav atļauti. OmniRoute `postinstall` (`node scripts/build/postinstall.mjs`) ir nepieciešams, lai sagatavotu tā natīvos izpildlaika failus. Globāli instalējot, atļaujiet npm brīdinājumā minētās pakotnes. Pakotņu kopai, ko norāda OmniRoute 3.8.54:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1807,7 +1807,7 @@ MIT licence — skatiet [LICENSE](LICENSE), lai iegūtu plašāku informāciju.
 
 **[⬆ Atgriezties augšā](#-omniroute)** · Izveidots ❤️ ar atvērtā pirmkoda MI kopienai.
 
-<sub>Izveidoja <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT licence · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Izveidoja <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT licence · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions iespējots kopienas jautājumiem un atbildēm -->

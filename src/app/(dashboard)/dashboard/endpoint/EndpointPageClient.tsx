@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { Alert } from "@omniroute/ui-kit/alert";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
@@ -2170,6 +2171,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
           {/* Sync Progress / Success */}
           {(cloudSyncing || modalSuccess) && (
             <div
+              role="status"
               className={`flex items-center gap-3 p-3 rounded-lg border transition-all duration-300 ${
                 modalSuccess ? "bg-success/10 border-success/30" : "bg-primary/10 border-primary/30"
               }`}
@@ -2177,7 +2179,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
               {modalSuccess ? (
                 <Icon name="check_circle" className="text-success text-xl" />
               ) : (
-                <Icon name="progress_activity" className="animate-spin text-primary" />
+                <Spinner decorative size="sm" className="text-primary" />
               )}
               <div className="flex-1">
                 <p
@@ -2201,7 +2203,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
             >
               {cloudSyncing ? (
                 <span className="flex items-center gap-2">
-                  <Icon name="progress_activity" className="animate-spin text-sm" />
+                  <Spinner decorative size="sm" />
                   {syncStep === "syncing" ? t("connecting") : t("verifying")}
                 </span>
               ) : modalSuccess ? (
@@ -2244,8 +2246,11 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
 
           {/* Sync Progress */}
           {cloudSyncing && (
-            <div className="flex items-center gap-3 p-3 bg-primary/10 border border-primary/30 rounded-lg">
-              <Icon name="progress_activity" className="animate-spin text-primary" />
+            <div
+              role="status"
+              className="flex items-center gap-3 p-3 bg-primary/10 border border-primary/30 rounded-lg"
+            >
+              <Spinner decorative size="sm" className="text-primary" />
               <div className="flex-1">
                 <p className="text-sm font-medium text-primary">
                   {syncStep === "syncing" && t("syncingData")}
@@ -2266,7 +2271,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
             >
               {cloudSyncing ? (
                 <span className="flex items-center gap-2">
-                  <Icon name="progress_activity" className="animate-spin text-sm" />
+                  <Spinner decorative size="sm" />
                   {syncStep === "syncing" ? t("syncing") : t("disabling")}
                 </span>
               ) : (
@@ -2330,7 +2335,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
             >
               {tailscaleInstallBusy ? (
                 <span className="flex items-center gap-2">
-                  <Icon name="progress_activity" className="animate-spin text-sm" />
+                  <Spinner decorative size="sm" />
                   {translateOrFallback("tailscaleInstalling", "Installing")}
                 </span>
               ) : (

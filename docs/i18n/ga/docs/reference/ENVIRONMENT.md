@@ -1366,9 +1366,9 @@ Casann rindreáil seirbhís gréasáin saor in aisce síos tar éis thart ar 15 
 
 ## Cásanna Imscartha
 
-Le haghaidh treoir SRE maidir le hinneall taca an athsheachadáin (iompar ts/bifrost/auto, socrúchán 9router i gcomparáid le CLIProxyAPI, agus straitéis chúltaca ardtréchuir), féach ar [Straitéis Inneall Taca an Athsheachadáin](/docs/reference/RELAY_BACKEND_STRATEGY.md).
+Le haghaidh treorach SRE maidir le hinnill chúil relay (iompar `ts/bifrost/auto`, socrúchán 9router i gcomparáid le CLIProxyAPI, agus straitéis chúltaca ardtréchuir), féach ar [Straitéis Inneall Cúil Relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).
 
-### Forbairt Áitiúil Íosta
+### Forbairt Logánta Íosta
 
 ```bash
 JWT_SECRET=$(openssl rand -base64 48)
@@ -1408,7 +1408,7 @@ OMNIROUTE_DISABLE_BACKGROUND_SERVICES=true
 APP_LOG_TO_FILE=false
 ```
 
-### VPS le Seachfhreastalaí Droim ar Ais (nginx + Cloudflare)
+### VPS le Seachfhreastalaí (nginx + Cloudflare)
 
 ```bash
 JWT_SECRET=<generated>
@@ -1870,3 +1870,14 @@ Tomhaltóir SSE fadsaoil a léiríonn tascanna OmniConductor isteach sa A2A Task
 | Athróg                         | Réamhshocrú | Comhad Foinse                                | Cur síos                                                                                                                                                                                                                              |
 | ------------------------------ | ----------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`         | `src/lib/providerModels/modelSyncTimings.ts` | Socraigh go `1` chun uainiú na céime a logáil, iarratas ginte ID agus torthaí céim success/error le linn sioncrónaithe múnla. Díchumasaithe do gach luach eile. Fágann logaí amach ualaí iarratais, cuntais, catalóige agus earráide. |
+
+## Uirlis anailíse meán OpenCode áitiúil
+
+Úsáidte ag `scripts/cli/omniroute-media-mcp.mjs`. Socraigh iad seo i dtimpeallacht phróiseas na huirlise áitiúla.
+
+| Athróg                     | Réamhshocrú                                                                       | Cur síos                                                                                           |
+| -------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (nó `~/.config/opencode/opencode.json`) | Cumraíocht OpenCode a léann an uirlis meán agus an suiteálaí.                                      |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                       | Iontráil an tsoláthraí a léann an uirlis meán ó chumraíocht OpenCode.                              |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                            | Múnla a sheolann an uirlis meán. Caithfidh a soláthraí tacú leis na cineálacha meán iarrtha.       |
+| `OMNIROUTE_MEDIA_API_KEY`  | Eochair API an tsoláthraí cumraithe nó a thagairt timpeallachta                   | Dintiúr roghnach le sárú. Coinnigh i dtimpeallacht an phróisis áitiúil é; ná déan commit de riamh. |

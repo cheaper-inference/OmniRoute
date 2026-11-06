@@ -29,14 +29,14 @@ export default function DegradationBadge() {
 
   if (!isDegraded) return null;
 
-  // Warning tone of the kit badge (`.ci-badge[data-tone="warning"]` in globals.css), rendered
-  // as the link itself so the whole pill stays one focusable target.
+  // Warning tone of the kit badge, rendered as the link itself so the whole pill stays one
+  // focusable target.
   return (
     <KitBadge
       asChild
-      variant="outline"
+      variant="secondary"
       shape="pill"
-      data-tone="warning"
+      tone="warning"
       icon={<Icon name="healing" size={14} />}
       className="whitespace-nowrap no-underline"
     >
