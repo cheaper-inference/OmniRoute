@@ -152,7 +152,7 @@ test.describe("Skills marketplace", () => {
     await expect(weatherSwitch).toHaveAttribute("aria-checked", "true");
     await expect.poll(() => state.toggleCalls).toBe(1);
 
-    await page.getByRole("button", { name: /marketplace/i }).click();
+    await page.getByRole("tab", { name: /marketplace/i }).click();
     const marketplaceSearch = page.getByPlaceholder(/Search SkillsMP\.\.\./i);
     await expect(marketplaceSearch).toBeVisible({ timeout: 15000 });
 
@@ -168,13 +168,12 @@ test.describe("Skills marketplace", () => {
     await lastMarketplaceSkill.scrollIntoViewIfNeeded();
     await expect(lastMarketplaceSkill).toBeVisible();
 
-    await page.getByRole("button", { name: /^skills$/i }).click();
+    await page.getByRole("tab", { name: /^skills$/i }).click();
     await expect(page.getByText("Weather Pro")).toBeVisible();
 
     await page.getByRole("button", { name: /^install skill$/i }).click();
-    const installDialog = page
-      .locator("div.fixed.inset-0.z-50")
-      .filter({ has: page.getByRole("heading", { name: /^install skill$/i }) });
+    // The install form is the Modal adapter (kit Dialog): named by its title heading.
+    const installDialog = page.getByRole("dialog", { name: /^install skill$/i });
     await expect(installDialog).toBeVisible();
     await installDialog.locator("textarea").fill(
       JSON.stringify(

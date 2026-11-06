@@ -1,3 +1,12 @@
+import {
+  TRANSPORT_ERROR_LABEL,
+  NO_RESPONSE_LABEL,
+  type HttpAttemptRecord,
+} from "../../utils/upstreamHttp.ts";
+import type {
+  HttpAttemptCollector,
+  HttpAttemptSelection,
+} from "../../utils/providerHttpAttempts.ts";
 /**
  * chatCore per-attempt logging persistence (Quality Gate v2 / Fase 9 — chatCore god-file
  * decomposition, #3501).
@@ -15,7 +24,7 @@ import { logAuditEvent } from "@/lib/compliance";
 import { emit } from "@/lib/events/eventBus";
 import { maybeLogToolCallSpecViolation } from "./toolCallSpecViolationAudit.ts";
 import type { RequestCompletedPayload, RequestFailedPayload } from "@/lib/events/types";
-import { saveCallLog } from "@/lib/usageDb";
+import { saveCallLog, saveUpstreamHttpAttempt } from "@/lib/usageDb";
 import type { VideoBridgeLogRedactionEntry } from "@/lib/guardrails/videoBridge";
 import { redactVideoTranscriptFieldsForLog } from "@/lib/guardrails/videoBridgeSnapshotRedaction";
 import { FORMATS } from "../../translator/formats.ts";
@@ -24,7 +33,12 @@ import { sanitizeErrorMessage } from "../../utils/error.ts";
 import { isEstimatedUsage } from "../../utils/usageTracking.ts";
 import { cloneBoundedChatLogPayload, truncateForLog } from "./logTruncation.ts";
 import { attachLogMeta } from "./cacheUsageMeta.ts";
-import { readAddedWait } from "../../utils/proxyFetch.ts";
+import {
+  readAddedWait,
+  readUpstreamDispatchedAt,
+  queueWaitMsFromDispatch,
+} from "../../utils/proxyFetch.ts";
+import { clientSessionIdFromRawRequest } from "./clientSessionId.ts";
 
 const OMITTED_VIDEO_TRANSCRIPT_REQUEST = { _omniroute_omitted: "video-transcript" };
 
@@ -243,6 +257,7 @@ export function extractResponsesId(sourceFormat: unknown, clientResponse: unknow
 }
 
 export type PersistAttemptLogsArgs = {
+  upstreamHttpSelection?: HttpAttemptSelection | null;
   status: number;
   tokens?: unknown;
   usageEstimated?: boolean | null;
@@ -253,6 +268,7 @@ export type PersistAttemptLogsArgs = {
   clientResponse?: unknown;
   claudeCacheMeta?: Record<string, unknown>;
   claudeCacheUsageMeta?: Record<string, unknown>;
+  geminiPromptCache?: Record<string, unknown> | null;
   cacheSource?: "upstream" | "semantic";
   /**
    * #13130: time to the first forwarded stream chunk (ms), as measured by
@@ -272,6 +288,7 @@ export type PersistAttemptLogsArgs = {
 };
 
 export type PersistAttemptLogsContext = {
+  httpAttempts?: HttpAttemptCollector;
   /** Per-attempt trace id — MUST match the id emitted in `request.started` so the live
    * dashboard can pair the terminal event and clear the topology node's active pulse. */
   traceId: string;
@@ -282,7 +299,8 @@ export type PersistAttemptLogsContext = {
   detailedLoggingEnabled: boolean;
   reqLogger: { getPipelinePayloads?: () => Record<string, unknown> | undefined } | null | undefined;
   pendingRequestId: unknown;
-  clientRawRequest: { endpoint?: string } | null | undefined;
+  pendingRequestGeneration?: string;
+  clientRawRequest: { endpoint?: string; headers?: unknown; body?: unknown } | null | undefined;
   requestedModel: unknown;
   credentials: { connectionId?: string } | null | undefined;
   startTime: number;
@@ -398,7 +416,69 @@ export function resolveRequestLifecycleEvent(input: {
   };
 }
 
+type HttpAttemptLogContext = Pick<
+  PersistAttemptLogsContext,
+  "httpAttempts" | "correlationId" | "traceId" | "noLogEnabled" | "apiKeyInfo" | "comboName"
+>;
+
+function toUpstreamHttpAttemptLog(
+  send: HttpAttemptRecord,
+  groupId: string,
+  ctx: HttpAttemptLogContext
+): Parameters<typeof saveUpstreamHttpAttempt>[0] {
+  return {
+    timestamp: new Date(send.endedAt ?? send.cutoffAt ?? send.startedAt).toISOString(),
+    method: send.method,
+    path: send.endpoint,
+    status: send.status ?? 0,
+    model: send.model,
+    provider: send.provider,
+    connectionId: send.connectionId,
+    duration: send.durationMs ?? 0,
+    error:
+      send.outcome === "transport_error"
+        ? TRANSPORT_ERROR_LABEL
+        : send.outcome === "no_response_observed"
+          ? NO_RESPONSE_LABEL
+          : null,
+    correlationId: ctx.correlationId || ctx.traceId,
+    noLog: Boolean(ctx.noLogEnabled),
+    apiKeyId: ctx.apiKeyInfo?.id,
+    apiKeyName: ctx.apiKeyInfo?.name,
+    comboName: ctx.comboName,
+    upstreamHttp: { version: 1, groupId, role: "attempt", send },
+  };
+}
+
+/** One synchronous seal shared by terminal logging and exits before stream handoff. */
+export function drainUpstreamHttpAttempts(
+  ctx: HttpAttemptLogContext,
+  args?: Pick<PersistAttemptLogsArgs, "upstreamHttpSelection" | "status" | "error">
+) {
+  try {
+    const observed = ctx.httpAttempts?.drain(
+      args?.upstreamHttpSelection ?? null,
+      args?.status,
+      args?.error
+    );
+    if (observed) {
+      for (const send of observed.records) {
+        if (send.id === observed.summary.send?.id) continue;
+        try {
+          saveUpstreamHttpAttempt(
+            toUpstreamHttpAttemptLog(send, observed.summary.groupId, ctx)
+          ).catch(() => {});
+        } catch {}
+      }
+    }
+    return observed?.summary;
+  } catch {
+    return undefined;
+  }
+}
+
 export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAttemptLogsContext) {
+  const upstreamHttp = drainUpstreamHttpAttempts(ctx, args);
   const {
     status,
     tokens,
@@ -409,6 +489,7 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
     clientResponse,
     claudeCacheMeta,
     claudeCacheUsageMeta,
+    geminiPromptCache,
     cacheSource,
     ttft,
   } = args;
@@ -561,13 +642,20 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
   // Primary key is a fresh UUID from saveCallLog, not traceId. Attempts share
   // pendingRequestId and must not share the row key. correlationId still
   // pairs the row with request.started. pendingRequestId is NOT the row key: it only
-  // routes token usage to the live in-memory request row (#14324).
+  // routes token usage and generation-checked persistence linkage to the live preview.
   // Late read of the per-request added wait published on the ALS
   // capture sink by the executor. Fail-soft: null outside a capture or when
   // nothing was published — the row stores NULL (no wait), never throws.
   const addedWait = readAddedWait();
+  // First-upstream-dispatch stamp for queue_wait_ms: how long this execution
+  // waited inside OmniRoute (scheduling, translation, parking) before the
+  // first byte left for the provider. Null when nothing was dispatched
+  // (rejected before egress) — mirrors the addedWait late-read above.
+  const upstreamDispatchedAt = readUpstreamDispatchedAt();
   saveCallLog({
+    upstreamHttp: upstreamHttp?.total ? upstreamHttp : null,
     pendingRequestId: ctx.pendingRequestId,
+    pendingRequestGeneration: ctx.pendingRequestGeneration,
     method: "POST",
     path: clientRawRequest?.endpoint || "/v1/chat/completions",
     status,
@@ -591,6 +679,7 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
       attachLogMeta(truncateForLog(retainedRequest as Record<string, unknown>), {
         ...accountRotationMeta,
         claudePromptCache: claudeCacheMeta,
+        geminiPromptCache,
       })
     ),
     responseBody: cloneBoundedChatLogPayload(
@@ -604,6 +693,7 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
             }
           : null,
         claudePromptCacheUsage: claudeCacheUsageMeta,
+        geminiPromptCache,
         // Operators can tell estimated token counts (and the cost derived from them)
         // apart from provider-reported ones. Log-only: billing is unchanged.
         usageEstimated: isEstimatedUsage(tokens) ? true : null,
@@ -624,9 +714,11 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
     correlationId: correlationId || traceId,
     modelPinned: modelPinned || false,
     sessionTag: sessionTag || null,
+    clientSessionId: clientSessionIdFromRawRequest(clientRawRequest),
     responseId: extractResponsesId(sourceFormat, clientResponse),
     videoContentRemoved: videoContentRemoved || false,
     addedWaitMs: addedWait?.ms ?? null,
+    queueWaitMs: queueWaitMsFromDispatch(upstreamDispatchedAt, startTime),
     addedWaitCause: addedWait?.cause ?? null,
   }).catch(() => {});
 

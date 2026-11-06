@@ -15,8 +15,13 @@ Thank you for your interest in contributing! This guide covers everything you ne
 - **Node.js** `>=22.22.2 <23`, ou `>=24.0.0 <27` (recommandé : 24 LTS)
 - **npm** 10+
 
-> **Utilisateurs de npm v11+ (Node 24+) :** Après `npm install`, vérifiez que les modules natifs ont été installés :
-> `node -e "require('better-sqlite3')"`. Si la commande échoue avec `MODULE_NOT_FOUND`,
+> **Windows avec Node 24 :** utilisez la version corrective 24 LTS actuelle (au moins 24.20.0).
+> Les versions antérieures peuvent s’interrompre après la réussite des tests lorsque `--test-force-exit` ferme le
+> processus. Le [correctif libuv pour Windows](https://github.com/nodejs/node/pull/61999) de Node résout
+> ce plantage à l’exécution ; laissez activées les assertions des tests et les vérifications de sortie de l’exécuteur.
+
+> **Utilisateurs de npm v11+ (Node 24+) :** après `npm install`, vérifiez que les modules natifs ont été installés :
+> `node -e "require('better-sqlite3')"`. Si cette commande échoue avec `MODULE_NOT_FOUND`,
 > exécutez `npm approve-scripts better-sqlite3 && npm install`. Consultez
 > [Dépannage](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
@@ -43,76 +48,76 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 Variables principales pour le développement :
 
-| Variable               | Valeur par défaut en développement | Description                         |
-| ---------------------- | ---------------------------------- | ----------------------------------- |
-| `PORT`                 | `20128`                            | Port du serveur                     |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`           | URL de base de l’interface frontend |
-| `JWT_SECRET`           | (à générer ci-dessus)              | Secret de signature JWT             |
-| `INITIAL_PASSWORD`     | `CHANGEME`                         | Mot de passe de première connexion  |
-| `APP_LOG_LEVEL`        | `info`                             | Niveau de verbosité des journaux    |
+| Variable               | Valeur par défaut en développement | Description                           |
+| ---------------------- | ---------------------------------- | ------------------------------------- |
+| `PORT`                 | `20128`                            | Port du serveur                       |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`           | URL de base de l’interface            |
+| `JWT_SECRET`           | (généré ci-dessus)                 | Secret de signature JWT               |
+| `INITIAL_PASSWORD`     | `CHANGEME`                         | Mot de passe de la première connexion |
+| `APP_LOG_LEVEL`        | `info`                             | Niveau de verbosité des journaux      |
 
 ### Paramètres du tableau de bord
 
 Le tableau de bord fournit des options d’interface pour les fonctionnalités qui peuvent également être configurées au moyen de variables d’environnement :
 
-| Emplacement du paramètre | Option                          | Description                                              |
-| ------------------------ | ------------------------------- | -------------------------------------------------------- |
-| Paramètres → Avancé      | Mode de débogage                | Activer les journaux de requêtes de débogage (interface) |
-| Paramètres → Général     | Visibilité de la barre latérale | Afficher/masquer les sections de la barre latérale       |
+| Emplacement du paramètre | Option                          | Description                                             |
+| ------------------------ | ------------------------------- | ------------------------------------------------------- |
+| Paramètres → Avancé      | Mode débogage                   | Active les journaux de requêtes de débogage (interface) |
+| Paramètres → Général     | Visibilité de la barre latérale | Affiche/masque les sections de la barre latérale        |
 
-Ces paramètres sont stockés dans la base de données et persistent après les redémarrages, remplaçant les valeurs par défaut des variables d’environnement lorsqu’ils sont définis.
+Ces paramètres sont stockés dans la base de données et persistent après les redémarrages. Lorsqu’ils sont définis, ils remplacent les valeurs par défaut des variables d’environnement.
 
-### Exécution en local
+### Exécution locale
 
 ```bash
 # Mode développement (rechargement à chaud)
 npm run dev
 
 # Build de production
-npm run build    # next build → .build/next/ puis assembleStandalone → dist/
+npm run build    # next build → .build/next/, puis assembleStandalone → dist/
 npm run start
 
 # Compilation rapide du backend/de l’API uniquement pour les modifications des contributeurs
 npm run build:contributor
 
-# Build de publication (reconstruction propre + sentinelle HEAD — requis pour le déploiement)
-npm run build:release   # rm -rf .build dist && build + écrit dist/BUILD_SHA
+# Build de publication (reconstruction complète + sentinelle HEAD — requis pour le déploiement)
+npm run build:release   # rm -rf .build dist, puis build + écriture de dist/BUILD_SHA
 
 # Configuration courante du port
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Le build destiné aux contributeurs effectue uniquement une validation de la compilation : il n’assemble pas la
-distribution autonome et ne génère pas les ressources facultatives de paquetage natif. Utilisez le build de production standard lorsque
-vous devez valider le bundle distribuable.
+Le build pour les contributeurs effectue uniquement une validation de la compilation : il n’assemble pas la
+distribution autonome et ne génère pas les ressources facultatives de packaging natif. Utilisez le build de production standard lorsque
+vous devez valider le paquet livrable.
 
-### Structure des fichiers générés par le build
+### Structure des sorties du build
 
 | Répertoire | Contenu                                                                                     | Suivi par Git |
 | ---------- | ------------------------------------------------------------------------------------------- | ------------- |
 | `src/`     | Code source de l’application (TypeScript / TSX)                                             | Oui           |
 | `.build/`  | Fichiers intermédiaires — sortie de `next build` (ignorée par Git, `distDir = .build/next`) | Non           |
-| `dist/`    | Bundle distribuable — assemblé par `assembleStandalone` (ignoré par Git)                    | Non           |
+| `dist/`    | Paquet livrable — assemblé par `assembleStandalone` (ignoré par Git)                        | Non           |
 
-Le pipeline de build s’effectue en une seule passe :
+Le pipeline de build s’effectue en un seul passage :
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (sortie Next.js)
-  └─ assembleStandalone()                 (copie les ressources autonomes, statiques, publiques et natives)
-       └─ sortie : dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ assembleStandalone()                 (copie les fichiers autonomes + statiques + publics + les ressources natives)
+       └─ sortie : dist/                  (server.js, .next/static/, public/, node_modules/)
 ```
 
 `npm run build:release` nettoie également les deux répertoires au préalable et écrit
 `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) comme sentinelle d’intégrité du déploiement.
 
-`npm run build:contributor` utilise le profil de build du backend uniquement. Il remplace temporairement par des stubs
-les fichiers de l’interface du tableau de bord pendant le build, conserve les gestionnaires des routes de l’API et restaure les fichiers d’origine
-après le build. Utilisez `npm run build` pour les modifications qui affectent l’interface du tableau de bord ou pour une validation complète
-de la publication ; le profil destiné aux contributeurs ne remplace pas le build de publication.
+`npm run build:contributor` utilise le profil de build réservé au backend. Il remplace temporairement par des stubs
+les fichiers de l’interface du tableau de bord pendant le build, conserve les gestionnaires de routes de l’API et restaure les fichiers d’origine
+après le build. Utilisez `npm run build` pour les modifications qui affectent l’interface du tableau de bord ou pour une
+validation complète de la publication ; le profil pour les contributeurs ne remplace pas le build de publication.
 
-> **Remarque sur le déploiement sur VPS :** le répertoire distant de l’image `/usr/lib/node_modules/omniroute/app/`
-> reste inchangé. Les outils de déploiement synchronisent le contenu de `dist/` dans celui-ci avec rsync.
+> **Remarque concernant le déploiement sur VPS :** le répertoire distant de l’image `/usr/lib/node_modules/omniroute/app/`
+> reste inchangé. Les outils de déploiement synchronisent le contenu de `dist/` dans ce répertoire avec rsync.
 > Seul le chemin de sortie du build dans le dépôt a changé (`app/` → `dist/`).
 
 URL par défaut :
@@ -173,15 +178,15 @@ Périmètres (v3.8) : `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`,
 # Tous les tests (unitaires + vitest + écosystème + e2e)
 npm run test:all
 
-# Un seul fichier de test (exécuteur de tests natif de Node.js — la plupart des tests l’utilisent)
+# Un seul fichier de test (exécuteur de tests natif de Node.js — utilisé par la plupart des tests)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
 # Uniquement les tests unitaires affectés par votre modification (même sélecteur TIA que le contrôle CI, #8084)
 npm run test:scoped            # modifications du dernier commit (ou de l’arborescence de travail)
-npm run test:scoped:staged     # modifications indexées uniquement — convient bien à une exécution avant commit
-npm run test:scoped:full       # reconstruit d’abord la carte du graphe d’importation (après l’ajout ou le déplacement de fichiers)
-# Le code de sortie 1 + « run the full suite » signifie qu’un fichier central (tsconfig, package.json, …) ou
-# une source non mappée a été modifié — le sélecteur échoue de manière sûre et n’ignore jamais silencieusement des tests.
+npm run test:scoped:staged     # modifications indexées uniquement — s’associe bien à une exécution avant commit
+npm run test:scoped:full       # reconstruit d’abord la carte du graphe des imports (après l’ajout/le déplacement de fichiers)
+# Un code de sortie 1 + « run the full suite » signifie qu’un fichier central (tsconfig, package.json, …) ou une
+# source non répertoriée a été modifié — le sélecteur échoue de manière sûre et n’ignore jamais silencieusement des tests.
 
 # Vitest (serveur MCP, autoCombo, cache)
 npm run test:vitest
@@ -189,7 +194,7 @@ npm run test:vitest
 # Tests E2E (nécessite Playwright)
 npm run test:e2e
 
-# Tests E2E des clients de protocole (transports MCP, A2A)
+# E2E des clients de protocole (transports MCP, A2A)
 npm run test:protocols:e2e
 
 # Tests de compatibilité avec l’écosystème
@@ -203,16 +208,16 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Test de fumée contrôlé de combinaisons avec de vrais services en amont (nécessite un accès au VPS et de vrais crédits fournisseur)
-# Interroge de VRAIS fournisseurs — cela coûte un peu. Ne s’exécute JAMAIS dans la CI. Est ignoré proprement sans l’activation.
+# Test de fumée conditionnel d’un combo avec de véritables services upstream (nécessite un accès au VPS et de vrais crédits fournisseur)
+# Interroge de VRAIS fournisseurs — entraîne un faible coût. Ne s’exécute JAMAIS dans la CI. Est ignoré proprement sans l’activation.
 # Nécessite : un accès ssh root@192.168.0.15 (charge un instantané de base de données en lecture seule depuis le VPS).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Test de fumée en direct sur le VPS de phase 3 — scripts Node ESM simples, interrogeant directement le serveur .15 actif.
-# Nécessite : un accès ssh root@192.168.0.15 (combinaisons créées/supprimées via SQLite par SSH).
-# Interroge de VRAIS fournisseurs (faible coût). Crée/supprime uniquement les combinaisons __live_test__*. Ne s’exécute JAMAIS dans la CI.
-# REQUIRE_API_KEY=false sur .15, donc aucune clé d’API n’est nécessaire, mais respecte COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY si elles sont définies.
-npm run test:combo:live:vps              # 7 scénarios HTTP (priorité/round-robin/pondéré/coût/fusion/auto + état de santé)
+# Test de fumée en conditions réelles de la phase 3 sur le VPS — scripts Node ESM simples, interrogeant directement le serveur .15 en production.
+# Nécessite : un accès ssh root@192.168.0.15 (combos créés/supprimés via SSH sqlite).
+# Interroge de VRAIS fournisseurs (faible coût). Crée/supprime uniquement des combos __live_test__*. Ne s’exécute JAMAIS dans la CI.
+# REQUIRE_API_KEY=false sur .15, donc aucune clé API n’est nécessaire, mais respecte COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY si elles sont définies.
+npm run test:combo:live:vps              # 7 scénarios HTTP (priorité/round-robin/pondéré/coût/fusion/auto + santé)
 npm run test:combo:live:vps:failover     # ajoute un véritable scénario de basculement entre fournisseurs (8 au total)
 ```
 
@@ -223,20 +228,21 @@ Remarques sur la couverture :
 - Si une PR modifie du code de production dans `src/`, `open-sse/`, `electron/` ou `bin/`, elle doit ajouter ou mettre à jour des tests automatisés dans la même PR
 - `npm run coverage:report` affiche le rapport détaillé fichier par fichier de la dernière exécution de la couverture
 - `npm run test:coverage:legacy` conserve l’ancienne métrique à des fins de comparaison historique
-- Consultez `docs/ops/COVERAGE_PLAN.md` pour la feuille de route d’amélioration progressive de la couverture
+- Consultez `docs/ops/COVERAGE_PLAN.md` pour connaître la feuille de route d’amélioration progressive de la couverture
 
 ### Exigences relatives aux pull requests
 
-Avant d’ouvrir une PR, suivez le
-[parcours de contribution recommandé](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) afin d’exécuter la boucle ciblée correspondant
-à vos modifications. La suite complète de tests unitaires (4 fragments CI), Vitest, le seuil de couverture de **60 % ou plus** et
-la compilation de production relèvent de la CI — leur exécution en local n’apporte aucune information supplémentaire par rapport aux
-vérifications déjà effectuées sur la PR et peut saturer l’hôte sur les machines plus modestes (#8084) :
+Avant d’ouvrir une PR, utilisez le
+[parcours de référence pour les contributions](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) afin d’exécuter la boucle ciblée correspondant à
+vos modifications. La suite complète de tests unitaires (4 partitions CI), Vitest, le seuil de couverture de **60 % ou plus** et
+la compilation de production relèvent de la responsabilité de la CI — leur exécution locale n’apporte aucun signal supplémentaire par rapport aux
+vérifications déjà effectuées pour la PR et peut saturer l’hôte sur les machines moins puissantes (#8084) :
 
 - Exécutez les fichiers de test qui couvrent votre modification : `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Exécutez `npm run lint`
-- Ajoutez ou mettez à jour des tests automatisés dans la même PR chaque fois que le code de production est modifié
-- Mentionnez les fichiers de test modifiés ou ajoutés dans la description de la PR lorsque le code de production a été modifié
+- Ajoutez ou mettez à jour des tests automatisés dans la même PR chaque fois que du code de production est modifié
+- Dans les fichiers `node:test`, placez chaque `await` de niveau supérieur (comme `await import(...)`) avant le premier `test()` / `describe()` : avec `--test-force-exit`, les tests enregistrés après celui-ci peuvent silencieusement ne jamais s’exécuter (#18045 ; règle appliquée par `npm run check:test-tla-order`)
+- Indiquez les fichiers de test modifiés ou ajoutés dans la description de la PR lorsque du code de production a été modifié
 - Vérifiez le résultat SonarQube sur la PR lorsque les secrets du projet sont configurés dans la CI
 
 État actuel des tests : **122 fichiers de tests unitaires** couvrant :
@@ -246,7 +252,7 @@ vérifications déjà effectuées sur la PR et peut saturer l’hôte sur les ma
 - Le cache sémantique, l’idempotence et le suivi de la progression
 - Les opérations de base de données et le schéma (21 modules de base de données)
 - Les flux OAuth et l’authentification
-- La validation des points de terminaison d’API (Zod v4)
+- La validation des endpoints d’API (Zod v4)
 - Les outils du serveur MCP et l’application des portées
 - Les systèmes de mémoire et de compétences
 

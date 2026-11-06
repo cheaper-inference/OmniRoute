@@ -3,7 +3,7 @@ import {
   MODEL_SUPPORTED_ENDPOINT_VALUES,
   normalizeModelSupportedEndpoints,
 } from "@/shared/constants/modelSupportedEndpoints";
-import { providerAllowsOptionalApiKey } from "@/shared/constants/providers";
+import { providerAllowsOptionalApiKey, resolveProviderId } from "@/shared/constants/providers";
 import { validateProviderSpecificData } from "@/shared/validation/providerSpecificData";
 import {
   isReservedProviderPrefix,
@@ -105,7 +105,7 @@ export const createProviderSchema = z
   })
   .superRefine((data, ctx) => {
     const apiKey = typeof data.apiKey === "string" ? data.apiKey.trim() : "";
-    const catalogAllowsOptionalKey = providerAllowsOptionalApiKey(data.provider);
+    const catalogAllowsOptionalKey = providerAllowsOptionalApiKey(resolveProviderId(data.provider));
     if (data.allowNoCredential === true && !catalogAllowsOptionalKey) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -802,6 +802,8 @@ export const validateProviderApiKeySchema = z
     runtimeKey: z.string().trim().max(65_536).optional(),
     tunnelId: z.string().trim().max(128).optional(),
     connectorName: z.string().trim().max(200).optional(),
+    // Command Code per-connection Zero Data Retention: probe with `x-cmd-zdr: 1`.
+    zdrEnabled: z.boolean().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.provider === "google-pse-search" && !data.cx) {

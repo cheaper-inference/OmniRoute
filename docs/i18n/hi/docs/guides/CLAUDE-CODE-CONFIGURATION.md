@@ -25,38 +25,40 @@ omniroute launch --profile glm52  # OmniRoute के माध्यम से g
 
 ---
 
-## Claude Code किसी गेटवे से कैसे कनेक्ट होता है
+## Claude कोड गेटवे से कैसे जुड़ता है
 
-Claude Code **Anthropic Messages API** से संचार करता है और environment variables के माध्यम से
-एक कस्टम endpoint की ओर इंगित किया जाता है (इसमें कोई `--base-url` फ़्लैग नहीं है):
+Claude कोड बात करता है**Anthropic संदेश API** और पर्यावरण चर के साथ एक कस्टम समापन बिंदु पर इंगित किया गया है (इसमें कोई `--base-url` ध्वज नहीं है):
 
-| वेरिएबल                                      | उद्देश्य                                                                                                         |
-| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | गेटवे का रूट URL (Claude Code `/v1/messages` जोड़ता है)। **कोई `/v1` suffix नहीं।**                              |
-| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` के रूप में भेजा जाता है — अपने OmniRoute access token / API key का उपयोग करें          |
-| `ANTHROPIC_API_KEY`                          | विकल्प: `x-api-key` के रूप में भेजा जाता है। यदि दोनों सेट हों, तो `ANTHROPIC_AUTH_TOKEN` को प्राथमिकता मिलती है |
-| `ANTHROPIC_MODEL`                            | किसी विशिष्ट मॉडल को बाध्य करें (`/model` picker के डिफ़ॉल्ट को ओवरराइड करता है)                                 |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → मूल `/model` picker `/v1/models` से `claude*`/`anthropic*` मॉडल सूचीबद्ध करता है                           |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | प्रति response output tokens की सीमा तय करें (जैसे `65536`)                                                      |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | स्वचालित compaction के लिए token threshold                                                                       |
+| चर                                           | उद्देश्य                                                                                                    |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | गेटवे रूट URL (Claude कोड `/v1/messages` जोड़ता है)।** कोई `/v1` प्रत्यय नहीं.**                            |
+| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` — के रूप में भेजा गया अपनी OmniRoute एक्सेस टोकन / API कुंजी का उपयोग करें        |
+| `ANTHROPIC_API_KEY`                          | वैकल्पिक: `x-api-key` के रूप में भेजा गया। यदि दोनों सेट हो जाते हैं, तो `ANTHROPIC_AUTH_TOKEN` जीत जाता है |
+| `ANTHROPIC_MODEL`                            | एक विशिष्ट मॉडल को बाध्य करें ( `/model` पिकर डिफ़ॉल्ट को ओवरराइड करता है)                                  |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → मूल `/model` पिकर `/v1/models` से `claude*`/`anthropic*` मॉडल सूचीबद्ध करता है                        |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | प्रति प्रतिक्रिया कैप आउटपुट टोकन (जैसे `65536`)                                                            |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | ऑटो-संपीड़न के लिए टोकन सीमा                                                                                |
 
-> Env vars को **स्टार्टअप पर केवल एक बार** पढ़ा जाता है — उन्हें बदलने के बाद Claude Code पुनः शुरू करें।
+> Env संस्करण पढ़े जाते हैं** एक बार स्टार्टअप पर** — उन्हें बदलने के बाद Claude कोड को पुनरारंभ करें।
 
-`omniroute launch` आपके लिए इन सभी को सेट करता है: यह सक्रिय context से base URL + token
-resolve करता है (इसलिए `omniroute connect <vps>` और फिर `omniroute launch`
-सीधे काम करता है), server का health-check करता है और `claude` को exec करता है।
+एक निश्चित स्ट्रिंग के बजाय घूमने वाले क्रेडेंशियल के लिए, `apiKeyHelper` `~/.claude/settings.json` में एक कमांड पर सेट करें जो वर्तमान क्रेडेंशियल को stdout पर प्रिंट करता है। Claude कोड अपने आउटपुट को डिफ़ॉल्ट रूप से पांच मिनट के लिए कैश करता है (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` उसे ओवरराइड करता है) और `Authorization: Bearer` और `x-api-key` दोनों में मान भेजता है। स्क्रिप्ट को क्रेडेंशियल प्रिंट करना होगा और इसके अलावा एक बैनर — नहीं होना चाहिए, यह v2.1.227 + पर सहायक को विफल कर देता है।
+
+Entra ID SSO इस प्रकार काम करता है: `scripts/cli/omniroute-sso.mjs token` एक अल्पकालिक एंट्रा एक्सेस टोकन प्रिंट करता है जिसे OmniRoute एक API कुंजी के बजाय सत्यापित करता है। [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) देखें।
+
+`omniroute launch` आपके लिए ये सब सेट करता है: यह सक्रिय संदर्भ से आधार URL + टोकन को हल करता है (इसलिए `omniroute connect <vps>` तब `omniroute launch` बस काम करता है), सर्वर की स्वास्थ्य जांच करता है, और `claude` निष्पादित करता है।
 
 ---
 
-## Discovery aliases — गैर-Claude मॉडलों को `/model` picker में दिखाएँ
+## डिस्कवरी एलियास — `/model` पिकर में गैर-Claude मॉडल दिखाना
 
-Claude Code का gateway model discovery केवल उन IDs को सूचीबद्ध करता है जो `claude`
-या `anthropic` से शुरू होती हैं, इसलिए `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` के साथ मूल
-`/model` picker सामान्यतः OmniRoute के **केवल** Claude/Anthropic मॉडल दिखाता है —
-`kimi/kimi-k2.6` या `glm/glm-5.2` कभी दिखाई नहीं देता, भले ही उसकी routing ठीक से होती हो।
+Claude Code की गेटवे मॉडल डिस्कवरी केवल उन्हीं ids को सूचीबद्ध करती है जो `claude`
+या `anthropic` से शुरू होती हैं, इसलिए `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`
+के साथ भी मूल `/model` पिकर सामान्य रूप से **केवल** OmniRoute के Claude/Anthropic
+मॉडल दिखाता है — कोई `kimi/kimi-k2.6` या `glm/glm-5.2` कभी नहीं दिखता, भले ही वह
+ठीक से रूट होता हो।
 
-OmniRoute किसी भी सक्षम मॉडल (और combo) को `claude/…` ID के अंतर्गत mirror कर सकता है, ताकि वह
-इस filter से गुज़रकर picker में दिखाई दे:
+OmniRoute किसी भी सक्षम मॉडल (और कॉम्बो) को `claude/…` id के अंतर्गत मिरर कर सकता
+है ताकि वह उस फ़िल्टर को पास करके पिकर में दिखाई दे:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -64,32 +66,42 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-जब आप Claude Code में इनमें से किसी एक को चुनते हैं, तो OmniRoute routing से पहले `claude/` wrapper
-हटाकर वास्तविक ID वापस प्राप्त कर लेता है — वास्तविक `claude/<real-claude-model>` ID
-(वास्तविक Claude OAuth provider) को हमेशा अपरिवर्तित रखा जाता है।
+जब आप Claude Code में इनमें से कोई एक चुनते हैं, तो OmniRoute रूटिंग से पहले
+`claude/` रैपर हटाकर असली id पर वापस कर देता है — किसी असली
+`claude/<real-claude-model>` id (वास्तविक Claude OAuth प्रदाता) को हमेशा अछूता
+छोड़ा जाता है।
 
-**यह डिफ़ॉल्ट रूप से बंद है** और एक तीन-स्तरीय gate द्वारा नियंत्रित होता है (सबसे विशिष्ट
-सेटिंग प्रभावी होती है), ताकि सामान्य OmniRoute उन clients के लिए अपने catalog को दोगुना न करे जो
-Claude Code का उपयोग नहीं करते:
+डिफ़ॉल्ट रूप से केवल बेस ids ही मिरर की जाती हैं। ऑप्ट-इन
+`CATALOG_MIRROR_REFINEMENTS_ENABLED` फ़ीचर फ़्लैग चालू होने पर, कैटलॉग में पहले से
+सूचीबद्ध reasoning-effort वैरिएंट (जैसे `codex/gpt-6-sol-high`) भी किसी अन्य id की
+तरह मिरर किए जाते हैं, ताकि Claude Code कोई स्पष्ट effort स्तर चुन सके, और ऐसी
+बिल्ट-इन `auto/*` ids जिन्हें रिक्वेस्ट पाथ मैटेरियलाइज़ नहीं कर सकता, मिरर नहीं
+की जातीं। effort वैरिएंट सूचीबद्ध होते भी हैं या नहीं, यह अब भी
+`OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` द्वारा नियंत्रित होता है — मिरर कभी भी
+ऐसा वैरिएंट नहीं जोड़ता जो बेस कैटलॉग में मौजूद न हो।
 
-| स्तर     | स्थान                                                                          |
-| -------- | ------------------------------------------------------------------------------ |
-| मॉडल     | Provider detail page → प्रति-मॉडल "Expose in Claude Code" toggle               |
-| Provider | Provider detail page → provider-level toggle (इसके सभी मॉडलों पर लागू)         |
-| Global   | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (डिफ़ॉल्ट रूप से बंद) |
+**यह डिफ़ॉल्ट रूप से बंद होता है** और तीन-स्तरीय गेट द्वारा नियंत्रित होता है
+(सबसे विशिष्ट स्तर प्राथमिकता पाता है), ताकि साधारण OmniRoute उन क्लाइंट के लिए
+अपना कैटलॉग कभी दोगुना न करे जो Claude Code का उपयोग नहीं करते:
 
-`EXPOSE_CC_DISCOVERY_ALIASES` environment variable global स्तर को बलपूर्वक चालू करता है
-और dashboard override पर प्राथमिकता लेता है (ऐसा होने पर Feature Flags screen
-"active via environment variable" नोट दिखाती है)। इसके बाद प्रति-provider और
-प्रति-मॉडल toggles इसे और परिष्कृत करते हैं — उदाहरण के लिए, global बंद + Kimi provider चालू होने पर
-केवल Kimi के मॉडल दिखाई देते हैं।
+| स्तर    | कहाँ                                                                       |
+| ------- | -------------------------------------------------------------------------- |
+| मॉडल    | प्रदाता विवरण पृष्ठ → प्रति-मॉडल "Expose in Claude Code" टॉगल              |
+| प्रदाता | प्रदाता विवरण पृष्ठ → प्रदाता-स्तरीय टॉगल (उसके सभी मॉडलों को कवर करता है) |
+| वैश्विक | सेटिंग्स → फ़ीचर फ़्लैग्स → `EXPOSE_CC_DISCOVERY_ALIASES` (डिफ़ॉल्ट बंद)   |
 
-> ⚠️ **गैर-Claude मॉडलों पर window mismatch।** Claude Code किसी भी ऐसी ID के लिए 200K context
-> window मानता है जिसे वह नहीं पहचानता (वह `/v1/models` से वास्तविक window नहीं पढ़ सकता)।
-> अधिक बड़ी window वाले मॉडल (जैसे Kimi K2 की 256K) के लिए,
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` को मॉडल की वास्तविक window से कम मान पर सेट करें, ताकि
-> auto-compaction समय से पहले शुरू न हो। ऊपर जनरेट की गई प्रोफ़ाइलें पहले से ही
-> प्रति मॉडल ऐसा करती हैं।
+`EXPOSE_CC_DISCOVERY_ALIASES` एनवायरनमेंट वेरिएबल वैश्विक स्तर को जबरन चालू कर
+देता है और डैशबोर्ड ओवरराइड पर प्राथमिकता रखता है (ऐसा होने पर फ़ीचर फ़्लैग्स
+स्क्रीन एक "active via environment variable" नोट दिखाती है)। प्रति-प्रदाता और
+प्रति-मॉडल टॉगल वहाँ से आगे परिष्कृत करते हैं — जैसे वैश्विक बंद + Kimi प्रदाता
+चालू करने पर केवल Kimi के मॉडल ही दिखते हैं।
+
+> ⚠️ **गैर-Claude मॉडलों पर विंडो असंगति।** Claude Code किसी भी अपरिचित id के लिए
+> 200K कॉन्टेक्स्ट विंडो मान लेता है (वह `/v1/models` से असली विंडो नहीं पढ़
+> सकता)। बड़ी विंडो वाले मॉडल (जैसे Kimi K2 की 256K) के लिए,
+> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` को मॉडल की असली विंडो से कम मान पर सेट करें
+> ताकि ऑटो-कॉम्पैक्शन समय से पहले ट्रिगर न हो। ऊपर बताई गई जनरेट की गई
+> प्रोफ़ाइलें यह पहले से ही प्रति-मॉडल करती हैं।
 
 ---
 

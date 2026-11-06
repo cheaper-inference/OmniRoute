@@ -27,37 +27,38 @@ omniroute launch --profile glm52  # Claude Code gebruikt glm/glm-5.2 via OmniRou
 
 ## Hoe Claude Code verbinding maakt met een gateway
 
-Claude Code communiceert via de **Anthropic Messages API** en wordt met omgevingsvariabelen
-naar een aangepast endpoint verwezen (het heeft geen `--base-url`-vlag):
+Claude Code spreekt de**Anthropic Berichten API** en wijst naar een aangepast eindpunt met omgevingsvariabelen (het heeft geen `--base-url` vlag):
 
-| Variabele                                    | Doel                                                                                                    |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | Basis-URL van de gateway (Claude Code voegt `/v1/messages` toe). **Geen `/v1`-achtervoegsel.**          |
-| `ANTHROPIC_AUTH_TOKEN`                       | Verzonden als `Authorization: Bearer …` — gebruik je OmniRoute-toegangstoken/API-sleutel                |
-| `ANTHROPIC_API_KEY`                          | Alternatief: verzonden als `x-api-key`. Als beide zijn ingesteld, heeft `ANTHROPIC_AUTH_TOKEN` voorrang |
-| `ANTHROPIC_MODEL`                            | Dwing een specifiek model af (overschrijft de standaardwaarde van de `/model`-kiezer)                   |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → de ingebouwde `/model`-kiezer toont `claude*`/`anthropic*`-modellen uit `/v1/models`              |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Beperk het aantal uitvoertokens per antwoord (bijv. `65536`)                                            |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Tokendrempel voor automatische compactie                                                                |
+| Variabel                                     | Doel                                                                                          |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | Gateway root URL (Claude -code voegt `/v1/messages`).** Geen `/v1` achtervoegsel.**           |
+| `ANTHROPIC_AUTH_TOKEN`                       | Verzonden als `Authorization: Bearer …` — gebruik uw OmniRoute toegangstoken / API sleutel    |
+| `ANTHROPIC_API_KEY`                          | Alternatief: verzonden als `x-api-key`. Als beide ingesteld zijn, wint `ANTHROPIC_AUTH_TOKEN` |
+| `ANTHROPIC_MODEL`                            | Een specifiek model forceren (overschrijft de standaard `/model` kiezer)                      |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → de native `/model` kiezer vermeldt `claude*`/`anthropic*` modellen van `/v1/models`     |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Cap-uitvoertokens per antwoord (bijv. `65536`)                                                |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Tokendrempel voor automatische compactie                                                      |
 
-> Omgevingsvariabelen worden **eenmalig bij het opstarten** gelezen — start Claude Code opnieuw nadat je ze hebt gewijzigd.
+> Env-vars worden gelezen** een keer bij het opstarten** — herstart Claude code nadat deze is gewijzigd.
 
-`omniroute launch` stelt dit allemaal voor je in: het bepaalt de basis-URL en het token
-op basis van de actieve context (zodat `omniroute connect <vps>` gevolgd door `omniroute launch`
-direct werkt), voert een statuscontrole op de server uit en start `claude` via exec.
+Voor een referentie die roteert in plaats van een vaste tekenreeks, stelt `apiKeyHelper` in `~/.claude/settings.json` in op een opdracht die de huidige referentie naar stdout afdrukt. Claude Code bewaart de uitvoer standaard vijf minuten in de cache (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` overschrijft dat) en verzendt de waarde in zowel `Authorization: Bearer` als `x-api-key`. Het script moet de inloggegevens afdrukken en niets anders — een banner ernaast faalt de helper op v2.1.227 +.
+
+Dit is hoe Entra ID SSO werkt: `scripts/cli/omniroute-sso.mjs token` drukt een kortstondig Entra-toegangstoken af dat OmniRoute verifieert in plaats van een API sleutel. Zie [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
+`omniroute launch` stelt dit allemaal voor je in: het lost het basis URL + token op uit de actieve context (dus `omniroute connect <vps>` en dan werkt `omniroute launch` gewoon), controleert de gezondheid van de server en voert `claude` uit.
 
 ---
 
-## Discovery-aliassen — toon niet-Claude-modellen in de `/model`-kiezer
+## Discovery-aliassen — niet-Claude-modellen tonen in de `/model`-kiezer
 
-De gatewaymodeldetectie van Claude Code toont alleen id's die beginnen met `claude`
-of `anthropic`. Daarom toont de ingebouwde `/model`-kiezer met
-`CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` normaal gesproken **alleen** de
-Claude/Anthropic-modellen van OmniRoute — een `kimi/kimi-k2.6` of `glm/glm-5.2`
-verschijnt nooit, hoewel de routering prima werkt.
+De gateway-modeldetectie van Claude Code toont alleen id's die beginnen met `claude`
+of `anthropic`, dus met `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` toont de
+ingebouwde `/model`-kiezer normaal gesproken **alleen** de Claude/Anthropic-modellen
+van OmniRoute — een `kimi/kimi-k2.6` of `glm/glm-5.2` verschijnt nooit, ook al
+werkt de routing prima.
 
-OmniRoute kan elk ingeschakeld model (en elke combinatie) spiegelen onder een
-`claude/…`-id, zodat het door dat filter komt en in de kiezer verschijnt:
+OmniRoute kan elk ingeschakeld model (en elke combo) spiegelen onder een
+`claude/…`-id, zodat het door die filter komt en in de kiezer verschijnt:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -65,35 +66,43 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Wanneer je in Claude Code een van deze modellen kiest, verwijdert OmniRoute de
-`claude/`-omsluiting vóór de routering, zodat het oorspronkelijke id wordt gebruikt —
-een echt `claude/<real-claude-model>`-id (van de daadwerkelijke Claude OAuth-provider)
-blijft altijd ongewijzigd.
+Wanneer je een van deze kiest in Claude Code, verwijdert OmniRoute de
+`claude/`-wrapper weer tot de echte id vóór de routing — een echte
+`claude/<real-claude-model>`-id (de daadwerkelijke Claude OAuth-provider) blijft
+altijd onaangeroerd.
 
-**Dit is standaard uitgeschakeld** en wordt geregeld door een poort met drie niveaus
-(het meest specifieke niveau heeft voorrang), zodat een standaardinstallatie van
-OmniRoute de catalogus niet verdubbelt voor clients die Claude Code niet gebruiken:
+Standaard worden alleen basis-id's gespiegeld. Met de opt-in-featureflag
+`CATALOG_MIRROR_REFINEMENTS_ENABLED` ingeschakeld worden reasoning-effort-varianten
+die de catalogus al vermeldt (bijv. `codex/gpt-6-sol-high`) gespiegeld zoals elke
+andere id, zodat Claude Code een expliciet effort-niveau kan kiezen, en worden
+ingebouwde `auto/*`-id's die het aanvraagpad niet kan materialiseren niet
+gespiegeld. Of effort-varianten überhaupt worden weergegeven, wordt nog steeds
+bepaald door `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` — de spiegel voegt nooit
+een variant toe die de basiscatalogus niet heeft.
 
-| Niveau   | Waar                                                                                    |
-| -------- | --------------------------------------------------------------------------------------- |
-| Model    | Detailpagina van provider → schakelaar "Expose in Claude Code" per model                |
-| Provider | Detailpagina van provider → schakelaar op providerniveau (geldt voor al diens modellen) |
-| Globaal  | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (standaard uit)                |
+**Dit staat standaard uit** en wordt geregeld door een poort met drie niveaus (de
+meest specifieke wint), zodat een standaard OmniRoute zijn catalogus nooit
+verdubbelt voor clients die Claude Code niet gebruiken:
 
-De omgevingsvariabele `EXPOSE_CC_DISCOVERY_ALIASES` schakelt het globale niveau
-verplicht in en heeft voorrang op de overschrijving via het dashboard (het scherm
-Feature Flags toont de melding "active via environment variable" wanneer dit het
-geval is). Schakelaars per provider en per model verfijnen dit verder — zo worden
-bijvoorbeeld met globaal uitgeschakeld + Kimi-provider ingeschakeld alleen de
-modellen van Kimi beschikbaar gemaakt.
+| Niveau   | Waar                                                                         |
+| -------- | ---------------------------------------------------------------------------- |
+| Model    | Provider-detailpagina → schakelaar "Tonen in Claude Code" per model          |
+| Provider | Provider-detailpagina → schakelaar op providerniveau (dekt alle modellen)    |
+| Globaal  | Instellingen → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (standaard uit) |
 
-> ⚠️ **Niet-overeenkomend contextvenster bij niet-Claude-modellen.** Claude Code
-> gaat uit van een contextvenster van 200K voor elk id dat het niet herkent (het
-> kan het werkelijke venster niet uitlezen uit `/v1/models`). Stel voor een model
-> met een groter venster (bijv. de 256K van Kimi K2)
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` in op een waarde onder het werkelijke venster
-> van het model, zodat automatische compactie niet voortijdig wordt geactiveerd.
-> De hierboven gegenereerde profielen doen dit al per model.
+De omgevingsvariabele `EXPOSE_CC_DISCOVERY_ALIASES` forceert het globale niveau
+aan en gaat voor op de dashboard-override (het Feature Flags-scherm toont dan een
+notitie "actief via omgevingsvariabele"). Schakelaars per provider en per model
+verfijnen vanaf daar — bijv. globaal uit + Kimi-provider aan stelt alleen de
+modellen van Kimi bloot.
+
+> ⚠️ **Window-mismatch bij niet-Claude-modellen.** Claude Code gaat uit van een
+> contextvenster van 200K voor elke id die het niet herkent (het kan geen echt
+> venster uitlezen uit `/v1/models`). Voor een model met een groter venster
+> (bijv. de 256K van Kimi K2) stel je `CLAUDE_CODE_AUTO_COMPACT_WINDOW` in op een
+> waarde onder het echte venster van het model, zodat automatische compactie niet
+> voortijdig wordt geactiveerd. De gegenereerde profielen hierboven doen dit al
+> per model.
 
 ---
 

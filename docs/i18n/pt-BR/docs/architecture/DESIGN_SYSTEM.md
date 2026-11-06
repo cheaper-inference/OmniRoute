@@ -4,228 +4,94 @@
 
 ---
 
-> **Status:** referência — a padronização descrita aqui está **implementada** (fases 1–6: papel de parede quadriculado, primitivas, centralização das cores de status, token mono, migração dos tokens da DataTable, focus-ring → accent, primitivas Checkbox/Textarea, `cn()` → tailwind-merge, grade em todas as telas independentes, shell de conteúdo fluido em 4K, superfícies opacas de tabelas de dados). Este documento é a descrição canônica dos tokens de design, componentes e convenções do dashboard; a estrutura por fases abaixo é mantida como justificativa para cada decisão.
-> **Escopo:** o dashboard do OmniRoute (`src/`) e o site de marketing (`_mono_repo/omnirouteSite/`) compartilham **uma única identidade visual** — o mesmo fundo quadriculado de papel milimetrado (32px), os mesmos tokens de cor e componentes padronizados.
->
-> Observações práticas para os mantenedores:
->
-> - Vários valores hexadecimais ainda codificados diretamente são **intencionais** (terminal do console sempre escuro, traços SVG do ReactFlow) e **NÃO** devem ser convertidos em tokens indiscriminadamente.
-> - Uma grade "maior" em uma instância em execução indica uma build desatualizada, não um problema no código — o tamanho da grade é 32px, idêntico ao do site.
-> - Os valores `--table-*` do tema escuro são idênticos, byte por byte, aos valores rgba codificados diretamente antes da migração; o tema claro foi corrigido (ele ficava incorretamente sempre escuro devido a fallbacks de `var()` inativos).
+> **Status:** o painel é construído no** Kit Keak CI UI** (`@keak/cheaper-inference-ui-kit`), vendido como o espaço de trabalho `packages/ui-kit` (`@omniroute/ui-kit`; o instantâneo upstream é fixado em `packages/ui-kit/UPSTREAM.md` e protegido por `npm run check:ui-kit-snapshot`). A luz é o tema canônico; a preferência padrão é `system`. A paleta padrão é a do kit** Edições** aparência (papel neutro quente e detalhes em cobre `#e5ac82`, `packages/ui-kit/src/ci-editions.css`); Configurações → Aparência → Paleta de cores oferece** Clássico** , os tokens básicos do kit com detalhes em limão. Switzer é a única família para UI, display e texto de código (`--ci-font-ui`; `--ci-font-display` e `--ci-font-mono` resolvem isso), auto-hospedado pelo próprio kit (`packages/ui-kit/src/ci-fonts.css`, importado por `ci-tokens.css`). Scripts Switzer carece de glifo por glifo (`src/app/globals.css`): Inter para cirílico, grego e vietnamita e, apenas sob `html[dir="rtl"]`, Vazirmatn para escrita árabe. Cada ícone é um glifo Lucide.
 
----
+## 1. Onde as coisas vivem
 
-## 1. Objetivo
+- **Kit.** `packages/ui-kit/src` é uma cópia byte por byte do `src/` upstream no commit fixado em `packages/ui-kit/UPSTREAM.md` (que também registra a autorização da licença); `PATCHES.md` lista patches locais (nenhum). Ele é consumido como fonte, sem compilação: `next.config.mjs` o transpila e `tsconfig.json` mapeia `@omniroute/ui-kit` → `packages/ui-kit/src` e `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` e `vitest.mcp.config.ts` carregam o mesmo alias). Importe um componente do kit por seu subcaminho (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), nunca através do barril `@omniroute/ui-kit` : o barril puxa todos os componentes (incluindo o seletor de data) para cada importador. A folha de estilo do kit entra por meio de `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-styles.css"`, a folha completa: o `ci-ui.css` principal mais cada família de padrões).
+- **Fichas.** `packages/ui-kit/src/ci-tokens.css` declara os tokens `--ci-*` ; `src/app/globals.css` os conecta aos nomes OmniRoute herdados (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), para que as leituras `var(--color-*)` existentes e os utilitários Tailwind continuem funcionando. O novo código usa os utilitários Tailwind (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) ou classes de kit — nunca um valor hexadecimal (`tests/unit/design-kit-bridge.test.ts` impõe a ponte). `text-primary` resolve para `--color-primary-ink` por meio `--text-color-primary`, então o texto primário permanece legível enquanto `bg-primary`/`border-primary` mantém a superfície de acento: nas Edições é o `--ci-color-accent-active` do kit (o cobre profundo `#99562f` na luz, o acento de cobre no escuro); sob Classic, lime-800 em claro e sotaque limão em escuro. As séries de gráficos usam `--color-chart-1` … `--color-chart-8`, cada uma com um `--color-chart-N-ink` seguro para texto e uma tonalidade de chip `--color-chart-N-subtle` opaca, atribuída na ordem da série do kit (`ciChartSeriesOrder`).
+- **Temas.** `<html className="ci-theme">` (`src/app/layout.tsx`) insere o documento no tema do kit. A preferência é `light`, `dark` ou `system` (`THEME_CONFIG.defaultTheme = "system"` em `src/shared/constants/appConfig.ts`; `system` segue `prefers-color-scheme`). `applyTheme()` em `src/store/themeStore.ts` (espelhado por `THEME_BOOT_SCRIPT`, embutido em `src/app/layout.tsx`, que é executado antes da hidratação) define `data-theme="dark"|"light"` e alterna a classe `.dark` em `<html>` juntos. O conjunto de tokens escuros do kit é digitado em `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`); As próprias substituições escuras de OmniRoute(o bloco `.dark` em `globals.css`) e a chave de utilitários herdada Tailwind `dark:` na classe `.dark`. Não há predefinições de cores de destaque: o destaque sempre vem do kit, e uma predefinição persistente de uma versão mais antiga é descartada quando a loja carrega.
+- **Paletas.** Dois, ambos do kit (`src/shared/constants/appearancePalette.ts`): `editions`, o padrão, e `classic`. Editions é o atributo `data-ci-appearance="editions"` do kit em `<html>`, que `ci-editions.css` (importado por `ci-ui.css`) combina com `data-theme`; Clássico é a ausência do atributo. O servidor de layout raiz renderiza o atributo, de modo que um visitante sem nada armazenado (ou sem JS) obtenha edições em cada superfície — dashboard, login, `/status`, páginas de erro, `/docs` e PWA. A escolha é persistida junto ao tema na mesma loja `theme` (`palette`, `setPalette()`, `applyPalette()` em `src/store/themeStore.ts`) e aplicada antes do paint por `THEME_BOOT_SCRIPT` (`src/shared/utils/themeBootScript.ts`, embutido no `<head>` do layout ), que remove o atributo apenas quando a paleta armazenada é `"classic"`; `src/app/global-error.tsx`, fora do layout raiz, aplica-o na mesma loja. Não coloque `data-ci-appearance` em nenhum outro elemento: o kit combina com `html:root:has([data-ci-appearance="editions"])`, então um descendente trocaria todo o documento. A variante Editions `data-ci-editions-variant="landing"` é para páginas de marketing, não para o painel. Navegador cromado: o servidor renderiza o padrão, Edições, em `viewport.themeColor` (uma tag por `prefers-color-scheme`) e o manifesto da web — `PWA_THEME_COLORS` em `src/shared/constants/pwaThemeColors.ts`, o único espelho das Edições `--ci-color-background` (`#f3f1e9` / `#11120f`), fixado em `ci-editions.css` por `tests/unit/pwa-theme-colors.test.ts`. O `<meta name="theme-color">` ao vivo segue a paleta e o modo armazenados: `THEME_BOOT_SCRIPT` reescreve as tags antes da pintura e as ações da loja de temas fazem isso a cada alteração (`resolveThemeColor()` / `applyThemeColor()` em `src/shared/utils/themeColorMeta.ts`, com `CLASSIC_PAGE_BACKGROUND` lido no `ciTokens` do kit). Um tema light/dark explícito define cada tag para esse modo; `system` mantém uma cor por esquema. O manifesto permanece Edições: é obtido uma vez por instalação, sem preferência. Mônaco lê suas cores em uma sonda (`monacoKitTheme.ts`); em Edições, a leitura do teste inverte o `data-theme` raiz para uma passagem síncrona, porque o kit resolve as edições light/dark a partir da raiz.
+- **Componentes (adaptadores).** `src/shared/components/index.tsx` mantém o componente OmniRoute API (mesmos nomes, exportações padrão e adereços), e as primitivas por trás dele são adaptadores sobre o kit: formulários (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), sobreposições e feedback (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`), estrutura (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) e tabelas (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Um adaptador importa o componente do kit por subcaminho e mapeia os adereços herdados nele — por exemplo `Button variant="primary"` é o botão do kit `default` (`--ci-button-primary-*`: a superfície inversa na luz, o acento com sua tinta `--ci-color-accent-foreground` no escuro), `danger` é `destructive` e `warning` é o botão do kit `warning`. variantes de status `Badge` são tons de kit, e `Select` com `<option>` filhos renderiza o kit `NativeSelect`. `tests/unit/ui/adapters/*.test.tsx` fixe cada adaptador.
+- **Concha.** `src/app/(dashboard)/layout.tsx` renderiza `DashboardLayout`, que renderiza `src/shared/components/layouts/DashboardShell.tsx`: o kit `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), com a lógica de navegação de OmniRoute em `src/shared/components/Sidebar.tsx`. Um link "pular para conteúdo" para `#main-content` é o primeiro elemento focalizável. `src/shared/components/Header.tsx` contém o kit `SidebarTrigger` (o único botão de alternância da barra lateral do shell), o Keak `ProductSwitcher` e o abridor de paleta de comandos; ele mostra o título da rota apenas enquanto nenhum kit `PageHeader` (`.ci-page-header`) estiver montado dentro `#main-content`, portanto, uma página com seu próprio `PageHeader` possui um único `h1`. `src/shared/components/CommandPalette.tsx` é um kit `Dialog`.
+- **Ícones.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) resolve o nome (o vocabulário de símbolos de materiais que as telas usam) por meio de `ICON_MAP` (`src/shared/constants/iconMap.ts`) para um glifo Lucide. A fonte e o pacote Material Symbols desapareceram: um nome ausente no mapa renderiza um glifo de espaço reservado neutro (`data-icon-missing="true"`) e registra um aviso de console fora da produção. `npm run gen:icon-map` imprime os nomes em uso que estão faltando no mapa (`tests/unit/icon-map-coverage.test.ts` falha em qualquer nome sem um ícone do Lucide; `tests/unit/icon-map-object-values.test.ts` cobre nomes armazenados em objetos de pesquisa); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` reescreve extensões literais `<span className="material-symbols-outlined">` para `<Icon>`.
+- **Marca.** `src/shared/components/OmniRouteLogo.tsx` envolve o kit: a exportação padrão `OmniRouteLogo` renderiza `ProductIcon product="omniroute" variant="glyph"` (inline SVG, `basePath` -safe) e `OmniRouteLockup` renderiza `ProductLockup product="omniroute"` (nome acessível "Keak OmniRoute") ou, para operadores de marca branca, seus próprios `name`/`logoSrc`. Os destinos de troca de produto residem em `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). As telas independentes — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` e `src/shared/components/ErrorPageScaffold.tsx` — mostram o bloqueio; `tests/unit/brand-pages-static.test.ts` o protege.
 
-O site de marketing (`viral.omniroute.online`, `why.omniroute.online`, `omniroute.online`) e o dashboard do produto devem parecer **um único produto**. O site já adotou sua paleta do dashboard — seu `css/tokens.css` inclusive diz _"A paleta espelha o dashboard do OmniRoute (src/app/globals.css)"_. Portanto, ambos já estão cerca de 80% alinhados no nível das cores. O que falta no dashboard:
+## 2. Regras
 
-1. O **papel de parede quadriculado de papel milimetrado** que o site utiliza em todas as páginas.
-2. Alguns **tokens de design compartilhados** que o site possui, mas o dashboard não (escala de raios, gradiente da marca, `surface-2`, fonte mono).
-3. **Consistência no nível dos componentes** — vários componentes do dashboard ignoram os tokens do tema e usam valores hex/rgba codificados diretamente.
+1. Tokens, nunca literais. Exceções mantidas propositalmente: o terminal de console sempre escuro e `STATUS_HEX` (`src/shared/constants/statusColors.ts`), o espelho hexadecimal resolvido da paleta de status do kit para chamadores que precisam de um hexadecimal literal. As paletas categóricas não são mais exceção: elas rodam nos oito tokens gráficos do kit (`--color-chart-1..8`, mais `-ink`/`-subtle`), na ordem da série do kit, por meio de `src/shared/utils/categoricalPalette.ts` e, para estratégias de roteamento, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; As arestas ReactFlow e a tela de orquestração leem as variáveis `--orch-status-*` com reconhecimento de tema (`src/shared/components/flow/edgeStyles.ts`).
+2. Nunca corrija `packages/ui-kit/src` manualmente: sincronize com `scripts/dev/sync-ui-kit.sh <commit>`; o portão de pré-confirmação `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) falha em qualquer byte que seja diferente do commit upstream fixado (ele pula com um aviso quando o clone upstream, `UI_KIT_CLONE` ou `_references/cheaper-inference-ui-kit`, está ausente). Quando falta alguma coisa no kit, contorne-o no adaptador ou na tela e peça ao upstream.
+3. Os padrões de texto do kit são inglês (`label = "Loading"`, `loadingLabel = "Loading table"`…) — passa strings traduzidas do `useTranslations(...)` sempre que um componente do kit renderiza texto.
+4. Os utilitários Tailwind vencem as classes de componentes do kit (o kit declara `@layer theme, base, components, utilities` e suas regras estão em `components`) — usa utilitários para espaçamento e layout, não para recolorir os componentes do kit.
+5. Cabeçalhos: `.ci-heading` para títulos de páginas e seções; `.ci-dashboard-display` apenas para texto de exibição grande e esparso, como o código de status da página de erro. Ambos usam o Switzer.
+6. `tests/unit/dashboard-kit-sweep.test.ts` protege a adoção do kit: não há extensão de ligadura de material sob `src/app` ou `src/shared/components`; na árvore do painel (`src/app/(dashboard)` e `src/shared/components`) nenhum `<select>`, `<textarea>` ou `<table>` bruto e nenhum `role="dialog"` enrolado manualmente fora das exceções listadas (o branch nativo do adaptador `Select`, `RequestLoggerDetail`); todo `<button>` ou `<input>` bruto precisa de um comentário contendo `kit-exception:` (com o motivo) terminando no máximo 3 linhas acima dele; tons de paleta e variantes `dark:` apenas nos arquivos das listas de teste.
+7. Verifique os temas e a janela de visualização de 390 px antes de um PR (capturas de tela); `tests/e2e/a11y.spec.ts` executa o machado.
 
-Este documento apresenta a análise e o plano.
+## 3. Adicionando uma tela
 
----
+1. Abra a página com o `PageHeader` do kit (`@omniroute/ui-kit/page-header`, `compact` dentro do
+   dashboard) — título, descrição e `actions`. O cabeçalho do shell então omite seu próprio título.
+2. Construa os controles a partir de `@/shared/components` (os adaptadores) e use componentes do kit
+   por subcaminho onde não houver adaptador (`Table`/`TableScrollArea`/`DataTableShell`, `Field`,
+   `Alert`, `Tabs`, `RadioGroup`, `Slider`…).
+3. Ícones: `<Icon name="…" />`. Um novo nome entra no `ICON_MAP` com o componente Lucide
+   semanticamente correspondente; `npm run gen:icon-map` lista os nomes ainda ausentes.
+4. Cores: utilidades semânticas (`text-success`, `bg-warning-bg`, `border-border`…) e
+   `var(--color-chart-N)` para séries de gráficos; nenhum valor hexadecimal e nenhuma variante
+   `dark:` que apenas repita uma cor.
+5. Texto: toda string, incluindo os rótulos que você passa para os componentes do kit, vem de
+   `useTranslations`. Novas chaves vão em `src/i18n/messages/en.json`, `pt-BR.json` e `vi.json` (o
+   teste de paridade do vietnamita fixa todas as chaves em inglês); os outros locales são
+   preenchidos pela sincronização de i18n.
+6. Execute as verificações antes do PR: `tests/unit/dashboard-kit-sweep.test.ts`,
+   `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+   `npm run check:dashboard-typecheck` (a única verificação que detecta uma importação duplicada em
+   `iconMap.ts`), `npm run check:ui-icu` e os testes da própria tela.
 
-## 2. Princípios
+## 4. Adicionando ou alterando um adaptador
 
-- **Fonte única da verdade = `src/app/globals.css`.** O site espelha o dashboard, nunca o contrário. Novos tokens são adicionados primeiro ao `globals.css`.
-- **Tokens, nunca literais.** Os componentes consomem tokens semânticos (`bg-surface`, `text-primary`, `border-border`), nunca valores `#hex` brutos.
-- **Sutil, não chamativo.** A grade é um papel de parede discreto que fica atrás do conteúdo — ela jamais deve reduzir o contraste do texto ou competir com a interface.
-- **Ciente do tema.** Tudo funciona tanto no modo `.dark` (a aparência característica do produto) quanto no modo claro.
-- **Implementação cirúrgica.** Primeiro, entregue a grade + os tokens (baixo risco, alta visibilidade); depois, faça a limpeza dos componentes em etapas.
+1. Mantenha a API pública de `src/shared/components/index.tsx`: mesmos nomes de exportação, exportações padrão e
+   props aceitas. Mapeie as props legadas para o kit dentro do adaptador (veja `Button.tsx`: `VARIANT_TO_KIT`,
+   `SIZE_TO_KIT`).
+2. Importe o kit por subcaminho (`@omniroute/ui-kit/<component>`).
+3. As soluções alternativas para lacunas do kit ficam no adaptador (ou em `globals.css` `@layer components` quando
+   a correção é um estilo), nunca em `packages/ui-kit/src`.
+4. Adicione ou atualize `tests/unit/ui/adapters/<name>.test.tsx`. Para um adaptador com muitos chamadores, compare a
+   marcação renderizada antes e depois da alteração — mudanças de padding ou de wrapper se propagam para todas as telas.
 
----
+## 5. Atualizando o kit
 
-## 3. Estado atual — o que já está alinhado e o que não está
+`npm run check:ui-kit-upstream` compara a versão fixada em `packages/ui-kit/UPSTREAM.md` com a tag `v*` mais recente do repositório upstream e imprime o comando de sincronização quando uma versão é lançada.
 
-### 3.1 Cores — já unificadas ✅
+O fluxo de trabalho diário `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) executa a mesma verificação. Enquanto o pino está atrás, `scripts/ci/ui-kit-sync-pr.sh` mantém uma sincronização PR aberta no ramo `release/vX.Y.Z` mais alto, no ramo rolante `chore/ui-kit-sync-latest`. Ele nunca se funde: todo lançamento de kit ainda precisa de uma verificação visual no VPS local. O branch é reconstruído quando uma versão mais recente é lançada e, caso contrário, é deixado de lado. Um PR aberto com commits enviados manualmente não é sobrescrito, e um PR para uma versão que um mantenedor fechou sem mesclagem permanece fechado até uma versão mais recente.
 
-Todas as cores da marca e superfícies já correspondem às do site **em valor** (apenas os nomes diferem — o dashboard usa o prefixo `--color-`). Verificado em `src/app/globals.css:30-128`:
+Quando nenhum PR pode ser aberto (a versão de destino está congelada, o PR tem commits enviados manualmente, o PR foi fechado ou nenhum token PR está definido), o fluxo de trabalho mantém um problema de rastreamento aberto que diz o porquê.
 
-| Conceito                           | Token do site (`tokens.css`)                | Token do dashboard (`globals.css`) | Correspondência |
-| ---------------------------------- | ------------------------------------------- | ---------------------------------- | --------------- |
-| primária                           | `--primary #e54d5e`                         | `--color-primary #e54d5e`          | ✅              |
-| primária-hover                     | `--primary-hover #c93d4e`                   | `--color-primary-hover #c93d4e`    | ✅              |
-| destaque                           | `--accent #6366f1`                          | `--color-accent #6366f1`           | ✅              |
-| destaque-2                         | `--accent-2 #8b5cf6`                        | `--color-accent-hover #8b5cf6`     | ✅ (renomeado)  |
-| destaque-3                         | `--accent-3 #a855f7`                        | `--color-accent-light #a855f7`     | ✅ (renomeado)  |
-| sucesso / aviso / erro             | `#22c55e / #f59e0b / #ef4444`               | idênticos                          | ✅              |
-| luzes de status                    | `#ff5f56 / #ffbd2e / #27c93f`               | idênticas                          | ✅              |
-| fundo / superfície / borda escuros | `#0b0e14 / #161b22 / rgba(255,255,255,.08)` | idênticos                          | ✅              |
-| fundo / superfície / texto claros  | `#f9f9fb / #fff / #1a1a2e`                  | idênticos                          | ✅              |
+O fluxo de trabalho usa dois segredos:
 
-**Conclusão:** não há nenhuma migração de cores a ser feita. A identidade já é compartilhada; estamos _concluindo_ sua implementação, não a reconstruindo.
+- `secrets.UI_KIT_READ_TOKEN`: um token somente leitura para o repositório upstream privado. Quando o fluxo de trabalho não consegue ler o upstream (sem token, um token que parou de funcionar ou GitHub inacessível), a execução permanece verde, mas grava um aviso e mantém um problema separado aberto, que se fecha quando uma execução posterior pode ler o upstream novamente.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: um token refinado neste repositório com acesso de gravação de solicitações de conteúdo e pull. O `GITHUB_TOKEN` padrão não pode criar PRs aqui, e um PR aberto não acionaria CI. Sem esse token, o fluxo de trabalho apenas envia push para a ramificação.
 
-### 3.2 Lacunas — o que falta no dashboard
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` copia o `src/` upstream naquele commit (`latest` = a tag `v*` mais recente) em `packages/ui-kit/src`, aplica a única transformação permitida (ele elimina o sufixo `.js` das importações relativas) e define a versão do espaço de trabalho em `packages/ui-kit/package.json` e `package-lock.json` para o upstream. Em seguida: revise `git diff packages/ui-kit`, faça uma passagem visual sobre provedores, configurações, combos, uso e endpoint em ambos os temas, execute `npm run check:ui-kit-snapshot` e `npm run test:vitest:ui` e abra o PR com o changelog upstream.
 
-| Lacuna                           | O site possui                                                                           | Dashboard                                                                      | Ação                      |
-| -------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------- |
-| **Papel de parede quadriculado** | Papel milimetrado em `body::before`, `--grid-line`, `--grid-size 32px`, `--section-alt` | **✅ adicionado (Fase 1)**                                                     | **Parte A**               |
-| **Escala de raio**               | `--radius 14px`, `--radius-sm 9px`                                                      | `--radius 14px` adicionado; `-sm` + redirecionamento dos componentes pendentes | **Parte B / Fase 2**      |
-| **Gradiente da marca**           | `--grad-brand 135deg primary→accent-3`                                                  | **✅ token adicionado (Fase 1)**; utilizado na Fase 2                          | **Parte B**               |
-| **Superfície aninhada**          | `--surface-2 #1c2230`                                                                   | **✅ adicionado (Fase 1)**                                                     | **Parte B**               |
-| **Fonte monoespaçada**           | `--font-mono` (pilha ui-monospace)                                                      | pendente (Fase 4, com os consumidores)                                         | **Parte B**               |
-| **`text-muted` (escuro)**        | `#8b8b9e`                                                                               | `#a1a1aa` (zinc-400)                                                           | reconciliar — **Parte B** |
+## 6. diagramas README
 
-### 3.3 Mecânica de temas (para não quebrarmos nada)
+Os doze diagramas que o `README.md` raiz incorpora (`docs/diagrams/*.svg`) são o kit aplicado a uma imagem estática e são gerados, não desenhados à mão: 13 arquivos geradores em `scripts/docs/gen-readme-*.mjs` (doze diagramas mais o driver `gen-readme-diagrams.mjs` ) e 12 testes de inatividade em `tests/unit/docs/readme-*-svg.test.ts`, um por diagrama, cada byte comparando o arquivo confirmado com a saída de seu gerador (job `test-unit`).
 
-- **Tailwind v4, CSS-first** (sem `tailwind.config.*`). Os tokens são definidos em `:root`/`.dark` e disponibilizados aos utilitários por meio de `@theme inline` (`globals.css:130-179`).
-- **Modo escuro via classe `.dark`** em `<html>` (`@custom-variant dark` em `globals.css:22`), alternado por uma store Zustand personalizada (`src/store/themeStore.ts`), tema padrão = `system` (`src/shared/constants/appConfig.ts:11`). O site usa `html[data-theme="light"]` em vez disso — **os mecanismos são diferentes, mas nunca se encontram** (origens separadas), portanto não há conflito. Mantemos o mecanismo `.dark` do dashboard.
-- **Existe uma substituição da cor primária em tempo de execução** (`themeStore.ts:85-97`, predefinições em `COLOR_THEMES`) — os usuários podem trocar `--color-primary`. Qualquer novo token (gradiente etc.) que faça referência a `--color-primary` herda essas substituições sem nenhum esforço adicional. ✅
-- **Nomes de raio reservados do Tailwind v4:** `--radius-sm/md/lg/...` são a base dos utilitários `rounded-*`. Redefini-los altera retroativamente todos os `rounded-*` existentes (por exemplo, `rounded-sm` é usado em 12 arquivos). Portanto, o valor do raio pequeno e o redirecionamento dos componentes foram deliberadamente adiados para a Fase 2, quando os consumidores serão alterados em conjunto.
+- **Fichas.** `scripts/docs/readme-diagram-theme.mjs` copia a paleta Editions (a aparência padrão) de `packages/ui-kit/src/ci-editions.css` (fixada nesse arquivo por `tests/unit/docs/readme-diagram-theme.test.ts`, que também verifica WCAG AA para cada cor de texto em cada superfície em ambos os esquemas; a única exceção, light `warn`, é o aviso do kit escurecido 10% porque o valor do kit é 4,46:1 na tela) e define as funções do texto na escala de tipo do kit (`ci-tokens.css`): Switzer nos pesos do kit (400/500/600, display em 500) e rastreamento para tudo, exceto as funções de código (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`), que são IBM Plex Mono e são apenas para comandos, URLs, identificadores e telas de terminal. Os valores claros ficam em `:root`, os valores escuros atrás de `prefers-color-scheme: dark`, dentro do arquivo, então cada imagem segue o esquema do visualizador em GitHub.
+- **Fontes.** GitHub Markdown não carrega CSS e o proxy camo bloqueia todas as buscas externas, então o tipo de kit precisa viajar dentro do arquivo. `scripts/docs/readme-outline.mjs`, a última etapa de cada gerador, molda os papéis de Switzer com HarfBuzz e os desenha como contornos vetoriais ( caminhos `<defs>` e `<use>`), com as setas e símbolos geométricos que faltam a Switzer desenhados em suas próprias métricas. Contornos, nunca uma fonte incorporada: a licença da Switzer (`packages/ui-kit/src/fonts/FFL.txt`) proíbe subconjuntos e conversão de formato sem consentimento por escrito e permite desenhos vetoriais, portanto, não reintroduza um Switzer `@font-face` ou `data:` URI. A única fonte restante em um arquivo é o subconjunto OFL IBM Plex Mono para o que permanece como texto de código real (`scripts/docs/readme-fonts.mjs`), construído a partir desses caracteres; qualquer glifo que não possa incorporar lances.
+- **Regenerado.** `npm run docs:readme-diagrams` reescreve todos os doze na ordem README e imprime uma linha por arquivo com seu tamanho. Um único gerador também funciona sozinho (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` precisa `node --import tsx/esm` porque seus números vêm do carregador de catálogo ativo em `open-sse/config/freeModelCatalog.ts`; a consequência CI de uma mudança de catálogo está em `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Confirme o gerador e o SVG juntos.
+- **Prova.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renderiza um arquivo da maneira que GitHub o atende (uma tag `<img>`, camo's `Content-Security-Policy`, `image/svg+xml`), captura um quadro claro e um escuro e relata as solicitações de fonte externa que a página fez (deve ser 0).
+- **Orçamento.** Menos de 200 KB por arquivo (cada teste de desatualização afirma isso); 500 KB é o limite máximo para qualquer imagem README (a regra do validador do SVG studio).
+- **Cópia inalterada, conta a partir do portão.** A reformulação da marca mudou o tipo e a paleta, não as palavras: cada gerador carrega a cópia de seu diagrama em uma constante `*_COPY` (ou a constrói a partir do catálogo ativo) que é tanto o texto desenhado quanto a entrada da etapa de estruturação. As figuras canônicas ficam em nós `<text>` (invisíveis uma vez delineados, `fill-opacity:0`), lidos por `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); os testes de desatualização dos diagramas que a porta lê também executam seus validadores no arquivo gerado, portanto, uma figura que sai do código falha no teste — corrige a fonte que a porta lê, nunca o número no gerador.
 
----
+## 7. Índice de referência
 
-## 4. Parte A — O fundo de grade quadriculada (solicitação principal) — IMPLEMENTADO (Fase 1)
-
-### 4.1 O que é
-
-A receita exata do site (`_mono_repo/omnirouteSite/css/base.css`): um **pseudo-elemento fixo, ocupando toda a viewport**, que desenha dois gradientes de linhas de 1px e fica em `z-index:-1` atrás de todo o conteúdo.
-
-```css
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
-```
-
-**Por que isso funciona mesmo que `body` tenha um `background-color` opaco:** um `::before` com `z-index:-1` é renderizado _acima_ do fundo do próprio elemento, mas _abaixo_ do conteúdo dele que está no fluxo. Portanto, `--color-bg` é o preenchimento base, a grade é sobreposta a ele e o aplicativo é renderizado acima da grade.
-
-### 4.2 Precedente já existente na base de código
-
-`src/app/landing/page.tsx:16-26` **já implementa essa mesma grade por página** — mas com linhas **vermelhas** (`#E54D5E`, opacidade `0.06`) a cada **50px**, além de orbes animados. Portanto, o padrão já foi validado no produto; este trabalho o promove a um papel de parede **global e adaptado ao tema**.
-
-### 4.3 Tokens adicionados (em `globals.css`)
-
-```css
-:root {
-  /* claro — opacidade da grade aumentada em relação aos 0.045 do site para que o papel de parede
-     seja realmente visível no dashboard denso (cards/interface cobrem a maior parte da viewport) */
-  --grid-line: rgba(0, 0, 0, 0.07);
-  --grid-size: 32px;
-  --section-alt: rgba(0, 0, 0, 0.022);
-}
-.dark {
-  /* escuro — aumentada em relação a 0.035 pelo mesmo motivo */
-  --grid-line: rgba(255, 255, 255, 0.06);
-  --section-alt: rgba(255, 255, 255, 0.018);
-}
-```
-
-### 4.4 O único bloqueio — removido
-
-A grade é global por definição (ela cobre o painel, `auth`/`login`, páginas de erro — todas as rotas — de uma só vez). Exatamente **um** elemento a ocultava dentro do painel:
-
-- `src/shared/components/layouts/DashboardLayout.tsx` — o wrapper externo desenhava um `bg-bg` opaco. Tudo abaixo dele já é transparente (`<main>`, o contêiner de rolagem e o elemento interno `max-w-7xl`), portanto, **remover `bg-bg`** permite que a grade do body apareça através da área de conteúdo (o `--color-bg` do body continua sendo o preenchimento base).
-
-  ```diff
-  - <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-bg">
-  + <div className="flex h-dvh min-h-0 w-full overflow-hidden">
-  ```
-
-### 4.5 Interação com a interface (barra lateral / cabeçalho)
-
-- `Header` (`Header.tsx:207`, `bg-bg`) e `Sidebar` (`Sidebar.tsx:430`, `bg-sidebar`) permanecem **opacos** → a grade aparece **somente na área de conteúdo**, emoldurada por uma interface sólida. É um padrão visual discreto e corresponde à maneira como o site separa a interface da área de trabalho (decisão D3 = sólida).
-
-### 4.6 Páginas de login / autenticação / erro
-
-Essas páginas são renderizadas diretamente sob `<body>` (sem a interface do painel), portanto, a grade global deve aparecer atrás delas automaticamente. **Fase 5 — CONCLUÍDA:** os wrappers independentes de tela cheia eram, de fato, opacos (`min-h-screen … bg-bg`, em que `bg-bg` é o mesmo preenchimento sólido de `<body>`), o que ocultava a grade em todas as telas fora do dashboard — não apenas no login. Agora, todos eles são transparentes para que o papel de parede compartilhado apareça: `login`, `forgot-password`, `callback`, `maintenance`, `offline`, `status`, `terms`, `privacy`, `onboarding` e `ErrorPageScaffold` (abrange `400`/`401`). Isso conclui a **D4** (ampliada de apenas login para todas as telas independentes). Protegido por `tests/unit/design-grid-background.test.ts`.
-
-### 4.7 Landing page
-
-`landing/page.tsx` mantém seu fundo animado mais elaborado (orbes + vinheta) — sua própria apresentação de marketing (decisão D5 = manter como está).
-
----
-
-## 5. Parte B — Unificação de tokens
-
-A Fase 1 adiciona os tokens de identidade inertes e sem colisões (`--surface-2`/`--color-surface-2`, `--grad-brand`, `--radius`). A Fase 2 integra a escala de raios ao Tailwind e redireciona os componentes; a Fase 4 adiciona `--font-mono` e seus consumidores.
-
-| Token                      | Motivo                                                                   | Fase                                    |
-| -------------------------- | ------------------------------------------------------------------------ | --------------------------------------- |
-| `--radius` / `--radius-sm` | Uma escala de raios (14/9) em vez de valores ad hoc de 6/8/12            | 1 (valor) / 2 (integrar + redirecionar) |
-| `--grad-brand`             | Gradiente da marca para CTAs primários (vermelho→violeta), igual ao site | 1 (token) / 2 (Button)                  |
-| `--surface-2`              | Painéis aninhados / cabeçalhos de tabela / linhas recuadas               | 1                                       |
-| `--font-mono`              | Blocos de código, terminal, IDs, endpoints                               | 4                                       |
-| reconciliar `--text-muted` | Escolher um único valor para site↔painel (`#a1a1aa` recomendado)         | 2                                       |
-
-**D2 (text-muted):** site `#8b8b9e` vs. dashboard `#a1a1aa`. Recomenda-se manter o **`#a1a1aa` do dashboard** e atualizar o _site_ para corresponder. Alteração cosmética.
-
----
-
-## 6. Parte C — Padronização de componentes (Fases 2–4)
-
-Componentes personalizados (sem shadcn/Radix), Tailwind v4, tokens semânticos **majoritariamente** adotados (195 arquivos importam o barrel compartilhado). O trabalho consiste em remover os **desvios**. Local: `src/shared/components/`.
-
-| #   | Item                                        | Arquivo(s)                                                                                                               | Problema → Objetivo                                                                                                                           | Fase |
-| --- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
-| C1  | **Alinhamento dos raios**                   | `Button.tsx:14-18`, `Card.tsx:39`, `Modal.tsx`, `Input.tsx`, `Select.tsx`                                                | mistura de 6/8/12px → `--radius`/`--radius-sm` (14/9)                                                                                         | 2    |
-| C2  | **Gradiente do Button + variante `accent`** | `Button.tsx:5-12`                                                                                                        | primário é vermelho→vermelho chapado; alinhar a `--grad-brand`; adicionar a variante `accent` ausente. ~195 importadores — maior visibilidade | 2    |
-| C3  | **Tabelas**                                 | `DataTable.tsx:122-176`, `logTableStyles.ts`, `globals.css:405-414`                                                      | 100% de rgba hardcoded inline + variáveis inexistentes; migrar para tokens e descontinuar estilos divergentes                                 | 3    |
-| C4  | **Centralizar cores de status**             | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `ProviderCascadeNode.tsx`, `Badge.tsx` + 5 helpers | mais de 6 cópias dos mesmos valores hex → um único módulo baseado em `--color-success/warning/error`                                          | 3    |
-| C5  | **Borda do Card**                           | `Card.tsx:39`                                                                                                            | `border-white/5` → marca `/8`                                                                                                                 | 2    |
-| C6  | **Reconciliar anel de foco** ✅ CONCLUÍDO   | `globals.css` `--focus-ring` (accent) vs. `ring-primary/30` dos controles de formulário                                  | unificado em **accent (violeta)** para corresponder ao anel global + diferenciar do anel vermelho de erro; o erro permanece vermelho          | 4    |
-| C7  | **Adicionar `Checkbox` + `Textarea`**       | `<input>`/`<textarea>` brutos com `accentColor:#6366f1` inline                                                           | primitivas orientadas por tokens                                                                                                              | 4    |
-| C8  | **Varredura de hex hardcoded**              | `ConsoleLogViewer.tsx:240`, `ComboLiveStudio.tsx:306`, pontos do Modal, ~14 arquivos de gráficos                         | literais → tokens                                                                                                                             | 4    |
-| C9  | **`cn()` → clsx + tailwind-merge**          | `src/shared/utils/cn.ts`                                                                                                 | classes conflitantes se acumulam; necessário para sobrescritas de C1                                                                          | 2    |
-
-**Já alinhados à marca (orientados por tokens, precisam apenas de raio):** `Badge`, `Toggle`, `SegmentedControl`, `Input`, `Select`.
-
----
-
-## 7. Plano de rollout
-
-- **Fase 1 — Grid + tokens de identidade (ESTE PR).** Grid no `globals.css` + tokens `--surface-2`/`--grad-brand`/`--radius`; wallpaper em `body::before`; remover o bloqueador `bg-bg`; teste de proteção estático. Baixo risco, reversível em um único commit.
-- **Fase 2 — Primitivos (C1, C2, C5) — CONCLUÍDA neste PR.** Utilitários semânticos de raio `rounded-card` (14px) / `rounded-control` (9px) adicionados via `@theme` (nomes personalizados, portanto os padrões `rounded-sm/md/lg/xl` permanecem intactos — sem impacto em 400 arquivos); Card/Modal → 14px, Button/Input/Select → 9px; Button primário → `--grad-brand` (vermelho→violeta) + nova variante `accent`; bordas de Card → o token `border-border` (0.08). **Adiado:** `cn()`→tailwind-merge (C9) precisa de novas dependências; a varredura pontual de `rounded-lg` (326 arquivos) foi mantida como está, pois os primitivos cobrem a maior parte da superfície.
-- **Fase 3 — Cores de status + tabelas (C3, C4) — CONCLUÍDA neste PR.** ✅ **C4** (`src/shared/constants/statusColors.ts` — `STATUS_HEX` como fonte única; `flow/edgeStyles.ts` + `TokenHealthBadge` redirecionados, fiéis/mesmo valor hexadecimal). ✅ Token **`--font-mono`**. ✅ **C3 (DataTable)** — substituídos todos os rgba inline + os fallbacks inativos `var(--bg-table-header)` / `var(--text-secondary)` por um conjunto de tokens `--table-*` (`--table-header-bg/-row-zebra/-row-hover/-cell-border/-row-selected`), cujos **valores no tema escuro são exatamente iguais aos antigos rgba codificados diretamente** (tema escuro idêntico byte a byte) e cujos valores no tema claro corrigem o tema claro que antes era sempre escuro. Borda do cabeçalho → `--color-border`, texto secundário → `--color-text-muted`. **Requer uma revisão visual antes do merge.** (Não alterados: `logTableStyles.ts` e as regras legadas `.ant-table` do Ant — separados, com prioridade menor.)
-- **Fase 4 — Limpeza (C6, C7, C9 concluídos; C8 pendente).** ✅ **C9** `cn()` → `twMerge(clsx(...))` (clsx + tailwind-merge adicionados como dependências) — agora o `className` de quem chama substitui corretamente uma classe conflitante do primitivo, em vez de empilhá-la. ✅ **C7** novos primitivos `Checkbox` + `Textarea` (orientados por tokens, exportados pelo barrel; aditivos — a adoção dos 32 checkboxes brutos / 41 textareas brutas pode ocorrer de forma incremental). ✅ **C6** conciliação do anel de foco — os controles de formulário (`Input`/`Select`/`Textarea`/`Toggle`/`Checkbox`) agora usam o anel de **accent (violeta)** no foco para corresponder ao `--focus-ring` global e evitar conflito com o anel vermelho de erro; o estado vermelho de erro permanece inalterado. ⏳ **A varredura de valores hexadecimais da C8 NÃO é um localizar/substituir indiscriminado** — ocorrências confirmadas como _intencionais_ e que devem permanecer: `ConsoleLogViewer.tsx:240` (terminal sempre escuro), popover de `TokenHealthBadge`, traços SVG do ReactFlow. Migrar apenas valores hexadecimais que realmente devam responder ao tema.
-
-Em cada fase: `npm run lint` + `npm run typecheck:core` + uma revisão visual.
-
----
-
-## 8. Decisões em aberto (recomendações)
-
-- **D1 — Button primário:** manter vermelho→vermelho ou mudar para **vermelho→violeta `--grad-brand`**? Recomendação: **vermelho→violeta** (Fase 2).
-- **D2 — Cor das linhas do grid:** **neutra** (estilo do site) — escolhida — em vez de vermelho da marca. Tamanho **32px** (reduzido em ~30% em relação aos 46px originais após feedback do responsável — células de 46px pareciam grandes demais no layout do dashboard).
-- **D3 — Vivacidade do chrome:** sidebar/header **sólidos** — escolhido.
-- **D4 — Grid de autenticação/login:** ✅ **CONCLUÍDO (Fase 5)** — `bg-bg` opaco removido de todos os wrappers independentes de tela cheia (não apenas do login), para que o grid apareça em todas as telas. Consulte §4.6.
-- **D5 — Landing page:** manter a splash animada como está. Escolhido.
-- **D6 — Raio 14/9 em todo o produto:** Recomendação: sim (Fase 2).
-- **D7 — Fase 1 enviada primeiro:** Escolhido.
-- **D8 — Largura do layout (Fase 5):** o contêiner de conteúdo do dashboard estava limitado a `max-w-7xl` (1280px), ficando centralizado com amplas margens laterais vazias em monitores grandes. ✅ **CONCLUÍDO** — aumentado para um `max-w-[3840px]` fluido (4K real): agora o conteúdo acompanha a viewport até ~4K e só é centralizado além desse ponto (`DashboardLayout.tsx`). Páginas deliberadamente estreitas continuam estreitas por design (`ProviderOnboardingWizard` max-w-5xl, `Rtk`/`CavemanContextPageClient` max-w-6xl).
-- **D9 — Tabelas de dados opacas (Fase 6):** com a área de conteúdo do dashboard agora transparente (para que o wallpaper de grid apareça através dela, Fase 5), tabelas de dados cujo contêiner _não_ era uma superfície opaca deixavam o grid vazar por suas linhas pares transparentes / zebra de baixa opacidade. ✅ **CONCLUÍDO** — agora toda tabela sem card aplica `bg-surface` (ou, no caso do primitivo `<DataTable>`, `background: var(--color-surface)` em seu contêiner de rolagem). Corrigidos: `DataTable` (primitivo), `ProxyLogger`/`RequestLoggerV2` (o tom `bg-black/5 dark:bg-black/20` de seus `<Card>` estava prevalecendo sobre o `bg-surface` do Card via tailwind-merge → ~95% transparente), `BatchListTab`/`FilesListTab`/`CacheEntriesTab`/`ReasoningCacheTab`/`cache page`/`FreePoolTab`/`ModelMappingTable`/`HeaderTable`, além das duas "tabelas" em CSS grid nas visualizações de cache (`bg-surface/35` → `bg-surface`). As tabelas que já estavam dentro de um `<Card>`/Modal foram verificadas como opacas e deliberadamente mantidas intactas (`bg-surface` seria redundante e não teria efeito ali). O grid em si **não precisou de nenhuma alteração** — o `body::before` do dashboard é idêntico byte a byte ao do site (`--grid-size: 32px`); qualquer "grid maior" visto em uma instância em execução é um build antigo anterior ao `#4143`, não o código atual. Protegido por `tests/unit/design-grid-background.test.ts` (bloco da Fase 6).
-
----
-
-## 9. Fora do escopo / riscos
-
-- **Nenhuma alteração na paleta** — as cores já correspondem; adicionamos apenas os tokens ausentes. Risco zero de alterar as cores do produto.
-- **Nenhuma alteração no mecanismo de temas** — manter `.dark` + store Zustand.
-- **A mudança de raio (Fase 2) é abrangente** — afeta todos os cards/botões/inputs; inspecione visualmente telas densas (tabelas, modais) antes do merge.
-- **As tabelas (C3)** concentram a maior quantidade de estilos hardcoded e a maior superfície de regressão — isole-as em seu próprio PR.
-
----
-
-## 10. Índice de referências
-
-| Área                                         | Caminho                                                                                                              |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Tokens do dashboard                          | `src/app/globals.css` (`:root`, `.dark`, `@theme inline`, `body`, `body::before`)                                    |
-| Store de tema                                | `src/store/themeStore.ts`, `src/shared/components/ThemeProvider.tsx`, `src/shared/constants/appConfig.ts:9-11`       |
-| Estrutura do painel (grid desbloqueado aqui) | `src/shared/components/layouts/DashboardLayout.tsx`                                                                  |
-| Chrome                                       | `src/shared/components/Header.tsx:207`, `src/shared/components/Sidebar.tsx:430`                                      |
-| Precedente do grid                           | `src/app/landing/page.tsx:16-26`                                                                                     |
-| Primitivos                                   | `src/shared/components/{Button,Card,Input,Select,Badge,Modal,Toggle,SegmentedControl,Loading,Tooltip,DataTable}.tsx` |
-| Fontes de cores de status                    | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `logTableStyles.ts`                            |
-| Utilitário `cn`                              | `src/shared/utils/cn.ts`                                                                                             |
-| Teste de proteção da Fase 1                  | `tests/unit/design-grid-background.test.ts`                                                                          |
-| Referência do site                           | `_mono_repo/omnirouteSite/css/tokens.css`, `css/base.css`                                                            |
+- ponte de token `src/app/globals.css` —, substituições `.dark`, extensões OmniRoute `@layer components`
+- `packages/ui-kit/UPSTREAM.md` — commit upstream fixado e autorização de licença; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-editions.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` e os adaptadores próximos a ele; `src/shared/components/layouts/DashboardShell.tsx`, `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`, `scripts/dev/codemod-material-icons.mjs`
+- `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
+- `src/store/themeStore.ts`, `src/shared/utils/themeBootScript.ts`, `src/shared/constants/appearancePalette.ts`, `src/shared/constants/pwaThemeColors.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

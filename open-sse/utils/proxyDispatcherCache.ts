@@ -166,8 +166,8 @@ export function evictDispatcherPool(scope: DispatcherPoolScope): void {
   const globalWithCache = globalThis as GlobalWithDispatcherCache;
   const keys =
     scope === "local"
-      ? [LOCAL_DEFAULT_DISPATCHER_KEY, LOCAL_RETRY_DISPATCHER_KEY]
-      : [DEFAULT_DISPATCHER_KEY, RETRY_DISPATCHER_KEY];
+      ? ([LOCAL_DEFAULT_DISPATCHER_KEY, LOCAL_RETRY_DISPATCHER_KEY] as const)
+      : ([DEFAULT_DISPATCHER_KEY, RETRY_DISPATCHER_KEY] as const);
   for (const key of keys) {
     try {
       closeDispatcher(globalWithCache[key]);

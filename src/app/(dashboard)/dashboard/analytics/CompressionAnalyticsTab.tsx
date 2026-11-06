@@ -10,6 +10,8 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
+import SegmentedControl from "@/shared/components/SegmentedControl";
+import Icon from "@/shared/components/Icon";
 
 interface CompressionAnalyticsSummary {
   totalRequests: number;
@@ -51,7 +53,7 @@ function StatCard({
   return (
     <div className="card p-4 flex flex-col gap-1">
       <div className="flex items-center gap-2 text-text-muted text-sm">
-        <span className="material-symbols-outlined text-[18px]">{icon}</span>
+        <Icon name={icon} size={18} />
         {label}
       </div>
       <div className="text-2xl font-bold text-text">{value}</div>
@@ -163,7 +165,7 @@ export default function CompressionAnalyticsTab() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16 text-text-muted">
-        <span className="material-symbols-outlined animate-spin mr-2">progress_activity</span>
+        <Icon name="progress_activity" className="animate-spin mr-2" />
         {t("compressionAnalyticsLoading")}
       </div>
     );
@@ -172,7 +174,7 @@ export default function CompressionAnalyticsTab() {
   if (error || !stats) {
     return (
       <div className="card p-6 text-center text-text-muted">
-        <span className="material-symbols-outlined text-[32px] mb-2 block">compress</span>
+        <Icon name="compress" size={32} className="mb-2 block" />
         {error || t("compressionAnalyticsNoDataYet")}
         <p className="text-xs mt-2">{t("compressionAnalyticsNoDataDescription")}</p>
       </div>
@@ -190,27 +192,19 @@ export default function CompressionAnalyticsTab() {
   return (
     <div className="flex flex-col gap-6">
       {/* Time Range Selector */}
-      <div className="flex gap-2">
-        {(["24h", "7d", "30d", "all"] as const).map((range) => (
-          <button
-            key={range}
-            onClick={() => setSince(range)}
-            className={`px-3 py-1 rounded text-sm transition-colors ${
-              since === range
-                ? "bg-primary text-primary-foreground"
-                : "bg-bg-muted text-text-muted hover:bg-bg-muted/80"
-            }`}
-          >
-            {range === "24h"
-              ? t("rangeLast24h")
-              : range === "7d"
-                ? t("rangeLast7d")
-                : range === "30d"
-                  ? t("rangeLast30d")
-                  : t("rangeAllTime")}
-          </button>
-        ))}
-      </div>
+      <SegmentedControl
+        size="sm"
+        aria-label={t("compressionAnalyticsTitle")}
+        value={since}
+        onChange={(next) => setSince(next as typeof since)}
+        options={[
+          { value: "24h", label: t("rangeLast24h") },
+          { value: "7d", label: t("rangeLast7d") },
+          { value: "30d", label: t("rangeLast30d") },
+          { value: "all", label: t("rangeAllTime") },
+        ]}
+        className="w-fit"
+      />
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
@@ -253,7 +247,7 @@ export default function CompressionAnalyticsTab() {
       {stats.realUsage.requestsWithReceipts > 0 && (
         <div className="card p-5">
           <h3 className="font-semibold text-text mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-[20px]">receipt_long</span>
+            <Icon name="receipt_long" size={20} className="text-primary" />
             {t("compressionAnalyticsRealUsageReceipts")}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 text-sm">
@@ -299,7 +293,7 @@ export default function CompressionAnalyticsTab() {
       {modes.length > 0 && (
         <div className="card p-5">
           <h3 className="font-semibold text-text mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-[20px]">tune</span>
+            <Icon name="tune" size={20} className="text-primary" />
             {t("compressionAnalyticsModeBreakdown")}
           </h3>
           <div className="flex flex-col gap-4">
@@ -321,7 +315,7 @@ export default function CompressionAnalyticsTab() {
       {providers.length > 0 && (
         <div className="card p-5">
           <h3 className="font-semibold text-text mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-[20px]">hub</span>
+            <Icon name="hub" size={20} className="text-primary" />
             {t("compressionAnalyticsProviderBreakdown")}
           </h3>
           <div className="flex flex-col gap-4">
@@ -342,7 +336,7 @@ export default function CompressionAnalyticsTab() {
       {stats.last24h.length > 0 && (
         <div className="card p-5">
           <h3 className="font-semibold text-text mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-[20px]">show_chart</span>
+            <Icon name="show_chart" size={20} className="text-primary" />
             {t("compressionAnalyticsLast24HoursActivity")}
           </h3>
           <div className="flex items-end gap-2 h-48">
@@ -385,9 +379,7 @@ export default function CompressionAnalyticsTab() {
       {/* Empty state */}
       {totalAttempts === 0 && (
         <div className="card p-8 text-center text-text-muted">
-          <span className="material-symbols-outlined text-[48px] mb-3 block text-primary opacity-50">
-            compress
-          </span>
+          <Icon name="compress" size={48} className="mb-3 block text-primary opacity-50" />
           <p className="font-medium text-text">{t("compressionAnalyticsNoDataYet")}</p>
           <p className="text-sm mt-1">
             {t.rich("compressionAnalyticsStartTracking", {
@@ -399,7 +391,7 @@ export default function CompressionAnalyticsTab() {
 
       {/* Info note */}
       <div className="text-xs text-text-muted border border-border rounded-lg p-3 flex items-start gap-2">
-        <span className="material-symbols-outlined text-[16px] text-blue-500 mt-0.5">info</span>
+        <Icon name="info" size={16} className="text-info mt-0.5" />
         <span>
           {t.rich("compressionAnalyticsInfo", {
             strong: (chunks) => <strong>{chunks}</strong>,

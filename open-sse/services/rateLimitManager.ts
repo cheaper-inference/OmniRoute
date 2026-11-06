@@ -47,7 +47,7 @@ import { LimiterWedgeWatchdog, WATCHDOG_INTERVAL_MS } from "./rateLimitManager/w
 import { createCancellableJob } from "./rateLimitManager/queuedJobCancel";
 import * as bodyRetryPause from "./rateLimitManager/bodyRetryPause";
 import { errorRateLimit, logRateLimit, warnRateLimit } from "./rateLimitManager/log";
-import { toNumber } from "@/shared/utils/numeric";
+import { toNumber } from "../utils/numeric.ts";
 import type { ConnectionRateLimitOverrides } from "@/lib/db/providers/columns";
 import {
   getExecutorTimeoutMs,
@@ -119,7 +119,16 @@ export const ZAI_WEB_REQUEST_QUEUE_MAX_WAIT_MS = 60_000;
 export const MAXAI_REQUEST_QUEUE_MAX_WAIT_MS = 300_000;
 
 const limiterEffectiveSettings = new WeakMap<Bottleneck, Bottleneck.ConstructorOptions>();
-const preservedReplacementSettings = new Map<string, Bottleneck.ConstructorOptions>();
+// Wedge evictions stash per-key limiter settings here for the NEXT replacement
+// (preserved reservoir carry-forward). A key that is never requested again
+// (model churn) would keep its entry for the whole process lifetime, so this
+// is LRU-capped: evicting an entry only means a replacement rebuilds from
+// defaults instead of carried settings, which is always safe.
+const preservedReplacementSettings = boundedMap<Bottleneck.ConstructorOptions>(
+  "preserved-limiter-settings",
+  512,
+  "lru"
+);
 const limiterWatchdog = new LimiterWedgeWatchdog({
   limiters,
   limiterLastUsed,
@@ -416,11 +425,10 @@ export async function initializeRateLimits() {
   applyBottleneckHeartbeatPatch();
 
   try {
-    const { getCachedProviderConnections } = await import("@/lib/db/readCache");
-    const { getSettings } = await import("@/lib/db/settings");
+    const { getCachedProviderConnections, getCachedSettings } = await import("@/lib/db/readCache");
     const [connections, settings] = await Promise.all([
       getCachedProviderConnections(),
-      getSettings(),
+      getCachedSettings(),
     ]);
     const resilience = resolveResilienceSettings(settings);
     currentRequestQueueSettings = { ...resilience.requestQueue };
@@ -761,8 +769,10 @@ export async function withRateLimit(
     if (queueWaitDisabled) return; // sentinel: never fires
     delayId = setTimeout(() => {
       queueTimedOut = true;
-      abandonQueuedJob();
+      // Settle the caller-facing cause before immediate queue cleanup can reject
+      // the scheduled promise with Bottleneck's internal drop message.
       reject(queueTimeoutErr);
+      abandonQueuedJob();
     }, queueRemainingMs);
   });
   timeoutPromise.catch(() => {});
@@ -795,20 +805,20 @@ export async function withRateLimit(
       let abortListener: (() => void) | undefined;
       const { promise: abortPromise, reject: rejectAbort } = Promise.withResolvers<never>();
       const onAbort = () => {
-        abandonQueuedJob();
         const reason = signal.reason;
         // Preserve native Error reasons (including AbortController's
         // read-only DOMException) instead of mutating or wrapping them.
         if (reason instanceof Error) {
           rejectAbort(reason);
-          return;
+        } else {
+          const err = new Error(typeof reason === "string" ? reason : "The operation was aborted");
+          err.name = "AbortError";
+          if (reason !== undefined) {
+            (err as Error & { cause?: unknown }).cause = reason;
+          }
+          rejectAbort(err);
         }
-        const err = new Error(typeof reason === "string" ? reason : "The operation was aborted");
-        err.name = "AbortError";
-        if (reason !== undefined) {
-          (err as Error & { cause?: unknown }).cause = reason;
-        }
-        rejectAbort(err);
+        abandonQueuedJob();
       };
       if (signal.aborted) {
         onAbort();
@@ -1164,8 +1174,8 @@ export async function __getLimiterStateForTests(provider, connectionId, model = 
  */
 async function loadPersistedLimits() {
   try {
-    const { getSettings } = await import("@/lib/db/settings");
-    const settings = await getSettings();
+    const { getCachedSettings } = await import("@/lib/db/readCache");
+    const settings = await getCachedSettings();
     const raw = settings?.learnedRateLimits;
     if (typeof raw !== "string" || raw.trim().length === 0) return;
 

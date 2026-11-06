@@ -9,7 +9,9 @@ import { SAFE_OUTBOUND_FETCH_PRESETS, safeOutboundFetch } from "@/shared/network
 import { getProviderOutboundGuard } from "@/shared/network/outboundUrlGuardPolicy";
 import { getModelsByProviderId } from "@/shared/constants/models";
 import { isProviderBlockedByIdOrAlias } from "@/shared/utils/noAuthProviders";
+import { applyDiscoveryDegradation, type DiscoveryFailure } from "@/shared/discovery/degradedCause";
 import { mergeLocalCatalogModels } from "./discovery/helpers";
+import { recordDiscoveryOutcome } from "./discovery/discoveryOutcome";
 
 export function filterModelsForRoute<
   T extends { id: string; supportedEndpoints?: readonly string[] },
@@ -30,13 +32,22 @@ function toLiveModel(item: Record<string, unknown>): { id: string; name: string 
   return { id: itemId, name: itemName };
 }
 
+/**
+ * The outcome of a live no-auth discovery: the live catalog, or the reason the
+ * live catalog could not be used. The reason is a code or an HTTP status —
+ * never a message, a body or an URL.
+ */
+type NoAuthLiveOutcome =
+  | { kind: "live"; payload: Record<string, unknown> }
+  | { kind: "failed"; failure: DiscoveryFailure };
+
 async function fetchLiveNoAuthModels(
   modelsUrl: string,
   providerId: string,
   connectionId: string,
   excludeHidden: boolean,
   chatOnly: boolean
-): Promise<NextResponse | null> {
+): Promise<NoAuthLiveOutcome> {
   try {
     const liveResponse = await safeOutboundFetch(modelsUrl, {
       ...SAFE_OUTBOUND_FETCH_PRESETS.modelsDiscovery,
@@ -44,7 +55,7 @@ async function fetchLiveNoAuthModels(
       method: "GET",
       headers: { "Content-Type": "application/json" },
     });
-    if (!liveResponse.ok) return null;
+    if (!liveResponse.ok) return { kind: "failed", failure: { status: liveResponse.status } };
 
     const data = await liveResponse.json();
     const liveModels: Array<{ id: string; name: string }> = (
@@ -52,20 +63,21 @@ async function fetchLiveNoAuthModels(
     )
       .map(toLiveModel)
       .filter((model): model is { id: string; name: string } => model !== null);
-    if (liveModels.length === 0) return null;
+    if (liveModels.length === 0) return { kind: "failed", failure: { code: "EMPTY_CATALOG" } };
 
     const selectable = filterModelsForRoute(providerId, liveModels, chatOnly);
     const visible = excludeHidden
       ? selectable.filter((model) => !getModelIsHidden(providerId, model.id))
       : selectable;
-    return NextResponse.json({
+    const payload = {
       provider: providerId,
       connectionId,
       models: visible,
       source: "upstream",
-    });
+    };
+    return { kind: "live", payload };
   } catch {
-    return null;
+    return { kind: "failed", failure: {} };
   }
 }
 
@@ -84,6 +96,8 @@ export async function buildNoAuthModelsResponse(
     typeof registryEntry?.modelsUrl === "string" && registryEntry.modelsUrl.length > 0
       ? registryEntry.modelsUrl
       : null;
+  let liveFailure: DiscoveryFailure | undefined;
+  let livePayload: Record<string, unknown> | null = null;
   if (modelsUrl) {
     const live = await fetchLiveNoAuthModels(
       modelsUrl,
@@ -92,9 +106,34 @@ export async function buildNoAuthModelsResponse(
       excludeHidden,
       chatOnly
     );
-    if (live) return live;
+    if (live.kind === "live") livePayload = live.payload;
+    else liveFailure = live.failure;
   }
 
+  const payload =
+    livePayload ??
+    applyDiscoveryDegradation({
+      ...buildLocalCatalogPayload(
+        providerId,
+        connectionId,
+        excludeHidden,
+        chatOnly,
+        Boolean(modelsUrl)
+      ),
+      ...(liveFailure ? { failure: liveFailure } : {}),
+    });
+  // Keep the outcome of this discovery: the response carrying it is gone on the next read.
+  recordDiscoveryOutcome(payload);
+  return NextResponse.json(payload);
+}
+
+function buildLocalCatalogPayload(
+  providerId: string,
+  connectionId: string,
+  excludeHidden: boolean,
+  chatOnly: boolean,
+  hasModelsUrl: boolean
+): Record<string, unknown> {
   const catalog = mergeLocalCatalogModels(
     getModelsByProviderId(providerId) || [],
     getStaticModelsForProvider(providerId) || []
@@ -103,7 +142,7 @@ export async function buildNoAuthModelsResponse(
   const visible = excludeHidden
     ? selectable.filter((model) => !getModelIsHidden(providerId, model.id))
     : selectable;
-  return NextResponse.json({
+  return {
     provider: providerId,
     connectionId,
     models: visible,
@@ -114,8 +153,8 @@ export async function buildNoAuthModelsResponse(
     // tag, model-sync's isDegradedDiscovery guard 502s before importing and the
     // provider can never persist a model while /models keeps returning 200.
     // Providers that DO declare `modelsUrl` return above with source:"upstream",
-    // and a failed live fetch still falls through here untagged only when the
+    // and a failed live fetch still falls back here untagged only when the
     // URL exists — that case stays a genuine degradation.
-    ...(modelsUrl ? {} : { intentional: true }),
-  });
+    ...(hasModelsUrl ? {} : { intentional: true }),
+  };
 }

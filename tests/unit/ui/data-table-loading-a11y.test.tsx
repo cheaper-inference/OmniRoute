@@ -51,17 +51,20 @@ describe("DataTable loading state accessibility", () => {
     const status = container.querySelector<HTMLDivElement>('[role="status"]')!;
 
     expect(status).not.toBeNull();
-    expect(status.getAttribute("aria-live")).toBe("polite");
+    // KEA-7886: the kit BrandLoader is the status region (role="status" is an implicit
+    // aria-live="polite" region). It must carry the loading label and stay exposed to
+    // assistive technology even though the retained rows beside it are aria-hidden.
+    expect(status.getAttribute("aria-label")).toBe("loading");
+    expect(status.closest('[aria-hidden="true"]')).toBeNull();
     expect(status.getAttribute("aria-busy")).toBe("true");
   });
 
   it("hides the decorative spinner glyph from assistive technology", () => {
     const container = renderTable({ loading: true });
-    const glyph = [...container.querySelectorAll("span")].find((el) =>
-      el.textContent?.includes("⏳")
-    )!;
+    // KEA-7886: the decorative glyph is the kit loader artwork (an SVG), not the ⏳ emoji.
+    const glyph = container.querySelector<SVGElement>('[role="status"] svg')!;
 
-    expect(glyph).toBeDefined();
+    expect(glyph).not.toBeNull();
     expect(glyph.getAttribute("aria-hidden")).toBe("true");
   });
 
@@ -85,27 +88,35 @@ describe("DataTable loading state accessibility", () => {
   it("keeps the spinner animation and layout untouched", () => {
     const container = renderTable({ loading: true });
     const status = container.querySelector<HTMLDivElement>('[role="status"]')!;
-    const glyph = status.querySelector<HTMLSpanElement>('span[aria-hidden="true"]')!;
 
-    expect(status.style.display).toBe("flex");
-    expect(status.style.alignItems).toBe("center");
-    expect(status.style.justifyContent).toBe("center");
-    expect(glyph.style.animation).toContain("spin");
-    expect(glyph.style.marginRight).toBe("8px");
-    expect(status.querySelector("style")?.textContent).toContain("@keyframes spin");
+    // KEA-7886: layout and animation now belong to the kit — a centred overlay over the
+    // table region holding the animated BrandLoader (styled by ci-ui.css, not inline styles).
+    const overlay = container.querySelector('[data-slot="table-loading-overlay"]')!;
+    expect(overlay).not.toBeNull();
+    expect(overlay.className).toContain("ci-table-loading-overlay");
+    expect(overlay.contains(status)).toBe(true);
+    expect(status.className).toContain("ci-brand-loader");
+    expect(status.getAttribute("data-phase")).toBe("loading");
   });
 
   it("renders no table while loading", () => {
     const container = renderTable({ loading: true });
 
-    expect(container.querySelector("table")).toBeNull();
+    // KEA-7886: the kit keeps the previous rows under the overlay (scroll position survives),
+    // but they are hidden from assistive technology and not interactive while loading.
+    const content = container.querySelector<HTMLElement>('[data-slot="table-loading-content"]')!;
+    expect(content.getAttribute("aria-hidden")).toBe("true");
+    expect(content.hasAttribute("inert")).toBe(true);
+    expect(
+      container.querySelector('table:not([data-slot="table-loading-content"] table)')
+    ).toBeNull();
   });
 
   it("does not expose a status region once rows have rendered", () => {
     const container = renderTable();
 
     expect(container.querySelector('[role="status"]')).toBeNull();
-    expect(container.querySelector("[aria-busy]")).toBeNull();
+    expect(container.querySelector('[aria-busy="true"]')).toBeNull();
     expect(container.querySelector("tbody tr")).not.toBeNull();
   });
 
@@ -113,7 +124,7 @@ describe("DataTable loading state accessibility", () => {
     const container = renderTable({ rows: [] });
 
     expect(container.querySelector('[role="status"]')).toBeNull();
-    expect(container.querySelector("[aria-busy]")).toBeNull();
+    expect(container.querySelector('[aria-busy="true"]')).toBeNull();
     expect(container.textContent).toContain("noData");
   });
 

@@ -309,6 +309,8 @@ export class CompressionWorkerPool {
         ...wireJob
       } = job;
       try {
+        // Hold the process open until this job's reply arrives, even if the worker was idle.
+        slot.worker.ref();
         slot.worker.postMessage(wireJob);
       } catch (error) {
         // A non-cloneable payload (DataCloneError) must not strand the slot until its
@@ -352,6 +354,9 @@ export class CompressionWorkerPool {
     // for the whole process lifetime, invisible to process.memoryUsage(). (#12812)
     slot.idle = setTimeout(() => void this.remove(slot), this.idleMs);
     slot.idle.unref();
+    // An idle worker must not keep the process alive for idleMs after its last job (a CLI or
+    // test process would otherwise linger 60 s). dispatch() refs it again for the next job.
+    slot.worker.unref();
     this.dispatch();
   }
   private fail(
