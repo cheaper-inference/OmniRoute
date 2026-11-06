@@ -48,12 +48,18 @@ fs.writeFileSync(
   "CREATE TABLE IF NOT EXISTS radar_referrals_cache (id TEXT PRIMARY KEY);"
 );
 
-const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
+// The runner resolves OMNIROUTE_MIGRATIONS_DIR once, when the module loads, and
+// test:unit:fast shares one module cache across files. A fresh instance keeps this
+// directory out of that cache, so the variable can go back as soon as it has loaded.
+const runnerUrl = new URL("../../src/lib/db/migrationRunner.ts", import.meta.url).href;
+const { runMigrations } = (await import(
+  `${runnerUrl}?test=${Date.now()}-${Math.random().toString(16).slice(2)}`
+)) as typeof import("../../src/lib/db/migrationRunner.ts");
+if (originalMigrationsDir === undefined) delete process.env.OMNIROUTE_MIGRATIONS_DIR;
+else process.env.OMNIROUTE_MIGRATIONS_DIR = originalMigrationsDir;
 
 test.after(() => {
   fs.rmSync(migrationsDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
-  if (originalMigrationsDir === undefined) delete process.env.OMNIROUTE_MIGRATIONS_DIR;
-  else process.env.OMNIROUTE_MIGRATIONS_DIR = originalMigrationsDir;
 });
 
 function seedLedger(db: BetterSqlite3.Database, rows: Array<[string, string]>) {
@@ -122,7 +128,9 @@ test("a ledger row whose file moved elsewhere releases its slot too", { skip }, 
 
     assert.ok(
       db
-        .prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'radar_referrals_cache'")
+        .prepare(
+          "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'radar_referrals_cache'"
+        )
         .get(),
       "radar_referrals_cache must be created once its slot is released"
     );

@@ -280,7 +280,10 @@ export const LEGACY_VERSION_SLOT_MIGRATIONS = [
   // 139, api_key_cache_default_mode at 143), so only the other row is listed
   // here. Its occupancy is what stopped the file now belonging at that version
   // from being back-filled; radar_referrals_cache and the two
-  // proxy_subscriptions columns were the visible casualties.
+  // proxy_subscriptions columns were the visible casualties. Releasing a slot
+  // replays that version's file after everything newer has run, so an entry here
+  // needs a file that is safe out of order, or a guard in isSchemaAlreadyApplied
+  // (178 has one: its file would otherwise overwrite the trigger 203 installed).
   { version: "140", name: "ccr_blocks" },
   { version: "141", name: "api_key_cache_default_mode" },
   { version: "142", name: "connection_runtime_state" },
