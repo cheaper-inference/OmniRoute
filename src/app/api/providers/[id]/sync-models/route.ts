@@ -15,11 +15,13 @@ import {
 import { createModelSyncTimings } from "@/lib/providerModels/modelSyncTimings";
 import { saveCallLog } from "@/lib/usage/callLogs";
 import { isAuthenticated } from "@/shared/utils/apiAuth";
+import { AUTHZ_HEADER_PEER_LOCALITY } from "@/server/authz/headers";
 import {
   buildModelSyncInternalHeaders,
   fetchModelSyncInternal,
   getModelSyncInternalBaseUrl,
   isModelSyncInternalRequest,
+  isModelSyncLocalSpawnDenied,
 } from "@/shared/services/modelSyncScheduler";
 import { autoSyncCodexProfilesFromLiveCatalog } from "@/lib/cli-helper/codexProfileAutoSync";
 import { autoSyncClaudeProfilesFromLiveCatalog } from "@/lib/cli-helper/claudeProfileAutoSync";
@@ -372,10 +374,12 @@ async function fetchProviderModelsForSync(request: Request, connectionId: string
   const modelsPath =
     `/api/providers/${encodeURIComponent(connectionId)}/models` +
     "?refresh=true&excludeCustom=true";
+  const peerLocality = request.headers.get(AUTHZ_HEADER_PEER_LOCALITY) || "remote";
+  const denyLocalSpawn = peerLocality !== "loopback" || isModelSyncLocalSpawnDenied(request);
   const headers = {
     cookie: request.headers.get("cookie") || "",
     "x-omniroute-model-surface": "chat",
-    ...buildModelSyncInternalHeaders(),
+    ...buildModelSyncInternalHeaders({ denyLocalSpawn }),
   };
 
   const targetUrl = `${safeOrigin}${modelsPath}`;
@@ -391,7 +395,8 @@ async function fetchProviderModelsForSync(request: Request, connectionId: string
       getProviderModels(
         new Request(new URL(modelsPath, "http://localhost").href, {
           method: "GET",
-          headers,
+          // This direct call bypasses the pipeline that normally stamps trusted locality.
+          headers: { ...headers, [AUTHZ_HEADER_PEER_LOCALITY]: peerLocality },
         }),
         { params: { id: connectionId } }
       ),

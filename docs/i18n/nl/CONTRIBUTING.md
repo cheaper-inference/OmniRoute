@@ -15,9 +15,14 @@ Thank you for your interest in contributing! This guide covers everything you ne
 - **Node.js** `>=22.22.2 <23`, of `>=24.0.0 <27` (aanbevolen: 24 LTS)
 - **npm** 10+
 
-> **Gebruikers van npm v11+ (Node 24+):** Controleer na `npm install` of de native modules zijn geïnstalleerd:
+> **Windows met Node 24:** gebruik de huidige 24 LTS-patchrelease (minimaal 24.20.0).
+> Eerdere releases kunnen na geslaagde tests afbreken wanneer `--test-force-exit` het
+> proces sluit. Node's [Windows libuv-fix](https://github.com/nodejs/node/pull/61999) verhelpt
+> deze runtimecrash; laat de testasserties en controles van het runner-afsluiten ingeschakeld.
+
+> **Gebruikers van npm v11+ (Node 24+):** Controleer na `npm install` of native modules zijn geïnstalleerd:
 > `node -e "require('better-sqlite3')"`. Als dit mislukt met `MODULE_NOT_FOUND`,
-> voer dan `npm approve-scripts better-sqlite3 && npm install` uit. Zie
+> voer je `npm approve-scripts better-sqlite3 && npm install` uit. Zie
 > [Probleemoplossing](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
@@ -33,7 +38,7 @@ npm install
 ### Omgevingsvariabelen
 
 ```bash
-# Maak uw .env aan op basis van de sjabloon
+# Maak je .env aan vanuit de template
 cp .env.example .env
 
 # Genereer de vereiste geheimen
@@ -43,77 +48,74 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 Belangrijke variabelen voor ontwikkeling:
 
-| Variabele              | Standaardwaarde voor ontwikkeling | Beschrijving                    |
-| ---------------------- | --------------------------------- | ------------------------------- |
-| `PORT`                 | `20128`                           | Serverpoort                     |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`          | Basis-URL voor de frontend      |
-| `JWT_SECRET`           | (hierboven genereren)             | Geheim voor JWT-ondertekening   |
-| `INITIAL_PASSWORD`     | `CHANGEME`                        | Wachtwoord voor eerste login    |
-| `APP_LOG_LEVEL`        | `info`                            | Detailniveau van logregistratie |
+| Variabele              | Standaardwaarde voor ontwikkeling | Beschrijving                 |
+| ---------------------- | --------------------------------- | ---------------------------- |
+| `PORT`                 | `20128`                           | Serverpoort                  |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`          | Basis-URL voor frontend      |
+| `JWT_SECRET`           | (hierboven genereren)             | JWT-ondertekeningsgeheim     |
+| `INITIAL_PASSWORD`     | `CHANGEME`                        | Wachtwoord voor eerste login |
+| `APP_LOG_LEVEL`        | `info`                            | Niveau van loguitvoer        |
 
 ### Dashboardinstellingen
 
 Het dashboard biedt UI-schakelaars voor functies die ook via omgevingsvariabelen kunnen worden geconfigureerd:
 
-| Locatie van instelling     | Schakelaar            | Beschrijving                                   |
-| -------------------------- | --------------------- | ---------------------------------------------- |
-| Instellingen → Geavanceerd | Debugmodus            | Logboeken voor debugverzoeken inschakelen (UI) |
-| Instellingen → Algemeen    | Zichtbaarheid zijbalk | Secties in de zijbalk tonen/verbergen          |
+| Instellingslocatie  | Schakelaar         | Beschrijving                             |
+| ------------------- | ------------------ | ---------------------------------------- |
+| Settings → Advanced | Debug Mode         | Debug-aanvraaglogboeken inschakelen (UI) |
+| Settings → General  | Sidebar Visibility | Zijbalksecties tonen/verbergen           |
 
-Deze instellingen worden in de database opgeslagen en blijven behouden na herstarts. Wanneer ze zijn ingesteld, overschrijven ze de standaardwaarden van omgevingsvariabelen.
+Deze instellingen worden in de database opgeslagen en blijven na herstarts behouden. Wanneer ze zijn ingesteld, overschrijven ze de standaardwaarden van omgevingsvariabelen.
 
 ### Lokaal uitvoeren
 
 ```bash
-# Ontwikkelmodus (automatisch herladen)
+# Ontwikkelingsmodus (hot reload)
 npm run dev
 
 # Productiebuild
 npm run build    # next build → .build/next/ en vervolgens assembleStandalone → dist/
 npm run start
 
-# Snelle compilatie van alleen backend/API voor wijzigingen van bijdragers
+# Snelle backend/API-only compilatie voor wijzigingen van bijdragers
 npm run build:contributor
 
-# Releasebuild (schone herbouw + HEAD-controlebestand — vereist voor implementatie)
-npm run build:release   # rm -rf .build dist && build + schrijft dist/BUILD_SHA
+# Releasebuild (schone rebuild + HEAD-sentinel — vereist voor deployment)
+npm run build:release   # rm -rf .build dist en build + schrijft dist/BUILD_SHA
 
-# Gebruikelijke poortconfiguratie
+# Veelgebruikte poortconfiguratie
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-De bijdragersbuild voert alleen compilatievalidatie uit: deze stelt de zelfstandige
-distributie niet samen en bouwt geen optionele native pakketassets. Gebruik de reguliere productiebuild wanneer
-u de distribueerbare bundel moet valideren.
+De contributor-build voert uitsluitend compilatievalidatie uit: de standalone-distributie wordt niet samengesteld en optionele native packaging-assets worden niet gebouwd. Gebruik de reguliere productiebuild wanneer je de distributie die kan worden uitgeleverd wilt valideren.
 
-### Indeling van builduitvoer
+### Indeling van de build-uitvoer
 
-| Map       | Inhoud                                                                                   | Bijgehouden |
-| --------- | ---------------------------------------------------------------------------------------- | ----------- |
-| `src/`    | Broncode van de applicatie (TypeScript / TSX)                                            | Ja          |
-| `.build/` | Tussenbestanden — uitvoer van `next build` (genegeerd door Git, `distDir = .build/next`) | Nee         |
-| `dist/`   | Distribueerbare bundel — samengesteld door `assembleStandalone` (genegeerd door Git)     | Nee         |
+| Map       | Inhoud                                                                           | Bijgehouden |
+| --------- | -------------------------------------------------------------------------------- | ----------- |
+| `src/`    | Broncode van de applicatie (TypeScript / TSX)                                    | Ja          |
+| `.build/` | Tussenbestanden — uitvoer van `next build` (gitignored, `distDir = .build/next`) | Nee         |
+| `dist/`   | Uitleverbare bundel — samengesteld door `assembleStandalone` (gitignored)        | Nee         |
 
-De buildpipeline bestaat uit één doorgang:
+De build-pipeline bestaat uit één doorgang:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js-uitvoer)
   └─ assembleStandalone()                 (kopieert standalone + static + public + native assets)
-       └─ uitvoer: dist/                  (server.js, .next/static/, public/, node_modules/)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
 `npm run build:release` maakt bovendien eerst beide mappen leeg en schrijft
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) als controlebestand voor de integriteit van de implementatie.
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) als sentinel voor de integriteit van de deployment.
 
-`npm run build:contributor` gebruikt het buildprofiel voor alleen de backend. Tijdens het builden worden
-dashboard-UI-bestanden tijdelijk vervangen door stubs, blijven API-routehandlers behouden en worden de oorspronkelijke bestanden
-na de build hersteld. Gebruik `npm run build` voor wijzigingen die invloed hebben op de dashboard-UI of voor volledige
-releasevalidatie; het bijdragersprofiel is geen vervanging voor de releasebuild.
+`npm run build:contributor` gebruikt het backend-only-buildprofiel. Tijdens het bouwen worden
+dashboard-UI-bestanden tijdelijk gestubd, blijven API-routehandlers behouden en worden de oorspronkelijke bestanden
+na de build teruggezet. Gebruik `npm run build` voor wijzigingen die gevolgen hebben voor de dashboard-UI of voor volledige releasevalidatie; het contributor-profiel is geen vervanging voor de releasebuild.
 
-> **Opmerking voor VPS-implementatie:** de externe image-map `/usr/lib/node_modules/omniroute/app/`
-> blijft ongewijzigd. De implementatietaken synchroniseren de inhoud van `dist/` er via rsync naartoe.
-> Alleen het pad voor builduitvoer binnen de repository is gewijzigd (`app/` → `dist/`).
+> **Opmerking over VPS-deployment:** de externe imagemap `/usr/lib/node_modules/omniroute/app/`
+> blijft ongewijzigd. De deploy-skills rsync'en de inhoud van `dist/` hiernaartoe.
+> Alleen het build-uitvoerpad in de repository is gewijzigd (`app/` → `dist/`).
 
 Standaard-URL's:
 

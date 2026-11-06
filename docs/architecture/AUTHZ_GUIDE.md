@@ -339,8 +339,11 @@ credential only. See [Management Authentication](../guides/MANAGEMENT-AUTH.md).
   minting CLI access tokens at any scope, and creating an API key with the `manage`/`admin` scope,
   granting that scope to a key, or regenerating or revealing such a key
   (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`).
-  Inference-only keys stay open.
-- No password configured **and** no `INITIAL_PASSWORD` env var → bootstrap mode allows the onboarding wizard and loopback requests, but exposed network requests still need credentials.
+  Inference-only keys stay open. Writing a protected feature flag (`REQUIRE_API_KEY`, the other
+  Security flags, and the SSRF / TLS / MCP-scope / sandbox flags listed in
+  [Feature Flags](../reference/FEATURE_FLAGS.md#rest-api)) and saving the PII masking settings
+  (`PUT /api/settings/pii`) also keep needing a credential.
+- No password configured **and** no `INITIAL_PASSWORD` env var → bootstrap mode allows the onboarding wizard and loopback requests, but exposed network requests still need credentials. Exception: writing a protected feature flag and saving the PII masking settings (`PUT /api/settings/pii`) need a credential even from loopback, so loopback by itself is not enough there.
 - Any DB error → fails closed (secure-by-default).
 
 Client API key enforcement uses `isRequireApiKeyEnabled()` in `src/shared/utils/featureFlags.ts`, not a direct `process.env.REQUIRE_API_KEY` read. This matters for deployed instances: toggling `REQUIRE_API_KEY` in Dashboard → Feature Flags stores a DB override and immediately affects `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, and other client-API auth checks that share this helper. If the feature flag store cannot be read, client API auth fails closed and requires a key.

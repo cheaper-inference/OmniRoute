@@ -54,7 +54,7 @@ test("an active named combo's pipeline is what selectCompressionPlan resolves, f
   assert.equal(headerless.source, "active-profile");
   assert.deepEqual(headerless.stackedPipeline, [
     { engine: "session-dedup" },
-    { engine: "lite", config: { compressToolResults: false } },
+    { engine: "lite", config: { compressToolResults: false, preserveToolWhitespace: true } },
   ]);
 
   // Setting activeComboId did NOT change which combo is is_default (legacy untouched).
