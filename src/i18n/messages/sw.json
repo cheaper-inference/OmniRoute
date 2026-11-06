@@ -923,6 +923,8 @@
     "batchListTitle": "Makundi",
     "batchListCount": "Makundi {count}",
     "batchListRemovingCompleted": "Inaondoa…",
+    "batchListRemoveCompletedPartial": "Idadi kubwa ya makundi imeondolewa. Bofya tena ili kufuta yaliyosalia.",
+    "batchListRemoveCompletedFailed": "Hitilafu imetokea wakati wa kuondoa makundi.",
     "batchListRemoveCompleted": "Ondoa zilizokamilika",
     "batchListTableStatus": "Hali",
     "batchListTableId": "Kitambulisho",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "Inaonyesha upya…",
     "batchListRefresh": "Onyesha upya",
     "uploadFileModalRemove": "Ondoa",
+    "fileInputChoose": "Chagua faili",
+    "fileInputChooseMultiple": "Chagua faili",
+    "fileInputEmpty": "Hakuna faili lililochaguliwa",
+    "fileInputSelectedCount": "{count, plural, one {Faili # limechaguliwa} other {Faili # zimechaguliwa}}",
+    "fileDropLabel": "Dondosha faili hapa au uchague moja",
+    "fileDropLabelMultiple": "Dondosha faili hapa au uchague faili",
     "uploadFileModalUploading": "Inapakia…",
     "wizardInputReading": "Inasoma faili…",
     "wizardInputReady": "Tayari",
@@ -1035,7 +1043,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "Tuma alama ya utambulisho ya kiteja cha OpenCode v2 CLI kwenye maombi ya OpenCode Zen/Go: User-Agent ya opencode/latest/<2.x>/cli na x-opencode-client cli, na kwenye maombi ya kiwango cha bure, vichwa vya kipindi vya v2, miundo ya zana za read/shell za v2 CLI, na bila tool_choice \"none\". Imezimwa kwa chaguo-msingi: kila ombi la OpenCode huhifadhi utambulisho, vichwa na mwili wa sasa bila kubadilishwa.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Wakati kundi la wagombea la mchanganyiko otomatiki tayari ni tupu kabla ya kichujio cha awali cha uitaji wa zana kuendeshwa (kila lengwa limerukwa kwa sababu ya vipindi vya kusubiri, vizuizi au kuishiwa), rudisha 503 no_eligible_targets badala ya jibu la zamani la 400 \"Hakuna lengwa linalotumia uitaji wa zana\" capability_mismatch. Huzimwa kwa chaguo-msingi: kundi tupu huendelea kutumia jibu la zamani la 400.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Tekeleza lebo zinazoaminika za endpointi za modeli (zilizotangazwa na katalogi ya mtoa huduma, zilizobainishwa kutokana na kitambulisho cha modeli maalum, au zilizowekwa na mwendeshaji): kataa kwa HTTP 400 kabla ya kutuma ombi lililotumwa kwa endpointi ambayo modeli haihudumii kwenye /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations na /v1/audio/*; ficha modeli ambazo endpointi zake zilizo na lebo hazina adapta ya OmniRoute kutoka /v1/models; na ujibu jaribio la modeli la dashibodi kwa 422 kwa modeli kama hizo. Hali hii imezimwa kwa chaguo-msingi: lebo za endpointi hubaki za taarifa na maombi hutumwa kama hapo awali.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "Kwenye relays za kawaida zinazooana na anthropic, weka ujumbe wa mfumo wa katikati ya mazungumzo ndani ya orodha ya ujumbe badala ya kuuhamishia kwenye kidokezo cha mfumo cha kiwango cha juu, ili kiambishi awali cha kidokezo kilichohifadhiwa kwenye akiba kisibadilike kati ya zamu. Hii inatumika tu wakati mteja mwenyewe ametuma beta ya mid-conversation-system-2026-04-07. Hali hii imezimwa kwa chaguo-msingi: kila ujumbe wa mfumo huhamishwa hadi kwenye kidokezo cha mfumo kama ilivyokuwa awali, kwa sababu relays zisizo na beta hiyo hukataa ujumbe wa mfumo ulio kwenye orodha ya ujumbe.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Tumia viwango vya juhudi za kufikiri vinavyochapishwa na models.dev wakati ambapo hakuna ubatilishaji wa opereta wala sajili ya mtoa huduma inayovitaja, ukihifadhi viwango vya juhudi vinavyojulikana pekee, na uchukulie orodha tupu ya viwango vilivyotajwa kama \"hakuna viwango\". Imezimwa kwa chaguo-msingi: katalogi ya modeli na viwango vya juhudi vilivyobainishwa hubaki kama vilivyokuwa awali.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "Huruhusu maombi ya auto/* kujenga kundi la wagombea kwa kutumia uwezo wa modeli uliotatuliwa (maono, hoja, kufikiri) na alama za ubora zilizoonekana, zinazosomwa kwa usomaji mmoja wa jumla. Imezimwa kwa chaguo-msingi: uzito wa wagombea wakati wa ombi unabaki kama ulivyokuwa hapo awali. Ikiwashwa: ishara hizo huingia kwenye uzito wa picha ya papo hapo, hivyo uzito wa wagombea na uteuzi unaweza kubadilika.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Ruhusu ukaguzi wa afya ya vitambulisho ujaribu upya miunganisho ambayo lango lilizima lenyewe (angalau mara moja tu kila baada ya saa 6 kwa kila muunganisho, miunganisho 5 kwa kila ukaguzi) na uiwashe tena inapofaulu jaribio hilo. Hali hii imezimwa kwa chaguo-msingi: miunganisho hiyo husalia imezimwa hadi opereta achukue hatua. Miunganisho iliyozimwa na opereta na iliyopigwa marufuku kabisa haijaribiwi tena kamwe.",
@@ -1939,7 +1946,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# ombi} other {# maombi}}, {keys, plural, one {# ufunguo lenye kikomo} other {# funguo zenye kikomo}}",
     "unpricedUsageMore": "…na {count} zaidi",
     "unpricedUsageConfigure": "Sanidi bei",
-    "unpricedUsageDismiss": "Puuza"
+    "unpricedUsageDismiss": "Puuza",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Uchanganuzi",
@@ -6264,6 +6280,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Ruka muda wa utulivu wa mpito ili muunganisho huu uendelee kustahiki hata baada ya hitilafu zinazoweza kurekebishwa (hali za mwisho kama vile zilizopigwa marufuku/zilizopitwa na wakati bado zinatumika).",
     "disableCoolingLabel": "Zima muda wa utulivu kwa muunganisho huu",
+    "keepMidConversationSystemDescription": "Acha ujumbe wa mfumo uliotumwa katikati ya mazungumzo ndani ya orodha ya ujumbe badala ya kuwahamisha hadi kwenye kidokezo cha mfumo wa kiwango cha juu, kwa hivyo akiba ya papo hapo inaendelea kupiga zamu. Washa tu ikiwa mkondo huu wa juu unakubali jukumu la \"mfumo\" ndani ya ujumbe (vinginevyo hujibu 400).",
+    "keepMidConversationSystemLabel": "Weka ujumbe wa mfumo wa mazungumzo katikati",
+    "requireUserLastMessageDescription": "Kwa mitiririko ya juu inayokataa ujazaji awali wa mratibu: dondosha zamu za msaidizi (hakuna_use) kabla ya kutuma. Mfano unaweza kuunda tena jibu lake la hapo awali.",
+    "requireUserLastMessageLabel": "Inahitaji mazungumzo ili kumalizika kwa ujumbe wa mtumiaji",
     "bulkPasteAdded": "{count, plural, one {Ufunguo 1 umeongezwa} other {Funguo # zimeongezwa}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Nakala rudufu 1 imerukwa} other {Nakala rudufu # zimerukwa}}",
     "bulkPasteHint": "Bandika ufunguo mmoja wa API kwa kila mstari. Mistari tupu hupuuzwa na funguo zilizorudiwa hurukwa.",
@@ -6363,6 +6383,9 @@
     "localProviders": "Watoa Huduma wa Ndani",
     "maxConcurrentWholeNumberError": "Hitilafu ya nambari nzima ya kiwango cha juu cha miunganisho sambamba",
     "m365TierLabel": "Kiwango cha Copilot",
+    "m365RefreshTokenLabel": "Onyesha upya tokeni (si lazima)",
+    "m365RefreshTokenHint": "Inatumika kuonyesha upya tokeni ya ufikiaji Microsoft 365 kiotomatiki.",
+    "m365RefreshTokenEditHint": "Acha wazi ili kuweka tokeni iliyopo. Bandika tokeni mpya ili kuibadilisha.",
     "m365TierHint": "Chagua ni kiolesura gani cha Microsoft 365 Copilot ambacho muunganisho huu unatumia. Binafsi ndiyo BizChat ya kawaida ya mtumiaji; Elimu na Biashara (kazi) huchagua violesura vya wapangaji wao.",
     "m365TierIndividualOption": "Binafsi (chaguo-msingi)",
     "m365TierEduOption": "Elimu",
@@ -7097,6 +7120,7 @@
     "proxySubTabsAria": "Sehemu za proksi",
     "requestBodyLimitTitle": "Kikomo cha Mwili wa Ombi",
     "requestBodyLimitDescription": "Ukubwa wa juu zaidi wa data ya API unaokubaliwa kabla ya mwili wa ombi kuchanganuliwa. Njia maalum za upakiaji huhifadhi angalau kikomo chao cha ndani cha MB 100.",
+    "requestBodyLimitChatHint": "Chat Completions na Responses zinakubali hadi 50 MB hadi utakapohifadhi kikomo hapa. Kikomo kilichohifadhiwa kinatumika pia kwao, kiwe cha chini au cha juu zaidi.",
     "requestBodyLimitInputLabel": "Kikomo cha mwili wa ombi kwa MB",
     "requestBodyLimitEmptyError": "Weka kikomo kwa MB",
     "requestBodyLimitWholeNumberError": "Tumia nambari kamili",
@@ -12282,7 +12306,9 @@
       "failedTitle": "Jaribio zote {count} zimefeli",
       "failed": "imeshindwa",
       "pinnedTitle": "Mfano umechaguliwa kupitia upanuzi wa muktadha wa kikao",
-      "pinned": "imefungwa"
+      "pinned": "imefungwa",
+      "recoveredAttemptsTitle": "Ombi limerejeshwa baada ya majaribio {count}",
+      "latestOutcomeFailed": "Matokeo ya ombi la mwisho yameshindwa"
     },
     "attempts": "jaribio",
     "detail": {
@@ -12384,13 +12410,20 @@
       "continuesFromParent": "inaendelea kutoka kwa mzazi",
       "continuesFrom": "Inaendelea kutoka {id}",
       "viewConversation": "tazama mazungumzo",
-      "openConversation": "Fungua mazungumzo {id}"
+      "openConversation": "Fungua mazungumzo {id}",
+      "omittedHttpAttempts": "Matumaji {count} ya HTTP hayakuhifadhiwa",
+      "noHttpResponse": "Hakuna jibu la HTTP lililoonekana",
+      "transportError": "Hitilafu ya usafirishaji"
     },
     "tableLabel": "Kumbukumbu za maombi",
     "throughputPostFirstToken": "Baada ya tokeni ya kwanza",
     "throughputEndToEnd": "Mwanzo hadi mwisho",
     "throughputRate": "{value} tokeni/sek",
-    "throughputExplanation": "Viwango vyote viwili hutumia idadi kubwa zaidi kati ya tokeni za matokeo na tokeni za ufikiri. Baada-ya-tokeni-ya-kwanza haijumuishi TTFT halali; vinginevyo hutumia muda kamili. Mwanzo-hadi-mwisho hutumia muda kamili kila wakati. Jibu lililohifadhiwa linaweza kuwa na kiwango cha juu cha uwasilishaji wa mlipuko bila uzalishaji wa modeli wa haraka zaidi."
+    "throughputExplanation": "Viwango vyote viwili hutumia idadi kubwa zaidi kati ya tokeni za matokeo na tokeni za ufikiri. Baada-ya-tokeni-ya-kwanza haijumuishi TTFT halali; vinginevyo hutumia muda kamili. Mwanzo-hadi-mwisho hutumia muda kamili kila wakati. Jibu lililohifadhiwa linaweza kuwa na kiwango cha juu cha uwasilishaji wa mlipuko bila uzalishaji wa modeli wa haraka zaidi.",
+    "omittedHttpAttempts": "Matumaji {count} ya HTTP hayakuhifadhiwa",
+    "upstreamStatus": "Seva ya juu {status}",
+    "noHttpResponse": "Hakuna jibu la HTTP lililoonekana",
+    "transportError": "Hitilafu ya usafirishaji"
   },
   "proxyLogger": {
     "filterAll": "Zote",
@@ -14157,6 +14190,14 @@
         "label": "Mpangilio wa Kitanda cha Sogoro Shirikishi",
         "description": "Kwa waangalizi ambao kiwango chao kinapatikana kwa maelezo ya anwani ya sogoro, weka alama kwa mtu anayeshiriki alama ya anwani ya sogoro aliyotajwa mara ndogo zilizokataliwa tu ndani ya mwanasayansi. Mpangilio tu, usikutolii. Inahitaji PROXY_SKIP_RECENTLY_FAILED, ambayo hutoa ishara ya ukatili wanayoelekeza kuisoma. Imezimwa kwa chaguo-msingi: mpangilio wa uteuzo ni sawaswa na mzunguko safi."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Kukataliwa kwa mgao wa modeli",
+        "description": "Tumia mgawo wa opencode 429 pekee kwa mfano ulioipiga, kwa hivyo njia hiyo hiyo inaendelea kutumikia mifano mingine, na kuifuta tu wakati mtindo huo unafaulu. Wateja ambao hawana muundo (mzunguko wa bwawa, bustani na kucheza tena, mwonekano wa msimamizi, kichochezi cha kuchagua, kufagia afya) bado wanaiona. Inahitaji PROXY_SKIP_RECENTLY_FAILED, ambayo hutoa kukataa. Imezimwa kwa chaguo-msingi: mgawo wa modeli 429 huweka kando kwa kila modeli."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Uletaji wa wakala: kucheza tena kwa POST",
+        "description": "Kwa ombi lisilo la msingi (POST, PUT, PATCH, DELETE), tuma tena baada ya hitilafu ya usafiri (soketi safi, mbadala mbadala, urejeshaji asilia) pale tu hitilafu inapothibitisha kuwa hakuna kitu kilitumwa: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH au muda wa kuunganisha. Hitilafu ya soketi baada ya kuandika inaweza kumaanisha mkondo wa juu ulikubali ombi, kwa hivyo kutuma tena kunaweza kutoa na kulitoza mara mbili. Imezimwa kwa chaguo-msingi: mwili unaoweza kucheza tena hutupwa tena mara moja kwenye hitilafu yoyote ya usafiri, ambayo pia hurejesha soketi iliyochakaa iliyounganishwa."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Kurekodi ya Marefu ya Mzunguko",
         "description": "Mzunguko wa opencode unrekodi akaunti ambayo ilitumwa au ilirukaa (alama za masiki tu, kamwe alama kamili za akaunti) na linakiangusisha rekodi za proxy na ombi la ombi, ili msimamizi anaweze kutofautisha akaunti zilizorukaa na zile zisizotumwa. Imezimwa kwa chaguo-msingi: hakuna mistari ya ziada ya ukandisi, hakuna mizunguko ya ziada ya mwandiko."
@@ -14208,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "Ombi la OpenCode la 429 la Kuchagua Upya Mzigo",
         "description": "Kwa mzunguko wa multi-account wa OpenCode, baada ya 429 kutoka kwa muuguzi wa egress-bucketed kwenye akaunti isiyo na proxy chini ya mazingira ya mzigo, ombi mzigo wa mahusiano mwanahati naye kwa jaribio likifanya kile badala ya kurudia anwango la egress zilele. Utaratibu, haihitimu kabisa: mzigo umechoka huondoa mtazamo wa sasa. Imezimwa kwa chaguo-msingi: 429 yoyote huzunguka kwenda akaunti ifuatayo haswa kama awali."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Uchunguzi wa Egress wa Kiwango Huria",
+        "description": "Kwa mtekelezaji wa OpenCode, wakati ombi la wakala linapojibiwa 403 au 451 FreeTierError na zana zinazozingatiwa hazijafaulu au hazikutumika, tuma ombi hilo mara moja kupitia seva mbadala tofauti (wakala mwingine wa akaunti au mwanachama mwingine wa kikundi, kamwe muunganisho wa moja kwa moja). Wakati uchunguzi huo unajibu 200 tu ndipo njia ya kwanza iliyowekwa kando katika kumbukumbu ya kukataa wakala na majibu ya uchunguzi yanatolewa; wakati wote wanakataa, kukataa asili kunarejeshwa na hakuna kitu kinachorekodiwa. Maandishi yale yale ya kukataa yanafunika IP iliyotiwa alama na umbo la ombi lililokataliwa, kwa hivyo uchunguzi unawatofautisha kwa ushahidi. Imezimwa kwa chaguo-msingi: kukataa kunarudishwa bila kubadilika."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Joho la Client ya OpenCode v2",
@@ -14388,6 +14433,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Mzingamano: Kumuisha kwa Kukataa kwa Sera ya Mwenendo",
         "description": "Tangu mzingamano wa awali wa kutoka amwajibu kukataa kwa sera ya mwenendo tu (mabao au aina cyber_policy / content_policy_violation), mzingamano anamwisha na kurejea kukataa kwa hata tangu awali wa mzingamano ni michoro tofauti, badala ya kwenda kwa mzingamano unaofuata. Imezimwa kwa chaguo-msingi: kukataa haina kufuruputa akaunti au kutosha mwingiliano, na mzingamano anakwenda kwa mzingamano unaofuata kama ya awali."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Majibu: weka hai kwenye usafiri pekee",
+        "description": "Tuma kumbukumbu za Majibu kama mstari tupu badala ya tukio response.in_progress, ili picha ya muhtasari ya syntetisk haiwezi kamwe kuchukua nafasi ya jibu halisi katika SDK rasmi. Laini tupu haitumi tukio la SSE, kwa hivyo shirika la ulinzi la mteja ambalo linaweka upya matukio pekee halitawekwa upya wakati wa awamu ya kimya ya muda mrefu. Imezimwa kwa chaguo-msingi: vipima muda hutuma tukio sahihi response.in_progress."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Jaribio Tena la Kupumzika: Kuzima Ukwilizaji wa 403/410",

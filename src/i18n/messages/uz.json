@@ -923,6 +923,8 @@
     "batchListTitle": "Paketlar",
     "batchListCount": "{count} ta paket",
     "batchListRemovingCompleted": "Olib tashlanmoqda…",
+    "batchListRemoveCompletedPartial": "Ko‘p sonli paketlar o‘chirildi. Qolganlarini tozalash uchun yana bosing.",
+    "batchListRemoveCompletedFailed": "Paketlarni o‘chirishda xatolik yuz berdi.",
     "batchListRemoveCompleted": "Yakunlanganlarni olib tashlash",
     "batchListTableStatus": "Holat",
     "batchListTableId": "ID",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "Yangilanmoqda…",
     "batchListRefresh": "Yangilash",
     "uploadFileModalRemove": "Olib tashlash",
+    "fileInputChoose": "Faylni tanlash",
+    "fileInputChooseMultiple": "Fayllarni tanlash",
+    "fileInputEmpty": "Hech qanday fayl tanlanmagan",
+    "fileInputSelectedCount": "{count, plural, one {# ta fayl tanlandi} other {# ta fayl tanlandi}}",
+    "fileDropLabel": "Faylni shu yerga tashlang yoki tanlang",
+    "fileDropLabelMultiple": "Fayllarni shu yerga tashlang yoki tanlang",
     "uploadFileModalUploading": "Yuklanmoqda…",
     "wizardInputReading": "Fayl o‘qilmoqda…",
     "wizardInputReady": "Tayyor",
@@ -1035,7 +1043,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "OpenCode Zen/Go so‘rovlarida OpenCode v2 CLI mijoz fingerprintini yuborish: opencode/latest/<2.x>/cli User-Agent va x-opencode-client cli, bepul tarifdagi so‘rovlarda esa v2 sessiya sarlavhalari, v2 CLI read/shell vosita sxemalari hamda tool_choice \"none\" bo‘lmasin. Sukut bo‘yicha o‘chiq: har bir OpenCode so‘rovida joriy identifikatsiya, sarlavhalar va tana o‘zgarmay qoladi.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Avtomatik kombinatsiyaning nomzodlar puli vosita chaqiruvini dastlabki filtrlash ishga tushishidan oldin bo‘sh bo‘lsa (barcha nishonlar kutish muddatlari, blokirovkalar yoki limit tugashi sababli o‘tkazib yuborilgan bo‘lsa), eski 400 \"Hech bir nishon vosita chaqiruvini qo‘llab-quvvatlamaydi\" capability_mismatch o‘rniga 503 no_eligible_targets javobini qaytaring. Sukut bo‘yicha o‘chirilgan: bo‘sh pul uchun eski 400 javobi saqlanadi.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Ishonchli model endpoint teglariga rioya qilishni majburiy eting (provayder katalogida e’lon qilingan, maxsus model identifikatoridan aniqlangan yoki operator tomonidan belgilangan): model xizmat ko‘rsatmaydigan endpointga yuborilgan so‘rovni /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations va /v1/audio/* yo‘nalishlarida jo‘natishdan oldin HTTP 400 bilan rad eting; teg bilan belgilangan endpointlari uchun OmniRoute adapteri mavjud bo‘lmagan modellarni /v1/models ro‘yxatidan yashiring; bunday modellar uchun boshqaruv panelidagi model sinoviga 422 bilan javob bering. Odatiy holatda o‘chirilgan: endpoint teglari faqat axborot uchun qoladi va so‘rovlar avvalgidek jo‘natiladi.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "Oddiy Anthropic bilan mos retranslyatorlarda suhbat o‘rtasidagi system navbatlarini yuqori darajadagi system promptiga ko‘chirish o‘rniga xabarlar ro‘yxatida saqlang, shunda keshlangan prompt prefiksi navbatlar davomida barqaror qoladi. Bu faqat mijozning o‘zi mid-conversation-system-2026-04-07 beta-versiyasini yuborganida qo‘llanadi. Sukut bo‘yicha o‘chiq: ushbu beta-versiyani qo‘llab-quvvatlamaydigan retranslyatorlar xabarlar ro‘yxatidagi system navbatlarini rad etgani sababli, har bir system navbati avvalgidek system promptiga ko‘chiriladi.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Operator tomonidan qayta belgilash ham, provayder reyestri ham hech qanday darajani eʼlon qilmaganida models.dev eʼlon qilgan fikrlash sarfi darajalaridan foydalaning, bunda faqat maʼlum sarf darajalarini saqlab qoling va eʼlon qilingan darajalar roʻyxati boʻsh boʻlsa, uni «darajalar yoʻq» deb hisoblang. Sukut boʻyicha oʻchiq: model katalogi va aniqlangan sarf darajalari avvalgidek qoladi.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "auto/* so‘rovlariga nomzodlar havzasini hal qilingan model imkoniyatlari (ko‘rish, mulohaza, fikrlash) va kuzatilgan sifat ballari bilan, bitta ommaviy o‘qishda, tuzish imkonini beradi. Standart holatda o‘chirilgan: so‘rov vaqtidagi nomzod vaznlari aynan avvalgidek qoladi. Yoqilganda: bu signallar snapshot vaznlariga kiradi, shuning uchun nomzod vaznlari va tanlov o‘zgarishi mumkin.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Hisob ma’lumotlari holatini tekshirish jarayoniga shlyuz o‘zi o‘chirgan ulanishlarni qayta sinashga (har birini ko‘pi bilan 6 soatda bir marta, har bir tekshiruvda 5 tadan) va qayta sinovdan muvaffaqiyatli o‘tgan ulanishni yana yoqishga ruxsat bering. Odatiy holatda o‘chiq: bunday ulanishlar operator chora ko‘rmaguncha o‘chiq qoladi. Operator o‘chirgan va doimiy ravishda taqiqlangan ulanishlar hech qachon qayta sinalmaydi.",
@@ -1939,7 +1946,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# ta so’rov} other {# ta so’rov}}, {keys, plural, one {# ta cheklangan kalit} other {# ta cheklangan kalit}}",
     "unpricedUsageMore": "…va yana {count} ta",
     "unpricedUsageConfigure": "Narxlarni sozlash",
-    "unpricedUsageDismiss": "Yopish"
+    "unpricedUsageDismiss": "Yopish",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Tahlil",
@@ -6264,6 +6280,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Vaqtinchalik kutish davrini chetlab o‘tadi, shunda ushbu ulanish tiklanadigan xatolardan keyin ham foydalanish uchun yaroqli bo‘lib qoladi (bloklangan yoki muddati tugagan kabi yakuniy holatlar baribir amal qiladi).",
     "disableCoolingLabel": "Ushbu ulanish uchun kutish davrini o‘chirish",
+    "keepMidConversationSystemDescription": "Suhbat o‘rtasida yuborilgan tizim xabarlarini yuqori darajadagi tizim so‘roviga o‘tkazish o‘rniga xabarlar ro‘yxati ichida qoldiring, shunda so‘rov keshi burilishlar bo‘ylab tegib turadi. Agar bu yuqori oqim xabarlar ichidagi rol \"tizim\" ni qabul qilsa, yoqing (aks holda u 400 ga javob beradi).",
+    "keepMidConversationSystemLabel": "Suhbat o'rtasida tizim xabarlarini joyida saqlang",
+    "requireUserLastMessageDescription": "Yordamchini oldindan toʻldirishni rad etuvchi yuqori oqimlar uchun: joʻnatishdan oldin keyingi yordamchi burilishni tashlab qoʻying (asbobdan foydalanishsiz). Model avvalgi javobini qayta tiklashi mumkin.",
+    "requireUserLastMessageLabel": "Suhbatni foydalanuvchi xabari bilan yakunlashni talab qiling",
     "bulkPasteAdded": "{count, plural, one {1 ta kalit qo‘shildi} other {# ta kalit qo‘shildi}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 ta takroriy kalit o‘tkazib yuborildi} other {# ta takroriy kalit o‘tkazib yuborildi}}",
     "bulkPasteHint": "Har bir qatorga bittadan API kalitini joylang. Bo‘sh qatorlar e’tiborga olinmaydi va takroriy kalitlar o‘tkazib yuboriladi.",
@@ -6363,6 +6383,9 @@
     "localProviders": "Mahalliy provayderlar",
     "maxConcurrentWholeNumberError": "Maksimal bir vaqtdagi qiymat butun son boʻlishi kerak",
     "m365TierLabel": "Copilot tarifi",
+    "m365RefreshTokenLabel": "Tokenni yangilash (ixtiyoriy)",
+    "m365RefreshTokenHint": "Microsoft 365 kirish tokenini avtomatik ravishda yangilash uchun foydalaniladi.",
+    "m365RefreshTokenEditHint": "Mavjud tokenni saqlash uchun bo'sh qoldiring. Uni almashtirish uchun yangi tokenni joylashtiring.",
     "m365TierHint": "Bu ulanish qaysi Microsoft 365 Copilot interfeysidan foydalanishini tanlang. Individual — standart iste’molchi BizChat interfeysi; Education va Enterprise (ish) esa tegishli tashkilot interfeyslarini yoqadi.",
     "m365TierIndividualOption": "Individual (standart)",
     "m365TierEduOption": "Ta’lim",
@@ -7097,6 +7120,7 @@
     "proxySubTabsAria": "Proksi boʻlimlari",
     "requestBodyLimitTitle": "Soʻrov tanasi cheklovi",
     "requestBodyLimitDescription": "Soʻrov tanasi tahlil qilinishidan oldin qabul qilinadigan API maʼlumotlarining maksimal hajmi. Maxsus yuklash marshrutlari kamida oʻzlarining ichki 100 MB cheklovini saqlab qoladi.",
+    "requestBodyLimitChatHint": "Bu yerda chegara saqlamaguningizcha Chat Completions va Responses 50 MB gacha qabul qiladi. Saqlangan chegara pastroq yoki yuqoriroq boʻlishidan qatʼi nazar, ularga ham qoʻllanadi.",
     "requestBodyLimitInputLabel": "Soʻrov tanasi cheklovi (MB)",
     "requestBodyLimitEmptyError": "MB hisobida cheklovni kiriting",
     "requestBodyLimitWholeNumberError": "Butun sondan foydalaning",
@@ -12282,7 +12306,9 @@
       "failedTitle": "{count} ta urinishning barchasi muvaffaqiyatsiz tugadi",
       "failed": "muvaffaqiyatsiz tugadi",
       "pinnedTitle": "Model kontekst-kesh seansiga biriktirish orqali tanlangan",
-      "pinned": "biriktirilgan"
+      "pinned": "biriktirilgan",
+      "recoveredAttemptsTitle": "So‘rov {count} urinishdan keyin tiklandi",
+      "latestOutcomeFailed": "Oxirgi so‘rov natijasi muvaffaqiyatsiz bo‘ldi"
     },
     "attempts": "urinishlar",
     "detail": {
@@ -12384,13 +12410,20 @@
       "continuesFromParent": "ota elementdan davom etadi",
       "continuesFrom": "{id} dan davom etadi",
       "viewConversation": "suhbatni koʻrish",
-      "openConversation": "{id} suhbatini ochish"
+      "openConversation": "{id} suhbatini ochish",
+      "omittedHttpAttempts": "{count} ta HTTP jo‘natmasi saqlanmadi",
+      "noHttpResponse": "HTTP javobi kuzatilmadi",
+      "transportError": "Uzatish xatosi"
     },
     "tableLabel": "Soʻrov jurnallari",
     "throughputPostFirstToken": "Birinchi tokendan keyin",
     "throughputEndToEnd": "Boshdan-oxirigacha",
     "throughputRate": "{value} token/sek",
-    "throughputExplanation": "Ikkala koʻrsatkich ham chiqish va mulohaza tokenlari sonidan kattasini ishlatadi. Birinchi tokendan keyingi koʻrsatkich haqiqiy TTFTni hisobga olmaydi; aks holda u toʻliq davomiylikdan foydalanadi. Boshdan-oxirigacha har doim toʻliq davomiylikdan foydalanadi. Buferlangan javob model tezroq generatsiya qilmasa ham, yuqori portlash yetkazib berish tezligiga ega boʻlishi mumkin."
+    "throughputExplanation": "Ikkala koʻrsatkich ham chiqish va mulohaza tokenlari sonidan kattasini ishlatadi. Birinchi tokendan keyingi koʻrsatkich haqiqiy TTFTni hisobga olmaydi; aks holda u toʻliq davomiylikdan foydalanadi. Boshdan-oxirigacha har doim toʻliq davomiylikdan foydalanadi. Buferlangan javob model tezroq generatsiya qilmasa ham, yuqori portlash yetkazib berish tezligiga ega boʻlishi mumkin.",
+    "omittedHttpAttempts": "{count} ta HTTP jo‘natmasi saqlanmadi",
+    "upstreamStatus": "Yuqori server {status}",
+    "noHttpResponse": "HTTP javobi kuzatilmadi",
+    "transportError": "Uzatish xatosi"
   },
   "proxyLogger": {
     "filterAll": "Barchasi",
@@ -14157,6 +14190,14 @@
         "label": "Umumiy chiqish havuzi tartibi",
         "description": "Kvota chiqish manzili bo'yicha to'plamga ajratilgan provayderlar uchun, so'nggi rad etilgan a'zo tomon kuzatilgan chiqish manzili bilan umumlashuvchi havuz a'zolarini sog'lom a'zolar darajada kamroq qatnashish uchun tartiblang. Faqat tartib, hech qachon rad etilmaydi. Rad etish signalini o'qiydigan PROXY_SKIP_RECENTLY_FAILED talab qiladi. Standart holatda o'chiq: tanlov tartibi faqat oddiy rotatsiya bilan o'zgarmaydi."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Model doirasidagi kvotani rad etish",
+        "description": "opencode kvotasi 429 ni faqat unga mos keladigan modelga qo'llang, shuning uchun bir xil chiqish boshqa modellarga xizmat qilishda davom etadi va faqat ushbu model muvaffaqiyatli bo'lganda uni o'chiring. Modeli bo'lmagan iste'molchilar (hovuzni aylantirish, to'xtash va qayta o'ynash, administrator ko'rinishi, selektorni ishga tushirish, sog'liqni tozalash) hali ham buni ko'rishadi. Rad etishni keltirib chiqaradigan PROXY_SKIP_RECENTLY_FAILED kerak. Sukut bo'yicha o'chirilgan: bitta modelning 429 kvotasi har bir model uchun chiqishni ajratib turadi."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Proksi-serverni olish: qat'iy POST takrorlash",
+        "description": "Idempotent bo'lmagan so'rov uchun (POST, PUT, PATCH, DELETE) tashish xatosidan so'ng (yangi rozetka, proksi-server, mahalliy zaxira) faqat xato hech narsa yuborilmaganini tasdiqlagandagina qayta yuboring: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH yoki ulanish vaqti tugashi. Yozishdan so'ng rozetka xatosi yuqori oqim so'rovni qabul qilganligini anglatishi mumkin, shuning uchun qayta yuborish uni ikki marta yaratishi va hisob-kitob qilishi mumkin. Sukut bo'yicha o'chirilgan: qayta o'ynaladigan korpus har qanday transport xatosida bir marta qayta yuboriladi, bu ham eskirgan birlashtirilgan rozetkani tiklaydi."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotatsiya atib etib loglash",
         "description": "Opencode rotatsiyasi qaysi hisob xizmat ko'rsatgan yoki o'tkazib yuborilganini yozadi (faqat maskalangan identifikatorlar, hech qachon to'liq hisob identifikatorlari yozilmaydi) va proksi log yozuvlarini so'rovga bog'laydi, shunda operator o'tkazib yuborilgan hisoblarni ishlatilmaganlarni farqlash uchun. Standart holatda o'chiq: qo'shimcha log qatorlari yoki ustunlar yozilmaydi."
@@ -14208,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 O‘rta Qayta Tanlash",
         "description": "OpenCode ko‘p hisob aylanishi uchun, proxy-siz hisobda, muhit o‘rta kontekstida, chiqish-savati bo‘yicha yetkazib beruvchidan 429 kelganda, xuddi shu chiqish manzilini takrorlash o‘rniga keyingi urinish uchun ulanish o‘rtasidan boshqa a‘zoning so‘raving. Tartib saqlanadi, hech qachon taqiq qilinmaydi: to‘liq o‘rta joriy xatti-harakatni saqlaydi. Standart holatda o‘chiq: har bir 429 avvalgidagidek keyingi hisobga aylanadi."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress Probe",
+        "description": "OpenCode ijrochisi uchun proksilangan so‘rovga 403 yoki 451 FreeTierError javob berilsa va kuzatilgan asboblarni qayta urinish muvaffaqiyatsiz tugadi yoki qo‘llanilmasa, so‘rovni boshqa proksi-server orqali bir marta yuboring (boshqa proksi-server yoki boshqa hovuz a’zosi, hech qachon to‘g‘ridan-to‘g‘ri ulanish emas). Bu prob 200 ga javob bergandagina proksi-serverni rad etish xotirasida birinchi chiqish ajratiladi va tekshiruv javobi xizmat qiladi; ikkalasi ham rad etganda, rad etishning asl nusxasi qaytariladi va hech narsa yozilmaydi. Xuddi shu rad etish matni bayroqli chiqish IP va rad etilgan so'rov shaklini qamrab oladi, shuning uchun tekshiruv ularni dalillar bilan ajratib turadi. Sukut bo'yicha o'chirilgan: rad etish o'zgarishsiz qaytariladi."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 Mijoz Kiyim Izini",
@@ -14388,6 +14433,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Kombinatsiya: Kontent Siyosati Rad Etishda To‘xtash",
         "description": "Kombinatsiya maqsadi aniq kontent siyosati rad etish bilan javob qaytarganda (kod yoki tur cyber_policy / content_policy_violation), kombinatsiyani to‘xtating va bu rad etishni qaytaring, garchi qolgan maqsadlar boshqa modellarda bo‘lsa ham, keyingi maqsadga o‘tmasdan. Standart holatda o‘chiq: bu rad etish hech qachon hisobni sovuq tushirmaydi yoki provayder circuit breaker’ini ishlamasdan qoldirmaydi, va kombinatsiya xuddi avvalgidec keyingi maqsadga o‘tadi."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Javoblar: faqat transportda saqlanish",
+        "description": "Javoblarni response.in_progress hodisasi oʻrniga boʻsh satr sifatida yuboring, shuning uchun sintetik oniy rasm hech qachon rasmiy SDK dagi haqiqiy javob oʻrnini bosa olmaydi. Bo'sh satr hech qanday SSE hodisasini jo'natmaydi, shuning uchun faqat voqealar bo'yicha qayta tiklanadigan mijoz kuzatuvi uzoq davom etadigan jim fazada tiklanmaydi. Sukut bo'yicha o'chirilgan: taymerlar aniq response.in_progress hodisasini yuboradi."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Poxatona takrorlash: 403/410 radlarini oʻtkazib yuborish",

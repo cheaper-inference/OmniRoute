@@ -13,6 +13,7 @@ import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Select from "@/shared/components/Select";
 import { useTranslations } from "next-intl";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 
 type A2ATaskState = "submitted" | "working" | "completed" | "failed" | "cancelled";
 
@@ -94,6 +95,7 @@ function stateClass(state: A2ATaskState) {
 
 export default function A2ADashboardPage() {
   const t = useTranslations("a2aDashboard");
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<A2AStatus | null>(null);
 
@@ -181,7 +183,7 @@ export default function A2ADashboardPage() {
   };
 
   const handleCancelTask = async (taskId: string) => {
-    if (!globalThis.confirm(t("confirmCancelTask", { taskId }))) return;
+    if (!(await requestConfirm(t("confirmCancelTask", { taskId })))) return;
     setActionBusy("cancel");
     setActionMessage("");
     try {
@@ -592,6 +594,7 @@ export default function A2ADashboardPage() {
           </div>
         </Card>
       )}
+      {confirmDialog}
     </div>
   );
 }
