@@ -85,3 +85,10 @@ test("operator-set endpoints DO override discovered endpoints", () => {
   assert.deepEqual(merged.supportedEndpoints, ["embeddings", "chat"]);
   assert.equal(merged.endpointCapabilitySource, "operator");
 });
+
+test("with no custom models the base list is returned as a copy", () => {
+  const base = [{ id: "a" }, { id: "b" }];
+  const merged = mergeModelsWithCustomPrecedence(base, []);
+  assert.deepEqual(merged, base);
+  assert.notEqual(merged, base);
+});
