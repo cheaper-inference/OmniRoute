@@ -24,7 +24,12 @@ const { replaceSyncedAvailableModelsForConnection, setModelIsHidden } =
 const { updateSettings } = await import("../../src/lib/db/settings.ts");
 const { invalidateModelCatalogCache } = await import("../../src/lib/db/readCache.ts");
 const modelsRoute = await import("../../src/app/api/v1/models/route.ts");
-const { applyCatalogPostFilters } = await import("../../src/app/api/v1/models/catalogResponse.ts");
+const { applyCatalogPostFilters, syntheticVariantListingIds } =
+  await import("../../src/app/api/v1/models/catalogResponse.ts");
+const { removeFeatureFlagOverride, setFeatureFlagOverride } =
+  await import("../../src/lib/db/featureFlags.ts");
+const { setFunctionalGatewayProviderSetting } =
+  await import("../../src/lib/db/functionalGatewayMirrors.ts");
 
 test.after(() => {
   resetDbInstance();
@@ -77,6 +82,36 @@ test("post-filter without a hidden predicate still lists every variant", async (
     { connections: [], prefixMode: "dual", aliasToProviderId: {}, hideNoThinkVariants: true }
   );
   assert.ok(out.some((m) => m.id === "cmd/claude-opus-4-7-low"));
+});
+
+test("a real claude/ row is not read as a discovery mirror", () => {
+  assert.deepEqual(syntheticVariantListingIds({ id: "claude/claude-opus-4-7-low" }), [
+    "claude/claude-opus-4-7-low",
+  ]);
+  assert.deepEqual(syntheticVariantListingIds({ id: "no-think/cmd/claude-opus-4-7-low" }), [
+    "cmd/claude-opus-4-7-low",
+  ]);
+  assert.deepEqual(syntheticVariantListingIds({}), []);
+});
+
+test("post-filter applies the hidden predicate and the key authorizer to the same variants", async () => {
+  const out = await applyCatalogPostFilters(
+    new Request("http://localhost/v1/models"),
+    [{ id: "cmd/claude-opus-4-7", owned_by: "command-code", type: "chat" }],
+    {
+      connections: [],
+      prefixMode: "dual",
+      aliasToProviderId: {},
+      hideNoThinkVariants: true,
+      isSyntheticVariantHidden: (model) => model.id === "cmd/claude-opus-4-7-low",
+      authorizeSyntheticModel: (model) => model.id !== "cmd/claude-opus-4-7-high",
+    }
+  );
+  const ids = out.map((m) => m.id);
+  assert.ok(ids.includes("cmd/claude-opus-4-7"));
+  assert.ok(ids.includes("cmd/claude-opus-4-7-medium"));
+  assert.equal(ids.includes("cmd/claude-opus-4-7-low"), false, "hidden by the operator");
+  assert.equal(ids.includes("cmd/claude-opus-4-7-high"), false, "rejected by the key");
 });
 
 test("/v1/models honors a hidden effort variant and a denylisted variant glob", async () => {
@@ -143,6 +178,74 @@ test("/v1/models honors a hidden effort variant and a denylisted variant glob", 
     "a hidden variant stays hidden under an allowlist"
   );
   await updateSettings({ modelVisibilityAllowlist: [], modelVisibilityDenylist: [] });
+});
+
+test("/v1/models keeps a hidden effort variant out of the claude/ discovery mirrors", async () => {
+  process.env.EXPOSE_CC_DISCOVERY_ALIASES = "true";
+  try {
+    const before = await catalogIds();
+    const mirror = before.find(
+      (id) => id.startsWith("claude/") && id.endsWith("/claude-opus-4-7-high")
+    );
+    assert.ok(mirror, "baseline must advertise the mirrored -high variant; do not skip this");
+    const prefix = mirror.slice("claude/".length, mirror.lastIndexOf("/"));
+
+    // The synced-effort pass runs after the mirror pass, so `-high` is derived from
+    // the visible `claude/<prefix>/<base>` row, which the base-row filters never saw.
+    setModelIsHidden("command-code", "claude-opus-4-7-high", true);
+    await updateSettings({ modelVisibilityDenylist: ["command-code/claude-opus-4-7-medium"] });
+    const after = await catalogIds();
+    assert.deepEqual(
+      after.filter((id) => id.endsWith("/claude-opus-4-7-high")),
+      [],
+      "a hidden effort variant must not come back through a discovery mirror"
+    );
+    assert.deepEqual(
+      after.filter((id) => id.endsWith("/claude-opus-4-7-medium")),
+      [],
+      "a deny entry under the real id must reach the mirror too"
+    );
+    assert.ok(after.includes(`claude/${prefix}/claude-opus-4-7`), "the mirrored base stays");
+  } finally {
+    delete process.env.EXPOSE_CC_DISCOVERY_ALIASES;
+    setModelIsHidden("command-code", "claude-opus-4-7-high", false);
+    await updateSettings({ modelVisibilityDenylist: [] });
+  }
+});
+
+test("/v1/models keeps a hidden effort variant out of functional-gateway mirrors", async () => {
+  const gateway = await createProviderConnection({
+    provider: "agentrouter",
+    authType: "apikey",
+    name: "catalog gateway fixture",
+    apiKey: "synthetic-agentrouter",
+    isActive: true,
+    testStatus: "active",
+  });
+  assert.ok(gateway.id);
+  setFeatureFlagOverride("EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS", "true");
+  setFunctionalGatewayProviderSetting("agentrouter", "on");
+  try {
+    const before = await catalogIds();
+    const mirror = before.find(
+      (id) => id.startsWith("agentrouter/") && id.endsWith("/claude-opus-4-7-high")
+    );
+    assert.ok(mirror, "baseline must advertise the gateway -high variant; do not skip this");
+    const base = mirror.slice(0, -"-high".length);
+
+    setModelIsHidden("command-code", "claude-opus-4-7-high", true);
+    const after = await catalogIds();
+    assert.deepEqual(
+      after.filter((id) => id.endsWith("/claude-opus-4-7-high")),
+      [],
+      "a hidden effort variant must not come back through a gateway mirror"
+    );
+    assert.ok(after.includes(base), "the gateway mirror of the base stays");
+  } finally {
+    removeFeatureFlagOverride("EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS");
+    setFunctionalGatewayProviderSetting("agentrouter", null);
+    setModelIsHidden("command-code", "claude-opus-4-7-high", false);
+  }
 });
 
 test("/v1/models checks a compatible node's effort variants under the node id", async () => {

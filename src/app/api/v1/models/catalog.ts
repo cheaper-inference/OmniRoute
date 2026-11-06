@@ -87,7 +87,11 @@ import {
   isProviderNodePrefixReserved,
   selectCompatibleNodeForPrefix,
 } from "@/lib/providerNodePrefixes";
-import { applyCatalogPostFilters, finalizeCatalogResponse } from "./catalogResponse";
+import {
+  applyCatalogPostFilters,
+  finalizeCatalogResponse,
+  syntheticVariantListingIds,
+} from "./catalogResponse";
 import {
   isNoAuthProviderBlocked,
   isNoAuthProviderKey,
@@ -150,7 +154,6 @@ import { isModelExposureAllowed } from "@/shared/utils/modelExposureList";
 import { collapseProviderPrefix, resolveProviderNodePrefix } from "@/shared/utils/modelIdPrefix";
 import { isCodexDiscoveryModelExcluded } from "@/shared/services/codexDiscoveryPolicy";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error";
-import { stripNoThinkingAlias } from "@omniroute/open-sse/utils/noThinkingAlias";
 
 // Public API of this module is preserved after the catalog helper extraction:
 // `isVisionModelId` (vision-detection-consistency.test.ts) and
@@ -898,15 +901,14 @@ async function buildUnifiedModelsResponseCore(
     // after the base-row loops ran these checks, so a variant hidden on its own
     // (or matched by the exposure denylist) is re-checked by its own id. A
     // compatible-node prefix maps back to the node id the hidden row is keyed by.
-    // A `no-think/` alias of a hidden variant is checked by the real model id.
+    // A `no-think/` alias or a mirror of a hidden variant is checked by the real model id.
     // Only the denylist applies here: a variant inherits its base's allowlist
     // match, so allowlisting a base keeps advertising its variants. A deny entry
     // under the public prefix, the canonical id or the node id hides the variant.
     const variantDenylistOnly = { modelVisibilityDenylist: settings.modelVisibilityDenylist };
     const isSyntheticVariantDenied = (providerKeys: string[], modelId: string): boolean =>
       providerKeys.some((key) => !isModelExposureAllowed(key, modelId, variantDenylistOnly));
-    const isSyntheticVariantHidden = (model: Record<string, any>): boolean => {
-      const id = typeof model.id === "string" ? stripNoThinkingAlias(model.id) : "";
+    const isListingIdHidden = (id: string): boolean => {
       const slash = id.indexOf("/");
       if (slash <= 0 || slash === id.length - 1) return false;
       const providerKey = id.slice(0, slash);
@@ -920,6 +922,8 @@ async function buildUnifiedModelsResponseCore(
         isSyntheticVariantDenied(providerKeys, modelId)
       );
     };
+    const isSyntheticVariantHidden = (model: Record<string, any>): boolean =>
+      syntheticVariantListingIds(model).some(isListingIdHidden);
     const postFilterContext = {
       connections,
       prefixMode,

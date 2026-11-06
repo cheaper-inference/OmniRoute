@@ -8,10 +8,17 @@
  * mirrors the first time it was written as a duplicate.
  */
 
-import { appendNoThinkingVariants } from "@omniroute/open-sse/utils/noThinkingAlias";
+import {
+  appendNoThinkingVariants,
+  stripNoThinkingAlias,
+} from "@omniroute/open-sse/utils/noThinkingAlias";
 import { appendClaudeEffortVariants } from "@omniroute/open-sse/utils/claudeEffortVariants";
 import { appendSyncedEffortVariants } from "@omniroute/open-sse/utils/syncedEffortVariants";
-import { appendCcDiscoveryAliases } from "@omniroute/open-sse/utils/ccDiscoveryAliases";
+import {
+  appendCcDiscoveryAliases,
+  CC_DISCOVERY_PREFIX,
+  isCcDiscoveryAlias,
+} from "@omniroute/open-sse/utils/ccDiscoveryAliases";
 import { isResolvableBuiltinAutoId } from "@omniroute/open-sse/services/autoCombo/builtinCatalog";
 import {
   appendFunctionalGatewayMirrors,
@@ -103,6 +110,25 @@ function composeEffortVariantAuthorizer(
   if (!isHidden) return authorize;
   if (!authorize) return (model) => !isHidden(model);
   return (model) => !isHidden(model) && authorize(model);
+}
+
+/**
+ * #18726: the ids a synthesized effort variant answers to. The synced-effort pass
+ * runs after the mirror passes, so a variant can be derived from a mirror row
+ * (`claude/<id>`, `<gateway-alias>/<id>`, or a gateway mirror of a `no-think/` alias)
+ * and carry that row's marker. Its own id is kept so an entry that names the mirror
+ * still applies; the marker, not the prefix, tells a mirror from a real `claude/` row.
+ */
+export function syntheticVariantListingIds(model: Record<string, any>): string[] {
+  if (typeof model.id !== "string") return [];
+  const unmirrored = isFunctionalGatewayMirror(model)
+    ? model.id.slice(model.id.indexOf("/") + 1)
+    : model.id;
+  const real =
+    isCcDiscoveryAlias(model) && unmirrored.startsWith(CC_DISCOVERY_PREFIX)
+      ? unmirrored.slice(CC_DISCOVERY_PREFIX.length)
+      : unmirrored;
+  return [...new Set([model.id, unmirrored, real].map(stripNoThinkingAlias))];
 }
 
 /**
