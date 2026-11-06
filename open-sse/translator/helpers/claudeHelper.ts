@@ -517,18 +517,37 @@ function bodyHasAnyCacheControl(body: ClaudeRequestBody): boolean {
   return false;
 }
 
+/** Marks the last block Anthropic accepts a breakpoint on, walking back from the
+ * tail: it rejects `cache_control` on thinking, redacted_thinking and blank text
+ * blocks, which would turn a working request into a 400. */
+function markLastCacheableBlock(
+  blocks: ClaudeContentBlock[],
+  cacheControl: { type: string; ttl?: string }
+): boolean {
+  for (let i = blocks.length - 1; i >= 0; i--) {
+    const block = blocks[i];
+    if (isThinkingLike(block) || !isNonEmptyClaudeBlock(block)) continue;
+    block.cache_control = { ...cacheControl };
+    return true;
+  }
+  return false;
+}
+
 /** Prompt-cache rescue for the pure claude→claude passthrough branch
  * (chatCore passthrough-trust): marker-less Anthropic-format clients (e.g.
  * Cursor) ship zero cache breakpoints through passthrough, re-billing the full
  * prefix every turn. Injects breakpoints ONLY when the body carries none
  * anywhere — a client that manages its own markers (Claude Code) is returned
  * byte-untouched. Placement mirrors the standard heuristic:
- *   - system tail: 1h breakpoint (system prompt changes rarely)
- *   - second-to-last user turn + last assistant turn: plain ephemeral
- *     breakpoints on the stable rolling prefix (the last user turn stays
- *     unmarked — it is the working set and would invalidate on every turn).
+ *   - system tail: provider default TTL (system prompt changes rarely)
+ *   - second-to-last user turn + last assistant turn: conversation-tail TTL on
+ *     the stable rolling prefix (the last user turn stays unmarked — it is the
+ *     working set and would invalidate on every turn).
  * Mutates in place and returns the same body reference. */
-export function ensurePassthroughCacheBreakpoints(body: ClaudeRequestBody): ClaudeRequestBody {
+export function ensurePassthroughCacheBreakpoints(
+  body: ClaudeRequestBody,
+  provider?: string | null
+): ClaudeRequestBody {
   // Client already manages its cache markers — must stay byte-untouched.
   if (bodyHasAnyCacheControl(body)) return body;
 
@@ -539,26 +558,24 @@ export function ensurePassthroughCacheBreakpoints(body: ClaudeRequestBody): Clau
     ensureMessageContentArray(msg);
   }
 
-  if (Array.isArray(body.system) && body.system.length > 0) {
-    const tail = body.system[body.system.length - 1];
-    if (tail && typeof tail === "object") {
-      tail.cache_control = { type: "ephemeral", ttl: "1h" };
-    }
+  if (Array.isArray(body.system)) {
+    markLastCacheableBlock(body.system, createDefaultClaudeCacheControl(provider));
   }
 
+  const tailCacheControl = createClaudeTailCacheControl(provider);
   const userTurnIndices: number[] = [];
-  let lastAssistantIndex = -1;
   for (let i = 0; i < messages.length; i++) {
-    const role = messages[i]?.role;
-    if (role === "user") userTurnIndices.push(i);
-    else if (role === "assistant") lastAssistantIndex = i;
+    if (messages[i]?.role === "user") userTurnIndices.push(i);
   }
 
   if (userTurnIndices.length >= 2) {
-    markMessageCacheControl(messages[userTurnIndices[userTurnIndices.length - 2]]);
+    const secondToLastUser = messages[userTurnIndices[userTurnIndices.length - 2]];
+    markLastCacheableBlock(ensureMessageContentArray(secondToLastUser), tailCacheControl);
   }
-  if (lastAssistantIndex >= 0) {
-    markMessageCacheControl(messages[lastAssistantIndex]);
+  // A thinking-only turn has nothing to mark, so take the closest earlier assistant turn.
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i]?.role !== "assistant") continue;
+    if (markLastCacheableBlock(ensureMessageContentArray(messages[i]), tailCacheControl)) break;
   }
 
   return body;

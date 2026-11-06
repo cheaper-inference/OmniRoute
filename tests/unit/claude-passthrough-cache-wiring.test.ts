@@ -177,3 +177,35 @@ test("claude→claude passthrough leaves client-managed markers untouched", asyn
   const system = upstreamBody.system;
   assert.deepEqual(system[system.length - 1].cache_control, { type: "ephemeral", ttl: "5m" });
 });
+
+test("a connection that opts out of prompt caching gets no injected breakpoints", async () => {
+  let upstreamBody = null;
+
+  globalThis.fetch = async (_url, init = {}) => {
+    upstreamBody = JSON.parse(String(init.body || "{}"));
+    return createSseResponse([
+      `event: message_start\ndata: {"type":"message_start","message":{"id":"msg_x","model":"claude-sonnet-5"}}`,
+      `event: message_stop\ndata: {"type":"message_stop"}`,
+    ]);
+  };
+
+  const body = markerlessClaudeBody();
+  await handleChatCore({
+    body,
+    modelInfo: { provider: "claude", model: "claude-sonnet-5", extendedContext: false },
+    credentials: {
+      apiKey: "test-key",
+      providerSpecificData: { cache: { supportsPromptCaching: false } },
+    },
+    log: noopLog(),
+    clientRawRequest: {
+      endpoint: "/v1/messages",
+      body: structuredClone(body),
+      headers: new Headers({ "content-type": "application/json" }),
+    },
+    userAgent: "cursor/1.0",
+  });
+
+  assert.ok(upstreamBody, "upstream fetch captured the passthrough body");
+  assert.equal(countCacheControls(upstreamBody), 0);
+});
