@@ -1366,9 +1366,9 @@ Ang isang serbisyong pinananatiling gising sa loob ng isang buong buwan ay gumag
 
 ## Mga Sitwasyon ng Deployment
 
-Para sa gabay ng SRE sa relay backend (gawi ng ts/bifrost/auto, paglalagay ng 9router kumpara sa CLIProxyAPI, at estratehiya sa fallback na may mataas na throughput), tingnan ang [Estratehiya ng Relay Backend](/docs/reference/RELAY_BACKEND_STRATEGY.md).
+Para sa gabay ng SRE sa relay backend (gawi ng ts/bifrost/auto, paglalagay ng 9router kumpara sa CLIProxyAPI, at fallback strategy para sa mataas na throughput), tingnan ang [Diskarte sa Relay Backend](/docs/reference/RELAY_BACKEND_STRATEGY.md).
 
-### Minimal na Lokal na Pag-develop
+### Minimal na Lokal na Development
 
 ```bash
 JWT_SECRET=$(openssl rand -base64 48)
@@ -1397,7 +1397,7 @@ OMNIROUTE_MEMORY_MB=8192
 CORS_ORIGIN=https://your-frontend.example.com
 ```
 
-### Walang Internet / CI
+### Naka-isolate sa Network / CI
 
 ```bash
 JWT_SECRET=test-jwt-secret-for-ci
@@ -1870,3 +1870,14 @@ Ginagamit ng `open-sse/services/combo.ts` at `src/lib/quota/quotaScheduler.ts` p
 | Variable                       | Default | Pinagmulan ng File                           | Paglalarawan                                                                                                                                                                                                                                                             |
 | ------------------------------ | ------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`     | `src/lib/providerModels/modelSyncTimings.ts` | Itakda sa `1` para i-log ang phase timing, isang nabuong kahilingan ID at phase success/error na mga resulta sa panahon ng pag-synchronize ng modelo. Naka-disable para sa lahat ng iba pang value. Inalis ng mga log ang kahilingan, account, catalog at error payload. |
+
+## Lokal na tool para sa pagsusuri ng media ng OpenCode
+
+Ginagamit ng `scripts/cli/omniroute-media-mcp.mjs`. Itakda ang mga ito sa environment ng lokal na proseso ng tool.
+
+| Variable                   | Default                                                                          | Paglalarawan                                                                                                  |
+| -------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (o `~/.config/opencode/opencode.json`) | Configuration ng OpenCode na binabasa ng media tool at installer.                                             |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                      | Entry ng provider na binabasa mula sa configuration ng OpenCode ng media tool.                                |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                           | Model na isinusumite ng media tool. Dapat suportahan ng provider nito ang mga hinihinging uri ng media.       |
+| `OMNIROUTE_MEDIA_API_KEY`  | Configured provider API key o ang environment reference nito                     | Opsyonal na override ng credential. Panatilihin ito sa environment ng lokal na proseso; huwag itong i-commit. |
