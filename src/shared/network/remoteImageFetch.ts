@@ -8,6 +8,7 @@ import {
   parseOutboundUrl,
 } from "@/shared/network/outboundUrlGuard";
 import { getProviderOutboundGuard } from "@/shared/network/outboundUrlGuardPolicy";
+import { resolveProxyForRequest } from "@omniroute/open-sse/utils/proxyFetch.ts";
 // #12569: `createPinnedFetch` now lives in the shared `dnsPinnedFetch.ts` module so the
 // webhook outbound-URL guard can reuse the exact same connection-pinning mechanism instead of
 // duplicating it. Re-exported here for backward compatibility with existing importers of
@@ -35,6 +36,13 @@ export interface RemoteImageFetchOptions {
   fetchImpl?: typeof fetch;
   /** Pin the network connection to a DNS answer that passed validation. */
   pinDns?: boolean;
+  /**
+   * With `pinDns`, pin only a direct connection. A pinned connection goes straight to the checked
+   * address, so a request that a proxy should carry keeps the proxied fetch instead. The proxy
+   * resolves the name itself: a local lookup failure is then no reason to refuse the request, but
+   * a private answer still is. Decided at every hop, because NO_PROXY can differ between hosts.
+   */
+  pinDirectOnly?: boolean;
   guard?: OutboundUrlGuardMode;
   maxBytes?: number;
   maxRedirects?: number;
@@ -77,7 +85,8 @@ const defaultLookup: RemoteImageLookup = (hostname) => dns.promises.lookup(hostn
 async function assertHostnameResolvesPublic(
   url: URL,
   guard: OutboundUrlGuardMode,
-  lookup: RemoteImageLookup
+  lookup: RemoteImageLookup,
+  failClosed: boolean
 ): Promise<Array<{ address: string; family: number }>> {
   if (guard !== "public-only") return [];
   const hostname = url.hostname;
@@ -89,9 +98,11 @@ async function assertHostnameResolvesPublic(
   try {
     resolved = await lookup(bare);
   } catch {
+    if (!failClosed) return [];
     throw new Error("Remote media host could not be resolved (blocked)");
   }
   if (!resolved.length) {
+    if (!failClosed) return [];
     throw new Error("Remote media host could not be resolved (blocked)");
   }
   for (const { address } of resolved) {
@@ -185,11 +196,14 @@ async function openRemoteMedia(
   for (let redirectCount = 0; redirectCount <= maxRedirects; redirectCount++) {
     // DNS-rebinding guard: validate every hop's hostname against its resolved
     // IPs before issuing the request (GHSA-cmhj-wh2f-9cgx).
-    const addresses = await assertHostnameResolvesPublic(currentUrl, guard, lookup);
+    const proxied =
+      options.pinDirectOnly === true &&
+      resolveProxyForRequest(currentUrl.toString()).source !== "direct";
+    const addresses = await assertHostnameResolvesPublic(currentUrl, guard, lookup, !proxied);
     const fetchImpl =
       injectedFetch ??
       pinnedFetchTestOverride ??
-      (pinDns && addresses.length
+      (pinDns && !proxied && addresses.length
         ? createPinnedFetch(addresses[0].address, addresses[0].family)
         : fetch);
     const response = await fetchImpl(currentUrl.toString(), {
@@ -290,6 +304,7 @@ function upstreamMediaPolicy(): RemoteMediaFetchOptions {
   return {
     guard: "public-only",
     pinDns: true,
+    pinDirectOnly: true,
     enforceHttps: true,
     maxRedirects: UPSTREAM_MEDIA_MAX_REDIRECTS,
   };
@@ -299,9 +314,10 @@ function upstreamMediaPolicy(): RemoteMediaFetchOptions {
  * Download a result file whose URL came back in a provider's API response (a generated image,
  * song, speech clip or video). OmniRoute does not choose that host, so it gets the same policy
  * as a caller-supplied URL: HTTPS only, public addresses only at every redirect hop, at most
- * three redirects, the connection pinned to the address that was checked, and an explicit
- * byte cap and timeout from the caller. No request headers are sent, so this is only for
- * URLs that need no credentials.
+ * three redirects, a direct connection pinned to the address that was checked, and an explicit
+ * byte cap and timeout from the caller. A proxied request stays on its proxy, so the download
+ * leaves through the same egress as the rest of the connection. No request headers are sent, so
+ * this is only for URLs that need no credentials.
  */
 export async function downloadUpstreamMedia(
   url: string,
@@ -318,7 +334,7 @@ export async function downloadUpstreamMedia(
 /**
  * Same policy as downloadUpstreamMedia, but hand back the final response unread, for a caller
  * that reads the body with its own limits. A non-2xx response is returned as is. `fetchImpl`
- * is a test seam: it replaces the pinned connection, so production callers leave it unset.
+ * is a test seam: it replaces the connection, so production callers leave it unset.
  */
 export async function openUpstreamMedia(
   url: string,

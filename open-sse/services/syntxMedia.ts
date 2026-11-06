@@ -797,7 +797,7 @@ export async function transcribeSyntxAudio(options: {
 /**
  * Download a finished SYNTX result. The URL comes from SYNTX's chat messages, so it goes through
  * the upstream-media policy (HTTPS, public addresses at every hop, at most three redirects,
- * pinned connection). `transport` is a test seam that replaces the pinned connection; the
+ * direct connections pinned). `transport` is a test seam that replaces the connection; the
  * policy checks still run. Production callers leave it unset.
  */
 export async function fetchSyntxMediaBytes(

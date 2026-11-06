@@ -109,7 +109,8 @@ async function mockFetch(input: string | URL | Request, init: RequestInit = {}) 
   if (url.hostname === SLOW_MEDIA) {
     publicHits++;
     midDownloadAbort?.abort();
-    if (init.signal?.aborted) throw new DOMException("This operation was aborted", "AbortError");
+    // Like the real fetch, reject with the signal's own reason, which need not be an Error.
+    if (init.signal?.aborted) throw init.signal.reason;
     return new Response(PUBLIC_BYTES, { status: 200 });
   }
   if (url.hostname === HOPS) {
@@ -544,6 +545,34 @@ describe("upstream media downloads", () => {
         const outcome = await driver(`https://${SLOW_MEDIA}/result.bin`, controller.signal);
         assert.equal(publicHits, 1, "the download must have started");
         assert.equal(outcome.ok, false, outcome.payload);
+      } finally {
+        midDownloadAbort = null;
+      }
+    });
+  }
+
+  for (const [label, reason] of [
+    ["an Error", new DOMException("This operation was aborted", "AbortError")],
+    ["a non-Error", "client went away"],
+  ] as const) {
+    test(`haiper video: an abort with ${label} reason during the download is a 499`, async () => {
+      apiRoute = (url, init) => {
+        if ((init.method || "GET") === "POST") return json({ job_id: "hv-abort" });
+        if (url.pathname.endsWith("/hv-abort")) {
+          return json({ status: "completed", creation_url: `https://${SLOW_MEDIA}/result.bin` });
+        }
+      };
+      const controller = new AbortController();
+      midDownloadAbort = { abort: () => controller.abort(reason) } as AbortController;
+      try {
+        const result = await handleVideoGeneration({
+          body: { model: "haiper/gen2", prompt: "p" },
+          credentials: { apiKey: "h-key" },
+          log: null,
+          signal: controller.signal,
+        });
+        assert.equal(publicHits, 1, "the download must have started");
+        assert.deepEqual(result, { success: false, status: 499, error: "Request aborted" });
       } finally {
         midDownloadAbort = null;
       }

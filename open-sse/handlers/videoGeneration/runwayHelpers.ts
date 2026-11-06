@@ -6,7 +6,7 @@ import {
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 
 // Generated videos are fetched from URLs the provider returns, so they go through the
-// upstream-media policy (HTTPS, public hosts only, pinned DNS, bounded size and time).
+// upstream-media policy (HTTPS, public hosts only, pinned when direct, bounded size and time).
 export async function downloadResultVideo(
   url: string,
   signal?: AbortSignal | null,
