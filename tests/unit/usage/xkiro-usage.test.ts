@@ -1,7 +1,7 @@
 // xKiro usage fetcher locks — GET https://api.xkiro.com/v1/usage maps ONLY
 // `free_tokens` onto quotas.free_daily so the strict-zero-cost filter can
 // resolve a connection's free allowance. The paid `wallet` is never read.
-import { test, after } from "node:test";
+import { test, beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
 
 import { USAGE_FETCHER_PROVIDERS } from "../../../open-sse/services/usage/fetcherProviders.ts";
@@ -13,11 +13,14 @@ import { connectionProxyTestOverride } from "../../../open-sse/services/connecti
 const X = await import("../../../open-sse/services/usage/xkiro.ts");
 
 const resolvedConnections: string[] = [];
-connectionProxyTestOverride.resolveProxyForConnection = async (connectionId) => {
-  resolvedConnections.push(connectionId);
-  return null;
-};
-after(() => {
+// Installed per test: other files sharing the process clear the override in their own hooks.
+beforeEach(() => {
+  connectionProxyTestOverride.resolveProxyForConnection = async (connectionId) => {
+    resolvedConnections.push(connectionId);
+    return null;
+  };
+});
+afterEach(() => {
   connectionProxyTestOverride.resolveProxyForConnection = null;
 });
 
