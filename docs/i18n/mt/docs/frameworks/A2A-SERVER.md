@@ -163,7 +163,7 @@ OmniRoute jesponi 6 ħiliet A2A fili `src/lib/a2a/taskExecution.ts::A2A_SKILL_HA
 | Rapport tas-Saħħa     | `health-report`      | Aggregati circuit breaker, cooldown, lockout state għal kull fornitur                                                                                                                | saħħa, reżiljenza          | "Uri l-istat tas-saħħa tal-fornituri kollha"    |
 | Lista Kapaċitajiet    | `list-capabilities`  | Jirritorna l-katalgu sħiħ tal-Ħiliet tal-Aġenti b'45 entrata (23 API + 21 CLI + 1 konfigurazzjoni) bħala tabella ta' markdown URLs SKILL.md ipproċessat għall-injezzjoni tal-kuntest | katalogu, skoperta, ħiliet | "Elenka l-kapaċitajiet kollha OmniRoute "       |
 
-> Il-Karta tal-Aġent għandha tinżamm allinjata mal-katalgu live 377-fornitur; l-għadd tal-fornituri u l-metadata free/no-auth jinxtraw mir-reġistru tar-runtime.
+> Il-Karta tal-Aġent għandha tinżamm allinjata mal-katalgu ta' 380 fornitur dirett; l-għadd tal-fornituri u l-metadata free/no-auth jinxtraw mir-reġistru tar-runtime.
 
 ### `list-capabilities` Skill Detail
 
@@ -199,37 +199,37 @@ Il-punt ta' dħul JSON-RPC `/a2a` huwa l-punt A2A kanoniku. L-estremitajiet REST
 
 ## Żieda ta' Ħila Ġdida
 
-1. **Ħoloq tal-ħila:** `src/lib/a2a/skills/<ħila-ġdida>.ts`
+1. **Oħloq fajl tal-ħiliet:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Esporta funzjoni asinkrona `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Segwi l-forma ta' ħiliet eżistenti bħal `smartRouting.ts`.
+   Esporta funzjoni asinkronika `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Segwi l-forma ta 'ħiliet eżistenti bħal `smartRouting.ts`.
 
-2. **Irreġistra l-handlur:** f'`src/lib/a2a/taskExecution.ts`, żid dħul għal `A2A_SKILL_HANDLERS`:
+2. **Reġistru handler:** `src/lib/a2a/taskExecution.ts`, żid entrata ma' `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...ħiliet eżistenti
-     "ħila-ġdida": async (task) => {
-       const skillModule = await import("./skills/skillGdida");
-       return skillModule.executeSkillGdida(task);
+     // ...existing skills
+     "your-skill": async (task) => {
+       const skillModule = await import("./skills/yourSkill");
+       return skillModule.executeYourSkill(task);
      },
    };
    ```
 
-3. **Agħmilha disponibbli fil-Kard tal-Aġent:** f'`src/app/.well-known/agent.json/route.ts`, appendi għall-kunsinna `skills`:
+3. **Esponi fil-Karta tal-Aġent:** `src/lib/a2a/agentCardMetadata.ts` (kondiviż minn `/.well-known/agent.json` u `/.well-known/agent-card.json`), waħħal mal-firxa `skills` :
 
    ```json
    {
-     "id": "ħila-ġdida",
-     "name": "Ħila Ġdida",
-     "description": "Deskrizzjoni qasira, iffukata l-intenzjoni",
+     "id": "your-skill",
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["Eżempju ta' sejħa bil-lingwa naturali"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Ikteb testijiet:** `tests/unit/a2a-<ħila-ġdida>.test.ts`. Ħu ħsieb it-triq ferħana + it-triq tal-żbalji.
+4. **Ikteb it-testijiet:** `tests/unit/a2a-<your-skill>.test.ts`. Għatti happy path + error path.
 
-5. **Dokumenta** l-ħila ġdida fil-tabella `Available Skills` ta' dan il-fajl.
+5. **Dokument** il-ħila l-ġdida fit-tabella `Available Skills` ta' dan il-fajl.
 
 ---
 

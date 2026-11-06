@@ -1,4 +1,3 @@
-import { randomUUID } from "crypto";
 import {
   BaseExecutor,
   type ExecuteInput,
@@ -18,6 +17,7 @@ import {
   runWithProxyContext,
   noteRotationAccount,
   noteAddedWait,
+  proxyFetch,
   resolveProxyForRequest,
   type AddedWaitCause,
 } from "../utils/proxyFetch.ts";
@@ -77,6 +77,13 @@ import {
   isResponsesTerminalLine,
   normalizeMuseSparkFinishReason,
 } from "./opencodeMuseSpark.ts";
+import {
+  applyMuseSparkResponsesEffort,
+  dispatchWithMuseSparkMaxFallback,
+  parseDynamicMuseSparkEffort,
+  type HttpExecuteResult,
+} from "./opencodeMuseSparkEffort.ts";
+export { isUnsupportedReasoningEffortRejection } from "./opencodeMuseSparkEffort.ts";
 import { currentRequestContext, runInRequestContext } from "./opencodeRequestContext.ts";
 import {
   handleLoopFreeTierRefusal,
@@ -84,6 +91,14 @@ import {
   retryFreeTierRefusalWithObservedTools,
 } from "./opencodeFreeTierRetry.ts";
 import { withRequestShapeRetry } from "./opencodeRequestShape.ts";
+import {
+  clampResponsesCallId,
+  coerceResponsesArguments,
+  coerceResponsesOutput,
+  normalizeResponsesReasoningField,
+  normalizeResponsesTokenFields,
+} from "./opencodeResponsesFields.ts";
+import { probeFreeTierRefusalEgress } from "./opencodeFreeTierEgressProbe.ts";
 import { trimOversizedToolEnums } from "./opencodeEnumTrim.ts";
 
 // Re-exported: the free-model catalog moved to the contract module (it decides whether the
@@ -106,6 +121,7 @@ import { isProxyAvoided } from "../utils/proxyRefusalMemory.ts";
 import * as egressPacing from "./opencodeEgressThrottle.ts";
 import {
   isNetworkRotationSharedEgressGuardEnabled,
+  isProxyRefusalModelScopeEnabled,
   isProxySkipRecentlyFailedEnabled,
   isRotationAttributionEnabled,
   isOpencodeUserBlockedRotationEnabled,
@@ -113,10 +129,16 @@ import {
   isOpencodeRateLimited429EarlyStopEnabled,
   isOpencodeParkAndResumeEnabled,
   isOpencodePoolReselectEnabled,
+  isOpencodeFreeTierEgressProbeEnabled,
   isOpencodePublishedCatalogRoutingEnabled,
   isOpencodeV2ClientFingerprintEnabled,
 } from "@/shared/utils/featureFlags";
-import { setPublishedCatalogRoutingGate } from "../utils/opencodePublishedCatalog.ts";
+import {
+  getPublishedBaseUrl,
+  setPublishedCatalogFetch,
+  setPublishedCatalogRoutingGate,
+} from "../utils/opencodePublishedCatalog.ts";
+import { setToolSchemaMemoryGate } from "./opencodeToolObservation.ts";
 import { rotatesEgressOnQuotaRefusal } from "../config/providerErrorRules.ts";
 import {
   BURST_PARK_THRESHOLD,
@@ -145,67 +167,6 @@ export type { ScopedAccount as OpencodeAccountState };
 const EFFORT_LEVELS = ["none", "low", "high", "max"] as const;
 
 const MAX_TOOL_NAME_LEN = 128;
-
-function clampResponsesCallId(callId: unknown): string {
-  const s = String(callId || "").trim();
-  return s || `call_${randomUUID().replace(/-/g, "").slice(0, 16)}`;
-}
-
-function coerceResponsesArguments(args: unknown): string {
-  if (typeof args === "string") return args;
-  if (args && typeof args === "object") {
-    try {
-      return JSON.stringify(args);
-    } catch {
-      return "{}";
-    }
-  }
-  return "{}";
-}
-
-function coerceResponsesOutput(output: unknown): string {
-  if (typeof output === "string") return output;
-  if (output && typeof output === "object") {
-    try {
-      return JSON.stringify(output);
-    } catch {
-      return "";
-    }
-  }
-  return String(output ?? "");
-}
-
-/**
- * Move a legacy max_tokens/max_completion_tokens value to the Responses API's
- * max_output_tokens field, in place. Extracted from sanitizeResponsesBody to
- * keep that function under the max-lines-per-function ratchet.
- */
-function normalizeResponsesTokenFields(body: Record<string, unknown>): void {
-  if (body.max_output_tokens === undefined) {
-    if (body.max_completion_tokens !== undefined) {
-      body.max_output_tokens = body.max_completion_tokens;
-    } else if (body.max_tokens !== undefined) {
-      body.max_output_tokens = body.max_tokens;
-    }
-  }
-  delete body.max_tokens;
-  delete body.max_completion_tokens;
-}
-
-/**
- * Fold a legacy reasoning_effort field into the Responses API's reasoning
- * object, in place. Extracted from sanitizeResponsesBody (see above).
- */
-function normalizeResponsesReasoningField(body: Record<string, unknown>): void {
-  if (body.reasoning_effort !== undefined && body.reasoning === undefined) {
-    body.reasoning = { effort: body.reasoning_effort, summary: "auto" };
-  }
-  if (body.reasoning && typeof body.reasoning === "object" && !Array.isArray(body.reasoning)) {
-    const r = body.reasoning as Record<string, unknown>;
-    if (!r.summary) r.summary = "auto";
-  }
-  delete body.reasoning_effort;
-}
 
 /** Whether `value` is a non-array, non-null object. */
 function isPlainRecord(value: unknown): value is Record<string, unknown> {
@@ -267,6 +228,15 @@ function normalizeResponsesToolEntry(t: unknown): Record<string, unknown> | null
   return toolObj;
 }
 
+/** Whether a Responses-API reasoning item carries plaintext in `content` or `summary`. */
+function hasReplayableReasoningText(item: Record<string, unknown>): boolean {
+  return [item.content, item.summary].some(
+    (parts) =>
+      Array.isArray(parts) &&
+      parts.some((part) => isPlainRecord(part) && typeof part.text === "string" && part.text !== "")
+  );
+}
+
 /**
  * Whether a Responses-API `input` item should be kept, normalizing
  * function_call/function_call_output entries in place as a side effect.
@@ -274,9 +244,11 @@ function normalizeResponsesToolEntry(t: unknown): Record<string, unknown> | null
 function shouldKeepResponsesInputItem(item: unknown): boolean {
   if (!item || typeof item !== "object" || Array.isArray(item)) return true;
   const rec = item as Record<string, unknown>;
-  if (rec.type === "reasoning") return false;
   delete rec.encrypted_content;
   delete rec.reasoning_encrypted_content;
+  // An opaque reasoning item means nothing to this upstream, but one with readable text is the
+  // replayed thinking DeepSeek rejects a turn without (#13031).
+  if (rec.type === "reasoning") return hasReplayableReasoningText(rec);
   if (rec.type === "function_call") {
     if (!rec.name || typeof rec.name !== "string" || (rec.name as string).trim() === "")
       return false;
@@ -328,8 +300,11 @@ export function sanitizeResponsesBody(body: Record<string, unknown>): void {
  *   grok-4.5 low/medium/high; hy3 none/low/high; kimi-k3 max;
  *   qwen3.6-plus / qwen3.7-max / qwen3.7-plus high/max;
  *   muse-spark-1.2-contributor minimal/low/medium/high/xhigh (no max)
- * - #12674 Muse Spark 1.3 Contributor: minimal/low/medium/high/xhigh (no max),
- *   verified via `opencode models opencode-go --refresh --verbose`
+ * - #12674 Muse Spark 1.3 Contributor: minimal/low/medium/high/xhigh verified
+ *   via `opencode models opencode-go --refresh --verbose`; #12687 adds `max`
+ *   as an explicit alias suffix — the wire tier is still sent verbatim and
+ *   falls back to xhigh only on the upstream's unsupported-effort 400 (see
+ *   dispatchWithMuseSparkMaxFallback).
  */
 const EFFORT_TIERS: Record<string, readonly string[]> = {
   "deepseek-v4-pro": EFFORT_LEVELS,
@@ -342,8 +317,8 @@ const EFFORT_TIERS: Record<string, readonly string[]> = {
   "qwen3.6-plus": ["high", "max"],
   "qwen3.7-max": ["high", "max"],
   "qwen3.7-plus": ["high", "max"],
+  "muse-spark-1.3-contributor": ["minimal", "low", "medium", "high", "xhigh", "max"],
   "muse-spark-1.2-contributor": ["minimal", "low", "medium", "high", "xhigh"],
-  "muse-spark-1.3-contributor": ["minimal", "low", "medium", "high", "xhigh"],
 };
 
 /**
@@ -361,7 +336,7 @@ export function parseEffortLevel(model: string): { baseModel: string; effort: st
       }
     }
   }
-  return null;
+  return parseDynamicMuseSparkEffort(m);
 }
 
 // #16798: the published-catalog surface lookup in providerModels.ts is client-reachable and
@@ -369,6 +344,11 @@ export function parseEffortLevel(model: string): { baseModel: string; effort: st
 // pipeline) hands it the OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED reader. Unregistered
 // (client bundle) reads as off.
 setPublishedCatalogRoutingGate(isOpencodePublishedCatalogRoutingEnabled);
+// The catalog read goes through the proxy-aware transport; the module itself cannot import
+// it (client-reachable). The same flag also turns on the client's own x-opencode-* header
+// relay and the accepted tool-schema memory.
+setPublishedCatalogFetch(proxyFetch);
+setToolSchemaMemoryGate(isOpencodePublishedCatalogRoutingEnabled);
 
 /**
  * Resolves the registry `targetFormat` for a model, aliasing `provider` first.
@@ -548,9 +528,10 @@ export class OpencodeExecutor extends BaseExecutor {
   private pickAccountWith(
     accounts: ScopedAccount[],
     isReady: (account: ScopedAccount) => boolean,
-    keyOfMember?: (account: ScopedAccount) => string | null
+    keyOfMember?: (account: ScopedAccount) => string | null,
+    model?: string | null
   ): ScopedAccount {
-    return pickRotatableAccount(accounts, this, isReady, keyOfMember);
+    return pickRotatableAccount(accounts, this, isReady, keyOfMember, model);
   }
 
   /** Snapshot entries for the attribution registry — ids already masked. */
@@ -818,6 +799,7 @@ export class OpencodeExecutor extends BaseExecutor {
       // Opt-in pool re-selection on a per-address 429 (default off): one flag
       // read per request, like the attribution flag above — never in the loop.
       const poolReselectOn = isOpencodePoolReselectEnabled();
+      const freeTierEgressProbeOn = isOpencodeFreeTierEgressProbeEnabled(); // opt-in, default off
       // Resolver published by the chat layer when the ambient egress came from
       // a live connection pool (undefined otherwise). Read once per request.
       // The provider test is the quota-refusal scope, so an operator widening it
@@ -861,9 +843,14 @@ export class OpencodeExecutor extends BaseExecutor {
         // execute() in runWithProxyContext(proxyInfo.proxy, ...) before we run.
         // Only pin direct egress when no such context exists; otherwise let the
         // ambient proxy stand instead of clobbering it with the direct sentinel.
-        const dispatch = () => super.execute(input);
+        const dispatch = (effInput: ExecuteInput) =>
+          super.execute(effInput) as Promise<HttpExecuteResult>;
         const single = (await guardStall(
-          await (hasAmbientProxyContext() ? dispatch() : runWithDirectFetchContext(dispatch))
+          await (hasAmbientProxyContext()
+            ? dispatchWithMuseSparkMaxFallback(input, dispatch, parseEffortLevel)
+            : runWithDirectFetchContext(() =>
+                dispatchWithMuseSparkMaxFallback(input, dispatch, parseEffortLevel)
+              ))
         )) as HttpExecuteResult;
         const retryAfterRefusal = await retryFreeTierRefusalWithObservedTools(
           this.freeTierRetryCtx(input),
@@ -878,6 +865,38 @@ export class OpencodeExecutor extends BaseExecutor {
                 : runWithDirectFetchContext(() => super.execute(retryInput))
             ) as unknown as Promise<HttpExecuteResult>
         );
+        // Opt-in: a FreeTierError through a pool member probes one other member (never direct).
+        const singleEgress = freeTierEgressProbeOn
+          ? egressPacing.createAppliedEgressTracker(
+              this.buildUrl(String(input.model ?? ""), Boolean(input.stream)),
+              resolveProxyForRequest
+            )
+          : null;
+        const probed =
+          singleEgress &&
+          (await probeFreeTierRefusalEgress(true, {
+            refusal: retryAfterRefusal ?? single,
+            account: accounts[0],
+            accounts,
+            keyOfMember: singleEgress.keyOfMember,
+            dispatch: async (proxy) =>
+              (await guardStall(
+                await runWithProxyContext(proxy, () =>
+                  super.execute({ ...input, skipUpstreamRetry: true })
+                )
+              )) as HttpExecuteResult,
+            recordRefused: () =>
+              void singleEgress.noteRefused(
+                accounts[0],
+                isProxySkipRecentlyFailedEnabled(),
+                "geo_blocked"
+              ),
+            log,
+            cid,
+          }));
+        if (probed) {
+          return this.finalizeForcedStream(input, this.normalizeMuseSparkResponse(input, probed));
+        }
         if (retryAfterRefusal) {
           await this.noteFreeTierRefusal(input, retryAfterRefusal.response, log);
           return this.finalizeForcedStream(
@@ -919,10 +938,6 @@ export class OpencodeExecutor extends BaseExecutor {
       // This loop only ever dispatches through super.execute() (the HTTP request
       // path), which always resolves the object-shaped arm of ExecutorExecuteResult
       // — the bare-Response arm belongs to web/scraping executors only (base.ts:290).
-      type HttpExecuteResult = Extract<
-        Awaited<ReturnType<BaseExecutor["execute"]>>,
-        { response: Response }
-      >;
       let lastResult: HttpExecuteResult | null = null;
       let lastSharedEgressError: unknown = null;
       const sharedEgressGuardEnabled = isNetworkRotationSharedEgressGuardEnabled();
@@ -937,10 +952,18 @@ export class OpencodeExecutor extends BaseExecutor {
       // through the accounts is the retry). Avoids an unbounded loop on a
       // persistently malformed upstream.
       const emptyRejectionBudget = accounts.length === 1 ? 1 : 0;
+      // Opt-in: off, nothing below names a model and quota refusals cover the whole egress.
+      const refusalModel = isProxyRefusalModelScopeEnabled() ? input.model : undefined;
       // Request-local: geo/transient + 429 no-replay keys, one last resort after a 429.
       const geoTriedProxyKeys = new Set<string>(),
         rateLimitedProxyKeys = new Set<string>(),
-        spare = egressPacing.lastResort429(accounts, this, geoTriedProxyKeys, rateLimitedProxyKeys);
+        spare = egressPacing.lastResort429ForModel(
+          refusalModel,
+          accounts,
+          this,
+          geoTriedProxyKeys,
+          rateLimitedProxyKeys
+        );
       // (PROXY_SKIP_RECENTLY_FAILED, default on): members the provider just refused
       // (received refusal or refused TCP probe) are skipped. =false = plain rotation.
       const skipRecentlyFailed = isProxySkipRecentlyFailedEnabled();
@@ -988,7 +1011,8 @@ export class OpencodeExecutor extends BaseExecutor {
       };
       const appliedEgress = egressPacing.createAppliedEgressTracker(
         this.buildUrl(String(input.model ?? ""), Boolean(input.stream)),
-        resolveProxyForRequest
+        resolveProxyForRequest,
+        refusalModel
       );
       const { readAppliedKey, keyOfMember, noteRefused } = appliedEgress;
 
@@ -1000,14 +1024,16 @@ export class OpencodeExecutor extends BaseExecutor {
           // stays eligible (preserves the plain round-robin first pick).
           const memberKey = keyOfMember(a);
           if (a.proxy === null) {
-            if (skipRecentlyFailed && isProxyAvoided(memberKey)) return false;
+            if (skipRecentlyFailed && isProxyAvoided(memberKey, undefined, refusalModel))
+              return false;
             return !directTried || geoTriedProxyKeys.size === 0;
           }
-          if (skipRecentlyFailed && isProxyAvoided(memberKey)) return false;
+          if (skipRecentlyFailed && isProxyAvoided(memberKey, undefined, refusalModel))
+            return false;
           const k = proxyKeyOf(a.proxy);
           return k !== null && !geoTriedProxyKeys.has(k) && !rateLimitedProxyKeys.has(k);
         };
-        let account = this.pickAccountWith(accounts, isProxiedCandidate, keyOfMember);
+        let account = this.pickAccountWith(accounts, isProxiedCandidate, keyOfMember, refusalModel);
         if (attributionOn) {
           const nowMs = Date.now();
           for (const a of accounts) {
@@ -1105,7 +1131,7 @@ export class OpencodeExecutor extends BaseExecutor {
           requestPacing,
           account,
           isProxiedCandidate,
-          () => this.pickAccountWith(accounts, isProxiedCandidate, keyOfMember),
+          () => this.pickAccountWith(accounts, isProxiedCandidate, keyOfMember, refusalModel),
           input.signal,
           readAppliedKey
         );
@@ -1128,16 +1154,19 @@ export class OpencodeExecutor extends BaseExecutor {
             accounts,
             isProxiedCandidate,
             (attemptSignal) =>
-              (async () =>
-                guardStall(
-                  await runWithProxyContext(account.proxy ?? reselectedProxy, () =>
+              (async () => {
+                const loopDispatch = (effInput: ExecuteInput) =>
+                  runWithProxyContext(account.proxy ?? reselectedProxy, () =>
                     super.execute({
-                      ...input,
+                      ...effInput,
                       skipUpstreamRetry: true,
-                      signal: attemptSignal ?? input.signal,
+                      signal: attemptSignal ?? effInput.signal,
                     })
-                  )
-                ) as Promise<HttpExecuteResult>)(),
+                  ) as Promise<HttpExecuteResult>;
+                return guardStall(
+                  await dispatchWithMuseSparkMaxFallback(input, loopDispatch, parseEffortLevel)
+                ) as Promise<HttpExecuteResult>;
+              })(),
             input.signal
           );
           if (outcome.kind !== "ok") {
@@ -1268,7 +1297,7 @@ export class OpencodeExecutor extends BaseExecutor {
                   {
                     execute: (i: ExecuteInput) =>
                       super.execute(i) as Promise<ExecutorExecuteResult & { response: Response }>,
-                    markSuccess: (a: ScopedAccount) => markSuccess(a),
+                    markSuccess: (a: ScopedAccount) => markSuccess(a, refusalModel),
                     sleep: parkSleepCounting,
                     accounts,
                     replayKeyOfMember: keyOfMember,
@@ -1425,7 +1454,25 @@ export class OpencodeExecutor extends BaseExecutor {
                     runWithProxyContext(account.proxy, () =>
                       super.execute({ ...retryInput, skipUpstreamRetry: true })
                     ) as Promise<HttpExecuteResult>,
-                  noteServed: (a) => noteResponseServed(a as typeof account),
+                  noteServed: (a) => noteResponseServed(a as typeof account, refusalModel),
+                  probe: () =>
+                    probeFreeTierRefusalEgress(freeTierEgressProbeOn, {
+                      refusal: result,
+                      account,
+                      accounts,
+                      keyOfMember,
+                      dispatch: async (proxy) =>
+                        (await guardStall(
+                          await runWithProxyContext(proxy, () =>
+                            super.execute({ ...input, skipUpstreamRetry: true })
+                          )
+                        )) as HttpExecuteResult,
+                      recordRefused: () =>
+                        void noteRefused(account, skipRecentlyFailed, "geo_blocked"),
+                      noteServed: (a) => markSuccess(a, refusalModel),
+                      log,
+                      cid,
+                    }),
                 }
               );
             }
@@ -1456,7 +1503,7 @@ export class OpencodeExecutor extends BaseExecutor {
             }
             // A 400 carrying a real error (or non-empty content): propagate
             // immediately, untouched — same as before this change.
-            markOutcome(account, result.response);
+            markOutcome(account, result.response, refusalModel);
             if (attributionOn && skippedCooldown.size > 0) {
               this.logSkippedCooldownAccounts(log, cid, skippedCooldown);
             }
@@ -1464,7 +1511,7 @@ export class OpencodeExecutor extends BaseExecutor {
           }
 
           egressPacing.observePacingSuccess(requestPacing, result.response.ok);
-          markOutcome(account, result.response);
+          markOutcome(account, result.response, refusalModel);
           if (attributionOn && skippedCooldown.size > 0) {
             this.logSkippedCooldownAccounts(log, cid, skippedCooldown);
           }
@@ -1512,10 +1559,12 @@ export class OpencodeExecutor extends BaseExecutor {
     void urlIndex;
     void credentials;
 
+    // Off, unpublished or invalid: the registered base URL. A gated free-tier request keeps
+    // the inference contract's constant and never consults the catalog.
     const base =
       Boolean(model) && isGatedFreeTierRequest(this._surface(), this.provider, model)
         ? FREE_TIER_INFERENCE_BASE_URL
-        : this.config.baseUrl;
+        : (getPublishedBaseUrl(this.provider) ?? this.config.baseUrl);
     switch (this._requestFormat) {
       case "claude":
         return `${base}/messages`;
@@ -1606,6 +1655,7 @@ export class OpencodeExecutor extends BaseExecutor {
         sessionBody: projectOpencodeSessionBody(body),
         reencodeSession: gatedScope,
         v2Fingerprint,
+        forwardAllOpencodeHeaders: isOpencodePublishedCatalogRoutingEnabled(),
       });
     }
 
@@ -1653,9 +1703,9 @@ export class OpencodeExecutor extends BaseExecutor {
 
     const prompt =
       "You must respond with valid JSON that strictly follows " +
-      "this JSON schema:\\n```json\\n" +
+      "this JSON schema:\n```json\n" +
       schemaJson +
-      "\\n```\\nRespond ONLY with the JSON object, no other text and no markdown code fences.";
+      "\n```\nRespond ONLY with the JSON object, no other text and no markdown code fences.";
 
     const messages: Array<Record<string, unknown>> = Array.isArray(record.messages)
       ? (record.messages as Array<Record<string, unknown>>).map((message) => ({ ...message }))
@@ -1665,12 +1715,9 @@ export class OpencodeExecutor extends BaseExecutor {
 
     if (systemMessage) {
       if (typeof systemMessage.content === "string") {
-        systemMessage.content = `${systemMessage.content}\\n\\n${prompt}`;
+        systemMessage.content = `${systemMessage.content}\n\n${prompt}`;
       } else if (Array.isArray(systemMessage.content)) {
-        systemMessage.content = [
-          ...systemMessage.content,
-          { type: "text", text: `\\n\\n${prompt}` },
-        ];
+        systemMessage.content = [...systemMessage.content, { type: "text", text: `\n\n${prompt}` }];
       }
     } else {
       messages.unshift({
@@ -1758,6 +1805,7 @@ export class OpencodeExecutor extends BaseExecutor {
       if (parsed) {
         const deepseekFamily =
           parsed.baseModel === "deepseek-v4-pro" || parsed.baseModel === "deepseek-v4-flash";
+        const museSparkFamily = parsed.baseModel.startsWith("muse-spark");
         if (deepseekFamily) {
           // DeepSeek via opencode-go proxies the native DeepSeek contract, which
           // accepts a flat reasoning_effort field (#4647).
@@ -1765,6 +1813,8 @@ export class OpencodeExecutor extends BaseExecutor {
           if (mb.reasoning_effort === undefined) {
             mb.reasoning_effort = parsed.effort;
           }
+        } else if (museSparkFamily) {
+          applyMuseSparkResponsesEffort(mb, parsed);
         }
         // #10788: every other family's ONLY native effort mechanism is the
         // -<tier> suffix in the model id itself (the ids `opencode models

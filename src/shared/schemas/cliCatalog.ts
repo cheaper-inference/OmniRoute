@@ -16,7 +16,7 @@ export const CliCatalogEntrySchema = z.object({
   description: z.string().min(1),
   docsUrl: z.string().min(1),
   configType: z.enum(["env", "custom", "guide", "custom-builder", "mitm"]),
-  envVars: z.record(z.string()).optional(),
+  envVars: z.record(z.string(), z.string()).optional(),
   modelAliases: z.array(z.string()).optional(),
   settingsFile: z.string().optional(),
   defaultCommand: z.string().optional(),
@@ -45,7 +45,9 @@ export const CliCatalogEntrySchema = z.object({
       })
     )
     .optional(),
-  codeBlock: z.object({ language: z.string(), code: z.string() }).optional(),
+  codeBlock: z
+    .object({ title: z.string().optional(), language: z.string(), code: z.string() })
+    .optional(),
   notes: z
     .array(z.object({ type: z.enum(["info", "warning", "error", "cloudCheck"]), text: z.string() }))
     .optional(),
@@ -57,14 +59,15 @@ export const CliCatalogEntrySchema = z.object({
 
 export type CliCatalogEntry = z.infer<typeof CliCatalogEntrySchema>;
 
-export const CliCatalogSchema = z.record(CliCatalogEntrySchema);
+export const CliCatalogSchema = z.record(z.string(), CliCatalogEntrySchema);
 
 /** Cardinalidade obrigatória (Plano §3.1/§3.2 + D15). +1 (crush, decolua/9router#1233). */
 // +1 (2026-07-02): "codewhale" added as a dual entry alongside "deepseek-tui"
 // (CodeWhale is the actively-maintained successor to DeepSeek TUI).
 // +1 (grok-build, decolua/9router#2571): xAI Grok Build TUI coding agent.
 // +1 (zed): Zed editor's built-in agent via an OpenAI-compatible provider (`omniroute setup-zed`).
-export const EXPECTED_CODE_COUNT = 22;
+// +1 (openclaude): OpenClaude (Gitlawb/openclaude) guide card.
+export const EXPECTED_CODE_COUNT = 23;
 // +2 (#6318): "omp" (Oh My Pi) and "letta" (Letta CLI) added as agent entries.
 // Note: #6318 originally also shipped duplicate "pi"/"jcode"/"codewhale" entries —
 // those tools were already delivered by a separate PR, so only omp+letta landed here.

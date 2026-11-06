@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 /**
  * ModelRow — Issue #3501 Phase 1e
  *
@@ -20,6 +21,7 @@ import {
 import { providerText } from "../providerPageHelpers";
 import { Input as KitInput } from "@omniroute/ui-kit/input";
 import { Button, Checkbox, FilterPills } from "@/shared/components";
+import ModelComboBadge from "./ModelComboBadge";
 import ModelCompatPopover from "./ModelCompatPopover";
 import {
   ContextWindowOverrideEditButton,
@@ -255,6 +257,8 @@ export interface ModelRowProps {
   fullModel: string;
   provider: string;
   alias?: string;
+  /** Combo names that reference this model, for the "used in combo" badge. */
+  combos?: string[];
   copied?: string;
   onCopy: (text: string, key: string) => void;
   onSetAlias?: (alias: string) => void;
@@ -284,6 +288,7 @@ export default function ModelRow({
   fullModel,
   provider,
   alias,
+  combos,
   copied,
   onCopy,
   onSetAlias,
@@ -377,6 +382,7 @@ export default function ModelRow({
       {/* Line 2 (never wraps): source, alias (truncates) and the actions, in the name's column. */}
       <div className="flex min-w-0 items-center gap-2 pl-6">
         <ModelSourceBadge source={model.source} />
+        {combos && combos.length > 0 && <ModelComboBadge combos={combos} t={t} />}
         {onSaveContextWindowOverride && (
           <ContextWindowOverrideField
             editor={contextEditor}
@@ -470,7 +476,7 @@ export default function ModelRow({
               }
             >
               {testingModel ? (
-                <Icon name="progress_activity" size={14} className="animate-spin" />
+                <Spinner decorative size="xs" />
               ) : testStatus === "ok" ? (
                 <Icon name="check_circle" size={14} />
               ) : testStatus === "quota" ? (
