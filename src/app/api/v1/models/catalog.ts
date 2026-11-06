@@ -1930,9 +1930,23 @@ async function buildUnifiedModelsResponseCore(
           const existingIndex = models.findIndex((m) => m.id === aliasId);
           if (existingIndex !== -1) {
             const existing = models[existingIndex] as Record<string, unknown> & { id: string };
-            const endpoints = Array.isArray(model.supportedEndpoints)
-              ? model.supportedEndpoints
-              : undefined;
+            // #16929 / #18510: when custom row has defaulted provenance (synthetically assigned ["chat"])
+            // and discovered model has trusted declared/inferred endpoints, do not overwrite discovered endpoints.
+            const isCustomDefaulted =
+              model.endpointCapabilitySource === "defaulted" ||
+              model.endpointCapabilitySource === undefined;
+            const isExistingTrusted =
+              existing.endpointCapabilitySource === "declared" ||
+              existing.endpointCapabilitySource === "inferred" ||
+              (Array.isArray(existing.supported_endpoints) &&
+                existing.supported_endpoints.some((e: any) => e !== "chat" && e !== "responses"));
+
+            const endpoints =
+              isCustomDefaulted && isExistingTrusted
+                ? undefined
+                : Array.isArray(model.supportedEndpoints)
+                  ? model.supportedEndpoints
+                  : undefined;
             const apiFormat = typeof model.apiFormat === "string" ? model.apiFormat : undefined;
             const visionFields =
               typeof model.supportsVision === "boolean"

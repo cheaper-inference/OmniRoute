@@ -1,0 +1,1 @@
+**fix(catalog):** prevent defaulted custom model endpoint overlays (`["chat"]` with `defaulted` provenance) from masking trusted declared or inferred endpoints (such as `embeddings`, `ocr`, and audio endpoints on Mistral / Voxtral models) in the `/v1/models` catalog and downstream capability resolution.
