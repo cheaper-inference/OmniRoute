@@ -3,11 +3,14 @@ import assert from "node:assert/strict";
 
 const { OpencodeExecutor } = await import("../../open-sse/executors/opencode.ts");
 const { getModelTargetFormat } = await import("../../open-sse/config/providerModels.ts");
+const { configurePublishedCatalogForTests, resetPublishedCatalogForTests } =
+  await import("../../open-sse/utils/opencodePublishedCatalog.ts");
 
 // OpenCode Go serves gemini-4-argon only over the Google Generative AI wire,
 // on its own inference host (not the `/zen/go/v1` chat host) and keyed by `x-goog-api-key`.
 const GO_GEMINI_BASE = "https://opencode.ai/inference/go/v1";
 const ARGON = "gemini-4-argon";
+const PUBLISHED_FLAG = "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED";
 
 describe("OpenCode Go Gemini wire", () => {
   let originalFetch: typeof globalThis.fetch;
@@ -78,6 +81,49 @@ describe("OpenCode Go Gemini wire", () => {
     );
     const headers = zen.buildHeaders({ apiKey: "k" }, true, {}, "gemini-2.5-pro");
     assert.equal(headers["Authorization"], "Bearer k");
+    assert.equal(headers["x-goog-api-key"], undefined);
+  });
+
+  it("ignores a published catalog base on the Go gemini lane", () => {
+    process.env[PUBLISHED_FLAG] = "true";
+    configurePublishedCatalogForTests({
+      "opencode-go": { id: "opencode-go", api: "https://opencode.ai/inference/go/openai/v1" },
+    });
+    try {
+      const go = new OpencodeExecutor("opencode-go");
+      go._requestFormat = "openai";
+      assert.equal(
+        go.buildUrl("glm-5.2", true),
+        "https://opencode.ai/inference/go/openai/v1/chat/completions"
+      );
+      go._requestFormat = "gemini";
+      assert.equal(go.buildUrl(ARGON, false), `${GO_GEMINI_BASE}/models/${ARGON}:generateContent`);
+    } finally {
+      delete process.env[PUBLISHED_FLAG];
+      resetPublishedCatalogForTests();
+    }
+  });
+
+  it("keeps a free-looking id on the Go gemini lane, because Go has no gated tier", () => {
+    const go = new OpencodeExecutor("opencode-go");
+    go._requestFormat = "gemini";
+    const model = "gemini-4-argon-free";
+    assert.equal(go.buildUrl(model, false), `${GO_GEMINI_BASE}/models/${model}:generateContent`);
+    const headers = go.buildHeaders({ apiKey: "k" }, true, {}, model);
+    assert.equal(headers["x-goog-api-key"], "k");
+    assert.equal(headers["Authorization"], undefined);
+  });
+
+  it("keeps a gated Zen gemini request on the free-tier lane and its credential", () => {
+    const zen = new OpencodeExecutor("opencode-zen");
+    zen._requestFormat = "gemini";
+    const model = "gemini-4-argon-free";
+    assert.equal(
+      zen.buildUrl(model, false),
+      `https://opencode.ai/inference/v1/models/${model}:generateContent`
+    );
+    const headers = zen.buildHeaders({ apiKey: "k" }, true, {}, model);
+    assert.equal(headers["Authorization"], "Bearer public");
     assert.equal(headers["x-goog-api-key"], undefined);
   });
 

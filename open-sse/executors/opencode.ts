@@ -61,12 +61,12 @@ import {
 } from "./opencodeGeoBlock.ts";
 import {
   FREE_TIER_INFERENCE_BASE_URL,
-  GO_GEMINI_INFERENCE_BASE_URL,
   attemptFor,
   isGatedFreeTierRequest,
   isGoGeminiWire,
   isPremiumOpencodeModel,
   noteFreeTierOutcome,
+  opencodeEndpointUrl,
   prepareFreeTierRequest,
   rebuildJsonFromForcedStream,
   resolveFreeTierCredential,
@@ -1563,23 +1563,11 @@ export class OpencodeExecutor extends BaseExecutor {
 
     // Off, unpublished or invalid: the registered base URL. A gated free-tier request keeps
     // the inference contract's constant and never consults the catalog.
-    const gated = Boolean(model) && isGatedFreeTierRequest(this._surface(), this.provider, model);
-    const base = gated
-      ? FREE_TIER_INFERENCE_BASE_URL
-      : (getPublishedBaseUrl(this.provider) ?? this.config.baseUrl);
-    switch (this._requestFormat) {
-      case "claude":
-        return `${base}/messages`;
-      case "openai-responses":
-        return `${base}/responses`;
-      case "gemini": {
-        const goWire = isGoGeminiWire(this._requestFormat, this._surface());
-        const geminiBase = goWire && !gated ? GO_GEMINI_INFERENCE_BASE_URL : base;
-        return `${geminiBase}/models/${model}:${stream ? "streamGenerateContent?alt=sse" : "generateContent"}`;
-      }
-      default:
-        return `${base}/chat/completions`;
-    }
+    const base =
+      Boolean(model) && isGatedFreeTierRequest(this._surface(), this.provider, model)
+        ? FREE_TIER_INFERENCE_BASE_URL
+        : (getPublishedBaseUrl(this.provider) ?? this.config.baseUrl);
+    return opencodeEndpointUrl(this._requestFormat, this._surface(), base, model, stream);
   }
 
   /**
@@ -1621,7 +1609,7 @@ export class OpencodeExecutor extends BaseExecutor {
     if (key) {
       if (this._requestFormat === "claude" || this.usesZenApiKeyAuth()) {
         headers["x-api-key"] = key;
-      } else if (isGoGeminiWire(this._requestFormat, this._surface()) && !gatedScope) {
+      } else if (isGoGeminiWire(this._requestFormat, this._surface())) {
         headers["x-goog-api-key"] = key;
       } else {
         headers["Authorization"] = `Bearer ${key}`;
