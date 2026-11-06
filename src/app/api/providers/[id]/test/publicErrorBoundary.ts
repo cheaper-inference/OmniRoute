@@ -20,7 +20,10 @@ export function isAccountDeactivatedMessage(text: string): boolean {
   return (
     normalized.includes("account_deactivated") ||
     (normalized.includes("deactivat") && normalized.includes("account")) ||
-    normalized.includes("tos_violation") ||
+    (normalized.includes("tos_violation") &&
+      (normalized.includes("cloudcode") ||
+        normalized.includes("disabled in this account") ||
+        normalized.includes("terms of service"))) ||
     normalized.includes("disabled in this account for violation") ||
     (normalized.includes("disabled in this account") && normalized.includes("terms of service"))
   );

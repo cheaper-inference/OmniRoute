@@ -1,3 +1,4 @@
+import { isAccountDeactivated } from "../../open-sse/services/accountFallback.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
 
@@ -63,4 +64,18 @@ test("connectionRecovery flags verificationPending for stored Google Forms appea
   };
   const recoverable = toRecoverableConnectionInput(conn);
   assert.equal(recoverable.verificationPending, true);
+});
+
+test("incidental tos_violation in non-Google response does not deactivate account", () => {
+  const unrelated = {
+    error: { message: "The user prompt discussed tos_violation in conversation" },
+  };
+  const str = JSON.stringify(unrelated);
+  assert.equal(isAccountDeactivatedMessage(str), false);
+  assert.equal(isAccountDeactivated(str), false);
+});
+
+test("isAccountDeactivated identifies Google Cloud Code TOS_VIOLATION", () => {
+  const str = JSON.stringify(TOS_BODY);
+  assert.equal(isAccountDeactivated(str), true);
 });

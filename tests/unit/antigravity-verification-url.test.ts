@@ -8,6 +8,7 @@ import {
   extractVerificationUrl,
   isGoogleVerificationUrl,
   readStoredVerificationUrl,
+  redactVerificationUrls,
 } from "../../open-sse/services/antigravityVerification.ts";
 
 const URL_A = "https://accounts.google.com/signin/continue?sarp=1&continue=https://x.example";
@@ -140,4 +141,25 @@ test("isGoogleVerificationUrl accepts docs.google.com/forms links but rejects ot
     true
   );
   assert.equal(isGoogleVerificationUrl("https://docs.google.com/document/d/123/edit"), false);
+});
+
+test("redactVerificationUrls masks case-variant and JSON-escaped URLs", () => {
+  const text =
+    'Upper: HTTPS://ACCOUNTS.GOOGLE.COM/signin and HTTPS://FORMS.GLE/xyz - Escaped: {"appeal_url":"https:\\/\\/forms.gle\\/abc","verif":"https:\\/\\/accounts.google.com\\/challenge"}';
+  const redacted = redactVerificationUrls(text);
+  assert.equal(
+    redacted,
+    'Upper: [verification-url] and [verification-url] - Escaped: {"appeal_url":"[verification-url]","verif":"[verification-url]"}'
+  );
+});
+
+test("isGoogleVerificationUrl and extractVerificationUrl accept uppercase and escaped-slash URLs", () => {
+  assert.equal(isGoogleVerificationUrl("HTTPS://FORMS.GLE/xyz"), true);
+  assert.equal(isGoogleVerificationUrl("HTTPS://ACCOUNTS.GOOGLE.COM/signin"), true);
+  assert.equal(isGoogleVerificationUrl("https:\\/\\/forms.gle\\/xyz"), true);
+  assert.equal(isGoogleVerificationUrl("https:\\/\\/accounts.google.com\\/signin"), true);
+
+  const escapedBody =
+    '{"error":{"message":"Verify your account at https:\\/\\/forms.gle\\/abc to continue"}}';
+  assert.equal(extractVerificationUrl(escapedBody), "https://forms.gle/abc");
 });

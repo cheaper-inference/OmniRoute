@@ -22,7 +22,7 @@ const GOOGLE_DOCS_HOST = "docs.google.com";
 const VERIFICATION_WORDING = /validation|verif|appeal|tos_violation|violation of terms/i;
 // Bounded quantifier keeps the scan linear on untrusted upstream text.
 const FREE_TEXT_URL =
-  /https:\/\/(?:accounts\.google\.com|forms\.gle|docs\.google\.com\/forms\/)[^\s"'\\<>]{1,2048}/;
+  /https:(?:\\\/\\\/|\/\/)(?:accounts\.google\.com|forms\.gle|docs\.google\.com(?:\/|\\\/)forms(?:\/|\\\/))[^\s"'<>]{1,2048}/i;
 
 function asRecord(value: unknown): JsonRecord | null {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
@@ -36,12 +36,14 @@ function asArray(value: unknown): unknown[] {
 export function isGoogleVerificationUrl(candidate: unknown): candidate is string {
   if (typeof candidate !== "string" || candidate.length === 0) return false;
   try {
-    const parsed = new URL(candidate);
+    const normalized = candidate.replace(/\\\//g, "/");
+    const parsed = new URL(normalized);
     if (parsed.protocol !== "https:") return false;
-    if (parsed.hostname === GOOGLE_ACCOUNTS_HOST || parsed.hostname === GOOGLE_FORMS_HOST) {
+    const hostname = parsed.hostname.toLowerCase();
+    if (hostname === GOOGLE_ACCOUNTS_HOST || hostname === GOOGLE_FORMS_HOST) {
       return true;
     }
-    if (parsed.hostname === GOOGLE_DOCS_HOST && parsed.pathname.startsWith("/forms/")) {
+    if (hostname === GOOGLE_DOCS_HOST && parsed.pathname.startsWith("/forms/")) {
       return true;
     }
     return false;
@@ -106,13 +108,14 @@ export function extractVerificationUrl(payload: unknown): string | null {
   }
 
   for (const candidate of candidates) {
-    if (isGoogleVerificationUrl(candidate)) return new URL(candidate).href;
+    const normalized = typeof candidate === "string" ? candidate.replace(/\\\//g, "/") : candidate;
+    if (isGoogleVerificationUrl(normalized)) return new URL(normalized).href;
   }
   return null;
 }
 
 const ANY_ACCOUNTS_OR_APPEAL_URL =
-  /https:\/\/(?:accounts\.google\.com|forms\.gle|docs\.google\.com\/forms\/)[^\s"'\\<>]{1,2048}/g;
+  /https:(?:\\\/\\\/|\/\/)(?:accounts\.google\.com|forms\.gle|docs\.google\.com(?:\/|\\\/)forms(?:\/|\\\/))[^\s"'<>]{1,2048}/gi;
 
 /** Masks every accounts.google.com and appeal link so a raw upstream body can be logged safely. */
 export function redactVerificationUrls(text: string): string {

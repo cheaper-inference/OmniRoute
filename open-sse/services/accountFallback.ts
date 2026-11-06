@@ -227,7 +227,6 @@ export const ACCOUNT_DEACTIVATED_SIGNALS = [
   // a ban (operator-actionable) — see ACCOUNT_VERIFICATION_REQUIRED_SIGNALS in errorClassifier.ts.
   "this service has been disabled in this account for violation",
   "this service has been disabled in this account",
-  "tos_violation",
 ];
 
 // Custom banned signals — loaded from DB settings at runtime.
@@ -474,8 +473,20 @@ export const PARAM_VALIDATION_PATTERNS = [
 /**
  * T06: Returns true if response body indicates the account is permanently deactivated.
  */
+export function isGoogleCloudCodeTosViolation(lowerText: string): boolean {
+  return (
+    lowerText.includes("tos_violation") &&
+    (lowerText.includes("cloudcode") ||
+      lowerText.includes("disabled in this account") ||
+      lowerText.includes("terms of service"))
+  );
+}
+
 export function isAccountDeactivated(errorText: string): boolean {
   const lower = String(errorText || "").toLowerCase();
+  if (isGoogleCloudCodeTosViolation(lower)) {
+    return true;
+  }
   return getMergedBannedSignals().some((sig) => lower.includes(sig));
 }
 
