@@ -51,6 +51,8 @@ const { updateSettingsSchema } = await import("../../../src/shared/validation/se
 const { createProviderSchema, updateProviderConnectionSchema } =
   await import("../../../src/shared/validation/schemas/provider.ts");
 const cli = await import("../../../bin/cli/provider-store.mjs");
+const { readNewConnectionProxyDefault } =
+  await import("../../../src/lib/db/newConnectionProxy.mjs");
 const { runJsonMigration } = await import("../../../src/lib/db/jsonMigration.ts");
 const transfer = await import("../../../src/lib/transfer/providerTransfer.ts");
 const { sealJson } = await import("../../../src/lib/transfer/sealedPayload.ts");
@@ -261,6 +263,20 @@ for (const invalid of ["null", '"false"', "0", "[]", "{}", "not-json"]) {
     assert.equal(explicit.proxyEnabled, false);
   });
 }
+
+test("policy reader treats every driver's no-row result as missing and still rejects bad rows", () => {
+  const dbReturning = (row: unknown) => ({ prepare: () => ({ get: () => row }) });
+  // better-sqlite3 reports no row as undefined; the CLI's bun:sqlite wrapper reports it as null.
+  assert.equal(readNewConnectionProxyDefault(dbReturning(undefined)), true);
+  assert.equal(readNewConnectionProxyDefault(dbReturning(null)), true);
+  assert.equal(readNewConnectionProxyDefault(dbReturning({ value: "false" })), false);
+  for (const malformed of [{}, { value: 0 }, { value: null }, "false", 0, false]) {
+    assert.throws(
+      () => readNewConnectionProxyDefault(dbReturning(malformed)),
+      /new.connection proxy default/i
+    );
+  }
+});
 
 test("database policy read failure fails closed before implicit insertion", async () => {
   core.getDbInstance().exec("DROP TABLE key_value");

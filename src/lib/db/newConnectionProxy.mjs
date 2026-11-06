@@ -15,13 +15,9 @@ export function readNewConnectionProxyDefault(db) {
         "SELECT value FROM key_value WHERE namespace = 'settings' AND key = 'defaultNewConnectionProxyEnabled'"
       )
       .get();
-    if (row === undefined) return DEFAULT_NEW_CONNECTION_PROXY_ENABLED;
-    if (
-      row === null ||
-      typeof row !== "object" ||
-      !("value" in row) ||
-      typeof row.value !== "string"
-    ) {
+    // better-sqlite3 reports no row as undefined; the CLI's bun:sqlite wrapper reports it as null.
+    if (row === undefined || row === null) return DEFAULT_NEW_CONNECTION_PROXY_ENABLED;
+    if (typeof row !== "object" || !("value" in row) || typeof row.value !== "string") {
       throw new Error("Invalid policy row");
     }
     const value = JSON.parse(row.value);
