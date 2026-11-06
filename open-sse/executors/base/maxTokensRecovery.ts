@@ -7,7 +7,7 @@
  * requests pre-clamp, and retry the same URL once. Mirrors
  * applyReasoningEffortRecovery's contract.
  */
-import { readResponseTextWithinCap } from "../../handlers/chatCore/nonStreamingResponseBody.ts";
+import { readResponseTextWithinCap } from "../../utils/responseBodyCap.ts";
 import { HTTP_STATUS } from "../../config/constants.ts";
 import {
   clampTopLevelMaxTokens,

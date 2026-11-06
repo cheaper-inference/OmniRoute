@@ -29,7 +29,7 @@ import { COOLDOWN_MS } from "../../config/errorConfig.ts";
 import { normalizeHeaders } from "../../utils/headers.ts";
 import { shouldSkipCredentialRefresh } from "./skipCredentialRefresh.ts";
 import { isTransientCodexCapacity429 } from "../../services/codexAccount/capacity429.ts";
-import { readResponseTextWithinCap } from "./nonStreamingResponseBody.ts";
+import { readResponseTextWithinCap } from "../../utils/responseBodyCap.ts";
 
 export interface ChatCoreExecutorResult {
   response: Response;

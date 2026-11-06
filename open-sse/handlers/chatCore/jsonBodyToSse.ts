@@ -17,7 +17,7 @@ import { inheritEmptyTurnPolicy } from "../../utils/emptyTurnPolicy.ts";
 import { withBodyTimeout as defaultWithBodyTimeout } from "../../utils/stream.ts";
 import { synthesizeOpenAiSseFromJson as defaultSynthesize } from "../../utils/jsonToSse.ts";
 import { prependBufferedChunks } from "../../utils/streamReadiness.ts";
-import { readResponseTextWithinCap } from "./nonStreamingResponseBody.ts";
+import { readResponseTextWithinCap } from "../../utils/responseBodyCap.ts";
 
 type LoggerLike = { debug?: (...args: unknown[]) => void } | null | undefined;
 

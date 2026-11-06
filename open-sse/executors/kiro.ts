@@ -1,4 +1,4 @@
-import { readResponseTextWithinCap } from "../handlers/chatCore/nonStreamingResponseBody.ts";
+import { readResponseTextWithinCap } from "../utils/responseBodyCap.ts";
 import {
   BaseExecutor,
   mergeUpstreamExtraHeaders,

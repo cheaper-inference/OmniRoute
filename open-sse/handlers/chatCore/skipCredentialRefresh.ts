@@ -1,4 +1,4 @@
-import { readResponseTextWithinCap } from "./nonStreamingResponseBody.ts";
+import { readResponseTextWithinCap } from "../../utils/responseBodyCap.ts";
 import { isNoAuthProviderKey } from "@/shared/utils/noAuthProviders";
 import { isOpencodeFreeTierRefusalForProvider } from "../../executors/opencodeGeoBlock.ts";
 import { isProviderSafetyRefusalBody } from "../../utils/providerSafety.ts";

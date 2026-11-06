@@ -2,7 +2,7 @@
 // to keep that file under its frozen size cap. When upstream answers 400 because
 // it could not decrypt advisor results carried in the request, those results are
 // replaced with an "unavailable" marker and the SAME url is retried once.
-import { readResponseTextWithinCap } from "../../handlers/chatCore/nonStreamingResponseBody.ts";
+import { readResponseTextWithinCap } from "../../utils/responseBodyCap.ts";
 import { HTTP_STATUS } from "../../config/constants.ts";
 import {
   isAdvisorUndecryptableError,

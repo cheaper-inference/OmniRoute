@@ -8,7 +8,7 @@
 // requests clamp proactively via sanitizeReasoningEffortForProvider →
 // getLearnedReasoningEffort), clamp the live request body by re-running the
 // sanitizer, and retry the SAME url once.
-import { readResponseTextWithinCap } from "../../handlers/chatCore/nonStreamingResponseBody.ts";
+import { readResponseTextWithinCap } from "../../utils/responseBodyCap.ts";
 import { HTTP_STATUS } from "../../config/constants.ts";
 import {
   nextProbeReasoningEffort,
