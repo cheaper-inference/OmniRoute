@@ -121,6 +121,30 @@ supplemented:
   Importing an older backup therefore cannot revive a session that a password
   change or a sign-out already ended.
 
+#### Optional TOTP two-factor login (#16619)
+
+Enrolled from Settings → Security; off until the operator turns it on
+(`src/server/auth/dashboardMfa.ts`).
+
+- **What it covers:** password login (`POST /api/auth/login`, which then needs
+  `POST /api/auth/mfa/verify`) and `omniroute connect` (`POST /api/cli/connect`,
+  which refuses a password-only exchange and takes the code as `totp`).
+- **What it does not cover:** OIDC / SSO sign-in (`/api/auth/oidc/callback`) does
+  not ask for the OmniRoute TOTP. It relies on the identity provider's own second
+  factor, so enforce MFA in the IdP if OIDC is enabled.
+- **Recovery** (lost device, no recovery codes left, or a factor that can no longer
+  be verified, for example after `STORAGE_ENCRYPTION_KEY` changed):
+  1. Restart the server with `OMNIROUTE_DISABLE_MFA=true`.
+  2. On the host itself (loopback peer and loopback `Host`, such as
+     `http://localhost:20128`), sign in with the password. The second factor is
+     skipped for that origin only; every other origin still needs the code.
+  3. In Settings → Security → Disable, enter the password and leave the code
+     blank. `POST /api/auth/mfa/disable` accepts a body without `code` only while
+     the variable is set and the request comes from the host; it still requires
+     the dashboard session and the current password, and is audited as
+     `auth.mfa.disabled` with `secondFactor: "recovery_switch"`.
+  4. Unset `OMNIROUTE_DISABLE_MFA`, restart, and enroll again if needed.
+
 ## Route Classes
 
 `src/server/authz/types.ts` defines three classes; any route that cannot be classified deterministically falls back to `MANAGEMENT`.
@@ -176,9 +200,10 @@ Each route class has a policy in `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — always returns `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — extracts Bearer, validates via `validateApiKey()`. Falls through to anonymous only when the effective `REQUIRE_API_KEY` feature flag is disabled. The effective flag is resolved through `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) so Dashboard Feature Flags and environment variables govern `/api/v1/*`, `/api/v1beta/*`, and aliases consistently; resolver failures fail closed. Allows dashboard-session requests on client API routes (including `/api/v1/models`, used by the dashboard model catalog).
+  When Entra ID SSO is enabled, a Bearer that is structurally an Entra token (three base64url segments, `RS*` alg, `kid`) is handled by the SSO branch **before** `validateApiKey()` and its verdict is final — it never falls through to the API-key path or the degrade-to-anonymous branch, so an identity-provider outage cannot become open access. Static API keys are unaffected. See [Entra ID SSO](../security/ENTRA_SSO.md).
 - **`managementPolicy`** (`policies/management.ts`) — accepts dashboard session, internal model-sync requests (matched against `/api/providers/[name]/(sync-models|models)`), or skips entirely if `isAuthRequired()` returns false. Returns 403 (`AUTH_001`) when a Bearer token is present but invalid, 401 otherwise. Also enforces the route-guard tiers (LOCAL_ONLY / ALWAYS_PROTECTED) before any auth branch — see [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY paths in `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (today: `/api/mcp/`) may be accessed from non-loopback when the Bearer key carries the `manage` scope; all other LOCAL_ONLY paths remain strict-loopback regardless of scope.
 
-A successful policy returns `AuthSubject` with `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Downstream handlers can read it via `assertAuth(request, "CLIENT_API")` in `src/server/authz/assertAuth.ts` instead of re-running auth logic.
+A successful policy returns `AuthSubject` with `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Downstream handlers can read it via `assertAuth(request, "CLIENT_API")` in `src/server/authz/assertAuth.ts` instead of re-running auth logic.
 
 ## Public Routes List
 
@@ -205,6 +230,7 @@ PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/init",
   "/api/sync/bundle",
   "/api/cli/connect",
@@ -345,8 +371,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 For authenticated requests the upstream (handler-side) request headers also include:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (optional)
 x-omniroute-auth-scopes:    comma-separated list
 ```

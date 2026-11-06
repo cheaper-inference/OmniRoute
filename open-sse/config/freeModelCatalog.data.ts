@@ -22,7 +22,7 @@ import type { FreeModelBudget } from "./freeModelCatalog.ts";
  * rewrites file timestamps on every deploy, which would report a months-old
  * catalog as "updated today". Bump this whenever the entries below change.
  */
-export const FREE_CATALOG_CURATED_AT = "2026-10-27";
+export const FREE_CATALOG_CURATED_AT = "2026-10-30";
 
 export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "agentrouter", modelId: "claude-opus-4-8", displayName: "Claude Opus 4.8", monthlyTokens: 0, creditTokens: 200000000, freeType: "one-time-initial", poolKey: "agentrouter", tos: "caution" },
@@ -316,9 +316,10 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "nscale", modelId: "openai/gpt-oss-20b", displayName: "openai/gpt-oss-20b", monthlyTokens: 0, creditTokens: 5000000, freeType: "one-time-initial", poolKey: "nscale", tos: "caution" },
   { provider: "nscale", modelId: "meta-llama/Llama-4-Scout-17B-16E-Instruct", displayName: "meta-llama/Llama-4-Scout-17B-16E-Instruct", monthlyTokens: 0, creditTokens: 5000000, freeType: "one-time-initial", poolKey: "nscale", tos: "caution" },
   { provider: "nscale", modelId: "meta-llama/Llama-3.3-70B-Instruct", displayName: "meta-llama/Llama-3.3-70B-Instruct", monthlyTokens: 0, creditTokens: 5000000, freeType: "one-time-initial", poolKey: "nscale", tos: "caution" },
-  { provider: "nvidia", modelId: "google/gemma-4-31b-it", displayName: "Gemma 4 31B", monthlyTokens: 0, creditTokens: 0, freeType: "one-time-initial", poolKey: "nvidia", tos: "caution" },
-  { provider: "nvidia", modelId: "nvidia/nemotron-3.5-super-vl-120b-a12b", displayName: "Nemotron 3.5 Super VL 120B A12B", monthlyTokens: 0, creditTokens: 0, freeType: "one-time-initial", poolKey: "nvidia", tos: "caution" },
-  { provider: "nvidia", modelId: "openai/gpt-oss-120b", displayName: "GPT OSS 120B", monthlyTokens: 0, creditTokens: 0, freeType: "one-time-initial", poolKey: "nvidia", tos: "caution" },
+  // evidence: public-page 2026-10-30 https://docs.api.nvidia.com/nim/docs/product — free API endpoints for Developer Program prototyping.
+  // https://build.nvidia.com/search publishes request-rate limits, not a token/credit allowance; model pages advertise free endpoints. Requires an API key; trial-use restrictions apply (#18499).
+  { provider: "nvidia", modelId: "google/gemma-4-31b-it", displayName: "Gemma 4 31B", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "nvidia", tos: "caution" },
+  { provider: "nvidia", modelId: "nvidia/nemotron-3.5-super-vl-120b-a12b", displayName: "Nemotron 3.5 Super VL 120B A12B", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "nvidia", tos: "caution" },
   // evidence: https://ollama.com/pricing (2026-10-27) now bills exact IDs
   // deepseek-v4-pro, kimi-k2.6, minimax-m2.7 and nemotron-3-super. Their
   // unconditional grants were removed. Older Free/starter-plan copy is stale;
@@ -463,6 +464,11 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   // evidence: public /v1/models (2026-10-27): zero prices, NVIDIA trial
   // terms, 30-day retention and data_used_for_training=true.
   { provider: "requesty", modelId: "nvidia/nemotron-3-nano-30b-a3b", displayName: "Nemotron 3 Nano 30B (Requesty free)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "requesty-free", tos: "caution", trainsOnPrompts: true },
+  // Exact free routes listed at tokenharbor.ai/models?category=free (2026-10-29).
+  // Shared rolling 7-day allowance; no published fixed token count. See the
+  // per-model source records and limitations in free-catalog-evidence.json.
+  { provider: "tokenharbor", modelId: "deepseek-v4.1-flash:free", displayName: "DeepSeek V4.1 Flash (Token Harbor free)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "tokenharbor-free", tos: "caution" },
+  { provider: "tokenharbor", modelId: "mimo-v2.6-flash:free", displayName: "MiMo V2.6 Flash (Token Harbor free)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "tokenharbor-free", tos: "caution" },
   { provider: "ovhcloud", modelId: "gpt-oss-120b", displayName: "GPT-OSS 120B (OVH anonymous)", monthlyTokens: 0, creditTokens: 0, freeType: "keyless", poolKey: "ovhcloud-anon", tos: "ok" },
   { provider: "ovhcloud", modelId: "gpt-oss-20b", displayName: "GPT-OSS 20B (OVH anonymous)", monthlyTokens: 0, creditTokens: 0, freeType: "keyless", poolKey: "ovhcloud-anon", tos: "ok" },
   { provider: "ovhcloud", modelId: "Qwen3.6-27B", displayName: "Qwen3.6 27B (OVH anonymous)", monthlyTokens: 0, creditTokens: 0, freeType: "keyless", poolKey: "ovhcloud-anon", tos: "ok" },

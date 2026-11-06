@@ -36,14 +36,16 @@ describe("#17028 SiliconFlow pay-as-you-go model protection", () => {
     // Measured 2026-10-28 inventory subtracts five
     // priced Ollama grants, three retired offers, two AINative grants and ten OpenCode-only offers.
     // Includes the release base NVIDIA Nemotron 3.5 identity rename.
+    // 464 → 465 on the v3.8.54 base: #16315/#18579 add two sourced Token Harbor :free routes,
+    // and #18418 drops NVIDIA's retired openai/gpt-oss-120b endpoint.
     // Pin identities as well as the total so unrelated replacement is visible.
     const identities = FREE_MODEL_BUDGETS.map((row) => `${row.provider}/${row.modelId}`).sort();
-    assert.equal(new Set(identities).size, 464);
+    assert.equal(new Set(identities).size, 465);
     assert.equal(
       createHash("sha256").update(identities.join("\n")).digest("hex"),
-      "7c905895edcd8f7f0e80be30e15705a6ded978ae951a1da87b114d6a15c85884"
+      "098c2c2eeed42c3c99ad93ec8e92d0d65146e6db8f66c4c920a2b4b414fe7732"
     );
-    assert.equal(totals.modelCount, 464);
+    assert.equal(totals.modelCount, 465);
     assert.equal(totals.poolCount, 34);
     assert.equal(totals.uncappedProviders.includes("siliconflow"), false);
   });

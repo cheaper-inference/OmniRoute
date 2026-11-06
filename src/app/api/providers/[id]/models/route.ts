@@ -10,7 +10,10 @@ import { getRegistryEntry } from "@omniroute/open-sse/config/providerRegistry.ts
 import { getModelsByProviderId } from "@/shared/constants/models";
 import { resolveAlibabaProviderModelsUrl } from "@/shared/constants/alibabaProviderRegions";
 import { getStaticModelsForProvider } from "@/lib/providers/staticModels";
-import { providerUsesCuratedModelsOnly } from "@/lib/providers/modelListingCapability";
+import {
+  isDiscoveryImportedCustomSource,
+  providerUsesCuratedModelsOnly,
+} from "@/lib/providers/modelListingCapability";
 import { mergeModelsWithCustomPrecedence } from "@/lib/providers/modelMetadataPrecedence";
 import { addModelsSuffix } from "@/lib/providers/validation/urlHelpers";
 import { getCachedProviderConnectionById } from "@/lib/db/readCache";
@@ -106,6 +109,7 @@ import { getAdobeModels } from "./adobeFireflyDiscovery";
 import { getSyncedAvailableModels, getCustomModels, getModelIsHidden } from "@/lib/db/models";
 import { isConnectionUnavailableToAuxiliaryActivity } from "@/lib/exclusiveLeaseIsolation";
 import { AUTHZ_HEADER_PEER_LOCALITY } from "@/server/authz/headers";
+import { isModelSyncLocalSpawnDenied } from "@/shared/services/modelSyncScheduler";
 import { fetchCursorAgentModels } from "@/lib/providerModels/cursorAgent";
 import { fetchCursorAvailableModels } from "@/lib/providerModels/cursorAvailableModels";
 import { ensureCursorAutoCatalogEntry } from "@/lib/providerModels/cursorAutoCatalog";
@@ -156,6 +160,7 @@ import { fetchClaudeDiscoveryModels } from "./discovery/claude";
 import { applyConnectionCustomHeaders } from "./discovery/connectionCustomHeaders";
 import { maybeHandleConolOrSyntxModelDiscovery } from "./webSessionDiscovery";
 import { maybeHandleTwinmindModelDiscovery } from "./twinmindDiscovery";
+import { maybeHandleDevinDesktopModelDiscovery } from "./devinDesktopDiscovery";
 import { maybeHandleVertexModelDiscovery } from "./vertexDiscovery";
 import { buildNoAuthModelsResponse, filterModelsForRoute } from "./modelRouteProjection";
 
@@ -234,12 +239,19 @@ export async function GET(
     // over discovered metadata for the same id.
     let customModelsForProvider: Array<Record<string, unknown> & { id: string; name?: string }> =
       [];
-    if (!excludeCustom && !usesCuratedModelsOnly) {
+    if (!excludeCustom) {
       try {
         const custom = await getCustomModels(provider);
         if (Array.isArray(custom)) {
+          // #18018 keeps operator rows on curated providers; rows a discovery sync
+          // imported are stale there and stay out (#8451).
           customModelsForProvider = custom.flatMap((model) =>
-            model && typeof model === "object" && typeof model.id === "string" ? [model] : []
+            model &&
+            typeof model === "object" &&
+            typeof model.id === "string" &&
+            !(usesCuratedModelsOnly && isDiscoveryImportedCustomSource(model.source))
+              ? [model]
+              : []
           );
         }
       } catch {
@@ -705,6 +717,9 @@ export async function GET(
       refreshToken: (connection as { refreshToken?: unknown }).refreshToken,
     });
     if (twinmindResponse) return twinmindResponse;
+
+    const devinDesktopResponse = await maybeHandleDevinDesktopModelDiscovery(webDiscoveryArgs);
+    if (devinDesktopResponse) return devinDesktopResponse;
 
     if (provider === "bedrock") {
       const cachedResponse = maybeReturnCachedDiscovery();
@@ -1500,14 +1515,17 @@ export async function GET(
         // TCP peer (never the spoofable Host header), mirroring cursorAgentImage.ts. Fail closed:
         // an absent/unrecognized locality skips the spawn and serves the cached/local catalog, or an
         // explicit 403 when neither exists — it never falls through to executing a child process.
-        if (request.headers.get(AUTHZ_HEADER_PEER_LOCALITY) !== "loopback") {
+        if (
+          request.headers.get(AUTHZ_HEADER_PEER_LOCALITY) !== "loopback" ||
+          isModelSyncLocalSpawnDenied(request)
+        ) {
           warnings.push(
             "cursor-agent model discovery requires a local request; using cached catalog"
           );
           const localFallback = buildDiscoveryFallbackResponse({
             cacheWarning: `${warnings.join("; ")} — using cached catalog`,
             localWarning: `${warnings.join("; ")} — using local catalog`,
-            // The discovery needs a local request that this request is not.
+            // Local CLI discovery is not permitted for this request.
             failure: { code: "LOCALITY_REFUSED" },
           });
           if (localFallback) return localFallback;
@@ -1593,8 +1611,9 @@ export async function GET(
 
         const modelsResp = await safeOutboundFetch(
           "https://platformapi.innerai.com/api/v1/ai_models",
-          { headers: innerAiHeaders },
-          getProviderOutboundGuard(provider)
+          // The guard is an option, not a third positional argument; passing it
+          // separately left this request running under the default "none".
+          { headers: innerAiHeaders, guard: getProviderOutboundGuard() }
         );
         if (!modelsResp.ok) {
           throw new Error(`Inner.ai models API returned HTTP ${modelsResp.status}`);
@@ -2475,6 +2494,7 @@ export async function GET(
     let pageCount = 0;
     const MAX_PAGES = 20; // Safety limit
     const seenTokens = new Set<string>();
+    const seenPageUrls = new Set<string>([url]);
 
     while (pageUrl && pageCount < MAX_PAGES) {
       pageCount++;
@@ -2519,6 +2539,14 @@ export async function GET(
       }
       allModels = allModels.concat(pageModels);
 
+      if (config.nextPageUrl) {
+        const nextUrl = config.nextPageUrl(data, pageUrl);
+        if (!nextUrl || seenPageUrls.has(nextUrl)) break;
+        seenPageUrls.add(nextUrl);
+        pageUrl = nextUrl;
+        continue;
+      }
+
       const nextPageToken = data.nextPageToken;
       if (!nextPageToken) break;
       if (seenTokens.has(nextPageToken)) {
@@ -2530,6 +2558,16 @@ export async function GET(
       if (config.authQuery) {
         pageUrl += `&${config.authQuery}=${token}`;
       }
+    }
+
+    if (config.nextPageUrl && pageCount > 1) {
+      // Page-numbered listings can shift while being walked; keep the first row per id.
+      const seenIds = new Set<unknown>();
+      allModels = allModels.filter((model) => {
+        if (seenIds.has(model?.id)) return false;
+        seenIds.add(model?.id);
+        return true;
+      });
     }
 
     if (pageCount > 1) {

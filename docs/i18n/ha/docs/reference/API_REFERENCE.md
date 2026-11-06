@@ -6,47 +6,50 @@
 
 🌐 **Harsuna:** 🇺🇸 [Turanci](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
 
-Babban kundin bayani na OmniRoute API. Ya ƙunshi ɓangaren jama'a na `/v1` da kuma wuraren ƙarshen gudanarwa da aka fi amfani da su; [`docs/openapi.yaml`](../openapi.yaml) mai sauƙin karantawa ta na'ura da tsarin hanyoyi da ke ƙarƙashin `src/app/api/` su ne cikakkun tushe.
+Wannan shi ne babban bayanin OmniRoute API. Ya ƙunshi abubuwan da ake iya amfani da su na `/v1` da kuma fitattun wuraren kira na gudanarwa; [`docs/openapi.yaml`](../openapi.yaml) mai tsarin da inji zai iya karantawa da kuma itacen hanyoyin da ke ƙarƙashin `src/app/api/` su ne cikakkun tushe.
 
-Don ƙa'idar da aka mayar da hankali kanta mai dacewa da OpenAI da jadawalin iyawar masu samarwa, duba
+Don samun takamaiman bayani kan ƙa’idar da ta dace da OpenAI da jadawalin damar masu samarwa, duba
 [`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md).
+
+Kowace tura tana ba da nata kwafin bayanin a `/openapi.yaml`, wanda ake samarwa daga `docs/openapi.yaml` yayin gina manhajar. Yana ɗauke da sigar ginin da kuma URL na uwar garke mai alaƙa (`./`), saboda haka buƙatun suna ci gaba da zuwa ga uwar garken da ta ba da takardar. Kayan aiki da ke shigo da fayil ɗin da aka sauke ba shi da irin wannan uwar garke, don haka ana buƙatar saita URL na tushe da hannu.
 
 ---
 
-## Abubuwan da ke Ciki
+## Teburin Abubuwan Ciki
 
-- [Kammalawar Tattaunawa](#chat-completions)
-- [Hayar Zaman da Aka Keɓance Mai Gudanarwa](#exclusive-managed-session-leases)
-- [Wakilcin Vekta](#embeddings)
+- [Kammala Tattaunawa](#chat-completions)
+- [Hayar Zaman Gudanarwa Na Musamman](#exclusive-managed-session-leases)
+- [Abubuwan Ƙayyadawa](#embeddings)
 - [Ƙirƙirar Hoto](#image-generation)
 - [OCR na Takardu](#document-ocr)
-- [Jerin Samfura](#list-models)
-- [Manifest ɗin Plugin na Mai Bayarwa](#provider-plugin-manifest)
-- [Ƙarshen API na Daidaituwa](#compatibility-endpoints)
+- [Jera Samfura](#list-models)
+- [Bayanin Plugin na Mai Bayarwa](#provider-plugin-manifest)
+- [Ƙarshen Dacewa](#compatibility-endpoints)
 - [API na Fayiloli](#files-api)
-- [API na Batches](#batches-api)
+- [API na Tarin Ayyuka](#batches-api)
 - [API na Bincike](#search-api)
 - [Yawo ta WebSocket](#websocket-streaming)
 - [Rahoton Ƙayyadaddun Amfani da Matsaloli](#quotas--issues-reporting)
-- [Ma'ajiyar Ƙwaƙwalwa ta Ma'ana](#semantic-cache)
+- [Ma'ajiyar Ma'ana](#semantic-cache)
+- [Dacewar Gudanar da CLIProxyAPI](#cliproxyapi-management-compatibility)
 - [Dashboard da Gudanarwa](#dashboard--management)
-- [Gudanar da Combo](#combo-management)
+- [Gudanar da Haɗaka](#combo-management)
 - [Webhooks](#webhooks)
-- [Maɓallan da Aka Yi Rajista (Gudanarwa ta Atomatik)](#registered-keys-auto-management)
-- [Yarjejeniyar Agents](#agents-protocol)
-- [Proxies na Gudanarwa](#management-proxies)
-- [Juriya ga Matsala (faɗaɗaɗɗe)](#resilience-extended)
+- [Maɓallan da Aka Yi Rijista (Gudanarwa ta Atomatik)](#registered-keys-auto-management)
+- [Ka'idar Agents](#agents-protocol)
+- [Wakilan Gudanarwa](#management-proxies)
+- [Juriya (faɗaɗɗe)](#resilience-extended)
 - [Ƙwarewa](#skills)
 - [Ƙwaƙwalwa](#memory)
 - [Sabar MCP](#mcp-server)
 - [Sabar A2A](#a2a-server)
 - [Cloud, Evals da Assess](#cloud-evals--assess)
-- [Sarrafa Buƙata](#request-processing)
-- [Tabbatar da Shaida](#authentication)
+- [Tsarin Buƙata](#request-processing)
+- [Tabbatarwa](#authentication)
 
 ---
 
-## Kammalawar Tattaunawa
+## Kammala Tattaunawa
 
 ```bash
 POST /v1/chat/completions
@@ -64,33 +67,33 @@ Content-Type: application/json
 
 ### Kanun Kai na Musamman
 
-| Kanun Kai                | Alkibla | Bayani                                                                                                                                                                                                                       |
-| ------------------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | Buƙata  | Saita zuwa `true` don ƙetare ma'ajiyar cache                                                                                                                                                                                 |
-| `x-omniroute-no-memory`  | Buƙata  | Saita zuwa `true` don tsallake saka ƙwaƙwalwa + ƙwarewa a wannan buƙatar (yana kwaikwayon no-cache; yana kauce wa ƙarin nauyin token/kuɗi na kowane kira)                                                                    |
-| `X-OmniRoute-Progress`   | Buƙata  | Saita zuwa `true` domin abubuwan da suka faru na ci gaba                                                                                                                                                                     |
-| `X-Session-Id`           | Buƙata  | Maɓallin zaman da ake riƙewa don dangantakar zaman waje                                                                                                                                                                      |
-| `x_session_id`           | Buƙata  | Ana kuma karɓar nau'in da ke amfani da alamar underscore (HTTP kai tsaye)                                                                                                                                                    |
-| `X-OmniRoute-Session-Id` | Buƙata  | Alamar zaman/tattaunawa da mai kira ya bayar (kuma tana ciyar da ƙwaƙwalwa). Idan tana nan, ana adana ta yadda take a `call_logs.session_tag` don danganta kuɗi da kowane zama (#8249) — ba a taɓa ƙirƙirar ta idan babu ita |
-| `Idempotency-Key`        | Buƙata  | Maɓallin cire maimaitawa (tazarar 5s)                                                                                                                                                                                        |
-| `X-Request-Id`           | Buƙata  | Wani madadin maɓallin cire maimaitawa                                                                                                                                                                                        |
-| `x-omniroute-connection` | Buƙata  | Ɗaure buƙatar samfurin-guda zuwa haɗin mai bayarwa guda ɗaya (asusu) ta id ɗinsa — duba [Ɗaure asusu ga kowace buƙata](#account-pinning-per-request)                                                                         |
-| `X-OmniRoute-Cache`      | Amsa    | `HIT` ko `MISS` (ba yawo ba)                                                                                                                                                                                                 |
-| `X-OmniRoute-Idempotent` | Amsa    | `true` idan an cire maimaitawa                                                                                                                                                                                               |
-| `X-OmniRoute-Progress`   | Amsa    | `enabled` idan ana bin diddigin ci gaba                                                                                                                                                                                      |
-| `X-OmniRoute-Session-Id` | Amsa    | ID na zaman da OmniRoute ya yi amfani da shi                                                                                                                                                                                 |
-| `X-OmniRoute-Request-Id` | Amsa    | id na haɗa buƙata da bayananta (idan an san shi)                                                                                                                                                                             |
-| `X-OmniRoute-Version`    | Amsa    | Sigar ginin OmniRoute (kullum tana nan)                                                                                                                                                                                      |
-| `X-OmniRoute-Cost-Saved` | Amsa    | Adadin USD da cache ya hana kashewa a kan HIT (bugun cache kawai)                                                                                                                                                            |
-| `X-OmniRoute-Decision`   | Amsa    | Bayanan bin diddigin turawa: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` shi ne dabarar combo, ko `single` don buƙatar da ba ta combo ba) — kullum yana nan a amsoshin kammalawa                           |
+| Header                   | Direction | Description                                                                                                                                                                                                               |
+| ------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | Buƙata    | Saita zuwa `true` don ƙetare cache                                                                                                                                                                                        |
+| `x-omniroute-no-memory`  | Buƙata    | Saita zuwa `true` don tsallake shigar da memory + skills ga wannan buƙatar (yana kama da no-cache; yana guje wa ƙarin kuɗin token/kudin kowane kira)                                                                      |
+| `X-OmniRoute-Progress`   | Buƙata    | Saita zuwa `true` don abubuwan ci gaba                                                                                                                                                                                    |
+| `X-Session-Id`           | Buƙata    | Maɓallin zaman da ba ya canzawa don daidaita zaman waje                                                                                                                                                                   |
+| `x_session_id`           | Buƙata    | Hakanan ana karɓar sigar da ke amfani da alamar ƙasa (HTTP kai tsaye)                                                                                                                                                     |
+| `X-OmniRoute-Session-Id` | Buƙata    | Alamar zaman/tattaunawar da mai kira ya samar (kuma tana ciyar da memory). Idan tana nan, ana adana ta yadda take a `call_logs.session_tag` don danganta kuɗi bisa zaman (#8249) — ba a taɓa ƙirƙirarta ba idan ba ta nan |
+| `Idempotency-Key`        | Buƙata    | Maɓallin hana maimaitawa (tazarar sakan 5)                                                                                                                                                                                |
+| `X-Request-Id`           | Buƙata    | Madadin maɓallin hana maimaitawa                                                                                                                                                                                          |
+| `x-omniroute-connection` | Buƙata    | Kulle buƙatar samfurin guda zuwa haɗin mai bayarwa guda (asusun) ta ID ɗinsa — duba [Kulle asusu bisa buƙata](#account-pinning-per-request)                                                                               |
+| `X-OmniRoute-Cache`      | Amsa      | `HIT` ko `MISS` (ba mai yawo ba)                                                                                                                                                                                          |
+| `X-OmniRoute-Idempotent` | Amsa      | `true` idan an cire maimaitawa                                                                                                                                                                                            |
+| `X-OmniRoute-Progress`   | Amsa      | `enabled` idan an kunna bin diddigin ci gaba                                                                                                                                                                              |
+| `X-OmniRoute-Session-Id` | Amsa      | Ingantaccen ID ɗin zaman da OmniRoute ya yi amfani da shi                                                                                                                                                                 |
+| `X-OmniRoute-Request-Id` | Amsa      | ID ɗin haɗa dangantakar buƙata (idan an san shi)                                                                                                                                                                          |
+| `X-OmniRoute-Version`    | Amsa      | Sigar ginin OmniRoute (koyaushe tana nan)                                                                                                                                                                                 |
+| `X-OmniRoute-Cost-Saved` | Amsa      | Adadin USD da cache ta guje wa kashewa a kan HIT (hits na cache kawai)                                                                                                                                                    |
+| `X-OmniRoute-Decision`   | Amsa      | Bibiyar routing: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` dabarar haɗin ce, ko `single` don buƙatar da ba ta haɗuwa ba) — koyaushe tana nan a amsoshin kammalawa                                     |
 
-> Bayanin Nginx: idan kana dogaro da kanun bayanai masu alamar ƙasan layi (misali `x_session_id`), kunna `underscores_in_headers on;`.
+> Bayanin Nginx: idan kuna dogara da headers masu amfani da alamar ƙasa (misali `x_session_id`), kunna `underscores_in_headers on;`.
 
-#### Ɗaure asusu ga kowace buƙata
+#### Kulle asusu bisa buƙata
 
-Idan mai samarwa yana da haɗe-haɗe da yawa (asusun ko maɓallai), OmniRoute yawanci yana zaɓar ɗaya
-ta hanyar dabararsa ta zaɓen asusu. A maimakon haka, buƙata za ta iya ɗaure takamaiman haɗi guda
-ta amfani da kanun `x-omniroute-connection`:
+Lokacin da mai bayarwa yake da haɗi da yawa (asusun ko maɓallai), OmniRoute yawanci yana zaɓar ɗaya
+ta hanyar dabararsa ta zaɓar asusu. A maimakon haka, buƙata na iya kulle takamaiman haɗi guda
+ta amfani da header na `x-omniroute-connection`:
 
 ```bash
 curl http://localhost:20128/v1/chat/completions \
@@ -100,25 +103,25 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **Inda za a sami id ɗin.** Buɗe shafin mai samarwar a dashboard
-  (**Dashboard → Providers → <provider>**) sannan danna guntun id na `xxxxxxxx…` a layin haɗi
-  — hakan zai kwafi cikakken id na haɗin.
-- **Buƙatun da ke amfani da shi.** Buƙatun samfurin guda ɗaya (`provider/model`) a
-  `/v1/chat/completions`, `/v1/messages` da `/v1/responses`. Combos ba sa amfani da kanun: ɗaure
-  asusu ga kowane matakin combo ta hanyar haɗin matakin da kansa.
-- **Ɗaurin tilas ne, ba fifiko kawai ba.** Za a yi amfani da haɗin da aka ɗaure shi kaɗai. Idan
-  gazawa ta faru a cikin buƙatar, za a yi rikodin lokacin hutawar asusun amma **ba** za a sauya zuwa
-  wani asusun mai samarwar ɗaya ba.
-- **Lokacin hutawa da ƙarewar ƙima suna sakin ɗaurin.** Yayin da haɗin da aka ɗaure yake cikin lokacin hutawa,
-  ƙimarsa ta ƙare ko manufar ƙima ta toshe shi, buƙatu na gaba za su koma ga sauran haɗe-haɗen mai samarwar,
-  daidai kamar zirga-zirgar da ba a ɗaure ba.
-- **id da ba a sani ba ko aka kashe suna haddasa gazawa.** id da ba ya cikin rukunin haɗe-haɗe masu aiki na mai samarwar (an goge shi,
-  an kashe shi, ko na wani mai samarwa ne) ba zai bar wani asusu da ya cancanta ba, don haka buƙatar
-  za ta gaza maimakon a tura ta wani wuri a ɓoye.
+- **Inda za a sami id.** Buɗe shafin mai samarwa a dashboard
+  (**Dashboard → Providers → <provider>**) sannan ka danna guntun id na `xxxxxxxx…` a kan layin haɗi
+  — hakan zai kwafi cikakken id ɗin haɗin.
+- **Waɗanne buƙatu ne suke mutunta shi.** Buƙatun samfurin guda ɗaya (`provider/model`) a
+  `/v1/chat/completions`, `/v1/messages` da `/v1/responses`. Haɗaɗɗun buƙatu suna yin watsi da taken: kulle
+  asusu ɗaya ga kowane mataki na haɗin ta hanyar haɗin nasa.
+- **Kullen yana da tsauri, ba fifiko ba ne.** Ana amfani da haɗin da aka kulle shi kaɗai. Idan
+  kuskure ya faru a cikin buƙatar, ana yin rikodin lokacin jiran asusun, amma ba a
+  juya zuwa wani asusun ɗan’uwan mai samarwa ɗaya ba.
+- **Lokacin jiran aiki da ƙayyadadden kaso suna sakin kullen.** Yayin da haɗin da aka kulle yake cikin lokacin jiran aiki,
+  ya ƙare ƙayyadadden kaso ko kuma an toshe shi saboda wata manufar ƙayyadadden kaso, buƙatu na gaba suna komawa ga
+  sauran haɗe-haɗen mai samarwar, daidai kamar zirga-zirgar da ba a kulle ba.
+- **Ids da ba a sani ba ko waɗanda aka kashe suna gaza.** Id ɗin da ba ya cikin rumbun haɗe-haɗen mai samarwa mai aiki (an
+  share shi, an kashe shi, ko kuma na wani mai samarwa ne) ba ya barin wani asusu da ya cancanta, don haka buƙatar
+  tana gaza maimakon a tura ta wani wuri ba tare da sanarwa ba.
 
-Claude Code yana aika kanun bayanai na musamman ta hanyar `ANTHROPIC_CUSTOM_HEADERS`. Saka shi a cikin ɓangaren `env`
-na `~/.claude/settings.json`, ko a cikin `.claude/settings.json` na matakin aikin domin ɗaure wani asusu daban
-ga kowane aiki:
+Claude Code yana aika taken al'ada ta `ANTHROPIC_CUSTOM_HEADERS`. Sanya shi a cikin ɓangaren `env`
+na `~/.claude/settings.json`, ko a cikin `.claude/settings.json` na matakin aiki domin kulle wani
+asusu daban ga kowane aiki:
 
 ```jsonc
 {
@@ -130,22 +133,22 @@ ga kowane aiki:
 }
 ```
 
-Tushe: `src/sse/handlers/chat.ts` (karanta kanun), `src/sse/services/auth.ts` da
-`src/sse/services/sessionAffinityPin.ts` (sakin ɗauri da binciken rashin kasancewa a cikin rukuni).
+Madogara: `src/sse/handlers/chat.ts` (karanta taken), `src/sse/services/auth.ts` da
+`src/sse/services/sessionAffinityPin.ts` (sakin kullen da binciken abin da ya ɓace daga rumbun).
 
-> **Kanun telemetirin kuɗi:** amsoshin nasara marasa yawo kuma suna ɗauke da saitin telemetirin kuɗi na `X-OmniRoute-*` — `X-OmniRoute-Response-Cost` (USD, lambobi 10 tabbatattu bayan ɗigo; `0.0000000000` ga kyauta/marasa farashi), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, da `X-OmniRoute-Fallback-Attempts` (kawai idan > 0), tare da `X-OmniRoute-Request-Id` da `X-OmniRoute-Version`. Ana fitar da waɗannan ta hanyar kammalawar taɗi, `/v1/responses`, `/v1/messages`, **da kuma maƙallan kafofin watsa labarai** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, da `/v1/moderations` (kullum kuɗinsa `0`). Ana ƙididdige kuɗin kafofin watsa labarai bisa kowane nau'i (ga kowane hoto, kowace daƙiƙa, kowane harafi, kowace naúrar bincike) idan akwai bayanan farashi, in ba haka ba `0` (a bar shi ya wuce idan ƙididdigar ta gaza).
+> **Taken bayanan farashi:** amsoshin nasara marasa yawo su ma suna ɗauke da saitin bayanan farashi na `X-OmniRoute-*` — `X-OmniRoute-Response-Cost` (USD, ƙayyadaddun lambobi 10 bayan goma; `0.0000000000` idan kyauta/ne ba a saka farashi ba), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, da `X-OmniRoute-Fallback-Attempts` (kawai idan > 0), tare da `X-OmniRoute-Request-Id` da `X-OmniRoute-Version`. Ana fitar da waɗannan daga kammalawar hira, `/v1/responses`, `/v1/messages`, **da kuma ƙarshen kafofin watsa labarai** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, da `/v1/moderations` (koyaushe farashi `0`). Ana ƙididdige farashin kafofin watsa labarai bisa ga nau’in bayanan da ake sarrafawa (kowane hoto, kowane daƙiƙa, kowane hali, kowane rukunin bincike) idan ana da farashi, in ba haka ba `0` (fail-open).
 
-> **Ma’anar kuɗin cache-hit:** idan an sami HIT na cache na ma’ana (`X-OmniRoute-Cache-Hit: true`) ba a yin kira zuwa sabis na sama, don haka `X-OmniRoute-Response-Cost` yana zama `0.0000000000` (kuɗin **ƙari** na bayar da amsar da aka samu). Ana bayar da rahoton kuɗin asali/da zai kasance daban a cikin `X-OmniRoute-Cost-Saved`. Masu amfani da bayanan lissafin kuɗi su tara `X-OmniRoute-Response-Cost` (amsoshin cache ba su da kuɗi); nazarin cache kuma zai iya tara `X-OmniRoute-Cost-Saved`.
+> **Ma’anar farashi idan an samu cache:** a kan semantic-cache HIT (`X-OmniRoute-Cache-Hit: true`) ba a kira upstream ba, don haka `X-OmniRoute-Response-Cost` yana zama `0.0000000000` (farashin **ƙari** na bayar da amsar da aka samu). Ana bayar da ainihin/farashin da da an samu daban a cikin `X-OmniRoute-Cost-Saved`. Masu amfani da bayanan lissafin kuɗi su tara `X-OmniRoute-Response-Cost` (hits ba su da farashi); nazarin cache na iya tara `X-OmniRoute-Cost-Saved`.
 
-## Keɓantattun Hayar Zaman da Ake Sarrafawa
+## Leases na Zaman Gudanarwa na Musamman
 
-Hayar zaman da ake sarrafawa ta keɓance hanya ce ta tura buƙatu da ake zaɓar amfani da ita, wadda ba ta fifita wani abokin ciniki: mai shi guda ɗaya mai aiki ne
-ke riƙe haɗin OmniRoute guda ɗaya da ya cancanta. Ba ta hayar da wani samfuri, ba ta buƙatar OAuth, ba ta tantance wani
-takamaiman abokin ciniki, kuma ba ta buƙatar wani takamaiman mai samarwa.
+Leasing na zaman gudanarwa na musamman kwangilar tura buƙatu ce ta zaɓi, wadda ba ta dogara da nau'in abokin ciniki ba: mai mallaka guda ɗaya mai aiki
+yana riƙe haɗin OmniRoute guda ɗaya da ya cancanta. Ba ya lease samfurin, ba ya buƙatar OAuth, ba ya tantance
+wani takamaiman abokin ciniki, kuma ba ya buƙatar wani takamaiman mai samarwa.
 
-Dole ne maɓallin API da ake tantancewa ya kasance da ikon `lease:exclusive` da kuma jerin
-`allowedConnections` da aka bayyana a sarari kuma ba komai a cikinsa. Iyakar sauyin bayanai a ma’adanar bayanai tana tilasta kasancewar filayen biyu tare yayin
-ƙirƙirar maɓalli da sabunta wani ɓangarensa.
+Maɓallin API da ke tantancewa dole ne ya kasance yana da scope `lease:exclusive` da jerin
+`allowedConnections` bayyananne wanda ba komai ba. Iyakar sauya bayanai ta bayanan ajiya tana tabbatar da
+filayen biyu tare yayin ƙirƙirar maɓalli da sabuntawa na wani ɓangare.
 
 ```http
 POST /api/v1/session-leases
@@ -156,9 +159,9 @@ X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 {"action":"acquire","model":"glm/glm-4.6"}
 ```
 
-Amsoshin nasarar karɓa, sabuntawa, da sakin haya suna nuna alamomin lokaci, `state`, da ainihin ƙimar
-`generation` mai kyau, amma ba sa taɓa nuna haɗin da aka zaɓa ko bayanan shiga. Sabuntawa da saki suna bayar da
-ƙimar generation a jikin JSON:
+Amsoshin acquire, renew, da release masu nasara suna bayyana timestamps, `state`, da ainihin
+`generation` mai kyau, amma ba sa taɓa bayyana haɗin da aka zaɓa ko bayanan tantancewa. Renew da release suna aika
+generation a cikin jikin JSON:
 
 ```json
 { "action": "renew", "generation": 1 }
@@ -168,7 +171,7 @@ Amsoshin nasarar karɓa, sabuntawa, da sakin haya suna nuna alamomin lokaci, `st
 { "action": "release", "generation": 1, "reason": "OWNER_EXIT" }
 ```
 
-Mai hayar da ke aiki zai iya neman metadata na nuni mai kiyaye sirri a sarari don haɗinsa na yanzu:
+Mai mallakar lease mai aiki zai iya neman bayanan nunawa masu kiyaye sirri a fili don binding ɗinsa na yanzu:
 
 ```json
 { "action": "status", "generation": 1 }
@@ -188,37 +191,38 @@ Mai hayar da ke aiki zai iya neman metadata na nuni mai kiyaye sirri a sarari do
 }
 ```
 
-Wannan aikin matsayin da ake zaɓar amfani da shi yana da kariya ta mai shi marar bayyana, ingantaccen maɓallin API da ake sarrafawa, da ainihin
-generation mai aiki a cikin mu’amalar ma’adanar bayanai guda ɗaya. `displayName` shi ne kawai sunan haɗin da aka saita
-wanda aka cire sararin da ya wuce kima daga gare shi; yana zama `null` idan babu amintaccen suna da aka saita. OmniRoute ba ya taɓa maye gurbinsa da
-adireshin imel ko bayanan asusun da aka samar. Ƙimar mai samarwa alamar nuni ce marar muhimmanci ga tsaro, kuma ba ta taɓa zama
-wani ganowar mai samarwa mai jituwa da aka samar ba. An cire bayanan shiga, tokens, cookies, ɗanyen ganowar haɗi ko
-ganowar maɓallin API, hashes na masu shi, sirrin shinge, da bayanan tura buƙatu na cikin gida.
+Wannan aikin status na zaɓi ana katange shi da opaque owner, ingantaccen managed API key, da ainihin
+active generation a cikin mu’amalar bayanan ajiya guda ɗaya. `displayName` sunan haɗin da aka saita ne kawai bayan
+an cire sararin gefe; yana zama `null` idan babu ingantaccen sunan da aka saita. OmniRoute ba ta taɓa maye gurbin
+shi da imel ko wata alamar asusun da aka ƙirƙira ba. Ƙimar provider alamar nunawa ce da ba ta ƙunshi bayanan sirri ba, kuma ba ta taɓa
+zama identifier na mai samarwa mai dacewa da aka ƙirƙira ba. An cire bayanan tantancewa, tokens, cookies, ɗanyen connection ko API
+key ids, owner hashes, fencing secrets, da bayanan tura buƙatu na cikin gida.
 
-Bincike da maɓalli marar daidai, mai shi marar daidai, tsohon generation, ko wanda ya ɓace, ya ƙare, aka sake shi, ko aka soke shi duk
-suna mayar da kuskuren `409 LEASE_FENCE_STALE` iri ɗaya ba tare da metadata na haɗi ba. Abokin ciniki da ya karɓi amsar jiran ƙarfin aiki ba shi da haɗin da ke aiki da zai bincika. Lokacin da tura buƙatu ta sauya haɗin haya mai aiki,
-generation ɗin nan ɗaya zai ci gaba da aiki, kuma matsayin zai mayar da sabon haɗin ta atomatik, ba tsohon ba.
-Abokan ciniki da suke akwai ba za su canza ba saboda amsoshin karɓa, sabuntawa, saki, da jira suna riƙe
-tsarinsu na baya.
+Neman lookup da key mara daidai, owner mara daidai, generation da ya tsufa, wanda ya ɓace, wanda ya ƙare, wanda aka saki, ko wanda aka soke duk
+suna mayar da kuskuren `409 LEASE_FENCE_STALE` iri ɗaya ba tare da metadata na haɗin ba. Abokin ciniki da ya karɓi amsar jiran
+samun capacity ba shi da binding mai aiki da zai bincika. Lokacin da tura buƙatu ta sauya lease mai aiki,
+generation ɗin nan ɗaya yana ci gaba da aiki, kuma status na mayar da sabon binding ta atomatik, ba tsohon ba.
+Abokan ciniki da suke akwai ba su canza ba saboda acquire, renew, release, da amsoshin jira sun riƙe
+siffofinsu na baya.
 
-Wannan kwangilar sabar ba ta canza tsohon OpenAI Codex `/status` ba. A halin yanzu, tsohon Codex yana bayar da rahoton
-mai samar da samfurinsa da ginannen yanayin tantancewa/asusu, amma ba ya nuna metadata na asusun
-mai samarwa na musamman da aka ƙirƙira yadda aka ga dama; haɗawar abokin ciniki a nan gaba dole ne ta kira wannan aikin sannan ta yanke shawarar yadda za ta
+Wannan kwangilar uwar garke ba ta sauya stock OpenAI Codex `/status` ba. A halin yanzu Stock Codex yana bayar da
+mai samar da samfurinsa da halin tantancewa/asusu da aka gina a ciki, amma ba ya nuna metadata na asusun mai samarwa na
+musamman; haɗin abokin ciniki na gaba dole ne ya kira wannan aikin kuma ya yanke shawarar yadda zai
 nuna `connection.displayName`.
 
-Daga nan, kowace buƙatar inference da ake sarrafawa tana bayar da dukkan headers na sarrafawa biyu:
+Kowane buƙatar managed inference daga nan sai ya samar da control headers biyu:
 
 ```http
 X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 X-OmniRoute-Lease-Generation: 1
 ```
 
-Ana tabbatar da ainihin mai shi, generation, haɗin da ke aiki, da ingantaccen maɓallin API nan take
-kafin kowane yunƙurin zuwa upstream da ake tallafawa. Sake amfani da mai shi da generation tare da wani maɓalli zai gaza ko da
-maɓallin yana ba da izinin haɗi iri ɗaya. Ba a adana ɗanyen bayanan masu shi, ba a rubuta su a logs, ba a riƙe su a cikin
-hoton buƙata, kuma ba a tura su zuwa upstream.
+Ana tabbatar da ainihin owner, generation, active connection, da authenticated API key nan take
+kafin kowace yunƙurin upstream da aka tallafa. Sake amfani da owner da generation tare da wani key ya gaza ko da
+wannan key ɗin yana ba da izinin haɗin ɗaya. Ba a adana ɗanyen owners, ba a rubuta su a log, ba a riƙe su
+a cikin request snapshot, kuma ba a tura su upstream.
 
-Cunkoso na wucin gadi yana mayar da HTTP `429` tare da `Retry-After` da:
+Rikicin ɗan lokaci yana mayar da HTTP `429` tare da `Retry-After` da:
 
 ```json
 {
@@ -229,32 +233,32 @@ Cunkoso na wucin gadi yana mayar da HTTP `429` tare da `Retry-After` da:
 }
 ```
 
-Wannan amsar tana nufin kawai cewa rukunin haɗe-haɗe na yau da kullum da suka cancanta ba komai ba ne, kuma kowanne ɗan takara da ke samuwa
-yana hannun wata hayar mai aiki ta wani daban. Samfura/masu samarwa da ba a tallafawa, rashin dacewar manufofi, lokacin dakatawa, quota,
-lafiya, da sauran gazawar cancanta ta yau da kullum suna riƙe amsoshin OmniRoute da suke da su.
+Wannan amsar tana nufin ne kawai cewa jerin waɗanda suka cancanta na yau da kullum ba komai ba ne, kuma kowane ɗan takara
+mai ’yanci yana hannun wani lease mai aiki na waje. Samfuran/masu samarwa da ba a tallafa ba, rashin daidaiton manufofi, cooldown, quota,
+lafiya, da sauran gazawar cancanta ta yau da kullum suna riƙe amsoshin OmniRoute ɗinsu na yanzu.
 
 ### `x-omniroute-compression`
 
-Sauya tsarin matse bayanai na kowace buƙata. Shi ne mafi fifiko — yana fin
-sauyin haɗin hanyoyin tura buƙatu, profile mai aiki, tayarwa ta atomatik, da Tsoho na panel. Ƙimomi:
+Sauya tsarin compression na kowace buƙata. Mafi girman fifiko — ya fi routing-combo
+override, active profile, auto-trigger, da panel Default fifiko. Ƙimomi:
 
-| Ƙima          | Tasiri                                                                                                                |
-| ------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `off`         | Babu matse bayanai don wannan buƙatar.                                                                                |
-| `default`     | Profile na Tsoho da aka samo daga panel (yana watsi da profile mai aiki). Ana barin injunan lossy a kashe.            |
-| `safe`        | Cire maimaituwa da naɗe farin sarari kawai.                                                                           |
-| `allow-lossy` | Riƙe tsarin mai gudanarwa don wannan buƙatar, gami da taƙaitawa da sake rubuta salo.                                  |
-| `engine:<id>` | Inji guda ɗaya idan an kunna shi, misali `engine:rtk`. Zaɓin amfani da wannan injin ga kowace buƙata.                 |
-| `<combo>`     | Combo mai suna, wanda ake fara daidaitawa ta suna (ba tare da la’akari da manya ko ƙananan haruffa ba), sannan ta id. |
+| Value         | Effect                                                                                                        |
+| ------------- | ------------------------------------------------------------------------------------------------------------- |
+| `off`         | Babu compression ga wannan buƙatar.                                                                           |
+| `default`     | Profile na Default da aka samo daga panel (yana watsi da active profile). Ana barin injunan loss ɗin a kashe. |
+| `safe`        | Dedup da folding na whitespace kawai.                                                                         |
+| `allow-lossy` | A riƙe tsarin operator na wannan buƙatar, har da taƙaitawa da sake rubuta salo.                               |
+| `engine:<id>` | Inji guda ɗaya idan an kunna shi, misali `engine:rtk`. Zaɓin wannan injin na kowace buƙata.                   |
+| `<combo>`     | Combo mai suna, ana fara daidaita shi da suna (ba tare da la’akari da manya da ƙanana ba), sannan da id.      |
 
 Bayanan kula:
 
-- Ana yin watsi da ƙimomin da ba a sani ba (ba a taɓa ƙin buƙatar); tantancewa za ta koma ga tsarin fifikon mai gudanarwa na yau da kullum.
-- Idan combos da yawa suna da suna ɗaya, bayar da **id** na combo don samun daidaitaccen zaɓi.
-- Ba za a iya zaɓar combo mai suna `off` ko `default` ta hanyar suna ba (ana fara fassara waɗannan kalmomin maɓalli); koma ga irin wannan combo ta amfani da id ɗinsa.
-- Babban maɓallin matse bayanai shinge ne na ƙarshe: idan an kashe matse bayanai gaba ɗaya, wannan header ba zai iya kunna shi ba.
+- Ana yin watsi da ƙimomin da ba a sani ba (ba a taɓa ƙin buƙatar ba); warwarewa yana komawa ga fifikon operator na yau da kullum.
+- Idan combos da yawa suna da suna ɗaya, aika combo **id** don samun daidaito tabbatacce.
+- Combo wanda sunansa `off` ko `default` ba za a iya zaɓarsa da suna ba (ana fara fassara waɗannan kalmomin); a koma ga irin wannan combo ta id ɗinsa.
+- Babban switch na compression ƙofa ce mai tsauri: idan an kashe compression gaba ɗaya, wannan header ba zai iya kunna shi ba.
 
-Ana maimaita tsarin da aka yi amfani da shi a cikin header na amsa:
+Ana mayar da tsarin da aka aiwatar a cikin response header:
 
 ```
 X-OmniRoute-Compression: <mode>; source=<source>
@@ -277,18 +281,15 @@ Content-Type: application/json
 }
 ```
 
-Masu samarwa da ake da su: Nebius, OpenAI, Mistral, Together AI, Fireworks, NVIDIA, **OpenRouter**, Jina AI.
+Masu samuwa: Nebius, OpenAI, Mistral, Together AI, Fireworks, NVIDIA, **OpenRouter**, Jina AI.
 
-ID na kundin suna da tsarin `provider/model` (misali: `jina-ai/jina-embeddings-v5-omni-small`). ID na samfurin Jina marasa sunan mai samarwa waɗanda suke bayyana a rajista (misali `jina-embeddings-v5-text-small`, `jina-reranker-v3.5`) su ma ana iya warware su. Ayyukan embed/rerank/classify/segment na Jina suna fara amfani da bayanan shaidar `jina-ai` na dashboard; `JINA_AI_API_KEY` madadi ne kawai idan babu maɓallin dashboard. Katin `jina-reader` na Reader / `r.jina.ai` ne kawai (`POST /v1/web/fetch`) kuma ba ya taɓa samar da embeddings ko rerank.
+Catalog ids su ne `provider/model` (misali: `jina-ai/jina-embeddings-v5-omni-small`). Bare Jina model ids da suka bayyana a registry (misali `jina-embeddings-v5-text-small`, `jina-reranker-v3.5`) su ma suna resolve. Jina embed/rerank/classify/segment suna fara amfani da bayanan shiga na `jina-ai` na dashboard; `JINA_AI_API_KEY` madadin ne kawai idan babu mabuɗin dashboard. Katin `jina-reader` na Reader / `r.jina.ai` ne kawai (`POST /v1/web/fetch`), kuma ba ya samar da embeddings ko rerank.
 
-Samfuran rajista da suke bayyana goyon bayan multimodal suna kuma karɓar abubuwa masu tsari
-har 32 waɗanda ba su dogara da wani mai samarwa ba. Nau'ikan abubuwan kafofin watsa labarai su ne `text`, `image`, `audio`, `video`, da `document`. `source`
-na kafofin watsa labaransu ko dai `{"type":"url","url":"https://..."}` ne ko
-`{"type":"base64","data":"...","media_type":"..."}`.
+Registry models da ke sanar da goyon bayan multimodal suna kuma karɓar har zuwa abubuwa 32 masu tsari, marasa dogaro da provider. Nau’ikan abubuwan media su ne `text`, `image`, `audio`, `video`, da `document`. `source` na media ɗinsu ko dai `{"type":"url","url":"https://..."}` ne ko `{"type":"base64","data":"...","media_type":"..."}`.
 
 Jina v5 Omni (`jina-ai/jina-embeddings-v5-omni-small`, `jina-ai/jina-embeddings-v5-omni-nano`,
-da sunan laƙabi na iyalin `jina-ai/jina-embeddings-v5-omni` → omni-small) yana kuma karɓar takardun
-EmbeddingsV5Request na asali na Jina kuma yana **tura su ba tare da canji ba** zuwa `https://api.jina.ai/v1/embeddings`:
+da family alias `jina-ai/jina-embeddings-v5-omni` → omni-small) yana kuma karɓar takardun Jina na asali
+na EmbeddingsV5Request kuma yana **turawa ba tare da wani sauyi ba** zuwa `https://api.jina.ai/v1/embeddings`:
 
 ```json
 {
@@ -303,33 +304,29 @@ EmbeddingsV5Request na asali na Jina kuma yana **tura su ba tare da canji ba** z
 }
 ```
 
-Ƙimomin asali na `{ image | audio | video | pdf }` na iya zama URL na HTTPS na jama'a, URI na `data:`, ko ɗanyen
-base64. OmniRoute ba ya sauya waɗannan objects zuwa strings ko ɗauko URLs na hotuna na asali — Jina da kansa ke ɗauko
-kafofin watsa labarai na jama'a. Ana tura ƙarin filayen Jina (`task`, `normalized`, `truncate`, `embedding_type`).
-SKUs na Jina masu rubutu kaɗai har yanzu suna ƙin takardun da ba rubutu ba.
+Ƙimomin asali na `{ image | audio | video | pdf }` na iya zama URL na HTTPS na jama’a, URI na `data:`, ko
+base64 kai tsaye. OmniRoute ba ya mayar da waɗannan objects zuwa string ko kuma ɗauko native image URLs — Jina ce
+ke karɓo public media ɗin da kanta. Ana tura ƙarin filayen Jina (`task`, `normalized`, `truncate`, `embedding_type`) yadda suke.
 
-Iyakokin tsaro da sufuri:
+Jina SKUs masu text kawai har yanzu suna ƙin docs marasa text.
 
-- Dole ne URLs na kafofin watsa labarai na nesa su zama HTTPS na jama'a. Ana ɗauko abubuwan `{type,source:url}` na ƙa'ida
-  a gefen uwar garke (sake tabbatar da redirects, wa'adin lokaci, iyakokin girma, DNS na jama'a, da kulle haɗi) sannan a
-  saka su kai tsaye kafin kiran mai samarwa. Ana tura abubuwan `{image:"https://..."}` na asali na Jina yadda suke
-  bayan binciken HTTPS na jama'a iri ɗaya; Jina ne ke ɗauko URL ɗin.
-- Kafofin watsa labarai na base64 da aka saka kai tsaye suna da iyakar 8 MiB bayan decoding ga kowane abu da 16 MiB bayan decoding a dukkan buƙatar.
+Iyakar tsaro da jigilar bayanai:
 
-Fassarar tsarin mai samarwa (ba a taɓa tura abubuwan ƙa'ida yadda suke ba):
+- Dole remote media URLs su kasance HTTPS na jama’a. Ana ɗauko canonical `{type,source:url}` items
+  a gefen server (sake tabbatar da redirects, iyakar lokaci, iyakar girma, public DNS, da haɗa takamaiman adireshi) sannan a saka su a ciki kafin kiran provider. Ana tura Jina-native `{image:"https://..."}` items yadda suke bayan binciken HTTPS na jama’a iri ɗaya; Jina ce ke ɗauko URL ɗin.
+- Media na base64 da aka saka a ciki yana da iyakar 8 MiB bayan decoding ga kowane item, da 16 MiB bayan decoding a dukkan request ɗin.
 
-- Samfuran multimodal na Jina: kowane abu na matakin sama yana zama object guda mai maɓallin modality
-  (`text` / `image` / `audio` / `video` / `pdf`) ta amfani da data URIs don kafofin watsa labarai da aka saka kai tsaye; vector guda ga kowane
-  abu na matakin sama.
-- Iyalan Gemini Embedding 2: array guda na matakin sama yana zama buƙatar asali guda ta
-  `models/{model}:embedContent` mai ɗauke da `content.parts` (`text` ko `inline_data`).
-- llama.cpp (`llama-cpp/<model>`, duk wani samfurin da uwar garken gida ya loda): abubuwan `text` na ƙa'ida
-  suna zama strings na yau da kullum, yayin da `image` / `audio` / `video` suke zama object guda na
-  `{"content": [part]}` kowanne, ta amfani da sassan abun cikin chat na llama-server (`image_url`,
-  `input_audio` mai tsarin `wav` / `mp3` / `flac`, `input_video`) tare da bayanan da aka saka kai tsaye; vector guda
-  ga kowane abu na matakin sama. Dole ne uwar garken ta gudana da `--embedding --mmproj …`; idan babu projector,
-  ita da kanta za ta ƙi kafofin watsa labaran. Ba a goyon bayan `document`.
-- Samfuran da ba a sani ba/masu sauyawa waɗanda ba su da takamaiman metadata na modality suna ƙin shigarwar da aka tsara tare da HTTP 400.
+Fassarar provider (canonical items ba a taɓa tura su yadda suke ba):
+
+- Jina multimodal models: kowane top-level item yana zama object guda mai maɓallin modality
+  (`text` / `image` / `audio` / `video` / `pdf`) ta amfani da data URIs don media na cikin gida; vector guda ɗaya ga kowane top-level item.
+- Gemini Embedding 2 family: array guda na top-level yana zama request na asali guda zuwa
+  `models/{model}:embedContent`, tare da `content.parts` (`text` ko `inline_data`).
+- llama.cpp (`llama-cpp/<model>`, ko wane model server na gida ya loda): canonical `text` items
+  suna zama plain strings, yayin da `image` / `audio` / `video` suke zama object guda na
+  `{"content": [part]}` kowannensu, ta amfani da chat content parts na llama-server (`image_url`,
+  `input_audio` mai format `wav` / `mp3` / `flac`, `input_video`) tare da bayanan da aka saka a ciki; vector guda ɗaya ga kowane top-level item. Dole server ya yi aiki da `--embedding --mmproj …`; idan babu projector, shi kansa yana ƙin media. `document` ba ya samun goyon baya.
+- Unknown/dynamic models da ba su da metadata na modality a sarari suna ƙin structured input tare da HTTP 400.
 
 ```json
 {
@@ -346,17 +343,16 @@ Fassarar tsarin mai samarwa (ba a taɓa tura abubuwan ƙa'ida yadda suke ba):
 }
 ```
 
-Haɗin samfur/modality da ba a goyon baya yana mayar da HTTP 400 maimakon tilasta sauya abin. Filayen tsawaitawa
-waɗanda ba na input ba a cikin tsofaffin buƙatun string/token suna ci gaba da wucewa ba tare da canji ba.
+Haɗin model/modality da ba ya samun goyon baya yana mayar da HTTP 400 maimakon tilasta canza item ɗin. Filayen kari da ba na input ba a legacy string/token requests suna ci gaba da wucewa ba tare da sauyi ba.
 
 ```bash
-# Jera dukkan samfuran embedding
+# Jera dukkan embedding models
 GET /v1/embeddings
 ```
 
 ---
 
-## Samar da Hotuna
+## Samar da Hoto
 
 ```bash
 POST /v1/images/generations
@@ -372,35 +368,26 @@ Content-Type: application/json
 
 Masu samarwa da ake da su sun haɗa da OpenAI (GPT Image 2), xAI (Grok Image), Together AI (FLUX), Fireworks AI, Nebius (FLUX), Hyperbolic, NanoBanana, **OpenRouter**, **ZenMux**, SD WebUI (na gida), ComfyUI (na gida).
 
-`n` yana dawo da hotuna `n` a cikin `data[]`. Masu samarwa waɗanda API na tushen su ke dawo da hoto ɗaya a kowane kira
+`n` yana mayar da hotuna `n` a cikin `data[]`. Masu samarwa waɗanda API ɗinsu na sama ke mayar da hoto guda ɗaya a kowane kira
 (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI) suna samun kiraye-kirayen tushe daban-daban guda `n`, da iyakar guda 4 masu gudana a lokaci guda. Ana
-ƙara wa tsayayyen `seed` bisa fihirisar kira (`seed`, `seed + 1`, …), don haka hotunan su bambanta amma su kasance
-masu iya sake samarwa iri ɗaya. An iyakance `n` zuwa 10. Buƙatar gaba ɗaya za ta gaza idan kowane kira ya gaza. Jerin
-tsare-tsaren fan-out yana cikin `SINGLE_IMAGE_FANOUT_FORMATS` a
+NVIDIA NIM, Cloudflare Workers AI) ana yi musu kiran sama `n` daban-daban, tare da iyakar kira 4 da ke gudana lokaci guda. Ana ƙara `seed` da aka kayyade da ma’aunin index na kira (`seed`, `seed + 1`, …), don haka hotunan su bambanta amma su kasance masu sake samarwa iri ɗaya. An takaita `n` zuwa 10. Buƙatar gaba ɗaya tana fuskantar gazawa idan kowane kira ya gaza. Jerin tsarin fan-out yana cikin `SINGLE_IMAGE_FANOUT_FORMATS` a
 `open-sse/handlers/imageGeneration/fanOut.ts`.
 
-ZenMux yana sake amfani da haɗin API-key da ake da shi kuma yana karɓar kari-gaba na `zenmux/` ko `zm/`:
+ZenMux yana sake amfani da haɗin API-key da ake da shi kuma yana karɓar prefixes na `zenmux/` ko `zm/`:
 
 - `zenmux/openai/gpt-image-2` yana amfani da OpenAI Images API na ZenMux. Zaɓuɓɓuka sun haɗa da `size`,
   `quality`, `n`, `output_format`, `output_compression`, `background`, da `response_format`.
-- Sauran masu wallafawa, kamar `zm/meta/muse-image-1.0`, suna amfani da maƙurar `:predict`
-  ta Vertex AI ta ZenMux. `n` yana daidaituwa da `sampleCount`, `aspect_ratio` da `aspectRatio`, sannan `image_size`
-  (`1K`, `2K`, `4K`) da `sampleImageSize`. `size` na piksel yana samar da rabon faɗi-da-tsawo ne kawai,
-  ba tabbatattun girman piksel ba. Rabon, ƙuduri, da adadin da ake tallafawa sun bambanta gwargwadon samfurin.
-- `zm/inclusionai/ming-image-0.1-design` yana zaɓar girmansa da kansa. A bar `size`,
-  `aspect_ratio`, da `image_size`; ƙimomin da aka bayyana kai tsaye suna dawo da HTTP 400. Ana iya
-  neman PNG, JPEG, da WebP ta amfani da `output_format`.
+- Sauran masu wallafawa, kamar `zm/meta/muse-image-1.0`, suna amfani da ƙarshen Vertex AI `:predict` na ZenMux. `n` yana komawa zuwa `sampleCount`, `aspect_ratio` zuwa `aspectRatio`, kuma `image_size`
+  (`1K`, `2K`, `4K`) zuwa `sampleImageSize`. `size` na pixel yana samar da rabon fuska ne kawai,
+  ba a tabbatar da girman pixel ba. Ratayen fuska, ƙuduri, da adadin da ake tallafawa sun bambanta bisa samfurin.
+- `zm/inclusionai/ming-image-0.1-design` yana zaɓar nasa girma. A bar `size`,
+  `aspect_ratio`, da `image_size` ba tare da bayarwa ba; ƙayyadaddun ƙimomi suna mayar da HTTP 400. Ana iya neman PNG, JPEG, da WebP ta amfani da `output_format`.
 
-Wannan haɗin gwiwar yana tallafawa samar da hoto daga rubutu, ba gyaran hoto ta amfani da hoton tunani ba. Ana
-daidaita fitarwar Vertex zuwa `data[].b64_json`; `response_format: "url"` yana dawo da URL na HTTPS
-daga tushen ko URL na bayanan base64 idan bayanan bytes na hoto kawai ake da su. Fitarwa marar komai/wadda aka tace
-tana dawo da kuskure maimakon nasara marar komai. Samun damar samfurori ya dogara da asusun ZenMux.
-Duba [Vertex API na ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) da
+Wannan haɗin yana tallafawa samar da hoto daga rubutu, ba gyaran hoto na misali ba. Ana daidaita fitowar Vertex zuwa `data[].b64_json`; `response_format: "url"` yana mayar da URL na HTTPS daga sama ko URL na bayanan base64 idan bytes na hoton kaɗai ake da su. Fitowar da babu komai ko aka tace tana mayar da kuskure maimakon nasara marar komai. Samun samfurin ya dogara da asusun ZenMux. Duba [Vertex API na ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) da
 [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
 
 ```bash
-# Jera duk samfuran hotuna
+# Jerin duk samfuran hoto
 GET /v1/images/generations
 ```
 
@@ -422,15 +409,15 @@ Content-Type: application/json
 }
 ```
 
-`model` yana zaɓar mai samar da OCR ta hanyar kari-gaban `provider/model`; id na samfurin kaɗai (misali,
-`mistral-ocr-latest`) yana komawa ga mai samarwarsa da aka yi wa rajista, kuma idan ba a saka `model` ba, ana amfani da
-Mistral (`mistral-ocr-latest`) a matsayin tsoho. Masu samarwa da aka yi wa rajista (`open-sse/config/ocrRegistry.ts`):
+`model` yana zaɓar mai samar da OCR ta hanyar prefix na `provider/model`; ID na samfurin da ba shi da prefix (misali
+`mistral-ocr-latest`) yana warwarewa zuwa mai samarwar da aka yi masa rajista, kuma idan ba a saka `model` ba, tsoho shi ne
+Mistral (`mistral-ocr-latest`). Masu samarwa da aka yi wa rajista (`open-sse/config/ocrRegistry.ts`):
 
-| Id na mai samarwa             | Id na samfuri        | Ƙimar `model`                                                | Bayanan kula                                                                                                     |
-| ----------------------------- | -------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (ko `mistral-ocr-latest` kaɗai) | Na aiki tare — ana dawo da amsar kai tsaye daga kiran tushe guda ɗaya.                                           |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                  | Tushen mara aiki tare (`analyze` + bincike akai-akai) — duba ƙasa.                                               |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                      | Na aiki tare, ta maƙurar abokin hulɗa ta Vertex AI ta `openapi/chat/completions` — duba ƙasa don tantancewa/URL. |
+| ID na mai samarwa             | ID na samfurin       | Ƙimar `model`                                          | Bayanan kula                                                                                            |
+| ----------------------------- | -------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (ko `mistral-ocr-latest`) | Aiki kai tsaye — ana mayar da amsa kai tsaye daga kiran sama guda ɗaya.                                 |
+| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`            | Kiran sama na asynchronous (`analyze` + poll) — duba ƙasa.                                              |
+| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                | Aiki kai tsaye, ta ƙarshen abokin hulɗar Vertex AI `openapi/chat/completions` — duba ƙasa don auth/URL. |
 
 Dukkan masu samarwa ukun suna amsawa da jiki mai tsarin Mistral iri ɗaya:
 
@@ -442,28 +429,22 @@ Dukkan masu samarwa ukun suna amsawa da jiki mai tsarin Mistral iri ɗaya:
 }
 ```
 
-### Gudanarwar bincike akai-akai ta Azure Document Intelligence
+### Tsarin jiran amsa na Azure Document Intelligence
 
-API na `analyze` na Azure Document Intelligence mara aiki tare ne: buƙatar farko tana dawo da
-kanun `Operation-Location` maimakon jiki, kuma dole ne a riƙa bincika sakamakon akai-akai. Mai sarrafawa
-(`open-sse/handlers/ocr.ts`) yana bincikar wannan URL kowane daƙiƙa ɗaya har zuwa yunƙuri 30, yana gaza nan take (ba ya
-ci gaba da bincike) idan amsar binciken ba `ok` ba ce ko matsayi ya kasance `"failed"`, kuma yana dawo da `504` idan
-aikin har yanzu yana gudana bayan an ƙare adadin yunƙuran da aka ware. Ana daidaita amsar ƙarshe ta Azure
-zuwa tsarin `pages`/`markdown` iri ɗaya da Mistral ke amfani da shi kafin a mayar wa
-mai kira, don haka lambar abokin hulɗa ba ta buƙatar ware mai samarwan ta hanya ta musamman.
+API na `analyze` na Azure Document Intelligence asynchronous ne: buƙatar farko tana mayar da taken
+`Operation-Location` maimakon jiki, kuma dole ne a yi polling don samun sakamakon. Handler ɗin
+(`open-sse/handlers/ocr.ts`) yana yin polling ga wannan URL kowane daƙiƙa na tsawon yunƙuri 30, yana dakatar da aiki nan take (ba ya ci gaba da polling)
+idan amsar polling ba `ok` ba ce ko kuma matsayin ya kasance `"failed"`, sannan yana mayar da `504` idan aikin har yanzu yana gudana bayan an ƙare adadin yunƙurin. Ana daidaita amsar Azure ta ƙarshe
+zuwa tsarin `pages`/`markdown` iri ɗaya da Mistral ke amfani da shi kafin a mayar da ita ga mai kira, don haka lambar abokin ciniki ba ta buƙatar keɓance mai samarwar.
 
-### Tantancewar Vertex AI DeepSeek OCR da warware maƙura
+### Tabbatarwa da warware ƙarshen Vertex AI DeepSeek OCR
 
-`vertex-deepseek-ocr` yana sake amfani da tantancewar Vertex AI iri ɗaya da OmniRoute ya riga ya tallafa wa
-zirga-zirgar taɗi/hoto (`open-sse/executors/vertex.ts`): mabuɗin API na haɗin ko dai
-takardar shaidar Service Account JSON ce (wadda ake musanyawa da alamar samun damar OAuth mai ɗan gajeren wa'adin aiki ta hanyar
-gudanarwar JWT-bearer) ko kuma alamar samun damar OAuth da aka riga aka samar, wadda ake amfani da ita yadda take. URL na maƙurar tushe shi ne
-maƙurar abokin hulɗa ta Vertex ta gama-gari `openapi/chat/completions`, wanda aka gina daga project da
-region na haɗin — takamaiman `providerSpecificData.project`/`providerSpecificData.region` koyaushe yana da fifiko;
-in ba haka ba, ana samo project daga `project_id` na Service Account JSON, sannan ana amfani da
-`us-central1` a matsayin region na tsoho. Dukkan warwarewar biyu suna faruwa a `open-sse/handlers/ocr.ts`
-(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), kuma
-`src/app/api/v1/ocr/route.ts` yana amfani da su kafin aikawa zuwa `handleOcr`.
+`vertex-deepseek-ocr` yana sake amfani da tabbacin Vertex AI iri ɗaya da OmniRoute ta riga ta tallafa don
+zirga-zirgar chat/hoto (`open-sse/executors/vertex.ts`): API key na haɗin yana kasancewa ko dai takardar shaidar Service Account JSON (ana musanya ta da OAuth access token mai ɗan gajeren lokaci ta hanyar JWT-bearer flow) ko kuma OAuth access token da aka riga aka samar wanda ake amfani da shi yadda yake. Ana gina URL na ƙarshen sama daga generic
+`openapi/chat/completions` na Vertex a matsayin ƙarshen abokin hulɗa, bisa project da region na haɗin — `providerSpecificData.project`/`providerSpecificData.region` da aka bayar kai tsaye koyaushe suna da fifiko;
+in ba haka ba ana samo project daga `project_id` na Service Account JSON, kuma region ɗin tsoho shi ne
+`us-central1`. Ana yin warwarewar duka a cikin `open-sse/handlers/ocr.ts`
+(`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), sannan `src/app/api/v1/ocr/route.ts` ke amfani da su kafin aikawa zuwa `handleOcr`.
 
 ---
 
@@ -473,15 +454,15 @@ in ba haka ba, ana samo project daga `project_id` na Service Account JSON, sanna
 GET /v1/models
 Authorization: Bearer your-api-key
 
-→ Yana dawo da duk samfuran hira, embedding, da hoto + haɗe-haɗe a tsarin OpenAI
+→ Yana mayar da dukkan samfuran hira, embedding, da hoto + haɗe-haɗe cikin tsarin OpenAI
 ```
 
 ### Farashin samfura (`pricing`)
 
-Shigarwa tana ɗauke da abin `pricing` idan OmniRoute ya san farashin samfurin. Farashin yana fitowa
-daga jadawalin farashin da lissafin kuɗi ke amfani da shi: tsoffin ƙimomi na ciki, farashin da aka daidaita, da
-gyare-gyaren da aka saita ta `/api/pricing`. Waɗannan farashin jeri ne, don haka masu samar da biyan kuɗin rajista ma
-suna nuna farashin kowace token.
+Shigarwa tana ɗauke da wani abu na `pricing` lokacin da OmniRoute ya san farashin samfurin. Farashin yana
+fitowa daga teburin farashin da lissafin kuɗi ke amfani da shi: tsoffin ƙimomin da aka gina a ciki,
+farashin da aka daidaita, da gyare-gyaren da aka saita ta `/api/pricing`. Waɗannan farashin jerin farashi
+ne, saboda haka masu ba da sabis na biyan kuɗi ma suna nuna farashi na kowane token.
 
 ```json
 "pricing": {
@@ -496,81 +477,78 @@ suna nuna farashin kowace token.
 }
 ```
 
-| Filaye                                                          | Ma'auni                              | Bayani                                                                                                                                                                 |
-| --------------------------------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `prompt`, `completion`, `input_cache_read`, `input_cache_write` | USD ga kowace token, rubutun decimal | Ya dace da OpenRouter, kuma ba ya taɓa kasancewa cikin tsarin exponent. Filayen cache guda biyu suna bayyana ne kawai idan akwai farashin cache.                       |
-| `input`, `output`, `cached`, `cache_creation`                   | USD ga tokens miliyan 1, lamba       | Filaye daga tsofaffin nau'ikan kundin, waɗanda aka riƙe domin kwastomomin da suke akwai. `reasoning` da `long_context` ma suna bayyana idan layin farashin yana da su. |
+| Filayen                                                         | Ma'auni                             | Bayanan kula                                                                                                                                                       |
+| --------------------------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `prompt`, `completion`, `input_cache_read`, `input_cache_write` | USD a kowane token, igiyar goma     | Mai jituwa da OpenRouter, ba ya taɓa amfani da tsarin rubutun exponent. Filayen cache guda biyu suna bayyana ne kawai idan akwai farashin cache.                   |
+| `input`, `output`, `cached`, `cache_creation`                   | USD a kowane token miliyan 1, lamba | Filayen daga tsofaffin sigogin kundin bayanai, an bar su don abokan ciniki na yanzu. `reasoning` da `long_context` ma suna bayyana idan layin farashin yana da su. |
 
-- **Haɗe-haɗe** suna ɗaukar farashin manufa ta farko da ake iya gani. Haɗe-haɗen `auto/*` na ciki suna zaɓar
-  manufa a lokacin buƙata, don haka ba su da `pricing`.
+- **Haɗe-haɗe** suna ɗauke da farashin target ɗinsu na farko da ake iya gani. Haɗe-haɗen `auto/*` da aka gina a ciki suna zaɓar
+  target a lokacin buƙata, saboda haka ba su da `pricing`.
 - **Samfuran kyauta** suna nuna `"0"` (da `0`) idan farashinsu sifili ne. Samfurin da ba shi da layin farashi
-  ma yana nuna `"0"` idan kundin ya yi masa alamar kyauta (`free: true`) ko kuma kundin samfuran kyauta
-  na ciki ya jera shi.
-- **Farashin da ba a sani ba:** shigarwar ba ta da maɓallin `pricing`.
-- **Masu samarwa da ake ƙididdige su bisa credit** (kamar Kiro) suna cajin kowace buƙata maimakon kowace token. Shigarwarsu
-  tana riƙe filayen lambobi na kowace miliyan 1 da suke da su a baya, kuma ba ta ɗauke da filayen rubutun kowace token.
-- **Nau'uka** (ids na matakin ƙoƙarin tunani, laƙabban marasa tunani, madubin ganowa da na gateway)
-  suna kwafin farashin samfurin da suke tura buƙata zuwa gare shi.
-- Filayen suna ɗauke da ƙimar tushe kawai. Matakan mahallin dogo (filin lamba na `long_context`) da
-  masu ninka matakin sabis (misali Codex fast ko flex) ba sa canza `prompt` ko
+  ma yana nuna `"0"` lokacin da kundin bayanai ya nuna shi kyauta (`free: true`) ko kundin samfuran kyauta da aka gina a ciki ya jera shi.
+- **Farashin da ba a sani ba:** shigarwar ba ta da mabuɗin `pricing`.
+- **Masu ba da sabis masu auna kuɗi ta credit** (kamar Kiro) suna cajin kowane buƙata maimakon kowane token. Shigarwarsu
+  tana riƙe da filayen lamba na kowane token miliyan 1 da suke da su a baya, kuma ba ta ɗauke da filayen kirtani na kowane token.
+- **Bambance-bambance** (ids na reasoning-effort, laƙabin no-thinking, madubin discovery da gateway)
+  suna kwafi farashin samfurin da suke tura buƙatu zuwa gare shi.
+- Filayen suna ɗauke da ƙimomin tushe ne kawai. Matakan long-context (filin lamba na `long_context`) da
+  masu ninkawa na service-tier (misali Codex fast ko flex) ba sa canza `prompt` ko
   `completion`.
-- Abin iri ɗaya ne ga kowane salon tabbatar da izini, har da buƙata mai salon Anthropic
-  tare da `x-api-key` da `anthropic-version` (amsar tana nan a `{ "object": "list",
+- Abun yana ɗaya ga kowane salon tantancewa, har da buƙatar irin ta Anthropic mai ɗauke da `x-api-key` da `anthropic-version` (amsar tana nan `{ "object": "list",
 "data": [...] }`). Aiwatarwa: `src/app/api/v1/models/catalogPricing.ts`.
 
-### Prefixes na id na samfura (`?prefix=`)
+### Gabatarwar id na samfura (`?prefix=`)
 
-Yawancin samfura ana tallata su ƙarƙashin **prefix na mai samarwa**. Prefix ɗin da za ka samu yana ƙarƙashin ikon
-feature flag na `MODELS_CATALOG_PREFIX_MODE`, kuma ana iya maye gurbinsa **ga kowace buƙata** da
-query parameter — wannan yana da amfani ga kwastoman da ke son jeri mai tsabta ba tare da canza saitin
-uwar-garken gaba ɗaya ga kowa ba:
+Yawancin samfura ana tallata su ƙarƙashin **gabatarwar mai ba da sabis**. Wane gabatarwa za ku samu yana ƙarƙashin ikon
+tutar fasalin `MODELS_CATALOG_PREFIX_MODE`, kuma ana iya sauya shi **ga kowace buƙata** ta hanyar siga ta query — wannan yana da amfani
+ga abokin ciniki da yake son jerin tsafta ba tare da canza saitin uwar garke na kowa ba:
 
 ```bash
-GET /v1/models?prefix=alias        # id guda ɗaya ga kowane samfuri — gajeren prefix na laƙabi
-GET /v1/models?prefix=dual         # dukkan siffofin biyu (tsohon saitin uwar-garke)
-GET /v1/models?prefix=canonical    # cikakken prefix na provider-id kawai
+GET /v1/models?prefix=alias        # id guda ɗaya ga kowane samfur — gajeriyar gabatarwar alias
+GET /v1/models?prefix=dual         # siffofin biyu (tsoffin saitin uwar garke)
+GET /v1/models?prefix=canonical    # gabatarwar cikakken provider-id kawai
 ```
 
-| Yanayi      | Abin da yake fitarwa                                     | Bayani                                                                                                                                                                                                                              |
-| ----------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dual`      | `cc/claude-sonnet-4-6` **da** `claude/claude-sonnet-4-6` | **Tsohon saiti.** Duk ids biyun suna tura buƙata zuwa samfurin ɗaya; an riƙe su domin saitunan kwastoma da suka hardcode ɗaya daga cikin siffofin su ci gaba da aiki. Kusan yana ninka girman kundin sau biyu.                      |
-| `alias`     | `cc/claude-sonnet-4-6`                                   | Shigarwa ɗaya ga kowane samfuri. Masu samarwa da ba su da wani laƙabi na daban har yanzu suna fitar da shigarwarsu, don haka babu abin da ya ɓace.                                                                                  |
-| `canonical` | `claude/claude-sonnet-4-6`                               | Shigarwa ɗaya ga kowane samfuri ƙarƙashin cikakken prefix na provider-id. Masu samarwa da ba su da wani laƙabi na daban (misali `antigravity/…`, `agy/…`) su ma suna fitar da id guda ɗayansu a nan, don haka babu abin da ya ɓace. |
+| Yanayi      | Abin da yake fitarwa                                     | Bayanan kula                                                                                                                                                                                                                                |
+| ----------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dual`      | `cc/claude-sonnet-4-6` **da** `claude/claude-sonnet-4-6` | **Tsoho.** Duk ids ɗin suna tura buƙatu zuwa samfurin ɗaya; an bar su domin saitunan abokan ciniki da suka rubuta ɗaya daga cikin siffofin da hannu su ci gaba da aiki. Yawanci kundin bayanai ya ninka.                                    |
+| `alias`     | `cc/claude-sonnet-4-6`                                   | Shigarwa guda ɗaya ga kowane samfur. Masu ba da sabis da ba su da alias na daban har yanzu suna fitar da shigarwarsu, don haka babu abin da ya ɓace.                                                                                        |
+| `canonical` | `claude/claude-sonnet-4-6`                               | Shigarwa guda ɗaya ga kowane samfur ƙarƙashin cikakkiyar gabatarwar provider-id. Masu ba da sabis da ba su da alias na daban (misali `antigravity/…`, `agy/…`) su ma suna fitar da id ɗinsu guda ɗaya a nan, don haka babu abin da ya ɓace. |
 
-Ana kuma iya gane madubin yanayin `dual` ba tare da query parameter ba: yana ɗauke da filin `parent`
-wanda ke nuna id na farko.
+Hakanan ana iya gane madubin yanayin `dual` ba tare da siga ta query ba: yana ɗauke da filin `parent`
+da ke nuna id na farko.
 
-Kwastomomin da ke nuna wurin zaɓen samfuri ya kamata su nemi `?prefix=alias` — wannan shi ne abin da
+Abokan ciniki da ke nuna mai zaɓar samfur ya kamata su nemi `?prefix=alias` — wannan shi ne abin da
 [ƙarin OmniCopilot na VS Code](../guides/VSCODE-COPILOT.md) yake yi.
 
 ### Matatun ganowa (`?capability=`, `?min_context=`, `?kind=`, `?q=`)
 
-`GET /v1/models` yana karɓar matatun ganowa na zaɓi. Idan babu ko ɗaya daga cikinsu, amsar
-ba ta canzawa. Suna taƙaita kundin da mai kira ya riga yake gani (ana fara amfani da izinin API-key),
-kuma suna aiki kafin rarraba shafuka na salon OpenAI na `limit` / `after`:
+`GET /v1/models` yana karɓar matatun ganowa na zaɓi. Idan ba a yi amfani da ko ɗaya daga cikinsu ba, amsar
+ba ta canza. Suna rage kundin bayanan da mai kira ya riga ya gani (izinin API-key yana aiki da farko),
+kuma suna gudana kafin shafin OpenAI-style na `limit` / `after`:
 
 ```bash
-GET /v1/models?capability=vision&capability=tool_calling   # dole ne kowane capability da aka jera ya zama gaskiya
+GET /v1/models?capability=vision&capability=tool_calling   # kowane capability da aka jera dole ya zama true
 GET /v1/models?capability=vision,reasoning&min_context=200000
-GET /v1/models?kind=embedding                              # `type` na kundin; layukan da ba su da shi su ne `chat`
-GET /v1/models?q=sonnet&limit=10                           # daidaitawa marar kula da manya ko ƙananan haruffa a kan id ko suna
+GET /v1/models?kind=embedding                              # `type` na kundin bayanai; layukan da ba su da shi su ne `chat`
+GET /v1/models?q=sonnet&limit=10                           # daidaitawa ba tare da la’akari da manyan/ƙananan haruffa ba kan id ko suna
 ```
 
-| Siga          | Ƙimomi                                                                                              |
+| Param         | Values                                                                                              |
 | ------------- | --------------------------------------------------------------------------------------------------- |
 | `capability`  | `attachment`, `reasoning`, `structured_output`, `temperature`, `thinking`, `tool_calling`, `vision` |
-| `min_context` | lamba cikakkiya marar korau, ana kwatanta ta da `context_length`                                    |
+| `min_context` | lamba mara mara mara mara mara mara mara mara, wanda aka kwatanta da `context_length`               |
 | `kind`        | `chat`, `audio`, `embedding`, `image`, `moderation`, `music`, `rerank`, `video`                     |
 | `q`           | haruffa 1–200                                                                                       |
 
-Ƙimar da ba a sani ba, ko `min_context` da ba lamba cikakkiya marar korau ba (misali `1.5`),
-za ta mayar da HTTP `400`, kuma saƙon zai jero ƙimomin da suka dace. Aiwatarwa:
+Ƙimar da ba a sani ba, ko `min_context` da ba lamba cikakkiya ce mara mara ba (misali `1.5`),
+na mayar da HTTP `400`, kuma saƙon yana jera ingantattun ƙimomi. Aiwatarwa:
 `src/app/api/v1/models/catalogFilters.ts`.
 
-### Taƙaitaccen jerin samfura (`POST /v1/models/query`)
+### Jerin gajerun samfura (`POST /v1/models/query`)
 
-`POST /v1/models/query` yana mayar da gajeren jeri mai sakamako tabbatacce daga kundin guda, tare da
-tantance izini da ganuwa ta kowane maɓalli irin na `GET /v1/models`:
+`POST /v1/models/query` na mayar da gajeren jerin da ba ya canzawa daga kundin samfura ɗaya, tare da
+ingantaccen izini da ganuwa ga kowane maɓalli kamar `GET /v1/models`:
 
 ```bash
 POST /v1/models/query
@@ -583,89 +561,94 @@ Content-Type: application/json
 → { "object": "list", "data": [ ...models ] }
 ```
 
-Kowane fili na zaɓi ne. `capabilities` da `exclude` suna karɓar jeri ko zaren da waƙafi ya raba;
-`max_output` yana kwatantawa da `max_output_tokens`. Ana jera sakamakon bisa `owned_by`, sannan `id`.
-Tsohuwar ƙimar `limit` ita ce `20`, kuma ana iyakance ƙimomin da suka wuce `100` zuwa `100`. JSON mara
-inganci, filin da ba a sani ba, ko ƙima mara inganci yana mayar da HTTP `400`.
+Dukkan filayen zaɓi ne. `capabilities` da `exclude` suna karɓar tsararru ko kirtani da aka raba da waƙafi;
+`max_output` yana kwatanta da `max_output_tokens`. Ana jera sakamako bisa `owned_by`, sannan `id`.
+`limit` yana da tsohuwar ƙima ta `20`, kuma ƙimomin da suka wuce `100` ana takaita su zuwa `100`. JSON mara inganci,
+filin da ba a sani ba ko ƙima mara inganci na mayar da HTTP `400`.
 
-### Samfuran taɗi da aka ɓoye ɗaya bayan ɗaya
+### Samfuran tattaunawa da aka ɓoye ɗaiɗaiku
 
-Samfurin da aka yi wa alamar **Ɓoyayye** a shafin mai samar da shi ba a haɗa shi cikin kundin, kuma ana ƙin
-buƙatarsa da HTTP `404` / `model_not_found` idan aka buƙace shi kai tsaye. Binciken yana amfani da
-mai samarwa da samfurin da aka warware, ciki har da sunayen madadin masu samarwa, kari na farkon kumburin
-mai samarwa mai jituwa, da tsoffin saitunan haɗi. Haɗi yana tsallake maƙasudai da aka ɓoye kuma yana iya
-amfani da ɗan'uwa mai ganuwa; idan babu wata maƙasudi mai aiwatuwa da ta rage, yana mayar da lambar kuskure
-ɗaya. Cire ɓoyewar yana fara aiki a buƙata ta gaba. Saitunan ganuwa na hotuna kaɗai ba sa ɓoye samfurin
-taɗi mai ID iri ɗaya.
+Samfurin da aka yi wa alamar **Boyayye** a shafin mai samar da shi ana cire shi daga kundin samfura kuma a ƙi
+buƙatarsa kai tsaye da HTTP `404` / `model_not_found`. Binciken yana amfani da mai samarwa da samfurin da aka
+warware, har da laƙabin masu samarwa, prefix na nodes na masu samarwa masu jituwa, da tsoffin saitunan haɗi.
+Combo yana tsallake wuraren da aka ɓoye kuma yana iya amfani da ɗan'uwa da yake bayyane; idan babu sauran wurin
+aiwatarwa, yana mayar da lambar kuskure ɗaya. Cire ɓoyewa yana aiki a buƙata ta gaba. Sauye-sauyen ganuwa
+na hotuna kaɗai ba sa ɓoye samfurin tattaunawa mai ID ɗaya.
 
-Wannan saitin samfurin ɗaiɗaiku ya bambanta da
-[jerin izini/hanawa na bayyanar da samfura](../routing/MODEL_EXPOSURE_LIST.md), waɗanda ke tace
-tallata kundin da masu neman takarar zaɓin hanya ta atomatik, yayin da suke ci gaba da aika buƙata kai tsaye. Izinin samfurin
-maɓallin API yana ci gaba da aiki daban. Tsohuwar yanayin kari na farkon kundin har yanzu ita ce `dual`.
+Wannan saitin samfurin na ɗaiɗaiku ya bambanta da
+[jerin ba da izini/ƙin izini na fallasa samfura](../routing/MODEL_EXPOSURE_LIST.md), waɗanda ke tace tallan kundin
+samfura da 'yan takarar sarrafa hanya ta atomatik yayin da suke riƙe da aika buƙata kai tsaye. Izinin samfurin
+na maɓallin API yana ci gaba da aiki daban. Tsohon yanayin prefix na kundin samfura ya kasance `dual`.
 
-### Nau'ukan samfuri marasa tunani
+### Bambance-bambancen samfura marasa tunani
 
-Ga samfuran Claude masu iya tunani, `/v1/models` yana kuma tallata nau'in **marar tunani** wanda aka fara ID ɗinsa da `claude-3-omniroute-no-thinking/`:
+Ga samfuran Claude masu iya tunani, `/v1/models` yana kuma tallata wani bambanci **marar tunani** wanda ID ɗinsa
+ke da prefix `claude-3-omniroute-no-thinking/`:
 
 ```
 claude-3-omniroute-no-thinking/<provider>/<model>
 ```
 
-Zaɓar wannan ID (misali, a cikin saitin Claude Code da ke haɗa tubalin `thinking` a koyaushe) yana warwarewa zuwa ainihin `<provider>/<model>` tare da danne tunani — `thinking:{type:"disabled"}` a kan hanyar `/v1/messages`, ko kuma a cire filayen `reasoning`/`reasoning_effort` a kan hanyar `/v1/chat/completions`. Ana jera nau'in ne kawai ga samfuran iyalin Claude waɗanda ke goyon bayan tunani **kuma** suke bin `disabled` (don haka, misali, ba a haɗa samfuran da ke karɓar daidaitawa kawai waɗanda ke ƙin `disabled` ba). Masu gudanarwa za su iya tilasta kunna ko kashe nau'in ga kowane samfuri ta hanyar `ModelSpec.noThinkingAlias`.
+Zaɓar wannan ID (misali a cikin saitin Claude Code da ke haɗa tubalin `thinking` koyaushe) yana warwarewa zuwa ainihin
+`<provider>/<model>` tare da kashe reasoning — `thinking:{type:"disabled"}` a hanyar `/v1/messages`, ko kuma a cire filayen
+`reasoning`/`reasoning_effort` a hanyar `/v1/chat/completions`. Ana jera wannan bambanci ne kawai ga samfuran dangin
+Claude da ke goyan bayan tunani **kuma** suke mutunta `disabled` (saboda haka, misali, ana cire samfuran da suka dogara
+kaɗai da adaptive waɗanda ke ƙin `disabled`). Masu gudanarwa na iya tilasta kunna ko kashe wannan laƙabi ga kowane samfur
+ta hanyar `ModelSpec.noThinkingAlias`.
 
 ---
 
-## Manifest ɗin Plugin na Mai Bayarwa
+## Bayanin Plugin na Provider
 
 ```bash
 GET /api/v1/provider-plugin-manifest
 ```
 
-Yana mayar da manifest ɗin plugin na mai bayarwa wanda ya dace da JSON da Bifrost, CLIProxyAPI, da
-masu tsara hanyoyin sidecar na gaba suke amfani da shi. Ana samar da amsar daga rajistar mai bayarwa
-ta TypeScript, kuma da gangan ba ta haɗa da sirrin abokin ciniki na OAuth, warware muhallin lokacin
-gudanarwa, ayyukan executor, headers na buƙata, da bayanan asusu.
+Yana dawo da bayanin plugin na provider mai aminci ga JSON wanda Bifrost, CLIProxyAPI, da
+masu tura buƙatu na sidecar na gaba ke amfani da shi. Ana samar da amsar ne daga rajistar
+provider ta TypeScript, kuma da gangan ba ta ƙunshi sirrin abokan cinikin OAuth ba, warware
+yanayin runtime, ayyukan executor, taken buƙata, ko bayanan asusu.
 
-Yi amfani da wannan endpoint lokacin da sidecar ke gudana a wajen process kuma ba zai iya shigo da
-`open-sse/config/providerPluginManifestRegistry.ts` kai tsaye ba.
+Yi amfani da wannan endpoint lokacin da sidecar ke aiki a matsayin wani tsari dabam kuma ba zai iya
+shigo da `open-sse/config/providerPluginManifestRegistry.ts` kai tsaye ba.
 
 ---
 
-## Samar da sauti na ElevenLabs
+## Samar da sautin ElevenLabs
 
-Saita haɗin mai bayarwa na `elevenlabs` a OmniRoute da maɓallin API ɗinka na ElevenLabs.
-Abokan ciniki suna tabbatar da sahihancinsu da maɓallin **OmniRoute** nasu (`Authorization: Bearer $OMNIROUTE_API_KEY`);
-gateway ɗin yana samar da maɓallin mai bayarwa da aka adana a matsayin `xi-api-key`. Kada ka taɓa aika maɓallin ElevenLabs
-a matsayin bearer token na gateway.
+Saita haɗin provider na `elevenlabs` a OmniRoute tare da maɓallin API na ElevenLabs.
+Abokan ciniki suna tantancewa da maɓallin **OmniRoute** ɗinsu (`Authorization: Bearer $OMNIROUTE_API_KEY`);
+gateway ɗin yana aika maɓallin provider da aka adana a matsayin `xi-api-key`. Kada a taɓa aika maɓallin ElevenLabs
+a matsayin alamar bearer ta gateway.
 
-| Hanya | Path                        | Amsa                                         | Rukunin endpoint na maɓallin API |
-| ----- | --------------------------- | -------------------------------------------- | -------------------------------- |
-| POST  | `/v1/sound-generation`      | Bytes na sauti na asali                      | `elevenlabs`                     |
-| POST  | `/v1/music`                 | Bytes na sauti na asali                      | `music`                          |
-| POST  | `/v1/music/stream`          | Bytes na sauti masu gudana                   | `music`                          |
-| POST  | `/v1/music/detailed`        | Sauti na multipart na asali da tsarin haɗawa | `music`                          |
-| POST  | `/v1/music/detailed/stream` | Metadata na SSE na asali da ɓangarorin sauti | `music`                          |
-| POST  | `/v1/music/plan`            | Tsarin haɗawa na JSON                        | `music`                          |
+| Hanya | Path                        | Amsa                                           | Rukunin endpoint na maɓallin API |
+| ----- | --------------------------- | ---------------------------------------------- | -------------------------------- |
+| POST  | `/v1/sound-generation`      | Bayt ɗin sauti na asali                        | `elevenlabs`                     |
+| POST  | `/v1/music`                 | Bayt ɗin sauti na asali                        | `music`                          |
+| POST  | `/v1/music/stream`          | Bayt ɗin sauti masu gudana                     | `music`                          |
+| POST  | `/v1/music/detailed`        | Sautin multipart na asali da tsarin tsara      | `music`                          |
+| POST  | `/v1/music/detailed/stream` | Metadata na SSE na asali da gutsattsarin sauti | `music`                          |
+| POST  | `/v1/music/plan`            | Tsarin tsara a tsarin JSON                     | `music`                          |
 
-Waɗannan endpoints suna cika hanyoyin `/v1/audio/speech`, `/v1/audio/transcriptions`,
-`/v1/voices`, `/v1/text-to-speech/{voiceId}` da `/v1/speech-to-text` da ake da su. Ana kiyaye filayen JSON
+Waɗannan endpoints suna ƙara wa hanyoyin `/v1/audio/speech`, `/v1/audio/transcriptions`,
+`/v1/voices`, `/v1/text-to-speech/{voiceId}` da `/v1/speech-to-text` da ake da su. Ana adana filayen JSON
 na asali da sigogin query kamar `output_format` da `enable_logging`.
-Amsoshin `/v1/music/detailed` suna riƙe da iyakokin multipart nasu; sarrafa su a matsayin multipart.
-`/v1/music/detailed/stream` yana mayar da `text/event-stream` tare da metadata na haɗawa da
-ɓangarorin sauti na base64 a cikin abubuwan SSE. Dukkan hanyoyin shida suna goyon bayan preflight na CORS.
+Amsoshin `/v1/music/detailed` suna riƙe iyakokin multipart ɗinsu; yi fassarar su a matsayin multipart.
+`/v1/music/detailed/stream` yana dawo da `text/event-stream` mai ɗauke da metadata na tsara da
+gutsattsarin sauti na base64 a cikin abubuwan SSE. Dukkan hanyoyi shida suna goyon bayan CORS preflight.
 
 ```bash
 export OMNIROUTE_BASE_URL="http://localhost:20128"
 export OMNIROUTE_API_KEY="your-omniroute-api-key"
 
-# Ɗan gajeren tasirin sauti. Tsawon lokaci: daƙiƙa 0.5 zuwa 30.
+# Tasirin sauti gajere. Tsawon lokaci: daƙiƙa 0.5 zuwa 30.
 curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/sound-generation?output_format=mp3_44100_128" \
   -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"text":"A single soft bell chime","duration_seconds":1,"model_id":"eleven_text_to_sound_v2"}' \
   --output effect.mp3
 
-# Ana bayyana tsawon waƙa da millisekan: 3000 zuwa 600000.
+# Ana bayyana tsawon kiɗa da milisakan: 3000 zuwa 600000.
 curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music?output_format=mp3_44100_128" \
   -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
   -H "Content-Type: application/json" \
@@ -673,19 +656,19 @@ curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music?output_format=mp3_44100_128"
   --output music.mp3
 ```
 
-Yi amfani da `/v1/music/stream` tare da wannan jikin JSON don isar da sauti a hankali. Haɗawar
-tana karɓar ɗaya tak daga `prompt` ko `composition_plan`; `/v1/music/plan` yana buƙatar `prompt`
-kuma zai iya karɓar `source_composition_plan`. Schemas na asali suna kiyaye ƙarin
-filayen mai bayarwa domin nau'ikan tsarin haɗawa da zaɓuɓɓukan fine-tuning su isa ElevenLabs.
+Yi amfani da `/v1/music/stream` tare da jikin JSON iri ɗaya domin isar da sauti a hankali.
+Tsarawa tana karɓar ɗaya kawai daga cikin `prompt` ko `composition_plan`; `/v1/music/plan` yana buƙatar
+`prompt` kuma bisa zaɓi yana karɓar `source_composition_plan`. Tsare-tsaren asali suna adana ƙarin
+filayen provider domin nau’ikan tsarin tsara da zaɓuɓɓukan daidaita sauti su isa ElevenLabs.
 
-Haɗaɗɗen endpoint na `/v1/music/generations` shi ma yana karɓar `elevenlabs/music_v1`,
-`elevenlabs/music_v2` da `elevenlabs/music_v2_5`. Idan akwai haɗin ElevenLabs mai aiki,
-ana nuna waɗannan models a kundin waƙa. Wannan endpoint yana mayar da
+Endpoint ɗin haɗin kai `/v1/music/generations` ma yana karɓar
+`elevenlabs/music_v1`, `elevenlabs/music_v2` da `elevenlabs/music_v2_5`. Tare da haɗin ElevenLabs mai aiki,
+ana nuna waɗannan samfura a cikin kundin kiɗa. Wannan endpoint yana dawo da
 `{"created":...,"data":[{"b64_json":"...","format":"mp3"}]}`. Filinsa na `duration` yana cikin
-daƙiƙoƙi kuma yana dacewa da `music_length_ms`; idan an bayyana `music_length_ms` kai tsaye, shi ake fifitawa.
-`instrumental` yana dacewa da `force_instrumental`, inda ake fifita filin na asali.
-Yi amfani da endpoints na streaming na asali don streaming, da endpoint na haɗawa na asali
-don buƙatun da tsarin haɗawa kaɗai ke jagoranta.
+daƙiƙu kuma yana taswira zuwa `music_length_ms`; `music_length_ms` da aka bayyana kai tsaye yana da fifiko.
+`instrumental` yana taswira zuwa `force_instrumental`, tare da filin asali yana da fifiko.
+Yi amfani da endpoints na yawo na asali don yawo, sannan endpoint na tsara na asali
+don buƙatun da tsarin tsara kaɗai ke jagoranta.
 
 ```bash
 curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music/generations" \
@@ -694,111 +677,112 @@ curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music/generations" \
   -d '{"model":"elevenlabs/music_v1","prompt":"Gentle instrumental piano","duration":10,"instrumental":true}'
 ```
 
-Ƙuntatawar endpoint, model, kasafin kuɗi da haɗi suna aiki kafin kiran upstream. Hanyoyin
-asali suna mayar da status codes da jikin kuskure na upstream ba tare da canji ba, ciki har da `402` don
-ƙuntatawar tsari da `429` don iyakar quota. Ana kiyaye headers na `character-cost`, `song-id`, `request-id` da `retry-after`
-idan suna nan. Samun ma'aunin kuɗin amfani na kyauta ba ya tabbatar da damar amfani da kowane
-model na waƙa, tsarin fitarwa ko fasalin API: ElevenLabs ne ke yanke shawarar izinin kowace buƙata.
-Haɗaɗɗen endpoint yana kiyaye status codes na kuskure a cikin daidaitaccen kunshin kuskure na OmniRoute.
+Ana aiwatar da ƙuntatawa na endpoint, samfuri, kasafi da haɗi kafin kiran upstream. Hanyoyin asali
+suna dawo da lambobin matsayin upstream da jikin kurakurai ba tare da canji ba, har da `402`
+don ƙuntatawar shiri da `429` don iyakar quota. Ana adana taken
+`character-cost`, `song-id`, `request-id` da `retry-after` idan suna nan. Samun ragowar kyauta
+ba ya tabbatar da damar amfani da kowane samfurin kiɗa, tsarin fitarwa ko fasalin API ba: ElevenLabs ne
+ke yanke damar amfani ga kowace buƙata. Endpoint ɗin haɗin kai yana adana lambobin matsayin kurakurai
+a cikin ambulan kurakurai da aka daidaita na OmniRoute.
 
-Yarjejeniyoyin upstream: [tasirin sauti](https://elevenlabs.io/docs/api-reference/text-to-sound-effects/convert),
-[haɗa waƙa](https://elevenlabs.io/docs/api-reference/music/compose) da
-[cikakkun bayanan waƙa masu gudana](https://elevenlabs.io/docs/api-reference/music/compose-detailed-stream).
+Kwangilolin upstream: [tasirin sauti](https://elevenlabs.io/docs/api-reference/text-to-sound-effects/convert),
+[tsarin kiɗa](https://elevenlabs.io/docs/api-reference/music/compose) da
+[bayanan kiɗa masu gudana](https://elevenlabs.io/docs/api-reference/music/compose-detailed-stream).
 
 ---
 
-## Wuraren Ƙarshen Daidaituwa
+## Ƙarshen Haɗin Kai
 
-| Hanya | Tafarki                                   | Tsari                                  |
-| ----- | ----------------------------------------- | -------------------------------------- |
-| POST  | `/v1/chat/completions`                    | OpenAI                                 |
-| POST  | `/v1/messages`                            | Anthropic                              |
-| POST  | `/v1/responses`                           | OpenAI Responses                       |
-| POST  | `/v1/embeddings`                          | OpenAI                                 |
-| POST  | `/v1/images/generations`                  | Hotunan OpenAI                         |
-| POST  | `/v1/images/edits`                        | Hotunan OpenAI (gyara/cike hoto)       |
-| POST  | `/v1/videos/generations`                  | Samar da bidiyo irin na OpenAI         |
-| POST  | `/v1/music/generations`                   | Samar da kiɗa irin na OpenAI           |
-| POST  | `/v1/audio/transcriptions`                | Sautin OpenAI (STT)                    |
-| POST  | `/v1/audio/speech`                        | OpenAI TTS (yana mayar da jikin sauti) |
-| POST  | `/v1/rerank`                              | Sake jeri irin na Cohere/Voyage        |
-| POST  | `/v1/classify`                            | Rarrabawar Jina (`api.jina.ai`)        |
-| POST  | `/v1/segment`                             | Mai rarraba Jina (`segment.jina.ai`)   |
-| POST  | `/v1/moderations`                         | Tacewar OpenAI                         |
-| GET   | `/v1/models`                              | OpenAI                                 |
-| POST  | `/v1/models/query`                        | Taƙaitaccen jerin samfura da aka tace  |
-| POST  | `/v1/messages/count_tokens`               | Anthropic                              |
-| GET   | `/v1beta/models`                          | Gemini                                 |
-| POST  | `/v1beta/models/{...path}`                | Gemini generateContent                 |
-| POST  | `/v1/api/chat`                            | Ollama                                 |
-| GET   | `/api/v1/vscode/{token}/`                 | Laƙabin kasidar OpenAI                 |
-| GET   | `/api/v1/vscode/{token}/models`           | Laƙabin samfuran OpenAI                |
-| POST  | `/api/v1/vscode/{token}/chat/completions` | Laƙabin OpenAI mai token               |
-| POST  | `/api/v1/vscode/{token}/responses`        | Laƙabin OpenAI Responses mai token     |
-| POST  | `/api/v1/vscode/{token}/api/chat`         | Laƙabin Ollama mai token               |
-| GET   | `/api/v1/vscode/{token}/api/tags`         | Laƙabin alamomin Ollama mai token      |
+| Hanya | Hanya                                     | Tsari                                     |
+| ----- | ----------------------------------------- | ----------------------------------------- |
+| POST  | `/v1/chat/completions`                    | OpenAI                                    |
+| POST  | `/v1/messages`                            | Anthropic                                 |
+| POST  | `/v1/responses`                           | OpenAI Responses                          |
+| POST  | `/v1/embeddings`                          | OpenAI                                    |
+| POST  | `/v1/images/generations`                  | OpenAI Images                             |
+| POST  | `/v1/images/edits`                        | OpenAI Images (gyara/cika gibi)           |
+| POST  | `/v1/videos/generations`                  | Samar da bidiyo irin na OpenAI            |
+| POST  | `/v1/music/generations`                   | Samar da kiɗa irin na OpenAI              |
+| POST  | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                        |
+| POST  | `/v1/audio/speech`                        | OpenAI TTS (yana dawo da jikin sauti)     |
+| POST  | `/v1/rerank`                              | Sake jera irin na Cohere/Voyage           |
+| POST  | `/v1/classify`                            | Jina classify (`api.jina.ai`)             |
+| POST  | `/v1/segment`                             | Jina segmenter (`segment.jina.ai`)        |
+| POST  | `/v1/moderations`                         | OpenAI Moderations                        |
+| GET   | `/v1/models`                              | OpenAI                                    |
+| POST  | `/v1/models/query`                        | Jerin gajerun samfura da aka tace         |
+| POST  | `/v1/messages/count_tokens`               | Anthropic                                 |
+| GET   | `/v1beta/models`                          | Gemini                                    |
+| POST  | `/v1beta/models/{...path}`                | Gemini generateContent                    |
+| POST  | `/v1/api/chat`                            | Ollama                                    |
+| GET   | `/api/v1/vscode/{token}/`                 | Laƙabin kundin OpenAI                     |
+| GET   | `/api/v1/vscode/{token}/models`           | Laƙabin samfuran OpenAI                   |
+| POST  | `/api/v1/vscode/{token}/chat/completions` | Laƙabin OpenAI mai alamar token           |
+| POST  | `/api/v1/vscode/{token}/responses`        | Laƙabin OpenAI Responses mai alamar token |
+| POST  | `/api/v1/vscode/{token}/api/chat`         | Laƙabin Ollama mai alamar token           |
+| GET   | `/api/v1/vscode/{token}/api/tags`         | Laƙabin alamun Ollama mai alamar token    |
 
-Duk hanyoyin POST suna bin tsari iri ɗaya: `Bearer your-api-key` + jikin JSON da Zod ya inganta (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, da sauransu, duba `src/shared/validation/schemas.ts`). Ana mayar da 4xx idan ingancin schema ya gaza.
+Dukkan hanyoyin POST suna bin tsari iri ɗaya: `Bearer your-api-key` + jikin JSON da Zod ya tabbatar da ingancinsa (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, da sauransu, duba `src/shared/validation/schemas.ts`). Ana dawo da 4xx idan tsarin bayanai bai yi nasara ba.
 
-Ga abokan hulɗa waɗanda ba za su iya haɗa `Authorization: Bearer ...` ba, OmniRoute kuma yana karɓar maɓallan API a cikin URL ta hanyar daidaituwar query-string (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) ko kuma keɓaɓɓun wuraren ƙarshen `/api/v1/vscode/{token}/...` da aka bayyana a ƙasa.
+Ga abokan ciniki waɗanda ba za su iya haɗa `Authorization: Bearer ...` ba, OmniRoute yana kuma karɓar maɓallan API a cikin URL ta hanyar ko dai daidaitawar query string (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) ko kuma keɓaɓɓun hanyoyin `/api/v1/vscode/{token}/...` da aka bayyana a ƙasa.
 
 ```bash
-# Sake jeri (mai bayarwa daga rajistar cloud, ko kumburin mai bayarwa mai dacewa da OpenAI a matsayin "<prefix>/<model>")
+# Sake jera (mai samarwa daga rajistar girgije, ko kumburin mai samarwa mai dacewa da OpenAI a matsayin "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Rarrabawar Jina (takardun shaidar Foundation API)
+# Jina classify (takardun shaidar Foundation API)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
-# Mai rarraba Jina
+# Jina segmenter
 POST /v1/segment     { "content": "...", "return_chunks": true }
 
-# Binciken Jina (s.jina.ai; laƙaban masu bayarwa: jina-search, jina-ai, jina)
+# Binciken Jina (s.jina.ai; laƙaban masu samarwa: jina-search, jina-ai, jina)
 POST /v1/search      { "query": "...", "provider": "jina-search" }
 
-# Tacewa
+# Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 
-# TTS — yana mayar da jikin audio/mpeg (ko tsarin da aka nema)
+# TTS — yana dawo da jikin audio/mpeg (ko tsarin da aka nema)
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# Soniox TTS yana buƙatar harshe da murya: `language` yana amfani da "en" a matsayin tsoho; idan babu
-# murya ko kuma an yi amfani da sunan daidaitacciyar muryar OpenAI (alloy, nova, …), zai koma "Adrian"
+# Soniox TTS yana buƙatar harshe da murya: `language` yana da tsohowar "en"; idan babu
+# murya ko aka yi amfani da sunan muryar OpenAI na asali (alloy, nova, …), ya zama "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
 # Gyaran hoto (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
-# Samar da bidiyo / kiɗa (ID na samfuri mai gaban sunan mai bayarwa)
+# Samar da bidiyo / kiɗa (ID ɗin samfurin da aka riga aka sa sunan mai samarwa)
 POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Nodes na mai samar da rerank:** `POST /v1/rerank` yana kuma tura buƙatu zuwa nodes na masu samarwa masu dacewa da OpenAI
-> (oMLX, vLLM, Infinity, TEI a bayan gateway, …) waɗanda ake yi wa adireshi da `<node-prefix>/<model>`. Nodes na loopback
-> (`localhost`, `127.0.0.1`, `172.16.0.0/12`) koyaushe sun cancanta, haka kuma sunayen rundunan da
-> mai gudanarwa ya jera a `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (misali sunan sabis na Docker/Compose kamar
-> `http://reranker:8080/v1`; ana kiransu kai tsaye, ba ta hanyar `HTTP(S)_PROXY` ko proxy da aka
-> ƙure wa wata haɗi ba). Nodes da ke kan kowace runduna dabam
-> — na'ura a LAN ko abokin Tailscale — suna cancanta ne kawai idan mai gudanarwa ya kunna tutar fasalin
-> `RERANK_REMOTE_PROVIDER_NODES` **kuma** URL na tushen node ɗin ya tsallake manufofin URL masu fita na mai samarwa
+> **Nodes na provider don sake-rarrabawa:** `POST /v1/rerank` yana kuma tura buƙatu zuwa nodes na provider masu jituwa da OpenAI
+> (oMLX, vLLM, Infinity, TEI a bayan gateway, …) waɗanda ake adireshinsu da `<node-prefix>/<model>`. Nodes na loopback
+> (`localhost`, `127.0.0.1`, `172.16.0.0/12`) koyaushe sun cancanci amfani, haka ma sunayen runduna
+> da mai gudanarwa ya jera a cikin `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (misali sunan sabis na Docker/Compose kamar
+> `http://reranker:8080/v1`; ana kiran waɗannan kai tsaye, ba ta `HTTP(S)_PROXY` ko wakilin da aka kulle wa haɗi ba).
+> Nodes da ke kan kowace runduna
+> dabam — kwamfuta a LAN ko abokin Tailscale — suna cancantar amfani ne kawai idan mai gudanarwa ya kunna
+> tutar fasalin `RERANK_REMOTE_PROVIDER_NODES` **kuma** tushen URL na node ya wuce manufar URL na fita ta provider
 > (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`).
-> Matakin rerank na injin ƙwaƙwalwa yana kiran wannan hanya ta
-> loopback, don haka ƙa'ida ɗaya ce ke sarrafa `rerankProviderModel` a saitunan Memory.
+> Matakin sake-rarrabawa na injin memory yana kiran wannan hanya ta
+> loopback, saboda haka ƙa'ida ɗaya ce ke jagorantar `rerankProviderModel` a saitunan Memory.
 >
-> **Tsarukan uwar garken gida:** ana kiran node ɗin a `<base>/v1/rerank`, sannan idan an samu 404, a `<base>/rerank`
-> (Infinity, TEI). Jikin buƙatar da ake turawa yana ɗauke da salon rubutun Cohere/OpenAI (`documents`,
-> `return_documents`) da salon rubutun TEI (`texts`, `return_text`), kuma ana daidaita amsar da aka samu
-> zuwa tsarin Cohere: tsagwaron jerin TEI na `[{index, score, text}]`, da `{results: [{index, score}]}`
-> daga ƙananan gateways, da kuma tsarin Voyage na `{data: [...]}` duk suna komawa ga abokin ciniki a matsayin
-> `{results: [{index, relevance_score, document?}]}`, an jera su bisa maki kuma an iyakance su zuwa `top_n`.
+> **Siffofin sabar ta gida:** ana kiran node a `<base>/v1/rerank` sannan, idan an sami 404, a `<base>/rerank`
+> (Infinity, TEI). Jikin buƙatar zuwa upstream yana ɗauke da rubutun Cohere/OpenAI duka (`documents`,
+> `return_documents`) da kuma rubutun TEI (`texts`, `return_text`), sannan ana daidaita amsar upstream
+> zuwa ambulaf ɗin Cohere: `[{index, score, text}]` marar kunshin daga TEI, `{results: [{index, score}]}`
+> daga ƙananan gateways, da `{data: [...]}` mai salo irin na Voyage duk suna dawowa ga abokin ciniki a matsayin
+> `{results: [{index, relevance_score, document?}]}`, an jera su bisa maki kuma an taƙaita su zuwa `top_n`.
 
-> **Gano nodes na masu samarwa:** samfuran da ke kan node na mai samarwa mai dacewa da OpenAI suna bayyana a `GET /v1/models`
-> ƙarƙashin prefix na node ɗin. Layukan da ba su ɗauke da metadata na endpoint ba (kamar yadda aka saba a jerin `/v1/models` na gida)
-> suna gādon `apiType` na node ɗin, saboda haka samfuran node na `embeddings` suna zama `type: "embedding"`, sannan
-> samfuran node na `rerank` suna zama `type: "rerank"` maimakon su koma chat ta tsohuwa; takamaiman
-> `supportedEndpoints` a kan layin da aka daidaita ko aka ƙara da hannu har yanzu shi ne ke da fifiko.
+> **Gano nodes na provider:** samfura a kan node na provider mai jituwa da OpenAI suna bayyana a cikin `GET /v1/models`
+> a ƙarƙashin prefix ɗin node. Layukan da ba su ɗauke da metadata na endpoint ba (abin da aka saba gani a jerin `/v1/models`
+> na gida) suna gadon `apiType` na node, saboda haka samfuran node na `embeddings` suna da
+> `type: "embedding"` kuma samfuran node na `rerank` suna da `type: "rerank"` maimakon su koma chat ta tsohuwa;
+> `supportedEndpoints` da aka bayyana a sarari a kan layin da aka daidaita ko aka ƙara da hannu har yanzu yana da fifiko.
 
-### Keɓaɓɓun Hanyoyin Masu Samarwa
+### Hanyoyin Provider na Musamman
 
 ```bash
 POST /v1/providers/{provider}/chat/completions
@@ -806,122 +790,132 @@ POST /v1/providers/{provider}/embeddings
 POST /v1/providers/{provider}/images/generations
 ```
 
-Ana ƙara prefix na mai samarwa ta atomatik idan babu shi. Samfuran da ba su dace ba suna mayar da `400`.
+Ana ƙara prefix ɗin provider ta atomatik idan babu shi. Samfuran da ba su dace ba suna dawo da `400`.
 
 ---
 
-## API na Fayiloli
+## API ɗin Fayiloli
 
-Wurin ƙarshen fayiloli mai dacewa da OpenAI don shigarwa/fitarwa ta rukuni da loda fayiloli bisa manufa.
+Ƙarshen fayiloli mai dacewa da OpenAI don shigarwa/fitarwa na batch da loda fayiloli bisa manufa.
 
-| Hanya  | Tafarki                  | Bayani                                                                                                        |
+| Hanya  | Hanya                    | Bayani                                                                                                        |
 | ------ | ------------------------ | ------------------------------------------------------------------------------------------------------------- |
 | POST   | `/v1/files`              | Loda fayil (multipart: `file`, `purpose`, `expires_after[anchor]`, `expires_after[seconds]`) — iyakar 512 MiB |
-| GET    | `/v1/files`              | Jera fayiloli na maɓallin API da aka tantance                                                                 |
-| GET    | `/v1/files/[id]`         | Samo metadata na fayil                                                                                        |
-| DELETE | `/v1/files/[id]`         | Share fayil                                                                                                   |
-| GET    | `/v1/files/[id]/content` | Yaɗa ainihin jikin fayil ɗin kai tsaye                                                                        |
+| GET    | `/v1/files`              | Jera fayilolin maɓallin API da aka tabbatar da shi                                                            |
+| GET    | `/v1/files/[id]`         | Dawo da bayanan fayil                                                                                         |
+| DELETE | `/v1/files/[id]`         | Goge fayil                                                                                                    |
+| GET    | `/v1/files/[id]/content` | Mayar da ɗanyen jikin fayil a matsayin rafi                                                                   |
 
-**Tantancewa:** Maɓallin API na Bearer — ana ware fayiloli bisa kowane maɓallin API ta hanyar `getApiKeyRequestScope`. Maɓalli
-yana gani, yana saukewa kuma yana share fayilolinsa kawai; zaman dashboard ba tare da maɓalli ba yana karanta
-dukkan instance ɗin; fayil marar mai shi (wanda aka loda ba tare da tantancewa ba ko ta zaman dashboard) ba a yarda duk
-mai kira da ba na zaman ba ya isa gare shi. `GET /v1/files` yana ƙin mai kira da ba a tantance ba — da kuma maɓallin da aka gabatar wanda
-ba a iya gano shi ba — da `401` ko da `REQUIRE_API_KEY=false`, maimakon jera fayilolin
-duk masu haya (GHSA-m3hp-hq9g-fpmv, GHSA-2jm2-mpx8-6523).
+**Tabbatarwa:** Maɓallin API na Bearer — ana keɓe fayiloli ga kowane maɓallin API ta hanyar `getApiKeyRequestScope`. Maɓalli yana ganin, sauke da goge fayilolinsa kawai; zaman dashboard ba tare da maɓalli ba yana karanta dukkan instans; fayil da ba shi da mai shi (loda ba tare da tantancewa ba ko ta zaman dashboard) ana hana kowane mai kira da ba na zaman ba shiga. `GET /v1/files` yana ƙin mai kira marar tantancewa — da kuma maɓallin da aka gabatar wanda ba a samu daidaitonsa ba — da `401` ko da `REQUIRE_API_KEY=false` ne, maimakon jera fayilolin dukkan masu haya (GHSA-m3hp-hq9g-fpmv, GHSA-2jm2-mpx8-6523).
 
 ---
 
-## API na Rukunai
+## API ɗin Batches
 
-Sarrafa ayyuka a rukuni mai dacewa da OpenAI.
+Ayyukan batch masu dacewa da OpenAI.
 
-| Hanya  | Tafarki                   | Bayani                                                                                                         |
-| ------ | ------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| POST   | `/v1/batches`             | Ƙirƙiri rukuni — ana tantance jiki ta `v1BatchCreateSchema` (`input_file_id`, `endpoint`, `completion_window`) |
-| GET    | `/v1/batches`             | Jera rukunai                                                                                                   |
-| GET    | `/v1/batches/[id]`        | Samo matsayin rukuni + `request_counts`                                                                        |
-| DELETE | `/v1/batches/[id]`        | Share rukuni da ya kammala/ya gaza                                                                             |
-| POST   | `/v1/batches/[id]/cancel` | Soke rukuni da ake kan aiwatarwa                                                                               |
+| Hanya  | Hanya                     | Bayani                                                                                                                  |
+| ------ | ------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| POST   | `/v1/batches`             | Ƙirƙiri batch — `v1BatchCreateSchema` yana tabbatar da jikin buƙatar (`input_file_id`, `endpoint`, `completion_window`) |
+| GET    | `/v1/batches`             | Jera batches                                                                                                            |
+| GET    | `/v1/batches/[id]`        | Dawo da matsayin batch + `request_counts`                                                                               |
+| DELETE | `/v1/batches/[id]`        | Goge batch da ya kammala/ya gaza                                                                                        |
+| POST   | `/v1/batches/[id]/cancel` | Soke batch da ke kan aiki                                                                                               |
 
-**Tantancewa:** Maɓallin API na Bearer. Ana ware rukunai bisa kowane maɓallin API ƙarƙashin ƙa'idar ɓangarori uku iri ɗaya da ta
-fayiloli: maɓallin mai shi kawai, zaman dashboard a duk faɗin instance, bayanan da ba su da mai shi kuwa an hana duk
-mai kira da ba na zaman ba (samu, sharewa, sokewa, da binciken `input_file_id` yayin ƙirƙirawa).
-`GET /v1/batches` yana ƙin mai kira da ba a tantance ba da `401` ko da `REQUIRE_API_KEY=false`.
+**Tabbatarwa:** Maɓallin API na Bearer. Ana keɓe batches ga kowane maɓallin API bisa ƙa’idar rarrabuwa ta hanyoyi uku da ta shafi fayiloli: maɓallin kansa kawai, zaman dashboard yana da ikon ganin dukkan instans, kuma bayanan da ba su da mai su ana hana duk masu kira da ba na zaman ba shiga (dawo da bayanai, gogewa, sokewa, da binciken `input_file_id` yayin ƙirƙira). `GET /v1/batches` yana ƙin mai kira marar tantancewa da `401` ko da `REQUIRE_API_KEY=false` ne.
 
 ---
 
-## API na Bincike
+## API ɗin Bincike
 
-Tsarin haɗa masu samar da binciken yanar gizo/bincike (Tavily, Brave, Exa, Serper, da sauransu).
+Ƙyalli na masu samar da binciken yanar gizo (Tavily, Brave, Exa, Serper, da sauransu).
 
-| Hanya | Path                   | Bayani                                                                                                   |
-| ----- | ---------------------- | -------------------------------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | Jera masu samar da bincike da aka saita + ƙwarewarsu                                                     |
-| POST  | `/v1/search`           | Gudanar da tambayar bincike — ana tantance body ta `v1SearchSchema`, yana goyon bayan caching/coalescing |
-| GET   | `/v1/search/analytics` | Ƙididdigar hit/latency/cache ta kowane mai samarwa                                                       |
+| Hanya | Hanya                  | Bayani                                                                                                  |
+| ----- | ---------------------- | ------------------------------------------------------------------------------------------------------- |
+| GET   | `/v1/search`           | Jerin masu samar da bincike da aka tsara + damar da suke da ita                                         |
+| POST  | `/v1/search`           | Gudanar da tambayar bincike — `v1SearchSchema` ne ke tantance jiki, yana goyon bayan caching/coalescing |
+| GET   | `/v1/search/analytics` | Ƙididdigar hits/latency/cache ga kowane mai samarwa                                                     |
 
-**Tabbatar da izini:** Maɓallin Bearer API (`extractApiKey` + `isValidApiKey`). Ana tilasta manufofin bincike ta hanyar `enforceApiKeyPolicy`.
+**Tabbatarwa:** Maɓallin API na Bearer (`extractApiKey` + `isValidApiKey`). Ana tabbatar da manufofin bincike ta `enforceApiKeyPolicy`.
 
 ### `provider_options` na Exa da Tavily
 
-Exa da Tavily suna karanta filaye na musamman ga mai samarwa daga jakar namespace:
+Exa da Tavily suna karanta filayen da suka keɓanta ga mai samarwa daga jakar da aka sanya wa suna:
 `provider_options.exa` (ko `provider_options["exa-search"]`) da `provider_options.tavily`
-(ko `provider_options["tavily-search"]`). Maɓallan da ke ƙasa kawai ake tura wa gaba. Ana
-tantance kowannensu da Zod schema nasa a `open-sse/handlers/search/providerOptionsPassthrough.ts`,
-kuma ana watsar da maɓalli mai nau'in da bai dace ba. Ana yin watsi da duk wani maɓalli, ciki har da auth, base URL,
-`stream` da `outputSchema`. Maɓallan flat da sauran masu samarwa ke amfani da su (`cx`, `depth`, ...) suna aiki
-kamar yadda suke a baya.
+(ko `provider_options["tavily-search"]`). Maɓallan da ke ƙasa kaɗai ake turawa. Ana
+duba kowannensu da nasa tsarin Zod a cikin `open-sse/handlers/search/providerOptionsPassthrough.ts`,
+kuma ana watsar da maɓalli idan nau’in sa bai dace ba. Ana yi watsi da kowane maɓalli
+dabam, har da auth, base URL, `stream` da `outputSchema`. Filayen lebur da sauran masu samarwa ke
+amfani da su (`cx`, `depth`, ...) suna aiki kamar da.
 
-| Mai samarwa | Filayen matakin sama                                                                                                                                                                                                                                                                                                                                                      | Na ciki                                                                                                                                                               |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa         | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flat primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | Ana haɗa `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` a kan tsohon ƙimar `{ text: true, highlights: true }` |
-| Tavily      | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                     |
+| Mai samarwa | Filayen mataki na sama                                                                                                                                                                                                                                                                                                                                                    | Na ciki                                                                                                                                  |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa         | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (primitive masu lebur), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                         | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` ana haɗa su a kan tsoho `{ text: true, highlights: true }` |
+| Tavily      | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                        |
 
-Filayen gama-gari kullum su ne ke da fifiko: `query`, `max_results`, `filters` (domains), `country` da
-topic da aka samo daga `search_type`. A Exa, `search_type: "news"` yana riƙe `category: "news"`.
-Tavily kuma yana karɓar `search_type: "finance"` (`topic: "finance"`).
+Filayen gama-gari koyaushe su ne masu rinjaye: `query`, `max_results`, `filters` (domains), `country` da
+batun da aka samo daga `search_type`. A Exa, `search_type: "news"` yana riƙe da
+`category: "news"`. Tavily kuma yana karɓar `search_type: "finance"` (`topic: "finance"`).
 
-Yanzu `time_range` na gama-gari yana isa ga dukkan masu samarwar biyu: Exa yana samun `startPublishedDate` (ISO
-timestamp), Tavily kuma yana samun `start_date` (`YYYY-MM-DD`). Kwanan wata da aka fayyace kai tsaye a `provider_options`
-yana maye gurbin wanda aka tsara.
+Ana rubuta kuɗin binciken Firecrawl ga kowane rukuni na sakamako 10 da aka dawo da su, a
+$0.002 (credits 2) ga kowane rukuni, kuma aƙalla rukuni ɗaya a kowane kira
+([Kuɗin Firecrawl](https://docs.firecrawl.dev/billing)): sakamako 11 yana cin $0.004.
 
-Sakamakon Exa yana riƙe `id`, `highlight_scores`, `summary`, `subpages`, `entities` da `extras` a cikin
-`provider_raw`. Sakamakon Tavily yana riƙe `images` da `favicon`.
+`time_range` na gama-gari yanzu yana isa ga duka masu samarwa: Exa yana samun
+`startPublishedDate` (tambarin lokaci na ISO), Tavily kuma yana samun `start_date` (`YYYY-MM-DD`).
+Wata bayyananniyar kwanan wata a cikin `provider_options`
+tana maye gurbin wadda aka tsara.
 
-Lissafin kuɗi har yanzu yana amfani da flat registry `costPerQuery`. Tavily yana cajin
-`search_depth: "advanced"` da ƙarin credits a kowane kira, kuma ba a nuna wannan bambanci a cikin
-`usage.search_cost_usd`.
+Sakamakon Exa yana riƙe da `id`, `highlights` (kowane highlight, ba na farko kaɗai ba wanda aka
+yi amfani da shi a matsayin `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` da
+`extras` a cikin `provider_raw`. Sakamakon Tavily yana riƙe da `images` da `favicon`.
+
+Ana rubuta kuɗin binciken Linkup a $0.005 ga `depth` `fast` da `standard`, sannan $0.05 ga
+`deep` ([Farashin Linkup](https://docs.linkup.so/pages/documentation/development/pricing)),
+ko `depth` ya fito daga `provider_options` ko kuma daga saitunan haɗin.
+
+Exa `type: "lite"` (Exa 3.0) yana karɓar ƙaramin rukuni na filaye kuma yana ƙin dukkan buƙatar
+idan an saita wani filin daban. Ga lite, ana watsar da `additionalQueries`, `systemPrompt` da kowane
+maɓallin `contents` ban da `text` da `highlights` kafin kira. `subpages`, `subpageTarget`,
+`highlights.numSentences` da `highlights.highlightsPerUrl` da aka daina amfani da su, ba
+sa ƙara turawa.
+
+Ƙididdigar kuɗi ita ce rajistar lebur `costPerQuery`, sai dai Exa, wanda ke bin
+farashinsa na kansa: $0.007 a kowane kira ga `auto` (da tsohon `fast`) ko $0.004 ga `lite`
+(da tsohon `instant`), wanda ya ƙunshi sakamako 10; $0.001 ga kowane ƙarin sakamako; da
+$0.001 ga kowane sakamakon da aka dawo da shi idan an saita `contents.summary`. Ana rubuta Tavily
+a credits 1 ($0.008) ga `search_depth` `basic`, `fast` da `ultra-fast`, sannan credits 2
+($0.016) ga `advanced`
+([Credits na Tavily API](https://docs.tavily.com/documentation/api-credits)). Kira mai
+`auto_parameters: true` wanda ya sa Tavily ya haɓaka zuwa advanced har yanzu ana rubuta shi a
+credit 1.
 
 ---
 
-## API na Kawo Bayanai daga Yanar Gizo
+## API ɗin Web Fetch
 
-Cirato abun ciki daga URL ta hanyar mai samar da sabis na web-fetch da aka saita (Firecrawl, Jina
+Ciro abun ciki daga URL ta hanyar wani mai samar da web-fetch da aka tsara (Firecrawl, Jina
 Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
 
-Parallel Extract (`parallel-search`, maɓallin API iri ɗaya da na Parallel Search) yana mayar da Markdown
-kawai — duk wani `format` daban zai haifar da `400` — kuma yana iyakance abun ciki zuwa haruffa 100,000. Idan
-ba za a iya cirato shafin da ake nufi da kansa ba, sabis na sama yana bayar da rahoton hakan a cikin HTTP 200;
-OmniRoute yana bayyana wannan a matsayin `422` tare da tsayayyen saƙo.
+Parallel Extract (`parallel-search`, yana amfani da API key iri ɗaya da Parallel Search) yana dawo da Markdown
+kawai — duk wani `format` zai zama `400` — kuma yana iyakance abun ciki zuwa haruffa 100,000. Lokacin da ba za a iya ciro shafin da ake nema da kansa ba, upstream yana sanar da hakan a cikin HTTP 200;
+OmniRoute yana bayyana hakan a matsayin `422` tare da saƙo tsayayye.
 
-| Hanya | Path            | Bayani                                                    |
-| ----- | --------------- | --------------------------------------------------------- |
-| POST  | `/v1/web/fetch` | Kawo/cirato URL — ana tantance body ta `v1WebFetchSchema` |
+| Hanya | Hanya           | Bayani                                                                |
+| ----- | --------------- | --------------------------------------------------------------------- |
+| POST  | `/v1/web/fetch` | Ciro/scrape URL — jikin buƙatar ana inganta shi ta `v1WebFetchSchema` |
 
-**Tantancewa:** Maɓallin API na Bearer (`extractApiKey` + `isValidApiKey`). Ana tilasta manufofi ta `enforceApiKeyPolicy`.
+**Tabbatarwa:** Bearer API key (`extractApiKey` + `isValidApiKey`). Ana tilasta ƙa'ida ta hanyar `enforceApiKeyPolicy`.
 
-**Komawa madadin bisa la'akari da ƙima (#8297):** idan ba a bayar da takamaiman `provider` ba, ana bi ta cikin rukunin
+**Madadin mai lura da quota (#8297):** idan ba a bayar da `provider` a sarari ba, ana zagayawa cikin pool
 (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) bisa tsayayyen
-jerin fifiko (cika-na-farko) — ana tsallake mai samarwa da aka saita amma aka taƙaita ƙimar amfani da shi
-maimakon a katse buƙatar nan take, sannan gazawar sabis na sama da za a iya sake gwadawa/mai nasaba da ƙima
-(HTTP 429 a kowane lokaci; 402/403 ga matakan kyauta masu salon ƙimar amfani na Firecrawl/Tavily/TinyFish —
-ba ga Jina Reader ba, kuma ba a taɓa yin haka ga buƙata marar kyau ta 400 kai tsaye ba) tana wucewa zuwa
-mai samarwa na gaba da ba a gwada ba wanda ke da bayanan tantancewa a lokacin buƙatar. Idan an ƙare duk masu samarwa da ke cikin
-rukunin, endpoint ɗin yana mayar da `429` guda ɗaya (tare da
-header na `Retry-After`) maimakon tsohon `400` na gama-gari. Idan an nemi takamaiman `provider`,
-**ba a yin** komawa madadin a ɓoye — takamaiman mai samarwa da aka taƙaita ƙimar amfani da shi ko ya gaza
-yana bayyana kuskurensa da kansa (`429` idan an taƙaita ƙimar amfani, in ba haka ba status na sabis na sama).
+`parallel-search`) cikin tsayayyen
+tsarin fifiko (fill-first) — ana tsallake mai samarwa da aka saita amma aka iyakance masa yawan buƙatu
+maimakon dakatar da buƙatar nan take, kuma gazawar upstream da za a iya sake gwadawa/ta quota
+(HTTP 429 koyaushe; 402/403 ga Firecrawl/Tavily/TinyFish idan quota ta shafi matakan kyauta —
+ba ga Jina Reader ba, kuma ba a taɓa amfani da wannan ga 400 na buƙatar da ba ta dace ba) tana wucewa zuwa
+mai samarwa na gaba mai takardun shaida wanda ba a gwada ba a lokacin buƙatar. Idan kowane mai samarwa da ke cikin pool ya ƙare,
+endpoint yana dawo da `429` guda ɗaya (tare da kanun `Retry-After`) maimakon `400` na gabaɗaya da ake samu a baya. Idan an buƙaci `provider` a sarari, **babu madadin ɓoye** — kuskure ko iyakancewar mai samarwa da aka zaɓa yana bayyana da kansa (`429` idan an iyakance shi, in ba haka ba matsayin upstream).
 
 ---
 
@@ -931,14 +925,14 @@ yana bayyana kuskurensa da kansa (`429` idan an taƙaita ƙimar amfani, in ba ha
 GET /v1/ws?handshake=1
 ```
 
-Yana tantance handshake na haɓakawa zuwa WebSocket kuma yana mayar da misalan saƙonnin wire protocol (`request`, `cancel`). Ainihin frames na WS ana sarrafa su ne ta bundled WS server a wajen jadawalin route na Next.js.
+Yana inganta handshake na WebSocket kuma yana dawo da saƙonnin misalin wire protocol (`request`, `cancel`). Uwar garken WS da aka haɗa ce ke sarrafa ainihin WS frames a wajen teburin hanyoyin Next.js.
 
-**Tantancewa:** Maɓallin API na Bearer yayin handshake.
+**Tabbatarwa:** Bearer API key yayin handshake.
 
 ### Responses API ta WebSocket (codex kawai)
 
 ```bash
-# Host:port iri ɗaya da na HTTP API (tsoho 20128); haɓaka haɗin:
+# Mai masauki:port iri ɗaya da HTTP API (tsoho 20128); haɓaka haɗin:
 wscat -c "ws://localhost:20128/v1/responses?api_key=<OMNIROUTE_API_KEY>"
 # (ko: -H "Authorization: Bearer <OMNIROUTE_API_KEY>")
 
@@ -946,94 +940,104 @@ wscat -c "ws://localhost:20128/v1/responses?api_key=<OMNIROUTE_API_KEY>"
 { "type": "response.create", "model": "gpt-5.5", "input": [ { "role": "user", "content": "hi" } ] }
 ```
 
-An haɗa wakilin Responses-API-over-WebSocket **ga `codex` kaɗai** (backend na ChatGPT).
-Yana sauraro a port ɗaya da API/dashboard a paths `/v1/responses`,
-`/responses`, da `/api/v1/responses`. A frame na farko na `response.create`, yana
-tantancewa + shiryawa ta internal bridge na `codex-responses-ws`, yana zaɓar
-haɗin OAuth na codex, sannan yana buɗe tunnel zuwa `wss://chatgpt.com/backend-api/codex/responses`
-ta hanyar transport na `wreq-js`. **Ana ƙin models da ba na codex ba** (`codex_ws_provider_required`).
-Don routing na rabon ƙima, yi amfani da `model: "qtSd/<group>/codex/<model>"`. An aiwatar da shi a
+An haɗa wakilin Responses-API-over-WebSocket **na musamman ga `codex`** (backend ɗin ChatGPT). Yana sauraro a tashar da API/dashboard ke amfani da ita a hanyoyin `/v1/responses`,
+`/responses`, da `/api/v1/responses`. A farkon frame na `response.create`, yana tabbatarwa + shirya ta hanyar gadar cikin gida ta `codex-responses-ws`, ya zaɓi haɗin OAuth na codex, sannan ya ratsa zuwa `wss://chatgpt.com/backend-api/codex/responses`
+ta hanyar jigilar `wreq-js`. Ana ƙin samfuran da ba na codex ba (`codex_ws_provider_required`).
+Don amfani da rabon quota, yi amfani da `model: "qtSd/<group>/codex/<model>"`. An aiwatar da shi a
 `app/server-ws.mjs` + `scripts/dev/responses-ws-proxy.mjs` + `src/app/api/internal/codex-responses-ws/route.ts`.
 
-**Tantancewa:** Maɓallin API na Bearer yayin handshake. Bundled HTTP server (`server-ws.mjs`)
-dole ne ya zama entrypoint mai aiki (kuma shi ne, ta tsohuwa, idan `app/server-ws.mjs` yana nan).
+**Tabbatarwa:** Bearer API key yayin handshake. Dole ne uwar garken HTTP da aka haɗa (`server-ws.mjs`)
+ta zama entrypoint mai aiki (haka take ta tsohuwa idan `app/server-ws.mjs` yana akwai).
 
-#### ID na model: yi amfani da tsantsar ID na ChatGPT (ba tare da prefix na `codex/` ba)
+#### ID na model: yi amfani da ID ɗin ChatGPT kai tsaye (ba tare da prefix na `codex/` ba)
 
-OpenAI **Codex CLI** yana tantance sunan model a gefen client idan
-`supports_websockets = true` kuma yana **ƙin IDs masu prefix na provider** kamar
-`codex/gpt-5.5` (`The 'codex/gpt-5.5' model is not supported when using Codex with
-a ChatGPT account`). Aika **tsantsar** ID (misali `gpt-5.5`). Bridge na OmniRoute
-na codex kawai ne, saboda haka yana sake warware tsantsar ID a matsayin model na codex
-(`resolveCodexWsModelInfo`) kafin ya buɗe tunnel zuwa sabis na sama — ko da yake tsantsar
-`gpt-5.5` in ba haka ba zai bi route zuwa wani provider ta HTTP.
+OpenAI **Codex CLI** yana inganta sunan model a gefen client idan
+`supports_websockets = true` kuma yana ƙin ID masu prefix na provider
+kamar `codex/gpt-5.5` (`The 'codex/gpt-5.5' model is not supported when using Codex with
+a ChatGPT account`). Aika ID ɗin kai tsaye (misali `gpt-5.5`). Gadar OmniRoute ta codex kawai ce, don haka tana sake warware ID kai tsaye a matsayin model na codex
+(`resolveCodexWsModelInfo`) kafin ta ratsa upstream — duk da cewa `gpt-5.5` kai tsaye zai iya bi ta wani provider ta HTTP a wani yanayi.
 
-#### Saita OpenAI Codex CLI
+#### Tsara OpenAI Codex CLI
 
-Nuna Codex CLI zuwa OmniRoute ta ƙara custom provider mai goyon bayan WebSocket
-zuwa `~/.codex/config.toml` (yi amfani da `CODEX_HOME` daban don guje wa taɓa
-config da ke akwai):
+Nuna Codex CLI zuwa OmniRoute ta ƙara wani mai samarwa na musamman mai goyon bayan WebSocket zuwa `~/.codex/config.toml` (yi amfani da `CODEX_HOME` na daban don guje wa taɓa wani config da ke akwai):
 
 ```toml
-model = "gpt-5.5"                 # tsantsar ID — BA "codex/gpt-5.5" BA
+model = "gpt-5.5"                 # ID kai tsaye — BA "codex/gpt-5.5" BA
 model_provider = "omniroute"
 
 [model_providers.omniroute]
 name = "OmniRoute (WS)"
-base_url = "http://localhost:20128/v1"   # babu slash a ƙarshe; ana samo URL na WS daga gare shi (yi amfani da https/wss a production)
-wire_api = "responses"                    # ƙima ɗaya tilo da ake goyon baya tun Feb 2026
-supports_websockets = true                # yana kunna transport na Responses-over-WS
-env_key = "OMNIROUTE_API_KEY"             # yana riƙe da maɓallin API na OmniRoute (Bearer)
+base_url = "http://localhost:20128/v1"   # babu slash a ƙarshe; ana samo URL ɗin WS daga gare shi (yi amfani da https/wss a production)
+wire_api = "responses"                    # ƙima kawai da ake tallafawa tun Fabrairu 2026
+supports_websockets = true                # yana kunna jigilar Responses-over-WS
+env_key = "OMNIROUTE_API_KEY"             # yana riƙe API key na OmniRoute (Bearer)
 ```
 
 ```bash
-export OMNIROUTE_API_KEY=sk-...           # maɓallin API na OmniRoute (kowane maɓalli idan REQUIRE_API_KEY=false)
+export OMNIROUTE_API_KEY=sk-...           # API key na OmniRoute (kowace key idan REQUIRE_API_KEY=false)
 codex exec "Responda apenas: PONG"
 ```
 
-CLI yana haɓaka `base_url + /responses` zuwa WebSocket, sannan OmniRoute yana buɗe masa tunnel
-zuwa zaɓaɓɓen haɗin OAuth na codex. An tantance shi daga farko har ƙarshe a kan local
-server: ChatGPT yana mayar da `codex.rate_limits` + `response.created` kuma yana watsa
-completion ɗin a hankali.
+CLI yana haɓaka `base_url + /responses` zuwa WebSocket, kuma OmniRoute tana ratsa shi zuwa zaɓaɓɓen haɗin OAuth na codex. An tabbatar da shi daga farko har ƙarshe a kan uwar garken gida: ChatGPT yana dawo da `codex.rate_limits` + `response.created` kuma yana yawo da amsar.
 
 ---
 
-## Ƙayyadaddun Amfani & Rahoton Matsaloli
+## Rahoton Ƙayyadaddun Amfani da Matsaloli
 
-| Hanya | Path                | Bayani                                                                                                          |
-| ----- | ------------------- | --------------------------------------------------------------------------------------------------------------- |
-| GET   | `/v1/quotas/check`  | Tabbatar da ƙayyadadden amfani na `provider` + `accountId` tun da farko kafin bayar da maɓalli mai rajista      |
-| POST  | `/v1/issues/report` | Kai rahoton gazawar ƙayyadadden amfani/bayar da maɓalli zuwa GitHub (yana buƙatar `GITHUB_ISSUES_REPO` + token) |
+| Hanya | Hanya               | Bayani                                                                                               |
+| ----- | ------------------- | ---------------------------------------------------------------------------------------------------- |
+| GET   | `/v1/quotas/check`  | Tabbatar da quota tun farko don `provider` + `accountId` kafin bayar da maɓallin da aka yi rajista   |
+| POST  | `/v1/issues/report` | Ba da rahoton gazawar bayar da quota/maɓalli zuwa GitHub (yana buƙatar `GITHUB_ISSUES_REPO` + token) |
 
-**Tantancewa:** Maɓallin API na Bearer (`isAuthenticated`).
+**Tabbatarwa:** Maɓallin API na Bearer (`isAuthenticated`).
+
+### Maido da zaman quota (na zaɓi)
+
+`POST /v1/chat/completions` ko `POST /v1/responses` wanda ba na streaming ba, idan ya gaza da
+kuskuren quota na ƙarshe (`402`/`429`/`503` wanda jikin amsar ya ce quota ko credits sun ƙare),
+ana iya ajiye shi a sake kunna shi daga baya maimakon mayar da kuskuren. Mai kira yana zaɓar wannan
+a kowane request ta amfani da headers guda uku:
+
+| Header                       | Ƙima                                                     |
+| ---------------------------- | -------------------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                                   |
+| `x-omniroute-session`        | ID na zaman, `[A-Za-z0-9._:-]{1,128}`                    |
+| `x-omniroute-recovery-turn`  | ID na juyawa na musamman a cikin zaman (ƙa'ida iri ɗaya) |
+
+Juyawar da ke da `stream: false` kawai, waɗanda ba su da tools, tarihin tool ko
+`previous_response_id`, kuma ba su da pin na `x-omniroute-connection`, ne suka cancanta; dole ne a saita
+`STORAGE_ENCRYPTION_KEY` (ana adana request ɗin cikin ɓoyayyen tsari na har zuwa awanni 24). Daga nan amsar
+ta zama `202` mai ɗauke da `recovery.poll`; a yi polling da `GET /v1/quota-recoveries/{id}` (`202` yayin da ake jira,
+`200` tare da jikin amsar da aka dawo da ita idan an kammala) ko a soke ta da `DELETE`. Tikiti ana iya ganin su ne kawai
+ga maɓallin API da ya ƙirƙire su. Sake kunna request ɗin da ba a tabbatar da sakamakonsa ba yana ƙarewa da
+`needs_confirmation` maimakon a aika shi sau biyu. Madogara: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
-## Amfani na kai-tsaye (`/api/usage/om-usage`)
+## Amfani da kai-da-kai (`/api/usage/om-usage`)
 
-Kowane maɓallin API zai iya duba amfani da ƙayyadaddun amfanin **nasa** — ba a buƙatar tantancewar gudanarwa. Wannan shi ne endpoint ɗin da
-abokin hulɗa (CLI, panel ɗin OmniCopilot) ke amfani da shi don nuna wa mai maɓalli adadin kuɗin da ya kashe.
+Duk wani maɓallin API na iya karanta amfaninsa da quotas ɗinsa — ba a buƙatar ikon gudanarwa. Wannan shi ne endpoint ɗin da
+client (CLI, ko allon OmniCopilot) ke amfani da shi don nuna wa mai maɓalli yawan kuɗin da ya kashe.
 
 ```bash
-# Tsarin rubutu (yarjejeniyar da aka daɗe ana amfani da ita — rubutu marar tsari don terminal)
+# Tsarin rubutu (yarjejeniyar tarihi — rubutu tsantsa don tashar umarni)
 curl -H "Authorization: Bearer <your-api-key>" \
   http://localhost:20128/api/usage/om-usage
 
-# Tsari mai tsararren bayanai — abin da UI ke amfani da shi
+# Tsari mai siffa — abin da UI ke amfani da shi
 curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Dole ne maɓallin ya kunna **`allowUsageCommand`** (a kashe yake ta tsohuwa — manajan maɓallin API na dashboard
-yana kunna ko kashe shi ga kowane maɓalli). Idan babu shi, endpoint ɗin zai ba da amsar `403`.
+Dole maɓallin ya sami **`allowUsageCommand`** a kunne (a kashe yake ta tsohuwa — mai sarrafa maɓallan API
+na dashboard yana kunna ko kashe shi ga kowane maɓalli). Idan ba haka ba, endpoint ɗin yana amsa da `403`.
 
-`?format=json` yana mayar da tsari mai bambance nau'i domin mai kira kada ya taɓa karanta filin bayanai daga
-amsar ƙin yarda. Idan an yi nasara:
+`?format=json` yana dawo da tsari mai nuna bambanci domin mai kira kada ya taɓa karanta filin bayanai daga amsar ƙin amincewa. Idan an yi nasara:
 
 ```jsonc
 {
   "allowed": true,
-  // yana bayyana ne kawai idan maɓallin ya zaɓi ƙayyadaddun amfani na kowane maɓalli (USD na yau da kullum/mako-mako):
+  // yana bayyana ne kawai idan maɓallin ya zaɓi iyakokin amfani na kowane maɓalli (USD na yau/mako):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -1042,9 +1046,9 @@ amsar ƙin yarda. Idan an yi nasara:
     "weeklyLimitUsd": 20,
     "weeklyResetAtIso": "…" /* … */,
   },
-  // hoton halin ƙayyadadden amfani na provider da aka zaɓa, ko null idan har yanzu ba a adana komai a cache ba:
+  // hoton quota na provider da aka zaɓa, ko null idan har yanzu babu abin da aka adana:
   "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
-  // hoton halin kowace connection, domin UI ya iya nuna providers da dama a jere:
+  // hoton kowace connection, domin UI ta iya nuna providers da yawa gefe da gefe:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
     { "provider": "codex" /* … */ },
@@ -1052,74 +1056,66 @@ amsar ƙin yarda. Idan an yi nasara:
 }
 ```
 
-Idan an ƙi (`401` maɓalli mara inganci / `403` ba a ba da izini ba), route ɗin yana mayar da
-`{ "allowed": false, "error": { "message": "…" } }` — kasancewar `personal`/`provider` amma babu komai a cikinsu
-(an yarda da maɓallin, amma har yanzu ba a samu wani bayani ba) yanayi ne daban da ƙin yarda, kuma tsarin JSON ne
-kaɗai ke bambance su.
+Idan an ƙi amincewa (`401` maɓalli mara kyau / `403` ba a yarda ba), wannan hanya tana dawo da
+`{ "allowed": false, "error": { "message": "…" } }` — `personal`/`provider` da yake nan amma babu komai
+(maɓallin ya sami izini, ba a gano komai ba tukuna) yanayi ne dabam da ƙin amincewa, kuma tsarin JSON ne kawai
+ke bambanta su.
 
-**Tantancewa:** Maɓallin API na Bearer na mai kiran, wanda aka tabbatar da shi ta `isValidApiKey` — wannan _ba_
-ɓangaren gudanarwa ba ne (`/api/keys/…`), wanda har yanzu yake ƙarƙashin `requireManagementAuth`.
+**Tabbatarwa:** maɓallin API na Bearer na mai kiran, wanda aka inganta da `isValidApiKey` — wannan _ba_ wurin
+gudanarwa ba ne (`/api/keys/…`), wanda ke ci gaba da kasancewa a bayan `requireManagementAuth`.
 
-### Kashi na Asali da Kashi da Aka Daidaita da Iyakar Yankewa
+### Kashi na Raw da na Cutoff-Adjusted na Quota
 
-Lokacin amfani da `/api/usage/om-usage`, ya kamata masu kira su lura da bambancin da ke tsakanin
-kason da **fitowar rubutu marar tsari** ke gabatarwa da wanda tsararren **fitowar JSON** ke gabatarwa:
+Lokacin amfani da `/api/usage/om-usage`, masu kira su lura da bambanci tsakanin kaso da ake gabatarwa ta
+**fitarwar rubutu tsantsa** da kuma fitarwar **JSON mai tsari**:
 
-| Fanni                | Tsarin rubutu marar tsari (`/api/usage/om-usage` / `@@om-usage`)                                             | Tsarin JSON (`?format=json`)                                                            |
-| :------------------- | :----------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------- |
-| **Filin fitarwa**    | `NN% left` (misali, `20% left`)                                                                              | `provider.quotas` / `providers[].quotas`                                                |
-| **Ma'auni**          | **Adadin da za a iya amfani da shi bayan daidaita iyakar yankewa**: ƙarfin da ya rage sama da iyakar yankewa | **Ƙayyadadden amfani na asali daga upstream**: ma'aunin provider da ba a daidaita ba    |
-| **Daidaita yankewa** | Ana daidaita shi ta `effectiveRemainingPercent()` domin ajiyar da aka kare ta bayyana a matsayin `0% left`   | Babu (ƙimomin hoton hali na asali kamar yadda provider ya bayar da rahotonsu)           |
-| **Bayanan iyaka**    | An haɗa su cikin kason da aka nuna                                                                           | Ana adana su a `quotaWindowThresholds` ga kowace connection (ko tsoffin ƙimomin server) |
-| **Babban mabukaci**  | CLI masu mu'amala, saƙonnin terminal, masu gudanarwa na ɗan Adam                                             | Haɗaɗɗun shirye-shirye, dashboards, nazari, masu bibiyar kuɗin caji                     |
+| Abu                   | Tsarin rubutu tsantsa (`/api/usage/om-usage` / `@@om-usage`)                            | Tsarin JSON (`?format=json`)                                                             |
+| :-------------------- | :-------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------- |
+| **Filin fitarwa**     | `NN% left` (misali, `20% left`)                                                         | `provider.quotas` / `providers[].quotas`                                                 |
+| **Ma'auni**           | **Izinin amfani da ya rage bayan cutoff**: ƙarfin da ya rage sama da ƙofar cutoff       | **Raw upstream quota**: ma'aunin provider da ba a daidaita shi ba                        |
+| **Daidaita cutoff**   | Ana daidaita shi ta `effectiveRemainingPercent()` domin ajiyar kariya ta nuna `0% left` | Babu (ƙimomin hoton raw kamar yadda provider ya bayar)                                   |
+| **Bayanan ƙofa**      | An haɗa su cikin kason da aka nuna                                                      | Ana adana su a `quotaWindowThresholds` ga kowace connection (ko tsoffin saitunan server) |
+| **Babban mai amfani** | CLI masu mu'amala, saƙonnin tashar umarni, masu aiki na mutane                          | Haɗa shirye-shirye, dashboards, nazari, masu bibiyar lissafin kuɗi                       |
 
-#### Tsarin Lissafin Daidaita Iyakar Yankewa
+#### Tsarin Lissafin Daidaita Cutoff
 
-OmniRoute yana goyon bayan yankewar ƙayyadadden amfani tun da wuri domin hana ƙarewar albarkatun upstream (ana saita shi ta
-`quotaWindowThresholds` na connection, tsoffin ƙimomin provider, ko saitunan juriya na gama-gari). Lokacin da aka kunna iyakar yankewa
-(misali, `cutoff = 25%`) a kan taga na ƙayyadadden amfani, mai fitar da rubutu yana lissafa adadin da ya rage kamar haka:
+OmniRoute yana tallafa wa cutoff na quota na kariya domin hana upstream ya ƙare (ana saita shi ta
+`quotaWindowThresholds` na connection, tsoffin saitunan provider, ko saitunan juriya na duniya). Lokacin da cutoff
+(e.g., `cutoff = 25%`) ke aiki a kan taga quota, mai tsara rubutu yana lissafa izinin da ya rage kamar haka:
 
-- Idan `remaining <= cutoff`: yana mayar da `0%`.
-- Idan `remaining > cutoff`: yana mayar da `((remaining - cutoff) / (100 - cutoff)) * 100`.
+- Idan `remaining <= cutoff`: yana dawo da `0%`.
+- Idan `remaining > cutoff`: yana dawo da `((remaining - cutoff) / (100 - cutoff)) * 100`.
 
-Fitowar rubutun da aka tsara tana zagaye wannan zuwa lamba mafi kusa (`Math.round(...)`).
+Fitarwar rubutun da aka tsara tana zagaye wannan zuwa mafi kusa da cikakken lamba (`Math.round(...)`).
 
-#### Misali don Bayyanawa
+#### Misali Mai Bayani
 
-Yi la'akari da tagar provider mai **60% na amfani na asali** (saboda haka akwai **40% na ƙayyadadden amfani na asali da ya rage**) da kuma
-saitacciyar iyakar yankewa ta **25% na ƙayyadadden amfani da ya rage**:
+Yi la’akari da taga mai samarwa mai **amfani na asali 60%** (saboda haka **ragowar kaso na asali 40%**) da aka saita mata ƙofar yanke ta **25% na ragowar kaso**:
 
-| Wakilci                            | Lissafi                                            | Abin da Ya Rage |            Amfanin da Ake Fahimta            |
-| :--------------------------------- | :------------------------------------------------- | :-------------: | :------------------------------------------: |
-| **JSON na asali (`?format=json`)** | Hoton hali daga upstream (`quotas[window]`)        |     **40%**     |                   **60%**                    |
-| **Tsarin rubutu (`NN% left`)**     | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` |     **20%**     | **80%** (idan ana lissafa `100 - remaining`) |
+| Wakilci                            | Lissafi                                                | Ragowa  |             Amfanin da ake nufi              |
+| :--------------------------------- | :----------------------------------------------------- | :-----: | :------------------------------------------: |
+| **JSON na asali (`?format=json`)** | Hoton halin da mai samarwa ya bayar (`quotas[window]`) | **40%** |                   **60%**                    |
+| **Tsarin rubutu (`NN% left`)**     | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100`     | **20%** | **80%** (idan ana lissafa `100 - remaining`) |
 
-- **Dalilin da rubutu ke nuna ragowar 20%:** Daga cikin 40% na zahirin ƙayyadadden amfani da ya rage a account, an ware 25% ta hanyar
-  manufofin yankewa. Mai kiran yana da 15% ne kawai daga cikin 75% na sararin amfani da ya rage kafin router ya daina
-  tura request zuwa wannan connection. Daidaitawa yana tabbatar da cewa connection ta nuna ƙarewa (`0% left`) daidai lokacin da
-  za a dakatar da tura request.
-- **Dalilin da JSON ke kiyaye ƙimomin asali:** Payload na JSON yana mayar da ainihin hoton halin provider (`UsageSnapshot`)
-  domin kayan aiki na waje su sami ainihin bayanan amfani na upstream da kuma
-  `quotaWindowThresholds` na matakin connection ba tare da daidaitawa mai rasa bayanai daga ɓangaren server ba.
+- **Dalilin da ya sa rubutu ke nuna 20% a saura:** Daga cikin kaso na jiki 40% da ya rage a asusun, an keɓe 25% ta manufar ƙofar yanke. Mai kira yana da ragowar 15% ne kawai daga cikin sararin amfani na 75% kafin na’ura mai ba da hanya ta daina tura zirga-zirga zuwa wannan haɗin. Wannan daidaitawar tana tabbatar da cewa haɗin yana nuna ƙarewa (`0% left`) daidai lokacin da tura zirga-zirgar za ta tsaya.
+- **Dalilin da ya sa JSON ke riƙe ƙimomin asali:** Abubuwan da ke cikin JSON suna dawo da ainihin hoton halin da mai samarwa ya bayar (`UsageSnapshot`), don haka kayan aikin waje suna samun ainihin bayanan amfani daga sama da kuma `quotaWindowThresholds` na matakin haɗi ba tare da daidaitawar da ke rasa wani bayani daga uwar garke ba.
 
-#### Jagorar Sauyin Masu Amfani
+#### Jagorar ƙaura ga masu amfani
 
-Idan wata haɗakar waje (kamar plugin na edita ko tsawaitawar wakili) a baya tana ɗebo bayanai daga
-endpoint na rubutu (`NN% left`) sannan tana ƙididdige kaso da aka yi amfani da shi a matsayin `100 - NN`, ƙaura zuwa `?format=json` yana nufin:
+Idan wani haɗin waje (kamar ƙarin kayan aikin editan ko na wakili) a baya yana karanta ƙarshen rubutu (`NN% left`) kuma yana ƙididdige kaso da aka yi amfani da shi a matsayin `100 - NN`, ƙaura zuwa `?format=json` na nufin:
 
-- Karanta ƙimomin JSON kai tsaye zai nuna **ainihin amfani daga tushe** (an yi amfani da 60% a misalin da ke sama).
-- Idan haɗakar tana son kiyaye ma’anar adadin da za a iya amfani da shi ta endpoint na rubutu, za ta iya kimanta
-  dabarar ragowar adadi mai tasiri a ɓangaren abokin ciniki ta amfani da `quotaWindowThresholds` don sauye-sauye na matakin haɗi.
+- Karanta ƙimomin JSON na asali zai nuna **ainihin amfani daga sama** (60% da aka yi amfani da shi a misalin da ke sama).
+- Idan haɗin yana son ci gaba da amfani da ma’anar izinin amfani ta ƙarshen rubutu, zai iya kimanta dabarar ragowar ingantacciya a gefen abokin ciniki ta amfani da `quotaWindowThresholds` don sauye-sauyen matakin haɗi.
 
 ---
 
-## Ma'ajiyar Ma'ana
+## Ma'ajiyar Semantic
 
 ```bash
-# Samo ƙididdigar ma'ajiyar cache
+# Samo ƙididdigar ma'ajiya
 GET /api/cache/stats
 
-# Goge dukkan ma'ajiyoyin cache
+# Share dukkan ma'ajiyoyi
 DELETE /api/cache/stats
 ```
 
@@ -1142,34 +1138,35 @@ Misalin amsa:
 
 ### Tasirin jinkiri
 
-Nasarar samu a ma'ajiyar ma'ana tana bayar da amsa daga cache **ba tare da yin kira zuwa upstream ba**, saboda haka `X-OmniRoute-Response-Latency` da aka bayar yana kusa da sifili
-(ba tare da la'akari da ainihin jinkirin upstream ba). Abokan ciniki masu kula da jinkiri
-(gwajin aiki, sa ido na p50/p99) ya kamata su duba kanun amsa na
+Semantic cache HIT yana bayar da amsar daga ma'ajiya **ba tare da kiran upstream
+ba**, saboda haka `X-OmniRoute-Response-Latency` da aka bayar yana kusa da sifili
+(ba tare da la'akari da ainihin jinkirin upstream ba). Abokan ciniki masu kula da
+jinkiri (ma'aunin gwaji, sa ido kan p50/p99) ya kamata su duba taken amsar
 `X-OmniRoute-Cache-Latency`:
 
-| Ƙima        | Ma'ana                                                                  |
-| ----------- | ----------------------------------------------------------------------- |
-| `synthetic` | An bayar da amsa daga cache; jinkirin ba ainihin lokacin upstream ba ne |
-| _(babu)_    | Amsa daga ainihin kiran upstream                                        |
+| Value       | Ma'ana                                                                     |
+| ----------- | -------------------------------------------------------------------------- |
+| `synthetic` | An bayar da amsa daga ma'ajiya; jinkirin ba ainihin lokacin upstream ba ne |
+| _(absent)_  | Amsa daga ainihin kiran upstream                                           |
 
-### Tsallake cache bisa kowane maɓalli
+### Ketare ma'ajiya ga kowane maɓalli
 
-Maɓallan API za su iya ƙin karantawa daga ma'ajiyar ma'ana ta hanyar `cacheDefaultMode`:
+Maɓallan API na iya zaɓar fita daga karatun semantic cache ta hanyar `cacheDefaultMode`:
 
-| Ƙima     | Halayya                                                     |
-| -------- | ----------------------------------------------------------- |
-| `legacy` | Halayyar cache ta al'ada (tsoho)                            |
-| `bypass` | Tsallake binciken cache gaba ɗaya; koyaushe a kira upstream |
+| Value    | Hali                                                         |
+| -------- | ------------------------------------------------------------ |
+| `legacy` | Halin ma'ajiya na yau da kullum (tsoho)                      |
+| `bypass` | Tsallake binciken ma'ajiya gaba ɗaya; kullum a buga upstream |
 
-Saita lokacin ƙirƙirar maɓalli (`POST /api/keys`) ko sabuntawa (`PATCH /api/keys/[id]`):
+Saita yayin ƙirƙirar maɓalli (`POST /api/keys`) ko sabuntawa (`PATCH /api/keys/[id]`):
 
 ```json
 { "cacheDefaultMode": "bypass" }
 ```
 
-### Tsallake cache bisa kowace buƙata
+### Ketare ma'ajiya ga kowace bukata
 
-Kowace buƙata za ta iya tsallake cache ba tare da la'akari da saitunan maɓalli ba:
+Duk wata bukata na iya ketare ma'ajiya ba tare da la'akari da saitunan maɓalli ba:
 
 ```
 X-OmniRoute-No-Cache: true
@@ -1177,52 +1174,87 @@ X-OmniRoute-No-Cache: true
 
 ---
 
-## Allon Sarrafawa da Gudanarwa
+## Dacewar Gudanarwa da CLIProxyAPI
 
-Hanyoyin gudanarwa (`/api/*` ban da tantancewa/shiga na jama'a) **ba a ba su izini** ta hanyar
-maɓallan API na inference na yau da kullum. Rukunin bayanan shaida, scopes, da misalan curl:
+OmniRoute yana amsa ƙarshen hanyoyin gudanarwa guda uku na [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
+waɗanda dashboards na amfani ke kira don karanta iyakokin rajistar Claude da Codex
+(misali tushen iyakar amfani na `cliproxy` na T3 Code). Nuna base URL na abokin ciniki zuwa
+OmniRoute kuma yi amfani da maɓallin API mai ikon `manage` a matsayin maɓallin gudanarwarsa. Hanyoyin suna
+a `/v0/management/*` da kuma `/api/v0/management/*`.
+
+| Method | Path                         | Description                                                                                                                                                  |
+| ------ | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/v0/management/auth-files`  | Haɗin OAuth na Claude da Codex a matsayin `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`. Babu alamun shiga                          |
+| POST   | `/v0/management/api-call`    | Jiki `{ auth_index, method, url, header?, data? }`. Yana aika bukata guda da aka amince da ita tare da alamar asusun kuma ya dawo da `{ status_code, body }` |
+| POST   | `/v0/management/reset-quota` | Jiki `{ auth_index }`. Yana share lokacin dakatarwar haɗi, kulle-kullen samfuri da lokutan dakatarwa na Codex na kowane iyaka na asusu guda                  |
+
+- `auth_index` shi ne ID ɗin haɗin OmniRoute. `provider` shi ne `claude` ko `codex` (haɗin
+  OAuth kawai; ba a jera mai samar da maɓallin API na `anthropic` ba). Ga Codex,
+  `id_token.chatgpt_account_id` shi ne ID ɗin workspace da aka adana, sannan `plan_type` shi ne tsarin da aka adana.
+- `api-call` ba wakili na gama-gari ba ne. Yana karɓar Claude `GET
+https://api.anthropic.com/api/oauth/usage` kawai da Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` da
+  `POST .../wham/rate-limit-reset-credits/consume` kawai, kuma kowanne sai don asusun mai samarwa da ya dace.
+  Duk wani abu dabam yana dawo da `403` ba tare da tuntuɓar upstream ba. Ana yin watsi da taken
+  `Authorization` na mai kira (har da madadin `$TOKEN$`): OmniRoute yana saka access token na haɗin,
+  yana sabunta shi da farko idan yana kusa da ƙarewa, sannan yana tura taken da aka amince da su kawai
+  (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
+  `Accept`, `Content-Type`). Idan `Chatgpt-Account-Id` ya ɓace, ana amfani da ID ɗin workspace da aka adana.
+  Bukatu suna ƙarewa bayan daƙiƙa 15 kuma suna amfani da wakilin haɗin.
+- `reset-quota` yana barin yanayi na ƙarshe (`banned`, `expired`, `credits_exhausted`) yadda suke. Idan
+  `auth_index` ba a sani ba ne, ana dawo da `404`.
+
+**Tabbatarwa:** Zaman dashboard ko maɓallin API mai ikon `manage`, wanda ake buƙata ko da an kashe
+shiga (hanyoyin suna cikin `ALWAYS_PROTECTED_API_PATHS`). Maɓallan da ke da ikon inference kawai suna samun `403`. Madogara:
+`src/lib/cliproxyCompat/managementApi.ts`.
+
+---
+
+## Dashboard da Gudanarwa
+
+Hanyoyin gudanarwa (`/api/*` ban da tantancewa/shiga ta jama'a) **ba sa samun izini ta maɓallan API na inference na yau da kullum**. Iyalan takardun shaida, iyakokin izini, da misalan curl:
 [Tantancewar Gudanarwa](../guides/MANAGEMENT-AUTH.md).
 
 ### Tantancewa
 
-| Endpoint                      | Hanya    | Bayani                                                                                                                                                                                                                                                                                                                      |
-| ----------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/auth/login`             | POST     | Shiga                                                                                                                                                                                                                                                                                                                       |
-| `/api/auth/logout`            | POST     | Fita                                                                                                                                                                                                                                                                                                                        |
-| `/api/settings/require-login` | GET/POST | Matsayin shiga (GET, na jama'a). POST yana saita kalmar sirri / kunna ko kashe shiga: mai gudanarwa kaɗai da zarar akwai kalmar sirri (zaman dashboard, CLI na cikin gida, ko an kashe shiga — maɓallan API da tokens na `oma_` suna samun `403`); zaman dashboard yana aika `currentPassword` don maye gurbin kalmar sirri |
+| Endpoint                      | Method   | Description                                                                                                                                                                                                                                                                                                                             |
+| ----------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/auth/login`             | POST     | Shiga                                                                                                                                                                                                                                                                                                                                   |
+| `/api/auth/logout`            | POST     | Fita                                                                                                                                                                                                                                                                                                                                    |
+| `/api/settings/require-login` | GET/POST | Matsayin shiga (GET, na jama'a). POST yana saita kalmar sirri / kunna ko kashe shiga: mai aiki kaɗai zai iya yin hakan da zarar an sami kalmar sirri (zaman dashboard, CLI na cikin gida, ko an kashe shiga — maɓallan API da alamun `oma_` suna samun `403`); zaman dashboard yana aika `currentPassword` don maye gurbin kalmar sirri |
 
-### Gudanar da Masu Bayar da Sabis
+### Gudanar da Masu Bayarwa
 
-| Ƙarshen hanya                           | Hanya                     | Bayani                                                                                                                                                                            |
-| --------------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/providers`                        | GET/POST                  | Jera / ƙirƙiri masu samarwa                                                                                                                                                       |
-| `/api/providers/[id]`                   | GET/PUT/DELETE            | Sarrafa mai samarwa                                                                                                                                                               |
-| `/api/providers/[id]/test`              | POST                      | Gwada haɗin mai samarwa                                                                                                                                                           |
-| `/api/providers/[id]/models`            | GET                       | Jera samfurorin mai samarwa                                                                                                                                                       |
-| `/api/providers/validate`               | POST                      | Tabbatar da daidaitawar mai samarwa                                                                                                                                               |
-| `/api/providers/bulk`                   | POST                      | Ƙara maɓallan API da yawa ga mai samarwa GUDA ƊAYA                                                                                                                                |
-| `/api/providers/import`                 | POST                      | Shigo da JERIN masu samarwa iri-iri daga fayil ɗin CSV/JSON da aka rarrabe (#6836); sakamakon gazawar-sashe na kowane layi                                                        |
-| `/api/provider-nodes*`                  | Daban-daban               | Sarrafa mahaɗan masu samarwa                                                                                                                                                      |
-| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Samfura na al'ada da sauye-sauyen kowane samfuri (ƙara, sabuntawa, ɓoye/nunawa, gogewa)                                                                                           |
-| `/api/provider-models/validate-and-add` | POST                      | Tabbatar da haɗi mai tsauri bisa zaɓi, tare da ingantacciyar izinin gudanarwa, da rajistar samfuri na al'ada ta atomik; duba [Tabbatar da samfuri](../guides/MODEL-VALIDATION.md) |
+| Endpoint                                | Method                    | Description                                                                                                                                                                  |
+| --------------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/providers`                        | GET/POST                  | Jera / ƙirƙiri masu bayarwa                                                                                                                                                  |
+| `/api/providers/[id]`                   | GET/PUT/DELETE            | Sarrafa mai bayarwa                                                                                                                                                          |
+| `/api/providers/[id]/test`              | POST                      | Gwada haɗin mai bayarwa                                                                                                                                                      |
+| `/api/providers/[id]/models`            | GET                       | Jera samfuran mai bayarwa                                                                                                                                                    |
+| `/api/providers/validate`               | POST                      | Tabbatar da tsarin mai bayarwa                                                                                                                                               |
+| `/api/providers/bulk`                   | POST                      | Ƙara maɓallan API da yawa na mai bayarwa ƊAYA                                                                                                                                |
+| `/api/providers/import`                 | POST                      | Shigo da jerin masu bayarwa iri-iri daga fayil ɗin CSV/JSON da aka fassara (#6836); sakamakon gazawa na kowane layi daban-daban                                              |
+| `/api/provider-nodes*`                  | Various                   | Gudanar da nodes na masu bayarwa                                                                                                                                             |
+| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Samfuran musamman da sauye-sauyen kowane samfur (ƙara, sabuntawa, ɓoye/nuna, gogewa)                                                                                         |
+| `/api/provider-models/validate-and-add` | POST                      | Tabbatarwar tsauraran haɗi da rajistar samfurin musamman ta atomatik, bisa tantancewar gudanarwa kuma idan an zaɓa; duba [Tabbatar da samfur](../guides/MODEL-VALIDATION.md) |
 
-Ga samfuran da aka daidaita/shigo da su, `PUT /api/provider-models` yana karɓar `provider`, `modelId`, da
-`maxOutputTokenOverride`: cikakken lamba tabbatacciya tana saita iyakar token ɗin fitarwa da hannu, yayin da `null`
-ke share ta don dawo da tsohuwar ƙima. `GET /api/provider-models?provider=<provider>` yana mayar da waɗannan
-ƙimomin a cikin `modelOutputOverrides`, har da samfuran da ba su da layin samfuri na al'ada. Sauyin
-yana amfani da ƙarfin `max_output_tokens` na lokacin aiki kuma yana ci gaba da kasancewa bayan sake daidaita samfuri. Shafin mai samarwa mai
-jituwa da OpenAI yana ba da irin waɗannan sarrafawar gyara/sharewa kuma yana yi wa samfuran da ke da bayyanannen goyon bayan hangen nesa alama.
+Ga samfuran da aka daidaita/aka shigo da su, `PUT /api/provider-models` yana karɓar `provider`, `modelId`, da
+`maxOutputTokenOverride`: lamba mai kyau tana saita iyakar alamun fitarwa da hannu, yayin da `null`
+ke share ta don dawo da tsohuwar ƙima. `GET /api/provider-models?provider=<provider>` yana dawo da waɗannan
+ƙimomin a cikin `modelOutputOverrides`, har da samfuran da ba su da layin samfur na musamman. Sauyin
+yana amfani da damar `max_output_tokens` ta lokacin aiki kuma yana ci gaba bayan sake daidaita samfur.
+Shafin mai bayarwa mai jituwa da OpenAI yana ba da irin waɗannan sarrafawar gyara/share kuma yana yi wa
+samfuran da ke da bayyananniyar goyon bayan hangen nesa alama.
 
-Mahaɗan Chat Completions na al'ada suna daidaita bayyanannen ƙin amfani da tunani zuwa backend na sama. Gwajin
-haɗi mai nasara yana zaɓar sarrafawar samfurin hira ta atomatik ga kowane ainihin ID na samfuri
-wanda shigarwar `/models` ɗinsa ta tabbatar da sananniyar ƙimar `owned_by`: `vllm`, `sglang`, ko `llamacpp`.
-Masu naɗe masu jituwa da OpenAI masu gaskiya na iya adana asalin shigarwar samfurin a cikin wani
-abin `openai` da aka ƙunsar; ganowa yana bin har zuwa irin waɗannan marufai guda uku. Samfuran da mallakarsu ta ɓace, ba a san ta ba, ko
-ta saɓa wa juna suna ci gaba da halayen OpenAI na yau da kullum. Ganowa yana sake amfani da buƙatar kundin da ake da ita,
-ba ya samar da token na kammalawa, kuma yana zama mara inganci idan ƙarshen hanyar haɗi ya canza.
+A kan node na mai bayarwa mai jituwa, hanyoyin rubutawa (`POST`, `PUT`, `PATCH`, `DELETE` da
+`/api/provider-models/validate-and-add`) suna adana id ɗin samfurin a matsayin id ɗin upstream marar kari: id
+da aka liƙa daga jerin da ke da kari yana cire duk jerin kari na node ɗin da ke kan gaba, kuma
+amsoshi suna mayar da id ɗin da aka adana. Ana adana id ɗin masu bayarwa na canonical masu slash (misali `nvidia/nemotron-…`)
+kai tsaye ba tare da canji ba. `/v1/models` ba ya taɓa fitar da id mai tarin `<prefix>/<prefix>/<model>`.
 
-Don tsayar da halayyar ga backend wanda ba ya bayyana wannan metadata, yi amfani da API ɗin sabunta
-mai samarwa na ɓangare da ake da shi:
+Nodes na Custom Chat Completions suna daidaita zaɓukan kin bayar da cikakken tunani zuwa backend na sama. Gwajin haɗi mai nasara yana zaɓar sarrafawar chat-template ta atomatik ga kowane ainihin model ID wanda shigarwar `/models` ta tabbatar da ƙimar `owned_by` da aka gane: `vllm`, `sglang`, ko `llamacpp`. Masu rufe OpenAI masu jituwa a bayyane na iya adana ainihin shigarwar model a cikin wani abu na `openai` da aka saƙa; ganowa yana bin irin waɗannan envelopes har zuwa uku. Model da ke da bayanan mallaka da suka ɓace, waɗanda ba a sani ba, ko masu karo da juna suna ci gaba da amfani da halayyar OpenAI ta yau da kullum. Ganowa yana sake amfani da buƙatar kundin da ke akwai, ba ya samar da alamomin completion, kuma ana soke shi idan endpoint ɗin haɗin ya canza.
+
+Don kulle wannan ɗabi'a ga backend da ba ya fallasa waɗannan metadata, yi amfani da API ɗin sabunta provider na ɓangare da ke akwai:
 
 ```json
 {
@@ -1232,83 +1264,90 @@ mai samarwa na ɓangare da ake da shi:
 }
 ```
 
-Aika wannan jikin tare da `PUT /api/providers/<connection-id>`. A kan wannan haɗin, bayyanannen
-ƙoƙarin tunani na `none` ana aikawa a matsayin `chat_template_kwargs.thinking=false` da
-`chat_template_kwargs.enable_thinking=false`. Bayyanannun ƙimomin samfuri na asali suna ci gaba da kasancewa masu iko
-sai dai idan dokar tunani ta gefen sabar ta tilasta wani ƙoƙari. Saitin yana aiki ne kawai lokacin da haɗin
-al'ada mai jituwa da OpenAI ya tura jikin Chat Completions; buƙatun Responses da masu samarwa na
-yau da kullum suna riƙe tsarin buƙatarsu na asali. Saita `reasoningControl` zuwa `openai` don tilasta isar da
-`reasoning_effort` na OpenAI na yau da kullum kai tsaye, ko a bar shi/a saita shi zuwa `null` don amfani da ganowa ta atomatik.
+Aika wannan jikin tare da `PUT /api/providers/<connection-id>`. A kan wannan haɗin, ana aika ƙoƙarin tunani na `none` a sarari a matsayin `chat_template_kwargs.thinking=false` da `chat_template_kwargs.enable_thinking=false`. Ƙimomin template na asali da aka ayyana a sarari suna nan masu iko, sai dai idan dokar tunani ta gefen uwar garke ta tilasta wani ƙoƙari. Saitin yana aiki ne kawai lokacin da haɗin OpenAI-compatible na al'ada ya aika da jikin Chat Completions; buƙatun Responses da providers na yau da kullum suna riƙe tsarin buƙatarsu na asali. Saita `reasoningControl` zuwa `openai` don tilasta wucewar `reasoning_effort` na OpenAI na yau da kullum, ko ka bar shi/ka saita shi zuwa `null` don amfani da ganowa ta atomatik.
 
-Buƙatun mai rarrabewar yanayin-atomatik na Claude Code suna sa tunanin asali ya zama a kashe ta tsohuwa idan ba su ƙunshi
-bayyanannun sarrafawar tunani ba. Ganowa yana amfani da alamar tsarin mai rarrabewa a cikin buƙatu masu tsarin Claude,
-ba sunayen samfuri ko iyakokin kammalawa ba. Bayyanannun sarrafawar jiki, taken ƙoƙari/tunani da ake goyon baya,
-dokokin turawa, da ƙoƙarin samfuri da aka warware suna riƙe fifikonsu na yanzu. Duk matakan mai rarrabewa
-guda biyu suna riƙe umarninsu, iyakokin kammalawa, jerin tsayawa, da ainihin hukuncin izini na
-sama; mataki na biyu har yanzu zai iya samar da tunaninsa da aka nema wanda ake gani a matsayin rubutu na yau da kullum.
+Buƙatun classifier na Claude Code auto-mode suna sa tunanin asali ya kasance a kashe ta tsohuwa idan ba su ƙunshi sarrafawar tunani a sarari ba. Ganowa yana amfani da alamar tsarin classifier a cikin buƙatun tsarin Claude, ba sunayen model ko iyakokin completion ba. Sarrafawar jiki a sarari, headers na effort/thinking da aka tallafa, dokokin routing, da ƙoƙarin model da aka warware suna riƙe fifikonsu na yanzu. Matakan classifier guda biyu suna riƙe prompts, iyakokin completion, jerin stop, da ainihin hukuncin izini daga upstream; mataki na biyu har yanzu na iya samar da tunanin da ya nema a bayyane a matsayin rubutu na yau da kullum.
 
-### Gudanawar OAuth
+### Gudanarwar OAuth
 
-| Ƙarshen hanya                    | Hanya       | Bayani                           |
-| -------------------------------- | ----------- | -------------------------------- |
-| `/api/oauth/[provider]/[action]` | Daban-daban | OAuth na musamman ga mai samarwa |
+| Endpoint                         | Method  | Bayani                        |
+| -------------------------------- | ------- | ----------------------------- |
+| `/api/oauth/[provider]/[action]` | Various | OAuth na musamman ga provider |
 
-### Turawa & Daidaitawa
+### Routing da Tsari
 
-| Mahaɗar API           | Hanya       | Bayani                               |
-| --------------------- | ----------- | ------------------------------------ |
-| `/api/models/alias`   | GET/POST    | Laƙabin samfura                      |
-| `/api/models/catalog` | GET         | Duk samfura bisa mai samarwa + nau'i |
-| `/api/combos*`        | Daban-daban | Gudanar da combo                     |
-| `/api/keys*`          | Daban-daban | Gudanar da maɓallan API              |
-| `/api/pricing`        | GET         | Farashin samfura                     |
+| Endpoint              | Method   | Bayani                          |
+| --------------------- | -------- | ------------------------------- |
+| `/api/models`         | GET/PUT  | Jerin model / sabunta alias     |
+| `/api/models/alias`   | GET/POST | Alias na model                  |
+| `/api/models/catalog` | GET      | Duk model bisa provider + nau'i |
+| `/api/combos*`        | Various  | Gudanar da combo                |
+| `/api/keys*`          | Various  | Gudanar da maɓallan API         |
+| `/api/pricing`        | GET      | Farashin model                  |
 
-### Amfani & Nazari
+#### Asalin iyakar model
 
-| Mahaɗar API                      | Hanya           | Bayani                                                                                                                                                                                                                                                                                                                          |
-| -------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/usage/history`             | GET             | Tarihin amfani                                                                                                                                                                                                                                                                                                                  |
-| `/api/usage/logs`                | GET             | Rajistan amfani                                                                                                                                                                                                                                                                                                                 |
-| `/api/usage/request-logs`        | GET             | Rajista a matakin buƙata                                                                                                                                                                                                                                                                                                        |
-| `/api/usage/[connectionId]`      | GET             | Amfani na kowace haɗi                                                                                                                                                                                                                                                                                                           |
-| `/api/usage/token-limits`        | GET/POST/DELETE | Kasafin iyakar token na kowane maɓallin API                                                                                                                                                                                                                                                                                     |
-| `/api/usage/model-latency-stats` | GET             | Jimillar ƙididdigar jinkiri mai ci gaba ta kowane mai samarwa/samfuri (avg/p50/p95/p99, ƙimar nasara); matatu: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                  |
-| `/api/usage/cache-health`        | GET             | Taƙaitaccen lafiyar ma'ajiyar prompt a kan `call_logs` — rabon rubutu/karatu, rarrabawar girman rubutu ta p50/p90/p99, taruwar rubutu mai yawa, rarrabawa ta kowane samfuri, da hukuncin `healthy`/`degraded`/`thrash`/`no-data`; sigogin tambaya `range` (`1h`\|`24h`\|`7d`\|`30d`, na asali `24h`) da `model` na zaɓi (#8827) |
+`GET /api/models?withLimits=1` (har ila yau `true`; `0`/`false` ko barinsa ba tare da shi ba yana barin payload na tsoho bai canza ba) yana ƙara `contextWindow`, `maxInputTokens`, `maxOutputTokens` da wani abu na `capsSource` ga kowane layin model. `capsSource` yana bayyana dokar da ta samar da kowace iyaka, ta yadda za a iya bin diddigin iyakar da ta ba da mamaki (misali 128k a kan model mai 1M) zuwa asalinta. Ƙimomin da aka warware su ne waɗanda routing ke amfani da su; alamar tana ƙara filaye ne kawai kuma ba ta taɓa canza wata ƙima ba. Duk wata ƙimar `withLimits` za a ƙi karɓarta da `400`.
+
+| Ƙimar `capsSource`                           | Asali                                                                  |
+| -------------------------------------------- | ---------------------------------------------------------------------- |
+| `override:context`                           | Sauyawar context-window da aka adana (`model_context_overrides`)       |
+| `override:max_input` / `override:max_output` | Sauyawar ikon `max_input_tokens` / `max_output_tokens` da aka adana    |
+| `static-authoritative:<provider>/<model>`    | Teburin static na context-window mai iko                               |
+| `synced:<provider>/<model>`                  | Layin ikon da aka daidaita na models.dev                               |
+| `registry:<provider>/<model>`                | Shigarwar rajistar provider                                            |
+| `spec:<model>`                               | Bayanin model na static                                                |
+| `effort-base:` prefix                        | Layi da aka aro daga ainihin model na bambancin da ke da effort suffix |
+| `none`                                       | Babu tushe da ya ayyana iyakar (ƙimar ita ce `null`)                   |
+
+Aiwatarwa: `getResolvedModelCapabilitiesWithLimitSources()` a cikin `src/lib/modelCapabilities.ts` da jerin fifiko a cikin `src/lib/modelCapabilityLimits.ts`.
+
+### Amfani da Nazari
+
+| Endpoint                         | Method          | Bayani                                                                                                                                                                                                                                                                                                                   |
+| -------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/api/usage/history`             | GET             | Tarihin amfani                                                                                                                                                                                                                                                                                                           |
+| `/api/usage/logs`                | GET             | Rajistar amfani                                                                                                                                                                                                                                                                                                          |
+| `/api/usage/request-logs`        | GET             | Rajistar matakin buƙata                                                                                                                                                                                                                                                                                                  |
+| `/api/usage/[connectionId]`      | GET             | Amfani na kowane haɗi                                                                                                                                                                                                                                                                                                    |
+| `/api/usage/token-limits`        | GET/POST/DELETE | Kasafin iyakar token na kowane maɓallin API                                                                                                                                                                                                                                                                              |
+| `/api/usage/model-latency-stats` | GET             | Tarin jinkiri mai ci gaba na kowane mai samarwa/model (avg/p50/p95/p99, ƙimar nasara); matatun: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                          |
+| `/api/usage/cache-health`        | GET             | Taƙaitaccen lafiyar prompt-cache a kan `call_logs` — rabon rubutu/karatu, rarraba girman rubutu na p50/p90/p99, yawan rubuce-rubuce masu nauyi, rarrabuwa ta kowane model, da hukuncin `healthy`/`degraded`/`thrash`/`no-data`; sigogin tambaya `range` (`1h`\|`24h`\|`7d`\|`30d`, tsoho `24h`) da zaɓin `model` (#8827) |
 
 ### Izinin maɓallin API
 
-`PATCH /api/keys/{id}` yana sabunta izinin maɓalli da yake akwai. Kamar kowace hanyar `/api/keys*`, yana buƙatar izinin gudanarwa (duba [Tantancewar Gudanarwa](../guides/MANAGEMENT-AUTH.md)), ba maɓallin hasashe ba. Aika filayen da kake son canzawa kawai; buƙatar da ba ta ƙunshi ko ɗaya daga cikinsu ba za a ƙi ta da `No valid fields to update`. An ayyana filayen da ake karɓa ta `updateKeyPermissionsSchema` a cikin `src/shared/validation/schemas/keys.ts`.
+`PATCH /api/keys/{id}` yana sabunta izinin maɓallin da yake akwai. Kamar kowace hanya ta `/api/keys*`, tana buƙatar izinin gudanarwa (duba [Ingantaccen Gudanarwa](../guides/MANAGEMENT-AUTH.md)), ba maɓallin inference ba. Aika filayen da kake son canzawa kawai; za a ƙi buƙatar da ba ta ƙunshi ko ɗaya daga cikinsu ba da `No valid fields to update`. Filayen da aka amince da su an ayyana su a cikin `updateKeyPermissionsSchema` na `src/shared/validation/schemas/keys.ts`.
 
-| Fili                                        | Nau'i                                                                         | Bayani                                                                                                                                                 |
-| ------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `name`                                      | kirtani, haruffa 1-200                                                        |                                                                                                                                                        |
-| `isActive`                                  | boolean                                                                       |                                                                                                                                                        |
-| `isBanned`                                  | boolean                                                                       |                                                                                                                                                        |
-| `expiresAt`                                 | kwanan wata da lokaci na ISO 8601 ko `null`                                   | `null` yana goge lokacin ƙarewa                                                                                                                        |
-| `modelAccessMode`                           | `all` \| `restricted`                                                         | Dole `allowedModels` ya zama babu komai idan yanayin shi ne `all`                                                                                      |
-| `allowedModels`, `blockedModels`            | jerin kirtani, har zuwa 1000                                                  |                                                                                                                                                        |
-| `allowedCombos`                             | jerin kirtani, har zuwa 500                                                   | Yana iyakance haɗaɗɗun zaɓuɓɓukan da maɓallin zai iya kira; `modelAccessMode` / `allowedModels` ne ke sarrafa samfuran kai tsaye                       |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                         | Dole `allowedConnections` ya kasance da ƙima idan yanayin shi ne `restricted`, kuma babu komai idan yanayin shi ne `all`                               |
-| `allowedConnections`                        | jerin UUIDs, har zuwa 100                                                     |                                                                                                                                                        |
-| `allowAutoCombos`                           | boolean                                                                       | `false` yana ƙin buƙatun samfuran `auto/*` da wannan maɓalli; ana ba da izini ga maɓallan da ba su taɓa saita shi ba                                   |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                                 | Abin da `GET /v1/models` ke jera wa wannan maɓalli (haɗaɗɗun zaɓuɓɓuka kawai, samfura kawai, ko duka biyun); ba ya canza abin da maɓallin zai iya kira |
-| `forcedModel`                               | kirtani mai haruffa har zuwa 300, ko `null`                                   | Yana tura buƙatun hira zuwa wannan samfuri/haɗaɗɗen zaɓi, maimakon `X-Route-Model` da `body.model`; har yanzu iyakokin maɓallin suna aiki              |
-| `noLog`, `autoResolve`                      | boolean                                                                       |                                                                                                                                                        |
-| `throttleDelayMs`                           | cikakkiyar lamba, 0-300000                                                    |                                                                                                                                                        |
-| `maxSessions`                               | cikakkiyar lamba, 0-10000                                                     |                                                                                                                                                        |
-| `rateLimits`                                | jerin `{ limit, window }` (cikakkun lambobi masu kyau, har zuwa 50) ko `null` | `null` yana goge iyakokin                                                                                                                              |
-| `accessSchedule`                            | abin jadawali ko `null`                                                       | `null` yana goge jadawalin                                                                                                                             |
-| `scopes`                                    | jerin kirtani, har zuwa 32                                                    |                                                                                                                                                        |
-| `allowedEndpoints`                          | jerin kirtani, har zuwa 20                                                    |                                                                                                                                                        |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                            |                                                                                                                                                        |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                          | Duba [Tsallake cache na kowane maɓalli](#per-key-cache-bypass)                                                                                         |
-| `compressionEnabled`                        | boolean                                                                       |                                                                                                                                                        |
-| `codexServiceMode`                          | ɗaya daga cikin yanayin sabis na Codex                                        |                                                                                                                                                        |
-| `disableNonPublicModels`                    | boolean                                                                       |                                                                                                                                                        |
-| `allowUsageCommand`                         | boolean                                                                       |                                                                                                                                                        |
-| `usageLimitEnabled`                         | boolean                                                                       |                                                                                                                                                        |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 ko `null`                                                         |                                                                                                                                                        |
-| `chaosModeEnabled`                          | boolean                                                                       |                                                                                                                                                        |
+| Filin                                       | Nau'i                                                                          | Bayanan kula                                                                                                                               |
+| ------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `name`                                      | kirtani, haruffa 1-200                                                         |                                                                                                                                            |
+| `isActive`                                  | boolean                                                                        |                                                                                                                                            |
+| `isBanned`                                  | boolean                                                                        |                                                                                                                                            |
+| `expiresAt`                                 | kwanan wata da lokaci na ISO 8601 ko `null`                                    | `null` yana share lokacin ƙarewa                                                                                                           |
+| `modelAccessMode`                           | `all` \| `restricted`                                                          | `allowedModels` dole ne ya kasance fanko idan yanayin `all` ne                                                                             |
+| `allowedModels`, `blockedModels`            | jerin kirtani, har zuwa 1000                                                   |                                                                                                                                            |
+| `allowedCombos`                             | jerin kirtani, har zuwa 500                                                    | Yana ƙayyade waɗanne combos maɓallin zai iya kira; samfura kai tsaye suna ƙarƙashin `modelAccessMode` / `allowedModels`                    |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                          | `allowedConnections` dole ne ya kasance ba fanko ba idan `restricted` ne, kuma ya kasance fanko idan `all` ne                              |
+| `allowedConnections`                        | jerin UUIDs, har zuwa 100                                                      |                                                                                                                                            |
+| `allowAutoCombos`                           | boolean                                                                        | `false` yana ƙin buƙatun samfuran `auto/*` da wannan maɓalli; maɓallan da ba su taɓa saita shi ba ana ba su izini                          |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                                  | Abin da `GET /v1/models` ke jera wa wannan maɓalli (combos kawai, samfura kawai, ko duka biyun); ba ya canza abin da maɓallin zai iya kira |
+| `forcedModel`                               | kirtani har zuwa haruffa 300, ko `null`                                        | Yana tura buƙatun tattaunawa zuwa wannan samfuri/combo, a gaban `X-Route-Model` da `body.model`; iyakokin maɓallin har yanzu suna aiki     |
+| `noLog`, `autoResolve`                      | boolean                                                                        |                                                                                                                                            |
+| `throttleDelayMs`                           | lamba cikakkiya, 0-300000                                                      |                                                                                                                                            |
+| `maxSessions`                               | lamba cikakkiya, 0-10000                                                       |                                                                                                                                            |
+| `rateLimits`                                | jeri na `{ limit, window }` (lambobi cikakku masu kyau, har zuwa 50) ko `null` | `null` yana share iyakokin                                                                                                                 |
+| `accessSchedule`                            | abin tsara lokaci ko `null`                                                    | `null` yana share tsarin lokaci                                                                                                            |
+| `scopes`                                    | jerin kirtani, har zuwa 32                                                     |                                                                                                                                            |
+| `allowedEndpoints`                          | jerin kirtani, har zuwa 20                                                     |                                                                                                                                            |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                             |                                                                                                                                            |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                           | Duba [Kewayar cache ta kowane maɓalli](#per-key-cache-bypass)                                                                              |
+| `compressionEnabled`                        | boolean                                                                        |                                                                                                                                            |
+| `codexServiceMode`                          | ɗaya daga cikin yanayin sabis na Codex                                         |                                                                                                                                            |
+| `disableNonPublicModels`                    | boolean                                                                        |                                                                                                                                            |
+| `allowUsageCommand`                         | boolean                                                                        |                                                                                                                                            |
+| `usageLimitEnabled`                         | boolean                                                                        |                                                                                                                                            |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                                          |                                                                                                                                            |
+| `chaosModeEnabled`                          | boolean                                                                        |                                                                                                                                            |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1319,162 +1358,159 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 
 ### Saituna
 
-| Endpoint                              | Hanya         | Bayani                                                                                                                                                                                                                                                                                                    |
-| ------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/settings`                       | GET/PUT/PATCH | Saitunan gama-gari. Maɓallan manufofin tsaro (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) suna buƙatar `currentPassword` da shaidar mai gudanarwa — maɓallan API da token na `oma_` suna samun `403`; kowane sauyi yana buƙatar iyakar token ɗin samun dama ta `admin` |
-| `/api/settings/proxy`                 | GET/PUT       | Tsarin proxy na hanyar sadarwa                                                                                                                                                                                                                                                                            |
-| `/api/settings/proxy/test`            | POST          | Gwada haɗin proxy                                                                                                                                                                                                                                                                                         |
-| `/api/settings/ip-filter`             | GET/PUT       | Jerin IP da aka yarda/aka toshe                                                                                                                                                                                                                                                                           |
-| `/api/settings/thinking-budget`       | GET/PUT       | Yanayin sake rubuta **buƙatar** kasafin tunani/ƙiyasta (wucewa kai tsaye / cirewa ta atomatik / na musamman / mai daidaitawa). Ba ya dogara da matsawa. Duba [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md).                                                                                          |
-| `/api/settings/system-prompt`         | GET/PUT       | Umarnin tsarin duniya baki ɗaya                                                                                                                                                                                                                                                                           |
-| `/api/settings/compression`           | GET/PUT       | Tsarin matsawa na duniya baki ɗaya                                                                                                                                                                                                                                                                        |
-| `/api/settings/purge-request-history` | POST          | Share layukan kundin buƙatu da kayan tarihin kira na cikin gida                                                                                                                                                                                                                                           |
+| Endpoint                              | Method        | Bayani                                                                                                                                                                                                                                                                                                       |
+| ------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/api/settings`                       | GET/PUT/PATCH | Saitunan gaba ɗaya. Maɓallan manufofin tsaro (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) suna buƙatar `currentPassword` da bayanan shaidar mai aiki — API keys da alamun `oma_` suna samun `403`; kowane canji yana buƙatar iyakar samun dama ta `admin` na access-token |
+| `/api/settings/proxy`                 | GET/PUT       | Tsarin wakilin hanyar sadarwa                                                                                                                                                                                                                                                                                |
+| `/api/settings/proxy/test`            | POST          | Gwada haɗin wakili                                                                                                                                                                                                                                                                                           |
+| `/api/settings/ip-filter`             | GET/PUT       | Jerin IP da aka yarda ko aka toshe                                                                                                                                                                                                                                                                           |
+| `/api/settings/thinking-budget`       | GET/PUT       | Yanayin sake rubuta **buƙatar** tunani/ƙididdigar dalilai (passthrough / auto-strip / custom / adaptive). Ba ya dogara da matsawa. Duba [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md).                                                                                                                  |
+| `/api/settings/system-prompt`         | GET/PUT       | Umarnin tsarin na duniya                                                                                                                                                                                                                                                                                     |
+| `/api/settings/compression`           | GET/PUT       | Tsarin matsawa na duniya                                                                                                                                                                                                                                                                                     |
+| `/api/settings/purge-request-history` | POST          | Share layukan tarihin buƙatu da kayan aikin rajistar kira na cikin gida                                                                                                                                                                                                                                      |
 
-### Mahalli & Matsawa
+### Mahallin & Matsawa
 
-| Ƙarshen hanya                          | Hanya          | Bayani                                                                            |
-| -------------------------------------- | -------------- | --------------------------------------------------------------------------------- |
-| `/api/compression/preview`             | POST           | Samfotin matsewa na off/lite/standard/aggressive/ultra/RTK/stacked                |
-| `/api/compression/language-packs`      | GET            | Jera kundin harsunan Caveman da ake da su                                         |
-| `/api/compression/rules`               | GET            | Jera metadata na dokokin Caveman                                                  |
-| `/api/context/caveman/config`          | GET/PUT        | Laƙabin saituna na musamman ga Caveman                                            |
-| `/api/context/rtk/config`              | GET/PUT        | Saituna na musamman ga RTK, gami da matatan al'ada da riƙe ɗanyen fitarwa         |
-| `/api/context/rtk/filters`             | GET            | Kundin matatan RTK da binciken matsalolin matatan al'ada                          |
-| `/api/context/rtk/test`                | POST           | Gudanar da samfoti/gwajin RTK a kan bayanan rubutu                                |
-| `/api/context/rtk/raw-output/[id]`     | GET            | Karanta ɗanyen fitarwa da aka ɓoye bayanansa kuma aka riƙe ta hanyar id na manuni |
-| `/api/context/combos`                  | GET/POST       | Jerin haɗin matsewa/ƙirƙira                                                       |
-| `/api/context/combos/[id]`             | GET/PUT/DELETE | Bayanai/sabuntawa/sharewar haɗin matsewa                                          |
-| `/api/context/combos/[id]/assignments` | GET/PUT        | Sanya haɗin matsewa ga haɗin sarrafa hanya                                        |
-| `/api/context/analytics`               | GET            | Laƙabin nazarin matsewa                                                           |
+| Endpoint                               | Hanya          | Bayani                                                                           |
+| -------------------------------------- | -------------- | -------------------------------------------------------------------------------- |
+| `/api/compression/preview`             | POST           | Samfotin matsawar off/lite/standard/aggressive/ultra/RTK/stacked                 |
+| `/api/compression/language-packs`      | GET            | Jera fakitin harsunan Caveman da ake da su                                       |
+| `/api/compression/rules`               | GET            | Jera bayanan dokokin Caveman                                                     |
+| `/api/context/caveman/config`          | GET/PUT        | Laƙabin saitunan da suka keɓanta da Caveman                                      |
+| `/api/context/rtk/config`              | GET/PUT        | Saitunan da suka keɓanta da RTK, har da matattarar al'ada da riƙe ɗanyen fitarwa |
+| `/api/context/rtk/filters`             | GET            | Kundin matattarar RTK da binciken matsalolin matattarar al'ada                   |
+| `/api/context/rtk/test`                | POST           | Gudanar da samfoti/gwajin RTK kan bayanan rubutu                                 |
+| `/api/context/rtk/raw-output/[id]`     | GET            | Karanta ɗanyen fitarwar da aka riƙe kuma aka ɓoye bayanai ta hanyar id na nuni   |
+| `/api/context/combos`                  | GET/POST       | Jerin/ƙirƙirar haɗe-haɗen matsawa                                                |
+| `/api/context/combos/[id]`             | GET/PUT/DELETE | Duba/gyara/goge bayanan haɗin matsawa                                            |
+| `/api/context/combos/[id]/assignments` | GET/PUT        | Sanya haɗe-haɗen matsawa ga haɗe-haɗen hanya                                     |
+| `/api/context/analytics`               | GET            | Laƙabin nazarin bayanan matsawa                                                  |
 
 ### Sa-ido
 
-| Ƙarshen hanya                        | Hanya      | Bayani                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| ------------------------------------ | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/sessions`                      | GET        | Bibiyar zaman da ke aiki                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `/api/rate-limits`                   | GET        | Iyakokin ƙimar amfani na kowane asusu                                                                                                                                                                                                                                                                                                                                                                                             |
-| `/api/monitoring/health`             | GET        | Binciken lafiya + taƙaitaccen bayanin mai samarwa (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). Mahangar gudanarwa ta haɗa da `credentialHealth`: ƙimomin probe-cache, `failedConnections` idan `failed>0`, da `staleDbNonOkCount` (`test_status` na SQLite mai ɗorewa, ba ma'aunin gauge ba). Duba [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
-| `/api/cache/stats`                   | GET/DELETE | Ƙididdigar cache / sharewa                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `/api/modality-bridge/stats`         | GET        | `attempts` na cikin ƙwaƙwalwa, nasarori/`bridged`, gazawa, samun bayanai daga cache, `totalLatencyMs`, `latencySamples`, `averageLatencyMs` da aka ƙididdige bisa adadin samfura, da lokacin amfani na ƙarshe (ana sake saita shi idan an sake farawa; tantancewar gudanarwa)                                                                                                                                                     |
-| `/api/modality-bridge/video/runtime` | GET        | Tsauraran binciken trusted-loopback kafin tantancewar gudanarwa/probe; samuwar FFmpeg/ffprobe da nau'ikansu da aka tsaftace (no-store)                                                                                                                                                                                                                                                                                            |
-| `/api/modality-bridge/video/extract` | POST       | Dillalin byte na cikin gida mai tantancewa da trusted-loopback; shigarwar 50 MiB, jerin jira mai iyaka/fitarwar 32 MiB, `503` idan ƙarfin ya cika, `499` idan an yanke haɗi, `504` idan wa'adi ya ƙare; ba API na loda fayil na jama'a ba                                                                                                                                                                                         |
+| Endpoint                             | Hanya      | Bayani                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/sessions`                      | GET        | Bibiyar zaman aiki                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `/api/rate-limits`                   | GET        | Iyakokin ƙima na kowane asusu                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `/api/monitoring/health`             | GET        | Binciken lafiyar tsarin + taƙaitaccen bayani kan masu samarwa (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). Kallon gudanarwa ya ƙunshi `credentialHealth`: ma'aunan ma'ajiyar bincike, `failedConnections` idan `failed>0`, da `staleDbNonOkCount` (ƙimar `test_status` da SQLite ke riƙewa, ba ma'aunin aunawa ba). Duba [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
+| `/api/cache/stats`                   | GET/DELETE | Ƙididdigar ma'ajiya / sharewa                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `/api/modality-bridge/stats`         | GET        | `attempts` na cikin ƙwaƙwalwa, nasarori/`bridged`, gazawa, nasarar amfani da ma'ajiya, `totalLatencyMs`, `latencySamples`, `averageLatencyMs` da aka ƙididdige bisa samfurori, da lokacin amfani na ƙarshe (ana sake saita su bayan sake farawa; izinin gudanarwa)                                                                                                                                                                                      |
+| `/api/modality-bridge/video/runtime` | GET        | Tsauraran binciken amintaccen madaukin gida kafin izinin gudanarwa/bincike; samuwa da sigogin FFmpeg/ffprobe da aka tsabtace (ba a adanawa)                                                                                                                                                                                                                                                                                                             |
+| `/api/modality-bridge/video/extract` | POST       | Dillalin baiti na ciki mai ingantaccen amintaccen madaukin gida; shigarwar 50 MiB, jerin aiki mai iyaka/fitarwa 32 MiB, `503` idan ƙarfin aiki ya cika, `499` idan an katse haɗin, `504` idan wa'adin ya wuce; ba API ba ne na loda bayanan jama'a                                                                                                                                                                                                      |
 
-### Ajiyar Bayanai da Fitarwa/Shigowa
+### Ajiyar Ajiyayyen & Fitarwa/Shigarwa
 
-| Mahaɗa                      | Hanya  | Bayani                                                                                      |
+| Endpoint                    | Method | Description                                                                                 |
 | --------------------------- | ------ | ------------------------------------------------------------------------------------------- |
-| `/api/db-backups`           | GET    | Jera kwafe-kwafen ajiyar da ake da su                                                       |
-| `/api/db-backups`           | PUT    | Ƙirƙiri kwafin ajiya da hannu                                                               |
-| `/api/db-backups`           | POST   | Mayar da bayanai daga takamaiman kwafin ajiya                                               |
-| `/api/db-backups`           | PATCH  | Ajiye saitunan riƙe kwafin ajiya (na mai gudanarwa kawai)                                   |
-| `/api/db-backups`           | DELETE | Rage kwafe-kwafen ajiyar da aka adana bisa saitunan riƙewa (na mai gudanarwa kawai)         |
-| `/api/db-backups/export`    | GET    | Sauke ma'ajiyar bayanai a matsayin fayil .sqlite                                            |
-| `/api/db-backups/import`    | POST   | Loda fayil .sqlite don maye gurbin ma'ajiyar bayanai (`?dryRun=true` yana tantancewa kawai) |
-| `/api/db-backups/exportAll` | GET    | Sauke cikakken kwafin ajiya a matsayin ma'ajiyar .tar.gz                                    |
+| `/api/db-backups`           | GET    | Jera madadin bayanan da ake da su                                                           |
+| `/api/db-backups`           | PUT    | Ƙirƙiri madadin bayanai da hannu                                                            |
+| `/api/db-backups`           | POST   | Maido daga takamaiman madadin bayanai                                                       |
+| `/api/db-backups`           | PATCH  | Ajiye saitunan riƙe madadin bayanai (na ma'aikacin aiki kawai)                              |
+| `/api/db-backups`           | DELETE | Tsabtace madadin bayanan da aka adana bisa saitunan riƙewa (na ma'aikacin aiki kawai)       |
+| `/api/db-backups/export`    | GET    | Zazzage rumbun bayanai a matsayin fayil na .sqlite                                          |
+| `/api/db-backups/import`    | POST   | Loda fayil na .sqlite don maye gurbin rumbun bayanai (`?dryRun=true` yana tantancewa kawai) |
+| `/api/db-backups/exportAll` | GET    | Zazzage cikakken madadin bayanai a matsayin rumbun .tar.gz                                  |
 
-`/api/db-backups/export`, `/api/db-backups/exportAll` da `/api/settings/export-json` suna bayar da
-duk wani bayanin shiga da aka adana, don haka suna buƙatar zaman dashboard ko CLI na gida (ko kuma an
-kashe shiga). Maɓallan API na kowane scope da access token na `oma_` suna samun `403`. Ayyukan dawo da
-bayanai suna da wannan iyaka: `POST /api/db-backups/import` (har da `dryRun=true`), `POST /api/db-backups`
-(dawo da bayanai ta id) da `POST /api/settings/import-json` suna maye gurbin ma'ajiyar bayanai ko saitunan
-da ke aiki, don haka bayanan shiga na na'ura su ma suna samun `403` a wurin; `omniroute sync import` yana
-aika bayanan shiga na CLI na gida. Haka ma `DELETE /api/db-backups` (rage kwafe-kwafen ajiyar da aka adana)
-da `PATCH /api/db-backups` (saitunan riƙewa: ƙimomin da aka adana ne ke tafiyar da ragewa ta atomatik bayan
-kowane kwafin ajiya). Jerawa (`GET`) da ƙirƙirar kwafin ajiya da hannu (`PUT`) suna ci gaba da amfani da
-tabbatar da izinin gudanarwa na yau da kullum.
+`/api/db-backups/export`, `/api/db-backups/exportAll` da `/api/settings/export-json` suna fitar da
+duk takardun shaidar da aka adana, saboda haka suna buƙatar zaman dashboard ko CLI na gida (ko kuma a kashe
+shiga). Makullin API na kowace iyaka da alamun samun dama na `oma_` suna samun `403`. Maido da bayanai yana da
+iyaka iri ɗaya: `POST /api/db-backups/import` (har da `dryRun=true`), `POST /api/db-backups` (maido ta id) da `POST /api/settings/import-json` suna maye gurbin rumbun bayanai ko saitunan da ake aiki da su, saboda haka takardar shaidar na'ura ma tana samun `403` a wurin; `omniroute sync import` yana aika takardar shaidar CLI na gida. Haka kuma
+`DELETE /api/db-backups` (tsabtace madadin bayanan da aka adana) da `PATCH /api/db-backups` (saitunan riƙewa:
+ƙimomin da aka adana su ne ke tafiyar da tsabtacewa ta atomatik bayan kowane madadin). Jeri (`GET`) da ƙirƙirar
+madadin bayanai da hannu (`PUT`) suna ci gaba da amfani da tantancewar gudanarwa ta yau da kullum.
 
-### Daidaitawar Gajimare
+### Daidaitawar Cloud
 
-| Mahaɗa                 | Hanya       | Bayani                       |
-| ---------------------- | ----------- | ---------------------------- |
-| `/api/sync/cloud`      | Daban-daban | Ayyukan daidaitawar gajimare |
-| `/api/sync/initialize` | POST        | Fara daidaitawa              |
-| `/api/cloud/*`         | Daban-daban | Gudanar da gajimare          |
+| Endpoint               | Method  | Description               |
+| ---------------------- | ------- | ------------------------- |
+| `/api/sync/cloud`      | Various | Ayyukan daidaitawar Cloud |
+| `/api/sync/initialize` | POST    | Fara daidaitawa           |
+| `/api/cloud/*`         | Various | Gudanar da Cloud          |
 
-### Tunnels
+### Ramukan Sadarwa
 
-| Mahaɗa                     | Hanya | Bayani                                                                  |
-| -------------------------- | ----- | ----------------------------------------------------------------------- |
-| `/api/tunnels/cloudflared` | GET   | Karanta matsayin shigarwa/aiki na Cloudflare Quick Tunnel don dashboard |
-| `/api/tunnels/cloudflared` | POST  | Kunna ko kashe Cloudflare Quick Tunnel (`action=enable/disable`)        |
-| `/api/tunnels/ngrok`       | GET   | Karanta matsayin aikin ngrok Tunnel don dashboard                       |
-| `/api/tunnels/ngrok`       | POST  | Kunna ko kashe ngrok Tunnel (`action=enable/disable`)                   |
+| Endpoint                   | Method | Description                                                                     |
+| -------------------------- | ------ | ------------------------------------------------------------------------------- |
+| `/api/tunnels/cloudflared` | GET    | Karanta matsayin shigarwa/lokacin aiki na Cloudflare Quick Tunnel don dashboard |
+| `/api/tunnels/cloudflared` | POST   | Kunna ko kashe Cloudflare Quick Tunnel (`action=enable/disable`)                |
+| `/api/tunnels/ngrok`       | GET    | Karanta matsayin lokacin aiki na ngrok Tunnel don dashboard                     |
+| `/api/tunnels/ngrok`       | POST   | Kunna ko kashe ngrok Tunnel (`action=enable/disable`)                           |
 
 ### Kayan Aikin CLI
 
-| Mahaɗa                             | Hanya | Bayani                        |
-| ---------------------------------- | ----- | ----------------------------- |
-| `/api/cli-tools/claude-settings`   | GET   | Matsayin Claude CLI           |
-| `/api/cli-tools/codex-settings`    | GET   | Matsayin Codex CLI            |
-| `/api/cli-tools/droid-settings`    | GET   | Matsayin Droid CLI            |
-| `/api/cli-tools/openclaw-settings` | GET   | Matsayin OpenClaw CLI         |
-| `/api/cli-tools/runtime/[toolId]`  | GET   | Tsarin aikin CLI na gama-gari |
+| Endpoint                           | Method | Description                      |
+| ---------------------------------- | ------ | -------------------------------- |
+| `/api/cli-tools/claude-settings`   | GET    | Matsayin Claude CLI              |
+| `/api/cli-tools/codex-settings`    | GET    | Matsayin Codex CLI               |
+| `/api/cli-tools/droid-settings`    | GET    | Matsayin Droid CLI               |
+| `/api/cli-tools/openclaw-settings` | GET    | Matsayin OpenClaw CLI            |
+| `/api/cli-tools/runtime/[toolId]`  | GET    | Lokacin aiki na CLI na gaba ɗaya |
 
-Amsoshin CLI sun haɗa da: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
+Amsoshin CLI sun ƙunshi: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
 
 ### Wakilan ACP
 
-| Mahaɗa            | Hanya  | Bayani                                                               |
-| ----------------- | ------ | -------------------------------------------------------------------- |
-| `/api/acp/agents` | GET    | Jera duk wakilan da aka gano (ginannu + na musamman) tare da matsayi |
-| `/api/acp/agents` | POST   | Ƙara wakili na musamman ko sabunta ma'ajiyar wucin gadi ta ganowa    |
-| `/api/acp/agents` | DELETE | Cire wakili na musamman ta query param na `id`                       |
+| Endpoint          | Method | Description                                                             |
+| ----------------- | ------ | ----------------------------------------------------------------------- |
+| `/api/acp/agents` | GET    | Jera duk wakilan da aka gano (na ciki + na musamman) tare da matsayinsu |
+| `/api/acp/agents` | POST   | Ƙara wakili na musamman ko sabunta ma'ajiyar gano wakilai               |
+| `/api/acp/agents` | DELETE | Cire wakili na musamman ta hanyar sigar tambayar `id`                   |
 
-Amsar GET ta haɗa da `agents[]` (id, name, binary, version, installed, protocol, isCustom) da `summary` (total, installed, notFound, builtIn, custom).
+Amsar GET ta ƙunshi `agents[]` (id, name, binary, version, installed, protocol, isCustom) da `summary` (total, installed, notFound, builtIn, custom).
 
-### Juriyar Matsala da Iyakokin Yawan Buƙatu
+### Juriya da Iyakokin Yawan Buƙatu
 
-| Endpoint                          | Hanya     | Bayani                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| --------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/resilience`                 | GET/PATCH | Samo/sabunta jerin jiran buƙatu, lokacin dakatar da haɗi, mai katse da'irar mai samarwa, da saitunan jira                                                                                                                                                                                                                                                                                                                                    |
-| `/api/resilience/reset`           | POST      | Sake saita masu katse da'irar masu samarwa                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `/api/resilience/model-cooldowns` | GET       | Jera kulle-kullen kowane-(mai samarwa, haɗi, samfuri) da ke aiki, a jere bisa lokacin da ya rage                                                                                                                                                                                                                                                                                                                                             |
-| `/api/resilience/model-cooldowns` | DELETE    | Share kullewar samfuri — jiki `{provider, model}` ko `{all: true}` don share komai                                                                                                                                                                                                                                                                                                                                                           |
-| `/api/rate-limits`                | GET/POST  | Matsayin iyakar ƙimar kowane asusu (GET), ko kunna/kashe kariyar iyakar ƙima ga haɗi (POST `{connectionId, enabled}`). Hanyar rubutawa da ake tallafawa don `rateLimitProtection` (ba a taɓa gyara ta ta hanyar `PUT /api/providers/[id]`). Lura: `enabled: false` yana kashe kariya da aka ayyana kai tsaye, amma ba ya cire haɗin maɓallin API da ke aiki daga tsarin kariya na kunna ta atomatik na duniya (`autoEnableApiKeyProviders`). |
-| `/api/rate-limit`                 | GET       | Tsarin iyakar ƙima na duniya (an daina ba da shawarar amfani da shi; laƙabi ne na `/api/rate-limits`)                                                                                                                                                                                                                                                                                                                                        |
+| Endpoint                          | Hanya     | Bayani                                                                                                                                                                                                                                                                                                                                                                                                           |
+| --------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/resilience`                 | GET/PATCH | Samo/ɗaukaka layin jerin buƙatu, lokacin sanyaya haɗi, mai katse mai samarwa, da saitunan jira                                                                                                                                                                                                                                                                                                                   |
+| `/api/resilience/reset`           | POST      | Sake saita masu katse da'irar masu samarwa                                                                                                                                                                                                                                                                                                                                                                       |
+| `/api/resilience/model-cooldowns` | GET       | Jera kulle-kullen (mai samarwa, haɗi, samfur) masu aiki, a jere bisa ragowar lokaci                                                                                                                                                                                                                                                                                                                              |
+| `/api/resilience/model-cooldowns` | DELETE    | Share kullen samfur — jiki `{provider, model}` ko `{all: true}` don share komai                                                                                                                                                                                                                                                                                                                                  |
+| `/api/rate-limits`                | GET/POST  | Matsayin iyakar ƙima ga kowane asusu (GET) ko kunna/kashe kariyar iyakar ƙima don haɗi (POST `{connectionId, enabled}`). Hanyar rubutu da ake tallafawa don `rateLimitProtection` (ba a taɓa gyara shi ta `PUT /api/providers/[id]` ba). Lura: `enabled: false` yana kashe kariyar bayyane amma ba ya cire haɗin API-key mai aiki daga tsarin kariyar kunna ta atomatik na duniya (`autoEnableApiKeyProviders`). |
+| `/api/rate-limit`                 | GET       | Tsarin iyakar ƙima na duniya (wanda aka daina amfani da shi; madadin zuwa `/api/rate-limits`)                                                                                                                                                                                                                                                                                                                    |
 
-> Duk hanyoyin `/api/resilience/*` guda huɗu suna buƙatar **tabbatar da izinin gudanarwa** (`requireManagementAuth`). Duba [Juriya (cikakke)](#resilience-extended) don cikakken bayani kan mai katse da'irar mai samarwa da lokacin dakatar da haɗi da kuma kullewar samfuri.
+> Dukkan hanyoyi huɗu na `/api/resilience/*` suna buƙatar **tantancewar gudanarwa** (`requireManagementAuth`). Duba [Resilience (extended)](#resilience-extended) don cikakken bayani kan bambanci tsakanin mai katse mai samarwa, lokacin sanyaya haɗi, da kullen samfur.
 
 ### Kimantawa
 
-| Endpoint     | Hanya    | Bayani                                      |
-| ------------ | -------- | ------------------------------------------- |
-| `/api/evals` | GET/POST | Jera tarin kimantawa / gudanar da kimantawa |
+| Endpoint     | Hanya    | Bayani                                        |
+| ------------ | -------- | --------------------------------------------- |
+| `/api/evals` | GET/POST | Jera rukunin kimantawa / gudanar da kimantawa |
 
 ### Manufofi
 
-| Endpoint        | Hanya           | Bayani                        |
-| --------------- | --------------- | ----------------------------- |
-| `/api/policies` | GET/POST/DELETE | Sarrafa manufofin zaɓin hanya |
+| Endpoint        | Hanya           | Bayani                   |
+| --------------- | --------------- | ------------------------ |
+| `/api/policies` | GET/POST/DELETE | Sarrafa manufofin turawa |
 
-### Bin ƙa'idoji
+### Bin ƙa'ida
 
 | Endpoint                    | Hanya | Bayani                                     |
 | --------------------------- | ----- | ------------------------------------------ |
-| `/api/compliance/audit-log` | GET   | Kundin binciken bin ƙa'idoji (N na ƙarshe) |
+| `/api/compliance/audit-log` | GET   | Rajistar binciken bin ƙa'ida (N na ƙarshe) |
 
-### v1beta (Mai Jituwa da Gemini)
+### v1beta (Mai dacewa da Gemini)
 
-| Endpoint                   | Hanya | Bayani                                |
-| -------------------------- | ----- | ------------------------------------- |
-| `/v1beta/models`           | GET   | Jera samfura a tsarin Gemini          |
-| `/v1beta/models/{...path}` | POST  | Endpoint ɗin Gemini `generateContent` |
+| Endpoint                   | Hanya | Bayani                           |
+| -------------------------- | ----- | -------------------------------- |
+| `/v1beta/models`           | GET   | Jera samfura cikin tsarin Gemini |
+| `/v1beta/models/{...path}` | POST  | Hanyar Gemini `generateContent`  |
 
-Waɗannan endpoints suna kwaikwayon tsarin API na Gemini don clients da ke buƙatar jituwa ta asali da Gemini SDK.
+Waɗannan hanyoyi suna kwaikwayon tsarin API na Gemini don abokan ciniki da ke buƙatar dacewa ta asali da Gemini SDK.
 
-### APIs na Ciki / Tsari
+### API na Ciki / Tsarin
 
-| Endpoint                 | Hanya | Bayani                                                               |
-| ------------------------ | ----- | -------------------------------------------------------------------- |
-| `/api/init`              | GET   | Duba farawar manhaja (ana amfani da shi a fara gudanarwa)            |
-| `/api/tags`              | GET   | Alamomin samfuri masu jituwa da Ollama (don clients na Ollama)       |
-| `/api/restart`           | POST  | Fara sake kunna uwar garke cikin tsari                               |
-| `/api/shutdown`          | POST  | Fara kashe uwar garke cikin tsari                                    |
-| `/api/system/env/repair` | POST  | Gyara environment variables na mai samar da OAuth                    |
-| `/api/system/version`    | GET   | Nau'in yanzu/na baya-bayan nan, matsayin sabuntawa, tashar fitarwa   |
-| `/api/system/version`    | POST  | Fara sabuntawa mai la'akari da deployment zuwa nau'in baya-bayan nan |
+| Endpoint                 | Hanya | Bayani                                                                |
+| ------------------------ | ----- | --------------------------------------------------------------------- |
+| `/api/init`              | GET   | Binciken fara aikace-aikacen (ana amfani da shi a farkon gudanarwa)   |
+| `/api/tags`              | GET   | Alamar samfura mai dacewa da Ollama (don abokan cinikin Ollama)       |
+| `/api/restart`           | POST  | Ƙaddamar da sake farawa cikin ladabi na uwar garke                    |
+| `/api/shutdown`          | POST  | Ƙaddamar da kashe uwar garke cikin ladabi                             |
+| `/api/system/env/repair` | POST  | Gyara masu canjin muhalli na masu samar da OAuth                      |
+| `/api/system/version`    | GET   | Sigar yanzu/ta baya-bayan nan, matsayin ɗaukakawa, tashar sakin sigar |
+| `/api/system/version`    | POST  | Fara ɗaukakawa mai sanin yanayin turawa zuwa sigar baya-bayan nan     |
 
-> **Lura:** Tsarin yana amfani da waɗannan endpoints a ciki ko kuma don jituwa da client na Ollama. Galibi masu amfani na ƙarshe ba sa kiransu.
+> **Lura:** Tsarin yana amfani da waɗannan hanyoyi a ciki ko don dacewa da abokin cinikin Ollama. Masu amfani na ƙarshe ba sa kiran su yawanci.
 
 ### Gyaran Muhallin OAuth _(v3.6.1+)_
 
@@ -1487,7 +1523,7 @@ Content-Type: application/json
 }
 ```
 
-Yana gyara mabambantan muhalli na OAuth da suka ɓace ko suka lalace don takamaiman mai samarwa. Yana dawo da:
+Yana gyara OAuth environment variables da suka ɓace ko suka lalace na takamaiman mai samarwa. Yana dawo da:
 
 ```json
 {
@@ -1497,13 +1533,13 @@ Yana gyara mabambantan muhalli na OAuth da suka ɓace ko suka lalace don takamai
 }
 ```
 
-### Siga da Tashar Fitarwa
+### Sigar da Tashar Saki
 
 ```bash
 GET /api/system/version
 ```
 
-Hanyar gudanarwa ce ta loopback kawai (tabbatar da admin). Tana dawo da sigar da ke aiki, sabuwar sigar da aka wallafa da kuma matsayin sabuntawa ta atomatik. `releaseChannel` da `channels` filaye ne da aka ƙara (rail 3.8.54); `channel` yana riƙe da ma'anarsa — yanayin turawa da mai sabunta dashboard yake amfani da shi (`npm`, `source` ko `docker-compose`).
+Hanyar gudanarwa ce ta loopback kawai (tana buƙatar tantancewar mai gudanarwa). Tana dawo da sigar da ke gudana, sabuwar sigar da aka wallafa, da matsayin sabuntawa ta atomatik. `releaseChannel` da `channels` filayen ƙari ne (rail 3.8.54); `channel` yana riƙe da ma’anarsa — yanayin tura tsarin da mai sabunta dashboard ke amfani da shi (`npm`, `source` ko `docker-compose`).
 
 ```json
 {
@@ -1519,21 +1555,14 @@ Hanyar gudanarwa ce ta loopback kawai (tabbatar da admin). Tana dawo da sigar da
 }
 ```
 
-- `releaseChannel` — tashar npm ta build ɗin da ke aiki: `nightly` don sigogin `-nightly.*`,
-  `next` don sauran sigogin kafin fitarwa (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` don tsayayyen sigar
-  babban reshe da ya girmi `channels.latest`, in ba haka ba `latest`. Dokokin iri ɗaya ne da na
-  `scripts/release/dist-tag.mjs`, wanda ke zaɓar npm dist-tag a lokacin wallafawa.
-- `channels` — sigar gaba ta kowane dist-tag da aka wallafa, daga `npm view omniroute dist-tags` (madadin
-  HTTP na registry), wanda aka adana a cache da TTL na mintuna 10 iri ɗaya da `latest`. `latest` yana nan
-  koyaushe (yana komawa ga filin `latest`, sannan `"unavailable"`); `next`, `nightly` da `lts` suna bayyana
-  ne kawai idan wannan dist-tag ɗin yana nan. Buƙatar `Cache-Control: no-cache` tana sabunta binciken biyu.
+- `releaseChannel` — tashar npm ta ginin da ke gudana: `nightly` don sigogin `-nightly.*`, `next` don sauran sigogin gwaji kafin saki (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` don tsayayyen sigar wani babban sigar da ya girmi `channels.latest`, in ba haka ba `latest`. Waɗannan dokoki iri ɗaya ne da na `scripts/release/dist-tag.mjs`, wanda ke zaɓar npm dist-tag a lokacin wallafawa.
+- `channels` — sabuwar sigar da aka wallafa ta kowane dist-tag, daga `npm view omniroute dist-tags` (tare da madadin HTTP na rajista), ana adanawa tare da TTL na mintuna 10 iri ɗaya da `latest`. `latest` yana kasancewa koyaushe (yana komawa zuwa filin `latest`, sannan `"unavailable"`); `next`, `nightly` da `lts` suna bayyana ne kawai idan wannan dist-tag ɗin yana wanzuwa. Buƙatar `Cache-Control: no-cache` tana sabunta duka binciken.
 
-An bayyana tsarin tashoshi (`latest` = v3 har zuwa 4.0 GA, `next` = rc, `nightly` = build na `develop`,
-`lts` = facin v3 bayan 4.0 GA) a cikin `docs/ops/RELEASE_STRATEGY.md`.
+An bayyana tsarin tashoshi (`latest` = v3 har zuwa GA na 4.0, `next` = rc, `nightly` = ginin `develop`, `lts` = facin v3 bayan GA na 4.0) a cikin `docs/ops/RELEASE_STRATEGY.md`.
 
 ---
 
-## Mayar da Sauti zuwa Rubutu
+## Canza Sauti zuwa Rubutu
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1541,9 +1570,7 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Mayar da fayilolin sauti zuwa rubutu ta amfani da duk wani mai samar da STT da aka saita. Sashen farko na hanyar
-yana zaɓar mai samarwa na asali (`openai/…`, `deepgram/…`). Ƙofofin da
-ke sake fitar da samfurin wani mai samarwa suna amfani da id mai cikakken bayani
+Canza fayilolin sauti zuwa rubutu ta amfani da duk wani mai samar da STT da aka tsara. Sashen farko na hanyar URL yana zaɓar mai samarwa na asali (`openai/…`, `deepgram/…`). Ƙofofin da suke sake fitar da samfurin wani mai samarwa suna amfani da ƙayyadadden ID
 (`openrouter/deepgram/nova-3`).
 
 **Buƙata:**
@@ -1566,43 +1593,48 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Misalan id na samfura:** `openai/whisper-1` (yana buƙatar maɓallin OpenAI),
+**Misalan ID na samfurai:** `openai/whisper-1` (yana buƙatar maɓallin OpenAI),
 `openrouter/deepgram/nova-3` (yana buƙatar maɓallin OpenRouter),
 `deepgram/nova-3` (yana buƙatar maɓallin Deepgram na asali). Buƙatar
-`deepgram/nova-3` kai tsaye **ba ta** amfani da OpenRouter.
+`deepgram/nova-3` kai tsaye **ba** ta amfani da OpenRouter.
 
 **Tsarukan da ake tallafawa:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
 
----
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** canza sauti zuwa rubutu cikin yanayin fayil ta hanyar
+WebSocket na Gemini Live (yana buƙatar maɓallin Gemini API). Ana canza abin da aka ɗora zuwa PCM mono mai 16 kHz ta amfani da `ffmpeg`
+(`ffmpeg` dole ne ya kasance a kan `PATH`, sai dai idan fayil ɗin ya riga ya kasance WAV PCM mono mai 16 kHz), sannan a
+watsa shi zuwa zaman kuma a dawo da rubutun da aka kammala a matsayin `{ "text": "..." }`. Ana tura filayen fom na `language` da `prompt` na zaɓi. Iyakoki: idan abubuwan da aka ɗora sun wuce 25 MiB ko tsawon sautin da aka warware ya wuce mintuna 10, ana amsa da
+`413`; idan juyawar ta ɗauki fiye da daƙiƙu 60, ana dakatar da ita kuma a amsa da
+`504`. Ana aika maɓallin API a cikin taken `x-goog-api-key` kawai, ba a cikin URL ɗin WebSocket ba.
 
-## Daidaituwa da Ollama
+## Daidaituwar Ollama
 
 Ga abokan ciniki da ke amfani da tsarin API na Ollama:
 
 ```bash
-# Mahadar taɗi (tsarin Ollama)
+# Ƙarshen magana ta tattaunawa (tsarin Ollama)
 POST /v1/api/chat
 
-# Jerin samfura (tsarin Ollama)
+# Jerin samfurai (tsarin Ollama)
 GET /api/tags
 ```
 
-Ana fassara buƙatu ta atomatik tsakanin tsarin Ollama da tsare-tsaren ciki.
+Ana fassara buƙatu kai tsaye tsakanin tsarin Ollama da tsarin ciki.
 
-## Madadin Hanyoyin VS Code Masu Token / Marasa Header
+## VS Code Mai Alamar Token / Sunayen Madadin Marasa Taken Kai
 
-Yi amfani da waɗannan madadin hanyoyi idan wata haɗawa ba za ta iya saka header na `Authorization` ba kuma tana buƙatar saka maɓallin API a cikin URL na tushe.
+Yi amfani da waɗannan sunayen madadin idan haɗin kai ba zai iya saka taken `Authorization` ba kuma yana buƙatar saka mabuɗin API a cikin URL na tushe.
 
 ```bash
-# Madadin kundin bayanai mai tsarin OpenAI
+# Sunan madadin kundin OpenAI
 GET /api/v1/vscode/{token}/
 GET /api/v1/vscode/{token}/models
 
-# Madadin hanyoyin taɗi masu tsarin OpenAI
+# Sunayen madadin tattaunawa irin na OpenAI
 POST /api/v1/vscode/{token}/chat/completions
 POST /api/v1/vscode/{token}/responses
 
-# Madadin hanyoyi masu tsarin Ollama
+# Sunayen madadin irin na Ollama
 POST /api/v1/vscode/{token}/api/chat
 GET /api/v1/vscode/{token}/api/tags
 ```
@@ -1616,18 +1648,18 @@ curl -X POST https://your-host.example/api/v1/vscode/YOUR_API_KEY/chat/completio
   -d '{"model":"auto","messages":[{"role":"user","content":"hello"}]}'
 ```
 
-Bayanan lura:
+Bayanan kula:
 
-- Madadin hanyoyin masu token suna sake amfani da handlers iri ɗaya da `/v1/*` da `/api/tags`; siffofin amsa suna nan iri ɗaya.
-- Fi son amfani da `Authorization: Bearer ...` a duk lokacin da abokin ciniki ke tallafawa headers na musamman.
-- Tokens da ke cikin URL na iya bayyana a cikin rajistan ayyukan reverse-proxy, tarihin burauza, da telemetry da ke wajen OmniRoute. Ɗauke su a matsayin zaɓin daidaituwa, ba tsohuwar hanyar tabbatar da sahihanci ba.
+- Sunayen madadin masu alamar token suna sake amfani da masu sarrafa buƙatu iri ɗaya da `/v1/*` da `/api/tags`; tsarin amsoshi yana nan iri ɗaya.
+- Fi son `Authorization: Bearer ...` a duk lokacin da abokin ciniki ke tallafa wa taken da aka keɓance.
+- Token na URL na iya bayyana a rajistan ayyukan reverse-proxy, tarihin burauza, da bayanan telemetry a wajen OmniRoute. Mu ɗauke su a matsayin zaɓin daidaituwa, ba yanayin tantancewa na asali ba.
 
 ---
 
 ## Telemetry
 
 ```bash
-# Samo taƙaitaccen telemetry na jinkiri (p50/p95/p99 ga kowane mai samarwa)
+# Samu taƙaitaccen bayanin telemetry na jinkiri (p50/p95/p99 ga kowane mai samarwa)
 GET /api/telemetry/summary
 ```
 
@@ -1647,7 +1679,7 @@ GET /api/telemetry/summary
 ## Kasafin Kuɗi
 
 ```bash
-# Samo matsayin kasafin kuɗi na dukkan maɓallan API
+# Samu matsayin kasafin kuɗi na dukkan mabuɗan API
 GET /api/usage/budget
 
 # Saita ko sabunta kasafin kuɗi
@@ -1664,14 +1696,14 @@ Content-Type: application/json
 }
 ```
 
-> **Bayanan schema** (`setBudgetSchema`): Ana buƙatar `apiKeyId`; aƙalla ɗaya daga cikin `dailyLimitUsd`, `weeklyLimitUsd`, ko `monthlyLimitUsd` dole ne ya fi sifili. Filayen zaɓi: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). Tsohon tsari na `{keyId, limit, period}` yana dawo da `400 Bad Request`.
+> **Bayanan kula na tsarin** (`setBudgetSchema`): `apiKeyId` wajibi ne; aƙalla ɗaya daga cikin `dailyLimitUsd`, `weeklyLimitUsd`, ko `monthlyLimitUsd` dole ya fi sifili. Filayen zaɓi: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). Tsarin gado `{keyId, limit, period}` yana mayar da `400 Bad Request`.
 
 ## Iyakokin Token
 
-Kasafin **token** na kowane maɓallin API (wanda ya bambanta da Kasafin da ke bisa USD da ke sama). Ana aiwatar da shi kai tsaye a hanyar buƙata: idan amfani da maɓalli a taga na yanzu ya kai iyakarsa, ana ƙin buƙatun da `429 Too Many Requests`. Ana iya keɓance iyakoki ga takamaiman `model`, `provider`, ko a yi amfani da su a matakin `global` ga duk maɓallin; idan iyakoki da yawa suka dace da buƙata, mafi tsauri ne zai yi aiki.
+Kasafin **token** na kowane API key (dabam da Kasafin da ya dogara da USD da aka ambata a sama). Ana aiwatar da su kai tsaye a hanyar buƙata: idan amfani da taga na yanzu na key ya kai iyakarsa, ana ƙin buƙatun da `429 Too Many Requests`. Ana iya keɓance iyakokin ga takamaiman `model`, `provider`, ko a yi amfani da su `global`ly a faɗin key ɗin; idan iyakoki da yawa sun dace da buƙata, mafi tsaurin iyaka ce ke aiki.
 
 ```bash
-# Jera iyakokin token na maɓalli (ya haɗa da amfani na yanzu a taga)
+# Jerin iyakokin token na key (ya haɗa da amfani da taga kai tsaye)
 GET /api/usage/token-limits?apiKeyId=key-123
 
 # Ƙirƙira ko sabunta iyakar token
@@ -1687,92 +1719,92 @@ Content-Type: application/json
   "enabled": true
 }
 
-# Share iyakar token ta id
+# Goge iyakar token ta id
 DELETE /api/usage/token-limits?id=tl-abc
 ```
 
-> **Bayanan tsari** (`setTokenLimitSchema`): Ana buƙatar `apiKeyId` da `scopeType` (`model` | `provider` | `global`). Ana buƙatar `scopeValue` sai dai idan `scopeType` ya kasance `global` (misali, id na model don iyakar `model`, ko id na provider don iyakar `provider`). Dole ne `tokenLimit` ya kasance cikakkiyar lamba mai kyau (ana sauya shi daga string). Na zaɓi: `id` (a bar shi don ƙirƙira, a bayar da shi don sabuntawa), `resetInterval` (`daily` | `weekly` | `monthly`, tsoho `monthly`), `resetTime` (`HH:MM`), `enabled` (tsoho `true`). Amsoshin `GET` suna ƙara wa kowace iyaka bayanan `tokensUsed`, `remaining`, `windowStart`, `periodStartAt`, da `nextResetAt`. Wannan endpoint ne na ajin gudanarwa (ana aiwatar da tabbatar da izini a tsakiya ta authz pipeline).
+> **Bayanan tsarin** (`setTokenLimitSchema`): `apiKeyId` da `scopeType` (`model` | `provider` | `global`) dole ne su kasance. `scopeValue` dole ne ya kasance sai dai idan `scopeType` ɗin `global` ne (misali, model id don iyakar `model`, ko provider id don iyakar `provider`). `tokenLimit` dole ne ya zama cikakkiyar lamba mai kyau (ana juya shi daga string). Na zaɓi: `id` (a bar shi don ƙirƙira, a samar da shi don sabuntawa), `resetInterval` (`daily` | `weekly` | `monthly`, tsoho `monthly`), `resetTime` (`HH:MM`), `enabled` (tsoho `true`). Amsoshin `GET` suna ƙara wa kowace iyaka `tokensUsed`, `remaining`, `windowStart`, `periodStartAt`, da `nextResetAt`. Wannan ƙarshen hanya na ajin gudanarwa ne (ana tilasta tantancewa ta tsakiya ta hanyar bututun authz).
 
-## Sarrafa Buƙata
+## Sarrafa Buƙatu
 
-1. Client yana aika buƙata zuwa `/v1/*`
-2. Route handler yana kiran `handleChat`, `handleEmbedding`, `handleAudioTranscription`, ko `handleImageGeneration`
-3. Ana tantance model (provider/model kai tsaye ko alias/combo)
-4. Ana zaɓar credentials daga DB na cikin gida tare da tace samuwar account
-5. Don chat: `handleChatCore` yana duba semantic/signature cache kuma yana tantance saitunan matsawar combo
-6. Ana gudanar da proactive compression kafin fassarar provider idan an kunna shi (`lite`, Caveman, RTK, ko waɗanda aka jera tare)
-7. Provider executor yana aika buƙatar upstream
-8. Ana fassara amsa zuwa tsarin client (chat) ko a mayar da ita yadda take (embeddings/images/audio)
-9. Ana rikodin usage, compression analytics, da request logs
-10. Ana amfani da fallback idan kurakurai sun faru bisa ƙa'idodin combo
+1. Abokin ciniki yana aika buƙata zuwa `/v1/*`
+2. Mai sarrafa hanya yana kiran `handleChat`, `handleEmbedding`, `handleAudioTranscription`, ko `handleImageGeneration`
+3. Ana warware model (provider/model kai tsaye ko alias/combo)
+4. Ana zaɓar bayanan tantancewa daga DB na cikin gida tare da tace samuwar account
+5. Don chat: `handleChatCore` yana duba semantic/signature cache kuma yana warware saitunan matsawa na combo
+6. Matsawa ta gaba tana gudana kafin fassarar provider idan an kunna ta (`lite`, Caveman, RTK, ko stacked)
+7. Mai aiwatar da provider yana aika buƙatar zuwa upstream
+8. Ana mayar da amsa zuwa tsarin abokin ciniki (chat), ko a mayar da ita yadda take (embeddings/images/audio)
+9. Ana yin rikodin amfani, nazarin matsawa, da rajistan buƙatu
+10. Ana amfani da fallback idan an samu kurakurai bisa ga dokokin combo
 
-Cikakken bayanin architecture: [`ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
+Cikakken bayanin gine-gine: [`ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
 
 ---
 
-## Gudanar da Combo
+## Sarrafa Combo
 
-Hakanan za a iya daidaita manyan routing combos (waɗanda aka riga aka taƙaita a ƙarƙashin `/api/combos*`) 1:1 daga tsarin id na model, wanda ke ba da damar karkatar da id na model mai salon OpenAI zuwa combo ba tare da bayyanawa ba.
+Hanyoyin routing na mataki mafi girma (waɗanda aka riga aka taƙaita ƙarƙashin `/api/combos*`) za a iya tsara su 1:1 daga tsarin model id, wanda ke ba da damar karkatar da model id mai salon OpenAI a bayyane zuwa combo.
 
 | Hanya  | Path                             | Bayani                                                                          |
 | ------ | -------------------------------- | ------------------------------------------------------------------------------- |
-| GET    | `/api/model-combo-mappings`      | Jera duk mappings na model→combo                                                |
-| POST   | `/api/model-combo-mappings`      | Ƙirƙiri mapping — body: `{pattern, comboId, priority?, enabled?, description?}` |
-| GET    | `/api/model-combo-mappings/[id]` | Samo mapping guda ɗaya                                                          |
-| PUT    | `/api/model-combo-mappings/[id]` | Sabunta fields na mapping da ke akwai                                           |
-| DELETE | `/api/model-combo-mappings/[id]` | Cire mapping                                                                    |
+| GET    | `/api/model-combo-mappings`      | Jera duk taswirar model→combo                                                   |
+| POST   | `/api/model-combo-mappings`      | Ƙirƙiri taswira — jiki: `{pattern, comboId, priority?, enabled?, description?}` |
+| GET    | `/api/model-combo-mappings/[id]` | Dawo da taswira guda ɗaya                                                       |
+| PUT    | `/api/model-combo-mappings/[id]` | Sabunta filayen taswirar da take akwai                                          |
+| DELETE | `/api/model-combo-mappings/[id]` | Cire taswira                                                                    |
 
-**Auth:** zaman gudanarwa/maɓallin API (`requireManagementAuth`).
+**Tantancewa:** zaman gudanarwa/API key (`requireManagementAuth`).
 
 ---
 
 ## Webhooks
 
-Biyan kuɗin webhook masu fita don abubuwan da suka faru na OmniRoute (kammala buƙata, ƙarewar ƙayyadadden amfani, sauya maɓalli, da sauransu).
+Biyan kuɗin webhook na waje don abubuwan OmniRoute (kammala buƙata, ƙarewar kaso, jujjuyawar maɓalli, da sauransu).
 
-| Hanya  | Path                      | Bayani                                                                     |
-| ------ | ------------------------- | -------------------------------------------------------------------------- |
-| GET    | `/api/webhooks`           | Jera webhooks (an ɓoye sirrika zuwa `<prefix>...`)                         |
-| POST   | `/api/webhooks`           | Ƙirƙiri webhook — body: `{url, events?: ["*"], secret?, description?}`     |
-| GET    | `/api/webhooks/[id]`      | Samo webhook                                                               |
-| PUT    | `/api/webhooks/[id]`      | Sabunta url/events/secret/description                                      |
-| DELETE | `/api/webhooks/[id]`      | Cire webhook                                                               |
-| POST   | `/api/webhooks/[id]/test` | Aika payload na gwaji zuwa URL na webhook sannan a dawo da matsayin isarwa |
+| Hanya  | Hanya                     | Bayani                                                                 |
+| ------ | ------------------------- | ---------------------------------------------------------------------- |
+| GET    | `/api/webhooks`           | Jera webhooks (ana ɓoye sirrika zuwa `<prefix>...`)                    |
+| POST   | `/api/webhooks`           | Ƙirƙiri webhook — jiki: `{url, events?: ["*"], secret?, description?}` |
+| GET    | `/api/webhooks/[id]`      | Dawo da webhook                                                        |
+| PUT    | `/api/webhooks/[id]`      | Sabunta url/events/secret/description                                  |
+| DELETE | `/api/webhooks/[id]`      | Cire webhook                                                           |
+| POST   | `/api/webhooks/[id]/test` | Aika bayanan gwaji zuwa URL ɗin webhook kuma dawo da matsayin isarwa   |
 
-**Auth:** zaman gudanarwa/maɓallin API (`requireManagementAuth`).
-
----
-
-## Maɓallan da Aka Yi Wa Rajista (Gudanarwa ta Atomatik)
-
-Tsarin gudanar da maɓalli ta atomatik yana amfani da su don bayarwa da sauya maɓallan API ta hannun mai samarwa/asusun da ke goyon baya, tare da ƙayyadaddun amfani na yau da kullum/na kowace awa.
-
-| Hanya  | Path                                  | Bayani                                                                                                                                                                                                                                     |
-| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| GET    | `/api/v1/registered-keys`             | Jera maɓallan da aka yi wa rajista (prefix da aka ɓoye kawai)                                                                                                                                                                              |
-| POST   | `/api/v1/registered-keys`             | Bayar da sabon maɓalli mai rajista — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Yana dawo da ainihin maɓallin sau **ɗaya**. Yana dawo da `429` idan an ƙi saboda ƙayyadadden amfani. |
-| GET    | `/api/v1/registered-keys/[id]`        | Samo metadata na maɓalli mai rajista (ba tare da ainihin maɓallin ba)                                                                                                                                                                      |
-| DELETE | `/api/v1/registered-keys/[id]`        | Soke maɓalli mai rajista                                                                                                                                                                                                                   |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Endpoint na soke maɓalli kai tsaye (tasirinsa iri ɗaya ne da DELETE)                                                                                                                                                                       |
-
-**Auth:** zaman gudanarwa/maɓallin API (`requireManagementAuth`) — kariya iri ɗaya da ta `/api/keys`: zaman dashboard, token na CLI na gida, ko maɓallin API mai iyakar izinin `manage`/`admin`; maɓallan API na inference kawai suna samun `403`. Duba kuma `/v1/quotas/check` da `/v1/issues/report`.
+**Tabbatarwa:** zaman gudanarwa/maɓallin API (`requireManagementAuth`).
 
 ---
 
-## Ka'idar Wakilai
+## Maɓallan da Aka Yi Rajista (Gudanarwa ta atomatik)
 
-Ayyukan wakilan girgije (Claude Code, Codex Cloud, OpenHands, da sauransu) waɗanda ake aiwatarwa daga nesa a madadin masu amfani da OmniRoute.
+Ana amfani da su ta tsarin gudanar da maɓallai ta atomatik don fitarwa da jujjuya maɓallan API a kan mai samarwa/asusu na baya, tare da kaso na yau da kullum/na awa.
 
-| Hanya  | Tafarki                       | Bayani                                                                                                                                                   |
-| ------ | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/agents/tasks`        | Jera ayyuka — `?provider=`, `?status=`, `?limit=` na zaɓi ne (1–500, tsoho 50)                                                                           |
-| POST   | `/api/v1/agents/tasks`        | Ƙirƙiri aiki — ana inganta jiki ta `CreateCloudAgentTaskSchema` (`providerId`, `prompt`, `source`, `options?`). Yana dawo da `201` tare da kunshin aikin |
-| DELETE | `/api/v1/agents/tasks?id=...` | Share aiki                                                                                                                                               |
-| GET    | `/api/v1/agents/tasks/[id]`   | Karanta aiki — yana sabunta matsayi kai tsaye daga wakilin girgije na sama idan an saita `external_id`                                                   |
-| POST   | `/api/v1/agents/tasks/[id]`   | Aikin da aka bambanta: `{action: "approve"}`, `{action: "message", message}`, ko `{action: "cancel"}`                                                    |
-| DELETE | `/api/v1/agents/tasks/[id]`   | Share takamaiman aiki ta id                                                                                                                              |
+| Hanya  | Hanya                                 | Bayani                                                                                                                                                                                                                                  |
+| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Jera maɓallan da aka yi rajista (gabatarwar da aka ɓoye kawai)                                                                                                                                                                          |
+| POST   | `/api/v1/registered-keys`             | Fitar da sabon maɓallin da aka yi rajista — jiki: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Yana dawo da maɓallin danye **sau ɗaya kawai**. Yana dawo da `429` idan an ƙi saboda kaso. |
+| GET    | `/api/v1/registered-keys/[id]`        | Dawo da bayanan maɓallin da aka yi rajista (babu ainihin abin da ke cikin maɓallin)                                                                                                                                                     |
+| DELETE | `/api/v1/registered-keys/[id]`        | Soke maɓallin da aka yi rajista                                                                                                                                                                                                         |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Ƙarshen API na soke maɓalli a sarari (sakamako iri ɗaya da DELETE)                                                                                                                                                                      |
 
-> **Tabbatarwa:** ana buƙatar tabbatarwar gudanarwa a kowace hanya (`requireCloudAgentManagementAuth`). Kafin v3.8.0 waɗannan ba su buƙatar tabbatarwa ba — duba commit `588a0333` don sauyin da ya karya dacewa.
+**Tabbatarwa:** zaman gudanarwa/maɓallin API (`requireManagementAuth`) — mai gadi iri ɗaya da `/api/keys`: zaman dashboard, alamar CLI ta cikin gida, ko maɓallin API mai ikon `manage`/`admin`; maɓallan API na inference-kawai suna samun `403`. Duba kuma `/v1/quotas/check` da `/v1/issues/report`.
+
+---
+
+## Yarjejeniyar Agents
+
+Ayyukan wakilin girgije (Claude Code, Codex Cloud, OpenHands, da sauransu) da ake aiwatarwa daga nesa a madadin masu amfani da OmniRoute.
+
+| Method | Path                          | Description                                                                                                                                                       |
+| ------ | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/agents/tasks`        | Jerin ayyuka — zaɓi na `?provider=`, `?status=`, `?limit=` (1–500, tsoho 50)                                                                                      |
+| POST   | `/api/v1/agents/tasks`        | Ƙirƙiri aiki — `CreateCloudAgentTaskSchema` ne ke tantance jikin buƙatar (`providerId`, `prompt`, `source`, `options?`). Yana dawo da `201` tare da kunshin aikin |
+| DELETE | `/api/v1/agents/tasks?id=...` | Goge aiki                                                                                                                                                         |
+| GET    | `/api/v1/agents/tasks/[id]`   | Karanta aiki — yana sabunta matsayi a aiki tare daga wakilin girgije na sama idan an saita `external_id`                                                          |
+| POST   | `/api/v1/agents/tasks/[id]`   | Aiki bisa nau'in buƙata: `{action: "approve"}`, `{action: "message", message}`, ko `{action: "cancel"}`                                                           |
+| DELETE | `/api/v1/agents/tasks/[id]`   | Goge takamaiman aiki ta id                                                                                                                                        |
+
+> **Auth:** Ana buƙatar izinin gudanarwa a kowace hanya (`requireCloudAgentManagementAuth`). Kafin v3.8.0, waɗannan hanyoyin ba su da tantancewa — duba commit `588a0333` don canjin da ya karya daidaito.
 
 ```bash
 # Ƙirƙiri aikin girgije na Claude Code
@@ -1784,130 +1816,130 @@ curl -X POST http://localhost:20128/api/v1/agents/tasks \
 
 ---
 
-## Wakilan Tsakani na Gudanarwa
+## Wakilan Gudanarwa
 
-Wakilan tsakani na HTTP(S)/SOCKS masu fita waɗanda za a iya sanyawa ga masu samarwa, asusu, ko a matakin duniya.
+Wakilan HTTP(S)/SOCKS masu fita waɗanda za a iya sanya wa masu samar da sabis, asusu, ko a duk duniya.
 
-| Hanya  | Tafarki                                      | Bayani                                                                                                                                                 |
-| ------ | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| GET    | `/api/v1/management/proxies`                 | Jera wakilan tsakani (tare da `?id=` yana dawo da guda ɗaya; tare da `?id=&where_used=1` yana dawo da zanen alaƙar sanyawa)                            |
-| POST   | `/api/v1/management/proxies`                 | Ƙirƙiri wakilin tsakiya — ana inganta jiki ta `createProxyRegistrySchema`                                                                              |
-| PATCH  | `/api/v1/management/proxies`                 | Sabunta wakilin tsakiya — ana inganta jiki ta `updateProxyRegistrySchema` (yana buƙatar `id`)                                                          |
-| DELETE | `/api/v1/management/proxies?id=...&force=1`  | Share wakilin tsakiya (yi amfani da `force=1` don cire alaƙar sanyawa)                                                                                 |
-| GET    | `/api/v1/management/proxies/assignments`     | Jera sanyawa — ana iya tacewa ta `proxy_id`, `scope`, `scope_id`; aika `resolve_connection_id=<id>` don tantance wakilin tsakiya mai aiki na wata haɗi |
-| PUT    | `/api/v1/management/proxies/assignments`     | Sanya — ana inganta jiki ta `proxyAssignmentSchema` (`{scope, scopeId?, proxyId?}`). Yana share ma'ajiyar wucin-gadi ta dispatcher                     |
-| PUT    | `/api/v1/management/proxies/bulk-assign`     | Sanya da yawa — ana inganta jiki ta `bulkProxyAssignmentSchema` (`{scope, scopeIds[], proxyId?}`)                                                      |
-| GET    | `/api/v1/management/proxies/health?hours=24` | Haɗa bayanan lafiyar wakilin tsakiya (adadin nasara/rashin nasara, jinkiri) a cikin wani zangon lokaci                                                 |
+| Method | Path                                         | Description                                                                                                                                           |
+| ------ | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/management/proxies`                 | Jera wakilai (tare da `?id=` yana dawo da guda ɗaya; tare da `?id=&where_used=1` yana dawo da jadawalin sanya su)                                     |
+| POST   | `/api/v1/management/proxies`                 | Ƙirƙiri wakili — `createProxyRegistrySchema` ne ke tantance jikin buƙatar                                                                             |
+| PATCH  | `/api/v1/management/proxies`                 | Sabunta wakili — `updateProxyRegistrySchema` ne ke tantance jikin buƙatar (ana buƙatar `id`)                                                          |
+| DELETE | `/api/v1/management/proxies?id=...&force=1`  | Goge wakili (yi amfani da `force=1` don cire abubuwan da aka sanya)                                                                                   |
+| GET    | `/api/v1/management/proxies/assignments`     | Jera abubuwan da aka sanya — ana iya tacewa ta `proxy_id`, `scope`, `scope_id`; aika `resolve_connection_id=<id>` don warware wakili mai aiki na haɗi |
+| PUT    | `/api/v1/management/proxies/assignments`     | Sanya — `proxyAssignmentSchema` ne ke tantance jikin buƙatar (`{scope, scopeId?, proxyId?}`). Yana share ma'ajiyar dispatcher                         |
+| PUT    | `/api/v1/management/proxies/bulk-assign`     | Sanya da yawa — `bulkProxyAssignmentSchema` ne ke tantance jikin buƙatar (`{scope, scopeIds[], proxyId?}`)                                            |
+| GET    | `/api/v1/management/proxies/health?hours=24` | Tara lafiyar wakilai (adadin nasara/rashin nasara, jinkiri) a cikin wani tazarar lokaci                                                               |
 
-**Tabbatarwa:** zaman gudanarwa/maɓallin API a kowace hanya (`requireManagementAuth`).
+**Auth:** Ana buƙatar zaman gudanarwa/maɓallin API a kowace hanya (`requireManagementAuth`).
 
-> Ana gudanar da `POST /api/v1/management/proxies/[id]/assignments` da `POST /api/v1/management/proxies/[id]/health` da aka ambata a bayanin aikin ta hanyar madaidaitan hanyoyin `/assignments` da `/health` da aka nuna a sama — babu ƙananan hanyoyi na kowane id a cikin tushen lambar.
+> Bayanin aikin `POST /api/v1/management/proxies/[id]/assignments` da `POST /api/v1/management/proxies/[id]/health` ana hidimta musu ta hanyoyin `/assignments` da `/health` marasa rassa da aka nuna a sama — babu hanyoyin ƙasa na kowane id a cikin kundin lambar.
 
 ---
 
-## Juriya (faɗaɗɗe)
+## Juriya (ƙarin bayani)
 
-OmniRoute yana samar da hanyoyi uku masu zaman kansu don magance gazawar wucin gadi; maƙararan gudanarwa da ke ƙasa suna ba masu gudanarwa damar karantawa da sauya saitunansu:
+OmniRoute yana samar da hanyoyi uku masu zaman kansu na ɗan gajeren gazawa; endpoints na gudanarwa da ke ƙasa suna ba masu aiki damar karantawa da kuma gyara su:
 
-| Iyaka                | Ma'ajiyar yanayi                               | Karantawa                                 | Sake saiti / gogewa                                                   |
-| -------------------- | ---------------------------------------------- | ----------------------------------------- | --------------------------------------------------------------------- |
-| Katsewar mai samarwa | `domain_circuit_breakers` + cikin ƙwaƙwalwa    | `/api/monitoring/health`                  | `POST /api/resilience/reset`                                          |
-| Lokacin jiran haɗi   | `rateLimitedUntil` a kan haɗin masu samarwa    | `/api/rate-limits`, `/api/providers/[id]` | (yana sake kunnawa idan an buƙata; goge ta hanyar PUT na mai samarwa) |
-| Kulle samfurin       | Rijistar samuwar samfuri da ke cikin ƙwaƙwalwa | `GET /api/resilience/model-cooldowns`     | `DELETE /api/resilience/model-cooldowns`                              |
+| Iyakar aiki           | Adana yanayi                                | Karantawa                                 | Sake saita / sharewa                                          |
+| --------------------- | ------------------------------------------- | ----------------------------------------- | ------------------------------------------------------------- |
+| Mai katse mai samarwa | `domain_circuit_breakers` + cikin ƙwaƙwalwa | `/api/monitoring/health`                  | `POST /api/resilience/reset`                                  |
+| Jinkirin haɗi         | `rateLimitedUntil` a kan haɗin masu samarwa | `/api/rate-limits`, `/api/providers/[id]` | (yana sake kunnawa a hankali; sharewa ta hanyar provider PUT) |
+| Kulle samfur          | Rijistar samuwar samfur a cikin ƙwaƙwalwa   | `GET /api/resilience/model-cooldowns`     | `DELETE /api/resilience/model-cooldowns`                      |
 
-`PATCH /api/resilience` yana karɓar sauye-sauyen katsewar mai samarwa ƙarƙashin `providerBreaker.oauth` da `providerBreaker.apikey`. Kowane bayanin martaba yana goyon bayan `degradationThreshold`, `failureThreshold`, da `resetTimeoutMs`; ana kuma nuna waɗannan filaye a Dashboard → Settings → Resilience.
+`PATCH /api/resilience` yana karɓar gyare-gyaren mai katse mai samarwa a ƙarƙashin `providerBreaker.oauth` da `providerBreaker.apikey`. Kowane bayanin saituna yana tallafa wa `degradationThreshold`, `failureThreshold`, da `resetTimeoutMs`; ana kuma nuna filayen iri ɗaya a Dashboard → Saituna → Juriya.
 
 ```bash
-# Goge kullen samfuri guda ɗaya
+# Share kullen samfur guda ɗaya
 curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
   -d '{"provider":"openai","model":"gpt-4o-mini"}'
 
-# Goge dukkan kulle-kullen
+# Share dukkan kulle-kulle
 curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
   -H "Cookie: auth_token=..." \
   -d '{"all":true}'
 ```
 
-Don cikakken bayani kan tsarin da tsoffin saitunan katsewa: duba [`CLAUDE.md`](../../CLAUDE.md) → "Yanayin Juriya na Lokacin Gudanarwa" da [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md).
+Don cikakken bayanin ra’ayi da tsoffin saitunan mai katsewa: duba [`CLAUDE.md`](../../CLAUDE.md) → "Resilience Runtime State" da [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md).
 
-### Jerin Jira na Iyakance Ƙima da Kariyar Kunna Kai-tsaye
+### Layin Jerin Rate-Limit da Kariyar Auto-Enable
 
-- **Hanyar rubutawa da ake goyon baya**: `POST /api/rate-limits` tare da jiki `{"connectionId": "<id>", "enabled": true|false}` ita ce maƙarar gudanarwa da ake goyon baya don kunna ko kashe kariyar iyakance ƙima ga wani haɗi. Da gangan `PUT /api/providers/[id]` ba ya gyara ko sauya `rateLimitProtection` (#11278).
-- **Ma'anar `enabled: false`**: Saita `enabled: false` yana cire kariyar da aka ayyana kai tsaye ga haɗin, amma **ba ya** cire haɗin maballin API mai aiki daga kariyar kunna kai-tsaye ta gaba ɗaya (`autoEnableApiKeyProviders = true`). A cikin `reconcileEnabledConnections` (`open-sse/services/rateLimitManager.ts`), `false` da `undefined` suna da ma'ana iri ɗaya; haɗin maballin API masu aiki waɗanda ba su da kariyar da aka ayyana kai tsaye za su ci gaba da samun kariya ƙarƙashin kariyar kunna kai-tsaye.
-- **Kashewa na gaba ɗaya**: Don gudanar da haɗin maballin API ba tare da jerin jiran iyakance ƙima ba, kashe kariyar ta gaba ɗaya ta hanyar `RATE_LIMIT_AUTO_ENABLE=false` (env) ko `resilienceSettings.requestQueue.autoEnableApiKeyProviders = false` (Settings → Resilience / `PATCH /api/resilience`).
+- **Hanyar rubutu da ake tallafawa**: `POST /api/rate-limits` tare da jikin `{"connectionId": "<id>", "enabled": true|false}` shi ne endpoint ɗin gudanarwa da ake tallafawa don kunna ko kashe kariyar rate-limit ga haɗi. `PUT /api/providers/[id]` da gangan ba ya gyara ko sauya `rateLimitProtection` (#11278).
+- **Ma’anar `enabled: false`**: Saita `enabled: false` yana cire kariya ta musamman ga haɗin, amma **ba ya fitar da** haɗin API-key mai aiki daga tsarin kariyar auto-enable na duniya (`autoEnableApiKeyProviders = true`). A cikin `reconcileEnabledConnections` (`open-sse/services/rateLimitManager.ts`), `false` da `undefined` suna da ma’ana iri ɗaya; haɗin API-key mai aiki ba tare da kariya ta musamman ba zai ci gaba da samun kariya ƙarƙashin tsarin auto-enable.
+- **Kashewa a duniya**: Don gudanar da haɗin API-key ba tare da layukan jerin rate-limit ba, kashe tsarin kariyar a duniya ta hanyar `RATE_LIMIT_AUTO_ENABLE=false` (env) ko `resilienceSettings.requestQueue.autoEnableApiKeyProviders = false` (Saituna → Juriya / `PATCH /api/resilience`).
 
 ---
 
 ## Ƙwarewa
 
-Tsarin ƙwarewa don faɗaɗa OmniRoute da masu sarrafa umarni na musamman waɗanda za a iya aiwatarwa, tare da haɗin gwiwar kasuwar ƙwarewa.
+Tsarin ƙwarewa don faɗaɗa OmniRoute da masu sarrafa aiwatarwa na musamman, tare da haɗin gwiwar kasuwar kayayyaki.
 
-| Hanya  | Tafarki                           | Bayani                                                                                                                                           |
-| ------ | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| GET    | `/api/skills`                     | Jera ƙwarewar da aka girka — ana iya tacewa da `?q=`, `?mode=on\|off\|auto`, `?source=skillsmp\|skillssh\|local`, tare da rarrabawa zuwa shafuka |
-| GET    | `/api/skills/[id]`                | Samo ƙwarewa guda ɗaya                                                                                                                           |
-| PUT    | `/api/skills/[id]`                | Sabunta ƙwarewa (suna, bayani, yanayi, tsari, mai sarrafawa, alamomi)                                                                            |
-| DELETE | `/api/skills/[id]`                | Cire ƙwarewa                                                                                                                                     |
-| POST   | `/api/skills/install`             | Girka ƙwarewa daga ɗanyen fayil ɗin bayani — jiki: `{name, version, description, schema:{input, output}, handlerCode, apiKeyId?}`                |
-| GET    | `/api/skills/executions`          | Jera aiwatar da ƙwarewa na baya-bayan nan (sahihin tarihin bayanai masu shiga/fita/tsawon lokaci)                                                |
-| GET    | `/api/skills/marketplace?q=...`   | Bincike/jerin shahararru daga kasuwar SkillsMP (yana buƙatar saitin `skillsmpApiKey`)                                                            |
-| POST   | `/api/skills/marketplace/install` | Girka ƙwarewa ta amfani da id daga SkillsMP                                                                                                      |
-| GET    | `/api/skills/skillssh?q=&limit=`  | Bincika rajistar skills.sh                                                                                                                       |
-| POST   | `/api/skills/skillssh/install`    | Girka ƙwarewa ta amfani da id daga skills.sh                                                                                                     |
+| Hanya  | Tafarki                           | Bayani                                                                                                                                    |
+| ------ | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/skills`                     | Jera ƙwarewar da aka girka — ana iya tacewa ta `?q=`, `?mode=on\|off\|auto`, `?source=skillsmp\|skillssh\|local`, tare da rarraba shafuka |
+| GET    | `/api/skills/[id]`                | Dawo da ƙwarewa guda ɗaya                                                                                                                 |
+| PUT    | `/api/skills/[id]`                | Sabunta ƙwarewa (suna, bayani, yanayi, tsari, mai sarrafawa, alamomi)                                                                     |
+| DELETE | `/api/skills/[id]`                | Cire ƙwarewa                                                                                                                              |
+| POST   | `/api/skills/install`             | Girka ƙwarewa daga bayyanannen bayani kai tsaye — jiki: `{name, version, description, schema:{input, output}, handlerCode, apiKeyId?}`    |
+| GET    | `/api/skills/executions`          | Jera aiwatar da ƙwarewa na baya-bayan nan (tarihin bincike tare da shigarwa/fitarwa/lokacin aiwatarwa)                                    |
+| GET    | `/api/skills/marketplace?q=...`   | Bincika/jera mashahurai daga kasuwar SkillsMP (yana buƙatar saitin `skillsmpApiKey`)                                                      |
+| POST   | `/api/skills/marketplace/install` | Girka ƙwarewa ta ID daga SkillsMP                                                                                                         |
+| GET    | `/api/skills/skillssh?q=&limit=`  | Bincika rajistar skills.sh                                                                                                                |
+| POST   | `/api/skills/skillssh/install`    | Girka ƙwarewa ta ID daga skills.sh                                                                                                        |
 
-**Tabbatar da izini:** zaman gudanarwa/maballin API. Hanyoyin binciken kasuwa suna karɓar ko dai izinin gudanarwa ko maballin API na Bearer (`isAuthenticated`).
+**Tabbatarwa:** zaman gudanarwa/mabuɗin API. Hanyoyin binciken kasuwa suna karɓar ko dai tabbacin gudanarwa ko mabuɗin API na Bearer (`isAuthenticated`).
 
 ---
 
 ## Ƙwaƙwalwa
 
-Ma'ajiyar ƙwaƙwalwar tattaunawa/bayanan gaskiya mai ɗorewa, wadda aka keɓance ga kowane maɓallin API / zama.
+Ma’ajiyar bayanan tattaunawa/haƙiƙa ta dindindin, wadda ta keɓanta ga kowane maɓallin API / zaman.
 
-| Hanya  | Tafarki              | Bayani                                                                                                                          |
-| ------ | -------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/memory`        | Jera abubuwan ƙwaƙwalwa — `?apiKeyId=`, `?type=`, `?sessionId=`, `?q=`, tare da rabon shafuka na `offset/limit` ko `page/limit` |
-| POST   | `/api/memory`        | Ƙirƙiri ƙwaƙwalwa — Zod na tantance jiki: `{content, key, type?, sessionId?, apiKeyId?, metadata?, expiresAt?}`                 |
-| GET    | `/api/memory/[id]`   | Maido da ƙwaƙwalwa guda ɗaya                                                                                                    |
-| DELETE | `/api/memory/[id]`   | Share ƙwaƙwalwa                                                                                                                 |
-| GET    | `/api/memory/health` | Lafiyar tsarin ƙwaƙwalwa (haɗin DB, tsarin embeddings na baya, matsayin fihirisar vector)                                       |
+| Hanya  | Hanya                | Bayani                                                                                                                     |
+| ------ | -------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/memory`        | Jera ƙwaƙwalwa — `?apiKeyId=`, `?type=`, `?sessionId=`, `?q=`, tare da rarrabawa ta `offset/limit` ko `page/limit`         |
+| POST   | `/api/memory`        | Ƙirƙiri ƙwaƙwalwa — jikin buƙatar da Zod ya inganta: `{content, key, type?, sessionId?, apiKeyId?, metadata?, expiresAt?}` |
+| GET    | `/api/memory/[id]`   | Dawo da ƙwaƙwalwa guda ɗaya                                                                                                |
+| DELETE | `/api/memory/[id]`   | Goge ƙwaƙwalwa                                                                                                             |
+| GET    | `/api/memory/health` | Lafiyar tsarin ƙwaƙwalwa (haɗin DB, backend na embeddings, matsayin vector index)                                          |
 
-**Tabbatar da izini:** zaman gudanarwa/maɓallin API (`requireManagementAuth`). Ƙimar enum ta `type`: `FACTUAL`, `EPISODIC`, `SEMANTIC`, `PROCEDURAL` (duba `MemoryType` a cikin `src/lib/memory/types.ts`).
+**Tabbatar da izini:** zaman gudanarwa/maɓallin API (`requireManagementAuth`). Enum na `type`: `FACTUAL`, `EPISODIC`, `SEMANTIC`, `PROCEDURAL` (duba `MemoryType` a cikin `src/lib/memory/types.ts`).
 
 ---
 
 ## Sabar MCP
 
-OmniRoute yana zuwa da sabar Model Context Protocol da aka haɗa cikinsa, mai hanyoyin jigilar bayanai guda 3 (stdio, SSE, streamable-http) da kayan aikin da aka keɓance iyakokinsu. Endpoints na dashboard da ke ƙasa suna karanta bayanan matsayi/audit kuma suna wakiltar hanyoyin jigilar HTTP.
+OmniRoute na zuwa da ginanniyar sabar Model Context Protocol mai jigilar bayanai 3 (stdio, SSE, streamable-http) da kayan aiki masu iyakantaccen yanki. Ƙarshen dashboard da ke ƙasa suna karanta bayanan matsayi/audit kuma suna tura jigilar HTTP.
 
-| Hanya | Tafarki | Bayani |
+| Hanya | Hanya | Bayani |
 | ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Bugun zuciya, hanyar jigilar bayanai, yanayin kasancewa kan layi, kira na ƙarshe, manyan kayan aiki, ƙimar nasara ta sa'o'i 24 |
+| GET | `/api/mcp/status` | Bugun zuciya, jigilar bayanai, matsayin kan layi, kiran ƙarshe, manyan kayan aiki, ƙimar nasara ta awanni 24 |
 | GET | `/api/mcp/tools` | Jerin kayan aikin MCP tare da `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | Buɗe rafin SSE don hanyar jigilar SSE (yana dawo da `503` idan an kashe MCP ko hanyar jigilar ba ta dace ba) |
-| POST | `/api/mcp/sse` | Aika firam ɗin JSON-RPC ta hanyar jigilar SSE |
-| GET | `/api/mcp/stream` | Buɗe ɓangaren SSE na hanyar jigilar Streamable HTTP (saƙonnin da sabar ta fara aikawa) |
-| POST | `/api/mcp/stream` | Aika firam ɗin JSON-RPC ta hanyar jigilar Streamable HTTP |
+| GET | `/api/mcp/sse` | Buɗe rafin SSE don jigilar SSE (yana dawo da `503` idan MCP a kashe yake ko jigilar ba ta dace ba) |
+| POST | `/api/mcp/sse` | Aika firam ɗin JSON-RPC ta jigilar SSE |
+| GET | `/api/mcp/stream` | Buɗe ɓangaren SSE na jigilar Streamable HTTP (saƙonnin da sabar ta fara) |
+| POST | `/api/mcp/stream` | Aika firam ɗin JSON-RPC ta jigilar Streamable HTTP |
 | DELETE | `/api/mcp/stream` | Ƙare zaman Streamable HTTP |
-| GET | `/api/mcp/audit` | Bincika kundin audit — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Ƙididdigar audit da aka tara (jimilla, ƙimar nasara, matsakaicin tsawon lokaci, manyan kayan aiki) |
+| GET | `/api/mcp/audit` | Yi tambaya ga log ɗin audit — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
+| GET | `/api/mcp/audit/stats` | Ƙididdigar audit da aka tattara (jimilloli, ƙimar nasara, matsakaicin tsawon lokaci, manyan kayan aiki) |
 
-**Tabbatar da izini:** hanyoyin jigilar `sse`/`stream` suna mutunta tsarin tabbatar da izini na musamman ga MCP (maɓallin Bearer API mai iyakar `mcp`); hanyoyin `status`/`tools`/`audit*` ana iya karanta su daga dashboard (ba a buƙatar ƙarin tabbatar da izini bayan samun damar host ɗin dashboard).
+**Tabbatar da izini:** jigilar `sse`/`stream` suna bin tsarin izini na musamman na MCP (maɓallin API na Bearer mai `mcp` scope); ana iya karanta hanyoyin `status`/`tools`/`audit*` daga dashboard (babu ƙarin izini da ake buƙata bayan isa ga masaukin dashboard).
 
-> Dukkan hanyoyin jigilar HTTP suna ƙarƙashin `settings.mcpEnabled` da `settings.mcpTransport` — rashin dacewar hanyar jigilar yana dawo da `400`, yayin da yanayin da aka kashe MCP yake dawo da `503`.
+> Ana sarrafa jigilar HTTP ɗin biyu ta `settings.mcpEnabled` da `settings.mcpTransport` — rashin dacewar jigila yana dawo da `400`, yayin da MCP da aka kashe yake dawo da `503`.
 
 ---
 
 ## Sabar A2A
 
-OmniRoute yana samar da mashigar A2A (Agent-to-Agent) ta JSON-RPC 2.0 tare da marufin REST don dubawa/amfani da dashboard.
+OmniRoute yana fallasa ƙarshen JSON-RPC 2.0 na A2A (Agent-to-Agent), tare da kunshin REST don dubawa da amfani da dashboard.
 
 ### JSON-RPC
 
 ```bash
 POST /a2a
-Authorization: Bearer your-api-key   # na zaɓi ne sai dai idan an saita OMNIROUTE_API_KEY
+Authorization: Bearer your-api-key   # na zaɓi ne sai idan an saita OMNIROUTE_API_KEY
 Content-Type: application/json
 
 {
@@ -1921,68 +1953,68 @@ Content-Type: application/json
 }
 ```
 
-Hanyoyin da ake tallafawa (duk suna dogara da `settings.a2aEnabled`):
+Hanyoyin da ake tallafawa (duk suna buƙatar `settings.a2aEnabled`):
 
-| Hanya            | Bayani                                                                   |
-| ---------------- | ------------------------------------------------------------------------ |
-| `message/send`   | Gudanar da ƙwarewa kai-tsaye; yana dawo da `{task, artifacts, metadata}` |
-| `message/stream` | Gudanarwar SSE mai gudana ta saitin ƙwarewa iri ɗaya                     |
-| `tasks/get`      | Ɗauko aiki ta amfani da `taskId`                                         |
-| `tasks/cancel`   | Soke aiki ta amfani da `taskId`                                          |
+| Hanya            | Bayani                                                                     |
+| ---------------- | -------------------------------------------------------------------------- |
+| `message/send`   | Aiwatar da skill cikin jituwa; yana mayar da `{task, artifacts, metadata}` |
+| `message/stream` | Aiwatar da skill iri ɗaya ta hanyar SSE mai gudana                         |
+| `tasks/get`      | Dawo da task ta `taskId`                                                   |
+| `tasks/cancel`   | Soke task ta `taskId`                                                      |
 
-Ƙwarewar da ke ciki tun farko: `smart-routing`, `quota-management`, `provider-discovery`, `cost-analysis`, `health-report`.
+Skills da aka gina a ciki: `smart-routing`, `quota-management`, `provider-discovery`, `cost-analysis`, `health-report`.
 
-### Katin Wakili
+### Katin Agent
 
 ```bash
 GET /.well-known/agent.json
 ```
 
-Yana dawo da katin wakilin A2A na jama'a (suna, bayani, iyawa, kundin ƙwarewa, tsarin tantancewa) — ana adana shi a cache na jama'a na awa 1. Ba a buƙatar tantancewa.
+Yana mayar da katin agent na A2A na jama'a (suna, bayani, damar aiki, kundin skills, tsarin tantancewa) — ana adana shi a cache ga jama'a na awa 1. Ba a buƙatar tantancewa.
 
-### Mataimakan REST
+### Masu taimakon REST
 
-| Hanya | Tafarki                      | Bayani                                                                                                           |
-| ----- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| GET   | `/api/a2a/status`            | Ko an kunna A2A + ƙididdigar ayyuka + taƙaitaccen katin wakili da aka adana a cache                              |
-| GET   | `/api/a2a/tasks`             | Jera ayyuka — `?state=submitted\|working\|completed\|failed\|cancelled`, `?skill=`, `?limit=` (≤200), `?offset=` |
-| POST  | `/api/a2a/tasks`             | (Ba a aiwatar da shi a matsayin mataimakin REST ba — ƙirƙira ta JSON-RPC `message/send`)                         |
-| GET   | `/api/a2a/tasks/[id]`        | Ɗauko aiki guda ɗaya                                                                                             |
-| POST  | `/api/a2a/tasks/[id]/cancel` | Soke aiki                                                                                                        |
+| Hanya | Hanya                        | Bayani                                                                                                          |
+| ----- | ---------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| GET   | `/api/a2a/status`            | Bayanin ko an kunna A2A + ƙididdigar tasks + taƙaitaccen katin agent da ke cikin cache                          |
+| GET   | `/api/a2a/tasks`             | Jera tasks — `?state=submitted\|working\|completed\|failed\|cancelled`, `?skill=`, `?limit=` (≤200), `?offset=` |
+| POST  | `/api/a2a/tasks`             | (Ba a aiwatar da shi a matsayin mai taimakon REST ba — ƙirƙira ta JSON-RPC `message/send`)                      |
+| GET   | `/api/a2a/tasks/[id]`        | Dawo da task guda                                                                                               |
+| POST  | `/api/a2a/tasks/[id]/cancel` | Soke task                                                                                                       |
 
-**Tantancewa:** mataimakan REST suna aiki ba tare da tantancewar gudanarwa ba (dashboard na iya karantawa); hanyar JSON-RPC `/a2a` tana amfani da Bearer `OMNIROUTE_API_KEY` idan an saita shi.
+**Tantancewa:** masu taimakon REST suna aiki ba tare da tantancewar gudanarwa ba (ana iya karanta su daga dashboard); hanyar JSON-RPC `/a2a` tana amfani da Bearer `OMNIROUTE_API_KEY` idan an saita shi.
 
 ---
 
 ## Gajimare, Evals da Assess
 
-| Hanya | Tafarki | Bayani |
+| Hanya | Hanya | Bayani |
 | ------ | ------------------------------- | ------------------------------------------------------------------------------------------------- | ----------------------------- | ----------------------------------- |
-| POST | `/api/cloud/auth` | Tabbatar da maɓallin Bearer sannan a dawo da haɗin masu samarwa da aka ɓoye wani ɓangarensa + laƙaban samfura ga abokan cinikin daidaitawar gajimare |
-| POST | `/api/cloud/credentials/update` | Sabunta bayanan shaida masu ɓoyayyen tsaro na mai samarwa da aka daidaita da gajimare |
-| POST | `/api/cloud/model/resolve` | Warware ID na samfuri na ma'ana zuwa takamaiman mai samarwa/samfuri ta amfani da teburin zaɓin hanya na gida |
-| GET | `/api/cloud/models/alias` | Jera laƙaban samfura kamar yadda ake nuna su ga daidaitawar gajimare |
-| GET | `/api/assess` | Karanta sabbin rabe-raben tantancewa (na kowane mai samarwa/samfuri) |
-| POST | `/api/assess` | Gudanar da tantancewa — jiki: `{scope: {type:"all"}                                                   | {type:"provider", providerId} | {type:"model", modelId}, trigger?}` |
-| GET | `/api/evals` | Jera rukunin eval da ke ciki tun farko + ayyukan da aka gudanar kwanan nan |
+| POST | `/api/cloud/auth` | Tabbatar da maɓallin Bearer sannan ya mayar da haɗin masu samarwa da aka ɓoye + laƙabban samfura don abokan cinikin da ke daidaitawa da gajimare |
+| POST | `/api/cloud/credentials/update` | Sabunta bayanan tantancewa da aka ɓoye na mai samarwa da aka daidaita da gajimare |
+| POST | `/api/cloud/model/resolve` | Warware ID na samfurin ma'ana zuwa takamaiman mai samarwa/samfurin ta amfani da teburin kewayawa na gida |
+| GET | `/api/cloud/models/alias` | Jera laƙabban samfura kamar yadda ake fallasa su ga daidaitawar gajimare |
+| GET | `/api/assess` | Karanta sabbin rarrabuwar assessment (na kowane mai samarwa/samfuri) |
+| POST | `/api/assess` | Gudanar da assessment — jiki: `{scope: {type:"all"}                                                   | {type:"provider", providerId} | {type:"model", modelId}, trigger?}` |
+| GET | `/api/evals` | Jera rukunin evals da aka gina a ciki + gudanarwar baya-bayan nan |
 | POST | `/api/evals` | Fara gudanar da eval |
-| POST | `/api/evals/suites` | Ƙirƙiri rukunin eval na musamman — ana tantance jiki ta `evalSuiteSaveSchema` |
-| GET | `/api/evals/suites/[id]` | Ɗauko rukunin eval na musamman |
+| POST | `/api/evals/suites` | Ƙirƙiri rukunin eval na musamman — ana tabbatar da jiki ta `evalSuiteSaveSchema` |
+| GET | `/api/evals/suites/[id]` | Dawo da rukunin eval na musamman |
 
-**Tantancewa:** `/api/cloud/auth` yana tantance maɓallin Bearer kai-tsaye sannan ya dawo da maɓallin da aka ɓoye wani ɓangarensa da `projectId` na kowane haɗi kawai ga maɓalli mai ikon `manage` / `admin`; sauran hanyoyin `/api/cloud/*`, `/api/evals/*`, da `/api/assess` suna buƙatar zaman gudanarwa/maɓallin API. POST na `/api/assess` yana amfani da `validateBody` tare da tsarin scope na discriminated-union.
+**Tantancewa:** `/api/cloud/auth` yana tabbatar da maɓallin Bearer kai tsaye kuma yana mayar da maɓallin da aka ɓoye da `projectId` na kowace haɗi ne kawai ga maɓallin da ke da ikon `manage` / `admin`; sauran hanyoyin `/api/cloud/*`, `/api/evals/*`, da `/api/assess` suna buƙatar zaman/API key na gudanarwa. POST na `/api/assess` yana amfani da `validateBody` tare da tsarin scope na discriminated-union.
 
 ---
 
 ## Gudanar da ACP (Agent Client Protocol)
 
-a matsayin matakan ɗa. Waɗannan mashigai suna gudanar da gano wakilan ACP da rajistar wakilai
-na musamman.
+a matsayin hanyoyin `child processes`. Waɗannan wuraren shiga suna sarrafa gano wakilan ACP da
+rajistar wakilai na musamman.
 
-| Hanya  | Tafarki           | Bayani                                                                                                                                                         |
-| ------ | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/acp/agents` | Jera duk sanannun wakilan CLI (na ciki + na musamman) tare da matsayin shigarwa, siga, da binary                                                               |
-| POST   | `/api/acp/agents` | Yi rajistar wakilin ACP na musamman ko sabunta cache — body: `{id, name, binary, versionCommand, providerAlias, spawnArgs, protocol}` ko `{action: "refresh"}` |
-| DELETE | `/api/acp/agents` | Cire wakilin ACP na musamman — query param: `?id=<agentId>`                                                                                                    |
+| Hanya  | Wuri              | Bayani                                                                                                                                                            |
+| ------ | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/acp/agents` | Jera duk sanannun wakilan CLI (na ciki + na musamman) tare da matsayin girkawa, sigar, da binary                                                                  |
+| POST   | `/api/acp/agents` | Yi rajistar wakilin ACP na musamman ko sabunta ma’ajiya — jiki: `{id, name, binary, versionCommand, providerAlias, spawnArgs, protocol}` ko `{action: "refresh"}` |
+| DELETE | `/api/acp/agents` | Cire wakilin ACP na musamman — sigar tambaya: `?id=<agentId>`                                                                                                     |
 
 **Misalin amsa** (`GET /api/acp/agents`):
 
@@ -2013,24 +2045,24 @@ na musamman.
 }
 ```
 
-**Tabbatarwa:** Yana buƙatar zaman gudanarwa (cookie na dashboard mai suna `auth_token`) ko
-maɓallin API mai ikon gudanarwa.
+**Tabbatarwa:** Yana buƙatar zaman gudanarwa (kuk ɗin `auth_token` na dashboard) ko
+maɓallin API mai iyakar gudanarwa.
 
 Duba [Tsarin ACP](../frameworks/ACP.md) don cikakkun bayanai.
 
 ---
 
-## Nazari & Sa-ido
+## Nazarin Bayanai da Sa-ido
 
-Mashigan nazari na ainihin lokaci don sa ido kan zaɓin hanya, matsawa, da bambancin
-masu samarwa. Waɗannan ne ke tallafa wa shafukan `/dashboard/analytics/*`.
+Wuraren shiga na nazarin bayanai na ainihin lokaci don sa ido kan turawa, matsewa, da
+bambancin masu samarwa. Waɗannan su ne ke ƙarfafa shafukan `/dashboard/analytics/*`.
 
-### Nazarin zaɓin hanya ta atomatik
+### Nazarin bayanan turawa ta atomatik
 
-| Hanya | Tafarki                              | Bayani                                                                                                                 |
-| ----- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| GET   | `/api/analytics/auto-routing`        | Haɗaɗɗun ƙididdigar zaɓin hanya ta atomatik: jimillar kira, rarrabuwar dabaru, rarrabuwar matakai, manyan masu samarwa |
-| GET   | `/api/analytics/auto-routing?days=7` | Ƙididdigar takamaiman zangon lokaci (tsoho 24h)                                                                        |
+| Hanya | Wuri                                 | Bayani                                                                                                  |
+| ----- | ------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| GET   | `/api/analytics/auto-routing`        | Tara ƙididdigar turawa ta atomatik: jimillar kira, rarraba dabaru, rarraba matakai, manyan masu samarwa |
+| GET   | `/api/analytics/auto-routing?days=7` | Ƙididdiga bisa tazarar lokaci (tsoho 24h)                                                               |
 
 **Misalin amsa**:
 
@@ -2058,11 +2090,11 @@ masu samarwa. Waɗannan ne ke tallafa wa shafukan `/dashboard/analytics/*`.
 }
 ```
 
-### Nazarin matsawa
+### Nazarin matsewa
 
-| Hanya | Tafarki                      | Bayani                                                                                                |
-| ----- | ---------------------------- | ----------------------------------------------------------------------------------------------------- |
-| GET   | `/api/analytics/compression` | Haɗaɗɗun ƙididdigar matsawa: tokens da aka adana, kaso na tanadi, rarrabuwar yanayi, amfani da engine |
+| Hanya | Wuri                         | Bayani                                                                                           |
+| ----- | ---------------------------- | ------------------------------------------------------------------------------------------------ |
+| GET   | `/api/analytics/compression` | Tara ƙididdigar matsewa: alamomin da aka adana, kaso na tanadi, rarraba yanayi, amfani da injuna |
 
 **Misalin amsa**:
 
@@ -2089,9 +2121,9 @@ masu samarwa. Waɗannan ne ke tallafa wa shafukan `/dashboard/analytics/*`.
 
 ### Bibiyar bambancin masu samarwa
 
-| Hanya | Tafarki                    | Bayani                                                                                                                              |
-| ----- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| GET   | `/api/analytics/diversity` | Bibiyar bambanci bisa Shannon entropy: tana hana wuraren gazawa guda ɗaya ta hanyar auna yadda amfani ya bazu tsakanin masu samarwa |
+| Hanya | Wuri                       | Bayani                                                                                                                |
+| ----- | -------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| GET   | `/api/analytics/diversity` | Bibiyar bambanci bisa entropy na Shannon: tana hana dogaro da wuri guda na gazawa ta hanyar auna yaɗuwar masu samarwa |
 
 **Misalin amsa**:
 
@@ -2111,187 +2143,185 @@ masu samarwa. Waɗannan ne ke tallafa wa shafukan `/dashboard/analytics/*`.
 }
 ```
 
-**Tabbatarwa:** Yana buƙatar zaman gudanarwa ko maɓallin API mai ikon gudanarwa.
+**Tabbatarwa:** Yana buƙatar zaman gudanarwa ko maɓallin API mai iyakar gudanarwa.
 
 ---
 
 ## Ayyukan Gudanarwa
 
-Endpoints na admin kawai don gudanar da ayyuka.
+Ƙarshen hanyoyin da masu gudanarwa kawai za su iya amfani da su don sarrafa ayyukan aiki.
 
-| Hanya | Path                     | Bayani                                                                                                 |
-| ----- | ------------------------ | ------------------------------------------------------------------------------------------------------ |
-| GET   | `/api/admin/concurrency` | Karanta iyakokin ayyukan lokaci guda na yanzu (na gaba ɗaya + na kowane mai bayarwa)                   |
-| POST  | `/api/admin/concurrency` | Sabunta iyakokin ayyukan lokaci guda — jiki: `{global?: number, perProvider?: Record<string, number>}` |
+| Method | Path                     | Description                                                                                    |
+| ------ | ------------------------ | ---------------------------------------------------------------------------------------------- |
+| GET    | `/api/admin/concurrency` | Karanta iyakokin concurrency na yanzu (na gaba ɗaya + na kowane mai samarwa)                   |
+| POST   | `/api/admin/concurrency` | Sabunta iyakokin concurrency — jiki: `{global?: number, perProvider?: Record<string, number>}` |
 
-**Izini:** Yana buƙatar zaman gudanarwa mai ikon admin.
+**Auth:** Yana buƙatar zaman gudanarwa mai ikon admin.
 
 ---
 
 ## Gudanar da Kayan Aikin CLI
 
-Gudanar da kayan aikin CLI da ke haɗuwa da OmniRoute (antigravity, commandCode,
-devin-cli, da sauransu). Duba [Manazartar Masu Bayarwa](./PROVIDER_REFERENCE.md) don cikakken jerin.
+Sarrafa kayan aikin CLI da ke haɗuwa da OmniRoute (antigravity, commandCode,
+devin-cli, da sauransu). Duba [Maganar Mai Samarwa](./PROVIDER_REFERENCE.md) don cikakken jerin.
 
-| Hanya | Path                                    | Bayani                                                                                                                                                                             |
-| ----- | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET   | `/api/cli-tools/all-statuses`           | Matsayin duk kayan aikin CLI (an girka, siga, lokacin da aka gani na ƙarshe)                                                                                                       |
-| GET   | `/api/cli-tools/status`                 | Cikakken matsayin kayan aikin CLI guda ɗaya (tambayar `?tool=`)                                                                                                                    |
-| POST  | `/api/cli-tools/apply`                  | Rubuta saitunan da kayan aiki ya samar (`dryRun` yana nuna samfoti; `422` + `containerEphemeralTarget` idan yana cikin container; `migration` yana nuna bayanin tsohon Codex YAML) |
-| GET   | `/api/cli-tools/backups`                | Jera kwafin ajiyar saitunan kayan aikin CLI                                                                                                                                        |
-| POST  | `/api/cli-tools/backups`                | Ƙirƙiri kwafin ajiyar duk saitunan kayan aikin CLI                                                                                                                                 |
-| POST  | `/api/cli-tools/backups`                | Mayarwa: endpoint ɗin nan ɗin tare da `{tool, backupId}` a cikin jiki yana mayar da wannan kwafin ajiyar                                                                           |
-| GET   | `/api/cli-tools/antigravity-mitm`       | Matsayin proxy na Antigravity MITM (kayan aikin CLI na "antigravity-mitm")                                                                                                         |
-| POST  | `/api/cli-tools/antigravity-mitm/alias` | Saita sunayen laƙabi na antigravity-mitm                                                                                                                                           |
+| Method | Path                                    | Description                                                                                                                                                                                     |
+| ------ | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/cli-tools/all-statuses`           | Matsayin duk kayan aikin CLI (an girka, sigar, lokacin gani na ƙarshe)                                                                                                                          |
+| GET    | `/api/cli-tools/status`                 | Cikakken matsayin kayan aikin CLI guda ɗaya (`?tool=` query)                                                                                                                                    |
+| POST   | `/api/cli-tools/apply`                  | Rubuta saitin kayan aiki da aka samar (`dryRun` yana nuna samfoti; `422` + `containerEphemeralTarget` lokacin da aka saka shi cikin akwati; `migration` yana rubuta bayanin Codex YAML na gado) |
+| GET    | `/api/cli-tools/backups`                | Jera madadin saitunan kayan aikin CLI                                                                                                                                                           |
+| POST   | `/api/cli-tools/backups`                | Ƙirƙiri madadin duk saitunan kayan aikin CLI                                                                                                                                                    |
+| POST   | `/api/cli-tools/backups`                | Mayarwa: amfani da wannan hanyar tare da `{tool, backupId}` a jiki yana mayar da wannan madadin                                                                                                 |
+| GET    | `/api/cli-tools/antigravity-mitm`       | Matsayin wakilin MITM na Antigravity (kayan aikin CLI na "antigravity-mitm")                                                                                                                    |
+| POST   | `/api/cli-tools/antigravity-mitm/alias` | Saita laƙabin antigravity-mitm                                                                                                                                                                  |
 
-**Izini:** Yana buƙatar zaman gudanarwa.
-
----
-
-## Ƙwarewar Wakilai
-
-Gudanar da ƙwarewar wakilan AI (mai kama da GPTs na musamman na OpenAI amma don wakilai).
-
-| Hanya  | Path                         | Bayani                                                                                          |
-| ------ | ---------------------------- | ----------------------------------------------------------------------------------------------- |
-| GET    | `/api/agent-skills`          | Jera duk ƙwarewar wakilai (na ciki + na musamman)                                               |
-| GET    | `/api/agent-skills/[id]`     | Samo takamaiman ƙwarewar wakili                                                                 |
-| POST   | `/api/agent-skills`          | Ƙirƙiri ƙwarewar wakili ta musamman — jiki: `{name, description, prompt, model?, temperature?}` |
-| PUT    | `/api/agent-skills/[id]`     | Sabunta ƙwarewar wakili ta musamman                                                             |
-| DELETE | `/api/agent-skills/[id]`     | Share ƙwarewar wakili ta musamman                                                               |
-| GET    | `/api/agent-skills/[id]/raw` | Samo prompt da metadata na asali (ba tare da aiwatarwa ba)                                      |
-| POST   | `/api/agent-skills/generate` | Yi amfani da AI don samar da sabuwar ƙwarewa daga bayanin harshe na yau da kullum               |
-
-**Izini:** Yana buƙatar zaman gudanarwa ko API key mai ikon gudanarwa.
+**Auth:** Yana buƙatar zaman gudanarwa.
 
 ---
 
-## Gudanar da Ma'ajiyar Wucin Gadi
+## Ƙwarewar Wakili
 
-Gudanar da ma'ajiyar wucin gadi ta ma'ana da ma'ajiyar wucin gadi ta tunani.
+Sarrafa ƙwarewar wakilan AI (mai kama da GPTs na al'ada na OpenAI, amma don wakilai).
 
-| Hanya  | Tafarki                | Bayani                                                                                                                          |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/cache`           | Bayanin ma'ajiyar wucin gadi: jimillar bayanai, ƙimar samun bayanai, girman da ke kan faifai                                    |
-| GET    | `/api/cache/entries`   | Jera bayanan da aka adana a ma'ajiyar wucin gadi (tare da rarraba shafuka)                                                      |
-| DELETE | `/api/cache/entries`   | Share bayanan ma'ajiyar wucin gadi (tace ta amfani da sigogin tambaya)                                                          |
-| GET    | `/api/cache/stats`     | Cikakkun ƙididdigar ma'ajiyar wucin gadi (ga kowane mai samarwa, ga kowane samfuri)                                             |
-| GET    | `/api/cache/reasoning` | Matsayin ma'ajiyar wucin gadi ta tunani (don sake kunna tunani)                                                                 |
-| DELETE | `/api/cache/reasoning` | Share ma'ajiyar wucin gadi ta tunani — sigogin tambaya: `?toolCallId=<id>` (guda ɗaya) ko `?provider=<p>` ko babu sigogi (duka) |
+| Method | Path                         | Description                                                                                   |
+| ------ | ---------------------------- | --------------------------------------------------------------------------------------------- |
+| GET    | `/api/agent-skills`          | Jera duk ƙwarewar wakilai (ginannu + na al'ada)                                               |
+| GET    | `/api/agent-skills/[id]`     | Samu takamaiman ƙwarewar wakili                                                               |
+| POST   | `/api/agent-skills`          | Ƙirƙiri ƙwarewar wakili ta al'ada — jiki: `{name, description, prompt, model?, temperature?}` |
+| PUT    | `/api/agent-skills/[id]`     | Sabunta ƙwarewar wakili ta al'ada                                                             |
+| DELETE | `/api/agent-skills/[id]`     | Goge ƙwarewar wakili ta al'ada                                                                |
+| GET    | `/api/agent-skills/[id]/raw` | Samu prompt + metadata ɗanye (ba tare da aiwatarwa ba)                                        |
+| POST   | `/api/agent-skills/generate` | Samar da sabuwar ƙwarewa ta AI daga bayanin cikin harshen dabi'a                              |
 
-**Tabbatar da izini:** Ana buƙatar zaman gudanarwa.
+**Auth:** Yana buƙatar zaman gudanarwa ko maɓallin API mai ikon gudanarwa.
 
 ---
 
-## Tsarin Ƙwaƙwalwa
+## Gudanar da Cache
 
-Gudanar da ƙwaƙwalwar dindindin (FTS5 + vector embeddings).
+Sarrafa semantic cache da reasoning cache.
 
-| Hanya  | Tafarki            | Bayani                                                                      |
-| ------ | ------------------ | --------------------------------------------------------------------------- |
-| GET    | `/api/memory`      | Jera bayanan ƙwaƙwalwa (tace bisa fage, nau'i, tambayar bincike)            |
-| POST   | `/api/memory`      | Ƙirƙiri sabon bayanin ƙwaƙwalwa — jiki: `{scope, type, content, metadata?}` |
-| GET    | `/api/memory/[id]` | Samo takamaiman bayanin ƙwaƙwalwa                                           |
-| PUT    | `/api/memory/[id]` | Sabunta bayanin ƙwaƙwalwa                                                   |
-| DELETE | `/api/memory/[id]` | Share bayanin ƙwaƙwalwa                                                     |
-| GET    | `/api/memory?q=`   | Bincika ƙwaƙwalwa (FTS5 + vector) — an haɗa ƙididdiga a cikin amsa ɗaya     |
+| Method | Path                   | Description                                                                                                 |
+| ------ | ---------------------- | ----------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/cache`           | Bayanin cache: jimillar shigarwa, ƙimar amfani, girman da ke kan faifai                                     |
+| GET    | `/api/cache/entries`   | Jera shigarwar cache (tare da pagination)                                                                   |
+| DELETE | `/api/cache/entries`   | Goge shigarwar cache (tacewa ta sigogin tambaya)                                                            |
+| GET    | `/api/cache/stats`     | Cikakkun ƙididdigar cache (ta kowane mai samarwa, ta kowane samfurin)                                       |
+| GET    | `/api/cache/reasoning` | Matsayin reasoning cache (don sake kunna reasoning)                                                         |
+| DELETE | `/api/cache/reasoning` | Share reasoning cache — sigogin tambaya: `?toolCallId=<id>` (ɗaya) ko `?provider=<p>` ko babu sigogi (duka) |
 
-**Tabbatar da izini:** Ana buƙatar zaman gudanarwa ko maɓallin API mai iyakar gudanarwa.
+**Auth:** Yana buƙatar zaman gudanarwa.
+
+---
+
+## Tsarin Memory
+
+Sarrafa memory mai ɗorewa (FTS5 + vector embeddings).
+
+| Method | Path               | Description                                                                  |
+| ------ | ------------------ | ---------------------------------------------------------------------------- |
+| GET    | `/api/memory`      | Jera shigarwar memory (tacewa ta scope, type, search query)                  |
+| POST   | `/api/memory`      | Ƙirƙiri sabuwar shigarwar memory — body: `{scope, type, content, metadata?}` |
+| GET    | `/api/memory/[id]` | Samu takamaiman shigarwar memory                                             |
+| PUT    | `/api/memory/[id]` | Sabunta shigarwar memory                                                     |
+| DELETE | `/api/memory/[id]` | Goge shigarwar memory                                                        |
+| GET    | `/api/memory?q=`   | Bincika memory (FTS5 + vector) — ana haɗa ƙididdiga a cikin amsa ɗaya        |
+
+**Auth:** Yana buƙatar zaman gudanarwa ko maɓallin API mai iyakar gudanarwa.
 
 ---
 
 ## Webhooks
 
-Gudanar da rajistar webhook don abubuwan da ke faruwa.
+Sarrafa rajistar webhook don abubuwan da ke faruwa.
 
-| Hanya  | Tafarki                         | Bayani                                                               |
+| Method | Path                            | Description                                                          |
 | ------ | ------------------------------- | -------------------------------------------------------------------- |
-| GET    | `/api/webhooks`                 | Jera duk rajistocin webhook                                          |
-| POST   | `/api/webhooks`                 | Ƙirƙiri rajistar webhook — jiki: `{url, events[], secret?, active?}` |
-| GET    | `/api/webhooks/[id]`            | Samo takamaiman rajistar webhook                                     |
+| GET    | `/api/webhooks`                 | Jera dukkan rajistar webhook                                         |
+| POST   | `/api/webhooks`                 | Ƙirƙiri rajistar webhook — body: `{url, events[], secret?, active?}` |
+| GET    | `/api/webhooks/[id]`            | Samu takamaiman rajistar webhook                                     |
 | PUT    | `/api/webhooks/[id]`            | Sabunta rajistar webhook                                             |
-| DELETE | `/api/webhooks/[id]`            | Share rajistar webhook                                               |
-| GET    | `/api/webhooks/[id]/deliveries` | Jera tarihin isarwa na webhook (rajistar nasara/rashin nasara)       |
-| POST   | `/api/webhooks/[id]/test`       | Aika taron gwaji zuwa webhook                                        |
+| DELETE | `/api/webhooks/[id]`            | Goge rajistar webhook                                                |
+| GET    | `/api/webhooks/[id]/deliveries` | Jera tarihin isarwa na webhook (rahoton nasara/rashin nasara)        |
+| POST   | `/api/webhooks/[id]/test`       | Aika abin da ya faru na gwaji zuwa webhook                           |
 
-**Tabbatar da izini:** Ana buƙatar zaman gudanarwa.
+**Auth:** Yana buƙatar zaman gudanarwa.
 
-Duba [Tsarin Webhooks](../frameworks/WEBHOOKS.md) don cikakkun nau'ikan abubuwan da ke faruwa.
-
----
-
-## Tsarin Skills
-
-Sarrafa Skills (tsarin faɗaɗa ayyukan wakili).
-
-| Hanya  | Path                     | Bayani                                                                             |
-| ------ | ------------------------ | ---------------------------------------------------------------------------------- |
-| GET    | `/api/skills`            | Jera duk Skills da aka girka (na ciki + na musamman)                               |
-| POST   | `/api/skills/install`    | Girka Skill daga path na cikin na'ura ko URL                                       |
-| DELETE | `/api/skills/[id]`       | Cire Skill                                                                         |
-| PUT    | `/api/skills/[id]`       | Kunna ko kashe Skill — body: `{enabled?: boolean, mode?: "on" \| "off" \| "auto"}` |
-| POST   | `/api/skills/executions` | Gudanar da Skill — body: `{skillName, apiKeyId, input?, sessionId?}`               |
-| GET    | `/api/skills/executions` | Jera tarihin gudanarwa na duk Skills (tace ta `?apiKeyId=`)                        |
-
-**Tabbatar da Shaida:** Ana buƙatar zaman gudanarwa ko API key mai ikon gudanarwa.
-
-Duba [Tsarin Skills](../frameworks/SKILLS.md) don cikakkun bayanai.
+Duba [Tsarin Webhooks](../frameworks/WEBHOOKS.md) don cikakkun nau’ikan abubuwan da ke faruwa.
 
 ---
 
-## Plugins
+## Tsarin Ƙwarewa
 
-Sarrafa plugins na OmniRoute (faɗaɗa ayyuka daga wasu kamfanoni).
+Sarrafa Ƙwarewa (tsarin faɗaɗa ayyukan wakili).
 
-| Hanya  | Path                               | Bayani                        |
-| ------ | ---------------------------------- | ----------------------------- |
-| GET    | `/api/plugins`                     | Jera plugins da aka girka     |
-| POST   | `/api/plugins/marketplace/install` | Girka plugin daga marketplace |
-| DELETE | `/api/plugins/[name]`              | Cire plugin                   |
-| POST   | `/api/plugins/[name]/activate`     | Kunna plugin                  |
-| POST   | `/api/plugins/[name]/deactivate`   | Kashe plugin                  |
-| GET    | `/api/plugins/[name]/config`       | Samu saitunan plugin          |
-| PUT    | `/api/plugins/[name]/config`       | Sabunta saitunan plugin       |
+| Hanya  | Hanya                    | Bayani                                                                               |
+| ------ | ------------------------ | ------------------------------------------------------------------------------------ |
+| GET    | `/api/skills`            | Jera duk ƙwarewar da aka girka (na cikin tsari + na musamman)                        |
+| POST   | `/api/skills/install`    | Girka ƙwarewa daga hanyar gida ko URL                                                |
+| DELETE | `/api/skills/[id]`       | Cire ƙwarewa                                                                         |
+| PUT    | `/api/skills/[id]`       | Kunna ko kashe ƙwarewa — jiki: `{enabled?: boolean, mode?: "on" \| "off" \| "auto"}` |
+| POST   | `/api/skills/executions` | Aiwatar da ƙwarewa — jiki: `{skillName, apiKeyId, input?, sessionId?}`               |
+| GET    | `/api/skills/executions` | Jera tarihin aiwatarwa na duk ƙwarewa (tace ta `?apiKeyId=`)                         |
 
-**Tabbatar da Shaida:** Ana buƙatar zaman gudanarwa.
+**Tabbatarwa:** Ana buƙatar zaman gudanarwa ko maɓallin API mai iyakar gudanarwa.
 
-Duba [Tsarin Plugins](../frameworks/PLUGIN_SDK.md) don cikakkun bayanai.
-
----
-
-## Shadow Routing
-
-Kwatanta masu samarwa ta Shadow / A-B **ba wani keɓantaccen REST surface ba ne** — ana saita shi ta hanyar combo routing (duba [Auto-Combo](../routing/AUTO-COMBO.md)). Ana samar da ma'aunin kwatantawa na kowane combo ta `GET /api/combos/metrics`.
+Duba [Tsarin Ƙwarewa](../frameworks/SKILLS.md) don cikakkun bayanai.
 
 ---
 
-## Guardrails
+## Ƙarin Manhajoji
 
-Bincika guardrails na lokacin aiki (gano PII, gano shigar da prompt ta ɓarna, haɗa ayyukan hangen nesa). Guardrails suna aiki a kan kowace buƙata; ana iya cire su daga kira ɗaya ta hanyar request header na `x-omniroute-disabled-guardrails` — babu wani surface na dindindin don kunna ko kashewa.
+Sarrafa ƙarin manhajojin OmniRoute (faɗaɗawa daga wasu ɓangarori).
 
-| Hanya | Path                   | Bayani                                                                                          |
-| ----- | ---------------------- | ----------------------------------------------------------------------------------------------- |
-| GET   | `/api/guardrails`      | Jera guardrails da aka yi wa rajista da matsayinsu (suna / an kunna / fifiko)                   |
-| POST  | `/api/guardrails/test` | Gudanar da gwajin pre-call pipeline a kan samfurin input — body: `{input, disabledGuardrails?}` |
+| Hanya  | Hanya                              | Bayani                                     |
+| ------ | ---------------------------------- | ------------------------------------------ |
+| GET    | `/api/plugins`                     | Jera ƙarin manhajojin da aka girka         |
+| POST   | `/api/plugins/marketplace/install` | Girka ƙarin manhaja daga kasuwar manhajoji |
+| DELETE | `/api/plugins/[name]`              | Cire ƙarin manhaja                         |
+| POST   | `/api/plugins/[name]/activate`     | Kunna ƙarin manhaja                        |
+| POST   | `/api/plugins/[name]/deactivate`   | Kashe ƙarin manhaja                        |
+| GET    | `/api/plugins/[name]/config`       | Samo saitin ƙarin manhaja                  |
+| PUT    | `/api/plugins/[name]/config`       | Sabunta saitin ƙarin manhaja               |
 
-**Tabbatar da Shaida:** Ana buƙatar zaman gudanarwa.
+**Tabbatarwa:** Ana buƙatar zaman gudanarwa.
 
-Duba [Tsaro > Guardrails](../security/GUARDRAILS.md) don cikakkun bayanai.
+Duba [Tsarin Ƙarin Manhajoji](../frameworks/PLUGIN_SDK.md) don cikakkun bayanai.
+
+---
+
+## Karkatar da Inuya
+
+Kwatanta masu samarwa ta hanyar inuwa / A-B **ba wani keɓaɓɓen REST surface ba** — ana tsara shi ta hanyar haɗa hanyoyin kewayawa (duba [Haɗa Kai Tsaye](../routing/AUTO-COMBO.md)). Ana samar da ma’aunan kwatanta na kowane haɗin hanya ta `GET /api/combos/metrics`.
+
+---
+
+## Ka’idojin Kariya
+
+Duba ka’idojin kariya na lokacin aiki (gano PII, gano allurar umarni, haɗa hangen nesa). Ka’idojin kariya suna aiki a kowace buƙata; cire su ga kira guda ana yin sa ta kanun buƙatar `x-omniroute-disabled-guardrails` — babu wani wuri na dindindin na kunnawa/kashewa.
+
+| Hanya | Hanya                  | Bayani                                                                                                         |
+| ----- | ---------------------- | -------------------------------------------------------------------------------------------------------------- |
+| GET   | `/api/guardrails`      | Jera ka’idojin kariyar da aka yi rajista da matsayinsu (suna / an kunna / fifiko)                              |
+| POST  | `/api/guardrails/test` | Gudanar da butaccen gwaji na bututun kafin kira a kan samfurin shigarwa — jiki: `{input, disabledGuardrails?}` |
+
+**Tabbatarwa:** Ana buƙatar zaman gudanarwa.
+
+Duba [Tsaro > Ka’idojin Kariya](../security/GUARDRAILS.md) don cikakkun bayanai.
 
 ---
 
 ---
 
-## Tantancewa
+## Tabbatarwa
 
-Duba [Tantancewar Gudanarwa](../guides/MANAGEMENT-AUTH.md) don nau’ukan hujjojin shiga guda huɗu
-(zaman dashboard, token na CLI na gida, Token na Samun Dama na `oma_live_…`,
-maɓallin API mai izinin gudanarwa) da yadda suka bambanta da maɓallan inference.
+Duba [Tabbatarwar Sarrafawa](../guides/MANAGEMENT-AUTH.md) don iyalan takardun shaidar guda huɗu (zaman dashboard, alamar CLI ta gida, `oma_live_…` Access Token, da maɓallin API mai iyakar manage) da yadda suka bambanta da maɓallan inference.
 
 - Hanyoyin dashboard (`/dashboard/*`) suna amfani da kukin `auth_token`
-- Shiga yana amfani da hash ɗin kalmar sirri da aka adana; idan hakan bai yi aiki ba, sai a koma ga `INITIAL_PASSWORD`
-- Ana iya kunna ko kashe `requireLogin` ta hanyar `/api/settings/require-login`
-- Hanyoyin `/v1/*` za su iya buƙatar maɓallin API na Bearer idan `REQUIRE_API_KEY=true`
-- “token na gudanarwa” / “maɓallin API mai izinin gudanarwa” a wannan bayanin yana nufin ɗaya daga cikin nau’ukan da ke cikin wancan jagorar — ba wani ƙarin nau’in sirri da ba a bayyana ba
+- Shiga yana amfani da hash ɗin kalmar sirri da aka ajiye; madadin shi ne `INITIAL_PASSWORD`
+- Ana iya kunnawa ko kashe zaɓin `requireLogin` ta `/api/settings/require-login`
+- Hanyoyin `/v1/*` na iya buƙatar maɓallin API na Bearer idan `REQUIRE_API_KEY=true`
+- “alamar sarrafawa” / “maɓallin API mai iyakar sarrafawa” a cikin wannan bayanin yana nufin ɗaya daga cikin iyalan da ke cikin wannan jagorar — ba wani ƙarin nau'in sirri da ba a fayyace ba
 
-> **Canji mai karya dacewa (v3.8.0)** — `/api/v1/agents/tasks/*` da wuraren ƙarshen gudanar da cooldown yanzu suna buƙatar **tantancewar gudanarwa** (kukin dashboard na `auth_token` ko maɓallin API mai izinin gudanarwa). Abokan hulɗa da a baya suke kiran waɗannan hanyoyin ba tare da tantancewa ba za su karɓi `401 Unauthorized`. Duba commit `588a0333` (`fix(auth): require management auth for agent and cooldown APIs`).
+> **Sauyin da ke karya jituwa (v3.8.0)** — `/api/v1/agents/tasks/*` da wuraren sarrafa lokacin dakatawa yanzu suna buƙatar **tabbatarwar sarrafawa** (kukin `auth_token` na dashboard ko maɓallin API mai iyakar sarrafawa). Abokan ciniki da a baya suke kiran waɗannan hanyoyi ba tare da tabbatarwa ba za su karɓi `401 Unauthorized`. Duba commit `588a0333` (`fix(auth): require management auth for agent and cooldown APIs`).

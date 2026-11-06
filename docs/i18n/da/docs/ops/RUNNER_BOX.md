@@ -27,13 +27,12 @@ Målt 2026-10-18:
 | swap      | 16 GB                           | `omniroute-113-5` kører med swap slået fra (`MemorySwapMax=0`), så et løbsk build stoppes ved sin grænse i stedet for at få maskinen til at swappe                                                                                                                                                                                                                       |
 | `/tmp`    | **12 GB tmpfs = RAM**           | alt, der placeres der, bruger hukommelse; rester ryddes efter 3 timer                                                                                                                                                                                                                                                                                                    |
 | CPU       | load 60 på 32 kerner observeret | før kvoterne fratog ét Turbopack-build (~1166 % CPU) plus en coverage-suite på samme maskine de øvrige lytteres heartbeats de nødvendige ressourcer (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                |
-| runners   | **6 lyttere**                   | 4 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` er deaktiveret (`systemctl enable --now` aktiverer én igen)                                                                                                                                                                                                                                              |
+| runners   | **7 lyttere** (2026-10-28)      | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` bærer også `omni-build`; `omniroute-113-3/-4/-8` blev slettet fra repositoriet (2026-10-28)                                                                                                                                                                                                                       |
 
 Grænserne findes i hver units `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
 (tidligere værdier er bevaret som `override.conf.bak-20261018`) og blev anvendt live med
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — uden genstart, så ingen
-kørende jobs blev berørt. Labels ændres via runners-API'et
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+kørende jobs blev berørt. Labels ændres via runners-API'et (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), også live.
 
 ## Installer oprydderen (én gang på maskinen)
@@ -42,7 +41,7 @@ kørende jobs blev berørt. Labels ændres via runners-API'et
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): hvert 30. minut, log til /var/log/runner-janitor.log
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` er påkrævet: Oprydderen bekræfter, at en sti er inaktiv, med ét øjebliksbillede af åbne
@@ -81,8 +80,8 @@ gangen, og kun når den er inaktiv**, med inaktivitetskontrollen og genstarten i
 ## Driftsregler
 
 - **Ét Turbopack-build ad gangen — håndhævet via label.** Alle jobs, der kører et komplet Turbopack-
-  `next build`, er målrettet `[self-hosted, omni-build]`, og kun **`omniroute-113-5`** har dette
-  label: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
+  `next build`, er målrettet `[self-hosted, omni-build]`, og kun **`omniroute-113-5`** har dette label:
+  `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
   det natlige a11y-build (#16853) og `docker-publish.yml` **amd64** (webpack i BuildKit —
   Turbopack gik i panik dér, kørsel 33253576569). Docker-delen for arm64 forbliver på `ubuntu-24.04-arm`.
   `docker-publish` amd64 deler concurrency-gruppen `heavy-build-main` med `ci.yml` `Build`
@@ -118,9 +117,17 @@ gangen, og kun når den er inaktiv**, med inaktivitetskontrollen og genstarten i
   `omniroute-113` havde `MemoryHigh=4G` indtil 2026-10-18 — promptfoo-buildet måtte genvinde
   hukommelse under hele den 54 minutter lange kørsel dér; 8 GB fjerner begrænsningen.
 - **Færre listeners med vilje.** Fire OmniRoute-enheder blev deaktiveret den 2026-08-29 — hver ekstra
-  listener er endnu en tenant i ovenstående hukommelsesbudget. Janitorens loft er 6
-  (`MAX_ACTIVE_RUNNERS=6` i cron): den tæller alle `Runner.Listener` på maskinen, og OmniHeuris +
-  OmniMind føjer to til vores fire.
+  listener er endnu en tenant i ovenstående hukommelsesbudget. Janitorens loft er 8
+  (`MAX_ACTIVE_RUNNERS=8` i cron): den tæller alle `Runner.Listener` på maskinen, og OmniHeuris +
+  OmniMind føjer to til vores fem.
+- **Unit- og Vitest-jobs forbliver hostede.** `ci.yml` sender sine unit-shards og Vitest-jobbet til
+  `[self-hosted, omni-ci]` kun når repository-variablen `vars.USE_VPS_TEST_RUNNER` er
+  `true`, og da kun for `pull_request`-kørsler fra samme repository; forks, `merge_group` og pushes
+  forbliver på `ubuntu-latest` (`tests/unit/vps-runner-variable-scope.test.ts`). Variablen er
+  `false`. Den 2026-10-28 brugte tre `omni-ci`-lyttere med 4 kerner 250–270 s på `npm ci`, og hvert
+  unit-shard ramte jobgrænsen på 30 minutter, mod ~634 s for et hostet shard, med maskinen på load
+  17–24. Lytterne blev slettet. Slå ikke variablen til igen uden lyttere, der er dimensioneret til
+  et unit-shard.
 - **Ryd aldrig `/tmp` eller `_work` manuelt, mens en runner er optaget.** En
   kontrollér-og-slet-procedure med en pause mellem de to trin var årsagen til, at et aktivt
   Build-job mistede sit `_work` den 2026-08-27. Janitoren udfører kontrollen og fjernelsen i ét
@@ -135,8 +142,10 @@ gangen, og kun når den er inaktiv**, med inaktivitetskontrollen og genstarten i
 
 ## Hostet spor (GitHub-hostede runners)
 
-Kontoen er på **Pro**-abonnementet: **40 samtidige hostede jobs**, som deles af alle PR-kontroller,
-alle push-udløste workflows og CodeQL's standardopsætning. Målt 2026-10-18 under en
+Repositoriet tilhører organisationen `cheaper-inference` på **Team**-abonnementet: **60
+samtidige hostede jobs**, som deles af alle repositorier i organisationen, alle PR-kontroller,
+alle push-udløste workflows og CodeQL's standardopsætning. Tallene nedenfor blev målt på
+**Pro**-abonnementet (40 samtidige hostede jobs). Målt 2026-10-18 under en
 mergekampagne (~10 merges/time på `release/v3.8.52`): **2.500 workflowkørsler oprettet på
 24 timer**, 44 pushes til grenen på 6 timer, **106 hostede jobs i kø**, mens PR-kontroller ventede i
 timevis, og PR'er blev merget uden dem. Ni workflows blev udløst ved hvert push til grenen:
