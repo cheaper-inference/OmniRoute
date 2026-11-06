@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                     |        v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
+|                                     |        v3.8.50         | **v3.8.51** |      `v3.8.54+`       |
 | ----------------------------------- | :--------------------: | :---------: | :-------------------: |
 | 🌐 Palveluntarjoajat                |          352           |   **358**   |          380          |
 | 🧠 Yksilölliset chat-mallitunnukset |          1320          |  **1374**   |         1491          |
@@ -589,7 +589,7 @@ nykyisestä luettelosta on osoitteessa **[radar.omniroute.online/planos](https:/
 
 </div>
 
-> Viimeaikaisia kohokohtia versiosta **v3.8.20 → v3.8.53**. Koko historia [`CHANGELOG.md`](CHANGELOG.md).
+> Viimeaikaisia kohokohtia versiosta **v3.8.20 → v3.8.54**. Koko historia [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ `quota-weighted` reititys** — 20. yhdistelmästrategia ohittaa loppuun käytetyt tilit ja arpoo jäljellä olevien kesken suhteessa jäljellä olevaan kiintiöön ÷ käynnissä olevaan kuormaan, pitäen olemassa olevat keskustelut kiinnitettyinä. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Headless-tila** — `omniroute serve --headless` (tai `OMNIROUTE_HEADLESS=1`) ajaa vain `/v1/*` proxy-moottoria, ilman hallintapaneelia ja siihen liittyviä alajärjestelmiä. → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1814,7 +1814,7 @@ MIT-lisenssi – lisätietoja on [LICENSE](LICENSE)-tiedostossa.
 
 **[⬆ Takaisin alkuun](#-omniroute)** · Rakennettu ❤️:lla avoimen lähdekoodin tekoäly-yhteisölle.
 
-<sub>Luonut <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT-lisenssi · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Luonut <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT-lisenssi · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions on otettu käyttöön yhteisön kysymyksiä ja vastauksia varten -->

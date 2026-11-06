@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                    |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
+|                                    |          v3.8.50           | **v3.8.51** |      `v3.8.54+`       |
 | ---------------------------------- | :------------------------: | :---------: | :-------------------: |
 | 🌐 Teenusepakkujad                 |            352             |   **358**   |          380          |
 | 🧠 Unikaalsed vestlusmudelite ID-d |            1320            |  **1374**   |         1491          |
@@ -589,7 +589,7 @@ praeguse kataloogi kohta leiate teavet aadressilt **[radar.omniroute.online/plan
 
 </div>
 
-> Viimased tähtsamad uuendused versioonides **v3.8.20 → v3.8.53**. Täielik ajalugu failis [`CHANGELOG.md`](CHANGELOG.md).
+> Viimased tähtsamad uuendused versioonides **v3.8.20 → v3.8.54**. Täielik ajalugu failis [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ `quota-weighted` marsruutimine** — 20. kombineeritud strateegia jätab tühjaks saanud kontod vahele ning valib ülejäänute seast proportsionaalselt allesjäänud kvoodi ÷ jooksva koormuse järgi, hoides olemasolevad vestlused paigal. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Peata režiim** — `omniroute serve --headless` (või `OMNIROUTE_HEADLESS=1`) käivitab ainult `/v1/*` puhverserveri mootori, juhtpaneeli ja ainult juhtpaneelile mõeldud alamsüsteemid on välja lülitatud. → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1024,7 +1024,7 @@ omniroute
 ```
 
 > 💡 Kas näete hoiatust `npm warn ERESOLVE` või peer-dep hoiatusi? [Need on kahjutud](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Kas kasutate npm 11 või uuemat versiooni?** npm võib blokeerida pakettide elutsükliskripte, kui neid pole lubatud. OmniRoute'i `postinstall` (`node scripts/build/postinstall.mjs`) on vajalik selle natiivsete käitusfailide ettevalmistamiseks. Globaalsel installimisel lubage npm-i hoiatuses nimetatud paketid. OmniRoute 3.8.53 teatatud paketikomplekti jaoks:
+> **Kas kasutate npm 11 või uuemat versiooni?** npm võib blokeerida pakettide elutsükliskripte, kui neid pole lubatud. OmniRoute'i `postinstall` (`node scripts/build/postinstall.mjs`) on vajalik selle natiivsete käitusfailide ettevalmistamiseks. Globaalsel installimisel lubage npm-i hoiatuses nimetatud paketid. OmniRoute 3.8.54 teatatud paketikomplekti jaoks:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1820,7 +1820,7 @@ MIT-litsents – üksikasju vt [LICENSE](LICENSE).
 
 **[⬆ Tagasi üles](#-omniroute)** · Loodud ❤️ abil avatud lähtekoodiga tehisintellekti kogukonnale.
 
-<sub>Loonud <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT-litsents · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Loonud <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT-litsents · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions on kogukonna küsimuste ja vastuste jaoks lubatud -->

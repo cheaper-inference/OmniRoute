@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                   |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
+|                                   |         v3.8.50         | **v3.8.51** |      `v3.8.54+`       |
 | --------------------------------- | :---------------------: | :---------: | :-------------------: |
 | 🌐 Провајдери                     |           352           |   **358**   |          380          |
 | 🧠 Јединствени ID-ови чет модела  |          1320           |  **1374**   |         1491          |
@@ -588,7 +588,7 @@ Radar се користи по избору и подржава само GET. Om
 
 </div>
 
-> Недавне новине од **v3.8.20 → v3.8.53**. Комплетна историја у [`CHANGELOG.md`](CHANGELOG.md).
+> Недавне новине од **v3.8.20 → v3.8.54**. Комплетна историја у [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ `quota-weighted` рутирање** — 20. комбо стратегија прескаче исцрпљене налоге, затим бира међу осталима сразмерно преосталој квоти ÷ тренутном оптерећењу, задржавајући постојеће разговоре прикованим. → [Ауто-Комбо](docs/routing/AUTO-COMBO.md)
 - **🧰 Headless режим** — `omniroute serve --headless` (или `OMNIROUTE_HEADLESS=1`) покреће само `/v1/*` прокси енџин, са искљученим контролним панелом и подсистемима који су само за панел. → [Headless режим](docs/guides/HEADLESS.md)
@@ -1023,7 +1023,7 @@ omniroute
 ```
 
 > 💡 Видите `npm warn ERESOLVE` или упозорења о peer зависностима? [Безопасна су](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Користите npm 11 или новији?** npm може блокирати скрипте животног циклуса пакета ако нису дозвољене. OmniRoute скрипта `postinstall` (`node scripts/build/postinstall.mjs`) неопходна је за припрему његових изворних runtime датотека. При глобалној инсталацији дозволите пакете наведене у npm упозорењу. За скуп пакета који пријављује OmniRoute 3.8.53:
+> **Користите npm 11 или новији?** npm може блокирати скрипте животног циклуса пакета ако нису дозвољене. OmniRoute скрипта `postinstall` (`node scripts/build/postinstall.mjs`) неопходна је за припрему његових изворних runtime датотека. При глобалној инсталацији дозволите пакете наведене у npm упозорењу. За скуп пакета који пријављује OmniRoute 3.8.54:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1817,7 +1817,7 @@ OmniRoute стоји на раменима великана. Започео је
 
 **[⬆ Назад на врх](#-omniroute)** · Направљено са ❤️ за AI заједницу отвореног кода.
 
-<sub>Креирао <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Лиценца MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Креирао <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · Лиценца MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions је омогућен за питања и одговоре у заједници -->

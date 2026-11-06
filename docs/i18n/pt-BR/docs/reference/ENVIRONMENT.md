@@ -1366,7 +1366,7 @@ Um serviço mantido ativo por um mês inteiro usa cerca de 744 horas de instânc
 
 ## Cenários de implantação
 
-Para obter orientações de SRE sobre o backend de relay (comportamento de ts/bifrost/auto, posicionamento do 9router em relação ao CLIProxyAPI e estratégia de fallback para alto throughput), consulte [Estratégia do Backend de Relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).
+Para obter orientações de SRE sobre o backend de relay (comportamento de ts/bifrost/auto, posicionamento do 9router em relação ao CLIProxyAPI e estratégia de fallback de alto throughput), consulte [Estratégia do backend de relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).
 
 ### Desenvolvimento local mínimo
 
@@ -1397,7 +1397,7 @@ OMNIROUTE_MEMORY_MB=8192
 CORS_ORIGIN=https://your-frontend.example.com
 ```
 
-### Ambiente isolado da rede / CI
+### Ambiente isolado / CI
 
 ```bash
 JWT_SECRET=test-jwt-secret-for-ci
@@ -1870,3 +1870,14 @@ Usado por `open-sse/services/combo.ts` e `src/lib/quota/quotaScheduler.ts` para 
 | Variável                       | Padrão | Arquivo de origem                            | Descrição                                                                                                                                                                                                                                                    |
 | ------------------------------ | ------ | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`    | `src/lib/providerModels/modelSyncTimings.ts` | Defina como `1` para registrar o tempo de fase, uma solicitação ID gerada e resultados de fase success/error durante a sincronização do modelo. Desativado para todos os outros valores. Os logs omitem cargas úteis de solicitação, conta, catálogo e erro. |
+
+## Ferramenta local de análise de mídia do OpenCode
+
+Usada por `scripts/cli/omniroute-media-mcp.mjs`. Defina estas variáveis no ambiente do processo da ferramenta local.
+
+| Variável                   | Padrão                                                                            | Descrição                                                                                                                 |
+| -------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (ou `~/.config/opencode/opencode.json`) | Configuração do OpenCode lida pela ferramenta de mídia e pelo instalador.                                                 |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                       | Entrada do provedor lida pela ferramenta de mídia na configuração do OpenCode.                                            |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                            | Modelo enviado pela ferramenta de mídia. O provedor correspondente deve ser compatível com os tipos de mídia solicitados. |
+| `OMNIROUTE_MEDIA_API_KEY`  | Chave de API do provedor configurado ou sua referência de ambiente                | Substituição opcional da credencial. Mantenha-a no ambiente do processo local; nunca a versione.                          |

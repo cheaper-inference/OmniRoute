@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                   |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
+|                                   |          v3.8.50           | **v3.8.51** |      `v3.8.54+`       |
 | --------------------------------- | :------------------------: | :---------: | :-------------------: |
 | 🌐 Furnizori                      |            352             |   **358**   |          380          |
 | 🧠 ID-uri unice de modele de chat |            1320            |  **1374**   |         1491          |
@@ -588,7 +588,7 @@ catalogul actual la **[radar.omniroute.online/planos](https://radar.omniroute.on
 
 </div>
 
-> Repere recente din **v3.8.20 → v3.8.53**. Istoricul complet în [`CHANGELOG.md`](CHANGELOG.md).
+> Repere recente din **v3.8.20 → v3.8.54**. Istoricul complet în [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ Rutare `quota-weighted`** — a 20-a strategie combo sare peste conturile epuizate, apoi alege dintre cele rămase proporțional cu cota rămasă ÷ încărcarea în curs, păstrând conversațiile existente fixate. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Mod headless** — `omniroute serve --headless` (sau `OMNIROUTE_HEADLESS=1`) rulează doar motorul proxy `/v1/*`, cu dashboard-ul și subsistemele doar pentru dashboard dezactivate. → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1023,7 +1023,7 @@ omniroute
 ```
 
 > 💡 Vezi `npm warn ERESOLVE` sau avertismente peer-dep? [Sunt inofensive](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Folosești npm 11 sau mai nou?** npm poate bloca scripturile de ciclu de viață ale pachetelor dacă nu sunt permise. `postinstall`-ul OmniRoute (`node scripts/build/postinstall.mjs`) este necesar pentru pregătirea fișierelor native de runtime. Permite pachetele menționate în avertismentul npm la instalarea globală. Pentru setul de pachete raportat de OmniRoute 3.8.53:
+> **Folosești npm 11 sau mai nou?** npm poate bloca scripturile de ciclu de viață ale pachetelor dacă nu sunt permise. `postinstall`-ul OmniRoute (`node scripts/build/postinstall.mjs`) este necesar pentru pregătirea fișierelor native de runtime. Permite pachetele menționate în avertismentul npm la instalarea globală. Pentru setul de pachete raportat de OmniRoute 3.8.54:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1816,7 +1816,7 @@ Licență MIT - consultați [LICENSE](LICENSE) pentru detalii.
 
 **[⬆ Înapoi sus](#-omniroute)** · Creat cu ❤️ pentru comunitatea AI open-source.
 
-<sub>Creat de <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Licență MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Creat de <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · Licență MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Discuțiile GitHub sunt activate pentru întrebări și răspunsuri din partea comunității -->

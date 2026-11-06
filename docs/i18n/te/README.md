@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                             |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
+|                             |          v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | --------------------------- | :-----------------------: | :---------: | :-------------------: |
 | 🌐 ప్రొవైడర్లు              |            352            |   **358**   |          380          |
 | 🧠 ప్రత్యేక చాట్ మోడల్ IDలు |           1320            |  **1374**   |         1491          |
@@ -580,7 +580,7 @@ Radar ఐచ్ఛికం మరియు GET-మాత్రమే. OmniRoute
 
 </div>
 
-> **v3.8.20 → v3.8.53** నుండి ఇటీవల జరిగిన ముఖ్యాంశాలు. పూర్తి చరిత్ర [`CHANGELOG.md`](CHANGELOG.md) లో ఉంది.
+> **v3.8.20 → v3.8.54** నుండి ఇటీవల జరిగిన ముఖ్యాంశాలు. పూర్తి చరిత్ర [`CHANGELOG.md`](CHANGELOG.md) లో ఉంది.
 
 - **⚖️ `quota-weighted` రౌటింగ్** — 20వ కాంబో స్ట్రాటజీ ఖాళీ అయిన ఖాతాలను దాటవేసి, మిగిలిన వాటిలో మిగిలిన కోటా ÷ ప్రస్తుత లోడ్ నిష్పత్తిలో డ్రా చేస్తుంది, ఇప్పటికే ఉన్న సంభాషణలను పిన్ చేస్తుంది. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 హెడ్లెస్ మోడ్** — `omniroute serve --headless` (లేదా `OMNIROUTE_HEADLESS=1`) కేవలం `/v1/*` ప్రాక్సీ ఇంజిన్ను మాత్రమే నడుపుతుంది, డాష్బోర్డ్ మరియు డాష్బోర్డ్-ఒన్లీ సబ్సిస్టమ్లు ఆఫ్లో ఉంటాయి. → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1015,7 +1015,7 @@ omniroute
 ```
 
 > 💡 `npm warn ERESOLVE` లేదా peer-dep హెచ్చరికలు కనిపిస్తున్నాయా? [అవి హానికరం కావు](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **npm 11 లేదా తర్వాతి వెర్షన్ ఉపయోగిస్తున్నారా?** అనుమతించకపోతే npm ప్యాకేజీ lifecycle స్క్రిప్ట్లను బ్లాక్ చేయవచ్చు. దాని native runtime ఫైల్లను సిద్ధం చేయడానికి OmniRoute యొక్క `postinstall` (`node scripts/build/postinstall.mjs`) అవసరం. గ్లోబల్గా ఇన్స్టాల్ చేసేటప్పుడు npm హెచ్చరికలో పేర్కొన్న ప్యాకేజీలను అనుమతించండి. OmniRoute 3.8.53 నివేదించిన ప్యాకేజీ సెట్ కోసం:
+> **npm 11 లేదా తర్వాతి వెర్షన్ ఉపయోగిస్తున్నారా?** అనుమతించకపోతే npm ప్యాకేజీ lifecycle స్క్రిప్ట్లను బ్లాక్ చేయవచ్చు. దాని native runtime ఫైల్లను సిద్ధం చేయడానికి OmniRoute యొక్క `postinstall` (`node scripts/build/postinstall.mjs`) అవసరం. గ్లోబల్గా ఇన్స్టాల్ చేసేటప్పుడు npm హెచ్చరికలో పేర్కొన్న ప్యాకేజీలను అనుమతించండి. OmniRoute 3.8.54 నివేదించిన ప్యాకేజీ సెట్ కోసం:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1808,7 +1808,7 @@ MIT లైసెన్స్ - వివరాల కోసం [లైసెన�
 
 **[⬆ పైకి తిరిగి వెళ్లండి](#-omniroute)** · ఓపెన్-సోర్స్ AI సముదాయం కోసం ❤️ తో రూపొందించబడింది.
 
-<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> రూపొందించారు · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT లైసెన్స్ · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> రూపొందించారు · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT లైసెన్స్ · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- సముదాయ ప్రశ్నలు మరియు సమాధానాల కోసం GitHub Discussions ప్రారంభించబడింది -->

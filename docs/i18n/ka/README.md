@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                    |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
+|                                    |         v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | ---------------------------------- | :----------------------: | :---------: | :-------------------: |
 | 🌐 პროვაიდერები                    |           352            |   **358**   |          380          |
 | 🧠 ჩატის უნიკალური მოდელის ID-ები  |           1320           |  **1374**   |         1491          |
@@ -580,7 +580,7 @@ Radar-ში მონაწილეობა ნებაყოფლობი
 
 </div>
 
-> ბოლო სიახლეები **v3.8.20 → v3.8.53**-დან. სრული ისტორია იხილეთ [`CHANGELOG.md`](CHANGELOG.md)-ში.
+> ბოლო სიახლეები **v3.8.20 → v3.8.54**-დან. სრული ისტორია იხილეთ [`CHANGELOG.md`](CHANGELOG.md)-ში.
 
 - **⚖️ `quota-weighted` რაუტინგი** — მე-20 კომბო სტრატეგია გამოტოვებს ამოწურულ ანგარიშებს და შემდეგ დარჩენილებს შორის არჩევს დარჩენილი კვოტის ÷ მიმდინარე დატვირთვის პროპორციით, არსებული საუბრები კი რჩება მიბმული. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Headless რეჟიმი** — `omniroute serve --headless` (ან `OMNIROUTE_HEADLESS=1`) მხოლოდ `/v1/*` პროქსი ძრავს უშვებს, დეშბორდისა და მხოლოდ-დეშბორდის ქვეპროცესების გარეშე. → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1014,7 +1014,7 @@ omniroute
 ```
 
 > 💡 ხედავ `npm warn ERESOLVE` ან peer-dep გაფრთხილებებს? [ისინი უვნებელია](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **იყენებ npm 11-ს ან უფრო ახალს?** npm-მ შეიძლება დაბლოკოს პაკეტის სასიცოცხლო ციკლის სკრიპტები, თუ ისინი ნებადართული არ არის. OmniRoute-ის `postinstall` (`node scripts/build/postinstall.mjs`) აუცილებელია მისი ნატივური runtime ფაილების მოსამზადებლად. გლობალური ინსტალაციისას ნება დართე npm-ის გაფრთხილებაში ნახსენებ პაკეტებს. OmniRoute 3.8.53-ის მიერ მოცემული პაკეტების ნაკრებისთვის:
+> **იყენებ npm 11-ს ან უფრო ახალს?** npm-მ შეიძლება დაბლოკოს პაკეტის სასიცოცხლო ციკლის სკრიპტები, თუ ისინი ნებადართული არ არის. OmniRoute-ის `postinstall` (`node scripts/build/postinstall.mjs`) აუცილებელია მისი ნატივური runtime ფაილების მოსამზადებლად. გლობალური ინსტალაციისას ნება დართე npm-ის გაფრთხილებაში ნახსენებ პაკეტებს. OmniRoute 3.8.54-ის მიერ მოცემული პაკეტების ნაკრებისთვის:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1807,7 +1807,7 @@ MIT ლიცენზია — დეტალებისთვის იხ�
 
 **[⬆ დაბრუნება დასაწყისში](#-omniroute)** · შექმნილია ❤️-ით ღია კოდის AI საზოგადოებისთვის.
 
-<sub>შექმნა <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT ლიცენზია · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>შექმნა <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT ლიცენზია · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions ჩართულია საზოგადოების კითხვა-პასუხისთვის -->

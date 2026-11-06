@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                 |              v3.8.50              | **v3.8.51** |      `v3.8.53+`       |
+|                                 |              v3.8.50              | **v3.8.51** |      `v3.8.54+`       |
 | ------------------------------- | :-------------------------------: | :---------: | :-------------------: |
 | 🌐 プロバイダー                 |                352                |   **358**   |          380          |
 | 🧠 一意なチャットモデル ID      |               1320                |  **1374**   |         1491          |
@@ -580,7 +580,7 @@ Radarはオプトイン方式で、GETリクエストのみを使用します。
 
 </div>
 
-> **v3.8.20 → v3.8.53** の最近のハイライト。全履歴は [`CHANGELOG.md`](CHANGELOG.md) をご覧ください。
+> **v3.8.20 → v3.8.54** の最近のハイライト。全履歴は [`CHANGELOG.md`](CHANGELOG.md) をご覧ください。
 
 - **⚖️ `quota-weighted` ルーティング** — 20番目のコンボ戦略は、使い切ったアカウントをスキップし、残りのアカウントから残りのクォータ ÷ 処理中の負荷の比率に応じて抽選し、既存の会話をピン留めしたままにします。→ [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 ヘッドレスモード** — `omniroute serve --headless`（または `OMNIROUTE_HEADLESS=1`）で `/v1/*` プロキシエンジンのみを実行し、ダッシュボードおよびダッシュボード専用サブシステムをオフにします。→ [ヘッドレスモード](docs/guides/HEADLESS.md)
@@ -1015,7 +1015,7 @@ omniroute
 ```
 
 > 💡 `npm warn ERESOLVE` や peer-dep の警告が出ますか？[それらは無害です](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated)。
-> **npm 11 以降を使用していますか？** npm はパッケージのライフサイクルスクリプトが許可されていない場合、それをブロックすることがあります。OmniRoute の `postinstall`（`node scripts/build/postinstall.mjs`）は、ネイティブランタイムファイルを準備するために必要です。グローバルにインストールする際は、npm の警告で示されたパッケージを許可してください。OmniRoute 3.8.53 で報告されたパッケージセットは次のとおりです:
+> **npm 11 以降を使用していますか？** npm はパッケージのライフサイクルスクリプトが許可されていない場合、それをブロックすることがあります。OmniRoute の `postinstall`（`node scripts/build/postinstall.mjs`）は、ネイティブランタイムファイルを準備するために必要です。グローバルにインストールする際は、npm の警告で示されたパッケージを許可してください。OmniRoute 3.8.54 で報告されたパッケージセットは次のとおりです:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1809,7 +1809,7 @@ MITライセンス - 詳細は [LICENSE](LICENSE) を参照してください。
 
 **[⬆ トップに戻る](#-omniroute)** · オープンソースAIコミュニティのために❤️を込めて作られています。
 
-<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> 作成 · OmniRoute v3.8.53 · Node ≥22.22.2 · MITライセンス · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> 作成 · OmniRoute v3.8.54 · Node ≥22.22.2 · MITライセンス · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- コミュニティのQ&A向けにGitHub Discussionsを有効化 -->
