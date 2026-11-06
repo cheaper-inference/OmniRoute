@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Button, Modal } from "@/shared/components";
+import { Badge, Button, Icon, Modal, Spinner } from "@/shared/components";
 
 interface NewModelsInboxModel {
   modelId: string;
@@ -110,25 +110,28 @@ export default function NewModelsButton() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={handleOpen}
-        className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border bg-bg-subtle border-border text-text-muted hover:text-text-primary hover:border-primary/40 transition-colors"
-        title={t("newModelsButtonTitle")}
-        aria-label={unseenCount > 0 ? `${t("newModelsButton")} (${badgeLabel})` : undefined}
-        data-testid="new-models-button"
-      >
-        <span className="material-symbols-outlined text-[14px]">new_releases</span>
-        {t("newModelsButton")}
+      <span className="relative inline-flex">
+        <Button
+          size="sm"
+          variant="secondary"
+          icon="new_releases"
+          onClick={handleOpen}
+          title={t("newModelsButtonTitle")}
+          aria-label={unseenCount > 0 ? `${t("newModelsButton")} (${badgeLabel})` : undefined}
+          data-testid="new-models-button"
+        >
+          {t("newModelsButton")}
+        </Button>
         {unseenCount > 0 && (
           <span
-            className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold px-1"
+            className="pointer-events-none absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-error text-white text-[10px] font-bold px-1"
             aria-hidden="true"
+            data-testid="new-models-badge"
           >
             {unseenCount > 99 ? "99+" : unseenCount}
           </span>
         )}
-      </button>
+      </span>
 
       <Modal
         isOpen={open}
@@ -151,13 +154,11 @@ export default function NewModelsButton() {
         <div className="flex flex-col gap-3 max-h-[60vh] overflow-y-auto">
           {loading && groups.length === 0 ? (
             <div className="flex items-center justify-center gap-2 py-6 text-sm text-text-muted">
-              <span className="material-symbols-outlined text-[18px] animate-spin">
-                progress_activity
-              </span>
+              <Spinner size="sm" decorative />
               {tc("loading")}
             </div>
           ) : error ? (
-            <div className="flex flex-col items-center gap-2 py-6 text-sm text-red-500">
+            <div className="flex flex-col items-center gap-2 py-6 text-sm text-error">
               <span>{t("newModelsLoadError")}</span>
               <Button size="sm" variant="secondary" icon="refresh" onClick={() => void load()}>
                 {tc("retry")}
@@ -165,7 +166,7 @@ export default function NewModelsButton() {
             </div>
           ) : groups.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-8 text-sm text-text-muted text-center">
-              <span className="material-symbols-outlined text-[28px]">new_releases</span>
+              <Icon name="new_releases" size={28} />
               <span className="font-medium text-text-main">{t("newModelsEmpty")}</span>
               <span className="text-xs">{t("newModelsEmptyDesc")}</span>
             </div>
@@ -181,21 +182,17 @@ export default function NewModelsButton() {
                       {group.models.length}
                     </span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => void markProviderRead(group)}
-                    className="text-xs text-text-muted hover:text-text-primary transition-colors"
-                  >
+                  <Button size="sm" variant="ghost" onClick={() => void markProviderRead(group)}>
                     {t("newModelsMarkProviderRead")}
-                  </button>
+                  </Button>
                 </div>
                 <div className="divide-y divide-border">
                   {group.models.map((model) => (
                     <div key={model.modelId} className="flex items-center gap-2 px-3 py-1.5">
                       {model.isFree && (
-                        <span className="shrink-0 text-[9px] font-bold uppercase text-green-600 bg-green-500/10 rounded px-1 py-0.5">
+                        <Badge variant="success" size="sm" className="shrink-0">
                           {t("freeBadge")}
-                        </span>
+                        </Badge>
                       )}
                       <code className="text-xs font-mono text-text-muted truncate flex-1">
                         {model.modelId}
