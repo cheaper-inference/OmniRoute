@@ -1,0 +1,1 @@
+- **perf(ci):** the test-impact map is written entry by entry instead of being serialised into one string first. The release map reaches about 502 MiB when serialised whole, which is close to the runtime's maximum string length, so a branch that added a few hundred edges made the Fast Quality Gates job die with `RangeError: Invalid string length` before it could report anything

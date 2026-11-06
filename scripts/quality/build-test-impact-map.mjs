@@ -91,11 +91,71 @@ export function buildTestImpactMap(root = ROOT) {
   };
 }
 
+/**
+ * Write one JSON value, streaming arrays and objects entry by entry.
+ *
+ * Only scalars ever reach `JSON.stringify`, so no single allocation grows with
+ * the document.
+ */
+function writeJsonValue(fd, value) {
+  if (Array.isArray(value)) {
+    fs.writeSync(fd, "[");
+    for (let i = 0; i < value.length; i += 1) {
+      if (i > 0) fs.writeSync(fd, ",");
+      writeJsonValue(fd, value[i]);
+    }
+    fs.writeSync(fd, "]");
+    return;
+  }
+  if (value !== null && typeof value === "object") {
+    const entries = Object.entries(value);
+    if (entries.length === 0) {
+      fs.writeSync(fd, "{}");
+      return;
+    }
+    fs.writeSync(fd, "{");
+    entries.forEach(([key, entryValue], index) => {
+      if (index > 0) fs.writeSync(fd, ",");
+      fs.writeSync(fd, JSON.stringify(key) + ":");
+      writeJsonValue(fd, entryValue);
+    });
+    fs.writeSync(fd, "}");
+    return;
+  }
+  fs.writeSync(fd, JSON.stringify(value));
+}
+
+/**
+ * Write the map without ever building it as one string.
+ *
+ * `JSON.stringify` refuses to produce a string longer than V8's limit, and this
+ * map is already close to it: the release map serialises to about 502 MiB, so a
+ * branch that adds a few hundred edges made the whole gate die with
+ * "RangeError: Invalid string length" before it could report anything. Streaming
+ * one entry at a time keeps memory flat and removes the ceiling.
+ *
+ * Top-level entries are separated by newlines so the file stays diffable; nested
+ * values stay compact because the readers parse the whole thing anyway.
+ */
+export function writeTestImpactMap(out, map) {
+  const fd = fs.openSync(out, "w");
+  try {
+    fs.writeSync(fd, "{");
+    Object.entries(map).forEach(([key, value], index) => {
+      fs.writeSync(fd, (index > 0 ? ",\n" : "\n") + JSON.stringify(key) + ":");
+      writeJsonValue(fd, value);
+    });
+    fs.writeSync(fd, "\n}\n");
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+
 if (fileURLToPath(import.meta.url) === path.resolve(process.argv[1] || "")) {
   const result = buildTestImpactMap();
   const { testFileCount, ...map } = result;
   const out = path.join(ROOT, "config/quality/test-impact-map.json");
-  fs.writeFileSync(out, JSON.stringify(map, null, 2) + "\n");
+  writeTestImpactMap(out, map);
   console.log(
     `test-impact-map: ${Object.keys(map.sources).length} source files + ${Object.keys(map.artifacts).length} artifact files mapped from ${testFileCount} test files`
   );
