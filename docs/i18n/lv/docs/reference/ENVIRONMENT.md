@@ -1368,7 +1368,7 @@ Pakalpojums, kas tiek turēts nomodā veselu mēnesi, izmanto aptuveni 744 eksem
 
 ## Izvietošanas scenāriji
 
-Lai iegūtu SRE norādes par relay aizmugursistēmu (ts/bifrost/auto darbību, 9router un CLIProxyAPI izvietojumu, kā arī augstas caurlaidspējas rezerves stratēģiju), skatiet [Relay aizmugursistēmas stratēģija](/docs/reference/RELAY_BACKEND_STRATEGY.md).
+Lai skatītu SRE norādes par relay aizmugursistēmu (`ts/bifrost/auto` darbību, 9router un CLIProxyAPI izvietojumu, kā arī augstas caurlaidspējas rezerves stratēģiju), skatiet [Relay aizmugursistēmas stratēģija](/docs/reference/RELAY_BACKEND_STRATEGY.md).
 
 ### Minimāla lokālā izstrāde
 
@@ -1399,7 +1399,7 @@ OMNIROUTE_MEMORY_MB=8192
 CORS_ORIGIN=https://your-frontend.example.com
 ```
 
-### Nošķirts no tīkla / CI
+### Izolēts tīkls / CI
 
 ```bash
 JWT_SECRET=test-jwt-secret-for-ci
@@ -1872,3 +1872,14 @@ To izmanto `open-sse/services/combo.ts` un `src/lib/quota/quotaScheduler.ts`, la
 | Mainīgs                        | Noklusējums | Avota fails                                  | Apraksts                                                                                                                                                                                                                                        |
 | ------------------------------ | ----------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`         | `src/lib/providerModels/modelSyncTimings.ts` | Iestatiet uz `1`, lai modeļa sinhronizācijas laikā reģistrētu fāzes laiku, ģenerētu pieprasījumu ID un fāzes success/error rezultātus. Atspējots visām pārējām vērtībām. Žurnālos nav iekļautas pieprasījumu, kontu, katalogu un kļūdu slodzes. |
+
+## Lokālais OpenCode multivides analīzes rīks
+
+Izmanto `scripts/cli/omniroute-media-mcp.mjs`. Iestatiet šos mainīgos lokālā rīka procesa vidē.
+
+| Mainīgais                  | Noklusējums                                                                        | Apraksts                                                                                                        |
+| -------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (vai `~/.config/opencode/opencode.json`) | OpenCode konfigurācija, ko nolasa multivides rīks un instalētājs.                                               |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                        | Pakalpojuma sniedzēja ieraksts, ko multivides rīks nolasa no OpenCode konfigurācijas.                           |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                             | Multivides rīka iesniegtais modelis. Tā pakalpojuma sniedzējam jāatbalsta pieprasītie multivides veidi.         |
+| `OMNIROUTE_MEDIA_API_KEY`  | Konfigurēta pakalpojuma sniedzēja API atslēga vai tās vides mainīgā atsauce        | Neobligāts akreditācijas datu aizstājējs. Glabājiet to lokālā procesa vidē; nekad neiekļaujiet to repozitorijā. |
