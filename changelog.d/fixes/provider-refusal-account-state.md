@@ -1,1 +1,0 @@
-- Keep explicit `misalignment_policy_violation` responses request-scoped instead of treating them as account failures, and preserve OpenRouter stream errors with populated choices as failed Responses events.
