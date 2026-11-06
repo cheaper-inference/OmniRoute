@@ -194,10 +194,14 @@ it.each(["en", "zh-CN"])(
   }
 );
 
-it("five-minute cache rereads use exactly the two cache GETs; hidden pages do not read", async () => {
+it("rereads quota caches every five seconds, accounts every five minutes, never while hidden", async () => {
   vi.useFakeTimers();
   vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
   const requests = fixture();
+  const cacheRequests = () =>
+    requests.filter(
+      (url) => !["/api/resilience/cooldowns", "/api/usage/availability"].includes(url)
+    );
   mount("en");
   await act(async () => {
     await vi.advanceTimersByTimeAsync(0);
@@ -205,22 +209,23 @@ it("five-minute cache rereads use exactly the two cache GETs; hidden pages do no
   expect(document.querySelectorAll("[data-availability]")).toHaveLength(5);
   requests.length = 0;
   await act(async () => {
-    await vi.advanceTimersByTimeAsync(299_000);
+    await vi.advanceTimersByTimeAsync(4999);
   });
-  expect(
-    requests.filter(
-      (url) => !["/api/resilience/cooldowns", "/api/usage/availability"].includes(url)
-    )
-  ).toEqual([]);
+  expect(cacheRequests()).toEqual([]);
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(1);
+  });
+  expect(cacheRequests()).toEqual(["/api/providers/client", "/api/usage/provider-limits"]);
   requests.length = 0;
   await act(async () => {
-    await vi.advanceTimersByTimeAsync(1000);
+    await vi.advanceTimersByTimeAsync(295_000);
   });
-  expect(
-    requests.filter(
-      (url) => !["/api/resilience/cooldowns", "/api/usage/availability"].includes(url)
-    )
-  ).toEqual(["/api/providers/client", "/api/usage/provider-limits"]);
+  expect(cacheRequests()).toEqual(Array(59).fill("/api/usage/provider-limits"));
+  requests.length = 0;
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(5000);
+  });
+  expect(cacheRequests()).toEqual(["/api/providers/client", "/api/usage/provider-limits"]);
   vi.spyOn(document, "visibilityState", "get").mockReturnValue("hidden");
   requests.length = 0;
   await act(async () => {

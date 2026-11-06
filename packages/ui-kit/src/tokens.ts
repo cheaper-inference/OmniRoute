@@ -44,7 +44,7 @@ export const ciTokens = {
     status: {
       live: "#cff331",
       success: "#087a4f",
-      warning: "#a75a00",
+      warning: "#a05600",
       danger: "#bf3636",
       info: "#2869d8",
     },
@@ -75,6 +75,24 @@ export const ciTokens = {
       property: "#e9c1ff",
       comment: "#9ca39f",
     },
+    /** Log level inks (default-theme values); 4.5:1 on the inverse surface and every log tint. */
+    log: {
+      debug: "#c7cbc5",
+      trace: "#9ca39f",
+      info: "#39c5cf",
+      warn: "#e3b341",
+      error: "#ff7b72",
+      fatal: "#f778ba",
+    },
+    /** Translucent row/badge tint per log level, composited over the inverse surface. */
+    logSubtle: {
+      debug: "rgb(199 203 197 / 0.16)",
+      trace: "rgb(156 163 159 / 0.16)",
+      info: "rgb(57 197 207 / 0.16)",
+      warn: "rgb(227 179 65 / 0.16)",
+      error: "rgb(255 123 114 / 0.16)",
+      fatal: "rgb(247 120 186 / 0.16)",
+    },
     /** Text-safe ink per chart colour (light theme values); 4.5:1 on content surfaces. */
     chartInk: {
       1: "#4d5c00",
@@ -96,6 +114,26 @@ export const ciTokens = {
       6: "#faebe2",
       7: "#e0f0f1",
       8: "#f2ebe5",
+    },
+    /** Magnitude ramp (light theme values). Step 1 is nearest the surface; every step keeps 3:1 on it. */
+    scaleSeq: {
+      1: "#559471",
+      2: "#43815f",
+      3: "#326e4e",
+      4: "#205b3d",
+      5: "#0b492d",
+      6: "#013720",
+      7: "#002614",
+    },
+    /** Polarity ramp (light theme values). Step 4 is the neutral midpoint; 1 and 7 are the opposite extremes. */
+    scaleDiv: {
+      1: "#4d1e00",
+      2: "#783302",
+      3: "#a24c15",
+      4: "#888885",
+      5: "#3969a6",
+      6: "#06498e",
+      7: "#012d5d",
     },
   },
   font: {

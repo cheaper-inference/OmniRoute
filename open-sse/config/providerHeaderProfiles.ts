@@ -1,6 +1,9 @@
 import { getAntigravityContentHeaders } from "../services/antigravityHeaders.ts";
 import type { AntigravityClientProfile } from "@/shared/constants/antigravityClientProfile";
-import { canStartBackgroundRefresh } from "@/shared/utils/backgroundRefresh";
+import {
+  BACKGROUND_REFRESH_RETRY_AFTER_FAILURE_MS,
+  canStartBackgroundRefresh,
+} from "@/shared/utils/backgroundRefresh";
 
 // GitHub Copilot request identity. Ported to match the GitHub Copilot CLI
 // (`copilot` npm package) wire identity that Hermes captured live, NOT the
@@ -24,6 +27,9 @@ type CopilotFetchLike = typeof fetch;
 
 let copilotVersionCache: { fetchedAt: number; version: string } | null = null;
 let copilotVersionInFlight: Promise<string> | null = null;
+// Earliest time the getter may start another background lookup: one TTL after any answer
+// (the cache only keeps versions newer than the pin), the retry window after a failure.
+let copilotNextRefreshAt = 0;
 
 function getSafeCopilotEnvValue(name: string, pattern: RegExp): string | null {
   const raw = typeof process === "undefined" ? undefined : process.env?.[name];
@@ -103,6 +109,9 @@ export function resolveGitHubCopilotCliVersion(
     if (resolved && compareCopilotDottedTriple(resolved, GITHUB_COPILOT_CLI_VERSION) > 0) {
       copilotVersionCache = { fetchedAt: Date.now(), version: resolved };
     }
+    copilotNextRefreshAt =
+      Date.now() +
+      (resolved ? GITHUB_COPILOT_VERSION_CACHE_TTL_MS : BACKGROUND_REFRESH_RETRY_AFTER_FAILURE_MS);
     return pickCopilotVersionAtLeastPin(resolved ?? readFreshCopilotVersionCache());
   })();
 
@@ -115,6 +124,7 @@ export function resolveGitHubCopilotCliVersion(
 
 /** Test seam: drop the registry cache so the next resolve hits the network. */
 export function resetGitHubCopilotCliVersionCache(): void {
+  copilotNextRefreshAt = 0;
   copilotVersionCache = null;
   copilotVersionInFlight = null;
 }
@@ -130,7 +140,8 @@ export function getGitHubCopilotCliVersion(): string {
     canStartBackgroundRefresh() &&
     !process.env.NODE_TEST_CONTEXT &&
     !readFreshCopilotVersionCache() &&
-    !copilotVersionInFlight
+    !copilotVersionInFlight &&
+    Date.now() >= copilotNextRefreshAt
   )
     void resolveGitHubCopilotCliVersion();
   return pickCopilotVersionAtLeastPin(readFreshCopilotVersionCache());
@@ -242,6 +253,9 @@ let qwenVersionCache: VersionCache | null = null;
 let qwenVersionInFlight: Promise<string> | null = null;
 let codeBuddyVersionCache: VersionCache | null = null;
 let codeBuddyVersionInFlight: Promise<string> | null = null;
+// Earliest time each getter may start another background lookup (see refreshNpmDottedTriple).
+let qwenNextRefreshAt = 0;
+let codeBuddyNextRefreshAt = 0;
 
 function parseDottedTriple(value: unknown): string | null {
   if (typeof value !== "string") return null;
@@ -288,6 +302,8 @@ function refreshNpmDottedTriple(options: {
   setCache: (next: VersionCache) => void;
   readInFlight: () => Promise<string> | null;
   setInFlight: (next: Promise<string> | null) => void;
+  /** Records when a getter may start the next background lookup. */
+  setNextRefreshAt: (at: number) => void;
   fetchImpl: NpmFetchLike;
 }): Promise<string> {
   const fresh = readFreshVersionCache(options.readCache(), options.ttlMs);
@@ -317,6 +333,11 @@ function refreshNpmDottedTriple(options: {
       clearTimeout(timeoutId);
     }
 
+    // Any answer counts as checked for the TTL — the cache only keeps newer-than-pin versions,
+    // so an answer equal to the pin would otherwise be re-fetched on every call.
+    options.setNextRefreshAt(
+      Date.now() + (resolved ? options.ttlMs : BACKGROUND_REFRESH_RETRY_AFTER_FAILURE_MS)
+    );
     if (resolved && compareDottedTriple(resolved, options.pin) > 0) {
       options.setCache({ fetchedAt: Date.now(), version: resolved });
       return resolved;
@@ -335,7 +356,7 @@ function refreshNpmDottedTriple(options: {
 
 /** Sync hot path. Cache if newer than the pin, else the pin. Never waits. */
 export function getQwenCliVersion(): string {
-  if (shouldAutoRefreshCliVersion() && !qwenVersionInFlight) {
+  if (shouldAutoRefreshCliVersion() && !qwenVersionInFlight && Date.now() >= qwenNextRefreshAt) {
     const fresh = readFreshVersionCache(qwenVersionCache, QWEN_CLI_VERSION_CACHE_TTL_MS);
     if (!fresh || compareDottedTriple(fresh, QWEN_CLI_VERSION) <= 0) {
       void refreshQwenCliVersion();
@@ -361,11 +382,15 @@ export function refreshQwenCliVersion(fetchImpl: NpmFetchLike = fetch): Promise<
     setInFlight: (next) => {
       qwenVersionInFlight = next;
     },
+    setNextRefreshAt: (at) => {
+      qwenNextRefreshAt = at;
+    },
     fetchImpl,
   });
 }
 
 export function resetQwenCliVersionCache(): void {
+  qwenNextRefreshAt = 0;
   qwenVersionCache = null;
   qwenVersionInFlight = null;
 }
@@ -376,7 +401,11 @@ function formatCodeBuddyCnUserAgent(version: string): string {
 
 /** Sync hot path. Both numbers move together, or the captured pin stays. */
 export function getCodeBuddyCnUserAgent(): string {
-  if (shouldAutoRefreshCliVersion() && !codeBuddyVersionInFlight) {
+  if (
+    shouldAutoRefreshCliVersion() &&
+    !codeBuddyVersionInFlight &&
+    Date.now() >= codeBuddyNextRefreshAt
+  ) {
     const fresh = readFreshVersionCache(codeBuddyVersionCache, CODEBUDDY_CN_VERSION_CACHE_TTL_MS);
     if (!fresh) void refreshCodeBuddyCnUserAgent();
   }
@@ -401,11 +430,15 @@ export function refreshCodeBuddyCnUserAgent(fetchImpl: NpmFetchLike = fetch): Pr
     setInFlight: (next) => {
       codeBuddyVersionInFlight = next;
     },
+    setNextRefreshAt: (at) => {
+      codeBuddyNextRefreshAt = at;
+    },
     fetchImpl,
   }).then((version) => formatCodeBuddyCnUserAgent(version));
 }
 
 export function resetCodeBuddyCnVersionCache(): void {
+  codeBuddyNextRefreshAt = 0;
   codeBuddyVersionCache = null;
   codeBuddyVersionInFlight = null;
 }
