@@ -44,7 +44,7 @@ Un flag boolean este considerat **activat** atunci când valoarea sa efectivă e
 
 ## Catalog Flag
 
-119 steaguri din 6 categorii.** Implicit** este definiția implicită — valoarea utilizată atunci când nu este prezentă nici o modificare DB, nici o variabilă de mediu.
+120 steaguri din 6 categorii.** Implicit** este definiția implicită — valoarea utilizată atunci când nu este prezentă nici o modificare DB, nici o variabilă de mediu.
 
 ### Securitate (11)
 
@@ -252,10 +252,10 @@ Returnează fiecare indicator împreună cu valoarea efectivă, sursa și un rez
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 120 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

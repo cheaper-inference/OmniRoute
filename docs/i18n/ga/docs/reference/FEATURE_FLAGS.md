@@ -44,7 +44,7 @@ Meastar bratach bhooleach a bheith **cumasaithe** nuair is é `"true"`,
 
 ## Catalóg Bratach
 
-119 bratach thar 6 chatagóir.** Réamhshocrú** Is é an sainmhíniú réamhshocraithe — an luach a úsáidtear nuair nach bhfuil sáraíocht DB ná athróg timpeallachta i láthair.
+120 bratach thar 6 chatagóir.** Réamhshocrú** Is é an sainmhíniú réamhshocraithe — an luach a úsáidtear nuair nach bhfuil sáraíocht DB ná athróg timpeallachta i láthair.
 
 ### Slándáil (11)
 
@@ -252,10 +252,10 @@ Filleann sé gach bratach lena luach éifeachtach, lena foinse agus le hachoimre
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... na 119 bhratach ar fad
+    // ... na 120 bhratach ar fad
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

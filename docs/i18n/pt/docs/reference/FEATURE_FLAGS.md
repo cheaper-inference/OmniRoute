@@ -35,7 +35,7 @@ Um sinalizador booleano é considerado **ativado** quando o seu valor efetivo é
 
 ## Catálogo de Bandeiras
 
-119 bandeiras em 6 categorias.** Predefinição** é a definição padrão — o valor utilizado quando não há substituição de DB nem de variável de ambiente.
+120 bandeiras em 6 categorias.** Predefinição** é a definição padrão — o valor utilizado quando não há substituição de DB nem de variável de ambiente.
 
 ### Segurança (11)
 
@@ -244,10 +244,10 @@ Devolve todas as flags com o respetivo valor efetivo, origem e um resumo.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 120 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

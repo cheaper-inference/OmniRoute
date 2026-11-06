@@ -44,7 +44,7 @@ En boolesk flagga anses vara **aktiverad** när dess effektiva värde är `"true
 
 ## Flagga katalog
 
-119 flaggor i 6 kategorier.** Standard** är definitionen standard — värdet som används när varken en DB åsidosättning eller en miljövariabel är närvarande.
+120 flaggor i 6 kategorier.** Standard** är definitionen standard — värdet som används när varken en DB åsidosättning eller en miljövariabel är närvarande.
 
 ### Säkerhet (11)
 
@@ -252,10 +252,10 @@ Returnerar alla flaggor med deras effektiva värde, källa och en sammanfattning
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... alla 119 flaggor
+    // ... alla 120 flaggor
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

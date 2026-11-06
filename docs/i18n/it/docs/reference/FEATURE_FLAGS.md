@@ -44,7 +44,7 @@ Un flag booleano è considerato **abilitato** quando il suo valore effettivo è 
 
 ## Catalogo delle bandiere
 
-119 bandiere in 6 categorie.** Predefinito** è la definizione predefinita — il valore utilizzato quando non è presente né un override DB né una variabile di ambiente.
+120 bandiere in 6 categorie.** Predefinito** è la definizione predefinita — il valore utilizzato quando non è presente né un override DB né una variabile di ambiente.
 
 ### Sicurezza (11)
 
@@ -253,10 +253,10 @@ Restituisce ogni flag con il relativo valore effettivo, l’origine e un riepilo
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... tutti i 119 flag
+    // ... tutti i 120 flag
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

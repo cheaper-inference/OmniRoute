@@ -39,7 +39,7 @@
 
 ## 标志目录
 
-跨 6 个类别的 119 个标志。**默认值**是定义默认值 — 在不存在数据库覆盖值或环境变量时使用的值。
+跨 6 个类别的 120 个标志。**默认值**是定义默认值 — 在不存在数据库覆盖值或环境变量时使用的值。
 
 ### 安全性 (11)
 
@@ -258,10 +258,10 @@
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 120 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

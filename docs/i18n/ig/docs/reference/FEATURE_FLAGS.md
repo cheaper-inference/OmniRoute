@@ -43,7 +43,7 @@ A na-ewere boolean flag dị ka nke **agbanyere** mgbe uru ya dị irè bụ `"t
 
 ## Katalọgụ ọkọlọtọ
 
-Ọkọlọtọ 119 gafee ụdị 6.** Ọdabara** bụ nkọwapụta nke ndabara — uru a na-eji mgbe na-enweghị DB override ma ọ bụ mgbanwe gburugburu ebe obibi adịghị.
+Ọkọlọtọ 120 gafee ụdị 6.** Ọdabara** bụ nkọwapụta nke ndabara — uru a na-eji mgbe na-enweghị DB override ma ọ bụ mgbanwe gburugburu ebe obibi adịghị.
 
 ### Nchekwa (11)
 
@@ -254,10 +254,10 @@ Na-eweghachite flag ọ bụla tinyere uru ya dị irè, isi mmalite ya, na nch�
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 120 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

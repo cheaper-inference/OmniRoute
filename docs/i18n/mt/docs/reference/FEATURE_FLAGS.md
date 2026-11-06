@@ -38,7 +38,7 @@ Flag boolean huwa kkunsidrat **attivat** meta l-valur effettiv tiegħu jkun `"tr
 
 ## Katalgu tal-Bandiera
 
-119-il bandiera fuq 6 kategoriji.** Default** hija d-definizzjoni default — il-valur użat meta la DB override u lanqas varjabbli ambjentali ma jkunu preżenti.
+120-il bandiera fuq 6 kategoriji.** Default** hija d-definizzjoni default — il-valur użat meta la DB override u lanqas varjabbli ambjentali ma jkunu preżenti.
 
 ### Sigurtà (11)
 
@@ -246,10 +246,10 @@ Jirritorna kull markatur bil-valur effettiv, is-sors, u sommarju.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... il-119-il markatur kollha
+    // ... il-120-il markatur kollha
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

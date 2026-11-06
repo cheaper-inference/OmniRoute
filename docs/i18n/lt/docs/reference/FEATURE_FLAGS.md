@@ -39,7 +39,7 @@ Loginė vėliavėlė laikoma **įjungta**, kai jos efektyvioji reikšmė yra `"t
 
 ## Vėliavos katalogas
 
-119 vėliavų 6 kategorijose.** Numatytoji** yra numatytoji apibrėžimo — reikšmė, naudojama, kai nėra nei DB nepaisymo, nei aplinkos kintamojo.
+120 vėliavų 6 kategorijose.** Numatytoji** yra numatytoji apibrėžimo — reikšmė, naudojama, kai nėra nei DB nepaisymo, nei aplinkos kintamojo.
 
 ### Saugumas (11)
 
@@ -248,10 +248,10 @@ Grąžina kiekvieną vėliavėlę su jos faktine reikšme, šaltiniu ir suvestin
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... visos 119 vėliavėlių
+    // ... visos 120 vėliavėlių
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

@@ -44,7 +44,7 @@ Bir boolean bayrağı, etkin değeri `"true"`, `"1"` veya `"yes"` olduğunda
 
 ## Bayrak Kataloğu
 
-6 kategoride 119 bayrak. **Varsayılan**, tanım varsayılanıdır — ne bir DB geçersiz kılması ne de bir ortam değişkeni mevcut olduğunda kullanılan değer.
+6 kategoride 120 bayrak. **Varsayılan**, tanım varsayılanıdır — ne bir DB geçersiz kılması ne de bir ortam değişkeni mevcut olduğunda kullanılan değer.
 
 ### Güvenlik (11)
 
@@ -269,10 +269,10 @@ Her bayrağı etkin değeri, kaynağı ve bir özetle birlikte döndürür.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... tüm 119 bayrak
+    // ... tüm 120 bayrak
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

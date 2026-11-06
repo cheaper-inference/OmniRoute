@@ -44,7 +44,7 @@ Un indicateur booléen est considéré comme **activé** lorsque sa valeur effec
 
 ## Catalogue de drapeaux
 
-119 drapeaux répartis en 6 catégories.** Défaut** est la définition par défaut — la valeur utilisée lorsque ni un remplacement DB ni une variable d'environnement ne sont présents.
+120 drapeaux répartis en 6 catégories.** Défaut** est la définition par défaut — la valeur utilisée lorsque ni un remplacement DB ni une variable d'environnement ne sont présents.
 
 ### Sécurité (11)
 
@@ -252,10 +252,10 @@ Renvoie chaque indicateur avec sa valeur effective, sa source et un récapitulat
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... les 119 indicateurs
+    // ... les 120 indicateurs
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

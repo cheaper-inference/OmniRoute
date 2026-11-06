@@ -44,7 +44,7 @@ Flaga logiczna jest uznawana za **włączoną**, gdy jej efektywna wartość to 
 
 ## Katalog flag
 
-119 flag w 6 kategoriach. **Domyślna** to domyślna wartość definicji — wartość
+120 flag w 6 kategoriach. **Domyślna** to domyślna wartość definicji — wartość
 używana, gdy nie ma ani nadpisania w bazie danych, ani zmiennej środowiskowej.
 
 ### Bezpieczeństwo (11)
@@ -267,10 +267,10 @@ Zwraca każdą flagę wraz z jej efektywną wartością, źródłem i podsumowan
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... wszystkie 119 flag
+    // ... wszystkie 120 flag
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

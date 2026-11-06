@@ -42,7 +42,7 @@ Boolean zastavica se smatra **omogućenom** kada je njena efektivna vrijednost `
 
 ## Katalog zastavica
 
-119 zastavica u 6 kategorija. **Zadano** je zadana vrijednost definicije — vrijednost
+120 zastavica u 6 kategorija. **Zadano** je zadana vrijednost definicije — vrijednost
 koja se koristi kada nisu prisutni ni DB zamjena ni varijabla okruženja.
 
 ### Sigurnost (11)
@@ -261,10 +261,10 @@ Vraća svaku zastavicu sa efektivnom vrijednošću, izvorom i sažetkom.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... svih 119 zastavica
+    // ... svih 120 zastavica
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

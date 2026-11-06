@@ -44,7 +44,7 @@ Logična zastavica se šteje za **omogočeno**, kadar je njena dejanska vrednost
 
 ## Katalog zastav
 
-119 zastav v 6 kategorijah.** Privzeto** je privzeta definicija — vrednost, uporabljena, ko ni prisotna niti preglasitev DB niti spremenljivka okolja.
+120 zastav v 6 kategorijah.** Privzeto** je privzeta definicija — vrednost, uporabljena, ko ni prisotna niti preglasitev DB niti spremenljivka okolja.
 
 ### Varnost (11)
 
@@ -253,10 +253,10 @@ Vrne vse zastavice z njihovo učinkovito vrednostjo, virom in povzetkom.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... vseh 119 zastavic
+    // ... vseh 120 zastavic
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

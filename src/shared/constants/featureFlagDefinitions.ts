@@ -1,4 +1,5 @@
 import type { FeatureFlagDefinition } from "./featureFlagTypes";
+import { USAGE_DAILY_ROLLUP_FLAG } from "./usageDailyRollupFlag";
 
 export type { FeatureFlagDefinition };
 
@@ -1382,18 +1383,7 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     requiresRestart: false,
     warningLevel: "caution",
   },
-  {
-    key: "USAGE_DAILY_ROLLUP_ENABLED",
-    label: "Daily Usage Rollup",
-    description:
-      "Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
-    descriptionI18nKey: "featureFlagUsageDailyRollupEnabledDescription",
-    category: "runtime",
-    defaultValue: "false",
-    type: "boolean",
-    requiresRestart: false,
-    warningLevel: "caution",
-  },
+  USAGE_DAILY_ROLLUP_FLAG,
   {
     key: "CURSOR_GROK_47_DROP_MAX_EFFORT",
     label: "Cursor Grok 4.7: Drop the max Effort Tier",

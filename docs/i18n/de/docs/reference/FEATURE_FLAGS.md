@@ -45,7 +45,7 @@ Ein boolesches Flag gilt als **aktiviert**, wenn sein effektiver Wert `"true"`,
 
 ## Flaggenkatalog
 
-119 Flaggen in 6 Kategorien.** Standard** ist der Definitionsstandard — der Wert, der verwendet wird, wenn weder eine DB Überschreibung noch eine Umgebungsvariable vorhanden ist.
+120 Flaggen in 6 Kategorien.** Standard** ist der Definitionsstandard — der Wert, der verwendet wird, wenn weder eine DB Überschreibung noch eine Umgebungsvariable vorhanden ist.
 
 ### Sicherheit (11)
 
@@ -253,10 +253,10 @@ Gibt jedes Flag mit seinem effektiven Wert, seiner Quelle und einer Zusammenfass
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... alle 119 Flags
+    // ... alle 120 Flags
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

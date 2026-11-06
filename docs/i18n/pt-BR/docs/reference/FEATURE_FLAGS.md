@@ -44,7 +44,7 @@ Uma flag booleana é considerada **habilitada** quando seu valor efetivo é `"tr
 
 ## Catálogo de Bandeiras
 
-119 bandeiras em 6 categorias.** Padrão** é a definição padrão — o valor usado quando não há substituição de DB nem variável de ambiente.
+120 bandeiras em 6 categorias.** Padrão** é a definição padrão — o valor usado quando não há substituição de DB nem variável de ambiente.
 
 ### Segurança (11)
 
@@ -254,10 +254,10 @@ Retorna todos os sinalizadores com seu valor efetivo, origem e um resumo.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 120 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

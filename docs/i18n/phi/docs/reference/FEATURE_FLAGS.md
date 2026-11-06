@@ -44,7 +44,7 @@ Itinuturing na **enabled** ang isang boolean flag kapag ang effective value nito
 
 ## Catalog ng Bandila
 
-119 na mga flag sa 6 na kategorya.** Default** ay ang default na depinisyon — ang halaga na ginagamit kapag walang DB na nag-override o isang variable ng kapaligiran ay naroroon.
+120 na mga flag sa 6 na kategorya.** Default** ay ang default na depinisyon — ang halaga na ginagamit kapag walang DB na nag-override o isang variable ng kapaligiran ay naroroon.
 
 ### Seguridad (11)
 
@@ -251,10 +251,10 @@ Ibinabalik ang bawat flag kasama ang epektibong value, source, at summary.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 120 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

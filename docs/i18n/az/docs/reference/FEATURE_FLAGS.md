@@ -44,7 +44,7 @@ o, **aktiv** hesab edilir (`isFeatureFlagEnabled()` funksiyasına baxın).
 
 ## Bayraq kataloqu
 
-6 kateqoriya üzrə 119 bayraq.** Defolt** defolt tərifdir — nə DB ləğvi, nə də mühit dəyişəni mövcud olmadıqda istifadə edilən dəyərdir.
+6 kateqoriya üzrə 120 bayraq.** Defolt** defolt tərifdir — nə DB ləğvi, nə də mühit dəyişəni mövcud olmadıqda istifadə edilən dəyərdir.
 
 ### Təhlükəsizlik (11)
 
@@ -252,10 +252,10 @@ Hər bayrağı effektiv dəyəri, mənbəyi və xülasəsi ilə birlikdə qaytar
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 120 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

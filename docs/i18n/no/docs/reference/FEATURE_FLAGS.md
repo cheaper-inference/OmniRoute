@@ -44,7 +44,7 @@ Et boolsk flagg anses som **aktivert** når dets effektive verdi er `"true"`,
 
 ## Flaggkatalog
 
-119 flagg fordelt på 6 kategorier.** Misligholde** er definisjonen standard — verdien som brukes når verken en DB overstyring eller en miljøvariabel er tilstede.
+120 flagg fordelt på 6 kategorier.** Misligholde** er definisjonen standard — verdien som brukes når verken en DB overstyring eller en miljøvariabel er tilstede.
 
 ### Sikkerhet (11)
 
@@ -252,10 +252,10 @@ Returnerer alle flagg med effektiv verdi, kilde og et sammendrag.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... alle 119 flagg
+    // ... alle 120 flagg
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

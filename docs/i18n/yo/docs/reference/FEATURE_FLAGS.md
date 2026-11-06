@@ -43,7 +43,7 @@ A ka àmì boolean sí **tí a ti mú ṣiṣẹ́** nígbà tí iye tó ń ṣi
 
 ## Katalogi Flag
 
-Awọn asia 119 kọja awọn ẹka 6.** Aiyipada** jẹ — aiyipada asọye iye ti a lo nigbati DB kọju tabi oniyipada ayika ko wa.
+Awọn asia 120 kọja awọn ẹka 6.** Aiyipada** jẹ — aiyipada asọye iye ti a lo nigbati DB kọju tabi oniyipada ayika ko wa.
 
 ### Aabo (11)
 
@@ -252,10 +252,10 @@ Gbogbo iṣẹ́ máa ń gba ọ̀nà kan ṣoṣo:
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... gbogbo àsìápadà 119
+    // ... gbogbo àsìápadà 120
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

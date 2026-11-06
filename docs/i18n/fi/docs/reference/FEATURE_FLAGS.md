@@ -44,7 +44,7 @@ Totuusarvoinen lippu katsotaan **käytössä olevaksi**, kun sen voimassa oleva 
 
 ## Lippujen luettelo
 
-119 lippua 6 kategoriassa.** Oletus** on määritelmä oletusarvo — arvo, jota käytetään, kun DB ohitusta tai ympäristömuuttujaa ei ole.
+120 lippua 6 kategoriassa.** Oletus** on määritelmä oletusarvo — arvo, jota käytetään, kun DB ohitusta tai ympäristömuuttujaa ei ole.
 
 ### Turvallisuus (11)
 
@@ -252,10 +252,10 @@ Palauttaa kaikki liput niiden voimassa olevan arvon, lähteen ja yhteenvedon kan
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... kaikki 119 lippua
+    // ... kaikki 120 lippua
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

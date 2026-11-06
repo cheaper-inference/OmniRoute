@@ -44,7 +44,7 @@ Būla karogs tiek uzskatīts par **iespējotu**, ja tā efektīvā vērtība ir 
 
 ## Karoga katalogs
 
-119 karogi 6 kategorijās.** Noklusējums** ir definīcijas noklusējuma — vērtība, ko izmanto, ja nav ne DB ignorēšanas, ne vides mainīgā.
+120 karogi 6 kategorijās.** Noklusējums** ir definīcijas noklusējuma — vērtība, ko izmanto, ja nav ne DB ignorēšanas, ne vides mainīgā.
 
 ### Drošība (11)
 
@@ -252,10 +252,10 @@ Atgriež visus karodziņus ar to efektīvo vērtību, avotu un kopsavilkumu.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 120 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

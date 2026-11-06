@@ -43,7 +43,7 @@ Een boolean-vlag wordt als **ingeschakeld** beschouwd wanneer de effectieve waar
 
 ## Vlagcatalogus
 
-119 vlaggen in 6 categorieën.** Standaard** is de standaarddefinitie — de waarde die wordt gebruikt wanneer noch een DB overschrijving noch een omgevingsvariabele aanwezig is.
+120 vlaggen in 6 categorieën.** Standaard** is de standaarddefinitie — de waarde die wordt gebruikt wanneer noch een DB overschrijving noch een omgevingsvariabele aanwezig is.
 
 ### Beveiliging (11)
 
@@ -252,10 +252,10 @@ Retourneert elke vlag met de effectieve waarde, bron en een samenvatting.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... alle 119 vlaggen
+    // ... alle 120 vlaggen
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

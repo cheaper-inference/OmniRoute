@@ -44,7 +44,7 @@ Un indicador booleano se considera **habilitado** cuando su valor efectivo es `"
 
 ## Catálogo de banderas
 
-119 banderas en 6 categorías.** Por defecto** es la definición predeterminada — el valor utilizado cuando no están presentes ni una anulación de DB ni una variable de entorno.
+120 banderas en 6 categorías.** Por defecto** es la definición predeterminada — el valor utilizado cuando no están presentes ni una anulación de DB ni una variable de entorno.
 
 ### Seguridad (11)
 
@@ -252,10 +252,10 @@ Devuelve todos los indicadores con su valor efectivo, origen y un resumen.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 120 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

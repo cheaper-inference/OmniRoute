@@ -44,7 +44,7 @@ Tõeväärtusega lipp loetakse **lubatuks**, kui selle tegelik väärtus on `"tr
 
 ## Lipu kataloog
 
-119 lippu 6 kategoorias.** Vaikimisi** on definitsiooni vaikeväärtus —, mida kasutatakse siis, kui DB alistamist ega keskkonnamuutujat pole.
+120 lippu 6 kategoorias.** Vaikimisi** on definitsiooni vaikeväärtus —, mida kasutatakse siis, kui DB alistamist ega keskkonnamuutujat pole.
 
 ### Turvalisus (11)
 
@@ -252,10 +252,10 @@ Tagastab kõik lipud koos nende efektiivse väärtuse, allika ja kokkuvõttega.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 120 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

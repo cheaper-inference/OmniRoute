@@ -44,7 +44,7 @@ Et boolean-flag betragtes som **aktiveret**, når dets effektive værdi er `"tru
 
 ## Flagkatalog
 
-119 flag fordelt på 6 kategorier.** Misligholdelse** er definitionen standard — den værdi, der bruges, når hverken en DB tilsidesættelse eller en miljøvariabel er til stede.
+120 flag fordelt på 6 kategorier.** Misligholdelse** er definitionen standard — den værdi, der bruges, når hverken en DB tilsidesættelse eller en miljøvariabel er til stede.
 
 ### Sikkerhed (11)
 
@@ -253,10 +253,10 @@ Returnerer alle flag med deres effektive værdi, kilde og en oversigt.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... alle 119 flag
+    // ... alle 120 flag
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

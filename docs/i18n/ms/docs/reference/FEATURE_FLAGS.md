@@ -44,7 +44,7 @@ Bendera boolean dianggap **didayakan** apabila nilai berkuat kuasanya ialah `"tr
 
 ## Katalog Bendera
 
-119 bendera merentasi 6 kategori. **Lalai** ialah lalai definisi — nilai
+120 bendera merentasi 6 kategori. **Lalai** ialah lalai definisi — nilai
 yang digunakan apabila tiada penggantian DB atau pemboleh ubah persekitaran hadir.
 
 ### Keselamatan (11)
@@ -262,10 +262,10 @@ Mengembalikan setiap bendera bersama nilai berkesan, sumber dan ringkasan.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... kesemua 119 bendera
+    // ... kesemua 120 bendera
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

@@ -45,7 +45,7 @@ Egy logikai jelző akkor tekinthető **engedélyezettnek**, ha tényleges érté
 
 ## Zászló katalógus
 
-119 zászló 6 kategóriában.** Alapértelmezett** az alapértelmezett — definíció, amely akkor használatos, ha sem DB felülírás, sem környezeti változó nincs jelen.
+120 zászló 6 kategóriában.** Alapértelmezett** az alapértelmezett — definíció, amely akkor használatos, ha sem DB felülírás, sem környezeti változó nincs jelen.
 
 ### Biztonság (11)
 
@@ -256,10 +256,10 @@ Minden jelzőt visszaad a tényleges értékével, forrásával és egy összes�
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... mind a 119 jelző
+    // ... mind a 120 jelző
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

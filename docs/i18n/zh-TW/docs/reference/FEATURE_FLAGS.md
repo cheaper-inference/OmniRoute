@@ -43,7 +43,7 @@
 
 ## 標記目錄
 
-分為 6 個類別的 119 個標記。**預設值**是定義中的預設值 — 在不存在資料庫覆寫值或環境變數時使用的值。
+分為 6 個類別的 120 個標記。**預設值**是定義中的預設值 — 在不存在資料庫覆寫值或環境變數時使用的值。
 
 ### 安全性（11）
 
@@ -262,10 +262,10 @@
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 120 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

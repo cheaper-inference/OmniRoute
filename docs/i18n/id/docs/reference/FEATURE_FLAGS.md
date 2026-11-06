@@ -44,7 +44,7 @@ Flag boolean dianggap **diaktifkan** ketika nilai efektifnya adalah `"true"`,
 
 ## Katalog Bendera
 
-119 bendera di 6 kategori.** Bawaan** adalah definisi default — nilai yang digunakan ketika tidak ada penggantian DB atau variabel lingkungan.
+120 bendera di 6 kategori.** Bawaan** adalah definisi default — nilai yang digunakan ketika tidak ada penggantian DB atau variabel lingkungan.
 
 ### Keamanan (11)
 
@@ -254,10 +254,10 @@ Mengembalikan setiap flag beserta nilai efektif, sumber, dan ringkasan.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 120 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

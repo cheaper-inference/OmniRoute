@@ -44,7 +44,7 @@ Ana ɗaukar alamar boolean a matsayin **mai aiki** idan ƙimarta mai aiki ita ce
 
 ## Tuta Catalog
 
-Tutoci 119 a cikin rukunan 6.** Default** ita ce ma'anar tsohowar — ƙimar da ake amfani da ita lokacin da DB ba ta soke ko canjin yanayi ba.
+Tutoci 120 a cikin rukunan 6.** Default** ita ce ma'anar tsohowar — ƙimar da ake amfani da ita lokacin da DB ba ta soke ko canjin yanayi ba.
 
 ### Tsaro (11)
 
@@ -253,10 +253,10 @@ Yana dawo da kowanne tuta tare da ƙimar da ake amfani da ita, tushenta, da taƙ
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 120 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

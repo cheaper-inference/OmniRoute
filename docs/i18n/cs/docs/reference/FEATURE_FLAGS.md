@@ -44,7 +44,7 @@ Příznak typu boolean se považuje za **povolený**, pokud je jeho efektivní h
 
 ## Katalog přepínačů
 
-119 přepínačů v 6 kategoriích. **Výchozí** je výchozí hodnota definice — hodnota
+120 přepínačů v 6 kategoriích. **Výchozí** je výchozí hodnota definice — hodnota
 použitá, pokud není přítomen ani přepsání v DB, ani proměnná prostředí.
 
 ### Bezpečnost (11)
@@ -267,10 +267,10 @@ Vrací každý příznak s jeho efektivní hodnotou, zdrojem a souhrnem.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... všech 119 příznaků
+    // ... všech 120 příznaků
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

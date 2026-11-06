@@ -44,7 +44,7 @@ Bendera ya boolean huchukuliwa kuwa **imewashwa** wakati thamani yake inayotumik
 
 ## Katalogi ya Bendera
 
-Bendera 119 katika kategoria 6.** Chaguomsingi** ni ufafanuzi chaguo-msingi — thamani inayotumika wakati hakuna ubatilishaji wa DB au utofauti wa mazingira haupo.
+Bendera 120 katika kategoria 6.** Chaguomsingi** ni ufafanuzi chaguo-msingi — thamani inayotumika wakati hakuna ubatilishaji wa DB au utofauti wa mazingira haupo.
 
 ### Usalama (11)
 
@@ -252,10 +252,10 @@ Hurejesha kila bendera pamoja na thamani yake inayotumika, chanzo, na muhtasari.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 119 flags
+    // ... all 120 flags
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

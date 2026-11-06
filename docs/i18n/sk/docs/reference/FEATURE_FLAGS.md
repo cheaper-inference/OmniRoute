@@ -44,7 +44,7 @@ Booleovský príznak sa považuje za **povolený**, keď je jeho efektívna hodn
 
 ## Katalóg príznakov
 
-119 príznakov v 6 kategóriách. **Predvolená hodnota** je predvolená hodnota definície — hodnota
+120 príznakov v 6 kategóriách. **Predvolená hodnota** je predvolená hodnota definície — hodnota
 použitá v prípade, že nie je k dispozícii ani prepísanie v DB, ani premenná prostredia.
 
 ### Bezpečnosť (11)
@@ -269,10 +269,10 @@ Vráti každý príznak s jeho efektívnou hodnotou, zdrojom a súhrnom.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... všetkých 119 príznakov
+    // ... všetkých 120 príznakov
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

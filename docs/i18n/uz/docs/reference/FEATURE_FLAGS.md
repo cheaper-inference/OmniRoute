@@ -48,7 +48,7 @@ boʻlsa, u **yoqilgan** hisoblanadi (`isFeatureFlagEnabled()`ga qarang).
 
 ## Bayroq katalogi
 
-6 toifadagi 119 ta bayroq.** Standart** standart — ta'rifi, na DB bekor qilish, na muhit o'zgaruvchisi mavjud bo'lmaganda ishlatiladigan qiymat.
+6 toifadagi 120 ta bayroq.** Standart** standart — ta'rifi, na DB bekor qilish, na muhit o'zgaruvchisi mavjud bo'lmaganda ishlatiladigan qiymat.
 
 ### Xavfsizlik (11)
 
@@ -259,10 +259,10 @@ Har bir bayroqni uning samarali qiymati, manbasi va umumiy ma’lumotlari bilan 
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... barcha 119 ta bayroq
+    // ... barcha 120 ta bayroq
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

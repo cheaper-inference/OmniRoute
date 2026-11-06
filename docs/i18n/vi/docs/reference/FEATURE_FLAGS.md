@@ -39,7 +39,7 @@ Một cờ boolean được coi là **đã bật** khi giá trị hiệu quả c
 
 ## Danh mục cờ
 
-119 lá cờ trên 6 loại.** Mặc định** — mặc định của định nghĩa là giá trị được sử dụng khi không có ghi đè DB cũng như biến môi trường.
+120 lá cờ trên 6 loại.** Mặc định** — mặc định của định nghĩa là giá trị được sử dụng khi không có ghi đè DB cũng như biến môi trường.
 
 ### An ninh (11)
 
@@ -249,10 +249,10 @@ Trả về mọi cờ cùng với giá trị hiệu lực, nguồn và thông ti
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... tất cả 119 cờ
+    // ... tất cả 120 cờ
   ],
   "summary": {
-    "total": 119,
+    "total": 120,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,
