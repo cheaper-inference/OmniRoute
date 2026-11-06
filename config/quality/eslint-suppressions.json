@@ -533,11 +533,6 @@
       "count": 3
     }
   },
-  "open-sse/services/usage/github.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "open-sse/services/usage/glm.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
@@ -593,11 +588,6 @@
       "count": 1
     }
   },
-  "open-sse/translator/webTools.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 2
-    }
-  },
   "open-sse/types.d.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 2
@@ -616,11 +606,6 @@
   "open-sse/utils/setupPolyfill.ts": {
     "@typescript-eslint/no-explicit-any": {
       "count": 5
-    }
-  },
-  "open-sse/utils/stream.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
     }
   },
   "open-sse/utils/streamHelpers.ts": {
@@ -774,11 +759,6 @@
     }
   },
   "src/app/(dashboard)/dashboard/resilience/connections/components/ConnectionsTable.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
-  "src/app/(dashboard)/dashboard/search-tools/components/SearchHistory.tsx": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
     }
@@ -1018,11 +998,6 @@
       "count": 1
     }
   },
-  "src/app/api/v1/chat/completions/route.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "src/app/api/v1/embeddings/route.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
@@ -1064,11 +1039,6 @@
     }
   },
   "src/app/api/v1/music/generations/route.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
-  "src/app/api/v1/ocr/route.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
     }
@@ -1341,14 +1311,6 @@
   "src/lib/middleware/registry.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 2
-    }
-  },
-  "src/lib/monitoring/providerHealthAutopilot.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    },
-    "no-restricted-syntax": {
-      "count": 1
     }
   },
   "src/lib/monitoring/providerHealthMatrix.ts": {
@@ -4392,11 +4354,6 @@
       "count": 5
     }
   },
-  "tests/unit/serial/provider-health-autopilot.test.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "tests/unit/service-combo-metrics.test.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
@@ -4757,7 +4714,7 @@
   },
   "tests/unit/translator-openai-to-gemini.test.ts": {
     "@typescript-eslint/no-explicit-any": {
-      "count": 65
+      "count": 63
     }
   },
   "tests/unit/translator-openai-to-kiro.test.ts": {

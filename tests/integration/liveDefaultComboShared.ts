@@ -50,7 +50,7 @@ async function apiFetch(path: string, options: RequestInit = {}): Promise<Respon
 // always what gets read and tested — this list never overrides it.
 const FALLBACK_COMBO_MODELS: { model: string; providerId: string }[] = [
   { model: "opencode/big-pickle", providerId: "opencode" },
-  { model: "opencode/mimo-v2.5-free", providerId: "opencode" },
+  { model: "opencode/mimo-v2.6-flash-free", providerId: "opencode" },
   { model: "opencode/laguna-s-2.1-free", providerId: "opencode" },
   { model: "openrouter/cohere/north-mini-code:free", providerId: "openrouter" },
   { model: "openrouter/poolside/laguna-m.1:free", providerId: "openrouter" },

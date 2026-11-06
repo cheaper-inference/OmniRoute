@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getCachedSettings } from "../../lib/db/readCache";
+import { getCachedBodySizeSettings } from "../../lib/db/readCache";
 import { isDraining } from "../../lib/gracefulShutdown";
 import { checkBodySize, getBodySizeLimit } from "../../shared/middleware/bodySizeGuard";
 import {
@@ -9,6 +9,10 @@ import {
   getDashboardJwtSecret,
 } from "@/shared/utils/dashboardSessionToken";
 import { generateRequestId } from "../../shared/utils/requestId";
+import {
+  buildAnthropicErrorBody,
+  isAnthropicMessagesPath,
+} from "../../shared/utils/anthropicErrorEnvelope";
 import { applyCorsHeaders } from "../cors/origins";
 import {
   buildMcpInvalidOriginBody,
@@ -70,14 +74,22 @@ function rejectionResponse(
   classification: RouteClassification,
   requestId: string
 ): NextResponse {
+  // Claude Code only shows a /v1/messages 401 in Anthropic's error envelope;
+  // the correlation id stays on the x-request-id header.
+  const anthropicAuthError =
+    outcome.status === 401 &&
+    classification.routeClass === "CLIENT_API" &&
+    isAnthropicMessagesPath(classification.normalizedPath);
   const response = NextResponse.json(
-    {
-      error: {
-        code: outcome.code,
-        message: outcome.message,
-        correlation_id: requestId,
-      },
-    },
+    anthropicAuthError
+      ? buildAnthropicErrorBody("authentication_error", outcome.message)
+      : {
+          error: {
+            code: outcome.code,
+            message: outcome.message,
+            correlation_id: requestId,
+          },
+        },
     { status: outcome.status }
   );
   response.headers.set(AUTHZ_HEADER_REQUEST_ID, requestId);
@@ -236,7 +248,7 @@ function stampRouteResponse(
 
 async function getBodySizeSettings(): Promise<Record<string, unknown> | undefined> {
   try {
-    return await getCachedSettings();
+    return await getCachedBodySizeSettings();
   } catch (error) {
     console.warn(
       "[Authz] Failed to load request body limit settings:",

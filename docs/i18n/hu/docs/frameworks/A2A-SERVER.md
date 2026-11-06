@@ -156,7 +156,7 @@ OmniRoute 6 A2A képességet tesz közzé `src/lib/a2a/taskExecution.ts::A2A_SKI
 | Egészségügyi jelentés   | `health-report`      | Aggregálja a megszakítót, a lehűlést, a lezárási állapotot szolgáltatónként                                                                                                      | egészség, rugalmasság            | "Minden szolgáltató egészségi állapotának megjelenítése" |
 | Képességek listázása    | `list-capabilities`  | Visszaadja a teljes, 45 bejegyzésből álló Agent Skills katalógust (23 API + 21 CLI + 1 konfiguráció) leértékelési táblázatként nyers SKILL.md URLs vel a kontextus-injektáláshoz | katalógus, felfedezés, készségek | "List all OmniRoute képességek"                          |
 
-> Az ügynökkártyát összhangban kell tartani az élő 377-es szolgáltatókatalógussal; A szolgáltatók száma és free/no-auth metaadatok a futásidejű beállításjegyzékből származnak.
+> Az ügynökkártyát az élő 380-as szolgáltatókatalógussal összhangban kell tartani; A szolgáltatók száma és free/no-auth metaadatok a futásidejű beállításjegyzékből származnak.
 
 ### `list-capabilities` Skill Detail
 
@@ -190,17 +190,17 @@ A JSON-RPC `/a2a` végpont a kanonikus A2A belépési pont. Az alábbi REST-vég
 
 ---
 
-## Új képesség hozzáadása
+## Új készség hozzáadása
 
-1. **Képességfájl létrehozása:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Készségfájl létrehozása:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Exportáljon egy `(task: A2ATask) => Promise<{ artifacts, metadata }>` aszinkron függvényt. Kövesse a meglévő képességek, például a `smartRouting.ts` felépítését.
+   `(task: A2ATask) => Promise<{ artifacts, metadata }>` aszinkron függvény exportálása. Kövesse a meglévő készségek, például `smartRouting.ts` alakját.
 
-2. **Kezelő regisztrálása:** a `src/lib/a2a/taskExecution.ts` fájlban adjon hozzá egy bejegyzést az `A2A_SKILL_HANDLERS` objektumhoz:
+2. **Regisztrációs kezelő:** `src/lib/a2a/taskExecution.ts` nyelven adjon hozzá egy bejegyzést `A2A_SKILL_HANDLERS` hez:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...meglévő képességek
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -208,7 +208,7 @@ A JSON-RPC `/a2a` végpont a kanonikus A2A belépési pont. Az alábbi REST-vég
    };
    ```
 
-3. **Közzététel az Ügynökkártyán:** a `src/app/.well-known/agent.json/route.ts` fájlban fűzze hozzá a következőt a `skills` tömbhöz:
+3. **Tedd ki az ügynökkártyán:** `src/lib/a2a/agentCardMetadata.ts` ban ( `/.well-known/agent.json` és `/.well-known/agent-card.json` osztja meg), fűzze hozzá a `skills` tömbhöz:
 
    ```json
    {
@@ -220,9 +220,9 @@ A JSON-RPC `/a2a` végpont a kanonikus A2A belépési pont. Az alábbi REST-vég
    }
    ```
 
-4. **Tesztek írása:** `tests/unit/a2a-<your-skill>.test.ts`. Fedje le a sikeres végrehajtási és a hibakezelési útvonalat.
+4. **Írj teszteket:** `tests/unit/a2a-<your-skill>.test.ts`. Borító boldog út + hibaútvonal.
 
-5. **Dokumentálja** az új képességet e fájl `Available Skills` táblázatában.
+5. **Dokumentum** az új készség ennek a fájlnak `Available Skills` táblázatában.
 
 ---
 

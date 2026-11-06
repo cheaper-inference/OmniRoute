@@ -19,7 +19,13 @@ async function loadHiddenInclusiveRows(
   request: Request,
   visibleRows: CatalogRow[]
 ): Promise<{ rows: CatalogRow[]; annotate: VisibilityAnnotator } | null> {
-  const revealed = await getUnifiedModelsResponse(request, {}, { revealHidden: true });
+  // Same opt-out as the regular management build: the hide/show view needs provider
+  // rows even when /v1/models lists combos only.
+  const revealed = await getUnifiedModelsResponse(
+    request,
+    {},
+    { revealHidden: true, ignoreExposeCombosOnly: true }
+  );
   if (!revealed.ok) return null;
   const revealedBody = await revealed.json();
   let nodes: Awaited<ReturnType<typeof getCachedProviderNodes>> = [];
@@ -50,7 +56,8 @@ export async function GET(request: Request) {
     if (authError) return authError;
   }
   try {
-    const response = await getUnifiedModelsResponse(request, {});
+    // Dashboard model pickers need provider rows even when /v1/models lists combos only.
+    const response = await getUnifiedModelsResponse(request, {}, { ignoreExposeCombosOnly: true });
     const body = await response.json();
     // The body is regrouped below, so forward only retry/status metadata, not
     // representation headers such as Content-Length or ETag from the core body.
