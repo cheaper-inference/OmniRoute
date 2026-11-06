@@ -4,7 +4,7 @@
  * A `resource_pressure` / `heap_pressure` 503 means this process is shedding load from its own
  * V8/cgroup state, so retrying another combo target cannot help. The same status and body can
  * also arrive from an upstream (a chained gateway), and that one must keep ordinary fallback.
- * Only a response this process built is branded; the WeakMap identity cannot be forged by an
+ * Only a response this process built is branded; the WeakSet identity cannot be forged by an
  * upstream body or header. Internal wrappers that must allocate a new Response inherit the brand.
  */
 const localPressureResponses = new WeakSet<Response>();

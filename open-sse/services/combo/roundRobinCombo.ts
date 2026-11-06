@@ -1115,7 +1115,14 @@ export async function handleRoundRobinCombo({
           }
           // Process-wide shedding is terminal, not a target failure. Preserve the
           // original body/headers and leave health, semaphore cooldown and pins alone.
-          if (isLocalProcessPressureResponse(result, errorBody)) return result;
+          if (isLocalProcessPressureResponse(result, errorBody)) {
+            rrEvents.failed(
+              errorText || `HTTP ${result.status}`,
+              Date.now() - startTime,
+              selectedConnectionIdOf(result)
+            );
+            return result;
+          }
           retryAfter ||= readProseRetryAfter(bodyText); // #13672 opt-in prose hints
 
           if (result.status === 499) {

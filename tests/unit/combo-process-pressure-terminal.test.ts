@@ -34,6 +34,7 @@ const { getAllModelLockouts, clearAllModelLockouts } =
 const { clearCooldownState, isProviderInCooldown } =
   await import("../../open-sse/services/providerCooldownTracker.ts");
 const semaphore = await import("../../open-sse/services/accountSemaphore.ts");
+const eventBus = await import("../../src/lib/events/eventBus.ts");
 
 /** Provides a no-op logger callback for offline routing fixtures. */
 const noop = () => {};
@@ -428,6 +429,21 @@ for (const strategy of ["priority", "round-robin"]) {
     });
   }
 }
+
+test("round-robin closes the live attempt it opened before a terminal pressure shed", async () => {
+  const seen: string[] = [];
+  const unsubscribers = (["combo.target.attempt", "combo.target.failed"] as const).map((event) =>
+    eventBus.on(event, () => seen.push(event))
+  );
+  try {
+    const original = pressure("resource_pressure");
+    const response = await run(combo("round-robin"), async () => original);
+    assert.equal(response, original);
+    assert.deepEqual(seen, ["combo.target.attempt", "combo.target.failed"]);
+  } finally {
+    for (const unsubscribe of unsubscribers) unsubscribe();
+  }
+});
 
 test("internal header wrappers keep the local pressure brand when they must clone", async () => {
   const { withSelectedConnectionHeader } =
