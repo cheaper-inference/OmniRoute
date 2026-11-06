@@ -44,7 +44,7 @@ const HOUR_MS = 60 * 60 * 1000;
 const probeCalls = new Map<string, number>();
 const failingNodes = new Set<string>();
 const originalFetch = globalThis.fetch;
-globalThis.fetch = (async (input: string | URL | Request) => {
+const validationFetch = (async (input: string | URL | Request) => {
   const url =
     typeof input === "string" ? input : input instanceof Request ? input.url : input.toString();
   const match = VALIDATION_PATH.exec(url);
@@ -60,6 +60,7 @@ globalThis.fetch = (async (input: string | URL | Request) => {
   }
   return new Response("not found", { status: 404 });
 }) as typeof fetch;
+globalThis.fetch = validationFetch;
 
 const core = await import("../../src/lib/db/core.ts");
 const providerNodesRoute = await import("../../src/app/api/provider-nodes/route.ts");
@@ -73,6 +74,10 @@ const autopilot = await import("../../src/lib/monitoring/providerHealthAutopilot
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const { maybeAutoDisableBannedAccount } =
   await import("../../src/sse/services/autoDisableBannedAccount.ts");
+
+// Loading the routes can install the proxy fetch interceptor. Keep every probe
+// on the fixture transport, including the initial fire-and-forget auto-test.
+globalThis.fetch = validationFetch;
 
 const OPERATOR_DISABLED_AT_KEY = operatorDisable.OPERATOR_DISABLED_AT_KEY;
 // Not imported from the module on purpose: the marker is persisted JSON, and the
@@ -90,8 +95,6 @@ async function readJsonObject(response: Response): Promise<Record<string, unknow
     return {};
   }
 }
-
-const settle = () => new Promise((resolve) => setTimeout(resolve, 50));
 
 async function createConnection(node: string): Promise<string> {
   const nodeResponse = await providerNodesRoute.POST(
@@ -122,9 +125,16 @@ async function createConnection(node: string): Promise<string> {
   );
   const body = await readJsonObject(response);
   assert.equal(response.status, 201, `create connection failed: ${JSON.stringify(body)}`);
-  // POST fires a background auto-test; let it land before the test acts.
-  await settle();
-  return (body.connection as { id: string }).id;
+  // POST fires a background auto-test. Wait for its persisted result instead of
+  // racing a fixed sleep: a late initial probe must not run during an operator
+  // disable/revalidation assertion below. Failed initial probes also settle.
+  const connectionId = (body.connection as { id: string }).id;
+  const deadline = Date.now() + 5000;
+  while (readRow(connectionId).lastTested === null) {
+    assert.ok(Date.now() < deadline, "the initial background probe must finish before setup");
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+  return connectionId;
 }
 
 async function activeConnection(node: string): Promise<string> {
