@@ -61,122 +61,126 @@ Ceturtais, **pēc izvēles ieslēdzams** slānis (`PROVIDER_COOLDOWN_ENABLED`, n
 
 Zem sliekšņa pakalpojumu sniedzējs **netiek** uzskatīts par dzesējamu; veiksmīgs pieprasījums notīra logu. Savienojuma līmeņa ieraksti (`provider:connectionId`) tā vietā patur eksponenciālo `minRetryCooldownMs → maxRetryCooldownMs` atkapšanos. Noklusējumu pārrakstīšana: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Aizsargs pret regresiju: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
-## 2. Savienojuma dzesēšana
+## 2. Savienojuma gaidīšanas periods
 
-**Darbības joma:** viens pakalpojumu sniedzējs connection/account/key.
+**Tvērums:** viena nodrošinātāja savienojums/konts/atslēga.
 
-**Mērķis:** izlaist vienu sliktu atslēgu, kamēr citi tā paša pakalpojumu sniedzēja savienojumi turpina apkalpot.
+**Mērķis:** izlaist vienu nederīgu atslēgu, kamēr citi tā paša nodrošinātāja savienojumi turpina apkalpot pieprasījumus.
 
-**Īstenošana:**
+**Ieviešana:**
 
-- Atzīmēt kā nepieejamu: `src/sse/services/auth.ts::markAccountUnavailable()`
+- Atzīmēšana kā nepieejamam: `src/sse/services/auth.ts::markAccountUnavailable()`
 - Atlase: `getProviderCredentials*` tajā pašā failā
-- Atdzesēšanas aprēķins: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Gaidīšanas perioda aprēķins: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Iestatījumi: `src/lib/resilience/settings.ts`
 
-**Lauki katram savienojumam:**
+**Katra savienojuma lauki:**
 
-- `rateLimitedUntil` — laikspiedols līdz atdzišanas termiņa beigām
+- `rateLimitedUntil` — laika zīmogs, līdz kuram beidzas gaidīšanas periods
 - `testStatus: "unavailable"`
 - `lastError`, `lastErrorType`, `errorCode`
-- `backoffLevel` — eksponenciālais atkāpšanās skaitītājs
+- `backoffLevel` — eksponenciālās atkāpšanās skaitītājs
 
-**Noklusējuma atdzišanas periodi:**
+**Noklusējuma gaidīšanas periodi:**
 
-- OAuth bāze: 5s
-- API atslēgas bāze: 3 s
-- API atslēga 429: dod priekšroku augšpus `Retry-After`/reset headers/parseable atiestatīšanas tekstam
+- OAuth bāze: 5 s
+- API atslēgas bāze: 3 s
+- API atslēgas 429: priekšroka tiek dota augšupējām `Retry-After`/atiestatīšanas galvenēm/parsējamam atiestatīšanas tekstam
 - Atkāpšanās: `baseCooldownMs * 2 ** failureIndex`
 
-**Atkārtota mēģinājuma aizkave katram pakalpojumu sniedzējam.** Pakalpojumu sniedzēja informācijas lapā ir a** Mēģiniet vēlreiz, aizkave** izvēlieties (Auto, 15s līdz 1h). Tas ietaupa `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600, izmantojot `PATCH /api/resilience`). Ja ātruma ierobežojuma kļūda nesniedz ieteikumu par atkārtotu mēģinājumu augšup, šī vērtība aizstāj nodrošinātāja mērogoto atkāpšanos un atiestata `backoffLevel` uz 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Ierobežota ātruma kļūdas prioritāte, vispirms augstākā: augšējais atkārtotā mēģinājuma padoms, pēc tam katram savienojumam `providerSpecificData.rotationOverrides.rateLimitResetSeconds`, pēc tam katra nodrošinātāja atkārtotā mēģinājuma aizkave, pēc tam env `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, pēc tam mērogotā atkāpšanās. Auto noņem lauku. Tas ietekmē tikai ātruma ierobežojuma iemeslu, nevis gala stāvokļus.
+**Atkārtota mēģinājuma aizkave katram nodrošinātājam.** Nodrošinātāja detalizētajā lapā ir **Retry delay** atlase (Auto, no 15 s līdz 1 h). Tā saglabā `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600), izmantojot `PATCH /api/resilience`. Ja ātruma ierobežojuma kļūda nesatur augšupēju atkārtota mēģinājuma norādi, šī vērtība aizstāj mērogoto atkāpšanos konkrētajam nodrošinātājam un atiestata `backoffLevel` uz 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Prioritāte ātruma ierobežojuma kļūdai, sākot ar augstāko: augšupēja atkārtota mēģinājuma norāde, pēc tam katram savienojumam specifiska `providerSpecificData.rotationOverrides.rateLimitResetSeconds`, pēc tam atkārtota mēģinājuma aizkave konkrētajam nodrošinātājam, pēc tam `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS` vide, visbeidzot mērogotā atkāpšanās. Auto noņem šo lauku. Tas ietekmē tikai ātruma ierobežojuma iemeslu, nevis terminālos stāvokļus.
 
-**Ganāmpulka aizsargs pret pērkonu:** novērš vienlaicīgu atteici no pārmērīgas dzesēšanas vai dubultas `backoffLevel` palielināšanas.
+**Aizsardzība pret vienlaicīgu pieprasījumu uzplūdu:** novērš to, ka vienlaicīgas kļūmes pārmērīgi pagarina gaidīšanas periodu vai divkārši palielina `backoffLevel`.
 
-**Vienlaicīguma ierobežojums 429 nepakāpj pa atkāpšanās kāpnēm.** `429`, kura pamattekstā tiek ziņots par vienlaicīguma ierobežojumu ("pārāk daudz vienlaicīgu pieprasījumu", "vienlaicīguma ierobežojums", "paralēlā pieprasījuma ierobežojums", GLM `并发数过高`), nozīmē, ka konts ir vesels, bet aizņemts. `checkFallbackError()` atgriež iemeslu `concurrency_limited`: pārejiet pie nākamā savienojuma tūlīt, atdzesējiet šo savienojumu, lai iegūtu fiksētu `CONCURRENCY_LIMIT_COOLDOWN_MS` (1s) vai augšpuses atkārtota mēģinājuma mājienu, nemainītu `backoffLevel` un iestatītu `skipProviderBreaker`. Skaidrs kvotas pamatteksts joprojām uzvar, tāpēc pamatteksts, kas arī atbilst kvotas modelim, paliek kvotas spriedums. Atklāšana: `looksLikeConcurrencyLimit()` in `src/shared/utils/classify429.ts`; spriedums: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()` (pārslēdzēja `FailureKind`) ir nemainīgs un joprojām nolasa `rate_limit` šiem korpusiem.
+**429 kļūmes, ko izraisa vienlaicības ierobežojums, nepalielina atkāpšanās līmeni.** `429`, kura pamattekstā norādīts vienlaicības ierobežojums ("too many concurrent requests", "concurrency limit", "parallel request limit", GLM `并发数过高`), nozīmē, ka konts ir darbspējīgs, bet aizņemts. `checkFallbackError()` atgriež iemeslu `concurrency_limited`: nekavējoties pārslēdzas uz nākamo savienojumu, šo savienojumu atdzesē uz fiksētu `CONCURRENCY_LIMIT_COOLDOWN_MS` (1 s) vai uz augšupējā atkārtota mēģinājuma norādes laiku, saglabā `backoffLevel` nemainīgu un iestata `skipProviderBreaker`. Skaidri norādīts kvotas pamatteksts joprojām ir prioritārs, tāpēc pamatteksts, kas atbilst arī kvotas paraugam, paliek kvotas spriedums. Noteikšana: `looksLikeConcurrencyLimit()` failā `src/shared/utils/classify429.ts`; spriedums: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()` (pārtraucēja `FailureKind`) netiek mainīts un šādiem pamattekstiem joprojām nolasa `rate_limit`.
 
-**Straumes satura stendi neatvēsina kontu.** Kad satura apstāšanās uzraugs (`open-sse/utils/streamHandler.ts`) atsakās no straumes, kas laikā nenosūtīja modeļa izvadi, `markAccountUnavailable()` reģistrē savienojuma kļūdu, bet neiestata atdzišanu: apstāklis attiecas uz šo pieprasījumu, visbiežāk tas ir garš argumentācijas pagrieziens bez izvades. Operatori var atkal izvēlēties, izmantojot `resilienceSettings.streamStallCooldown.enabled` (noklusējuma `false`).
+**Straumes satura dīkstāve kontu neatdzesē.** Kad satura dīkstāves uzraugs (`open-sse/utils/streamHandler.ts`) pārtrauc straumi, kas noteiktajā laikā nav nosūtījusi modeļa izvadi, `markAccountUnavailable()` reģistrē kļūdu savienojumam, bet neiestata gaidīšanas periodu: dīkstāve pieder šim pieprasījumam un visbiežāk rodas ilgstošas spriešanas laikā, kad izvade vēl nav parādījusies. Operatori var to ieslēgt ar `resilienceSettings.streamStallCooldown.enabled` (noklusējums `false`).
 
-**Pieteikšanās latentuma signāls `p2c` konta atlasei.** Katrs nosūtītais mēģinājums reģistrē laiku līdz pirmajam baitam un iznākumu katram savienojumam (un katram savienojumam + modelim) atmiņas ritošā logā: pēdējie 20 paraugi 15 minūšu laikā (`open-sse/services/connectionLatencyTracker.ts`, ierakstīts no `safeLogEvents()` in `src/sse/handlers/chatHelpers.ts`). Ja `resilienceSettings.p2cLatency.weight` ir virs `0` (diapazons 0–20, noklusējuma `0` = izslēgts), `compareP2CConnections()` `src/sse/services/auth.ts` katram pāra kandidātam pievieno `weight` punktus. Pusi no tā veido latentums kā attiecība pret ātrāko kandidātu (divreiz lēnākam ir pilna puse) un pusi no mainīgā kļūdu līmeņa. Šis termiņš ir spēkā tikai tad, ja abiem kandidātiem ir vismaz 3 paraugi, tāpēc jauni konti netiek sodīti, un tā griesti nepārsniedz kvotu bloķēto un kvotu izsmelto sodu. Tas nepievieno nekādu ķēdi: neveiksmīgos kontus joprojām apstrādā dzesēšanas, bloķēšanas un pārtraukuma slāņi. Iestatiet to ar `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`.
+**Pēc izvēles ieslēdzams latentuma signāls `p2c` kontu atlasei.** Katrs nosūtītais mēģinājums katram savienojumam (un katram savienojuma un modeļa pārim) atmiņā slīdošā logā reģistrē laiku līdz pirmajam baitam un rezultātu: pēdējos 20 paraugus 15 minūšu laikā (`open-sse/services/connectionLatencyTracker.ts`, reģistrēts no `safeLogEvents()` failā `src/sse/handlers/chatHelpers.ts`). Ja `resilienceSettings.p2cLatency.weight` ir lielāks par `0` (diapazons 0–20, noklusējums `0` = izslēgts), `compareP2CConnections()` failā `src/sse/services/auth.ts` katram pāra kandidātam pievieno līdz `weight` punktiem. Pusi no tiem veido latentums kā attiecība pret ātrāko kandidātu (divreiz lēnāks kandidāts saņem visu šo pusi), bet otru pusi — slīdošais kļūdu līmenis. Šis komponents tiek piemērots tikai tad, ja abiem kandidātiem ir vismaz 3 paraugi, tāpēc jaunie konti netiek sodīti, un tā maksimālā vērtība paliek zem kvotas bloķēšanas un kvotas izsmelšanas sodiem. Tas pats par sevi neveido ķēdes pārtraucēju: kontus ar kļūmēm joprojām apstrādā gaidīšanas perioda, bloķēšanas un pārtraucēja slāņi. Iestatiet to ar `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`.
 
-**Sprieduma rāmji restartē satura aiztures budžetu.** Spriešanas modelis var domāt minūtes pirms tā pirmā redzamā marķiera: Claude straumē `thinking_delta` kadrus, kuru domāšanas teksts var būt tukšs, un atbildes API straumē vienu argumentācijas vienumu pēc otra. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) atpazīst šos kadrus, un sargsuns restartē savu budžetu katram no tiem, nevis atceļ pagriezienu. Tie joprojām nav modeļa izvade, tāpēc pagrieziens, kas beidzas tikai ar argumentāciju, joprojām tiek ziņots kā tukšs, un pagrieziens, kas pārtrauc spriešanu un sūta tikai sirdspukstus, joprojām pakļauj sargsuni.
+**Spriešanas kadri restartē satura dīkstāves budžetu.** Spriešanas modelis var domāt vairākas minūtes pirms pirmā redzamā marķiera: Claude straumē `thinking_delta` kadrus, kuru spriešanas teksts var būt tukšs, bet Responses API straumē vienu spriešanas vienumu pēc otra. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) atpazīst šos kadrus, un uzraugs restartē savu budžetu pēc katra no tiem, nevis atceļ izpildi. Tie joprojām nav modeļa izvade, tāpēc izpilde, kas beidzas tikai ar spriešanu, joprojām tiek ziņota kā tukša, bet izpilde, kurā spriešana apstājas un tiek sūtīti tikai sirdspuksti, joprojām aktivizē uzraugu.
 
-Kiro binārie `reasoningContentEvent` kadri ar netukšu parakstu saglabā šo spriešanas darbību caur izpildītāju kā tukšu `reasoning_content` delta. Paraksts netiek pārsūtīts. Metadati, nepilnīgi kadri un tukši paraksti nerestartē satura budžetu; joprojām ir spēkā neatkarīgais aktīvās straumes taimauts un klienta atcelšana (`open-sse/executors/kiro/reasoning.ts`).
+Kiro binārie `reasoningContentEvent` kadri ar netukšu parakstu saglabā šo spriešanas aktivitāti izpildītājā kā tukšu `reasoning_content` delta. Paraksts netiek pārsūtīts. Metadati, nepabeigti kadri un tukši paraksti nerestartē satura budžetu; neatkarīgais aktīvās straumes taimauts un klienta atcelšana joprojām ir spēkā (`open-sse/executors/kiro/reasoning.ts`).
 
-**Termināla stāvokļi (NOT atdzišana):**
+**Terminālie stāvokļi (NAV gaidīšanas periodi):**
 
-- `banned` — noteikts, izmantojot aizliegta atslēgvārda/konta aizlieguma noteikšanu (skatiet [BAN_DETECTION](../security/BAN_DETECTION.md) ) un trīs secīgus augšupejošus pieprasījuma noraidījumus (`request_rejected`, piemēram, Anthropic OAuth 403 "Pieprasījums nav atļauts" — `open-sse/services/requestRejectedStreak.ts`); viens atteikums tikai atdzesē savienojumu
-- `expired` (pārejas uz termināli pēc ierobežotiem mēģinājumiem — `EXPIRED_RETRY_MAX = 3` ar eksponenciālu atkāpšanos —, lai pārejošas OAuth kļūdas varētu pašdziedināties, pirms konts tiek neatgriezeniski deaktivizēts)
+- `banned` — iestata aizliegtu atslēgvārdu / konta aizlieguma noteikšana (skatiet [BAN_DETECTION](../security/BAN_DETECTION.md)). Augšupējs atteikums katram pieprasījumam (`request_rejected`, piemēram, Anthropic OAuth 403 "Request not allowed") to nekad neiestata: šādi atteikumi tiek uzskaitīti katram savienojumam un modelim un izņem šo modeli no rotācijas, izmantojot pieaugošu gaidīšanas periodu, kas ierobežots ar `REQUEST_REJECTED_MAX_COOLDOWN_MS` (1 h), vai atdzesē savienojumu, ja modelis nav zināms — `open-sse/services/requestRejectedStreak.ts`
+- `expired` (pēc ierobežota atkārtotu mēģinājumu skaita pāriet terminālā stāvoklī — `EXPIRED_RETRY_MAX = 3` ar eksponenciālu atkāpšanos — lai īslaicīgas OAuth kļūdas varētu pašas novērsties, pirms konts tiek neatgriezeniski deaktivizēts)
 - `credits_exhausted`
 
-Tie saglabājas, līdz tiek mainīti akreditācijas dati vai operators tos atiestata. Nepārrakstīt termināļa stāvokļus ar pārejošu dzesēšanas stāvokli.
+Tie saglabājas, līdz tiek mainīti akreditācijas dati vai operators tos atiestata. Nepārrakstiet termināļa stāvokļus ar īslaicīga atdzišanas perioda stāvokli.
 
-**Slinka atveseļošanās:** kad `rateLimitedUntil` ir pagājis, savienojums atkal kļūst piemērots. Veiksmīgas lietošanas gadījumā `clearAccountError()` notīra visus kļūdu laukus.
+**Lēna atkopšana:** kad `rateLimitedUntil` laiks ir pagājis, savienojums atkal kļūst pieejams. Pēc veiksmīgas izmantošanas `clearAccountError()` notīra visus kļūdu laukus.
 
-### Claude OAuth lietošanas siena: zemākas prioritātes joslas + sesijas ierobežojumu atiestatīšana
+### Claude OAuth lietojuma ierobežojums: zemākas prioritātes kanāls + sesijas ierobežojuma atiestatīšana
 
-**Darbības joma:** viens Claude abonementa (OAuth) savienojums. Abas funkcijas ir** izvēlēties katram savienojumam** (Rediģēt savienojuma → Claude sadaļu → `lowPriorityMode` / `autoLimitReset` in `providerSpecificData`, abas noklusējuma ir izslēgtas) un atspoguļot Claude koda komandas `/low-priority` un `/limit-reset` (vadu līgums, kas iegūts no Claude koda 2.1.263).
+**Tvērums:** viens Claude abonementa (OAuth) savienojums. Abas funkcijas ir **pēc izvēles iespējojamas katram savienojumam** (Edit connection → Claude section → `lowPriorityMode` / `autoLimitReset` sadaļā `providerSpecificData`; abas pēc noklusējuma ir izslēgtas) un atspoguļo Claude Code komandas `/low-priority` un `/limit-reset` (protokola līgums iegūts no Claude Code 2.1.263).
 
-**Īstenošana:**
+**Implementācija:**
 
-- Stāvokļa mašīnas + reakcijas klasifikācija: `open-sse/services/claudeLowPriority.ts`
-- Atiestatīt status/claim klientu: `open-sse/services/claudeLimitReset.ts`
-- Izpildītāja āķis (galvenes injekcija + tajā pašā kontā atkārtots mēģinājums): `open-sse/executors/base.ts::execute()`
-- Pieteikšanās noturība: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
+- Stāvokļu mašīna un atbilžu klasifikācija: `open-sse/services/claudeLowPriority.ts`
+- Atiestatīšanas statusa/pieprasījuma klients: `open-sse/services/claudeLimitReset.ts`
+- Izpildītāja āķis (galvenes ievietošana + atkārtots mēģinājums ar to pašu kontu): `open-sse/executors/base.ts::execute()`
+- Iespējas saglabāšana: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
 
-**Aktivizētājs:** 5 stundu lietošanas siena — a `429`, kuras galvenēs ir `anthropic-ratelimit-unified-status: rejected` un, ja konts ir piemērots, `anthropic-ratelimit-unified-slow-offer: treatment`. Pirms šīs pirmās sienas nekas netiek nosūtīts 429; sērijveida 429 bez vienotām galvenēm iziet cauri parastajam atdzišanas ceļam.
+**Aktivizētājs:** 5 stundu lietojuma ierobežojums — `429`, kura galvenēs ir
+`anthropic-ratelimit-unified-status: rejected` un, ja konts ir piemērots,
+`anthropic-ratelimit-unified-slow-offer: treatment`. Pirms pirmā ierobežojuma `429` nekas netiek nosūtīts; sērijveida `429` bez vienotajām galvenēm tiek apstrādāts parastajā atdzišanas perioda ceļā.
 
-**Zemākas prioritātes josla** (`lowPriorityMode`):
+**Zemākas prioritātes kanāls** (`lowPriorityMode`):
 
-- Uz sienas 429 izpildītājs pieņem piedāvājumu un nekavējoties mēģina vēlreiz** tas pats** konts `anthropic-usage-limit: slow`; josla paliek aktīva līdz paziņotajam `anthropic-ratelimit-unified-reset` (+ 60s grace), un katrs pieprasījums šajā logā satur galveni. Pārtvertais 429 nekad nesasniedz `handleChatCore`, tāpēc savienojums ir** nē** ieliek dzesēšanā un netiek pagriezts prom.
-- `anthropic-ratelimit-unified-slow-status` uz vēlākām atbildēm: `active` / `not_needed` saglabāt joslu; `slot_busy` (429) vai `529` pagaidiet servera `anthropic-ratelimit-unified-slow-retry-after` (noklusējums 20 s, skavs 5–600 s, ±— % nervozitāte) un mēģiniet vēlreiz, ierobežojot ar `anthropic-ratelimit-unified-slow-max-wait` (noklusējums 20 min, skavs 1 min–6 h). Gaidīšanu papildus ierobežo tas, kas ir palicis no paša pieprasījuma augšupvērstā sākuma sākuma taimauta (`resolveFetchStartTimeout`, 10 min pēc noklusējuma), mīnus 5 s robeža: bez šī ierobežojuma 20 minūšu noklusējuma maksimālā gaidīšanas laiks pārsniegs pieprasījumu un miegs tiktu pārtraukts gaidīšanas vidū, parādot `TimeoutError` nevis graciozo + `max_wait`
-- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, 5 h loga apgāšanās vai `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (kas beidzas kā `extra_usage` jebkurā statusā, jo apmaksātais pārsniegums tagad sedz sienu) beidz joslu; reakcija pēc tam plūst uz parasto dzesēšanas ceļu. `budget_exhausted` tiek atcerēts līdz paziņotajai budžeta atiestatīšanai (≤ 8 dienas).
-- Sienas pārbaude tiek veikta pēc paša izpildītāja 400 virzītiem atkārtotiem mēģinājumiem (konteksta rediģēšana, thinking/effort skavas, automātiskās mācīšanās parametrs), tāpēc siena 429, kas atrodas tikai vienā no šiem atkārtojumiem, joprojām tiek pārtverta, nevis sasniedz atdzišanas ceļu.
-- Katra savienojuma statuss ir atmiņā (restartēšana maksā vienu papildu sienu 429, lai atkārtoti pieņemtu).
+- Pēc ierobežojuma `429` izpildītājs pieņem piedāvājumu un nekavējoties atkārto pieprasījumu ar **to pašu** kontu, izmantojot `anthropic-usage-limit: slow`; kanāls paliek aktīvs līdz paziņotajam `anthropic-ratelimit-unified-reset` laikam (+60 sekunžu pielaide), un katram pieprasījumam šajā periodā tiek pievienota galvene. Pārtvertais `429` nekad nesasniedz `handleChatCore`, tāpēc savienojums **netiek** ievietots atdzišanas periodā un netiek nomainīts.
+- `anthropic-ratelimit-unified-slow-status` turpmākajās atbildēs: `active` / `not_needed` saglabā kanālu; `slot_busy` (`429`) vai `529` gaida servera norādīto `anthropic-ratelimit-unified-slow-retry-after` (pēc noklusējuma 20 s, ierobežojums 5–600 s, ±30% nejauša variācija) un atkārto pieprasījumu, ievērojot `anthropic-ratelimit-unified-slow-max-wait` (pēc noklusējuma 20 min, ierobežojums 1 min–6 h) — pēc šī laika kanāls tiek izbeigts, un 10 minūšu atdzišanas periods bloķē atkārtotu pieņemšanu. Gaidīšanas laiku papildus ierobežo tas, kas atlicis no paša pieprasījuma augšupējās darbības sākšanas taimauta (`resolveFetchStartTimeout`, pēc noklusējuma 10 min) mīnus 5 sekunžu rezerve: bez šī ierobežojuma noklusējuma 20 minūšu maksimālais gaidīšanas laiks pārsniegtu pieprasījuma darbības laiku, un gaidīšana tiktu pārtraukta tās vidū, parādot `TimeoutError`, nevis nodrošinot korektu `max_wait` beigas un atdzišanas periodu.
+- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, 5 stundu loga pāreja uz nākamo periodu vai `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (kas to izbeidz kā `extra_usage` pie jebkura statusa, jo maksas pārtēriņš tagad sedz šo ierobežojumu) izbeidz kanālu; pēc tam atbilde tiek nodota parastajam atdzišanas perioda ceļam. `budget_exhausted` tiek saglabāts līdz paziņotajai budžeta atiestatīšanai (ne vairāk kā 8 dienas).
+- Ierobežojuma pārbaude tiek veikta pēc izpildītāja paša 400 izraisītajiem atkārtotajiem mēģinājumiem viena mēģinājuma ietvaros (konteksta rediģēšana, domāšanas/centības ierobežojumi, parametru automātiskā apguve), tāpēc ierobežojuma `429`, kas parādās tikai kādā no šiem atkārtotajiem mēģinājumiem, joprojām tiek pārtverts, nevis nonāk atdzišanas perioda ceļā.
+- Stāvoklis tiek glabāts atmiņā katram savienojumam (pēc restartēšanas nepieciešams vēl viens ierobežojuma `429`, lai atkārtoti pieņemtu piedāvājumu).
 
-**Sesijas ierobežojumu atiestatīšana** (`autoLimitReset`, mēģināts pirms joslas, kad abi ir ieslēgti):
+**Sesijas ierobežojuma atiestatīšana** (`autoLimitReset`, ja abas funkcijas ir ieslēgtas, tiek izmēģināta pirms kanāla):
 
-- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → `juniper_tide` bloks; kad `arm: "reset"` un `available: true`, `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` ar `{ "program": "juniper_tide" }` (organizācija UUID no `providerSpecificData.organizationUUID`, bootstrap atkāpšanās).
-- `result: reset|not_limited` → pieprasījums tiek mēģināts atkārtoti pilnā ātrumā (nav lēnas galvenes). `already_used` / `not_offered` memoise `next_available_at` (noklusējuma viena nedēļa); jebkura kļūme atkāpjas pēc 15 minūtēm. Atiestatīšana notiek reizi nedēļā, un tā joprojām tiek ieskaitīta nedēļas limitā.
+- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → `juniper_tide` bloks; ja `arm: "reset"` un `available: true`, tiek izpildīts
+  `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` ar
+  `{ "program": "juniper_tide" }` (organizācijas UUID no `providerSpecificData.organizationUUID`, ar sākotnējās ielādes rezerves vērtību).
+- `result: reset|not_limited` → pieprasījums tiek atkārtots ar pilnu ātrumu (bez lēnās darbības galvenes).
+  `already_used` / `not_offered` saglabā `next_available_at` (pēc noklusējuma viena nedēļa); pēc jebkuras kļūmes tiek piemērota 15 minūšu pauze. Atiestatīšana notiek reizi nedēļā un joprojām tiek ieskaitīta nedēļas ierobežojumā.
 
-Regresijas aizsargi: `tests/unit/claude-low-priority-mode.test.ts`, `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
+Regresijas aizsargi: `tests/unit/claude-low-priority-mode.test.ts`,
+`tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
-### Sesijas intereses (#7274)
+### Sesijas piesaiste (#7274)
 
-**Darbības joma:** viena klienta sesija (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` galvene) ir piesprausta vienam savienojumam,** jebkura** pakalpojumu sniedzējs.
+**Tvērums:** viena klienta sesija (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` galvene) tiek piesaistīta vienam savienojumam jebkuram pakalpojumu sniedzējam.
 
-**Mērķis:** Saglabājiet vairāku apgriezienu aģentu (Claude Code, aider, custom agents) vienā kontā visos pieprasījumos, samazinot starpkontu konteksta zudumus un atkārtotas aukstās palaišanas 429s pakalpojumu sniedzējiem ar viena konta sesijas stāvokli.
+**Mērķis:** saglabāt vairāku mijiedarbību aģentu (Claude Code, aider, pielāgoti aģenti) vienā kontā starp pieprasījumiem, samazinot konteksta zudumu kontu maiņas dēļ un atkārtotus aukstās palaišanas `429` stāvokļus pakalpojumu sniedzējiem ar katram kontam specifisku sesijas stāvokli.
 
-**Īstenošana:**
+**Implementācija:**
 
-- TTL izšķirtspēja: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
-- Pin selection/creation: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
-- Galvenes izvilkšana (vispārējs, jebkurš nodrošinātājs): `src/sse/services/auth.ts::extractSessionAffinityKey()`
-- Noturīgs tapu galds: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
-- Iestatījums: `sessionAffinityTtlMs` (globālais TTL ms, `0` atspējo) — `src/lib/db/settings.ts`. Pārdēvēts no Codex-only `codexSessionAffinityTtlMs`, veicot migrāciju `124_generic_session_affinity_ttl.sql`, kas pārņem jebkuru iepriekš konfigurētu Codex TTL kā jauno noklusējuma vērtību.
+- TTL noteikšana: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
+- Piesaistes izvēle/izveide: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
+- Galvenes izvilkšana (vispārīga, jebkuram pakalpojumu sniedzējam): `src/sse/services/auth.ts::extractSessionAffinityKey()`
+- Persistenta piesaistes tabula: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
+- Iestatījums: `sessionAffinityTtlMs` (globālais TTL milisekundēs, `0` atspējo) — `src/lib/db/settings.ts`. Pārdēvēts no tikai Codex paredzētā `codexSessionAffinityTtlMs`, izmantojot migrāciju `124_generic_session_affinity_ttl.sql`, kas jebkuru iepriekš konfigurētu Codex TTL pārnes kā jauno noklusējuma vērtību.
 
-Pirms #7274. `resolveSessionAffinityTtlMs()` tika stingri pievienots `0` katram pakalpojumu sniedzējam, izņemot `codex`, tāpēc TTL iestatījumam (un sesijas galvenēm) nebija nekādas ietekmes nekur citur, lai gan piespraušanas mehānisms un galvenes izvilkšana jau bija pakalpojumu sniedzēja agnostiķis. Labojums noņēma šo agrīno atgriešanos; TTL tagad vienādi attiecas uz katru pakalpojumu sniedzēju, kad tas globāli iestatīts virs `0`.
+Pirms #7274 `resolveSessionAffinityTtlMs()` katram pakalpojumu sniedzējam, izņemot `codex`, nekavējoties atgrieza `0`, tāpēc TTL iestatījumam (un sesijas galvenēm) nekur citur nebija ietekmes, lai gan piesaistes mehānisms un galveņu izvilkšana jau bija neatkarīga no pakalpojumu sniedzēja. Labojums noņēma šo agrīno atgriešanos; TTL tagad tiek vienādi piemērots visiem pakalpojumu sniedzējiem, tiklīdz tas globāli iestatīts uz vērtību, kas lielāka par `0`.
 
-Trīs sesijas radniecības galvenes nekad netiek pārsūtītas, jo — izpildītāji izveido paši savas augšteces galvenes no nulles, nevis nodod klientu galvenes, tāpēc tas paliek tikai iekšējās korelācijas ID.
+Trīs sesijas piesaistes galvenes nekad netiek pārsūtītas augšupējā sistēmā — izpildītāji paši no jauna izveido augšupējās galvenes, nevis pārsūta klienta galvenes, tāpēc šis paliek tikai iekšējs korelācijas identifikators.
 
-### Ekskluzīvas pārvaldītas sesijas savienojuma nomas līgumi
+### Ekskluzīvas pārvaldītu sesiju savienojumu nomas tiesības
 
-**Darbības joma:** vienam aktīvam pārvaldītam HTTP client/session pieder viens piemērots OmniRoute savienojums.
+**Tvērums:** viena aktīva pārvaldīta HTTP klienta/sesijas instance ir piesaistīta vienam piemērotam OmniRoute savienojumam.
 
-**Mērķis:** nodrošiniet ilgstošas ekskluzīvas savienojuma īpašumtiesības klientiem, kuriem ir nepieciešams stingrs maršrutēšanas žogs pāri pieprasījumiem. Tas atšķiras no sesijas radniecības, kas ir mīksta nepārtrauktības izvēle: ekskluzīva noma saglabā dzīves cikla stāvokli SQLite, nodrošina globālu aktīvā īpašnieka un aktīvā savienojuma unikalitāti un noraida novecojušu ģenerēšanu pirms pakalpojumu sniedzēja nosūtīšanas.
+**Mērķis:** nodrošināt noturīgu ekskluzīvu savienojuma īpašumtiesību klientiem, kuriem pieprasījumu ietvaros nepieciešama stingra maršrutēšanas robeža. Tas atšķiras no sesijas piesaistes, kas ir maiga nepārtrauktības preference: ekskluzīva noma saglabā dzīves cikla stāvokli SQLite, nodrošina globālu aktīvā īpašnieka un aktīvā savienojuma unikalitāti un noraida novecojušu paaudzi pirms nosūtīšanas pakalpojumu sniedzējam.
 
-Funkciju var izvēlēties katrai API atslēgai. Pārvaldītajai atslēgai ir jābūt `lease:exclusive` tvērumam un nepārprotamam `allowedConnections` sarakstam, kas nav tukšs. Jebkurš HTTP klients var izmantot dzīves cikla galapunktu; nav nepieciešams klienta nosaukums, lietotāja aģents, nodrošinātājs, OAuth metode vai modelis. Nomas līgumam pieder savienojums, nevis modelis, tāpēc modeļa maiņa saglabā saistību, kamēr savienojums joprojām ir piemērots. Parasta modeļa, kvotas, veselības stāvokļa, atdzišanas un atļaušanas saraksta noteikumi paliek autoritatīvi un var pāriet to pašu paaudzi uz citu bezmaksas piemērotu savienojumu.
+Šī funkcija ir izvēles iespēja katrai API atslēgai. Pārvaldītai atslēgai ir jābūt tvērumam `lease:exclusive` un skaidri norādītam sarakstam `allowedConnections`, kas nav tukšs. Dzīves cikla galapunktu var izmantot jebkurš HTTP klients; klienta nosaukums, lietotāja aģents, pakalpojumu sniedzējs, OAuth metode vai modelis nav nepieciešams. Noma pārvalda savienojumu, nevis modeli, tāpēc modeļa maiņa saglabā piesaisti, kamēr savienojums joprojām ir parasti piemērots. Parastie modeļa, kvotas, veselības stāvokļa, gaidīšanas perioda un atļauto sarakstu noteikumi joprojām ir noteicošie un var pārvietot to pašu paaudzi uz citu brīvu piemērotu savienojumu.
 
-Dzīves cikls ir `POST /api/v1/session-leases` ar JSON darbībām `acquire`, `renew` un `release`. Pārvaldītie secinājumu pieprasījumi uzrāda necaurspīdīgo `X-OmniRoute-Lease-Owner` vērtību un precīzu `X-OmniRoute-Lease-Generation`. Īpašnieks izmanto `vlo_` kam seko 43 base64url rakstzīmes; tiek saglabāts tikai tā SHA-256 hash. Katrs galīgais nosūtīšanas žogs saista arī autentificēto API taustiņu ID un aktīvo savienojumu ID. Nomas kontroles galvenes tiek noņemtas no žurnāliem, saglabātajiem pieprasījumu momentuzņēmumiem un iepriekšējās izpildītāja galvenes.
+Dzīves ciklu veido `POST /api/v1/session-leases` ar JSON darbībām `acquire`, `renew` un `release`. Pārvaldītiem inferenču pieprasījumiem tiek nosūtīta necaurspīdīgā `X-OmniRoute-Lease-Owner` vērtība un precīza `X-OmniRoute-Lease-Generation` vērtība. Īpašnieks sākas ar `vlo_`, kam seko 43 base64url rakstzīmes; tiek saglabāta tikai tā SHA-256 jaucējvērtība. Katra galīgā nosūtīšanas pārbaude papildus piesaista autentificētās API atslēgas ID un aktīvā savienojuma ID. Nomas vadības galvenes tiek izņemtas no žurnāliem, saglabātajiem pieprasījumu momentuzņēmumiem un augšupējā izpildītāja galvenēm.
 
-Ja parastajā maršrutēšanā ir piemēroti pārvaldīti kandidāti, bet katrs brīvais kandidāts ir aizņemts ar ārvalstu aktīvu nomu, OmniRoute atgriež HTTP `429`, nomas jaudas nav pieejams kods, gaidīšanas jaudas statuss un ierobežots `Retry-After` kas iegūts no agrākā attiecīgā derīguma termiņa beigām. Parasta tukša piemērotība nav strīds par nomu un saglabā esošo maršrutēšanas kļūdu semantiku.
+Ja parastajā maršrutēšanā ir piemēroti pārvaldīti kandidāti, bet katru brīvo kandidātu aizņem ārēja aktīva noma, OmniRoute atgriež HTTP `429`, nomas kapacitātes nepieejamības kodu, stāvokli `waiting-for-capacity` un ierobežotu `Retry-After`, kas aprēķināts, pamatojoties uz agrāko attiecināmo derīguma termiņu. Parasta piemērotu kandidātu neesamība nav nomu izraisīta konkurence, un tai tiek saglabāta esošā maršrutēšanas kļūdu semantika.
 
-Saistītie mehānismi paliek atsevišķi:
+Saistītie mehānismi paliek nošķirti:
 
-- OAuth sesijas noslogojums ir procesa lokālais mīkstais sadalījums OAuth kontiem.
-- Konta semafori piešķir pieprasījumu sakritības atļaujas un beidzas, kad pieprasījums ir pabeigts.
-- Ekskluzīvas pārvaldītas sesijas nomas līgumi ir ilgstošas dzīves cikla īpašumtiesības ar paaudzes žogu.
-
----
+- OAuth sesiju noslodze ir procesam lokāla, maiga OAuth kontu sadale.
+- Kontu semafori piešķir pieprasījumu paralēlās izpildes atļaujas un beidzas, kad pieprasījums ir pabeigts.
+- Ekskluzīvas pārvaldītu sesiju nomas ir noturīgas dzīves cikla īpašumtiesības ar paaudzes pārbaudi.
 
 ## 3. Modeļa bloķēšana
 

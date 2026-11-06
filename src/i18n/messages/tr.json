@@ -923,6 +923,8 @@
     "batchListTitle": "Toplu işlemler",
     "batchListCount": "{count} toplu işlem",
     "batchListRemovingCompleted": "Kaldırılıyor…",
+    "batchListRemoveCompletedPartial": "Çok sayıda toplu işlem kaldırıldı. Kalanları temizlemek için tekrar tıklayın.",
+    "batchListRemoveCompletedFailed": "Toplu işlemler kaldırılırken bir hata oluştu.",
     "batchListRemoveCompleted": "Tamamlananları kaldır",
     "batchListTableStatus": "Durum",
     "batchListTableId": "Kimlik",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "Yenileniyor…",
     "batchListRefresh": "Yenile",
     "uploadFileModalRemove": "Kaldır",
+    "fileInputChoose": "Dosya seç",
+    "fileInputChooseMultiple": "Dosyaları seç",
+    "fileInputEmpty": "Dosya seçilmedi",
+    "fileInputSelectedCount": "{count, plural, one {# dosya seçildi} other {# dosya seçildi}}",
+    "fileDropLabel": "Buraya bir dosya bırakın veya bir dosya seçin",
+    "fileDropLabelMultiple": "Dosyaları buraya bırakın veya dosyaları seçin",
     "uploadFileModalUploading": "Yükleniyor…",
     "wizardInputReading": "Dosya okunuyor…",
     "wizardInputReady": "Hazır",
@@ -1035,7 +1043,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "OpenCode Zen/Go isteklerinde OpenCode v2 CLI istemci parmak izini gönderir: opencode/latest/<2.x>/cli User-Agent ve x-opencode-client cli; ücretsiz katman isteklerinde ise v2 oturum üstbilgilerini, v2 CLI read/shell araç şemalarını gönderir ve tool_choice \"none\" kullanmaz. Varsayılan olarak kapalıdır: her OpenCode isteğinin mevcut kimliği, üstbilgileri ve gövdesi değişmeden kalır.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Bir otomatik kombinasyonun aday havuzu, araç çağırma ön filtresi çalışmadan önce zaten boşsa (tüm hedefler bekleme süreleri, kilitlenmeler veya tükenme nedeniyle atlanmışsa), eski 400 \"Hiçbir hedef araç çağırmayı desteklemiyor\" capability_mismatch yanıtı yerine 503 no_eligible_targets yanıtını döndürün. Varsayılan olarak kapalıdır: boş havuz, eski 400 yanıtını döndürmeye devam eder.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Güvenilir model uç noktası etiketlerini (sağlayıcı kataloğu tarafından bildirilen, özel amaçlı bir model kimliğinden çıkarılan veya operatör tarafından ayarlanan) zorunlu kılın: modelin hizmet vermediği bir uç noktaya gönderilen isteği /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations ve /v1/audio/* yollarında yönlendirmeden önce HTTP 400 ile reddedin; etiketli uç noktaları için OmniRoute bağdaştırıcısı bulunmayan modelleri /v1/models üzerinden gizleyin ve bu tür modeller için pano model testine 422 ile yanıt verin. Varsayılan olarak kapalıdır: uç noktası etiketleri yalnızca bilgilendirme amaçlı kalır ve istekler daha önce olduğu gibi yönlendirilir.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "Standart Anthropic uyumlu aktarıcılarda, önbelleğe alınan istem önekinin turlar arasında sabit kalması için konuşmanın ortasındaki sistem turlarını üst düzey sistem istemine taşımak yerine mesaj listesinde tutar. Yalnızca istemcinin kendisi mid-conversation-system-2026-04-07 beta sürümünü gönderdiğinde uygulanır. Varsayılan olarak kapalıdır: Bu beta sürümünü desteklemeyen aktarıcılar mesaj listesindeki sistem turlarını reddettiğinden, her sistem turu daha önce olduğu gibi sistem istemine taşınır.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Ne bir operatör geçersiz kılması ne de sağlayıcı kayıt defteri herhangi bir seviye belirttiğinde, models.dev tarafından yayımlanan akıl yürütme eforu seviyelerini kullanın; yalnızca bilinen efor seviyelerini koruyun ve boş bir seviye listesini \"seviye yok\" olarak değerlendirin. Varsayılan olarak kapalıdır: model kataloğu ve çözümlenmiş efor seviyeleri tam olarak önceki gibi kalır.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "auto/* isteklerinin aday havuzunu çözümlenmiş model yetenekleri (görme, akıl yürütme, düşünme) ve gözlemlenen kalite puanlarıyla, tek bir toplu okumada oluşturmasını sağlar. Varsayılan olarak kapalı: istek anındaki aday ağırlıkları tam olarak önceki gibi kalır. Açık: bu sinyaller anlık görüntü ağırlıklarına girer, bu nedenle aday ağırlıkları ve seçim değişebilir.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Kimlik bilgisi durumu taramasının, ağ geçidinin kendiliğinden kapattığı bağlantıları yeniden test etmesine (her biri en fazla 6 saatte bir, tarama başına 5 adet) ve yeniden testi geçen bir bağlantıyı tekrar açmasına izin verin. Varsayılan olarak kapalıdır: bu tür bağlantılar, bir operatör müdahale edene kadar kapalı kalır. Operatör tarafından devre dışı bırakılan ve kalıcı olarak yasaklanan bağlantılar hiçbir zaman yeniden test edilmez.",
@@ -1939,7 +1946,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# istek} other {# istek}}, {keys, plural, one {# sınırlı anahtar} other {# sınırlı anahtar}}",
     "unpricedUsageMore": "…ve {count} tane daha",
     "unpricedUsageConfigure": "Fiyatlandırmayı yapılandır",
-    "unpricedUsageDismiss": "Kapat"
+    "unpricedUsageDismiss": "Kapat",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analitik",
@@ -6264,6 +6280,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Geçici bekleme süresini atlayın; böylece bu bağlantı kurtarılabilir hatalardan sonra bile uygun kalmaya devam eder (yasaklandı/süresi doldu gibi nihai durumlar yine de geçerlidir).",
     "disableCoolingLabel": "Bu bağlantı için bekleme süresini devre dışı bırak",
+    "keepMidConversationSystemDescription": "Konuşmanın ortasında gönderilen sistem mesajlarını üst düzey sistem istemine taşımak yerine mesaj listesinin içinde bırakın, böylece bilgi istemi önbelleği sırayla etkin olmaya devam eder. Yalnızca bu yukarı akış, mesajların içindeki \"sistem\" rolünü kabul ederse etkinleştirin (aksi takdirde 400 yanıtını verir).",
+    "keepMidConversationSystemLabel": "Konuşma ortasında sistem mesajlarını yerinde tutun",
+    "requireUserLastMessageDescription": "Asistan ön doldurmasını reddeden yukarı akışlar için: göndermeden önce sondaki asistan dönüşlerini bırakın (tool_use yok). Model önceki cevabını yeniden oluşturabilir.",
+    "requireUserLastMessageLabel": "Konuşmanın bir kullanıcı mesajıyla bitmesini zorunlu kıl",
     "bulkPasteAdded": "{count, plural, one {1 anahtar eklendi} other {# anahtar eklendi}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 yinelenen anahtar atlandı} other {# yinelenen anahtar atlandı}}",
     "bulkPasteHint": "Her satıra bir API anahtarı yapıştırın. Boş satırlar yok sayılır ve yinelenen anahtarlar atlanır.",
@@ -6363,6 +6383,9 @@
     "localProviders": "Yerel Sağlayıcılar",
     "maxConcurrentWholeNumberError": "Maksimum Eşzamanlılık Değerinin Tam Sayı Olması Gerektiği Hatası",
     "m365TierLabel": "Copilot katmanı",
+    "m365RefreshTokenLabel": "Belirteci yenile (isteğe bağlı)",
+    "m365RefreshTokenHint": "Microsoft 365 erişim belirtecini otomatik olarak yenilemek için kullanılır.",
+    "m365RefreshTokenEditHint": "Mevcut jetonu korumak için boş bırakın. Değiştirmek için yeni bir jeton yapıştırın.",
     "m365TierHint": "Bu bağlantının hangi Microsoft 365 Copilot yüzeyini kullanacağını seçin. Bireysel, varsayılan tüketici BizChat'idir; Eğitim ve Kurumsal (iş) kendi kiracı yüzeylerini tercih eder.",
     "m365TierIndividualOption": "Bireysel (varsayılan)",
     "m365TierEduOption": "Eğitim",
@@ -7097,6 +7120,7 @@
     "proxySubTabsAria": "Proxy bölümleri",
     "requestBodyLimitTitle": "İstek Gövdesi Sınırı",
     "requestBodyLimitDescription": "Bir istek gövdesi ayrıştırılmadan önce kabul edilen maksimum API yükü boyutu. Özel yükleme rotaları, en az kendi yerleşik 100 MB sınırını korur.",
+    "requestBodyLimitChatHint": "Burada bir sınır kaydedene kadar Chat Completions ve Responses en fazla 50 MB kabul eder. Kaydedilen sınır daha düşük veya daha yüksek olsa da ikisi için de geçerlidir.",
     "requestBodyLimitInputLabel": "MB cinsinden istek gövdesi sınırı",
     "requestBodyLimitEmptyError": "MB cinsinden bir sınır girin",
     "requestBodyLimitWholeNumberError": "Tam sayı kullanın",
@@ -12282,7 +12306,9 @@
       "failedTitle": "Tüm {count} denemeler başarısız oldu",
       "failed": "başarısız",
       "pinnedTitle": "Bağlam önbellek oturumu sabitleme ile seçilen model",
-      "pinned": "sabitlenmiş"
+      "pinned": "sabitlenmiş",
+      "recoveredAttemptsTitle": "İstek {count} denemeden sonra kurtarıldı",
+      "latestOutcomeFailed": "Son istek sonucu başarısız oldu"
     },
     "attempts": "denemeler",
     "detail": {
@@ -12384,13 +12410,20 @@
       "continuesFromParent": "üst öğeden devam eder",
       "continuesFrom": "{id} üzerinden devam eder",
       "viewConversation": "konuşmayı görüntüle",
-      "openConversation": "{id} konuşmasını aç"
+      "openConversation": "{id} konuşmasını aç",
+      "omittedHttpAttempts": "{count} HTTP gönderimi saklanmadı",
+      "noHttpResponse": "HTTP yanıtı gözlemlenmedi",
+      "transportError": "Aktarım hatası"
     },
     "tableLabel": "İstek günlükleri",
     "throughputPostFirstToken": "İlk token sonrası",
     "throughputEndToEnd": "Uçtan uca",
     "throughputRate": "{value} token/sn",
-    "throughputExplanation": "Her iki oran da çıktı ve akıl yürütme token sayılarından büyük olanını kullanır. İlk token sonrası, geçerli bir TTFT'yi hariç tutar; aksi durumda tam süreyi kullanır. Uçtan uca her zaman tam süreyi kullanır. Tamponlanmış bir yanıt, daha hızlı model üretimi olmadan yüksek ani teslim hızına sahip olabilir."
+    "throughputExplanation": "Her iki oran da çıktı ve akıl yürütme token sayılarından büyük olanını kullanır. İlk token sonrası, geçerli bir TTFT'yi hariç tutar; aksi durumda tam süreyi kullanır. Uçtan uca her zaman tam süreyi kullanır. Tamponlanmış bir yanıt, daha hızlı model üretimi olmadan yüksek ani teslim hızına sahip olabilir.",
+    "omittedHttpAttempts": "{count} HTTP gönderimi saklanmadı",
+    "upstreamStatus": "Üst sunucu {status}",
+    "noHttpResponse": "HTTP yanıtı gözlemlenmedi",
+    "transportError": "Aktarım hatası"
   },
   "proxyLogger": {
     "filterAll": "Tümü",
@@ -14157,6 +14190,14 @@
         "label": "Paylaşılan Egress Havuzu Sıralaması",
         "description": "Kotası çıkış adresine göre bölünmüş sağlayıcılar için, son zamanlarda reddedilen bir üyenin gözlemlenen çıkış adresini paylaşan havuz üyesini, sağlıklı üyelerin hemen altına sıralayın. Yalnızca sıralama, asla hariç tutulma gerekçesi. Bunu okuyan reddetme sinyalini üreten PROXY_SKIP_RECENTLY_FAILED gerektirir. Varsayılan olarak kapalıdır: seçim sırası tamamen düz rotasyonla aynıdır."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Model kapsamlı kota retleri",
+        "description": "Yalnızca kendisine isabet eden modele 429 numaralı opencode kotasını uygulayın, böylece aynı çıkış diğer modellere hizmet vermeye devam eder ve onu yalnızca bu model başarılı olduğunda temizler. Herhangi bir modeli olmayan (havuz rotasyonu, park etme ve tekrar oynatma, yönetici görünürlüğü, seçici tetikleyici, sağlık taraması) tüketiciler bunu görmeye devam ediyor. Reddi doğuran PROXY_SKIP_RECENTLY_FAILED ihtiyaç var. Varsayılan olarak kapalı: Bir modelin 429'luk kotası, her model için çıkışı bir kenara koyar."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Proxy getirme: katı POST tekrarı",
+        "description": "İdempotent olmayan bir istek için (POST, PUT, PATCH, DELETE), bir aktarım hatasından sonra (yeni soket, proxy geri dönüşü, yerel geri dönüş) yalnızca hata hiçbir şeyin gönderilmediğini kanıtladığında yeniden gönderin: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH veya bağlantı zaman aşımı. Yazma sonrasındaki bir soket hatası, yukarı akışın isteği kabul ettiği anlamına gelebilir, dolayısıyla bir yeniden gönderme, isteği iki kez oluşturup faturalandırabilir. Varsayılan olarak kapalı: herhangi bir aktarım hatasında yeniden oynatılabilir bir gövde bir kez yeniden gönderilir, bu aynı zamanda eski havuzlanmış bir soketi de kurtarır."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotasyon Nispetlendirme Kaydına (Log) Yazma",
         "description": "Opencode rotasyonu, hangi hesabın hizmet verdiğini veya atlandığını (yalnızca maskeli kimlikler, asla tam hesap kimlikleri değil) kaydeder ve vekil log kayıtlarını istekle ilişkilendirir; böylece operatör atlanan hesapları kullanılmayanlardan ayırt edebilir. Varsayılan olarak kapalıdır: ek log satırı yok, yazılan ek sütun yok."
@@ -14208,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 Havuz Yeniden Seçimi",
         "description": "Proxy'siz bir hesapta ve ortam havuz bağlamında egress-bucket'li bir sağlayıcıdan gelen 429 için OpenCode çoklu hesap rotasyonunda, aynı egress adresini yeniden denemek yerine bir sonraki deneme için bağlantı havuzundan başka bir üye isteyin. Sıralar, asla hariç tutmaz: tükenmiş bir havuz mevcut davranışı korur. Varsayılan olarak kapalıdır: her 429, tıpkı öncekiler gibi bir sonraki hesaba rotasyona gider."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Ücretsiz Katmanlı Çıkış Probu",
+        "description": "OpenCode yürütücüsü için, proxy'li bir istek 403 veya 451 FreeTierError olarak yanıtlandığında ve gözlemlenen araçların yeniden denemesi başarısız olduğunda veya uygulanmadığında, isteği farklı bir proxy (başka bir hesap proxy'si veya başka bir havuz üyesi, asla doğrudan bağlantı değil) aracılığıyla bir kez gönderin. Yalnızca bu araştırma 200'e yanıt verdiğinde, vekil reddetme belleğinde ilk çıkış bir kenara bırakılır ve araştırma yanıtı sunulur; her ikisi de reddettiğinde, orijinal redde geri dönülür ve hiçbir şey kaydedilmez. Aynı ret metni, işaretlenmiş bir çıkış IP ve reddedilen istek şeklini kapsar, böylece araştırma bunları kanıtlarla birbirinden ayırır. Varsayılan olarak kapalı: reddetme değiştirilmeden iade edilir."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 İstemci Parmak İzi",
@@ -14388,6 +14433,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Kombinasyon: İçerik Politikası Reddinde Dur",
         "description": "Bir kombinasyon hedefi tam bir içerik politikası reddiyle (kod veya tür cyber_policy / content_policy_violation) yanıt verdiğinde, kalan hedefler farklı modeller olsa bile kombinasyonu durdurur ve bu reddi döndürür, bir sonraki hedefe ilerlemek yerine. Varsayılan olarak kapalıdır: bu reddi, hesabı soğutmaz veya sağlayıcı sigortasını tetiklemez; kombinasyon tam olarak önceki gibi bir sonraki hedefine ilerler."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Yanıtlar: yalnızca aktarım sırasında canlı kalma",
+        "description": "Yanıtları Gönder response.in_progress olayı yerine boş bir satır olarak canlı tutulur, böylece sentetik bir anlık görüntü hiçbir zaman resmi SDK gerçek yanıtın yerini alamaz. Boş bir satır hiçbir SSE olayı göndermez; dolayısıyla yalnızca olaylarda sıfırlanan bir istemci gözlemcisi, uzun bir sessiz aşama sırasında sıfırlanmaz. Varsayılan olarak kapalı: zamanlayıcılar spesifikasyona uygun response.in_progress olayını gönderir."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Soğuma Yeniden Denemesi: 403/410 Redlerini Atla",
