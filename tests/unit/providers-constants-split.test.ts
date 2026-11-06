@@ -63,7 +63,7 @@ const P = await import("../../src/shared/constants/providers.ts");
 // Token Harbor (#16315) adds one apikey/gateways entry — 253.
 // Runcrate (#18061) adds one apikey/inference-hosts entry — 254.
 // Gisoo (#18112) adds one apikey/gateways entry — 255.
-// Pareto Inference (#NNNNN) adds one apikey/inference-hosts entry — 256.
+// Pareto Inference (#19238) adds one apikey/inference-hosts entry — 256.
 const APIKEY_PROVIDER_COUNT = 256;
 
 test("barrel still exports every catalog + key helpers", () => {
