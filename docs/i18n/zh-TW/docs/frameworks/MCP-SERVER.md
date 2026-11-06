@@ -4,13 +4,13 @@
 
 ---
 
-> Model Context Protocol 伺服器提供涵蓋路由、快取、壓縮、記憶體、技能、代理、資源池、Radar 與上下文來源操作的 110 項工具。
+> 模型上下文協定伺服器具有 110 個工具，涵蓋路由、快取、壓縮、記憶體、技能、代理、池、雷達和上下文來源操作。
 >
-> 事實依據：`open-sse/mcp-server/server.ts` 使用 `countUniqueMcpTools()` 計算出 **110 項不重複工具**：45 個標準定義（包括六個 CCR 生命週期工具、agent-skills 三件組、`omniroute_radar_catalog` 與 `omniroute_x_search`），再加上記憶體（3）、技能（4）、GitHub 技能（3）、資源池（6）、遊戲化（8）、外掛程式（8）、Notion（6）、Obsidian（22）、本機語料庫（3），以及兩個僅限 RTK 的壓縮工具。
+> 事實來源： `open-sse/mcp-server/server.ts`計算**110 個獨特的工具**CCR `countUniqueMcpTools()` `omniroute_radar_catalog` `omniroute_x_search` GitHub Notion Obsidian
 
 ## 安裝
 
-OmniRoute MCP 已內建。請使用以下指令啟動：
+OmniRoute MCP是內建的。開始：
 
 ```bash
 omniroute --mcp
@@ -19,48 +19,42 @@ omniroute --mcp
 或透過 open-sse 傳輸：
 
 ```bash
-# HTTP 可串流傳輸（連接埠 20130）
-omniroute --dev  # MCP 會在 /mcp 端點自動啟動
+# HTTP streamable transport (port 20130)
+omniroute --dev  # MCP auto-starts on /mcp endpoint
 ```
 
-HTTP 傳輸（`sse` / `streamable-http`，由儀表板伺服器在同一程序內提供）預設為
-停用，先前只能從 `/dashboard/mcp` 頁面切換。自 v3.8.51 起，
-CLI 也提供相同功能：
+預設情況下， HTTP傳輸（`sse` / `streamable-http`，由儀表板伺服器在進程中提供服務）處於關閉狀態，之前只能從`/dashboard/mcp`頁面進行切換。從 v3.8.51 開始， CLI具有奇偶校驗：
 
 ```bash
-omniroute mcp status                                  # 啟用狀態／上線狀態、傳輸方式、工具數量
+omniroute mcp status                                  # enabled/online, transport, tool count
 omniroute mcp enable [--transport stdio|sse|streamable-http]
 omniroute mcp disable
-omniroute mcp restart                                 # 重設使用中的 sse/streamable-http 工作階段
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` 會對儀表板透過 `/api/settings` 切換的同一個 `mcpEnabled`
-設定（以及選用的 `mcpTransport`）發出 PATCH 請求。`mcp restart` 會呼叫 `POST /api/mcp/restart`：
-它會終止使用中的 `sse`/`streamable-http` 工作階段，讓下一個請求可以乾淨地重新初始化；
-若 MCP 已停用，則傳回 `409`；若使用 `stdio` 傳輸，則傳回 `501`（stdio 用戶端會管理自己的
-子程序，因此沒有可在程序內重新啟動的控制代碼）。
+`mcp enable`/`mcp disable` PATCH `mcpEnabled` （和可選的`mcpTransport`）相同，透過`/api/settings`設定儀表板切換。 `mcp restart`呼叫`POST /api/mcp/restart`：它會拆除活動的`sse`/`streamable-http`會話，以便下一個請求乾淨地重新初始化，如果MCP被禁用，則返回`409` ，並返回`501`用於`stdio`傳輸（stdio 用戶端擁有自己的子進程—沒有進程內句柄可以重新啟動）。
 
-## 傳輸方式
+## 交通
 
-MCP 伺服器提供三種傳輸方式，全部由相同的 `createMcpServer()` 工廠提供支援：
+MCP伺服器公開三種傳輸，全部由同一個`createMcpServer()`工廠支援：
 
-| 傳輸方式          | 位置                                            | 使用時機                                        |
-| :---------------- | :---------------------------------------------- | :---------------------------------------------- |
-| `stdio`           | `open-sse/mcp-server/server.ts`                 | IDE 整合（Claude Desktop、Cursor 等）           |
-| `sse`             | 透過 `httpTransport` 的 `POST/GET /api/mcp/sse` | 需要事件串流的瀏覽器／代理程式用戶端            |
-| `streamable-http` | `POST/GET/DELETE /api/mcp/stream`               | 多工作階段 HTTP 用戶端（`mcp-session-id` 標頭） |
+| 運輸              | 在哪裡                                     | 何時使用                                 |
+| :---------------- | :----------------------------------------- | :--------------------------------------- |
+| `stdio`           | `open-sse/mcp-server/server.ts`            | IDE整合（Claude Desktop、 Cursor等）     |
+| `sse`             | `POST/GET /api/mcp/sse`透過`httpTransport` | 需要事件流的Browser/agent客戶端          |
+| `streamable-http` | `POST/GET/DELETE /api/mcp/stream`          | 多會話HTTP客戶端（`mcp-session-id`標頭） |
 
-使用中的 HTTP 傳輸（`sse` 或 `streamable-http`）由 `mcpTransport` 設定選取。切換傳輸方式會關閉另一種傳輸上現有的工作階段。
+活動HTTP傳輸（`sse`或`streamable-http`）由`mcpTransport`設定選擇。切換傳輸會關閉其他傳輸上的現有會話。
 
-### 遠端存取（略過 manage 範圍限制）
+### 遠端存取（管理範圍旁路）
 
-`/api/mcp/*` 位於 LOCAL_ONLY 層級（`src/server/authz/routeGuard.ts`）——預設只有回送主機（`localhost`、`127.0.0.1`、`::1`）可以存取。自 v3.8.2 起，若非回送用戶端提供 `Authorization: Bearer <api-key>`，且其金鑰具有 `manage` 範圍，即可連線。這是透過通道、反向代理或公開主機名稱連線至遠端 MCP 伺服器的唯一方式。
+`/api/mcp/*`位於LOCAL_ONLY層 (`src/server/authz/routeGuard.ts`) —預設只有環回主機 (`localhost`、 `127.0.0.1`、 `::1`) 可以到達它。從 v3.8.2 開始，如果非環回客戶端提供其金鑰攜帶`manage`範圍的`Authorization: Bearer <api-key>`則它們可以連線。這是透過隧道、反向代理或公用主機名稱到達遠端MCP伺服器的唯一方法。
 
 ```bash
-# 授予 manage 範圍：開啟儀表板的 API Keys 頁面，並為該金鑰切換
-# 「Management Access」，或在建立時 POST scopes:["manage"]。
+# Grant manage scope: open the dashboard API Keys page and toggle
+# "Management Access" on the key, or POST scopes:["manage"] when creating.
 
-# 接著從遠端 MCP 用戶端連線：
+# Then connect from a remote MCP client:
 curl -i \
   -H "Host: your-public-host.example" \
   -H "Authorization: Bearer sk-…" \
@@ -70,474 +64,387 @@ curl -i \
   https://your-public-host.example/api/mcp/stream
 ```
 
-不具 `manage` 範圍的金鑰（或未提供 Bearer）會傳回 `403 LOCAL_ONLY`。相鄰的前綴 `/api/cli-tools/runtime/*` 刻意設計為不可略過——請參閱[路由防護層級——manage 範圍例外](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out)。
+非管理金鑰（或無承載）傳回`403 LOCAL_ONLY`。同級前綴`/api/cli-tools/runtime/*`是有意NOT可繞過的—請參閱[Route Guard Tiers — Manage-scope carve-out](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out) 。
 
-### Origin 驗證
+### 原產地驗證
 
-通過驗證後，所有送往 `/api/mcp/*` 的請求（包括傳輸端點與 `status`, `tools`, `audit`, `restart` 等管理路由）都會驗證 `Origin` 標頭，不論呼叫方為何（API key、CLI token、dashboard 工作階段，或停用登入時的匿名回環存取）。這是 MCP Streamable HTTP 規範要求的 DNS rebinding 防護。
+驗證後，對`/api/mcp/*` —的每個請求，傳輸和管理路由（例如`status`、 `tools`、 `audit`和`restart` —都會驗證其`Origin`標頭，無論呼叫者是什麼（API金鑰、 CLI令牌、儀表板會話或禁用登入的匿名環回）。這是MCP Streamable HTTP規格要求的 DNS 重新綁定保護。
 
-- **沒有 `Origin` 標頭** → 允許。OmniRoute CLI、SDK 與 IDE 用戶端都不會傳送此標頭。
-- **允許的 `Origin`** → 任意連接埠上的 `localhost` / `127.0.0.1` / `[::1]`，或 OmniRoute 自身的公開 origin：`OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`、受信任反向代理轉送的 origin（`OMNIROUTE_TRUST_PROXY`，僅在未設定 base URL 時生效），或直連的回環／區域網路 IP 主機。單憑 `Host` 標頭絕不會讓某個 origin 變成受信任。
-- **其他任何 `Origin`（包括 `null`）** → `403`，回應本文為 JSON-RPC 錯誤：`id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`。帶有有效 CSRF token 的 dashboard 工作階段仍會被接受，與其他 dashboard 寫入操作一致。
+- **沒有`Origin`標頭**→允許。 OmniRoute CLI、 SDK和IDE客戶端不發送。
+- **允許`Origin`**任何連接埠上的→ `localhost`、 `127.0.0.1`或`[::1]` ，或OmniRoute自己的公共來源： `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`，受信任的反向代理的轉送來源（`OMNIROUTE_TRUST_PROXY`，僅當未設定基本URL時），或直接loopback/LAN IP主機。僅靠`Host`標頭永遠不會使來源變得可信。
+- **任何其他`Origin`，包括`null`** → `403`帶有 JSON-RPC 錯誤主體： `id: null`、 `error.code: -32000`、 `error.data.code: "INVALID_ORIGIN"`。與其他儀表板寫入一樣，仍接受提供有效CSRF令牌的儀表板會話。
 
-部署在反向代理後方的瀏覽器 MCP 用戶端需要設定 `OMNIROUTE_PUBLIC_BASE_URL`；不提供其他 origin 的允許清單。CORS 預檢（`OPTIONS`）不驗證 Origin，但隨後的實際請求會驗證。
+在反向代理後面提供服務的瀏覽器MCP客戶端需要`OMNIROUTE_PUBLIC_BASE_URL`；沒有其他來源的允許名單。 CORS預檢 (`OPTIONS`) 未進行來源檢查；接下來的請求是。
 
-## IDE 設定
+## IDE配置
 
-請參閱 [MCP 用戶端設定](../guides/SETUP_GUIDE.md#mcp-client-configuration)，以瞭解 Claude Desktop、Cursor、Cline 及相容 MCP 用戶端的設定方式。
+請參閱[MCP客戶端配置](../guides/SETUP_GUIDE.md#mcp-client-configuration)以了解Claude Desktop、 Cursor、 Cline和相容的MCP客戶端設定。
 
 ---
 
-## 必備工具（14）— 第 1 階段
+## 基本工具 (14) —第一階段
 
-| 工具                            | 權限範圍              | 說明                                                                                         |
-| :------------------------------ | :-------------------- | :------------------------------------------------------------------------------------------- |
-| `omniroute_get_health`          | `read:health`         | 運作時間、記憶體、斷路器、速率限制、快取統計資料                                             |
-| `omniroute_list_combos`         | `read:combos`         | 所有已設定的組合及其策略（可選擇包含指標）                                                   |
-| `omniroute_get_combo_metrics`   | `read:combos`         | 特定組合的效能指標                                                                           |
-| `omniroute_switch_combo`        | `write:combos`        | 啟用或停用組合                                                                               |
-| `omniroute_create_combo`        | `write:combos`        | 透過現有的組合 API 建立經過驗證的組合                                                        |
-| `omniroute_check_quota`         | `read:quota`          | 已用／總配額、剩餘百分比、重設時間、權杖健康狀態                                             |
-| `omniroute_route_request`       | `execute:completions` | 透過 OmniRoute 路由傳送聊天補全請求                                                          |
-| `omniroute_cost_report`         | `read:usage`          | 依期間（工作階段／日／週／月）提供成本報告                                                   |
-| `omniroute_list_models_catalog` | `read:models`         | 完整的模型目錄，包含功能、狀態與定價                                                         |
-| `omniroute_radar_catalog`       | `read:radar`          | 本機已簽署的 Radar 目錄；可選擇依提供者／系列篩選                                            |
-| `omniroute_tool_search`         | `read:tools`          | 從已註冊的 MCP 目錄探索工具                                                                  |
-| `omniroute_web_search`          | `execute:search`      | 透過已設定的搜尋提供者進行網頁搜尋。不包含 X/Twitter。                                       |
-| `omniroute_x_search`            | `execute:search`      | 透過 xAI/SuperGrok 搜尋 X，或選擇 `xquik-search` 以取得 Xquik API 結果。需要所選後端的憑證。 |
-| `omniroute_web_fetch`           | `execute:search`      | 透過已設定的擷取提供者取得網頁內容                                                           |
+| 工具                            | 範圍                  | 描述                                                                                    |
+| :------------------------------ | :-------------------- | :-------------------------------------------------------------------------------------- |
+| `omniroute_get_health`          | `read:health`         | 正常運行時間、記憶體、斷路器、速率限制、快取統計信息                                    |
+| `omniroute_list_combos`         | `read:combos`         | 所有配置的組合與策略（可選指標）                                                        |
+| `omniroute_get_combo_metrics`   | `read:combos`         | 特定組合的性能指標                                                                      |
+| `omniroute_switch_combo`        | `write:combos`        | 啟用或停用組合                                                                          |
+| `omniroute_create_combo`        | `write:combos`        | 透過現有的組合API創建一個經過驗證的組合                                                 |
+| `omniroute_check_quota`         | `read:quota`          | 配額used/total、剩餘百分比、重設時間、令牌運作狀況                                      |
+| `omniroute_route_request`       | `execute:completions` | 透過OmniRoute路由發送聊天完成訊息                                                       |
+| `omniroute_cost_report`         | `read:usage`          | 按期間的成本報告 (session/day/week/month)                                               |
+| `omniroute_list_models_catalog` | `read:models`         | 包含功能、狀態、定價的完整型號目錄                                                      |
+| `omniroute_radar_catalog`       | `read:radar`          | 本地簽署的雷達目錄；可選provider/family過濾器                                           |
+| `omniroute_tool_search`         | `read:tools`          | 從註冊的MCP目錄中發現工具                                                               |
+| `omniroute_web_search`          | `execute:search`      | 透過設定的搜尋提供者進行 Web 搜尋。不是X/Twitter.                                       |
+| `omniroute_x_search`            | `execute:search`      | 透過xAI/SuperGrok搜尋 X，或選擇`xquik-search`來取得 Xquik API結果。需要所選後端的憑證。 |
+| `omniroute_web_fetch`           | `execute:search`      | 透過配置的取得提供者取得網頁內容                                                        |
 
-## 進階工具 (11) — 第 2 階段
+## 進階工具（11） —第2期
 
-| 工具                               | 權限範圍                             | 說明                                                                   |
-| :--------------------------------- | :----------------------------------- | :--------------------------------------------------------------------- |
-| `omniroute_simulate_route`         | `read:health`, `read:combos`         | 使用備援樹進行路由模擬試跑                                             |
-| `omniroute_set_budget_guard`       | `write:budget`                       | 設定工作階段預算，並採取降級／封鎖／警示動作                           |
-| `omniroute_set_routing_strategy`   | `write:combos`                       | 在執行階段更新組合策略（優先順序／加權／自動等）                       |
-| `omniroute_set_resilience_profile` | `write:resilience`                   | 套用 `aggressive`／`balanced`／`conservative` 韌性預設設定             |
-| `omniroute_test_combo`             | `execute:completions`, `read:combos` | 使用真實上游呼叫即時測試組合中的每個提供者                             |
-| `omniroute_get_provider_metrics`   | `read:health`                        | 各提供者的指標，包含 p50／p95／p99 延遲和斷路器狀態                    |
-| `omniroute_best_combo_for_task`    | `read:combos`, `read:health`         | 根據工作類型、預算與延遲限制建議組合                                   |
-| `omniroute_explain_route`          | `read:health`, `read:usage`          | 說明請求為何被路由至某個提供者（評分因素與備援）                       |
-| `omniroute_get_session_snapshot`   | `read:usage`                         | 完整工作階段快照：成本、權杖、最常用的模型／提供者、錯誤、預算防護機制 |
-| `omniroute_db_health_check`        | `read:health`, `write:resilience`    | 診斷（並可選擇自動修復）資料庫偏移，例如損壞的組合參照／孤立資料列     |
-| `omniroute_sync_pricing`           | `pricing:write`                      | 從外部來源（LiteLLM）同步定價資料；支援 `dryRun`                       |
+| 工具                               | 範圍                                 | 描述                                                            |
+| :--------------------------------- | :----------------------------------- | :-------------------------------------------------------------- |
+| `omniroute_simulate_route`         | `read:health`, `read:combos`         | 使用後備樹進行試運行路由模擬                                    |
+| `omniroute_set_budget_guard`       | `write:budget`                       | degrade/block/alert行動的會議預算                               |
+| `omniroute_set_routing_strategy`   | `write:combos`                       | 在運行時更新組合策略（priority/weighted/auto/etc.）             |
+| `omniroute_set_resilience_profile` | `write:resilience`                   | 應用`aggressive` / `balanced` / `conservative`彈性預設          |
+| `omniroute_test_combo`             | `execute:completions`, `read:combos` | 使用真實的上游呼叫對組合中的每個提供者進行即時測試              |
+| `omniroute_get_provider_metrics`   | `read:health`                        | 每個提供者的指標，包括p50/p95/p99延遲和斷路器狀態               |
+| `omniroute_best_combo_for_task`    | `read:combos`, `read:health`         | 根據budget/latency約束依任務類型推薦組合                        |
+| `omniroute_explain_route`          | `read:health`, `read:usage`          | 解釋為什麼請求被路由到提供者（評分因素+後備）                   |
+| `omniroute_get_session_snapshot`   | `read:usage`                         | 完整會話快照：成本、代幣、頂級models/providers、錯誤、預算保護  |
+| `omniroute_db_health_check`        | `read:health`, `write:resilience`    | 診斷（以及可選的自動修復）資料庫漂移，例如損壞的組合參考/孤立行 |
+| `omniroute_sync_pricing`           | `pricing:write`                      | 同步外部來源的定價資料（LiteLLM）；支援`dryRun`                 |
 
 ## 快取工具 (2)
 
-| 工具                    | 權限範圍      | 說明                               |
+| 工具                    | 範圍          | 描述                               |
 | :---------------------- | :------------ | :--------------------------------- |
-| `omniroute_cache_stats` | `read:cache`  | 語意快取、提示快取與冪等性統計資料 |
-| `omniroute_cache_flush` | `write:cache` | 全域或依特徵／模型清除快取         |
+| `omniroute_cache_stats` | `read:cache`  | 語義快取、提示快取和冪等性統計訊息 |
+| `omniroute_cache_flush` | `write:cache` | 全域或透過signature/model刷新快取  |
 
 ## 壓縮工具 (13)
 
-| 工具                                | 權限範圍            | 說明                                                                                        |
-| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------ |
-| `omniroute_compression_status`      | `read:compression`  | 壓縮設定、分析摘要與快取感知統計資料（包含 `analytics.mcpDescriptionCompression` 中繼資料） |
-| `omniroute_compression_configure`   | `write:compression` | 設定壓縮模式、閾值、目標比率、系統提示保留及 MCP 說明壓縮開關                               |
-| `omniroute_set_compression_engine`  | `write:compression` | 選擇使用中的引擎（off/caveman/rtk/stacked）及 Caveman/RTK 強度                              |
-| `omniroute_list_compression_combos` | `read:compression`  | 列出具名壓縮組合及其引擎管線                                                                |
-| `omniroute_compression_combo_stats` | `read:compression`  | 依壓縮組合與引擎分組的分析資料                                                              |
-| `omniroute_ccr_store`               | `write:compression` | 將依呼叫端隔離的內容儲存至有界的記憶體內 CCR 儲存區，並傳回標記與 `ccr://` 參照             |
-| `omniroute_ccr_retrieve`            | `read:compression`  | 完整擷取 CCR 內容，或使用開頭、結尾、行、grep 及統計模式擷取                                |
-| `omniroute_ccr_inspect`             | `read:compression`  | 檢查由呼叫端擁有的 CCR 中繼資料，但不傳回內容                                               |
-| `omniroute_ccr_list`                | `read:compression`  | 列出由呼叫端擁有之 CCR 區塊的分頁中繼資料                                                   |
-| `omniroute_ccr_delete`              | `write:compression` | 刪除由呼叫端擁有的 CCR 區塊                                                                 |
-| `omniroute_ccr_stats`               | `read:compression`  | 回報呼叫端範圍內的記憶體用量、生命週期計數器與儲存區限制                                    |
-| `omniroute_rtk_discover`            | `read:compression`  | 在選擇加入的 RTK 輸出樣本中探索重複出現的雜訊                                               |
-| `omniroute_rtk_learn`               | `read:compression`  | 從選擇加入的樣本產生可供檢閱的 RTK 篩選器草稿                                               |
+| 工具                                | 範圍                | 描述                                                                                  |
+| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------ |
+| `omniroute_compression_status`      | `read:compression`  | 壓縮設定、分析摘要和快取感知統計資料（包括`analytics.mcpDescriptionCompression`資料） |
+| `omniroute_compression_configure`   | `write:compression` | 配置壓縮模式、閾值、目標比率、系統提示儲存、 MCP描述壓縮切換                          |
+| `omniroute_set_compression_engine`  | `write:compression` | 選擇活動引擎（off/caveman/rtk/stacked）和Caveman/RTK強度                              |
+| `omniroute_list_compression_combos` | `read:compression`  | 列出命名的壓縮組合及其引擎管道                                                        |
+| `omniroute_compression_combo_stats` | `read:compression`  | 按壓縮組合和引擎分組的分析                                                            |
+| `omniroute_ccr_store`               | `write:compression` | 將呼叫者隔離的內容儲存在有界記憶體CCR儲存中，並傳回標記和`ccr://`引用                 |
+| `omniroute_ccr_retrieve`            | `read:compression`  | 完整或使用 head、tail、lines、grep 和 stats 模式檢索CCR內容                           |
+| `omniroute_ccr_inspect`             | `read:compression`  | 檢查呼叫者擁有的CCR資料而不回傳內容                                                   |
+| `omniroute_ccr_list`                | `read:compression`  | 列出呼叫者擁有的CCR區塊的分頁元數據                                                   |
+| `omniroute_ccr_delete`              | `write:compression` | 刪除呼叫者擁有的CCR塊                                                                 |
+| `omniroute_ccr_stats`               | `read:compression`  | 報告呼叫者範圍的記憶體使用情況、生命週期計數器和儲存限制                              |
+| `omniroute_rtk_discover`            | `read:compression`  | 發現選擇加入RTK輸出樣本中反覆出現的噪音                                               |
+| `omniroute_rtk_learn`               | `read:compression`  | 從選擇加入的樣本產生可審查的RTK過濾器草稿                                             |
 
-CCR 項目僅儲存於記憶體中，並會在重新啟動時消失。每個區塊上限為 2 MiB，每個
-主體上限為 16 MiB，全域儲存區上限為 64 MiB。項目的預設 TTL 為 24 小時（最長
-七天）。完整 MCP 擷取限制為 256 KiB；較大的區塊仍可透過
-範圍與 grep 模式取得。儲存、擷取、列出、檢查、刪除及統計資料均依
-已驗證的 API 金鑰主體進行隔離。稽核記錄僅包含雜湊與大小中繼資料，絕不包含內容。
+CCR條目僅存在於記憶體中，並在重新啟動時消失。每個區塊限制為 2 個MiB，每個主體限制為 16 個MiB，全域儲存限制為 64 個MiB。條目預設為 24 小時TTL （最多 7 天）。完整MCP檢索僅限於 256 KiB；較大的區塊仍可透過 ranged 和 grep 模式使用。儲存、檢索、列出、檢查、刪除和統計由經過驗證的 API 金鑰主體隔離。審計記錄包含哈希值和大小元數據，而不是內容。
 
-`omniroute_compression_status` 會在
-`analytics.mcpDescriptionCompression` 下單獨回報 MCP 描述壓縮。這些值是 MCP 可列舉描述
-（`tools`、`prompts`、`resources` 與 `resourceTemplates`）的中繼資料大小估計值；它們不是提供者用量
-收據，並標記為 `source: "mcp_metadata_estimate"`。
+`omniroute_compression_status`在`analytics.mcpDescriptionCompression`下單獨報告MCP描述壓縮。這些值是MCP可列出描述的元資料大小估計（`tools`、 `prompts`、 `resources`和`resourceTemplates`）；它們不是提供者使用收據並標示`source: "mcp_metadata_estimate"`。
 
-### MCP 無障礙樹狀結構篩選器 (v3.8.0)
+### MCP可訪問性樹過濾器 (v3.8.0)
 
-除了上述壓縮工具之外，OmniRoute 還包含一個執行後篩選器，會在 MCP 瀏覽器／無障礙工具的
-**工具結果**傳回給代理程式之前加以壓縮。此篩選器本身並非工具，而是會透明地處理任何包含
-冗長無障礙樹狀結構或瀏覽器快照文字（≥2000 個字元）的工具結果。
+與上面的壓縮工具不同， OmniRoute包含一個執行後過濾器，用於壓縮**工具結果**MCP browser/accessibility工具在傳回給代理之前。此過濾器本身並不是一個工具—它可以在任何包含詳細可訪問性樹或瀏覽器快照文字（≥ 2000 個字元）的工具結果上透明地運行。
 
-主要行為：
+關鍵行為：
 
-- 將 ≥30 個連續重複的同層級項目行摺疊為開頭 + 結尾摘要
-- 保留 Playwright／電腦操作所需的 `[ref=eXX]` 錨點
-- 對過大的文字（>50,000 個字元）進行強制截斷，並附上導覽提示
-- 預期節省量：瀏覽器快照承載內容可減少 **60–80%**
+- 將≥ 30 個連續重複的兄弟行折疊成 head + tail 摘要
+- 保留Playwright/computer-use所需的`[ref=eXX]`錨點
+- 硬截斷超大文字（> 50,000 個字元）並帶有導航提示
+- 預期節省：** 60–80%**在瀏覽器快照負載上
 
-設定：全域設定中的 `compression.mcpAccessibility`（遷移 056）。
-實作：`open-sse/services/compression/engines/mcpAccessibility/`。
-完整文件：[壓縮引擎 — MCP 無障礙樹狀結構篩選器](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter)。
+配置：全域設定中的`compression.mcpAccessibility` （遷移056）。實作： `open-sse/services/compression/engines/mcpAccessibility/`。完整文件：[壓縮引擎— MCP輔助功能樹過濾器](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter)。
 
-請參閱[壓縮引擎](../compression/COMPRESSION_ENGINES.md)與 [RTK 壓縮](../compression/RTK_COMPRESSION.md)，以瞭解
-這些工具背後的執行階段壓縮模型。
+有關這些工具背後的運行時壓縮模型，請參閱[壓縮引擎](../compression/COMPRESSION_ENGINES.md)和[RTK壓縮](../compression/RTK_COMPRESSION.md)。
 
-## 1Proxy 工具（3）
+## 1代理工具 (3)
 
-| 工具                        | 權限範圍       | 說明                                                                       |
-| :-------------------------- | :------------- | :------------------------------------------------------------------------- |
-| `omniroute_oneproxy_fetch`  | `read:proxies` | 從 1proxy 市集取得免費代理伺服器（可依通訊協定／國家／品質／數量限制篩選） |
-| `omniroute_oneproxy_rotate` | `read:proxies` | 依策略（`random` / `quality` / `sequential`）取得下一個可用的代理伺服器    |
-| `omniroute_oneproxy_stats`  | `read:proxies` | 代理池統計資料、同步狀態，以及依通訊協定與國家分類的分布情況               |
+| 工具                        | 範圍           | 描述                                                               |
+| :-------------------------- | :------------- | :----------------------------------------------------------------- |
+| `omniroute_oneproxy_fetch`  | `read:proxies` | 從 1proxy 市場取得免費代理（protocol/country/quality/limit過濾器） |
+| `omniroute_oneproxy_rotate` | `read:proxies` | 按策略取得下一個可用代理程式 (`random` / `quality` / `sequential`) |
+| `omniroute_oneproxy_stats`  | `read:proxies` | 礦池統計資料、同步狀態、依協定和國家分佈                           |
 
-## 記憶工具（3）
+## 記憶工具 (3)
 
-定義於 `open-sse/mcp-server/tools/memoryTools.ts`。驗證／權限範圍會透過標準 MCP 權限範圍管線強制執行。
+在`open-sse/mcp-server/tools/memoryTools.ts`中定義。 Auth/scope透過標準MCP範圍管道強制執行。
 
-| 工具                      | 權限範圍       | 說明                                                               |
-| :------------------------ | :------------- | :----------------------------------------------------------------- |
-| `omniroute_memory_search` | `read:memory`  | 依查詢／類型／API 金鑰搜尋記憶，並強制執行權杖預算限制             |
-| `omniroute_memory_add`    | `write:memory` | 新增記憶項目（`factual` / `episodic` / `procedural` / `semantic`） |
-| `omniroute_memory_clear`  | `write:memory` | 清除某個 API 金鑰的記憶，可選擇依類型或 `olderThan` 時間戳記篩選   |
+| 工具                      | 範圍           | 描述                                                                     |
+| :------------------------ | :------------- | :----------------------------------------------------------------------- |
+| `omniroute_memory_search` | `read:memory`  | 透過查詢/類型/ API密鑰搜尋記憶體，並執行代幣預算                         |
+| `omniroute_memory_add`    | `write:memory` | 新增新的記憶體條目（`factual` / `episodic` / `procedural` / `semantic`） |
+| `omniroute_memory_clear`  | `write:memory` | 清除API金鑰的記憶體，可選擇按類型或`olderThan`時間戳進行過濾             |
 
-## 技能工具（4）
+## 技能工具 (4)
 
-定義於 `open-sse/mcp-server/tools/skillTools.ts`。由 `src/lib/skills/registry` + `src/lib/skills/executor` 提供支援。
+在`open-sse/mcp-server/tools/skillTools.ts`中定義。由`src/lib/skills/registry` + `src/lib/skills/executor`支援。
 
-| 工具                          | 權限範圍         | 說明                                                    |
-| :---------------------------- | :--------------- | :------------------------------------------------------ |
-| `omniroute_skills_list`       | `read:skills`    | 列出已註冊的技能，可選擇依 API 金鑰、名稱或啟用狀態篩選 |
-| `omniroute_skills_enable`     | `write:skills`   | 依 ID 啟用或停用特定技能                                |
-| `omniroute_skills_execute`    | `execute:skills` | 使用提供的輸入執行技能，並傳回執行記錄                  |
-| `omniroute_skills_executions` | `read:skills`    | 列出近期的技能執行歷程                                  |
+| 工具                          | 範圍             | 描述                                                        |
+| :---------------------------- | :--------------- | :---------------------------------------------------------- |
+| `omniroute_skills_list`       | `read:skills`    | 列出已註冊的技能，並可按API金鑰、名稱或啟用狀態進行可選過濾 |
+| `omniroute_skills_enable`     | `write:skills`   | 透過ID啟動或停用特定技能                                    |
+| `omniroute_skills_execute`    | `execute:skills` | 根據提供的輸入執行技能並傳回執行記錄                        |
+| `omniroute_skills_executions` | `read:skills`    | 列出最近的技能執行歷史                                      |
 
-## Notion 上下文來源（6）
+## Notion上下文原始碼（6）
 
-定義於 `open-sse/mcp-server/tools/notionTools.ts`。權杖透過 `src/lib/db/notion.ts` 儲存於 `key_value` 資料表中。REST 用戶端位於 `src/lib/notion/api.ts`。設定 API 位於 `src/app/api/settings/notion/route.ts`。儀表板 UI 位於 `src/app/(dashboard)/dashboard/endpoint/components/NotionSourceCard.tsx`。
+在`open-sse/mcp-server/tools/notionTools.ts`中定義。令牌透過`src/lib/db/notion.ts`儲存在`key_value`表中。 `src/lib/notion/api.ts`中的REST客戶端。在`src/app/api/settings/notion/route.ts`中設定API 。 `src/app/(dashboard)/dashboard/endpoint/components/NotionSourceCard.tsx`中的儀表板UI 。
 
-請從端點儀表板的 **上下文來源** 分頁設定您的 Notion 整合權杖，或透過 REST API 進行設定：
+從以下位置配置您的Notion整合令牌**上下文來源**Endpoint 儀表板中的選項卡，或透過REST API：
 
 ```bash
-# 設定權杖
+# Set token
 curl -X POST http://localhost:20128/api/settings/notion \
   -H "Content-Type: application/json" \
   -d '{"token": "ntn_..."}'
 
-# 檢查狀態
+# Check status
 curl http://localhost:20128/api/settings/notion
 
-# 中斷連線
+# Disconnect
 curl -X DELETE http://localhost:20128/api/settings/notion
 ```
 
-| 工具                         | 權限範圍       | 說明                                        |
+| 工具                         | 範圍           | 描述                                        |
 | :--------------------------- | :------------- | :------------------------------------------ |
-| `notion_search`              | `read:notion`  | 在所有頁面與資料庫中進行全文搜尋            |
-| `notion_get_page`            | `read:notion`  | 依 ID 取得頁面及其屬性                      |
+| `notion_search`              | `read:notion`  | 跨所有頁面和資料庫的全文搜索                |
+| `notion_get_page`            | `read:notion`  | 取得ID的頁面及其屬性                        |
 | `notion_list_block_children` | `read:notion`  | 列出頁面或區塊的子區塊                      |
-| `notion_query_database`      | `read:notion`  | 使用篩選條件、排序與分頁查詢資料庫          |
-| `notion_get_database`        | `read:notion`  | 依 ID 取得資料庫結構描述                    |
-| `notion_append_blocks`       | `write:notion` | 將子區塊附加至父區塊（每個請求最多 100 個） |
+| `notion_query_database`      | `read:notion`  | 使用篩選器、排序和分頁查詢資料庫            |
+| `notion_get_database`        | `read:notion`  | 透過ID獲取資料庫schema                      |
+| `notion_append_blocks`       | `write:notion` | 將子區塊附加到父區塊（每個請求最多 100 個） |
 
-## 代理技能目錄工具（3）
+## 特工技能目錄工具 (3)
 
-定義於 `open-sse/mcp-server/tools/agentSkillTools.ts`。由 `src/lib/agentSkills/catalog` 提供支援。這些工具將包含 45 個項目的代理技能文件目錄公開給 MCP 用戶端與外部代理。範圍：`read:catalog`。
+在`open-sse/mcp-server/tools/agentSkillTools.ts`中定義。由`src/lib/agentSkills/catalog`支援。這些工具向MCP客戶端和外部代理程式公開包含 45 個條目的代理技能文件目錄。範圍： `read:catalog`.
 
-| 工具                              | 範圍           | 說明                                                                                                      |
-| :-------------------------------- | :------------- | :-------------------------------------------------------------------------------------------------------- |
-| `omniroute_agent_skills_list`     | `read:catalog` | 列出全部 45 項代理技能，可選用 `category`（api\|cli）與 `area` 篩選條件；回傳中繼資料與涵蓋情況           |
-| `omniroute_agent_skills_get`      | `read:catalog` | 依標準 `id` 取得單一技能的完整中繼資料與 SKILL.md 內容                                                    |
-| `omniroute_agent_skills_coverage` | `read:catalog` | 涵蓋率統計：檔案系統中具有 SKILL.md 檔案的 23 項 API、21 項 CLI 與 1 項設定技能數量，相較於目錄總數的情況 |
+| 工具                              | 範圍           | 描述                                                                                          |
+| :-------------------------------- | :------------- | :-------------------------------------------------------------------------------------------- |
+| `omniroute_agent_skills_list`     | `read:catalog` | 使用可選的`category` (api\| cli) 和`area`過濾器列出所有 45 個代理技能；返回元資料+覆蓋範圍    |
+| `omniroute_agent_skills_get`      | `read:catalog` | 透過規範`id`獲取單一技能的完整元資料+ SKILL.md內容                                            |
+| `omniroute_agent_skills_coverage` | `read:catalog` | 覆蓋率統計數據：23 個API、21 個CLI和 1 個設定技能中有多少在檔案系統上有SKILL.md檔案與目錄總數 |
 
-如需完整目錄以及外部代理使用方式，請參閱 [AGENT-SKILLS.md](./AGENT-SKILLS.md)。
+請參閱[AGENT-SKILLS.md](./AGENT-SKILLS.md)以了解完整目錄以及外部代理程式如何使用它。
 
 ## 相關框架（v3.8.0）
 
-上述 MCP 工具清單（110 個不重複工具，由 `countUniqueMcpTools()` 計算）刻意
-限定於執行階段路由、快取、壓縮、記憶體、技能、代理及內容來源操作。v3.8.0 隨 MCP 伺服器
-一併提供另外兩個相鄰框架，並分別記載於獨立文件中：
+上面的MCP工具清單（110 個獨特的工具，由`countUniqueMcpTools()`計算）有意限定為運行時routing/cache/compression/memory/skills/proxy/context-source操作。在 v3.8.0 中，兩個相鄰的框架與MCP伺服器一起提供，並單獨記錄：
 
 ### 雲端代理
 
-雲端代理是程序外的 AI 程式設計代理（codex-cloud、cursor-cloud、devin、jules），透過與
-LLM 提供者相同的連線模型接入 OmniRoute。它們透過自身的 REST 介面
-（`/api/v1/agents/*`）公開，且**不**屬於 MCP 工具目錄的一部分
-——呼叫雲端代理不會耗用 MCP 範圍。
+雲端代理是進程外的AI編碼代理程式（codex-cloud、cursor-cloud、devin、jules），透過與LLM提供者使用的相同連接模型連接到OmniRoute 。它們透過自己的REST表面 (`/api/v1/agents/*`) 暴露出來，並且**不是**MCP工具目錄的一部分—呼叫雲端代理不消耗MCP作用域。
 
-- 實作：`src/lib/cloudAgent/`（`registry.ts`、`agents/codex.ts`、`agents/cursor.ts`、`agents/devin.ts`、`agents/jules.ts`）。
-- 生命週期：`createTask`、`getStatus`、`approvePlan`、`sendMessage`、`listSources`。
-- 文件：[docs/frameworks/CLOUD_AGENT.md](./CLOUD_AGENT.md)。
+- 實作： `src/lib/cloudAgent/` （`registry.ts`、 `agents/codex.ts`、 `agents/cursor.ts`、 `agents/devin.ts`、 `agents/jules.ts`）。
+- 生命週期： `createTask`、 `getStatus`、 `approvePlan`、 `sendMessage`、 `listSources`。
+- 文件： [docs/frameworks/CLOUD_AGENT.md](./CLOUD_AGENT.md).
 
-### 防護機制
+### 護欄
 
-防護機制是在聊天管線內套用的執行前／執行後篩選器（vision-bridge、pii-masker、prompt-injection）。
-它們會在請求抵達 MCP 工具／路由層之前執行，並將結構化違規資訊傳送至稽核管線；它們不會作為 MCP 工具被呼叫。
+Guardrail 是應用於聊天管道內的pre/post-execution過濾器（vision-bridge、pii-masker、prompt-injection）。它們在到達MCP tool/route層之前運行，並向審計管道發出結構化違規；它們不會作為MCP工具被呼叫。
 
-- 實作：`src/lib/guardrails/`。
-- 文件：[docs/security/GUARDRAILS.md](../security/GUARDRAILS.md)。
+- 實施： `src/lib/guardrails/`。
+- 文件： [docs/security/GUARDRAILS.md](../security/GUARDRAILS.md).
 
-偵錯看似遭封鎖的 MCP 呼叫時，請同時檢查 MCP 稽核記錄
-（`scope_denied:*` 項目）與防護機制稽核軌跡——請求可能在抵達 MCP 範圍強制執行層**之前**
-就被防護機制拒絕。
+當偵錯似乎被阻止的MCP呼叫時，請檢查MCP審核日誌（`scope_denied:*`條目）和 Guardrails 審核追蹤—請求可能被 Guardrail 拒絕**前**它曾經到達MCP範圍執行層。
 
 ---
 
-## REST API 端點
+## REST API端點
 
-| 端點                   | 方法                  | 說明                                                                                               | 驗證                     |
-| :--------------------- | :-------------------- | :------------------------------------------------------------------------------------------------- | :----------------------- |
-| `/api/mcp/status`      | `GET`                 | 伺服器狀態：活動訊號、HTTP 傳輸狀態、稽核活動摘要                                                  | 管理（工作階段／管理員） |
-| `/api/mcp/tools`       | `GET`                 | 工具目錄（名稱、說明、範圍、階段、來源端點）                                                       | 管理                     |
-| `/api/mcp/sse`         | `GET` / `POST`        | SSE 傳輸端點（受 `mcpEnabled` + `mcpTransport === "sse"` 限制）                                    | API 金鑰 + 範圍          |
-| `/api/mcp/stream`      | `POST`/`GET`/`DELETE` | 可串流 HTTP 傳輸（使用 `mcp-session-id` 標頭；`DELETE` 會結束工作階段）                            | API 金鑰 + 範圍          |
-| `/api/mcp/audit`       | `GET`                 | 來自 `mcp_tool_audit` 的稽核記錄項目（篩選條件：`limit`、`offset`、`tool`、`success`、`apiKeyId`） | 管理                     |
-| `/api/mcp/audit/stats` | `GET`                 | 彙總稽核統計資料（`totalCalls`、`successRate`、`avgDurationMs`、熱門工具）                         | 管理                     |
+| 端點                   | 方法                  | 描述                                                                                              | 授權                  |
+| :--------------------- | :-------------------- | :------------------------------------------------------------------------------------------------ | :-------------------- |
+| `/api/mcp/status`      | `GET`                 | 伺服器狀態：心跳、 HTTP傳輸狀態、審核活動摘要                                                     | 管理（session/admin） |
+| `/api/mcp/tools`       | `GET`                 | 工具目錄（名稱、描述、範圍、階段、來源端點）                                                      | 管理                  |
+| `/api/mcp/sse`         | `GET` / `POST`        | SSE傳輸端點（由`mcpEnabled` + `mcpTransport === "sse"`閘控）                                      | API密鑰+範圍          |
+| `/api/mcp/stream`      | `POST`/`GET`/`DELETE` | 可串流HTTP傳輸（使用`mcp-session-id`標頭； `DELETE`結束會話）                                     | API密鑰+範圍          |
+| `/api/mcp/audit`       | `GET`                 | 來自`mcp_tool_audit`審核日誌條目（過濾器： `limit`、 `offset`、 `tool`、 `success`、 `apiKeyId`） | 管理                  |
+| `/api/mcp/audit/stats` | `GET`                 | 聚合審計統計資料（`totalCalls`、 `successRate`、 `avgDurationMs`、頂級工具）                      | 管理                  |
 
-原始檔案：`src/app/api/mcp/{status,tools,sse,stream,audit,audit/stats}/route.ts`。
+原始檔： `src/app/api/mcp/{status,tools,sse,stream,audit,audit/stats}/route.ts`.
 
-在「設定」中啟用 MCP 伺服器（`mcpEnabled`）並選取適當的 `mcpTransport` 之前，SSE 與可串流 HTTP 傳輸都會遭到封鎖。若設定了錯誤的傳輸方式，路由會回傳 HTTP 400，並提示切換設定。
+SSE和 Streamable HTTP傳輸都會被阻止，直到在「設定」(`mcpEnabled`) 中啟用MCP伺服器並選擇適當的`mcpTransport` 。如果配置了錯誤的傳輸，則路由將返回HTTP 400 並提示切換設定。
 
 ---
 
-## 驗證與範圍
+## 身份驗證和範圍
 
-MCP 工具呼叫會從呼叫端讀取範圍字串。該檢查是三個彼此獨立的命名空間之一。通過其中一個檢查器，不代表也通過其他檢查器。規則請參閱[三種範圍命名空間](#three-scope-namespaces)。
-工具目錄請參閱 [MCP 工具範圍](#mcp-tool-scopes)。
+MCP工具呼叫從呼叫者讀取範圍字串。此檢查是三個獨立命名空間之一。一名檢查員的傳球不等於其他檢查員的傳球。規則是[三個範圍名稱空間](#three-scope-namespaces)。工具目錄是[MCP工具範圍](#mcp-tool-scopes)。
 
-### 三種範圍命名空間
+### 三個作用域命名空間
 
-API 金鑰上的 `manage`、MCP 工具上的 `read:compression`，以及
-`oma_live_…` 存取權杖上的 `read`，是三種不同的授權。呼叫端若將 `read`
-存取權杖傳送至會進行變更的管理路由，將收到 HTTP 403：
-`Access token scope 'read' is insufficient; 'write' required.`
-該層級由 `scopeSatisfies` 判定。它不會查閱 MCP 表格，而 MCP
-比對器也不會查閱它。
+API金鑰上的`manage` 、 MCP工具上的`read:compression`和`oma_live_…`存取權杖上的`read`是三種不同的授權。將`read`存取令牌傳送到變異管理路由的呼叫者將獲得HTTP 403 `Access token scope 'read' is insufficient; 'write' required.`該等級為`scopeSatisfies`。它不查閱MCP表，並且MCP匹配器也不查閱它。
 
-| 命名空間         | 憑證                                                          | 檢查器             | 通過後允許的操作                     |
-| :--------------- | :------------------------------------------------------------ | :----------------- | :----------------------------------- |
-| API 金鑰管理     | `api_keys.scopes`                                             | `hasManageScope`   | 使用該 Bearer 金鑰存取管理 REST      |
-| API 金鑰附加範圍 | 相同陣列中的一個完全相符字串                                  | 下方指定的輔助函式 | 僅限該項能力                         |
-| MCP 工具範圍     | 相同陣列，否則為 MCP `_meta`，再否則為 `OMNIROUTE_MCP_SCOPES` | `scopeMatches`     | 啟用強制執行後，可使用該工具         |
-| 存取權杖         | `oma_live_…`                                                  | `scopeSatisfies`   | 使用需要該層級之方法與路徑的管理路由 |
+| 命名空間      | 憑證                                                                      | 檢查者           | 通行證允許                       |
+| :------------ | :------------------------------------------------------------------------ | :--------------- | :------------------------------- |
+| API 金鑰管理  | `api_keys.scopes`                                                         | `hasManageScope` | 此承載密鑰的管理REST             |
+| API金鑰添加劑 | 相同的數組，一個完全相同的字串                                            | 下面命名的幫助者 | 只有這項能力                     |
+| MCP工具範圍   | 相同的數組，否則MCP `_meta` （僅限HTTP/SSE ），否則`OMNIROUTE_MCP_SCOPES` | `scopeMatches`   | 一旦執行該工具                   |
+| 訪問令牌      | `oma_live_…`                                                              | `scopeSatisfies` | 其方法和路徑需要該等級的管理路由 |
 
-各種憑證的簽發方式請參閱
-[管理驗證](../guides/MANAGEMENT-AUTH.md)。
+[管理身分驗證](../guides/MANAGEMENT-AUTH.md)中介紹了建立每個憑證的過程。
 
 #### API 金鑰範圍
 
-同一個 `api_keys.scopes` 陣列負責兩項工作。兩者使用不同的函式。
+一個`api_keys.scopes`陣列可滿足兩項作業。他們使用不同的功能。
 
-**管理 REST。** `manage` 與 `admin` 是
-`MANAGEMENT_API_KEY_SCOPES`（`src/shared/constants/managementScopes.ts`）的成員。
-`hasManageScope` 負責授權該金鑰存取管理路由。在這些路由上，`admin`
-具備管理能力。此處的 `admin` 並不是存取權杖的層級，也不會展開成
-MCP 工具範圍。
+**管理REST.** `manage`和`admin`是`MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) 的成員。 `hasManageScope`是為該金鑰授權管理路由的內容。 `admin`能夠對這些路由進行管理。這裡的`admin`一詞不是存取令牌等級，它不會擴展到MCP工具範圍。
 
-**附加字串。** 每個字串都使用完全相符的成員資格測試，而且都位於
-`MANAGEMENT_API_KEY_SCOPES` 之外。
+**附加字串。**每一項都是精確的會員資格測試，每一項都位於`MANAGEMENT_API_KEY_SCOPES`之外。
 
-| 範圍                           | 通過後允許的操作                                                                                                                                              |
-| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `mcp:connect`                  | 僅限非回送位址的 `/api/mcp/` LOCAL_ONLY 例外（`hasMcpConnectOrManageScope`）。具有 `manage` 或 `admin` 的金鑰仍可通過此例外。                                 |
-| `self:usage`                   | 取得此金鑰的 `GET /api/v1/me/status`（`src/app/api/v1/me/status/route.ts`）。`POST /api/keys` 會在建立時加入此範圍（`normalizeSelfServiceScopesForCreate`）。 |
-| `self:account-quota`           | 該狀態承載資料中的上游帳戶配額（`src/lib/usage/apiKeySelfService.ts`）。該狀態路由仍需要 `self:usage`。                                                       |
-| `policy:bypass-provider-quota` | 此金鑰的推論呼叫會略過提供者配額原則（`src/sse/handlers/chat.ts` 中的 `hasProviderQuotaBypassScope`）。                                                       |
+| 範圍                           | 通行證允許                                                                                                                                            |
+| :----------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | 僅非環回`/api/mcp/` LOCAL_ONLY剝離 (`hasMcpConnectOrManageScope`)。具有`manage`或`admin`密鑰仍然可以通過該排除。                                      |
+| `self:usage`                   | 此密鑰的`GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`)。 `POST /api/keys`在建立（`normalizeSelfServiceScopesForCreate`）時新增此範圍。 |
+| `self:account-quota`           | 此狀態負載 (`src/lib/usage/apiKeySelfService.ts`) 內的上游帳戶配額。狀態路由仍然需要`self:usage`。                                                    |
+| `policy:bypass-provider-quota` | 此金鑰的推理呼叫會跳過提供者配額策略（ `src/sse/handlers/chat.ts`中的`hasProviderQuotaBypassScope` ）。                                               |
 
-#### 比對
+#### 匹配
 
-目錄是 [MCP 工具範圍](#mcp-tool-scopes)下方的表格。請勿將
-`src/shared/constants/mcpScopes.ts` 中的 `MCP_SCOPE_LIST` 視為該目錄：
-它是原始的類型化子集。後續工具在其旁宣告了其他範圍
-（`read:notion`、`read:skills`、`read:local-corpus`，以及表格中的其餘範圍）。
+目錄是[MCP工具範圍](#mcp-tool-scopes)下的表格。不要將`src/shared/constants/mcpScopes.ts`中的`MCP_SCOPE_LIST`視為該目錄：它是原始類型化子集。後來的工具在它旁邊聲明了更多範圍（`read:notion`、 `read:skills`、 `read:local-corpus`和表的其餘部分）。
 
-`open-sse/mcp-server/scopeEnforcement.ts` 中的 `evaluateToolScopes`
-會在每個必要範圍都與某個已授予範圍相符時允許呼叫：
+`open-sse/mcp-server/scopeEnforcement.ts`中的`evaluateToolScopes`允許在每個所需範圍與某個授予範圍相符時進行呼叫：
 
-- `*` 會比對所有必要範圍。
-- 以 `*` 結尾的已授予範圍，會比對開頭符合星號前綴的必要範圍。
-  `read:*` 會比對 `read:compression`。
-- 其他所有已授予範圍只會比對完全相同的必要字串。
+- `*`符合每個所需的範圍。
+- 以`*`結尾的授予範圍與以星號之前的前綴開頭的必要範圍相符。 `read:*`匹配`read:compression`。
+- 每個其他授予的範圍僅匹配相同的必需字串。
 
-範圍為 `["manage"]` 的金鑰無法通過 `read:compression` 的
-`scopeMatches`。如果唯一授予的字串分別是 `admin`、`mcp:connect`、`read`
-或 `write`，相同的呼叫也會失敗。除了結尾的 `*` 之外，MCP 工具範圍之間
-不存在任何階層關係。
+對於`read:compression`，範圍為`["manage"]`的鍵無法使用`scopeMatches` 。當`admin`、 `mcp:connect`、 `read`和`write`是唯一被授予的字串時，相同的呼叫會失敗。除了尾隨`*`之外， MCP工具範圍之間沒有層次結構。
 
-除非 `OMNIROUTE_MCP_ENFORCE_SCOPES=true`，否則不會啟用強制執行（預設值為
-`false`）。停用時，`evaluateToolScopes` 會允許呼叫並略過目錄。啟用時，
-HTTP 會使用 Bearer 金鑰的 `api_keys.scopes` 作為 `authInfo`
-（請參閱[每個金鑰的 HTTP 範圍繫結](#per-key-http-scope-binding-7895)）。
-如果無法解析出任何金鑰範圍，已授予集合會依序改用 MCP `_meta`，再改用
-`OMNIROUTE_MCP_SCOPES`。
+除非`OMNIROUTE_MCP_ENFORCE_SCOPES=true` （預設`false`），否則強制執行。當它關閉時， `evaluateToolScopes`允許呼叫並跳過目錄。當它打開時， HTTP使用承載密鑰的`api_keys.scopes`作為`authInfo` （請參閱[每個密鑰HTTP範圍綁定](#per-key-http-scope-binding-7895)）。當沒有關鍵範圍解析時，授予的集合會落入MCP `_meta` （僅適用於HTTP身份驗證上下文中的HTTP/SSE呼叫者；stdio 呼叫者的`_meta`會被忽略，因為客戶端控制它並且它不攜帶每個呼叫者身份），然後是`OMNIROUTE_MCP_SCOPES`。
 
-#### 存取權杖範圍
+#### 訪問令牌範圍
 
-`oma_live_…` 權杖（`src/lib/accessTokens/scopes.ts`）帶有 `read`、`write`
-或 `admin`。`scopeSatisfies` 採用層級判定：`admin` 涵蓋 `write` 與 `read`，
-而 `write` 涵蓋 `read`。未知範圍不涵蓋任何權限。
+`oma_live_…`幣 (`src/lib/accessTokens/scopes.ts`) 帶有`read`、 `write`或`admin`。 `scopeSatisfies`是一個等級： `admin`涵蓋`write`和`read`，而`write`涵蓋`read`。未知的範圍什麼也覆蓋不了。
 
-`evaluateAccessTokenAuth`（`src/server/authz/accessTokenAuth.ts`）會將該層級
-與 `inferRequiredScope`（`src/server/authz/accessScopes.ts`）進行比較：
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) 將此排名與`inferRequiredScope` (`src/server/authz/accessScopes.ts`) 進行比較：
 
-- `GET`、`HEAD` 與 `OPTIONS` 需要 `read`。
-- 其他所有方法都需要 `write`。
-- `ADMIN_SCOPE_PREFIXES` 中的路徑，其所有方法都需要 `admin`。`/api/mcp`
-  位於該清單中，因此具有 `write` 的存取權杖仍無法呼叫 MCP HTTP
-  介面。
-- `ADMIN_MUTATION_PREFIXES` 中的路徑，只有變更操作需要 `admin`。
-- `ADMIN_MUTATION_EXACT_PATHS` 中的路徑（`/api/settings`、
-  `/api/settings/require-login`）只有變更操作才需要 `admin`，且僅適用於
-  該完全相符的路徑——其他 `/api/settings/*` 子路由仍維持使用 `write`。
+- `GET`、 `HEAD`和`OPTIONS`需要`read`。
+- 所有其他方法都需要`write`。
+- `ADMIN_SCOPE_PREFIXES`中的路徑對於每個方法都需要`admin` 。 `/api/mcp`位於該清單中，因此`write`存取權杖仍然無法呼叫MCP HTTP表面。
+- `ADMIN_MUTATION_PREFIXES`中的路徑只需要`admin`來進行突變。
+- `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`) 中的路徑僅需要`admin`進行突變，並且僅在該確切路徑—上，其他`/api/settings/*`路由保留`write`。
 
-`PATCH /api/keys/{id}` 是一項變更操作，且不在那些管理員清單中，因此
-`read` 權杖會收到 403：
-`Access token scope 'read' is insufficient; 'write' required.`
-`write` 或 `admin` 存取權杖可滿足該路由的要求。儀表板 JWT、回送 CLI machine-id 權杖，以及具有 `manage` 或 `admin` 的 API 金鑰會採用其他分支，不受此等級限制。
+`PATCH /api/keys/{id}`是一個突變，不在這些管理清單中，因此`read`令牌會收到 403 `Access token scope 'read' is insufficient; 'write' required.` `write`或`admin`存取權杖滿足該路由。儀表板JWT、環回CLI機器 ID 令牌以及具有`manage`或`admin` API密鑰採用其他分支，並且不會受到此等級的限制。
 
-針對 `/api/mcp` 通過 `scopeSatisfies` 的存取權杖只代表已通過管理閘門。工具呼叫仍會針對 API 金鑰範圍執行 `scopeMatches`。存取權杖的等級不會作為 `scopeMatches` 的輸入。
+為`/api/mcp`傳遞`scopeSatisfies`存取權杖僅清除了管理閘。工具呼叫仍然針對 API 金鑰範圍執行`scopeMatches` 。訪問令牌排名不是`scopeMatches`的輸入。
 
-### MCP 工具範圍
+### MCP工具範圍
 
-範圍強制執行集中在 `open-sse/mcp-server/scopeEnforcement.ts` 中。
-每項工具都需要特定的範圍：
+範圍執行集中在`open-sse/mcp-server/scopeEnforcement.ts`。每個工具都需要特定的範圍：
 
-| 範圍                  | 工具                                                                                                                                                                         |
-| :-------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                            |
-| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                    |
-| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                       |
-| `read:quota`          | `check_quota`                                                                                                                                                                |
-| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                       |
-| `read:models`         | `list_models_catalog`                                                                                                                                                        |
-| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                |
-| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                        |
-| `write:budget`        | `set_budget_guard`                                                                                                                                                           |
-| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                  |
-| `pricing:write`       | `sync_pricing`                                                                                                                                                               |
-| `read:cache`          | `cache_stats`                                                                                                                                                                |
-| `write:cache`         | `cache_flush`                                                                                                                                                                |
-| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                   |
-| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                            |
-| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                        |
-| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                             |
-| `write:notion`        | `notion_append_blocks`                                                                                                                                                       |
-| `read:memory`         | `memory_search`                                                                                                                                                              |
-| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                 |
-| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                           |
-| `write:skills`        | `skills_enable`                                                                                                                                                              |
-| `execute:skills`      | `skills_execute`                                                                                                                                                             |
-| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                             |
-| `read:tools`          | `omniroute_tool_search`                                                                                                                                                      |
-| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                    |
-| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                             |
-| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                               |
-| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                           |
-| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                              |
-| `read:obsidian`       | 13 個讀取工具 — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
-| `write:obsidian`      | 9 個寫入工具 — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                |
-| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                            |
+| 範圍                  | 工具                                                                                                                                                                       |
+| :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                          |
+| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                  |
+| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                     |
+| `read:quota`          | `check_quota`                                                                                                                                                              |
+| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                     |
+| `read:models`         | `list_models_catalog`                                                                                                                                                      |
+| `execute:completions` | `route_request`, `test_combo`                                                                                                                                              |
+| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                      |
+| `write:budget`        | `set_budget_guard`                                                                                                                                                         |
+| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                |
+| `pricing:write`       | `sync_pricing`                                                                                                                                                             |
+| `read:cache`          | `cache_stats`                                                                                                                                                              |
+| `write:cache`         | `cache_flush`                                                                                                                                                              |
+| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                 |
+| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                          |
+| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                      |
+| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                           |
+| `write:notion`        | `notion_append_blocks`                                                                                                                                                     |
+| `read:memory`         | `memory_search`                                                                                                                                                            |
+| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                               |
+| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                         |
+| `write:skills`        | `skills_enable`                                                                                                                                                            |
+| `execute:skills`      | `skills_execute`                                                                                                                                                           |
+| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                           |
+| `read:tools`          | `omniroute_tool_search`                                                                                                                                                    |
+| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                  |
+| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                           |
+| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                             |
+| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                         |
+| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                            |
+| `read:obsidian`       | 13個閱讀工具— `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
+| `write:obsidian`      | 9個寫入工具— `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                |
+| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                          |
 
-支援萬用字元作用域：`read:*` 授予所有讀取作用域，`*` 授予完整存取權。
+支援通配符範圍： `read:*`授予所有讀取範圍， `*`授予完全存取權限。
 
-### `mcp:connect` — 窄範圍路由能力 (#7895)
+### `mcp:connect` —窄路能力 (#7895)
 
-若要從非迴路位址存取 HTTP/SSE MCP 傳輸層（`/api/mcp/*`），需要使用
-`/api/mcp/` 的 LOCAL_ONLY 例外（請參閱 `docs/security/ROUTE_GUARD_TIERS.md`）。過去，
-該例外僅接受具有完整 `manage`/`admin` 作用域的 API 金鑰——對於只需與 MCP
-通訊的呼叫者而言，權限過於寬泛。`src/shared/constants/managementScopes.ts` 現在
-會匯出 `MCP_CONNECT_SCOPE = "mcp:connect"`：這是一個附加的窄範圍作用域（與
-`SELF_USAGE_SCOPE` 採用相同先例），僅授權略過
-`src/server/authz/policies/management.ts` 中的 `/api/mcp/` 限制——它不授予任何其他管理路由的存取權，
-並刻意排除在 `MANAGEMENT_API_KEY_SCOPES` 之外。持有 `manage`/`admin`
-的金鑰仍可照常通過該例外；`mcp:connect` 則是供僅需遠端 MCP 存取的呼叫者使用之
-較低權限替代方案，透過 `hasMcpConnectOrManageScope()` 檢查。
+從非環回到達HTTP/SSE MCP傳輸 (`/api/mcp/*`) 需要`/api/mcp/` LOCAL_ONLY剝離（請參閱`docs/security/ROUTE_GUARD_TIERS.md`）。從歷史上看，剝離只接受完整的`manage`/`admin` -scope API密鑰—對於只需要談論MCP呼叫者來說太廣泛了。 `src/shared/constants/managementScopes.ts`現在導出`MCP_CONNECT_SCOPE = "mcp:connect"`：一個附加的窄範圍（與`SELF_USAGE_SCOPE`相同的先例），授權ONLY `src/server/authz/policies/management.ts` —中的`/api/mcp/`旁路，它不授予其他管理路由存取權限，並故意保留OUT或`MANAGEMENT_API_KEY_SCOPES`。持有`manage`/`admin`金鑰仍然透過剝離不變； `mcp:connect`是遠端僅 MCP 呼叫者的低權限替代方案，透過`hasMcpConnectOrManageScope()`檢查。
 
-### 每個金鑰的 HTTP 作用域繫結 (#7895)
+### 每鍵HTTP範圍綁定 (#7895)
 
-透過 HTTP/SSE 時，`open-sse/mcp-server/httpTransport.ts` 現在會透過
-`resolveMcpCallerAuthInfo()`（`open-sse/mcp-server/httpAuthContext.ts`）
-解析呼叫者實際的 `api_keys.scopes`，並將其傳遞給 MCP SDK 的
-`transport.handleRequest(req, { authInfo })`，使每次工具呼叫收到的
-`extra.authInfo.scopes` 都能反映 Bearer 金鑰本身的作用域。
-`scopeEnforcement.ts` 的 `resolveCallerScopeContext()` 原本就會優先使用 `authInfo`，
-而非 `_meta` 與 `OMNIROUTE_MCP_SCOPES` 環境變數備援——此變更只是填入第一個、
-優先順序最高的來源，而先前透過 HTTP 時並未提供此來源。若無法解析 API 金鑰
-（沒有標頭、金鑰無效），`authInfo` 會維持 `undefined`，而解析流程則會照常
-退回至現有的 `meta`/環境變數鏈。stdio 沒有個別呼叫者身分（請參閱
-`mcpCallerIdentity.ts`），因此不受影響——它會繼續使用 `_meta`/環境變數備援鏈。
+透過HTTP/SSE， `open-sse/mcp-server/httpTransport.ts`現在透過`resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) 解析呼叫者的真實`api_keys.scopes`並將其傳遞給MCP SDK的`transport.handleRequest(req, { authInfo })`，因此`extra.authInfo.scopes`到達每個工具呼叫都反映了 Bearer key 自己的範圍。 `scopeEnforcement.ts`的`resolveCallerScopeContext()`已經將`authInfo`優先於`_meta`和`OMNIROUTE_MCP_SCOPES` env 後備—這僅填充第一個、最高優先級的源，該源之前未通過HTTP提供。當沒有API金鑰解析時（無標頭、無效金鑰）， `authInfo`保持`undefined`狀態，且解析會繼續到現有的`meta`/env 鏈不變。 stdio 沒有每個呼叫者的身份（請參閱`mcpCallerIdentity.ts`），並且不受每個密鑰綁定—影響，它會跳過`_meta`步驟（`_meta`僅在HTTP身份驗證上下文中受到尊重，#15159）並僅從`OMNIROUTE_MCP_SCOPES` env 密鑰解析。
 
-**對於窄作用域的 HTTP/SSE 呼叫者，無論
-`OMNIROUTE_MCP_ENFORCE_SCOPES` 為何，都會強制啟用執行限制。** `OMNIROUTE_MCP_ENFORCE_SCOPES`
-預設為 `false`，僅對本機/stdio 單一操作者流程安全，因為該流程沒有可用於限制作用域的個別呼叫者身分。
-只要 `resolveCallerScopeContext()` 解析出
-`source === "authInfo"`（即真實的逐金鑰 HTTP Authorization 標頭，僅限 HTTP/SSE），且該
-金鑰不具有完整的 `manage`/`admin` 作用域，`open-sse/mcp-server/server.ts::withScopeEnforcement()`
-就會無條件啟用每個工具的作用域限制（透過 `scopeEnforcement.ts` 中的
-`shouldForceScopeEnforcement()`）。這修補了一項缺口：僅持有窄範圍 `mcp:connect`
-略過作用域的金鑰——如上所述，它除了授權 `/api/mcp/` 的 LOCAL_ONLY 例外之外，
-不授予任何其他權限——原本可能在操作者啟用遠端/非迴路 MCP 存取後，僅因
-`OMNIROUTE_MCP_ENFORCE_SCOPES` 出廠預設為 `false`，便可叫用所有 MCP 工具。
-透過 HTTP 使用完整 `manage`/`admin` 金鑰的情況，以及所有 stdio/本機呼叫者，
-都會維持現有由 `OMNIROUTE_MCP_ENFORCE_SCOPES` 控制的行為不變。
+**Enforcement is forced on for narrow-scoped HTTP/SSE callers regardless of `OMNIROUTE_MCP_ENFORCE_SCOPES`.** `OMNIROUTE_MCP_ENFORCE_SCOPES` defaulting to `false` is only safe for the local/stdio single-operator flow, where there is no per-caller identity to scope against. `open-sse/mcp-server/server.ts::withScopeEnforcement()` turns per-tool scope enforcement on unconditionally (`shouldForceScopeEnforcement()` in `scopeEnforcement.ts`) whenever `resolveCallerScopeContext()` resolved `source === "authInfo"` (i.e. a real per-key HTTP Authorization header, HTTP/SSE-only) AND that key does not hold full `manage`/`admin` scope. This closes the gap where a key holding ONLY the narrow `mcp:connect` bypass scope — documented above as authorizing nothing but the `/api/mcp/` LOCAL_ONLY carve-out — could otherwise invoke every MCP tool once an operator enabled remote/non-loopback MCP access, simply because `OMNIROUTE_MCP_ENFORCE_SCOPES` ships `false` by default. A full `manage`/`admin` key over HTTP, and every stdio/local caller, keep the existing `OMNIROUTE_MCP_ENFORCE_SCOPES`-gated behavior unchanged.
 
 ---
 
 ## 環境變數
 
-| 變數                                    | 預設值                        | 用途                                                                                                                                                                                                                                                                                                                                                                               |
-| :-------------------------------------- | :---------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`      | MCP 伺服器呼叫 OmniRoute 內部 API 時使用的基底 URL                                                                                                                                                                                                                                                                                                                                 |
-| `OMNIROUTE_API_KEY`                     | （空白）                      | 以 `Authorization: Bearer` 形式轉送至內部 API 呼叫的 API 金鑰                                                                                                                                                                                                                                                                                                                      |
-| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false`（僅 `"true"` 會啟用） | 啟用後，缺少範圍時會拒絕工具呼叫，並在稽核日誌中記錄 `scope_denied:<reason>`。此外，若任何 HTTP/SSE 呼叫端是透過個別金鑰的 Authorization 標頭解析而得（`source === "authInfo"`），且缺少完整的 `manage`/`admin` 範圍，則無論此旗標為何都會強制執行；例如，金鑰僅具有狹義的 `mcp:connect` 繞過範圍。因此，此預設值僅適用於本機/stdio 的單一操作者流程，絕不可用於遠端非迴路位址存取 |
-| `OMNIROUTE_MCP_SCOPES`                  | （空白）                      | 以逗號分隔的範圍允許清單，預設視為「可用」（在呼叫端未提供自己的範圍時使用）                                                                                                                                                                                                                                                                                                       |
-| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | （未設定 = 開啟）             | 設為 `0/false/off/no` 時，停用註冊階段的 MCP 描述壓縮                                                                                                                                                                                                                                                                                                                              |
-| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | （未設定 = 開啟）             | 上述相同切換設定的替代別名                                                                                                                                                                                                                                                                                                                                                         |
-| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                       | 內部管理讀取作業（健康狀態、韌性、組合、配額、使用量）的中止時間上限                                                                                                                                                                                                                                                                                                               |
-| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                       | 等待提供者之各階段（`route_request`、`web_search`、`web_fetch`）的中止時間上限                                                                                                                                                                                                                                                                                                     |
-| `MCP_TOOL_DENY`                         | （未設定 = 不篩選）           | 以逗號分隔、要從 `tools/list` 中移除的工具名稱（降低工具基數——請參閱下文）                                                                                                                                                                                                                                                                                                         |
-| `MCP_TOOL_ALLOW`                        | （未設定 = 不篩選）           | 以逗號分隔、要獨家保留的工具名稱（允許清單模式 — 請見下文）                                                                                                                                                                                                                                                                                                                        |
-| `DATA_DIR`                              | `~/.omniroute`                | 心跳檔案會寫入 `${DATA_DIR}/runtime/mcp-heartbeat.json`                                                                                                                                                                                                                                                                                                                            |
+| 多變的                                  | 預設                       | 目的                                                                                                                                                                                                                                                                                                                   |
+| :-------------------------------------- | :------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`   | MCP伺服器呼叫OmniRoute內部APIs時所使用的基礎URL                                                                                                                                                                                                                                                                        |
+| `OMNIROUTE_API_KEY`                     | （空的）                   | API密鑰作為`Authorization: Bearer`轉發到內部API呼叫                                                                                                                                                                                                                                                                    |
+| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` （僅`"true"`啟用） | 啟用後，缺失範圍會拒絕工具呼叫並將`scope_denied:<reason>`記錄在審核日誌中。對於從缺乏完整`manage`/`admin`範圍—的每鍵授權標頭 (`source === "authInfo"`) 解析的任何HTTP/SSE呼叫者，無論此標誌如何，強制執行ALSO例如僅保留窄`mcp:connect`旁路範圍—鍵，因此此預設值僅對於local/stdio單操作符流是安全的，對於遠端非環回存取 |
+| `OMNIROUTE_MCP_SCOPES`                  | （空的）                   | 預設被視為「可用」的範圍的逗號分隔白名單（當呼叫者不提供自己的範圍時使用）                                                                                                                                                                                                                                             |
+| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | （取消=開啟）              | 當設定為`0/false/off/no`，在註冊時會停用MCP描述壓縮                                                                                                                                                                                                                                                                    |
+| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | （取消=開啟）              | 與上面相同的切換的備用別名                                                                                                                                                                                                                                                                                             |
+| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                    | 中止內部管理讀取預算（健康、彈性、組合、配額、使用）                                                                                                                                                                                                                                                                   |
+| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                    | 中止等待提供者的躍點的預算（`route_request`、 `web_search`、 `web_fetch`）                                                                                                                                                                                                                                             |
+| `MCP_TOOL_DENY`                         | （取消設定=無過濾器）      | 從`tools/list`中刪除的以逗號分隔的工具名稱（工具基數縮減—見下文）                                                                                                                                                                                                                                                      |
+| `MCP_TOOL_ALLOW`                        | （取消設定=無過濾器）      | 以逗號分隔的工具名稱以獨佔方式保留（允許清單模式—見下文）                                                                                                                                                                                                                                                              |
+| `DATA_DIR`                              | `~/.omniroute`             | 心跳檔寫入`${DATA_DIR}/runtime/mcp-heartbeat.json`                                                                                                                                                                                                                                                                     |
 
 ---
 
-## 描述壓縮
+## 描述 壓縮
 
-MCP 工具、提示與資源登錄可在註冊／列出時壓縮描述，以減少暴露給用戶端的中繼資料量（從而降低提示內容的上下文成本）。實作位於 `open-sse/mcp-server/descriptionCompressor.ts`，並透過 `createMcpServer()` 內的 `compressMcpRegistryMetadata` 整合至 MCP 伺服器。
+MCP工具、提示和資源註冊表可以在registration/list時壓縮描述，以減少暴露給客戶端的元資料佔用空間（從而減少提示上下文成本）。實作位於`open-sse/mcp-server/descriptionCompressor.ts`中，並透過`createMcpServer()`內的`compressMcpRegistryMetadata`連接到MCP伺服器。
 
-- 壓縮會使用 Caveman 規則集（`getRulesForContext("all", "full")`）處理描述文字，並擷取需保留的區塊（程式碼範圍、圍欄式區塊等），因此不會變更結構化內容。
-- 可透過 `key_value` 設定資料表中的 `compression.mcpDescriptionCompressionEnabled` 值，針對各部署切換此功能（預設：啟用）— 在 UI 中顯示為 **分析 → MCP 描述壓縮**。
-- 可透過 `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS=false` 或 `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION=false`，在整個處理程序範圍內切換此功能。
-- 即時統計資料會透過 `omniroute_compression_status` 下的 `analytics.mcpDescriptionCompression` 呈現，並標記為 `source: "mcp_metadata_estimate"`，以便與實際的提供者用量收據區分。
+- 使用 Caveman 規則集 (`getRulesForContext("all", "full")`) 和保留區塊提取（程式碼跨度、隔離區塊等）對描述文字進行壓縮，因此結構內容不會改變。
+- 透過`key_value`設定表中的`compression.mcpDescriptionCompressionEnabled`值切換每個部署（預設：啟用） —在UI中公開為**分析→ MCP描述壓縮**。
+- 透過`OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS=false`或`OMNIROUTE_MCP_DESCRIPTION_COMPRESSION=false`在進程範圍內切換。
+- 即時統計數據透過`analytics.mcpDescriptionCompression`下的`omniroute_compression_status`呈現，並標記為`source: "mcp_metadata_estimate"` ，以消除與真實提供者使用收據的歧義。
 
 ---
 
-## 工具基數縮減 (F4.3)
+## 工具基數減少 (F4.3)
 
-描述壓縮會縮減每個工具的中繼資料；**工具基數縮減**則更進一步，減少實際公告的工具_數量_。在 `tools/list` 資訊清單中公布較少的工具，可降低用戶端模型每次請求為工具目錄支付的權杖成本（「第 5 層」壓縮）。其實作是位於 `open-sse/mcp-server/toolCardinality.ts` 中的純無狀態篩選器 (`reduceToolManifest`)，並已整合至 `createMcpServer()` (`open-sse/mcp-server/server.ts`) 的註冊迴圈中。
+描述壓縮縮小了每個工具的元資料；**工具基數約簡**更進一步，減少了發布的工具數量。在`tools/list`清單中宣傳較少的工具可以減少客戶端模型為工具目錄支付的每個請求令牌成本（「第 5 層」壓縮）。此實作是`open-sse/mcp-server/toolCardinality.ts` (`reduceToolManifest`) 中的純無狀態過濾器，連接到`createMcpServer()` (`open-sse/mcp-server/server.ts`) 中的註冊循環。
 
-**選擇性啟用，預設關閉。** 只有在設定了兩個環境變數中的至少一個時，篩選器才會執行；若兩者皆未設定，則會原樣公告全部 110 個工具。
+**選擇加入，預設為關閉。**只有在設定了兩個環境變數中的至少一個時，過濾器才會運作；兩者皆未設置，所有 110 個工具都宣布不變。
 
-| 變數             | 模式                                                         |
-| :--------------- | :----------------------------------------------------------- |
-| `MCP_TOOL_DENY`  | 黑名單——以逗號分隔的工具名稱，一律從 `tools/list` 中移除     |
-| `MCP_TOOL_ALLOW` | 允許清單——以逗號分隔的工具名稱；僅保留這些工具，其餘全部移除 |
+| 多變的           | 模式                                                                  |
+| :--------------- | :-------------------------------------------------------------------- |
+| `MCP_TOOL_DENY`  | 將始終從`tools/list`中刪除的—逗號分隔工具名稱列入黑名單               |
+| `MCP_TOOL_ALLOW` | 將—逗號分隔的工具名稱列入允許清單；只有這些倖存下來，其他一切都被丟棄 |
 
-`deny` 的優先順序高於 `allow`。名稱以逗號分隔、會移除前後空白，並忽略空白項目。範例：
+`deny`優先於`allow`。名稱以逗號分隔、經過修剪，空白條目將被忽略。範例：
 
 ```bash
-# 從目錄中移除兩個工具
+# Drop two tools from the catalog
 MCP_TOOL_DENY="omniroute_get_health,omniroute_list_combos" omniroute --mcp
 
-# 僅公告路由與配額工具（允許清單模式）
+# Announce only the routing + quota tools (allow-list mode)
 MCP_TOOL_ALLOW="omniroute_route_request,omniroute_check_quota" omniroute --mcp
 ```
 
-**移除已篩選工具的方式：** 註冊一律會成功；若設定檔拒絕某個工具，則會在 MCP SDK 控制代碼上對其呼叫 `.disable()`，使其永遠不會出現在 `tools/list` 中，但配線仍保持完整（可乾淨地啟用／停用，無須重新註冊）。設定檔剖析器為 `readMcpToolProfileFromEnv(process.env)`；當兩個變數皆為空時，會傳回 `null`（不進行篩選）。
+**如何刪除過濾工具：**註冊總是成功；設定檔拒絕的工具是MCP SDK句柄上的`.disable()` d ，因此它永遠不會出現在`tools/list`中，但接線保持不變（乾淨的enable/disable，無需重新註冊）。設定檔解析器是`readMcpToolProfileFromEnv(process.env)`，當兩個變數都為空時，它會傳回`null` （無過濾）。
 
-`reduceToolManifest` 背後更完整的 `ToolProfile` 結構也支援範圍交集篩選（`allowScopes`，採用 `read:*` 樣式的萬用字元比對），以及具確定性的 `maxTools` 上限；但這兩個選項需要在註冊時取得完整資訊清單，因此目前**不會**透過環境變數公開（後續已規劃加入 `tools/list` 層級的掛鉤）。可使用 `estimateManifestTokens()` 比較縮減前後的資訊清單權杖成本。
+`reduceToolManifest`後面更豐富的`ToolProfile`形狀也支援範圍交叉過濾（`allowScopes`，與`read:*` -style通配符匹配）和確定性`maxTools`上限，但這兩個旋鈕在註冊時需要完整的清單，並且是**不是**今天透過環境變數暴露（ `tools/list` -level鉤子是追蹤的後續）。 `estimateManifestTokens()`可用於比較減少前後的清單代幣成本。
 
 ---
 
-## 執行時心跳 (Runtime Heartbeat)
+## 運行時心跳
 
-stdio 傳輸層每 5 秒將存活狀態持久化到 `${DATA_DIR}/runtime/mcp-heartbeat.json`。儀表板 (`/api/mcp/status`) 讀取此檔案以及 PID 存活狀態以推導出 `online` 狀態。HTTP 傳輸層則從程序內的 `getMcpHttpStatus()` 報告狀態（不寫入檔案）。
+stdio 傳輸每 5 秒保持`${DATA_DIR}/runtime/mcp-heartbeat.json`活動狀態。儀表板 (`/api/mcp/status`) 讀取此檔案加上PID liveness 來匯出`online`。 HTTP相反地從進程內`getMcpHttpStatus()`傳輸報告狀態（無檔案寫入）。
 
 心跳快照包含：
 
@@ -556,47 +463,47 @@ stdio 傳輸層每 5 秒將存活狀態持久化到 `${DATA_DIR}/runtime/mcp-hea
 
 ---
 
-## 稽核記錄
+## 審計日誌記錄
 
-每次工具呼叫都會由 `open-sse/mcp-server/audit.ts` 記錄至 SQLite 的 `mcp_tool_audit` 資料表：
+每個工具呼叫都會由`open-sse/mcp-server/audit.ts`記錄到SQLite `mcp_tool_audit`表：
 
-- 工具名稱、引數（依各工具的 `auditLevel` 進行雜湊／截斷）、結果
-- 持續時間（毫秒）、成功／失敗旗標、錯誤訊息（適用時）
-- API 金鑰雜湊、時間戳記
-- 範圍拒絕會記錄為 `scope_denied:<reason>`，並附上缺少的範圍清單
+- 工具名稱、參數（hashed/truncated作為每個工具`auditLevel`）、結果
+- 持續時間（以毫秒為單位）、 success/failure標誌、錯誤訊息（如果適用）
+- API密鑰哈希、時間戳
+- 範圍拒絕被記錄為`scope_denied:<reason>`並缺少範圍列表
 
-可使用儀表板或 `/api/mcp/audit` 與 `/api/mcp/audit/stats` REST 端點檢視近期呼叫。
+使用儀表板或`/api/mcp/audit`和`/api/mcp/audit/stats` REST端點來檢查最近的呼叫。
 
 ---
 
-## 檔案
+## 文件
 
-| 檔案                                                                     | 用途                                                |
-| :----------------------------------------------------------------------- | :-------------------------------------------------- |
-| `open-sse/mcp-server/server.ts`                                          | MCP 伺服器工廠、stdio 進入點、具範圍限制的工具註冊  |
-| `open-sse/mcp-server/httpTransport.ts`                                   | SSE + Streamable HTTP 傳輸（工作階段管理）          |
-| `open-sse/mcp-server/scopeEnforcement.ts`                                | 工具範圍評估與呼叫者解析                            |
-| `open-sse/mcp-server/audit.ts`                                           | 工具呼叫稽核記錄（`mcp_tool_audit`）                |
-| `open-sse/mcp-server/runtimeHeartbeat.ts`                                | stdio 活動訊號寫入器（`mcp-heartbeat.json`）        |
-| `open-sse/mcp-server/descriptionCompressor.ts`                           | 工具／提示／資源登錄檔的描述壓縮                    |
-| `open-sse/mcp-server/schemas/tools.ts`                                   | Zod 結構描述 + 工具登錄檔（`MCP_TOOLS`，45 個項目） |
-| `open-sse/mcp-server/tools/advancedTools.ts`                             | 第 2 階段 + 快取 + 1proxy 工具處理常式              |
-| `open-sse/mcp-server/tools/compressionTools.ts`                          | 壓縮工具處理常式                                    |
-| `open-sse/mcp-server/tools/memoryTools.ts`                               | 記憶體工具定義（3 個工具）                          |
-| `open-sse/mcp-server/tools/skillTools.ts`                                | 技能工具定義（4 個工具）                            |
-| `open-sse/mcp-server/tools/notionTools.ts`                               | Notion 上下文來源工具定義（6 個工具）               |
-| `open-sse/mcp-server/tools/gamificationTools.ts`                         | 遊戲化工具定義（8 個工具）                          |
-| `open-sse/mcp-server/tools/pluginTools.ts`                               | 外掛註冊與管理工具（8 個工具）                      |
-| `src/app/api/mcp/status/route.ts`                                        | `/api/mcp/status` 端點                              |
-| `src/app/api/mcp/tools/route.ts`                                         | `/api/mcp/tools` 端點                               |
-| `src/app/api/mcp/sse/route.ts`                                           | `/api/mcp/sse` SSE 傳輸路由                         |
-| `src/app/api/mcp/stream/route.ts`                                        | `/api/mcp/stream` Streamable HTTP 傳輸路由          |
-| `src/app/api/mcp/audit/route.ts`                                         | `/api/mcp/audit` 稽核記錄查詢                       |
-| `src/app/api/mcp/audit/stats/route.ts`                                   | `/api/mcp/audit/stats` 彙總稽核指標                 |
-| `src/lib/notion/api.ts`                                                  | Notion REST API 用戶端（重試、逾時、錯誤分類）      |
-| `src/lib/db/notion.ts`                                                   | Notion 權杖持久化（`key_value` 資料表）             |
-| `src/app/api/settings/notion/route.ts`                                   | Notion 設定 API（GET/POST/DELETE）                  |
-| `src/app/(dashboard)/dashboard/endpoint/components/NotionSourceCard.tsx` | Notion 權杖管理 UI                                  |
-| `tests/unit/notion-api.test.ts`                                          | Notion API 用戶端測試（7）                          |
-| `tests/unit/notion-tools.test.ts`                                        | Notion 工具範圍強制執行測試（10）                   |
-| `tests/unit/db/notion.test.mjs`                                          | Notion DB 模組測試（3）                             |
+| 文件                                                                     | 目的                                          |
+| :----------------------------------------------------------------------- | :-------------------------------------------- |
+| `open-sse/mcp-server/server.ts`                                          | MCP伺服器工廠、stdio 入口點、範圍工具註冊     |
+| `open-sse/mcp-server/httpTransport.ts`                                   | SSE +可串流HTTP傳輸（會話管理）               |
+| `open-sse/mcp-server/scopeEnforcement.ts`                                | 工具範圍評估和呼叫者解析                      |
+| `open-sse/mcp-server/audit.ts`                                           | 工具呼叫審計日誌記錄（`mcp_tool_audit`）      |
+| `open-sse/mcp-server/runtimeHeartbeat.ts`                                | stdio 心跳寫入器 (`mcp-heartbeat.json`)       |
+| `open-sse/mcp-server/descriptionCompressor.ts`                           | 工具/提示/資源登錄的描述壓縮                  |
+| `open-sse/mcp-server/schemas/tools.ts`                                   | Zod模式+工具登錄（`MCP_TOOLS`，45 個條目）    |
+| `open-sse/mcp-server/tools/advancedTools.ts`                             | 第 2 階段+快取+ 1proxy 工具處理程序           |
+| `open-sse/mcp-server/tools/compressionTools.ts`                          | 壓縮工具處理程序                              |
+| `open-sse/mcp-server/tools/memoryTools.ts`                               | 記憶工具定義（3個工具）                       |
+| `open-sse/mcp-server/tools/skillTools.ts`                                | 技能工具定義（4個工具）                       |
+| `open-sse/mcp-server/tools/notionTools.ts`                               | Notion上下文來源工具定義（6個工具）           |
+| `open-sse/mcp-server/tools/gamificationTools.ts`                         | 遊戲化工具定義（8 個工具）                    |
+| `open-sse/mcp-server/tools/pluginTools.ts`                               | 外掛程式註冊和管理工具（8個工具）             |
+| `src/app/api/mcp/status/route.ts`                                        | `/api/mcp/status`端點                         |
+| `src/app/api/mcp/tools/route.ts`                                         | `/api/mcp/tools`端點                          |
+| `src/app/api/mcp/sse/route.ts`                                           | `/api/mcp/sse` SSE運輸路線                    |
+| `src/app/api/mcp/stream/route.ts`                                        | `/api/mcp/stream` Streamable HTTP傳輸路線     |
+| `src/app/api/mcp/audit/route.ts`                                         | `/api/mcp/audit`稽核日誌查詢                  |
+| `src/app/api/mcp/audit/stats/route.ts`                                   | `/api/mcp/audit/stats`聚合審計指標            |
+| `src/lib/notion/api.ts`                                                  | Notion REST API客戶端（重試、逾時、錯誤分類） |
+| `src/lib/db/notion.ts`                                                   | Notion令牌持久化（`key_value`表）             |
+| `src/app/api/settings/notion/route.ts`                                   | Notion設定API (GET/POST/DELETE)               |
+| `src/app/(dashboard)/dashboard/endpoint/components/NotionSourceCard.tsx` | Notion幣管理UI                                |
+| `tests/unit/notion-api.test.ts`                                          | Notion API客戶端測試（7）                     |
+| `tests/unit/notion-tools.test.ts`                                        | Notion工具範圍執行測試 (10)                   |
+| `tests/unit/db/notion.test.mjs`                                          | Notion DB模組測試（3）                        |

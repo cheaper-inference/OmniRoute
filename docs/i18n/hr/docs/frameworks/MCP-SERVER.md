@@ -298,113 +298,71 @@ I SSE i Streamable HTTP transporti su blokirani dok MCP poslužitelj nije omogu�
 
 ---
 
-## Autentikacija i opsezi
+## Autentifikacija i opseg
 
-Pozivi MCP alata čitaju nizove opsega od pozivatelja. Ta je provjera jedan od triju
-neovisnih prostora naziva. Prolaz jedne provjere ne znači prolaz ostalih.
-Pravila su opisana u odjeljku [Tri prostora naziva opsega](#three-scope-namespaces).
-Katalog alata nalazi se u odjeljku [Opsezi MCP alata](#mcp-tool-scopes).
+MCP alat poziva nizove opsega čitanja od pozivatelja. Ta je provjera jedan od tri neovisna imenska prostora. Dodavanje jednog igrača nije dodavanje ostalih. Pravila su [Tri imenska prostora opsega](#three-scope-namespaces). Katalog alata je [MCP tool scopes](#mcp-tool-scopes).
 
-### Tri prostora naziva opsega
+### Tri prostora imena opsega
 
-`manage` na API ključu, `read:compression` na MCP alatu i `read` na pristupnom
-tokenu `oma_live_…` tri su različite ovlasti. Pozivatelji koji pošalju pristupni
-token `read` mutirajućoj upravljačkoj ruti dobivaju HTTP 403
-`Access token scope 'read' is insufficient; 'write' required.`
-Taj je rang `scopeSatisfies`. On ne provjerava MCP tablicu, a ni MCP alat za
-podudaranje ne provjerava njega.
+`manage` na API ključu, `read:compression` na MCP alatu i `read` na `oma_live_…` pristupnom tokenu tri su različita odobrenja. Pozivatelji koji pošalju `read` pristupni token na rutu upravljanja koja mutira dobivaju HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` Taj rang je `scopeSatisfies`. Ne konzultira MCP tablicu, a MCP matcher je ne konzultira.
 
-| Prostor naziva           | Vjerodajnica                                              | Provjera                             | Prolaz omogućuje                                        |
-| :----------------------- | :-------------------------------------------------------- | :----------------------------------- | :------------------------------------------------------ |
-| Upravljanje API ključem  | `api_keys.scopes`                                         | `hasManageScope`                     | Upravljački REST za taj Bearer ključ                    |
-| Dodatni opseg API ključa | isti niz, jedan točno određeni niz znakova                | pomoćna funkcija navedena u nastavku | Samo tu jednu mogućnost                                 |
-| Opsezi MCP alata         | isti niz, inače MCP `_meta`, inače `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                       | Taj alat, nakon što se uključi provedba                 |
-| Pristupni token          | `oma_live_…`                                              | `scopeSatisfies`                     | Upravljačku rutu čija metoda i put zahtijevaju taj rang |
+| Imenski prostor         | Uvjerenje                                                                  | Dama                        | Propusnica dopušta                                     |
+| :---------------------- | :------------------------------------------------------------------------- | :-------------------------- | :----------------------------------------------------- |
+| Upravljanje API ključem | `api_keys.scopes`                                                          | `hasManageScope`            | Upravljanje REST za taj ključ nositelja                |
+| API-ključni aditiv      | isti niz, jedan točan niz                                                  | pomoćnik naveden u nastavku | Samo ta jedna sposobnost                               |
+| MCP alata               | isti niz, inače MCP `_meta` (samo HTTP/SSE ), inače `OMNIROUTE_MCP_SCOPES` | `scopeMatches`              | Taj alat, nakon što je ovrha uključena                 |
+| Pristupni token         | `oma_live_…`                                                               | `scopeSatisfies`            | Put upravljanja čija metoda i put zahtijevaju taj rang |
 
-Izdavanje svake vjerodajnice opisano je u
-[Autentikacija za upravljanje](../guides/MANAGEMENT-AUTH.md).
+Kovanje svake vjerodajnice pokriveno je u [Autentifikaciji upravljanja](../guides/MANAGEMENT-AUTH.md).
 
-#### Opsezi API ključa
+#### Opseg API-ključeva
 
-Jedan niz `api_keys.scopes` služi za dvije namjene. One upotrebljavaju različite funkcije.
+Jedno `api_keys.scopes` polje hrani dva posla. Koriste različite funkcije.
 
-**Upravljački REST.** `manage` i `admin` članovi su skupa
-`MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`).
-`hasManageScope` autorizira upravljačke rute za taj ključ. `admin` omogućuje
-upravljanje na tim rutama. Riječ `admin` ovdje nije rang pristupnog
-tokena i ne proširuje se na opsege MCP alata.
+**Upravljanje REST.** `manage` i `admin` su članovi `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`). `hasManageScope` je ono što autorizira rute upravljanja za taj ključ. `admin` je sposoban upravljati na tim rutama. Riječ `admin` ovdje nije rang tokena pristupa i ne proširuje se na opseg MCP alata.
 
-**Dodatni nizovi.** Svaki se provjerava zasebnim testom točnog članstva i svaki
-ostaje izvan skupa `MANAGEMENT_API_KEY_SCOPES`.
+**Aditivni nizovi.** Svaki je točan test članstva i svaki ostaje izvan `MANAGEMENT_API_KEY_SCOPES`.
 
-| Opseg                          | Prolaz omogućuje                                                                                                                                                       |
-| :----------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | Samo LOCAL_ONLY iznimku za `/api/mcp/` izvan povratne petlje (`hasMcpConnectOrManageScope`). Ključ s opsegom `manage` ili `admin` također prolazi tu iznimku.          |
-| `self:usage`                   | `GET /api/v1/me/status` za ovaj ključ (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` dodaje ovaj opseg pri stvaranju (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Kvote računa uzvodnog pružatelja unutar tog sadržaja statusa (`src/lib/usage/apiKeySelfService.ts`). Ruta statusa i dalje zahtijeva `self:usage`.                      |
-| `policy:bypass-provider-quota` | Inferencijski pozivi ovog ključa zaobilaze pravilo kvote pružatelja (`hasProviderQuotaBypassScope` u `src/sse/handlers/chat.ts`).                                      |
+| Opseg                          | Propusnica dopušta                                                                                                                                                          |
+| :----------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | Samo izdvojeni `/api/mcp/` LOCAL_ONLY bez petlje (`hasMcpConnectOrManageScope`). Ključ sa `manage` ili `admin` i dalje prolazi taj izrez.                                   |
+| `self:usage`                   | `GET /api/v1/me/status` za ovaj ključ (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` dodaje ovaj opseg prilikom stvaranja (`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | Kvote uzvodnog računa unutar tog nosivosti statusa (`src/lib/usage/apiKeySelfService.ts`). Statusna ruta i dalje zahtijeva `self:usage`.                                    |
+| `policy:bypass-provider-quota` | Pozivi zaključivanja ovog ključa preskaču pravilo kvote pružatelja (`hasProviderQuotaBypassScope` u `src/sse/handlers/chat.ts`).                                            |
 
 #### Podudaranje
 
-Katalog je tablica u odjeljku [Opsezi MCP alata](#mcp-tool-scopes). Nemojte
-smatrati `MCP_SCOPE_LIST` u `src/shared/constants/mcpScopes.ts` tim katalogom:
-to je izvorni tipizirani podskup. Kasnije dodani alati deklariraju dodatne opsege uz njega
-(`read:notion`, `read:skills`, `read:local-corpus` i ostale iz tablice).
+Katalog je tablica pod [opsegom MCP alata](#mcp-tool-scopes). Ne tretirajte `MCP_SCOPE_LIST` u `src/shared/constants/mcpScopes.ts` kao taj katalog: to je originalni tipizirani podskup. Kasniji alati deklariraju daljnje opsege pored njega (`read:notion`, `read:skills`, `read:local-corpus` i ostatak tablice).
 
-`evaluateToolScopes` u `open-sse/mcp-server/scopeEnforcement.ts` dopušta poziv
-kada se svaki potrebni opseg podudara s nekim dodijeljenim opsegom:
+`evaluateToolScopes` u `open-sse/mcp-server/scopeEnforcement.ts` dopušta poziv kada svaki zahtijevani opseg odgovara nekom dodijeljenom opsegu:
 
 - `*` odgovara svakom potrebnom opsegu.
-- Dodijeljeni opseg koji završava znakom `*` odgovara potrebnom opsegu koji počinje
-  prefiksom ispred zvjezdice. `read:*` odgovara opsegu `read:compression`.
-- Svaki drugi dodijeljeni opseg odgovara samo identičnom potrebnom nizu znakova.
+- Dodijeljeni opseg koji završava na `*` odgovara potrebnom opsegu koji počinje prefiksom ispred zvjezdice. `read:*` odgovara `read:compression`.
+- Svaki drugi dodijeljeni opseg odgovara samo identičnom traženom nizu.
 
-Ključ čiji su opsezi `["manage"]` ne prolazi `scopeMatches` za `read:compression`.
-Isti poziv ne prolazi ni za `admin`, `mcp:connect`, `read` i `write` kada su to
-jedini dodijeljeni nizovi. Među opsezima MCP alata ne postoji hijerarhija
-osim završnog znaka `*`.
+Ključ čiji je opseg `["manage"]` ne uspijeva `scopeMatches` za `read:compression`. Isti poziv ne uspijeva za `admin`, `mcp:connect`, `read` i `write` kada su to jedini odobreni nizovi. Ne postoji hijerarhija među opsegom MCP alata izvan `*` na kraju.
 
-Provedba je isključena osim ako je `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (zadano
-`false`). Dok je isključena, `evaluateToolScopes` dopušta poziv i preskače
-katalog. Dok je uključena, HTTP upotrebljava `api_keys.scopes` Bearer ključa kao
-`authInfo` (pogledajte [HTTP povezivanje opsega po ključu](#per-key-http-scope-binding-7895)).
-Kada se ne razriješi nijedan opseg ključa, dodijeljeni skup prelazi na MCP `_meta`, a zatim
-na `OMNIROUTE_MCP_SCOPES`.
+Provedba je isključena osim ako `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (zadano `false`). Dok je isključen, `evaluateToolScopes` dopušta poziv i preskače katalog. Dok je uključen, HTTP koristi `api_keys.scopes` ključa nositelja kao `authInfo` (pogledajte [Povezivanje HTTP opsega po ključu](#per-key-http-scope-binding-7895) ). Kada se nijedan opseg ključa ne razriješi, dodijeljeni skup pada na MCP `_meta` (poštuje se samo za HTTP/SSE pozivatelje, unutar konteksta HTTP autentifikacije; `_meta` stdio pozivatelja se zanemaruje jer ga kontrolira klijent i ne nosi identitet po pozivatelju), zatim `OMNIROUTE_MCP_SCOPES`.
 
-#### Opsezi pristupnih tokena
+#### Opseg tokena pristupa
 
-Tokeni `oma_live_…` (`src/lib/accessTokens/scopes.ts`) nose `read`, `write`
-ili `admin`. `scopeSatisfies` predstavlja rang: `admin` obuhvaća `write` i `read`, a
-`write` obuhvaća `read`. Nepoznati opsezi ne obuhvaćaju ništa.
+`oma_live_…` tokeni (`src/lib/accessTokens/scopes.ts`) nose `read`, `write` ili `admin`. `scopeSatisfies` je rang: `admin` pokriva `write` i `read`, a `write` pokriva `read`. Nepoznati opseg ne pokriva ništa.
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) uspoređuje taj
-rang s rezultatom funkcije `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) uspoređuje taj rang sa `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
 - `GET`, `HEAD` i `OPTIONS` zahtijevaju `read`.
 - Svaka druga metoda zahtijeva `write`.
-- Putovi u `ADMIN_SCOPE_PREFIXES` zahtijevaju `admin` za svaku metodu. `/api/mcp`
-  nalazi se na tom popisu, pa pristupni token `write` ipak ne može pozvati MCP HTTP
-  sučelje.
+- Staze u `ADMIN_SCOPE_PREFIXES` zahtijevaju `admin` za svaku metodu. `/api/mcp` je na tom popisu, tako da `write` pristupni token još uvijek ne može pozvati MCP HTTP površinu.
 - Putovi u `ADMIN_MUTATION_PREFIXES` zahtijevaju `admin` samo za mutacije.
-- Putovi u `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
-  `/api/settings/require-login`) zahtijevaju `admin` samo za mutacije i samo na
-  tom točnom putu — ostale podrute `/api/settings/*` zadržavaju `write`.
+- Staze u `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`) zahtijevaju `admin` samo za mutacije, a samo na toj točnoj stazi — druge `/api/settings/*` podrute zadržavaju `write`.
 
-`PATCH /api/keys/{id}` jest mutacija i ne nalazi se na tim administratorskim popisima, pa
-token s opsegom `read` prima 403
-`Opseg pristupnog tokena 'read' nije dovoljan; potreban je 'write'.`
-Pristupni token s opsegom `write` ili `admin` zadovoljava zahtjeve te rute. JWT nadzorne ploče,
-loopback CLI token s ID-jem stroja i API ključ s opsegom `manage` ili `admin` prolaze
-drugim granama te nisu ograničeni ovim rangom.
+`PATCH /api/keys/{id}` je mutacija i nije na tim popisima administratora, tako da `read` token prima 403 `Access token scope 'read' is insufficient; 'write' required.` `write` ili `admin` pristupni token zadovoljava tu rutu. Nadzorna ploča JWT, povratna petlja CLI strojni id token i API ključ sa `manage` ili `admin` imaju druge grane i nisu suženi ovim rangom.
 
-Pristupni token koji prođe `scopeSatisfies` za `/api/mcp` prošao je samo
-upravljačku provjeru. Pozivi alata i dalje izvršavaju `scopeMatches` nad opsezima
-API ključa. Rang pristupnog tokena nije ulazni podatak za `scopeMatches`.
+Pristupni token koji prosljeđuje `scopeSatisfies` za `/api/mcp` očistio je samo upravljačka vrata. Pozivi alata i dalje pokreću `scopeMatches` prema opsegu API-ključa. Rang tokena pristupa nije ulaz u `scopeMatches`.
 
-### Opsezi MCP alata
+### MCP alata
 
-Provedba opsega centralizirana je u `open-sse/mcp-server/scopeEnforcement.ts`.
-Svaki alat zahtijeva određene opsege:
+Provedba opsega je centralizirana u `open-sse/mcp-server/scopeEnforcement.ts`. Svaki alat zahtijeva određene opsege:
 
 | Opseg                 | Alati                                                                                                                                                                              |
 | :-------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -442,48 +400,17 @@ Svaki alat zahtijeva određene opsege:
 | `write:obsidian`      | 9 alata za pisanje — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                  |
 
-Podržani su opsezi sa zamjenskim znakovima: `read:*` dodjeljuje sve opsege za čitanje, a `*` dodjeljuje potpuni pristup.
+Podržani su opsezi zamjenskih znakova: `read:*` odobrava sve opsege čitanja, `*` daje puni pristup.
 
-### `mcp:connect` — uska ovlast za rutu (#7895)
+### `mcp:connect` — mogućnost uske rute (#7895)
 
-Pristup HTTP/SSE MCP transportu (`/api/mcp/*`) izvan povratne petlje zahtijeva
-iznimku LOCAL_ONLY za `/api/mcp/` (pogledajte `docs/security/ROUTE_GUARD_TIERS.md`). Povijesno
-je ta iznimka prihvaćala samo API ključ s punim opsegom `manage`/`admin` — što je preširoko za
-pozivatelja koji treba samo komunicirati s MCP-om. `src/shared/constants/managementScopes.ts` sada
-izvozi `MCP_CONNECT_SCOPE = "mcp:connect"`: dodatni, uski opseg (po istom presedanu kao
-`SELF_USAGE_SCOPE`) koji autorizira ISKLJUČIVO zaobilaženje za `/api/mcp/` u
-`src/server/authz/policies/management.ts` — ne dodjeljuje pristup nijednoj drugoj upravljačkoj ruti
-i namjerno je IZOSTAVLJEN iz `MANAGEMENT_API_KEY_SCOPES`. Ključ s opsegom `manage`/`admin`
-i dalje neizmijenjeno prolazi kroz iznimku; `mcp:connect` je alternativa s manjim ovlastima za
-udaljene pozivatelje koji koriste samo MCP, a provjerava se putem `hasMcpConnectOrManageScope()`.
+Dosezanje HTTP/SSE MCP prijenosa (`/api/mcp/*`) iz ne-povratne petlje zahtijeva `/api/mcp/` LOCAL_ONLY izdvajanje (pogledajte `docs/security/ROUTE_GUARD_TIERS.md`). Povijesno gledano, to izdvajanje prihvaćalo je samo puni `manage`/`admin` -scope API ključ — preširok za pozivatelja koji treba samo govoriti MCP. `src/shared/constants/managementScopes.ts` sada izvozi `MCP_CONNECT_SCOPE = "mcp:connect"`: aditivni, uski opseg (isti presedan kao `SELF_USAGE_SCOPE`) koji autorizira ONLY `/api/mcp/` premosnicu u `src/server/authz/policies/management.ts` — ne dopušta nikakav drugi pristup upravljačkoj ruti i namjerno se čuva OUT od `MANAGEMENT_API_KEY_SCOPES`. Ključ koji drži `manage`/`admin` i dalje prolazi izrez nepromijenjen; `mcp:connect` je alternativa s nižim privilegijama za udaljene samo MCP pozivatelje, provjerava se putem `hasMcpConnectOrManageScope()`.
 
-### Vezivanje HTTP opsega po ključu (#7895)
+### Vezanje HTTP opsega po ključu (#7895)
 
-Putem HTTP-a/SSE-a, `open-sse/mcp-server/httpTransport.ts` sada razrješava stvarne
-`api_keys.scopes` pozivatelja putem `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
-i prosljeđuje ih MCP SDK-ovoj metodi `transport.handleRequest(req, { authInfo })`, tako da
-`extra.authInfo.scopes` koji dospijeva do svakog poziva alata odražava vlastite opsege Bearer ključa.
-`resolveCallerScopeContext()` iz `scopeEnforcement.ts` već je davao prednost `authInfo` u odnosu na
-`_meta` i rezervnu vrijednost varijable okruženja `OMNIROUTE_MCP_SCOPES` — ovime se samo popunjava taj prvi
-izvor najvišeg prioriteta, koji se prethodno nije popunjavao putem HTTP-a. Kada se ne razriješi nijedan API ključ
-(nema zaglavlja ili je ključ nevažeći), `authInfo` ostaje `undefined`, a razrješavanje se neizmijenjeno
-nastavlja kroz postojeći lanac `meta`/varijable okruženja. stdio nema identitet pojedinačnog pozivatelja (pogledajte
-`mcpCallerIdentity.ts`) i ovo na njega ne utječe — ostaje na rezervnom lancu `_meta`/varijable okruženja.
+Preko HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` sada razrješava stvarni `api_keys.scopes` pozivatelja preko `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) i prosljeđuje ga MCP SDK-ovom `transport.handleRequest(req, { authInfo })`, tako da `extra.authInfo.scopes` koji dosegne svaki poziv alata odražava vlastite opsege ključa nositelja. `scopeEnforcement.ts`-ov `resolveCallerScopeContext()` već je dao prioritet `authInfo` u nad `_meta` i `OMNIROUTE_MCP_SCOPES` env rezervnim — ovo samo popunjava onaj prvi izvor s najvišim prioritetom, koji je prethodno bio neuhranjen preko HTTP. Kada se nijedan API ključ ne razriješi (nema zaglavlja, nevažeći ključ), `authInfo` ostaje `undefined` i razrješenje prelazi na postojeći `meta`/env lanac nepromijenjen. stdio nema identitet po pozivatelju (pogledajte `mcpCallerIdentity.ts`) i na njega ne utječe vezanje po ključu — on preskače korak `_meta` (`_meta` se poštuje samo unutar konteksta autentifikacije HTTP, #15159) i rješava se samo iz ključa `OMNIROUTE_MCP_SCOPES` env.
 
-**Provedba se prisilno uključuje za HTTP/SSE pozivatelje s uskim opsegom bez obzira na
-`OMNIROUTE_MCP_ENFORCE_SCOPES`.** Zadana vrijednost `false` za `OMNIROUTE_MCP_ENFORCE_SCOPES` sigurna je samo
-za lokalni/stdio tijek jednog operatora, gdje ne postoji identitet pojedinačnog pozivatelja prema kojem bi se opseg
-mogao primijeniti. `open-sse/mcp-server/server.ts::withScopeEnforcement()` bezuvjetno uključuje provedbu
-opsega po alatu (`shouldForceScopeEnforcement()` u `scopeEnforcement.ts`) kad god je
-`resolveCallerScopeContext()` razriješio
-`source === "authInfo"` (tj. stvarno HTTP zaglavlje Authorization po ključu, samo za HTTP/SSE) I taj
-ključ nema puni opseg `manage`/`admin`. Time se uklanja propust zbog kojeg bi ključ koji ima SAMO
-gore dokumentirani uski opseg zaobilaženja `mcp:connect` — koji ne autorizira ništa osim
-iznimke LOCAL_ONLY za `/api/mcp/` — inače mogao pozvati svaki MCP alat nakon što operator
-omogući udaljeni MCP pristup odnosno pristup izvan povratne petlje, samo zato što se
-`OMNIROUTE_MCP_ENFORCE_SCOPES` isporučuje sa zadanom vrijednošću `false`. Puni ključ `manage`/`admin`
-putem HTTP-a i svaki stdio/lokalni pozivatelj zadržavaju nepromijenjeno postojeće ponašanje uvjetovano
-varijablom `OMNIROUTE_MCP_ENFORCE_SCOPES`.
+**Provedba je prisilno uključena za HTTP/SSE pozivatelje uskog opsega bez obzira na `OMNIROUTE_MCP_ENFORCE_SCOPES`.** `OMNIROUTE_MCP_ENFORCE_SCOPES` zadana vrijednost `false` sigurna je samo za local/stdio tijek s jednim operatorom, gdje ne postoji identitet pozivatelja prema kojemu se može promatrati. `open-sse/mcp-server/server.ts::withScopeEnforcement()` bezuvjetno uključuje provedbu opsega po alatu (`shouldForceScopeEnforcement()` u `scopeEnforcement.ts`) kad `resolveCallerScopeContext()` razriješi `source === "authInfo"` (tj. stvarno zaglavlje autorizacije HTTP po ključu, HTTP/SSE-only) AND taj ključ ne sadrži puni opseg `manage`/`admin`. Time se zatvara praznina u kojoj bi ključ koji drži ONLY uski opseg `mcp:connect` zaobilaženja — dokumentiran gore kao ovlaštenje za ništa osim `/api/mcp/` LOCAL_ONLY izrezivanja — inače mogao pozvati svaki MCP alat nakon što operater omogući pristup remote/non-loopback MCP, jednostavno zato što `OMNIROUTE_MCP_ENFORCE_SCOPES` isporučuje `false` prema zadanim postavkama. Puni `manage`/`admin` ključ preko HTTP i svaki stdio/local pozivatelj, zadržava postojeće `OMNIROUTE_MCP_ENFORCE_SCOPES` -gated ponašanje nepromijenjenim.
 
 ---
 

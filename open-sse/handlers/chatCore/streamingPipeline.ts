@@ -20,7 +20,11 @@ import {
   wantsProgress as defaultWantsProgress,
 } from "../../utils/progressTracker.ts";
 import { createPiiSseTransform as defaultPiiSse } from "@/lib/streamingPiiTransform";
-import { isPiiTransformEnabled } from "@/lib/streamingPiiTransform";
+import { isPiiTransformEnabled, resolvePiiGate } from "@/lib/streamingPiiTransform";
+
+// Single seam to the PII stream module: streamingTail resolves the per-request gate through this
+// file instead of importing src/ itself (boundary ratchet, quality-baseline.json).
+export { resolvePiiGate };
 import {
   createCredentialSseTransform as defaultCredentialSse,
   isCredentialTransformEnabled,

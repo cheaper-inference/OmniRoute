@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import path from "path";
-import fs from "fs";
+import { readdir, stat } from "fs/promises";
 import { resolveDataDir } from "@/lib/dataPaths";
 import {
   getAppLogRetentionDays,
@@ -24,10 +24,8 @@ export async function GET() {
     // Get DB file size
     let sizeBytes = 0;
     try {
-      if (fs.existsSync(dbFilePath)) {
-        const stat = fs.statSync(dbFilePath);
-        sizeBytes = stat.size;
-      }
+      const fileStat = await stat(dbFilePath);
+      sizeBytes = fileStat.size;
     } catch {
       /* ignore */
     }
@@ -36,17 +34,14 @@ export async function GET() {
     let lastBackupAt = null;
     let backupCount = 0;
     try {
-      if (fs.existsSync(backupsDir)) {
-        const files = fs
-          .readdirSync(backupsDir)
-          .filter((f) => f.startsWith("db_") && f.endsWith(".sqlite"))
-          .sort()
-          .reverse();
-        backupCount = files.length;
-        if (files.length > 0) {
-          const latestStat = fs.statSync(path.join(backupsDir, files[0]));
-          lastBackupAt = latestStat.mtime.toISOString();
-        }
+      const files = (await readdir(backupsDir))
+        .filter((f) => f.startsWith("db_") && f.endsWith(".sqlite"))
+        .sort()
+        .reverse();
+      backupCount = files.length;
+      if (files.length > 0) {
+        const latestStat = await stat(path.join(backupsDir, files[0]));
+        lastBackupAt = latestStat.mtime.toISOString();
       }
     } catch {
       /* ignore */

@@ -17,12 +17,26 @@ import { encrypt, decrypt } from "./encryption";
 import { getProxyRegistryGeneration, resolveProxyForScopeFromRegistry } from "./proxies";
 import { isEgressBucketedLockScope } from "@omniroute/open-sse/config/providerErrorRules.ts";
 import { getComboModelProvider as getComboEntryProvider } from "@/lib/combos/steps";
-import { requestBodyLimitMbFromEnv } from "@/shared/constants/bodySize";
+import {
+  normalizeRequestBodyLimitMb,
+  requestBodyLimitMbFromEnv,
+} from "@/shared/constants/bodySize";
 import { DEFAULT_RESPONSES_PREVIOUS_RESPONSE_ID_MODE } from "@/shared/constants/responsesPreviousResponseId";
 import { decodeUserinfo } from "@/shared/utils/decodeUserinfo";
 import { type JsonRecord, toRecord } from "./settings/shared";
 import { resolveNoAuthSharedProviderProxy } from "./settings/noAuthProxyFallback";
 import { PROXY_BULK_IMPORT_LIMIT_DEFAULT } from "@/shared/constants/proxyBulkImport";
+
+/**
+ * Settings values stored encrypted at rest (AES-256-GCM via ./encryption).
+ * Read and write must stay in sync — a key that is encrypted on write but not
+ * decrypted on read hands ciphertext to the consumer, which fails as a silent
+ * auth error rather than a visible one. Both paths derive from this set.
+ */
+const ENCRYPTED_SETTING_KEYS: ReadonlySet<string> = new Set([
+  "oidcClientSecret",
+  "entraGraphClientSecret",
+]);
 
 type ProxyValue = JsonRecord | string | null;
 type ProxyResolutionResult = {
@@ -161,6 +175,10 @@ export async function getSettings() {
     disableSessionStickiness: false,
     // Global connection-aware expansion fallback for group-B combo strategies is opt-in.
     connectionAwareExpansion: false,
+    // Keep combo targets whose known output ceiling is below the request's
+    // max_tokens instead of treating output_tokens as a hard compatibility
+    // mismatch; the upstream then applies its own ceiling.
+    outputLimitAdvisory: false,
     promptCacheAffinityEnabled: true,
     geminiPromptCacheMode: "off",
     comboStrategy: "fallback",
@@ -188,6 +206,17 @@ export async function getSettings() {
     oidcRedirectPath: "/api/auth/oidc/callback",
     oidcAllowedSubjects: [], // optional sub or email whitelist
     oidcAdmissionClaim: null, // optional ID-token role/group admission policy
+    // Entra ID SSO for /v1/* (see docs/security/ENTRA_SSO.md). Off by default:
+    // enabling it only ADDS a way to authenticate — static API keys keep working.
+    entraSsoEnabled: false,
+    entraAuthorityHost: "",
+    entraTenantId: "",
+    entraClientId: "",
+    entraApiAudience: "",
+    entraGroupMappings: [],
+    entraDefaultKeyGroupId: null, // null = users matching no mapping are denied
+    entraGraphFallbackEnabled: false,
+    entraGraphClientSecret: "",
     mcpEnabled: false,
     a2aEnabled: false,
     hiddenSidebarItems: [],
@@ -271,6 +300,9 @@ export async function getSettings() {
     // #9418: Opt-in filter that hides no-think/* gateway variants from the /v1/models catalog.
     // Routing still works for hidden ids sent explicitly.
     hideNoThinkVariants: false,
+    // Opt-in: the public /v1/models listing advertises only combos (user combos +
+    // auto/*). Catalog-only — explicit provider/model ids still route.
+    exposeCombosOnly: false,
     // #11481: Opt-in explicit model exposure allow/deny list, mirrored into the
     // auto/* combo candidate pool (open-sse/services/autoCombo/modelExposureFilter.ts)
     // so a denied model can't sneak back in via combo routing — the same trap
@@ -288,6 +320,10 @@ export async function getSettings() {
     codexAutoPing: { connections: {} },
     // #8848: opt-in per-connection Claude proactive warmup (empty = off for everyone).
     claudeWarmup: { connections: {} },
+    // Operator-set CLI client-version overrides for the Claude Code / Codex
+    // identity presets (open-sse/config/cliVersions.ts). Empty record = no
+    // override: resolution falls back to the env var, then the captured pin.
+    cliVersionOverrides: {},
   };
   for (const row of rows) {
     const record = toRecord(row);
@@ -301,8 +337,10 @@ export async function getSettings() {
     }
   }
 
-  if (typeof settings.oidcClientSecret === "string") {
-    settings.oidcClientSecret = decrypt(settings.oidcClientSecret) ?? "";
+  for (const encryptedKey of ENCRYPTED_SETTING_KEYS) {
+    if (typeof settings[encryptedKey] === "string") {
+      settings[encryptedKey] = decrypt(settings[encryptedKey] as string) ?? "";
+    }
   }
   applySessionAffinityLegacyFallback(settings);
 
@@ -320,6 +358,23 @@ export async function getSettings() {
   }
 
   return settings;
+}
+
+/**
+ * The `maxBodySizeMb` an operator saved, or null if they never did. getSettings() cannot tell these
+ * apart because it fills the key with the default.
+ */
+export function getSavedRequestBodyLimitMb(): number | null {
+  const row = getDbInstance()
+    .prepare("SELECT value FROM key_value WHERE namespace = 'settings' AND key = 'maxBodySizeMb'")
+    .get();
+  const rawValue = toRecord(row).value;
+  if (typeof rawValue !== "string") return null;
+  try {
+    return normalizeRequestBodyLimitMb(JSON.parse(rawValue));
+  } catch {
+    return null;
+  }
 }
 
 export async function updateSettings(
@@ -347,7 +402,7 @@ export async function updateSettings(
       throw new SettingsRevisionConflictError(currentRevision);
     }
     for (const [key, value] of Object.entries(updates)) {
-      const toStore = key === "oidcClientSecret" ? encrypt(value as string) : value;
+      const toStore = ENCRYPTED_SETTING_KEYS.has(key) ? encrypt(value as string) : value;
       insert.run(key, JSON.stringify(toStore));
     }
     insert.run(SETTINGS_REVISION_KEY, JSON.stringify(currentRevision + 1));

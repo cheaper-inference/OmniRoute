@@ -1,0 +1,6 @@
+{
+  "extends": "../../tsconfig.typecheck-dashboard.json",
+  "compilerOptions": { "incremental": false, "noEmit": true },
+  "include": [],
+  "files": ["../../electron/types.d.ts", "./dashboard-shared-contracts.tsx"]
+}
