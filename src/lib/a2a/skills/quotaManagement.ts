@@ -50,14 +50,26 @@ export async function executeQuotaManagement(task: A2ATask): Promise<QuotaManage
       : [];
   const providers = quota.providers;
 
-  const availableQuota = (provider: { quotaTotal: number | null; quotaUsed: number }) => {
-    if (provider.quotaTotal === null) return Number.POSITIVE_INFINITY;
+  // A null total means the quota is unknown, not unlimited.
+  const availableQuota = (provider: {
+    quotaTotal: number | null;
+    quotaUsed: number;
+  }): number | null => {
+    if (provider.quotaTotal === null) return null;
     return provider.quotaTotal - provider.quotaUsed;
   };
 
   // Query classification
   if (query.includes("ranking") || query.includes("most quota") || query.includes("best")) {
-    const sorted = [...providers].sort((a, b) => availableQuota(b) - availableQuota(a));
+    // Known amounts first (most available first); unknown amounts last.
+    const sorted = [...providers].sort((a, b) => {
+      const ra = availableQuota(a);
+      const rb = availableQuota(b);
+      if (ra === null && rb === null) return 0;
+      if (ra === null) return 1;
+      if (rb === null) return -1;
+      return rb - ra;
+    });
     return {
       artifacts: [
         {
@@ -65,8 +77,7 @@ export async function executeQuotaManagement(task: A2ATask): Promise<QuotaManage
           content: `**Quota Ranking (most available first):**\n${sorted
             .map((p, i) => {
               const remaining = availableQuota(p);
-              const remainingLabel =
-                remaining === Number.POSITIVE_INFINITY ? "unlimited" : remaining.toLocaleString();
+              const remainingLabel = remaining === null ? "unknown" : remaining.toLocaleString();
               const percentLabel =
                 p.quotaTotal === null || p.percentRemaining === null
                   ? "n/a"

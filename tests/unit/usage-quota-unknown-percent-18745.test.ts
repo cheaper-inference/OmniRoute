@@ -112,11 +112,13 @@ test("#18745 the A2A quota summary does not warn about unknown quotas", async ()
     assert.doesNotMatch(summary.artifacts[0].content, /unknown-quota[^\n]*at or below/);
 
     const ranking = await executeQuotaManagement(a2aTask("quota ranking"));
+    assert.match(ranking.artifacts[0].content, /1\. \*\*low-quota\*\* — 5 remaining \(5%\)/);
     assert.match(
       ranking.artifacts[0].content,
-      /\*\*unknown-quota\*\* — unlimited remaining \(n\/a\)/
+      /2\. \*\*unknown-quota\*\* — unknown remaining \(n\/a\)/
     );
-    assert.match(ranking.artifacts[0].content, /\*\*low-quota\*\* — 5 remaining \(5%\)/);
+    assert.doesNotMatch(ranking.artifacts[0].content, /unlimited/);
+    assert.deepEqual(ranking.metadata.providers, ["low-quota", "unknown-quota"]);
   } finally {
     globalThis.fetch = originalFetch;
   }
