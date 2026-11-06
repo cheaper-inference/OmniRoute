@@ -700,10 +700,19 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
     authHeader: "bearer",
     format: "openai",
     models: [
-      { id: "ZImageTurbo_INT8", name: "Z-Image Turbo (deAPI)" },
+      // Z-Image models accept square sizes only (gateway returns size_not_supported otherwise).
+      {
+        id: "ZImageTurbo_INT8",
+        name: "Z-Image Turbo (deAPI)",
+        supportedSizes: ["512x512", "768x768", "1024x1024"],
+      },
       { id: "Flux_2_Klein_4B_BF16", name: "FLUX.2 Klein 4B (deAPI)" },
       { id: "Flux1schnell", name: "FLUX.1 schnell (deAPI)" },
-      { id: "ZAnimeDistill_8Step_INT8", name: "Z-Anime (deAPI)" },
+      {
+        id: "ZAnimeDistill_8Step_INT8",
+        name: "Z-Anime (deAPI)",
+        supportedSizes: ["512x512", "768x768", "1024x1024"],
+      },
     ],
     supportedSizes: ["512x512", "768x768", "1024x1024", "1024x1536", "1536x1024"],
   },

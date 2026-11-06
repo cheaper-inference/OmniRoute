@@ -84,6 +84,19 @@ test("deapi registries use native model ids and gateway-specific defaults", () =
   assert.ok(getVideoJobPreset("deapi-video-job"), "video format must resolve to a job preset");
 });
 
+test("deapi Z-Image models advertise only the square sizes the gateway accepts", () => {
+  const square = ["512x512", "768x768", "1024x1024"];
+  const models = IMAGE_PROVIDERS.deapi.models;
+  for (const id of ["ZImageTurbo_INT8", "ZAnimeDistill_8Step_INT8"]) {
+    assert.deepEqual(models.find((m) => m.id === id)?.supportedSizes, square, id);
+  }
+  // FLUX models take the portrait/landscape sizes too, so they inherit the provider list.
+  for (const id of ["Flux_2_Klein_4B_BF16", "Flux1schnell"]) {
+    assert.equal(models.find((m) => m.id === id)?.supportedSizes, undefined, id);
+  }
+  assert.ok(IMAGE_PROVIDERS.deapi.supportedSizes.includes("1024x1536"));
+});
+
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
