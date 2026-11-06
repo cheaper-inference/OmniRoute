@@ -105,7 +105,7 @@ _Living section — reconciled 2026-11-06 from all cycle commits (`c754707d0e` �
 | 👥 People who contributed | **222** |
 | 📝 Commits in the cycle | **1,162** |
 | 🔀 Pull requests referenced | **847** |
-| 📋 Changelog entries | **1,188** |
+| 📋 Changelog entries | **1,189** |
 | 🙌 Contributors credited in entries | **221** |
 | 🤖 Automated dependency commits | 11 |
 
@@ -116,7 +116,7 @@ _Living section — reconciled 2026-11-06 from all cycle commits (`c754707d0e` �
 | 🐛 Fixes | 588 |
 | ♻️ Refactor | 204 |
 | ✨ Features | 146 |
-| 🧪 Tests | 92 |
+| 🧪 Tests | 93 |
 | 📚 Docs | 70 |
 | 🧹 Chore | 51 |
 | ⚙️ CI | 18 |
@@ -1352,6 +1352,7 @@ _By commits in `c754707d0e..616801a2b6`, author identities consolidated via `.ma
 - **docs(i18n):** re-sync RESILIENCE_GUIDE and FEATURE_FLAGS mirrors after the v3.8.53 fix train ([#19102](https://github.com/cheaper-inference/OmniRoute/pull/19102))
 - **test(rate-limit):** give the queue-wait regression test a real budget ([#19156](https://github.com/cheaper-inference/OmniRoute/pull/19156))
 - **docs(i18n):** sync ENVIRONMENT mirrors with the media-tool section ([#19187](https://github.com/cheaper-inference/OmniRoute/pull/19187))
+- **test(usage):** time the #15172 pacing test at the throttle grant instead of at the fetch; the per-connection proxy lookup between them varies per call and failed the release CI. — thanks @diegosouzapw
 
 ### 🙌 Contributors
 
@@ -1458,6 +1459,7 @@ Thanks to everyone whose work landed in v3.8.53:
 | [@kenny000666](https://github.com/kenny000666) | #14736 |
 | [@KiaroSama](https://github.com/KiaroSama) | #16450, #16795, #17184, #17550 |
 | [@Kizuno18](https://github.com/Kizuno18) | #15305 |
+| [@kl3inIT](https://github.com/kl3inIT) | #16843 |
 | [@KSonny4](https://github.com/KSonny4) | #15521 |
 | [@LazyGatto](https://github.com/LazyGatto) | #17269 |
 | [@leoplife](https://github.com/leoplife) | #17345 |
