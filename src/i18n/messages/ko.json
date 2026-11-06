@@ -6250,7 +6250,7 @@
     "apiRegionChina": "중국 본토",
     "apiRegionHint": "API 액세스 및 할당량 추적에 사용할 엔드포인트 리전을 선택하세요.",
     "apiRegionInternational": "해외",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionLabel": "API 리전",
     "apikey": "API 키",
     "audio": "오디오",
     "audioProvidersHeading": "오디오 제공업체 제목",
