@@ -151,12 +151,6 @@ export function isAbortError(error: unknown): boolean {
   );
 }
 
-/**
- * `fetch()` wrapper that aborts if the upstream never returns response headers
- * within `timeoutMs` (default FETCH_TIMEOUT_MS, the global startup budget).
- * SSE readiness is checked separately after headers arrive.
- * Shared by every fetch attempt in executeOnce() (initial, 403-retry, credits-retry).
- */
 type PhysicalSendTiming = { correlationId: string | null; ordinal: number };
 
 function observeTimedAntigravitySend(
@@ -168,21 +162,29 @@ function observeTimedAntigravitySend(
   // The feature is off by default. The outer HTTP-attempt collector must see
   // the final response wrapper so response-to-attempt correlation still works.
   return prl.observeProviderHttpSend(metadata, () => {
-    if (
-      process.env.OMNIROUTE_ANTIGRAVITY_TIMING_TELEMETRY !== "true" ||
-      !metadata.connectionId
-    ) return send();
-    return withAntigravityTiming({
-      enabled: true,
-      connectionId: metadata.connectionId,
-      model: metadata.model,
-      correlationId: timing?.correlationId,
-      physicalSendOrdinal: timing?.ordinal,
-      emit: (event) => timingLog.info("ANTIGRAVITY_TIMING", "Antigravity physical-send timing", event),
-    }, () => timeAntigravityFetch(send, signal));
+    if (process.env.OMNIROUTE_ANTIGRAVITY_TIMING_TELEMETRY !== "true" || !metadata.connectionId)
+      return send();
+    return withAntigravityTiming(
+      {
+        enabled: true,
+        connectionId: metadata.connectionId,
+        model: metadata.model,
+        correlationId: timing?.correlationId,
+        physicalSendOrdinal: timing?.ordinal,
+        emit: (event) =>
+          timingLog.info("ANTIGRAVITY_TIMING", "Antigravity physical-send timing", event),
+      },
+      () => timeAntigravityFetch(send, signal)
+    );
   });
 }
 
+/**
+ * `fetch()` wrapper that aborts if the upstream never returns response headers
+ * within `timeoutMs` (default FETCH_TIMEOUT_MS, the global startup budget).
+ * SSE readiness is checked separately after headers arrive.
+ * Shared by every fetch attempt in executeOnce() (initial, 403-retry, credits-retry).
+ */
 export async function fetchAntigravityWithReadinessTimeout(
   url: string,
   init: RequestInit,

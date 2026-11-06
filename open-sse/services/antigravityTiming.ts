@@ -4,7 +4,10 @@ import { resolveAntigravityModelId } from "../config/antigravityModelAliases.ts"
 import { isAntigravityPreResponseTimeout } from "./antigravityTimeout.ts";
 
 function normalizeAntigravityTimingModel(value: string): string {
-  const normalized = value.trim().replace(/^(?:antigravity|agy)\//i, "").toLowerCase();
+  const normalized = value
+    .trim()
+    .replace(/^(?:antigravity|agy)\//i, "")
+    .toLowerCase();
   if (!/^[a-z0-9_.:-]{1,160}$/.test(normalized)) return "unknown";
   return resolveAntigravityModelId(normalized);
 }
@@ -34,10 +37,12 @@ function isMeaningfulPart(value: unknown): boolean {
     executableCode?: unknown;
     codeExecutionResult?: unknown;
   };
-  return (typeof part.text === "string" && part.text.length > 0) ||
+  return (
+    (typeof part.text === "string" && part.text.length > 0) ||
     (typeof part.functionCall?.name === "string" && part.functionCall.name.length > 0) ||
     (typeof part.inlineData?.data === "string" && part.inlineData.data.length > 0) ||
-    Boolean(part.executableCode || part.codeExecutionResult);
+    Boolean(part.executableCode || part.codeExecutionResult)
+  );
 }
 
 function candidateHasMeaningfulPart(value: unknown): boolean {
@@ -52,10 +57,15 @@ export function hasAntigravityMeaningfulDelta(frame: string): boolean {
     try {
       const parsed = JSON.parse(line.slice(5).trim()) as Record<string, unknown>;
       const response = (parsed.response ?? parsed) as { candidates?: unknown[] };
-      if (Array.isArray(response.candidates) && response.candidates.some(candidateHasMeaningfulPart)) {
+      if (
+        Array.isArray(response.candidates) &&
+        response.candidates.some(candidateHasMeaningfulPart)
+      ) {
         return true;
       }
-    } catch { /* Partial, invalid or terminal frame: no measured delta. */ }
+    } catch {
+      /* Partial, invalid or terminal frame: no measured delta. */
+    }
   }
   return false;
 }
@@ -125,11 +135,17 @@ function wrapTrackedResponseBody(
     },
     async cancel(reason) {
       handlers.finish("cancelled");
-      try { await reader.cancel(reason); } finally { reader.releaseLock(); }
+      try {
+        await reader.cancel(reason);
+      } finally {
+        reader.releaseLock();
+      }
     },
   });
   return new Response(body, {
-    status: response.status, statusText: response.statusText, headers: response.headers,
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
   });
 }
 
@@ -162,7 +178,7 @@ export class AntigravityTimingTracker {
   private accounts = new Map<string, AccountTiming>();
   constructor(
     private now: () => number = () => performance.now(),
-    private maxObservationMs: number = MAX_TIMING_OBSERVATION_MS,
+    private maxObservationMs: number = MAX_TIMING_OBSERVATION_MS
   ) {}
 
   async fetch(send: () => Promise<Response>, signal?: AbortSignal | null): Promise<Response> {
@@ -171,8 +187,12 @@ export class AntigravityTimingTracker {
     const account = claimTimingAccount(this.accounts, scope.connectionId);
     if (!account) return send();
     const started = this.now();
-    const idleDurationMs = account.inflight > 0 ? 0 : account.lastFinishedAt === null
-      ? null : Math.max(0, started - account.lastFinishedAt);
+    const idleDurationMs =
+      account.inflight > 0
+        ? 0
+        : account.lastFinishedAt === null
+          ? null
+          : Math.max(0, started - account.lastFinishedAt);
     const concurrentInflight = ++account.inflight;
     const physicalSend = ++scope.sends;
     let headersAt: number | null = null;
@@ -183,17 +203,29 @@ export class AntigravityTimingTracker {
       if (physicalSend > MAX_EVENTS_PER_ATTEMPT / 3) return;
       // Correlation ids stay log fields, never metric labels. No URLs or payloads.
       const fields = {
-        event: "antigravity_timing", phase, requestId: scope.requestId,
+        event: "antigravity_timing",
+        phase,
+        requestId: scope.requestId,
         account: createHash("sha256").update(scope.connectionId).digest("hex").slice(0, 16),
-        model: normalizeAntigravityTimingModel(scope.model), physicalSend,
-        idleDurationMs, concurrentInflight,
-        dnsMs: null, connectMs: null, tlsMs: null,
+        model: normalizeAntigravityTimingModel(scope.model),
+        physicalSend,
+        idleDurationMs,
+        concurrentInflight,
+        dnsMs: null,
+        connectMs: null,
+        tlsMs: null,
         headerLatencyMs: headersAt === null ? null : headersAt - started,
-        firstMeaningfulDeltaFromHeadersMs: firstDeltaAt === null || headersAt === null ? null : firstDeltaAt - headersAt,
+        firstMeaningfulDeltaFromHeadersMs:
+          firstDeltaAt === null || headersAt === null ? null : firstDeltaAt - headersAt,
         firstMeaningfulDeltaFromSendMs: firstDeltaAt === null ? null : firstDeltaAt - started,
-        elapsedMs: Math.max(0, this.now() - started), ...extra,
+        elapsedMs: Math.max(0, this.now() - started),
+        ...extra,
       };
-      try { scope.emit(fields); } catch { /* Diagnostics cannot change request behavior. */ }
+      try {
+        scope.emit(fields);
+      } catch {
+        /* Diagnostics cannot change request behavior. */
+      }
     };
     const finish = (phase: string) => {
       if (finished) return;
@@ -245,7 +277,13 @@ export class AntigravityTimingTracker {
         },
       });
     } catch (error) {
-      finish(isAntigravityPreResponseTimeout(error) ? "pre_response_timeout" : signal?.aborted ? abortPhase() : "fetch_failed");
+      finish(
+        isAntigravityPreResponseTimeout(error)
+          ? "pre_response_timeout"
+          : signal?.aborted
+            ? abortPhase()
+            : "fetch_failed"
+      );
       throw error;
     }
   }
@@ -256,14 +294,25 @@ export const timeAntigravityFetch = (send: () => Promise<Response>, signal?: Abo
   tracker.fetch(send, signal);
 
 export function withAntigravityTiming<T>(
-  options: { enabled: boolean; connectionId: string; model: string; correlationId?: string | null;
-    physicalSendOrdinal?: number; emit: TimingContext["emit"] },
+  options: {
+    enabled: boolean;
+    connectionId: string;
+    model: string;
+    correlationId?: string | null;
+    physicalSendOrdinal?: number;
+    emit: TimingContext["emit"];
+  },
   fn: () => T
 ): T {
   if (!options.enabled) return fn();
   const requestId = /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(options.correlationId ?? "")
-    ? options.correlationId! : randomUUID();
-  const sends = options.physicalSendOrdinal && Number.isInteger(options.physicalSendOrdinal) &&
-    options.physicalSendOrdinal > 0 ? options.physicalSendOrdinal - 1 : 0;
+    ? options.correlationId!
+    : randomUUID();
+  const sends =
+    options.physicalSendOrdinal &&
+    Number.isInteger(options.physicalSendOrdinal) &&
+    options.physicalSendOrdinal > 0
+      ? options.physicalSendOrdinal - 1
+      : 0;
   return context.run({ ...options, requestId, sends }, fn);
 }
