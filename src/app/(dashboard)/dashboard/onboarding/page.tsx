@@ -513,8 +513,11 @@ export default function OnboardingWizard() {
                   </Button>
                 )}
                 {testStatus === "testing" && (
-                  <div className="flex items-center justify-center gap-2 text-text-muted">
-                    <Icon name="progress_activity" size={20} className="animate-spin" />
+                  <div
+                    role="status"
+                    className="flex items-center justify-center gap-2 text-text-muted"
+                  >
+                    <Spinner decorative size="sm" />
                     <span className="text-sm">{testMessage}</span>
                   </div>
                 )}

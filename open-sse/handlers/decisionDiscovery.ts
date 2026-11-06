@@ -25,7 +25,7 @@ async function ollamaDecisionCapabilities(
   });
   if (!show.ok) {
     await show.body?.cancel();
-    return [];
+    throw new DecisionError(show.status, "model_capabilities_failed");
   }
   const metadata = record(await readDecisionJson(show, 502, signal));
   const capabilities = metadata.capabilities;
@@ -43,6 +43,7 @@ export async function discoverDecisionModels(
     object: "model",
     owned_by: backend.provider,
     type: "decisions",
+    api_format: backend.format,
     supported_endpoints: [backend.format],
     capabilities: { decision: true, ...(vision ? { vision } : {}) },
     pricing: null,

@@ -120,10 +120,13 @@ function readCachedUsage(
   persistedUsage: Usage | undefined,
   requestedModel: string | null
 ): Usage & { cached?: ReturnType<typeof getQuotaCache> } {
-  getQuotaSnapshotFetchedAt(id);
   seedReadView(id, provider, persistedUsage || {});
   hydrateCodexQuotaCacheForRequest(connection, requestedModel);
-  const cached = getQuotaCache(id);
+  let cached = getQuotaCache(id);
+  if (!cached && !persistedUsage?.quotas) {
+    getQuotaSnapshotFetchedAt(id);
+    cached = getQuotaCache(id);
+  }
   return {
     ...(persistedUsage ||
       (cached
@@ -348,7 +351,7 @@ export function evaluateCachedQuotaAvailability(
       ),
       ...(predicates.cutoffEnabled ? { cutoffEvaluated: predicates.cutoffEvaluated } : {}),
     };
-  });
+  }, toProviderConnection(input).id);
 }
 
 export function buildConnectionQuotaAvailability(
@@ -357,10 +360,14 @@ export function buildConnectionQuotaAvailability(
   policy: QuotaPreflightPolicy
 ): ConnectionQuotaAvailability {
   const connection = toProviderConnection(input);
-  const cachedUsage = withQuotaCacheReadView(() => {
-    getQuotaSnapshotFetchedAt(connection.id);
-    const cached = getQuotaCache(connection.id);
-    return (
+  return withQuotaCacheReadView(() => {
+    seedReadView(connection.id, connection.provider, usage || {});
+    let cached = getQuotaCache(connection.id);
+    if (!cached && !usage?.quotas) {
+      getQuotaSnapshotFetchedAt(connection.id);
+      cached = getQuotaCache(connection.id);
+    }
+    const cachedUsage =
       usage ||
       (cached
         ? {
@@ -368,60 +375,59 @@ export function buildConnectionQuotaAvailability(
             modelQuotas: cached.modelQuotas,
             fetchedAt: timestamp(cached.fetchedAt)!,
           }
-        : {})
+        : {});
+    const evaluated = appendSavedRouterScopes(
+      connection,
+      availabilityScopes(
+        connection.provider,
+        cachedUsage,
+        connection.providerSpecificData?.antigravityFamilyRateLimitedUntil
+      )
+    ).map((scope) => ({
+      ...scope,
+      // Routing has no request-specific selector for this display-only window.
+      decision:
+        scope.id === "code_review" &&
+        connection.provider === "codex" &&
+        scope.windows.some((name) => {
+          const q = normalizeQuotas(cachedUsage.quotas || {})[name];
+          return q && q.fractionReported !== false && q.remainingPercentage <= 0;
+        })
+          ? {
+              usable: null,
+              blockers: [],
+              allowanceReasons: [],
+              fetchedAt: cachedUsage.fetchedAt || null,
+            }
+          : scope.models
+            ? combineQuotaAlternatives(
+                scope.models.map((model) =>
+                  evaluateCachedQuotaAvailability(input, usage, policy, model)
+                ),
+                evaluateCachedQuotaAvailability(input, usage, policy, scope.model)
+              )
+            : evaluateCachedQuotaAvailability(input, usage, policy, scope.model),
+    }));
+    const candidates = evaluated.filter((scope) => scope.id !== "code_review");
+    // Ordinary requests define the account verdict. Only peer pools may use any-usable
+    // aggregation; attached scopes remain visible without promoting a blocked account.
+    const ordinary = evaluated.find((scope) => scope.kind === "account");
+    const decisions = evaluated
+      .filter((scope) => scope.kind === "group")
+      .map((scope) => scope.decision);
+    const fallback = evaluateCachedQuotaAvailability(input, usage, policy);
+    const account = ordinary ? ordinary.decision : combineQuotaAlternatives(decisions, fallback);
+    const payloadScopes = evaluated.flatMap((scope) =>
+      scope.kind === "account"
+        ? candidates.some((candidate) => candidate.kind !== "account")
+          ? [{ ...scope, kind: "scoped" as const }]
+          : []
+        : [{ ...scope, kind: scope.kind }]
     );
-  });
-  const evaluated = appendSavedRouterScopes(
-    connection,
-    availabilityScopes(
-      connection.provider,
-      cachedUsage,
-      connection.providerSpecificData?.antigravityFamilyRateLimitedUntil
-    )
-  ).map((scope) => ({
-    ...scope,
-    // Routing has no request-specific selector for this display-only window.
-    decision:
-      scope.id === "code_review" &&
-      connection.provider === "codex" &&
-      scope.windows.some((name) => {
-        const q = normalizeQuotas(cachedUsage.quotas || {})[name];
-        return q && q.fractionReported !== false && q.remainingPercentage <= 0;
-      })
-        ? {
-            usable: null,
-            blockers: [],
-            allowanceReasons: [],
-            fetchedAt: cachedUsage.fetchedAt || null,
-          }
-        : scope.models
-          ? combineQuotaAlternatives(
-              scope.models.map((model) =>
-                evaluateCachedQuotaAvailability(input, usage, policy, model)
-              ),
-              evaluateCachedQuotaAvailability(input, usage, policy, scope.model)
-            )
-          : evaluateCachedQuotaAvailability(input, usage, policy, scope.model),
-  }));
-  const candidates = evaluated.filter((scope) => scope.id !== "code_review");
-  // Ordinary requests define the account verdict. Only peer pools may use any-usable
-  // aggregation; attached scopes remain visible without promoting a blocked account.
-  const ordinary = evaluated.find((scope) => scope.kind === "account");
-  const decisions = evaluated
-    .filter((scope) => scope.kind === "group")
-    .map((scope) => scope.decision);
-  const fallback = evaluateCachedQuotaAvailability(input, usage, policy);
-  const account = ordinary ? ordinary.decision : combineQuotaAlternatives(decisions, fallback);
-  const payloadScopes = evaluated.flatMap((scope) =>
-    scope.kind === "account"
-      ? candidates.some((candidate) => candidate.kind !== "account")
-        ? [{ ...scope, kind: "scoped" as const }]
-        : []
-      : [{ ...scope, kind: scope.kind }]
-  );
-  return {
-    id: connection.id,
-    account,
-    scopes: payloadScopes,
-  };
+    return {
+      id: connection.id,
+      account,
+      scopes: payloadScopes,
+    };
+  }, connection.id);
 }

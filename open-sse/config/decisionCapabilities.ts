@@ -3,11 +3,36 @@ import { record } from "../handlers/decisionTypes.ts";
 /** Annotate only models already present in the authorized catalog. */
 export const OPENAI_DECISION_MODEL_IDS = new Set(["gpt-6-luna"]);
 
+/** Legacy `decisions` is a category: TypeSafe/OpenRouter use System One on the wire. */
+export function isLegacySystemOneModel(row: Record<string, unknown>): boolean {
+  if (typeof row.id !== "string" || !/^(typesafe|openrouter)\//.test(row.id)) return false;
+  const endpoints = Array.isArray(row.supported_endpoints) ? row.supported_endpoints : [];
+  return (
+    row.type === "decisions" || endpoints.includes("systemone") || endpoints.includes("decisions")
+  );
+}
+
+export function annotateLegacySystemOneModel(
+  row: Record<string, unknown>
+): Record<string, unknown> {
+  if (!isLegacySystemOneModel(row)) return row;
+  const endpoints = Array.isArray(row.supported_endpoints) ? row.supported_endpoints : [];
+  return {
+    ...row,
+    api_format: "systemone",
+    supported_endpoints: [
+      ...new Set([...endpoints.filter((endpoint) => endpoint !== "decisions"), "systemone"]),
+    ],
+    capabilities: { ...record(row.capabilities), decision: true },
+  };
+}
+
 export function annotateNativeDecisionCapabilities(
   rows: Record<string, unknown>[]
 ): Record<string, unknown>[] {
   return rows.map((row) => {
     if (row.owned_by === "combo") return row;
+    if (isLegacySystemOneModel(row)) return annotateLegacySystemOneModel(row);
     if (row.id === "supersoniclabs/julia-1") {
       return {
         ...row,

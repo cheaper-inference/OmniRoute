@@ -132,7 +132,8 @@ async function buildGatewayLiveCatalogCheck(
  */
 function appendCcMirrorsWhenEnabled(
   models: Array<Record<string, any>>,
-  mirrorRefinements: boolean
+  mirrorRefinements: boolean,
+  providerNodeIdsByPrefix?: Record<string, string>
 ): Array<Record<string, any>> {
   const ccAliasGlobal = isCcAliasGlobalEnabled();
   const ccAliasSettings = getCcAliasSettingsBulk();
@@ -145,6 +146,7 @@ function appendCcMirrorsWhenEnabled(
       global: ccAliasGlobal,
       providers: ccAliasSettings.providers,
       models: ccAliasSettings.models,
+      providerNodeIdsByPrefix,
     }),
     { refined: mirrorRefinements, isResolvableAutoId: isResolvableBuiltinAutoId }
   );
@@ -249,7 +251,11 @@ export async function applyCatalogPostFilters(
   // mirrors that cannot resolve, and checks gateways against what they will receive.
   const mirrorRefinements = isCatalogMirrorRefinementsEnabled();
   if (ctx.allowCcDiscoveryAliases !== false) {
-    finalModels = appendCcMirrorsWhenEnabled(finalModels, mirrorRefinements);
+    finalModels = appendCcMirrorsWhenEnabled(
+      finalModels,
+      mirrorRefinements,
+      ctx.pricing?.providerNodeIdsByPrefix
+    );
   }
 
   // Advertise `<gateway-alias>/<id>` functional-gateway mirrors so discovery

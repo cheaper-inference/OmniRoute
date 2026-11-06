@@ -10,6 +10,7 @@ export const MODEL_SUPPORTED_ENDPOINT_VALUES = [
   "audio-transcriptions",
   "music",
   "images-generations",
+  "ocr",
   // System One typed-decision models (TypeSafe Jev, …) — POST /v1/systemone.
   // Not chat-capable; see classifyModelSupportedEndpoints.
   "decisions",
@@ -40,7 +41,7 @@ export function normalizeModelSupportedEndpoints(endpoints: readonly string[]): 
 }
 
 export function classifyModelSupportedEndpoints(endpoints: readonly string[]): {
-  type?: "embedding" | "rerank" | "image" | "video" | "audio" | "music" | "decisions";
+  type?: "embedding" | "rerank" | "image" | "video" | "audio" | "music" | "ocr" | "decisions";
   subtype?: "speech" | "transcription";
 } {
   // "chat" and "responses" are text-conversation endpoints; they carry no
@@ -58,6 +59,7 @@ export function classifyModelSupportedEndpoints(endpoints: readonly string[]): {
       ["videos", "video"],
       ["video", "video"],
       ["music", "music"],
+      ["ocr", "ocr"],
     ] as const
   ).find(([endpoint]) => endpoints.includes(endpoint));
   if (primary) return { type: primary[1] };
@@ -99,6 +101,8 @@ export function defaultEndpointsForProviderNodeApiType(
       return ["images"];
     case "systemone":
       return ["systemone"];
+    case "ocr":
+      return ["ocr"];
     case "decisions":
       return ["decisions"];
     default:

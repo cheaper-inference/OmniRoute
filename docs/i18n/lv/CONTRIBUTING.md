@@ -13,15 +13,20 @@ ar to līgumiem, mērķētiem testiem, CI pārklājumu un saskaņošanas darbīb
 
 ---
 
-## Izstrādes vides iestatīšana
+## Izstrādes iestatīšana
 
 ### Priekšnosacījumi
 
-- **Node.js** `>=22.22.2 <23` vai `>=24.0.0 <27` (ieteicams: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, vai `>=24.0.0 <27` (ieteicams: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ lietotājiem (Node 24+):** pēc `npm install` izpildes pārbaudiet, vai vietējie moduļi ir instalēti:
-> `node -e "require('better-sqlite3')"`. Ja komanda neizdodas ar kļūdu `MODULE_NOT_FOUND`,
+> **Windows ar Node 24:** izmantojiet pašreizējo 24 LTS labojumversiju (vismaz 24.20.0).
+> Vecākas versijas var pārtraukt darbību pēc veiksmīgiem testiem, kad `--test-force-exit` aizver
+> procesu. Node [Windows libuv labojums](https://github.com/nodejs/node/pull/61999) novērš
+> šo izpildlaika avāriju; atstājiet testu apgalvojumu un izpildītāja iziešanas pārbaudes iespējotas.
+
+> **npm v11+ lietotāji (Node 24+):** pēc `npm install` pārbaudiet, vai vietējie moduļi tika instalēti:
+> `node -e "require('better-sqlite3')"`. Ja komanda neizdodas ar `MODULE_NOT_FOUND`,
 > izpildiet `npm approve-scripts better-sqlite3 && npm install`. Skatiet
 > [Problēmu novēršana](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
@@ -38,7 +43,7 @@ npm install
 ### Vides mainīgie
 
 ```bash
-# Izveidojiet savu .env failu no veidnes
+# Izveidojiet .env no veidnes
 cp .env.example .env
 
 # Ģenerējiet nepieciešamos noslēpumus
@@ -46,79 +51,79 @@ echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Galvenie izstrādes vides mainīgie:
+Galvenie izstrādes mainīgie:
 
-| Mainīgais              | Izstrādes noklusējuma vērtība | Apraksts                      |
-| ---------------------- | ----------------------------- | ----------------------------- |
-| `PORT`                 | `20128`                       | Servera ports                 |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`      | Priekšgala pamata URL         |
-| `JWT_SECRET`           | (ģenerējiet iepriekš)         | JWT parakstīšanas noslēpums   |
-| `INITIAL_PASSWORD`     | `CHANGEME`                    | Pirmās pieteikšanās parole    |
-| `APP_LOG_LEVEL`        | `info`                        | Žurnāla detalizācijas līmenis |
+| Mainīgais              | Noklusējuma vērtība izstrādē | Apraksts                      |
+| ---------------------- | ---------------------------- | ----------------------------- |
+| `PORT`                 | `20128`                      | Servera ports                 |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`     | Frontend pamata URL           |
+| `JWT_SECRET`           | (ģenerējiet iepriekš)        | JWT parakstīšanas noslēpums   |
+| `INITIAL_PASSWORD`     | `CHANGEME`                   | Pirmās pieteikšanās parole    |
+| `APP_LOG_LEVEL`        | `info`                       | Žurnāla detalizācijas līmenis |
 
 ### Informācijas paneļa iestatījumi
 
-Informācijas panelī ir pieejami funkciju UI pārslēgi, kuras var konfigurēt arī ar vides mainīgajiem:
+Informācijas panelī ir pieejami lietotāja saskarnes slēdži funkcijām, kuras var konfigurēt arī, izmantojot vides mainīgos:
 
-| Iestatījuma atrašanās vieta | Pārslēgs            | Apraksts                                         |
-| --------------------------- | ------------------- | ------------------------------------------------ |
-| Iestatījumi → Papildu       | Atkļūdošanas režīms | Iespējot atkļūdošanas pieprasījumu žurnālus (UI) |
-| Iestatījumi → Vispārīgi     | Sānjoslas redzamība | Rādīt/paslēpt sānjoslas sadaļas                  |
+| Iestatījuma atrašanās vieta | Slēdzis            | Apraksts                                         |
+| --------------------------- | ------------------ | ------------------------------------------------ |
+| Settings → Advanced         | Debug Mode         | Iespējot atkļūdošanas pieprasījumu žurnālus (UI) |
+| Settings → General          | Sidebar Visibility | Rādīt/slēpt sānjoslas sadaļas                    |
 
-Šie iestatījumi tiek glabāti datubāzē un saglabājas pēc restartēšanas, aizstājot vides mainīgo noklusējuma vērtības, ja tie ir iestatīti.
+Šie iestatījumi tiek glabāti datubāzē un saglabājas pēc atkārtotas palaišanas, ja tie ir iestatīti, ignorējot vides mainīgo noklusējuma vērtības.
 
-### Lokāla palaišana
+### Palaišana lokāli
 
 ```bash
 # Izstrādes režīms (automātiska pārlāde)
 npm run dev
 
 # Produkcijas būvējums
-npm run build    # next build → .build/next/, pēc tam assembleStandalone → dist/
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Ātra tikai aizmugursistēmas/API kompilēšana līdzdalībnieku izmaiņām
+# Ātra aizmugursistēmas/API kompilācija līdzautoru izmaiņām
 npm run build:contributor
 
-# Laidiena būvējums (tīra pārbūve + HEAD kontrolmarķieris — nepieciešams izvietošanai)
-npm run build:release   # rm -rf .build dist && build + ieraksta dist/BUILD_SHA
+# Izlaides būvējums (tīra pārbūve + HEAD marķieris — nepieciešams izvietošanai)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Bieži izmantota porta konfigurācija
+# Izplatīta porta konfigurācija
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Līdzdalībnieku būvējums veic tikai kompilēšanas validāciju: tas neizveido autonomo
-izplatījumu un nebūvē neobligātos vietējās pakotnes resursus. Izmantojiet parasto produkcijas būvējumu, kad
-nepieciešams validēt izplatāmo komplektu.
+Līdzautoru būvējums veic tikai kompilācijas validāciju: tas neizveido atsevišķo
+distribūciju un nebūvē neobligātos vietējās pakotnes līdzekļus. Izmantojiet parasto produkcijas būvējumu,
+ja nepieciešams validēt publicējamo pakotni.
 
-### Būvējuma izvades struktūra
+### Būvējuma izvades izkārtojums
 
-| Direktorijs | Saturs                                                                     | Izseko Git |
-| ----------- | -------------------------------------------------------------------------- | ---------- |
-| `src/`      | Lietotnes pirmkods (TypeScript / TSX)                                      | Jā         |
-| `.build/`   | Starprezultāti — `next build` izvade (Git ignorē, `distDir = .build/next`) | Nē         |
-| `dist/`     | Izplatāmais komplekts — izveido `assembleStandalone` (Git ignorē)          | Nē         |
+| Direktorija | Saturs                                                                           | Izsekota |
+| ----------- | -------------------------------------------------------------------------------- | -------- |
+| `src/`      | Lietotnes pirmkods (TypeScript / TSX)                                            | Jā       |
+| `.build/`   | Starpfaili — `next build` izvade (ignorēta Git sistēmā, `distDir = .build/next`) | Nē       |
+| `dist/`     | Publicējamā pakotne — izveidota ar `assembleStandalone` (ignorēta Git sistēmā)   | Nē       |
 
-Būvēšanas konveijers tiek izpildīts vienā piegājienā:
+Būvēšanas process notiek vienā piegājienā:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js izvade)
-  └─ assembleStandalone()                 (kopē autonomo būvējumu + statiskos + publiskos + vietējos resursus)
-       └─ izvade: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ assembleStandalone()                 (kopē standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` vispirms papildus iztīra abus direktorijus un ieraksta
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kā izvietošanas integritātes kontrolmarķieri.
+`npm run build:release` papildus vispirms notīra abas direktorijas un ieraksta
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kā izvietošanas integritātes marķieri.
 
-`npm run build:contributor` izmanto tikai aizmugursistēmai paredzēto būvēšanas profilu. Būvēšanas laikā tas īslaicīgi aizstāj
-informācijas paneļa UI failus ar aizstājējiem, saglabā API maršrutu apstrādātājus un pēc būvēšanas atjauno sākotnējos failus.
-Izmantojiet `npm run build` izmaiņām, kas ietekmē informācijas paneļa UI, vai pilnai
-laidiena validācijai; līdzdalībnieku profils neaizstāj laidiena būvējumu.
+`npm run build:contributor` izmanto tikai aizmugursistēmas būvējuma profilu. Būvēšanas laikā
+tas īslaicīgi aizstāj informācijas paneļa UI failus ar tukšiem failiem, saglabā API maršrutu
+apstrādātājus un pēc būvējuma atjauno sākotnējos failus. Izmantojiet `npm run build`, ja izmaiņas
+ietekmē informācijas paneļa UI, vai pilnai izlaides validācijai; līdzautoru profils neaizstāj izlaides būvējumu.
 
-> **Piezīme par izvietošanu VPS:** attālā attēla direktorijs `/usr/lib/node_modules/omniroute/app/`
-> nav mainīts. Izvietošanas rīki ar rsync sinhronizē `dist/` saturu uz šo direktoriju.
-> Mainījās tikai repozitorijā esošās būvējuma izvades ceļš (`app/` → `dist/`).
+> **Piezīme par VPS izvietošanu:** attālā attēla direktorija `/usr/lib/node_modules/omniroute/app/`
+> paliek nemainīta. Izvietošanas prasmes tajā sinhronizē `dist/` saturu, izmantojot rsync.
+> Mainīts ir tikai repozitorijā esošais būvējuma izvades ceļš (`app/` → `dist/`).
 
 Noklusējuma URL:
 

@@ -124,6 +124,7 @@ import {
   qualifyOpenRouterModelId,
   normalizeOpenRouterModalities,
   getOpenRouterModelType,
+  hasOpenRouterDecisions,
   isOpenRouterFreeModel,
   getOpenRouterDisplayName,
   openRouterCapabilityEntry,
@@ -1517,6 +1518,7 @@ async function buildUnifiedModelsResponseCore(
     ) {
       try {
         const openRouterCatalog = await getOpenRouterCatalog();
+        if (openRouterCatalog.stale) diagnosticHeaders["X-OmniRoute-Catalog-Status"] = "partial";
         const openRouterCaps: Record<string, ModelCapabilityEntry> = {};
         for (const openRouterModel of openRouterCatalog.data || []) {
           await maybeYieldCatalogBuild();
@@ -1540,6 +1542,8 @@ async function buildUnifiedModelsResponseCore(
             ? openRouterModel.supported_parameters
             : [];
           const capabilities: Record<string, boolean> = {};
+          const hasDecisions = hasOpenRouterDecisions(outputModalities);
+          if (hasDecisions) capabilities.decision = true;
           if (inputModalities.includes("image")) capabilities.vision = true;
           if (
             supportedParameters.includes("reasoning") ||
@@ -1565,6 +1569,14 @@ async function buildUnifiedModelsResponseCore(
             parent: null,
             name: getOpenRouterDisplayName(openRouterModel),
             type: modelType,
+            ...(hasDecisions
+              ? {
+                  api_format: "systemone",
+                  supported_endpoints: outputModalities.includes("text")
+                    ? ["chat", "systemone"]
+                    : ["systemone"],
+                }
+              : {}),
             ...(isFree ? { free: true } : {}),
             ...(typeof openRouterModel.context_length === "number"
               ? { context_length: openRouterModel.context_length }
@@ -1586,6 +1598,7 @@ async function buildUnifiedModelsResponseCore(
         }
         upsertSyncedCapabilities("openrouter", openRouterCaps);
       } catch (err) {
+        diagnosticHeaders["X-OmniRoute-Catalog-Status"] = "partial";
         console.error("[catalog] Error loading OpenRouter catalog:", err);
       }
     }

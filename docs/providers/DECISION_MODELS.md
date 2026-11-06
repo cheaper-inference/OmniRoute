@@ -202,12 +202,30 @@ protocol and URL; similarly named Decisions APIs are not wire-compatible.
 
 ## Discovery, routing and limits
 
-`GET /v1/systemone/models` returns qualified IDs, `type: decisions`,
-`supported_endpoints`, decision/vision capability and `pricing: null`. It
-includes both native protocols and filters by the caller's connection/model
-scope. `X-OmniRoute-Catalog-Status` is `partial` on backend failures or malformed connection records. Enumeration
-does not rotate account selection. Decision-only synced models are excluded
-from chat selection; mixed models retain chat capabilities.
+`GET /v1/systemone/models` returns qualified IDs and explicit `api_format`
+(`decisions` or `systemone`) on every row, including legacy TypeSafe/OpenRouter
+models. Clients select the native endpoint from this field, without guessing
+from provider names. Native rows have `type: decisions`, `supported_endpoints`,
+decision/vision capability and `pricing: null`. OpenRouter models with both
+text and decision output retain `type: chat` and both `chat` and `systemone`
+endpoints; decision-only models remain outside chat selection.
+
+The catalog includes both native protocols and applies the caller's connection
+and model restrictions before pagination. Optional `limit` and `after` parameters
+page the final combined catalog in ID order. Paged responses include `has_more`
+and, for a nonempty page, `last_id`; use that exact ID as the next `after` value.
+Without these parameters the response contains the complete authorized list.
+Catalogs are live, so a backend or configuration change between requests can
+change the available rows.
+
+`X-OmniRoute-Catalog-Status: complete` means all queried catalog sources succeeded,
+not that one page contains all rows or that the account has inference entitlement.
+Backend failures, stale OpenRouter fallback or malformed connection records produce
+`partial` with HTTP 200 when some authorized results survive. If no results survive,
+the response is HTTP 503 with status `unavailable`. `has_more: false` on a partial
+catalog describes only the available results; it does not prove completeness.
+Enumeration does not rotate account selection. Catalog visibility does not prove
+successful inference.
 
 No cross-format translation is implemented. Sending OpenAI input to a System
 One model, or vice versa, returns 400. New adapters require qualified IDs; existing TypeSafe aliases remain supported. Default

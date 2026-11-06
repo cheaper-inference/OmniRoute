@@ -218,9 +218,32 @@ describe("decision routes use real runtime policy wiring", () => {
     deps.allowed.mockResolvedValue(false);
     expect((await (await GET(makeRequest())).json()).data).toEqual([]);
   });
-  it("reports partial discovery when a backend is unavailable", async () => {
+  it("reports unavailable discovery when no backend results survive", async () => {
     deps.fetch.mockRejectedValue(new Error("unreachable"));
-    expect((await GET(makeRequest())).headers.get("X-OmniRoute-Catalog-Status")).toBe("partial");
+    const response = await GET(makeRequest());
+    expect(response.status).toBe(503);
+    expect(response.headers.get("X-OmniRoute-Catalog-Status")).toBe("unavailable");
+  });
+  it("retains native results with partial status when legacy discovery fails", async () => {
+    vi.mocked(getSpecialtyModelsResponse).mockResolvedValueOnce(
+      new Response(null, { status: 503 })
+    );
+    const response = await GET(makeRequest());
+    expect(response.status).toBe(200);
+    expect(response.headers.get("X-OmniRoute-Catalog-Status")).toBe("partial");
+    expect((await response.json()).data.map((row: { id: string }) => row.id)).toEqual([
+      "basal/current",
+    ]);
+  });
+  it("retains legacy results with partial status when native discovery fails", async () => {
+    deps.fetch.mockRejectedValue(new Error("unreachable"));
+    vi.mocked(getSpecialtyModelsResponse).mockResolvedValueOnce(
+      Response.json({ data: [{ id: "typesafe/jev-latest", type: "decisions" }] })
+    );
+    const response = await GET(makeRequest());
+    expect(response.status).toBe(200);
+    expect(response.headers.get("X-OmniRoute-Catalog-Status")).toBe("partial");
+    expect((await response.json()).data[0].api_format).toBe("systemone");
   });
   it("enforces endpoint permission on catalog before making upstream requests", async () => {
     deps.policy.mockResolvedValue({ rejection: new Response(null, { status: 403 }) });
@@ -230,7 +253,7 @@ describe("decision routes use real runtime policy wiring", () => {
 });
 
 describe("discovery connection record validation", () => {
-  it("marks malformed database rows partial without forwarding credentials", async () => {
+  it("marks an unusable connection catalog unavailable without forwarding credentials", async () => {
     deps.valid.mockResolvedValue(true);
     deps.policy.mockResolvedValue({ rejection: null });
     deps.metadata.mockResolvedValue({ allowedEndpoints: ["decisions"] });
@@ -241,7 +264,7 @@ describe("discovery connection record validation", () => {
     ]);
     deps.fetch.mockClear();
     const response = await GET(makeRequest());
-    expect(response.headers.get("X-OmniRoute-Catalog-Status")).toBe("partial");
+    expect(response.headers.get("X-OmniRoute-Catalog-Status")).toBe("unavailable");
     expect((await response.json()).data).toEqual([]);
     expect(deps.fetch).not.toHaveBeenCalled();
   });
@@ -274,8 +297,9 @@ describe("universal native decision catalog", () => {
     );
     expect(response.status).toBe(200);
     const data = (await response.json()).data;
-    expect(data[0].id).toBe("ollamacloud/clef:27b");
-    expect(data[0].supported_endpoints).toEqual(["systemone"]);
+    expect(data.find((row: { id: string }) => row.id === "ollamacloud/clef:27b")).toEqual(
+      expect.objectContaining({ supported_endpoints: ["systemone"], api_format: "systemone" })
+    );
     expect(deps.allowed).toHaveBeenCalledWith("client-test", "ollamacloud/clef:27b");
   });
 });
@@ -300,8 +324,8 @@ it("unions the scoped legacy TypeSafe and OpenRouter catalog with native results
     })
   );
   expect((await response.json()).data.map((row: { id: string }) => row.id)).toEqual([
-    "typesafe/jev-latest",
     "openrouter/typesafe/jev-1.13",
+    "typesafe/jev-latest",
   ]);
 });
 

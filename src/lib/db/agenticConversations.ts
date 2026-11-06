@@ -20,6 +20,7 @@
  */
 
 import { v4 as uuidv4 } from "uuid";
+import { logicalCallSql } from "./logicalCallSql";
 import { getDbInstance } from "./core";
 
 export interface AgenticConversationRow {
@@ -350,7 +351,9 @@ export function resolveCallLogIdsByCorrelationIds(correlationIds: string[]): Map
   const db = getDbInstance();
   const placeholders = unique.map(() => "?").join(",");
   const rows = db
-    .prepare(`SELECT id, correlation_id FROM call_logs WHERE correlation_id IN (${placeholders})`)
+    .prepare(
+      `SELECT id, correlation_id FROM call_logs WHERE ${logicalCallSql()} AND correlation_id IN (${placeholders})`
+    )
     .all(...unique);
   for (const r of rows) {
     const rec = asRecord(r);

@@ -27,6 +27,7 @@ export interface DecisionModel {
   object: "model";
   owned_by: string;
   type: "decisions";
+  api_format: DecisionFormat;
   supported_endpoints: DecisionFormat[];
   capabilities: { decision: true; vision?: boolean };
   pricing: null;

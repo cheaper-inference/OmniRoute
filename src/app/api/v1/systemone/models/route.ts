@@ -1,5 +1,11 @@
 import { getRegistryEntry } from "@omniroute/open-sse/config/providerRegistry.ts";
 import { getSpecialtyModelsResponse } from "../../_shared/specialtyCatalog";
+import { applyCatalogPage, parseCatalogPage } from "../../models/catalogPagination";
+import {
+  annotateLegacySystemOneModel,
+  isLegacySystemOneModel,
+} from "@omniroute/open-sse/config/decisionCapabilities.ts";
+import { buildErrorBody } from "@omniroute/open-sse/utils/error.ts";
 import { getProviderAlias } from "@/shared/constants/providers";
 import { getProviderConnections } from "@/lib/db/providers";
 import { getApiKeyMetadata, isModelAllowedForKey } from "@/lib/db/apiKeys";
@@ -100,7 +106,7 @@ export async function GET(request: Request) {
   const scope = await resolveKeyConnectionScope(metadata);
   if (scope.rejection) return scope.rejection;
   const rows = await getProviderConnections({ isActive: true });
-  const { models, partial } = await collectDecisionCatalog(
+  const { models, partial: nativePartial } = await collectDecisionCatalog(
     rows,
     request,
     scope.allowedConnections,
@@ -108,21 +114,47 @@ export async function GET(request: Request) {
     metadata
   );
 
-  const legacy = await getSpecialtyModelsResponse(request, "/v1/systemone/models", (model) => {
-    const id = typeof model.id === "string" ? model.id : "";
-    return (
-      (id.startsWith("typesafe/") || id.startsWith("openrouter/")) && model.type === "decisions"
-    );
-  });
-  if (!legacy.ok) return legacy;
-  const legacyPayload = record(await legacy.json());
-  const legacyModels = Array.isArray(legacyPayload.data) ? legacyPayload.data : [];
+  // Page only after both sources have applied authorization and decision filtering.
+  const legacyUrl = new URL(request.url);
+  legacyUrl.searchParams.delete("limit");
+  legacyUrl.searchParams.delete("after");
+  const legacy = await getSpecialtyModelsResponse(
+    new Request(legacyUrl, request),
+    "/v1/systemone/models",
+    isLegacySystemOneModel
+  );
+  if (!legacy.ok && legacy.status < 500) return legacy;
+  const legacyPayload = legacy.ok ? record(await legacy.json()) : {};
+  const partial =
+    nativePartial || !legacy.ok || legacy.headers.get("X-OmniRoute-Catalog-Status") === "partial";
+  const allModels = new Map<string, Record<string, unknown>>();
+  for (const row of Array.isArray(legacyPayload.data) ? legacyPayload.data : []) {
+    const model = annotateLegacySystemOneModel(record(row));
+    if (typeof model.id === "string") allModels.set(model.id, model);
+  }
+  for (const model of models.values()) allModels.set(model.id, { ...model });
+  const ordered = [...allModels.values()].sort((a, b) => String(a.id).localeCompare(String(b.id)));
+  const unavailable = partial && ordered.length === 0;
+  const page = parseCatalogPage(request);
+  const paged = applyCatalogPage(ordered, page);
   return Response.json(
-    { object: "list", data: [...legacyModels, ...models.values()] },
     {
+      object: "list",
+      data: paged.models,
+      ...(page.limit !== null || page.after
+        ? { has_more: paged.hasMore, ...(paged.lastId ? { last_id: paged.lastId } : {}) }
+        : {}),
+      ...(unavailable ? buildErrorBody(503, "Decision model catalog unavailable") : {}),
+    },
+    {
+      status: unavailable ? 503 : 200,
       headers: {
         "Cache-Control": "no-store",
-        "X-OmniRoute-Catalog-Status": partial ? "partial" : "complete",
+        "X-OmniRoute-Catalog-Status": unavailable
+          ? "unavailable"
+          : partial
+            ? "partial"
+            : "complete",
       },
     }
   );
