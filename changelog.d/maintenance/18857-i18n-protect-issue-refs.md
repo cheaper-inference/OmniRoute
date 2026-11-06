@@ -1,1 +1,0 @@
-- **fix(i18n):** the Google docs-mirror engine now keeps GitHub issue references (`#15281`) verbatim and maps the Odia danda it answers as `|` back to `।`; `validateTranslatedChunk()` rejects a chunk whose issue references, table cell count or escaped pipes changed, so a corrupted row falls back instead of shipping (related to #18795) (#18857).
