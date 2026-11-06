@@ -162,6 +162,27 @@ async function solvePow(challenge: PowChallenge, signal?: AbortSignal | null): P
 
 // ── SSE Transform (DeepSeek → OpenAI) ───────────────────────────────────
 
+class DeepSeekUpstreamHintError extends Error {
+  readonly status: 429 | 502;
+
+  constructor(rateLimited: boolean) {
+    super(
+      rateLimited
+        ? "DeepSeek upstream rate limit reached"
+        : "DeepSeek upstream rejected the request"
+    );
+    this.name = "DeepSeekUpstreamHintError";
+    this.status = rateLimited ? 429 : 502;
+  }
+}
+
+function upstreamHintError(payload: unknown): DeepSeekUpstreamHintError | undefined {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return;
+  const hint = payload as Record<string, unknown>;
+  if (hint.type !== "error") return;
+  return new DeepSeekUpstreamHintError(hint.finish_reason === "rate_limit_reached");
+}
+
 function transformSSE(deepseekStream: ReadableStream, model: string): ReadableStream {
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
@@ -178,6 +199,7 @@ function transformSSE(deepseekStream: ReadableStream, model: string): ReadableSt
       async start(controller) {
         const reader = deepseekStream.getReader();
         let buffer = "";
+        let eventName = "";
 
         const emit = (obj: object) => {
           controller.enqueue(encoder.encode(`data: ${JSON.stringify(obj)}\n\n`));
@@ -260,8 +282,16 @@ function transformSSE(deepseekStream: ReadableStream, model: string): ReadableSt
             buffer = lines.pop() || "";
 
             for (const line of lines) {
-              if (!line.startsWith("data: ") && !line.startsWith("data:")) continue;
-              const payload = line.replace(/^data:\s*/, "").trim();
+              if (line.trim() === "") {
+                eventName = "";
+                continue;
+              }
+              if (line.startsWith("event:")) {
+                eventName = line.slice("event:".length).trim();
+                continue;
+              }
+              if (!line.startsWith("data:")) continue;
+              const payload = line.slice("data:".length).trim();
 
               if (payload === "[DONE]") {
                 finishStream();
@@ -272,6 +302,12 @@ function transformSSE(deepseekStream: ReadableStream, model: string): ReadableSt
               try {
                 data = JSON.parse(payload);
               } catch {
+                continue;
+              }
+
+              if (eventName === "hint") {
+                const error = upstreamHintError(data);
+                if (error) throw error;
                 continue;
               }
 
@@ -371,6 +407,8 @@ async function collectSSEContent(
   const decoder = new TextDecoder();
   const reader = deepseekStream.getReader();
   let buffer = "";
+  let eventName = "";
+  let hintError: DeepSeekUpstreamHintError | undefined;
   let content = "";
   let reasoningContent = "";
   let currentPath: "thinking" | "content" | "" = "";
@@ -419,10 +457,22 @@ async function collectSSEContent(
     buffer = lines.pop() || "";
 
     for (const line of lines) {
-      if (!line.startsWith("data: ") && !line.startsWith("data:")) continue;
-      const payload = line.replace(/^data:\s*/, "").trim();
+      if (line.trim() === "") {
+        eventName = "";
+        continue;
+      }
+      if (line.startsWith("event:")) {
+        eventName = line.slice("event:".length).trim();
+        continue;
+      }
+      if (!line.startsWith("data:")) continue;
+      const payload = line.slice("data:".length).trim();
       try {
         const data = JSON.parse(payload);
+        if (eventName === "hint") {
+          hintError ??= upstreamHintError(data);
+          continue;
+        }
         const p = data?.p;
         const v = data?.v;
 
@@ -486,6 +536,8 @@ async function collectSSEContent(
     }
   }
 
+  // Preserve typed rejections outside the malformed-frame catch above.
+  if (hintError) throw hintError;
   const citations = appendSearchCitations(searchResults, streamModel);
   if (citations) content += `\n\n${citations}`;
 
@@ -1203,7 +1255,9 @@ export class DeepSeekWebExecutor extends BaseExecutor {
 
       return {
         response: errorResponse(
-          err instanceof DeepSeekImageError ? err.status : 502,
+          err instanceof DeepSeekUpstreamHintError || err instanceof DeepSeekImageError
+            ? err.status
+            : 502,
           `DeepSeek error: ${sanitizeErrorMessage(msg)}`
         ),
         url: COMPLETION_URL,

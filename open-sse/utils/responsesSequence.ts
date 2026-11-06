@@ -5,15 +5,47 @@
  * openai-responses/eventEmitter.ts, whose `state.seq` starts at 0 so the first real event
  * is numbered 1).
  *
- * These synthesized sites (startup/mid-stream keepalive, early-stream and translated-error
- * failure frames, Codex WebSocket failure frames) have no access to that live counter —
- * threading a shared counter across four independent modules would risk colliding with a
- * real event's own sequence_number (#14330 risk notes). Per the Responses event schema, a
- * strict decoder only requires the field to be a monotonic-looking number starting at 1 (it
- * never validates it against a prior stream), so every synthesized site uses this same
- * seed: 1, never the previous default of 0, which collided with the real first event.
+ * The seed applies before a real response has started. Once upstream events have
+ * passed through, a generated failure must retain that response identity and use
+ * a sequence number beyond the greatest fully observed event.
  */
 export const SYNTHETIC_RESPONSES_SEQUENCE_NUMBER = 1;
+
+/** Bounded identity projection of complete, client-visible Responses events. */
+export type ResponsesStreamContext = {
+  id?: string;
+  model?: string;
+  createdAt?: number;
+  lastSequenceNumber?: number;
+};
+
+export function withResponsesFailureContext(
+  event: Record<string, unknown>,
+  context: ResponsesStreamContext = {}
+): Record<string, unknown> {
+  if (event.type !== "response.failed") return event;
+  const response = event.response;
+  if (!response || typeof response !== "object" || Array.isArray(response)) return event;
+  const sequence = event.sequence_number;
+  const last = context.lastSequenceNumber;
+  const next = last === undefined ? undefined : last + 1;
+  const sequenceNumber =
+    next === undefined
+      ? sequence
+      : typeof sequence === "number" && Number.isSafeInteger(sequence) && sequence > last!
+        ? sequence
+        : next;
+  return {
+    ...event,
+    ...(sequenceNumber === undefined ? {} : { sequence_number: sequenceNumber }),
+    response: {
+      ...response,
+      ...(context.id ? { id: context.id } : {}),
+      ...(context.model ? { model: context.model } : {}),
+      ...(context.createdAt === undefined ? {} : { created_at: context.createdAt }),
+    },
+  };
+}
 
 /** Wraps a `response.failed` payload's `response` object with the synthetic seed. */
 export function buildSyntheticResponsesFailedEvent(
