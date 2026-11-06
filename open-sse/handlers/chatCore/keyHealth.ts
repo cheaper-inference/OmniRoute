@@ -6,8 +6,11 @@
  * handleChatCore. Translates an upstream HTTP status into the in-memory key-health state
  * (apiKeyRotator) for the connection's currently-selected key, and persists the change to the
  * provider connection so it survives process restarts:
- *   - genuine 401/403 credential rejection → record a failure (warning, then invalid at the
- *     threshold), always persisted.
+ *   - genuine 401/403 credential rejection → terminal invalid on a store key in one shot
+ *     (a definitive credential rejection never recovers mid-session — HAC-116 D3); on an
+ *     `env:<VAR>` credential it stays in-memory only (D2), because that connectionId is a
+ *     synthetic sentinel with no backing `provider_connections` row. An ambiguous 403
+ *     (no credential pattern in the body) keeps the 2× threshold.
  *   - 402 → terminal (insufficient balance) on single-credential providers; mark the
  *           current key invalid immediately (#5239), persisted on the active→invalid
  *           transition. openai-compatible / per-model-quota gateways keep the key —
@@ -18,7 +21,10 @@
  *           where a 429 is a per-model signal, mirroring the 402 rule.
  *   - 2xx → record a success, persisted only when recovering from a warning/invalid state.
  * Model availability failures remain model/routing telemetry even when an upstream reports them
- * with 401/403. Any other status only refreshes the tracked extra-key set.
+ * with 401/403. A 403 classified by errorClassifier as routing/policy (PROJECT_ROUTE_ERROR,
+ * REQUEST_REJECTED, PROVIDER_SAFETY_REFUSAL) or as Cloudflare/geo never touches credential
+ * health — it is not the credential that was refused. Any other status only refreshes the
+ * tracked extra-key set.
  */
 
 import {
@@ -32,6 +38,12 @@ import {
 } from "../../services/apiKeyRotator.ts";
 import { isModelUnavailableError } from "../../services/modelFamilyFallback.ts";
 import { hasPerModelQuota } from "../../services/accountFallback.ts";
+import {
+  classifyProviderError,
+  PROVIDER_ERROR_TYPES,
+  type ProviderErrorType,
+} from "../../services/errorClassifier.ts";
+import { credentialSource, envVarName } from "../../services/credentialSource.ts";
 import { updateProviderConnection } from "@/lib/db/providers";
 
 type KeyHealthLog = {
@@ -57,6 +69,38 @@ function isModelCapabilityFailure(status: number, failureDetail: string): boolea
   // classification because some aggregators misreport the same model rejection as 401.
   return isModelUnavailableError(status === 401 ? 403 : status, normalizedDetail);
 }
+
+/**
+ * Classifications that describe a request/account/routing problem rather than a dead
+ * credential. The provider refused THIS request — or this project/config — not the API key,
+ * so the same key stays usable for the next call. Mirrors projectRouteFailure.ts.
+ */
+const NON_CREDENTIAL_403_TYPES: readonly ProviderErrorType[] = [
+  PROVIDER_ERROR_TYPES.PROJECT_ROUTE_ERROR,
+  PROVIDER_ERROR_TYPES.REQUEST_REJECTED,
+  PROVIDER_ERROR_TYPES.PROVIDER_SAFETY_REFUSAL,
+  PROVIDER_ERROR_TYPES.ACCOUNT_DEACTIVATED,
+  PROVIDER_ERROR_TYPES.FINGERPRINT_REJECTION,
+  PROVIDER_ERROR_TYPES.GEO_BLOCKED,
+];
+
+/**
+ * D6: a 403 the classifier resolves to a routing/policy/Cloudflare/geo condition is never a
+ * credential rejection, however the CREDENTIAL_FAILURE_PATTERNS read on its body. An empty
+ * body cannot be classified, so it falls through to the pattern match (unchanged behaviour).
+ */
+function isNonCredentialRefusal(
+  status: number,
+  failureDetail: string,
+  provider: string | null | undefined
+): boolean {
+  if (status !== 403 || !failureDetail) return false;
+  const classified = classifyProviderError(status, failureDetail, provider);
+  if (!classified) return false;
+  return NON_CREDENTIAL_403_TYPES.includes(classified);
+}
+
+export const _isNonCredentialRefusal = isNonCredentialRefusal;
 
 function isCredentialFailure(status: number, failureDetail: string): boolean {
   if (status !== 401 && status !== 403) return false;
@@ -87,12 +131,24 @@ export function recordKeyHealthStatus(
   // above: there is nothing to record when no key material exists.
   if (!creds?.apiKey && !creds?.accessToken) return;
 
+  const source = credentialSource(creds);
+
   const psd = creds.providerSpecificData as Record<string, unknown> | undefined;
   const extraKeys = (psd?.extraApiKeys as string[] | undefined) ?? [];
   const health = psd?.apiKeyHealth as Record<string, KeyHealth> | undefined;
   const currentKeyId = (psd?.selectedKeyId as string | undefined) ?? "primary";
 
   trackConnectionExtraKeys(connId, extraKeys);
+
+  if (source === "env") {
+    const envVar = envVarName(connId);
+    const errMsg = envVar ? `env var ${envVar}` : "env credential";
+    log?.error?.(
+      "AUTH",
+      `${status} on env ${errMsg} — validation errors must mention the source var name (e.g. OPENAI_API_KEY)`
+    );
+    return;
+  }
 
   if (isCredentialFailure(status, failureDetail)) {
     const updatedHealth = recordKeyFailure(connId, currentKeyId);

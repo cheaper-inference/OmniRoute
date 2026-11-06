@@ -898,3 +898,54 @@ export function formatProviderError(
     causeCode || causeMsg ? ` (cause: ${[causeCode, causeMsg].filter(Boolean).join(": ")})` : "";
   return `[${code}]: ${message}${causeStr}`;
 }
+
+/**
+ * HAC-116 D5: explain a 401/403 credential refusal in operator-facing language.
+ *
+ * The plain cause leads ("what do I do about it"), safe diagnostic details trail
+ * (where to look). The message never contains the key value, Authorization
+ * headers, or the raw upstream body — only identifiers that are safe to log:
+ * provider, model, status code, connection id, and (for env credentials) the
+ * environment variable NAME (never its value).
+ */
+export interface CredentialRefusalExplanation {
+  status: number;
+  source: "store" | "env";
+  connectionId?: string | null;
+  provider?: string | null;
+  model?: string | null;
+  envVarName?: string | null;
+  action?: string | null;
+  detail?: string | null;
+}
+
+export function explainCredentialRefusal(input: CredentialRefusalExplanation): string {
+  const {
+    status,
+    source,
+    connectionId,
+    provider,
+    model,
+    envVarName: envVar,
+    action,
+    detail,
+  } = input;
+
+  const cause =
+    source === "env"
+      ? `The environment credential${envVar ? ` (${envVar})` : ""} was rejected by the provider — update that environment variable with a valid key, then restart the gateway.`
+      : `The stored API key was rejected by the provider — replace it in the gateway dashboard${action ? ` (suggested action: ${action})` : ""}.`;
+
+  const safeDetails: string[] = [`status ${status}`];
+  if (provider) safeDetails.push(`provider ${provider}`);
+  if (model) safeDetails.push(`model ${model}`);
+  if (source === "env" && envVar) safeDetails.push(`source env:${envVar}`);
+  if (source === "store" && connectionId) safeDetails.push(`connection_id ${connectionId}`);
+
+  let msg = `${cause} [${safeDetails.join(" | ")}]`;
+  if (detail) {
+    const sanitized = sanitizeUpstreamDetails(detail);
+    if (sanitized && !msg.includes(sanitized)) msg += ` — ${sanitized}`;
+  }
+  return msg;
+}
