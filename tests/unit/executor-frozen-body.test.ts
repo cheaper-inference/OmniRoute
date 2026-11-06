@@ -46,8 +46,8 @@ const REPO_ROOT = fileURLToPath(new URL("../../", import.meta.url));
 const CASE_TIMEOUT_MS = 5000;
 /** How long a case that timed out gets, after its abort, to settle before the survey ends. */
 const LINGER_GRACE_MS = 10_000;
-/** execute() calls that timed out and have not settled yet (labels). */
-const lingering = new Set<string>();
+/** Cases whose execute() timed out and has not settled yet. Labels repeat across a provider's cases. */
+const lingering = new Set<Case>();
 const SUITE_TIMEOUT_MS = 60_000;
 const BUCKETS: Bucket[] = ["openai", "openai-responses", "claude", "gemini"];
 
@@ -428,8 +428,8 @@ async function runCase(c: Case): Promise<Outcome> {
     globalThis.fetch = (async () => okResponse()) as typeof fetch;
   }
   if (timedOut) {
-    lingering.add(c.label);
-    const settled = () => void lingering.delete(c.label);
+    lingering.add(c);
+    const settled = () => void lingering.delete(c);
     run.then(settled, settled);
   }
 
@@ -472,13 +472,13 @@ function writerLines(outcomes: Outcome[]): string[] {
 
 type Survey = { cases: Case[]; refused: number; outcomes: Outcome[]; stillRunning: string[] };
 
-/** Wait up to `ms` for every timed-out execute() to settle; returns the labels still running. */
+/** Wait up to `ms` for every timed-out execute() to settle; returns the cases still running. */
 async function waitForLingering(ms: number): Promise<string[]> {
   const deadline = Date.now() + ms;
   while (lingering.size > 0 && Date.now() < deadline) {
     await new Promise((resolve) => setTimeout(resolve, 50));
   }
-  return [...lingering];
+  return [...lingering].map((c) => `${c.label}/${c.bucket}`);
 }
 
 /**
