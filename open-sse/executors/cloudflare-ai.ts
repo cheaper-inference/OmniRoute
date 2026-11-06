@@ -144,6 +144,11 @@ export class CloudflareAIExecutor extends BaseExecutor {
     return headers;
   }
 
+  /**
+   * @executorRecovery native
+   * @executorRecoveryReason Every request goes through the base recovery loop unchanged; only a successful non-streaming thinking-off reply is rewritten afterwards.
+   * @executorRecoveryTest tests/unit/cloudflare-ai-reasoning-only-content.test.ts
+   */
   async execute(input: ExecuteInput): Promise<ExecutorExecuteResult> {
     const result = await super.execute(input);
     if (input.stream || result instanceof Response) return result;
