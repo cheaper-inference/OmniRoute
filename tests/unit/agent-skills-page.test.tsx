@@ -157,8 +157,6 @@ beforeEach(() => {
     value: { origin: "http://localhost:20128" },
     configurable: true,
   });
-  // Mock window.confirm
-  vi.spyOn(window, "confirm").mockReturnValue(false);
 });
 
 afterEach(async () => {
