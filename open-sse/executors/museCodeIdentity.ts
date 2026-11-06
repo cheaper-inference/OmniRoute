@@ -39,22 +39,34 @@ function sessionFor(clientSession: string | undefined, now: number): string {
   return entry.id;
 }
 
-/** The Muse Code client headers for one request. */
-export function museCodeClientHeaders(
+/**
+ * The per-request Muse Code session and trace headers. `scope` keeps one client session from
+ * sharing a Muse session across connections, which would link those accounts upstream.
+ */
+export function museCodeSessionHeaders(
   clientHeaders?: Record<string, string> | null,
   body?: unknown,
+  scope: string = "",
   now: number = Date.now()
 ): Record<string, string> {
-  const session = sessionFor(resolveOpencodeSessionIdentity(clientHeaders, body), now);
+  const clientSession = resolveOpencodeSessionIdentity(clientHeaders, body);
+  const session = sessionFor(clientSession && `${scope}\n${clientSession}`, now);
   return {
-    "User-Agent": museCodeClientUserAgent(),
-    "X-Client-Id": MUSE_CODE_CLIENT_SURFACE,
     "X-Tbh-Session-Id": session,
     "X-Meta-Ai-Gateway-Session-Id": session,
     "X-Tbh-Thread-Id": session,
     "X-Tbh-Root-Session-Id": session,
     "X-Tbh-Agent-Role": "main",
     traceparent: `00-${randomBytes(16).toString("hex")}-${randomBytes(8).toString("hex")}-01`,
+  };
+}
+
+/** The whole client identity, for requests that do not go through the provider registry headers. */
+export function museCodeClientHeaders(): Record<string, string> {
+  return {
+    "User-Agent": museCodeClientUserAgent(),
+    "X-Client-Id": MUSE_CODE_CLIENT_SURFACE,
+    ...museCodeSessionHeaders(),
   };
 }
 

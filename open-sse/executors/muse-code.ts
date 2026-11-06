@@ -1,5 +1,5 @@
 import { DefaultExecutor } from "./default.ts";
-import { museCodeClientHeaders } from "./museCodeIdentity.ts";
+import { museCodeSessionHeaders } from "./museCodeIdentity.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -29,18 +29,19 @@ export class MuseCodeExecutor extends DefaultExecutor {
   }
 
   /**
-   * Inference requests carry the Muse Code client identity (see museCodeIdentity.ts). The
-   * generic executor forwards other clients' attribution headers (x-opencode-*, x-session-id,
-   * x-title, http-referer); the Muse Code client never sends them, so they are dropped here.
-   * The caller's session still selects the Muse session id.
+   * Inference requests carry the Muse Code client identity: the registry supplies User-Agent
+   * (so MUSE_CODE_USER_AGENT still overrides it) and X-Client-Id, and museCodeIdentity.ts the
+   * session headers. The generic executor forwards other clients' attribution headers
+   * (x-opencode-*, x-session-id, x-title, http-referer); the Muse Code client never sends them,
+   * so they are dropped here. The caller's session still selects the Muse session id.
    */
   buildHeaders(...args: Parameters<DefaultExecutor["buildHeaders"]>): Record<string, string> {
-    const [, , clientHeaders, , , body] = args;
+    const [credentials, , clientHeaders, , , body] = args;
     const headers = super.buildHeaders(...args);
     for (const name of Object.keys(headers)) {
       if (FOREIGN_CLIENT_HEADER.test(name)) delete headers[name];
     }
-    return { ...headers, ...museCodeClientHeaders(clientHeaders, body) };
+    return { ...headers, ...museCodeSessionHeaders(clientHeaders, body, credentials.connectionId) };
   }
 
   transformRequest(

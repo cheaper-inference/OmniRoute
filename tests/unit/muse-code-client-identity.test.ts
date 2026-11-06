@@ -24,9 +24,13 @@ const SESSION_HEADERS = [
 const credentials = { accessToken: "test-inference-key" };
 
 /** Builds inference headers with optional client session metadata and fixture credentials. */
-function headersFor(clientHeaders: Record<string, string> | null = null, body?: unknown) {
+function headersFor(
+  clientHeaders: Record<string, string> | null = null,
+  body?: unknown,
+  requestCredentials: Record<string, unknown> = credentials
+) {
   return new MuseCodeExecutor().buildHeaders(
-    credentials,
+    requestCredentials,
     true,
     clientHeaders,
     "muse-spark-1.3",
@@ -77,6 +81,29 @@ test("one client session keeps one Muse session id; another session gets its own
 test("requests without a client session each get a fresh Muse session", () => {
   __resetMuseCodeSessionsForTesting();
   assert.notEqual(headersFor()["X-Tbh-Session-Id"], headersFor()["X-Tbh-Session-Id"]);
+});
+
+test("the same client session on another connection gets its own Muse session", () => {
+  __resetMuseCodeSessionsForTesting();
+  const session = { "x-opencode-session": "ses_a" };
+  const on = (connectionId: string) =>
+    headersFor(session, undefined, { ...credentials, connectionId })["X-Tbh-Session-Id"];
+  assert.equal(on("conn-1"), on("conn-1"));
+  assert.notEqual(on("conn-1"), on("conn-2"));
+});
+
+test("the MUSE_CODE_USER_AGENT override reaches the wire", (t) => {
+  const previous = process.env.MUSE_CODE_USER_AGENT;
+  t.after(() => {
+    if (previous === undefined) delete process.env.MUSE_CODE_USER_AGENT;
+    else process.env.MUSE_CODE_USER_AGENT = previous;
+  });
+  process.env.MUSE_CODE_USER_AGENT = "muse-build/9.9.9 (operator)";
+  const headers = headersFor();
+  assert.equal(headers["User-Agent"], "muse-build/9.9.9 (operator)");
+  assert.equal(headers["X-Client-Id"], "tbh:exec");
+  delete process.env.MUSE_CODE_USER_AGENT;
+  assert.equal(headersFor()["User-Agent"], museCodeClientUserAgent());
 });
 
 test("the provider registry advertises the current client identity, not the retired 1.3.0 build", () => {
