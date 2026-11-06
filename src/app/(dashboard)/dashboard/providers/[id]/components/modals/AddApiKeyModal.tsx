@@ -47,7 +47,10 @@ import { useOpenRouterPresetControl } from "../OpenRouterPresetInput";
 import WebSessionCredentialGuide from "../WebSessionCredentialGuide";
 import HarImportButton from "../HarImportButton";
 import CcCompatibleRequestDefaultsFields from "./CcCompatibleRequestDefaultsFields";
-import { buildAddProviderSpecificData } from "./connectionProviderSpecificData";
+import {
+  assignM365RefreshToken,
+  buildAddProviderSpecificData,
+} from "./connectionProviderSpecificData";
 import CommandCodeZdrToggle from "./CommandCodeZdrToggle";
 import { buildProviderValidateRequestBody } from "./providerValidateRequestBody";
 import { getCommandCodeAuthPhaseLabel } from "./commandCodeAuthPhase";
@@ -161,6 +164,11 @@ export default function AddApiKeyModal({
   const [bulkWarnings, setBulkWarnings] = useState<string[]>([]);
   const resetOpenRouterPreset = openRouterPreset.setValue;
   const wasOpenRef = useRef(false);
+  const [previousProvider, setPreviousProvider] = useState(provider);
+  if (provider !== previousProvider) {
+    setPreviousProvider(provider);
+    setFormData((current) => ({ ...current, m365RefreshToken: "" }));
+  }
   useEffect(() => {
     const wasOpen = wasOpenRef.current;
     wasOpenRef.current = isOpen;
@@ -408,6 +416,7 @@ export default function AddApiKeyModal({
         ...(providerSpecificData || {}),
         ...(validatedProviderSpecificData || {}),
       };
+      assignM365RefreshToken(provider, formData, mergedProviderSpecificData);
 
       const encodedCredential = isChatGptWebCodex
         ? JSON.stringify({
@@ -1041,6 +1050,16 @@ export default function AddApiKeyModal({
                     }
                     placeholder="account-123"
                     hint={t("huggingfaceBillToHint")}
+                  />
+                )}
+                {provider === "copilot-m365-web" && (
+                  <Input
+                    type="password"
+                    autoComplete="new-password"
+                    label={t("m365RefreshTokenLabel")}
+                    value={formData.m365RefreshToken}
+                    onChange={(e) => setFormData({ ...formData, m365RefreshToken: e.target.value })}
+                    hint={t("m365RefreshTokenHint")}
                   />
                 )}
                 <Input

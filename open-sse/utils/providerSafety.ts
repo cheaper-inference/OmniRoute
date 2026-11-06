@@ -29,6 +29,13 @@ export interface ProviderSafetyInput {
   message?: unknown;
 }
 
+/** Account-health handling must not depend on the public error-projection flag. */
+export function isRequestScopedMisalignmentRefusal(input: ProviderSafetyInput): boolean {
+  return (
+    (input.status === 400 || input.status === 403) && input.code === "misalignment_policy_violation"
+  );
+}
+
 /**
  * Match an explicit protocol safety stop by its structured fields, without inferring a
  * private detector from prose. Independent of PROVIDER_SAFETY_STOPS_TERMINAL: account

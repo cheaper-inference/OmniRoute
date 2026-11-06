@@ -11973,10 +11973,70 @@ paths:
     get:
       tags:
         - Logs
-      summary: "GET logs › console"
+      summary: Read retained application console history
+      description: >-
+        Requires management access. Reads the active file and retained OmniRoute
+        timestamped rotations, returning the newest page in display order. The
+        default range is all retained history, not only the last hour. Reads are
+        bounded to 64 files, 4096 directory entries and 8 MiB per request; individual
+        lines above 256 KiB are skipped. A cursor continues older pages and is bound
+        to the original filters and file identity. Deleted or replaced history
+        requires a fresh request. Retention settings are unchanged.
+      parameters:
+        - in: query
+          name: range
+          schema:
+            type: string
+            enum: [1h, 24h, 7d, all]
+            default: all
+        - in: query
+          name: level
+          schema:
+            type: string
+            enum: [all, trace, debug, info, warn, error, fatal]
+            default: all
+        - in: query
+          name: component
+          schema:
+            type: string
+            maxLength: 128
+        - in: query
+          name: limit
+          description: Positive integer; values above 2000 are clamped.
+          schema:
+            type: integer
+            minimum: 1
+            default: 500
+        - in: query
+          name: cursor
+          description: Opaque value returned by X-Console-Next-Cursor.
+          schema:
+            type: string
+            maxLength: 1800
       responses:
         "200":
-          description: OK
+          description: Console entries in display order; an empty page can still have a cursor.
+          headers:
+            X-Console-Next-Cursor:
+              description: Opaque cursor for older retained history, when available.
+              schema:
+                type: string
+            X-Console-Truncated:
+              description: Whether a scan, directory, file or line bound was reached.
+              schema:
+                type: string
+                enum: ["true", "false"]
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+        "400":
+          description: Invalid query or cursor/filter mismatch.
+        "410":
+          description: Retained history changed; refresh without a cursor.
   /api/logs/detail:
     get:
       tags:
@@ -14464,6 +14524,71 @@ paths:
       responses:
         "200":
           description: OK
+  /api/system/metrics:
+    get:
+      tags:
+        - System
+      summary: Host and OmniRoute process CPU and memory
+      description: >-
+        Management-tier (dashboard session or management API key) snapshot behind the home-page
+        system metrics cards. CPU percentages are deltas since the previous call that was at least
+        400 ms earlier, so the first call after process start (and any call inside the 400 ms
+        window) returns the last computed value, which is `0` before the first delta. Host values
+        come from `os.cpus()` / `os.totalmem()` / `os.freemem()` and describe the host, not a
+        container limit; the process CPU percentage is normalised by the host core count. Sent
+        with `Cache-Control: no-store, no-cache, must-revalidate`.
+      responses:
+        "200":
+          description: Host and process metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [host, process]
+                properties:
+                  host:
+                    type: object
+                    required: [cpuPercent, memory, cpuCount, platform]
+                    properties:
+                      cpuPercent:
+                        type: number
+                        minimum: 0
+                        maximum: 100
+                        description: Host CPU busy share since the previous sample, 0-100.
+                      memory:
+                        type: object
+                        required: [totalBytes, usedBytes, freeBytes, usedPercent]
+                        properties:
+                          totalBytes: { type: integer }
+                          usedBytes: { type: integer }
+                          freeBytes: { type: integer }
+                          usedPercent: { type: number, minimum: 0, maximum: 100 }
+                      cpuCount: { type: integer, minimum: 0 }
+                      platform:
+                        type: string
+                        description: Node.js `process.platform`.
+                  process:
+                    type: object
+                    required: [cpuPercent, memory, uptimeSeconds, pid]
+                    properties:
+                      cpuPercent:
+                        type: number
+                        minimum: 0
+                        maximum: 100
+                        description: OmniRoute process CPU share of the whole host, 0-100.
+                      memory:
+                        type: object
+                        required: [rssBytes, heapUsedBytes, heapTotalBytes]
+                        properties:
+                          rssBytes: { type: integer }
+                          heapUsedBytes: { type: integer }
+                          heapTotalBytes: { type: integer }
+                      uptimeSeconds: { type: integer }
+                      pid: { type: integer }
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
   /api/system/version:
     get:
       tags:
