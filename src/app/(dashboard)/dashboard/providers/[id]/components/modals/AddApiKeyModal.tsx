@@ -47,7 +47,12 @@ import { useOpenRouterPresetControl } from "../OpenRouterPresetInput";
 import WebSessionCredentialGuide from "../WebSessionCredentialGuide";
 import HarImportButton from "../HarImportButton";
 import CcCompatibleRequestDefaultsFields from "./CcCompatibleRequestDefaultsFields";
-import { buildAddProviderSpecificData } from "./connectionProviderSpecificData";
+import {
+  assignM365RefreshToken,
+  buildAddProviderSpecificData,
+} from "./connectionProviderSpecificData";
+import CommandCodeZdrToggle from "./CommandCodeZdrToggle";
+import { buildProviderValidateRequestBody } from "./providerValidateRequestBody";
 import { getCommandCodeAuthPhaseLabel } from "./commandCodeAuthPhase";
 import { createInitialAddApiKeyFormData } from "./addApiKeyInitialFormData";
 import AgentrouterConsoleFields from "./AgentrouterConsoleFields";
@@ -159,6 +164,11 @@ export default function AddApiKeyModal({
   const [bulkWarnings, setBulkWarnings] = useState<string[]>([]);
   const resetOpenRouterPreset = openRouterPreset.setValue;
   const wasOpenRef = useRef(false);
+  const [previousProvider, setPreviousProvider] = useState(provider);
+  if (provider !== previousProvider) {
+    setPreviousProvider(provider);
+    setFormData((current) => ({ ...current, m365RefreshToken: "" }));
+  }
   useEffect(() => {
     const wasOpen = wasOpenRef.current;
     wasOpenRef.current = isOpen;
@@ -240,7 +250,7 @@ export default function AddApiKeyModal({
       : isQoder
         ? t("qoderPatHint")
         : isFreebuff
-          ? "Freebuff uses an authentic CLI auth token obtained via codebuff CLI login."
+          ? "Freebuff uses the auth token from `freebuff login` (or use the Sign in button for the browser login)."
           : isWebSessionCredential
             ? getWebSessionCredentialHint(t, webSessionCredential, providerDisplayName, false)
             : isLocalSelfHostedProvider
@@ -267,6 +277,18 @@ export default function AddApiKeyModal({
         ? combineModalCredential(formData.apiKey, formData.tokenSecret)
         : formData.apiKey;
 
+  const validateRequestBody = (apiKey: string) =>
+    JSON.stringify(
+      buildProviderValidateRequestBody({
+        provider,
+        apiKey,
+        formData,
+        isAwsPolly,
+        showsRegion,
+        defaultRegion,
+        isChatGptWebCodex,
+      })
+    );
   const handleValidate = async () => {
     setValidating(true);
     setSaveError(null);
@@ -274,24 +296,7 @@ export default function AddApiKeyModal({
       const res = await fetch("/api/providers/validate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          provider,
-          apiKey: resolveCredentialInput(),
-          validationModelId: formData.validationModelId || undefined,
-          customUserAgent: formData.customUserAgent.trim() || undefined,
-          baseUrl: formData.baseUrl.trim() || undefined,
-          region: isAwsPolly
-            ? formData.region.trim() || "us-east-1"
-            : showsRegion
-              ? formData.region.trim() || defaultRegion
-              : undefined,
-          accessKeyId: isAwsPolly ? formData.awsAccessKeyId.trim() || undefined : undefined,
-          sessionToken: isAwsPolly ? formData.awsSessionToken.trim() || undefined : undefined,
-          cx: formData.cx.trim() || undefined,
-          runtimeKey: isChatGptWebCodex ? formData.runtimeKey.trim() || undefined : undefined,
-          tunnelId: isChatGptWebCodex ? formData.tunnelId.trim() || undefined : undefined,
-          connectorName: isChatGptWebCodex ? formData.connectorName.trim() || undefined : undefined,
-        }),
+        body: validateRequestBody(resolveCredentialInput()),
       });
       const data = await res.json();
       const ok = !!data.valid;
@@ -360,26 +365,7 @@ export default function AddApiKeyModal({
           const res = await fetch("/api/providers/validate", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              provider,
-              apiKey: credentialInput,
-              validationModelId: formData.validationModelId || undefined,
-              customUserAgent: formData.customUserAgent.trim() || undefined,
-              baseUrl: formData.baseUrl.trim() || undefined,
-              region: isAwsPolly
-                ? formData.region.trim() || "us-east-1"
-                : showsRegion
-                  ? formData.region.trim() || defaultRegion
-                  : undefined,
-              accessKeyId: isAwsPolly ? formData.awsAccessKeyId.trim() || undefined : undefined,
-              sessionToken: isAwsPolly ? formData.awsSessionToken.trim() || undefined : undefined,
-              cx: formData.cx.trim() || undefined,
-              runtimeKey: isChatGptWebCodex ? formData.runtimeKey.trim() || undefined : undefined,
-              tunnelId: isChatGptWebCodex ? formData.tunnelId.trim() || undefined : undefined,
-              connectorName: isChatGptWebCodex
-                ? formData.connectorName.trim() || undefined
-                : undefined,
-            }),
+            body: validateRequestBody(credentialInput),
           });
           const data = await res.json();
           isValid = !!data.valid;
@@ -430,6 +416,7 @@ export default function AddApiKeyModal({
         ...(providerSpecificData || {}),
         ...(validatedProviderSpecificData || {}),
       };
+      assignM365RefreshToken(provider, formData, mergedProviderSpecificData);
 
       const encodedCredential = isChatGptWebCodex
         ? JSON.stringify({
@@ -765,6 +752,11 @@ export default function AddApiKeyModal({
                 </div>
               </div>
             )}
+            <CommandCodeZdrToggle
+              provider={provider}
+              checked={formData.commandCodeZdrEnabled}
+              onChange={(checked) => setFormData({ ...formData, commandCodeZdrEnabled: checked })}
+            />
             <Input
               label={t("nameLabel")}
               value={formData.name}
@@ -831,14 +823,11 @@ export default function AddApiKeyModal({
             {isChatGptWebCodex && (
               <div className="space-y-3 rounded-lg border border-border bg-bg-subtle p-3">
                 <div>
-                  <p className="text-sm font-medium text-text-main">Codex-Toolverbindung</p>
-                  <p className="mt-1 text-xs text-text-muted">
-                    Der Tunnel bleibt ausschließlich ausgehend. Lokale Tools werden weiterhin nur
-                    von Codex gemäß dessen Sandbox- und Freigaberichtlinie ausgeführt.
-                  </p>
+                  <p className="text-sm font-medium text-text-main">{t("codexTunnelTitle")}</p>
+                  <p className="mt-1 text-xs text-text-muted">{t("codexTunnelDescription")}</p>
                 </div>
                 <Input
-                  label="Tunnel-ID"
+                  label={t("tunnelIdLabel")}
                   value={formData.tunnelId}
                   onChange={(e) => setFormData({ ...formData, tunnelId: e.target.value })}
                   placeholder="tunnel_0123456789abcdef0123456789abcdef"
@@ -846,17 +835,17 @@ export default function AddApiKeyModal({
                   spellCheck={false}
                 />
                 <Input
-                  label="Tunnel Runtime-Key"
+                  label={t("tunnelRuntimeKeyLabel")}
                   type="password"
                   value={formData.runtimeKey}
                   onChange={(e) => setFormData({ ...formData, runtimeKey: e.target.value })}
-                  placeholder="Runtime-Key"
-                  hint="Wird zusammen mit dem Cookie verschlüsselt gespeichert und nie in Logs ausgegeben."
+                  placeholder={t("tunnelRuntimeKeyPlaceholder")}
+                  hint={t("tunnelRuntimeKeyHint")}
                   autoComplete="off"
                   spellCheck={false}
                 />
                 <Input
-                  label="ChatGPT-Custom-Connector"
+                  label={t("chatgptConnectorLabel")}
                   value={formData.connectorName}
                   onChange={(e) => setFormData({ ...formData, connectorName: e.target.value })}
                   placeholder={CHATGPT_WEB_CODEX_CONNECTOR_NAME}
@@ -1061,6 +1050,16 @@ export default function AddApiKeyModal({
                     }
                     placeholder="account-123"
                     hint={t("huggingfaceBillToHint")}
+                  />
+                )}
+                {provider === "copilot-m365-web" && (
+                  <Input
+                    type="password"
+                    autoComplete="new-password"
+                    label={t("m365RefreshTokenLabel")}
+                    value={formData.m365RefreshToken}
+                    onChange={(e) => setFormData({ ...formData, m365RefreshToken: e.target.value })}
+                    hint={t("m365RefreshTokenHint")}
                   />
                 )}
                 <Input

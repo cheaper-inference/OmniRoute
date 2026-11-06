@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 /**
  * PassthroughModelRow — Issue #3501 Phase 1e
  *
@@ -15,7 +16,9 @@ import { Input as KitInput } from "@omniroute/ui-kit/input";
 import { Badge, Button, CapabilityBadge } from "@/shared/components";
 import { parseContextWindowOverrideInput, providerText } from "../providerPageHelpers";
 import ModelCompatPopover from "./ModelCompatPopover";
+import ModelVisionOverrideEditor from "./ModelVisionOverrideEditor";
 import ModelEndpointTagsEditor, { type ModelEndpointEditorInfo } from "./ModelEndpointTagsEditor";
+import ModelComboBadge from "./ModelComboBadge";
 import ModelOutputTokenEditor from "./ModelOutputTokenEditor";
 import { ModelSourceBadge, type ModelCompatSavePatch } from "./ModelRow";
 
@@ -35,6 +38,8 @@ export interface PassthroughModelRowProps {
   source?: string;
   isFree?: boolean;
   isHidden?: boolean;
+  /** Combo names that reference this model, for the "used in combo" badge. */
+  combos?: string[];
   copied?: string;
   onCopy: (text: string, key: string) => void;
   onDeleteAlias?: () => void;
@@ -56,6 +61,9 @@ export interface PassthroughModelRowProps {
   // PUT compatOnly branch has always accepted for these rows — was unreachable
   // from the UI. Absent handler keeps the row exactly as it was.
   supportsVision?: boolean;
+  visionOverride?: boolean | null;
+  onSaveVisionOverride?: (modelId: string, value: boolean | null) => Promise<boolean>;
+  savingVisionOverride?: boolean;
   maxOutputTokenOverride?: number | null;
   onSaveMaxOutputTokenOverride?: (modelId: string, value: number | null) => Promise<boolean>;
   savingOutputOverride?: boolean;
@@ -77,6 +85,7 @@ export default function PassthroughModelRow({
   source,
   isFree,
   isHidden,
+  combos,
   copied,
   onCopy,
   onDeleteAlias,
@@ -95,6 +104,9 @@ export default function PassthroughModelRow({
   testStatus,
   testingModel,
   supportsVision,
+  visionOverride,
+  onSaveVisionOverride,
+  savingVisionOverride,
   maxOutputTokenOverride,
   onSaveMaxOutputTokenOverride,
   savingOutputOverride,
@@ -243,11 +255,19 @@ export default function PassthroughModelRow({
               {...endpointInfo}
             />
           )}
+          {combos && combos.length > 0 && <ModelComboBadge combos={combos} t={t} />}
           {supportsVision === true && (
             <Badge variant="success" className="shrink-0 px-1.5 py-0 text-[10px]">
               {t("visionCapableLabel")}
             </Badge>
           )}
+          <ModelVisionOverrideEditor
+            modelId={modelId}
+            value={visionOverride}
+            onSave={onSaveVisionOverride}
+            saving={savingVisionOverride}
+            t={t}
+          />
           <ModelOutputTokenEditor
             modelId={modelId}
             value={maxOutputTokenOverride}
@@ -384,7 +404,7 @@ export default function PassthroughModelRow({
               }
             >
               {testingModel ? (
-                <Icon name="progress_activity" size={14} className="animate-spin" />
+                <Spinner decorative size="xs" />
               ) : testStatus === "ok" ? (
                 <Icon name="check_circle" size={14} />
               ) : testStatus === "quota" ? (

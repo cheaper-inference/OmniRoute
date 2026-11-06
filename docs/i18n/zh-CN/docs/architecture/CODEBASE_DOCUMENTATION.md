@@ -435,7 +435,7 @@ server/
 
 ## 4. `open-sse/` — 流式处理引擎工作区
 
-作为独立的 npm 工作区发布，包名为 `@omniroute/open-sse`。负责请求处理、执行器、转换器、服务、转换流以及 MCP 服务器。
+作为独立的 npm 工作区发布为 `@omniroute/open-sse`。负责请求处理、执行器、转换器、服务、变换器和 MCP 服务器。
 
 ```
 open-sse/
@@ -445,19 +445,19 @@ open-sse/
 ├── types.d.ts
 ├── config/                 提供者注册表、请求头配置、身份信息等
 ├── handlers/               请求处理器（聊天、嵌入、音频、图像等）
-├── executors/              156 个提供者执行器模块（执行器类及各提供者辅助模块）
+├── executors/              159 个提供者执行器模块（执行器类及每个提供者的辅助工具）
 ├── translator/             格式转换（OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro）
 ├── transformer/            Responses API ↔ Chat Completions 流转换器
-├── services/               80 多个服务模块（组合、回退、配额、身份等）
+├── services/               80+ 个服务模块（组合、回退、配额、身份等）
 ├── utils/                  流式处理辅助工具、TLS 客户端、AWS SigV4、代理 fetch 等
 └── mcp-server/             MCP 服务器（3 种传输方式、33 个作用域、110 个工具）
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| 处理器                  | 用途                                                   |
+| Handler                 | Purpose                                                |
 | ----------------------- | ------------------------------------------------------ |
-| `chatCore.ts`           | 主聊天处理管线（缓存、速率限制、组合路由、执行器分派） |
+| `chatCore.ts`           | 主要聊天流水线（缓存、速率限制、组合路由、执行器分派） |
 | `responsesHandler.ts`   | OpenAI Responses API 入口点                            |
 | `embeddings.ts`         | 嵌入                                                   |
 | `imageGeneration.ts`    | 图像生成                                               |
@@ -467,31 +467,31 @@ open-sse/
 | `musicGeneration.ts`    | 音乐生成                                               |
 | `rerank.ts`             | 重排序                                                 |
 | `moderations.ts`        | 内容审核                                               |
-| `search.ts`             | Web 搜索                                               |
+| `search.ts`             | 网络搜索                                               |
 | `sseParser.ts`          | SSE 事件解析器                                         |
-| `usageExtractor.ts`     | 从上游流中提取令牌计数                                 |
-| `responseSanitizer.ts`  | 去除提供者特有的无关内容                               |
-| `responseTranslator.ts` | 连接提供者响应与转换器层的适配代码                     |
+| `usageExtractor.ts`     | 从上游流中提取令牌数量                                 |
+| `responseSanitizer.ts`  | 移除提供者特有的噪声                                   |
+| `responseTranslator.ts` | 连接提供者响应与转换器层                               |
 
 ### 4.2 `open-sse/executors/`
 
-包含 156 个顶层执行器模块（`*.ts`，不包括 `base.ts`、`index.ts` 和测试文件——该数量由
-`npm run check:docs-counts` 测量）。每个执行器类都直接或通过 `DefaultExecutor` 或其他执行器继承自 `BaseExecutor`（`base.ts`）；
-其余模块则是各提供者专用的辅助模块（工具架构、fetch/TTS 适配器、特殊行为处理器）。执行器包括：
+159 个顶层执行器模块（`*.ts`，不包括 `base.ts`、`index.ts` 和测试——该数量由
+`npm run check:docs-counts` 测量）。每个执行器类都直接或通过 `DefaultExecutor` 或其他执行器继承
+`BaseExecutor`（`base.ts`）；其余模块是每个提供者的辅助工具（工具架构、fetch/TTS 适配器、特殊行为处理器）。执行器包括：
 
 `antigravity`、`azure-openai`、`blackbox-web`、`cliproxyapi`、
 `chatgpt-web-codex`、`cloudflare-ai`、`codex`、`commandCode`、`cursor`、`default`、`devin-cli`、
 `muse-spark-web`、`nlpcloud`、`opencode`、`perplexity-web`、`petals`、
-`pollinations`、`qoder`、`vertex`、`devin-desktop`，以及 `claudeIdentity.ts`
-（共享身份辅助模块）和 `index.ts`（注册表）。
+`pollinations`、`qoder`、`vertex`、`devin-desktop`，以及
+`claudeIdentity.ts`（共享身份辅助工具）和 `index.ts`（注册表）。
 
-> 注意：此处未列出的提供者由 `default.ts` 使用通用的
-> OpenAI 兼容执行器提供服务。完整的提供者目录（376 个提供者）位于
+> 注意：此处未列出的提供者由 `default.ts` 提供服务，并使用通用的
+> OpenAI 兼容执行器。完整的提供者目录（380 个提供者）位于
 > `src/shared/constants/providers.ts`。
 
 ### 4.3 `open-sse/translator/`
 
-采用中心辐射式转换架构（OpenAI 为中心）。
+中心辐射式转换架构（OpenAI 是中心）。
 
 - **9 个请求转换器**（`translator/request/`）：
   `antigravity-to-openai`、`claude-to-gemini`、`claude-to-openai`、
@@ -501,61 +501,73 @@ open-sse/
   `claude-to-openai`、`cursor-to-openai`、`gemini-to-claude`、`gemini-to-openai`、
   `kiro-to-openai`、`openai-responses`、`openai-to-antigravity`、
   `openai-to-claude`。
-- **9 个辅助模块**（`translator/helpers/`）：
+- **9 个辅助工具**（`translator/helpers/`）：
   `claudeHelper`、`geminiHelper`、`geminiToolsSanitizer`、`maxTokensHelper`、
   `openaiHelper`、`responsesApiHelper`、`schemaCoercion`、`toolCallHelper`，以及
-  辅助模块测试。
-- **图像辅助模块**（`translator/image/sizeMapper.ts`）。
+  辅助工具测试。
+- **图像辅助工具**（`translator/image/sizeMapper.ts`）。
 - 顶层文件：`bootstrap.ts`、`formats.ts`、`registry.ts`、`index.ts`。
 
 ### 4.4 `open-sse/transformer/`
 
 - `responsesTransformer.ts` — 基于 `TransformStream` 的 Responses API ↔ Chat
-  Completions 转换器（由 `responses/` 路由的全匹配处理器使用）。
+  Completions 转换器（由 `responses/` 路由的 catch-all 使用）。
 
 ### 4.5 `open-sse/services/`
 
-重点内容（完整列表位于 `open-sse/services/` 下）：
+重点内容（完整列表位于 `open-sse/services/`）：
 
-| 关注点       | 文件                                                                                                                                                                                                                                                     |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 组合路由     | `combo.ts`（20 种策略）、`comboConfig.ts`、`comboMetrics.ts`、`comboManifestMetrics.ts`、`comboAgentMiddleware.ts`                                                                                                                                       |
-| 自动组合引擎 | `autoCombo/` — `engine.ts`、`scoring.ts`、`taskFitness.ts`、`virtualFactory.ts`、`modePacks.ts`、`autoPrefix.ts`、`persistence.ts`、`providerDiversity.ts`、`providerRegistryAccessor.ts`、`routerStrategy.ts`、`selfHealing.ts`、`index.ts`             |
-| 弹性机制     | `accountFallback.ts`（冷却 + 锁定）、`errorClassifier.ts`、`requestRejectedStreak.ts`、`emergencyFallback.ts`、`rateLimitManager.ts`、`rateLimitSemaphore.ts`、`accountSemaphore.ts`、`accountSelector.ts`                                               |
-| 配额         | `quotaMonitor.ts`、`quotaPreflight.ts`、`bailianQuotaFetcher.ts`、`codexQuotaFetcher.ts`、`deepseekQuotaFetcher.ts`、`openrouterQuotaFetcher.ts`、`openrouterFreeWindow.ts`、`llmgatewayQuotaFetcher.ts`、`crofUsageFetcher.ts`、`antigravityCredits.ts` |
-| 缓存         | `reasoningCache.ts`、`searchCache.ts`、`signatureCache.ts`、`requestDedup.ts`                                                                                                                                                                            |
-| 路由智能     | `intentClassifier.ts`、`taskAwareRouter.ts`、`backgroundTaskDetector.ts`、`volumeDetector.ts`、`wildcardRouter.ts`、`workflowFSM.ts`、`specificityDetector.ts`、`specificityRules.ts`、`specificityTypes.ts`                                             |
-| 模型处理     | `modelCapabilities.ts`、`modelDeprecation.ts`、`modelFamilyFallback.ts`、`modelStrip.ts`、`model.ts`、`provider.ts`、`providerRequestDefaults.ts`、`providerCostData.ts`、`payloadRules.ts`                                                              |
-| 压缩         | `compression/` — 完整的压缩引擎接线                                                                                                                                                                                                                      |
-| 令牌 + 会话  | `tokenRefresh.ts`、`sessionManager.ts`、`apiKeyRotator.ts`、`contextManager.ts`、`contextHandoff.ts`、`systemPrompt.ts`、`roleNormalizer.ts`、`responsesInputSanitizer.ts`、`toolSchemaSanitizer.ts`、`toolLimitDetector.ts`、`thinkingBudget.ts`        |
-| 层级 / 清单  | `tierResolver.ts`、`tierConfig.ts`、`tierDefaults.json`、`tierTypes.ts`、`manifestAdapter.ts`                                                                                                                                                            |
-| IP / 网络    | `ipFilter.ts`、`webSearchFallback.ts`                                                                                                                                                                                                                    |
-| 批处理       | `batchProcessor.ts`                                                                                                                                                                                                                                      |
-| 使用情况     | `usage.ts`                                                                                                                                                                                                                                               |
+| 关注点          | 文件                                                                                                                                                                                                                                                     |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 组合路由        | `combo.ts`（20 种策略）、`comboConfig.ts`、`comboMetrics.ts`、`comboManifestMetrics.ts`、`comboAgentMiddleware.ts`                                                                                                                                       |
+| Auto Combo 引擎 | `autoCombo/` — `engine.ts`、`scoring.ts`、`taskFitness.ts`、`virtualFactory.ts`、`modePacks.ts`、`autoPrefix.ts`、`persistence.ts`、`providerDiversity.ts`、`providerRegistryAccessor.ts`、`routerStrategy.ts`、`selfHealing.ts`、`index.ts`             |
+| 弹性            | `accountFallback.ts`（冷却 + 锁定）、`errorClassifier.ts`、`requestRejectedStreak.ts`、`emergencyFallback.ts`、`rateLimitManager.ts`、`rateLimitSemaphore.ts`、`accountSemaphore.ts`、`accountSelector.ts`                                               |
+| 配额            | `quotaMonitor.ts`、`quotaPreflight.ts`、`bailianQuotaFetcher.ts`、`codexQuotaFetcher.ts`、`deepseekQuotaFetcher.ts`、`openrouterQuotaFetcher.ts`、`openrouterFreeWindow.ts`、`llmgatewayQuotaFetcher.ts`、`crofUsageFetcher.ts`、`antigravityCredits.ts` |
+| 缓存            | `reasoningCache.ts`、`searchCache.ts`、`signatureCache.ts`、`requestDedup.ts`                                                                                                                                                                            |
+| 路由智能        | `intentClassifier.ts`、`taskAwareRouter.ts`、`backgroundTaskDetector.ts`、`volumeDetector.ts`、`wildcardRouter.ts`、`workflowFSM.ts`、`specificityDetector.ts`、`specificityRules.ts`、`specificityTypes.ts`                                             |
+| 模型处理        | `modelCapabilities.ts`、`modelDeprecation.ts`、`modelFamilyFallback.ts`、`modelStrip.ts`、`model.ts`、`provider.ts`、`providerRequestDefaults.ts`、`providerCostData.ts`、`payloadRules.ts`                                                              |
+| 压缩            | `compression/` — 完整的压缩引擎连接                                                                                                                                                                                                                      |
+| Token + 会话    | `tokenRefresh.ts`、`sessionManager.ts`、`apiKeyRotator.ts`、`contextManager.ts`、`contextHandoff.ts`、`systemPrompt.ts`、`roleNormalizer.ts`、`responsesInputSanitizer.ts`、`toolSchemaSanitizer.ts`、`toolLimitDetector.ts`、`thinkingBudget.ts`        |
+| 层级 / 清单     | `tierResolver.ts`、`tierConfig.ts`、`tierDefaults.json`、`tierTypes.ts`、`manifestAdapter.ts`                                                                                                                                                            |
+| IP / 网络       | `ipFilter.ts`、`webSearchFallback.ts`                                                                                                                                                                                                                    |
+| 批处理          | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| 使用情况        | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 个唯一工具**在 `server.ts` 中完成接线（`schemas/tools.ts` 中有 45 个规范工具，另加内存、技能、GitHub 技能、池、游戏化、插件、Notion、Obsidian、本地语料库和压缩模块——并集由 `countUniqueMcpTools` 统计）。
+- `server.ts` 中连接了 **110 个唯一工具**（`schemas/tools.ts` 中的 45 个规范工具，加上 memory、skills、GitHub-skills、pool、gamification、plugin、Notion、Obsidian、local-corpus 和 compression 模块——通过 `countUniqueMcpTools` 统计并集）。
 - **3 种传输方式**：stdio、HTTP Streamable、SSE。
-- 运行时强制执行 **33 个作用域**——基础列表位于 `src/shared/constants/mcpScopes.ts`，完整集合是各工具模块所声明作用域的并集。
+- 运行时强制执行 **33 个作用域**——基础列表位于 `src/shared/constants/mcpScopes.ts`，完整集合是各工具模块声明的作用域的并集。
 - 审计表：`mcp_tool_audit`（由 `audit.ts` 填充）。
-- 文件：`server.ts`、`index.ts`、`httpTransport.ts`、`audit.ts`、`scopeEnforcement.ts`、`runtimeHeartbeat.ts`、`descriptionCompressor.ts`、`schemas/{tools, a2a, audit, index}.ts`、`tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`，以及 `__tests__/` 下的测试。
-- 有关完整工具目录，请参阅 [MCP-SERVER.md](../frameworks/MCP-SERVER.md)。
+- 文件：`server.ts`、`index.ts`、`httpTransport.ts`、`audit.ts`、`scopeEnforcement.ts`、
+  `runtimeHeartbeat.ts`、`descriptionCompressor.ts`、`schemas/{tools, a2a, audit, index}.ts`、
+  `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`，
+  以及 `__tests__/` 下的测试。
+- 请参阅 [MCP-SERVER.md](../frameworks/MCP-SERVER.md) 了解完整的工具目录。
 
 ### 4.7 `open-sse/config/`
 
-提供者注册表（`providerRegistry.ts`、`providerModels.ts`、`providerHeaderProfiles.ts`）、按格式划分的模型注册表（`audioRegistry.ts`、`embeddingRegistry.ts`、`imageRegistry.ts`、`moderationRegistry.ts`、`musicRegistry.ts`、`rerankRegistry.ts`、`searchRegistry.ts`、`videoRegistry.ts`）、身份辅助工具（`codexIdentity.ts`、`codexInstructions.ts`、`anthropicHeaders.ts`、`antigravityUpstream.ts`、`antigravityModelAliases.ts`、`cliFingerprints.ts`、`toolCloaking.ts`、`defaultThinkingSignature.ts`）、凭证辅助工具（`credentialLoader.ts`、`codexClient.ts`），以及云适配器（`azureAi.ts`、`bedrock.ts`、`datarobot.ts`、`glmProvider.ts`、`maritalk.ts`、`oci.ts`、`petals.ts`、`runway.ts`、`sap.ts`、`watsonx.ts`、`ollamaModels.ts`、`errorConfig.ts`、`constants.ts`、`registryUtils.ts`）。
+提供者注册表（`providerRegistry.ts`、`providerModels.ts`、
+`providerHeaderProfiles.ts`）、按格式划分的模型注册表（`audioRegistry.ts`、
+`embeddingRegistry.ts`、`imageRegistry.ts`、`moderationRegistry.ts`、
+`musicRegistry.ts`、`rerankRegistry.ts`、`searchRegistry.ts`、`videoRegistry.ts`）、
+身份辅助工具（`codexIdentity.ts`、`codexInstructions.ts`、
+`anthropicHeaders.ts`、`antigravityUpstream.ts`、`antigravityModelAliases.ts`、
+`cliFingerprints.ts`、`toolCloaking.ts`、`defaultThinkingSignature.ts`）、
+凭据辅助工具（`credentialLoader.ts`、`codexClient.ts`）和云适配器（`azureAi.ts`、`bedrock.ts`、`datarobot.ts`、`glmProvider.ts`、
+`maritalk.ts`、`oci.ts`、`petals.ts`、`runway.ts`、`sap.ts`、`watsonx.ts`、
+`ollamaModels.ts`、`errorConfig.ts`、`constants.ts`、`registryUtils.ts`）。
 
 ### 4.8 `open-sse/utils/`
 
-流式处理原语和提供者辅助工具：`stream.ts`、`streamHandler.ts`、
-`streamHelpers.ts`、`streamPayloadCollector.ts`、`streamReadiness.ts`、
-`sseHeartbeat.ts`、`proxyFetch.ts`、`proxyDispatcher.ts`、`tlsClient.ts`、
-`networkProxy.ts`、`awsSigV4.ts`、`cacheControlPolicy.ts`、
-`cursorChecksum.ts`、`cursorAgentProtobuf.ts`、`cursorVersionDetector.ts`、
-`comfyuiClient.ts`、`kieTask.ts`、`bypassHandler.ts`、`aiSdkCompat.ts`、
-`thinkTagParser.ts`、`urlSanitize.ts`、`usageTracking.ts`、`requestLogger.ts`、
-`progressTracker.ts`、`cors.ts`、`error.ts`、`logger.ts`、`sleep.ts`、
+流式处理原语和提供者辅助工具：`stream.ts`、`streamHandler.ts`、  
+`streamHelpers.ts`、`streamPayloadCollector.ts`、`streamReadiness.ts`、  
+`sseHeartbeat.ts`、`proxyFetch.ts`、`proxyDispatcher.ts`、`tlsClient.ts`、  
+`networkProxy.ts`、`awsSigV4.ts`、`cacheControlPolicy.ts`、  
+`cursorChecksum.ts`、`cursorAgentProtobuf.ts`、`cursorVersionDetector.ts`、  
+`comfyuiClient.ts`、`kieTask.ts`、`bypassHandler.ts`、`aiSdkCompat.ts`、  
+`thinkTagParser.ts`、`urlSanitize.ts`、`usageTracking.ts`、`requestLogger.ts`、  
+`progressTracker.ts`、`cors.ts`、`error.ts`、`logger.ts`、`sleep.ts`、  
 `ollamaTransform.ts`。
 
 ---

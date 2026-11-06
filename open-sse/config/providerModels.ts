@@ -245,7 +245,13 @@ export function findModelName(aliasOrId: string, modelId: string): string {
 // OpenCode's Muse Spark family is Responses-only. Keep this rule provider-scoped
 // and version-agnostic so a newly published Muse Spark model is routed correctly
 // before the static catalog is refreshed.
-const OPENCODE_MUSE_SPARK_ALIASES = new Set(["opencode-zen", "opencode-go"]);
+const OPENCODE_MUSE_SPARK_ALIASES = new Set([
+  "opencode-zen",
+  "opencode-go",
+  // Short aliases that do not normalize via PROVIDER_ID_TO_ALIAS (#12687).
+  "ocg",
+  "ocz",
+]);
 const MUSE_SPARK_MODEL_PATTERN = /^muse-spark(?:-|$)/i;
 
 const OPENCODE_MODEL_PREFIXES = ["opencode/", "opencode-zen/", "opencode-go/"] as const;
@@ -341,14 +347,15 @@ export function getModelTargetFormat(aliasOrId: string, modelId: string): string
   // executor actually sends the request (same pattern as the openai "-pro" heuristic above,
   // #5842).
   if ((alias === "gh" || alias === "ghe-copilot") && /claude/i.test(bareModelId)) return "claude";
-  // #15499: GheCopilotExecutor.buildUrl sends any unregistered `gpt-6*` id to
-  // /responses (`/^gpt-6/i`, same gate as supportsResponsesEndpoint). A missing
-  // catalog tag otherwise leaves the body on the provider's chat-completions
-  // format (`messages` / `max_tokens`), which /responses rejects. github.com
-  // Copilot does not use that URL regex, so this stays ghe-copilot-only.
+  // #15499: GheCopilotExecutor.buildUrl sends any unregistered `gpt-6*` / `gpt-5.5+`
+  // id to /responses (`/^gpt-(?:[6-9]|5\.[5-9])/i`, same gate as supportsResponsesEndpoint).
+  // A missing catalog tag otherwise leaves the body on the provider's chat-completions
+  // format (`messages` / `max_tokens`), which /responses rejects. github.com Copilot
+  // infers unsynced GPT-6/5.5+ formats in `src/sse/services/githubResponsesFallback.ts`
+  // so explicit chat-capable synced/custom rows on `github` can still stay on chat/completions.
   if (
     alias === "ghe-copilot" &&
-    /^gpt-6/i.test(bareModelId) &&
+    /^gpt-(?:[6-9]|5\.[5-9])/i.test(bareModelId) &&
     !/gemini|claude/i.test(bareModelId)
   ) {
     return "openai-responses";

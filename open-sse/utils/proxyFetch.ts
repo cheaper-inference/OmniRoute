@@ -26,10 +26,7 @@ import { sanitizeTransportError } from "./proxyTransportError.ts";
 import { isProxyReachable } from "@/lib/proxyHealth";
 import { isDirectBypassHost } from "./proxyDirectBypass.ts";
 import { noProxyMatch, resolveEnvProxyUrl } from "./proxyEnv.ts";
-import {
-  isControlPlaneProxyDirectFallbackEnabled,
-  isFeatureFlagEnabled,
-} from "@/shared/utils/featureFlags";
+import { isRegisteredFeatureFlagEnabled } from "./registeredFeatureFlag.ts";
 import {
   directFetchWithBoundedResponseStart,
   isDirectResponseStartTimeout,
@@ -93,23 +90,6 @@ const RETRY_BACKOFF_MS = Math.max(Number(process.env.OMNIROUTE_RETRY_BACKOFF_MS)
 
 function isTlsFingerprintEnabled() {
   return process.env.ENABLE_TLS_FINGERPRINT === "true";
-}
-
-/**
- * Per-provider TLS impersonation profile. Most providers use the default
- * Chrome/macOS wreq profile; providers that must match a specific browser
- * fingerprint (e.g. MaxAI expects a Windows Firefox-150 client) override it here.
- * Returns undefined to keep the tlsClient default (chrome_124 / macos).
- */
-const TLS_PROVIDER_PROFILE: Record<string, { browser: string; os: string }> = {
-  maxai: { browser: "firefox_150", os: "windows" },
-};
-
-type TlsProfileResult = { browserProfile?: string; os?: string };
-function tlsProfileForProvider(provider: string | null | undefined): TlsProfileResult {
-  if (!provider) return {};
-  const p = TLS_PROVIDER_PROFILE[provider.trim().toLowerCase()];
-  return p ? { browserProfile: p.browser, os: p.os } : {};
 }
 
 type TlsClientLike = {
@@ -199,6 +179,14 @@ export type AppliedProxySink = {
    * pool has nothing else to offer — the executor keeps its behavior then.
    */
   reselectPoolMember?: () => Promise<unknown>;
+  /**
+   * Wall-clock Date.now() of the first upstream dispatch inside this capture
+   * (sticky: the first writer wins, retries keep the original stamp). Null /
+   * absent when nothing dispatched. Lets the call log derive how long the
+   * request waited in OmniRoute (scheduling, translation, parking) before the
+   * first byte left for the provider.
+   */
+  upstreamDispatchedAt?: number | null;
 };
 const APPLIED_PROXY_CONTEXT_KEY = Symbol.for("omniroute.proxyFetch.applied-context");
 type AppliedProxyStore = typeof globalThis & {
@@ -283,6 +271,47 @@ export function readAddedWait(): { ms: number | null; cause: string | null } | n
   } catch {
     return null;
   }
+}
+
+/**
+ * Stamp the first upstream dispatch of this capture on the sink (sticky: only
+ * the first writer wins, so retry dispatches keep the original moment). Best-
+ * effort like noteAddedWait: no-op outside a capture.
+ */
+export function noteUpstreamDispatch(): void {
+  try {
+    const sink = getAppliedProxyContext().getStore();
+    if (sink && sink.upstreamDispatchedAt == null) sink.upstreamDispatchedAt = Date.now();
+  } catch {
+    /* queue-wait is best-effort; never break the request path */
+  }
+}
+
+/**
+ * Late read of the first upstream dispatch timestamp. Fail-soft: null
+ * outside a capture or when nothing dispatched — callers persist NULL.
+ */
+export function readUpstreamDispatchedAt(): number | null {
+  try {
+    const sink = getAppliedProxyContext().getStore();
+    return sink && typeof sink.upstreamDispatchedAt === "number" ? sink.upstreamDispatchedAt : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Queue wait = how long the serving execution waited from `startTime` until
+ * the first byte left for the provider. Null when no dispatch happened
+ * (rejected before egress); clamped at 0 against clock skew.
+ */
+export function queueWaitMsFromDispatch(
+  upstreamDispatchedAt: number | null,
+  startTime: number
+): number | null {
+  if (upstreamDispatchedAt === null || !Number.isFinite(upstreamDispatchedAt)) return null;
+  if (!Number.isFinite(startTime)) return null;
+  return Math.max(0, Math.round(upstreamDispatchedAt - startTime));
 }
 
 type FetchWithDispatcherOptions = RequestInit & { dispatcher?: unknown };
@@ -401,6 +430,53 @@ function isAmbiguousFailureReplaySafe(
     (method === "GET" || method === "HEAD" || method === "OPTIONS") &&
     !requestHasNonReplayableBody(input, options)
   );
+}
+
+// Transport errors raised while still connecting: no request byte left this host, so a resend
+// cannot deliver the request twice, whatever the method. ETIMEDOUT stays out because it can also
+// fire on an established socket after the body was written.
+const PRE_SEND_ERROR_CODES = new Set([
+  "ECONNREFUSED",
+  "ENOTFOUND",
+  "EAI_AGAIN",
+  "ENETUNREACH",
+  "UND_ERR_CONNECT_TIMEOUT",
+]);
+
+function isPreSendConnectionError(error: unknown): boolean {
+  let current = error;
+  for (let depth = 0; depth < 4 && current && typeof current === "object"; depth++) {
+    const { code, cause } = current as { code?: unknown; cause?: unknown };
+    if (typeof code === "string" && PRE_SEND_ERROR_CODES.has(code)) return true;
+    current = cause;
+  }
+  return false;
+}
+
+function isStrictPostReplayEnabled(): boolean {
+  try {
+    return isRegisteredFeatureFlagEnabled("PROXY_STRICT_POST_REPLAY_ENABLED");
+  } catch {
+    // no-effect: an unreadable flag store keeps the legacy resend policy
+    return false;
+  }
+}
+
+/**
+ * Whether this transport error allows another delivery attempt (fresh socket, proxy fallback or
+ * native fallback). A consumed body can never be resent. With PROXY_STRICT_POST_REPLAY_ENABLED on
+ * (default off), a non-idempotent request also needs proof that nothing was sent: a socket error
+ * after the write can mean the upstream accepted the request, and a resend generates and bills it
+ * twice. Off, a replayable body is resent, which is what recovers a stale pooled socket (#4252).
+ */
+function canResendAfterTransportError(
+  input: RequestInfo | URL,
+  options: FetchWithDispatcherOptions,
+  error: unknown
+): boolean {
+  if (requestHasNonReplayableBody(input, options)) return false;
+  if (!isStrictPostReplayEnabled()) return true;
+  return isAmbiguousFailureReplaySafe(input, options) || isPreSendConnectionError(error);
 }
 
 function getEffectiveSignal(
@@ -548,7 +624,8 @@ export async function runWithProxyContext(
   // The caller must opt in, and the runtime feature flag must also be enabled.
   // This fallback changes egress IP, so upgrades must not silently turn it on.
   const directFallbackOnUnreachable =
-    opts?.directFallbackOnUnreachable === true && isControlPlaneProxyDirectFallbackEnabled();
+    opts?.directFallbackOnUnreachable === true &&
+    isRegisteredFeatureFlagEnabled("OMNIROUTE_CONTROL_PLANE_PROXY_DIRECT_FALLBACK");
   // Keep an explicit direct sentinel so resolveProxyForRequest cannot re-read
   // HTTPS_PROXY/HTTP_PROXY after the control-plane route decision.
   const runDirect = () => proxyContext.run(DIRECT_PROXY_CONTEXT, fn);
@@ -767,7 +844,6 @@ async function patchedFetchUnrecorded(
           signal: getEffectiveSignal(input, options),
           proxy: null,
           sessionScope: tlsStore?.sessionScope,
-          ...tlsProfileForProvider(tlsStore?.provider),
         });
         if (tlsStore) tlsStore.used = true;
         return await guardTlsFirstByte(response);
@@ -872,6 +948,8 @@ async function patchedFetchUnrecorded(
           );
           throw dispatcherError;
         }
+        // Read before tagging: the tag overwrites the transport code the policy reads.
+        const canResend = canResendAfterTransportError(input, options, dispatcherError);
         // Retry/fallback only for connection errors, never HTTP errors.
         tagProxyUnreachable(dispatcherError);
         const errCode = (dispatcherError as { code?: unknown })?.code;
@@ -888,20 +966,21 @@ async function patchedFetchUnrecorded(
           (typeof errCode === "string" && errCode.startsWith("UND_ERR")) ||
           msg.includes("UND_ERR")
         ) {
-          if (attempt === 0 && maxAttempts > 1) {
+          if (attempt === 0 && canResend) {
             // Retry after a short fixed backoff on a fresh socket.
             lastDispatcherError = dispatcherError;
             await new Promise((r) => setTimeout(r, RETRY_BACKOFF_MS));
             continue;
           }
-          if (hasNonReplayableBody) {
+          if (!canResend) {
+            const reason = hasNonReplayableBody
+              ? "non-replayable request body"
+              : "request may already have been delivered";
             const detail = describeFallbackFailure(
               describeFetchCause(dispatcherError),
-              "skipped: non-replayable request body"
+              `skipped: ${reason}`
             );
-            console.warn(
-              `[ProxyFetch] skipping native fetch fallback for non-replayable body: ${detail}`
-            );
+            console.warn(`[ProxyFetch] skipping native fetch fallback, ${reason}: ${detail}`);
             if (dispatcherError instanceof Error) {
               (dispatcherError as Error & { proxyFetchDetail?: string }).proxyFetchDetail = detail;
             }
@@ -912,7 +991,7 @@ async function patchedFetchUnrecorded(
           if (
             !tlsDirectFallback &&
             source === "direct" &&
-            isFeatureFlagEnabled("PROXY_AUTO_SELECT_ENABLED")
+            isRegisteredFeatureFlagEnabled("PROXY_AUTO_SELECT_ENABLED")
           ) {
             let targetHostname = "";
             try {
@@ -1056,7 +1135,12 @@ async function patchedFetchUnrecorded(
           msg.includes("ECONNREFUSED") ||
           (typeof errCode === "string" && errCode.startsWith("UND_ERR")) ||
           msg.includes("UND_ERR");
-        if (attempt === 0 && maxRelayAttempts > 1 && isTransportFailure) {
+        if (
+          attempt === 0 &&
+          maxRelayAttempts > 1 &&
+          isTransportFailure &&
+          canResendAfterTransportError(input, options, relayError)
+        ) {
           lastRelayError = relayError;
           // #9158: fixed OMNIROUTE_RETRY_BACKOFF_MS backoff — the retry uses a
           // FRESH no-keep-alive RELAY_RETRY_AGENT (connections: 1, keepAliveTimeout:
@@ -1096,7 +1180,6 @@ async function patchedFetchUnrecorded(
         signal: getEffectiveSignal(input, options),
         proxy: proxyUrl,
         sessionScope: tlsStore?.sessionScope,
-        ...tlsProfileForProvider(tlsStore?.provider),
       });
       if (tlsStore) tlsStore.used = true;
       return await guardTlsFirstByte(response);
@@ -1150,7 +1233,12 @@ async function patchedFetchUnrecorded(
         msg.includes("ECONNREFUSED") ||
         (typeof errCode === "string" && errCode.startsWith("UND_ERR")) ||
         msg.includes("UND_ERR");
-      if (attempt === 0 && maxProxyAttempts > 1 && isTransportFailure) {
+      if (
+        attempt === 0 &&
+        maxProxyAttempts > 1 &&
+        isTransportFailure &&
+        canResendAfterTransportError(input, options, error)
+      ) {
         lastProxyError = error;
         // #9158: fixed OMNIROUTE_RETRY_BACKOFF_MS backoff — the retry uses a
         // fresh no-keep-alive dispatcher (getProxyRetryDispatcher), so the old
