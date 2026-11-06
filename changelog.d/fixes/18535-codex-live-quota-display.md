@@ -1,0 +1,1 @@
+- **fix(dashboard):** Keep Codex quota panels in sync with accepted upstream response observations using local cached reads. Preserve separate Codex/Spark windows, partial observations and their ages; prevent delayed usage refreshes from hiding newer inference quota. Pause automatic cached reads in hidden tabs without adding upstream calls or blocking generation.

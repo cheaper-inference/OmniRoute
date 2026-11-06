@@ -1,0 +1,1 @@
+- **fix(sse):** Opt-in `OPENCODE_FREE_TIER_EGRESS_PROBE` (default off): after an OpenCode `403 FreeTierError` through a proxy, probe the request once through another account proxy or pool member (never a direct connection) and set the first egress aside only when that probe answers 200 ([#18423](https://github.com/cheaper-inference/OmniRoute/pull/18423)) — thanks @yxxrn
