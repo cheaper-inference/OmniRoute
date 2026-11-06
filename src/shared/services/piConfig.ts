@@ -294,10 +294,13 @@ function mergePiModels(
   );
   const prev = previous.find((m) => m.id === options.model) ?? {};
   const prevName = typeof prev.name === "string" && prev.name ? prev.name : undefined;
+  // Pi reads `model.baseUrl ?? provider.baseUrl` (same for `api`), so leaving these
+  // on the applied entry would send it past the OmniRoute endpoint Apply just wrote.
+  const { baseUrl: _baseUrl, api: _api, ...prevKept } = prev;
   return [
     {
       // Keep hand-set contextWindow/maxTokens and any other key on the entry.
-      ...prev,
+      ...prevKept,
       id: options.model,
       // The dashboard card has no name field and the route used to pass
       // `modelName: model`, so a name equal to the id means "unset" — keep a

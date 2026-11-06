@@ -104,3 +104,40 @@ test("an explicit modelName different from the id still wins", async () => {
   assert.equal(models[0].id, "cx/gpt-6-sol");
   assert.equal(models[0].name, "Renamed");
 });
+
+test("apply drops a model-level baseUrl/api so the applied model uses OmniRoute", async () => {
+  const env = await makeEnv({
+    providers: {
+      omniroute: {
+        baseUrl: "http://127.0.0.1:20128/v1",
+        apiKey: "sk-old",
+        api: "openai-completions",
+        omnirouteManaged: true,
+        models: [
+          {
+            id: "cx/gpt-6-sol",
+            name: "My Label",
+            contextWindow: 123456,
+            baseUrl: "https://elsewhere.example/v1",
+            api: "anthropic-messages",
+          },
+          { id: "other/model", baseUrl: "https://kept.example/v1", api: "openai-responses" },
+        ],
+      },
+    },
+  });
+
+  await applyOmniRoutePiProvider({ ...APPLY, model: "cx/gpt-6-sol" }, env);
+
+  const { config } = await readPiModelsJson(env);
+  const provider = readOmniRoutePiProvider(config);
+  assert.equal(provider?.baseUrl, "http://127.0.0.1:20128/v1");
+  assert.equal(provider?.api, "openai-completions");
+  assert.deepEqual(provider?.models, [
+    // Pi reads `definition.baseUrl ?? provider.baseUrl`, so these would win over
+    // the provider values Apply just wrote. Everything else on the entry stays.
+    { id: "cx/gpt-6-sol", name: "My Label", contextWindow: 123456 },
+    // A model that was not applied is left exactly as the user wrote it.
+    { id: "other/model", baseUrl: "https://kept.example/v1", api: "openai-responses" },
+  ]);
+});
