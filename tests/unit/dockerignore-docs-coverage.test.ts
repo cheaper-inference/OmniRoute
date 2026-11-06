@@ -49,6 +49,20 @@ const REQUIRED_DOC_SCREENSHOTS = [
   "docs/screenshots/05-translator.png",
 ];
 
+test("container builds exclude local environment files at every directory depth", () => {
+  const parsed = parseDockerignore(fs.readFileSync(DOCKERIGNORE, "utf8"));
+  for (const file of [
+    ".env",
+    ".env.production",
+    ".env.development",
+    ".env.local",
+    "contrib/vps/.env",
+    "src/.env.production.local",
+  ])
+    assert.equal(isDockerIgnored(file, parsed), true, `${file} must not enter the build context`);
+  assert.equal(isDockerIgnored(".env.example", parsed), false);
+});
+
 test("#2348 .dockerignore keeps every doc the in-product viewer needs", () => {
   const parsed = parseDockerignore(fs.readFileSync(DOCKERIGNORE, "utf8"));
   const missing: string[] = [];
