@@ -25,38 +25,35 @@ omniroute launch --profile glm52  # OmniRoute හරහා glm/glm-5.2 භාව
 
 ---
 
-## Claude Code ද්වාරයකට සම්බන්ධ වන ආකාරය
+## Claude කේතය ද්වාරයකට සම්බන්ධ වන ආකාරය
 
-Claude Code **Anthropic Messages API** සමඟ සන්නිවේදනය කරන අතර, පරිසර විචල්ය භාවිතයෙන් අභිරුචි
-අන්ත ලක්ෂ්යයක් වෙත යොමු කරනු ලැබේ (එයට `--base-url` සලකුණක් නොමැත):
+Claude කේතය කතා කරයි**Anthropic පණිවිඩ API** සහ පරිසර විචල්‍යයන් සහිත අභිරුචි අන්ත ලක්ෂ්‍යයකට යොමු කර ඇත (එයට `--base-url` ධජයක් නොමැත):
 
-| විචල්යය                                      | අරමුණ                                                                                                 |
-| -------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | ද්වාර මූල URL එක (Claude Code විසින් `/v1/messages` අගට එක් කරයි). **`/v1` උපසර්ගයක් නොතිබිය යුතුය.** |
-| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` ලෙස යවනු ලැබේ — ඔබේ OmniRoute ප්රවේශ ටෝකනය / API යතුර භාවිත කරන්න           |
-| `ANTHROPIC_API_KEY`                          | විකල්පය: `x-api-key` ලෙස යවනු ලැබේ. දෙකම සකසා ඇත්නම්, `ANTHROPIC_AUTH_TOKEN` ප්රමුඛ වේ                |
-| `ANTHROPIC_MODEL`                            | නිශ්චිත මාදිලියක් බලහත්කාරයෙන් භාවිත කරයි (`/model` තේරීම්කාරකයේ පෙරනිමිය අභිබවා යයි)                 |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → ස්වදේශීය `/model` තේරීම්කාරකය `/v1/models` වෙතින් `claude*`/`anthropic*` මාදිලි ලැයිස්තුගත කරයි |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | එක් ප්රතිචාරයක ප්රතිදාන ටෝකන සීමා කරයි (උදා. `65536`)                                                 |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | ස්වයංක්රීය සංක්ෂිප්ත කිරීම සඳහා ටෝකන සීමාව                                                            |
+| විචල්ය                                       | අරමුණ                                                                                          |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | Gateway root URL (Claude කේතය `/v1/messages` එකතු කරයි).** `/v1` උපසර්ගයක් නැත.**              |
+| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` — ලෙස යවන ලද ඔබගේ OmniRoute ප්‍රවේශ ටෝකනය / API යතුර භාවිතා කරන්න    |
+| `ANTHROPIC_API_KEY`                          | විකල්ප: `x-api-key` ලෙස යවනු ලැබේ. දෙකම සෙට් උනොත් `ANTHROPIC_AUTH_TOKEN` දිනනවා               |
+| `ANTHROPIC_MODEL`                            | නිශ්චිත ආකෘතියක් බල කරන්න ( `/model` පිකර් පෙරනිමිය අභිබවා යයි)                                |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → ස්වදේශීය `/model` පිකර් `/v1/models` වෙතින් `claude*`/`anthropic*` ආකෘති ලැයිස්තුගත කරයි |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | ප්‍රතිචාරයකට කැප් ප්‍රතිදාන ටෝකන (උදා: `65536`)                                                |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | ස්වයං සංයුක්ත කිරීම සඳහා ටෝකන සීමාව                                                            |
 
-> පරිසර විචල්ය කියවනු ලබන්නේ **ආරම්භයේදී එක් වරක් පමණි** — ඒවා වෙනස් කිරීමෙන් පසු Claude Code නැවත ආරම්භ කරන්න.
+> Env vars කියවනු ලැබේ** ආරම්භයේදී වරක්** — ඒවා වෙනස් කිරීමෙන් පසු Claude කේතය නැවත ආරම්භ කරන්න.
 
-`omniroute launch` මේ සියල්ල ඔබ වෙනුවෙන් සකසයි: එය සක්රිය සන්දර්භයෙන් මූල URL එක + ටෝකනය
-විසඳා ගනී (එබැවින් `omniroute connect <vps>` පසු `omniroute launch`
-සෘජුවම ක්රියා කරයි), සේවාදායකයේ සෞඛ්ය පරීක්ෂා කර, `claude` ක්රියාත්මක කරයි.
+ස්ථාවර තන්තුවක් වෙනුවට භ්‍රමණය වන අක්තපත්‍රයක් සඳහා, වත්මන් අක්තපත්‍රය stdout වෙත මුද්‍රණය කරන විධානයකට `~/.claude/settings.json` හි `apiKeyHelper` සකසන්න. Claude කේතය පෙරනිමියෙන් මිනිත්තු පහක් එහි ප්‍රතිදානය හැඹිලි කරයි (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` එය අභිබවා යයි) සහ අගය `Authorization: Bearer` සහ `x-api-key` දෙකෙහිම යවයි. ස්ක්‍රිප්ටය අක්තපත්‍රය මුද්‍රණය කළ යුතු අතර වෙන කිසිවක් — එය සමඟ බැනරයක් v2.1.227 + හි සහායකයා අසමත් වේ.
+
+Entra ID SSO ක්‍රියා කරන ආකාරය මෙයයි: `scripts/cli/omniroute-sso.mjs token` API යතුරක් වෙනුවට OmniRoute සත්‍යාපනය කරන කෙටි කාලීන Entra ප්‍රවේශ ටෝකනයක් මුද්‍රණය කරයි. [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) බලන්න.
+
+`omniroute launch` ඔබට මේ සියල්ල සකසයි: එය සක්‍රිය සන්දර්භය වෙතින් URL + ටෝකනය නිරාකරණය කරයි (එබැවින් `omniroute connect <vps>` පසුව `omniroute launch` ක්‍රියා කරයි), සේවාදායකය සෞඛ්‍ය පරීක්ෂා කරයි, සහ `claude` execs .
 
 ---
 
-## සොයාගැනීමේ අන්වර්ථ නාම — Claude නොවන මාදිලි `/model` තේරීම්කාරකයේ පෙන්වන්න
+## සොයාගැනීමේ අන්වර්ථ (Discovery aliases) — `/model` picker එකේ Claude නොවන මොඩල් නිරාවරණය කරන්න
 
-Claude Code හි ද්වාර මාදිලි සොයාගැනීම ලැයිස්තුගත කරන්නේ `claude`
-හෝ `anthropic` සමඟ ආරම්භ වන හැඳුනුම් පමණි. එබැවින් `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` සමඟ ස්වදේශීය
-`/model` තේරීම්කාරකය සාමාන්යයෙන් පෙන්වන්නේ OmniRoute හි Claude/Anthropic මාදිලි **පමණි** —
-`kimi/kimi-k2.6` හෝ `glm/glm-5.2` නිවැරදිව මාර්ගගත වුවද කිසිවිටෙක නොපෙන්වයි.
+Claude Code හි gateway මොඩල් සොයාගැනීම `claude` හෝ `anthropic` ලෙස ආරම්භ වන ids පමණක් ලැයිස්තුගත කරයි. එබැවින් `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` සමඟ ස්වදේශීය `/model` picker එක සාමාන්යයෙන් පෙන්වන්නේ OmniRoute හි Claude/Anthropic මොඩල් **පමණි** — `kimi/kimi-k2.6` හෝ `glm/glm-5.2` කිසිවිටෙක නොපෙන්වයි, එය හරියටම route වුවද.
 
-OmniRoute හට සක්රීය කර ඇති ඕනෑම මාදිලියක් (සහ සංයෝජනයක්) `claude/…` හැඳුනුමක් යටතේ පිළිබිඹු කළ හැකි බැවින්, එය
-එම පෙරහන පසු කර තේරීම්කාරකයේ දිස් වේ:
+OmniRoute හට ඕනෑම සක්රීය කර ඇති මොඩලයක් (සහ combo එකක්) `claude/…` id එකක් යටතේ mirror කළ හැක, එවිට එය එම filter එක සමත් වී picker එකේ දිස්වේ:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -64,31 +61,21 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-ඔබ Claude Code තුළින් මේවායින් එකක් තෝරාගත් විට, OmniRoute විසින් මාර්ගගත කිරීමට පෙර `claude/` ආවරණය
-ඉවත් කර නැවත සැබෑ හැඳුනුම ලබා ගනී — සැබෑ `claude/<real-claude-model>` හැඳුනුමක්
-(සත්ය Claude OAuth සැපයුම්කරු) සැමවිටම නොවෙනස්ව තබනු ලැබේ.
+ඔබ Claude Code හි මෙවැනි එකක් තෝරාගත් විට, OmniRoute route කිරීමට පෙර `claude/` wrapper එක ඉවත් කර සැබෑ id එකට ආපසු හරවයි — සැබවින්ම `claude/<real-claude-model>` id එකක් (සැබෑ Claude OAuth provider එක) සැමවිටම ස්පර්ශ නොකළ ලෙස තබනු ලැබේ.
 
-**මෙය පෙරනිමියෙන් අක්රියයි** සහ මට්ටම් තුනක දොරටුවක් මඟින් පාලනය වේ (වඩාත් නිශ්චිත
-මට්ටම ප්රමුඛ වේ). එබැවින් Claude Code භාවිත නොකරන සේවාලාභීන් සඳහා සාමාන්ය OmniRoute එකක්
-එහි නාමාවලිය දෙගුණ නොකරයි:
+පෙරනිමියෙන් mirror කරනු ලබන්නේ base ids පමණි. opt-in `CATALOG_MIRROR_REFINEMENTS_ENABLED` feature flag එක සක්රීය කළ විට, catalog එක දැනටමත් ලැයිස්තුගත කර ඇති reasoning-effort variants (උදා. `codex/gpt-6-sol-high`) වෙනත් ඕනෑම id එකක් මෙන් mirror කරනු ලැබේ, එවිට Claude Code හට පැහැදිලි effort මට්ටමක් තෝරාගත හැක. request path එකට materialize කළ නොහැකි built-in `auto/*` ids mirror නොකෙරේ. effort variants ලැයිස්තුගත වේද යන්න තවමත් `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` මඟින් පාලනය වේ — base catalog එකේ නොමැති variant එකක් mirror එක කිසිවිටෙක එකතු නොකරයි.
 
-| මට්ටම      | ස්ථානය                                                                            |
-| ---------- | --------------------------------------------------------------------------------- |
-| මාදිලිය    | සැපයුම්කරුගේ විස්තර පිටුව → එක් එක් මාදිලිය සඳහා "Expose in Claude Code" ටොගලය    |
-| සැපයුම්කරු | සැපයුම්කරුගේ විස්තර පිටුව → සැපයුම්කරු මට්ටමේ ටොගලය (එහි සියලු මාදිලි ආවරණය කරයි) |
-| ගෝලීය      | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (පෙරනිමියෙන් අක්රියයි)   |
+**මෙය පෙරනිමියෙන් අක්රීයයි** සහ ත්රි-මට්ටම් gate එකකින් පාලනය වේ (වඩාත් නිශ්චිත එක ජය ගනී), එබැවින් සාමාන්ය OmniRoute එකක් Claude Code භාවිත නොකරන clients සඳහා එහි catalog එක කිසිවිටෙක දෙගුණ නොකරයි:
 
-`EXPOSE_CC_DISCOVERY_ALIASES` පරිසර විචල්යය ගෝලීය මට්ටම සක්රීය කිරීමට බල කරන
-අතර උපකරණ පුවරුවේ අභිභවා යෑමට වඩා ප්රමුඛත්වය ගනී (එය එසේ කරන විට Feature Flags තිරය
-"පරිසර විචල්යය හරහා සක්රියයි" යන සටහනක් පෙන්වයි). එක් එක් සැපයුම්කරු සහ
-එක් එක් මාදිලිය සඳහා වන ටොගල මඟින් එය තවදුරටත් පිරිපහදු කරයි — උදා. ගෝලීය මට්ටම අක්රිය + Kimi සැපයුම්කරු සක්රිය නම්
-නිරාවරණය වන්නේ Kimi හි මාදිලි පමණි.
+| මට්ටම    | කොහෙද                                                                          |
+| -------- | ------------------------------------------------------------------------------ |
+| මොඩලය    | Provider විස්තර පිටුව → මොඩලය-එකකට "Expose in Claude Code" toggle එක           |
+| Provider | Provider විස්තර පිටුව → provider-මට්ටම් toggle එක (එහි සියලු මොඩල් ආවරණය කරයි) |
+| ගෝලීය    | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (පෙරනිමියෙන් අක්රීය)  |
 
-> ⚠️ **Claude නොවන මාදිලිවල කවුළු නොගැළපීම.** Claude Code එය හඳුනා නොගන්නා ඕනෑම හැඳුනුමක් සඳහා 200K සන්දර්භ
-> කවුළුවක් උපකල්පනය කරයි (`/v1/models` වෙතින් සැබෑ කවුළුවක් කියවීමට එයට නොහැකිය).
-> විශාල කවුළුවක් ඇති මාදිලියක් සඳහා (උදා. Kimi K2 හි 256K), ස්වයංක්රීය සංක්ෂිප්ත කිරීම
-> අකාලයේ ක්රියාත්මක නොවන ලෙස `CLAUDE_CODE_AUTO_COMPACT_WINDOW` මාදිලියේ සැබෑ කවුළුවට වඩා අඩු අගයකට සකසන්න.
-> ඉහත ජනනය කළ පැතිකඩ දැනටමත් එක් එක් මාදිලිය සඳහා මෙය සිදු කරයි.
+`EXPOSE_CC_DISCOVERY_ALIASES` පරිසර විචල්යය ගෝලීය මට්ටම බලහත්කාරයෙන් සක්රීය කරයි සහ dashboard override එකට වඩා ප්රමුඛතාව ගනී (එය එසේ වන විට Feature Flags තිරය "active via environment variable" සටහනක් පෙන්වයි). per-provider සහ per-model toggles එතැනින් සිට වැඩිදුර සකසයි — උදා. ගෝලීය අක්රීය + Kimi provider සක්රීය විට Kimi හි මොඩල් පමණක් නිරාවරණය වේ.
+
+> ⚠️ **Claude නොවන මොඩල්වල window නොගැලපීම.** Claude Code එය හඳුනා නොගන්නා ඕනෑම id එකක් සඳහා 200K context window එකක් උපකල්පනය කරයි (එයට `/v1/models` වෙතින් සැබෑ window එකක් කියවිය නොහැක). විශාල window එකක් ඇති මොඩලයක් සඳහා (උදා. Kimi K2 හි 256K), auto-compaction එක කලින් වේලාවට ක්රියාත්මක නොවන පරිදි `CLAUDE_CODE_AUTO_COMPACT_WINDOW` මොඩලයේ සැබෑ window එකට වඩා අඩු අගයකට සකසන්න. ඉහත ජනනය කළ profiles දැනටමත් මෙය මොඩලය-එකකට කර ඇත.
 
 ---
 

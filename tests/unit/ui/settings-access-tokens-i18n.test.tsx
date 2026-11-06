@@ -1,9 +1,12 @@
 import React from "react";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import AccessTokensTab from "@/app/(dashboard)/dashboard/settings/components/AccessTokensTab";
 import zh from "@/i18n/messages/zh-CN.json";
+// The shared Select renders the kit (Radix) Select for `options` since KEA-7886: no DOM
+// <select>/<option>; the helpers read the menu items (data-value) and the controlled value.
+import { chooseKitSelectValue } from "../../helpers/kitSelect";
 
 const token = {
   id: "demo/read",
@@ -17,6 +20,15 @@ const token = {
 };
 // Exercise the real catalog and formatter, not the global key-only test mock.
 vi.unmock("next-intl");
+
+// The kit Table measures itself with ResizeObserver (persistent scrollbar); jsdom lacks it.
+beforeAll(() => {
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+});
 
 const reply = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status });
 const fetchMock = vi.fn<typeof fetch>();
@@ -100,7 +112,7 @@ describe("access-token settings with real Chinese catalogs", () => {
     fireEvent.change(screen.getByPlaceholderText("名称（例如：笔记本电脑）"), {
       target: { value: "  Remote laptop  " },
     });
-    fireEvent.change(screen.getByRole("combobox"), { target: { value: "admin" } });
+    chooseKitSelectValue(screen.getByRole("combobox"), "admin");
     fireEvent.change(screen.getByPlaceholderText("有效期（天，可选）"), { target: { value: "7" } });
     let resolve!: (value: Response) => void;
     fetchMock.mockImplementationOnce(
@@ -126,6 +138,11 @@ describe("access-token settings with real Chinese catalogs", () => {
     expect(copy).toHaveBeenCalledWith("omni_disposable_test_secret");
     fireEvent.click(screen.getByRole("button", { name: "关闭" }));
     expect(screen.queryByText("omni_disposable_test_secret")).toBeNull();
+    // The opener ("Create") is disabled again after the name is cleared, so focus goes back
+    // to the name field rather than falling to <body>.
+    await waitFor(() =>
+      expect(document.activeElement).toBe(screen.getByPlaceholderText("名称（例如：笔记本电脑）"))
+    );
   });
 
   it("uses a localized create failure instead of surfacing English transport errors", async () => {
@@ -165,14 +182,14 @@ describe("access-token settings with real Chinese catalogs", () => {
     mount();
     await screen.findByRole("table");
     fireEvent.click(screen.getByRole("button", { name: "撤销" }));
-    let dialog = screen.getByRole("dialog");
+    let dialog = screen.getByRole("alertdialog");
     expect(within(dialog).getByText("撤销访问令牌")).toBeTruthy();
     expect(within(dialog).getByText(zh.settings.accessTokensRevokeConfirm)).toBeTruthy();
     fireEvent.click(within(dialog).getByRole("button", { name: zh.common.cancel }));
-    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(screen.queryByRole("alertdialog")).toBeNull();
     expect(fetchMock.mock.calls.some(([, init]) => init?.method === "DELETE")).toBe(false);
     fireEvent.click(screen.getByRole("button", { name: "撤销" }));
-    dialog = screen.getByRole("dialog");
+    dialog = screen.getByRole("alertdialog");
     fetchMock.mockResolvedValueOnce(reply({}, 500));
     fireEvent.click(within(dialog).getByRole("button", { name: "撤销" }));
     await screen.findByText("无法撤销令牌。");
@@ -187,7 +204,7 @@ describe("access-token settings with real Chinese catalogs", () => {
     fetchMock.mockResolvedValueOnce(
       reply({ tokens: [{ ...token, revokedAt: "2026-01-04T00:00:00Z" }] })
     );
-    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "撤销" }));
+    fireEvent.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "撤销" }));
     await screen.findByText("已撤销");
     await waitFor(() => expect(screen.queryByRole("button", { name: "撤销" })).toBeNull());
   });

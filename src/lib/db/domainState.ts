@@ -5,7 +5,8 @@
  * Replaces in-memory Map() storage with durable persistence.
  *
  * Tables: domain_fallback_chains, domain_budgets, domain_cost_history,
- *         domain_lockout_state, domain_circuit_breakers
+ *         domain_lockout_state, domain_circuit_breakers (+ the
+ *         `budgetUnpricedUsage` namespace of key_value)
  *
  * @module lib/db/domainState
  */
@@ -360,6 +361,55 @@ export function deleteBudget(apiKeyId: string) {
   const db = getDbInstance();
   db.prepare("DELETE FROM domain_budgets WHERE api_key_id = ?").run(apiKeyId);
   db.prepare("DELETE FROM domain_budget_reset_logs WHERE api_key_id = ?").run(apiKeyId);
+  deleteBudgetUnpricedPeriodStart(apiKeyId);
+}
+
+// ──────────────── Budget Unpriced Usage ────────────────
+
+/**
+ * The budget period in which a key used a metered model it could not price (no
+ * pricing row and no provider-reported cost). Stored in `key_value` beside the
+ * budget rather than as a `domain_budgets` column, so it needs no schema change.
+ */
+const BUDGET_UNPRICED_NAMESPACE = "budgetUnpricedUsage";
+
+/**
+ * Start of the budget period that recorded unpriced usage for a key, or null.
+ * @param {string} apiKeyId
+ */
+export function loadBudgetUnpricedPeriodStart(apiKeyId: string): number | null {
+  const db = getDbInstance();
+  const row = db
+    .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
+    .get(BUDGET_UNPRICED_NAMESPACE, apiKeyId);
+  const periodStart = toNumber(asRecord(row).value, 0);
+  return periodStart > 0 ? periodStart : null;
+}
+
+/**
+ * Record that a key's budget saw unpriced usage in the period starting at `periodStartAt`.
+ * @param {string} apiKeyId
+ * @param {number} periodStartAt
+ */
+export function saveBudgetUnpricedPeriodStart(apiKeyId: string, periodStartAt: number) {
+  const db = getDbInstance();
+  db.prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)").run(
+    BUDGET_UNPRICED_NAMESPACE,
+    apiKeyId,
+    String(periodStartAt)
+  );
+}
+
+/**
+ * Forget a key's unpriced-usage period.
+ * @param {string} apiKeyId
+ */
+export function deleteBudgetUnpricedPeriodStart(apiKeyId: string) {
+  const db = getDbInstance();
+  db.prepare("DELETE FROM key_value WHERE namespace = ? AND key = ?").run(
+    BUDGET_UNPRICED_NAMESPACE,
+    apiKeyId
+  );
 }
 
 // ──────────────── Cost History ────────────────
@@ -485,6 +535,7 @@ export function deleteAllCostData() {
   db.prepare("DELETE FROM domain_cost_history").run();
   db.prepare("DELETE FROM domain_budgets").run();
   db.prepare("DELETE FROM domain_budget_reset_logs").run();
+  db.prepare("DELETE FROM key_value WHERE namespace = ?").run(BUDGET_UNPRICED_NAMESPACE);
 }
 
 // ──────────────── Lockout State ────────────────

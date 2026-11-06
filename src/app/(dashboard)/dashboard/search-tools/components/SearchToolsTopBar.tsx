@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { Tabs, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
 import ExportCodeModal from "@/app/(dashboard)/dashboard/playground/components/ExportCodeModal";
 import type { PlaygroundState } from "@/lib/playground/codeExport";
 
@@ -40,30 +43,27 @@ export default function SearchToolsTopBar({
         data-testid="search-tools-topbar"
       >
         {/* Tab switcher */}
-        <div className="flex gap-1" role="tablist" aria-label={t("searchTools")}>
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              role="tab"
-              aria-selected={activeTab === tab.id}
-              aria-controls={`tabpanel-${tab.id}`}
-              id={`tab-${tab.id}`}
-              className={[
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors",
-                activeTab === tab.id
-                  ? "bg-primary/15 text-primary"
-                  : "text-text-muted hover:text-text-main hover:bg-black/5 dark:hover:bg-white/5",
-              ].join(" ")}
-              onClick={() => onTabChange(tab.id)}
-              data-testid={`tab-${tab.id}`}
-            >
-              <span className="material-symbols-outlined text-[16px]" aria-hidden="true">
-                {tab.icon}
-              </span>
-              <span>{t(tab.labelKey)}</span>
-            </button>
-          ))}
-        </div>
+        <Tabs
+          variant="capsule"
+          value={activeTab}
+          onValueChange={(next) => onTabChange(next as ActiveTab)}
+        >
+          <TabsList aria-label={t("searchTools")}>
+            {TABS.map((tab) => (
+              // The panel is rendered by SearchToolsClient (id="tabpanel-<tab>"), not a TabsContent.
+              <TabsTrigger
+                key={tab.id}
+                value={tab.id}
+                id={`tab-${tab.id}`}
+                aria-controls={`tabpanel-${tab.id}`}
+                data-testid={`tab-${tab.id}`}
+              >
+                <Icon name={tab.icon} size={16} />
+                <span>{t(tab.labelKey)}</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
 
         {/* Metrics + export */}
         <div className="flex items-center gap-3">
@@ -77,15 +77,16 @@ export default function SearchToolsTopBar({
               ${costUsd.toFixed(4)}
             </span>
           )}
-          <button
-            className="flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-surface border border-border text-text-muted hover:text-text-main hover:border-border-hover transition-colors"
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setExportOpen(true)}
             aria-label={tPlayground("exportCode")}
             data-testid="export-code-button"
           >
             <span className="font-mono text-[11px]">{"/>"}</span>
             <span>{tPlayground("exportShort")}</span>
-          </button>
+          </Button>
         </div>
       </div>
 

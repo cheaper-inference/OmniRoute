@@ -11,7 +11,7 @@ const chatCoreSource = readFileSync(
   "utf8"
 );
 
-// Regression guard for https://github.com/diegosouzapw/OmniRoute/issues/12793:
+// Regression guard for https://github.com/cheaper-inference/OmniRoute/issues/12793:
 // native Codex passthrough (`POST /v1/responses`, provider `codex`) silently stopped
 // producing compression analytics (100% `skip_reason='excluded'`) after #8933 added
 // `nativeCodexPassthrough ||` to the prompt-compression exclusion (landed on release

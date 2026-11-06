@@ -77,3 +77,31 @@ test("classifyModelSupportedEndpoints returns empty object when chat or response
   assert.deepEqual(classifyModelSupportedEndpoints(["chat", "images"]), {});
   assert.deepEqual(classifyModelSupportedEndpoints(["responses", "audio-transcriptions"]), {});
 });
+
+// ─── decisions (System One, #13987) ────────────────────────────────────────
+
+test("classifies decisions-only models as the decisions model kind", () => {
+  assert.deepEqual(classifyModelSupportedEndpoints(["decisions"]), { type: "decisions" });
+  // A decisions model is never a chat model even if mislabeled with both.
+  assert.deepEqual(classifyModelSupportedEndpoints(["chat", "decisions"]), {});
+});
+
+test("accepts decisions in model metadata and provider-node api types", () => {
+  assert.ok(MODEL_SUPPORTED_ENDPOINT_VALUES.includes("decisions"));
+  assert.deepEqual(normalizeModelSupportedEndpoints(["decisions"]), ["decisions"]);
+
+  const parsed = providerModelMutationSchema.safeParse({
+    provider: "typesafe",
+    modelId: "jev-latest",
+    supportedEndpoints: ["decisions"],
+  });
+  assert.equal(parsed.success, true);
+  assert.deepEqual(parsed.success && parsed.data.supportedEndpoints, ["decisions"]);
+});
+
+test("defaultEndpointsForProviderNodeApiType maps a decisions node to decisions only", async () => {
+  const { defaultEndpointsForProviderNodeApiType } =
+    await import("../../src/shared/constants/modelSupportedEndpoints.ts");
+  assert.deepEqual(defaultEndpointsForProviderNodeApiType("decisions"), ["decisions"]);
+  assert.deepEqual(defaultEndpointsForProviderNodeApiType("Decisions "), ["decisions"]);
+});

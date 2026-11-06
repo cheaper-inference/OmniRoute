@@ -4,6 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { createManagementSessionToken } from "../helpers/managementSession.ts";
 
 /**
  * POST /api/cli-tools/apply writes host CLI config files. Inside a container
@@ -12,6 +13,14 @@ import { pathToFileURL } from "node:url";
  */
 
 const routePath = path.join(process.cwd(), "src/app/api/cli-tools/apply/route.ts");
+// These routes require a dashboard session in every mode (login enabled or not).
+const SESSION_COOKIE = `auth_token=${await createManagementSessionToken()}`;
+function authed(url: string, init: RequestInit = {}): Request {
+  const headers = new Headers(init.headers);
+  headers.set("cookie", SESSION_COOKIE);
+  return new Request(url, { ...init, headers });
+}
+// Captured after the session secret is set, so the per-test env restore keeps it.
 const originalEnv = { ...process.env };
 const tempDirs = new Set<string>();
 
@@ -43,7 +52,7 @@ test.after(async () => {
 });
 
 function applyRequest(body: Record<string, unknown>) {
-  return new Request("http://localhost:20128/api/cli-tools/apply", {
+  return authed("http://localhost:20128/api/cli-tools/apply", {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ toolId: "codex", apiKey: "sk-test", ...body }),
@@ -134,7 +143,7 @@ test("the dashboard's guide-settings writer refuses the same way", async () => {
   const { POST } = await import(`${pathToFileURL(guideRoute).href}?case=guide-${Date.now()}`);
 
   const response = await POST(
-    new Request("http://localhost:20128/api/cli-tools/guide-settings/continue", {
+    authed("http://localhost:20128/api/cli-tools/guide-settings/continue", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ baseUrl: "http://localhost:20128/v1", model: "glm/glm-5.2" }),

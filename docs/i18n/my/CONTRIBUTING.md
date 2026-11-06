@@ -13,21 +13,25 @@ UI/UX၊ i18n၊ CLI၊ database နှင့် build/deploy ပြောင်
 
 ---
 
-## ဖွံ့ဖြိုးတိုးတက်ရေး စနစ်ပြင်ဆင်ခြင်း
+## ဖွံ့ဖြိုးတိုးတက်ရေး စနစ်ပြင်ဆင်မှု
 
-### ကြိုတင်လိုအပ်ချက်များ
+### လိုအပ်ချက်များ
 
-- **Node.js** `>=22.22.2 <23` သို့မဟုတ် `>=24.0.0 <27` (အကြံပြုချက်: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, သို့မဟုတ် `>=24.0.0 <27` (အကြံပြုချက်: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ အသုံးပြုသူများ (Node 24+):** `npm install` ပြုလုပ်ပြီးနောက် native module များ ထည့်သွင်းထားကြောင်း အတည်ပြုပါ:
-> `node -e "require('better-sqlite3')"`. `MODULE_NOT_FOUND` ဖြင့် မအောင်မြင်ပါက
-> `npm approve-scripts better-sqlite3 && npm install` ကို လုပ်ဆောင်ပါ။ အသေးစိတ်ကို
-> [ပြဿနာဖြေရှင်းခြင်း](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) တွင် ကြည့်ပါ။
+> **Node 24 အသုံးပြုသည့် Windows:** လက်ရှိ 24 LTS patch release (အနည်းဆုံး 24.20.0) ကို အသုံးပြုပါ။
+> အစောပိုင်း release များတွင် `--test-force-exit` က process ကိုပိတ်ပြီးနောက် စမ်းသပ်မှုများအောင်မြင်သော်လည်း ရပ်တန့်သွားနိုင်သည်။
+> Node ၏ [Windows libuv ပြင်ဆင်ချက်](https://github.com/nodejs/node/pull/61999) သည်
+> ဤ runtime crash ကို ဖြေရှင်းပေးသည်။ test assertions နှင့် runner exit checks များကို ဖွင့်ထားပါ။
+
+> **npm v11+ အသုံးပြုသူများ (Node 24+):** `npm install` ပြီးနောက် native modules များ ထည့်သွင်းပြီးကြောင်း အတည်ပြုပါ:
+> `node -e "require('better-sqlite3')"`. ၎င်းသည် `MODULE_NOT_FOUND` ဖြင့် မအောင်မြင်ပါက
+> `npm approve-scripts better-sqlite3 && npm install` ကို လုပ်ဆောင်ပါ။ [ပြဿနာဖြေရှင်းခြင်း](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) တွင် ကြည့်ပါ။
 
 - **Git**
 
-### Clone ပြုလုပ်ခြင်းနှင့် ထည့်သွင်းခြင်း
+### Clone လုပ်ခြင်းနှင့် ထည့်သွင်းခြင်း
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -35,92 +39,93 @@ cd OmniRoute
 npm install
 ```
 
-### ပတ်ဝန်းကျင် Variable များ
+### Environment Variables
 
 ```bash
-# နမူနာဖိုင်မှ သင့် .env ကို ဖန်တီးပါ
+# သင်၏ .env ကို template မှ ဖန်တီးပါ
 cp .env.example .env
 
-# လိုအပ်သော secret များကို ထုတ်လုပ်ပါ
+# လိုအပ်သော secrets များကို ထုတ်လုပ်ပါ
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-ဖွံ့ဖြိုးတိုးတက်ရေးအတွက် အဓိက variable များ:
+ဖွံ့ဖြိုးတိုးတက်ရေးအတွက် အဓိက variables များ:
 
-| Variable               | ဖွံ့ဖြိုးတိုးတက်ရေး ပုံသေတန်ဖိုး | ဖော်ပြချက်                   |
-| ---------------------- | -------------------------------- | ---------------------------- |
-| `PORT`                 | `20128`                          | ဆာဗာ port                    |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`         | frontend အတွက် အခြေခံ URL    |
-| `JWT_SECRET`           | (အထက်ပါအတိုင်း ထုတ်လုပ်ပါ)       | JWT လက်မှတ်ရေးထိုးမှု secret |
-| `INITIAL_PASSWORD`     | `CHANGEME`                       | ပထမဆုံး login စကားဝှက်       |
-| `APP_LOG_LEVEL`        | `info`                           | Log အသေးစိတ်အဆင့်            |
+| Variable               | Development Default      | ဖော်ပြချက်                 |
+| ---------------------- | ------------------------ | -------------------------- |
+| `PORT`                 | `20128`                  | Server port                |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Frontend အတွက် Base URL    |
+| `JWT_SECRET`           | (အထက်တွင် ထုတ်လုပ်ပါ)    | JWT signing secret         |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | ပထမဆုံး login password     |
+| `APP_LOG_LEVEL`        | `info`                   | Log အသေးစိတ်ဖော်ပြမှုအဆင့် |
 
-### Dashboard ဆက်တင်များ
+### Dashboard Settings
 
-Dashboard တွင် ပတ်ဝန်းကျင် variable များမှတစ်ဆင့်လည်း စီစဉ်သတ်မှတ်နိုင်သည့် လုပ်ဆောင်ချက်များအတွက် UI toggle များ ပါရှိသည်:
+Dashboard တွင် environment variables များမှတစ်ဆင့်လည်း ပြင်ဆင်နိုင်သော feature များအတွက် UI toggles များ ပါဝင်သည်:
 
-| ဆက်တင်တည်နေရာ       | Toggle             | ဖော်ပြချက်                              |
-| ------------------- | ------------------ | --------------------------------------- |
-| Settings → Advanced | Debug Mode         | Debug request log များကို ဖွင့်ရန် (UI) |
-| Settings → General  | Sidebar Visibility | Sidebar အပိုင်းများကို ပြရန်/ဖျောက်ရန်  |
+| Setting Location    | Toggle             | ဖော်ပြချက်                           |
+| ------------------- | ------------------ | ------------------------------------ |
+| Settings → Advanced | Debug Mode         | Debug request logs (UI) ကို ဖွင့်ပါ  |
+| Settings → General  | Sidebar Visibility | Sidebar sections များကို ပြ/ဖျောက်ပါ |
 
-ဤဆက်တင်များကို database တွင် သိမ်းဆည်းထားပြီး restart ပြုလုပ်ပြီးနောက်တွင်လည်း ဆက်လက်တည်ရှိသည်။ ဆက်တင်တန်ဖိုး သတ်မှတ်ထားပါက env var ပုံသေတန်ဖိုးများကို အစားထိုးအသုံးပြုသည်။
+ဤ settings များကို database တွင် သိမ်းဆည်းထားပြီး restart လုပ်ပြီးနောက်တွင်လည်း ဆက်လက်တည်ရှိသည်။ သတ်မှတ်ထားပါက env var defaults များကို အစားထိုးသည်။
 
 ### Local တွင် လုပ်ဆောင်ခြင်း
 
 ```bash
-# ဖွံ့ဖြိုးတိုးတက်ရေး mode (အလိုအလျောက် ပြန်လည်တင်ခြင်း)
+# Development mode (hot reload)
 npm run dev
 
 # Production build
-npm run build    # next build → .build/next/၊ ထို့နောက် assembleStandalone → dist/
+npm run build    # next build → .build/next/ ထို့နောက် assembleStandalone → dist/
 npm run start
 
-# Contributor ပြောင်းလဲမှုများအတွက် လျင်မြန်သော backend/API သီးသန့် compile
+# Contributor ပြင်ဆင်မှုများအတွက် အမြန် backend/API-only compile
 npm run build:contributor
 
-# Release build (အစမှ ပြန်လည် build လုပ်ခြင်း + HEAD sentinel — deploy အတွက် မဖြစ်မနေလိုအပ်သည်)
-npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA ကို ရေးသားသည်
+# Release build (သန့်ရှင်းသော rebuild + HEAD sentinel — deploy အတွက် လိုအပ်သည်)
+npm run build:release   # rm -rf .build dist ပြီးနောက် build + dist/BUILD_SHA ကို ရေးသားသည်
 
-# အသုံးများသော port ဖွဲ့စည်းသတ်မှတ်မှု
+# အသုံးများသော port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Contributor build သည် compile သီးသန့် စစ်ဆေးအတည်ပြုမှုကို လုပ်ဆောင်သည်။ ၎င်းသည် standalone
-ဖြန့်ချိမှုကို စုစည်းခြင်း သို့မဟုတ် ရွေးချယ်နိုင်သော native packaging asset များကို build လုပ်ခြင်း မပြုပါ။ ဖြန့်ချိနိုင်သည့်
-bundle ကို စစ်ဆေးအတည်ပြုရန် လိုအပ်သည့်အခါ ပုံမှန် production build ကို အသုံးပြုပါ။
+Contributor build သည် compile-only validation ကို လုပ်ဆောင်သည်: standalone
+distribution ကို assemble လုပ်ခြင်း သို့မဟုတ် optional native packaging assets များကို build လုပ်ခြင်း မရှိပါ။
+ဖြန့်ချိနိုင်သော bundle ကို အတည်ပြုရန်လိုအပ်ပါက ပုံမှန် production build ကို အသုံးပြုပါ။
 
-### Build Output ဖွဲ့စည်းပုံ
+### Build Output Layout
 
-| Directory | ပါဝင်သည့်အရာများ                                                                         | ခြေရာခံထားမှု |
-| --------- | ---------------------------------------------------------------------------------------- | ------------- |
-| `src/`    | Application source (TypeScript / TSX)                                                    | ရှိသည်        |
-| `.build/` | ကြားခံဖိုင်များ — `next build` output (gitignore လုပ်ထားသည်၊ `distDir = .build/next`)    | မရှိပါ        |
-| `dist/`   | ဖြန့်ချိနိုင်သော bundle — `assembleStandalone` ဖြင့် စုစည်းထားသည် (gitignore လုပ်ထားသည်) | မရှိပါ        |
+| Directory | Contents                                                                              | Tracked |
+| --------- | ------------------------------------------------------------------------------------- | ------- |
+| `src/`    | Application source (TypeScript / TSX)                                                 | Yes     |
+| `.build/` | Intermediates — `next build` output (gitignored, `distDir = .build/next`)             | No      |
+| `dist/`   | ဖြန့်ချိနိုင်သော bundle — `assembleStandalone` ဖြင့် assemble လုပ်ထားသည် (gitignored) | No      |
 
-Build pipeline သည် တစ်ကြိမ်တည်းဖြင့် လုပ်ဆောင်သည်:
+Build pipeline သည် single pass ဖြစ်သည်:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js output)
-  └─ assembleStandalone()                 (standalone + static + public + native asset များကို ကူးယူသည်)
+  └─ assembleStandalone()                 (standalone + static + public + native assets များကို ကူးယူသည်)
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` သည် directory နှစ်ခုစလုံးကို ဦးစွာ ရှင်းလင်းပြီး deploy ပြည့်စုံမှန်ကန်မှု စစ်ဆေးရေး sentinel အဖြစ်
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ကို ထပ်မံရေးသားသည်။
+`npm run build:release` သည် ထို့အပြင် directory နှစ်ခုလုံးကို အရင်ရှင်းလင်းပြီး
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ကို deploy integrity sentinel အဖြစ် ရေးသားသည်။
 
-`npm run build:contributor` သည် backend သီးသန့် build profile ကို အသုံးပြုသည်။ Build လုပ်နေစဉ်
-dashboard UI ဖိုင်များကို ယာယီ stub ပြုလုပ်ပြီး API route handler များကို ဆက်လက်ထားရှိကာ build ပြီးနောက် မူရင်းဖိုင်များကို
-ပြန်လည်ထားရှိသည်။ Dashboard UI ကို သက်ရောက်စေသော ပြောင်းလဲမှုများ သို့မဟုတ် release အပြည့်အစုံ
-စစ်ဆေးအတည်ပြုမှုအတွက် `npm run build` ကို အသုံးပြုပါ။ Contributor profile သည် release build ကို အစားထိုး၍ မရပါ။
+`npm run build:contributor` သည် backend-only build profile ကို အသုံးပြုသည်။ Build လုပ်နေစဉ်
+dashboard UI files များကို ယာယီ stub ပြုလုပ်ပြီး API route handlers များကို ထိန်းသိမ်းထားကာ
+build ပြီးနောက် မူလ files များကို ပြန်လည်ထားရှိသည်။ Dashboard UI ကို သက်ရောက်မှုရှိသော
+ပြင်ဆင်မှုများအတွက် သို့မဟုတ် release validation အပြည့်အစုံအတွက် `npm run build` ကို အသုံးပြုပါ။
+Contributor profile သည် release build ကို အစားထိုးရန် မဟုတ်ပါ။
 
-> **VPS deploy မှတ်ချက်:** Remote image directory `/usr/lib/node_modules/omniroute/app/`
-> သည် ပြောင်းလဲခြင်းမရှိပါ။ Deploy skill များသည် `dist/` ၏ အကြောင်းအရာများကို ၎င်းထဲသို့ rsync လုပ်သည်။
-> Repository အတွင်းရှိ build output path သာ ပြောင်းလဲသွားသည် (`app/` → `dist/`)။
+> **VPS deploy မှတ်ချက်:** remote image directory `/usr/lib/node_modules/omniroute/app/`
+> သည် မပြောင်းလဲပါ။ Deploy skills များသည် `dist/` ၏ contents များကို ၎င်းထဲသို့ rsync လုပ်သည်။
+> Repository အတွင်းရှိ build output path သာ ပြောင်းလဲထားသည် (`app/` → `dist/`)။
 
-ပုံသေ URL များ:
+ပုံမှန် URLs:
 
 - **Dashboard**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
@@ -172,84 +177,84 @@ Scope များ (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `doc
 
 ---
 
-## Test များ လုပ်ဆောင်ခြင်း
+## စမ်းသပ်မှုများ လုပ်ဆောင်ခြင်း
 
 ```bash
-# Test အားလုံး (unit + vitest + ecosystem + e2e)
+# စမ်းသပ်မှုအားလုံး (unit + vitest + ecosystem + e2e)
 npm run test:all
 
-# Test file တစ်ခုတည်း (Node.js ၏ မူရင်း test runner — test အများစုက ၎င်းကို အသုံးပြုသည်)
+# စမ်းသပ်မှုဖိုင်တစ်ခုတည်း (Node.js မူရင်း test runner — စမ်းသပ်မှုအများစုက ဒါကို အသုံးပြုသည်)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# သင်၏ပြောင်းလဲမှုကြောင့် သက်ရောက်မှုရှိသော unit test များသာ (CI gate၊ #8084 နှင့် တူညီသော TIA selector)
-npm run test:scoped            # နောက်ဆုံး commit (သို့မဟုတ် working tree) ရှိ ပြောင်းလဲမှုများ
-npm run test:scoped:staged     # staged လုပ်ထားသော ပြောင်းလဲမှုများသာ — pre-commit run နှင့် ကောင်းမွန်စွာ တွဲဖက်အသုံးပြုနိုင်သည်
-npm run test:scoped:full       # import-graph map ကို ဦးစွာ ပြန်လည်တည်ဆောက်ပါ (file များ ထည့်သွင်း/ရွှေ့ပြောင်းပြီးနောက်)
-# Exit 1 + "run the full suite" ဆိုသည်မှာ hub file (tsconfig, package.json, …) သို့မဟုတ်
-# mapping မရှိသော source ပြောင်းလဲသွားခြင်းကို ဆိုလိုသည် — selector သည် ဘေးကင်းစွာ fail ဖြစ်ပြီး မည်သည့်အရာကိုမျှ တိတ်တဆိတ် မကျော်သွားပါ။
+# သင့်ပြောင်းလဲမှုကြောင့် သက်ရောက်မှုရှိသော unit စမ်းသပ်မှုများသာ (CI gate နှင့်တူညီသော TIA selector၊ #8084)
+npm run test:scoped            # နောက်ဆုံး commit အတွင်းရှိ ပြောင်းလဲမှုများ (သို့မဟုတ် working tree)
+npm run test:scoped:staged     # staged လုပ်ထားသော ပြောင်းလဲမှုများသာ — pre-commit လုပ်ဆောင်မှုနှင့် တွဲဖက်ရန် သင့်တော်သည်
+npm run test:scoped:full       # import-graph မြေပုံကို ဦးစွာ ပြန်လည်တည်ဆောက်သည် (ဖိုင်များ ထည့်သွင်း/ရွှေ့ပြောင်းပြီးနောက်)
+# Exit 1 + "suite အပြည့်အစုံကို လုပ်ဆောင်ပါ" ဆိုသည်မှာ hub ဖိုင်တစ်ခု (tsconfig, package.json, …) သို့မဟုတ်
+# မြေပုံတွင် မပါဝင်သော source တစ်ခု ပြောင်းလဲထားခြင်းကို ဆိုလိုသည် — selector သည် ဘေးကင်းစွာ ပျက်ကွက်ပြီး တိတ်တဆိတ် ကျော်သွားခြင်း မရှိပါ။
 
-# Vitest (MCP server၊ autoCombo၊ cache)
+# Vitest (MCP server, autoCombo, cache)
 npm run test:vitest
 
-# E2E test များ (Playwright လိုအပ်သည်)
+# E2E စမ်းသပ်မှုများ (Playwright လိုအပ်သည်)
 npm run test:e2e
 
-# Protocol client E2E (MCP transport များ၊ A2A)
+# Protocol client E2E (MCP transports, A2A)
 npm run test:protocols:e2e
 
-# Ecosystem လိုက်ဖက်ညီမှု test များ
+# Ecosystem လိုက်ဖက်ညီမှု စမ်းသပ်မှုများ
 npm run test:ecosystem
 
-# Coverage gate: statement/line/function/branch များ၏ 60%
+# Coverage gate: statements/lines/functions/branches အတွက် 60%
 npm run test:coverage
 npm run coverage:report
 
-# Lint + format စစ်ဆေးခြင်း
+# Lint + format စစ်ဆေးမှု
 npm run lint
 npm run check
 
-# Gate ဖြင့် ကန့်သတ်ထားသော အမှန်တကယ် upstream combo smoke test (VPS အသုံးပြုခွင့် + provider credit အစစ်များ လိုအပ်သည်)
-# အမှန်တကယ် provider များကို ခေါ်ယူသည် — အနည်းငယ် ကုန်ကျမည်။ CI တွင် လုံးဝ မလုပ်ဆောင်ပါ။ Gate မရှိပါက ပြဿနာမဖြစ်စေဘဲ ကျော်သွားမည်။
-# လိုအပ်ချက်: ssh root@192.168.0.15 အသုံးပြုခွင့် (VPS မှ read-only DB snapshot ကို source လုပ်သည်)။
+# Gate ဖြင့် ကန့်သတ်ထားသော တကယ့် upstream combo smoke စမ်းသပ်မှု (VPS ဝင်ရောက်ခွင့် + တကယ့် provider credits လိုအပ်သည်)
+# တကယ့် provider များကို အသုံးပြုသည် — ကုန်ကျစရိတ် အနည်းငယ်ရှိသည်။ CI တွင် လုံးဝ မလုပ်ဆောင်ပါ။ Gate မရှိပါက ပြဿနာမရှိဘဲ ကျော်သွားသည်။
+# လိုအပ်ချက်: ssh root@192.168.0.15 ဝင်ရောက်ခွင့် (VPS မှ read-only DB snapshot တစ်ခုကို ရယူအသုံးပြုသည်)။
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS live smoke — ရိုးရိုး Node ESM script များဖြစ်ပြီး live .15 server ကို တိုက်ရိုက်ခေါ်ယူသည်။
-# လိုအပ်ချက်: ssh root@192.168.0.15 အသုံးပြုခွင့် (combo များကို SSH sqlite မှတစ်ဆင့် ဖန်တီး/ဖျက်သိမ်းသည်)။
-# အမှန်တကယ် provider များကို ခေါ်ယူသည် (ကုန်ကျစရိတ် အနည်းငယ်ရှိသည်)။ __live_test__* combo များကိုသာ ဖန်တီး/ဖျက်ပစ်သည်။ CI တွင် လုံးဝ မလုပ်ဆောင်ပါ။
-# .15 တွင် REQUIRE_API_KEY=false ဖြစ်သဖြင့် API key မလိုအပ်သော်လည်း သတ်မှတ်ထားပါက COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ကို လိုက်နာအသုံးပြုသည်။
+# Phase-3 VPS live smoke စမ်းသပ်မှု — ရိုးရိုး Node ESM scripts များဖြစ်ပြီး live .15 server ကို တိုက်ရိုက် အသုံးပြုသည်။
+# လိုအပ်ချက်: ssh root@192.168.0.15 ဝင်ရောက်ခွင့် (combo များကို SSH sqlite မှတစ်ဆင့် ဖန်တီး/ဖျက်သိမ်းသည်)။
+# တကယ့် provider များကို အသုံးပြုသည် (ကုန်ကျစရိတ်အနည်းငယ်ရှိသည်)။ __live_test__* combo များကိုသာ ဖန်တီး/ဖျက်သည်။ CI တွင် လုံးဝ မလုပ်ဆောင်ပါ။
+# .15 တွင် REQUIRE_API_KEY=false ဖြစ်သောကြောင့် API key မလိုအပ်သော်လည်း သတ်မှတ်ထားပါက COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ကို လိုက်နာသည်။
 npm run test:combo:live:vps              # HTTP scenario 7 ခု (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # အမှန်တကယ် cross-provider failover scenario တစ်ခု ထပ်ထည့်သည် (စုစုပေါင်း 8 ခု)
+npm run test:combo:live:vps:failover     # တကယ့် cross-provider failover scenario တစ်ခု ထည့်သွင်းသည် (စုစုပေါင်း 8 ခု)
 ```
 
-Coverage မှတ်ချက်များ-
+Coverage မှတ်ချက်များ:
 
-- `npm run test:coverage` သည် အဓိက unit test suite အတွက် source coverage ကို တိုင်းတာပြီး `tests/**` ကို ချန်လှပ်ကာ `open-sse/**` ကို ထည့်သွင်းသည်
-- Pull request များသည် statement/line/function/branch များအတွက် coverage gate ကို **60%+** တွင် ထိန်းထားရမည်
-- PR တစ်ခုက `src/`, `open-sse/`, `electron/` သို့မဟုတ် `bin/` ရှိ production code ကို ပြောင်းလဲပါက တူညီသော PR ထဲတွင် automated test များကို ထည့်သွင်းရန် သို့မဟုတ် အပ်ဒိတ်လုပ်ရန် လိုအပ်သည်
-- `npm run coverage:report` သည် နောက်ဆုံး coverage run မှ file တစ်ခုချင်းစီအလိုက် အသေးစိတ် report ကို ဖော်ပြသည်
-- `npm run test:coverage:legacy` သည် ယခင်အခြေအနေနှင့် နှိုင်းယှဉ်နိုင်ရန် အဟောင်း metric ကို ထိန်းသိမ်းထားသည်
-- အဆင့်လိုက် coverage မြှင့်တင်ရေး လမ်းပြအစီအစဉ်အတွက် `docs/ops/COVERAGE_PLAN.md` ကို ကြည့်ပါ
+- `npm run test:coverage` သည် အဓိက unit test suite အတွက် source coverage ကို တိုင်းတာပြီး `tests/**` ကို ဖယ်ထုတ်ကာ `open-sse/**` ကို ထည့်သွင်းသည်
+- Pull request များသည် statements/lines/functions/branches အတွက် coverage gate ကို **60%+** တွင် ထိန်းသိမ်းရမည်
+- PR တစ်ခုက `src/`, `open-sse/`, `electron/`, သို့မဟုတ် `bin/` အတွင်းရှိ production code ကို ပြောင်းလဲပါက ထို PR တစ်ခုတည်းအတွင်း automated test များကို ထည့်သွင်း သို့မဟုတ် အပ်ဒိတ်လုပ်ရမည်
+- `npm run coverage:report` သည် နောက်ဆုံး coverage လုပ်ဆောင်မှုမှ ဖိုင်တစ်ဖိုင်ချင်းစီအလိုက် အသေးစိတ် report ကို ဖော်ပြသည်
+- `npm run test:coverage:legacy` သည် သမိုင်းကြောင်းအလိုက် နှိုင်းယှဉ်ရန် ယခင် metric ကို ထိန်းသိမ်းထားသည်
+- အဆင့်လိုက် coverage တိုးတက်ရေး လမ်းပြမြေပုံအတွက် `docs/ops/COVERAGE_PLAN.md` ကို ကြည့်ပါ
 
 ### Pull Request လိုအပ်ချက်များ
 
-PR တစ်ခု မဖွင့်မီ သင်ပြောင်းလဲထားသည့်အရာအတွက် သီးသန့်အာရုံစိုက်ထားသော လုပ်ငန်းစဉ်ကို လုပ်ဆောင်ရန်
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) ကို အသုံးပြုပါ။
-Unit suite အပြည့်အစုံ (CI shard 4 ခု)၊ Vitest၊ **60%+** coverage gate နှင့်
+PR တစ်ခု မဖွင့်မီ သင်ပြောင်းလဲထားသည့်အရာအတွက် အာရုံစိုက်ထားသော လုပ်ငန်းစဉ်ကို လုပ်ဆောင်ရန်
+[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) ကို အသုံးပြုပါ။ Unit suite အပြည့်အစုံ (CI shard 4 ခု)၊ Vitest၊ **60%+** coverage gate နှင့်
 production build တို့သည် CI ၏ တာဝန်ဖြစ်သည် — ၎င်းတို့ကို local တွင် လုပ်ဆောင်ခြင်းသည် PR
-စစ်ဆေးမှုများက မပေးနိုင်သေးသော နောက်ထပ်အချက်အလက် မပေးနိုင်သည့်အပြင် စွမ်းဆောင်ရည်နိမ့်သော စက်များတွင် host ကို အပြည့်အဝ အသုံးပြုမိစေနိုင်သည် (#8084)-
+စစ်ဆေးမှုများက ပေးမည့်အရာထက် ပိုမိုအသုံးဝင်သော အချက်အလက် မပေးသည့်အပြင် စက်ငယ်များတွင် host ကို ဝန်ပိစေနိုင်သည် (#8084):
 
-- သင်၏ပြောင်းလဲမှုကို လွှမ်းခြုံသော test file များကို လုပ်ဆောင်ပါ- `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- သင့်ပြောင်းလဲမှုကို လွှမ်းခြုံသော test file များကို လုပ်ဆောင်ပါ: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint` ကို လုပ်ဆောင်ပါ
-- Production code ပြောင်းလဲသည့်အခါတိုင်း တူညီသော PR ထဲတွင် automated test များကို ထည့်သွင်းပါ သို့မဟုတ် အပ်ဒိတ်လုပ်ပါ
-- Production code ပြောင်းလဲသည့်အခါ ပြောင်းလဲထားသော သို့မဟုတ် အသစ်ထည့်ထားသော test file များကို PR ဖော်ပြချက်ထဲတွင် ထည့်သွင်းပါ
-- Project secret များကို CI တွင် configure လုပ်ထားပါက PR ပေါ်ရှိ SonarQube ရလဒ်ကို စစ်ဆေးပါ
+- Production code ပြောင်းလဲသည့်အခါတိုင်း တူညီသော PR အတွင်း automated test များကို ထည့်သွင်း သို့မဟုတ် အပ်ဒိတ်လုပ်ပါ
+- `node:test` ဖိုင်များတွင် top-level `await` တစ်ခုစီ (ဥပမာ `await import(...)`) ကို ပထမဆုံး `test()` / `describe()` မတိုင်မီ ထားပါ: `--test-force-exit` အောက်တွင် ၎င်းနောက်မှ register လုပ်ထားသော စမ်းသပ်မှုများသည် တိတ်တဆိတ် လုံးဝ မလုပ်ဆောင်ဘဲ ဖြစ်နိုင်သည် (#18045; `npm run check:test-tla-order` ဖြင့် စည်းကမ်းသတ်မှတ်ထားသည်)
+- Production code ပြောင်းလဲထားပါက ပြောင်းလဲထားသော သို့မဟုတ် ထည့်သွင်းထားသော test file များကို PR ဖော်ပြချက်တွင် ထည့်သွင်းပါ
+- Project secrets များကို CI တွင် configure လုပ်ထားသည့်အခါ PR ပေါ်ရှိ SonarQube ရလဒ်ကို စစ်ဆေးပါ
 
-လက်ရှိ test အခြေအနေ- အောက်ပါတို့ကို လွှမ်းခြုံထားသည့် **unit test file 122 ခု**-
+လက်ရှိ စမ်းသပ်မှုအခြေအနေ: အောက်ပါတို့ကို လွှမ်းခြုံထားသော **unit test ဖိုင် 122 ခု**:
 
-- Provider translator များနှင့် format ပြောင်းလဲခြင်း
+- Provider translator များနှင့် format ပြောင်းလဲမှု
 - Rate limiting၊ circuit breaker နှင့် resilience
 - Semantic cache၊ idempotency နှင့် progress tracking
-- Database operation များနှင့် schema (DB module 21 ခု)
+- Database လုပ်ဆောင်ချက်များနှင့် schema (DB module 21 ခု)
 - OAuth flow များနှင့် authentication
 - API endpoint validation (Zod v4)
 - MCP server tool များနှင့် scope enforcement

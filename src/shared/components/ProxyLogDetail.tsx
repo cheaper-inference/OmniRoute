@@ -1,19 +1,24 @@
 "use client";
 
-import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 import {
   TYPE_COLORS,
   LEVEL_COLORS,
   PROVIDER_COLORS,
-  getProxyStatusStyle as getStatusStyle,
+  neutralBadge,
 } from "@/shared/constants/colors";
 import {
   formatDuration as formatLatency,
   maskAccount,
   maskSegment,
 } from "@/shared/utils/formatting";
+import {
+  EGRESS_FAMILY_LABEL_ARGUMENT,
+  observedEgressAddresses,
+} from "@/shared/network/egressAddress";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
+import Badge from "./Badge";
+import Modal, { TALL_MODAL_PROPS } from "./Modal";
 
 /**
  * Proxy log detail modal — shows full proxy event metadata, error info, and config.
@@ -45,6 +50,34 @@ function ObservedField({ label, children }) {
   );
 }
 
+/**
+ * The egress addresses of a log line: the reported one first, then the other
+ * address observed for a family, each with the family it was observed in. No
+ * address at all renders the dash alone — a missing address is not a family.
+ */
+function ObservedEgressAddresses({ log, t }) {
+  const addresses = observedEgressAddresses({
+    primary: log.egressIp ?? null,
+    ipv4: log.egressIpv4 ?? null,
+    ipv6: log.egressIpv6 ?? null,
+  });
+  if (addresses.length === 0) return <span className="text-success">—</span>;
+  return (
+    <>
+      {addresses.map((entry) => (
+        <div key={entry.address}>
+          <span className="text-success">{maskSegment(entry.address)}</span>
+          {entry.family ? (
+            <span className="ml-1 text-text-muted">
+              {t("egressIpFamily", { version: EGRESS_FAMILY_LABEL_ARGUMENT[entry.family] })}
+            </span>
+          ) : null}
+        </div>
+      ))}
+    </>
+  );
+}
+
 function ObservedLinkField({ label, href, title, short }) {
   return (
     <div>
@@ -65,17 +98,10 @@ function ObservedLinkField({ label, href, title, short }) {
 }
 
 function StatusBadges({ log, t }) {
-  const typeColor = TYPE_COLORS[log.proxy?.type] || {
-    bg: "#6B7280",
-    text: "#fff",
-    label: log.proxy?.type || "-",
-  };
+  const typeColor = TYPE_COLORS[log.proxy?.type] || neutralBadge(log.proxy?.type || "-");
   const levelColor = LEVEL_COLORS[log.level] || LEVEL_COLORS.direct;
-  const providerColor = PROVIDER_COLORS[log.provider] || {
-    bg: "#374151",
-    text: "#fff",
-    label: (log.provider || "-").toUpperCase(),
-  };
+  const providerColor =
+    PROVIDER_COLORS[log.provider] || neutralBadge((log.provider || "-").toUpperCase());
   return (
     <>
       <div>
@@ -125,12 +151,9 @@ function TlsBadge({ log, t }) {
         {t("tlsFingerprint")}
       </div>
       {log.tlsFingerprint ? (
-        <span
-          className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-bold uppercase"
-          style={{ backgroundColor: "rgba(6, 182, 212, 0.15)", color: "#22d3ee" }}
-        >
-          <span style={{ fontSize: "12px" }}>🔒</span> Chrome 124
-        </span>
+        <Badge variant="info" className="text-[10px] font-bold uppercase">
+          <span aria-hidden="true">🔒</span> Chrome 124
+        </Badge>
       ) : (
         <div className="text-sm text-text-muted">{t("directNative")}</div>
       )}
@@ -155,7 +178,7 @@ function ObservedMetadataGrid({ log, t, emailsVisible }) {
         <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
           {t("clientIp")}
         </div>
-        <div className="text-sm font-medium font-mono text-emerald-400">{log.clientIp || "—"}</div>
+        <div className="text-sm font-medium font-mono text-success">{log.clientIp || "—"}</div>
       </div>
       <div>
         <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
@@ -174,7 +197,7 @@ function ObservedMetadataGrid({ log, t, emailsVisible }) {
         {formatAttemptTiming(log.firstChunkMs)}
       </ObservedField>
       <ObservedField label={t("egressIp")}>
-        <span className="text-emerald-400">{maskSegment(log.egressIp) || "—"}</span>
+        <ObservedEgressAddresses log={log} t={t} />
       </ObservedField>
       <ObservedLinkField
         label={t("correlationId")}
@@ -210,79 +233,62 @@ function formatDateValue(iso) {
   }
 }
 
+// Proxy status string → kit Badge tone.
+function proxyStatusTone(status: unknown) {
+  if (status === "success") return "success" as const;
+  if (status === "error") return "error" as const;
+  if (status === "timeout") return "warning" as const;
+  return "default" as const;
+}
+
 export default function ProxyLogDetail({ log, onClose }) {
   const t = useTranslations("proxyLog");
   const { emailsVisible } = useEmailPrivacyStore();
-  useEffect(() => {
-    const handler = (e) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [onClose]);
 
-  const statusStyle = getStatusStyle(log.status);
-
+  // The Modal adapter (kit Dialog) owns Escape, the overlay click, the focus trap and the
+  // focus return.
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-start justify-center pt-[5vh]"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-label={t("detailAriaLabel")}
+    <Modal
+      isOpen
+      onClose={onClose}
+      maxWidth="700px"
+      size="full"
+      {...TALL_MODAL_PROPS}
+      title={
+        <span className="flex items-center gap-3">
+          <Badge variant={proxyStatusTone(log.status)} className="font-bold uppercase">
+            {log.status}
+          </Badge>
+          <span>{t("event")}</span>
+        </span>
+      }
     >
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-      <div
-        className="relative bg-bg-primary border border-border rounded-xl w-full max-w-[700px] max-h-[90vh] overflow-y-auto shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-border bg-bg-primary/95 backdrop-blur-sm rounded-t-xl">
-          <div className="flex items-center gap-3">
-            <span
-              className="inline-block px-2.5 py-1 rounded text-xs font-bold uppercase"
-              style={{ backgroundColor: statusStyle.bg, color: statusStyle.text }}
-            >
-              {log.status}
-            </span>
-            <span className="font-bold text-lg">{t("event")}</span>
+      <div className="flex flex-col gap-6">
+        {/* Metadata Grid */}
+        <ObservedMetadataGrid log={log} t={t} emailsVisible={emailsVisible} />
+
+        {/* Error */}
+        {log.error && (
+          <div className="rounded-xl border border-error/30 bg-error/10 p-4">
+            <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-error">
+              {t("error")}
+            </div>
+            <div className="font-mono text-sm text-error">{log.error}</div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-bg-subtle text-text-muted hover:text-text-primary transition-colors"
-            aria-label={t("close")}
-          >
-            <span className="material-symbols-outlined">close</span>
-          </button>
-        </div>
+        )}
 
-        <div className="p-6 flex flex-col gap-6">
-          {/* Metadata Grid */}
-          <ObservedMetadataGrid log={log} t={t} emailsVisible={emailsVisible} />
-
-          {/* Error */}
-          {log.error && (
-            <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30">
-              <div className="text-[10px] text-red-400 uppercase tracking-wider mb-1 font-bold">
-                {t("error")}
-              </div>
-              <div className="text-sm text-red-300 font-mono">{log.error}</div>
+        {/* Proxy Config Details */}
+        {log.proxy && (
+          <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            <div className="mb-2 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+              {t("configuration")}
             </div>
-          )}
-
-          {/* Proxy Config Details */}
-          {log.proxy && (
-            <div className="p-4 rounded-xl bg-bg-subtle border border-border">
-              <div className="text-[10px] text-text-muted uppercase tracking-wider mb-2 font-bold">
-                {t("configuration")}
-              </div>
-              <pre className="text-xs font-mono text-text-primary bg-black/20 rounded-lg p-3 overflow-x-auto">
-                {JSON.stringify(log.proxy, null, 2)}
-              </pre>
-            </div>
-          )}
-        </div>
+            <pre className="overflow-x-auto rounded-lg bg-surface-2 p-3 font-mono text-xs text-text-primary">
+              {JSON.stringify(log.proxy, null, 2)}
+            </pre>
+          </div>
+        )}
       </div>
-    </div>
+    </Modal>
   );
 }

@@ -32,9 +32,14 @@ test("buildDockerArgs passes the version via env, never into the script body", (
   assert.ok(args.includes("--rm"), "container must not linger");
 });
 
-test("container script installs from the registry and polls health with a version match", () => {
+test("container script installs from the registry, proves the installed version and polls health", () => {
   assert.ok(CONTAINER_SCRIPT.includes('npm install -g "omniroute@${VERIFY_VERSION}"'));
-  assert.ok(CONTAINER_SCRIPT.includes("/api/monitoring/health"));
-  assert.ok(CONTAINER_SCRIPT.includes("body.version === want"), "must assert the served version");
+  // The version comes from the installed bytes (CLI banner + packaged dist/package.json), never
+  // from the health endpoint — /api/monitoring/health no longer reports `version` (v3.8.52).
+  assert.ok(CONTAINER_SCRIPT.includes("omniroute --version"), "must read the CLI banner");
+  assert.ok(CONTAINER_SCRIPT.includes("dist/package.json"), "must read the packaged dist version");
   assert.ok(CONTAINER_SCRIPT.includes("WRONG VERSION"), "must fail loudly on version mismatch");
+  assert.ok(!CONTAINER_SCRIPT.includes("body.version"), "health has no version field any more");
+  assert.ok(CONTAINER_SCRIPT.includes("/api/monitoring/health"));
+  assert.ok(CONTAINER_SCRIPT.includes('body.status === "healthy"'), "must require a healthy boot");
 });

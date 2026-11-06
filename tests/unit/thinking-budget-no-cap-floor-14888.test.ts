@@ -17,11 +17,11 @@ test("does not inject a 4096 ceiling for kimi-coding k3 (no maxOutputTokens regi
   assert.equal(body.max_completion_tokens, undefined);
 });
 
-test("still applies the 4096 floor when a validated maxOutputTokens is registered (#14888)", () => {
+test("does not inject a ceiling for moonshot kimi-k3 even with a registered maxOutputTokens (#17971)", () => {
   const executor = new DefaultExecutor("moonshot");
   const body = { model: "kimi-k3", reasoning_effort: "max" } as Record<string, unknown>;
 
   executor.ensureThinkingBudget(body, "kimi-k3");
 
-  assert.equal(body.max_tokens, 4096);
+  assert.equal(body.max_tokens, undefined);
 });

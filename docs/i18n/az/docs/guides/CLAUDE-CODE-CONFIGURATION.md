@@ -24,31 +24,40 @@ omniroute launch --profile glm52  # OmniRoute vasitəsilə glm/glm-5.2 istifadə
 
 ---
 
-## Claude Code şlüzə necə qoşulur
+## Claude Kodu şlüzə necə qoşulur
 
-Claude Code **Anthropic Messages API** ilə əlaqə qurur və mühit dəyişənləri vasitəsilə xüsusi son nöqtəyə yönləndirilir (onun `--base-url` bayrağı yoxdur):
+Claude Code danışır**Anthropic Mesajlar API** və ətraf mühit dəyişənləri ilə xüsusi son nöqtəyə işarə olunur (onun `--base-url` bayrağı yoxdur):
 
-| Dəyişən                                      | Təyinatı                                                                                                   |
-| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | Şlüzün kök URL-i (Claude Code `/v1/messages` əlavə edir). **`/v1` suffiksi olmamalıdır.**                  |
-| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` kimi göndərilir — OmniRoute giriş tokeninizdən / API açarınızdan istifadə edin   |
-| `ANTHROPIC_API_KEY`                          | Alternativ: `x-api-key` kimi göndərilir. Hər ikisi təyin edilibsə, `ANTHROPIC_AUTH_TOKEN` üstünlük qazanır |
-| `ANTHROPIC_MODEL`                            | Konkret modeli məcburi seçir (`/model` seçicisinin standart dəyərini əvəz edir)                            |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → daxili `/model` seçicisi `/v1/models` siyahısından `claude*`/`anthropic*` modellərini göstərir       |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Hər cavab üçün çıxış tokenlərinin sayını məhdudlaşdırır (məsələn, `65536`)                                 |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Avtomatik sıxlaşdırma üçün token həddi                                                                     |
+| Dəyişən                                      | Məqsəd                                                                                                  |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | Gateway kök URL (Claude Kodu `/v1/messages` əlavə edir).** `/v1` şəkilçisi yoxdur.**                    |
+| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` — olaraq göndərilən OmniRoute giriş nişanı / API açarınızdan istifadə edin    |
+| `ANTHROPIC_API_KEY`                          | Alternativ: `x-api-key` olaraq göndərildi. Hər ikisi təyin edilərsə, `ANTHROPIC_AUTH_TOKEN` qalib gəlir |
+| `ANTHROPIC_MODEL`                            | Xüsusi modeli məcbur edin ( `/model` seçici defoltunu ləğv edir)                                        |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → yerli `/model` seçicisi `/v1/models` dən `claude*`/`anthropic*` modellərini siyahıya alır         |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Cavab üçün çıxış tokenləri (məsələn, `65536`)                                                           |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Avtomatik sıxılma üçün işarə həddi                                                                      |
 
-> Mühit dəyişənləri **işə salınarkən yalnız bir dəfə** oxunur — onları dəyişdirdikdən sonra Claude Code-u yenidən başladın.
+> Env vars oxunur** başlanğıcda bir dəfə** — onları dəyişdirdikdən sonra Claude Kodunu yenidən başladın.
 
-`omniroute launch` bunların hamısını sizin üçün təyin edir: əsas URL-i və tokeni aktiv kontekstdən müəyyənləşdirir (beləliklə, `omniroute connect <vps>` və ardınca `omniroute launch` dərhal işləyir), serverin sağlamlıq yoxlamasını aparır və `claude` proqramını işə salır.
+Sabit sətir əvəzinə fırlanan etimadnamə üçün `~/.claude/settings.json` `apiKeyHelper` nı cari etimadnaməsini stdout-a çap edən əmrə təyin edin. Claude Kodu defolt olaraq öz çıxışını beş dəqiqə ərzində yaddaşda saxlayır (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` bunu ləğv edir) və dəyəri həm `Authorization: Bearer`, həm də `x-api-key` də göndərir. Skript etimadnaməni çap etməlidir və onun yanında banner — başqa heç bir şey v2.1.227 +-də köməkçini uğursuz edə bilməz.
+
+Entra ID SSO belə işləyir: `scripts/cli/omniroute-sso.mjs token` API açarı əvəzinə OmniRoute təsdiqlənən qısamüddətli Entra giriş nişanını çap edir. [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) baxın.
+
+`omniroute launch` bunların hamısını sizin üçün təyin edir: o, əsas URL + nişanını aktiv kontekstdən həll edir (beləliklə `omniroute connect <vps>` sonra `omniroute launch` sadəcə işləyir), serverin sağlamlığını yoxlayır və `claude` icra edir.
 
 ---
 
-## Aşkarlama aliasları — Claude olmayan modelləri `/model` seçicisində göstərin
+## Aşkarlama aliasları — Claude olmayan modellərin `/model` seçicisində göstərilməsi
 
-Claude Code-un şlüz modeli aşkarlaması yalnız `claude` və ya `anthropic` ilə başlayan ID-ləri göstərir. Buna görə də `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` olduqda daxili `/model` seçicisi adətən OmniRoute-un **yalnız** Claude/Anthropic modellərini göstərir — `kimi/kimi-k2.6` və ya `glm/glm-5.2`, düzgün marşrutlaşdırılsa belə, heç vaxt görünmür.
+Claude Code-un gateway model aşkarlaması yalnız `claude` və ya `anthropic`
+ilə başlayan id-ləri siyahıya alır, buna görə `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`
+olduqda nativ `/model` seçicisi adətən OmniRoute-un **yalnız** Claude/Anthropic
+modellərini göstərir — `kimi/kimi-k2.6` və ya `glm/glm-5.2` heç vaxt görünmür,
+baxmayaraq ki, marşrutlaşdırma düzgün işləyir.
 
-OmniRoute istənilən aktiv modeli (və kombinasiyanı) `claude/…` ID-si altında əks etdirə bilər ki, o, həmin filtrdən keçsin və seçicidə görünsün:
+OmniRoute istənilən aktiv modeli (və kombonu) `claude/…` id-si altında əks etdirə
+bilər ki, o, həmin filtrdən keçsin və seçicidə görünsün:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -56,19 +65,41 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Claude Code-da bunlardan birini seçdiyiniz zaman OmniRoute marşrutlaşdırmadan əvvəl `claude/` örtüyünü silərək real ID-ni bərpa edir — həqiqi `claude/<real-claude-model>` ID-si (faktiki Claude OAuth provayderi) isə həmişə toxunulmaz qalır.
+Claude Code-da bunlardan birini seçdikdə, OmniRoute marşrutlaşdırmadan əvvəl
+`claude/` örtüyünü çıxarıb real id-yə qaytarır — həqiqi `claude/<real-claude-model>`
+id-si (faktiki Claude OAuth provayderi) həmişə toxunulmaz qalır.
 
-**Bu, standart olaraq deaktivdir** və üçsəviyyəli keçidlə idarə olunur (ən spesifik parametr üstünlük qazanır). Beləliklə, adi OmniRoute Claude Code istifadə etməyən klientlər üçün kataloqunu ikiqat artırmır:
+Defolt olaraq yalnız baza id-ləri əks etdirilir. Opt-in
+`CATALOG_MIRROR_REFINEMENTS_ENABLED` feature flag-i aktiv olduqda, kataloqun artıq
+siyahıya aldığı mühakimə-səyi variantları (məs. `codex/gpt-6-sol-high`) istənilən digər
+id kimi əks etdirilir, beləliklə Claude Code açıq səy səviyyəsi seçə bilir, sorğu
+yolunun materializə edə bilmədiyi daxili `auto/*` id-ləri isə əks etdirilmir. Səy
+variantlarının ümumiyyətlə siyahıya alınıb-alınmaması hələ də
+`OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` tərəfindən idarə olunur — əks etdirmə
+baza kataloqda olmayan variantı heç vaxt əlavə etmir.
 
-| Səviyyə   | Yeri                                                                                             |
-| --------- | ------------------------------------------------------------------------------------------------ |
-| Model     | Provayder təfərrüatları səhifəsi → hər model üçün "Claude Code-da göstər" keçidi                 |
-| Provayder | Provayder təfərrüatları səhifəsi → provayder səviyyəli keçid (onun bütün modellərini əhatə edir) |
-| Qlobal    | Parametrlər → Funksiya bayraqları → `EXPOSE_CC_DISCOVERY_ALIASES` (standart olaraq deaktivdir)   |
+**Bu, defolt olaraq sönülüdür** və üç səviyyəli nəzarət qapısı ilə idarə olunur (ən
+spesifik qalib gəlir), beləliklə sadə bir OmniRoute Claude Code istifadə etməyən
+müştərilər üçün kataloqunu heç vaxt ikiqat artırmır:
 
-`EXPOSE_CC_DISCOVERY_ALIASES` mühit dəyişəni qlobal səviyyəni məcburi aktivləşdirir və idarəetmə panelindəki əvəzləyici parametrdən üstün olur (Funksiya bayraqları ekranı bu halda "mühit dəyişəni vasitəsilə aktivdir" qeydini göstərir). Provayder və model səviyyəli keçidlər bundan sonra davranışı dəqiqləşdirir — məsələn, qlobal səviyyə deaktiv, Kimi provayderi isə aktiv olduqda yalnız Kimi modelləri göstərilir.
+| Səviyyə   | Harada                                                                                  |
+| --------- | --------------------------------------------------------------------------------------- |
+| Model     | Provayder təfərrüat səhifəsi → model üzrə "Claude Code-da göstər" keçidi                |
+| Provayder | Provayder təfərrüat səhifəsi → provayder səviyyəli keçid (bütün modellərini əhatə edir) |
+| Qlobal    | Tənzimləmələr → Funksiya Bayraqları → `EXPOSE_CC_DISCOVERY_ALIASES` (defolt sönülü)     |
 
-> ⚠️ **Claude olmayan modellərdə kontekst pəncərəsi uyğunsuzluğu.** Claude Code tanımadığı hər bir ID üçün 200K kontekst pəncərəsi nəzərdə tutur (real pəncərə ölçüsünü `/v1/models` vasitəsilə oxuya bilmir). Daha böyük pəncərəsi olan model üçün (məsələn, Kimi K2-nin 256K pəncərəsi) `CLAUDE_CODE_AUTO_COMPACT_WINDOW` dəyərini modelin real pəncərəsindən aşağı təyin edin ki, avtomatik sıxlaşdırma vaxtından əvvəl işə düşməsin. Yuxarıda yaradılan profillər bunu artıq hər model üçün ayrıca edir.
+`EXPOSE_CC_DISCOVERY_ALIASES` mühit dəyişəni qlobal səviyyəni məcburi aktivləşdirir
+və dashboard override-dan üstün tutulur (Funksiya Bayraqları ekranı bu halda
+"mühit dəyişəni vasitəsilə aktivdir" qeydini göstərir). Provayder və model üzrə
+keçidlər bundan sonra dəqiqləşdirmə edir — məs. qlobal sönülü + Kimi provayderi aktiv
+olduqda yalnız Kimi modelləri göstərilir.
+
+> ⚠️ **Claude olmayan modellərdə pəncərə uyğunsuzluğu.** Claude Code tanımadığı
+> istənilən id üçün 200K kontekst pəncərəsi olduğunu güman edir (`/v1/models`-dən
+> real pəncərəni oxuya bilmir). Daha böyük pəncərəli model üçün (məs. Kimi K2-nin
+> 256K), `CLAUDE_CODE_AUTO_COMPACT_WINDOW` dəyərini modelin real pəncərəsindən aşağı
+> təyin edin ki, avtomatik sıxılma vaxtından əvvəl işə düşməsin. Yuxarıdakı
+> generasiya olunmuş profillər bunu artıq hər model üçün edir.
 
 ---
 

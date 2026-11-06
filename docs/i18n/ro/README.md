@@ -6,32 +6,34 @@
 
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="Panoul de control OmniRoute" width="820"/>
+<img src="./docs/screenshots/MainOmniRoute.png" alt="Panoul OmniRoute" width="820"/>
 
 <br/>
 <br/>
 
 # 🚀 OmniRoute — Gateway-ul AI gratuit
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nu te opri niciodată din programat. Orice instrument AI → 375 de furnizori — peste 150 gratuiți — printr-un singur endpoint. Claude Code, Codex, Cursor, Cline, Copilot și Antigravity în Claude / GPT / Gemini GRATUIT, cu fallback automat. Compresia combinată RTK + Caveman economisește 15–95% din tokenuri (~89% în medie) — fără să mai atingi limitele. 375 de furnizori AI · peste 150 de niveluri gratuite · ~1,62 mld. de tokenuri gratuite/lună · 20 de strategii de rutare · cost inițial de 0 USD."/>
+**Creat de [Diego Souza](https://github.com/diegosouzapw)**
+
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nu te opri niciodată din programat. Fiecare instrument AI → 380 de furnizori — peste 150 gratuiți — printr-un singur endpoint. Claude Code, Codex, Cursor, Cline, Copilot și Antigravity către Claude / GPT / Gemini GRATUITE, cu fallback automat. Compresia combinată RTK + Caveman economisește între 15 și 95% din tokenuri (aproximativ 89% în medie) — nu atinge niciodată limitele. 380 de furnizori AI · peste 150 de niveluri gratuite · aproximativ 1,62 miliarde de tokenuri gratuite/lună · 20 de strategii de rutare · începe de la 0 $."/>
 
 </div>
 
 <div align="center">
 
-## 💰 ~1,62 mld. de tokenuri / lună prin nivelurile gratuite ale furnizorilor terți
+## 💰 ~1,62B de tokeni / lună în planurile gratuite ale terților
 
 </div>
 
-> **Folosește propriile conturi de furnizor.** Aceasta este o estimare cumulată pentru niveluri gratuite distincte ale furnizorilor terți pentru care ești eligibil, nu o alocare de tokenuri oferită de OmniRoute. Înregistrează-te, obține datele de autentificare acolo unde sunt necesare și conectează furnizorii pe care îi poți utiliza; fiecare furnizor își controlează limitele, disponibilitatea și termenii.
+> **Folosește propriile conturi de furnizor.** Aceasta este o estimare agregată pentru planuri gratuite ale terților eligibile separat, nu un credit de tokeni oferit de OmniRoute. Înregistrează-te, obține acreditările acolo unde este necesar și conectează furnizorii pe care îi poți utiliza; fiecare furnizor își controlează limitele, disponibilitatea și condițiile.
 >
-> Combinarea manuală a nivelurilor gratuite este dificilă — zeci de SDK-uri, zeci de limite de rată și nicio idee despre cât ai de fapt la dispoziție. OmniRoute cataloghează **467 de intrări de nivel gratuit în cadrul a 34 de chei pentru fonduri recurente** și calculează totalul de tokenuri afișat folosind cele **17 fonduri cu un buget lunar pozitiv publicat, plus cinci plafoane Groq per model**, eliminând dublurile pe baza fondurilor partajate. Cotele care devin disponibile numai după verificarea regională a identității (în prezent: ModelScope) sunt afișate separat, +~6 mil. în urma verificării regionale a identității, și nu sunt incluse niciodată în totalul principal. Rezultatul rămâne vizibil în panoul de control (`/dashboard/free-tiers`).
+> Combinarea manuală a planurilor gratuite este dificilă — zeci de SDK-uri, zeci de limite de rată și nicio idee despre cât ai de fapt la dispoziție. OmniRoute cataloghează **485 de intrări în planuri gratuite, distribuite în 34 de chei de pool recurente** și calculează cifra totală de tokeni pe baza celor **17 pool-uri cu un buget lunar pozitiv publicat, plus cinci limite Groq per model**, deduplicate după pool-ul comun. Cotele care devin disponibile doar după o verificare regională a identității (astăzi: ModelScope) sunt afișate separat, +~6M după verificarea identității regionale, și nu sunt incluse niciodată în cifra totală. Rezultatul rămâne vizibil în panoul de control (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Cardul OmniRoute pentru bugetul nivelurilor gratuite: ~1,62 mld. de tokenuri gratuite pe lună în regim constant, până la ~2,22 mld. în prima lună, cu creditele de înregistrare, provenind din 34 de chei documentate pentru fonduri recurente, care acoperă 467 de intrări de nivel gratuit catalogate în spatele unui singur endpoint. Calcul transparent, cu eliminarea dublurilor la nivel de fond — fiecare fond partajat este numărat o singură dată, inclusiv 17 fonduri recurente cu un buget lunar pozitiv de tokenuri publicat, plus cinci plafoane Groq per model; 12 furnizori sunt marcați ca de evitat în catalogul riscurilor privind termenii, astfel încât tu să decizi. Bara de buget include Mistral 1 mld., Nara 210 mil., LLM7 150 mil., xKiro 150 mil., Groq 30 mil. (cinci plafoane per model) și fonduri mai mici, plus creditele de înregistrare din prima lună și furnizorii permanent gratuiți fără plafon de tokenuri, afișați separat pentru a nu umfla niciodată totalul principal. Utilizare și sold rămase în timp real la /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Cardul OmniRoute pentru bugetul planurilor gratuite: ~1,62B de tokeni gratuiți pe lună în mod constant, până la ~2,22B în prima lună cu credite de înregistrare, din 34 de chei de pool recurente documentate care acoperă 485 de intrări catalogate în planuri gratuite, accesibile printr-un singur endpoint. Calcul corect, deduplicat după pool — fiecare pool comun este numărat o singură dată, inclusiv 17 pool-uri recurente cu un buget lunar pozitiv de tokeni publicat, plus cinci limite Groq per model; 12 furnizori sunt marcați ca de evitat în catalogul riscurilor asociate condițiilor, astfel încât tu să decizi. Bara bugetului include Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (cinci limite per model) și pool-uri mai mici, plus credite de înregistrare pentru prima lună și furnizori permanent gratuiți fără limită de tokeni, afișați separat pentru a nu umfla niciodată cifra totală. Valoarea utilizată/rămasă în timp real pe /dashboard/free-tiers."/>
 
-> Rezumat animat al paginii live `/dashboard/free-tiers`. Metodologia completă (eliminarea dublurilor fondurilor, nivelurile de credit, termenii furnizorilor): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+> Rezumat animat al paginii active `/dashboard/free-tiers`. Metodologia completă (deduplicarea pool-urilor, nivelurile de credit, condițiile furnizorilor): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
-> <sub>Aceste cifre sunt reauditate la fiecare două săptămâni pe baza catalogului live și **se modifică în ambele direcții** — dacă un furnizor încheie un nivel gratuit, cifra scade; dacă apare unul nou, aceasta crește. Publicăm ceea ce calculează efectiv catalogul, niciodată un scenariu optimist rotunjit în sus.</sub>
+> <sub>Aceste cifre sunt reauditate la fiecare două săptămâni în raport cu catalogul activ și **se pot modifica în ambele direcții** — un furnizor încheie un plan gratuit, iar numărul scade; apare unul nou, iar acesta crește. Publicăm ceea ce calculează efectiv catalogul, niciodată un scenariu optimist rotunjit în sus.</sub>
 
 <br/>
 
@@ -39,7 +41,7 @@
 
 <h3>
 
-⭐ Acordă o stea depozitului dacă OMNIROUTE te-a ajutat să economisești bani și să-ți ușurezi munca.
+⭐ Acordă o stea repo-ului dacă OMNIROUTE te-a ajutat să economisești bani și să-ți faci munca mai ușoară.
 
 </h3>
 
@@ -50,10 +52,10 @@
 
 ### 💬 Alătură-te comunității
 
-**👋 Urmărește administratorul proiectului — află primul despre furnizori noi, versiuni și sfaturi:**
+**👋 Urmărește maintainerul — află primul despre furnizori noi, versiuni și sfaturi:**
 
 [![Urmărește-l pe Diego pe LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![Urmărește-l pe @diegosouzapw pe GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![Urmărește @diegosouzapw pe GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
 
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
 [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
@@ -61,7 +63,7 @@
 [![WhatsApp Brazilia](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
 [![Site web](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
 
-**Întrebări, sfaturi despre furnizori, foaie de parcurs și asistență → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brazilia](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**Întrebări, recomandări despre furnizori, planul de dezvoltare și asistență → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brazilia](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
@@ -69,28 +71,28 @@
 
 <div align="center">
 
-|                                     |          v3.8.50          | **v3.8.51** |      `v3.8.52+`       |
-| ----------------------------------- | :-----------------------: | :---------: | :-------------------: |
-| 🌐 Furnizori                        |            352            |   **358**   |          375          |
-| 🧠 ID-uri unice de modele de chat   |           1320            |  **1374**   |         1475          |
-| 🖼️ Punte pentru modalități          | 🆕 vedere + audio + video |      ✓      |           ✓           |
-| 📡 Catalog Radar gratuit            | 🆕 participare opțională  |      ✓      |           ✓           |
-| ⚖️ Planificare bazată pe cote       |      🆕 Quota-Share       |      ✓      |           ✓           |
-| 📊 Telemetria cotelor               |       🆕 în direct        |      ✓      |           ✓           |
-| 🧰 Mod fără interfață               |             —             |      —      | 🆕 `serve --headless` |
-| 🛤️ Infrastructură pentru ramura LTS |             —             |      —      | 🆕 canale de lansare  |
-| 🔎 API de descoperire a modelelor   |             —             |      —      | 🆕 `/v1/models/query` |
+|                                   |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
+| --------------------------------- | :------------------------: | :---------: | :-------------------: |
+| 🌐 Furnizori                      |            352             |   **358**   |          380          |
+| 🧠 ID-uri unice de modele de chat |            1320            |  **1374**   |         1491          |
+| 🖼️ Punte pentru modalități        | 🆕 viziune + audio + video |      ✓      |           ✓           |
+| 📡 Catalog gratuit Radar          |   🆕 activare voluntară    |      ✓      |           ✓           |
+| ⚖️ Planificare în funcție de cote |       🆕 Quota-Share       |      ✓      |           ✓           |
+| 📊 Telemetrie a cotelor           |      🆕 în timp real       |      ✓      |           ✓           |
+| 🧰 Mod fără interfață             |             —              |      —      | 🆕 `serve --headless` |
+| 🛤️ Infrastructură feroviară LTS   |             —              |      —      | 🆕 canale de lansare  |
+| 🔎 API de descoperire a modelelor |             —              |      —      | 🆕 `/v1/models/query` |
 
-**→ [Foaia de parcurs](ROADMAP.md) — pe drumul către `v3.9.0 LTS`**
+**→ [Foaia de parcurs](ROADMAP.md) — pe calea către `v3.9.0 LTS`**
 
 </div>
 
 <br/>
 
-## 🧩 Disponibilitate
+## 🧩 Disponibil
 
-[![versiune npm](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
-![Descărcări NPM lunare](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
+[![versiunea npm](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
+![NPM lunar](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 [![Licență: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Descărcări Docker](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
@@ -98,46 +100,46 @@
 
 <table>
   <tr>
-    <td align="right"><b>🚀 Începeți</b></td>
+    <td align="right"><b>🚀 Începe</b></td>
     <td align="center"><a href="#-quick-start">🚀 Pornire rapidă</a></td>
     <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Instalare</a></td>
-    <td align="center"><a href="#first-run">🆓 Conectați un furnizor</a></td>
+    <td align="center"><a href="#first-run">🆓 Conectează un furnizor</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💡 Aflați mai multe</b></td>
+    <td align="right"><b>💡 Află mai multe</b></td>
     <td align="center"><a href="#-the-promise">💥 Promisiunea</a></td>
     <td align="center"><a href="#-why-omniroute">🤔 De ce OmniRoute</a></td>
-    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 Ce diferențiază OmniRoute</a></td>
+    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 Ce îl diferențiază</a></td>
   </tr>
   <tr>
     <td align="right"><b>⚙️ Funcționalități</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combinații</a></td>
-    <td align="center"><a href="#-375-ai-providers--153-catalog-marked-free">🌐 Furnizori</a></td>
-    <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI și MCP</a></td>
+    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Furnizori</a></td>
+    <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
     <td align="right"></td>
     <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ Compresie</a></td>
     <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Unde rulează</a></td>
-    <td align="center"><a href="#-private--local-first">🔒 Confidențialitate</a></td>
+    <td align="center"><a href="#-private--local-first">🔒 Privat</a></td>
   </tr>
   <tr>
-    <td align="right"><b>👀 Vedeți-l</b></td>
+    <td align="right"><b>👀 Privește</b></td>
     <td align="center"><a href="#-omniroute-in-action">🎬 În acțiune</a></td>
     <td align="center"><a href="#-whats-new">✨ Noutăți</a></td>
-    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 CLI-uri compatibile</a></td>
+    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 CLI compatibile</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💚 Susținere</b></td>
-    <td align="center"><a href="#-support-omniroute">💚 Susțineți / Donați</a></td>
+    <td align="right"><b>💚 Susține</b></td>
+    <td align="center"><a href="#-support-omniroute">💚 Susține / Donează</a></td>
     <td align="center"><a href="#-community--help">💬 Comunitate</a></td>
     <td align="center"><a href="#-sponsors">💖 Sponsori</a></td>
   </tr>
   <tr>
     <td align="right"><b>📦 Proiect</b></td>
-    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Tehnologii utilizate</a></td>
+    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Tehnologii</a></td>
     <td align="center"><a href="#-documentation">📖 Documentație</a></td>
-    <td align="center"><a href="#-900-contributors">👥 Colaboratori</a></td>
+    <td align="center"><a href="#-1000-contributors">👥 Contribuitori</a></td>
   </tr>
 </table>
 
@@ -173,7 +175,7 @@
   <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="Thailandeză (th)" title="Thailandeză (th)"></a>
   <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Vietnameză (vi)" title="Vietnameză (vi)"></a>
   <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Indoneziană (id)" title="Indoneziană (id)"></a>
-  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Malaeză (ms)" title="Malaeză (ms)"></a>
+  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Malaieză (ms)" title="Malaieză (ms)"></a>
   <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Filipineză (phi)" title="Filipineză (phi)"></a>
   <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Hindi (hi)" title="Hindi (hi)"></a>
   <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Gujarati (gu)" title="Gujarati (gu)"></a>
@@ -202,8 +204,8 @@
   <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Odia (or)" title="Odia (or)"></a>
   <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Punjabi (pa)" title="Punjabi (pa)"></a>
   <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="Nepaleză (ne)" title="Nepaleză (ne)"></a>
-  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="Singaleză (si)" title="Singaleză (si)"></a>
-  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="Birmană (my)" title="Birmană (my)"></a>
+  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="Sinhala (si)" title="Sinhala (si)"></a>
+  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="Birmaneză (my)" title="Birmaneză (my)"></a>
   <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="Khmeră (km)" title="Khmeră (km)"></a>
   <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Hausa (ha)" title="Hausa (ha)"></a>
   <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Yoruba (yo)" title="Yoruba (yo)"></a>
@@ -226,19 +228,19 @@
 
 </div>
 
-<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Trei pași: instalează și pornește OmniRoute, conectează un furnizor eligibil folosind propriul cont sau propria cheie API, apoi configurează instrumentul să utilizeze localhost:20128/v1 cu o cheie API OmniRoute și modelul auto. Direcționarea depinde de conexiunile eligibile disponibile și de limitele furnizorilor."/>
+<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Trei pași: instalează și pornește OmniRoute, conectează un furnizor eligibil folosind propriul cont sau propria cheie API, apoi configurează instrumentul să utilizeze localhost:20128/v1 cu o cheie API OmniRoute și modelul auto. Direcționarea depinde de conexiunile eligibile disponibile și de limitele furnizorului."/>
 
 ```bash
-# După conectarea unui furnizor, copiază cheia OmniRoute din Panou de control → Puncte finale:
+# După conectarea unui furnizor, copiază cheia OmniRoute din Panou de control → Endpoints:
 curl http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer YOUR_OMNIROUTE_KEY" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-<sub>`auto` necesită o rută eligibilă. Este posibil ca o instalare nouă să nu aibă destinații eligibile fără cheie, iar un furnizor fără cheie poate respinge clienții terți. Furnizorii marcați cu `tos: avoid`, inclusiv Kiro, sunt excluși implicit din direcționarea automată; conectarea unui cont nu suprascrie această setare. Consultă [Ghidul nivelurilor gratuite](docs/getting-started/FREE-TIERS-GUIDE.md) înainte de a alege un furnizor.</sub>
+<sub>`auto` are nevoie de o rută eligibilă. O instalare nouă poate să nu aibă ținte eligibile fără cheie, iar un furnizor fără cheie poate respinge clienții terți. Furnizorii marcați cu `tos: avoid`, inclusiv Kiro, sunt excluși implicit din direcționarea automată; conectarea unui cont nu suprascrie această setare. Consultă [Ghidul nivelurilor gratuite](docs/getting-started/FREE-TIERS-GUIDE.md) înainte de a alege un furnizor.</sub>
 
-<sub>📦 Scripturi de pornire rapidă, gata de copiat și lipit, pentru **Python, Node.js, PHP și cURL** → [`examples/quickstart/`](examples/quickstart/)</sub>
+<sub>📦 Scripturi de pornire rapidă care pot fi copiate și lipite pentru **Python, Node.js, PHP și cURL** → [`examples/quickstart/`](examples/quickstart/)</sub>
 
 <br/>
 
@@ -248,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Promisiunea — Un singur punct final și 375 de furnizori. Mecanismul automat de rezervă menține direcționarea atât timp cât este disponibilă o altă destinație funcțională. Șase piloni: mecanism de rezervă rezilient pentru 375 de furnizori · economii de până la 95% la tokenuri pentru sarcinile de lucru eligibile · cost inițial de 0 USD, cu peste 150 de niveluri gratuite și 52 de furnizori recurenți/fără cheie, gratuiți permanent · 37 de integrări CLI/agent printr-o singură configurație · compatibilitate cu OpenAI, Claude, Gemini și Responses API la /v1 · mecanisme de control pentru producție, inclusiv întrerupătoare de circuit, disimulare TLS, 110 instrumente MCP, A2A, memorie, limite de siguranță, evaluări și peste 56.000 de declarații de teste statice în peste 7.800 de fișiere de testare urmărite."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Promisiunea — Un singur punct final și 380 de furnizori. Fallback-ul automat menține direcționarea cât timp este disponibilă o altă țintă funcțională. Șase piloni: fallback rezilient între 380 de furnizori · economii de până la 95% la tokenuri pentru sarcinile eligibile · începi de la 0 $ cu peste 150 de niveluri gratuite și 54 de furnizori gratuiți permanent, recurenți/fără cheie · 39 de integrări CLI/agenți printr-o singură configurare · compatibilitate cu API-urile OpenAI, Claude, Gemini și Responses la /v1 · controale pentru producție, inclusiv întrerupătoare de circuit, disimulare TLS, MCP cu 110 instrumente, A2A, memorie, bariere de siguranță, evaluări și peste 56.000 de declarații statice de test în peste 7.800 de fișiere de test urmărite."/>
 
 <br/>
 <br/>
@@ -259,11 +261,11 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="De ce OmniRoute — nu mai jongla cu 10 panouri de control, chei API inactive și facturi neașteptate. Zece probleme cotidiene și soluțiile lor: cota expiră neutilizată → valorifică la maximum abonamentele; limite de rată atinse în timpul programării → mecanism automat de rezervă pe 4 niveluri (Abonament → API → Ieftin → Gratuit); rezultatele instrumentelor consumă tokenuri → compresie RTK + Caveman (15–95%); API-uri costisitoare → direcționare optimizată în funcție de costuri; fiecare instrument necesită propria configurare → un singur punct final, un singur panou de control; acces AI blocat → proxy pe 3 niveluri + disimulare TLS; chei inactive → reziliență pe 3 niveluri (întrerupătoare de circuit, perioadă de așteptare pentru chei, blocarea modelului); o echipă folosește în comun un singur abonament → grupuri de chei cu cote distribuite echitabil; solicitările trec prin infrastructura cloud a altcuiva → abordare locală în primul rând, cu chei criptate folosind AES-256-GCM; lipsa vizibilității asupra cheltuielilor → analize în timp real (utilizare, cotă, economii, latență p95)."/>
+<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="De ce OmniRoute — nu mai jongla cu 10 tablouri de bord, chei API expirate și facturi neașteptate. Zece probleme zilnice și soluțiile lor: cota care expiră neutilizată → maximizează abonamentele; limite de rată atinse în timpul programării → fallback automat pe 4 niveluri (Abonament → API → Ieftin → Gratuit); ieșirile instrumentelor consumă tokenuri → compresie RTK + Caveman (15–95%); API-uri costisitoare → direcționare optimizată pentru cost; fiecare instrument are propria configurare → un singur punct final, un singur tablou de bord; AI blocat → proxy pe 3 niveluri + disimulare TLS; chei expirate → reziliență pe 3 niveluri (întrerupătoare de circuit, răcirea cheilor, blocarea modelelor); echipa folosește un singur abonament → grupuri de chei cu cote distribuite echitabil; solicitările trec prin cloud-ul altcuiva → prioritate locală, cu chei criptate AES-256-GCM; lipsa vizibilității asupra cheltuielilor → analize în timp real (utilizare, cotă, economii, latență p95)."/>
 
 <div align="center">
 
-<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="Fluxul solicitărilor OmniRoute: IDE-ul sau CLI-ul tău (Claude Code, Cursor, Cline…) apelează un singur punct final local (http://localhost:20128/v1); Routerul inteligent OmniRoute (compresie RTK + Caveman, 20 de strategii de direcționare, întrerupătoare de circuit, disimulare TLS, MCP, A2A, limite de siguranță) poate comuta automat între 4 niveluri de furnizori atât timp cât rămâne disponibilă o destinație eligibilă și funcțională — Nivelul 1 Abonament, Nivelul 2 Cheie API, Nivelul 3 Ieftin și Nivelul 4 Gratuit."/>
+<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="Fluxul unei solicitări OmniRoute: IDE-ul sau CLI-ul tău (Claude Code, Cursor, Cline…) apelează un singur punct final local (http://localhost:20128/v1); Routerul inteligent OmniRoute (compresie RTK + Caveman, 20 de strategii de direcționare, întrerupătoare de circuit, disimulare TLS, MCP, A2A, bariere de siguranță) poate face fallback între 4 niveluri de furnizori cât timp rămâne disponibilă o țintă eligibilă și funcțională — Nivelul 1 Abonament, Nivelul 2 Cheie API, Nivelul 3 Ieftin și Nivelul 4 Gratuit."/>
 
 </div>
 
@@ -508,9 +510,9 @@ Toate cele **20** de strategii — combină-le după preferință pentru fiecare
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ce diferențiază OmniRoute — o imagine de ansamblu datată a funcționalităților în comparație cu 9router, OpenRouter, CLIProxyAPI și LiteLLM, pentru 13 capabilități. OmniRoute: 375 de furnizori, peste 150 de niveluri gratuite integrate, 20 de strategii de rutare, compresie de tokenuri cu 12 motoare, server MCP integrat cu 110 instrumente, protocol de agenți A2A, memorie persistentă, mecanisme de protecție, agenți cloud, disimularea amprentei TLS, Desktop/Termux/PWA și interfață tradusă în 67 de limbi. OmniRoute este licențiat sub MIT și poate fi auto-găzduit. Capabilitățile și valorile concurenților se pot schimba; consultați metodologia din link."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ce diferențiază OmniRoute — o captură de caracteristici la zi vs 9router, OpenRouter, CLIProxyAPI și LiteLLM pe 13 capabilități. OmniRoute: 380 furnizori, peste 150 de planuri gratuite integrate, 20 de strategii de rutare, compresie de token pe 12 motoare, server MCP integrat cu 110 unelte, protocol agent A2A, memorie persistentă, garduri de protecție, agenți cloud, stealth TLS fingerprint, Desktop/Termux/PWA și 67 de limbi UI i18n. OmniRoute are licență MIT și poate fi găzduit local. Capabilitățile și numărul competitorilor pot varia; vezi metodologia din link."/>
 
-<sub>📊 Metodologia completă &amp; detalii pentru fiecare funcționalitate în comparație cu 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
+<sub>📊 Metodologie completă &amp; detalii pe caracteristici vs 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
 <br/>
 
@@ -582,47 +584,47 @@ catalogul actual la **[radar.omniroute.online/planos](https://radar.omniroute.on
 
 <div align="center">
 
-## ✨ Noutăți
+## ✨ Ce e nou
 
 </div>
 
-> Cele mai recente noutăți din **v3.8.20 → v3.8.52**. Istoricul complet este disponibil în [`CHANGELOG.md`](CHANGELOG.md).
+> Repere recente din **v3.8.20 → v3.8.53**. Istoricul complet în [`CHANGELOG.md`](CHANGELOG.md).
 
-- **⚖️ Rutare `quota-weighted`** — a 20-a strategie combo omite conturile cu cota epuizată, apoi alege dintre cele rămase proporțional cu cota disponibilă ÷ sarcina în curs, păstrând conversațiile existente fixate. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🧰 Mod headless** — `omniroute serve --headless` (sau `OMNIROUTE_HEADLESS=1`) rulează doar motorul proxy `/v1/*`, cu panoul de control și subsistemele dedicate acestuia dezactivate. → [Modul headless](docs/guides/HEADLESS.md)
-- **🔎 Descoperirea modelelor** — `/v1/models` filtrează după capabilitate, context, tip și text, iar `POST /v1/models/query` returnează o listă scurtă și deterministă, cu aceeași vizibilitate per cheie. → [Referință API](docs/reference/API_REFERENCE.md)
-- **🔑 Control al rutării per cheie** — fixați o cheie API la un singur model sau combo cu `forcedModel` și adăugați sau eliminați atomic modelele și combinațiile unei chei (`/api/keys/{id}/access`). → [Referință API](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
-- **🛡️ Controale PII mai granulare** — selecție per tip, până la 20 de modele personalizate și validate de mascare și contoare de detectare per tip; mascarea rămâne opțională. → [Măsuri de protecție](docs/security/GUARDRAILS.md)
-- **🌍 67 de limbi** — panoul de control, versiunile localizate ale documentației și CLI-ul, iar `npm run i18n:add-locale` adaugă o limbă peste tot printr-o singură comandă. → [Ghid i18n](docs/guides/I18N.md)
-- **🎛️ OmniConductor** — delegare A2A de intrare către flota dvs. de agenți, abilități Conductor pe Agent Card și un panou de control cu chat vocal Faro de tip „apasă pentru a vorbi”. → [Server A2A](docs/frameworks/A2A-SERVER.md)
-- **🛂 Admitere adaptivă și protecție la supraîncărcare** — solicitările de chat cu sarcină mare sunt plasate în coadă în loc să returneze 503, cu alocări glisante RPM atomice per conexiune. → [Ghid de reziliență](docs/architecture/RESILIENCE_GUIDE.md)
-- **🗂️ Ordonare canonică pentru `/v1/models`** — câte un bloc contiguu, grupat după furnizor, pentru fiecare furnizor (cu combinațiile fixate primele), stabil în toate sursele catalogului. → [Referință API](docs/reference/API_REFERENCE.md)
-- **🗜️ Consolidarea compresiei** — protecție implicit activă împotriva expandării excesive, pachete Caveman pentru DE / FR / JA + chineză (wényán), filtre RTK pentru Gradle și .NET. → [Compresie](docs/compression/COMPRESSION_ENGINES.md)
-- **💸 Cost fix raportat corect** — furnizorii pe bază de abonament / plan de programare afișează **$0** în analiza costurilor; bugetul, cota și rutarea continuă să folosească estimări. → [Referință API](docs/reference/API_REFERENCE.md)
-- **⚖️ Rutare Quota-Share** — distribuie echitabil cota unui cont partajat între cheile grupate și conservă capacitatea de lucru, astfel încât segmentele neutilizate sunt împrumutate. → [Ghid de reziliență](docs/architecture/RESILIENCE_GUIDE.md)
-- **🤖 Configurare CLI/agent printr-o singură comandă** — 15 comenzi `setup-*` înregistrate; `omniroute run` lansează 7 CLI-uri (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); `omniroute configure` acceptă 11 destinații, cu un selector interactiv de furnizor și model și favorite per context. → [Integrări CLI](docs/guides/CLI-INTEGRATIONS.md)
-- **🛰️ Mod la distanță** — controlați o instanță OmniRoute la distanță folosind tokenuri cu domeniu limitat (`connect` / `contexts` / `tokens`) și un instrument OAuth `antigravity` pentru instalările pe VPS. → [Mod la distanță](docs/guides/REMOTE-MODE.md)
-- **🧭 Rutare automată mai inteligentă** — combinații `auto/<category>:<tier>`, **Fusion** (panou de modele + evaluator), rutare adaptată sarcinii, suprascrieri per solicitare pentru model / mod / buget USD. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🗜️ Compresie modulară** — 12 motoare care pot fi compuse + Compression Studios: LLMLingua-2, Ultra pe două niveluri, omniglyph, prag de fidelitate pentru fiecare pas, GCF v3.2, editor cu reordonare prin tragere. → [Compresie](docs/compression/COMPRESSION_ENGINES.md)
-- **🕵️ Decriptare MITM transparentă (TPROXY)** — interceptează CLI-urile care ignoră variabilele de mediu pentru proxy, cu o CA per SNI și un program de instalare în depozitul de încredere. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
-- **💸 Telemetria costurilor pretutindeni** — anteturi `X-OmniRoute-*` cu informații despre cost și utilizare pentru fiecare endpoint, antet cu economiile obținute la cache-HIT, cote de cheltuieli în USD per cheie. → [Referință API](docs/reference/API_REFERENCE.md)
-- **🧠 Memorie pe care o controlați** — dezactivată implicit, cuantizare vectorială int8 opțională + degradare tipizată, `x-omniroute-no-memory` per solicitare. → [Memorie](docs/frameworks/MEMORY.md)
-- **🛡️ Securitate** — protecție împotriva injectării de prompturi pe fiecare rută LLM (suită red-team), mecanism opțional de mascare a acreditărilor (ocultează cheile API/secretele divulgate în ambele direcții), căutare web gratuită DuckDuckGo ca ultimă soluție și un control opțional de autentificare OIDC pentru panoul de control (autentificarea cu parolă rămâne întotdeauna disponibilă). → [Măsuri de protecție](docs/security/GUARDRAILS.md)
-- **🖼️ Endpointuri noi** — `/v1/ocr` (Mistral OCR) și `/v1/audio/translations` (în stil Whisper) completează funcționalitățile media. → [Referință API](docs/reference/API_REFERENCE.md)
-- **🎨 Generare de imagini / videoclipuri / conținut audio** — un singur API pentru conținut media: xAI Grok Imagine și Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind și furnizori de servicii vocale precum ElevenLabs. → [Referință API](docs/reference/API_REFERENCE.md)
-- **🌍 Implementare și operațiuni** — `basePath` pentru proxy invers, detectarea automată a limbii browserului, urmărirea dispozitivelor per cheie, încredere MITM fără privilegii root, localizare zh-TW. → [Mediu](docs/reference/ENVIRONMENT.md)
-- **🤝 Mai mulți furnizori și agenți** — agenți cloud (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) cu browser + autentificare OAuth, card dedicat Ollama, Claude Opus 5 și Sonnet 5, parteneriat oficial Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… și un **catalog cu 375 de furnizori** actualizat. → [Furnizori](docs/reference/PROVIDER_REFERENCE.md)
-- **📡 Transparența rutării** — fiecare răspuns include un antet `X-OmniRoute-Decision` care indică strategia/furnizorul/ latența care l-a deservit, o nouă strategie combo `cache-optimized` + factorul Auto-Combo `cacheAffinity` direcționează solicitările repetate înapoi către conexiunea care deține prefixul din cache, iar un endpoint doar în citire `/v1/auto-combo/{channel}/candidates` expune grupul curent de candidați al unui canal `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **⚡ Performanță și infrastructură locale** — Redis local cu un singur clic, instrumente de implementare a releelor pentru Cloudflare Workers / Deno Deploy, Bifrost și Mux ca servicii încorporate supravegheate. → [Servicii încorporate](docs/frameworks/EMBEDDED-SERVICES.md)
-- **🧩 Incluse, de asemenea** — cadru pentru pluginuri + marketplace, cadre pentru abilități Omni/Agent/GitHub, integrare cu seifuri Obsidian (22 de instrumente MCP), API-uri Batch și Files compatibile cu OpenAI, cache semantic pentru răspunsuri, gamificare cu clasamente, descoperirea agenților ACP (15 agenți încorporați), export programat al jurnalelor în BigQuery, distribuire paralelă `auto/chaos` către mai multe modele, o punte pentru boți Telegram, un manager de versiuni în aplicație și clasamente LMArena-ELO ale furnizorilor gratuiți. → [Documentație](docs/README.md)
+- **⚖️ Rutare `quota-weighted`** — a 20-a strategie combo sare peste conturile epuizate, apoi alege dintre cele rămase proporțional cu cota rămasă ÷ încărcarea în curs, păstrând conversațiile existente fixate. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **🧰 Mod headless** — `omniroute serve --headless` (sau `OMNIROUTE_HEADLESS=1`) rulează doar motorul proxy `/v1/*`, cu dashboard-ul și subsistemele doar pentru dashboard dezactivate. → [Headless Mode](docs/guides/HEADLESS.md)
+- **🔎 Descoperire modele** — `/v1/models` filtrează după capabilitate, context, tip și text, iar `POST /v1/models/query` returnează o listă scurtă deterministă cu aceeași vizibilitate per-cheie. → [API Reference](docs/reference/API_REFERENCE.md)
+- **🔑 Control de rutare per-cheie** — fixează o cheie API la un model sau combo cu `forcedModel` și adaugă sau elimină modelele și combourile unei chei atomic (`/api/keys/{id}/access`). → [API Reference](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
+- **🛡️ Control PII mai fin** — selecție pe tip, până la 20 de modele personalizate de mascarea validate și contoare de detecție pe tip; mascarea rămâne opțională. → [Guardrails](docs/security/GUARDRAILS.md)
+- **🌍 67 de limbi** — dashboard, oglinzi de documentație și CLI, cu `npm run i18n:add-locale` adăugând o limbă peste tot dintr-o singură comandă. → [i18n Guide](docs/guides/I18N.md)
+- **🎛️ OmniConductor** — delegare A2A inbound către flota ta de agenți, abilități Conductor pe Agent Card și un panou dashboard cu chat vocal Faro push-to-talk. → [A2A Server](docs/frameworks/A2A-SERVER.md)
+- **🛂 Admitere adaptivă & protecție la supraîncărcare** — cererile de chat grele sunt puse în coadă în loc să primească 503, cu lease-uri atomice RPM per conexiune. → [Resilience Guide](docs/architecture/RESILIENCE_GUIDE.md)
+- **🗂️ Ordine canonică `/v1/models`** — un singur bloc contiguu grupat pe provider pentru fiecare provider (combos fixate primele), stabil pentru orice sursă de catalog. → [API Reference](docs/reference/API_REFERENCE.md)
+- **🗜️ Consolidare compresie** — protecție la inflație activată implicit, Caveman packs pentru DE / FR / JA + chineză (wényán), filtre RTK pentru Gradle & .NET. → [Compression](docs/compression/COMPRESSION_ENGINES.md)
+- **💸 Cost fix onest** — providerii cu abonament / coding-plan apar cu **$0** în analiza costurilor; bugetul, cota & rutarea continuă să estimeze. → [API Reference](docs/reference/API_REFERENCE.md)
+- **⚖️ Rutare Quota-Share** — împarte cota unui cont partajat echitabil între cheile din pool, cu redistribuire pentru porțiunile nefolosite. → [Resilience Guide](docs/architecture/RESILIENCE_GUIDE.md)
+- **🤖 Setup CLI/agent dintr-o comandă** — 15 comenzi `setup-*` înregistrate; `omniroute run` lansează 7 CLI-uri (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); `omniroute configure` suportă 11 ținte cu selector interactiv provider+model și favorite per-context. → [CLI Integrations](docs/guides/CLI-INTEGRATIONS.md)
+- **🛰️ Mod remote** — controlează un OmniRoute remote cu tokenuri limitate (`connect` / `contexts` / `tokens`) + un helper OAuth `antigravity` pentru instalări pe VPS. → [Remote Mode](docs/guides/REMOTE-MODE.md)
+- **🧭 Rutare automată mai inteligentă** — combo-uri `auto/<category>:<tier>`, **Fusion** (panou model + judecător), rutare conștientă de task, suprascrieri per-request pentru model / mod / buget USD. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **🗜️ Compresie pluggabilă** — 12 motoare compozabile + Compression Studios: LLMLingua-2, Ultra pe două niveluri, omniglyph, filtru fidelitate per-pas, GCF v3.2, editor drag-reorder. → [Compression](docs/compression/COMPRESSION_ENGINES.md)
+- **🕵️ Decriptare MITM transparentă (TPROXY)** — capturează CLI-uri care ignoră variabilele de mediu proxy, cu CA per-SNI + installer trust-store. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
+- **💸 Telemetrie cost peste tot** — headere `X-OmniRoute-*` cost/usage pe fiecare endpoint, header de economii cache-HIT, limite USD per-cheie. → [API Reference](docs/reference/API_REFERENCE.md)
+- **🧠 Memorie controlată de tine** — dezactivată implicit, opțional quantizare vectorială int8 + decay tipizat, per-request `x-omniroute-no-memory`. → [Memory](docs/frameworks/MEMORY.md)
+- **🛡️ Securitate** — protecție prompt-injection pe fiecare rută LLM (red-team suite), protecție opțională de mascarea credentialelor (redactează chei API/secrete scurse în ambele direcții), căutare web DuckDuckGo gratuită ca ultimă soluție și poartă de login OIDC opțională pentru dashboard (login-ul cu parolă rămâne mereu disponibil). → [Guardrails](docs/security/GUARDRAILS.md)
+- **🖼️ Endpointuri noi** — `/v1/ocr` (Mistral OCR) și `/v1/audio/translations` (stil Whisper) completează suprafața media. → [API Reference](docs/reference/API_REFERENCE.md)
+- **🎨 Generare imagine / video / audio** — un singur API pentru media: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind și provideri de voce precum ElevenLabs. → [API Reference](docs/reference/API_REFERENCE.md)
+- **🌍 Deploy & operațiuni** — `basePath` pentru reverse-proxy, auto-detectare limbă browser, tracking dispozitiv per-cheie, trust MITM fără root, localizare zh-TW. → [Environment](docs/reference/ENVIRONMENT.md)
+- **🤝 Mai mulți provideri & agenți** — agenți cloud (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) cu login browser + OAuth, card Ollama de primă clasă, Claude Opus 5 & Sonnet 5, parteneriat oficial Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… și un catalog actualizat cu **380 de provideri**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
+- **📡 Transparență rutare** — fiecare răspuns poartă un header `X-OmniRoute-Decision` cu strategia/providerul/latenta care l-a servit, o nouă strategie combo `cache-optimized` + factorul Auto-Combo `cacheAffinity` rutează cererile repetate către conexiunea cu prefixul cache-uit, iar endpointul doar-citire `/v1/auto-combo/{channel}/candidates` expune pool-ul live de candidați al unui canal `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **⚡ Performanță locală & infrastructură** — Redis local cu un singur click, deployeri de relay pentru Cloudflare Workers / Deno Deploy, Bifrost & Mux ca servicii încorporate supravegheate. → [Servicii Încorporate](docs/frameworks/EMBEDDED-SERVICES.md)
+- **🧩 De asemenea în pachet** — framework de plugin-uri + marketplace, framework-uri de abilități Omni/Agent/GitHub, integrare cu Obsidian vault (22 de unelte MCP), API-uri Batch & Files compatibile cu OpenAI, cache semantic pentru răspunsuri, gamificare cu clasamente, descoperire agenți ACP (15 agenți integrați), export programat de loguri către BigQuery, `auto/chaos` fan-out paralel multi-model, un bridge pentru bot Telegram, un manager de versiuni în aplicație și clasamente LMArena-ELO pentru furnizori gratuiți. → [Documentație](docs/README.md)
 
 <br/>
 
 <div align="center">
 
-## 🤖 CLI-uri și agenți de programare compatibili
+## 🤖 CLI-uri & Agenți de programare compatibili
 
-> O singură configurație — `http://localhost:20128/v1` — și **orice** IDE sau CLI cu AI rulează pe modele gratuite și cu cost redus.
+> O singură configurare — `http://localhost:20128/v1` — și **orice** IDE AI sau CLI rulează pe modele gratuite & cu cost redus.
 
 <div align="center">
 <table>
@@ -662,17 +664,17 @@ catalogul actual la **[radar.omniroute.online/planos](https://radar.omniroute.on
 </div>
 
 <div align="center">
-<b>＋ funcționează și cu</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>orice instrument compatibil cu OpenAI</b>
+<b>＋ funcționează și cu</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>orice unealtă compatibilă cu OpenAI</b>
 </div>
 
-<sub>📖 Configurare specifică pentru toate cele 37 de instrumente (27 CLI Code + 10 agenți CLI) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 Plugin OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 Configurare per-instrument pentru toate cele 39 de unelte (28 CLI Code + 11 CLI Agents) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 Plugin OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
 <br/>
 
-**Lansați orice CLI acceptat prin OmniRoute cu o singură comandă** — fără a scrie fișiere de configurare,
-datele de autentificare sunt injectate pentru fiecare proces, iar Qwen/Gemini primesc un director home izolat și temporar:
+**Lansează orice CLI suportat prin OmniRoute cu o singură comandă** — fără fișiere de configurare scrise,
+credentiale injectate per proces, Qwen/Gemini primesc un home izolat temporar:
 
 ```bash
 omniroute run claude   --model openai/gpt-5.4          # Claude Code
@@ -683,27 +685,27 @@ omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 omniroute run qwen     --model glm/glm-5.2 -- -p "reply OK"
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "reply OK"
 
-# Sau selectați interactiv furnizorul și modelul și scrieți configurația proprie a instrumentului:
-omniroute configure codex          # și: claude opencode qwen aider goose gemini cline continue kilo 5dive
+# Sau alege provider+model interactiv și scrie propria configurație a uneltei:
+omniroute configure codex          # de asemenea: claude opencode qwen aider goose gemini cline continue kilo 5dive
 ```
 
-Fiecare comandă respectă contextul de la distanță activ (`omniroute connect <host>`), `--dry-run`
-previzualizează variabilele de mediu/argumentele exacte fără a executa comanda, iar `--api-key-env NAME` păstrează secretele în afara
-istoricului shell-ului. → [Integrări CLI](docs/guides/CLI-INTEGRATIONS.md)
+Fiecare comandă respectă contextul remote activ (`omniroute connect <host>`), `--dry-run`
+previzualizează exact env/args fără a executa, iar `--api-key-env NAME` păstrează secretele
+în afara istoricului shell-ului tău. → [Integrări CLI](docs/guides/CLI-INTEGRATIONS.md)
 
 <br/>
 
 <div align="center">
 
-## 🌐 375 de furnizori AI — 153 marcați în catalog ca fiind gratuiți
+## 🌐 380 de furnizori AI — 153 marcați ca gratuiți în catalog
 
 </div>
 
-> **375 de furnizori înregistrați** în colecțiile canonice de chat, media, căutare, locale, de agenți cloud și de sistem, dintre care **153 au metadatele de descoperire `hasFree: true`**. Registrul modelelor de chat cuprinde **239 de furnizori / 3.059 de perechi distincte furnizor-model / 1.475 de ID-uri brute de modele**; catalogul separat pentru bugete gratuite conține **467 de rânduri per model**, **34 de fonduri recurente** și **52 de furnizori recurenți/fără cheie, gratuiți permanent**. Acești numitori sunt diferiți în mod intenționat; definițiile și calculele cu fondurile deduplicate se găsesc în [Referința furnizorilor](docs/reference/PROVIDER_REFERENCE.md) și [Nivelurile gratuite](docs/reference/FREE_TIERS.md).
+> **380 de furnizori înregistrați** în colecțiile canonice de chat, media, căutare, locale, agenți cloud și sistem, inclusiv **153 care au metadatele de descoperire `hasFree: true`**. Registrul modelelor de chat acoperă **239 de furnizori / 3.059 de perechi distincte furnizor-model / 1.475 de ID-uri brute de modele**; catalogul separat de bugete gratuite are **471 de rânduri per model**, **34 de grupuri recurente** și **54 de furnizori recurenți/gratuiți pentru totdeauna, fără cheie**. Aceștia sunt numitori diferiți în mod intenționat; definițiile și calculele deduplicate la nivel de grup se găsesc în [Referința furnizorilor](docs/reference/PROVIDER_REFERENCE.md) și [Nivelurile gratuite](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
-### 🏢 Fiecare laborator important — printr-un singur endpoint
+### 🏢 Toate laboratoarele majore — printr-un singur endpoint
 
 <table>
   <tr>
@@ -732,16 +734,16 @@ istoricului shell-ului. → [Integrări CLI](docs/guides/CLI-INTEGRATIONS.md)
   </tr>
 </table>
 
-<sub>…și încă peste 350 — fiecare pictogramă este preluată în timp real din catalogul de furnizori al tabloului de bord. 📖 [Referința furnizorilor](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>…și încă peste 350 — fiecare pictogramă este încărcată live din catalogul de furnizori al tabloului de bord. 📖 [Referința furnizorilor](docs/reference/PROVIDER_REFERENCE.md)</sub>
 
 <br/>
 
-### 🆓 Gratuit pentru totdeauna — $0, fără card
+### 🆓 Gratuit pentru totdeauna — $0, fără card</
 
 <table>
   <tr>
     <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4, Nemotron 3<br/>Fără limită de tokenuri</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>Rutare automată, Tencent Hy3<br/>Gratuit pentru totdeauna</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>Router automat, Tencent Hy3<br/>Gratuit pentru totdeauna</sub></td>
     <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B, Nemotron<br/>Gratuit pentru totdeauna</sub></td>
     <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>Nivel gratuit</sub></td>
     <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>Gratuit pentru totdeauna</sub></td>
@@ -750,106 +752,94 @@ istoricului shell-ului. → [Integrări CLI](docs/guides/CLI-INTEGRATIONS.md)
   <tr>
     <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max, Kimi-K2<br/>GRATUIT nelimitat</sub></td>
     <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT, Llama, Claude<br/>Nu este necesară nicio cheie</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>Peste 50 de modele<br/>10.000 de neuroni/zi</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>Peste 50 de modele<br/>10K neuroni/zi</sub></td>
     <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>~40 RPM gratuit</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>Credit unic de 5 USD; card obligatoriu</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>Credit unic de 5 USD; card necesar</sub></td>
     <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>modele :free<br/>+10 USD → RPM mai mare</sub></td>
   </tr>
 </table>
 
-📖 Catalog complet, într-un format prelucrabil automat → [`docs/reference/PROVIDER_REFERENCE.md`](docs/reference/PROVIDER_REFERENCE.md)
+📖 Catalog complet, într-un format lizibil automat → [`docs/reference/PROVIDER_REFERENCE.md`](docs/reference/PROVIDER_REFERENCE.md)
 
 <br/>
 </div>
 
 <div align="center">
 
-## 🖥️ Unde rulează OmniRoute — oriunde
+## 🖥️ Unde rulează OmniRoute — Oriunde
 
 </div>
 
-> Aceeași aplicație, dispozitivul tău, regulile tale. De la o instalare globală npm până la **telefonul tău** prin Termux.
+> Aceeași aplicație, mașina ta, regulile tale. De la o instalare globală npm la** telefonul dvs** prin Termux.
 
 <table>
-  <tr><th align="left">Platformă</th><th align="left">Instalare</th><th align="left">Avantaje</th></tr>
-  <tr><td align="left" nowrap>📦 <b>npm (global)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">O singură comandă, orice sistem de operare</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Multi-arhitectură <b>AMD64 + ARM64</b></td></tr>
-  <tr><td align="left" nowrap>🖥️ <b>Desktop (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Fereastră nativă + zonă de notificare — <b>Windows / macOS / Linux</b></td></tr>
-  <tr><td align="left" nowrap>🎩 <b>Bară de meniu (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Monitorizează și actualizează automat serverul — <b>macOS</b></td></tr>
-  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap><code>arm64</code> nativ</td><td align="left">Raspberry Pi, servere ARM, Apple Silicon</td></tr>
-  <tr><td align="left" nowrap>📱 <b>Android (Termux)</b></td><td align="left" nowrap><code>pkg install nodejs && npx -y omniroute</code></td><td align="left">Rulează <b>pe telefonul tău</b>, 24/7, fără root</td></tr>
-  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>„Adaugă pe ecranul principal”</td><td align="left">Ecran complet, funcționare offline, instalabilă din browser</td></tr>
-  <tr><td align="left" nowrap>🧩 <b>Plugin OpenCode</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">Integrare nativă cu OpenCode</td></tr>
-  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat</b></td><td align="left" nowrap>instalează extensia <b>OmniCopilot</b></td><td align="left">Fiecare model OmniRoute în selectorul nativ Copilot Chat — versiunile stabilă și Insiders</td></tr>
-  <tr><td align="left" nowrap>🛠️ <b>Din sursă</b></td><td align="left" nowrap><code>npm install && npm run dev</code></td><td align="left">Modifică-l, contribuie</td></tr>
+  <tr><th align="left"> Platformă </th><th align="left"> Instalați </th><th align="left"> Repere </th></tr>
+  <tr><td align="left" nowrap>📦 <b> npm (global)</b></td><td align="left" nowrap><code> npm install -g omniroute </code></td><td align="left"> O singură comandă, orice OS</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (global)</b></td><td align="left" nowrap><code> bun add -g omniroute </code></td><td align="left"> Același tarball de registry, instalări mai rapide </td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code> docker run … diegosouzapw/omniroute</code></td><td align="left"> Multi-arch <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🖥️ <b> Desktop (Electron)</b></td><td align="left" nowrap><code> npm run electron:build </code></td><td align="left"> Native window + system tray — <b>Windows / macOS / Linux</b></td></tr>
+  <tr><td align="left" nowrap>🎩 <b> Bara de meniu (OmniRouteTray)</b></td><td align="left" nowrap><code> brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left"> Supervizează &amp; actualizează automat serverul — <b>macOS</b></td></tr>
+  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap> nativ <code> arm64 </code></td><td align="left"> Raspberry Pi, servere ARM, Apple Silicon </td></tr>
+  <tr><td align="left" nowrap>📱 <b> Android (Termux)</b></td><td align="left" nowrap><code> pkg install nodejs && npx -y omniroute </code></td><td align="left"> Rulează <b> pe telefonul dvs.</b>, 24/7, no root </td></tr>
+  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>„Adăugați la ecranul de pornire”</td><td align="left"> Ecran complet, offline, instalabil din browser </td></tr>
+  <tr><td align="left" nowrap>🧩 <b>OpenCode plugin </b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left"> Integrare OpenCode </td></tr>
+  <tr><td align="left" nowrap>🤖 <b>VS Cod Copilot Chat </b></td><td align="left" nowrap> install <b>OmniCopilot</b> extension </td><td align="left">OmniRoute model zqo din selectorul nativ Copilot Chat — stabil &amp; Insiders </td></tr>
+  <tr><td align="left" nowrap>🛠️ <b> Din sursă </b></td><td align="left" nowrap><code> npm instalați && npm rulați dev </code></td><td align="left"> Hack pe el, contribuiți </td></tr>
 </table>
 
-<sub>📖 [Ghid Docker](docs/guides/DOCKER_GUIDE.md) · [Desktop](electron/README.md) · [Zona barei de meniu](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+Ghid <sub>📖 [Docker](docs/guides/DOCKER_GUIDE.md) · [Desktop](electron/README.md) · [Bara de meniu](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
 
 <br/>
 
 <div align="center">
 
-### 🧩 Nou: OmniRoute în Copilot Chat nativ din VS Code
+### 🧩 Nou: OmniRoute în chatul Copilot nativ al codului VS
 
 </div>
 
-> Nicio bară laterală nouă, nicio interfață nouă de chat — fiecare model furnizat de OmniRoute apare direct în
-> **selectorul de modele Copilot Chat pe care îl folosești deja**. Începând cu VS Code 1.122, modelele furnizorilor funcționează
-> fără autentificare GitHub sau abonament Copilot — mod agent, apelare de instrumente și capabilități vizuale,
-> gratuit.
+> Fără bară laterală nouă, fără chat nou UI - fiecare model OmniRoute servit apare chiar în** Selectorul de modele de chat Copilot pe care îl utilizați deja** . Începând cu VS Code 1.122, modelele de furnizori funcționează fără o conectare GitHub sau un abonament Copilot - modul agent, apelare instrument și viziune, gratuit.
 
-Instalează extensia **[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)**, configureaz-o să utilizeze
-serverul tău OmniRoute (implicit `localhost:20128`), apoi deschide Copilot Chat → selectorul de modele
-→ **Gestionează modelele…** → **OmniRoute**.
+Instalați** [OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** extensia, îndreptați-o către serverul dvs. OmniRoute (implicit la `localhost:20128`), apoi deschideți Copilot Chat → model selector →** Gestionați modelele...** →**OmniRoute** .
 
 <table>
-  <tr><th align="left">Magazin</th><th align="left">Link</th><th align="left">Funcționează cu</th></tr>
-  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">Instalează →</a></td><td align="left">VS Code — versiunile stabilă și Insiders</td></tr>
-  <tr><td align="left" nowrap>🔓 <b>Open VSX Registry</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">Instalează →</a></td><td align="left">Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro…</td></tr>
+  <tr><th align="left"> Store </th><th align="left"> Link </th><th align="left"> Funcționează cu </th></tr>
+  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace </b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot"> Instalați →</a ></td >< td align =„stânga”>VS Cod — stabil &amp; Insiders </td></tr>
+  <tr><td align="left" nowrap>🔓 <b> Deschide VSX Registry </b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot"> Instalează →</a ></td >< td align ="left">Cursor, Windsurf, VSCodium, Theia, code-server </tr>AntigravityKiro…</td>
 </table>
 
-Din editor: deschide vizualizarea **Extensii**, caută **„OmniRoute”**, apasă pe **Instalează**
-— funcționează la fel în ambele magazine. Codul sursă, problemele și ghidul de publicare se află la
-[diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
+Din interiorul editorului: deschideți** Extensii** vizualizare, cautare** "OmniRoute"** , faceți clic** Instala** — funcționează la fel în ambele magazine. Sursa, problemele și runbook-ul de publicare live la [diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
 
-<sub>📖 [Ghid VS Code Copilot Chat](docs/guides/VSCODE-COPILOT.md) — configurare, ce afișează selectorul, panou de control într-o filă, depanare</sub>
+<sub>📖 [VS Cod Copilot Ghid de chat](docs/guides/VSCODE-COPILOT.md) — configurare, ceea ce arată selectorul, tabloul de bord într-o filă, depanare </sub>
 
 <br/>
 
 <div align="center">
 
-### 🎩 Nou: OmniRouteTray — gateway-ul tău, direct în bara de meniu
+### 🎩 Nou: OmniRouteTray — poarta dvs. de acces, care locuiește în bara de meniu
 
 </div>
 
-> `omniroute serve` funcționează cel mai bine când este mereu pornit. **[OmniRouteTray](https://github.com/zoispag/omniroute-tray)**
-> îl transformă într-o aplicație pentru bara de meniu din macOS, pe care o configurezi și apoi o poți uita: pornește serverul, îl menține activ
-> după reporniri, îl actualizează fără reinstalare și îți pune bugetul de tokenuri în timp real la un clic distanță — **fără
-> o fereastră de terminal lăsată deschisă, fără `npm install -g omniroute` care să necesite supraveghere.**
+> `omniroute serve` este cel mai fericit când este mereu pornit.** [OmniRouteTray](https://github.com/zoispag/omniroute-tray)** transformă asta într-o aplicație de bară de meniu set-and-forget pentru macOS: pornește serverul, îl menține în viață în timpul repornirilor, îl actualizează și pune bugetul pentru token live la un clic distanță -** nicio fereastră de terminal nu a rămas deschisă, nicio `npm install -g omniroute` pentru a îngriji.**
 
-Construit cu [Tauri v2](https://v2.tauri.app/) (un nucleu Rust minuscul), include
-propriul runtime Node 24 semnat și gestionează o instalare OmniRoute deținută de aplicație, astfel încât să nu intre niciodată în conflict cu
-instalarea ta globală `node`/`bun`. **Partajează configurația și baza de date existente din `~/.omniroute/`** — așadar, este
-același OmniRoute pe care îl rulezi deja, doar că poartă o pălărie. 🎩
+Construit cu [Tauri v2](https://v2.tauri.app/) (un nucleu Rust de dimensiunea unei erori de rotunjire), acesta își livrează propriul runtime Node 24 semnat și gestionează o instalare OmniRoute deținută de aplicație, astfel încât să nu se lupte niciodată cu `node`/`bun` global. Ea** partajează configurația și baza de date `~/.omniroute/` existente** — deci este același OmniRoute pe care îl alergați deja, doar cu o pălărie. 🎩
 
 <table>
-  <tr><th align="left">Ce face</th><th align="left">Cum</th></tr>
-  <tr><td align="left" nowrap>🟢 <b>Monitorizează serverul</b></td><td align="left">Pornește <code>omniroute serve</code> și preia o instanță deja pornită în loc să o dubleze</td></tr>
-  <tr><td align="left" nowrap>📊 <b>Utilizare în timp real, dintr-o privire</b></td><td align="left">Bare pentru cotele furnizorilor, limite Claude per sesiune/săptămânale cu numărătoare inversă până la resetare, defalcare a costurilor pe 30 de zile</td></tr>
-  <tr><td align="left" nowrap>🔄 <b>Actualizări automate fără reinstalare</b></td><td align="left">Instalare etapizată, înlocuire atomică, revenire în caz de eșec — mereu la cea mai nouă versiune</td></tr>
-  <tr><td align="left" nowrap>🚀 <b>Pornire la autentificare</b></td><td align="left">Pornire opțională la autentificare; doar în zona de notificare, fără pictogramă în dock</td></tr>
-  <tr><td align="left" nowrap>🩺 <b>Diagnosticare și jurnale</b></td><td align="left">Diagnosticare cu un singur clic și acces la jurnalele serverului</td></tr>
+  <tr><th align="left"> Ce face </th><th align="left"></th></tr>
+  <tr><td align="left" nowrap>🟢 <b> Supervizează serverul </b></td><td align="left"> Spawns <code> omniroute serve </code>, adoptă o instanță care rulează deja în loc să o dubleze </td></tr>
+  <tr><td align="left" nowrap>📊 <b> Utilizarea live dintr-o privire </b></td><td align="left"> Bare de cote ale furnizorilor, limite Claude session/weekly cu numărătoare inversă de resetare, defalcare a costurilor pe 30 de zile </td></tr>
+  <tr><td align="left" nowrap>🔄 <b> Actualizări automate la locul lor </b></td><td align="left"> Instalare în etape, schimbare atomică, rollback în caz de eșec — întotdeauna la cea mai nouă versiune </td></tr>
+  <tr><td align="left" nowrap>🚀 <b> Începe la autentificare </b></td><td align="left"> Lansare opțională la conectare; numai pentru tavă, fără pictogramă de andocare </td></tr>
+  <tr><td align="left" nowrap>🩺 <b> Doctor &amp; jurnalele </b></td><td align="left"> Diagnosticare cu un singur clic și acces la jurnalul serverului </td></tr>
 </table>
 
 ```sh
 brew install --cask zoispag/tap/omniroute-tray
 ```
 
-<sub>Preferați o descărcare? Luați cel mai recent fișier <code>.dmg</code> din
-<a href="https://github.com/zoispag/omniroute-tray/releases">Versiuni</a>. Codul sursă, problemele și documentația de compilare
-se găsesc la <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
-<br/>💛 Un proiect al comunității realizat de <a href="https://github.com/zoispag">@zoispag</a> — nu este o versiune oficială OmniRoute.</sub>
+<sub> Preferi o descărcare? Luați cel mai recent <code>.dmg </code> de la
+<a href="https://github.com/zoispag/omniroute-tray/releases"> Lansări </a>. Sursă, probleme și construcție
+docs live la <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
+<br/>💛 Un proiect comunitar de <a href="https://github.com/zoispag">@zoispag </a> — nu o lansare oficială OmniRoute.</sub>
 
 <br/>
 
@@ -930,15 +920,15 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
 
 <div align="center">
 
-## 🗜️ Economisiți automat 15–95% din tokenuri
+## 🗜️ Economisește 15–95% tokeni — automat
 
 </div>
 
-### 📖 Cum funcționează — flux, arhitectură și calculul economiilor
+### 📖 Cum funcționează — pipeline, arhitectură și matematica economiilor
 
-<img src="./docs/diagrams/compression-pipeline.svg" width="100%" alt="Fluxul de compresie OmniRoute: o solicitare ilustrativă a clientului de 10.000 de tokenuri trece prin 12 motoare composabile — Session-Dedup, CCR, Lite, RTK, Responses Tool Output, Headroom, Relevance, Caveman, Aggressive, LLMLingua-2, Ultra și OmniGlyph — și poate ajunge la furnizor cu aproximativ 1.080 de tokenuri în exemplul documentat de utilizare combinată. Conținutul structurat este protejat prin mecanisme de conservare și verificări de fidelitate la fiecare pas; modurile explicit distructive sau experimentale pot transforma conținutul eligibil."/>
+<img src="./docs/diagrams/compression-pipeline.svg" width="100%" alt="Pipeline-ul de compresie OmniRoute: o cerere ilustrativă de 10.000 de tokeni de la client trece prin 12 motoare combinabile — Session-Dedup, CCR, Lite, RTK, Responses Tool Output, Headroom, Relevance, Caveman, Aggressive, LLMLingua-2, Ultra și OmniGlyph — și poate ajunge la furnizor la aproximativ 1.080 de tokeni în exemplul stivuit documentat. Conținutul structurat este protejat de gărzi de păstrare și de porți de fidelitate la fiecare pas; modurile explicite cu pierderi sau experimentale pot transforma conținutul eligibil."/>
 
-Combinația implicită rulează `RTK → Caveman`. Atunci când ambele acționează asupra aceleiași încărcături utile de instrument/context, economiile se cumulează:
+Combinația stivuită implicită rulează `RTK → Caveman`. Când ambele acționează asupra aceluiași payload de unealtă/context, economiile sunt:
 
 ```txt
 combined = 1 − (1 − RTK) × (1 − Caveman_input)
@@ -946,74 +936,74 @@ average  = 1 − (1 − 0.80) × (1 − 0.46) = 89.2%
 range    = 78.4 – 94.6%
 ```
 
-Blocurile de cod, URL-urile, JSON și datele structurate sunt **întotdeauna protejate** de motorul de conservare.
+Blocurile de cod, URL-urile, JSON-ul și datele structurate sunt **întotdeauna protejate** de motorul de păstrare.
 
-> **De ce să folosiți multe tokenuri când doar câteva sunt suficiente?** Fiecare solicitare trece prin fluxul de compresie OmniRoute în mod **transparent** — fără modificări ale clientului. Acesta este acum o **stivă de 12 motoare composabile** care rulează în ordine și pot fi combinate în funcție de fiecare configurație de rutare — dezvoltate pe baza ideilor din [RTK](https://github.com/rtk-ai/rtk), [Caveman](https://github.com/JuliusBrussee/caveman) (⭐ 90K+), [LLMLingua-2](https://github.com/microsoft/LLMLingua) și [Troglodita](https://github.com/leninejunior/troglodita) (PT-BR).
+> **De ce să folosești mulți tokeni când puțini tokeni fac treaba?** Fiecare cerere trece prin pipeline-ul de compresie OmniRoute **transparent** — fără modificări la client. Este acum un **stiv de 12 motoare combinabile** care rulează în ordine și se combină în funcție de combinația de rutare — construind pe idei din [RTK](https://github.com/rtk-ai/rtk), [Caveman](https://github.com/JuliusBrussee/caveman) (⭐ 90K+), [LLMLingua-2](https://github.com/microsoft/LLMLingua) și [Troglodita](https://github.com/leninejunior/troglodita) (PT-BR).
 
-### 🧱 Stiva de 12 motoare
+### 🧱 Stivul de 12 motoare
 
-Motoarele rulează în ordinea fluxului; fiecare poate fi activat sau dezactivat independent și configurat pentru fiecare combinație:
+Motoarele rulează în ordinea pipeline-ului; fiecare poate fi activat/dezactivat independent și configurat pentru fiecare combinație:
 
 <table>
   <tr><th align="center">#</th><th align="left">Motor</th><th align="left">Ce face</th></tr>
-  <tr><td align="center" nowrap>1</td><td align="left" nowrap><b>Session-Dedup</b></td><td align="left">Elimină conținutul repetat între schimburi (adresat după conținut, între schimburi)</td></tr>
-  <tr><td align="center" nowrap>2</td><td align="left" nowrap><b>CCR</b></td><td align="left">Arhivează blocurile mari în spatele unor marcaje de recuperare, fiind preluate la cerere</td></tr>
-  <tr><td align="center" nowrap>3</td><td align="left" nowrap><b>Lite</b></td><td align="left">Eliminarea spațiilor albe și scurtarea URL-urilor imaginilor (nivel de bază cu latență redusă)</td></tr>
-  <tr><td align="center" nowrap>4</td><td align="left" nowrap><b>RTK</b></td><td align="left">Filtrare inteligentă, deduplicare și trunchiere a rezultatelor instrumentelor (în funcție de comandă)</td></tr>
-  <tr><td align="center" nowrap>5</td><td align="left" nowrap><b>Responses Tool Output</b></td><td align="left">JSON procesat prioritar fără pierderi, plus compresie limitată a informațiilor de diagnosticare pentru rezultatele shell/patch/search/build (Responses API)</td></tr>
-  <tr><td align="center" nowrap>6</td><td align="left" nowrap><b>Headroom</b></td><td align="left">Compactarea tabelară fără pierderi a matricelor JSON (~30%) printr-un codec <b>GCF</b> integrat</td></tr>
-  <tr><td align="center" nowrap>7</td><td align="left" nowrap><b>Relevance</b></td><td align="left">Evaluarea extractivă a propozițiilor în raport cu ultima interogare a utilizatorului</td></tr>
-  <tr><td align="center" nowrap>8</td><td align="left" nowrap><b>Caveman</b></td><td align="left">Compresie a prozei bazată pe reguli (~65–75% pentru ieșire)</td></tr>
-  <tr><td align="center" nowrap>9</td><td align="left" nowrap><b>Aggressive</b></td><td align="left">Rezumare și învechire progresivă a schimburilor anterioare</td></tr>
-  <tr><td align="center" nowrap>10</td><td align="left" nowrap><b>LLMLingua-2</b></td><td align="left">Eliminare semantică bazată pe ML prin MobileBERT ONNX — sigură pentru cod, asincronă</td></tr>
-  <tr><td align="center" nowrap>11</td><td align="left" nowrap><b>Ultra</b></td><td align="left">Eliminare euristică a tokenurilor, cu un nivel opțional bazat pe un model mic (SLM)</td></tr>
-  <tr><td align="center" nowrap>12</td><td align="left" nowrap><b>OmniGlyph</b></td><td align="left">Codificare experimentală a contextului sub formă de imagine pentru Claude Fable 5 evaluat pe conexiunea directă Anthropic; transformatoarele GPT 5.6 rămân implicit blocate în așteptarea confirmărilor furnizorului. Patru profiluri de compresie (agresiv implicit, echilibrat, sigur pentru cod, fără procesare) (cel mai agresiv; necesită activare explicită)</td></tr>
+  <tr><td align="center" nowrap>1</td><td align="left" nowrap><b>Session-Dedup</b></td><td align="left">Elimină conținutul repetat între ture (adresat după conținut, între ture)</td></tr>
+  <tr><td align="center" nowrap>2</td><td align="left" nowrap><b>CCR</b></td><td align="left">Arhivează blocurile mari în spatele unor markeri de recuperare, preluați la cerere</td></tr>
+  <tr><td align="center" nowrap>3</td><td align="left" nowrap><b>Lite</b></td><td align="left">Trimmarea spațiilor albe + a URL-urilor de imagini (variantă de bază cu latență redusă)</td></tr>
+  <tr><td align="center" nowrap>4</td><td align="left" nowrap><b>RTK</b></td><td align="left">Filtrare inteligentă a rezultatelor uneltelor, deduplicare și trunchiere (conștientă de comandă)</td></tr>
+  <tr><td align="center" nowrap>5</td><td align="left" nowrap><b>Responses Tool Output</b></td><td align="left">JSON fără pierderi prioritar + compresie diagnostică mărginită pentru ieșirile shell/patch/search/build (Responses API)</td></tr>
+  <tr><td align="center" nowrap>6</td><td align="left" nowrap><b>Headroom</b></td><td align="left">Compactare tabelară fără pierderi a array-urilor JSON (~30%) printr-un codec <b>GCF</b> vendorizat</td></tr>
+  <tr><td align="center" nowrap>7</td><td align="left" nowrap><b>Relevance</b></td><td align="left">Punctare extractivă a propozițiilor față de ultima interogare a utilizatorului</td></tr>
+  <tr><td align="center" nowrap>8</td><td align="left" nowrap><b>Caveman</b></td><td align="left">Compresie de proză bazată pe reguli (~65–75% la ieșire)</td></tr>
+  <tr><td align="center" nowrap>9</td><td align="left" nowrap><b>Aggressive</b></td><td align="left">Rezumare + îmbătrânire progresivă a turelor vechi</td></tr>
+  <tr><td align="center" nowrap>10</td><td align="left" nowrap><b>LLMLingua-2</b></td><td align="left">Eliminare semantică ML prin MobileBERT ONNX — sigur pentru cod, asincron</td></tr>
+  <tr><td align="center" nowrap>11</td><td align="left" nowrap><b>Ultra</b></td><td align="left">Eliminare euristică de tokeni cu un nivel opțional de model mic (SLM)</td></tr>
+  <tr><td align="center" nowrap>12</td><td align="left" nowrap><b>OmniGlyph</b></td><td align="left">Codare experimentală context-ca-imagine pentru Claude Fable 5 măsurat pe firul direct Anthropic; transformatoarele GPT 5.6 rămân fail-closed în așteptarea confirmărilor de la furnizor. Patru profiluri de compresie (aggressive implicit, balanced, coding-safe, passthrough) (cel mai agresiv; opt-in)</td></tr>
 </table>
 
-Blocurile de cod, URL-urile și datele structurate sunt **întotdeauna păstrate** identic la nivel de octet. **Presetările cu un singur clic** combină motoarele:
+Blocurile de cod, URL-urile și datele structurate sunt **întotdeauna păstrate** perfect la nivel de byte. **Presetările cu un clic** combină motoarele:
 
 <table>
-  <tr><th align="left">Mod</th><th align="left">Economii</th><th align="left">Recomandat pentru</th></tr>
-  <tr><td align="left" nowrap>🪶 <b>Lite</b></td><td align="left" nowrap>~15%</td><td align="left">Setare implicită sigură, permanent activă</td></tr>
-  <tr><td align="left" nowrap>🪨 <b>Standard (Caveman)</b></td><td align="left" nowrap>~30%</td><td align="left">Programare zilnică</td></tr>
-  <tr><td align="left" nowrap>⚡ <b>Aggressive</b></td><td align="left" nowrap>~50%</td><td align="left">Sesiuni lungi care utilizează intens instrumente</td></tr>
+  <tr><th align="left">Mod</th><th align="left">Economii</th><th align="left">Cel mai potrivit pentru</th></tr>
+  <tr><td align="left" nowrap>🪶 <b>Lite</b></td><td align="left" nowrap>~15%</td><td align="left">Implicit sigur, mereu activ</td></tr>
+  <tr><td align="left" nowrap>🪨 <b>Standard (Caveman)</b></td><td align="left" nowrap>~30%</td><td align="left">Cod zilnic</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Aggressive</b></td><td align="left" nowrap>~50%</td><td align="left">Sesiuni lungi, cu multe unelte</td></tr>
   <tr><td align="left" nowrap>🔥 <b>Ultra</b></td><td align="left" nowrap>~75%</td><td align="left">Economii maxime</td></tr>
-  <tr><td align="left" nowrap>🧰 <b>RTK</b></td><td align="left" nowrap>60–90%</td><td align="left">Rezultate shell/test/build/git</td></tr>
-  <tr><td align="left" nowrap>🔗 <b>Combinate (RTK → Caveman)</b></td><td align="left" nowrap><b>78–95%</b></td><td align="left">Prompturi mixte și jurnale ale instrumentelor</td></tr>
+  <tr><td align="left" nowrap>🧰 <b>RTK</b></td><td align="left" nowrap>60–90%</td><td align="left">Ieșiri shell/test/build/git</td></tr>
+  <tr><td align="left" nowrap>🔗 <b>Stacked (RTK → Caveman)</b></td><td align="left" nowrap><b>78–95%</b></td><td align="left">Prompturi mixte + loguri de unelte</td></tr>
 </table>
 
 **Exemplu real — modul Standard:**
 
-> **Înainte (69 de tokenuri):** _„Motivul pentru care componenta React este randată din nou este probabil faptul că creați o referință nouă de obiect la fiecare ciclu de randare. Atunci când transmiteți un obiect inline ca prop, comparația superficială din React îl consideră de fiecare dată un obiect diferit, ceea ce declanșează o nouă randare. V-aș recomanda să utilizați useMemo pentru memorarea obiectului.”_
+> **Înainte (69 tokeni):** _"Motivul pentru care componenta ta React se re-randează este probabil că creezi o referință nouă de obiect la fiecare ciclu de randare. Când trimiți un obiect inline ca prop, comparația superficială a React îl vede ca pe un obiect diferit de fiecare dată, ceea ce declanșează o re-randare. Ți-aș recomanda să folosești useMemo pentru a memoiza obiectul."_
 >
-> **După (19 tokenuri):** _„Referință nouă de obiect la fiecare randare. Obiect inline ca prop = referință nouă = randare nouă. Încapsulați în useMemo.”_
+> **După (19 tokeni):** _"Referință nouă de obiect la fiecare randare. Prop de obiect inline = referință nouă = re-randare. Înfășoară în useMemo."_
 >
-> **Același răspuns. Cu 72% mai puține tokenuri. Fără pierderi de acuratețe.** ✅
+> **Același răspuns. Cu 72% mai puțini tokeni. Zero pierdere de acuratețe.** ✅
 
 **Exemplu PT-BR — modul [Troglodita](https://github.com/leninejunior/troglodita):**
 
-> **Înainte (42 de tokenuri):** _„Problema este că această componentă se randează din nou deoarece o nouă referință la obiect este creată la fiecare ciclu de randare. Aș recomanda utilizarea useMemo.”_
+> **Înainte (42 de tokenuri):** _"Problema este că componenta se re-randează pentru că o nouă referință de obiect este creată în fiecare ciclu de randare. Aș recomanda să folosești useMemo."_
 >
-> **După (12 tokenuri):** _„Re-randare: referință nouă la fiecare ciclu (obiect inline recreat). Folosiți `useMemo`.”_
+> **După (12 tokenuri):** _"Re-render: ref nouă la fiecare ciclu (obiect inline recreat). Folosește `useMemo`."_
 >
-> **Același răspuns. Cu ~70% mai puține tokenuri. Precizie tehnică intactă.** ✅
+> **Același răspuns. ~70% mai puține tokenuri. Precizie tehnică intactă.** ✅
 
 <br/>
 
-### 🎚️ Dincolo de motoare — stiluri de răspuns, reglajul adaptiv și controlul per solicitare
+### 🎚️ Dincolo de motoare — stiluri de output, butonul adaptiv & control per-cerere
 
-Cele 12 motoare de mai sus reduc ceea ce intră. Alte trei niveluri modelează **cum**, **când** și ceea ce iese:
+Cele 12 motoare de mai sus reduc ceea ce **intră**. Încă trei straturi modelează **cum**, **când** și ce **iese**:
 
-- **🪄 Stiluri de răspuns** _(direcționare pe axa răspunsului)_ — injectează instrucțiuni deterministe și compatibile cu memoria cache pentru modelarea răspunsului; pot fi combinate, fiecare cu intensitatea `lite` / `full` / `ultra`. Adăugarea unui stil necesită o singură linie în registru:
-  - **Proză concisă** — elimină umplutura / articolele / exprimările ezitante; păstrează cu exactitate substanța tehnică.
-  - **Mai puțin cod** — YAGNI în stilul „dezvoltatorului senior comod”: cea mai mică modificare funcțională, fără infrastructură nesolicitată.
-  - **Ponytail (dezvoltator senior comod)** — urcă pe scara YAGNI, remediază cauza principală, cu cel mai mic diff funcțional.
-  - **Am ADHD (acțiunea mai întâi)** — începe cu următoarea acțiune, pași numerotați, un singur pas următor concret, fără preambul.
-  - **CJK concis (文言)** — stil ultraconcis în chineza clasică (limitat la configurația regională `zh`).
-- **🎯 Buget de context adaptiv** _(reglajul)_ — în locul unui singur prag de tokenuri activat/dezactivat, aplică progresiv cele mai ieftine motoare, cu cele mai mici pierderi, doar atât cât este necesar pentru **a se încadra în fereastra de context a modelului**. Politică: `reserve-output` (implicită, adaptată modelului) · `percentage` · `absolute`. Mod: `floor` (garantează încadrarea) · `replace-autotrigger` (alegerea dvs. explicită prevalează) · `off` (prag vechi).
-- **🎛️ Unde este decisă compresia** _(precedență, de la ridicată la scăzută)_ — antetul per solicitare `x-omniroute-compression` › suprascrierea combinației de rutare › profilul denumit activ › declanșarea adaptivă / automată › valoarea implicită din panou › dezactivat. Planul aplicat este reflectat în antetul de răspuns `X-OmniRoute-Compression: <mode>; source=<source>`.
+- **🪄 Stiluri de output** _(direcționare pe axa output-ului)_ — injectează instrucțiuni deterministe, sigure pentru cache, de modelare a răspunsului; combinabile, fiecare la intensitatea `lite` / `full` / `ultra`. Adăugarea unui stil este o intrare de o singură linie în registru:
+  - **Proză concisă** — elimină umplutura / articolele / formulările ezitante; păstrează substanța tehnică exactă.
+  - **Mai puțin cod** — YAGNI „senior dev leneș”: cea mai mică modificare funcțională, fără schelet de cod nesolicitat.
+  - **Ponytail (senior dev leneș)** — urcă pe scara YAGNI, remediază cauza rădăcină, cel mai mic diff funcțional.
+  - **Am ADHD (acțiune întâi)** — următoarea acțiune conduce, pașii numerotați, un singur pas concret următor, fără preambul.
+  - **CJK concis (文言)** — stil ultra-concis în chineză clasică (condiționat de localizare la `zh`).
+- **🎯 Buget de context adaptiv** _(butonul)_ — în loc de un singur prag on/off de tokenuri, escaladează cele mai ieftine și mai puțin pierdute motoare doar cât este necesar pentru a **încăpea în fereastra de context a modelului**. Politică: `reserve-output` (implicit, conștientă de model) · `percentage` · `absolute`. Mod: `floor` (garantează încadrarea) · `replace-autotrigger` (alegerea ta explicită câștigă) · `off` (prag legacy).
+- **🎛️ Unde se decide compresia** _(precedență, de la mare la mică)_ — header per-cerere `x-omniroute-compression` › suprascriere routing-combo › profil numit activ › adaptiv / auto-trigger › implicit panel › oprit. Planul aplicat este reflectat în header-ul de răspuns `X-OmniRoute-Compression: <mode>; source=<source>`.
 
-Declanșați automat după pragul de tokenuri, activați reglajul adaptiv, fixați un profil denumit, configurați o singură solicitare sau atribuiți un flux unei combinații de rutare — oricare variantă se potrivește volumului de lucru. Un **instrument de evaluare** offline opțional (`npm run eval:compression`) evaluează fidelitatea în raport cu economiile pe un corpus fixat înainte de a promova o modificare.
+Auto-trigger după prag de tokenuri, activează butonul adaptiv, fixează un profil numit, setează o valoare unică per cerere sau atribuie un pipeline per routing combo — oricare se potrivește sarcinii. Un **eval harness** offline opt-in (`npm run eval:compression`) evaluează fidelitatea vs. economiile pe un corpus fixat înainte de a promova o modificare.
 
 📖 [`COMPRESSION_GUIDE.md`](docs/compression/COMPRESSION_GUIDE.md) · [`RTK_COMPRESSION.md`](docs/compression/RTK_COMPRESSION.md) · [`COMPRESSION_ENGINES.md`](docs/compression/COMPRESSION_ENGINES.md)
 
@@ -1025,67 +1015,67 @@ Declanșați automat după pragul de tokenuri, activați reglajul adaptiv, fixa�
 
 </div>
 
-**1) Instalați și rulați**
+**1) Instalează & rulează**
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-> 💡 Vedeți `npm warn ERESOLVE` sau avertismente privind dependențele peer? [Sunt inofensive](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Folosiți npm 11 sau o versiune ulterioară?** npm poate bloca scripturile ciclului de viață al pachetelor dacă acestea nu sunt permise. Scriptul `postinstall` al OmniRoute (`node scripts/build/postinstall.mjs`) este necesar pentru pregătirea fișierelor native de rulare. Permiteți pachetele menționate în avertismentul npm atunci când instalați global. Pentru setul de pachete raportat de OmniRoute 3.8.51:
+> 💡 Vezi `npm warn ERESOLVE` sau avertismente peer-dep? [Sunt inofensive](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
+> **Folosești npm 11 sau mai nou?** npm poate bloca scripturile de ciclu de viață ale pachetelor dacă nu sunt permise. `postinstall`-ul OmniRoute (`node scripts/build/postinstall.mjs`) este necesar pentru pregătirea fișierelor native de runtime. Permite pachetele menționate în avertismentul npm la instalarea globală. Pentru setul de pachete raportat de OmniRoute 3.8.53:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
 > ```
 >
-> Pentru a reutiliza această listă de permisiuni la instalările globale viitoare, configurați-o o singură dată, apoi instalați în mod obișnuit:
+> Pentru a reutiliza această listă de permisiuni la instalările globale viitoare, configureaz-o o dată, apoi instalează normal:
 >
 > ```bash
 > npm config set allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
 > npm install -g omniroute
 > ```
 >
-> Lista de dependențe se poate modifica între versiuni; dacă npm raportează o listă diferită, utilizați numele pachetelor din acel avertisment. Permiterea unui pachet autorizează rularea scripturilor sale de instalare.
-> **Folosiți Gemini Web sau alt furnizor bazat pe cookie-uri web?** Pachetul npm include
-> Playwright, dar nu și binarul său Chromium. Consultați nota despre
-> [configurarea Chromium pentru Playwright](docs/guides/TROUBLESHOOTING.md#gemini-web-and-playwright-chromium)
-> înainte de a efectua prima solicitare către furnizorul web.
+> Lista de dependențe se poate schimba între versiuni; dacă npm raportează o listă diferită, folosește numele de pachete din acel avertisment. Permiterea unui pachet permite rularea scripturilor sale de instalare.
+> **Folosești Gemini Web sau alt furnizor cu cookie web?** Pachetul npm include
+> Playwright, dar nu și binarul său Chromium. Vezi nota
+> [Configurare Playwright Chromium](docs/guides/TROUBLESHOOTING.md#gemini-web-and-playwright-chromium)
+> înainte de a face prima cerere către un furnizor web.
 
-Panou de control la `http://localhost:20128` · API la `http://localhost:20128/v1`.
+Dashboard la `http://localhost:20128` · API la `http://localhost:20128/v1`.
 
-**2) Conectați un furnizor eligibil folosind propriul cont**
+**2) Conectează un furnizor eligibil folosind propriul cont**
 
-Panou de control → **Furnizori** → alegeți un furnizor ale cărui condiții și cote actuale se potrivesc cazului dvs. de utilizare → adăugați cheia sa API sau finalizați fluxul de conectare a contului. Nivelurile gratuite pot necesita înregistrare, aprobare sau o metodă de plată. Consultați [Ghidul nivelurilor gratuite](docs/getting-started/FREE-TIERS-GUIDE.md); disponibilitatea fără cheie nu este garantată, iar furnizorii marcați `tos: avoid` sunt excluși implicit din `auto`.
+Dashboard → **Providers** → alege un furnizor ale cărui termeni și cotă curente se potrivesc cazului tău de utilizare → adaugă cheia sa API sau finalizează fluxul contului. Nivelurile gratuite pot necesita înregistrare, aprobare sau o metodă de plată. Consultă [Ghidul nivelurilor gratuite](docs/getting-started/FREE-TIERS-GUIDE.md); disponibilitatea fără cheie nu este garantată, iar furnizorii marcați `tos: avoid` sunt excluși implicit din `auto`.
 
-**3) Configurați instrumentul de programare**
+**3) Îndreaptă-ți instrumentul de programare**
 
 ```txt
-URL de bază: http://localhost:20128/v1
-Cheie API:    [copiați din Panou de control → Puncte finale]
-Model:        auto            (rutează între conexiunile eligibile — sau alegeți furnizorul/modelul)
+Base URL: http://localhost:20128/v1
+API Key:  [copy from Dashboard → Endpoints]
+Model:    auto            (routes among eligible connections — or choose provider/model)
 ```
 
-**4) Verificați dacă funcționează**
+**4) Verifică dacă funcționează**
 
 ```bash
 curl http://localhost:20128/v1/models -H "Authorization: Bearer YOUR_KEY"
 ```
 
-Ar trebui să vedeți listate modelele conectate. 🎉 Gata — începeți să programați, iar OmniRoute va efectua automat rutarea și va folosi alternative când este necesar.
+Ar trebui să vezi modelele conectate listate. 🎉 Gata — începe să programezi, iar OmniRoute rutează automat & face fallback pentru tine.
 
-Dacă aplicația client nu poate trimite antete personalizate, OmniRoute oferă și aliasuri de compatibilitate cu tokenuri:
+Dacă clientul tău nu poate trimite header-e personalizate, OmniRoute expune și aliasuri de compatibilitate cu token:
 
 ```txt
-Catalog OpenAI:    http://localhost:20128/vscode/YOUR_KEY/
-Modele OpenAI:     http://localhost:20128/vscode/YOUR_KEY/models
-Chat OpenAI:       http://localhost:20128/vscode/YOUR_KEY/chat/completions
-Răspunsuri OpenAI: http://localhost:20128/vscode/YOUR_KEY/responses
-Chat Ollama:       http://localhost:20128/vscode/YOUR_KEY/api/chat
-Etichete Ollama:   http://localhost:20128/vscode/YOUR_KEY/api/tags
+OpenAI catalog:   http://localhost:20128/vscode/YOUR_KEY/
+OpenAI models:    http://localhost:20128/vscode/YOUR_KEY/models
+OpenAI chat:      http://localhost:20128/vscode/YOUR_KEY/chat/completions
+OpenAI responses: http://localhost:20128/vscode/YOUR_KEY/responses
+Ollama chat:      http://localhost:20128/vscode/YOUR_KEY/api/chat
+Ollama tags:      http://localhost:20128/vscode/YOUR_KEY/api/tags
 ```
 
-Folosiți-le numai pentru aplicațiile client care nu pot atașa `Authorization: Bearer ...`. Autentificarea prin antet rămâne metoda preferată.
+Folosește-le doar pentru clienții care nu pot atașa `Authorization: Bearer ...`. Autentificarea prin header rămâne modul preferat.
 
 <br/>
 
@@ -1304,28 +1294,28 @@ Metrici canonice la 2026-10-18: **1.976 de videoclipuri unice** · **20.220.289 
 <br/>
 <div align="center">
 
-## 🛠️ Stivă tehnologică
+## 🛠️ Stack tehnologic
 
 </div>
 
 <table>
-  <tr><th align="left">Nivel</th><th align="left">Tehnologie</th></tr>
-  <tr><td nowrap><b>Mediu de execuție</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><th align="left">Strat</th><th align="left">Tehnologie</th></tr>
+  <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Limbaj</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> în <code>src/</code> și <code>open-sse/</code> (zero <code>any</code> în nucleu începând cu v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Bază de date</b></td><td>better-sqlite3 (SQLite, jurnalizare WAL) + LowDB (JSON moștenit) — 147 de module de domeniu, 209 migrări</td></tr>
-  <tr><td nowrap><b>Memorie</b></td><td>Căutare în text integral cu SQLite FTS5 + reprezentări vectoriale cuantificate int8, degradare tipizată</td></tr>
-  <tr><td nowrap><b>Scheme</b></td><td>Zod 4 — validarea intrărilor/ieșirilor instrumentelor MCP + contracte API</td></tr>
+  <tr><td nowrap><b>Bază de date</b></td><td>better-sqlite3 (SQLite, jurnalizare WAL) + LowDB (JSON legacy) — 147 de module de domeniu, 222 de migrări</td></tr>
+  <tr><td nowrap><b>Memorie</b></td><td>Căutare full-text SQLite FTS5 + reprezentări vectoriale cuantizate int8, cu degradare tipizată</td></tr>
+  <tr><td nowrap><b>Scheme</b></td><td>Zod 4 — validarea I/O pentru instrumentele MCP + contracte API</td></tr>
   <tr><td nowrap><b>Protocoale</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Streaming</b></td><td>Server-Sent Events (SSE) + punte WebSocket (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Compresie</b></td><td>Flux cu 12 motoare — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Autentificare &amp; securitate</b></td><td>OAuth 2.0 (PKCE) + JWT + chei API + autentificare MCP cu domenii de acces · AES-256-GCM pentru datele stocate · DOMPurify</td></tr>
-  <tr><td nowrap><b>Disimulare</b></td><td>wreq-js — imitarea amprentelor TLS JA3 / JA4, proxy pe 3 niveluri</td></tr>
-  <tr><td nowrap><b>Reziliență</b></td><td>Întrerupător de circuit, temporizare exponențială, protecție împotriva efectului de turmă, autoremediere automată combinată</td></tr>
-  <tr><td nowrap><b>Jurnalizare</b></td><td>pino — jurnale JSON structurate cu contextul cererii</td></tr>
-  <tr><td nowrap><b>Testare</b></td><td>Executorul de teste Node.js + Vitest — <b>peste 56.000 de declarații statice de teste</b> în peste 7.800 de fișiere de testare urmărite (unitare, integrare, E2E, securitate, ecosistem)</td></tr>
+  <tr><td nowrap><b>Streaming</b></td><td>Evenimente trimise de server (SSE) + punte WebSocket (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Compresie</b></td><td>Pipeline cu 12 motoare — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Autentificare &amp; securitate</b></td><td>OAuth 2.0 (PKCE) + JWT + chei API + autentificare MCP cu domeniu de aplicare · AES-256-GCM pentru datele inactive · DOMPurify</td></tr>
+  <tr><td nowrap><b>Discreție</b></td><td>wreq-js — imitarea amprentelor TLS JA3 / JA4, proxy cu 3 niveluri</td></tr>
+  <tr><td nowrap><b>Reziliență</b></td><td>Întrerupător de circuit, retragere exponențială, prevenirea efectului de turmă, auto-vindecare auto-combo</td></tr>
+  <tr><td nowrap><b>Jurnalizare</b></td><td>pino — jurnale JSON structurate cu contextul solicitării</td></tr>
+  <tr><td nowrap><b>Testare</b></td><td>Executorul de teste Node.js + Vitest — <b>peste 60.000 de declarații statice de teste</b> în peste 8.400 de fișiere de teste urmărite (unitare, de integrare, E2E, de securitate, ale ecosistemului)</td></tr>
   <tr><td nowrap><b>Platforme</b></td><td>Desktop (Electron) · Android (Termux) · PWA (orice browser)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — publicare automată pe npm + Docker Hub la lansare</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — publicare automată npm + Docker Hub la lansare</td></tr>
   <tr><td nowrap><b>Linkuri</b></td><td><a href="https://omniroute.online">Site web</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
@@ -1337,47 +1327,47 @@ Metrici canonice la 2026-10-18: **1.976 de videoclipuri unice** · **20.220.289 
 
 </div>
 
-### 📘 Primii pași
+### 📘 Noțiuni introductive
 
 <table>
   <tr><th align="left">Document</th><th align="left">Descriere</th></tr>
   <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">Ghidul utilizatorului</a></b></td><td>Furnizori, combinații, integrare CLI, implementare</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">Ghid de configurare</a></b></td><td>Metode complete de instalare, configurări ale instrumentelor CLI, configurarea protocoalelor, ajustarea timpilor de expirare</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">Ghid de configurare</a></b></td><td>Metode complete de instalare, configurări pentru instrumentele CLI, configurarea protocoalelor, ajustarea timpilor de expirare</td></tr>
   <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">Ghidul instrumentelor CLI</a></b></td><td>Configurare pentru fiecare instrument: Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Mod la distanță</a></b></td><td>Controlați o instanță OmniRoute la distanță (VPS) din CLI-ul laptopului, prin tokenuri de acces cu domeniu limitat</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Configurarea Claude Code</a></b></td><td>Conectați Claude Code la OmniRoute (local/la distanță) folosind <code>launch</code> și profiluri pentru fiecare model</td></tr>
-  <tr><td nowrap><b><a href="README.md#-quick-start">Pornire rapidă</a></b></td><td>3 pași: instalare → conectare → configurare</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Modul la distanță</a></b></td><td>Controlați un OmniRoute la distanță (VPS) din CLI-ul laptopului, prin tokenuri de acces cu domeniu de aplicare</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Configurare Claude Code</a></b></td><td>Direcționați Claude Code către OmniRoute (local/la distanță) cu <code>launch</code> + profiluri per model</td></tr>
+  <tr><td nowrap><b><a href="README.md#-quick-start">Pornire rapidă</a></b></td><td>Instalare → conectare → configurare în 3 pași</td></tr>
 </table>
 
-### 🔧 Operațiuni și implementare
+### 🔧 Operare și implementare
 
 <table>
   <tr><th align="left">Document</th><th align="left">Descriere</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Ghid Docker</a></b></td><td>Docker run, profiluri Compose, Caddy HTTPS, tuneluri, etichete de imagine</td></tr>
-  <tr><td nowrap><b><a href="contrib/podman/README.md">Ghid Podman</a></b></td><td>Integrare Quadlet systemd, podman-compose, SELinux</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">Implementare pe VM</a></b></td><td>Ghid complet: configurare VM + nginx + Cloudflare</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Implementare pe Fly.io</a></b></td><td>Implementare pe Fly.io cu stocare persistentă</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Ghid Termux</a></b></td><td>Rulați OmniRoute pe Android prin Termux</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">Ghid PWA</a></b></td><td>Instalarea aplicației web progresive, memorare în cache, arhitectură</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Ghid Docker</a></b></td><td>Rulare Docker, profiluri Compose, Caddy HTTPS, tuneluri, etichete de imagini</td></tr>
+  <tr><td nowrap><b><a href="contrib/podman/README.md">Ghid Podman</a></b></td><td>Integrare Quadlet cu systemd, podman-compose, SELinux</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">Implementare pe VM</a></b></td><td>Ghid complet: configurarea VM + nginx + Cloudflare</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Implementare Fly.io</a></b></td><td>Implementare pe Fly.io cu stocare persistentă</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Ghid Termux</a></b></td><td>Rularea OmniRoute pe Android prin Termux</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">Ghid PWA</a></b></td><td>Instalarea, stocarea în cache și arhitectura Progressive Web App</td></tr>
   <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">Ghid de dezinstalare</a></b></td><td>Eliminare completă pentru toate metodele de instalare</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Configurarea mediului</a></b></td><td>Variabile <code>.env</code> complete și referințe</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Configurarea mediului</a></b></td><td>Variabile și referințe complete pentru <code>.env</code></td></tr>
 </table>
 
 ### 🧠 Funcționalități și arhitectură
 
 <table>
   <tr><th align="left">Document</th><th align="left">Descriere</th></tr>
-  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Arhitectură</a></b></td><td>Arhitectura sistemului, fluxul de date și componentele interne</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Ghid de compresie</a></b></td><td>Flux cu 7 opțiuni: dezactivat / redus / standard / agresiv / ultra / RTK / stivuit</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">Compresie RTK</a></b></td><td>Compresia rezultatelor comenzilor, filtre, încredere, verificare, recuperarea rezultatului brut</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Motoare de compresie</a></b></td><td>Caveman, RTK, fluxuri stivuite, interfețe de tablou de bord/API/MCP</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Formatul regulilor de compresie</a></b></td><td>Scheme JSON pentru pachetele de reguli ale filtrelor Caveman și RTK</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Pachete lingvistice pentru compresie</a></b></td><td>Detectarea limbii și crearea pachetelor de reguli Caveman</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Ghid de reziliență</a></b></td><td>Întrerupătoare de circuit, perioade de așteptare, coadă, prevenirea efectului de turmă, falsificare TLS</td></tr>
-  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Motor Auto-Combo</a></b></td><td>Evaluare pe baza a 16 factori, pachete de moduri, autoremediere</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Ghid proxy</a></b></td><td>Sistem proxy pe 3 niveluri, piața 1proxy, operațiuni CRUD pentru registru</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Niveluri gratuite</a></b></td><td>Catalog consolidat: 34 de grupuri recurente documentate / 467 de intrări gratuite catalogate</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Galeria funcționalităților</a></b></td><td>Tur vizual al tabloului de bord, cu capturi de ecran</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Arhitectură</a></b></td><td>Arhitectura sistemului, fluxul datelor și componentele interne</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Ghid de comprimare</a></b></td><td>Flux cu 7 opțiuni: dezactivat / lite / standard / agresiv / ultra / RTK / suprapus</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">Comprimare RTK</a></b></td><td>Comprimarea rezultatelor comenzilor, filtre, încredere, verificare, recuperarea rezultatelor brute</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Motoare de comprimare</a></b></td><td>Caveman, RTK, fluxuri suprapuse, interfețe dashboard/API/MCP</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Formatul regulilor de comprimare</a></b></td><td>Scheme JSON pentru pachetele de reguli ale filtrelor Caveman și RTK</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Pachete de limbi pentru comprimare</a></b></td><td>Detectarea limbii și crearea pachetelor de reguli Caveman</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Ghid de reziliență</a></b></td><td>Întrerupătoare de circuit, perioade de răcire, coadă, prevenirea efectului de turmă, falsificarea TLS</td></tr>
+  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Motorul Auto-Combo</a></b></td><td>Scorare pe 16 factori, pachete de moduri, autovindecare</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Ghid pentru proxy</a></b></td><td>Sistem de proxy pe 3 niveluri, piața 1proxy, operații CRUD pentru registru</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Niveluri gratuite</a></b></td><td>Director consolidat: 34 de grupuri recurente documentate / 485 de intrări catalogate pentru nivelurile gratuite</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Galeria funcționalităților</a></b></td><td>Tur vizual al dashboardului cu capturi de ecran</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Documentația bazei de cod</a></b></td><td>Prezentare a bazei de cod, accesibilă începătorilor</td></tr>
 </table>
 
@@ -1385,64 +1375,64 @@ Metrici canonice la 2026-10-18: **1.976 de videoclipuri unice** · **20.220.289 
 
 <table>
   <tr><th align="left">Document</th><th align="left">Descriere</th></tr>
-  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">Referință API</a></b></td><td>Toate punctele finale, cu exemple</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">Referință API</a></b></td><td>Toate endpointurile cu exemple</td></tr>
   <tr><td nowrap><b><a href="docs/openapi.yaml">Specificație OpenAPI</a></b></td><td>Specificația OpenAPI 3.0</td></tr>
   <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">Server MCP</a></b></td><td>110 instrumente MCP, configurări IDE, clienți Python/TS/Go</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">Ghidul serverului MCP</a></b></td><td>Instalare MCP, transporturi și referința instrumentelor</td></tr>
-  <tr><td nowrap><b><a href="src/lib/a2a/README.md">Server A2A</a></b></td><td>Protocol JSON-RPC 2.0, abilități, streaming, gestionarea sarcinilor</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">Ghidul serverului A2A</a></b></td><td>Fișa agentului A2A, sarcini, abilități și streaming</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">Ghidul serverului MCP</a></b></td><td>Instalarea MCP, transporturi și referința instrumentelor</td></tr>
+  <tr><td nowrap><b><a href="src/lib/a2a/README.md">Server A2A</a></b></td><td>Protocol JSON-RPC 2.0, competențe, transmitere în flux, gestionarea sarcinilor</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">Ghidul serverului A2A</a></b></td><td>Fișa agentului A2A, sarcini, competențe și transmitere în flux</td></tr>
 </table>
 
 ### 📋 Proiect și calitate
 
 <table>
   <tr><th align="left">Document</th><th align="left">Descriere</th></tr>
-  <tr><td nowrap><b><a href="CONTRIBUTING.md">Contribuții</a></b></td><td>Configurarea mediului de dezvoltare și reguli</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Modelul de ramificare și lansare</a></b></td><td>Ramurile vizate de PR-uri (<code>release/*</code>) și semnificația ramurii <code>main</code> și a etichetelor</td></tr>
-  <tr><td nowrap><b><a href="CHANGELOG.md">Jurnal de modificări</a></b></td><td>Istoricul complet al lansărilor pentru fiecare versiune</td></tr>
+  <tr><td nowrap><b><a href="CONTRIBUTING.md">Contribuții</a></b></td><td>Configurarea și orientările pentru dezvoltare</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Modelul de ramificare și lansare</a></b></td><td>Unde sunt direcționate PR-urile (<code>release/*</code>), ce înseamnă <code>main</code> și etichetele</td></tr>
+  <tr><td nowrap><b><a href="CHANGELOG.md">Jurnalul modificărilor</a></b></td><td>Istoricul complet al lansărilor pentru fiecare versiune</td></tr>
   <tr><td nowrap><b><a href="SECURITY.md">Politica de securitate</a></b></td><td>Raportarea vulnerabilităților și practicile de securitate</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/I18N.md">Ghid i18n</a></b></td><td>Suport pentru 67 de limbi, fluxul de lucru pentru traduceri, RTL</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Listă de verificare pentru lansare</a></b></td><td>Pași de validare înainte de lansare</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Plan de acoperire</a></b></td><td>Strategia de acoperire cu teste pentru peste 56.000 de declarații statice de teste din peste 7.800 de fișiere de testare urmărite</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/I18N.md">Ghid i18n</a></b></td><td>Suport pentru 67 de limbi, fluxul de traducere, RTL</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Lista de verificare pentru lansare</a></b></td><td>Pașii de validare dinaintea lansării</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Planul de acoperire</a></b></td><td>Strategia de acoperire a testelor pentru peste 60.000 de declarații statice de testare din peste 8.400 de fișiere de testare urmărite</td></tr>
 </table>
 
 <br/>
 
 <div align="center">
 
-# ⭐ Principalii contribuitori
+# ⭐ Contribuitori principali
 
-> OmniRoute este modelat de o comunitate open-source pasionată. Aceste persoane au adus contribuții excepționale care influențează direct calitatea, stabilitatea și amploarea proiectului. **Vă mulțumim.**
+> OmniRoute este modelat de o comunitate open-source pasionată. Aceste persoane au avut contribuții excepționale care influențează direct calitatea, stabilitatea și amploarea proiectului. **Vă mulțumim.**
 
-### Contribuitori externi în funcție de cererile de extragere îmbinate
+### Contribuitori externi în funcție de pull request-urile îmbinate
 
 <table>
-  <tr><th align="center">Poziție</th><th align="left">Contribuitor</th><th align="center">PR-uri îmbinate</th><th align="right">~Linii modificate</th></tr>
-  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
-  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
-  <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
-  <tr><td align="center">4</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
-  <tr><td align="center">5</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">174</td><td align="right">78,276</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">151</td><td align="right">3,562,936</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
+  <tr><th align="center">Loc</th><th align="left">Contribuitor</th><th align="center">PR-uri îmbinate</th><th align="right">~Linii modificate</th></tr>
+  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
+  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
+  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
+  <tr><td align="center">4</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
+  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">198</td><td align="right">3,570,623</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
+  <tr><td align="center">7</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
   <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
   <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500,065</td></tr>
   <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
-  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">84</td><td align="right">2,849,554</td></tr>
-  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">67</td><td align="right">68,548</td></tr>
+  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">85</td><td align="right">2,849,623</td></tr>
+  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
   <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
-  <tr><td align="center">14</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
-  <tr><td align="center">15</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
-  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">47</td><td align="right">33,626</td></tr>
-  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">46</td><td align="right">809,391</td></tr>
-  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">44</td><td align="right">147,896</td></tr>
+  <tr><td align="center">14</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">59</td><td align="right">126,220</td></tr>
+  <tr><td align="center">15</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
+  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
+  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">48</td><td align="right">811,771</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">46</td><td align="right">151,229</td></tr>
+  <tr><td align="center">19</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">43</td><td align="right">28,166</td></tr>
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
-  <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>Recensământ efectuat la 2026-10-18 15:09:09 UTC folosind cea mai recentă stare a ramurii <code>release/v3.8.52</code>, la commitul <code>656f01cb43</code>. Recensământul paginat GitHub GraphQL conține 9.191 de PR-uri îmbinate: 3.834 de către proprietarul depozitului, 229 de către Dependabot, 6 de către alți boți/aplicații și <b>5.122 de PR-uri externe provenite de la 835 de contribuitori distincți</b>. „Linii modificate” reprezintă adăugările + ștergerile raportate de GitHub și include fișiere generate, lockfile-uri, cataloage, traduceri și documentație; reprezintă volumul modificărilor, nu LOC create. Pentru 49 de PR-uri, GitHub raportează diferențe de peste 500.000 de linii (de exemplu, #13399, adăugarea unui singur furnizor, enumeră 2.347 de fișiere modificate), ceea ce mărește artificial mai multe dintre totalurile de mai sus. Pozițiile egale au același rang.</sub>
+<sub>Recensământ realizat la 2026-11-03 03:01:19 UTC cu vârful live <code>release/v3.8.53</code> <code>05bc048d6c</code>. Recensământul GitHub GraphQL paginat conține 9.947 de PR-uri îmbinate: 4.130 deținute de proprietarul depozitului, 240 de Dependabot, 6 de alți roboți/aplicații și <b>5.571 de PR-uri externe de la 883 de contribuitori distincti</b>. „Liniile modificate” reprezintă adunarea adăugărilor și ștergerilor din GitHub și includ fișiere generate, fișiere lock, cataloage, traduceri și documentație; acestea reprezintă volumul modificărilor, nu LOC scrise de autori. 53 de PR-uri raportează diferențe GitHub de peste 500.000 de linii (de exemplu #13399, o singură adăugare de furnizor, listează 2.347 de fișiere modificate), ceea ce umflă mai multe totaluri de mai sus. Egalitățile sunt clasate împreună.</sub>
 
-### Commituri atribuite de GitHub
+### Commit-uri atribuite GitHub-ului
 
 <table>
   <tr>
@@ -1451,86 +1441,93 @@ Metrici canonice la 2026-10-18: **1.976 de videoclipuri unice** · **20.220.289 
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 367 de commituri atribuite de GitHub</sub>
+      <sub>🥇 418 de commit-uri atribuite GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 269 de commituri atribuite de GitHub</sub>
+      <sub>🥈 294 de commit-uri atribuite GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
         <img src="https://github.com/oyi77.png" width="40" style="border-radius:50%" alt="Paijo"/><br/>
         <b>Paijo</b>
       </a><br/>
-      <sub>🥉 229 de commituri atribuite de GitHub</sub>
-    </td>
-    <td align="center" width="160">
-      <a href="https://github.com/backryun">
-        <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
-        <b>backryun</b>
-      </a><br/>
-      <sub>🏅 202 commituri atribuite de GitHub</sub>
+      <sub>🥉 229 de commit-uri atribuite GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/pacocartones">
         <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
         <b>Paco Cartones</b>
       </a><br/>
-      <sub>🏅 174 de commituri atribuite de GitHub</sub>
+      <sub>🏅 222 de commit-uri atribuite GitHub</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/RaviTharuma">
-        <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
-        <b>Ravi Tharuma</b>
+      <a href="https://github.com/backryun">
+        <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
+        <b>backryun</b>
       </a><br/>
-      <sub>🏅 126 de commituri atribuite de GitHub</sub>
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="160">
-      <a href="https://github.com/hartmark">
-        <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
-        <b>Markus Hartung</b>
-      </a><br/>
-      <sub>🏅 114 commituri atribuite de GitHub</sub>
-    </td>
-    <td align="center" width="160">
-      <a href="https://github.com/rdself">
-        <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
-        <b>Randi</b>
-      </a><br/>
-      <sub>🏅 108 commituri atribuite de GitHub</sub>
+      <sub>🏅 202 de commit-uri atribuite GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/JxnLexn">
         <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
         <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 87 de commituri atribuite de GitHub</sub>
+      <sub>🏅 134 de commit-uri atribuite GitHub</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="160">
+      <a href="https://github.com/RaviTharuma">
+        <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
+        <b>Ravi Tharuma</b>
+      </a><br/>
+      <sub>🏅 126 de commit-uri atribuite GitHub</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/hartmark">
+        <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
+        <b>Markus Hartung</b>
+      </a><br/>
+      <sub>🏅 115 de commit-uri atribuite GitHub</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/rdself">
+        <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
+        <b>Randi</b>
+      </a><br/>
+      <sub>🏅 108 de commit-uri atribuite GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
-      <sub>🏅 70 de commituri atribuite de GitHub</sub>
+      <sub>🏅 70 de commit-uri atribuite GitHub</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/jonlwheat2-gif">
+        <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
+        <b>WebPerson</b>
+      </a><br/>
+      <sub>🏅 68 de commit-uri atribuite GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
         <img src="https://github.com/KooshaPari.png" width="40" style="border-radius:50%" alt="Koosha Paridehpour"/><br/>
         <b>Koosha Paridehpour</b>
       </a><br/>
-      <sub>🏅 68 de commituri atribuite de GitHub</sub>
+      <sub>🏅 68 de commit-uri atribuite GitHub</sub>
     </td>
   </tr>
 </table>
 
-<sub>Reverificat la 2026-10-18 14:44:45 UTC: commituri atribuite de GitHub, raportate de API-ul Contributors al depozitului pentru ramura implicită <code>release/v3.8.52</code>. API-ul a returnat 849 de identități (429 de utilizatori, 2 boți, 418 anonime); acest tabel exclude întreținătorul, boții și identitățile anonime și păstrează egalitățile din clasament. Acesta este distinct atât de clasamentul bazat pe PR-uri îmbinate de mai sus, cât și de inventarul metadatelor Git de mai jos.</sub>
+<sub>Verificat din nou la 2026-11-03 02:09:16 UTC: commit-urile atribuite GitHub raportate de API-ul Contributors al depozitului pentru ramura implicită <code>release/v3.8.53</code>. API-ul a returnat 903 identități (429 de utilizatori, 2 boți, 472 anonime); acest tabel exclude responsabilul proiectului, boții și identitățile anonime și păstrează egalitățile din clasament. Este distinct atât de clasamentul PR-urilor îmbinate de mai sus, cât și de recensământul metadatelor Git de mai jos.</sub>
 
-> 🙏 Funcționalitățile, remedierile erorilor și îmbunătățirile de infrastructură realizate de acești contribuitori reprezintă o **parte esențială** din ceea ce face ca OmniRoute să fie fiabil și bogat în funcționalități. Fiecare pull request, fiecare caz de testare și fiecare fișier de traducere i18n contează. Proiectele open-source sunt construite de oameni ca ei.
+> 🙏 Funcționalitățile, remedierea erorilor și îmbunătățirile de infrastructură ale acestor contributori reprezintă o **parte esențială** din ceea ce face OmniRoute fiabil și bogat în funcționalități. Fiecare pull request, fiecare caz de testare și fiecare fișier de traducere i18n contează. Codul open source este construit de oameni ca ei.
 
 </div>
 
@@ -1640,29 +1637,29 @@ Mulțumiri din inimă celor care finanțează OmniRoute din propriul buzunar —
 
 <div align="center">
 
-## 👥 Peste 900 de contributori
+## 👥 Peste 1.000 de contributori
 
 </div>
 
-[![Contributori](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=993&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
 
-<sub>Auditat la 2026-10-18, la cel mai recent commit <code>ad160ab2d1</code> al ramurii <code>release/v3.8.52</code> (6.826 de commituri): <b>993 de identități Git umane normalizate</b> — 707 apar ca autori ai commiturilor (inclusiv responsabilul de întreținere), iar 286 apar doar în liniile explicite <code>Co-authored-by</code>. Recensământul aplică <code>.mailmap</code>, compară adresele de e-mail fără a ține cont de litere mari și mici, asociază adresele GitHub noreply numerice cu cele simple doar atunci când codifică același identificator, exclude 26 de identități de boți/agenți/servicii/substituenți și nu combină adresele de e-mail obișnuite doar pentru că numele lor afișate coincid. Auditul din 2026-08-24 a raportat 639; reaplicarea acestei metode pe baza auditului respectiv, <code>ac02c5b42f</code>, produce 619, astfel încât creșterea provine de la contributori noi, nu de la o metodă mai permisivă.</sub>
+<sub>Auditat la 2026-11-02 pe tip-ul live <code>release/v3.8.53</code> <code>1c7135e0fb</code> (7.972 de commituri): <b>1.074 de identități Git umane normalizate</b> — 759 apar ca autori ai commiturilor (inclusiv maintainerul), iar 315 apar doar în trailere explicite <code>Co-authored-by</code>. Recensământul aplică <code>.mailmap</code>, compară adresele de e-mail fără diferențiere între litere mari și mici, asociază adresele numerice și simple GitHub noreply doar atunci când codifică același handle, exclude 29 de identități de tip bot/agent/serviciu/placeholder și nu combină adrese de e-mail obișnuite doar pentru că numele afișate coincid. Auditul din 2026-08-24 a publicat 639; această metodă, rulată din nou pe baza acelui audit <code>ac02c5b42f</code>, oferă 619, astfel încât creșterea provine de la contributori noi, nu de la o metodă mai permisivă.</sub>
 
-### Cum să contribuiți
+### Cum poți contribui
 
-1. Creați un fork al depozitului
-2. Creați o ramură pornind de la cel mai recent commit al ramurii **active** `release/vX.Y.Z` (nu de la `main`) — consultați [Modelul de ramificare și lansare](docs/ops/BRANCHING_MODEL.md)
-3. Creați ramura pentru funcționalitatea dvs. (`git checkout -b feat/amazing-feature`)
-4. Salvați modificările într-un commit (`git commit -m 'feat: add amazing feature'`)
-5. Trimiteți modificările în ramură (`git push origin feat/amazing-feature`)
-6. Deschideți un Pull Request cu **baza = ramura `release/vX.Y.Z` respectivă**
+1. Creează un fork al depozitului
+2. Creează o ramură pornind de la tip-ul **activ** `release/vX.Y.Z` (nu `main`) — vezi [Modelul de ramificare și lansare](docs/ops/BRANCHING_MODEL.md)
+3. Creează ramura pentru funcționalitatea ta (`git checkout -b feat/amazing-feature`)
+4. Fă commit pentru modificările tale (`git commit -m 'feat: add amazing feature'`)
+5. Trimite modificările în ramură (`git push origin feat/amazing-feature`)
+6. Deschide un Pull Request cu **base = acea ramură** `release/vX.Y.Z`
 
-Consultați [CONTRIBUTING.md](CONTRIBUTING.md) pentru instrucțiuni detaliate.
+Consultă [CONTRIBUTING.md](CONTRIBUTING.md) pentru instrucțiuni detaliate.
 
 ### Lansarea unei versiuni noi
 
 ```bash
-# Creați o versiune — publicarea npm are loc automat
+# Creează o versiune — npm publish se execută automat
 VERSION=x.y.z
 gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 ```
@@ -1704,114 +1701,114 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 </div>
 
-OmniRoute se sprijină pe umerii unor giganți. A început ca un fork al proiectului **[9router](https://github.com/decolua/9router)** și ca un port TypeScript al proiectului Go **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** — iar de atunci, fiecare subsistem de mai jos a fost inspirat de un proiect open-source care a deschis drumul. Fiecare dintre ele a contribuit la conturarea unei componente concrete din OmniRoute. Acesta este modul nostru de a le mulțumi tuturor. 🙏
+OmniRoute se sprijină pe umerii unor giganți. A început ca un fork al **[9router](https://github.com/decolua/9router)** și ca un port TypeScript al proiectului Go **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** — iar de acolo, fiecare subsistem de mai jos a fost inspirat de un proiect open-source care a ajuns primul acolo. Fiecare a contribuit la modelarea unei componente concrete a OmniRoute. Acesta este modul nostru de a le mulțumi tuturor. 🙏
 
-> ⭐ numărul de stele a fost verificat prin API-ul REST GitHub la 18 octombrie 2026 — acordați-le o stea acestor proiecte. Valorile reprezintă un instantaneu exact, datat, și se vor modifica în mod firesc.
+> ⭐ numărul de stele a fost verificat prin GitHub's REST API la 3 noiembrie 2026 — mergeți să le acordați o stea acestor proiecte. Numărătorile reprezintă un instantaneu exact la data respectivă și se vor schimba în mod natural.
 
-### 🧬 Filiație și gateway
+### 🧬 Linie de origine și gateway
 
 <table>
   <tr><th align="left">Proiect</th><th align="center">⭐</th><th align="left">Cum a inspirat OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,004</td><td>Proiectul original pe care este construit acest fork — extins aici cu API-uri multimodale și o rescriere completă în TypeScript.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">55,591</td><td>Implementarea Go care a inspirat acest port JavaScript / TypeScript.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">61,482</td><td>Gateway-ul AI al cărui set public de date privind prețurile alimentează sincronizarea noastră pentru urmărirea costurilor și al cărui model de normalizare a furnizorilor ne-a influențat rutarea.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">14,526</td><td>Sursă MIT adaptată în puntea inclusă ChatGPT Web → Codex Responses, inclusiv adaptoare pentru sesiunea browserului, încadrarea răspunsurilor, utilizare și căutare web.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">61,430</td><td>Modele portate pentru recuperarea fluxurilor, aliasuri fără raționament, căutare web de rezervă, limite cu fereastră glisantă, mascarea datelor din jurnale și fluxuri de lansare securizate.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">346</td><td>Modele Cursor Composer pentru alegerea instrumentelor, constrângerile de ieșire și confirmarea instrumentelor, adaptate în executorul Cursor nativ.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">553</td><td>Modele pentru autentificări noi și rotația tokenurilor de reîmprospătare, portate în reautentificarea Codex OAuth.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">558</td><td>Valorile implicite de transformare compatibile cu Claude Code și comportamentul antetelor de facturare, generalizate în puntea OmniRoute controlată prin configurație.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/520mmxx/grok2api-merged">grok2api-merged</a></b></td><td align="center">2</td><td>Mapările sale pentru modelele Grok, generatorul Statsig cu TypeError simulat, valorile implicite pentru cereri și dispozitive, precum și procesorul de răspunsuri NDJSON au fost adaptate în mod substanțial în executorul Grok Web al OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">706</td><td>Principala sursă tranzitivă de cod din spatele grok2api-merged; implementările sale pentru modele, antete, sarcini utile, Statsig și procesoare sunt păstrate în filiația Grok Web.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,819</td><td>Sursa MIT subiacentă pentru sarcinile utile Grok și valorile implicite ale dispozitivelor, generatorul Statsig și procesorul <code>result.response</code>, preluate prin TQZHR și grok2api-merged.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/miuzhaii/grok2api-pro">grok2api-pro</a></b></td><td align="center">27</td><td>O sursă tranzitivă menționată de grok2api-merged pentru stratul său de pool-uri proxy; OmniRoute păstrează mențiunea acestei filiații, dar nu pretinde că a portat un pool de proxy-uri în executorul său Grok Web cu domeniu limitat.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">51</td><td>Proxy-ul său Grok autentificat prin cookie-uri și modelul de streaming <code>result.response.token</code> au influențat transportul Grok Web al OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lianying1716/GrokBridge">GrokBridge</a></b></td><td align="center">5</td><td>Implementarea originală Grok Web a consultat arhitectura sa upstream HTTP/browser; calea sa HTTP directă derivă din GrokProxy, astfel că nu se revendică niciun port independent de cod.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,861</td><td>Proiectul original pe care se bazează acest fork — extins aici cu API-uri multimodale și o rescriere completă în TypeScript.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">57,329</td><td>Implementarea în Go care a inspirat acest port JavaScript / TypeScript.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">62,580</td><td>Gateway-ul AI al cărui set public de date privind prețurile alimentează sincronizarea pentru urmărirea costurilor și al cărui model de normalizare a furnizorilor a influențat rutarea noastră.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">15,435</td><td>Sursă MIT adaptată în puntea inclusă în vendor ChatGPT Web → Codex Responses, inclusiv adaptoarele pentru sesiuni de browser, încadrarea răspunsurilor, utilizare și căutare web.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">65,966</td><td>Modele portate în recuperarea fluxurilor, aliasurile no-thinking, căutarea web de rezervă, limitele bazate pe ferestre glisante, redactarea jurnalelor și fluxurile de lansare consolidate.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">347</td><td>Modelele pentru alegerea instrumentelor Cursor Composer, constrângerile de ieșire și confirmarea instrumentelor au fost adaptate în executorul nativ Cursor.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">561</td><td>Modelele pentru autentificarea la o sesiune nouă și rotația tokenurilor de reîmprospătare au fost portate în reautentificarea OAuth Codex.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">562</td><td>Valorile implicite de transformare compatibile cu Claude Code și comportamentul antetelor de facturare au fost generalizate în puntea OmniRoute bazată pe configurație.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/520mmxx/grok2api-merged">grok2api-merged</a></b></td><td align="center">2</td><td>Mapările modelelor Grok, generatorul Statsig fake-TypeError, valorile implicite pentru cereri și dispozitive și procesorul de răspuns NDJSON au fost adaptate substanțial în executorul Grok Web al OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">707</td><td>Sursa principală de cod tranzitivă din spatele grok2api-merged; implementările sale pentru modele, antete, payload-uri, Statsig și procesor sunt păstrate în linia de origine Grok Web.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,874</td><td>Sursa MIT de bază pentru payload-urile Grok și valorile implicite ale dispozitivelor, generatorul Statsig și procesorul <code>result.response</code> transmise prin TQZHR și grok2api-merged.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/miuzhaii/grok2api-pro">grok2api-pro</a></b></td><td align="center">27</td><td>Sursă tranzitivă menționată de grok2api-merged pentru stratul său de pool de proxy-uri; OmniRoute păstrează această mențiune a liniei de origine, dar nu revendică un port al unui pool de proxy-uri în executorul său Grok Web cu domeniu limitat.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">52</td><td>Proxy-ul său Grok autentificat prin cookie și modelul de transmitere în flux a <code>result.response.token</code> au influențat transportul Grok Web al OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lianying1716/GrokBridge">GrokBridge</a></b></td><td align="center">5</td><td>Implementarea originală Grok Web a fost consultată pentru designul upstream HTTP/browser; calea sa HTTP directă derivă din GrokProxy, prin urmare nu este revendicat niciun port de cod independent.</td></tr>
 </table>
 
-### 🗜️ Comprimarea contextului și a tokenurilor — motoare
+### 🗜️ Compresia contextului și a tokenurilor — motoare
 
 <table>
   <tr><th align="left">Proiect</th><th align="center">⭐</th><th align="left">Cum a inspirat OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">113,396</td><td>Proiectul viral „de ce folosi multe cuvinte când puține cuvinte rezolvă” — filosofia sa de vorbire rudimentară stă la baza modului nostru standard de compresie și a peste 30 de reguli de eliminare a umpluturilor și condensare.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">83,835</td><td>Compresie de înaltă performanță a ieșirii comenzilor — a inspirat motorul nostru RTK, DSL-ul de filtrare JSON, recuperarea ieșirii brute și fluxul suprapus RTK → Caveman.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">75,741</td><td>Compresie reversibilă a contextului (SmartCrusher) — a inspirat motorul nostru <code>headroom</code> și modelul de marcaj pentru recuperare <code>ccr</code>.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,757</td><td>Cercetare privind compresia prompturilor (LLMLingua / LLMLingua-2) — a inspirat motorul nostru asincron <code>llmlingua</code>, sigur pentru cod și cu funcționare neîntreruptă în caz de eroare.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">32</td><td>Portarea JS/ONNX (MobileBERT / XLM-RoBERTa), utilizată ca backend bazat pe fire de execuție worker pentru motorul nostru LLMLingua.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/leninejunior/troglodita">Troglodita</a></b></td><td align="center">50</td><td>Compresie de tokenuri pentru portugheza braziliană — stă la baza pachetului nostru lingvistic pt-BR: reducerea pleonasmelor și eliminarea umpluturilor, ajustate pentru gramatica portughezei braziliene.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">166,731</td><td>Competența virală de programare YAGNI a „dezvoltatorului senior leneș” — a inspirat stilul nostru de ieșire <b>less-code</b>: orientarea către cea mai mică modificare funcțională, care reduce codul _generat_ (echivalentul pentru axa ieșirii al prozei concise din Caveman).</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">57,628</td><td>Stilul său de răspuns orientat mai întâi spre acțiune și adaptat persoanelor cu ADHD a fost transpus în stilul de ieșire concis al OmniRoute, disponibil în cinci limbi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">116,957</td><td>Proiectul viral „de ce să folosești multe tokenuri când câteva tokenuri fac treaba” — filozofia sa de exprimare cavemanească stă la baza modului nostru standard de comprimare și a peste 30 de reguli de eliminare/condensare a umpluturii.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">85,350</td><td>Comprimarea de înaltă performanță a rezultatelor comenzilor — a inspirat motorul nostru RTK, DSL-ul pentru filtrarea JSON, recuperarea rezultatelor brute și conducta RTK → Caveman suprapusă.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">78,672</td><td>Comprimarea reversibilă a contextului (SmartCrusher) — a inspirat motorul nostru <code>headroom</code> și modelul de marcatori pentru recuperare <code>ccr</code>.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,797</td><td>Cercetarea privind comprimarea prompturilor (LLMLingua / LLMLingua-2) — a inspirat motorul nostru <code>llmlingua</code> asincron, sigur pentru cod și cu eșec permis.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">33</td><td>Portarea JS/ONNX (MobileBERT / XLM-RoBERTa), utilizată ca backend pe fire de execuție pentru motorul nostru LLMLingua.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/leninejunior/troglodita">Troglodita</a></b></td><td align="center">50</td><td>Comprimarea tokenurilor PT-BR — alimentează pachetul nostru de limbă pt-BR: reducerea pleonasmelor și eliminarea cuvintelor de umplutură, ajustate pentru gramatica portughezei braziliene.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">182,929</td><td>Abilitatea virală de programare YAGNI a „dezvoltatorului senior leneș” — a inspirat stilul nostru de ieșire <b>less-code</b>: ghidarea către cea mai mică modificare funcțională, care reduce codul _generat_ (echivalentul pe axa ieșirii al exprimării concise din Caveman).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">59,838</td><td>Stilul său de răspuns, orientat mai întâi către acțiune și adaptat persoanelor cu ADHD, a fost adaptat în stilul concis de ieșire al OmniRoute, pentru cinci limbi.</td></tr>
 </table>
 
-### 🧩 Formate compacte, cercetarea tokenurilor și instrumente care țin cont de cod
+### 🧩 Formate compacte, cercetarea tokenurilor și instrumente conștiente de cod
 
 <table>
   <tr><th align="left">Proiect</th><th align="center">⭐</th><th align="left">Cum a inspirat OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,509</td><td>Notație de obiecte orientată pe tokenuri — modelul său columnar, cu antet urmat de rânduri, a modelat etapa noastră de compactare tabelară.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">59</td><td>Formatul său compact pentru grafuri și concepția bazată pe profil generic au influențat compactarea tabelară din OmniRoute și formatul codecului Headroom.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf-typescript">gcf-typescript</a></b></td><td align="center">4</td><td>Implementarea MIT în TypeScript, integrată direct și extinsă drept codec cu profil generic pentru Headroom.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">551</td><td>Cache Brotli/SQLite + diferență de context pentru fiecare sesiune — a inspirat motorul nostru <code>session-dedup</code>.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,182</td><td>Compactarea ieșirii Bash + profiluri MCP — a inspirat disciplina noastră de renunțare la compresie și reducerea manifestelor instrumentelor MCP.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">154</td><td>Compresie a ieșirii în funcție de conținut și de tipul fișierului, cu renunțare în caz de eșec — a validat distribuirea noastră în funcție de tip și omiterea compresiei când câștigul este sub pragul minim.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,595</td><td>„Găsește tokenurile-fantomă” — modelul său de externalizare + identificator recuperabil a influențat abordarea noastră privind externalizarea CCR.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">33</td><td>Un model bazat pe graful sesiunii + deduplicarea liniilor între interacțiuni, care a influențat proiectarea mecanismului nostru session-dedup.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/jessefreitas/OmniCompress">OmniCompress</a></b></td><td align="center">3</td><td>JSON columnar în Rust + recuperare adresată după conținut + deduplicare între mesaje — a validat proiectarea motoarelor noastre <code>headroom</code>/<code>ccr</code>/<code>session-dedup</code> și invariantul stabil pentru cache „forma comprimată este independentă de poziție”.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">133</td><td>Compresia schemelor și descrierilor instrumentelor MCP — a influențat reducerea cardinalității manifestelor instrumentelor MCP.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">217</td><td>Clasificarea hărților de depozite în stil Aider — a influențat explorarea noastră privind hărțile depozitelor / clasificarea rezultatelor regăsite.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/mrsimpson/quiet-shell-mcp">quiet-shell-mcp</a></b></td><td align="center">4</td><td>Reducerea declarativă a ieșirii shell prin MCP — a validat compactarea noastră declarativă a ieșirii Bash.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,205</td><td>Set de instrumente pentru TypeScript Compiler API — a inspirat eliminarea comentariilor bazată pe parser, care păstrează literalii de tip șir, șablon și expresie regulată.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,602</td><td>Token-Oriented Object Notation — modelul său pe coloane, cu antet și rânduri, a influențat etapa noastră de compactare tabulară.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">61</td><td>Formatul său compact pentru grafuri și designul cu profil generic au contribuit la compactarea tabulară și formatul de codec Headroom din OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf-typescript">gcf-typescript</a></b></td><td align="center">4</td><td>Implementarea TypeScript sub licență MIT, inclusă direct și extinsă ca codec cu profil generic pentru Headroom.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">566</td><td>Cache Brotli/SQLite + delta de context per sesiune — a inspirat motorul nostru <code>session-dedup</code>.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,203</td><td>Compactarea rezultatelor Bash + profiluri MCP — au inspirat disciplina noastră de abandonare a comprimării și reducerea manifestului instrumentelor MCP.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">162</td><td>Comprimarea rezultatelor în funcție de conținut și de tipul fiecărui fișier, cu abandonare în caz de eșec — a validat distribuirea noastră per tip și omiterea atunci când câștigul minim nu este atins.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,853</td><td>„Găsește tokenurile fantomă” — modelul său de externalizare + identificator recuperabil a contribuit la modul în care concepem externalizarea CCR.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">34</td><td>Un plan pentru graf de sesiune + deduplicarea liniilor între ture, care a contribuit la designul nostru pentru session-dedup.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/jessefreitas/OmniCompress">OmniCompress</a></b></td><td align="center">3</td><td>JSON pe coloane în Rust + recuperare adresată prin conținut + deduplicare între mesaje — a validat designul motoarelor noastre <code>headroom</code>/<code>ccr</code>/<code>session-dedup</code> și invariantul stabil pentru cache „forma comprimată este independentă de poziție”.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">140</td><td>Comprimarea schemelor/descrierilor instrumentelor MCP — a contribuit la reducerea cardinalității manifestului instrumentelor MCP.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">218</td><td>Clasarea hărții depozitului în stilul Aider — a contribuit la explorarea noastră privind harta depozitului / clasarea pentru recuperare.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/mrsimpson/quiet-shell-mcp">quiet-shell-mcp</a></b></td><td align="center">4</td><td>Reducerea declarativă a rezultatelor shell prin MCP — a validat compactarea declarativă a rezultatelor bash.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,222</td><td>Set de instrumente pentru TypeScript Compiler API — a inspirat eliminarea comentariilor pe baza analizării sintactice, care păstrează literalii de tip șir, șablon și expresie regulată.</td></tr>
 </table>
 
 ### 🧠 Memorie și RAG
 
 <table>
   <tr><th align="left">Proiect</th><th align="center">⭐</th><th align="left">Cum a inspirat OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">67,385</td><td>Strat universal de memorie — modelul său de proxy ca limită de scriere/citire a influențat arhitectura noastră de memorie.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,179</td><td>Agenți cu stare și memorie pe niveluri — au inspirat modelul nostru pe niveluri pentru Controlul și recuperarea contextului (CCR).</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,800</td><td>Taxonomia ProblemMap a 16 moduri recurente de eșec RAG/LLM — vocabularul comun din ghidul nostru de depanare.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">68,294</td><td>Strat universal de memorie — modelul său de proxy ca limită de scriere/citire a influențat arhitectura memoriei noastre.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,321</td><td>Agenți cu stare și memorie pe niveluri — a inspirat modelul nostru pe niveluri Context Control & Recovery (CCR).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,804</td><td>Taxonomia ProblemMap cu 16 moduri recurente de eșec RAG/LLM — vocabularul comun din ghidul nostru de depanare.</td></tr>
 </table>
 
 ### 🛰️ Inspectarea traficului, MITM și proxy transparent
 
 <table>
   <tr><th align="left">Proiect</th><th align="center">⭐</th><th align="left">Cum a inspirat OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">79</td><td>Interceptarea/analiza MITM a traficului dintre asistentul de programare ↔ LLM a stat la baza cerințelor inițiale pentru Inspectorul de trafic. Patru module derivate anterior — îmbinarea SSE, normalizarea conversațiilor, mascarea secretelor și igienizarea anteturilor — au fost înlocuite cu implementări independente de tip clean-room, bazate pe standarde publice de protocol. Cele două suprafețe de trecere directă către gazdă (<code>passthrough.ts</code> și <code>_internal/bypass.cjs</code>) rămân implementări interne OmniRoute, clasificate independent; acestea nu au fost rescrise ca parte a înlocuirii respective.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,814</td><td>Rutarea transparentă prin proxy pentru fiecare proces — a inspirat oprirea noastră MITM sigură în caz de blocare, expirările de inactivitate pentru socketuri, atribuirea proceselor prin <code>/proc</code> și capturarea TPROXY.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">81</td><td>Interceptarea/analiza MITM a traficului dintre asistenții de programare și LLM a influențat cerințele inițiale pentru Traffic Inspector. Patru module derivate anterior — îmbinarea SSE, normalizarea conversațiilor, mascarea secretelor și igienizarea antetelor — au fost înlocuite de implementări independente, realizate într-un mediu clean-room pe baza standardelor publice de protocol. Cele două suprafețe de passthrough pentru gazdă (<code>passthrough.ts</code> și <code>_internal/bypass.cjs</code>) rămân implementări interne OmniRoute, clasificate independent; nu au fost rescrise ca parte a acelei înlocuiri.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,978</td><td>Rutarea transparentă a proxy-ului pentru fiecare proces — a inspirat închiderea MITM sigură în caz de eroare, timpii de expirare pentru socketurile inactive, atribuirea proceselor prin <code>/proc</code> și capturarea TPROXY.</td></tr>
 </table>
 
 ### 📚 Date despre modele, observabilitate și interfață
 
 <table>
   <tr><th align="left">Proiect</th><th align="center">⭐</th><th align="left">Cum a inspirat OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,286</td><td>Bază de date deschisă cu specificațiile, prețurile și capabilitățile modelelor IA — sincronizată nativ în catalogul nostru de modele.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,705</td><td>Biblioteca de grafuri bazată pe noduri care asigură funcționarea în timp real a Compression Studio și Combo/Routing Studio.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">43,443</td><td>Vizualizarea în timp real a grafului fluxului de lucru din LangGraph Studio a inspirat vizualizarea în timp real a cascadei din studiourile noastre.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">35,990</td><td>Modelul său de observabilitate urmă → interval → generare a influențat diagrama cascadă din Compression Studio.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,645</td><td>Observabilitate pentru rețeaua de servicii Istio — a inspirat indicatoarele noastre pentru disjunctoare și reprezentările vizuale ale muchiilor cu erori din Routing/Combo Studio.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,615</td><td>Sigle ale mărcilor IA/LLM care redau pictogramele furnizorilor în întregul nostru panou de control.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,473</td><td>Furnizează steagurile SVG sub licență MIT utilizate de selectorul de limbă din README.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,486</td><td>Bază de date deschisă cu specificațiile, prețurile și capabilitățile modelelor AI — sincronizată nativ în catalogul nostru de modele.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,874</td><td>Biblioteca de grafuri bazată pe noduri care alimentează Compression Studio și Combo/Routing Studio în timp real.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">44,349</td><td>Vizualizarea live a grafului fluxului de lucru din LangGraph Studio a inspirat vizualizarea în cascadă în timp real din Studiourile noastre.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">36,907</td><td>Modelul său de observabilitate trace → span → generation a influențat vizualizarea waterfall din Compression Studio.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,647</td><td>Observabilitatea service mesh pentru Istio — a inspirat insignele circuit-breaker și reprezentările vizuale ale muchiilor de eroare din Routing/Combo Studio.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,666</td><td>Sigle de brand AI/LLM care afișează pictogramele furnizorilor în tabloul nostru de bord.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,499</td><td>Oferă steagurile SVG cu licență MIT utilizate de selectorul de limbă din README.</td></tr>
 </table>
 
 ### 🛡️ Securitate
 
 <table>
   <tr><th align="left">Proiect</th><th align="center">⭐</th><th align="left">Cum a inspirat OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">722</td><td>O listă atent selecționată de biblioteci securizate în mod implicit, care ne ghidează alegerile de securitate (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">723</td><td>O listă selectată de biblioteci sigure în mod implicit, care ghidează alegerile noastre de securitate (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink).</td></tr>
 </table>
 
 ### 🧭 Instrumente complementare
 
 <table>
   <tr><th align="left">Proiect</th><th align="center">⭐</th><th align="left">Cum a inspirat OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,628</td><td>A inspirat deduplicarea cererilor, soluția de rezervă de urgență fără costuri, strategiile Auto-Combo extensibile și clasificarea multilingvă a intențiilor.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,333</td><td>Remaparea modelelor în funcție de cont, validarea căii executabilului și comportamentul etichetelor de plan au stat la baza mediului de execuție Antigravity din OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,850</td><td>Formatul său compact pentru numărătoarea inversă până la resetarea cotei a inspirat afișarea corespunzătoare a limitei furnizorului în OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,611</td><td>Integrările sale ACP au inspirat detectarea automată de către OmniRoute a agenților CLI instalați.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,616</td><td>A identificat suprafața cotei Grok Build; apoi OmniRoute a verificat și a corectat independent formatul efectiv al datelor transmise.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,649</td><td>A inspirat deduplicarea solicitărilor, fallback-ul de urgență cu cost zero, strategiile Auto-Combo conectabile și clasificarea multilingvă a intențiilor.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,785</td><td>Redirecționarea modelelor în funcție de cont, validarea căilor executabile și comportamentul etichetelor planurilor au influențat runtime-ul Antigravity din OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,852</td><td>Formatul compact al numărătorii inverse pentru resetarea cotei a inspirat afișarea corespunzătoare a limitelor furnizorilor în OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,996</td><td>Integrările sale ACP au inspirat detectarea automată de către OmniRoute a agenților CLI instalați.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,955</td><td>A identificat suprafața cotei Grok Build; OmniRoute a verificat și corectat apoi independent formatul wire activ.</td></tr>
 </table>
 
 ## 📄 Licență
 
-Licența MIT - consultați [LICENSE](LICENSE) pentru detalii.
+Licență MIT - consultați [LICENSE](LICENSE) pentru detalii.
 
 ---
 
@@ -1819,7 +1816,7 @@ Licența MIT - consultați [LICENSE](LICENSE) pentru detalii.
 
 **[⬆ Înapoi sus](#-omniroute)** · Creat cu ❤️ pentru comunitatea AI open-source.
 
-<sub>OmniRoute v3.8.52 · Node ≥22.22.2 · Licența MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Creat de <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Licență MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Discuțiile GitHub sunt activate pentru întrebări și răspunsuri din partea comunității -->

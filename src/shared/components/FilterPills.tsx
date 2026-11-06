@@ -1,6 +1,8 @@
 "use client";
 
+import { ToggleChip } from "@omniroute/ui-kit/toggle-chip";
 import { cn } from "@/shared/utils/cn";
+import Icon from "./Icon";
 
 export interface FilterPillOption {
   value: string;
@@ -18,8 +20,10 @@ interface FilterPillsProps {
 }
 
 /**
- * Filter chips that wrap instead of overflowing. On narrow screens each line is
- * stretched to the full width (pills grow), from `sm` up they keep their natural size.
+ * Single-select filter chips over the kit `ToggleChip` (`aria-pressed`, #19066). Clicking a pill
+ * always reports its value, so the active pill stays active. They wrap instead of overflowing:
+ * on narrow screens each line is stretched to the full width (pills grow), from `sm` up they
+ * keep their natural size.
  */
 export default function FilterPills({
   options,
@@ -30,36 +34,23 @@ export default function FilterPills({
 }: FilterPillsProps) {
   return (
     <div
-      role="tablist"
+      role="group"
       aria-label={ariaLabel}
       className={cn("flex w-full flex-wrap items-center gap-1.5 sm:w-auto", className)}
     >
-      {options.map((opt) => {
-        const active = value === opt.value;
-        return (
-          <button
-            key={opt.value}
-            type="button"
-            role="tab"
-            aria-selected={active}
-            onClick={() => onChange(opt.value)}
-            className={cn(
-              "inline-flex grow items-center justify-center gap-1 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-medium transition-colors sm:grow-0",
-              active ? "bg-primary text-white" : "bg-muted/60 text-text-muted hover:bg-muted"
-            )}
-          >
-            {opt.icon && (
-              <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-                {opt.icon}
-              </span>
-            )}
-            {opt.label}
-            {opt.count !== undefined && (
-              <span className={active ? "text-white/80" : "text-text-muted/70"}>{opt.count}</span>
-            )}
-          </button>
-        );
-      })}
+      {options.map((opt) => (
+        <ToggleChip
+          key={opt.value}
+          size="sm"
+          pressed={value === opt.value}
+          icon={opt.icon ? <Icon name={opt.icon} /> : undefined}
+          count={opt.count}
+          onClick={() => onChange(opt.value)}
+          className="inline-flex grow items-center justify-center sm:grow-0"
+        >
+          {opt.label}
+        </ToggleChip>
+      ))}
     </div>
   );
 }

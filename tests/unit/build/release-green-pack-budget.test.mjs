@@ -8,11 +8,11 @@ const source = readFileSync(
 );
 
 // Wiring regressions, not evidence that a real build finishes within this budget.
-test("the full package lane receives the 40 minute shared deadline", () => {
+test("the full package lane receives the 90 minute shared deadline", () => {
   const lane = source.slice(source.indexOf('id: "pack-artifact"'));
   const laneEnd = lane.indexOf("\n      });");
   assert.ok(laneEnd > 0, "the package lane must have a bounded declaration");
-  assert.match(lane.slice(0, laneEnd), /run: runPackArtifactGate,[\s\S]*timeout: 40 \* 60 \* 1000/);
+  assert.match(lane.slice(0, laneEnd), /run: runPackArtifactGate,[\s\S]*timeout: 90 \* 60 \* 1000/);
   assert.match(source, /g\.run\(g\.timeout\)/);
   const runner = source.slice(
     source.indexOf("async function runPackArtifactGate"),
@@ -31,17 +31,21 @@ test("the nightly full sweep selects the full package lane, not the quick path",
     "utf8"
   );
   assert.match(workflow, /MODE="--with-build --full-ci --suites-from suite-results"/);
-  assert.match(workflow, /MODE="--with-build --full-ci"/);
+  // release-green and main-green both read hosted receipts (#18776); neither keeps a local form.
+  assert.deepEqual(workflow.match(/MODE="--with-build --full-ci[^"]*"/g), [
+    'MODE="--with-build --full-ci --suites-from suite-results"',
+    'MODE="--with-build --full-ci --suites-from suite-results"',
+  ]);
   assert.match(
     source,
     /const lanes = SUITES_FROM \? slow\.filter\(\(g\) => g\.id === "pack-artifact"\) : slow/
   );
 });
 
-test("full-mode tarball boot keeps its independent 15 minute ceiling and package dependency", () => {
+test("full-mode tarball boot keeps its independent 40 minute ceiling and package dependency", () => {
   const boot = source.slice(source.indexOf("const packArtifactIndex"));
   assert.match(boot, /packArtifactResult\.code !== 0/);
-  assert.match(boot, /\["run", "check:pack-boot"\], \{\s*timeout: 15 \* 60 \* 1000/);
+  assert.match(boot, /\["run", "check:pack-boot"\], \{\s*timeout: 40 \* 60 \* 1000/);
 });
 
 // Quick mode is a separate preflight contract, not the full nightly budget.

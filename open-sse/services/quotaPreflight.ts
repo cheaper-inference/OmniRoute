@@ -19,7 +19,7 @@
  */
 
 import { isCompatibleProviderConnectionId } from "@/shared/utils/compatibleProviderId";
-import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import { isRegisteredFeatureFlagEnabled } from "../utils/registeredFeatureFlag.ts";
 import { isClaudeExtraUsageAllowed } from "@/lib/providers/claudeExtraUsage";
 import { isCodexQuotaFilteringDisabled } from "@/lib/providers/codexQuotaFiltering";
 // #14359 — import the leaf, NOT "@/domain/quotaCache": quotaCache → usage.ts → usage/openrouter.ts →
@@ -31,6 +31,7 @@ import {
   isCodexPaidCreditsEnabled,
   type CodexPaidCredits,
 } from "@/lib/providers/codexPaidCredits";
+import { filterCodexQuotaWindows } from "./codexQuotaWindowPolicy.ts";
 import {
   fetchNewApiAggregatorQuota,
   invalidateNewApiAggregatorQuotaCache,
@@ -62,6 +63,8 @@ export interface QuotaWindowInfo {
 }
 
 export interface QuotaInfo {
+  /** Raw account plan identifier from the live usage fetch, when reported. */
+  plan?: string;
   used: number;
   total: number;
   /** Worst-case percentUsed across all known windows (legacy, single-signal). */
@@ -139,6 +142,10 @@ export function registerQuotaFetcher(provider: string, fetcher: QuotaFetcher): v
   quotaFetcherRegistry.set(provider, fetcher);
 }
 
+export function getRegisteredQuotaFetchers(): ReadonlyMap<string, QuotaFetcher> {
+  return new Map(quotaFetcherRegistry);
+}
+
 export function getQuotaFetcher(provider: string): QuotaFetcher | undefined {
   return quotaFetcherRegistry.get(provider) || quotaFetcherRegistry.get(provider.toLowerCase());
 }
@@ -202,6 +209,8 @@ export interface PreflightQuotaThresholds {
    * point.
    */
   resolveWarnRemainingPercent?: (window: string | null) => number;
+  /** Whether this window's cutoff is an operator-configured policy, not the factory fallback. */
+  isConfiguredCutoff?: (window: string | null) => boolean;
 }
 
 function resolveOrDefault(
@@ -242,10 +251,13 @@ function exhaustedResult(
   };
 }
 
-function windowsForScope(
+export function windowsForScope(
   windows: NonNullable<QuotaInfo["windows"]>,
   scope?: QuotaCutoffScope
 ): NonNullable<QuotaInfo["windows"]> {
+  if (scope?.provider === "codex") {
+    return filterCodexQuotaWindows(windows, scope.providerSpecificData);
+  }
   if (!scope?.requestedModel || !isAntigravityQuotaProvider(scope.provider ?? null)) {
     return windows;
   }
@@ -304,7 +316,7 @@ function evaluateQuotaGroup(
   return { exhausted, worstPercent: Math.max(0, worstPercent), worstWindow, worstResetAt };
 }
 
-function groupQuotaWindowsByBase(
+export function groupQuotaWindowsByBase(
   windows: NonNullable<QuotaInfo["windows"]>
 ): Map<string, Array<[string, QuotaWindowInfo]>> {
   const groups = new Map<string, Array<[string, QuotaWindowInfo]>>();
@@ -409,7 +421,10 @@ function windowedQuotaCutoffResult(
   if (isAntigravityQuotaProvider(scope?.provider ?? null) && scope?.requestedModel) {
     return { proceed: true, quotaPercent: quota.percentUsed };
   }
-  if (quota.limitReached === true) return limitReachedResult(quota);
+  // An aggregate signal cannot re-enable a Codex window explicitly removed by its toggle.
+  if (quota.limitReached === true && !(scope?.provider === "codex" && scopedWindows !== windows)) {
+    return limitReachedResult(quota);
+  }
   return { proceed: true, quotaPercent: quota.percentUsed };
 }
 
@@ -417,6 +432,44 @@ function windowedQuotaCutoffResult(
  * Pure cutoff evaluator used by routing paths that already fetched quota.
  * Mirrors preflightQuota threshold semantics without performing I/O or logging.
  */
+function configuredCurrentWindows(
+  windows: NonNullable<QuotaInfo["windows"]>,
+  configured: (window: string | null) => boolean
+): NonNullable<QuotaInfo["windows"]> {
+  const groups = groupQuotaWindowsByBase(windows);
+  const selected: NonNullable<QuotaInfo["windows"]> = {};
+  for (const entries of groups.values()) {
+    if (!entries.some(([name]) => configured(name))) continue;
+    for (const [name, info] of entries) {
+      if (!info.resetAt || new Date(info.resetAt).getTime() > Date.now()) {
+        selected[name] = info;
+      }
+    }
+  }
+  return selected;
+}
+
+function healthyQuotaCutoffResult(
+  quota: QuotaInfo,
+  thresholds: PreflightQuotaThresholds | undefined,
+  scope: QuotaCutoffScope | undefined
+): PreflightQuotaResult {
+  const configured = thresholds?.isConfiguredCutoff;
+  if (!configured) return { proceed: true, quotaPercent: quota.percentUsed };
+  const windows = quota.windows;
+  if (windows && Object.keys(windows).length > 0) {
+    const scoped = windowsForScope(windows, scope);
+    const cutoff = quotaWindowCutoffResult(
+      configuredCurrentWindows(scoped, configured),
+      thresholds
+    );
+    return cutoff ?? { proceed: true, quotaPercent: quota.percentUsed };
+  }
+  return configured(null) && (!quota.resetAt || new Date(quota.resetAt).getTime() > Date.now())
+    ? quotaPercentCutoffResult(quota, thresholds)
+    : { proceed: true, quotaPercent: quota.percentUsed };
+}
+
 export function evaluateQuotaCutoff(
   quota: QuotaInfo | null | undefined,
   thresholds?: PreflightQuotaThresholds,
@@ -432,9 +485,10 @@ export function evaluateQuotaCutoff(
   ) {
     return { proceed: true, quotaPercent: quota.percentUsed };
   }
-  // #14359 — same escape as the dispatch-time predicates: a recent success is not exhaustion.
+  // #14359 — a recent success discounts default exhaustion hints. Explicit
+  // cutoffs are still evaluated against their measured windows (#17879).
   if (scope?.connectionId && isQuotaHealthy(scope.connectionId)) {
-    return { proceed: true, quotaPercent: quota.percentUsed };
+    return healthyQuotaCutoffResult(quota, thresholds, scope);
   }
 
   const windowedResult = windowedQuotaCutoffResult(quota, thresholds, scope);
@@ -462,7 +516,7 @@ export function resolveDynamicQuotaFetcher(
   if (!psd || psd.newApiAggregatorBalance !== true) return undefined;
 
   // Feature flag must be enabled
-  if (!isFeatureFlagEnabled("NEWAPI_AGGREGATOR_BALANCE")) return undefined;
+  if (!isRegisteredFeatureFlagEnabled("NEWAPI_AGGREGATOR_BALANCE")) return undefined;
 
   // The aggregator fetcher has no static registrar, so its invalidator is
   // registered on the first dynamic resolution — the same moment the fetcher's
@@ -545,38 +599,20 @@ export async function preflightQuota(
     return decision;
   }
 
-  // Legacy single-signal path for fetchers that don't expose per-window data.
-  const minRemainingPercent = resolveOrDefault(
-    thresholds?.resolveMinRemainingPercent,
-    null,
-    DEFAULT_MIN_REMAINING_PERCENT
-  );
-  const warnRemainingPercent = resolveOrDefault(
-    thresholds?.resolveWarnRemainingPercent,
-    null,
-    DEFAULT_WARN_REMAINING_PERCENT
-  );
-
-  const { percentUsed } = quota;
-  const remainingPercent = remainingPercentFrom(percentUsed);
-
-  if (isRemainingAtOrBelowThreshold(remainingPercent, minRemainingPercent)) {
-    console.info(
-      `[QuotaPreflight] ${provider}/${connectionId}: ${remainingPercent.toFixed(1)}% remaining — switching (cutoff ${minRemainingPercent}%)`
+  // Legacy single-signal warning; the evaluator already made the cutoff decision.
+  if (Number.isFinite(quota.percentUsed)) {
+    const warnRemainingPercent = resolveOrDefault(
+      thresholds?.resolveWarnRemainingPercent,
+      null,
+      DEFAULT_WARN_REMAINING_PERCENT
     );
-    return {
-      proceed: false,
-      reason: "quota_exhausted",
-      quotaPercent: percentUsed,
-      resetAt: quota.resetAt ?? null,
-    };
+    const remainingPercent = remainingPercentFrom(quota.percentUsed);
+    if (isRemainingAtOrBelowThreshold(remainingPercent, warnRemainingPercent)) {
+      console.warn(
+        `[QuotaPreflight] ${provider}/${connectionId}: ${remainingPercent.toFixed(1)}% remaining — approaching cutoff`
+      );
+    }
   }
 
-  if (isRemainingAtOrBelowThreshold(remainingPercent, warnRemainingPercent)) {
-    console.warn(
-      `[QuotaPreflight] ${provider}/${connectionId}: ${remainingPercent.toFixed(1)}% remaining — approaching cutoff`
-    );
-  }
-
-  return { proceed: true, quotaPercent: percentUsed };
+  return decision;
 }

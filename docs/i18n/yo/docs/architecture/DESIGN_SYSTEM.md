@@ -4,228 +4,89 @@
 
 ---
 
-> **Ipò:** ìtọ́kasí — ìṣọ̀kan tí a ṣàlàyé níbí ti jẹ́ **mímúṣẹ** (àwọn ìpele 1–6: àwòrán abẹ́lẹ̀ grid, primitives, ṣíṣe àkójọpọ̀ àárín fún àwọn àwọ̀ ipò, token mono, ìṣípadà token DataTable, focus-ring → accent, primitives Checkbox/Textarea, `cn()` → tailwind-merge, grid lórí gbogbo ojú-ìwòye aládàáṣe, àpò àkóónú 4K tó ń mú ara rẹ̀ bá ìwọ̀n mu, àwọn ojú data-table tí kò ṣe kedere). Ìwé yìí ni àlàyé àṣẹ fún àwọn token àpẹrẹ, àwọn component, àti àwọn àṣà dashboard náà; a pa ìṣètò ìpele tó wà ní ìsàlẹ̀ mọ́ gẹ́gẹ́ bí ìdí fún ìpinnu kọ̀ọ̀kan.
-> **Ààlà iṣẹ́:** dashboard OmniRoute (`src/`) àti ojú-òpó ìpolówó (`_mono_repo/omnirouteSite/`) ń pín **ìdánimọ̀ àwòrán kan ṣoṣo** — abẹ́lẹ̀ grid bíi bébà àwòrán kan náà (32px), àwọn token àwọ̀ kan náà, àti àwọn component tí a ti mú bá òṣùwọ̀n mu.
->
-> Àwọn àkíyèsí tó wúlò fún àwọn olùtọ́jú:
->
-> - Ọ̀pọ̀ àwọn iye hex tí a kọ taara tó ṣì kù jẹ́ **ìmọ̀ọ́mọ̀** (terminal console tó máa ń ṣókùnkùn nígbà gbogbo, àwọn stroke SVG ReactFlow), a kò sì gbọ́dọ̀ **RÁRÁ** kó wọn sínú àwọn token.
-> - Grid tó dà bí ẹni pé ó “tóbi jù” lórí instance tó ń ṣiṣẹ́ jẹ́ build àtijọ́, kì í ṣe kóòdù — ìwọ̀n grid jẹ́ 32px, ó sì jẹ́ bákan náà pẹ̀lú ti ojú-òpó náà.
-> - Àwọn iye `--table-*` fún theme òkùnkùn jẹ́ báìtì-kan-náà pẹ̀lú rgba tí a kọ taara ṣáájú ìṣípadà; a ti ṣàtúnṣe theme ìmọ́lẹ̀ (ó ní àṣìṣe tó mú kó máa ṣókùnkùn nígbà gbogbo nítorí àwọn fallback `var()` tí kò ṣiṣẹ́).
+> **Ipo:** Dasibodu ti wa ni itumọ ti lori awọn** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), ti a ṣe tita bi aaye iṣẹ-iṣẹ `packages/ui-kit` (`@omniroute/ui-kit`; fọtoyiya ti oke ti wa ni ṣoki ni `packages/ui-kit/UPSTREAM.md` ati aabo nipasẹ `npm run check:ui-kit-snapshot`). Imọlẹ jẹ koko ọrọ-ọrọ; ààyò aiyipada jẹ `system`. Paleti aiyipada jẹ ti kit** Awọn ẹda** irisi (awọn didoju iwe gbigbona ati asẹnti bàbà `#e5ac82`, `packages/ui-kit/src/ci-editions.css`); Eto → Irisi → Awọ paleti ipese** Alailẹgbẹ** , awọn ami ipilẹ kit pẹlu ohun orombo wewe. Switzer jẹ ẹbi ẹyọkan fun UI, ifihan ati ọrọ koodu (`--ci-font-ui`; `--ci-font-display` ati `--ci-font-mono` pinnu si rẹ), ti gbalejo funrararẹ nipasẹ ohun elo funrararẹ (`packages/ui-kit/src/ci-fonts.css`, gbe wọle nipasẹ `ci-tokens.css`). Awọn iwe afọwọkọ Switzer ko kuna nipasẹ glyph nipasẹ glyph (`src/app/globals.css`): Inter fun Cyrillic, Greek ati Vietnamese ati, labẹ `html[dir="rtl"]` nikan, Vazirmatn fun iwe afọwọkọ Larubawa. Gbogbo aami jẹ glyph Lucide kan.
 
----
+## 1. Nibiti ohun gbe
 
-## 1. Ète
+- **Kit.** `packages/ui-kit/src` jẹ ẹda baiti-fun-baiti ti `src/` ti o wa ni oke ni ṣiṣe pinned ni `packages/ui-kit/UPSTREAM.md` (eyiti o tun ṣe igbasilẹ aṣẹ aṣẹ); `PATCHES.md` ṣe atokọ awọn abulẹ agbegbe (ko si). O jẹ orisun bi orisun, ti ko si kikọ: `next.config.mjs` yi i pada, ati awọn maapu `tsconfig.json` `@omniroute/ui-kit` → `packages/ui-kit/src` ati `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` ati `vitest.mcp.config.ts` gbe inagijẹ kan naa). Ṣe agbewọle paati ohun elo nipasẹ ọna abẹlẹ rẹ (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), rara nipasẹ agba `@omniroute/ui-kit` : agba naa fa gbogbo paati (pẹlu oluyan ọjọ) sinu agbewọle kọọkan. Iwe aṣa ohun elo naa nwọle nipasẹ `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-styles.css"`, iwe pipe: `ci-ui.css` mojuto pẹlu gbogbo idile apẹrẹ).
+- **Awọn ami-ami.** `packages/ui-kit/src/ci-tokens.css` kede awọn ami `--ci-*` ; `src/app/globals.css` ṣe afara wọn si awọn orukọ OmniRoute julọ (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), nitorina `var(--color-*)` ti o wa tẹlẹ ati awọn ohun elo Tailwind tẹsiwaju ṣiṣẹ. Koodu titun nlo awọn ohun elo Tailwind (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`...) tabi kit kilasi — rara iye hex kan (`tests/unit/design-kit-bridge.test.ts` fi agbara mu afara). `text-primary` pinnu lati `--color-primary-ink` nipasẹ `--text-color-primary`, nitorina ọrọ akọkọ duro ni kika nigba ti `bg-primary`/`border-primary` tọju dada asẹnti: labẹ Awọn ikede o jẹ `--ci-color-accent-active` kit naa ( `#99562f` ti o jinlẹ ninu ina, asẹnti bàbà ni dudu); labẹ Alailẹgbẹ, lime-800 ni imọlẹ ati orombo wewe ni dudu. Ẹya aworan apẹrẹ lo `--color-chart-1` … `--color-chart-8`, ọkọọkan pẹlu ọrọ-ailewu `--color-chart-N-ink` ati tint chirún `--color-chart-N-subtle` akomo kan, ti a sọtọ ni aṣẹ lẹsẹsẹ kit (`ciChartSeriesOrder`).
+- **Awọn akori.** `<html className="ci-theme">` (`src/app/layout.tsx`) yan iwe-ipamọ sinu akori kit. Iyanfẹ jẹ `light`, `dark` tabi `system` (`THEME_CONFIG.defaultTheme = "system"` ni `src/shared/constants/appConfig.ts`; `system` tẹle `prefers-color-scheme`). `applyTheme()` in `src/store/themeStore.ts` (digi nipasẹ `THEME_BOOT_SCRIPT`, inlined in `src/app/layout.tsx`, eyi ti o nṣiṣẹ ṣaaju ki o to hydration) ṣeto `data-theme="dark"|"light"` ati ki o yipo `.dark` kilasi lori `<html>` papo. Eto aami dudu ti kit naa jẹ bọtini lori `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`); OmniRoute's ti ara dudu yi danu (awọn `.dark` Àkọsílẹ ni `globals.css`) ati awọn julọ Tailwind `dark:` awọn ohun elo bọtini lori `.dark` kilasi. Ko si awọn tito tẹlẹ awọ asẹnti: asẹnti nigbagbogbo wa lati inu ohun elo naa, ati pe tito tẹlẹ lati inu kikọ agbalagba ti lọ silẹ nigbati ile itaja ba di ẹru.
+- **Awọn paleti.** Meji, mejeeji lati ohun elo (`src/shared/constants/appearancePalette.ts`): `editions`, aiyipada, ati `classic`. Awọn atẹjade jẹ ẹya `data-ci-appearance="editions"` kit lori `<html>`, eyiti `ci-editions.css` (ti a gbe wọle nipasẹ `ci-ui.css`) darapọ pẹlu `data-theme`; Alailẹgbẹ jẹ isansa ti abuda naa. Olupin ipalẹmọ gbongbo jẹ ẹya-ara, nitorinaa alejo ti ko ni nkan ti o fipamọ (tabi ko si JS) gba Awọn ẹda lori gbogbo dasibodu — dada, buwolu wọle, `/status`, awọn oju-iwe aṣiṣe, `/docs` ati PWA naa. Yiyan naa duro lẹgbẹẹ akori ni ile itaja `theme` kanna (`palette`, `setPalette()`, `applyPalette()` ni `src/store/themeStore.ts`) ati lo ṣaaju ki o to kun nipasẹ `THEME_BOOT_SCRIPT` (`src/shared/utils/themeBootScript.ts`, inlined in the layout's `<head>`), eyiti o yọ ẹda naa kuro nikan nigbati paleti ti o fipamọ jẹ `"classic"`; `src/app/global-error.tsx`, ni ita ipilẹ ipilẹ, lo lati ile itaja kanna. Maṣe fi `data-ci-appearance` sori nkan miiran: kit naa baamu rẹ pẹlu `html:root:has([data-ci-appearance="editions"])`, nitorinaa iru-ọmọ kan yoo yi gbogbo iwe naa pada. Iyatọ `data-ci-editions-variant="landing"` Awọn ẹda jẹ fun awọn oju-iwe titaja, kii ṣe dasibodu naa. chrome ẹrọ aṣawakiri: olupin n ṣe aiyipada, Awọn ikede, ni `viewport.themeColor` (aami kan fun `prefers-color-scheme`) ati oju opo wẹẹbu iṣafihan — `PWA_THEME_COLORS` ni `src/shared/constants/pwaThemeColors.ts`, digi kan ti Awọn ikede `--ci-color-background` (`#f3f1e9` / `#11120f`), ti a fi si `ci-editions.css` nipasẹ `tests/unit/pwa-theme-colors.test.ts`. `<meta name="theme-color">` laaye lẹhinna tẹle paleti ti o fipamọ ati ipo: `THEME_BOOT_SCRIPT` tun awọn afi kọ ṣaaju ki o to kun ati awọn iṣe ile itaja akori ṣe lori gbogbo iyipada (`resolveThemeColor()` / `applyThemeColor()` ni `src/shared/utils/themeColorMeta.ts`, pẹlu `CLASSIC_PAGE_BACKGROUND` kika lati `ciTokens` kit naa). Akori light/dark ti o fojuhan ṣeto gbogbo aami si ipo yẹn; `system` tọju awọ kan fun ero kan. Ifihan naa duro Awọn ikede: o ti mu ni ẹẹkan fun fifi sori ẹrọ, laisi ayanfẹ. Monaco ka awọn oniwe-awọ pa a ibere (`monacoKitTheme.ts`); labẹ Awọn ẹya, iwadii kika yoo tan root `data-theme` fun igbasilẹ amuṣiṣẹpọ kan, nitori ohun elo naa ṣe ipinnu Awọn ikede light/dark lati gbongbo.
+- **Awọn paati (awọn alamuuṣẹ).** `src/shared/components/index.tsx` tọju paati OmniRoute API (awọn orukọ kanna, awọn okeere okeere ati awọn atilẹyin), ati awọn ipilẹṣẹ ti o wa lẹhin rẹ jẹ awọn oluyipada lori ohun elo: awọn fọọmu (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), overlays ati esi (`Modal`/`ConfirmModal`, `Tooltip`/ `EmptyState`), `NotificationToast` `InfoTooltip` zq (`Collapsible`, `CollapsibleSection`, `Loading`, `SegmentedControl`, `Avatar`) ati tabili (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider` `Breadcrumbs`. Ohun ti nmu badọgba ṣe agbewọle paati ohun elo nipasẹ ọna abẹ-ọna ati ṣe maapu awọn atilẹyin ohun-ini sori rẹ — fun apẹẹrẹ `Button variant="primary"` ni bọtini `default` kit (`--ci-button-primary-*`: dada onidakeji ninu ina, asẹnti pẹlu inki `--ci-color-accent-foreground` rẹ ninu okunkun), `danger` jẹ `destructive`, ati `warning` ni bọtini `warning` kit. awọn iyatọ ipo `Badge` jẹ awọn ohun orin kit, ati `Select` pẹlu awọn ọmọde `<option>` ṣe apẹrẹ ohun elo `NativeSelect`. `tests/unit/ui/adapters/*.test.tsx` pin kọọkan ohun ti nmu badọgba.
+- **Ikarahun.** `src/app/(dashboard)/layout.tsx` ṣe `DashboardLayout`, eyiti o tumọ `src/shared/components/layouts/DashboardShell.tsx`: kit `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), pẹlu ọgbọn lilọ kiri OmniRoute ni `src/shared/components/Sidebar.tsx`. Ọna asopọ “fo si akoonu” si `#main-content` jẹ ipin akọkọ ti a le fojusi. `src/shared/components/Header.tsx` di ohun elo `SidebarTrigger` mu (ayipada ikarahun nikan ti ikarahun), Keak `ProductSwitcher` ati ṣiṣi paleti-paleti; o ṣe afihan akọle ipa ọna nikan nigbati ko si kit `PageHeader` (`.ci-page-header`) ti o wa ninu `#main-content`, nitorina oju-iwe ti o ni `PageHeader` tirẹ ni `h1` kan. `src/shared/components/CommandPalette.tsx` jẹ ohun elo `Dialog`.
+- **Awọn aami.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) pinnu orukọ naa (awọn ọrọ Awọn aami Ohun elo ti awọn iboju lo) nipasẹ `ICON_MAP` (`src/shared/constants/iconMap.ts`) si glyph Lucide kan. Fọọmu Awọn aami Ohun elo ati idii ti lọ: orukọ ti o padanu lati maapu naa ṣe afihan glyph ibi didoju didoju (`data-icon-missing="true"`) ati ṣe igbasilẹ ikilọ console ni ita iṣelọpọ. `npm run gen:icon-map` ṣe atẹjade awọn orukọ ti o wa ni lilo ti o nsọnu lati maapu (`tests/unit/icon-map-coverage.test.ts` kuna lori eyikeyi orukọ laisi aami Lucide; `tests/unit/icon-map-object-values.test.ts` bo awọn orukọ ti o fipamọ sinu awọn nkan wiwa); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` ṣe atunko awọn aaye gangan `<span className="material-symbols-outlined">` si `<Icon>`.
+- **Brand.** `src/shared/components/OmniRouteLogo.tsx` fi ipari si ohun elo naa: okeere okeere `OmniRouteLogo` ṣe afihan `ProductIcon product="omniroute" variant="glyph"` (inline SVG, `basePath` -safe) ati `OmniRouteLockup` n ṣe `ProductLockup product="omniroute"` (orukọ wiwọle "Keak OmniRoute") tabi, fun awọn oniṣẹ aami funfun, `name`/`logoSrc` tiwọn. Awọn ibi-iyipada ọja n gbe ni `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Awọn iboju imurasilẹ — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` ati `src/shared/components/ErrorPageScaffold.tsx` — fihan titiipa; `tests/unit/brand-pages-static.test.ts` ṣọ rẹ.
 
-Ojú-òpó ìpolówó (`viral.omniroute.online`, `why.omniroute.online`, `omniroute.online`) àti dashboard ọjà náà gbọ́dọ̀ dà bí **ọjà kan ṣoṣo**. Ojú-òpó náà ti gba palette rẹ̀ láti inú dashboard tẹ́lẹ̀ — `css/tokens.css` rẹ̀ tilẹ̀ sọ pé _“Palette náà bá ti dashboard OmniRoute mu (src/app/globals.css)”_. Nítorí náà, àwọn méjèèjì ti bára mu tó ~80% ní ìpele àwọ̀. Ohun tí kò tíì sí lórí dashboard ni:
+## 2. Awọn ofin
 
-1. **Àwòrán abẹ́lẹ̀ grid bíi bébà àwòrán** tí ojú-òpó náà ń lò lórí gbogbo ojú-ewé.
-2. Díẹ̀ lára àwọn **token àpẹrẹ tí wọ́n ń pín** tí ojú-òpó náà ní ṣùgbọ́n tí dashboard kò ní (òṣùwọ̀n radius, gradient brand, `surface-2`, font mono).
-3. **Ìṣọ̀kan ní ìpele component** — ọ̀pọ̀ àwọn component dashboard ń kọjá àwọn token theme pẹ̀lú hex/rgba tí a kọ taara.
+1. Awọn ami-ami, kii ṣe gangan. Awọn imukuro wa ni idi: ebute console dudu nigbagbogbo ati `STATUS_HEX` (`src/shared/constants/statusColors.ts`), digi ti o yanju-hex ti paleti ipo kit fun awọn olupe ti o nilo hex gangan. Awọn paleti isọri kii ṣe iyatọ diẹ sii: wọn gùn lori awọn ami apẹrẹ iwe mẹjọ ti kit (`--color-chart-1..8`, plus `-ink`/`-subtle`), ni aṣẹ lẹsẹsẹ kit, nipasẹ `src/shared/utils/categoricalPalette.ts` ati, fun awọn ilana ipa ọna, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; awọn egbegbe ReactFlow ati kanfasi orchestration ka akori-mọ `--orch-status-*` oniyipada (`src/shared/components/flow/edgeStyles.ts`).
+2. Maṣe patch `packages/ui-kit/src` pẹlu ọwọ: muṣiṣẹpọ pẹlu `scripts/dev/sync-ui-kit.sh <commit>`; ẹnu-ọna ti a ti sọ tẹlẹ `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) kuna lori eyikeyi baiti ti o yato si ipinnu oke ti a pin (o fo pẹlu ikilọ nigbati ẹda oniye ti oke, `UI_KIT_CLONE` tabi `_references/cheaper-inference-ui-kit`, ko si). Nigbati ohun elo ko ba ni nkan, ṣiṣẹ ni ayika rẹ ni ohun ti nmu badọgba tabi iboju ki o beere fun u ni oke.
+3. Awọn aiyipada ọrọ kit jẹ Gẹẹsi (`label = "Loading"`, `loadingLabel = "Loading table"`…) — kọja awọn gbolohun ọrọ ti a tumọ lati `useTranslations(...)` nigbakugba ti paati ohun elo ba ṣe ọrọ.
+4. awọn ohun elo Tailwind bori lori awọn kilasi paati ohun elo (ohun elo naa sọ `@layer theme, base, components, utilities` ati awọn ofin rẹ n gbe ni `components`) — lo awọn ohun elo fun aye ati ipilẹ, kii ṣe lati tun awọn ohun elo ohun elo awọ pada.
+5. Awọn akọle: `.ci-heading` fun oju-iwe ati awọn akọle apakan; `.ci-dashboard-display` nikan fun titobi nla, ọrọ ifihan fọnka gẹgẹbi koodu ipo oju-iwe aṣiṣe. Mejeeji lo Swiss.
+6. `tests/unit/dashboard-kit-sweep.test.ts` ṣe aabo fun igbasilẹ ohun elo: ko si akoko ligature ohun elo labẹ `src/app` tabi `src/shared/components`; ninu igi dasibodu (`src/app/(dashboard)` ati `src/shared/components`) ko si `<select>` aise, `<textarea>` tabi `<table>` ati pe ko si `role="dialog"` ti a fi ọwọ yiyi ni ita awọn imukuro ti a ṣe akojọ (ẹka abinibi `Select` ti nmu badọgba, `RequestLoggerDetail`); gbogbo `<button>` aise tabi `<input>` nibẹ nilo asọye ti o ni `kit-exception:` (pẹlu idi) ti o pari ni pupọ julọ awọn ila 3 loke rẹ; paleti hues ati `dark:` aba nikan ni awọn faili awọn akojọ igbeyewo.
+7. Ṣe idaniloju awọn akori mejeeji ati iwoye 390 px ṣaaju PR kan (awọn sikirinisoti); `tests/e2e/a11y.spec.ts` nṣiṣẹ ake.
 
-Ìwé yìí ni àyẹ̀wò àti ètò náà.
+## 3. Ẹ̀kun Síkíríìnì Kan
 
----
+1. Ṣí ojú-ìwé náà pẹ̀lú `PageHeader` ti kit (`@omniroute/ui-kit/page-header`, `compact` nínú
+   dashboard) — àkópọ̀, àpèjúwe àti `actions`. Àkọ́pọ̀ shell nígbà náà máa fi àkópọ̀ tirẹ̀ sílẹ̀.
+2. Kọ́ àwọn ìṣàkóso láti `@/shared/components` (àwọn adapter) kí o sì lo àwọn ẹ̀yà kit nípasẹ̀ subpath ní ibi tí kò
+   sí adapter (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`,
+   `Slider`…).
+3. Àwọn àwòrán: `<Icon name="…" />`. Orúkọ tuntun máa wọ inú `ICON_MAP` pẹ̀lú ẹ̀yà Lucide tí ó bá ìtumọ̀ rẹ̀
+   mu; `npm run gen:icon-map` máa kọ àwọn orúkọ tí ó ṣì kù sílẹ̀.
+4. Àwọn àwọ: àwọn ohun èlò ìtumọ̀ (`text-success`, `bg-warning-bg`, `border-border`…) àti
+   `var(--color-chart-N)` fún àwọn ìtẹ̀sí chart; kò sí àwọn iye hex, kò sí àwọn ìyàtọ̀ `dark:` tí ó ṣì ń tún àwọ kan sọ.
+5. Ọrọ̀: gbogbo ìtẹ̀lé-ọrọ̀, pẹ̀lú àwọn àmì-ọrọ̀ tí o rán lọ sọ́dọ̀ àwọn ẹ̀yà kit, máa wá láti `useTranslations`. Àwọn
+   kó̀kọ́rọ́ tuntun máa wọ inú `src/i18n/messages/en.json`, `pt-BR.json` àti `vi.json` (ìdánwò ìbáṣepọ̀ Vietnamese fi
+   gbogbo kó̀kọ́rọ́ Gẹ̀ẹ́sì tẹ̀ lé); ìṣàmu i18n ni ó máa kún àwọn locale tókù.
+6. Ṣe àwọn aláàbò lọ ṣáájú PR: `tests/unit/dashboard-kit-sweep.test.ts`,
+   `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+   `npm run check:dashboard-typecheck` (àyẹ̀wò kan ṣoṣo tí ó ń mu import tí a ṣe lẹ́mejì nínú `iconMap.ts`),
+   `npm run check:ui-icu`, àti àwọn ìdánwò tirẹ̀ ti síkíríìnì náà.
 
-## 2. Àwọn ìlànà
+## 4. Ṣíṣàfikún tàbí yíyí adapter kan padà
 
-- **Orísun òtítọ́ kan ṣoṣo = `src/app/globals.css`.** Ojú-òpó náà máa ń tẹ̀lé dashboard, kì í ṣe òdìkejì. Àwọn token tuntun máa ń wọ `globals.css` lákọ̀ọ́kọ́.
-- **Àwọn token, kì í ṣe àwọn iye tí a kọ taara.** Àwọn component máa ń lo àwọn token tó ní ìtumọ̀ (`bg-surface`, `text-primary`, `border-border`), kì í ṣe `#hex` gidi.
-- **Kí ó rọra hàn, kì í ṣe kí ó pariwo.** Grid náà jẹ́ àwòrán abẹ́lẹ̀ fífẹ́ tí ó wà lẹ́yìn àkóónú — kò gbọ́dọ̀ dín ìyàtọ̀ àwọ̀ ọ̀rọ̀ kù tàbí dí UI lọ́wọ́ láé.
-- **Ó mọ theme tó ń lò.** Ohun gbogbo ń ṣiṣẹ́ nínú `.dark` (ìrísí àkànṣe ọjà náà) àti theme ìmọ́lẹ̀.
-- **Ìmúṣẹ pẹ̀lú ìṣọ́ra.** Kọ́kọ́ ṣe àgbéjáde grid + àwọn token (ewu kékeré, ìfarahàn gíga), lẹ́yìn náà ṣe ìmótótó àwọn component ní àwọn ìgbì.
+1. Pa API gbogbogbò ti `src/shared/components/index.tsx` mọ́: orúkọ export kannáà, àwọn default export àti àwọn props tí wọ́n gba. So àwọn props àtijọ́ pọ̀ mọ́ kit láti inú adapter náà (wo `Button.tsx`: `VARIANT_TO_KIT`,
+   `SIZE_TO_KIT`).
+2. Ṣe import kit náà nípasẹ subpath (`@omniroute/ui-kit/<component>`).
+3. Àwọn ìyanáà fún àwọn àlàfo kit gbọdọ̀ wà nínú adapter náà (tàbí nínú `globals.css` `@layer components` tí àtúnṣe náà bá jẹ́ style), kì í ṣe nínú `packages/ui-kit/src` rárá.
+4. Ṣàfikún tàbí ṣe àtúnṣe `tests/unit/ui/adapters/<name>.test.tsx`. Fún adapter tí ó ní ọ̀pọ̀ olùpè, ṣe àfiwè markup tí a ṣe jáde ṣáájú àti lẹ́yìn àyípadà náà — àyípadà padding tàbí wrapper máa ń tàn ká sí gbogbo ojú-ìbòjú.
 
----
+## 5. Nmu awọn kit
 
-## 3. Ipò lọ́wọ́lọ́wọ́ — ohun tó ti bára mu àti ohun tí kò tíì bára mu
+`npm run check:ui-kit-upstream` ṣe afiwe ẹya ti a pinni ni `packages/ui-kit/UPSTREAM.md` pẹlu aami `v*` tuntun ti repo oke ati ṣe atẹjade aṣẹ amuṣiṣẹpọ nigbati itusilẹ ba jade.
 
-### 3.1 Àwọn àwọ̀ — wọ́n ti ṣọ̀kan tẹ́lẹ̀ ✅
+Ṣiṣan iṣẹ `UI Kit upstream watch` ojoojumọ (`.github/workflows/ui-kit-upstream-watch.yml`) nṣiṣẹ ayẹwo kanna. Lakoko ti pinni wa ni ẹhin, `scripts/ci/ui-kit-sync-pr.sh` ntọju PR amuṣiṣẹpọ kan ṣiṣi si ẹka `release/vX.Y.Z` ti o ga julọ, lori ẹka yiyi `chore/ui-kit-sync-latest`. Ko dapọ rara: gbogbo idasilẹ ohun elo tun nilo ayẹwo wiwo lori VPS agbegbe. Ẹka naa ni a tun kọ nigbati itusilẹ tuntun ba jade ti o fi silẹ nikan bibẹẹkọ. PR ti o ṣii pẹlu awọn iṣẹ titari nipasẹ ọwọ ko ni atunkọ, ati PR kan fun ẹya kan ti olutọju kan ti a ti pa ti ko dapọ duro ni pipade titi ti idasilẹ tuntun.
 
-Gbogbo àwọ̀ brand àti surface ti bá ojú-òpó náà mu **nípa iye** (orúkọ nìkan ló yàtọ̀ — dashboard ń fi `--color-` sí iwájú wọn). A ti ṣàyẹ̀wò èyí nínú `src/app/globals.css:30-128`:
+Nigbati ko ba si PR ti o le ṣii (itusilẹ ibi-afẹde ti di didi, PR ti ṣe titari nipasẹ ọwọ, PR ti wa ni pipade, tabi ko si ami ami PR ti a ṣeto) ṣiṣiṣẹ ṣiṣẹ jẹ ki ọran ipasẹ kan ṣii ti o sọ idi.
 
-| Èrò                           | Token ojú-òpó (`tokens.css`)                | Token dashboard (`globals.css`) | Ìbámu                |
-| ----------------------------- | ------------------------------------------- | ------------------------------- | -------------------- |
-| àkọ́kọ́                         | `--primary #e54d5e`                         | `--color-primary #e54d5e`       | ✅                   |
-| àkọ́kọ́-nígbà-hover             | `--primary-hover #c93d4e`                   | `--color-primary-hover #c93d4e` | ✅                   |
-| ìtẹnumọ́                       | `--accent #6366f1`                          | `--color-accent #6366f1`        | ✅                   |
-| ìtẹnumọ́-2                     | `--accent-2 #8b5cf6`                        | `--color-accent-hover #8b5cf6`  | ✅ (a tún un lórúkọ) |
-| ìtẹnumọ́-3                     | `--accent-3 #a855f7`                        | `--color-accent-light #a855f7`  | ✅ (a tún un lórúkọ) |
-| àṣeyọrí / ìkìlọ̀ / àṣìṣe       | `#22c55e / #f59e0b / #ef4444`               | bákan náà                       | ✅                   |
-| àwọn iná ìrìnnà               | `#ff5f56 / #ffbd2e / #27c93f`               | bákan náà                       | ✅                   |
-| bg òkùnkùn / surface / border | `#0b0e14 / #161b22 / rgba(255,255,255,.08)` | bákan náà                       | ✅                   |
-| bg ìmọ́lẹ̀ / surface / ọ̀rọ̀      | `#f9f9fb / #fff / #1a1a2e`                  | bákan náà                       | ✅                   |
+Ṣiṣẹ iṣẹ naa nlo awọn aṣiri meji:
 
-**Ìparí:** kò sí ìṣípadà àwọ̀ kankan tó yẹ kí a ṣe. Wọ́n ti ń pín ìdánimọ̀ náà tẹ́lẹ̀; a ń _parí_ rẹ̀ ni, a kò tún un kọ́ láti ìbẹ̀rẹ̀.
+- `secrets.UI_KIT_READ_TOKEN`: àmi kika-nikan fun repo oke ikọkọ. Nigbati iṣan-iṣẹ ko le ka ni oke (ko si ami ami, ami ami kan ti o da iṣẹ duro, tabi GitHub unreachable) ṣiṣe naa duro alawọ ewe ṣugbọn o kọ ikilọ kan ati pe o jẹ ki ọrọ lọtọ kan ṣii, eyiti o tilekun funrararẹ ni kete ti ṣiṣe nigbamii le ka soke lẹẹkansi.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: àmi-ọkà daradara kan lori ibi ipamọ yii pẹlu Awọn akoonu ati Awọn ibeere Fa kikọ wiwọle. `GITHUB_TOKEN` aiyipada ko le ṣẹda PRs nibi, ati pe PR ti o ṣii kii yoo ṣe okunfa CI. Laisi ami ami yii, ṣiṣan iṣẹ naa n tẹ ẹka nikan.
 
-### 3.2 Àwọn àlàfo — ohun tí dashboard kò tíì ní
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` daakọ `src/` ti o wa ni oke ni adehun yẹn (`latest` = tuntun `v*` tag) sinu `packages/ui-kit/src`, nlo iyipada ti a gba laaye nikan (o ju suffix `.js` silẹ lati agbewọle ojulumọ), o si ṣeto ẹya aaye iṣẹ ni `packages/ui-kit/package.json` ati `package-lock.json` si oke oke. Lẹhinna: atunwo `git diff packages/ui-kit`, ṣe iwe-iwoye wiwo lori awọn olupese, awọn eto, awọn akojọpọ, lilo ati aaye ipari ni awọn akori mejeeji, ṣiṣe `npm run check:ui-kit-snapshot` ati `npm run test:vitest:ui`, ati ṣii PR pẹlu iyipada iyipada oke.
 
-| Àlàfo                      | Ohun tí ojúlé ní                                                                   | Dashboard                                                          | Ìgbésẹ̀                     |
-| -------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------ | -------------------------- |
-| **Àwòrán abẹ́lẹ̀ grid**      | `body::before` bí ìwé aláwòrán, `--grid-line`, `--grid-size 32px`, `--section-alt` | **✅ ti fi kún un (Ìpele 1)**                                      | **Apá A**                  |
-| **Ìwọ̀n radius**            | `--radius 14px`, `--radius-sm 9px`                                                 | `--radius 14px` ti fi kún un; `-sm` + àtúntọ́ka component ṣì ń dúró | **Apá B / Ìpele 2**        |
-| **Gradient brand**         | `--grad-brand 135deg primary→accent-3`                                             | **✅ ti fi token kún un (Ìpele 1)**; a ó lò ó ní Ìpele 2           | **Apá B**                  |
-| **Surface inú surface**    | `--surface-2 #1c2230`                                                              | **✅ ti fi kún un (Ìpele 1)**                                      | **Apá B**                  |
-| **Fọ́ńtì mono**             | `--font-mono` (àkójọpọ̀ ui-monospace)                                               | ṣì ń dúró (Ìpele 4, pẹ̀lú àwọn olùlò rẹ̀)                            | **Apá B**                  |
-| **`text-muted` (òkùnkùn)** | `#8b8b9e`                                                                          | `#a1a1aa` (zinc-400)                                               | mú wọn bára mu — **Apá B** |
+## 6. README awọn aworan atọka
 
-### 3.3 Bí theming ṣe ń ṣiṣẹ́ (kí a má bà á jẹ́)
+Awọn aworan atọka mejila ti root `README.md` embeds (`docs/diagrams/*.svg`) jẹ ohun elo ti a lo si aworan aimi, ati pe wọn jẹ ipilẹṣẹ, kii ṣe pẹlu ọwọ: awọn faili monomono 13 ni `scripts/docs/gen-readme-*.mjs` (awọn aworan mejila pẹlu awakọ `gen-readme-diagrams.mjs` ) ati awọn idanwo iduroṣinṣin 12 ni `tests/unit/docs/readme-*-svg.test.ts`, ọkan fun aworan atọka, kọọkan baiti-ifarawe pẹlu olupilẹṣẹ faili `test-unit`.
 
-- **Tailwind v4, CSS-first** (kò sí `tailwind.config.*`). A ṣàlàyé àwọn token nínú `:root`/`.dark`, a sì mú wọn wà fún àwọn utility nípasẹ̀ `@theme inline` (`globals.css:130-179`).
-- **Ipo òkùnkùn nípasẹ̀ class `.dark`** lórí `<html>` (`@custom-variant dark` ní `globals.css:22`), tí custom Zustand store (`src/store/themeStore.ts`) ń yí padà, theme àkọ́kọ́ = `system` (`src/shared/constants/appConfig.ts:11`). Ojúlé náà ń lo `html[data-theme="light"]` dípò rẹ̀ — **àwọn ọ̀nà ìṣiṣẹ́ náà yàtọ̀, wọn kò sì ní pàdé rárá** (orísun ọ̀tọ̀ọ̀tọ̀), nítorí náà kò sí ìjà. A máa pa ọ̀nà ìṣiṣẹ́ `.dark` ti dashboard mọ́.
-- **Àtúnṣe primary ní runtime** wà (`themeStore.ts:85-97`, àwọn preset nínú `COLOR_THEMES`) — àwọn olumulo lè pààrọ̀ `--color-primary`. Eyikeyi token tuntun (gradient, abbl.) tó tọ́ka sí `--color-primary` yóò jogún àwọn àtúnṣe wọ̀nyẹn láìsí iṣẹ́ àfikún. ✅
-- **Àwọn orúkọ radius tí Tailwind v4 fi pamọ́:** `--radius-sm/md/lg/...` ni àwọn utility `rounded-*` gbára lé. Títún wọn ṣàlàyé yóò yí gbogbo `rounded-*` tó ti wà tẹ́lẹ̀ padà lẹ́sẹ̀kẹsẹ̀ (fún àpẹẹrẹ, a lo `rounded-sm` nínú fáìlì 12). Nítorí náà, a mọ̀ọ́mọ̀ sún iye radius kékeré àti àtúntọ́ka component sí Ìpele 2, níbi tí àwọn olùlò wọn yóò ti yí padà papọ̀.
+- **Awọn ami-ami.** `scripts/docs/readme-diagram-theme.mjs` daakọ paleti Awọn ikede (iwo aiyipada) lati `packages/ui-kit/src/ci-editions.css` (ti a fi si faili yẹn nipasẹ `tests/unit/docs/readme-diagram-theme.test.ts`, eyiti o tun ṣe ayẹwo WCAG AA fun gbogbo awọ ọrọ lori gbogbo oju ni awọn ero mejeeji; iyasọtọ kan, ina `warn`, jẹ ikilọ kit ṣokunkun 10% nitori iye kit jẹ 4.46:1 lori kanfasi) ati asọye ọrọ `ci-tokens.css` ni iwọn kanfasi): awọn iwuwo kit (400/500/600, ifihan ni 500) ati ipasẹ fun ohun gbogbo, ayafi awọn ipa koodu (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`), eyiti o jẹ IBM Plex Mono ati pe o wa fun awọn aṣẹ nikan, URLs, awọn idanimọ ati awọn iboju ebute. Awọn iye ina joko lori `:root`, awọn iye dudu lẹhin `prefers-color-scheme: dark`, inu faili naa, nitorinaa aworan kọọkan tẹle ero oluwo lori GitHub.
+- **Awọn nkọwe.** GitHub Markdown ko gbe CSS ko si ati pe camo proxy dina gbogbo bulọọki ita, nitorinaa iru ohun elo ni lati rin irin-ajo sinu faili naa. `scripts/docs/readme-outline.mjs`, igbesẹ ti o kẹhin ti gbogbo olupilẹṣẹ, ṣe apẹrẹ awọn ipa Switzer pẹlu HarfBuzz ati fa wọn gẹgẹbi awọn ilana vector ( awọn ọna `<defs>` ati `<use>`), pẹlu awọn itọka ati awọn aami jiometirika Switzer ko ni iyaworan lori awọn metiriki tirẹ. Awọn ilana, kii ṣe fonti ti a fi sinu: Iwe-aṣẹ Switzer (`packages/ui-kit/src/fonts/FFL.txt`) ṣe idiwọ isọdọtun ati iyipada ọna kika laisi aṣẹ kikọ ati gba awọn iyaworan fekito laaye, nitorinaa ma ṣe tun Switzer `@font-face` tabi `data:` URI bẹrẹ. Fọọmu kan ti o ku ninu faili ni OFL IBM Plex Mono subset fun ohun ti o duro ọrọ koodu gidi (`scripts/docs/readme-fonts.mjs`), ti a ṣe lati awọn ohun kikọ wọnyẹn; eyikeyi glyph ko le fi sabe jiju.
+- **Tuntun-pada.** `npm run docs:readme-diagrams` tun kọ gbogbo awọn mejila ni aṣẹ README ati tẹ laini kan fun faili pẹlu iwọn rẹ. Olupilẹṣẹ ẹyọkan tun nṣiṣẹ lori tirẹ (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` nilo `node --import tsx/esm` nitori awọn eeka rẹ wa lati agberu katalogi laaye ni `open-sse/config/freeModelCatalog.ts`; abajade CI ti iyipada katalogi kan wa ni `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Fi monomono ati SVG naa papọ.
+- **Ẹri.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` ṣe agbekalẹ faili kan ni ọna ti GitHub ṣe nṣe iranṣẹ rẹ ( tag `<img>` kan, camo's `Content-Security-Policy`, `image/svg+xml`), gba ina ati fireemu dudu kan ati ijabọ awọn ibeere fonti ita ti oju-iwe ti o ṣe (gbọdọ jẹ 0).
+- **Isuna.** Labẹ 200 KB fun faili kan (idanwo staleness kọọkan jẹri rẹ); 500 KB jẹ fila lile fun aworan README eyikeyi (ofin SVG isise afọwọsi).
+- **Daakọ ko yipada, awọn iṣiro lati ẹnu-bode.** Atunkọ yi pada iru ati paleti, kii ṣe awọn ọrọ: olupilẹṣẹ kọọkan n gbe ẹda aworan rẹ ni igbagbogbo `*_COPY` (tabi kọ ọ lati inu katalogi laaye) ti o jẹ mejeeji ọrọ ti o ya ati titẹ sii ti igbesẹ itọka. Awọn isiro Canonical duro ni awọn apa `<text>` (airi ti a ṣe alaye lẹkan, `fill-opacity:0`), kika nipasẹ `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); awọn idanwo iduroṣinṣin ti awọn aworan atọka ti ẹnu-ọna kika tun ṣiṣe awọn olufọwọsi rẹ lori faili ti ipilẹṣẹ, nitorinaa eeya kan ti o yọ kuro lati koodu naa kuna idanwo — ṣe atunṣe orisun ti ẹnu-ọna kika, kii ṣe nọmba ninu monomono.
 
----
+## 7. Atọka itọkasi
 
-## 4. Apá A — Àbẹ́lẹ̀ àkójọpọ̀ gíríìdì bébà-gíráfù (ìbéèrè pàtàkì) — TI ṢE ÀMÚṢẸ (Ìpele 1)
-
-### 4.1 Ohun tí ó jẹ́
-
-Ilànà gangan láti ojúlé náà (`_mono_repo/omnirouteSite/css/base.css`): **pseudo-element tí ó dúró ṣinṣin, tí ó sì bo gbogbo viewport**, tí ń ya gradient ìlà 1px méjì, tí ó wà ní `z-index:-1` lẹ́yìn gbogbo àkóónú.
-
-```css
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
-```
-
-**Ìdí tí èyí fi ń ṣiṣẹ́ bó tilẹ̀ jẹ́ pé `body` ní `background-color` tí kò ṣe kedere:** `::before` kan pẹ̀lú `z-index:-1` máa ń yà _lókè_ àbẹ́lẹ̀ ti element náà fúnra rẹ̀ ṣùgbọ́n _ní ìsàlẹ̀_ àkóónú in-flow rẹ̀. Nítorí náà, `--color-bg` ni àwọ̀ ìpìlẹ̀, gíríìdì náà wà ní fẹ́lẹ̀fẹ́lẹ̀ lórí rẹ̀, app náà sì ń render lókè gíríìdì náà.
-
-### 4.2 Àpẹẹrẹ tó ti wà tẹ́lẹ̀ nínú codebase
-
-`src/app/landing/page.tsx:16-26` **ti ṣe àgbékalẹ̀ gíríìdì kan náà fún ojú-ewé kọ̀ọ̀kan tẹ́lẹ̀** — ṣùgbọ́n pẹ̀lú àwọn ìlà **pupa** (`#E54D5E`, opacity `0.06`) ní **50px**, pẹ̀lú àwọn orb aláàrìn-ìn. Nítorí náà, a ti fi ẹ̀rí múlẹ̀ pé àpẹẹrẹ náà ń ṣiṣẹ́ nínú ọjà náà; iṣẹ́ yìí ń gbé e ga sí iṣẹ́ṣọ́ ògiri **àgbáyé, tí ó mọ theme**.
-
-### 4.3 Àwọn token tí a ṣàfikún (nínú `globals.css`)
-
-```css
-:root {
-  /* light — a gbé opacity gíríìdì sókè láti 0.045 ti ojúlé náà kí iṣẹ́ṣọ́ ògiri náà
-     lè hàn ní tòótọ́ lórí dashboard tó kún fún nǹkan (àwọn card/chrome bo ọ̀pọ̀ jù lọ nínú viewport) */
-  --grid-line: rgba(0, 0, 0, 0.07);
-  --grid-size: 32px;
-  --section-alt: rgba(0, 0, 0, 0.022);
-}
-.dark {
-  /* dark — a gbé e sókè láti 0.035 fún ìdí kan náà */
-  --grid-line: rgba(255, 255, 255, 0.06);
-  --section-alt: rgba(255, 255, 255, 0.018);
-}
-```
-
-### 4.4 Ìdènà kan ṣoṣo — ti yọ kúrò
-
-Gíríìdì náà jẹ́ àgbáyé nípa bí a ṣe kọ́ ọ (ó bo panel, `auth`/`login`, àwọn ojú-ewé àṣìṣe — gbogbo route — lẹ́ẹ̀kan náà). Element **kan ṣoṣo** ló fi pamọ́ sínú panel:
-
-- `src/shared/components/layouts/DashboardLayout.tsx` — wrapper ìta náà ya `bg-bg` tí kò ṣe kedere. Gbogbo ohun tó wà ní ìsàlẹ̀ rẹ̀ ti ṣe kedere tẹ́lẹ̀ (`<main>`, container tí a lè scroll, àti inner `max-w-7xl`), nítorí náà **yíyọ `bg-bg` kúrò** jẹ́ kí gíríìdì body hàn gba agbègbè àkóónú náà (àwọ̀ ìpìlẹ̀ `--color-bg` ti body ṣì wà).
-
-  ```diff
-  - <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-bg">
-  + <div className="flex h-dvh min-h-0 w-full overflow-hidden">
-  ```
-
-### 4.5 Ìbáṣepọ̀ chrome (sidebar / header)
-
-- `Header` (`Header.tsx:207`, `bg-bg`) àti `Sidebar` (`Sidebar.tsx:430`, `bg-sidebar`) ṣì jẹ́ **èyí tí kò ṣe kedere** → gíríìdì náà hàn ní **agbègbè àkóónú nìkan**, pẹ̀lú chrome tó lágbára tó yí i ká. Àyànfẹ́ ìbẹ̀rẹ̀ tó fara balẹ̀, ó sì bá ọ̀nà tí ojúlé náà fi ń ya chrome sọ́tọ̀ kúrò ní canvas mu (ìpinnu D3 = alágbára).
-
-### 4.6 Àwọn ojú-ewé login / auth / àṣìṣe
-
-Àwọn wọ̀nyí ń render ní tààrà lábẹ́ `<body>` (kò sí chrome panel), nítorí náà gíríìdì àgbáyé náà yẹ kí ó hàn lẹ́yìn wọn láìfọwọ́sí. **Ìpele 5 — TI PARÍ:** àwọn wrapper olójú-iboju-kíkún standalone náà jẹ́ èyí tí kò ṣe kedere ní tòótọ́ (`min-h-screen … bg-bg`, níbi tí `bg-bg` ti jẹ́ àwọ̀ ìpìlẹ̀ líle kan náà bí `<body>`), èyí tó fi gíríìdì pamọ́ lórí gbogbo ojú-iboju tí kì í ṣe dashboard — kì í ṣe login nìkan. Gbogbo wọn ti ṣe kedere báyìí kí iṣẹ́ṣọ́ ògiri tí wọ́n jọ lò lè hàn: `login`, `forgot-password`, `callback`, `maintenance`, `offline`, `status`, `terms`, `privacy`, `onboarding`, àti `ErrorPageScaffold` (tó bo `400`/`401`). Èyí ti parí **D4** (a fa á gbòòrò láti login nìkan sí gbogbo ojú-iboju standalone). `tests/unit/design-grid-background.test.ts` ló ń ṣọ́ ọ.
-
-### 4.7 Ojú-ewé ìbẹ̀rẹ̀
-
-`landing/page.tsx` ṣì pa àbẹ́lẹ̀ aláàrìn-ìn rẹ̀ tó ní kúlẹ̀kúlẹ̀ síi mọ́ (àwọn orb + vignette) — ìfihàn títà tirẹ̀ ni (ìpinnu D5 = fi sílẹ̀ bí ó ṣe wà).
-
----
-
-## 5. Apá B — Ìṣọ̀kan token
-
-Ìpele 1 ń ṣàfikún àwọn token ìdánimọ̀ tí kò ṣiṣẹ́ lọ́wọ́lọ́wọ́, tí kò sì ní ìkọlù (`--surface-2`/`--color-surface-2`, `--grad-brand`, `--radius`). Ìpele 2 so ìwọ̀n radius pọ̀ mọ́ Tailwind, ó sì tún tọ́ àwọn component sí i; Ìpele 4 ṣàfikún `--font-mono` pẹ̀lú àwọn tó ń lò ó.
-
-| Token                      | Ìdí                                                             | Ìpele                           |
-| -------------------------- | --------------------------------------------------------------- | ------------------------------- |
-| `--radius` / `--radius-sm` | Ìwọ̀n radius kan ṣoṣo (14/9) dípò 6/8/12 àd-hoc                  | 1 (iye) / 2 (sọ pọ̀ + tún tọ́ sí) |
-| `--grad-brand`             | Gradient brand fún àwọn CTA àkọ́kọ́ (pupa→violet), tó bá ojúlé mu | 1 (token) / 2 (Button)          |
-| `--surface-2`              | Àwọn panel inú panel / àkọlé tábìlì / àwọn ìlà inset            | 1                               |
-| `--font-mono`              | Àwọn block kóòdù, terminal, ID, endpoints                       | 4                               |
-| Àtúnṣe `--text-muted`      | Yan iye kan fún ojúlé↔panel (`#a1a1aa` ni a dámọ̀ràn)            | 2                               |
-
-**D2 (text-muted):** ojúlé `#8b8b9e` vs dashboard `#a1a1aa`. A dámọ̀ràn pé kí a pa **`#a1a1aa` ti dashboard** mọ́, kí a sì ṣe àfikún sí _ojúlé_ láti bá a mu. Ìyípadà ìrísí nìkan.
-
----
-
-## 6. Apá C — Ìṣọ̀kan àwọn component (Àwọn Ìpele 2–4)
-
-Àwọn component àdáni (kò sí shadcn/Radix), Tailwind v4, àwọn token semantic ni a ti gba lò **ní ọ̀pọ̀ jù lọ** (fáìlì 195 ló import barrel tí gbogbo wọn ń pín). Iṣẹ́ tó kù ni yíyọ àwọn **ọ̀nà tó ń kọjá ètò náà** kúrò. Ilé: `src/shared/components/`.
-
-| #   | Ohun                                     | Fáìlì/Fáìlì                                                                                                              | Ìṣòro → Àfojúsùn                                                                                                              | Ìpele |
-| --- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- | ----- |
-| C1  | **Ìbámu radius**                         | `Button.tsx:14-18`, `Card.tsx:39`, `Modal.tsx`, `Input.tsx`, `Select.tsx`                                                | àkópọ̀ 6/8/12px → `--radius`/`--radius-sm` (14/9)                                                                              | 2     |
-| C2  | **Gradient Button + variant `accent`**   | `Button.tsx:5-12`                                                                                                        | primary jẹ́ pupa→pupa tó fẹlẹ́fẹlẹ́; mú un bá `--grad-brand` mu; ṣàfikún variant `accent` tó sọnù. ~195 importers — tó hàn jù lọ | 2     |
-| C3  | **Àwọn tábìlì**                          | `DataTable.tsx:122-176`, `logTableStyles.ts`, `globals.css:405-414`                                                      | 100% rgba inline tí a hardcode + vars tí kò sí; ṣí wọn lọ sí tokens, dá àwọn style tó yàtọ̀ dúró                               | 3     |
-| C4  | **Ṣe àwọn àwọ̀ status ní àárín gbùngbùn** | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `ProviderCascadeNode.tsx`, `Badge.tsx` + 5 helpers | ẹ̀dà 6+ ti hex kan náà → module kan láti inú `--color-success/warning/error`                                                   | 3     |
-| C5  | **Ààlà Card**                            | `Card.tsx:39`                                                                                                            | `border-white/5` → brand `/8`                                                                                                 | 2     |
-| C6  | **Àtúnṣe focus ring** ✅ TI PARÍ         | `globals.css` `--focus-ring` (accent) vs `ring-primary/30` àwọn control form                                             | a sọ ọ́ di ọ̀kan lórí **accent (violet)** láti bá global ring mu + láti yà á kúrò ní error ring pupa; error ṣì jẹ́ pupa          | 4     |
-| C7  | **Ṣàfikún `Checkbox` + `Textarea`**      | `<input>`/`<textarea>` raw pẹ̀lú `accentColor:#6366f1` inline                                                             | àwọn primitive tí token ń darí                                                                                                | 4     |
-| C8  | **Ìwádìí hex tí a hardcode**             | `ConsoleLogViewer.tsx:240`, `ComboLiveStudio.tsx:306`, àwọn dot Modal, ~14 fáìlì chart                                   | àwọn literal → tokens                                                                                                         | 4     |
-| C9  | **`cn()` → clsx + tailwind-merge**       | `src/shared/utils/cn.ts`                                                                                                 | àwọn class tó ń ta ko ara wọn ń tò pọ̀; ó ṣe pàtàkì fún overrides C1                                                           | 2     |
-
-**Tí ó ti bá brand mu tẹ́lẹ̀ (token ló ń darí wọn, radius nìkan ni wọ́n nílò):** `Badge`, `Toggle`, `SegmentedControl`, `Input`, `Select`.
-
----
-
-## 7. Ètò ìmújáde
-
-- **Ìpele 1 — Grid + àwọn token ìdánimọ̀ (PR YÌÍ).** Grid `globals.css` + àwọn token `--surface-2`/`--grad-brand`/`--radius`; wallpaper `body::before`; yọ ohun ìdènà `bg-bg` kúrò; ìdánwò guard aláìyípadà. Ewu rẹ̀ kéré, a sì lè dá a padà nínú commit kan.
-- **Ìpele 2 — Àwọn primitive (C1, C2, C5) — TI PARÍ nínú PR yìí.** Àwọn utility radius onítumọ̀ `rounded-card` (14px) / `rounded-control` (9px) ni a fi kún un nípasẹ̀ `@theme` (àwọn orúkọ àkànṣe ni wọ́n, nítorí náà àwọn `rounded-sm/md/lg/xl` àìṣe-déédéé kò yí padà — kò sí ìyípadà ńlá tó kan fáìlì 400); Card/Modal → 14px, Button/Input/Select → 9px; Button àkọ́kọ́ → `--grad-brand` (pupa→violet) + variant `accent` tuntun; àwọn border Card → token `border-border` (0.08). **Ti sún síwájú:** `cn()`→tailwind-merge (C9) nílò àwọn dep tuntun; a fi àtúnyẹ̀wò `rounded-lg` ad-hoc (fáìlì 326) sílẹ̀ bí ó ti rí nítorí pé àwọn primitive ló bo ọ̀pọ̀ jù lọ lára surface.
-- **Ìpele 3 — Àwọn àwọ̀ ipò + àwọn tábìlì (C3, C4) — TI PARÍ nínú PR yìí.** ✅ **C4** (`src/shared/constants/statusColors.ts` — `STATUS_HEX` gẹ́gẹ́ bí orísun kan ṣoṣo; a tún darí `flow/edgeStyles.ts` + `TokenHealthBadge` sí i, wọ́n sì pa hex kan náà mọ́ láìyípadà). ✅ Token **`--font-mono`**. ✅ **C3 (DataTable)** — a rọ́pò gbogbo rgba inline + àwọn fallback `var(--bg-table-header)` / `var(--text-secondary)` tí kò ṣiṣẹ́ mọ́ pẹ̀lú àkójọpọ̀ token `--table-*` (`--table-header-bg/-row-zebra/-row-hover/-cell-border/-row-selected`), níbi tí **àwọn iye dark ti dọ́gba pátápátá pẹ̀lú rgba hardcoded àtijọ́** (dark jẹ́ byte-identical), tí àwọn iye light sì ṣàtúnṣe theme light tó máa ń jẹ́ dark tẹ́lẹ̀. Border header → `--color-border`, ọ̀rọ̀ secondary → `--color-text-muted`. **Ó nílò àyẹ̀wò ojú kí a tó merge.** (Àwọn tí a kò fọwọ́ kàn: `logTableStyles.ts` àti àwọn rule Ant `.ant-table` legacy — wọ́n yàtọ̀, ààyò wọn sì kéré.)
-- **Ìpele 4 — Ìmọ́tótó (C6, C7, C9 ti parí; C8 ṣì ń dúró).** ✅ **C9** `cn()` → `twMerge(clsx(...))` (a fi clsx + tailwind-merge kún un gẹ́gẹ́ bí àwọn dep) — `className` olùpè kan ń _rọ́pò_ class primitive tó ń tako rẹ̀ lọ́nà tó tọ́ báyìí dípò kí wọ́n kójọ pọ̀. ✅ **C7** àwọn primitive `Checkbox` + `Textarea` tuntun (àwọn token ló ń darí wọn, a sì export wọn láti inú barrel; àfikún ni wọ́n — a lè máa gba àwọn checkbox raw 32 / textarea raw 41 lò ní kẹ̀rẹ̀kẹ̀rẹ̀). ✅ **C6** ìbámu focus-ring — àwọn control form (`Input`/`Select`/`Textarea`/`Toggle`/`Checkbox`) ń focus lórí ring **accent (violet)** báyìí láti bá `--focus-ring` àgbáyé mu àti láti dẹ́kun ìkọlù rẹ̀ pẹ̀lú ring àṣìṣe pupa; ipò àṣìṣe pupa kò yí padà. ⏳ **C8 hex-sweep KÌ Í ṣe find/replace afọ́jú** — àwọn tó ṣẹ̀ tí a ti fìdí wọn múlẹ̀ pé wọ́n jẹ́ _ìmọ̀-ọkàn_ tí wọ́n sì gbọ́dọ̀ dúró: `ConsoleLogViewer.tsx:240` (terminal always-dark), popover `TokenHealthBadge`, àwọn stroke SVG ReactFlow. Ṣe migration àwọn hex tí a pinnu gan-an pé kí wọ́n tẹ̀lé theme nìkan.
-
-Ní ìpele kọ̀ọ̀kan: `npm run lint` + `npm run typecheck:core` + àyẹ̀wò ojú.
-
----
-
-## 8. Àwọn ìpinnu tí kò tíì dé (àwọn àbá)
-
-- **D1 — Button àkọ́kọ́:** jẹ́ kí ó dúró ní pupa→pupa tàbí kí a yí i sí **pupa→violet `--grad-brand`**? Àbá: **pupa→violet** (Ìpele 2).
-- **D2 — Àwọ̀ ìlà grid:** **neutral** (ara site) — èyí la yàn — dípò pupa brand. Ìwọ̀n **32px** (a dín in kù ní nǹkan bí 30% láti 46px àkọ́kọ́ lẹ́yìn ìdáhùn owner — àwọn cell 46px dà bí ohun tó tóbi jù lórí layout dashboard).
-- **D3 — Ìmọ́lẹ̀ Chrome:** sidebar/header **solid** — èyí la yàn.
-- **D4 — Grid Auth/login:** ✅ **TI PARÍ (Ìpele 5)** — a yọ `bg-bg` opaque kúrò nínú gbogbo wrapper full-screen standalone (kì í ṣe login nìkan), kí grid lè hàn lórí gbogbo screen. Wo §4.6.
-- **D5 — Ojú-ìwé landing:** fi splash animated sílẹ̀ bí ó ti rí. Èyí la yàn.
-- **D6 — Radius 14/9 jákèjádò product:** Àbá: bẹ́ẹ̀ ni (Ìpele 2).
-- **D7 — Ìpele 1 ni kí ó kọ́kọ́ ship:** Èyí la yàn.
-- **D8 — Ìbú layout (Ìpele 5):** a fi ààlà `max-w-7xl` (1280px) sí shell àkóónú dashboard, èyí tó mú kí ó wà ní àárín pẹ̀lú gutter ẹgbẹ̀ tó ṣófo tí ó sì fẹ̀ lórí àwọn monitor ńlá. ✅ **TI PARÍ** — a gbé e sókè sí `max-w-[3840px]` fluid (4K gidi): àkóónú ń tẹ̀lé viewport báyìí títí dé nǹkan bí 4K, ó sì máa ń wà ní àárín lẹ́yìn ìwọ̀n yẹn nìkan (`DashboardLayout.tsx`). Àwọn ojú-ìwé tí a mọ̀ọ́mọ̀ ṣe ní híhá ṣì wà ní híhá gẹ́gẹ́ bí design (`ProviderOnboardingWizard` max-w-5xl, `Rtk`/`CavemanContextPageClient` max-w-6xl).
-- **D9 — Àwọn data table opaque (Ìpele 6):** níwọ̀n bí agbègbè àkóónú dashboard ti di transparent báyìí (kí wallpaper grid lè hàn lábẹ́ rẹ̀, Ìpele 5), àwọn data table tí container wọn _kì í ṣe_ surface opaque jẹ́ kí grid yọ wọ inú àwọn even-row transparent / zebra alpha-kékeré wọn. ✅ **TI PARÍ** — gbogbo table tí kò ní card ń kun `bg-surface` báyìí (tàbí, fún primitive `<DataTable>`, `background: var(--color-surface)` lórí scroll container rẹ̀). Àwọn tí a ṣàtúnṣe: `DataTable` (primitive), `ProxyLogger`/`RequestLoggerV2` (tint `<Card>` `bg-black/5 dark:bg-black/20` wọn ń borí `bg-surface` Card nípasẹ̀ tailwind-merge → ó fẹ́rẹ̀ẹ́ tó 95% transparent), `BatchListTab`/`FilesListTab`/`CacheEntriesTab`/`ReasoningCacheTab`/`cache page`/`FreePoolTab`/`ModelMappingTable`/`HeaderTable`, pẹ̀lú àwọn “table” CSS-grid méjì tó wà nínú àwọn view cache (`bg-surface/35` → `bg-surface`). A ṣàyẹ̀wò àwọn table tó ti wà nínú `<Card>`/Modal pé wọ́n opaque, a sì mọ̀ọ́mọ̀ fi wọ́n sílẹ̀ láìfọwọ́ kàn wọ́n (`bg-surface` níbẹ̀ jẹ́ no-op tí kò pọndandan). Grid fúnra rẹ̀ **kò nílò ìyípadà kankan** — `body::before` dashboard jẹ́ byte-identical sí ti site (`--grid-size: 32px`); “grid tó tóbi jù” èyíkéyìí tí a bá rí lórí instance tó ń ṣiṣẹ́ jẹ́ build stale tó wà ṣáájú `#4143`, kì í ṣe code. `tests/unit/design-grid-background.test.ts` ló ń guard rẹ̀ (block Ìpele 6).
-
----
-
-## 9. Ohun tí kò sí nínú ààlà iṣẹ́ / àwọn ewu
-
-- **Kò sí ìyípadà palette** — àwọn àwọ̀ ti bá ara wọn mu tẹ́lẹ̀; a kàn ń ṣàfikún àwọn token tí ó ṣì kù. Kò sí ewu kankan pé a ó tún àwọ̀ ọja náà ṣe.
-- **Kò sí ìyípadà sí theme-engine** — ẹ jẹ́ kí `.dark` + ibi ìpamọ́ Zustand wà bí ó ṣe rí.
-- **Ìyípadà radius (Phase 2) gbòòrò** — ó kan gbogbo card/button/input; ẹ fi ojú wo àwọn ojú-ìwé tí ó kún fún ohun èlò (àwọn table, àwọn modal) dáadáa kí ẹ tó merge.
-- **Àwọn table (C3)** ní ọ̀pọ̀ jù lọ nínú styling tí a kọ sínú kóòdù tààrà, wọ́n sì ní ààyè regression tó ga jù lọ — ẹ ya wọn sọ́tọ̀ sínú PR tiwọn.
-
----
-
-## 10. Atọ́ka ìtọ́kasí
-
-| Agbègbè                                 | Path                                                                                                                 |
-| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Àwọn token Dashboard                    | `src/app/globals.css` (`:root`, `.dark`, `@theme inline`, `body`, `body::before`)                                    |
-| Ibi ìpamọ́ theme                         | `src/store/themeStore.ts`, `src/shared/components/ThemeProvider.tsx`, `src/shared/constants/appConfig.ts:9-11`       |
-| Ìkarahun panel (grid tí a ṣí sílẹ̀ níbí) | `src/shared/components/layouts/DashboardLayout.tsx`                                                                  |
-| Chrome                                  | `src/shared/components/Header.tsx:207`, `src/shared/components/Sidebar.tsx:430`                                      |
-| Àpẹẹrẹ tẹ́lẹ̀ fún grid                    | `src/app/landing/page.tsx:16-26`                                                                                     |
-| Àwọn primitive                          | `src/shared/components/{Button,Card,Input,Select,Badge,Modal,Toggle,SegmentedControl,Loading,Tooltip,DataTable}.tsx` |
-| Àwọn orísun status-color                | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `logTableStyles.ts`                            |
-| Ohun èlò `cn`                           | `src/shared/utils/cn.ts`                                                                                             |
-| Ìdánwò guard Phase 1                    | `tests/unit/design-grid-background.test.ts`                                                                          |
-| Ìtọ́kasí site                            | `_mono_repo/omnirouteSite/css/tokens.css`, `css/base.css`                                                            |
+- `src/app/globals.css` — àmi afara, `.dark` danu, OmniRoute `@layer components` awọn amugbooro
+- `packages/ui-kit/UPSTREAM.md` — pinned upstream ṣẹ ati aṣẹ iwe-aṣẹ; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-editions.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` ati awọn oluyipada lẹgbẹẹ rẹ; `src/shared/components/layouts/DashboardShell.tsx`, `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`, `scripts/dev/codemod-material-icons.mjs`
+- `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
+- `src/store/themeStore.ts`, `src/shared/utils/themeBootScript.ts`, `src/shared/constants/appearancePalette.ts`, `src/shared/constants/pwaThemeColors.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

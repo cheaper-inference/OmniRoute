@@ -25,74 +25,57 @@ omniroute launch --profile glm52  # OmniRoute 経由で glm/glm-5.2 を使用す
 
 ---
 
-## Claude Code がゲートウェイに接続する仕組み
+## Claudeコードがゲートウェイに接続する方法
 
-Claude Code は **Anthropic Messages API** と通信し、環境変数を使用してカスタム
-エンドポイントに接続します（`--base-url` フラグはありません）。
+Claudeコードは次のことを話します**AnthropicメッセージAPI**環境変数を持つカスタム エンドポイントを指します ( `--base-url`フラグはありません)。
 
-| 変数                                         | 用途                                                                                             |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `ANTHROPIC_BASE_URL`                         | ゲートウェイのルート URL（Claude Code が `/v1/messages` を追加）。**`/v1` サフィックスは不要。** |
-| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` として送信 — OmniRoute のアクセストークン／API キーを使用              |
-| `ANTHROPIC_API_KEY`                          | 代替手段：`x-api-key` として送信。両方が設定されている場合は `ANTHROPIC_AUTH_TOKEN` が優先       |
-| `ANTHROPIC_MODEL`                            | 特定のモデルを強制的に使用（`/model` ピッカーのデフォルトを上書き）                              |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → ネイティブの `/model` ピッカーに、`/v1/models` の `claude*`/`anthropic*` モデルを表示      |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | レスポンスごとの出力トークン数を制限（例：`65536`）                                              |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | 自動コンパクションを実行するトークンしきい値                                                     |
+| 変数                                         | 目的                                                                                                    |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | ゲートウェイ ルートURL (Claudeコードは`/v1/messages`を追加します)。** `/v1`サフィックスはありません。** |
+| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` —として送信され、 OmniRouteアクセス トークン / APIキーを使用してください      |
+| `ANTHROPIC_API_KEY`                          | 代替案: `x-api-key`として送信されます。両方がセットされた場合、 `ANTHROPIC_AUTH_TOKEN`勝ちます          |
+| `ANTHROPIC_MODEL`                            | 特定のモデルを強制します ( `/model`ピッカーのデフォルトをオーバーライドします)                          |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` →ネイティブ`/model`ピッカーは、 `/v1/models`からの`claude*`/`anthropic*`モデルをリストします。      |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | 応答ごとの出力トークンの制限 (例: `65536`)                                                              |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | 自動圧縮のトークンしきい値                                                                              |
 
-> 環境変数は**起動時に一度だけ**読み込まれます。変更後は Claude Code を再起動してください。
+> 環境変数が読み取られます**起動時に1回**変更後、 — Claudeコードを再起動します。
 
-`omniroute launch` は、これらをすべて自動的に設定します。アクティブなコンテキストから
-ベース URL とトークンを解決するため、`omniroute connect <vps>` の後に
-`omniroute launch` を実行するだけで動作します。さらに、サーバーのヘルスチェックを行い、
-`claude` を exec します。
+固定文字列ではなく循環する資格情報の場合は、 `~/.claude/settings.json`の`apiKeyHelper`を、現在の資格情報を stdout に出力するコマンドに設定します。 Claudeコードは、デフォルトで出力を 5 分間キャッシュし (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS`それをオーバーライドします)、値を`Authorization: Bearer`と`x-api-key`両方に送信します。スクリプトは資格情報を出力する必要があり、それ以外は何も出力しません—一緒にバナーを出力すると、v2.1.227 +ではヘルパーが失敗します。
+
+This is how Entra ID SSO works: `scripts/cli/omniroute-sso.mjs token` prints a short-lived Entra access token that OmniRoute verifies instead of an API key. See [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
+`omniroute launch`これらすべてを設定します。アクティブなコンテキストからベースURL +トークンを解決し (つまり、 `omniroute connect <vps>`の後に`omniroute launch`動作するだけです)、サーバーのヘルスチェックを行い、 `claude`を実行します。
 
 ---
 
-## ディスカバリーエイリアス — Claude 以外のモデルを `/model` ピッカーに表示
+## ディスカバリエイリアス — `/model` ピッカーに Claude 以外のモデルを表示する
 
-Claude Code のゲートウェイモデルディスカバリーでは、ID が `claude` または
-`anthropic` で始まるモデルのみが表示されます。そのため、
-`CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` を設定しても、通常、ネイティブの
-`/model` ピッカーに表示されるのは OmniRoute の Claude／Anthropic モデル**のみ**です。
-`kimi/kimi-k2.6` や `glm/glm-5.2` は正常にルーティングできるにもかかわらず、表示されません。
+Claude Code のゲートウェイモデルディスカバリは、`claude` または `anthropic` で始まる ID のみをリストアップします。そのため、`CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` を設定しても、ネイティブの `/model` ピッカーには通常 OmniRoute の Claude/Anthropic モデル**のみ**が表示され、`kimi/kimi-k2.6` や `glm/glm-5.2` はルーティングが正常に機能していても一切表示されません。
 
-OmniRoute は、有効になっている任意のモデル（およびコンボ）を `claude/…` ID の配下に
-ミラーリングできます。これによりフィルターを通過し、ピッカーに表示されるようになります。
+OmniRoute は、有効になっている任意のモデル(およびコンボ)を `claude/…` ID の下にミラーリングできるため、そのフィルターを通過してピッカーに表示されるようになります:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
 glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
-<コンボ "custo-otimizado"> →  claude/combo/custo-otimizado
+<combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Claude Code でこれらのいずれかを選択すると、OmniRoute はルーティング前に
-`claude/` ラッパーを取り除き、実際の ID に戻します。一方、本物の
-`claude/<real-claude-model>` ID（実際の Claude OAuth プロバイダー）は常にそのまま維持されます。
+Claude Code でこれらのいずれかを選択すると、OmniRoute はルーティング前に `claude/` ラッパーを取り除いて実際の ID に戻します。本物の `claude/<real-claude-model>` ID(実際の Claude OAuth プロバイダー)は常にそのまま変更されません。
 
-**この機能はデフォルトで無効**であり、3 段階のゲートによって制御されます
-（より具体的な設定が優先されます）。そのため、Claude Code を使用しないクライアントに
-対して、通常の OmniRoute がカタログを二重に表示することはありません。
+デフォルトではベース ID のみがミラーリングされます。オプトインの `CATALOG_MIRROR_REFINEMENTS_ENABLED` フィーチャーフラグをオンにすると、カタログにすでにリストされている推論エフォートバリアント(例: `codex/gpt-6-sol-high`)も他の ID と同様にミラーリングされるため、Claude Code で明示的なエフォートレベルを選択できるようになります。また、リクエストパスで実体化できない組み込みの `auto/*` ID はミラーリングされません。エフォートバリアントがそもそもリストされるかどうかは、引き続き `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` によって制御されます。ミラーリングがベースカタログに存在しないバリアントを追加することはありません。
 
-| レベル       | 場所                                                                    |
-| ------------ | ----------------------------------------------------------------------- |
-| モデル       | プロバイダー詳細ページ → モデルごとの「Claude Code で公開」トグル       |
-| プロバイダー | プロバイダー詳細ページ → プロバイダー単位のトグル（全モデルが対象）     |
-| グローバル   | 設定 → 機能フラグ → `EXPOSE_CC_DISCOVERY_ALIASES`（デフォルトではオフ） |
+**これはデフォルトでオフ**になっており、3 段階のゲート(最も具体的な設定が優先)によって制御されるため、通常の OmniRoute が Claude Code を使用しないクライアントに対してカタログを二重に公開することはありません:
 
-`EXPOSE_CC_DISCOVERY_ALIASES` 環境変数を設定すると、グローバルレベルが強制的に有効になり、
-ダッシュボードでの上書きよりも優先されます。この場合、機能フラグ画面には
-「環境変数によって有効」という注記が表示されます。そのうえで、プロバイダー単位および
-モデル単位のトグルによって、さらに設定を絞り込めます。たとえば、グローバルがオフで
-Kimi プロバイダーがオンの場合、Kimi のモデルだけが公開されます。
+| レベル       | 場所                                                                                     |
+| ------------ | ---------------------------------------------------------------------------------------- |
+| モデル       | プロバイダー詳細ページ → モデルごとの「Expose in Claude Code」(Claude Code で公開)トグル |
+| プロバイダー | プロバイダー詳細ページ → プロバイダーレベルのトグル(そのすべてのモデルをカバー)          |
+| グローバル   | 設定 → フィーチャーフラグ → `EXPOSE_CC_DISCOVERY_ALIASES`(デフォルトはオフ)              |
 
-> ⚠️ **Claude 以外のモデルにおけるウィンドウの不一致。** Claude Code は、認識できない
-> ID に対して 200K のコンテキストウィンドウを想定します（`/v1/models` から実際の
-> ウィンドウサイズを読み取ることはできません）。より大きなウィンドウを持つモデル
-> （例：Kimi K2 の 256K）では、自動コンパクションが早すぎるタイミングで実行されないよう、
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` をモデルの実際のウィンドウサイズより小さい値に
-> 設定してください。上記で生成されるプロファイルでは、モデルごとにこの設定が
-> すでに適用されています。
+`EXPOSE_CC_DISCOVERY_ALIASES` 環境変数はグローバルレベルを強制的にオンにし、ダッシュボードのオーバーライドよりも優先されます(有効になっている場合、フィーチャーフラグ画面に「active via environment variable」(環境変数経由で有効)という注記が表示されます)。プロバイダーごとおよびモデルごとのトグルはそこからさらに細かく調整します。たとえば、グローバルがオフで Kimi プロバイダーがオンの場合、Kimi のモデルのみが公開されます。
+
+> ⚠️ **Claude 以外のモデルでのウィンドウ不一致。** Claude Code は、認識できない ID に対して 200K のコンテキストウィンドウを想定します(`/v1/models` から実際のウィンドウを読み取ることができません)。より大きなウィンドウを持つモデル(例: Kimi K2 の 256K)の場合、自動コンパクションが早すぎるタイミングで発動しないよう、`CLAUDE_CODE_AUTO_COMPACT_WINDOW` をモデルの実際のウィンドウより小さい値に設定してください。上記の生成済みプロファイルは、モデルごとにすでにこの設定を行っています。
 
 ---
 

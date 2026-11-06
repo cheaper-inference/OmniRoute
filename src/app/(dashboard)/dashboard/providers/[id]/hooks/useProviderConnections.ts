@@ -365,8 +365,10 @@ export function useProviderConnections(
   // every setState below runs after an await.
 
   useEffect(() => {
+    let active = true;
     const run = async () => {
       const result = await loadProviderConnectionsData(providerId, isCompatible);
+      if (!active) return;
       if (result) {
         if (result.connections) setConnections(result.connections);
         if (result.nodeResolved) setProviderNode(result.node);
@@ -376,9 +378,13 @@ export function useProviderConnections(
     void run();
     const runProxyConfig = async () => {
       const result = await loadProxyConfigData();
+      if (!active) return;
       if (result) setProxyConfig(result.config);
     };
     void runProxyConfig();
+    return () => {
+      active = false;
+    };
   }, [providerId, isCompatible]);
 
   // Per-connection proxy (handles registry assignments)

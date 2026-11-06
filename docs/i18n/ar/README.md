@@ -13,25 +13,27 @@
 
 # 🚀 OmniRoute — بوابة الذكاء الاصطناعي المجانية
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — لا تتوقف عن البرمجة أبدًا. كل أداة ذكاء اصطناعي ← 375 مزودًا — أكثر من 150 منها مجاني — عبر نقطة نهاية واحدة. Claude Code وCodex وCursor وCline وCopilot وAntigravity إلى Claude / GPT / Gemini مجانًا مع تبديل احتياطي تلقائي. يوفّر الضغط المتراكم RTK + Caveman ما بين 15% و95% من الرموز (~89% في المتوسط) — فلا تصل إلى الحدود القصوى أبدًا. 375 مزودًا للذكاء الاصطناعي · أكثر من 150 فئة مجانية · ~1.62 مليار رمز مجاني شهريًا · 20 استراتيجية توجيه · تكلفة البدء $0."/>
+**أنشأه [Diego Souza](https://github.com/diegosouzapw)**
+
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — لا تتوقف عن البرمجة. كل أداة ذكاء اصطناعي → 380 مزودًا — أكثر من 150 منها مجانية — عبر نقطة نهاية واحدة. Claude Code وCodex وCursor وCline وCopilot وAntigravity إلى Claude / GPT / Gemini مجانًا مع التبديل التلقائي عند التعطل. يوفر الضغط المتراص RTK + Caveman نسبة 15–95% من الرموز (بمتوسط ~89%) — ولن تصل إلى الحدود أبدًا. 380 مزودًا للذكاء الاصطناعي · أكثر من 150 مستوى مجانيًا · ~1.62 مليار رمز مجاني شهريًا · 20 استراتيجية توجيه · ابدأ بتكلفة 0 دولار."/>
 
 </div>
 
 <div align="center">
 
-## 💰 ~1.62B رمز / شهر عبر الخطط المجانية للجهات الخارجية
+## 💰 ~1.62B من الرموز / شهر عبر المستويات المجانية التابعة لجهات خارجية
 
 </div>
 
-> **استخدم حساباتك الخاصة لدى المزوّدين.** هذا تقدير إجمالي عبر خطط مجانية منفصلة ومؤهلة لدى جهات خارجية، وليس منحة رموز من OmniRoute. سجّل، واحصل على بيانات الاعتماد عند الحاجة، واربط المزوّدين الذين يمكنك استخدامهم؛ إذ يتحكم كل مزوّد في حدوده وتوافره وشروطه.
+> **استخدم حسابات مزوّدي الخدمة الخاصة بك.** هذا تقدير إجمالي عبر مستويات مجانية تابعة لجهات خارجية ومؤهلة بشكل منفصل، وليس منحة رموز من OmniRoute. سجّل حسابًا، واحصل على بيانات الاعتماد عند الحاجة، واربط المزوّدين الذين يمكنك استخدامهم؛ إذ يتحكم كل مزوّد في حدوده ومدى توفّره وشروطه.
 >
-> إن تجميع الخطط المجانية يدويًا أمر شاق — عشرات حزم SDK، وعشرات حدود المعدل، ومن دون أي فكرة عن المقدار المتاح لك فعليًا. يفهرس OmniRoute **467 إدخالًا للخطط المجانية عبر 34 مفتاحًا للمجموعات المتكررة**، ويحسب إجمالي الرموز الرئيسي من **17 مجموعة ذات ميزانية شهرية موجبة منشورة، بالإضافة إلى خمسة حدود Groq لكل نموذج**، بعد إزالة التكرار حسب المجموعة المشتركة. تُعرض بشكل منفصل الحصص التي لا تصبح متاحة إلا بعد التحقق الإقليمي من الهوية (حاليًا: ModelScope)، وهي +~6M خلف التحقق الإقليمي من الهوية، ولا تُضاف أبدًا إلى الرقم الرئيسي. وتظل النتيجة ظاهرة في لوحة المعلومات (`/dashboard/free-tiers`).
+> إن تجميع المستويات المجانية يدويًا أمر شاق — عشرات حِزم SDK، وعشرات حدود معدّل الطلبات، ومن دون معرفة واضحة بكمية ما تملكه فعليًا. يفهرس OmniRoute **485 إدخالًا ضمن المستوى المجاني عبر 34 مفتاح تجميعي متكرر**، ويحسب العنوان الخاص بالرموز من **17 مجموعة ذات ميزانية شهرية إيجابية منشورة، بالإضافة إلى خمسة حدود Groq لكل نموذج**، مع إزالة التكرار حسب المجموعة المشتركة. تظهر الحصص التي لا تُفتح إلا بعد التحقق من الهوية الإقليمية (حاليًا: ModelScope) بشكل منفصل، مع إضافة ~6M بعد التحقق من الهوية الإقليمية، ولا تُجمع مطلقًا في العنوان الرئيسي. تظل النتيجة ظاهرة على لوحة المعلومات (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="بطاقة ميزانية الخطط المجانية في OmniRoute: نحو ~1.62B من الرموز المجانية شهريًا بصورة مستمرة، وتصل إلى ~2.22B في الشهر الأول مع أرصدة التسجيل، من 34 مفتاحًا موثقًا للمجموعات المتكررة تغطي 467 إدخالًا مفهرسًا للخطط المجانية خلف نقطة نهاية واحدة. حسابات صادقة بعد إزالة تكرار المجموعات — تُحتسب كل مجموعة مشتركة مرة واحدة، بما في ذلك 17 مجموعة متكررة ذات ميزانية شهرية موجبة منشورة للرموز، بالإضافة إلى خمسة حدود Groq لكل نموذج؛ وقد وُسم 12 مزوّدًا بضرورة التجنب في فهرس مخاطر الشروط لكي تقرر بنفسك. يتضمن شريط الميزانية Mistral 1B وNara 210M وLLM7 150M وxKiro 150M وGroq 30M (خمسة حدود لكل نموذج) ومجموعات أصغر، بالإضافة إلى أرصدة التسجيل للشهر الأول والمزوّدين المجانيين دائمًا الذين لا يفرضون حدًا للرموز، والمعروضين بشكل منفصل حتى لا يضخموا الرقم الرئيسي أبدًا. بيانات الاستخدام والمتبقي المباشرة على /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="بطاقة الميزانية للمستوى المجاني في OmniRoute: نحو 1.62B من الرموز المجانية شهريًا بشكل مستقر، وما يصل إلى نحو 2.22B في الشهر الأول مع أرصدة التسجيل، من 34 مفتاحًا تجميعيًا متكررًا موثقًا يغطي 485 إدخالًا مفهرسًا ضمن المستويات المجانية عبر نقطة نهاية واحدة. حساب صادق مع إزالة تكرار المجموعات — تُحتسب كل مجموعة مشتركة مرة واحدة، بما في ذلك 17 مجموعة متكررة ذات ميزانية شهرية إيجابية منشورة للرموز، بالإضافة إلى خمسة حدود Groq لكل نموذج؛ وقد تم وضع علامة «تجنب» على 12 مزوّدًا في كتالوج مخاطر الشروط، لتتخذ قرارك بنفسك. يتضمن شريط الميزانية Mistral 1B وNara 210M وLLM7 150M وxKiro 150M وGroq 30M (خمسة حدود لكل نموذج) ومجموعات أصغر، بالإضافة إلى أرصدة التسجيل للشهر الأول والمزوّدين المجانيين نهائيًا من دون سقف للرموز، المعروضين بشكل منفصل حتى لا يضخموا العنوان الرئيسي. الاستخدام/المتبقي المباشر على /dashboard/free-tiers."/>
 
-> ملخص متحرك لصفحة `/dashboard/free-tiers` المباشرة. المنهجية الكاملة (إزالة تكرار المجموعات، فئات الأرصدة، شروط المزوّدين): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+> ملخص متحرك لصفحة `/dashboard/free-tiers` المباشرة. المنهجية الكاملة (إزالة تكرار المجموعات، وشرائح الأرصدة، وشروط المزوّدين): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
-> <sub>تُعاد مراجعة هذه الأرقام كل أسبوعين مقارنةً بالفهرس المباشر، وهي **تتحرك في كلا الاتجاهين** — إذا أنهى مزوّد خطة مجانية ينخفض الرقم؛ وإذا أُضيفت خطة جديدة يرتفع. ننشر ما يحسبه الفهرس فعليًا، وليس أفضل سيناريو بعد تقريبه إلى الأعلى.</sub>
+> <sub>تُعاد مراجعة هذه الأرقام كل أسبوعين مقابل الكتالوج المباشر، وهي **تتحرك في كلا الاتجاهين** — عندما ينهي مزوّد مستوى مجانيًا ينخفض الرقم؛ وعندما ينضم مزوّد جديد يرتفع. ننشر ما يحسبه الكتالوج فعليًا، ولا نقرّب الرقم إلى الأعلى أبدًا لعرض أفضل حالة ممكنة.</sub>
 
 <br/>
 
@@ -39,7 +41,7 @@
 
 <h3>
 
-⭐ ضع نجمة للمستودع إذا ساعدك OMNIROUTE على توفير المال وتسهيل عملك.
+⭐ امنح المستودع نجمة إذا ساعدك OMNIROUTE على توفير المال وجعل عملك أسهل.
 
 </h3>
 
@@ -50,38 +52,38 @@
 
 ### 💬 انضم إلى المجتمع
 
-**👋 تابع المشرف — وكن أول من يحصل على المزوّدين الجدد والإصدارات والنصائح:**
+**👋 تابع المسؤول عن الصيانة — واحصل أولًا على المزوّدين والإصدارات والنصائح الجديدة:**
 
 [![تابع Diego على LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
 [![تابع @diegosouzapw على GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
 
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
 [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsApp العالمي](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp البرازيل](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
+[![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
+[![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
 [![الموقع الإلكتروني](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
 
-**الأسئلة، ونصائح المزوّدين، وخريطة الطريق، والدعم ← [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 العالمي](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 البرازيل](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [البوابة](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**الأسئلة، ونصائح المزوّدين، وخارطة الطريق، والدعم ← [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [البوابة](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
-## 📈 البوابة تواصل النمو
+## 📈 البوابة تواصل نموّها
 
 <div align="center">
 
-|                                   |        v3.8.50        | **v3.8.51** |      `v3.8.52+`       |
-| --------------------------------- | :-------------------: | :---------: | :-------------------: |
-| 🌐 المزوّدون                      |          352          |   **358**   |          375          |
-| 🧠 معرّفات نماذج المحادثة الفريدة |         1320          |  **1374**   |         1475          |
-| 🖼️ جسر الأنماط                    | 🆕 رؤية + صوت + فيديو |      ✓      |           ✓           |
-| 📡 كتالوج Radar المجاني           |   🆕 اشتراك اختياري   |      ✓      |           ✓           |
-| ⚖️ الجدولة المدركة للحصص          |    🆕 Quota-Share     |      ✓      |           ✓           |
-| 📊 قياسات الحصص                   |       🆕 مباشرة       |      ✓      |           ✓           |
-| 🧰 الوضع بلا واجهة                |           —           |      —      | 🆕 `serve --headless` |
-| 🛤️ بنية مسار LTS التحتية          |           —           |      —      |   🆕 قنوات الإصدار    |
-| 🔎 واجهة API لاكتشاف النماذج      |           —           |      —      | 🆕 `/v1/models/query` |
+|                                  |           v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
+| -------------------------------- | :-------------------------: | :---------: | :-------------------: |
+| 🌐 المزوّدون                     |             352             |   **358**   |          380          |
+| 🧠 معرّفات نماذج الدردشة الفريدة |            1320             |  **1374**   |         1491          |
+| 🖼️ جسر الوسائط                   | 🆕 الرؤية + الصوت + الفيديو |      ✓      |           ✓           |
+| 📡 الكتالوج المجاني للرادار      |         🆕 اختياري          |      ✓      |           ✓           |
+| ⚖️ الجدولة المراعية للحصص        |       🆕 Quota-Share        |      ✓      |           ✓           |
+| 📊 بيانات الحصص                  |          🆕 مباشرة          |      ✓      |           ✓           |
+| 🧰 الوضع دون واجهة               |              —              |      —      | 🆕 `serve --headless` |
+| 🛤️ بنية مسار LTS                 |              —              |      —      |   🆕 قنوات الإصدار    |
+| 🔎 واجهة برمجة اكتشاف النماذج    |              —              |      —      | 🆕 `/v1/models/query` |
 
-**← [خارطة الطريق](ROADMAP.md) — على المسار نحو `v3.9.0 LTS`**
+**→ [خارطة الطريق](ROADMAP.md) — على المسار نحو `v3.9.0 LTS`**
 
 </div>
 
@@ -89,12 +91,12 @@
 
 ## 🧩 متاح
 
-[![إصدار npm](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
-![تنزيلات NPM الشهرية](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
+[![npm version](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
+![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
-[![الترخيص: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-![عمليات سحب Docker](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![تنزيلات Electron](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
+![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -111,9 +113,9 @@
   </tr>
   <tr>
     <td align="right"><b>⚙️ الميزات</b></td>
-    <td align="center"><a href="#-combos--the-flagship">🎯 المجموعات</a></td>
-    <td align="center"><a href="#-375-ai-providers--153-catalog-marked-free">🌐 الموفّرون</a></td>
-    <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI وMCP</a></td>
+    <td align="center"><a href="#-combos--the-flagship">🎯 التركيبات</a></td>
+    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 الموفّرون</a></td>
+    <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI و MCP</a></td>
   </tr>
   <tr>
     <td align="right"></td>
@@ -128,23 +130,23 @@
     <td align="center"><a href="#-compatible-clis--coding-agents">🤖 واجهات CLI المتوافقة</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💚 الدعم</b></td>
-    <td align="center"><a href="#-support-omniroute">💚 الدعم / التبرّع</a></td>
+    <td align="right"><b>💚 ادعم</b></td>
+    <td align="center"><a href="#-support-omniroute">💚 الدعم / التبرع</a></td>
     <td align="center"><a href="#-community--help">💬 المجتمع</a></td>
     <td align="center"><a href="#-sponsors">💖 الرعاة</a></td>
   </tr>
   <tr>
     <td align="right"><b>📦 المشروع</b></td>
-    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ الحزمة التقنية</a></td>
+    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ حزمة التقنيات</a></td>
     <td align="center"><a href="#-documentation">📖 الوثائق</a></td>
-    <td align="center"><a href="#-900-contributors">👥 المساهمون</a></td>
+    <td align="center"><a href="#-1000-contributors">👥 المساهمون</a></td>
   </tr>
 </table>
 
 </div>
 
 <div align="center">
-  <b>🌐 متاح بـ 67 لغة</b>
+  <b>🌐 بـ67 لغة</b>
   <br/><br/>
   <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="الإنجليزية (en)" title="الإنجليزية (en)"></a>
   <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="البرتغالية — البرازيل (pt-BR)" title="البرتغالية — البرازيل (pt-BR)"></a>
@@ -197,7 +199,7 @@
   <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="السلوفينية (sl)" title="السلوفينية (sl)"></a>
   <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="المالطية (mt)" title="المالطية (mt)"></a>
   <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="الأيرلندية (ga)" title="الأيرلندية (ga)"></a>
-  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="الكنادية (kn)" title="الكنادية (kn)"></a>
+  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="الكانادا (kn)" title="الكانادا (kn)"></a>
   <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="المالايالامية (ml)" title="المالايالامية (ml)"></a>
   <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="الأوديا (or)" title="الأوديا (or)"></a>
   <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="البنجابية (pa)" title="البنجابية (pa)"></a>
@@ -211,7 +213,7 @@
   <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="الأمهرية (am)" title="الأمهرية (am)"></a>
   <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="الأوزبكية (uz)" title="الأوزبكية (uz)"></a>
   <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="الجورجية (ka)" title="الجورجية (ka)"></a>
-  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="الأرمينية (hy)" title="الأرمينية (hy)"></a>
+  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="الأرمنية (hy)" title="الأرمنية (hy)"></a>
   <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="البوسنية (bs)" title="البوسنية (bs)"></a>
 </div>
 
@@ -222,23 +224,23 @@
 
 <a id="first-run"></a>
 
-## 🆓 ثبّت، وصّل مزوّدًا، ثم وجّه الطلبات عبر نقطة نهاية واحدة
+## 🆓 ثبّت موفرًا، وصِله، ثم مرّر الطلبات عبر نقطة نهاية واحدة
 
 </div>
 
-<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="ثلاث خطوات: ثبّت OmniRoute وشغّله، وصّل مزوّدًا مؤهلًا باستخدام حسابك أو مفتاح API الخاص بك، ثم وجّه أداتك إلى localhost:20128/v1 باستخدام مفتاح OmniRoute API والنموذج auto. يعتمد التوجيه على الاتصالات المؤهلة المتاحة وحدود المزوّد."/>
+<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="ثلاث خطوات: ثبّت OmniRoute وشغّله، وصِل موفرًا مؤهلًا باستخدام حسابك الخاص أو مفتاح API، ثم وجّه أداتك إلى localhost:20128/v1 باستخدام مفتاح OmniRoute API والنموذج auto. تعتمد عملية التوجيه على الاتصالات المؤهلة المتاحة وحدود الموفر."/>
 
 ```bash
-# بعد توصيل مزوّد، انسخ مفتاح OmniRoute الخاص بك من لوحة المعلومات ← نقاط النهاية:
+# بعد توصيل موفر، انسخ مفتاح OmniRoute من لوحة المعلومات ← نقاط النهاية:
 curl http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer YOUR_OMNIROUTE_KEY" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-<sub>يتطلب `auto` مسارًا مؤهلًا. قد لا يحتوي التثبيت الجديد على أي وجهات مؤهلة لا تتطلب مفاتيح، وقد يرفض المزوّد الذي لا يتطلب مفتاحًا عملاء الجهات الخارجية. تُستبعد المزوّدات الموسومة بـ `tos: avoid`، بما فيها Kiro، من التوجيه التلقائي افتراضيًا؛ ولا يؤدي توصيل حساب إلى تجاوز هذا الإعداد. راجع [دليل الخطط المجانية](docs/getting-started/FREE-TIERS-GUIDE.md) قبل اختيار مزوّد.</sub>
+<sub>يحتاج `auto` إلى مسار مؤهل. قد لا يتضمن التثبيت الجديد أي أهداف مؤهلة بلا مفاتيح، وقد يرفض موفر بلا مفتاح عملاء من جهات خارجية. يُستبعد الموفرون المعلّمة بـ `tos: avoid`، بما في ذلك Kiro، من التوجيه التلقائي افتراضيًا؛ ولا يؤدي توصيل حساب إلى تجاوز هذا الإعداد. راجع [دليل المستويات المجانية](docs/getting-started/FREE-TIERS-GUIDE.md) قبل اختيار موفر.</sub>
 
-<sub>📦 نصوص برمجية للبدء السريع جاهزة للنسخ واللصق لـ **Python وNode.js وPHP وcURL** ← [`examples/quickstart/`](examples/quickstart/)</sub>
+<sub>📦 نصوص بدء سريع قابلة للنسخ واللصق لـ **Python وNode.js وPHP وcURL** ← [`examples/quickstart/`](examples/quickstart/)</sub>
 
 <br/>
 
@@ -248,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="الوعد — نقطة نهاية واحدة و375 مزوّدًا. يحافظ التحويل التلقائي إلى مسار بديل على استمرار التوجيه ما دامت هناك وجهة سليمة أخرى متاحة. ست ركائز: تحويل مرن إلى مسار بديل عبر 375 مزوّدًا · توفير يصل إلى 95% من الرموز المميزة لأعباء العمل المؤهلة · بدء الاستخدام مقابل $0 مع أكثر من 150 خطة مجانية و52 مزوّدًا مجانيًا دائمًا، متكررًا أو بلا مفاتيح · 37 عملية تكامل مع واجهات سطر الأوامر والوكلاء من خلال إعداد واحد · توافق مع OpenAI وClaude وGemini وResponses API عند /v1 · عناصر تحكم للإنتاج تشمل قواطع الدارات، وتمويه TLS، و110 أدوات MCP، وA2A، والذاكرة، وحواجز الحماية، والتقييمات، وأكثر من 56,000 تعريف اختبار ثابت عبر أكثر من 7,800 ملف اختبار متتبَّع."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="الوعد — نقطة نهاية واحدة و380 موفرًا. يحافظ الإرجاع التلقائي على استمرار التوجيه ما دام هناك هدف آخر سليم متاحًا. ست ركائز: إرجاع مرن عبر 380 موفرًا · توفير يصل إلى 95% من الرموز في أعباء العمل المؤهلة · بدءًا من 0 دولار مع أكثر من 150 مستوى مجانيًا و54 موفرًا مجانيًا متكررًا/دائمًا بلا مفاتيح · 39 تكاملًا مع CLI/الوكلاء عبر إعداد واحد · توافق مع OpenAI وClaude وGemini وResponses API عبر /v1 · عناصر تحكم للإنتاج تشمل قواطع الدائرة، وتخفّي TLS، وMCP مع 110 أدوات، وA2A، والذاكرة، والضوابط الوقائية، والتقييمات، و56,000+ تصريح اختبار ثابت عبر أكثر من 7,800 ملف اختبار متعقَّب."/>
 
 <br/>
 <br/>
@@ -259,11 +261,11 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="لماذا OmniRoute — توقّف عن التنقل بين 10 لوحات معلومات، ومفاتيح API المعطّلة، والفواتير المفاجئة. عشر مشكلات يومية مقابل حلولها: انتهاء صلاحية الحصة من دون استخدامها ← الاستفادة القصوى من الاشتراكات؛ بلوغ حدود المعدل في أثناء البرمجة ← تحويل تلقائي إلى مسار بديل من 4 مستويات (الاشتراك ← API ← منخفض التكلفة ← مجاني)؛ استهلاك مخرجات الأدوات للرموز المميزة ← ضغط RTK + Caveman ‏(15–95%)؛ واجهات API باهظة التكلفة ← توجيه محسّن وفق التكلفة؛ لكل أداة إعدادها الخاص ← نقطة نهاية واحدة ولوحة معلومات واحدة؛ حظر الذكاء الاصطناعي ← وكيل من 3 مستويات + تمويه TLS؛ مفاتيح معطّلة ← مرونة من 3 طبقات (قواطع الدارات، وفترة تهدئة المفاتيح، وقفل النموذج)؛ مشاركة الفريق لاشتراك واحد ← مجموعات مفاتيح بحصص عادلة؛ مرور المطالبات عبر سحابة طرف آخر ← نهج محلي أولًا مع مفاتيح مشفّرة باستخدام AES-256-GCM؛ غياب الرؤية الواضحة للإنفاق ← تحليلات مباشرة (الاستخدام، والحصة، والتوفير، وزمن استجابة p95)."/>
+<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="لماذا OmniRoute — توقّف عن إدارة 10 لوحات معلومات ومفاتيح API معطّلة وفواتير مفاجئة. عشرة تحديات يومية مقابل حلولها: انتهاء الحصة دون استخدامها ← تعظيم الاستفادة من الاشتراكات؛ بلوغ حدود المعدل أثناء البرمجة ← إرجاع تلقائي من 4 مستويات (الاشتراك ← API ← الرخيص ← المجاني)؛ استهلاك مخرجات الأدوات للرموز ← ضغط RTK + Caveman (15–95%)؛ واجهات API باهظة الثمن ← توجيه محسّن التكلفة؛ إعداد خاص بكل أداة ← نقطة نهاية واحدة ولوحة معلومات واحدة؛ حجب الذكاء الاصطناعي ← وكيل عكسي من 3 مستويات + تخفّي TLS؛ مفاتيح معطّلة ← مرونة من 3 طبقات (قواطع الدائرة، وتهدئة المفاتيح، وإيقاف النماذج)؛ مشاركة الفريق لاشتراك واحد ← مجموعات مفاتيح مع حصص عادلة؛ مرور المطالبات عبر سحابة شخص آخر ← محلي أولًا مع مفاتيح مشفّرة باستخدام AES-256-GCM؛ عدم وضوح الإنفاق ← تحليلات مباشرة (الاستخدام، والحصة، والتوفير، وزمن الاستجابة p95)."/>
 
 <div align="center">
 
-<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="تدفق طلب OmniRoute: تستدعي بيئة IDE أو واجهة CLI الخاصة بك (Claude Code وCursor وCline…) نقطة نهاية محلية واحدة (http://localhost:20128/v1)؛ ويمكن للموجّه الذكي في OmniRoute ‏(ضغط RTK + Caveman، و20 استراتيجية توجيه، وقواطع الدارات، وتمويه TLS، وMCP، وA2A، وحواجز الحماية) التحويل إلى مسار بديل عبر 4 مستويات من المزوّدين ما دامت هناك وجهة مؤهلة وسليمة — المستوى 1: الاشتراك، المستوى 2: مفتاح API، المستوى 3: منخفض التكلفة، والمستوى 4: مجاني."/>
+<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="تدفق طلب OmniRoute: تستدعي بيئة التطوير المتكاملة أو CLI لديك (Claude Code وCursor وCline…) نقطة نهاية محلية واحدة (http://localhost:20128/v1)؛ ويمكن لموجّه OmniRoute الذكي (ضغط RTK + Caveman، و20 استراتيجية توجيه، وقواطع الدائرة، وتخفّي TLS، وMCP، وA2A، والضوابط الوقائية) الرجوع عبر 4 مستويات من الموفرين ما دام هناك هدف مؤهل وسليم — المستوى 1 الاشتراك، والمستوى 2 مفتاح API، والمستوى 3 الرخيص، والمستوى 4 المجاني."/>
 
 </div>
 
@@ -504,13 +506,13 @@ curl http://localhost:20128/v1/chat/completions \
 
 <div align="center">
 
-## 🏆 ما الذي يميّز OmniRoute
+## 🏆 ما الذي يميز OmniRoute
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="ما الذي يميّز OmniRoute — لقطة مؤرخة لمقارنة الميزات مع 9router وOpenRouter وCLIProxyAPI وLiteLLM عبر 13 قدرة. OmniRoute: ‏375 مزوّدًا، وأكثر من 150 مستوى مجانيًا مدمجًا، و20 استراتيجية توجيه، وضغط رموز بمحرك ذي 12 آلية، وخادم MCP مدمج يضم 110 أدوات، وبروتوكول وكلاء A2A، وذاكرة دائمة، وحواجز حماية، ووكلاء سحابيّون، وتمويه بصمة TLS، ودعم Desktop/Termux/PWA، و67 لغة لواجهة المستخدم ضمن i18n. يخضع OmniRoute لترخيص MIT ويمكن استضافته ذاتيًا. قد تتغير قدرات المنافسين وأعدادها؛ راجع المنهجية المرتبطة."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="ما الذي يميز OmniRoute — لقطة ميزات مؤرخة مقابل 9router و OpenRouter و CLIProxyAPI و LiteLLM عبر 13 قدرة. OmniRoute: 380 مزودًا، أكثر من 150 طبقة مجانية مدمجة، 20 استراتيجية توجيه، ضغط رموز بـ 12 محركًا، خادم MCP مدمج مع 110 أدوات، بروتوكول وكيل A2A، ذاكرة دائمة، حواجز أمان، وكلاء سحابة، إخفاء بصمة TLS، سطح مكتب/Termux/PWA و67 لغة لواجهة المستخدم. OmniRoute مرخصة بترخيص MIT وقابلة للاستضافة الذاتية. قد تتغير قدرات وأعداد المنافسين؛ راجع المنهجية المرتبطة."/>
 
-<sub>📊 المنهجية الكاملة وتفاصيل كل ميزة مقارنةً بـ 9router وOpenRouter وCLIProxyAPI وLiteLLM ← [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
+<sub>📊 المنهجية الكاملة وتفاصيل كل ميزة مقابل 9router و OpenRouter و CLIProxyAPI و LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
 <br/>
 
@@ -578,43 +580,43 @@ Radar اختياري ويستخدم طلبات GET فقط. لا يرفع عمي�
 
 </div>
 
-> أبرز المستجدات من **v3.8.20 → v3.8.52**. السجل الكامل في [`CHANGELOG.md`](CHANGELOG.md).
+> أبرز التحديثات الأخيرة من **v3.8.20 → v3.8.53**. السجل الكامل في [`CHANGELOG.md`](CHANGELOG.md).
 
-- **⚖️ توجيه `quota-weighted`** — تتخطى استراتيجية الدمج العشرون الحسابات التي استنفدت حصتها، ثم تختار من بين البقية بما يتناسب مع الحصة المتبقية ÷ الحمل الجاري، مع إبقاء المحادثات الحالية مثبتة. → [الدمج التلقائي](docs/routing/AUTO-COMBO.md)
-- **🧰 الوضع بلا واجهة** — يشغّل `omniroute serve --headless` (أو `OMNIROUTE_HEADLESS=1`) محرك الوكيل `/v1/*` فقط، مع تعطيل لوحة المعلومات والأنظمة الفرعية الخاصة بها. → [الوضع بلا واجهة](docs/guides/HEADLESS.md)
-- **🔎 اكتشاف النماذج** — يرشّح `/v1/models` حسب الإمكانات والسياق والنوع والنص، ويعيد `POST /v1/models/query` قائمة مختصرة حتمية مع مستوى الرؤية نفسه لكل مفتاح. → [مرجع API](docs/reference/API_REFERENCE.md)
-- **🔑 التحكم في التوجيه لكل مفتاح** — ثبّت مفتاح API على نموذج أو دمج واحد باستخدام `forcedModel`، وأضف نماذج المفتاح وعمليات الدمج الخاصة به أو أزلها ذريًا (`/api/keys/{id}/access`). → [مرجع API](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
-- **🛡️ عناصر تحكم أدق في معلومات التعريف الشخصية** — تحديد حسب النوع، وما يصل إلى 20 نمط إخفاء مخصصًا خاضعًا للتحقق، وعدادات اكتشاف لكل نوع؛ وتظل عملية الإخفاء نفسها اختيارية. → [ضوابط الحماية](docs/security/GUARDRAILS.md)
-- **🌍 67 لغة** — للوحة المعلومات ونسخ الوثائق وواجهة CLI، مع إضافة لغة في كل مكان بأمر واحد عبر `npm run i18n:add-locale`. → [دليل i18n](docs/guides/I18N.md)
-- **🎛️ OmniConductor** — تفويض A2A وارد إلى أسطول وكلائك، ومهارات Conductor على بطاقة الوكيل، ولوحة معلومات تتضمن دردشة Faro الصوتية بنظام اضغط للتحدث. → [خادم A2A](docs/frameworks/A2A-SERVER.md)
-- **🛂 قبول تكيفي وحماية من الحمل الزائد** — توضع طلبات الدردشة الثقيلة في قائمة انتظار بدلًا من إرجاع 503، مع عقود إيجار متجددة ذرية لمعدل RPM لكل اتصال. → [دليل المرونة](docs/architecture/RESILIENCE_GUIDE.md)
-- **🗂️ ترتيب قياسي لـ `/v1/models`** — كتلة واحدة متجاورة ومجمعة حسب المزوّد لكل مزوّد (مع تثبيت عمليات الدمج أولًا)، ومستقرة عبر كل مصادر الكتالوج. → [مرجع API](docs/reference/API_REFERENCE.md)
-- **🗜️ تعزيز الضغط** — حاجز تمدد مفعّل افتراضيًا، وحزم Caveman للألمانية / الفرنسية / اليابانية + الصينية (wényán)، ومرشحات RTK لـ Gradle و.NET. → [الضغط](docs/compression/COMPRESSION_ENGINES.md)
-- **💸 تكلفة صادقة للأسعار الثابتة** — تعرض تحليلات التكلفة **$0** لمزوّدي الاشتراكات / خطط البرمجة؛ بينما تستمر تقديرات الميزانية والحصة والتوجيه. → [مرجع API](docs/reference/API_REFERENCE.md)
-- **⚖️ توجيه مشاركة الحصة** — قسّم حصة حساب مشترك بإنصاف بين المفاتيح المجمعة، مع الحفاظ على العمل بحيث تُعار الشرائح الخاملة. → [دليل المرونة](docs/architecture/RESILIENCE_GUIDE.md)
-- **🤖 إعداد CLI/الوكيل بأمر واحد** — 15 أمرًا مسجلًا من نوع `setup-*`؛ يشغّل `omniroute run` سبع واجهات CLI (Claude Code وCodex وAider وGoose وOpenCode وQwen Code وGemini CLI)؛ ويدعم `omniroute configure` أحد عشر هدفًا، مع منتقي تفاعلي للمزوّد والنموذج ومفضلات خاصة بكل سياق. → [عمليات تكامل CLI](docs/guides/CLI-INTEGRATIONS.md)
-- **🛰️ الوضع البعيد** — تحكّم في OmniRoute بعيد باستخدام رموز مقيّدة النطاق (`connect` / `contexts` / `tokens`) + مساعد OAuth باسم `antigravity` لتثبيتات VPS. → [الوضع البعيد](docs/guides/REMOTE-MODE.md)
-- **🧭 توجيه تلقائي أذكى** — عمليات دمج `auto/<category>:<tier>`، و**Fusion** (لوحة نماذج + حَكَم)، وتوجيه مدرك للمهمة، وتجاوزات لكل طلب للنموذج / الوضع / الميزانية بالدولار الأمريكي. → [الدمج التلقائي](docs/routing/AUTO-COMBO.md)
-- **🗜️ ضغط قابل للتوسعة** — 12 محركًا قابلًا للتركيب + Compression Studios: ‏LLMLingua-2، وUltra ثنائي المستوى، وomniglyph، وبوابة دقة لكل خطوة، وGCF v3.2، ومحرر لإعادة الترتيب بالسحب. → [الضغط](docs/compression/COMPRESSION_ENGINES.md)
-- **🕵️ فك تشفير MITM شفاف (TPROXY)** — التقط واجهات CLI التي تتجاهل متغيرات بيئة الوكيل، باستخدام CA لكل SNI + مثبّت لمخزن الثقة. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
-- **💸 قياس التكلفة في كل مكان** — ترويسات التكلفة/الاستخدام `X-OmniRoute-*` على كل نقطة نهاية، وترويسة وفورات إصابة ذاكرة التخزين المؤقت، وحصص إنفاق بالدولار الأمريكي لكل مفتاح. → [مرجع API](docs/reference/API_REFERENCE.md)
-- **🧠 ذاكرة تتحكم بها** — معطّلة افتراضيًا، مع تكميم متجهات int8 اختياري + اضمحلال محدد النوع، و`x-omniroute-no-memory` لكل طلب. → [الذاكرة](docs/frameworks/MEMORY.md)
-- **🛡️ الأمان** — حاجز لحقن المطالبات على كل مسار LLM (حزمة اختبارات الفريق الأحمر)، وضابط حماية اختياري لإخفاء بيانات الاعتماد (يحجب مفاتيح API/الأسرار المسرّبة في كلا الاتجاهين)، وبحث ويب مجاني عبر DuckDuckGo كملاذ أخير، وبوابة تسجيل دخول OIDC اختيارية للوحة المعلومات (يظل تسجيل الدخول بكلمة المرور متاحًا دائمًا). → [ضوابط الحماية](docs/security/GUARDRAILS.md)
-- **🖼️ نقاط نهاية جديدة** — تكمل `/v1/ocr` ‏(Mistral OCR) و`/v1/audio/translations` (بأسلوب Whisper) واجهة الوسائط. → [مرجع API](docs/reference/API_REFERENCE.md)
-- **🎨 إنشاء الصور / الفيديو / الصوت** — واجهة API واحدة للوسائط: فيديو xAI Grok Imagine وNovita AI، وComfyUI، وMagnific، وAdobe Firefly، وSegmind، ومزوّدو الصوت مثل ElevenLabs. → [مرجع API](docs/reference/API_REFERENCE.md)
-- **🌍 النشر والعمليات** — `basePath` للوكيل العكسي، واكتشاف تلقائي للغة المتصفح، وتتبع الأجهزة لكل مفتاح، وثقة MITM دون صلاحيات الجذر، وتعريب zh-TW. → [البيئة](docs/reference/ENVIRONMENT.md)
-- **🤝 مزيد من المزوّدين والوكلاء** — وكلاء سحابيون (Codex Cloud وCursor وDevin وJules)، وGrok Build ‏(xAI) مع تسجيل الدخول عبر المتصفح + OAuth، وبطاقة من الفئة الأولى لـ Ollama، وClaude Opus 5 وSonnet 5، وشراكة رسمية مع Kimi ‏(Code/Web/Moonshot)، وZed، وRequesty، وSenseNova، وYuanbao، وAgnes AI… بالإضافة إلى **كتالوج محدّث يضم 375 مزوّدًا**. → [المزوّدون](docs/reference/PROVIDER_REFERENCE.md)
-- **📡 شفافية التوجيه** — يتضمن كل رد ترويسة `X-OmniRoute-Decision` تحدد الاستراتيجية/المزوّد/زمن الاستجابة الذي خدمه، كما تعيد استراتيجية دمج جديدة باسم `cache-optimized` + عامل Auto-Combo المسمى `cacheAffinity` توجيه الطلبات المتكررة إلى الاتصال الذي يحتفظ بالبادئة المخزنة مؤقتًا، وتكشف نقطة نهاية للقراءة فقط باسم `/v1/auto-combo/{channel}/candidates` عن مجموعة المرشحين الحية لقناة `auto/*`. → [الدمج التلقائي](docs/routing/AUTO-COMBO.md)
-- **⚡ الأداء والبنية التحتية المحلية** — تشغيل Redis محليًا بنقرة واحدة، وأدوات نشر المرحّلات إلى Cloudflare Workers / Deno Deploy، وBifrost وMux كخدمات مضمّنة خاضعة للإشراف. ← [الخدمات المضمّنة](docs/frameworks/EMBEDDED-SERVICES.md)
-- **🧩 مضمّن أيضًا** — إطار عمل للإضافات + سوق، وأطر عمل لمهارات Omni/Agent/GitHub، وتكامل مع خزنة Obsidian (22 أداة MCP)، وواجهات Batch وFiles المتوافقة مع OpenAI، وذاكرة تخزين مؤقت دلالية للاستجابات، ونظام تحفيز يتضمن لوحات صدارة، واكتشاف وكلاء ACP (15 وكيلًا مضمّنًا)، وتصديرًا مجدولًا للسجلات إلى BigQuery، وتوزيعًا متوازيًا متعدد النماذج عبر `auto/chaos`، وجسرًا لبوت Telegram، ومدير إصدارات داخل التطبيق، وتصنيفات LMArena-ELO لموفّري الخدمات المجانية. ← [الوثائق](docs/README.md)
+- **⚖️ التوجيه بناءً على الحصة النسبية (`quota-weighted`)** — استراتيجية الدمج رقم 20 تتجاوز الحسابات المستنفدة، ثم تختار من الباقي بنسبة الحصة المتبقية ÷ الحمل الجاري، مع إبقاء المحادثات الحالية مثبتة. → [الدمج التلقائي](docs/routing/AUTO-COMBO.md)
+- **🧰 وضع بدون واجهة (`Headless mode`)** — تشغيل `omniroute serve --headless` (أو `OMNIROUTE_HEADLESS=1`) يقوم بتشغيل محرك البروكسي `/v1/*` فقط، مع إيقاف لوحة التحكم والأنظمة الفرعية الخاصة بها. → [وضع بدون واجهة](docs/guides/HEADLESS.md)
+- **🔎 اكتشاف النماذج** — يقوم `/v1/models` بالتصفية حسب الإمكانيات، السياق، النوع والنص، و`POST /v1/models/query` يعيد قائمة مختصرة حتمية بنفس رؤية كل مفتاح. → [مرجع API](docs/reference/API_REFERENCE.md)
+- **🔑 تحكم في التوجيه لكل مفتاح** — تثبيت مفتاح API على نموذج أو دمج معين باستخدام `forcedModel`، وإضافة أو إزالة نماذج ودمج المفتاح بشكل ذري (`/api/keys/{id}/access`). → [مرجع API](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
+- **🛡️ تحكم أدق في بيانات التعريف الشخصية (PII)** — اختيار حسب النوع، حتى 20 نمط إخفاء مخصص تم التحقق منه وعدادات كشف حسب النوع؛ الإخفاء نفسه يبقى اختياريًا. → [الضوابط الأمنية](docs/security/GUARDRAILS.md)
+- **🌍 67 لغة** — لوحة التحكم، نسخ الوثائق وCLI، مع إمكانية إضافة لغة في كل مكان بأمر واحد `npm run i18n:add-locale`. → [دليل الترجمة](docs/guides/I18N.md)
+- **🎛️ OmniConductor** — تفويض A2A الوارد إلى أسطول وكلائك، مهارات Conductor على بطاقة الوكيل، ولوحة تحكم مع دردشة صوتية Faro بالضغط للتحدث. → [خادم A2A](docs/frameworks/A2A-SERVER.md)
+- **🛂 قبول متكيف وحماية من الحمل الزائد** — طلبات الدردشة الثقيلة توضع في قائمة انتظار بدلاً من إرجاع 503، مع عقود إيجار RPM متجددة ذرية لكل اتصال. → [دليل الصمود](docs/architecture/RESILIENCE_GUIDE.md)
+- **🗂️ ترتيب قياسي لنقطة `/v1/models`** — كتلة متجاورة واحدة لكل مزود (الدمج المثبت أولاً)، ثابتة عبر جميع مصادر الكتالوج. → [مرجع API](docs/reference/API_REFERENCE.md)
+- **🗜️ تعزيز الضغط** — حماية التضخيم مفعلة افتراضيًا، حزم Caveman للغات الألمانية/الفرنسية/اليابانية + الصينية (wényán)، مرشحات RTK لـ Gradle و .NET. → [الضغط](docs/compression/COMPRESSION_ENGINES.md)
+- **💸 تكلفة ثابتة وصادقة** — مزودو الاشتراكات / خطط البرمجة تظهر **$0** في تحليلات التكلفة؛ الميزانية، الحصة والتوجيه تستمر في التقدير. → [مرجع API](docs/reference/API_REFERENCE.md)
+- **⚖️ توجيه مشاركة الحصة** — تقسيم حصة الحساب المشترك بشكل عادل بين المفاتيح المجمعة، مع إمكانية إعارة الشرائح غير المستخدمة. → [دليل الصمود](docs/architecture/RESILIENCE_GUIDE.md)
+- **🤖 إعداد CLI/وكيل بأمر واحد** — 15 أمر `setup-*` مسجل؛ `omniroute run` يشغل 7 CLIs (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI)؛ `omniroute configure` يدعم 11 هدفًا مع منتقي مزود+نموذج تفاعلي ومفضلات لكل سياق. → [تكامل CLI](docs/guides/CLI-INTEGRATIONS.md)
+- **🛰️ وضع بعيد** — تشغيل OmniRoute بعيد باستخدام رموز مميزة محددة النطاق (`connect` / `contexts` / `tokens`) + مساعد OAuth `antigravity` لتثبيتات VPS. → [الوضع البعيد](docs/guides/REMOTE-MODE.md)
+- **🧭 توجيه تلقائي أذكى** — دمج `auto/<category>:<tier>`، **Fusion** (لوحة النماذج + الحكم)، توجيه حسب المهمة، تجاوزات للنموذج/الوضع/الميزانية بالدولار لكل طلب. → [الدمج التلقائي](docs/routing/AUTO-COMBO.md)
+- **🗜️ ضغط قابل للإضافة** — 12 محرك ضغط مركب + استوديوهات الضغط: LLMLingua-2، Ultra ذو مستويين، omniglyph، بوابة دقة لكل خطوة، GCF v3.2، محرر سحب وإعادة ترتيب. → [الضغط](docs/compression/COMPRESSION_ENGINES.md)
+- **🕵️ فك تشفير MITM شفاف (TPROXY)** — التقاط CLIs التي تتجاهل متغيرات بيئة البروكسي، مع CA لكل SNI + مثبت مخزن الثقة. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
+- **💸 قياس التكلفة في كل مكان** — رؤوس تكلفة/استخدام `X-OmniRoute-*` على كل نقطة نهاية، رأس توفير cache-HIT، حصص إنفاق بالدولار لكل مفتاح. → [مرجع API](docs/reference/API_REFERENCE.md)
+- **🧠 ذاكرة يمكنك التحكم بها** — متوقفة افتراضيًا، تفعيل اختياري لتكميم المتجهات int8 + تلاشي حسب النوع، `x-omniroute-no-memory` لكل طلب. → [الذاكرة](docs/frameworks/MEMORY.md)
+- **🛡️ الأمان** — حماية من حقن الأوامر في كل مسار LLM (مجموعة اختبار red-team)، حاجز إخفاء بيانات الاعتماد اختياري (إخفاء مفاتيح/أسرار API المسربة في كلا الاتجاهين)، بحث ويب DuckDuckGo مجاني كملاذ أخير، وبوابة تسجيل دخول OIDC اختيارية للوحة التحكم (تسجيل الدخول بكلمة المرور متاح دائمًا). → [الضوابط الأمنية](docs/security/GUARDRAILS.md)
+- **🖼️ نقاط نهاية جديدة** — `/v1/ocr` (Mistral OCR) و `/v1/audio/translations` (على نمط Whisper) توسعان واجهة الوسائط. → [مرجع API](docs/reference/API_REFERENCE.md)
+- **🎨 توليد الصور / الفيديو / الصوت** — واجهة API واحدة للوسائط: xAI Grok Imagine & Novita AI للفيديو، ComfyUI، Magnific، Adobe Firefly، Segmind، ومزودو الصوت مثل ElevenLabs. → [مرجع API](docs/reference/API_REFERENCE.md)
+- **🌍 النشر والتشغيل** — `basePath` للبروكسي العكسي، اكتشاف لغة المتصفح تلقائيًا، تتبع الأجهزة لكل مفتاح، ثقة MITM بدون صلاحيات الجذر، دعم zh-TW. → [البيئة](docs/reference/ENVIRONMENT.md)
+- **🤝 مزيد من المزودين والوكلاء** — وكلاء سحابة (Codex Cloud, Cursor, Devin, Jules)، Grok Build (xAI) مع تسجيل دخول المتصفح + OAuth، بطاقة Ollama مميزة، Claude Opus 5 & Sonnet 5، شراكة رسمية مع Kimi (Code/Web/Moonshot)، Zed، Requesty، SenseNova، Yuanbao، Agnes AI… وتحديث كتالوج **380 مزود**. → [المزودون](docs/reference/PROVIDER_REFERENCE.md)
+- **📡 شفافية التوجيه** — كل استجابة تحمل رأس `X-OmniRoute-Decision` يذكر الاستراتيجية/المزود/الزمن الذي خدمها، استراتيجية دمج جديدة `cache-optimized` + عامل `cacheAffinity` في Auto-Combo يعيد توجيه الطلبات المتكررة إلى الاتصال الذي يحمل البادئة المخزنة، ونقطة نهاية للقراءة فقط `/v1/auto-combo/{channel}/candidates` تعرض مجموعة المرشحين الحية لقناة `auto/*`. → [الدمج التلقائي](docs/routing/AUTO-COMBO.md)
+- **⚡ الأداء المحلي والبنية التحتية** — Redis محلي بنقرة واحدة، أدوات نشر مرحلية لـ Cloudflare Workers / Deno Deploy، خدمات Bifrost و Mux كمكونات مدمجة تحت الإشراف. → [الخدمات المدمجة](docs/frameworks/EMBEDDED-SERVICES.md)
+- **🧩 أيضًا ضمن الحزمة** — إطار عمل الإضافات + سوق الإضافات، أطر مهارات Omni/Agent/GitHub، تكامل مع Obsidian vault (22 أداة MCP)، واجهات برمجة تطبيقات Batch & Files متوافقة مع OpenAI، ذاكرة تخزين مؤقت للاستجابات الدلالية، عناصر تحفيزية مع لوحات المتصدرين، اكتشاف وكلاء ACP (15 وكيل مدمج)، تصدير السجلات المجدولة إلى BigQuery، `auto/chaos` توزيع متوازي متعدد النماذج، جسر بوت Telegram، مدير إصدارات داخل التطبيق وتصنيفات LMArena-ELO لمزودي الخدمة المجانية. → [التوثيق](docs/README.md)
 
 <br/>
 
 <div align="center">
 
-## 🤖 واجهات سطر الأوامر ووكلاء البرمجة المتوافقون
+## 🤖 واجهات الأوامر والوكلاء البرمجيون المتوافقون
 
-> إعداد واحد — `http://localhost:20128/v1` — ويعمل **كل** محرر IDE أو واجهة سطر أوامر مدعومة بالذكاء الاصطناعي باستخدام نماذج مجانية ومنخفضة التكلفة.
+> إعداد واحد — `http://localhost:20128/v1` — وكل **أداة تطوير أو واجهة أوامر** تعمل على نماذج مجانية ومنخفضة التكلفة.
 
 <div align="center">
 <table>
@@ -657,14 +659,14 @@ Radar اختياري ويستخدم طلبات GET فقط. لا يرفع عمي�
 <b>＋ يعمل أيضًا مع</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>أي أداة متوافقة مع OpenAI</b>
 </div>
 
-<sub>📖 إعدادات خاصة بكل أداة لجميع الأدوات الـ 37 (27 من أدوات CLI البرمجية + 10 من وكلاء CLI) ← [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 إضافة OpenCode ← [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 إعداد لكل أداة من الأدوات الـ 39 (28 أداة CLI Code + 11 وكيل CLI) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 إضافة OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
 <br/>
 
-**شغّل أي أداة CLI مدعومة عبر OmniRoute بأمر واحد** — من دون كتابة ملفات إعداد،
-مع حقن بيانات الاعتماد لكل عملية، ومنح Qwen/Gemini مجلدًا رئيسيًا مؤقتًا ومعزولًا:
+**شغّل أي CLI مدعوم عبر OmniRoute بأمر واحد** — بدون كتابة ملفات إعداد،
+يتم حقن بيانات الاعتماد لكل عملية، وتحصل Qwen/Gemini على مجلد منزلي معزول مؤقت:
 
 ```bash
 omniroute run claude   --model openai/gpt-5.4          # Claude Code
@@ -675,27 +677,27 @@ omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 omniroute run qwen     --model glm/glm-5.2 -- -p "reply OK"
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "reply OK"
 
-# أو اختر المزوّد والنموذج تفاعليًا، واكتب ملف الإعداد الخاص بالأداة:
-omniroute configure codex          # متاح أيضًا: claude opencode qwen aider goose gemini cline continue kilo 5dive
+# أو اختر المزود+النموذج بشكل تفاعلي واكتب إعداد الأداة نفسها:
+omniroute configure codex          # أيضًا: claude opencode qwen aider goose gemini cline continue kilo 5dive
 ```
 
-يراعي كل أمر سياق الاتصال البعيد النشط (`omniroute connect <host>`)، ويتيح `--dry-run`
-معاينة متغيرات البيئة/الوسائط الدقيقة من دون تنفيذ، بينما يُبقي `--api-key-env NAME` الأسرار خارج
-سجل الصدفة لديك. ← [تكاملات CLI](docs/guides/CLI-INTEGRATIONS.md)
+كل أمر يلتزم بسياق الاتصال البعيد النشط (`omniroute connect <host>`)، و`--dry-run`
+يعرض معاينة دقيقة للبيئة/المعطيات بدون تنفيذ، و`--api-key-env NAME` يبقي الأسرار
+خارج سجل أوامر الصدفة لديك. → [تكاملات CLI](docs/guides/CLI-INTEGRATIONS.md)
 
 <br/>
 
 <div align="center">
 
-## 🌐 375 مزودًا للذكاء الاصطناعي — 153 منها موسوم في الكتالوج بأنه مجاني
+## 🌐 380 مزوّدًا للذكاء الاصطناعي — 153 موسومة في الفهرس بأنها مجانية
 
 </div>
 
-> **375 مزودًا مسجلًا** عبر مجموعات الدردشة والوسائط والبحث والتشغيل المحلي ووكلاء السحابة والنظام المعتمدة، منها **153 مزودًا يحمل بيانات الاكتشاف الوصفية `hasFree: true`**. يغطي سجل نماذج الدردشة **239 مزودًا / 3,059 زوجًا مميزًا من المزود والنموذج / 1,475 معرّف نموذج أوليًا**؛ بينما يحتوي كتالوج الميزانيات المجانية المنفصل على **467 صفًا لكل نموذج**، و**34 حصة متكررة**، و**52 مزودًا مجانيًا إلى الأبد بحصص متكررة أو من دون مفتاح**. صُممت هذه الإحصاءات لتستخدم مقامات مختلفة؛ وتتوفر التعريفات والحسابات بعد إزالة تكرار الحصص في [مرجع المزودين](docs/reference/PROVIDER_REFERENCE.md) و[الخطط المجانية](docs/reference/FREE_TIERS.md).
+> **380 مزوّدًا مسجّلًا** ضمن مجموعات الدردشة والوسائط والبحث والمحلية ووكلاء السحابة والنظام المعتمدة، بما في ذلك **153 مزوّدًا يحمل بيانات تعريف الاكتشاف `hasFree: true`**. يغطي سجل نماذج الدردشة **239 مزوّدًا / 3,059 زوجًا مميّزًا من المزوّد والنموذج / 1,475 معرّف نموذج خام**؛ بينما يضم فهرس الميزانية المجانية المنفصل **471 صفًا لكل نموذج** و**34 مجموعة متكررة** و**54 مزوّدًا مجانيًا دائمًا ومتكررًا/من دون مفتاح**. هذه مقامات مختلفة عمدًا؛ وتوجد التعريفات والحسابات بعد إزالة التكرار من المجموعات في [مرجع المزوّدين](docs/reference/PROVIDER_REFERENCE.md) و[الخطط المجانية](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
-### 🏢 جميع المختبرات الكبرى — من خلال نقطة نهاية واحدة
+### 🏢 كل مختبر رئيسي — عبر نقطة نهاية واحدة
 
 <table>
   <tr>
@@ -724,124 +726,116 @@ omniroute configure codex          # متاح أيضًا: claude opencode qwen a
   </tr>
 </table>
 
-<sub>…وأكثر من 350 مزودًا آخر — يُستمد كل رمز مباشرةً من كتالوج المزودين في لوحة المعلومات. 📖 [مرجع المزودين](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>…و350+ مزوّدًا آخر — تُحمّل كل أيقونة مباشرةً من فهرس المزوّدين في لوحة المعلومات. 📖 [مرجع المزوّدين](docs/reference/PROVIDER_REFERENCE.md)</sub>
 
 <br/>
 
-### 🆓 مجاني إلى الأبد — $0، من دون بطاقة
+### 🆓 مجاني إلى الأبد — $0، من دون بطاقة ائتمانالتحليل code>We need answer should preserve inline `hasFree` exactly yes. Did we violate "Never change text between backticks" kept. "HTML tags exact" We translated no attrs. Fine. But term "153 carrying metadata" Arabic. Need issue "catalog-marked" okay. Could translate alt? didn't. proper names. User asks only translated markdown. We have it. Ensure source says "free-budget catalog" maybe فهرس الميزانية المجانية. good. "recurring/keyless free-forever providers" translated perhaps recurring/without key. Fine. Check hidden issue: "Every major lab" lab singular each? okay.
+
+Need perhaps "380 AI Providers" translate AI to الذكاء الاصطناعي. Fine. No need alter closing div.
+
+Final already.
 
 <table>
   <tr>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4, Nemotron 3<br/>بلا حد للرموز</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>توجيه تلقائي، Tencent Hy3<br/>مجاني إلى الأبد</sub></td>
-    <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B, Nemotron<br/>مجاني إلى الأبد</sub></td>
-    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>فئة مجانية</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4، Nemotron 3<br/>بلا حدّ للرموز</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>موجّه تلقائي، Tencent Hy3<br/>مجاني إلى الأبد</sub></td>
+    <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B، Nemotron<br/>مجاني إلى الأبد</sub></td>
+    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>خطة مجانية</sub></td>
     <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>مجاني إلى الأبد</sub></td>
     <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>مجاني إلى الأبد</sub></td>
   </tr>
   <tr>
-    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max, Kimi-K2<br/>مجاني بلا حدود</sub></td>
-    <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT, Llama, Claude<br/>لا حاجة إلى مفتاح</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>أكثر من 50 نموذجًا<br/>10 آلاف عصبون/يوم</sub></td>
-    <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>نحو 40 طلبًا في الدقيقة مجانًا</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>رصيد بقيمة $5 لمرة واحدة؛ البطاقة مطلوبة</sub></td>
-    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>نماذج :free<br/>+$10 ← طلبات أكثر في الدقيقة</sub></td>
+    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max، Kimi-K2<br/>مجاني بلا حدود</sub></td>
+    <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT، Llama، Claude<br/>لا حاجة إلى مفتاح</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>أكثر من 50 نموذجًا<br/>10K من الخلايا العصبية يوميًا</sub></td>
+    <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM، MiniMax<br/>نحو 40 RPM مجانًا</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7، GPT-OSS<br/>رصيد لمرة واحدة بقيمة $5؛ البطاقة مطلوبة</sub></td>
+    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>نماذج :free<br/>+$10 ← RPM أعلى</sub></td>
   </tr>
 </table>
 
-📖 الكتالوج الكامل القابل للقراءة آليًا ← [`docs/reference/PROVIDER_REFERENCE.md`](docs/reference/PROVIDER_REFERENCE.md)
+📖 الكتالوج الكامل القابل للقراءة آليًا → [`docs/reference/PROVIDER_REFERENCE.md`](docs/reference/PROVIDER_REFERENCE.md)
 
 <br/>
 </div>
 
 <div align="center">
 
-## 🖥️ أين يعمل OmniRoute — في أي مكان
+## 🖥️ حيث يعمل OmniRoute - في أي مكان
 
 </div>
 
-> التطبيق نفسه، جهازك، قواعدك. من تثبيت npm عام إلى **هاتفك** عبر Termux.
+> نفس التطبيق، جهازك، القواعد الخاصة بك. من تثبيت npm عالمي إلى** هاتفك** عبر ترموكس.
 
 <table>
-  <tr><th align="left">المنصة</th><th align="left">التثبيت</th><th align="left">أبرز الميزات</th></tr>
-  <tr><td align="left" nowrap>📦 <b>npm (عام)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">أمر واحد، على أي نظام تشغيل</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">متعدد المعماريات <b>AMD64 + ARM64</b></td></tr>
-  <tr><td align="left" nowrap>🖥️ <b>سطح المكتب (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">نافذة أصلية + علبة النظام — <b>Windows / macOS / Linux</b></td></tr>
-  <tr><td align="left" nowrap>🎩 <b>شريط القوائم (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">يراقب الخادم ويحدّثه تلقائيًا — <b>macOS</b></td></tr>
-  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap><code>arm64</code> أصلي</td><td align="left">Raspberry Pi، وخوادم ARM، وApple Silicon</td></tr>
-  <tr><td align="left" nowrap>📱 <b>Android (Termux)</b></td><td align="left" nowrap><code>pkg install nodejs && npx -y omniroute</code></td><td align="left">يعمل <b>على هاتفك</b> على مدار الساعة، دون صلاحيات root</td></tr>
-  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>«إضافة إلى الشاشة الرئيسية»</td><td align="left">ملء الشاشة، والعمل دون اتصال، وقابل للتثبيت من المتصفح</td></tr>
-  <tr><td align="left" nowrap>🧩 <b>ملحق OpenCode</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">تكامل أصلي مع OpenCode</td></tr>
-  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat</b></td><td align="left" nowrap>ثبّت إضافة <b>OmniCopilot</b></td><td align="left">كل نموذج OmniRoute في منتقي النماذج الأصلي لـ Copilot Chat — الإصدار المستقر وInsiders</td></tr>
-  <tr><td align="left" nowrap>🛠️ <b>من المصدر</b></td><td align="left" nowrap><code>npm install && npm run dev</code></td><td align="left">عدّله وساهم فيه</td></tr>
+  <tr><th align="left"> منصة </th><th align="left"> تثبيت </th><th align="left"> يسلط الضوء على </th></tr>
+  <tr><td align="left" nowrap>📦 <b> npm (عالمي)</b></td><td align="left" nowrap><code> npm تثبيت -g omniroute </code></td><td align="left"> أمر واحد، أي OS</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (عالمي)</b></td><td align="left" nowrap><code> Bun add -g omniroute </code></td><td align="left"> نفس التسجيل tarball، عمليات تثبيت أسرع </td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code> docker run … diegosouzapw/omniroute</code></td><td align="left"> متعدد القوس <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🖥️ <b> سطح المكتب (Electron)</b></td><td align="left" nowrap><code> npm تشغيل الإلكترون: بناء </code></td><td align="left"> علبة النظام + النافذة الأصلية — <b>Windows / macOS / Linux</b></td></tr>
+  <tr><td align="left" nowrap>🎩 <b> شريط القوائم (OmniRouteTray)</b></td><td align="left" nowrap><code> Brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left"> يشرف &amp; يقوم بتحديث الخادم تلقائيًا — <b>macOS</b></td></tr>
+  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap> الأصلي <code></code></td><td align="left"> Raspberry Pi، ARM zqm، Apple Silicon </td></tr>
+  <tr><td align="left" nowrap>📱 <b> Android (Termux)</b></td><td align="left" nowrap><code> pkg تثبيت عقدة js && npx -y omniroute </code></td><td align="left"> تشغيل <b> على هاتفك </b>، 24/7، بدون جذر </td></tr>
+  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"إضافة إلى الشاشة الرئيسية"</td><td align="left"> ملء الشاشة، غير متصل، قابل للتثبيت من المتصفح </td></tr>
+  <tr><td align="left" nowrap>🧩 <b>OpenCode المساعد </b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left"> التكامل OpenCode الأصلي </td></tr>
+  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat </b></td><td align="left" nowrap> install <b>OmniCopilot</b> ملحق </td><td align="left"> كل نموذج OmniRoute في منتقي الدردشة Copilot الأصلي - &amp; المطلعون </td></tr>
+  <tr><td align="left" nowrap>🛠️ <b> من المصدر </b></td><td align="left" nowrap><code> npm install && npm run dev </code></td><td align="left"> اخترقها، ساهم </td></tr>
 </table>
 
-<sub>📖 [دليل Docker](docs/guides/DOCKER_GUIDE.md) · [سطح المكتب](electron/README.md) · [علبة شريط القوائم](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+[Docker](docs/guides/DOCKER_GUIDE.md)<sub>📖 zqc · [سطح المكتب](electron/README.md) · [علبة شريط القائمة](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
 
 <br/>
 
 <div align="center">
 
-### 🧩 جديد: OmniRoute داخل Copilot Chat الأصلي في VS Code
+### 🧩 جديد: OmniRoute داخل دردشة Copilot الأصلية لـ VS Code
 
 </div>
 
-> لا شريط جانبي جديد ولا واجهة دردشة جديدة — يظهر كل نموذج يقدّمه OmniRoute مباشرةً في
-> **منتقي نماذج Copilot Chat الذي تستخدمه بالفعل**. منذ VS Code 1.122، تعمل نماذج الموفّرين
-> دون تسجيل الدخول إلى GitHub أو الاشتراك في Copilot — وضع الوكيل، واستدعاء الأدوات، والرؤية،
-> مجانًا.
+> لا يوجد شريط جانبي جديد، ولا توجد دردشة جديدة UI - كل نموذج يقدمه OmniRoute يظهر مباشرة في** منتقي نماذج الدردشة Copilot الذي تستخدمه بالفعل** . منذ كود VS 1.122، تعمل نماذج الموفر بدون تسجيل دخول GitHub أو اشتراك Copilot - وضع الوكيل واستدعاء الأدوات والرؤية مجانًا.
 
-ثبّت إضافة **[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)**، ووجّهها
-إلى خادم OmniRoute لديك (الإعداد الافتراضي هو `localhost:20128`)، ثم افتح Copilot Chat ← منتقي النماذج
-← **إدارة النماذج…** ← **OmniRoute**.
+تثبيت** [OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** الامتداد، قم بتوجيهه إلى خادم OmniRoute (الافتراضي هو `localhost:20128`)، ثم افتح Copilot Chat → model Picker →** إدارة النماذج...** →**OmniRoute** .
 
 <table>
-  <tr><th align="left">المتجر</th><th align="left">الرابط</th><th align="left">يعمل مع</th></tr>
-  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">تثبيت ←</a></td><td align="left">VS Code — الإصدار المستقر وInsiders</td></tr>
-  <tr><td align="left" nowrap>🔓 <b>Open VSX Registry</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">تثبيت ←</a></td><td align="left">Cursor، وWindsurf، وVSCodium، وTheia، وcode-server، وGitpod، وAntigravity، وKiro…</td></tr>
+  متجر <tr><th align="left"></th><th align="left"> Link </th><th align="left"> يعمل مع </th></tr>
+  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace </b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot"> تثبيت →</a ></td >< td align ="left">VS Code — مستقر &amp; Insiders </td></tr>
+  <tr><td align="left" nowrap>🔓 <b> افتح سجل VSX </b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot"> تثبيت →</a ></td >< td محاذاة ="left">Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro...</td></tr>
 </table>
 
-من داخل المحرر: افتح عرض **الإضافات**، وابحث عن **"OmniRoute"**، وانقر على **تثبيت**
-— تعمل بالطريقة نفسها في كلا المتجرين. تتوفر الشيفرة المصدرية والمشكلات ودليل النشر في
-[diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
+من داخل المحرر: افتح ملف** ملحقات** عرض، بحث** "OmniRoute"** ، انقر** ثَبَّتَ** - يعمل بنفس الطريقة في كلا المتجرين. المصدر والقضايا ودليل النشر مباشر على [diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
 
-<sub>📖 [دليل VS Code Copilot Chat](docs/guides/VSCODE-COPILOT.md) — الإعداد، وما يعرضه المنتقي، ولوحة المعلومات داخل علامة تبويب، واستكشاف الأخطاء وإصلاحها</sub>
+<sub>📖 [VS Code Copilot دليل الدردشة](docs/guides/VSCODE-COPILOT.md) - الإعداد، ما يعرضه المنتقي، لوحة المعلومات في علامة تبويب، استكشاف أخطاء </sub> وإصلاحها
 
 <br/>
 
 <div align="center">
 
-### 🎩 جديد: OmniRouteTray — بوابتك المقيمة في شريط القوائم
+### 🎩 جديد: OmniRouteTray — بوابتك، التي تعيش في شريط القائمة
 
 </div>
 
-> يكون `omniroute serve` في أفضل حالاته عندما يعمل دائمًا. يحوّل **[OmniRouteTray](https://github.com/zoispag/omniroute-tray)**
-> ذلك إلى تطبيق لشريط القوائم في macOS يمكنك إعداده ونسيانه: فهو يشغّل الخادم، ويبقيه قيد التشغيل
-> عبر عمليات إعادة التشغيل، ويحدّثه في موضعه، ويضع ميزانية الرموز المباشرة على بُعد نقرة واحدة — **دون
-> ترك نافذة طرفية مفتوحة، ودون الحاجة إلى متابعة `npm install -g omniroute`.**
+> `omniroute serve` يكون أسعد عندما يكون قيد التشغيل دائمًا.** [OmniRouteTray](https://github.com/zoispag/omniroute-tray)** يحول ذلك إلى تطبيق شريط قوائم "ضبط ونسيان" لـ macOS: فهو يبدأ تشغيل الخادم، ويبقيه نشطًا عبر عمليات إعادة التشغيل، ويحدثه في مكانه، ويضع ميزانية الرمز المميز الخاص بك على بعد نقرة واحدة -** لم يتم ترك نافذة طرفية مفتوحة، ولا `npm install -g omniroute` أطفال.**
 
-بُني باستخدام [Tauri v2](https://v2.tauri.app/) (نواة Rust بحجم يكاد لا يُذكر)، ويأتي
-مع بيئة تشغيل Node 24 موقّعة خاصة به، ويدير تثبيت OmniRoute مملوكًا للتطبيق، لذا لا يتعارض مطلقًا مع
-`node`/`bun` العام لديك. وهو **يشارك إعداداتك وقاعدة بياناتك الحالية في `~/.omniroute/`** — لذا فهو
-OmniRoute نفسه الذي تشغّله بالفعل، ولكن مع قبعة. 🎩
+تم تصميمه باستخدام [Tauri v2](https://v2.tauri.app/) (نواة Rust بحجم خطأ تقريبي)، فهو يشحن وقت تشغيل Node 24 الموقع الخاص به ويدير تثبيت OmniRoute المملوك للتطبيق، لذلك فهو لا يحارب `node`/`bun` العالمي أبدًا. هو - هي** يشارك التكوين وقاعدة البيانات `~/.omniroute/` الموجودة لديك** - لذا فهو نفس OmniRoute الذي قمت بتشغيله بالفعل، فقط مع ارتداء القبعة. 🎩
 
 <table>
-  <tr><th align="left">ما يفعله</th><th align="left">كيف</th></tr>
-  <tr><td align="left" nowrap>🟢 <b>يراقب الخادم</b></td><td align="left">يشغّل <code>omniroute serve</code>، ويتبنّى نسخة تعمل بالفعل بدلًا من تكرارها</td></tr>
-  <tr><td align="left" nowrap>📊 <b>الاستخدام المباشر بلمحة</b></td><td align="left">أشرطة حصص الموفّرين، وحدود جلسات Claude وحدوده الأسبوعية مع العد التنازلي لإعادة التعيين، وتفصيل التكلفة لمدة 30 يومًا</td></tr>
-  <tr><td align="left" nowrap>🔄 <b>يُجري تحديثات تلقائية في موضعه</b></td><td align="left">تثبيت مرحلي، واستبدال ذري، وتراجع عند الفشل — دائمًا على أحدث إصدار</td></tr>
-  <tr><td align="left" nowrap>🚀 <b>البدء عند تسجيل الدخول</b></td><td align="left">تشغيل اختياري عند تسجيل الدخول؛ في علبة النظام فقط، دون أيقونة في Dock</td></tr>
-  <tr><td align="left" nowrap>🩺 <b>التشخيص والسجلات</b></td><td align="left">تشخيص بنقرة واحدة والوصول إلى سجلات الخادم</td></tr>
+  <tr><th align="left"> ماذا يفعل </th><th align="left"> كيف </th></tr>
+  <tr><td align="left" nowrap>🟢 <b> يشرف على الخادم </b></td><td align="left"> يولد <code> omniroute يخدم </code>، ويتبنى مثيلًا قيد التشغيل بالفعل بدلاً من تكراره </td></tr>
+  <tr><td align="left" nowrap>📊 <b> الاستخدام المباشر في لمحة </b></td><td align="left"> أشرطة حصص الموفر، حدود Claude session/weekly مع إعادة تعيين العد التنازلي، توزيع التكلفة لمدة 30 يومًا </td></tr>
+  <tr><td align="left" nowrap>🔄 <b> التحديثات التلقائية في مكانها </b></td><td align="left"> التثبيت المرحلي والمبادلة الذرية والتراجع عند الفشل - دائمًا على الإصدار الأحدث </td></tr>
+  <tr><td align="left" nowrap>🚀 <b> ابدأ عند تسجيل الدخول </b></td><td align="left"> إطلاق اختياري عند تسجيل الدخول؛ صينية فقط، لا يوجد رمز قفص الاتهام </td></tr>
+  <tr><td align="left" nowrap>🩺 <b> سجلات Doctor &amp; </b></td><td align="left"> التشخيص بنقرة واحدة والوصول إلى سجل الخادم </td></tr>
 </table>
 
 ```sh
 brew install --cask zoispag/tap/omniroute-tray
 ```
 
-<sub>تفضّل التنزيل؟ احصل على أحدث ملف <code>.dmg</code> من
-<a href="https://github.com/zoispag/omniroute-tray/releases">الإصدارات</a>. تتوفر الشيفرة المصدرية والمشكلات ووثائق
-البناء في <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
-<br/>💛 مشروع مجتمعي من إنشاء <a href="https://github.com/zoispag">@zoispag</a> — وليس إصدارًا رسميًا من OmniRoute.</sub>
+<sub> هل تفضل التنزيل؟ احصل على أحدث إصدار من <code>.dmg </code> من
+<a href="https://github.com/zoispag/omniroute-tray/releases"> تطلق </a>. المصدر والقضايا والبناء
+المستندات مباشرة في <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
+<br/>💛 مشروع مجتمعي لـ <a href="https://github.com/zoispag">@zoispag </a> - وليس إصدارًا رسميًا OmniRoute.</sub>
 
 <br/>
 
@@ -922,15 +916,15 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
 
 <div align="center">
 
-## 🗜️ وفّر 15–95% من الرموز — تلقائيًا
+## 🗜️ وفّر 15–95% من التوكنات — تلقائيًا
 
 </div>
 
-### 📖 آلية العمل — خط المعالجة والبنية وحساب التوفير
+### 📖 كيف يعمل — خط المعالجة، البنية، وحسابات التوفير
 
-<img src="./docs/diagrams/compression-pipeline.svg" width="100%" alt="خط ضغط OmniRoute: يمر طلب عميل توضيحي مكوّن من 10,000 رمز عبر 12 محركًا قابلًا للتركيب — Session-Dedup وCCR وLite وRTK وResponses Tool Output وHeadroom وRelevance وCaveman وAggressive وLLMLingua-2 وUltra وOmniGlyph — ويمكن أن يصل إلى المزوّد بنحو 1,080 رمزًا في المثال الموثّق للتكديس. تحمي ضوابط الحفظ المحتوى المنظّم، إلى جانب بوابات الدقة الخاصة بكل خطوة؛ وقد تحوّل الأوضاع الصريحة ذات الفقد أو التجريبية المحتوى المؤهل."/>
+<img src="./docs/diagrams/compression-pipeline.svg" width="100%" alt="خط ضغط OmniRoute: طلب توضيحي من العميل بحجم 10,000 توكن يمر عبر 12 محرّكًا قابلاً للتركيب — Session-Dedup وCCR وLite وRTK وResponses Tool Output وHeadroom وRelevance وCaveman وAggressive وLLMLingua-2 وUltra وOmniGlyph — ويمكن أن يصل إلى المزوّد بحجم 1,080 توكنًا تقريبًا في المثال الم stacking الموثّق. المحتوى المهيكل محميٌّ بحُرّاس الحفاظ وبوّابات الأمانة لكل خطوة؛ وقد تعمل الأوضاع الصريحة الفاقدة للدقة أو التجريبية على تحويل المحتوى المؤهّل."/>
 
-تشغّل التركيبة المكدّسة الافتراضية `RTK → Caveman`. عندما يعمل كلاهما على حمولة الأداة/السياق نفسها، يتراكم التوفير:
+المزيج المكدّس الافتراضي يشغّل `RTK → Caveman`. وعندما يعمل كلاهما على نفس حمولة الأدوات/السياق، تتراكم التوفيرات:
 
 ```txt
 combined = 1 − (1 − RTK) × (1 − Caveman_input)
@@ -938,74 +932,74 @@ average  = 1 − (1 − 0.80) × (1 − 0.46) = 89.2%
 range    = 78.4 – 94.6%
 ```
 
-تكون كتل الشيفرة وعناوين URL وJSON والبيانات المنظّمة **محمية دائمًا** بواسطة محرك الحفظ.
+كتل الشيفرة وعناوين URL وJSON والبيانات المهيكلة **محمية دائمًا** بواسطة محرّك الحفاظ.
 
-> **لماذا تستخدم رموزًا كثيرة عندما تفي رموز قليلة بالغرض؟** يمر كل طلب عبر خط ضغط OmniRoute **بشفافية** — من دون تغييرات لدى العميل. وهو الآن **مكدّس من 12 محركًا قابلًا للتركيب** تعمل بالترتيب ويمكن مزجها ومطابقتها لكل تركيبة توجيه — استنادًا إلى أفكار من [RTK](https://github.com/rtk-ai/rtk) و[Caveman](https://github.com/JuliusBrussee/caveman) (⭐ أكثر من 90 ألفًا) و[LLMLingua-2](https://github.com/microsoft/LLMLingua) و[Troglodita](https://github.com/leninejunior/troglodita) (البرتغالية البرازيلية).
+> **لماذا تستخدم توكنات كثيرة عندما تُنجز التوكنات القليلة المهمة؟** يمر كل طلب عبر خط ضغط OmniRoute **بشفافية تامة** — دون أي تغييرات على العميل. أصبح الآن **حزمة من 12 محرّكًا قابلاً للتركيب** تعمل بالترتيب ويمكن مزجها ومطابقتها لكل تركيبة توجيه — بناءً على أفكار من [RTK](https://github.com/rtk-ai/rtk) و[Caveman](https://github.com/JuliusBrussee/caveman) (⭐ 90K+) و[LLMLingua-2](https://github.com/microsoft/LLMLingua) و[Troglodita](https://github.com/leninejunior/troglodita) (البرتغالية البرازيلية).
 
-### 🧱 مكدّس المحركات الاثني عشر
+### 🧱 حزمة المحرّكات الاثني عشر
 
-تعمل المحركات وفق ترتيب خط المعالجة؛ ويمكن تفعيل كل منها أو تعطيله وتكوينه بصورة مستقلة لكل تركيبة:
+تعمل المحرّكات بترتيب خط المعالجة؛ وكل واحد منها قابل للتفعيل/الإيقاف والتهيئة بشكل مستقل لكل تركيبة:
 
 <table>
-  <tr><th align="center">#</th><th align="left">المحرك</th><th align="left">ما الذي يفعله</th></tr>
-  <tr><td align="center" nowrap>1</td><td align="left" nowrap><b>Session-Dedup</b></td><td align="left">يحذف المحتوى المتكرر عبر التبادلات (معنون بحسب المحتوى، وعابر للتبادلات)</td></tr>
-  <tr><td align="center" nowrap>2</td><td align="left" nowrap><b>CCR</b></td><td align="left">يؤرشف الكتل الكبيرة خلف علامات استرجاع، ليجري جلبها عند الطلب</td></tr>
-  <tr><td align="center" nowrap>3</td><td align="left" nowrap><b>Lite</b></td><td align="left">تقليص المسافات البيضاء وعناوين URL للصور (خط أساس خفيف زمن الاستجابة)</td></tr>
-  <tr><td align="center" nowrap>4</td><td align="left" nowrap><b>RTK</b></td><td align="left">تصفية ذكية لنتائج الأدوات وإزالة التكرار والاقتطاع (مع مراعاة الأوامر)</td></tr>
-  <tr><td align="center" nowrap>5</td><td align="left" nowrap><b>Responses Tool Output</b></td><td align="left">ضغط JSON بلا فقد أولًا، مع ضغط تشخيصي محدود لمخرجات الصدفة/الترقيع/البحث/البناء (Responses API)</td></tr>
-  <tr><td align="center" nowrap>6</td><td align="left" nowrap><b>Headroom</b></td><td align="left">ضغط جدولي بلا فقد لمصفوفات JSON (نحو 30%) عبر برنامج ترميز <b>GCF</b> مضمّن محليًا</td></tr>
-  <tr><td align="center" nowrap>7</td><td align="left" nowrap><b>Relevance</b></td><td align="left">تقييم استخراجي للجمل مقارنةً بآخر استعلام للمستخدم</td></tr>
-  <tr><td align="center" nowrap>8</td><td align="left" nowrap><b>Caveman</b></td><td align="left">ضغط للنثر قائم على القواعد (نحو 65–75% من المخرجات)</td></tr>
-  <tr><td align="center" nowrap>9</td><td align="left" nowrap><b>Aggressive</b></td><td align="left">تلخيص وتقادم تدريجي للتبادلات القديمة</td></tr>
-  <tr><td align="center" nowrap>10</td><td align="left" nowrap><b>LLMLingua-2</b></td><td align="left">تشذيب دلالي بتعلّم الآلة عبر MobileBERT ONNX — آمن للشيفرة وغير متزامن</td></tr>
-  <tr><td align="center" nowrap>11</td><td align="left" nowrap><b>Ultra</b></td><td align="left">تشذيب استدلالي للرموز مع طبقة اختيارية من نموذج صغير (SLM)</td></tr>
-  <tr><td align="center" nowrap>12</td><td align="left" nowrap><b>OmniGlyph</b></td><td align="left">ترميز تجريبي للسياق كصورة لنموذج Claude Fable 5 المقاس عبر اتصال Anthropic المباشر؛ وتظل محوّلات GPT 5.6 مغلقة عند الفشل بانتظار إيصالات المزوّد. أربعة ملفات تعريف للضغط (قوي افتراضيًا، ومتوازن، وآمن للبرمجة، وتمرير مباشر) (الأكثر قوة؛ يتطلب اشتراكًا صريحًا)</td></tr>
+  <tr><th align="center">#</th><th align="left">المحرّك</th><th align="left">ماذا يفعل</th></tr>
+  <tr><td align="center" nowrap>1</td><td align="left" nowrap><b>Session-Dedup</b></td><td align="left">يحذف المحتوى المتكرر عبر الأدوار (معنون بالمحتوى، وعبر الأدوار)</td></tr>
+  <tr><td align="center" nowrap>2</td><td align="left" nowrap><b>CCR</b></td><td align="left">يؤرشف الكتل الكبيرة خلف علامات استرجاع، تُجلب عند الطلب</td></tr>
+  <tr><td align="center" nowrap>3</td><td align="left" nowrap><b>Lite</b></td><td align="left">تشذيب المسافات البيضاء وعناوين URL للصور (أساس خفيف على زمن الاستجابة)</td></tr>
+  <tr><td align="center" nowrap>4</td><td align="left" nowrap><b>RTK</b></td><td align="left">تصفية ذكية لنتائج الأدوات، مع إزالة التكرار والاقتطاع (مدرك للأوامر)</td></tr>
+  <tr><td align="center" nowrap>5</td><td align="left" nowrap><b>Responses Tool Output</b></td><td align="left">ضغط JSON بلا فقدان أولًا + ضغط تشخيصي محدود لمخرجات shell/patch/search/build (واجهة Responses API)</td></tr>
+  <tr><td align="center" nowrap>6</td><td align="left" nowrap><b>Headroom</b></td><td align="left">ضغط جدولي بلا فقدان لمصفوفات JSON (~30%) عبر مرمّز <b>GCF</b> مُضمَّن</td></tr>
+  <tr><td align="center" nowrap>7</td><td align="left" nowrap><b>Relevance</b></td><td align="left">تقييم استخلاصي للجُمل مقابل آخر استعلام للمستخدم</td></tr>
+  <tr><td align="center" nowrap>8</td><td align="left" nowrap><b>Caveman</b></td><td align="left">ضغط نثري قائم على القواعد (~65–75% على المخرجات)</td></tr>
+  <tr><td align="center" nowrap>9</td><td align="left" nowrap><b>Aggressive</b></td><td align="left">تلخيص + تقادم تدريجي للأدوار القديمة</td></tr>
+  <tr><td align="center" nowrap>10</td><td align="left" nowrap><b>LLMLingua-2</b></td><td align="left">تشذيب دلالي عبر تعلّم الآلة باستخدام MobileBERT ONNX — آمن على الشيفرة وغير متزامن</td></tr>
+  <tr><td align="center" nowrap>11</td><td align="left" nowrap><b>Ultra</b></td><td align="left">تشذيب استكشافي للتوكنات مع طبقة اختيارية لنموذج صغير (SLM)</td></tr>
+  <tr><td align="center" nowrap>12</td><td align="left" nowrap><b>OmniGlyph</b></td><td align="left">ترميز تجريبي للسياق كصورة، مُقاس على Claude Fable 5 عبر اتصال Anthropic المباشر؛ أما محوّلات GPT 5.6 فتبقى مغلقة عند الفشل بانتظار إثباتات من المزوّد. أربعة ملفات ضغط (aggressive الافتراضي، balanced، coding-safe، passthrough) (الأكثر عدوانية؛ تفعيل اختياري)</td></tr>
 </table>
 
-تُحفظ كتل الشيفرة وعناوين URL والبيانات المنظّمة **دائمًا** بصورة مطابقة تمامًا على مستوى البايت. تجمع **الإعدادات المسبقة بنقرة واحدة** بين المحركات:
+كتل الشيفرة وعناوين URL والبيانات المهيكلة **تُحفظ دائمًا** بايتًا ببايت. **الإعدادات المسبقة بنقرة واحدة** تجمع المحرّكات:
 
 <table>
-  <tr><th align="left">الوضع</th><th align="left">التوفير</th><th align="left">الأنسب لـ</th></tr>
-  <tr><td align="left" nowrap>🪶 <b>Lite</b></td><td align="left" nowrap>~15%</td><td align="left">إعداد افتراضي آمن ودائم التشغيل</td></tr>
-  <tr><td align="left" nowrap>🪨 <b>قياسي (Caveman)</b></td><td align="left" nowrap>~30%</td><td align="left">البرمجة اليومية</td></tr>
-  <tr><td align="left" nowrap>⚡ <b>قوي</b></td><td align="left" nowrap>~50%</td><td align="left">الجلسات الطويلة كثيفة استخدام الأدوات</td></tr>
+  <tr><th align="left">الوضع</th><th align="left">التوفير</th><th align="left">الأفضل لـ</th></tr>
+  <tr><td align="left" nowrap>🪶 <b>Lite</b></td><td align="left" nowrap>~15%</td><td align="left">الافتراضي الآمن الدائم التشغيل</td></tr>
+  <tr><td align="left" nowrap>🪨 <b>Standard (Caveman)</b></td><td align="left" nowrap>~30%</td><td align="left">البرمجة اليومية</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Aggressive</b></td><td align="left" nowrap>~50%</td><td align="left">الجلسات الطويلة كثيفة الأدوات</td></tr>
   <tr><td align="left" nowrap>🔥 <b>Ultra</b></td><td align="left" nowrap>~75%</td><td align="left">أقصى توفير</td></tr>
-  <tr><td align="left" nowrap>🧰 <b>RTK</b></td><td align="left" nowrap>60–90%</td><td align="left">مخرجات الصدفة/الاختبار/البناء/git</td></tr>
-  <tr><td align="left" nowrap>🔗 <b>مكدّس (RTK → Caveman)</b></td><td align="left" nowrap><b>78–95%</b></td><td align="left">المطالبات المختلطة وسجلات الأدوات</td></tr>
+  <tr><td align="left" nowrap>🧰 <b>RTK</b></td><td align="left" nowrap>60–90%</td><td align="left">مخرجات shell/test/build/git</td></tr>
+  <tr><td align="left" nowrap>🔗 <b>Stacked (RTK → Caveman)</b></td><td align="left" nowrap><b>78–95%</b></td><td align="left">أوامر مختلطة + سجلات الأدوات</td></tr>
 </table>
 
-**مثال حقيقي — الوضع القياسي:**
+**مثال حقيقي — وضع Standard:**
 
-> **قبل (69 رمزًا):** _"يرجع سبب إعادة تصيير مكوّن React على الأرجح إلى أنك تنشئ مرجع كائن جديدًا في كل دورة تصيير. عندما تمرر كائنًا مضمّنًا بوصفه خاصية، ترى المقارنة السطحية في React أنه كائن مختلف في كل مرة، ما يؤدي إلى إعادة التصيير. أوصي باستخدام useMemo لحفظ الكائن مؤقتًا."_
+> **قبل (69 توكنًا):** _"The reason your React component is re-rendering is likely because you're creating a new object reference on each render cycle. When you pass an inline object as a prop, React's shallow comparison sees it as a different object every time, which triggers a re-render. I would recommend using useMemo to memoize the object."_
 >
-> **بعد (19 رمزًا):** _"مرجع كائن جديد في كل تصيير. خاصية كائن مضمّن = مرجع جديد = إعادة تصيير. غلّفه بـ useMemo."_
+> **بعد (19 توكنًا):** _"New object ref each render. Inline object prop = new ref = re-render. Wrap in useMemo."_
 >
-> **الإجابة نفسها. رموز أقل بنسبة 72%. بلا أي فقد في الدقة.** ✅
+> **نفس الإجابة. توكنات أقل بنسبة 72%. صفر خسارة في الدقة.** ✅
 
-**مثال بالبرتغالية البرازيلية — وضع [Troglodita](https://github.com/leninejunior/troglodita):**
+**مثال بالبرتغالية البرازيلية (PT-BR) — وضع [Troglodita](https://github.com/leninejunior/troglodita):**
 
-> **قبل (42 رمزًا):** _"المشكلة هي أن المكوّن يُعاد تصييره لأن مرجع كائن جديدًا يُنشأ في كل دورة تصيير. أوصي باستخدام useMemo."_
+> **قبل (42 رمزًا):** _"المشكلة هي أن المكوّن يُعاد تصييره لأن مرجع كائن جديد يُنشأ في كل دورة تصيير. أوصي باستخدام `useMemo`."_
 >
-> **بعد (12 رمزًا):** _"إعادة التصيير: مرجع جديد في كل دورة (إعادة إنشاء كائن مضمن). استخدم `useMemo`."_
+> **بعد (12 رمزًا):** _"إعادة تصيير: مرجع جديد كل دورة (كائن مضمَّن يُعاد إنشاؤه). استخدم `useMemo`."_
 >
-> **الإجابة نفسها. رموز أقل بنحو 70%. الدقة التقنية محفوظة.** ✅
+> **الاستجابة نفسها. ~70% رموز أقل. الدقة التقنية سليمة.** ✅
 
 <br/>
 
-### 🎚️ ما وراء المحركات — أنماط المخرجات، والقرص التكيّفي، والتحكم لكل طلب
+### 🎚️ ما وراء المحرّكات — أنماط المخرجات، القرص التكيّفي والتحكّم لكل طلب
 
-تُقلّص المحركات الاثنا عشر أعلاه ما **يدخل**. وتُشكّل ثلاث طبقات إضافية **الكيفية** و**التوقيت** وما **يخرج**:
+المحرّكات الاثنا عشر أعلاه تُقلّص ما **يدخل**. وهناك ثلاث طبقات أخرى تُشكّل **كيف** و**متى** وما **يخرج**:
 
-- **🪄 أنماط المخرجات** _(توجيه محور المخرجات)_ — تحقن تعليمات حتمية وآمنة للتخزين المؤقت لتشكيل الاستجابة؛ ويمكن دمجها، مع شدة `lite` / `full` / `ultra` لكل منها. لا تتطلب إضافة نمط سوى إدخال من سطر واحد في السجل:
-  - **نثر مقتضب** — احذف الحشو وأدوات التعريف والتحوّط؛ وأبقِ المحتوى التقني دقيقًا.
-  - **كود أقل** — نهج YAGNI لـ«المطور الخبير الكسول»: أصغر تغيير عامل، بلا هياكل لم تُطلب.
-  - **ذيل الحصان (المطور الخبير الكسول)** — اصعد سلّم YAGNI، وأصلح السبب الجذري، وقدّم أصغر فرق عامل.
-  - **لدي اضطراب فرط الحركة وتشتت الانتباه (الإجراء أولًا)** — ابدأ بالإجراء التالي، ورقّم الخطوات، وقدّم خطوة تالية ملموسة واحدة، بلا مقدمة.
-  - **الصينية المقتضبة (文言)** — أسلوب صيني كلاسيكي فائق الإيجاز (مقيّد باللغة `zh`).
-- **🎯 ميزانية سياق تكيّفية** _(القرص)_ — بدلًا من عتبة رموز واحدة للتشغيل/الإيقاف، صعّد استخدام أرخص المحركات وأقلها فقدًا للمعلومات بالقدر اللازم فقط **للملاءمة ضمن نافذة سياق النموذج**. السياسة: `reserve-output` (الافتراضية، واعية بالنموذج) · `percentage` · `absolute`. الوضع: `floor` (ضمان الملاءمة) · `replace-autotrigger` (يَغلِب اختيارك الصريح) · `off` (العتبة القديمة).
-- **🎛️ موضع اتخاذ قرار الضغط** _(الأولوية، من الأعلى إلى الأدنى)_ — ترويسة `x-omniroute-compression` لكل طلب › تجاوز مجموعة التوجيه › ملف التعريف المسمّى النشط › التكيّف / التشغيل التلقائي › الإعداد الافتراضي للوحة › الإيقاف. تُعاد الخطة المطبقة في ترويسة الاستجابة `X-OmniRoute-Compression: <mode>; source=<source>`.
+- **🪄 أنماط المخرجات** _(توجيه محور المخرجات)_ — حقن تعليمات حتمية آمنة للتخزين المؤقت تُشكّل الاستجابة؛ قابلة للدمج، كلٌّ منها بكثافة `lite` / `full` / `ultra`. إضافة نمط هي مدخل سطر واحد في السجل:
+  - **نثر موجز** — احذف الحشو / أدوات التعريف / التخفيف؛ أبقِ الجوهر التقني دقيقًا.
+  - **كود أقل** — «مطوّر أول كسول» YAGNI: أصغر تغيير فعّال، بلا سقالات غير مطلوبة.
+  - **Ponytail (مطوّر أول كسول)** — اصعد سلّم YAGNI، أصلح السبب الجذري، أصغر فرق فعّال.
+  - **لديّ ADHD (الإجراء أولًا)** — الإجراء التالي يتصدّر، خطوات مرقّمة، خطوة تالية ملموسة واحدة، بلا مقدّمات.
+  - **نثر CJK موجز (文言)** — أسلوب صيني كلاسيكي فائق الإيجاز (مقيّد باللغة إلى `zh`).
+- **🎯 ميزانية السياق التكيّفية** _(القرص)_ — بدلًا من عتبة توكِن واحدة تشغيل/إيقاف، صعّد أرخص المحرّكات وأقلّها فقدًا بالقدر اللازم فقط لـ**ملاءمة نافذة سياق النموذج**. السياسة: `reserve-output` (افتراضية، واعية بالنموذج) · `percentage` · `absolute`. الوضع: `floor` (ضمان الملاءمة) · `replace-autotrigger` (خيارك الصريح يفوز) · `off` (العتبة القديمة).
+- **🎛️ أين يُقرَّر الضغط** _(الأولوية، من الأعلى إلى الأدنى)_ — ترويسة `x-omniroute-compression` لكل طلب › تجاوز تركيبة التوجيه › الملف الشخصي المسمّى النشط › التكيّفي / التشغيل التلقائي › افتراضي اللوحة › إيقاف. تُعاد الخطة المطبّقة في ترويسة الاستجابة `X-OmniRoute-Compression: <mode>; source=<source>`.
 
-شغّل تلقائيًا بحسب عتبة الرموز، أو فعّل القرص التكيّفي، أو ثبّت ملف تعريف مسمّى، أو عيّن إعدادًا لمرة واحدة لكل طلب، أو خصّص خط معالجة لكل مجموعة توجيه — أيًا كان الأنسب لعبء العمل. وتقيّم **حزمة تقييم** اختيارية وغير متصلة بالإنترنت (`npm run eval:compression`) مدى الحفاظ على المعنى مقابل التوفير، باستخدام مجموعة نصوص ثابتة، قبل اعتماد أي تغيير.
+شغّل تلقائيًا حسب عتبة التوكِنات، أو فعّل القرص التكيّفي، أو ثبّت ملفًا شخصيًا مسمّى، أو اضبط إعدادًا لمرة واحدة لكل طلب، أو خصّص خط أنابيب لكل تركيبة توجيه — أيًّا كان الأنسب لعبء العمل. وهناك **أداة تقييم** offline اختيارية (`npm run eval:compression`) تقيس الأمانة مقابل التوفير على مجموعة نصوص مثبّتة قبل ترقية تغيير.
 
 📖 [`COMPRESSION_GUIDE.md`](docs/compression/COMPRESSION_GUIDE.md) · [`RTK_COMPRESSION.md`](docs/compression/RTK_COMPRESSION.md) · [`COMPRESSION_ENGINES.md`](docs/compression/COMPRESSION_ENGINES.md)
 
@@ -1024,38 +1018,35 @@ npm install -g omniroute
 omniroute
 ```
 
-> 💡 هل ترى `npm warn ERESOLVE` أو تحذيرات تبعيات النظير؟ [إنها غير ضارة](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **هل تستخدم npm 11 أو إصدارًا أحدث؟** قد يمنع npm نصوص دورة حياة الحزمة ما لم يُسمح بها. يلزم `postinstall` الخاص بـ OmniRoute (`node scripts/build/postinstall.mjs`) لإعداد ملفات بيئة التشغيل الأصلية. اسمح بالحزم المذكورة في تحذير npm عند التثبيت العام. بالنسبة إلى مجموعة الحزم التي أبلغ عنها OmniRoute 3.8.51:
+> 💡 هل ترى `npm warn ERESOLVE` أو تحذيرات peer-dep؟ [إنها غير ضارّة](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
+> **هل تستخدم npm 11 أو أحدث؟** قد تمنع npm سكربتات دورة حياة الحزم ما لم يُسمح بها. إن `postinstall` الخاص بـ OmniRoute (`node scripts/build/postinstall.mjs`) مطلوب لتحضير ملفات بيئة التشغيل الأصلية. اسمح بالحزم المذكورة في تحذير npm عند التثبيت العام. بالنسبة لمجموعة الحزم التي أبلغ عنها OmniRoute 3.8.53:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
 > ```
 >
-> لإعادة استخدام قائمة السماح هذه في عمليات التثبيت العامة المستقبلية، اضبطها مرة واحدة، ثم ثبّت كالمعتاد:
+> لإعادة استخدام قائمة السماح هذه في عمليات التثبيت العام المستقبلية، اضبطها مرة واحدة ثم ثبّت بشكل عادي:
 >
 > ```bash
 > npm config set allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
 > npm install -g omniroute
 > ```
 >
-> قد تتغير قائمة التبعيات بين الإصدارات؛ إذا أبلغ npm عن قائمة مختلفة، فاستخدم أسماء الحزم الواردة في ذلك التحذير. يسمح السماح بحزمة ما بتشغيل نصوص التثبيت الخاصة بها.
-> **هل تستخدم Gemini Web أو مزوّدًا آخر يعتمد ملفات تعريف ارتباط الويب؟** تتضمن حزمة npm
-> Playwright، لكنها لا تتضمن ملف Chromium الثنائي. راجع ملاحظة
-> [إعداد Chromium لـ Playwright](docs/guides/TROUBLESHOOTING.md#gemini-web-and-playwright-chromium)
-> قبل إرسال أول طلب إلى مزوّد ويب.
+> قد تتغيّر قائمة التبعيات بين الإصدارات؛ إذا أبلغ npm عن قائمة مختلفة، فاستخدم أسماء الحزم من ذلك التحذير. السماح بحزمة يتيح تشغيل سكربتات التثبيت الخاصة بها.
+> **هل تستخدم Gemini Web أو مزوّدًا آخر يعتمد على كوكيز الويب؟** تتضمّن حزمة npm مكتبة Playwright لكن ليس ثنائي Chromium الخاص بها. راجع ملاحظة [إعداد Playwright Chromium](docs/guides/TROUBLESHOOTING.md#gemini-web-and-playwright-chromium) قبل إجراء أول طلب لمزوّد ويب.
 
-لوحة المعلومات على `http://localhost:20128` · وواجهة API على `http://localhost:20128/v1`.
+لوحة التحكّم على `http://localhost:20128` · واجهة API على `http://localhost:20128/v1`.
 
-**2) صِل مزوّدًا مؤهلًا باستخدام حسابك الخاص**
+**2) اربط مزوّدًا مؤهلًا باستخدام حسابك الخاص**
 
-لوحة المعلومات ← **المزوّدون** ← اختر مزوّدًا تلائم شروطه وحصته الحالية حالة استخدامك ← أضف مفتاح API الخاص به أو أكمل تدفق حسابه. قد تتطلب الخطط المجانية التسجيل أو الموافقة أو وسيلة دفع. راجع [دليل الخطط المجانية](docs/getting-started/FREE-TIERS-GUIDE.md)؛ لا يتوفر الوصول دون مفتاح بشكل مضمون، ويُستبعد المزوّدون الموسومون بـ `tos: avoid` من `auto` افتراضيًا.
+لوحة التحكّم ← **Providers** ← اختر مزوّدًا تناسبه شروطه وحصته الحالية مع حالتك ← أضف مفتاح API الخاص به أو أكمل تدفّق حسابه. قد تتطلّب الطبقات المجانية التسجيل أو الموافقة أو وسيلة دفع. راجع [دليل الطبقات المجانية](docs/getting-started/FREE-TIERS-GUIDE.md)؛ توفّر الوصول بدون مفتاح غير مضمون، والمزوّدون المعلَّمون بـ `tos: avoid` مستبعَدون من `auto` افتراضيًا.
 
-**3) وجّه أداة البرمجة الخاصة بك**
+**3) وجّه أداة البرمجة لديك**
 
 ```txt
-عنوان URL الأساسي: http://localhost:20128/v1
-مفتاح API:          [انسخه من لوحة المعلومات ← نقاط النهاية]
-النموذج:            auto            (يوجّه بين الاتصالات المؤهلة — أو اختر المزوّد/النموذج)
+Base URL: http://localhost:20128/v1
+API Key:  [copy from Dashboard → Endpoints]
+Model:    auto            (routes among eligible connections — or choose provider/model)
 ```
 
 **4) تحقّق من أنه يعمل**
@@ -1064,20 +1055,20 @@ omniroute
 curl http://localhost:20128/v1/models -H "Authorization: Bearer YOUR_KEY"
 ```
 
-يُفترض أن ترى نماذجك المتصلة مدرجة. 🎉 هذا كل شيء — ابدأ البرمجة، وسيتولى OmniRoute التوجيه التلقائي والرجوع الاحتياطي نيابةً عنك.
+ينبغي أن ترى نماذجك المتصلة مدرجة. 🎉 هذا كل شيء — ابدأ البرمجة، وسيقوم OmniRoute بالتوجيه التلقائي والتراجع نيابةً عنك.
 
-إذا تعذّر على عميلك إرسال ترويسات مخصصة، فإن OmniRoute يوفّر أيضًا أسماء توافق بديلة مضمّنة فيها رموز وصول:
+إذا لم يتمكّن عميلك من إرسال ترويسات مخصّصة، فإن OmniRoute يوفّر أيضًا أسماء مستعارة للتوافق مع رمز مميّز:
 
 ```txt
-كتالوج OpenAI:       http://localhost:20128/vscode/YOUR_KEY/
-نماذج OpenAI:        http://localhost:20128/vscode/YOUR_KEY/models
-دردشة OpenAI:        http://localhost:20128/vscode/YOUR_KEY/chat/completions
-استجابات OpenAI:     http://localhost:20128/vscode/YOUR_KEY/responses
-دردشة Ollama:        http://localhost:20128/vscode/YOUR_KEY/api/chat
-وسوم Ollama:         http://localhost:20128/vscode/YOUR_KEY/api/tags
+OpenAI catalog:   http://localhost:20128/vscode/YOUR_KEY/
+OpenAI models:    http://localhost:20128/vscode/YOUR_KEY/models
+OpenAI chat:      http://localhost:20128/vscode/YOUR_KEY/chat/completions
+OpenAI responses: http://localhost:20128/vscode/YOUR_KEY/responses
+Ollama chat:      http://localhost:20128/vscode/YOUR_KEY/api/chat
+Ollama tags:      http://localhost:20128/vscode/YOUR_KEY/api/tags
 ```
 
-استخدمها فقط للعملاء الذين لا يمكنهم إرفاق `Authorization: Bearer ...`. تظل المصادقة بالترويسة هي الوضع المفضّل.
+استخدم هذه فقط للعملاء الذين لا يستطيعون إرفاق `Authorization: Bearer ...`. تبقى المصادقة عبر الترويسة الوضع المفضّل.
 
 <br/>
 
@@ -1303,21 +1294,21 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # يؤدي CI=1 أيضً
 <table>
   <tr><th align="left">الطبقة</th><th align="left">التقنية</th></tr>
   <tr><td nowrap><b>بيئة التشغيل</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>اللغة</b></td><td>TypeScript 6.0 — <b>TypeScript بنسبة 100%</b> عبر <code>src/</code> و<code>open-sse/</code> (من دون أي استخدام لـ <code>any</code> في النواة منذ v2.0)</td></tr>
+  <tr><td nowrap><b>اللغة</b></td><td>TypeScript 6.0 — <b>TypeScript بنسبة 100%</b> عبر <code>src/</code> و<code>open-sse/</code> (لا توجد <code>any</code> في النواة منذ v2.0)</td></tr>
   <tr><td nowrap><b>إطار العمل</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>قاعدة البيانات</b></td><td>better-sqlite3 (SQLite، مع تسجيل WAL) + LowDB (نظام JSON قديم) — 147 وحدة نطاق، و209 عمليات ترحيل</td></tr>
-  <tr><td nowrap><b>الذاكرة</b></td><td>بحث نصي كامل باستخدام SQLite FTS5 + تضمينات متجهية مكمّمة بصيغة int8، مع اضمحلال محدد النوع</td></tr>
-  <tr><td nowrap><b>المخططات</b></td><td>Zod 4 — التحقق من مدخلات ومخرجات أدوات MCP + عقود API</td></tr>
+  <tr><td nowrap><b>قاعدة البيانات</b></td><td>better-sqlite3 (SQLite، تسجيل WAL) + LowDB (JSON قديم) — 147 وحدة نطاق، و222 عملية ترحيل</td></tr>
+  <tr><td nowrap><b>الذاكرة</b></td><td>بحث SQLite FTS5 في النصوص الكاملة + تضمينات متجهية بكمّية int8، وتلاشي مُنظَّم حسب النوع</td></tr>
+  <tr><td nowrap><b>المخططات</b></td><td>Zod 4 — التحقق من إدخال/إخراج أدوات MCP + عقود API</td></tr>
   <tr><td nowrap><b>البروتوكولات</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>البث</b></td><td>Server-Sent Events (SSE) + جسر WebSocket (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>الضغط</b></td><td>مسار معالجة يضم 12 محركًا — RTK، وCaveman، وLLMLingua-2 (MobileBERT ONNX)، وGCF، وOmniGlyph</td></tr>
-  <tr><td nowrap><b>المصادقة والأمان</b></td><td>OAuth 2.0 (PKCE) + JWT + مفاتيح API + مصادقة MCP محددة النطاق · AES-256-GCM للبيانات المخزنة · DOMPurify</td></tr>
-  <tr><td nowrap><b>التخفي</b></td><td>wreq-js — انتحال بصمات JA3 / JA4 TLS، ووكيل بثلاثة مستويات</td></tr>
-  <tr><td nowrap><b>المرونة</b></td><td>قاطع دائرة، وتراجع أُسّي، ومنع الاندفاع المتزامن للطلبات، وتعافٍ ذاتي تلقائي للتركيبات</td></tr>
-  <tr><td nowrap><b>التسجيل</b></td><td>pino — سجلات JSON منظّمة تتضمن سياق الطلب</td></tr>
-  <tr><td nowrap><b>الاختبار</b></td><td>مشغّل اختبارات Node.js + Vitest — <b>أكثر من 56,000 تعريف اختبار ثابت</b> موزعة على أكثر من 7,800 ملف اختبار متتبَّع (اختبارات الوحدات، والتكامل، والشاملة E2E، والأمان، والمنظومة)</td></tr>
+  <tr><td nowrap><b>البث</b></td><td>الأحداث المرسلة من الخادم (SSE) + جسر WebSocket (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>الضغط</b></td><td>مسار معالجة يضم 12 محرّكًا — RTK وCaveman وLLMLingua-2 (MobileBERT ONNX) وGCF وOmniGlyph</td></tr>
+  <tr><td nowrap><b>المصادقة والأمان</b></td><td>OAuth 2.0 (PKCE) + JWT + مفاتيح API + مصادقة MCP محددة النطاق · AES-256-GCM للبيانات الساكنة · DOMPurify</td></tr>
+  <tr><td nowrap><b>التخفي</b></td><td>wreq-js — انتحال بصمة JA3 / JA4 لـ TLS، ووكيل من 3 مستويات</td></tr>
+  <tr><td nowrap><b>المرونة</b></td><td>قاطع الدائرة، والتراجع الأسي، ومكافحة اندفاع الطلبات، والشفاء الذاتي التلقائي للمجموعات</td></tr>
+  <tr><td nowrap><b>التسجيل</b></td><td>pino — سجلات JSON منظَّمة مع سياق الطلب</td></tr>
+  <tr><td nowrap><b>الاختبار</b></td><td>مشغّل اختبارات Node.js + Vitest — <b>أكثر من 60,000 تصريح اختبار ثابت</b> عبر أكثر من 8,400 ملف اختبار متعقَّب (وحدات، وتكامل، وE2E، وأمان، ومنظومة بيئية)</td></tr>
   <tr><td nowrap><b>المنصات</b></td><td>سطح المكتب (Electron) · Android (Termux) · PWA (أي متصفح)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — نشر تلقائي على npm وDocker Hub عند الإصدار</td></tr>
+  <tr><td nowrap><b>التكامل والنشر المستمران</b></td><td>GitHub Actions — نشر تلقائي إلى npm + Docker Hub عند الإصدار</td></tr>
   <tr><td nowrap><b>الروابط</b></td><td><a href="https://omniroute.online">الموقع الإلكتروني</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
@@ -1333,12 +1324,12 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # يؤدي CI=1 أيضً
 
 <table>
   <tr><th align="left">المستند</th><th align="left">الوصف</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">دليل المستخدم</a></b></td><td>المزوّدون، والتركيبات، والتكامل مع واجهة سطر الأوامر، والنشر</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">دليل الإعداد</a></b></td><td>طرق التثبيت الكاملة، وإعدادات أدوات واجهة سطر الأوامر، وإعداد البروتوكولات، وضبط المهلة الزمنية</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">دليل أدوات واجهة سطر الأوامر</a></b></td><td>إعداد كل أداة من Claude Code وCodex وCursor وCline وOpenClaw وKilo وCopilot</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">الوضع البعيد</a></b></td><td>التحكم في OmniRoute بعيد (على VPS) من واجهة سطر الأوامر في حاسوبك المحمول عبر رموز وصول محدودة النطاق</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">إعداد Claude Code</a></b></td><td>توجيه Claude Code إلى OmniRoute (محلي/بعيد) باستخدام <code>launch</code> + ملفات تعريف خاصة بكل نموذج</td></tr>
-  <tr><td nowrap><b><a href="README.md#-quick-start">البدء السريع</a></b></td><td>3 خطوات: التثبيت ← الاتصال ← الإعداد</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">دليل المستخدم</a></b></td><td>المزوّدون، التركيبات، تكامل CLI، النشر</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">دليل الإعداد</a></b></td><td>طرق التثبيت الكاملة، إعدادات أدوات CLI، إعداد البروتوكول، ضبط مهلة الانتظار</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">دليل أدوات CLI</a></b></td><td>إعداد كل أداة على حدة لـ Claude Code وCodex وCursor وCline وOpenClaw وKilo وCopilot</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">الوضع البعيد</a></b></td><td>التحكم في OmniRoute بعيد (VPS) من CLI على حاسوبك المحمول باستخدام رموز وصول محددة النطاق</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">إعداد Claude Code</a></b></td><td>توجيه Claude Code إلى OmniRoute (محلي/بعيد) باستخدام <code>launch</code> وملفات تعريف لكل نموذج</td></tr>
+  <tr><td nowrap><b><a href="README.md#-quick-start">البدء السريع</a></b></td><td>التثبيت → الاتصال → الإعداد في 3 خطوات</td></tr>
 </table>
 
 ### 🔧 العمليات والنشر
@@ -1347,30 +1338,30 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # يؤدي CI=1 أيضً
   <tr><th align="left">المستند</th><th align="left">الوصف</th></tr>
   <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">دليل Docker</a></b></td><td>تشغيل Docker، وملفات تعريف Compose، وCaddy HTTPS، والأنفاق، ووسوم الصور</td></tr>
   <tr><td nowrap><b><a href="contrib/podman/README.md">دليل Podman</a></b></td><td>تكامل Quadlet مع systemd، وpodman-compose، وSELinux</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">النشر على آلة افتراضية</a></b></td><td>دليل كامل: إعداد آلة افتراضية + nginx + Cloudflare</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">النشر على VM</a></b></td><td>دليل كامل: إعداد VM وnginx وCloudflare</td></tr>
   <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">النشر على Fly.io</a></b></td><td>النشر على Fly.io باستخدام تخزين دائم</td></tr>
   <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">دليل Termux</a></b></td><td>تشغيل OmniRoute على Android عبر Termux</td></tr>
   <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">دليل PWA</a></b></td><td>تثبيت تطبيق الويب التقدمي، والتخزين المؤقت، والبنية</td></tr>
   <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">دليل إلغاء التثبيت</a></b></td><td>إزالة نظيفة لجميع طرق التثبيت</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">إعداد البيئة</a></b></td><td>متغيرات <code>.env</code> والمراجع الكاملة</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">إعداد البيئة</a></b></td><td>متغيرات <code>.env</code> ومراجعها بالكامل</td></tr>
 </table>
 
 ### 🧠 الميزات والبنية
 
 <table>
   <tr><th align="left">المستند</th><th align="left">الوصف</th></tr>
-  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">البنية</a></b></td><td>بنية النظام، وتدفق البيانات، والتفاصيل الداخلية</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">دليل الضغط</a></b></td><td>مسار من 7 خيارات: معطّل / خفيف / قياسي / مكثّف / فائق / RTK / مكدّس</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">البنية</a></b></td><td>بنية النظام، وتدفق البيانات، والأجزاء الداخلية</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">دليل الضغط</a></b></td><td>مسار من 7 خيارات: off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
   <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">ضغط RTK</a></b></td><td>ضغط مخرجات الأوامر، والمرشحات، والثقة، والتحقق، واستعادة المخرجات الخام</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">محركات الضغط</a></b></td><td>Caveman وRTK والمسارات المكدّسة وواجهات لوحة المعلومات/API/MCP</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">تنسيق قواعد الضغط</a></b></td><td>مخططات حزم قواعد JSON لمرشحات Caveman وRTK</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">محركات الضغط</a></b></td><td>مسارات Caveman وRTK والمسارات المكدسة، وواجهات لوحة المعلومات وAPI وMCP</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">تنسيق قواعد الضغط</a></b></td><td>مخططات حزم القواعد بتنسيق JSON لمرشحات Caveman وRTK</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">حزم لغات الضغط</a></b></td><td>اكتشاف اللغة وتأليف حزم قواعد Caveman</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">دليل المرونة</a></b></td><td>قواطع الدارات، وفترات التهدئة، وقائمة الانتظار، ومنع الاندفاع المتزامن، وانتحال TLS</td></tr>
-  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">محرك التركيب التلقائي</a></b></td><td>تقييم يستند إلى 16 عاملًا، وحزم أوضاع، وإصلاح ذاتي</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">دليل الوكيل</a></b></td><td>نظام وكيل من 3 مستويات، وسوق 1proxy، وعمليات CRUD للسجل</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">الطبقات المجانية</a></b></td><td>دليل موحّد: 34 مجموعة دورية موثقة / 467 إدخالًا مفهرسًا ضمن الطبقة المجانية</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">دليل المرونة</a></b></td><td>قواطع الدائرة، وفترات التهدئة، وقائمة الانتظار، ومنع تدافع الطلبات، وانتحال TLS</td></tr>
+  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">محرك Auto-Combo</a></b></td><td>تقييم من 16 عاملاً، وحزم الأوضاع، والإصلاح الذاتي</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">دليل الوكيل</a></b></td><td>نظام وكلاء من 3 مستويات، وسوق 1proxy، وعمليات CRUD للسجل</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">المستويات المجانية</a></b></td><td>دليل موحّد: 34 مجموعة متكررة موثقة / 485 إدخالاً مفهرساً ضمن المستوى المجاني</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">معرض الميزات</a></b></td><td>جولة مرئية في لوحة المعلومات مع لقطات شاشة</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">توثيق قاعدة الشيفرة</a></b></td><td>شرح تفصيلي لقاعدة الشيفرة مناسب للمبتدئين</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">توثيق قاعدة الشيفرة</a></b></td><td>شرح مبسّط لقاعدة الشيفرة للمبتدئين</td></tr>
 </table>
 
 ### 🤖 البروتوكولات وواجهات API
@@ -1379,7 +1370,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # يؤدي CI=1 أيضً
   <tr><th align="left">المستند</th><th align="left">الوصف</th></tr>
   <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">مرجع API</a></b></td><td>جميع نقاط النهاية مع أمثلة</td></tr>
   <tr><td nowrap><b><a href="docs/openapi.yaml">مواصفات OpenAPI</a></b></td><td>مواصفات OpenAPI 3.0</td></tr>
-  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">خادم MCP</a></b></td><td>110 أداة MCP، وإعدادات IDE، وعملاء Python/TS/Go</td></tr>
+  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">خادم MCP</a></b></td><td>110 أدوات MCP، وإعدادات IDE، وعملاء Python/TS/Go</td></tr>
   <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">دليل خادم MCP</a></b></td><td>تثبيت MCP، ووسائل النقل، ومرجع الأدوات</td></tr>
   <tr><td nowrap><b><a href="src/lib/a2a/README.md">خادم A2A</a></b></td><td>بروتوكول JSON-RPC 2.0، والمهارات، والبث، وإدارة المهام</td></tr>
   <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">دليل خادم A2A</a></b></td><td>بطاقة وكيل A2A، والمهام، والمهارات، والبث</td></tr>
@@ -1389,13 +1380,13 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # يؤدي CI=1 أيضً
 
 <table>
   <tr><th align="left">المستند</th><th align="left">الوصف</th></tr>
-  <tr><td nowrap><b><a href="CONTRIBUTING.md">المساهمة</a></b></td><td>إعداد بيئة التطوير والإرشادات</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">نموذج التفريع والإصدار</a></b></td><td>الفروع التي تستهدفها طلبات السحب (<code>release/*</code>)، وما يعنيه <code>main</code> والوسوم</td></tr>
-  <tr><td nowrap><b><a href="CHANGELOG.md">سجل التغييرات</a></b></td><td>السجل الكامل للإصدارات حسب كل إصدار</td></tr>
+  <tr><td nowrap><b><a href="CONTRIBUTING.md">المساهمة</a></b></td><td>إعداد التطوير والإرشادات</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">نموذج التفرع والإصدار</a></b></td><td>إلى أين تستهدف طلبات السحب (<code>release/*</code>)، وما الذي يعنيه <code>main</code> والوسوم</td></tr>
+  <tr><td nowrap><b><a href="CHANGELOG.md">سجل التغييرات</a></b></td><td>السجل الكامل لإصدارات كل نسخة</td></tr>
   <tr><td nowrap><b><a href="SECURITY.md">سياسة الأمان</a></b></td><td>الإبلاغ عن الثغرات وممارسات الأمان</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/I18N.md">دليل التدويل</a></b></td><td>دعم 67 لغة، وسير عمل الترجمة، والكتابة من اليمين إلى اليسار</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">قائمة التحقق من الإصدار</a></b></td><td>خطوات التحقق السابقة للإصدار</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">خطة التغطية</a></b></td><td>استراتيجية تغطية الاختبارات لأكثر من 56,000 تصريح اختبار ثابت عبر أكثر من 7,800 ملف اختبار متتبَّع</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/I18N.md">دليل i18n</a></b></td><td>دعم 67 لغة، وسير عمل الترجمة، ودعم RTL</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">قائمة التحقق من الإصدار</a></b></td><td>خطوات التحقق قبل الإصدار</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">خطة التغطية</a></b></td><td>استراتيجية تغطية الاختبارات لأكثر من 60,000 تصريح اختبار ثابت عبر أكثر من 8,400 ملف اختبار متعقَّب</td></tr>
 </table>
 
 <br/>
@@ -1404,37 +1395,37 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # يؤدي CI=1 أيضً
 
 # ⭐ أبرز المساهمين
 
-> يتشكل OmniRoute بفضل مجتمع شغوف بالمصادر المفتوحة. قدّم هؤلاء الأفراد مساهمات استثنائية تؤثر مباشرةً في جودة المشروع واستقراره وانتشاره. **شكرًا لكم.**
+> يتشكّل OmniRoute بفضل مجتمع شغوف بالمصادر المفتوحة. قدّم هؤلاء الأفراد مساهمات استثنائية تؤثر مباشرةً في جودة المشروع واستقراره وانتشاره. **شكرًا لكم.**
 
 ### المساهمون الخارجيون حسب طلبات السحب المدمجة
 
 <table>
   <tr><th align="center">الترتيب</th><th align="left">المساهم</th><th align="center">طلبات السحب المدمجة</th><th align="right">~الأسطر المتغيرة</th></tr>
-  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
-  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
-  <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
-  <tr><td align="center">4</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
-  <tr><td align="center">5</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">174</td><td align="right">78,276</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">151</td><td align="right">3,562,936</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
+  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
+  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
+  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
+  <tr><td align="center">4</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
+  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">198</td><td align="right">3,570,623</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
+  <tr><td align="center">7</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
   <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
   <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500,065</td></tr>
   <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
-  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">84</td><td align="right">2,849,554</td></tr>
-  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">67</td><td align="right">68,548</td></tr>
+  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">85</td><td align="right">2,849,623</td></tr>
+  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
   <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
-  <tr><td align="center">14</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
-  <tr><td align="center">15</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
-  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">47</td><td align="right">33,626</td></tr>
-  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">46</td><td align="right">809,391</td></tr>
-  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">44</td><td align="right">147,896</td></tr>
+  <tr><td align="center">14</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">59</td><td align="right">126,220</td></tr>
+  <tr><td align="center">15</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
+  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
+  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">48</td><td align="right">811,771</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">46</td><td align="right">151,229</td></tr>
+  <tr><td align="center">19</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">43</td><td align="right">28,166</td></tr>
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
-  <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>أُجري الإحصاء في 2026-10-18 15:09:09 UTC باستخدام أحدث نقطة من <code>release/v3.8.52</code> وهي <code>656f01cb43</code>. يتضمن إحصاء GitHub GraphQL المقسّم إلى صفحات 9,191 طلب سحب مدمجًا: 3,834 من مالك المستودع، و229 من Dependabot، و6 من روبوتات/تطبيقات أخرى، و<b>5,122 طلب سحب خارجيًا من 835 مساهمًا مختلفًا</b>. تشير «الأسطر المتغيرة» إلى مجموع الإضافات والحذف في GitHub، وتشمل الملفات المُنشأة وملفات القفل والكتالوجات والترجمات والوثائق؛ وهي مقياس لحجم التغيير وليست عدد أسطر التعليمات البرمجية التي كتبها المؤلف. تُظهر 49 من طلبات السحب فروقًا على GitHub تتجاوز 500,000 سطر (على سبيل المثال، يسرد الطلب #13399، وهو إضافة موفّر واحد، 2,347 ملفًا متغيرًا)، ما يضخّم العديد من الإجماليات أعلاه. تُمنح الحالات المتعادلة الترتيب نفسه.</sub>
+<sub>أُجري الإحصاء في 2026-11-03 03:01:19 بالتوقيت العالمي المنسق باستخدام أحدث نسخة مباشرة من <code>release/v3.8.53</code>، وهي <code>05bc048d6c</code>. يحتوي إحصاء GitHub GraphQL المُقسّم إلى صفحات على 9,947 طلب سحب مدمج: 4,130 منها بواسطة مالك المستودع، و240 بواسطة Dependabot، و6 بواسطة روبوتات/تطبيقات أخرى، و<b>5,571 طلب سحب خارجيًا من 883 مساهمًا متميزًا</b>. تمثل «الأسطر المتغيرة» عمليات الإضافة + الحذف في GitHub، وتشمل الملفات المُولّدة وملفات القفل والفهارس والترجمات والتوثيق؛ وهي تمثل حجم التغييرات، لا عدد أسطر التعليمات البرمجية التي ألّفها المساهم. يُبلغ 53 طلب سحب عن فروق GitHub تتجاوز 500,000 سطر (على سبيل المثال #13399، وهي إضافة موفّر واحدة، وتسرد 2,347 ملفًا متغيرًا)، ما يؤدي إلى تضخيم عدة إجماليات أعلاه. صُنّفت حالات التعادل معًا.</sub>
 
-### الالتزامات المنسوبة عبر GitHub
+### عمليات الإيداع المنسوبة إلى GitHub
 
 <table>
   <tr>
@@ -1443,14 +1434,14 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # يؤدي CI=1 أيضً
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 367 مساهمة منسوبة إلى GitHub</sub>
+      <sub>🥇 418 مساهمة منسوبة إلى GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 269 مساهمة منسوبة إلى GitHub</sub>
+      <sub>🥈 294 مساهمة منسوبة إلى GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
@@ -1460,6 +1451,13 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # يؤدي CI=1 أيضً
       <sub>🥉 229 مساهمة منسوبة إلى GitHub</sub>
     </td>
     <td align="center" width="160">
+      <a href="https://github.com/pacocartones">
+        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
+        <b>Paco Cartones</b>
+      </a><br/>
+      <sub>🏅 222 مساهمة منسوبة إلى GitHub</sub>
+    </td>
+    <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
@@ -1467,12 +1465,14 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # يؤدي CI=1 أيضً
       <sub>🏅 202 مساهمة منسوبة إلى GitHub</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/pacocartones">
-        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
-        <b>Paco Cartones</b>
+      <a href="https://github.com/JxnLexn">
+        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
+        <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 174 مساهمة منسوبة إلى GitHub</sub>
+      <sub>🏅 134 مساهمة منسوبة إلى GitHub</sub>
     </td>
+  </tr>
+  <tr>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
@@ -1480,14 +1480,12 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # يؤدي CI=1 أيضً
       </a><br/>
       <sub>🏅 126 مساهمة منسوبة إلى GitHub</sub>
     </td>
-  </tr>
-  <tr>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 114 مساهمة منسوبة إلى GitHub</sub>
+      <sub>🏅 115 مساهمة منسوبة إلى GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
@@ -1497,18 +1495,18 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # يؤدي CI=1 أيضً
       <sub>🏅 108 مساهمة منسوبة إلى GitHub</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/JxnLexn">
-        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
-        <b>Jan Leon</b>
-      </a><br/>
-      <sub>🏅 87 مساهمة منسوبة إلى GitHub</sub>
-    </td>
-    <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
       <sub>🏅 70 مساهمة منسوبة إلى GitHub</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/jonlwheat2-gif">
+        <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
+        <b>WebPerson</b>
+      </a><br/>
+      <sub>🏅 68 مساهمة منسوبة إلى GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
@@ -1520,9 +1518,9 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # يؤدي CI=1 أيضً
   </tr>
 </table>
 
-<sub>أُعيد التحقق في 2026-10-18 14:44:45 UTC: المساهمات المنسوبة إلى GitHub كما أبلغت عنها واجهة Contributors API الخاصة بالمستودع للفرع الافتراضي <code>release/v3.8.52</code>. أعادت واجهة API عدد 849 هوية (429 مستخدمًا، وروبوتين، و418 مجهولي الهوية)؛ يستثني هذا الجدول المشرف على الصيانة والروبوتات والهويات مجهولة الهوية، ويحتفظ بالتعادلات في الترتيب. وهو يختلف عن كلٍّ من ترتيب طلبات السحب المدمجة أعلاه وإحصاء بيانات Git الوصفية أدناه.</sub>
+<sub>أُعيد التحقق في 2026-11-03 02:09:16 UTC: المساهمات المنسوبة إلى GitHub التي أبلغت عنها واجهة Contributors API البرمجية للمستودع للفرع الافتراضي <code>release/v3.8.53</code>. أعادت الواجهة 903 هويات (429 مستخدمًا، و2 من الروبوتات، و472 مجهولة الهوية)؛ يستبعد هذا الجدول المشرف والروبوتات والهويات المجهولة، ويُبقي على حالات التعادل في الترتيب. وهو متميز عن كلٍّ من ترتيب طلبات السحب المدمجة أعلاه وإحصاء بيانات Git الوصفية أدناه.</sub>
 
-> 🙏 إن ميزات هؤلاء المساهمين وإصلاحاتهم للأخطاء وتحسيناتهم للبنية التحتية هي **جزء أساسي** مما يجعل OmniRoute موثوقًا وغنيًا بالميزات. كل طلب سحب، وكل حالة اختبار، وكل ملف ترجمة i18n له أهميته. فالبرمجيات مفتوحة المصدر يبنيها أشخاص مثلهم.
+> 🙏 تُعد ميزات هؤلاء المساهمين وإصلاحاتهم للأخطاء وتحسيناتهم للبنية التحتية **جزءًا أساسيًا** مما يجعل OmniRoute موثوقًا وغنيًا بالميزات. فكل طلب سحب، وكل حالة اختبار، وكل ملف ترجمة i18n مهم. تُبنى المصادر المفتوحة على أيدي أشخاص مثلهم.
 
 </div>
 
@@ -1632,29 +1630,29 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # يؤدي CI=1 أيضً
 
 <div align="center">
 
-## 👥 أكثر من 900 مساهم
+## 👥 أكثر من 1,000 مساهم
 
 </div>
 
-[![المساهمون](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=993&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
 
-<sub>أُجري التدقيق في 2026-10-18 عند أحدث نقطة في <code>release/v3.8.52</code> المباشر، وهي <code>ad160ab2d1</code> (6,826 التزامًا): <b>993 هوية Git بشرية موحّدة</b> — يظهر 707 منهم كمؤلفي التزامات (بمن فيهم المشرف)، بينما يظهر 286 فقط في التذييلات الصريحة <code>Co-authored-by</code>. يطبّق الإحصاء <code>.mailmap</code>، ويقارن عناوين البريد الإلكتروني دون حساسية لحالة الأحرف، ويدمج عناوين GitHub الرقمية والعادية من نوع noreply فقط عندما ترمّز إلى المعرّف نفسه، ويستبعد 26 هوية لبوتات/وكلاء/خدمات/عناصر نائبة، ولا يدمج عناوين البريد الإلكتروني العادية لمجرد تطابق أسماء العرض الخاصة بها. نشر تدقيق 2026-08-24 عددًا قدره 639؛ وعند إعادة تشغيل هذه المنهجية على أساس ذلك التدقيق <code>ac02c5b42f</code>، تكون النتيجة 619، لذا ترجع الزيادة إلى مساهمين جدد، وليس إلى منهجية أكثر تساهلًا.</sub>
+<sub>تم التدقيق في 2026-11-02 عند أحدث نسخة مباشرة من <code>release/v3.8.53</code>، وهي <code>1c7135e0fb</code> (7,972 عملية إيداع): <b>1,074 هوية بشرية موحّدة في Git</b> — يظهر 759 منها كمؤلفي عمليات إيداع (بما في ذلك المشرف) و315 منها فقط في تذييلات <code>Co-authored-by</code> الصريحة. يطبّق الإحصاء <code>.mailmap</code>، ويقارن عناوين البريد الإلكتروني دون تمييز حالة الأحرف، ويجمع عناوين GitHub الرقمية والعادية بدون رد فقط عندما ترمّز إلى المعرّف نفسه، ويستبعد 29 هوية لروبوتات/وكلاء/خدمات/عناصر نائبة، ولا يدمج عناوين البريد الإلكتروني العادية لمجرد تطابق أسماء العرض الخاصة بها. نشر تدقيق 2026-08-24 العدد 639؛ ويعطي تطبيق هذه الطريقة مجددًا على أساس ذلك التدقيق <code>ac02c5b42f</code> العدد 619، لذا فإن الزيادة ناتجة عن مساهمين جدد، وليست عن استخدام طريقة أقل صرامة.</sub>
 
 ### كيفية المساهمة
 
 1. أنشئ نسخة متفرعة من المستودع
-2. أنشئ فرعًا انطلاقًا من أحدث نقطة **نشطة** في `release/vX.Y.Z` (وليس `main`) — راجع [نموذج التفريع والإصدار](docs/ops/BRANCHING_MODEL.md)
-3. أنشئ فرع ميزتك (`git checkout -b feat/amazing-feature`)
+2. أنشئ فرعًا انطلاقًا من أحدث نسخة نشطة من `release/vX.Y.Z` (وليس `main`) — راجع [نموذج الفروع والإصدارات](docs/ops/BRANCHING_MODEL.md)
+3. أنشئ فرع الميزات الخاص بك (`git checkout -b feat/amazing-feature`)
 4. ثبّت تغييراتك (`git commit -m 'feat: add amazing feature'`)
-5. ادفع إلى الفرع (`git push origin feat/amazing-feature`)
-6. افتح طلب سحب مع تعيين **الأساس = فرع `release/vX.Y.Z` ذاك**
+5. ادفع التغييرات إلى الفرع (`git push origin feat/amazing-feature`)
+6. افتح طلب سحب مع جعل **الأساس = فرع `release/vX.Y.Z`** هذا
 
-راجع [CONTRIBUTING.md](CONTRIBUTING.md) للاطلاع على الإرشادات التفصيلية.
+راجع [CONTRIBUTING.md](CONTRIBUTING.md) للحصول على إرشادات مفصلة.
 
 ### إصدار نسخة جديدة
 
 ```bash
-# أنشئ إصدارًا — يتم تنفيذ npm publish تلقائيًا
+# إنشاء إصدار — يتم تنفيذ npm publish تلقائيًا
 VERSION=x.y.z
 gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 ```
@@ -1696,122 +1694,122 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 </div>
 
-يقف OmniRoute على أكتاف عمالقة. فقد بدأ كتفرّع من **[9router](https://github.com/decolua/9router)** وكنسخة منقولة إلى TypeScript من مشروع Go‏ **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** — ومنذ ذلك الحين، استُلهم كل نظام فرعي أدناه من مشروع مفتوح المصدر سبقه إلى ذلك. وقد أسهم كل واحد منها في تشكيل جزء ملموس من OmniRoute. وهذا تعبيرنا عن امتناننا لهم جميعًا. 🙏
+يقف OmniRoute على أكتاف عمالقة. بدأ كمشتق من **[9router](https://github.com/decolua/9router)** وكمنفذ بلغة TypeScript لمشروع Go **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** — ومن هناك، استُلهم كل نظام فرعي أدناه من مشروع مفتوح المصدر سبقه إلى ذلك. وقد أسهم كل مشروع منها في تشكيل جزء ملموس من OmniRoute. وهذا هو شكرنا وامتناننا لها جميعًا. 🙏
 
-> ⭐ تم التحقق من أعداد النجوم عبر GitHub REST API في 18 أكتوبر 2026 — فامنحوا هذه المشاريع نجمة. تمثل الأعداد لقطة دقيقة مؤرخة، ومن الطبيعي أن تتغير.
+> ⭐ تم التحقق من أعداد النجوم باستخدام واجهة GitHub REST API في 3 نوفمبر 2026 — اذهبوا لمنح هذه المشاريع نجمة. الأعداد لقطة مؤرخة بدقة، ومن الطبيعي أن تتغير بمرور الوقت.
 
-### 🧬 الأصول والبوابة
+### 🧬 النَسَب والبوابة
 
 <table>
-  <tr><th align="left">المشروع</th><th align="center">⭐</th><th align="left">كيف ألهم OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,004</td><td>المشروع الأصلي الذي بُني عليه هذا التفرّع — وقد جرى توسيعه هنا بإضافة واجهات API متعددة الوسائط وإعادة كتابة كاملة باستخدام TypeScript.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">55,591</td><td>تنفيذ Go الذي ألهم هذه النسخة المنقولة إلى JavaScript / TypeScript.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">61,482</td><td>بوابة الذكاء الاصطناعي التي تغذي مجموعة بيانات التسعير العامة الخاصة بها مزامنة تتبّع التكاليف لدينا، والتي أسهم نموذجها لتوحيد مزوّدي الخدمة في تصميم آلية التوجيه لدينا.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">14,526</td><td>شيفرة مصدرية بترخيص MIT جرى تكييفها ضمن جسر ChatGPT Web → Codex Responses المضمّن، بما في ذلك محوّلات جلسات المتصفح، وتأطير الاستجابات، والاستخدام، والبحث على الويب.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">61,430</td><td>أنماط نُقلت إلى استعادة التدفق، والأسماء البديلة من دون تفكير، والبحث الاحتياطي على الويب، وحدود النافذة المنزلقة، وتنقيح السجلات، ومسارات التشغيل المحصّنة.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">346</td><td>أنماط اختيار الأدوات، وقيود المخرجات، وتثبيت الأدوات في Cursor Composer، والتي جرى تكييفها ضمن منفّذ Cursor الأصلي.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">553</td><td>أنماط تسجيل الدخول الجديد وتدوير رموز التحديث، والتي نُقلت إلى إعادة مصادقة Codex OAuth.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">558</td><td>إعدادات التحويل الافتراضية المتوافقة مع Claude Code وسلوك ترويسات الفوترة، والتي جرى تعميمها ضمن جسر OmniRoute المعتمد على الإعدادات.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/520mmxx/grok2api-merged">grok2api-merged</a></b></td><td align="center">2</td><td>جرى تكييف تعيينات نماذج Grok الخاصة به، ومولّد Statsig الذي يحاكي TypeError، والإعدادات الافتراضية للطلبات والأجهزة، ومعالج استجابات NDJSON، بصورة جوهرية ضمن منفّذ Grok Web في OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">706</td><td>المصدر البرمجي الانتقالي الرئيسي وراء grok2api-merged؛ وقد حوفظ على تنفيذاته الخاصة بالنماذج، والترويسات، والحمولات، وStatsig، والمعالجات ضمن سلالة Grok Web.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,819</td><td>المصدر الأساسي المرخّص بموجب MIT للإعدادات الافتراضية لحمولات Grok وأجهزته، ومولّد Statsig، ومعالج <code>result.response</code> المنقول عبر TQZHR وgrok2api-merged.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/miuzhaii/grok2api-pro">grok2api-pro</a></b></td><td align="center">27</td><td>مصدر انتقالي نسب إليه grok2api-merged الفضل في طبقة مجمّع الوكلاء الخاصة به؛ يحافظ OmniRoute على إشعار النسب هذا، لكنه لا يدّعي نقل مجمّع وكلاء ضمن منفّذ Grok Web محدود النطاق الخاص به.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">51</td><td>أسهم وكيل Grok الموثّق بملفات تعريف الارتباط ونمط تدفق <code>result.response.token</code> الخاص به في تصميم آلية نقل Grok Web في OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lianying1716/GrokBridge">GrokBridge</a></b></td><td align="center">5</td><td>استعان تنفيذ Grok Web الأصلي بتصميم المنبع الخاص به والقائم على HTTP/المتصفح؛ ويُشتق مسار HTTP المباشر فيه من GrokProxy، ولذلك لا يُدّعى نقل أي شيفرة مستقلة منه.</td></tr>
+  <tr><th align="left">المشروع</th><th align="center">⭐</th><th align="left">كيفية إلهامه لـ OmniRoute</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,861</td><td>المشروع الأصلي الذي بُني عليه هذا المشتق — وقد تم توسيعه هنا ليشمل واجهات برمجة تطبيقات متعددة الوسائط وإعادة كتابة كاملة بلغة TypeScript.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">57,329</td><td>تطبيق Go الذي ألهم هذا المنفذ بلغة JavaScript / TypeScript.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">62,580</td><td>بوابة الذكاء الاصطناعي التي تغذي مجموعة بيانات الأسعار العامة فيها مزامنة تتبع التكلفة لدينا، كما أن نموذج توحيد المزوّدين فيها أسهم في توجيهنا.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">15,435</td><td>تم تكييف مصدر MIT منه ليُستخدم في جسر ChatGPT Web → Codex Responses المضمّن، بما في ذلك محوّلات جلسات المتصفح وتأطير الاستجابات والاستخدام والبحث على الويب.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">65,966</td><td>تم نقل أنماطه إلى استعادة التدفق، والأسماء المستعارة no-thinking، والبحث الاحتياطي على الويب، والحدود المعتمدة على النافذة المنزلقة، وتنقيح السجلات، وتدفقات تشغيل محسّنة للأمان.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">347</td><td>تم تكييف أنماط اختيار الأدوات وقيود المخرجات وتثبيت الأدوات في Cursor Composer ضمن المنفّذ الأصلي لـ Cursor.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">561</td><td>تم نقل أنماط تسجيل الدخول الجديد وتدوير رموز التحديث إلى إعادة المصادقة عبر Codex OAuth.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">562</td><td>تم تعميم الإعدادات الافتراضية للتحويل المتوافقة مع Claude Code وسلوك ترويسة الفوترة ضمن جسر OmniRoute القائم على الإعدادات.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/520mmxx/grok2api-merged">grok2api-merged</a></b></td><td align="center">2</td><td>تم تكييف تعيينات نماذج Grok فيه، ومولّد Statsig المزيف من نوع TypeError، والإعدادات الافتراضية للطلبات والأجهزة، ومعالج الاستجابات NDJSON، بصورة جوهرية ضمن منفّذ Grok Web في OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">707</td><td>المصدر الرئيسي العابر للكود وراء grok2api-merged؛ وقد حُفظت تطبيقات النماذج والترويسات والحمولة وStatsig والمعالج فيه ضمن نَسَب Grok Web.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,874</td><td>المصدر الأساسي المرخّص بـ MIT لإعدادات حمولة Grok والأجهزة الافتراضية، ومولّد Statsig، ومعالج <code>result.response</code> المنقول عبر TQZHR وgrok2api-merged.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/miuzhaii/grok2api-pro">grok2api-pro</a></b></td><td align="center">27</td><td>مصدر عابر ينسب إليه grok2api-merged طبقة تجميع الوكلاء؛ وتحافظ OmniRoute على إشعار النَسَب هذا، لكنها لا تدّعي نقل طبقة تجميع الوكلاء إلى منفّذ Grok Web المحدود الخاص بها.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">52</td><td>أثر وكيل Grok الخاص به، والمصادَق عليه عبر ملفات تعريف الارتباط، ونمط تدفق <code>result.response.token</code> في نقل Grok Web الخاص بـ OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lianying1716/GrokBridge">GrokBridge</a></b></td><td align="center">5</td><td>تمت الاستعانة بتطبيق Grok Web الأصلي فيه لتصميم المنبع عبر HTTP/المتصفح؛ ويستمد مساره المباشر عبر HTTP من GrokProxy، لذلك لا يُدّعى نقل كود مستقل منه.</td></tr>
 </table>
 
-### 🗜️ ضغط السياق والرموز — المحركات
+### 🗜️ ضغط السياق والرموز المميّزة — المحركات
 
 <table>
   <tr><th align="left">المشروع</th><th align="center">⭐</th><th align="left">كيف ألهم OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">113,396</td><td>مشروع «لماذا تستخدم رموزًا كثيرة حين تؤدي رموز قليلة الغرض» واسع الانتشار — تدعم فلسفته القائمة على لغة رجل الكهف وضع الضغط القياسي لدينا وأكثر من 30 قاعدة لإزالة الحشو والتكثيف.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">83,835</td><td>ضغط عالي الأداء لمخرجات الأوامر — ألهم محرك RTK لدينا، ولغة JSON DSL للتصفية، واستعادة المخرجات الخام، ومسار RTK → Caveman المتسلسل.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">75,741</td><td>ضغط سياق قابل للعكس (SmartCrusher) — ألهم محرك <code>headroom</code> لدينا ونمط علامة الاسترداد <code>ccr</code>.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,757</td><td>أبحاث ضغط المطالبات (LLMLingua / LLMLingua-2) — ألهمت محرك <code>llmlingua</code> لدينا، غير المتزامن والآمن للتعليمات البرمجية والمصمم لإتاحة المتابعة عند الفشل.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">32</td><td>منفذ JS/ONNX ‏(MobileBERT / XLM-RoBERTa) المستخدم كواجهة خلفية قائمة على خيوط العامل لمحرك LLMLingua لدينا.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/leninejunior/troglodita">Troglodita</a></b></td><td align="center">50</td><td>ضغط الرموز للبرتغالية البرازيلية — يشغّل حزمة اللغة pt-BR لدينا: تقليل الحشو البلاغي وإزالة الكلمات الزائدة، بضبط ملائم لقواعد البرتغالية البرازيلية.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">166,731</td><td>مهارة المبرمج «الكبير الكسول» واسعة الانتشار والقائمة على مبدأ YAGNI — ألهمت نمط المخرجات <b>less-code</b> لدينا: توجيه نحو أصغر تغيير صالح للعمل، ما يقلل التعليمات البرمجية _المولّدة_ (النظير على محور المخرجات لنثر Caveman المقتضب).</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">57,628</td><td>جرى تكييف أسلوب استجابته الذي يقدّم الإجراءات أولًا ويلائم اضطراب فرط الحركة وتشتت الانتباه ليصبح نمط المخرجات الموجز في OmniRoute عبر خمس لغات.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">116,957</td><td>مشروع العبارة واسعة الانتشار "لماذا تستخدم كثيرًا من الرموز عندما تؤدي القليل منها الغرض" — فلسفة حديث الكهف فيه تُشغّل وضع الضغط القياسي لدينا وأكثر من 30 قاعدة للحشو/التكثيف.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">85,350</td><td>ضغط مخرجات الأوامر عالي الأداء — ألهم محرّك RTK لدينا، وDSL لتصفية JSON، واستعادة المخرجات الخام، وخط الأنابيب المتراكم RTK → Caveman.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">78,672</td><td>ضغط السياق القابل للعكس (SmartCrusher) — ألهم محرّك <code>headroom</code> لدينا ونمط علامة الاسترجاع <code>ccr</code>.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,797</td><td>أبحاث ضغط المطالبات (LLMLingua / LLMLingua-2) — ألهمت محرّك <code>llmlingua</code> غير المتزامن، الآمن مع التعليمات البرمجية، والمفتوح عند الفشل.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">33</td><td>منفذ JS/ONNX (MobileBERT / XLM-RoBERTa) المستخدم كواجهة خلفية لخيوط العامل في محرّك LLMLingua لدينا.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/leninejunior/troglodita">Troglodita</a></b></td><td align="center">50</td><td>ضغط الرموز للغة PT-BR — يشغّل حزمة اللغة pt-BR لدينا: تقليل الحشو وإزالة الكلمات الزائدة بما يتلاءم مع قواعد البرتغالية البرازيلية.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">182,929</td><td>مهارة مبرمج YAGNI للعبارة واسعة الانتشار "المطوّر المخضرم الكسول" — ألهمت نمط المخرجات <b>less-code</b> لدينا: توجيه نحو أصغر تغيير عملي يقتطع التعليمات البرمجية _المُولَّدة_ (النظير على محور المخرجات لنثر Caveman المقتضب).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">59,838</td><td>أسلوب الاستجابة الذي يقدّم الإجراء أولًا والمناسب لاضطراب فرط الحركة وتشتت الانتباه فيه جرى تكييفه ليصبح أسلوب المخرجات الموجز في OmniRoute عبر خمس لغات.</td></tr>
 </table>
 
-### 🧩 تنسيقات مدمجة وأبحاث الرموز وأدوات واعية بالتعليمات البرمجية
+### 🧩 التنسيقات المدمجة، وأبحاث الرموز، والأدوات المدركة للتعليمات البرمجية
 
 <table>
   <tr><th align="left">المشروع</th><th align="center">⭐</th><th align="left">كيف ألهم OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,509</td><td>ترميز الكائنات الموجّه نحو الرموز — شكّل نموذجه العمودي القائم على رأس يليه صفوف مرحلة الضغط الجدولي لدينا.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">59</td><td>أسهم تنسيق الرسوم البيانية المدمج وتصميم ملف التعريف العام فيه في صياغة الضغط الجدولي وتنسيق برنامج الترميز Headroom في OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf-typescript">gcf-typescript</a></b></td><td align="center">4</td><td>تطبيق MIT بلغة TypeScript، المضمّن مباشرةً والموسّع ليكون برنامج ترميز ملف التعريف العام في Headroom.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">551</td><td>ذاكرة تخزين مؤقت باستخدام Brotli/SQLite مع فروق سياق لكل جلسة — ألهمت محرك <code>session-dedup</code> لدينا.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,182</td><td>ضغط مخرجات Bash مع ملفات تعريف MCP — ألهم نهجنا المنضبط للتراجع عن الضغط وتقليل بيان أدوات MCP.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">154</td><td>ضغط مخرجات واعٍ بالمحتوى ولكل نوع ملف، مع تراجع يراعي حالات الفشل — أثبت صحة توجيهنا حسب النوع وتجاوز الضغط عند عدم بلوغ الحد الأدنى للمكاسب.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,595</td><td>«اعثر على الرموز الشبحية» — أسهم نمطه القائم على التفريغ والمقابض القابلة للاستعادة في تشكيل تصوّرنا للتفريغ عبر CCR.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">33</td><td>مخطط لجلسات قائمة على الرسوم البيانية وإزالة تكرار الأسطر عبر الأدوار، أسهم في تصميمنا لإزالة التكرار بين الجلسات.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/jessefreitas/OmniCompress">OmniCompress</a></b></td><td align="center">3</td><td>تنسيق JSON عمودي بلغة Rust، واسترداد معنْون بالمحتوى، وإزالة التكرار عبر الرسائل — أثبت صحة تصميم محركات <code>headroom</code>/<code>ccr</code>/<code>session-dedup</code> لدينا، وثابت استقرار ذاكرة التخزين المؤقت القائل إن «الصيغة المضغوطة مستقلة عن الموضع».</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">133</td><td>ضغط مخططات أدوات MCP وأوصافها — أسهم في تشكيل نهجنا لتقليل عدد عناصر بيان أدوات MCP.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">217</td><td>ترتيب خرائط المستودعات بأسلوب Aider — أسهم في استكشافنا لخرائط المستودعات وترتيب الاسترداد.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/mrsimpson/quiet-shell-mcp">quiet-shell-mcp</a></b></td><td align="center">4</td><td>تقليل تصريحي لمخرجات الصدفة عبر MCP — أثبت صحة نهجنا التصريحي لضغط مخرجات bash.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,205</td><td>مجموعة أدوات لواجهة TypeScript Compiler API — ألهمت إزالة التعليقات القائمة على المحلّل لدينا، والتي تحافظ على القيم الحرفية للسلاسل والقوالب والتعبيرات النمطية.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,602</td><td>ترميز الكائنات الموجّه بالرموز — شكّل نموذج الأعمدة والرأس بالإضافة إلى الصفوف مرحلة التكثيف الجدولي لدينا.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">61</td><td>أفاد تنسيق الرسم البياني المدمج وتصميم الملف التعريفي العام فيه عملية التكثيف الجدولي وتنسيق برنامج الترميز Headroom في OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf-typescript">gcf-typescript</a></b></td><td align="center">4</td><td>تنفيذ TypeScript بترخيص MIT، أُدرج مباشرةً وجرى توسيعه ليكون برنامج ترميز الملف التعريفي العام في Headroom.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">566</td><td>ذاكرة تخزين مؤقت Brotli/SQLite + دلتا سياق لكل جلسة — ألهمت محرّك <code>session-dedup</code> لدينا.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,203</td><td>تكثيف مخرجات Bash + ملفات تعريف MCP — ألهم انضباط التراجع عن الضغط لدينا وتقليل بيان أدوات MCP.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">162</td><td>ضغط مخرجات مدرك للمحتوى ولكل نوع ملف، مع تراجع مدرك للفشل — أكد صحة التوجيه حسب النوع وتخطي العمليات ذات المكسب الأدنى لدينا.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,853</td><td>"اعثر على الرموز الشبحية" — أفاد نمط التفريغ + المقبض القابل للاستعادة فيه طريقة تفكيرنا في تفريغ CCR.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">34</td><td>مخطط أولي لرسم بياني للجلسة + إزالة التكرار بين الأسطر وعبر الأدوار، أفاد تصميم session-dedup لدينا.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/jessefreitas/OmniCompress">OmniCompress</a></b></td><td align="center">3</td><td>JSON عمودي في Rust + استرجاع معنون بالمحتوى + إزالة التكرار بين الرسائل — أكد صحة تصميم محرّكات <code>headroom</code>/<code>ccr</code>/<code>session-dedup</code> لدينا وثابت "التنسيق المضغوط مستقل عن الموضع" المستقر في الذاكرة المؤقتة.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">140</td><td>ضغط مخطط/وصف أدوات MCP — أفاد تقليل عدد بيان أدوات MCP لدينا.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">218</td><td>ترتيب خريطة المستودع بأسلوب Aider — أفاد استكشافنا لخريطة المستودع / ترتيب الاسترجاع.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/mrsimpson/quiet-shell-mcp">quiet-shell-mcp</a></b></td><td align="center">4</td><td>تقليل تصريحي لمخرجات shell عبر MCP — أكد صحة تكثيف مخرجات bash التصريحي لدينا.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,222</td><td>مجموعة أدوات TypeScript Compiler API — ألهمت إزالة التعليقات المعتمدة على المحلل النحوي لدينا، مع الحفاظ على السلاسل الحرفية وقوالب النصوص والتعابير النمطية.</td></tr>
 </table>
 
 ### 🧠 الذاكرة وRAG
 
 <table>
   <tr><th align="left">المشروع</th><th align="center">⭐</th><th align="left">كيف ألهم OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">67,385</td><td>طبقة ذاكرة عامة — شكّل نموذج الوكيل بوصفه حدًا للكتابة/القراءة بنية الذاكرة لدينا.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,179</td><td>وكلاء ذوو حالة وذاكرة متعددة المستويات — ألهموا نموذجنا متعدد المستويات للتحكم في السياق واستعادته (CCR).</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,800</td><td>تصنيف ProblemMap لستة عشر نمطًا متكررًا من حالات فشل RAG/LLM — وهو المفردات المشتركة في دليل استكشاف الأخطاء وإصلاحها لدينا.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">68,294</td><td>طبقة ذاكرة شاملة — شكّل نموذج الوكيل كحدّ للكتابة/القراءة بنية ذاكرتنا.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,321</td><td>وكلاء ذوو حالة مع ذاكرة متعددة المستويات — ألهموا نموذجنا متعدد المستويات للتحكم في السياق والاسترداد (CCR).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,804</td><td>تصنيف ProblemMap لأنماط فشل RAG/LLM المتكررة وعددها 16 — وهو المفردات المشتركة في دليل استكشاف الأخطاء وإصلاحها لدينا.</td></tr>
 </table>
 
-### 🛰️ فحص حركة البيانات، واعتراض MITM، والوكيل الشفاف
+### 🛰️ فحص حركة المرور، MITM والوكيل الشفاف
 
 <table>
   <tr><th align="left">المشروع</th><th align="center">⭐</th><th align="left">كيف ألهم OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">79</td><td>أسهم اعتراض حركة البيانات وتحليلها باستخدام MITM بين مساعد البرمجة وLLM في تحديد المتطلبات المبكرة لأداة فحص حركة البيانات. وقد استُبدلت أربع وحدات مشتقة سابقًا — دمج SSE، وتوحيد المحادثات، وإخفاء الأسرار، وتنقية الترويسات — بتنفيذات مستقلة من الصفر تستند إلى معايير البروتوكولات العامة. ولا تزال واجهتا تمرير المضيف (<code>passthrough.ts</code> و<code>_internal/bypass.cjs</code>) تنفيذين داخليين في OmniRoute مصنّفين بصورة مستقلة؛ ولم تُعَد كتابتهما ضمن ذلك الاستبدال.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,814</td><td>توجيه شفاف عبر الوكيل لكل عملية — ألهم آلية الإنهاء الآمن عند التعطل لاتصال MITM، ومُهَل خمول المقابس، وإسناد العمليات عبر <code>/proc</code>، والالتقاط باستخدام TPROXY.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">81</td><td>أفاد اعتراض/تحليل MITM لحركة المرور بين مساعد البرمجة وLLM بمتطلبات Traffic Inspector المبكرة. وقد استُبدلت أربع وحدات مشتقة سابقًا — دمج SSE، وتطبيع المحادثات، وإخفاء الأسرار، وتنقية الرؤوس — بتطبيقات مستقلة نُفذت من الصفر وبالاستناد إلى معايير البروتوكولات العامة. ولا تزال واجهتا تمرير المضيف (<code>passthrough.ts</code> و<code>_internal/bypass.cjs</code>) تطبيقات داخلية خاصة بـ OmniRoute ومصنفة بشكل مستقل؛ ولم يُعَدَت كتابتهما كجزء من ذلك الاستبدال.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,978</td><td>توجيه شفاف للوكيل لكل عملية — ألهم إنهاء MITM الآمن عند التعطل، ومهلات خمول المقابس، وإسناد العمليات عبر <code>/proc</code>، والتقاط TPROXY.</td></tr>
 </table>
 
-### 📚 بيانات النماذج، وقابلية الرصد، وواجهة المستخدم
+### 📚 بيانات النماذج، وقابلية المراقبة وواجهة المستخدم
 
 <table>
   <tr><th align="left">المشروع</th><th align="center">⭐</th><th align="left">كيف ألهم OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,286</td><td>قاعدة بيانات مفتوحة لمواصفات نماذج الذكاء الاصطناعي وأسعارها وقدراتها — تُزامَن بصورة أصلية مع كتالوج النماذج لدينا.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,705</td><td>مكتبة الرسوم البيانية القائمة على العُقد التي تشغّل استوديو الضغط واستوديو الدمج/التوجيه في الوقت الفعلي لدينا.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">43,443</td><td>ألهم التصوير المرئي المباشر للرسم البياني لسير العمل في LangGraph Studio عرض التتابع في الوقت الفعلي داخل الاستوديوهات لدينا.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">35,990</td><td>شكّل نموذج الرصد الخاص به، من التتبّع ← إلى النطاق ← إلى التوليد، مخطط الشلال في استوديو الضغط لدينا.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,645</td><td>قابلية رصد شبكة خدمات Istio — ألهمت شارات قواطع الدارات والتمثيلات المرئية لحواف الأخطاء في استوديو التوجيه/الدمج.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,615</td><td>شعارات العلامات التجارية للذكاء الاصطناعي/LLM التي تعرض أيقونات المزوّدين في لوحة المعلومات لدينا.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,473</td><td>يوفّر أعلام SVG المرخّصة بموجب MIT والمستخدمة في محدد اللغة بملف README.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,486</td><td>قاعدة بيانات مفتوحة لمواصفات نماذج الذكاء الاصطناعي وأسعارها وقدراتها — تُزامَن أصليًا مع كتالوج النماذج لدينا.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,874</td><td>مكتبة الرسوم البيانية القائمة على العقد التي تشغّل Compression Studio وCombo/Routing Studio الآنيين لدينا.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">44,349</td><td>ألهم تصور الرسم البياني لسير العمل المباشر في LangGraph Studio عرض التتابع الآني في Studios لدينا.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">36,907</td><td>شكّل نموذج قابلية المراقبة trace → span → generation الخاص به تصميم الشلال في Compression Studio لدينا.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,647</td><td>قابلية مراقبة شبكة خدمات Istio — ألهمت شارات قاطع الدائرة والمرئيات الخاصة بحواف الأخطاء في Routing/Combo Studio.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,666</td><td>شعارات العلامات التجارية للذكاء الاصطناعي/LLM التي تعرض أيقونات المزوّدين عبر لوحة المعلومات لدينا.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,499</td><td>يوفّر أعلام SVG المرخّصة بموجب MIT المستخدمة في محدد لغة README.</td></tr>
 </table>
 
 ### 🛡️ الأمان
 
 <table>
   <tr><th align="left">المشروع</th><th align="center">⭐</th><th align="left">كيف ألهم OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">722</td><td>قائمة منتقاة من المكتبات الآمنة افتراضيًا، تسترشد بها خياراتنا الأمنية (Helmet.js، وDOMPurify، وssrf-req-filter، وsafe-regex، وGoogle Tink).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">723</td><td>قائمة منتقاة من المكتبات الآمنة افتراضيًا التي توجه اختياراتنا الأمنية (Helmet.js وDOMPurify وssrf-req-filter وsafe-regex وGoogle Tink).</td></tr>
 </table>
 
-### 🧭 أدوات تكميلية
+### 🧭 أدوات مكمّلة
 
 <table>
   <tr><th align="left">المشروع</th><th align="center">⭐</th><th align="left">كيف ألهم OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,628</td><td>ألهم إزالة الطلبات المكررة، وخيار الرجوع الطارئ عديم التكلفة، واستراتيجيات Auto-Combo القابلة للتوصيل، وتصنيف النوايا متعدد اللغات.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,333</td><td>أسهمت آلياته في إعادة تعيين النماذج مع مراعاة الحساب، والتحقق من مسار الملف التنفيذي، وسلوك تسميات الخطط، في صياغة بيئة تشغيل Antigravity في OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,850</td><td>ألهم تنسيق العد التنازلي الموجز لإعادة تعيين الحصة لديه عرض حدود المزوّد المقابل في OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,611</td><td>ألهمت تكاملات ACP الخاصة به ميزة الكشف التلقائي في OmniRoute عن وكلاء CLI المثبّتين.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,616</td><td>حدّد واجهة حصة Grok Build؛ ثم تحقّق OmniRoute بصورة مستقلة من تنسيق البيانات الفعلي وصححه.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,649</td><td>ألهم إزالة تكرار الطلبات، والبديل الطارئ من دون تكلفة، واستراتيجيات Auto-Combo القابلة للتوصيل، وتصنيف النوايا متعدد اللغات.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,785</td><td>أفادت إعادة تعيين النماذج مع مراعاة الحساب، والتحقق من مسارات الملفات التنفيذية، وسلوك تسميات الخطط في Antigravity runtime الخاص بـ OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,852</td><td>ألهم تنسيق العد التنازلي المدمج لإعادة ضبط الحصة عرض حدود المزوّد المناظر في OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,996</td><td>ألهمت تكاملات ACP الخاصة به OmniRoute للكشف التلقائي عن وكلاء CLI المثبتين.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,955</td><td>حدّد سطح حصة Grok Build؛ ثم تحقّق OmniRoute بشكل مستقل من تنسيق البيانات الفعلي عبر السلك وصحّحه.</td></tr>
 </table>
 
 ## 📄 الترخيص
 
-ترخيص MIT - راجع [LICENSE](LICENSE) للتفاصيل.
+ترخيص MIT - راجع [LICENSE](LICENSE) لمزيد من التفاصيل.
 
 ---
 
 <div align="center">
 
-**[⬆ العودة إلى الأعلى](#-omniroute)** · صُنع بكل ❤️ لمجتمع الذكاء الاصطناعي مفتوح المصدر.
+**[⬆ العودة إلى الأعلى](#-omniroute)** · صُنع بـ ❤️ لمجتمع الذكاء الاصطناعي مفتوح المصدر.
 
-<sub>OmniRoute v3.8.52 · Node ≥22.22.2 · ترخيص MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>أنشأه <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · ترخيص MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
-<!-- تم تفعيل GitHub Discussions لأسئلة وأجوبة المجتمع -->
+<!-- تم تفعيل مناقشات GitHub للأسئلة والأجوبة المجتمعية -->

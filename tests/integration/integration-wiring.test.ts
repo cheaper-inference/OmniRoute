@@ -257,12 +257,54 @@ describe("API Routes — dashboard and tool consumers", () => {
   it("keeps request log surfaces on opaque theme colors", () => {
     const requestLogger = readProjectFile("src/shared/components/RequestLoggerV2.tsx");
     const globals = readProjectFile("src/app/globals.css");
+    const kitTokens = readProjectFile("packages/ui-kit/src/ci-tokens.css");
 
     assert.ok(requestLogger, "RequestLoggerV2 should exist");
     assert.ok(globals, "globals.css should exist");
-    assert.match(globals, /--color-card:\s+#ffffff/);
-    assert.match(globals, /--color-card:\s+#161b22/);
+    assert.ok(kitTokens, "vendored CI UI Kit tokens should exist");
     assert.match(globals, /--color-card:\s+var\(--color-card\)/);
+
+    // KEA-7886 track A replaced the :root/.dark hex values with a bridge to the CI UI Kit
+    // (`--color-card: var(--ci-…)`); the kit flips its --ci-* values on data-theme="dark".
+    // The intent is unchanged: card/surface colours resolve to an OPAQUE colour in both themes.
+    const kitCss = kitTokens.replace(/\/\*[\s\S]*?\*\//g, "");
+    const kitBlock = (selector: RegExp) => {
+      const match = selector.exec(kitCss);
+      assert.ok(match, `ci-tokens.css should declare ${selector}`);
+      const body = kitCss.slice(match.index + match[0].length, kitCss.indexOf("}", match.index));
+      return new Map([...body.matchAll(/(--[\w-]+):\s*([^;]+);/g)].map((m) => [m[1], m[2].trim()]));
+    };
+    const light = kitBlock(/^:root,\s*\.ci-theme\s*\{/m);
+    const dark = kitBlock(/^:root\[data-theme="dark"\][^{]*\{/m);
+    const resolveKitToken = (token: string, scopes: Map<string, string>[]) => {
+      let value = `var(${token})`;
+      for (let hops = 0; hops < 10; hops++) {
+        const ref = /^var\((--[\w-]+)\)$/.exec(value);
+        if (!ref) return value;
+        const next = scopes.map((scope) => scope.get(ref[1])).find((v) => v !== undefined);
+        assert.ok(next, `${ref[1]} should be declared in ci-tokens.css`);
+        value = next;
+      }
+      return assert.fail(`${token} does not resolve to a literal colour`);
+    };
+    const OPAQUE =
+      /^(#[0-9a-f]{3}|#[0-9a-f]{6}|rgb\(\s*\d+(\s*,\s*|\s+)\d+(\s*,\s*|\s+)\d+\s*\))$/i;
+
+    for (const bridged of ["--color-card", "--color-surface"]) {
+      const declared = [...globals.matchAll(new RegExp(`(?<![\\w-])${bridged}:\\s*([^;]+);`, "g"))];
+      for (const [, value] of declared) {
+        assert.match(value.trim(), new RegExp(`^var\\((--ci-[\\w-]+|${bridged})\\)$`));
+      }
+      const kitToken = new RegExp(`${bridged}:\\s+var\\((--ci-[\\w-]+)\\)`).exec(globals)?.[1];
+      assert.ok(kitToken, `${bridged} should bridge to a --ci-* kit token in globals.css`);
+      for (const [theme, scopes] of [
+        ["light", [light]],
+        ["dark", [dark, light]],
+      ] as const) {
+        const resolved = resolveKitToken(kitToken, [...scopes]);
+        assert.match(resolved, OPAQUE, `${bridged} → ${kitToken} must be opaque in ${theme}`);
+      }
+    }
     // #4233 ("opaque tables D9") replaced the bg-black/5 tint — which lost to
     // bg-surface via tailwind-merge — with the opaque bg-surface theme color.
     // The intent here (request log surface stays opaque over theme colors) is now
@@ -413,21 +455,27 @@ describe("Barrel Exports — store", () => {
 describe("Barrel Exports — shared/components/layouts", () => {
   const src = readProjectFile("src/shared/components/layouts/index.tsx");
 
-  it("should export DashboardLayout and AuthLayout", () => {
+  it("should export DashboardLayout (the orphan AuthLayout was removed, KEA-7886 P10)", () => {
     assert.ok(src, "src/shared/components/layouts/index.tsx should exist");
     assert.match(src, /DashboardLayout/);
-    assert.match(src, /AuthLayout/);
+    assert.doesNotMatch(src, /AuthLayout/);
   });
 });
 
 // ─── Layout and Page Integration ────────────────────
 
 describe("DashboardLayout Integration", () => {
-  const src = readProjectFile("src/shared/components/layouts/DashboardLayout.tsx");
+  // DashboardLayout.tsx renders the kit shell (DashboardShell), which mounts the toast system.
+  const src = readProjectFile("src/shared/components/layouts/DashboardShell.tsx");
 
   it("should render NotificationToast globally", () => {
-    assert.ok(src, "src/shared/components/layouts/DashboardLayout.tsx should exist");
+    assert.ok(src, "src/shared/components/layouts/DashboardShell.tsx should exist");
     assert.match(src, /NotificationToast/);
+    assert.match(
+      readProjectFile("src/shared/components/layouts/DashboardLayout.tsx"),
+      /<DashboardShell\b/,
+      "DashboardLayout renders the kit shell"
+    );
   });
 
   it.skip("should include Breadcrumbs in page wrapper", () => {
@@ -537,7 +585,8 @@ describe("Page Integration — combos page empty state", () => {
 
   it("should mask combo test result labels with the global email privacy toggle", () => {
     assert.match(src, /function TestResultsView/);
-    assert.match(src, /pickDisplayValue\(\[r\.label\], emailsVisible, r\.model\)/);
+    // #14944: each row leads with the model id and shows the (masked) account label beneath it.
+    assert.match(src, /pickDisplayValue\(\[r\.label\], emailsVisible, r\.label\)/);
   });
 });
 
