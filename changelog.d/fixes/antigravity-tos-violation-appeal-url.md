@@ -1,1 +1,0 @@
-- **fix(antigravity):** Capture Google Forms appeal URL on `403 PERMISSION_DENIED (TOS_VIOLATION)` so operators can submit account appeals directly from the dashboard, classify the failure as account deactivated to prevent retry loops, and mask appeal links in probe logs.
