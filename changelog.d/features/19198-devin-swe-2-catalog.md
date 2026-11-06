@@ -1,0 +1,1 @@
+- **feat(devin):** add SWE-2 and SWE-2 Flash (max / high / medium) to the curated Devin catalog so `devin-cli-agentic` accepts them ([#19198](https://github.com/diegosouzapw/OmniRoute/pull/19198)) — thanks @TakashiAihara
