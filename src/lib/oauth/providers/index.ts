@@ -28,6 +28,7 @@ import { devinCli, devinDesktop } from "./devin-desktop";
 import { grokCli } from "./grok-cli";
 import { xaiOauth } from "./xai-oauth";
 import { openference } from "./openference";
+import { infCode } from "./inf-code";
 import { codebuddyCn } from "./codebuddy-cn";
 import { freebuff } from "./freebuff";
 import { codebuddyIntl } from "./codebuddy-intl";
@@ -64,6 +65,7 @@ export const PROVIDERS = {
   "grok-cli": grokCli,
   "xai-oauth": xaiOauth,
   openference,
+  "inf-code": infCode,
   "codebuddy-cn": codebuddyCn,
   freebuff,
   "codebuddy-intl": codebuddyIntl,

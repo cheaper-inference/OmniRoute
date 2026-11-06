@@ -59,6 +59,7 @@ const PKCE_CALLBACK_PROVIDERS = new Set([
   "grok-cli",
   "openference",
   "devin-desktop",
+  "inf-code",
 ]);
 
 /**

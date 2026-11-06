@@ -293,6 +293,7 @@ import { syntxProvider } from "./registry/syntx/index.ts";
 import { daoxeProvider } from "./registry/daoxe/index.ts";
 import { gisooProvider } from "./registry/gisoo/index.ts";
 import { demonrouteProvider } from "./registry/demonroute/index.ts";
+import { inf_codeProvider } from "./registry/inf-code/index.ts";
 
 export const REGISTRY: Record<string, RegistryEntry> = {
   aimlapi: aimlapiProvider,
@@ -590,4 +591,5 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   daoxe: daoxeProvider,
   gisoo: gisooProvider,
   demonroute: demonrouteProvider,
+  "inf-code": inf_codeProvider,
 };
