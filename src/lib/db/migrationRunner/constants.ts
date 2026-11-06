@@ -166,6 +166,68 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toVersion: "081",
     toName: "inspector_custom_hosts",
   },
+  // Vacate feature slot 215 before Team history is rehomed there.
+  {
+    // Earlier traffic candidates occupied slots now owned by release migrations.
+    fromVersion: "206",
+    fromName: "proxy_payload_traffic",
+    toVersion: "226",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "207",
+    fromName: "proxy_payload_traffic",
+    toVersion: "226",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "213",
+    fromName: "proxy_payload_traffic",
+    toVersion: "226",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "214",
+    fromName: "proxy_payload_traffic",
+    toVersion: "226",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "215",
+    fromName: "proxy_payload_traffic",
+    toVersion: "226",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "217",
+    fromName: "proxy_payload_traffic",
+    toVersion: "226",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "218",
+    fromName: "proxy_payload_traffic",
+    toVersion: "226",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "223",
+    fromName: "proxy_payload_traffic",
+    toVersion: "226",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "224",
+    fromName: "proxy_payload_traffic",
+    toVersion: "226",
+    toName: "proxy_payload_traffic",
+  },
+  {
+    fromVersion: "225",
+    fromName: "proxy_payload_traffic",
+    toVersion: "226",
+    toName: "proxy_payload_traffic",
+  },
   // PR #10409 circulated through these draft slots before the current release
   // claimed them. The name guard is mandatory: canonical migrations using the
   // same numbers must never be rehomed as Team state.

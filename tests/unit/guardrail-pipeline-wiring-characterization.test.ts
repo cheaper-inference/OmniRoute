@@ -182,14 +182,14 @@ test("the post-call verdict is applied to what is cached, and the cache write is
 
 test("proxyFetch stamps the self-hop header before any dispatch decision", () => {
   const proxyFetch = read("open-sse/utils/proxyFetch.ts");
-  const fn = indexOrFail(proxyFetch, "async function patchedFetchUnrecorded(");
-  const stamp = indexOrFail(proxyFetch, "stampOwnListenerSelfHop(input, options);", fn);
-  const direct = indexOrFail(
-    proxyFetch,
-    "if (proxyContext.getStore() === DIRECT_PROXY_CONTEXT)",
-    fn
-  );
-  assert.ok(stamp < direct);
+  const facade = indexOrFail(proxyFetch, "function patchedFetchUnrecorded(");
+  indexOrFail(proxyFetch, "return dispatchProxyFetch(input, options, deps, {", facade);
+  const transport = read("open-sse/utils/proxyFetchTransport.ts");
+  const fn = indexOrFail(transport, "export async function dispatchProxyFetch(");
+  const stamp = indexOrFail(transport, "stampOwnListenerSelfHop(input, options);", fn);
+  const context = indexOrFail(transport, "const context = runtime.proxyContext.getStore();", fn);
+  const direct = indexOrFail(transport, "if (context === DIRECT_PROXY_CONTEXT)", fn);
+  assert.ok(stamp < context && context < direct);
 });
 
 test("characterization: the vision-bridge describe call uses undici fetch, bypassing the self-hop stamp", () => {
