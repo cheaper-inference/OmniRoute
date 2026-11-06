@@ -7039,6 +7039,7 @@
     "fallbackRetryBackendTitle": "Moodulu mgbochi nke mbàmbà nchịkwa"
   },
   "settings": {
+    "proxyManagedCoresTab": "Isi ndị a na-ejikwa",
     "title": "Ntọala",
     "general": "Izugbe",
     "security": "Nchedo",
@@ -11585,7 +11586,26 @@
     "entries": "Ndenye",
     "viewSwitcherAria": "Nlele cache"
   },
+  "managedProxy": {
+    "title": "Isi proksi a na-ejikwa",
+    "description": "Mado njikọ ọwara n’oghere onye nnabata nke proksi ahaziri iche iji chekwaa ma kenye ya. N’ebe a, ị nwekwara ike ichekwa nkọwa JSON nke isi ahụ nke njikọ na-apụ apụ n’agbanweghị ọrụ e kenyere.",
+    "saveHint": "Mgbe a na-echekwa, a na-enyocha izi ezi nke isi gọọmentị ma ọ bụrụ na ọ dị mkpa ma nyochaa nhazi nke isi ahụ tupu ịgbanye ya. Isi mmalite chọrọ izo ya ezo. Enweghị nrụnye n’oge nlele mbụ, ịmalite na-akpaghị aka ma ọ bụ mgbanwe na proksi na-agafe ozugbo.",
+    "saveActivate": "Chekwaa ma gbanye",
+    "core": "Isi",
+    "selectCore": "Họrọ isi",
+    "name": "Aha",
+    "source": "Njikọ isi mmalite ma ọ bụ JSON nke isi ahụ nke njikọ na-apụ apụ",
+    "start": "Malite",
+    "stop": "Kwụsị",
+    "loadError": "Enweghị ike ibu isi ndị a na-ejikwa",
+    "operationError": "Ọrụ isi a na-ejikwa dara",
+    "state": "{state, select, not_installed {E tinyebeghị} stopped {Akwụsịla} starting {Na-amalite} running {Na-arụ ọrụ} stopping {Na-akwụsị} error {Njehie} other {Amaghị}}"
+  },
   "proxyConfigModal": {
+    "managedCore": "Isi proksi",
+    "managedSelectCore": "Họrọ isi",
+    "managedSaveHint": "Ichekwa na-ebudata ma nyochaa izi ezi nke isi gọọmentị ma ọ bụrụ na ọ dị mkpa, na-enyocha nhazi, wee gbanye proksi a. Ịpị ederede anaghị etinye ihe ọ bụla.",
+    "errorSelectManagedCore": "Họrọ sing-box ma ọ bụ Xray tupu ịchekwa ọwara a",
     "levelGlobal": "Zuru ụwa ọnụ",
     "levelProvider": "Onye na-eweta ọrụ",
     "levelCombo": "Ngwakọta",

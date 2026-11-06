@@ -7039,6 +7039,7 @@
     "fallbackRetryBackendTitle": "Fallback-Backend für Wiederholungen"
   },
   "settings": {
+    "proxyManagedCoresTab": "Verwaltete Kerne",
     "title": "Einstellungen",
     "general": "Allgemein",
     "security": "Sicherheit",
@@ -11585,7 +11586,26 @@
     "entries": "Einträge",
     "viewSwitcherAria": "Cache-Ansicht"
   },
+  "managedProxy": {
+    "title": "Verwaltete Proxy-Kerne",
+    "description": "Fügen Sie einen Tunnel-Link in das Host-Feld des benutzerdefinierten Proxys ein, um ihn zu speichern und zuzuweisen. Hier können Sie auch eine ausgehende Verbindung im nativen JSON-Format definieren und speichern, ohne eine Zuweisung zu ändern.",
+    "saveHint": "Beim Speichern wird bei Bedarf der offizielle Kern verifiziert und die native Konfiguration vor der Aktivierung geprüft. Quellen müssen verschlüsselt sein. Keine Installation während der Vorschau, kein Autostart und keine Änderungen am transparenten Proxy.",
+    "saveActivate": "Speichern und aktivieren",
+    "core": "Kern",
+    "selectCore": "Kern auswählen",
+    "name": "Name",
+    "source": "Quell-Link oder ausgehende Verbindung im nativen JSON-Format",
+    "start": "Starten",
+    "stop": "Stoppen",
+    "loadError": "Verwaltete Kerne konnten nicht geladen werden",
+    "operationError": "Aktion für den verwalteten Kern fehlgeschlagen",
+    "state": "{state, select, not_installed {Nicht installiert} stopped {Gestoppt} starting {Wird gestartet} running {Läuft} stopping {Wird gestoppt} error {Fehler} other {Unbekannt}}"
+  },
   "proxyConfigModal": {
+    "managedCore": "Proxy-Kern",
+    "managedSelectCore": "Kern auswählen",
+    "managedSaveHint": "Beim Speichern wird bei Bedarf der offizielle Kern heruntergeladen und verifiziert, die Konfiguration geprüft und anschließend dieser Proxy aktiviert. Die Texteingabe installiert nichts.",
+    "errorSelectManagedCore": "Wählen Sie sing-box oder Xray aus, bevor Sie diesen Tunnel speichern",
     "levelGlobal": "Global",
     "levelProvider": "Anbieter",
     "levelCombo": "Kombi",

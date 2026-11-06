@@ -7039,6 +7039,7 @@
     "fallbackRetryBackendTitle": "Zaxira takrorlash orqali backend"
   },
   "settings": {
+    "proxyManagedCoresTab": "Boshqariladigan yadrolar",
     "title": "Sozlamalar",
     "general": "Umumiy",
     "security": "Xavfsizlik",
@@ -11585,7 +11586,26 @@
     "entries": "Yozuvlar",
     "viewSwitcherAria": "Kesh koʻrinishi"
   },
+  "managedProxy": {
+    "title": "Boshqariladigan proksi yadrolari",
+    "description": "Saqlash va tayinlash uchun tunnel havolasini maxsus proksining xost maydoniga joylashtiring. Bu yerda hech bir tayinlashni o‘zgartirmasdan chiqish ulanishining mahalliy JSON ta’rifini ham saqlashingiz mumkin.",
+    "saveHint": "Saqlash vaqtida kerak bo‘lsa rasmiy yadro tasdiqlanadi va faollashtirishdan oldin mahalliy konfiguratsiya tekshiriladi. Manbalar shifrlashni talab qiladi. Oldindan ko‘rishda o‘rnatish, avtomatik ishga tushirish yoki shaffof proksiga o‘zgartirish kiritish amalga oshirilmaydi.",
+    "saveActivate": "Saqlash va faollashtirish",
+    "core": "Yadro",
+    "selectCore": "Yadroni tanlang",
+    "name": "Nomi",
+    "source": "Manba havolasi yoki chiqish ulanishining mahalliy JSON ta’rifi",
+    "start": "Ishga tushirish",
+    "stop": "To‘xtatish",
+    "loadError": "Boshqariladigan yadrolarni yuklab bo‘lmadi",
+    "operationError": "Boshqariladigan yadro amali bajarilmadi",
+    "state": "{state, select, not_installed {O‘rnatilmagan} stopped {To‘xtatilgan} starting {Ishga tushmoqda} running {Ishlamoqda} stopping {To‘xtatilmoqda} error {Xato} other {Noma’lum}}"
+  },
   "proxyConfigModal": {
+    "managedCore": "Proksi yadrosi",
+    "managedSelectCore": "Yadroni tanlang",
+    "managedSaveHint": "Saqlash kerak bo‘lsa rasmiy yadroni yuklab olib tasdiqlaydi, konfiguratsiyani tekshiradi, so‘ng ushbu proksini faollashtiradi. Matn kiritish hech narsani o‘rnatmaydi.",
+    "errorSelectManagedCore": "Ushbu tunnelni saqlashdan oldin sing-box yoki Xray tanlang",
     "levelGlobal": "Umumiy",
     "levelProvider": "Provayder",
     "levelCombo": "Kombinatsiya",

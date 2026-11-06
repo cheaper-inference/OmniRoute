@@ -7039,6 +7039,7 @@
     "fallbackRetryBackendTitle": "Backend za ponovna poskuse ob neuspehu"
   },
   "settings": {
+    "proxyManagedCoresTab": "Upravljana jedra",
     "title": "Nastavitve",
     "general": "Splošno",
     "security": "Varnost",
@@ -11585,7 +11586,26 @@
     "entries": "Vnosi",
     "viewSwitcherAria": "Prikaz predpomnilnika"
   },
+  "managedProxy": {
+    "title": "Upravljana jedra posredniškega strežnika",
+    "description": "Za shranjevanje in dodelitev prilepite povezavo predora v polje gostitelja posredniškega strežnika po meri. Tukaj lahko shranite tudi izvorno definicijo odhodne povezave JSON, ne da bi spremenili katero koli dodelitev.",
+    "saveHint": "Pri shranjevanju se po potrebi preveri uradno jedro in pred aktiviranjem izvorna konfiguracija. Viri zahtevajo šifriranje. Predogled ne namešča, ne omogoča samodejnega zagona in ne spreminja prosojnega posredniškega strežnika.",
+    "saveActivate": "Shrani in aktiviraj",
+    "core": "Jedro",
+    "selectCore": "Izberite jedro",
+    "name": "Ime",
+    "source": "Povezava vira ali izvorni JSON odhodne povezave",
+    "start": "Zaženi",
+    "stop": "Ustavi",
+    "loadError": "Upravljanih jeder ni bilo mogoče naložiti",
+    "operationError": "Operacija upravljanega jedra ni uspela",
+    "state": "{state, select, not_installed {Ni nameščeno} stopped {Ustavljeno} starting {Se zaganja} running {Deluje} stopping {Se ustavlja} error {Napaka} other {Neznano}}"
+  },
   "proxyConfigModal": {
+    "managedCore": "Jedro posredniškega strežnika",
+    "managedSelectCore": "Izberite jedro",
+    "managedSaveHint": "Shranjevanje po potrebi prenese in preveri uradno jedro, preveri konfiguracijo in nato aktivira ta posredniški strežnik. Tipkanje ne namesti ničesar.",
+    "errorSelectManagedCore": "Pred shranjevanjem tega predora izberite sing-box ali Xray",
     "levelGlobal": "Globalno",
     "levelProvider": "Ponudnik",
     "levelCombo": "Kombinacija",

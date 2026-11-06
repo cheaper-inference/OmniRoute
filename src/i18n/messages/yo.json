@@ -7039,6 +7039,7 @@
     "fallbackRetryBackendTitle": "Oníṣẹ́ àsọtẹ́lẹ́ ìṣọ̀ṣe"
   },
   "settings": {
+    "proxyManagedCoresTab": "Àwọn kókó tí a ń ṣàkóso",
     "title": "Àwọn Ààtò",
     "general": "Gbogbogbòò",
     "security": "Ààbò",
@@ -11585,7 +11586,26 @@
     "entries": "Àwọn Àkọsílẹ̀",
     "viewSwitcherAria": "Ìwò cache"
   },
+  "managedProxy": {
+    "title": "Àwọn kókó proksi tí a ń ṣàkóso",
+    "description": "Lẹ ìjápọ̀ ọ̀nà abẹ́ sí pápá olùgbàlejò proksi àdáni láti fi pamọ́ kí o sì yàn án. Níhìn-ín, o tún lè fi ìtumọ̀ JSON ìbílẹ̀ fún ìsopọ̀ tó ń jáde pamọ́ láì yí ìyànkankan padà.",
+    "saveHint": "Fífi pamọ́ máa ń jẹ́rìí kókó tí a fọwọ́ sí tí a bá nílò rẹ̀, ó sì ń ṣàyẹ̀wò ìṣètò ìbílẹ̀ ṣáájú mímú ṣiṣẹ́. Àwọn orísun nílò ìfipamọ́ àṣírí. Kò sí fífi sí ẹ̀rọ ní àwòtẹ́lẹ̀, ìbẹ̀rẹ̀ aládàáṣiṣẹ́ tàbí àyípadà proksi tí ń gba ìsopọ̀ kọjá láìfarahàn.",
+    "saveActivate": "Fi pamọ́ kí o sì mú ṣiṣẹ́",
+    "core": "Kókó",
+    "selectCore": "Yan kókó kan",
+    "name": "Orúkọ",
+    "source": "Ìjápọ̀ orísun tàbí JSON ìbílẹ̀ fún ìsopọ̀ tó ń jáde",
+    "start": "Bẹ̀rẹ̀",
+    "stop": "Dá dúró",
+    "loadError": "Kò ṣeé kó àwọn kókó tí a ń ṣàkóso wọlé",
+    "operationError": "Iṣẹ́ kókó tí a ń ṣàkóso kùnà",
+    "state": "{state, select, not_installed {A kò tíì fi sí ẹ̀rọ} stopped {Ti dúró} starting {Ń bẹ̀rẹ̀} running {Ń ṣiṣẹ́} stopping {Ń dúró} error {Àṣìṣe} other {Àìmọ̀}}"
+  },
   "proxyConfigModal": {
+    "managedCore": "Kókó proksi",
+    "managedSelectCore": "Yan kókó kan",
+    "managedSaveHint": "Fífi pamọ́ máa ń gba kókó tí a fọwọ́ sí sílẹ̀, ó ń jẹ́rìí rẹ̀ tí a bá nílò rẹ̀, ó ṣàyẹ̀wò ìṣètò, lẹ́yìn náà ó mú proksi yìí ṣiṣẹ́. Títẹ̀ ọ̀rọ̀ kò fi ohunkóhun sí ẹ̀rọ.",
+    "errorSelectManagedCore": "Yan sing-box tàbí Xray ṣáájú fífi ọ̀nà abẹ́ yìí pamọ́",
     "levelGlobal": "Gbogbogbo",
     "levelProvider": "Olùpèsè",
     "levelCombo": "Àpapọ̀",

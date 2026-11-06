@@ -26,7 +26,11 @@ test("managed source form keeps native values and input on failed activation wit
   const name = screen.getByLabelText("Name") as HTMLInputElement;
   const input = screen.getByLabelText("Source link or native outbound JSON") as HTMLTextAreaElement;
   const save = screen.getByRole("button", { name: "Save and activate" }) as HTMLButtonElement;
-  expect(core.classList.contains("ci-select-native")).toBe(true);
+  expect(core.tagName).toBe("SELECT");
+  expect(core.classList.contains("ci-native-select__control")).toBe(true);
+  expect(core.closest('[data-slot="native-select"]')?.classList.contains("ci-native-select")).toBe(
+    true
+  );
   expect(name.classList.contains("ci-input")).toBe(true);
   expect(input.classList.contains("ci-textarea")).toBe(true);
   expect(name.maxLength).toBe(120);

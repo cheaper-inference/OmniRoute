@@ -7116,6 +7116,7 @@
     "fallbackRetryBackendTitle": "Back-end de nova tentativa de recurso"
   },
   "settings": {
+    "proxyManagedCoresTab": "Núcleos geridos",
     "title": "Configurações",
     "general": "Geral",
     "security": "Segurança",
@@ -11662,7 +11663,26 @@
     "entries": "Entradas",
     "viewSwitcherAria": "Vista da cache"
   },
+  "managedProxy": {
+    "title": "Núcleos de proxy geridos",
+    "description": "Cole uma ligação de túnel no campo do anfitrião do proxy personalizado para o guardar e atribuir. Aqui também pode guardar uma definição de ligação de saída no formato JSON nativo sem alterar qualquer atribuição.",
+    "saveHint": "Ao guardar, o núcleo oficial é verificado, se necessário, e a configuração nativa é validada antes da ativação. As fontes exigem encriptação. Não há instalação durante a pré-visualização, arranque automático nem alterações ao proxy transparente.",
+    "saveActivate": "Guardar e ativar",
+    "core": "Núcleo",
+    "selectCore": "Selecione um núcleo",
+    "name": "Nome",
+    "source": "Ligação de origem ou ligação de saída no formato JSON nativo",
+    "start": "Iniciar",
+    "stop": "Parar",
+    "loadError": "Não foi possível carregar os núcleos geridos",
+    "operationError": "Falha na operação do núcleo gerido",
+    "state": "{state, select, not_installed {Não instalado} stopped {Parado} starting {A iniciar} running {Em execução} stopping {A parar} error {Erro} other {Desconhecido}}"
+  },
   "proxyConfigModal": {
+    "managedCore": "Núcleo do proxy",
+    "managedSelectCore": "Selecione um núcleo",
+    "managedSaveHint": "Ao guardar, o núcleo oficial é descarregado e verificado, se necessário, a configuração é validada e o proxy é ativado. Escrever não instala nada.",
+    "errorSelectManagedCore": "Selecione sing-box ou Xray antes de guardar este túnel",
     "levelGlobal": "Globais",
     "levelProvider": "Provedor",
     "levelCombo": "Combinação",

@@ -7039,6 +7039,7 @@
     "fallbackRetryBackendTitle": "Backend ya jaribio la upandaji"
   },
   "settings": {
+    "proxyManagedCoresTab": "Viini vinavyosimamiwa",
     "title": "Mipangilio",
     "general": "Jumla",
     "security": "Usalama",
@@ -11585,7 +11586,26 @@
     "entries": "Maingizo",
     "viewSwitcherAria": "Mwonekano wa kache"
   },
+  "managedProxy": {
+    "title": "Viini vya proksi vinavyosimamiwa",
+    "description": "Bandika kiungo cha handaki katika sehemu ya seva ya proksi maalumu ili kukihifadhi na kukikabidhi. Hapa unaweza pia kuhifadhi ufafanuzi wa asili wa JSON wa muunganisho unaotoka bila kubadilisha ukabidhi wowote.",
+    "saveHint": "Wakati wa kuhifadhi, kiini rasmi kinathibitishwa ikihitajika na usanidi wa asili hukaguliwa kabla ya kuwezeshwa. Vyanzo vinahitaji usimbaji fiche. Hakuna usakinishaji wakati wa hakiki, kuanza kiotomatiki au mabadiliko ya proksi inayopitisha trafiki bila kuonekana.",
+    "saveActivate": "Hifadhi na uwezeshe",
+    "core": "Kiini",
+    "selectCore": "Chagua kiini",
+    "name": "Jina",
+    "source": "Kiungo cha chanzo au JSON ya asili ya muunganisho unaotoka",
+    "start": "Anzisha",
+    "stop": "Simamisha",
+    "loadError": "Imeshindikana kupakia viini vinavyosimamiwa",
+    "operationError": "Operesheni ya kiini kinachosimamiwa imeshindwa",
+    "state": "{state, select, not_installed {Hakijasakinishwa} stopped {Kimesimamishwa} starting {Kinaanza} running {Kinafanya kazi} stopping {Kinasimama} error {Hitilafu} other {Haijulikani}}"
+  },
   "proxyConfigModal": {
+    "managedCore": "Kiini cha proksi",
+    "managedSelectCore": "Chagua kiini",
+    "managedSaveHint": "Kuhifadhi hupakua na kuthibitisha kiini rasmi ikihitajika, hukagua usanidi, kisha huwezesha proksi hii. Kuandika hakusakinishi chochote.",
+    "errorSelectManagedCore": "Chagua sing-box au Xray kabla ya kuhifadhi handaki hili",
     "levelGlobal": "Ya Jumla",
     "levelProvider": "Mtoa Huduma",
     "levelCombo": "Mchanganyiko",

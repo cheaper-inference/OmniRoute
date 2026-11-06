@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { IntlMessageFormat } from "intl-messageformat";
 
 // Source/catalog-only regression: never import the managed service, open a DB,
 // download a core, spawn a listener, or issue network requests.
@@ -25,11 +26,15 @@ const managedKeys = [
   "state",
 ];
 const modalKeys = ["managedCore", "managedSelectCore", "managedSaveHint", "errorSelectManagedCore"];
+const config = JSON.parse(read("config/i18n.json"));
+const locales: string[] = [
+  ...new Set<string>([
+    config.default,
+    ...config.locales.map((entry: { code: string }) => entry.code),
+  ]),
+];
 const catalogs = Object.fromEntries(
-  ["en", "pt-BR", "vi"].map((locale) => [
-    locale,
-    JSON.parse(read(`src/i18n/messages/${locale}.json`)),
-  ])
+  locales.map((locale) => [locale, JSON.parse(read(`src/i18n/messages/${locale}.json`))])
 );
 
 test("managed proxy controls and errors use translated messages", () => {
@@ -45,7 +50,7 @@ test("managed proxy controls and errors use translated messages", () => {
   }
 });
 
-for (const locale of ["en", "pt-BR", "vi"]) {
+for (const locale of locales) {
   test(`${locale} includes all managed proxy messages and lifecycle states`, () => {
     for (const [namespace, keys] of [
       ["managedProxy", managedKeys],
@@ -55,11 +60,30 @@ for (const locale of ["en", "pt-BR", "vi"]) {
         const value = catalogs[locale][namespace]?.[key];
         assert.equal(typeof value, "string", `${namespace}.${key}`);
         assert.ok(value.trim().length > 0, `${namespace}.${key}`);
-        if (locale !== "en")
+        assert.ok(!value.startsWith("__MISSING__:"), `${namespace}.${key}`);
+        // Some short labels are legitimately identical (e.g. German "Name").
+        if (
+          locale !== "en" &&
+          (["pt-BR", "vi"].includes(locale) || !["core", "name", "start", "stop"].includes(key))
+        )
           assert.notEqual(value, catalogs.en[namespace][key], `${namespace}.${key}`);
+        const message = new IntlMessageFormat(value, locale);
+        const placeholders = message
+          .getAst()
+          .filter((node) => node.type !== 0)
+          .map((node) => ("value" in node ? node.value : "#"));
+        assert.deepEqual(
+          placeholders,
+          key === "state" ? ["state"] : [],
+          `${namespace}.${key} ICU arguments`
+        );
       }
     }
-    assert.equal(typeof catalogs[locale].settings.proxyManagedCoresTab, "string");
+    const tabLabel = catalogs[locale].settings.proxyManagedCoresTab;
+    assert.equal(typeof tabLabel, "string");
+    assert.ok(tabLabel.trim().length > 0);
+    assert.ok(!tabLabel.startsWith("__MISSING__:"));
+    assert.ok(new IntlMessageFormat(tabLabel, locale).getAst().every((node) => node.type === 0));
     if (locale !== "en") {
       assert.notEqual(
         catalogs[locale].settings.proxyManagedCoresTab,
@@ -67,7 +91,13 @@ for (const locale of ["en", "pt-BR", "vi"]) {
       );
     }
     const state = catalogs[locale].managedProxy.state;
-    for (const name of [
+    const stateMessage = new IntlMessageFormat(state, locale);
+    const stateAst = stateMessage.getAst();
+    assert.equal(stateAst.length, 1);
+    const selector = stateAst[0];
+    assert.equal(selector.type, 5);
+    if (selector.type !== 5) throw new Error("Expected a state select expression");
+    const states = [
       "not_installed",
       "stopped",
       "starting",
@@ -75,8 +105,23 @@ for (const locale of ["en", "pt-BR", "vi"]) {
       "stopping",
       "error",
       "other",
-    ]) {
-      assert.ok(state.includes(`${name} {`), `missing lifecycle state ${name}`);
+    ];
+    assert.deepEqual(Object.keys(selector.options).sort(), [...states].sort());
+    for (const option of Object.values(selector.options)) {
+      assert.ok(
+        option.value.every((node) => node.type === 0),
+        "State branches must be literal labels"
+      );
     }
+    for (const name of states) {
+      assert.ok(state.includes(`${name} {`), `missing lifecycle state ${name}`);
+      const formatted = stateMessage.format({ state: name });
+      assert.equal(typeof formatted, "string");
+      assert.ok(String(formatted).trim().length > 0);
+    }
+    assert.equal(
+      stateMessage.format({ state: "unrecognized" }),
+      stateMessage.format({ state: "other" })
+    );
   });
 }

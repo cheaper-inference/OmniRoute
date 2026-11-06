@@ -7039,6 +7039,7 @@
     "fallbackRetryBackendTitle": "Backend percobaan ulang fallback"
   },
   "settings": {
+    "proxyManagedCoresTab": "Inti terkelola",
     "title": "Pengaturan",
     "general": "Umum",
     "security": "Keamanan",
@@ -11585,7 +11586,26 @@
     "entries": "Entri",
     "viewSwitcherAria": "Tampilan cache"
   },
+  "managedProxy": {
+    "title": "Inti proxy terkelola",
+    "description": "Tempel tautan terowongan di kolom host proxy kustom untuk menyimpan dan menetapkannya. Di sini Anda juga dapat menyimpan definisi JSON bawaan untuk koneksi keluar tanpa mengubah penetapan apa pun.",
+    "saveHint": "Saat disimpan, inti resmi diverifikasi jika diperlukan dan konfigurasi bawaan diperiksa sebelum aktivasi. Sumber memerlukan enkripsi. Tidak ada instalasi saat pratinjau, mulai otomatis, atau perubahan proxy transparan.",
+    "saveActivate": "Simpan dan aktifkan",
+    "core": "Inti",
+    "selectCore": "Pilih inti",
+    "name": "Nama",
+    "source": "Tautan sumber atau JSON bawaan untuk koneksi keluar",
+    "start": "Mulai",
+    "stop": "Hentikan",
+    "loadError": "Tidak dapat memuat inti terkelola",
+    "operationError": "Operasi inti terkelola gagal",
+    "state": "{state, select, not_installed {Belum diinstal} stopped {Dihentikan} starting {Memulai} running {Berjalan} stopping {Menghentikan} error {Kesalahan} other {Tidak diketahui}}"
+  },
   "proxyConfigModal": {
+    "managedCore": "Inti proxy",
+    "managedSelectCore": "Pilih inti",
+    "managedSaveHint": "Saat disimpan, inti resmi diunduh dan diverifikasi jika diperlukan, konfigurasi diperiksa, lalu proxy ini diaktifkan. Mengetik tidak menginstal apa pun.",
+    "errorSelectManagedCore": "Pilih sing-box atau Xray sebelum menyimpan terowongan ini",
     "levelGlobal": "Global",
     "levelProvider": "Penyedia",
     "levelCombo": "kombo",
