@@ -1364,7 +1364,7 @@ Render memutarkan perkhidmatan web percuma ke bawah selepas kira-kira 15 minit t
 
 Perkhidmatan yang terjaga selama sebulan penuh menggunakan kira-kira 744 jam contoh, jadi semaknya dengan elaun peringkat percuma semasa Render.
 
-## Senario Deployment
+## Senario Pelaksanaan
 
 Untuk panduan SRE backend geganti (tingkah laku ts/bifrost/auto, penempatan 9router berbanding CLIProxyAPI, dan strategi sandaran throughput tinggi), lihat [Strategi Backend Geganti](/docs/reference/RELAY_BACKEND_STRATEGY.md).
 
@@ -1397,7 +1397,7 @@ OMNIROUTE_MEMORY_MB=8192
 CORS_ORIGIN=https://your-frontend.example.com
 ```
 
-### Terasing Rangkaian / CI
+### Terasing daripada Rangkaian / CI
 
 ```bash
 JWT_SECRET=test-jwt-secret-for-ci
@@ -1408,7 +1408,7 @@ OMNIROUTE_DISABLE_BACKGROUND_SERVICES=true
 APP_LOG_TO_FILE=false
 ```
 
-### VPS dengan Proksi Terbalik (nginx + Cloudflare)
+### VPS dengan Proksi Songsang (nginx + Cloudflare)
 
 ```bash
 JWT_SECRET=<generated>
@@ -1870,3 +1870,14 @@ Digunakan oleh `open-sse/services/combo.ts` dan `src/lib/quota/quotaScheduler.ts
 | Pembolehubah                   | Lalai | Fail Sumber                                  | Penerangan                                                                                                                                                                                                                            |
 | ------------------------------ | ----- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`   | `src/lib/providerModels/modelSyncTimings.ts` | Tetapkan kepada `1` untuk mencatat pemasaan fasa, permintaan ID yang dijana dan hasil success/error fasa semasa penyegerakan model. Dilumpuhkan untuk semua nilai lain. Log meninggalkan permintaan, akaun, katalog dan muatan ralat. |
+
+## Alat analisis media OpenCode tempatan
+
+Digunakan oleh `scripts/cli/omniroute-media-mcp.mjs`. Tetapkan pemboleh ubah ini dalam persekitaran proses alat tempatan.
+
+| Pemboleh ubah              | Lalai                                                                               | Penerangan                                                                                                   |
+| -------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (atau `~/.config/opencode/opencode.json`) | Konfigurasi OpenCode yang dibaca oleh alat media dan pemasang.                                               |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                         | Enri penyedia yang dibaca daripada konfigurasi OpenCode oleh alat media.                                     |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                              | Model yang dihantar oleh alat media. Penyedianya mesti menyokong jenis media yang diminta.                   |
+| `OMNIROUTE_MEDIA_API_KEY`  | Kunci API penyedia yang dikonfigurasikan atau rujukan persekitarannya               | Penggantian kelayakan pilihan. Simpan dalam persekitaran proses tempatan; jangan sekali-kali lakukan commit. |
