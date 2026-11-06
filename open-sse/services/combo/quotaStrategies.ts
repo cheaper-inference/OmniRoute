@@ -31,7 +31,7 @@ import {
   type ProviderProfile,
 } from "../accountFallback.ts";
 import { PRE_SCREEN_CONCURRENCY } from "../comboConfig.ts";
-import { getQuotaFetcher } from "../quotaPreflight.ts";
+import { getQuotaFetcher, isCodexPaidCreditsBacked, type QuotaInfo } from "../quotaPreflight.ts";
 import { getCircuitBreaker } from "../../../src/shared/utils/circuitBreaker";
 import { getCachedProviderPoolConnections } from "../providerConnectionPool.ts";
 import { MAX_RR_COUNTERS, rrCounters } from "./rrState.ts";
@@ -53,16 +53,13 @@ import { resolveQuotaWeightedScoring, scoreQuotaPace } from "./quotaPaceScoring.
 import { resolvePlanCapacity } from "./quotaPlanCapacity.ts";
 import { isRecord } from "./comboData.ts";
 import { getInflight, incrementInflight } from "./quotaShareInflight.ts";
-import {
-  isCodexPaidCreditsBacked,
-  type CodexPaidCredits,
-} from "../../../src/lib/providers/codexPaidCredits.ts";
 import { preferAntigravityConnectionsWithStoredProject } from "../antigravityProjectPersist.ts";
 import { getQuotaFetchScope } from "../antigravityQuotaFamily.ts";
 import {
   getQuotaSnapshotFetchedAt,
   getQuotaWeightedRemainingPercent,
   isQuotaExhaustedForRequest,
+  isQuotaRefusalMarked,
 } from "../../../src/domain/quotaCache.ts";
 
 /**
@@ -831,7 +828,7 @@ function paidCreditsDrawWeight(entry: QuotaWeightedScored): number | null {
 export function getQuotaWeightedDrawWeight(entry: QuotaWeightedScored): number {
   const load = getInflight(entry.target.connectionId ?? "");
   const creditsWeight = paidCreditsDrawWeight(entry);
-  if (creditsWeight !== null) return creditsWeight;
+  if (creditsWeight !== null) return creditsWeight / (1 + load);
   // Only pace entries carry capacity; leftover retains its exact historical divisor.
   if (entry.capacity !== undefined) {
     return Math.max(0, entry.score) / (1 + load / entry.capacity);
@@ -869,6 +866,11 @@ function sortByScoreThenIndex(a: QuotaWeightedScored, b: QuotaWeightedScored): n
   return a.index - b.index;
 }
 
+function sortByDrawWeightThenIndex(a: QuotaWeightedScored, b: QuotaWeightedScored): number {
+  const difference = getQuotaWeightedDrawWeight(b) - getQuotaWeightedDrawWeight(a);
+  return difference !== 0 ? difference : a.index - b.index;
+}
+
 function resolveQuotaWeightedFloor(
   configSource: Record<string, unknown> | null | undefined
 ): number {
@@ -895,7 +897,7 @@ function scoreQuotaWeightedWithCredits(
   scoring: Parameters<typeof scoreQuotaWeighted>[3],
   scoreNow: number
 ): Omit<QuotaWeightedScored, "target" | "index"> {
-  const credits = (quota as { paidCredits?: CodexPaidCredits } | null)?.paidCredits;
+  const credits = (quota as Pick<QuotaInfo, "paidCredits"> | null)?.paidCredits;
   return {
     ...scoreQuotaWeighted(quota, target, config, scoring, scoreNow),
     paidCreditsBacked: isCodexPaidCreditsBacked(
@@ -964,6 +966,8 @@ export async function orderTargetsByQuotaWeighted(
     return {
       ...entry,
       remainingPercent: marked === 0 ? 0 : entry.remainingPercent,
+      // The balance comes from a cached fetch; a later upstream refusal outranks it.
+      paidCreditsBacked: entry.paidCreditsBacked === true && !isQuotaRefusalMarked(connectionId),
       stale: fetchedAt !== null && now - fetchedAt > QUOTA_WEIGHTED_MAX_SNAPSHOT_AGE_MS,
     };
   });
@@ -971,10 +975,13 @@ export async function orderTargetsByQuotaWeighted(
   // A used-up subscription window drops a target only when nothing can absorb
   // the request. Codex accounts with paid credits still serve it, and the
   // preflight already lets them through — dropping them here is what turned a
-  // credit-backed combo into "no executable targets". Every other provider keeps
-  // the old behaviour: paidCreditsBacked stays false and a spent window drops it.
-  const eligible = withSnapshot.filter(
-    (entry) => entry.remainingPercent > 0 || entry.paidCreditsBacked === true
+  // credit-backed combo into "no executable targets". They stay out of A and B
+  // because paid credits are the last resort: their weight is a balance, which
+  // would win any draw against a score, whatever the floor or staleness. Every
+  // other provider keeps the old behaviour: a spent window drops it.
+  const eligible = withSnapshot.filter((entry) => entry.remainingPercent > 0);
+  const creditsOnly = withSnapshot.filter(
+    (entry) => entry.remainingPercent <= 0 && entry.paidCreditsBacked
   );
   const floor = resolveQuotaWeightedFloor(configSource);
   const hasRoom = (entry: (typeof eligible)[number]) =>
@@ -982,7 +989,8 @@ export async function orderTargetsByQuotaWeighted(
   // A holds only connections we both believe have room AND observed recently.
   const poolA = eligible.filter((entry) => hasRoom(entry) && !entry.stale);
   const poolB = eligible.filter((entry) => !hasRoom(entry) || entry.stale);
-  const selected = poolA.length > 0 ? poolA : poolB;
+  const fromCredits = poolA.length === 0 && poolB.length === 0;
+  const selected = fromCredits ? creditsOnly : poolA.length > 0 ? poolA : poolB;
   if (selected.length === 0) return [];
 
   const weights = selected.map(getQuotaWeightedDrawWeight);
@@ -1004,9 +1012,10 @@ export async function orderTargetsByQuotaWeighted(
   const unusedSelected = selected
     .filter((_, i) => i !== pickIndex)
     .slice()
-    .sort(sortByScoreThenIndex);
+    .sort(fromCredits ? sortByDrawWeightThenIndex : sortByScoreThenIndex);
   const fromA = poolA.length > 0;
   const unusedB = fromA ? poolB.slice().sort(sortByScoreThenIndex) : [];
+  const unusedCredits = fromCredits ? [] : creditsOnly.slice().sort(sortByDrawWeightThenIndex);
 
-  return [winner, ...unusedSelected, ...unusedB].map((entry) => entry.target);
+  return [winner, ...unusedSelected, ...unusedB, ...unusedCredits].map((entry) => entry.target);
 }
