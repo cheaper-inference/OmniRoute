@@ -125,12 +125,14 @@ for (const model of FLASH_LITE_MODELS) {
     assert.deepEqual(result.generationConfig.thinkingConfig, { includeThoughts: true });
   });
 
-  test(`claude -> gemini: ${model} with positive budget_tokens still sends thinkingBudget`, () => {
+  test(`claude -> gemini: ${model} with positive budget_tokens uses supported thinking control`, () => {
     const result = claude(model, { thinking: { type: "enabled", budget_tokens: 2048 } });
-    assert.deepEqual(result.generationConfig.thinkingConfig, {
-      thinkingBudget: 2048,
-      includeThoughts: true,
-    });
+    assert.deepEqual(
+      result.generationConfig.thinkingConfig,
+      model === "gemini-3.5-flash-lite"
+        ? { thinkingLevel: "medium", includeThoughts: true }
+        : { thinkingBudget: 2048, includeThoughts: true }
+    );
   });
 
   test(`claude -> gemini: ${model} with output_config.effort none sends no thinkingBudget`, () => {
@@ -138,12 +140,14 @@ for (const model of FLASH_LITE_MODELS) {
     assert.equal(result.generationConfig.thinkingConfig?.thinkingBudget, undefined);
   });
 
-  test(`claude -> gemini: ${model} with output_config.effort low sends positive budget`, () => {
+  test(`claude -> gemini: ${model} with output_config.effort low uses supported thinking control`, () => {
     const result = claude(model, { output_config: { effort: "low" } });
-    assert.deepEqual(result.generationConfig.thinkingConfig, {
-      thinkingBudget: 1024,
-      includeThoughts: true,
-    });
+    assert.deepEqual(
+      result.generationConfig.thinkingConfig,
+      model === "gemini-3.5-flash-lite"
+        ? { thinkingLevel: "low", includeThoughts: true }
+        : { thinkingBudget: 1024, includeThoughts: true }
+    );
   });
 }
 

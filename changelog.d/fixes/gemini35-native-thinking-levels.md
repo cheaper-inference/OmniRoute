@@ -1,1 +1,0 @@
-- Translate Gemini 3.5 Flash-Lite reasoning controls into native thinkingLevel values and honor explicit level overrides before numeric budgets.

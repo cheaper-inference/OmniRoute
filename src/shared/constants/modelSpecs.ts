@@ -4,6 +4,8 @@
  * when clients request more than the model supports.
  */
 
+export type GeminiThinkingLevel = "minimal" | "low" | "medium" | "high";
+
 export interface ModelSpec {
   maxOutputTokens?: number;
   contextWindow?: number;
@@ -62,8 +64,8 @@ export interface ModelSpec {
   // Gemini 3+ native reasoning control. Models that expose this list use
   // generationConfig.thinkingConfig.thinkingLevel instead of legacy numeric
   // thinkingBudget; Google rejects mixing the two controls.
-  geminiThinkingLevels?: Array<"minimal" | "low" | "medium" | "high">;
-  defaultGeminiThinkingLevel?: "minimal" | "low" | "medium" | "high";
+  geminiThinkingLevels?: GeminiThinkingLevel[];
+  defaultGeminiThinkingLevel?: GeminiThinkingLevel;
 }
 
 const BEDROCK_CLAUDE_ALIASES = (...modelIds: string[]) => [
