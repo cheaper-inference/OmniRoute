@@ -18,6 +18,8 @@ const { chatProbeIsolationOf } = await import("../../open-sse/executors/chatProb
 const { ChatGptWebExecutor } = await import("../../open-sse/executors/chatgpt-web.ts");
 const { CHATGPT_WEB_PAGE_URL } = await import("../../open-sse/utils/chatgptWebExecutorAdapter.ts");
 const { Assessor } = await import("../../src/domain/assessment/assessor.ts");
+const { resolveSelfLoopBearer } =
+  await import("../../src/shared/middleware/chatAdmissionIdentity.ts");
 
 const originalFetch = globalThis.fetch;
 const WEB_SESSION_MODEL = "deepseek-web/deepseek-v4-pro-think";
@@ -35,6 +37,11 @@ function countUpstreamCalls(): { calls: number } {
     throw new Error("a refused probe must not reach any upstream");
   }) as typeof fetch;
   return counter;
+}
+
+/** A probe as OmniRoute sends it in-process (the model runner): marked, with the self-loop bearer. */
+function ownProbe(mark: string): Record<string, string> {
+  return { "X-Internal-Test": mark, Authorization: `Bearer ${resolveSelfLoopBearer()}` };
 }
 
 function chatRequest(model: string, headers: Record<string, string> = {}) {
@@ -71,9 +78,7 @@ test("the policy: API-key providers and isolating executors pass, other web sess
 for (const mark of ["combo-health-check", "assessment"]) {
   test(`a ${mark} probe to a web-session model is refused before any upstream call`, async () => {
     const upstream = countUpstreamCalls();
-    const response = await chatRoute.POST(
-      chatRequest(WEB_SESSION_MODEL, { "X-Internal-Test": mark })
-    );
+    const response = await chatRoute.POST(chatRequest(WEB_SESSION_MODEL, ownProbe(mark)));
     const body = await response.json();
 
     assert.equal(response.status, 422);
@@ -99,7 +104,7 @@ test("a probe reaching a web-session target inside a combo is refused for that t
   });
   const upstream = countUpstreamCalls();
   const response = await chatRoute.POST(
-    chatRequest("probe-isolation-web-only", { "X-Internal-Test": "combo-health-check" })
+    chatRequest("probe-isolation-web-only", ownProbe("combo-health-check"))
   );
   const body = await response.json();
 
