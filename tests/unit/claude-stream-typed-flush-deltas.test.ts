@@ -33,6 +33,22 @@ const { createCredentialSseTransform } =
   await import("../../src/lib/streamingCredentialTransform.ts");
 const { createPiiSseTransform } = await import("../../src/lib/streamingPiiTransform.ts");
 
+for (const [name, make] of [
+  ["credential", () => createCredentialSseTransform()],
+  ["PII", () => createPiiSseTransform({ windowSize: 8 })],
+] as const) {
+  for (const terminal of ["EOF", "[DONE]"]) {
+    test(`${name} transform: generic JSON array stays one payload at ${terminal}`, async () => {
+      const input = ['data: [{"text":"hello"}]\n\n'];
+      if (terminal === "[DONE]") input.push("data: [DONE]\n\n");
+      const frames = parseFrames(await runTransform(make(), input));
+      assert.equal(frames.length, 2, "one buffered frame followed by one tail frame");
+      assert.deepEqual(frames[0].data, [{ text: "" }]);
+      assert.deepEqual(frames[1].data, [{ text: "hello" }], "the tail keeps its array envelope");
+    });
+  }
+}
+
 async function runTransform(transform: TransformStream, inputChunks: string[]): Promise<string> {
   const source = new ReadableStream({
     start(controller) {

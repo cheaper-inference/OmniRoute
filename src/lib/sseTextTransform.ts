@@ -184,13 +184,15 @@ export function createSseTextTransform(
   // SSE event name (the Anthropic SDKs) must see the matching event line, not the last one.
   const claudeFlushEventLine = () => (sawEventLine ? "event: content_block_delta" : "");
 
-  // onFlush may return one frame or several (one per Claude content block / delta type).
+  // Only Claude flushes return batches (one frame per content block / delta type).
+  // Other formats can return a JSON array as a single payload; preserve that envelope.
   const emitFlushed = (
     flushedValue: unknown,
     controller: TransformStreamDefaultController,
-    eventLine: string
+    eventLine: string,
+    isClaudeFlush: boolean
   ) => {
-    const values = Array.isArray(flushedValue) ? flushedValue : [flushedValue];
+    const values = isClaudeFlush && Array.isArray(flushedValue) ? flushedValue : [flushedValue];
     for (const value of values) {
       if (!value) continue;
       const prefix = lastPrefix || "data: ";
@@ -226,7 +228,8 @@ export function createSseTextTransform(
           emitFlushed(
             onFlush(lastJson, isJsonStream, lastContentJson),
             controller,
-            isClaudeStreamEvent(lastJson) ? claudeFlushEventLine() : lastEventLine
+            isClaudeStreamEvent(lastJson) ? claudeFlushEventLine() : lastEventLine,
+            isClaudeStreamEvent(lastJson)
           );
           flushed = true;
         }
@@ -371,7 +374,8 @@ export function createSseTextTransform(
             emitFlushed(
               onFlush(flushBase, isJsonStream, lastContentJson || lastJson || json),
               controller,
-              claudeEvent ? claudeFlushEventLine() : lastEventLine
+              claudeEvent ? claudeFlushEventLine() : lastEventLine,
+              claudeEvent
             );
             // A per-block drain must not latch: a block that never sent its own
             // content_block_stop still gets drained by message_delta / message_stop.
@@ -485,7 +489,8 @@ export function createSseTextTransform(
           emitFlushed(
             onFlush(lastJson, isJsonStream, lastContentJson),
             controller,
-            isClaudeStreamEvent(lastJson) ? claudeFlushEventLine() : lastEventLine
+            isClaudeStreamEvent(lastJson) ? claudeFlushEventLine() : lastEventLine,
+            isClaudeStreamEvent(lastJson)
           );
         }
       } catch (err) {

@@ -598,11 +598,7 @@ function flushRemainingByShape(
   const last = lastJson as Record<string, unknown>;
   const lastType = typeof last.type === "string" ? (last.type as string) : "";
   // A trailing `ping` is still a Claude stream: its buffered tails need typed deltas.
-  if (
-    lastType.startsWith("message") ||
-    lastType.startsWith("content_block") ||
-    lastType === "ping"
-  )
+  if (lastType.startsWith("message") || lastType.startsWith("content_block") || lastType === "ping")
     return flushClaudeFormat(store, last);
   if (Array.isArray(last.choices)) return flushOpenAiTextBuffers(store, last);
   if (lastType.startsWith("response.")) return flushResponsesFormat(store, last, lastType);
