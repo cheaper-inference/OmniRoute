@@ -136,3 +136,47 @@ test("unavailable shadow candidates do not dispatch and available siblings keep 
   assert.deepEqual(dispatched, ["online"]);
   assert.equal(body.messages[0].content, "original");
 });
+
+async function countRequestClones(run: () => Promise<void>): Promise<number> {
+  const scope = globalThis as unknown as { structuredClone: typeof structuredClone };
+  const originalClone = scope.structuredClone;
+  let clones = 0;
+  scope.structuredClone = ((value: unknown, options?: StructuredSerializeOptions) => {
+    if (value !== null && typeof value === "object" && "messages" in value) clones++;
+    return originalClone(value, options);
+  }) as typeof structuredClone;
+  try {
+    await run();
+  } finally {
+    scope.structuredClone = originalClone;
+  }
+  return clones;
+}
+
+const cloneBudgets = [
+  { name: "one available target reuses the snapshot", targets: ["online"], clones: 1 },
+  { name: "one unavailable target clones nothing extra", targets: ["offline"], clones: 1 },
+  { name: "an unavailable sibling is not cloned", targets: ["offline", "online"], clones: 2 },
+  { name: "every dispatched sibling gets its own copy", targets: ["a", "b"], clones: 3 },
+];
+
+for (const budget of cloneBudgets) {
+  test(`clone budget: ${budget.name}`, async () => {
+    const { done, log, failures } = completionLogger(budget.targets.length);
+    const clones = await countRequestClones(async () => {
+      scheduleShadowRouting(
+        combo,
+        config,
+        requestBody(),
+        budget.targets.map(target),
+        async () => new Response("shadow done"),
+        async (model) => model !== "offline",
+        "priority",
+        log
+      );
+      await done;
+    });
+    assert.deepEqual(failures, [], "shadow executor must not fail silently");
+    assert.equal(clones, budget.clones);
+  });
+}
