@@ -245,7 +245,7 @@ export const FREE_TIER_INFERENCE_BASE_URL = "https://opencode.ai/inference/v1";
  * `<base>/models/<model>:streamGenerateContent?alt=sse` keyed by `x-goog-api-key`. The
  * `/zen/go/v1` chat host does not serve those models.
  */
-export const GO_GEMINI_INFERENCE_BASE_URL = "https://opencode.ai/inference/go/v1";
+const GO_GEMINI_INFERENCE_BASE_URL = "https://opencode.ai/inference/go/v1";
 
 /**
  * OpenCode Go's Gemini wire: its own inference host, keyed by `x-goog-api-key`. Never gated:
