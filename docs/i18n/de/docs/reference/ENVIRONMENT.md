@@ -1370,7 +1370,7 @@ Ein Dienst, der einen ganzen Monat lang aktiv bleibt, verbraucht etwa 744 Instan
 
 ## Bereitstellungsszenarien
 
-Richtlinien für SREs zum Relay-Backend (Verhalten von ts/bifrost/auto, Platzierung von 9router im Vergleich zu CLIProxyAPI und Fallback-Strategie für hohen Durchsatz) finden Sie unter [Strategie für das Relay-Backend](/docs/reference/RELAY_BACKEND_STRATEGY.md).
+Richtlinien für SREs zum Relay-Backend (Verhalten von ts/bifrost/auto, Platzierung von 9router im Vergleich zu CLIProxyAPI und Fallback-Strategie für hohen Durchsatz) finden Sie unter [Relay-Backend-Strategie](/docs/reference/RELAY_BACKEND_STRATEGY.md).
 
 ### Minimale lokale Entwicklung
 
@@ -1874,3 +1874,14 @@ Wird von `open-sse/services/combo.ts` und `src/lib/quota/quotaScheduler.ts` für
 | Variable                       | Standard | Quelldatei                                   | Beschreibung                                                                                                                                                                                                                                                                                    |
 | ------------------------------ | -------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`      | `src/lib/providerModels/modelSyncTimings.ts` | Auf `1` setzen, um das Phasentiming, eine generierte Anforderung ID und Phasen- success/error -Ergebnisse während der Modellsynchronisierung zu protokollieren. Für alle anderen Werte deaktiviert. In den Protokollen werden Anforderungs-, Konto-, Katalog- und Fehlernutzlasten weggelassen. |
+
+## Lokales OpenCode-Tool zur Medienanalyse
+
+Wird von `scripts/cli/omniroute-media-mcp.mjs` verwendet. Legen Sie diese Variablen in der Umgebung des lokalen Tool-Prozesses fest.
+
+| Variable                   | Standardwert                                                                        | Beschreibung                                                                                                                  |
+| -------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (oder `~/.config/opencode/opencode.json`) | OpenCode-Konfiguration, die vom Medien-Tool und vom Installationsprogramm gelesen wird.                                       |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                         | Vom Medien-Tool aus der OpenCode-Konfiguration gelesener Provider-Eintrag.                                                    |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                              | Vom Medien-Tool übermitteltes Modell. Sein Provider muss die angeforderten Medientypen unterstützen.                          |
+| `OMNIROUTE_MEDIA_API_KEY`  | Konfigurierter API-Schlüssel des Providers oder seine Umgebungsreferenz             | Optionale Überschreibung der Zugangsdaten. Belassen Sie ihn in der Umgebung des lokalen Prozesses; committen Sie ihn niemals. |

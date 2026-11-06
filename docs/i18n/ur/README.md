@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                          |        v3.8.50        | **v3.8.51** |      `v3.8.53+`       |
+|                          |        v3.8.50        | **v3.8.51** |      `v3.8.54+`       |
 | ------------------------ | :-------------------: | :---------: | :-------------------: |
 | 🌐 فراہم کنندگان         |          352          |   **358**   |          380          |
 | 🧠 منفرد چیٹ ماڈل IDs    |         1320          |  **1374**   |         1491          |
@@ -584,7 +584,7 @@ Radar اختیاری ہے اور صرف GET استعمال کرتا ہے۔ OmniR
 
 </div>
 
-> حالیہ جھلکیاں **v3.8.20 → v3.8.53** سے۔ مکمل تاریخ [`CHANGELOG.md`](CHANGELOG.md) میں۔
+> حالیہ جھلکیاں **v3.8.20 → v3.8.54** سے۔ مکمل تاریخ [`CHANGELOG.md`](CHANGELOG.md) میں۔
 
 - **⚖️ `quota-weighted` روٹنگ** — 20ویں کومبو اسٹریٹیجی ختم شدہ اکاؤنٹس کو چھوڑ دیتی ہے، پھر باقی اکاؤنٹس میں بچی ہوئی کوٹا ÷ جاری لوڈ کے تناسب سے انتخاب کرتی ہے، اور موجودہ گفتگو کو پن کیے رکھتی ہے۔ → [آٹو-کومبو](docs/routing/AUTO-COMBO.md)
 - **🧰 ہیڈلیس موڈ** — `omniroute serve --headless` (یا `OMNIROUTE_HEADLESS=1`) صرف `/v1/*` پراکسی انجن چلاتا ہے، ڈیش بورڈ اور صرف ڈیش بورڈ سب سسٹمز بند رہتے ہیں۔ → [ہیڈلیس موڈ](docs/guides/HEADLESS.md)
@@ -1017,7 +1017,7 @@ omniroute
 ```
 
 > 💡 `npm warn ERESOLVE` یا peer-dep وارننگز نظر آ رہی ہیں؟ [یہ بے ضرر ہیں](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated)۔
-> **npm 11 یا بعد کا ورژن استعمال کر رہے ہیں؟** npm پیکج لائف سائیکل اسکرپٹس کو تب تک بلاک کر سکتا ہے جب تک انہیں اجازت نہ دی جائے۔ OmniRoute کا `postinstall` (`node scripts/build/postinstall.mjs`) اس کی native runtime فائلیں تیار کرنے کے لیے ضروری ہے۔ عالمی طور پر انسٹال کرتے وقت npm کی وارننگ میں نامزد پیکجز کو اجازت دیں۔ OmniRoute 3.8.53 کی جانب سے رپورٹ شدہ پیکج سیٹ کے لیے:
+> **npm 11 یا بعد کا ورژن استعمال کر رہے ہیں؟** npm پیکج لائف سائیکل اسکرپٹس کو تب تک بلاک کر سکتا ہے جب تک انہیں اجازت نہ دی جائے۔ OmniRoute کا `postinstall` (`node scripts/build/postinstall.mjs`) اس کی native runtime فائلیں تیار کرنے کے لیے ضروری ہے۔ عالمی طور پر انسٹال کرتے وقت npm کی وارننگ میں نامزد پیکجز کو اجازت دیں۔ OmniRoute 3.8.54 کی جانب سے رپورٹ شدہ پیکج سیٹ کے لیے:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1809,7 +1809,7 @@ MIT لائسنس - تفصیلات کے لیے [LICENSE](LICENSE) دیکھیں۔
 
 **[⬆ واپس اوپر جائیں](#-omniroute)** · اوپن سورس AI کمیونٹی کے لیے ❤️ سے تیار کردہ۔
 
-<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> کی جانب سے تخلیق کردہ · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT لائسنس · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> کی جانب سے تخلیق کردہ · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT لائسنس · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- کمیونٹی کے سوال و جواب کے لیے GitHub Discussions فعال ہیں -->

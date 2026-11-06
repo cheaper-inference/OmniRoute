@@ -1366,9 +1366,9 @@ Render는 인바운드 트래픽 없이 약 15분 후에 무료 웹 서비스를
 
 ## 배포 시나리오
 
-릴레이 백엔드 SRE 지침(`ts/bifrost/auto` 동작, 9router와 CLIProxyAPI 배치, 고처리량 폴백 전략)은 [릴레이 백엔드 전략](/docs/reference/RELAY_BACKEND_STRATEGY.md)을 참조하세요.
+릴레이 백엔드 SRE 지침(ts/bifrost/auto 동작, 9router와 CLIProxyAPI 배치, 고처리량 폴백 전략)은 [Relay Backend Strategy](/docs/reference/RELAY_BACKEND_STRATEGY.md)를 참조하세요.
 
-### 최소 로컬 개발
+### 최소 로컬 개발 환경
 
 ```bash
 JWT_SECRET=$(openssl rand -base64 48)
@@ -1378,7 +1378,7 @@ PORT=20128
 NODE_ENV=development
 ```
 
-### Docker 프로덕션
+### Docker 프로덕션 환경
 
 ```bash
 JWT_SECRET=<generated>
@@ -1408,7 +1408,7 @@ OMNIROUTE_DISABLE_BACKGROUND_SERVICES=true
 APP_LOG_TO_FILE=false
 ```
 
-### 리버스 프록시가 있는 VPS (nginx + Cloudflare)
+### 리버스 프록시가 구성된 VPS (nginx + Cloudflare)
 
 ```bash
 JWT_SECRET=<generated>
@@ -1870,3 +1870,14 @@ OmniConductor 허브 작업을 로컬 A2A TaskManager (`src/lib/conductor/`)에 
 | 변하기 쉬운                    | 기본 | 소스 파일                                    | 설명                                                                                                                                                                                                         |
 | ------------------------------ | ---- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`  | `src/lib/providerModels/modelSyncTimings.ts` | 단계 타이밍, 생성된 요청 ID 및 단계 success/error 결과를 모델 동기화 중에 기록하려면 `1` 로 설정합니다. 다른 모든 값에 대해서는 비활성화됩니다. 로그에는 요청, 계정, 카탈로그 및 오류 페이로드가 생략됩니다. |
+
+## 로컬 OpenCode 미디어 분석 도구
+
+`scripts/cli/omniroute-media-mcp.mjs`에서 사용됩니다. 로컬 도구 프로세스 환경에서 다음을 설정하세요.
+
+| 변수                       | 기본값                                                                              | 설명                                                                                     |
+| -------------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (또는 `~/.config/opencode/opencode.json`) | 미디어 도구와 설치 프로그램이 읽는 OpenCode 구성입니다.                                  |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                         | 미디어 도구가 OpenCode 구성에서 읽는 Provider 항목입니다.                                |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                              | 미디어 도구가 제출하는 모델입니다. 해당 Provider는 요청된 미디어 유형을 지원해야 합니다. |
+| `OMNIROUTE_MEDIA_API_KEY`  | 구성된 Provider API 키 또는 해당 환경 변수 참조                                     | 선택적 자격 증명 재정의입니다. 로컬 프로세스 환경에 유지하고 커밋하지 마세요.            |
