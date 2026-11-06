@@ -12,6 +12,10 @@ import { createLazyRowProxy } from "./providers/lazyConnectionView";
 import { invalidateDbCache, getCachedRawProviderConnections } from "./readCache";
 import { invalidateConnectionUpdate, type UpdateOpts } from "./readCache";
 import { reorderConnections } from "./providers/deletion";
+import {
+  removeConnectionHealth,
+  removeConnectionIndex,
+} from "@omniroute/open-sse/services/apiKeyRotator.ts";
 import { normalizeConnectionProviderSpecificData } from "./providers/providerSpecificData";
 import { mergeConnectionProviderSpecificData } from "./providers/providerSpecificDataMerge";
 import { registerConnectionStore } from "@omniroute/open-sse/utils/registeredConnectionStore.ts";
@@ -992,6 +996,20 @@ export async function updateProviderConnection(
     ...data,
     updatedAt: new Date().toISOString(),
   };
+  // #HAC-119 D4: a replaced credential invalidates every health verdict the
+  // rotator recorded for the OLD key material. In-memory health is keyed by
+  // connection id, not by key value, so a stale "invalid" would keep the fresh
+  // key unselectable until restart. Compare the DECRYPTED stored values — the
+  // row holds AES-GCM ciphertext that never matches plaintext input.
+  const replacedCredentials = CONNECTION_CREDENTIAL_FIELDS.filter((field) => {
+    if (!Object.hasOwn(data, field)) return false;
+    const stored = decryptConnectionFields({ ...existingCamel })[field];
+    return stored !== data[field];
+  });
+  if (replacedCredentials.length > 0) {
+    removeConnectionHealth(id);
+    removeConnectionIndex(id);
+  }
   merged.providerSpecificData = applyCodexChildCooldownClearOnUpdate(
     data,
     normalizeConnectionProviderSpecificData(
