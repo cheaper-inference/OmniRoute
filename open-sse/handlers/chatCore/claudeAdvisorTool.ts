@@ -12,13 +12,19 @@ export function normalizeAdvisorToolModel(model: string): string {
   return name.replace(/(\d)\.(\d)/g, "$1-$2");
 }
 
-/** Rewrite the `model` of every advisor tool in a Messages API body, in place. */
+/**
+ * Replace every advisor tool in a Messages API body with a copy carrying Anthropic's model id.
+ * The tools array and its objects are shared with the caller's request (combo fallbacks and the
+ * semantic cache reuse it), so they are copied rather than edited in place.
+ */
 export function normalizeAdvisorToolModels(body: Record<string, unknown>): void {
   if (!Array.isArray(body.tools)) return;
-  for (const tool of body.tools) {
-    if (!tool || typeof tool !== "object") continue;
+  body.tools = body.tools.map((tool) => {
+    if (!tool || typeof tool !== "object") return tool;
     const entry = tool as Record<string, unknown>;
-    if (typeof entry.type !== "string" || !entry.type.startsWith("advisor_")) continue;
-    if (typeof entry.model === "string") entry.model = normalizeAdvisorToolModel(entry.model);
-  }
+    if (typeof entry.type !== "string" || !entry.type.startsWith("advisor_")) return tool;
+    if (typeof entry.model !== "string") return tool;
+    const model = normalizeAdvisorToolModel(entry.model);
+    return model === entry.model ? tool : { ...entry, model };
+  });
 }

@@ -59,3 +59,10 @@ test("already valid and non-Claude names are unchanged", () => {
   assert.equal(normalizeAdvisorToolModel("claude-haiku-5-5-20261001"), "claude-haiku-5-5-20261001");
   assert.equal(normalizeAdvisorToolModel("best-coding"), "best-coding");
 });
+
+test("the caller's request keeps its own tool objects", () => {
+  const tools = [advisor("claude-opus-5.5")];
+  const body = passthrough(tools);
+  assert.equal((body.tools as Array<Record<string, unknown>>)[0].model, "claude-opus-5-5");
+  assert.equal(tools[0].model, "claude-opus-5.5", "a combo fallback must still see the original");
+});
