@@ -4,3 +4,5 @@
   and track usage without treating unknown decision prices as chat prices.
   Validate discovery connection records and retain the native System One format
   through custom-model persistence and API-route type checks.
+  Keep discovery validation, catalog assembly and provider selection within the
+  complexity limits while preserving pagination, partial status and model scope.

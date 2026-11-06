@@ -68,19 +68,23 @@ function getCompactProviderEntryGroups<TProvider>({
 
   if (showFreeOnly) return [freeSectionEntries];
 
-  if (activeCategory === "compatible") return [compatibleProviderEntries];
-  if (activeCategory === "oauth") return [oauthEntries];
-  if (activeCategory === "ide") return [ideProviderEntries];
-  if (activeCategory === "no-auth") return [noAuthEntries];
-  if (activeCategory === "upstream-proxy") return [upstreamProxyEntries];
-  if (activeCategory === "apikey") return apiKeyEntries;
-  if (activeCategory === "webcookie") return [webCookieProviderEntries];
-  if (activeCategory === "search") return [searchProviderEntries];
-  if (activeCategory === "decisions") return [decisionProviderEntries];
-  if (activeCategory === "webfetch") return [webFetchEntries];
-  if (activeCategory === "audio") return [audioProviderEntries];
-  if (activeCategory === "local") return [localProviderEntries];
-  if (activeCategory === "cloudagent") return [cloudAgentProviderEntries];
+  const categoryGroups = new Map<string, ProviderEntry<TProvider>[][]>([
+    ["compatible", [compatibleProviderEntries]],
+    ["oauth", [oauthEntries]],
+    ["ide", [ideProviderEntries]],
+    ["no-auth", [noAuthEntries]],
+    ["upstream-proxy", [upstreamProxyEntries]],
+    ["apikey", apiKeyEntries],
+    ["webcookie", [webCookieProviderEntries]],
+    ["search", [searchProviderEntries]],
+    ["decisions", [decisionProviderEntries]],
+    ["webfetch", [webFetchEntries]],
+    ["audio", [audioProviderEntries]],
+    ["local", [localProviderEntries]],
+    ["cloudagent", [cloudAgentProviderEntries]],
+  ]);
+  const categoryGroup = categoryGroups.get(activeCategory);
+  if (categoryGroup) return categoryGroup;
 
   return [
     compatibleProviderEntries,

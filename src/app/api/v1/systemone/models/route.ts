@@ -134,13 +134,28 @@ export async function GET(request: Request) {
     !legacy.ok ||
     legacy.headers.get("X-OmniRoute-Catalog-Status") === "partial" ||
     ["last-good", "stale"].includes(legacy.headers.get("x-omniroute-catalog") || "");
+  const ordered = mergeDecisionCatalogs(legacyPayload, models);
+  return decisionCatalogResponse(request, ordered, partial);
+}
+
+function mergeDecisionCatalogs(
+  legacyPayload: Record<string, unknown>,
+  models: Map<string, DecisionModel>
+) {
   const allModels = new Map<string, Record<string, unknown>>();
   for (const row of Array.isArray(legacyPayload.data) ? legacyPayload.data : []) {
     const model = annotateLegacySystemOneModel(record(row));
     if (typeof model.id === "string") allModels.set(model.id, model);
   }
   for (const model of models.values()) allModels.set(model.id, { ...model });
-  const ordered = [...allModels.values()].sort((a, b) => String(a.id).localeCompare(String(b.id)));
+  return [...allModels.values()].sort((a, b) => String(a.id).localeCompare(String(b.id)));
+}
+
+function decisionCatalogResponse(
+  request: Request,
+  ordered: Record<string, unknown>[],
+  partial: boolean
+) {
   const unavailable = partial && ordered.length === 0;
   const page = parseCatalogPage(request);
   const paged = applyCatalogPage(ordered, page);

@@ -32,6 +32,38 @@ async function ollamaDecisionCapabilities(
   return Array.isArray(capabilities) ? capabilities : [];
 }
 
+async function fetchDecisionCatalog(
+  backend: DecisionBackend,
+  credentials: DecisionCredentials,
+  fetcher: DecisionFetch,
+  signal: AbortSignal
+): Promise<unknown[]> {
+  const response = await fetcher(backend.modelsUrl, credentials, {
+    headers: decisionHeaders(credentials),
+    signal,
+  });
+  if (!response.ok) {
+    await response.body?.cancel();
+    throw new DecisionError(response.status, "model_discovery_failed");
+  }
+  const payload = record(await readDecisionJson(response, 502, signal));
+  const rows = payload.data ?? payload.models ?? payload.result;
+  if (!Array.isArray(rows) || rows.length > 2048)
+    throw new DecisionError(502, "invalid_model_catalog");
+  return rows;
+}
+
+function decisionRowId(
+  item: unknown,
+  discovery: DecisionBackend["discovery"],
+  requestedModel?: string
+): string | null {
+  const row = record(item);
+  const id = discovery === "cloudflare" ? row.name : (row.id ?? row.name ?? row.model);
+  if (requestedModel && requestedModel !== id) return null;
+  return typeof id === "string" && id.length > 0 && id.length <= 512 ? id : null;
+}
+
 export async function discoverDecisionModels(
   backend: DecisionBackend,
   credentials: DecisionCredentials,
@@ -55,24 +87,11 @@ export async function discoverDecisionModels(
       .filter((id) => !options.model || options.model === id)
       .map((id) => asModel(id));
   }
-  const response = await fetcher(backend.modelsUrl, credentials, {
-    headers: decisionHeaders(credentials),
-    signal,
-  });
-  if (!response.ok) {
-    await response.body?.cancel();
-    throw new DecisionError(response.status, "model_discovery_failed");
-  }
-  const payload = record(await readDecisionJson(response, 502, signal));
-  const rows = payload.data ?? payload.models ?? payload.result;
-  if (!Array.isArray(rows) || rows.length > 2048)
-    throw new DecisionError(502, "invalid_model_catalog");
+  const rows = await fetchDecisionCatalog(backend, credentials, fetcher, signal);
   const models: DecisionModel[] = [];
   for (const item of rows) {
-    const row = record(item);
-    const id = backend.discovery === "cloudflare" ? row.name : (row.id ?? row.name ?? row.model);
-    if (typeof id !== "string" || !id || id.length > 512) continue;
-    if (options.model && options.model !== id) continue;
+    const id = decisionRowId(item, backend.discovery, options.model);
+    if (!id) continue;
     try {
       const found = await discoverDecisionRow(backend, credentials, fetcher, signal, id, asModel);
       models.push(...found);

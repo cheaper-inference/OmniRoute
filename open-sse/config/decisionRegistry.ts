@@ -107,15 +107,23 @@ function parseDecisionConfiguration(value: unknown) {
   return parsed.data;
 }
 
+function decisionBackendLocation(
+  config: Partial<z.infer<typeof decisionConnectionSchema>>,
+  entry: ReturnType<typeof decisionDefaults>[string] | undefined
+) {
+  // Julia and future engines explicitly configure the endpoint; no runtime endpoint guess.
+  const url = config.endpoint || entry?.url;
+  const format = config.format || entry?.format;
+  if (!url || !format) throw new DecisionError(503, "invalid_provider_configuration");
+  return { url, format };
+}
+
 function buildDecisionBackend(
   provider: string,
   config: Partial<z.infer<typeof decisionConnectionSchema>>,
   entry: ReturnType<typeof decisionDefaults>[string] | undefined
 ): DecisionBackend {
-  // Julia and future engines explicitly configure the endpoint; no runtime endpoint guess.
-  const url = config.endpoint || entry?.url;
-  const format = config.format || entry?.format;
-  if (!url || !format) throw new DecisionError(503, "invalid_provider_configuration");
+  const { url, format } = decisionBackendLocation(config, entry);
   return {
     provider,
     format,

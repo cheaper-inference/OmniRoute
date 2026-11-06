@@ -32,6 +32,53 @@ const upstreamRows = [
   },
 ];
 
+test("native discovery validates row identifiers and preserves provider-specific ID selection", async () => {
+  const backend = resolveDecisionBackend("basal", {});
+  const fetcher = async () =>
+    Response.json({
+      data: [
+        null,
+        {},
+        { id: "" },
+        { id: 1 },
+        { id: "x".repeat(513) },
+        { id: "by-id", name: "ignored" },
+        { name: "by-name" },
+        { model: "by-model" },
+      ],
+    });
+  const signal = new AbortController().signal;
+  const models = await discoverDecisionModels(backend, {}, fetcher, signal);
+  assert.deepEqual(
+    models.map((model) => model.id),
+    ["basal/by-id", "basal/by-name", "basal/by-model"]
+  );
+  const filtered = await discoverDecisionModels(backend, {}, fetcher, signal, { model: "by-name" });
+  assert.deepEqual(
+    filtered.map((model) => model.id),
+    ["basal/by-name"]
+  );
+  const cloudflare = resolveDecisionBackend("cloudflare-ai", {
+    providerSpecificData: { accountId: "test" },
+  });
+  const cloudflareModels = await discoverDecisionModels(
+    cloudflare,
+    {},
+    async () =>
+      Response.json({
+        result: [
+          { id: "opaque-id", name: "@cf/cloudflare/clef" },
+          { id: "@cf/cloudflare/clef-flash" },
+        ],
+      }),
+    signal
+  );
+  assert.deepEqual(
+    cloudflareModels.map((model) => model.id),
+    ["cloudflare-ai/@cf/cloudflare/clef"]
+  );
+});
+
 test.beforeEach(async () => {
   core.resetDbInstance();
   fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5 });

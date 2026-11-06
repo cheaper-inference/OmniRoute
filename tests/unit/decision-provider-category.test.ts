@@ -61,7 +61,7 @@ test("decision category works in compact display without duplicating identities"
     displayAuthType: "apikey" as const,
     toggleAuthType: "apikey" as const,
   }));
-  const result = buildCompactProviderEntriesForPage({
+  const options = {
     activeCategory: "decisions",
     showFreeOnly: false,
     decisionProviderEntries: rows,
@@ -83,7 +83,19 @@ test("decision category works in compact display without duplicating identities"
     audioProviderEntries: [],
     localProviderEntries: [],
     cloudAgentProviderEntries: [],
-  });
+  };
+  const result = buildCompactProviderEntriesForPage(options);
   assert.equal(result.length, 6);
   assert.equal(new Set(result.map((r) => r.providerId)).size, 6);
+  assert.deepEqual(
+    buildCompactProviderEntriesForPage({ ...options, decisionProviderEntries: undefined }),
+    []
+  );
+  assert.deepEqual(buildCompactProviderEntriesForPage({ ...options, showFreeOnly: true }), []);
+  for (const activeCategory of ["all", "unknown", "__proto__"]) {
+    assert.deepEqual(
+      buildCompactProviderEntriesForPage({ ...options, activeCategory }).map((r) => r.providerId),
+      result.map((r) => r.providerId)
+    );
+  }
 });
