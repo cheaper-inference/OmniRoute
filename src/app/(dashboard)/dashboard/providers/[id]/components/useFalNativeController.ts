@@ -40,6 +40,7 @@ type State = {
   schema: string;
   transport: string;
   jobId: string | null;
+  jobVersion: number;
   result: FalValue | null;
   error: string;
   busy: boolean;
@@ -56,6 +57,7 @@ const initial: State = {
   schema: "{}",
   transport: "queue",
   jobId: null,
+  jobVersion: 0,
   result: null,
   error: "",
   busy: false,
@@ -70,6 +72,7 @@ export function useFalNativeController(connectionId: string | null) {
   const abort = useRef<AbortController | null>(null);
   const lock = useRef(false);
   const submission = useRef<FalSubmission | null>(null);
+  const jobRevision = useRef(0);
   const receiptData = useSyncExternalStore(subscribeFalReceipts, falReceiptSnapshot, () => "[]");
   const receipts = useMemo(() => readFalReceipts(receiptData), [receiptData]);
   const activeReceipt = state.selectedReceipt ?? receipts[0] ?? null;
@@ -86,6 +89,7 @@ export function useFalNativeController(connectionId: string | null) {
     abort,
     lock,
     submission,
+    jobRevision,
     receipts,
     activeReceipt,
     parsed,
@@ -114,6 +118,10 @@ export function useFalNativeController(connectionId: string | null) {
     retrieve: (cancel = false) => retrieve(context, cancel),
     setParameter: (name: string, value: unknown) => setParameter(context, name, value),
     selectReceipt: (key: string) => selectReceipt(context, key),
+    setJobId: (jobId: string) => {
+      const jobVersion = ++jobRevision.current;
+      patch({ jobId, jobVersion, result: null, error: "" });
+    },
   };
 }
 export type FalPanelController = ReturnType<typeof useFalNativeController>;
@@ -128,6 +136,7 @@ type ControllerContext = {
   abort: { current: AbortController | null };
   lock: { current: boolean };
   submission: { current: FalSubmission | null };
+  jobRevision: { current: number };
   receipts: FalReceipt[];
   activeReceipt: FalReceipt | null;
   parsed: ReturnType<typeof parseFalEditor>;
@@ -202,19 +211,23 @@ function selectReceipt(c: Context, key: string) {
   c.patch({ selectedReceipt: receipt, jobId: receipt.jobId ?? "", result: null, error: "" });
 }
 function save(c: Context, value: FalSubmission) {
+  persistFalReceipt(value);
+  if (c.jobRevision.current !== c.state.jobVersion) return;
   c.submission.current = value;
   c.patch({ selectedReceipt: value, jobId: value.jobId ?? "", result: null });
-  persistFalReceipt(value);
 }
 function updateSubmission(c: Context, value: FalSubmission, patch: Partial<State>) {
   persistFalReceipt(value);
   // History navigation changes the selection, never the owner of an in-flight response.
-  if (c.submission.current?.key !== value.key) return;
+  if (!receiptSelected(c, value.key)) return;
   c.submission.current = value;
   c.patch({ selectedReceipt: value, ...patch });
 }
 function receiptSelected(c: Context, key: string | undefined) {
-  return (c.submission.current ?? c.activeReceipt)?.key === key;
+  return (
+    c.jobRevision.current === c.state.jobVersion &&
+    (c.submission.current ?? c.activeReceipt)?.key === key
+  );
 }
 async function receiptAction(c: Context, key: string | undefined, task: () => Promise<void>) {
   try {
@@ -256,7 +269,7 @@ async function stream(c: Context, response: Response, value: FalSubmission) {
     response.body,
     (event) => {
       state = mergeFalEvent(state, event);
-      if (c.submission.current?.key !== value.key) return;
+      if (!receiptSelected(c, value.key)) return;
       c.patch({
         result: { ...state },
         ...(state.error !== undefined ? { error: c.t("streamError") } : {}),

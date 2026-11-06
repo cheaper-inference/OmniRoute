@@ -234,7 +234,7 @@ export function FalJobs({ c }: Props) {
         aria-label={c.t("job")}
         placeholder={c.t("job")}
         value={c.currentJobId}
-        onChange={(e) => c.patch({ jobId: e.target.value })}
+        onChange={(e) => c.setJobId(e.target.value)}
         className="min-w-0 flex-1 rounded border bg-transparent p-2"
       />
       <Button disabled={c.busy || !c.currentJobId} onClick={() => c.action(() => c.retrieve())}>
