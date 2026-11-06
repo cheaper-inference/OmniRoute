@@ -103,6 +103,8 @@ const SAFE_PUBLIC_ERROR_IDENTIFIERS = new Set([
   "gateway_timeout",
   "gcp_project_required",
   "gemini_tpm_exhausted",
+  "gemini_web_no_response",
+  "gemini_web_unparseable_response",
   "grok_error",
   "heap_pressure",
   "hedge_cancelled",

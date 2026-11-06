@@ -611,15 +611,19 @@ export class GeminiWebExecutor extends BaseExecutor {
       let captured = false;
       // #19073: remember which endpoints answered while we waited (origin + path only,
       // never the query string), so a "No response" 502 says whether the page posted
-      // nowhere, somewhere else, or to StreamGenerate with an unreadable body.
+      // nowhere, somewhere else, or to StreamGenerate with an unreadable body. Collection
+      // starts at submission: the navigation document and page-load assets would otherwise
+      // fill the cap and make "the page never posted" impossible to read from the list.
       const seenResponseUrls: string[] = [];
       const MAX_SEEN_RESPONSE_URLS = 20;
+      let promptSubmitted = false;
       const responsePromise = new Promise<void>((resolve) => {
         page.on("response", async (resp: any) => {
           try {
             const seen = new URL(resp.url());
             const bare = `${seen.origin}${seen.pathname}`;
             if (
+              promptSubmitted &&
               !seenResponseUrls.includes(bare) &&
               seenResponseUrls.length < MAX_SEEN_RESPONSE_URLS
             ) {
@@ -728,6 +732,7 @@ export class GeminiWebExecutor extends BaseExecutor {
       // cost that made long prompts race the 30s response-wait timeout.
       await page.keyboard.insertText(prompt);
       await page.waitForTimeout(300);
+      promptSubmitted = true;
       await page.keyboard.press("Enter");
 
       await Promise.race([responsePromise, page.waitForTimeout(resolveResponseTimeoutMs(modelId))]);
