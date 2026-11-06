@@ -1,1 +1,0 @@
-- **fix(usage):** Provider Limits now reads the Kimi Coding subscription name when refreshing quotas, while keeping quota and billing data available if the optional profile request fails.

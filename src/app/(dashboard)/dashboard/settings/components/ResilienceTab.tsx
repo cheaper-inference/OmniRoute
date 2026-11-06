@@ -3,6 +3,7 @@
 import { type ReactNode, useCallback, useEffect, useState } from "react";
 import { Button, Card, Select } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useTranslations } from "next-intl";
 import AutoDisableCard from "./AutoDisableCard";
@@ -1192,8 +1193,8 @@ export default function ResilienceTab() {
   if (loading && !data) {
     return (
       <Card className="p-6">
-        <div className="flex items-center gap-2 text-sm text-text-muted">
-          <Icon name="progress_activity" className="animate-spin" />
+        <div role="status" className="flex items-center gap-2 text-sm text-text-muted">
+          <Spinner decorative size="sm" />
           {tx("loadingResilience", "Loading resilience settings...")}
         </div>
       </Card>

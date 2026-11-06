@@ -1366,7 +1366,7 @@ En tjänst som hålls vaken i en hel månad använder cirka 744 instanstimmar, s
 
 ## Distributionsscenarier
 
-För SRE-vägledning för relay-backend (ts/bifrost/auto-beteende, placering av 9router kontra CLIProxyAPI samt strategi för fallback vid hög genomströmning), se [Strategi för relay-backend](/docs/reference/RELAY_BACKEND_STRATEGY.md).
+För SRE-vägledning för relay-backend (ts/bifrost/auto-beteende, placering av 9router kontra CLIProxyAPI och reservstrategi för hög genomströmning), se [Strategi för relay-backend](/docs/reference/RELAY_BACKEND_STRATEGY.md).
 
 ### Minimal lokal utveckling
 
@@ -1397,7 +1397,7 @@ OMNIROUTE_MEMORY_MB=8192
 CORS_ORIGIN=https://your-frontend.example.com
 ```
 
-### Isolerad miljö / CI
+### Isolerad från nätverk / CI
 
 ```bash
 JWT_SECRET=test-jwt-secret-for-ci
@@ -1868,3 +1868,14 @@ Används av `open-sse/services/combo.ts` och `src/lib/quota/quotaScheduler.ts` f
 | Variabel                       | Standard | Källfil                                      | Beskrivning                                                                                                                                                                                                                       |
 | ------------------------------ | -------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`      | `src/lib/providerModels/modelSyncTimings.ts` | Ställ in på `1` för att logga fastiming, en genererad begäran ID och fas success/error -resultat under modellsynkronisering. Inaktiverad för alla andra värden. Loggar utelämnar nyttolaster för begäran, konto, katalog och fel. |
+
+## Lokalt OpenCode-verktyg för medieanalys
+
+Används av `scripts/cli/omniroute-media-mcp.mjs`. Ange dessa i den lokala verktygsprocessens miljö.
+
+| Variabel                   | Standardvärde                                                                        | Beskrivning                                                                                                      |
+| -------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (eller `~/.config/opencode/opencode.json`) | OpenCode-konfiguration som läses av medieverktyget och installationsprogrammet.                                  |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                          | Leverantörspost som läses från OpenCode-konfigurationen av medieverktyget.                                       |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                               | Modell som skickas av medieverktyget. Dess leverantör måste ha stöd för de begärda medietyperna.                 |
+| `OMNIROUTE_MEDIA_API_KEY`  | Konfigurerad API-nyckel för leverantören eller dess miljöreferens                    | Valfri åsidosättning av autentiseringsuppgifter. Behåll den i den lokala processens miljö; checka aldrig in den. |
