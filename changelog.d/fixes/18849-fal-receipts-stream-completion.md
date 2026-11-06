@@ -1,0 +1,3 @@
+- Keep Fal response IDs and status attached to the initiating submission when navigating recovery history during a request. Preserve the selected receipt and its displayed job ID.
+- Keep late generation, retrieval and cancellation results or errors off a different selected recovery record.
+- Keep HTTP-over-WebSocket SSE completion metadata and `[DONE]` markers separate from native final output, including null, false, zero and empty text. Preserve reasoning, artifacts and HTTP errors.

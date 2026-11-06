@@ -173,9 +173,11 @@ and stop a realtime stream; repeated-message clients use the native POST API.
 `wss://ws.fal.run/{endpoint_id}`. It works with the ordinary HTTP input schema. The server
 sends the input object directly, receives `start` with request ID/status/headers, then raw
 body chunks and `end` with matching request ID/status/timing. MessagePack is not involved.
-The gateway emits `http-start`, native SSE events where applicable, and a `final` or `error`
-event containing HTTP metadata and parsed JSON/text output. Cumulative output replaces the
-previous snapshot. Non-JSON error text and upstream status/content type remain available.
+The gateway emits `http-start` and native SSE events where applicable. SSE response completion
+emits `http-end` with HTTP metadata, without replacing the model's final snapshot; failed HTTP
+responses emit `error`. JSON/text and binary responses emit `final` or `error` with the output
+and HTTP metadata. Cumulative model output replaces the previous snapshot. Non-JSON error
+text and upstream status/content type remain available.
 
 Binary responses are delivered through authenticated
 `GET /v1/fal/jobs/{id}?artifact={file_id}` downloads with their content type and filename;

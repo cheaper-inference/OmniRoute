@@ -12,7 +12,12 @@ import {
 } from "../../open-sse/handlers/fal/schema.ts";
 import { connectFalRealtime, falRealtimePath } from "../../open-sse/handlers/fal/realtime.ts";
 import { connectFalHttpWebsocket } from "../../open-sse/handlers/fal/httpWebsocket.ts";
-import { readFalEvents, type FalEvent } from "../../open-sse/handlers/fal/events.ts";
+import {
+  readFalEvents,
+  mergeFalEvent,
+  type FalEvent,
+  type FalStreamState,
+} from "../../open-sse/handlers/fal/events.ts";
 
 function fixture(id: string): FalDefinition {
   return JSON.parse(
@@ -407,12 +412,19 @@ test("HTTP WebSockets parse native SSE and close pending invocations on deadline
     assert.equal(peer.ended, true);
     assert.equal(uncertain, mode !== "sse");
     assert.equal(peer.messages.length, 1);
-    if (mode === "sse")
+    if (mode === "sse") {
       assert.deepEqual(events.find((e) => e.event === "token")?.data, {
         partial: true,
         output: "é",
       });
-    else assert.equal(events.at(-1)?.event, "error");
+      const state = events.reduce<FalStreamState>(mergeFalEvent, { artifacts: [], events: [] });
+      assert.equal(state.final, "é cube");
+      assert.equal(events.at(-1)?.event, "http-end");
+      assert.equal(
+        (events.at(-1)?.data as { http: { request_id: string } }).http.request_id,
+        "sse"
+      );
+    } else assert.equal(events.at(-1)?.event, "error");
   }
 });
 

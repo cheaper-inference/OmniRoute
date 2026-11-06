@@ -16,12 +16,141 @@ vi.mock("@/shared/components", () => ({
 }));
 
 import FalNativePanel from "../../../src/app/(dashboard)/dashboard/providers/[id]/components/FalNativePanel";
+import { persistFalReceipt, readFalReceipts } from "../../../src/shared/fal/submission";
 
 afterEach(() => {
   cleanup();
   sessionStorage.clear();
   vi.unstubAllGlobals();
 });
+
+for (const phase of ["headers", "body", "invalid body"] as const) {
+  test(`an in-flight submission keeps its own receipt when history changes before ${phase}`, async () => {
+    const original = {
+      key: "history-a",
+      fingerprint: "original-fingerprint",
+      endpoint: "publisher/original",
+      connection: "connection-1",
+      transport: "queue",
+      jobId: "job-a",
+      status: "COMPLETED",
+    };
+    persistFalReceipt(original);
+    let release!: () => void;
+    const deferred = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let submittedKey = "";
+    const response = Response.json(
+      { id: "job-b", status: "IN_QUEUE" },
+      { headers: { "X-Request-ID": "header-b" } }
+    );
+    if (phase !== "headers")
+      vi.spyOn(response, "json").mockImplementation(async () => {
+        await deferred;
+        if (phase === "invalid body") throw new SyntaxError("Invalid response body");
+        return { id: "job-b", status: "IN_QUEUE" };
+      });
+    const fetcher = vi.fn(async (url: string, init?: RequestInit) => {
+      if (url === "/api/v1/fal/run") {
+        submittedKey = new Headers(init?.headers).get("Idempotency-Key")!;
+        if (phase === "headers") await deferred;
+        return response;
+      }
+      return Response.json({
+        endpoint_id: "publisher/new",
+        capabilities: { inputs: {}, required: [], reasoning: {}, transports: { queue: true } },
+      });
+    });
+    vi.stubGlobal("fetch", fetcher);
+    render(<FalNativePanel connectionId="connection-1" />);
+    fireEvent.change(screen.getByRole("textbox", { name: "falNative.endpoint" }), {
+      target: { value: "publisher/new" },
+    });
+    fireEvent.click(screen.getAllByRole("button", { name: "common.refresh" })[0]);
+    const generate = screen.getByRole("button", { name: "falNative.newGeneration" });
+    await waitFor(() => expect((generate as HTMLButtonElement).disabled).toBe(false));
+    fireEvent.click(generate);
+    await waitFor(() => expect(submittedKey).not.toBe(""));
+    if (phase !== "headers")
+      await waitFor(() => expect(readFalReceipts()[0].jobId).toBe("header-b"));
+    fireEvent.change(screen.getByLabelText("falNative.recoveryRecord"), {
+      target: { value: original.key },
+    });
+    release();
+    await waitFor(() => expect((generate as HTMLButtonElement).disabled).toBe(false));
+    const records = readFalReceipts();
+    expect(records.find((receipt) => receipt.key === original.key)).toEqual(original);
+    expect(records.find((receipt) => receipt.key === submittedKey)).toMatchObject({
+      endpoint: "publisher/new",
+      jobId: phase === "invalid body" ? "header-b" : "job-b",
+      status: phase === "invalid body" ? "SUBMISSION_UNKNOWN" : "IN_QUEUE",
+    });
+    expect((screen.getByLabelText("falNative.recoveryRecord") as HTMLSelectElement).value).toBe(
+      original.key
+    );
+    expect((screen.getByLabelText("falNative.job") as HTMLInputElement).value).toBe("job-a");
+    expect(screen.queryByRole("alert")).toBeNull();
+    fireEvent.change(screen.getByLabelText("falNative.recoveryRecord"), {
+      target: { value: submittedKey },
+    });
+    expect((screen.getByLabelText("falNative.job") as HTMLInputElement).value).toBe(
+      phase === "invalid body" ? "header-b" : "job-b"
+    );
+    expect(fetcher.mock.calls.filter(([url]) => url === "/api/v1/fal/run")).toHaveLength(1);
+  });
+}
+
+for (const cancel of [false, true]) {
+  for (const failed of [false, true]) {
+    test(`late ${cancel ? "cancel" : "retrieval"} ${failed ? "errors" : "results"} stay off another history record`, async () => {
+      for (const key of ["b", "a"])
+        persistFalReceipt({
+          key,
+          fingerprint: key,
+          endpoint: "publisher/app",
+          connection: "connection-1",
+          transport: "queue",
+          jobId: `job-${key}`,
+          status: "IN_QUEUE",
+        });
+      let release!: (response: Response) => void;
+      const pending = new Promise<Response>((resolve) => {
+        release = resolve;
+      });
+      const fetcher = vi.fn(() => pending);
+      vi.stubGlobal("fetch", fetcher);
+      render(<FalNativePanel connectionId="connection-1" />);
+      fireEvent.click(
+        cancel
+          ? screen.getByRole("button", { name: "common.cancel" })
+          : screen.getAllByRole("button", { name: "common.refresh" })[1]
+      );
+      expect(fetcher).toHaveBeenCalledWith(
+        `/api/v1/fal/jobs/job-a${cancel ? "" : "?result=true"}`,
+        { method: cancel ? "DELETE" : "GET" }
+      );
+      fireEvent.change(screen.getByLabelText("falNative.recoveryRecord"), {
+        target: { value: "b" },
+      });
+      release(
+        Response.json(
+          failed ? { error: { message: "late A error" } } : { output: "late A result" },
+          { status: failed ? 502 : 200 }
+        )
+      );
+      await waitFor(() =>
+        expect(
+          (screen.getAllByRole("button", { name: "common.refresh" })[1] as HTMLButtonElement)
+            .disabled
+        ).toBe(false)
+      );
+      expect(screen.queryByRole("alert")).toBeNull();
+      expect(screen.queryByText(/late A result/)).toBeNull();
+      expect((screen.getByLabelText("falNative.job") as HTMLInputElement).value).toBe("job-b");
+    });
+  }
+}
 
 test("non-object editor values remain editable and never dispatch substituted input", async () => {
   const fetcher = vi.fn(async () =>

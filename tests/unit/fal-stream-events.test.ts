@@ -6,6 +6,18 @@ import {
   type FalStreamState,
 } from "../../open-sse/handlers/fal/events.ts";
 
+test("a transport DONE marker never replaces a native final snapshot", () => {
+  for (const output of ["answer", "", 0, false, null, { answer: "structured" }]) {
+    let state: FalStreamState = { artifacts: [], events: [] };
+    state = mergeFalEvent(state, { event: "final", data: { partial: false, output } });
+    state = mergeFalEvent(state, { event: "message", data: "[DONE]" });
+    assert.deepEqual(state.final, output);
+    assert.equal(state.events.at(-1)?.data, "[DONE]");
+  }
+  const empty = mergeFalEvent({ artifacts: [], events: [] }, { event: "message", data: "[DONE]" });
+  assert.equal(empty.final, undefined);
+});
+
 test("native final snapshots preserve null, false, zero and empty text", () => {
   for (const value of [null, false, 0, ""]) {
     const state = mergeFalEvent(

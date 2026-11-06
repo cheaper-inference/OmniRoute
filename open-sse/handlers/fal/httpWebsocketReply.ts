@@ -73,12 +73,13 @@ export class FalHttpWebsocketReply {
     };
     this.emit("http-start", frame);
   }
-  private result(start: Start, completion: Record<string, unknown>) {
+  private result(start: Start) {
     const type = header(start, "content-type") || "application/octet-stream";
     if (type.includes("text/event-stream")) {
       this.parser.push(this.decoder.decode());
       this.parser.finish();
-      return normalizeFalOutput({ completion });
+      // The SSE parser already emitted the model output. The HTTP end is metadata only.
+      return {};
     }
     if (/^(text\/|application\/(json|[^;]+\+json))/.test(type))
       return normalizeFalOutput(this.text(type));
@@ -107,10 +108,11 @@ export class FalHttpWebsocketReply {
     if (!start || frame.request_id !== start.id) throw new Error("Invalid end");
     const failed = start.status >= 400 || status(frame.status) >= 400;
     const completion = { ...start, ...frame };
-    this.emit(failed ? "error" : "final", {
-      ...this.result(start, completion),
+    const streaming = header(start, "content-type").includes("text/event-stream");
+    this.emit(failed ? "error" : streaming ? "http-end" : "final", {
+      ...this.result(start),
       http: completion,
-      partial: false,
+      ...(!streaming ? { partial: false } : {}),
       ...(failed ? { error: "Fal upstream HTTP response failed" } : {}),
     });
     this.pending = false;

@@ -199,12 +199,30 @@ function selectReceipt(c: Context, key: string) {
   const receipt = c.receipts.find((r) => r.key === key);
   if (!receipt) return;
   c.submission.current = c.submission.current?.key === receipt.key ? c.submission.current : receipt;
-  c.patch({ selectedReceipt: receipt, jobId: receipt.jobId ?? "" });
+  c.patch({ selectedReceipt: receipt, jobId: receipt.jobId ?? "", result: null, error: "" });
 }
 function save(c: Context, value: FalSubmission) {
   c.submission.current = value;
-  c.patch({ selectedReceipt: value });
+  c.patch({ selectedReceipt: value, jobId: value.jobId ?? "", result: null });
   persistFalReceipt(value);
+}
+function updateSubmission(c: Context, value: FalSubmission, patch: Partial<State>) {
+  persistFalReceipt(value);
+  // History navigation changes the selection, never the owner of an in-flight response.
+  if (c.submission.current?.key !== value.key) return;
+  c.submission.current = value;
+  c.patch({ selectedReceipt: value, ...patch });
+}
+function receiptSelected(c: Context, key: string | undefined) {
+  return (c.submission.current ?? c.activeReceipt)?.key === key;
+}
+async function receiptAction(c: Context, key: string | undefined, task: () => Promise<void>) {
+  try {
+    await task();
+  } catch (failure) {
+    // A late failure belongs to the request, not the history record now on screen.
+    if (receiptSelected(c, key)) throw failure;
+  }
 }
 async function snapshot(c: Context, recover: boolean): Promise<FalSubmission> {
   const parsed = c.parsed;
@@ -231,13 +249,14 @@ async function snapshot(c: Context, recover: boolean): Promise<FalSubmission> {
     throw new Error(c.t("recoveryMismatch"));
   return { ...original, draft: original.draft ?? draft, status: "SUBMISSION_UNKNOWN" };
 }
-async function stream(c: Context, response: Response, transport: string) {
+async function stream(c: Context, response: Response, value: FalSubmission) {
   if (!response.body) throw new Error(c.t("streamIncomplete"));
   let state: FalStreamState = { artifacts: [], events: [] };
   await readFalEvents(
     response.body,
     (event) => {
       state = mergeFalEvent(state, event);
+      if (c.submission.current?.key !== value.key) return;
       c.patch({
         result: { ...state },
         ...(state.error !== undefined ? { error: c.t("streamError") } : {}),
@@ -245,11 +264,15 @@ async function stream(c: Context, response: Response, transport: string) {
     },
     c.abort.current?.signal
   );
-  if (state.final === undefined && transport === "stream") throw new Error(c.t("streamIncomplete"));
+  if (state.final === undefined && value.transport === "stream")
+    throw new Error(c.t("streamIncomplete"));
 }
 async function run(c: Context, recover: boolean) {
   const value = await snapshot(c, recover);
   save(c, value);
+  await receiptAction(c, value.key, () => execute(c, value));
+}
+async function execute(c: Context, value: FalSubmission) {
   c.abort.current = new AbortController();
   const response = await fetch("/api/v1/fal/run", {
     method: "POST",
@@ -263,27 +286,30 @@ async function run(c: Context, recover: boolean) {
   // Receipt headers survive every HTTP status and malformed/non-JSON bodies.
   const jobId = response.headers.get("X-Request-ID");
   if (jobId) {
-    c.patch({ jobId });
-    save(c, { ...c.submission.current!, jobId });
+    value = { ...value, jobId };
+    updateSubmission(c, value, { jobId });
   }
   if (["stream", "realtime", "http-websocket"].includes(value.transport) && response.ok) {
-    await stream(c, response, value.transport);
+    await stream(c, response, value);
     return;
   }
   const result = await readResponse(response);
-  c.patch({ result, ...(result.id ? { jobId: result.id } : {}) });
-  save(c, {
-    ...c.submission.current!,
+  value = {
+    ...value,
     ...(result.id ? { jobId: result.id } : {}),
     status: result.status ?? "COMPLETED",
-  });
+  };
+  updateSubmission(c, value, { result, ...(result.id ? { jobId: result.id } : {}) });
 }
 async function retrieve(c: Context, cancel: boolean) {
   const id = c.state.jobId ?? c.activeReceipt?.jobId ?? "";
-  const result = await readResponse(
-    await fetch(`/api/v1/fal/jobs/${encodeURIComponent(id)}${cancel ? "" : "?result=true"}`, {
-      method: cancel ? "DELETE" : "GET",
-    })
-  );
-  c.patch({ result });
+  const key = (c.submission.current ?? c.activeReceipt)?.key;
+  await receiptAction(c, key, async () => {
+    const result = await readResponse(
+      await fetch(`/api/v1/fal/jobs/${encodeURIComponent(id)}${cancel ? "" : "?result=true"}`, {
+        method: cancel ? "DELETE" : "GET",
+      })
+    );
+    if (receiptSelected(c, key)) c.patch({ result });
+  });
 }

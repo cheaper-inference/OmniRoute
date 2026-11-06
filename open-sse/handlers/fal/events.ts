@@ -103,13 +103,14 @@ export function mergeFalEvent(state: FalStreamState, event: FalEvent): FalStream
   const artifacts = mergeArtifacts(state.artifacts, payload, event.data);
   // Retain native event names/payloads in a bounded history. Cumulative snapshots replace.
   const next = { ...state, artifacts, events: [...state.events, event].slice(-40) };
+  // A transport sentinel is not a model snapshot, including when no final arrived.
+  if (event.data === "[DONE]") return next;
   if (event.event === "error" || payload.error) next.error = payload.error ?? event.data;
   if (nativeRecord.reasoning !== undefined) next.reasoning = nativeRecord.reasoning;
   const native = nativeValue(nativeRecord, payload, event.data);
   const partial = nativeRecord.partial ?? payload.partial;
   if (partial === true) next.partial = native;
-  else if (partial === false || event.event === "final" || event.data === "[DONE]")
-    next.final = native;
+  else if (partial === false || event.event === "final") next.final = native;
   return next;
 }
 
