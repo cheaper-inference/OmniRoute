@@ -1,16 +1,17 @@
 import { clearHealthCheckLogCache } from "@/lib/tokenHealthCheck";
 import { setCustomBannedSignals } from "@omniroute/open-sse/services/accountFallback.ts";
+import { setOpencodeServerSettings } from "@omniroute/open-sse/services/opencodeServerSettings.ts";
 import {
   setOperatorProviderErrorRules,
   type OperatorProviderErrorRule,
 } from "@omniroute/open-sse/config/providerErrorRules.ts";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
+import { isSpawnCapableBypassPrefix } from "@/shared/constants/spawnCapablePrefixes";
 import {
   normalizeCliVersionOverrides,
   setCliVersionOverrides,
   type CliVersionOverrides,
 } from "@omniroute/open-sse/config/cliVersions.ts";
-import { isSpawnCapableBypassPrefix } from "@/shared/constants/spawnCapablePrefixes";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -30,6 +31,7 @@ export type RuntimeReloadSection =
   | "systemPrompt"
   | "authzBypass"
   | "bannedSignals"
+  | "opencodeServer"
   | "cliVersionOverrides";
 
 export interface RuntimeReloadChange {
@@ -60,6 +62,7 @@ interface RuntimeSettingsSnapshot {
   authzBypass: AuthzBypassSnapshot;
   customBannedSignals: string[];
   providerErrorRules: Record<string, OperatorProviderErrorRule[]> | null;
+  opencodeServerUrl: string;
   cliVersionOverrides: CliVersionOverrides;
 }
 
@@ -89,6 +92,7 @@ const DEFAULT_RUNTIME_SETTINGS_SNAPSHOT: RuntimeSettingsSnapshot = {
   authzBypass: DEFAULT_AUTHZ_BYPASS_SNAPSHOT,
   customBannedSignals: [],
   providerErrorRules: null,
+  opencodeServerUrl: "",
   cliVersionOverrides: {},
 };
 
@@ -319,6 +323,8 @@ export function buildRuntimeSettingsSnapshot(
     authzBypass: normalizeAuthzBypass(settings),
     customBannedSignals: normalizeStringArray(settings.customBannedSignals),
     providerErrorRules: normalizeOperatorProviderErrorRules(settings.providerErrorRules),
+    opencodeServerUrl:
+      typeof settings.opencode_server_url === "string" ? settings.opencode_server_url.trim() : "",
     cliVersionOverrides: normalizeCliVersionOverrides(settings.cliVersionOverrides),
   };
 }
@@ -643,7 +649,12 @@ export async function applyRuntimeSettings(
     setOperatorProviderErrorRules(currentSnapshot.providerErrorRules ?? undefined);
   }
 
-  // CLI client-version overrides: swap the shared leaf store the Claude Code /
+  if (force || hasChanged(currentSnapshot.opencodeServerUrl, previousSnapshot.opencodeServerUrl)) {
+    setOpencodeServerSettings({ url: currentSnapshot.opencodeServerUrl });
+    markChanged("opencodeServer");
+  }
+
+  // CLI client-version overrides: swap the shared leaf store the [CC] /
   // Codex identity presets read on every request. Cheap and idempotent, so it is
   // safe on every settings write (dashboard edit, import-json, config restore).
   //

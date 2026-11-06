@@ -9,6 +9,7 @@ import ProviderPlaygroundPanel from "./ProviderPlaygroundPanel";
 import ProviderParamFilterSection from "./ProviderParamFilterSection";
 import ProviderInterceptionSection from "./ProviderInterceptionSection";
 import ProviderCcAliasSection from "./ProviderCcAliasSection";
+import OpencodeServerSettingsCard from "../../components/OpencodeServerSettingsCard";
 import ProviderCliVersionSection from "./ProviderCliVersionSection";
 
 export default function ProviderExtraPanels({ providerId }: { providerId: string }) {
@@ -22,6 +23,9 @@ export default function ProviderExtraPanels({ providerId }: { providerId: string
 
       {/* Web search/fetch tool interception toggles (#3384/#7339) */}
       <ProviderInterceptionSection providerId={providerId} />
+
+      {/* opencode CLI server: address + CLI binary path (local provider) */}
+      {providerId === "opencode-server" && <OpencodeServerSettingsCard />}
 
       {/* Claude Code discovery-alias gate — provider/model on/off/inherit */}
       <ProviderCcAliasSection providerId={providerId} />
