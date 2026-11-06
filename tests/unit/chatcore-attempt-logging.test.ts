@@ -15,7 +15,8 @@ const testDataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omni-attempt-logging-
 process.env.DATA_DIR = testDataDir;
 
 const coreDb = await import("../../src/lib/db/core.ts");
-const { getCallLogById, getCallLogs, waitForCallLogSaves } = await import("../../src/lib/usage/callLogs.ts");
+const { getCallLogById, getCallLogs, waitForCallLogSaves } =
+  await import("../../src/lib/usage/callLogs.ts");
 const { persistAttemptLogs } = await import("../../open-sse/handlers/chatCore/attemptLogging.ts");
 const { getAuditLog } = await import("../../src/lib/compliance/index.ts");
 
@@ -325,8 +326,20 @@ test("no-log attempt skips traversing request and response bodies while retainin
       throw new Error("no-log body must not be cloned");
     },
   });
+  // Below the provider-warning walk's depth cap, which reads the live response on
+  // every attempt, and within the log clone's depth cap, so only a clone reaches it.
+  const expensive: Record<string, unknown> = {};
+  Object.defineProperty(expensive, "expensive", {
+    enumerable: true,
+    get() {
+      throw new Error("no-log response must not be cloned");
+    },
+  });
+  let nested = expensive;
+  for (let level = 0; level < 8; level += 1) nested = { nested };
+  const responseBody = { choices: [], nested };
   persistAttemptLogs(
-    { status: 200, tokens: { input: 125_000, output: 2 }, responseBody: { choices: [] } },
+    { status: 200, tokens: { input: 125_000, output: 2 }, responseBody },
     baseCtx({ pendingRequestId: traceId, body, noLogEnabled: true })
   );
   assert.equal(await waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS), true);
@@ -339,8 +352,19 @@ test("no-log attempt skips traversing request and response bodies while retainin
 
 test("no-log responses preserve scalar reasoning observations without storing response bodies", async () => {
   for (const [suffix, responseBody, expectedSource, expectedChars] of [
-    ["content", { choices: [{ message: { reasoning_content: "private thoughts" } }] }, "content", 16],
-    ["encrypted", { output: [{ type: "reasoning", encrypted_content: "private opaque blob" }] }, "encrypted", null],
+    [
+      "content",
+      { choices: [{ message: { reasoning_content: "private thoughts" } }] },
+      "content",
+      16,
+    ],
+    [
+      "encrypted",
+      { output: [{ type: "reasoning", encrypted_content: "private opaque blob" }] },
+      "encrypted",
+      null,
+    ],
+    ["think", { choices: [{ message: { content: "<think>private</think>answer" } }] }, "think", 7],
   ] as const) {
     const id = `no-log-reasoning-${suffix}`;
     persistAttemptLogs(
@@ -355,4 +379,20 @@ test("no-log responses preserve scalar reasoning observations without storing re
     assert.equal(rows[0]?.reasoningSource, expectedSource);
     assert.equal(rows[0]?.reasoningChars, expectedChars);
   }
+});
+
+test("no-log reasoning capture survives a live response with more items than a spread can take", async () => {
+  // The no-log capture reads the live body, which has no 1000-item tail cap.
+  const output: unknown[] = new Array(200_000).fill({ type: "message" });
+  output.push({ type: "reasoning", encrypted_content: "private opaque blob" });
+  const traceId = "no-log-reasoning-wide-output";
+  persistAttemptLogs(
+    { status: 200, tokens: { input: 4, output: 2 }, responseBody: { output } },
+    baseCtx({ pendingRequestId: traceId, noLogEnabled: true })
+  );
+  assert.equal(await waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS), true);
+  const rows = await getCallLogs({ correlationId: traceId, limit: 5 });
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0]?.hasResponseBody, false);
+  assert.equal(rows[0]?.reasoningSource, "encrypted");
 });

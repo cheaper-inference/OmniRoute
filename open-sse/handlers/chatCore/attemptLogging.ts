@@ -552,7 +552,9 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
   const retainedError = videoContentRemoved && error ? "[omitted: video transcript]" : error;
   // Keep reasoning observability even though no-log policy discards all
   // request/response payloads. Only source and character-count scalars survive.
-  const noLogReasoningSnapshot = noLogEnabled ? captureReasoningSnapshotMeta(retainedResponse) : null;
+  const noLogReasoningSnapshot = noLogEnabled
+    ? captureReasoningSnapshotMeta(retainedResponse)
+    : null;
 
   const providerWarnings = extractProviderWarnings(providerResponse, clientResponse, responseBody);
   if (providerWarnings.length > 0) {
@@ -681,30 +683,34 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
       : (args.reasoningMeta ?? null),
     clientRequestBody: body ?? null,
     upstreamRequestBody: providerRequest ?? null,
-    requestBody: noLogEnabled ? null : cloneBoundedChatLogPayload(
-      attachLogMeta(truncateForLog(retainedRequest as Record<string, unknown>), {
-        ...accountRotationMeta,
-        claudePromptCache: claudeCacheMeta,
-        geminiPromptCache,
-      })
-    ),
-    responseBody: noLogEnabled ? null : cloneBoundedChatLogPayload(
-      attachLogMeta(truncateForLog(retainedResponse as Record<string, unknown>), {
-        ...accountRotationMeta,
-        claudePromptCache: claudeCacheMeta
-          ? {
-              applied: claudeCacheMeta.applied,
-              totalBreakpoints: claudeCacheMeta.totalBreakpoints,
-              anthropicBeta: claudeCacheMeta.anthropicBeta,
-            }
-          : null,
-        claudePromptCacheUsage: claudeCacheUsageMeta,
-        geminiPromptCache,
-        // Operators can tell estimated token counts (and the cost derived from them)
-        // apart from provider-reported ones. Log-only: billing is unchanged.
-        usageEstimated: isEstimatedUsage(tokens) ? true : null,
-      })
-    ),
+    requestBody: noLogEnabled
+      ? null
+      : cloneBoundedChatLogPayload(
+          attachLogMeta(truncateForLog(retainedRequest as Record<string, unknown>), {
+            ...accountRotationMeta,
+            claudePromptCache: claudeCacheMeta,
+            geminiPromptCache,
+          })
+        ),
+    responseBody: noLogEnabled
+      ? null
+      : cloneBoundedChatLogPayload(
+          attachLogMeta(truncateForLog(retainedResponse as Record<string, unknown>), {
+            ...accountRotationMeta,
+            claudePromptCache: claudeCacheMeta
+              ? {
+                  applied: claudeCacheMeta.applied,
+                  totalBreakpoints: claudeCacheMeta.totalBreakpoints,
+                  anthropicBeta: claudeCacheMeta.anthropicBeta,
+                }
+              : null,
+            claudePromptCacheUsage: claudeCacheUsageMeta,
+            geminiPromptCache,
+            // Operators can tell estimated token counts (and the cost derived from them)
+            // apart from provider-reported ones. Log-only: billing is unchanged.
+            usageEstimated: isEstimatedUsage(tokens) ? true : null,
+          })
+        ),
     error: retainedError || null,
     sourceFormat,
     targetFormat,
