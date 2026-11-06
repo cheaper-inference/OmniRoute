@@ -1,6 +1,7 @@
 // Gemini helper functions for translator
 
 import { safeParseJSON } from "./jsonUtil.ts";
+import { videoPartToGemini } from "./mediaContentParts.ts";
 import { coerceSchemaValueShapes } from "./schemaValueShapes.ts";
 import { createSchemaBudget, createSchemaMeter } from "./schemaBudget.ts";
 import type { SchemaBudget, SchemaMeter } from "./schemaBudget.ts";
@@ -218,6 +219,8 @@ function normalizeGeminiMediaResolution(...values: unknown[]): JsonRecord | unde
   return undefined;
 }
 
+/** Translate OpenAI content to Gemini parts while retaining typed media carriers. */
+
 export function convertOpenAIContentToParts(content: unknown): JsonRecord[] {
   const parts: JsonRecord[] = [];
 
@@ -228,6 +231,9 @@ export function convertOpenAIContentToParts(content: unknown): JsonRecord[] {
       const rec = toRecord(item);
       if (rec.type === "text") {
         parts.push({ text: rec.text });
+      } else if (rec.type === "video_url" || rec.type === "input_video") {
+        const video = videoPartToGemini(rec);
+        if (video) parts.push(video);
       } else if (rec.type === "input_audio" || rec.type === "audio") {
         const audio = toRecord(rec.input_audio || rec.audio);
         if (typeof audio.data === "string" && audio.data) {

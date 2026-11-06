@@ -39,9 +39,10 @@ describe("EventTypeFilter on FilterPills", () => {
     const all = screen.getByRole("button", { name: a.filterAll });
     expect(combos.getAttribute("aria-pressed")).toBe("true");
     expect(all.getAttribute("aria-pressed")).toBe("false");
-    // FilterPills' active/inactive variants (kit Button).
-    expect(combos.className).toContain("ci-button--secondary");
-    expect(all.className).toContain("ci-button--ghost");
+    // FilterPills' active/inactive states (kit ToggleChip).
+    expect(combos.className).toContain("ci-toggle-chip");
+    expect(combos.getAttribute("data-state")).toBe("on");
+    expect(all.getAttribute("data-state")).toBe("off");
     fireEvent.click(screen.getByRole("button", { name: a.filterQuota }));
     expect(onChange).toHaveBeenCalledWith("quota");
   });
