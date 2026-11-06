@@ -1,0 +1,1 @@
+- **fix(sse):** Preserve the captured outgoing request when streaming provider execution fails, and leave provider-request diagnostics absent when no outgoing request was captured.

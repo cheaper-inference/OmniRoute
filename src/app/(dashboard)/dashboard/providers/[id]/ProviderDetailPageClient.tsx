@@ -75,6 +75,7 @@ import SearchProviderCard from "./components/SearchProviderCard";
 import NoAuthProviderControls from "./components/NoAuthProviderControls";
 import AnonymousFallbackToggle from "./components/AnonymousFallbackToggle";
 import ProviderRetryDelaySelect from "./components/ProviderRetryDelaySelect";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 // providerText used by UpstreamProxyCard (Phase 1t.7)
 
 export default function ProviderDetailPageClient() {
@@ -212,6 +213,7 @@ export default function ProviderDetailPageClient() {
   const t = useTranslations("providers");
   const emailsVisible = useEmailPrivacyStore((s) => s.emailsVisible);
   const notify = useNotificationStore();
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   // Per-account usage/limits strip — cached snapshot from the server's
   // providerLimitsCache, with per-connection on-demand live refresh.
   const {
@@ -552,6 +554,7 @@ export default function ProviderDetailPageClient() {
     fetchProviderModelMeta,
     fetchAliases,
     notify,
+    requestConfirm,
     t,
     selectedConnection,
     providerNode,
@@ -971,6 +974,7 @@ export default function ProviderDetailPageClient() {
         notify={notify}
         t={t}
       />
+      {confirmDialog}
     </div>
   );
 }
