@@ -85,7 +85,11 @@ async function collectDecisionCatalog(
         catalogSignal,
         AbortSignal.timeout(Math.min(backend.timeoutMs, 10_000)),
       ]);
-      const found = await discoverDecisionModels(backend, credentials, fetchDecision, signal);
+      const found = await discoverDecisionModels(backend, credentials, fetchDecision, signal, {
+        onIncomplete: () => {
+          partial = true;
+        },
+      });
       await addAllowedDecisionModels(found, models, clientKey, metadata);
     } catch {
       // A failed backend never becomes an empty complete catalog.
@@ -126,7 +130,10 @@ export async function GET(request: Request) {
   if (!legacy.ok && legacy.status < 500) return legacy;
   const legacyPayload = legacy.ok ? record(await legacy.json()) : {};
   const partial =
-    nativePartial || !legacy.ok || legacy.headers.get("X-OmniRoute-Catalog-Status") === "partial";
+    nativePartial ||
+    !legacy.ok ||
+    legacy.headers.get("X-OmniRoute-Catalog-Status") === "partial" ||
+    ["last-good", "stale"].includes(legacy.headers.get("x-omniroute-catalog") || "");
   const allModels = new Map<string, Record<string, unknown>>();
   for (const row of Array.isArray(legacyPayload.data) ? legacyPayload.data : []) {
     const model = annotateLegacySystemOneModel(record(row));

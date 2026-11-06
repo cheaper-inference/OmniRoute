@@ -36,7 +36,8 @@ export async function discoverDecisionModels(
   backend: DecisionBackend,
   credentials: DecisionCredentials,
   fetcher: DecisionFetch,
-  signal: AbortSignal
+  signal: AbortSignal,
+  options: { model?: string; onIncomplete?: () => void } = {}
 ): Promise<DecisionModel[]> {
   const asModel = (id: string, vision?: boolean): DecisionModel => ({
     id: `${backend.provider}/${id}`,
@@ -50,7 +51,9 @@ export async function discoverDecisionModels(
   });
   // Explicit lists are for operator-managed servers (e.g. Julia); Ollama ALWAYS proves capability.
   if (backend.models && backend.discovery !== "ollama" && backend.discovery !== "openai") {
-    return backend.models.map((id) => asModel(id));
+    return backend.models
+      .filter((id) => !options.model || options.model === id)
+      .map((id) => asModel(id));
   }
   const response = await fetcher(backend.modelsUrl, credentials, {
     headers: decisionHeaders(credentials),
@@ -69,8 +72,17 @@ export async function discoverDecisionModels(
     const row = record(item);
     const id = backend.discovery === "cloudflare" ? row.name : (row.id ?? row.name ?? row.model);
     if (typeof id !== "string" || !id || id.length > 512) continue;
-    const found = await discoverDecisionRow(backend, credentials, fetcher, signal, id, asModel);
-    models.push(...found);
+    if (options.model && options.model !== id) continue;
+    try {
+      const found = await discoverDecisionRow(backend, credentials, fetcher, signal, id, asModel);
+      models.push(...found);
+    } catch (error) {
+      // Inference verifies only its target and must fail closed if that lookup fails.
+      if (options.model) throw error;
+      // Enumeration retains already verified rows and reports its incompleteness.
+      options.onIncomplete?.();
+      if (signal.aborted) break;
+    }
   }
   return models;
 }

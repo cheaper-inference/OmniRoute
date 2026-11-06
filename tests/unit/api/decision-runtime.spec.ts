@@ -224,6 +224,23 @@ describe("decision routes use real runtime policy wiring", () => {
     expect(response.status).toBe(503);
     expect(response.headers.get("X-OmniRoute-Catalog-Status")).toBe("unavailable");
   });
+  it("retains verified Ollama rows when another model's capability lookup fails", async () => {
+    deps.connections.mockResolvedValue([{ id: "c1", provider: "ollama-cloud" }]);
+    deps.fetch.mockImplementation(async (url, _credentials, init) => {
+      if (url.endsWith("/api/tags"))
+        return Response.json({ models: [{ name: "clef:27b" }, { name: "removed-chat" }] });
+      const model = JSON.parse(String(init.body)).model;
+      return model === "clef:27b"
+        ? Response.json({ capabilities: ["decision"] })
+        : new Response(null, { status: 404 });
+    });
+    const response = await GET(makeRequest());
+    expect(response.status).toBe(200);
+    expect(response.headers.get("X-OmniRoute-Catalog-Status")).toBe("partial");
+    expect((await response.json()).data.map((row: { id: string }) => row.id)).toEqual([
+      "ollamacloud/clef:27b",
+    ]);
+  });
   it("retains native results with partial status when legacy discovery fails", async () => {
     vi.mocked(getSpecialtyModelsResponse).mockResolvedValueOnce(
       new Response(null, { status: 503 })
@@ -234,6 +251,19 @@ describe("decision routes use real runtime policy wiring", () => {
     expect((await response.json()).data.map((row: { id: string }) => row.id)).toEqual([
       "basal/current",
     ]);
+  });
+  it.each(["last-good", "stale"])("marks a %s legacy snapshot partial", async (cacheStatus) => {
+    vi.mocked(getSpecialtyModelsResponse).mockResolvedValueOnce(
+      Response.json(
+        { data: [{ id: "typesafe/jev-latest", type: "decisions" }] },
+        {
+          headers: { "x-omniroute-catalog": cacheStatus },
+        }
+      )
+    );
+    const response = await GET(makeRequest());
+    expect(response.status).toBe(200);
+    expect(response.headers.get("X-OmniRoute-Catalog-Status")).toBe("partial");
   });
   it("retains legacy results with partial status when native discovery fails", async () => {
     deps.fetch.mockRejectedValue(new Error("unreachable"));

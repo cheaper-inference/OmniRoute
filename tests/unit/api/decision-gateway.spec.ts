@@ -142,6 +142,46 @@ describe("native decision contracts", () => {
     expect(JSON.stringify(s.observations)).not.toContain("PRIVATE_INPUT");
     expect(JSON.stringify(s.observations)).not.toContain("upstream-test");
   });
+  it("does not inspect an unrelated broken Ollama model during inference", async () => {
+    const inspected: string[] = [];
+    const s = setup({
+      fetch: vi.fn(async (url, _credentials, init) => {
+        if (url.endsWith("/api/tags"))
+          return Response.json({ models: [{ name: "clef:27b" }, { name: "removed-chat" }] });
+        if (url.endsWith("/api/show")) {
+          const model = JSON.parse(String(init.body)).model;
+          inspected.push(model);
+          return model === "clef:27b"
+            ? Response.json({ capabilities: ["decision"] })
+            : new Response(null, { status: 404 });
+        }
+        return Response.json(native);
+      }),
+    });
+    const response = await s.post(
+      request({ ...state, model: "ollama-cloud/clef:27b" }),
+      "systemone"
+    );
+    expect(response.status).toBe(200);
+    expect(inspected).toEqual(["clef:27b"]);
+  });
+  it("rejects inference if the requested Ollama capability lookup fails", async () => {
+    const fetch = vi.fn(async (url: string) =>
+      url.endsWith("/api/tags")
+        ? Response.json({ models: [{ name: "clef:27b" }] })
+        : new Response(null, { status: 404 })
+    );
+    const s = setup({ fetch });
+    const response = await s.post(
+      request({ ...state, model: "ollama-cloud/clef:27b" }),
+      "systemone"
+    );
+    expect(response.status).toBe(404);
+    expect(fetch.mock.calls.map(([url]) => new URL(url).pathname)).toEqual([
+      "/api/tags",
+      "/api/show",
+    ]);
+  });
   it("forwards a native structured OpenAI input without conversion", async () => {
     const s = setup();
     const body = {

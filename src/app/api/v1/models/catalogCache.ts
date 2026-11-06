@@ -542,7 +542,9 @@ export async function resolveCachedCatalogResponse(
     );
     return catalogStringResponse(
       cached.body,
-      mergeCatalogHeaders(corsHeaders, cached.headers, diagnosticHeaders),
+      mergeCatalogHeaders(corsHeaders, cached.headers, diagnosticHeaders, {
+        "x-omniroute-catalog": "stale",
+      }),
       cached.status
     );
   }

@@ -220,12 +220,17 @@ change the available rows.
 
 `X-OmniRoute-Catalog-Status: complete` means all queried catalog sources succeeded,
 not that one page contains all rows or that the account has inference entitlement.
-Backend failures, stale OpenRouter fallback or malformed connection records produce
+Backend failures, stale OpenRouter or unified-catalog fallback, or malformed connection records produce
 `partial` with HTTP 200 when some authorized results survive. If no results survive,
 the response is HTTP 503 with status `unavailable`. `has_more: false` on a partial
 catalog describes only the available results; it does not prove completeness.
 Enumeration does not rotate account selection. Catalog visibility does not prove
 successful inference.
+
+A failed per-model capability lookup leaves other verified catalog rows available
+with partial status. Inference verifies the requested model only, so an unrelated
+model's failed capability lookup cannot block an otherwise valid request. Failure
+to verify the requested model still prevents inference.
 
 No cross-format translation is implemented. Sending OpenAI input to a System
 One model, or vice versa, returns 400. New adapters require qualified IDs; existing TypeSafe aliases remain supported. Default

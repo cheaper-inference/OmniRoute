@@ -78,7 +78,9 @@ async function runDecisionAttempt(
   const { provider, model } = attempt;
   let result: DecisionRecord | null = null;
   try {
-    const catalog = await discoverDecisionModels(backend, credentials, runtime.fetch, signal);
+    const catalog = await discoverDecisionModels(backend, credentials, runtime.fetch, signal, {
+      model,
+    });
     if (!catalog.some((row) => row.id === `${provider}/${model}`))
       throw new DecisionError(404, "decision_model_not_found");
     const upstreamUrl =
