@@ -16,6 +16,7 @@ const TEST_DATA_DIR = fs.mkdtempSync(
 process.env.DATA_DIR = TEST_DATA_DIR;
 
 const core = await import("../../src/lib/db/core.ts");
+const providersDb = await import("../../src/lib/db/providers.ts");
 const contextOverrides = await import("../../src/lib/db/modelContextOverrides.ts");
 const contextManager = await import("../../open-sse/services/contextManager.ts");
 const providerModelsRoute = await import("../../src/app/api/provider-models/route.ts");
@@ -94,4 +95,43 @@ test("POST on an already-existing model id still applies the override", async ()
   assert.equal(res.status, 200);
   const record = contextOverrides.getModelContextOverrideRecord("p1", "m1");
   assert.equal(record?.realContext, 256_000);
+});
+
+test("POST with a prefixed id on a compatible node keys the override by the stored bare id", async () => {
+  // #17334 grava o row sob o id sem prefixo; o guard consulta esse mesmo id. Um override
+  // gravado sob o id colado (`strata/modelo`) nunca seria lido e o modelo cairia em 128k.
+  const nodeId = "openai-compatible-chat-550e8400-e29b-41d4-a716-446655440001";
+  await providersDb.createProviderNode({
+    id: nodeId,
+    type: "openai-compatible",
+    name: "Strata",
+    prefix: "strata",
+    baseUrl: "http://127.0.0.1:8080",
+    chatPath: "/v1/chat/completions",
+    modelsPath: "/v1/models",
+  });
+
+  const res = await providerModelsRoute.POST(
+    buildRequest("POST", {
+      provider: nodeId,
+      modelId: "strata/strata/qwen3.8-max",
+      contextWindowOverride: 1_000_000,
+    })
+  );
+  const body = (await res.json()) as {
+    model?: { id?: string; contextWindowOverride?: number };
+  };
+  assert.equal(res.status, 200);
+  assert.equal(body.model?.id, "qwen3.8-max");
+  assert.equal(body.model?.contextWindowOverride, 1_000_000);
+
+  assert.equal(
+    contextOverrides.getModelContextOverrideRecord(nodeId, "qwen3.8-max")?.realContext,
+    1_000_000
+  );
+  assert.equal(
+    contextOverrides.getModelContextOverrideRecord(nodeId, "strata/strata/qwen3.8-max"),
+    null
+  );
+  assert.equal(contextManager.getTokenLimit(nodeId, "qwen3.8-max"), 1_000_000);
 });

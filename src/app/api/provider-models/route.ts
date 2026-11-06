@@ -297,7 +297,7 @@ export async function POST(request) {
     );
 
     return Response.json(
-      withAddTimeContextOverride(provider, modelId, model, contextWindowOverride)
+      withAddTimeContextOverride(provider, storedModelId, model, contextWindowOverride)
     );
   } catch (error) {
     console.error("Error adding provider model:", error);
