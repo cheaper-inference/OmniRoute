@@ -63,6 +63,31 @@ test("a guarded request keeps its retry but never falls back to native fetch", a
   assert.equal(native(), 0);
 });
 
+test("a guarded request never leaves through the proxy auto-select fallback", async (t) => {
+  const previous = process.env.PROXY_AUTO_SELECT_ENABLED;
+  t.after(() => {
+    if (previous === undefined) delete process.env.PROXY_AUTO_SELECT_ENABLED;
+    else process.env.PROXY_AUTO_SELECT_ENABLED = previous;
+  });
+  process.env.PROXY_AUTO_SELECT_ENABLED = "true";
+  const { deps, undiciCalls, native } = recorder(connectionFailure());
+  let looked = 0;
+  const findWorkingProxy = async () => {
+    looked += 1;
+    return "http://127.0.0.1:9";
+  };
+  await assert.rejects(() =>
+    proxyFetch(URL_UNDER_TEST, { connectGuard: "block-metadata" }, { ...deps, findWorkingProxy })
+  );
+  assert.equal(looked, 0);
+  assert.equal(undiciCalls.length, 2);
+  assert.equal(native(), 0);
+
+  // Control: the same failure without the guard does reach the fallback.
+  await proxyFetch(URL_UNDER_TEST, {}, { ...deps, findWorkingProxy }).catch(() => undefined);
+  assert.equal(looked, 1);
+});
+
 test("an unguarded request keeps its native fallback", async () => {
   const { deps, undiciCalls, native } = recorder(connectionFailure());
   const response = await proxyFetch(URL_UNDER_TEST, {}, deps);

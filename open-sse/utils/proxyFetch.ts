@@ -1003,6 +1003,10 @@ async function patchedFetchUnrecorded(
             throw tagProxyUnreachable(dispatcherError);
           }
 
+          // A proxy fallback or native fetch would resolve the name with no guard, so a guarded
+          // request ends here.
+          if (connectGuard) throw dispatcherError;
+
           // Exhausted attempts: try proxy fallback before native fetch.
           if (
             !tlsDirectFallback &&
@@ -1029,8 +1033,6 @@ async function patchedFetchUnrecorded(
               }
             }
           }
-          // Native fetch resolves the name again with no guard, so a guarded request ends here.
-          if (connectGuard) throw dispatcherError;
           // Preserve the original monitoring phrase and append the transport cause.
           console.warn(
             `[ProxyFetch] Undici dispatcher failed, falling back to native fetch (after retry): ${describeFetchCause(dispatcherError)}`
