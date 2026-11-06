@@ -120,6 +120,9 @@ export function buildClaudePassthroughBody({
     normalizeClaudeUpstreamMessages(translatedBody, {
       preserveToolResultBlocks: targetFormat === FORMATS.CLAUDE,
     });
+    if (provider === "anthropic") {
+      ensureCacheControlOnLastUserMessage(translatedBody);
+    }
   }
 
   log?.debug?.("FORMAT", `claude passthrough (preserveCache=${preserveCacheControl})`);

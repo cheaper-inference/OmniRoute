@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 
 const { buildClaudePassthroughBody } =
   await import("@omniroute/open-sse/handlers/chatCore/claudePassthroughBody.ts");
-const { isAnthropicThinkingSignatureError } =
+const { isAnthropicThinkingSignatureError, isClaudeCodeSemanticPassthroughRequest } =
   await import("@omniroute/open-sse/handlers/chatCore/passthroughHelpers.ts");
 const { DEFAULT_THINKING_CLAUDE_SIGNATURE } =
   await import("@omniroute/open-sse/config/defaultThinkingSignature.ts");
@@ -60,11 +60,21 @@ test("passthrough: adaptive thinking stays on without a block", () => {
 });
 
 test("passthrough: anthropic API-key provider gets the same first-party passthrough hygiene as claude", () => {
+  assert.equal(
+    isClaudeCodeSemanticPassthroughRequest({
+      provider: "anthropic",
+      sourceFormat: "claude",
+      targetFormat: "claude",
+      userAgent: "claude-cli/2.1.137",
+    }),
+    true
+  );
+
   const out = buildClaudePassthroughBody({
     body: bodyWith({ type: "enabled", budget_tokens: 4096 }),
     provider: "anthropic",
     clientHeaders: null,
-    isClaudeCodeSemanticPassthrough: true,
+    isClaudeCodeSemanticPassthrough: false,
     effectiveModel: "claude-opus-4-8",
     targetFormat: "claude",
     preserveCacheControl: true,
