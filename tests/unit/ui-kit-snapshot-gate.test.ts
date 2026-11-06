@@ -13,7 +13,7 @@ test("packages/ui-kit is a private, UNLICENSED workspace pinned to an upstream c
   assert.equal(pkg.private, true);
   assert.equal(pkg.license, "UNLICENSED");
   assert.equal(pkg.exports["."], "./src/index.ts");
-  assert.equal(pkg.exports["./styles.css"], "./src/ci-ui.css");
+  assert.equal(pkg.exports["./styles.css"], "./src/ci-styles.css");
   for (const target of Object.values(pkg.exports))
     assert.ok(
       fs.existsSync(path.join(ROOT, "packages/ui-kit", target as string)),

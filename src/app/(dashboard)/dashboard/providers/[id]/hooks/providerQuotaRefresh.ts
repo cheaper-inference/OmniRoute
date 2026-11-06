@@ -1,14 +1,7 @@
-import type { ProviderQuotaCacheEntry } from "./useProviderQuota";
-
 export interface QuotaRefreshState {
   status: "loading" | "fresh" | "partial" | "stale" | "error";
   missingWindows?: Array<"session" | "weekly">;
   connectionsRefreshFailed?: boolean;
-}
-
-interface QuotaObservation {
-  state: QuotaRefreshState;
-  entry?: ProviderQuotaCacheEntry;
 }
 
 function record(value: unknown): Record<string, unknown> | null {
@@ -30,38 +23,21 @@ function validWindow(value: unknown): boolean {
   );
 }
 
-function timestamp(value: unknown): string | undefined {
-  return typeof value === "string" && Number.isFinite(Date.parse(value)) ? value : undefined;
-}
-
-/** Classifies an observation, never a decision to release a backend cooldown. */
-export function classifyQuotaObservation(value: unknown, providerId?: string): QuotaObservation {
+/**
+ * Classifies a live read's outcome, never a decision to release a backend cooldown. The state
+ * carries no upstream text, and the payload itself is not displayed: panels read the canonical
+ * server projection, which already keeps a stale entry's original age.
+ */
+export function classifyQuotaObservation(value: unknown, providerId?: string): QuotaRefreshState {
   const usage = record(value);
-  if (!usage) return { state: { status: "error" } };
-  if (providerId !== "codex") {
-    return {
-      state: { status: "fresh" },
-      entry: { ...usage, fetchedAt: timestamp(usage.fetchedAt) ?? new Date().toISOString() },
-    };
-  }
+  if (!usage) return { status: "error" };
+  if (providerId !== "codex") return { status: "fresh" };
+  if (usage._stale === true) return { status: "stale" };
+  if (usage.error || usage.message) return { status: "error" };
   const quotas = record(usage.quotas) ?? {};
-  const validQuotas = Object.fromEntries(
-    Object.entries(quotas).filter(([, window]) => validWindow(window))
-  );
-  // Only presentation data crosses the boundary: upstream errors stay out of the UI.
-  const entry: ProviderQuotaCacheEntry = { quotas: validQuotas, plan: usage.plan };
-  if (usage._stale === true) {
-    entry.fetchedAt = timestamp(usage._staleSince);
-    return { state: { status: "stale" }, entry };
-  }
-  if (usage.error || usage.message) return { state: { status: "error" } };
   const missingWindows = (["session", "weekly"] as const).filter(
     (name) => !validWindow(quotas[name])
   );
-  if (missingWindows.length === 2) return { state: { status: "error" } };
-  entry.fetchedAt = timestamp(usage.fetchedAt) ?? new Date().toISOString();
-  return {
-    state: missingWindows.length ? { status: "partial", missingWindows } : { status: "fresh" },
-    entry,
-  };
+  if (missingWindows.length === 2) return { status: "error" };
+  return missingWindows.length ? { status: "partial", missingWindows } : { status: "fresh" };
 }

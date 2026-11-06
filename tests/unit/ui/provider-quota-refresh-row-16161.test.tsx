@@ -299,7 +299,8 @@ function fixtureFetch(listFails = false) {
   return vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
     const url = String(input);
     expect(init?.method ?? "GET").toBe("GET");
-    if (url === "/api/usage/provider-limits") return Response.json({ caches: {} });
+    if (url === "/api/usage/provider-limits")
+      return Response.json({ caches: live ? { a: valid } : {} });
     if (url === "/api/usage/a") {
       live = true;
       return Response.json(valid);

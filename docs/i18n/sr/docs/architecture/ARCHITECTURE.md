@@ -8,78 +8,79 @@
 
 _Последње ажурирање: 2026-06-28_
 
-## Резиме
+## Izvršni rezime
 
-OmniRoute је локални AI мрежни пролаз и контролна табла изграђена на Next.js. Обезбеђује једну ОпенАИ-компатибилну крајњу тачку (`/v1/*`) и усмерава саобраћај преко више упстреам провајдера са преводом, резервним, освежавањем токена и праћењем коришћења.
+OmniRoute je lokalni AI gateway za rutiranje i kontrolnu tablu izgrađen na platformi Next.js.  
+Obezbeđuje jednu OpenAI-kompatibilnu krajnju tačku (`/v1/*`) i rutira saobraćaj između više uzvodnih provajdera uz prevođenje, rezervni izbor, osvežavanje tokena i praćenje korišćenja.
 
-Основне могућности:
+Ključne mogućnosti:
 
-- ОпенАИ компатибилна API површина за CLI/tools (377 провајдера, 156 извршних модула)
-- Request/response превод у различитим форматима добављача
-- Замена комбинованог модела (секвенца са више модела)
-- Структурирани комбиновани кораци (`provider + model + connection`) са поређањем времена извршавања према `compositeTiers`
-- Замена на нивоу налога (више налога по добављачу)
-- Одабир P2C налога пре почетка рада и квоте у главној путањи за ћаскање
-- OAuth + АПИ-кључ за управљање везом провајдера (27 модула OAuth провајдера)
-- Уградња генерисања преко `/v1/embeddings` (18 провајдера)
-- Генерисање слика преко `/v1/images/generations` (10 + провајдера, 20 + модела)
-- Аудио транскрипција преко `/v1/audio/transcriptions` (18 провајдера)
-- Претварање текста у говор преко `/v1/audio/speech` (24 уграђена провајдера)
-- Генерисање видео записа преко `/v1/videos/generations` (ComfyUI + SD WebUI)
-- Генерисање музике преко `/v1/music/generations` (ComfyUI)
-- Веб претрага преко `/v1/search` (20 провајдера)
-- Модерације преко `/v1/moderations`
-- Поновно рангирање преко `/v1/rerank`
-- Размислите о рашчлањивању ознака (`<think>...</think>`) за моделе закључивања
-- Санација одговора за строгу OpenAI SDK компатибилност
-- Нормализација улога (програмер → систем, систем → корисник) за компатибилност међу добављачима
-- Структурирана конверзија излаза (јсон_сцхема → Gemini респонсеСцхема)
-- Локална постојаност за провајдере, кључеве, алијасе, комбинације, подешавања, цене (122 DB модула)
-- Usage/cost праћење и евидентирање захтева
-- Опционална синхронизација у облаку за multi-device/state синхронизацију
-- IP allowlist/blocklist за API контролу приступа
-- Размишљање о управљању буџетом (passthrough/auto/custom/adaptive)
-- Промптно убризгавање глобалног система
-- Праћење сесије и узимање отисака прстију
-- Побољшано ограничење стопе по налогу са профилима специфичним за провајдера
-- Образац прекидача за отпорност провајдера
-- Заштита стада од грома са мутек закључавањем
-- Кеш за дедупликацију захтева заснован на потписима
-- Слој домена: правила о трошковима, резервна политика, политика закључавања
-- Релеј контекста: резимеи примопредаје сесије за континуитет ротације налога
-- Постојаност стања домена (SQLite кеш меморија за уписивање за резерве, буџете, блокаде, прекидаче)
-- Смерница за централизовану процену захтева (замена за закључавање → буџета → )
-- Захтевајте телеметрију са p50/p95/p99 агрегацијом кашњења
-- Комбинована телеметрија циља и историјска комбинована циљна здравље преко `combo_execution_key` / `combo_step_id`
-- Корелација ID (Кс-Рекуест-Ид) за праћење од краја до краја
-- Евидентирање ревизије усклађености са опт-оут по API кључу
-- Евал оквир за LLM осигурање квалитета
-- Здравствена контролна табла са статусом прекидача добављача у реалном времену
-- MCP сервер (110 алата) са 3 транспорта (stdio/SSE/Streamable HTTP)
-- A2A сервер (ЈСОН-РПЦ 2.0 + SSE) са вештинама и животним циклусом задатака
-- Систем меморије (вађење, убризгавање, проналажење, сумирање)
-- Систем вештина (регистратор, извршилац, сандбок, уграђене вештине)
-- MITM проки са управљањем сертификатима и DNS руковањем
-- Промпт ињецтион гуард средњи софтвер
-- Промптни компресијски цевовод са Цавеман-ом, RTK, сложеним цевоводима, комбинацијама компресије, језичким пакетима и аналитиком
-- ACP (Агент Цоммуницатион Протоцол) регистар
-- Модуларни OAuth провајдери (22 појединачна модула под `src/lib/oauth/providers/`)
-- Uninstall/full-uninstall скрипте
-- OAuth акција поправке животне средине
-- WebSocket мост за WS клијенте компатибилне са ОпенАИ (`/v1/ws`)
-- Управљање токенима синхронизације (issue/revoke, преузимање пакета конфигурација у верзији ЕТаг)
-- GLM Тхинкинг (`glmt`) првокласни унапред постављени провајдер
-- Хибридно бројање токена ( `/messages/count_tokens` на страни добављача са резервним проценом)
-- Аутоматско постављање псеудонима модела (30 нормализација дијалекта + унакрсних проксија при покретању)
-- Безбедно одлазно преузимање са SSRF чуваром, приватним URL блокирањем и поновним покушајем који се може конфигурисати
-- Поновни покушаји ћаскања са хлађењем са подесивим `requestRetry` и `maxRetryIntervalSec`
-- Провера рунтиме окружења са Zod при покретању
-- Ревизија усклађености в2 са пагинацијом, CRUD догађајима провајдера и евидентирањем валидације блокираног ССРФ-ом
+- OpenAI-kompatibilan API interfejs za CLI/alate (380 provajdera, 159 modula izvršavanja)
+- Prevođenje zahteva/odgovora između formata provajdera
+- Rezervni izbor kombinacije modela (sekvenca sa više modela)
+- Strukturirani koraci kombinacije (`provider + model + connection`) sa izvršnim redosledom prema `compositeTiers`
+- Rezervni izbor na nivou naloga (više naloga po provajderu)
+- Provera kvote pre izvršavanja i P2C izbor naloga uz uvažavanje kvote u glavnom toku ćaskanja
+- Upravljanje OAuth vezama i vezama zasnovanim na API ključevima (27 OAuth modula provajdera)
+- Generisanje embeddinga putem `/v1/embeddings` (18 provajdera)
+- Generisanje slika putem `/v1/images/generations` (10+ provajdera, 20+ modela)
+- Transkripcija zvuka putem `/v1/audio/transcriptions` (18 provajdera)
+- Pretvaranje teksta u govor putem `/v1/audio/speech` (24 ugrađena provajdera)
+- Generisanje video-sadržaja putem `/v1/videos/generations` (ComfyUI + SD WebUI)
+- Generisanje muzike putem `/v1/music/generations` (ComfyUI)
+- Veb pretraga putem `/v1/search` (20 provajdera)
+- Moderacija putem `/v1/moderations`
+- Ponovno rangiranje putem `/v1/rerank`
+- Analiza oznaka za razmišljanje (`<think>...</think>`) za modele koji podržavaju rezonovanje
+- Sanitizacija odgovora radi stroge kompatibilnosti sa OpenAI SDK-om
+- Normalizacija uloga (developer→system, system→user) radi kompatibilnosti između provajdera
+- Konverzija strukturiranog izlaza (json_schema → Gemini responseSchema)
+- Lokalna postojanost provajdera, ključeva, aliasa, kombinacija, podešavanja i cena (122 modula baze podataka)
+- Praćenje korišćenja/troškova i evidentiranje zahteva
+- Opciono sinhronizovanje sa oblakom za sinhronizaciju između više uređaja/stanja
+- Lista dozvoljenih/blokiranih IP adresa za kontrolu pristupa API-ju
+- Upravljanje budžetom za razmišljanje (prosleđivanje/automatski/prilagođeni/adaptivni režim)
+- Umetanje globalnog sistemskog upita
+- Praćenje sesija i izrada otiska
+- Unapređeno ograničavanje brzine po nalogu sa profilima specifičnim za provajdera
+- Obrazac prekidača kola za otpornost provajdera
+- Zaštita od efekta grmljavine uz zaključavanje mutexom
+- Keš za deduplikaciju zahteva zasnovan na potpisu
+- Domenски sloj: pravila troškova, politika rezervnog izbora, politika zaključavanja
+- Context Relay: sažeci za predaju sesije radi kontinuiteta pri rotaciji naloga
+- Postojanost stanja domena (SQLite keš sa upisom kroz keš za rezervne izbore, budžete, zaključavanja i prekidače kola)
+- Mehanizam politika za centralizovanu procenu zahteva (zaključavanje → budžet → rezervni izbor)
+- Telemetrija zahteva sa agregacijom kašnjenja p50/p95/p99
+- Telemetrija ciljnih kombinacija i istorijsko stanje zdravlja ciljnih kombinacija putem `combo_execution_key` / `combo_step_id`
+- ID korelacije (X-Request-Id) za praćenje od početka do kraja
+- Evidentiranje revizije usklađenosti sa mogućnošću isključivanja po API ključu
+- Okvir za evaluaciju kvaliteta LLM-a
+- Kontrolna tabla zdravlja sa statusom prekidača kola provajdera u realnom vremenu
+- MCP Server (110 alata) sa 3 transporta (stdio/SSE/Streamable HTTP)
+- A2A Server (JSON-RPC 2.0 + SSE) sa veštinama i životnim ciklusom zadataka
+- Sistem memorije (ekstrakcija, umetanje, preuzimanje, sažimanje)
+- Sistem veština (registar, izvršavač, sandbox, ugrađene veštine)
+- MITM proksi sa upravljanjem sertifikatima i obradom DNS-a
+- Middleware za zaštitu od ubrizgavanja upita
+- Tok kompresije upita sa Caveman, RTK, naslaganim tokovima, kombinacijama kompresije, jezičkim paketima i analitikom
+- ACP registar (Agent Communication Protocol)
+- Modularni OAuth provajderi (22 pojedinačna modula u okviru `src/lib/oauth/providers/`)
+- Skripte za deinstalaciju/potpunu deinstalaciju
+- Radnja za popravku OAuth okruženja
+- WebSocket most za OpenAI-kompatibilne WS klijente (`/v1/ws`)
+- Upravljanje tokenima za sinhronizaciju (izdavanje/opoziv, preuzimanje konfiguracionog paketa sa verzionisanjem putem ETag-a)
+- Prvoklasna unapred podešena konfiguracija provajdera GLM Thinking (`glmt`)
+- Hibridno brojanje tokena (provajdersko `/messages/count_tokens` uz rezervnu procenu)
+- Automatsko početno formiranje aliasa modela (30+ normalizacija dijalekata između proksija pri pokretanju)
+- Bezbedno preuzimanje sa odredišta uz SSRF zaštitu, blokiranje privatnih URL adresa i podesivo ponovno pokušavanje
+- Ponovni pokušaji ćaskanja uz uvažavanje perioda hlađenja, sa podesivim vrednostima `requestRetry` i `maxRetryIntervalSec`
+- Validacija izvršnog okruženja pomoću Zod-a pri pokretanju
+- Revizija usklađenosti v2 sa paginacijom, CRUD događajima provajdera i evidentiranjem validacije blokirane zbog SSRF-a
 
-Примарни модел времена рада:
+Primarni model izvršavanja:
 
-- Руте апликације Next.js под `src/app/api/*` имплементирају и контролну таблу APIs и компатибилност APIs
-- Заједничко SSE/routing језгро у `src/sse/*` + `open-sse/*` управља извршавањем провајдера, превођењем, стримингом, резервним коришћењем и употребом
+- Rute aplikacije Next.js u okviru `src/app/api/*` implementiraju i API-je kontrolne table i API-je kompatibilnosti
+- Zajedničko jezgro za SSE/rutiranje u `src/sse/*` + `open-sse/*` obrađuje izvršavanje provajdera, prevođenje, strimovanje, rezervni izbor i korišćenje
 
 ## Референтни дијаграми
 

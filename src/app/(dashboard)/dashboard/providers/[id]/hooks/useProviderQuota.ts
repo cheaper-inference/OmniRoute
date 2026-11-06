@@ -1,25 +1,16 @@
 "use client";
 
 /**
- * useProviderQuota — data source for the per-account quota panel on the
- * provider detail page.
- *
- * The server already owns the whole quota pipeline: per-provider usage
- * fetchers persist their latest snapshot into `providerLimitsCache`
- * (namespace of the key_value store), a background scheduler refreshes it
- * every ~70 min, and two routes expose it:
- *   - GET /api/usage/provider-limits  → all cached entries, no upstream calls
- *   - GET /api/usage/[connectionId]   → live upstream fetch + persist
- *
- * This hook only loads the cached map once per page and refreshes a single
- * connection on demand — it never talks to an upstream provider itself.
- *
- * Kept cycle-safe like the sibling hooks: imports only React + leaf types,
- * never from ProviderDetailPageClient.
+ * Per-account display reads the server's canonical cached snapshots. Polling is
+ * local-only and visible-tab-only; only the explicit refresh button probes upstream.
+ * The probe's response only reports how the refresh went (providerQuotaRefresh.ts);
+ * the panels keep showing the canonical projection, which is re-read right afterwards.
  */
-
 import { useCallback, useEffect, useRef, useState } from "react";
+import { startVisibleCachePolling } from "@/shared/utils/visiblePolling";
 import { classifyQuotaObservation, type QuotaRefreshState } from "./providerQuotaRefresh";
+
+const LIVE_READ_TIMEOUT_MS = 15000;
 
 export interface ProviderQuotaCacheEntry {
   quotas?: Record<string, unknown> | null;
@@ -47,16 +38,26 @@ async function readObservation(
   id: string,
   providerId: string | undefined,
   signal: AbortSignal
-): Promise<ReturnType<typeof classifyQuotaObservation>> {
+): Promise<QuotaRefreshState> {
+  if (signal.aborted) return { status: "error" };
+  // The deadline stays off `signal`, so a timed-out read is a failed observation and not an
+  // obsolete request: the button must report it and become available again.
+  const deadline = new AbortController();
+  const abort = () => deadline.abort();
+  signal.addEventListener("abort", abort, { once: true });
+  const timeout = setTimeout(abort, LIVE_READ_TIMEOUT_MS);
   try {
     const response = await fetch(`/api/usage/${encodeURIComponent(id)}`, {
       cache: "no-store",
-      signal,
+      signal: deadline.signal,
     });
     if (!response.ok) throw new Error("Quota request failed");
     return classifyQuotaObservation(await response.json(), providerId);
   } catch {
-    return { state: { status: "error" } as QuotaRefreshState };
+    return { status: "error" };
+  } finally {
+    clearTimeout(timeout);
+    signal.removeEventListener("abort", abort);
   }
 }
 
@@ -74,29 +75,52 @@ function useQuotaCache() {
     Record<string, ProviderQuotaCacheEntry>
   >({});
   const [quotaLoading, setQuotaLoading] = useState(true);
+  const polling = useRef<ReturnType<typeof startVisibleCachePolling> | null>(null);
+  const liveReads = useRef(0);
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
+    let alive = true;
+    const reader = startVisibleCachePolling(async (signal) => {
+      if (liveReads.current > 0) return;
       try {
-        const res = await fetch("/api/usage/provider-limits", { cache: "no-store" });
+        const res = await fetch("/api/usage/provider-limits", { cache: "no-store", signal });
         if (!res.ok) return;
         const data = await res.json();
-        if (cancelled || !data?.caches || typeof data.caches !== "object") return;
-        // A completed explicit observation takes precedence over a delayed initial snapshot.
-        setQuotaByConnectionId((prev) => ({ ...data.caches, ...prev }));
-      } catch {
-        // Cached quotas are best-effort; explicit per-account refresh remains available.
+        if (
+          signal.aborted ||
+          !alive ||
+          !data?.caches ||
+          typeof data.caches !== "object" ||
+          Array.isArray(data.caches)
+        )
+          return;
+        // Preserve observation times supplied by the server. A cache read is not new evidence.
+        setQuotaByConnectionId(data.caches as Record<string, ProviderQuotaCacheEntry>);
       } finally {
-        if (!cancelled) setQuotaLoading(false);
+        if (alive && !signal.aborted) setQuotaLoading(false);
       }
-    })();
+    });
+    polling.current = reader;
     return () => {
-      cancelled = true;
+      alive = false;
+      polling.current = null;
+      reader.dispose();
     };
   }, []);
 
-  return { quotaByConnectionId, setQuotaByConnectionId, quotaLoading };
+  const beginLiveRead = useCallback(() => {
+    // A pre-refresh cached GET must not arrive later and roll back the refreshed panel.
+    polling.current?.cancel();
+    liveReads.current += 1;
+  }, []);
+  const endLiveRead = useCallback(() => {
+    liveReads.current -= 1;
+  }, []);
+  const rereadCache = useCallback(async () => {
+    await polling.current?.refresh(true);
+  }, []);
+
+  return { quotaByConnectionId, quotaLoading, beginLiveRead, endLiveRead, rereadCache };
 }
 
 function usePendingQuotaRequests(options: QuotaOptions) {
@@ -127,14 +151,15 @@ function usePendingQuotaRequests(options: QuotaOptions) {
 }
 
 export function useProviderQuota(options: QuotaOptions = {}) {
-  const { quotaByConnectionId, setQuotaByConnectionId, quotaLoading } = useQuotaCache();
+  const { quotaByConnectionId, quotaLoading, beginLiveRead, endLiveRead, rereadCache } =
+    useQuotaCache();
   const [refreshingIds, setRefreshingIds] = useState<ReadonlySet<string>>(new Set());
   const [refreshStates, setRefreshStates] = useState<Record<string, QuotaRefreshState>>({});
   const { pending, mounted } = usePendingQuotaRequests(options);
 
   const refreshConnection = useCallback(
     (connectionId: string): Promise<void> => {
-      if (!connectionId) return Promise.resolve();
+      if (!connectionId || !mounted.current) return Promise.resolve();
       const existing = pending.current.get(connectionId);
       if (existing && !existing.controller.signal.aborted) return existing.promise;
       const request: PendingRefresh = {
@@ -144,34 +169,25 @@ export function useProviderQuota(options: QuotaOptions = {}) {
       };
       // Register before the first asynchronous operation, including calls in the same event tick.
       pending.current.set(connectionId, request);
+      beginLiveRead();
       setRefreshingIds((prev) => new Set(prev).add(connectionId));
       setRefreshStates((prev) => ({ ...prev, [connectionId]: { status: "loading" } }));
       request.promise = Promise.resolve().then(async () => {
         try {
-          const observation = await readObservation(
+          const state = await readObservation(
             connectionId,
             options.providerId,
             request.controller.signal
-          );
+          ).finally(endLiveRead);
           if (!mounted.current || request.controller.signal.aborted) return;
-          const entry = observation.entry;
-          if (entry) {
-            setQuotaByConnectionId((prev) => ({
-              ...prev,
-              [connectionId]:
-                observation.state.status === "stale" && prev[connectionId]
-                  ? prev[connectionId]
-                  : entry,
-            }));
-          }
-          const refreshed = await refreshProjection(options.refreshConnections);
+          const [, refreshed] = await Promise.all([
+            rereadCache(),
+            refreshProjection(options.refreshConnections),
+          ]);
           if (!mounted.current || request.controller.signal.aborted) return;
           setRefreshStates((prev) => ({
             ...prev,
-            [connectionId]: {
-              ...observation.state,
-              ...(!refreshed ? { connectionsRefreshFailed: true } : {}),
-            },
+            [connectionId]: { ...state, ...(!refreshed ? { connectionsRefreshFailed: true } : {}) },
           }));
         } finally {
           if (pending.current.get(connectionId) === request) {
@@ -187,7 +203,15 @@ export function useProviderQuota(options: QuotaOptions = {}) {
       });
       return request.promise;
     },
-    [options.providerId, options.refreshConnections, pending, mounted, setQuotaByConnectionId]
+    [
+      options.providerId,
+      options.refreshConnections,
+      pending,
+      mounted,
+      beginLiveRead,
+      endLiveRead,
+      rereadCache,
+    ]
   );
 
   return { quotaByConnectionId, quotaLoading, refreshingIds, refreshConnection, refreshStates };

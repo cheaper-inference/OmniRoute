@@ -2,11 +2,16 @@
 import React, { act, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useProviderQuota } from "@/app/(dashboard)/dashboard/providers/[id]/hooks/useProviderQuota";
+import {
+  useProviderQuota,
+  type ProviderQuotaCacheEntry,
+} from "@/app/(dashboard)/dashboard/providers/[id]/hooks/useProviderQuota";
 
 const oldTime = "2026-10-01T10:00:00.000Z";
+const newTime = "2026-10-01T11:00:00.000Z";
 const cached = { quotas: { session: { used: 90, total: 100 } }, fetchedAt: oldTime };
 const valid = { quotas: { session: { used: 20, total: 100 }, weekly: { used: 40, total: 100 } } };
+const persisted = { ...valid, fetchedAt: newTime };
 const cleanup: Array<() => void> = [];
 let current: ReturnType<typeof useProviderQuota>;
 
@@ -37,12 +42,16 @@ async function mount(providerId = "codex", refreshConnections?: () => Promise<bo
   return element;
 }
 
-function respond(response: Response) {
+/**
+ * `stored` is what the server's cache holds after the live read: the route persists its result,
+ * and the panels show that canonical projection. Omit it when the read leaves the cache as it was.
+ */
+function respond(response: Response, stored?: ProviderQuotaCacheEntry | null) {
+  let caches: Record<string, ProviderQuotaCacheEntry> = { "account/a": cached };
   return vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
-    if (String(input) === "/api/usage/provider-limits") {
-      return Response.json({ caches: { "account/a": cached } });
-    }
+    if (String(input) === "/api/usage/provider-limits") return Response.json({ caches });
     expect(String(input)).toBe("/api/usage/account%2Fa");
+    if (stored !== undefined) caches = stored ? { "account/a": stored } : {};
     return response;
   });
 }
@@ -54,20 +63,25 @@ afterEach(() => {
   while (cleanup.length) cleanup.pop()?.();
   document.body.innerHTML = "";
   vi.restoreAllMocks();
+  vi.useRealTimers();
 });
 
 describe("#16161 manual quota refresh", () => {
   it("A01 loads cached data without a live call and updates only the requested account", async () => {
-    const fetch = respond(Response.json(valid));
+    const fetch = respond(Response.json(valid), persisted);
     await mount();
     expect(fetch).toHaveBeenCalledTimes(1);
     expect(current.quotaByConnectionId["account/a"]).toEqual(cached);
     await act(async () => current.refreshConnection("account/a"));
-    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(fetch.mock.calls.map(([url]) => url)).toEqual([
+      "/api/usage/provider-limits",
+      "/api/usage/account%2Fa",
+      "/api/usage/provider-limits",
+    ]);
     expect(fetch.mock.calls[1][1]).toMatchObject({ cache: "no-store" });
     expect(fetch.mock.calls[1][1]?.method).toBeUndefined();
     expect(current.quotaByConnectionId["account/a"].quotas).toEqual(valid.quotas);
-    expect(current.quotaByConnectionId["account/a"].fetchedAt).not.toBe(oldTime);
+    expect(current.quotaByConnectionId["account/a"].fetchedAt).toBe(newTime);
     expect(current.refreshingIds.size).toBe(0);
   });
 
@@ -116,7 +130,7 @@ describe("#16161 observation validation", () => {
     "A05 reports only the valid %s window, without merging an old sibling",
     async (window) => {
       const quotas = { [window]: { used: 20, total: 100 } };
-      respond(Response.json({ quotas }));
+      respond(Response.json({ quotas }), { quotas, fetchedAt: newTime });
       await mount();
       await act(async () => current.refreshConnection("account/a"));
       expect(current.quotaByConnectionId["account/a"].quotas).toEqual(quotas);
@@ -127,11 +141,12 @@ describe("#16161 observation validation", () => {
     }
   );
 
-  it("A05 removes an invalid sibling while retaining the valid window", async () => {
+  it("A05 reports an invalid sibling as missing and shows only the server's window", async () => {
     respond(
       Response.json({
         quotas: { session: { used: 20, total: 100 }, weekly: { used: -1, total: 100 } },
-      })
+      }),
+      { quotas: { session: { used: 20, total: 100 } }, fetchedAt: newTime }
     );
     await mount();
     await act(async () => current.refreshConnection("account/a"));
@@ -145,11 +160,8 @@ describe("#16161 observation validation", () => {
   });
 
   it("A06 accepts exhausted windows as a fresh observation without claiming recovery", async () => {
-    respond(
-      Response.json({
-        quotas: { session: { used: 100, total: 100 }, weekly: { used: 101, total: 100 } },
-      })
-    );
+    const quotas = { session: { used: 100, total: 100 }, weekly: { used: 101, total: 100 } };
+    respond(Response.json({ quotas }), { quotas, fetchedAt: newTime });
     await mount();
     await act(async () => current.refreshConnection("account/a"));
     expect(current.refreshStates["account/a"]).toEqual({ status: "fresh" });
@@ -167,7 +179,8 @@ describe("#16161 observation validation", () => {
         _staleSince: oldTime,
         _staleReason: "secret",
         message: "secret",
-      })
+      }),
+      { ...valid, fetchedAt: oldTime }
     );
     fetch.mockResolvedValueOnce(Response.json({ caches: {} }));
     await mount();
@@ -179,11 +192,11 @@ describe("#16161 observation validation", () => {
   });
 
   it("A03 never invents an age for a stale fallback without a valid timestamp", async () => {
-    const fetch = respond(Response.json({ ...valid, _stale: true, _staleSince: "invalid" }));
+    const fetch = respond(Response.json({ ...valid, _stale: true, _staleSince: "invalid" }), null);
     fetch.mockResolvedValueOnce(Response.json({ caches: {} }));
     await mount();
     await act(async () => current.refreshConnection("account/a"));
-    expect(current.quotaByConnectionId["account/a"].fetchedAt).toBeUndefined();
+    expect(current.quotaByConnectionId["account/a"]).toBeUndefined();
     expect(current.refreshStates["account/a"].status).toBe("stale");
   });
 
@@ -205,7 +218,7 @@ describe("#16161 observation validation", () => {
 
   it("A11 preserves non-Codex percentage-only quota data", async () => {
     const quotas = { "session (5h)": { used: 0, total: 0, remainingPercentage: 80 } };
-    respond(Response.json({ quotas }));
+    respond(Response.json({ quotas }), { quotas, fetchedAt: newTime });
     await mount("claude");
     await act(async () => current.refreshConnection("account/a"));
     expect(current.quotaByConnectionId["account/a"].quotas).toEqual(quotas);
@@ -279,7 +292,7 @@ describe("#16161 concurrency and list reconciliation", () => {
 
   it("A08 a delayed initial cache cannot overwrite a completed live observation", async () => {
     const initial = deferred<Response>();
-    const fetch = respond(Response.json(valid));
+    const fetch = respond(Response.json(valid), persisted);
     fetch.mockReturnValueOnce(initial.promise);
     await mount();
     await act(async () => current.refreshConnection("account/a"));
@@ -294,7 +307,7 @@ describe("#16161 concurrency and list reconciliation", () => {
         if (failure === "throw") throw new Error("secret list error");
         return false;
       });
-      respond(Response.json(valid));
+      respond(Response.json(valid), persisted);
       await mount("codex", reload);
       await act(async () => current.refreshConnection("account/a"));
       expect(reload).toHaveBeenCalledTimes(1);
@@ -394,6 +407,65 @@ describe("#16161 scope boundaries", () => {
     await act(async () => current.refreshConnection(""));
     expect(fetch).toHaveBeenCalledTimes(1);
     expect(current.refreshingIds.size).toBe(0);
+  });
+});
+
+describe("#16161 canonical projection (#18535)", () => {
+  it("A12 shows the server's projection, never the live payload", async () => {
+    // Inference evidence accepted during the read outranks it, so the two can differ.
+    const newer = { quotas: { session: { used: 55, total: 100 } }, fetchedAt: newTime };
+    respond(Response.json(valid), newer);
+    await mount();
+    await act(async () => current.refreshConnection("account/a"));
+    expect(current.quotaByConnectionId["account/a"]).toEqual(newer);
+    expect(current.refreshStates["account/a"]).toEqual({ status: "fresh" });
+  });
+
+  it("A12 keeps the outcome when the next cached poll lands", async () => {
+    vi.useFakeTimers();
+    respond(Response.json(valid), persisted);
+    await mount();
+    await act(async () => current.refreshConnection("account/a"));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(5000);
+    });
+    expect(current.refreshStates["account/a"]).toEqual({ status: "fresh" });
+    expect(current.quotaByConnectionId["account/a"]).toEqual(persisted);
+  });
+
+  it("A12 a stalled live read times out as a failure and polling resumes", async () => {
+    vi.useFakeTimers();
+    const reload = vi.fn(async () => true);
+    const fetch = respond(Response.json(valid));
+    await mount("codex", reload);
+    let signal: AbortSignal | undefined;
+    fetch.mockImplementationOnce(
+      (_input, init) =>
+        new Promise<Response>((_resolve, reject) => {
+          signal = init?.signal ?? undefined;
+          signal?.addEventListener("abort", () => reject(new DOMException("", "AbortError")));
+        })
+    );
+    let request!: Promise<void>;
+    await act(async () => {
+      request = current.refreshConnection("account/a");
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(14999);
+    });
+    expect(signal?.aborted).toBe(false);
+    expect(current.refreshingIds.has("account/a")).toBe(true);
+    // Cached polls must not run while a live read is in flight.
+    expect(fetch).toHaveBeenCalledTimes(2);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1);
+      await request;
+    });
+    expect(signal?.aborted).toBe(true);
+    expect(current.refreshStates["account/a"].status).toBe("error");
+    expect(current.refreshingIds.size).toBe(0);
+    expect(reload).toHaveBeenCalledTimes(1);
+    expect(fetch.mock.calls.at(-1)?.[0]).toBe("/api/usage/provider-limits");
   });
 });
 

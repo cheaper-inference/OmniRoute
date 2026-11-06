@@ -1,5 +1,6 @@
 "use client";
 
+import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-kit/disclosure";
 /**
  * Faro chat with voice (Conductor PRD RF4). Text: input → /api/conductor/ask
  * (server-side proxy — the hub credential never reaches the browser). When the
@@ -259,9 +260,9 @@ export default function FaroChat() {
           />
         </div>
 
-        <details className="text-xs text-text-muted">
-          <summary>{t("voiceModels")}</summary>
-          <div className="flex gap-2 pt-2">
+        <Disclosure className="text-xs text-text-muted">
+          <DisclosureTrigger>{t("voiceModels")}</DisclosureTrigger>
+          <DisclosureContent keepMounted className="flex gap-2 pt-2">
             <Input
               className="flex-1"
               label="STT"
@@ -274,8 +275,8 @@ export default function FaroChat() {
               value={ttsModel}
               onChange={(e) => persistModels(sttModel, e.target.value)}
             />
-          </div>
-        </details>
+          </DisclosureContent>
+        </Disclosure>
       </div>
     </Card>
   );
