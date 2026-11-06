@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 
 import {
   useState,
@@ -2048,7 +2049,7 @@ function ComboCardInner({
               <ComboCompressionModeSelect
                 combo={combo}
                 title={t("compressionOverride")}
-                className="text-xs py-1 px-2 rounded border border-border bg-surface text-text-main focus:border-primary focus:outline-none transition-colors disabled:opacity-50 max-w-[130px] md:max-w-none"
+                className="text-xs max-w-[130px] md:max-w-none"
               />
             )}
             <Link
@@ -2074,11 +2075,7 @@ function ComboCardInner({
               title={t("testCombo")}
               aria-label={t("testCombo")}
             >
-              <Icon
-                name={testing ? "progress_activity" : "play_arrow"}
-                size={16}
-                className={cn(testing && "animate-spin")}
-              />
+              {testing ? <Spinner decorative size="sm" /> : <Icon name="play_arrow" size={16} />}
             </Button>
             <Button
               variant="ghost"
@@ -3765,7 +3762,7 @@ function ComboFormModal({
                 {builderSelectionMode === "step" && (
                   <>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3">
-                      {/* Native-mode Select adapter (`ci-select-native`): long dynamic lists, and
+                      {/* Native-mode Select adapter (kit NativeSelect): long dynamic lists, and
                           the builder e2e specs drive these three with selectOption(). */}
                       <Select
                         label={`1. ${getI18nOrFallback(t, "builderProvider", "Provider")}`}

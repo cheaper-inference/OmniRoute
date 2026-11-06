@@ -1,1 +1,0 @@
-- **chore(release): raise the Release-Green tarball boot-smoke limit and align the lite pipeline tests**: `check:pack-boot` gets the same 40-minute limit as the package lane, because the translated docs mirrors (#18869) added 8,885 files to the tarball. `tests/integration/compression-pipeline.test.ts` now expects lite as a scoped stacked step (#18818) reporting `lite`.
