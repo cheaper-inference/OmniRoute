@@ -509,6 +509,7 @@
       "tests/unit/providers-route-codex-account-pool.test.ts",
       "tests/unit/proxy-logs-egress-lookup-10880.test.ts",
       "tests/unit/public-client-ids-3493.test.ts",
+      "tests/unit/public-stream-error-codes.test.ts",
       "tests/unit/publicCreds.test.ts",
       "tests/unit/qoder-oauth-config.test.ts",
       "tests/unit/qoder-pat-tools-13697.test.ts",
