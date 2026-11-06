@@ -83,6 +83,18 @@ export const DEVIN_MODEL_PRICING: Record<string, DevinTokenPricing> = {
     output: 0.5,
   }),
 
+  // `devin models list` reports SWE-2 and SWE-2 Flash as Free (self-serve, through 2026-11-30).
+  ...priced(
+    [
+      ...variantIds("swe-2", ["max", "high", "medium"]),
+      ...variantIds("swe-2-flash", ["max", "high", "medium"]),
+    ],
+    {
+      input: 0,
+      cached: 0,
+      output: 0,
+    }
+  ),
   ...priced(["swe-1-7", "swe-1-7-medium"], {
     input: 0.5,
     cached: 0.2,

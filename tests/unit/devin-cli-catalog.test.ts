@@ -22,7 +22,7 @@ test("Devin transports expose the curated catalog with truthful tool capabilitie
     devin_cli_agenticProvider.models.map((model) => model.id),
     catalogIds
   );
-  assert.equal(catalogIds.length, 110);
+  assert.equal(catalogIds.length, 116);
   assert.equal(new Set(catalogIds).size, catalogIds.length);
   assert.ok(catalogIds.every((id) => !id.toLowerCase().includes("byok")));
 });
@@ -42,6 +42,8 @@ test("Devin catalog contains only the operator-selected model families", () => {
     "kimi-k2-7",
     "glm-5-3-max",
     "glm-5-3-flash-max",
+    "swe-2-max",
+    "swe-2-flash-max",
     "swe-1-7",
     "swe-1-7-lightning",
     "adaptive",
@@ -129,4 +131,7 @@ test("Devin catalog carries the live output limits for representative models", (
   assert.equal(models.get("kimi-k2-7")?.maxOutputTokens, 16_000);
   assert.equal(models.get("grok-4-6-xhigh")?.maxOutputTokens, 100_000);
   assert.equal(models.get("gemini-3-7-flash-high")?.maxOutputTokens, 65_535);
+  assert.equal(models.get("swe-2-high")?.maxOutputTokens, 128_000);
+  assert.equal(models.get("swe-2-flash-high")?.maxOutputTokens, 131_072);
+  assert.equal(models.get("swe-2-flash-high")?.contextLength, 262_144);
 });
