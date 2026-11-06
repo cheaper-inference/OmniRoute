@@ -83,11 +83,7 @@ test("#12597 reconcile must not exclude a provider for a picker-only model", asy
 
 test("reconcile preserves literal slash IDs and recognizes this provider's explicit prefix", async () => {
   await addCustomModel(PROVIDER, PICKER_MODEL, "DeepSeek R1 via picker");
-  for (const requested of [
-    PICKER_MODEL,
-    `github/${PICKER_MODEL}`,
-    `gh/${PICKER_MODEL}`,
-  ]) {
+  for (const requested of [PICKER_MODEL, `github/${PICKER_MODEL}`, `gh/${PICKER_MODEL}`]) {
     const result = await reconcileProvidersWithActiveSyncedCatalog([PROVIDER], requested);
     assert.deepEqual(result.providers, [PROVIDER], requested);
     assert.deepEqual(result.excludedProviders, [], requested);
