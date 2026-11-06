@@ -923,6 +923,8 @@
     "batchListTitle": "Partijas",
     "batchListCount": "{count} partijas",
     "batchListRemovingCompleted": "Noņem…",
+    "batchListRemoveCompletedPartial": "Noņemts liels skaits pakešu. Noklikšķiniet vēlreiz, lai notīrītu atlikušās.",
+    "batchListRemoveCompletedFailed": "Noņemot paketes, radās kļūda.",
     "batchListRemoveCompleted": "Noņemt pabeigtos",
     "batchListTableStatus": "Statuss",
     "batchListTableId": "ID",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "Atsvaidzina…",
     "batchListRefresh": "Atsvaidzināt",
     "uploadFileModalRemove": "Noņemt",
+    "fileInputChoose": "Izvēlēties failu",
+    "fileInputChooseMultiple": "Izvēlēties failus",
+    "fileInputEmpty": "Fails nav izvēlēts",
+    "fileInputSelectedCount": "{count, plural, one {Atlasīts # fails} other {Atlasīti # faili}}",
+    "fileDropLabel": "Nometiet failu šeit vai izvēlieties to",
+    "fileDropLabelMultiple": "Nometiet failus šeit vai izvēlieties tos",
     "uploadFileModalUploading": "Augšupielādē…",
     "wizardInputReading": "Nolasa failu…",
     "wizardInputReady": "Gatavs",
@@ -12298,7 +12306,9 @@
       "failedTitle": "Neizdevās neviens no {count} mēģinājumiem",
       "failed": "neizdevās",
       "pinnedTitle": "Modelis izvēlēts, izmantojot konteksta kešatmiņas sesijas piesaisti",
-      "pinned": "piesaistīts"
+      "pinned": "piesaistīts",
+      "recoveredAttemptsTitle": "Pieprasījums atjaunots pēc {count} mēģinājumiem",
+      "latestOutcomeFailed": "Pēdējā pieprasījuma rezultāts bija neveiksmīgs"
     },
     "attempts": "mēģinājumi",
     "detail": {
@@ -12400,13 +12410,20 @@
       "continuesFromParent": "turpinās no vecākelementa",
       "continuesFrom": "Turpinās no {id}",
       "viewConversation": "skatīt sarunu",
-      "openConversation": "Atvērt sarunu {id}"
+      "openConversation": "Atvērt sarunu {id}",
+      "omittedHttpAttempts": "{count} HTTP sūtījumi nav saglabāti",
+      "noHttpResponse": "HTTP atbilde nav novērota",
+      "transportError": "Pārsūtīšanas kļūda"
     },
     "tableLabel": "Pieprasījumu žurnāli",
     "throughputPostFirstToken": "Pēc pirmā marķiera",
     "throughputEndToEnd": "No sākuma līdz beigām",
     "throughputRate": "{value} marķieri/s",
-    "throughputExplanation": "Abas likmes izmanto lielāko no izvades un spriešanas marķieru skaita. Rādītājs “Pēc pirmā marķiera” neietver derīgu TTFT; pretējā gadījumā tiek izmantots pilns ilgums. Rādītājs “No sākuma līdz beigām” vienmēr izmanto pilnu ilgumu. Buferētai atbildei var būt augsta brāzmaina piegādes likme bez ātrākas modeļa ģenerēšanas."
+    "throughputExplanation": "Abas likmes izmanto lielāko no izvades un spriešanas marķieru skaita. Rādītājs “Pēc pirmā marķiera” neietver derīgu TTFT; pretējā gadījumā tiek izmantots pilns ilgums. Rādītājs “No sākuma līdz beigām” vienmēr izmanto pilnu ilgumu. Buferētai atbildei var būt augsta brāzmaina piegādes likme bez ātrākas modeļa ģenerēšanas.",
+    "omittedHttpAttempts": "{count} HTTP sūtījumi nav saglabāti",
+    "upstreamStatus": "Augšupējais serveris {status}",
+    "noHttpResponse": "HTTP atbilde nav novērota",
+    "transportError": "Pārsūtīšanas kļūda"
   },
   "proxyLogger": {
     "filterAll": "Visi",
@@ -14173,9 +14190,13 @@
         "label": "Koplietotās izejošās plūsmas pūla secība",
         "description": "Pakalpojumu sniedzējiem, kuru kvota tiek grupēta pēc izejošās adreses, ierindot pūla dalībnieku, kuram ir kopīga novērotā izejošā adrese ar nesen noraidītu dalībnieku, tieši aiz veselajiem dalībniekiem. Tikai secība, nekad netiek izslēgts. Nepieciešams PROXY_SKIP_RECENTLY_FAILED, kas nodrošina noraidījuma signālu tā nolasīšanai. Pēc noklusējuma izslēgts: atlases secība precīzi atbilst parastajai rotācijai."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Kvotu atteikumi uz modeli",
+        "description": "Lietojiet opencode kvotu 429 tikai tam modelim, kas to trāpījis, lai tā pati izeja turpinātu apkalpot citus modeļus, un notīriet to tikai tad, kad šim modelim ir izdevies. Patērētāji, kuriem nav modeļa (baseina rotācija, stāvēšana un atkārtošana, administratora redzamība, selektora aktivizētājs, veselības pārbaude), joprojām to redz. Nepieciešams PROXY_SKIP_RECENTLY_FAILED, kas rada atteikumu. Izslēgts pēc noklusējuma: viena modeļa kvota 429 katram modelim nosaka izeju."
+      },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "Starpniekservera ielāde: stingra POST atkārtošana",
+        "description": "Ja pieprasījums nav idempotens (POST, PUT, PATCH, DELETE), atkārtoti sūtiet pēc transportēšanas kļūdas (svaiga ligzda, starpniekservera atkāpšanās, vietējā atkāpšanās) tikai tad, ja kļūda pierāda, ka nekas nav nosūtīts: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH vai savienojuma taimauts. Kontaktligzdas kļūda pēc rakstīšanas var nozīmēt, ka augšējais pieprasījums ir pieņēmis pieprasījumu, tāpēc atkārtota sūtīšana var ģenerēt un iekasēt to divreiz. Pēc noklusējuma izslēgts: atkārtoti atskaņojams pamatteksts tiek nosūtīts atkārtoti jebkuras transportēšanas kļūdas gadījumā, kas arī atkopj novecojušu apvienoto ligzdu."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotācijas atribūcijas reģistrēšana",
@@ -14228,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 pūla atkārtota atlase",
         "description": "OpenCode vairāku kontu rotācijā pēc 429 kļūdas saņemšanas no pakalpojumu sniedzēja ar izejošās plūsmas sadalījumu grozos kontā bez starpniekservera apkārtējā pūla kontekstā, nākamajam mēģinājumam pieprasīt savienojumu pūlam citu dalībnieku, nevis atkārtot to pašu izejošo adresi. Sakārto, nekad neizslēdz: izsmelts pūls saglabā pašreizējo darbību. Pēc noklusējuma izslēgts: katra 429 kļūda rotē uz nākamo kontu tieši tāpat kā iepriekš."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress Probe",
+        "description": "OpenCode izpildītājam, ja uz starpniekservera pieprasījumu tiek atbildēts 403 vai 451 FreeTierError un novēroto rīku atkārtots mēģinājums neizdevās vai netika lietots, nosūtiet pieprasījumu vienreiz, izmantojot citu starpniekserveri (citu konta starpniekserveri vai citu kopas dalībnieku, nekad nav tieša savienojuma). Tikai tad, kad šī zonde atbild uz 200, starpniekservera atteikuma atmiņā tiek atstāta pirmā izeja un tiek apkalpota zondes atbilde; kad abi atsakās, tiek atgriezts sākotnējais atteikums un nekas netiek ierakstīts. Tas pats atteikuma teksts aptver atzīmētu izejas IP un atteikta pieprasījuma formu, tāpēc zonde tos atšķir ar pierādījumiem. Pēc noklusējuma izslēgts: atteikums tiek atgriezts nemainīts."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 klienta ciparospiedums",
@@ -14410,8 +14435,8 @@
         "description": "Kad combo mērķis atbild ar precīzu satura politikas atteikumu (kods vai tips cyber_policy / content_policy_violation), apturēt combo un atgriezt šo atteikumu pat tad, ja atlikušie mērķi ir citi modeļi, nevis pāriet pie nākamā mērķa. Pēc noklusējuma izslēgts: atteikums nekad neatvēsina kontu un neiedarbina pakalpojumu sniedzēja slēdzi, un combo pāriet pie nākamā mērķa tieši tāpat kā iepriekš."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "Atbildes: saglabāt dzīvību tikai transporta laikā",
+        "description": "Nosūtiet atbildes kā tukšu rindiņu, nevis response.in_progress notikumu, tāpēc sintētisks momentuzņēmums nekad nevar aizstāt reālo atbildi oficiālajā SDK. Tukša rinda nenosūta SSE notikumu, tāpēc klienta sargsuns, kas atiestata tikai notikumus, netiktu atiestatīts ilgstošas klusuma fāzes laikā. Pēc noklusējuma izslēgts: taimeri nosūta specifikācijas derīgu response.in_progress notikumu."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Atdzišanas atkārtošana: izlaist 403/410 atteikumus",

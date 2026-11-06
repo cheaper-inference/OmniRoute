@@ -923,6 +923,8 @@
     "batchListTitle": "Групе",
     "batchListCount": "{count} група",
     "batchListRemovingCompleted": "Уклањање…",
+    "batchListRemoveCompletedPartial": "Уклоњен је велики број група. Кликните поново да бисте обрисали преостале.",
+    "batchListRemoveCompletedFailed": "Дошло је до грешке при уклањању група.",
     "batchListRemoveCompleted": "Уклони завршене",
     "batchListTableStatus": "Статус",
     "batchListTableId": "ID",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "Освежавање…",
     "batchListRefresh": "Освежи",
     "uploadFileModalRemove": "Уклони",
+    "fileInputChoose": "Изаберите датотеку",
+    "fileInputChooseMultiple": "Изаберите датотеке",
+    "fileInputEmpty": "Није изабрана ниједна датотека",
+    "fileInputSelectedCount": "{count, plural, one {Изабрана је # датотека} few {Изабране су # датотеке} other {Изабрано је # датотека}}",
+    "fileDropLabel": "Превуците датотеку овде или је изаберите",
+    "fileDropLabelMultiple": "Превуците датотеке овде или их изаберите",
     "uploadFileModalUploading": "Отпремање…",
     "wizardInputReading": "Читање датотеке…",
     "wizardInputReady": "Спремно",
@@ -12298,7 +12306,9 @@
       "failedTitle": "Ниједан од {count} покушаја није успео",
       "failed": "неуспешно",
       "pinnedTitle": "Модел изабран путем закачивања у context-cache сесији",
-      "pinned": "закачено"
+      "pinned": "закачено",
+      "recoveredAttemptsTitle": "Захтев је опорављен после {count} покушаја",
+      "latestOutcomeFailed": "Исход последњег захтева није успешан"
     },
     "attempts": "покушаји",
     "detail": {
@@ -12400,13 +12410,20 @@
       "continuesFromParent": "наставља се од надређеног",
       "continuesFrom": "Наставља се од {id}",
       "viewConversation": "прикажи разговор",
-      "openConversation": "Отвори разговор {id}"
+      "openConversation": "Отвори разговор {id}",
+      "omittedHttpAttempts": "{count} HTTP слања није сачувано",
+      "noHttpResponse": "HTTP одговор није забележен",
+      "transportError": "Грешка у преносу"
     },
     "tableLabel": "Евиденција захтева",
     "throughputPostFirstToken": "Nakon prvog tokena",
     "throughputEndToEnd": "Kraj do kraja",
     "throughputRate": "{value} tokena/s",
-    "throughputExplanation": "Obe brzine koriste veći od broja izlaznih i reasoning tokena. Brzina nakon prvog tokena isključuje važeći TTFT; u suprotnom koristi ukupno trajanje. Kraj do kraja uvek koristi ukupno trajanje. Baferovani odgovor može imati visoku brzinu isporuke u naletu bez brže generacije modela."
+    "throughputExplanation": "Obe brzine koriste veći od broja izlaznih i reasoning tokena. Brzina nakon prvog tokena isključuje važeći TTFT; u suprotnom koristi ukupno trajanje. Kraj do kraja uvek koristi ukupno trajanje. Baferovani odgovor može imati visoku brzinu isporuke u naletu bez brže generacije modela.",
+    "omittedHttpAttempts": "{count} HTTP слања није сачувано",
+    "upstreamStatus": "Надређени сервер {status}",
+    "noHttpResponse": "HTTP одговор није забележен",
+    "transportError": "Грешка у преносу"
   },
   "proxyLogger": {
     "filterAll": "Све",
@@ -14173,9 +14190,13 @@
         "label": "Редослед заједничког egress пулова",
         "description": "За провајдере чија је квота буцкет-ована по egress адреси, пореди члан пулва који дели опажену egress адресу недавно одбијеног члана одмах испод здравих чланова. Само редослед, никада не искључује. Потребно је PROXY_SKIP_RECENTLY_FAILED, који генерише сигнал одбијања који се чита. Подразумевано искључено: редослед избора је тачно обична ротација."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Одбијања квота на основу модела",
+        "description": "Примените opencode квоту 429 само на модел који га је погодио, тако да исти излаз наставља да служи другим моделима, и обришите га само када тај модел успе. Потрошачи који немају модел (ротација базена, паркирање и понављање, видљивост администратора, окидач бирача, преглед здравља) га и даље виде. Потребан је PROXY_SKIP_RECENTLY_FAILED, који производи одбијање. Подразумевано искључено: квота једног модела 429 оставља излаз на страну за сваки модел."
+      },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "Прокси преузимање: стриктно понављање POST",
+        "description": "За захтев који није идемпотентан (POST, PUT, PATCH, DELETE), поново пошаљите након грешке у транспорту (свежа утичница, прокси резервни, изворни резервни) само када грешка докаже да ништа није послато: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH или временско ограничење везе. Грешка утичнице након писања може значити да је упстреам прихватио захтев, тако да би поновно слање могло да генерише и наплати два пута. Подразумевано искључено: тело које се може поново репродуковати се поново шаље једном приликом сваке грешке у транспорту, што такође опоравља застарели спојени сокет."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "Евиденција атрибуције ротације",
@@ -14228,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429: поновни избор из пула",
         "description": "За OpenCode ротацију више налога, након 429 од провајдера са излазним групама (egress buckets) на налогу без проксија у амбијенталном контексту пула, тражи од пула веза други члан за следећи покушај уместо поновног покушаја на истој излазној адреси. Само мења редослед, никада не искључује: исцрпљен пул задржава тренутно понашање. Подразумевано искључено: сваки 429 ротира на следећи налог тачно као раније."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode излазна сонда слободног нивоа",
+        "description": "За OpenCode извршиоца, када се на прокси захтев одговори 403 или 451 FreeTierError и поновни покушај посматраних алата није успео или се није применио, пошаљите захтев једном преко другог проксија (другог проксија налога или другог члана скупа, никада директну везу). Тек када та сонда одговори на 200, први излаз се оставља по страни у меморији одбијања прокси сервера и служи одговор сонде; када обоје одбију, првобитно одбијање се враћа и ништа се не бележи. Исти текст одбијања покрива означени излазни IP и одбијени облик захтева, тако да их сонда разликује на основу доказа. Подразумевано искључено: одбијање се враћа непромењено."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 отисак клијента",
@@ -14410,8 +14435,8 @@
         "description": "Када combo циљ одговори тачним одбијањем политике садржаја (код или тип cyber_policy / content_policy_violation), заустави combo и врати то одбијање чак и када су преостали циљеви различити модели, уместо да напредује ка следећем циљу. Подразумевано искључено: одбијање никада не хлади налог ни не окида осигурач пружалаца, а combo напредује ка свом следећем циљу тачно као и пре."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "Одговори: само преко транспорта",
+        "description": "Пошаљите одговоре као празну линију уместо response.in_progress догађаја, тако да синтетички снимак никада не може да замени прави одговор у званичном SDK. Празан ред не шаље никакав SSE догађај, тако да се клијент чувар који се ресетује само на догађаје не би ресетовао током дуге тихе фазе. Подразумевано искључено: тајмери шаљу response.in_progress догађај који важи за спецификацију."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Поновно покретање након паузе: Прескачи одбијене захтеве 403/410",

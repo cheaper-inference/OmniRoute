@@ -923,6 +923,8 @@
     "batchListTitle": "Kelompok",
     "batchListCount": "{count} kelompok",
     "batchListRemovingCompleted": "Mengalih keluar…",
+    "batchListRemoveCompletedPartial": "Sebilangan besar kelompok telah dialih keluar. Klik sekali lagi untuk mengosongkan selebihnya.",
+    "batchListRemoveCompletedFailed": "Ralat berlaku semasa mengalih keluar kelompok.",
     "batchListRemoveCompleted": "Alih keluar yang selesai",
     "batchListTableStatus": "Status",
     "batchListTableId": "ID",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "Memuat semula…",
     "batchListRefresh": "Muat semula",
     "uploadFileModalRemove": "Alih keluar",
+    "fileInputChoose": "Pilih fail",
+    "fileInputChooseMultiple": "Pilih fail",
+    "fileInputEmpty": "Tiada fail dipilih",
+    "fileInputSelectedCount": "{count, plural, one {# fail dipilih} other {# fail dipilih}}",
+    "fileDropLabel": "Lepaskan fail di sini atau pilih satu",
+    "fileDropLabelMultiple": "Lepaskan fail di sini atau pilih fail",
     "uploadFileModalUploading": "Memuat naik…",
     "wizardInputReading": "Membaca fail…",
     "wizardInputReady": "Sedia",
@@ -12298,7 +12306,9 @@
       "failedTitle": "Semua {count} percubaan gagal",
       "failed": "gagal",
       "pinnedTitle": "Model dipilih melalui penetapan sesi cache konteks",
-      "pinned": "disematkan"
+      "pinned": "disematkan",
+      "recoveredAttemptsTitle": "Permintaan pulih selepas {count} percubaan",
+      "latestOutcomeFailed": "Hasil permintaan terkini gagal"
     },
     "attempts": "cuba",
     "detail": {
@@ -12400,13 +12410,20 @@
       "continuesFromParent": "bersambung daripada induk",
       "continuesFrom": "Bersambung daripada {id}",
       "viewConversation": "lihat perbualan",
-      "openConversation": "Buka perbualan {id}"
+      "openConversation": "Buka perbualan {id}",
+      "omittedHttpAttempts": "{count} penghantaran HTTP tidak disimpan",
+      "noHttpResponse": "Tiada respons HTTP diperhatikan",
+      "transportError": "Ralat pengangkutan"
     },
     "tableLabel": "Log permintaan",
     "throughputPostFirstToken": "Selepas-token-pertama",
     "throughputEndToEnd": "Hujung ke hujung",
     "throughputRate": "{value} token/saat",
-    "throughputExplanation": "Kedua-dua kadar menggunakan nilai yang lebih besar antara bilangan token output dan token penaakulan. Selepas-token-pertama mengecualikan TTFT yang sah; jika tidak, ia menggunakan tempoh penuh. Hujung ke hujung sentiasa menggunakan tempoh penuh. Respons yang dibufferkan boleh mempunyai kadar penghantaran semburan yang tinggi tanpa penjanaan model yang lebih pantas."
+    "throughputExplanation": "Kedua-dua kadar menggunakan nilai yang lebih besar antara bilangan token output dan token penaakulan. Selepas-token-pertama mengecualikan TTFT yang sah; jika tidak, ia menggunakan tempoh penuh. Hujung ke hujung sentiasa menggunakan tempoh penuh. Respons yang dibufferkan boleh mempunyai kadar penghantaran semburan yang tinggi tanpa penjanaan model yang lebih pantas.",
+    "omittedHttpAttempts": "{count} penghantaran HTTP tidak disimpan",
+    "upstreamStatus": "Pelayan huluan {status}",
+    "noHttpResponse": "Tiada respons HTTP diperhatikan",
+    "transportError": "Ralat pengangkutan"
   },
   "proxyLogger": {
     "filterAll": "Semua",
@@ -14173,9 +14190,13 @@
         "label": "Susunan Kolam Egress Terkongsi",
         "description": "Bagi penyedia yang kuotanya dikumpulkan mengikut alamat egress, letakkan kedudukan ahli kolam yang berkongsi alamat egress tercerap bagi ahli yang baru sahaja ditolak tepat di bawah ahli yang sihat. Susunan sahaja, tidak pernah dikecualikan. Memerlukan PROXY_SKIP_RECENTLY_FAILED, yang menghasilkan isyarat penolakan yang dibacanya. Dimatikan secara lalai: susunan pemilihan adalah sama tepat seperti putaran biasa."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Penolakan kuota berskop model",
+        "description": "Gunakan kuota opencode 429 hanya pada model yang mencecahnya, jadi jalan keluar yang sama terus melayani model lain dan kosongkannya hanya apabila model itu berjaya. Pengguna yang tidak mempunyai model (putaran kolam, taman dan main semula, keterlihatan pentadbir, pencetus pemilih, sapuan kesihatan) masih melihatnya. Memerlukan PROXY_SKIP_RECENTLY_FAILED, yang menghasilkan penolakan. Mati secara lalai: kuota satu model 429 mengetepikan laluan keluar untuk setiap model."
+      },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "Pengambilan proksi: main semula POST yang ketat",
+        "description": "Untuk permintaan bukan idempoten (POST, PUT, PATCH, DELETE), hantar semula selepas ralat pengangkutan (soket baharu, sandaran proksi, sandaran asli) hanya apabila ralat membuktikan tiada apa-apa dihantar: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH atau tamat masa sambungan. Ralat soket selepas penulisan boleh bermakna huluan menerima permintaan itu, jadi hantaran semula boleh menjana dan mengebilnya dua kali. Mati secara lalai: badan boleh main semula dihantar semula sekali pada sebarang ralat pengangkutan, yang turut memulihkan soket terkumpul yang lapuk."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "Pengelogan Atribusi Putaran",
@@ -14228,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "Pilih Semula Kolam 429 OpenCode",
         "description": "Untuk penggiliran berbilang akaun OpenCode, selepas 429 daripada penyedia berkumpulan egress pada akaun tanpa proksi di bawah konteks kolam ambien, minta ahli lain daripada kolam sambungan untuk percubaan seterusnya dan bukannya mencuba semula alamat egress yang sama. Menyusun urutan, tidak sekali-kali mengecualikan: kolam yang kehabisan mengekalkan kelakuan semasa. Dinyahaktifkan secara lalai: setiap 429 bergilir ke akaun seterusnya tepat seperti sebelum ini."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Siasatan Keluar Tahap Bebas",
+        "description": "Untuk pelaksana OpenCode, apabila permintaan yang diproksi dijawab 403 atau 451 FreeTierError dan alat pemerhatian cuba semula gagal atau tidak digunakan, hantar permintaan itu sekali melalui proksi lain (proksi akaun lain atau ahli kumpulan lain, jangan sekali-kali sambungan langsung). Hanya apabila siasatan itu menjawab 200, jalan keluar pertama diketepikan dalam memori penolakan proksi dan respons siasatan disampaikan; apabila kedua-duanya menolak, penolakan asal dikembalikan dan tiada apa-apa yang direkodkan. Teks penolakan yang sama meliputi IP jalan keluar yang dibenderakan dan bentuk permintaan yang ditolak, jadi siasatan membezakan mereka melalui bukti. Mati secara lalai: penolakan dikembalikan tidak berubah."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Cap Jari Klien OpenCode v2",
@@ -14410,8 +14435,8 @@
         "description": "Apabila sasaran kombo membalas dengan penolakan dasar kandungan yang tepat (kod atau jenis cyber_policy / content_policy_violation), hentikan kombo dan kembalikan penolakan tersebut walaupun sasaran yang selebihnya adalah model yang berbeza, bukannya mara ke sasaran seterusnya. Dimatikan secara lalai: penolakan tidak sekali-kali menyejukkan akaun atau mencetuskan pemutus litar penyedia, dan kombo mara ke sasaran seterusnya sama seperti sebelum ini."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "Respons: keepalive over the transport sahaja",
+        "description": "Hantar Respons tetap hidup sebagai baris kosong dan bukannya acara response.in_progress, jadi syot kilat sintetik tidak boleh menggantikan respons sebenar dalam SDK rasmi . Baris kosong tidak menghantar sebarang acara SSE, jadi pengawas pelanggan yang menetapkan semula hanya pada acara tidak akan ditetapkan semula semasa fasa senyap yang panjang. Mati secara lalai: pemasa menghantar acara response.in_progress yang sah dengan spesifikasi."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Percubaan Semula Tempoh Bertenang: Langkau Penolakan 403/410",

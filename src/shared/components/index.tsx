@@ -12,6 +12,7 @@ export { default as Loading, Spinner, PageLoading, Skeleton, CardSkeleton } from
 export { default as Avatar } from "./Avatar";
 export { default as Badge } from "./Badge";
 export { default as Toggle } from "./Toggle";
+export { FileInput, FileDropZone } from "./FileInput";
 export { default as ThemeToggle } from "./ThemeToggle";
 export { ThemeProvider } from "./ThemeProvider";
 export { default as Sidebar } from "./Sidebar";

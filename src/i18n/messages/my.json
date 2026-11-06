@@ -1000,6 +1000,8 @@
     "batchListTitle": "အစုလိုက်လုပ်ငန်းများ",
     "batchListCount": "အစုလိုက်လုပ်ငန်း {count} ခု",
     "batchListRemovingCompleted": "ဖယ်ရှားနေသည်…",
+    "batchListRemoveCompletedPartial": "အသုတ်အများအပြားကို ဖယ်ရှားပြီးပါပြီ။ ကျန်ရှိသည့်အသုတ်များကို ရှင်းလင်းရန် ထပ်မံနှိပ်ပါ။",
+    "batchListRemoveCompletedFailed": "အသုတ်များကို ဖယ်ရှားနေစဉ် အမှားတစ်ခု ဖြစ်ပွားခဲ့သည်။",
     "batchListRemoveCompleted": "ပြီးစီးထားသည်များကို ဖယ်ရှားရန်",
     "batchListTableStatus": "အခြေအနေ",
     "batchListTableId": "ID",
@@ -1038,6 +1040,12 @@
     "batchListRefreshing": "ပြန်လည်ရယူနေသည်…",
     "batchListRefresh": "ပြန်လည်ရယူပါ",
     "uploadFileModalRemove": "ဖယ်ရှားပါ",
+    "fileInputChoose": "ဖိုင်ရွေးပါ",
+    "fileInputChooseMultiple": "ဖိုင်များရွေးပါ",
+    "fileInputEmpty": "မည်သည့်ဖိုင်မျှ မရွေးရသေးပါ",
+    "fileInputSelectedCount": "{count, plural, one {ဖိုင် # ဖိုင် ရွေးထားသည်} other {ဖိုင် # ဖိုင် ရွေးထားသည်}}",
+    "fileDropLabel": "ဖိုင်တစ်ဖိုင်ကို ဤနေရာသို့ ဆွဲချပါ သို့မဟုတ် ဖိုင်တစ်ဖိုင်ရွေးပါ",
+    "fileDropLabelMultiple": "ဖိုင်များကို ဤနေရာသို့ ဆွဲချပါ သို့မဟုတ် ဖိုင်များရွေးပါ",
     "uploadFileModalUploading": "အပ်လုဒ်တင်နေသည်…",
     "wizardInputReading": "ဖိုင်ကို ဖတ်နေသည်…",
     "wizardInputReady": "အသင့်ဖြစ်ပြီ",
@@ -2016,14 +2024,14 @@
     "unpricedUsageMore": "…နှင့် {count} ခု အပိုရှိသည်",
     "unpricedUsageConfigure": "စျေးနှုန်း သတ်မှတ်ရန်",
     "unpricedUsageDismiss": "ပယ်ဖျက်",
-    "systemMetricsTitle": "System metrics",
-    "systemMetricsActive": "Monitoring active",
-    "systemMetricsLoading": "Loading...",
+    "systemMetricsTitle": "စနစ်တိုင်းတာမှုများ",
+    "systemMetricsActive": "တက်ကြွစွာ စောင့်ကြည့်နေပါသည်။",
+    "systemMetricsLoading": "ဖွင့်နေသည်...",
     "systemMetricsCpu": "CPU",
-    "systemMetricsMemory": "Memory",
-    "systemMetricsHost": "VPS / Host",
+    "systemMetricsMemory": "ဉာဏ်",
+    "systemMetricsHost": "VPS / အိမ်ရှင်",
     "systemMetricsCpuCount": "{count} vCPUs • {platform}",
-    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessCpu": "OmniRoute (လုပ်ငန်းစဉ်)",
     "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
@@ -12375,7 +12383,9 @@
       "failedTitle": "ကြိုးပမ်းမှု {count} ကြိမ်စလုံး မအောင်မြင်ပါ",
       "failed": "မအောင်မြင်ပါ",
       "pinnedTitle": "context-cache session pinning မှတစ်ဆင့် ရွေးချယ်ထားသော မော်ဒယ်",
-      "pinned": "ပုံသေသတ်မှတ်ထားသည်"
+      "pinned": "ပုံသေသတ်မှတ်ထားသည်",
+      "recoveredAttemptsTitle": "{count} ကြိမ် ကြိုးပမ်းပြီးနောက် တောင်းဆိုချက် ပြန်လည်အောင်မြင်ခဲ့သည်",
+      "latestOutcomeFailed": "နောက်ဆုံးတောင်းဆိုချက်၏ ရလဒ် မအောင်မြင်ပါ"
     },
     "attempts": "ကြိုးပမ်းမှုများ",
     "detail": {
@@ -12477,13 +12487,20 @@
       "continuesFromParent": "မိခင်မှ ဆက်လက်သည်",
       "continuesFrom": "{id} မှ ဆက်လက်သည်",
       "viewConversation": "စကားဝိုင်းကို ကြည့်ရန်",
-      "openConversation": "စကားဝိုင်း {id} ကို ဖွင့်ရန်"
+      "openConversation": "စကားဝိုင်း {id} ကို ဖွင့်ရန်",
+      "omittedHttpAttempts": "HTTP ပို့မှု {count} ခုကို မသိမ်းဆည်းထားပါ",
+      "noHttpResponse": "HTTP တုံ့ပြန်မှုကို မတွေ့ရှိရပါ",
+      "transportError": "ပို့ဆောင်မှု အမှား"
     },
     "tableLabel": "တောင်းဆိုမှုမှတ်တမ်းများ",
     "throughputPostFirstToken": "ပထမတိုကင် နောက်ပိုင်း",
     "throughputEndToEnd": "အစမှအဆုံး",
     "throughputRate": "{value} တိုကင်/စက္ကန့်",
-    "throughputExplanation": "နှုန်းနှစ်ခုစလုံးသည် output နှင့် reasoning တိုကင်အရေအတွက်များထဲမှ ပိုကြီးသည့်အရေအတွက်ကို အသုံးပြုသည်။ ပထမတိုကင် နောက်ပိုင်းနှုန်းသည် တရားဝင် TTFT ကို ချန်လှပ်ထားသည်။ မဟုတ်ပါက စုစုပေါင်းကြာချိန်ကို အသုံးပြုသည်။ အစမှအဆုံးနှုန်းသည် အမြဲတမ်း စုစုပေါင်းကြာချိန်ကို အသုံးပြုသည်။ ဘာဖာလုပ်ထားသော တုံ့ပြန်မှုတစ်ခုသည် မော်ဒယ်ထုတ်လုပ်မှု ပိုမြန်ခြင်းမရှိဘဲ မြင့်မားသော အရှိန်အဟုန်ဖြင့် ပို့ဆောင်မှုနှုန်း ရှိနိုင်သည်။"
+    "throughputExplanation": "နှုန်းနှစ်ခုစလုံးသည် output နှင့် reasoning တိုကင်အရေအတွက်များထဲမှ ပိုကြီးသည့်အရေအတွက်ကို အသုံးပြုသည်။ ပထမတိုကင် နောက်ပိုင်းနှုန်းသည် တရားဝင် TTFT ကို ချန်လှပ်ထားသည်။ မဟုတ်ပါက စုစုပေါင်းကြာချိန်ကို အသုံးပြုသည်။ အစမှအဆုံးနှုန်းသည် အမြဲတမ်း စုစုပေါင်းကြာချိန်ကို အသုံးပြုသည်။ ဘာဖာလုပ်ထားသော တုံ့ပြန်မှုတစ်ခုသည် မော်ဒယ်ထုတ်လုပ်မှု ပိုမြန်ခြင်းမရှိဘဲ မြင့်မားသော အရှိန်အဟုန်ဖြင့် ပို့ဆောင်မှုနှုန်း ရှိနိုင်သည်။",
+    "omittedHttpAttempts": "HTTP ပို့မှု {count} ခုကို မသိမ်းဆည်းထားပါ",
+    "upstreamStatus": "အထက်ဆာဗာ {status}",
+    "noHttpResponse": "HTTP တုံ့ပြန်မှုကို မတွေ့ရှိရပါ",
+    "transportError": "ပို့ဆောင်မှု အမှား"
   },
   "proxyLogger": {
     "filterAll": "အားလုံး",
@@ -14250,9 +14267,13 @@
         "label": "Shared Egress Pool အစီအစဉ်",
         "description": "Quota ကို egress လိပ်စာအလိုက် ခွဲဝေသတ်မှတ်ထားသည့် provider များအတွက် မကြာသေးမီက ငြင်းပယ်ခံခဲ့ရသောအဖွဲ့ဝင်နှင့် တူညီသော egress လိပ်စာကို မျှဝေသုံးစွဲနေသည့် pool အဖွဲ့ဝင်အား ကောင်းမွန်သောအဖွဲ့ဝင်များ၏ အောက်တွင် အဆင့်သတ်မှတ်ပေးသည်။ အစီအစဉ်သတ်မှတ်ရုံသာဖြစ်ပြီး မည်သည့်အခါမျှ ဖယ်ထုတ်မည် မဟုတ်ပါ။ ၎င်းဖတ်ရှုမည့် ငြင်းပယ်မှုအချက်ပြသင်္ကေတကို ထုတ်ပေးသော PROXY_SKIP_RECENTLY_FAILED လိုအပ်ပါသည်။ မူရင်းအတိုင်း ပိတ်ထားသည်- ရွေးချယ်မှုအစီအစဉ်သည် သာမန် အလှည့်ကျစနစ်အတိုင်း အတိအကျ ဖြစ်သည်။"
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "မော်ဒယ်အလိုက် ခွဲတမ်း ငြင်းဆိုမှုများ",
+        "description": "opencode quota 429 ကို ၎င်းနှင့်ထိမိသော မော်ဒယ်တွင်သာ အသုံးပြုပါ၊ ထို့ကြောင့် အဆိုပါ egress သည် အခြားမော်ဒယ်များကို ဆက်လက်လုပ်ဆောင်နေပြီး ထိုမော်ဒယ်အောင်မြင်မှသာ ၎င်းကို ရှင်းလင်းပါ။ မော်ဒယ်မရှိသော စားသုံးသူများ (ရေကူးကန်လည်ပတ်ခြင်း၊ ပန်းခြံနှင့် ပြန်လည်ပြသခြင်း၊ စီမံခန့်ခွဲသူမြင်နိုင်မှု၊ ရွေးချယ်မှုအစပျိုးခြင်း၊ ကျန်းမာရေး ပွတ်ဆွဲခြင်း) တို့ကို တွေ့မြင်နေရဆဲဖြစ်သည်။ ငြင်းဆိုမှုကို ထုတ်ပေးသည့် PROXY_SKIP_RECENTLY_FAILED လိုအပ်သည်။ ပုံသေအားဖြင့် ပိတ်သည်- မော်ဒယ်တစ်ခု၏ ခွဲတမ်း 429 သည် မော်ဒယ်တိုင်းအတွက် egress ကို ဘေးဖယ်ထားသည်။"
+      },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "ပရောက်စီရယူမှု- တင်းကျပ်သော POST ပြန်လည်ကစားခြင်း။",
+        "description": "error သည် မည်သည့်အရာကိုမျှ သက်သေမပြနိုင်သောအခါမှ ပေးပို့ခြင်းဖြစ်သည်- ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH သို့မဟုတ် ချိတ်ဆက်မှု အချိန်ကုန်သွားသောအခါတွင် အရည်အချင်းမရှိသော တောင်းဆိုချက် (POST, PUT, PATCH, DELETE) ကို ပြန်လည်ပေးပို့ပါ။ ရေးပြီးနောက် socket အမှားတစ်ခုသည် အထက်စီးကြောင်းမှ တောင်းဆိုချက်ကို လက်ခံသည်ဟု ဆိုလိုနိုင်သည်၊ ထို့ကြောင့် ပြန်လည်ပေးပို့မှုတစ်ခုသည် ၎င်းကို နှစ်ကြိမ်ပြန်ထုတ်ပေးနိုင်ပြီး ငွေတောင်းခံနိုင်သည်။ ပုံသေအားဖြင့် ပိတ်သည်- ပြန်လည်ကစားနိုင်သော ကိုယ်ထည်သည် သယ်ယူပို့ဆောင်ရေးဆိုင်ရာ ချို့ယွင်းချက်တစ်ခုခုတွင် တစ်ကြိမ်ပြန်မြင်ရပြီး၊ ၎င်းသည် ဟောင်းနွမ်းနေသော ပေါင်းလောင်းပေါက်ပေါက်ကိုလည်း ပြန်လည်ရယူသည်။"
       },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotation Attribution မှတ်တမ်းတင်ခြင်း",
@@ -14305,6 +14326,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 Pool ပြန်လည်ရွေးချယ်ခြင်း",
         "description": "OpenCode multi-account rotation အတွက် ambient pool context အောက်ရှိ proxy မပါသော အကောင့်တစ်ခုပေါ်တွင် egress-bucketed provider ထံမှ 429 ရရှိပြီးနောက် တူညီသော egress address ကို ထပ်မံကြိုးစားမည့်အစား နောက်တစ်ကြိမ်ကြိုးစားမှုအတွက် အခြား member တစ်ခုကို connection pool ထံ တောင်းဆိုပါ။ အစီအစဉ်ချပေးရုံသာဖြစ်ပြီး ဖယ်ထုတ်ခြင်းမပြုပါ- ကုန်ဆုံးသွားသော pool သည် လက်ရှိအပြုအမူအတိုင်း ဆက်လက်ရှိနေပါမည်။ မူရင်းအတိုင်း ပိတ်ထားပါသည်- 429 တိုင်းသည် ယခင်အတိုင်း နောက်အကောင့်တစ်ခုသို့ အတိအကျ လှည့်လည်သွားပါမည်။"
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode အခမဲ့အဆင့် ထွက်ပေါက် စုံစမ်းခြင်း",
+        "description": "OpenCode executor အတွက်၊ proxyed တောင်းဆိုချက်တစ်ခုအား 403 သို့မဟုတ် 451 FreeTierError ဖြင့်ဖြေကြားပြီး Observed-tools ပြန်လည်ကြိုးစားမှု မအောင်မြင်ပါက သို့မဟုတ် မလျှောက်ထားပါက၊ တောင်းဆိုချက်ကို မတူညီသော proxy မှတဆင့် တစ်ကြိမ်ပေးပို့ပါ (အခြားအကောင့် proxy သို့မဟုတ် အခြား pool member၊ တိုက်ရိုက်ချိတ်ဆက်မှု ဘယ်သောအခါမှ) မရှိပါ။ အဆိုပါစုံစမ်းစစ်ဆေးမှုသည် အဖြေ 200 သည် ပရောက်စီငြင်းဆန်မှုမှတ်ဉာဏ်တွင် ဖယ်ထားသော ပထမဆုံးထွက်ပေါက်ဖြစ်ပြီး စုံစမ်းစစ်ဆေးမှုတုံ့ပြန်မှုကို လုပ်ဆောင်သည့်အခါမှသာ၊ နှစ်ဦးစလုံး ငြင်းဆိုသည့်အခါ မူရင်းငြင်းဆိုမှုကို ပြန်လည်ရရှိပြီး မည်သည့်အရာကိုမျှ မှတ်တမ်းတင်ထားခြင်းမရှိပါ။ တူညီသောငြင်းဆိုချက်စာသားသည် အလံပြထားသော egress IP နှင့် ငြင်းဆိုထားသောတောင်းဆိုမှုပုံစံကို ဖုံးအုပ်ထားသောကြောင့် စုံစမ်းစစ်ဆေးရေးအဖွဲ့သည် ၎င်းတို့အား သက်သေအထောက်အထားဖြင့် ခွဲခြားပြောပြသည်။ မူရင်းအားဖြင့် ပိတ်သည်- ငြင်းဆိုချက်ကို မပြောင်းလဲဘဲ ပြန်ပေးသည်။"
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 ကလိုင်းရန့် လက်ဗွေရာ",
@@ -14487,8 +14512,8 @@
         "description": "combo ပစ်မှတ်တစ်ခုက တိကျသော content-policy ငြင်းပယ်မှု (ကုဒ် သို့မဟုတ် အမျိုးအစား cyber_policy / content_policy_violation) ဖြင့် တုံ့ပြန်သည့်အခါ နောက်ပစ်မှတ်သို့ ရှေ့ဆက်မည့်အစား combo ကို ရပ်တန့်ပြီး ကျန်ရှိသော ပစ်မှတ်များသည် မတူညီသော မော်ဒယ်များဖြစ်နေလျှင်ပင် ထိုငြင်းပယ်မှုကို ပြန်ပို့မည်ဖြစ်သည်။ မူရင်းအတိုင်း ပိတ်ထားသည်- ထိုငြင်းပယ်မှုသည် အကောင့်ကို အေးခဲစေခြင်း သို့မဟုတ် provider breaker ကို ဖြတ်တောက်စေခြင်း မရှိဘဲ combo သည် ယခင်အတိုင်းပင် နောက်ပစ်မှတ်သို့ ရှေ့ဆက်သွားမည်ဖြစ်သည်။"
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "တုံ့ပြန်ချက်များ- သယ်ယူပို့ ဆောင်မှုတွင်သာ စောင့်ရှောက်ပါ။",
+        "description": "response.in_progress ဖြစ်ရပ်အစား တုံ့ပြန်မှုများကို Keepalive မှ အလွတ်စာကြောင်းအဖြစ် ပေးပို့ပါ၊ ထို့ကြောင့် ပေါင်းစပ်လျှပ်တစ်ပြက်ရိုက်ချက်သည် တရားဝင် SDK တွင် စစ်မှန်သောတုံ့ပြန်မှုကို ဘယ်သောအခါမှ အစားထိုးမရနိုင်ပါ။ အလွတ်လိုင်းတစ်ခုသည် SSE ဖြစ်ရပ်ကို ပေးပို့ခြင်းမရှိပါ၊ ထို့ကြောင့် ဖြစ်ရပ်များပေါ်တွင်သာ ပြန်လည်သတ်မှတ်သည့် ဖောက်သည်စောင့်ကြည့်ရေးအဖွဲ့သည် ရှည်လျားသော အသံတိတ်အဆင့်အတွင်း ပြန်လည်သတ်မှတ်မည်မဟုတ်ပါ။ ပုံမှန်အားဖြင့် ပိတ်သည်- အချိန်တိုင်းကိရိယာများသည် spec-တရားဝင် response.in_progress ဖြစ်ရပ်ကို ပေးပို့သည်။"
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown Retry: 403/410 ငြင်းပယ်မှုများကို ကျော်ရန်",

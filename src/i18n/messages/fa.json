@@ -923,6 +923,8 @@
     "batchListTitle": "دستهها",
     "batchListCount": "{count} دسته",
     "batchListRemovingCompleted": "در حال حذف…",
+    "batchListRemoveCompletedPartial": "تعداد زیادی از دستهها حذف شدند. برای پاک کردن بقیه، دوباره کلیک کنید.",
+    "batchListRemoveCompletedFailed": "هنگام حذف دستهها خطایی رخ داد.",
     "batchListRemoveCompleted": "حذف موارد تکمیلشده",
     "batchListTableStatus": "وضعیت",
     "batchListTableId": "شناسه",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "در حال تازهسازی…",
     "batchListRefresh": "تازهسازی",
     "uploadFileModalRemove": "حذف",
+    "fileInputChoose": "انتخاب فایل",
+    "fileInputChooseMultiple": "انتخاب فایلها",
+    "fileInputEmpty": "هیچ فایلی انتخاب نشده است",
+    "fileInputSelectedCount": "{count, plural, one {# فایل انتخاب شده است} other {# فایل انتخاب شدهاند}}",
+    "fileDropLabel": "یک فایل را اینجا رها کنید یا فایلی را انتخاب کنید",
+    "fileDropLabelMultiple": "فایلها را اینجا رها کنید یا فایلها را انتخاب کنید",
     "uploadFileModalUploading": "در حال بارگذاری…",
     "wizardInputReading": "در حال خواندن فایل…",
     "wizardInputReady": "آماده",
@@ -12298,7 +12306,9 @@
       "failedTitle": "تمام {count} تلاش‌ها ناموفق بود",
       "failed": "ناموفق",
       "pinnedTitle": "مدل انتخاب شده از طریق پین کردن جلسه کش زمینه",
-      "pinned": "سنجاق شده"
+      "pinned": "سنجاق شده",
+      "recoveredAttemptsTitle": "درخواست پس از {count} تلاش بازیابی شد",
+      "latestOutcomeFailed": "نتیجهٔ آخرین درخواست ناموفق بود"
     },
     "attempts": "تلاش‌ها",
     "detail": {
@@ -12400,13 +12410,20 @@
       "continuesFromParent": "از والد ادامه مییابد",
       "continuesFrom": "از {id} ادامه مییابد",
       "viewConversation": "مشاهده مکالمه",
-      "openConversation": "باز کردن مکالمه {id}"
+      "openConversation": "باز کردن مکالمه {id}",
+      "omittedHttpAttempts": "{count} ارسال HTTP نگهداری نشد",
+      "noHttpResponse": "هیچ پاسخ HTTP مشاهده نشد",
+      "transportError": "خطای انتقال"
     },
     "tableLabel": "گزارشهای درخواست",
     "throughputPostFirstToken": "پس از نخستین توکن",
     "throughputEndToEnd": "سرتاسری",
     "throughputRate": "{value} توکن/ثانیه",
-    "throughputExplanation": "هر دو نرخ از بزرگترِ تعداد توکنهای خروجی و استدلال استفاده میکنند. نرخ پس از نخستین توکن، یک TTFT معتبر را کنار میگذارد؛ در غیر این صورت از کل مدت استفاده میکند. نرخ سرتاسری همیشه از کل مدت استفاده میکند. یک پاسخ بافرشده میتواند نرخ تحویل انفجاری بالایی داشته باشد بدون آنکه تولید مدل سریعتر شود."
+    "throughputExplanation": "هر دو نرخ از بزرگترِ تعداد توکنهای خروجی و استدلال استفاده میکنند. نرخ پس از نخستین توکن، یک TTFT معتبر را کنار میگذارد؛ در غیر این صورت از کل مدت استفاده میکند. نرخ سرتاسری همیشه از کل مدت استفاده میکند. یک پاسخ بافرشده میتواند نرخ تحویل انفجاری بالایی داشته باشد بدون آنکه تولید مدل سریعتر شود.",
+    "omittedHttpAttempts": "{count} ارسال HTTP نگهداری نشد",
+    "upstreamStatus": "سرور بالادستی {status}",
+    "noHttpResponse": "هیچ پاسخ HTTP مشاهده نشد",
+    "transportError": "خطای انتقال"
   },
   "proxyLogger": {
     "filterAll": "همه",
@@ -14173,9 +14190,13 @@
         "label": "ترتیب استخر بر اساس خروجی مشترک",
         "description": "برای ارائه‌دهندگانی که سهمیه آن‌ها بر اساس نشانی خروجی (egress) سهمیه‌بندی می‌شود، اولویت عضو استخری که دارای نشانی خروجی مشاهده‌شده مشترک با یک عضو اخیراً رد شده است، درست در زیر اعضای سالم قرار می‌گیرد. صرفاً تغییر ترتیب است و هرگز کنار گذاشته نمی‌شود. به PROXY_SKIP_RECENTLY_FAILED نیاز دارد که سیگنال رد را برای خواندن تولید می‌کند. به‌طور پیش‌فرض غیرفعال است: ترتیب انتخاب دقیقاً همان چرخش ساده است."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "امتناع از سهمیه بندی مدل",
+        "description": "یک سهمیه opencode 429 را فقط برای مدلی اعمال کنید که به آن ضربه زده است، بنابراین همان خروجی به مدلهای دیگر ادامه میدهد و تنها زمانی که آن مدل موفق شد، آن را پاک کنید. مصرفکنندگانی که هیچ مدلی ندارند (چرخش استخر، پارک و پخش مجدد، دید مدیر، ماشه انتخابگر، جابجایی سلامت) هنوز آن را میبینند. نیاز به PROXY_SKIP_RECENTLY_FAILED، که تولید امتناع. خاموش به طور پیش فرض: سهمیه یک مدل 429 خروجی را برای هر مدل کنار می گذارد."
+      },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "واکشی پروکسی: بازپخش دقیق POST",
+        "description": "برای یک درخواست غیرقابل قدرت (POST، PUT، PATCH، DELETE)، پس از یک خطای انتقال (سوکت تازه، بازگشت پراکسی، بازگشت اصلی) فقط زمانی که خطا ثابت میکند چیزی ارسال نشده است: ECONNREFUSED، ENOTFOUND، EAI_AGAIN، ENETUNREACH یا مهلت زمانی اتصال دوباره ارسال کنید. یک خطای سوکت بعد از نوشتن میتواند به این معنی باشد که بالادست درخواست را پذیرفته است، بنابراین ارسال مجدد میتواند آن را دو بار ایجاد و صورتحساب کند. به طور پیشفرض خاموش: یک بدنه قابل پخش مجدد یک بار در هر خطای حمل و نقل ارسال میشود، که سوکت جمعشده کهنه را نیز بازیابی میکند."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "ثبت لاگ انتساب چرخش",
@@ -14228,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "انتخاب مجدد استخر 429 در OpenCode",
         "description": "برای چرخش چندحسابه OpenCode، پس از دریافت 429 از یک ارائه‌دهنده با سطل خروجی (egress-bucketed) روی حسابی بدون پروکسی در یک زمینه استخر فراگیر، برای تلاش بعدی به‌جای تلاش مجدد روی همان آدرس خروجی، عضو دیگری را از استخر اتصال بخواهید. مرتب‌سازی می‌کند، هرگز حذف نمی‌کند: یک استخر تخلیه‌شده رفتار فعلی را حفظ می‌کند. به‌طور پیش‌فرض غیرفعال است: دقیقاً مانند گذشته، هر 429 به حساب بعدی چرخش می‌یابد."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "کاوشگر خروجی لایه آزاد OpenCode",
+        "description": "برای مجری OpenCode ، هنگامی که به یک درخواست پراکسی 403 یا 451 FreeTierError پاسخ داده می شود و ابزارهای مشاهده شده مجدداً امتحان نمی شوند یا اعمال نمی شوند، درخواست را یک بار از طریق یک پراکسی دیگر ارسال کنید (پراکسی حساب دیگر یا عضو دیگر استخر، هرگز یک اتصال مستقیم). تنها زمانی که آن کاوشگر به 200 پاسخ دهد، اولین خروجی در حافظه امتناع پروکسی کنار گذاشته می شود و پاسخ کاوشگر ارائه می شود. وقتی هر دو امتناع کنند، رد اصلی برگشت داده می شود و چیزی ثبت نمی شود. همان متن رد یک خروجی پرچم گذاری شده IP و یک شکل درخواست رد شده را پوشش می دهد، بنابراین کاوشگر آنها را با شواهد از هم جدا می کند. خاموش به طور پیش فرض: امتناع بدون تغییر برگردانده می شود."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "اثر انگشت کلاینت OpenCode v2",
@@ -14410,8 +14435,8 @@
         "description": "هنگامی که یکی از اهداف combo با یک رد صریح بر اساس خط‌مشی محتوا (کد یا نوع cyber_policy / content_policy_violation) پاسخ می‌دهد، combo متوقف شده و همان پاسخ رد بازگردانده می‌شود حتی اگر اهداف باقی‌مانده مدل‌های متفاوتی باشند، به‌جای اینکه به هدف بعدی برود. به‌طور پیش‌فرض غیرفعال است: این رد هرگز حساب را وارد دوره خنک‌سازی (cooldown) نکرده و مدارشکن ارائه‌دهنده را فعال نمی‌کند، و combo دقیقاً مانند گذشته به هدف بعدی خود پیش می‌رود."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "پاسخ ها: نگهدارنده فقط در حمل و نقل",
+        "description": "پاسخها را بهجای رویداد response.in_progress به عنوان یک خط خالی ارسال کنید، بنابراین یک عکس فوری مصنوعی هرگز نمیتواند جایگزین پاسخ واقعی در SDK رسمی شود. یک خط خالی هیچ رویداد SSE ارسال نمیکند، بنابراین یک ناظر مشتری که فقط روی رویدادها بازنشانی میکند، در طول یک فاز خاموش طولانی بازنشانی نمیشود. خاموش به طور پیشفرض: تایمرها رویداد response.in_progress معتبر را ارسال میکنند."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "تلاش مجدد در دوره خنک‌سازی: صرف‌نظر از پاسخ‌های رد 403/410",

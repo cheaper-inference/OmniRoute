@@ -34,7 +34,12 @@ describe("CachePerformance", () => {
       render(<CachePerformance {...defaultProps} />);
       const meter = screen.getByRole("progressbar", { name: "cachePerformanceHitRate" });
       expect(meter).toHaveAttribute("aria-valuenow", "85");
-      expect(within(meter).getByText("85.0%")).toBeInTheDocument();
+      // Kit Progress: the track is the progressbar; the visible value sits in the header above it.
+      expect(meter).toHaveClass("ci-progress__track");
+      expect(meter).toHaveAttribute("aria-valuetext", "85.0%");
+      const hitRateBlock = meter.closest(".ci-progress")?.parentElement as HTMLElement;
+      expect(within(hitRateBlock).getByText("85.0%")).toBeInTheDocument();
+      expect(meter.querySelector('[data-tone="success"]')).not.toBeNull();
     });
 
     it("renders total requests", () => {

@@ -923,6 +923,8 @@
     "batchListTitle": "బ్యాచ్లు",
     "batchListCount": "{count} బ్యాచ్లు",
     "batchListRemovingCompleted": "తొలగిస్తోంది…",
+    "batchListRemoveCompletedPartial": "పెద్ద సంఖ్యలో బ్యాచ్లు తొలగించబడ్డాయి. మిగిలిన వాటిని తొలగించడానికి మళ్లీ క్లిక్ చేయండి.",
+    "batchListRemoveCompletedFailed": "బ్యాచ్లను తొలగిస్తున్నప్పుడు లోపం సంభవించింది.",
     "batchListRemoveCompleted": "పూర్తయిన వాటిని తొలగించండి",
     "batchListTableStatus": "స్థితి",
     "batchListTableId": "ID",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "రిఫ్రెష్ చేస్తోంది…",
     "batchListRefresh": "రిఫ్రెష్ చేయి",
     "uploadFileModalRemove": "తొలగించు",
+    "fileInputChoose": "ఫైల్ను ఎంచుకోండి",
+    "fileInputChooseMultiple": "ఫైళ్లను ఎంచుకోండి",
+    "fileInputEmpty": "ఏ ఫైల్ను ఎంచుకోలేదు",
+    "fileInputSelectedCount": "{count, plural, one {# ఫైల్ ఎంచుకోబడింది} other {# ఫైళ్లు ఎంచుకోబడ్డాయి}}",
+    "fileDropLabel": "ఫైల్ను ఇక్కడ వదలండి లేదా ఒకదాన్ని ఎంచుకోండి",
+    "fileDropLabelMultiple": "ఫైళ్లను ఇక్కడ వదలండి లేదా ఫైళ్లను ఎంచుకోండి",
     "uploadFileModalUploading": "అప్లోడ్ చేస్తోంది…",
     "wizardInputReading": "ఫైల్ను చదువుతోంది…",
     "wizardInputReady": "సిద్ధంగా ఉంది",
@@ -12298,7 +12306,9 @@
       "failedTitle": "అన్ని {count} ప్రయత్నాలు విఫలమయ్యాయి",
       "failed": "అసఫలమైంది",
       "pinnedTitle": "సందర్భ-కాష్ సెషన్ పిన్నింగ్ ద్వారా మోడల్ ఎంపిక చేయబడింది",
-      "pinned": "పిన్చబడింది"
+      "pinned": "పిన్చబడింది",
+      "recoveredAttemptsTitle": "{count} ప్రయత్నాల తర్వాత అభ్యర్థన పునరుద్ధరించబడింది",
+      "latestOutcomeFailed": "తాజా అభ్యర్థన ఫలితం విఫలమైంది"
     },
     "attempts": "ప్రయత్నాలు",
     "detail": {
@@ -12400,13 +12410,20 @@
       "continuesFromParent": "పేరెంట్ నుండి కొనసాగుతుంది",
       "continuesFrom": "{id} నుండి కొనసాగుతుంది",
       "viewConversation": "సంభాషణను వీక్షించండి",
-      "openConversation": "{id} సంభాషణను తెరవండి"
+      "openConversation": "{id} సంభాషణను తెరవండి",
+      "omittedHttpAttempts": "{count} HTTP పంపకాలు నిల్వ చేయబడలేదు",
+      "noHttpResponse": "HTTP ప్రతిస్పందన గమనించబడలేదు",
+      "transportError": "రవాణా లోపం"
     },
     "tableLabel": "అభ్యర్థన లాగ్లు",
     "throughputPostFirstToken": "మొదటి టోకెన్ తర్వాత",
     "throughputEndToEnd": "ఎండ్-టు-ఎండ్",
     "throughputRate": "{value} టోకెన్లు/సెకను",
-    "throughputExplanation": "రెండు రేట్లు ఔట్పుట్ మరియు రీజనింగ్ టోకెన్ కౌంట్లలో పెద్దదాన్ని ఉపయోగిస్తాయి. మొదటి టోకెన్ తర్వాత రేటు చెల్లుబాటు అయ్యే TTFTని మినహాయిస్తుంది; లేకపోతే అది పూర్తి వ్యవధిని ఉపయోగిస్తుంది. ఎండ్-టు-ఎండ్ ఎల్లప్పుడూ పూర్తి వ్యవధిని ఉపయోగిస్తుంది. బఫర్ చేసిన ప్రతిస్పందన, మోడల్ వేగంగా జనరేట్ అవ్వకపోయినా అధిక బరస్ట్ డెలివరీ రేటును కలిగి ఉండవచ్చు."
+    "throughputExplanation": "రెండు రేట్లు ఔట్పుట్ మరియు రీజనింగ్ టోకెన్ కౌంట్లలో పెద్దదాన్ని ఉపయోగిస్తాయి. మొదటి టోకెన్ తర్వాత రేటు చెల్లుబాటు అయ్యే TTFTని మినహాయిస్తుంది; లేకపోతే అది పూర్తి వ్యవధిని ఉపయోగిస్తుంది. ఎండ్-టు-ఎండ్ ఎల్లప్పుడూ పూర్తి వ్యవధిని ఉపయోగిస్తుంది. బఫర్ చేసిన ప్రతిస్పందన, మోడల్ వేగంగా జనరేట్ అవ్వకపోయినా అధిక బరస్ట్ డెలివరీ రేటును కలిగి ఉండవచ్చు.",
+    "omittedHttpAttempts": "{count} HTTP పంపకాలు నిల్వ చేయబడలేదు",
+    "upstreamStatus": "అప్‌స్ట్రీమ్ సర్వర్ {status}",
+    "noHttpResponse": "HTTP ప్రతిస్పందన గమనించబడలేదు",
+    "transportError": "రవాణా లోపం"
   },
   "proxyLogger": {
     "filterAll": "అన్నీ",
@@ -14173,9 +14190,13 @@
         "label": "షేర్డ్ ఎగ్రెస్ పూల్ క్రమం",
         "description": "ఎగ్రెస్ చిరునామా ఆధారంగా కోటా విభజించబడే ప్రొవైడర్‌ల కోసం, ఇటీవల తిరస్కరించబడిన సభ్యుని గమనించిన ఎగ్రెస్ చిరునామాను పంచుకునే పూల్ సభ్యుడిని ఆరోగ్యకరమైన సభ్యుల కంటే కొంచెం దిగువన ర్యాంక్ చేయండి. ఇది క్రమాన్ని మాత్రమే మారుస్తుంది, ఎప్పుడూ మినహాయించదు. ఇది చదివే తిరస్కరణ సంకేతాన్ని PROXY_SKIP_RECENTLY_FAILED ఉత్పత్తి చేస్తుంది, కాబట్టి అది అవసరం. డిఫాల్ట్‌గా ఆఫ్: ఎంపిక క్రమం సాధారణ రొటేషన్‌కు ఖచ్చితంగా సమానం."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "మోడల్-స్కోప్డ్ కోటా తిరస్కరణలు",
+        "description": "opencode కోటా 429ని హిట్ చేసిన మోడల్కు మాత్రమే వర్తింపజేయండి, కాబట్టి అదే ఎగ్రెస్ ఇతర మోడల్లకు సేవలను అందిస్తూనే ఉంటుంది మరియు ఆ మోడల్ విజయవంతమైనప్పుడు మాత్రమే దాన్ని క్లియర్ చేస్తుంది. మోడల్ లేని వినియోగదారులు (పూల్ రొటేషన్, పార్క్ మరియు రీప్లే, అడ్మిన్ విజిబిలిటీ, సెలెక్టర్ ట్రిగ్గర్, హెల్త్ స్వీప్) ఇప్పటికీ దీన్ని చూస్తారు. PROXY_SKIP_RECENTLY_FAILED అవసరం, ఇది తిరస్కరణను ఉత్పత్తి చేస్తుంది. డిఫాల్ట్గా ఆఫ్: ఒక మోడల్ కోటా 429 ప్రతి మోడల్కు ఎగ్రెస్ను పక్కన పెడుతుంది."
+      },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "ప్రాక్సీ పొందడం: కఠినమైన POST రీప్లే",
+        "description": "నాన్-ఐడెంపోటెంట్ అభ్యర్థన కోసం (POST, PUT, PATCH, DELETE), రవాణా లోపం (తాజా సాకెట్, ప్రాక్సీ ఫాల్బ్యాక్, స్థానిక ఫాల్బ్యాక్) తర్వాత ఏదీ పంపబడలేదని లోపం రుజువు చేసినప్పుడు మాత్రమే మళ్లీ పంపండి: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH లేదా కనెక్ట్ సమయం ముగిసింది. వ్రాసిన తర్వాత సాకెట్ లోపం అంటే అప్స్ట్రీమ్ అభ్యర్థనను అంగీకరించిందని అర్థం, కాబట్టి మళ్లీ పంపడం ద్వారా దాన్ని రెండుసార్లు రూపొందించవచ్చు మరియు బిల్లు చేయవచ్చు. డిఫాల్ట్గా ఆఫ్: రీప్లే చేయగల బాడీ ఏదైనా రవాణా లోపంపై ఒకసారి రీసెట్ చేయబడుతుంది, ఇది పాత పూల్ చేసిన సాకెట్ను కూడా తిరిగి పొందుతుంది."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "రొటేషన్ ఆపాదింపు లాగింగ్",
@@ -14228,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 పూల్ పునఃఎంపిక",
         "description": "OpenCode బహుళ-ఖాతా రొటేషన్ కోసం, ambient పూల్ సందర్భంలో ప్రాక్సీ లేని ఖాతాపై ఎగ్రెస్-ఆధారిత కోటా ఉన్న ప్రొవైడర్ నుండి 429 వచ్చిన తర్వాత, అదే ఎగ్రెస్ చిరునామాను మళ్లీ ప్రయత్నించే బదులు తదుపరి ప్రయత్నం కోసం కనెక్షన్ పూల్‌ను మరో సభ్యుడిని అడగండి. క్రమాన్ని మాత్రమే మారుస్తుంది, ఎప్పుడూ మినహాయించదు: పూల్ అయిపోతే ప్రస్తుత ప్రవర్తనే కొనసాగుతుంది. డిఫాల్ట్‌గా ఆఫ్: మునుపటిలాగే ప్రతి 429 తదుపరి ఖాతాకు రొటేట్ అవుతుంది."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode ఫ్రీ-టైర్ ఎగ్రెస్ ప్రోబ్",
+        "description": "OpenCode ఎగ్జిక్యూటర్ కోసం, ప్రాక్సీడ్ అభ్యర్థనకు 403 లేదా 451 FreeTierError సమాధానం ఇచ్చినప్పుడు మరియు గమనించిన సాధనాలు మళ్లీ ప్రయత్నించినప్పుడు విఫలమైనప్పుడు లేదా వర్తించనప్పుడు, అభ్యర్థనను వేరే ప్రాక్సీ ద్వారా ఒకసారి పంపండి (మరొక ఖాతా ప్రాక్సీ లేదా మరొక పూల్ సభ్యుడు, ప్రత్యక్ష కనెక్షన్ కాదు). ఆ ప్రోబ్ 200కి సమాధానం ఇచ్చినప్పుడు మాత్రమే ప్రాక్సీ తిరస్కరణ మెమరీలో మొదటి ఎగ్రెస్ పక్కన పెట్టబడుతుంది మరియు ప్రోబ్ ప్రతిస్పందన అందించబడుతుంది; ఇద్దరూ తిరస్కరించినప్పుడు, అసలు తిరస్కరణ తిరిగి వస్తుంది మరియు ఏమీ నమోదు చేయబడదు. అదే తిరస్కరణ వచనం ఫ్లాగ్ చేయబడిన ఎగ్రెస్ IP మరియు తిరస్కరించబడిన అభ్యర్థన ఆకారాన్ని కవర్ చేస్తుంది, కాబట్టి ప్రోబ్ వాటిని సాక్ష్యం ద్వారా వేరు చేస్తుంది. డిఫాల్ట్గా ఆఫ్: తిరస్కరణ మారకుండా తిరిగి ఇవ్వబడుతుంది."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 క్లయింట్ ఫింగర్‌ప్రింట్",
@@ -14410,8 +14435,8 @@
         "description": "కాంబో లక్ష్యం ఖచ్చితమైన కంటెంట్-పాలసీ తిరస్కరణతో (code లేదా type cyber_policy / content_policy_violation) సమాధానం ఇచ్చినప్పుడు, తదుపరి లక్ష్యానికి వెళ్లే బదులు, మిగిలిన లక్ష్యాలు వేర్వేరు మోడల్‌లైనా కాంబోను ఆపి ఆ తిరస్కరణను తిరిగి ఇవ్వండి. డిఫాల్ట్‌గా ఆఫ్: తిరస్కరణ ఎప్పుడూ ఖాతాను కూల్‌డౌన్ చేయదు లేదా ప్రొవైడర్ బ్రేకర్‌ను ట్రిప్ చేయదు, మరియు కాంబో మునుపటిలాగే తదుపరి లక్ష్యానికి వెళ్తుంది."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "ప్రతిస్పందనలు: రవాణాలో మాత్రమే ఉంచాలి",
+        "description": "ప్రతిస్పందనల కీపాలివ్లను response.in_progress ఈవెంట్కు బదులుగా ఖాళీ లైన్గా పంపండి, కాబట్టి సింథటిక్ స్నాప్షాట్ అధికారిక SDK లో నిజమైన ప్రతిస్పందనను ఎప్పటికీ భర్తీ చేయదు. ఖాళీ లైన్ SSE ఈవెంట్ను పంపదు, కాబట్టి ఈవెంట్లపై మాత్రమే రీసెట్ చేసే క్లయింట్ వాచ్డాగ్ సుదీర్ఘ నిశ్శబ్ద దశలో రీసెట్ చేయబడదు. డిఫాల్ట్గా ఆఫ్: టైమర్లు స్పెక్ చెల్లుబాటు అయ్యే response.in_progress ఈవెంట్ను పంపుతాయి."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "కూల్‌డౌన్ రీట్రై: 403/410 తిరస్కరణలను దాటవేయండి",

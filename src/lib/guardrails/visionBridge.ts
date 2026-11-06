@@ -327,6 +327,7 @@ export class VisionBridgeGuardrail extends BaseGuardrail {
     this.deps = options?.deps ?? {};
   }
 
+  /** Apply the configured vision bridge while preserving ordinary non-image content. */
   async preCall(payload: unknown, context: GuardrailContext): Promise<GuardrailResult<unknown>> {
     // 1. Check if disabled at guardrail level
     if (!this.enabled) {
@@ -414,6 +415,13 @@ export class VisionBridgeGuardrail extends BaseGuardrail {
         ? body.input
         : null;
     if (!messages || messages.length === 0) {
+      return { block: false };
+    }
+
+    // The image-only router cannot qualify a destination for other attachments.
+    // Auto's compatibility pass checks every required modality (including after
+    // catalog expansion); let it keep the complete mixed request intact.
+    if (isAuto && detectMediaParts(messages).some((part) => part.kind !== "image")) {
       return { block: false };
     }
 

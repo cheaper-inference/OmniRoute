@@ -923,6 +923,8 @@
     "batchListTitle": "Toplu işlemler",
     "batchListCount": "{count} toplu işlem",
     "batchListRemovingCompleted": "Kaldırılıyor…",
+    "batchListRemoveCompletedPartial": "Çok sayıda toplu işlem kaldırıldı. Kalanları temizlemek için tekrar tıklayın.",
+    "batchListRemoveCompletedFailed": "Toplu işlemler kaldırılırken bir hata oluştu.",
     "batchListRemoveCompleted": "Tamamlananları kaldır",
     "batchListTableStatus": "Durum",
     "batchListTableId": "Kimlik",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "Yenileniyor…",
     "batchListRefresh": "Yenile",
     "uploadFileModalRemove": "Kaldır",
+    "fileInputChoose": "Dosya seç",
+    "fileInputChooseMultiple": "Dosyaları seç",
+    "fileInputEmpty": "Dosya seçilmedi",
+    "fileInputSelectedCount": "{count, plural, one {# dosya seçildi} other {# dosya seçildi}}",
+    "fileDropLabel": "Buraya bir dosya bırakın veya bir dosya seçin",
+    "fileDropLabelMultiple": "Dosyaları buraya bırakın veya dosyaları seçin",
     "uploadFileModalUploading": "Yükleniyor…",
     "wizardInputReading": "Dosya okunuyor…",
     "wizardInputReady": "Hazır",
@@ -12298,7 +12306,9 @@
       "failedTitle": "Tüm {count} denemeler başarısız oldu",
       "failed": "başarısız",
       "pinnedTitle": "Bağlam önbellek oturumu sabitleme ile seçilen model",
-      "pinned": "sabitlenmiş"
+      "pinned": "sabitlenmiş",
+      "recoveredAttemptsTitle": "İstek {count} denemeden sonra kurtarıldı",
+      "latestOutcomeFailed": "Son istek sonucu başarısız oldu"
     },
     "attempts": "denemeler",
     "detail": {
@@ -12400,13 +12410,20 @@
       "continuesFromParent": "üst öğeden devam eder",
       "continuesFrom": "{id} üzerinden devam eder",
       "viewConversation": "konuşmayı görüntüle",
-      "openConversation": "{id} konuşmasını aç"
+      "openConversation": "{id} konuşmasını aç",
+      "omittedHttpAttempts": "{count} HTTP gönderimi saklanmadı",
+      "noHttpResponse": "HTTP yanıtı gözlemlenmedi",
+      "transportError": "Aktarım hatası"
     },
     "tableLabel": "İstek günlükleri",
     "throughputPostFirstToken": "İlk token sonrası",
     "throughputEndToEnd": "Uçtan uca",
     "throughputRate": "{value} token/sn",
-    "throughputExplanation": "Her iki oran da çıktı ve akıl yürütme token sayılarından büyük olanını kullanır. İlk token sonrası, geçerli bir TTFT'yi hariç tutar; aksi durumda tam süreyi kullanır. Uçtan uca her zaman tam süreyi kullanır. Tamponlanmış bir yanıt, daha hızlı model üretimi olmadan yüksek ani teslim hızına sahip olabilir."
+    "throughputExplanation": "Her iki oran da çıktı ve akıl yürütme token sayılarından büyük olanını kullanır. İlk token sonrası, geçerli bir TTFT'yi hariç tutar; aksi durumda tam süreyi kullanır. Uçtan uca her zaman tam süreyi kullanır. Tamponlanmış bir yanıt, daha hızlı model üretimi olmadan yüksek ani teslim hızına sahip olabilir.",
+    "omittedHttpAttempts": "{count} HTTP gönderimi saklanmadı",
+    "upstreamStatus": "Üst sunucu {status}",
+    "noHttpResponse": "HTTP yanıtı gözlemlenmedi",
+    "transportError": "Aktarım hatası"
   },
   "proxyLogger": {
     "filterAll": "Tümü",
@@ -14173,9 +14190,13 @@
         "label": "Paylaşılan Egress Havuzu Sıralaması",
         "description": "Kotası çıkış adresine göre bölünmüş sağlayıcılar için, son zamanlarda reddedilen bir üyenin gözlemlenen çıkış adresini paylaşan havuz üyesini, sağlıklı üyelerin hemen altına sıralayın. Yalnızca sıralama, asla hariç tutulma gerekçesi. Bunu okuyan reddetme sinyalini üreten PROXY_SKIP_RECENTLY_FAILED gerektirir. Varsayılan olarak kapalıdır: seçim sırası tamamen düz rotasyonla aynıdır."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Model kapsamlı kota retleri",
+        "description": "Yalnızca kendisine isabet eden modele 429 numaralı opencode kotasını uygulayın, böylece aynı çıkış diğer modellere hizmet vermeye devam eder ve onu yalnızca bu model başarılı olduğunda temizler. Herhangi bir modeli olmayan (havuz rotasyonu, park etme ve tekrar oynatma, yönetici görünürlüğü, seçici tetikleyici, sağlık taraması) tüketiciler bunu görmeye devam ediyor. Reddi doğuran PROXY_SKIP_RECENTLY_FAILED ihtiyaç var. Varsayılan olarak kapalı: Bir modelin 429'luk kotası, her model için çıkışı bir kenara koyar."
+      },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "Proxy getirme: katı POST tekrarı",
+        "description": "İdempotent olmayan bir istek için (POST, PUT, PATCH, DELETE), bir aktarım hatasından sonra (yeni soket, proxy geri dönüşü, yerel geri dönüş) yalnızca hata hiçbir şeyin gönderilmediğini kanıtladığında yeniden gönderin: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH veya bağlantı zaman aşımı. Yazma sonrasındaki bir soket hatası, yukarı akışın isteği kabul ettiği anlamına gelebilir, dolayısıyla bir yeniden gönderme, isteği iki kez oluşturup faturalandırabilir. Varsayılan olarak kapalı: herhangi bir aktarım hatasında yeniden oynatılabilir bir gövde bir kez yeniden gönderilir, bu aynı zamanda eski havuzlanmış bir soketi de kurtarır."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotasyon Nispetlendirme Kaydına (Log) Yazma",
@@ -14228,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 Havuz Yeniden Seçimi",
         "description": "Proxy'siz bir hesapta ve ortam havuz bağlamında egress-bucket'li bir sağlayıcıdan gelen 429 için OpenCode çoklu hesap rotasyonunda, aynı egress adresini yeniden denemek yerine bir sonraki deneme için bağlantı havuzundan başka bir üye isteyin. Sıralar, asla hariç tutmaz: tükenmiş bir havuz mevcut davranışı korur. Varsayılan olarak kapalıdır: her 429, tıpkı öncekiler gibi bir sonraki hesaba rotasyona gider."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Ücretsiz Katmanlı Çıkış Probu",
+        "description": "OpenCode yürütücüsü için, proxy'li bir istek 403 veya 451 FreeTierError olarak yanıtlandığında ve gözlemlenen araçların yeniden denemesi başarısız olduğunda veya uygulanmadığında, isteği farklı bir proxy (başka bir hesap proxy'si veya başka bir havuz üyesi, asla doğrudan bağlantı değil) aracılığıyla bir kez gönderin. Yalnızca bu araştırma 200'e yanıt verdiğinde, vekil reddetme belleğinde ilk çıkış bir kenara bırakılır ve araştırma yanıtı sunulur; her ikisi de reddettiğinde, orijinal redde geri dönülür ve hiçbir şey kaydedilmez. Aynı ret metni, işaretlenmiş bir çıkış IP ve reddedilen istek şeklini kapsar, böylece araştırma bunları kanıtlarla birbirinden ayırır. Varsayılan olarak kapalı: reddetme değiştirilmeden iade edilir."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 İstemci Parmak İzi",
@@ -14410,8 +14435,8 @@
         "description": "Bir kombinasyon hedefi tam bir içerik politikası reddiyle (kod veya tür cyber_policy / content_policy_violation) yanıt verdiğinde, kalan hedefler farklı modeller olsa bile kombinasyonu durdurur ve bu reddi döndürür, bir sonraki hedefe ilerlemek yerine. Varsayılan olarak kapalıdır: bu reddi, hesabı soğutmaz veya sağlayıcı sigortasını tetiklemez; kombinasyon tam olarak önceki gibi bir sonraki hedefine ilerler."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "Yanıtlar: yalnızca aktarım sırasında canlı kalma",
+        "description": "Yanıtları Gönder response.in_progress olayı yerine boş bir satır olarak canlı tutulur, böylece sentetik bir anlık görüntü hiçbir zaman resmi SDK gerçek yanıtın yerini alamaz. Boş bir satır hiçbir SSE olayı göndermez; dolayısıyla yalnızca olaylarda sıfırlanan bir istemci gözlemcisi, uzun bir sessiz aşama sırasında sıfırlanmaz. Varsayılan olarak kapalı: zamanlayıcılar spesifikasyona uygun response.in_progress olayını gönderir."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Soğuma Yeniden Denemesi: 403/410 Redlerini Atla",

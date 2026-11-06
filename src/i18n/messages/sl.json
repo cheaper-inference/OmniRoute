@@ -923,6 +923,8 @@
     "batchListTitle": "Paketne obdelave",
     "batchListCount": "{count} paketnih obdelav",
     "batchListRemovingCompleted": "Odstranjevanje…",
+    "batchListRemoveCompletedPartial": "Odstranjeno je bilo veliko število paketov. Kliknite znova, da počistite preostale.",
+    "batchListRemoveCompletedFailed": "Pri odstranjevanju paketov je prišlo do napake.",
     "batchListRemoveCompleted": "Odstrani dokončane",
     "batchListTableStatus": "Stanje",
     "batchListTableId": "ID",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "Osveževanje…",
     "batchListRefresh": "Osveži",
     "uploadFileModalRemove": "Odstrani",
+    "fileInputChoose": "Izberite datoteko",
+    "fileInputChooseMultiple": "Izberite datoteke",
+    "fileInputEmpty": "Nobena datoteka ni izbrana",
+    "fileInputSelectedCount": "{count, plural, one {Izbrana je # datoteka} two {Izbrani sta # datoteki} few {Izbrane so # datoteke} other {Izbranih je # datotek}}",
+    "fileDropLabel": "Spustite datoteko sem ali jo izberite",
+    "fileDropLabelMultiple": "Spustite datoteke sem ali jih izberite",
     "uploadFileModalUploading": "Nalaganje…",
     "wizardInputReading": "Branje datoteke…",
     "wizardInputReady": "Pripravljeno",
@@ -12298,7 +12306,9 @@
       "failedTitle": "Vseh {count} poskusov je bilo neuspešnih",
       "failed": "neuspešno",
       "pinnedTitle": "Model je bil izbran s pripenjanjem seje predpomnilnika konteksta",
-      "pinned": "pripeto"
+      "pinned": "pripeto",
+      "recoveredAttemptsTitle": "Zahteva je bila obnovljena po {count} poskusih",
+      "latestOutcomeFailed": "Zadnji rezultat zahteve je bil neuspešen"
     },
     "attempts": "poskusi",
     "detail": {
@@ -12400,13 +12410,20 @@
       "continuesFromParent": "nadaljuje se od nadrejenega",
       "continuesFrom": "Nadaljuje se od {id}",
       "viewConversation": "ogled pogovora",
-      "openConversation": "Odpri pogovor {id}"
+      "openConversation": "Odpri pogovor {id}",
+      "omittedHttpAttempts": "{count} pošiljanj HTTP ni bilo shranjenih",
+      "noHttpResponse": "Odgovor HTTP ni bil zaznan",
+      "transportError": "Napaka prenosa"
     },
     "tableLabel": "Dnevniki zahtev",
     "throughputPostFirstToken": "Po prvem tokenu",
     "throughputEndToEnd": "Od začetka do konca",
     "throughputRate": "{value} tokenov/s",
-    "throughputExplanation": "Pri obeh stopnjah se upošteva večje od števila izhodnih in razmišljevalnih tokenov. Stopnja po prvem tokenu izključuje veljaven TTFT; sicer uporablja celotno trajanje. Stopnja od začetka do konca vedno uporablja celotno trajanje. Odgovor iz medpomnilnika ima lahko visoko stopnjo dostave v izbruhih, čeprav model ne generira hitreje."
+    "throughputExplanation": "Pri obeh stopnjah se upošteva večje od števila izhodnih in razmišljevalnih tokenov. Stopnja po prvem tokenu izključuje veljaven TTFT; sicer uporablja celotno trajanje. Stopnja od začetka do konca vedno uporablja celotno trajanje. Odgovor iz medpomnilnika ima lahko visoko stopnjo dostave v izbruhih, čeprav model ne generira hitreje.",
+    "omittedHttpAttempts": "{count} pošiljanj HTTP ni bilo shranjenih",
+    "upstreamStatus": "Nadrejeni strežnik {status}",
+    "noHttpResponse": "Odgovor HTTP ni bil zaznan",
+    "transportError": "Napaka prenosa"
   },
   "proxyLogger": {
     "filterAll": "Vse",
@@ -14173,9 +14190,13 @@
         "label": "Vrstni red skupnega izhodnega seznama",
         "description": "Za ponudnike, za katere se kvota obsega po izhodni naslovu, vrsti člane seznama, ki delijo opažen izhodni naslov nedavno zavrnjenega člena, neposredno pod zdravimi člani. Samo vrstni red, nikoli izključitev. Potrebuje PROXY_SKIP_RECENTLY_FAILED, ki ustvari signal zavrnitve, ki ga bere. Privzeto je izklopljeno: vrstni red izbiranja je prav rotacija."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Zavrnitve kvot v okviru modela",
+        "description": "Kvoto opencode 429 uporabite samo za model, ki jo je zadel, tako da isti izhod še naprej služi drugim modelom, in jo počistite šele, ko ta model uspe. Potrošniki, ki nimajo modela (rotacija skupine, parkiranje in ponovno predvajanje, skrbniška vidnost, sprožilec izbirnika, preverjanje zdravja), ga še vedno vidijo. Potrebuje PROXY_SKIP_RECENTLY_FAILED, ki povzroči zavrnitev. Privzeto izklopljeno: kvota enega modela 429 določi izhod na stran za vsak model."
+      },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "Pridobivanje proxyja: strogo ponavljanje POST",
+        "description": "Za neidempotentno zahtevo (POST, PUT, PATCH, DELETE) pošljite znova po napaki pri transportu (sveža vtičnica, nadomestni proxy, izvorna nadomestna) samo, ko napaka dokaže, da ni bilo nič poslano: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH ali časovna omejitev povezave. Napaka vtičnice po pisanju lahko pomeni, da je navzgor sprejela zahtevo, tako da bi lahko ponovno pošiljanje ustvarilo in zaračunalo dvakrat. Privzeto izklopljeno: telo, ki ga je mogoče ponovno predvajati, se znova pošlje ob kateri koli napaki pri transportu, kar prav tako obnovi zastarelo združeno vtičnico."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "Evidenje pripisovanja rotacije",
@@ -14228,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "Ponovni izbirni pool za OpenCode 429",
         "description": "Za večračunalniško rotacijo OpenCode, po 429 od ponudnika, razdeljenega po izstopnem loncu, na računu brez posrednika v ambientalnem kontekstu poola, se obrnite na pool povezav za drugega člana za naslednji poskus namesto ponovnega poskusa iste izstopne naslove. Red, nikoli izločanje: izčrpan pool ohranja trenutno vedenje. Privzeto izklopljeno: vsak 429 se nanaša na naslednji račun natančno kot prej."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress Probe",
+        "description": "Za izvajalca OpenCode, ko na proksi zahtevo odgovori 403 ali 451 FreeTierError in ponovni poskus opazovanih orodij ni uspel ali se ni uporabil, pošlji zahtevo enkrat prek drugega proxyja (drugega računa proxy ali drugega člana skupine, nikoli neposredne povezave). Šele ko ta sonda odgovori 200, se prvi izhod postavi na stran v pomnilniku za zavrnitev proxyja in odziv sonde se postreže; če oba zavrneta, se izvirna zavrnitev vrne in nič se ne zabeleži. Enako besedilo zavrnitve zajema označeni izstopni IP in zavrnjeno obliko zahteve, tako da ju sonda loči na podlagi dokazov. Privzeto izklopljeno: zavrnitev se vrne nespremenjena."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Odprtje OpenCode v2 oznake zahtevka stranke",
@@ -14410,8 +14435,8 @@
         "description": "Ko kombinacijski cilj odgovori s točno zavrnitvijo politike vsebine (koda ali tip cyber_policy / content_policy_violation), ustavi kombinacijo in vrni to zavrnitev, tudi če so preostali cilji različni modeli, namesto napredovanja na naslednji cilj. Privzeto je izklopljeno: zavrnitev nikoli ne ohladi računa ali sproži varnostnega prekinitva ponudnika, kombinacija pa napreduje na svoj naslednji cilj natanko kot prej."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "Odgovori: Keepalive samo pri transportu",
+        "description": "Pošljite keepalive Responses API kot prazno vrstico namesto dogodka response.in_progress, tako da sintetični posnetek nikoli ne more nadomestiti pravega odziva v uradnem SDK. Prazna vrstica ne odpošlje nobenega dogodka SSE, tako da nadzornik odjemalca, ki se ponastavi samo ob dogodkih, ne bi bil ponastavljen med dolgo tiho fazo. Privzeto izklopljeno: časovniki pošljejo specifikacijsko veljaven dogodek response.in_progress."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Ponovna poskusa po čakanju: Preskoči zavrge 403/410",

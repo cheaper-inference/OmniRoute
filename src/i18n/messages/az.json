@@ -1000,6 +1000,8 @@
     "batchListTitle": "Paketlər",
     "batchListCount": "{count} paket",
     "batchListRemovingCompleted": "Silinir…",
+    "batchListRemoveCompletedPartial": "Çox sayda paket silindi. Qalanlarını təmizləmək üçün yenidən klikləyin.",
+    "batchListRemoveCompletedFailed": "Paketlər silinərkən xəta baş verdi.",
     "batchListRemoveCompleted": "Tamamlanmışları sil",
     "batchListTableStatus": "Vəziyyət",
     "batchListTableId": "ID",
@@ -1038,6 +1040,12 @@
     "batchListRefreshing": "Yenilənir…",
     "batchListRefresh": "Yenilə",
     "uploadFileModalRemove": "Sil",
+    "fileInputChoose": "Fayl seçin",
+    "fileInputChooseMultiple": "Faylları seçin",
+    "fileInputEmpty": "Heç bir fayl seçilməyib",
+    "fileInputSelectedCount": "{count, plural, one {# fayl seçilib} other {# fayl seçilib}}",
+    "fileDropLabel": "Faylı buraya buraxın və ya seçin",
+    "fileDropLabelMultiple": "Faylları buraya buraxın və ya seçin",
     "uploadFileModalUploading": "Yüklənir…",
     "wizardInputReading": "Fayl oxunur…",
     "wizardInputReady": "Hazırdır",
@@ -12375,7 +12383,9 @@
       "failedTitle": "Bütün {count} cəhdlər uğursuz oldu",
       "failed": "başarısız oldu",
       "pinnedTitle": "Kontekst-cache sessiya pinləmə vasitəsilə model seçildi",
-      "pinned": "sabitləşdirilmiş"
+      "pinned": "sabitləşdirilmiş",
+      "recoveredAttemptsTitle": "Sorğu {count} cəhddə bərpa edildi",
+      "latestOutcomeFailed": "Son sorğunun nəticəsi uğursuz oldu"
     },
     "attempts": "cəhdlər",
     "detail": {
@@ -12477,13 +12487,20 @@
       "continuesFromParent": "ana elementdən davam edir",
       "continuesFrom": "{id} elementindən davam edir",
       "viewConversation": "söhbətə bax",
-      "openConversation": "{id} söhbətini aç"
+      "openConversation": "{id} söhbətini aç",
+      "omittedHttpAttempts": "{count} HTTP göndərişi saxlanılmayıb",
+      "noHttpResponse": "HTTP cavabı müşahidə edilməyib",
+      "transportError": "Nəqliyyat xətası"
     },
     "tableLabel": "Sorğu jurnalları",
     "throughputPostFirstToken": "İlk tokendən sonra",
     "throughputEndToEnd": "Ucdan-uca",
     "throughputRate": "{value} token/san",
-    "throughputExplanation": "Hər iki sürət çıxış və düşünmə tokenlərinin sayından daha böyük olanını istifadə edir. İlk tokendən sonrakı sürət etibarlı TTFT-ni nəzərə almır; əks halda, tam müddətdən istifadə edir. Ucdan-uca sürət həmişə tam müddətdən istifadə edir. Buferlənmiş cavab model daha sürətli generasiya etmədən də yüksək ani çatdırılma sürətinə malik ola bilər."
+    "throughputExplanation": "Hər iki sürət çıxış və düşünmə tokenlərinin sayından daha böyük olanını istifadə edir. İlk tokendən sonrakı sürət etibarlı TTFT-ni nəzərə almır; əks halda, tam müddətdən istifadə edir. Ucdan-uca sürət həmişə tam müddətdən istifadə edir. Buferlənmiş cavab model daha sürətli generasiya etmədən də yüksək ani çatdırılma sürətinə malik ola bilər.",
+    "omittedHttpAttempts": "{count} HTTP göndərişi saxlanılmayıb",
+    "upstreamStatus": "Yuxarı server {status}",
+    "noHttpResponse": "HTTP cavabı müşahidə edilməyib",
+    "transportError": "Nəqliyyat xətası"
   },
   "proxyLogger": {
     "filterAll": "Hamısı",
@@ -14250,9 +14267,13 @@
         "label": "Paylaşılan Egress Hovuzunun Sırası",
         "description": "Kvotası egress ünvanına görə qruplaşdırılan təminatçılar üçün, son vaxtlar rədd edilmiş üzvün müşahidə olunan egress ünvanını paylaşan hovuz üzvünü sağlam üzvlərdən dərhal aşağıda sıralayın. Yalnız sıralama üçündür, heç vaxt istisna edilmir. Oxuduğu imtina siqnalını yaradan PROXY_SKIP_RECENTLY_FAILED tələb olunur. Defolt olaraq qeyri-aktivdir: seçim sırası adi rotasiya ilə tamamilə eynidir."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Model üzrə kvotadan imtinalar",
+        "description": "opencode kvotası 429-u yalnız onu vuran modelə tətbiq edin ki, eyni çıxış digər modellərə xidmət etməyə davam etsin və yalnız həmin model uğur qazandıqda onu silin. Modeli olmayan istehlakçılar (hovuz fırlanması, park və təkrar oynatma, admin görünürlüğü, seçici tetikleyici, sağlamlıq taraması) hələ də bunu görür. İmtina çıxaran PROXY_SKIP_RECENTLY_FAILED lazımdır. Defolt olaraq söndürülür: bir modelin 429 kvotası hər model üçün çıxışı kənara qoyur."
+      },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "Proksi gətirmə: ciddi POST təkrarı",
+        "description": "Qeyri-idempotent sorğu üçün (POST, PUT, PATCH, DELETE) nəql xətasından sonra (təzə yuva, proksi bərpası, yerli ehtiyat) yalnız xəta heç bir şeyin göndərilmədiyini sübut etdikdə yenidən göndərin: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH və ya qoşulma vaxtı aşımı. Yazmadan sonra bir yuva xətası yuxarı axının sorğunu qəbul etdiyi anlamına gələ bilər, beləliklə, yenidən göndərmə onu iki dəfə yarada və hesaba çıxara bilər. Defolt olaraq sönülüdür: təkrar oxuna bilən gövdə istənilən nəqliyyat xətasında bir dəfə göndərilir, bu da köhnə yığılmış rozetkanı bərpa edir."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotasiya Aidiyyətinin Loqlanması",
@@ -14305,6 +14326,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 Hovuzun Yenidən Seçilməsi",
         "description": "OpenCode çoxhesablı rotasiyası üçün, ümumi hovuz kontekstində proksisiz hesabda çıxışa görə qruplaşdırılmış (egress-bucketed) provayderdən 429 xətası alındıqdan sonra, eyni çıxış ünvanı ilə yenidən cəhd etmək əvəzinə, növbəti cəhd üçün bağlantı hovuzundan başqa bir üzv tələb edin. Sıralayır, heç vaxt istisna etmir: tükənmiş hovuz mövcud davranışı saxlayır. Varsayılan olaraq deaktivdir: hər bir 429 əvvəlki kimi növbəti hesaba keçir."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Pulsuz Səviyyəli Çıxış Probu",
+        "description": "OpenCode icraçısı üçün proksiləşdirilmiş sorğuya 403 və ya 451 FreeTierError cavab verildikdə və müşahidə alətlərinin təkrar cəhdi uğursuz olduqda və ya tətbiq edilmədikdə, sorğunu bir dəfə fərqli proksi vasitəsilə göndərin (başqa bir hesab proksisi və ya başqa bir hovuz üzvü, heç vaxt birbaşa əlaqə olmadan). Yalnız bu zond 200-ə cavab verdikdə, proksi imtina yaddaşında ilk çıxış ayrılır və sorğu cavabı verilir; hər ikisi imtina etdikdə, imtinanın əsli qaytarılır və heç nə qeydə alınmır. Eyni imtina mətni işarələnmiş çıxış IP və rədd edilmiş sorğu formasını əhatə edir, ona görə də araşdırma onları sübutlarla ayırır. Defolt olaraq söndürülür: imtina dəyişməz olaraq qaytarılır."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 Klient Barmaq İzi",
@@ -14487,8 +14512,8 @@
         "description": "Kombo hədəfi dəqiq məzmun siyasəti imtinası ilə cavab verdikdə (kod və ya növü cyber_policy / content_policy_violation), növbəti hədəfə keçmək əvəzinə, komboyu dayandırın və qalan hədəflər fərqli modellər olsa belə, həmin imtina cavabını qaytarın. Defolt olaraq qeyri-aktivdir: rədd cavabı heç vaxt hesabı soyutmur və ya provayder kəsicisini işə salmır və kombo əvvəlki kimi növbəti hədəfinə keçir."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "Cavablar: yalnız nəqliyyatda sağ olun",
+        "description": "Cavabları response.in_progress hadisəsi əvəzinə boş sətir kimi göndərin, beləliklə, sintetik snapshot heç vaxt rəsmi SDK-də real cavabı əvəz edə bilməz. Boş sətir heç bir SSE hadisəsi göndərmir, buna görə də yalnız hadisələrdə sıfırlanan müştəri nəzarətçisi uzun səssiz faza zamanı sıfırlanmayacaq. Defolt olaraq söndürülür: taymerlər etibarlı response.in_progress hadisəsini göndərir."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Soyuma Təkrar Cəhdi: 403/410 İmtinalarını Keç",

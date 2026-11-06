@@ -923,6 +923,8 @@
     "batchListTitle": "אצוות",
     "batchListCount": "{count} אצוות",
     "batchListRemovingCompleted": "מסיר…",
+    "batchListRemoveCompletedPartial": "הוסרו מספר רב של אצוות. יש ללחוץ שוב כדי לנקות את השאר.",
+    "batchListRemoveCompletedFailed": "אירעה שגיאה בעת הסרת האצוות.",
     "batchListRemoveCompleted": "הסרת אצוות שהושלמו",
     "batchListTableStatus": "סטטוס",
     "batchListTableId": "מזהה",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "מתבצע רענון…",
     "batchListRefresh": "רענון",
     "uploadFileModalRemove": "הסרה",
+    "fileInputChoose": "בחירת קובץ",
+    "fileInputChooseMultiple": "בחירת קבצים",
+    "fileInputEmpty": "לא נבחר קובץ",
+    "fileInputSelectedCount": "{count, plural, one {נבחר קובץ אחד} other {נבחרו # קבצים}}",
+    "fileDropLabel": "יש לגרור קובץ לכאן או לבחור קובץ",
+    "fileDropLabelMultiple": "יש לגרור קבצים לכאן או לבחור קבצים",
     "uploadFileModalUploading": "מתבצעת העלאה…",
     "wizardInputReading": "מתבצעת קריאת הקובץ…",
     "wizardInputReady": "מוכן",
@@ -12298,7 +12306,9 @@
       "failedTitle": "כל {count} הניסיונות נכשלו",
       "failed": "נכשל",
       "pinnedTitle": "המודל נבחר באמצעות נעילת מושב מטמון ההקשר",
-      "pinned": "מוצמד"
+      "pinned": "מוצמד",
+      "recoveredAttemptsTitle": "הבקשה התאוששה לאחר {count} ניסיונות",
+      "latestOutcomeFailed": "תוצאת הבקשה האחרונה נכשלה"
     },
     "attempts": "ניסיונות",
     "detail": {
@@ -12400,13 +12410,20 @@
       "continuesFromParent": "ממשיך מהאב",
       "continuesFrom": "ממשיך מ־{id}",
       "viewConversation": "הצגת השיחה",
-      "openConversation": "פתיחת השיחה {id}"
+      "openConversation": "פתיחת השיחה {id}",
+      "omittedHttpAttempts": "{count} שליחות HTTP לא נשמרו",
+      "noHttpResponse": "לא נצפתה תגובת HTTP",
+      "transportError": "שגיאת תעבורה"
     },
     "tableLabel": "יומני בקשות",
     "throughputPostFirstToken": "לאחר הטוקן הראשון",
     "throughputEndToEnd": "מקצה לקצה",
     "throughputRate": "{value} טוקנים/שנייה",
-    "throughputExplanation": "שני הקצבים משתמשים במספר הגדול מבין ספירות טוקני הפלט והחשיבה. הקצב שלאחר הטוקן הראשון אינו כולל TTFT תקף; אחרת הוא משתמש במשך המלא. קצב מקצה לקצה משתמש תמיד במשך המלא. לתגובה עם חוצץ יכולה להיות מהירות אספקה גבוהה בפרץ בלי יצירת מודל מהירה יותר."
+    "throughputExplanation": "שני הקצבים משתמשים במספר הגדול מבין ספירות טוקני הפלט והחשיבה. הקצב שלאחר הטוקן הראשון אינו כולל TTFT תקף; אחרת הוא משתמש במשך המלא. קצב מקצה לקצה משתמש תמיד במשך המלא. לתגובה עם חוצץ יכולה להיות מהירות אספקה גבוהה בפרץ בלי יצירת מודל מהירה יותר.",
+    "omittedHttpAttempts": "{count} שליחות HTTP לא נשמרו",
+    "upstreamStatus": "שרת במעלה הזרם {status}",
+    "noHttpResponse": "לא נצפתה תגובת HTTP",
+    "transportError": "שגיאת תעבורה"
   },
   "proxyLogger": {
     "filterAll": "הכול",
@@ -14173,9 +14190,13 @@
         "label": "סדר מאגר לפי כתובת יציאה משותפת",
         "description": "עבור ספקים שהמכסה שלהם מחולקת לפי כתובת יציאה, דרג חבר מאגר שחולק את כתובת היציאה הנצפית של חבר שנדחה לאחרונה מיד מתחת לחברים תקינים. שינוי סדר בלבד, לעולם לא מוחרג. דורש את PROXY_SKIP_RECENTLY_FAILED, המפיק את אות הדחייה שהוא קורא. מושבת כברירת מחדל: סדר הבחירה זהה בדיוק לרוטציה הרגילה."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "סירובי מכסה בהיקף של מודל",
+        "description": "החל מכסת opencode 429 רק על הדגם שפגע בו, כך שאותה יציאה תמשיך לשרת דגמים אחרים, ותנקה אותה רק כאשר הדגם הזה מצליח. צרכנים שאין להם דגם (סיבוב בריכה, חניה והשמעה חוזרת, נראות מנהל, טריגר בורר, סריקה בריאותית) עדיין רואים את זה. צריך PROXY_SKIP_RECENTLY_FAILED, שמייצר את הסירוב. כבוי כברירת מחדל: מכסה 429 של דגם אחד מפרידה את היציאה לכל דגם."
+      },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "שליפת פרוקסי: שידור חוזר POST קפדני",
+        "description": "עבור בקשה שאינה אימפוטנטית (POST, PUT, PATCH, DELETE), שלח שוב לאחר שגיאת העברה (resh socket, proxy fallback, Native fallback) רק כאשר השגיאה מוכיחה ששום דבר לא נשלח: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH או פסק זמן לחיבור. שגיאת socket לאחר הכתיבה יכולה לומר שהמעלה קיבל את הבקשה, כך ששליחה חוזרת יכולה ליצור ולחייב אותה פעמיים. כבוי כברירת מחדל: גוף הניתן להשמעה חוזר נשלח פעם אחת בכל שגיאת העברה, אשר גם משחזרת שקע אסוף מיושן."
       },
       "ROTATION_ATTRIBUTION": {
         "label": "תיעוד שיוך ברוטציה",
@@ -14228,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "בחירה מחדש של מאגר ב-OpenCode עבור 429",
         "description": "עבור סבב החשבונות המרובים של OpenCode, לאחר 429 מספק המחולק לפי כתובות יציאה (egress-bucketed) בחשבון ללא פרוקסי תחת הקשר מאגר סביבתי, בקש ממאגר החיבורים חבר אחר עבור הניסיון הבא במקום לנסות שוב באותה כתובת יציאה (egress). קובע סדר, לעולם אינו שולל: מאגר שמוצה שומר על ההתנהגות הנוכחית. מושבת כברירת מחדל: כל 429 עובר בסבב לחשבון הבא בדיוק כמו קודם."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress Probe",
+        "description": "עבור המבצע OpenCode, כאשר בקשת פרוקסי נענית 403 או 451 FreeTierError והניסיון החוזר של הכלים שנצפו נכשל או לא הוחל, שלח את הבקשה פעם אחת דרך פרוקסי אחר (פרוקסי אחר בחשבון או חבר אחר במאגר, אף פעם לא חיבור ישיר). רק כאשר בדיקה זו עונה על 200, היציאה הראשונה מופרשת בזיכרון סרבנות ה-Proxy ותגובת הבדיקה מוגשת; כאשר שניהם מסרבים, הסירוב המקורי מוחזר ושום דבר לא נרשם. אותו טקסט סירוב מכסה יציאה מסומנת של IP וצורת בקשה שנדחתה, כך שהבדיקה מבדילה ביניהם על ידי ראיות. כבוי כברירת מחדל: הסירוב מוחזר ללא שינוי."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "טביעת אצבע של לקוח OpenCode v2",
@@ -14410,8 +14435,8 @@
         "description": "כאשר יעד combo משיב עם סירוב מדויק של מדיניות תוכן (קוד או סוג cyber_policy / content_policy_violation), עצור את ה-combo והחזר סירוב זה גם כאשר היעדים הנותרים הם מודלים שונים, במקום להתקדם ליעד הבא. מושבת כברירת מחדל: הסירוב לעולם אינו מכניס את החשבון לתקופת צינון ואינו מפעיל את ה-breaker של הספק, וה-combo ממשיך ליעד הבא שלו בדיוק כמו בעבר."
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "תגובות: שמירה על ההובלה בלבד",
+        "description": "שלח תגובות keepalives כשורה ריקה במקום אירוע response.in_progress, כך שתמונת מצב סינתטית לעולם לא תוכל להחליף את התגובה האמיתית ב- SDK הרשמי. שורה ריקה לא שולחת אירוע SSE, כך שכלב שמירה של לקוח שמתאפס רק על אירועים לא יאופס במהלך שלב שקט ארוך. כבוי כברירת מחדל: טיימרים שולחים את אירוע response.in_progress תקף למפרט."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "ניסיון חוזר בתקופת צינון: דילוג על סירובי 403/410",

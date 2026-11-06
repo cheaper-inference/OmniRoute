@@ -923,6 +923,8 @@
     "batchListTitle": "ବ୍ୟାଚ୍ଗୁଡ଼ିକ",
     "batchListCount": "{count}ଟି ବ୍ୟାଚ୍",
     "batchListRemovingCompleted": "ଅପସାରଣ କରାଯାଉଛି…",
+    "batchListRemoveCompletedPartial": "ବହୁ ସଂଖ୍ୟକ ବ୍ୟାଚ୍ ଅପସାରଣ କରାଯାଇଛି। ଅବଶିଷ୍ଟଗୁଡ଼ିକୁ ସଫା କରିବା ପାଇଁ ପୁଣି କ୍ଲିକ୍ କରନ୍ତୁ।",
+    "batchListRemoveCompletedFailed": "ବ୍ୟାଚ୍ଗୁଡ଼ିକୁ ଅପସାରଣ କରିବା ସମୟରେ ଏକ ତ୍ରୁଟି ଘଟିଛି।",
     "batchListRemoveCompleted": "ସମ୍ପୂର୍ଣ୍ଣ ହୋଇଥିବାଗୁଡ଼ିକୁ ଅପସାରଣ କରନ୍ତୁ",
     "batchListTableStatus": "ସ୍ଥିତି",
     "batchListTableId": "ID",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "ରିଫ୍ରେଶ୍ ହେଉଛି…",
     "batchListRefresh": "ରିଫ୍ରେଶ୍ କରନ୍ତୁ",
     "uploadFileModalRemove": "ହଟାନ୍ତୁ",
+    "fileInputChoose": "ଫାଇଲ ବାଛନ୍ତୁ",
+    "fileInputChooseMultiple": "ଫାଇଲଗୁଡ଼ିକ ବାଛନ୍ତୁ",
+    "fileInputEmpty": "କୌଣସି ଫାଇଲ ବଛାଯାଇନାହିଁ",
+    "fileInputSelectedCount": "{count, plural, one {#ଟି ଫାଇଲ ବଛାଯାଇଛି} other {#ଟି ଫାଇଲ ବଛାଯାଇଛି}}",
+    "fileDropLabel": "ଏଠାରେ ଏକ ଫାଇଲ ଛାଡ଼ନ୍ତୁ କିମ୍ବା ଗୋଟିଏ ବାଛନ୍ତୁ",
+    "fileDropLabelMultiple": "ଏଠାରେ ଫାଇଲଗୁଡ଼ିକ ଛାଡ଼ନ୍ତୁ କିମ୍ବା ଫାଇଲଗୁଡ଼ିକ ବାଛନ୍ତୁ",
     "uploadFileModalUploading": "ଅପଲୋଡ୍ ହେଉଛି…",
     "wizardInputReading": "ଫାଇଲ୍ ପଢ଼ାଯାଉଛି…",
     "wizardInputReady": "ପ୍ରସ୍ତୁତ",
@@ -12298,7 +12306,9 @@
       "failedTitle": "ସମସ୍ତ {count}ଟି ପ୍ରୟାସ ବିଫଳ ହୋଇଛି",
       "failed": "ବିଫଳ",
       "pinnedTitle": "କଣ୍ଟେକ୍ସ୍ଟ-କ୍ୟାଶ୍ ସେସନ୍ ପିନିଂ ମାଧ୍ୟମରେ ମଡେଲ୍ ଚୟନ କରାଯାଇଛି",
-      "pinned": "ପିନ୍ କରାଯାଇଛି"
+      "pinned": "ପିନ୍ କରାଯାଇଛି",
+      "recoveredAttemptsTitle": "{count} ପ୍ରୟାସ ପରେ ଅନୁରୋଧ ପୁନରୁଦ୍ଧାର ହୋଇଛି",
+      "latestOutcomeFailed": "ସର୍ବଶେଷ ଅନୁରୋଧର ଫଳାଫଳ ବିଫଳ ହୋଇଛି"
     },
     "attempts": "ପ୍ରୟାସଗୁଡ଼ିକ",
     "detail": {
@@ -12400,13 +12410,20 @@
       "continuesFromParent": "ପ୍ୟାରେଣ୍ଟରୁ ଜାରି ରହିଛି",
       "continuesFrom": "{id}ରୁ ଜାରି ରହିଛି",
       "viewConversation": "ବାର୍ତ୍ତାଳାପ ଦେଖନ୍ତୁ",
-      "openConversation": "ବାର୍ତ୍ତାଳାପ {id} ଖୋଲନ୍ତୁ"
+      "openConversation": "ବାର୍ତ୍ତାଳାପ {id} ଖୋଲନ୍ତୁ",
+      "omittedHttpAttempts": "{count} HTTP ପ୍ରେରଣ ସଂରକ୍ଷିତ ହୋଇନାହିଁ",
+      "noHttpResponse": "କୌଣସି HTTP ପ୍ରତିକ୍ରିୟା ଦେଖାଯାଇନାହିଁ",
+      "transportError": "ପରିବହନ ତ୍ରୁଟି"
     },
     "tableLabel": "ଅନୁରୋଧ ଲଗ୍ଗୁଡ଼ିକ",
     "throughputPostFirstToken": "ପ୍ରଥମ ଟୋକନ୍ ପରେ",
     "throughputEndToEnd": "ଆରମ୍ଭରୁ ଶେଷ ପର୍ଯ୍ୟନ୍ତ",
     "throughputRate": "{value} ଟୋକନ୍/ସେକେଣ୍ଡ",
-    "throughputExplanation": "ଉଭୟ ହାର ଆଉଟପୁଟ୍ ଏବଂ ରିଜନିଂ ଟୋକନ୍ ସଂଖ୍ୟା ମଧ୍ୟରୁ ବଡ଼ଟିକୁ ବ୍ୟବହାର କରନ୍ତି। ପ୍ରଥମ ଟୋକନ୍ ପରେ ଏକ ବୈଧ TTFT ବାଦ ଦିଏ; ନଚେତ୍ ଏହା ସମ୍ପୂର୍ଣ୍ଣ ଅବଧି ବ୍ୟବହାର କରେ। ଆରମ୍ଭରୁ ଶେଷ ପର୍ଯ୍ୟନ୍ତ ସର୍ବଦା ସମ୍ପୂର୍ଣ୍ଣ ଅବଧି ବ୍ୟବହାର କରେ। ଏକ ବଫର୍ଡ ପ୍ରତିକ୍ରିୟାରେ ମଡେଲ ଉତ୍ପାଦନ ଶୀଘ୍ର ନହେଲେ ମଧ୍ୟ ଉଚ୍ଚ ବର୍ଷ୍ଟ ଡେଲିଭରି ହାର ରହିପାରେ।"
+    "throughputExplanation": "ଉଭୟ ହାର ଆଉଟପୁଟ୍ ଏବଂ ରିଜନିଂ ଟୋକନ୍ ସଂଖ୍ୟା ମଧ୍ୟରୁ ବଡ଼ଟିକୁ ବ୍ୟବହାର କରନ୍ତି। ପ୍ରଥମ ଟୋକନ୍ ପରେ ଏକ ବୈଧ TTFT ବାଦ ଦିଏ; ନଚେତ୍ ଏହା ସମ୍ପୂର୍ଣ୍ଣ ଅବଧି ବ୍ୟବହାର କରେ। ଆରମ୍ଭରୁ ଶେଷ ପର୍ଯ୍ୟନ୍ତ ସର୍ବଦା ସମ୍ପୂର୍ଣ୍ଣ ଅବଧି ବ୍ୟବହାର କରେ। ଏକ ବଫର୍ଡ ପ୍ରତିକ୍ରିୟାରେ ମଡେଲ ଉତ୍ପାଦନ ଶୀଘ୍ର ନହେଲେ ମଧ୍ୟ ଉଚ୍ଚ ବର୍ଷ୍ଟ ଡେଲିଭରି ହାର ରହିପାରେ।",
+    "omittedHttpAttempts": "{count} HTTP ପ୍ରେରଣ ସଂରକ୍ଷିତ ହୋଇନାହିଁ",
+    "upstreamStatus": "ଅପଷ୍ଟ୍ରିମ୍ ସର୍ଭର {status}",
+    "noHttpResponse": "କୌଣସି HTTP ପ୍ରତିକ୍ରିୟା ଦେଖାଯାଇନାହିଁ",
+    "transportError": "ପରିବହନ ତ୍ରୁଟି"
   },
   "proxyLogger": {
     "filterAll": "ସବୁ",
@@ -14173,9 +14190,13 @@
         "label": "ଅଂଶୀଦାରିତ ଇଗ୍ରେସ୍ ପୁଲ୍ କ୍ରମ",
         "description": "ଯେଉଁ ପ୍ରଦାନକାରୀଙ୍କ କୋଟା ଇଗ୍ରେସ୍ ଠିକଣା ଦ୍ୱାରା ବଣ୍ଟନ କରାଯାଇଥାଏ, ସେମାନଙ୍କ ପାଇଁ ନିକଟରେ ପ୍ରତ୍ୟାଖ୍ୟାତ ସଦସ୍ୟଙ୍କ ନିରୀକ୍ଷିତ ଇଗ୍ରେସ୍ ଠିକଣା ଅଂଶୀଦାର କରୁଥିବା ଏକ ପୁଲ୍ ସଦସ୍ୟଙ୍କୁ ସୁସ୍ଥ ସଦସ୍ୟଙ୍କ ଠିକ୍ ତଳେ ସ୍ଥାନିତ କରନ୍ତୁ। କେବଳ କ୍ରମ, କଦାପି ବାଦ୍ ଦିଆଯାଏ ନାହିଁ। PROXY_SKIP_RECENTLY_FAILED ଆବଶ୍ୟକ, ଯାହା ଏହା ପଢ଼ୁଥିବା ପ୍ରତ୍ୟାଖ୍ୟାନ ସଙ୍କେତ ଉତ୍ପନ୍ନ କରେ। ଡିଫଲ୍ଟ ଭାବରେ ଅଫ୍ ଅଛି: ଚୟନ କ୍ରମ ସମ୍ପୂର୍ଣ୍ଣ ଭାବରେ ସାଧାରଣ ରୋଟେସନ୍ ଅଟେ।"
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "ମଡେଲ୍-ସ୍କୋପିଡ୍ କୋଟା ପ୍ରତ୍ୟାଖ୍ୟାନ \\|",
+        "description": "କେବଳ ଏକ ମଡେଲରେ ଏକ opencode କୋଟା 429 ପ୍ରୟୋଗ କରନ୍ତୁ, ତେଣୁ ସମାନ ଇଗ୍ରେସ୍ ଅନ୍ୟ ମଡେଲଗୁଡିକର ସେବା ଜାରି ରଖେ ଏବଂ ସେହି ମଡେଲ୍ ସଫଳ ହେଲେ ହିଁ ଏହାକୁ ସଫା କର \\| ଯେଉଁ ଗ୍ରାହକଙ୍କର କ model ଣସି ମଡେଲ୍ ନାହିଁ (ପୁଲ୍ ଘୂର୍ଣ୍ଣନ, ପାର୍କ ଏବଂ ରିପ୍ଲେ, ଆଡମିନ୍ ଭିଜିବିଲିଟି, ସିଲେକ୍ଟର୍ ଟ୍ରିଗର, ହେଲ୍ଥ ସୁଇପ୍) ତଥାପି ଏହାକୁ ଦେଖନ୍ତି \\| PROXY_SKIP_RECENTLY_FAILED ଆବଶ୍ୟକ, ଯାହା ପ୍ରତ୍ୟାଖ୍ୟାନ ସୃଷ୍ଟି କରେ \\| ଡିଫଲ୍ଟ ଭାବରେ ବନ୍ଦ: ଗୋଟିଏ ମଡେଲର କୋଟା 429 ପ୍ରତ୍ୟେକ ମଡେଲ ପାଇଁ ଏଗ୍ରେସକୁ ପୃଥକ କରିଥାଏ \\|"
+      },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
-        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
-        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+        "label": "ପ୍ରକ୍ସି ଫେଚ୍: କଠୋର POST ରିପ୍ଲେ \\|",
+        "description": "ଏକ ଅଣ-କ୍ଷମତାହୀନ ଅନୁରୋଧ ପାଇଁ (POST, PUT, PATCH, DELETE), ଏକ ପରିବହନ ତ୍ରୁଟି ପରେ ପଠାନ୍ତୁ (ତାଜା ସକେଟ୍, ପ୍ରକ୍ସି ଫଲବ୍ୟାକ୍, ଦେଶୀ ଫଲବ୍ୟାକ୍) ଯେତେବେଳେ ତ୍ରୁଟି ପ୍ରମାଣ କରେ ଯେ କିଛି ପଠାଯାଇ ନାହିଁ: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH କିମ୍ବା ଏକ ସଂଯୋଗ ସମୟ ସମାପ୍ତ \\| ଲେଖା ପରେ ଏକ ସକେଟ୍ ତ୍ରୁଟିର ଅର୍ଥ ହେଉଛି ଅପଷ୍ଟ୍ରିମ୍ ଅନୁରୋଧକୁ ଗ୍ରହଣ କରିଛି, ତେଣୁ ଏକ ରିସେଣ୍ଡ୍ ଏହାକୁ ଦୁଇଥର ସୃଷ୍ଟି ଏବଂ ବିଲ୍ କରିପାରେ \\| ଡିଫଲ୍ଟ ଭାବରେ ଅଫ୍: ଯେକ any ଣସି ପରିବହନ ତ୍ରୁଟି ଉପରେ ଏକ ପୁନ play ଚିତ୍ରଣକାରୀ ଶରୀର ଥରେ ବିରକ୍ତ ହୁଏ, ଯାହା ଏକ ଷ୍ଟାଲ୍ ପୁଲଡ୍ ସକେଟ୍ ମଧ୍ୟ ପୁନରୁଦ୍ଧାର କରେ \\|"
       },
       "ROTATION_ATTRIBUTION": {
         "label": "ରୋଟେସନ୍ ଆଟ୍ରିବ୍ୟୁସନ୍ ଲଗିଂ",
@@ -14228,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 ପୁଲ୍ ରିସିଲେକ୍ଟ",
         "description": "OpenCode ମଲ୍ଟି-ଆକାଉଣ୍ଟ ରୋଟେସନ୍ ପାଇଁ, ଏକ ଆମ୍ବିଏଣ୍ଟ୍ ପୁଲ୍ ପ୍ରସଙ୍ଗରେ ପ୍ରକ୍ସି-ବିହୀନ ଆକାଉଣ୍ଟରେ ଥିବା ଏକ egress-bucketed ପ୍ରଦାନକାରୀଙ୍କଠାରୁ 429 ଆସିବା ପରେ, ସମାନ egress ଠିକଣାକୁ ପୁନଃଚେଷ୍ଟା କରିବା ପରିବର୍ତ୍ତେ ପରବର୍ତ୍ତୀ ପ୍ରୟାସ ପାଇଁ କନେକ୍ସନ୍ ପୁଲ୍‌କୁ ଅନ୍ୟ ଏକ ସଦସ୍ୟ ମାଗନ୍ତୁ। କ୍ରମ ସ୍ଥିର କରେ, କେବେହେଲେ ବାଦ୍ ଦିଏ ନାହିଁ: ଏକ ସମାପ୍ତ ହୋଇଥିବା ପୁଲ୍ ବର୍ତ୍ତମାନର ଆଚରଣ ବଜାୟ ରଖେ। ଡିଫଲ୍ଟ ଭାବରେ ବନ୍ଦ: ପୂର୍ବ ଭଳି ପ୍ରତ୍ୟେକ 429 ପରବର୍ତ୍ତୀ ଆକାଉଣ୍ଟକୁ ରୋଟେଟ୍ ହୁଏ।"
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode ଫ୍ରି-ଟାୟାର୍ ଏଗ୍ରେସ୍ ପ୍ରୋବ \\|",
+        "description": "OpenCode ଏକଜେକ୍ୟୁଟର ପାଇଁ, ଯେତେବେଳେ ଏକ ପ୍ରକ୍ସିଡ୍ ଅନୁରୋଧ 403 କିମ୍ବା 451 FreeTierError ଉତ୍ତର ଦିଆଯାଏ ଏବଂ ପର୍ଯ୍ୟବେକ୍ଷଣ-ଉପକରଣଗୁଡିକ ପୁନ ry ଚେଷ୍ଟା ବିଫଳ ହେଲା କିମ୍ବା ପ୍ରୟୋଗ ହେଲା ନାହିଁ, ଏକ ଭିନ୍ନ ପ୍ରକ୍ସି (ଅନ୍ୟ ଏକ ଆକାଉଣ୍ଟ୍ ପ୍ରକ୍ସି କିମ୍ବା ଅନ୍ୟ ପୁଲ୍ ସଦସ୍ୟ, କେବେବି ପ୍ରତ୍ୟକ୍ଷ ସଂଯୋଗ) ମାଧ୍ୟମରେ ଅନୁରୋଧ ପଠାନ୍ତୁ \\| କେବଳ ଯେତେବେଳେ ସେହି ଅନୁସନ୍ଧାନର ଉତ୍ତର 200 ହେଉଛି ପ୍ରକ୍ସି ପ୍ରତ୍ୟାଖ୍ୟାନ ମେମୋରୀରେ ରଖାଯାଇଥିବା ପ୍ରଥମ ଏଗ୍ରେସ୍ ଏବଂ ପ୍ରୋବ ପ୍ରତିକ୍ରିୟା ପରିବେଷଣ କରାଯାଏ \\| ଯେତେବେଳେ ଉଭୟ ମନା କରନ୍ତି, ମୂଳ ପ୍ରତ୍ୟାଖ୍ୟାନ ଫେରସ୍ତ ହୁଏ ଏବଂ କିଛି ରେକର୍ଡ ହୁଏ ନାହିଁ \\| ସମାନ ପ୍ରତ୍ୟାଖ୍ୟାନ ପାଠ୍ୟ ଏକ ଫ୍ଲାଗ୍ ହୋଇଥିବା egress IP ଏବଂ ଏକ ପ୍ରତ୍ୟାଖ୍ୟାନ ଅନୁରୋଧ ଆକୃତିକୁ ଆବୃତ କରେ, ତେଣୁ ଅନୁସନ୍ଧାନ ସେମାନଙ୍କୁ ପ୍ରମାଣ ଦ୍ୱାରା ପୃଥକ ଭାବରେ କହିଥାଏ \\| ଡିଫଲ୍ଟ ଭାବରେ ବନ୍ଦ: ପ୍ରତ୍ୟାଖ୍ୟାନ ଅପରିବର୍ତ୍ତିତ ଭାବରେ ଫେରସ୍ତ ହୁଏ \\|"
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 କ୍ଲାଏଣ୍ଟ ଫିଙ୍ଗରପ୍ରିଣ୍ଟ",
@@ -14410,8 +14435,8 @@
         "description": "ଯେତେବେଳେ ଏକ combo ଟାର୍ଗେଟ୍ ଏକ ନିର୍ଦ୍ଦିଷ୍ଟ content-policy ପ୍ରତ୍ୟାଖ୍ୟାନ (କୋଡ୍ କିମ୍ବା ପ୍ରକାର cyber_policy / content_policy_violation) ସହିତ ଉତ୍ତର ଦିଏ, ପରବର୍ତ୍ତୀ ଟାର୍ଗେଟକୁ ଅଗ୍ରସର ହେବା ପରିବର୍ତ୍ତେ, combo କୁ ଅଟକାନ୍ତୁ ଏବଂ ଅବଶିଷ୍ଟ ଟାର୍ଗେଟଗୁଡ଼ିକ ଭିନ୍ନ ମଡେଲ୍ ହୋଇଥିଲେ ମଧ୍ୟ ସେହି ପ୍ରତ୍ୟାଖ୍ୟାନକୁ ଫେରାନ୍ତୁ। ଡିଫଲ୍ଟ ଭାବରେ ବନ୍ଦ: ଏହି ପ୍ରତ୍ୟାଖ୍ୟାନ କଦାପି ଆକାଉଣ୍ଟକୁ କୁଲ୍ ଡାଉନ୍ କରେ ନାହିଁ କିମ୍ବା ପ୍ରୋଭାଇଡର୍ ବ୍ରେକର୍‌କୁ ଟ୍ରିପ୍ କରେ ନାହିଁ, ଏବଂ combo ପୂର୍ବ ଭଳି ଠିକ୍ ଏହାର ପରବର୍ତ୍ତୀ ଟାର୍ଗେଟକୁ ଅଗ୍ରସର ହୁଏ।"
       },
       "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
-        "label": "__MISSING__:Responses: Transport-Only Keepalive",
-        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
+        "label": "ପ୍ରତିକ୍ରିୟା: କେବଳ ପରିବହନ ଉପରେ ରକ୍ଷଣାବେକ୍ଷଣ \\|",
+        "description": "response.in_progress ଇଭେଣ୍ଟ ପରିବର୍ତ୍ତେ ଏକ ଖାଲି ରେଖା ଭାବରେ ପ୍ରତିକ୍ରିୟାଗୁଡ଼ିକୁ ରଖନ୍ତୁ, ତେଣୁ ଏକ ସିନ୍ଥେଟିକ୍ ସ୍ନାପସଟ୍ ଅଫିସିଆଲ୍ SDK ରେ ପ୍ରକୃତ ପ୍ରତିକ୍ରିୟାକୁ କେବେବି ବଦଳାଇ ପାରିବ ନାହିଁ \\| ଏକ ଖାଲି ଲାଇନ SSE ଇଭେଣ୍ଟ ପଠାଏ ନାହିଁ, ତେଣୁ ଏକ କ୍ଲାଏଣ୍ଟ ୱାଚଡଗ୍ ଯାହା କେବଳ ଇଭେଣ୍ଟରେ ପୁନ ets ସେଟ୍ ହୁଏ ଏକ ଦୀର୍ଘ ନୀରବ ପର୍ଯ୍ୟାୟରେ ପୁନ et ସେଟ୍ ହେବ ନାହିଁ \\| ଡିଫଲ୍ଟ ଭାବରେ ଅଫ୍: ଟାଇମର୍ଗୁଡ଼ିକ ନିର୍ଦ୍ଦିଷ୍ଟ ବ valid response.in_progress ଇଭେଣ୍ଟ ପଠାନ୍ତି \\|"
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "କୁଲ୍‌ଡାଉନ୍ ପୁନଃପ୍ରୟାସ: 403/410 ପ୍ରତ୍ୟାଖ୍ୟାନଗୁଡ଼ିକୁ ଏଡ଼ାନ୍ତୁ",

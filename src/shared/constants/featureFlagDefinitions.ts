@@ -1,15 +1,6 @@
-export interface FeatureFlagDefinition {
-  key: string;
-  label: string;
-  description: string;
-  descriptionI18nKey: string;
-  category: "security" | "network" | "policies" | "runtime" | "cli" | "health";
-  defaultValue: string;
-  type: "boolean" | "enum";
-  enumValues?: string[];
-  requiresRestart: boolean;
-  warningLevel?: "info" | "caution" | "danger";
-}
+import type { FeatureFlagDefinition } from "./featureFlagTypes";
+
+export type { FeatureFlagDefinition };
 
 export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
   // ──────────────── Security (10) ────────────────
@@ -241,6 +232,18 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "caution",
   },
   {
+    key: "PROXY_REFUSAL_MODEL_SCOPE",
+    label: "Model-Scoped Quota Refusals",
+    description:
+      "Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model.",
+    descriptionI18nKey: "featureFlagProxyRefusalModelScopeDescription",
+    category: "network",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
     key: "ROTATION_ATTRIBUTION",
     label: "Rotation Attribution Logging",
     description:
@@ -390,6 +393,18 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     description:
       "For the OpenCode multi-account rotation, after a 429 from an egress-bucketed provider on a proxy-less account under an ambient pool context, ask the connection pool for another member for the next attempt instead of retrying the same egress address. Orders, never excludes: an exhausted pool keeps the current behavior. Off by default: every 429 rotates to the next account exactly as before.",
     descriptionI18nKey: "featureFlagOpencodePoolReselectDescription",
+    category: "network",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
+    key: "OPENCODE_FREE_TIER_EGRESS_PROBE",
+    label: "OpenCode Free-Tier Egress Probe",
+    description:
+      "For the OpenCode executor, when a proxied request is answered 403 or 451 FreeTierError and the observed-tools retry failed or did not apply, send the request once through a different proxy (another account proxy or another pool member, never a direct connection). Only when that probe answers 200 is the first egress set aside in the proxy refusal memory and the probe response served; when both refuse, the original refusal is returned and nothing is recorded. The same refusal text covers a flagged egress IP and a refused request shape, so the probe tells them apart by evidence. Off by default: the refusal is returned unchanged.",
+    descriptionI18nKey: "featureFlagOpencodeFreeTierEgressProbeDescription",
     category: "network",
     defaultValue: "false",
     type: "boolean",

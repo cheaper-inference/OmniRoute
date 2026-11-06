@@ -1,3 +1,8 @@
+import {
+  observeProviderHttpSend,
+  selectHttpResponse,
+  type HttpAttemptSelection,
+} from "../utils/providerHttpAttempts.ts";
 import { HTTP_STATUS, FETCH_TIMEOUT_MS } from "../config/constants.ts";
 import { getApiKeyCodexServiceTier } from "../../src/lib/providers/codexApiKeyServiceMode";
 import { resolveProviderUserAgentOverride } from "./providerUserAgentOverride.ts";
@@ -299,6 +304,7 @@ export type ExecutorExecuteResult =
   | Response
   | {
       response: Response;
+      upstreamHttpSelection?: HttpAttemptSelection | null;
       url?: string;
       headers?: Record<string, string>;
       transformedBody?: unknown;
@@ -323,6 +329,15 @@ export class BaseExecutor {
   constructor(provider: string, config: ProviderConfig) {
     this.provider = provider;
     this.config = config;
+  }
+
+  /** Provider-specific wire transport, after validation and serialization. */
+  protected dispatchRequest(
+    url: string,
+    init: RequestInit,
+    credentials: ProviderCredentials
+  ): Promise<Response> {
+    return dispatchGuarded(this.provider, url, init, credentials);
   }
 
   getProvider() {
@@ -739,6 +754,7 @@ export class BaseExecutor {
     }
   }
 
+  /** Dispatch a validated provider request through its recovery loop and transport hook. */
   async execute(input: ExecuteInput): Promise<ExecutorExecuteResult> {
     const {
       model,
@@ -986,6 +1002,7 @@ export class BaseExecutor {
       }
 
       try {
+        /** Bound connection startup while using the provider-specific wire transport. */
         const fetchWithStartTimeout = async (requestUrl: string, requestOptions: RequestInit) => {
           // GHSA-4f49: guard here (not only next to the first buildUrl) so retries
           // and fallback URLs are validated too, before any bytes leave the host.
@@ -1019,7 +1036,19 @@ export class BaseExecutor {
               this.provider,
               model,
               requestCredentials,
-              (url, init) => dispatchGuarded(this.provider, url, init, requestCredentials)
+              (url, init) =>
+                observeProviderHttpSend(
+                  {
+                    provider: this.provider,
+                    model:
+                      typeof (serializedBody as Record<string, unknown> | null)?.model === "string"
+                        ? String((serializedBody as Record<string, unknown>).model)
+                        : model,
+                    connectionId: requestCredentials?.connectionId ?? null,
+                    endpoint: "unknown",
+                  },
+                  () => this.dispatchRequest(url, init, requestCredentials)
+                )
             )(requestUrl, optionsWithSignal);
           } finally {
             if (timeoutId) clearTimeout(timeoutId);
@@ -1817,6 +1846,7 @@ export class BaseExecutor {
 
         return {
           response,
+          upstreamHttpSelection: selectHttpResponse(response),
           url,
           headers: finalHeaders,
           transformedBody: serializedBody,

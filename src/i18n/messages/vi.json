@@ -923,6 +923,8 @@
     "batchListTitle": "Lô",
     "batchListCount": "{count} lô",
     "batchListRemovingCompleted": "Đang xóa…",
+    "batchListRemoveCompletedPartial": "Đã xóa một số lượng lớn các lô. Nhấp lại để xóa phần còn lại.",
+    "batchListRemoveCompletedFailed": "Đã xảy ra lỗi khi xóa các lô.",
     "batchListRemoveCompleted": "Xóa các mục đã hoàn thành",
     "batchListTableStatus": "Trạng thái",
     "batchListTableId": "ID",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "Đang làm mới…",
     "batchListRefresh": "Làm mới",
     "uploadFileModalRemove": "Xóa",
+    "fileInputChoose": "Chọn tập tin",
+    "fileInputChooseMultiple": "Chọn các tập tin",
+    "fileInputEmpty": "Chưa chọn tập tin",
+    "fileInputSelectedCount": "{count, plural, other {Đã chọn # tập tin}}",
+    "fileDropLabel": "Thả tập tin vào đây hoặc chọn một tập tin",
+    "fileDropLabelMultiple": "Thả các tập tin vào đây hoặc chọn tập tin",
     "uploadFileModalUploading": "Đang tải lên…",
     "wizardInputReading": "Đang đọc tệp…",
     "wizardInputReady": "Sẵn sàng",
@@ -12298,7 +12306,9 @@
       "failedTitle": "Tất cả {count} lần thử đều thất bại",
       "failed": "thất bại",
       "pinnedTitle": "Mô hình được chọn bằng cách ghim phiên context-cache",
-      "pinned": "đã ghim"
+      "pinned": "đã ghim",
+      "recoveredAttemptsTitle": "Yêu cầu đã được khôi phục sau {count} lần thử",
+      "latestOutcomeFailed": "Kết quả yêu cầu gần nhất đã thất bại"
     },
     "attempts": "lần thử",
     "detail": {
@@ -12400,13 +12410,20 @@
       "continuesFromParent": "tiếp nối từ yêu cầu cha",
       "continuesFrom": "Tiếp nối từ {id}",
       "viewConversation": "xem hội thoại",
-      "openConversation": "Mở hội thoại {id}"
+      "openConversation": "Mở hội thoại {id}",
+      "omittedHttpAttempts": "{count} lần gửi HTTP không được lưu giữ",
+      "noHttpResponse": "Chưa quan sát thấy phản hồi HTTP",
+      "transportError": "Lỗi truyền tải"
     },
     "tableLabel": "Nhật ký yêu cầu",
     "throughputPostFirstToken": "Sau token đầu tiên",
     "throughputEndToEnd": "Từ đầu đến cuối",
     "throughputRate": "{value} token/giây",
-    "throughputExplanation": "Cả hai tốc độ đều dùng giá trị lớn hơn giữa số token đầu ra và số token suy luận. Sau token đầu tiên loại trừ TTFT hợp lệ; nếu không, nó dùng toàn bộ thời lượng. Từ đầu đến cuối luôn dùng toàn bộ thời lượng. Một phản hồi được đệm có thể có tốc độ gửi bùng nổ cao mà mô hình không tạo nhanh hơn."
+    "throughputExplanation": "Cả hai tốc độ đều dùng giá trị lớn hơn giữa số token đầu ra và số token suy luận. Sau token đầu tiên loại trừ TTFT hợp lệ; nếu không, nó dùng toàn bộ thời lượng. Từ đầu đến cuối luôn dùng toàn bộ thời lượng. Một phản hồi được đệm có thể có tốc độ gửi bùng nổ cao mà mô hình không tạo nhanh hơn.",
+    "omittedHttpAttempts": "{count} lần gửi HTTP không được lưu giữ",
+    "upstreamStatus": "Máy chủ thượng nguồn {status}",
+    "noHttpResponse": "Chưa quan sát thấy phản hồi HTTP",
+    "transportError": "Lỗi truyền tải"
   },
   "proxyLogger": {
     "filterAll": "Tất cả",
@@ -14173,6 +14190,10 @@
         "label": "Thứ tự Pool Egress Chung",
         "description": "Đối với các nhà cung cấp có hạn mức được chia theo địa chỉ egress, xếp hạng thành viên pool chia sẻ địa chỉ egress quan sát được của thành viên vừa bị từ chối ngay dưới các thành viên đang khỏe mạnh. Chỉ thay đổi thứ tự, không bao giờ loại trừ. Cần PROXY_SKIP_RECENTLY_FAILED, vì tính năng này tạo ra tín hiệu từ chối để đọc. Tắt theo mặc định: thứ tự chọn chỉ đơn thuần là xoay vòng thường."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Từ chối hạn mức theo từng model",
+        "description": "Giới hạn lỗi 429 hết hạn mức của opencode cho đúng model gặp lỗi, để cùng egress đó vẫn phục vụ các model khác, và chỉ xóa khi chính model đó thành công. Các nơi đọc không chỉ định model (xoay vòng pool, tạm dừng và phát lại, trang quản trị, trình kích hoạt selector, quét sức khỏe) vẫn thấy lỗi này. Cần PROXY_SKIP_RECENTLY_FAILED, nơi tạo ra tín hiệu từ chối. Tắt theo mặc định: lỗi 429 hạn mức của một model đặt egress sang một bên cho mọi model."
+      },
       "PROXY_STRICT_POST_REPLAY_ENABLED": {
         "label": "Proxy Fetch: Giới hạn gửi lại POST",
         "description": "Với yêu cầu không lũy đẳng (POST, PUT, PATCH, DELETE), chỉ gửi lại sau lỗi truyền tải (socket mới, proxy dự phòng, native fallback) khi lỗi chứng minh chưa có gì được gửi: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH hoặc hết thời gian kết nối. Lỗi socket sau khi ghi có thể nghĩa là upstream đã nhận yêu cầu, nên gửi lại có thể tạo và tính phí hai lần. Tắt theo mặc định: nội dung có thể phát lại được gửi lại một lần với mọi lỗi truyền tải, cũng là cách khôi phục socket pool đã cũ."
@@ -14228,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "Chọn Lại Pool Mã Lỗi 429 OpenCode",
         "description": "Đối với lượt xoay vòng đa tài khoản OpenCode, sau một mã 429 từ nhà cung cấp chia theo bucket egress trên tài khoản không có proxy trong ngữ cảnh pool chung, yêu cầu pool kết nối chọn một thành viên khác cho lần thử kế tiếp thay vì thử lại cùng một địa chỉ egress. Chỉ thay đổi thứ tự, không loại trừ: một pool cạn kiệt sẽ giữ nguyên hành vi hiện tại. Mặc định tắt: mọi mã 429 sẽ xoay vòng sang tài khoản kế tiếp hoàn toàn như trước."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "Đầu dò đầu ra miễn phí OpenCode",
+        "description": "Đối với người thực thi OpenCode, khi yêu cầu được ủy quyền được trả lời 403 hoặc 451 FreeTierError và việc thử lại công cụ được quan sát không thành công hoặc không áp dụng, hãy gửi yêu cầu một lần thông qua một proxy khác (proxy tài khoản khác hoặc thành viên nhóm khác, không bao giờ kết nối trực tiếp). Chỉ khi câu trả lời của thăm dò đó là 200 thì đầu ra đầu tiên mới được đặt sang một bên trong bộ nhớ từ chối proxy và phản hồi thăm dò được cung cấp; khi cả hai đều từ chối, lời từ chối ban đầu sẽ được trả lại và không có gì được ghi lại. Văn bản từ chối tương tự bao gồm một hình dạng đầu ra được gắn cờ IP và một hình dạng yêu cầu bị từ chối, do đó, cuộc điều tra sẽ phân biệt chúng bằng bằng chứng. Tắt theo mặc định: từ chối được trả về không thay đổi."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Dấu ấn khách hàng OpenCode v2",
