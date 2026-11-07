@@ -164,6 +164,11 @@ export function normalizeClaudeUpstreamMessages(
         return [];
       }
 
+      // Anthropic-native targets (preserveToolResultBlocks) speak the Messages
+      // format: unknown block types (search_result, container_upload, future
+      // additions) are the upstream's call, not ours to delete — the model would
+      // answer without the documents and nothing would report the loss.
+      if (preserveToolResultBlocks) return [block];
       log?.debug?.("CONTENT", `Dropped unsupported content part type="${block.type}"`);
       return [];
     });
