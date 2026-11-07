@@ -163,3 +163,18 @@ test("adaptive quarantine is opt-in and only applies to Antigravity aliases", as
     else process.env.OMNIROUTE_ANTIGRAVITY_ADAPTIVE_HEALTH_ENABLED = previous;
   }
 });
+
+test("stream wrapper preserves provider-probe and empty-turn response policies", async () => {
+  const { markProviderProbeResponse, isProviderProbeResponse } =
+    await import("../../src/shared/utils/providerProbeResult.ts");
+  const tracker = new AntigravityHealthTracker(() => 1000);
+  const original = new Response('data: {"choices":[{"delta":{"content":"ok"}}]}\n\n', {
+    headers: { "Content-Type": "text/event-stream" },
+  });
+  markProviderProbeResponse(original);
+  const wrapped = holdAntigravityHealthThroughResponse(original, tracker.begin("policy", MODEL)!);
+  assert.notEqual(wrapped, original);
+  assert.equal(isProviderProbeResponse(wrapped), true);
+  await wrapped.text();
+  assert.equal(tracker.snapshot("policy")[0].samples, 1);
+});
