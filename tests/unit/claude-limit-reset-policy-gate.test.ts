@@ -24,6 +24,7 @@ const limitReset = await import("../../open-sse/services/claudeLimitReset.ts");
 const { ClaudeUsageLimitGuard } = await import("../../open-sse/executors/claudeUsageLimit.ts");
 const { createClaudeSessionResetPolicy } =
   await import("../../src/lib/usage/claudeSessionResetPolicy.ts");
+const bankedResetAudit = await import("../../src/lib/usage/bankedResetAudit.ts");
 
 type Attempt = Awaited<ReturnType<typeof limitReset.attemptClaudeLimitReset>>;
 
@@ -399,6 +400,9 @@ function createPolicyHarness(
     failSettings?: boolean;
   } = {}
 ) {
+  // Each harness is a fresh world: an allowed verdict whose onSettled a test never calls
+  // would otherwise keep its in-process slot reserved into the next harness.
+  bankedResetAudit._resetBankedResetReservations();
   const audit: AuditEntry[] = [];
   const webhooks: { event: string; data: Record<string, unknown> }[] = [];
   const calls = { settings: 0, connections: 0, windows: 0, rows: 0 };

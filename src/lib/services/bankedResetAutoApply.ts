@@ -11,7 +11,10 @@
  *     idle account is never scanned; a busy one is scanned at most every 6 h for a credit
  *     about to expire.
  * At most one redemption (or dry-run row) per tick, the credit expiring soonest first, with
- * the idempotency key `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>`. A failed listing or
+ * the idempotency key `auto-reset:<connectionId>:<yyyy-mm-dd>:<n>`. After the listing the
+ * history is re-read and the decision re-made, and the slot is reserved in that same
+ * synchronous step (reserveBankedResetSlot, shared with the Claude request-path gate), so
+ * a claim made while the listing was in flight is respected. A failed listing or
  * redemption backs the account off for 1 h. Outcomes go to the audit log (and the webhook
  * on success) through bankedResetAudit.ts; skip decisions are only logged at debug level.
  *
@@ -33,6 +36,8 @@ import {
   createDefaultBankedResetSinks,
   readBankedResetAuditRows,
   recordBankedResetOutcome,
+  releaseBankedResetSlot,
+  reserveBankedResetSlot,
   summarizeBankedResetHistory,
   toBankedResetReason,
   type BankedResetAuditRow,
@@ -331,12 +336,17 @@ async function listCredit(
   }
 }
 
-/** Record a dry-run, or redeem and record its outcome. Exactly one audit row either way. */
+/**
+ * Record a dry-run, or redeem and record its outcome. Exactly one audit row either way.
+ * Runs synchronously up to the redemption call, so the reservation is taken in the same
+ * step as the caller's re-decision; it is released once the outcome row is written.
+ */
 async function applyDecision(
   ctx: TickContext,
   candidate: BankedResetCandidate,
   decision: BankedResetDecision & { trigger: NonNullable<BankedResetDecision["trigger"]> },
-  credit: BankedResetCredit
+  credit: BankedResetCredit,
+  rows: BankedResetAuditRow[]
 ): Promise<void> {
   const { deps, state, settings, nowMs } = ctx;
   const { connectionId, key } = candidate;
@@ -358,26 +368,34 @@ async function applyDecision(
   }
 
   const day = new Date(nowMs).toISOString().slice(0, 10);
-  const n = countBankedResetsToday(ctx.rows, connectionId, nowMs) + 1;
+  const n = countBankedResetsToday(rows, connectionId, nowMs) + 1;
   const idempotencyKey = `auto-reset:${connectionId}:${day}:${n}`;
+  const reservation = reserveBankedResetSlot({ connectionId, now: nowMs });
   try {
-    await deps.redeemCredit(
-      candidate.provider,
-      connectionId,
-      idempotencyKey,
-      credit.selectionToken
+    try {
+      await deps.redeemCredit(
+        candidate.provider,
+        connectionId,
+        idempotencyKey,
+        credit.selectionToken
+      );
+    } catch (err) {
+      state.backoffUntil[key] = nowMs + BANKED_RESET_BACKOFF_MS;
+      const reason = toBankedResetReason((err as { code?: unknown } | null)?.code);
+      recordBankedResetOutcome({ ...outcome, status: "failed", reason }, deps.sinks);
+      log.warn(`${key}: banked reset redemption failed; backing off 1 h`, errorFields(err));
+      return;
+    }
+    delete state.listings[key];
+    delete state.backoffUntil[key];
+    recordBankedResetOutcome(
+      { ...outcome, status: "success", reason: decision.reason },
+      deps.sinks
     );
-  } catch (err) {
-    state.backoffUntil[key] = nowMs + BANKED_RESET_BACKOFF_MS;
-    const reason = toBankedResetReason((err as { code?: unknown } | null)?.code);
-    recordBankedResetOutcome({ ...outcome, status: "failed", reason }, deps.sinks);
-    log.warn(`${key}: banked reset redemption failed; backing off 1 h`, errorFields(err));
-    return;
+    log.info(`${key}: banked reset redeemed`, { trigger: decision.trigger });
+  } finally {
+    releaseBankedResetSlot(reservation);
   }
-  delete state.listings[key];
-  delete state.backoffUntil[key];
-  recordBankedResetOutcome({ ...outcome, status: "success", reason: decision.reason }, deps.sinks);
-  log.info(`${key}: banked reset redeemed`, { trigger: decision.trigger });
 }
 
 /** Returns true once a redemption or dry-run row happened (the tick then stops). */
@@ -411,13 +429,27 @@ async function processCandidate(
 
   const credit = await listCredit(ctx, candidate);
   if (!credit) return false;
-  const decision = walled ? probe : decide(ctx, candidate, history, credit.expiresAt ?? null);
+
+  // The listing awaited the network, so the request-path gate may have taken a slot since
+  // the tick started. Re-read the history and decide again; no await from here until
+  // applyDecision has reserved the slot.
+  const rows = readHistoryRows(deps, nowMs);
+  const fresh = summarizeBankedResetHistory(rows, {
+    connectionId: candidate.connectionId,
+    mode: settings.mode,
+    now: nowMs,
+  });
+  const decision = decide(ctx, candidate, fresh, walled ? undefined : (credit.expiresAt ?? null));
   if (decision.action === "skip" || !decision.trigger) {
     log.debug(`${candidate.key}: skipped`, { reason: decision.reason });
     return false;
   }
-  await applyDecision(ctx, candidate, { ...decision, trigger: decision.trigger }, credit);
+  await applyDecision(ctx, candidate, { ...decision, trigger: decision.trigger }, credit, rows);
   return true;
+}
+
+function readHistoryRows(deps: BankedResetAutoApplyDeps, nowMs: number): BankedResetAuditRow[] {
+  return deps.readAuditRows(new Date(nowMs - BANKED_RESET_HISTORY_WINDOW_MS).toISOString());
 }
 
 /**
@@ -440,7 +472,7 @@ export async function runBankedResetAutoApplyTick(
 
     const candidates = await collectCandidates(deps, settings);
     if (candidates.length === 0) return;
-    const rows = deps.readAuditRows(new Date(nowMs - BANKED_RESET_HISTORY_WINDOW_MS).toISOString());
+    const rows = readHistoryRows(deps, nowMs);
     const ctx: TickContext = { deps, state, settings, nowMs, rows };
 
     for (const candidate of candidates) {

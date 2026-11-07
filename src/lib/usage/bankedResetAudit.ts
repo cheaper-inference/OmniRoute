@@ -118,6 +118,51 @@ export function recordBankedResetOutcome(outcome: BankedResetOutcome, sinks: Ban
   }
 }
 
+/**
+ * Pending redemptions. The audit row of a claim or redemption is written only once it
+ * settles, so two deciders running at the same time (two Claude walls, or the request-path
+ * gate and the background job) could both pass the caps. Each decider reserves a slot in
+ * the same synchronous step as its decision; summarizeBankedResetHistory() counts live
+ * reservations exactly like success rows. OmniRoute runs as one Node process, so an
+ * in-memory map is shared by both paths. A reservation whose outcome is never recorded
+ * (a shared in-flight claim, a crash) expires on its own, so it can only make the caps
+ * stricter for a while, never looser.
+ */
+export const BANKED_RESET_RESERVATION_TTL_MS = 10 * 60_000;
+
+export type BankedResetReservationToken = number;
+
+const reservations = new Map<BankedResetReservationToken, { connectionId: string; at: number }>();
+let lastReservationToken = 0;
+
+function isReservationLive(at: number, now: number): boolean {
+  return now - at < BANKED_RESET_RESERVATION_TTL_MS;
+}
+
+export function reserveBankedResetSlot(input: {
+  connectionId: string;
+  now: number;
+}): BankedResetReservationToken {
+  for (const [token, reservation] of reservations) {
+    if (!isReservationLive(reservation.at, input.now)) reservations.delete(token);
+  }
+  lastReservationToken += 1;
+  reservations.set(lastReservationToken, { connectionId: input.connectionId, at: input.now });
+  return lastReservationToken;
+}
+
+/** Drop a reservation once its outcome is recorded. Unknown or released tokens are a no-op. */
+export function releaseBankedResetSlot(
+  token: BankedResetReservationToken | null | undefined
+): void {
+  if (token != null) reservations.delete(token);
+}
+
+/** Test-only: forget every reservation. */
+export function _resetBankedResetReservations(): void {
+  reservations.clear();
+}
+
 function rowMs(row: BankedResetAuditRow): number | null {
   const ms = Date.parse(row.timestamp);
   return Number.isFinite(ms) ? ms : null;
@@ -130,28 +175,38 @@ function countsAsRedemption(row: BankedResetAuditRow, mode: BankedResetMode): bo
 }
 
 /**
- * Caps input for decideBankedReset, from the audit rows. Targets are compared exactly in
- * code (the audit-log filter is a LIKE match).
+ * Caps input for decideBankedReset, from the audit rows plus the live reservations (each
+ * counts like a success row timestamped when it was taken). Targets are compared exactly
+ * in code (the audit-log filter is a LIKE match).
  */
 export function summarizeBankedResetHistory(
   rows: BankedResetAuditRow[],
   options: { connectionId: string; mode: BankedResetMode; now: number }
 ): BankedResetHistory {
   const since = options.now - BANKED_RESET_HISTORY_WINDOW_MS;
-  let accountRedemptions24h = 0;
-  let poolRedemptions24h = 0;
-  let lastMs: number | null = null;
+  const counted: { target: string | null | undefined; ms: number }[] = [];
   for (const row of rows) {
     if (!countsAsRedemption(row, options.mode)) continue;
     const ms = rowMs(row);
     if (ms === null || ms < since || ms > options.now) continue;
-    poolRedemptions24h += 1;
-    if (row.target === options.connectionId) accountRedemptions24h += 1;
+    counted.push({ target: row.target, ms });
+  }
+  // Pending redemptions: live until released or expired (a reservation taken on a clock
+  // ahead of this one still counts — stricter, never looser).
+  for (const reservation of reservations.values()) {
+    if (!isReservationLive(reservation.at, options.now)) continue;
+    counted.push({ target: reservation.connectionId, ms: reservation.at });
+  }
+
+  let accountRedemptions24h = 0;
+  let lastMs: number | null = null;
+  for (const { target, ms } of counted) {
+    if (target === options.connectionId) accountRedemptions24h += 1;
     if (lastMs === null || ms > lastMs) lastMs = ms;
   }
   return {
     accountRedemptions24h,
-    poolRedemptions24h,
+    poolRedemptions24h: counted.length,
     lastRedemptionAt: lastMs === null ? null : new Date(lastMs).toISOString(),
   };
 }

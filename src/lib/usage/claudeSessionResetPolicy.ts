@@ -7,7 +7,10 @@
  * the per-account `autoLimitReset` toggle decides exactly as before. Otherwise the account
  * scope is the opt-in and decideBankedReset() decides with the walled window `session`:
  * `redeem` → claim (its outcome is audited once, when the claim settles), `dry-run` → no
- * claim plus a dry-run audit row, `skip` → no claim. Any error → no claim.
+ * claim plus a dry-run audit row, `skip` → no claim. Any error → no claim. A `redeem`
+ * reserves a slot in the same synchronous step as the decision (see
+ * reserveBankedResetSlot), so concurrent walls and the background job cannot all pass the
+ * caps before the first audit row exists.
  */
 
 import { logger } from "@omniroute/open-sse/utils/logger.ts";
@@ -26,6 +29,8 @@ import {
   createDefaultBankedResetSinks,
   readBankedResetAuditRows,
   recordBankedResetOutcome,
+  releaseBankedResetSlot,
+  reserveBankedResetSlot,
   summarizeBankedResetHistory,
   toBankedResetReason,
   type BankedResetAuditRow,
@@ -99,7 +104,11 @@ async function decideClaudeSessionReset(
   if (!settings.enabled || !settings.creditTypes.claudeSessionReset) return null;
   const connectionId = input.connectionId;
   if (!connectionId) return { allow: false };
+  const pool = await loadPool(deps, settings, connectionId);
 
+  // No await from here to the reservation: reading the history (audit rows + live
+  // reservations), deciding and reserving form one synchronous step, so a concurrent wall
+  // on another account, or the background job, sees this claim before it settles.
   const windows = readBankedResetWindows(deps.getQuotaWindowStatus, connectionId);
   const rows = deps.readAuditRows(
     new Date(input.now - BANKED_RESET_HISTORY_WINDOW_MS).toISOString()
@@ -119,7 +128,7 @@ async function decideClaudeSessionReset(
       },
       weekly: windows.weekly,
     },
-    pool: await loadPool(deps, settings, connectionId),
+    pool,
     history: summarizeBankedResetHistory(rows, {
       connectionId,
       mode: settings.mode,
@@ -145,15 +154,23 @@ async function decideClaudeSessionReset(
     );
     return { allow: false };
   }
+  // Released once the outcome row is written. A claim that never reports (a sibling that
+  // joined another request's in-flight claim) leaves it to expire — stricter, never looser.
+  const reservation = reserveBankedResetSlot({ connectionId, now: input.now });
   return {
     allow: true,
-    onSettled: (attempt) =>
-      recordBankedResetOutcome(
-        attempt.reset
-          ? { ...outcome, status: "success", reason: decision.reason }
-          : { ...outcome, status: "failed", reason: toBankedResetReason(attempt.outcome) },
-        deps.sinks
-      ),
+    onSettled: (attempt) => {
+      try {
+        recordBankedResetOutcome(
+          attempt.reset
+            ? { ...outcome, status: "success", reason: decision.reason }
+            : { ...outcome, status: "failed", reason: toBankedResetReason(attempt.outcome) },
+          deps.sinks
+        );
+      } finally {
+        releaseBankedResetSlot(reservation);
+      }
+    },
   };
 }
 
