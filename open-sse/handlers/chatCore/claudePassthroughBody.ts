@@ -21,6 +21,7 @@ import {
 } from "../../translator/helpers/claudeHelper.ts";
 import { FORMATS } from "../../translator/formats.ts";
 import { sanitizeAnthropicPassthroughHistory } from "./anthropicPassthroughHistory.ts";
+import { normalizeAdvisorToolModels } from "./claudeAdvisorTool.ts";
 import {
   extractSystemRoleMessages,
   hoistLeadingTextSystemMessages,
@@ -83,6 +84,10 @@ export function buildClaudePassthroughBody({
     disableManualThinkingWithoutFinalBlock(translatedBody as ClaudeRequestBody);
 
     stripClaudeRejectedTopLevelFields(translatedBody, clientHeaders);
+  }
+  if (provider === "claude" || provider === "anthropic") {
+    // Claude Code names the advisor tool's model with the OmniRoute alias (claude-opus-5.5).
+    normalizeAdvisorToolModels(translatedBody);
   }
 
   // Legacy models reject role:"system" messages. Supported models accept
