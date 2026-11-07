@@ -212,6 +212,7 @@ export const tokenRefreshBreakerSettingsSchema = z
 
 export const updateResilienceSchema = z
   .object({
+    antigravityAdaptiveHealth: z.object({ enabled: z.boolean().optional() }).strict().optional(),
     requestQueue: requestQueueSettingsSchema.optional(),
     connectionCooldown: z
       .object({
@@ -270,6 +271,7 @@ export const updateResilienceSchema = z
   .superRefine((value, ctx) => {
     const provided = [
       value.requestQueue,
+      value.antigravityAdaptiveHealth,
       value.connectionCooldown,
       value.providerBreaker,
       value.tokenRefreshBreaker,

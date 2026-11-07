@@ -7,6 +7,7 @@ import {
 import type { JsonRecord, ResilienceSettings, ResilienceSettingsPatch } from "./settings/types";
 import {
   asRecord,
+  toBoolean,
   toInteger,
   resolveStreamRecoveryDefaults,
   normalizeLegacyConnectionCooldownProfile,
@@ -83,6 +84,9 @@ export const DEFAULT_REQUEST_QUEUE_MAX_DEPTH = (() => {
 })();
 
 export const DEFAULT_RESILIENCE_SETTINGS: ResilienceSettings = {
+  antigravityAdaptiveHealth: {
+    enabled: process.env.OMNIROUTE_ANTIGRAVITY_ADAPTIVE_HEALTH_ENABLED === "true",
+  },
   requestQueue: {
     autoEnableApiKeyProviders: true,
     requestsPerMinute: DEFAULT_API_LIMITS.requestsPerMinute,
@@ -329,6 +333,7 @@ function buildLegacyFallback(settings: JsonRecord): ResilienceSettings {
     streamRecovery: streamRecoveryDefaults,
     providerQuotaOverrides: DEFAULT_RESILIENCE_SETTINGS.providerQuotaOverrides,
     credentialHealthCheck: DEFAULT_RESILIENCE_SETTINGS.credentialHealthCheck,
+    antigravityAdaptiveHealth: DEFAULT_RESILIENCE_SETTINGS.antigravityAdaptiveHealth,
   };
 }
 
@@ -364,9 +369,19 @@ export function resolveResilienceSettings(
   if (cached) return cached;
 
   const current = asRecord(record.resilienceSettings);
+  const legacyAntigravitySettings = asRecord(current.antigravity);
   const fallback = buildLegacyFallback(record);
 
   const resolved: ResilienceSettings = {
+    antigravityAdaptiveHealth: {
+      enabled: toBoolean(
+        asRecord(current.antigravityAdaptiveHealth).enabled,
+        toBoolean(
+          legacyAntigravitySettings.adaptiveHealthEnabled,
+          fallback.antigravityAdaptiveHealth.enabled
+        )
+      ),
+    },
     requestQueue: normalizeRequestQueueSettings(current.requestQueue, fallback.requestQueue),
     connectionCooldown: {
       oauth: normalizeConnectionCooldownProfile(
@@ -440,6 +455,12 @@ export function mergeResilienceSettings(
   updates: ResilienceSettingsPatch
 ): ResilienceSettings {
   return {
+    antigravityAdaptiveHealth: {
+      enabled: toBoolean(
+        updates.antigravityAdaptiveHealth?.enabled,
+        current.antigravityAdaptiveHealth.enabled
+      ),
+    },
     requestQueue: normalizeRequestQueueSettings(updates.requestQueue, current.requestQueue),
     connectionCooldown: {
       oauth: normalizeConnectionCooldownProfile(

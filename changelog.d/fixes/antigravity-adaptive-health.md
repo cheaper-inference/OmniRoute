@@ -1,0 +1,1 @@
+- Antigravity can optionally quarantine an account/model after repeated confirmed pre-response timeouts, without treating client cancellations, quota failures, or unrelated models as unhealthy.

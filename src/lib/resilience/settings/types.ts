@@ -277,7 +277,13 @@ export interface StreamThroughputWatchdogSettings {
   minUsefulBytes: number;
 }
 
+/** Per-request Antigravity account/model quarantine toggle. */
+export interface AntigravityAdaptiveHealthSettings {
+  enabled: boolean;
+}
+
 export interface ResilienceSettings {
+  antigravityAdaptiveHealth: AntigravityAdaptiveHealthSettings;
   requestQueue: RequestQueueSettings;
   connectionCooldown: Record<AuthCategory, ConnectionCooldownProfileSettings>;
   providerBreaker: Record<AuthCategory, ProviderBreakerProfileSettings>;
@@ -295,6 +301,7 @@ export interface ResilienceSettings {
 }
 
 export interface ResilienceSettingsPatch {
+  antigravityAdaptiveHealth?: Partial<AntigravityAdaptiveHealthSettings>;
   requestQueue?: Partial<RequestQueueSettings>;
   connectionCooldown?: Partial<Record<AuthCategory, Partial<ConnectionCooldownProfileSettings>>>;
   providerBreaker?: Partial<Record<AuthCategory, Partial<ProviderBreakerProfileSettings>>>;
