@@ -5,6 +5,8 @@ import {
   type ProviderCredentials,
 } from "./base.ts";
 import { PROVIDERS } from "../config/constants.ts";
+import { dropInjectedToolCalls } from "./opencodeInjectedToolFilter.ts";
+import { applyRelayHeaders, freeTierDispatchBase, relayEgressUrl } from "./opencodeRelay.ts";
 import { getModelTargetFormat, stripOpencodeModelPrefix } from "../config/providerModels.ts";
 import {
   injectReasoningContentForThinkingModel,
@@ -60,7 +62,6 @@ import {
   isOpencodeUserBlocked,
 } from "./opencodeGeoBlock.ts";
 import {
-  FREE_TIER_INFERENCE_BASE_URL,
   attemptFor,
   isGatedFreeTierRequest,
   isPremiumOpencodeModel,
@@ -563,12 +564,6 @@ export class OpencodeExecutor extends BaseExecutor {
   }
 
   /**
-   * Rewrite muse-spark's bogus `finish_reason:"length"` (see the
-   * normalizeMuseSparkFinishReason note) to `"stop"` on both streaming and
-   * non-streaming success responses. Non-muse-spark models pass through
-   * untouched.
-   */
-  /**
    * Hand a JSON caller a JSON body even though the free-tier contract forced the upstream
    * request to stream. A streaming caller, a refusal and an already-JSON body pass through.
    */
@@ -577,6 +572,7 @@ export class OpencodeExecutor extends BaseExecutor {
     result: ExecutorExecuteResult
   ): ExecutorExecuteResult {
     this.noteForcedStreamOutcome(input, result);
+    result = dropInjectedToolCalls(result, attemptFor(input.body)?.injectedToolNames);
     if (input.stream) return result;
     if (!(result instanceof Response)) {
       if (!("response" in result) || !result.response) return result;
@@ -868,7 +864,7 @@ export class OpencodeExecutor extends BaseExecutor {
         // Opt-in: a FreeTierError through a pool member probes one other member (never direct).
         const singleEgress = freeTierEgressProbeOn
           ? egressPacing.createAppliedEgressTracker(
-              this.buildUrl(String(input.model ?? ""), Boolean(input.stream)),
+              relayEgressUrl(this.buildUrl(String(input.model ?? ""), Boolean(input.stream))),
               resolveProxyForRequest
             )
           : null;
@@ -1010,7 +1006,7 @@ export class OpencodeExecutor extends BaseExecutor {
         return elapsed;
       };
       const appliedEgress = egressPacing.createAppliedEgressTracker(
-        this.buildUrl(String(input.model ?? ""), Boolean(input.stream)),
+        relayEgressUrl(this.buildUrl(String(input.model ?? ""), Boolean(input.stream))),
         resolveProxyForRequest,
         refusalModel
       );
@@ -1563,7 +1559,7 @@ export class OpencodeExecutor extends BaseExecutor {
     // the inference contract's constant and never consults the catalog.
     const base =
       Boolean(model) && isGatedFreeTierRequest(this._surface(), this.provider, model)
-        ? FREE_TIER_INFERENCE_BASE_URL
+        ? freeTierDispatchBase()
         : (getPublishedBaseUrl(this.provider) ?? this.config.baseUrl);
     switch (this._requestFormat) {
       case "claude":
@@ -1659,6 +1655,8 @@ export class OpencodeExecutor extends BaseExecutor {
       });
     }
 
+    if (gatedScope) applyRelayHeaders(headers);
+
     // The Muse Responses workaround that forced a UUID session here is gone: the shape it
     // produced is exactly what the upstream now refuses, and the canonical session it used
     // to overwrite is accepted on that surface (measured 2026-09-17, 200 on
@@ -1737,10 +1735,10 @@ export class OpencodeExecutor extends BaseExecutor {
 
   transformRequest(
     model: string,
-    body: any,
+    body: unknown,
     stream: boolean,
     credentials: ProviderCredentials
-  ): any {
+  ): unknown {
     let modifiedBody = super.transformRequest(model, body, stream, credentials);
     modifiedBody = this.applyDeepSeekJsonSchemaFallback(model, modifiedBody);
     // Free-tier request contract (see opencodeFreeTierContract.ts): streaming plus a
@@ -1753,7 +1751,7 @@ export class OpencodeExecutor extends BaseExecutor {
       this.provider,
       model,
       this._clientSession,
-      body,
+      body as object,
       isOpencodeV2ClientFingerprintEnabled()
     );
     modifiedBody = prepared.body;

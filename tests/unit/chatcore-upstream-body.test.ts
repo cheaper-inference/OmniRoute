@@ -870,3 +870,84 @@ test("injects prompt_cache_key for Kimi Code's OpenAI protocol", async () => {
   });
   assert.match(String(out.prompt_cache_key), /^omni-[0-9a-f]{32}$/);
 });
+
+test("Codex Responses attempts reuse immutable input when no payload rules exist", async () => {
+  setPayloadRulesConfig({});
+  const input = [
+    {
+      type: "message",
+      role: "user",
+      content: [{ type: "input_text", text: "large context" }],
+    },
+  ];
+  const source = {
+    model: "original-model",
+    input,
+    tools: [{ type: "function", name: "lookup", parameters: { type: "object" } }],
+    reasoning: { effort: "low" },
+  };
+  try {
+    const options = {
+      translatedBody: source,
+      provider: "codex",
+      targetFormat: FORMATS.OPENAI_RESPONSES,
+      credentials: null,
+    };
+    const first = await prepareUpstreamBody({ ...options, modelToCall: "gpt-5.4-codex" });
+    assert.notStrictEqual(first, source);
+    assert.strictEqual(first.input, input);
+    assert.strictEqual(first.tools, source.tools);
+    assert.equal(first.model, "gpt-5.4-codex");
+    assert.equal(source.model, "original-model");
+
+    const fallback = await prepareUpstreamBody({ ...options, modelToCall: "gpt-5.3-codex" });
+    assert.equal(fallback.model, "gpt-5.3-codex");
+    assert.strictEqual(fallback.input, input);
+    assert.equal(source.model, "original-model");
+
+    const otherProvider = await prepareUpstreamBody({
+      ...options,
+      provider: "openai",
+      modelToCall: "gpt-5.4-codex",
+    });
+    assert.notStrictEqual(otherProvider.input, input);
+    assert.deepEqual(otherProvider.input, input);
+  } finally {
+    resetPayloadRulesConfigForTests();
+  }
+});
+
+test("Codex attempts preserve caller-owned nested history with configured rules", async () => {
+  setPayloadRulesConfig({
+    override: [
+      {
+        models: [{ name: "gpt-5.4-codex" }],
+        params: { "reasoning.effort": "medium" },
+      },
+    ],
+  });
+  const source = {
+    input: [
+      {
+        type: "message",
+        role: "user",
+        content: [{ type: "input_text", text: "preserve me" }],
+      },
+    ],
+    reasoning: { effort: "low" },
+  };
+  try {
+    const result = await prepareUpstreamBody({
+      translatedBody: source,
+      provider: "codex",
+      targetFormat: FORMATS.OPENAI_RESPONSES,
+      credentials: null,
+      modelToCall: "gpt-5.4-codex",
+    });
+    assert.notStrictEqual(result.input, source.input);
+    assert.equal((result.reasoning as { effort: string }).effort, "medium");
+    assert.equal(source.reasoning.effort, "low");
+  } finally {
+    resetPayloadRulesConfigForTests();
+  }
+});

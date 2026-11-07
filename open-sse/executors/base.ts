@@ -1360,8 +1360,13 @@ export class BaseExecutor {
             mergeCcHeaders(headers, ccHeaders);
             if (usesCcWireImage(this.provider) && usesClaudeCodeProtocol) {
               delete headers["Authorization"];
+              // Keep the rotated key buildHeaders set (selectedKeyId names it); a second
+              // resolveEffectiveKey() call would advance the rotator.
               headers["x-api-key"] =
-                activeCredentials?.apiKey || activeCredentials?.accessToken || "";
+                headers["x-api-key"] ||
+                activeCredentials?.apiKey ||
+                activeCredentials?.accessToken ||
+                "";
             }
             delete headers["X-Stainless-Helper-Method"];
             applyStainlessHeaders(headers, { arch: stainlessArch(), os: stainlessOS() });
