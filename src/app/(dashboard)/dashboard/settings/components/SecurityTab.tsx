@@ -388,8 +388,7 @@ export default function SecurityTab() {
                             <ProviderIcon
                               providerId={provider.id}
                               size={14}
-                              className="shrink-0"
-                              style={{ color: provider.color }}
+                              className="shrink-0 text-text-muted"
                             />
                           )}
                           <span className="truncate">{provider.name}</span>

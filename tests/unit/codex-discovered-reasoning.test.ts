@@ -35,7 +35,7 @@ test.before(async () => {
 });
 test.after(() => {
   resetDbInstance();
-  fs.rmSync(dataDir, { recursive: true, force: true });
+  fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 });
 });
 
 async function sync() {
