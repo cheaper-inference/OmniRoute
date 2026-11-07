@@ -1,1 +1,0 @@
-- **fix(providers):** Use the global startup timeout for Antigravity response headers instead of the shorter SSE-readiness timeout.

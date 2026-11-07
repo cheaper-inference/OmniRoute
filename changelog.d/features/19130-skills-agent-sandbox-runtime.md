@@ -1,0 +1,1 @@
+- **feat(skills):** opt-in `agent-sandbox` runtime for the skill sandbox — `execute_command` / `eval_code` can run in a remote Kubernetes sandbox (kubernetes-sigs/agent-sandbox warm pools, e.g. gVisor) instead of a local container; selected with `SKILLS_SANDBOX_RUNTIME=agent-sandbox`, never auto-detected

@@ -1399,7 +1399,7 @@ OMNIROUTE_MEMORY_MB=8192
 CORS_ORIGIN=https://your-frontend.example.com
 ```
 
-### Air-Gapped / CI
+### Terisolasi Jaringan / CI
 
 ```bash
 JWT_SECRET=test-jwt-secret-for-ci
@@ -1872,3 +1872,14 @@ Digunakan oleh `open-sse/services/combo.ts` dan `src/lib/quota/quotaScheduler.ts
 | Variabel                       | Bawaan | Berkas Sumber                                | Keterangan                                                                                                                                                                                                                                |
 | ------------------------------ | ------ | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`    | `src/lib/providerModels/modelSyncTimings.ts` | Atur ke `1` untuk mencatat waktu fase, permintaan ID yang dihasilkan, dan hasil fase success/error selama sinkronisasi model. Dinonaktifkan untuk semua nilai lainnya. Log menghilangkan permintaan, akun, katalog, dan muatan kesalahan. |
+
+## Alat analisis media OpenCode lokal
+
+Digunakan oleh `scripts/cli/omniroute-media-mcp.mjs`. Tetapkan ini di lingkungan proses alat lokal.
+
+| Variabel                   | Default                                                                             | Deskripsi                                                                                 |
+| -------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (atau `~/.config/opencode/opencode.json`) | Konfigurasi OpenCode yang dibaca oleh alat media dan penginstal.                          |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                         | Entri penyedia yang dibaca dari konfigurasi OpenCode oleh alat media.                     |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                              | Model yang dikirim oleh alat media. Penyedianya harus mendukung jenis media yang diminta. |
+| `OMNIROUTE_MEDIA_API_KEY`  | Kunci API penyedia yang dikonfigurasi atau referensi lingkungannya                  | Kredensial pengganti opsional. Simpan di lingkungan proses lokal; jangan pernah commit.   |

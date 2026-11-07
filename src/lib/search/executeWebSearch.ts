@@ -1,3 +1,5 @@
+import { getSettings } from "@/lib/db/settings";
+import { isProviderBlockedByIdOrAlias } from "@/shared/utils/noAuthProviders";
 import { getProviderCredentials } from "@/sse/services/auth";
 import { isCredentialDiagnosticSentinel } from "@/sse/services/credentialSentinel";
 import { recordSearchUsageCost } from "@omniroute/open-sse/handlers/search/reportedCost.ts";
@@ -11,6 +13,8 @@ import {
   getSearchCredentialFallbacks,
   SEARCH_PROVIDERS,
   type SearchProviderConfig,
+  autoSearchCandidates,
+  admitsAutoCandidate,
 } from "@omniroute/open-sse/config/searchRegistry.ts";
 import { handleSearch, type SearchResponse } from "@omniroute/open-sse/handlers/search.ts";
 import {
@@ -70,6 +74,13 @@ async function resolveSearchCredentials(providerId: string) {
     if (fallback && !isCredentialDiagnosticSentinel(fallback)) return fallback;
   }
   return null;
+}
+
+/** The blockedProviders policy /v1/search applies to everything auto-select may pick. */
+async function loadAutoSelectPolicy() {
+  const settings = await getSettings().catch(() => null);
+  return (provider: SearchProviderConfig) =>
+    !isProviderBlockedByIdOrAlias(provider.id, settings?.blockedProviders);
 }
 
 function buildDomainFilter(filters?: {
@@ -187,17 +198,16 @@ export async function executeWebSearch(
       );
     }
   } else {
-    // Auto-select: prefer the cheapest non-fallback provider that actually has
+    // Auto-select: prefer the cheapest admitted provider that actually has
     // credentials. Fallback-only free providers are a last resort, so a
     // configured paid provider is never skipped just because a cheaper
     // no-credentials provider appears first in the cost sort (issue #11524).
-    const candidateProviders = Object.values(SEARCH_PROVIDERS)
-      .filter((provider) => !provider.fallbackOnly && supportsSearchType(provider, searchType))
-      .sort((a, b) => a.costPerQuery - b.costPerQuery);
+    const isAllowed = await loadAutoSelectPolicy();
+    const candidateProviders = autoSearchCandidates(searchType).filter(isAllowed);
 
     for (const candidate of candidateProviders) {
       const candidateCredentials = await resolveSearchCredentials(candidate.id);
-      if (candidateCredentials) {
+      if (admitsAutoCandidate(candidate, candidateCredentials)) {
         providerConfig = candidate;
         credentials = candidateCredentials;
         break;
@@ -209,6 +219,7 @@ export async function executeWebSearch(
       // still works when no credentialed provider is configured.
       const fallbackProviders = Object.values(SEARCH_PROVIDERS)
         .filter((provider) => provider.fallbackOnly && supportsSearchType(provider, searchType))
+        .filter(isAllowed)
         .sort((a, b) => a.costPerQuery - b.costPerQuery);
 
       for (const fallbackProvider of fallbackProviders) {
@@ -234,18 +245,16 @@ export async function executeWebSearch(
       );
     }
 
-    // Exclude fallback-only providers from execution-time alternates.
-    // They are reserved for last-resort primary selection.
-    const otherIds = Object.values(SEARCH_PROVIDERS)
-      .filter((provider) => !provider.fallbackOnly && supportsSearchType(provider, searchType))
-      .sort((a, b) => a.costPerQuery - b.costPerQuery)
+    // Alternates come from the same unblocked candidates. The other fallback-only
+    // providers are reserved for last-resort primary selection.
+    const otherIds = candidateProviders
       .map((provider) => provider.id)
       .filter((providerId) => providerId !== providerConfig!.id);
 
     for (const providerId of otherIds) {
       const altConfig = getSearchProvider(providerId);
       const altCreds = await resolveSearchCredentials(providerId);
-      if (altConfig && altCreds) {
+      if (altConfig && admitsAutoCandidate(altConfig, altCreds)) {
         alternateProviderId = providerId;
         alternateCredentials = altCreds;
         break;

@@ -76,6 +76,10 @@ headless mode too.
 | `models-dev-sync`           | models.dev capability sync (opt-in in settings)                        |
 | `live-dashboard-ws`         | Real-time dashboard WebSocket daemon (port 20132)                      |
 
+The `cloud-sync` bootstrap also starts the budget-reset, token-health and log-export jobs. In
+headless mode they do not run unless an authorized caller starts the bootstrap later with
+`GET /api/init` (`omniroute api system get-api-init`).
+
 Each skip is logged once at startup, for example:
 
 ```
