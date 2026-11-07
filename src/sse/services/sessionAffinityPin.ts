@@ -207,7 +207,11 @@ export function extractSessionAffinityKey(
   const headerKey = normalizeSessionKey(
     readHeaderValue(headers, "x-codex-session-id") ??
       readHeaderValue(headers, "x-session-id") ??
-      readHeaderValue(headers, "x-omniroute-session"),
+      readHeaderValue(headers, "x-omniroute-session") ??
+      // Claude Code's per-session UUID. Its first user message starts with the same
+      // CLAUDE.md / system-reminder preamble in every session, so the input-hash fallback
+      // below collides across concurrent sessions of the same project.
+      readHeaderValue(headers, "x-claude-code-session-id"),
     "header"
   );
   if (headerKey) return headerKey;
