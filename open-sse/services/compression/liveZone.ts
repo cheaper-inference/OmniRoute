@@ -314,6 +314,61 @@ async function compressAndStore(
   return result;
 }
 
+/**
+ * A stacked-pipeline post-pass (e.g. the CCR marker-protocol instruction) may
+ * prepend a single leading `system` note. That note is per-request protocol
+ * state, not part of the frozen/live history, so it must NOT be carried into
+ * the live copy-back (which is spliced into the final body after the frozen
+ * prefix). When present, the rest of the sequence still aligns 1:1 with the
+ * context, shifted by one. Returns that shift (0 or 1).
+ */
+function leadingNoteOffset(transformed: unknown[], contextItems: unknown[]): number {
+  if (transformed.length !== contextItems.length + 1) return 0;
+  const leading = transformed[0];
+  if (
+    leading &&
+    typeof leading === "object" &&
+    (leading as Record<string, unknown>).role === "system"
+  ) {
+    return 1;
+  }
+  return 0;
+}
+
+/**
+ * True when the transformed sequence lines up 1:1 with the context (up to the
+ * leading-note shift) and every live tool slot was actually rewritten with a
+ * resolvable linkage. Any mismatch means the copy-back must fail open to the
+ * raw live items.
+ */
+function transformedMatchesContext(
+  transformed: unknown[],
+  noteOffset: number,
+  liveOffset: number,
+  contextItems: unknown[],
+  identities: Array<string | null>,
+  liveToolIndexes: number[],
+  originalToolDigests: Array<string | null>,
+  liveToolLinks: Array<string | null>,
+  toolLinkCounts: Map<string, number>
+): boolean {
+  if (transformed.length !== contextItems.length + noteOffset) return false;
+  for (let index = 0; index < contextItems.length; index++) {
+    const identity = identities[index];
+    if (identity === null || identity !== itemIdentity(transformed[noteOffset + index])) {
+      return false;
+    }
+  }
+  // An unchanged live tool is fine; a rewritten one needs a resolvable,
+  // unambiguous linkage to copy it back.
+  return !liveToolIndexes.some((liveIndex, index) => {
+    const ti = noteOffset + liveOffset + liveIndex;
+    if (digest(transformed[ti]) === originalToolDigests[index]) return false;
+    const link = liveToolLinks[index];
+    return link === null || toolLinkCounts.get(link) !== 1;
+  });
+}
+
 async function compressLiveToolOutputs(
   body: Record<string, unknown>,
   field: "messages" | "input",
@@ -347,23 +402,29 @@ async function compressLiveToolOutputs(
   const liveToolLinks = liveToolIndexes.map((index) => toolLinkage(transformedLive[index]));
   const liveResult = await compress({ ...body, [field]: compressionItems });
   const transformed = liveResult.body[field];
+  if (!Array.isArray(transformed)) {
+    return { liveResult: { body, compressed: false, stats: null }, transformedLive };
+  }
+
+  const noteOffset = leadingNoteOffset(transformed, contextItems);
   if (
-    !Array.isArray(transformed) ||
-    transformed.length !== contextItems.length ||
-    identities.some(
-      (identity, index) => identity === null || identity !== itemIdentity(transformed[index])
-    ) ||
-    liveToolIndexes.some((liveIndex, index) => {
-      if (digest(transformed[liveOffset + liveIndex]) === originalToolDigests[index]) return false;
-      const link = liveToolLinks[index];
-      return link === null || toolLinkCounts.get(link) !== 1;
-    })
+    !transformedMatchesContext(
+      transformed,
+      noteOffset,
+      liveOffset,
+      contextItems,
+      identities,
+      liveToolIndexes,
+      originalToolDigests,
+      liveToolLinks,
+      toolLinkCounts
+    )
   ) {
     return { liveResult: { body, compressed: false, stats: null }, transformedLive };
   }
   for (let index = 0; index < liveToolIndexes.length; index++) {
     const liveIndex = liveToolIndexes[index];
-    transformedLive[liveIndex] = transformed[liveOffset + liveIndex];
+    transformedLive[liveIndex] = transformed[noteOffset + liveOffset + liveIndex];
   }
   return { liveResult, transformedLive };
 }

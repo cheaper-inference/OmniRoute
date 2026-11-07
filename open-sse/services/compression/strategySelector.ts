@@ -35,6 +35,7 @@ import {
 } from "./stackedStepCore.ts";
 import { resolveStepDetailConfig } from "./stepDetailConfig.ts";
 import { registerBuiltinCompressionEngines } from "./engines/index.ts";
+import { applyCcrProtocolInstruction } from "./engines/ccr/protocolInstruction.ts";
 import { getCompressionEngine, getEngineEntry } from "./engines/registry.ts";
 import { codexResponsesEngine } from "./engines/codexResponses/index.ts";
 import { applyOmniglyphSingleMode } from "./engines/omniglyphSingleMode.ts";
@@ -1042,6 +1043,14 @@ function runStackedCompression(
     if (!bailout?.enabled) reportEngineStep(onStep, stepIdx++, totalSteps, step.engine, result);
   }
 
+  // Marker-protocol post-pass (#8033): after all engines, one leading system note
+  // explains any `[CCR retrieve hash=...]` / `[dedup:ref sha=...]` marker left in the
+  // body (idempotent: a replayed prior note carrying the sentinel suppresses a second).
+  // The note is a protocol explanation, not a compression: it does not set `compressed`,
+  // so on a marker-only request (no real engine advanced) the inflation guard in
+  // finalizeStackedResult stays off and cannot revert the note along with the body.
+  currentBody = applyCcrProtocolInstruction(currentBody).body;
+
   // Hard-budget post-pass (#17): runs after all engines, before finalize.
   if (options?.config?.targetTokens != null || options?.config?.targetRatio != null) {
     const hbResult = applyHardBudget(currentBody, {
@@ -1155,6 +1164,12 @@ async function runStackedCompressionAsync(
     if (committed.advanced) compressed = true;
     if (!bailout?.enabled) reportEngineStep(onStep, stepIdx++, totalSteps, step.engine, result);
   }
+
+  // Marker-protocol post-pass (#8033): same rule as the sync sibling
+  // `runStackedCompression` — one leading system note for any CCR/dedup marker
+  // left in the body (idempotent; a protocol explanation, not a compression —
+  // see that call site for the full rule).
+  currentBody = applyCcrProtocolInstruction(currentBody).body;
 
   // Hard-budget post-pass (#17): runs after all engines, before finalize.
   if (options?.config?.targetTokens != null || options?.config?.targetRatio != null) {

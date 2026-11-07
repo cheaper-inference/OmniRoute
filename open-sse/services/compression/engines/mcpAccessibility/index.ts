@@ -11,10 +11,136 @@ function isNoiseLine(line: string): boolean {
   return NOISE_LINE_PATTERNS.some((p) => p.test(line));
 }
 
-export function smartFilterText(text: string, config: McpAccessibilityConfig): string {
-  if (typeof text !== "string" || text.length < config.minLengthToProcess) {
-    return text;
+/**
+ * Generic pagination hint for truncated tool results. Deliberately NOT a
+ * web-page hint (no "scroll/navigate", no "click an element"): the filter also
+ * truncates non-navigable tool output (retrieve results, corpus dumps), where
+ * the old wording was wrong. Names the concrete ways to re-run a tool call
+ * with a bounded slice: a narrower query, limit/offset pagination, or a
+ * `mode` (`"lines"` / `"grep"`) with an offset.
+ */
+export const MCP_TEXT_TRUNCATION_HINT =
+  "The result exceeded the size limit and was truncated. Re-run the same tool call with a bounded " +
+  'slice to read the rest: a narrower query, limit/offset pagination, or mode: "lines" / mode: "grep" with an offset.';
+
+/** Mark set on a JSON result (and each truncated block) whose `content` was truncated. */
+const MCP_JSON_TRUNCATED_FIELD = "truncated";
+
+type JsonRecord = Record<string, unknown>;
+
+function tryParseMcpJson(text: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
   }
+}
+
+function isTextBlock(value: unknown): value is { type: string; text: string } {
+  return (
+    !!value &&
+    typeof value === "object" &&
+    (value as JsonRecord).type === "text" &&
+    typeof (value as JsonRecord).text === "string"
+  );
+}
+
+/**
+ * True when the parsed JSON carries a `content` field the filter can shrink:
+ * a plain string, or an array of `{type:"text", text}` blocks. Anything else
+ * (absent/other-shaped content) is not truncatable here — the filter must not
+ * invent a new shape on an opaque result.
+ */
+function hasTruncatableContent(value: JsonRecord): boolean {
+  const content = value.content;
+  if (typeof content === "string") return true;
+  if (Array.isArray(content)) {
+    return content.length > 0 && content.every((block) => isTextBlock(block));
+  }
+  return false;
+}
+
+/** Shallow copy of the JSON with `content` emptied and the truncation marks applied. */
+function buildEnvelope(value: JsonRecord, indented: boolean): number {
+  const clone: JsonRecord = { ...value };
+  if (typeof clone.content === "string") clone.content = "";
+  else if (Array.isArray(clone.content)) {
+    clone.content = (clone.content as unknown[]).map((block) =>
+      isTextBlock(block) ? { ...block, text: "" } : block
+    );
+  }
+  clone[MCP_JSON_TRUNCATED_FIELD] = true;
+  clone.hint = MCP_TEXT_TRUNCATION_HINT;
+  return JSON.stringify(clone, null, indented ? 2 : undefined).length ?? 0;
+}
+
+function isIndentedJson(text: string): boolean {
+  // Compact JSON has no newlines; a newline followed by indentation in the
+  // head of the document marks the pretty-printed shape.
+  return text.slice(0, 200).includes("\n  ");
+}
+
+/**
+ * Shrink the `content` field of a shallow clone to fit the budget (a string is
+ * cut, each text block gets its even share). Returns `true` when anything was
+ * shrunk; the truncation marks are applied on the affected blocks here and on
+ * the object by the caller.
+ */
+function shrinkContentField(clone: JsonRecord, budget: number): boolean {
+  let changed = false;
+  if (typeof clone.content === "string") {
+    if (clone.content.length > budget) {
+      clone.content = clone.content.slice(0, budget);
+      changed = true;
+    }
+    return changed;
+  }
+  const blocks = clone.content as unknown[];
+  const share = Math.floor(budget / blocks.length);
+  clone.content = blocks.map((block) => {
+    if (!isTextBlock(block) || block.text.length <= share) return block;
+    changed = true;
+    return {
+      ...block,
+      text: block.text.slice(0, share),
+      [MCP_JSON_TRUNCATED_FIELD]: true,
+      hint: MCP_TEXT_TRUNCATION_HINT,
+    };
+  });
+  return changed;
+}
+
+/**
+ * JSON-aware truncation of a tool result: shrink the `content` field (string,
+ * or the `text` of every text block) so the RE-SERIALIZED JSON fits
+ * `maxTextChars`, set `truncated: true` + the generic `hint` on the object and
+ * on each truncated block, and return the new string. Returns `null` when the
+ * result has no truncatable `content` (the caller must then leave the JSON
+ * untouched) or when nothing needed to be shrunk. The output is always valid
+ * JSON — a raw slice of a JSON string is never produced.
+ */
+function truncateJsonContent(text: string, config: McpAccessibilityConfig): string | null {
+  const parsed = tryParseMcpJson(text);
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
+  const value = parsed as JsonRecord;
+  if (!hasTruncatableContent(value)) return null;
+
+  const indented = isIndentedJson(text);
+  const budget = Math.max(0, config.maxTextChars - buildEnvelope(value, indented));
+  const clone: JsonRecord = { ...value };
+  if (!shrinkContentField(clone, budget)) return null;
+  clone[MCP_JSON_TRUNCATED_FIELD] = true;
+  clone.hint = MCP_TEXT_TRUNCATION_HINT;
+  const serialized = JSON.stringify(clone, null, indented ? 2 : undefined);
+  return typeof serialized === "string" ? serialized : null;
+}
+
+/**
+ * Plain-text path of `smartFilterText`: drop noise lines, collapse sibling
+ * runs, and when the result is still over budget keep a bounded head plus a
+ * truncation notice carrying the generic hint.
+ */
+function filterPlainText(text: string, config: McpAccessibilityConfig): string {
   // Drop noise lines entirely (not blank them) so interleaved noise does not split sibling runs.
   let out = text
     .split("\n")
@@ -39,9 +165,72 @@ export function smartFilterText(text: string, config: McpAccessibilityConfig): s
     const omitted = out.length - head.length;
     out =
       `${head}\n\n... [truncated ${omitted} chars by OmniRoute MCP filter. ` +
-      `Page is large; ask user to scroll/navigate to a specific section, or click an element with the refs shown above]`;
+      `${MCP_TEXT_TRUNCATION_HINT}`;
   }
   return out;
+}
+
+export function smartFilterText(text: string, config: McpAccessibilityConfig): string {
+  if (typeof text !== "string" || text.length < config.minLengthToProcess) {
+    return text;
+  }
+
+  if (text.length > config.maxTextChars) {
+    // JSON-aware path: a valid JSON tool result must stay valid. Parse the RAW
+    // text (before the line pipeline — noise/collapse would otherwise corrupt
+    // it), shrink its `content` field, and re-serialize. A JSON result without
+    // a truncatable `content` is left untouched: the filter must never turn a
+    // valid JSON into an unparseable slice.
+    const truncatedJson = truncateJsonContent(text, config);
+    if (truncatedJson !== null) return truncatedJson;
+    if (tryParseMcpJson(text) !== null) return text;
+  }
+
+  return filterPlainText(text, config);
+}
+
+/**
+ * `true` when the text block (already filtered) is a JSON result carrying the
+ * `truncated` mark set by the JSON path of `smartFilterText` — i.e. the text
+ * view of this result is a bounded slice, not the full content.
+ */
+function jsonBlockIsTruncated(block: unknown): boolean {
+  if (!block || typeof block !== "object" || (block as JsonRecord).type !== "text") return false;
+  const text = (block as JsonRecord).text;
+  if (typeof text !== "string") return false;
+  const parsed = tryParseMcpJson(text);
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return false;
+  return (parsed as JsonRecord)[MCP_JSON_TRUNCATED_FIELD] === true;
+}
+
+/**
+ * Keep `structuredContent` consistent with the text blocks the filter just
+ * rewrote. A text block that was JSON-truncated carries `truncated: true`
+ * (set by `smartFilterText`); when the result also ships a `structuredContent`
+ * object, that view would otherwise still claim the full content — two truths
+ * for one result. Re-parse the filtered text (at most once per block, and only
+ * when a `structuredContent` object is present) and mirror the mark onto
+ * `structuredContent` when the JSON-truncated brand is found. `isError` and
+ * every other field are untouched. A failed parse (text path) or a missing
+ * brand leaves the result as-is: the text stays human-readable and there is no
+ * divergence to signal.
+ */
+export function propagateTruncationToStructuredContent(result: {
+  content?: unknown;
+  structuredContent?: unknown;
+  [key: string]: unknown;
+}): typeof result {
+  if (!result || typeof result !== "object") return result;
+  const structured = result.structuredContent;
+  if (!structured || typeof structured !== "object" || Array.isArray(structured)) {
+    return result;
+  }
+  const blocks = Array.isArray(result.content) ? (result.content as unknown[]) : [];
+  if (blocks.some((block) => jsonBlockIsTruncated(block))) {
+    (structured as JsonRecord)[MCP_JSON_TRUNCATED_FIELD] = true;
+    (structured as JsonRecord).hint = MCP_TEXT_TRUNCATION_HINT;
+  }
+  return result;
 }
 
 export type { McpAccessibilityConfig } from "./constants.ts";
