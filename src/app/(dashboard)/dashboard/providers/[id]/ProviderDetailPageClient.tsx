@@ -100,6 +100,7 @@ export default function ProviderDetailPageClient() {
   const [importCodexModalOpen, setImportCodexModalOpen] = useState(false);
   const [codexCliGuideOpen, setCodexCliGuideOpen] = useState(false);
   const [importClaudeModalOpen, setImportClaudeModalOpen] = useState(false);
+  const [importAgyModalOpen, setImportAgyModalOpen] = useState(false);
   const [importGeminiModalOpen, setImportGeminiModalOpen] = useState(false);
   const [importGrokCliModalOpen, setImportGrokCliModalOpen] = useState(false);
   const [connectingVolcengineAccount, setConnectingVolcengineAccount] = useState(false);
@@ -688,6 +689,7 @@ export default function ProviderDetailPageClient() {
             onOpenCodexCliGuide={() => setCodexCliGuideOpen(true)}
             onOpenImportCodex={() => setImportCodexModalOpen(true)}
             onOpenImportClaude={() => setImportClaudeModalOpen(true)}
+            onOpenImportAgy={() => setImportAgyModalOpen(true)}
             onOpenImportGemini={() => setImportGeminiModalOpen(true)}
             onOpenImportGrokCli={() => setImportGrokCliModalOpen(true)}
             t={t}
@@ -709,6 +711,7 @@ export default function ProviderDetailPageClient() {
               onOpenOAuthModal={() => setShowOAuthModal(true)}
               onOpenImportCodex={() => setImportCodexModalOpen(true)}
               onOpenImportClaude={() => setImportClaudeModalOpen(true)}
+              onOpenImportAgy={() => setImportAgyModalOpen(true)}
               onOpenImportGemini={() => setImportGeminiModalOpen(true)}
               onOpenImportGrokCli={() => setImportGrokCliModalOpen(true)}
               t={t}
@@ -956,6 +959,8 @@ export default function ProviderDetailPageClient() {
         handleApplyClaudeAuthLocal={handleApplyClaudeAuthLocal}
         importClaudeModalOpen={importClaudeModalOpen}
         setImportClaudeModalOpen={setImportClaudeModalOpen}
+        importAgyModalOpen={importAgyModalOpen}
+        setImportAgyModalOpen={setImportAgyModalOpen}
         importGrokCliModalOpen={importGrokCliModalOpen}
         setImportGrokCliModalOpen={setImportGrokCliModalOpen}
         batchTestResults={batchTestResults}
