@@ -26,10 +26,10 @@ Object.assign(process.env, {
   OMNIROUTE_MIGRATIONS_DIR: fixture,
 });
 const sql = fs.readFileSync(
-  new URL("../../src/lib/db/migrations/226_daily_cached_input.sql", import.meta.url),
+  new URL("../../src/lib/db/migrations/228_daily_cached_input.sql", import.meta.url),
   "utf8"
 );
-fs.writeFileSync(path.join(fixture, "226_daily_cached_input.sql"), sql, "utf8");
+fs.writeFileSync(path.join(fixture, "228_daily_cached_input.sql"), sql, "utf8");
 fs.writeFileSync(
   path.join(fixture, "224_proxy_logs_egress_ip_families.sql"),
   fs.readFileSync(
@@ -46,6 +46,15 @@ fs.writeFileSync(
   ),
   "utf8"
 );
+for (const file of [
+  "226_request_cost_ledger_read_indexes.sql",
+  "227_quota_recovery_due_cover.sql",
+]) {
+  fs.copyFileSync(
+    new URL(`../../src/lib/db/migrations/${file}`, import.meta.url),
+    path.join(fixture, file)
+  );
+}
 for (const [version, name] of [
   ["206", "codex_wakeup_tasks"],
   ["213", "api_key_preferred_connections"],
@@ -72,6 +81,12 @@ const makeDb = () => {
       created_at TEXT, amount INTEGER
     );
     INSERT INTO token_ledger VALUES (1, 'from', 'to', 'fixture-created', 7);
+    CREATE TABLE request_cost_ledger (api_key_id TEXT, timestamp TEXT, success INTEGER, service_tier TEXT, amount_usd REAL, request_id TEXT);
+    INSERT INTO request_cost_ledger VALUES ('key','fixture-created',1,'default',0.25,'request');
+    CREATE INDEX idx_rcl_api_key_timestamp ON request_cost_ledger(api_key_id,timestamp);
+    CREATE TABLE quota_recovery_tickets (state TEXT, next_attempt_at TEXT, expires_at TEXT, api_key_id TEXT);
+    INSERT INTO quota_recovery_tickets VALUES ('queued','fixture-due','fixture-expiry','key');
+    CREATE INDEX idx_quota_recovery_due ON quota_recovery_tickets(state,next_attempt_at);
     CREATE TABLE daily_usage_summary (id INTEGER PRIMARY KEY, total_input_tokens INTEGER);
     INSERT INTO daily_usage_summary VALUES (1,100);
     CREATE TABLE _omniroute_migrations (
@@ -79,6 +94,42 @@ const makeDb = () => {
       applied_at TEXT NOT NULL DEFAULT (datetime('now'))
     );`);
   return db;
+};
+
+const assertCanonicalIndexes = (db: ReturnType<typeof makeDb>) => {
+  assert.deepEqual(db.prepare("SELECT * FROM request_cost_ledger").all(), [
+    {
+      api_key_id: "key",
+      timestamp: "fixture-created",
+      success: 1,
+      service_tier: "default",
+      amount_usd: 0.25,
+      request_id: "request",
+    },
+  ]);
+  assert.deepEqual(
+    db
+      .prepare(
+        "SELECT name FROM sqlite_master WHERE type='index' AND name LIKE 'idx_rcl_%' ORDER BY name"
+      )
+      .all(),
+    [{ name: "idx_rcl_api_key_ts_cover" }, { name: "idx_rcl_request_id" }]
+  );
+  assert.deepEqual(db.prepare("SELECT * FROM quota_recovery_tickets").all(), [
+    {
+      state: "queued",
+      next_attempt_at: "fixture-due",
+      expires_at: "fixture-expiry",
+      api_key_id: "key",
+    },
+  ]);
+  assert.deepEqual(
+    db
+      .prepare("PRAGMA index_info(idx_quota_recovery_due)")
+      .all()
+      .map((row) => row.name),
+    ["state", "next_attempt_at", "expires_at", "api_key_id"]
+  );
 };
 
 test.after(() => {
@@ -89,9 +140,9 @@ test.after(() => {
 
 test(
   "cached migration rehomes published ledgers and preserves unknown history",
-  { timeout: 3000 },
+  { timeout: 10000 },
   () => {
-    const publishedSlots = ["206", "213", "214", "215", "217", "218", "223", "224", "225"];
+    const publishedSlots = ["206", "213", "214", "215", "217", "218", "223", "224", "225", "226"];
     for (let mask = 0; mask < 1 << publishedSlots.length; mask++) {
       const versions = publishedSlots.filter((_, index) => mask & (1 << index));
       const db = makeDb();
@@ -105,7 +156,7 @@ test(
             "INSERT INTO _omniroute_migrations (version,name,applied_at) VALUES (?,?,?)"
           ).run(version, "daily_cached_input", "fixture-applied");
         }
-        assert.equal(runMigrations(db, { isNewDb: true }), versions.length ? 10 : 11);
+        assert.equal(runMigrations(db, { isNewDb: true }), versions.length ? 12 : 13);
         assert.deepEqual(db.prepare("SELECT * FROM proxy_logs").all(), [
           { id: "retained", egress_ip_v4: null, egress_ip_v6: null },
         ]);
@@ -122,7 +173,9 @@ test(
             { version: "223", name: "call_logs_queue_wait_ms" },
             { version: "224", name: "proxy_logs_egress_ip_families" },
             { version: "225", name: "token_ledger_balance_indexes" },
-            { version: "226", name: "daily_cached_input" },
+            { version: "226", name: "request_cost_ledger_read_indexes" },
+            { version: "227", name: "quota_recovery_due_cover" },
+            { version: "228", name: "daily_cached_input" },
           ]
         );
         assert.deepEqual(db.prepare("SELECT * FROM daily_usage_summary").all(), [
@@ -132,7 +185,7 @@ test(
           assert.equal(
             (
               db
-                .prepare("SELECT applied_at FROM _omniroute_migrations WHERE version='226'")
+                .prepare("SELECT applied_at FROM _omniroute_migrations WHERE version='228'")
                 .get() as {
                 applied_at: string;
               }
@@ -165,6 +218,7 @@ test(
             .all(),
           [{ name: "idx_token_ledger_from_created" }, { name: "idx_token_ledger_to_created" }]
         );
+        assertCanonicalIndexes(db);
         assert.equal(runMigrations(db, { isNewDb: true }), 0);
       } finally {
         db.close();
@@ -196,7 +250,7 @@ test("cached migration preserves published 224 alongside canonical 223", { timeo
     );
     assert.equal(
       (
-        db.prepare("SELECT applied_at FROM _omniroute_migrations WHERE version='226'").get() as {
+        db.prepare("SELECT applied_at FROM _omniroute_migrations WHERE version='228'").get() as {
           applied_at: string;
         }
       ).applied_at,
@@ -227,6 +281,7 @@ test("cached migration preserves published 224 alongside canonical 223", { timeo
         .all(),
       [{ name: "idx_token_ledger_from_created" }, { name: "idx_token_ledger_to_created" }]
     );
+    assertCanonicalIndexes(db);
     assert.equal(runMigrations(db, { isNewDb: true }), 0);
   } finally {
     db.close();
@@ -241,10 +296,10 @@ test(
     try {
       db.exec(sql);
       db.exec(`INSERT INTO _omniroute_migrations (version,name) VALUES
-      ('206','daily_cached_input'),('226','unrelated_migration');
+      ('206','daily_cached_input'),('228','unrelated_migration');
       UPDATE daily_usage_summary SET total_cache_read_tokens=60;`);
       const before = db.prepare("SELECT * FROM _omniroute_migrations ORDER BY version").all();
-      assert.throws(() => runMigrations(db, { isNewDb: true }), /target version 226 is occupied/);
+      assert.throws(() => runMigrations(db, { isNewDb: true }), /target version 228 is occupied/);
       assert.deepEqual(
         db.prepare("SELECT * FROM _omniroute_migrations ORDER BY version").all(),
         before
@@ -262,3 +317,53 @@ test(
     }
   }
 );
+
+for (const duplicateLegacy226 of [false, true]) {
+  test(`cached migration preserves existing 228 timestamp with ${duplicateLegacy226 ? "legacy" : "canonical"} 226`, () => {
+    const db = makeDb();
+    try {
+      db.exec(sql);
+      db.exec("UPDATE daily_usage_summary SET total_cache_read_tokens=60");
+      db.exec(
+        "INSERT INTO _omniroute_migrations (version,name,applied_at) VALUES ('228','daily_cached_input','destination-applied')"
+      );
+      if (duplicateLegacy226) {
+        db.exec(
+          "INSERT INTO _omniroute_migrations (version,name,applied_at) VALUES ('226','daily_cached_input','legacy-applied')"
+        );
+      } else {
+        db.exec(
+          fs.readFileSync(path.join(fixture, "226_request_cost_ledger_read_indexes.sql"), "utf8")
+        );
+        db.exec(
+          "INSERT INTO _omniroute_migrations (version,name,applied_at) VALUES ('226','request_cost_ledger_read_indexes','canonical-applied')"
+        );
+      }
+      runMigrations(db, { isNewDb: true });
+      assertCanonicalIndexes(db);
+      assert.equal(
+        db.prepare("SELECT applied_at FROM _omniroute_migrations WHERE version='228'").get()
+          ?.applied_at,
+        "destination-applied"
+      );
+      assert.equal(
+        db.prepare("SELECT name FROM _omniroute_migrations WHERE version='226'").get()?.name,
+        "request_cost_ledger_read_indexes"
+      );
+      if (!duplicateLegacy226)
+        assert.equal(
+          db.prepare("SELECT applied_at FROM _omniroute_migrations WHERE version='226'").get()
+            ?.applied_at,
+          "canonical-applied"
+        );
+      assert.equal(
+        db.prepare("SELECT total_cache_read_tokens FROM daily_usage_summary").get()
+          ?.total_cache_read_tokens,
+        60
+      );
+      assert.equal(runMigrations(db, { isNewDb: true }), 0);
+    } finally {
+      db.close();
+    }
+  });
+}
