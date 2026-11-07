@@ -16,7 +16,13 @@
 
 import { recordLedgerEntrySafe } from "@/lib/db/costLedger";
 import { getPricingForModel } from "@/lib/db/settings/pricing";
-import { getLoggedInputTokens, getLoggedOutputTokens, getReasoningTokens } from "./tokenAccounting";
+import {
+  getLoggedInputTokens,
+  getLoggedOutputTokens,
+  getPromptCacheCreationTokens,
+  getPromptCacheReadTokens,
+  getReasoningTokens,
+} from "./tokenAccounting";
 import { toNumber } from "@/shared/utils/numeric";
 
 export interface CostLedgerRecorderInput {
@@ -55,6 +61,8 @@ export async function recordLedgerFromCost(input: CostLedgerRecorderInput): Prom
       model: input.model || "unknown",
       tokensInput: getLoggedInputTokens(input.tokens),
       tokensOutput: getLoggedOutputTokens(input.tokens),
+      tokensCacheRead: getPromptCacheReadTokens(input.tokens),
+      tokensCacheCreation: getPromptCacheCreationTokens(input.tokens),
       tokensReasoning: getReasoningTokens(input.tokens),
       unitPriceInput,
       unitPriceOutput,
