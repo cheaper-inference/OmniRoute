@@ -6,10 +6,12 @@
 
 🌐 **Լեզուներ:** 🇺🇸 [English](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
 
-OmniRoute API-ի հիմնական տեղեկատուն։ Այն ներառում է հանրային `/v1` մակերեսը և կառավարման առավել հաճախ օգտագործվող վերջնակետերը։ Մեքենայաընթեռնելի [`docs/openapi.yaml`](../openapi.yaml) ֆայլը և `src/app/api/`-ի ներքո գտնվող երթուղիների ծառը ամբողջական աղբյուրներն են։
+OmniRoute API-ի հիմնական տեղեկատուն։ Այն ընդգրկում է հանրային `/v1` մակերեսը և կառավարման ամենաշատ օգտագործվող վերջնակետերը։ Մեքենայաընթեռնելի [`docs/openapi.yaml`](../openapi.yaml) ֆայլը և `src/app/api/`-ի ներքո գտնվող երթուղիների ծառը ամբողջական աղբյուրներն են։
 
 OpenAI-ին համատեղելի արձանագրության և մատակարարների հնարավորությունների կենտրոնացված մատրիցի համար տես
 [`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md)։
+
+Յուրաքանչյուր տեղակայում սպասարկում է սպեցիֆիկացիայի իր պատճենը՝ `/openapi.yaml` հասցեում, որը կառուցման ընթացքում ստեղծվում է `docs/openapi.yaml`-ից։ Այն պարունակում է կառուցման տարբերակը և հարաբերական սերվերի URL՝ (`./`), ուստի հարցումները մնում են այն հոսթում, որը սպասարկել է փաստաթուղթը։ Ներբեռնված ֆայլը ներմուծող գործիքը նման հոսթ չունի և բազային URL-ը պետք է սահմանվի ձեռքով։
 
 ---
 
@@ -1575,7 +1577,7 @@ GET /api/system/version
 
 ---
 
-## Աուդիոյի տրանսկրիպցիա
+## Աուդիոյի տառադարձում
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1583,7 +1585,7 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Տրանսկրիպցիայի ենթարկեք աուդիո ֆայլերը՝ օգտագործելով կազմաձևված STT մատակարարներից ցանկացածը։ Ճանապարհի առաջին հատվածը ընտրում է բնիկ մատակարարին (`openai/…`, `deepgram/…`)։ Մեկ այլ վաճառողի մոդելը վերաարտահանող gateway-ներն օգտագործում են որակավորված նույնացուցիչ
+Տառադարձեք աուդիոֆայլերը ցանկացած կարգավորված STT մատակարարի միջոցով։ Ուղու առաջին հատվածը ընտրում է բնիկ մատակարարին (`openai/…`, `deepgram/…`)։ Այլ մատակարարի մոդելը վերաարտահանող gateway-ներն օգտագործում են որակավորված նույնացուցիչ
 (`openrouter/deepgram/nova-3`)։
 
 **Հարցում՝**
@@ -1606,12 +1608,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Մոդելի նույնացուցիչների օրինակներ՝** `openai/whisper-1` (պահանջվում է OpenAI բանալի),
-`openrouter/deepgram/nova-3` (պահանջվում է OpenRouter բանալի),
-`deepgram/nova-3` (պահանջվում է բնիկ Deepgram բանալի)։ Առանձին
-`deepgram/nova-3` հարցումը **չի** օգտագործում OpenRouter։
+**Մոդելների նույնացուցիչների օրինակներ՝** `openai/whisper-1` (պահանջում է OpenAI բանալի),
+`openrouter/deepgram/nova-3` (պահանջում է OpenRouter բանալի),
+`deepgram/nova-3` (պահանջում է բնիկ Deepgram բանալի)։ Առանց նախածանցի
+`deepgram/nova-3` հարցումը **չի օգտագործում OpenRouter**։
 
 **Աջակցվող ձևաչափեր՝** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`։
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`)․** ֆայլային ռեժիմով տառադարձում Gemini Live-ի
+WebSocket-ի միջոցով (պահանջում է Gemini API բանալի)։ Վերբեռնված ֆայլը `ffmpeg`-ի միջոցով փոխարկվում է 16 kHz մոնո PCM-ի
+(`ffmpeg`-ը պետք է հասանելի լինի `PATH`-ում, եթե ֆայլն արդեն 16 kHz մոնո PCM WAV չէ), փոխանցվում է
+սեսիային, և վերջնականացված տեքստը վերադարձվում է որպես `{ "text": "..." }`։ Ընտրովի `language` և `prompt` ձևի դաշտերը
+փոխանցվում են հետագա մշակման համար։ Սահմանափակումներ՝ 25 MiB-ից մեծ վերբեռնումները կամ 10 րոպեից երկար վերծանված աուդիոն վերադարձնում են
+`413`․ 60 վայրկյանից երկար տևող փոխարկումը դադարեցվում է և վերադարձնում է `504`։ API բանալին ուղարկվում է միայն
+`x-goog-api-key` վերնագրում, երբեք՝ WebSocket URL-ում։
 
 ---
 
@@ -1664,14 +1674,14 @@ curl -X POST https://your-host.example/api/v1/vscode/YOUR_API_KEY/chat/completio
 
 ---
 
-## Հեռաչափություն
+## Հեռաչափում
 
 ```bash
-# Get latency telemetry summary (p50/p95/p99 per provider)
+# Ստանալ ուշացման հեռաչափության ամփոփում (p50/p95/p99 յուրաքանչյուր մատակարարի համար)
 GET /api/telemetry/summary
 ```
 
-**Պատասխան՝**
+**Պատասխան․**
 
 ```json
 {
@@ -1687,10 +1697,10 @@ GET /api/telemetry/summary
 ## Բյուջե
 
 ```bash
-# Get budget status for all API keys
+# Ստանալ բյուջեի կարգավիճակը բոլոր API բանալիների համար
 GET /api/usage/budget
 
-# Set or update a budget
+# Սահմանել կամ թարմացնել բյուջեն
 POST /api/usage/budget
 Content-Type: application/json
 
@@ -1704,7 +1714,7 @@ Content-Type: application/json
 }
 ```
 
-> **Schema notes** (`setBudgetSchema`)՝ `apiKeyId`-ը պարտադիր է․ `dailyLimitUsd`, `weeklyLimitUsd` կամ `monthlyLimitUsd` դաշտերից առնվազն մեկը պետք է զրոյից մեծ լինի։ Ընտրովի դաշտեր՝ `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`)։ Ժառանգական `{keyId, limit, period}` կառուցվածքը վերադարձնում է `400 Bad Request`։
+> **Սխեմայի նշումներ** (`setBudgetSchema`). `apiKeyId`-ը պարտադիր է. `dailyLimitUsd`, `weeklyLimitUsd` կամ `monthlyLimitUsd` դաշտերից առնվազն մեկը պետք է զրոյից մեծ լինի։ Ընտրովի դաշտեր՝ `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`)։ Հին `{keyId, limit, period}` ձևաչափը վերադարձնում է `400 Bad Request`։
 
 ## Տոկենների սահմանաչափեր
 

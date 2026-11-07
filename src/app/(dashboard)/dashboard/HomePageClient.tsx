@@ -9,6 +9,7 @@ import { SectionHeader } from "@omniroute/ui-kit/page-header";
 import { WorkflowGuide } from "@omniroute/ui-kit/workflow-guide";
 import EmptyState from "@/shared/components/EmptyState";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { CardSkeleton, Button, Modal } from "@/shared/components";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import { AI_PROVIDERS, NOAUTH_PROVIDERS, OAUTH_PROVIDERS } from "@/shared/constants/providers";
@@ -27,6 +28,7 @@ import { HomeProviderTopologySection } from "./HomeProviderTopologySection";
 import { shouldShowProviderTopologyOnHome } from "./homeAppearance";
 import ManualUpdateCommand from "./ManualUpdateCommand";
 import HomeRecentRequests from "../home/HomeRecentRequests";
+import { isEnabledNoAuthProvider } from "../home/topologyUtils";
 
 type UpdateStep = {
   step: string;
@@ -230,6 +232,7 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
   // topology connection is never opened before we know the user wants it.
   const [showProviderTopologyOnHome, setShowProviderTopologyOnHome] = useState(false);
   const [appearanceSettingsLoaded, setAppearanceSettingsLoaded] = useState(false);
+  const [blockedProviders, setBlockedProviders] = useState<unknown>([]);
 
   useEffect(() => {
     // Fetch the pin settings (lightweight)
@@ -237,6 +240,7 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
       .then((r) => (r.ok ? r.json() : {}))
       .then((data: Record<string, unknown> | null) => {
         if (data) {
+          setBlockedProviders(data.blockedProviders);
           if (typeof data.showQuickStartOnHome === "boolean") {
             setShowQuickStartOnHome(data.showQuickStartOnHome);
           }
@@ -497,11 +501,14 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
       if (!canonical || healthByProvider.has(canonical)) return;
 
       const connections = providerConnections.filter(
-        (connection) =>
-          normalizeProviderId(connection.provider) === canonical && connection.isActive !== false
+        (connection) => normalizeProviderId(connection.provider) === canonical
       );
-
-      healthByProvider.set(canonical, getProviderHealth(connections));
+      // An enabled no-auth provider has no connections to test and is always reachable.
+      const noAuthHealthy =
+        connections.length === 0 && isEnabledNoAuthProvider(canonical, blockedProviders)
+          ? "active"
+          : null;
+      healthByProvider.set(canonical, noAuthHealthy ?? getProviderHealth(connections));
     };
 
     providerStats.forEach((stat) => noteProviderHealth(stat.id));
@@ -514,10 +521,12 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
       const canonicalProviderId = normalizeProviderId(rawProviderId);
       if (!canonicalProviderId || byProvider.has(canonicalProviderId)) return;
 
-      // Exclude providers with no active connections (or where all connections are deactivated)
-      const hasActiveConn = providerConnections.some(
-        (c) => normalizeProviderId(c.provider) === canonicalProviderId && c.isActive !== false
-      );
+      // Exclude providers with no active connections (or where all connections are deactivated).
+      // No-auth providers have none: they count unless blocked.
+      const hasActiveConn =
+        providerConnections.some(
+          (c) => normalizeProviderId(c.provider) === canonicalProviderId && c.isActive !== false
+        ) || isEnabledNoAuthProvider(canonicalProviderId, blockedProviders);
       if (!hasActiveConn) return;
 
       const resolvedName =
@@ -541,7 +550,7 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
     Object.keys(providerMetrics).forEach((provider) => addProvider(provider));
 
     return Array.from(byProvider.values());
-  }, [providerStats, providerMetrics, providerNodes, providerConnections]);
+  }, [providerStats, providerMetrics, providerNodes, providerConnections, blockedProviders]);
 
   const { lastProvider, errorProvider } = providerTopology;
 
@@ -818,8 +827,8 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
       {showUpdateOverlay && (
         <div className="fixed inset-0 z-[999] bg-[var(--ci-color-overlay)] backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-bg-main border border-border rounded-2xl shadow-2xl max-w-md w-full p-6">
-            <div className="flex items-center gap-3 mb-5">
-              <Icon name="progress_activity" size={28} className="text-primary animate-spin" />
+            <div role="status" className="flex items-center gap-3 mb-5">
+              <Spinner decorative size="md" className="text-primary" />
               <div>
                 <h3 className="text-lg font-bold">
                   {updatePhase === "done"
@@ -856,11 +865,7 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
                     }`}
                   >
                     {s.status === "running" ? (
-                      <Icon
-                        name="progress_activity"
-                        size={18}
-                        className="text-primary animate-spin"
-                      />
+                      <Spinner size="sm" />
                     ) : s.status === "done" ? (
                       <Icon name="check_circle" size={18} className="text-success" />
                     ) : s.status === "failed" ? (
@@ -987,11 +992,7 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
                   )}
                   {electronUpdateStatus.status === "downloading" && (
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/20">
-                      <Icon
-                        name="progress_activity"
-                        size={16}
-                        className="text-primary animate-spin"
-                      />
+                      <Spinner size="sm" />
                       <span className="text-xs font-semibold">
                         {electronUpdateStatus.percent || 0}%
                       </span>

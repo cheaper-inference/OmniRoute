@@ -200,8 +200,25 @@ export async function GET(request) {
 }
 
 /**
+ * Stores the manual context-window override sent at ADD time and echoes it on the
+ * added model. Without an override the response body is unchanged.
+ */
+function withAddTimeContextOverride<T extends object>(
+  provider: string,
+  modelId: string,
+  model: T,
+  contextWindowOverride: number | null | undefined
+) {
+  if (contextWindowOverride == null) return { model };
+  setModelContextOverride(provider, modelId, contextWindowOverride, "manual");
+  return {
+    model: { ...model, contextWindowOverride, contextWindowOverrideSource: "manual" as const },
+  };
+}
+
+/**
  * POST /api/provider-models
- * Body: { provider, modelId, modelName? }
+ * Body: { provider, modelId, modelName?, contextWindowOverride? }
  */
 export async function POST(request) {
   const authError = await requireManagementAuth(request);
@@ -242,6 +259,10 @@ export async function POST(request) {
       dimensions,
       supportedInputTypes,
       modelType,
+      // Manual context-window override set at ADD time — same Feature-5004 table
+      // the PUT path (#4125) writes, so the chatCore guard sees the real window
+      // from the first request instead of DEFAULT_LIMITS.default (128k).
+      contextWindowOverride,
     } = validation.data;
 
     // Store the bare upstream id: a pasted/imported id can arrive already
@@ -274,7 +295,10 @@ export async function POST(request) {
         ...(endpointCapabilitySource ? { endpointCapabilitySource } : {}),
       }
     );
-    return Response.json({ model });
+
+    return Response.json(
+      withAddTimeContextOverride(provider, storedModelId, model, contextWindowOverride)
+    );
   } catch (error) {
     console.error("Error adding provider model:", error);
     return Response.json(
@@ -287,6 +311,7 @@ export async function POST(request) {
 /**
  * PUT /api/provider-models
  * Body: { provider, modelId, modelName?, apiFormat?, supportedEndpoints? }
+ * A body with only `contextWindowOverride` next to provider/modelId never creates a custom-model row.
  */
 export async function PUT(request) {
   const authError = await requireManagementAuth(request);
@@ -370,8 +395,17 @@ export async function PUT(request) {
       }
     }
 
+    // A body whose only mutable key is `contextWindowOverride` edits the
+    // `model_context_overrides` record alone. It must not upsert a customModels
+    // row: that would turn a native/synced catalog model into a "custom" one
+    // (/v1/models overlay, apiFormat flip, availability under a live catalog).
+    const contextOnly =
+      "contextWindowOverride" in raw &&
+      Object.keys(raw).every((k) => ["provider", "modelId", "contextWindowOverride"].includes(k));
+
     const model = await updateCustomModel(provider, storedModelId, updates, {
-      createIfMissing: maxOutputTokenOverride === undefined || Object.keys(updates).length > 0,
+      createIfMissing:
+        !contextOnly && (maxOutputTokenOverride === undefined || Object.keys(updates).length > 0),
     });
     clearLegacyVisionOverride(provider, modelId, updates);
 
