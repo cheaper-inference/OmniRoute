@@ -7084,7 +7084,16 @@
     "chatgptConnectorLabel": "ChatGPT kọmịta kọmịta",
     "doctorChecking": "Ị na-lekọtaọnwe...",
     "doctorCheck": "Lege onwe dọkịta",
-    "fallbackRetryBackendTitle": "Moodulu mgbochi nke mbàmbà nchịkwa"
+    "fallbackRetryBackendTitle": "Moodulu mgbochi nke mbàmbà nchịkwa",
+    "quotaRefreshCurrent": "Melite oke ojiji dị ugbu a",
+    "quotaRefreshCurrentHint": "Na-enyocha oke ojiji akaụntụ a dị ugbu a na-ejighị kredit nrụgharị.",
+    "quotaRefreshing": "A na-enyocha oke ojiji…",
+    "quotaRefreshFresh": "A nyochala oke ojiji. Sava na-ekpebi ma akaụntụ dị njikere.",
+    "quotaRefreshFailed": "Nnyocha oke ojiji dara. Data gara aga agbanwebeghị.",
+    "quotaRefreshStale": "Sava weghachiri data oke ojiji ochie. Nke a abụghị nlele ọhụrụ.",
+    "quotaRefreshPartial": "Naanị akụkụ data oke ojiji dị.",
+    "quotaWindowUnavailable": "Oke ojiji {window} adịghị",
+    "quotaConnectionRefreshFailed": "Nnyocha oke ojiji agwụla, mana enweghị ike imelite ndepụta akaụntụ."
   },
   "settings": {
     "title": "Ntọala",

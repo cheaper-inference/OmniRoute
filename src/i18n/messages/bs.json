@@ -7161,7 +7161,16 @@
     "chatgptConnectorLabel": "ChatGPT prilagođeni konektor",
     "doctorChecking": "Provjeravanje statusa…",
     "doctorCheck": "Provjeri status liječnika",
-    "fallbackRetryBackendTitle": "Pozadišni servis za ponavljanje u slučaju pada"
+    "fallbackRetryBackendTitle": "Pozadišni servis za ponavljanje u slučaju pada",
+    "quotaRefreshCurrent": "Osvježi trenutnu kvotu",
+    "quotaRefreshCurrentHint": "Provjerava trenutnu kvotu ovog računa bez trošenja kredita za resetovanje.",
+    "quotaRefreshing": "Provjera kvote…",
+    "quotaRefreshFresh": "Kvota je provjerena. Server određuje dostupnost računa.",
+    "quotaRefreshFailed": "Provjera kvote nije uspjela. Prethodni podaci nisu promijenjeni.",
+    "quotaRefreshStale": "Server je vratio stare podatke o kvoti. Ovo nije novo očitanje.",
+    "quotaRefreshPartial": "Dostupan je samo dio podataka o kvoti.",
+    "quotaWindowUnavailable": "Kvota za {window} nije dostupna",
+    "quotaConnectionRefreshFailed": "Provjera kvote je završena, ali lista računa nije mogla biti osvježena."
   },
   "settings": {
     "title": "Postavke",
