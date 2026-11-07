@@ -319,8 +319,17 @@ for (const profile of ["ci", "quality"]) {
         .sort(),
       ids
     );
-    assert.equal(verdict.name, policy.profiles[profile].checkName);
-    assert.equal(verdict.if, "${{ always() }}");
+    // The exact check name, except on a Mergify queue-draft edit run (ci-mergify-candidate.test.mjs).
+    const checkName = policy.profiles[profile].checkName;
+    assert.ok(
+      verdict.name.endsWith(`&& '${checkName} (queue-draft edit)' || '${checkName}' }}`),
+      verdict.name
+    );
+    // always(), except a description edit on a Mergify queue draft (ci-mergify-candidate.test.mjs).
+    assert.match(
+      verdict.if,
+      /^\$\{\{ always\(\) && !\(github\.event_name == 'pull_request' && github\.event\.action == 'edited' && github\.event\.pull_request\.user\.login == 'mergify\[bot\]' && /
+    );
     assert.deepEqual(workflow.on.pull_request.branches, ["main", "release/**"]);
     // Push runs only for main since 2026-10-18: each change already ran the matrix on its
     // PR and Release-Green validates the merged combination on release/** (the per-push
