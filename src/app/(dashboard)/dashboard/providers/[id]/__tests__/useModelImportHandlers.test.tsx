@@ -359,6 +359,34 @@ describe("useModelImportHandlers — import through the model sync", () => {
     setTimeoutSpy.mockRestore();
   });
 
+  it("gives a shared bare alias to the first added model only", async () => {
+    const handleSetAlias = vi.fn().mockResolvedValue(undefined);
+    const hook = renderHook(
+      buildParams({
+        providerId: "openrouter",
+        providerStorageAlias: "openrouter",
+        connections: [conn("or-1", true)],
+        handleSetAlias,
+      })
+    );
+    vi.mocked(fetch).mockResolvedValue(
+      syncResponse(true, 200, {
+        ok: true,
+        source: "api",
+        addedModelIds: ["a/foo", "b/foo"],
+        removedModelIds: [],
+      })
+    );
+
+    await act(async () => {
+      await hook.get().handleImportModels();
+    });
+
+    // `b/foo` must not take over the `foo` alias the import just gave `a/foo`.
+    expect(handleSetAlias).toHaveBeenCalledTimes(1);
+    expect(handleSetAlias).toHaveBeenCalledWith("a/foo", "foo", "openrouter");
+  });
+
   it("says the catalog is up to date when the listing holds nothing new", async () => {
     const hook = renderHook(buildParams({ connections: [conn("c-1", true)] }));
     vi.mocked(fetch).mockResolvedValue(
@@ -487,6 +515,41 @@ describe("useModelImportHandlers — no-auth listing import", () => {
     expect(JSON.parse(String(createCall?.[1]?.body))).toEqual(
       expect.objectContaining({ provider: "aihorde", modelId: "grok-4.6", targetFormat: "openai" })
     );
+  });
+
+  it("flags a degraded listing, imports it and refreshes the list in place", async () => {
+    const fetchProviderModelMeta = vi.fn().mockResolvedValue(undefined);
+    const setTimeoutSpy = vi.spyOn(globalThis, "setTimeout");
+    const hook = renderHook(noAuthParams({ fetchProviderModelMeta }));
+    vi.mocked(fetch).mockImplementation(async (input, init) => {
+      if (input === "/api/provider-models" && init?.method === "POST") {
+        return { ok: true } as Response;
+      }
+      return {
+        ok: true,
+        json: async () => ({
+          source: "local_catalog",
+          warning: "API unavailable — using local catalog",
+          error: "HTTP 500",
+          models: [{ id: "listed-model" }],
+        }),
+      } as Response;
+    });
+
+    await act(async () => {
+      await hook.get().handleImportModels();
+    });
+
+    const progress = hook.get().importProgress;
+    expect(progress.phase).toBe("done");
+    expect(progress.importedCount).toBe(1);
+    expect(progress.degraded).toBe(true);
+    expect(progress.degradedCause).toBe("HTTP 500");
+    expect(progress.logs).toContain("API unavailable — using local catalog");
+    // The degraded notice must stay on screen: no reload, the list is refreshed in place.
+    expect(setTimeoutSpy.mock.calls.some(([, delay]) => delay === 2000)).toBe(false);
+    expect(fetchProviderModelMeta).toHaveBeenCalledTimes(2);
+    setTimeoutSpy.mockRestore();
   });
 
   it("reports an error instead of success when every model is rejected (bug repro)", async () => {

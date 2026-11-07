@@ -541,6 +541,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         syncedModels: synced.length,
         availableModelsCount: synced.length,
         modelChanges: { added, removed, total: added + removed },
+        addedModelIds: modelIdsMissingFrom(previous, synced),
+        removedModelIds: modelIdsMissingFrom(synced, previous),
         models: synced,
       });
     }

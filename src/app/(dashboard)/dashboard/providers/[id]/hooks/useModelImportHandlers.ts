@@ -461,10 +461,14 @@ export function useModelImportHandlers({
       const added = outcome.addedModelIds;
       const removed = outcome.kind === "synced" ? outcome.removedModelIds : [];
       // A model the import adds keeps its bare-id alias, as the per-model import did.
+      // Two added ids can share a last segment (`a/foo`, `b/foo`): the first one
+      // keeps the alias, and the import never overwrites one it just set.
+      const claimedAliases = new Set(Object.keys(modelAliases));
       for (const modelId of added) {
         const baseAlias = modelId.split("/").pop() || modelId;
-        if (!modelAliases[baseAlias])
-          await handleSetAlias(modelId, baseAlias, providerStorageAlias);
+        if (claimedAliases.has(baseAlias)) continue;
+        claimedAliases.add(baseAlias);
+        await handleSetAlias(modelId, baseAlias, providerStorageAlias);
       }
       await fetchAliases();
 

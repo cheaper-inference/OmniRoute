@@ -25,6 +25,7 @@ import {
 import { isDiscoverableAgyModelId } from "@omniroute/open-sse/config/agyModels.ts";
 import {
   declaresOnlyNonChatEndpoints,
+  isProviderExcludedModel,
   filterChatSelectableModels,
 } from "@omniroute/open-sse/services/modelEndpointPolicy.ts";
 import { filterSelectableModels } from "@omniroute/open-sse/services/modelLifecycle.ts";
@@ -316,7 +317,11 @@ export async function importManagedModels({
       ? selectableModels
           .filter(
             (model) =>
-              !chatModelIds.has(model.id) && declaresOnlyNonChatEndpoints(model.supportedEndpoints)
+              !chatModelIds.has(model.id) &&
+              declaresOnlyNonChatEndpoints(model.supportedEndpoints) &&
+              // A model the provider policy excludes outright (OpenRouter `:batch`)
+              // is not a media model, whatever endpoints it declares.
+              !isProviderExcludedModel(providerId, model)
           )
           .map(normalizeImportedNonChatModel)
       : [];

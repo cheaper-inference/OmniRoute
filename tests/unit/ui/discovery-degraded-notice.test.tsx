@@ -261,7 +261,7 @@ describe("the model import dialog", () => {
     // The catalog the operator asked for is not a fallback: no notice, no reason.
     expect(document.body.querySelector('[data-testid="discovery-degraded-notice"]')).toBeNull();
   });
-  it("refreshes the model list only after a sync that stored something", async () => {
+  it("refreshes the model list after a sync, but not after a refused one", async () => {
     const fetchProviderModelMeta = vi.fn().mockResolvedValue(undefined);
     const hook = renderHook(
       buildParams({ connections: [{ id: "conn-1", isActive: true }], fetchProviderModelMeta })
@@ -274,6 +274,14 @@ describe("the model import dialog", () => {
 
     // A refused (degraded) import changed nothing, so there is nothing to reload.
     expect(fetchProviderModelMeta).not.toHaveBeenCalled();
+
+    mockSync(true, 200, { ok: true, source: "api", addedModelIds: [], removedModelIds: [] });
+    await act(async () => {
+      await hook.get().handleImportModels();
+    });
+
+    // A sync that answered reloads the list, whatever it stored.
+    expect(fetchProviderModelMeta).toHaveBeenCalledTimes(1);
   });
 
   it("imports the models of a built-in catalog the operator asked for, without a notice", async () => {
