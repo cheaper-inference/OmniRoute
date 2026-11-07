@@ -4,7 +4,8 @@
  * Policy already admitted the requested combo. Per-target
  * `isModelAllowedForKey` must not then skip every member just because the
  * allow-list is the combo name. auto/* / disableNonPublic still check the
- * inner target so #9057 holds.
+ * inner target so #9057 holds. blockedModels applies to every inner target,
+ * including targets of a combo granted through allowedCombos.
  */
 
 import { isModelBlockedByPatterns } from "@/lib/db/apiKeys";
@@ -44,7 +45,8 @@ function allowListCoversRequestedCombo(
 
 /**
  * A stored (non-`auto/*`) combo named in the key's `allowedCombos` grants its
- * own targets (#14197). `auto/*` combos keep per-candidate model checks (#9057).
+ * own targets past `allowedModels` (#14197), but never past `blockedModels`.
+ * `auto/*` combos keep per-candidate model checks (#9057).
  */
 export function isExplicitlyAllowedComboForKey(
   apiKeyInfo: ComboTargetKeyPolicyInfo | null | undefined,
@@ -66,9 +68,9 @@ export async function comboTargetPassesKeyModelPolicy(
 
   if (!hasApiKeyModelRestrictions(apiKeyInfo)) return true;
 
-  if (isExplicitlyAllowedComboForKey(apiKeyInfo, requestedModelStr)) return true;
-
   if (await isModelBlockedByPatterns(apiKeyInfo.blockedModels, targetModelStr)) return false;
+
+  if (isExplicitlyAllowedComboForKey(apiKeyInfo, requestedModelStr)) return true;
 
   if (allowListCoversRequestedCombo(apiKeyInfo.allowedModels, requestedModelStr)) {
     return true;
