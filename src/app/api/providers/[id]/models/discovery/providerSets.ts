@@ -138,6 +138,9 @@ export const NAMED_OPENAI_STYLE_PROVIDERS = new Set([
   // served from its key-gated /v1/models endpoint; the registry seed stays as the
   // offline fallback.
   "tokenharbor",
+  // Pareto Inference serves its catalog from a public /v1/models; live discovery picks up
+  // new models without a release, and the registry seed stays as the offline fallback.
+  "pareto",
 ]);
 
 export function isNamedOpenAIStyleProvider(provider: string): boolean {
