@@ -1,9 +1,9 @@
 import { isAccountDeactivated } from "@omniroute/open-sse/services/accountFallback.ts";
 
 export type GeminiProjectBlock =
-  | "gemini_free_tier_ineligible"
-  | "gemini_prepay_depleted"
-  | "gemini_monthly_spend_cap";
+  "gemini_free_tier_ineligible" | "gemini_prepay_depleted" | "gemini_monthly_spend_cap";
+
+export const GEMINI_PROJECT_BLOCK_COOLDOWN_MS = 6 * 60 * 60 * 1000;
 
 export function classifyGeminiProjectBlock(
   provider: string | null | undefined,

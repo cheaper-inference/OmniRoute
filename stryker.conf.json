@@ -213,6 +213,7 @@
       "tests/unit/auth-antigravity-account-retry-v2.test.ts",
       "tests/unit/auth-clear-account-error.test.ts",
       "tests/unit/auth-disable-cooling-2997.test.ts",
+      "tests/unit/geminiProjectBlockAuth.test.ts",
       "tests/unit/auth-extract-api-key.test.ts",
       "tests/unit/auth-noauth-fallback-loop-3061.test.ts",
       "tests/unit/auth-ollama-cloud-per-model-403-3027.test.ts",
