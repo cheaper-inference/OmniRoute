@@ -190,10 +190,13 @@ test("phone-only heading/button rules leave kit elements alone (spike conflicts 
   assert.doesNotMatch(css, /main :is\(h1, h2\) \{/);
 });
 
-test("adapter extension classes exist for the Button warning variant and Badge tones", () => {
-  assert.match(css, /\.ci-button--warning \{/);
-  for (const tone of ["success", "warning", "danger", "info", "primary"]) {
-    assert.match(css, new RegExp(`\\.ci-badge\\[data-tone="${tone}"\\]`), `badge tone ${tone}`);
+test("the Button warning variant and Badge tones come from the kit, with no local extension", () => {
+  const kit = read("packages/ui-kit/src/ci-ui.css");
+  assert.match(kit, /\.ci-button--warning \{/);
+  assert.doesNotMatch(css, /\.ci-button--warning|\.ci-select-native/);
+  for (const tone of ["success", "warning", "danger", "info", "accent"]) {
+    assert.match(kit, new RegExp(`\\.ci-badge--tone-${tone} \\{`), `badge tone ${tone}`);
+    assert.doesNotMatch(css, new RegExp(`\\.ci-badge\\[data-tone="${tone}"\\]`), `local ${tone}`);
   }
 });
 
@@ -553,16 +556,13 @@ test("token aliases with no consumer are gone (KEA-7886 F4)", () => {
   assert.doesNotMatch(css, /\.traffic-lights?\b/, "the unused .traffic-light(s) chrome is gone");
 });
 
-test("the primary Badge tone keeps dark ink in light and takes the lime ink in dark (F4)", () => {
-  // Light: near-black ink on lime-100. Dark: the kit keeps --ci-color-accent-foreground near-black
-  // while the surface becomes a 14 % lime tint over the dark background, so the "8 features"
-  // translator badge read near-black on near-black. Dark flips the ink to the lime itself.
+test("the primary Badge tone uses the kit accent ink in every look (F4)", () => {
+  // The near-black accent foreground vanished on the dark accent tint ("8 features" on the
+  // translator). The kit tone draws its own ink, which holds AA in all four looks.
+  const kit = read("packages/ui-kit/src/ci-ui.css");
   assert.match(
-    css,
-    /\.ci-badge\[data-tone="primary"\] \{\s*color: var\(--ci-color-accent-foreground\);\s*background: var\(--ci-color-accent-surface-strong\);/
+    kit,
+    /\.ci-badge--tone-accent \{[^}]*color: var\(--ci-badge-accent-ink\);[^}]*background: var\(--ci-color-accent-surface-strong\);/
   );
-  assert.match(
-    css,
-    /:root\[data-theme="dark"\] \.ci-badge\[data-tone="primary"\] \{\s*color: var\(--ci-color-accent\);/
-  );
+  assert.doesNotMatch(css, /\.ci-badge\[data-tone="primary"\]/);
 });

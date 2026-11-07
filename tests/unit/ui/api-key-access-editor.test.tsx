@@ -327,9 +327,12 @@ describe("ApiKeyAccessEditorClient", () => {
   // click is always held; the link is followed (router.push) only after Confirm.
   const leaveDialog = () => screen.queryByText(messages.apiManager.unsavedChangesWarning);
   const leaveDialogButton = (name: string) =>
-    within(screen.getByRole("dialog", { name: messages.common.confirmTitle })).getByRole("button", {
-      name,
-    });
+    within(screen.getByRole("alertdialog", { name: messages.common.confirmTitle })).getByRole(
+      "button",
+      {
+        name,
+      }
+    );
 
   it("asks for confirmation before following an in-app link while dirty", async () => {
     await renderLoaded();

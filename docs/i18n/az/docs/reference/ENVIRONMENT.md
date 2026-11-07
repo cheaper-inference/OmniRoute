@@ -1366,9 +1366,9 @@ Bir ay ərzində oyaq saxlanılan xidmət təxminən 744 instansiya saatından i
 
 ## Yerləşdirmə ssenariləri
 
-Relay backend SRE təlimatları (ts/bifrost/auto davranışı, 9router və CLIProxyAPI yerləşdirilməsi, həmçinin yüksək ötürmə qabiliyyətli ehtiyat strategiyası) üçün [Relay Backend Strategy](/docs/reference/RELAY_BACKEND_STRATEGY.md) bölməsinə baxın.
+Relay backend SRE təlimatları (ts/bifrost/auto davranışı, 9router və CLIProxyAPI yerləşdirməsi, eləcə də yüksək ötürmə qabiliyyətli fallback strategiyası) üçün [Relay Backend Strategiyası](/docs/reference/RELAY_BACKEND_STRATEGY.md) bölməsinə baxın.
 
-### Minimal lokal inkişaf
+### Minimal lokal işlənmə
 
 ```bash
 JWT_SECRET=$(openssl rand -base64 48)
@@ -1397,7 +1397,7 @@ OMNIROUTE_MEMORY_MB=8192
 CORS_ORIGIN=https://your-frontend.example.com
 ```
 
-### Şəbəkədən təcrid olunmuş mühit / CI
+### Şəbəkədən təcrid olunmuş / CI
 
 ```bash
 JWT_SECRET=test-jwt-secret-for-ci
@@ -1870,3 +1870,14 @@ OmniConductor mərkəzi tapşırıqlarını yerli A2A TaskManager (`src/lib/cond
 | Dəyişən                        | Defolt | Mənbə Faylı                                  | Təsvir                                                                                                                                                                                                                                |
 | ------------------------------ | ------ | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`    | `src/lib/providerModels/modelSyncTimings.ts` | Model sinxronizasiyası zamanı faza vaxtı, yaradılan sorğu ID və faza success/error nəticələrini qeyd etmək üçün `1` olaraq təyin edin. Bütün digər dəyərlər üçün deaktivdir. Qeydlər sorğu, hesab, kataloq və səhv yüklərini buraxır. |
+
+## Local OpenCode media-analysis aləti
+
+`scripts/cli/omniroute-media-mcp.mjs` tərəfindən istifadə olunur. Bunları lokal alət prosesinin mühitində təyin edin.
+
+| Dəyişən                    | Susayılan dəyər                                                                      | Təsvir                                                                                                      |
+| -------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (və ya `~/.config/opencode/opencode.json`) | Media aləti və quraşdırıcı tərəfindən oxunan OpenCode konfiqurasiyası.                                      |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                          | Media aləti tərəfindən OpenCode konfiqurasiyasından oxunan provayder girişi.                                |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                               | Media aləti tərəfindən göndərilən model. Onun provayderi tələb olunan media növlərini dəstəkləməlidir.      |
+| `OMNIROUTE_MEDIA_API_KEY`  | Konfiqurasiya edilmiş provayder API açarı və ya onun mühit dəyişəni istinadı         | İxtiyari etimadnamə əvəzetməsi. Onu lokal proses mühitində saxlayın; heç vaxt repozitoriyaya əlavə etməyin. |

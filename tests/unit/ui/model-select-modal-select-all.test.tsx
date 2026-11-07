@@ -50,7 +50,7 @@ async function renderModal(props: Partial<React.ComponentProps<typeof ModelSelec
 
 // The kit confirm dialog renders the mocked `common` keys as labels ("confirmAction", "cancel").
 function findDialogButton(label: string): HTMLButtonElement | null {
-  const buttons = document.body.querySelectorAll<HTMLButtonElement>('[role="dialog"] button');
+  const buttons = document.body.querySelectorAll<HTMLButtonElement>('[role="alertdialog"] button');
   return [...buttons].find((b) => b.textContent?.trim() === label) ?? null;
 }
 
