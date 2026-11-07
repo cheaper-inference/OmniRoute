@@ -38,6 +38,7 @@ export type ClassificationReason =
   | "cliproxy_management_alias"
   | "management_api"
   | "root_redirect"
+  | "grok_bridge_public_route"
   | "fallback_management";
 
 export interface RouteClassification {
