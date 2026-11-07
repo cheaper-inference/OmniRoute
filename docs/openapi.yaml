@@ -2626,6 +2626,7 @@ paths:
     post:
       tags: [Providers]
       summary: Auto-detect and import the local Antigravity CLI (agy) login from disk
+      x-loopback-only: true
       x-always-protected: true
       responses:
         "200":

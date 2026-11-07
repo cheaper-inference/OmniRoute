@@ -578,6 +578,7 @@ export const updateSettingsSchema = z.object({
     .optional(),
   proxyEnabled: z.boolean().optional(),
   perKeyProxyEnabled: z.boolean().optional(),
+  defaultNewConnectionProxyEnabled: z.boolean().optional(),
   // CLIProxyAPI connection settings
   cliproxyapi_fallback_enabled: z.boolean().optional(),
   cliproxyapi_url: z.string().url().max(500).optional(),

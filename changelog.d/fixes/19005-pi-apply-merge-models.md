@@ -1,0 +1,1 @@
+- **fix(cli):** Applying Pi Coding Agent settings now merges into the existing omniroute provider models instead of replacing the list — hand-set model labels, `contextWindow`/`maxTokens` values and extra models added by hand in models.json survive an Apply. ([#19005](https://github.com/cheaper-inference/OmniRoute/pull/19005))
