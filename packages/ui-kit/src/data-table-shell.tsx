@@ -1,6 +1,17 @@
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Columns3, RotateCcw } from "lucide-react";
 import { cloneElement, isValidElement } from "react";
 import type { ComponentProps, ReactNode } from "react";
+import { Button, type ButtonProps } from "./button";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  type DropdownMenuAlign,
+} from "./dropdown-menu";
+import { resolveLabels } from "./lib/labels";
 import { cn } from "./lib/utils";
 import { Select, type SelectProps } from "./select";
 import { TableLoadingRegion } from "./table-loading";
@@ -112,6 +123,97 @@ export function DataTableShell({
         )}
       </div>
     </section>
+  );
+}
+
+export interface DataTableColumnsMenuColumn {
+  key: string;
+  label: ReactNode;
+  /** Locks the column at its current state, for columns the table cannot lose. */
+  disabled?: boolean;
+}
+
+export interface DataTableColumnsMenuLabels {
+  /** The trigger's visible text. */
+  trigger: string;
+  reset: string;
+}
+
+export const defaultDataTableColumnsMenuLabels: DataTableColumnsMenuLabels = {
+  trigger: "Columns",
+  reset: "Reset columns",
+};
+
+export interface DataTableColumnsMenuProps extends Omit<ButtonProps, "asChild" | "children"> {
+  columns: readonly DataTableColumnsMenuColumn[];
+  /** Visibility by column key. A column that is missing here counts as visible. */
+  visible: Readonly<Record<string, boolean | undefined>>;
+  onVisibilityChange: (key: string, visible: boolean) => void;
+  /** Adds a reset item below the columns. Restoring the defaults is yours to do. */
+  onReset?: () => void;
+  /** Disables the reset item, for example while the columns already match the defaults. */
+  resetDisabled?: boolean;
+  labels?: Partial<DataTableColumnsMenuLabels>;
+  /** Menu alignment against the trigger. Defaults to "end". */
+  align?: DropdownMenuAlign;
+}
+
+/**
+ * Column visibility for the `DataTableShell` toolbar. Visibility stays with the consumer, and the
+ * menu stays open so several columns can change in a row. Other props go to the trigger `Button`.
+ */
+export function DataTableColumnsMenu({
+  columns,
+  visible,
+  onVisibilityChange,
+  onReset,
+  resetDisabled,
+  labels: labelOverrides,
+  align = "end",
+  variant = "outline",
+  size = "sm",
+  dir,
+  ...props
+}: DataTableColumnsMenuProps) {
+  const labels = resolveLabels(defaultDataTableColumnsMenuLabels, labelOverrides);
+  return (
+    // Non-modal: the table stays readable and scrollable while its columns change.
+    <DropdownMenu modal={false} dir={dir === "rtl" || dir === "ltr" ? dir : undefined}>
+      <DropdownMenuTrigger asChild>
+        <Button variant={variant} size={size} dir={dir} {...props}>
+          <Columns3 aria-hidden="true" />
+          {labels.trigger}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align={align} scrollable>
+        {columns.map((column) => (
+          <DropdownMenuCheckboxItem
+            key={column.key}
+            checked={visible[column.key] !== false}
+            disabled={column.disabled}
+            onCheckedChange={(next) => onVisibilityChange(column.key, next)}
+            onSelect={(event) => event.preventDefault()}
+          >
+            {column.label}
+          </DropdownMenuCheckboxItem>
+        ))}
+        {onReset ? (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              icon={<RotateCcw aria-hidden="true" />}
+              disabled={resetDisabled}
+              onSelect={(event) => {
+                event.preventDefault();
+                onReset();
+              }}
+            >
+              {labels.reset}
+            </DropdownMenuItem>
+          </>
+        ) : null}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 

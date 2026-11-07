@@ -18,6 +18,7 @@ import { isContentPolicyRefusal } from "../../utils/contentPolicyError.ts";
 import { evaluateResponseValidation, type ResponseValidationConfig } from "./responseValidation.ts";
 import { getReasoningTokens } from "../../../src/lib/usage/tokenAccounting.ts";
 import { REASONING_BUFFER_MIN_TRIGGER } from "../reasoningTokenBuffer.ts";
+import { isDeliberateEmptyResponsesTerminal } from "../../translator/helpers/responsesTerminalStatus.ts";
 import type { ComboRetryAfter } from "./types.ts";
 import {
   classifyPreContentReadFailure,
@@ -951,7 +952,7 @@ export async function validateResponseQuality(
   if (json?.object === "response") {
     if (
       !responsesApiOutputHasContent(json.output) &&
-      !(json.status === "completed" && permitsEmptyTurn())
+      !(isDeliberateEmptyResponsesTerminal(json) && permitsEmptyTurn())
     )
       return { valid: false, reason: "empty_choices" };
     const status = typeof json.status === "string" ? json.status : "";
@@ -1032,9 +1033,12 @@ export async function validateResponseQuality(
     // same case the Claude shape exempts as stop_reason "max_tokens" (#12968).
     // A thinking model that spends the whole budget before any visible token
     // is a valid response, not a reason to fail the combo target over.
+    // "content_filter" with native trust is a translated Claude refusal: the model
+    // declined, so the next target would only be asked to answer what it refused.
     if (
       firstChoice?.finish_reason === "length" ||
-      (firstChoice?.finish_reason === "stop" && permitsEmptyTurn())
+      ((firstChoice?.finish_reason === "stop" || firstChoice?.finish_reason === "content_filter") &&
+        permitsEmptyTurn())
     ) {
       return {
         valid: true,
