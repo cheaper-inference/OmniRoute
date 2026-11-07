@@ -1361,9 +1361,9 @@ Adobe Firefly Web 提供者（`open-sse/services/adobeFireflyBrowserLogin.ts`、
 
 ## 部署情境
 
-如需 Relay Backend SRE 指引（ts/bifrost/auto 行為、9router 與 CLIProxyAPI 的配置，以及高吞吐量的回退策略），請參閱 [Relay Backend Strategy](/docs/reference/RELAY_BACKEND_STRATEGY.md)。
+如需轉送後端 SRE 指引（ts/bifrost/auto 行為、9router 與 CLIProxyAPI 的部署位置，以及高吞吐量備援策略），請參閱[轉送後端策略](/docs/reference/RELAY_BACKEND_STRATEGY.md)。
 
-### 最小本機開發環境
+### 最小化本機開發
 
 ```bash
 JWT_SECRET=$(openssl rand -base64 48)
@@ -1392,7 +1392,7 @@ OMNIROUTE_MEMORY_MB=8192
 CORS_ORIGIN=https://your-frontend.example.com
 ```
 
-### 隔離網路／CI
+### 隔離網路 / CI
 
 ```bash
 JWT_SECRET=test-jwt-secret-for-ci
@@ -1403,7 +1403,7 @@ OMNIROUTE_DISABLE_BACKGROUND_SERVICES=true
 APP_LOG_TO_FILE=false
 ```
 
-### 使用反向 Proxy 的 VPS（nginx + Cloudflare）
+### 配備反向 Proxy 的 VPS（nginx + Cloudflare）
 
 ```bash
 JWT_SECRET=<generated>
@@ -1865,3 +1865,14 @@ Redis 工作階段親和性回退失效處理（僅限選擇加入；SQLite 預�
 | 多變的                         | 預設 | 原始檔                                       | 描述                                                                                                                               |
 | ------------------------------ | ---- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`  | `src/lib/providerModels/modelSyncTimings.ts` | 設定為`1`以記錄模型同步期間的階段計時、產生的請求ID和階段success/error結果。對所有其他值停用。日誌省略請求、帳戶、目錄和錯誤負載。 |
+
+## 本機 OpenCode 媒體分析工具
+
+由 `scripts/cli/omniroute-media-mcp.mjs` 使用。在本機工具程序環境中設定這些變數。
+
+| 變數                       | 預設值                                                                             | 說明                                                 |
+| -------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json`（或 `~/.config/opencode/opencode.json`） | 媒體工具與安裝程式讀取的 OpenCode 設定。             |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                        | 媒體工具從 OpenCode 設定中讀取的提供者項目。         |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                             | 媒體工具提交的模型。其提供者必須支援要求的媒體類型。 |
+| `OMNIROUTE_MEDIA_API_KEY`  | 已設定的提供者 API 金鑰或其環境參照                                                | 選用的憑證覆寫值。請保留在本機程序環境中；切勿提交。 |
