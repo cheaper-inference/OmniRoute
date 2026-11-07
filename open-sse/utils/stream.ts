@@ -1983,23 +1983,15 @@ export function createSSEStream(options: StreamOptions = {}) {
                     }
                   }
                   // #7936/#18600 — restore provider tool-name aliases (and the
-                  // #7936 `{namespace, name}` identities) on passthrough Responses
-                  // call items through the shared shape-safe helper. The done and
-                  // completed branches above already restored their own copies;
-                  // this covers `response.output_item.added` plus the
-                  // `response.incomplete`/`response.failed`/`response.done` and
-                  // cancellation terminal snapshots so a truncated/alternate stream
-                  // is restored too. The restoration mutates
-                  // `parsed`, so a real change must be re-serialized; otherwise
-                  // the client still receives the alias.
-                  if (
-                    parsed.type === "response.output_item.added" ||
-                    parsed.type === "response.incomplete" ||
-                    parsed.type === "response.failed" ||
-                    parsed.type === "response.done" ||
-                    parsed.type === "response.cancelled" ||
-                    parsed.type === "response.canceled"
-                  ) {
+                  // #7936 `{namespace, name}` identities) on every passthrough
+                  // Responses event through the shared shape-safe helper: call items,
+                  // argument events, and the tools/tool_choice any response object
+                  // echoes (created, in_progress, terminal snapshots). The done and
+                  // completed branches above already restored their own copies and the
+                  // helper is idempotent. The restoration mutates `parsed`, so a real
+                  // change must be re-serialized; otherwise the client still receives
+                  // the alias.
+                  if (typeof parsed.type === "string") {
                     if (
                       restoreResponsesToolNames(
                         parsed as JsonRecord,
