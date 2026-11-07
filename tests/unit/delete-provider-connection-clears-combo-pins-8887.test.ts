@@ -93,7 +93,12 @@ test.after(() => {
   });
 });
 
-test("#8887: single connection delete clears only matching combo pins", async () => {
+// The deleted connection's pin is deliberately kept. Clearing it turned the step
+// into "any account of this provider", so deleting one account silently moved
+// that step's traffic onto the survivors. A dead pin cannot resolve: the target
+// reports ineligible, the combo moves to its next step, and the dashboard shows
+// the account as deleted until the user repoints or removes the step.
+test("#8887: single connection delete keeps the deleted step's pin", async () => {
   const doomedId = await createConnection("openai", "single-doomed");
   const survivorId = await createConnection("openai", "single-survivor");
 
@@ -116,14 +121,14 @@ test("#8887: single connection delete clears only matching combo pins", async ()
   const models = await readModels("single-delete-8887");
 
   assert.equal(
-    "connectionId" in models[0],
-    false,
-    "single delete must remove the deleted direct connection pin"
+    models[0].connectionId,
+    doomedId,
+    "single delete must not unpin the step whose account was removed"
   );
   assert.deepEqual(
     models[0].allowedConnectionIds,
     [survivorId],
-    "single delete must remove the deleted id from allowedConnectionIds"
+    "single delete must still prune the deleted id from allowedConnectionIds"
   );
   assert.equal(
     models[1].connectionId,
@@ -132,7 +137,7 @@ test("#8887: single connection delete clears only matching combo pins", async ()
   );
 });
 
-test("#8887: bulk connection delete clears every matching combo pin", async () => {
+test("#8887: bulk connection delete keeps both deleted pins", async () => {
   const doomedA = await createConnection("anthropic", "bulk-doomed-a");
   const doomedB = await createConnection("anthropic", "bulk-doomed-b");
   const survivorId = await createConnection("anthropic", "bulk-survivor");
@@ -161,22 +166,14 @@ test("#8887: bulk connection delete clears every matching combo pin", async () =
 
   const models = await readModels("bulk-delete-8887");
 
-  assert.equal(
-    "connectionId" in models[0],
-    false,
-    "bulk delete must remove the first deleted direct pin"
-  );
-  assert.equal(
-    "connectionId" in models[1],
-    false,
-    "bulk delete must remove the second deleted direct pin"
-  );
+  assert.equal(models[0].connectionId, doomedA, "bulk delete must keep the first dead pin");
+  assert.equal(models[1].connectionId, doomedB, "bulk delete must keep the second dead pin");
   assert.deepEqual(models[0].allowedConnectionIds, [survivorId]);
   assert.deepEqual(models[1].allowedConnectionIds, [survivorId]);
   assert.equal(models[2].connectionId, survivorId);
 });
 
-test("#8887: provider-wide delete clears that provider's combo pins only", async () => {
+test("#8887: provider-wide delete keeps that provider's pins and other providers' scope", async () => {
   const doomedA = await createConnection("nvidia", "provider-doomed-a");
   const doomedB = await createConnection("nvidia", "provider-doomed-b");
   const otherProviderId = await createConnection("cerebras", "provider-survivor");
@@ -204,16 +201,8 @@ test("#8887: provider-wide delete clears that provider's combo pins only", async
 
   const models = await readModels("provider-delete-8887");
 
-  assert.equal(
-    "connectionId" in models[0],
-    false,
-    "provider delete must remove its first deleted direct pin"
-  );
-  assert.equal(
-    "connectionId" in models[1],
-    false,
-    "provider delete must remove its second deleted direct pin"
-  );
+  assert.equal(models[0].connectionId, doomedA, "provider delete must keep its first dead pin");
+  assert.equal(models[1].connectionId, doomedB, "provider delete must keep its second dead pin");
   assert.deepEqual(
     models[0].allowedConnectionIds,
     [otherProviderId],
@@ -223,5 +212,35 @@ test("#8887: provider-wide delete clears that provider's combo pins only", async
     models[2].connectionId,
     otherProviderId,
     "provider delete must preserve another provider's direct pin"
+  );
+});
+
+test("#8887: a scope that loses every id stays restrictive instead of becoming the whole pool", async () => {
+  const doomedId = await createConnection("google", "scope-doomed");
+
+  await createPinnedCombo("scope-only-delete-8887", [
+    {
+      provider: "google",
+      model: "gemini-3.8-pro",
+      allowedConnectionIds: [doomedId],
+    },
+  ]);
+
+  assert.equal(await providersDb.deleteProviderConnection(doomedId), true);
+
+  const models = await readModels("scope-only-delete-8887");
+
+  // The step keeps the list naming the dead id. It is still non-empty, so the
+  // scope filter runs and matches no connection: the target is ineligible
+  // rather than unrestricted. An empty list would mean "whole active pool".
+  assert.equal(
+    "connectionId" in models[0],
+    false,
+    "the scope-only fixture must stay unpinned so the allowlist is the only scope"
+  );
+  assert.deepEqual(
+    models[0].allowedConnectionIds,
+    [doomedId],
+    "an emptied allowlist must not become an unrestricted pool"
   );
 });

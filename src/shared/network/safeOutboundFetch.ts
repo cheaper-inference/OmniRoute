@@ -4,6 +4,7 @@ import {
   getOriginalFetch,
   resolveProxyForRequest,
 } from "@omniroute/open-sse/utils/proxyFetch.ts";
+import { isConnectGuardRefusal } from "@omniroute/open-sse/utils/connectGuardDispatcher.ts";
 import { FetchTimeoutError, fetchWithTimeout } from "@/shared/utils/fetchTimeout";
 import {
   bareHostname,
@@ -402,6 +403,17 @@ function normalizeFetchFailure(
     });
   }
 
+  if (isConnectGuardRefusal(error)) {
+    return new SafeOutboundFetchError(`Host of ${targetUrl} resolves to a blocked address`, {
+      code: "URL_GUARD_BLOCKED",
+      url: targetUrl,
+      method,
+      attempts,
+      isRetryable: false,
+      cause: error,
+    });
+  }
+
   const message = error instanceof Error ? error.message : String(error);
   const code = error && typeof error === "object" ? (error as { code?: string }).code : undefined;
 
@@ -457,12 +469,17 @@ export async function safeOutboundFetch(url: string | URL, options: SafeOutbound
     pinsConnection && checkedAddresses?.length
       ? (checkedAddresses.find((entry) => entry.family === 4) ?? checkedAddresses[0])
       : null;
+  // Without a pin the connection makes its own lookup, so it re-checks that answer. Patched fetch
+  // applies this on its direct route only; a proxy resolves the name itself.
+  const connectGuard =
+    guard !== "none" && !pinTo && !bypassProxyPatch ? { connectGuard: guard } : {};
 
   for (let attempt = 1; attempt <= retryConfig.attempts; attempt++) {
     try {
       const executeFetch = () =>
         fetchWithTimeout(targetUrl.toString(), {
           ...fetchOptions,
+          ...connectGuard,
           method,
           redirect,
           signal,
