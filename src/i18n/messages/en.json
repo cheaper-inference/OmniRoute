@@ -1000,6 +1000,8 @@
     "batchListTitle": "Batches",
     "batchListCount": "{count} batches",
     "batchListRemovingCompleted": "Removing…",
+    "batchListRemoveCompletedPartial": "Removed a large number of batches. Click again to clear the rest.",
+    "batchListRemoveCompletedFailed": "An error occurred while removing batches.",
     "batchListRemoveCompleted": "Remove completed",
     "batchListTableStatus": "Status",
     "batchListTableId": "ID",
@@ -1038,6 +1040,12 @@
     "batchListRefreshing": "Refreshing…",
     "batchListRefresh": "Refresh",
     "uploadFileModalRemove": "Remove",
+    "fileInputChoose": "Choose file",
+    "fileInputChooseMultiple": "Choose files",
+    "fileInputEmpty": "No file chosen",
+    "fileInputSelectedCount": "{count, plural, one {# file selected} other {# files selected}}",
+    "fileDropLabel": "Drop a file here or choose one",
+    "fileDropLabelMultiple": "Drop files here or choose files",
     "uploadFileModalUploading": "Uploading…",
     "wizardInputReading": "Reading file…",
     "wizardInputReady": "Ready",
@@ -1112,7 +1120,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "Send the OpenCode v2 CLI client fingerprint on OpenCode Zen/Go requests: the opencode/latest/<2.x>/cli User-Agent and x-opencode-client cli, and on free-tier requests the v2 session headers, the v2 CLI read/shell tool schemas and no tool_choice \"none\". Off by default: every OpenCode request keeps the current identity, headers and body unchanged.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "When an auto combo's candidate pool is already empty before the tool-calling pre-filter runs (every target skipped by cooldowns, lockouts or exhaustion), answer 503 no_eligible_targets instead of the legacy 400 \"No target supports tool calling\" capability_mismatch. Off by default: the empty pool keeps the legacy 400.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Enforce trusted model endpoint tags (declared by the provider catalog, inferred from a specialty model id, or set by the operator): reject a request sent to an endpoint the model does not serve with HTTP 400 before dispatch on /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations and /v1/audio/*; hide models whose tagged endpoints have no OmniRoute adapter from /v1/models; and answer the dashboard model test with 422 for such models. Off by default: endpoint tags stay informational and requests are dispatched exactly as before.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "On plain anthropic-compatible relays, keep mid-conversation system turns inside the message list instead of moving them into the top-level system prompt, so the cached prompt prefix stays stable across turns. Applies only when the client itself sent the mid-conversation-system-2026-04-07 beta. Off by default: every system turn is moved into the system prompt exactly as before, because relays without that beta reject system turns in the message list.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Use the reasoning effort tiers models.dev publishes when neither an operator override nor the provider registry declares any, keeping only known effort levels, and treat an empty declared tier list as \"no tiers\". Off by default: the model catalog and resolved effort tiers stay exactly as before.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "Let auto/* requests build the candidate pool with resolved model capabilities (vision, reasoning, thinking) and observed quality scores, read in one bulk pass. Off by default: request-time candidate weights stay exactly as before. On: those signals feed the snapshot weights, so candidate weights and selection can change.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Let the credential health sweep retest connections the gateway switched off by itself (at most once every 6 hours each, 5 per sweep) and switch one back on when its retest passes. Off by default: such connections stay off until an operator acts. Operator-disabled and permanently banned connections are never retested.",
@@ -2016,7 +2023,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# request} other {# requests}}, {keys, plural, one {# limited key} other {# limited keys}}",
     "unpricedUsageMore": "…and {count} more",
     "unpricedUsageConfigure": "Configure pricing",
-    "unpricedUsageDismiss": "Dismiss"
+    "unpricedUsageDismiss": "Dismiss",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analytics",
@@ -6341,6 +6357,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled, unless local quota filtering is fully turned off (quota preflight and limit policy both disabled).",
     "disableCoolingDescription": "Skip the transient cooldown so this connection stays eligible even after recoverable errors (terminal states like banned/expired still apply).",
     "disableCoolingLabel": "Disable cooldown for this connection",
+    "keepMidConversationSystemDescription": "Leave system messages sent mid-conversation inside the message list instead of moving them into the top-level system prompt, so the prompt cache keeps hitting across turns. Enable only if this upstream accepts role \"system\" inside messages (otherwise it answers 400).",
+    "keepMidConversationSystemLabel": "Keep mid-conversation system messages in place",
+    "requireUserLastMessageDescription": "For upstreams that reject assistant prefill: drop trailing assistant turns (no tool_use) before sending. The model may regenerate its previous answer.",
+    "requireUserLastMessageLabel": "Require conversation to end with a user message",
     "bulkPasteAdded": "{count, plural, one {1 key added} other {# keys added}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplicate skipped} other {# duplicates skipped}}",
     "bulkPasteHint": "Paste one API key per line. Empty lines are ignored and duplicate keys are skipped.",
@@ -6440,6 +6460,9 @@
     "localProviders": "Local Providers",
     "maxConcurrentWholeNumberError": "Max Concurrent Whole Number Error",
     "m365TierLabel": "Copilot tier",
+    "m365RefreshTokenLabel": "Refresh token (optional)",
+    "m365RefreshTokenHint": "Used to refresh the Microsoft 365 access token automatically.",
+    "m365RefreshTokenEditHint": "Leave blank to keep the existing token. Paste a new token to replace it.",
     "m365TierHint": "Choose which Microsoft 365 Copilot surface this connection uses. Individual is the default consumer BizChat; Education and Enterprise (work) opt into their tenant surfaces.",
     "m365TierIndividualOption": "Individual (default)",
     "m365TierEduOption": "Education",
@@ -7174,6 +7197,7 @@
     "proxySubTabsAria": "Proxy sections",
     "requestBodyLimitTitle": "Request Body Limit",
     "requestBodyLimitDescription": "Maximum API payload size accepted before a request body is parsed. Dedicated upload routes keep at least their built-in 100 MB limit.",
+    "requestBodyLimitChatHint": "Chat Completions and Responses accept up to 50 MB until you save a limit here. A saved limit applies to them too, lower or higher.",
     "requestBodyLimitInputLabel": "Request body limit in MB",
     "requestBodyLimitEmptyError": "Enter a limit in MB",
     "requestBodyLimitWholeNumberError": "Use a whole number",
@@ -12268,6 +12292,10 @@
     "messageInputAria": "Message"
   },
   "requestLogger": {
+    "omittedHttpAttempts": "{count} HTTP sends not retained",
+    "upstreamStatus": "Upstream {status}",
+    "noHttpResponse": "No HTTP response observed",
+    "transportError": "Transport error",
     "recording": "Recording",
     "paused": "Paused",
     "pipelineLogsOn": "Pipeline logs on",
@@ -12351,6 +12379,8 @@
       "increase": "Increase interval"
     },
     "status": {
+      "recoveredAttemptsTitle": "Request recovered across {count} attempts",
+      "latestOutcomeFailed": "The latest request outcome failed",
       "inProgress": "In progress",
       "recoveredByRetry": "Recovered by retry",
       "goToParent": "Go to parent request",
@@ -12363,6 +12393,9 @@
     },
     "attempts": "attempts",
     "detail": {
+      "omittedHttpAttempts": "{count} HTTP sends not retained",
+      "noHttpResponse": "No HTTP response observed",
+      "transportError": "Transport error",
       "collapse": "Collapse {title}",
       "expand": "Expand {title}",
       "copyTitle": "Copy {title}",
@@ -14234,6 +14267,14 @@
         "label": "Shared Egress Pool Order",
         "description": "For providers whose quota is bucketed by egress address, rank a pool member sharing a recently refused member's observed egress address just below healthy members. Order only, never excluded. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal signal it reads. Off by default: selection order is exactly the plain rotation."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Model-Scoped Quota Refusals",
+        "description": "Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Proxy Fetch: Strict POST Replay",
+        "description": "For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotation Attribution Logging",
         "description": "Opencode rotation records which account served or was skipped (masked ids only, never full account ids) and links proxy log entries to their request, so the operator can tell skipped accounts apart from unused ones. Off by default: no extra log lines, no extra columns written."
@@ -14285,6 +14326,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 Pool Reselect",
         "description": "For the OpenCode multi-account rotation, after a 429 from an egress-bucketed provider on a proxy-less account under an ambient pool context, ask the connection pool for another member for the next attempt instead of retrying the same egress address. Orders, never excludes: an exhausted pool keeps the current behavior. Off by default: every 429 rotates to the next account exactly as before."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress Probe",
+        "description": "For the OpenCode executor, when a proxied request is answered 403 or 451 FreeTierError and the observed-tools retry failed or did not apply, send the request once through a different proxy (another account proxy or another pool member, never a direct connection). Only when that probe answers 200 is the first egress set aside in the proxy refusal memory and the probe response served; when both refuse, the original refusal is returned and nothing is recorded. The same refusal text covers a flagged egress IP and a refused request shape, so the probe tells them apart by evidence. Off by default: the refusal is returned unchanged."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 Client Fingerprint",
@@ -14465,6 +14510,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Stop on Content-Policy Refusal",
         "description": "When a combo target answers with an exact content-policy refusal (code or type cyber_policy / content_policy_violation), stop the combo and return that refusal even when the remaining targets are different models, instead of advancing to the next target. Off by default: the refusal never cools the account or trips the provider breaker, and the combo advances to its next target exactly as before."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Responses: Transport-Only Keepalive",
+        "description": "Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown Retry: Skip 403/410 Refusals",
