@@ -16,7 +16,7 @@ function canonicalOverrideKey(kind: OverrideKind, key: string): string {
 }
 
 function validOverrideKey(kind: OverrideKind, key: string): boolean {
-  if (!/^[a-z0-9][a-z0-9._/@:+-]*\\*?$/i.test(key) || key.length > 180) return false;
+  if (!/^[a-z0-9][a-z0-9._/@:+-]*\*?$/i.test(key) || key.length > 180) return false;
   return kind === "provider" ? !/[/*]/.test(key) : key.includes("/");
 }
 
