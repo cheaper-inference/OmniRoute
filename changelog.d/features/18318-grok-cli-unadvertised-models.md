@@ -1,0 +1,1 @@
+- **feat(providers):** the Grok CLI catalog now lists `grok-4.7-build-fast` (Grok 4.7 on Grok Build's faster lane, 500k window, low–xhigh efforts) and `grok-code-fast-1`, both accepted by the Grok Build proxy but never shown in the model pickers ([#18318](https://github.com/cheaper-inference/OmniRoute/pull/18318)) — thanks @cristianob
