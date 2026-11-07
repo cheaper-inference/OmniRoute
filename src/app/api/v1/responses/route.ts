@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { handleChat } from "@/sse/handlers/chat";
+import { maybeQueueQuotaSessionRecovery } from "@/lib/quota/quotaSessionRecovery";
 import { logAdmissionRejection } from "@/sse/handlers/admissionRejectionLog";
 import { CORS_HEADERS } from "@/shared/utils/cors";
 import { createInjectionGuard } from "@/middleware/promptInjectionGuard";
@@ -29,6 +30,10 @@ import {
   buildKeepaliveResponseId,
   buildResponsesInProgressFrame,
 } from "@omniroute/open-sse/utils/responsesKeepaliveFrame";
+import {
+  isResponsesTransportKeepaliveEnabled,
+  RESPONSES_KEEPALIVE_FRAME,
+} from "@omniroute/open-sse/utils/sseHeartbeat";
 
 // NOTE: We do NOT call initTranslators() here — the translator registry is
 // bootstrapped at module level inside open-sse/translator/index.ts when it
@@ -104,6 +109,16 @@ export async function withCodexPreferredModel(
  * POST /v1/responses - OpenAI Responses API format
  * Handled by the unified chat handler (openai-responses format auto-detected).
  */
+// #17825: per-request complete frame (stable id, request-time created_at, request model).
+export function buildRequestKeepaliveFrame(body: { model?: unknown } | null | undefined) {
+  if (isResponsesTransportKeepaliveEnabled()) return RESPONSES_KEEPALIVE_FRAME;
+  const model = body?.model;
+  return buildResponsesInProgressFrame({
+    id: buildKeepaliveResponseId(),
+    model: typeof model === "string" ? model : undefined,
+  });
+}
+
 async function postHandler(request: any) {
   // Defense-in-depth: the authz proxy (src/proxy.ts) is the primary gate, but
   // its matcher can miss path variants (e.g. uppercase /V1/ aliases), so the
@@ -208,7 +223,7 @@ async function postHandler(request: any) {
     // Codex CLI (wire_api="responses") consumes this endpoint over SSE and its reqwest
     // client drops the connection if no bytes arrive within ~5s. Keep the connection
     // warm with transport comments plus sparse parser-visible events while the upstream
-    // produces its first token (#2544).
+    // produces its first token (#2544). RESPONSES_TRANSPORT_KEEPALIVE_ENABLED sends only bytes.
     const { request: resolved, body: resolvedBody } = await withCodexPreferredModel(
       request,
       parsedBody
@@ -229,11 +244,7 @@ async function postHandler(request: any) {
         admission.lease,
         { signal: streamSignal }
       );
-      // #17825: per-request complete frame (stable id, request-time created_at, request model).
-      const keepaliveFrame = buildResponsesInProgressFrame({
-        id: buildKeepaliveResponseId(),
-        model: typeof resolvedBody?.model === "string" ? resolvedBody.model : undefined,
-      });
+      const keepaliveFrame = buildRequestKeepaliveFrame(resolvedBody);
       return await withEarlyStreamKeepalive(handlerResponse, {
         signal: streamSignal,
         thresholdMs,
@@ -249,7 +260,14 @@ async function postHandler(request: any) {
       });
     }
 
-    return finishAdmission(await handleChat(resolved, null, resolvedBody, correlationId));
+    const handlerResponse = await handleChat(resolved, null, resolvedBody, correlationId);
+    const recoveryResponse = await maybeQueueQuotaSessionRecovery({
+      request: resolved,
+      body: resolvedBody,
+      response: handlerResponse,
+      endpoint: "responses",
+    });
+    return finishAdmission(recoveryResponse);
   } catch (error) {
     admission.lease?.release();
     throw error;

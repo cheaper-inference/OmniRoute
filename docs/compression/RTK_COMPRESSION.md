@@ -31,12 +31,12 @@ Range:         1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 
 ## What It Compresses
 
-The built-in catalog currently ships 49 filters across these categories:
+The built-in catalog currently ships 56 filters across these categories:
 
 | Category  | Examples                                                      |
 | --------- | ------------------------------------------------------------- |
 | `git`     | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`    | Vitest, Jest, Pytest, Playwright, Go tests, Cargo tests       |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo tests    |
 | `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
 | `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
 | `shell`   | `ls`, `find`, `grep`, generic shell logs                      |
@@ -425,9 +425,7 @@ Both the **head** and **tail** of each section are preserved; middle content is 
 ```json
 {
   "combo": "my-coding-combo",
-  "routing": {
-    /* ... */
-  },
+  "routing": {/* ... */},
   "compression": {
     "engine": "rtk",
     "intensity": "aggressive"

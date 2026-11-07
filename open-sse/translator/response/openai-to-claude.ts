@@ -28,6 +28,38 @@ import {
   initThinkState,
   processStreamingThinkDelta,
 } from "../../utils/thinkTagParser.ts";
+import {
+  buildClaudeWebSearchBlockEvents,
+  toClaudeWebSearchResults,
+} from "../helpers/claudeServerWebSearch.ts";
+
+// Claude Code WebSearch bridge, emit half. On the Responses→Claude hub, translateResponse
+// accumulated every `web_search_call` / `url_citation` on this same state object; turn
+// them into the Anthropic server_tool_use + web_search_tool_result pairs via the shared
+// emitter. Deferred to the finish handler (not emitted where the call was seen) because
+// the citations arrive with/after the answer text, so only at finish is the full hit list
+// known. Results prefer the call's own `action.sources`, falling back to the message's
+// citations. No-op for every other upstream (nothing was accumulated) and for non-Claude
+// clients (this translator is only reached for a CLAUDE target). Emitted at most once.
+function emitResponsesWebSearch(state, results) {
+  const evidence = state._responsesWebSearchEvidence;
+  if (!evidence || typeof evidence !== "object" || !Array.isArray(evidence.calls)) return;
+  state._responsesWebSearchEvidence = null;
+  const citations = Array.isArray(evidence.citations) ? evidence.citations : [];
+  for (const call of evidence.calls) {
+    const items = Array.isArray(call.items) && call.items.length > 0 ? call.items : citations;
+    const { events, nextIndex } = buildClaudeWebSearchBlockEvents({
+      query: call.query || "",
+      results: toClaudeWebSearchResults(items),
+      startIndex: state.nextBlockIndex,
+      // Deterministic id derived from the upstream call id (the helper would otherwise
+      // generate a time-based one).
+      toolUseId: `srvtoolu_${call.id}`,
+    });
+    results.push(...events);
+    state.nextBlockIndex = nextIndex;
+  }
+}
 
 function normalizeToolName(name: string): string {
   return REVERSE_MAP[name] ?? name;
@@ -376,7 +408,13 @@ export function openaiToClaudeResponse(chunk, state) {
   const choice = chunkChoice || state.pendingClaudeFinishChoice;
   if (!choice) return null;
   if (flushingPendingFinish) state.pendingClaudeFinishChoice = null;
-  const delta = choice.delta;
+  // The deferred choice was already processed on the pass that received it: its
+  // text / reasoning / tool-arg fragments were emitted then, and only the
+  // terminal blocks were held back for the real usage. Re-reading the delta
+  // here replays the trailing fragment a second time, so an OpenAI→Claude
+  // client that concatenates input_json_delta into one JSON string receives the
+  // final fragment twice and fails to parse the tool input.
+  const delta = flushingPendingFinish ? undefined : choice.delta;
   // First chunk - ALWAYS send message_start first
   if (!state.messageStartSent) {
     state.messageStartSent = true;
@@ -787,6 +825,11 @@ export function openaiToClaudeResponse(chunk, state) {
 
     stopTextBlock(state, results);
 
+    // Splice the web-search block pairs in now (see emitResponsesWebSearch above): the
+    // text block is closed, so they take the next indices and stay ahead of the
+    // message_delta/message_stop below.
+    emitResponsesWebSearch(state, results);
+
     for (const [, toolInfo] of state.toolCalls) {
       // A tool call whose name/args never arrived (only an id chunk was seen)
       // still has a reserved block index but no content_block_start. Emit it now
@@ -836,8 +879,17 @@ export function openaiToClaudeResponse(chunk, state) {
       });
     }
 
-    // Override finish_reason to tool_use if XML tool calls were found
-    const overrideFinishReason = xmlToolCalls.length > 0 ? "tool_calls" : choice.finish_reason;
+    // Override finish_reason to tool_calls when tool calls were emitted but the
+    // upstream reported a clean stop (#18270): some OpenAI-compatible upstreams
+    // send finish_reason "stop" together with tool_calls, and the Claude client
+    // stops its agent loop unless stop_reason is "tool_use".
+    const hasEmittedToolCalls =
+      xmlToolCalls.length > 0 || (state.toolCalls instanceof Map && state.toolCalls.size > 0);
+    const overrideFinishReason =
+      hasEmittedToolCalls &&
+      openAIFinishReasonToClaudeStopReason(choice.finish_reason) === "end_turn"
+        ? "tool_calls"
+        : choice.finish_reason;
 
     // Mark finish for later usage injection in stream.js
     state.finishReason = overrideFinishReason;

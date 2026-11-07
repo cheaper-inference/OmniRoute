@@ -3,8 +3,13 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { PROVIDER_ORDER } from "./constants";
+import { useProviderOrder } from "./useProviderOrder";
 import QuotaCard from "./QuotaCard";
-import { SortableProviderItem, SortableProviderList } from "./SortableProviderList";
+import QuotaHealthOverview from "./QuotaHealthOverview";
+import { buildHealthGroups, type HealthAccount } from "./healthOverview";
+import { displayAccount } from "./availabilityDisplay";
+import { HealthCounts } from "./HealthOverviewChrome";
+import { useTranslations } from "next-intl";
 import {
   worstStatus,
   type CardStatus,
@@ -35,12 +40,9 @@ interface Props {
   onHideQuota?: (scope: QuotaVisibilityScope, quota: any) => void;
   onShowQuota?: (scope: QuotaVisibilityScope, quota: any) => void;
   compact?: boolean;
-  /** Provider group rank map; defaults to the built-in PROVIDER_ORDER. */
-  providerOrder?: Record<string, number>;
-  /** Drag-to-reorder provider sections (full layout only); omitted = no drag. */
-  onReorderProviders?: (fromProvider: string, toProvider: string) => void;
-  dragDisabled?: boolean;
-  dragHandleLabel?: string;
+  overview?: boolean;
+  accounts?: Record<string, HealthAccount>;
+  summaryFailed?: boolean;
 }
 
 const STATUS_RANK: Record<CardStatus, number> = {
@@ -124,8 +126,7 @@ export function sortProviderConnectionsByPriority(
 function buildProviderGroups(
   connections: any[],
   quotaData: Record<string, any>,
-  providerLabels: Record<string, string>,
-  providerOrder: Record<string, number>
+  providerLabels: Record<string, string>
 ) {
   const groups = new Map<string, typeof connections>();
   for (const conn of connections) {
@@ -141,7 +142,7 @@ function buildProviderGroups(
     }))
     .sort((a, b) =>
       compareProviderGroups(a.provider, b.provider, {
-        providerOrder,
+        providerOrder: PROVIDER_ORDER,
         providerLabels,
         compare: compareTr,
       })
@@ -152,7 +153,52 @@ interface ProviderQuotaSectionProps extends Omit<Props, "connections"> {
   provider: string;
   connections: any[];
   defaultOpen?: boolean;
-  dragHandle?: ReactNode;
+}
+
+function ProviderQuotaHeader({
+  group,
+  providerLabel,
+  activeCount,
+  count,
+  open,
+}: {
+  group: ReturnType<typeof buildHealthGroups>[number] | undefined;
+  providerLabel: string;
+  activeCount: number;
+  count: number;
+  open: boolean;
+}) {
+  const t = useTranslations("usage");
+  const groupColor = group
+    ? {
+        critical: "var(--color-error)",
+        alert: "var(--color-warning)",
+        ok: "var(--color-success)",
+        empty: "var(--color-text-muted)",
+        paused: "var(--color-text-muted)",
+      }[group.status]
+    : undefined;
+  return (
+    <summary className="flex items-center gap-3 px-3 py-2.5 cursor-pointer select-none hover:bg-surface-2 [&::-webkit-details-marker]:hidden">
+      <Icon name={open ? "expand_less" : "expand_more"} size={16} className="text-text-muted" />
+      <div className="min-w-0 flex-1">
+        <h3 className="text-sm font-semibold text-text-main leading-5 truncate">
+          {group && (
+            <span
+              className="me-2 inline-block h-2 w-2 rounded-full"
+              style={{ background: groupColor }}
+              aria-hidden
+            />
+          )}
+          {providerLabel}
+        </h3>
+        <p className="text-[11px] text-text-muted tabular-nums">
+          {t("activeCount", { count: activeCount })} / {t("accountsCount", { count })}
+        </p>
+      </div>
+      {group && <HealthCounts accounts={group.accounts.map((a) => displayAccount(a))} />}
+    </summary>
+  );
 }
 
 function ProviderQuotaSection({
@@ -175,9 +221,11 @@ function ProviderQuotaSection({
   quotaVisibility,
   onHideQuota,
   onShowQuota,
-  dragHandle = null,
+  accounts,
 }: ProviderQuotaSectionProps) {
   const [open, setOpen] = useState(defaultOpen);
+  const group =
+    accounts && buildHealthGroups(connections.map((c) => accounts[c.id]).filter(Boolean))[0];
   const activeCount = connections.filter((conn) => conn.isActive ?? true).length;
   const providerLabel = providerLabels[provider] || provider;
 
@@ -187,19 +235,13 @@ function ProviderQuotaSection({
       onToggle={(event) => setOpen((event.target as HTMLDetailsElement).open)}
       className="rounded-lg border border-border bg-surface overflow-hidden"
     >
-      <summary className="flex items-center gap-3 px-3 py-2.5 cursor-pointer select-none hover:bg-surface-2 [&::-webkit-details-marker]:hidden">
-        {dragHandle}
-        <Icon name={open ? "expand_less" : "expand_more"} size={16} className="text-text-muted" />
-        <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-semibold text-text-main leading-5 truncate">
-            {providerLabel}
-          </h3>
-          <p className="text-[11px] text-text-muted tabular-nums">
-            {activeCount} active / {connections.length} account
-            {connections.length !== 1 ? "s" : ""}
-          </p>
-        </div>
-      </summary>
+      <ProviderQuotaHeader
+        group={group}
+        providerLabel={providerLabel}
+        activeCount={activeCount}
+        count={connections.length}
+        open={open}
+      />
       <div className="px-3 pb-3">
         <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-3">
           {connections.map((conn) => (
@@ -258,11 +300,14 @@ export default function QuotaCardGrid({
   onHideQuota,
   onShowQuota,
   compact = false,
-  providerOrder = PROVIDER_ORDER,
-  onReorderProviders,
-  dragDisabled = false,
-  dragHandleLabel = "Drag to reorder providers",
+  overview = false,
+  accounts,
+  summaryFailed,
 }: Props) {
+  const { order } = useProviderOrder(connections.map((c) => c.provider));
+  const orderedConnections = [...connections].sort(
+    (a, b) => order.indexOf(a.provider) - order.indexOf(b.provider)
+  );
   if (connections.length === 0) return null;
 
   const renderCard = (conn: (typeof connections)[number]) => (
@@ -296,65 +341,65 @@ export default function QuotaCardGrid({
     />
   );
 
+  if (overview) {
+    return (
+      <QuotaHealthOverview
+        connections={connections}
+        quotaData={quotaData}
+        quotaVisibility={quotaVisibility}
+        accounts={accounts}
+        summaryFailed={summaryFailed}
+        providerLabels={providerLabels}
+        emailsVisible={emailsVisible}
+        renderCard={renderCard}
+      />
+    );
+  }
+
   // Compact mode: flat 3-column card grid, across all connections.
   if (compact) {
     return (
       <div className="grid grid-cols-[repeat(auto-fill,minmax(17rem,1fr))] gap-3">
-        {connections.map(renderCard)}
+        {orderedConnections.map(renderCard)}
       </div>
     );
   }
 
   // Default layout: expandable provider sections. Provider groups are ordered
-  // deterministically (operator drag order, else PROVIDER_ORDER rank → label →
-  // key) so the group order never shuffles between quota refreshes, and
-  // connections are priority-sorted within each provider.
-  const groups = buildProviderGroups(connections, quotaData, providerLabels, providerOrder);
-  const canReorder = !!onReorderProviders && groups.length > 1;
-  const sortDisabled = dragDisabled || !canReorder;
+  // deterministically (PROVIDER_ORDER rank → label → key) so the group order
+  // never shuffles between quota refreshes, and connections are
+  // priority-sorted within each provider.
+  const groups = buildProviderGroups(connections, quotaData, providerLabels).sort(
+    (a, b) => order.indexOf(a.provider) - order.indexOf(b.provider)
+  );
 
   return (
     <div className="space-y-4">
-      <SortableProviderList
-        providerIds={groups.map((group) => group.provider)}
-        disabled={sortDisabled}
-        onReorder={(from, to) => onReorderProviders?.(from, to)}
-      >
-        {groups.map(({ provider, connections: conns }) => (
-          <SortableProviderItem
-            key={provider}
-            id={provider}
-            disabled={sortDisabled}
-            showHandle={canReorder}
-            handleLabel={`${dragHandleLabel}: ${providerLabels[provider] || provider}`}
-          >
-            {(dragHandle) => (
-              <ProviderQuotaSection
-                provider={provider}
-                connections={conns}
-                quotaData={quotaData}
-                loading={loading}
-                errors={errors}
-                lastRefreshedAt={lastRefreshedAt}
-                emailsVisible={emailsVisible}
-                providerLabels={providerLabels}
-                onRefresh={onRefresh}
-                onOpenCutoff={onOpenCutoff}
-                onOpenResetCredits={onOpenResetCredits}
-                onToggleActive={onToggleActive}
-                togglingActiveId={togglingActiveId}
-                quotaVisibility={quotaVisibility}
-                onHideQuota={onHideQuota}
-                onShowQuota={onShowQuota}
-                redeemingResetCreditId={redeemingResetCreditId}
-                loadingResetCreditsId={loadingResetCreditsId}
-                dragHandle={dragHandle}
-                defaultOpen
-              />
-            )}
-          </SortableProviderItem>
-        ))}
-      </SortableProviderList>
+      {groups.map(({ provider, connections: conns }) => (
+        <ProviderQuotaSection
+          key={provider}
+          provider={provider}
+          connections={conns}
+          accounts={accounts}
+          quotaData={quotaData}
+          loading={loading}
+          errors={errors}
+          lastRefreshedAt={lastRefreshedAt}
+          emailsVisible={emailsVisible}
+          providerLabels={providerLabels}
+          onRefresh={onRefresh}
+          onOpenCutoff={onOpenCutoff}
+          onOpenResetCredits={onOpenResetCredits}
+          onToggleActive={onToggleActive}
+          togglingActiveId={togglingActiveId}
+          quotaVisibility={quotaVisibility}
+          onHideQuota={onHideQuota}
+          onShowQuota={onShowQuota}
+          redeemingResetCreditId={redeemingResetCreditId}
+          loadingResetCreditsId={loadingResetCreditsId}
+          defaultOpen
+        />
+      ))}
     </div>
   );
 }
