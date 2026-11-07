@@ -5,6 +5,7 @@ import { randomUUID } from "crypto";
 import { getProviderSearchPool } from "@omniroute/open-sse/services/providerConnectionPool.ts";
 import { hydrateConnectionProviderSpecificData } from "./compatibleNodeBaseUrl.ts"; // #13452
 import { extractGoogApiKeyHeader } from "./googApiKeyAuth.ts";
+import { classifyGeminiProjectBlock } from "./geminiProjectBlock.ts";
 import { isCooldownRetrySkipRefusalsEnabled } from "./cooldownAwareRetry.ts";
 import { isPerAccountCatalogProvider } from "./perAccountCatalogFilter.ts";
 import { describeUpstreamFailure } from "@/shared/utils/upstreamError";
@@ -2532,6 +2533,32 @@ export async function markAccountUnavailable(
         `${connectionId.slice(0, 8)} stream content stall on ${provider}:${model ?? "n/a"} — no account cooldown`
       );
       return { shouldFallback: true, cooldownMs: 0 };
+    }
+
+    // A project-level billing refusal must extend an earlier, shorter cooldown.
+    // Handle it before the concurrent-failure guard, which otherwise returns
+    // without persisting the six-hour block. Probe-origin failures still leave
+    // account routing state untouched.
+    const geminiProjectBlock = classifyGeminiProjectBlock(provider, status, errorText);
+    if (geminiProjectBlock && !(await shouldIsolateProbeFailures())) {
+      const projectCooldownMs = 6 * 60 * 60 * 1000;
+      const priorUntilMs = conn?.rateLimitedUntil
+        ? cooldownUntilMs(conn.rateLimitedUntil)
+        : NaN;
+      const cooldownMs = Math.max(
+        projectCooldownMs,
+        Number.isFinite(priorUntilMs) ? priorUntilMs - Date.now() : 0
+      );
+      await updateProviderConnection(connectionId, {
+        lastErrorType: geminiProjectBlock,
+        lastError: geminiProjectBlock,
+        lastErrorAt: new Date().toISOString(),
+        errorCode: status,
+        backoffLevel: 0,
+        rateLimitedUntil: getUnavailableUntil(cooldownMs),
+        testStatus: "unavailable",
+      });
+      return { shouldFallback: true, cooldownMs };
     }
 
     // ─── Anti-Thundering Herd Guard ─────────────────────────────────
