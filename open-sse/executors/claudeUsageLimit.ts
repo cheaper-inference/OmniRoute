@@ -142,22 +142,26 @@ export class ClaudeUsageLimitGuard {
           }
         : undefined,
       claimLimitReset: async () => {
-        const attempt = await attemptClaudeLimitReset({
-          key,
-          connectionId: credentials?.connectionId ?? null,
-          accessToken: credentials?.accessToken ?? "",
-          providerSpecificData: credentials?.providerSpecificData,
-          log: this.log,
-          onSettled: (settled) => verdict?.onSettled?.(settled),
-        });
-        // No claim POST (memo, recent reset, a sibling's in-flight claim, not on offer):
-        // onSettled never ran, so free the reservation now instead of holding the caps.
         try {
-          verdict?.release?.();
-        } catch {
-          // Releasing is best-effort and must never change the attempt's outcome.
+          const attempt = await attemptClaudeLimitReset({
+            key,
+            connectionId: credentials?.connectionId ?? null,
+            accessToken: credentials?.accessToken ?? "",
+            providerSpecificData: credentials?.providerSpecificData,
+            log: this.log,
+            onSettled: (settled) => verdict?.onSettled?.(settled),
+          });
+          return attempt.reset;
+        } finally {
+          // No claim POST (memo, recent reset, a sibling's in-flight claim, not on offer), or
+          // the attempt rejected: onSettled never ran, so free the reservation now instead of
+          // holding the caps.
+          try {
+            verdict?.release?.();
+          } catch {
+            // Releasing is best-effort and must never change the attempt's outcome.
+          }
         }
-        return attempt.reset;
       },
     });
 
