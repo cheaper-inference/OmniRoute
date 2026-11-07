@@ -13,6 +13,16 @@ const { handleComboChat } = await import("../../open-sse/services/combo.ts");
 const noop = () => {};
 const log = { info: noop, warn: noop, debug: noop, error: noop };
 
+// #18668: the retry delay uses full jitter. The aborts below land during that delay, so pin
+// the RNG at 0.5: the first retry then sleeps exactly retryDelayMs, as before the jitter.
+const originalRandom = Math.random;
+test.beforeEach(() => {
+  Math.random = () => 0.5;
+});
+test.afterEach(() => {
+  Math.random = originalRandom;
+});
+
 function makeCombo(strategy = "priority", models = ["a/model-1", "b/model-2", "c/model-3"]) {
   return {
     name: "test-combo-499",

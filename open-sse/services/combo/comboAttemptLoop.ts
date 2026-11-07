@@ -224,16 +224,13 @@ export async function dispatchWithCooldownRetry(opts: {
   extra: DispatchWithCooldownRetryExtra;
 }): Promise<Response> {
   const { state, deps, extra } = opts;
-
-  // The cooldown-aware re-dispatch is an iterative loop (not self-recursion).
-  // It stays bounded by maxSetRetries, comboCooldownWait.maxAttempts and the
-  // cooldown budget, all of which are consumed on every re-dispatch.
-  let currentSetTry = 0;
-  let activeLoopSafetyTimer: ReturnType<typeof setTimeout> | null = null;
-
+  // The cooldown-aware re-dispatch restarts this loop instead of recursing. It stays
+  // bounded by maxSetRetries, comboCooldownWait.maxAttempts and the cooldown budget.
+  let setTry = 0;
   // #7360: persist lastStatus/earliestRetryAfter across set retries; reset
   // only on a fresh dispatch (including cooldown-aware re-dispatch).
   const resetForFreshDispatch = () => {
+    setTry = 0;
     state.lastError = null;
     state.earliestRetryAfter = null;
     state.lastStatus = null;
@@ -241,9 +238,13 @@ export async function dispatchWithCooldownRetry(opts: {
     state.earliestCircuitOpenRetryMs = 0;
   };
   resetForFreshDispatch();
+  // #11804: the loop-safety timer is armed per setTry iteration but must be
+  // cleared on EVERY exit path, not just the happy one. Hoisted to function
+  // scope so the `finally` at the end of this function always reaches it.
+  let activeLoopSafetyTimer: ReturnType<typeof setTimeout> | null = null;
 
   try {
-    while (currentSetTry <= extra.maxSetRetries) {
+    while (setTry <= extra.maxSetRetries) {
       // Durable exhaustion (quota, credits, auth) survives the set boundary: a
       // provider or connection whose quota is gone stays skipped on the next
       // set. Transient failures (rate limit, connection error) are replayed.
@@ -251,13 +252,9 @@ export async function dispatchWithCooldownRetry(opts: {
       // Set instance — so a transient mark written during this set can never
       // be reported as durable on the next one.
       const durableProviders =
-        currentSetTry === 0
-          ? new Set<string>()
-          : (state.durableExhaustedProviders ?? new Set<string>());
+        setTry === 0 ? new Set<string>() : (state.durableExhaustedProviders ?? new Set<string>());
       const durableConnections =
-        currentSetTry === 0
-          ? new Set<string>()
-          : (state.durableExhaustedConnections ?? new Set<string>());
+        setTry === 0 ? new Set<string>() : (state.durableExhaustedConnections ?? new Set<string>());
       state.durableExhaustedProviders = durableProviders;
       state.durableExhaustedConnections = durableConnections;
       state.exhaustedProviders = new Set<string>(durableProviders);
@@ -266,17 +263,17 @@ export async function dispatchWithCooldownRetry(opts: {
       state.skippedForCircuitOpen = false;
       state.earliestCircuitOpenRetryMs = 0;
       state.skippedConnectionCooldownUntil = undefined;
-      if (currentSetTry > 0) {
+      if (setTry > 0) {
         deps.log.info(
           "COMBO",
-          `All targets failed — retrying set (${currentSetTry}/${extra.maxSetRetries})`
+          `All targets failed — retrying set (${setTry}/${extra.maxSetRetries})`
         );
-        // Full jitter on the blind set-retry delay (no deadline is known here).
-        // Keep zero-delay retries on a timer turn so queued cancellation can run.
-        const jitteredSetRetryDelay = calculateFullJitter(currentSetTry, {
+        // Full jitter: no deadline is known here, unlike the cooldown waits below.
+        const jitteredSetRetryDelay = calculateFullJitter(setTry, {
           baseDelayMs: extra.setRetryDelayMs,
-          maxDelayMs: 30_000,
+          maxDelayMs: Math.max(30_000, extra.setRetryDelayMs),
         });
+        // Keep zero-delay retries on a timer turn so queued cancellation can run.
         await waitForCooldownAwareRetry(Math.max(1, jitteredSetRetryDelay), deps.signal);
         if (deps.signal?.aborted) {
           deps.log.info("COMBO", "Client disconnected during set retry delay — aborting");
@@ -636,16 +633,13 @@ export async function dispatchWithCooldownRetry(opts: {
       // error streak already proved the request itself is malformed, in which
       // case a fresh set-try would just reproduce the same streak.
       if (
-        currentSetTry < extra.maxSetRetries &&
+        setTry < extra.maxSetRetries &&
         !comboRequestMalformed &&
         !state.requestScopedFailureSeen
       ) {
-        currentSetTry++;
+        setTry++;
         continue;
       }
-
-      // Circuit-open / model-lock waits re-dispatch iteratively (no self-recursion).
-      let cooldownWaitMs: number | null = null;
 
       if (!state.lastStatus && state.recordedAttempts === 0 && extra.comboCooldownWaitEnabled) {
         const circuitOpenWait = resolveCircuitOpenWaitDecision({
@@ -656,13 +650,21 @@ export async function dispatchWithCooldownRetry(opts: {
           settings: deps.resilienceSettings.comboCooldownWait,
         });
         if (circuitOpenWait.wait) {
-          // No jitter: the wait is derived from a known deadline, a shorter wait
-          // would re-dispatch before the circuit has cleared.
-          cooldownWaitMs = circuitOpenWait.waitMs;
           deps.log.info(
             "COMBO",
             `${deps.strategy} circuit-open wait: waiting ${Math.ceil(circuitOpenWait.waitMs / 1000)}s (reason=${circuitOpenWait.reason ?? "circuit_open"}) then retrying (attempt ${extra.comboCooldownAttempt.current + 1}/${deps.resilienceSettings.comboCooldownWait.maxAttempts})`
           );
+          const completed = await waitForCooldownAwareRetry(circuitOpenWait.waitMs, deps.signal);
+          if (!completed) {
+            return errorResponse(499, "Request aborted");
+          }
+          extra.comboCooldownAttempt.current += 1;
+          extra.comboCooldownBudgetLeftMs.current = Math.max(
+            0,
+            extra.comboCooldownBudgetLeftMs.current - circuitOpenWait.waitMs
+          );
+          resetForFreshDispatch();
+          continue;
         }
         // #16319: a model-scoped cooldown is not a circuit-open skip. With zero
         // dispatched attempts nothing populates state.earliestRetryAfter, so the
@@ -671,45 +673,36 @@ export async function dispatchWithCooldownRetry(opts: {
         // same helper the post-dispatch path uses — it derives the wait from each
         // target's own lock and rejects quota/auth/not-found reasons — and
         // re-dispatch when a SHORT transient lock is about to clear.
-        if (cooldownWaitMs === null) {
-          const modelLockWait = resolveComboCooldownWaitDecision({
-            targets: state.orderedTargets,
-            earliestRetryAfter: null,
-            attempt: extra.comboCooldownAttempt.current,
-            budgetLeftMs: extra.comboCooldownBudgetLeftMs.current,
-            settings: deps.resilienceSettings.comboCooldownWait,
-            lookupLock: (provider, connectionId, target) => {
-              const rawModel = parseModel(target?.modelStr ?? "").model || "";
-              if (!rawModel) return null;
-              return lookupComboModelLockout(provider, connectionId, rawModel);
-            },
-            computeWaitMs: () => null,
-          });
-          if (modelLockWait.wait) {
-            // No jitter: the wait is derived from the earliest lock expiry (#16551).
-            cooldownWaitMs = modelLockWait.waitMs;
-            deps.log.info(
-              "COMBO",
-              `${deps.strategy} model-lock wait: waiting ${Math.ceil(modelLockWait.waitMs / 1000)}s (reason=${modelLockWait.reason ?? "model_lockout"}) then retrying (attempt ${extra.comboCooldownAttempt.current + 1}/${deps.resilienceSettings.comboCooldownWait.maxAttempts})`
-            );
+        const modelLockWait = resolveComboCooldownWaitDecision({
+          targets: state.orderedTargets,
+          earliestRetryAfter: null,
+          attempt: extra.comboCooldownAttempt.current,
+          budgetLeftMs: extra.comboCooldownBudgetLeftMs.current,
+          settings: deps.resilienceSettings.comboCooldownWait,
+          lookupLock: (provider, connectionId, target) => {
+            const rawModel = parseModel(target?.modelStr ?? "").model || "";
+            if (!rawModel) return null;
+            return lookupComboModelLockout(provider, connectionId, rawModel);
+          },
+          computeWaitMs: () => null,
+        });
+        if (modelLockWait.wait) {
+          deps.log.info(
+            "COMBO",
+            `${deps.strategy} model-lock wait: waiting ${Math.ceil(modelLockWait.waitMs / 1000)}s (reason=${modelLockWait.reason ?? "model_lockout"}) then retrying (attempt ${extra.comboCooldownAttempt.current + 1}/${deps.resilienceSettings.comboCooldownWait.maxAttempts})`
+          );
+          const completed = await waitForCooldownAwareRetry(modelLockWait.waitMs, deps.signal);
+          if (!completed) {
+            return errorResponse(499, "Request aborted");
           }
+          extra.comboCooldownAttempt.current += 1;
+          extra.comboCooldownBudgetLeftMs.current = Math.max(
+            0,
+            extra.comboCooldownBudgetLeftMs.current - modelLockWait.waitMs
+          );
+          resetForFreshDispatch();
+          continue;
         }
-      }
-
-      if (cooldownWaitMs !== null) {
-        const completed = await waitForCooldownAwareRetry(cooldownWaitMs, deps.signal);
-        if (!completed) {
-          return errorResponse(499, "Request aborted");
-        }
-        extra.comboCooldownAttempt.current += 1;
-        extra.comboCooldownBudgetLeftMs.current = Math.max(
-          0,
-          extra.comboCooldownBudgetLeftMs.current - cooldownWaitMs
-        );
-        // Iterate instead of recursing: a fresh dispatch starts from a clean slate.
-        currentSetTry = 0;
-        resetForFreshDispatch();
-        continue;
       }
 
       // All set retries exhausted — return the final error
@@ -907,8 +900,6 @@ export async function dispatchWithCooldownRetry(opts: {
             0,
             extra.comboCooldownBudgetLeftMs.current - decision.waitMs
           );
-          // Iterate instead of recursing: a fresh dispatch starts from a clean slate.
-          currentSetTry = 0;
           resetForFreshDispatch();
           continue;
         }

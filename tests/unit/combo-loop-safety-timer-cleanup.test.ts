@@ -15,6 +15,17 @@ const { resetDbInstance } = await import("../../src/lib/db/core.ts");
 
 const SAFETY_TIMEOUT_MS = 31_337;
 const SET_RETRY_DELAY_MS = 60_000;
+// #18668: the set-retry delay uses full jitter, rand(0, min(cap, delay * 2^setTry)) with
+// cap = max(30s, delay). With the RNG pinned at 0.5, a delay of 0 or >= 30s arms a timer of
+// half the configured delay on every set try, so the controlled clock waits for that one.
+const setRetryTimerMs = (delayMs: number) => delayMs / 2;
+const originalRandom = Math.random;
+test.beforeEach(() => {
+  Math.random = () => 0.5;
+});
+test.afterEach(() => {
+  Math.random = originalRandom;
+});
 
 function makeLog() {
   const warnings: string[] = [];
@@ -377,7 +388,7 @@ test(
         log.warnings.filter((message) => /loop safety timeout.*reached/i.test(message)).length,
         0
       );
-    }, SET_RETRY_DELAY_MS);
+    }, setRetryTimerMs(SET_RETRY_DELAY_MS));
   }
 );
 
@@ -470,7 +481,7 @@ test("pre-abort at the set retry boundary skips the retry timer", { timeout: 500
           clock.fireRetryTimers();
           await request.response;
         }
-      }, delayMs)
+      }, setRetryTimerMs(delayMs))
     );
   }
 });
@@ -504,7 +515,7 @@ test("expired set retry waits release their abort listeners", { timeout: 5000 },
           0,
           "completed waits must leave no request abort listeners"
         );
-      }, SET_RETRY_DELAY_MS)
+      }, setRetryTimerMs(SET_RETRY_DELAY_MS))
     );
   }
 });
