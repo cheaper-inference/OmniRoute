@@ -153,6 +153,13 @@ export type ClaudeBootstrap = {
   organization_name: string | null;
   organization_type: string | null;
   organization_rate_limit_tier: string | null;
+  /** The account's own tier inside its org (a Team seat's tier), e.g. `default_claude_max_5x`. */
+  user_rate_limit_tier: string | null;
+  /**
+   * Team seat, e.g. `team_standard` or `team_*_premium`. A member with no seat never
+   * sees it here: the bootstrap itself answers 403 oauth_not_allowed_for_organization.
+   */
+  seat_tier: string | null;
 };
 
 /** GET /api/claude_cli/bootstrap with the same headers real CLI uses. */
@@ -184,6 +191,8 @@ export async function fetchClaudeBootstrap(accessToken: string): Promise<ClaudeB
       organization_name: stringOrNull(account.organization_name),
       organization_type: stringOrNull(account.organization_type),
       organization_rate_limit_tier: stringOrNull(account.organization_rate_limit_tier),
+      user_rate_limit_tier: stringOrNull(account.user_rate_limit_tier),
+      seat_tier: stringOrNull(account.seat_tier),
     };
   } catch {
     return null;

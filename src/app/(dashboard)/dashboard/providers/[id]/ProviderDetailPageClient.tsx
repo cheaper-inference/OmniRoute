@@ -52,6 +52,7 @@ import { useModelImportHandlers } from "./hooks/useModelImportHandlers";
 import { useApiKeySave } from "./hooks/useApiKeySave";
 import { useModelVisibilityHandlers } from "./hooks/useModelVisibilityHandlers";
 import { useModelCompatState } from "./hooks/useModelCompatState";
+import { useModelComboUsage } from "./hooks/useModelComboUsage";
 import { useConnectionGate } from "./hooks/useConnectionGate";
 import { useProviderNodeActions } from "./hooks/useProviderNodeActions";
 import ProviderExtraPanels from "./components/ProviderExtraPanels";
@@ -73,6 +74,8 @@ import UpstreamProxyCard from "./components/UpstreamProxyCard";
 import SearchProviderCard from "./components/SearchProviderCard";
 import NoAuthProviderControls from "./components/NoAuthProviderControls";
 import AnonymousFallbackToggle from "./components/AnonymousFallbackToggle";
+import ProviderRetryDelaySelect from "./components/ProviderRetryDelaySelect";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 // providerText used by UpstreamProxyCard (Phase 1t.7)
 
 export default function ProviderDetailPageClient() {
@@ -96,6 +99,7 @@ export default function ProviderDetailPageClient() {
   const [importCodexModalOpen, setImportCodexModalOpen] = useState(false);
   const [codexCliGuideOpen, setCodexCliGuideOpen] = useState(false);
   const [importClaudeModalOpen, setImportClaudeModalOpen] = useState(false);
+  const [importAgyModalOpen, setImportAgyModalOpen] = useState(false);
   const [importGeminiModalOpen, setImportGeminiModalOpen] = useState(false);
   const [importGrokCliModalOpen, setImportGrokCliModalOpen] = useState(false);
   const [connectingVolcengineAccount, setConnectingVolcengineAccount] = useState(false);
@@ -210,6 +214,7 @@ export default function ProviderDetailPageClient() {
   const t = useTranslations("providers");
   const emailsVisible = useEmailPrivacyStore((s) => s.emailsVisible);
   const notify = useNotificationStore();
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   // Per-account usage/limits strip — cached snapshot from the server's
   // providerLimitsCache, with per-connection on-demand live refresh.
   const {
@@ -504,6 +509,9 @@ export default function ProviderDetailPageClient() {
 
   // Phase 1e: compat-state derivations
   const compat = useModelCompatState(modelMeta.customModels, modelMeta.modelCompatOverrides);
+  // Combo membership for every model on this provider — drives the small
+  // "used in combo X" badge behind each model row (#16216).
+  const comboUsage = useModelComboUsage(providerId);
   const { customMap } = compat;
   const effectiveModelNormalize = compat.effectiveModelNormalize;
   const effectiveModelPreserveDeveloper = compat.effectiveModelPreserveDeveloper;
@@ -547,6 +555,7 @@ export default function ProviderDetailPageClient() {
     fetchProviderModelMeta,
     fetchAliases,
     notify,
+    requestConfirm,
     t,
     selectedConnection,
     providerNode,
@@ -624,6 +633,7 @@ export default function ProviderDetailPageClient() {
           providerName={providerInfo?.name || providerId}
         />
       )}
+      {!isUpstreamProxyProvider && <ProviderRetryDelaySelect providerId={providerId} />}
       {!isUpstreamProxyProvider && (!isFreeNoAuth || providerSupportsPat) && (
         <Card>
           <ProviderAccountRoutingCard
@@ -678,6 +688,7 @@ export default function ProviderDetailPageClient() {
             onOpenCodexCliGuide={() => setCodexCliGuideOpen(true)}
             onOpenImportCodex={() => setImportCodexModalOpen(true)}
             onOpenImportClaude={() => setImportClaudeModalOpen(true)}
+            onOpenImportAgy={() => setImportAgyModalOpen(true)}
             onOpenImportGemini={() => setImportGeminiModalOpen(true)}
             onOpenImportGrokCli={() => setImportGrokCliModalOpen(true)}
             t={t}
@@ -699,6 +710,7 @@ export default function ProviderDetailPageClient() {
               onOpenOAuthModal={() => setShowOAuthModal(true)}
               onOpenImportCodex={() => setImportCodexModalOpen(true)}
               onOpenImportClaude={() => setImportClaudeModalOpen(true)}
+              onOpenImportAgy={() => setImportAgyModalOpen(true)}
               onOpenImportGemini={() => setImportGeminiModalOpen(true)}
               onOpenImportGrokCli={() => setImportGrokCliModalOpen(true)}
               t={t}
@@ -806,6 +818,7 @@ export default function ProviderDetailPageClient() {
             models={models}
             modelMeta={modelMeta}
             modelAliases={modelAliases}
+            comboUsage={comboUsage}
             syncedAvailableModels={syncedAvailableModels}
             syncedCatalogAuthoritative={syncedCatalogAuthoritative}
             compatibleFallbackModels={compatibleFallbackModels}
@@ -939,6 +952,8 @@ export default function ProviderDetailPageClient() {
         handleApplyClaudeAuthLocal={handleApplyClaudeAuthLocal}
         importClaudeModalOpen={importClaudeModalOpen}
         setImportClaudeModalOpen={setImportClaudeModalOpen}
+        importAgyModalOpen={importAgyModalOpen}
+        setImportAgyModalOpen={setImportAgyModalOpen}
         importGrokCliModalOpen={importGrokCliModalOpen}
         setImportGrokCliModalOpen={setImportGrokCliModalOpen}
         batchTestResults={batchTestResults}
@@ -964,6 +979,7 @@ export default function ProviderDetailPageClient() {
         notify={notify}
         t={t}
       />
+      {confirmDialog}
     </div>
   );
 }
