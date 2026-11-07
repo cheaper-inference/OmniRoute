@@ -80,7 +80,6 @@ export async function cleanupQuotaSnapshots(): Promise<CleanupResult> {
  * Clean up old call_logs based on retention settings.
  */
 export async function cleanupCallLogs(): Promise<CleanupResult> {
-  const db = getDbInstance();
   const retention = getRetentionSettings();
 
   const retentionDays = retention.callLogs;
@@ -91,13 +90,19 @@ export async function cleanupCallLogs(): Promise<CleanupResult> {
   const result: CleanupResult = { deleted: 0, errors: 0 };
 
   try {
-    const stmt = db.prepare("DELETE FROM call_logs WHERE timestamp < ?");
-    const runResult = stmt.run(cutoffISO);
-    result.deleted = runResult.changes;
+    // Batched (10k rows per statement, yielding between batches): a single
+    // DELETE over a retention backlog holds the event loop for seconds.
+    // `result` doubles as the running total, so a failed batch still reports
+    // the rows the earlier batches removed.
+    await deleteFromTableBeforeInBatches(
+      { table: "call_logs", column: "timestamp", cutoff: "iso" },
+      cutoffISO,
+      { progress: result }
+    );
 
     console.log(`[Cleanup] Deleted ${result.deleted} call_logs older than ${retentionDays} days`);
   } catch (err: unknown) {
-    console.error("[Cleanup] Error cleaning call_logs:", err);
+    console.error(`[Cleanup] Error cleaning call_logs (${result.deleted} rows deleted):`, err);
     result.errors++;
   }
 
@@ -108,7 +113,6 @@ export async function cleanupCallLogs(): Promise<CleanupResult> {
  * Clean up old usage_history based on retention settings.
  */
 export async function cleanupUsageHistory(): Promise<CleanupResult> {
-  const db = getDbInstance();
   const retention = getRetentionSettings();
 
   const retentionDays = retention.usageHistory;
@@ -118,6 +122,7 @@ export async function cleanupUsageHistory(): Promise<CleanupResult> {
   const cutoffDateStr = cutoffISO.split("T")[0];
 
   const result: CleanupResult = { deleted: 0, errors: 0 };
+  const db = getDbInstance();
   const dates = db
     .prepare(
       "SELECT DISTINCT DATE(timestamp) AS day FROM usage_history WHERE timestamp < ? ORDER BY day"

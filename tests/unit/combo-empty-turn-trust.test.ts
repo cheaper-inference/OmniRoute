@@ -2,6 +2,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { isTrustedEmptyTurn } from "../../open-sse/services/combo/emptyTurnTrust.ts";
+import { convertStopReason } from "../../open-sse/translator/response/claude-to-openai.ts";
 import {
   markEmptyTurnExecution,
   inheritEmptyTurnPolicy,
@@ -27,6 +28,25 @@ async function allowed(response: Response) {
   await response.text();
   return permission();
 }
+
+const claudeRefusal =
+  'data: {"type":"message_start","message":{"content":[]}}\n\ndata: {"type":"message_delta","delta":{"stop_reason":"refusal"}}\n\ndata: {"type":"message_stop"}\n\n';
+
+test("a Claude refusal is an ordinary terminal, not a failed attempt", async () => {
+  // The model declined to answer and said so. The stream completed. A combo must
+  // hand that refusal to the caller instead of failing over to a 502: the caller
+  // can act on "the model refused", it cannot act on "the gateway broke", and a
+  // caller that retries a 502 retries the same refusal forever.
+  const response = executed("https://api.anthropic.com/v1/messages", claudeRefusal);
+  assert.equal(await allowed(response), true);
+});
+
+test("the refusal reason survives translation as content_filter", () => {
+  // Trusting the turn must not hide why it ended. The response translator maps
+  // Anthropic's refusal to OpenAI's content_filter, so the caller still learns
+  // the model declined rather than receiving an unexplained empty answer.
+  assert.equal(convertStopReason("refusal"), "content_filter");
+});
 
 test("origin alone is not terminal proof; permission observes the native bytes later", async () => {
   const response = executed();
