@@ -15,51 +15,67 @@ OmniRoute は、管理操作、認証イベント、プロバイダー認証情�
 
 ### 管理監査イベント（`audit_log`）
 
-`logAuditEvent({ action, actor, target, details, ... })` を呼び出すたびに、1 行が生成されます。アクション文字列は `domain.verb`（または `domain.verb.outcome`）形式に従います。ソースツリー内で確認されているアクションタイプは次のとおりです。
+`logAuditEvent({ action, actor, target, details, ... })` の呼び出しごとに
+1 行が生成されます。アクション文字列は `domain.verb`（または
+`domain.verb.outcome`）パターンに従います。ツリー内で確認済みのアクション型は次のとおりです。
 
-| アクション                           | ソース                                  |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Action                               | Source                                   |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-各エントリには、`action`、`actor`（デフォルトは `"system"`）、`target`、`details`/`metadata`（JSON）、`ip_address`、`resource_type`、`status`、`request_id`、および `timestamp` が記録されます。機密性の高いキー（`apiKey`、`accessToken`、`refreshToken`、`password`、`*token`/`*secret`/`*apikey` に一致するものなど）は、行が書き込まれる前に再帰的に `"[redacted]"` に置換されます。
+各エントリには、`action`、`actor`（デフォルトは `"system"`）、`target`、
+`details`/`metadata`（JSON）、`ip_address`、`resource_type`、`status`、
+`request_id`、`timestamp` が記録されます。機密キー（`apiKey`、`accessToken`、
+`refreshToken`、`password`、`*token`/`*secret`/`*apikey` に一致するものなど）は、
+行が書き込まれる前に再帰的に `"[redacted]"` へ置換されます。
+
+`api_key.auth.touch` 行には、リクエストログに到達しない API キーのメタデータおよび
+検出読み取り（GET/HEAD）の成功が記録されます。対象となるのはキー、日時、正規化された
+パスで、最大 1,000 行にまとめられ、上限が適用されます。`noLog` が設定されたキーと
+環境キーはスキップされます。呼び出し元の IP アドレスとユーザーエージェントは、
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` 機能フラグがオンの場合にのみ追加されます
+（デフォルトではオフ）。
 
 ### MCP ツール呼び出し（`mcp_tool_audit`）
 
-MCP ツールが呼び出されるたびに、`open-sse/mcp-server/audit.ts` を介して行が書き込まれます。スキーマ（`src/lib/db/migrations/002_mcp_a2a_tables.sql` より）は次のとおりです。
+すべての MCP ツール呼び出しは、`open-sse/mcp-server/audit.ts` を通じて 1 行を書き込みます。
+スキーマは `src/lib/db/migrations/002_mcp_a2a_tables.sql` から取得されます。
 
-| 列               | 備考                                      |
-| ---------------- | ----------------------------------------- |
-| `id`             | 自動インクリメント                        |
-| `tool_name`      | MCP ツール識別子                          |
-| `input_hash`     | 入力の sha256（ペイロードは保存されない） |
-| `output_summary` | 短く切り詰められた要約                    |
-| `duration_ms`    | 経過時間                                  |
-| `api_key_id`     | 呼び出し元（null 可）                     |
-| `success`        | `1` / `0`                                 |
-| `error_code`     | 失敗時の最終エラーコード                  |
-| `created_at`     | ISO タイムスタンプ                        |
+| Column           | Notes                                       |
+| ---------------- | ------------------------------------------- |
+| `id`             | 自動インクリメント                          |
+| `tool_name`      | MCP ツール識別子                            |
+| `input_hash`     | 入力の sha256（ペイロードは保存されません） |
+| `output_summary` | 短く切り詰められた概要                      |
+| `duration_ms`    | 実時間                                      |
+| `api_key_id`     | 呼び出し元（null 許容）                     |
+| `success`        | `1` / `0`                                   |
+| `error_code`     | 失敗時の終端エラーコード                    |
+| `created_at`     | ISO タイムスタンプ                          |
 
-### リクエスト／使用状況ログ
+### リクエスト / 使用状況ログ
 
-これらは運用テレメトリ（厳密には管理監査ではありません）ですが、同じ保持パイプラインを共有します。
+これらは運用テレメトリ（厳密には管理監査ではありません）ですが、同じ保持
+パイプラインを共有します。
 
-- `usage_history` — リクエスト単位の使用状況集計
-- `call_logs` — リクエスト単位の完全なログ（行数上限の対象。以下を参照）
-- `proxy_logs` — プロキシトラフィックログ（行数上限の対象）
-- `request_detail_logs` — 従来の詳細リクエストログ（存在する場合は引き続き削除対象）
+- `usage_history` — リクエストごとの使用状況の集計
+- `call_logs` — リクエストごとの完全なログ（以下の行数上限の対象）
+- `proxy_logs` — プロキシ通信ログ（行数上限の対象）
+- `request_detail_logs` — 従来の詳細なリクエストログ（存在する場合も引き続き削除対象）
 
 ## ストレージスキーマ
 

@@ -9,6 +9,7 @@
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { isModelAllowedForKey } from "@/lib/db/apiKeys";
+import { resolveEnforcedPolicyKey } from "@/shared/utils/apiKeyPolicy";
 import { withHiddenModelGate } from "./hiddenModelGate.ts";
 import {
   checkResolvedModelPermission,
@@ -116,19 +117,37 @@ export function comboAuthorizationOptions(
   };
 }
 
+/**
+ * #18471: the key apiKeyInfo was loaded from, resolved the way enforceApiKeyPolicy
+ * resolves it (validated credential, bearer, bare header, dashboard playground
+ * key id, self-loop scope). Re-reading only the client headers missed the
+ * playground key id, so every selected non-default key failed closed.
+ */
+async function resolveGateApiKey(request: Request | null | undefined): Promise<string | null> {
+  try {
+    if (!request?.headers) return null;
+    const enforced = await resolveEnforcedPolicyKey(request);
+    // A scope that no longer resolves must not fall back to the self-loop bearer.
+    return enforced.selfLoopScope.rejection ? null : enforced.apiKey;
+  } catch {
+    return null;
+  }
+}
+
 /** Per-request gate: returns a rejection for the first resolved model the key does not admit. */
 export function createResolvedModelGate(opts: {
   apiKeyInfo: unknown;
-  apiKey: string | null | undefined;
+  request: Request | null | undefined;
   contextModel: string | null | undefined;
   comboGrantsTargets: boolean | undefined;
   provider: string;
   model: string;
   modelStr: string;
 }): (resolvedModels: Iterable<string>) => Promise<Response | null> {
+  const hasApiKeyMetadata = Boolean(opts.apiKeyInfo);
+  let apiKey: Promise<string | null> | undefined;
   const base = {
-    hasApiKeyMetadata: Boolean(opts.apiKeyInfo),
-    apiKey: opts.apiKey,
+    hasApiKeyMetadata,
     requestedModel: resolveAuthorizationContextModel(opts.contextModel, opts.modelStr),
     grantedTargets: comboGrantedTargetSet(
       opts.comboGrantsTargets,
@@ -137,7 +156,10 @@ export function createResolvedModelGate(opts: {
       opts.modelStr
     ),
   };
-  return (resolvedModels) => rejectUnauthorizedResolvedModels({ ...base, resolvedModels });
+  return async (resolvedModels) => {
+    if (hasApiKeyMetadata) apiKey ??= resolveGateApiKey(opts.request);
+    return rejectUnauthorizedResolvedModels({ ...base, apiKey: await apiKey, resolvedModels });
+  };
 }
 
 /**

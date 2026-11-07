@@ -10,76 +10,77 @@ _Sist oppdatert: 2026-06-28_
 
 ## Sammendrag
 
-OmniRoute er en lokal AI rutinggateway og dashbord bygget på Next.js. Den gir et enkelt OpenAI-kompatibelt endepunkt (`/v1/*`) og ruter trafikk på tvers av flere oppstrømsleverandører med oversettelse, fallback, token-oppdatering og brukssporing.
+OmniRoute er en lokal AI-rutingsgateway og et dashbord bygget på Next.js.
+Den tilbyr ett enkelt OpenAI-kompatibelt endepunkt (`/v1/*`) og ruter trafikk på tvers av flere oppstrømsleverandører med oversettelse, reservevalg, token-fornyelse og brukssporing.
 
 Kjernefunksjoner:
 
-- OpenAI-kompatibel API overflate for CLI/tools (377 leverandører, 156 eksekveringsmoduler)
-- Request/response -oversettelse på tvers av leverandørformater
-- Modell combo fallback (multi-modell sekvens)
-- Strukturerte kombinasjonstrinn (`provider + model + connection`) med kjøretidsbestilling etter `compositeTiers`
-- Reserveback på kontonivå (multikonto per leverandør)
-- Kvote forhåndskontroll og kvotebevisst P2C kontovalg i hovedchatbanen
-- OAuth + API-nøkkelleverandørtilkoblingsadministrasjon (27 OAuth leverandørmoduler)
-- Innbyggingsgenerering via `/v1/embeddings` (18 leverandører)
-- Bildegenerering via `/v1/images/generations` (10 + leverandører, 20 + modeller)
+- OpenAI-kompatibelt API-grensesnitt for CLI-verktøy (380 leverandører, 159 eksekveringsmoduler)
+- Oversettelse av forespørsler og svar på tvers av leverandørformater
+- Reservevalg for modellkombinasjoner (sekvens med flere modeller)
+- Strukturerte kombinasjonstrinn (`provider + model + connection`) med kjøretidsrekkefølge via `compositeTiers`
+- Reservevalg på kontonivå (flere kontoer per leverandør)
+- Forhåndskontroll av kvoter og kvotebevisst P2C-kontoutvalg i hovedstien for chat
+- Administrasjon av OAuth- og API-nøkkelbaserte leverandørtilkoblinger (27 OAuth-leverandørmoduler)
+- Generering av embedding-er via `/v1/embeddings` (18 leverandører)
+- Bildef generering via `/v1/images/generations` (10+ leverandører, 20+ modeller)
 - Lydtranskripsjon via `/v1/audio/transcriptions` (18 leverandører)
 - Tekst-til-tale via `/v1/audio/speech` (24 innebygde leverandører)
 - Videogenerering via `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Musikkgenerering via `/v1/music/generations` (ComfyUI)
 - Nettsøk via `/v1/search` (20 leverandører)
-- Moderasjoner via `/v1/moderations`
-- Omrangering via `/v1/rerank`
-- Tenk tag-parsing (`<think>...</think>`) for resonneringsmodeller
-- Respons sanitization for streng OpenAI SDK kompatibilitet
-- Rollenormalisering (utvikler → system, system → bruker) for kompatibilitet på tvers av leverandører
-- Konvertering av strukturert utdata (json_schema → Gemini responseSchema)
-- Lokal persistens for leverandører, nøkler, aliaser, kombinasjoner, innstillinger, priser (122 DB moduler)
-- Usage/cost sporing og forespørselslogging
-- Valgfri skysynkronisering for multi-device/state synkronisering
-- IP allowlist/blocklist for API tilgangskontroll
-- Tenkende budsjettstyring (passthrough/auto/custom/adaptive)
-- Global systemprompt injeksjon
-- Sesjonssporing og fingeravtrykk
-- Forbedret prisbegrensning per konto med leverandørspesifikke profiler
-- Strømbrytermønster for leverandørens motstandskraft
-- Anti-tordenbesetning med mutex-låsing
-- Signaturbasert forespørselsdedupliseringsbuffer
-- Domenelag: kostnadsregler, reservepolicy, lockoutpolicy
-- Kontekstrelé: oppsummeringer av øktoverlevering for kontinuitet i kontorotasjon
-- Vedvarende domenetilstand (SQLite -gjennomskrivingsbuffer for reserver, budsjetter, lockouts, strømbrytere)
-- Policymotor for sentralisert forespørselsevaluering (lockout → budget → fallback)
-- Be om telemetri med p50/p95/p99 latency aggregering
-- Combo target telemetri og historisk combo target helse via `combo_execution_key` / `combo_step_id`
-- Korrelasjon ID (X-Request-Id) for ende-til-ende-sporing
-- Overholdelsesrevisjonslogging med opt-out per API nøkkel
-- Eval rammeverk for LLM kvalitetssikring
-- Helse dashbord med sanntids leverandørens strømbryterstatus
-- MCP Server (110 verktøy) med 3 transporter (stdio/SSE/Streamable HTTP)
+- Moderering via `/v1/moderations`
+- Rangering på nytt via `/v1/rerank`
+- Parsing av tenketagger (`<think>...</think>`) for resonneringsmodeller
+- Rensing av svar for streng OpenAI SDK-kompatibilitet
+- Normalisering av roller (developer→system, system→user) for kompatibilitet på tvers av leverandører
+- Konvertering av strukturerte resultater (json_schema → Gemini responseSchema)
+- Lokal persistens for leverandører, nøkler, aliaser, kombinasjoner, innstillinger og priser (122 databasemoduler)
+- Sporing av bruk/kostnad og logging av forespørsler
+- Valgfri skysynkronisering for synkronisering av flere enheter/tilstander
+- IP-tillatelsesliste/blokkeringsliste for tilgangskontroll til API-et
+- Administrasjon av tenkebudsjett (passthrough/auto/custom/adaptive)
+- Injisering av global systemprompt
+- Øktsporing og fingeravtrykksgenerering
+- Forbedret hastighetsbegrensning per konto med leverandørspesifikke profiler
+- Circuit breaker-mønster for leverandørrobusthet
+- Beskyttelse mot «thundering herd» med mutex-låsing
+- Signaturbasert hurtigbuffer for deduplisering av forespørsler
+- Domenelag: kostnadsregler, reservevalgpolicy og utestengingspolicy
+- Context Relay: sammendrag for overlevering av økter, slik at kontinuiteten opprettholdes ved kontorotasjon
+- Persistens av domenetilstand (SQLite write-through-hurtigbuffer for reservevalg, budsjetter, utestenginger og circuit breakers)
+- Policy-motor for sentralisert evaluering av forespørsler (utestenging → budsjett → reservevalg)
+- Forespørselstelemetri med aggregering av p50/p95/p99-latens
+- Telemetri for kombinasjonsmål og historisk helse for kombinasjonsmål via `combo_execution_key` / `combo_step_id`
+- Korrelasjons-ID (X-Request-Id) for sporing fra ende til ende
+- Samsvarsrevisjonslogging med mulighet for fravalg per API-nøkkel
+- Eval-rammeverk for kvalitetssikring av LLM-er
+- Helsedashbord med sanntidsstatus for leverandørenes circuit breakers
+- MCP Server (110 verktøy) med 3 transportmekanismer (stdio/SSE/Streamable HTTP)
 - A2A Server (JSON-RPC 2.0 + SSE) med ferdigheter og oppgavelivssyklus
-- Minnesystem (ekstraksjon, injeksjon, gjenfinning, oppsummering)
-- Ferdighetssystem (register, eksekutør, sandkasse, innebygde ferdigheter)
-- MITM proxy med sertifikathåndtering og DNS -håndtering
-- Rask injeksjonsbeskyttelse mellomvare
-- Spør kompresjonspipeline med Caveman, RTK, stablede pipelines, kompresjonskombinasjoner, språkpakker og analyser
-- ACP -registeret (Agent Communication Protocol).
-- Modulære OAuth leverandører (22 individuelle moduler under `src/lib/oauth/providers/`)
-- Uninstall/full-uninstall -skript
-- OAuth miljøreparasjonshandling
-- WebSocket bro for OpenAI-kompatible WS klienter (`/v1/ws`)
-- Synkroniseringstokenadministrasjon (issue/revoke, nedlasting av konfigurasjonspakke med ETag-versjon)
-- GLM Thinking (`glmt`) førsteklasses leverandør forhåndsinnstilt
-- Hybrid tokentelling ( `/messages/count_tokens` på leverandørsiden med estimert reserve)
-- Modellalias automatisk seeding (30 + kryssproxy-dialektnormaliseringer ved oppstart)
-- Sikker utgående henting med SSRF vakt, privat URL blokkering og konfigurerbart forsøk på nytt
-- Nedkjølingsbevisste chatteforsøk med konfigurerbare `requestRetry` og `maxRetryIntervalSec`
-- Kjøretidsmiljøvalidering med Zod ved oppstart
-- Samsvarsrevisjon v2 med paginering, leverandør- CRUD hendelser og SSRF-blokkert valideringslogging
+- Minnessystem (ekstrahering, injisering, henting og oppsummering)
+- Ferdighetssystem (register, eksekvering, sandkasse og innebygde ferdigheter)
+- MITM-proxy med sertifikatadministrasjon og DNS-håndtering
+- Middleware for beskyttelse mot prompt-injisering
+- Pipeline for promptkomprimering med Caveman, RTK, stablede pipelines, komprimeringskombinasjoner, språkpakker og analyse
+- ACP-register
+- Modulære OAuth-leverandører (22 individuelle moduler under `src/lib/oauth/providers/`)
+- Skript for avinstallering/fullstendig avinstallering
+- Handling for reparasjon av OAuth-miljøet
+- WebSocket-bro for OpenAI-kompatible WS-klienter (`/v1/ws`)
+- Administrasjon av synkroniseringstokener (utstedelse/tilbakekalling, nedlasting av ETag-versjonert konfigurasjonspakke)
+- GLM Thinking (`glmt`) som førsteklasses leverandørforvalg
+- Hybrid tokenopptelling (leverandørside `/messages/count_tokens` med reserveberegning)
+- Automatisk oppretting av modelaliaser (30+ normaliseringer av dialekter på tvers av proxyer ved oppstart)
+- Sikker utgående henting med SSRF-vakt, blokkering av private URL-er og konfigurerbart nytt forsøk
+- Chat-nytt forsøk som tar hensyn til nedkjølingsperioder, med konfigurerbare `requestRetry` og `maxRetryIntervalSec`
+- Validering av kjøretidsmiljø med Zod ved oppstart
+- Samsvarsrevisjon v2 med paginering, CRUD-hendelser for leverandører og valideringslogging av SSRF-blokkeringer
 
 Primær kjøretidsmodell:
 
-- Next.js app-ruter under `src/app/api/*` implementerer både dashboard APIs og kompatibilitet APIs
-- En delt SSE/routing kjerne i `src/sse/*` + `open-sse/*` håndterer leverandørutførelse, oversettelse, streaming, fallback og bruk
+- Next.js-app-ruter under `src/app/api/*` implementerer både dashbord-API-er og kompatibilitets-API-er
+- En delt SSE-/rutingskjerne i `src/sse/*` + `open-sse/*` håndterer leverandøreksekvering, oversettelse, strømming, reservevalg og bruksgenerering
 
 ## Referansediagrammer
 

@@ -12,6 +12,7 @@ import { useTranslations } from "next-intl";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@omniroute/ui-kit/popover";
+import { startVisiblePolling } from "@/shared/utils/visiblePolling";
 import Badge from "./Badge";
 import Button from "./Button";
 import Icon from "./Icon";
@@ -61,9 +62,7 @@ export default function TokenHealthBadge() {
       }
     };
 
-    poll();
-    const interval = setInterval(poll, 60000);
-    return () => clearInterval(interval);
+    return startVisiblePolling(poll, 60000);
   }, []);
 
   const handleRefresh = useCallback(async () => {
