@@ -7,6 +7,7 @@ import {
 import type { JsonRecord, ResilienceSettings, ResilienceSettingsPatch } from "./settings/types";
 import {
   asRecord,
+  toBoolean,
   toInteger,
   resolveStreamRecoveryDefaults,
   normalizeLegacyConnectionCooldownProfile,
@@ -373,11 +374,13 @@ export function resolveResilienceSettings(
 
   const resolved: ResilienceSettings = {
     antigravityTimingTelemetry: {
-      enabled: typeof asRecord(current.antigravityTimingTelemetry).enabled === "boolean"
-        ? asRecord(current.antigravityTimingTelemetry).enabled as boolean
-        : typeof legacyAntigravitySettings.timingTelemetryEnabled === "boolean"
-          ? legacyAntigravitySettings.timingTelemetryEnabled as boolean
-          : fallback.antigravityTimingTelemetry.enabled,
+      enabled: toBoolean(
+        asRecord(current.antigravityTimingTelemetry).enabled,
+        toBoolean(
+          legacyAntigravitySettings.timingTelemetryEnabled,
+          fallback.antigravityTimingTelemetry.enabled
+        )
+      ),
     },
     requestQueue: normalizeRequestQueueSettings(current.requestQueue, fallback.requestQueue),
     connectionCooldown: {
@@ -453,9 +456,10 @@ export function mergeResilienceSettings(
 ): ResilienceSettings {
   return {
     antigravityTimingTelemetry: {
-      enabled: typeof updates.antigravityTimingTelemetry?.enabled === "boolean"
-        ? updates.antigravityTimingTelemetry.enabled
-        : current.antigravityTimingTelemetry.enabled,
+      enabled: toBoolean(
+        updates.antigravityTimingTelemetry?.enabled,
+        current.antigravityTimingTelemetry.enabled
+      ),
     },
     requestQueue: normalizeRequestQueueSettings(updates.requestQueue, current.requestQueue),
     connectionCooldown: {
