@@ -395,7 +395,10 @@ function resolveCodexPaidCreditsGate(
     scope?.requestedModel
   );
   if (!paidCreditsEnabled) return null;
-  if (!quota) return { proceed: false, reason: "quota_unavailable" };
+  // When quota telemetry is unavailable (timeout, network error), fail open
+  // rather than falsely assuming credit exhaustion and persisting a cooldown.
+  // Upstream will enforce billing/credits directly.
+  if (!quota) return null;
   if (hasCodexPaidCredits(quota.paidCredits)) {
     return { proceed: true, quotaPercent: quota.percentUsed };
   }

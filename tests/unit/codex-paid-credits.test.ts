@@ -152,7 +152,7 @@ test("the global inclusive 1% cutoff is unchanged for subscription accounts", ()
   );
 });
 
-test("preflight honors paid credits even without window data and fails closed on unknown usage", async () => {
+test("preflight honors paid credits even without window data and fails open on unknown usage", async () => {
   registerQuotaFetcher("codex", async () => ({
     ...exhausted,
     windows: undefined,
@@ -164,6 +164,6 @@ test("preflight honors paid credits even without window data and fails closed on
   };
   assert.equal((await preflightQuota("codex", "paid-test", connection, thresholds)).proceed, true);
   registerQuotaFetcher("codex", async () => null);
-  assert.equal((await preflightQuota("codex", "paid-test", connection, thresholds)).proceed, false);
+  assert.equal((await preflightQuota("codex", "paid-test", connection, thresholds)).proceed, true);
   assert.equal((await preflightQuota("codex", "normal-test", {}, thresholds)).proceed, true);
 });
