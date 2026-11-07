@@ -80,6 +80,7 @@ function GenericProviderIcon({ size }: { size: number }) {
 }
 
 const KNOWN_SVGS = new Set([
+  "supersoniclabs",
   "360ai",
   "alibaba",
   "anthropic",
@@ -222,6 +223,8 @@ const KNOWN_SVGS = new Set([
 ]);
 
 const LOCAL_SVG_ALIASES: Record<string, string> = {
+  "ollama-cloud": "ollama",
+  "cloudflare-ai": "cloudflare",
   bigmodel: "zhipu",
   "cursor-api": "cursor",
   "qwen-cloud": "qwencloud",
@@ -310,6 +313,10 @@ const GENERIC_PROVIDER_IDS = new Set([
 ]);
 
 const THEMED_SVGS: Record<string, { light: string; dark: string }> = {
+  orcarouter: {
+    light: "/providers/orcarouter-original.png",
+    dark: "/providers/orcarouter-original.png",
+  },
   // Kimi (Moonshot AI) official-partnership logomarks (2026-07): the official
   // rounded-square badge in Kimi's brand blue (#1783FF — see KIMI_BRAND_COLOR in
   // featuredProviders.ts) for the 3 visible Kimi-family cards. This replaces two

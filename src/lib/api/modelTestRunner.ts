@@ -1,3 +1,4 @@
+import { nativeDecisionTestEndpoint } from "./decisionModelTestPolicy";
 import { randomUUID } from "node:crypto";
 import { prepareConnectionModelTest } from "@/lib/providerModels/prepareConnectionModelTest";
 import { POST as postChatCompletion } from "@/app/api/v1/chat/completions/route";
@@ -607,6 +608,21 @@ export async function runSingleModelTest(
     isResponses,
     isNonChatGeneration,
   } = detectTestKind(fullModelStr, customModel, nodeApiType);
+  const decisionEndpoint = await nativeDecisionTestEndpoint(
+    providerId,
+    fullModelStr,
+    customModel,
+    nodeApiType
+  );
+  if (decisionEndpoint)
+    return {
+      modelId: fullModelStr,
+      status: "error",
+      httpStatus: 422,
+      latencyMs: 0,
+      skipped: true,
+      error: `Skipped: native decision model — use ${decisionEndpoint} with a scoped client key`,
+    };
 
   // #13376: Skip image/music/video generation models — dispatching them as
   // chat completions incurs real billable generations the operator never asked for.

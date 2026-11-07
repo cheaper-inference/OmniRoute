@@ -13,6 +13,7 @@ import {
   TALL_MODAL_PROPS,
 } from "@/shared/components";
 import {
+  DECISION_PROVIDER_IDS,
   AGGREGATOR_PROVIDER_IDS,
   EMBEDDING_RERANK_PROVIDER_IDS,
   ENTERPRISE_CLOUD_PROVIDER_IDS,
@@ -706,6 +707,20 @@ function ProvidersPageContent() {
     connections
   );
 
+  const decisionProviderEntriesAll = apiKeyProviderEntriesAll.filter((entry) =>
+    DECISION_PROVIDER_IDS.has(entry.providerId)
+  );
+  const decisionProviderEntries = filterConfiguredProviderEntries(
+    decisionProviderEntriesAll,
+    effectiveShowConfiguredOnly,
+    searchQuery,
+    showFreeOnly,
+    modelSearchQuery,
+    activeServiceKind,
+    liveModelsByProviderId,
+    connections
+  );
+
   const audioProviderEntriesAll = buildStaticProviderEntries("audio", getProviderStats);
   const audioProviderEntries = filterConfiguredProviderEntries(
     audioProviderEntriesAll,
@@ -860,6 +875,7 @@ function ProvidersPageContent() {
     videoProviderEntries,
     webCookieProviderEntries,
     searchProviderEntries,
+    decisionProviderEntries,
     webFetchEntries,
     audioProviderEntries,
     localProviderEntries,
@@ -875,6 +891,7 @@ function ProvidersPageContent() {
     compatible: countConfigured(compatibleProviderEntriesAll),
     webcookie: countConfigured(webCookieProviderEntriesAll),
     search: countConfigured(searchProviderEntriesAll),
+    decisions: countConfigured(decisionProviderEntriesAll),
     audio: countConfigured(audioProviderEntriesAll),
     local: countConfigured(localProviderEntriesAll),
     upstreamproxy: countConfigured(upstreamProxyEntriesAll),
@@ -1679,6 +1696,36 @@ function ProvidersPageContent() {
                       }
                     />
                   ))}
+                </ProviderCardGrid>
+              </div>
+            )}
+
+            {showSection("decisions") && decisionProviderEntries.length > 0 && (
+              <div className="flex flex-col gap-4">
+                <SectionHeader
+                  title={
+                    <span className="flex items-center gap-2">
+                      {t("decisionProvidersHeading")}
+                      <ProviderCountBadge {...countConfigured(decisionProviderEntriesAll)} />
+                    </span>
+                  }
+                  description={t("decisionProvidersDesc")}
+                />
+                <ProviderCardGrid>
+                  {decisionProviderEntries.map(
+                    ({ providerId, provider, stats, toggleAuthType }) => (
+                      <HighlightableProviderCard
+                        key={providerId}
+                        providerId={providerId}
+                        provider={provider}
+                        stats={stats}
+                        authType="apikey"
+                        onToggle={(active) =>
+                          handleToggleProvider(providerId, toggleAuthType, active)
+                        }
+                      />
+                    )
+                  )}
                 </ProviderCardGrid>
               </div>
             )}

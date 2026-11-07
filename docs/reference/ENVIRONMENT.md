@@ -6,6 +6,12 @@ lastUpdated: 2026-10-11
 
 # Environment Variables Reference
 
+The [native decision gateway](../providers/DECISION_MODELS.md) uses existing
+provider connections and needs no new environment variables. Local/private
+servers follow `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` and the existing provider
+outbound policy; cloud metadata remains blocked. Configure decision endpoints
+in the operator-managed connection rather than in client requests.
+
 > Complete reference for every environment variable recognized by OmniRoute.
 > For a quick-start template, see [`.env.example`](../../.env.example).
 

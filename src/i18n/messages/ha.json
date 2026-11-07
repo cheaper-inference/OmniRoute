@@ -2570,7 +2570,8 @@
       "webFetch": "Dawo da Bayani daga Yanar Gizo",
       "video": "Bidiyo",
       "music": "Kiɗa",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "Shawarwari"
     },
     "noProviders": "Har yanzu ba a saita masu samarwa don wannan nau'in ba.",
     "addConnection": "Ƙara Haɗi",
@@ -7036,7 +7037,10 @@
     "chatgptConnectorLabel": "Mahaɗin ChatGPT na musamman",
     "doctorChecking": "Ana duban yanke…",
     "doctorCheck": "Duba yanke doctor",
-    "fallbackRetryBackendTitle": "Baya mara da maganin maimaitawa"
+    "fallbackRetryBackendTitle": "Baya mara da maganin maimaitawa",
+    "categoryDecisions": "Shawarwari",
+    "decisionProvidersHeading": "Samfuran yanke shawara",
+    "decisionProvidersDesc": "Yanke shawara mai ƙayyadadden nau'i ta asusun masu samarwa da ake da su. Saita wurin ƙarshen shawara mai tallafi kuma tabbatar da samuwar samfurin."
   },
   "settings": {
     "title": "Saituna",

@@ -2570,7 +2570,8 @@
       "webFetch": "אחזור מהרשת",
       "video": "וידאו",
       "music": "מוזיקה",
-      "ocr": "OCR"
+      "ocr": "OCR",
+      "decisions": "החלטות"
     },
     "noProviders": "עדיין לא הוגדרו ספקים עבור סוג זה.",
     "addConnection": "הוסף חיבור",
@@ -7036,7 +7037,10 @@
     "chatgptConnectorLabel": "מחבר מותאם אישית עבור ChatGPT",
     "doctorChecking": "בדוק סטטוס…",
     "doctorCheck": "בדוק סטטוס רופא",
-    "fallbackRetryBackendTitle": "מנגנון נסיון חוזר לזיהום"
+    "fallbackRetryBackendTitle": "מנגנון נסיון חוזר לזיהום",
+    "categoryDecisions": "החלטות",
+    "decisionProvidersHeading": "מודלי החלטה",
+    "decisionProvidersDesc": "החלטות מקוריות בעלות טיפוסים מוגדרים דרך חשבונות ספקים קיימים. הגדירו את נקודת הקצה הנתמכת ובדקו את זמינות המודל."
   },
   "settings": {
     "title": "הגדרות",

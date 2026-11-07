@@ -3,6 +3,19 @@
  * Pure data; merged by apikey/index.ts via spread (god-file decomposition; semantic split).
  */
 export const APIKEY_PROVIDERS_FRONTIER = {
+  supersoniclabs: {
+    id: "supersoniclabs",
+    alias: "supersoniclabs",
+    name: "Supersonic Labs",
+    icon: "psychology",
+    color: "#111111",
+    textIcon: "SL",
+    website: "https://supersoniclabs.ai",
+    serviceKinds: ["decisions"],
+    authHint: "Supersonic Labs API key for Julia-1",
+    apiHint:
+      "Native System One decisions. Models are declared; use a scoped client key to verify inference.",
+  },
   openai: {
     id: "openai",
     alias: "openai",
