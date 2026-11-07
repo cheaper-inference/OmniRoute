@@ -3404,12 +3404,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Uża l- URL li tintlaħaq mill-magna li taħdem Pi. L-endpoint /v1 kompatibbli mal-OpenAI huwa miżjud awtomatikament.",
     "piManualMergeHint": "Preview biss. Għaqqad din id-dħul providers.omniroute models.json sabiex il-fornituri l-oħra tiegħek u s-settings jibqgħu intatti.",
-    "removeMapping": "Neħħi l-immappjar",
     "customUrl": "URL personalizzata",
     "customEndpointAria": "Punt tal-app ta' personalizzazzjoni",
     "useDefaultKey": "Uża l-ħaġa predefinita ta' OmniRoute",
     "mainModelAria": "Il-mudell ewlieni",
-    "manualConfigTitle": "Konfigurazzjoni manwali tal-Grok Build"
+    "manualConfigTitle": "Konfigurazzjoni manwali tal-Grok Build",
+    "removeMapping": "Neħħi l-immappjar"
   },
   "modelCatalog": {
     "title": "Mudelli u Combos",
@@ -3656,6 +3656,7 @@
     "more": "+{count} oħra",
     "reqs": "talbiet",
     "success": "suċċess",
+    "fallbackSummary": "{rate}% tal-bitiet wasslu għal fallback, ċaże mhux medja ~{skips} objettivi salta",
     "proxyConfigured": "Il-proxy ġie kkonfigurat",
     "copyComboName": "Ikkopja isem il-kombinazzjoni",
     "enableCombo": "Attiva l-kombinazzjoni",
@@ -4225,8 +4226,7 @@
     "duplicateAutoComboSnapshotMsg": "Dan se joħloq snapshot tal-fornituri/mudelli konnessi bħalissa li jaqblu ma’ din is-sagoma, f’kombinazzjoni li tista’ tiġi editjata.",
     "duplicateAutoComboFailedPrefix": "Ma rnexxilniex nidduplikaw il-kombinazzjoni awtomatika:",
     "duplicateAutoComboUnknownError": "Żball mhux magħruf",
-    "duplicateAutoComboTitle": "Oħloq kombinazzjoni statika minn {name}",
-    "fallbackSummary": "{rate}% tal-bitiet wasslu għal fallback, ċaże mhux medja ~{skips} objettivi salta"
+    "duplicateAutoComboTitle": "Oħloq kombinazzjoni statika minn {name}"
   },
   "costs": {
     "title": "Spejjeż",
@@ -9290,9 +9290,9 @@
         "financial": "Finanzjarju",
         "brazilian": "Brażiljan",
         "usa": "Stati Uniti",
-        "full": "Sħiħ",
         "gdpr": "GDPR (EU)",
-        "popia": "POPIA (Afrika t'Isfel)"
+        "popia": "POPIA (Afrika t'Isfel)",
+        "full": "Sħiħ"
       },
       "builtinTypes": "Tipi integrati",
       "types": {
@@ -10228,6 +10228,10 @@
     "healthExtraUsageBypass": "Il-kwota ntużat kollha; l-użu żejjed huwa permess, għalhekk is-servizz ikompli.",
     "healthPaidCreditsBypass": "Il-kwota ntużat kollha; il-krediti mħallsa disponibbli jippermettu li s-servizz ikompli.",
     "healthFilteringBypass": "Il-kwota ntużat kollha; il-filtrazzjoni lokali tal-kwoti hija diżattivata, għalhekk is-servizz ikompli.",
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Użu",
     "grokExtraUsageCredits": "Krediti Addizzjonali għall-Użu",
     "grokAutoTopUp": "Rikarga Awtomatika",
@@ -10685,10 +10689,6 @@
     "confirmRedeemClaudeResetCredit": "It-tifdija tirrisettja immedjatament il-limiti eliġibbli tal-użu ta' Claude u tikkonsma dan il-kreditu b'mod permanenti.",
     "claudeResetCreditsModalTitle": "Krediti għall-irrisettjar ta' Claude",
     "claudeResetCreditsModalExplainer": "Krediti disponibbli għall-irrisettjar ta' Claude u rrisettjar ta' sessjonijiet ta' kull ġimgħa għal dan il-kont.",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "healthAccountHint": "Ibbażat fuq osservazzjonijiet reċenti, mhux test dirett. Agħżel kont għad-dettalji.",
     "healthRecovery": "Irkupru mistenni",
     "healthAvailable": "Disponibbli",
@@ -12344,6 +12344,10 @@
     "messageInputAria": "Messaġġ"
   },
   "requestLogger": {
+    "omittedHttpAttempts": "{count} trażmissjonijiet HTTP ma nżammux",
+    "upstreamStatus": "Server upstream {status}",
+    "noHttpResponse": "Ma ġiet osservata l-ebda tweġiba HTTP",
+    "transportError": "Żball fit-trasport",
     "recording": "Qed jirreġistra",
     "paused": "Mwaqqaf temporanjament",
     "pipelineLogsOn": "Ir-reġistri tal-pipeline mixgħulin",
@@ -12427,6 +12431,8 @@
       "increase": "Żid l-intervall"
     },
     "status": {
+      "recoveredAttemptsTitle": "It-talba rkuprat wara {count} tentattivi",
+      "latestOutcomeFailed": "L-aħħar riżultat tat-talba falla",
       "inProgress": "Għaddej",
       "recoveredByRetry": "Irkuprat permezz ta' tentattiv mill-ġdid",
       "goToParent": "Mur fit-talba prinċipali",
@@ -12435,12 +12441,13 @@
       "failedTitle": "{count} tentattivi fallew kollha",
       "failed": "falla",
       "pinnedTitle": "Mudell magħżul permezz tal-iffissar tas-sessjoni fil-cache tal-kuntest",
-      "pinned": "iffissat",
-      "recoveredAttemptsTitle": "It-talba rkuprat wara {count} tentattivi",
-      "latestOutcomeFailed": "L-aħħar riżultat tat-talba falla"
+      "pinned": "iffissat"
     },
     "attempts": "tentattivi",
     "detail": {
+      "omittedHttpAttempts": "{count} trażmissjonijiet HTTP ma nżammux",
+      "noHttpResponse": "Ma ġiet osservata l-ebda tweġiba HTTP",
+      "transportError": "Żball fit-trasport",
       "collapse": "Ikkollassa {title}",
       "expand": "Espandi {title}",
       "copyTitle": "Ikkopja {title}",
@@ -12539,20 +12546,13 @@
       "continuesFromParent": "ikompli mill-ġenitur",
       "continuesFrom": "Ikompli minn {id}",
       "viewConversation": "ara l-konverżazzjoni",
-      "openConversation": "Iftaħ il-konverżazzjoni {id}",
-      "omittedHttpAttempts": "{count} trażmissjonijiet HTTP ma nżammux",
-      "noHttpResponse": "Ma ġiet osservata l-ebda tweġiba HTTP",
-      "transportError": "Żball fit-trasport"
+      "openConversation": "Iftaħ il-konverżazzjoni {id}"
     },
     "tableLabel": "Reġistri tat-talbiet",
     "throughputPostFirstToken": "Wara l-ewwel token",
     "throughputEndToEnd": "Mit-tarf għat-tarf",
     "throughputRate": "{value} tokens/sec",
-    "throughputExplanation": "Iż-żewġ rati jużaw l-akbar fost l-għadd ta' tokens tal-output u tar-raġunament. Il-metrika 'Wara l-ewwel token' teskludi TTFT validu; inkella tuża t-tul sħiħ. Mit-tarf għat-tarf dejjem juża t-tul sħiħ. Risposta b'buffer tista' jkollha rata għolja ta' twassil f'daqqa mingħajr ġenerazzjoni aktar mgħaġġla mill-mudell.",
-    "omittedHttpAttempts": "{count} trażmissjonijiet HTTP ma nżammux",
-    "upstreamStatus": "Server upstream {status}",
-    "noHttpResponse": "Ma ġiet osservata l-ebda tweġiba HTTP",
-    "transportError": "Żball fit-trasport"
+    "throughputExplanation": "Iż-żewġ rati jużaw l-akbar fost l-għadd ta' tokens tal-output u tar-raġunament. Il-metrika 'Wara l-ewwel token' teskludi TTFT validu; inkella tuża t-tul sħiħ. Mit-tarf għat-tarf dejjem juża t-tul sħiħ. Risposta b'buffer tista' jkollha rata għolja ta' twassil f'daqqa mingħajr ġenerazzjoni aktar mgħaġġla mill-mudell."
   },
   "proxyLogger": {
     "filterAll": "Kollha",
@@ -16041,6 +16041,15 @@
     "rosterEmpty": "Agħżel kont biex tara l-bots tiegħu.",
     "conversationTitle": "Konversazzjoni",
     "conversationEmpty": "Agħżel bot biex tara l-konversazzjoni.",
+    "conversationOlder": "Messaġġi preċedenti",
+    "rosterLoading": "Qed jitgħabbew il-bots...",
+    "pickAccountFirst": "Agħżel kont l-ewwel.",
+    "detailsTitle": "Dettalji",
+    "fanoutTitle": "Ibgħat ukoll lil",
+    "attachButton": "Ehmeż",
+    "attachUnavailable": "{name} ma ntbagħatx. It-tlugħ ta' fajls għadu mhux disponibbli.",
+    "cardQueued": "{count} karti oħra qed jistennew",
+    "marketplaceNote": "It-tab il-ġdida tuża l-kont x.ai li dħalt fih f'dan il-brawżer, li jista' jkun differenti mill-kont magħżul hawn.",
     "conversationBlocked": "Il-konversazzjoni ma setgħetx tinbeda.",
     "conversationLost": "Il-konnessjoni ma' dan il-bot intilfet.",
     "conversationSignIn": "Trid terġa' tidħol f'dan il-kont.",
@@ -16057,7 +16066,7 @@
     "stateRunning": "Il-bot qed jaħdem.",
     "stateIdle": "Il-bot mhux qed jaħdem bħalissa.",
     "stateStale": "L-istat tal-bot mhux magħruf.",
-    "stateBox": "Box: {state}",
+    "stateBox": "Kaxxa: {state}",
     "sendPlaceholder": "Ibgħat messaġġ lil dan il-bot",
     "sendButton": "Ibgħat",
     "sendUnknown": "Mhux ikkonfermat. Ma reġax intbagħat.",
@@ -16068,22 +16077,13 @@
     "chiefOfStaff": "kap tal-persunal",
     "connectorAllow": "Ħalli",
     "connectorSkip": "Aqbeż",
-    "unsupportedMessage": "Dan il-messaġġ mhux appoġġjat hawn.",
-    "cardFailed": "It-tweġiba ma waslitx għand il-bot. Il-karta għadha hawn.",
     "connectorAlwaysBot": "Dejjem għal dan il-bot",
     "connectorAlwaysTeam": "Dejjem għall-bots tat-tim",
     "connectorAllowChannel": "Ħalli fil-kanal",
+    "cardFailed": "It-tweġiba ma waslitx għand il-bot. Il-karta għadha hawn.",
     "widgetSubmit": "Ibgħat",
     "widgetCustom": "Ibgħat tweġiba personalizzata",
     "widgetDismiss": "Agħlaq",
-    "conversationOlder": "Messaġġi preċedenti",
-    "rosterLoading": "Qed jitgħabbew il-bots...",
-    "pickAccountFirst": "Agħżel kont l-ewwel.",
-    "detailsTitle": "Dettalji",
-    "marketplaceNote": "It-tab il-ġdida tuża l-kont x.ai li dħalt fih f'dan il-brawżer, li jista' jkun differenti mill-kont magħżul hawn.",
-    "fanoutTitle": "Ibgħat ukoll lil",
-    "attachButton": "Ehmeż",
-    "attachUnavailable": "{name} ma ntbagħatx. It-tlugħ ta' fajls għadu mhux disponibbli.",
-    "cardQueued": "{count} karti oħra qed jistennew"
+    "unsupportedMessage": "Dan il-messaġġ mhux appoġġjat hawn."
   }
 }

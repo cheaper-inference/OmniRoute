@@ -3404,12 +3404,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Pi ilə işləyən maşından əldə edilə bilən URL istifadə edin. OpenAI uyğun /v1 son nöqtəsi avtomatik olaraq əlavə edilir.",
     "piManualMergeHint": "Yalnız önizləmə. Bu providers.omniroute girişini models.json -ya birləşdirin ki, digər provayderlər və parametrlər toxunulmaz olsun.",
-    "removeMapping": "Uyğunlaşdırmanı sil",
     "customUrl": "Özəl URL",
     "customEndpointAria": "Özəl nöqtə",
     "useDefaultKey": "OmniRoute standart açarından istifadə edin",
     "mainModelAria": "Əsas model",
-    "manualConfigTitle": "Grok Build əl ilə tənzimləmə konfiqurasiyası"
+    "manualConfigTitle": "Grok Build əl ilə tənzimləmə konfiqurasiyası",
+    "removeMapping": "Uyğunlaşdırmanı sil"
   },
   "modelCatalog": {
     "title": "Modellər və Kombolar",
@@ -3656,6 +3656,7 @@
     "more": "+{count} əlavə",
     "reqs": "sorğu",
     "success": "uğurlu",
+    "fallbackSummary": "Sorğuların {rate}-i ehtiyat rejimindən istifadə etdi, hər sorğuda təqribən {skips} obyekti atlandı",
     "proxyConfigured": "Proksi konfiqurasiya edilib",
     "copyComboName": "Kombinasiya adını kopyala",
     "enableCombo": "Kombinasiyanı aktivləşdir",
@@ -4225,8 +4226,7 @@
     "duplicateAutoComboSnapshotMsg": "Bu, bu şablona uyğun olan hazırkı qoşulmuş provayderləri/modeləri redaktə oluna bilən kombo kimi saxlayacaq.",
     "duplicateAutoComboFailedPrefix": "Avtokombo kopyalanması uğursuz oldu:",
     "duplicateAutoComboUnknownError": "Naməlum xəta",
-    "duplicateAutoComboTitle": "{name}-dan statik kombo yarat",
-    "fallbackSummary": "Sorğuların {rate}-i ehtiyat rejimindən istifadə etdi, hər sorğuda təqribən {skips} obyekti atlandı"
+    "duplicateAutoComboTitle": "{name}-dan statik kombo yarat"
   },
   "costs": {
     "title": "Xərclər",
@@ -9290,9 +9290,9 @@
         "financial": "Maliyyə",
         "brazilian": "Braziliya",
         "usa": "ABŞ",
-        "full": "Tam",
         "gdpr": "GDPR (EU)",
-        "popia": "POPIA (Cənubi Afrika)"
+        "popia": "POPIA (Cənubi Afrika)",
+        "full": "Tam"
       },
       "builtinTypes": "Daxili növlər",
       "types": {
@@ -10228,6 +10228,10 @@
     "healthExtraUsageBypass": "Kvota tükənib; əlavə istifadəyə icazə verildiyi üçün xidmət davam edir.",
     "healthPaidCreditsBypass": "Kvota tükənib; mövcud ödənişli kreditlər xidmətin davam etməsinə imkan verir.",
     "healthFilteringBypass": "Kvota tükənib; yerli kvota filtrləməsi söndürüldüyü üçün xidmət davam edir.",
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "İstifadə",
     "grokExtraUsageCredits": "Əlavə İstifadə Krediti",
     "grokAutoTopUp": "Avtomatik Yükləmə",
@@ -10685,10 +10689,6 @@
     "confirmRedeemClaudeResetCredit": "İstifadə edilməsi uyğun Claude istifadə limitlərini dərhal sıfırlayır və bu krediti həmişəlik sərf edir.",
     "claudeResetCreditsModalTitle": "Claude sıfırlama kreditləri",
     "claudeResetCreditsModalExplainer": "Bu hesab üçün mövcud Claude sıfırlama kreditləri və həftəlik sessiya sıfırlamaları.",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "healthAccountHint": "Son müşahidələrə əsaslanır, canlı yoxlama deyil. Təfərrüatlar üçün hesab seçin.",
     "healthRecovery": "Gözlənilən bərpa vaxtı",
     "healthAvailable": "Əlçatandır",
@@ -12344,6 +12344,10 @@
     "messageInputAria": "Mesaj"
   },
   "requestLogger": {
+    "omittedHttpAttempts": "{count} HTTP göndərişi saxlanılmayıb",
+    "upstreamStatus": "Yuxarı server {status}",
+    "noHttpResponse": "HTTP cavabı müşahidə edilməyib",
+    "transportError": "Nəqliyyat xətası",
     "recording": "Qeydə alınır",
     "paused": "Fasilə verilib",
     "pipelineLogsOn": "Konveyer jurnalları aktivdir",
@@ -12427,6 +12431,8 @@
       "increase": "Arttır intervalı"
     },
     "status": {
+      "recoveredAttemptsTitle": "Sorğu {count} cəhddə bərpa edildi",
+      "latestOutcomeFailed": "Son sorğunun nəticəsi uğursuz oldu",
       "inProgress": "İcra olunur",
       "recoveredByRetry": "Təkrar cəhdlə bərpa edildi",
       "goToParent": "Valideyn tələbinə keçin",
@@ -12435,12 +12441,13 @@
       "failedTitle": "Bütün {count} cəhdlər uğursuz oldu",
       "failed": "başarısız oldu",
       "pinnedTitle": "Kontekst-cache sessiya pinləmə vasitəsilə model seçildi",
-      "pinned": "sabitləşdirilmiş",
-      "recoveredAttemptsTitle": "Sorğu {count} cəhddə bərpa edildi",
-      "latestOutcomeFailed": "Son sorğunun nəticəsi uğursuz oldu"
+      "pinned": "sabitləşdirilmiş"
     },
     "attempts": "cəhdlər",
     "detail": {
+      "omittedHttpAttempts": "{count} HTTP göndərişi saxlanılmayıb",
+      "noHttpResponse": "HTTP cavabı müşahidə edilməyib",
+      "transportError": "Nəqliyyat xətası",
       "collapse": "{title}ni Sıxışdır",
       "expand": "{title} genişləndirin",
       "copyTitle": "Kopyala {title}",
@@ -12539,20 +12546,13 @@
       "continuesFromParent": "ana elementdən davam edir",
       "continuesFrom": "{id} elementindən davam edir",
       "viewConversation": "söhbətə bax",
-      "openConversation": "{id} söhbətini aç",
-      "omittedHttpAttempts": "{count} HTTP göndərişi saxlanılmayıb",
-      "noHttpResponse": "HTTP cavabı müşahidə edilməyib",
-      "transportError": "Nəqliyyat xətası"
+      "openConversation": "{id} söhbətini aç"
     },
     "tableLabel": "Sorğu jurnalları",
     "throughputPostFirstToken": "İlk tokendən sonra",
     "throughputEndToEnd": "Ucdan-uca",
     "throughputRate": "{value} token/san",
-    "throughputExplanation": "Hər iki sürət çıxış və düşünmə tokenlərinin sayından daha böyük olanını istifadə edir. İlk tokendən sonrakı sürət etibarlı TTFT-ni nəzərə almır; əks halda, tam müddətdən istifadə edir. Ucdan-uca sürət həmişə tam müddətdən istifadə edir. Buferlənmiş cavab model daha sürətli generasiya etmədən də yüksək ani çatdırılma sürətinə malik ola bilər.",
-    "omittedHttpAttempts": "{count} HTTP göndərişi saxlanılmayıb",
-    "upstreamStatus": "Yuxarı server {status}",
-    "noHttpResponse": "HTTP cavabı müşahidə edilməyib",
-    "transportError": "Nəqliyyat xətası"
+    "throughputExplanation": "Hər iki sürət çıxış və düşünmə tokenlərinin sayından daha böyük olanını istifadə edir. İlk tokendən sonrakı sürət etibarlı TTFT-ni nəzərə almır; əks halda, tam müddətdən istifadə edir. Ucdan-uca sürət həmişə tam müddətdən istifadə edir. Buferlənmiş cavab model daha sürətli generasiya etmədən də yüksək ani çatdırılma sürətinə malik ola bilər."
   },
   "proxyLogger": {
     "filterAll": "Hamısı",
@@ -16041,6 +16041,15 @@
     "rosterEmpty": "Botlarını görmək üçün bir hesab seçin.",
     "conversationTitle": "Söhbət",
     "conversationEmpty": "Söhbəti görmək üçün bir bot seçin.",
+    "conversationOlder": "Dərkən mesajlar",
+    "rosterLoading": "Botlar oxunur...",
+    "pickAccountFirst": "İlk növbətlə hesab seçin.",
+    "detailsTitle": "Ətraflı məlumatlar",
+    "fanoutTitle": "Həmçinin göndər",
+    "attachButton": "Əlavə et",
+    "attachUnavailable": "{name} göndərilmədi. Fayl yükləmə hələ əlçatan deyil.",
+    "cardQueued": "{count} daha çox kart gözləyir",
+    "marketplaceNote": "Yeni sekme bu brauzerdə daxil olmuş x.ai hesabından istifadə edir; bu, burada seçilən hesabdən fərqli ola bilər.",
     "conversationBlocked": "Söhbət başladıla bilmədi.",
     "conversationLost": "Bu bot ilə əlaqə kəsildi.",
     "conversationSignIn": "Bu hesaba yenidən daxil olmaq tələb olunur.",
@@ -16066,24 +16075,15 @@
     "computersTitle": "Lokal kompüterlər",
     "computersEmpty": "Heç bir kompüter bildirilməyib.",
     "chiefOfStaff": "aparat rəhbəri",
-    "connectorAllow": "Allow",
-    "connectorSkip": "Skip",
-    "unsupportedMessage": "This message is not supported here.",
-    "cardFailed": "The answer did not reach the bot. The card is still here.",
-    "connectorAlwaysBot": "Always for this bot",
-    "connectorAlwaysTeam": "Always for team bots",
-    "connectorAllowChannel": "Allow in channel",
-    "widgetSubmit": "Submit",
-    "widgetCustom": "Send custom answer",
-    "widgetDismiss": "Dismiss",
-    "conversationOlder": "Earlier messages",
-    "rosterLoading": "Reading bots...",
-    "pickAccountFirst": "Choose an account first.",
-    "detailsTitle": "Details",
-    "marketplaceNote": "The new tab uses the x.ai account signed in to this browser, which may differ from the account selected here.",
-    "fanoutTitle": "Also send to",
-    "attachButton": "Attach",
-    "attachUnavailable": "{name} was not sent. File upload is not available yet.",
-    "cardQueued": "{count} more cards waiting"
+    "connectorAllow": "İcazə ver",
+    "connectorSkip": "Keçir",
+    "connectorAlwaysBot": "Bu bot üçün həmişə",
+    "connectorAlwaysTeam": "Komanda botları üçün həmişə",
+    "connectorAllowChannel": "Kanalda icazə ver",
+    "cardFailed": "Cavab bota çatmadı. Kart hələ də buradadır.",
+    "widgetSubmit": "Təsdiqlə",
+    "widgetCustom": "Xüsusi cavab göndər",
+    "widgetDismiss": "İmtina et",
+    "unsupportedMessage": "Bu mesaj burada dəstəklənmir."
   }
 }

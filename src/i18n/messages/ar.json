@@ -1124,7 +1124,7 @@
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "يسمح لطلبات auto/* ببناء مجموعة المرشحين باستخدام قدرات النماذج المحسومة (الرؤية، الاستدلال، التفكير) ودرجات الجودة المرصودة، مقروءة دفعة واحدة. معطّل افتراضيًا: تبقى أوزان المرشحين وقت الطلب كما كانت تمامًا. عند التفعيل: تغذي هذه الإشارات أوزان اللقطة، لذا قد تتغير أوزان المرشحين والاختيار.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "اسمح لفحص سلامة بيانات الاعتماد بإعادة اختبار الاتصالات التي أوقفتها البوابة تلقائيًا (بحد أقصى مرة واحدة كل 6 ساعات لكل اتصال، و5 اتصالات لكل فحص)، وإعادة تشغيل أي اتصال يجتاز الاختبار. يكون هذا الخيار معطّلًا افتراضيًا: تظل هذه الاتصالات متوقفة حتى يتدخل أحد المشغّلين. لا تُعاد أبدًا اختبارات الاتصالات التي عطّلها المشغّل أو المحظورة نهائيًا.",
   "sidebar": {
-    "grokBot": "Grok Bot",
+    "grokBot": "روبوت غروك",
     "grokBotSubtitle": "وحدة تحكم الروبوتات: تحدث مع الروبوتات المتصلة، أجب على أذونات الطلب التي يطلبها، وأرسل إلى عدة حسابات في وقت واحد",
     "home": "الصفحة الرئيسية",
     "dashboard": "لوحة القيادة",
@@ -3404,12 +3404,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "استخدم URL الذي يمكن الوصول إليه من الجهاز الذي يقوم بتشغيل Pi. تتم إضافة نقطة النهاية /v1 المتوافقة مع OpenAI تلقائيًا.",
     "piManualMergeHint": "معاينة فقط. قم بدمج إدخال providers.omniroute هذا في models.json حتى يظل مقدمو الخدمة والإعدادات الأخرى كما هي.",
-    "removeMapping": "إزالة التعيين",
     "customUrl": "رابط مخصص",
     "customEndpointAria": "نقطة اتصال مخصصة",
     "useDefaultKey": "استخدام مفتاح OmniRoute الافتراضي",
     "mainModelAria": "النموذج الرئيسي",
-    "manualConfigTitle": "إعدادات Grok Build اليدوية"
+    "manualConfigTitle": "إعدادات Grok Build اليدوية",
+    "removeMapping": "إزالة التعيين"
   },
   "modelCatalog": {
     "title": "النماذج والمجموعات",
@@ -3656,6 +3656,7 @@
     "more": "+{count} المزيد",
     "reqs": "الطلبات",
     "success": "النجاح",
+    "fallbackSummary": "نسبة {rate}% من الطلبات استخدمت المسار البديل، مع تخطي ~{skips} أهداف لكل طلب تقريباً",
     "proxyConfigured": "تم تكوين بروكسي",
     "copyComboName": "نسخ اسم المجموعة",
     "enableCombo": "تمكين المجموعة",
@@ -4225,8 +4226,7 @@
     "duplicateAutoComboSnapshotMsg": "سيؤدي هذا إلى التقاط المزودين/النماذج المتصلة حاليًا التي تطابق هذا القالب في مجموعة قابلة للتحرير.",
     "duplicateAutoComboFailedPrefix": "فشل تكرار المجموعة التلقائية:",
     "duplicateAutoComboUnknownError": "خطأ غير معروف",
-    "duplicateAutoComboTitle": "إنشاء مجموعة ثابتة من {name}",
-    "fallbackSummary": "نسبة {rate}% من الطلبات استخدمت المسار البديل، مع تخطي ~{skips} أهداف لكل طلب تقريباً"
+    "duplicateAutoComboTitle": "إنشاء مجموعة ثابتة من {name}"
   },
   "costs": {
     "title": "التكاليف",
@@ -9290,9 +9290,9 @@
         "financial": "مالي",
         "brazilian": "برازيلي",
         "usa": "الولايات المتحدة",
-        "full": "كامل",
         "gdpr": "GDPR (EU)",
-        "popia": "POPIA (جنوب أفريقيا)"
+        "popia": "POPIA (جنوب أفريقيا)",
+        "full": "كامل"
       },
       "builtinTypes": "الأنواع المضمّنة",
       "types": {
@@ -10228,6 +10228,10 @@
     "healthExtraUsageBypass": "نفدت الحصة؛ الاستخدام الإضافي مسموح، لذا تستمر الخدمة.",
     "healthPaidCreditsBypass": "نفدت الحصة؛ تتيح الأرصدة المدفوعة المتاحة استمرار الخدمة.",
     "healthFilteringBypass": "نفدت الحصة؛ تصفية الحصة المحلية معطلة، لذا تستمر الخدمة.",
+    "codexPaidCreditsLabel": "أرصدة Codex المدفوعة",
+    "codexPaidCreditsAvailable": "متاح (الرصيد غير مُبلَّغ عنه)",
+    "codexPaidCreditsUnavailable": "غير متاح أو تم بلوغ حد الإنفاق",
+    "codexPaidCreditsUnlimited": "غير محدود",
     "title": "الاستخدام",
     "grokExtraUsageCredits": "رصيد استخدام إضافي",
     "grokAutoTopUp": "إعادة تعبئة تلقائية",
@@ -10685,10 +10689,6 @@
     "confirmRedeemClaudeResetCredit": "يؤدي الاسترداد إلى إعادة تعيين حدود استخدام Claude المؤهلة فورًا واستهلاك هذا الرصيد بشكل دائم.",
     "claudeResetCreditsModalTitle": "أرصدة إعادة تعيين Claude",
     "claudeResetCreditsModalExplainer": "أرصدة إعادة تعيين Claude المتاحة وعمليات إعادة تعيين الجلسات الأسبوعية لهذا الحساب.",
-    "codexPaidCreditsLabel": "أرصدة Codex المدفوعة",
-    "codexPaidCreditsAvailable": "متاح (الرصيد غير مُبلَّغ عنه)",
-    "codexPaidCreditsUnavailable": "غير متاح أو تم بلوغ حد الإنفاق",
-    "codexPaidCreditsUnlimited": "غير محدود",
     "healthAccountHint": "استنادًا إلى أحدث الملاحظات، وليس فحصًا مباشرًا. حدد حسابًا لعرض التفاصيل.",
     "healthRecovery": "وقت الاستعادة المتوقع",
     "healthAvailable": "متاح",
@@ -12344,6 +12344,10 @@
     "messageInputAria": "الرسالة"
   },
   "requestLogger": {
+    "omittedHttpAttempts": "لم يتم الاحتفاظ بـ {count} من عمليات إرسال HTTP",
+    "upstreamStatus": "الخادم الأعلى {status}",
+    "noHttpResponse": "لم تُرصد أي استجابة HTTP",
+    "transportError": "خطأ في النقل",
     "recording": "التسجيل",
     "paused": "متوقف مؤقتًا",
     "pipelineLogsOn": "سجلات مسار المعالجة مفعّلة",
@@ -12427,6 +12431,8 @@
       "increase": "زيادة الفاصل الزمني"
     },
     "status": {
+      "recoveredAttemptsTitle": "تم استرداد الطلب عبر {count} من المحاولات",
+      "latestOutcomeFailed": "فشلت نتيجة الطلب الأخيرة",
       "inProgress": "قيد التقدم",
       "recoveredByRetry": "تم الاسترداد عن طريق إعادة المحاولة",
       "goToParent": "اذهب إلى الطلب الرئيسي",
@@ -12435,12 +12441,13 @@
       "failedTitle": "فشلت جميع المحاولات {count}",
       "failed": "فشل",
       "pinnedTitle": "تم اختيار النموذج عبر تثبيت جلسة ذاكرة التخزين المؤقت للسياق",
-      "pinned": "مثبت",
-      "recoveredAttemptsTitle": "تم استرداد الطلب عبر {count} من المحاولات",
-      "latestOutcomeFailed": "فشلت نتيجة الطلب الأخيرة"
+      "pinned": "مثبت"
     },
     "attempts": "محاولات",
     "detail": {
+      "omittedHttpAttempts": "لم يتم الاحتفاظ بـ {count} من عمليات إرسال HTTP",
+      "noHttpResponse": "لم تُرصد أي استجابة HTTP",
+      "transportError": "خطأ في النقل",
       "collapse": "طي {title}",
       "expand": "قم بتوسيع {title}",
       "copyTitle": "نسخ {title}",
@@ -12539,20 +12546,13 @@
       "continuesFromParent": "يتابع من الأصل",
       "continuesFrom": "يتابع من {id}",
       "viewConversation": "عرض المحادثة",
-      "openConversation": "فتح المحادثة {id}",
-      "omittedHttpAttempts": "لم يتم الاحتفاظ بـ {count} من عمليات إرسال HTTP",
-      "noHttpResponse": "لم تُرصد أي استجابة HTTP",
-      "transportError": "خطأ في النقل"
+      "openConversation": "فتح المحادثة {id}"
     },
     "tableLabel": "سجلات الطلبات",
     "throughputPostFirstToken": "ما بعد الرمز الأول",
     "throughputEndToEnd": "من البداية إلى النهاية",
     "throughputRate": "{value} رمز/ثانية",
-    "throughputExplanation": "يستخدم كلا المعدلين العدد الأكبر بين رموز الإخراج ورموز الاستدلال. يستثني معدل ما بعد الرمز الأول قيمة TTFT صالحة؛ وإلا فإنه يستخدم المدة الكاملة. أما معدل البداية إلى النهاية فيستخدم دائمًا المدة الكاملة. قد يحقق الرد المخزّن مؤقتًا معدل تسليم لحظيًا مرتفعًا دون أن يكون توليد النموذج أسرع.",
-    "omittedHttpAttempts": "لم يتم الاحتفاظ بـ {count} من عمليات إرسال HTTP",
-    "upstreamStatus": "الخادم الأعلى {status}",
-    "noHttpResponse": "لم تُرصد أي استجابة HTTP",
-    "transportError": "خطأ في النقل"
+    "throughputExplanation": "يستخدم كلا المعدلين العدد الأكبر بين رموز الإخراج ورموز الاستدلال. يستثني معدل ما بعد الرمز الأول قيمة TTFT صالحة؛ وإلا فإنه يستخدم المدة الكاملة. أما معدل البداية إلى النهاية فيستخدم دائمًا المدة الكاملة. قد يحقق الرد المخزّن مؤقتًا معدل تسليم لحظيًا مرتفعًا دون أن يكون توليد النموذج أسرع."
   },
   "proxyLogger": {
     "filterAll": "الكل",
@@ -16033,7 +16033,7 @@
     "btnSend": "إرسال"
   },
   "grokBotPage": {
-    "title": "Grok Bot",
+    "title": "روبوت غروك",
     "subtitle": "الحسابات المسجّل دخولها، وبوتاتها، ومهاراتها، وأجهزة الكمبيوتر المحلية.",
     "accountsTitle": "الحسابات",
     "accountsEmpty": "لا توجد حسابات مسجّل دخولها.",
@@ -16041,6 +16041,15 @@
     "rosterEmpty": "اختر حسابًا لعرض بوتاته.",
     "conversationTitle": "المحادثة",
     "conversationEmpty": "اختر بوتًا لعرض المحادثة.",
+    "conversationOlder": "الرسائل السابقة",
+    "rosterLoading": "قراءة الروبوتات...",
+    "pickAccountFirst": "اختر حسابًا أولاً.",
+    "detailsTitle": "تفاصيل",
+    "fanoutTitle": "أرسل أيضاً إلى",
+    "attachButton": "إرفاق",
+    "attachUnavailable": "لم يُرسل {name}. رفع الملفات غير متاح بعد.",
+    "cardQueued": "{count} بطاقات إضافية قيد الانتظار",
+    "marketplaceNote": "يستخدم التبويب الجديد حساب x.ai المسجّل الدخول في هذا المتصفح، وقد يختلف عن الحساب المحدد هنا.",
     "conversationBlocked": "تعذر بدء المحادثة.",
     "conversationLost": "فُقد الاتصال بهذا البوت.",
     "conversationSignIn": "يتطلب هذا الحساب تسجيل الدخول مرة أخرى.",
@@ -16057,7 +16066,7 @@
     "stateRunning": "البوت يعمل.",
     "stateIdle": "البوت في وضع الخمول.",
     "stateStale": "حالة البوت غير معروفة.",
-    "stateBox": "Box: {state}",
+    "stateBox": "الصندوق: {state}",
     "sendPlaceholder": "مراسلة هذا البوت",
     "sendButton": "إرسال",
     "sendUnknown": "لم يتم التأكيد. لم تتم إعادة الإرسال.",
@@ -16066,24 +16075,15 @@
     "computersTitle": "أجهزة الكمبيوتر المحلية",
     "computersEmpty": "لم يتم الإبلاغ عن أي أجهزة كمبيوتر.",
     "chiefOfStaff": "رئيس الأركان",
-    "connectorAllow": "Allow",
-    "connectorSkip": "Skip",
-    "unsupportedMessage": "This message is not supported here.",
-    "cardFailed": "The answer did not reach the bot. The card is still here.",
-    "connectorAlwaysBot": "Always for this bot",
-    "connectorAlwaysTeam": "Always for team bots",
-    "connectorAllowChannel": "Allow in channel",
-    "widgetSubmit": "Submit",
-    "widgetCustom": "Send custom answer",
-    "widgetDismiss": "Dismiss",
-    "conversationOlder": "Earlier messages",
-    "rosterLoading": "Reading bots...",
-    "pickAccountFirst": "Choose an account first.",
-    "detailsTitle": "Details",
-    "marketplaceNote": "The new tab uses the x.ai account signed in to this browser, which may differ from the account selected here.",
-    "fanoutTitle": "Also send to",
-    "attachButton": "Attach",
-    "attachUnavailable": "{name} was not sent. File upload is not available yet.",
-    "cardQueued": "{count} more cards waiting"
+    "connectorAllow": "السماح",
+    "connectorSkip": "تخطّي",
+    "connectorAlwaysBot": "دائماً لهذا الروبوت",
+    "connectorAlwaysTeam": "دائماً لروبوتات الفريق",
+    "connectorAllowChannel": "السماح في القناة",
+    "cardFailed": "لم يصل الجواب إلى الروبوت. البطاقة لا تزال هنا.",
+    "widgetSubmit": "إرسال",
+    "widgetCustom": "إرسال جواب مخصص",
+    "widgetDismiss": "إغلاق",
+    "unsupportedMessage": "هذا النوع من الرسائل غير مدعوم هنا."
   }
 }

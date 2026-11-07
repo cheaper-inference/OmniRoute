@@ -3404,12 +3404,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Pi চালিত মেশিন থেকে URL ব্যবহার করুন। OpenAI- সামঞ্জস্যপূর্ণ /v1 এন্ডপয়েন্ট স্বয়ংক্রিয়ভাবে যোগ করা হয়।",
     "piManualMergeHint": "শুধুমাত্র পূর্বরূপ. এই providers.omniroute এন্ট্রিকে models.json তে মার্জ করুন যাতে আপনার অন্যান্য প্রদানকারী এবং সেটিংস অক্ষত থাকে।",
-    "removeMapping": "ম্যাপিং সরান",
     "customUrl": "কাস্টম URL",
     "customEndpointAria": "কাস্টম এন্ডপয়েন্ট",
     "useDefaultKey": "OmniRoute ডিফল্ট কী ব্যবহার করুন",
     "mainModelAria": "প্রধান মডেল",
-    "manualConfigTitle": "Grok Build ম্যানুয়াল কনফিগ"
+    "manualConfigTitle": "Grok Build ম্যানুয়াল কনফিগ",
+    "removeMapping": "ম্যাপিং সরান"
   },
   "modelCatalog": {
     "title": "মডেল ও কম্বো",
@@ -3656,6 +3656,7 @@
     "more": "+আরও {count}টি",
     "reqs": "অনুরোধ",
     "success": "সফল",
+    "fallbackSummary": "আপেক্ষার {rate}% ফলব্যাক ব্যবহার করেছিল, প্রতিটিতে গড় করে ~{skips}টি লক্ষ্য বিমুখ",
     "proxyConfigured": "প্রক্সি কনফিগার করা হয়েছে",
     "copyComboName": "কম্বোর নাম কপি করুন",
     "enableCombo": "কম্বো সক্রিয় করুন",
@@ -4225,8 +4226,7 @@
     "duplicateAutoComboSnapshotMsg": "এটি এই টেমপ্লেটের সাথে মিলে যায় এমন বর্তমান সংযুক্ত প্রদানকারী/মডেলগুলিকে একটি সম্পাদনযোগ্য কম্বোতে স্ন্যাপশট নেবে।",
     "duplicateAutoComboFailedPrefix": "অটোকম্বো ডুপ্লিকেশন ব্যর্থ:",
     "duplicateAutoComboUnknownError": "অজানা ত্রুটি",
-    "duplicateAutoComboTitle": "{name} থেকে একটি স্ট্যাটিক কম্বো তৈরি করুন",
-    "fallbackSummary": "আপেক্ষার {rate}% ফলব্যাক ব্যবহার করেছিল, প্রতিটিতে গড় করে ~{skips}টি লক্ষ্য বিমুখ"
+    "duplicateAutoComboTitle": "{name} থেকে একটি স্ট্যাটিক কম্বো তৈরি করুন"
   },
   "costs": {
     "title": "খরচ",
@@ -9290,9 +9290,9 @@
         "financial": "আর্থিক",
         "brazilian": "ব্রাজিলীয়",
         "usa": "যুক্তরাষ্ট্র",
-        "full": "সম্পূর্ণ",
         "gdpr": "GDPR (EU)",
-        "popia": "POPIA (দক্ষিণ আফ্রিকা)"
+        "popia": "POPIA (দক্ষিণ আফ্রিকা)",
+        "full": "সম্পূর্ণ"
       },
       "builtinTypes": "অন্তর্নির্মিত ধরন",
       "types": {
@@ -10228,6 +10228,10 @@
     "healthExtraUsageBypass": "কোটা শেষ; অতিরিক্ত ব্যবহার অনুমোদিত, তাই পরিষেবা চলতে থাকে।",
     "healthPaidCreditsBypass": "কোটা শেষ; উপলব্ধ প্রদত্ত ক্রেডিট দিয়ে পরিষেবা চালিয়ে যাওয়া যায়।",
     "healthFilteringBypass": "কোটা শেষ; স্থানীয় কোটা ফিল্টার বন্ধ, তাই পরিষেবা চলতে থাকে।",
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "ব্যবহার",
     "grokExtraUsageCredits": "অতিরিক্ত ব্যবহার ক্রেডিট",
     "grokAutoTopUp": "অটো টপ-আপ",
@@ -10685,10 +10689,6 @@
     "confirmRedeemClaudeResetCredit": "রিডিম করার সাথে সাথে উপযুক্ত Claude ব্যবহারের সীমা রিসেট হয়ে যায় এবং এই ক্রেডিটটি স্থায়ীভাবে ব্যবহৃত হয়।",
     "claudeResetCreditsModalTitle": "Claude রিসেট ক্রেডিট",
     "claudeResetCreditsModalExplainer": "এই অ্যাকাউন্টের জন্য উপলব্ধ Claude রিসেট ক্রেডিট এবং সাপ্তাহিক সেশন রিসেট।",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "healthAccountHint": "সর্বশেষ পর্যবেক্ষণের ভিত্তিতে, সরাসরি পরীক্ষা নয়। বিস্তারিত দেখতে একটি অ্যাকাউন্ট বেছে নিন।",
     "healthRecovery": "প্রত্যাশিত পুনরুদ্ধারের সময়",
     "healthAvailable": "উপলভ্য",
@@ -12344,6 +12344,10 @@
     "messageInputAria": "বার্তা"
   },
   "requestLogger": {
+    "omittedHttpAttempts": "{count}টি HTTP প্রেরণ সংরক্ষিত হয়নি",
+    "upstreamStatus": "উজানের সার্ভার {status}",
+    "noHttpResponse": "কোনো HTTP প্রতিক্রিয়া পর্যবেক্ষণ করা যায়নি",
+    "transportError": "পরিবহন ত্রুটি",
     "recording": "রেকর্ড হচ্ছে",
     "paused": "বিরতিতে আছে",
     "pipelineLogsOn": "পাইপলাইন লগ চালু",
@@ -12427,6 +12431,8 @@
       "increase": "ইন্টারভ্যাল বাড়ান"
     },
     "status": {
+      "recoveredAttemptsTitle": "{count}টি প্রচেষ্টায় অনুরোধ পুনরুদ্ধার হয়েছে",
+      "latestOutcomeFailed": "সর্বশেষ অনুরোধের ফলাফল ব্যর্থ হয়েছে",
       "inProgress": "চলমান",
       "recoveredByRetry": "পুনরায় চেষ্টা করে পুনরুদ্ধার করা হয়েছে",
       "goToParent": "মাতৃ অনুরোধে যান",
@@ -12435,12 +12441,13 @@
       "failedTitle": "সব {count} প্রচেষ্টা ব্যর্থ হয়েছে",
       "failed": "ব্যর্থ",
       "pinnedTitle": "প্রসঙ্গ-ক্যাশ সেশন পিনিং দ্বারা নির্বাচিত মডেল",
-      "pinned": "পিন করা",
-      "recoveredAttemptsTitle": "{count}টি প্রচেষ্টায় অনুরোধ পুনরুদ্ধার হয়েছে",
-      "latestOutcomeFailed": "সর্বশেষ অনুরোধের ফলাফল ব্যর্থ হয়েছে"
+      "pinned": "পিন করা"
     },
     "attempts": "চেষ্টা",
     "detail": {
+      "omittedHttpAttempts": "{count}টি HTTP প্রেরণ সংরক্ষিত হয়নি",
+      "noHttpResponse": "কোনো HTTP প্রতিক্রিয়া পর্যবেক্ষণ করা যায়নি",
+      "transportError": "পরিবহন ত্রুটি",
       "collapse": "{title} সংকুচিত করুন",
       "expand": "{title} সম্প্রসারিত করুন",
       "copyTitle": "কপি {title}",
@@ -12539,20 +12546,13 @@
       "continuesFromParent": "মূল আইটেম থেকে অব্যাহত",
       "continuesFrom": "{id} থেকে অব্যাহত",
       "viewConversation": "কথোপকথন দেখুন",
-      "openConversation": "কথোপকথন {id} খুলুন",
-      "omittedHttpAttempts": "{count}টি HTTP প্রেরণ সংরক্ষিত হয়নি",
-      "noHttpResponse": "কোনো HTTP প্রতিক্রিয়া পর্যবেক্ষণ করা যায়নি",
-      "transportError": "পরিবহন ত্রুটি"
+      "openConversation": "কথোপকথন {id} খুলুন"
     },
     "tableLabel": "অনুরোধের লগ",
     "throughputPostFirstToken": "প্রথম-টোকেন-পরবর্তী",
     "throughputEndToEnd": "এন্ড-টু-এন্ড",
     "throughputRate": "{value} টোকেন/সেকেন্ড",
-    "throughputExplanation": "উভয় রেটই আউটপুট এবং রিজনিং টোকেন সংখ্যার মধ্যে বড়টি ব্যবহার করে। প্রথম-টোকেন-পরবর্তী রেট একটি বৈধ TTFT বাদ দেয়; অন্যথায় এটি সম্পূর্ণ সময়কাল ব্যবহার করে। এন্ড-টু-এন্ড সর্বদা সম্পূর্ণ সময়কাল ব্যবহার করে। একটি বাফার করা রেসপন্সে মডেলের দ্রুততর জেনারেশন ছাড়াই উচ্চ বার্স্ট ডেলিভারি রেট থাকতে পারে।",
-    "omittedHttpAttempts": "{count}টি HTTP প্রেরণ সংরক্ষিত হয়নি",
-    "upstreamStatus": "উজানের সার্ভার {status}",
-    "noHttpResponse": "কোনো HTTP প্রতিক্রিয়া পর্যবেক্ষণ করা যায়নি",
-    "transportError": "পরিবহন ত্রুটি"
+    "throughputExplanation": "উভয় রেটই আউটপুট এবং রিজনিং টোকেন সংখ্যার মধ্যে বড়টি ব্যবহার করে। প্রথম-টোকেন-পরবর্তী রেট একটি বৈধ TTFT বাদ দেয়; অন্যথায় এটি সম্পূর্ণ সময়কাল ব্যবহার করে। এন্ড-টু-এন্ড সর্বদা সম্পূর্ণ সময়কাল ব্যবহার করে। একটি বাফার করা রেসপন্সে মডেলের দ্রুততর জেনারেশন ছাড়াই উচ্চ বার্স্ট ডেলিভারি রেট থাকতে পারে।"
   },
   "proxyLogger": {
     "filterAll": "সব",
@@ -16041,6 +16041,15 @@
     "rosterEmpty": "এর বটগুলো দেখতে একটি অ্যাকাউন্ট নির্বাচন করুন।",
     "conversationTitle": "কথোপকথন",
     "conversationEmpty": "কথোপকথন দেখতে একটি বট নির্বাচন করুন।",
+    "conversationOlder": "আগের বার্তা",
+    "rosterLoading": "বট পড়া হচ্ছে...",
+    "pickAccountFirst": "আগে একটি অ্যাকাউন্ট নির্বাচন করুন।",
+    "detailsTitle": "বিবরণ",
+    "fanoutTitle": "এছাড়াও পাঠান",
+    "attachButton": "যোগ করুন",
+    "attachUnavailable": "{name} পাঠানো হয়নি। ফাইল আপলোড এখনো উপলব্ধ নয়।",
+    "cardQueued": "আরও {count}টি কার্ড অপেক্ষায়",
+    "marketplaceNote": "নতুন ট্যাবটি এই ব্রাউজারে সাইন ইন করা x.ai অ্যাকাউন্ট ব্যবহার করে, যা এখানে নির্বাচন করা অ্যাকাউন্ট থেকে ভিন্ন হতে পারে।",
     "conversationBlocked": "কথোপকথনটি শুরু করা যায়নি।",
     "conversationLost": "এই বটের সাথে সংযোগ বিচ্ছিন্ন হয়েছে।",
     "conversationSignIn": "এই অ্যাকাউন্টে আবার সাইন ইন করার জন্য আপনার প্রয়োজন।",
@@ -16057,7 +16066,7 @@
     "stateRunning": "বটটি কাজ করছে।",
     "stateIdle": "বটটি নিষ্ক্রিয় রয়েছে।",
     "stateStale": "বটের স্থিতি অজানা।",
-    "stateBox": "Box: {state}",
+    "stateBox": "বক্স: {state}",
     "sendPlaceholder": "এই বটকে বার্তা পাঠান",
     "sendButton": "পাঠান",
     "sendUnknown": "নিশ্চিত করা হয়নি। পুনরায় পাঠানো হয়নি।",
@@ -16066,24 +16075,15 @@
     "computersTitle": "লোকাল কম্পিউটার",
     "computersEmpty": "কোনো কম্পিউটার রিপোর্ট করা হয়নি।",
     "chiefOfStaff": "চিফ অব স্টাফ",
-    "connectorAllow": "Allow",
-    "connectorSkip": "Skip",
-    "unsupportedMessage": "This message is not supported here.",
-    "cardFailed": "The answer did not reach the bot. The card is still here.",
-    "connectorAlwaysBot": "Always for this bot",
-    "connectorAlwaysTeam": "Always for team bots",
-    "connectorAllowChannel": "Allow in channel",
-    "widgetSubmit": "Submit",
-    "widgetCustom": "Send custom answer",
-    "widgetDismiss": "Dismiss",
-    "conversationOlder": "Earlier messages",
-    "rosterLoading": "Reading bots...",
-    "pickAccountFirst": "Choose an account first.",
-    "detailsTitle": "Details",
-    "marketplaceNote": "The new tab uses the x.ai account signed in to this browser, which may differ from the account selected here.",
-    "fanoutTitle": "Also send to",
-    "attachButton": "Attach",
-    "attachUnavailable": "{name} was not sent. File upload is not available yet.",
-    "cardQueued": "{count} more cards waiting"
+    "connectorAllow": "অনুমোদন করুন",
+    "connectorSkip": "ফাঁকি দিন",
+    "connectorAlwaysBot": "এই বটের জন্য সবসময়",
+    "connectorAlwaysTeam": "টিম বটের জন্য সবসময়",
+    "connectorAllowChannel": "চ্যানেলে অনুমোদন দিন",
+    "cardFailed": "উত্তরটি বটের কাছে পৌঁছায়নি। কার্ডটি এখনো আছে।",
+    "widgetSubmit": "জমা দিন",
+    "widgetCustom": "কাস্টম উত্তর পাঠান",
+    "widgetDismiss": "নাকচ করুন",
+    "unsupportedMessage": "এই বার্তাটি এখানে সমর্থিত নয়।"
   }
 }

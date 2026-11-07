@@ -3404,12 +3404,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Použijte URL dosažitelné ze stroje, na kterém běží Pi. Koncový bod /v1 kompatibilní s OpenAI se přidá automaticky.",
     "piManualMergeHint": "Pouze náhled. Sloučte tento záznam providers.omniroute do models.json, aby vaši ostatní poskytovatelé a nastavení zůstali nedotčeni.",
-    "removeMapping": "Odebrat mapování",
     "customUrl": "Vlastní adresa URL",
     "customEndpointAria": "Vlastní koncový bod",
     "useDefaultKey": "Použít výchozí klíč OmniRoute",
     "mainModelAria": "Hlavní model",
-    "manualConfigTitle": "Ruční konfigurace buildu pro Grok"
+    "manualConfigTitle": "Ruční konfigurace buildu pro Grok",
+    "removeMapping": "Odebrat mapování"
   },
   "modelCatalog": {
     "title": "Modely a komba",
@@ -3656,6 +3656,7 @@
     "more": "+{count} dalších",
     "reqs": "požadavky",
     "success": "úspěch",
+    "fallbackSummary": "{rate} % požadavků využilo záložní cestu, každý přeskočil průměrně ~{skips} cílů",
     "proxyConfigured": "Proxy nastavena",
     "copyComboName": "Kopírovat název komba",
     "enableCombo": "Povolit kombo",
@@ -4225,8 +4226,7 @@
     "duplicateAutoComboSnapshotMsg": "Tím se zachytí aktuálně připojení poskytovatelé/modely, které odpovídají této šabloně, do upravitelné kombinace.",
     "duplicateAutoComboFailedPrefix": "Duplikace automatické kombinace selhala:",
     "duplicateAutoComboUnknownError": "Neznámá chyba",
-    "duplicateAutoComboTitle": "Vytvořte statickou kombinaci z {name}",
-    "fallbackSummary": "{rate} % požadavků využilo záložní cestu, každý přeskočil průměrně ~{skips} cílů"
+    "duplicateAutoComboTitle": "Vytvořte statickou kombinaci z {name}"
   },
   "costs": {
     "title": "Náklady",
@@ -9290,9 +9290,9 @@
         "financial": "Finanční",
         "brazilian": "Brazilská",
         "usa": "USA",
-        "full": "Úplná",
         "gdpr": "GDPR (EU)",
-        "popia": "POPIA (Jihoafrická republika)"
+        "popia": "POPIA (Jihoafrická republika)",
+        "full": "Úplná"
       },
       "builtinTypes": "Vestavěné typy",
       "types": {
@@ -10228,6 +10228,10 @@
     "healthExtraUsageBypass": "Kvóta je vyčerpána; dodatečné využití je povoleno, takže služba pokračuje.",
     "healthPaidCreditsBypass": "Kvóta je vyčerpána; dostupné placené kredity umožňují pokračování služby.",
     "healthFilteringBypass": "Kvóta je vyčerpána; místní filtrování kvót je vypnuto, takže služba pokračuje.",
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Použití",
     "grokExtraUsageCredits": "Další kredit na použití",
     "grokAutoTopUp": "Automatické dobíjení",
@@ -10685,10 +10689,6 @@
     "confirmRedeemClaudeResetCredit": "Uplatnění okamžitě resetuje příslušné limity využití Claude a trvale spotřebuje tento kredit.",
     "claudeResetCreditsModalTitle": "Kredity na reset Claude",
     "claudeResetCreditsModalExplainer": "Dostupné kredity na reset Claude a týdenní resety relací pro tento účet.",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "healthAccountHint": "Podle posledních pozorování, nejde o živou kontrolu. Vyberte účet pro podrobnosti.",
     "healthRecovery": "Očekávané obnovení",
     "healthAvailable": "Dostupné",
@@ -12344,6 +12344,10 @@
     "messageInputAria": "Zpráva"
   },
   "requestLogger": {
+    "omittedHttpAttempts": "{count} odeslání HTTP nebylo uchováno",
+    "upstreamStatus": "Nadřazený server {status}",
+    "noHttpResponse": "Nebyla zaznamenána žádná odpověď HTTP",
+    "transportError": "Chyba přenosu",
     "recording": "Zaznamenávání",
     "paused": "Pozastaveno",
     "pipelineLogsOn": "Protokolování pipeline je zapnuté",
@@ -12427,6 +12431,8 @@
       "increase": "Zvýšit interval"
     },
     "status": {
+      "recoveredAttemptsTitle": "Požadavek byl obnoven po {count} pokusech",
+      "latestOutcomeFailed": "Výsledek posledního požadavku byl neúspěšný",
       "inProgress": "Probíhá",
       "recoveredByRetry": "Obnoveno opětovným pokusem",
       "goToParent": "Přejít na nadřazenou žádost",
@@ -12435,12 +12441,13 @@
       "failedTitle": "Všechny {count} pokusy selhaly",
       "failed": "neúspěšné",
       "pinnedTitle": "Model vybrán prostřednictvím připnutí relace kontextové cache",
-      "pinned": "připnutý",
-      "recoveredAttemptsTitle": "Požadavek byl obnoven po {count} pokusech",
-      "latestOutcomeFailed": "Výsledek posledního požadavku byl neúspěšný"
+      "pinned": "připnutý"
     },
     "attempts": "pokusy",
     "detail": {
+      "omittedHttpAttempts": "{count} odeslání HTTP nebylo uchováno",
+      "noHttpResponse": "Nebyla zaznamenána žádná odpověď HTTP",
+      "transportError": "Chyba přenosu",
       "collapse": "Sbalit {title}",
       "expand": "Rozbalit {title}",
       "copyTitle": "Kopírovat {title}",
@@ -12539,20 +12546,13 @@
       "continuesFromParent": "pokračuje z nadřazené položky",
       "continuesFrom": "Pokračuje z {id}",
       "viewConversation": "zobrazit konverzaci",
-      "openConversation": "Otevřít konverzaci {id}",
-      "omittedHttpAttempts": "{count} odeslání HTTP nebylo uchováno",
-      "noHttpResponse": "Nebyla zaznamenána žádná odpověď HTTP",
-      "transportError": "Chyba přenosu"
+      "openConversation": "Otevřít konverzaci {id}"
     },
     "tableLabel": "Protokoly požadavků",
     "throughputPostFirstToken": "Po prvním tokenu",
     "throughputEndToEnd": "Od začátku do konce",
     "throughputRate": "{value} tokenů/s",
-    "throughputExplanation": "Obě rychlosti používají větší z počtu výstupních tokenů a tokenů pro uvažování. Hodnota po prvním tokenu nezahrnuje platné TTFT; jinak používá celkovou dobu trvání. Hodnota od začátku do konce vždy používá celkovou dobu trvání. U bufferované odpovědi může být vysoká rychlost doručení v dávce, aniž by model generoval rychleji.",
-    "omittedHttpAttempts": "{count} odeslání HTTP nebylo uchováno",
-    "upstreamStatus": "Nadřazený server {status}",
-    "noHttpResponse": "Nebyla zaznamenána žádná odpověď HTTP",
-    "transportError": "Chyba přenosu"
+    "throughputExplanation": "Obě rychlosti používají větší z počtu výstupních tokenů a tokenů pro uvažování. Hodnota po prvním tokenu nezahrnuje platné TTFT; jinak používá celkovou dobu trvání. Hodnota od začátku do konce vždy používá celkovou dobu trvání. U bufferované odpovědi může být vysoká rychlost doručení v dávce, aniž by model generoval rychleji."
   },
   "proxyLogger": {
     "filterAll": "Vše",
@@ -16041,6 +16041,15 @@
     "rosterEmpty": "Vyberte účet pro zobrazení jeho botů.",
     "conversationTitle": "Konverzace",
     "conversationEmpty": "Vyberte bota pro zobrazení konverzace.",
+    "conversationOlder": "Dřívější zprávy",
+    "rosterLoading": "Čtení roboti...",
+    "pickAccountFirst": "Nejprve vyberte účet.",
+    "detailsTitle": "Podrobnosti",
+    "fanoutTitle": "Také poslat na",
+    "attachButton": "Připojit",
+    "attachUnavailable": "{name} nebyla odeslána. Nahrání souboru zatím není k dispozici.",
+    "cardQueued": "{count} další karty čekají",
+    "marketplaceNote": "Nová karta používá účet x.ai přihlášený do tohoto prohlížeče, který se může lišit od účtu vybraného zde.",
     "conversationBlocked": "Konverzaci se nepodařilo zahájit.",
     "conversationLost": "Spojení s tímto botem bylo ztraceno.",
     "conversationSignIn": "Tento účet vyžaduje, abyste se znovu přihlásili.",
@@ -16057,7 +16066,7 @@
     "stateRunning": "Bot pracuje.",
     "stateIdle": "Bot je nečinný.",
     "stateStale": "Stav bota je neznámý.",
-    "stateBox": "Box: {state}",
+    "stateBox": "Krabice: {state}",
     "sendPlaceholder": "Poslat zprávu tomuto botovi",
     "sendButton": "Odeslat",
     "sendUnknown": "Nepotvrzeno. Znovu neodesláno.",
@@ -16066,24 +16075,15 @@
     "computersTitle": "Místní počítače",
     "computersEmpty": "Žádné nahlášené počítače.",
     "chiefOfStaff": "šéf štábu",
-    "connectorAllow": "Allow",
-    "connectorSkip": "Skip",
-    "unsupportedMessage": "This message is not supported here.",
-    "cardFailed": "The answer did not reach the bot. The card is still here.",
-    "connectorAlwaysBot": "Always for this bot",
-    "connectorAlwaysTeam": "Always for team bots",
-    "connectorAllowChannel": "Allow in channel",
-    "widgetSubmit": "Submit",
-    "widgetCustom": "Send custom answer",
-    "widgetDismiss": "Dismiss",
-    "conversationOlder": "Earlier messages",
-    "rosterLoading": "Reading bots...",
-    "pickAccountFirst": "Choose an account first.",
-    "detailsTitle": "Details",
-    "marketplaceNote": "The new tab uses the x.ai account signed in to this browser, which may differ from the account selected here.",
-    "fanoutTitle": "Also send to",
-    "attachButton": "Attach",
-    "attachUnavailable": "{name} was not sent. File upload is not available yet.",
-    "cardQueued": "{count} more cards waiting"
+    "connectorAllow": "Povolit",
+    "connectorSkip": "Přeskočit",
+    "connectorAlwaysBot": "Vždy pro tohoto robota",
+    "connectorAlwaysTeam": "Vždy pro týmové roboty",
+    "connectorAllowChannel": "Povolit v kanálu",
+    "cardFailed": "Odpověď k robotovi nedorazila. Karta je stále tady.",
+    "widgetSubmit": "Předložit",
+    "widgetCustom": "Odeslat vlastní odpověď",
+    "widgetDismiss": "Propustit",
+    "unsupportedMessage": "Tato zpráva zde není podporována."
   }
 }

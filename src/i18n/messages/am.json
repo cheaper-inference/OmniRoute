@@ -3404,12 +3404,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Pi ከሚያሄደው ማሽን URL ሊደረስበት የሚችለውን ይጠቀሙ። የOpenAI-ተኳሃኝ/v1 የመጨረሻ ነጥብ በራስ-ሰር ይታከላል።",
     "piManualMergeHint": "ቅድመ እይታ ብቻ። ሌሎች አቅራቢዎችዎ እና ቅንብሮችዎ ሳይበላሹ እንዲቆዩ ይህን providers.omniroute ግቤት ወደ models.json ያዋህዱ።",
-    "removeMapping": "ማዛመዱን አስወግድ",
     "customUrl": "ግሌባ URL",
     "customEndpointAria": "ግሌባ ጫፍ ነጥብ",
     "useDefaultKey": "የOmniRoute ድምፅ ቁልፍ ይጠቀሙ",
     "mainModelAria": "ዋና ሞዴል",
-    "manualConfigTitle": "Grok Build የራስ-ሰር ኮንፊግ"
+    "manualConfigTitle": "Grok Build የራስ-ሰር ኮንፊግ",
+    "removeMapping": "ማዛመዱን አስወግድ"
   },
   "modelCatalog": {
     "title": "ሞዴሎች እና ኮምቦዎች",
@@ -3656,6 +3656,7 @@
     "more": "+{count} ተጨማሪ",
     "reqs": "ጥያቄዎች",
     "success": "ስኬት",
+    "fallbackSummary": "የጥያቄዎች {rate}% ተመለሱ፣ እያንዳንዱ ~{skips} ግዴታዎች ተገለጭዋለን",
     "proxyConfigured": "ፕሮክሲ ተዋቅሯል",
     "copyComboName": "የጥምረቱን ስም ቅዳ",
     "enableCombo": "ጥምረቱን አንቃ",
@@ -4225,8 +4226,7 @@
     "duplicateAutoComboSnapshotMsg": "ይህ ከዚህ አብነት ጋር የሚዛመዱትን በአሁኑ ጊዜ የተገናኙ አቅራቢዎች/ሞዴሎች ቅጽበታዊ ቅጂ ወደሚስተካከል ጥምረት ይቀይራል።",
     "duplicateAutoComboFailedPrefix": "ራስ-ሰር ጥምረቱን ማባዛት አልተሳካም፦",
     "duplicateAutoComboUnknownError": "ያልታወቀ ስህተት",
-    "duplicateAutoComboTitle": "ከ{name} የማይለወጥ ጥምረት ፍጠር",
-    "fallbackSummary": "የጥያቄዎች {rate}% ተመለሱ፣ እያንዳንዱ ~{skips} ግዴታዎች ተገለጭዋለን"
+    "duplicateAutoComboTitle": "ከ{name} የማይለወጥ ጥምረት ፍጠር"
   },
   "costs": {
     "title": "ወጪዎች",
@@ -9290,9 +9290,9 @@
         "financial": "ፋይናንስ",
         "brazilian": "ብራዚላዊ",
         "usa": "አሜሪካ",
-        "full": "ሙሉ",
         "gdpr": "GDPR (EU)",
-        "popia": "POPIA (ደቡብ አፍሪካ)"
+        "popia": "POPIA (ደቡብ አፍሪካ)",
+        "full": "ሙሉ"
       },
       "builtinTypes": "አብሮ የተሰሩ ዓይነቶች",
       "types": {
@@ -12344,6 +12344,10 @@
     "messageInputAria": "መልዕክት"
   },
   "requestLogger": {
+    "omittedHttpAttempts": "{count} የHTTP መላኪያዎች አልተቀመጡም",
+    "upstreamStatus": "የላይኛው አገልጋይ {status}",
+    "noHttpResponse": "የHTTP ምላሽ አልታየም",
+    "transportError": "የማጓጓዣ ስህተት",
     "recording": "በመቅዳት ላይ",
     "paused": "ለጊዜው ቆሟል",
     "pipelineLogsOn": "የፓይፕላይን ምዝግብ ማስታወሻዎች በርተዋል",
@@ -12427,6 +12431,8 @@
       "increase": "ክፍተቱን ጨምር"
     },
     "status": {
+      "recoveredAttemptsTitle": "ጥያቄው በ{count} ሙከራዎች ተሳክቷል",
+      "latestOutcomeFailed": "የመጨረሻው ጥያቄ ውጤት አልተሳካም",
       "inProgress": "በሂደት ላይ",
       "recoveredByRetry": "በድጋሚ ሙከራ ተስተካክሏል",
       "goToParent": "ወደ ዋናው ጥያቄ ሂድ",
@@ -12435,12 +12441,13 @@
       "failedTitle": "ሁሉም {count} ሙከራዎች አልተሳኩም",
       "failed": "አልተሳካም",
       "pinnedTitle": "ሞዴሉ በcontext-cache ክፍለ ጊዜ ማጣበቅ ተመርጧል",
-      "pinned": "ተያይዟል",
-      "recoveredAttemptsTitle": "ጥያቄው በ{count} ሙከራዎች ተሳክቷል",
-      "latestOutcomeFailed": "የመጨረሻው ጥያቄ ውጤት አልተሳካም"
+      "pinned": "ተያይዟል"
     },
     "attempts": "ሙከራዎች",
     "detail": {
+      "omittedHttpAttempts": "{count} የHTTP መላኪያዎች አልተቀመጡም",
+      "noHttpResponse": "የHTTP ምላሽ አልታየም",
+      "transportError": "የማጓጓዣ ስህተት",
       "collapse": "{title}ን ሰብስብ",
       "expand": "{title}ን ዘርጋ",
       "copyTitle": "{title}ን ቅዳ",
@@ -12539,20 +12546,13 @@
       "continuesFromParent": "ከወላጅ ይቀጥላል",
       "continuesFrom": "ከ{id} ይቀጥላል",
       "viewConversation": "ውይይቱን ይመልከቱ",
-      "openConversation": "ውይይት {id}ን ይክፈቱ",
-      "omittedHttpAttempts": "{count} የHTTP መላኪያዎች አልተቀመጡም",
-      "noHttpResponse": "የHTTP ምላሽ አልታየም",
-      "transportError": "የማጓጓዣ ስህተት"
+      "openConversation": "ውይይት {id}ን ይክፈቱ"
     },
     "tableLabel": "የጥያቄ ምዝግብ ማስታወሻዎች",
     "throughputPostFirstToken": "ከመጀመሪያው ቶከን በኋላ",
     "throughputEndToEnd": "ከጫፍ እስከ ጫፍ",
     "throughputRate": "በሰከንድ {value} ቶከኖች",
-    "throughputExplanation": "ሁለቱም ፍጥነቶች ከውጤት እና ከምክንያታዊ ትንተና ቶከኖች ብዛት የሚበልጠውን ይጠቀማሉ። ከመጀመሪያው ቶከን በኋላ ያለው ፍጥነት ትክክለኛ TTFTን አያካትትም፤ ካልሆነ ግን ሙሉውን ቆይታ ይጠቀማል። ከጫፍ እስከ ጫፍ ሁልጊዜ ሙሉውን ቆይታ ይጠቀማል። በቋት የተያዘ ምላሽ የሞዴሉ ማመንጨት ሳይፈጥን ከፍተኛ የፈጣን ማድረስ ፍጥነት ሊኖረው ይችላል።",
-    "omittedHttpAttempts": "{count} የHTTP መላኪያዎች አልተቀመጡም",
-    "upstreamStatus": "የላይኛው አገልጋይ {status}",
-    "noHttpResponse": "የHTTP ምላሽ አልታየም",
-    "transportError": "የማጓጓዣ ስህተት"
+    "throughputExplanation": "ሁለቱም ፍጥነቶች ከውጤት እና ከምክንያታዊ ትንተና ቶከኖች ብዛት የሚበልጠውን ይጠቀማሉ። ከመጀመሪያው ቶከን በኋላ ያለው ፍጥነት ትክክለኛ TTFTን አያካትትም፤ ካልሆነ ግን ሙሉውን ቆይታ ይጠቀማል። ከጫፍ እስከ ጫፍ ሁልጊዜ ሙሉውን ቆይታ ይጠቀማል። በቋት የተያዘ ምላሽ የሞዴሉ ማመንጨት ሳይፈጥን ከፍተኛ የፈጣን ማድረስ ፍጥነት ሊኖረው ይችላል።"
   },
   "proxyLogger": {
     "filterAll": "ሁሉም",
@@ -16041,6 +16041,15 @@
     "rosterEmpty": "ቦቶቹን ለማየት መለያ ይምረጡ።",
     "conversationTitle": "ውይይት",
     "conversationEmpty": "ውይይቱን ለማየት ቦት ይምረጡ።",
+    "conversationOlder": "ቀደም ያሉ መልዕክቶች",
+    "rosterLoading": "ቦቶች ማንበብ...",
+    "pickAccountFirst": "መጀመሪያ መለያ ይምረጡ።",
+    "detailsTitle": "ዝርዝሮች",
+    "fanoutTitle": "እንዲሁም ይላኩ።",
+    "attachButton": "ያያይዙ",
+    "attachUnavailable": "{name} አልተላከም። ፋይል ሰቀላ እስካሁን አይገኝም።",
+    "cardQueued": "{count} ተጨማሪ ካርዶችን በመጠባበቅ ላይ",
+    "marketplaceNote": "አዲሱ ትር ወደዚህ አሳሽ የገባውን x.ai መለያ ይጠቀማል፣ይህም እዚህ ከተመረጠው መለያ ሊለይ ይችላል።",
     "conversationBlocked": "ውይይቱን ማስጀመር አልተቻለም።",
     "conversationLost": "ከዚህ ቦት ጋር ያለው ግንኙነት ተቋርጧል።",
     "conversationSignIn": "ይህ መለያ እንደገና መግቢያ መስጠት ይፈልጋል።",
@@ -16057,7 +16066,7 @@
     "stateRunning": "ቦቱ እየሰራ ነው።",
     "stateIdle": "ቦቱ ስራ ፈት ነው።",
     "stateStale": "የቦቱ ሁኔታ አይታወቅም።",
-    "stateBox": "Box: {state}",
+    "stateBox": "ሳጥን: {state}",
     "sendPlaceholder": "ለዚህ ቦት መልዕክት ይላኩ",
     "sendButton": "ላክ",
     "sendUnknown": "አልተረጋገጠም። እንደገና አልተላከም።",
@@ -16066,24 +16075,15 @@
     "computersTitle": "የአካባቢ ኮምፒውተሮች",
     "computersEmpty": "ምንም ሪፖርት የተደረጉ ኮምፒውተሮች የሉም።",
     "chiefOfStaff": "የሰራተኞች አለቃ",
-    "connectorAllow": "Allow",
-    "connectorSkip": "Skip",
-    "unsupportedMessage": "This message is not supported here.",
-    "cardFailed": "The answer did not reach the bot. The card is still here.",
-    "connectorAlwaysBot": "Always for this bot",
-    "connectorAlwaysTeam": "Always for team bots",
-    "connectorAllowChannel": "Allow in channel",
-    "widgetSubmit": "Submit",
-    "widgetCustom": "Send custom answer",
-    "widgetDismiss": "Dismiss",
-    "conversationOlder": "Earlier messages",
-    "rosterLoading": "Reading bots...",
-    "pickAccountFirst": "Choose an account first.",
-    "detailsTitle": "Details",
-    "marketplaceNote": "The new tab uses the x.ai account signed in to this browser, which may differ from the account selected here.",
-    "fanoutTitle": "Also send to",
-    "attachButton": "Attach",
-    "attachUnavailable": "{name} was not sent. File upload is not available yet.",
-    "cardQueued": "{count} more cards waiting"
+    "connectorAllow": "ፍቀድ",
+    "connectorSkip": "ዝለል",
+    "connectorAlwaysBot": "ሁልጊዜ ለዚህ ቦት",
+    "connectorAlwaysTeam": "ሁልጊዜ ለቡድን ቦቶች",
+    "connectorAllowChannel": "ቻናል ውስጥ ፍቀድ",
+    "cardFailed": "መልሱ ቦት ላይ አልደረሰም. ካርዱ አሁንም እዚህ አለ።",
+    "widgetSubmit": "አስገባ",
+    "widgetCustom": "ብጁ መልስ ይላኩ።",
+    "widgetDismiss": "አሰናብት",
+    "unsupportedMessage": "ይህ መልእክት እዚህ አይደገፍም።"
   }
 }

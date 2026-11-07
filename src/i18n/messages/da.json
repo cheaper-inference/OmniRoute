@@ -3404,12 +3404,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Brug URL, der kan nås fra maskinen, der kører Pi. Det OpenAI-kompatible /v1-slutpunkt tilføjes automatisk.",
     "piManualMergeHint": "Kun forhåndsvisning. Flet denne providers.omniroute-indgang til models.json, så dine andre udbydere og indstillinger forbliver intakte.",
-    "removeMapping": "Fjern tilknytning",
     "customUrl": "Tilpasset URL",
     "customEndpointAria": "Tilpasset slutpunkt",
     "useDefaultKey": "Brug OmniRoute-standnøglen",
     "mainModelAria": "Hovedmodel",
-    "manualConfigTitle": "Grok Build manuel konfiguration"
+    "manualConfigTitle": "Grok Build manuel konfiguration",
+    "removeMapping": "Fjern tilknytning"
   },
   "modelCatalog": {
     "title": "Models & Combos",
@@ -3656,6 +3656,7 @@
     "more": "+{count} mere",
     "reqs": "req",
     "success": "succes",
+    "fallbackSummary": "{rate} % af anmodningerne faldt tilbage, hver hoppede i gennemsnit over ~{skips} mål",
     "proxyConfigured": "Proxy konfigureret",
     "copyComboName": "Kopiér kombinationsnavnet",
     "enableCombo": "Aktiver kombination",
@@ -4225,8 +4226,7 @@
     "duplicateAutoComboSnapshotMsg": "Dette vil tage et øjebliksbillede af de aktuelt tilsluttede udbydere/modeller, der matcher denne skabelon, i en redigerbar kombination.",
     "duplicateAutoComboFailedPrefix": "Kopiering af auto-kombination mislykkedes:",
     "duplicateAutoComboUnknownError": "Ukendt fejl",
-    "duplicateAutoComboTitle": "Opret en statisk kombination fra {name}",
-    "fallbackSummary": "{rate} % af anmodningerne faldt tilbage, hver hoppede i gennemsnit over ~{skips} mål"
+    "duplicateAutoComboTitle": "Opret en statisk kombination fra {name}"
   },
   "costs": {
     "title": "Omkostninger",
@@ -9290,9 +9290,9 @@
         "financial": "Finansiel",
         "brazilian": "Brasiliansk",
         "usa": "USA",
-        "full": "Fuld",
         "gdpr": "GDPR (EU)",
-        "popia": "POPIA (Sydafrika)"
+        "popia": "POPIA (Sydafrika)",
+        "full": "Fuld"
       },
       "builtinTypes": "Indbyggede typer",
       "types": {
@@ -10228,6 +10228,10 @@
     "healthExtraUsageBypass": "Kvoten er opbrugt; ekstra forbrug er tilladt, så tjenesten fortsætter.",
     "healthPaidCreditsBypass": "Kvoten er opbrugt; tilgængelige betalte kreditter gør det muligt at fortsætte tjenesten.",
     "healthFilteringBypass": "Kvoten er opbrugt; lokal kvotefiltrering er deaktiveret, så tjenesten fortsætter.",
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Brug",
     "grokExtraUsageCredits": "Ekstra Brugs Kreditter",
     "grokAutoTopUp": "Auto Opladning",
@@ -10685,10 +10689,6 @@
     "confirmRedeemClaudeResetCredit": "Indløsning nulstiller øjeblikkeligt de gældende Claude-brugsgrænser og forbruger denne kredit permanent.",
     "claudeResetCreditsModalTitle": "Claude-nulstillingskreditter",
     "claudeResetCreditsModalExplainer": "Tilgængelige Claude-nulstillingskreditter og ugentlige sessionsnulstillinger for denne konto.",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "healthAccountHint": "Baseret på de seneste observationer, ikke en direkte kontrol. Vælg en konto for detaljer.",
     "healthRecovery": "Forventet genoprettelse",
     "healthAvailable": "Tilgængelig",
@@ -12344,6 +12344,10 @@
     "messageInputAria": "Besked"
   },
   "requestLogger": {
+    "omittedHttpAttempts": "{count} HTTP-afsendelser blev ikke gemt",
+    "upstreamStatus": "Opstrømsserver {status}",
+    "noHttpResponse": "Intet HTTP-svar blev observeret",
+    "transportError": "Transportfejl",
     "recording": "Registrerer",
     "paused": "Sat på pause",
     "pipelineLogsOn": "Pipeline-logs slået til",
@@ -12427,6 +12431,8 @@
       "increase": "Forøg intervallet"
     },
     "status": {
+      "recoveredAttemptsTitle": "Anmodningen blev genoprettet efter {count} forsøg",
+      "latestOutcomeFailed": "Det seneste anmodningsresultat mislykkedes",
       "inProgress": "Under behandling",
       "recoveredByRetry": "Gendannet ved forsøg igen",
       "goToParent": "Gå til overordnet anmodning",
@@ -12435,12 +12441,13 @@
       "failedTitle": "Alle {count} forsøg mislykkedes",
       "failed": "mislykkedes",
       "pinnedTitle": "Model valgt via kontekst-cache session fastgørelse",
-      "pinned": "fastgjort",
-      "recoveredAttemptsTitle": "Anmodningen blev genoprettet efter {count} forsøg",
-      "latestOutcomeFailed": "Det seneste anmodningsresultat mislykkedes"
+      "pinned": "fastgjort"
     },
     "attempts": "forsøg",
     "detail": {
+      "omittedHttpAttempts": "{count} HTTP-afsendelser blev ikke gemt",
+      "noHttpResponse": "Intet HTTP-svar blev observeret",
+      "transportError": "Transportfejl",
       "collapse": "Skjul {title}",
       "expand": "Udvid {title}",
       "copyTitle": "Kopier {title}",
@@ -12539,20 +12546,13 @@
       "continuesFromParent": "fortsætter fra overordnet",
       "continuesFrom": "Fortsætter fra {id}",
       "viewConversation": "vis samtale",
-      "openConversation": "Åbn samtale {id}",
-      "omittedHttpAttempts": "{count} HTTP-afsendelser blev ikke gemt",
-      "noHttpResponse": "Intet HTTP-svar blev observeret",
-      "transportError": "Transportfejl"
+      "openConversation": "Åbn samtale {id}"
     },
     "tableLabel": "Anmodningslogfiler",
     "throughputPostFirstToken": "Efter første token",
     "throughputEndToEnd": "Ende-til-ende",
     "throughputRate": "{value} tokens/sek.",
-    "throughputExplanation": "Begge hastigheder bruger det højeste af antallet af output- og reasoning-tokens. Efter første token udelader en gyldig TTFT; ellers bruges hele varigheden. Ende-til-ende bruger altid hele varigheden. Et bufret svar kan have en høj burst-leveringshastighed uden hurtigere modelgenerering.",
-    "omittedHttpAttempts": "{count} HTTP-afsendelser blev ikke gemt",
-    "upstreamStatus": "Opstrømsserver {status}",
-    "noHttpResponse": "Intet HTTP-svar blev observeret",
-    "transportError": "Transportfejl"
+    "throughputExplanation": "Begge hastigheder bruger det højeste af antallet af output- og reasoning-tokens. Efter første token udelader en gyldig TTFT; ellers bruges hele varigheden. Ende-til-ende bruger altid hele varigheden. Et bufret svar kan have en høj burst-leveringshastighed uden hurtigere modelgenerering."
   },
   "proxyLogger": {
     "filterAll": "Alle",
@@ -16041,6 +16041,15 @@
     "rosterEmpty": "Vælg en konto for at se dens bots.",
     "conversationTitle": "Samtale",
     "conversationEmpty": "Vælg en bot for at se samtalen.",
+    "conversationOlder": "Tidligere beskeder",
+    "rosterLoading": "Læser bots...",
+    "pickAccountFirst": "Vælg først en konto.",
+    "detailsTitle": "Detaljer",
+    "fanoutTitle": "Send også til",
+    "attachButton": "Vedhæft",
+    "attachUnavailable": "{name} blev ikke sendt. Filupload er ikke tilgængelig endnu.",
+    "cardQueued": "{count} flere kort venter",
+    "marketplaceNote": "Den nye fane bruger x.ai-kontoen, der er logget ind på denne browser, som kan afvige fra den konto, der er valgt her.",
     "conversationBlocked": "Samtalen kunne ikke startes.",
     "conversationLost": "Forbindelsen til denne bot blev afbrudt.",
     "conversationSignIn": "Denne konto kræver, at du logger ind igen.",
@@ -16057,33 +16066,24 @@
     "stateRunning": "Botten arbejder.",
     "stateIdle": "Botten er inaktiv.",
     "stateStale": "Bottens status er ukendt.",
-    "stateBox": "Box: {state}",
+    "stateBox": "Æske: {state}",
     "sendPlaceholder": "Send besked til denne bot",
-    "sendButton": "Send",
+    "sendButton": "Sende",
     "sendUnknown": "Ikke bekræftet. Ikke sendt igen.",
     "skillsTitle": "Færdigheder og rutiner",
     "skillsEmpty": "Ingen færdigheder eller rutiner.",
     "computersTitle": "Lokale computere",
     "computersEmpty": "Ingen computere rapporteret.",
     "chiefOfStaff": "stabschef",
-    "connectorAllow": "Allow",
-    "connectorSkip": "Skip",
-    "unsupportedMessage": "This message is not supported here.",
-    "cardFailed": "The answer did not reach the bot. The card is still here.",
-    "connectorAlwaysBot": "Always for this bot",
-    "connectorAlwaysTeam": "Always for team bots",
-    "connectorAllowChannel": "Allow in channel",
-    "widgetSubmit": "Submit",
-    "widgetCustom": "Send custom answer",
-    "widgetDismiss": "Dismiss",
-    "conversationOlder": "Earlier messages",
-    "rosterLoading": "Reading bots...",
-    "pickAccountFirst": "Choose an account first.",
-    "detailsTitle": "Details",
-    "marketplaceNote": "The new tab uses the x.ai account signed in to this browser, which may differ from the account selected here.",
-    "fanoutTitle": "Also send to",
-    "attachButton": "Attach",
-    "attachUnavailable": "{name} was not sent. File upload is not available yet.",
-    "cardQueued": "{count} more cards waiting"
+    "connectorAllow": "Tillade",
+    "connectorSkip": "Springe",
+    "connectorAlwaysBot": "Altid for denne bot",
+    "connectorAlwaysTeam": "Altid for teambots",
+    "connectorAllowChannel": "Tillad i kanalen",
+    "cardFailed": "Svaret nåede ikke botten. Kortet er her stadig.",
+    "widgetSubmit": "Indsend",
+    "widgetCustom": "Send tilpasset svar",
+    "widgetDismiss": "Afskedige",
+    "unsupportedMessage": "Denne besked understøttes ikke her."
   }
 }

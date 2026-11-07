@@ -3404,12 +3404,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Utilizza URL raggiungibile dalla macchina che esegue Pi. L'endpoint /v1 compatibile con OpenAI viene aggiunto automaticamente.",
     "piManualMergeHint": "Solo anteprima. Unisci questa voce providers.omniroute in models.json in modo che gli altri provider e le impostazioni rimangano intatti.",
-    "removeMapping": "Rimuovi mappatura",
     "customUrl": "URL personalizzata",
     "customEndpointAria": "Endpoint personalizzato",
     "useDefaultKey": "Utilizza la chiave predefinita di OmniRoute",
     "mainModelAria": "Modello principale",
-    "manualConfigTitle": "Configurazione manuale di Grok Build"
+    "manualConfigTitle": "Configurazione manuale di Grok Build",
+    "removeMapping": "Rimuovi mappatura"
   },
   "modelCatalog": {
     "title": "Modelli e combo",
@@ -3656,6 +3656,7 @@
     "more": "+{count} altro",
     "reqs": "req",
     "success": "successo",
+    "fallbackSummary": "{rate}% delle richieste ha utilizzato un fallback, saltando in media ~{skips} target ciascuna",
     "proxyConfigured": "Proxy configurato",
     "copyComboName": "Copia il nome della combinazione",
     "enableCombo": "Abilita combinazione",
@@ -4225,8 +4226,7 @@
     "duplicateAutoComboSnapshotMsg": "Questo catturerà i fornitori/modelli attualmente connessi che corrispondono a questo modello in una combinazione modificabile.",
     "duplicateAutoComboFailedPrefix": "Duplicazione della combinazione automatica fallita:",
     "duplicateAutoComboUnknownError": "Errore sconosciuto",
-    "duplicateAutoComboTitle": "Crea una combinazione statica da {name}",
-    "fallbackSummary": "{rate}% delle richieste ha utilizzato un fallback, saltando in media ~{skips} target ciascuna"
+    "duplicateAutoComboTitle": "Crea una combinazione statica da {name}"
   },
   "costs": {
     "title": "Costi",
@@ -9290,9 +9290,9 @@
         "financial": "Finanziario",
         "brazilian": "Brasiliano",
         "usa": "USA",
-        "full": "Completo",
         "gdpr": "GDPR (UE)",
-        "popia": "POPIA (Sudafrica)"
+        "popia": "POPIA (Sudafrica)",
+        "full": "Completo"
       },
       "builtinTypes": "Tipi integrati",
       "types": {
@@ -10228,6 +10228,10 @@
     "healthExtraUsageBypass": "Quota esaurita; l’utilizzo aggiuntivo è consentito, quindi il servizio continua.",
     "healthPaidCreditsBypass": "Quota esaurita; i crediti a pagamento disponibili consentono di continuare il servizio.",
     "healthFilteringBypass": "Quota esaurita; il filtro locale delle quote è disattivato, quindi il servizio continua.",
+    "codexPaidCreditsLabel": "Crediti a pagamento Codex",
+    "codexPaidCreditsAvailable": "Disponibili (saldo non riportato)",
+    "codexPaidCreditsUnavailable": "Non disponibili o limite di spesa raggiunto",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Utilizzo",
     "grokExtraUsageCredits": "Crediti Aggiuntivi di Utilizzo",
     "grokAutoTopUp": "Ricarica Automatica",
@@ -10685,10 +10689,6 @@
     "confirmRedeemClaudeResetCredit": "Il riscatto ripristina immediatamente i limiti di utilizzo di Claude idonei e consuma permanentemente questo credito.",
     "claudeResetCreditsModalTitle": "Crediti di ripristino Claude",
     "claudeResetCreditsModalExplainer": "Crediti di ripristino Claude disponibili e ripristini settimanali delle sessioni per questo account.",
-    "codexPaidCreditsLabel": "Crediti a pagamento Codex",
-    "codexPaidCreditsAvailable": "Disponibili (saldo non riportato)",
-    "codexPaidCreditsUnavailable": "Non disponibili o limite di spesa raggiunto",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "healthAccountHint": "Basato sulle osservazioni recenti, non su un test in tempo reale. Seleziona un account per i dettagli.",
     "healthRecovery": "Ripristino previsto",
     "healthAvailable": "Disponibile",
@@ -12344,6 +12344,10 @@
     "messageInputAria": "Messaggio"
   },
   "requestLogger": {
+    "omittedHttpAttempts": "{count} invii HTTP non conservati",
+    "upstreamStatus": "Server a monte {status}",
+    "noHttpResponse": "Nessuna risposta HTTP osservata",
+    "transportError": "Errore di trasporto",
     "recording": "Registrazione in corso",
     "paused": "In pausa",
     "pipelineLogsOn": "Log della pipeline attivi",
@@ -12427,6 +12431,8 @@
       "increase": "Aumenta l'intervallo"
     },
     "status": {
+      "recoveredAttemptsTitle": "Richiesta recuperata dopo {count} tentativi",
+      "latestOutcomeFailed": "L'ultimo esito della richiesta è fallito",
       "inProgress": "In corso",
       "recoveredByRetry": "Recuperato tramite ripetizione",
       "goToParent": "Vai alla richiesta padre",
@@ -12435,12 +12441,13 @@
       "failedTitle": "Tutti i {count} tentativi sono falliti",
       "failed": "fallito",
       "pinnedTitle": "Modello selezionato tramite il pinning della sessione context-cache",
-      "pinned": "pinnato",
-      "recoveredAttemptsTitle": "Richiesta recuperata dopo {count} tentativi",
-      "latestOutcomeFailed": "L'ultimo esito della richiesta è fallito"
+      "pinned": "pinnato"
     },
     "attempts": "tentativi",
     "detail": {
+      "omittedHttpAttempts": "{count} invii HTTP non conservati",
+      "noHttpResponse": "Nessuna risposta HTTP osservata",
+      "transportError": "Errore di trasporto",
       "collapse": "Riduci {title}",
       "expand": "Espandi {title}",
       "copyTitle": "Copia {title}",
@@ -12539,20 +12546,13 @@
       "continuesFromParent": "continua dal padre",
       "continuesFrom": "Continua da {id}",
       "viewConversation": "visualizza conversazione",
-      "openConversation": "Apri conversazione {id}",
-      "omittedHttpAttempts": "{count} invii HTTP non conservati",
-      "noHttpResponse": "Nessuna risposta HTTP osservata",
-      "transportError": "Errore di trasporto"
+      "openConversation": "Apri conversazione {id}"
     },
     "tableLabel": "Log delle richieste",
     "throughputPostFirstToken": "Dopo il primo token",
     "throughputEndToEnd": "Da inizio a fine",
     "throughputRate": "{value} token/sec",
-    "throughputExplanation": "Entrambe le velocità usano il maggiore tra il conteggio dei token di output e di reasoning. La velocità dopo il primo token esclude un TTFT valido; in caso contrario usa la durata completa. La velocità da inizio a fine usa sempre la durata completa. Una risposta bufferizzata può avere un'elevata velocità di consegna a raffica senza una generazione del modello più rapida.",
-    "omittedHttpAttempts": "{count} invii HTTP non conservati",
-    "upstreamStatus": "Server a monte {status}",
-    "noHttpResponse": "Nessuna risposta HTTP osservata",
-    "transportError": "Errore di trasporto"
+    "throughputExplanation": "Entrambe le velocità usano il maggiore tra il conteggio dei token di output e di reasoning. La velocità dopo il primo token esclude un TTFT valido; in caso contrario usa la durata completa. La velocità da inizio a fine usa sempre la durata completa. Una risposta bufferizzata può avere un'elevata velocità di consegna a raffica senza una generazione del modello più rapida."
   },
   "proxyLogger": {
     "filterAll": "Tutti",
@@ -16041,6 +16041,15 @@
     "rosterEmpty": "Seleziona un account per visualizzarne i bot.",
     "conversationTitle": "Conversazione",
     "conversationEmpty": "Seleziona un bot per visualizzare la conversazione.",
+    "conversationOlder": "Messaggi precedenti",
+    "rosterLoading": "Lettura dei bot...",
+    "pickAccountFirst": "Scegli prima un account.",
+    "detailsTitle": "Dettagli",
+    "fanoutTitle": "Invia anche a",
+    "attachButton": "Allegare",
+    "attachUnavailable": "{name} non è stato inviato. Il caricamento del file non è ancora disponibile.",
+    "cardQueued": "{count} altre carte in attesa",
+    "marketplaceNote": "La nuova scheda utilizza l'account x.ai connesso a questo browser, che potrebbe differire dall'account selezionato qui.",
     "conversationBlocked": "Non è stato possibile avviare la conversazione.",
     "conversationLost": "La connessione a questo bot è stata persa.",
     "conversationSignIn": "Questo account richiede di accedere di nuovo.",
@@ -16057,7 +16066,7 @@
     "stateRunning": "Il bot è attivo.",
     "stateIdle": "Il bot è inattivo.",
     "stateStale": "Lo stato del bot è sconosciuto.",
-    "stateBox": "Box: {state}",
+    "stateBox": "Scatola: {state}",
     "sendPlaceholder": "Invia un messaggio a questo bot",
     "sendButton": "Invia",
     "sendUnknown": "Non confermato. Non inviato di nuovo.",
@@ -16065,25 +16074,16 @@
     "skillsEmpty": "Nessuna abilità o routine.",
     "computersTitle": "Computer locali",
     "computersEmpty": "Nessun computer segnalato.",
-    "chiefOfStaff": "chief of staff",
-    "connectorAllow": "Allow",
-    "connectorSkip": "Skip",
-    "unsupportedMessage": "This message is not supported here.",
-    "cardFailed": "The answer did not reach the bot. The card is still here.",
-    "connectorAlwaysBot": "Always for this bot",
-    "connectorAlwaysTeam": "Always for team bots",
-    "connectorAllowChannel": "Allow in channel",
-    "widgetSubmit": "Submit",
-    "widgetCustom": "Send custom answer",
-    "widgetDismiss": "Dismiss",
-    "conversationOlder": "Earlier messages",
-    "rosterLoading": "Reading bots...",
-    "pickAccountFirst": "Choose an account first.",
-    "detailsTitle": "Details",
-    "marketplaceNote": "The new tab uses the x.ai account signed in to this browser, which may differ from the account selected here.",
-    "fanoutTitle": "Also send to",
-    "attachButton": "Attach",
-    "attachUnavailable": "{name} was not sent. File upload is not available yet.",
-    "cardQueued": "{count} more cards waiting"
+    "chiefOfStaff": "capo dello staff",
+    "connectorAllow": "Permettere",
+    "connectorSkip": "Saltare",
+    "connectorAlwaysBot": "Sempre per questo bot",
+    "connectorAlwaysTeam": "Sempre per i bot della squadra",
+    "connectorAllowChannel": "Consenti nel canale",
+    "cardFailed": "La risposta non è arrivata al bot. La carta è ancora qui.",
+    "widgetSubmit": "Invia",
+    "widgetCustom": "Invia una risposta personalizzata",
+    "widgetDismiss": "Congedare",
+    "unsupportedMessage": "Questo messaggio non è supportato qui."
   }
 }

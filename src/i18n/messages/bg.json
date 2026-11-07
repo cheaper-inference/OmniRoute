@@ -3404,12 +3404,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Използвайте URL, достъпен от машината, работеща с Pi. Съвместимата с OpenAI крайна точка /v1 се добавя автоматично.",
     "piManualMergeHint": "Само преглед. Обединете този запис providers.omniroute в models.json така че другите ви доставчици и настройки да останат непокътнати.",
-    "removeMapping": "Премахване на съпоставянето",
     "customUrl": "Персонализиран URL",
     "customEndpointAria": "Персонализиран крайна точка",
     "useDefaultKey": "Използвайте ключа по подразбиране на OmniRoute",
     "mainModelAria": "Основен модел",
-    "manualConfigTitle": "Ръчна конфигурация за Grok Build"
+    "manualConfigTitle": "Ръчна конфигурация за Grok Build",
+    "removeMapping": "Премахване на съпоставянето"
   },
   "modelCatalog": {
     "title": "Модели и комбота",
@@ -3656,6 +3656,7 @@
     "more": "+ още {count}",
     "reqs": "изисквания",
     "success": "успех",
+    "fallbackSummary": "{rate}% от заявките използваха резервна линия, всяка изпусна средно ~{skips} цели",
     "proxyConfigured": "Конфигуриран прокси",
     "copyComboName": "Копирайте името на комбинацията",
     "enableCombo": "Активиране на комбинацията",
@@ -4225,8 +4226,7 @@
     "duplicateAutoComboSnapshotMsg": "Това ще направи моментна снимка на текущо свързаните доставчици/модели, които съвпадат с този шаблон, в редактируемо комбо.",
     "duplicateAutoComboFailedPrefix": "Неуспешно копиране на автоматично комбо:",
     "duplicateAutoComboUnknownError": "Неизвестна грешка",
-    "duplicateAutoComboTitle": "Създайте статично комбо от {name}",
-    "fallbackSummary": "{rate}% от заявките използваха резервна линия, всяка изпусна средно ~{skips} цели"
+    "duplicateAutoComboTitle": "Създайте статично комбо от {name}"
   },
   "costs": {
     "title": "Разходи",
@@ -9290,9 +9290,9 @@
         "financial": "Финансов",
         "brazilian": "Бразилски",
         "usa": "САЩ",
-        "full": "Пълен",
         "gdpr": "GDPR (EU)",
-        "popia": "POPIA (Южна Африка)"
+        "popia": "POPIA (Южна Африка)",
+        "full": "Пълен"
       },
       "builtinTypes": "Вградени типове",
       "types": {
@@ -10228,6 +10228,10 @@
     "healthExtraUsageBypass": "Квотата е изчерпана; допълнителното потребление е разрешено, затова услугата продължава.",
     "healthPaidCreditsBypass": "Квотата е изчерпана; наличните платени кредити позволяват услугата да продължи.",
     "healthFilteringBypass": "Квотата е изчерпана; локалното филтриране на квоти е изключено, затова услугата продължава.",
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Използване",
     "grokExtraUsageCredits": "Допълнителни кредити за използване",
     "grokAutoTopUp": "Автоматично попълване",
@@ -10685,10 +10689,6 @@
     "confirmRedeemClaudeResetCredit": "Активирането незабавно нулира отговарящите на условията лимити за използване на Claude и окончателно изразходва този кредит.",
     "claudeResetCreditsModalTitle": "Кредити за нулиране на Claude",
     "claudeResetCreditsModalExplainer": "Налични кредити за нулиране на Claude и седмични нулирания на сесиите за този акаунт.",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "healthAccountHint": "Според последните наблюдения, не проверка в реално време. Изберете акаунт за подробности.",
     "healthRecovery": "Очаквано възстановяване",
     "healthAvailable": "Налично",
@@ -12344,6 +12344,10 @@
     "messageInputAria": "Съобщение"
   },
   "requestLogger": {
+    "omittedHttpAttempts": "{count} HTTP изпращания не са запазени",
+    "upstreamStatus": "Горен сървър {status}",
+    "noHttpResponse": "Не е наблюдаван HTTP отговор",
+    "transportError": "Грешка при преноса",
     "recording": "Записване",
     "paused": "На пауза",
     "pipelineLogsOn": "Регистрирането на логове за конвейера е включено",
@@ -12427,6 +12431,8 @@
       "increase": "Увеличи интервала"
     },
     "status": {
+      "recoveredAttemptsTitle": "Заявката е възстановена след {count} опита",
+      "latestOutcomeFailed": "Последният резултат от заявката е неуспешен",
       "inProgress": "В процес на изпълнение",
       "recoveredByRetry": "Възстановено чрез повторен опит",
       "goToParent": "Отидете на родителска заявка",
@@ -12435,12 +12441,13 @@
       "failedTitle": "Всички {count} опити неуспешни",
       "failed": "неуспешно",
       "pinnedTitle": "Моделът е избран чрез фиксиране на сесията в контекстния кеш",
-      "pinned": "закрепен",
-      "recoveredAttemptsTitle": "Заявката е възстановена след {count} опита",
-      "latestOutcomeFailed": "Последният резултат от заявката е неуспешен"
+      "pinned": "закрепен"
     },
     "attempts": "опити",
     "detail": {
+      "omittedHttpAttempts": "{count} HTTP изпращания не са запазени",
+      "noHttpResponse": "Не е наблюдаван HTTP отговор",
+      "transportError": "Грешка при преноса",
       "collapse": "Сгъни {title}",
       "expand": "Разширете {title}",
       "copyTitle": "Копирай {title}",
@@ -12539,20 +12546,13 @@
       "continuesFromParent": "продължава от родителския елемент",
       "continuesFrom": "Продължава от {id}",
       "viewConversation": "преглед на разговора",
-      "openConversation": "Отваряне на разговор {id}",
-      "omittedHttpAttempts": "{count} HTTP изпращания не са запазени",
-      "noHttpResponse": "Не е наблюдаван HTTP отговор",
-      "transportError": "Грешка при преноса"
+      "openConversation": "Отваряне на разговор {id}"
     },
     "tableLabel": "Регистри на заявките",
     "throughputPostFirstToken": "След първия токен",
     "throughputEndToEnd": "От край до край",
     "throughputRate": "{value} токена/сек",
-    "throughputExplanation": "И двете скорости използват по-голямата стойност от броя на изходните и разсъждаващите токени. „След първия токен“ изключва валидно TTFT; в противен случай използва пълната продължителност. „От край до край“ винаги използва пълната продължителност. Буфериран отговор може да има висока скорост на доставяне на порции, без моделът да генерира по-бързо.",
-    "omittedHttpAttempts": "{count} HTTP изпращания не са запазени",
-    "upstreamStatus": "Горен сървър {status}",
-    "noHttpResponse": "Не е наблюдаван HTTP отговор",
-    "transportError": "Грешка при преноса"
+    "throughputExplanation": "И двете скорости използват по-голямата стойност от броя на изходните и разсъждаващите токени. „След първия токен“ изключва валидно TTFT; в противен случай използва пълната продължителност. „От край до край“ винаги използва пълната продължителност. Буфериран отговор може да има висока скорост на доставяне на порции, без моделът да генерира по-бързо."
   },
   "proxyLogger": {
     "filterAll": "Всички",
@@ -16041,6 +16041,15 @@
     "rosterEmpty": "Изберете акаунт, за да видите неговите ботове.",
     "conversationTitle": "Разговор",
     "conversationEmpty": "Изберете бот, за да видите разговора.",
+    "conversationOlder": "По-рано съобщения",
+    "rosterLoading": "Четатe ботове...",
+    "pickAccountFirst": "Първо изберете акаунт.",
+    "detailsTitle": "Детайли",
+    "fanoutTitle": "Изпрати и към",
+    "attachButton": "Прикачи",
+    "attachUnavailable": "{name} не е изпратено. Качването на файлове все още не е налично.",
+    "cardQueued": "Още {count} карти чакат",
+    "marketplaceNote": "Новият таб използва x.ai акаунта, влезъл в този браузър, който може да се различава от избраният тук акаунт.",
     "conversationBlocked": "Разговорът не можа да бъде стартиран.",
     "conversationLost": "Връзката с този бот беше прекъсната.",
     "conversationSignIn": "Тази сметка изисква повторно влизане.",
@@ -16066,24 +16075,15 @@
     "computersTitle": "Локални компютри",
     "computersEmpty": "Няма отчетени компютри.",
     "chiefOfStaff": "началник на кабинета",
-    "connectorAllow": "Allow",
-    "connectorSkip": "Skip",
-    "unsupportedMessage": "This message is not supported here.",
-    "cardFailed": "The answer did not reach the bot. The card is still here.",
-    "connectorAlwaysBot": "Always for this bot",
-    "connectorAlwaysTeam": "Always for team bots",
-    "connectorAllowChannel": "Allow in channel",
-    "widgetSubmit": "Submit",
-    "widgetCustom": "Send custom answer",
-    "widgetDismiss": "Dismiss",
-    "conversationOlder": "Earlier messages",
-    "rosterLoading": "Reading bots...",
-    "pickAccountFirst": "Choose an account first.",
-    "detailsTitle": "Details",
-    "marketplaceNote": "The new tab uses the x.ai account signed in to this browser, which may differ from the account selected here.",
-    "fanoutTitle": "Also send to",
-    "attachButton": "Attach",
-    "attachUnavailable": "{name} was not sent. File upload is not available yet.",
-    "cardQueued": "{count} more cards waiting"
+    "connectorAllow": "Разрешаване",
+    "connectorSkip": "Пропускане",
+    "connectorAlwaysBot": "Винаги за този бот",
+    "connectorAlwaysTeam": "Винаги за екипни ботове",
+    "connectorAllowChannel": "Разрешаване в канал",
+    "cardFailed": "Отговорът не е достигнал до бота. Карта все още е тук.",
+    "widgetSubmit": "Изпращане",
+    "widgetCustom": "Изпрати персонализиран отговор",
+    "widgetDismiss": "Затваряне",
+    "unsupportedMessage": "Това съобщение не се поддържа тук."
   }
 }

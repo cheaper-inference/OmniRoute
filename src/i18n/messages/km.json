@@ -3404,12 +3404,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "ប្រើ URL ដែលអាចទៅដល់បានពីម៉ាស៊ីនដែលកំពុងដំណើរការ Pi ។ ចំណុចបញ្ចប់ /v1 ដែលត្រូវគ្នានឹង OpenAI ត្រូវបានបន្ថែមដោយស្វ័យប្រវត្តិ។",
     "piManualMergeHint": "មើលជាមុនតែប៉ុណ្ណោះ។ បញ្ចូលការបញ្ចូល providers.omniroute នេះទៅក្នុង models.json ដូច្នេះអ្នកផ្តល់សេវា និងការកំណត់ផ្សេងទៀតរបស់អ្នកនៅដដែល។",
-    "removeMapping": "លុបការផ្គូផ្គង",
     "customUrl": "URL កាន់តែខ្លះ",
     "customEndpointAria": "Endpoint កាន់តែខ្លះ",
     "useDefaultKey": "ប្រើ key លំនាំដើមរបស់ OmniRoute",
     "mainModelAria": "ម៉ូឌែលសំខាន់",
-    "manualConfigTitle": "ការកំណត់ដោយដៃសម្រាប់ Grok Build"
+    "manualConfigTitle": "ការកំណត់ដោយដៃសម្រាប់ Grok Build",
+    "removeMapping": "លុបការផ្គូផ្គង"
   },
   "modelCatalog": {
     "title": "ម៉ូឌែល និង បន្សំ",
@@ -3656,6 +3656,7 @@
     "more": "+{count} ទៀត",
     "reqs": "សំណើ",
     "success": "ជោគជ័យ",
+    "fallbackSummary": "សំណើរ {rate}% បានប្រើជម្រើស រហូតដល់ ~{skips} គោលដៅ ដែលបានរំលង",
     "proxyConfigured": "បានកំណត់រចនាសម្ព័ន្ធប្រូកស៊ី",
     "copyComboName": "ចម្លងឈ្មោះបន្សំ",
     "enableCombo": "បើកដំណើរការបន្សំ",
@@ -4225,8 +4226,7 @@
     "duplicateAutoComboSnapshotMsg": "វានឹងថតស្ថានភាពបច្ចុប្បន្ននៃអ្នកផ្តល់សេវា/ម៉ូដែលដែលបានតភ្ជាប់ និងត្រូវគ្នានឹងគំរូនេះ ទៅជាបន្សំដែលអាចកែសម្រួលបាន។",
     "duplicateAutoComboFailedPrefix": "មិនអាចចម្លងបន្សំស្វ័យប្រវត្តិបានទេ៖",
     "duplicateAutoComboUnknownError": "កំហុសដែលមិនស្គាល់",
-    "duplicateAutoComboTitle": "បង្កើតបន្សំថេរពី {name}",
-    "fallbackSummary": "សំណើរ {rate}% បានប្រើជម្រើស រហូតដល់ ~{skips} គោលដៅ ដែលបានរំលង"
+    "duplicateAutoComboTitle": "បង្កើតបន្សំថេរពី {name}"
   },
   "costs": {
     "title": "ការចំណាយ",
@@ -9290,9 +9290,9 @@
         "financial": "ហិរញ្ញវត្ថុ",
         "brazilian": "ប្រេស៊ីល",
         "usa": "សហរដ្ឋអាមេរិក",
-        "full": "ពេញលេញ",
         "gdpr": "GDPR (EU)",
-        "popia": "POPIA (អាហ្វ្រិកខាងត្បូង)"
+        "popia": "POPIA (អាហ្វ្រិកខាងត្បូង)",
+        "full": "ពេញលេញ"
       },
       "builtinTypes": "ប្រភេទដែលមានស្រាប់",
       "types": {
@@ -12344,6 +12344,10 @@
     "messageInputAria": "សារ"
   },
   "requestLogger": {
+    "omittedHttpAttempts": "ការផ្ញើ HTTP ចំនួន {count} មិនត្រូវបានរក្សាទុកទេ",
+    "upstreamStatus": "ម៉ាស៊ីនមេខាងលើ {status}",
+    "noHttpResponse": "មិនបានសង្កេតឃើញការឆ្លើយតប HTTP ទេ",
+    "transportError": "កំហុសការដឹកជញ្ជូន",
     "recording": "កំពុងកត់ត្រា",
     "paused": "បានផ្អាក",
     "pipelineLogsOn": "កំណត់ហេតុ pipeline បានបើក",
@@ -12427,6 +12431,8 @@
       "increase": "បង្កើនចន្លោះពេល"
     },
     "status": {
+      "recoveredAttemptsTitle": "សំណើត្រូវបានស្ដារឡើងវិញបន្ទាប់ពីព្យាយាម {count} ដង",
+      "latestOutcomeFailed": "លទ្ធផលសំណើចុងក្រោយបានបរាជ័យ",
       "inProgress": "កំពុងដំណើរការ",
       "recoveredByRetry": "បានស្ដារឡើងវិញដោយការព្យាយាមម្ដងទៀត",
       "goToParent": "ទៅកាន់សំណើមេ",
@@ -12435,12 +12441,13 @@
       "failedTitle": "ការព្យាយាមទាំង {count} ដងបានបរាជ័យ",
       "failed": "បានបរាជ័យ",
       "pinnedTitle": "ម៉ូដែលត្រូវបានជ្រើសរើសតាមរយៈការខ្ទាស់សម័យ context-cache",
-      "pinned": "បានខ្ទាស់",
-      "recoveredAttemptsTitle": "សំណើត្រូវបានស្ដារឡើងវិញបន្ទាប់ពីព្យាយាម {count} ដង",
-      "latestOutcomeFailed": "លទ្ធផលសំណើចុងក្រោយបានបរាជ័យ"
+      "pinned": "បានខ្ទាស់"
     },
     "attempts": "ការព្យាយាម",
     "detail": {
+      "omittedHttpAttempts": "ការផ្ញើ HTTP ចំនួន {count} មិនត្រូវបានរក្សាទុកទេ",
+      "noHttpResponse": "មិនបានសង្កេតឃើញការឆ្លើយតប HTTP ទេ",
+      "transportError": "កំហុសការដឹកជញ្ជូន",
       "collapse": "បង្រួម {title}",
       "expand": "ពង្រីក {title}",
       "copyTitle": "ចម្លង {title}",
@@ -12539,20 +12546,13 @@
       "continuesFromParent": "បន្តពីធាតុមេ",
       "continuesFrom": "បន្តពី {id}",
       "viewConversation": "មើលការសន្ទនា",
-      "openConversation": "បើកការសន្ទនា {id}",
-      "omittedHttpAttempts": "ការផ្ញើ HTTP ចំនួន {count} មិនត្រូវបានរក្សាទុកទេ",
-      "noHttpResponse": "មិនបានសង្កេតឃើញការឆ្លើយតប HTTP ទេ",
-      "transportError": "កំហុសការដឹកជញ្ជូន"
+      "openConversation": "បើកការសន្ទនា {id}"
     },
     "tableLabel": "កំណត់ហេតុសំណើ",
     "throughputPostFirstToken": "ក្រោយតូខេនដំបូង",
     "throughputEndToEnd": "ពីដើមដល់ចប់",
     "throughputRate": "{value} តូខេន/វិនាទី",
-    "throughputExplanation": "អត្រាទាំងពីរប្រើចំនួនតូខេនធំជាងរវាងចំនួនតូខេនលទ្ធផល និងចំនួនតូខេនហេតុផល។ ក្រោយតូខេនដំបូងមិនរាប់បញ្ចូល TTFT ដែលត្រឹមត្រូវទេ; បើមិនដូច្នេះទេ វាប្រើរយៈពេលពេញលេញ។ ពីដើមដល់ចប់តែងតែប្រើរយៈពេលពេញលេញ។ ការឆ្លើយតបដែលបានស្តុកទុកអាចមានអត្រាបញ្ជូនផ្ទុះខ្ពស់ ដោយមិនមានការបង្កើតម៉ូដែលលឿនជាង។",
-    "omittedHttpAttempts": "ការផ្ញើ HTTP ចំនួន {count} មិនត្រូវបានរក្សាទុកទេ",
-    "upstreamStatus": "ម៉ាស៊ីនមេខាងលើ {status}",
-    "noHttpResponse": "មិនបានសង្កេតឃើញការឆ្លើយតប HTTP ទេ",
-    "transportError": "កំហុសការដឹកជញ្ជូន"
+    "throughputExplanation": "អត្រាទាំងពីរប្រើចំនួនតូខេនធំជាងរវាងចំនួនតូខេនលទ្ធផល និងចំនួនតូខេនហេតុផល។ ក្រោយតូខេនដំបូងមិនរាប់បញ្ចូល TTFT ដែលត្រឹមត្រូវទេ; បើមិនដូច្នេះទេ វាប្រើរយៈពេលពេញលេញ។ ពីដើមដល់ចប់តែងតែប្រើរយៈពេលពេញលេញ។ ការឆ្លើយតបដែលបានស្តុកទុកអាចមានអត្រាបញ្ជូនផ្ទុះខ្ពស់ ដោយមិនមានការបង្កើតម៉ូដែលលឿនជាង។"
   },
   "proxyLogger": {
     "filterAll": "ទាំងអស់",
@@ -16041,6 +16041,15 @@
     "rosterEmpty": "ជ្រើសរើសគណនីមួយដើម្បីមើលប៉ុតរបស់វា។",
     "conversationTitle": "ការព្រម្រៀង",
     "conversationEmpty": "ជ្រើសរើសប៉ុតមួយដើម្បីមើលការព្រម្រៀង។",
+    "conversationOlder": "សារពីមុន",
+    "rosterLoading": "កំពុងអាន bots...",
+    "pickAccountFirst": "ជ្រើសរើសគណនីជាមុនសិន។",
+    "detailsTitle": "ព័ត៌មានលម្អិត",
+    "fanoutTitle": "ផ្ញើទៅ",
+    "attachButton": "ភ្ជាប់",
+    "attachUnavailable": "{name} មិនត្រូវបានបញ្ជូនទេ។ ការផ្ទុកឯកសារមិនទាន់មាននៅឡើយទេ។",
+    "cardQueued": "{count} កាតច្រើនទៀតកំពុងរង់ចាំ",
+    "marketplaceNote": "ផ្ទាំងថ្មីប្រើគណនី x.ai ដែលបានចូលកម្មវិធីរុករកនេះ ដែលអាចខុសពីគណនីដែលបានជ្រើសរើសនៅទីនេះ។",
     "conversationBlocked": "មិនអាចចាប់ផ្តើមការព្រម្រៀងបានទេ។",
     "conversationLost": "ការតភ្ជាប់ទៅកាន់ប៉ុតនេះបាត់បង់ទៅហើយ។",
     "conversationSignIn": "គណនីនេះតម្រូវឱ្យអ្នកចូលព័ត៌មានម្តងទៀត។",
@@ -16057,7 +16066,7 @@
     "stateRunning": "ប៉ុតកំពុងធ្វើការ។",
     "stateIdle": "ប៉ុតកំពុងសម្រាក។",
     "stateStale": "ស្ថានភាពប៉ុតមិនច្បាស់លាស់។",
-    "stateBox": "Box: {state}",
+    "stateBox": "ប្រអប់: {state}",
     "sendPlaceholder": "ផ្ញើសារទៅប៉ុតនេះ",
     "sendButton": "ផ្ញើ",
     "sendUnknown": "មិនបានបញ្ជាក់។ មិនបានផ្ញើម្តងទៀតទេ។",
@@ -16066,24 +16075,15 @@
     "computersTitle": "កុំព្យូទ័រផ្ទៃក្នុង",
     "computersEmpty": "គ្មានកុំព្យូទ័រណាមួយដែលបានរាយការណ៍ទេ។",
     "chiefOfStaff": "អ្នកដឹកនាំក្រុមការងារ",
-    "connectorAllow": "Allow",
-    "connectorSkip": "Skip",
-    "unsupportedMessage": "This message is not supported here.",
-    "cardFailed": "The answer did not reach the bot. The card is still here.",
-    "connectorAlwaysBot": "Always for this bot",
-    "connectorAlwaysTeam": "Always for team bots",
-    "connectorAllowChannel": "Allow in channel",
-    "widgetSubmit": "Submit",
-    "widgetCustom": "Send custom answer",
-    "widgetDismiss": "Dismiss",
-    "conversationOlder": "Earlier messages",
-    "rosterLoading": "Reading bots...",
-    "pickAccountFirst": "Choose an account first.",
-    "detailsTitle": "Details",
-    "marketplaceNote": "The new tab uses the x.ai account signed in to this browser, which may differ from the account selected here.",
-    "fanoutTitle": "Also send to",
-    "attachButton": "Attach",
-    "attachUnavailable": "{name} was not sent. File upload is not available yet.",
-    "cardQueued": "{count} more cards waiting"
+    "connectorAllow": "អនុញ្ញាត",
+    "connectorSkip": "រំលង",
+    "connectorAlwaysBot": "តែងតែសម្រាប់ bot នេះ។",
+    "connectorAlwaysTeam": "តែងតែសម្រាប់ bots ក្រុម",
+    "connectorAllowChannel": "អនុញ្ញាតក្នុងឆានែល",
+    "cardFailed": "ចម្លើយមិនបានទៅដល់ bot ទេ។ កាតនៅតែមាននៅទីនេះ។",
+    "widgetSubmit": "ដាក់ស្នើ",
+    "widgetCustom": "ផ្ញើចម្លើយផ្ទាល់ខ្លួន",
+    "widgetDismiss": "ច្រានចោល",
+    "unsupportedMessage": "សារនេះមិនត្រូវបានគាំទ្រនៅទីនេះទេ។"
   }
 }

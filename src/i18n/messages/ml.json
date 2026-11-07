@@ -1124,7 +1124,7 @@
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "auto/* അഭ്യർത്ഥനകളെ പരിഹരിച്ച മോഡൽ കഴിവുകളും (വിഷൻ, റീസണിംഗ്, തിങ്കിംഗ്) നിരീക്ഷിച്ച ഗുണനിലവാര സ്കോറുകളും ഉപയോഗിച്ച്, ഒരൊറ്റ ബൾക്ക് റീഡിൽ, കാൻഡിഡേറ്റ് പൂൾ നിർമ്മിക്കാൻ അനുവദിക്കുന്നു. സ്ഥിരമായി ഓഫ്: അഭ്യർത്ഥന സമയത്തെ കാൻഡിഡേറ്റ് വെയ്റ്റുകൾ മുമ്പത്തെപ്പോലെ തന്നെ തുടരും. ഓൺ ആയാൽ: ഈ സിഗ്നലുകൾ സ്നാപ്ഷോട്ട് വെയ്റ്റുകളിലേക്ക് ചേരുന്നു, അതിനാൽ കാൻഡിഡേറ്റ് വെയ്റ്റുകളും തിരഞ്ഞെടുപ്പും മാറാം.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "ഗേറ്റ്വേ സ്വയം ഓഫാക്കിയ കണക്ഷനുകൾ ക്രെഡൻഷ്യൽ ആരോഗ്യ പരിശോധന വീണ്ടും പരിശോധിക്കാനും (ഓരോന്നും പരമാവധി 6 മണിക്കൂറിൽ ഒരിക്കൽ, ഓരോ പരിശോധനയിലും 5 എണ്ണം), പുനഃപരിശോധന വിജയിക്കുമ്പോൾ അവയിൽ ഒന്നിനെ വീണ്ടും ഓണാക്കാനും അനുവദിക്കുക. ഡിഫോൾട്ടായി ഓഫ്: ഒരു ഓപ്പറേറ്റർ നടപടി എടുക്കുന്നതുവരെ അത്തരം കണക്ഷനുകൾ ഓഫായിത്തന്നെ തുടരും. ഓപ്പറേറ്റർ പ്രവർത്തനരഹിതമാക്കിയതും ശാശ്വതമായി നിരോധിച്ചതുമായ കണക്ഷനുകൾ ഒരിക്കലും വീണ്ടും പരിശോധിക്കില്ല.",
   "sidebar": {
-    "grokBot": "Grok Bot",
+    "grokBot": "Grok ബോട്ട്",
     "grokBotSubtitle": "ബോട്ട് കൺസോൾ: സൈൻ-ഇൻ ചെയ്ത ബോട്ടുകളോട് സംസാരിക്കുക, അവ ചോദിക്കുന്ന അനുമതികൾ നൽകുക, ഒരിക്കലായി നിരവധി അക്കൗണ്ടുകളിലേക്ക് അയയ്ക്കുക",
     "home": "ഹോം",
     "dashboard": "ഡാഷ്ബോർഡ്",
@@ -3404,12 +3404,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "പൈ പ്രവർത്തിക്കുന്ന മെഷീനിൽ നിന്ന് എത്തിച്ചേരാവുന്ന URL ഉപയോഗിക്കുക. OpenAI-അനുയോജ്യമായ /v1 എൻഡ്പോയിൻ്റ് സ്വയമേവ ചേർക്കുന്നു.",
     "piManualMergeHint": "പ്രിവ്യൂ മാത്രം. ഈ providers.omniroute എൻട്രി models.json യിലേക്ക് ലയിപ്പിക്കുക, അതുവഴി നിങ്ങളുടെ മറ്റ് ദാതാക്കളും ക്രമീകരണങ്ങളും കേടുകൂടാതെയിരിക്കും.",
-    "removeMapping": "മാപ്പിംഗ് നീക്കംചെയ്യുക",
     "customUrl": "കസ്റ്റം URL",
     "customEndpointAria": "കസ്റ്റം എൻഡ്പോയിന്റ്",
     "useDefaultKey": "OmniRoute-ന്റെ ഡീഫോൾട്ട് കീ ഉപയോഗിക്കുക",
     "mainModelAria": "പ്രധാന മോഡൽ",
-    "manualConfigTitle": "Grok Build ഉപയോക്താവ് ക്രമീകരണം"
+    "manualConfigTitle": "Grok Build ഉപയോക്താവ് ക്രമീകരണം",
+    "removeMapping": "മാപ്പിംഗ് നീക്കംചെയ്യുക"
   },
   "modelCatalog": {
     "title": "മോഡലുകളും കോംബോകളും",
@@ -3656,6 +3656,7 @@
     "more": "+{count} കൂടി",
     "reqs": "അഭ്യർത്ഥനകൾ",
     "success": "വിജയം",
+    "fallbackSummary": "{rate}% ആവശ്യങ്ങൾ ഫോൾബാക്ക് ചെയ്തു, ഓരോ ആവശ്യവും ശരാശരി ~{skips} ടാർഗറ്റുകൾ പെറിച്ചു",
     "proxyConfigured": "പ്രോക്സി കോൺഫിഗർ ചെയ്തു",
     "copyComboName": "കോംബോയുടെ പേര് പകർത്തുക",
     "enableCombo": "കോംബോ പ്രവർത്തനക്ഷമമാക്കുക",
@@ -4225,8 +4226,7 @@
     "duplicateAutoComboSnapshotMsg": "ഈ ടെംപ്ലേറ്റുമായി പൊരുത്തപ്പെടുന്ന, നിലവിൽ കണക്റ്റ് ചെയ്തിരിക്കുന്ന പ്രൊവൈഡർമാരുടെയും മോഡലുകളുടെയും ഒരു സ്നാപ്പ്ഷോട്ട് എഡിറ്റ് ചെയ്യാവുന്ന കോംബോയാക്കി മാറ്റും.",
     "duplicateAutoComboFailedPrefix": "ഓട്ടോ-കോംബോ പകർത്തുന്നതിൽ പരാജയപ്പെട്ടു:",
     "duplicateAutoComboUnknownError": "അജ്ഞാത പിശക്",
-    "duplicateAutoComboTitle": "{name}-ൽ നിന്ന് ഒരു സ്റ്റാറ്റിക് കോംബോ സൃഷ്ടിക്കുക",
-    "fallbackSummary": "{rate}% ആവശ്യങ്ങൾ ഫോൾബാക്ക് ചെയ്തു, ഓരോ ആവശ്യവും ശരാശരി ~{skips} ടാർഗറ്റുകൾ പെറിച്ചു"
+    "duplicateAutoComboTitle": "{name}-ൽ നിന്ന് ഒരു സ്റ്റാറ്റിക് കോംബോ സൃഷ്ടിക്കുക"
   },
   "costs": {
     "title": "ചെലവുകൾ",
@@ -9290,9 +9290,9 @@
         "financial": "സാമ്പത്തികം",
         "brazilian": "ബ്രസീലിയൻ",
         "usa": "യുഎസ്എ",
-        "full": "പൂർണ്ണം",
         "gdpr": "GDPR (EU)",
-        "popia": "POPIA (ദക്ഷിണാഫ്രിക്ക)"
+        "popia": "POPIA (ദക്ഷിണാഫ്രിക്ക)",
+        "full": "പൂർണ്ണം"
       },
       "builtinTypes": "ബിൽറ്റ്-ഇൻ തരങ്ങൾ",
       "types": {
@@ -12344,6 +12344,10 @@
     "messageInputAria": "സന്ദേശം"
   },
   "requestLogger": {
+    "omittedHttpAttempts": "{count} HTTP അയയ്ക്കലുകൾ സൂക്ഷിച്ചിട്ടില്ല",
+    "upstreamStatus": "അപ്‌സ്ട്രീം സെർവർ {status}",
+    "noHttpResponse": "HTTP പ്രതികരണം നിരീക്ഷിക്കപ്പെട്ടിട്ടില്ല",
+    "transportError": "ഗതാഗത പിശക്",
     "recording": "റെക്കോർഡ് ചെയ്യുന്നു",
     "paused": "താൽക്കാലികമായി നിർത്തി",
     "pipelineLogsOn": "പൈപ്പ്ലൈൻ ലോഗുകൾ ഓണാണ്",
@@ -12427,6 +12431,8 @@
       "increase": "ഇടവേള കൂട്ടുക"
     },
     "status": {
+      "recoveredAttemptsTitle": "{count} ശ്രമങ്ങൾക്ക് ശേഷം അഭ്യർത്ഥന വീണ്ടെടുത്തു",
+      "latestOutcomeFailed": "ഏറ്റവും പുതിയ അഭ്യർത്ഥനയുടെ ഫലം പരാജയപ്പെട്ടു",
       "inProgress": "പുരോഗതിയിൽ",
       "recoveredByRetry": "വീണ്ടും ശ്രമിച്ചതിലൂടെ വീണ്ടെടുത്തു",
       "goToParent": "പാരന്റ് അഭ്യർത്ഥനയിലേക്ക് പോകുക",
@@ -12435,12 +12441,13 @@
       "failedTitle": "എല്ലാ {count} ശ്രമങ്ങളും പരാജയപ്പെട്ടു",
       "failed": "പരാജയപ്പെട്ടു",
       "pinnedTitle": "കോൺടെക്സ്റ്റ്-കാഷ് സെഷൻ പിന്നിംഗ് വഴി മോഡൽ തിരഞ്ഞെടുത്തു",
-      "pinned": "പിൻ ചെയ്തത്",
-      "recoveredAttemptsTitle": "{count} ശ്രമങ്ങൾക്ക് ശേഷം അഭ്യർത്ഥന വീണ്ടെടുത്തു",
-      "latestOutcomeFailed": "ഏറ്റവും പുതിയ അഭ്യർത്ഥനയുടെ ഫലം പരാജയപ്പെട്ടു"
+      "pinned": "പിൻ ചെയ്തത്"
     },
     "attempts": "ശ്രമങ്ങൾ",
     "detail": {
+      "omittedHttpAttempts": "{count} HTTP അയയ്ക്കലുകൾ സൂക്ഷിച്ചിട്ടില്ല",
+      "noHttpResponse": "HTTP പ്രതികരണം നിരീക്ഷിക്കപ്പെട്ടിട്ടില്ല",
+      "transportError": "ഗതാഗത പിശക്",
       "collapse": "{title} ചുരുക്കുക",
       "expand": "{title} വികസിപ്പിക്കുക",
       "copyTitle": "{title} പകർത്തുക",
@@ -12539,20 +12546,13 @@
       "continuesFromParent": "പാരന്റിൽ നിന്ന് തുടരുന്നു",
       "continuesFrom": "{id}-ൽ നിന്ന് തുടരുന്നു",
       "viewConversation": "സംഭാഷണം കാണുക",
-      "openConversation": "{id} സംഭാഷണം തുറക്കുക",
-      "omittedHttpAttempts": "{count} HTTP അയയ്ക്കലുകൾ സൂക്ഷിച്ചിട്ടില്ല",
-      "noHttpResponse": "HTTP പ്രതികരണം നിരീക്ഷിക്കപ്പെട്ടിട്ടില്ല",
-      "transportError": "ഗതാഗത പിശക്"
+      "openConversation": "{id} സംഭാഷണം തുറക്കുക"
     },
     "tableLabel": "അഭ്യർത്ഥന ലോഗുകൾ",
     "throughputPostFirstToken": "ആദ്യ ടോക്കണിന് ശേഷം",
     "throughputEndToEnd": "തുടക്കം മുതൽ അവസാനം വരെ",
     "throughputRate": "സെക്കൻഡിൽ {value} ടോക്കണുകൾ",
-    "throughputExplanation": "രണ്ട് നിരക്കുകളും ഔട്ട്പുട്ട് ടോക്കൺ എണ്ണത്തിലും റീസണിംഗ് ടോക്കൺ എണ്ണത്തിലും വലുതായത് ഉപയോഗിക്കുന്നു. സാധുവായ TTFT ഉണ്ടെങ്കിൽ ആദ്യ ടോക്കണിന് ശേഷമുള്ള നിരക്ക് അത് ഒഴിവാക്കുന്നു; അല്ലാത്തപക്ഷം, പൂർണ്ണ ദൈർഘ്യം ഉപയോഗിക്കുന്നു. തുടക്കം മുതൽ അവസാനം വരെയുള്ള നിരക്ക് എല്ലായ്പ്പോഴും പൂർണ്ണ ദൈർഘ്യം ഉപയോഗിക്കുന്നു. മോഡൽ ജനറേഷൻ വേഗത്തിലല്ലെങ്കിലും, ബഫർ ചെയ്ത പ്രതികരണത്തിന് ഉയർന്ന ബർസ്റ്റ് ഡെലിവറി നിരക്ക് ഉണ്ടായേക്കാം.",
-    "omittedHttpAttempts": "{count} HTTP അയയ്ക്കലുകൾ സൂക്ഷിച്ചിട്ടില്ല",
-    "upstreamStatus": "അപ്‌സ്ട്രീം സെർവർ {status}",
-    "noHttpResponse": "HTTP പ്രതികരണം നിരീക്ഷിക്കപ്പെട്ടിട്ടില്ല",
-    "transportError": "ഗതാഗത പിശക്"
+    "throughputExplanation": "രണ്ട് നിരക്കുകളും ഔട്ട്പുട്ട് ടോക്കൺ എണ്ണത്തിലും റീസണിംഗ് ടോക്കൺ എണ്ണത്തിലും വലുതായത് ഉപയോഗിക്കുന്നു. സാധുവായ TTFT ഉണ്ടെങ്കിൽ ആദ്യ ടോക്കണിന് ശേഷമുള്ള നിരക്ക് അത് ഒഴിവാക്കുന്നു; അല്ലാത്തപക്ഷം, പൂർണ്ണ ദൈർഘ്യം ഉപയോഗിക്കുന്നു. തുടക്കം മുതൽ അവസാനം വരെയുള്ള നിരക്ക് എല്ലായ്പ്പോഴും പൂർണ്ണ ദൈർഘ്യം ഉപയോഗിക്കുന്നു. മോഡൽ ജനറേഷൻ വേഗത്തിലല്ലെങ്കിലും, ബഫർ ചെയ്ത പ്രതികരണത്തിന് ഉയർന്ന ബർസ്റ്റ് ഡെലിവറി നിരക്ക് ഉണ്ടായേക്കാം."
   },
   "proxyLogger": {
     "filterAll": "എല്ലാം",
@@ -16033,7 +16033,7 @@
     "btnSend": "അയയ്ക്കുക"
   },
   "grokBotPage": {
-    "title": "Grok Bot",
+    "title": "Grok ബോട്ട്",
     "subtitle": "സൈൻ-ഇൻ ചെയ്ത അക്കൗണ്ടുകൾ, അവയുടെ ബോട്ടുകൾ, കഴിവുകൾ, ലോകൽ കമ്പ്യൂട്ടറുകൾ.",
     "accountsTitle": "അക്കൗണ്ടുകൾ",
     "accountsEmpty": "സൈൻ-ഇൻ ചെയ്ത അക്കൗണ്ടുകൾ ഇല്ല.",
@@ -16041,6 +16041,15 @@
     "rosterEmpty": "അതിന്റെ ബോട്ടുകൾ കാണാൻ ഒരു അക്കൗണ്ട് തിരഞ്ഞെടുക്കുക.",
     "conversationTitle": "സംഭാഷണം",
     "conversationEmpty": "സംഭാഷണം കാണാൻ ഒരു ബോട്ട് തിരഞ്ഞെടുക്കുക.",
+    "conversationOlder": "മുമ്പത്തെ സന്ദേശങ്ങൾ",
+    "rosterLoading": "ബോട്ടുകൾ വായിക്കുന്നു...",
+    "pickAccountFirst": "ആദ്യം ഒരു അക്കൗണ്ട് തിരഞ്ഞെടുക്കുക.",
+    "detailsTitle": "വിശദാംശങ്ങൾ",
+    "fanoutTitle": "എന്നതിലേക്കും അയയ്ക്കുക",
+    "attachButton": "അറ്റാച്ചുചെയ്യുക",
+    "attachUnavailable": "{name} അയച്ചിട്ടില്ല. ഫയൽ അപ്ലോഡ് ഇതുവരെ ലഭ്യമല്ല.",
+    "cardQueued": "{count} കൂടുതൽ കാർഡുകൾ കാത്തിരിക്കുന്നു",
+    "marketplaceNote": "പുതിയ ടാബ് ഈ ബ്രൗസറിൽ സൈൻ ഇൻ ചെയ്തിരിക്കുന്ന x.ai അക്കൗണ്ട് ഉപയോഗിക്കുന്നു, അത് ഇവിടെ തിരഞ്ഞെടുത്ത അക്കൗണ്ടിൽ നിന്ന് വ്യത്യസ്തമായിരിക്കാം.",
     "conversationBlocked": "സംഭാഷണം ആരംഭിക്കാൻ കഴിഞ്ഞില്ല.",
     "conversationLost": "ഈ ബോട്ടുമായുള്ള കണക്ഷൻ നഷ്ടപ്പെട്ടു.",
     "conversationSignIn": "ഈ അക്കൗണ്ടിൽ വീണ്ടും സൈൻ ഇൻ ചെയ്യേണ്ടതുണ്ട്.",
@@ -16057,7 +16066,7 @@
     "stateRunning": "ബോട്ട് പ്രവർത്തിക്കുന്നു.",
     "stateIdle": "ബോട്ട് വൈകാരിയ്ക്കുന്നു (idle).",
     "stateStale": "ബോട്ടിന്റെ സ്ഥിതി അറിയില്ല.",
-    "stateBox": "Box: {state}",
+    "stateBox": "ബോക്സ്: {state}",
     "sendPlaceholder": "ഈ ബോട്ടിന് സന്ദേശം അയയ്ക്കുക",
     "sendButton": "അയയ്ക്കുക",
     "sendUnknown": "നൽകുന്ന അല്ല. വീണ്ടും അയയ്ക്കുന്നില്ല.",
@@ -16066,24 +16075,15 @@
     "computersTitle": "ലോകൽ കമ്പ്യൂട്ടറുകൾ",
     "computersEmpty": "ലോകൽ കമ്പ്യൂട്ടറുകളും റിപ്പോർട്ട് ചെയ്തില്ല.",
     "chiefOfStaff": "സ്റ്റാഫിന്റെ തലവൻ",
-    "connectorAllow": "Allow",
-    "connectorSkip": "Skip",
-    "unsupportedMessage": "This message is not supported here.",
-    "cardFailed": "The answer did not reach the bot. The card is still here.",
-    "connectorAlwaysBot": "Always for this bot",
-    "connectorAlwaysTeam": "Always for team bots",
-    "connectorAllowChannel": "Allow in channel",
-    "widgetSubmit": "Submit",
-    "widgetCustom": "Send custom answer",
-    "widgetDismiss": "Dismiss",
-    "conversationOlder": "Earlier messages",
-    "rosterLoading": "Reading bots...",
-    "pickAccountFirst": "Choose an account first.",
-    "detailsTitle": "Details",
-    "marketplaceNote": "The new tab uses the x.ai account signed in to this browser, which may differ from the account selected here.",
-    "fanoutTitle": "Also send to",
-    "attachButton": "Attach",
-    "attachUnavailable": "{name} was not sent. File upload is not available yet.",
-    "cardQueued": "{count} more cards waiting"
+    "connectorAllow": "അനുവദിക്കുക",
+    "connectorSkip": "ഒഴിവാക്കുക",
+    "connectorAlwaysBot": "ഈ ബോട്ടിന് എപ്പോഴും",
+    "connectorAlwaysTeam": "എപ്പോഴും ടീം ബോട്ടുകൾക്കായി",
+    "connectorAllowChannel": "ചാനലിൽ അനുവദിക്കുക",
+    "cardFailed": "ഉത്തരം ബോട്ടിൽ എത്തിയില്ല. കാർഡ് ഇപ്പോഴും ഇവിടെയുണ്ട്.",
+    "widgetSubmit": "സമർപ്പിക്കുക",
+    "widgetCustom": "ഇഷ്ടാനുസൃത ഉത്തരം അയയ്ക്കുക",
+    "widgetDismiss": "പിരിച്ചുവിടുക",
+    "unsupportedMessage": "ഈ സന്ദേശം ഇവിടെ പിന്തുണയ്ക്കുന്നില്ല."
   }
 }

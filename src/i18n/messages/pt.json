@@ -1124,7 +1124,7 @@
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "Permite que os pedidos auto/* construam o conjunto de candidatos com as capacidades de modelo resolvidas (visão, raciocínio, pensamento) e as pontuações de qualidade observadas, lidas numa única leitura em lote. Desativado por predefinição: os pesos dos candidatos no momento do pedido mantêm-se exatamente como antes. Ativado: esses sinais alimentam os pesos do instantâneo, pelo que os pesos dos candidatos e a seleção podem mudar.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Permitir que a verificação do estado das credenciais volte a testar as ligações que o gateway desativou automaticamente (no máximo uma vez a cada 6 horas por ligação, 5 por verificação) e reative uma ligação quando o novo teste for bem-sucedido. Desativado por predefinição: essas ligações permanecem desativadas até que um operador intervenha. As ligações desativadas por um operador e as ligações permanentemente banidas nunca são testadas novamente.",
   "sidebar": {
-    "grokBot": "Grok Bot",
+    "grokBot": "Grok bot",
     "grokBotSubtitle": "Consola do bot: interaja com bots autenticados, responda às permissões solicitadas e envie para várias contas de uma vez",
     "home": "Página inicial",
     "dashboard": "Painel",
@@ -3404,12 +3404,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Utilize o URL acessível na máquina que executa o Pi. O endpoint /v1 compatível com OpenAI é adicionado automaticamente.",
     "piManualMergeHint": "Apenas visualização. Mescle esta entrada providers.omniroute no models.json para que os seus outros providers e definições permaneçam intactos.",
-    "removeMapping": "Remover mapeamento",
     "customUrl": "URL personalizado",
     "customEndpointAria": "Endpoint personalizado",
     "useDefaultKey": "Usar a chave predefinida do OmniRoute",
     "mainModelAria": "Modelo principal",
-    "manualConfigTitle": "Configuração manual do Grok Build"
+    "manualConfigTitle": "Configuração manual do Grok Build",
+    "removeMapping": "Remover mapeamento"
   },
   "modelCatalog": {
     "title": "Modelos e Combos",
@@ -3656,6 +3656,7 @@
     "more": "+{count} mais",
     "reqs": "requisitos",
     "success": "sucesso",
+    "fallbackSummary": "{rate}% das requisições usaram fallback, ~{skips} alvos ignorados por cada uma",
     "proxyConfigured": "Proxy configurado",
     "copyComboName": "Copiar nome do combo",
     "enableCombo": "Ativar combinação",
@@ -4225,8 +4226,7 @@
     "duplicateAutoComboSnapshotMsg": "Isto irá capturar os provedores/modelos atualmente conectados que correspondem a este modelo em uma combinação editável.",
     "duplicateAutoComboFailedPrefix": "Falha ao duplicar a combinação automática:",
     "duplicateAutoComboUnknownError": "Erro desconhecido",
-    "duplicateAutoComboTitle": "Criar uma combinação estática de {name}",
-    "fallbackSummary": "{rate}% das requisições usaram fallback, ~{skips} alvos ignorados por cada uma"
+    "duplicateAutoComboTitle": "Criar uma combinação estática de {name}"
   },
   "costs": {
     "title": "Custos",
@@ -9290,9 +9290,9 @@
         "financial": "Financeiro",
         "brazilian": "Brasileiro",
         "usa": "EUA",
-        "full": "Completo",
         "gdpr": "RGPD (UE)",
-        "popia": "POPIA (África do Sul)"
+        "popia": "POPIA (África do Sul)",
+        "full": "Completo"
       },
       "builtinTypes": "Tipos incorporados",
       "types": {
@@ -10228,6 +10228,10 @@
     "healthExtraUsageBypass": "Quota esgotada; a utilização adicional é permitida, pelo que o serviço continua.",
     "healthPaidCreditsBypass": "Quota esgotada; os créditos pagos disponíveis permitem continuar o serviço.",
     "healthFilteringBypass": "Quota esgotada; a filtragem local de quotas está desativada, pelo que o serviço continua.",
+    "codexPaidCreditsLabel": "Créditos pagos do Codex",
+    "codexPaidCreditsAvailable": "Disponíveis (saldo não indicado)",
+    "codexPaidCreditsUnavailable": "Indisponíveis ou limite de gastos atingido",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Uso",
     "grokExtraUsageCredits": "Créditos de Uso Extra",
     "grokAutoTopUp": "Recarregamento Automático",
@@ -10685,10 +10689,6 @@
     "confirmRedeemClaudeResetCredit": "O resgate repõe imediatamente os limites de utilização elegíveis do Claude e consome permanentemente este crédito.",
     "claudeResetCreditsModalTitle": "Créditos de reposição do Claude",
     "claudeResetCreditsModalExplainer": "Créditos de reposição do Claude disponíveis e reposições semanais de sessão para esta conta.",
-    "codexPaidCreditsLabel": "Créditos pagos do Codex",
-    "codexPaidCreditsAvailable": "Disponíveis (saldo não indicado)",
-    "codexPaidCreditsUnavailable": "Indisponíveis ou limite de gastos atingido",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "healthAccountHint": "Com base nas observações recentes, não num teste em direto. Selecione uma conta para ver detalhes.",
     "healthRecovery": "Recuperação prevista",
     "healthAvailable": "Disponível",
@@ -12344,6 +12344,10 @@
     "messageInputAria": "Mensagem"
   },
   "requestLogger": {
+    "omittedHttpAttempts": "{count} envios HTTP não foram retidos",
+    "upstreamStatus": "Servidor a montante {status}",
+    "noHttpResponse": "Não foi observada qualquer resposta HTTP",
+    "transportError": "Erro de transporte",
     "recording": "A gravar",
     "paused": "Em pausa",
     "pipelineLogsOn": "Registos de pipeline ligados",
@@ -12427,6 +12431,8 @@
       "increase": "Aumentar intervalo"
     },
     "status": {
+      "recoveredAttemptsTitle": "Pedido recuperado após {count} tentativas",
+      "latestOutcomeFailed": "O resultado mais recente do pedido falhou",
       "inProgress": "Em progresso",
       "recoveredByRetry": "Recuperado por nova tentativa",
       "goToParent": "Ir para o pedido pai",
@@ -12435,12 +12441,13 @@
       "failedTitle": "Todas as {count} tentativas falharam",
       "failed": "falhou",
       "pinnedTitle": "Modelo selecionado através do fixador de sessão do cache de contexto",
-      "pinned": "fixado",
-      "recoveredAttemptsTitle": "Pedido recuperado após {count} tentativas",
-      "latestOutcomeFailed": "O resultado mais recente do pedido falhou"
+      "pinned": "fixado"
     },
     "attempts": "tentativas",
     "detail": {
+      "omittedHttpAttempts": "{count} envios HTTP não foram retidos",
+      "noHttpResponse": "Não foi observada qualquer resposta HTTP",
+      "transportError": "Erro de transporte",
       "collapse": "Colapsar {title}",
       "expand": "Expandir {title}",
       "copyTitle": "Copiar {title}",
@@ -12539,20 +12546,13 @@
       "continuesFromParent": "continua a partir do elemento principal",
       "continuesFrom": "Continua a partir de {id}",
       "viewConversation": "ver conversa",
-      "openConversation": "Abrir conversa {id}",
-      "omittedHttpAttempts": "{count} envios HTTP não foram retidos",
-      "noHttpResponse": "Não foi observada qualquer resposta HTTP",
-      "transportError": "Erro de transporte"
+      "openConversation": "Abrir conversa {id}"
     },
     "tableLabel": "Registos de pedidos",
     "throughputPostFirstToken": "Após o primeiro token",
     "throughputEndToEnd": "Ponta a ponta",
     "throughputRate": "{value} tokens/s",
-    "throughputExplanation": "Ambas as taxas utilizam o maior valor entre a contagem de tokens de saída e de raciocínio. A taxa após o primeiro token exclui um TTFT válido; caso contrário, utiliza a duração total. A taxa ponta a ponta utiliza sempre a duração total. Uma resposta em buffer pode ter uma taxa de entrega em rajada elevada sem que a geração do modelo seja mais rápida.",
-    "omittedHttpAttempts": "{count} envios HTTP não foram retidos",
-    "upstreamStatus": "Servidor a montante {status}",
-    "noHttpResponse": "Não foi observada qualquer resposta HTTP",
-    "transportError": "Erro de transporte"
+    "throughputExplanation": "Ambas as taxas utilizam o maior valor entre a contagem de tokens de saída e de raciocínio. A taxa após o primeiro token exclui um TTFT válido; caso contrário, utiliza a duração total. A taxa ponta a ponta utiliza sempre a duração total. Uma resposta em buffer pode ter uma taxa de entrega em rajada elevada sem que a geração do modelo seja mais rápida."
   },
   "proxyLogger": {
     "filterAll": "Todos",
@@ -16033,14 +16033,23 @@
     "btnSend": "Enviar"
   },
   "grokBotPage": {
-    "title": "Grok Bot",
+    "title": "Grok bot",
     "subtitle": "Contas autenticadas, os respetivos bots, competências e computadores locais.",
     "accountsTitle": "Contas",
     "accountsEmpty": "Não há contas autenticadas.",
-    "rosterTitle": "Bots",
+    "rosterTitle": "Robôs",
     "rosterEmpty": "Selecione uma conta para ver os respetivos bots.",
     "conversationTitle": "Conversa",
     "conversationEmpty": "Selecione um bot para ver a conversa.",
+    "conversationOlder": "Mensagens anteriores",
+    "rosterLoading": "Leitura de bots...",
+    "pickAccountFirst": "Escolha primeiro uma conta.",
+    "detailsTitle": "Detalhes",
+    "fanoutTitle": "Envie também para",
+    "attachButton": "Anexar",
+    "attachUnavailable": "{name} não foi enviado. O upload do ficheiro ainda não está disponível.",
+    "cardQueued": "{count} mais cartas à espera",
+    "marketplaceNote": "O novo separador utiliza a conta x.ai ligada a este navegador, que pode ser diferente da conta aqui selecionada.",
     "conversationBlocked": "Não foi possível iniciar a conversa.",
     "conversationLost": "A ligação a este bot foi perdida.",
     "conversationSignIn": "Esta conta precisa que inicie sessão novamente.",
@@ -16057,7 +16066,7 @@
     "stateRunning": "O bot está a funcionar.",
     "stateIdle": "O bot está inativo.",
     "stateStale": "O estado do bot é desconhecido.",
-    "stateBox": "Box: {state}",
+    "stateBox": "Caixa: {state}",
     "sendPlaceholder": "Enviar mensagem a este bot",
     "sendButton": "Enviar",
     "sendUnknown": "Não confirmada. Não foi novamente enviada.",
@@ -16066,24 +16075,15 @@
     "computersTitle": "Computadores locais",
     "computersEmpty": "Não há computadores reportados.",
     "chiefOfStaff": "chefe de estado-maior",
-    "connectorAllow": "Allow",
-    "connectorSkip": "Skip",
-    "unsupportedMessage": "This message is not supported here.",
-    "cardFailed": "The answer did not reach the bot. The card is still here.",
-    "connectorAlwaysBot": "Always for this bot",
-    "connectorAlwaysTeam": "Always for team bots",
-    "connectorAllowChannel": "Allow in channel",
-    "widgetSubmit": "Submit",
-    "widgetCustom": "Send custom answer",
-    "widgetDismiss": "Dismiss",
-    "conversationOlder": "Earlier messages",
-    "rosterLoading": "Reading bots...",
-    "pickAccountFirst": "Choose an account first.",
-    "detailsTitle": "Details",
-    "marketplaceNote": "The new tab uses the x.ai account signed in to this browser, which may differ from the account selected here.",
-    "fanoutTitle": "Also send to",
-    "attachButton": "Attach",
-    "attachUnavailable": "{name} was not sent. File upload is not available yet.",
-    "cardQueued": "{count} more cards waiting"
+    "connectorAllow": "Permitir",
+    "connectorSkip": "Ignorar",
+    "connectorAlwaysBot": "Sempre para este bot",
+    "connectorAlwaysTeam": "Sempre para bots de equipa",
+    "connectorAllowChannel": "Permitir no canal",
+    "cardFailed": "A resposta não chegou ao bot. O cartão ainda está aqui.",
+    "widgetSubmit": "Submeter",
+    "widgetCustom": "Enviar resposta personalizada",
+    "widgetDismiss": "Dispensar",
+    "unsupportedMessage": "Esta mensagem não é suportada aqui."
   }
 }
