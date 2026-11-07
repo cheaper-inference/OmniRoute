@@ -482,7 +482,7 @@ export function claudeToOpenAIResponse(chunk, state) {
 }
 
 // Convert Claude stop_reason to OpenAI finish_reason
-function convertStopReason(reason) {
+export function convertStopReason(reason) {
   switch (reason) {
     case "end_turn":
       return "stop";
