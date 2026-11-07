@@ -2271,6 +2271,7 @@ async function handleChatCoreInner({
         effectiveModel,
         targetFormat,
         preserveCacheControl,
+        connectionCacheOverride,
         normalizeClaudeUpstreamMessages,
         applyReasoningRuleDirective,
         log,
