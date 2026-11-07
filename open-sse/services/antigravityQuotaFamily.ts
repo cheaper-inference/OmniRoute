@@ -79,13 +79,16 @@ export function quotaWindowNamesForScope(
   names: string[],
   scope?: { provider?: string | null; requestedModel?: string | null }
 ): string[] {
-  if (!scope?.requestedModel || !isAntigravityQuotaProvider(scope.provider)) return names;
-  const scoped = selectAntigravityQuotaWindowNames(names, scope.requestedModel);
-  if (scoped.length > 0) return scoped;
-  // Argon has its own pool: a window set with neither Argon nor Gemini buckets says nothing
-  // about it, so scan none (fail open). Gemini and Claude keep the shipped all-windows fallback.
-  if (getAntigravityQuotaFamily(scope.requestedModel) === "argon") return [];
-  return names;
+  if (!scope?.requestedModel || !isAntigravityQuotaProvider(scope.provider)) {
+    return names;
+  }
+
+  const scoped = selectAntigravityQuotaWindowNames(
+    names,
+    scope.requestedModel
+  );
+
+  return scoped;
 }
 
 /**
@@ -192,7 +195,11 @@ export function selectAntigravityQuotaWindowNames(
   if (scoped.length > 0) return scoped;
   if (requestedFamily === "argon") return argonFallbackWindowNames(quotaNames);
 
-  return quotaNames.filter(
-    (windowName) => getAntigravityQuotaFamily(windowName) === requestedFamily
-  );
+  if (requestedFamily === "claude") {
+    return quotaNames.filter(
+      (windowName) => getAntigravityQuotaFamily(windowName) === requestedFamily
+    );
+  }
+
+  return [];
 }
