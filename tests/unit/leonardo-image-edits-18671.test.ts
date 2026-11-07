@@ -6,6 +6,7 @@
  */
 
 import assert from "node:assert/strict";
+import dns from "node:dns";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -21,6 +22,8 @@ const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const imageEditRoute = await import("../../src/app/api/v1/images/edits/route.ts");
 const { handleLeonardoImageGeneration } =
   await import("../../open-sse/handlers/imageGeneration/providers/leonardo.ts");
+const { waitForCallLogSaves } = await import("../../src/lib/usage/callLogs.ts");
+const { setPinnedFetchTestOverride } = await import("../../src/shared/network/remoteImageFetch.ts");
 
 const GENERATIONS_URL = "https://cloud.leonardo.ai/api/rest/v1/generations";
 const INIT_IMAGE_URL = "https://cloud.leonardo.ai/api/rest/v1/init-image";
@@ -29,9 +32,21 @@ const PHOENIX_1_0 = "de7d3faf-762f-48e0-b3b7-9d0ac3a3fcf3";
 const REFERENCE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1]);
 
 const originalFetch = globalThis.fetch;
+// The result download goes through the guarded media fetch, which resolves the host and then
+// connects through a pinned agent. Resolve cdn.leonardo.ai to a public address and send the
+// pinned request to the mocked globalThis.fetch.
+const originalLookup = dns.promises.lookup;
+(dns.promises as { lookup: unknown }).lookup = (async () => [
+  { address: "93.184.216.34", family: 4 },
+]) as typeof dns.promises.lookup;
+setPinnedFetchTestOverride(((input: string | URL | Request, init?: RequestInit) =>
+  globalThis.fetch(input, init)) as typeof fetch);
 
-test.after(() => {
+test.after(async () => {
   globalThis.fetch = originalFetch;
+  (dns.promises as { lookup: unknown }).lookup = originalLookup;
+  setPinnedFetchTestOverride(undefined);
+  await waitForCallLogSaves(1_000);
   apiKeysDb.resetApiKeyState();
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
