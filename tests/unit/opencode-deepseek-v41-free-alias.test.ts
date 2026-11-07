@@ -40,12 +40,14 @@ test("opencode-zen registry advertises v4.1 and keeps the old id as an alias", (
   );
 });
 
-test("free-model catalog lists v4.1 instead of the delisted id", () => {
-  assert.ok(
+test("the alias replacement does not grant client-restricted free eligibility", () => {
+  assert.equal(
     FREE_MODEL_BUDGETS.some(
       (entry) =>
         entry.provider === "opencode-zen" && entry.modelId === "opencode/deepseek-v4.1-flash-free"
-    )
+    ),
+    false,
+    "a valid authenticated model is not a generic proxy free-tier grant"
   );
   assert.equal(
     FREE_MODEL_BUDGETS.some((entry) => entry.modelId === "opencode/deepseek-v4-flash-free"),

@@ -102,6 +102,12 @@ export type AttemptLoopDeps = {
   signal?: AbortSignal | null;
   body: Record<string, unknown>;
   startTime: number;
+  /** Shares the existing request wait limits with an inline, already-authorized retry. */
+  retryCooldownWait?: {
+    attempt: { current: number };
+    budgetLeftMs: { current: number };
+    deadline: number;
+  };
   releaseStickyPinOnFailure: (
     messageHash: string | null | undefined,
     failedConnectionId: string | null | undefined
@@ -127,7 +133,7 @@ export type AttemptLoopDeps = {
   getWeightedStepKeyForTarget?: (target: ResolvedComboTarget) => string | null;
   universalHandoffConfig?: UniversalHandoffConfig;
   sourceFormat?: string | null;
-  relayOptions?: { sessionId?: string | null } | null;
+  relayOptions?: { sessionId?: string | null; apiKeyId?: string | null } | null;
   relayConfig?: ContextRelayConfig | null;
 };
 

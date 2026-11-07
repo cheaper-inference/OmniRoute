@@ -68,11 +68,22 @@ describe("ProviderCard — Kimi (Moonshot AI) founding-friend accent", () => {
     // so the rendered text is the hardcoded English fallback.
     expect(el.textContent).toContain("Founding Friend");
 
-    // The card's own accent border/glow (KIMI_BRAND_COLOR = #1783FF) must be
-    // present on some element in the tree — both the outer Card border classes
-    // and the badge chip carry it.
-    const accented = el.querySelector("[class*='1783FF']");
-    expect(accented).not.toBeNull();
+    // The card's own tint (KIMI_BRAND_COLOR = #1783FF) must be present: the kit Card takes the
+    // brand through `brandColor`, and the badge chip carries the same brand tint.
+    const card = el.querySelector<HTMLElement>("[data-slot='card']");
+    expect(card?.classList.contains("ci-brand-tint")).toBe(true);
+    expect(card?.style.getPropertyValue("--ci-brand")).toBe("#1783ff");
+    const chip = Array.from(el.querySelectorAll<HTMLElement>("span.ci-brand-tint")).find((node) =>
+      node.textContent?.includes("Founding Friend")
+    );
+    expect(chip?.style.getPropertyValue("--ci-brand")).toBe("#1783ff");
+  });
+
+  it("tints the Cheaper Inference card with its own brand, not the catalog fallback", () => {
+    const el = renderCard("cheaperinference", "Cheaper Inference");
+    const card = el.querySelector<HTMLElement>("[data-slot='card']");
+    expect(card?.classList.contains("ci-brand-tint")).toBe(true);
+    expect(card?.style.getPropertyValue("--ci-brand")).toBe("#31f889");
   });
 
   it("renders the Founding Friend badge for kimi-web and moonshot too", () => {
@@ -86,7 +97,7 @@ describe("ProviderCard — Kimi (Moonshot AI) founding-friend accent", () => {
   it("does NOT render the Kimi badge or accent for an unrelated provider", () => {
     const el = renderCard("openai", "OpenAI");
     expect(el.textContent).not.toContain("Founding Friend");
-    expect(el.querySelector("[class*='1783FF']")).toBeNull();
+    expect(el.querySelector(".ci-brand-tint")).toBeNull();
   });
 
   it("does NOT render the Kimi badge for the hidden kimi-coding-apikey alias id", () => {
