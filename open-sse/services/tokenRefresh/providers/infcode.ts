@@ -62,6 +62,30 @@ function normalizeExpiresIn(value: unknown): number | undefined {
     : undefined;
 }
 
+/** Log a failed refresh and report whether the refresh token itself is dead. */
+async function handleRefreshFailure(response: Response, log?: RefreshLogger) {
+  const errorText = await response.text();
+  log?.error?.("TOKEN_REFRESH", "Failed to refresh InfCode token", {
+    status: response.status,
+    error: errorText.slice(0, 300),
+  });
+
+  // 401/403 on the token endpoint means the refresh credential itself was
+  // rejected (rotated away, expired, or invalid). Retrying with the same
+  // dead refresh token will never succeed — surface re-auth.
+  if (response.status === 401 || response.status === 403) {
+    const code = extractOAuthErrorCode(errorText) || "unauthorized";
+    return { error: "unrecoverable_refresh_error", code };
+  }
+
+  const code = extractOAuthErrorCode(errorText);
+  if (code === "invalid_grant" || code === "invalid_request") {
+    return { error: "unrecoverable_refresh_error", code };
+  }
+
+  return null;
+}
+
 /**
  * Specialized refresh for InfCode OAuth tokens.
  */
@@ -91,28 +115,7 @@ export async function refreshInfCodeToken(
       })
     );
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      log?.error?.("TOKEN_REFRESH", "Failed to refresh InfCode token", {
-        status: response.status,
-        error: errorText.slice(0, 300),
-      });
-
-      // 401/403 on the token endpoint means the refresh credential itself was
-      // rejected (rotated away, expired, or invalid). Retrying with the same
-      // dead refresh token will never succeed — surface re-auth.
-      if (response.status === 401 || response.status === 403) {
-        const code = extractOAuthErrorCode(errorText) || "unauthorized";
-        return { error: "unrecoverable_refresh_error", code };
-      }
-
-      const code = extractOAuthErrorCode(errorText);
-      if (code === "invalid_grant" || code === "invalid_request") {
-        return { error: "unrecoverable_refresh_error", code };
-      }
-
-      return null;
-    }
+    if (!response.ok) return await handleRefreshFailure(response, log);
 
     const tokens = await response.json();
 
