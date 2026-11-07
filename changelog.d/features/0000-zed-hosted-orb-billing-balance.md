@@ -1,1 +1,0 @@
-- **feat(usage):** Zed Hosted Models connections show the remaining USD credit on the Provider Limits page when the operator pastes the optional Orb billing portal link into the connection settings, stored as a credential (encrypted at rest, stripped from API responses) and displayed without affecting routing or connection parking
