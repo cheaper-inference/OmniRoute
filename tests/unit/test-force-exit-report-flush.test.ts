@@ -19,6 +19,7 @@ import test from "node:test";
 
 const REPO_ROOT = fileURLToPath(new URL("../..", import.meta.url));
 const FIXTURE_DIR = "tests/fixtures/test-force-exit";
+const TEST_ISOLATION_PRELOAD = "--import ./tests/_setup/isolateDataDir.ts";
 
 function runForceExit(files: string[]) {
   const env: NodeJS.ProcessEnv = { ...process.env };
@@ -77,4 +78,34 @@ test("force-exit runs every test when the top-level await precedes the first tes
   ]);
   assert.equal(result.status, 0, result.stderr);
   assert.deepEqual({ tests, pass, fail }, { tests: 3, pass: 3, fail: 0 });
+});
+
+test("every force-exit npm command preloads the report-flush guard (#18045)", () => {
+  const packageJson = JSON.parse(readFileSync(path.join(REPO_ROOT, "package.json"), "utf8")) as {
+    scripts: Record<string, string>;
+  };
+  const manifest = JSON.parse(
+    readFileSync(path.join(REPO_ROOT, "config/quality/gate-manifest.json"), "utf8")
+  ) as {
+    aliases: Array<{ name: string; command: string }>;
+  };
+  const forceExitScripts = Object.entries(packageJson.scripts).filter(([, command]) =>
+    command.includes("--test-force-exit")
+  );
+  const missingPreload = forceExitScripts
+    .filter(([, command]) => !command.includes(TEST_ISOLATION_PRELOAD))
+    .map(([name]) => name);
+
+  assert.ok(forceExitScripts.length > 0, "expected at least one force-exit test command");
+  assert.deepEqual(missingPreload, [], "every force-exit command must load the stdout-flush guard");
+  assert.match(
+    packageJson.scripts["test:property"],
+    /--import tsx\/esm --import \.\/tests\/_setup\/isolateDataDir\.ts --test --test-force-exit/
+  );
+
+  const aliasesByName = new Map(manifest.aliases.map((alias) => [alias.name, alias.command]));
+  const manifestDrift = forceExitScripts
+    .filter(([name, command]) => aliasesByName.get(name) !== command)
+    .map(([name]) => name);
+  assert.deepEqual(manifestDrift, [], "quality manifest must match every force-exit command");
 });
