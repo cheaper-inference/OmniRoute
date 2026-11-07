@@ -29,14 +29,15 @@ function cloudflareReply(message: Record<string, unknown>, init: ResponseInit = 
 async function run(
   body: Record<string, unknown>,
   reply: () => Response,
-  stream = false
+  stream = false,
+  model = MODEL
 ): Promise<Response> {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async () => reply();
   try {
     const result = await new CloudflareAIExecutor().execute({
-      model: MODEL,
-      body: { model: MODEL, messages: [{ role: "user", content: "17+25?" }], ...body },
+      model,
+      body: { model, messages: [{ role: "user", content: "17+25?" }], ...body },
       stream,
       credentials: CREDENTIALS,
     });
@@ -173,4 +174,20 @@ test("thinking off: a JSON reply that cannot be parsed reaches the client unchan
   );
 
   assert.equal(await response.text(), "not json");
+});
+
+// #18994 sends `low` instead of `none` to Workers AI models that reject `none`, so the
+// request that reaches Cloudflare has thinking on and a reasoning-only reply stays put.
+test("none clamped to low for a model that rejects it (#18994) counts as thinking on", async () => {
+  const reply = { content: null, reasoning_content: "We need to add 17 and" };
+  const response = await run(
+    { reasoning_effort: "none" },
+    () => cloudflareReply(reply),
+    false,
+    "@cf/openai/gpt-oss-20b"
+  );
+  const message = (await response.json()).choices[0].message;
+
+  assert.equal(message.content, null);
+  assert.equal(message.reasoning_content, "We need to add 17 and");
 });
