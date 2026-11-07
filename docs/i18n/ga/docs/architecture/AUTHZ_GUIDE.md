@@ -313,15 +313,15 @@ Fanann sé múchta mura bhfuil `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 (`src/lib/accessTokens/scopes.ts`). Ní bhaineann an rang seo ach leis an dintiúr
 comhartha rochtana. Féach [Fíordheimhniú Bainistíochta](../guides/MANAGEMENT-AUTH.md).
 
-## Aistriú Fíordheimhnithe Riachtanach
+## Údar ag Teastáil Scoránaigh
 
-Socraíonn `isAuthRequired()` i `src/shared/utils/apiAuth.ts` an ndéanfar **aon** fhíordheimhniú a fhorfheidhmiú d'iarratas:
+Cinneann `isAuthRequired()` in `src/shared/utils/apiAuth.ts` cé acu** ar bith** cuirtear an t-údar i bhfeidhm le haghaidh iarratais:
 
-- `settings.requireLogin === false` → díchumasaítear fíordheimhniú go domhanda, ach amháin an leibhéal cosanta buan (féach [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) agus na glaonna a thugann creidiúint a nglacann sé léi, a éilíonn an creidiúint chéanna mar a éilítear nuair a bhíonn logáil isteach cumasaithe: tocáin sioncrónaithe a eisiúint, tocáin rochtana CLI a mhint ar scóip ar bith, agus eochair API le scóip `manage`/`admin` a chruthú, an scóip sin a thabhairt d'eochair, nó eochair den sórt sin a athghiniúint nó a nochtadh (`requireCredentialForManagementScopedKey()` i `src/lib/api/requireManagementAuth.ts`). Fanann eochracha inference-amháin oscailte.
-- Gan pasfhocal cumraithe **agus** gan athraitheach comhshaoil `INITIAL_PASSWORD` → mód bootstrap: ceadaíonn sé an draoi onboarding agus iarratais loopback, ach éilíonn iarratais líonra nochtaithe creidiúintí fós.
-- Aon earráid DB → teipeann sé ar dhúnadh (secure-by-default).
+- tá `settings.requireLogin === false` → auth díchumasaithe ar fud an domhain, ach amháin an tsraith atá faoi chosaint i gcónaí (féach [Sraitheanna an Gharda Slí](../security/ROUTE_GUARD_TIERS.md) ) agus na glaonna a thugann dintiúr a nglacann sé leis, a bhfuil an dintiúir chéanna ag teastáil uathu agus atá le logáil isteach: ag eisiúint éarlaisí sioncronaithe, ag miontú comharthaí rochtana CLI ag aon scóip, agus ag cruthú eochair API leis an `manage`/`admin` key scope to regen scope a dheonú nó a nochtadh, ag nochtadh na heochrach sin chun raon feidhme a dheonú nó a nochtadh. eochair (`requireCredentialForManagementScopedKey()` i `src/lib/api/requireManagementAuth.ts`). Fanann eochracha tátail amháin ar oscailt. Bratach gné chosanta a scríobh (`REQUIRE_API_KEY`, na bratacha Slándála eile, agus na bratacha SSRF / TLS / MCP-scope / sandbox atá liostaithe i [Bratacha Gné](../reference/FEATURE_FLAGS.md#rest-api) ) agus na socruithe um chumhdach PII (`PUT /api/settings/pii`) a shábháil freisin, ní mór dintiúir i gcónaí.
+- Níl aon phasfhocal cumraithe** agus** ní cheadaíonn modh bootstrap `INITIAL_PASSWORD` env var → an draoi bordála agus iarratais loopback, ach tá dintiúir fós ag teastáil ó iarratais líonra nochta. Eisceacht: scríobh bratach gné chosanta agus a shábháil ar na socruithe chumhdaigh PII (`PUT /api/settings/pii`) gá dintiúir fiú ó loopback, mar sin ní leor loopback ann féin.
+- Theipeann ar aon earráid DB → dúnta (slán de réir réamhshocraithe).
 
-Úsáideann forfheidhmiú eochair API an chliaint `isRequireApiKeyEnabled()` i `src/shared/utils/featureFlags.ts`, ní léamh dhíreach ar `process.env.REQUIRE_API_KEY`. Tá sé seo tábhachtach d'ionstraimí a imscaoileadh: nuair a athraítear `REQUIRE_API_KEY` i Dashboard → Feature Flags, stórálann sé forshárú DB agus dar ndóigh bíonn tionchar aige ar `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, agus ar sheiceálacha fíordheimhnithe eile client-API a roinneann an cúntóir seo. Mura féidir stór na mbratach gné a léamh, teipeann ar fhíordheimhniú client API ar dhúnadh agus éilíonn sé eochair.
+Úsáideann cliant forfheidhmithe API key `isRequireApiKeyEnabled()` in `src/shared/utils/featureFlags.ts`, ní léamh `process.env.REQUIRE_API_KEY` díreach. Baineann sé seo le cásanna imlonnaithe: déanann scoránú `REQUIRE_API_KEY` i Deais → Feature Flags sáruithe DB a stóráil agus bíonn tionchar láithreach aige ar `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, agus seiceálacha údaráis cliant-API eile a roinneann an cúntóir seo. Murar féidir an stór brataí gné a léamh, ní dhúntar cliant API auth agus teastaíonn eochair.
 
 ## Athrú Bristeach — v3.8.0
 

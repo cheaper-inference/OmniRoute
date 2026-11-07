@@ -274,15 +274,15 @@ API 密钥带有一个 `scopes` 数组（以 JSON 格式存储在 `api_keys.scop
 
 在 `oma_live_…` 令牌上的 `read` / `write` / `admin`，按 `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) 排名。此排名仅适用于访问令牌凭据。请参阅[管理认证](../guides/MANAGEMENT-AUTH.md)。
 
-## 认证要求开关
+## 需要身份验证 切换
 
-`src/shared/utils/apiAuth.ts` 中的 `isAuthRequired()` 决定某个请求是否需要**任何**认证：
+`src/shared/utils/apiAuth.ts`中的`isAuthRequired()`决定是否**任何**对请求强制执行身份验证：
 
-- `settings.requireLogin === false` → 全局禁用认证，但以下情况除外：始终受保护的层级（参见 [路由守卫层级](../security/ROUTE_GUARD_TIERS.md)），以及发放其所接受凭证的调用。这些调用需要与开启登录时相同的凭证：签发同步令牌、以任意范围签发 CLI 访问令牌、创建具有 `manage`/`admin` 范围的 API 密钥、把该范围授予某个密钥，或重新生成、显示此类密钥（`src/lib/api/requireManagementAuth.ts` 中的 `requireCredentialForManagementScopedKey()`）。仅用于推理的密钥仍保持开放。
-- 未配置密码**并且**未设置 `INITIAL_PASSWORD` 环境变量 → 引导模式允许使用新手引导向导和回环请求，但暴露在网络上的请求仍需要凭证。
-- 任何数据库错误 → 失败时默认拒绝（fail closed，即默认安全）。
+- `settings.requireLogin === false` → auth 全局禁用，除了始终受保护的层（请参阅[Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ）以及分发其接受的凭证的调用，这些调用需要与登录时相同的凭证：发出同步令牌、在任何范围内生成CLI访问令牌、使用`manage`/`admin`范围创建API密钥、将该范围授予密钥，或者重新生成或显示此类密钥（ `src/lib/api/requireManagementAuth.ts`中的`requireCredentialForManagementScopedKey()` ）。仅推理键保持打开状态。写入受保护的功能标志（`REQUIRE_API_KEY`、其他安全标志以及[功能标志](../reference/FEATURE_FLAGS.md#rest-api)中列出的SSRF / TLS / MCP-scope / 沙箱标志）并保存PII屏蔽设置 (`PUT /api/settings/pii`) 也仍然需要凭据。
+- 没有配置密码**和**no `INITIAL_PASSWORD` env var →引导模式允许加入向导和环回请求，但公开的网络请求仍然需要凭据。例外：写入受保护的功能标志并保存PII屏蔽设置（`PUT /api/settings/pii`）甚至需要来自环回的凭据，因此环回本身是不够的。
+- 任何DB错误→都会失败关闭（默认安全）。
 
-客户端 API 密钥的强制执行使用 `src/shared/utils/featureFlags.ts` 中的 `isRequireApiKeyEnabled()`，而不是直接读取 `process.env.REQUIRE_API_KEY`。这对已部署的实例很重要：在仪表板 → 功能开关中切换 `REQUIRE_API_KEY` 会存储一个数据库覆盖值，并立即影响 `/v1/*`、`/v1beta/*`、`/models`、`/responses`、`/chat/completions`、`/codex/*` 以及其他共享此辅助函数的客户端 API 认证检查。如果无法读取功能开关存储，客户端 API 认证将失败时默认拒绝，并要求提供密钥。
+客户端API密钥强制执行使用`src/shared/utils/featureFlags.ts`中的`isRequireApiKeyEnabled()` ，而不是直接`process.env.REQUIRE_API_KEY`读取。这对于已部署的实例很重要：在仪表板→功能标志中切换`REQUIRE_API_KEY`会存储DB覆盖并立即影响`/v1/*`、 `/v1beta/*`、 `/models`、 `/responses`、 `/chat/completions`、 `/codex/*`和共享此帮助器的其他客户端 API 身份验证检查。如果无法读取功能标志存储，则客户端API auth 将无法关闭并需要密钥。
 
 ## 破坏性变更 — v3.8.0
 

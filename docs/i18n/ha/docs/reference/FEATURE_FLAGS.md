@@ -222,32 +222,27 @@ mai aiki.
 > suna ƙin kowace ƙima da ba ta cikin jerin ƙimomin da aka amince da su (ana tabbatar da hakan a ɓangaren uwar garke a cikin
 > `setFeatureFlagOverride()` da kuma mai kula da REST `PUT`).
 
-## Kunna da Kashe Tutoci
+## Tutoci masu juyawa
 
 ### Dashboard
 
-Je zuwa **Dashboard → Saituna → Tutocin Fasaloli**
-(`/dashboard/settings/feature-flags`). Grid ɗin
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-yana tallafawa:
+Kewaya zuwa** Dashboard → Saitunan → Feature Tutocin** (`/dashboard/settings/feature-flags`). Grid (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) yana goyan bayan:
 
-- **Bincike** ta maɓalli ko bayanin, da **tacewa** ta rukuni (ƙari da wani ra'ayi na wucin gadi na
-  **Yana Buƙatar Sake Farawa**).
-- **Maɓallin kunnawa/kashewa** don tutocin boolean da **jerin zaɓuɓɓuka** don tutocin enum
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Alamar **tushen** kowanne tuta — `DB`, `ENV`, ko `DEF` — da ke nuna inda ƙimar da ake amfani da ita ta fito.
-- Maɓallin **Sake saita** (ana nuna shi ne kawai ga tutocin da tushensu `DB` ne) don cire override, da maɓallin **Sake saita dukkan Overrides** a ƙasa.
-- Banner ɗin **Sake kunna Sabar** lokacin da aka canza tuta mai `requiresRestart`.
+- **Bincika** ta maɓalli ko bayanin, kuma** tace** ta rukuni (da na roba** Yana buƙatar sake farawa** duba).
+- A** juya** don tutocin boolean da a** zazzagewa** ga tutocin enum (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- A** lambar tushe** kowane tuta — `DB`, `ENV`, ko `DEF` — yana nuna inda inganci mai inganci ya fito.
+- A** Sake saiti** maɓalli (wanda aka nuna don tutocin `DB` -sourced kawai) don jefar da abin rufewa, da a** Sake saita Duk Saukewa** button a kasa.
+- A** Sake kunna uwar garken** tuta lokacin da aka canza tutar `requiresRestart`.
 
 ### REST API
 
-Dukkan ayyuka suna bi ta hanya guda:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Kowace hanya tana buƙatar ingantaccen zaman dashboard (`401` idan ba haka ba).
+Duk ayyuka suna tafiya ta hanya ɗaya: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Kowace hanya tana buƙatar ingantaccen zaman dashboard (`401` in ba haka ba).
+
+Tare da nakasasshen shiga (`requireLogin=false`) hanya a buɗe take, sai dai ga tutoci masu kariya: kowace tuta a cikin rukunin Tsaro da `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` da `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` a `protectedFeatureFlags.ts`). A `PUT` akan ɗayansu, da `DELETE` yayin da ɗayansu yana da jujjuyawar DB, har yanzu yana buƙatar zaman dashboard, maɓalli na `manage` -scope API, alamar shiga `oma_` tare da rubutu ko mafi girma, ko alamar CLI ko alamar sabis na cikin gida da aka aika daga madauki. Wannan saitin ya fi fadi fiye da shiga a kunne, inda hanyar ke karɓar zama kawai ko maɓallin `manage` -scope.
 
 #### `GET /api/settings/feature-flags`
 
-Yana dawo da kowanne tuta tare da ƙimar da ake amfani da ita, tushenta, da taƙaice.
+Yana dawo da kowace tuta tare da ingantaccen ƙimarta, tushenta, da taƙaice.
 
 ```jsonc
 {
@@ -279,34 +274,30 @@ Yana dawo da kowanne tuta tare da ƙimar da ake amfani da ita, tushenta, da taƙ
 
 #### `PUT /api/settings/feature-flags`
 
-Saita ko cire override guda. Jikin buƙatar: `{ key: string; value?: string }`.
-Idan ba a saka `value` ba, ana cire override ɗin (a maido da env / tsoho).
+Saita ko cire wuce gona da iri. Jiki: `{ key: string; value?: string }`. Yin watsi da `value` yana kawar da abin rufewa (sake dawo da env / tsoho).
 
 ```bash
-# Saita DB override
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Cire override (ba tare da "value" ba)
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Amsar tana maimaita sabon `effectiveValue`/`source`, `previousValue`/
-`previousSource`, da `requiresRestart`. Ana ƙin maɓallan da ba a sani ba da ƙimomin enum
-da suka fita daga kewaye tare da `400`.
+Amsar tana sake maimaita sabon `effectiveValue`/`source`, da `previousValue`/ `previousSource`, da `requiresRestart`. Maɓallan da ba a san su ba da ƙimar ƙima ta ƙima tare da `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Yana share **dukkan** DB overrides lokaci guda, yana maido da kowanne tuta zuwa ƙimar env / tsoho
-ɗinsa. Yana dawo da `{ cleared: <count>, message: "..." }`.
+Yana sharewa** duka** DB ya soke lokaci guda, yana maido da kowace tuta zuwa ƙimar env/tsoho. Yana dawo `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Tutocin da ke da `requiresRestart: true` ba sa fara aiki sai bayan an sake loda tsarin aiki.
-> Tsarin sake farawa na dashboard yana kiran `POST /api/restart` sannan yana yawan tambayar
-> `GET /api/health/ping` har sai sabar ta dawo aiki.
+> Tutoci masu `requiresRestart: true` suna aiki ne kawai bayan an sake lodawa. Sake kunna dashboard ɗin yana kiran `POST /api/restart` sannan ya yi `GET /api/health/ping` har sai uwar garken ya dawo.
+
+---
 
 ## Madadin Kasafin Kuɗi na Gaggawa
 

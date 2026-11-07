@@ -415,7 +415,7 @@ Dėl taisyklių rinkinio kūrimo ir slenksčio derinimo žr. [`docs/security/GUA
 - Connection/model taisyklių stalius: `src/domain/connectionModelRules.ts`
 - Modelio prieinamumo momentinės nuotraukos: `src/domain/modelAvailability.ts`
 - Teikėjo galiojimo pabaigos stebėjimas: `src/domain/providerExpiration.ts`
-- Kvotos talpykla: `src/domain/quotaCache.ts`
+- Kvotos talpykla: `src/domain/quotaCache.ts`. Teikėjai prideda ir pašalina kvotų langus (kai kuriuose planuose OpenAI atmetė 5 valandų Codex langą), todėl paslaugų teikėjo adapterio naudojimas patvirtina, kad jis yra baigtas (`quotasComplete`, žr. `src/lib/usage/usageReading.ts`) yra visas paskyros langų rinkinys: langas, žinomas anksčiau, bet jame nėra Claude yra pašalintas, talpykloje, atnaujintame įraše (prid. išliko Codex kvotos būsena ir `quota_snapshots` prisotinimo segmentuose. Daliniai įrodymai (atsakymų antraštės, pasenusios kopijos) atnaujina tik turimus langus.
 - Skilimo būsena: `src/domain/degradation.ts`
 - Konfigūracijos auditas: `src/domain/configAudit.ts`
 - OmniRoute atsako metaduomenų kūrimo priemonė: `src/domain/omnirouteResponseMeta.ts`

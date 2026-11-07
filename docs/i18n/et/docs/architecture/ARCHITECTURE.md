@@ -414,7 +414,7 @@ Reeglikomplekti loomise ja läve häälestamise kohta vt [`docs/security/GUARDRA
 - Connection/model reegli liitja: `src/domain/connectionModelRules.ts`
 - Mudeli saadavuse hetktõmmised: `src/domain/modelAvailability.ts`
 - Pakkuja aegumise jälgimine: `src/domain/providerExpiration.ts`
-- Kvoodi vahemälu: `src/domain/quotaCache.ts`
+- Kvoodi vahemälu: `src/domain/quotaCache.ts`. Pakkujad lisavad ja eemaldavad kvoodiaknaid (mõnede plaanide puhul loobus OpenAI 5-tunnise Codex aknast), nii et teenusepakkuja adapteri kasutuslugemine kinnitab täielikku (`quotasComplete`, vt `src/lib/usage/usageReading.ts`) on konto täielik akende komplekt: varem tuntud aken, mis sellest puudus, on kasutuselt kõrvaldatud, vahemälus, lisa `quota_snapshots`. püsis Codex kvoodi olek ja Claude küllastussalvedes. Osalised tõendid (vastuse päised, aegunud koopiad) värskendavad ainult neid aknaid, mida see kannab.
 - Lagunemisaste: `src/domain/degradation.ts`
 - Konfiguratsiooni audit: `src/domain/configAudit.ts`
 - OmniRoute vastuse metaandmete koostaja: `src/domain/omnirouteResponseMeta.ts`
@@ -432,7 +432,7 @@ Autoriseerimiskonveier klassifitseerib kõik sissetulevad taotlused ja rakendab 
 - Väiteabiline: `src/server/authz/assertAuth.ts`
 - Taotluse kontekst: `src/server/authz/context.ts`
 
-Avalikud ja haldusmarsruudid on rasked piirid: agent/cooldown APIs ja pakkuja mutatsioonid nõuavad haldusautentimist (kui see puudub HTTP 401).
+Avalikud vs haldusmarsruudid on ranged piirid: agent/cooldown APIs ja pakkuja mutatsioonid nõuavad haldamise autentimist (kui puudub HTTP 401).
 
 Täielikud marsruudi klassifitseerimise reeglid leiate jaotisest [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
 

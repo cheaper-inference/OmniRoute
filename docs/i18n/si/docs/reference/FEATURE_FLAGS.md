@@ -222,36 +222,27 @@ opt-out එකක් මිල නියම කළ වියදම හෝ අස
 
 ---
 
-## ධජ මාරු කිරීම
+## කොඩි ටොගල් කිරීම
 
 ### උපකරණ පුවරුව
 
-**උපකරණ පුවරුව → සැකසුම් → විශේෂාංග ධජ** වෙත යන්න
-(`/dashboard/settings/feature-flags`)। ග්රිඩය
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-සහාය දක්වන්නේ:
+වෙත සංචාලනය කරන්න** උපකරණ පුවරුව → සැකසුම් → විශේෂාංග කොඩි** (`/dashboard/settings/feature-flags`) ජාලකය (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) සහාය දක්වයි:
 
-- යතුර හෝ විස්තරය අනුව **සෙවීම**, සහ කාණ්ඩය අනුව **පෙරීම** (කෘත්රිම
-  **නැවත ආරම්භ කිරීම අවශ්යයි** දසුනක් සමඟ)।
-- බූලීය ධජ සඳහා **මාරුවක්**, සහ enum ධජ සඳහා **පතන මෙනුවක්**
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`)।
-- එක් එක් ධජය සඳහා මූලාශ්ර බැජයක් — `DB`, `ENV`, හෝ `DEF` — ඵලදායී අගය
-  පැමිණියේ කොතැනින්දැයි පෙන්වයි।
-- override එක ඉවත් කිරීම සඳහා (`DB` මූලාශ්ර සහිත ධජ සඳහා පමණක් පෙන්වන)
-  **යළි සකසන්න** බොත්තමක්, සහ පහළින් **සියලු Overrides යළි සකසන්න** බොත්තමක්।
-- `requiresRestart` ධජයක් වෙනස් කළ විට **සේවාදායකය නැවත ආරම්භ කරන්න**
-  බැනරයක්।
+- **සොයන්න** යතුර හෝ විස්තරය මගින්, සහ** පෙරහන** කාණ්ඩය අනුව (ප්ලස් කෘතිම** නැවත ආරම්භ කිරීම අවශ්‍ය වේ** දැක්ම).
+- ඒ** ටොගල් කරන්න** බූලියන් කොඩි සඳහා සහ ඒ** පතන** enum කොඩි සඳහා (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- ඒ** මූලාශ්ර ලාංඡනය** කොඩියකට — `DB`, `ENV`, හෝ `DEF` — ඵලදායි අගය පැමිණියේ කොහෙන්ද යන්න පෙන්වයි.
+- ඒ** යළි පිහිටුවන්න** බොත්තම ( `DB` -sourced කොඩි සඳහා පමණක් පෙන්වා ඇත) ප්‍රතික්‍ෂේප කිරීම අතහැරීමට, සහ a** සියලුම ප්‍රතික්‍රියා නැවත සකසන්න** පතුලේ ඇති බොත්තම.
+- ඒ** සේවාදායකය නැවත ආරම්භ කරන්න** `requiresRestart` ධජයක් වෙනස් කළ විට බැනරය.
 
 ### REST API
 
-සියලු මෙහෙයුම් තනි route එකක් හරහා සිදු වේ:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts)।
-සෑම method එකකටම සත්යාපිත උපකරණ පුවරු සැසියක් අවශ්ය වේ (එසේ නොමැතිනම්
-`401`)।
+සියලුම මෙහෙයුම් තනි මාර්ගයක් හරහා ගමන් කරයි: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). සෑම ක්‍රමයක් සඳහාම සත්‍යාපිත උපකරණ පුවරු සැසියක් අවශ්‍ය වේ (එසේ නොමැති නම්`401` ).
+
+පිවිසුම් අක්‍රිය (`requireLogin=false`) සමඟ ආරක්ෂිත කොඩි හැර, මාර්ගය විවෘත වේ: ආරක්‍ෂක කාණ්ඩයේ සෑම ධජයක්ම සහ `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` සහ `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` in `protectedFeatureFlags.ts`). ඒවායින් එකක `PUT` එකක් සහ `DELETE` එකකට DB ප්‍රතික්‍ෂේපයක් ඇති විට, තවමත් උපකරණ පුවරු සැසියක්, `manage` -scope API යතුරක්, ලිවීමේ විෂය පථය හෝ ඊට වැඩි `oma_` ප්‍රවේශ ටෝකනයක් හෝ loopback වෙතින් යවන ලද CLI ටෝකනය හෝ අභ්‍යන්තර සේවා ටෝකනය අවශ්‍ය වේ. එම කට්ටලය පුරනය වීමේදී වඩා පුළුල් වේ, එහිදී මාර්ගය පිළිගන්නේ සැසියක් හෝ `manage` -scope යතුරක් පමණි.
 
 #### `GET /api/settings/feature-flags`
 
-සෑම ධජයක්ම එහි ඵලදායී අගය, මූලාශ්රය සහ සාරාංශයක් සමඟ ලබා දෙයි।
+සෑම ධජයක්ම එහි ඵලදායි අගය, මූලාශ්‍රය සහ සාරාංශයක් සමඟ ආපසු ලබා දෙයි.
 
 ```jsonc
 {
@@ -269,7 +260,7 @@ opt-out එකක් මිල නියම කළ වියදම හෝ අස
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... ධජ 119 ම
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -283,34 +274,30 @@ opt-out එකක් මිල නියම කළ වියදම හෝ අස
 
 #### `PUT /api/settings/feature-flags`
 
-තනි override එකක් සකසන්න හෝ ඉවත් කරන්න। Body: `{ key: string; value?: string }`.
-`value` නොදැක්වීමෙන් override එක ඉවත් කරයි (env / default යළි ස්ථාපනය කරයි)।
+තනි අභිබවා යාමක් සකසන්න හෝ ඉවත් කරන්න. ශරීරය: `{ key: string; value?: string }`. `value` මඟ හැරීම ප්‍රතික්ෂේප කිරීම ඉවත් කරයි (env / default ප්‍රතිසාධනය කිරීම).
 
 ```bash
-# DB override එකක් සකසන්න
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# override එක ඉවත් කරන්න ("value" නොමැත)
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-ප්රතිචාරය නව `effectiveValue`/`source`, පෙර `previousValue`/
-`previousSource`, සහ `requiresRestart` නැවත ලබා දෙයි। නොදන්නා යතුරු සහ
-පරාසයෙන් බැහැර enum අගයන් `400` සමඟ ප්රතික්ෂේප කෙරේ।
+ප්රතිචාරය නව `effectiveValue`/`source`, `previousValue`/ `previousSource` සහ `requiresRestart` ප්රතිරාවය කරයි. නොදන්නා යතුරු සහ පරාසයෙන් පිටත enum අගයන් `400` සමඟ ප්‍රතික්ෂේප කරනු ලැබේ.
 
 #### `DELETE /api/settings/feature-flags`
 
-සියලුම DB overrides එකවර හිස් කරයි, එමඟින් සෑම ධජයක්ම එහි env / default
-අගයට යළි ප්රතිස්ථාපනය කරයි। `{ cleared: <count>, message: "..." }` ලබා දෙයි।
+පැහැදිලි කරයි** සියලු** DB එකවර අභිබවා යන අතර, සෑම ධජයක්ම එහි env / පෙරනිමි අගයට ප්‍රතිස්ථාපනය කරයි. `{ cleared: <count>, message: "..." }` ආපසු ලබා දෙයි.
 
 > [!NOTE]
-> `requiresRestart: true` සහිත ධජ ක්රියාත්මක වන්නේ process එක reload කළ
-> පසුව පමණි। උපකරණ පුවරුවේ restart ප්රවාහය `POST /api/restart` කැඳවා, පසුව
-> සේවාදායකය නැවත ක්රියාත්මක වන තෙක් `GET /api/health/ping` polling කරයි।
+> `requiresRestart: true` සහිත කොඩි ක්‍රියාත්මක වන්නේ ක්‍රියාවලියක් නැවත පූරණය කිරීමෙන් පසුව පමණි. උපකරණ පුවරුවේ නැවත පණගැන්වීමේ ප්‍රවාහය `POST /api/restart` අමතා සේවාදායකය නැවත ක්‍රියාත්මක වන තෙක් `GET /api/health/ping` මත විමසයි.
+
+---
 
 ## හදිසි අයවැය විකල්ප මාර්ගය
 

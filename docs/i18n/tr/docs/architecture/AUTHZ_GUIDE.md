@@ -299,15 +299,15 @@ Katalog ve eşleştirme kuralları (aynı dize veya `*` ile biten verilmiş bir 
 
 `oma_live_…` belirteçlerinde `read` / `write` / `admin`, `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) tarafından sıralanır. Bu sıralama yalnızca erişim belirteci kimlik bilgisi için geçerlidir. Bkz. [Yönetim Kimlik Doğrulaması](../guides/MANAGEMENT-AUTH.md).
 
-## Kimlik Doğrulama Gerekli Anahtarı
+## Kimlik Doğrulaması Gerekli Geçiş
 
-`src/shared/utils/apiAuth.ts` içindeki `isAuthRequired()`, bir istek için **herhangi bir** kimlik doğrulamanın zorunlu olup olmadığını belirler:
+`src/shared/utils/apiAuth.ts` `isAuthRequired()` karar verir** herhangi** auth bir istek için uygulanır:
 
-- `settings.requireLogin === false` → kimlik doğrulama genel olarak kapalıdır; ancak her zaman korunan katman ([Rota Koruma Katmanları](../security/ROUTE_GUARD_TIERS.md)) ve kabul edilen bir kimlik bilgisini veren çağrılar bunun dışındadır. Bunlar, girişin açık olduğu durumdaki ile aynı kimlik bilgisini ister: senkronizasyon token'ları vermek, her kapsamda CLI erişim token'ları basmak ve `manage`/`admin` kapsamlı API anahtarı oluşturmak, bu kapsamı bir anahtara vermek veya böyle bir anahtarı yeniden üretmek/göstermek (`src/lib/api/requireManagementAuth.ts` içindeki `requireCredentialForManagementScopedKey()`). Çıkarım amaçlı anahtarlar açık kalır.
-- Yönetim şifresi yok **ve** `INITIAL_PASSWORD` ortam değişkeni yok → önyükleme modu: kurulum sihirbazına ve loopback isteklerine izin verilir, ancak dışarıdan gelen ağ isteklerinin yine kimlik bilgisi gerekir.
-- Herhangi bir veritabanı hatası → kapalı durumda başarısız olur (güvenli varsayılan).
+- `settings.requireLogin === false` → kimlik doğrulaması, her zaman korunan katman (bkz. [Rota Koruma Katmanları](../security/ROUTE_GUARD_TIERS.md) ) ve oturum açma sırasındakiyle aynı kimlik bilgilerine ihtiyaç duyan, kabul ettiği bir kimlik bilgisini dağıtan çağrılar dışında genel olarak devre dışıdır: senkronizasyon belirteçleri yayınlama, herhangi bir kapsamda CLI erişim belirteçlerini basma ve `manage`/`admin` kapsamıyla bir API anahtarı oluşturma, bu kapsamı bir anahtara verme veya böyle bir anahtarı yeniden oluşturma veya açığa çıkarma (`requireCredentialForManagementScopedKey()` ) `src/lib/api/requireManagementAuth.ts`). Yalnızca çıkarım anahtarları açık kalır. Korumalı bir özellik bayrağı (`REQUIRE_API_KEY`, diğer Güvenlik bayrakları ve [Özellik Bayraklarında](../reference/FEATURE_FLAGS.md#rest-api) listelenen SSRF / TLS / MCP-scope / sandbox bayrakları) yazmak ve PII maskeleme ayarlarını (`PUT /api/settings/pii`) kaydetmek de bir kimlik bilgisi gerektirmeye devam eder.
+- Şifre yapılandırılmadı** Ve** no `INITIAL_PASSWORD` env var → önyükleme modu, ekleme sihirbazına ve geridöngü isteklerine izin verir, ancak açığa çıkan ağ isteklerinin yine de kimlik bilgilerine ihtiyacı vardır. İstisna: korumalı bir özellik bayrağı yazmak ve PII maskeleme ayarlarını (`PUT /api/settings/pii`) kaydetmek, geri döngüden bile bir kimlik bilgisi gerektirir, bu nedenle geri döngü tek başına burada yeterli değildir.
+- Herhangi bir DB hatası → kapatılamaz (varsayılan olarak güvenlidir).
 
-İstemci API anahtarı zorlaması, doğrudan `process.env.REQUIRE_API_KEY` okumak yerine `src/shared/utils/featureFlags.ts` içindeki `isRequireApiKeyEnabled()` fonksiyonunu kullanır. Bu, dağıtılmış örnekler için önemlidir: Kontrol Paneli → Özellik Bayrakları içinde `REQUIRE_API_KEY` değiştirmek bir DB geçersiz kılma kaydeder ve `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` ve bu yardımcıyı paylaşan diğer istemci API kimlik denetimlerini anında etkiler. Özellik bayrağı deposu okunamıyorsa istemci API kimlik doğrulaması kapalı duruma geçer ve bir anahtar ister.
+İstemci API anahtar uygulaması, doğrudan `process.env.REQUIRE_API_KEY` okumasını değil, `src/shared/utils/featureFlags.ts` `isRequireApiKeyEnabled()` kullanır. Bu, konuşlandırılan örnekler için önemlidir: Kontrol Paneli → Özellik Bayraklarında `REQUIRE_API_KEY` değiştirmek, bir DB geçersiz kılmayı depolar ve `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` ve bu yardımcıyı paylaşan diğer istemci API kimlik doğrulama kontrollerini anında etkiler. Özellik bayrağı deposu okunamıyorsa istemci API kimlik doğrulaması başarısız olur ve bir anahtar gerektirir.
 
 ## Uyumluluğu Bozan Değişiklik — v3.8.0
 

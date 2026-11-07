@@ -315,15 +315,15 @@ Den forbliver deaktiveret, medmindre `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 (`src/lib/accessTokens/scopes.ts`). Denne rangering gælder kun for
 adgangstoken-legitimationsoplysningerne. Se [Administrationsgodkendelse](../guides/MANAGEMENT-AUTH.md).
 
-## Skift for påkrævet godkendelse
+## Godkendelse påkrævet til/fra
 
-`isAuthRequired()` i `src/shared/utils/apiAuth.ts` afgør, om **nogen** godkendelse overhovedet håndhæves for en anmodning:
+`isAuthRequired()` i `src/shared/utils/apiAuth.ts` afgør om** enhver** auth håndhæves for en anmodning:
 
-- `settings.requireLogin === false` → godkendelse er globalt deaktiveret, undtagen for det altid beskyttede niveau (se [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) og de kald, der udleverer en legitimationsoplysning, som den accepterer. De kræver samme legitimation, som når login er aktiveret: udstedelse af synkroniseringstokens, udstedelse af CLI-adgangstokens med vilket som helst scope, og oprettelse af en API-nøgle med scopet `manage`/`admin`, tildeling af det scope til en nøgle, eller regenerering eller visning af en sådan nøgle (`requireCredentialForManagementScopedKey()` i `src/lib/api/requireManagementAuth.ts`). Nøgler, der kun bruges til inferens, forbliver åbne.
-- Ingen adgangskode konfigureret **og** ingen `INITIAL_PASSWORD`-miljøvariabel → bootstrap-tilstanden tillader introduktionsguiden og loopback-anmodninger, men eksponerede netværksanmodninger kræver stadig legitimationsoplysninger.
-- Enhver DB-fejl → lukker af (sikkert som standard).
+- `settings.requireLogin === false` → auth er globalt deaktiveret, bortset fra det altid beskyttede niveau (se [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) og de opkald, der uddeler en legitimationsoplysninger, som den accepterer, som har brug for samme legitimationsoplysninger som med login på: udstedelse af synkroniseringstokens, prægning af CLI adgangstokens i ethvert omfang og oprettelse af en API nøgle med en `admin` -nøgle med `manage`-nøglen, nøgle, eller genskabelse eller afsløring af en sådan nøgle (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`). Nøgler, der kun kan konkludere, forbliver åbne. At skrive et beskyttet funktionsflag (`REQUIRE_API_KEY`, de andre sikkerhedsflag og SSRF / TLS /MCP-scope/sandbox-flag anført i [Feature Flags](../reference/FEATURE_FLAGS.md#rest-api) ) og gemme PII maskeringsindstillingerne (`PUT /api/settings/pii`) kræver også stadig en legitimationsoplysninger.
+- Ingen adgangskode konfigureret** og** no `INITIAL_PASSWORD` env var → bootstrap-tilstand tillader onboarding-guiden og loopback-anmodninger, men blotlagte netværksanmodninger kræver stadig legitimationsoplysninger. Undtagelse: at skrive et beskyttet funktionsflag og gemme PII maskeringsindstillingerne (`PUT /api/settings/pii`) kræver en legitimation selv fra loopback, så loopback i sig selv er ikke nok der.
+- Enhver DB fejl → mislykkes lukket (sikker som standard).
 
-Klient-API-nøglehåndhævelsen bruger `isRequireApiKeyEnabled()` i `src/shared/utils/featureFlags.ts` og ikke en direkte læsning af `process.env.REQUIRE_API_KEY`. Det har betydning for udrullede instanser: at ændre `REQUIRE_API_KEY` i Dashboard → Feature Flags gemmer en DB-overskrivning og påvirker straks `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` og andre klient-API-godkendelseskontroller, der deler denne hjælper. Hvis feature flag-lageret ikke kan læses, afviser klient-API-godkendelsen adgang og kræver en nøgle.
+Client API -nøglehåndhævelse bruger `isRequireApiKeyEnabled()` i `src/shared/utils/featureFlags.ts`, ikke en direkte `process.env.REQUIRE_API_KEY` læsning. Dette har betydning for implementerede forekomster: Skift af `REQUIRE_API_KEY` i Dashboard → Feature Flags gemmer en DB tilsidesættelse og påvirker øjeblikkeligt `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` og andre klient-API-godkendelsestjek, der deler denne hjælper. Hvis funktionsflaglageret ikke kan læses, lukkes ikke klientens API godkendelse og kræver en nøgle.
 
 ## Inkompatibel ændring — v3.8.0
 

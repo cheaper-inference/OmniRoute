@@ -405,7 +405,7 @@ guardrails module သည် PII၊ ချက်ခြင်းထိုးသွ
 - Connection/model စည်းမျဉ်း joiner: `src/domain/connectionModelRules.ts`
 - မော်ဒယ်ရရှိနိုင်မှု လျှပ်တစ်ပြက်ပုံများ- `src/domain/modelAvailability.ts`
 - ဝန်ဆောင်မှုပေးသူ သက်တမ်းကုန်ဆုံးမှုကို ခြေရာခံခြင်း- `src/domain/providerExpiration.ts`
-- Quota cache: `src/domain/quotaCache.ts`
+- Quota cache- `src/domain/quotaCache.ts` ဝန်ဆောင်မှုပေးသူများသည် ခွဲတမ်းပြတင်းပေါက်များကို ပေါင်းထည့်ကာ ဖယ်ရှားလိုက်သည် (OpenAI အစီအစဉ်အချို့အတွက် 5 နာရီ Codex ဝင်းဒိုးကို ချန်ထားခဲ့သည်) ထို့ကြောင့် ဝန်ဆောင်မှုပေးသူ၏ အဒက်တာအတည်ပြုချက်ကို အပြည့်အစုံဖတ်ခြင်း (`quotasComplete`၊ `src/lib/usage/usageReading.ts`) သည် အကောင့်၏ဝင်းဒိုးအစုံအလင်ဖြစ်သည်- အစောပိုင်းကသိထားသော်လည်း ပျက်ကွက်သည့်ဝင်းဒိုးသည် အနားယူသွားပြီဖြစ်သည်၊ ကက်ရှ်တွင်၊ `quota_snapshots` တွင် ရေဓာတ်ပြန်လည်စတင်သည့်နှုန်းကို ပြန်လည်စတင်သည် ( Codex ) အက်ပ်တွင်ဖော်ပြထားသော၊ Claude's saturation ပုံး။ တစ်စိတ်တစ်ပိုင်းအထောက်အထားများ (တုံ့ပြန်မှုခေါင်းစီးများ၊ အဟောင်းမိတ္တူများ) သည် ၎င်းတွင်ပါရှိသော windows များကိုသာ အပ်ဒိတ်လုပ်ပါသည်။
 - ပျက်စီးခြင်းအခြေအနေ- `src/domain/degradation.ts`
 - ဖွဲ့စည်းမှုစာရင်းစစ်- `src/domain/configAudit.ts`
 - OmniRoute တုံ့ပြန်မှု မက်တာဒေတာ တည်ဆောက်သူ- `src/domain/omnirouteResponseMeta.ts`

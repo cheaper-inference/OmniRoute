@@ -217,33 +217,27 @@
 
 ---
 
-## 切換旗標
+## 切換標誌
 
 ### 儀表板
 
-前往 **儀表板 → 設定 → 功能旗標**
-(`/dashboard/settings/feature-flags`)。網格
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-支援：
+導航至**儀表板→設定→功能標誌**（`/dashboard/settings/feature-flags`）。網格（`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`）支援：
 
-- 依金鑰或描述進行**搜尋**，並依類別進行**篩選**（另有合成的
-  **需要重新啟動**檢視）。
-- 布林旗標的**切換開關**，以及列舉旗標的**下拉式選單**
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`)。
-- 每個旗標的**來源標籤** — `DB`、`ENV` 或 `DEF` — 顯示有效值的來源。
-- **重設**按鈕（僅對 `DB` 來源的旗標顯示），可移除覆寫；底部另有
-  **全部重設覆寫**按鈕。
-- 當 `requiresRestart` 旗標變更時顯示**重新啟動伺服器**橫幅。
+- **搜尋**按鍵或描述，以及**篩選**按類別（加上合成**需要重新啟動**看法）。
+- 一個**切換**對於布爾標誌和**下拉式選單**對於枚舉標誌（`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`）。
+- 一個**源徽章**每個標誌— `DB`、 `ENV`或`DEF` —顯示有效值的來源。
+- 一個**重置**按鈕（僅針對`DB` -sourced標誌顯示）來刪除覆蓋，以及**重置所有覆蓋**按鈕位於底部。
+- 一個**重啟伺服器**當`requiresRestart`標誌更改時的橫幅。
 
 ### REST API
 
-所有操作都會經由單一路由：
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts)。
-每個方法都需要已驗證的儀表板工作階段（否則回傳 `401`）。
+所有操作都通過單一路線： [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts) 。每種方法都需要經過驗證的儀表板會話（否則為`401` ）。
+
+停用登入 (`requireLogin=false`) 時，路由將打開，但受保護的標誌除外：安全類別中的每個標誌加上`OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`、 `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`、 `MITM_DISABLE_TLS_VERIFY`、 `OMNIROUTE_MCP_ENFORCE_SCOPES`和`SKILLS_SANDBOX_NETWORK_ENABLED` （ `protectedFeatureFlags.ts`中的`isProtectedFeatureFlag()` ）。其中一個上的`PUT`和`DELETE`雖然其中一個具有DB覆蓋，但仍然需要儀表板會話、 `manage` -scope API密鑰、具有寫入範圍或更高範圍的`oma_`訪問令牌，或者從環回發送的CLI令牌或內部服務令牌。此集合比登入時更寬，登入時路由僅接受會話或`manage` -scope密鑰。
 
 #### `GET /api/settings/feature-flags`
 
-回傳每個旗標的有效值、來源及摘要。
+傳回每個標誌及其有效值、來源和摘要。
 
 ```jsonc
 {
@@ -275,34 +269,30 @@
 
 #### `PUT /api/settings/feature-flags`
 
-設定或移除單一覆寫。主體：`{ key: string; value?: string }`。
-省略 `value` 會移除覆寫（還原為環境變數／預設值）。
+設定或刪除單一覆蓋。正文： `{ key: string; value?: string }`。省略`value`將刪除覆蓋（恢復 env / 預設值）。
 
 ```bash
-# 設定 DB 覆寫
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# 移除覆寫（不含 "value"）
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-回應會回傳新的 `effectiveValue`／`source`、`previousValue`／
-`previousSource` 及 `requiresRestart`。未知金鑰及超出範圍的列舉值會以
-`400` 拒絕。
+此回應呼應了新的`effectiveValue`/`source`、 `previousValue`/ `previousSource`和`requiresRestart`。 `400`會拒絕未知的鍵和超出範圍的枚舉值。
 
 #### `DELETE /api/settings/feature-flags`
 
-一次清除**所有** DB 覆寫，將每個旗標還原為其環境變數／預設值。回傳
-`{ cleared: <count>, message: "..." }`。
+清除**全部**DB立即覆蓋，將每個標誌恢復為其環境/預設值。返回`{ cleared: <count>, message: "..." }`。
 
 > [!NOTE]
-> `requiresRestart: true` 的旗標只有在程序重新載入後才會生效。
-> 儀表板的重新啟動流程會呼叫 `POST /api/restart`，接著輪詢
-> `GET /api/health/ping`，直到伺服器恢復運作。
+> `requiresRestart: true`標誌僅在進程重新載入後生效。儀表板的重新啟動流程呼叫`POST /api/restart` ，然後輪詢`GET /api/health/ping` ，直到伺服器備份。
+
+---
 
 ## 緊急預算備援
 

@@ -415,7 +415,7 @@ Spațiul de nume `src/domain/` centralizează deciziile de politică, astfel în
 - Connection/model rule joiner: `src/domain/connectionModelRules.ts`
 - Instantanee despre disponibilitatea modelului: `src/domain/modelAvailability.ts`
 - Urmărirea expirării furnizorului: `src/domain/providerExpiration.ts`
-- Cota cache: `src/domain/quotaCache.ts`
+- Cota cache: `src/domain/quotaCache.ts`. Furnizorii adaugă și elimină ferestre de cotă (OpenAI a renunțat la fereastra Codex de 5 ore pentru unele planuri), astfel încât o citire de utilizare a adaptorului furnizorului atestă ca fiind completă (`quotasComplete`, vezi `src/lib/usage/usageReading.ts`) este setul complet de ferestre ale contului: o fereastră cunoscută mai devreme, dar absentă din ea este retrasă, în cache, în `quota_snapshots` rehidratate, înregistrările anexate (o restul rehidratate). starea cotei Codex și în gălețile de saturație ale lui Claude. Dovezile parțiale (anteturi de răspuns, copii învechite) actualizează doar ferestrele pe care le poartă.
 - Stare de degradare: `src/domain/degradation.ts`
 - Audit configurare: `src/domain/configAudit.ts`
 - Generator de metadate de răspuns OmniRoute : `src/domain/omnirouteResponseMeta.ts`

@@ -67,23 +67,23 @@ OMNIROUTE ನಿಮಗೆ ಹಣ ಉಳಿಸಲು ಮತ್ತು ನಿಮ್
 
 <br/>
 
-## 📈 ಗೇಟ್ವೇ ಬೆಳೆಯುತ್ತಲೇ ಇದೆ
+## 📈 ಗೇಟ್ವೇ ಬೆಳೆಯುತ್ತಲೇ ಇರುತ್ತದೆ
 
 <div align="center">
 
-|                              |          v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
-| ---------------------------- | :-----------------------: | :---------: | :-------------------: |
-| 🌐 ಪೂರೈಕೆದಾರರು               |            352            |   **358**   |          380          |
-| 🧠 ಅನನ್ಯ ಚಾಟ್ ಮಾದರಿ IDಗಳು    |           1320            |  **1374**   |         1491          |
-| 🖼️ ಮಾಧ್ಯಮ ಸೇತುವೆ             | 🆕 ದೃಶ್ಯ + ಆಡಿಯೋ + ವೀಡಿಯೋ |      ✓      |           ✓           |
-| 📡 ರೇಡಾರ್ ಉಚಿತ ಕ್ಯಾಟಲಾಗ್     |      🆕 ಆಯ್ಕೆ-ಸಕ್ರಿಯ      |      ✓      |           ✓           |
-| ⚖️ ಕೋಟಾ-ಅರಿವುಳ್ಳ ಶೆಡ್ಯೂಲಿಂಗ್ |      🆕 Quota-Share       |      ✓      |           ✓           |
-| 📊 ಕೋಟಾ ಟೆಲಿಮೆಟ್ರಿ           |          🆕 ಲೈವ್          |      ✓      |           ✓           |
-| 🧰 ಹೆಡ್ಲೆಸ್ ಮೋಡ್             |             —             |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS ರೈಲು ಮೂಲಸೌಕರ್ಯ        |             —             |      —      | 🆕 ಬಿಡುಗಡೆ ಚಾನೆಲ್ಗಳು  |
-| 🔎 ಮಾದರಿ ಅನ್ವೇಷಣೆ API        |             —             |      —      | 🆕 `/v1/models/query` |
+|                           |          v3.8.50           | **v3.8.51** |      `v3.8.54+`       |
+| ------------------------- | :------------------------: | :---------: | :-------------------: |
+| 🌐 ಪೂರೈಕೆದಾರರು            |            352             |   **358**   |          380          |
+| 🧠 ವಿಶಿಷ್ಟ ಚಾಟ್ ಮಾದರಿ IDs |            1320            |  **1374**   |         1491          |
+| 🖼️ ಮಾದರಿ ಸೇತುವೆ           | 🆕 ದೃಷ್ಟಿ + ಆಡಿಯೊ + ವೀಡಿಯೊ |      ✓      |           ✓           |
+| 📡 ರಾಡಾರ್ ಉಚಿತ ಕ್ಯಾಟಲಾಗ್  |          🆕 ಆಯ್ಕೆ          |      ✓      |           ✓           |
+| ⚖️ ಕೋಟಾ-ಅರಿವಿನ ವೇಳಾಪಟ್ಟಿ  |     🆕 ಕೋಟಾ-ಹಂಚಿಕೊಳ್ಳಿ     |      ✓      |           ✓           |
+| 📊 ಕೋಟಾ ಟೆಲಿಮೆಟ್ರಿ        |          🆕 ಲೈವ್           |      ✓      |           ✓           |
+| 🧰 ಹೆಡ್ಲೆಸ್ ಮೋಡ್          |             —              |      —      | 🆕 `serve --headless` |
+| 🛤️ LTS ರೈಲ್ ಇನ್ಫ್ರಾ       |             —              |      —      |  🆕 ಬಿಡುಗಡೆ ಚಾನಲ್ಗಳು  |
+| 🔎 ಮಾದರಿ ಅನ್ವೇಷಣೆ API     |             —              |      —      | 🆕 `/v1/models/query` |
 
-**→ [ರೋಡ್ಮ್ಯಾಪ್](ROADMAP.md) — `v3.9.0 LTS` ಕಡೆಗೆ ರೈಲಿನಲ್ಲಿ ಸಾಗುತ್ತಾ**
+**→ [ಮಾರ್ಗಸೂಚಿ](ROADMAP.md) — `v3.9.0 LTS` ಗೆ ರೈಲು ಸವಾರಿ**
 
 </div>
 
@@ -576,39 +576,39 @@ Radar ಬಳಸುವುದು ಐಚ್ಛಿಕವಾಗಿದ್ದು, ಅ�
 
 <div align="center">
 
-## ✨ ಹೊಸದು ಏನು
+## ✨ ಹೊಸತೇನಿದೆ
 
 </div>
 
-> **v3.8.20 → v3.8.54** ನ ಇತ್ತೀಚಿನ ಪ್ರಮುಖ ಅಂಶಗಳು. ಸಂಪೂರ್ಣ ಇತಿಹಾಸ [`CHANGELOG.md`](CHANGELOG.md) ನಲ್ಲಿ.
+> ನಿಂದ ಇತ್ತೀಚಿನ ಮುಖ್ಯಾಂಶಗಳು** v3.8.20 → v3.8.54** . [`CHANGELOG.md`](CHANGELOG.md) ನಲ್ಲಿ ಪೂರ್ಣ ಇತಿಹಾಸ.
 
-- **⚖️ `quota-weighted` ಮಾರ್ಗದರ್ಶನ** — 20ನೇ ಕಾಂಬೋ ತಂತ್ರವು ಖಾಲಿಯಾದ ಖಾತೆಗಳನ್ನು ಬಿಟ್ಟು, ಉಳಿದವುಗಳಲ್ಲಿ ಉಳಿದಿರುವ ಕೋಟಾ ÷ ಪ್ರಸ್ತುತ ಲೋಡ್ ಅನುಪಾತದಲ್ಲಿ ಆಯ್ಕೆಮಾಡುತ್ತದೆ, ಈಗಿರುವ ಸಂಭಾಷಣೆಗಳನ್ನು ಸ್ಥಿರವಾಗಿಡುತ್ತದೆ. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🧰 ಹೆಡ್ಲೆಸ್ ಮೋಡ್** — `omniroute serve --headless` (ಅಥವಾ `OMNIROUTE_HEADLESS=1`) ಕೇವಲ `/v1/*` ಪ್ರಾಕ್ಸಿ ಎಂಜಿನ್ ಅನ್ನು ಚಾಲನೆ ಮಾಡುತ್ತದೆ, ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಮತ್ತು ಡ್ಯಾಶ್ಬೋರ್ಡ್-ಮಾತ್ರ ಉಪಪ್ರಣಾಳಿಗಳನ್ನು ಆಫ್ ಮಾಡುತ್ತದೆ. → [Headless Mode](docs/guides/HEADLESS.md)
-- **🔎 ಮಾದರಿ ಅನ್ವೇಷಣೆ** — `/v1/models` ಸಾಮರ್ಥ್ಯ, ಸನ್ನಿವೇಶ, ಪ್ರಕಾರ ಮತ್ತು ಪಠ್ಯದಿಂದ ಫಿಲ್ಟರ್ ಮಾಡುತ್ತದೆ, ಮತ್ತು `POST /v1/models/query` ಒಂದೇ ಪ್ರತಿ-ಕೀ ದೃಶ್ಯತೆಯೊಂದಿಗೆ ಚಿಕ್ಕ ನಿರ್ಧಿಷ್ಟ ಶಾರ್ಟ್ಲಿಸ್ಟ್ ಅನ್ನು ನೀಡುತ್ತದೆ. → [API Reference](docs/reference/API_REFERENCE.md)
-- **🔑 ಪ್ರತಿ-ಕೀ ಮಾರ್ಗದರ್ಶನ ನಿಯಂತ್ರಣ** — API ಕೀ ಅನ್ನು ಒಂದು ಮಾದರಿ ಅಥವಾ ಕಾಂಬೋಗೆ `forcedModel` ಮೂಲಕ ಪಿನ್ ಮಾಡಿ, ಮತ್ತು ಕೀಯ ಮಾದರಿ ಮತ್ತು ಕಾಂಬೋಗಳನ್ನು ಏಕಕಾಲದಲ್ಲಿ ಸೇರಿಸಿ ಅಥವಾ ತೆಗೆದುಹಾಕಿ (`/api/keys/{id}/access`). → [API Reference](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
-- **🛡️ ಸೂಕ್ಷ್ಮ PII ನಿಯಂತ್ರಣಗಳು** — ಪ್ರತಿ-ಪ್ರಕಾರ ಆಯ್ಕೆ, 20 ಮಾನ್ಯಗೊಳಿಸಿದ ಕಸ್ಟಮ್ ಮಾಸ್ಕಿಂಗ್ ಪ್ಯಾಟರ್ನ್ಗಳು ಮತ್ತು ಪ್ರತಿ-ಪ್ರಕಾರ ಪತ್ತೆ ಕೌಂಟರ್ಗಳು; ಮಾಸ್ಕಿಂಗ್ ಸ್ವಯಂ ಆಯ್ಕೆಮಾಡಬೇಕಾದದ್ದು. → [Guardrails](docs/security/GUARDRAILS.md)
-- **🌍 67 ಭಾಷೆಗಳು** — ಡ್ಯಾಶ್ಬೋರ್ಡ್, ಡಾಕ್ಸ್ ಮಿರರ್ಗಳು ಮತ್ತು CLI, `npm run i18n:add-locale` ಮೂಲಕ ಎಲ್ಲೆಡೆ ಒಂದು ಭಾಷೆ ಸೇರಿಸಲು ಒಂದು ಆಜ್ಞೆ. → [i18n Guide](docs/guides/I18N.md)
-- **🎛️ OmniConductor** — ನಿಮ್ಮ ಏಜೆಂಟ್ ಫ್ಲೀಟ್ಗೆ ಒಳಗಿನ A2A ನಿಯೋಜನೆ, ಏಜೆಂಟ್ ಕಾರ್ಡ್ನಲ್ಲಿ ಕಂಡಕ್ಟರ್ ಸ್ಕಿಲ್ಗಳು, ಮತ್ತು ಫಾರೋ ಪುಶ್-ಟು-ಟಾಕ್ ವಾಯ್ಸ್ ಚಾಟ್ನೊಂದಿಗೆ ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಪ್ಯಾನೆಲ್. → [A2A Server](docs/frameworks/A2A-SERVER.md)
-- **🛂 ಅನುವಯೋಗಿ ಪ್ರವೇಶ ಮತ್ತು ಓವರ್ಲೋಡ್ ರಕ್ಷಣೆ** — ಭಾರೀ ಚಾಟ್ ವಿನಂತಿಗಳು 503 ಬದಲು ಕ್ಯೂ ಆಗುತ್ತವೆ, ಪ್ರತಿ ಸಂಪರ್ಕಕ್ಕೆ ಪರಮಾಣು RPM ರೋಲಿಂಗ್ ಲೀಸ್ಗಳೊಂದಿಗೆ. → [Resilience Guide](docs/architecture/RESILIENCE_GUIDE.md)
-- **🗂️ ಮಾನ್ಯ `/v1/models` ಕ್ರಮ** — ಪ್ರತಿ ಪೂರೈಕೆದಾರನಿಗೆ ಒಂದೇ ನಿರಂತರ ಗುಂಪು (ಕಾಂಬೋಗಳು ಮೊದಲು ಪಿನ್ ಆಗುತ್ತವೆ), ಪ್ರತಿ ಕ್ಯಾಟಲಾಗ್ ಮೂಲದಲ್ಲಿಯೂ ಸ್ಥಿರ. → [API Reference](docs/reference/API_REFERENCE.md)
-- **🗜️ ಸಂಕುಚನ ಬಲಪಡಿಕೆ** — ಡೀಫಾಲ್ಟ್-ಆನ್ ಇನ್ಫ್ಲೇಶನ್ ಗಾರ್ಡ್, Caveman ಪ್ಯಾಕ್ಗಳು DE / FR / JA + ಚೈನೀಸ್ (wényán) ಗೆ, Gradle & .NET ಗೆ RTK ಫಿಲ್ಟರ್ಗಳು. → [Compression](docs/compression/COMPRESSION_ENGINES.md)
-- **💸 ನಿಷ್ಠಾವಂತ ಫ್ಲಾಟ್-ರೇಟ್ ವೆಚ್ಚ** — ಚಂದಾದಾರಿಕೆ / ಕೋಡಿಂಗ್-ಪ್ಲಾನ್ ಪೂರೈಕೆದಾರರು ವೆಚ್ಚ ವಿಶ್ಲೇಷಣೆಯಲ್ಲಿ **$0** ಎಂದು ತೋರಿಸುತ್ತಾರೆ; ಬಜೆಟ್, ಕೋಟಾ ಮತ್ತು ಮಾರ್ಗದರ್ಶನ ಅಂದಾಜು ಮುಂದುವರಿಸುತ್ತದೆ. → [API Reference](docs/reference/API_REFERENCE.md)
-- **⚖️ ಕೋಟಾ-ಹಂಚಿಕೆ ಮಾರ್ಗದರ್ಶನ** — ಹಂಚಿದ ಖಾತೆಯ ಕೋಟಾವನ್ನು ಸಮಾನವಾಗಿ ಹಂಚಿಕೊಳ್ಳುವಂತೆ, ಕೆಲಸ-ಉಳಿಸುವಂತೆ, ನಿರುದ್ಯೋಗ ಭಾಗಗಳನ್ನು ಇತರರಿಗೆ ನೀಡುತ್ತದೆ. → [Resilience Guide](docs/architecture/RESILIENCE_GUIDE.md)
-- **🤖 ಒಂದು ಆಜ್ಞೆಯಲ್ಲಿ CLI/ಏಜೆಂಟ್ ಸೆಟಪ್** — 15 ನೋಂದಾಯಿತ `setup-*` ಆಜ್ಞೆಗಳು; `omniroute run` 7 CLIಗಳನ್ನು ಪ್ರಾರಂಭಿಸುತ್ತದೆ (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); `omniroute configure` 11 ಗುರಿಗಳನ್ನು ಇಂಟರ್ಯಾಕ್ಟಿವ್ ಪೂರೈಕೆದಾರ+ಮಾದರಿ ಆಯ್ಕೆ ಮತ್ತು ಪ್ರತಿ-ಸನ್ನಿವೇಶ ಫೇವರಿಟ್ಗಳೊಂದಿಗೆ ಬೆಂಬಲಿಸುತ್ತದೆ. → [CLI Integrations](docs/guides/CLI-INTEGRATIONS.md)
-- **🛰️ ರಿಮೋಟ್ ಮೋಡ್** — ಸ್ಕೋಪ್ ಮಾಡಿದ ಟೋಕನ್ಗಳೊಂದಿಗೆ ದೂರದ OmniRoute ಅನ್ನು ಚಾಲನೆ ಮಾಡಿ (`connect` / `contexts` / `tokens`) + VPS ಇನ್ಸ್ಟಾಲ್ಗಳಿಗೆ `antigravity` OAuth ಸಹಾಯಕ. → [Remote Mode](docs/guides/REMOTE-MODE.md)
-- **🧭 ಹೆಚ್ಚು ಚತುರ ಸ್ವಯಂ-ಮಾರ್ಗದರ್ಶನ** — `auto/<category>:<tier>` ಕಾಂಬೋಗಳು, **Fusion** (ಮಾದರಿ ಪ್ಯಾನೆಲ್ + ನ್ಯಾಯಾಧೀಶ), ಕಾರ್ಯ-ಅನುಗುಣ ಮಾರ್ಗದರ್ಶನ, ಪ್ರತಿ-ವಿನಂತಿಗೆ ಮಾದರಿ / ಮೋಡ್ / USD-ಬಜೆಟ್ ಓವರ್ರೈಡ್ಗಳು. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🗜️ ಪ್ಲಗ್ ಮಾಡಬಹುದಾದ ಸಂಕುಚನ** — 12 ಸಂಯೋಜಿಸಬಹುದಾದ ಎಂಜಿನ್ಗಳು + Compression Studios: LLMLingua-2, ಎರಡು-ಹಂತದ Ultra, omniglyph, ಪ್ರತಿ-ಹಂತ ನಿಖರತೆ ಗೇಟ್, GCF v3.2, ಡ್ರ್ಯಾಗ್-ರೀಆರ್ಡರ್ ಸಂಪಾದಕ. → [Compression](docs/compression/COMPRESSION_ENGINES.md)
-- **🕵️ ಪಾರದರ್ಶಕ MITM ಡಿಕ್ರಿಪ್ಟ್ (TPROXY)** — ಪ್ರಾಕ್ಸಿ ಎನ್ವೈರನ್ ವೇರಿಯಬಲ್ಗಳನ್ನು ನಿರ್ಲಕ್ಷಿಸುವ CLIಗಳನ್ನು ಹಿಡಿಯಿರಿ, ಪ್ರತಿ-SNI CA + ಟ್ರಸ್ಟ್-ಸ್ಟೋರ್ ಇನ್ಸ್ಟಾಲರ್ನೊಂದಿಗೆ. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
-- **💸 ಎಲ್ಲೆಡೆ ವೆಚ್ಚ ಟೆಲಿಮೆಟ್ರಿ** — ಪ್ರತಿ ಎಂಡ್ಪಾಯಿಂಟ್ನಲ್ಲಿ `X-OmniRoute-*` ವೆಚ್ಚ/ಬಳಕೆ ಹೆಡರ್ಗಳು, cache-HIT ಉಳಿತಾಯ ಹೆಡರ್, ಪ್ರತಿ-ಕೀ USD ವೆಚ್ಚ ಕೋಟಾ. → [API Reference](docs/reference/API_REFERENCE.md)
-- **🧠 ನೀವು ನಿಯಂತ್ರಿಸುವ ಮೆಮೊರಿ** — ಡೀಫಾಲ್ಟ್ ಆಗಿ ಆಫ್, ಸ್ವಯಂ ಆಯ್ಕೆಮಾಡಬಹುದಾದ int8 ವೆಕ್ಟರ್ ಕ್ವಾಂಟೈಜೆಷನ್ + ಪ್ರಕಾರದ ಕ್ಷಯ, ಪ್ರತಿ-ವಿನಂತಿಗೆ `x-omniroute-no-memory`. → [Memory](docs/frameworks/MEMORY.md)
-- **🛡️ ಭದ್ರತೆ** — ಪ್ರತಿ LLM ಮಾರ್ಗದಲ್ಲಿ ಪ್ರಾಂಪ್ಟ್-ಇಂಜೆಕ್ಷನ್ ಗಾರ್ಡ್ (ರೆಡ್-ಟೀಮ್ ಸೂಟ್), ಸ್ವಯಂ ಆಯ್ಕೆಮಾಡಬಹುದಾದ ಕ್ರೆಡೆನ್ಷಿಯಲ್-ಮಾಸ್ಕಿಂಗ್ ಗಾರ್ಡ್ರೈಲ್ (ಎರಡು ದಿಕ್ಕಿನಲ್ಲಿ ಲೀಕ್ ಆದ API ಕೀ/ಸೀಕ್ರೆಟ್ಗಳನ್ನು ರೆಡಾಕ್ಟ್ ಮಾಡುತ್ತದೆ), ಉಚಿತ DuckDuckGo ಅಂತಿಮ ವೆಬ್ ಸರ್ಚ್, ಮತ್ತು ಡ್ಯಾಶ್ಬೋರ್ಡ್ಗೆ ಐಚ್ಛಿಕ OIDC ಲಾಗಿನ್ ಗೇಟ್ (ಪಾಸ್ವರ್ಡ್ ಲಾಗಿನ್ ಯಾವಾಗಲೂ ಲಭ್ಯವಿರುತ್ತದೆ). → [Guardrails](docs/security/GUARDRAILS.md)
-- **🖼️ ಹೊಸ ಎಂಡ್ಪಾಯಿಂಟ್ಗಳು** — `/v1/ocr` (Mistral OCR) ಮತ್ತು `/v1/audio/translations` (Whisper-ಶೈಲಿ) ಮಾಧ್ಯಮ ಮೇಲ್ಮೈಯನ್ನು ಪೂರೈಸುತ್ತವೆ. → [API Reference](docs/reference/API_REFERENCE.md)
-- **🎨 ಚಿತ್ರ / ವೀಡಿಯೋ / ಆಡಿಯೋ ಉತ್ಪಾದನೆ** — ಮಾಧ್ಯಮಕ್ಕೆ ಒಂದೇ API: xAI Grok Imagine & Novita AI ವೀಡಿಯೋ, ComfyUI, Magnific, Adobe Firefly, Segmind, ಮತ್ತು ElevenLabs ಮುಂತಾದ ಸ್ಪೀಚ್ ಪೂರೈಕೆದಾರರು. → [API Reference](docs/reference/API_REFERENCE.md)
-- **🌍 ಡಿಪ್ಲಾಯ್ಮೆಂಟ್ ಮತ್ತು ಆಪ್ಸ್** — ರಿವರ್ಸ್-ಪ್ರಾಕ್ಸಿ `basePath`, ಬ್ರೌಸರ್-ಭಾಷೆ ಸ್ವಯಂ ಪತ್ತೆ, ಪ್ರತಿ-ಕೀ ಡಿವೈಸ್ ಟ್ರ್ಯಾಕಿಂಗ್, ರೂಟ್-ಲೆಸ್ MITM ಟ್ರಸ್ಟ್, zh-TW ಸ್ಥಳೀಕರಣ. → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 ಹೆಚ್ಚಿನ ಪೂರೈಕೆದಾರರು ಮತ್ತು ಏಜೆಂಟ್ಗಳು** — ಕ್ಲೌಡ್ ಏಜೆಂಟ್ಗಳು (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) ಬ್ರೌಸರ್ + OAuth ಲಾಗಿನ್ನೊಂದಿಗೆ, Ollama ಪ್ರಥಮ ದರ್ಜೆ ಕಾರ್ಡ್, Claude Opus 5 & Sonnet 5, Kimi ಅಧಿಕೃತ ಪಾಲುದಾರಿ (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… ಮತ್ತು ನವೀಕರಿಸಿದ **380-ಪೂರೈಕೆದಾರ ಕ್ಯಾಟಲಾಗ್**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
-- **📡 ಮಾರ್ಗದರ್ಶನ ಪಾರದರ್ಶಕತೆ** — ಪ್ರತಿ ಪ್ರತಿಕ್ರಿಯೆಯಲ್ಲಿ `X-OmniRoute-Decision` ಹೆಡರ್ ಇರುತ್ತದೆ, ಅದು ಸೇವೆ ನೀಡಿದ ತಂತ್ರ/ಪೂರೈಕೆದಾರ/ವಿಲಂಬವನ್ನು ಹೆಸರಿಸುತ್ತದೆ, ಹೊಸ `cache-optimized` ಕಾಂಬೋ ತಂತ್ರ + Auto-Combo `cacheAffinity` ಅಂಶವು ಕ್ಯಾಶ್ ಮಾಡಿದ ಪ್ರಿಫಿಕ್ಸ್ ಹೊಂದಿರುವ ಸಂಪರ್ಕಕ್ಕೆ ಪುನರಾವೃತ್ತಿ ವಿನಂತಿಗಳನ್ನು ಹಿಂತಿರುಗಿಸುತ್ತದೆ, ಮತ್ತು ಓದಲು ಮಾತ್ರ `/v1/auto-combo/{channel}/candidates` ಎಂಡ್ಪಾಯಿಂಟ್ ಒಂದು `auto/*` ಚಾನೆಲ್ನ ನೈಜ ಅಭ್ಯರ್ಥಿ ಪೂಲ್ ಅನ್ನು ಬಹಿರಂಗಪಡಿಸುತ್ತದೆ. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **⚡ ಸ್ಥಳೀಯ ಕಾರ್ಯಕ್ಷಮತೆ ಮತ್ತು ಮೂಲಸೌಕರ್ಯ** — ಒನ್-ಕ್ಲಿಕ್ ಸ್ಥಳೀಯ Redis, Cloudflare Workers / Deno Deploy ರಿಲೇ ಡಿಪ್ಲಾಯರ್ಗಳು, Bifrost ಮತ್ತು Mux ಅನ್ನು ಮೇಲ್ವಿಚಾರಿತ ಎम्बೆಡ್ ಮಾಡಿದ ಸೇವೆಗಳಾಗಿ. → [ಎಂಬೆಡ್ ಮಾಡಿದ ಸೇವೆಗಳು](docs/frameworks/EMBEDDED-SERVICES.md)
-- **🧩 ಪ್ಯಾಕೇಜ್ನಲ್ಲಿಯೂ ಇದೆ** — ಪ್ಲಗಿನ್ ಫ್ರೇಮ್ವರ್ಕ್ + ಮಾರ್ಕೆಟ್ಪ್ಲೇಸ್, Omni/Agent/GitHub ಸ್ಕಿಲ್ಸ್ ಫ್ರೇಮ್ವರ್ಕ್ಗಳು, Obsidian ವಾಲ್ಟ್ ಇಂಟಿಗ್ರೇಶನ್ (22 MCP ಉಪಕರಣಗಳು), OpenAI-ಅನುಕೂಲವಾದ Batch & Files APIಗಳು, ಅರ್ಥಪೂರ್ಣ ಪ್ರತಿಕ್ರಿಯೆ ಕ್ಯಾಶೆ, ಲೀಡರ್ಬೋರ್ಡ್ಗಳೊಂದಿಗೆ ಆಟೀಕರಣ, ACP ಏಜೆಂಟ್ ಅನ್ವೇಷಣೆ (15 ನಿರ್ಮಿತ ಏಜೆಂಟ್ಗಳು), BigQueryಗೆ ನಿಗದಿತ ಲಾಗ್ ಎಕ್ಸ್ಪೋರ್ಟ್, `auto/chaos` ಸಮಾಂತರ ಬಹು-ಮಾಡೆಲ್ ಫ್ಯಾನ್-ಔಟ್, Telegram ಬಾಟ್ ಬ್ರಿಡ್ಜ್, ಆ್ಯಪ್ನೊಳಗಿನ ಆವೃತ್ತಿ ನಿರ್ವಾಹಕ ಮತ್ತು LMArena-ELO ಉಚಿತ-ಪ್ರೊವೈಡರ್ ರ್ಯಾಂಕಿಂಗ್ಗಳು. → [ಡಾಕ್ಸ್](docs/README.md)
+- **⚖️ `quota-weighted` ರೂಟಿಂಗ್** — 20ನೇ ಕಾಂಬೊ ತಂತ್ರವು ಖಾಲಿಯಾದ ಖಾತೆಗಳನ್ನು ಬಿಟ್ಟುಬಿಡುತ್ತದೆ, ನಂತರ ಉಳಿದಿರುವ ಕೋಟಾ ÷ ಇನ್-ಫ್ಲೈಟ್ ಲೋಡ್ಗೆ ಅನುಪಾತದಲ್ಲಿ ಉಳಿದವುಗಳನ್ನು ಸೆಳೆಯುತ್ತದೆ, ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಸಂಭಾಷಣೆಗಳನ್ನು ಪಿನ್ ಮಾಡಿರುತ್ತದೆ. → [ಆಟೋ-ಕಾಂಬೊ](docs/routing/AUTO-COMBO.md)
+- **🧰 ಹೆಡ್ಲೆಸ್ ಮೋಡ್** — `omniroute serve --headless` (ಅಥವಾ `OMNIROUTE_HEADLESS=1`) ಕೇವಲ `/v1/*` ಪ್ರಾಕ್ಸಿ ಎಂಜಿನ್ ಅನ್ನು ರನ್ ಮಾಡುತ್ತದೆ, ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಮತ್ತು ಡ್ಯಾಶ್ಬೋರ್ಡ್-ಮಾತ್ರ ಉಪವ್ಯವಸ್ಥೆಗಳು ಆಫ್ ಆಗಿರುತ್ತವೆ. → [ಹೆಡ್ಲೆಸ್ ಮೋಡ್](docs/guides/HEADLESS.md)
+- **🔎 ಮಾದರಿ ಅನ್ವೇಷಣೆ** — `/v1/models` ಸಾಮರ್ಥ್ಯ, ಸಂದರ್ಭ, ರೀತಿಯ ಮತ್ತು ಪಠ್ಯದ ಮೂಲಕ ಫಿಲ್ಟರ್ ಮಾಡುತ್ತದೆ ಮತ್ತು `POST /v1/models/query` ಅದೇ ಪ್ರತಿ-ಕೀ ಗೋಚರತೆಯೊಂದಿಗೆ ಸಣ್ಣ ನಿರ್ಣಾಯಕ ಕಿರುಪಟ್ಟಿಯನ್ನು ಹಿಂತಿರುಗಿಸುತ್ತದೆ. → [API ಉಲ್ಲೇಖ](docs/reference/API_REFERENCE.md)
+- **🔑 ಪ್ರತಿ-ಕೀ ರೂಟಿಂಗ್ ನಿಯಂತ್ರಣ** — ಒಂದು ಮಾದರಿಗೆ API ಕೀಯನ್ನು ಪಿನ್ ಮಾಡಿ ಅಥವಾ `forcedModel` ನೊಂದಿಗೆ ಕಾಂಬೊ , ಮತ್ತು ಕೀಲಿಯ ಮಾದರಿಗಳು ಮತ್ತು ಕಾಂಬೊಗಳನ್ನು ಪರಮಾಣುವಾಗಿ ಸೇರಿಸಿ ಅಥವಾ ತೆಗೆದುಹಾಕಿ (`/api/keys/{id}/access`). → [API ಉಲ್ಲೇಖ](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
+- **🛡️ ಫೈನರ್ PII ನಿಯಂತ್ರಣಗಳು** — ಪ್ರತಿ-ಪ್ರಕಾರದ ಆಯ್ಕೆ, 20 ಮೌಲ್ಯೀಕರಿಸಿದ ಕಸ್ಟಮ್ ಮಾಸ್ಕಿಂಗ್ ಮಾದರಿಗಳು ಮತ್ತು ಪ್ರತಿ-ಪ್ರಕಾರದ ಪತ್ತೆ ಕೌಂಟರ್ಗಳು; ಮರೆಮಾಚುವಿಕೆಯು ಆಯ್ಕೆಯಾಗಿ ಉಳಿಯುತ್ತದೆ. → [ಗಾರ್ಡ್ರೈಲ್ಸ್](docs/security/GUARDRAILS.md)
+- **🌍 67 ಭಾಷೆಗಳು** — ಡ್ಯಾಶ್ಬೋರ್ಡ್, ಡಾಕ್ಸ್ ಮಿರರ್ಗಳು ಮತ್ತು CLI, ಜೊತೆಗೆ `npm run i18n:add-locale` ಒಂದು ಆಜ್ಞೆಯಲ್ಲಿ ಎಲ್ಲೆಡೆ ಭಾಷೆಯನ್ನು ಸೇರಿಸುತ್ತದೆ. → [i18n ಮಾರ್ಗದರ್ಶಿ](docs/guides/I18N.md)
+- **🎛️ OmniConductor** ನಿಮ್ಮ ಏಜೆಂಟ್ ಫ್ಲೀಟ್ಗೆ — ಒಳಬರುವ A2A ನಿಯೋಗ, ಏಜೆಂಟ್ ಕಾರ್ಡ್ನಲ್ಲಿ ಕಂಡಕ್ಟರ್ ಕೌಶಲ್ಯಗಳು ಮತ್ತು ಫಾರೋ ಪುಶ್-ಟು-ಟಾಕ್ ವಾಯ್ಸ್ ಚಾಟ್ನೊಂದಿಗೆ ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಪ್ಯಾನೆಲ್. → [A2A ಸರ್ವರ್](docs/frameworks/A2A-SERVER.md)
+- **🛂 ಅಡಾಪ್ಟಿವ್ ಪ್ರವೇಶ ಮತ್ತು ಓವರ್ಲೋಡ್ ರಕ್ಷಣೆ** ಪ್ರತಿ ಸಂಪರ್ಕಕ್ಕೆ ಪರಮಾಣು RPM ರೋಲಿಂಗ್ ಲೀಸ್ಗಳೊಂದಿಗೆ 503ing ಬದಲಿಗೆ — ಹೆವಿವೇಯ್ಟ್ ಚಾಟ್ ವಿನಂತಿಗಳ ಕ್ಯೂ. → [ಸ್ಥಿತಿಸ್ಥಾಪಕತ್ವ ಮಾರ್ಗದರ್ಶಿ](docs/architecture/RESILIENCE_GUIDE.md)
+- **🗂️ ಅಂಗೀಕೃತ `/v1/models` ಆದೇಶ** — ಪ್ರತಿ ಪೂರೈಕೆದಾರರಿಗೆ ಒಂದು ಪಕ್ಕದ ಪೂರೈಕೆದಾರ-ಗುಂಪಿನ ಬ್ಲಾಕ್ (ಕಾಂಬೋಸ್ ಅನ್ನು ಮೊದಲು ಪಿನ್ ಮಾಡಲಾಗಿದೆ), ಪ್ರತಿ ಕ್ಯಾಟಲಾಗ್ ಮೂಲದಲ್ಲಿ ಸ್ಥಿರವಾಗಿರುತ್ತದೆ. → [API ಉಲ್ಲೇಖ](docs/reference/API_REFERENCE.md)
+- **🗜️ ಸಂಕೋಚನ ಗಟ್ಟಿಯಾಗುವುದು** — ಡೀಫಾಲ್ಟ್-ಆನ್ ಇನ್ಫ್ಲೇಶನ್ ಗಾರ್ಡ್, DE / FR / JA + ಚೈನೀಸ್ (wényán) ಗಾಗಿ ಕೇವ್ಮ್ಯಾನ್ ಪ್ಯಾಕ್ಗಳು, ಗ್ರೇಡಲ್ & ಗಾಗಿ RTK ಫಿಲ್ಟರ್ಗಳು.NET→ [ಕಂಪ್ರೆಷನ್](docs/compression/COMPRESSION_ENGINES.md)
+- **💸 ಪ್ರಾಮಾಣಿಕ ಫ್ಲಾಟ್ ದರದ ವೆಚ್ಚ** — ಚಂದಾದಾರಿಕೆ / ಕೋಡಿಂಗ್-ಯೋಜನೆ ಪೂರೈಕೆದಾರರು ಓದುತ್ತಾರೆ** $0** ವೆಚ್ಚ ವಿಶ್ಲೇಷಣೆಯಲ್ಲಿ; ಬಜೆಟ್, ಕೋಟಾ ಮತ್ತು ರೂಟಿಂಗ್ ಅಂದಾಜು ಮಾಡುತ್ತಿರಿ. → [API ಉಲ್ಲೇಖ](docs/reference/API_REFERENCE.md)
+- **⚖️ ಕೋಟಾ-ಹಂಚಿಕೆ ರೂಟಿಂಗ್** — ಪೂಲ್ ಮಾಡಿದ ಕೀಗಳಾದ್ಯಂತ ಹಂಚಿದ ಖಾತೆಯ ಕೋಟಾವನ್ನು ವಿಭಜಿಸುತ್ತದೆ, ಕೆಲಸ-ಸಂರಕ್ಷಿಸುತ್ತದೆ ಆದ್ದರಿಂದ ಐಡಲ್ ಸ್ಲೈಸ್ಗಳನ್ನು ನೀಡಲಾಗುತ್ತದೆ. → [ಸ್ಥಿತಿಸ್ಥಾಪಕತ್ವ ಮಾರ್ಗದರ್ಶಿ](docs/architecture/RESILIENCE_GUIDE.md)
+- **🤖 ಒನ್-ಕಮಾಂಡ್ CLI/agent ಸೆಟಪ್** — 15 ನೋಂದಾಯಿತ `setup-*` ಆಜ್ಞೆಗಳು; `omniroute run` 7 CLIs ಪ್ರಾರಂಭಿಸುತ್ತದೆ (Claude ಕೋಡ್, Codex, Aider, Goose, OpenCode, Qwen ಕೋಡ್, Gemini CLI); `omniroute configure` ಸಂವಾದಾತ್ಮಕ ಪೂರೈಕೆದಾರ + ಮಾದರಿ ಪಿಕ್ಕರ್ ಮತ್ತು ಪ್ರತಿ ಸಂದರ್ಭ ಮೆಚ್ಚಿನವುಗಳೊಂದಿಗೆ 11 ಗುರಿಗಳನ್ನು ಬೆಂಬಲಿಸುತ್ತದೆ. → [CLI ಇಂಟಿಗ್ರೇಷನ್ಗಳು](docs/guides/CLI-INTEGRATIONS.md)
+- **🛰️ ರಿಮೋಟ್ ಮೋಡ್** — ಸ್ಕೋಪ್ಡ್ ಟೋಕನ್ಗಳೊಂದಿಗೆ ರಿಮೋಟ್ OmniRoute ಅನ್ನು ಚಾಲನೆ ಮಾಡಿ (`connect` / `contexts` / `tokens`) + ಮತ್ತು VPS ಸ್ಥಾಪನೆಗಳಿಗಾಗಿ `antigravity` OAuth ಸಹಾಯಕ → [ರಿಮೋಟ್ ಮೋಡ್](docs/guides/REMOTE-MODE.md)
+- **🧭 ಸ್ಮಾರ್ಟರ್ ಸ್ವಯಂ-ರೂಟಿಂಗ್** — `auto/<category>:<tier>` ಸಂಯೋಜನೆಗಳು,** ಫ್ಯೂಷನ್** (ಮಾದರಿ ಫಲಕ + ನ್ಯಾಯಾಧೀಶರು), ಟಾಸ್ಕ್-ಅವೇರ್ ರೂಟಿಂಗ್, ಪ್ರತಿ ವಿನಂತಿಯ ಮಾದರಿ / ಮೋಡ್ / USD-ಬಜೆಟ್ ಅತಿಕ್ರಮಿಸುತ್ತದೆ. → [ಆಟೋ-ಕಾಂಬೊ](docs/routing/AUTO-COMBO.md)
+- **🗜️ ಪ್ಲಗ್ ಮಾಡಬಹುದಾದ ಸಂಕೋಚನ** — 12 ಕಂಪೋಸಬಲ್ ಇಂಜಿನ್ಗಳು + ಕಂಪ್ರೆಷನ್ ಸ್ಟುಡಿಯೋಸ್: LLMLingua-2, ಎರಡು-ಹಂತದ ಅಲ್ಟ್ರಾ, ಓಮ್ನಿಗ್ಲಿಫ್, ಪ್ರತಿ-ಹಂತದ ಫಿಡೆಲಿಟಿ ಗೇಟ್, GCF v3.2, ಡ್ರ್ಯಾಗ್-ರೀಆರ್ಡರ್ ಎಡಿಟರ್. → [ಕಂಪ್ರೆಷನ್](docs/compression/COMPRESSION_ENGINES.md)
+- **🕵️ ಪಾರದರ್ಶಕ MITM ಡೀಕ್ರಿಪ್ಟ್ (TPROXY)** ಪ್ರತಿ-SNI CA + ಟ್ರಸ್ಟ್-ಸ್ಟೋರ್ ಅನುಸ್ಥಾಪಕದೊಂದಿಗೆ ಪ್ರಾಕ್ಸಿ env vars ಅನ್ನು ನಿರ್ಲಕ್ಷಿಸುವ — ಕ್ಯಾಪ್ಚರ್ CLIs. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
+- **💸 ವೆಚ್ಚ ಟೆಲಿಮೆಟ್ರಿ ಎಲ್ಲೆಡೆ** ಪ್ರತಿ ಎಂಡ್ ಪಾಯಿಂಟ್ನಲ್ಲಿ — `X-OmniRoute-*` cost/usage ಹೆಡರ್ಗಳು, ಸಂಗ್ರಹ-HIT ಉಳಿತಾಯ ಹೆಡರ್, ಪ್ರತಿ-ಕೀ USD ಖರ್ಚು ಕೋಟಾಗಳು. → [API ಉಲ್ಲೇಖ](docs/reference/API_REFERENCE.md)
+- **ನೀವು ನಿಯಂತ್ರಿಸುವ 🧠 ಮೆಮೊರಿ** ಡಿಫಾಲ್ಟ್ ಆಗಿ — ಆಫ್, ಆಪ್ಟ್-ಇನ್ int8 ವೆಕ್ಟರ್ ಕ್ವಾಂಟೈಸೇಶನ್ + ಟೈಪ್ ಮಾಡಿದ ಡಿಕೇ, ಪ್ರತಿ ವಿನಂತಿ `x-omniroute-no-memory`. → [ಮೆಮೊರಿ](docs/frameworks/MEMORY.md)
+- **🛡️ ಭದ್ರತೆ** ಪ್ರತಿ LLM ಮಾರ್ಗದಲ್ಲಿ — ಪ್ರಾಂಪ್ಟ್-ಇಂಜೆಕ್ಷನ್ ಗಾರ್ಡ್ (ರೆಡ್-ಟೀಮ್ ಸೂಟ್), ಆಪ್ಟ್-ಇನ್ ರುಜುವಾತು-ಮರೆಮಾಚುವ ಗಾರ್ಡ್ರೈಲ್ (ಎರಡೂ ದಿಕ್ಕುಗಳಲ್ಲಿ ಸೋರಿಕೆಯಾದ API keys/secrets ಅನ್ನು ಮರುಪರಿಶೀಲಿಸುತ್ತದೆ), ಉಚಿತ DuckDuckGo ಕೊನೆಯ ರೆಸಾರ್ಟ್ ವೆಬ್ ಹುಡುಕಾಟ ಮತ್ತು ಡ್ಯಾಶ್ಬೋರ್ಡ್ಗಾಗಿ ಐಚ್ಛಿಕ OIDC ಲಾಗಿನ್ ಗೇಟ್ (ಪಾಸ್ವರ್ಡ್ ಲಾಗಿನ್ ಯಾವಾಗಲೂ ಲಭ್ಯವಿರುತ್ತದೆ). → [ಗಾರ್ಡ್ರೈಲ್ಗಳು](docs/security/GUARDRAILS.md)
+- **🖼️ ಹೊಸ ಅಂತಿಮ ಬಿಂದುಗಳು** — `/v1/ocr` (Mistral OCR) ಮತ್ತು `/v1/audio/translations` (ವಿಸ್ಪರ್-ಶೈಲಿ) ಮಾಧ್ಯಮ ಮೇಲ್ಮೈಯನ್ನು ಪೂರ್ತಿಗೊಳಿಸುತ್ತದೆ. → [API ಉಲ್ಲೇಖ](docs/reference/API_REFERENCE.md)
+- **🎨 ಚಿತ್ರ / ವಿಡಿಯೋ / ಆಡಿಯೋ ಉತ್ಪಾದನೆ** ಮಾಧ್ಯಮಕ್ಕಾಗಿ — one API : xAI Grok ಇಮ್ಯಾಜಿನ್ & ನೋವಿಟಾ AI ವೀಡಿಯೊ, ComfyUI, ಮ್ಯಾಗ್ನಿಫಿಕ್, ಅಡೋಬ್ ಫೈರ್ಫ್ಲೈ, ಸೆಗ್ಮೈಂಡ್ ಮತ್ತು ElevenLabs ನಂತಹ ಭಾಷಣ ಪೂರೈಕೆದಾರರು. → [API ಉಲ್ಲೇಖ](docs/reference/API_REFERENCE.md)
+- **🌍 ನಿಯೋಜನೆ ಮತ್ತು ಆಪ್ಗಳು** — ರಿವರ್ಸ್-ಪ್ರಾಕ್ಸಿ `basePath`, ಬ್ರೌಸರ್-ಭಾಷೆಯ ಸ್ವಯಂ-ಪತ್ತೆಹಚ್ಚುವಿಕೆ, ಪ್ರತಿ-ಕೀ ಸಾಧನದ ಟ್ರ್ಯಾಕಿಂಗ್, ರೂಟ್-ಲೆಸ್ MITM ಟ್ರಸ್ಟ್, zh-TW ಸ್ಥಳೀಕರಣ. → [ಪರಿಸರ](docs/reference/ENVIRONMENT.md)
+- **🤝 ಇನ್ನಷ್ಟು ಪೂರೈಕೆದಾರರು ಮತ್ತು ಏಜೆಂಟ್ಗಳು** — ಕ್ಲೌಡ್ ಏಜೆಂಟ್ಗಳು (Codex Cloud, Cursor, Devin, Jules), Grok ಬಿಲ್ಡ್ (xAI) ಜೊತೆಗೆ ಬ್ರೌಸರ್ + OAuth ಲಾಗಿನ್, Ollama ಪ್ರಥಮ ದರ್ಜೆ ಕಾರ್ಡ್, Claude Opus 5 & Sonnet 5, Kimi, ಅಧಿಕೃತ ಪಾಲುದಾರಿಕೆ,Code/Web/Moonshot, Zed, ಯುವಾನ್ಬಾವೊ, ಆಗ್ನೆಸ್ SenseNovaAI ಮತ್ತು ರಿಫ್ರೆಶ್** 380-ಒದಗಿಸುವವರ ಕ್ಯಾಟಲಾಗ್** . → [ಪೂರೈಕೆದಾರರು](docs/reference/PROVIDER_REFERENCE.md)
+- **📡 ರೂಟಿಂಗ್ ಪಾರದರ್ಶಕತೆ** — ಪ್ರತಿ ಪ್ರತಿಕ್ರಿಯೆಯು ಅದನ್ನು ಒದಗಿಸಿದ strategy/provider/latency ಅನ್ನು ಹೆಸರಿಸುವ `X-OmniRoute-Decision` ಹೆಡರ್ ಅನ್ನು ಹೊಂದಿರುತ್ತದೆ, ಹೊಸ `cache-optimized` ಕಾಂಬೊ ಸ್ಟ್ರಾಟಜಿ + ಸ್ವಯಂ-ಕಾಂಬೋ `cacheAffinity` ಅಂಶದ ಮಾರ್ಗವು ಸಂಗ್ರಹಗೊಂಡ ಪೂರ್ವಪ್ರತ್ಯಯವನ್ನು ಹೊಂದಿರುವ ಸಂಪರ್ಕಕ್ಕೆ ಪುನರಾವರ್ತಿತ ವಿನಂತಿಗಳನ್ನು ಹಿಂತಿರುಗಿಸುತ್ತದೆ ಮತ್ತು ಓದಲು-ಮಾತ್ರ `/v1/auto-combo/{channel}/candidates` ಅಂತಿಮ ಬಿಂದುವು `auto/*` ಚಾನಲ್ನ ಲೈವ್ ಅಭ್ಯರ್ಥಿ ಪೂಲ್ ಅನ್ನು ಬಹಿರಂಗಪಡಿಸುತ್ತದೆ. → [ಸ್ವಯಂ ಕಾಂಬೊ](docs/routing/AUTO-COMBO.md)
+- **⚡ ಸ್ಥಳೀಯ ಕಾರ್ಯಕ್ಷಮತೆ ಮತ್ತು ಇನ್ಫ್ರಾ** — ಒಂದು ಕ್ಲಿಕ್ ಸ್ಥಳೀಯ Redis, Cloudflare ವರ್ಕರ್ಸ್ / ಡೆನೋ ರಿಲೇ ನಿಯೋಜಕರು, Bifrost & Mux ಅನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಲಾದ ಎಂಬೆಡೆಡ್ ಸೇವೆಗಳಂತೆ ನಿಯೋಜಿಸಿ. → [ಎಂಬೆಡೆಡ್ ಸೇವೆಗಳು](docs/frameworks/EMBEDDED-SERVICES.md)
+- **🧩 ಸಹ ಪೆಟ್ಟಿಗೆಯಲ್ಲಿ** — ಪ್ಲಗಿನ್ ಫ್ರೇಮ್ವರ್ಕ್ + ಮಾರುಕಟ್ಟೆ ಸ್ಥಳ, Omni/Agent/GitHub ಕೌಶಲ್ಯಗಳ ಚೌಕಟ್ಟುಗಳು, Obsidian ವಾಲ್ಟ್ ಏಕೀಕರಣ (22 MCP ಪರಿಕರಗಳು), OpenAI-ಹೊಂದಾಣಿಕೆಯ ಬ್ಯಾಚ್ ಮತ್ತು ಫೈಲ್ಗಳು APIs, ಲಾಕ್ಷಣಿಕ ಪ್ರತಿಕ್ರಿಯೆ ಸಂಗ್ರಹ, ಲೀಡರ್ಬೋರ್ಡ್ಗಳೊಂದಿಗೆ ಗ್ಯಾಮಿಫಿಕೇಶನ್, ACP ಏಜೆಂಟ್ ಅನ್ವೇಷಣೆ (15 ಶೆಡ್ಯೂಲ್ BigQuery ಪೋರ್ಟ್ಗಳಿಗೆ), ಬಹು-ಮಾದರಿ ಫ್ಯಾನ್-ಔಟ್, `auto/chaos` ಬೋಟ್ Telegram, ಅಪ್ಲಿಕೇಶನ್ನಲ್ಲಿನ ಆವೃತ್ತಿ ನಿರ್ವಾಹಕ ಮತ್ತು LMArena-ELO ಉಚಿತ-ಒದಗಿಸುವವರ ಶ್ರೇಯಾಂಕಗಳು. → [ಡಾಕ್ಸ್](docs/README.md)
 
 <br/>
 
@@ -911,15 +911,15 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
 
 <div align="center">
 
-## 🗜️ 15–95% ಟೋಕನ್ಗಳನ್ನು ಉಳಿಸಿ — ಸ್ವಯಂಚಾಲಿತವಾಗಿ
+## 🗜️ 15–95% ಟೋಕನ್ಗಳನ್ನು — ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಉಳಿಸಿ
 
 </div>
 
-### 📖 ಇದು ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ — ಪೈಪ್ಲೈನ್, ಆರ್ಕಿಟೆಕ್ಚರ್ ಮತ್ತು ಉಳಿತಾಯದ ಗಣಿತ
+### 📖 ಇದು — ಪೈಪ್ಲೈನ್, ಆರ್ಕಿಟೆಕ್ಚರ್ ಮತ್ತು ಉಳಿತಾಯ ಗಣಿತ ಹೇಗೆ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ
 
-<img src="./docs/diagrams/compression-pipeline.svg" width="100%" alt="OmniRoute ಸಂಕೋಚನ ಪೈಪ್ಲೈನ್: ಒಂದು ಉದಾಹರಣಾತ್ಮಕ 10,000-ಟೋಕನ್ ಕ್ಲೈಂಟ್ ವಿನಂತಿಯು 12 ಸಂಯೋಜ್ಯ ಎಂಜಿನ್ಗಳ ಮೂಲಕ ಹಾದುಹೋಗುತ್ತದೆ — Session-Dedup, CCR, Lite, RTK, Responses Tool Output, Headroom, Relevance, Caveman, Aggressive, LLMLingua-2, Ultra ಮತ್ತು OmniGlyph — ಮತ್ತು ದಾಖಲಿತ ಸ್ಟಾಕ್ಡ್ ಉದಾಹರಣೆಯಲ್ಲಿ ಸುಮಾರು 1,080 ಟೋಕನ್ಗಳಲ್ಲಿ ಪ್ರೊವೈಡರ್ ಅನ್ನು ತಲುಪಬಹುದು. ಸ್ಟ್ರಕ್ಚರ್ಡ್ ವಿಷಯವನ್ನು ಪ್ರಿಜರ್ವೇಷನ್ ಗಾರ್ಡ್ಗಳು ಮತ್ತು ಪ್ರತಿ-ಹಂತದ ಫಿಡೆಲಿಟಿ ಗೇಟ್ಗಳು ರಕ್ಷಿಸುತ್ತವೆ; ಸ್ಪಷ್ಟ lossy ಅಥವಾ ಪ್ರಾಯೋಗಿಕ ಮೋಡ್ಗಳು ಅರ್ಹ ವಿಷಯವನ್ನು ರೂಪಾಂತರಿಸಬಹುದು."/>
+<img src="./docs/diagrams/compression-pipeline.svg" width="100%" alt="OmniRoute compression pipeline: an illustrative 10,000-token client request passes through 12 composable engines — Session-Dedup, CCR, Lite, RTK, Responses Tool Output, Headroom, Relevance, Caveman, Aggressive, LLMLingua-2, Ultra and OmniGlyph — and can reach the provider at about 1,080 tokens in the documented stacked example. Structured content is protected by preservation guards and per-step fidelity gates; explicit lossy or experimental modes may transform eligible content."/>
 
-ಡಿಫಾಲ್ಟ್ ಸ್ಟಾಕ್ಡ್ ಕಾಂಬೊವು `RTK → Caveman` ಅನ್ನು ಚಲಾಯಿಸುತ್ತದೆ. ಎರಡೂ ಒಂದೇ ಟೂಲ್/ಕಾಂಟೆಕ್ಸ್ಟ್ ಪೇಲೋಡ್ ಮೇಲೆ ಕಾರ್ಯನಿರ್ವಹಿಸಿದಾಗ, ಉಳಿತಾಯವು ಸಂಚಿತವಾಗುತ್ತದೆ:
+ಡೀಫಾಲ್ಟ್ ಸ್ಟ್ಯಾಕ್ ಮಾಡಿದ ಕಾಂಬೊ `RTK → Caveman` ರನ್ ಮಾಡುತ್ತದೆ. ಎರಡೂ ಒಂದೇ tool/context ಪೇಲೋಡ್ನಲ್ಲಿ ಕಾರ್ಯನಿರ್ವಹಿಸಿದಾಗ, ಉಳಿತಾಯ ಸಂಯುಕ್ತ:
 
 ```txt
 combined = 1 − (1 − RTK) × (1 − Caveman_input)
@@ -927,74 +927,74 @@ average  = 1 − (1 − 0.80) × (1 − 0.46) = 89.2%
 range    = 78.4 – 94.6%
 ```
 
-ಕೋಡ್ ಬ್ಲಾಕ್ಗಳು, URL ಗಳು, JSON ಮತ್ತು ಸ್ಟ್ರಕ್ಚರ್ಡ್ ಡೇಟಾವನ್ನು ಪ್ರಿಜರ್ವೇಷನ್ ಎಂಜಿನ್ **ಯಾವಾಗಲೂ ರಕ್ಷಿಸುತ್ತದೆ**.
+ಕೋಡ್ ಬ್ಲಾಕ್ಗಳು, URLs, JSON ಮತ್ತು ರಚನಾತ್ಮಕ ಡೇಟಾ** ಯಾವಾಗಲೂ ರಕ್ಷಿಸಲಾಗಿದೆ** ಸಂರಕ್ಷಣಾ ಎಂಜಿನ್ ಮೂಲಕ.
 
-> **ಕೆಲವೇ ಟೋಕನ್ಗಳಿಂದ ಕೆಲಸವಾಗುವಾಗ ಅನೇಕ ಟೋಕನ್ಗಳನ್ನು ಏಕೆ ಬಳಸಬೇಕು?** ಪ್ರತಿಯೊಂದು ವಿನಂತಿಯೂ OmniRoute ನ ಸಂಕೋಚನ ಪೈಪ್ಲೈನ್ ಮೂಲಕ **ಪಾರದರ್ಶಕವಾಗಿ** ಹಾದುಹೋಗುತ್ತದೆ — ಕ್ಲೈಂಟ್ ಬದಲಾವಣೆಗಳಿಲ್ಲ. ಇದು ಈಗ ಕ್ರಮವಾಗಿ ಚಲಿಸುವ ಮತ್ತು ಪ್ರತಿ ರೂಟಿಂಗ್ ಕಾಂಬೊದಲ್ಲಿ mix & match ಆಗುವ **12 ಸಂಯೋಜ್ಯ ಎಂಜಿನ್ಗಳ ಸ್ಟಾಕ್** ಆಗಿದೆ — [RTK](https://github.com/rtk-ai/rtk), [Caveman](https://github.com/JuliusBrussee/caveman) (⭐ 90K+), [LLMLingua-2](https://github.com/microsoft/LLMLingua), ಮತ್ತು [Troglodita](https://github.com/leninejunior/troglodita) (PT-BR) ಇವುಗಳ ಆಲೋಚನೆಗಳ ಮೇಲೆ ನಿರ್ಮಿತವಾಗಿದೆ.
+> **ಕೆಲವು ಟೋಕನ್ಗಳು ಟ್ರಿಕ್ ಮಾಡಿದಾಗ ಅನೇಕ ಟೋಕನ್ಗಳನ್ನು ಏಕೆ ಬಳಸಬೇಕು?** ಪ್ರತಿಯೊಂದು ವಿನಂತಿಯು OmniRoute ನ ಕಂಪ್ರೆಷನ್ ಪೈಪ್ಲೈನ್ ಮೂಲಕ ಹಾದುಹೋಗುತ್ತದೆ** ಪಾರದರ್ಶಕವಾಗಿ** — ಯಾವುದೇ ಕ್ಲೈಂಟ್ ಬದಲಾವಣೆಗಳಿಲ್ಲ. ಇದು ಈಗ ಎ** 12 ಸಂಯೋಜಿತ ಎಂಜಿನ್ಗಳ ಸ್ಟಾಕ್** [RTK](https://github.com/rtk-ai/rtk), [ಕೇವ್ಮ್ಯಾನ್](https://github.com/JuliusBrussee/caveman) (⭐ 90K +), [LLMLingua-2](https://github.com/microsoft/LLMLingua), ಮತ್ತು [ಟ್ರೊಗ್ಲೋಡಿಟಾ](https://github.com/leninejunior/troglodita) (PT-BR) ನಿಂದ ಕಲ್ಪನೆಗಳ ಮೇಲೆ ಪ್ರತಿ ರೂಟಿಂಗ್ ಕಾಂಬೊ — ಕಟ್ಟಡಕ್ಕೆ ಕ್ರಮವಾಗಿ ಮತ್ತು ಮಿಶ್ರಣ ಮತ್ತು ಹೊಂದಾಣಿಕೆ.
 
 ### 🧱 12-ಎಂಜಿನ್ ಸ್ಟಾಕ್
 
-ಎಂಜಿನ್ಗಳು ಪೈಪ್ಲೈನ್ ಕ್ರಮದಲ್ಲಿ ಚಲಿಸುತ್ತವೆ; ಪ್ರತಿಯೊಂದನ್ನು ಸ್ವತಂತ್ರವಾಗಿ ಆನ್/ಆಫ್ ಮಾಡಬಹುದು ಮತ್ತು ಪ್ರತಿ ಕಾಂಬೊದಲ್ಲಿ ಕಾನ್ಫಿಗರ್ ಮಾಡಬಹುದು:
+ಇಂಜಿನ್ಗಳು ಪೈಪ್ಲೈನ್ ಕ್ರಮದಲ್ಲಿ ಚಲಿಸುತ್ತವೆ; ಪ್ರತಿಯೊಂದೂ ಸ್ವತಂತ್ರವಾಗಿ ಟಾಗಲ್ ಮಾಡಬಹುದು ಮತ್ತು ಪ್ರತಿ ಕಾಂಬೊಗೆ ಕಾನ್ಫಿಗರ್ ಮಾಡಬಹುದು:
 
 <table>
-  <tr><th align="center">#</th><th align="left">ಎಂಜಿನ್</th><th align="left">ಇದು ಏನು ಮಾಡುತ್ತದೆ</th></tr>
-  <tr><td align="center" nowrap>1</td><td align="left" nowrap><b>Session-Dedup</b></td><td align="left">ಟರ್ನ್ಗಳಾದ್ಯಂತ ಪುನರಾವರ್ತಿತ ವಿಷಯವನ್ನು ಕೈಬಿಡುತ್ತದೆ (ಕಂಟೆಂಟ್-ಆಧಾರಿತ, ಕ್ರಾಸ್-ಟರ್ನ್)</td></tr>
-  <tr><td align="center" nowrap>2</td><td align="left" nowrap><b>CCR</b></td><td align="left">ದೊಡ್ಡ ಬ್ಲಾಕ್ಗಳನ್ನು retrieve ಮಾರ್ಕರ್ಗಳ ಹಿಂದೆ ಆರ್ಕೈವ್ ಮಾಡುತ್ತದೆ, ಬೇಕಾದಾಗ ತರುತ್ತದೆ</td></tr>
-  <tr><td align="center" nowrap>3</td><td align="left" nowrap><b>Lite</b></td><td align="left">Whitespace + image-URL ಟ್ರಿಮ್ಮಿಂಗ್ (ಕಡಿಮೆ latency ನ ಬೇಸ್ಲೈನ್)</td></tr>
-  <tr><td align="center" nowrap>4</td><td align="left" nowrap><b>RTK</b></td><td align="left">ಸ್ಮಾರ್ಟ್ ಟೂಲ್-ಫಲಿತಾಂಶ ಫಿಲ್ಟರಿಂಗ್, dedup ಮತ್ತು truncation (ಕಮಾಂಡ್-ಅರಿವಿನ)</td></tr>
-  <tr><td align="center" nowrap>5</td><td align="left" nowrap><b>Responses Tool Output</b></td><td align="left">shell/patch/search/build ಔಟ್ಪುಟ್ಗಳಿಗೆ lossless-ಮೊದಲ JSON + ಸೀಮಿತ ಡಯಾಗ್ನೊಸ್ಟಿಕ್ ಸಂಕೋಚನ (Responses API)</td></tr>
-  <tr><td align="center" nowrap>6</td><td align="left" nowrap><b>Headroom</b></td><td align="left">vendored <b>GCF</b> codec ಮೂಲಕ JSON arrays ಗಳ lossless ಟ್ಯಾಬ್ಯುಲಾರ್ ಕಾಂಪ್ಯಾಕ್ಷನ್ (~30%)</td></tr>
-  <tr><td align="center" nowrap>7</td><td align="left" nowrap><b>Relevance</b></td><td align="left">ಕೊನೆಯ ಬಳಕೆದಾರ ಪ್ರಶ್ನೆಯ ವಿರುದ್ಧ extractive ವಾಕ್ಯ ಸ್ಕೋರಿಂಗ್</td></tr>
-  <tr><td align="center" nowrap>8</td><td align="left" nowrap><b>Caveman</b></td><td align="left">ನಿಯಮ-ಆಧಾರಿತ ಗದ್ಯ ಸಂಕೋಚನ (ಔಟ್ಪುಟ್ನಲ್ಲಿ ~65–75%)</td></tr>
-  <tr><td align="center" nowrap>9</td><td align="left" nowrap><b>Aggressive</b></td><td align="left">ಸಾರಾಂಶೀಕರಣ + ಹಳೆಯ ಟರ್ನ್ಗಳ ಪ್ರಗತಿಶೀಲ aging</td></tr>
-  <tr><td align="center" nowrap>10</td><td align="left" nowrap><b>LLMLingua-2</b></td><td align="left">MobileBERT ONNX ಮೂಲಕ ML ಸೆಮಾಂಟಿಕ್ pruning — ಕೋಡ್-ಸುರಕ್ಷಿತ, async</td></tr>
-  <tr><td align="center" nowrap>11</td><td align="left" nowrap><b>Ultra</b></td><td align="left">ಐಚ್ಛಿಕ ಸಣ್ಣ-ಮಾದರಿ (SLM) tier ನೊಂದಿಗೆ heuristic ಟೋಕನ್ pruning</td></tr>
-  <tr><td align="center" nowrap>12</td><td align="left" nowrap><b>OmniGlyph</b></td><td align="left">ನೇರ Anthropic wire ನಲ್ಲಿ ಅಳತೆ ಮಾಡಿದ Claude Fable 5 ಗಾಗಿ ಪ್ರಾಯೋಗಿಕ context-as-image ಎನ್ಕೋಡಿಂಗ್; GPT 5.6 transformers ಗಳು ಪ್ರೊವೈಡರ್ ರಸೀದಿಗಳ ನಿರೀಕ್ಷೆಯಲ್ಲಿ fail-closed ಆಗಿ ಉಳಿದಿವೆ. ನಾಲ್ಕು ಸಂಕೋಚನ ಪ್ರೊಫೈಲ್ಗಳು (aggressive default, balanced, coding-safe, passthrough) (ಅತ್ಯಂತ aggressive; opt-in)</td></tr>
+  <tr><th align="center">#</th><th align="left">ಇಂಜಿನ್</th><th align="left">ಅದು ಏನು ಮಾಡುತ್ತದೆ</th></tr>
+  <tr><td align="center" nowrap>1</td><td align="left" nowrap><b>ಸೆಷನ್-ಡೆಡಪ್</b></td><td align="left">ತಿರುವುಗಳಾದ್ಯಂತ ಪುನರಾವರ್ತಿತವಾದ ಕಂಟೆಂಟ್ ಡ್ರಾಪ್ಸ್ (ವಿಷಯ-ವಿಳಾಸ, ಅಡ್ಡ-ತಿರುವು)</td></tr>
+  <tr><td align="center" nowrap>2</td><td align="left" nowrap><b>CCR</b></td><td align="left">ಹಿಂಪಡೆಯುವ ಗುರುತುಗಳ ಹಿಂದೆ ದೊಡ್ಡ ಬ್ಲಾಕ್ಗಳನ್ನು ಆರ್ಕೈವ್ ಮಾಡುತ್ತದೆ, ಬೇಡಿಕೆಯ ಮೇರೆಗೆ ಪಡೆಯಲಾಗುತ್ತದೆ</td></tr>
+  <tr><td align="center" nowrap>3</td><td align="left" nowrap><b>ಲೈಟ್</b></td><td align="left">ವೈಟ್ಸ್ಪೇಸ್ + ಇಮೇಜ್-URL ಟ್ರಿಮ್ಮಿಂಗ್ (ಲೇಟೆನ್ಸಿ-ಲೈಟ್ ಬೇಸ್ಲೈನ್)</td></tr>
+  <tr><td align="center" nowrap>4</td><td align="left" nowrap><b>RTK</b></td><td align="left">ಸ್ಮಾರ್ಟ್ ಟೂಲ್-ಫಲಿತಾಂಶ ಫಿಲ್ಟರಿಂಗ್, ಕಡಿತಗೊಳಿಸುವಿಕೆ ಮತ್ತು ಮೊಟಕುಗೊಳಿಸುವಿಕೆ (ಕಮಾಂಡ್-ಅವೇರ್)</td></tr>
+  <tr><td align="center" nowrap>5</td><td align="left" nowrap><b>ಪ್ರತಿಕ್ರಿಯೆಗಳ ಟೂಲ್ ಔಟ್ಪುಟ್</b></td><td align="left">shell/patch/search/build ಔಟ್ಪುಟ್ಗಳಿಗೆ ನಷ್ಟವಿಲ್ಲದ-ಮೊದಲ JSON + ಬೌಂಡೆಡ್ ಡಯಾಗ್ನೋಸ್ಟಿಕ್ ಕಂಪ್ರೆಷನ್ (ಪ್ರತಿಕ್ರಿಯೆಗಳು API)</td></tr>
+  <tr><td align="center" nowrap>6</td><td align="left" nowrap><b>ಹೆಡ್ ರೂಂ</b></td><td align="left">ಮಾರಾಟಗಾರನ ಮೂಲಕ JSON ಅರೇಗಳ (~ 30%) ನಷ್ಟವಿಲ್ಲದ ಕೋಷ್ಟಕ ಸಂಕೋಚನ <b>GCF</b> ಕೊಡೆಕ್</td></tr>
+  <tr><td align="center" nowrap>7</td><td align="left" nowrap><b>ಪ್ರಸ್ತುತತೆ</b></td><td align="left">ಕೊನೆಯ ಬಳಕೆದಾರರ ಪ್ರಶ್ನೆಗೆ ವಿರುದ್ಧವಾಗಿ ಹೊರತೆಗೆಯುವ ವಾಕ್ಯ ಸ್ಕೋರಿಂಗ್</td></tr>
+  <tr><td align="center" nowrap>8</td><td align="left" nowrap><b>ಗುಹಾನಿವಾಸಿ</b></td><td align="left">ನಿಯಮ-ಆಧಾರಿತ ಗದ್ಯ ಸಂಕೋಚನ (ಔಟ್ಪುಟ್ನಲ್ಲಿ~ 65-75%)</td></tr>
+  <tr><td align="center" nowrap>9</td><td align="left" nowrap><b>ಆಕ್ರಮಣಕಾರಿ</b></td><td align="left">ಹಳೆಯ ತಿರುವುಗಳ + ಪ್ರಗತಿಶೀಲ ವಯಸ್ಸಾದ ಸಾರಾಂಶ</td></tr>
+  <tr><td align="center" nowrap>10</td><td align="left" nowrap><b>LLMLingua-2</b></td><td align="left">ML ಶಬ್ದಾರ್ಥದ ಸಮರುವಿಕೆಯನ್ನು MobileBERT ONNX — ಕೋಡ್-ಸುರಕ್ಷಿತ, ಅಸಿಂಕ್ ಮೂಲಕ</td></tr>
+  <tr><td align="center" nowrap>11</td><td align="left" nowrap><b>ಅಲ್ಟ್ರಾ</b></td><td align="left">ಐಚ್ಛಿಕ ಸಣ್ಣ-ಮಾದರಿ (SLM) ಶ್ರೇಣಿಯೊಂದಿಗೆ ಹ್ಯೂರಿಸ್ಟಿಕ್ ಟೋಕನ್ ಸಮರುವಿಕೆ</td></tr>
+  <tr><td align="center" nowrap>12</td><td align="left" nowrap><b>OmniGlyph</b></td><td align="left">ನೇರ Anthropic ವೈರ್ನಲ್ಲಿ ಅಳತೆ ಮಾಡಲಾದ Claude ಫೇಬಲ್ 5 ಗಾಗಿ ಪ್ರಾಯೋಗಿಕ ಸನ್ನಿವೇಶ-ಆಸ್-ಇಮೇಜ್ ಎನ್ಕೋಡಿಂಗ್; GPT 5.6 ಟ್ರಾನ್ಸ್ಫಾರ್ಮರ್ಗಳು ವಿಫಲ-ಮುಚ್ಚಿದ ಪೂರೈಕೆದಾರರ ರಸೀದಿಗಳನ್ನು ಬಾಕಿ ಉಳಿದಿವೆ. ನಾಲ್ಕು ಕಂಪ್ರೆಷನ್ ಪ್ರೊಫೈಲ್ಗಳು (ಆಕ್ರಮಣಕಾರಿ ಡೀಫಾಲ್ಟ್, ಸಮತೋಲಿತ, ಕೋಡಿಂಗ್-ಸುರಕ್ಷಿತ, ಪಾಸ್ಥ್ರೂ) (ಅತ್ಯಂತ ಆಕ್ರಮಣಕಾರಿ; ಆಯ್ಕೆ-ಇನ್)</td></tr>
 </table>
 
-ಕೋಡ್ ಬ್ಲಾಕ್ಗಳು, URL ಗಳು ಮತ್ತು ಸ್ಟ್ರಕ್ಚರ್ಡ್ ಡೇಟಾವನ್ನು **ಯಾವಾಗಲೂ** ಬೈಟ್-ಪರಿಪೂರ್ಣವಾಗಿ **ಉಳಿಸಲಾಗುತ್ತದೆ**. **ಒಂದೇ-ಕ್ಲಿಕ್ ಪ್ರೀಸೆಟ್ಗಳು** ಎಂಜಿನ್ಗಳನ್ನು ಸಂಯೋಜಿಸುತ್ತವೆ:
+ಕೋಡ್ ಬ್ಲಾಕ್ಗಳು, URLs ಮತ್ತು ರಚನಾತ್ಮಕ ಡೇಟಾ** ಯಾವಾಗಲೂ ಸಂರಕ್ಷಿಸಲಾಗಿದೆ** ಬೈಟ್-ಪರಿಪೂರ್ಣ.** ಒಂದು ಕ್ಲಿಕ್ ಪೂರ್ವನಿಗದಿಗಳು** ಎಂಜಿನ್ಗಳನ್ನು ಸಂಯೋಜಿಸಿ:
 
 <table>
-  <tr><th align="left">ಮೋಡ್</th><th align="left">ಉಳಿತಾಯ</th><th align="left">ಯಾವುದಕ್ಕೆ ಉತ್ತಮ</th></tr>
-  <tr><td align="left" nowrap>🪶 <b>Lite</b></td><td align="left" nowrap>~15%</td><td align="left">ಯಾವಾಗಲೂ ಆನ್ ಆಗಿರುವ ಸುರಕ್ಷಿತ ಡಿಫಾಲ್ಟ್</td></tr>
-  <tr><td align="left" nowrap>🪨 <b>Standard (Caveman)</b></td><td align="left" nowrap>~30%</td><td align="left">ದೈನಂದಿನ ಕೋಡಿಂಗ್</td></tr>
-  <tr><td align="left" nowrap>⚡ <b>Aggressive</b></td><td align="left" nowrap>~50%</td><td align="left">ಉದ್ದನೆಯ ಟೂಲ್-ಹೆವಿ ಸೆಷನ್ಗಳು</td></tr>
-  <tr><td align="left" nowrap>🔥 <b>Ultra</b></td><td align="left" nowrap>~75%</td><td align="left">ಗರಿಷ್ಠ ಉಳಿತಾಯ</td></tr>
+  <tr><th align="left">ಮೋಡ್</th><th align="left">ಉಳಿತಾಯ</th><th align="left">ಗೆ ಉತ್ತಮ</th></tr>
+  <tr><td align="left" nowrap>🪶 <b>ಲೈಟ್</b></td><td align="left" nowrap>~15%</td><td align="left">ಯಾವಾಗಲೂ ಸುರಕ್ಷಿತ ಡೀಫಾಲ್ಟ್ ಆನ್</td></tr>
+  <tr><td align="left" nowrap>🪨 <b>ಪ್ರಮಾಣಿತ (ಗುಹಾನಿವಾಸಿ)</b></td><td align="left" nowrap>~30%</td><td align="left">ದೈನಂದಿನ ಕೋಡಿಂಗ್</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>ಆಕ್ರಮಣಕಾರಿ</b></td><td align="left" nowrap>~50%</td><td align="left">ದೀರ್ಘ ಉಪಕರಣ-ಭಾರೀ ಅವಧಿಗಳು</td></tr>
+  <tr><td align="left" nowrap>🔥 <b>ಅಲ್ಟ್ರಾ</b></td><td align="left" nowrap>~75%</td><td align="left">ಗರಿಷ್ಠ ಉಳಿತಾಯ</td></tr>
   <tr><td align="left" nowrap>🧰 <b>RTK</b></td><td align="left" nowrap>60–90%</td><td align="left">Shell/test/build/git ಔಟ್ಪುಟ್</td></tr>
-  <tr><td align="left" nowrap>🔗 <b>Stacked (RTK → Caveman)</b></td><td align="left" nowrap><b>78–95%</b></td><td align="left">ಮಿಶ್ರ ಪ್ರಾಂಪ్ట್ಗಳು + ಟೂಲ್ ಲಾಗ್ಗಳು</td></tr>
+  <tr><td align="left" nowrap>🔗 <b>ಸ್ಟ್ಯಾಕ್ಡ್ (RTK → ಕೇವ್ಮ್ಯಾನ್)</b></td><td align="left" nowrap><b>78–95%</b></td><td align="left">ಮಿಶ್ರಿತ ಪ್ರಾಂಪ್ಟ್ + ಟೂಲ್ ಲಾಗ್ಗಳು</td></tr>
 </table>
 
-**ನಿಜವಾದ ಉದಾಹರಣೆ — Standard ಮೋಡ್:**
+**ನೈಜ ಉದಾಹರಣೆ — ಸ್ಟ್ಯಾಂಡರ್ಡ್ ಮೋಡ್:**
 
-> **ಮೊದಲು (69 ಟೋಕನ್ಗಳು):** _"ನಿಮ್ಮ React ಕಾಂಪೋನೆಂಟ್ ಮರು-ರೆಂಡರ್ ಆಗುತ್ತಿರಲು ಕಾರಣವೆಂದರೆ ನೀವು ಪ್ರತಿ ರೆಂಡರ್ ಸೈಕಲ್ನಲ್ಲಿ ಹೊಸ ಆಬ್ಜೆಕ್ಟ್ ರೆಫರೆನ್ಸ್ ಅನ್ನು ರಚಿಸುತ್ತಿರುವಿರಿ. ನೀವು ಇನ್ಲೈನ್ ಆಬ್ಜೆಕ್ಟ್ ಅನ್ನು ಪ್ರಾಪ್ ಆಗಿ ಪಾಸ್ ಮಾಡಿದಾಗ, React ನ shallow ಕಂಪಾರಿಸನ್ ಅದನ್ನು ಪ್ರತಿ ಬಾರಿಯೂ ಬೇರೆ ಆಬ್ಜೆಕ್ಟ್ ಎಂದು ನೋಡುತ್ತದೆ, ಇದು ಮರು-ರೆಂಡರ್ ಅನ್ನು ಟ್ರಿಗರ್ ಮಾಡುತ್ತದೆ. ಆಬ್ಜೆಕ್ಟ್ ಅನ್ನು memoize ಮಾಡಲು useMemo ಬಳಸಲು ನಾನು ಶಿಫಾರಸು ಮಾಡುತ್ತೇನೆ."_
+> **ಮೊದಲು (69 ಟೋಕನ್ಗಳು):** _"ನಿಮ್ಮ React ಕಾಂಪೊನೆಂಟ್ ಮರು-ರೆಂಡರಿಂಗ್ ಆಗಲು ಕಾರಣ ನೀವು ಪ್ರತಿ ರೆಂಡರ್ ಸೈಕಲ್ನಲ್ಲಿ ಹೊಸ ಆಬ್ಜೆಕ್ಟ್ ಉಲ್ಲೇಖವನ್ನು ರಚಿಸುತ್ತಿದ್ದೀರಿ. ನೀವು ಇನ್ಲೈನ್ ವಸ್ತುವನ್ನು ಪ್ರಾಪ್ ಆಗಿ ರವಾನಿಸಿದಾಗ, React ನ ಆಳವಿಲ್ಲದ ಹೋಲಿಕೆಯು ಅದನ್ನು ಪ್ರತಿ ಬಾರಿಯೂ ವಿಭಿನ್ನ ವಸ್ತುವಾಗಿ ನೋಡುತ್ತದೆ, ಇದು ಮರು-ರೆಂಡರ್ ಅನ್ನು ಪ್ರಚೋದಿಸುತ್ತದೆ. ನಾನು ವಸ್ತುವನ್ನು ನೆನಪಿಟ್ಟುಕೊಳ್ಳಲು useMemo ಬಳಸಲು ಶಿಫಾರಸು ಮಾಡುತ್ತೇವೆ."_
 >
-> **ನಂತರ (19 ಟೋಕನ್ಗಳು):** _"ಪ್ರತಿ ರೆಂಡರ್ನಲ್ಲಿ ಹೊಸ ಆಬ್ಜೆಕ್ಟ್ ರೆಫ್. ಇನ್ಲೈನ್ ಆಬ್ಜೆಕ್ಟ್ ಪ್ರಾಪ್ = ಹೊಸ ರೆಫ್ = ಮರು-ರೆಂಡರ್. useMemo ನಲ್ಲಿ wrap ಮಾಡಿ."_
+> **ನಂತರ (19 ಟೋಕನ್ಗಳು):** _"ಹೊಸ ಆಬ್ಜೆಕ್ಟ್ ರೆಂಡರ್ ಪ್ರತಿ ರೆಂಡರ್. ಇನ್ಲೈನ್ ಆಬ್ಜೆಕ್ಟ್ ಪ್ರಾಪ್ = ಹೊಸ ರೆಫ್ = ಮರು-ರೆಂಡರ್. useMemo ನಲ್ಲಿ ಸುತ್ತು ."_
 >
-> **ಅದೇ ಉತ್ತರ. 72% ಕಡಿಮೆ ಟೋಕನ್ಗಳು. ಶೂನ್ಯ ನಿಖರತೆ ನಷ್ಟ.** ✅
+> **ಅದೇ ಉತ್ತರ. 72% ಕಡಿಮೆ ಟೋಕನ್ಗಳು. ಶೂನ್ಯ ನಿಖರತೆಯ ನಷ್ಟ.** ✅
 
 **PT-BR ಉದಾಹರಣೆ — [Troglodita](https://github.com/leninejunior/troglodita) ಮೋಡ್:**
 
-> **ಮೊದಲು (42 tokens):** _"ಸಮಸ್ಯೆ ಏನೆಂದರೆ, ಪ್ರತಿ ರೆಂಡರ್ ಸೈಕಲ್ನಲ್ಲಿ ಹೊಸ ಆಬ್ಜೆಕ್ಟ್ ರೆಫರೆನ್ಸ್ ರಚನೆಯಾಗುತ್ತಿರುವುದರಿಂದ ಕಾಂಪೊನೆಂಟ್ ರೀ-ರೆಂಡರ್ ಆಗುತ್ತಿದೆ. ನಾನು useMemo ಬಳಸಲು ಶಿಫಾರಸು ಮಾಡುತ್ತೇನೆ."_
+> **ಆಂಟೆಸ್ (42 ಟೋಕನ್ಗಳು):** _"ಓ ಪ್ರಾಬ್ಲಮ್ಮೆ ಇ ಕ್ಯು ಒ ಕಾಂಪೊನೆಂಟ್ ಎಸ್ಟಾ ರಿ-ರೆಂಡರಿಜಾಂಡೊ ಪೋರ್ಕ್ ಉಮಾ ನೋವಾ ರೆಫರೆನ್ಸಿಯಾ ಡಿ ಆಬ್ಜೆಟೋ ಎಸ್ಟಾ ಸೆಂಡೋ ಕ್ರಿಯಡಾ ಎಮ್ ಕ್ಯಾಡಾ ಸಿಕ್ಲೋ ಡಿ ರೆಂಡರಿಜಾಕಾವೊ. ಇಯು ರೆಕಮೆಂಡರಿಯಾ ಯುಸರ್ useMemo."_
 >
-> **ನಂತರ (12 tokens):** _"ರೀ-ರೆಂಡರ್: ಪ್ರತಿ ಸೈಕಲ್ನಲ್ಲಿ ಹೊಸ ref (ಇನ್ಲೈನ್ ಆಬ್ಜೆಕ್ಟ್ ಮರುರಚನೆ). `useMemo` ಬಳಸಿ."_
+> **ಡೆಪೊಯಿಸ್ (12 ಟೋಕನ್ಗಳು):** _"ಮರು-ನಿರೂಪಣೆ: ರೆಫ್ ನೋವಾ ಕ್ಯಾಡಾ ಸಿಕ್ಲೋ (ಒಬ್ಜೆಟೊ ಇನ್ಲೈನ್ ರೆಕ್ರಿಯಾಡೊ). ಯುಸರ್ `useMemo`."_
 >
-> **ಅದೇ ಉತ್ತರ. ~70% ಕಡಿಮೆ tokens. ತಾಂತ್ರಿಕ ನಿಖರತೆ ಹಾಗೆಯೇ ಇದೆ.** ✅
+> **ಮೆಸ್ಮಾ ರೆಸ್ಪೋಸ್ಟಾ. ~ 70% ಮೆನೋಸ್ ಟೋಕನ್ಗಳು. ನಿಖರವಾದ ಟೆಕ್ನಿಕಾ ಇಂಟಾಕ್ಟಾ.** ✅
 
 <br/>
 
-### 🎚️ ಎಂಜಿನ್ಗಳನ್ನು ಮೀರಿ — output styles, adaptive dial & per-request ನಿಯಂತ್ರಣ
+### 🎚️ ಎಂಜಿನ್ಗಳನ್ನು ಮೀರಿ — ಔಟ್ಪುಟ್ ಶೈಲಿಗಳು, ಅಡಾಪ್ಟಿವ್ ಡಯಲ್ ಮತ್ತು ಪ್ರತಿ ವಿನಂತಿಯ ನಿಯಂತ್ರಣ
 
-ಮೇಲಿನ 12 ಎಂಜಿನ್ಗಳು **ಒಳಗೆ** ಹೋಗುವುದನ್ನು ಕುಗ್ಗಿಸುತ್ತವೆ. ಮತ್ತೂ ಮೂರು ಪದರಗಳು **ಹೇಗೆ**, **ಯಾವಾಗ**, ಮತ್ತು **ಹೊರಗೆ** ಏನು ಬರುತ್ತದೆ ಎಂಬುದನ್ನು ರೂಪಿಸುತ್ತವೆ:
+ಮೇಲಿನ 12 ಎಂಜಿನ್ಗಳು ಏನಾಗುತ್ತದೆ ಎಂಬುದನ್ನು ಕುಗ್ಗಿಸುತ್ತದೆ** ಒಳಗೆ** . ಇನ್ನೂ ಮೂರು ಪದರಗಳ ಆಕಾರ** ಹೇಗೆ** ,** ಯಾವಾಗ** , ಮತ್ತು ಏನು ಬರುತ್ತದೆ** ಹೊರಗೆ** :
 
-- **🪄 Output Styles** _(output-ಅಕ್ಷ ಸ್ಟಿಯರಿಂಗ್)_ — ನಿರ್ಣಾಯಕ, cache-ಸುರಕ್ಷಿತ response-shaping ಸೂಚನೆಗಳನ್ನು ಸೇರಿಸುತ್ತದೆ; ಸಂಯೋಜಿಸಬಹುದು, ಪ್ರತಿಯೊಂದೂ `lite` / `full` / `ultra` ತೀವ್ರತೆಯಲ್ಲಿ. ಒಂದು style ಸೇರಿಸುವುದು ಒಂದು-ಸಾಲಿನ registry ಎಂಟ್ರಿ:
-  - **Terse prose** — filler / articles / hedging ಕೈಬಿಡಿ; ತಾಂತ್ರಿಕ ಸಾರಾಂಶವನ್ನು ನಿಖರವಾಗಿ ಇರಿಸಿ.
-  - **Less code** — "lazy senior dev" YAGNI: ಕೆಲಸ ಮಾಡುವ ಅತ್ಯಂತ ಸಣ್ಣ ಬದಲಾವಣೆ, ಕೇಳದ scaffolding ಇಲ್ಲ.
-  - **Ponytail (lazy senior dev)** — YAGNI ಏಣಿಯನ್ನು ಏರಿ, ಮೂಲ ಕಾರಣವನ್ನು ಸರಿಪಡಿಸಿ, ಕೆಲಸ ಮಾಡುವ ಅತ್ಯಂತ ಸಣ್ಣ diff.
-  - **I have ADHD (action-first)** — ಮುಂದಿನ ಕ್ರಿಯೆಯೇ ಮುಂಗಡೆ, ಹಂತಗಳಿಗೆ ಸಂಖ್ಯೆ, ಒಂದು ಕಾಂಕ್ರೀಟ್ ಮುಂದಿನ ಹಂತ, ಯಾವುದೇ preamble ಇಲ್ಲ.
-  - **Terse CJK (文言)** — ಕ್ಲಾಸಿಕಲ್-ಚೈನೀಸ್ ultra-terse style (`zh` ಗೆ locale-gated).
-- **🎯 Adaptive context-budget** _(ಡಯಲ್)_ — ಒಂದೇ on/off token threshold ಬದಲು, **ಮಾಡೆಲ್ನ context window ಗೆ ಹೊಂದುವಂತೆ** ಅಗತ್ಯವಿರುವಷ್ಟು ದೂರ ಮಾತ್ರ ಅಗ್ಗದ, ಅತ್ಯಂತ lossless ಎಂಜಿನ್ಗಳನ್ನು ಹಂತಹಂತವಾಗಿ ಹೆಚ್ಚಿಸುತ್ತದೆ. Policy: `reserve-output` (ಡೀಫಾಲ್ಟ್, model-aware) · `percentage` · `absolute`. Mode: `floor` (ಹೊಂದಿಕೆಯ ಖಾತ್ರಿ) · `replace-autotrigger` (ನಿಮ್ಮ ಸ್ಪಷ್ಟ ಆಯ್ಕೆ ಗೆಲ್ಲುತ್ತದೆ) · `off` (legacy threshold).
-- **🎛️ Compression ಎಲ್ಲಿ ನಿರ್ಧರಿಸಲಾಗುತ್ತದೆ** _(precedence, ಹೆಚ್ಚು → ಕಡಿಮೆ)_ — per-request `x-omniroute-compression` header › routing-combo override › active named profile › adaptive / auto-trigger › panel default › off. ಅನ್ವಯಿಸಿದ ಯೋಜನೆ `X-OmniRoute-Compression: <mode>; source=<source>` response header ನಲ್ಲಿ ಮರುಪ್ರತಿಧ್ವನಿಸುತ್ತದೆ.
+- **🪄 ಔಟ್ಪುಟ್ ಶೈಲಿಗಳು** _(ಔಟ್ಪುಟ್-ಆಕ್ಸಿಸ್ ಸ್ಟೀರಿಂಗ್)_ — ಇಂಜೆಕ್ಟ್ ಡಿಟರ್ಮಿನಿಸ್ಟಿಕ್, ಕ್ಯಾಶ್-ಸುರಕ್ಷಿತ ಪ್ರತಿಕ್ರಿಯೆ-ರೂಪಿಸುವ ಸೂಚನೆಗಳು; ಸಂಯೋಜಿತ, ಪ್ರತಿಯೊಂದೂ `lite` / `full` / `ultra` ತೀವ್ರತೆಯಲ್ಲಿ. ಶೈಲಿಯನ್ನು ಸೇರಿಸುವುದು ಒಂದು ಸಾಲಿನ ರಿಜಿಸ್ಟ್ರಿ ನಮೂದು:
+  - **ಕಟುವಾದ ಗದ್ಯ** — ಡ್ರಾಪ್ ಫಿಲ್ಲರ್ / ಲೇಖನಗಳು / ಹೆಡ್ಜಿಂಗ್; ತಾಂತ್ರಿಕ ವಸ್ತುವನ್ನು ನಿಖರವಾಗಿ ಇರಿಸಿ.
+  - **ಕಡಿಮೆ ಕೋಡ್** — "ಲೇಜಿ ಸೀನಿಯರ್ ದೇವ್" YAGNI: ಚಿಕ್ಕ ಕೆಲಸ ಬದಲಾವಣೆ, ಯಾವುದೇ ಅಪೇಕ್ಷಿಸದ ಸ್ಕ್ಯಾಫೋಲ್ಡಿಂಗ್.
+  - **ಪೋನಿಟೇಲ್ (ಸೋಮಾರಿಯಾದ ಹಿರಿಯ ದೇವ್)** — YAGNI ಏಣಿಯನ್ನು ಹತ್ತಿ, ಮೂಲ ಕಾರಣವನ್ನು ಸರಿಪಡಿಸಿ, ಚಿಕ್ಕದಾದ ಕೆಲಸ ವ್ಯತ್ಯಾಸ.
+  - **ನನ್ನ ಬಳಿ ADHD ಇದೆ (ಆಕ್ಷನ್-ಮೊದಲು)** — ಮುಂದಿನ ಆಕ್ಷನ್ ಲೀಡ್ಸ್, ಹಂತಗಳನ್ನು ಸಂಖ್ಯೆ, ಒಂದು ಕಾಂಕ್ರೀಟ್ ಮುಂದಿನ ಹಂತ, ಯಾವುದೇ ಮುನ್ನುಡಿ ಇಲ್ಲ.
+  - **Terse CJK (文言)** — ಕ್ಲಾಸಿಕಲ್-ಚೈನೀಸ್ ಅಲ್ಟ್ರಾ-ಟೆರ್ಸ್ ಶೈಲಿ ( `zh` ಗೆ ಸ್ಥಳೀಯ-ಗೇಟೆಡ್).
+- **🎯 ಅಡಾಪ್ಟಿವ್ ಸಂದರ್ಭ-ಬಜೆಟ್** ಒಂದು on/off ಟೋಕನ್ ಥ್ರೆಶೋಲ್ಡ್ ಬದಲಿಗೆ _(ಡಯಲ್)_ —, ಅಗತ್ಯವಿರುವಷ್ಟು ಮಾತ್ರ ಅಗ್ಗದ, ಹೆಚ್ಚು-ನಷ್ಟವಿಲ್ಲದ ಎಂಜಿನ್ಗಳನ್ನು ಹೆಚ್ಚಿಸಿ** ಮಾದರಿಯ ಸಂದರ್ಭ ವಿಂಡೋಗೆ ಹೊಂದಿಕೊಳ್ಳುತ್ತದೆ** . ನೀತಿ: `reserve-output` (ಡೀಫಾಲ್ಟ್, ಮಾಡೆಲ್-ಅವೇರ್) · `percentage` · `absolute`. ಮೋಡ್: `floor` (ಖಾತ್ರಿ ಫಿಟ್) · `replace-autotrigger` (ನಿಮ್ಮ ಸ್ಪಷ್ಟ ಆಯ್ಕೆಯು ಗೆಲ್ಲುತ್ತದೆ) · `off` (ಪರಂಪರೆ ಮಿತಿ).
+- **🎛️ ಅಲ್ಲಿ ಸಂಕೋಚನವನ್ನು ನಿರ್ಧರಿಸಲಾಗುತ್ತದೆ** _(ಆದ್ಯತೆ, ಹೆಚ್ಚಿನ → ಕಡಿಮೆ)_ — ಪ್ರತಿ ವಿನಂತಿಯ `x-omniroute-compression` ಹೆಡರ್ › ರೂಟಿಂಗ್-ಕಾಂಬೋ ಓವರ್ರೈಡ್ › ಸಕ್ರಿಯ ಹೆಸರಿನ ಪ್ರೊಫೈಲ್ › ಅಡಾಪ್ಟಿವ್ / ಸ್ವಯಂ-ಟ್ರಿಗ್ಗರ್ › ಪ್ಯಾನಲ್ ಡಿಫಾಲ್ಟ್ › ಆಫ್. ಅನ್ವಯಿಸಲಾದ ಯೋಜನೆಯು `X-OmniRoute-Compression: <mode>; source=<source>` ಪ್ರತಿಕ್ರಿಯೆ ಹೆಡರ್ನಲ್ಲಿ ಮತ್ತೆ ಪ್ರತಿಧ್ವನಿಸುತ್ತದೆ.
 
-token threshold ಮೂಲಕ auto-trigger ಮಾಡಿ, adaptive dial ಆನ್ ಮಾಡಿ, named profile ಪಿನ್ ಮಾಡಿ, ಪ್ರತಿ request ಗೆ ಒಮ್ಮೆಯದನ್ನು ಸೆಟ್ ಮಾಡಿ, ಅಥವಾ ಪ್ರತಿ routing combo ಗೆ pipeline ನಿಯೋಜಿಸಿ — workload ಗೆ ಯಾವುದು ಹೊಂದುತ್ತದೆಯೋ ಅದನ್ನು ಬಳಸಿ. ಒಂದು opt-in offline **eval harness** (`npm run eval:compression`) ಬದಲಾವಣೆಯನ್ನು promote ಮಾಡುವ ಮೊದಲು pinned corpus ಮೇಲೆ fidelity vs. savings ಅನ್ನು ಸ್ಕೋರ್ ಮಾಡುತ್ತದೆ.
+ಟೋಕನ್ ಥ್ರೆಶೋಲ್ಡ್ ಮೂಲಕ ಸ್ವಯಂ-ಪ್ರಚೋದಕ, ಅಡಾಪ್ಟಿವ್ ಡಯಲ್ನಲ್ಲಿ ಫ್ಲಿಪ್ ಮಾಡಿ, ಹೆಸರಿಸಿದ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಪಿನ್ ಮಾಡಿ, ಪ್ರತಿ ವಿನಂತಿಗೆ ಒಂದು-ಆಫ್ ಅನ್ನು ಹೊಂದಿಸಿ ಅಥವಾ ಕೆಲಸದ ಹೊರೆಗೆ ಸರಿಹೊಂದುವ ಪ್ರತಿ ರೂಟಿಂಗ್ ಕಾಂಬೊ — ಗೆ ಪೈಪ್ಲೈನ್ ಅನ್ನು ನಿಯೋಜಿಸಿ. ಆಫ್ಲೈನ್ ಆಯ್ಕೆ** ಸಮಾನ ಸರಂಜಾಮು** (`npm run eval:compression`) ನೀವು ಬದಲಾವಣೆಯನ್ನು ಉತ್ತೇಜಿಸುವ ಮೊದಲು ಪಿನ್ ಮಾಡಿದ ಕಾರ್ಪಸ್ನಲ್ಲಿ ನಿಷ್ಠೆ ವಿರುದ್ಧ ಉಳಿತಾಯವನ್ನು ಗಳಿಸುತ್ತದೆ.
 
 📖 [`COMPRESSION_GUIDE.md`](docs/compression/COMPRESSION_GUIDE.md) · [`RTK_COMPRESSION.md`](docs/compression/RTK_COMPRESSION.md) · [`COMPRESSION_ENGINES.md`](docs/compression/COMPRESSION_ENGINES.md)
 
@@ -1006,37 +1006,30 @@ token threshold ಮೂಲಕ auto-trigger ಮಾಡಿ, adaptive dial ಆನ್ 
 
 </div>
 
-**1) Install ಮಾಡಿ & run ಮಾಡಿ**
+**1) ಸ್ಥಾಪಿಸಿ ಮತ್ತು ರನ್ ಮಾಡಿ**
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-> 💡 `npm warn ERESOLVE` ಅಥವಾ peer-dep ಎಚ್ಚರಿಕೆಗಳು ಕಂಡಿವೆಯೇ? [ಅವು ಹಾನಿಕಾರಕವಲ್ಲ](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **npm 11 ಅಥವಾ ಹೊಸದನ್ನು ಬಳಸುತ್ತಿದ್ದೀರಾ?** ಅನುಮತಿಸದ ಹೊರತು npm ಪ್ಯಾಕೇಜ್ lifecycle ಸ್ಕ್ರಿಪ್ಟ್ಗಳನ್ನು ನಿರ್ಬಂಧಿಸಬಹುದು. OmniRoute ನ `postinstall` (`node scripts/build/postinstall.mjs`) ಅದರ native runtime ಫೈಲ್ಗಳನ್ನು ಸಿದ್ಧಪಡಿಸಲು ಅಗತ್ಯವಿದೆ. ಗ್ಲೋಬಲ್ ಆಗಿ install ಮಾಡುವಾಗ npm ಎಚ್ಚರಿಕೆಯಲ್ಲಿ ಹೆಸರಿಸಿದ ಪ್ಯಾಕೇಜ್ಗಳನ್ನು ಅನುಮತಿಸಿ. OmniRoute 3.8.54 ವರದಿ ಮಾಡಿದ ಪ್ಯಾಕೇಜ್ ಸೆಟ್ಗಾಗಿ:
+> 💡 `npm warn ERESOLVE` ಅಥವಾ ಪೀರ್-ಡೆಪ್ ಎಚ್ಚರಿಕೆಗಳನ್ನು ನೋಡುವುದೇ? [ಅವರು ನಿರುಪದ್ರವಿಗಳು](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).** npm 11 ಅಥವಾ ನಂತರ ಬಳಸುತ್ತಿರುವಿರಾ?** npm ಪ್ಯಾಕೇಜ್ ಲೈಫ್ಸೈಕಲ್ ಸ್ಕ್ರಿಪ್ಟ್ಗಳನ್ನು ಅನುಮತಿಸದ ಹೊರತು ನಿರ್ಬಂಧಿಸಬಹುದು. OmniRoute ನ `postinstall` (`node scripts/build/postinstall.mjs`) ಅದರ ಸ್ಥಳೀಯ ರನ್ಟೈಮ್ ಫೈಲ್ಗಳನ್ನು ಸಿದ್ಧಪಡಿಸಲು ಅಗತ್ಯವಿದೆ. ಜಾಗತಿಕವಾಗಿ ಸ್ಥಾಪಿಸುವಾಗ npm ನ ಎಚ್ಚರಿಕೆಯಲ್ಲಿ ಹೆಸರಿಸಲಾದ ಪ್ಯಾಕೇಜ್ಗಳನ್ನು ಅನುಮತಿಸಿ. OmniRoute 3.8.54 ವರದಿ ಮಾಡಿರುವ ಪ್ಯಾಕೇಜ್ ಸೆಟ್ಗಾಗಿ:
 >
-> ```bash
-> npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
-> ```
+> `bash npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute `
 >
-> ಈ allowlist ಅನ್ನು ಭವಿಷ್ಯದ ಗ್ಲೋಬಲ್ install ಗಳಿಗೆ ಮರುಬಳಸಲು, ಅದನ್ನು ಒಮ್ಮೆ configure ಮಾಡಿ, ನಂತರ ಸಾಮಾನ್ಯವಾಗಿ install ಮಾಡಿ:
+> ಭವಿಷ್ಯದ ಜಾಗತಿಕ ಸ್ಥಾಪನೆಗಳಿಗಾಗಿ ಈ ಅನುಮತಿಪಟ್ಟಿಯನ್ನು ಮರುಬಳಕೆ ಮಾಡಲು, ಅದನ್ನು ಒಮ್ಮೆ ಕಾನ್ಫಿಗರ್ ಮಾಡಿ, ನಂತರ ಸಾಮಾನ್ಯವಾಗಿ ಸ್ಥಾಪಿಸಿ:
 >
-> ```bash
-> npm config set allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
-> npm install -g omniroute
-> ```
+> `bash npm config set allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user npm install -g omniroute `
 >
-> ರಿಲೀಸ್ಗಳ ನಡುವೆ dependency ಪಟ್ಟಿ ಬದಲಾಗಬಹುದು; npm ಬೇರೆ ಪಟ್ಟಿಯನ್ನು ವರದಿ ಮಾಡಿದರೆ, ಆ ಎಚ್ಚರಿಕೆಯಲ್ಲಿನ ಪ್ಯಾಕೇಜ್ ಹೆಸರುಗಳನ್ನೇ ಬಳಸಿ. ಪ್ಯಾಕೇಜ್ ಅನ್ನು ಅನುಮತಿಸುವುದು ಅದರ install ಸ್ಕ್ರಿಪ್ಟ್ಗಳು ಓಡಲು ಅವಕಾಶ ನೀಡುತ್ತದೆ.
-> **Gemini Web ಅಥವಾ ಬೇರೆ web-cookie ಪ್ರೊವೈಡರ್ ಬಳಸುತ್ತಿದ್ದೀರಾ?** npm ಪ್ಯಾಕೇಜ್ನಲ್ಲಿ Playwright ಇದೆ ಆದರೆ ಅದರ Chromium ಬೈನರಿ ಇಲ್ಲ. ಮೊದಲ web-provider request ಮಾಡುವ ಮೊದಲು [Playwright Chromium ಸೆಟಪ್](docs/guides/TROUBLESHOOTING.md#gemini-web-and-playwright-chromium) ಟಿಪ್ಪಣಿಯನ್ನು ನೋಡಿ.
+> ಅವಲಂಬನೆ ಪಟ್ಟಿ ಬಿಡುಗಡೆಗಳ ನಡುವೆ ಬದಲಾಗಬಹುದು; npm ಬೇರೆ ಪಟ್ಟಿಯನ್ನು ವರದಿ ಮಾಡಿದರೆ, ಆ ಎಚ್ಚರಿಕೆಯಿಂದ ಪ್ಯಾಕೇಜ್ ಹೆಸರುಗಳನ್ನು ಬಳಸಿ. ಪ್ಯಾಕೇಜ್ ಅನ್ನು ಅನುಮತಿಸುವುದರಿಂದ ಅದರ ಸ್ಥಾಪನೆ ಸ್ಕ್ರಿಪ್ಟ್ಗಳನ್ನು ಚಲಾಯಿಸಲು ಅನುಮತಿಸುತ್ತದೆ.** Gemini ವೆಬ್ ಅಥವಾ ಇನ್ನೊಂದು ವೆಬ್-ಕುಕೀ ಪೂರೈಕೆದಾರರನ್ನು ಬಳಸುತ್ತಿರುವಿರಾ?** npm ಪ್ಯಾಕೇಜ್ Playwright ಒಳಗೊಂಡಿರುತ್ತದೆ ಆದರೆ ಅದರ Chromium ಬೈನರಿ ಅಲ್ಲ. ಮೊದಲ ವೆಬ್ ಒದಗಿಸುವವರ ವಿನಂತಿಯನ್ನು ಮಾಡುವ ಮೊದಲು [Playwright Chromium ಸೆಟಪ್](docs/guides/TROUBLESHOOTING.md#gemini-web-and-playwright-chromium) ಟಿಪ್ಪಣಿಯನ್ನು ನೋಡಿ.
 
-Dashboard `http://localhost:20128` ನಲ್ಲಿ · API `http://localhost:20128/v1` ನಲ್ಲಿ.
+`http://localhost:20128` ನಲ್ಲಿ ಡ್ಯಾಶ್ಬೋರ್ಡ್ · API ನಲ್ಲಿ `http://localhost:20128/v1`.
 
-**2) ನಿಮ್ಮ ಸ್ವಂತ ಖಾತೆಯನ್ನು ಬಳಸಿ ಅರ್ಹ ಪ್ರೊವೈಡರ್ ಅನ್ನು ಸಂಪರ್ಕಿಸಿ**
+**2) ನಿಮ್ಮ ಸ್ವಂತ ಖಾತೆಯನ್ನು ಬಳಸಿಕೊಂಡು ಅರ್ಹ ಪೂರೈಕೆದಾರರನ್ನು ಸಂಪರ್ಕಿಸಿ**
 
-Dashboard → **Providers** → ನಿಮ್ಮ ಬಳಕೆಯ ಸಂದರ್ಭಕ್ಕೆ ತಕ್ಕಂತೆ ಪ್ರಸ್ತುತ ನಿಯಮಗಳು ಮತ್ತು quota ಇರುವ ಪ್ರೊವೈಡರ್ ಆಯ್ಕೆಮಾಡಿ → ಅದರ API key ಸೇರಿಸಿ ಅಥವಾ ಅದರ account flow ಪೂರ್ಣಗೊಳಿಸಿ. ಉಚಿತ tier ಗಳಿಗೆ signup, ಅನುಮೋದನೆ, ಅಥವಾ ಪಾವತಿ ವಿಧಾನ ಬೇಕಾಗಬಹುದು. [ಉಚಿತ Tier ಗಳ ಮಾರ್ಗದರ್ಶಿ](docs/getting-started/FREE-TIERS-GUIDE.md) ಪರಿಶೀಲಿಸಿ; keyless ಲಭ್ಯತೆಗೆ ಖಾತ್ರಿಯಿಲ್ಲ, ಮತ್ತು `tos: avoid` ಎಂದು ಗುರುತಿಸಲಾದ ಪ್ರೊವೈಡರ್ಗಳನ್ನು ಡೀಫಾಲ್ಟ್ ಆಗಿ `auto` ನಿಂದ ಹೊರಗಿಡಲಾಗಿದೆ.
+ಡ್ಯಾಶ್ಬೋರ್ಡ್ →** ಪೂರೈಕೆದಾರರು** → ನಿಮ್ಮ ಬಳಕೆಯ ಸಂದರ್ಭಕ್ಕೆ ಸರಿಹೊಂದುವ ಪ್ರಸ್ತುತ ನಿಯಮಗಳು ಮತ್ತು ಕೋಟಾವನ್ನು ಒದಗಿಸುವವರನ್ನು ಆಯ್ಕೆ ಮಾಡಿ → ಅದರ API ಕೀಯನ್ನು ಸೇರಿಸಿ ಅಥವಾ ಅದರ ಖಾತೆಯ ಹರಿವನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ. ಉಚಿತ ಶ್ರೇಣಿಗಳಿಗೆ ಸೈನ್ ಅಪ್, ಅನುಮೋದನೆ ಅಥವಾ ಪಾವತಿ ವಿಧಾನದ ಅಗತ್ಯವಿರಬಹುದು. [ಉಚಿತ ಶ್ರೇಣಿಗಳ ಮಾರ್ಗದರ್ಶಿಯನ್ನು](docs/getting-started/FREE-TIERS-GUIDE.md) ಪರಿಶೀಲಿಸಿ; ಕೀಲಿ ರಹಿತ ಲಭ್ಯತೆ ಖಾತರಿಯಿಲ್ಲ, ಮತ್ತು `tos: avoid` ಎಂದು ಗುರುತಿಸಲಾದ ಪೂರೈಕೆದಾರರನ್ನು ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ `auto` ನಿಂದ ಹೊರಗಿಡಲಾಗಿದೆ.
 
-**3) ನಿಮ್ಮ coding tool ಅನ್ನು ಪಾಯಿಂಟ್ ಮಾಡಿ**
+**3) ನಿಮ್ಮ ಕೋಡಿಂಗ್ ಟೂಲ್ ಅನ್ನು ಸೂಚಿಸಿ**
 
 ```txt
 Base URL: http://localhost:20128/v1
@@ -1044,15 +1037,15 @@ API Key:  [copy from Dashboard → Endpoints]
 Model:    auto            (routes among eligible connections — or choose provider/model)
 ```
 
-**4) ಕೆಲಸ ಮಾಡುತ್ತಿದೆಯೇ ಎಂದು ಪರಿಶೀಲಿಸಿ**
+**4) ಅದು ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತಿದೆಯೇ ಎಂದು ಪರಿಶೀಲಿಸಿ**
 
 ```bash
 curl http://localhost:20128/v1/models -H "Authorization: Bearer YOUR_KEY"
 ```
 
-ನಿಮ್ಮ ಸಂಪರ್ಕಿತ ಮಾಡೆಲ್ಗಳು ಪಟ್ಟಿಯಾಗಿರುವುದನ್ನು ನೀವು ನೋಡಬೇಕು. 🎉 ಅಷ್ಟೇ — coding ಪ್ರಾರಂಭಿಸಿ, OmniRoute ನಿಮಗಾಗಿ auto-route & fallback ಮಾಡುತ್ತದೆ.
+ನಿಮ್ಮ ಸಂಪರ್ಕಿತ ಮಾದರಿಗಳನ್ನು ಪಟ್ಟಿ ಮಾಡಿರುವುದನ್ನು ನೀವು ನೋಡಬೇಕು. 🎉 ಅಷ್ಟೇ — ಕೋಡಿಂಗ್ ಪ್ರಾರಂಭಿಸಿ, ಮತ್ತು OmniRoute ಸ್ವಯಂ-ಮಾರ್ಗಗಳು ಮತ್ತು ನಿಮಗಾಗಿ ಹಿಂತಿರುಗುತ್ತವೆ.
 
-ನಿಮ್ಮ client ಕಸ್ಟಮ್ header ಗಳನ್ನು ಕಳುಹಿಸಲಾಗದಿದ್ದರೆ, OmniRoute tokenized compatibility aliases ಅನ್ನು ಸಹ ಒದಗಿಸುತ್ತದೆ:
+ನಿಮ್ಮ ಕ್ಲೈಂಟ್ ಕಸ್ಟಮ್ ಹೆಡರ್ಗಳನ್ನು ಕಳುಹಿಸಲು ಸಾಧ್ಯವಾಗದಿದ್ದರೆ, OmniRoute ಟೋಕನೈಸ್ ಮಾಡಲಾದ ಹೊಂದಾಣಿಕೆಯ ಅಲಿಯಾಸ್ಗಳನ್ನು ಸಹ ಬಹಿರಂಗಪಡಿಸುತ್ತದೆ:
 
 ```txt
 OpenAI catalog:   http://localhost:20128/vscode/YOUR_KEY/
@@ -1063,7 +1056,7 @@ Ollama chat:      http://localhost:20128/vscode/YOUR_KEY/api/chat
 Ollama tags:      http://localhost:20128/vscode/YOUR_KEY/api/tags
 ```
 
-`Authorization: Bearer ...` ಲಗತ್ತಿಸಲಾಗದ client ಗಳಿಗೆ ಮಾತ್ರ ಇವುಗಳನ್ನು ಬಳಸಿ. Header auth ಆದ್ಯತೆಯ ಮೋಡ್ ಆಗಿಯೇ ಉಳಿಯುತ್ತದೆ.
+`Authorization: Bearer ...` ಲಗತ್ತಿಸಲು ಸಾಧ್ಯವಾಗದ ಕ್ಲೈಂಟ್ಗಳಿಗೆ ಮಾತ್ರ ಇವುಗಳನ್ನು ಬಳಸಿ. ಶಿರೋಲೇಖ ದೃಢೀಕರಣವು ಆದ್ಯತೆಯ ಮೋಡ್ ಆಗಿ ಉಳಿದಿದೆ.
 
 <br/>
 
@@ -1282,29 +1275,29 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ಕೂಡ ಇದ�
 <br/>
 <div align="center">
 
-## 🛠️ ತಾಂತ್ರಿಕ ಸ್ಟ್ಯಾಕ್
+## 🛠️ ಟೆಕ್ ಸ್ಟಾಕ್
 
 </div>
 
 <table>
   <tr><th align="left">ಪದರ</th><th align="left">ತಂತ್ರಜ್ಞಾನ</th></tr>
-  <tr><td nowrap><b>ರನ್ಟೈಮ್</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>ಭಾಷೆ</b></td><td>TypeScript 6.0 — <code>src/</code> ಮತ್ತು <code>open-sse/</code> ಗಳಾದ್ಯಂತ <b>100% TypeScript</b> (v2.0 ರಿಂದ ಕೋರ್ನಲ್ಲಿ ಶೂನ್ಯ <code>any</code>)</td></tr>
-  <tr><td nowrap><b>ಫ್ರೇಮ್ವರ್ಕ್</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ಡೇಟಾಬೇಸ್</b></td><td>better-sqlite3 (SQLite, WAL ಜರ್ನಲಿಂಗ್) + LowDB (JSON ಲೆಗಸಿ) — 147 ಡೊಮೇನ್ ಮಾಡ್ಯೂಲ್ಗಳು, 223 ಮೈಗ್ರೇಶನ್ಗಳು</td></tr>
-  <tr><td nowrap><b>ಮೆಮೊರಿ</b></td><td>SQLite FTS5 ಪೂರ್ಣ-ಪಠ್ಯ + int8-ಕ್ವಾಂಟೈಸ್ ಮಾಡಿದ ವೆಕ್ಟರ್ ಎಂಬೆಡ್ಡಿಂಗ್ಗಳು, ಟೈಪ್ ಮಾಡಿದ ಕ್ಷಯ</td></tr>
-  <tr><td nowrap><b>ಸ್ಕೀಮಾಗಳು</b></td><td>Zod 4 — MCP ಟೂಲ್ I/O ಪರಿಶೀಲನೆ + API ಒಪ್ಪಂದಗಳು</td></tr>
+  <tr><td nowrap><b>ಚಾಲನಾಸಮಯ</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>ಭಾಷೆ</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> <code>src/</code> ಮತ್ತು <code>open-sse/</code> (v2.0 ರಿಂದ ಕೋರ್ನಲ್ಲಿ ಶೂನ್ಯ <code>any</code> )</td></tr>
+  <tr><td nowrap><b>ಚೌಕಟ್ಟು</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>ಡೇಟಾಬೇಸ್</b></td><td>better-sqlite3 (SQLite, WAL ಜರ್ನಲಿಂಗ್) + LowDB (JSON ಪರಂಪರೆ) — 147 ಡೊಮೇನ್ ಮಾಡ್ಯೂಲ್ಗಳು, 223 ವಲಸೆಗಳು</td></tr>
+  <tr><td nowrap><b>ಸ್ಮರಣೆ</b></td><td>SQLite FTS5 ಪೂರ್ಣ-ಪಠ್ಯ + int8-quantized ವೆಕ್ಟರ್ ಎಂಬೆಡಿಂಗ್ಗಳು, ಟೈಪ್ ಮಾಡಿದ ಕ್ಷಯ</td></tr>
+  <tr><td nowrap><b>ಯೋಜನೆಗಳು</b></td><td>Zod 4 — MCP ಉಪಕರಣ I/O ಮೌಲ್ಯೀಕರಣ + API ಒಪ್ಪಂದಗಳು</td></tr>
   <tr><td nowrap><b>ಪ್ರೋಟೋಕಾಲ್ಗಳು</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>ಸ್ಟ್ರೀಮಿಂಗ್</b></td><td>ಸರ್ವರ್-ಸೆಂಟ್ ಈವೆಂಟ್ಗಳು (SSE) + WebSocket ಬ್ರಿಡ್ಜ್ (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>ಸಂಕೋಚನ</b></td><td>12-ಎಂಜಿನ್ ಪೈಪ್ಲೈನ್ — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>ದೃಢೀಕರಣ &amp; ಭದ್ರತೆ</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP ಸ್ಕೋಪ್ ಮಾಡಿದ ದೃಢೀಕರಣ · ವಿಶ್ರಾಂತಿ ಸ್ಥಿತಿಯಲ್ಲಿರುವ ಡೇಟಾಗೆ AES-256-GCM · DOMPurify</td></tr>
-  <tr><td nowrap><b>ಸ್ಟೆಲ್ತ್</b></td><td>wreq-js — JA3 / JA4 TLS ಫಿಂಗರ್ಪ್ರಿಂಟ್ ಅನುಕರಣೆ, 3-ಹಂತದ ಪ್ರಾಕ್ಸಿ</td></tr>
-  <tr><td nowrap><b>ಸ್ಥೈರ್ಯ</b></td><td>ಸರ್ಕ್ಯೂಟ್ ಬ್ರೇಕರ್, ಎಕ್ಸ್ಪೋನೆನ್ಷಿಯಲ್ ಬ್ಯಾಕ್ಆಫ್, ಆಂಟಿ-ಥಂಡರಿಂಗ್-ಹರ್ಡ್, ಸ್ವಯಂ-ಕಾಂಬೋ ಸ್ವಯಂ-ಚೇತರಿಕೆ</td></tr>
-  <tr><td nowrap><b>ಲಾಗಿಂಗ್</b></td><td>pino — ವಿನಂತಿ ಸಂದರ್ಭದೊಂದಿಗೆ ರಚನಾತ್ಮಕ JSON ಲಾಗ್ಗಳು</td></tr>
-  <tr><td nowrap><b>ಪರೀಕ್ಷಣೆ</b></td><td>Node.js ಟೆಸ್ಟ್ ರನ್ನರ್ + Vitest — 8,400+ ಟ್ರ್ಯಾಕ್ ಮಾಡಲಾದ ಟೆಸ್ಟ್ ಫೈಲ್ಗಳಾದ್ಯಂತ <b>60,000+ ಸ್ಥಿರ ಟೆಸ್ಟ್ ಘೋಷಣೆಗಳು</b> (ಯೂನಿಟ್, ಇಂಟಿಗ್ರೇಷನ್, E2E, ಭದ್ರತೆ, ಪರಿಸರ ವ್ಯವಸ್ಥೆ)</td></tr>
-  <tr><td nowrap><b>ಪ್ಲಾಟ್ಫಾರ್ಮ್ಗಳು</b></td><td>ಡೆಸ್ಕ್ಟಾಪ್ (Electron) · Android (Termux) · PWA (ಯಾವುದೇ ಬ್ರೌಸರ್)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — ರಿಲೀಸ್ ಸಂದರ್ಭದಲ್ಲಿ ಸ್ವಯಂ npm ಪ್ರಕಟಣೆ + Docker Hub</td></tr>
-  <tr><td nowrap><b>ಲಿಂಕ್ಗಳು</b></td><td><a href="https://omniroute.online">ವೆಬ್ಸೈಟ್</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>ಸ್ಟ್ರೀಮಿಂಗ್</b></td><td>ಸರ್ವರ್-ಕಳುಹಿಸಿದ ಈವೆಂಟ್ಗಳು (SSE) + WebSocket ಸೇತುವೆ (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>ಸಂಕೋಚನ</b></td><td>12-ಎಂಜಿನ್ ಪೈಪ್ಲೈನ್ — RTK, ಕೇವ್ಮ್ಯಾನ್, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Auth &amp; ಭದ್ರತೆ</b></td><td>OAuth 2.0 (PKCE) + JWT + API ಕೀಗಳು + MCP ಸ್ಕೋಪ್ಡ್ ದೃಢೀಕರಣ · AES-256-GCM ವಿಶ್ರಾಂತಿಯಲ್ಲಿ · DOMPurify</td></tr>
+  <tr><td nowrap><b>ಸ್ಟೆಲ್ತ್</b></td><td>wreq-js — JA3 / JA4 TLS ಫಿಂಗರ್ಪ್ರಿಂಟ್ ಸೋಗು ಹಾಕುವಿಕೆ, 3-ಹಂತದ ಪ್ರಾಕ್ಸಿ</td></tr>
+  <tr><td nowrap><b>ಸ್ಥಿತಿಸ್ಥಾಪಕತ್ವ</b></td><td>ಸರ್ಕ್ಯೂಟ್ ಬ್ರೇಕರ್, ಘಾತೀಯ ಬ್ಯಾಕ್ಆಫ್, ಆಂಟಿ-ಥಂಡರಿಂಗ್-ಹರ್ಡ್, ಸ್ವಯಂ-ಕಾಂಬೋ ಸ್ವಯಂ-ಗುಣಪಡಿಸುವಿಕೆ</td></tr>
+  <tr><td nowrap><b>ಲಾಗಿಂಗ್</b></td><td>ವಿನಂತಿಯ ಸಂದರ್ಭದೊಂದಿಗೆ pino — ರಚನಾತ್ಮಕ JSON ಲಾಗ್ಗಳು</td></tr>
+  <tr><td nowrap><b>ಪರೀಕ್ಷೆ</b></td><td>Node.js ಟೆಸ್ಟ್ ರನ್ನರ್ + Vitest — <b>60,000 + ಸ್ಥಿರ ಪರೀಕ್ಷಾ ಘೋಷಣೆಗಳು</b> 8,400 + ಟ್ರ್ಯಾಕ್ ಮಾಡಿದ ಪರೀಕ್ಷಾ ಫೈಲ್ಗಳಾದ್ಯಂತ (ಘಟಕ, ಏಕೀಕರಣ, E2E, ಭದ್ರತೆ, ಪರಿಸರ ವ್ಯವಸ್ಥೆ)</td></tr>
+  <tr><td nowrap><b>ವೇದಿಕೆಗಳು</b></td><td>ಡೆಸ್ಕ್ಟಾಪ್ (Electron) · Android (Termux) · PWA (ಯಾವುದೇ ಬ್ರೌಸರ್)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub ಕ್ರಿಯೆಗಳು — ಸ್ವಯಂ npm ಬಿಡುಗಡೆಯಾದ ಮೇಲೆ + Docker ಹಬ್ ಅನ್ನು ಪ್ರಕಟಿಸಿ</td></tr>
+  <tr><td nowrap><b>ಲಿಂಕ್ಗಳು</b></td><td><a href="https://omniroute.online">ವೆಬ್ಸೈಟ್</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker ಹಬ್</a></td></tr>
 </table>
 
 <div align="center">
@@ -1796,15 +1789,15 @@ OmniRoute ದಿಗ್ಗಜರ ಹೆಗಲ ಮೇಲೆ ನಿಂತಿದೆ.
 
 ## 📄 ಪರವಾನಗಿ
 
-MIT ಪರವಾನಗಿ - ವಿವರಗಳಿಗಾಗಿ [ಪರವಾನಗಿ](LICENSE) ನೋಡಿ.
+MIT ಪರವಾನಗಿ - ವಿವರಗಳಿಗಾಗಿ [LICENSE](LICENSE) ನೋಡಿ.
 
 ---
 
 <div align="center">
 
-**[⬆ ಮೇಲಕ್ಕೆ ಹಿಂತಿರುಗಿ](#-omniroute)** · ಮುಕ್ತ-ಮೂಲ AI ಸಮುದಾಯಕ್ಕಾಗಿ ❤️ಯಿಂದ ನಿರ್ಮಿಸಲಾಗಿದೆ.
+**[⬆ ಮೇಲಕ್ಕೆ ಹಿಂತಿರುಗಿ](#-omniroute)** · ಓಪನ್ ಸೋರ್ಸ್ AI ಸಮುದಾಯಕ್ಕಾಗಿ ❤️ ನೊಂದಿಗೆ ನಿರ್ಮಿಸಲಾಗಿದೆ.
 
-<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> ಅವರಿಂದ ರಚಿಸಲಾಗಿದೆ · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT ಪರವಾನಗಿ · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>ಇವರಿಂದ ರಚಿಸಲಾಗಿದೆ <a href="https://github.com/diegosouzapw">ಡಿಯಾಗೋ ಸೋಜಾ</a> · OmniRoute v3.8.54 · ನೋಡ್ ≥ 22.22.2 · MIT ಪರವಾನಗಿ · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
-<!-- ಸಮುದಾಯದ ಪ್ರಶ್ನೋತ್ತರಕ್ಕಾಗಿ GitHub Discussions ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ -->
+<!-- GitHub Discussions enabled for community Q&A -->

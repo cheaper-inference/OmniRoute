@@ -422,7 +422,7 @@ Guardrails 模块是一个可热重载的中间件层，用于检查PII、提示
 - Connection/model规则加入者： `src/domain/connectionModelRules.ts`
 - 模型可用性快照： `src/domain/modelAvailability.ts`
 - 提供者到期跟踪： `src/domain/providerExpiration.ts`
-- 配额缓存： `src/domain/quotaCache.ts`
+- 配额缓存： `src/domain/quotaCache.ts`。提供者添加和删除配额窗口（OpenAI删除了某些计划的 5 小时Codex窗口），因此读取提供者的适配器证明已完成的使用（`quotasComplete`，请参阅`src/lib/usage/usageReading.ts`）是帐户的完整窗口集：之前已知但不存在的窗口已退休，在缓存中，在`quota_snapshots`中重新启动补水（附加的退休记录），在持久的Codex配额状态和Claude的饱和桶中。部分证据（响应标头、陈旧副本）仅更新其携带的窗口。
 - 降解状态： `src/domain/degradation.ts`
 - 配置审核： `src/domain/configAudit.ts`
 - OmniRoute响应元数据生成器： `src/domain/omnirouteResponseMeta.ts`
@@ -479,7 +479,7 @@ FSM转换纳入 Auto Combo 的评分中，偏向于background/automation任务�
   - DB层： `src/lib/db/reasoningCache.ts`
   - 服务层： `open-sse/services/reasoningCache.ts`
   - 有关重播语义，请参阅[`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md) 。
-- **读取缓存**—短期响应缓存，由签名键控，用于崩溃来自损坏的上游SDKs相同重试。
+- **读取缓存**—短期响应缓存，由签名键入，用于崩溃来自损坏的上游SDKs相同重试。
   - DB层： `src/lib/db/readCache.ts`
   - 统计端点： `GET /api/cache/stats`，仪表板位于`/dashboard/cache`
 

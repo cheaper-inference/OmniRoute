@@ -316,15 +316,15 @@ API բանալիները կրում են `scopes` զանգված (պահվում
 (`src/lib/accessTokens/scopes.ts`)։ Այս դասակարգումը վերաբերում է միայն մուտքի թոքենի
 հավատարմագրին։ Տես [Կառավարման աուտենտիֆիկացիա](../guides/MANAGEMENT-AUTH.md)։
 
-## Նույնականացման պահանջի անջատիչ
+## Auth Պահանջվում է Փոխարկել
 
-`src/shared/utils/apiAuth.ts`-ի `isAuthRequired()`-ը որոշում է, թե արդյոք **որևէ** նույնականացում է պարտադրվում հարցումի համար․
+`isAuthRequired()` in `src/shared/utils/apiAuth.ts` որոշում է, թե արդյոք** ցանկացած** auth-ն ուժի մեջ է մտնում խնդրանքի համար.
 
-- `settings.requireLogin === false` → նույնականացումն ընդհանրապես անջատված է, բացի միշտ պաշտպանված շերտից (տե՛ս [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) և այն կանչերից, որոնք տալիս են հավատարմագիր, որը այն ընդունում է. դրանց պահանջվում է նույն հավատարմագիրը, ինչ մուտքի միացված ժամանակ՝ սինխրոնիզացիայի token-ների թողարկում, CLI access token-ների ստեղծում ցանկացած scope-ով, և `manage`/`admin` scope ունեցող API բանալու ստեղծում, այդ scope-ի տրամադրում բանալուն, կամ այդպիսի բանալու վերագեներացում կամ բացահայտում (`requireCredentialForManagementScopedKey()`, `src/lib/api/requireManagementAuth.ts`)։ Միայն inference բանալիները բաց են մնում։
-- Գաղտնաբառ կարգավորված չէ **և** `INITIAL_PASSWORD` միջավայրի փոփոխական չկա → bootstrap ռեժիմը թույլ է տալիս onboarding wizard-ը և loopback հարցումները, մինչդեռ ցանցից եկող բաց հարցումներին դեռ անհրաժեշտ են հավատարմագրեր։
-- Ցանկացած DB սխալ → փակ վիճակում ձախողվում է (secure-by-default)։
+- `settings.requireLogin === false` → auth-ը գլոբալ անջատված է, բացառությամբ միշտ պաշտպանված մակարդակի (տես [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) և այն զանգերի, որոնք տրամադրում են իր կողմից ընդունված հավատարմագրերը, որոնց անհրաժեշտ է API հավատարմագիրը `requireCredentialForManagementScopedKey()` CLI `manage` `admin` `src/lib/api/requireManagementAuth.ts` Միայն եզրակացության բանալիները մնում են բաց: Պաշտպանված հատկանիշի դրոշ գրելը (`REQUIRE_API_KEY`, անվտանգության մյուս դրոշները և SSRF / TLS / MCP-scope / sandbox դրոշները, որոնք թվարկված են [Feature Flags-](../reference/FEATURE_FLAGS.md#rest-api) ում) և պահպանելով PII դիմակավորման կարգավորումները (`PUT /api/settings/pii`) նույնպես շարունակում են հավատարմագրերի կարիք ունենալ:
+- Գաղտնաբառ կազմաձևված չէ** և** no `INITIAL_PASSWORD` env var → bootstrap ռեժիմը թույլ է տալիս ներբեռնման հրաշագործին և loopback հարցումները, սակայն բացված ցանցային հարցումներին դեռևս անհրաժեշտ են հավատարմագրեր: PII `PUT /api/settings/pii`
+- DB ցանկացած սխալ → չի փակվում (անվտանգ ըստ կանխադրման):
 
-Client API բանալու պարտադրումն օգտագործում է `src/shared/utils/featureFlags.ts`-ի `isRequireApiKeyEnabled()`-ը, այլ ոչ թե ուղղակի `process.env.REQUIRE_API_KEY` ընթերցում։ Սա կարևոր է տեղադրված ինստանսների համար. Dashboard → Feature Flags-ում `REQUIRE_API_KEY`-ի փոխելը պահում է DB-ի վերագրանցում և անմիջապես ազդում է `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` և client API-ի մյուս նույնականացման ստուգումների վրա, որոնք կիսում են այս օգնականը։ Եթե feature flag-ների պահոցը չի կարող կարդացվել, client API-ի նույնականացումը փակ վիճակում ձախողվում է և պահանջում է բանալի։
+Հաճախորդի API բանալի կիրառումը `isRequireApiKeyEnabled()` ում օգտագործում է `src/shared/utils/featureFlags.ts`, ոչ թե ուղղակի `process.env.REQUIRE_API_KEY` ընթերցում: Սա կարևոր է տեղաբաշխված օրինակների համար. `REQUIRE_API_KEY` միացումը Dashboard → Feature Flags-ը պահպանում է DB վերափոխումը և անմիջապես ազդում `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` և հաճախորդի-API վավերացման այլ ստուգումների վրա, որոնք կիսում են այս օգնականը: Եթե առանձնահատկությունների դրոշի պահեստը հնարավոր չէ կարդալ, հաճախորդի API auth-ը չի փակվում և պահանջում է բանալի:
 
 ## Փոփոխություն, որը խախտում է համատեղելիությունը — v3.8.0
 

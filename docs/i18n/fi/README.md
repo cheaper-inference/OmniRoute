@@ -67,23 +67,23 @@
 
 <br/>
 
-## 📈 Yhdyskäytävä kasvaa jatkuvasti
+## 📈 Gateway jatkaa kasvuaan
 
 <div align="center">
 
-|                                     |        v3.8.50         | **v3.8.51** |      `v3.8.54+`       |
-| ----------------------------------- | :--------------------: | :---------: | :-------------------: |
-| 🌐 Palveluntarjoajat                |          352           |   **358**   |          380          |
-| 🧠 Yksilölliset chat-mallitunnukset |          1320          |  **1374**   |         1491          |
-| 🖼️ Modaliteettisilta                | 🆕 näkö + ääni + video |      ✓      |           ✓           |
-| 📡 Radarin ilmainen luettelo        |     🆕 hyväksyntä      |      ✓      |           ✓           |
-| ⚖️ Kiintiöt huomioiva ajoitus       |     🆕 Quota-Share     |      ✓      |           ✓           |
-| 📊 Kiintiötelemetria                |   🆕 reaaliaikainen    |      ✓      |           ✓           |
-| 🧰 Päätön tila                      |           —            |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS-ratainfra                    |           —            |      —      |  🆕 julkaisukanavat   |
-| 🔎 Mallien haku-API                 |           —            |      —      | 🆕 `/v1/models/query` |
+|                                  |          v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
+| -------------------------------- | :-----------------------: | :---------: | :-------------------: |
+| 🌐 Providers                     |            352            |   **358**   |          380          |
+| 🧠 Ainutlaatuinen chat-malli IDs |           1320            |  **1374**   |         1491          |
+| 🖼️ Modality Bridge               | 🆕 vision + audio + video |      ✓      |           ✓           |
+| 📡 Radar ilmainen luettelo       |         🆕 opt-in         |      ✓      |           ✓           |
+| ⚖️ Kiintiötietoinen aikataulutus |      🆕 Quota-Share       |      ✓      |           ✓           |
+| 📊 Quota telemetria              |         🆕 livenä         |      ✓      |           ✓           |
+| 🧰 Headless-tila                 |             —             |      —      | 🆕 `serve --headless` |
+| 🛤️ LTS rail infra                |             —             |      —      |  🆕 julkaisukanavat   |
+| 🔎 Mallin löytäminen API         |             —             |      —      | 🆕 `/v1/models/query` |
 
-**→ [Etenemissuunnitelma](ROADMAP.md) — kulkemassa rataa pitkin kohti versiota `v3.9.0 LTS`**
+**→ [Roadmap](ROADMAP.md) — ratsastaa raiteella `v3.9.0 LTS`:hen**
 
 </div>
 
@@ -589,35 +589,35 @@ nykyisestä luettelosta on osoitteessa **[radar.omniroute.online/planos](https:/
 
 </div>
 
-> Viimeaikaisia kohokohtia versiosta **v3.8.20 → v3.8.54**. Koko historia [`CHANGELOG.md`](CHANGELOG.md).
+> Viimeaikaiset kohokohdat kohteesta** v3.8.20 → v3.8.54** . Täysi historia [`CHANGELOG.md`](CHANGELOG.md) :ssä.
 
-- **⚖️ `quota-weighted` reititys** — 20. yhdistelmästrategia ohittaa loppuun käytetyt tilit ja arpoo jäljellä olevien kesken suhteessa jäljellä olevaan kiintiöön ÷ käynnissä olevaan kuormaan, pitäen olemassa olevat keskustelut kiinnitettyinä. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🧰 Headless-tila** — `omniroute serve --headless` (tai `OMNIROUTE_HEADLESS=1`) ajaa vain `/v1/*` proxy-moottoria, ilman hallintapaneelia ja siihen liittyviä alajärjestelmiä. → [Headless Mode](docs/guides/HEADLESS.md)
-- **🔎 Mallien tunnistus** — `/v1/models` suodattaa kyvykkyyden, kontekstin, lajin ja tekstin mukaan, ja `POST /v1/models/query` palauttaa lyhyen deterministisen ehdokaslistan samoilla avainkohtaisilla näkyvyyksillä. → [API Reference](docs/reference/API_REFERENCE.md)
-- **🔑 Avainkohtainen reititysohjaus** — kiinnitä API-avain yhteen malliin tai yhdistelmään `forcedModel`-asetuksella, ja lisää tai poista avaimen mallit ja yhdistelmät atomisesti (`/api/keys/{id}/access`). → [API Reference](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
-- **🛡️ Tarkemmat PII-suojaukset** — tyyppikohtainen valinta, jopa 20 validoitua mukautettua peittokuviota ja tyyppikohtaiset tunnistuslaskurit; peittäminen itsessään pysyy valinnaisena. → [Guardrails](docs/security/GUARDRAILS.md)
-- **🌍 67 kieltä** — hallintapaneeli, dokumentaation peilit ja CLI, `npm run i18n:add-locale` lisää kielen kaikkialle yhdellä komennolla. → [i18n Guide](docs/guides/I18N.md)
-- **🎛️ OmniConductor** — saapuva A2A-delegointi agenttilaivastollesi, Conductor-taidot Agent Cardilla ja hallintapaneelin osio, jossa Faro push-to-talk -äänichat. → [A2A Server](docs/frameworks/A2A-SERVER.md)
-- **🛂 Mukautuva pääsy & ylikuormitussuojelu** — raskaat keskustelupyynnöt jonotetaan 503-virheen sijaan, atomisilla RPM-liukuvilla vuokrasopimuksilla per yhteys. → [Resilience Guide](docs/architecture/RESILIENCE_GUIDE.md)
-- **🗂️ Kanoninen `/v1/models` järjestys** — yksi yhtenäinen tarjoajakohtainen lohko per tarjoaja (yhdistelmät ensin kiinnitettyinä), vakaa kaikissa katalogilähteissä. → [API Reference](docs/reference/API_REFERENCE.md)
-- **🗜️ Pakkausvahvistus** — oletuksena päällä oleva inflatiosuoja, Caveman-paketit DE / FR / JA + kiina (wényán), RTK-suodattimet Gradlelle & .NET:lle. → [Compression](docs/compression/COMPRESSION_ENGINES.md)
-- **💸 Reilu kiinteähintainen kustannus** — tilaus- / koodauspakettitarjoajat näkyvät **$0** kustannusanalytiikassa; budjetti, kiintiö & reititys jatkavat arviointia. → [API Reference](docs/reference/API_REFERENCE.md)
-- **⚖️ Quota-Share reititys** — jaa jaetun tilin kiintiö tasapuolisesti avainpoolin kesken, työkuormaa säästäen niin, että käyttämättömät osat lainataan muille. → [Resilience Guide](docs/architecture/RESILIENCE_GUIDE.md)
-- **🤖 Yhden komennon CLI/agenttiasennus** — 15 rekisteröityä `setup-*` komentoa; `omniroute run` käynnistää 7 CLI:tä (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); `omniroute configure` tukee 11 kohdetta interaktiivisella tarjoaja+malli-valitsimella ja kontekstikohtaisilla suosikeilla. → [CLI Integrations](docs/guides/CLI-INTEGRATIONS.md)
-- **🛰️ Etätila** — ohjaa etä-OmniRoutea rajatuilla tunnisteilla (`connect` / `contexts` / `tokens`) + `antigravity` OAuth-apuri VPS-asennuksiin. → [Remote Mode](docs/guides/REMOTE-MODE.md)
-- **🧭 Älykkäämpi automaattireititys** — `auto/<category>:<tier>` yhdistelmät, **Fusion** (mallipaneeli + tuomari), tehtävätietoinen reititys, pyyntökohtaiset malli / tila / USD-budjetti -ylikirjoitukset. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🗜️ Liitettävä pakkaus** — 12 yhdisteltävää moottoria + Compression Studios: LLMLingua-2, kaksitasoinen Ultra, omniglyph, vaiheittainen tarkkuusportti, GCF v3.2, vedä-ja-järjestä editori. → [Compression](docs/compression/COMPRESSION_ENGINES.md)
-- **🕵️ Läpinäkyvä MITM-purku (TPROXY)** — kaappaa CLI:t, jotka ohittavat proxy-ympäristömuuttujat, SNI-kohtainen CA + luottamusvaraston asentaja. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
-- **💸 Kustannustelemetria kaikkialla** — `X-OmniRoute-*` kustannus/käyttö -otsikot jokaisessa päätepisteessä, cache-HIT-säästöotsikko, avainkohtaiset USD-kulutuskiintiöt. → [API Reference](docs/reference/API_REFERENCE.md)
-- **🧠 Muisti, jota hallitset** — oletuksena pois päältä, valinnainen int8-vektorikvantisointi + tyypitetty häviäminen, pyyntökohtainen `x-omniroute-no-memory`. → [Memory](docs/frameworks/MEMORY.md)
-- **🛡️ Turvallisuus** — prompt-injektiosuoja jokaisella LLM-reitillä (red-team-paketti), valinnainen tunnistetietojen peittosuoja (peittää vuotaneet API-avaimet/salaisuudet molempiin suuntiin), ilmainen DuckDuckGo-hätäverkkohaku ja valinnainen OIDC-kirjautumisportti hallintapaneelille (salasanakirjautuminen aina käytettävissä). → [Guardrails](docs/security/GUARDRAILS.md)
-- **🖼️ Uudet päätepisteet** — `/v1/ocr` (Mistral OCR) ja `/v1/audio/translations` (Whisper-tyylinen) täydentävät mediasovellusrajapinnan. → [API Reference](docs/reference/API_REFERENCE.md)
-- **🎨 Kuvan / videon / äänen generointi** — yksi API mediaan: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind sekä puhepalvelut kuten ElevenLabs. → [API Reference](docs/reference/API_REFERENCE.md)
-- **🌍 Käyttöönotto & operointi** — reverse-proxy `basePath`, selaimen kieliautomaattitunnistus, avainkohtainen laitejäljitys, rootiton MITM-luottamus, zh-TW-lokalisaatio. → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 Lisää tarjoajia & agentteja** — pilviagentit (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) selaimella + OAuth-kirjautuminen, Ollama ensiluokkainen kortti, Claude Opus 5 & Sonnet 5, Kimi virallinen kumppanuus (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… ja päivitetty **380-tarjoajan katalogi**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
-- **📡 Reitityksen läpinäkyvyys** — jokainen vastaus sisältää `X-OmniRoute-Decision`-otsikon, jossa mainitaan strategia/tarjoaja/viive, uusi `cache-optimized` yhdistelmästrategia + Auto-Combo `cacheAffinity`-tekijä reitittää toistuvat pyynnöt takaisin yhteyteen, jolla on välimuistissa oleva alku, ja vain luku -päätepiste `/v1/auto-combo/{channel}/candidates` paljastaa `auto/*` kanavan elävän ehdokasjoukon. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **⚡ Paikallinen suorituskyky & infrastruktuuri** — yhdellä klikkauksella paikallinen Redis, Cloudflare Workers / Deno Deploy -välityspalveluiden käyttöönotto, Bifrost & Mux valvottuina upotettuina palveluina. → [Upotetut palvelut](docs/frameworks/EMBEDDED-SERVICES.md)
-- **🧩 Myös mukana paketissa** — liitännäiskehys + markkinapaikka, Omni/Agent/GitHub-taitokehykset, Obsidian-vault-integraatio (22 MCP-työkalua), OpenAI-yhteensopivat Batch & Files -rajapinnat, semanttinen vastausvälimuisti, pelillistäminen tulostaulukoilla, ACP-agenttien löytäminen (15 sisäänrakennettua agenttia), ajastettu lokien vienti BigQueryyn, `auto/chaos` rinnakkainen monimallifaniutus, Telegram-bottisilta, sisäänrakennettu versiohallinta ja LMArena-ELO ilmaiset tarjoajarankingit. → [Dokumentaatio](docs/README.md)
+- **⚖️ `quota-weighted` -reititys** — 20. yhdistelmästrategia ohittaa loppuun kuluneet tilit ja arvontaa sitten muiden kesken suhteessa jäljellä olevaan kiintiöön ÷ lennon aikana, jolloin olemassa olevat keskustelut pidetään kiinnitettyinä. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **🧰 Headless-tila** — `omniroute serve --headless` (tai `OMNIROUTE_HEADLESS=1`) käyttää vain `/v1/*` -välityspalvelinta kojelaudan ja vain kojelaudan alijärjestelmien ollessa pois päältä. → [päätön tila](docs/guides/HEADLESS.md)
+- **🔎 Mallin löytö** — `/v1/models` suodattaa ominaisuuden, kontekstin, lajin ja tekstin mukaan, ja `POST /v1/models/query` palauttaa lyhyen deterministisen luettelon, jolla on sama näkyvyys avainkohtaisesti. → [API Viite](docs/reference/API_REFERENCE.md)
+- **🔑 Avainkohtainen reititysohjaus** — kiinnitä API -avain yhteen malliin tai yhdistelmään `forcedModel` llä ja lisää tai poista avaimen malleja ja komboja atomeittain (`/api/keys/{id}/access`). → [API Viite](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
+- **🛡️ Hienommat PII -ohjaimet** — tyyppikohtainen valinta, jopa 20 vahvistettua mukautettua peitekuvioita ja tyyppikohtaisia tunnistuslaskuria; itse maskaaminen jää valinnaiseksi. → [suojakaiteet](docs/security/GUARDRAILS.md)
+- **🌍 67 kieltä** — koontinäyttö, docs-peilit ja CLI, `npm run i18n:add-locale` lisää kielen kaikkialle yhdessä komennossa. → [i18n opas](docs/guides/I18N.md)
+- **🎛️ OmniConductor** — saapuva A2A delegaatio agenttilaivastollesi, agenttikortilla olevat kapellimestaritaidot ja kojelautapaneeli, jossa on Faron push-to-talk-äänikeskustelu. → [A2A palvelin](docs/frameworks/A2A-SERVER.md)
+- **🛂 Mukautuva sisäänpääsy ja ylikuormitussuoja** — raskaansarjan chat pyytää jonoa 503ingin sijaan, ja RPM n jatkuvat vuokrasopimukset yhteyttä kohti. → [Resilience Guide](docs/architecture/RESILIENCE_GUIDE.md)
+- **🗂️ Canonical `/v1/models` tilaus** — yksi peräkkäinen tarjoajaryhmittymä lohko per toimittaja (kombot kiinnitetty ensin), vakaa kaikissa luettelolähteissä. → [API Viite](docs/reference/API_REFERENCE.md)
+- **🗜️ Puristuskarkaisu** — oletusarvoinen täyttösuoja, Caveman-paketit DE / FR / JA + Chinese (wényán), RTK suodattimet Gradle & .NET. → [pakkaus](docs/compression/COMPRESSION_ENGINES.md)
+- **💸 Rehellinen kiinteähintainen hinta** — tilauksen / koodaussuunnitelman tarjoajat lukevat** 0 dollaria** kustannusanalytiikassa; budjetti, kiintiö ja reititys arvioivat jatkuvasti. → [API Viite](docs/reference/API_REFERENCE.md)
+- **⚖️ Quota-Share reititys** — jakoi jaetun tilin kiintiön reilusti yhdistetyille avaimille, mikä säästää työtä, joten käyttämättömät osat lainataan. → [Resilience Guide](docs/architecture/RESILIENCE_GUIDE.md)
+- **🤖 Yhden komennon CLI/agent asetukset** — 15 rekisteröityä `setup-*` -komentoa; `omniroute run` käynnistää 7 CLIs (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); `omniroute configure` tukee 11 kohdetta interaktiivisella palveluntarjoajan +-mallivalitsimella ja kontekstikohtaisilla suosikeilla. → [CLI -integraatiot](docs/guides/CLI-INTEGRATIONS.md)
+- **🛰️ Kaukosäädintila** — ajaa etä- OmniRoute, jossa on laajennetut tunnukset (`connect` / `contexts` / `tokens`) + ja `antigravity` OAuth -apuohjelma VPS -asennuksiin. → [Remote Mode](docs/guides/REMOTE-MODE.md)
+- **🧭 Älykkäämpi automaattinen reititys** — `auto/<category>:<tier>` yhdistelmät,** Fuusio** (mallipaneelin + tuomari), tehtävätietoinen reititys, pyyntökohtainen malli / tila / USD-budjetin ohitukset. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **🗜️ Kytkettävä pakkaus** — 12 komposoitavaa moottoria + Compression Studios: LLMLingua-2, kaksitasoinen Ultra, omniglyfi, askelkohtainen tarkkuusportti, GCF v3.2, vedä uudelleenjärjestyseditori. → [pakkaus](docs/compression/COMPRESSION_ENGINES.md)
+- **🕵️ läpinäkyvä MITM salauksen purku (TPROXY)** — kaappaus CLIs, jotka ohittavat välityspalvelimen env vars, SNI-kohtaisella CA + -luottamuskaupan asennusohjelmalla. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
+- **💸 Kustannustelemetria kaikkialla** — `X-OmniRoute-*` cost/usage otsikot jokaisessa päätepisteessä, välimuisti-HIT-säästöotsikko, avainkohtaiset USD -kulutuskiintiöt. → [API Viite](docs/reference/API_REFERENCE.md)
+- **🧠 Muisti, jota hallitset** — pois päältä oletuksena, opt-in int8 vektorikvantisointi + kirjoitettu vaimeneminen, pyyntökohtainen `x-omniroute-no-memory`. → [Muisti](docs/frameworks/MEMORY.md)
+- **🛡️ turvallisuus** — pikaruiskutussuoja jokaisella LLM reitillä (punainen tiimipaketti), valinnainen valtuustietojen peittävä suojakaide (reduktoi vuotaneen API keys/secrets molempiin suuntiin), ilmainen DuckDuckGo -viimeinen verkkohaku ja valinnainen OIDC -kirjautumisportti kojelautaan (salasana on aina käytettävissä). → [suojakaiteet](docs/security/GUARDRAILS.md)
+- **🖼️ Uudet päätepisteet** — `/v1/ocr` (Mistral OCR) ja `/v1/audio/translations` (Whisper-tyyli) pyöristävät materiaalin pintaa. → [API Viite](docs/reference/API_REFERENCE.md)
+- **🎨 Kuvan / videon / äänen sukupolvi** — one API medialle: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind ja puheentarjoajat, kuten ElevenLabs. → [API Viite](docs/reference/API_REFERENCE.md)
+- **🌍 Käyttöönotto ja ops** — käänteinen välityspalvelin `basePath`, selainkielen automaattinen tunnistus, avaimenkohtainen laiteseuranta, juureton MITM luottamus, zh-TW-lokalisointi. → [Ympäristö](docs/reference/ENVIRONMENT.md)
+- **🤝 Lisää palveluntarjoajia ja edustajia** — -pilviagentit (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) selaimella + OAuth -sisäänkirjautumisella, Ollama ensiluokkainen kortti, Claude Opus 5 & Sonnet 5, Kimi virallinen kumppanuus, (Code/Web/Moonshot,z, AIZedSenseNova virkistynyt** 380 tarjoajan luettelo** . → [palveluntarjoajat](docs/reference/PROVIDER_REFERENCE.md)
+- **📡 Reitityksen läpinäkyvyys** — jokainen vastaus sisältää `X-OmniRoute-Decision` otsikon, joka nimeää sitä palvelevan strategy/provider/latency, uuden `cache-optimized` -yhdistelmästrategian + Auto-Combo `cacheAffinity` -tekijän toistopyynnöt takaisin yhteyteen, joka sisältää välimuistin etuliitettä, ja vain luku -tilassa oleva `/v1/auto-combo/{channel}/candidates` päätepiste paljastaa `auto/*` -kanavan live-ehdokasjoukon. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **⚡ Paikallinen suorituskyky ja infra** — yhdellä napsautuksella paikallinen Redis, Cloudflare Workers / Deno Deploy -välitteiset käyttöönottimet, Bifrost & Mux valvotuina sulautetuina palveluina. → [sulautetut palvelut](docs/frameworks/EMBEDDED-SERVICES.md)
+- **🧩 Myös laatikossa** — -laajennuskehys + markkinapaikka, Omni/Agent/GitHub -taitojen puitteet, Obsidian -holvin integrointi (22 MCP työkalua), OpenAI-yhteensopiva Batch & Files APIs, semanttinen vastausvälimuisti, pelillistäminen tulostaulukoilla, ACP agenttien etsintä (15 sisäänrakennettua BigQuery), ajoitettu lokivienti, `auto/chaos` -fan-out useaan Telegram bot Bridge, sovelluksen sisäinen versionhallinta ja LMArena-ELO ilmaisten palveluntarjoajien sijoitukset. → [Docs](docs/README.md)
 
 <br/>
 
@@ -921,15 +921,15 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
 
 <div align="center">
 
-## 🗜️ Säästä 15–95 % tokeneista — automaattisesti
+## 🗜️ Säästä 15–95 % Tokeneita — Automaattisesti
 
 </div>
 
-### 📖 Miten se toimii — putki, arkkitehtuuri ja säästölaskenta
+### 📖 Kuinka se toimii — putkisto, arkkitehtuuri ja säästömatematiikka
 
-<img src="./docs/diagrams/compression-pipeline.svg" width="100%" alt="OmniRoute-pakkausputki: havainnollistava 10 000 tokenin asiakaspyyntö kulkee 12 yhdisteltävän moottorin läpi — Session-Dedup, CCR, Lite, RTK, Responses Tool Output, Headroom, Relevance, Caveman, Aggressive, LLMLingua-2, Ultra ja OmniGlyph — ja voi saavuttaa tarjoajan noin 1 080 tokenilla dokumentoidussa pinotussa esimerkissä. Jäsennetty sisältö on suojattu säilytysvahdeilla ja vaihekohtaisilla uskollisuusporteilla; eksplisiittiset häviölliset tai kokeelliset tilat voivat muuntaa kelvollista sisältöä."/>
+<img src="./docs/diagrams/compression-pipeline.svg" width="100%" alt="OmniRoute compression pipeline: an illustrative 10,000-token client request passes through 12 composable engines — Session-Dedup, CCR, Lite, RTK, Responses Tool Output, Headroom, Relevance, Caveman, Aggressive, LLMLingua-2, Ultra and OmniGlyph — and can reach the provider at about 1,080 tokens in the documented stacked example. Structured content is protected by preservation guards and per-step fidelity gates; explicit lossy or experimental modes may transform eligible content."/>
 
-Oletusarvoinen pinottu yhdistelmä ajaa `RTK → Caveman`. Kun molemmat vaikuttavat samaan työkalu-/kontekstidataan, säästöt kertautuvat:
+Pinottu oletusyhdistelmä ajaa `RTK → Caveman`. Kun molemmat toimivat samalla tool/context -hyötykuormalla, säästöyhdiste:
 
 ```txt
 combined = 1 − (1 − RTK) × (1 − Caveman_input)
@@ -937,74 +937,74 @@ average  = 1 − (1 − 0.80) × (1 − 0.46) = 89.2%
 range    = 78.4 – 94.6%
 ```
 
-Koodilohkot, URL-osoitteet, JSON ja jäsennetty data ovat **aina suojattuja** säilytysmoottorin toimesta.
+Koodilohkot, URLs, JSON ja strukturoitu data ovat** aina suojattu** säilytysmoottorilla.
 
-> **Miksi käyttää monta tokenia, kun harva token riittää?** Jokainen pyyntö kulkee OmniRoute'n pakkausputken läpi **läpinäkyvästi** — ilman muutoksia asiakaspäässä. Se on nyt **12 yhdisteltävän moottorin pino**, jotka ajetaan järjestyksessä ja yhdistellään reititysyhdistelmäkohtaisesti — rakentuen ideoille [RTK](https://github.com/rtk-ai/rtk), [Caveman](https://github.com/JuliusBrussee/caveman) (⭐ 90K+), [LLMLingua-2](https://github.com/microsoft/LLMLingua) ja [Troglodita](https://github.com/leninejunior/troglodita) (PT-BR) pohjalta.
+> **Miksi käyttää monia tokeneita, kun harvat rahakkeet tekevät tempun?** Jokainen pyyntö kulkee OmniRoute pakkausputken kautta** läpinäkyvästi** — ei asiakasmuutoksia. Se on nyt a** pino 12 komposoitavaa moottoria** jotka toimivat järjestyksessä ja yhdistelevät reititysyhdistelmää — joka perustuu [RTK](https://github.com/rtk-ai/rtk), [Cavemanin](https://github.com/JuliusBrussee/caveman) (⭐ 90K +), [LLMLingua-2](https://github.com/microsoft/LLMLingua) ja [Trogloditan](https://github.com/leninejunior/troglodita) (PT-BR) ideoihin.
 
-### 🧱 12 moottorin pino
+### 🧱 12-moottorinen pino
 
-Moottorit ajetaan putken järjestyksessä; jokainen on itsenäisesti päälle kytkettävissä ja konfiguroitavissa yhdistelmäkohtaisesti:
+Moottorit toimivat putkistojärjestyksessä; jokainen on erikseen vaihdettavissa ja konfiguroitavissa yhdistelmää kohti:
 
 <table>
   <tr><th align="center">#</th><th align="left">Moottori</th><th align="left">Mitä se tekee</th></tr>
-  <tr><td align="center" nowrap>1</td><td align="left" nowrap><b>Session-Dedup</b></td><td align="left">Pudottaa sisällön, joka toistuu vuorojen välillä (sisältöosoitettu, vuorojen välinen)</td></tr>
-  <tr><td align="center" nowrap>2</td><td align="left" nowrap><b>CCR</b></td><td align="left">Arkistoi suuret lohkot noutomerkkien taakse, haetaan tarvittaessa</td></tr>
-  <tr><td align="center" nowrap>3</td><td align="left" nowrap><b>Lite</b></td><td align="left">Tyhjän tilan ja kuva-URL-osoitteiden karsinta (vähäviiveinen perustaso)</td></tr>
-  <tr><td align="center" nowrap>4</td><td align="left" nowrap><b>RTK</b></td><td align="left">Älykäs työkalutulosten suodatus, duplikaattien poisto ja katkaisu (komentotietoinen)</td></tr>
-  <tr><td align="center" nowrap>5</td><td align="left" nowrap><b>Responses Tool Output</b></td><td align="left">Häviötön ensisijaisesti JSON + rajattu diagnostinen pakkaus shell-/patch-/haku-/build-tulosteille (Responses API)</td></tr>
-  <tr><td align="center" nowrap>6</td><td align="left" nowrap><b>Headroom</b></td><td align="left">Häviötön taulukkomuotoinen tiivistys JSON-taulukoille (~30 %) sisällytetyn <b>GCF</b>-koodekin kautta</td></tr>
-  <tr><td align="center" nowrap>7</td><td align="left" nowrap><b>Relevance</b></td><td align="left">Ekstraktiivinen lauseiden pisteytys viimeisintä käyttäjän kyselyä vasten</td></tr>
-  <tr><td align="center" nowrap>8</td><td align="left" nowrap><b>Caveman</b></td><td align="left">Sääntöpohjainen proosan pakkaus (~65–75 % tulosteesta)</td></tr>
-  <tr><td align="center" nowrap>9</td><td align="left" nowrap><b>Aggressive</b></td><td align="left">Tiivistäminen + vanhojen vuorojen asteittainen vanhentaminen</td></tr>
-  <tr><td align="center" nowrap>10</td><td align="left" nowrap><b>LLMLingua-2</b></td><td align="left">ML-pohjainen semanttinen karsinta MobileBERT ONNX:n kautta — kooditurvallinen, asynkroninen</td></tr>
-  <tr><td align="center" nowrap>11</td><td align="left" nowrap><b>Ultra</b></td><td align="left">Heuristinen tokenien karsinta valinnaisella pienmallitasolla (SLM)</td></tr>
-  <tr><td align="center" nowrap>12</td><td align="left" nowrap><b>OmniGlyph</b></td><td align="left">Kokeellinen konteksti kuvana -koodaus mitatulle Claude Fable 5:lle suoralla Anthropic-yhteydellä; GPT 5.6 -transformers pysyvät fail-closed-tilassa odottaen tarjoajan kuittauksia. Neljä pakkausprofiilia (aggressiivinen oletus, tasapainoinen, kooditurvallinen, läpivienti) (aggressiivisin; valinnainen)</td></tr>
+  <tr><td align="center" nowrap>1</td><td align="left" nowrap><b>Istunto-Dedup</b></td><td align="left">Pudottaa sisällön toistuvasti käännöksissä (sisällön mukaan osoitettu, poikkikäännös)</td></tr>
+  <tr><td align="center" nowrap>2</td><td align="left" nowrap><b>CCR</b></td><td align="left">Arkistoi suuret lohkot hakumerkkien taakse, noudetaan pyynnöstä</td></tr>
+  <tr><td align="center" nowrap>3</td><td align="left" nowrap><b>Lite</b></td><td align="left">Tyhjennys + kuvan ja URL-osoitteen leikkaus (latenssin valon perusviiva)</td></tr>
+  <tr><td align="center" nowrap>4</td><td align="left" nowrap><b>RTK</b></td><td align="left">Älykäs työkalutulosten suodatus, poisto ja katkaisu (komennot tunteva)</td></tr>
+  <tr><td align="center" nowrap>5</td><td align="left" nowrap><b>Vastaustyökalun tulos</b></td><td align="left">Häviötön ensimmäinen JSON + -rajoitettu diagnostinen pakkaus shell/patch/search/build ulostuloille (vastaukset API)</td></tr>
+  <tr><td align="center" nowrap>6</td><td align="left" nowrap><b>Pääntila</b></td><td align="left">Häviötön JSON -taulukoiden tiivistys (~ 30 %) myyjän kautta <b>GCF</b> koodekki</td></tr>
+  <tr><td align="center" nowrap>7</td><td align="left" nowrap><b>Relevanssi</b></td><td align="left">Poimittava lauseen pisteytys viimeiseen käyttäjän kyselyyn</td></tr>
+  <tr><td align="center" nowrap>8</td><td align="left" nowrap><b>Luolaihminen</b></td><td align="left">Sääntöihin perustuva proosan pakkaus (~ 65–75 % lähdöstä)</td></tr>
+  <tr><td align="center" nowrap>9</td><td align="left" nowrap><b>Aggressiivinen</b></td><td align="left">Yhteenveto + vanhojen käänteiden progressiivinen ikääntyminen</td></tr>
+  <tr><td align="center" nowrap>10</td><td align="left" nowrap><b>LLMLingua-2</b></td><td align="left">ML semanttinen karsiminen MobileBERT kautta ONNX — code-safe, async</td></tr>
+  <tr><td align="center" nowrap>11</td><td align="left" nowrap><b>Ultra</b></td><td align="left">Heuristinen merkkien karsiminen valinnaisella pienmallitasolla (SLM).</td></tr>
+  <tr><td align="center" nowrap>12</td><td align="left" nowrap><b>OmniGlyph</b></td><td align="left">Kokeellinen konteksti-kuvakoodaus mitatulle Claude Fable 5:lle suorassa Anthropic johdossa; GPT 5.6 -muuntajat pysyvät virhesuljettuina odottamassa toimittajan kuitteja. Neljä pakkausprofiilia (aggressiivinen oletus, tasapainotettu, koodausturvallinen, läpivienti) (aggressiivisin; opt-in)</td></tr>
 </table>
 
-Koodilohkot, URL-osoitteet ja jäsennetty data **säilytetään aina** tavulleen. **Yhden napsautuksen esiasetukset** yhdistävät moottorit:
+Koodilohkot, URLs ja strukturoitu data ovat** aina säilynyt** tavu-täydellinen.** Esiasetukset yhdellä napsautuksella** yhdistä moottorit:
 
 <table>
-  <tr><th align="left">Tila</th><th align="left">Säästöt</th><th align="left">Parhaiten sopii</th></tr>
-  <tr><td align="left" nowrap>🪶 <b>Lite</b></td><td align="left" nowrap>~15 %</td><td align="left">Aina päällä oleva turvallinen oletus</td></tr>
-  <tr><td align="left" nowrap>🪨 <b>Standard (Caveman)</b></td><td align="left" nowrap>~30 %</td><td align="left">Päivittäinen koodaus</td></tr>
-  <tr><td align="left" nowrap>⚡ <b>Aggressive</b></td><td align="left" nowrap>~50 %</td><td align="left">Pitkät työkalupainotteiset istunnot</td></tr>
-  <tr><td align="left" nowrap>🔥 <b>Ultra</b></td><td align="left" nowrap>~75 %</td><td align="left">Maksimaaliset säästöt</td></tr>
-  <tr><td align="left" nowrap>🧰 <b>RTK</b></td><td align="left" nowrap>60–90 %</td><td align="left">Shell-/testi-/build-/git-tuloste</td></tr>
-  <tr><td align="left" nowrap>🔗 <b>Stacked (RTK → Caveman)</b></td><td align="left" nowrap><b>78–95 %</b></td><td align="left">Sekalaiset kehotteet + työkalulokit</td></tr>
+  <tr><th align="left">tila</th><th align="left">Säästöjä</th><th align="left">Parasta varten</th></tr>
+  <tr><td align="left" nowrap>🪶 <b>Lite</b></td><td align="left" nowrap>~15%</td><td align="left">Aina päällä turvallinen oletus</td></tr>
+  <tr><td align="left" nowrap>🪨 <b>Standard (Cuveman)</b></td><td align="left" nowrap>~30%</td><td align="left">Päivittäinen koodaus</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Aggressiivinen</b></td><td align="left" nowrap>~50%</td><td align="left">Pitkät, työkaluja vaativat istunnot</td></tr>
+  <tr><td align="left" nowrap>🔥 <b>Ultra</b></td><td align="left" nowrap>~75%</td><td align="left">Maksimi säästöt</td></tr>
+  <tr><td align="left" nowrap>🧰 <b>RTK</b></td><td align="left" nowrap>60–90%</td><td align="left">Shell/test/build/git lähtö</td></tr>
+  <tr><td align="left" nowrap>🔗 <b>Pinottu (RTK → Caveman)</b></td><td align="left" nowrap><b>78–95%</b></td><td align="left">Sekalaiset kehotteet + työkalulokit</td></tr>
 </table>
 
-**Todellinen esimerkki — Standard-tila:**
+**Todellinen esimerkki — Standard -tilasta:**
 
-> **Ennen (69 tokenia):** _"The reason your React component is re-rendering is likely because you're creating a new object reference on each render cycle. When you pass an inline object as a prop, React's shallow comparison sees it as a different object every time, which triggers a re-render. I would recommend using useMemo to memoize the object."_
+> **Ennen (69 merkkiä):** _"Syy, miksi React -komponenttisi hahmonnetaan uudelleen, johtuu todennäköisesti siitä, että luot uuden objektiviittauksen jokaisella renderöintijaksolla. Kun ohitat rivinomaisen objektin ehdotuksena, React:n matala vertailu näkee sen eri objektina joka kerta, mikä laukaisee uudelleen renderöinnin. Suosittelen useMemo käyttöä objektin muistiin tallentamiseen."_
 >
-> **Jälkeen (19 tokenia):** _"New object ref each render. Inline object prop = new ref = re-render. Wrap in useMemo."_
+> **Jälkeen (19 merkkiä):** _"Uusi objekti viittaus jokaiseen renderöintiin. Inline objektin ehdotus = uusi viite = uudelleenrenderöiminen. Kääri useMemo ksi."_
 >
-> **Sama vastaus. 72 % vähemmän tokeneita. Ei lainkaan tarkkuuden menetystä.** ✅
+> **Sama vastaus. 72 % vähemmän tokeneita. Tarkkuushäviö nolla.** ✅
 
-**PT-BR-esimerkki — [Troglodita](https://github.com/leninejunior/troglodita)-tila:**
+**PT-BR esimerkki — [Troglodita-](https://github.com/leninejunior/troglodita) tilasta:**
 
-> **Ennen (42 tokenia):** _"Ongelma on, että komponentti renderöityy uudelleen, koska joka renderöintikierroksella luodaan uusi olion viittaus. Suosittelisin käyttämään `useMemo`."_
+> **Antes (42 merkkiä):** _"O problem é que o componente está re-renderizando porque uma nova referência de objeto está sendo criada em cada ciclo de renderização. Eu recomendaria usar useMemo."_
 >
-> **Jälkeen (12 tokenia):** _"Uudelleenrenderöinti: uusi viittaus joka kierroksella (inline-olio luodaan uudelleen). Käytä `useMemo`."_
+> **Talletus (12 merkkiä):** _"Rennöi uudelleen: ref nova cada ciclo (objeto inline recriado). Usar `useMemo`."_
 >
-> **Sama vastaus. ~70 % vähemmän tokeneita. Tekninen tarkkuus ennallaan.** ✅
+> **Mesma resposta. ~ 70% menos-merkkejä. Precisão técnica intacta.** ✅
 
 <br/>
 
-### 🎚️ Moottoreiden tuolla puolen — tulostustyylit, adaptiivinen säädin ja pyyntökohtainen hallinta
+### 🎚️ Moottoreiden — lähtötyylien lisäksi mukautuva valitsin ja pyyntökohtainen ohjaus
 
-Yllä olevat 12 moottoria kutistavat sen, mitä menee **sisään**. Kolme lisäkerrosta muovaavat **miten**, **milloin** ja mitä tulee **ulos**:
+Yllä olevat 12 moottoria kutistavat mitä menee** sisään** . Muodostaa vielä kolme kerrosta** miten** ,** kun** ja mitä tulee** ulos** :
 
-- **🪄 Output Styles** _(tulostusakselin ohjaus)_ — injektoi deterministisiä, välimuistiturvallisia vastauksen muotoiluohjeita; yhdisteltävissä, kukin `lite` / `full` / `ultra` -tehokkuudella. Tyylin lisääminen on yhden rivin rekisterimerkintä:
-  - **Terse prose** — pudota täyteaineet / artikkelit / lieventelyt; pidä tekninen sisältö tarkkana.
-  - **Less code** — "lazy senior dev" YAGNI: pienin toimiva muutos, ei pyytämätöntä rakennetta.
-  - **Ponytail (lazy senior dev)** — kiipeä YAGNI-tikapuita, korjaa juurisyy, pienin toimiva diff.
-  - **I have ADHD (action-first)** — seuraava toiminto edellä, vaiheet numeroitu, yksi konkreettinen seuraava askel, ei johdantoa.
-  - **Terse CJK (文言)** — klassisen kiinan ultratiiviis tyyli (lokaatiorajoitettu kieleen `zh`).
-- **🎯 Adaptiivinen kontekstibudjetti** _(säädin)_ — yhden päälle/pois-tokenkynnyksen sijaan kasvata halvimmat ja häviöttömimmät moottorit vain niin pitkälle kuin on tarpeen, jotta **mahtuu mallin konteksti-ikkunaan**. Käytäntö: `reserve-output` (oletus, mallitietoinen) · `percentage` · `absolute`. Tila: `floor` (takaa mahtuminen) · `replace-autotrigger` (eksplisiittinen valintasi voittaa) · `off` (perinteinen kynnys).
-- **🎛️ Missä pakkaus päätetään** _(etusijajärjestys, korkea → matala)_ — pyyntökohtainen `x-omniroute-compression`-otsake › reititysyhdistelmän ohitus › aktiivinen nimetty profiili › adaptiivinen / automaattinen laukaisu › paneelin oletus › pois. Sovellettu suunnitelma kajastuu takaisin `X-OmniRoute-Compression: <mode>; source=<source>` -vastausotsakkeessa.
+- **🪄 Output Styles** _(output-axis steering)_ — injektio deterministiset, välimuistia suojaavat vasteen muotoiluohjeet; yhdistettävissä, kukin `lite` / `full` / `ultra` -intensiteetillä. Tyylin lisääminen on yksirivinen rekisterimerkintä:
+  - **Tiukkaa proosaa** — drop filler / artikkelit / suojaus; pitää tekninen sisältö täsmällisenä.
+  - **Vähemmän koodia** — "laiska vanhempi kehittäjä" YAGNI: pienin toimiva muutos, ei pyytämättömiä rakennustelineitä.
+  - **poninhäntä (laiska vanhempi kehittäjä)** — kiivetä YAGNI tikkaita, korjata perimmäinen syy, pienin toimiva ero.
+  - **Minulla on ADHD (toiminta ensin)** — seuraavan toiminnan johdot, vaiheet numeroidut, yksi konkreettinen seuraava vaihe, ei johdatusta.
+  - **Terse CJK (文言)** — klassinen-kiinalainen erittäin suppea tyyli (paikallinen `zh`).
+- **🎯 Mukautuva kontekstibudjetti** _(valitsin)_ — yhden on/off -tunnuksen kynnysarvon sijasta korota halvimmat, häviöttömät moottorit vain niin pitkälle kuin on tarpeen** sopii mallin konteksti-ikkunaan** . Käytäntö: `reserve-output` (oletus, mallitietoinen) · `percentage` · `absolute`. Tila: `floor` (takuu istuvuus) · `replace-autotrigger` (selkeä valintasi voittaa) · `off` (vanha kynnys).
+- **🎛️ Missä pakkaus päätetään** _(predence, high → low)_ — per-pyyntö `x-omniroute-compression` header › reititysyhdistelmän ohitus › aktiivinen nimetty profiili › mukautuva / automaattinen laukaisu › paneelin oletus › pois päältä. Sovellettu suunnitelma kaikuu takaisin `X-OmniRoute-Compression: <mode>; source=<source>` -vastauksen otsikossa.
 
-Laukaise automaattisesti tokenkynnyksellä, kytke adaptiivinen säädin päälle, kiinnitä nimetty profiili, aseta kertaluonteinen pyyntökohtaisesti tai määritä putki reititysyhdistelmää kohden — mikä tahansa sopii työkuormaan. Valinnainen offline-**eval-harness** (`npm run eval:compression`) pisteyttää uskollisuuden vs. säästöt kiinnitetyllä korpuksella ennen kuin otat muutoksen käyttöön.
+Automaattinen liipaisu tunnuksen kynnyksen mukaan, käännä mukautuva valitsin, kiinnitä nimetty profiili, aseta kertaluonteinen pyyntöä kohti tai määritä liukuhihna reititystä kohti — sen mukaan, mikä sopii työkuormaan. Osallistuminen offline-tilassa** eval valjaat** (`npm run eval:compression`) saa pisteet kiinnitetyssä korpuksessa uskollisuudesta vs. säästöihin ennen muutoksen edistämistä.
 
 📖 [`COMPRESSION_GUIDE.md`](docs/compression/COMPRESSION_GUIDE.md) · [`RTK_COMPRESSION.md`](docs/compression/RTK_COMPRESSION.md) · [`COMPRESSION_ENGINES.md`](docs/compression/COMPRESSION_ENGINES.md)
 
@@ -1012,7 +1012,7 @@ Laukaise automaattisesti tokenkynnyksellä, kytke adaptiivinen säädin päälle
 
 <div align="center">
 
-# ⚡ Pika-aloitus
+# ⚡ Quick Start
 
 </div>
 
@@ -1023,30 +1023,23 @@ npm install -g omniroute
 omniroute
 ```
 
-> 💡 Näetkö `npm warn ERESOLVE`- tai peer-dep-varoituksia? [Ne ovat vaarattomia](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Käytätkö npm 11:tä tai uudempaa?** npm voi estää paketin elinkaariskriptit, ellei niitä sallita. OmniRouten `postinstall` (`node scripts/build/postinstall.mjs`) tarvitaan valmistelemaan sen natiivit ajonaikaiset tiedostot. Salli npm:n varoituksessa nimetyt paketit asennettaessa globaalisti. OmniRouten 3.8.53 raportoimalle pakettijoukolle:
+> 💡 Näetkö `npm warn ERESOLVE` tai vertaisvaroitukset? [Ne ovat vaarattomia](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).** Käytätkö npm 11 tai uudempaa?** npm voi estää paketin elinkaaren komentosarjoja, elleivät ne ole sallittuja. OmniRoute:n `postinstall` (`node scripts/build/postinstall.mjs`) tarvitaan valmistelemaan alkuperäiset ajonaikaiset tiedostonsa. Salli npm:n varoituksessa nimetyt paketit, kun asennat maailmanlaajuisesti. OmniRoute 3.8.54:n ilmoittama pakettisarja:
 >
-> ```bash
-> npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
-> ```
+> `bash npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute `
 >
-> Voit käyttää tätä sallittujen luetteloa uudelleen tulevissa globaaleissa asennuksissa määrittämällä sen kerran ja asentamalla sitten normaalisti:
+> Jos haluat käyttää tätä sallittua luetteloa uudelleen tulevissa yleisissä asennuksissa, määritä se kerran ja asenna sitten normaalisti:
 >
-> ```bash
-> npm config set allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
-> npm install -g omniroute
-> ```
+> `bash npm config set allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user npm install -g omniroute `
 >
-> Riippuvuusluettelo voi muuttua julkaisujen välillä; jos npm raportoi eri luettelon, käytä kyseisen varoituksen pakettinimiä. Paketin salliminen antaa sen asennusskriptien suorittaa.
-> **Käytätkö Gemini Webiä tai toista web-evästepalveluntarjoajaa?** npm-paketti sisältää Playwrightin, mutta ei sen Chromium-binääriä. Katso [Playwright Chromium -asetukset](docs/guides/TROUBLESHOOTING.md#gemini-web-and-playwright-chromium) -huomautus ennen ensimmäisen web-palveluntarjoajapyynnön tekemistä.
+> Riippuvuusluettelo voi vaihdella julkaisujen välillä; jos npm ilmoittaa eri luettelosta, käytä varoituksen pakettien nimiä. Paketin salliminen sallii sen asennuskomentosarjojen suorittamisen.** Käytätkö Gemini Webiä tai muuta verkkoevästeiden tarjoajaa?** Npm-paketti sisältää Playwright, mutta ei sen Chromium-binaaria. Katso [Playwright Chromium -asetushuomautus](docs/guides/TROUBLESHOOTING.md#gemini-web-and-playwright-chromium) ennen kuin teet ensimmäisen verkkopalveluntarjoajan pyynnön.
 
-Kojelauta osoitteessa `http://localhost:20128` · API osoitteessa `http://localhost:20128/v1`.
+Kojelauta osoitteessa `http://localhost:20128` · API at `http://localhost:20128/v1`.
 
-**2) Yhdistä kelvollinen palveluntarjoaja omalla tililläsi**
+**2) Yhdistä kelvollinen palveluntarjoaja käyttämällä omaa tiliäsi**
 
-Kojelauta → **Providers** → valitse palveluntarjoaja, jonka nykyiset ehdot ja kiintiö sopivat käyttötapaukseesi → lisää sen API-avain tai suorita sen tiliivirta loppuun. Ilmaistasot voivat vaatia rekisteröitymisen, hyväksynnän tai maksutavan. Tutustu [Ilmaistasojen oppaaseen](docs/getting-started/FREE-TIERS-GUIDE.md); avaimeton saatavuus ei ole taattua, ja palveluntarjoajat, jotka on merkitty `tos: avoid`, jätetään oletuksena `auto`-reitityksen ulkopuolelle.
+Kojelauta →** Palveluntarjoajat** → valitse palveluntarjoaja, jonka nykyiset ehdot ja kiintiö sopivat käyttötapaukseesi. → lisää API -avaimensa tai viimeistele tilikulunsa. Ilmaiset tasot voivat edellyttää rekisteröitymistä, hyväksyntää tai maksutapaa. Tarkista [Free Tiers -opas](docs/getting-started/FREE-TIERS-GUIDE.md) ; avaimetonta saatavuutta ei taata, ja `tos: avoid` -merkityt palveluntarjoajat suljetaan oletuksena pois `auto`.
 
-**3) Osoita koodaustyökalusi**
+**3) Osoita koodaustyökaluasi**
 
 ```txt
 Base URL: http://localhost:20128/v1
@@ -1060,9 +1053,9 @@ Model:    auto            (routes among eligible connections — or choose provi
 curl http://localhost:20128/v1/models -H "Authorization: Bearer YOUR_KEY"
 ```
 
-Sinun pitäisi nähdä yhdistetyt mallisi listattuna. 🎉 Siinä kaikki — aloita koodaaminen, ja OmniRoute reitittää automaattisesti ja vaihtaa varamalliin puolestasi.
+Sinun pitäisi nähdä liitetyt mallit luettelossa. 🎉 Siinä kaikki — aloita koodauksen, ja OmniRoute reitittää automaattisesti ja palaa puolestasi.
 
-Jos asiakasohjelmasi ei voi lähettää mukautettuja otsakkeita, OmniRoute tarjoaa myös tokenisoidut yhteensopivuusalakset:
+Jos asiakkaasi ei voi lähettää mukautettuja otsikoita, OmniRoute paljastaa myös tokenoidut yhteensopivuusaliakset:
 
 ```txt
 OpenAI catalog:   http://localhost:20128/vscode/YOUR_KEY/
@@ -1073,7 +1066,7 @@ Ollama chat:      http://localhost:20128/vscode/YOUR_KEY/api/chat
 Ollama tags:      http://localhost:20128/vscode/YOUR_KEY/api/tags
 ```
 
-Käytä näitä vain asiakkaille, jotka eivät voi liittää `Authorization: Bearer ...`. Otsakeautentikointi on edelleen ensisijainen tila.
+Käytä näitä vain asiakkaille, jotka eivät voi liittää `Authorization: Bearer ...`. Otsikon todennus pysyy ensisijaisena tilana.
 
 <br/>
 
@@ -1292,28 +1285,28 @@ Kanoniset mittarit 2026-10-18: **1.976 yksilöllistä videota** · **20.220.289 
 <br/>
 <div align="center">
 
-## 🛠️ Teknologiapino
+## 🛠️ Tech Stack
 
 </div>
 
 <table>
-  <tr><th align="left">Kerroksella</th><th align="left">Teknologia</th></tr>
-  <tr><td nowrap><b>Ajonaikainen ympäristö</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Kieli</b></td><td>TypeScript 6.0 — <b>100 % TypeScriptiä</b> hakemistoissa <code>src/</code> ja <code>open-sse/</code> (ei <code>any</code>-tyyppejä ytimessä versiosta v2.0 lähtien)</td></tr>
-  <tr><td nowrap><b>Kehys</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Tietokanta</b></td><td>better-sqlite3 (SQLite, WAL-kirjaus) + LowDB (JSON-perintö) — 147 toimialamoduulia, 223 migraatiota</td></tr>
-  <tr><td nowrap><b>Muisti</b></td><td>SQLite FTS5 -kokotekstihaku + int8-kvantisoinnit vektoriupotuksille, tyypitetty vaimeneminen</td></tr>
-  <tr><td nowrap><b>Skeemat</b></td><td>Zod 4 — MCP-työkalujen I/O-validointi + API-sopimukset</td></tr>
+  <tr><th align="left">Kerros</th><th align="left">Tekniikka</th></tr>
+  <tr><td nowrap><b>Suoritusaika</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Kieli</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> <code>src/</code> ja <code>open-sse/</code> välillä (nolla <code>any</code> ytimessä v2.0:n jälkeen)</td></tr>
+  <tr><td nowrap><b>puitteet</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>Tietokanta</b></td><td>better-sqlite3 (SQLite, WAL kirjaus) + LowDB (JSON legacy) — 147 verkkotunnusmoduulia, 223 siirtoa</td></tr>
+  <tr><td nowrap><b>Muisti</b></td><td>SQLite FTS5 kokoteksti + int8-quantized vektori upotukset, kirjoitettu hajoaminen</td></tr>
+  <tr><td nowrap><b>Kaaviot</b></td><td>Zod 4 — MCP työkalu I/O validointi + API sopimukset</td></tr>
   <tr><td nowrap><b>Protokollat</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Suoratoisto</b></td><td>Server-Sent Events (SSE) + WebSocket-silta (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Pakkaus</b></td><td>12 moottorin putki — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Todennus ja tietoturva</b></td><td>OAuth 2.0 (PKCE) + JWT + API-avaimet + MCP:n rajattu todennus · AES-256-GCM levossa oleville tiedoille · DOMPurify</td></tr>
-  <tr><td nowrap><b>Huomaamattomuus</b></td><td>wreq-js — JA3 / JA4 TLS -sormenjälki-imitaatio, 3-tasoinen välityspalvelin</td></tr>
-  <tr><td nowrap><b>Vikasietoisuus</b></td><td>Piirikatkaisin, eksponentiaalinen perääntyminen, samanaikaisuuspiikkien esto, automaattinen yhdistelmäpohjainen itsekorjaus</td></tr>
-  <tr><td nowrap><b>Lokitus</b></td><td>pino — jäsennellyt JSON-lokit pyyntökontekstilla</td></tr>
-  <tr><td nowrap><b>Testaus</b></td><td>Node.js-testisuorittaja + Vitest — <b>yli 60 000 staattista testimäärittelyä</b> yli 8 400 seuratun testitiedoston joukossa (yksikkö-, integraatio-, E2E-, tietoturva- ja ekosysteemitestit)</td></tr>
+  <tr><td nowrap><b>Suoratoisto</b></td><td>Palvelimen lähettämät tapahtumat (SSE) + WebSocket silta (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Puristus</b></td><td>12-moottorinen putkisto — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Auth &amp; turvallisuus</b></td><td>OAuth 2.0 (PKCE) + JWT + API + MCP Scod auth · AES-256-GCM levossa · DOMPurify</td></tr>
+  <tr><td nowrap><b>Stealth</b></td><td>wreq-js — JA3 / JA4 TLS sormenjälkijälki, 3-tason välityspalvelin</td></tr>
+  <tr><td nowrap><b>Joustavuus</b></td><td>Katkaisija, eksponentiaalinen takaisku, ukkosen esto, automaattinen yhdistelmä itsekorjaava</td></tr>
+  <tr><td nowrap><b>Kirjaaminen</b></td><td>pino — strukturoidut JSON -lokit pyyntökontekstilla</td></tr>
+  <tr><td nowrap><b>Testaus</b></td><td>Node.js testijuoksija + Vitest — <b>60 000 + staattisen testauksen ilmoitusta</b> 8 400 + -seuraavalla testitiedostolla (yksikkö, integraatio, E2E, turvallisuus, ekosysteemi)</td></tr>
   <tr><td nowrap><b>Alustat</b></td><td>Työpöytä (Electron) · Android (Termux) · PWA (mikä tahansa selain)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — automaattinen npm-julkaisu + Docker Hub -julkaisu julkaisuversioiden yhteydessä</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — auto npm julkaise + Docker Hub julkaisussa</td></tr>
   <tr><td nowrap><b>Linkit</b></td><td><a href="https://omniroute.online">Verkkosivusto</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
@@ -1804,17 +1797,17 @@ OmniRoute seisoo jättiläisten harteilla. Se alkoi projektin **[9router](https:
   <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,955</td><td>Tunnisti Grok Build -kiintiöpinnan; OmniRoute varmisti ja korjasi sitten aktiivisen wire-muodon itsenäisesti.</td></tr>
 </table>
 
-## 📄 Lisenssi
+## 📄 lisenssi
 
-MIT-lisenssi – lisätietoja on [LICENSE](LICENSE)-tiedostossa.
+MIT -lisenssi – katso lisätietoja [LICENSE](LICENSE).
 
 ---
 
 <div align="center">
 
-**[⬆ Takaisin alkuun](#-omniroute)** · Rakennettu ❤️:lla avoimen lähdekoodin tekoäly-yhteisölle.
+**[⬆ Takaisin alkuun](#-omniroute)** · Rakennettu ❤️ llä avoimen lähdekoodin AI yhteisölle.
 
-<sub>Luonut <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT-lisenssi · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Luonut <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · solmu ≥ 22.22.2 · MIT lisenssi · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
-<!-- GitHub Discussions on otettu käyttöön yhteisön kysymyksiä ja vastauksia varten -->
+<!-- GitHub Discussions enabled for community Q&A -->

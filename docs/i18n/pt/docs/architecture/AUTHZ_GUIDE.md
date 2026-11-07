@@ -319,15 +319,15 @@ Permanece desativado a menos que `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 (`src/lib/accessTokens/scopes.ts`). Esta classificação aplica-se apenas à credencial
 do token de acesso. Veja [Autenticação de Gestão](../guides/MANAGEMENT-AUTH.md).
 
-## Alternador de autenticação obrigatória
+## Alternar autenticação necessária
 
-`isAuthRequired()` em `src/shared/utils/apiAuth.ts` decide se **qualquer** autenticação é imposta a um pedido:
+`isAuthRequired()` em `src/shared/utils/apiAuth.ts` decide se** qualquer** auth é aplicado para um pedido:
 
-- `settings.requireLogin === false` → a autenticação fica desativada globalmente, exceto para o nível sempre protegido (ver [Níveis do Route Guard](../security/ROUTE_GUARD_TIERS.md)) e para as chamadas que entregam uma credencial que este aceita. Estas exigem a mesma credencial que com o início de sessão ativo: emitir tokens de sincronização, criar tokens de acesso da CLI de qualquer âmbito, criar uma chave de API com âmbito `manage`/`admin`, conceder esse âmbito a uma chave, ou regenerar ou revelar uma chave assim (`requireCredentialForManagementScopedKey()` em `src/lib/api/requireManagementAuth.ts`). As chaves apenas de inferência continuam abertas.
-- Nenhuma palavra-passe configurada **e** nenhuma variável de ambiente `INITIAL_PASSWORD` → o modo de bootstrap permite o assistente de onboarding e os pedidos de loopback, mas os pedidos de rede expostos continuam a exigir credenciais.
-- Qualquer erro da base de dados → falha em modo fechado (seguro por omissão).
+- `settings.requireLogin === false` → auth está desativado globalmente, exceto a camada sempre protegida (ver [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) e as chamadas que distribuem uma credencial que aceita, que necessitam da mesma credencial do login: emissão de tokens de sincronização, criação de tokens de acesso CLI em qualquer âmbito e criação de uma chave API com o âmbito `manage`/`admin`, concessão desse âmbito a uma chave ou regeneração ou revelação de tal chave (`requireCredentialForManagementScopedKey()` em `src/lib/api/requireManagementAuth.ts`). As chaves apenas de inferência permanecem abertas. Escrever um sinalizador de recurso protegido (`REQUIRE_API_KEY`, os outros sinalizadores de segurança e os sinalizadores SSRF / TLS /MCP-scope/sandbox listados em [Feature Flags](../reference/FEATURE_FLAGS.md#rest-api) ) e guardar as definições de mascaramento PII (`PUT /api/settings/pii`) também continuam a necessitar de uma credencial.
+- Nenhuma palavra-passe configurada** e** no `INITIAL_PASSWORD` env var → bootstrap mode permite o assistente de integração e pedidos de loopback, mas os pedidos de rede expostos ainda precisam de credenciais. Exceção: escrever um sinalizador de recurso protegido e guardar as definições de mascaramento PII (`PUT /api/settings/pii`) necessita de uma credencial mesmo no loopback, pelo que o loopback por si só não é suficiente.
+- Qualquer erro DB → falha no fecho (seguro por defeito).
 
-A aplicação das chaves de API de cliente usa `isRequireApiKeyEnabled()` em `src/shared/utils/featureFlags.ts`, e não uma leitura direta de `process.env.REQUIRE_API_KEY`. Isto importa para instâncias implementadas: alterar `REQUIRE_API_KEY` em Dashboard → Feature Flags guarda uma substituição na base de dados e afeta de imediato `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` e as restantes verificações de autenticação da API de cliente que partilham este auxiliar. Se o armazenamento das feature flags não puder ser lido, a autenticação da API de cliente falha em modo fechado e exige uma chave.
+A aplicação da chave API do cliente utiliza `isRequireApiKeyEnabled()` em `src/shared/utils/featureFlags.ts`, e não uma leitura direta `process.env.REQUIRE_API_KEY`. Isto é importante para instâncias implantadas: alternar `REQUIRE_API_KEY` no Dashboard → Feature Flags armazena uma substituição DB e afeta imediatamente `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` e outras verificações de autenticação da API do cliente que partilham este auxiliar. Se o armazenamento do sinalizador de recurso não puder ser lido, o cliente API auth falhará o fecho e exigirá uma chave.
 
 ## Alteração incompatível — v3.8.0
 

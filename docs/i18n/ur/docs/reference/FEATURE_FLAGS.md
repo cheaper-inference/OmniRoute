@@ -221,34 +221,27 @@
 > فلیگز اپنی منظور شدہ سیٹ سے باہر کی کسی بھی قدر کو مسترد کرتے ہیں (سرور سائیڈ پر
 > `setFeatureFlagOverride()` اور REST `PUT` ہینڈلر، دونوں میں تصدیق کی جاتی ہے)۔
 
-## پرچموں کو ٹوگل کرنا
+## جھنڈوں کو ٹوگل کرنا
 
 ### ڈیش بورڈ
 
-**Dashboard → Settings → Feature Flags**
-(`/dashboard/settings/feature-flags`) پر جائیں۔ گرڈ
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-یہ سہولیات فراہم کرتا ہے:
+پر نیویگیٹ کریں۔** ڈیش بورڈ → سیٹنگز → فیچر فلیگ** (`/dashboard/settings/feature-flags`) گرڈ (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) سپورٹ کرتا ہے:
 
-- کلید یا وضاحت کے لحاظ سے **تلاش**، اور زمرے کے لحاظ سے **فلٹر** (اس کے علاوہ مصنوعی
-  **Requires Restart** منظر)۔
-- بولین پرچموں کے لیے **ٹوگل** اور enum پرچموں کے لیے **ڈراپ ڈاؤن**
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`)۔
-- ہر پرچم کے لیے ایک **ماخذ بیج** — `DB`، `ENV`، یا `DEF` — جو دکھاتا ہے کہ
-  مؤثر قدر کہاں سے حاصل ہوئی۔
-- ایک **Reset** بٹن (صرف `DB` ماخذ والے پرچموں کے لیے دکھایا جاتا ہے) جو اووررائیڈ
-  ختم کرتا ہے، اور نیچے ایک **Reset All Overrides** بٹن۔
-- `requiresRestart` پرچم تبدیل ہونے پر **Restart Server** بینر۔
+- **تلاش کریں۔** کلید یا تفصیل سے، اور** فلٹر** زمرہ کے لحاظ سے (علاوہ ایک مصنوعی** دوبارہ شروع کرنے کی ضرورت ہے۔** دیکھیں)۔
+- اے** ٹوگل** بولین جھنڈوں کے لیے اور اے** ڈراپ ڈاؤن** اینوم جھنڈوں کے لیے (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`)
+- اے** ماخذ بیج** فی جھنڈا — `DB`، `ENV`، یا `DEF` — دکھا رہا ہے کہ مؤثر قدر کہاں سے آئی ہے۔
+- اے** دوبارہ ترتیب دیں۔** اوور رائڈ چھوڑنے کے لیے بٹن (صرف `DB` -sourced جھنڈوں کے لیے دکھایا گیا ہے)، اور a** تمام اوور رائیڈز کو دوبارہ ترتیب دیں۔** نیچے بٹن.
+- اے** سرور کو دوبارہ شروع کریں۔** بینر جب `requiresRestart` جھنڈا تبدیل کیا جاتا ہے۔
 
 ### REST API
 
-تمام آپریشنز ایک ہی روٹ کے ذریعے انجام پاتے ہیں:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts)۔
-ہر طریقے کے لیے مستند ڈیش بورڈ سیشن درکار ہے (بصورتِ دیگر `401`)۔
+تمام آپریشنز ایک ہی راستے سے ہوتے ہیں: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts) ۔ ہر طریقہ کے لیے ایک مستند ڈیش بورڈ سیشن کی ضرورت ہوتی ہے ( بصورت دیگر `401` )۔
+
+لاگ ان غیر فعال (`requireLogin=false`) کے ساتھ راستہ کھلا ہے، سوائے محفوظ جھنڈوں کے: سیکیورٹی زمرہ میں ہر جھنڈا پلس `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` اور `SKILLS_SANDBOX_NETWORK_ENABLED` ( `protectedFeatureFlags.ts` میں `isProtectedFeatureFlag()` )۔ ان میں سے ایک پر ایک `PUT` ، اور ایک `DELETE` جب کہ ان میں سے ایک میں DB اوور رائڈ ہے، پھر بھی ڈیش بورڈ سیشن، `manage` -scope API کلید، لکھنے کی گنجائش یا اس سے زیادہ کے ساتھ ایک `oma_` رسائی ٹوکن، یا CLI ٹوکن یا لوپ بیک سے بھیجے گئے اندرونی سروس ٹوکن کی ضرورت ہے۔ وہ سیٹ لاگ ان آن کے مقابلے زیادہ وسیع ہے، جہاں روٹ صرف ایک سیشن یا `manage` -scope کلید کو قبول کرتا ہے۔
 
 #### `GET /api/settings/feature-flags`
 
-ہر پرچم کو اس کی مؤثر قدر، ماخذ، اور خلاصے کے ساتھ واپس کرتا ہے۔
+ہر پرچم کو اس کی مؤثر قدر، ماخذ اور خلاصہ کے ساتھ لوٹاتا ہے۔
 
 ```jsonc
 {
@@ -266,7 +259,7 @@
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... تمام 119 پرچم
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -280,34 +273,30 @@
 
 #### `PUT /api/settings/feature-flags`
 
-ایک اووررائیڈ سیٹ یا ختم کریں۔ باڈی: `{ key: string; value?: string }`۔
-`value` کو چھوڑنے سے اووررائیڈ ختم ہو جاتا ہے (اور env / default بحال ہو جاتا ہے)۔
+ایک اوور رائڈ کو سیٹ کریں یا ہٹا دیں۔ جسم: `{ key: string; value?: string }`. `value` کو چھوڑنا اوور رائڈ کو ہٹا دیتا ہے (env / ڈیفالٹ کو بحال کرنا)۔
 
 ```bash
-# DB اووررائیڈ سیٹ کریں
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# اووررائیڈ ختم کریں ("value" شامل نہ کریں)
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-جواب میں نئی `effectiveValue`/`source`، `previousValue`/
-`previousSource`، اور `requiresRestart` شامل ہوتے ہیں۔ نامعلوم کلیدیں اور حد سے
-باہر enum اقدار کو `400` کے ساتھ مسترد کر دیا جاتا ہے۔
+جواب نئے `effectiveValue`/`source`, `previousValue`/ `previousSource` اور `requiresRestart` بازگشت کرتا ہے۔ نامعلوم کلیدیں اور رینج سے باہر کی enum قدروں کو `400` کے ساتھ مسترد کر دیا جاتا ہے۔
 
 #### `DELETE /api/settings/feature-flags`
 
-ایک ہی بار میں تمام DB اووررائیڈز صاف کرتا ہے، اور ہر پرچم کو اس کی env / default
-قدر پر بحال کرتا ہے۔ `{ cleared: <count>, message: "..." }` واپس کرتا ہے۔
+صاف کرتا ہے۔** تمام** DB ایک ساتھ اوور رائیڈ کرتا ہے، ہر جھنڈے کو اس کی env/ ڈیفالٹ ویلیو پر بحال کرتا ہے۔ `{ cleared: <count>, message: "..." }` لوٹاتا ہے۔
 
 > [!NOTE]
-> `requiresRestart: true` والے پرچم صرف عمل کے دوبارہ لوڈ ہونے کے بعد مؤثر ہوتے ہیں۔
-> ڈیش بورڈ کا ری اسٹارٹ فلو `POST /api/restart` کو کال کرتا ہے، پھر
-> `GET /api/health/ping` کو پول کرتا ہے تاوقتیکہ سرور دوبارہ دستیاب ہو جائے۔
+> `requiresRestart: true` کے ساتھ جھنڈے صرف عمل کو دوبارہ لوڈ کرنے کے بعد لاگو ہوتے ہیں۔ ڈیش بورڈ کا دوبارہ شروع ہونے والا بہاؤ `POST /api/restart` کال کرتا ہے اور پھر سرور کے بیک اپ ہونے تک `GET /api/health/ping` پول کرتا ہے۔
+
+---
 
 ## ہنگامی بجٹ فال بیک
 

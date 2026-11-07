@@ -409,12 +409,12 @@ OmniRoute સ્થાનિક રીતે ચાલતી AI ટૂલ પ્
 - ખર્ચ નિયમો: `src/domain/costRules.ts`
 - ફોલબેક પોલિસી: `src/domain/fallbackPolicy.ts`
 - લોકઆઉટ નીતિ: `src/domain/lockoutPolicy.ts`
-- ટેગ-આધારિત રૂટીંગ: `src/domain/tagRouter.ts`
+- ટૅગ-આધારિત રૂટીંગ: `src/domain/tagRouter.ts`
 - કૉમ્બો રિઝોલ્વર: `src/domain/comboResolver.ts` — કૉમ્બો નામો, ઑટો/\* ઉપસર્ગો અને વાઇલ્ડકાર્ડ મૉડલ લક્ષ્યોને નક્કર અમલીકરણ યોજનાઓ માટે ઉકેલે છે
 - Connection/model નિયમ જોડનાર: `src/domain/connectionModelRules.ts`
 - મોડલ ઉપલબ્ધતા સ્નેપશોટ: `src/domain/modelAvailability.ts`
 - પ્રદાતા સમાપ્તિ ટ્રેકિંગ: `src/domain/providerExpiration.ts`
-- ક્વોટા કેશ: `src/domain/quotaCache.ts`
+- ક્વોટા કેશ: `src/domain/quotaCache.ts`. પ્રદાતાઓ ક્વોટા વિન્ડો ઉમેરે છે અને દૂર કરે છે (કેટલીક યોજનાઓ માટેOpenAI એ 5-કલાકની Codex વિન્ડો છોડી દીધી હતી), તેથી પ્રદાતાના એડેપ્ટરને સંપૂર્ણ તરીકે વાંચતા ઉપયોગ (`quotasComplete`, `src/lib/usage/usageReading.ts` જુઓ ) એ એકાઉન્ટનો સંપૂર્ણ વિન્ડો સેટ છે: જે વિન્ડો અગાઉ જાણીતી છે પરંતુ તેમાંથી ગેરહાજર છે તે નિવૃત્ત છે, કેશમાં, રિહાઈડ્રેન્ડ એપમાં રેકોર્ડ Claude, સતત Codex ક્વોટા સ્થિતિમાં અને `quota_snapshots` ની સંતૃપ્તિ બકેટમાં. આંશિક પુરાવા (પ્રતિસાદ હેડર, વાસી નકલો) ફક્ત તે જે વિન્ડો વહન કરે છે તેને અપડેટ કરે છે.
 - અધોગતિ સ્થિતિ: `src/domain/degradation.ts`
 - રૂપરેખાંકન ઓડિટ: `src/domain/configAudit.ts`
 - OmniRoute પ્રતિભાવ મેટાડેટા બિલ્ડર: `src/domain/omnirouteResponseMeta.ts`

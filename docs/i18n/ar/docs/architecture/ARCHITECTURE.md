@@ -415,7 +415,7 @@ flowchart LR
 - Connection/model قاعدة النجار: `src/domain/connectionModelRules.ts`
 - لقطات توفر النموذج: `src/domain/modelAvailability.ts`
 - تتبع انتهاء صلاحية الموفر: `src/domain/providerExpiration.ts`
-- ذاكرة التخزين المؤقت للحصة: `src/domain/quotaCache.ts`
+- ذاكرة التخزين المؤقت للحصة: `src/domain/quotaCache.ts`. يضيف الموفرون نوافذ الحصص ويزيلونها (أسقط OpenAI نافذة Codex لمدة 5 ساعات لبعض الخطط)، لذا فإن استخدام قراءة محول الموفر يشهد على أنه مكتمل (`quotasComplete`، راجع `src/lib/usage/usageReading.ts`) هو مجموعة النوافذ الكاملة للحساب: نافذة معروفة مسبقًا ولكنها غائبة عنها متقاعدة، في ذاكرة التخزين المؤقت، في `quota_snapshots` تتم إعادة التشغيل (سجل تقاعد ملحق)، في حالة حصة Codex المستمرة وفي تشبع Claude دلاء. الأدلة الجزئية (رؤوس الاستجابة، النسخ القديمة) تقوم فقط بتحديث النوافذ التي تحملها.
 - حالة التدهور: `src/domain/degradation.ts`
 - تدقيق التكوين: `src/domain/configAudit.ts`
 - منشئ البيانات الوصفية لاستجابة OmniRoute : `src/domain/omnirouteResponseMeta.ts`
@@ -433,7 +433,7 @@ flowchart LR
 - مساعد التأكيد: `src/server/authz/assertAuth.ts`
 - سياق الطلب: `src/server/authz/context.ts`
 
-تعد المسارات العامة مقابل الإدارة حدودًا صعبة: تتطلب طفرات agent/cooldown APIs وموفر مصادقة الإدارة (HTTP 401 إذا كانت مفقودة).
+تعد مسارات الإدارة مقابل العامة حدودًا صعبة: تتطلب طفرات agent/cooldown APIs وموفر مصادقة الإدارة (HTTP 401 إذا كانت مفقودة).
 
 للحصول على قواعد تصنيف المسار الكاملة، راجع [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
 
@@ -472,7 +472,7 @@ flowchart LR
   - طبقة DB : `src/lib/db/reasoningCache.ts`
   - طبقة الخدمة: `open-sse/services/reasoningCache.ts`
   - لدلالات إعادة التشغيل، راجع [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
-- **قراءة ذاكرة التخزين المؤقت** — ذاكرة تخزين مؤقت للاستجابة قصيرة العمر مرتبطة بالتوقيع وتستخدم لطي المحاولات المتماثلة من SDKs المنبع المعطوب.
+- **قراءة ذاكرة التخزين المؤقت** — ذاكرة تخزين مؤقت للاستجابة قصيرة العمر مرتبطة بالتوقيع وتستخدم لطي المحاولات المتطابقة من SDKs المعطلة.
   - طبقة DB : `src/lib/db/readCache.ts`
   - نقطة نهاية الإحصائيات: `GET /api/cache/stats`، لوحة القيادة في `/dashboard/cache`
 

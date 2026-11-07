@@ -227,30 +227,23 @@ boʻlsa, u **yoqilgan** hisoblanadi (`isFeatureFlagEnabled()`ga qarang).
 
 ### Boshqaruv paneli
 
-**Boshqaruv paneli → Sozlamalar → Funksiya bayroqlari**
-(`/dashboard/settings/feature-flags`) bo‘limiga o‘ting. To‘r
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-quyidagilarni qo‘llab-quvvatlaydi:
+ga oʻtish** Boshqaruv paneli → sozlamalari → Xususiyatlar bayroqlari** (`/dashboard/settings/feature-flags`). Grid (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) quyidagilarni qo'llab-quvvatlaydi:
 
-- Kalit yoki tavsif bo‘yicha **qidirish** va kategoriya bo‘yicha **filtrlash** (shuningdek, sintetik **Qayta ishga tushirish talab qilinadi** ko‘rinishi).
-- Mantiqiy bayroqlar uchun **almashtirgich** va enum bayroqlar uchun **ochiladigan ro‘yxat**
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Har bir bayroq uchun — samarali qiymat qayerdan olinganini ko‘rsatuvchi
-  `DB`, `ENV` yoki `DEF` **manba belgisi**.
-- Faqat `DB` manbali bayroqlar uchun ko‘rsatiladigan override’ni olib tashlashga
-  mo‘ljallangan **Tiklash** tugmasi hamda pastki qismdagi **Barcha override’larni tiklash** tugmasi.
-- `requiresRestart` bayrog‘i o‘zgartirilganda **Serverni qayta ishga tushirish** banneri.
+- **Qidiruv** kalit yoki tavsif bo'yicha va** filtr** kategoriya bo'yicha (plyus sintetik** Qayta ishga tushirishni talab qiladi** ko'rish).
+- A** almashtirish** mantiqiy bayroqlar uchun va a** ochiladigan ro'yxat** enum bayroqlari uchun (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- A** manba nishoni** bayroq boshiga — `DB`, `ENV` yoki `DEF` — samarali qiymat qayerdan kelganligini ko'rsatadi.
+- A** Qayta tiklash** tugmasi (faqat `DB` -sourced bayroqlari uchun ko'rsatilgan) bekor qilishni o'chirish uchun va a** Barcha bekor qilishni tiklash** pastki qismidagi tugma.
+- A** Serverni qayta ishga tushiring** `requiresRestart` bayrog'i o'zgartirilganda banner.
 
 ### REST API
 
-Barcha amallar yagona yo‘nalish orqali bajariladi:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Har bir metod autentifikatsiyadan o‘tgan boshqaruv paneli sessiyasini talab qiladi (aks holda
-`401` qaytariladi).
+Barcha operatsiyalar bitta marshrutdan o'tadi: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Har bir usul autentifikatsiya qilingan boshqaruv paneli seansini talab qiladi (aks holda `401` ).
+
+Kirish o'chirilgan bo'lsa (`requireLogin=false`) marshrut ochiq bo'ladi, himoyalangan bayroqlar bundan mustasno: Xavfsizlik toifasidagi har bir bayroq va `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` va `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` in `protectedFeatureFlags.ts`). Ulardan biridagi `PUT` va ulardan birida DB bekor qilingan `DELETE` hali ham asboblar paneli seansiga, `manage` -scope API kalitiga, yozish doirasi yoki undan yuqoriroq `oma_` kirish tokeniga yoki loopbackdan yuborilgan CLI tokeniga yoki ichki xizmat tokeniga muhtoj. Ushbu to'plam login yoqilgandan ko'ra kengroqdir, bunda marshrut faqat seans yoki `manage` -scope kalitini qabul qiladi.
 
 #### `GET /api/settings/feature-flags`
 
-Har bir bayroqni uning samarali qiymati, manbasi va umumiy ma’lumotlari bilan qaytaradi.
+Har bir bayroqni samarali qiymati, manbasi va xulosasi bilan qaytaradi.
 
 ```jsonc
 {
@@ -268,7 +261,7 @@ Har bir bayroqni uning samarali qiymati, manbasi va umumiy ma’lumotlari bilan 
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... barcha 119 ta bayroq
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -282,34 +275,30 @@ Har bir bayroqni uning samarali qiymati, manbasi va umumiy ma’lumotlari bilan 
 
 #### `PUT /api/settings/feature-flags`
 
-Bitta override’ni o‘rnatadi yoki olib tashlaydi. Body: `{ key: string; value?: string }`.
-`value` ko‘rsatilmasa, override olib tashlanadi (env / standart qiymat tiklanadi).
+Bitta bekor qilishni o'rnatish yoki olib tashlash. Tana: `{ key: string; value?: string }`. `value` o'tkazib yuborilsa, bekor qilish bekor qilinadi (env / sukut bo'yicha tiklanadi).
 
 ```bash
-# DB override’ini o‘rnatish
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Override’ni olib tashlash ("value"siz)
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Javob yangi `effectiveValue`/`source`, `previousValue`/
-`previousSource` va `requiresRestart` qiymatlarini qaytaradi. Noma’lum kalitlar va
-ruxsat etilgan diapazondan tashqaridagi enum qiymatlari `400` bilan rad etiladi.
+Javob yangi `effectiveValue`/`source`, `previousValue`/ `previousSource` va `requiresRestart` ni aks ettiradi. Noma'lum kalitlar va diapazondan tashqari enum qiymatlari `400` bilan rad etiladi.
 
 #### `DELETE /api/settings/feature-flags`
 
-Barcha DB override’larini bir vaqtning o‘zida tozalaydi va har bir bayroqning env /
-standart qiymatini tiklaydi. `{ cleared: <count>, message: "..." }` qaytaradi.
+Tozalaydi** hammasi** DB birdaniga bekor qiladi va har bir bayroqni env/standart qiymatiga qaytaradi. `{ cleared: <count>, message: "..." }` ni qaytaradi.
 
 > [!NOTE]
-> `requiresRestart: true` bo‘lgan bayroqlar faqat jarayon qayta yuklangandan keyin kuchga kiradi.
-> Boshqaruv panelining qayta ishga tushirish jarayoni `POST /api/restart` chaqiradi, so‘ngra
-> server qayta ishga tushguniga qadar `GET /api/health/ping` orqali so‘rov yuborib turadi.
+> `requiresRestart: true` bilan bayroqlar faqat jarayon qayta yuklangandan keyin kuchga kiradi. Boshqaruv panelining qayta ishga tushirish oqimi `POST /api/restart` chaqiradi va keyin server zaxiralanmaguncha `GET /api/health/ping` so'raydi.
+
+---
 
 ## Favqulodda byudjet zaxira mexanizmi
 

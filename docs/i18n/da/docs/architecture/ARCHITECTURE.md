@@ -415,7 +415,7 @@ For regelsætforfattelse og tærskeljustering, se [`docs/security/GUARDRAILS.md`
 - Connection/model regel snedker: `src/domain/connectionModelRules.ts`
 - Snapshots af modeltilgængelighed: `src/domain/modelAvailability.ts`
 - Sporing af udbyderens udløb: `src/domain/providerExpiration.ts`
-- Kvote cache: `src/domain/quotaCache.ts`
+- Quota cache: `src/domain/quotaCache.ts`. Providers add and remove quota windows (OpenAI dropped the 5-hour Codex window for some plans), so a usage reading the provider's adapter attests as complete (`quotasComplete`, see `src/lib/usage/usageReading.ts`) is the account's full window set: a window known earlier but absent from it is retired, in the cache, in the `quota_snapshots` a restart rehydrates (an appended retirement record), in the persisted Codex quota state and in Claude's saturation buckets. Partial evidence (response headers, stale copies) only updates the windows it carries.
 - Nedbrydningstilstand: `src/domain/degradation.ts`
 - Konfigurationsrevision: `src/domain/configAudit.ts`
 - OmniRoute respons metadata builder: `src/domain/omnirouteResponseMeta.ts`

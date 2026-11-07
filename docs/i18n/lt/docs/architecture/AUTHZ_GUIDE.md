@@ -319,15 +319,15 @@ Jis lieka išjungtas, nebent `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 (`src/lib/accessTokens/scopes.ts`). Šis reitingas taikomas tik prieigos rakto
 kredencialui. Žr. [Valdymo autentifikavimas](../guides/MANAGEMENT-AUTH.md).
 
-## Reikalaujamo autentifikavimo jungiklis
+## Reikalingas autentifikavimas
 
-`isAuthRequired()` faile `src/shared/utils/apiAuth.ts` nusprendžia, ar užklausai apskritai taikomas **koks nors** autentifikavimas:
+`isAuthRequired()` `src/shared/utils/apiAuth.ts` nusprendžia, ar** bet koks** Auth vykdomas užklausai:
 
-- `settings.requireLogin === false` → autentifikavimas visame pasaulyje išjungtas, išskyrus visada apsaugotą lygmenį (žr. [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) ir iškvietimus, kurie išduoda prisijungimo duomenis, kuriuos jis priima. Šie iškvietimai reikalauja tų pačių prisijungimo duomenų, kaip ir įjungus prisijungimą: sinchronizavimo žetonų išdavimas, CLI prieigos žetonų išdavimas bet kurios taikymo srities, API rakto su `manage`/`admin` taikymo sritimi kūrimas, tos srities suteikimas raktui arba tokio rakto perkūrimas ar rodymas (`requireCredentialForManagementScopedKey()` faile `src/lib/api/requireManagementAuth.ts`). Raktai tik išvadoms lieka atviri.
-- Slaptažodis nesukonfigūruotas **ir** nėra aplinkos kintamojo `INITIAL_PASSWORD` → bootstrap režimas leidžia pradinės sąrankos vedlį ir loopback užklausas, tačiau viešosios tinklo užklausos vis tiek reikalauja prisijungimo duomenų.
-- Bet kuri DB klaida → uždaro prieigą (saugu pagal numatytuosius nustatymus).
+- `settings.requireLogin === false` → autentifikavimas yra išjungtas visame pasaulyje, išskyrus visada apsaugotą pakopą (žr. [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) ir iškvietimus, išduodančius kredencialus, kuriuos ji priima, kuriems reikalingi tie patys kredencialai kaip ir prisijungiant: sinchronizavimo prieigos raktų išdavimas, CLI prieigos prieigos raktų kalimas bet kokia apimtimi, API rakto suteikimas / `manage` taikymo sritis `requireCredentialForManagementScopedKey()` `admin` `src/lib/api/requireManagementAuth.ts`). Tik išvados raktai lieka atidaryti. Įrašant apsaugotos funkcijos vėliavėlę (`REQUIRE_API_KEY`, kitas saugos žymas ir SSRF / TLS / MCP taikymo srities / smėlio dėžės vėliavėles, išvardytas [Funkcijų vėliavėlėse](../reference/FEATURE_FLAGS.md#rest-api) ) ir išsaugant PII maskavimo nustatymus (`PUT /api/settings/pii`), taip pat reikia kredencialų.
+- Nekonfigūruotas slaptažodis** ir** no `INITIAL_PASSWORD` env var → įkrovos režimas leidžia įjungimo vedlį ir atgalinio ryšio užklausas, tačiau atviroms tinklo užklausoms vis tiek reikia kredencialų. Išimtis: norint parašyti apsaugotos funkcijos vėliavėlę ir išsaugoti PII maskavimo nustatymus (`PUT /api/settings/pii`), reikia kredencialo net iš grįžtamojo ryšio, todėl vien atgalinio ciklo neužtenka.
+- Bet kokia DB klaida → nepavyksta uždaryti (saugus pagal numatytuosius nustatymus).
 
-Kliento API raktų vykdymui naudojama `isRequireApiKeyEnabled()` iš `src/shared/utils/featureFlags.ts`, o ne tiesioginis `process.env.REQUIRE_API_KEY` nuskaitymas. Tai svarbu įdiegtiems egzemplioriams: `REQUIRE_API_KEY` perjungimas Dashboard → Feature Flags išsaugo DB perrašymą ir iš karto veikia `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` ir kitus kliento API autentifikavimo patikrinimus, kurie naudoja šią pagalbinę funkciją. Jei funkcijų vėliavų saugyklos nepavyksta perskaityti, kliento API autentifikavimas uždaro prieigą ir reikalauja rakto.
+Kliento API rakto vykdymas naudoja `isRequireApiKeyEnabled()` `src/shared/utils/featureFlags.ts`, o ne tiesioginį `process.env.REQUIRE_API_KEY` skaitymą. Tai svarbu įdiegtiems egzemplioriams: perjungus `REQUIRE_API_KEY` prietaisų skydelyje → funkcijų vėliavėlės išsaugo DB nepaisymą ir iš karto paveikia `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` ir kitus kliento API autentifikavimo patikrinimus, kurie naudojasi šiuo pagalbininku. Jei funkcijos vėliavėlės saugyklos nuskaityti nepavyksta, kliento API autentifikavimas nepavyksta uždaryti ir reikia rakto.
 
 ## Nesuderinamas pakeitimas — v3.8.0
 

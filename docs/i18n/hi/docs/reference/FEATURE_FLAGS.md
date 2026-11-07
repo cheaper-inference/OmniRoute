@@ -203,34 +203,27 @@
 > `Restart` कॉलम उन फ़्लैग को चिह्नित करता है जिनमें `requiresRestart: true` है — मान
 > तुरंत स्थायी रूप से सहेजा जाता है, लेकिन प्रक्रिया के पुनः लोड होने के बाद ही प्रभावी होता है। Enum फ़्लैग अपने अनुमत सेट से बाहर के किसी भी मान को अस्वीकार करते हैं (सर्वर-साइड पर `setFeatureFlagOverride()` और REST `PUT` हैंडलर, दोनों में मान्य किए जाते हैं)।
 
-## फ़्लैग टॉगल करना
+## झंडे लहराना
 
 ### डैशबोर्ड
 
-**डैशबोर्ड → सेटिंग्स → फ़ीचर फ़्लैग्स** पर जाएँ
-(`/dashboard/settings/feature-flags`)। ग्रिड
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-इन सुविधाओं का समर्थन करता है:
+पर नेविगेट करें** डैशबोर्ड → सेटिंग्स → फ़ीचर फ़्लैग** (`/dashboard/settings/feature-flags`). ग्रिड (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) समर्थन करता है:
 
-- कुंजी या विवरण के आधार पर **खोज**, और श्रेणी के आधार पर **फ़िल्टर** (साथ ही एक सिंथेटिक
-  **रीस्टार्ट आवश्यक है** दृश्य)।
-- बूलियन फ़्लैग्स के लिए एक **टॉगल** और enum फ़्लैग्स के लिए एक **ड्रॉपडाउन**
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`)।
-- प्रत्येक फ़्लैग के लिए एक **स्रोत बैज** — `DB`, `ENV`, या `DEF` — जो दिखाता है कि
-  प्रभावी मान कहाँ से आया है।
-- override हटाने के लिए एक **रीसेट** बटन (केवल `DB`-स्रोत वाले फ़्लैग्स के लिए दिखाया जाता है),
-  और सबसे नीचे एक **सभी ओवरराइड रीसेट करें** बटन।
-- `requiresRestart` फ़्लैग बदलने पर एक **सर्वर रीस्टार्ट करें** बैनर।
+- **खोज** कुंजी या विवरण द्वारा, और** फ़िल्टर** श्रेणी के अनुसार (साथ ही एक सिंथेटिक** पुनरारंभ की आवश्यकता है** देखना)।
+- ए** टॉगल** बूलियन झंडों के लिए और a** ड्रॉप डाउन** एनम फ़्लैग्स (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`) के लिए।
+- ए** स्रोत बैज** प्रति ध्वज — `DB`, `ENV`, या `DEF` — दर्शाता है कि प्रभावी मूल्य कहाँ से आया है।
+- ए** रीसेट करें** ओवरराइड को छोड़ने के लिए बटन (केवल `DB` -sourced झंडे के लिए दिखाया गया है), और a** सभी ओवरराइड रीसेट करें** सबसे नीचे बटन.
+- ए** सर्वर पुनः प्रारंभ करें** जब `requiresRestart` ध्वज बदला जाता है तो बैनर।
 
 ### REST API
 
-सभी ऑपरेशन एक ही रूट से होते हैं:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts)।
-प्रत्येक विधि के लिए एक प्रमाणीकृत डैशबोर्ड सत्र आवश्यक है (अन्यथा `401`)।
+सभी ऑपरेशन एक ही मार्ग से होते हैं: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts) । प्रत्येक विधि के लिए एक प्रमाणित डैशबोर्ड सत्र (`401` अन्यथा) की आवश्यकता होती है।
+
+लॉगिन अक्षम (`requireLogin=false`) के साथ मार्ग खुला है, संरक्षित झंडे को छोड़कर: सुरक्षा श्रेणी में प्रत्येक ध्वज प्लस `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` और `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` in `protectedFeatureFlags.ts`)। उनमें से एक पर एक `PUT`, और एक `DELETE` जबकि उनमें से एक में DB ओवरराइड है, फिर भी एक डैशबोर्ड सत्र, एक `manage` -scope API कुंजी, लिखने के दायरे या उच्चतर के साथ एक `oma_` एक्सेस टोकन, या लूपबैक से भेजे गए CLI टोकन या आंतरिक-सेवा टोकन की आवश्यकता होती है। वह सेट लॉगिन की तुलना में व्यापक है, जहां मार्ग केवल एक सत्र या `manage` -scope कुंजी स्वीकार करता है।
 
 #### `GET /api/settings/feature-flags`
 
-प्रत्येक फ़्लैग को उसके प्रभावी मान, स्रोत और सारांश के साथ लौटाता है।
+प्रत्येक ध्वज को उसके प्रभावी मूल्य, स्रोत और सारांश के साथ लौटाता है।
 
 ```jsonc
 {
@@ -248,7 +241,7 @@
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... सभी 119 फ़्लैग
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -262,34 +255,28 @@
 
 #### `PUT /api/settings/feature-flags`
 
-एकल ओवरराइड सेट या हटाएँ। बॉडी: `{ key: string; value?: string }`.
-`value` को छोड़ने पर ओवरराइड हट जाता है (env / default पुनर्स्थापित होता है)।
+एकल ओवरराइड सेट करें या हटाएँ। शरीर: `{ key: string; value?: string }`. `value` को छोड़ने से ओवरराइड हट जाता है (env/डिफ़ॉल्ट पुनर्स्थापित करना)।
 
 ```bash
-# DB ओवरराइड सेट करें
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# ओवरराइड हटाएँ ("value" नहीं है)
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-प्रतिक्रिया में नया `effectiveValue`/`source`, `previousValue`/
-`previousSource`, और `requiresRestart` लौटाए जाते हैं। अज्ञात कुंजियाँ और सीमा से बाहर के enum
-मान `400` के साथ अस्वीकार कर दिए जाते हैं।
+प्रतिक्रिया नए `effectiveValue`/`source`, `previousValue`/ `previousSource`, और `requiresRestart` को प्रतिध्वनित करती है। अज्ञात कुंजियाँ और आउट-ऑफ़-रेंज एनम मान `400` के साथ अस्वीकार कर दिए जाते हैं।
 
 #### `DELETE /api/settings/feature-flags`
 
-एक साथ सभी DB ओवरराइड हटाता है और प्रत्येक फ़्लैग को उसके env / default
-मान पर पुनर्स्थापित करता है। `{ cleared: <count>, message: "..." }` लौटाता है।
+साफ करता है** सभी** DB एक बार में ओवरराइड करता है, प्रत्येक ध्वज को उसके env/डिफ़ॉल्ट मान पर पुनर्स्थापित करता है। `{ cleared: <count>, message: "..." }` लौटाता है।
 
 > [!NOTE]
-> `requiresRestart: true` वाले फ़्लैग केवल प्रक्रिया के री-लोड होने के बाद प्रभावी होते हैं।
-> डैशबोर्ड का रीस्टार्ट फ़्लो `POST /api/restart` कॉल करता है और फिर सर्वर के दोबारा उपलब्ध होने तक
-> `GET /api/health/ping` पर पोल करता है।
+> `requiresRestart: true` वाले झंडे प्रक्रिया पुनः लोड होने के बाद ही प्रभावी होते हैं। डैशबोर्ड का पुनरारंभ प्रवाह `POST /api/restart` कॉल करता है और फिर सर्वर के वापस आने तक `GET /api/health/ping` पोल करता है।
 
 ---
 

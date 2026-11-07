@@ -413,7 +413,7 @@ Aaye orukọ `src/domain/` ṣe agbedemeji awọn ipinnu eto imulo nitorinaa aw�
 - Connection/model ofin joiner: `src/domain/connectionModelRules.ts`
 - Awoṣe wiwa snapshots: `src/domain/modelAvailability.ts`
 - Titele ipari ti olupese: `src/domain/providerExpiration.ts`
-- Kaṣe ipin: `src/domain/quotaCache.ts`
+- Quota cache: `src/domain/quotaCache.ts`. Providers add and remove quota windows (OpenAI dropped the 5-hour Codex window for some plans), so a usage reading the provider's adapter attests as complete (`quotasComplete`, see `src/lib/usage/usageReading.ts`) is the account's full window set: a window known earlier but absent from it is retired, in the cache, in the `quota_snapshots` a restart rehydrates (an appended retirement record), in the persisted Codex quota state and in Claude's saturation buckets. Partial evidence (response headers, stale copies) only updates the windows it carries.
 - Ipinlẹ ibajẹ: `src/domain/degradation.ts`
 - Ayẹwo iṣeto ni: `src/domain/configAudit.ts`
 - OmniRoute idahun metadata Akole: `src/domain/omnirouteResponseMeta.ts`

@@ -383,7 +383,7 @@ Kluczowe możliwości:
 - **Automatyczne prefiksy** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — każdy wspierany przez dostrojony profil wagi.
 - **6 pakietów trybów** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` i `chaos-mode` — gotowe konfiguracje wag, które można wywołać z pulpitu nawigacyjnego. (Nie mylić z powyższymi przedrostkami `auto/*`, które są wariantami czasu żądania.)
 
-Aby uzyskać pełne szczegóły algorytmiczne (wzory na czynniki, dostrajanie wagi), zobacz [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
+Pełne szczegóły algorytmiczne (wzory na czynniki, dostrajanie wagi) można znaleźć w [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
 
 ### B. Agenci w chmurze
 
@@ -422,7 +422,7 @@ Przestrzeń nazw `src/domain/` centralizuje decyzje polityczne, dzięki czemu pr
 - łącznik reguł Connection/model : `src/domain/connectionModelRules.ts`
 - Migawki dostępności modelu: `src/domain/modelAvailability.ts`
 - Śledzenie wygaśnięcia dostawcy: `src/domain/providerExpiration.ts`
-- Pamięć podręczna kwot: `src/domain/quotaCache.ts`
+- Pamięć podręczna kwot: `src/domain/quotaCache.ts`. Dostawcy dodają i usuwają okna przydziałów (OpenAI porzucił 5-godzinne okno Codex w przypadku niektórych planów), więc odczyt użycia adaptera dostawcy potwierdza, że został ukończony (`quotasComplete`, zobacz `src/lib/usage/usageReading.ts`) jest ustawionym pełnym oknem konta: znane wcześniej, ale nieobecne w nim okno jest wycofywane, w pamięci podręcznej, w `quota_snapshots` ponowne nawodnienie (dołączony rekord wycofania), w utrwalonym stanie przydziału Codex i w nasyceniu Claude wiadra. Częściowe dowody (nagłówki odpowiedzi, nieaktualne kopie) aktualizują jedynie okna, które zawierają.
 - Stan degradacji: `src/domain/degradation.ts`
 - Audyt konfiguracji: `src/domain/configAudit.ts`
 - Kreator metadanych odpowiedzi OmniRoute : `src/domain/omnirouteResponseMeta.ts`

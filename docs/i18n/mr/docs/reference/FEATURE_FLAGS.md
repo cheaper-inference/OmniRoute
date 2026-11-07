@@ -227,30 +227,23 @@ boolean फ्लॅगचे प्रभावी मूल्य `"true"`, `"
 
 ### डॅशबोर्ड
 
-**Dashboard → Settings → Feature Flags** येथे जा
-(`/dashboard/settings/feature-flags`). ग्रिड
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-यामध्ये पुढील सुविधा आहेत:
+वर नेव्हिगेट करा** डॅशबोर्ड → सेटिंग्ज → वैशिष्ट्य ध्वज** (`/dashboard/settings/feature-flags`) ग्रिड (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) समर्थन करते:
 
-- की किंवा वर्णनानुसार **शोध**, तसेच श्रेणीनुसार **फिल्टर** (आणि कृत्रिम
-  **Requires Restart** दृश्य).
-- बूलियन ध्वजांसाठी **टॉगल** आणि enum ध्वजांसाठी **ड्रॉपडाउन**
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- प्रत्येक ध्वजासाठी एक **स्रोत बॅज** — `DB`, `ENV`, किंवा `DEF` — जो प्रभावी
-  मूल्य कोठून आले आहे ते दर्शवतो.
-- ओव्हरराइड काढण्यासाठी (फक्त `DB`-स्रोत असलेल्या ध्वजांसाठी दिसणारे) **Reset**
-  बटण आणि तळाशी **Reset All Overrides** बटण.
-- `requiresRestart` ध्वज बदलल्यावर **Restart Server** बॅनर.
+- **शोधा** की किंवा वर्णनानुसार, आणि** फिल्टर** श्रेणीनुसार (अधिक सिंथेटिक** रीस्टार्ट करणे आवश्यक आहे** दृश्य).
+- ए** टॉगल** बुलियन ध्वजांसाठी आणि ए** ड्रॉपडाउन** enum ध्वजांसाठी (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- ए** स्रोत बॅज** प्रति ध्वज — `DB`, `ENV`, किंवा `DEF` — प्रभावी मूल्य कुठून आले हे दर्शविते.
+- ए** रीसेट करा** ओव्हरराइड टाकण्यासाठी बटण (केवळ `DB` -sourced ध्वजांसाठी दर्शविले जाते), आणि a** सर्व ओव्हरराइड रीसेट करा** तळाशी बटण.
+- ए** सर्व्हर रीस्टार्ट करा** बॅनर जेव्हा `requiresRestart` ध्वज बदलला जातो.
 
 ### REST API
 
-सर्व ऑपरेशन्स एकाच रूटद्वारे होतात:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-प्रत्येक पद्धतीसाठी प्रमाणित डॅशबोर्ड सत्र आवश्यक आहे (अन्यथा `401`).
+सर्व ऑपरेशन्स एकाच मार्गाने जातात: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). प्रत्येक पद्धतीसाठी प्रमाणीकृत डॅशबोर्ड सत्र आवश्यक आहे ( अन्यथा`401` ).
+
+लॉगिन अक्षम करून (`requireLogin=false`) मार्ग खुला आहे, संरक्षित ध्वज वगळता: सुरक्षा श्रेणीतील प्रत्येक ध्वज अधिक `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` आणि `SKILLS_SANDBOX_NETWORK_ENABLED` ( `protectedFeatureFlags.ts` मध्ये`isProtectedFeatureFlag()` ). त्यापैकी एकावर `PUT`, आणि `DELETE` पैकी एकावर DB ओव्हरराइड असताना, तरीही डॅशबोर्ड सत्र आवश्यक आहे, `manage` -scope API की, लेखन स्कोप किंवा त्याहून अधिक `oma_` प्रवेश टोकन किंवा लूपबॅकमधून पाठवलेले CLI टोकन किंवा अंतर्गत-सेवा टोकन आवश्यक आहे. तो संच लॉगिन ऑन पेक्षा विस्तीर्ण आहे, जेथे मार्ग फक्त एक सत्र किंवा `manage` -scope की स्वीकारतो.
 
 #### `GET /api/settings/feature-flags`
 
-प्रत्येक ध्वजाचे प्रभावी मूल्य, स्रोत आणि सारांश परत करते.
+प्रत्येक ध्वज त्याचे प्रभावी मूल्य, स्त्रोत आणि सारांशासह परत करते.
 
 ```jsonc
 {
@@ -268,7 +261,7 @@ boolean फ्लॅगचे प्रभावी मूल्य `"true"`, `"
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... सर्व 119 ध्वज
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -282,34 +275,28 @@ boolean फ्लॅगचे प्रभावी मूल्य `"true"`, `"
 
 #### `PUT /api/settings/feature-flags`
 
-एकल ओव्हरराइड सेट किंवा काढते. बॉडी: `{ key: string; value?: string }`.
-`value` वगळल्यास ओव्हरराइड काढले जाते (env / default पुनर्स्थापित केले जाते).
+एकल ओव्हरराइड सेट करा किंवा काढा. मुख्य भाग: `{ key: string; value?: string }`. `value` वगळणे ओव्हरराइड काढून टाकते (env/डिफॉल्ट पुनर्संचयित करणे).
 
 ```bash
-# DB ओव्हरराइड सेट करा
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# ओव्हरराइड काढा ("value" नाही)
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-प्रतिसादामध्ये नवीन `effectiveValue`/`source`, `previousValue`/
-`previousSource` आणि `requiresRestart` परत केले जातात. अज्ञात की आणि मर्यादेबाहेरील
-enum मूल्ये `400` सह नाकारली जातात.
+प्रतिसाद नवीन `effectiveValue`/`source`, `previousValue`/ `previousSource`, आणि `requiresRestart` प्रतिध्वनी करतो. अज्ञात की आणि श्रेणीबाहेरील enum मूल्ये `400` सह नाकारली जातात.
 
 #### `DELETE /api/settings/feature-flags`
 
-सर्व DB ओव्हरराइड्स एकाच वेळी काढून टाकते आणि प्रत्येक ध्वजाचे env / default
-मूल्य पुनर्स्थापित करते. `{ cleared: <count>, message: "..." }` परत करते.
+साफ करतो** सर्व** DB एकाच वेळी ओव्हरराइड करते, प्रत्येक ध्वज त्याच्या env/डिफॉल्ट मूल्यावर पुनर्संचयित करते. `{ cleared: <count>, message: "..." }` परत करतो.
 
 > [!NOTE]
-> `requiresRestart: true` असलेले ध्वज प्रक्रिया रीलोड केल्यानंतरच प्रभावी होतात.
-> डॅशबोर्डचा रीस्टार्ट प्रवाह `POST /api/restart` कॉल करतो आणि सर्व्हर पुन्हा सुरू
-> होईपर्यंत `GET /api/health/ping` वर मतदान करतो.
+> `requiresRestart: true` सह ध्वज प्रक्रिया रीलोड केल्यानंतरच प्रभावी होतील. डॅशबोर्डचा रीस्टार्ट फ्लो `POST /api/restart` कॉल करतो आणि नंतर सर्व्हर बॅकअप होईपर्यंत `GET /api/health/ping` पोल करतो.
 
 ---
 

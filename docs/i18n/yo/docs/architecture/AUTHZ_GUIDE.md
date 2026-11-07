@@ -300,15 +300,15 @@ bá ti yanjú àwọn àyè láti ìwífún ìfọwọ́sí MCP, metadata ìbé�
 `read` / `write` / `admin` lórí àwọn àmì `oma_live_…`, tí a tò lẹ́sẹẹsẹ nípasẹ̀ `scopeSatisfies`
 (`src/lib/accessTokens/scopes.ts`). Ìpele yìí kan ìwé-ẹ̀rí àmì ìwọlé nìkan. Wo [Ìfọwọ́sí Ìṣàkóso](../guides/MANAGEMENT-AUTH.md).
 
-## Ìyípadà Ìjẹ́rìí Tí A Nílò
+## Auth Nilo Toggle
 
-`isAuthRequired()` nínú `src/shared/utils/apiAuth.ts` ló ń pinnu bóyá a óò fi **ìjẹ́rìí** kankan lélẹ̀ fún ìbéèrè kan:
+`isAuthRequired()` ni `src/shared/utils/apiAuth.ts` pinnu boya** eyikeyi** auth ti wa ni imuse fun ibeere kan:
 
-- `settings.requireLogin === false` → ìjẹ́rìí ti di pípa lápapọ̀, àfi ipele ààbò tí ó máa wà nígbà gbogbo (wo [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) àti àwọn ìpè tí ń fúnni ní credential tí ó gbà, tí ó nílò credential kan náà bí wíwọlé ṣe wà ní títàn: fífúnni ní sync token, ṣíṣe CLI access token ní ìwọ̀n èyíkéyìí, àti dídá kọ́kọ́rọ́ API tí ó ní ìwọ̀n `manage`/`admin`, fífún kọ́kọ́rọ́ ní ìwọ̀n yẹn, tàbí tún ṣe tàbí fihàn irú kọ́kọ́rọ́ bẹ́ẹ̀ (`requireCredentialForManagementScopedKey()` nínú `src/lib/api/requireManagementAuth.ts`). Àwọn kọ́kọ́rọ́ inference nìkan ló wà ní sísílẹ̀.
-- Kò sí ọ̀rọ̀ aṣínà tí a ṣètò **àti** kò sí env var `INITIAL_PASSWORD` → ipò bootstrap: ó gba onboarding wizard àti àwọn ìbéèrè loopback láàyè, ṣùgbọ́n àwọn ìbéèrè nẹ́tíwọ́kì tí a ṣí payá ṣì nílò credential.
-- Àṣìṣe DB èyíkéyìí → ó kùnà ní títì (secure-by-default).
+- `settings.requireLogin === false` → auth jẹ alaabo agbaye, ayafi fun ipele ti o ni aabo nigbagbogbo (wo [Awọn Tiers Itọju Ipa ọna](../security/ROUTE_GUARD_TIERS.md) ) ati awọn ipe ti o fi iwe `admin` ẹri kan ti o gba, eyiti o nilo iwe-ẹri kanna gẹgẹbi pẹlu iwọle lori: ipinfunni awọn ami amuṣiṣẹpọ, Mining CLI awọn ami iraye si ni eyikeyi iwọn, ati ṣiṣẹda bọtini API `manage`, fifun zq dopin to dopin zq atunbi tabi ṣiṣafihan iru bọtini bẹ (`requireCredentialForManagementScopedKey()` ni `src/lib/api/requireManagementAuth.ts`). Awọn bọtini idawọle nikan wa ni sisi. Kikọ asia ẹya ti o ni aabo kan (`REQUIRE_API_KEY`, awọn asia Aabo miiran, ati SSRF / TLS / MCP-scope / awọn asia apoti iyanrin ti a ṣe akojọ si ni [Awọn asia Ẹya](../reference/FEATURE_FLAGS.md#rest-api) ) ati fifipamọ awọn eto boju-boju PII (`PUT /api/settings/pii`) tun tọju nilo ijẹrisi kan.
+- Ko si ọrọ igbaniwọle tunto** ati** ko si `INITIAL_PASSWORD` env var → bootstrap mode faye gba awọn onboarding oluṣeto ati loopback ibeere, ṣugbọn fara nẹtiwọki ibeere tun nilo awọn iwe eri. Iyatọ: kikọ asia ẹya ti o ni aabo ati fifipamọ awọn eto boju-boju PII (`PUT /api/settings/pii`) nilo ijẹrisi paapaa lati loopback, nitorinaa loopback funrararẹ ko to nibẹ.
+- Eyikeyi aṣiṣe DB → kuna ni pipade (ni aabo-nipasẹ-aiyipada).
 
-Ìfipágbára API key ti oníbàárà ń lo `isRequireApiKeyEnabled()` nínú `src/shared/utils/featureFlags.ts`, kì í ṣe kíka `process.env.REQUIRE_API_KEY` tààrà. Èyí ṣe pàtàkì fún àwọn instance tí a fi ránṣẹ́: yíyí `REQUIRE_API_KEY` padà nínú Dashboard → Feature Flags ń tọ́jú DB override, ó sì ń nípa lórí `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, àti àwọn àyẹ̀wò ìjẹ́rìí client-API mìíràn tí ó ń pín olùrànlọ́wọ́ yìí lẹsẹkẹsẹ. Tí a kò bá lè ka feature flag store, ìjẹ́rìí client API ń kùnà ní títì, ó sì nílò kọ́kọ́rọ́.
+Imudaniloju bọtini API onibara nlo `isRequireApiKeyEnabled()` ni `src/shared/utils/featureFlags.ts`, kii ṣe kika `process.env.REQUIRE_API_KEY` taara. Eyi ṣe pataki fun awọn iṣẹlẹ ti a fi ranṣẹ: toggling `REQUIRE_API_KEY` ni Dashboard → Awọn asia Ẹya ṣe ipamọ DB kan ati pe lẹsẹkẹsẹ yoo kan `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, ati awọn sọwedowo auth alabara-API miiran ti o pin oluranlọwọ yii. Ti ile itaja asia ẹya ko ba le ka, alabara API auth kuna ni pipade ati nilo bọtini kan.
 
 ## Àyípadà Tó Fọ́ Ìbámu — v3.8.0
 

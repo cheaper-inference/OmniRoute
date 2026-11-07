@@ -207,32 +207,27 @@
 
 ---
 
-## ଫ୍ଲାଗ୍ ଟଗଲ୍ କରିବା
+## ପତାକା ଟୋଗଲ୍ କରିବା।
 
-### ଡ୍ୟାସ୍ବୋର୍ଡ
+### ଡ୍ୟାସବୋର୍ଡ।
 
-**Dashboard → Settings → Feature Flags** କୁ ଯାଆନ୍ତୁ
-(`/dashboard/settings/feature-flags`)। ଗ୍ରିଡ୍
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-ସମର୍ଥନ କରେ:
+କୁ ନେଭିଗେଟ୍ କରନ୍ତୁ।** ଡ୍ୟାସବୋର୍ଡ → ସେଟିଂସମୂହ → ବ ature ଶିଷ୍ଟ୍ୟ ପତାକା।** (`/dashboard/settings/feature-flags`) ଗ୍ରୀଡ୍ (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) ସମର୍ଥନ କରେ:
 
-- କୀ କିମ୍ବା ବର୍ଣ୍ଣନା ଦ୍ୱାରା **ସନ୍ଧାନ**, ଏବଂ ବର୍ଗ ଦ୍ୱାରା **ଫିଲ୍ଟର୍** (ଏହା ସହିତ ଏକ ସିନ୍ଥେଟିକ୍
-  **Requires Restart** ଭ୍ୟୁ)।
-- ବୁଲିଆନ୍ ଫ୍ଲାଗ୍ ପାଇଁ ଏକ **ଟଗଲ୍** ଏବଂ enum ଫ୍ଲାଗ୍ ପାଇଁ ଏକ **ଡ୍ରପ୍ଡାଉନ୍**
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`)।
-- ପ୍ରତ୍ୟେକ ଫ୍ଲାଗ୍ ପାଇଁ ଏକ **ସୋର୍ସ ବ୍ୟାଜ୍** — `DB`, `ENV`, କିମ୍ବା `DEF` — ଯାହା ପ୍ରଭାବୀ ମୂଲ୍ୟ କେଉଁଠାରୁ ଆସିଛି ଦର୍ଶାଏ।
-- ଓଭରରାଇଡ୍ ଅପସାରଣ କରିବା ପାଇଁ ଏକ **Reset** ବଟନ୍ (କେବଳ `DB`-ସୋର୍ସ ଫ୍ଲାଗ୍ ପାଇଁ ଦେଖାଯାଏ), ଏବଂ ତଳେ ଏକ **Reset All Overrides** ବଟନ୍।
-- କୌଣସି `requiresRestart` ଫ୍ଲାଗ୍ ପରିବର୍ତ୍ତିତ ହେଲେ ଏକ **Restart Server** ବ୍ୟାନର୍।
+- **ସନ୍ଧାନ କର।** କି କିମ୍ବା ବର୍ଣ୍ଣନା ଦ୍ୱାରା, ଏବଂ** ଫିଲ୍ଟର୍** ବର୍ଗ ଅନୁଯାୟୀ (ଏକ ସିନ୍ଥେଟିକ୍ ସହିତ।** ପୁନ Rest ଆରମ୍ଭ ଆବଶ୍ୟକ କରେ।** ଦର୍ଶନ)।
+- କ** ଟୋଗଲ୍ କରନ୍ତୁ।** ବୁଲିଆନ୍ ପତାକା ଏବଂ a** ଡ୍ରପଡାଉନ୍** enum flags (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`) ପାଇଁ।
+- କ** ଉତ୍ସ ବ୍ୟାଜ୍** ପ୍ରତି ଫ୍ଲାଗ୍ — `DB`, `ENV`, କିମ୍ବା `DEF` — ଦର୍ଶାଉଛି ଯେ ପ୍ରଭାବଶାଳୀ ମୂଲ୍ୟ କେଉଁଠୁ ଆସିଛି।
+- କ** ପୁନ et ସେଟ୍ କରନ୍ତୁ।** ଓଭରବାଇଡ୍ ଡ୍ରପ୍ କରିବାକୁ ବଟନ୍ (କେବଳ `DB` -sourced ଫ୍ଲାଗ୍ସ ପାଇଁ ଦେଖାଯାଏ), ଏବଂ a** ସମସ୍ତ ଓଭରବ୍ରିଡ୍ ପୁନ Res ସେଟ୍ କରନ୍ତୁ।** ତଳେ ଥିବା ବଟନ୍।
+- କ** ସର୍ଭରକୁ ପୁନ Rest ଆରମ୍ଭ କରନ୍ତୁ।** ଯେତେବେଳେ ଏକ `requiresRestart` ପତାକା ପରିବର୍ତ୍ତନ ହୁଏ ବ୍ୟାନର।
 
 ### REST API
 
-ସମସ୍ତ ଅପରେସନ୍ ଗୋଟିଏ ରୁଟ୍ ମାଧ୍ୟମରେ ହୁଏ:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts)।
-ପ୍ରତ୍ୟେକ ମେଥଡ୍ ପାଇଁ ଏକ ପ୍ରମାଣୀକୃତ ଡ୍ୟାସ୍ବୋର୍ଡ୍ ସେସନ୍ ଆବଶ୍ୟକ (`401` ଅନ୍ୟଥା)।
+ସମସ୍ତ ଅପରେସନ୍ ଗୋଟିଏ ମାର୍ଗ ଦେଇ ଗତି କରେ: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts)। ପ୍ରତ୍ୟେକ ପଦ୍ଧତି ଏକ ପ୍ରାମାଣିକ ଡ୍ୟାସବୋର୍ଡ ଅଧିବେଶନ ଆବଶ୍ୟକ କରେ (ଅନ୍ୟଥା`401` )।
+
+ଲଗଇନ୍ ଅକ୍ଷମ ହେବା ସହିତ (`requireLogin=false`) ସଂରକ୍ଷିତ ପତାକା ବ୍ୟତୀତ ମାର୍ଗ ଖୋଲା ଅଛି: ସୁରକ୍ଷା ବର୍ଗର ପ୍ରତ୍ୟେକ ପତାକା `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` ଏବଂ `SKILLS_SANDBOX_NETWORK_ENABLED` ( `protectedFeatureFlags.ts` ରେ`isProtectedFeatureFlag()` )। ସେମାନଙ୍କ ମଧ୍ୟରୁ ଗୋଟିଏ ଉପରେ `PUT`, ଏବଂ ଗୋଟିଏ `DELETE` ଥିବାବେଳେ ସେମାନଙ୍କ ମଧ୍ୟରୁ ଗୋଟିଏରେ DB ଓଭରଡାଇଡ୍ ଅଛି, ତଥାପି ଏକ ଡ୍ୟାସବୋର୍ଡ ଅଧିବେଶନ, ଏକ `manage` -scope API ଚାବି, ଲେଖା ପରିସର କିମ୍ବା ଅଧିକ ସହିତ `oma_` ପ୍ରବେଶ ଟୋକେନ୍, କିମ୍ବା ଲୁକବ୍ୟାକ୍ ରୁ ପଠାଯାଇଥିବା CLI ଟୋକେନ୍ କିମ୍ବା ଆଭ୍ୟନ୍ତରୀଣ ସେବା ଟୋକେନ୍ ଆବଶ୍ୟକ। ସେହି ସେଟ୍ ଲଗଇନ୍ ଅପେକ୍ଷା ଅଧିକ ପ୍ରଶସ୍ତ, ଯେଉଁଠାରେ ମାର୍ଗ କେବଳ ଏକ ଅଧିବେଶନ କିମ୍ବା `manage` -scope କି ଗ୍ରହଣ କରେ।
 
 #### `GET /api/settings/feature-flags`
 
-ପ୍ରତ୍ୟେକ ଫ୍ଲାଗ୍ର ପ୍ରଭାବୀ ମୂଲ୍ୟ, ସୋର୍ସ ଏବଂ ଏକ ସାରାଂଶ ଫେରାଇଥାଏ।
+ପ୍ରତ୍ୟେକ ପତାକାକୁ ଏହାର ପ୍ରଭାବଶାଳୀ ମୂଲ୍ୟ, ଉତ୍ସ ଏବଂ ଏକ ସାରାଂଶ ସହିତ ଫେରସ୍ତ କରେ।
 
 ```jsonc
 {
@@ -250,7 +245,7 @@
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... ସମସ୍ତ 119 ଫ୍ଲାଗ୍
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -264,34 +259,30 @@
 
 #### `PUT /api/settings/feature-flags`
 
-ଗୋଟିଏ ଓଭରରାଇଡ୍ ସେଟ୍ କିମ୍ବା ଅପସାରଣ କରେ। ବଡି: `{ key: string; value?: string }`।
-`value` ଛାଡ଼ିଦେଲେ ଓଭରରାଇଡ୍ ଅପସାରିତ ହୁଏ (env / default ପୁନଃସ୍ଥାପିତ ହୁଏ)।
+ଗୋଟିଏ ଓଭରବ୍ରିଡ୍ ସେଟ୍ କିମ୍ବା ଅପସାରଣ କରନ୍ତୁ। ଶରୀର: `{ key: string; value?: string }` `value` ଛାଡିବା ଦ୍ୱାରା ଓଭରବ୍ରିଡ୍ ଅପସାରଣ ହୁଏ (env / default ପୁନରୁଦ୍ଧାର)।
 
 ```bash
-# ଏକ DB ଓଭରରାଇଡ୍ ସେଟ୍ କରନ୍ତୁ
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# ଓଭରରାଇଡ୍ ଅପସାରଣ କରନ୍ତୁ ("value" ନାହିଁ)
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-ପ୍ରତିକ୍ରିୟାରେ ନୂତନ `effectiveValue`/`source`, `previousValue`/
-`previousSource`, ଏବଂ `requiresRestart` ଫେରାଇ ଦିଆଯାଏ। ଅଜଣା କୀ ଏବଂ ସୀମା ବାହାରର enum
-ମୂଲ୍ୟଗୁଡ଼ିକୁ `400` ସହିତ ପ୍ରତ୍ୟାଖ୍ୟାନ କରାଯାଏ।
+ପ୍ରତିକ୍ରିୟା ନୂତନ `effectiveValue`/`source`, `previousValue`/ `previousSource`, ଏବଂ `requiresRestart` କୁ ପ୍ରତିଫଳିତ କରେ। ଅଜ୍ known ାତ କି ଏବଂ ଆଉଟ-ରେ range ୍ଜ enum ମୂଲ୍ୟଗୁଡ଼ିକ `400` ସହିତ ପ୍ରତ୍ୟାଖ୍ୟାନ।
 
 #### `DELETE /api/settings/feature-flags`
 
-ଏକାଥରେ **ସମସ୍ତ** DB ଓଭରରାଇଡ୍ ସଫା କରେ, ଯାହା ଫଳରେ ପ୍ରତ୍ୟେକ ଫ୍ଲାଗ୍ ତାହାର env / default
-ମୂଲ୍ୟକୁ ଫେରିଯାଏ। `{ cleared: <count>, message: "..." }` ଫେରାଇଥାଏ।
+ସଫା** ସମସ୍ତ** DB ଏକାସାଙ୍ଗରେ ଅତିକ୍ରମ କରେ, ପ୍ରତ୍ୟେକ ପତାକାକୁ ଏହାର env / ଡିଫଲ୍ଟ ମୂଲ୍ୟରେ ପୁନ oring ସ୍ଥାପିତ କରେ। `{ cleared: <count>, message: "..." }` ଫେରସ୍ତ କରେ
 
 > [!NOTE]
-> `requiresRestart: true` ଥିବା ଫ୍ଲାଗ୍ଗୁଡ଼ିକ କେବଳ ପ୍ରୋସେସ୍ ରିଲୋଡ୍ ପରେ ପ୍ରଭାବୀ ହୁଅନ୍ତି।
-> ଡ୍ୟାସ୍ବୋର୍ଡ୍ର ରିଷ୍ଟାର୍ଟ୍ ଫ୍ଲୋ `POST /api/restart` କଲ୍ କରେ ଏବଂ ସର୍ଭର୍ ପୁଣି ଚାଲୁ ହେବା ପର୍ଯ୍ୟନ୍ତ
-> `GET /api/health/ping` ପୋଲ୍ କରେ।
+> `requiresRestart: true` ସହିତ ପତାକା କେବଳ ଏକ ପ୍ରକ୍ରିୟା ପୁନ o ଲୋଡ୍ ପରେ କାର୍ଯ୍ୟକାରୀ ହୁଏ। ଡ୍ୟାସବୋର୍ଡର ପୁନ rest ଆରମ୍ଭ ପ୍ରବାହ `POST /api/restart` କଲ୍ କରେ ଏବଂ ସର୍ଭର ବ୍ୟାକଅପ୍ ନହେବା ପର୍ଯ୍ୟନ୍ତ `GET /api/health/ping` ପୋଲ୍ କରେ।
+
+---
 
 ## ଜରୁରୀକାଳୀନ ବଜେଟ୍ ଫଲ୍ବ୍ୟାକ୍
 

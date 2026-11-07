@@ -221,42 +221,35 @@
 
 ---
 
-## ባንዲራዎችን ማቀያየር
+## ባንዲራዎች መቀያየር
 
 ### ዳሽቦርድ
 
-ወደ **ዳሽቦርድ → ቅንብሮች → የባህሪ ባንዲራዎች**
-(`/dashboard/settings/feature-flags`) ይሂዱ። ፍርግርጉ
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-የሚከተሉትን ይደግፋል፦
+ሂድ ወደ** ዳሽቦርድ → ቅንጅቶች → የባህሪ ባንዲራዎች** (`/dashboard/settings/feature-flags`) ፍርግርግ (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) ይደግፋል፡-
 
-- በቁልፍ ወይም በመግለጫ **መፈለግ**፣ እንዲሁም በምድብ **ማጣራት** (በተጨማሪም ሰው ሰራሽ የ
-  **ዳግም መነሳት ያስፈልገዋል** እይታ)።
-- ለቡሊያን ባንዲራዎች **መቀያየሪያ** እና ለኤኑም ባንዲራዎች **ተቆልቋይ ዝርዝር**
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`)።
-- ለእያንዳንዱ ባንዲራ የምንጭ ባጅ — `DB`፣ `ENV` ወይም `DEF` — ውጤታማው ዋጋ ከየት
-  እንደመጣ የሚያሳይ።
-- መተካቱን ለማስወገድ የሚያገለግል **ዳግም አስጀምር** አዝራር (የሚታየው ምንጫቸው `DB` ለሆኑ
-  ባንዲራዎች ብቻ ነው)፣ እንዲሁም ከታች የሚገኝ **ሁሉንም መተካቶች ዳግም አስጀምር** አዝራር።
-- `requiresRestart` ያለው ባንዲራ ሲቀየር የሚታይ የ**አገልጋይ ዳግም ማስጀመሪያ** ማስታወቂያ።
+- **ፈልግ** በቁልፍ ወይም በመግለጫ, እና** ማጣሪያ** በምድብ (በተጨማሪም ሰው ሠራሽ** ዳግም ማስጀመር ያስፈልገዋል** እይታ)።
+- ሀ** ቀያይር** ለቦሊያን ባንዲራዎች እና ሀ** መውረድ** ለ enum ባንዲራዎች (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- ሀ** ምንጭ ባጅ** በአንድ ባንዲራ — `DB`፣ `ENV` ወይም `DEF` — ውጤታማ እሴቱ ከየት እንደመጣ ያሳያል።
+- ሀ** ዳግም አስጀምር** መሻርን ለመጣል (ለ `DB` -sourced ባንዲራዎች ብቻ የሚታየው) እና ሀ** ሁሉንም መሻሮች ዳግም ያስጀምሩ** አዝራር ከታች.
+- ሀ** አገልጋይ እንደገና ያስጀምሩ** `requiresRestart` ባንዲራ ሲቀየር ባነር።
 
 ### REST API
 
-ሁሉም ክንውኖች በአንድ መንገድ በኩል ይከናወናሉ፦
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts)።
-እያንዳንዱ ዘዴ ማረጋገጫ ያለው የዳሽቦርድ ክፍለ ጊዜ ይፈልጋል (`401` ካልሆነ)።
+ሁሉም ክዋኔዎች በአንድ መስመር ያልፋሉ [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). እያንዳንዱ ዘዴ የተረጋገጠ ዳሽቦርድ ክፍለ ጊዜ ይፈልጋል (`401` አለበለዚያ)።
+
+ከመግባት ከተሰናከለ (`requireLogin=false`) መንገዱ ክፍት ነው፣ ከተጠበቁ ባንዲራዎች በስተቀር፡ እያንዳንዱ ባንዲራ በደህንነት ምድብ እና `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`፣ `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`፣ `MITM_DISABLE_TLS_VERIFY`፣ `OMNIROUTE_MCP_ENFORCE_SCOPES` እና `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` in `protectedFeatureFlags.ts`)። በአንደኛው ላይ አንድ `PUT` ፣ እና አንዱ `DELETE` DB ሲኖረው፣ አሁንም የዳሽቦርድ ክፍለ ጊዜ፣ `manage` -scope API ቁልፍ፣ የ `oma_` መዳረሻ ማስመሰያ የመፃፍ ወሰን ወይም ከዚያ በላይ፣ ወይም CLI token ወይም የውስጥ አገልግሎት ማስመሰያ ከ loopback የተላከ ነው። ያ ስብስብ መንገዱ አንድ ክፍለ ጊዜ ወይም የ `manage` -scope ቁልፍን ብቻ የሚቀበልበት መግቢያ ላይ ካለው የበለጠ ሰፊ ነው።
 
 #### `GET /api/settings/feature-flags`
 
-እያንዳንዱን ባንዲራ ከውጤታማ ዋጋው፣ ከምንጩ እና ከማጠቃለያ ጋር ይመልሳል።
+እያንዳንዱን ባንዲራ ውጤታማ እሴቱን፣ ምንጩን እና ማጠቃለያውን ይመልሳል።
 
 ```jsonc
 {
   "flags": [
     {
       "key": "REQUIRE_API_KEY",
-      "label": "የAPI ቁልፍ ያስፈልጋል",
-      "description": "ለሚገቡ ሁሉም ጥያቄዎች የAPI ቁልፍ ይፈልጋል",
+      "label": "Require API Key",
+      "description": "Require an API key for all incoming requests",
       "category": "security",
       "type": "boolean",
       "enumValues": null,
@@ -266,7 +259,7 @@
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... ሁሉም 119 ባንዲራዎች
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -280,34 +273,30 @@
 
 #### `PUT /api/settings/feature-flags`
 
-አንድ መተካት ያዘጋጁ ወይም ያስወግዱ። አካል፦ `{ key: string; value?: string }`።
-`value`ን መተው መተካቱን ያስወግዳል (የenv / ነባሪ ዋጋን ይመልሳል)።
+ነጠላ መሻር ያዘጋጁ ወይም ያስወግዱ። አካል: `{ key: string; value?: string }`. `value` ን መተው መሻሪያውን ያስወግዳል (env / default ወደነበረበት መመለስ)።
 
 ```bash
-# የDB መተካት ያዘጋጁ
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# መተካቱን ያስወግዱ ("value" የለም)
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-ምላሹ አዲሱን `effectiveValue`/`source`፣ `previousValue`/
-`previousSource` እና `requiresRestart`ን ይመልሳል። የማይታወቁ ቁልፎች እና ከተፈቀደው ክልል ውጭ ያሉ
-የኤኑም ዋጋዎች በ`400` ውድቅ ይደረጋሉ።
+ምላሹ አዲሱን `effectiveValue`/`source`፣ `previousValue`/ `previousSource` እና `requiresRestart` ን ያስተጋባል። ያልታወቁ ቁልፎች እና ከክልል ውጪ የሆኑ የቁጥር እሴቶች በ `400` ውድቅ ይደረጋሉ።
 
 #### `DELETE /api/settings/feature-flags`
 
-ሁሉንም የDB መተካቶች በአንድ ጊዜ ያጸዳል፣ ይህም እያንዳንዱን ባንዲራ ወደ የenv / ነባሪ ዋጋው ይመልሳል።
-`{ cleared: <count>, message: "..." }` ይመልሳል።
+ያጸዳል።** ሁሉም** DB በአንድ ጊዜ ይሽራል፣ እያንዳንዱን ባንዲራ ወደ env/ነባሪው እሴቱ ይመልሳል። `{ cleared: <count>, message: "..." }` ይመልሳል።
 
 > [!NOTE]
-> `requiresRestart: true` ያላቸው ባንዲራዎች ውጤታማ የሚሆኑት ሂደቱ እንደገና ከተጫነ በኋላ ብቻ ነው።
-> የዳሽቦርዱ ዳግም ማስጀመሪያ ፍሰት `POST /api/restart`ን ይጠራል፣ ከዚያም አገልጋዩ እንደገና እስኪነሳ ድረስ
-> `GET /api/health/ping`ን በተደጋጋሚ ይጠይቃል።
+> `requiresRestart: true` ያላቸው ባንዲራዎች የሚሰሩት እንደገና ከተጫነ በኋላ ብቻ ነው። የዳሽቦርዱ ዳግም ማስጀመሪያ ፍሰት `POST /api/restart` ይደውላል እና አገልጋዩ እስኪቀመጥ ድረስ `GET /api/health/ping` ይመርጣል።
+
+---
 
 ## የአደጋ ጊዜ በጀት አማራጭ
 

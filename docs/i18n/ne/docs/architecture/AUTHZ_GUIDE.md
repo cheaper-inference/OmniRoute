@@ -302,15 +302,15 @@ API कुञ्जीहरूले `scopes` एरे बोक्छन् (
 
 `oma_live_…` टोकनहरूमा `read` / `write` / `admin`, `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) द्वारा क्रमबद्ध। यो श्रेणी पहुँच-टोकन प्रमाणिकरणमा मात्र लागू हुन्छ। [व्यवस्थापन प्रमाणीकरण](../guides/MANAGEMENT-AUTH.md) हेर्नुहोस्।
 
-## Auth Required टगल
+## प्रमाणीकरण आवश्यक टगल
 
-`src/shared/utils/apiAuth.ts` मा रहेको `isAuthRequired()` ले अनुरोधका लागि **कुनै पनि** प्रमाणीकरण लागू गरिने हो कि होइन भन्ने निर्णय गर्छ:
+`src/shared/utils/apiAuth.ts` मा`isAuthRequired()` निर्णय गर्छ कि** कुनै पनि** अनुरोधको लागि प्रमाणीकरण लागू गरिएको छ:
 
-- `settings.requireLogin === false` → प्रमाणीकरण विश्वव्यापी रूपमा असक्षम हुन्छ, बाहेक always-protected tier ([Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) र त्यो credential दिने कलहरू, जसलाई लगइन सक्षम हुँदाकै credential चाहिन्छ: sync token जारी गर्ने, कुनै पनि scope मा CLI access token बनाउने, र `manage`/`admin` scope भएको API key बनाउने, त्यो scope key लाई दिने, वा त्यस्तो key पुनः जनरेट वा देखाउने (`src/lib/api/requireManagementAuth.ts` मा `requireCredentialForManagementScopedKey()`)। केवल inference का लागि भएका keys खुला रहन्छन्।
-- कुनै पासवर्ड कन्फिगर नभएको **र** `INITIAL_PASSWORD` env var नभएको → bootstrap मोडले onboarding wizard र loopback अनुरोधहरूलाई अनुमति दिन्छ, तर बाहिरका network अनुरोधहरूलाई अझै credentials चाहिन्छ।
-- कुनै पनि DB त्रुटि → fail closed (secure-by-default)।
+- `settings.requireLogin === false` → auth विश्वव्यापी रूपमा असक्षम गरिएको छ, सँधै-सुरक्षित टियर ( [रूट गार्ड टियरहरू](../security/ROUTE_GUARD_TIERS.md) हेर्नुहोस्) र यसले स्वीकार गर्ने प्रमाणहरू प्रदान गर्ने कलहरू बाहेक, जसलाई लगइन अन गर्दा उस्तै प्रमाण चाहिन्छ: सिंक टोकनहरू जारी गर्ने, CLI पहुँच टोकनहरू कुनै पनि स्कोपमा minting, `manage` scope, र API कुञ्जी सिर्जना गर्ने। कुञ्जीलाई त्यो दायरा प्रदान गर्दै, वा त्यस्ता कुञ्जीलाई पुन: उत्पन्न वा खुलासा गर्दै (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`)`admin` अनुमान-मात्र कुञ्जीहरू खुला रहन्छन्। सुरक्षित सुविधा झण्डा (`REQUIRE_API_KEY`, अन्य सुरक्षा झण्डाहरू, र SSRF / TLS / MCP-scope / स्यान्डबक्स झण्डाहरू [फीचर फ्ल्यागहरूमा](../reference/FEATURE_FLAGS.md#rest-api) सूचीबद्ध) लेख्न र PII मास्किङ सेटिङहरू (`PUT /api/settings/pii`) बचत गर्न पनि प्रमाणहरू आवश्यक पर्दछ।
+- कुनै पासवर्ड कन्फिगर गरिएको छैन** र** कुनै `INITIAL_PASSWORD` env var → बुटस्ट्र्याप मोडले अनबोर्डिङ विजार्ड र लुपब्याक अनुरोधहरूलाई अनुमति दिन्छ, तर खुला नेटवर्क अनुरोधहरूलाई अझै पनि प्रमाणहरू चाहिन्छ। अपवाद: सुरक्षित सुविधा झण्डा लेख्न र PII मास्किङ सेटिङहरू बचत गर्न (`PUT /api/settings/pii`) लुपब्याकबाट पनि प्रमाण चाहिन्छ, त्यसैले त्यहाँ लुपब्याक आफैंले पर्याप्त छैन।
+- कुनै पनि DB त्रुटि → असफल बन्द (सुरक्षित-द्वारा-पूर्वनिर्धारित)।
 
-Client API key लागू गर्न `src/shared/utils/featureFlags.ts` मा रहेको `isRequireApiKeyEnabled()` प्रयोग हुन्छ, सिधै `process.env.REQUIRE_API_KEY` पढिँदैन। यो deployed instances का लागि महत्त्वपूर्ण छ: Dashboard → Feature Flags मा `REQUIRE_API_KEY` टगल गर्दा DB override भण्डारण हुन्छ र तुरुन्तै `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` र यो helper साझा गर्ने अन्य client-API auth जाँचहरूमा असर पार्छ। Feature flag store पढ्न नसकिएमा client API auth fail closed हुन्छ र key माग्छ।
+क्लाइन्ट API कुञ्जी प्रवर्तनले `src/shared/utils/featureFlags.ts` मा `isRequireApiKeyEnabled()` प्रयोग गर्दछ, प्रत्यक्ष `process.env.REQUIRE_API_KEY` पढ्ने होइन। यो तैनाथ गरिएका उदाहरणहरूको लागि महत्त्वपूर्ण छ: ड्यासबोर्डमा `REQUIRE_API_KEY` टगल गर्नाले → फिचर फ्ल्यागले DB ओभरराइड भण्डारण गर्छ र तुरुन्तै `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, र अन्य क्लाइन्ट-एपीआई प्रमाणीकरण जाँचहरूलाई प्रभाव पार्छ जसले यो सहयोगी साझेदारी गर्दछ। यदि सुविधा फ्ल्याग स्टोर पढ्न सकिँदैन भने, ग्राहक API auth बन्द गर्न असफल हुन्छ र कुञ्जी चाहिन्छ।
 
 ## ब्रेकिङ परिवर्तन — v3.8.0
 

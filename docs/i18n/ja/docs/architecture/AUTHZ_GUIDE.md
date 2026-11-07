@@ -289,15 +289,15 @@ APIキーには`scopes`配列が含まれています（`api_keys.scopes`にJSON
 
 `oma_live_…`トークンに対する`read` / `write` / `admin`は、`scopeSatisfies`（`src/lib/accessTokens/scopes.ts`）によってランク付けされます。このランクはアクセストークン資格情報にのみ適用されます。[管理認証](../guides/MANAGEMENT-AUTH.md)を参照してください。
 
-## 認証必須トグル
+## 認証が必要です切り替え
 
-`src/shared/utils/apiAuth.ts` の `isAuthRequired()` は、リクエストに対して **いかなる** 認証を適用するかを決定します：
+`src/shared/utils/apiAuth.ts`の`isAuthRequired()`次のことを決定します。**どれでも**リクエストに対して認証が強制されます。
 
-- `settings.requireLogin === false` → 認証はグローバルに無効になります。ただし、常に保護される階層（[Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) を参照）と、認証情報を発行する操作は例外です。これらの操作では、ログインが有効な場合と同じ認証情報が必要です。具体的には、同期トークンの発行、任意のスコープでの CLI アクセストークンの発行、`manage`/`admin` スコープを持つ API キーの作成、そのスコープのキーへの付与、そのようなキーの再生成または表示（`src/lib/api/requireManagementAuth.ts` の `requireCredentialForManagementScopedKey()`）です。推論専用のキーは引き続きオープンです。
-- パスワードが設定されておらず **かつ** `INITIAL_PASSWORD` 環境変数もない → ブートストラップモードでは、オンボーディングウィザードとループバックからのリクエストを許可しますが、外部ネットワークからのリクエストには引き続き認証情報が必要です。
-- DB エラーが発生した場合 → フェイルクローズ（セキュアバイデフォルト）。
+- `settings.requireLogin === false` → auth は、常時保護層 ( [「 Route Guard Tiers 」](../security/ROUTE_GUARD_TIERS.md)を参照) と、それが受け入れる認証情報を渡す呼び出しを除き、グローバルに無効になっています。これらの呼び出しには、ログイン時と同じ認証情報が必要です。同期トークンの発行、任意のスコープでのCLIアクセス トークンの生成、 `manage`/`admin`スコープでのAPIキーの作成、そのスコープをキーに付与するか、そのスコープを再生成または公開する場合と同じです。キー ( `src/lib/api/requireManagementAuth.ts`の`requireCredentialForManagementScopedKey()` )。推論専用キーは開いたままになります。保護された機能フラグ (`REQUIRE_API_KEY`、その他のセキュリティ フラグ、および[機能フラグ](../reference/FEATURE_FLAGS.md#rest-api)にリストされているSSRF / TLS / MCP スコープ / サンドボックス フラグ) の書き込みと、 PIIマスキング設定の保存 (`PUT /api/settings/pii`) にも、引き続き資格情報が必要です。
+- パスワードが設定されていません**そして**no `INITIAL_PASSWORD` env var →ブートストラップ モードでは、オンボーディング ウィザードとループバック リクエストが許可されますが、公開されたネットワーク リクエストには依然として認証情報が必要です。例外: 保護された機能フラグの書き込みとPIIマスキング設定 (`PUT /api/settings/pii`) の保存には、ループバックからでも認証情報が必要なので、ループバックだけでは十分ではありません。
+- DBエラー→失敗して閉じられます (デフォルトでセキュア)。
 
-クライアント API キーの強制には、`process.env.REQUIRE_API_KEY` を直接読み取るのではなく、`src/shared/utils/featureFlags.ts` の `isRequireApiKeyEnabled()` を使用します。これは本番環境のインスタンスで重要です。ダッシュボード → Feature Flags で `REQUIRE_API_KEY` を切り替えると DB オーバーライドが保存され、即座に `/v1/*`、`/v1beta/*`、`/models`、`/responses`、`/chat/completions`、`/codex/*` および、このヘルパーを共有する他のクライアント API 認証チェックに影響します。フィーチャーフラグストアを読み取れない場合、クライアント API 認証はフェイルクローズし、キーを要求します。
+クライアントのAPIキーの強制では、 `process.env.REQUIRE_API_KEY`直接読み取りではなく、 `src/shared/utils/featureFlags.ts`内の`isRequireApiKeyEnabled()`が使用されます。これはデプロイされたインスタンスにとって重要です。ダッシュボード→機能フラグで`REQUIRE_API_KEY`切り替えると、 DBオーバーライドが保存され`/v1/*`、 `/v1beta/*`、 `/models`、 `/responses`、 `/chat/completions`、 `/codex/*`、およびこのヘルパーを共有する他のクライアント API 認証チェックに直ちに影響します。機能フラグ ストアを読み取れない場合、クライアントAPI認証は失敗し、キーが必要になります。
 
 ## 破壊的変更 — v3.8.0
 

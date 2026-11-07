@@ -222,27 +222,23 @@ o, **aktiv** hesab edilir (`isFeatureFlagEnabled()` funksiyasına baxın).
 
 ### İdarə paneli
 
-**İdarə paneli → Parametrlər → Funksiya bayraqları**
-(`/dashboard/settings/feature-flags`) bölməsinə keçin. Tor
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-aşağıdakı imkanları dəstəkləyir:
+-a keçin** İdarə paneli → Parametrləri → Xüsusiyyət Bayraqları** (`/dashboard/settings/feature-flags`). Şəbəkə (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) dəstəkləyir:
 
-- Açar və ya təsvir üzrə **axtarış**, həmçinin kateqoriyaya görə **filtrləmə** (əlavə olaraq sintetik **Yenidən başlatma tələb olunur** görünüşü).
-- Boolean bayraqları üçün **keçid**, enum bayraqları üçün isə **açılan menyu**
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Hər bayraq üçün effektiv dəyərin mənbəyini göstərən mənbə nişanı — `DB`, `ENV` və ya `DEF`.
-- Yalnız `DB` mənbəli bayraqlar üçün göstərilən override-u silmək məqsədilə **Sıfırla** düyməsi və aşağıda **Bütün override-ları sıfırla** düyməsi.
-- `requiresRestart` bayrağı dəyişdirildikdə **Serveri yenidən başlat** banneri.
+- **Axtar** açar və ya təsvirə görə və** filtr** kateqoriyaya görə (üstəlik sintetik** Yenidən başlamağı tələb edir** görünüşü).
+- A** keçid** boolean bayraqları üçün və a** açılan** enum bayraqları üçün (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- A** mənbə nişanı** hər bayraq — `DB`, `ENV` və ya `DEF` — effektiv dəyərin haradan gəldiyini göstərir.
+- A** Sıfırlayın** ləğv etmək üçün düymə (yalnız `DB` -sourced bayraqları üçün göstərilir) və a** Bütün ləğvetmələri sıfırlayın** altındakı düymə.
+- A** Serveri yenidən başladın** `requiresRestart` bayrağı dəyişdirildikdə banner.
 
 ### REST API
 
-Bütün əməliyyatlar vahid marşrut üzərindən həyata keçirilir:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Hər metod autentifikasiya olunmuş idarə paneli sessiyası tələb edir (əks halda `401`).
+Bütün əməliyyatlar bir marşrutdan keçir: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Hər bir üsul təsdiqlənmiş panel seansı tələb edir (əks halda `401` ).
+
+Giriş qeyri-aktiv olduqda (`requireLogin=false`) qorunan bayraqlar istisna olmaqla, marşrut açıqdır: Təhlükəsizlik kateqoriyasındakı hər bayraq üstəgəl `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` və `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` in `protectedFeatureFlags.ts`). Onlardan birində `PUT` və onlardan birinin DB ləğvi olduğu halda `DELETE` hələ də tablosuna seans, `manage` -scope API açarı, yazma əhatə dairəsi və ya daha yüksək olan `oma_` giriş nişanı və ya geri döngədən göndərilən CLI nişanı və ya daxili xidmət nişanı tələb edir. Bu dəst, marşrutun yalnız seansı və ya `manage` -scope düyməsini qəbul etdiyi girişdən daha genişdir.
 
 #### `GET /api/settings/feature-flags`
 
-Hər bayrağı effektiv dəyəri, mənbəyi və xülasəsi ilə birlikdə qaytarır.
+Hər bir bayrağı effektiv dəyəri, mənbəyi və xülasəsi ilə qaytarır.
 
 ```jsonc
 {
@@ -274,32 +270,30 @@ Hər bayrağı effektiv dəyəri, mənbəyi və xülasəsi ilə birlikdə qaytar
 
 #### `PUT /api/settings/feature-flags`
 
-Tək bir override-u təyin edir və ya silir. Gövdə: `{ key: string; value?: string }`.
-`value` göstərilmədikdə override silinir (env / default bərpa olunur).
+Tək bir ləğvi təyin edin və ya silin. Bədən: `{ key: string; value?: string }`. `value` buraxılması ləğvi aradan qaldırır (env / default bərpa olunur).
 
 ```bash
-# DB override-u təyin edin
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Override-u silin ("value" olmadan)
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Cavab yeni `effectiveValue`/`source`, əvvəlki `previousValue`/
-`previousSource` və `requiresRestart` dəyərlərini əks etdirir. Naməlum açarlar və icazə verilən diapazondan kənar enum dəyərləri `400` ilə rədd edilir.
+Cavab yeni `effectiveValue`/`source`, `previousValue`/ `previousSource` və `requiresRestart` ilə səsləşir . Naməlum açarlar və diapazondan kənar enum dəyərləri `400` ilə rədd edilir.
 
 #### `DELETE /api/settings/feature-flags`
 
-Bütün DB override-larını eyni anda silir və hər bayrağı env / default dəyərinə qaytarır. `{ cleared: <count>, message: "..." }` qaytarır.
+Təmizləyir** hamısı** DB hər bayrağı öz env/defolt dəyərinə qaytararaq bir anda ləğv edir. `{ cleared: <count>, message: "..." }` qaytarır.
 
 > [!NOTE]
-> `requiresRestart: true` olan bayraqlar yalnız proses yenidən yükləndikdən sonra qüvvəyə minir.
-> İdarə panelinin yenidən başlatma axını `POST /api/restart` çağırır və server yenidən işlək vəziyyətə gələnədək
-> `GET /api/health/ping` sorğusunu periodik olaraq göndərir.
+> `requiresRestart: true` ilə bayraqlar yalnız proses yenidən yükləndikdən sonra qüvvəyə minir. İdarə panelinin yenidən başlama axını `POST /api/restart` çağırır və sonra server ehtiyat nüsxələnənə qədər `GET /api/health/ping` sorğulayır.
+
+---
 
 ## Fövqəladə Büdcə Ehtiyat Mexanizmi
 

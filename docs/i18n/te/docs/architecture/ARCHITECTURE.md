@@ -361,10 +361,10 @@ OmniRoute స్థానికంగా నడుస్తున్న AI స�
 
 ### A. ఆటో కాంబో ఇంజిన్
 
-ఆటో కాంబో స్టాటిక్ కాంబో డెఫినిషన్పై ఆధారపడకుండా అభ్యర్థన సమయంలో రూటింగ్ లక్ష్యాలను డైనమిక్గా స్కోర్ చేస్తుంది మరియు ఎంచుకుంటుంది. ఇది `auto/*` మోడల్ ప్రిఫిక్స్ ఫ్యామిలీకి శక్తినిస్తుంది.
+ఆటో కాంబో స్టాటిక్ కాంబో డెఫినిషన్పై ఆధారపడకుండా అభ్యర్థన సమయంలో రూటింగ్ లక్ష్యాలను డైనమిక్గా స్కోర్ చేస్తుంది మరియు ఎంచుకుంటుంది. ఇది `auto/*` మోడల్ ప్రిఫిక్స్ కుటుంబానికి శక్తినిస్తుంది.
 
 - ఇంజిన్ ఎంట్రీ: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- రిసోల్వర్: `src/domain/comboResolver.ts` ( `auto/` ఉపసర్గ యొక్క స్వీయ-గుర్తింపు)
+- రిసోల్వర్: `src/domain/comboResolver.ts` ( `auto/` ఉపసర్గ స్వయంచాలకంగా గుర్తించడం)
 - డాష్బోర్డ్: `/dashboard/auto-combo`
 - టెలిమెట్రీ: `auto_combo_decisions` SQLite పట్టిక
 
@@ -376,7 +376,7 @@ OmniRoute స్థానికంగా నడుస్తున్న AI స�
 - **స్వీయ ఉపసర్గలు** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — ప్రతి ఒక్కటి ట్యూన్ చేయబడిన బరువు ప్రొఫైల్తో మద్దతు ఇస్తుంది.
 - **6 మోడ్ ప్యాక్లు** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` మరియు `chaos-mode` — ప్రీసెట్ వెయిట్ కాన్ఫిగరేషన్లను డాష్బోర్డ్ నుండి కాల్ చేయవచ్చు. (అభ్యర్థన-సమయ వైవిధ్యాలు అయిన ఎగువన ఉన్న `auto/*` ఉపసర్గలతో గందరగోళం చెందకూడదు.)
 
-పూర్తి అల్గారిథమిక్ వివరాల కోసం (ఫాక్టర్ ఫార్ములాలు, వెయిట్ ట్యూనింగ్), [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) చూడండి.
+పూర్తి అల్గారిథమిక్ వివరాల కోసం (కారకాల సూత్రాలు, బరువు ట్యూనింగ్), [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) చూడండి.
 
 ### బి. క్లౌడ్ ఏజెంట్లు
 
@@ -398,7 +398,7 @@ OmniRoute స్థానికంగా నడుస్తున్న AI స�
 - మాడ్యూల్ రూట్: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
 - హాట్ రీలోడ్: కాన్ఫిగరేషన్ మార్పుల కోసం రిజిస్ట్రీ గడియారాలు మరియు స్థానంలో గొలుసును పునర్నిర్మిస్తుంది
 - వైర్-ఇన్ పాయింట్లు: చాట్ హ్యాండ్లర్ ఎంట్రీ, ఇమేజ్ జనరేషన్ హ్యాండ్లర్, రెస్పాన్స్ శానిటైజర్
-- HTTP ఒప్పందం: ఉల్లంఘనలు `error.code = "GUARDRAIL_VIOLATION"` తో `503` వలె కనిపిస్తాయి
+- HTTP ఒప్పందం: ఉల్లంఘనల ఉపరితలం `error.code = "GUARDRAIL_VIOLATION"` తో `503`
 
 రూల్సెట్ ఆథరింగ్ మరియు థ్రెషోల్డ్ ట్యూనింగ్ కోసం, [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) చూడండి.
 
@@ -409,13 +409,13 @@ OmniRoute స్థానికంగా నడుస్తున్న AI స�
 - పాలసీ ఇంజిన్: ప్రీ-ఎగ్జిక్యూషన్ మూల్యాంకనం కోసం `src/domain/policyEngine.ts` — సింగిల్ ఎంట్రీ పాయింట్ (లాకౌట్ → బడ్జెట్ → ఫాల్బ్యాక్ ఆర్డరింగ్)
 - ధర నియమాలు: `src/domain/costRules.ts`
 - ఫాల్బ్యాక్ విధానం: `src/domain/fallbackPolicy.ts`
-- లాక్అవుట్ విధానం: `src/domain/lockoutPolicy.ts`
+- లాకౌట్ విధానం: `src/domain/lockoutPolicy.ts`
 - ట్యాగ్-ఆధారిత రూటింగ్: `src/domain/tagRouter.ts`
 - కాంబో రిసల్వర్: `src/domain/comboResolver.ts` — కాంబో పేర్లు, ఆటో/\* ప్రిఫిక్స్లు మరియు వైల్డ్కార్డ్ మోడల్ లక్ష్యాలను కాంక్రీట్ ఎగ్జిక్యూషన్ ప్లాన్లకు పరిష్కరిస్తుంది
 - Connection/model రూల్ జాయినర్: `src/domain/connectionModelRules.ts`
 - మోడల్ లభ్యత స్నాప్షాట్లు: `src/domain/modelAvailability.ts`
 - ప్రొవైడర్ గడువు ట్రాకింగ్: `src/domain/providerExpiration.ts`
-- కోటా కాష్: `src/domain/quotaCache.ts`
+- కోటా కాష్: `src/domain/quotaCache.ts`. ప్రొవైడర్లు కోటా విండోలను జోడించడం మరియు తీసివేయడం (కొన్ని ప్లాన్ల కోసంOpenAI 5-గంటల Codex విండోను వదిలివేసింది), కాబట్టి ప్రొవైడర్ యొక్క అడాప్టర్ను రీడింగ్ చేయడం పూర్తయిందని ధృవీకరిస్తుంది (`quotasComplete`, `src/lib/usage/usageReading.ts` చూడండి ) అనేది ఖాతా యొక్క పూర్తి విండో సెట్: ఒక విండో ముందుగా తెలిసినది కానీ దానిలో లేని విండో రిటైర్డ్ చేయబడింది, కాష్లో రిటైర్ చేయబడింది Codex కోటా స్థితి మరియు `quota_snapshots` Claude సంతృప్త బకెట్లలో కొనసాగింది. పాక్షిక సాక్ష్యం (స్పందన శీర్షికలు, పాత కాపీలు) అది కలిగి ఉన్న విండోలను మాత్రమే నవీకరిస్తుంది.
 - అధోకరణ స్థితి: `src/domain/degradation.ts`
 - కాన్ఫిగరేషన్ ఆడిట్: `src/domain/configAudit.ts`
 - OmniRoute ప్రతిస్పందన మెటాడేటా బిల్డర్: `src/domain/omnirouteResponseMeta.ts`

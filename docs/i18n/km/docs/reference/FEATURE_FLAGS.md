@@ -222,34 +222,27 @@ Boolean flag ត្រូវបានចាត់ទុកថា **បានប�
 
 ---
 
-## ការបិទបើក Flags
+## ការបិទបើកទង់
 
-### ផ្ទាំង Dashboard
+### ផ្ទាំងគ្រប់គ្រង
 
-ចូលទៅកាន់ **Dashboard → Settings → Feature Flags**
-(`/dashboard/settings/feature-flags`)។ ក្រឡាចត្រង្គ
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-គាំទ្រ៖
+រុករកទៅ** ផ្ទាំងគ្រប់គ្រង → ការកំណត់ → ទង់មុខងារ** (`/dashboard/settings/feature-flags`) ។ ក្រឡាចត្រង្គ (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) គាំទ្រ៖
 
-- **ស្វែងរក** តាម key ឬ description និង **ត្រង** តាម category (រួមទាំងទិដ្ឋភាពសិប្បនិម្មិត
-  **Requires Restart**)។
-- **ប៊ូតុងបិទបើក** សម្រាប់ boolean flags និង **បញ្ជីទម្លាក់ចុះ** សម្រាប់ enum flags
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`)។
-- **ស្លាកប្រភព** សម្រាប់ flag នីមួយៗ — `DB`, `ENV`, ឬ `DEF` — បង្ហាញថាតម្លៃមានប្រសិទ្ធភាព
-  មកពីណា។
-- ប៊ូតុង **កំណត់ឡើងវិញ** (បង្ហាញតែសម្រាប់ flags ដែលមានប្រភពជា `DB`) ដើម្បីលុប override
-  និងប៊ូតុង **កំណត់ Override ទាំងអស់ឡើងវិញ** នៅខាងក្រោម។
-- បដា **ចាប់ផ្ដើម Server ឡើងវិញ** នៅពេល flag `requiresRestart` ត្រូវបានផ្លាស់ប្តូរ។
+- **ស្វែងរក** តាមគន្លឹះ ឬការពិពណ៌នា និង** តម្រង** តាមប្រភេទ (បូកសំយោគ** ទាមទារការចាប់ផ្តើមឡើងវិញ** ទិដ្ឋភាព) ។
+- ក** បិទបើក** សម្រាប់ទង់ប៊ូលីន និង ក** ទម្លាក់ចុះ** សម្រាប់ទង់ជាតិ enum (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`) ។
+- ក** ផ្លាកសញ្ញាប្រភព** ក្នុងមួយទង់ — `DB`, `ENV`, ឬ `DEF` — បង្ហាញកន្លែងដែលតម្លៃមានប្រសិទ្ធភាពបានមកពី។
+- ក** កំណត់ឡើងវិញ** ប៊ូតុង (បង្ហាញសម្រាប់តែទង់ `DB` -sourced ) ដើម្បីទម្លាក់ការបដិសេធ និង a** កំណត់ការបដិសេធទាំងអស់ឡើងវិញ** ប៊ូតុងនៅខាងក្រោម។
+- ក** ចាប់ផ្ដើមម៉ាស៊ីនមេឡើងវិញ** បដានៅពេលដែលទង់ `requiresRestart` ត្រូវបានផ្លាស់ប្តូរ។
 
 ### REST API
 
-ប្រតិបត្តិការទាំងអស់ឆ្លងកាត់ route តែមួយ៖
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts)។
-គ្រប់ method តម្រូវឱ្យមាន dashboard session ដែលបានផ្ទៀងផ្ទាត់ (`401` បើមិនដូច្នោះទេ)។
+ប្រតិបត្តិការទាំងអស់ឆ្លងកាត់ផ្លូវតែមួយ៖ [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts) ។ វិធីសាស្រ្តនីមួយៗទាមទារវគ្គ dashboard ដែលផ្ទៀងផ្ទាត់ភាពត្រឹមត្រូវ (`401` បើមិនដូច្នេះទេ) ។
+
+ជាមួយនឹងការចូលត្រូវបានបិទ (`requireLogin=false`) ផ្លូវត្រូវបានបើក លើកលែងតែទង់ដែលត្រូវបានការពារ៖ រាល់ទង់នៅក្នុងប្រភេទសុវត្ថិភាព បូក `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` និង `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` in `protectedFeatureFlags.ts`)។ `PUT` នៅលើមួយក្នុងចំណោមពួកគេ និង `DELETE` ខណៈពេលដែលមួយក្នុងចំណោមពួកវាមាន DB override នៅតែត្រូវការវគ្គនៃផ្ទាំងគ្រប់គ្រង គន្លឹះ `manage` -scope API និមិត្តសញ្ញាចូលប្រើ `oma_` ដែលមានវិសាលភាពសរសេរ ឬខ្ពស់ជាងនេះ ឬនិមិត្តសញ្ញា CLI ឬសញ្ញាសម្ងាត់សេវាកម្មខាងក្នុងដែលបានផ្ញើពីរង្វិលជុំត្រឡប់មកវិញ។ សំណុំនោះធំជាងការចូលដែលផ្លូវទទួលបានតែវគ្គ ឬគ្រាប់ចុច `manage` -scope ប៉ុណ្ណោះ។
 
 #### `GET /api/settings/feature-flags`
 
-បញ្ជូន flag ទាំងអស់ជាមួយតម្លៃមានប្រសិទ្ធភាព ប្រភព និងសេចក្ដីសង្ខេប។
+ត្រឡប់ទង់នីមួយៗជាមួយនឹងតម្លៃ ប្រភពដើម និងសេចក្តីសង្ខេបរបស់វា។
 
 ```jsonc
 {
@@ -281,34 +274,30 @@ Boolean flag ត្រូវបានចាត់ទុកថា **បានប�
 
 #### `PUT /api/settings/feature-flags`
 
-កំណត់ ឬលុប override តែមួយ។ Body៖ `{ key: string; value?: string }`។
-ការមិនបញ្ចូល `value` នឹងលុប override (ស្ដារតម្លៃ env / default)។
+កំណត់ ឬលុបការបដិសេធតែមួយ។ តួ៖ `{ key: string; value?: string }`។ ការលុប `value` លុបការបដិសេធ (ការស្ដារ env / លំនាំដើម) ។
 
 ```bash
-# កំណត់ DB override
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# លុប override (គ្មាន "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-ចម្លើយនឹងបង្ហាញ `effectiveValue`/`source` ថ្មី
-`previousValue`/`previousSource` មុន និង `requiresRestart`។ key ដែលមិនស្គាល់ និងតម្លៃ enum
-ដែលនៅក្រៅជួរ នឹងត្រូវបានបដិសេធដោយ `400`។
+ការឆ្លើយតបបានបន្លឺឡើងនូវ `effectiveValue`/`source` ថ្មី `previousValue`/ `previousSource` និង `requiresRestart`។ គ្រាប់ចុចមិនស្គាល់ និងតម្លៃ enum ក្រៅជួរត្រូវបានបដិសេធជាមួយ `400`។
 
 #### `DELETE /api/settings/feature-flags`
 
-លុប DB overrides **ទាំងអស់** ក្នុងពេលតែមួយ ដោយស្ដារ flag នីមួយៗទៅតម្លៃ env / default
-របស់វា។ បញ្ជូនត្រឡប់ `{ cleared: <count>, message: "..." }`។
+ជម្រះ** ទាំងអស់។** DB បដិសេធក្នុងពេលតែមួយ ដោយស្ដាររាល់ទង់ទៅជាតម្លៃ env/default របស់វា។ ត្រឡប់ `{ cleared: <count>, message: "..." }`។
 
 > [!NOTE]
-> Flags ដែលមាន `requiresRestart: true` នឹងមានប្រសិទ្ធភាពតែបន្ទាប់ពី reload process ប៉ុណ្ណោះ។
-> លំហូរចាប់ផ្ដើមឡើងវិញរបស់ dashboard ហៅ `POST /api/restart` ហើយបន្ទាប់មកធ្វើ polling
-> `GET /api/health/ping` រហូតដល់ server ដំណើរការឡើងវិញ។
+> ទង់ដែលមាន `requiresRestart: true` មានប្រសិទ្ធភាពបន្ទាប់ពីដំណើរការដំណើរការឡើងវិញ។ លំហូរចាប់ផ្តើមឡើងវិញរបស់ផ្ទាំងគ្រប់គ្រង ហៅ `POST /api/restart` ហើយបន្ទាប់មកធ្វើការស្ទង់មតិ `GET /api/health/ping` រហូតដល់ម៉ាស៊ីនមេត្រូវបានបម្រុងទុក។
+
+---
 
 ## ជម្រើសបម្រុងថវិកាបន្ទាន់
 

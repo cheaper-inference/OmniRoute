@@ -219,42 +219,35 @@
 
 ---
 
-## ফ্ল্যাগ টগল করা
+## টগলিং পতাকা
 
 ### ড্যাশবোর্ড
 
-**Dashboard → Settings → Feature Flags**-এ যান
-(`/dashboard/settings/feature-flags`)। গ্রিডটি
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-সমর্থন করে:
+নেভিগেট করুন** ড্যাশবোর্ড → সেটিংস → বৈশিষ্ট্য পতাকা** (`/dashboard/settings/feature-flags`) গ্রিড (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) সমর্থন করে:
 
-- কী বা বিবরণ অনুযায়ী **অনুসন্ধান**, এবং বিভাগ অনুযায়ী **ফিল্টার** (এছাড়াও একটি কৃত্রিম
-  **Requires Restart** ভিউ)।
-- বুলিয়ান ফ্ল্যাগের জন্য একটি **টগল** এবং enum ফ্ল্যাগের জন্য একটি **ড্রপডাউন**
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`)।
-- প্রতিটি ফ্ল্যাগের জন্য একটি **সোর্স ব্যাজ** — `DB`, `ENV`, অথবা `DEF` — যা কার্যকর
-  মানটি কোথা থেকে এসেছে তা দেখায়।
-- একটি **Reset** বোতাম (শুধু `DB`-সোর্সযুক্ত ফ্ল্যাগের জন্য দেখানো হয়), যা ওভাররাইড
-  সরিয়ে দেয়, এবং নিচে একটি **Reset All Overrides** বোতাম।
-- `requiresRestart` ফ্ল্যাগ পরিবর্তন করা হলে একটি **Restart Server** ব্যানার।
+- **অনুসন্ধান করুন** কী বা বর্ণনা দ্বারা, এবং** ফিল্টার** বিভাগ দ্বারা (প্লাস একটি সিন্থেটিক** রিস্টার্ট প্রয়োজন** দেখুন)।
+- ক** টগল** বুলিয়ান পতাকা এবং ক** ড্রপডাউন** enum পতাকা জন্য (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`)।
+- ক** উৎস ব্যাজ** প্রতি পতাকা — `DB`, `ENV`, বা `DEF` — দেখায় যে কার্যকর মানটি কোথা থেকে এসেছে।
+- ক** রিসেট করুন** ওভাররাইড ড্রপ করার জন্য বোতাম (শুধুমাত্র `DB` -sourced পতাকাগুলির জন্য দেখানো হয়েছে) এবং ক** সমস্ত ওভাররাইড রিসেট করুন** নীচে বোতাম।
+- ক** সার্ভার পুনরায় চালু করুন** ব্যানার যখন একটি `requiresRestart` পতাকা পরিবর্তন করা হয়।
 
 ### REST API
 
-সব অপারেশন একটি মাত্র রুটের মাধ্যমে সম্পন্ন হয়:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts)।
-প্রতিটি মেথডের জন্য একটি প্রমাণীকৃত ড্যাশবোর্ড সেশন প্রয়োজন (অন্যথায় `401`)।
+সমস্ত ক্রিয়াকলাপ একটি একক রুটের মধ্য দিয়ে যায়: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts) । প্রতিটি পদ্ধতির জন্য একটি প্রমাণীকৃত ড্যাশবোর্ড সেশন প্রয়োজন ( অন্যথায়`401` )।
+
+লগইন অক্ষম (`requireLogin=false`) সহ রুটটি উন্মুক্ত, সুরক্ষিত পতাকা ব্যতীত: সুরক্ষা বিভাগের প্রতিটি পতাকা প্লাস `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` এবং `SKILLS_SANDBOX_NETWORK_ENABLED` ( `protectedFeatureFlags.ts` তে`isProtectedFeatureFlag()` )। তাদের মধ্যে একটিতে একটি `PUT`, এবং একটি `DELETE` যখন তাদের মধ্যে একটিতে একটি DB ওভাররাইড রয়েছে, তখনও একটি ড্যাশবোর্ড সেশন, একটি `manage` -scope API কী, একটি `oma_` অ্যাক্সেস টোকেন লেখার সুযোগ বা উচ্চতর, বা লুপব্যাক থেকে পাঠানো CLI টোকেন বা অভ্যন্তরীণ-পরিষেবা টোকেন প্রয়োজন৷ সেই সেটটি লগইন অনের তুলনায় আরও প্রশস্ত, যেখানে রুটটি শুধুমাত্র একটি সেশন বা একটি `manage` -scope কী গ্রহণ করে।
 
 #### `GET /api/settings/feature-flags`
 
-প্রতিটি ফ্ল্যাগের কার্যকর মান, সোর্স এবং একটি সারাংশ ফেরত দেয়।
+প্রতিটি পতাকাকে তার কার্যকরী মান, উৎস এবং একটি সারসংক্ষেপ দিয়ে ফেরত দেয়।
 
 ```jsonc
 {
   "flags": [
     {
       "key": "REQUIRE_API_KEY",
-      "label": "API কী প্রয়োজন",
-      "description": "সমস্ত আগত অনুরোধের জন্য একটি API কী প্রয়োজন",
+      "label": "Require API Key",
+      "description": "Require an API key for all incoming requests",
       "category": "security",
       "type": "boolean",
       "enumValues": null,
@@ -264,7 +257,7 @@
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... সব 119টি ফ্ল্যাগ
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -278,34 +271,30 @@
 
 #### `PUT /api/settings/feature-flags`
 
-একটি একক ওভাররাইড সেট বা সরান। বডি: `{ key: string; value?: string }`।
-`value` বাদ দিলে ওভাররাইডটি সরানো হয় (env / ডিফল্ট পুনরুদ্ধার করা হয়)।
+একটি একক ওভাররাইড সেট করুন বা সরান৷ শরীর: `{ key: string; value?: string }`। `value` বাদ দিলে ওভাররাইড মুছে যায় (env/ডিফল্ট পুনরুদ্ধার করা)।
 
 ```bash
-# একটি DB ওভাররাইড সেট করুন
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# ওভাররাইড সরান ("value" ছাড়া)
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-উত্তরে নতুন `effectiveValue`/`source`, `previousValue`/
-`previousSource`, এবং `requiresRestart` ফেরত দেওয়া হয়। অজানা কী এবং সীমার বাইরের
-enum মান `400` সহ প্রত্যাখ্যান করা হয়।
+প্রতিক্রিয়াটি নতুন `effectiveValue`/`source`, `previousValue`/ `previousSource` এবং `requiresRestart` প্রতিধ্বনি করে। অজানা কী এবং রেঞ্জের বাইরের enum মান `400` দিয়ে প্রত্যাখ্যান করা হয়।
 
 #### `DELETE /api/settings/feature-flags`
 
-একবারে **সমস্ত** DB ওভাররাইড সরিয়ে দেয়, প্রতিটি ফ্ল্যাগের env / ডিফল্ট
-মান পুনরুদ্ধার করে। `{ cleared: <count>, message: "..." }` ফেরত দেয়।
+সাফ করে** সব** DB একবারে ওভাররাইড করে, প্রতিটি পতাকাকে তার env/ডিফল্ট মানতে পুনরুদ্ধার করে। `{ cleared: <count>, message: "..." }` ফেরত দেয়।
 
 > [!NOTE]
-> `requiresRestart: true` থাকা ফ্ল্যাগগুলো কেবল প্রসেস রিলোডের পর কার্যকর হয়।
-> ড্যাশবোর্ডের রিস্টার্ট ফ্লো `POST /api/restart` কল করে এবং সার্ভার পুনরায় চালু না হওয়া পর্যন্ত
-> `GET /api/health/ping` পোল করে।
+> `requiresRestart: true` সহ পতাকা শুধুমাত্র একটি প্রক্রিয়া পুনরায় লোড করার পরে কার্যকর হয়৷ ড্যাশবোর্ডের রিস্টার্ট ফ্লো `POST /api/restart` কল করে এবং তারপর সার্ভার ব্যাক আপ না হওয়া পর্যন্ত `GET /api/health/ping` পোল করে।
+
+---
 
 ## জরুরি বাজেট ফলব্যাক
 

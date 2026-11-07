@@ -217,29 +217,23 @@
 
 ### 仪表板
 
-导航至 **仪表板 → 设置 → 功能标志**
-(`/dashboard/settings/feature-flags`)。网格
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-支持：
+导航至**仪表板→设置→功能标志**（`/dashboard/settings/feature-flags`）。网格（`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`）支持：
 
-- 按键或描述进行**搜索**，并按类别进行**筛选**（另有一个合成的
-  **需要重启**视图）。
-- 布尔标志使用**切换开关**，枚举标志使用**下拉菜单**
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`)。
-- 每个标志都有一个**来源徽章** — `DB`、`ENV` 或 `DEF` — 用于显示有效值的来源。
-- **重置**按钮（仅对来源为 `DB` 的标志显示）用于删除覆盖值，底部还有一个
-  **重置所有覆盖**按钮。
-- 修改 `requiresRestart` 标志时显示**重启服务器**横幅。
+- **搜索**按键或描述，以及**筛选**按类别（加上合成**需要重新启动**看法）。
+- 一个**切换**对于布尔标志和**下拉菜单**对于枚举标志（`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`）。
+- 一个**源徽章**每个标志— `DB`、 `ENV`或`DEF` —显示有效值的来源。
+- 一个**重置**按钮（仅针对`DB` -sourced标志显示）来删除覆盖，以及**重置所有覆盖**按钮位于底部。
+- 一个**重启服务器**当`requiresRestart`标志更改时的横幅。
 
 ### REST API
 
-所有操作都通过单一路由进行：
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts)。
-每个方法都要求通过身份验证的仪表板会话（否则返回 `401`）。
+所有操作都通过单一路线： [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts) 。每种方法都需要经过身份验证的仪表板会话（否则为`401` ）。
+
+禁用登录 (`requireLogin=false`) 时，路由将打开，但受保护的标志除外：安全类别中的每个标志加上`OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`、 `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`、 `MITM_DISABLE_TLS_VERIFY`、 `OMNIROUTE_MCP_ENFORCE_SCOPES`和`SKILLS_SANDBOX_NETWORK_ENABLED` （ `protectedFeatureFlags.ts`中的`isProtectedFeatureFlag()` ）。其中之一上的`PUT`和`DELETE`虽然其中之一具有DB覆盖，但仍然需要仪表板会话、 `manage` -scope API密钥、具有写入范围或更高范围的`oma_`访问令牌，或者从环回发送的CLI令牌或内部服务令牌。该集合比登录时更宽，登录时路由仅接受会话或`manage` -scope密钥。
 
 #### `GET /api/settings/feature-flags`
 
-返回每个标志的有效值、来源和摘要。
+返回每个标志及其有效值、来源和摘要。
 
 ```jsonc
 {
@@ -271,34 +265,30 @@
 
 #### `PUT /api/settings/feature-flags`
 
-设置或移除单个覆盖值。请求正文：`{ key: string; value?: string }`。
-省略 `value` 会移除覆盖值（恢复为环境变量值 / 默认值）。
+设置或删除单个覆盖。正文： `{ key: string; value?: string }`。省略`value`将删除覆盖（恢复 env / 默认值）。
 
 ```bash
-# 设置 DB 覆盖值
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# 移除覆盖值（没有 "value"）
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-响应会返回新的 `effectiveValue`/`source`、`previousValue`/
-`previousSource` 以及 `requiresRestart`。未知键和超出范围的枚举值将以
-`400` 拒绝。
+该响应呼应了新的`effectiveValue`/`source`、 `previousValue`/ `previousSource`和`requiresRestart`。 `400`会拒绝未知的键和超出范围的枚举值。
 
 #### `DELETE /api/settings/feature-flags`
 
-一次性清除所有 DB 覆盖值，将每个标志恢复为其环境变量值 / 默认值。返回
-`{ cleared: <count>, message: "..." }`。
+清除**全部**DB立即覆盖，将每个标志恢复为其环境/默认值。返回`{ cleared: <count>, message: "..." }`。
 
 > [!NOTE]
-> `requiresRestart: true` 的标志只有在进程重新加载后才会生效。
-> 仪表板的重启流程会调用 `POST /api/restart`，然后轮询
-> `GET /api/health/ping`，直到服务器恢复运行。
+> `requiresRestart: true`标志仅在进程重新加载后生效。仪表板的重新启动流程调用`POST /api/restart` ，然后轮询`GET /api/health/ping` ，直到服务器备份。
+
+---
 
 ## 紧急预算回退
 

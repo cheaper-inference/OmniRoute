@@ -415,7 +415,7 @@ Namnutrymmet `src/domain/` centraliserar policybeslut så att rutthanterare inte
 - Connection/model regel snickare: `src/domain/connectionModelRules.ts`
 - Ögonblicksbilder av modelltillgänglighet: `src/domain/modelAvailability.ts`
 - Spårning av leverantörens utgångsdatum: `src/domain/providerExpiration.ts`
-- Quot cache: `src/domain/quotaCache.ts`
+- Quota cache: `src/domain/quotaCache.ts`. Providers add and remove quota windows (OpenAI dropped the 5-hour Codex window for some plans), so a usage reading the provider's adapter attests as complete (`quotasComplete`, see `src/lib/usage/usageReading.ts`) is the account's full window set: a window known earlier but absent from it is retired, in the cache, in the `quota_snapshots` a restart rehydrates (an appended retirement record), in the persisted Codex quota state and in Claude's saturation buckets. Partial evidence (response headers, stale copies) only updates the windows it carries.
 - Nedbrytningstillstånd: `src/domain/degradation.ts`
 - Konfigurationsgranskning: `src/domain/configAudit.ts`
 - OmniRoute -svarsmetadatabyggare: `src/domain/omnirouteResponseMeta.ts`

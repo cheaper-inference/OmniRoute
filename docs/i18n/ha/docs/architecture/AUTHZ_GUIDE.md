@@ -309,15 +309,15 @@ Yana kashe sai dai idan `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 `read` / `write` / `admin` akan alamomin `oma_live_…`, an jera su ta `scopeSatisfies`
 (`src/lib/accessTokens/scopes.ts`). Wannan matsayi yana aiki ne kawai ga takardar shaidar alamar shiga. Duba [Tabbatar da Gudanarwa](../guides/MANAGEMENT-AUTH.md).
 
-## Maɓallin Buƙatar Tabbatarwa
+## Auth Bukatar Canji
 
-`isAuthRequired()` a cikin `src/shared/utils/apiAuth.ts` ne ke yanke shawara ko ana tilasta **kowane** tabbatarwa ga buƙata:
+`isAuthRequired()` a `src/shared/utils/apiAuth.ts` ya yanke shawarar ko** kowane** Ana aiwatar da auth don buƙatu:
 
-- `settings.requireLogin === false` → an kashe tabbatarwa gaba ɗaya, sai dai matakin kariya koyaushe (duba [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) da kiran da ke ba da takardar shaidar da yake karɓa, waɗanda ke buƙatar takardar shaida ɗaya kamar yadda ake yi lokacin da shiga ke kunne: bayar da sync tokens, ƙirƙirar CLI access tokens a kowane iyaka, da ƙirƙirar maɓallin API mai iyakar `manage`/`admin`, ba da wannan iyaka ga maɓalli, ko sake samar ko nuna irin wannan maɓalli (`requireCredentialForManagementScopedKey()` a `src/lib/api/requireManagementAuth.ts`). Maɓallan inference kawai suna zama a buɗe.
-- Babu kalmar sirri da aka saita **kuma** babu env var na `INITIAL_PASSWORD` → yanayin bootstrap: yana barin onboarding wizard da buƙatun loopback, amma buƙatun hanyar sadarwa da aka fallasa har yanzu suna buƙatar takardun shaida.
-- Duk kuskuren DB → yana gazawa a rufe (secure-by-default).
+- `settings.requireLogin === false` → auth naƙasasshe ne a duk duniya, in ban da matakin kariya koyaushe (duba [Tiers Guard Route](../security/ROUTE_GUARD_TIERS.md) ) da kuma kiran da ke ba da takaddun shaidar da yake karɓa, waɗanda ke buƙatar shaidar daidai da yadda ake shiga: ba da alamun daidaitawa, Mingin CLI samun damar shiga a kowane fage, da ƙirƙirar maɓallin API, ko ba da ikon `manage` da ikon `admin`. sabuntawa ko bayyana irin wannan maɓalli (`requireCredentialForManagementScopedKey()` a cikin `src/lib/api/requireManagementAuth.ts`). Maɓallai-kawai suna buɗewa. Rubuta tuta mai kariya (`REQUIRE_API_KEY`, sauran tutocin Tsaro, da tutocin SSRF / TLS / MCP-scope / sandbox da aka jera a cikin [Tutocin Feature](../reference/FEATURE_FLAGS.md#rest-api) ) da adana saitunan abin rufe fuska PII (`PUT /api/settings/pii`) suma suna buƙatar takaddun shaida.
+- Babu kalmar sirri da aka saita** kuma** babu `INITIAL_PASSWORD` env var → yanayin bootstrap yana ba da damar mayen hawan hawa da buƙatun madauki, amma buƙatun hanyar sadarwa da aka fallasa har yanzu suna buƙatar takaddun shaida. Banbanci: rubuta tutar sifa mai kariya da adana saitunan rufe fuska PII (`PUT /api/settings/pii`) suna buƙatar takaddun shaida ko da daga madauki, don haka madauki da kanta bai isa ba a can.
+- Duk wani kuskuren DB → ya kasa rufe (amintacce-by-default).
 
-Tilasta maɓallin API na abokin ciniki yana amfani da `isRequireApiKeyEnabled()` a `src/shared/utils/featureFlags.ts`, ba karanta `process.env.REQUIRE_API_KEY` kai tsaye ba. Wannan yana da muhimmanci ga instances da aka tura: canza `REQUIRE_API_KEY` a Dashboard → Feature Flags yana adana DB override kuma nan take yana shafar `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, da sauran duba tabbatarwar client-API da ke raba wannan mataimaki. Idan ba a iya karanta feature flag store ba, tabbatarwar client API tana gazawa a rufe kuma tana buƙatar maɓalli.
+Ƙaddamar da maɓallin API abokin ciniki yana amfani da `isRequireApiKeyEnabled()` a cikin `src/shared/utils/featureFlags.ts`, ba karanta `process.env.REQUIRE_API_KEY` kai tsaye ba. Wannan yana da mahimmanci ga al'amuran da aka tura: jujjuya `REQUIRE_API_KEY` a cikin Dashboard → Feature Tutoci yana adana DB wuce gona da iri kuma nan da nan ya shafi `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, da sauran abokin ciniki-API auth checks da ke raba wannan mataimaki. Idan ba a iya karanta kantin sayar da tuta, abokin ciniki API auth ya kasa rufe kuma yana buƙatar maɓalli.
 
 ## Sauyin da ke Karya Daidaituwa — v3.8.0
 

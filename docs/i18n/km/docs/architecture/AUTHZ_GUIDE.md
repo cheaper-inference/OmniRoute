@@ -308,15 +308,15 @@ API keys មាន array `scopes` (រក្សាទុកជា JSON ក្ន
 
 `read` / `write` / `admin` លើ tokens `oma_live_…` ដែលត្រូវបានចាត់ថ្នាក់ដោយ `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`)។ ចំណាត់ថ្នាក់នេះអនុវត្តចំពោះ access-token credential ប៉ុណ្ណោះ។ សូមមើល [Management Authentication](../guides/MANAGEMENT-AUTH.md)។
 
-## ប៊ូតុងបើក/បិទការត្រួតពិនិត្យ Auth
+## បិទ/បើកតម្រូវឱ្យមានការផ្ទៀងផ្ទាត់
 
-`isAuthRequired()` នៅ `src/shared/utils/apiAuth.ts` សម្រេចថាតើ auth **ណាមួយ** ត្រូវបានអនុវត្តសម្រាប់សំណើឬអត់:
+`isAuthRequired()` ក្នុង `src/shared/utils/apiAuth.ts` សម្រេចថាតើ** ណាមួយ។** ការផ្ទៀងផ្ទាត់ត្រូវបានអនុវត្តសម្រាប់សំណើមួយ៖
 
-- `settings.requireLogin === false` → auth ត្រូវបានបិទទូទាំងប្រព័ន្ធ លើកលែងតែ tier ដែលការពារជានិច្ច (មើល [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) និងការហៅដែលផ្ដល់ credential ដែលវាទទួលយក ដែលត្រូវការ credential ដូចគ្នាដូចពេលការចូលបើក: ការចេញ sync token, ការបង្កើត CLI access token នៃ scope ណាមួយ, និងការបង្កើត API key ដែលមាន scope `manage`/`admin`, ការផ្ដល់ scope នោះទៅ key, ឬការបង្កើតឡើងវិញ ឬការបង្ហាញ key បែបនោះ (`requireCredentialForManagementScopedKey()` នៅ `src/lib/api/requireManagementAuth.ts`)។ Key សម្រាប់ inference តែប៉ុណ្ណោះនៅតែបើក។
-- មិនបានកំណត់ password **និង** មិនមាន env var `INITIAL_PASSWORD` → mode bootstrap អនុញ្ញាត onboarding wizard និងសំណើ loopback ប៉ុន្តែសំណើបណ្តាញខាងក្រៅនៅតែត្រូវការ credential។
-- កំហុស DB ណាមួយ → fail closed (ការពារសុវត្ថិភាពតាមលំនាំដើម)។
+- `settings.requireLogin === false` → auth ត្រូវបានបិទជាសកល លើកលែងតែថ្នាក់ការពារជានិច្ច (សូមមើល [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) និងការហៅទូរសព្ទដែលផ្តល់ព័ត៌មានបញ្ជាក់អត្តសញ្ញាណដែលវាទទួលយក ដែលត្រូវការលិខិតសម្គាល់ដូចគ្នានឹងការចូល៖ ចេញនិមិត្តសញ្ញាសមកាលកម្ម ការបញ្ចូលលេខសម្ងាត់ចូលប្រើ CLI នៅគ្រប់វិសាលភាព និងបង្កើត API គន្លឹះដែលប្រើ `manage` `admin` គ្រាប់ចុច ឬការបង្កើតឡើងវិញ ឬបង្ហាញសោបែបនេះ (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`)។ គ្រាប់ចុចសម្រាប់តែការសន្និដ្ឋាននៅតែបើក។ ការសរសេរទង់មុខងារដែលបានការពារ (`REQUIRE_API_KEY` ទង់សុវត្ថិភាពផ្សេងទៀត និងទង់ SSRF / TLS / MCP-scope / sandbox ដែលបានរាយក្នុង [Feature Flags](../reference/FEATURE_FLAGS.md#rest-api) ) និងការរក្សាទុកការកំណត់របាំង PII (`PUT /api/settings/pii`) ក៏បន្តត្រូវការលិខិតសម្គាល់ផងដែរ។
+- គ្មានការកំណត់ពាក្យសម្ងាត់ទេ។** និង** គ្មាន `INITIAL_PASSWORD` env var → bootstrap mode អនុញ្ញាតឱ្យអ្នកជំនួយការចាប់ផ្តើមដំណើរការនិងសំណើរង្វិលជុំ ប៉ុន្តែសំណើបណ្តាញដែលបានលាតត្រដាងនៅតែត្រូវការព័ត៌មានសម្ងាត់។ ករណីលើកលែង៖ ការសរសេរទង់មុខងារដែលបានការពារ និងរក្សាទុកការកំណត់របាំង PII (`PUT /api/settings/pii`) ត្រូវការលិខិតសម្គាល់សូម្បីតែពីរង្វិលជុំវិញ ដូច្នេះរង្វិលជុំវិញដោយខ្លួនឯងគឺមិនគ្រប់គ្រាន់នៅទីនោះទេ។
+- កំហុស DB ណាមួយ → បរាជ័យ (សុវត្ថិភាពតាមលំនាំដើម) ។
 
-ការអនុវត្ត API key របស់ client ប្រើ `isRequireApiKeyEnabled()` នៅ `src/shared/utils/featureFlags.ts` មិនមែនការអាន `process.env.REQUIRE_API_KEY` ដោយផ្ទាល់ទេ។ នេះសំខាន់សម្រាប់ instance ដែលបានដាក់ពង្រាយ: ការប្ដូរ `REQUIRE_API_KEY` ក្នុង Dashboard → Feature Flags ទុក DB override ហើយមានផលភ្លាមៗលើ `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` និងការពិនិត្យ auth client-API ផ្សេងទៀតដែលចែករំលែក helper នេះ។ ប្រសិនបើមិនអាចអាន store feature flag ទេ auth client API fail closed ហើយតម្រូវឱ្យមាន key។
+ការអនុវត្តគន្លឹះ API អតិថិជនប្រើ `isRequireApiKeyEnabled()` ក្នុង `src/shared/utils/featureFlags.ts` មិនមែនជាការអាន `process.env.REQUIRE_API_KEY` ដោយផ្ទាល់ទេ។ វាសំខាន់សម្រាប់ករណីដែលបានដាក់ពង្រាយ៖ ការបិទបើក `REQUIRE_API_KEY` នៅក្នុងផ្ទាំងគ្រប់គ្រង → Feature Flags រក្សាទុក DB override និងប៉ះពាល់ដល់ `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, និងការពិនិត្យផ្ទៀងផ្ទាត់ភាពត្រឹមត្រូវរបស់អតិថិជន-API ផ្សេងទៀតដែលចែករំលែកជំនួយនេះ។ ប្រសិនបើកន្លែងផ្ទុកទង់មុខងារមិនអាចអានបានទេ អតិថិជន API auth បរាជ័យ ហើយទាមទារសោ។
 
 ## ការផ្លាស់ប្តូរដែលមិនត្រូវគ្នាជាមួយកំណែមុន — v3.8.0
 

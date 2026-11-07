@@ -67,23 +67,23 @@
 
 <br/>
 
-## 📈 השער ממשיך לצמוח
+## 📈 השער ממשיך לגדול
 
 <div align="center">
 
-|                             |        v3.8.50        | **v3.8.51** |      `v3.8.54+`       |
-| --------------------------- | :-------------------: | :---------: | :-------------------: |
-| 🌐 ספקים                    |          352          |   **358**   |          380          |
-| 🧠 מזהי מודלי צ'אט ייחודיים |         1320          |  **1374**   |         1491          |
-| 🖼️ גשר מודאליות             | 🆕 חזות + שמע + וידאו |      ✓      |           ✓           |
-| 📡 קטלוג Radar החינמי       |       🆕 opt-in       |      ✓      |           ✓           |
-| ⚖️ תזמון מודע למכסות        |    🆕 Quota-Share     |      ✓      |           ✓           |
-| 📊 טלמטריית מכסות           |        🆕 חיה         |      ✓      |           ✓           |
-| 🧰 מצב ללא ממשק             |           —           |      —      | 🆕 `serve --headless` |
-| 🛤️ תשתית מסילת LTS          |           —           |      —      |     🆕 ערוצי הפצה     |
-| 🔎 API לגילוי מודלים        |           —           |      —      | 🆕 `/v1/models/query` |
+|                        |          v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
+| ---------------------- | :-----------------------: | :---------: | :-------------------: |
+| ספקי 🌐                |            352            |   **358**   |          380          |
+| 🧠 דגם צ'אט ייחודי IDs |           1320            |  **1374**   |         1491          |
+| גשר אופנות 🖼️          | 🆕 vision + audio + וידאו |      ✓      |           ✓           |
+| 📡 Radar קטלוג חינם    |         🆕 opt-in         |      ✓      |           ✓           |
+| ⚖️ תזמון מודע למכסה    |      🆕 Quota-Share       |      ✓      |           ✓           |
+| 📊 Quota טלמטריה       |       🆕 בשידור חי        |      ✓      |           ✓           |
+| מצב 🧰 ללא ראש         |             —             |      —      | 🆕 `serve --headless` |
+| 🛤️ LTS rail infra      |             —             |      —      |    ערוצי שחרור 🆕     |
+| 🔎 גילוי מודל API      |             —             |      —      | 🆕 `/v1/models/query` |
 
-**→ [מפת דרכים](ROADMAP.md) — נוסעים על המסילה אל `v3.9.0 LTS`**
+**→ [מפת הדרכים](ROADMAP.md) — רוכבת על המסילה ל- `v3.9.0 LTS`**
 
 </div>
 
@@ -580,35 +580,35 @@ Radar הוא שירות אופציונלי המבוסס על GET בלבד. לק�
 
 </div>
 
-> נקודות עיקריות מהגרסה **v3.8.20 → v3.8.54**. היסטוריה מלאה ב-[`CHANGELOG.md`](CHANGELOG.md).
+> דגשים אחרונים מ** v3.8.20 → v3.8.54** . היסטוריה מלאה ב- [`CHANGELOG.md`](CHANGELOG.md).
 
-- **⚖️ ניתוב `quota-weighted`** — אסטרטגיית הקומבו ה-20 מדלגת על חשבונות שמיצו את המכסה, ואז בוחרת בין השאר לפי יחס מכסה שנותרה חלקי עומס פעיל, תוך שמירה על שיחות קיימות מוצמדות. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🧰 מצב Headless** — `omniroute serve --headless` (או `OMNIROUTE_HEADLESS=1`) מריץ רק את מנוע הפרוקסי `/v1/*`, עם לוח הבקרה ותתי-מערכות ייעודיות ללוח כבויים. → [Headless Mode](docs/guides/HEADLESS.md)
-- **🔎 גילוי מודלים** — `/v1/models` מסנן לפי יכולת, הקשר, סוג וטקסט, ו-`POST /v1/models/query` מחזיר רשימה קצרה ודטרמיניסטית עם אותה נראות לכל מפתח. → [API Reference](docs/reference/API_REFERENCE.md)
-- **🔑 שליטה בניתוב לפי מפתח** — הצמדת מפתח API למודל או קומבו אחד עם `forcedModel`, והוספה או הסרה אטומית של מודלים וקומבואים למפתח (`/api/keys/{id}/access`). → [API Reference](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
-- **🛡️ בקרה מדויקת יותר על PII** — בחירה לפי סוג, עד 20 תבניות מסכה מותאמות אישית מאומתות וספירת זיהוי לפי סוג; המסכה עצמה נשארת לפי opt-in. → [Guardrails](docs/security/GUARDRAILS.md)
-- **🌍 67 שפות** — לוח בקרה, מראות תיעוד ו-CLI, עם `npm run i18n:add-locale` שמוסיף שפה בכל מקום בפקודה אחת. → [i18n Guide](docs/guides/I18N.md)
-- **🎛️ OmniConductor** — האצלת A2A נכנסת לצי הסוכנים שלך, כישורי Conductor בכרטיס הסוכן, ופאנל בלוח הבקרה עם צ'אט קולי Faro בלחיצה. → [A2A Server](docs/frameworks/A2A-SERVER.md)
-- **🛂 קבלה אדפטיבית והגנה מעומס** — בקשות צ'אט כבדות נכנסות לתור במקום לקבל 503, עם השכרת RPM מתגלגלת אטומית לכל חיבור. → [Resilience Guide](docs/architecture/RESILIENCE_GUIDE.md)
-- **🗂️ סדר `/v1/models` קנוני** — בלוק אחד רציף לכל ספק (קומבואים מוצמדים ראשונים), יציב בכל מקור קטלוג. → [API Reference](docs/reference/API_REFERENCE.md)
-- **🗜️ חיזוק דחיסה** — הגנה על ניפוח מופעלת כברירת מחדל, Caveman packs לגרמנית / צרפתית / יפנית + סינית (וֶנְיֵאן), מסנני RTK ל-Gradle ו-.NET. → [Compression](docs/compression/COMPRESSION_ENGINES.md)
-- **💸 עלות קבועה אמיתית** — ספקי מנוי / coding-plan מוצגים כ-$0 באנליטיקות עלות; תקציב, מכסה וניתוב ממשיכים להעריך. → [API Reference](docs/reference/API_REFERENCE.md)
-- **⚖️ ניתוב Quota-Share** — חלוקת מכסה של חשבון משותף באופן הוגן בין מפתחות מאוגדים, עם שמירה על ניצול עבודה כך שפרוסות לא פעילות מושאלות. → [Resilience Guide](docs/architecture/RESILIENCE_GUIDE.md)
-- **🤖 התקנת CLI/agent בפקודה אחת** — 15 פקודות `setup-*` רשומות; `omniroute run` מפעיל 7 CLIs (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); `omniroute configure` תומך ב-11 יעדים עם בורר ספק+מודל אינטראקטיבי ומועדפים לכל הקשר. → [CLI Integrations](docs/guides/CLI-INTEGRATIONS.md)
-- **🛰️ מצב מרוחק** — הפעלת OmniRoute מרוחק עם טוקנים מוגדרי טווח (`connect` / `contexts` / `tokens`) + עוזר OAuth `antigravity` להתקנות VPS. → [Remote Mode](docs/guides/REMOTE-MODE.md)
-- **🧭 ניתוב אוטומטי חכם יותר** — קומבואים `auto/<category>:<tier>`, **Fusion** (פאנל מודלים + שופט), ניתוב מודע למשימה, עקיפת מודל / מצב / תקציב USD לכל בקשה. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🗜️ דחיסה ניתנת להחלפה** — 12 מנועים ניתנים להרכבה + Compression Studios: LLMLingua-2, Ultra דו-שלבי, omniglyph, שער נאמנות לכל שלב, GCF v3.2, עורך גרירה-סידור. → [Compression](docs/compression/COMPRESSION_ENGINES.md)
-- **🕵️ פענוח MITM שקוף (TPROXY)** — לכידת CLIs שמתעלמים ממשתני סביבה של פרוקסי, עם CA לפי SNI + מתקין trust-store. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
-- **💸 טלמטריית עלות בכל מקום** — כותרות עלות/שימוש `X-OmniRoute-*` בכל נקודת קצה, כותרת חיסכון cache-HIT, מכסות הוצאה ב-USD לכל מפתח. → [API Reference](docs/reference/API_REFERENCE.md)
-- **🧠 זיכרון בשליטתך** — כבוי כברירת מחדל, opt-in לכימות וקטורי int8 + דעיכה טיפוסית, `x-omniroute-no-memory` לכל בקשה. → [Memory](docs/frameworks/MEMORY.md)
-- **🛡️ אבטחה** — הגנת prompt-injection בכל מסלול LLM (ערכת red-team), guardrail הסתרת אישורים לפי opt-in (מסתיר מפתחות/סודות API דולפים לשני הכיוונים), חיפוש אינטרנט DuckDuckGo חינמי כמוצא אחרון, ושער כניסה אופציונלי OIDC ללוח הבקרה (כניסה בסיסמה תמיד זמינה). → [Guardrails](docs/security/GUARDRAILS.md)
-- **🖼️ נקודות קצה חדשות** — `/v1/ocr` (Mistral OCR) ו-`/v1/audio/translations` (בסגנון Whisper) משלימות את ממשק המדיה. → [API Reference](docs/reference/API_REFERENCE.md)
-- **🎨 יצירת תמונה / וידאו / אודיו** — API אחד למדיה: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind, וספקי דיבור כמו ElevenLabs. → [API Reference](docs/reference/API_REFERENCE.md)
-- **🌍 פריסה ותפעול** — `basePath` בפרוקסי הפוך, זיהוי שפת דפדפן אוטומטי, מעקב מכשירים לכל מפתח, MITM ללא root, לוקליזציה zh-TW. → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 עוד ספקים וסוכנים** — סוכני ענן (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) עם דפדפן + כניסת OAuth, כרטיס Ollama ייעודי, Claude Opus 5 & Sonnet 5, שותפות רשמית עם Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… וקטלוג **380 ספקים** מעודכן. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
-- **📡 שקיפות ניתוב** — כל תגובה נושאת כותרת `X-OmniRoute-Decision` עם שם האסטרטגיה/ספק/השהיה ששירתה אותה, אסטרטגיית קומבו חדשה `cache-optimized` + פקטור Auto-Combo `cacheAffinity` מנתבים בקשות חוזרות לאותו חיבור עם קידומת במטמון, ו-`/v1/auto-combo/{channel}/candidates` לקריאה בלבד חושף את מאגר המועמדים החי של ערוץ `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **⚡ ביצועים ותשתית מקומית** — Redis מקומי בלחיצה אחת, מפריסי relay ל-Cloudflare Workers / Deno Deploy, Bifrost & Mux כשירותים מוטמעים ומפוקחים. → [שירותים מוטמעים](docs/frameworks/EMBEDDED-SERVICES.md)
-- **🧩 גם כלול בערכה** — מסגרת פלאגינים + מרקטפלייס, מסגרות כישורים ל-Omni/Agent/GitHub, אינטגרציה עם Obsidian vault (22 כלי MCP), APIs תואמי OpenAI ל-Batch & Files, מטמון תגובות סמנטי, גיימיפיקציה עם לוחות מובילים, גילוי סוכני ACP (15 סוכנים מובנים), ייצוא לוגים מתוזמן ל-BigQuery, `auto/chaos` פיצול למודלים מרובים במקביל, גשר בוט ל-Telegram, מנהל גרסאות מובנה באפליקציה ודירוגי ספקים חינמיים LMArena-ELO. → [תיעוד](docs/README.md)
+- **⚖️ `quota-weighted`** — האסטרטגיה המשולבת ה-20 מדלגת על חשבונות מותשים, ואז מושכת בין השאר בפרופורציה לשארית המכסה ÷ בטיסה, תוך שמירה על שיחות קיימות מוצמדות. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **מצב 🧰 ללא ראש** — `omniroute serve --headless` (או `OMNIROUTE_HEADLESS=1`) מריץ רק את מנוע ה-proxy `/v1/*`, כאשר לוח המחוונים ולוח המחוונים בלבד כבויים. → [מצב ללא ראש](docs/guides/HEADLESS.md)
+- **גילוי מודל 🔎** — `/v1/models` מסנן לפי יכולת, הקשר, סוג וטקסט, ו- `POST /v1/models/query` מחזיר רשימה קצרה דטרמיניסטית עם אותה נראות לכל מפתח. → [API](docs/reference/API_REFERENCE.md)
+- **🔑 בקרת ניתוב לכל מפתח** — הצמד מפתח API לדגם אחד או שילוב עם `forcedModel`, והוסף או הסר את הדגמים והשילובים של המפתח בצורה אטומית (`/api/keys/{id}/access`). → [API הפניה](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
+- **🛡️ Finer PII בקרות** בחירת — לכל סוג, עד 20 תבניות מיסוך מותאמות אישית מאומתות ומדדי זיהוי לפי סוג; המיסוך עצמו נשאר בבחירה. [מעקות בטיחות](docs/security/GUARDRAILS.md) →
+- **🌍 67 שפות** לוח המחוונים —, מראות docs ו- CLI, כאשר `npm run i18n:add-locale` מוסיף שפה בכל מקום בפקודה אחת. [מדריך](docs/guides/I18N.md) → i18n
+- **🎛️ OmniConductor** האצלת — נכנסת A2A לצי הסוכנים שלך, כישורי מנצח בכרטיס הסוכן, ולוח מחוונים עם צ'אט קולי של Faro בדחיפה-לדיבור. → [A2A](docs/frameworks/A2A-SERVER.md)
+- **🛂 הגנת כניסה ועומס יתר** תור בקשות צ'אט במשקל כבד — במקום 503ing, עם חוזי חכירה מתגלגלים של אטומי RPM לכל חיבור. [מדריך חוסן](docs/architecture/RESILIENCE_GUIDE.md) →
+- **🗂️ Canonical `/v1/models`** — בלוק אחד רציף מקובץ ספק לכל ספק (שילובים מוצמדים ראשונים), יציב בכל מקור קטלוג. → [API](docs/reference/API_REFERENCE.md)
+- **🗜️ התקשות דחיסה** ברירת המחדל של — מגן אינפלציה, חבילות Caveman עבור DE / FR / JA + סינית (wényán), מסנני RTK עבור Gradle &.NET. [דחיסה](docs/compression/COMPRESSION_ENGINES.md) →
+- **💸 עלות כנה קבועה** ספקי מנוי / תוכנית קידוד — קראו** $0** בניתוח עלויות; תקציב, מכסה וניתוב המשיכו להעריך. → [API](docs/reference/API_REFERENCE.md)
+- **⚖️ Quota-Share ניתוב** — חילקה את מכסת החשבון המשותף בצורה הוגנת בין מפתחות מאוחדים, חוסכת עבודה ולכן מושאלות פרוסות סרק. → [מדריך חוסן](docs/architecture/RESILIENCE_GUIDE.md)
+- **הגדרת 🤖 CLI/agent אחת** — 15 פקודות `setup-*` רשומות; `omniroute run` משיק 7 CLIs (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); `omniroute configure` תומך ב-11 יעדים עם ספק אינטראקטיבי בוחר דגמים של + ומועדפים לפי הקשר. → [CLI שילובים](docs/guides/CLI-INTEGRATIONS.md)
+- **מצב מרחוק 🛰️** — כונן OmniRoute מרוחק עם אסימוני scoped (`connect` / `contexts` / `tokens`) + an `antigravity` OAuth עוזר להתקנות VPS. [מצב מרחוק](docs/guides/REMOTE-MODE.md) →
+- **🧭 ניתוב אוטומטי חכם יותר** — `auto/<category>:<tier>` שילובים,** הַתָכָה** (פאנל מודל + שופט), ניתוב מודע למשימות, מודל / מצב / תקציב לפי בקשה לפי בקשה. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **🗜️ דחיסה ניתנת לחיבור** — 12 מנועים ניתנים לחיבור + Compression Studios: LLMLingua-2, אולטרה דו-שכבתי, אומניglyph, שער נאמנות לפי שלב, GCF v3.2, עורך גרירה-סדר מחדש. [דחיסה](docs/compression/COMPRESSION_ENGINES.md) →
+- **🕵️ שקוף MITM פענוח (TPROXY)** — לכידת CLIs שמתעלמת מ-proxy env vars, עם מתקין ל-SNI CA + trust-store. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
+- **💸 עלות טלמטריה בכל מקום** כותרות — `X-OmniRoute-*` cost/usage בכל נקודת קצה, כותרת חיסכון במטמון-HIT, מכסות הוצאות USD לכל מפתח. → [API הפניה](docs/reference/API_REFERENCE.md)
+- **🧠 זיכרון שאתה שולט בו** — כבוי כברירת מחדל, opt-in int8 קוונטיזציה וקטורית + הקלדה דעיכה, לפי בקשה `x-omniroute-no-memory`. → [זיכרון](docs/frameworks/MEMORY.md)
+- **🛡️ Security** שמירה על הזרקת הנחיות — בכל מסלול LLM (חבילת צוות אדום), מעקה בטיחות למסיכת אישורים (מפרסמים דלפו API keys/secrets לשני הכיוונים), חיפוש אחרון בחינם DuckDuckGo באינטרנט, ושער כניסה אופציונלי OIDC ללוח המחוונים (כניסה לסיסמה תמיד נשארת זמינה). → [מעקות בטיחות](docs/security/GUARDRAILS.md)
+- **🖼️ נקודות קצה חדשות** — `/v1/ocr` (Mistral OCR) ו- `/v1/audio/translations` (בסגנון Whisper) מסגלים את פני המדיה. → [API הפניה](docs/reference/API_REFERENCE.md)
+- **🎨 ייצור תמונה / וידאו / אודיו** — one API למדיה: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind וספקי דיבור כגון ElevenLabs. → [API](docs/reference/API_REFERENCE.md)
+- **🌍 פריסה ופעולות** — -proxy הפוך `basePath`, זיהוי אוטומטי בשפת הדפדפן, מעקב אחר מכשיר לכל מפתח, אמון MITM ללא שורש, לוקליזציה של zh-TW. → [סביבה](docs/reference/ENVIRONMENT.md)
+- **🤝 ספקים וסוכנים נוספים** סוכני ענן — (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) עם כניסת דפדפן + OAuth, כרטיס Ollama מחלקה ראשונה, Claude Opus 5 & Sonnet 5, שותפות רשמית Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova Agnesbahed AI...** קטלוג 380 ספקים** . [ספקי](docs/reference/PROVIDER_REFERENCE.md) →
+- **📡 Routing transparency** — every response carries an `X-OmniRoute-Decision` header naming the strategy/provider/latency that served it, a new `cache-optimized` combo strategy + Auto-Combo `cacheAffinity` factor route repeat requests back to the connection holding the cached prefix, and a read-only `/v1/auto-combo/{channel}/candidates` endpoint exposes an `auto/*` channel's live candidate pool. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **⚡ ביצועים מקומיים ואינפרא** — בלחיצה אחת מקומית Redis, Cloudflare Workers / Deno פריס מפרסי ממסר, Bifrost & Mux כשירותים משובצים מפוקחים. → [שירותים משובצים](docs/frameworks/EMBEDDED-SERVICES.md)
+- **🧩 גם בקופסה** — plugin framework + marketplace, Omni/Agent/GitHub skills frameworks, Obsidian vault שילוב (22 כלים MCP ), אצווה וקבצים תואמי OpenAI APIs, מטמון תגובות סמנטי, gamification עם Leaderboards, ACP agent discovery (15 סוכנים מובנים), ייצוא יומן מתוזמן ל- BigQuery, `auto/chaos` -out מקביל בגרסת Telegram אאוט, מרובה דגמים ו-app manager. דירוגי ספקים בחינם של LMArena-ELO. → [Docs](docs/README.md)
 
 <br/>
 
@@ -911,15 +911,15 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
 
 <div align="center">
 
-## 🗜️ חסוך 15–95% טוקנים — אוטומטית
+## 🗜️ חסוך 15–95% אסימונים — באופן אוטומטי
 
 </div>
 
-### 📖 איך זה עובד — צינור עיבוד, ארכיטקטורה ומתמטיקת החיסכון
+### 📖 איך זה עובד — pipeline, אדריכלות וחיסכון מתמטיקה
 
-<img src="./docs/diagrams/compression-pipeline.svg" width="100%" alt="צינור הדחיסה של OmniRoute: בקשת הדגמה בת 10,000 טוקנים עוברת דרך 12 מנועים ניתנים להרכבה — Session-Dedup, CCR, Lite, RTK, Responses Tool Output, Headroom, Relevance, Caveman, Aggressive, LLMLingua-2, Ultra ו-OmniGlyph — ויכולה להגיע לספק בכ-1,080 טוקנים בדוגמת הערימה המתועדת. תוכן מובנה מוגן על ידי שומרי שימור ושערי נאמנות לכל שלב; מצבים מאבדי-מידע או ניסיוניים מפורשים עשויים לשנות תוכן זכאי."/>
+<img src="./docs/diagrams/compression-pipeline.svg" width="100%" alt="OmniRoute compression pipeline: an illustrative 10,000-token client request passes through 12 composable engines — Session-Dedup, CCR, Lite, RTK, Responses Tool Output, Headroom, Relevance, Caveman, Aggressive, LLMLingua-2, Ultra and OmniGlyph — and can reach the provider at about 1,080 tokens in the documented stacked example. Structured content is protected by preservation guards and per-step fidelity gates; explicit lossy or experimental modes may transform eligible content."/>
 
-קומבו מוערם כברירת מחדל מריץ `RTK → Caveman`. כאשר שניהם פועלים על אותו מטען (payload) של כלי/הקשר, החיסכון מצטבר:
+שילוב מוערם המוגדר כברירת מחדל פועל `RTK → Caveman`. כאשר שניהם פועלים על אותו מטען tool/context, מתחם חיסכון:
 
 ```txt
 combined = 1 − (1 − RTK) × (1 − Caveman_input)
@@ -927,74 +927,74 @@ average  = 1 − (1 − 0.80) × (1 − 0.46) = 89.2%
 range    = 78.4 – 94.6%
 ```
 
-בלוקי קוד, כתובות URL, JSON ונתונים מובנים **תמיד מוגנים** על ידי מנוע השימור.
+קוד בלוקים, URLs, JSON ונתונים מובנים הם** מוגן תמיד** על ידי מנוע השימור.
 
-> **למה להשתמש בהרבה טוקנים כשמעט טוקנים עושים את העבודה?** כל בקשה עוברת דרך צינור הדחיסה של OmniRoute **באופן שקוף** — ללא שינויים בצד הלקוח. זהו כעת **מערך של 12 מנועים ניתנים להרכבה** שרצים לפי הסדר ומתמזגים ומתחלפים לפי כל קומבו ניתוב — בבנייה על רעיונות מ-[RTK](https://github.com/rtk-ai/rtk), [Caveman](https://github.com/JuliusBrussee/caveman) (⭐ 90K+), [LLMLingua-2](https://github.com/microsoft/LLMLingua), ו-[Troglodita](https://github.com/leninejunior/troglodita) (PT-BR).
+> **למה להשתמש בהרבה אסימונים כאשר מעט אסימונים עושים את העבודה?** כל בקשה עוברת דרך צינור הדחיסה של OmniRoute** בשקיפות** — ללא שינויים בלקוח. עכשיו זה א** ערימה של 12 מנועים הניתנים לחיבור** שפועלים לפי הסדר ומערבבים ומתאימים לכל משולבת ניתוב — בונים על רעיונות מ- [RTK](https://github.com/rtk-ai/rtk), [Caveman](https://github.com/JuliusBrussee/caveman) (⭐ 90K +), [LLMLingua-2](https://github.com/microsoft/LLMLingua) ו- [Troglodita](https://github.com/leninejunior/troglodita) (PT-BR).
 
-### 🧱 מערך 12 המנועים
+### 🧱 מחסנית 12 המנועים
 
-המנועים פועלים לפי סדר הצינור; כל אחד ניתן להפעלה/כיבוי בנפרד וניתן להגדרה לכל קומבו:
-
-<table>
-  <tr><th align="center">#</th><th align="left">מנוע</th><th align="left">מה הוא עושה</th></tr>
-  <tr><td align="center" nowrap>1</td><td align="left" nowrap><b>Session-Dedup</b></td><td align="left">מפיל תוכן שחוזר על עצמו בין תורות (מבוסס תוכן, בין-תורי)</td></tr>
-  <tr><td align="center" nowrap>2</td><td align="left" nowrap><b>CCR</b></td><td align="left">מארכב בלוקים גדולים מאחורי סמני שליפה, נשלפים לפי דרישה</td></tr>
-  <tr><td align="center" nowrap>3</td><td align="left" nowrap><b>Lite</b></td><td align="left">קיצוץ רווחים + כתובות URL של תמונות (בסיס קליל-השהיה)</td></tr>
-  <tr><td align="center" nowrap>4</td><td align="left" nowrap><b>RTK</b></td><td align="left">סינון חכם של תוצאות כלים, דה-דופ וקיצוץ (מודע לפקודות)</td></tr>
-  <tr><td align="center" nowrap>5</td><td align="left" nowrap><b>Responses Tool Output</b></td><td align="left">דחיסת JSON חסרת-אובדן תחילה + דחיסת אבחון תחומה עבור פלטי shell/patch/search/build (Responses API)</td></tr>
-  <tr><td align="center" nowrap>6</td><td align="left" nowrap><b>Headroom</b></td><td align="left">כיווץ טבלאי חסר-אובדן של מערכי JSON (~30%) באמצעות קודק <b>GCF</b> מוטמע</td></tr>
-  <tr><td align="center" nowrap>7</td><td align="left" nowrap><b>Relevance</b></td><td align="left">ניקוד משפטים אקסטרקטיבי מול שאילתת המשתמש האחרונה</td></tr>
-  <tr><td align="center" nowrap>8</td><td align="left" nowrap><b>Caveman</b></td><td align="left">דחיסת פרוזה מבוססת-כללים (~65–75% בפלט)</td></tr>
-  <tr><td align="center" nowrap>9</td><td align="left" nowrap><b>Aggressive</b></td><td align="left">תמצות + הזדקנות הדרגתית של תורות ישנים</td></tr>
-  <tr><td align="center" nowrap>10</td><td align="left" nowrap><b>LLMLingua-2</b></td><td align="left">גיזום סמנטי ב-ML באמצעות MobileBERT ONNX — בטוח לקוד, אסינכרוני</td></tr>
-  <tr><td align="center" nowrap>11</td><td align="left" nowrap><b>Ultra</b></td><td align="left">גיזום טוקנים היוריסטי עם שכבת מודל קטן (SLM) אופציונלית</td></tr>
-  <tr><td align="center" nowrap>12</td><td align="left" nowrap><b>OmniGlyph</b></td><td align="left">קידוד הקשר-כתמונה ניסיוני עבור Claude Fable 5 נמדד על החוט הישיר של Anthropic; שנאי GPT 5.6 נותרים fail-closed בהמתנה לקבלות ספק. ארבעה פרופילי דחיסה (aggressive כברירת מחדל, balanced, coding-safe, passthrough) (האגרסיבי ביותר; בהצטרפות)</td></tr>
-</table>
-
-בלוקי קוד, כתובות URL ונתונים מובנים **נשמרים תמיד** באופן מושלם-בייט. **פריסטים בלחיצה אחת** משלבים את המנועים:
+מנועים פועלים בסדר צינור; כל אחת מהן ניתנת להחלפה עצמאית וניתנת להגדרה לכל שילוב:
 
 <table>
-  <tr><th align="left">מצב</th><th align="left">חיסכון</th><th align="left">הכי מתאים ל</th></tr>
-  <tr><td align="left" nowrap>🪶 <b>Lite</b></td><td align="left" nowrap>~15%</td><td align="left">ברירת מחדל בטוחה תמיד-פעילה</td></tr>
-  <tr><td align="left" nowrap>🪨 <b>Standard (Caveman)</b></td><td align="left" nowrap>~30%</td><td align="left">קידוד יומיומי</td></tr>
-  <tr><td align="left" nowrap>⚡ <b>Aggressive</b></td><td align="left" nowrap>~50%</td><td align="left">מפגשים ארוכים עתירי-כלים</td></tr>
-  <tr><td align="left" nowrap>🔥 <b>Ultra</b></td><td align="left" nowrap>~75%</td><td align="left">חיסכון מקסימלי</td></tr>
-  <tr><td align="left" nowrap>🧰 <b>RTK</b></td><td align="left" nowrap>60–90%</td><td align="left">פלט shell/test/build/git</td></tr>
-  <tr><td align="left" nowrap>🔗 <b>Stacked (RTK → Caveman)</b></td><td align="left" nowrap><b>78–95%</b></td><td align="left">פרומפטים משולבים + לוגים של כלים</td></tr>
+  <tr><th align="center">#</th><th align="left">מָנוֹעַ</th><th align="left">מה זה עושה</th></tr>
+  <tr><td align="center" nowrap>1</td><td align="left" nowrap><b>Session-Dedup</b></td><td align="left">מוריד תוכן שחוזר על עצמו על פני פניות (כתובת תוכן, פנייה צולבת)</td></tr>
+  <tr><td align="center" nowrap>2</td><td align="left" nowrap><b>CCR</b></td><td align="left">ארכיון בלוקים גדולים מאחורי סמני אחזור, נשלפים לפי דרישה</td></tr>
+  <tr><td align="center" nowrap>3</td><td align="left" nowrap><b>לייט</b></td><td align="left">רווח לבן + image-URL חיתוך (השהייה-אור בסיס)</td></tr>
+  <tr><td align="center" nowrap>4</td><td align="left" nowrap><b>RTK</b></td><td align="left">סינון תוצאות חכם של כלים, ביטול זיהוי וחיתוך (מודע לפקודות)</td></tr>
+  <tr><td align="center" nowrap>5</td><td align="left" nowrap><b>פלט כלי תגובות</b></td><td align="left">דחיסה אבחנתית מגובלת JSON + ללא הפסדים ראשונה עבור יציאות shell/patch/search/build (Responses API)</td></tr>
+  <tr><td align="center" nowrap>6</td><td align="left" nowrap><b>מרווח ראש</b></td><td align="left">דחיסה טבלאית ללא אובדן של מערכי JSON (~ 30%) באמצעות ספק <b>GCF</b> codec</td></tr>
+  <tr><td align="center" nowrap>7</td><td align="left" nowrap><b>רלוונטיות</b></td><td align="left">ניקוד משפטי חילוץ מול שאילתת המשתמש האחרונה</td></tr>
+  <tr><td align="center" nowrap>8</td><td align="left" nowrap><b>איש מערות</b></td><td align="left">דחיסת פרוזה מבוססת כללים (~ 65–75% בפלט)</td></tr>
+  <tr><td align="center" nowrap>9</td><td align="left" nowrap><b>תוֹקפָּנִי</b></td><td align="left">סיכום + הזדקנות מתקדמת של תורות ישנות</td></tr>
+  <tr><td align="center" nowrap>10</td><td align="left" nowrap><b>LLMLingua-2</b></td><td align="left">גיזום סמנטי ML באמצעות MobileBERT ONNX — בטוח בקוד, אסינכרון</td></tr>
+  <tr><td align="center" nowrap>11</td><td align="left" nowrap><b>אוּלְטרָה</b></td><td align="left">גיזום אסימון היוריסטי עם שכבה אופציונלית בדגם קטן (SLM).</td></tr>
+  <tr><td align="center" nowrap>12</td><td align="left" nowrap><b>OmniGlyph</b></td><td align="left">קידוד הקשר-כתמונה ניסיוני עבור Claude נמדד אגדה 5 על חוט Anthropic הישיר; שנאי GPT 5.6 נשארים סגורים לכשל ממתינים לקבלת קבלות ספק. ארבעה פרופילי דחיסה (ברירת מחדל אגרסיבית, מאוזנת, בטוחה בקידוד, מעבר) (האגרסיביות ביותר; הסכמה)</td></tr>
 </table>
 
-**דוגמה אמיתית — מצב Standard:**
+קוד בלוקים, URLs ונתונים מובנים הם** נשמר תמיד** בייט מושלם.** הגדרות קבועות מראש בלחיצה אחת** לשלב את המנועים:
 
-> **לפני (69 טוקנים):** _"הסיבה שרכיב ה-React שלך מתרנדר מחדש היא כנראה יצירת הפניה חדשה לאובייקט בכל מחזור רינדור. כשמעבירים אובייקט מוטבע כ-prop, ההשוואה הרדודה של React רואה אותו כאובייקט שונה בכל פעם, מה שמפעיל רינדור מחדש. הייתי ממליץ להשתמש ב-useMemo כדי לממואיזציה של האובייקט."_
->
-> **אחרי (19 טוקנים):** _"הפניה חדשה לאובייקט בכל רינדור. prop אובייקט מוטבע = הפניה חדשה = רינדור מחדש. עטוף ב-useMemo."_
->
-> **אותה תשובה. 72% פחות טוקנים. אפס אובדן דיוק.** ✅
+<table>
+  <tr><th align="left">מצב</th><th align="left">חיסכון</th><th align="left">הכי טוב עבור</th></tr>
+  <tr><td align="left" nowrap>🪶 <b>לייט</b></td><td align="left" nowrap>~15%</td><td align="left">ברירת מחדל בטוחה תמיד</td></tr>
+  <tr><td align="left" nowrap>🪨 <b>סטנדרט (איש מערות)</b></td><td align="left" nowrap>~30%</td><td align="left">קידוד יומי</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>תוֹקפָּנִי</b></td><td align="left" nowrap>~50%</td><td align="left">הפעלות ארוכות עמוסות כלים</td></tr>
+  <tr><td align="left" nowrap>🔥 <b>אוּלְטרָה</b></td><td align="left" nowrap>~75%</td><td align="left">חיסכון מקסימלי</td></tr>
+  <tr><td align="left" nowrap>🧰 <b>RTK</b></td><td align="left" nowrap>60–90%</td><td align="left">Shell/test/build/git</td></tr>
+  <tr><td align="left" nowrap>🔗 <b>מוערמים (RTK → Caveman)</b></td><td align="left" nowrap><b>78–95%</b></td><td align="left">הנחיות מעורבות יומני כלי +</td></tr>
+</table>
 
-**דוגמה PT-BR — מצב [Troglodita](https://github.com/leninejunior/troglodita):**
+**דוגמה אמיתית — מצב סטנדרטי:**
 
-> **לפני (42 טוקנים):** _"הבעיה היא שהקומפוננטה מבצעת רה-רנדור כי נוצרת הפניה חדשה לאובייקט בכל מחזור רינדור. הייתי ממליץ להשתמש ב-useMemo."_
+> **לפני (69 אסימונים):** _"הסיבה שרכיב React שלך מעבד מחדש היא ככל הנראה בגלל שאתה יוצר הפניה חדשה לאובייקט בכל מחזור רינדור. כאשר אתה מעביר אובייקט מוטבע כפרופסיה, ההשוואה הרדודה של React רואה אותו כאובייקט אחר בכל פעם, מה שמפעיל רינדור מחדש. הייתי ממליץ להשתמש useMemo כדי לשנן את האובייקט."_
 >
-> **אחרי (12 טוקנים):** _"רה-רנדור: הפניה חדשה בכל מחזור (אובייקט inline נוצר מחדש). להשתמש ב-`useMemo`."_
+> **אחרי (19 אסימונים):** _"רנדר אובייקט חדש בכל עיבוד. אבזר אובייקט מוטבע = רנדר חדש =. לעטוף ב- useMemo."_
 >
-> **אותה תשובה. ~70% פחות טוקנים. דיוק טכני נשמר.** ✅
+> **אותה תשובה. 72% פחות אסימונים. אובדן דיוק אפס.** ✅
+
+**דוגמה PT [-BR מצב טרוגלודיטה](https://github.com/leninejunior/troglodita) —**
+
+> **אנטים (42 אסימונים):** _"O problema é que o componente está re-renderizando porque uma nova referência de objeto está sendo criada em cada ciclo de renderização. Eu recomendaria usar useMemo."_
+>
+> **דפוי (12 אסימונים):** _"עיבוד מחדש: ref nova cada ciclo (objeto inline recriado). Usar `useMemo`."_
+>
+> **Mesma resposta. ~ 70% menos tokens. Precisão técnica intacta.** ✅
 
 <br/>
 
-### 🎚️ מעבר למנועים — סגנונות פלט, החוגה האדפטיבית ושליטה לכל בקשה
+### 🎚️ מעבר לסגנונות הפלט של מנועי —, החוגה האדפטיבית ושליטה לפי בקשה
 
-12 המנועים שלמעלה מקטינים את מה שנכנס **פנימה**. שלוש שכבות נוספות מעצבות **איך**, **מתי**, ומה שיוצא **החוצה**:
+12 המנועים שלמעלה מכווצים מה הולך** ב** . שלוש שכבות נוספות בצורת** אֵיך** ,** כַּאֲשֵׁר** , ומה שבא** הַחוּצָה** :
 
-- **🪄 סגנונות פלט** _(הכוונה על ציר הפלט)_ — הזרקת הוראות עיצוב תגובה דטרמיניסטיות ובטוחות למטמון; ניתנות לשילוב, כל אחת בעוצמת `lite` / `full` / `ultra`. הוספת סגנון היא רשומת registry של שורה אחת:
-  - **פרוזה תמציתית** — השמטת מילוי / מילות קישור / הסתייגויות; שמירה על התוכן הטכני במדויק.
-  - **פחות קוד** — YAGNI בסגנון "מפתח בכיר עצלן": השינוי הקטן ביותר שעובד, בלי תשתית שלא התבקשה.
-  - **Ponytail (מפתח בכיר עצלן)** — לטפס על סולם ה-YAGNI, לתקן את שורש הבעיה, ה-diff הקטן ביותר שעובד.
-  - **יש לי ADHD (פעולה תחילה)** — הפעולה הבאה מובילה, צעדים ממוספרים, צעד הבא קונקרטי אחד, בלי הקדמה.
-  - **CJK תמציתי (文言)** — סגנון סיני קלאסי אולטרה-תמציתי (מוגבל לפי locale ל-`zh`).
-- **🎯 תקציב הקשר אדפטיבי** _(החוגה)_ — במקום סף טוקנים יחיד של הפעל/כבה, מטפסים עם המנועים הזולים והפחות מאבדניים רק עד כמה שצריך כדי **להתאים לחלון ההקשר של המודל**. מדיניות: `reserve-output` (ברירת מחדל, מודע למודל) · `percentage` · `absolute`. מצב: `floor` (הבטחת התאמה) · `replace-autotrigger` (הבחירה המפורשת שלך מנצחת) · `off` (סף מורשת).
-- **🎛️ היכן הכיווץ מוכרע** _(עדיפות, גבוה → נמוך)_ — כותרת `x-omniroute-compression` לכל בקשה › עקיפת routing-combo › פרופיל פעיל בשם › אדפטיבי / auto-trigger › ברירת מחדל של הפאנל › כבוי. התוכנית שהוחלה מוחזרת בכותרת התגובה `X-OmniRoute-Compression: <mode>; source=<source>`.
+- **🪄 פלט סגנונות** _(היגוי ציר פלט)_ — מזריקים הוראות עיצוב תגובה דטרמיניסטיות, בטוחות במטמון; ניתן לשילוב, כל אחד בעוצמת `lite` / `full` / `ultra`. הוספת סגנון היא ערך רישום בשורה אחת:
+  - **פרוזה טרסה** מילוי טיפות — / מאמרים / גידור; לשמור על חומר טכני מדויק.
+  - **פחות קוד** — "Lazy senior dev" YAGNI: שינוי העבודה הקטן ביותר, ללא פיגומים לא רצויים.
+  - **קוקו (מפתח בכיר עצלן)** — לטפס על סולם YAGNI, תקן את הסיבה השורשית, הפרש העבודה הקטן ביותר.
+  - **יש לי ADHD (פעולה ראשונה)** — מוביל לפעולה הבאה, שלבים ממוספרים, שלב קונקרטי אחד הבא, ללא הקדמה.
+  - **Terse CJK (文言)** — בסגנון קלאסי-סיני אולטרה-דק (מגודר מקומי ל- `zh`).
+- **🎯 תקציב-הקשר מסתגל** _(החוגה)_ — במקום סף אסימון on/off אחד, הסלמה את המנועים הזולים ביותר וחסרי הפסדים רק עד כמה שצריך כדי** להתאים לחלון ההקשר של הדגם** . מדיניות: `reserve-output` (ברירת מחדל, מודע לדגם) · `percentage` · `absolute`. מצב: `floor` (התאמה מובטחת) · `replace-autotrigger` (הבחירה המפורשת שלך מנצחת) · `off` (סף מדור קודם).
+- **🎛️ איפה הדחיסה נקבעת** _(עדיפות, גבוהה → נמוך)_ — לכל בקשה `x-omniroute-compression` header › ניתוב-קומבו ביטול › פרופיל פעיל בשם › אדפטיבי / טריגר אוטומטי › ברירת המחדל של פאנל › כבוי. התוכנית המיושמת מהדהדת בחזרה בכותרת התגובה `X-OmniRoute-Compression: <mode>; source=<source>`.
 
-auto-trigger לפי סף טוקנים, הפעלת החוגה האדפטיבית, נעיצת פרופיל בשם, הגדרה חד-פעמית לכל בקשה, או שיוך pipeline לכל routing combo — מה שמתאים לעומס העבודה. **eval harness** אופליין אופציונלי (`npm run eval:compression`) מדרג נאמנות מול חיסכון על קורפוס נעוץ לפני שקידום שינוי.
+הפעל אוטומטית לפי סף אסימון, הפעל את החוגה האדפטיבית, הצמד פרופיל בעל שם, הגדר חד פעמי לכל בקשה, או הקצה צינור לכל ניתוב משולבת — מה שמתאים לעומס העבודה. הצטרפות לא מקוונת** רתמת eval** (`npm run eval:compression`) משיג נאמנות לעומת חיסכון בקורפוס מוצמד לפני שאתה מקדם שינוי.
 
 📖 [`COMPRESSION_GUIDE.md`](docs/compression/COMPRESSION_GUIDE.md) · [`RTK_COMPRESSION.md`](docs/compression/RTK_COMPRESSION.md) · [`COMPRESSION_ENGINES.md`](docs/compression/COMPRESSION_ENGINES.md)
 
@@ -1006,37 +1006,30 @@ auto-trigger לפי סף טוקנים, הפעלת החוגה האדפטיבית,
 
 </div>
 
-**1) התקנה והרצה**
+**1) התקן והפעל**
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-> 💡 רואה `npm warn ERESOLVE` או אזהרות peer-dep? [הן בלתי מזיקות](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **משתמשים ב-npm 11 ואילך?** ייתכן ש-npm יחסום סקריפטים של מחזור חיים של חבילות אלא אם הם מורשים. ה-`postinstall` של OmniRoute (`node scripts/build/postinstall.mjs`) נדרש כדי להכין את קבצי ה-runtime המקוריים שלו. אפשרו את החבילות הנקובות באזהרה של npm בעת התקנה גלובלית. עבור סט החבילות שדווח על ידי OmniRoute 3.8.54:
+> 💡 See `npm warn ERESOLVE` or peer-dep warnings? [They're harmless](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated). **Using npm 11 or later?** npm may block package lifecycle scripts unless they are allowed. OmniRoute's `postinstall` (`node scripts/build/postinstall.mjs`) is required to prepare its native runtime files. Allow the packages named in npm's warning when installing globally. For the package set reported by OmniRoute 3.8.54:
 >
-> ```bash
-> npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
-> ```
+> `bash npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute `
 >
-> כדי לעשות שימוש חוזר ברשימת ההיתר הזו בהתקנות גלובליות עתידיות, הגדירו אותה פעם אחת, ואז התקינו כרגיל:
+> כדי לעשות שימוש חוזר ברשימת ההיתרים הזו עבור התקנות גלובליות עתידיות, הגדר אותה פעם אחת ולאחר מכן התקן כרגיל:
 >
-> ```bash
-> npm config set allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
-> npm install -g omniroute
-> ```
+> `bash npm config set allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user npm install -g omniroute `
 >
-> רשימת התלויות יכולה להשתנות בין גרסאות; אם npm מדווח על רשימה אחרת, השתמשו בשמות החבילות מאותה אזהרה. אישור חבילה מתיר לסקריפטי ההתקנה שלה לרוץ.
-> **משתמשים ב-Gemini Web או בספק אחר מבוסס web-cookie?** חבילת ה-npm כוללת את Playwright אך לא את בינארי ה-Chromium שלה. ראו את ההערה על [הגדרת Playwright Chromium](docs/guides/TROUBLESHOOTING.md#gemini-web-and-playwright-chromium) לפני ביצוע הבקשה הראשונה לספק web.
+> רשימת התלות יכולה להשתנות בין מהדורות; אם npm מדווח על רשימה אחרת, השתמש בשמות החבילות מאותה אזהרה. מתן אפשרות לחבילה מאפשרת לסקריפט ההתקנה שלה לפעול.** משתמש ב- Gemini Web או ספק אחר של עוגיות אינטרנט?** חבילת npm כוללת Playwright אך לא Chromium הבינארי שלו. עיין בהערת [ההגדרה Playwright Chromium](docs/guides/TROUBLESHOOTING.md#gemini-web-and-playwright-chromium) לפני ביצוע הבקשה הראשונה של ספק האינטרנט.
 
-Dashboard בכתובת `http://localhost:20128` · API בכתובת `http://localhost:20128/v1`.
+לוח מחוונים ב- `http://localhost:20128` · API at `http://localhost:20128/v1`.
 
-**2) חיבור ספק זכאי באמצעות החשבון שלך**
+**2) חבר ספק זכאי באמצעות החשבון שלך**
 
-Dashboard → **Providers** → בחרו ספק שתנאיו ומכסתו הנוכחיים מתאימים לשימוש שלכם → הוסיפו את מפתח ה-API שלו או השלימו את תהליך החשבון שלו. חבילות חינמיות עשויות לדרוש הרשמה, אישור או אמצעי תשלום. עיינו ב-[Free Tiers Guide](docs/getting-started/FREE-TIERS-GUIDE.md); זמינות ללא מפתח אינה מובטחת, וספקים המסומנים `tos: avoid` מוחרגים מ-`auto` כברירת מחדל.
+לוח המחוונים →** ספקים** → בחר ספק שהתנאים והמכסה הנוכחיים שלו מתאימים למקרה השימוש שלך → הוסף את מפתח API שלו או השלם את זרימת החשבון שלו. שכבות חינם עשויות לדרוש הרשמה, אישור או אמצעי תשלום. עיין [במדריך השכבות החינמיות](docs/getting-started/FREE-TIERS-GUIDE.md) ; זמינות ללא מפתח אינה מובטחת, וספקים המסומנים `tos: avoid` אינם נכללים ב- `auto` כברירת מחדל.
 
-**3) כוונו את כלי הקידוד שלכם**
+**3) הצבע על כלי הקידוד שלך**
 
 ```txt
 Base URL: http://localhost:20128/v1
@@ -1044,15 +1037,15 @@ API Key:  [copy from Dashboard → Endpoints]
 Model:    auto            (routes among eligible connections — or choose provider/model)
 ```
 
-**4) אימות שהכול עובד**
+**4) ודא שזה עובד**
 
 ```bash
 curl http://localhost:20128/v1/models -H "Authorization: Bearer YOUR_KEY"
 ```
 
-אמורים להופיע המודלים המחוברים שלכם ברשימה. 🎉 זה הכול — התחילו לקודד, ו-OmniRoute מנתב אוטומטית ועושה fallback עבורכם.
+אתה אמור לראות את הדגמים המחוברים שלך ברשימה. 🎉 זהו זה — תתחיל בקידוד, ו- OmniRoute מנתב אוטומטית ונופל בחזרה בשבילך.
 
-אם הלקוח שלכם אינו יכול לשלוח כותרות מותאמות אישית, OmniRoute חושף גם כינויים לתאימות מבוססי טוקן:
+אם הלקוח שלך לא יכול לשלוח כותרות מותאמות אישית, OmniRoute חושף גם כינויים של תאימות אסימון:
 
 ```txt
 OpenAI catalog:   http://localhost:20128/vscode/YOUR_KEY/
@@ -1063,7 +1056,7 @@ Ollama chat:      http://localhost:20128/vscode/YOUR_KEY/api/chat
 Ollama tags:      http://localhost:20128/vscode/YOUR_KEY/api/tags
 ```
 
-השתמשו באלה רק עבור לקוחות שאינם יכולים לצרף `Authorization: Bearer ...`. אימות באמצעות כותרת נשאר המצב המועדף.
+השתמש באלה רק עבור לקוחות שאינם יכולים לצרף `Authorization: Bearer ...`. אימות כותרת נשאר המצב המועדף.
 
 <br/>
 
@@ -1282,29 +1275,29 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # גם CI=1 מדלג ע�
 <br/>
 <div align="center">
 
-## 🛠️ מחסנית טכנולוגית
+## 🛠️ Tech Stack
 
 </div>
 
 <table>
-  <tr><th align="left">שכבה</th><th align="left">טכנולוגיה</th></tr>
-  <tr><td nowrap><b>סביבת ריצה</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>שפה</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> בכל <code>src/</code> ו-<code>open-sse/</code> (אפס <code>any</code> בליבה מאז v2.0)</td></tr>
-  <tr><td nowrap><b>מסגרת</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>מסד נתונים</b></td><td>better-sqlite3 (SQLite, יומן WAL) + LowDB (JSON מדור קודם) — 147 מודולי תחום, 223 מיגרציות</td></tr>
-  <tr><td nowrap><b>זיכרון</b></td><td>חיפוש טקסט מלא SQLite FTS5 + הטמעות וקטוריות עם כימות int8, דעיכה עם טיפוסים</td></tr>
-  <tr><td nowrap><b>סכמות</b></td><td>Zod 4 — אימות קלט/פלט של כלי MCP + חוזי API</td></tr>
+  <tr><th align="left">שִׁכבָה</th><th align="left">טֶכנוֹלוֹגִיָה</th></tr>
+  <tr><td nowrap><b>זמן ריצה</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>שָׂפָה</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> על פני <code>src/</code> ו- <code>open-sse/</code> (אפס <code>any</code> בליבה מאז v2.0)</td></tr>
+  <tr><td nowrap><b>מִסגֶרֶת</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>מסד נתונים</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 מודולי תחום, 223 העברות</td></tr>
+  <tr><td nowrap><b>זֵכֶר</b></td><td>SQLite FTS5 טקסט מלא + int8-quantized הטבעות וקטוריות, דעיכה מודפסת</td></tr>
+  <tr><td nowrap><b>סכימות</b></td><td>Zod 4 — MCP tool I/O אימות + API חוזים</td></tr>
   <tr><td nowrap><b>פרוטוקולים</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>הזרמה</b></td><td>אירועים שנשלחים מהשרת (SSE) + גשר WebSocket (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>דחיסה</b></td><td>צינור בעל 12 מנועים — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>אימות ואבטחה</b></td><td>OAuth 2.0 (PKCE) + JWT + מפתחות API + אימות MCP מוגבל להיקף · AES-256-GCM במנוחה · DOMPurify</td></tr>
-  <tr><td nowrap><b>הסוואה</b></td><td>wreq-js — התחזות לטביעת אצבע TLS מסוג JA3 / JA4, פרוקסי בעל 3 רמות</td></tr>
-  <tr><td nowrap><b>עמידות</b></td><td>מפסיק מעגל, נסיגה אקספוננציאלית, מניעת הסתערות המונית, ריפוי עצמי אוטומטי משולב</td></tr>
-  <tr><td nowrap><b>רישום</b></td><td>pino — יומני JSON מובְנים עם הקשר הבקשה</td></tr>
-  <tr><td nowrap><b>בדיקות</b></td><td>מריץ הבדיקות של Node.js + Vitest — <b>יותר מ-60,000 הצהרות בדיקה סטטיות</b> ביותר מ-8,400 קובצי בדיקה במעקב (יחידה, אינטגרציה, E2E, אבטחה, מערכת אקולוגית)</td></tr>
-  <tr><td nowrap><b>פלטפורמות</b></td><td>מחשב שולחני (Electron) · Android (Termux) · PWA (כל דפדפן)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — פרסום npm אוטומטי + Docker Hub בעת שחרור</td></tr>
-  <tr><td nowrap><b>קישורים</b></td><td><a href="https://omniroute.online">אתר</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>נְהִירָה</b></td><td>אירועים שנשלחו על ידי שרת (SSE) + WebSocket bridge (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>דְחִיסָה</b></td><td>צינור 12 מנועים — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>&amp; אבטחה</b></td><td>OAuth 2.0 (PKCE) + JWT + API מפתחות + MCP scoped auth · AES-256-GCM במנוחה · DOMPurify</td></tr>
+  <tr><td nowrap><b>הִתגַנְבוּת</b></td><td>wreq-js — JA3 / JA4 TLS התחזות בטביעת אצבע, פרוקסי בשלוש רמות</td></tr>
+  <tr><td nowrap><b>כּוֹשֵׁר הִתאוֹשְׁשׁוּת</b></td><td>מפסק זרם, ביטול אקספוננציאלי, עדר נגד רעמים, ריפוי עצמי משולבת אוטומטית</td></tr>
+  <tr><td nowrap><b>רישום</b></td><td>יומני JSON מובנים של pino — עם הקשר הבקשה</td></tr>
+  <tr><td nowrap><b>בּוֹחֵן</b></td><td>Node.js test runner + Vitest — <b>60,000 הצהרות בדיקה סטטית +</b> על פני 8,400 קבצי בדיקה במעקב של + (יחידה, אינטגרציה, E2E, אבטחה, מערכת אקולוגית)</td></tr>
+  <tr><td nowrap><b>פלטפורמות</b></td><td>שולחן עבודה (Electron) · Android (Termux) · PWA (כל דפדפן)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — auto npm פרסם + Docker Hub בשחרור</td></tr>
+  <tr><td nowrap><b>קישורים</b></td><td><a href="https://omniroute.online">אֲתַר אִינטֶרנֶט</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">
@@ -1794,17 +1787,17 @@ OmniRoute עומד על כתפי ענקים. הוא התחיל כ-fork של **[9
   <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,955</td><td>זיהה את משטח המכסה של Grok Build; OmniRoute אימת לאחר מכן את פורמט התקשורת החי ותיקן אותו באופן עצמאי.</td></tr>
 </table>
 
-## 📄 רישיון
+## רישיון 📄
 
-רישיון MIT - לפרטים, ראו [LICENSE](LICENSE).
+רישיון MIT - ראה [LICENSE](LICENSE) לפרטים.
 
 ---
 
 <div align="center">
 
-**[⬆ חזרה לראש העמוד](#-omniroute)** · נבנה ❤️ עבור קהילת הבינה המלאכותית בקוד פתוח.
+**[⬆ חזרה למעלה](#-omniroute)** · נבנה עם ❤️ עבור קהילת AI בקוד פתוח.
 
-<sub>נוצר על ידי <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · רישיון MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>נוצר על ידי <a href="https://github.com/diegosouzapw">דייגו סוזה</a> · OmniRoute v3.8.54 · Node ≥ 22.22.2 · רישיון MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
-<!-- דיונים ב-GitHub מופעלים לשאלות ותשובות של הקהילה -->
+<!-- GitHub Discussions enabled for community Q&A -->

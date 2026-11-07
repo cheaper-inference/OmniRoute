@@ -303,15 +303,15 @@ müəyyən etdikdən sonra işləyir. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` olmad�
 (`src/lib/accessTokens/scopes.ts`) tərəfindən dərəcələndirilir. Bu dərəcə yalnız giriş tokeni
 etimadnaməsinə tətbiq olunur. Baxın: [İdarəetmə autentifikasiyası](../guides/MANAGEMENT-AUTH.md).
 
-## Autentifikasiya tələbi açarı
+## Auth tələb olunan keçid
 
-`src/shared/utils/apiAuth.ts`-dəki `isAuthRequired()` sorğu üçün **hər hansı** autentifikasiyanın tətbiq olunub-olunmayacağını müəyyən edir:
+`src/shared/utils/apiAuth.ts` -də `isAuthRequired()` qərar verir** hər hansı** sorğu üçün auth tətbiq edilir:
 
-- `settings.requireLogin === false` → autentifikasiya qlobal olaraq söndürülür, lakin həmişə qorunan təbəqə ([Marşrut Qoruma Təbəqələri](../security/ROUTE_GUARD_TIERS.md)) və qəbul edilən etimadnaməni verən çağırışlar istisnadır. Bunlar girişin aktiv olduğu zamankı ilə eyni etimadnaməni tələb edir: sinxronizasiya tokenləri vermək, istənilən əhatədə CLI giriş tokenləri vermək və `manage`/`admin` əhatəli API açarı yaratmaq, bu əhatəni açara vermək və ya belə açarı yenidən yaratmaq/göstərmək (`src/lib/api/requireManagementAuth.ts`-dəki `requireCredentialForManagementScopedKey()`). Inference üçün açarlar açıq qalır.
-- İdarəetmə parolu yoxdur **və** `INITIAL_PASSWORD` mühit dəyişəni yoxdur → bootstrap rejimi: quraşdırma sehrbazına və loopback sorğularına icazə verilir, lakin xarici şəbəkə sorğuları hələ də etimadnamə tələb edir.
-- İstənilən verilənlər bazası xətası → bağlı şəkildə uğursuz olur (təhlükəsiz defolt).
+- `settings.requireLogin === false` → auth qlobal olaraq qeyri-aktivdir, hər zaman qorunan səviyyə ( [Marşrut Mühafizəsi Səviyyələrinə](../security/ROUTE_GUARD_TIERS.md) baxın) və onun qəbul etdiyi etimadnaməni ötürən zənglər istisna olmaqla, giriş zamanı olduğu kimi eyni etimadnaməyə ehtiyac duyur: sinxronizasiya nişanlarının verilməsi, CLI giriş nişanlarının hər hansı bir əhatə dairəsində buraxılması və API açarının yaradılması, bir `manage` əhatə dairəsi və ya belə bir açarın bərpası və ya aşkarlanması (`admin` `src/lib/api/requireManagementAuth.ts` `requireCredentialForManagementScopedKey()` ). Yalnız nəticə çıxaran düymələr açıq qalır. Qorunan funksiya bayrağının yazılması (`REQUIRE_API_KEY`, digər Təhlükəsizlik bayraqları və [Xüsusiyyət Bayraqlarında](../reference/FEATURE_FLAGS.md#rest-api) sadalanan SSRF / TLS / MCP əhatə dairəsi / sandbox bayraqları ) və PII maskalanma parametrlərini (`PUT /api/settings/pii`) saxlamaq üçün də etimadnamə tələb olunur.
+- Heç bir parol konfiqurasiya olunmayıb** və** no `INITIAL_PASSWORD` env var → bootstrap rejimi onboarding sehrbazına və geri dönmə sorğularına imkan verir, lakin açıq şəbəkə sorğuları hələ də etimadnaməyə ehtiyac duyur. İstisna: qorunan xüsusiyyət bayrağının yazılması və PII maskalama parametrlərinin (`PUT /api/settings/pii`) saxlanması hətta geri dönmədən də etimadnaməyə ehtiyac duyur, ona görə də geri dönmə burada kifayət deyil.
+- İstənilən DB xətası → bağlana bilmir (defolt olaraq təhlükəsiz).
 
-Müştəri API açarının tətbiqi birbaşa `process.env.REQUIRE_API_KEY` oxumaq yerinə `src/shared/utils/featureFlags.ts`-dəki `isRequireApiKeyEnabled()`-dən istifadə edir. Bu yerləşdirilmiş instansiyalar üçün vacibdir: İdarəetmə Paneli → Funksiya Bayraqlarında `REQUIRE_API_KEY`-i dəyişdirmək DB üzərində override saxlayır və `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` və bu köməkçini paylaşan digər müştəri API autentifikasiya yoxlamalarına dərhal təsir edir. Funksiya bayrağı anbarı oxuna bilmirsə, müştəri API autentifikasiyası bağlı şəkildə uğursuz olur və açar tələb edir.
+Müştəri API açarının tətbiqi birbaşa `process.env.REQUIRE_API_KEY` oxunuşu deyil, `src/shared/utils/featureFlags.ts`-də `isRequireApiKeyEnabled()` istifadə edir. Bu yerləşdirilmiş nümunələr üçün vacibdir: İdarə Paneli → Xüsusiyyət Bayraqlarında `REQUIRE_API_KEY` dəyişdirilməsi DB ləğvini saxlayır və dərhal `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` və bu köməkçini paylaşan digər müştəri-API doğrulama yoxlamalarına təsir edir. Funksiya bayraq anbarı oxuna bilmirsə, müştəri API auth bağlanması uğursuz olur və açar tələb olunur.
 
 ## Uyğunluğu pozan dəyişiklik — v3.8.0
 

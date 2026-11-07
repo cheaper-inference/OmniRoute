@@ -319,15 +319,15 @@ subset ဖြစ်ပြီး၊ ထို full catalog မဟုတ်ပါ�
 (`src/lib/accessTokens/scopes.ts`) ဖြင့် အဆင့်သတ်မှတ်သည်။ ဤအဆင့်သည် access-token
 credential အတွက်သာ သက်ဆိုင်သည်။ [Management Authentication](../guides/MANAGEMENT-AUTH.md) ကို ကြည့်ပါ။
 
-## Auth လိုအပ်ချက် ခလုတ်
+## အထောက်အထားပြရန် လိုအပ်သည်
 
-`src/shared/utils/apiAuth.ts` ရှိ `isAuthRequired()` သည် request တစ်ခုအတွက် **မည်သည့်** auth ကိုမဆို တည်ဆဲ လုပ်ရမလား ဆုံးဖြတ်သည်:
+`isAuthRequired()` in `src/shared/utils/apiAuth.ts` ရှိမရှိ ဆုံးဖြတ်သည်။** တစ်ခုခု** တောင်းဆိုချက်တစ်ခုအတွက် auth ကို ပြဌာန်းသည်-
 
-- `settings.requireLogin === false` → auth ကို global အရ ပိတ်ထားသည်၊ ဒါပေမဲ့ always-protected tier ([Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) နှင့် ၎င်းလက်ခံသော credential ကို ထုတ်ပေးသည့် ခေါ်ဆိုမှုများကတော့ login ဖွင့်ထားစဉ်နှင့် တူညီသော credential လိုအပ်သည်: sync token ထုတ်ခြင်း၊ မည်သည့် scope ဖြင့်မဆို CLI access token ထုတ်ခြင်း၊ နှင့် `manage`/`admin` scope ပါသော API key ဖန်တီးခြင်း၊ ထို scope ကို key တစ်ခုသို့ ပေးခြင်း၊ သို့မဟုတ် ထို key ကို regenerate သို့မဟုတ် ပြခြင်း (`src/lib/api/requireManagementAuth.ts` ရှိ `requireCredentialForManagementScopedKey()`)။ Inference-only key များသည် ဖွင့်ထားဆဲ ဖြစ်သည်။
-- Password သတ်မှတ်မထားပြီး **နှင့်** `INITIAL_PASSWORD` env var မရှိပါက → bootstrap mode သည် onboarding wizard နှင့် loopback request များကို ခွင့်ပြုသော်လည်း ပြင်ပ network request များသည် credential လိုအပ်ဆဲ ဖြစ်သည်။
-- DB error မည်သည့်အချိန်မဆို → fail closed (ဘေးကင်းရေးကို မူလအဖြစ် ထားသည်)။
+- `settings.requireLogin === false` → auth သည် အမြဲတမ်းကာကွယ်ထားသောအဆင့် ( [Route Guard Tiers ကို](../security/ROUTE_GUARD_TIERS.md) ကြည့်ပါ) နှင့် အကောင့်ဝင်ခြင်းကဲ့သို့တူညီသောအထောက်အထားလိုအပ်သည့် အထောက်အထားတစ်ခုထုတ်ပေးသောခေါ်ဆိုမှုများမှလွဲ၍ တစ်ကမ္ဘာလုံးပိတ်ထားသည်- စင့်ခ်တိုကင်`admin` ထုတ်ပေးခြင်း၊ CLI ဝင်ရောက်ခွင့်တိုကင်များကိုမည်သည့်နယ်ပယ်တွင်မဆိုထည့်သွင်းခြင်းနှင့် API သော့ဖြင့် `manage` ကိုဖန်တီးခြင်း၊ သော့၊ သို့မဟုတ် ထိုသော့ကို ပြန်ထုတ်ခြင်း သို့မဟုတ် ထုတ်ဖော်ခြင်း (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`)။ အနုမာန-သီးသန့်သော့များ ဆက်လက်ဖွင့်ထားသည်။ ကာကွယ်ထားသော အင်္ဂါရပ်အလံ (`REQUIRE_API_KEY`၊ အခြားလုံခြုံရေးအလံများ၊ နှင့် SSRF / TLS / MCP-scope / sandbox အလံများ [အင်္ဂါရပ်အလံ](../reference/FEATURE_FLAGS.md#rest-api) များတွင် ဖော်ပြထားသော အလံများ ) နှင့် PII မျက်နှာဖုံးဆက်တင်များ (`PUT /api/settings/pii`) ကို သိမ်းဆည်းခြင်းသည်လည်း အထောက်အထားတစ်ခု လိုအပ်နေပါသည်။
+- စကားဝှက်ကို ပြင်ဆင်သတ်မှတ်ထားခြင်းမရှိပါ။** နှင့်** `INITIAL_PASSWORD` env var → bootstrap မုဒ်သည် onboarding wizard နှင့် loopback တောင်းဆိုမှုများကို ခွင့်ပြုသော်လည်း ထိတွေ့ထားသော ကွန်ရက်တောင်းဆိုမှုများသည် အထောက်အထားများ လိုအပ်နေသေးသည်။ ခြွင်းချက်- ကာကွယ်ထားသော အင်္ဂါရပ်အလံတစ်ခုရေးခြင်းနှင့် PII မျက်နှာဖုံးဆက်တင်များ (`PUT /api/settings/pii`) ကို သိမ်းဆည်းခြင်းသည် loopback မှပင် အထောက်အထားတစ်ခု လိုအပ်သည်၊ ထို့ကြောင့် loopback သူ့ဘာသာသူ မလုံလောက်ပါ။
+- မည်သည့် DB error → ပိတ်သည် (secure-by-default)။
 
-Client API key enforcement သည် `src/shared/utils/featureFlags.ts` ရှိ `isRequireApiKeyEnabled()` ကို အသုံးပြုသည်၊ တိုက်ရိုက် `process.env.REQUIRE_API_KEY` ကို ဖတ်ခြင်း မဟုတ်ပါ။ ၎င်းသည် deployed instance များအတွက် အရေးကြီးသည်: Dashboard → Feature Flags တွင် `REQUIRE_API_KEY` ကို ပြောင်းခြင်းက DB override ကို သိမ်းပြီး `/v1/*`၊ `/v1beta/*`၊ `/models`၊ `/responses`၊ `/chat/completions`၊ `/codex/*` နှင့် ဤ helper ကို မျှဝေသော အခြား client-API auth စစ်ဆေးမှုများကို ချက်ချင်း သက်ရောက်စေသည်။ Feature flag store ကို ဖတ်၍ မရပါက client API auth သည် fail closed ဖြစ်ပြီး key တစ်ခု လိုအပ်သည်။
+Client API key enforcement သည် `isRequireApiKeyEnabled()` `src/shared/utils/featureFlags.ts` တွင်အသုံးပြုသည်၊၊ တိုက်ရိုက် `process.env.REQUIRE_API_KEY` ဖတ်ခြင်းမဟုတ်ပါ။ အသုံးပြုထားသော သာဓကများအတွက် ၎င်းသည် အရေးကြီးသည်- Dashboard → တွင် `REQUIRE_API_KEY` အင်္ဂါရပ်အလံများကို ပြောင်းဖွင့်ခြင်းသည် DB အစားထိုးမှုတစ်ခုကို သိမ်းဆည်းထားပြီး `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, နှင့် ဤအကူအညီကို မျှဝေသော အခြား client-API စစ်မှန်ကြောင်းစစ်ဆေးမှုများကို အကျိုးသက်ရောက်စေသည်။ အင်္ဂါရပ်အလံစတိုးဆိုင်ကို မဖတ်နိုင်ပါက၊ ကလိုင်းယင့် API စစ်မှန်ခြင်းပျက်ကွက်ပြီး သော့တစ်ခု လိုအပ်သည်။
 
 ## လိုက်ဖက်ညီမှုကို ချိုးဖောက်သော ပြောင်းလဲမှု — v3.8.0
 

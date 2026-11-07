@@ -227,35 +227,31 @@
 
 ### Панель управления
 
-Перейдите в **Dashboard → Settings → Feature Flags**
-(`/dashboard/settings/feature-flags`). Сетка
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-поддерживает:
+Перейдите к** Настройки → информационной панели Флаги функций →** (`/dashboard/settings/feature-flags`). Сетка (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) поддерживает:
 
-- **Поиск** по ключу или описанию и **фильтрацию** по категории (включая синтетическое представление **Requires Restart**).
-- **Переключатель** для логических флагов и **раскрывающийся список** для флагов-перечислений
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Бейдж **источника** для каждого флага — `DB`, `ENV` или `DEF`, показывающий, откуда взято эффективное значение.
-- Кнопку **Сбросить** (отображается только для флагов с источником `DB`) для удаления переопределения, а также кнопку **Сбросить все переопределения** внизу.
-- Баннер **Перезапустить сервер**, когда изменён флаг `requiresRestart`.
+- **Поиск** по ключу или описанию, и** фильтр** по категориям (плюс синтетический** Требуется перезагрузка** вид).
+- А** переключать** для логических флагов и** падать** для флагов перечисления (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- А** значок источника** для каждого флага — `DB`, `ENV` или `DEF` — показано, откуда взялось эффективное значение.
+- А** Перезагрузить** (отображается только для флагов `DB` -sourced ), чтобы отменить переопределение, и кнопку** Сбросить все переопределения** кнопка внизу.
+- А** Перезапустить сервер** баннер при изменении флага `requiresRestart`.
 
 ### REST API
 
-Все операции выполняются через один маршрут:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Для каждого метода требуется аутентифицированная сессия панели управления (в противном случае возвращается `401`).
+Все операции выполняются по одному маршруту: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Для каждого метода требуется аутентифицированный сеанс информационной панели (в противном случае `401` ).
+
+При отключенном входе в систему (`requireLogin=false`) маршрут открыт, за исключением защищенных флагов: каждый флаг в категории «Безопасность» плюс `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` и `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` в `protectedFeatureFlags.ts`). `PUT` на одном из них и `DELETE`, пока один из них имеет переопределение DB, по-прежнему требует сеанса информационной панели, ключа `manage` -scope API, токена доступа `oma_` с областью записи или выше или токена CLI или токена внутренней службы, отправленного из шлейфа. Этот набор шире, чем при включенном входе в систему, где маршрут принимает только сеанс или ключ `manage` -scope.
 
 #### `GET /api/settings/feature-flags`
 
-Возвращает все флаги с их эффективным значением, источником и сводкой.
+Возвращает каждый флаг с его действующим значением, источником и сводкой.
 
 ```jsonc
 {
   "flags": [
     {
       "key": "REQUIRE_API_KEY",
-      "label": "Требовать API-ключ",
-      "description": "Требовать API-ключ для всех входящих запросов",
+      "label": "Require API Key",
+      "description": "Require an API key for all incoming requests",
       "category": "security",
       "type": "boolean",
       "enumValues": null,
@@ -265,7 +261,7 @@
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... все 119 флагов
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -279,34 +275,30 @@
 
 #### `PUT /api/settings/feature-flags`
 
-Устанавливает или удаляет одно переопределение. Тело запроса: `{ key: string; value?: string }`.
-Если `value` не указан, переопределение удаляется (восстанавливается значение из env / значение по умолчанию).
+Установите или удалите одно переопределение. Тело: `{ key: string; value?: string }`. Пропуск `value` удаляет переопределение (восстановление env/default).
 
 ```bash
-# Установить переопределение в БД
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Удалить переопределение (без "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-В ответе возвращаются новые `effectiveValue`/`source`, `previousValue`/
-`previousSource` и `requiresRestart`. Неизвестные ключи и значения перечислений
-вне допустимого диапазона отклоняются с кодом `400`.
+Ответ повторяет новые `effectiveValue`/`source`, `previousValue`/ `previousSource` и `requiresRestart`. Неизвестные ключи и значения перечислений, выходящие за пределы диапазона, отклоняются с помощью `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Одновременно удаляет **все** переопределения в БД, восстанавливая для каждого флага
-значение из env / значение по умолчанию. Возвращает `{ cleared: <count>, message: "..." }`.
+Очищает** все** DB переопределяет сразу, восстанавливая для каждого флага его значение env/default. Возвращает `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Флаги с `requiresRestart: true` вступают в силу только после перезагрузки процесса.
-> Процесс перезапуска панели управления вызывает `POST /api/restart`, а затем опрашивает
-> `GET /api/health/ping`, пока сервер снова не станет доступен.
+> Флаги с `requiresRestart: true` вступают в силу только после перезагрузки процесса. Поток перезапуска панели мониторинга вызывает `POST /api/restart`, а затем опрашивает `GET /api/health/ping` пока сервер не будет восстановлен.
+
+---
 
 ## Аварийный резервный маршрут при исчерпании бюджета
 

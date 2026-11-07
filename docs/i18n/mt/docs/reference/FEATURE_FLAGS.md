@@ -213,39 +213,35 @@ falluta tal-ipprezzar. L-infurzar u r-rapport tal-amministratur isolvu l-istess 
 > Il-kolonna `Restart` timmarka l-flags b’`requiresRestart: true` — il-valur
 > jinħażen immedjatament iżda jidħol fis-seħħ biss wara li l-proċess jerġa’ jitgħabba. Il-flags enum jirrifjutaw kwalunkwe valur barra mis-sett permess tagħhom (ivvalidat min-naħa tas-server kemm f’`setFeatureFlagOverride()` kif ukoll fil-handler REST `PUT`).
 
-## Qlib tal-Markaturi
+## Toggling Bnadar
 
 ### Dashboard
 
-Mur fuq **Dashboard → Settings → Feature Flags**
-(`/dashboard/settings/feature-flags`). Il-grilja
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-tappoġġja:
+Innaviga lejn** Dashboard → Settings → Feature Flags** (`/dashboard/settings/feature-flags`). Il-grilja (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) tappoġġja:
 
-- **Tfittxija** skont iċ-ċavetta jew id-deskrizzjoni, u **iffiltrar** skont il-kategorija (flimkien ma’ veduta sintetika **Jeħtieġ Ristartjar**).
-- **Qlib** għall-markaturi Boolean u **lista drop-down** għall-markaturi enum
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Tikketta tas-sors għal kull markatur — `DB`, `ENV`, jew `DEF` — li turi minn fejn ġie l-valur effettiv.
-- Buttuna **Irrisettja** (murija biss għall-markaturi mis-sors `DB`) biex jitneħħa l-override, u buttuna **Irrisettja l-Overrides Kollha** fil-qiegħ.
-- Banner **Irristartja s-Server** meta jinbidel markatur `requiresRestart`.
+- **Fittex** biċ-ċavetta jew deskrizzjoni, u** filtru** skond il-kategorija (flimkien ma' sintetiku** Jeħtieġ Irristartja** ħsieb).
+- A** toggle** għall-bnadar boolean u a** dropdown** for enum flags (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- A** badge tas-sors** kull bandiera — `DB`, `ENV`, jew `DEF` — li turi minn fejn ġie l-valur effettiv.
+- A** Irrisettja** buttuna (muri biss għall-bnadar `DB` -sourced ) biex twaqqa 'l-override, u a** Irrisettja Kollha Overrides** buttuna fil-qiegħ.
+- A** Ibda mill-ġdid Server** banner meta tinbidel bandiera `requiresRestart`.
 
 ### REST API
 
-L-operazzjonijiet kollha jgħaddu minn rotta waħda:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Kull metodu jeħtieġ sessjoni awtentikata tad-dashboard (`401` inkella).
+L-operazzjonijiet kollha jgħaddu minn rotta waħda: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Kull metodu jeħtieġ sessjoni dashboard awtentikata (`401` mod ieħor).
+
+Bil-login diżattivat (`requireLogin=false`) ir-rotta hija miftuħa, ħlief għall-bnadar protetti: kull bandiera fil-kategorija tas-Sigurtà flimkien ma `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` u `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` fi `protectedFeatureFlags.ts`). A `PUT` fuq waħda minnhom, u `DELETE` filwaqt li wieħed minnhom għandu DB override, xorta jeħtieġ sessjoni dashboard, `manage` -scope API key, token ta 'aċċess `oma_` b'ambitu ta' kitba jew ogħla, jew it-token CLI jew token tas-servizz intern mibgħut minn loopback. Dak is-sett huwa usa' milli bil-login mixgħul, fejn ir-rotta taċċetta biss sessjoni jew ċavetta `manage` -scope.
 
 #### `GET /api/settings/feature-flags`
 
-Jirritorna kull markatur bil-valur effettiv, is-sors, u sommarju.
+Jirritorna kull bandiera bil-valur effettiv tagħha, is-sors, u sommarju.
 
 ```jsonc
 {
   "flags": [
     {
       "key": "REQUIRE_API_KEY",
-      "label": "Jeħtieġ Ċavetta API",
-      "description": "Jeħtieġ ċavetta API għat-talbiet kollha deħlin",
+      "label": "Require API Key",
+      "description": "Require an API key for all incoming requests",
       "category": "security",
       "type": "boolean",
       "enumValues": null,
@@ -255,7 +251,7 @@ Jirritorna kull markatur bil-valur effettiv, is-sors, u sommarju.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... il-119-il markatur kollha
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -269,34 +265,30 @@ Jirritorna kull markatur bil-valur effettiv, is-sors, u sommarju.
 
 #### `PUT /api/settings/feature-flags`
 
-Issettja jew ineħħi override wieħed. Il-kontenut: `{ key: string; value?: string }`.
-Jekk jitħalla barra `value`, jitneħħa l-override (u jiġi restawrat l-env / default).
+Issettja jew neħħi override wieħed. Body: `{ key: string; value?: string }`. Li tħalli barra `value` tneħħi l-override (irrestawra env / default).
 
 ```bash
-# Issettja override tad-DB
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Neħħi l-override (mingħajr "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Ir-rispons jirritorna l-`effectiveValue`/`source` il-ġodda, il-`previousValue`/
-`previousSource`, u `requiresRestart`. Ċwievet mhux magħrufa u valuri enum barra
-mill-medda jiġu rrifjutati b’`400`.
+Ir-rispons itenni `effectiveValue`/`source` il-ġdid, iż `previousValue`/ `previousSource`, u `requiresRestart`. Ċwievet mhux magħrufa u valuri enum barra mill-firxa huma rrifjutati `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Iħassar **l-overrides kollha tad-DB** f’daqqa, u jirrestawra kull markatur għall-valur
-tiegħu mill-env / default. Jirritorna `{ cleared: <count>, message: "..." }`.
+Jiċċara** kollha** DB jegħleb f'daqqa, u jirrestawra kull bandiera għall-valur env / default tagħha. Ritorni `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Il-markaturi b’`requiresRestart: true` jidħlu fis-seħħ biss wara li l-proċess jerġa’ jitgħabba.
-> Il-fluss ta’ ristartjar tad-dashboard isejjaħ `POST /api/restart` u mbagħad jagħmel polling fuq
-> `GET /api/health/ping` sakemm is-server jerġa’ jkun attiv.
+> Bnadar bi `requiresRestart: true` jidħlu fis-seħħ biss wara proċess reload. Il-fluss mill-ġdid tad-dashboard isejjaħ `POST /api/restart` u mbagħad istħarriġ `GET /api/health/ping` sakemm is-server ikun lura.
+
+---
 
 ## Alternattiva ta' Emerġenza għall-Baġit
 

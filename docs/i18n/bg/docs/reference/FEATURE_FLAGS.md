@@ -219,40 +219,35 @@
 
 ---
 
-## Превключване на флагове
+## Превключване на знамена
 
-### Табло
+### Табло за управление
 
-Отидете на **Табло → Настройки → Функционални флагове**
-(`/dashboard/settings/feature-flags`). Мрежата
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-поддържа:
+Навигирайте до** Табло за управление → Настройки → Флагове за функции** (`/dashboard/settings/feature-flags`). Решетката (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) поддържа:
 
-- **Търсене** по ключ или описание и **филтриране** по категория (плюс синтетичен изглед
-  **Изисква рестартиране**).
-- **Превключвател** за булеви флагове и **падащо меню** за enum флагове
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- **Бадж за източника** за всеки флаг — `DB`, `ENV` или `DEF` — показващ откъде идва ефективната стойност.
-- Бутон **Нулиране** (показва се само за флагове с източник `DB`) за премахване на заместването и бутон **Нулиране на всички замествания** в долната част.
-- Банер **Рестартиране на сървъра**, когато флаг с `requiresRestart` бъде променен.
+- **Търсене** по ключ или описание и** филтър** по категория (плюс синтетичен** Изисква рестартиране** изглед).
+- А** превключвам** за булеви флагове и a** падащо меню** за флагове enum (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- А** значка за източник** за флаг — `DB`, `ENV` или `DEF` — показващ откъде идва ефективната стойност.
+- А** Нулиране** бутон (показан само за `DB` -sourced флагове), за да отмените отмяната, и a** Нулиране на всички замени** бутон в долната част.
+- А** Рестартирайте сървъра** банер при промяна на `requiresRestart` флаг.
 
 ### REST API
 
-Всички операции преминават през един маршрут:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Всеки метод изисква удостоверена сесия на таблото (`401` в противен случай).
+Всички операции преминават през един маршрут: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Всеки метод изисква удостоверена сесия на таблото за управление (в противен случай `401` ).
+
+При деактивирано влизане (`requireLogin=false`) маршрутът е отворен, с изключение на защитените флагове: всеки флаг в категорията Сигурност плюс `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` и `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` в `protectedFeatureFlags.ts`). `PUT` на един от тях и `DELETE`, докато един от тях има DB отмяна, все още се нуждае от сесия на таблото за управление, ключ `manage` -scope API, токен за достъп `oma_` с обхват на запис или по-висок, или токен CLI или токен за вътрешна услуга, изпратен от обратна връзка. Този набор е по-широк, отколкото при влизане, където маршрутът приема само сесия или `manage` -scope ключ.
 
 #### `GET /api/settings/feature-flags`
 
-Връща всеки флаг с ефективната му стойност, източника и обобщение.
+Връща всеки флаг с неговата ефективна стойност, източник и резюме.
 
 ```jsonc
 {
   "flags": [
     {
       "key": "REQUIRE_API_KEY",
-      "label": "Изискване на API ключ",
-      "description": "Изискване на API ключ за всички входящи заявки",
+      "label": "Require API Key",
+      "description": "Require an API key for all incoming requests",
       "category": "security",
       "type": "boolean",
       "enumValues": null,
@@ -262,7 +257,7 @@
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... всички 119 флага
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -276,33 +271,30 @@
 
 #### `PUT /api/settings/feature-flags`
 
-Задава или премахва едно заместване. Тяло: `{ key: string; value?: string }`.
-Пропускането на `value` премахва заместването (възстановявайки стойността от env / по подразбиране).
+Задайте или премахнете единична замяна. Тяло: `{ key: string; value?: string }`. Пропускането на `value` премахва отмяната (възстановяване на env / default).
 
 ```bash
-# Задаване на заместване в DB
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Премахване на заместването (без "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Отговорът връща новите `effectiveValue`/`source`, `previousValue`/
-`previousSource` и `requiresRestart`. Непознати ключове и enum стойности извън
-допустимия диапазон се отхвърлят с `400`.
+Отговорът повтаря новите `effectiveValue`/`source`, `previousValue`/ `previousSource` и `requiresRestart`. Неизвестните ключове и enum стойностите извън диапазона се отхвърлят с `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Изчиства **всички** замествания в DB наведнъж, като възстановява всеки флаг до стойността му от env / по подразбиране. Връща `{ cleared: <count>, message: "..." }`.
+Изчиства** всички** DB отменя наведнъж, възстановявайки всеки флаг до стойността му по подразбиране / env. Връща `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Флаговете с `requiresRestart: true` влизат в сила едва след презареждане на процеса.
-> Процесът за рестартиране на таблото извиква `POST /api/restart`, след което прави заявки към
-> `GET /api/health/ping`, докато сървърът отново заработи.
+> Флаговете с `requiresRestart: true` влизат в сила само след презареждане на процеса. Потокът за рестартиране на таблото за управление извиква `POST /api/restart` и след това проверява `GET /api/health/ping` докато сървърът се върне обратно.
+
+---
 
 ## Авариен резервен режим при изчерпан бюджет
 

@@ -221,32 +221,27 @@ tí ó kuna sílẹ̀. Ìfipá mú àti ìròyìn alákóso máa ń yanjú sí �
 > tí wọ́n yọ̀ǹda; a máa ń fọwọ́sí èyí ní ẹ̀gbẹ́ server nínú
 > `setFeatureFlagOverride()` àti handler REST `PUT`.
 
-## Yíyí Àwọn Àsìápadà
+## Awọn asia Yiyi
 
 ### Dasibodu
 
-Lọ sí **Dasibodu → Àwọn Ètò → Àwọn Àsìápadà Ẹya**
-(`/dashboard/settings/feature-flags`). Grid náà
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-ṣe àtìlẹ́yìn fún:
+Lilö kiri si** Dasibodu → Eto → Ẹya Awọn asia** (`/dashboard/settings/feature-flags`). Akoj (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) ṣe atilẹyin:
 
-- **Wíwá** nípasẹ̀ kọ́kọ́rọ́ tàbí àpèjúwe, àti **yíyan àlẹ̀mọ́** nípasẹ̀ ẹ̀ka (pẹ̀lú
-  ìwò **Ó Nílò Àtẹ̀jáde** tí a ṣe àfikún).
-- **Yíyí** fún àwọn àsìápadà boolean àti **àtòjọ yíyan** fún àwọn àsìápadà enum
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Ààmì orísun kan fún àsìápadà kọ̀ọ̀kan — `DB`, `ENV`, tàbí `DEF` — tó ń fihàn ibi tí iye tó ń ṣiṣẹ́ ti wá.
-- Bọ́tìnì **Tún Ṣètò** (tí a ń fi hàn fún àwọn àsìápadà orísun `DB` nìkan) láti yọ ìyípadà àfikún kúrò, àti bọ́tìnì **Tún Gbogbo Àwọn Ìyípadà Àfikún Ṣètò** ní ìsàlẹ̀.
-- Àpótí ìkìlọ̀ **Tun Sáfá Tẹ̀síwájú** nígbà tí a bá yí àsìápadà `requiresRestart` padà.
+- **Wa** nipa bọtini tabi apejuwe, ati** àlẹmọ** nipasẹ ẹka (pẹlu sintetiki kan** Nilo Tun bẹrẹ** wo).
+- A** yipada** fun Bolianu awọn asia ati ki o kan** faa silẹ** fun awọn asia enum (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- A** baaji orisun** fun asia — `DB`, `ENV`, tabi `DEF` — nfihan ibiti iye ti o munadoko ti wa.
+- A** Tunto** Bọtini (ti o han nikan fun awọn asia `DB` -sourced ) lati ju silẹ, ati a** Tun Gbogbo Yipada sẹhin** bọtini ni isalẹ.
+- A** Tun olupin bẹrẹ** asia nigbati a `requiresRestart` flag ti wa ni yi pada.
 
 ### REST API
 
-Gbogbo iṣẹ́ máa ń gba ọ̀nà kan ṣoṣo:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Ọ̀nà kọ̀ọ̀kan nílò ìgbàgbọ́ dashboard tí a ti fọwọ́sí (`401` bí kò bá sí).
+Gbogbo awọn iṣẹ ṣiṣe lọ nipasẹ ọna kan: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Gbogbo ọna nilo igba dasibodu ti a fọwọsi (`401` bibẹẹkọ).
+
+Pẹlu alaabo wiwọle (`requireLogin=false`) ọna naa wa ni sisi, ayafi fun awọn asia ti o ni aabo: gbogbo asia ninu Ẹka Aabo pẹlu `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` ati `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` ni `protectedFeatureFlags.ts`). A `PUT` lori ọkan ninu wọn, ati `DELETE` nigba ti ọkan ninu wọn ni o ni a DB idojuk, si tun nilo a Dasibodu igba, a `manage` -scope API bọtini, ohun `oma_` wiwọle àmi pẹlu kikọ dopin tabi ti o ga, tabi CLI àmi tabi ti abẹnu-iṣẹ àmi rán lati loopback. Eto yẹn gbooro ju pẹlu iwọle si, nibiti ipa ọna gba igba kan nikan tabi bọtini `manage` -scope kan.
 
 #### `GET /api/settings/feature-flags`
 
-Ó máa ń da gbogbo àsìápadà padà pẹ̀lú iye tó ń ṣiṣẹ́, orísun, àti àkótán.
+Pada gbogbo asia pada pẹlu iye to munadoko, orisun, ati akojọpọ kan.
 
 ```jsonc
 {
@@ -264,7 +259,7 @@ Gbogbo iṣẹ́ máa ń gba ọ̀nà kan ṣoṣo:
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... gbogbo àsìápadà 119
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -278,32 +273,30 @@ Gbogbo iṣẹ́ máa ń gba ọ̀nà kan ṣoṣo:
 
 #### `PUT /api/settings/feature-flags`
 
-Ṣètò tàbí yọ ìyípadà àfikún kan kúrò. Ara ìbéèrè: `{ key: string; value?: string }`.
-Bí a kò bá fi `value` ránṣẹ́, ó máa ń yọ ìyípadà àfikún náà kúrò (ó sì máa ń dá iye env / àiyipada padà).
+Ṣeto tabi yọkuro ẹyọkan. Ara: `{ key: string; value?: string }`. Gbigbe `value` yọkuro kuro (imupadabọsipo env / aiyipada).
 
 ```bash
-# Ṣètò ìyípadà àfikún DB
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Yọ ìyípadà àfikún kúrò (kò sí "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Ìdáhùn náà máa ń tún `effectiveValue`/`source` tuntun ṣe, pẹ̀lú
-`previousValue`/`previousSource`, àti `requiresRestart`. Àwọn kọ́kọ́rọ́ tí a kò mọ̀ àti àwọn iye enum tí kò sí láàárín ààlà ni a máa kọ̀ pẹ̀lú `400`.
+Idahun naa ṣe atunwo `effectiveValue`/`source` tuntun, `previousValue`/ `previousSource`, ati `requiresRestart`. Awọn bọtini aimọ ati awọn iye enum ti ita ni a kọ pẹlu `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Ó máa ń pa gbogbo àwọn ìyípadà àfikún DB rẹ́ lẹ́ẹ̀kan náà, ó sì máa ń dá gbogbo àsìápadà padà sí iye env / àiyipada wọn. Ó máa ń da `{ cleared: <count>, message: "..." }` padà.
+nsoro** gbogbo** DB bori ni ẹẹkan, mimu-pada sipo gbogbo asia si iye env / aiyipada rẹ. da `{ cleared: <count>, message: "..." }` pada.
 
 > [!NOTE]
-> Àwọn àsìápadà tó ní `requiresRestart: true` máa ń ṣiṣẹ́ lẹ́yìn tí a bá tún ètò náà kà.
-> Ìṣàn àtẹ̀jáde dashboard máa ń pe `POST /api/restart`, lẹ́yìn náà ó máa ń béèrè
-> `GET /api/health/ping` léraléra títí tí sáfá yóò fi tún padà wà lórí ẹ̀rọ.
+> Awọn asia pẹlu `requiresRestart: true` nikan ni ipa lẹhin igbasilẹ ilana kan. Ṣiṣan dasibodu tun bẹrẹ awọn ipe `POST /api/restart` ati lẹhinna idibo `GET /api/health/ping` titi olupin yoo fi ṣe afẹyinti.
+
+---
 
 ## Ọ̀nà Àfẹ́yinti Pajawiri fún Ìnáwó
 

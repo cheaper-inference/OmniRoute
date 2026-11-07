@@ -361,7 +361,7 @@ OmniRoute በአካባቢው የሚሰሩና **የተካተቱ አገልግሎ�
 
 ### ሀ. አውቶማቲክ ኮምቦ ሞተር
 
-አውቶ ኮምቦ በማይለዋወጥ ጥምር ፍቺ ላይ ከመተማመን ይልቅ በተጠየቀ ጊዜ የማዞሪያ ኢላማዎችን ያስመዘግብ እና ይመርጣል። የ `auto/*` ሞዴል ቅድመ ቅጥያ ቤተሰብን ያበረታታል።
+አውቶ ኮምቦ በማይለዋወጥ ጥምር ፍቺ ላይ ከመተማመን ይልቅ በተጠየቀ ጊዜ የማዞሪያ ኢላማዎችን ያስመዘግብ እና ይመርጣል። `auto/*` ሞዴል ቅድመ ቅጥያ ቤተሰብን ያበረታታል።
 
 - የሞተር ግቤት `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
 - መፍትሄ ሰጪ `src/domain/comboResolver.ts` (የ `auto/` ቅድመ ቅጥያ በራስ-ሰር ማግኘት)
@@ -393,7 +393,7 @@ Cloud Agents በሶስተኛ ወገን የሚስተናገዱ የኮድ ወኪል
 
 ### ሐ. Guardrails
 
-የጠባቂዎች ሞጁል ትኩስ-እንደገና ሊጫን የሚችል የመሃከለኛ ዌር ንብርብር ለ PII፣ ፈጣን መርፌ እና ደህንነቱ ያልተጠበቀ የእይታ ይዘትን የሚመረምር። ጥሰቶች ጥያቄውን በ HTTP አጭር ዙር ያደርጋሉ** 503** እና የተዋቀረ የስህተት ኮድ፣ የታችኛው ተፋሰስ ደዋዮች እንደገና እንዲሞክሩ ወይም እንዲቀጥሉ ያስችላቸዋል።
+የጠባቂዎች ሞጁል ትኩስ-እንደገና ሊጫን የሚችል የመሃከለኛ ዌር ንብርብር ለ PII፣ ፈጣን መርፌ እና ደህንነቱ ያልተጠበቀ የእይታ ይዘትን የሚመረምር። ጥሰቶች ጥያቄውን በ HTTP አጭር ዙር ያደርጋሉ** 503** እንዲሁም የተዋቀረ የስህተት ኮድ፣ የታችኛው ተፋሰስ ደዋዮች እንደገና እንዲሞክሩ ወይም እንዲቀጥሉ ያስችላቸዋል።
 
 - የሞዱል ሥር `src/lib/guardrails/` (`base.ts`፣ `registry.ts`፣ `piiMasker.ts`፣ `promptInjection.ts`፣ `visionBridge.ts`፣ `visionBridgeHelpers.ts`)
 - ትኩስ ዳግም መጫን፡ የመመዝገቢያ ሰዓቶች ለማዋቀር ለውጦች እና ሰንሰለቱን በቦታው እንደገና ይገነባል።
@@ -415,7 +415,7 @@ Cloud Agents በሶስተኛ ወገን የሚስተናገዱ የኮድ ወኪል
 - Connection/model ደንብ ተቀናጅተው `src/domain/connectionModelRules.ts`
 - የሞዴል ተገኝነት ቅጽበተ-ፎቶዎች `src/domain/modelAvailability.ts`
 - የአቅራቢው የማለፊያ ክትትል `src/domain/providerExpiration.ts`
-- የኮታ መሸጎጫ `src/domain/quotaCache.ts`
+- የኮታ መሸጎጫ `src/domain/quotaCache.ts`. አቅራቢዎች የኮታ መስኮቶችን ይጨምራሉ እና ያስወግዳሉ (OpenAI ለአንዳንድ ዕቅዶች የ5-ሰዓት Codex መስኮቱን ጥሏል) ስለዚህ የአቅራቢውን አስማሚ ማንበብ እንደተጠናቀቀ ይመሰክራል (`quotasComplete`, `src/lib/usage/usageReading.ts` ይመልከቱ) የመለያው ሙሉ መስኮት ስብስብ ነው፡ ቀደም ብሎ የሚታወቅ ነገር ግን ከእሱ የሌሉበት መስኮት ጡረታ ወጥቷል፣ በመሸጎጫው ውስጥ፣ በ `quota_snapshots` ውስጥ እንደገና ሃይድሮጂን እንደገና ይጀመራል እና የተመዘገበው መግለጫ Codex እንደገና ይጀምራል። የ Claude ሙሌት ባልዲዎች። ከፊል ማስረጃ (የምላሽ ራስጌዎች፣ የቆዩ ቅጂዎች) የተሸከሙትን መስኮቶች ብቻ ያዘምናል።
 - የማዋረድ ሁኔታ `src/domain/degradation.ts`
 - የማዋቀር ኦዲት `src/domain/configAudit.ts`
 - OmniRoute ምላሽ ሜታዳታ ገንቢ `src/domain/omnirouteResponseMeta.ts`
@@ -435,11 +435,11 @@ Cloud Agents በሶስተኛ ወገን የሚስተናገዱ የኮድ ወኪል
 
 የህዝብ እና የአስተዳደር መንገዶች ከባድ ድንበር ናቸው agent/cooldown APIs እና የአቅራቢ ሚውቴሽን የአስተዳደር ማረጋገጫ ያስፈልጋቸዋል (HTTP 401 ከጠፋ)።
 
-ለሙሉ መስመር አመዳደብ ደንቦች፣ [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md) ይመልከቱ።
+ለሙሉ መስመር ምደባ ደንቦች፣ [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md) ይመልከቱ።
 
 ### F. Workflow FSM እና Task-Aware Router
 
-በተገኘው የስራ ፍሰት ደረጃ (እቅድ፣ አፈጻጸም፣ ግምገማ) እና ከበስተጀርባ-ተግባር ትስስር ላይ በመመስረት ትራፊክን ለመምራት ከጥምር ምርጫ በላይ የተደራረበ ባለ ውሱን-ግዛት-ማሽን የሚነዳ ራውተር።
+በተገኘው የስራ ፍሰት ደረጃ (እቅድ፣ አፈጻጸም፣ ግምገማ) እና ከበስተጀርባ-ተግባር ትስስር ላይ በመመስረት ትራፊክን ለመምራት ከጥምር ምርጫ በላይ የተደራረበው ባለገደብ-ግዛት-ማሽን የሚነዳ ራውተር።
 
 - የስራ ፍሰት FSM: `open-sse/services/workflowFSM.ts`
 - ተግባርን የሚያውቅ ራውተር `open-sse/services/taskAwareRouter.ts`

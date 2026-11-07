@@ -222,35 +222,27 @@ report ले एउटै प्रभावकारी नीति निर
 
 ---
 
-## फ्ल्यागहरू टगल गर्ने
+## झण्डा टगल गर्दै
 
 ### ड्यासबोर्ड
 
-**Dashboard → Settings → Feature Flags**
-मा जानुहोस्
-(`/dashboard/settings/feature-flags`)। ग्रिड
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-ले यी सुविधाहरू समर्थन गर्छ:
+मा नेभिगेट गर्नुहोस्** ड्यासबोर्ड → सेटिङहरू → सुविधा झण्डा** (`/dashboard/settings/feature-flags`)। ग्रिड (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) ले समर्थन गर्दछ:
 
-- कुञ्जी वा विवरणद्वारा **खोजी**, र श्रेणीअनुसार **फिल्टर** (साथै कृत्रिम
-  **Requires Restart** दृश्य)।
-- बुलियन फ्ल्यागका लागि **टगल** र enum फ्ल्यागका लागि **ड्रपडाउन**
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`)।
-- प्रत्येक फ्ल्यागका लागि स्रोत ब्याज — `DB`, `ENV`, वा `DEF` — जसले प्रभावकारी
-  मान कहाँबाट आएको हो भनेर देखाउँछ।
-- ओभरराइड हटाउन **Reset** बटन (`DB`-स्रोत भएका फ्ल्यागमा मात्र देखाइन्छ), र
-  तल **Reset All Overrides** बटन।
-- `requiresRestart` फ्ल्याग परिवर्तन हुँदा **Restart Server** ब्यानर।
+- **खोज्नुहोस्** कुञ्जी वा विवरण द्वारा, र** फिल्टर** श्रेणी द्वारा (प्लस एक सिंथेटिक** पुन: सुरु गर्न आवश्यक छ** दृश्य)।
+- ए** टगल गर्नुहोस्** बुलियन झण्डा र ए को लागि** ड्रपडाउन** enum झण्डा (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`) को लागी।
+- ए** स्रोत ब्याज** प्रति झण्डा — `DB`, `ENV`, वा `DEF` — प्रभावकारी मान कहाँबाट आयो देखाउँदै।
+- ए** रिसेट गर्नुहोस्** ओभरराइड ड्रप गर्न बटन ( `DB` -sourced फ्ल्यागका लागि मात्र देखाइएको छ) र ए** सबै ओभरराइडहरू रिसेट गर्नुहोस्** तलको बटन।
+- ए** सर्भर पुन: सुरु गर्नुहोस्** ब्यानर जब `requiresRestart` झण्डा परिवर्तन हुन्छ।
 
 ### REST API
 
-सबै कार्यहरू एउटै रुटमार्फत हुन्छन्:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts)।
-हरेक विधिका लागि प्रमाणीकृत ड्यासबोर्ड सत्र आवश्यक हुन्छ (`401` अन्यथा)।
+सबै कार्यहरू एउटै मार्गबाट जान्छन्: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts) । प्रत्येक विधिलाई एक प्रमाणीकृत ड्यासबोर्ड सत्र आवश्यक छ (अन्यथा`401` )।
+
+लगइन असक्षम (`requireLogin=false`) संग मार्ग खुला छ, सुरक्षित झण्डाहरू बाहेक: सुरक्षा कोटीमा प्रत्येक झण्डा प्लस `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` र `SKILLS_SANDBOX_NETWORK_ENABLED` ( `protectedFeatureFlags.ts` मा`isProtectedFeatureFlag()` )। ती मध्ये एकमा `PUT`, र `DELETE` मा एक DB ओभरराइड हुँदा, अझै पनि ड्यासबोर्ड सत्र, `manage` -scope API कुञ्जी, लेखन स्कोप वा माथिको `oma_` पहुँच टोकन, वा लुपब्याकबाट पठाइएको CLI टोकन वा आन्तरिक-सेवा टोकन आवश्यक छ। त्यो सेट लगइन अन भएको भन्दा फराकिलो छ, जहाँ मार्गले सत्र वा `manage` -scope कुञ्जी मात्र स्वीकार गर्दछ।
 
 #### `GET /api/settings/feature-flags`
 
-यसले प्रत्येक फ्ल्यागको प्रभावकारी मान, स्रोत र सारांशसहित फिर्ता गर्छ।
+प्रत्येक झण्डालाई यसको प्रभावकारी मान, स्रोत र सारांशको साथ फर्काउँछ।
 
 ```jsonc
 {
@@ -268,7 +260,7 @@ report ले एउटै प्रभावकारी नीति निर
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... सबै 119 फ्ल्यागहरू
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -282,34 +274,30 @@ report ले एउटै प्रभावकारी नीति निर
 
 #### `PUT /api/settings/feature-flags`
 
-एउटा ओभरराइड सेट वा हटाउनुहोस्। Body: `{ key: string; value?: string }`।
-`value` हटाउँदा ओभरराइड हटाइन्छ (env / default पुनर्स्थापित हुन्छ)।
+एकल ओभरराइड सेट वा हटाउनुहोस्। शरीर: `{ key: string; value?: string }`। `value` हटाउनाले ओभरराइड हटाउँछ (env / पूर्वनिर्धारित पुनर्स्थापना)।
 
 ```bash
-# DB ओभरराइड सेट गर्नुहोस्
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# ओभरराइड हटाउनुहोस् ("value" बिना)
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-प्रतिक्रियामा नयाँ `effectiveValue`/`source`, `previousValue`/
-`previousSource`, र `requiresRestart` समावेश हुन्छन्। अज्ञात कुञ्जीहरू र
-दायराभन्दा बाहिरका enum मानहरू `400` सहित अस्वीकार गरिन्छन्।
+प्रतिक्रियाले नयाँ `effectiveValue`/`source`, `previousValue`/ `previousSource`, र `requiresRestart` प्रतिध्वनित गर्दछ। अज्ञात कुञ्जीहरू र दायरा बाहिरका enum मानहरू `400` सँग अस्वीकार गरिन्छ।
 
 #### `DELETE /api/settings/feature-flags`
 
-एकैपटक सबै DB ओभरराइडहरू हटाउँछ र प्रत्येक फ्ल्यागलाई यसको env / default
-मानमा पुनर्स्थापित गर्छ। यसले `{ cleared: <count>, message: "..." }` फिर्ता गर्छ।
+खाली गर्छ** सबै** DB एकैचोटि ओभरराइड गर्दछ, प्रत्येक झण्डालाई यसको env / पूर्वनिर्धारित मानमा पुनर्स्थापित गर्दै। `{ cleared: <count>, message: "..." }` फर्काउँछ।
 
 > [!NOTE]
-> `requiresRestart: true` भएका फ्ल्यागहरू प्रक्रिया पुनःलोड भएपछि मात्र प्रभावकारी हुन्छन्।
-> ड्यासबोर्डको पुनःसुरु प्रवाहले `POST /api/restart` कल गर्छ र सर्भर पुनः सञ्चालनमा नआएसम्म
-> `GET /api/health/ping` लाई पोल गर्छ।
+> `requiresRestart: true` सँग झण्डाहरू प्रक्रिया पुन: लोड पछि मात्र प्रभावकारी हुन्छन्। ड्यासबोर्डको रिस्टार्ट फ्लोले `POST /api/restart` कल गर्छ र त्यसपछि सर्भर ब्याकअप नभएसम्म `GET /api/health/ping` पोल गर्छ।
+
+---
 
 ## आपतकालीन बजेट फलब्याक
 

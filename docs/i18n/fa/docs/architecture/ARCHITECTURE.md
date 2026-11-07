@@ -366,12 +366,12 @@ Auto Combo بهجای تکیه بر تعریف ترکیبی استاتیک، ب�
 - ورودی موتور: `open-sse/services/autoCombo/` (`autoComboEngine.ts`، `scoringEngine.ts`، `virtualFactory.ts`، `modePacks.ts`)
 - حلکننده: `src/domain/comboResolver.ts` (تشخیص خودکار پیشوند `auto/` )
 - داشبورد: `/dashboard/auto-combo`
-- تله متری: میز `auto_combo_decisions` SQLite
+- تله متری: جدول `auto_combo_decisions` SQLite
 
 قابلیت های کلیدی:
 
 - **20 استراتژی مسیریابی** (اولویت، وزن دار، اول پر کردن، دور روبین، P2C، تصادفی، کم استفاده، بهینه سازی هزینه، آگاه مجدد، بازنشانی پنجره، فضای سر، سهمیه بندی، دقیق تصادفی،** خودکار** lkgp، زمینه بهینه، حافظه پنهان، رله زمینه،** همجوشی** , pipeline) — auto عنوان اضافه شده در نسخه 3.8.0 است. `fusion` (پانل پنل بیرونی + قاضی سنتز، `open-sse/services/fusion.ts`) در نسخه 3.8.36 جدید است.
-- **امتیاز 16 عاملی** : سهمیه، سلامت، هزینه معکوس، تأخیر معکوس، تناسب وظیفه و ده مورد دیگر. جدول متعارف فاکتورها و وزنهای پیشفرض آنها در [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — زندگی میکند، با تکرار آن در اینجا، جایگاه دومی برای کهنه شدن به آن میدهد.
+- **امتیاز دهی 16 عاملی** : سهمیه، سلامت، هزینه معکوس، تأخیر معکوس، تناسب وظیفه و ده مورد دیگر. جدول متعارف فاکتورها و وزنهای پیشفرض آنها در [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — زندگی میکند، با تکرار آن در اینجا، جایگاه دومی برای کهنه شدن به آن میدهد.
 - **کارخانه مجازی** ترکیبهای زودگذر را زمانی که هیچ ترکیبی با نام تطبیقی وجود نداشته باشد، تحقق میبخشد و نامزدها را از اتصالات ارائهدهنده فعال سالم تامین میکند.
 - **پیشوندهای خودکار** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — که هر کدام توسط یک نمایه وزن تنظیم شده پشتیبانی می شوند.
 - **6 بسته حالت** : `ship-fast`، `cost-saver`، `quality-first`، `offline-friendly`، `reliability-first` و `chaos-mode` — پیکربندی های وزن از پیش تعیین شده قابل فراخوانی از داشبورد. (با پیشوندهای `auto/*` در بالا که انواع زمان درخواست هستند اشتباه گرفته نشود.)
@@ -415,7 +415,7 @@ Cloud Agents پلتفرمهای عامل کد میزبان شخص ثالث (Code
 - وصال قاعده Connection/model : `src/domain/connectionModelRules.ts`
 - عکسهای فوری در دسترس بودن مدل: `src/domain/modelAvailability.ts`
 - ردیابی انقضای ارائه دهنده: `src/domain/providerExpiration.ts`
-- سهمیه کش: `src/domain/quotaCache.ts`
+- حافظه نهان سهمیه: `src/domain/quotaCache.ts`. ارائهدهندگان پنجرههای سهمیه را اضافه و حذف میکنند (OpenAI پنجره Codex 5 ساعته را برای برخی از طرحها حذف کرد)، بنابراین استفاده از خواندن آداپتور ارائهدهنده بهعنوان کامل تأیید میکند (`quotasComplete`، به `src/lib/usage/usageReading.ts` مراجعه کنید) مجموعه پنجره کامل حساب است: پنجرهای که قبلاً شناخته شده بود اما وجود ندارد، بازنشسته شده است، در `quota_snapshots` پنهان، در rehydrates rehydrates a ثبت شده است. وضعیت سهمیه Codex و در سطل های اشباع Claude ادامه داشت. شواهد جزئی (سرصفحههای پاسخ، کپیهای قدیمی) فقط پنجرههایی را که دارند بهروزرسانی میکنند.
 - حالت تنزل: `src/domain/degradation.ts`
 - ممیزی پیکربندی: `src/domain/configAudit.ts`
 - سازنده ابرداده پاسخ OmniRoute : `src/domain/omnirouteResponseMeta.ts`

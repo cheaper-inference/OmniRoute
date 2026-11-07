@@ -222,30 +222,25 @@ boolean 플래그는 유효 값이 `"true"`, `"1"` 또는 `"yes"`일 때
 
 ## 플래그 전환
 
-### 대시보드
+### 계기반
 
-**Dashboard → Settings → Feature Flags**
-(`/dashboard/settings/feature-flags`)로 이동합니다. 그리드
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)는 다음을 지원합니다.
+다음으로 이동** 대시보드 → 설정 → 기능 플래그** (`/dashboard/settings/feature-flags`). 그리드(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)는 다음을 지원합니다.
 
-- 키 또는 설명으로 **검색**하고 카테고리별로 **필터링**합니다(합성
-  **재시작 필요** 보기 포함).
-- 불리언 플래그용 **토글**과 열거형 플래그용 **드롭다운**
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- 플래그별 **소스 배지** — `DB`, `ENV` 또는 `DEF` — 를 표시하며, 유효 값의 출처를 보여줍니다.
-- `DB` 소스 플래그에만 표시되는 **초기화** 버튼으로 오버라이드를 제거하고,
-  하단의 **모든 오버라이드 초기화** 버튼을 제공합니다.
-- `requiresRestart` 플래그가 변경되면 **서버 재시작** 배너를 표시합니다.
+- **찾다** 키 또는 설명으로** 필터** 카테고리별(합성** 다시 시작해야 함** 보다).
+- 에이** 비녀장** 부울 플래그 및** 드롭다운** 열거형 플래그(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`)의 경우.
+- 에이** 소스 배지** 플래그당 — `DB`, `ENV` 또는 `DEF` — 는 유효 값의 출처를 표시합니다.
+- 에이** 다시 놓기** 재정의를 삭제하는 버튼( `DB` -sourced 플래그에만 표시됨)** 모든 재정의 재설정** 버튼을 클릭하세요.
+- 에이** 서버 다시 시작** `requiresRestart` 플래그가 변경될 때의 배너.
 
 ### REST API
 
-모든 작업은 단일 라우트를 통해 수행됩니다:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-모든 메서드에는 인증된 대시보드 세션이 필요합니다(그렇지 않으면 `401`).
+모든 작업은 단일 경로( [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts) 를 통해 진행됩니다. 모든 방법에는 인증된 대시보드 세션이 필요합니다(그렇지 않으면 `401` ).
+
+로그인이 비활성화되면(`requireLogin=false`) 보호된 플래그(보안 범주의 모든 플래그와 `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` 및 `SKILLS_SANDBOX_NETWORK_ENABLED` ( `protectedFeatureFlags.ts` 의 `isProtectedFeatureFlag()` ))를 제외하고 경로가 열립니다. 그 중 하나에 있는 `PUT` 와 그 중 하나에 DB 재정의가 있는 `DELETE` 에는 여전히 대시보드 세션, `manage` -scope API 키, 쓰기 범위 이상의 `oma_` 액세스 토큰 또는 루프백에서 전송된 CLI 토큰 또는 내부 서비스 토큰이 필요합니다. 해당 세트는 경로가 세션 또는 `manage` -scope 키만 허용하는 로그인 온보다 더 넓습니다.
 
 #### `GET /api/settings/feature-flags`
 
-모든 플래그와 유효 값, 소스 및 요약을 반환합니다.
+유효 값, 소스 및 요약과 함께 모든 플래그를 반환합니다.
 
 ```jsonc
 {
@@ -263,7 +258,7 @@ boolean 플래그는 유효 값이 `"true"`, `"1"` 또는 `"yes"`일 때
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... 모든 119개 플래그
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -277,34 +272,30 @@ boolean 플래그는 유효 값이 `"true"`, `"1"` 또는 `"yes"`일 때
 
 #### `PUT /api/settings/feature-flags`
 
-단일 오버라이드를 설정하거나 제거합니다. 본문: `{ key: string; value?: string }`.
-`value`를 생략하면 오버라이드가 제거됩니다(env / 기본값으로 복원).
+단일 재정의를 설정하거나 제거합니다. 본문: `{ key: string; value?: string }`. `value` 생략하면 재정의가 제거됩니다(env/기본값 복원).
 
 ```bash
-# DB 오버라이드 설정
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# 오버라이드 제거("value" 없음)
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-응답에는 새로운 `effectiveValue`/`source`, `previousValue`/
-`previousSource` 및 `requiresRestart`가 포함됩니다. 알 수 없는 키와 범위를 벗어난 열거형
-값은 `400`으로 거부됩니다.
+응답은 새로운 `effectiveValue`/`source`, `previousValue`/ `previousSource` 및 `requiresRestart` 반영합니다. 알 수 없는 키와 범위를 벗어난 열거형 값은 `400` 로 거부됩니다.
 
 #### `DELETE /api/settings/feature-flags`
 
-모든 DB 오버라이드를 한 번에 삭제하여 모든 플래그를 env / 기본값으로 복원합니다.
-`{ cleared: <count>, message: "..." }`를 반환합니다.
+클리어** 모두** DB 즉시 재정의하여 모든 플래그를 env / 기본값으로 복원합니다. `{ cleared: <count>, message: "..." }` 반환합니다.
 
 > [!NOTE]
-> `requiresRestart: true`인 플래그는 프로세스를 다시 로드한 후에만 적용됩니다.
-> 대시보드의 재시작 흐름은 `POST /api/restart`를 호출한 다음 서버가 다시 실행될 때까지
-> `GET /api/health/ping`을 폴링합니다.
+> `requiresRestart: true` 포함된 플래그는 프로세스를 다시 로드한 후에만 적용됩니다. 대시보드의 다시 시작 흐름은 `POST /api/restart` 호출한 다음 서버가 백업될 때까지 `GET /api/health/ping` 폴링합니다.
+
+---
 
 ## 긴급 예산 폴백
 

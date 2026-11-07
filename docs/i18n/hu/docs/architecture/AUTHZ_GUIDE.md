@@ -307,15 +307,15 @@ Ez kikapcsolva marad, hacsak az `OMNIROUTE_MCP_ENFORCE_SCOPES=true` nincs beáll
 hozzáférési token hitelesítő adatokra vonatkozik. Lásd:
 [Kezelési hitelesítés](../guides/MANAGEMENT-AUTH.md).
 
-## Hitelesítés-kötelezőség kapcsoló
+## Auth Required kapcsoló
 
-Az `isAuthRequired()` a `src/shared/utils/apiAuth.ts` fájlban dönti el, hogy egy kérésnél érvényesül-e **bármilyen** hitelesítés:
+`isAuthRequired()` `src/shared/utils/apiAuth.ts` ben dönti el, hogy** bármilyen** a hitelesítés érvényesítve egy kérésre:
 
-- `settings.requireLogin === false` → a hitelesítés globálisan ki van kapcsolva, kivéve az mindig védett szintet (lásd: [Útvonalvédelmi szintek](../security/ROUTE_GUARD_TIERS.md)), valamint azokat a hívásokat, amelyek olyan hitelesítő adatot állítanak ki, amelyet a rendszer elfogad. Ezekhez ugyanaz a hitelesítő adat kell, mint bejelentkezéssel: szinkronizációs tokenek kiállítása, CLI hozzáférési tokenek kiállítása bármilyen hatókörrel, valamint `manage`/`admin` hatókörű API-kulcs létrehozása, ilyen hatókör megadása egy kulcsnak, vagy ilyen kulcs újragenerálása és megjelenítése (`requireCredentialForManagementScopedKey()` a `src/lib/api/requireManagementAuth.ts` fájlban). A következtetési célú kulcsok nyitva maradnak.
-- Nincs jelszó beállítva **és** nincs `INITIAL_PASSWORD` környezeti változó → bootstrap mód: a beállító varázsló és a loopback kérések engedélyezettek, de a külső hálózati kéréseknek továbbra is hitelesítő adat kell.
-- Bármilyen adatbázis-hiba → zárt állapot (biztonságos alapértelmezés).
+- `settings.requireLogin === false` → hitelesítés globálisan le van tiltva, kivéve a mindig védett réteget (lásd: [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) és az általa elfogadott hitelesítő adatokat kiosztó hívásokat, amelyekhez ugyanaz a hitelesítő adat szükséges, mint a bejelentkezéskor: szinkronizálási tokenek kiadása, CLI hozzáférési jogkivonatok verése bármilyen hatókörben, és API `admin` megadása a `manage` hatókörhöz. kulcsot, vagy egy ilyen kulcsot újra generál vagy felfed (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`). A csak következtetésre szolgáló kulcsok nyitva maradnak. A védett funkciójelzők (`REQUIRE_API_KEY`, a többi biztonsági jelző és a SSRF / TLS / MCP-scope / sandbox jelzők [a Feature Flags](../reference/FEATURE_FLAGS.md#rest-api) részben felsorolt jelzők) írásához és a PII maszkolási beállítások (`PUT /api/settings/pii`) mentéséhez szintén szükség van hitelesítő adatokra.
+- Nincs beállítva jelszó** és** no `INITIAL_PASSWORD` env var → bootstrap mód lehetővé teszi a bekapcsolási varázslót és a visszahurkolási kérelmeket, de a nyílt hálózati kérésekhez továbbra is hitelesítő adatokra van szükség. Kivétel: a védett funkciójelző jelzőjének írásához és a PII maszkolási beállítások (`PUT /api/settings/pii`) mentéséhez még visszacsatolásból is kell egy hitelesítő adat, így a visszacsatolás önmagában nem elegendő.
+- Bármilyen DB hiba → sikertelen lezárása (alapértelmezés szerint biztonságos).
 
-Az ügyfél-API kulcs érvényesítése az `isRequireApiKeyEnabled()` függvényt használja a `src/shared/utils/featureFlags.ts` fájlban, nem közvetlenül a `process.env.REQUIRE_API_KEY` olvasását. Ez a telepített példányoknál fontos: a `REQUIRE_API_KEY` átkapcsolása az Irányítópult → Funkciókapcsolók menüben DB-felülírást tárol, és azonnal hat a `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` útvonalakra és a többi ügyfél-API hitelesítési ellenőrzésre, amelyek ezt a segédfüggvényt használják. Ha a funkciókapcsoló-tár nem olvasható, az ügyfél-API hitelesítés zárt állapotba kerül, és kulcsot kér.
+Az ügyfél API kulcsának végrehajtása `isRequireApiKeyEnabled()` használja `src/shared/utils/featureFlags.ts` ben, nem pedig a közvetlen `process.env.REQUIRE_API_KEY` olvasást. Ez fontos a telepített példányok esetében: `REQUIRE_API_KEY` átváltása az irányítópulton → Feature Flags tárolja a DB felülírást, és azonnal hatással van `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` és más ügyfél-API hitelesítési ellenőrzésekre, amelyek megosztják ezt a segítőt. Ha a szolgáltatásjelző tárolója nem olvasható, akkor a kliens API hitelesítése meghiúsul, és kulcsra van szükség.
 
 ## Inkompatibilis változás — v3.8.0
 

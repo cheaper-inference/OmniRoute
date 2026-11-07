@@ -223,32 +223,27 @@ e il report dell'amministratore risolvono la stessa policy effettiva.
 
 ---
 
-## Attivazione e disattivazione dei flag
+## Attivazione/disattivazione dei flag
 
-### Dashboard
+### Pannello di controllo
 
-Vai a **Dashboard → Impostazioni → Flag delle funzionalità**
-(`/dashboard/settings/feature-flags`). La griglia
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-supporta:
+Vai a** Dashboard → Impostazioni → Flag funzionalità** (`/dashboard/settings/feature-flags`). La griglia (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) supporta:
 
-- **Ricerca** per chiave o descrizione e **filtro** per categoria (oltre a una
-  vista sintetica **Richiede riavvio**).
-- Un **interruttore** per i flag booleani e un **menu a discesa** per i flag enum
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Un badge dell’**origine** per ogni flag — `DB`, `ENV` o `DEF` — che mostra da dove proviene il valore effettivo.
-- Un pulsante **Reimposta** (mostrato solo per i flag con origine `DB`) per rimuovere l’override e un pulsante **Reimposta tutti gli override** in fondo.
-- Un banner **Riavvia server** quando viene modificato un flag `requiresRestart`.
+- **Ricerca** per chiave o descrizione e** filtro** per categoria (più un sintetico** Richiede il riavvio** visualizzazione).
+- UN** attivare/disattivare** per flag booleani e a** cadere in picchiata** per i flag enum (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- UN** distintivo di origine** per flag — `DB`, `ENV` o `DEF` — che mostra da dove proviene il valore effettivo.
+- UN** Reset** pulsante (mostrato solo per i flag `DB` -sourced ) per eliminare l'override e a** Ripristina tutte le sostituzioni** pulsante in basso.
+- UN** Riavvia il server** banner quando viene modificata una bandiera `requiresRestart`.
 
-### API REST
+### REST API
 
-Tutte le operazioni passano attraverso un’unica route:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Ogni metodo richiede una sessione autenticata della dashboard (`401` altrimenti).
+Tutte le operazioni passano attraverso un unico percorso: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Ogni metodo richiede una sessione dashboard autenticata (altrimenti `401` ).
+
+Con login disabilitato (`requireLogin=false`) il percorso è aperto, ad eccezione dei flag protetti: ogni flag della categoria Sicurezza più `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` e `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` in `protectedFeatureFlags.ts`). Uno `PUT` su uno di essi e uno `DELETE` mentre uno di essi ha un override DB, necessita comunque di una sessione del dashboard, di una chiave `manage` -scope API, di un token di accesso `oma_` con ambito di scrittura o superiore o del token CLI o del token di servizio interno inviato dal loopback. Questo insieme è più ampio rispetto a quello con il login attivo, dove il percorso accetta solo una sessione o una chiave `manage` -scope.
 
 #### `GET /api/settings/feature-flags`
 
-Restituisce ogni flag con il relativo valore effettivo, l’origine e un riepilogo.
+Restituisce ogni flag con il valore effettivo, l'origine e un riepilogo.
 
 ```jsonc
 {
@@ -266,7 +261,7 @@ Restituisce ogni flag con il relativo valore effettivo, l’origine e un riepilo
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... tutti i 119 flag
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -280,34 +275,30 @@ Restituisce ogni flag con il relativo valore effettivo, l’origine e un riepilo
 
 #### `PUT /api/settings/feature-flags`
 
-Imposta o rimuove un singolo override. Body: `{ key: string; value?: string }`.
-Se si omette `value`, l’override viene rimosso (ripristinando il valore env / predefinito).
+Imposta o rimuovi una singola sostituzione. Corpo: `{ key: string; value?: string }`. L'omissione `value` rimuove l'override (ripristino env/default).
 
 ```bash
-# Imposta un override DB
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Rimuove l’override (senza "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-La risposta restituisce il nuovo `effectiveValue`/`source`, il
-`previousValue`/`previousSource` e `requiresRestart`. Le chiavi sconosciute e i
-valori enum fuori intervallo vengono rifiutati con `400`.
+La risposta fa eco ai nuovi `effectiveValue`/`source`, `previousValue`/ `previousSource` e `requiresRestart`. Chiavi sconosciute e valori enumerativi fuori intervallo vengono rifiutati con `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Cancella contemporaneamente **tutti** gli override DB, ripristinando per ogni flag
-il relativo valore env / predefinito. Restituisce `{ cleared: <count>, message: "..." }`.
+Cancella** Tutto** DB esegue l'override immediatamente, ripristinando ogni flag al suo valore env / predefinito. Restituisce `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> I flag con `requiresRestart: true` diventano effettivi solo dopo il ricaricamento del processo.
-> Il flusso di riavvio della dashboard chiama `POST /api/restart` e quindi esegue il polling di
-> `GET /api/health/ping` finché il server non torna operativo.
+> I flag con `requiresRestart: true` hanno effetto solo dopo il ricaricamento del processo. Il flusso di riavvio del dashboard chiama `POST /api/restart` e quindi esegue il polling `GET /api/health/ping` fino al ripristino del server.
+
+---
 
 ## Fallback di emergenza per il budget
 

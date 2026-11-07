@@ -226,32 +226,25 @@ fail closed ქცევას. არც ერთი opt-out არ ამს�
 
 ## დროშების გადართვა
 
-### საინფორმაციო დაფა
+### დაფა
 
-გადადით **Dashboard → Settings → Feature Flags**
-(`/dashboard/settings/feature-flags`). ბადე
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-მხარს უჭერს:
+ნავიგაცია** დაფის → პარამეტრები → ფუნქციის დროშები** (`/dashboard/settings/feature-flags`). ბადე (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) მხარს უჭერს:
 
-- **ძებნას** გასაღების ან აღწერის მიხედვით და **ფილტრაციას** კატეგორიის მიხედვით (ასევე სინთეზურ
-  **Requires Restart** ხედს).
-- ბულური დროშებისთვის **გადამრთველს**, ხოლო enum დროშებისთვის **ჩამოსაშლელ მენიუს**
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- თითოეული დროშისთვის **წყაროს ბეჯს** — `DB`, `ENV` ან `DEF` — რომელიც აჩვენებს, საიდან
-  მომდინარეობს ეფექტური მნიშვნელობა.
-- **Reset** ღილაკს (ნაჩვენებია მხოლოდ `DB`-ს წყაროს მქონე დროშებისთვის), რომელიც აუქმებს
-  ჩანაცვლებას, და ბოლოში განთავსებულ **Reset All Overrides** ღილაკს.
-- **Restart Server** ბანერს, როდესაც `requiresRestart` დროშა შეიცვლება.
+- **ძიება** გასაღებით ან აღწერით და** ფილტრი** კატეგორიის მიხედვით (პლუს სინთეზური** მოითხოვს გადატვირთვას** ხედი).
+- ა** გადართვა** ლოგიკური დროშებისთვის და ა** ჩამოსაშლელი** enum დროშებისთვის (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- ა** წყაროს სამკერდე ნიშანი** თითო დროშა — `DB`, `ENV`, ან `DEF` — რომელიც აჩვენებს, საიდან მოვიდა ეფექტური მნიშვნელობა.
+- ა** გადატვირთვა** ღილაკი (ნაჩვენებია მხოლოდ `DB` -sourced დროშებისთვის) გადახვევის დასაშვებად და ა** ყველა უგულებელყოფის გადატვირთვა** ღილაკი ბოლოში.
+- ა** გადატვირთეთ სერვერი** ბანერი, როდესაც იცვლება `requiresRestart` დროშა.
 
 ### REST API
 
-ყველა ოპერაცია სრულდება ერთი route-ის მეშვეობით:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-თითოეული მეთოდი მოითხოვს dashboard-ის ავთენტიფიცირებულ სესიას (`401` სხვა შემთხვევაში).
+ყველა ოპერაცია გადის ერთი მარშრუტით: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). ყველა მეთოდი მოითხოვს დაფის ავთენტიფიკაციას (`401` წინააღმდეგ შემთხვევაში).
+
+შესვლის გამორთულით (`requireLogin=false`) მარშრუტი ღიაა, გარდა დაცული დროშებისა: უსაფრთხოების კატეგორიის ყველა დროშა პლუს `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` და `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` `protectedFeatureFlags.ts` ში). `PUT` ერთ-ერთ მათგანზე და `DELETE`, როცა ერთ-ერთ მათგანს აქვს DB გადაფარვა, ჯერ კიდევ სჭირდება დაფის სესია, `manage` -scope API კლავიში, `oma_` წვდომის ჟეტონი ჩაწერის მასშტაბით ან უფრო მაღალი, ან CLI ჟეტონი ან შიდა სერვისის ჟეტონი გამოგზავნილი loopback-დან. ეს ნაკრები უფრო ფართოა, ვიდრე შესვლის ჩართული, სადაც მარშრუტი იღებს მხოლოდ სესიას ან `manage` -scope კლავიშს.
 
 #### `GET /api/settings/feature-flags`
 
-აბრუნებს ყველა დროშას მისი ეფექტური მნიშვნელობით, წყაროთი და შეჯამებით.
+აბრუნებს ყველა დროშას თავისი ეფექტური მნიშვნელობით, წყაროთი და შეჯამებით.
 
 ```jsonc
 {
@@ -283,8 +276,7 @@ fail closed ქცევას. არც ერთი opt-out არ ამს�
 
 #### `PUT /api/settings/feature-flags`
 
-აყენებს ან შლის ერთ ჩანაცვლებას. სხეული: `{ key: string; value?: string }`.
-`value`-ის გამოტოვება შლის ჩანაცვლებას (აღადგენს env / default მნიშვნელობას).
+დააყენეთ ან წაშალეთ ერთი უგულებელყოფა. სხეული: `{ key: string; value?: string }`. `value` გამოტოვება ხსნის გადაფარვას (აღადგენს env / ნაგულისხმევს).
 
 ```bash
 # Set a DB override
@@ -298,19 +290,16 @@ curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-პასუხი აბრუნებს ახალ `effectiveValue`/`source` მნიშვნელობებს, `previousValue`/
-`previousSource` მნიშვნელობებს და `requiresRestart`-ს. უცნობი გასაღებები და დასაშვები
-დიაპაზონის მიღმა მყოფი enum მნიშვნელობები უარყოფილია `400` სტატუსით.
+პასუხი ეხმიანება ახალ `effectiveValue`/`source`, `previousValue`/ `previousSource` და `requiresRestart`. უცნობი გასაღებები და დიაპაზონის გარეთ მყოფი მნიშვნელობები უარყოფილია `400` ით.
 
 #### `DELETE /api/settings/feature-flags`
 
-ერთდროულად შლის **ყველა** DB ჩანაცვლებას და ყველა დროშას უბრუნებს მის env / default
-მნიშვნელობას. აბრუნებს `{ cleared: <count>, message: "..." }` ობიექტს.
+ასუფთავებს** ყველა** DB ერთდროულად გადალახავს, აღადგენს ყველა დროშას env / ნაგულისხმევ მნიშვნელობაზე. აბრუნებს `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> `requiresRestart: true`-ის მქონე დროშები ძალაში შედის მხოლოდ პროცესის გადატვირთვის შემდეგ.
-> Dashboard-ის გადატვირთვის flow იძახებს `POST /api/restart`-ს და შემდეგ polling-ით ამოწმებს
-> `GET /api/health/ping`-ს, სანამ სერვერი ხელახლა ხელმისაწვდომი გახდება.
+> დროშები `requiresRestart: true` ით მოქმედებს მხოლოდ პროცესის გადატვირთვის შემდეგ. დაფის გადატვირთვის ნაკადი იძახებს `POST /api/restart` და შემდეგ გამოკითხავს `GET /api/health/ping` სანამ სერვერი არ დაბრუნდება.
+
+---
 
 ## ბიუჯეტის საგანგებო სარეზერვო მექანიზმი
 

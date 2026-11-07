@@ -223,31 +223,27 @@ meklēšanu. Piemērošana un administratora pārskats nosaka vienu un to pašu 
 
 ---
 
-## Karodziņu pārslēgšana
+## Karogu pārslēgšana
 
 ### Informācijas panelis
 
-Atveriet **Informācijas panelis → Iestatījumi → Funkciju karodziņi**
-(`/dashboard/settings/feature-flags`). Režģis
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-atbalsta:
+Dodieties uz** Informācijas paneļa → iestatījumi → funkciju karogi** (`/dashboard/settings/feature-flags`). Režģis (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) atbalsta:
 
-- **Meklēšanu** pēc atslēgas vai apraksta un **filtrēšanu** pēc kategorijas (kā arī sintētisku skatu **Nepieciešama restartēšana**).
-- **Pārslēgu** Būla tipa karodziņiem un **nolaižamo izvēlni** enumerācijas tipa karodziņiem
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Katra karodziņa **avota emblēmu** — `DB`, `ENV` vai `DEF` — kas parāda, no kurienes iegūta efektīvā vērtība.
-- Pogu **Atiestatīt** (tiek rādīta tikai karodziņiem ar avotu `DB`), lai noņemtu ignorēšanu, un pogu **Atiestatīt visas ignorēšanas** apakšdaļā.
-- Reklāmkarogu **Restartēt serveri**, kad tiek mainīts karodziņš `requiresRestart`.
+- **Meklēt** pēc atslēgas vai apraksta un** filtru** pēc kategorijas (plus sintētika** Nepieciešama restartēšana** skats).
+- A** pārslēgt** Būla karogiem un a** nolaižamajā izvēlnē** enum karodziņiem (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- A** avota žetons** katram karogam — `DB`, `ENV` vai `DEF` — kas parāda, no kurienes iegūta efektīvā vērtība.
+- A** Atiestatīt** pogu (tiek rādīta tikai `DB` -sourced karodziņiem), lai atmestu ignorēšanu, un a** Atiestatīt visus ignorēšanas iestatījumus** pogu apakšā.
+- A** Restartējiet serveri** reklāmkarogs, kad tiek mainīts `requiresRestart` karogs.
 
 ### REST API
 
-Visas darbības notiek, izmantojot vienu maršrutu:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Katrai metodei ir nepieciešama autentificēta informācijas paneļa sesija (pretējā gadījumā `401`).
+Visas darbības notiek pa vienu maršrutu: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Katrai metodei ir nepieciešama autentificēta informācijas paneļa sesija (citādi `401` ).
+
+Ja pieteikšanās ir atspējota (`requireLogin=false`), maršruts ir atvērts, izņemot aizsargātos karogus: katrs drošības kategorijas karogs plus `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` un `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` in `protectedFeatureFlags.ts`). `PUT` vienā no tiem un `DELETE`, kamēr vienam no tiem ir DB ignorēšana, joprojām ir nepieciešama informācijas paneļa sesija, `manage` -scope API atslēga, `oma_` piekļuves pilnvara ar rakstīšanas tvērumu vai augstāku vai CLI pilnvara vai iekšējā pakalpojuma pilnvara, kas nosūtīta no atpakaļcilpas. Šī kopa ir plašāka nekā ar pieteikšanos, kur maršruts pieņem tikai sesiju vai `manage` -scope taustiņu.
 
 #### `GET /api/settings/feature-flags`
 
-Atgriež visus karodziņus ar to efektīvo vērtību, avotu un kopsavilkumu.
+Atgriež katru karogu ar tā faktisko vērtību, avotu un kopsavilkumu.
 
 ```jsonc
 {
@@ -279,34 +275,30 @@ Atgriež visus karodziņus ar to efektīvo vērtību, avotu un kopsavilkumu.
 
 #### `PUT /api/settings/feature-flags`
 
-Iestata vai noņem vienu ignorēšanu. Pamatteksts: `{ key: string; value?: string }`.
-Ja `value` netiek norādīts, ignorēšana tiek noņemta (atjaunojot vides / noklusējuma vērtību).
+Iestatiet vai noņemiet vienu ignorēšanu. Korpuss: `{ key: string; value?: string }`. Izlaižot `value`, tiek noņemta ignorēšana (atjaunojot env/noklusējumu).
 
 ```bash
-# Iestatīt DB ignorēšanu
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Noņemt ignorēšanu (bez "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Atbildē tiek atspoguļota jaunā `effectiveValue`/`source`, `previousValue`/
-`previousSource` un `requiresRestart` vērtība. Nezināmas atslēgas un ārpus atļautā
-diapazona esošas enumerācijas vērtības tiek noraidītas ar `400`.
+Atbilde atkārto jaunos `effectiveValue`/`source`, `previousValue`/ `previousSource` un `requiresRestart`. Nezināmas atslēgas un ārpus diapazona esošās vērtības tiek noraidītas ar `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Vienlaikus notīra **visas** DB ignorēšanas, atjaunojot katra karodziņa vides / noklusējuma
-vērtību. Atgriež `{ cleared: <count>, message: "..." }`.
+Notīra** visi** DB ignorē uzreiz, katram karogam atjaunojot tā env / noklusējuma vērtību. Atgriež `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Karodziņi ar `requiresRestart: true` stājas spēkā tikai pēc procesa pārlādes.
-> Informācijas paneļa restartēšanas plūsma izsauc `POST /api/restart` un pēc tam atkārtoti
-> vaicā `GET /api/health/ping`, līdz serveris atkal ir pieejams.
+> Karogi ar `requiresRestart: true` stājas spēkā tikai pēc procesa atkārtotas ielādes. Informācijas paneļa restartēšanas plūsma izsauc `POST /api/restart` un pēc tam aptaujā `GET /api/health/ping` līdz serveris tiek dublēts.
+
+---
 
 ## Ārkārtas budžeta rezerves mehānisms
 

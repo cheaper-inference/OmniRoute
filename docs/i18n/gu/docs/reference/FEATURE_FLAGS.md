@@ -221,34 +221,27 @@ administrator report સમાન અસરકારક policy નક્કી �
 > ફ્લૅગ્સ તેમના મંજૂર સેટની બહારનું કોઈપણ મૂલ્ય નકારી દે છે (બંને
 > `setFeatureFlagOverride()` અને REST `PUT` હૅન્ડલરમાં સર્વર-સાઇડ ચકાસણી કરવામાં આવે છે).
 
-## ફ્લેગ્સ ટૉગલ કરવું
+## ટૉગલિંગ ફ્લેગ્સ
 
 ### ડેશબોર્ડ
 
-**ડેશબોર્ડ → સેટિંગ્સ → ફીચર ફ્લેગ્સ**
-(`/dashboard/settings/feature-flags`) પર જાઓ. ગ્રિડ
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-આ સુવિધાઓને સપોર્ટ કરે છે:
+પર નેવિગેટ કરો** ડેશબોર્ડ → સેટિંગ્સ → લક્ષણ ફ્લેગ્સ** (`/dashboard/settings/feature-flags`) ગ્રીડ (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) સપોર્ટ કરે છે:
 
-- કી અથવા વર્ણન દ્વારા **શોધ**, અને કેટેગરી દ્વારા **ફિલ્ટર** (સાથે કૃત્રિમ
-  **રીક્વાયર્સ રીસ્ટાર્ટ** વ્યૂ).
-- બુલિયન ફ્લેગ્સ માટે **ટૉગલ** અને enum ફ્લેગ્સ માટે **ડ્રૉપડાઉન**
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- દરેક ફ્લેગ માટે **સ્રોત બેજ** — `DB`, `ENV`, અથવા `DEF` — જે અસરકારક મૂલ્ય
-  ક્યાંથી આવ્યું તે દર્શાવે છે.
-- ઓવરરાઇડ દૂર કરવા માટેનું **રીસેટ** બટન (`DB`-સ્રોત ધરાવતા ફ્લેગ્સ માટે જ
-  દેખાય છે), અને તળિયે **બધા ઓવરરાઇડ્સ રીસેટ કરો** બટન.
-- `requiresRestart` ફ્લેગ બદલાય ત્યારે **સર્વર રીસ્ટાર્ટ કરો** બેનર.
+- **શોધો** કી અથવા વર્ણન દ્વારા, અને** ફિલ્ટર** શ્રેણી દ્વારા (વત્તા એક કૃત્રિમ** પુનઃપ્રારંભની જરૂર છે** જુઓ).
+- એ** ટૉગલ** બુલિયન ફ્લેગ માટે અને એ** ડ્રોપડાઉન** enum ફ્લેગો માટે (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- એ** સ્ત્રોત બેજ** પ્રતિ ધ્વજ — `DB`, `ENV`, અથવા `DEF` — દર્શાવે છે કે અસરકારક મૂલ્ય ક્યાંથી આવ્યું છે.
+- એ** રીસેટ કરો** ઓવરરાઇડ છોડવા માટે બટન (માત્ર `DB` -sourced ફ્લેગ્સ માટે બતાવવામાં આવે છે), અને a** બધા ઓવરરાઇડ્સને ફરીથી સેટ કરો** તળિયે બટન.
+- એ** સર્વર પુનઃપ્રારંભ કરો** બેનર જ્યારે `requiresRestart` ધ્વજ બદલવામાં આવે છે.
 
 ### REST API
 
-બધી કામગીરી એક જ રૂટ દ્વારા થાય છે:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-દરેક પદ્ધતિ માટે પ્રમાણિત ડેશબોર્ડ સત્ર આવશ્યક છે (અન્યથા `401`).
+તમામ કામગીરી એક જ રૂટમાંથી પસાર થાય છે: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). દરેક પદ્ધતિ માટે પ્રમાણિત ડેશબોર્ડ સત્રની જરૂર છે ( અન્યથા`401` ).
+
+લૉગિન અક્ષમ (`requireLogin=false`) સાથે માર્ગ ખુલ્લો છે, સંરક્ષિત ફ્લેગ્સ સિવાય: સુરક્ષા શ્રેણીમાં દરેક ધ્વજ વત્તા `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` અને `SKILLS_SANDBOX_NETWORK_ENABLED` ( `protectedFeatureFlags.ts` માં`isProtectedFeatureFlag()` ). તેમાંથી એક પર `PUT`, અને `DELETE` જ્યારે તેમાંથી એક DB ઓવરરાઇડ ધરાવે છે, ત્યારે હજુ પણ ડેશબોર્ડ સત્ર, `manage` -scope API કી, `oma_` એક્સેસ ટોકન લખવાની અવકાશ અથવા ઉચ્ચ, અથવા લૂપબેકમાંથી મોકલેલ CLI ટોકન અથવા આંતરિક-સેવા ટોકનની જરૂર છે. તે સેટ લોગિન ઓન કરતાં વધુ પહોળો છે, જ્યાં રૂટ માત્ર સત્ર અથવા `manage` -scope કી સ્વીકારે છે.
 
 #### `GET /api/settings/feature-flags`
 
-દરેક ફ્લેગનું અસરકારક મૂલ્ય, સ્રોત અને સારાંશ પરત કરે છે.
+દરેક ધ્વજને તેના અસરકારક મૂલ્ય, સ્ત્રોત અને સારાંશ સાથે પરત કરે છે.
 
 ```jsonc
 {
@@ -266,7 +259,7 @@ administrator report સમાન અસરકારક policy નક્કી �
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... બધા 119 ફ્લેગ્સ
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -280,34 +273,30 @@ administrator report સમાન અસરકારક policy નક્કી �
 
 #### `PUT /api/settings/feature-flags`
 
-એક ઓવરરાઇડ સેટ કરો અથવા દૂર કરો. બોડી: `{ key: string; value?: string }`.
-`value` ન આપવાથી ઓવરરાઇડ દૂર થાય છે (env / default પુનઃસ્થાપિત થાય છે).
+એક ઓવરરાઇડ સેટ કરો અથવા દૂર કરો. શરીર: `{ key: string; value?: string }`. `value` ને છોડી દેવાથી ઓવરરાઇડ દૂર થાય છે (env/default પુનઃસ્થાપિત કરવું).
 
 ```bash
-# DB ઓવરરાઇડ સેટ કરો
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# ઓવરરાઇડ દૂર કરો ("value" વિના)
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-પ્રતિસાદમાં નવું `effectiveValue`/`source`, `previousValue`/
-`previousSource`, અને `requiresRestart` પરત મળે છે. અજાણી કીઓ અને મર્યાદાની બહારના
-enum મૂલ્યો `400` સાથે નકારવામાં આવે છે.
+પ્રતિભાવ નવા `effectiveValue`/`source`, `previousValue`/ `previousSource`, અને `requiresRestart` પડઘો પાડે છે. અજાણી કીઓ અને રેન્જની બહારની enum કિંમતો `400` સાથે નકારી કાઢવામાં આવે છે.
 
 #### `DELETE /api/settings/feature-flags`
 
-એકસાથે **બધા** DB ઓવરરાઇડ્સ સાફ કરે છે અને દરેક ફ્લેગને તેના env / default
-મૂલ્ય પર પુનઃસ્થાપિત કરે છે. `{ cleared: <count>, message: "..." }` પરત કરે છે.
+સાફ કરે છે** બધા** DB એક જ સમયે ઓવરરાઇડ કરે છે, દરેક ફ્લેગને તેના env / ડિફોલ્ટ મૂલ્યમાં પુનઃસ્થાપિત કરે છે. `{ cleared: <count>, message: "..." }` પરત કરે છે.
 
 > [!NOTE]
-> `requiresRestart: true` ધરાવતા ફ્લેગ્સ પ્રક્રિયા ફરી લોડ થયા પછી જ અસરકારક બને છે.
-> ડેશબોર્ડનો રીસ્ટાર્ટ પ્રવાહ `POST /api/restart` કૉલ કરે છે અને સર્વર ફરી શરૂ થાય
-> ત્યાં સુધી `GET /api/health/ping` ને પોલ કરે છે.
+> `requiresRestart: true` સાથેના ફ્લેગ પ્રક્રિયાને ફરીથી લોડ કર્યા પછી જ પ્રભાવી થાય છે. ડેશબોર્ડનો પુનઃપ્રારંભ પ્રવાહ `POST /api/restart` કૉલ કરે છે અને પછી સર્વર બેકઅપ ન થાય ત્યાં સુધી `GET /api/health/ping` મતદાન કરે છે.
+
+---
 
 ## કટોકટી બજેટ ફૉલબૅક
 

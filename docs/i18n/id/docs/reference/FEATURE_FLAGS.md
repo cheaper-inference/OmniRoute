@@ -223,33 +223,27 @@ Penegakan dan laporan administrator menggunakan kebijakan efektif yang sama.
 
 ---
 
-## Mengaktifkan dan Menonaktifkan Flag
+## Mengalihkan Bendera
 
 ### Dasbor
 
-Buka **Dasbor → Pengaturan → Feature Flags**
-(`/dashboard/settings/feature-flags`). Grid
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-mendukung:
+Navigasi ke** Dasbor → Pengaturan → Fitur Bendera** (`/dashboard/settings/feature-flags`). Grid (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) mendukung:
 
-- **Pencarian** berdasarkan kunci atau deskripsi, dan **filter** berdasarkan kategori (serta tampilan sintetis
-  **Memerlukan Mulai Ulang**).
-- **Toggle** untuk flag boolean dan **dropdown** untuk flag enum
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- **Badge sumber** untuk setiap flag — `DB`, `ENV`, atau `DEF` — yang menunjukkan asal nilai efektif.
-- Tombol **Atur Ulang** (hanya ditampilkan untuk flag bersumber `DB`) untuk menghapus override,
-  serta tombol **Atur Ulang Semua Override** di bagian bawah.
-- Banner **Mulai Ulang Server** ketika flag `requiresRestart` diubah.
+- **Mencari** dengan kunci atau deskripsi, dan** menyaring** berdasarkan kategori (ditambah sintetis** Membutuhkan Mulai Ulang** melihat).
+- A** beralih** untuk bendera boolean dan a** tarik-turun** untuk bendera enum (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- A** lencana sumber** per tanda — `DB`, `ENV`, atau `DEF` — menunjukkan dari mana nilai efektif berasal.
+- A** Mengatur ulang** tombol (hanya ditampilkan untuk flag `DB` -sourced ) untuk menghapus override, dan a** Atur Ulang Semua Penggantian** tombol di bagian bawah.
+- A** Mulai ulang Server** spanduk ketika bendera `requiresRestart` diubah.
 
 ### REST API
 
-Semua operasi menggunakan satu rute:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Setiap metode memerlukan sesi dasbor yang terautentikasi (`401` jika tidak).
+Semua operasi melalui satu rute: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Setiap metode memerlukan sesi dasbor yang diautentikasi (`401` sebaliknya).
+
+Dengan login dinonaktifkan (`requireLogin=false`) rute terbuka, kecuali untuk bendera yang dilindungi: setiap bendera dalam kategori Keamanan ditambah `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` dan `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` di `protectedFeatureFlags.ts`). `PUT` pada salah satu dari mereka, dan `DELETE` sementara salah satu dari mereka memiliki DB override, masih memerlukan sesi dashboard, kunci `manage` -scope API, token akses `oma_` dengan cakupan tulis atau lebih tinggi, atau token CLI atau token layanan internal yang dikirim dari loopback. Kumpulan itu lebih luas dibandingkan dengan login aktif, di mana rute hanya menerima sesi atau kunci `manage` -scope.
 
 #### `GET /api/settings/feature-flags`
 
-Mengembalikan setiap flag beserta nilai efektif, sumber, dan ringkasan.
+Mengembalikan setiap tanda dengan nilai efektif, sumber, dan ringkasannya.
 
 ```jsonc
 {
@@ -281,34 +275,30 @@ Mengembalikan setiap flag beserta nilai efektif, sumber, dan ringkasan.
 
 #### `PUT /api/settings/feature-flags`
 
-Mengatur atau menghapus satu override. Body: `{ key: string; value?: string }`.
-Menghilangkan `value` akan menghapus override (memulihkan nilai env / default).
+Setel atau hapus satu override. Tubuh: `{ key: string; value?: string }`. Menghilangkan `value` akan menghapus override (memulihkan env/default).
 
 ```bash
-# Atur override DB
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Hapus override (tanpa "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Respons mengembalikan `effectiveValue`/`source` yang baru, `previousValue`/
-`previousSource`, dan `requiresRestart`. Kunci yang tidak dikenal dan nilai enum
-di luar rentang ditolak dengan `400`.
+Responsnya menggemakan `effectiveValue`/`source`, `previousValue`/ `previousSource`, dan `requiresRestart`. Kunci yang tidak dikenal dan nilai enum di luar jangkauan ditolak dengan `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Menghapus **semua** override DB sekaligus, sehingga setiap flag kembali ke nilai env /
-default-nya. Mengembalikan `{ cleared: <count>, message: "..." }`.
+Membersihkan** semua** DB menimpa sekaligus, mengembalikan setiap flag ke nilai env/defaultnya. Mengembalikan `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Flag dengan `requiresRestart: true` hanya berlaku setelah proses dimuat ulang.
-> Alur mulai ulang dasbor memanggil `POST /api/restart`, lalu melakukan polling
-> `GET /api/health/ping` hingga server kembali aktif.
+> Bendera dengan `requiresRestart: true` hanya berlaku setelah proses dimuat ulang. Alur mulai ulang dasbor memanggil `POST /api/restart` lalu melakukan polling `GET /api/health/ping` hingga server kembali aktif.
+
+---
 
 ## Fallback Anggaran Darurat
 

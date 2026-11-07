@@ -217,42 +217,35 @@ Feature flag คือตัวสลับที่มีชื่อ (ชน�
 > [!NOTE]
 > คอลัมน์ `Restart` ระบุแฟล็กที่มี `requiresRestart: true` — ค่าจะถูกบันทึกทันที แต่จะมีผลหลังจากกระบวนการโหลดใหม่เท่านั้น แฟล็กแบบ enum จะปฏิเสธค่าที่อยู่นอกชุดค่าที่อนุญาต (ตรวจสอบฝั่งเซิร์ฟเวอร์ทั้งใน `setFeatureFlagOverride()` และตัวจัดการ REST `PUT`)
 
-## การสลับแฟล็ก
+## การสลับการตั้งค่าสถานะ
 
 ### แดชบอร์ด
 
-ไปที่ **Dashboard → Settings → Feature Flags**
-(`/dashboard/settings/feature-flags`) กริด
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-รองรับ:
+นำทางไปยัง** แดชบอร์ด การตั้งค่า → การตั้งค่าสถานะ →** (`/dashboard/settings/feature-flags`). ตาราง (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) รองรับ:
 
-- **ค้นหา**ด้วยคีย์หรือคำอธิบาย และ **กรอง**ตามหมวดหมู่ (รวมถึงมุมมองสังเคราะห์
-  **Requires Restart**)
-- **สวิตช์**สำหรับแฟล็กแบบบูลีน และ **เมนูดรอปดาวน์**สำหรับแฟล็กแบบ enum
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`)
-- ป้ายแหล่งที่มาสำหรับแต่ละแฟล็ก — `DB`, `ENV` หรือ `DEF` — ซึ่งแสดงว่า
-  ค่า effective มาจากที่ใด
-- ปุ่ม **รีเซ็ต** (แสดงเฉพาะแฟล็กที่มีแหล่งที่มาเป็น `DB`) เพื่อลบค่า override
-  และปุ่ม **รีเซ็ตค่า Override ทั้งหมด** ที่ด้านล่าง
-- แบนเนอร์ **รีสตาร์ตเซิร์ฟเวอร์** เมื่อมีการเปลี่ยนแฟล็ก `requiresRestart`
+- **ค้นหา** ตามคีย์หรือคำอธิบาย และ** กรอง** ตามหมวดหมู่ (บวกกับสารสังเคราะห์** ต้องรีสตาร์ท** ดู).
+- ก** สลับ** สำหรับแฟล็กบูลีนและ** แบบเลื่อนลง** สำหรับแฟล็ก enum (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`)
+- ก** ป้ายแหล่งที่มา** ต่อแฟล็ก — `DB`, `ENV` หรือ `DEF` — แสดงว่าค่าที่มีประสิทธิผลมาจากไหน
+- ก** รีเซ็ต** ปุ่ม (แสดงเฉพาะสำหรับแฟล็ก `DB` -sourced ) เพื่อยกเลิกการแทนที่ และ a** รีเซ็ตการแทนที่ทั้งหมด** ปุ่มที่ด้านล่าง
+- ก** รีสตาร์ทเซิร์ฟเวอร์** แบนเนอร์เมื่อธง `requiresRestart` มีการเปลี่ยนแปลง
 
 ### REST API
 
-การดำเนินการทั้งหมดใช้เส้นทางเดียว:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts)
-ทุกเมธอดต้องใช้เซสชันแดชบอร์ดที่ผ่านการยืนยันตัวตน (`401` หากไม่ผ่าน)
+การดำเนินการทั้งหมดต้องผ่านเส้นทางเดียว: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts) ทุกวิธีต้องมีเซสชันแดชบอร์ดที่ได้รับการรับรองความถูกต้อง (เป็นอย่างอื่น `401` )
+
+เมื่อปิดใช้งานการเข้าสู่ระบบ (`requireLogin=false`) เส้นทางจะเปิดขึ้น ยกเว้นแฟล็กที่ได้รับการป้องกัน: ทุกแฟล็กในหมวดความปลอดภัยบวก `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` และ `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` ใน `protectedFeatureFlags.ts`) `PUT` บนหนึ่งในนั้น และ `DELETE` ในขณะที่หนึ่งในนั้นมีการแทนที่ DB ยังคงต้องการเซสชันแดชบอร์ด คีย์ `manage` -scope API โทเค็นการเข้าถึง `oma_` ที่มีขอบเขตการเขียนหรือสูงกว่า หรือโทเค็น CLI หรือโทเค็นบริการภายในที่ส่งจากลูปแบ็ค ชุดนั้นกว้างกว่าเมื่อเปิดการเข้าสู่ระบบ โดยที่เส้นทางยอมรับเฉพาะเซสชันหรือคีย์ `manage` -scope
 
 #### `GET /api/settings/feature-flags`
 
-ส่งคืนแฟล็กทั้งหมดพร้อมค่า effective แหล่งที่มา และสรุป
+ส่งกลับทุกแฟล็กพร้อมค่าที่มีประสิทธิผล แหล่งที่มา และข้อมูลสรุป
 
 ```jsonc
 {
   "flags": [
     {
       "key": "REQUIRE_API_KEY",
-      "label": "ต้องใช้ API Key",
-      "description": "ต้องใช้ API key สำหรับคำขอขาเข้าทั้งหมด",
+      "label": "Require API Key",
+      "description": "Require an API key for all incoming requests",
       "category": "security",
       "type": "boolean",
       "enumValues": null,
@@ -262,7 +255,7 @@ Feature flag คือตัวสลับที่มีชื่อ (ชน�
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... แฟล็กทั้งหมด 119 รายการ
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -276,34 +269,28 @@ Feature flag คือตัวสลับที่มีชื่อ (ชน�
 
 #### `PUT /api/settings/feature-flags`
 
-ตั้งค่าหรือลบ override รายการเดียว Body: `{ key: string; value?: string }`
-หากไม่ระบุ `value` จะเป็นการลบ override (คืนค่า env / default)
+ตั้งค่าหรือลบการแทนที่เดียว ร่างกาย: `{ key: string; value?: string }`. การละเว้น `value` จะลบการแทนที่ (การเรียกคืน env / ค่าเริ่มต้น)
 
 ```bash
-# ตั้งค่า DB override
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# ลบ override (ไม่มี "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-การตอบกลับจะแสดง `effectiveValue`/`source` ใหม่, `previousValue`/
-`previousSource` และ `requiresRestart` คีย์ที่ไม่รู้จักและค่า enum
-ที่อยู่นอกช่วงที่กำหนดจะถูกปฏิเสธด้วย `400`
+การตอบสนองสะท้อนถึง `effectiveValue`/`source` ใหม่ , `previousValue`/ `previousSource` และ `requiresRestart` คีย์ที่ไม่รู้จักและค่าแจงนับนอกช่วงจะถูกปฏิเสธด้วย `400`
 
 #### `DELETE /api/settings/feature-flags`
 
-ล้าง DB override **ทั้งหมด** พร้อมกัน และคืนค่าแฟล็กทุกตัวเป็นค่า env / default
-ส่งคืน `{ cleared: <count>, message: "..." }`
+เคลียร์** ทั้งหมด** DB จะแทนที่พร้อมกัน โดยกู้คืนทุกแฟล็กเป็น env / ค่าเริ่มต้น ส่งกลับ `{ cleared: <count>, message: "..." }`
 
 > [!NOTE]
-> แฟล็กที่มี `requiresRestart: true` จะมีผลหลังจากโหลดกระบวนการใหม่เท่านั้น
-> ขั้นตอนการรีสตาร์ตของแดชบอร์ดจะเรียก `POST /api/restart` จากนั้นจะเรียก
-> `GET /api/health/ping` แบบ polling จนกว่าเซิร์ฟเวอร์จะกลับมาใช้งานได้อีกครั้ง
+> แฟล็กที่มี `requiresRestart: true` จะมีผลหลังจากโหลดกระบวนการใหม่เท่านั้น โฟลว์การรีสตาร์ทของแดชบอร์ดจะเรียก `POST /api/restart` จากนั้นจึงสำรวจ `GET /api/health/ping` จนกว่าเซิร์ฟเวอร์จะสำรองข้อมูล
 
 ---
 

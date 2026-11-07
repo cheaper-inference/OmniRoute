@@ -219,30 +219,23 @@ boolean フラグは、実効値が `"true"`、`"1"`、または `"yes"` の場�
 
 ### ダッシュボード
 
-**ダッシュボード → 設定 → 機能フラグ**
-(`/dashboard/settings/feature-flags`) に移動します。グリッド
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-では、次の操作を行えます。
+に移動します**ダッシュボード→設定→機能フラグ**(`/dashboard/settings/feature-flags`)。グリッド (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) は以下をサポートします。
 
-- キーまたは説明による**検索**、およびカテゴリによる**フィルタリング**（合成された
-  **再起動が必要**ビューを含む）。
-- boolean フラグ用の**トグル**と enum フラグ用の**ドロップダウン**
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`)。
-- 各フラグの**ソースバッジ** — `DB`、`ENV`、または `DEF` —。有効な値の取得元を示します。
-- オーバーライドを解除する**リセット**ボタン（`DB` ソースのフラグにのみ表示）と、下部の
-  **すべてのオーバーライドをリセット**ボタン。
-- `requiresRestart` フラグが変更されたときに表示される**サーバーを再起動**バナー。
+- **検索**キーまたは説明による、および**フィルター**カテゴリ別（および合成）**再起動が必要です**ビュー）。
+- あ**トグル**ブール値フラグと**落ちる**enum フラグ (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`) 用。
+- あ**ソースバッジ**有効な値の由来を示すフラグ— `DB`、 `ENV`、または`DEF` —ごと。
+- あ**リセット**オーバーライドを削除するボタン ( `DB` -sourcedフラグのみに表示)、および**すべてのオーバーライドをリセット**下部にあるボタン。
+- あ**サーバーを再起動します**`requiresRestart`フラグが変更されたときのバナー。
 
 ### REST API
 
-すべての操作は単一のルートを介して行われます。
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts)。
-すべてのメソッドで認証済みのダッシュボードセッションが必要です（それ以外の場合は
-`401`）。
+すべての操作は単一のルート[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts)を経由します。すべての方法では、認証されたダッシュボード セッションが必要です (それ以外の場合は`401` )。
+
+ログインを無効にすると (`requireLogin=false`)、ルートは保護されたフラグを除いてオープンになります。セキュリティ カテゴリのすべてのフラグと`OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`、 `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`、 `MITM_DISABLE_TLS_VERIFY`、 `OMNIROUTE_MCP_ENFORCE_SCOPES` 、および`SKILLS_SANDBOX_NETWORK_ENABLED` ( `protectedFeatureFlags.ts`の`isProtectedFeatureFlag()` )。そのうちの 1 つに`PUT`があり、そのうちの 1 つにDBオーバーライドがある場合の`DELETE`には、ダッシュボード セッション、 `manage` -scope APIキー、書き込みスコープ以上の`oma_`アクセス トークン、またはループバックから送信されたCLIトークンまたは内部サービス トークンが必要です。このセットは、ルートがセッションまたは`manage` -scopeキーのみを受け入れるログイン オンの場合よりも幅が広くなります。
 
 #### `GET /api/settings/feature-flags`
 
-すべてのフラグについて、有効な値、ソース、および概要を返します。
+すべてのフラグとその有効値、ソース、および概要を返します。
 
 ```jsonc
 {
@@ -260,7 +253,7 @@ boolean フラグは、実効値が `"true"`、`"1"`、または `"yes"` の場�
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... 119 個すべてのフラグ
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -274,34 +267,30 @@ boolean フラグは、実効値が `"true"`、`"1"`、または `"yes"` の場�
 
 #### `PUT /api/settings/feature-flags`
 
-単一のオーバーライドを設定または削除します。本文: `{ key: string; value?: string }`。
-`value` を省略すると、オーバーライドが削除されます（環境変数 / デフォルトに戻ります）。
+単一のオーバーライドを設定または削除します。本体: `{ key: string; value?: string }`。 `value`を省略すると、オーバーライドが削除されます (環境 / デフォルトの復元)。
 
 ```bash
-# DB オーバーライドを設定
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# オーバーライドを削除（"value" なし）
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-レスポンスには、新しい `effectiveValue` / `source`、`previousValue` /
-`previousSource`、および `requiresRestart` が含まれます。不明なキーと範囲外の enum
-値は `400` で拒否されます。
+応答は、新しい`effectiveValue`/`source`、 `previousValue`/ `previousSource`、および`requiresRestart`をエコーします。不明なキーと範囲外の列挙値は、 `400`で拒否されます。
 
 #### `DELETE /api/settings/feature-flags`
 
-すべての DB オーバーライドを一度に削除し、すべてのフラグを環境変数 / デフォルト値に戻します。
-`{ cleared: <count>, message: "..." }` を返します。
+クリア**全て**DB一度にオーバーライドし、すべてのフラグをその環境 / デフォルト値に復元します。 `{ cleared: <count>, message: "..." }`を返します。
 
 > [!NOTE]
-> `requiresRestart: true` のフラグは、プロセスをリロードした後にのみ有効になります。
-> ダッシュボードの再起動フローでは `POST /api/restart` を呼び出し、その後サーバーが復旧するまで
-> `GET /api/health/ping` をポーリングします。
+> `requiresRestart: true`を含むフラグは、プロセスのリロード後にのみ有効になります。ダッシュボードの再起動フローは`POST /api/restart`呼び出し、サーバーがバックアップされるまで`GET /api/health/ping`をポーリングします。
+
+---
 
 ## 緊急予算フォールバック
 

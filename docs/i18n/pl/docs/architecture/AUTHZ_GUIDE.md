@@ -292,15 +292,15 @@ Katalog i reguły dopasowania (identyczny ciąg znaków lub przyznany zakres ko�
 
 `read` / `write` / `admin` na tokenach `oma_live_…`, uszeregowane według `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). Ta ranga dotyczy wyłącznie poświadczeń tokenu dostępu. Zobacz [Uwierzytelnianie zarządzania](../guides/MANAGEMENT-AUTH.md).
 
-## Przełącznik wymogu uwierzytelnienia
+## Wymagane uwierzytelnienie Przełącz
 
-`isAuthRequired()` w `src/shared/utils/apiAuth.ts` decyduje, czy wymuszane jest **jakiekolwiek** uwierzytelnienie dla żądania:
+`isAuthRequired()` w `src/shared/utils/apiAuth.ts` decyduje, czy** każdy** uwierzytelnianie jest wymuszane w przypadku żądania:
 
-- `settings.requireLogin === false` → uwierzytelnianie jest globalnie wyłączone, z wyjątkiem poziomu zawsze chronionego (zobacz [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) oraz wywołań, które wydają poświadczenie, jakie akceptuje — te wymagają tego samego poświadczenia co przy włączonym logowaniu: wystawianie tokenów synchronizacji, wydawanie tokenów dostępu CLI w dowolnym zakresie oraz tworzenie klucza API z zakresem `manage`/`admin`, nadawanie tego zakresu kluczowi, regenerowanie lub ujawnianie takiego klucza (`requireCredentialForManagementScopedKey()` w `src/lib/api/requireManagementAuth.ts`). Klucze służące tylko do inferencji pozostają otwarte.
-- Brak skonfigurowanego hasła **oraz** brak zmiennej środowiskowej `INITIAL_PASSWORD` → tryb bootstrap pozwala na kreator konfiguracji i żądania z loopback, ale żądania z sieci zewnętrznej nadal wymagają poświadczeń.
-- Każdy błąd bazy danych → odmowa dostępu (secure-by-default).
+- `settings.requireLogin === false` → auth jest globalnie wyłączone, z wyjątkiem zawsze chronionego poziomu (patrz [Poziomy strażników tras](../security/ROUTE_GUARD_TIERS.md) ) i wywołań przekazujących akceptowane przez niego poświadczenia, które wymagają tych samych poświadczeń, co przy logowaniu: wydawanie tokenów synchronizacji, tworzenie tokenów dostępu CLI w dowolnym zakresie i tworzenie klucza API z zakresem `manage`/`admin`, przydzielanie tego zakresu kluczowi lub regenerowanie lub ujawnianie takiego klucza (`requireCredentialForManagementScopedKey()` w `src/lib/api/requireManagementAuth.ts`). Klucze służące tylko do wnioskowania pozostają otwarte. Zapisanie flagi chronionej funkcji (`REQUIRE_API_KEY`, inne flagi bezpieczeństwa i flagi SSRF / TLS / MCP-scope / sandbox wymienione w [flagach funkcji](../reference/FEATURE_FLAGS.md#rest-api) ) i zapisanie ustawień maskowania PII (`PUT /api/settings/pii`) również nadal wymaga poświadczeń.
+- Nie skonfigurowano hasła** I** tryb ładowania początkowego no `INITIAL_PASSWORD` env var → umożliwia korzystanie z kreatora dołączania i żądań pętli zwrotnej, ale ujawnione żądania sieciowe nadal wymagają poświadczeń. Wyjątek: napisanie flagi chronionej funkcji i zapisanie ustawień maskowania PII (`PUT /api/settings/pii`) wymaga poświadczeń nawet z pętli zwrotnej, więc sama pętla zwrotna nie wystarczy.
+- Każdy błąd DB → nie zostaje zamknięty (domyślnie bezpieczne).
 
-Egzekwowanie klucza API klienta korzysta z `isRequireApiKeyEnabled()` w `src/shared/utils/featureFlags.ts`, a nie z bezpośredniego odczytu `process.env.REQUIRE_API_KEY`. Ma to znaczenie dla wdrożonych instancji: przełączenie `REQUIRE_API_KEY` w Dashboard → Feature Flags zapisuje nadpisanie w bazie i natychmiast wpływa na `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` oraz inne sprawdzenia uwierzytelnienia API klienta, które współdzielą tę funkcję. Jeśli magazynu flag nie da się odczytać, uwierzytelnianie API klienta odmawia dostępu i wymaga klucza.
+Egzekwowanie klucza API klienta używa `isRequireApiKeyEnabled()` w `src/shared/utils/featureFlags.ts`, a nie bezpośredniego odczytu `process.env.REQUIRE_API_KEY`. Ma to znaczenie dla wdrożonych instancji: przełączanie `REQUIRE_API_KEY` w Dashboardzie → Feature Flags przechowuje zastąpienie DB i natychmiast wpływa na `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` i inne kontrole autoryzacji klienta-API, które korzystają z tego pomocnika. Jeśli nie można odczytać magazynu flag funkcji, uwierzytelnianie klienta API kończy się niepowodzeniem i wymaga klucza.
 
 ## Breaking Change — v3.8.0
 

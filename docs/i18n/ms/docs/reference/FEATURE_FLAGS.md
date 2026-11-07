@@ -219,31 +219,27 @@ Nilai enum yang tidak sah dan storan bendera ciri yang tidak boleh dibaca akan g
 
 ---
 
-## Menogol Bendera
+## Togol Bendera
 
-### Papan Pemuka
+### Papan pemuka
 
-Navigasi ke **Papan Pemuka → Tetapan → Bendera Ciri**
-(`/dashboard/settings/feature-flags`). Grid
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-menyokong:
+Navigasi ke** Papan pemuka → Tetapan → Ciri Bendera** (`/dashboard/settings/feature-flags`). Grid (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) menyokong:
 
-- **Carian** mengikut kunci atau penerangan, dan **penapisan** mengikut kategori (serta paparan sintetik **Memerlukan Mulakan Semula**).
-- **Togol** untuk bendera boolean dan **menu lungsur** untuk bendera enum
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Lencana sumber bagi setiap bendera — `DB`, `ENV`, atau `DEF` — yang menunjukkan dari mana nilai berkesan datang.
-- Butang **Tetapkan Semula** (hanya dipaparkan untuk bendera bersumberkan `DB`) untuk membuang penggantian, serta butang **Tetapkan Semula Semua Penggantian** di bahagian bawah.
-- Sepanduk **Mulakan Semula Pelayan** apabila bendera `requiresRestart` diubah.
+- **Cari** dengan kunci atau penerangan, dan** penapis** mengikut kategori (tambah sintetik** Memerlukan Mulakan Semula** pandangan).
+- A** togol** untuk bendera boolean dan a** jatuh turun** untuk bendera enum (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- A** lencana sumber** setiap bendera — `DB`, `ENV`, atau `DEF` — menunjukkan dari mana datangnya nilai berkesan.
+- A** Tetapkan semula** butang (ditunjukkan hanya untuk bendera `DB` -sourced ) untuk menggugurkan penggantian, dan a** Tetapkan Semula Semua Penggantian** butang di bahagian bawah.
+- A** Mulakan semula Pelayan** banner apabila bendera `requiresRestart` ditukar.
 
-### API REST
+### REST API
 
-Semua operasi melalui satu laluan:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Setiap kaedah memerlukan sesi papan pemuka yang disahkan (`401` jika tidak).
+Semua operasi melalui satu laluan: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Setiap kaedah memerlukan sesi papan pemuka yang disahkan (`401` sebaliknya).
+
+Dengan log masuk dilumpuhkan (`requireLogin=false`) laluan dibuka, kecuali untuk bendera yang dilindungi: setiap bendera dalam kategori Keselamatan ditambah `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` dan `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` dalam `protectedFeatureFlags.ts`). `PUT` pada salah satu daripadanya, dan `DELETE` manakala salah satu daripadanya mengalami penggantian DB, masih memerlukan sesi papan pemuka, kunci `manage` -scope API, token akses `oma_` dengan skop tulis atau lebih tinggi, atau token CLI atau token perkhidmatan dalaman yang dihantar dari gelung balik. Set itu lebih luas berbanding dengan log masuk dihidupkan, di mana laluan hanya menerima sesi atau kunci `manage` -scope.
 
 #### `GET /api/settings/feature-flags`
 
-Mengembalikan setiap bendera bersama nilai berkesan, sumber dan ringkasan.
+Mengembalikan setiap bendera dengan nilai berkesan, sumber dan ringkasannya.
 
 ```jsonc
 {
@@ -261,7 +257,7 @@ Mengembalikan setiap bendera bersama nilai berkesan, sumber dan ringkasan.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... kesemua 119 bendera
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -275,34 +271,30 @@ Mengembalikan setiap bendera bersama nilai berkesan, sumber dan ringkasan.
 
 #### `PUT /api/settings/feature-flags`
 
-Menetapkan atau mengalih keluar satu penggantian. Isi: `{ key: string; value?: string }`.
-Meninggalkan `value` akan mengalih keluar penggantian (memulihkan env / lalai).
+Tetapkan atau alih keluar satu penggantian. Badan: `{ key: string; value?: string }`. Mengeluarkan `value` mengalih keluar override (memulihkan env / lalai).
 
 ```bash
-# Tetapkan penggantian DB
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Alih keluar penggantian (tiada "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Respons menggemakan `effectiveValue`/`source` baharu, `previousValue`/
-`previousSource`, dan `requiresRestart`. Kunci yang tidak diketahui serta nilai
-enum di luar julat ditolak dengan `400`.
+Respons itu menggemakan `effectiveValue`/`source` baharu , `previousValue`/ `previousSource` dan `requiresRestart`. Kekunci tidak diketahui dan nilai enum di luar julat ditolak dengan `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Mengosongkan **semua** penggantian DB serentak, lalu memulihkan setiap bendera kepada
-nilai env / lalainya. Mengembalikan `{ cleared: <count>, message: "..." }`.
+Membersihkan** semua** DB menimpa sekaligus, memulihkan setiap bendera kepada nilai env / lalainya. Mengembalikan `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Bendera dengan `requiresRestart: true` hanya berkuat kuasa selepas proses dimuatkan semula.
-> Aliran mulakan semula papan pemuka memanggil `POST /api/restart` dan kemudian mengundi
-> `GET /api/health/ping` sehingga pelayan tersedia semula.
+> Bendera dengan `requiresRestart: true` hanya berkuat kuasa selepas proses muat semula. Aliran mula semula papan pemuka memanggil `POST /api/restart` dan kemudian mengundi `GET /api/health/ping` sehingga pelayan disandarkan.
+
+---
 
 ## Sandaran Bajet Kecemasan
 
