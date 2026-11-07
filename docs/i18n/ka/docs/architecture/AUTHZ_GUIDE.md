@@ -310,15 +310,15 @@ API გასაღებები შეიცავს `scopes` მასი�
 `read` / `write` / `admin` `oma_live_…` ტოკენებზე, რანჟირებული `scopeSatisfies`-ის მიხედვით
 (`src/lib/accessTokens/scopes.ts`). ეს რანგი ვრცელდება მხოლოდ წვდომის ტოკენის სერთიფიკატზე. იხილეთ [მართვის ავთენტიფიკაცია](../guides/MANAGEMENT-AUTH.md).
 
-## ავთენტიფიკაციის საჭიროების გადამრთველი
+## ავტორიზაციის საჭირო გადართვა
 
-`src/shared/utils/apiAuth.ts`-ის `isAuthRequired()` განსაზღვრავს, ვრცელდება თუ არა **რაიმე** ავთენტიფიკაცია მოთხოვნაზე:
+`isAuthRequired()` in `src/shared/utils/apiAuth.ts` წყვეტს თუ არა** ნებისმიერი** ავტორიზაცია ძალაშია მოთხოვნისთვის:
 
-- `settings.requireLogin === false` → ავთენტიფიკაცია გლობალურად გამორთულია, გარდა ყოველთვის დაცული იარუსისა (იხ. [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) და იმ გამოძახებებისა, რომლებიც გასცემენ credential-ს, რომელსაც ის იღებს. ეს მოითხოვს იმავე credential-ს, რაც შესვლის ჩართულობისას: სინქრონიზაციის token-ების გაცემა, CLI წვდომის token-ების მოჭრა ნებისმიერი scope-ით, და `manage`/`admin` scope-ის მქონე API გასაღების შექმნა, ამ scope-ის მინიჭება გასაღებისთვის, ან ასეთი გასაღების ხელახლა გენერირება ან გამჟღავნება (`requireCredentialForManagementScopedKey()`, `src/lib/api/requireManagementAuth.ts`). მხოლოდ inference გასაღებები რჩება ღია.
-- პაროლი არ არის კონფიგურირებული **და** არ არსებობს `INITIAL_PASSWORD` გარემოს ცვლადი → bootstrap რეჟიმი უშვებს onboarding wizard-სა და loopback მოთხოვნებს, მაგრამ ქსელიდან გახსნილ მოთხოვნებს კვლავ სჭირდებათ credential-ები.
-- ნებისმიერი DB შეცდომა → დახურულად ვერ ხერხდება (secure-by-default).
+- `settings.requireLogin === false` → auth გლობალურად გამორთულია, გარდა ყოველთვის დაცული ფენისა (იხ. [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) და ზარები, რომლებიც აწვდიან ავტორიზაციას, რომელსაც იგი იღებს, რომლებიც საჭიროებენ იგივე რწმუნებათა სიგელებს, როგორც შესვლისას: სინქრონიზაციის ნიშნების გაცემა, CLI წვდომის ჟეტონების გამოთვლა ნებისმიერ ფარგლებსში და `manage`/ კლავიშის მინიჭება API `admin`. გასაღები, ან ასეთი გასაღების რეგენერაცია ან გამოვლენა (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`). მხოლოდ დასკვნის გასაღებები რჩება ღია. დაცული ფუნქციის დროშის დაწერა (`REQUIRE_API_KEY`, უსაფრთხოების სხვა დროშები და SSRF / TLS / MCP-scope / sandbox დროშები, რომლებიც ჩამოთვლილია [ფუნქციების დროშებში](../reference/FEATURE_FLAGS.md#rest-api) ) და PII masking პარამეტრების შენახვა (`PUT /api/settings/pii`) ასევე საჭიროებს რწმუნებათა სიგელებს.
+- პაროლი არ არის კონფიგურირებული** და** no `INITIAL_PASSWORD` env var → bootstrap რეჟიმი საშუალებას აძლევს ჩატვირთვის ოსტატის და loopback-ის მოთხოვნებს, მაგრამ გამოვლენილი ქსელის მოთხოვნას მაინც სჭირდება სერთიფიკატები. გამონაკლისი: დაცული ფუნქციის დროშის ჩაწერა და PII masking პარამეტრების (`PUT /api/settings/pii`) შენახვა საჭიროებს სერთიფიკატს, თუნდაც loopback-დან, ამიტომ loopback თავისთავად საკმარისი არ არის.
+- ნებისმიერი DB შეცდომა → ვერ დაიხურება (ნაგულისხმევად უსაფრთხო).
 
-კლიენტის API გასაღების აღსრულება იყენებს `src/shared/utils/featureFlags.ts`-ის `isRequireApiKeyEnabled()`-ს და არა `process.env.REQUIRE_API_KEY`-ის პირდაპირ წაკითხვას. ეს მნიშვნელოვანია განლაგებული ინსტანციებისთვის: Dashboard → Feature Flags-ში `REQUIRE_API_KEY`-ის შეცვლა ინახავს DB-ის გადაფარვას და მაშინვე მოქმედებს `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` და კლიენტის API-ის სხვა ავთენტიფიკაციის შემოწმებებზე, რომლებიც ამ დამხმარეს იზიარებენ. თუ feature flag-ების საცავი ვერ იკითხება, კლიენტის API-ის ავთენტიფიკაცია დახურულად ვერ ხერხდება და გასაღებს ითხოვს.
+კლიენტის API გასაღების აღსრულება იყენებს `isRequireApiKeyEnabled()` `src/shared/utils/featureFlags.ts` ში და არა პირდაპირ `process.env.REQUIRE_API_KEY` წაკითხვას. ეს მნიშვნელოვანია განლაგებული შემთხვევებისთვის: `REQUIRE_API_KEY` გადართვა Dashboard-ში → Feature Flags ინახავს DB გადაფარვას და დაუყოვნებლივ მოქმედებს `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` და კლიენტ-API-ის სხვა აუთ ჩეკებზე, რომლებიც იზიარებენ ამ დამხმარეს. თუ ფუნქციების დროშის მაღაზიის წაკითხვა შეუძლებელია, კლიენტი API auth ვერ დაიხურება და საჭიროებს გასაღებს.
 
 ## შეუთავსებელი ცვლილება — v3.8.0
 

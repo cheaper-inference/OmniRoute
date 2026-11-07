@@ -315,15 +315,15 @@ Den är avstängd om inte `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 (`src/lib/accessTokens/scopes.ts`). Denna rankning gäller endast för åtkomsttoken-
 autentiseringsuppgiften. Se [Management Authentication](../guides/MANAGEMENT-AUTH.md).
 
-## Växling av autentiseringskrav
+## Växla för autentisering krävs
 
-`isAuthRequired()` i `src/shared/utils/apiAuth.ts` avgör om **någon** autentisering alls tillämpas för en begäran:
+`isAuthRequired()` i `src/shared/utils/apiAuth.ts` avgör om** några** auth verkställs för en begäran:
 
-- `settings.requireLogin === false` → autentisering är globalt avstängd, förutom för den alltid skyddade nivån (se [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) och anropen som lämnar ut en inloggningsuppgift som den accepterar. Dessa kräver samma inloggningsuppgift som med inloggning påslagen: utfärdande av synk-tokens, utfärdande av CLI-åtkomsttokens med vilket scope som helst, och skapande av en API-nyckel med scopet `manage`/`admin`, beviljande av det scopet till en nyckel, eller förnyelse eller visning av en sådan nyckel (`requireCredentialForManagementScopedKey()` i `src/lib/api/requireManagementAuth.ts`). Nycklar för enbart inferens förblir öppna.
-- Inget lösenord konfigurerat **och** ingen miljövariabel `INITIAL_PASSWORD` → bootstrap-läget tillåter introduktionsguiden och loopback-begäranden, men exponerade nätverksbegäranden kräver fortfarande inloggningsuppgifter.
-- Vid varje DB-fel nekas åtkomst (säkert som standard).
+- `settings.requireLogin === false` → auth är globalt inaktiverad, förutom den alltid skyddade nivån (se [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) och de anrop som delar ut en autentiseringsinformation som den accepterar, som behöver samma autentiseringsuppgifter som med inloggning: utfärda synkroniseringstokens, prägla CLI åtkomsttokens oavsett omfattning, och skapa en API nyckel med `manage`-nyckeln,`admin` scope, nyckel, eller regenerera eller avslöja en sådan nyckel (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`). Endast slutledningsnycklar förblir öppna. Att skriva en skyddad funktionsflagga (`REQUIRE_API_KEY`, de andra säkerhetsflaggorna och SSRF / TLS /MCP-scope/sandbox-flaggorna listade i [Feature Flags](../reference/FEATURE_FLAGS.md#rest-api) ) och spara PII -maskeringsinställningarna (`PUT /api/settings/pii`) behöver också fortfarande en autentiseringsinformation.
+- Inget lösenord har konfigurerats** och** no `INITIAL_PASSWORD` env var → bootstrap-läge tillåter onboarding-guiden och loopback-förfrågningar, men exponerade nätverksbegäranden behöver fortfarande autentiseringsuppgifter. Undantag: att skriva en skyddad funktionsflagga och spara PII maskeringsinställningarna (`PUT /api/settings/pii`) behöver en referens även från loopback, så loopback i sig räcker inte där.
+- Alla DB fel → misslyckas stängs (säkert som standard).
 
-Klientens API-nyckelkontroll använder `isRequireApiKeyEnabled()` i `src/shared/utils/featureFlags.ts`, inte en direkt läsning av `process.env.REQUIRE_API_KEY`. Detta är viktigt för driftsatta instanser: att växla `REQUIRE_API_KEY` i Dashboard → Feature Flags sparar en DB-åsidosättning och påverkar omedelbart `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` och andra autentiseringskontroller för klient-API:et som delar denna hjälpfunktion. Om feature-flaggelagret inte kan läsas nekas klient-API-autentiseringen åtkomst och en nyckel krävs.
+Client API key enforcement använder `isRequireApiKeyEnabled()` i `src/shared/utils/featureFlags.ts`, inte en direkt `process.env.REQUIRE_API_KEY` läsning. Det här är viktigt för distribuerade instanser: växla `REQUIRE_API_KEY` i Dashboard → Feature Flags lagrar en DB överstyrning och påverkar omedelbart `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` och andra klient-API-autentiseringskontroller som delar denna hjälpare. Om funktionsflaggalagret inte kan läsas, stängs inte klientens API auth och kräver en nyckel.
 
 ## Bakåtinkompatibel ändring — v3.8.0
 

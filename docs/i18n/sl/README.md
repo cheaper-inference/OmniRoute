@@ -71,19 +71,19 @@
 
 <div align="center">
 
-|                                       |          v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
-| ------------------------------------- | :-----------------------: | :---------: | :-------------------: |
-| 🌐 Ponudniki                          |            352            |   **358**   |          380          |
-| 🧠 Enolični ID-ji klepetalnih modelov |           1320            |  **1374**   |         1491          |
-| 🖼️ Most za modalnosti                 |   🆕 vid + zvok + video   |      ✓      |           ✓           |
-| 📡 Katalog brezplačnih vsebin Radar   | 🆕 z možnostjo privolitve |      ✓      |           ✓           |
-| ⚖️ Razporejanje z upoštevanjem kvot   |      🆕 Quota-Share       |      ✓      |           ✓           |
-| 📊 Telemetrija kvot                   |         🆕 v živo         |      ✓      |           ✓           |
-| 🧰 Brezglavi način                    |             —             |      —      | 🆕 `serve --headless` |
-| 🛤️ Infrastruktura LTS-tirnice         |             —             |      —      |  🆕 release channels  |
-| 🔎 API za odkrivanje modelov          |             —             |      —      | 🆕 `/v1/models/query` |
+|                                    |          v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
+| ---------------------------------- | :-----------------------: | :---------: | :-------------------: |
+| Ponudniki 🌐                       |            352            |   **358**   |          380          |
+| 🧠 Edinstven model klepeta IDs     |           1320            |  **1374**   |         1491          |
+| Modalni 🖼️                         | 🆕 vision + avdio + video |      ✓      |           ✓           |
+| 📡 Radar brezplačni katalog        |         🆕 opt-in         |      ✓      |           ✓           |
+| ⚖️ Razporejanje, ki upošteva kvote |      🆕 Kvota-Share       |      ✓      |           ✓           |
+| 📊 Quota telemetrija               |         🆕 v živo         |      ✓      |           ✓           |
+| 🧰 Brezglavi način                 |             —             |      —      | 🆕 `serve --headless` |
+| 🛤️ LTS tirnica infra               |             —             |      —      |  kanali za izdajo 🆕  |
+| 🔎 Odkrivanje modela API           |             —             |      —      | 🆕 `/v1/models/query` |
 
-**→ [Načrt poti](ROADMAP.md) — po tirnici do `v3.9.0 LTS`**
+**→ [načrt](ROADMAP.md) — vožnja po železnici do `v3.9.0 LTS`**
 
 </div>
 
@@ -588,35 +588,35 @@ trenutnem katalogu najdete na **[radar.omniroute.online/planos](https://radar.om
 
 </div>
 
-> Nedavni poudarki iz **v3.8.20 → v3.8.54**. Celotna zgodovina v [`CHANGELOG.md`](CHANGELOG.md).
+> Nedavni poudarki iz** v3.8.20 → v3.8.54** . Celotna zgodovina v [`CHANGELOG.md`](CHANGELOG.md).
 
-- **⚖️ `quota-weighted` usmerjanje** — 20. kombinirana strategija preskoči izčrpane račune, nato izbere med ostalimi v sorazmerju s preostalo kvoto ÷ trenutna obremenitev, pri čemer ostanejo obstoječi pogovori pripeti. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🧰 Način brez glave** — `omniroute serve --headless` (ali `OMNIROUTE_HEADLESS=1`) zažene samo `/v1/*` proxy pogon, z izklopljeno nadzorno ploščo in podsistemi, ki so namenjeni samo nadzorni plošči. → [Headless Mode](docs/guides/HEADLESS.md)
-- **🔎 Odkritje modelov** — `/v1/models` filtrira po zmožnostih, kontekstu, vrsti in besedilu, `POST /v1/models/query` pa vrne kratko deterministično ožjo izbiro z enako vidnostjo po ključu. → [API Reference](docs/reference/API_REFERENCE.md)
-- **🔑 Nadzor usmerjanja po ključu** — API ključ lahko pripnete na en model ali kombinacijo z `forcedModel`, modele in kombinacije ključa pa dodajate ali odstranjujete atomsko (`/api/keys/{id}/access`). → [API Reference](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
-- **🛡️ Natančnejši PII nadzor** — izbira po tipu, do 20 potrjenih vzorcev za maskiranje po meri in števci zaznavanja po tipu; samo maskiranje ostaja izbirno. → [Guardrails](docs/security/GUARDRAILS.md)
-- **🌍 67 jezikov** — nadzorna plošča, zrcalne dokumentacije in CLI, z `npm run i18n:add-locale` dodate jezik povsod z enim ukazom. → [i18n Guide](docs/guides/I18N.md)
-- **🎛️ OmniConductor** — vhodna A2A delegacija vaši floti agentov, Conductor veščine na Agent Card in nadzorni panel z Faro push-to-talk glasovnim klepetom. → [A2A Server](docs/frameworks/A2A-SERVER.md)
-- **🛂 Prilagodljiv sprejem & zaščita pred preobremenitvijo** — zahtevki za obsežen klepet se uvrstijo v čakalno vrsto namesto da bi vrnili 503, z atomskimi RPM najemninami po povezavi. → [Resilience Guide](docs/architecture/RESILIENCE_GUIDE.md)
-- **🗂️ Kanonično razvrščanje `/v1/models`** — en neprekinjen blok po ponudniku (kombinacije najprej pripete), stabilno skozi vse vire kataloga. → [API Reference](docs/reference/API_REFERENCE.md)
-- **🗜️ Utrjevanje stiskanja** — privzeto vklopljena zaščita pred inflacijo, Caveman paketi za DE / FR / JA + kitajščina (wényán), RTK filtri za Gradle & .NET. → [Compression](docs/compression/COMPRESSION_ENGINES.md)
-- **💸 Poštena pavšalna cena** — ponudniki naročnin / coding-plan imajo **$0** v analitiki stroškov; proračun, kvota in usmerjanje še naprej ocenjujejo. → [API Reference](docs/reference/API_REFERENCE.md)
-- **⚖️ Quota-Share usmerjanje** — pošteno razdeli kvoto skupnega računa med združene ključe, neizkoriščeni deleži se posojajo naprej. → [Resilience Guide](docs/architecture/RESILIENCE_GUIDE.md)
-- **🤖 Nastavitev CLI/agenta z enim ukazom** — 15 registriranih `setup-*` ukazov; `omniroute run` zažene 7 CLI-jev (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); `omniroute configure` podpira 11 ciljev z interaktivnim izbirnikom ponudnika+modela in priljubljenimi po kontekstu. → [CLI Integrations](docs/guides/CLI-INTEGRATIONS.md)
-- **🛰️ Oddaljeni način** — upravljajte oddaljeni OmniRoute z omejenimi žetoni (`connect` / `contexts` / `tokens`) + `antigravity` OAuth pomočnikom za VPS namestitve. → [Remote Mode](docs/guides/REMOTE-MODE.md)
-- **🧭 Pametnejše samodejno usmerjanje** — `auto/<category>:<tier>` kombinacije, **Fusion** (panel modelov + sodnik), usmerjanje glede na nalogo, nadzor modela / načina / USD-proračuna po zahtevku. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🗜️ Priklopljivo stiskanje** — 12 sestavljivih pogonov + Compression Studios: LLMLingua-2, dvo-stopenjski Ultra, omniglyph, prehod zvestobe po korakih, GCF v3.2, urejevalnik z vlečenjem in preurejanjem. → [Compression](docs/compression/COMPRESSION_ENGINES.md)
-- **🕵️ Pregledno MITM dešifriranje (TPROXY)** — zajemite CLI-je, ki ignorirajo proxy okoljske spremenljivke, s CA po SNI + namestitvijo zaupanja vredne shrambe. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
-- **💸 Telemetrija stroškov povsod** — `X-OmniRoute-*` glave stroškov/uporabe na vsakem končnem točki, glava prihrankov cache-HIT, USD proračuni po ključu. → [API Reference](docs/reference/API_REFERENCE.md)
-- **🧠 Spomin pod vašim nadzorom** — privzeto izklopljen, izbirno int8 vektorsko kvantiziranje + tipizirano razpadanje, po zahtevku `x-omniroute-no-memory`. → [Memory](docs/frameworks/MEMORY.md)
-- **🛡️ Varnost** — zaščita pred prompt-injection na vsaki LLM poti (red-team paket), izbirna zaščita za maskiranje poverilnic (prekriva iztekle API ključe/gesla v obe smeri), brezplačno DuckDuckGo spletno iskanje v sili in izbirna OIDC prijava za nadzorno ploščo (prijava z geslom je vedno na voljo). → [Guardrails](docs/security/GUARDRAILS.md)
-- **🖼️ Novi končni točki** — `/v1/ocr` (Mistral OCR) in `/v1/audio/translations` (Whisper-style) dopolnjujeta medijsko površino. → [API Reference](docs/reference/API_REFERENCE.md)
-- **🎨 Generiranje slik / videa / zvoka** — en API za medije: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind in ponudniki govora kot ElevenLabs. → [API Reference](docs/reference/API_REFERENCE.md)
-- **🌍 Namestitev & upravljanje** — reverse-proxy `basePath`, samodejno zaznavanje jezika brskalnika, sledenje napravam po ključu, MITM zaupanje brez root dostopa, lokalizacija zh-TW. → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 Več ponudnikov & agentov** — cloud agenti (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) z brskalnikom + OAuth prijavo, Ollama kot prva izbira, Claude Opus 5 & Sonnet 5, uradno partnerstvo s Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… in prenovljen **katalog 380 ponudnikov**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
-- **📡 Preglednost usmerjanja** — vsak odgovor vsebuje glavo `X-OmniRoute-Decision` z imenom strategije/ponudnika/zamude, nova strategija kombinacije `cache-optimized` + Auto-Combo faktor `cacheAffinity` usmerja ponovljene zahteve nazaj na povezavo z ujemajočim predpomnjenim začetkom, in samo-za-branje `/v1/auto-combo/{channel}/candidates` končna točka razkriva živo kandidatno skupino kanala `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **⚡ Lokalna zmogljivost in infrastruktura** — enoklikovni lokalni Redis, Cloudflare Workers / Deno Deploy relejni izvajalniki, Bifrost & Mux kot nadzorovane vgrajene storitve. → [Vgrajene storitve](docs/frameworks/EMBEDDED-SERVICES.md)
-- **🧩 Tudi v paketu** — ogrodje za vtičnike + tržnica, ogrodja za veščine Omni/Agent/GitHub, integracija z Obsidian vault (22 MCP orodij), z OpenAI združljivi Batch & Files API-ji, semantična predpomnilna odgovorov, gamifikacija z lestvicami najboljših, odkrivanje agentov ACP (15 vgrajenih agentov), načrtovan izvoz dnevnikov v BigQuery, `auto/chaos` vzporedno razpošiljanje na več modelov, most do Telegram bota, vgrajeni upravljalnik različic in LMArena-ELO lestvice brezplačnih ponudnikov. → [Dokumentacija](docs/README.md)
+- **⚖️ `quota-weighted` usmerjanje** — 20th combo strategija preskoči izčrpane račune, nato pa črpa med ostalimi sorazmerno s preostalo kvoto ÷ obremenitev med letom, obstoječe pogovore pa ohranja pripete. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **🧰 Brezglavi način** — `omniroute serve --headless` (ali `OMNIROUTE_HEADLESS=1`) poganja samo mehanizem posrednika `/v1/*`, pri čemer so nadzorna plošča in podsistemi samo za nadzorno ploščo izklopljeni. → [Brezglavi način](docs/guides/HEADLESS.md)
+- **odkritje modela 🔎** — `/v1/models` filtrira glede na zmogljivost, kontekst, vrsto in besedilo, `POST /v1/models/query` pa vrne kratek deterministični ožji seznam z enako vidnostjo po ključu. → [API Referenca](docs/reference/API_REFERENCE.md)
+- **🔑 Nadzor usmerjanja po ključu** — pripnite ključ API na en model ali kombinacijo z `forcedModel` ter atomsko dodajte ali odstranite modele in kombinacije ključa (`/api/keys/{id}/access`). → [API Referenca](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
+- **🛡️ Finejše kontrole PII** izbira — na vrsto, do 20 potrjenih maskirnih vzorcev po meri in števci zaznavanja na vrsto; samo maskiranje ostane opt-in. → [zaščitne ograje](docs/security/GUARDRAILS.md)
+- **🌍 67 jezikov** nadzorna plošča —, ogledala dokumentov in CLI, pri čemer `npm run i18n:add-locale` dodaja jezik povsod v enem ukazu. Vodnik → [i18n](docs/guides/I18N.md)
+- **🎛️ OmniConductor** — inbound A2A delegiranje na vaš vozni park agentov, spretnosti dirigenta na kartici agenta in nadzorna plošča z glasovnim klepetom Faro push-to-talk. → [A2A](docs/frameworks/A2A-SERVER.md)
+- **🛂 Prilagodljiv sprejem in zaščita pred preobremenitvijo** — težka čakalna vrsta zahtev za klepet namesto 503ing, z atomic RPM tekočimi zakupi na povezavo. [Priročnik za odpornost](docs/architecture/RESILIENCE_GUIDE.md) →
+- **🗂️ Kanonično `/v1/models` razvrščanje** — en sosednji blok, razvrščen po ponudnikih, na ponudnika (kombo pripeti prvi), stabilen v vsakem viru kataloga. → [API Referenca](docs/reference/API_REFERENCE.md)
+- **🗜️ Utrjevanje na stiskanje** — privzeta zaščita pred napihovanjem, paketi Caveman za DE / FR / JA + kitajščina (wényán), filtri RTK za Gradle & .NET. → [stiskanje](docs/compression/COMPRESSION_ENGINES.md)
+- **💸 Pošteni pavšalni stroški** Ponudniki naročnine — / kodirnega načrta berejo** 0 $** v stroškovni analitiki; proračun, kvote in usmerjanje še naprej ocenjujete. → [API Referenca](docs/reference/API_REFERENCE.md)
+- **⚖️ Quota-Share usmerjanje** — kvoto računa v skupni rabi pravično razdeli na združene ključe, prihrani delo, tako da so nedejavne rezine posojene. [Priročnik za odpornost](docs/architecture/RESILIENCE_GUIDE.md) →
+- **🤖 Nastavitev CLI/agent z enim ukazom** — 15 registriranih ukazov `setup-*` ; `omniroute run` lansira 7 CLIs (koda Claude, Codex, Aider, Goose, OpenCode, koda Qwen, Gemini CLI); `omniroute configure` podpira 11 ciljev z interaktivnim izbirnikom modela + ponudnika in priljubljenimi po kontekstu. → [CLI integracije](docs/guides/CLI-INTEGRATIONS.md)
+- **🛰️ Oddaljeni način** — poganja oddaljeni OmniRoute z omejenimi žetoni (`connect` / `contexts` / `tokens`) + pomočnik za `antigravity` OAuth za namestitve VPS. → [oddaljeni način](docs/guides/REMOTE-MODE.md)
+- **🧭 Pametnejše samodejno usmerjanje** — `auto/<category>:<tier>` kombinacije,** Fuzija** (model panel + sodnik), usmerjanje glede na opravila, model / način na zahtevo / preglasitve proračuna v USD. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **🗜️ Pluggable kompresija** — 12 sestavljivih motorjev + Compression Studios: LLMLingua-2, dvonivojski Ultra, omniglif, vrata zvestobe na korak, GCF v3.2, urejevalnik povleci za preurejanje. → [stiskanje](docs/compression/COMPRESSION_ENGINES.md)
+- **🕵️ Transparent MITM decrypt (TPROXY)** — zajame CLIs, ki prezre proxy env vars, z namestitvenim programom zaupanja vredne CA + na SNI. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
+- **💸 Stroškovna telemetrija povsod** — `X-OmniRoute-*` cost/usage glave na vsaki končni točki, glava prihrankov cache-HIT, kvote porabe USD na ključ. → [API Referenca](docs/reference/API_REFERENCE.md)
+- **🧠 Pomnilnik, ki ga nadzorujete** — privzeto izklopljen, vektorska kvantizacija int8 opt-in + tipiziran razpad, `x-omniroute-no-memory` na zahtevo. → [pomnilnik](docs/frameworks/MEMORY.md)
+- **Varnost 🛡️** — prompt-injection guard na vsaki poti LLM (zbirka rdečih ekip), zaščitna ograja za prikrivanje poverilnic (popravlja uhajanje API keys/secrets v obe smeri), brezplačno spletno iskanje DuckDuckGo v zadnji sili in izbirna vrata za prijavo OIDC za nadzorno ploščo (prijava z geslom ostane vedno na voljo). → [zaščitne ograje](docs/security/GUARDRAILS.md)
+- **🖼️ Nove končne točke** — `/v1/ocr` (Mistral OCR) in `/v1/audio/translations` (v slogu šepeta) zaokrožita medijsko površino. → [API Referenca](docs/reference/API_REFERENCE.md)
+- **🎨 Generiranje slike / videa / zvoka** — en API za medije: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind in ponudniki govora, kot je ElevenLabs. → [API Referenca](docs/reference/API_REFERENCE.md)
+- **🌍 uvajanje in ops** — reverse-proxy `basePath`, samodejno zaznavanje jezika brskalnika, sledenje napravi po ključu, zaupanje MITM brez korena, lokalizacija zh-TW. → [okolje](docs/reference/ENVIRONMENT.md)
+- **🤝 Več ponudnikov in agentov** — cloud agents (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) z brskalnikom + OAuth login, Ollama first-class card, Claude Opus 5 & Sonnet 5, Kimi official partnership (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… in osveženo** Katalog 380 ponudnikov** . [Ponudniki](docs/reference/PROVIDER_REFERENCE.md) →
+- **📡 Preglednost usmerjanja** — vsak odgovor nosi glavo `X-OmniRoute-Decision` ki poimenuje strategy/provider/latency, ki ga je stregel, nova strategija `cache-optimized` combo + Auto-Combo `cacheAffinity` faktor usmerja ponavljajoče se zahteve nazaj v povezavo, ki vsebuje predpono v predpono, in končna točka `/v1/auto-combo/{channel}/candidates` samo za branje razkrije živo skupino kandidatov kanala `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **⚡ Lokalna zmogljivost & infra** — lokalni z enim klikom Redis, Cloudflare Workers / Deno Deploy relay deployers, Bifrost & Mux kot nadzorovane vgrajene storitve. → [vgrajene storitve](docs/frameworks/EMBEDDED-SERVICES.md)
+- **🧩 Tudi v škatli** ogrodje vtičnikov — + marketplace, ogrodje veščin Omni/Agent/GitHub, integracija trezorja Obsidian (22 orodij MCP ), Batch & Files APIs, združljiv z OpenAI, predpomnilnik semantičnega odziva, igrifikacija z lestvicami najboljših, odkrivanje agentov ACP (15 vgrajenih agentov), načrtovani izvoz dnevnika v BigQuery, vzporedno razprševanje več modelov `auto/chaos`, most Telegram bot, upravitelj različic v aplikaciji in uvrstitev brezplačnih ponudnikov LMArena-ELO. → [dokumenti](docs/README.md)
 
 <br/>
 
@@ -920,15 +920,15 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
 
 <div align="center">
 
-## 🗜️ Prihranite 15–95 % žetonov — samodejno
+## 🗜️ Samodejno prihranite 15–95 % žetonov —
 
 </div>
 
-### 📖 Kako deluje — cevovod, arhitektura in računica prihrankov
+### 📖 Kako deluje — pipeline, arhitektura in matematika prihrankov
 
-<img src="./docs/diagrams/compression-pipeline.svg" width="100%" alt="Cevovod stiskanja OmniRoute: ponazoritvena odjemalska zahteva z 10.000 žetoni gre skozi 12 sestavljivih pogonov — Session-Dedup, CCR, Lite, RTK, Responses Tool Output, Headroom, Relevance, Caveman, Aggressive, LLMLingua-2, Ultra in OmniGlyph — in lahko pri ponudniku prispe s približno 1.080 žetoni v dokumentiranem zloženem primeru. Strukturirano vsebino ščitijo varovala ohranjanja in kontrolne točke zvestobe na vsakem koraku; izrecni načini z izgubami ali poskusni načini lahko preoblikujejo primerno vsebino."/>
+<img src="./docs/diagrams/compression-pipeline.svg" width="100%" alt="OmniRoute compression pipeline: an illustrative 10,000-token client request passes through 12 composable engines — Session-Dedup, CCR, Lite, RTK, Responses Tool Output, Headroom, Relevance, Caveman, Aggressive, LLMLingua-2, Ultra and OmniGlyph — and can reach the provider at about 1,080 tokens in the documented stacked example. Structured content is protected by preservation guards and per-step fidelity gates; explicit lossy or experimental modes may transform eligible content."/>
 
-Privzeta zložena kombinacija izvaja `RTK → Caveman`. Ko oba delujeta na isti vsebini orodja/konteksta, se prihranki stopnjujejo:
+Privzeta zložena kombinacija zažene `RTK → Caveman`. Ko oba delujeta na isti obremenitvi tool/context, se prihranki sestavijo:
 
 ```txt
 combined = 1 − (1 − RTK) × (1 − Caveman_input)
@@ -936,74 +936,74 @@ average  = 1 − (1 − 0.80) × (1 − 0.46) = 89.2%
 range    = 78.4 – 94.6%
 ```
 
-Bloki kode, URL-ji, JSON in strukturirani podatki so **vedno zaščiteni** s pogonom ohranjanja.
+Kodni bloki, URLs, JSON in strukturirani podatki so** vedno zaščiten** z motorjem za ohranjanje.
 
-> **Zakaj uporabljati veliko žetonov, ko jih malo zadostuje?** Vsaka zahteva gre skozi cevovod stiskanja OmniRoute **transparentno** — brez sprememb odjemalca. Zdaj je to **sklad 12 sestavljivih pogonov**, ki se izvajajo zaporedno in se mešajo ter kombinirajo glede na kombinacijo usmerjanja — gradijo na idejah iz [RTK](https://github.com/rtk-ai/rtk), [Caveman](https://github.com/JuliusBrussee/caveman) (⭐ 90K+), [LLMLingua-2](https://github.com/microsoft/LLMLingua) in [Troglodita](https://github.com/leninejunior/troglodita) (PT-BR).
+> **Zakaj bi uporabljali veliko žetonov, če le malo žetonov pomaga?** Vsaka zahteva gre skozi kompresijski cevovod OmniRoute** pregledno** — brez sprememb odjemalca. Zdaj je a** kup 12 sestavljivih motorjev** ki tečejo po vrstnem redu in se mešajo in ujemajo na kombinacijo usmerjanja — ki temelji na idejah iz [RTK](https://github.com/rtk-ai/rtk), [Caveman](https://github.com/JuliusBrussee/caveman) (⭐ 90K +), [LLMLingua-2](https://github.com/microsoft/LLMLingua) in [Troglodita](https://github.com/leninejunior/troglodita) (PT-BR).
 
-### 🧱 Sklad 12 pogonov
+### 🧱 Skupina z 12 motorji
 
-Pogoni se izvajajo v vrstnem redu cevovoda; vsakega je mogoče neodvisno vklopiti/izklopiti in konfigurirati za vsako kombinacijo:
+Motorji delujejo v cevovodnem vrstnem redu; vsakega je mogoče neodvisno preklapljati in konfigurirati za posamezno kombinacijo:
 
 <table>
-  <tr><th align="center">#</th><th align="left">Pogon</th><th align="left">Kaj počne</th></tr>
-  <tr><td align="center" nowrap>1</td><td align="left" nowrap><b>Session-Dedup</b></td><td align="left">Odstrani vsebino, ki se ponavlja čez obrate (naslavljanje po vsebini, čez obrate)</td></tr>
-  <tr><td align="center" nowrap>2</td><td align="left" nowrap><b>CCR</b></td><td align="left">Arhivira velike bloke za označevalci pridobitve; pridobijo se na zahtevo</td></tr>
-  <tr><td align="center" nowrap>3</td><td align="left" nowrap><b>Lite</b></td><td align="left">Obrezovanje presledkov in URL-jev slik (osnovna raven z nizko zakasnitvijo)</td></tr>
-  <tr><td align="center" nowrap>4</td><td align="left" nowrap><b>RTK</b></td><td align="left">Pametno filtriranje rezultatov orodij, deduplikacija in odrezovanje (zavedanje ukazov)</td></tr>
-  <tr><td align="center" nowrap>5</td><td align="left" nowrap><b>Responses Tool Output</b></td><td align="left">Najprej brezizguben JSON + omejeno diagnostično stiskanje za izhode lupine, obližev, iskanja in gradnje (Responses API)</td></tr>
-  <tr><td align="center" nowrap>6</td><td align="left" nowrap><b>Headroom</b></td><td align="left">Brezizgubno tabelarično zgoščanje polj JSON (~30 %) prek priloženega kodeka <b>GCF</b></td></tr>
-  <tr><td align="center" nowrap>7</td><td align="left" nowrap><b>Relevance</b></td><td align="left">Ekstraktivno ocenjevanje stavkov glede na zadnjo uporabnikovo poizvedbo</td></tr>
-  <tr><td align="center" nowrap>8</td><td align="left" nowrap><b>Caveman</b></td><td align="left">Stiskanje proze na podlagi pravil (~65–75 % na izhodu)</td></tr>
-  <tr><td align="center" nowrap>9</td><td align="left" nowrap><b>Aggressive</b></td><td align="left">Povzemanje + postopno staranje starih obratov</td></tr>
-  <tr><td align="center" nowrap>10</td><td align="left" nowrap><b>LLMLingua-2</b></td><td align="left">Semantično obrezovanje z ML prek MobileBERT ONNX — varno za kodo, asinhrono</td></tr>
-  <tr><td align="center" nowrap>11</td><td align="left" nowrap><b>Ultra</b></td><td align="left">Hevristično obrezovanje žetonov z izbirno ravnjo majhnega modela (SLM)</td></tr>
-  <tr><td align="center" nowrap>12</td><td align="left" nowrap><b>OmniGlyph</b></td><td align="left">Poskusno kodiranje konteksta kot slike za izmerjeni Claude Fable 5 na neposredni povezavi Anthropic; transformerji GPT 5.6 ostajajo fail-closed, dokler ni potrdil ponudnika. Štirje profili stiskanja (privzeto agresivni, uravnoteženi, varni za kodo, passthrough) (najbolj agresivni; po izbiri)</td></tr>
+  <tr><th align="center">#</th><th align="left">Motor</th><th align="left">Kaj počne</th></tr>
+  <tr><td align="center" nowrap>1</td><td align="left" nowrap><b>Session-Dedup</b></td><td align="left">Spusti vsebino, ki se ponavlja med zavoji (naslovljena vsebina, navzkrižni zavoj)</td></tr>
+  <tr><td align="center" nowrap>2</td><td align="left" nowrap><b>CCR</b></td><td align="left">Arhivira velike bloke za oznakami za pridobitev, pridobljene na zahtevo</td></tr>
+  <tr><td align="center" nowrap>3</td><td align="left" nowrap><b>Lite</b></td><td align="left">Presledek + slika-URL obrezovanje (zakasnitev-svetloba osnovna črta)</td></tr>
+  <tr><td align="center" nowrap>4</td><td align="left" nowrap><b>RTK</b></td><td align="left">Pametno filtriranje rezultatov orodja, odstranjevanje kopij in obrezovanje (ob upoštevanju ukazov)</td></tr>
+  <tr><td align="center" nowrap>5</td><td align="left" nowrap><b>Izhod orodja za odzive</b></td><td align="left">Najprej brez izgub JSON + omejeno diagnostično stiskanje za izhode shell/patch/search/build (odzivi API)</td></tr>
+  <tr><td align="center" nowrap>6</td><td align="left" nowrap><b>Prostor za glavo</b></td><td align="left">Tabelarično zgoščevanje nizov JSON brez izgub (~ 30 %) prek dobavitelja <b>GCF</b> kodek</td></tr>
+  <tr><td align="center" nowrap>7</td><td align="left" nowrap><b>Ustreznost</b></td><td align="left">Izvlečno točkovanje stavkov glede na zadnjo uporabniško poizvedbo</td></tr>
+  <tr><td align="center" nowrap>8</td><td align="left" nowrap><b>Jamski človek</b></td><td align="left">Stiskanje proze na podlagi pravil (~ 65–75 % na izpisu)</td></tr>
+  <tr><td align="center" nowrap>9</td><td align="left" nowrap><b>Agresivno</b></td><td align="left">Povzetek + progresivno staranje starih obratov</td></tr>
+  <tr><td align="center" nowrap>10</td><td align="left" nowrap><b>LLMLingua-2</b></td><td align="left">semantično obrezovanje ML prek MobileBERT ONNX — kodno varno, asinhrono</td></tr>
+  <tr><td align="center" nowrap>11</td><td align="left" nowrap><b>Ultra</b></td><td align="left">Hevristično obrezovanje žetonov z izbirno plastjo majhnega modela (SLM).</td></tr>
+  <tr><td align="center" nowrap>12</td><td align="left" nowrap><b>OmniGlyph</b></td><td align="left">Eksperimentalno kodiranje konteksta kot slike za izmerjeno Claude Fable 5 na neposredni žici Anthropic ; Transformatorji GPT 5.6 ostanejo neuspešno zaprti in čakajo na potrdila ponudnika. Štirje profili stiskanja (agresivno privzeto, uravnoteženo, varno za kodiranje, prehod) (najbolj agresivno; opt-in)</td></tr>
 </table>
 
-Bloki kode, URL-ji in strukturirani podatki so **vedno ohranjeni** do bajta natančno. **Prednastavitve na en klik** združujejo pogone:
+Kodni bloki, URLs in strukturirani podatki so** vedno ohranjena** bajtno popoln.** Prednastavitve z enim klikom** združite motorje:
 
 <table>
   <tr><th align="left">Način</th><th align="left">Prihranki</th><th align="left">Najboljše za</th></tr>
-  <tr><td align="left" nowrap>🪶 <b>Lite</b></td><td align="left" nowrap>~15 %</td><td align="left">Vedno vklopljena varna privzeta raven</td></tr>
-  <tr><td align="left" nowrap>🪨 <b>Standard (Caveman)</b></td><td align="left" nowrap>~30 %</td><td align="left">Vsakodnevno kodiranje</td></tr>
-  <tr><td align="left" nowrap>⚡ <b>Aggressive</b></td><td align="left" nowrap>~50 %</td><td align="left">Dolge seje z intenzivno uporabo orodij</td></tr>
-  <tr><td align="left" nowrap>🔥 <b>Ultra</b></td><td align="left" nowrap>~75 %</td><td align="left">Največji prihranki</td></tr>
-  <tr><td align="left" nowrap>🧰 <b>RTK</b></td><td align="left" nowrap>60–90 %</td><td align="left">Izhod shell/test/build/git</td></tr>
-  <tr><td align="left" nowrap>🔗 <b>Stacked (RTK → Caveman)</b></td><td align="left" nowrap><b>78–95 %</b></td><td align="left">Mešani pozivi + dnevniki orodij</td></tr>
+  <tr><td align="left" nowrap>🪶 <b>Lite</b></td><td align="left" nowrap>~15%</td><td align="left">Vedno vklopljena varna privzeta nastavitev</td></tr>
+  <tr><td align="left" nowrap>🪨 <b>Standard (Jamski človek)</b></td><td align="left" nowrap>~30%</td><td align="left">Dnevno kodiranje</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Agresivno</b></td><td align="left" nowrap>~50%</td><td align="left">Dolge seje, obremenjene z orodjem</td></tr>
+  <tr><td align="left" nowrap>🔥 <b>Ultra</b></td><td align="left" nowrap>~75%</td><td align="left">Največji prihranki</td></tr>
+  <tr><td align="left" nowrap>🧰 <b>RTK</b></td><td align="left" nowrap>60–90%</td><td align="left">izhod Shell/test/build/git</td></tr>
+  <tr><td align="left" nowrap>🔗 <b>Zložen (RTK → Caveman)</b></td><td align="left" nowrap><b>78–95%</b></td><td align="left">Mešani pozivi Dnevniki orodja +</td></tr>
 </table>
 
-**Resnični primer — način Standard:**
+**Pravi primer standardnega načina — :**
 
-> **Pred (69 žetonov):** _"Razlog, da se vaša komponenta React ponovno upodablja, je verjetno v tem, da v vsakem ciklu upodabljanja ustvarjate novo referenco na objekt. Ko kot lastnost (prop) posredujete inline objekt, ga Reactova plitva primerjava vsakič vidi kot drug objekt, kar sproži ponovno upodabljanje. Priporočal bi uporabo useMemo za memoizacijo objekta."_
+> **Prej (69 žetonov):** _"Razlog za ponovno upodabljanje vaše komponente React je verjetno ta, da ustvarjate novo referenco objekta v vsakem ciklu upodabljanja. Ko posredujete vgrajeni objekt kot prop, ga plitka primerjava React vsakič vidi kot drug objekt, kar sproži ponovno upodabljanje. Priporočam uporabo useMemo za shranjevanje predmeta na spomin."_
 >
-> **Po (19 žetonov):** _"Nova referenca objekta ob vsakem upodabljanju. Inline objekt kot prop = nova referenca = ponovno upodabljanje. Ovijte v useMemo."_
+> **Po (19 žetonov):** _"Nov objekt ref vsak upodobitev. Vgrajen objekt prop = nov ref = ponovno upodobitev. Ovij v useMemo."_
 >
-> **Isti odgovor. 72 % manj žetonov. Nič izgube natančnosti.** ✅
+> **Isti odgovor. 72 % manj žetonov. Ničelna izguba natančnosti.** ✅
 
-**Primer PT-BR — način [Troglodita](https://github.com/leninejunior/troglodita):**
+**Primer PT-BR — način [Troglodita](https://github.com/leninejunior/troglodita) :**
 
-> **Pred (42 žetonov):** _"Težava je v tem, da se komponenta ponovno upodablja, ker se v vsakem ciklu upodabljanja ustvari nova referenca objekta. Priporočal bi uporabo useMemo."_
+> **Ante (42 žetonov):** _"O problem é que o componente está re-renderizando porque uma nova referência de objeto está sendo criada em cada ciclo de renderização. Eu recomendaria usar useMemo."_
 >
-> **Po (12 žetonov):** _"Ponovno upodabljanje: nova ref. v vsakem ciklu (objekt inline ponovno ustvarjen). Uporabite `useMemo`."_
+> **Depois (12 žetonov):** _"Ponovno upodabljanje: ref nova cada ciclo (objeto inline recriado). Usar `useMemo`."_
 >
-> **Isti odgovor. ~70 % manj žetonov. Tehnična natančnost nedotaknjena.** ✅
+> **Mesma resposta. ~ 70 % menos žetonov. Precisão técnica intacta.** ✅
 
 <br/>
 
-### 🎚️ Poleg pogonov — izhodni slogi, prilagodljiv gumb in nadzor po zahtevku
+### 🎚️ Poleg izhodnih slogov motorjev —, prilagodljivi gumb in nadzor na zahtevo
 
-Zgornjih 12 pogonov skrči tisto, kar gre **noter**. Tri dodatne plasti oblikujejo, **kako**, **kdaj** in kaj pride **ven**:
+Zgornjih 12 motorjev zmanjša, kar gre** v** . Še tri plasti oblike** kako** ,** kdaj** , in kaj pride** ven** :
 
-- **🪄 Izhodni slogi** _(usmerjanje po izhodni osi)_ — vstavijo deterministična, za predpomnilnik varna navodila za oblikovanje odgovorov; med seboj združljivi, vsak z intenzivnostjo `lite` / `full` / `ultra`. Dodajanje sloga je enovrstični vnos v register:
-  - **Jedrnata proza** — opusti polnilne besede / členke / ovinkarjenje; ohrani natančno tehnično vsebino.
-  - **Manj kode** — YAGNI "lenega senior razvijalca": najmanjša delujoča sprememba, brez nezahtevanega ogrodja.
-  - **Ponytail (leni senior razvijalec)** — povzpne se po lestvici YAGNI, odpravi korenski vzrok, najmanjši delujoči diff.
-  - **Imam ADHD (najprej dejanje)** — naslednje dejanje vodi, koraki so oštevilčeni, en konkreten naslednji korak, brez uvoda.
-  - **Jedrnata CJK (文言)** — izjemno jedrnat slog klasične kitajščine (omejeno na področno nastavitev `zh`).
-- **🎯 Prilagodljiv kontekstni proračun** _(gumb)_ — namesto enega samega praga žetonov za vklop/izklop stopnjuje najcenejše, najbolj brezizgubne pogone le toliko, kolikor je potrebno, da se vsebina **prilega kontekstnemu oknu modela**. Politika: `reserve-output` (privzeto, glede na model) · `percentage` · `absolute`. Način: `floor` (zagotovljeno prileganje) · `replace-autotrigger` (vaša izrecna izbira ima prednost) · `off` (podedovan prag).
-- **🎛️ Kje se odloča o stiskanju** _(prednost, visoka → nizka)_ — glava `x-omniroute-compression` na zahtevo › preglasitev kombinacije usmerjanja › aktivni poimenovani profil › prilagodljivo / samodejni sprožilec › privzeta nastavitev plošče › izklopljeno. Uporabljeni načrt se odzove nazaj v glavi odgovora `X-OmniRoute-Compression: <mode>; source=<source>`.
+- **Izhodni slogi 🪄** _(krmiljenje izhodne osi)_ — vstavi deterministična navodila za oblikovanje odziva, ki so varna predpomnilnika; jih je mogoče kombinirati, vsak z intenzivnostjo `lite` / `full` / `ultra`. Dodajanje sloga je enovrstični vnos v register:
+  - **Krasna proza** — kapljično polnilo / artikli / varovanje pred tveganjem; ohraniti natančnost tehnične vsebine.
+  - **Manj kode** — "leni starejši razvijalec" YAGNI: najmanjša delovna sprememba, brez nezahtevanega odra.
+  - **Čop (leni starejši razvijalec)** — splezati po lestvici YAGNI, odpraviti glavni vzrok, najmanjša delovna razlika.
+  - **Imam ADHD (najprej dejanje)** — naslednje dejanje vodi, koraki oštevilčeni, en konkreten naslednji korak, brez preambule.
+  - **kratko CJK (文言)** — klasično-kitajski ultra-kratki slog (lokalno omejen na `zh`).
+- **🎯 Adaptive context-budget** _(številčnica)_ — namesto enega praga žetona on/off stopnjuje najcenejše motorje z največ izgubami le toliko, kolikor je potrebno za** prilega kontekstnemu oknu modela** . Politika: `reserve-output` (privzeto, glede na model) · `percentage` · `absolute`. Način: `floor` (zajamčeno prileganje) · `replace-autotrigger` (zmaga vaša izrecna izbira) · `off` (podedovani prag).
+- **🎛️ Kjer se odloča o stiskanju** _(precedence, high → low)_ — per-request `x-omniroute-compression` header › routing-combo override › active imenovani profil › adaptive / auto-trigger › panel default › off. Uporabljeni načrt odmeva nazaj v glavi odgovora `X-OmniRoute-Compression: <mode>; source=<source>`.
 
-Samodejno sproženje po pragu žetonov, vklop prilagodljivega gumba, pripetje poimenovanega profila, enkratna nastavitev na zahtevo ali dodelitev cevovoda na kombinacijo usmerjanja — kar koli ustreza delovni obremenitvi. Izbirno brezpovezavno **ocenjevalno ogrodje** (`npm run eval:compression`) na pripetem korpusu oceni zvestobo glede na prihranke, preden spremembo uveljavite.
+Samodejni sprožilec glede na prag žetona, obrnite na prilagodljivo številčnico, pripnite imenovani profil, nastavite enkratno na zahtevo ali dodelite cevovod na kombinacijo usmerjanja — kar ustreza delovni obremenitvi. Prijave brez povezave** eval pas** (`npm run eval:compression`) ocenjuje zvestobo v primerjavi s prihranki na pripetem korpusu, preden promovirate spremembo.
 
 📖 [`COMPRESSION_GUIDE.md`](docs/compression/COMPRESSION_GUIDE.md) · [`RTK_COMPRESSION.md`](docs/compression/RTK_COMPRESSION.md) · [`COMPRESSION_ENGINES.md`](docs/compression/COMPRESSION_ENGINES.md)
 
@@ -1011,41 +1011,32 @@ Samodejno sproženje po pragu žetonov, vklop prilagodljivega gumba, pripetje po
 
 <div align="center">
 
-# ⚡ Hitri začetek
+# ⚡ Quick Start
 
 </div>
 
-**1) Namestitev in zagon**
+**1) Namestite in zaženite**
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-> 💡 Vidite `npm warn ERESOLVE` ali opozorila o peer-odvisnostih? [Nedolžna so](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Uporabljate npm 11 ali novejši?** npm lahko blokira skripte življenjskega cikla paketov, če niso dovoljene. OmniRoutov `postinstall` (`node scripts/build/postinstall.mjs`) je potreben za pripravo njegovih izvornih izvajalnih datotek. Pri globalni namestitvi dovolite pakete, navedene v opozorilu npm. Za nabor paketov, ki ga navaja OmniRoute 3.8.54:
+> 💡 Glejte opozorila `npm warn ERESOLVE` ali peer-dep? [So neškodljivi](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).** Uporabljate npm 11 ali novejši?** npm lahko blokira skripte življenjskega cikla paketa, razen če so dovoljeni. OmniRoute `postinstall` (`node scripts/build/postinstall.mjs`) je potreben za pripravo izvornih datotek izvajalnega okolja. Dovoli pakete, imenovane v opozorilu npm, pri globalni namestitvi. Za nabor paketov, ki ga poroča OmniRoute 3.8.54:
 >
-> ```bash
-> npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
-> ```
+> `bash npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute `
 >
-> Če želite ta seznam dovoljenih ponovno uporabiti pri prihodnjih globalnih namestitvah, ga enkrat konfigurirajte, nato pa nameščajte običajno:
+> Če želite ponovno uporabiti ta seznam dovoljenih za prihodnje globalne namestitve, ga enkrat konfigurirajte in nato namestite normalno:
 >
-> ```bash
-> npm config set allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
-> npm install -g omniroute
-> ```
+> `bash npm config set allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user npm install -g omniroute `
 >
-> Seznam odvisnosti se lahko med izdajami spremeni; če npm javi drugačen seznam, uporabite imena paketov iz tistega opozorila. Če paket dovolite, se lahko zaženejo njegove namestitvene skripte.
-> **Uporabljate Gemini Web ali drugega ponudnika prek spletnih piškotkov?** Paket npm vključuje
-> Playwright, ne pa njegove binarne datoteke Chromium. Pred prvo zahtevo do spletnega ponudnika si oglejte opombo
-> [Nastavitev Playwright Chromium](docs/guides/TROUBLESHOOTING.md#gemini-web-and-playwright-chromium).
+> Seznam odvisnosti se lahko spreminja med izdajami; če npm sporoči drugačen seznam, uporabite imena paketov iz tega opozorila. Če dovolite paket, se njegovi namestitveni skripti izvajajo.** Uporabljate Gemini Web ali drugega ponudnika spletnih piškotkov?** Paket npm vključuje Playwright, ne pa tudi njegove binarne datoteke Chromium. Pred prvo zahtevo spletnega ponudnika si oglejte opombo [o nastavitvi Playwright Chromium](docs/guides/TROUBLESHOOTING.md#gemini-web-and-playwright-chromium).
 
-Nadzorna plošča na `http://localhost:20128` · API na `http://localhost:20128/v1`.
+Nadzorna plošča pri `http://localhost:20128` · API pri `http://localhost:20128/v1`.
 
-**2) Povežite primernega ponudnika s svojim računom**
+**2) Povežite ustreznega ponudnika s svojim računom**
 
-Nadzorna plošča → **Ponudniki** → izberite ponudnika, katerega trenutni pogoji in kvota ustrezajo vašemu primeru uporabe → dodajte njegov ključ API ali dokončajte postopek povezave računa. Brezplačne ravni lahko zahtevajo registracijo, odobritev ali plačilno sredstvo. Preglejte [Vodnik po brezplačnih ravneh](docs/getting-started/FREE-TIERS-GUIDE.md); razpoložljivost brez ključa ni zagotovljena, ponudniki z oznako `tos: avoid` pa so privzeto izključeni iz `auto`.
+Nadzorna plošča →** Ponudniki** → izberite ponudnika, katerega trenutni pogoji in kvota ustrezajo vašemu primeru uporabe → dodajte svoj ključ API ali dokončajte svoj tok računa. Brezplačne stopnje lahko zahtevajo prijavo, odobritev ali način plačila. Preglejte [vodnik po brezplačnih stopnjah](docs/getting-started/FREE-TIERS-GUIDE.md) ; razpoložljivost brez ključa ni zajamčena, ponudniki z oznako `tos: avoid` pa so privzeto izključeni iz `auto`.
 
 **3) Usmerite svoje orodje za kodiranje**
 
@@ -1061,9 +1052,9 @@ Model:    auto            (routes among eligible connections — or choose provi
 curl http://localhost:20128/v1/models -H "Authorization: Bearer YOUR_KEY"
 ```
 
-Videti bi morali navedene povezane modele. 🎉 To je vse — začnite kodirati, OmniRoute pa bo namesto vas samodejno usmerjal in preklapljal v rezervo.
+Na seznamu bi morali videti svoje povezane modele. 🎉 To je to. — začnite s kodiranjem, OmniRoute pa samodejno usmeri poti in se vrne namesto vas.
 
-Če vaš odjemalec ne more pošiljati glav po meri, OmniRoute razkriva tudi žetonirane vzdevke za združljivost:
+Če vaš odjemalec ne more poslati glav po meri, OmniRoute izpostavi tudi vzdevke združljivosti z žetoni:
 
 ```txt
 OpenAI catalog:   http://localhost:20128/vscode/YOUR_KEY/
@@ -1074,7 +1065,7 @@ Ollama chat:      http://localhost:20128/vscode/YOUR_KEY/api/chat
 Ollama tags:      http://localhost:20128/vscode/YOUR_KEY/api/tags
 ```
 
-Te uporabite le za odjemalce, ki ne morejo priložiti `Authorization: Bearer ...`. Avtentikacija z glavo ostane prednostni način.
+Uporabite jih samo za odjemalce, ki ne morejo priložiti `Authorization: Bearer ...`. Preverjanje glave ostaja prednostni način.
 
 <br/>
 
@@ -1295,29 +1286,29 @@ Kanonične metrike na dan 2026-10-18: **1.976 edinstvenih videoposnetkov** · **
 <br/>
 <div align="center">
 
-## 🛠️ Tehnološki sklad
+## 🛠️ Tech Stack
 
 </div>
 
 <table>
-  <tr><th align="left">Plast</th><th align="left">Tehnologija</th></tr>
-  <tr><td nowrap><b> izvajalno okolje</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Jezik</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> v <code>src/</code> in <code>open-sse/</code> (brez <code>any</code> v jedru od v2.0)</td></tr>
-  <tr><td nowrap><b>Ogrodje</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Zbirka podatkov</b></td><td>better-sqlite3 (SQLite, beleženje WAL) + LowDB (starejši JSON) — 147 domenskih modulov, 223 migracij</td></tr>
-  <tr><td nowrap><b>Pomnilnik</b></td><td>SQLite FTS5 za iskanje po celotnem besedilu + vektorske vgradnje, kvantizirane z int8, s tipiziranim upadanjem</td></tr>
-  <tr><td nowrap><b>Sheme</b></td><td>Zod 4 — preverjanje V/I orodij MCP + pogodbe API</td></tr>
+  <tr><th align="left">Plast</th><th align="left">tehnologija</th></tr>
+  <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Jezik</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> čez <code>src/</code> in <code>open-sse/</code> (nič <code>any</code> v jedru od različice 2.0)</td></tr>
+  <tr><td nowrap><b>Okvir</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>Baza podatkov</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 domenskih modulov, 223 migracij</td></tr>
+  <tr><td nowrap><b>Spomin</b></td><td>SQLite FTS5 polno besedilo + int8-quantized vektorske vdelave, tipiziran razpad</td></tr>
+  <tr><td nowrap><b>Sheme</b></td><td>Zod 4 — MCP orodje I/O validacija + API pogodbe</td></tr>
   <tr><td nowrap><b>Protokoli</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Pretočno izvajanje</b></td><td>Dogodki, poslani s strežnika (SSE) + most WebSocket (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Stiskanje</b></td><td>Cevovod z 12 mehanizmi — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Preverjanje pristnosti in varnost</b></td><td>OAuth 2.0 (PKCE) + JWT + ključi API + omejeno preverjanje pristnosti MCP · AES-256-GCM za podatke v mirovanju · DOMPurify</td></tr>
-  <tr><td nowrap><b>Prikritost</b></td><td>wreq-js — posnemanje prstnega odtisa TLS JA3 / JA4, 3-stopenjski posredniški strežnik</td></tr>
-  <tr><td nowrap><b>Odpornost</b></td><td>Odklopnik, eksponentno čakanje, preprečevanje stampeda, samozdravljenje auto-combo</td></tr>
-  <tr><td nowrap><b>Beleženje</b></td><td>pino — strukturirani dnevniki JSON s kontekstom zahteve</td></tr>
-  <tr><td nowrap><b>Preizkušanje</b></td><td>Testni izvajalnik Node.js + Vitest — <b>več kot 60.000 statičnih deklaracij testov</b> v več kot 8.400 sledenih datotekah testov (enotno, integracijsko, E2E, varnostno, ekosistemsko)</td></tr>
-  <tr><td nowrap><b>Platforme</b></td><td>Namizni računalnik (Electron) · Android (Termux) · PWA (kateri koli brskalnik)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — samodejna objava npm + Docker Hub ob izdaji</td></tr>
-  <tr><td nowrap><b>Povezave</b></td><td><a href="https://omniroute.online">Spletno mesto</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>Pretakanje</b></td><td>Dogodki, poslani iz strežnika (SSE) + WebSocket most (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Stiskanje</b></td><td>12-motorni cevovod — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Auth &amp; varnost</b></td><td>OAuth 2.0 (PKCE) + JWT + API ključi + MCP avtorizacija v obsegu · AES-256-GCM v mirovanju · DOMPurify</td></tr>
+  <tr><td nowrap><b>Stealth</b></td><td>wreq-js — JA3 / JA4 TLS predstavljanje prstnega odtisa, 3-nivojski proxy</td></tr>
+  <tr><td nowrap><b>Odpornost</b></td><td>Prekinjevalec tokokroga, eksponentni odmik, čreda proti grmenju, samodejno kombinirano samozdravljenje</td></tr>
+  <tr><td nowrap><b>Sečnja</b></td><td>pino — strukturirani dnevniki JSON s kontekstom zahteve</td></tr>
+  <tr><td nowrap><b>Testiranje</b></td><td>Node.js testni tekač + Vitest — <b>60.000 izjav o statičnem preizkusu +</b> v 8400 + sledenih preskusnih datotekah (enota, integracija, E2E, varnost, ekosistem)</td></tr>
+  <tr><td nowrap><b>Platforme</b></td><td>Namizje (Electron) · Android (Termux) · PWA (kateri koli brskalnik)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Dejanja — auto npm objavi + Docker Hub ob izdaji</td></tr>
+  <tr><td nowrap><b>Povezave</b></td><td><a href="https://omniroute.online">Spletna stran</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">
@@ -1807,17 +1798,17 @@ OmniRoute stoji na ramenih velikanov. Začel se je kot razcep projekta **[9route
   <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,955</td><td>Identificiral je površino kvote Grok Build; OmniRoute je nato neodvisno preveril in popravil obliko podatkov v žičnem protokolu v živo.</td></tr>
 </table>
 
-## 📄 Licenca
+## licenca 📄
 
-Licenca MIT – za podrobnosti glejte [LICENSE](LICENSE).
+Licenca MIT - za podrobnosti glejte [LICENSE](LICENSE).
 
 ---
 
 <div align="center">
 
-**[⬆ Nazaj na vrh](#-omniroute)** · Ustvarjeno z ❤️ za odprtokodno skupnost umetne inteligence.
+**[⬆ Nazaj na vrh](#-omniroute)** · Zgrajeno z ❤️ za odprtokodno skupnost AI.
 
-<sub>Ustvaril <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · Licenca MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Ustvaril <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Vozlišče ≥ 22.22.2 · Licenca MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
-<!-- Omogočene so razprave GitHub Discussions za vprašanja in odgovore skupnosti -->
+<!-- GitHub Discussions enabled for community Q&A -->

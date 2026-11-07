@@ -319,15 +319,15 @@ Het blijft uitgeschakeld tenzij `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 (`src/lib/accessTokens/scopes.ts`). Deze rangschikking is alleen van toepassing op de
 access-token credential. Zie [Management Authenticatie](../guides/MANAGEMENT-AUTH.md).
 
-## Schakelaar voor vereiste authenticatie
+## Verificatie vereist schakelen
 
-`isAuthRequired()` in `src/shared/utils/apiAuth.ts` bepaalt of **enige** authenticatie wordt afgedwongen voor een verzoek:
+`isAuthRequired()` in `src/shared/utils/apiAuth.ts` beslist of** elk** auth wordt afgedwongen voor een verzoek:
 
-- `settings.requireLogin === false` → authenticatie is globaal uitgeschakeld, behalve voor het altijd beschermde niveau (zie [Route Guard-niveaus](../security/ROUTE_GUARD_TIERS.md)) en de aanroepen die een credential uitgeven dat het accepteert. Die vereisen dezelfde credential als wanneer aanmelding aan staat: synchronisatietokens uitgeven, CLI-toegangstokens met elke scope aanmaken, een API-sleutel met scope `manage`/`admin` aanmaken, die scope aan een sleutel toekennen, of zo'n sleutel opnieuw genereren of tonen (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`). Sleutels die alleen voor inferentie zijn, blijven open.
-- Geen wachtwoord ingesteld **en** geen omgevingsvariabele `INITIAL_PASSWORD` → de bootstrapmodus staat de onboardingwizard en loopback-verzoeken toe, maar blootgestelde netwerkverzoeken hebben nog steeds credentials nodig.
-- Elke databasefout → faalt gesloten (veilig per standaard).
+- `settings.requireLogin === false` → auth is globaal uitgeschakeld, behalve voor de altijd beschermde laag (zie [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) en de oproepen die een inloggegevens uitdelen die het accepteert, die dezelfde inloggegevens nodig hebben als bij inloggen: het uitgeven van synchronisatietokens, het aanmaken van CLI toegangstokens op elk bereik, en het maken van een API sleutel met de `manage`/`admin` -scope, het toekennen van die reikwijdte aan een sleutel, of het opnieuw genereren of onthullen van een dergelijke sleutel (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`). Alleen-inferentietoetsen blijven open. Het schrijven van een beschermde functievlag (`REQUIRE_API_KEY`, de andere beveiligingsvlaggen en de SSRF / TLS / MCP-scope / sandbox-vlaggen vermeld in [Feature Flags](../reference/FEATURE_FLAGS.md#rest-api) ) en het opslaan van de PII maskeringsinstellingen (`PUT /api/settings/pii`) blijven ook een referentie nodig hebben.
+- Geen wachtwoord geconfigureerd** En** no `INITIAL_PASSWORD` env var → bootstrap-modus staat de onboarding-wizard en loopback-verzoeken toe, maar voor blootgestelde netwerkverzoeken zijn nog steeds inloggegevens nodig. Uitzondering: voor het schrijven van een beschermde functievlag en het opslaan van de PII maskeringsinstellingen (`PUT /api/settings/pii`) is zelfs een referentie van loopback nodig, dus loopback op zichzelf is daar niet voldoende.
+- Elke DB -fout → mislukt gesloten (standaard beveiligd).
 
-Het afdwingen van client-API-sleutels gebruikt `isRequireApiKeyEnabled()` in `src/shared/utils/featureFlags.ts`, en niet een directe lezing van `process.env.REQUIRE_API_KEY`. Dit is belangrijk voor uitgerolde instanties: `REQUIRE_API_KEY` wijzigen in Dashboard → Feature Flags slaat een databaseoverschrijving op en werkt meteen door op `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` en de andere authenticatiecontroles van de client-API die deze helper delen. Als de opslag van de featureflags niet kan worden gelezen, faalt de authenticatie van de client-API gesloten en vereist ze een sleutel.
+Client API -sleutelafdwinging gebruikt `isRequireApiKeyEnabled()` in `src/shared/utils/featureFlags.ts`, niet een directe `process.env.REQUIRE_API_KEY` lezing. Dit is van belang voor geïmplementeerde instances: het in- en uitschakelen `REQUIRE_API_KEY` in Dashboard → Feature Flags slaat een DB -overschrijving op en heeft onmiddellijk invloed op `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` en andere client-API-authenticatiecontroles die deze helper delen. Als het functievlagarchief niet kan worden gelezen, mislukt de client API authenticatie en is er een sleutel vereist.
 
 ## Incompatibele wijziging — v3.8.0
 

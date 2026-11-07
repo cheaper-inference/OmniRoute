@@ -227,36 +227,31 @@ poročilo skrbniku razrešita isti učinkoviti pravilnik.
 
 ### Nadzorna plošča
 
-Pomaknite se na **Nadzorna plošča → Nastavitve → Zastavice funkcij**
-(`/dashboard/settings/feature-flags`). Mreža
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-podpira:
+Pojdite na** Nadzorna plošča → Nastavitve → Zastavice funkcij** (`/dashboard/settings/feature-flags`). Mreža (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) podpira:
 
-- **Iskanje** po ključu ali opisu ter **filtriranje** po kategoriji (vključno s sintetičnim pogledom
-  **Zahteva ponovni zagon**).
-- **Preklopno stikalo** za logične zastavice in **spustni seznam** za enum zastavice
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Značko vira za vsako zastavico — `DB`, `ENV` ali `DEF` — ki prikazuje, od kod izvira učinkovita vrednost.
-- Gumb **Ponastavi** (prikazan samo pri zastavicah z virom `DB`) za odstranitev preglasitve ter gumb **Ponastavi vse preglasitve** na dnu.
-- Pasico **Znova zaženi strežnik**, ko se spremeni zastavica `requiresRestart`.
+- **Iskanje** po ključu ali opisu in** filter** po kategoriji (plus sintetični** Zahteva ponovni zagon** pogled).
+- A** preklop** za logične zastavice in a** spustni meni** za oznake enum (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- A** značka vira** na zastavico — `DB`, `ENV` ali `DEF` — prikazuje, od kod izvira efektivna vrednost.
+- A** Ponastavi** gumb (prikazan samo za zastavice `DB` -sourced ), da opustite preglasitev, in a** Ponastavi vse preglasitve** gumb na dnu.
+- A** Ponovno zaženite strežnik** pasica, ko se spremeni zastavica `requiresRestart`.
 
 ### REST API
 
-Vse operacije potekajo prek ene same poti:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Vsaka metoda zahteva preverjeno sejo nadzorne plošče (sicer `401`).
+Vse operacije potekajo po eni sami poti: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Vsaka metoda zahteva overjeno sejo nadzorne plošče (`401` sicer).
+
+Ko je prijava onemogočena (`requireLogin=false`), je pot odprta, razen zaščitenih zastavic: vsaka zastavica v kategoriji Varnost plus `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` in `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` in `protectedFeatureFlags.ts`). `PUT` na enem od njih in `DELETE`, medtem ko ima eden od njiju preglasitev DB, še vedno potrebuje sejo nadzorne plošče, ključ `manage` -scope API, žeton za dostop `oma_` z obsegom pisanja ali višjim ali žeton CLI ali žeton notranje storitve, poslan iz povratne zanke. Ta niz je širši kot pri prijavi, kjer pot sprejme samo sejo ali ključ `manage` -scope.
 
 #### `GET /api/settings/feature-flags`
 
-Vrne vse zastavice z njihovo učinkovito vrednostjo, virom in povzetkom.
+Vrne vsako zastavico z njeno dejansko vrednostjo, virom in povzetkom.
 
 ```jsonc
 {
   "flags": [
     {
       "key": "REQUIRE_API_KEY",
-      "label": "Zahtevaj ključ API",
-      "description": "Zahtevaj ključ API za vse dohodne zahteve",
+      "label": "Require API Key",
+      "description": "Require an API key for all incoming requests",
       "category": "security",
       "type": "boolean",
       "enumValues": null,
@@ -266,7 +261,7 @@ Vrne vse zastavice z njihovo učinkovito vrednostjo, virom in povzetkom.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... vseh 119 zastavic
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -280,33 +275,30 @@ Vrne vse zastavice z njihovo učinkovito vrednostjo, virom in povzetkom.
 
 #### `PUT /api/settings/feature-flags`
 
-Nastavi ali odstrani eno preglasitev. Telo: `{ key: string; value?: string }`.
-Če `value` izpustite, se preglasitev odstrani (obnovi se vrednost iz okolja / privzeta vrednost).
+Nastavite ali odstranite posamezno preglasitev. Telo: `{ key: string; value?: string }`. Če izpustite `value`, odstranite preglasitev (obnovitev env / default).
 
 ```bash
-# Nastavi preglasitev v DB
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Odstrani preglasitev (brez "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Odgovor vsebuje novo `effectiveValue`/`source`, `previousValue`/
-`previousSource` in `requiresRestart`. Neznani ključi in vrednosti enumov
-zunaj dovoljenega obsega se zavrnejo z napako `400`.
+Odziv odmeva z novimi `effectiveValue`/`source`, `previousValue`/ `previousSource` in `requiresRestart`. Neznani ključi in enum vrednosti zunaj obsega so zavrnjeni z `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Hkrati počisti **vse** preglasitve v DB in vsako zastavico povrne na njeno vrednost iz okolja / privzeto vrednost. Vrne `{ cleared: <count>, message: "..." }`.
+Počisti** vse** DB preglasi naenkrat in obnovi vsako zastavico na njeno env/privzeto vrednost. Vrne `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Zastavice z `requiresRestart: true` začnejo učinkovati šele po ponovnem nalaganju procesa.
-> Potek ponovnega zagona na nadzorni plošči pokliče `POST /api/restart` in nato poizveduje
-> `GET /api/health/ping`, dokler strežnik ni znova vzpostavljen.
+> Zastavice z `requiresRestart: true` začnejo veljati šele po ponovnem nalaganju procesa. Tok ponovnega zagona nadzorne plošče pokliče `POST /api/restart` in nato anketira `GET /api/health/ping` dokler strežnik ni ponovno zagnan.
+
+---
 
 ## Nadomestna rešitev za prekoračitev proračuna v sili
 

@@ -226,25 +226,21 @@ lösen dieselbe effektive Richtlinie auf.
 
 ## Flags umschalten
 
-### Dashboard
+### Armaturenbrett
 
-Navigieren Sie zu **Dashboard → Einstellungen → Feature-Flags**
-(`/dashboard/settings/feature-flags`). Das Raster
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-unterstützt:
+Navigieren Sie zu** Dashboard- → -Einstellungen → Funktionsflags** (`/dashboard/settings/feature-flags`). Das Raster (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) unterstützt:
 
-- **Suche** nach Schlüssel oder Beschreibung und **Filterung** nach Kategorie (einschließlich einer synthetischen Ansicht **Neustart erforderlich**).
-- Einen **Umschalter** für boolesche Flags und ein **Dropdown-Menü** für Enum-Flags
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Ein **Quellen-Badge** pro Flag — `DB`, `ENV` oder `DEF` — das anzeigt, woher der effektive Wert stammt.
-- Eine Schaltfläche **Zurücksetzen** (nur für Flags mit der Quelle `DB` angezeigt), um die Überschreibung zu entfernen, sowie eine Schaltfläche **Alle Überschreibungen zurücksetzen** am unteren Rand.
-- Ein Banner **Server neu starten**, wenn ein Flag mit `requiresRestart` geändert wird.
+- **Suchen** nach Schlüssel oder Beschreibung, und** Filter** nach Kategorie (plus eine synthetische** Erfordert einen Neustart** Sicht).
+- A** umschalten** für boolesche Flags und a** runterfallen** für Enum-Flags (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- A** Quellenabzeichen** pro Flag — `DB`, `ENV` oder `DEF` — zeigt an, woher der effektive Wert stammt.
+- A** Zurücksetzen** Schaltfläche (wird nur für `DB` -sourced -Flags angezeigt), um die Überschreibung zu löschen, und a** Alle Überschreibungen zurücksetzen** Knopf unten.
+- A** Starten Sie den Server neu** Banner, wenn ein `requiresRestart` Flag geändert wird.
 
-### REST-API
+### REST API
 
-Alle Vorgänge laufen über eine einzige Route:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Jede Methode erfordert eine authentifizierte Dashboard-Sitzung (andernfalls `401`).
+Alle Vorgänge laufen über eine einzige Route: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Jede Methode erfordert eine authentifizierte Dashboard-Sitzung (andernfalls `401` ).
+
+Bei deaktivierter Anmeldung (`requireLogin=false`) ist die Route offen, mit Ausnahme der geschützten Flags: jedes Flag in der Sicherheitskategorie plus `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` und `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` in `protectedFeatureFlags.ts`). Ein `PUT` auf einem von ihnen und ein `DELETE`, während einer von ihnen über eine DB Überschreibung verfügt, benötigen weiterhin eine Dashboard-Sitzung, einen `manage` -scope API Schlüssel, ein `oma_` Zugriffstoken mit Schreibbereich oder höher oder das vom Loopback gesendete CLI -Token oder interne Service-Token. Dieser Satz ist umfangreicher als bei aktivierter Anmeldung, bei der die Route nur eine Sitzung oder einen `manage` -scope -Schlüssel akzeptiert.
 
 #### `GET /api/settings/feature-flags`
 
@@ -266,7 +262,7 @@ Gibt jedes Flag mit seinem effektiven Wert, seiner Quelle und einer Zusammenfass
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... alle 119 Flags
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -280,32 +276,28 @@ Gibt jedes Flag mit seinem effektiven Wert, seiner Quelle und einer Zusammenfass
 
 #### `PUT /api/settings/feature-flags`
 
-Setzt eine einzelne Überschreibung oder entfernt sie. Body: `{ key: string; value?: string }`.
-Wird `value` weggelassen, wird die Überschreibung entfernt (wodurch der Env-Wert / Standardwert wiederhergestellt wird).
+Legen Sie eine einzelne Überschreibung fest oder entfernen Sie sie. Körper: `{ key: string; value?: string }`. Durch Weglassen `value` wird die Überschreibung entfernt (Umgebung/Standard wird wiederhergestellt).
 
 ```bash
-# Eine DB-Überschreibung setzen
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Die Überschreibung entfernen (kein "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Die Antwort enthält den neuen `effectiveValue`/`source`, den
-`previousValue`/`previousSource` sowie `requiresRestart`. Unbekannte Schlüssel und Enum-Werte außerhalb des zulässigen Bereichs werden mit `400` abgelehnt.
+Die Antwort spiegelt das neue `effectiveValue`/`source`, das `previousValue`/ `previousSource` und `requiresRestart` wider. Unbekannte Schlüssel und Enum-Werte außerhalb des gültigen Bereichs werden mit `400` abgelehnt.
 
 #### `DELETE /api/settings/feature-flags`
 
-Löscht alle DB-Überschreibungen auf einmal und setzt jedes Flag auf seinen Env-Wert / Standardwert zurück. Gibt `{ cleared: <count>, message: "..." }` zurück.
+Löscht** alle** DB überschreibt sofort und stellt jedes Flag auf seinen Umgebungs-/Standardwert zurück. Gibt `{ cleared: <count>, message: "..." }` zurück.
 
 > [!NOTE]
-> Flags mit `requiresRestart: true` werden erst nach einem Neuladen des Prozesses wirksam.
-> Der Neustartablauf des Dashboards ruft `POST /api/restart` auf und fragt anschließend wiederholt
-> `GET /api/health/ping` ab, bis der Server wieder verfügbar ist.
+> Flags mit `requiresRestart: true` werden erst nach einem Neuladen des Prozesses wirksam. Der Neustartablauf des Dashboards ruft `POST /api/restart` auf und fragt dann `GET /api/health/ping` ab, bis der Server wieder hochgefahren ist.
 
 ---
 

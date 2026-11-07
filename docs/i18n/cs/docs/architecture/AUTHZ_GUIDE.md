@@ -314,15 +314,15 @@ Zůstává vypnuté, pokud není nastaveno `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 (`src/lib/accessTokens/scopes.ts`). Toto pořadí se vztahuje pouze na přihlašovací údaj
 přístupového tokenu. Viz [Ověřování pro správu](../guides/MANAGEMENT-AUTH.md).
 
-## Přepínač vyžadování autentizace
+## Přepínač vyžadováno ověření
 
-`isAuthRequired()` v `src/shared/utils/apiAuth.ts` rozhoduje, zda se pro požadavek vynucuje **jakákoli** autentizace:
+`isAuthRequired()` v `src/shared/utils/apiAuth.ts` rozhoduje, zda** žádný** auth je vynuceno pro požadavek:
 
-- `settings.requireLogin === false` → autentizace je globálně vypnuta, kromě trvale chráněné úrovně (viz [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) a volání, která vydávají pověření, jež tato konfigurace přijímá; ta vyžadují stejné pověření jako při zapnutém přihlášení: vydávání tokenů synchronizace, vytváření přístupových tokenů CLI v libovolném rozsahu a vytváření klíče API s rozsahem `manage`/`admin`, udělování tohoto rozsahu klíči, regenerace nebo zobrazení takového klíče (`requireCredentialForManagementScopedKey()` v `src/lib/api/requireManagementAuth.ts`). Klíče určené pouze pro inferenci zůstávají otevřené.
-- Není nastaveno žádné heslo **a** není nastavena proměnná prostředí `INITIAL_PASSWORD` → bootstrap režim povolí průvodce nastavením a požadavky z loopbacku, ale požadavky ze sítě stále vyžadují pověření.
-- Jakákoli chyba databáze → selhání uzavřené (secure-by-default).
+- `settings.requireLogin === false` → auth je globálně zakázáno, s výjimkou vždy chráněné vrstvy (viz [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) a volání, která předávají pověření, které přijímá a která potřebují stejné pověření jako při přihlášení: vydávání synchronizačních tokenů, ražení přístupových tokenů CLI v libovolném rozsahu a vytvoření klíče API pomocí klíče `manage` nebo udělení takového klíče /`admin` rozsahu. (`requireCredentialForManagementScopedKey()` v `src/lib/api/requireManagementAuth.ts`). Klíče pouze pro odvození zůstanou otevřené. Zapsání příznaku chráněné funkce (`REQUIRE_API_KEY`, ostatní příznaky zabezpečení a příznaky SSRF / TLS / MCP-scope / sandbox uvedené v [příznakech funkcí](../reference/FEATURE_FLAGS.md#rest-api) ) a uložení nastavení maskování PII (`PUT /api/settings/pii`) také stále potřebuje pověření.
+- Není nakonfigurováno žádné heslo** a** no `INITIAL_PASSWORD` env var → bootstrap režim umožňuje onboarding wizard a požadavky na zpětnou smyčku, ale vystavené síťové požadavky stále potřebují pověření. Výjimka: zapsání příznaku chráněné funkce a uložení nastavení maskování PII (`PUT /api/settings/pii`) vyžaduje pověření i ze zpětné smyčky, takže zpětná smyčka sama o sobě nestačí.
+- Jakákoli chyba DB → se nezdaří uzavřít (zabezpečeno ve výchozím nastavení).
 
-Vynucení klientského API klíče používá `isRequireApiKeyEnabled()` v `src/shared/utils/featureFlags.ts`, nikoli přímé čtení `process.env.REQUIRE_API_KEY`. To je důležité pro nasazené instance: přepnutí `REQUIRE_API_KEY` v Dashboard → Feature Flags uloží přepsání do databáze a okamžitě ovlivní `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` a další kontroly autentizace klientského API, které sdílejí tento pomocník. Pokud nelze přečíst úložiště feature flagů, autentizace klientského API selže uzavřeně a vyžaduje klíč.
+Vynucení klíče API klienta používá `isRequireApiKeyEnabled()` v `src/shared/utils/featureFlags.ts`, nikoli přímé čtení `process.env.REQUIRE_API_KEY`. To je důležité pro nasazené instance: přepnutí `REQUIRE_API_KEY` v Dashboard → Feature Flags uloží přepsání DB a okamžitě ovlivní `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` a další kontroly ověřování klientského rozhraní API, které sdílejí tohoto pomocníka. Pokud nelze číst úložiště příznaků funkcí, klientské ověření API se nezdaří a vyžaduje klíč.
 
 ## Zásadní změna — v3.8.0
 

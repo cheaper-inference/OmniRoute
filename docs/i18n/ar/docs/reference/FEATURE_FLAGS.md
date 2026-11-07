@@ -221,41 +221,35 @@
 > أي قيمة خارج مجموعتها المسموح بها (ويُتحقق من ذلك على جانب الخادم في كل من
 > `setFeatureFlagOverride()` ومعالج REST `PUT`).
 
-## تبديل العلامات
+## تبديل الأعلام
 
-### لوحة المعلومات
+### لوحة القيادة
 
-انتقل إلى **لوحة المعلومات → الإعدادات → علامات الميزات**
-(`/dashboard/settings/feature-flags`). تدعم الشبكة
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-ما يلي:
+انتقل إلى** لوحة المعلومات إعدادات → أعلام ميزات →** (`/dashboard/settings/feature-flags`). تدعم الشبكة (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`):
 
-- **البحث** حسب المفتاح أو الوصف، و**التصفية** حسب الفئة (بالإضافة إلى عرض اصطناعي
-  **يتطلب إعادة التشغيل**).
-- **مفتاح تبديل** للعلامات المنطقية و**قائمة منسدلة** لعلامات التعداد
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- شارة مصدر لكل علامة — `DB` أو `ENV` أو `DEF` — توضّح مصدر القيمة الفعّالة.
-- زر **إعادة الضبط** (يظهر فقط للعلامات ذات المصدر `DB`) لإزالة التجاوز،
-  وزر **إعادة ضبط جميع التجاوزات** في الأسفل.
-- شريط **إعادة تشغيل الخادم** عند تغيير علامة `requiresRestart`.
+- **يبحث** عن طريق المفتاح أو الوصف، و** فلتر** حسب الفئة (بالإضافة إلى الاصطناعية** يتطلب إعادة التشغيل** منظر).
+- أ** تبديل** للأعلام المنطقية و** اسقاط** لأعلام التعداد (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- أ** شارة المصدر** لكل علامة — `DB` أو `ENV` أو `DEF` — توضح مصدر القيمة الفعالة.
+- أ** إعادة ضبط** زر (يظهر فقط لأعلام `DB` -sourced ) لإسقاط التجاوز، وa** إعادة تعيين كافة التجاوزات** زر في الأسفل.
+- أ** إعادة تشغيل الخادم** لافتة عند تغيير علم `requiresRestart`.
 
 ### REST API
 
-تُجرى جميع العمليات عبر مسار واحد:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-تتطلب كل طريقة جلسة لوحة معلومات موثّقة (`401` بخلاف ذلك).
+جميع العمليات تمر عبر مسار واحد: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). تتطلب كل طريقة جلسة لوحة معلومات مصادق عليها (خلاف ذلك `401` ).
+
+مع تعطيل تسجيل الدخول (`requireLogin=false`) يكون المسار مفتوحًا، باستثناء العلامات المحمية: كل علامة في فئة الأمان بالإضافة إلى `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` و `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` و `MITM_DISABLE_TLS_VERIFY` و `OMNIROUTE_MCP_ENFORCE_SCOPES` و `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` في `protectedFeatureFlags.ts`). لا يزال `PUT` على أحدهما، و `DELETE` بينما يحتوي أحدهما على تجاوز DB ، بحاجة إلى جلسة لوحة معلومات، أو مفتاح `manage` -scope API ، أو رمز وصول `oma_` مع نطاق الكتابة أو أعلى، أو رمز CLI المميز أو رمز الخدمة الداخلية المرسل من الاسترجاع. هذه المجموعة أوسع من تسجيل الدخول، حيث يقبل المسار جلسة واحدة فقط أو مفتاح `manage` -scope.
 
 #### `GET /api/settings/feature-flags`
 
-يعيد كل علامة مع قيمتها الفعّالة ومصدرها وملخص.
+إرجاع كل علامة بقيمتها الفعالة ومصدرها وملخصها.
 
 ```jsonc
 {
   "flags": [
     {
       "key": "REQUIRE_API_KEY",
-      "label": "طلب مفتاح API",
-      "description": "طلب مفتاح API لجميع الطلبات الواردة",
+      "label": "Require API Key",
+      "description": "Require an API key for all incoming requests",
       "category": "security",
       "type": "boolean",
       "enumValues": null,
@@ -265,7 +259,7 @@
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... جميع العلامات البالغ عددها 119
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -279,34 +273,28 @@
 
 #### `PUT /api/settings/feature-flags`
 
-تعيين تجاوز واحد أو إزالته. جسم الطلب: `{ key: string; value?: string }`.
-يؤدي حذف `value` إلى إزالة التجاوز (واستعادة قيمة البيئة / القيمة الافتراضية).
+تعيين أو إزالة تجاوز واحد. الجسم : `{ key: string; value?: string }`. يؤدي حذف `value` إلى إزالة التجاوز (استعادة env/default).
 
 ```bash
-# تعيين تجاوز في قاعدة البيانات
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# إزالة التجاوز (بدون "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-يعكس الاستجابة `effectiveValue`/`source` الجديدين، و`previousValue`/
-`previousSource`، و`requiresRestart`. تُرفض المفاتيح غير المعروفة وقيم التعداد
-الخارجة عن النطاق بالرمز `400`.
+الرد يردد `effectiveValue`/`source` الجديد، و `previousValue`/ `previousSource`، و `requiresRestart`. يتم رفض المفاتيح غير المعروفة وقيم التعداد خارج النطاق باستخدام `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-يمسح **جميع** التجاوزات الموجودة في قاعدة البيانات دفعة واحدة، ويعيد كل علامة إلى
-قيمة البيئة / القيمة الافتراضية. يعيد `{ cleared: <count>, message: "..." }`.
+يمسح** الجميع** يتم تجاوز DB مرة واحدة، مما يؤدي إلى استعادة كل علامة إلى قيمتها البيئية/الافتراضية. إرجاع `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> لا تصبح العلامات التي لها `requiresRestart: true` سارية المفعول إلا بعد إعادة تحميل العملية.
-> يستدعي مسار إعادة التشغيل في لوحة المعلومات `POST /api/restart` ثم يستطلع
-> `GET /api/health/ping` حتى يعود الخادم للعمل.
+> تصبح العلامات ذات `requiresRestart: true` سارية المفعول فقط بعد إعادة تحميل العملية. يستدعي تدفق إعادة تشغيل لوحة المعلومات `POST /api/restart` ثم يستقصي `GET /api/health/ping` حتى يعود الخادم احتياطيًا.
 
 ---
 

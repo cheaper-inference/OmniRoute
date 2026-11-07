@@ -330,15 +330,15 @@ Se pysyy poissa käytöstä, ellei `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 (`src/lib/accessTokens/scopes.ts`). Tämä järjestys koskee vain käyttöoikeustunnuksen
 tunnistetietoja. Katso [Hallinnan todennus](../guides/MANAGEMENT-AUTH.md).
 
-## Todennuksen pakollisuuden kytkin
+## Todennus vaaditaan -kytkin
 
-`isAuthRequired()` tiedostossa `src/shared/utils/apiAuth.ts` ratkaisee, pakotetaanko pyynnölle **mitään** todennusta:
+`isAuthRequired()` in `src/shared/utils/apiAuth.ts` päättää, onko** mikä tahansa** todennus pakotetaan pyynnölle:
 
-- `settings.requireLogin === false` → todennus on kytketty globaalisti pois päältä, lukuun ottamatta aina suojattua tasoa (ks. [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) ja kutsuja, jotka antavat ulos tunnistetiedon, jonka se hyväksyy. Nämä vaativat saman tunnistetiedon kuin kirjautumisen ollessa päällä: synkronointitunnusten myöntäminen, CLI-käyttötunnusten myöntäminen millä tahansa laajuudella sekä `manage`/`admin`-laajuuden API-avaimen luominen, tuon laajuuden myöntäminen avaimelle tai sellaisen avaimen uudelleengenerointi tai näyttäminen (`requireCredentialForManagementScopedKey()` tiedostossa `src/lib/api/requireManagementAuth.ts`). Pelkkiä päättelyavaimia varten jäävät avoimiksi.
-- Salasanaa ei ole määritetty **eikä** `INITIAL_PASSWORD`-ympäristömuuttujaa ole → bootstrap-tila sallii käyttöönottotoimet ja loopback-pyynnöt, mutta verkkoon avatut pyynnöt vaativat edelleen tunnistetiedot.
-- Mikä tahansa tietokantavirhe → estää pääsyn (oletusarvoisesti turvallinen).
+- `settings.requireLogin === false` → auth on maailmanlaajuisesti poistettu käytöstä, lukuun ottamatta aina suojattua tasoa (katso [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) ja kutsuja, jotka jakavat sen hyväksymän valtuustiedot, jotka tarvitsevat samat valtuustiedot kuin sisäänkirjautumisen yhteydessä: synkronointitunnisteiden myöntäminen, CLI käyttötunnisteiden lyöminen missä tahansa laajuudessa, API avaimen luominen `manage`-`admin` -avaimella. avain tai sellaisen avaimen uudelleen luominen tai paljastaminen (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`). Vain päättelyavaimet pysyvät auki. Suojatun ominaisuuden lipun kirjoittaminen (`REQUIRE_API_KEY`, muut suojausliput ja [Ominaisuusliput](../reference/FEATURE_FLAGS.md#rest-api) -osiossa luetellut SSRF / TLS / MCP-scope / sandbox -liput) ja PII peiteasetusten (`PUT /api/settings/pii`) tallentaminen edellyttävät myös valtuustietoja.
+- Salasanaa ei ole määritetty** ja** no `INITIAL_PASSWORD` env var → bootstrap -tila mahdollistaa ohjatun aloitustoiminnon ja takaisinkytkentäpyynnöt, mutta avoimet verkkopyynnöt tarvitsevat silti kirjautumistiedot. Poikkeus: suojatun ominaisuuden lipun kirjoittaminen ja PII peittoasetusten (`PUT /api/settings/pii`) tallentaminen vaativat valtuustiedot jopa silmukasta, joten silmukka itsessään ei riitä.
+- Kaikki DB -virheet → epäonnistuu sulkeutumaan (oletussuojattu).
 
-Asiakas-API:n avainten pakottaminen käyttää `isRequireApiKeyEnabled()`-funktiota tiedostossa `src/shared/utils/featureFlags.ts`, ei suoraan `process.env.REQUIRE_API_KEY`-lukua. Tällä on merkitystä käyttöönotetuille instansseille: `REQUIRE_API_KEY`-arvon vaihtaminen kohdassa Dashboard → Feature Flags tallentaa tietokantaan ohituksen ja vaikuttaa välittömästi reitteihin `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` ja muihin asiakas-API:n todennustarkistuksiin, jotka jakavat tämän apufunktion. Jos feature flag -varastoa ei voi lukea, asiakas-API:n todennus estää pääsyn ja vaatii avaimen.
+Asiakkaan API -avaimen valvonta käyttää `isRequireApiKeyEnabled()` `src/shared/utils/featureFlags.ts` ssä, ei suoraa `process.env.REQUIRE_API_KEY` lukua. Tällä on merkitystä käyttöönotetuissa tapauksissa: `REQUIRE_API_KEY` vaihtaminen Dashboardissa → Feature Flags tallentaa DB -korjauksen ja vaikuttaa välittömästi `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` ja muihin asiakassovellusliittymän todennustarkistuksiin, jotka jakavat tämän apuohjelman. Jos ominaisuuden lippuvarastoa ei voida lukea, asiakkaan API -todennus epäonnistuu ja vaatii avaimen.
 
 ## Rikkova muutos — v3.8.0
 

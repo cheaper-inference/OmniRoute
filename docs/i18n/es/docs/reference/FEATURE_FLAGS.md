@@ -217,31 +217,27 @@ exclusión booleana ascendente selecciona `count_as_zero`; de lo contrario, el v
 > La columna `Restart` marca los indicadores con `requiresRestart: true` — el valor
 > se conserva al instante, pero solo surte efecto después de que el proceso se vuelva a cargar. Los indicadores de tipo enumerado rechazan cualquier valor fuera de su conjunto permitido (validado en el servidor tanto en `setFeatureFlagOverride()` como en el controlador REST `PUT`).
 
-## Alternar indicadores
+## Alternar banderas
 
 ### Panel
 
-Navega a **Panel → Configuración → Indicadores de funciones**
-(`/dashboard/settings/feature-flags`). La cuadrícula
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-admite:
+Navegar a** Panel de control Configuración → Banderas de funciones →** (`/dashboard/settings/feature-flags`). La cuadrícula (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) admite:
 
-- **Buscar** por clave o descripción y **filtrar** por categoría (además de una vista sintética de **Requiere reinicio**).
-- Un **conmutador** para los indicadores booleanos y un **menú desplegable** para los indicadores de tipo enumeración
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Una insignia de **origen** por indicador — `DB`, `ENV` o `DEF` — que muestra de dónde procede el valor efectivo.
-- Un botón **Restablecer** (que solo se muestra para los indicadores cuyo origen es `DB`) para eliminar la sustitución, y un botón **Restablecer todas las sustituciones** en la parte inferior.
-- Un banner de **Reiniciar servidor** cuando se cambia un indicador `requiresRestart`.
+- **Buscar** por clave o descripción, y** filtrar** por categoría (más un sintético** Requiere reinicio** vista).
+- A** palanca** para banderas booleanas y un** menú desplegable** para banderas de enumeración (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- A** insignia de fuente** por bandera — `DB`, `ENV` o `DEF` — que muestra de dónde proviene el valor efectivo.
+- A** Reiniciar** (se muestra solo para las banderas `DB` -sourced ) para eliminar la anulación, y un** Restablecer todas las anulaciones** botón en la parte inferior.
+- A** Reiniciar el servidor** banner cuando se cambia una bandera `requiresRestart`.
 
-### API REST
+### REST API
 
-Todas las operaciones se realizan mediante una única ruta:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Todos los métodos requieren una sesión autenticada del panel (`401` en caso contrario).
+Todas las operaciones transcurren por una única ruta: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Cada método requiere una sesión de panel autenticada (de lo contrario,`401` ).
+
+Con el inicio de sesión deshabilitado (`requireLogin=false`), la ruta está abierta, excepto las banderas protegidas: todas las banderas en la categoría Seguridad más `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` y `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` en `protectedFeatureFlags.ts`). Un `PUT` en uno de ellos, y un `DELETE` aunque uno de ellos tiene una anulación DB, aún necesita una sesión de panel, una clave `manage` -scope API, un token de acceso `oma_` con alcance de escritura o superior, o el token CLI o el token de servicio interno enviado desde loopback. Ese conjunto es más amplio que con el inicio de sesión activado, donde la ruta acepta solo una sesión o una clave `manage` -scope.
 
 #### `GET /api/settings/feature-flags`
 
-Devuelve todos los indicadores con su valor efectivo, origen y un resumen.
+Devuelve cada indicador con su valor efectivo, fuente y un resumen.
 
 ```jsonc
 {
@@ -273,32 +269,30 @@ Devuelve todos los indicadores con su valor efectivo, origen y un resumen.
 
 #### `PUT /api/settings/feature-flags`
 
-Establece o elimina una única sustitución. Cuerpo: `{ key: string; value?: string }`.
-Si se omite `value`, se elimina la sustitución (restaurando el valor de env / predeterminado).
+Establecer o eliminar una única anulación. Cuerpo: `{ key: string; value?: string }`. Omitir `value` elimina la anulación (restaurando el entorno/predeterminado).
 
 ```bash
-# Establecer una sustitución de DB
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Eliminar la sustitución (sin "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-La respuesta repite el `effectiveValue`/`source` nuevos, los valores
-`previousValue`/`previousSource` y `requiresRestart`. Las claves desconocidas y los valores de enumeración fuera de rango se rechazan con `400`.
+La respuesta hace eco del nuevo `effectiveValue`/`source`, el `previousValue`/ `previousSource` y `requiresRestart`. Las claves desconocidas y los valores de enumeración fuera de rango se rechazan con `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Elimina **todas** las sustituciones de DB a la vez, restaurando cada indicador a su valor de env / predeterminado. Devuelve `{ cleared: <count>, message: "..." }`.
+Borra** todo** DB anula a la vez, restaurando cada indicador a su valor env/predeterminado. Devuelve `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Los indicadores con `requiresRestart: true` solo surten efecto después de recargar el proceso.
-> El flujo de reinicio del panel llama a `POST /api/restart` y, a continuación, consulta periódicamente
-> `GET /api/health/ping` hasta que el servidor vuelve a estar disponible.
+> Las banderas con `requiresRestart: true` solo entran en vigor después de una recarga del proceso. El flujo de reinicio del panel llama `POST /api/restart` y luego sondea `GET /api/health/ping` hasta que el servidor vuelve a funcionar.
+
+---
 
 ## Alternativa de emergencia por presupuesto
 

@@ -225,31 +225,25 @@
 
 ## החלפת דגלים
 
-### לוח בקרה
+### לוּחַ מַחווָנִים
 
-נווט אל **לוח בקרה → הגדרות → דגלי תכונות**
-(`/dashboard/settings/feature-flags`). הרשת
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-תומכת ב:
+נווט אל** לוח המחוונים → הגדרות → דגלי תכונות** (`/dashboard/settings/feature-flags`). הרשת (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) תומכת ב:
 
-- **חיפוש** לפי מפתח או תיאור, ו**סינון** לפי קטגוריה (בתוספת תצוגה סינתטית
-  **דרוש אתחול**).
-- **מתג** עבור דגלים בוליאניים ו**רשימה נפתחת** עבור דגלי enum
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- תג מקור לכל דגל — `DB`, `ENV` או `DEF` — המציג מהיכן הגיע הערך האפקטיבי.
-- לחצן **איפוס** (מוצג רק עבור דגלים שמקורם ב־`DB`) להסרת העקיפה, ולחצן
-  **איפוס כל העקיפות** בתחתית.
-- באנר **אתחול השרת** כאשר משתנה דגל `requiresRestart`.
+- **לְחַפֵּשׂ** לפי מפתח או תיאור, ו** לְסַנֵן** לפי קטגוריה (בתוספת סינטטי** דורש הפעלה מחדש** נוֹף).
+- א** לְמַתֵג** עבור דגלים בוליאן וא** תפריט נפתח** עבור דגלי enum (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- א** תג מקור** לכל דגל — `DB`, `ENV` או `DEF` — מראה מהיכן הגיע הערך האפקטיבי.
+- א** אִתחוּל** לחצן (מוצג רק עבור דגלי `DB` -sourced ) כדי לבטל את העקיפה, ו-a** אפס את כל העקיפות** כפתור בתחתית.
+- א** הפעל מחדש את השרת** באנר כאשר דגל `requiresRestart` משתנה.
 
 ### REST API
 
-כל הפעולות עוברות דרך נתיב יחיד:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-כל שיטה דורשת הפעלת לוח בקרה מאומתת (`401` אחרת).
+כל הפעולות עוברות דרך אחת: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). כל שיטה דורשת הפעלת לוח מחוונים מאומתת (`401` אחרת).
+
+כשהכניסה מושבתת (`requireLogin=false`) המסלול פתוח, למעט הדגלים המוגנים: כל דגל בקטגוריית האבטחה בתוספת `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` ו- `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` in `protectedFeatureFlags.ts`). `PUT` על אחד מהם, ו- `DELETE` בעוד שלאחד מהם יש עקיפת DB, עדיין צריך הפעלה של לוח המחוונים, מפתח `manage` -scope API, אסימון גישה `oma_` עם היקף כתיבה ומעלה, או אסימון CLI או אסימון שירות פנימי שנשלח מ-loopback. הסט הזה רחב יותר מאשר עם התחברות, כאשר המסלול מקבל רק הפעלה או מפתח `manage` -scope.
 
 #### `GET /api/settings/feature-flags`
 
-מחזיר כל דגל עם הערך האפקטיבי שלו, המקור שלו וסיכום.
+מחזירה כל דגל עם הערך האפקטיבי שלו, המקור והסיכום שלו.
 
 ```jsonc
 {
@@ -281,34 +275,30 @@
 
 #### `PUT /api/settings/feature-flags`
 
-הגדרה או הסרה של עקיפה יחידה. גוף הבקשה: `{ key: string; value?: string }`.
-השמטת `value` מסירה את העקיפה (ומשחזרת את ערך הסביבה / ברירת המחדל).
+הגדר או הסר עקיפה בודדת. גוף: `{ key: string; value?: string }`. השמטת `value` מסירה את העקיפה (שחזור env / ברירת מחדל).
 
 ```bash
-# הגדרת עקיפת DB
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# הסרת העקיפה (ללא "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-התגובה מחזירה את `effectiveValue`/`source` החדשים, את
-`previousValue`/`previousSource` ואת `requiresRestart`. מפתחות לא מוכרים וערכי
-enum מחוץ לטווח נדחים עם `400`.
+התגובה מהדהדת את `effectiveValue`/`source` החדשים, את `previousValue`/ `previousSource` ואת `requiresRestart`. מפתחות לא ידועים וערכי ה-enum מחוץ לטווח נדחים עם `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-מנקה את **כל** עקיפות ה־DB בבת אחת, ומשחזר כל דגל לערך הסביבה / ברירת המחדל
-שלו. מחזיר `{ cleared: <count>, message: "..." }`.
+מנקה** כֹּל** DB עוקף בבת אחת, ומשחזר כל דגל לערך ה-env / ברירת המחדל שלו. מחזירה `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> דגלים עם `requiresRestart: true` נכנסים לתוקף רק לאחר טעינה מחדש של התהליך.
-> תהליך האתחול מחדש של לוח הבקרה קורא ל־`POST /api/restart` ולאחר מכן מבצע
-> תשאול של `GET /api/health/ping` עד שהשרת חוזר לפעול.
+> דגלים עם `requiresRestart: true` נכנסים לתוקף רק לאחר טעינת תהליך מחדש. זרימת ההפעלה מחדש של לוח המחוונים קוראת `POST /api/restart` ולאחר מכן סוקר `GET /api/health/ping` עד שהשרת יחזור.
+
+---
 
 ## מעבר חירום חלופי במקרה של חריגה מהתקציב
 

@@ -319,15 +319,15 @@ razriješi opsege iz MCP informacija o autentifikaciji, metapodataka zahtjeva il
 (`src/lib/accessTokens/scopes.ts`). Ovaj rang se primjenjuje samo na
 vjerodajnicu pristupnog tokena. Pogledajte [Upravljačka autentifikacija](../guides/MANAGEMENT-AUTH.md).
 
-## Prekidač za zahtijevanu autentifikaciju
+## Prekidač za autentifikaciju
 
-`isAuthRequired()` u `src/shared/utils/apiAuth.ts` odlučuje hoće li se za zahtjev provoditi **bilo kakva** autentifikacija:
+`isAuthRequired()` u `src/shared/utils/apiAuth.ts` odlučuje hoće li** bilo koji** autorizacija se provodi za zahtjev:
 
-- `settings.requireLogin === false` → autentifikacija je globalno isključena, osim za trajno zaštićenu razinu (vidi [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) i pozive koji izdaju vjerodajnicu koju ona prihvaća; oni zahtijevaju istu vjerodajnicu kao i pri uključenoj prijavi: izdavanje sinkronizacijskih tokena, kovanje CLI pristupnih tokena bilo kojeg opsega te stvaranje API ključa s opsegom `manage`/`admin`, dodjeljivanje tog opsega ključu, regeneriranje ili prikaz takvog ključa (`requireCredentialForManagementScopedKey()` u `src/lib/api/requireManagementAuth.ts`). Ključevi samo za inferenciju ostaju otvoreni.
-- Nije postavljena lozinka **i** nije postavljena okolinska varijabla `INITIAL_PASSWORD` → bootstrap način dopušta čarobnjak za postavljanje i zahtjeve s loopbacka, ali mrežni zahtjevi izvana i dalje zahtijevaju vjerodajnice.
-- Svaka pogreška baze → zatvoreno (secure-by-default).
+- `settings.requireLogin === false` → auth je globalno onemogućen, osim za uvijek zaštićenu razinu (pogledajte [Razine čuvara rute](../security/ROUTE_GUARD_TIERS.md) ) i pozive koji izdaju vjerodajnicu koju prihvaća, a koji trebaju istu vjerodajnicu kao i kod prijave: izdavanje tokena za sinkronizaciju, kovanje tokena za pristup CLI u bilo kojem opsegu i stvaranje API ključa s opsegom `manage`/`admin`, dodjeljivanje tog opsega ključu ili regeneriranje ili otkrivanje takvog ključa (`requireCredentialForManagementScopedKey()` u `src/lib/api/requireManagementAuth.ts`). Tipke samo za zaključivanje ostaju otvorene. Pisanje oznake zaštićene značajke (`REQUIRE_API_KEY`, druge sigurnosne oznake i oznake SSRF / TLS / MCP-scope / sandbox oznake navedene u [Oznakama značajki](../reference/FEATURE_FLAGS.md#rest-api) ) i spremanje postavki maskiranja PII (`PUT /api/settings/pii`) također zahtijevaju vjerodajnice.
+- Lozinka nije konfigurirana** i** no `INITIAL_PASSWORD` env var → početni način rada dopušta čarobnjaka za uključivanje i povratne zahtjeve, ali izloženi mrežni zahtjevi i dalje trebaju vjerodajnice. Iznimka: pisanje oznake zaštićene značajke i spremanje postavki PII maskiranja (`PUT /api/settings/pii`) trebaju vjerodajnicu čak i iz povratne petlje, tako da povratna petlja sama po sebi nije dovoljna.
+- Svaka DB pogreška → se ne zatvara (sigurno po zadanim postavkama).
 
-Provedba API ključa klijenta koristi `isRequireApiKeyEnabled()` u `src/shared/utils/featureFlags.ts`, a ne izravno čitanje `process.env.REQUIRE_API_KEY`. To je važno za instalirane instance: prebacivanje `REQUIRE_API_KEY` u Dashboard → Feature Flags sprema nadjačavanje u bazu i odmah utječe na `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` i druge provjere autentifikacije klijentskog API-ja koje dijele ovaj pomoćnik. Ako se spremište zastavica ne može pročitati, autentifikacija klijentskog API-ja zatvara se i zahtijeva ključ.
+Provedba API ključa klijenta koristi `isRequireApiKeyEnabled()` u `src/shared/utils/featureFlags.ts`, a ne izravno čitanje `process.env.REQUIRE_API_KEY`. Ovo je važno za implementirane instance: prebacivanje `REQUIRE_API_KEY` na Nadzornoj ploči → Feature Flags pohranjuje nadjačavanje DB i odmah utječe `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` i druge provjere autentifikacije klijentskog API-ja koje dijele ovaj pomoćnik. Ako se pohrana oznake značajke ne može pročitati, API autentifikacija klijenta nije uspjela zatvoriti i zahtijeva ključ.
 
 ## Nekompatibilna promjena — v3.8.0
 

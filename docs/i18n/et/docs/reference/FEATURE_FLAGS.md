@@ -223,29 +223,25 @@ Jõustamine ja administraatori aruanne lahendavad mõlemad sama tegeliku poliiti
 
 ## Lippude vahetamine
 
-### Juhtpaneel
+### Armatuurlaud
 
-Liikuge jaotisse **Juhtpaneel → Seaded → Funktsioonilipu**  
-(`/dashboard/settings/feature-flags`). Ruudustik  
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)  
-toetab järgmist:
+Navigeerige** Armatuurlaud → Seaded → Funktsioonide lipud** (`/dashboard/settings/feature-flags`). Võrk (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) toetab:
 
-- **Otsingut** võtme või kirjelduse järgi ning **filtreerimist** kategooria järgi (lisaks sünteetiline vaade **Nõuab taaskäivitust**).
-- Tõeväärtuslike lippude puhul **lüliti** ja enum-lippude puhul **rippmenüü**  
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Iga lipu juures **allika märgis** — `DB`, `ENV` või `DEF` — mis näitab, kust efektiivne väärtus pärineb.
-- **Lähtesta** nupp (kuvatakse ainult `DB`-allikaga lippude puhul) alistuse eemaldamiseks ning allosas nupp **Lähtesta kõik alistused**.
-- **Serveri taaskäivitamise** bänner, kui muudetakse lippu, mille `requiresRestart` väärtus on tõene.
+- **Otsi** võtme või kirjelduse järgi ja** filter** kategooria järgi (pluss sünteetiline** Nõuab taaskäivitamist** vaade).
+- A** lüliti** Boolean-lippude ja a** rippmenüüst** enum lippude jaoks (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- A** allika märk** lipu kohta — `DB`, `ENV` või `DEF` — mis näitab, kust tegelik väärtus tuli.
+- A** Lähtesta** nuppu (kuvatakse ainult `DB` -sourced lippude puhul), et tühistada alistamine, ja a** Lähtestage kõik alistamised** nuppu allosas.
+- A** Taaskäivitage server** bänner, kui `requiresRestart` lippu muudetakse.
 
 ### REST API
 
-Kõik toimingud käivad läbi ühe marsruudi:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Iga meetod nõuab autentitud juhtpaneeli seanssi (vastasel juhul `401`).
+Kõik toimingud läbivad ühe marsruudi: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Iga meetod nõuab autentitud armatuurlaua seanssi (muidu `401` ).
+
+Kui sisselogimine on keelatud (`requireLogin=false`), on marsruut avatud, välja arvatud kaitstud lipud: kõik turvakategooria lipud pluss `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` ja `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` in `protectedFeatureFlags.ts`). Ühel neist olev `PUT` ja `DELETE`, kui ühel neist on DB alistus, vajavad siiski armatuurlaua seanssi, `manage` -scope API võtit, `oma_` -pääsuluba, millel on kirjutusulatus või kõrgem, või CLI -luba või siseteenuse luba, mis on saadetud loopbackist. See komplekt on laiem kui sisselogimisel, kus marsruut aktsepteerib ainult seanssi või `manage` -scope klahvi.
 
 #### `GET /api/settings/feature-flags`
 
-Tagastab kõik lipud koos nende efektiivse väärtuse, allika ja kokkuvõttega.
+Tagastab iga lipu koos selle tegeliku väärtuse, allika ja kokkuvõttega.
 
 ```jsonc
 {
@@ -277,32 +273,30 @@ Tagastab kõik lipud koos nende efektiivse väärtuse, allika ja kokkuvõttega.
 
 #### `PUT /api/settings/feature-flags`
 
-Ühe alistuse määramine või eemaldamine. Keha: `{ key: string; value?: string }`.
-`value` väljajätmine eemaldab alistuse (taastades keskkonna / vaikeväärtuse).
+Määrake või eemaldage üks alistamine. Kere: `{ key: string; value?: string }`. `value` väljajätmine eemaldab alistamise (env / vaikeväärtuse taastamine).
 
 ```bash
-# Määra DB alistus
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Eemalda alistus (ilma "value"-ta)
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Vastus sisaldab uue `effectiveValue`/`source` väärtuse, `previousValue`/
-`previousSource` väärtuse ja `requiresRestart` väärtuse. Tundmatud võtmed ja
-lubatud vahemikust välja jäävad enum-väärtused lükatakse tagasi veaga `400`.
+Vastus kordab uusi `effectiveValue`/`source`, `previousValue`/ `previousSource` ja `requiresRestart`. Tundmatud võtmed ja vahemikust väljas olevad loendi väärtused lükatakse tagasi koos `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Eemaldab korraga **kõik** DB alistused, taastades iga lipu keskkonna- / vaikeväärtuse. Tagastab `{ cleared: <count>, message: "..." }`.
+Puhastab** kõik** DB alistab korraga, taastades iga lipu env / vaikeväärtus. Tagastab `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Lipud, mille `requiresRestart: true`, jõustuvad alles pärast protsessi uuesti laadimist.
-> Juhtpaneeli taaskäivitamise voog kutsub välja `POST /api/restart` ja seejärel küsib korduvalt `GET /api/health/ping`, kuni server on taas töövalmis.
+> `requiresRestart: true` -ga lipud jõustuvad alles pärast protsessi uuesti laadimist. Armatuurlaua taaskäivitusvoog kutsub välja `POST /api/restart` ja seejärel küsitleb `GET /api/health/ping`, kuni server on varundanud.
+
+---
 
 ## Eelarve hädaolukorra varuvariant
 

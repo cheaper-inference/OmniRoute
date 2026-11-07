@@ -225,30 +225,25 @@ selhání vyhledání cen. Vynucování i zpráva pro správce vyhodnocují stej
 
 ## Přepínání příznaků
 
-### Řídicí panel
+### Dashboard
 
-Přejděte do **Řídicí panel → Nastavení → Příznaky funkcí**
-(`/dashboard/settings/feature-flags`). Mřížka
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-podporuje:
+Přejděte na** Ovládací panel → Nastavení → Příznaky funkcí** (`/dashboard/settings/feature-flags`). Mřížka (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) podporuje:
 
-- **Vyhledávání** podle klíče nebo popisu a **filtrování** podle kategorie (včetně syntetického zobrazení
-  **Vyžaduje restart**).
-- **Přepínač** pro příznaky typu boolean a **rozbalovací nabídku** pro příznaky typu enum
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Odznak zdroje pro každý příznak — `DB`, `ENV` nebo `DEF` — zobrazující, odkud pochází efektivní hodnota.
-- Tlačítko **Obnovit** (zobrazené pouze u příznaků se zdrojem `DB`) pro zrušení přepsání a tlačítko **Obnovit všechna přepsání** dole.
-- Banner **Restartovat server**, když se změní příznak `requiresRestart`.
+- **Vyhledávání** podle klíče nebo popisu a** filtr** podle kategorie (plus syntetický** Vyžaduje restart** pohled).
+- A** přepnout** pro booleovské příznaky a a** rozevírací seznam** pro enum příznaky (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- A** odznak zdroje** za příznak — `DB`, `ENV` nebo `DEF` — ukazující, odkud pochází efektivní hodnota.
+- A** Resetovat** tlačítko (zobrazeno pouze pro příznaky `DB` -sourced ) pro zrušení přepsání a a** Resetovat všechna přepsání** tlačítko ve spodní části.
+- A** Restartujte server** banner při změně vlajky `requiresRestart`.
 
 ### REST API
 
-Všechny operace procházejí jedinou routou:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Každá metoda vyžaduje ověřenou relaci řídicího panelu (jinak `401`).
+Všechny operace procházejí jedinou cestou: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Každá metoda vyžaduje ověřenou relaci řídicího panelu (jinak `401` ).
+
+S deaktivovaným přihlášením (`requireLogin=false`) je cesta otevřená, kromě chráněných příznaků: každý příznak v kategorii zabezpečení plus `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` a `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` v `protectedFeatureFlags.ts`). `PUT` na jednom z nich a `DELETE`, zatímco jeden z nich má přepsání DB, stále potřebuje relaci řídicího panelu, klíč `manage` -scope API, přístupový token `oma_` s rozsahem zápisu nebo vyšším nebo token CLI nebo token interní služby odeslaný ze zpětné smyčky. Tato sada je širší než se zapnutým přihlášením, kde trasa přijímá pouze relaci nebo klíč `manage` -scope.
 
 #### `GET /api/settings/feature-flags`
 
-Vrací každý příznak s jeho efektivní hodnotou, zdrojem a souhrnem.
+Vrátí každý příznak s jeho efektivní hodnotou, zdrojem a souhrnem.
 
 ```jsonc
 {
@@ -266,7 +261,7 @@ Vrací každý příznak s jeho efektivní hodnotou, zdrojem a souhrnem.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... všech 119 příznaků
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -280,34 +275,30 @@ Vrací každý příznak s jeho efektivní hodnotou, zdrojem a souhrnem.
 
 #### `PUT /api/settings/feature-flags`
 
-Nastaví nebo odebere jediné přepsání. Tělo: `{ key: string; value?: string }`.
-Vynecháním `value` přepsání odeberete (obnoví se hodnota z prostředí / výchozí hodnota).
+Nastavte nebo odeberte jedno přepsání. Tělo: `{ key: string; value?: string }`. Vynechání `value` odstraní přepsání (obnovení env / výchozí).
 
 ```bash
-# Nastavení přepsání v DB
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Odebrání přepsání (bez "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Odpověď zopakuje novou hodnotu `effectiveValue`/zdroj `source`, předchozí hodnotu `previousValue`/
-předchozí zdroj `previousSource` a údaj `requiresRestart`. Neznámé klíče a hodnoty enum mimo povolený
-rozsah jsou odmítnuty s chybou `400`.
+Odezva odráží nové `effectiveValue`/`source`, `previousValue`/ `previousSource` a `requiresRestart`. Neznámé klíče a hodnoty výčtu mimo rozsah jsou odmítnuty pomocí `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Vymaže **všechna** přepsání v DB najednou a obnoví každý příznak na hodnotu z prostředí / výchozí
-hodnotu. Vrací `{ cleared: <count>, message: "..." }`.
+Čistí** vše** DB přepíše najednou a obnoví každý příznak na jeho env / výchozí hodnotu. Vrátí `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Příznaky s `requiresRestart: true` se projeví až po opětovném načtení procesu.
-> Proces restartování z řídicího panelu zavolá `POST /api/restart` a poté dotazuje
-> `GET /api/health/ping`, dokud server nebude znovu dostupný.
+> Příznaky s `requiresRestart: true` se projeví až po opětovném načtení procesu. Tok restartu řídicího panelu volá `POST /api/restart` a poté dotazuje `GET /api/health/ping`, dokud se server nezapne.
+
+---
 
 ## Nouzový záložní mechanismus při vyčerpání rozpočtu
 

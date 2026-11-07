@@ -224,31 +224,27 @@ tuairisc an riarthóra an beartas éifeachtach céanna.
 
 ---
 
-## Bratacha a scoránú
+## Bratacha á Scor
 
-### Deaischlár
+### Deais
 
-Téigh chuig **Deaischlár → Socruithe → Bratacha Gnéithe**
-(`/dashboard/settings/feature-flags`). Tacaíonn an eangach
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-leis na nithe seo:
+Déan nascleanúint chuig** Socruithe Painéal → → Bratacha Gné** (`/dashboard/settings/feature-flags`). Tacaíonn an eangach (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) le:
 
-- **Cuardach** de réir eochrach nó tuairisce, agus **scagadh** de réir catagóire (chomh maith le hamharc sintéiseach **Atosaigh de dhíth**).
-- **Scorán** le haghaidh bratacha Boole agus **liosta anuas** le haghaidh bratacha enum
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Suaitheantas foinse in aghaidh na brataí — `DB`, `ENV`, nó `DEF` — a thaispeánann cá as a tháinig an luach éifeachtach.
-- Cnaipe **Athshocraigh** (a thaispeántar do bhratacha a bhfuil foinse `DB` acu amháin) chun an sárú a bhaint, agus cnaipe **Athshocraigh gach sárú** ag an mbun.
-- Meirge **Freastalaí a atosú** nuair a athraítear bratach `requiresRestart`.
+- **Cuardach** de réir eochrach nó tuairisce, agus** scagaire** de réir catagóire (móide sintéiseacha** Éilíonn Atosaigh** amharc).
+- A** scoránaigh** le haghaidh bratacha boolean agus a** anuas** le haghaidh bratacha enum (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- A** suaitheantas foinse** per flag — `DB`, `ENV`, nó `DEF` — a thaispeánann cén áit ar tháinig an luach éifeachtach.
+- A** Athshocraigh** cnaipe (taispeántar le haghaidh bratacha `DB` -sourced amháin) chun an sárú a laghdú, agus a** Athshocraigh Gach Sárú** cnaipe ag bun an leathanaigh.
+- A** Atosaigh Freastalaí** banner nuair a athraítear bratach `requiresRestart`.
 
-### API REST
+### REST API
 
-Téann gach oibríocht trí bhealach aonair:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Éilíonn gach modh seisiún fíordheimhnithe de chuid an deais (`401` murach sin).
+Téann gach oibríocht trí bhealach amháin: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Teastaíonn seisiún deais fíordheimhnithe do gach modh (`401` ar shlí eile).
+
+Le logáil isteach díchumasaithe (`requireLogin=false`) tá an bealach oscailte, seachas na bratacha cosanta: gach bratach sa chatagóir Slándála móide `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` agus `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` in `protectedFeatureFlags.ts`). A `PUT` ar cheann acu, agus `DELETE` cé go bhfuil sárú DB ag duine acu, tá seisiún deais fós ag teastáil, eochair `manage` -scope API, comhartha rochtana `oma_` le raon feidhme scríobh nó níos airde, nó an comhartha CLI nó an comhartha seirbhíse inmheánach seolta ó loopback. Tá an tacar sin níos leithne ná le logáil isteach, áit nach nglacann an bealach ach le seisiún nó le eochair `manage` -scope.
 
 #### `GET /api/settings/feature-flags`
 
-Filleann sé gach bratach lena luach éifeachtach, lena foinse agus le hachoimre.
+Filleann sé gach bratach lena luach éifeachtach, foinse, agus achoimre.
 
 ```jsonc
 {
@@ -266,7 +262,7 @@ Filleann sé gach bratach lena luach éifeachtach, lena foinse agus le hachoimre
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... na 119 bhratach ar fad
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -280,34 +276,30 @@ Filleann sé gach bratach lena luach éifeachtach, lena foinse agus le hachoimre
 
 #### `PUT /api/settings/feature-flags`
 
-Socraigh sárú aonair nó bain é. Corp: `{ key: string; value?: string }`.
-Má fhágtar `value` ar lár, baintear an sárú (agus athchuirtear an luach env / réamhshocraithe).
+Socraigh nó bain aon sárú amháin. Comhlacht: `{ key: string; value?: string }`. Má fhágtar `value` ar lár, baintear an sáraíocht (env / default a athchóiriú).
 
 ```bash
-# Socraigh sárú DB
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Bain an sárú (gan "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Macallaíonn an freagra an `effectiveValue`/`source` nua, an
-`previousValue`/`previousSource`, agus `requiresRestart`. Diúltaítear eochracha
-anaithnide agus luachanna enum atá lasmuigh den raon le `400`.
+Léiríonn an freagra an `effectiveValue`/`source` nua, an `previousValue`/ `previousSource`, agus `requiresRestart`. Diúltaítear eochracha anaithnid agus luachanna enum lasmuigh den raon le `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Glanann sé **gach sárú DB** láithreach, agus athchuirtear gach bratach chuig a
-luach env / réamhshocraithe. Filleann sé `{ cleared: <count>, message: "..." }`.
+Glanann** go léir** sáraíonn DB láithreach, ag athbhunú gach bratach chuig a luach env / réamhshocraithe. Filleann `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Ní thiocfaidh bratacha a bhfuil `requiresRestart: true` i bhfeidhm go dtí go n-athlódálfar próiseas.
-> Glaonn sreabhadh atosaithe an deais ar `POST /api/restart` agus ansin déanann sé
-> vótail ar `GET /api/health/ping` go dtí go mbeidh an freastalaí ar ais ar bun.
+> Ní thagann bratacha le `requiresRestart: true` i bhfeidhm ach amháin tar éis próiseas athlódála. Glaonn sreabhadh atosú an deais ar `POST /api/restart` agus ansin déanann sé vótaíocht ar `GET /api/health/ping` go dtí go mbíonn an freastalaí cúltaca.
+
+---
 
 ## Cúltaca Éigeandála don Bhuiséad
 

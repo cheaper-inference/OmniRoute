@@ -219,40 +219,35 @@ Ongeldige enumwaarden en onleesbare opslag van featureflags leiden tot een geslo
 
 ---
 
-## Vlaggen in- en uitschakelen
+## Vlaggen wisselen
 
 ### Dashboard
 
-Ga naar **Dashboard → Instellingen → Functievlaggen**
-(`/dashboard/settings/feature-flags`). Het raster
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-ondersteunt:
+Navigeer naar** Dashboard → Instellingen → Functievlaggen** (`/dashboard/settings/feature-flags`). Het raster (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) ondersteunt:
 
-- **Zoeken** op sleutel of beschrijving, en **filteren** op categorie (plus een synthetische weergave
-  **Opnieuw opstarten vereist**).
-- Een **schakelaar** voor booleaanse vlaggen en een **vervolgkeuzelijst** voor enum-vlaggen
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Een **bronbadge** per vlag — `DB`, `ENV` of `DEF` — die aangeeft waar de effectieve waarde vandaan komt.
-- Een knop **Resetten** (alleen weergegeven voor vlaggen met bron `DB`) om de overschrijving te verwijderen, en onderaan een knop **Alle overschrijvingen resetten**.
-- Een banner **Server opnieuw opstarten** wanneer een vlag met `requiresRestart` wordt gewijzigd.
+- **Zoekopdracht** op sleutel of beschrijving, en** filter** per categorie (plus een synthetisch** Vereist opnieuw opstarten** weergave).
+- A** schakelaar** voor Booleaanse vlaggen en a** vervolgkeuzelijst** voor enum-vlaggen (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- A** bronbadge** per vlag — `DB`, `ENV` of `DEF` — die aangeeft waar de effectieve waarde vandaan komt.
+- A** Opnieuw instellen** knop (alleen weergegeven voor `DB` -sourced -vlaggen) om de overschrijving te verwijderen, en a** Reset alle overschrijvingen** knop onderaan.
+- A** Start de server opnieuw** banner wanneer een `requiresRestart` vlag wordt gewijzigd.
 
 ### REST API
 
-Alle bewerkingen verlopen via één route:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Voor elke methode is een geauthenticeerde dashboardsessie vereist (`401` anders).
+Alle operaties verlopen via één route: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Elke methode vereist een geverifieerde dashboardsessie (anders `401` ).
+
+Als inloggen is uitgeschakeld (`requireLogin=false`) is de route open, behalve de beschermde vlaggen: elke vlag in de categorie Beveiliging plus `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` en `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` in `protectedFeatureFlags.ts`). Een `PUT` op een van hen, en een `DELETE` terwijl een van hen een DB -override heeft, heeft nog steeds een dashboardsessie nodig, een `manage` -scope API sleutel, een `oma_` -toegangstoken met schrijfbereik of hoger, of het CLI -token of het interne servicetoken verzonden vanuit loopback. Die set is breder dan wanneer je inlogt, waarbij de route alleen een sessie of een `manage` -scope sleutel accepteert.
 
 #### `GET /api/settings/feature-flags`
 
-Retourneert elke vlag met de effectieve waarde, bron en een samenvatting.
+Retourneert elke vlag met zijn effectieve waarde, bron en een samenvatting.
 
 ```jsonc
 {
   "flags": [
     {
       "key": "REQUIRE_API_KEY",
-      "label": "API-sleutel vereist",
-      "description": "Een API-sleutel vereist voor alle binnenkomende verzoeken",
+      "label": "Require API Key",
+      "description": "Require an API key for all incoming requests",
       "category": "security",
       "type": "boolean",
       "enumValues": null,
@@ -262,7 +257,7 @@ Retourneert elke vlag met de effectieve waarde, bron en een samenvatting.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... alle 119 vlaggen
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -276,33 +271,30 @@ Retourneert elke vlag met de effectieve waarde, bron en een samenvatting.
 
 #### `PUT /api/settings/feature-flags`
 
-Stel één overschrijving in of verwijder deze. Body: `{ key: string; value?: string }`.
-Als `value` wordt weggelaten, wordt de overschrijving verwijderd (waarmee de omgevingswaarde / standaardwaarde wordt hersteld).
+Een enkele overschrijving instellen of verwijderen. Lichaam: `{ key: string; value?: string }`. Als u `value` weglaat, wordt de overschrijving verwijderd (herstel van env / standaard).
 
 ```bash
-# Een DB-overschrijving instellen
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# De overschrijving verwijderen (geen "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Het antwoord bevat de nieuwe `effectiveValue`/`source`, de `previousValue`/
-`previousSource` en `requiresRestart`. Onbekende sleutels en enum-waarden
-buiten het toegestane bereik worden geweigerd met `400`.
+Het antwoord weerspiegelt de nieuwe `effectiveValue`/`source`, de `previousValue`/ `previousSource` en `requiresRestart`. Onbekende sleutels en enumwaarden die buiten het bereik vallen, worden afgewezen met `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Wist alle DB-overschrijvingen in één keer, waardoor voor elke vlag de omgevingswaarde / standaardwaarde wordt hersteld. Retourneert `{ cleared: <count>, message: "..." }`.
+Wist** alle** DB overschrijft het in één keer en herstelt elke vlag naar de env / standaardwaarde. Retourneert `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Vlaggen met `requiresRestart: true` worden pas van kracht nadat het proces opnieuw is geladen.
-> De herstartprocedure van het dashboard roept `POST /api/restart` aan en voert daarna polling uit op
-> `GET /api/health/ping` totdat de server weer beschikbaar is.
+> Vlaggen met `requiresRestart: true` worden pas van kracht nadat het proces opnieuw is geladen. De herstartstroom van het dashboard roept `POST /api/restart` aan en vraagt vervolgens `GET /api/health/ping` totdat de server weer actief is.
+
+---
 
 ## Noodfallback voor budget
 

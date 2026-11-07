@@ -220,34 +220,27 @@ Usoro mmanye na akụkọ onye nchịkwa na-ekpebi otu policy dị irè ahụ.
 > ọ bụla na-adịghị n'ime set ha kwadoro (a na-akwado ya n'akụkụ sava n'ime
 > `setFeatureFlagOverride()` na REST `PUT` handler).
 
-## Ịgbanwe Flags
+## Ọkọlọtọ na-atụgharị
 
 ### Dashboard
 
-Gaa na **Dashboard → Settings → Feature Flags**
-(`/dashboard/settings/feature-flags`). Grid ahụ
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-na-akwado:
+Gaa na** Dashboard → Ntọala → Njirimara Njirimara** (`/dashboard/settings/feature-flags`). Grid (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) na-akwado:
 
-- **Ịchọ** site na igodo ma ọ bụ nkọwa, yana **nzacha** site na otu (gụnyere nlele synthetic
-  **Requires Restart**).
-- **Toggle** maka flags boolean na **dropdown** maka flags enum
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Badge isi mmalite maka flag ọ bụla — `DB`, `ENV`, ma ọ bụ `DEF` — na-egosi ebe uru
-  dị irè si bịa.
-- Bọtịnụ **Reset** (nke na-apụta naanị maka flags sitere na `DB`) iji wepụ override,
-  yana bọtịnụ **Reset All Overrides** dị na ala.
-- Banner **Restart Server** mgbe a gbanwere flag `requiresRestart`.
+- **Chọọ** site igodo ma ọ bụ nkọwa, na** nyo** site na udi (gbakwunyere ihe sịntetik** Achọrọ Malitegharịa ekwentị** ele).
+- A** tụgharịa** maka ọkọlọtọ boolean na a** wedaa** maka ọkọlọtọ enum (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- A** isi mmalite baaj** kwa ọkọlọtọ — `DB`, `ENV`, ma ọ bụ `DEF` — na-egosi ebe uru bara uru sitere.
+- A** Tọgharia** bọtịnụ (gosiri naanị maka ọkọlọtọ `DB` -sourced ) iji tufuo nbibi, yana a** Tọgharia Ntugharị niile** bọtịnụ dị n'okpuru.
+- A** Malitegharịa ekwentị nkesa** ọkọlọtọ mgbe a gbanwere ọkọlọtọ `requiresRestart`.
 
 ### REST API
 
-Ọrụ niile na-aga site na route otu:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Usoro ọ bụla chọrọ session dashboard nke enwetara ikike (`401` ma ọ bụghị ya).
+Ọrụ niile na-aga n'otu ụzọ: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Usoro ọ bụla chọrọ nnọkọ dashboard enwetara (`401` ma ọ bụghị).
+
+Na nbanye nwere nkwarụ (`requireLogin=false`) ụzọ ahụ mepere, belụsọ maka ọkọlọtọ echedoro: ọkọlọtọ ọ bụla dị na ngalaba nchekwa gbakwunyere `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` na `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` na `protectedFeatureFlags.ts`). A `PUT` n'otu n'ime ha, na `DELETE` mgbe otu n'ime ha nwere DB ngafe, ka na-achọ nnọkọ dashboard, igodo `manage` -scope API, akara ohere `oma_` nwere ederede ederede ma ọ bụ karịa, ma ọ bụ akara CLI ma ọ bụ akara ọrụ ime ezitere na loopback. Ntọala ahụ sara mbara karịa na nbanye, ebe ụzọ na-anabata naanị otu nnọkọ ma ọ bụ igodo `manage` -scope.
 
 #### `GET /api/settings/feature-flags`
 
-Na-eweghachite flag ọ bụla tinyere uru ya dị irè, isi mmalite ya, na nchịkọta.
+Na-eweghachi ọkọlọtọ ọ bụla nwere uru, isi mmalite ya na nchịkọta ya dị irè.
 
 ```jsonc
 {
@@ -279,34 +272,30 @@ Na-eweghachite flag ọ bụla tinyere uru ya dị irè, isi mmalite ya, na nch�
 
 #### `PUT /api/settings/feature-flags`
 
-Tọọ ma ọ bụ wepụ otu override. Ahụ: `{ key: string; value?: string }`.
-Ịhapụ `value` na-ewepụ override ahụ (na-eweghachi env / default).
+Tọọ ma ọ bụ wepụ otu ngafe. Isi: `{ key: string; value?: string }`. Ịhapụ `value` na-ewepụ nkwụsị (iweghachite env / ndabara).
 
 ```bash
-# Tọọ DB override
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Wepụ override ahụ (enweghị "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Nzaghachi ahụ na-egosipụta `effectiveValue`/`source` ọhụrụ, `previousValue`/
-`previousSource`, na `requiresRestart`. A na-ajụ igodo ndị a na-amaghị na uru enum
-nọ na mpụga oke site na `400`.
+Nzaghachi a na-ekwupụta `effectiveValue`/`source` ọhụrụ , `previousValue`/ `previousSource`, na `requiresRestart`. Eji `400` jụ igodo amaghi ama yana ụkpụrụ enum na-anọghị nso.
 
 #### `DELETE /api/settings/feature-flags`
 
-Na-ehichapụ **DB overrides** niile n'otu oge, na-eweghachi flag ọ bụla na uru env / default
-ya. Ọ na-eweghachi `{ cleared: <count>, message: "..." }`.
+Na-ekpochapụ** niile** DB na-ewepụ otu oge, na-eweghachi ọkọlọtọ ọ bụla na uru env / ndabere ya. na-eweghachi `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Flags nwere `requiresRestart: true` na-amalite ịrụ ọrụ naanị mgbe e bugharịchara process.
-> Usoro restart nke dashboard na-akpọ `POST /api/restart` ma mesịa na-enyocha
-> `GET /api/health/ping` ruo mgbe server laghachiri n'ọrụ.
+> Ọkọlọtọ nwere `requiresRestart: true` na-arụ ọrụ naanị ka ebugharịchara usoro. Mgbasa mmalite nke dashboard na-akpọ `POST /api/restart` wee mee ntuli aka `GET /api/health/ping` ruo mgbe ihe nkesa na-akwado.
+
+---
 
 ## Ndaghachi Atụmatụ Mmefu Mberede
 

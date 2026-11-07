@@ -226,29 +226,23 @@ mesma política efetiva.
 
 ### Painel
 
-Navegue até **Painel → Configurações → Sinalizadores de recursos**
-(`/dashboard/settings/feature-flags`). A grade
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-oferece suporte a:
+Navegue até** Configurações → do painel Sinalizadores de recurso →** (`/dashboard/settings/feature-flags`). A grade (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) suporta:
 
-- **Pesquisa** por chave ou descrição e **filtragem** por categoria (além de uma visualização sintética de
-  **Requer reinicialização**).
-- Um **alternador** para sinalizadores booleanos e um **menu suspenso** para sinalizadores enum
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Um selo de **origem** por sinalizador — `DB`, `ENV` ou `DEF` — mostrando de onde veio o valor efetivo.
-- Um botão **Redefinir** (exibido somente para sinalizadores de origem `DB`) para remover a substituição,
-  e um botão **Redefinir todas as substituições** na parte inferior.
-- Um banner **Reiniciar servidor** quando um sinalizador `requiresRestart` é alterado.
+- **Procurar** por chave ou descrição, e** filtro** por categoria (mais um sintético** Requer reinicialização** visualizar).
+- UM** alternar** para sinalizadores booleanos e um** suspenso** para sinalizadores enum (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- UM** selo de origem** por sinalizador — `DB`, `ENV` ou `DEF` — mostrando de onde veio o valor efetivo.
+- UM** Reiniciar** botão (mostrado apenas para sinalizadores `DB` -sourced ) para descartar a substituição e um** Redefinir todas as substituições** botão na parte inferior.
+- UM** Reinicie o servidor** banner quando um sinalizador `requiresRestart` é alterado.
 
-### API REST
+### REST API
 
-Todas as operações passam por uma única rota:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Cada método exige uma sessão autenticada do painel (`401` caso contrário).
+Todas as operações passam por uma única rota: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Cada método requer uma sessão de painel autenticada (caso contrário,`401` ).
+
+Com login desabilitado (`requireLogin=false`) a rota fica aberta, exceto para os flags protegidos: todos os flags da categoria Segurança mais `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` e `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` em `protectedFeatureFlags.ts`). Um `PUT` em um deles, e um `DELETE` enquanto um deles tiver uma substituição DB, ainda precisa de uma sessão de painel, uma chave `manage` -scope API, um token de acesso `oma_` com escopo de gravação ou superior, ou o token CLI ou token de serviço interno enviado do loopback. Esse conjunto é mais amplo do que com login ativado, onde a rota aceita apenas uma sessão ou uma chave `manage` -scope.
 
 #### `GET /api/settings/feature-flags`
 
-Retorna todos os sinalizadores com seu valor efetivo, origem e um resumo.
+Retorna cada sinalizador com seu valor efetivo, origem e um resumo.
 
 ```jsonc
 {
@@ -280,33 +274,30 @@ Retorna todos os sinalizadores com seu valor efetivo, origem e um resumo.
 
 #### `PUT /api/settings/feature-flags`
 
-Define ou remove uma única substituição. Corpo: `{ key: string; value?: string }`.
-Omitir `value` remove a substituição (restaurando o valor do ambiente / padrão).
+Defina ou remova uma única substituição. Corpo: `{ key: string; value?: string }`. A omissão de `value` remove a substituição (restaurando env/padrão).
 
 ```bash
-# Definir uma substituição no banco de dados
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Remover a substituição (sem "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-A resposta repete o novo `effectiveValue`/`source`, o `previousValue`/
-`previousSource` e `requiresRestart`. Chaves desconhecidas e valores enum
-fora do intervalo permitido são rejeitados com `400`.
+A resposta ecoa o novo `effectiveValue`/`source`, o `previousValue`/ `previousSource` e `requiresRestart`. Chaves desconhecidas e valores enum fora do intervalo são rejeitados com `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Remove **todas** as substituições do banco de dados de uma só vez, restaurando cada sinalizador ao seu valor do ambiente / padrão. Retorna `{ cleared: <count>, message: "..." }`.
+Limpa** todos** DB substitui de uma só vez, restaurando cada sinalizador para seu valor env/padrão. Retorna `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Os sinalizadores com `requiresRestart: true` só entram em vigor após o recarregamento do processo.
-> O fluxo de reinicialização do painel chama `POST /api/restart` e, em seguida, consulta
-> `GET /api/health/ping` até que o servidor volte a estar disponível.
+> Sinalizadores com `requiresRestart: true` só entram em vigor após o recarregamento do processo. O fluxo de reinicialização do painel chama `POST /api/restart` e pesquisa `GET /api/health/ping` até que o servidor esteja de volta.
+
+---
 
 ## Fallback Emergencial de Orçamento
 

@@ -415,7 +415,7 @@ Cloud Agents עוטף פלטפורמות קוד סוכני מתארחות של �
 - Connection/model כלל מצרף: `src/domain/connectionModelRules.ts`
 - תמונות זמינות דגם: `src/domain/modelAvailability.ts`
 - מעקב אחר תפוגה של ספק: `src/domain/providerExpiration.ts`
-- מטמון מכסה: `src/domain/quotaCache.ts`
+- מטמון מכסה: `src/domain/quotaCache.ts`. ספקים מוסיפים ומסירים חלונות מכסה (OpenAI השפיל את חלון Codex של 5 שעות עבור תוכניות מסוימות), כך ששימוש שקורא את המתאם של הספק מעיד כמושלם (`quotasComplete`, ראה `src/lib/usage/usageReading.ts`) הוא ערכת החלונות המלאה של החשבון: חלון שידוע קודם לכן אך נעדר ממנו מנותק, במטמון, ב- Codex, ב- `quota_snapshots` a restart in rehydrated. מצב מכסה ובדליי הרוויה של Claude. ראיות חלקיות (כותרות תגובות, עותקים מיושנים) מעדכנות רק את החלונות שהיא נושאת.
 - מצב השפלה: `src/domain/degradation.ts`
 - ביקורת תצורה: `src/domain/configAudit.ts`
 - בונה מטא נתונים של תגובות OmniRoute : `src/domain/omnirouteResponseMeta.ts`
@@ -435,7 +435,7 @@ Cloud Agents עוטף פלטפורמות קוד סוכני מתארחות של �
 
 מסלולים ציבוריים לעומת ניהול הם גבול קשה: agent/cooldown APIs ומוטציות ספק דורשות אישור ניהול (HTTP 401 אם חסר).
 
-לכללי סיווג המסלולים המלאים, ראה [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
+לכללי סיווג המסלול המלאים, ראה [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
 
 ### ו. זרימת עבודה FSM ונתב מודע למשימות
 

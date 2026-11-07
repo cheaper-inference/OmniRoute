@@ -218,33 +218,27 @@ báo cáo của quản trị viên sẽ phân giải thành cùng một chính s
 
 ---
 
-## Bật/tắt cờ
+## Chuyển đổi cờ
 
 ### Trang tổng quan
 
-Đi đến **Trang tổng quan → Cài đặt → Cờ tính năng**
-(`/dashboard/settings/feature-flags`). Lưới
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-hỗ trợ:
+Điều hướng đến** Bảng điều khiển → Cài đặt cờ tính năng →** (`/dashboard/settings/feature-flags`). Lưới (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) hỗ trợ:
 
-- **Tìm kiếm** theo khóa hoặc mô tả, và **lọc** theo danh mục (cùng với chế độ xem tổng hợp
-  **Yêu cầu khởi động lại**).
-- **Nút chuyển đổi** cho các cờ boolean và **menu thả xuống** cho các cờ enum
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- **Nhãn nguồn** cho mỗi cờ — `DB`, `ENV` hoặc `DEF` — hiển thị nguồn của giá trị hiệu lực.
-- Nút **Đặt lại** (chỉ hiển thị với các cờ có nguồn `DB`) để xóa ghi đè,
-  cùng nút **Đặt lại tất cả ghi đè** ở cuối.
-- Biểu ngữ **Khởi động lại máy chủ** khi một cờ `requiresRestart` được thay đổi.
+- **Tìm kiếm** theo khóa hoặc mô tả, và** lọc** theo danh mục (cộng với tổng hợp** Yêu cầu khởi động lại** xem).
+- MỘT** chuyển đổi** cho các cờ boolean và một** thả xuống** cho cờ enum (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- MỘT** huy hiệu nguồn** mỗi cờ — `DB`, `ENV` hoặc `DEF` — hiển thị giá trị hiệu quả đến từ đâu.
+- MỘT** Cài lại** nút (chỉ hiển thị cho cờ `DB` -sourced ) để bỏ phần ghi đè và** Đặt lại tất cả ghi đè** nút ở phía dưới.
+- MỘT** Khởi động lại máy chủ** biểu ngữ khi cờ `requiresRestart` được thay đổi.
 
 ### REST API
 
-Tất cả thao tác đều đi qua một route duy nhất:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Mọi phương thức đều yêu cầu phiên dashboard đã xác thực (`401` nếu không).
+Tất cả các hoạt động đều đi qua một tuyến đường duy nhất: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Mọi phương thức đều yêu cầu phiên bảng điều khiển được xác thực (`401` nếu không).
+
+Khi đăng nhập bị vô hiệu hóa (`requireLogin=false`), tuyến đường sẽ mở, ngoại trừ các cờ được bảo vệ: mọi cờ trong danh mục Bảo mật cộng với `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` và `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` trong `protectedFeatureFlags.ts`). Một `PUT` trên một trong số chúng và một `DELETE` trong khi một trong số chúng có ghi đè DB, vẫn cần phiên bảng điều khiển, khóa `manage` -scope API, mã thông báo truy cập `oma_` có phạm vi ghi trở lên hoặc mã thông báo CLI hoặc mã thông báo dịch vụ nội bộ được gửi từ loopback. Tập hợp đó rộng hơn so với khi bật đăng nhập, trong đó tuyến đường chỉ chấp nhận một phiên hoặc khóa `manage` -scope.
 
 #### `GET /api/settings/feature-flags`
 
-Trả về mọi cờ cùng với giá trị hiệu lực, nguồn và thông tin tổng hợp.
+Trả về mọi cờ với giá trị hiệu dụng, nguồn và bản tóm tắt.
 
 ```jsonc
 {
@@ -262,7 +256,7 @@ Trả về mọi cờ cùng với giá trị hiệu lực, nguồn và thông ti
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... tất cả 119 cờ
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -276,34 +270,30 @@ Trả về mọi cờ cùng với giá trị hiệu lực, nguồn và thông ti
 
 #### `PUT /api/settings/feature-flags`
 
-Thiết lập hoặc xóa một ghi đè. Body: `{ key: string; value?: string }`.
-Bỏ qua `value` sẽ xóa ghi đè (khôi phục về env / mặc định).
+Đặt hoặc xóa một ghi đè duy nhất. Thân: `{ key: string; value?: string }`. Việc bỏ qua `value` sẽ loại bỏ phần ghi đè (khôi phục env/default).
 
 ```bash
-# Đặt một ghi đè DB
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Xóa ghi đè (không có "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Phản hồi trả lại `effectiveValue`/`source` mới, `previousValue`/
-`previousSource` và `requiresRestart`. Các khóa không xác định và giá trị enum
-ngoài phạm vi sẽ bị từ chối với `400`.
+Phản hồi lặp lại `effectiveValue`/`source` mới , `previousValue`/ `previousSource` và `requiresRestart`. Các khóa không xác định và giá trị enum ngoài phạm vi sẽ bị từ chối bằng `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Xóa **tất cả** ghi đè DB cùng lúc, khôi phục mọi cờ về giá trị env / mặc định.
-Trả về `{ cleared: <count>, message: "..." }`.
+Xóa** tất cả** DB ghi đè cùng một lúc, khôi phục mọi cờ về giá trị env/mặc định của nó. Trả về `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Các cờ có `requiresRestart: true` chỉ có hiệu lực sau khi tiến trình được tải lại.
-> Quy trình khởi động lại của dashboard gọi `POST /api/restart`, sau đó thăm dò
-> `GET /api/health/ping` cho đến khi máy chủ hoạt động trở lại.
+> Cờ có `requiresRestart: true` chỉ có hiệu lực sau khi tải lại quá trình. Luồng khởi động lại của bảng thông tin gọi `POST /api/restart` rồi thăm dò `GET /api/health/ping` cho đến khi máy chủ hoạt động trở lại.
+
+---
 
 ## Phương án dự phòng ngân sách khẩn cấp
 

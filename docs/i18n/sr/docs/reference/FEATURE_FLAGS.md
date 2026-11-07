@@ -221,32 +221,27 @@
 
 ---
 
-## Пребацивање заставица
+## Тогглинг Флагс
 
-### Контролна табла
+### Дасхбоард
 
-Идите на **Контролна табла → Подешавања → Заставице функција**
-(`/dashboard/settings/feature-flags`). Мрежа
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-подржава:
+Дођите до** Контролна табла → Сеттингс → Феатуре Флагс** (`/dashboard/settings/feature-flags`). Мрежа (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) подржава:
 
-- **Претрагу** по кључу или опису и **филтрирање** по категорији (плус синтетички приказ
-  **Захтева поновно покретање**).
-- **Пребацивање** за логичке заставице и **падајући мени** за enum заставице
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Значку извора за сваку заставицу — `DB`, `ENV` или `DEF` — која приказује одакле потиче ефективна вредност.
-- Дугме **Ресетуј** (приказује се само за заставице чији је извор `DB`) за уклањање замене и дугме **Ресетуј све замене** на дну.
-- Банер **Поново покрени сервер** када се промени заставица `requiresRestart`.
+- **Тражи** по кључу или опису, и** филтер** по категорији (плус синтетички** Захтева Рестарт** поглед).
+- А** преклопити** за логичке заставе и а** падајући мени** за енум заставице (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- А** изворна значка** по заставици — `DB`, `ENV` или `DEF` — која показује одакле долази ефективна вредност.
+- А** Ресетуј** дугме (приказано само за `DB` -sourced заставице) за одбацивање замене, и а** Ресетуј све замене** дугме на дну.
+- А** Поново покрените сервер** банер када се промени `requiresRestart` застава.
 
 ### REST API
 
-Све операције пролазе кроз једну руту:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Сваки метод захтева потврђену сесију контролне табле (`401` у супротном).
+Све операције пролазе кроз једну руту: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Сваки метод захтева проверену сесију контролне табле (`401` иначе).
+
+Са онемогућеном пријавом (`requireLogin=false`) рута је отворена, осим заштићених заставица: свака заставица у категорији Безбедност плус `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` и `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` у `protectedFeatureFlags.ts`). А `PUT` на једном од њих и `DELETE` док један од њих има DB надјачавање, и даље је потребна сесија контролне табле, `manage` -scope API кључ, `oma_` приступни токен са опсегом писања или вишим, или CLI токен или токен интерне услуге послат из повратне петље. Тај скуп је шири него код укључене пријаве, где рута прихвата само сесију или `manage` -scope кључ.
 
 #### `GET /api/settings/feature-flags`
 
-Враћа све заставице са ефективном вредношћу, извором и резимеом.
+Враћа сваку заставицу са њеном ефективном вредношћу, извором и резимеом.
 
 ```jsonc
 {
@@ -264,7 +259,7 @@
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... све 119 заставица
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -278,33 +273,30 @@
 
 #### `PUT /api/settings/feature-flags`
 
-Поставља или уклања једну замену. Тело: `{ key: string; value?: string }`.
-Изостављањем `value` уклања се замена (враћа се вредност из окружења / подразумевана вредност).
+Подесите или уклоните једно замењивање. Тело: `{ key: string; value?: string }`. Изостављањем `value` уклања се замена (враћање енв / дефаулт).
 
 ```bash
-# Постављање DB замене
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Уклањање замене (без "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Одговор садржи нове вредности `effectiveValue`/`source`, претходне вредности
-`previousValue`/`previousSource` и `requiresRestart`. Непознати кључеви и enum
-вредности ван дозвољеног опсега одбијају се са `400`.
+Одговор одражава нови `effectiveValue`/`source`, `previousValue`/ `previousSource` и `requiresRestart`. Непознати кључеви и енум вредности ван опсега се одбијају помоћу `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Одједном уклања **све** DB замене, враћајући сваку заставицу на њену вредност из окружења / подразумевану вредност. Враћа `{ cleared: <count>, message: "..." }`.
+Цлеарс** све** DB замењује одједном, враћајући сваку заставицу на њену енв / подразумевану вредност. Враћа `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Заставице са `requiresRestart: true` ступају на снагу тек након поновног учитавања процеса.
-> Ток поновног покретања са контролне табле позива `POST /api/restart`, а затим периодично позива
-> `GET /api/health/ping` док сервер поново не буде доступан.
+> Заставице са `requiresRestart: true` ступају на снагу тек након поновног учитавања процеса. Ток поновног покретања контролне табле позива `POST /api/restart`, а затим испитује `GET /api/health/ping` док се сервер не врати.
+
+---
 
 ## Резервни механизам за прекорачење буџета у хитним случајевима
 

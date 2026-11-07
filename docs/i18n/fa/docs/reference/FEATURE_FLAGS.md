@@ -216,41 +216,35 @@ runtime تغییر داد و در پایگاه داده ذخیره کرد، بد
 
 ---
 
-## تغییر وضعیت پرچمها
+## تغییر دادن پرچم ها
 
 ### داشبورد
 
-به **داشبورد → تنظیمات → پرچمهای قابلیت**
-(`/dashboard/settings/feature-flags`) بروید. شبکه
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-از موارد زیر پشتیبانی میکند:
+حرکت به** داشبورد → تنظیمات پرچم های ویژگی →** (`/dashboard/settings/feature-flags`). شبکه (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) پشتیبانی می کند:
 
-- **جستوجو** بر اساس کلید یا توضیحات، و **فیلتر** بر اساس دستهبندی (بهعلاوه یک نمای ترکیبی
-  **نیازمند راهاندازی مجدد**).
-- یک **کلید تغییر وضعیت** برای پرچمهای بولی و یک **فهرست کشویی** برای پرچمهای enum
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- یک نشانگر منبع برای هر پرچم — `DB`، `ENV` یا `DEF` — که نشان میدهد مقدار مؤثر از کجا آمده است.
-- یک دکمه **بازنشانی** (فقط برای پرچمهایی که منبع آنها `DB` است) برای حذف override، و یک دکمه
-  **بازنشانی همه overrideها** در پایین صفحه.
-- نمایش بنر **راهاندازی مجدد سرور** هنگام تغییر پرچمی با `requiresRestart`.
+- **جستجو کنید** با کلید یا توضیحات، و** فیلتر** بر اساس دسته (به علاوه مصنوعی** نیاز به راه اندازی مجدد دارد** مشاهده).
+- الف** تغییر دهید** برای پرچم های بولی و الف** کشویی** برای پرچم های enum (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- الف** نشان منبع** در هر پرچم — `DB`، `ENV`، یا `DEF` — که نشان میدهد مقدار مؤثر از کجا آمده است.
+- الف** بازنشانی کنید** دکمه (فقط برای پرچم های `DB` -sourced نشان داده شده است) برای حذف لغو، و a** بازنشانی همه موارد لغو** دکمه در پایین
+- الف** سرور را مجددا راه اندازی کنید** بنر زمانی که پرچم `requiresRestart` تغییر می کند.
 
 ### REST API
 
-همه عملیات از طریق یک مسیر واحد انجام میشوند:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-هر متد به یک نشست احراز هویتشده داشبورد نیاز دارد (در غیر این صورت `401`).
+همه عملیات از یک مسیر واحد می گذرد: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). هر روشی نیاز به یک جلسه داشبورد تأیید شده دارد (در غیر این صورت `401` ).
+
+با غیرفعال شدن ورود به سیستم (`requireLogin=false`)، مسیر باز است، به جز پرچمهای محافظتشده: هر پرچم در دسته امنیتی به اضافه `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`، `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`، `MITM_DISABLE_TLS_VERIFY`، `OMNIROUTE_MCP_ENFORCE_SCOPES` و `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` در `protectedFeatureFlags.ts`). یک `PUT` روی یکی از آنها، و یک `DELETE` در حالی که یکی از آنها دارای نادیده گرفتن DB است، همچنان به یک جلسه داشبورد، یک کلید `manage` -scope API ، یک نشانه دسترسی `oma_` با محدوده نوشتن یا بالاتر، یا توکن CLI یا توکن سرویس داخلی ارسال شده از حلقه بک نیاز دارد. این مجموعه گسترده تر از زمانی است که ورود به سیستم فعال باشد، جایی که مسیر فقط یک جلسه یا یک کلید `manage` -scope می پذیرد.
 
 #### `GET /api/settings/feature-flags`
 
-همه پرچمها را بههمراه مقدار مؤثر، منبع و خلاصه بازمیگرداند.
+هر پرچمی را با ارزش مؤثر، منبع و خلاصه آن برمیگرداند.
 
 ```jsonc
 {
   "flags": [
     {
       "key": "REQUIRE_API_KEY",
-      "label": "الزام کلید API",
-      "description": "برای همه درخواستهای ورودی به یک کلید API نیاز است",
+      "label": "Require API Key",
+      "description": "Require an API key for all incoming requests",
       "category": "security",
       "type": "boolean",
       "enumValues": null,
@@ -260,7 +254,7 @@ runtime تغییر داد و در پایگاه داده ذخیره کرد، بد
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... هر 119 پرچم
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -274,34 +268,30 @@ runtime تغییر داد و در پایگاه داده ذخیره کرد، بد
 
 #### `PUT /api/settings/feature-flags`
 
-یک override منفرد را تنظیم یا حذف میکند. بدنه: `{ key: string; value?: string }`.
-حذف `value`، override را حذف میکند (و مقدار env / پیشفرض را بازیابی میکند).
+یک نادیده گرفتن واحد را تنظیم یا حذف کنید. بدنه: `{ key: string; value?: string }`. حذف `value` لغو را حذف می کند (بازیابی env / پیش فرض).
 
 ```bash
-# تنظیم یک override در DB
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# حذف override (بدون "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-پاسخ، `effectiveValue`/`source` جدید، `previousValue`/
-`previousSource` و `requiresRestart` را بازمیگرداند. کلیدهای ناشناخته و مقادیر enum
-خارج از محدوده با `400` رد میشوند.
+پاسخ بازتاب `effectiveValue`/`source` جدید، `previousValue`/ `previousSource` و `requiresRestart` است. کلیدهای ناشناخته و مقادیر enum خارج از محدوده با `400` رد می شوند.
 
 #### `DELETE /api/settings/feature-flags`
 
-همه overrideهای DB را بهصورت یکجا پاک میکند و هر پرچم را به مقدار env / پیشفرض آن بازمیگرداند. مقدار
-`{ cleared: <count>, message: "..." }` را بازمیگرداند.
+پاک می کند** همه** DB به یکباره لغو می شود و هر پرچم را به مقدار env / پیش فرض خود باز می گرداند. `{ cleared: <count>, message: "..." }` را برمیگرداند.
 
 > [!NOTE]
-> پرچمهایی که `requiresRestart: true` دارند، فقط پس از بارگذاری مجدد فرایند اعمال میشوند.
-> جریان راهاندازی مجدد داشبورد، `POST /api/restart` را فراخوانی میکند و سپس تا زمان بازگشت سرور،
-> بهطور دورهای `GET /api/health/ping` را بررسی میکند.
+> پرچمهای دارای `requiresRestart: true` فقط پس از بارگیری مجدد فرآیند اعمال میشوند. جریان راهاندازی مجدد داشبورد `POST /api/restart` را فراخوانی میکند و سپس `GET /api/health/ping` را نظرسنجی میکند تا زمانی که سرور پشتیبانگیری شود.
+
+---
 
 ## جایگزین اضطراری بودجه
 

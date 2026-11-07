@@ -371,7 +371,7 @@ Automatické kombo dynamicky hodnotí a vyberá ciele smerovania v čase vyžiad
 Kľúčové schopnosti:
 
 - **20 stratégií smerovania** (priorita, vážené, vyplňte najskôr, cyklicky, P2C, náhodné, najmenej používané, optimalizované z hľadiska nákladov, s vedomím obnovenia, okno obnovenia, rezerva, vážené kvótami, prísne náhodné,** auto** , lkgp, kontextovo optimalizované, cache optimalizované, kontextové relé,** fúzie** , pipeline) — auto je pridaný nadpis vo verzii 3.8.0; `fusion` (syntéza sudcu + s rozvetveným panelom, `open-sse/services/fusion.ts`) je novinkou vo verzii 3.8.36.
-- **16-faktorové bodovanie** : kvóta, zdravie, inverzné náklady, inverzná latencia, prispôsobenie úloh a desať ďalších. Kanonická tabuľka faktorov a ich predvolené váhy žije v [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — ak ju tu znova uvedieme, priradíme jej druhé miesto na zastaranie.
+- **16-faktorové bodovanie** : kvóta, zdravie, inverzná cena, inverzná latencia, prispôsobenie úloh a desať ďalších. Kanonická tabuľka faktorov a ich predvolené váhy žije v [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — ak ju tu znova uvedieme, priradíme jej druhé miesto na zastaranie.
 - **Virtuálna továreň** zhmotňuje efemérne kombá, keď neexistuje žiadne zodpovedajúce pomenované kombo, pričom kandidátov získava zo zdravých aktívnych pripojení poskytovateľov.
 - **Automatické predpony** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — každý podporený vyladeným hmotnostným profilom.
 - **6 balíkov režimov** : prednastavené konfigurácie hmotnosti `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` a `chaos-mode` — dostupné z prístrojovej dosky. (Nezamieňajte si s vyššie uvedenými predponami `auto/*`, ktoré predstavujú varianty v čase vyžiadania.)
@@ -411,11 +411,11 @@ Menný priestor `src/domain/` centralizuje rozhodnutia o politike, takže obslu�
 - Záložná politika: `src/domain/fallbackPolicy.ts`
 - Zásady blokovania: `src/domain/lockoutPolicy.ts`
 - Smerovanie založené na značkách: `src/domain/tagRouter.ts`
-- Rozkladač komba: `src/domain/comboResolver.ts` — rieši názvy komb, automatické/\* predpony a ciele modelu so zástupnými znakmi na konkrétne plány vykonávania
+- Rozkladač komb: `src/domain/comboResolver.ts` — rieši názvy komb, automatické/\* predpony a ciele modelu so zástupnými znakmi na konkrétne plány vykonávania
 - Connection/model rule joiner: `src/domain/connectionModelRules.ts`
 - Snímky dostupnosti modelu: `src/domain/modelAvailability.ts`
 - Sledovanie uplynutia platnosti poskytovateľa: `src/domain/providerExpiration.ts`
-- Vyrovnávacia pamäť kvóty: `src/domain/quotaCache.ts`
+- Vyrovnávacia pamäť kvóty: `src/domain/quotaCache.ts`. Poskytovatelia pridávajú a odstraňujú okná kvóty (OpenAI u niektorých plánov zrušilo 5-hodinové okno Codex ), takže používanie čítajúce adaptér poskytovateľa potvrdzuje ako dokončené (`quotasComplete`, pozri `src/lib/usage/usageReading.ts`) je úplným súborom okien účtu: okno známe skôr, ale chýba v ňom, je vyradené, vo vyrovnávacej pamäti, v `quota_snapshots` sa reštartuje (pridaný záznam Codex vyraďovania kvóty), v saturácii kvóty Claude vedierka. Čiastočné dôkazy (hlavičky odpovedí, zastarané kópie) aktualizujú iba okná, ktoré nesie.
 - Stav degradácie: `src/domain/degradation.ts`
 - Audit konfigurácie: `src/domain/configAudit.ts`
 - Zostavovač metadát odpovede OmniRoute : `src/domain/omnirouteResponseMeta.ts`

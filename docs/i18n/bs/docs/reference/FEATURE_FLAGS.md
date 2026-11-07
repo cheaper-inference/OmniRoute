@@ -217,32 +217,27 @@ Pravila primjene i izvještaj administratora razrješavaju istu efektivnu politi
 > Kolona `Restart` označava zastavice sa `requiresRestart: true` — vrijednost se
 > odmah čuva, ali stupa na snagu tek nakon ponovnog učitavanja procesa. Zastavice tipa enum odbijaju svaku vrijednost izvan dozvoljenog skupa (validacija se obavlja na strani servera i u `setFeatureFlagOverride()` i u REST rukovaocu `PUT`).
 
-## Uključivanje i isključivanje zastavica
+## Toggling Flags
 
-### Kontrolna tabla
+### Dashboard
 
-Idite na **Kontrolna tabla → Postavke → Zastavice funkcija**
-(`/dashboard/settings/feature-flags`). Mreža
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-podržava:
+Navigirajte do** Dashboard → Settings → Feature Flags** (`/dashboard/settings/feature-flags`). Mreža (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) podržava:
 
-- **Pretragu** prema ključu ili opisu i **filtriranje** prema kategoriji (uz sintetički prikaz
-  **Zahtijeva ponovno pokretanje**).
-- **Prekidač** za logičke zastavice i **padajući meni** za enum zastavice
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Bedž izvora za svaku zastavicu — `DB`, `ENV` ili `DEF` — koji prikazuje odakle potiče efektivna vrijednost.
-- Dugme **Resetuj** (prikazuje se samo za zastavice čiji je izvor `DB`) za uklanjanje nadjačavanja i dugme **Resetuj sva nadjačavanja** na dnu.
-- Baner **Ponovo pokreni server** kada se promijeni zastavica `requiresRestart`.
+- **Traži** po ključu ili opisu, i** filter** po kategoriji (plus sintetički** Zahtijeva ponovno pokretanje** pogled).
+- A** preklopiti** za logičke zastave i a** padajući meni** za enum zastavice (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- A** izvorna značka** po zastavici — `DB`, `ENV` ili `DEF` — koja pokazuje odakle dolazi efektivna vrijednost.
+- A** Reset** dugme (prikazano samo za `DB` -sourced zastavice) za odbacivanje nadjačavanja, i a** Poništi sve zaobilaženja** dugme na dnu.
+- A** Ponovo pokrenite server** banner kada se promijeni `requiresRestart` zastava.
 
 ### REST API
 
-Sve operacije prolaze kroz jednu rutu:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Svaka metoda zahtijeva autentifikovanu sesiju kontrolne table (`401` u suprotnom).
+Sve operacije prolaze kroz jednu rutu: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Svaka metoda zahtijeva autentificiranu sesiju nadzorne ploče (`401` inače).
+
+Sa onemogućenom prijavom (`requireLogin=false`) ruta je otvorena, osim zaštićenih zastavica: svaka zastavica u kategoriji Sigurnost plus `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` i `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` u `protectedFeatureFlags.ts`). A `PUT` na jednom od njih i `DELETE` dok jedan od njih ima DB nadjačavanje, i dalje treba sesiju nadzorne ploče, `manage` -scope API ključ, `oma_` pristupni token s opsegom pisanja ili višim, ili CLI token ili token interne usluge koji se šalje iz povratne petlje. Taj skup je širi nego kod uključene prijave, gdje ruta prihvaća samo sesiju ili `manage` -scope ključ.
 
 #### `GET /api/settings/feature-flags`
 
-Vraća svaku zastavicu sa efektivnom vrijednošću, izvorom i sažetkom.
+Vraća svaku zastavicu sa njenom efektivnom vrijednošću, izvorom i sažetkom.
 
 ```jsonc
 {
@@ -260,7 +255,7 @@ Vraća svaku zastavicu sa efektivnom vrijednošću, izvorom i sažetkom.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... svih 119 zastavica
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -274,32 +269,30 @@ Vraća svaku zastavicu sa efektivnom vrijednošću, izvorom i sažetkom.
 
 #### `PUT /api/settings/feature-flags`
 
-Postavlja ili uklanja jedno nadjačavanje. Tijelo: `{ key: string; value?: string }`.
-Izostavljanje parametra `value` uklanja nadjačavanje (vraća vrijednost iz okruženja / podrazumijevanu vrijednost).
+Postavite ili uklonite jedno nadjačavanje. Tijelo: `{ key: string; value?: string }`. Izostavljanjem `value` uklanja se zaobilaženje (vraćanje env / default).
 
 ```bash
-# Postavi DB nadjačavanje
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Ukloni nadjačavanje (bez parametra "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Odgovor ponavlja novu `effectiveValue`/`source`, `previousValue`/
-`previousSource` i `requiresRestart`. Nepoznati ključevi i enum vrijednosti izvan dozvoljenog opsega odbijaju se uz `400`.
+Odgovor odražava novi `effectiveValue`/`source`, `previousValue`/ `previousSource` i `requiresRestart`. Nepoznati ključevi i enum vrijednosti izvan raspona se odbijaju sa `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Briše **sva** DB nadjačavanja odjednom, vraćajući svaku zastavicu na vrijednost iz okruženja / podrazumijevanu vrijednost. Vraća `{ cleared: <count>, message: "..." }`.
+Clears** sve** DB nadjačava odjednom, vraćajući svaku zastavicu na njenu env / default vrijednost. Vraća `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Zastavice sa `requiresRestart: true` stupaju na snagu tek nakon ponovnog učitavanja procesa.
-> Tok ponovnog pokretanja iz kontrolne table poziva `POST /api/restart`, a zatim poziva
-> `GET /api/health/ping` u intervalima dok server ponovo ne bude dostupan.
+> Zastavice sa `requiresRestart: true` stupaju na snagu tek nakon ponovnog učitavanja procesa. Tok ponovnog pokretanja kontrolne ploče poziva `POST /api/restart`, a zatim ispituje `GET /api/health/ping` dok se server ne vrati.
+
+---
 
 ## Rezervna opcija u slučaju prekoračenja budžeta
 

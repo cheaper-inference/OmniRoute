@@ -220,31 +220,27 @@ inayotumika.
 > Safu ya `Restart` huashiria bendera zenye `requiresRestart: true` — thamani
 > huhifadhiwa papo hapo lakini huanza kutumika tu baada ya mchakato kupakiwa upya. Bendera za enum hukataa thamani yoyote iliyo nje ya seti iliyoruhusiwa (huthibitishwa upande wa seva katika `setFeatureFlagOverride()` na kidhibiti cha REST `PUT`).
 
-## Kuwasha na Kuzima Bendera
+## Kugeuza Bendera
 
 ### Dashibodi
 
-Nenda kwenye **Dashibodi → Mipangilio → Bendera za Vipengele**
-(`/dashboard/settings/feature-flags`). Gridi
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-inaunga mkono:
+Nenda kwa** Mipangilio ya Dashibodi → → za Vipengele** (`/dashboard/settings/feature-flags`). Gridi (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) inasaidia:
 
-- **Kutafuta** kwa kutumia ufunguo au maelezo, na **kuchuja** kwa kategoria (pamoja na mwonekano bandia wa **Inahitaji Kuwashwa Upya**).
-- **Kibadilishaji** cha bendera za boolean na **orodha kunjuzi** ya bendera za enum
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Beji ya **chanzo** kwa kila bendera — `DB`, `ENV`, au `DEF` — inayoonyesha mahali thamani inayotumika ilipotoka.
-- Kitufe cha **Weka upya** (kinachoonyeshwa tu kwa bendera zenye chanzo cha `DB`) ili kuondoa override, na kitufe cha **Weka Upya Override Zote** chini.
-- Bango la **Washa Seva Upya** wakati bendera yenye `requiresRestart` inabadilishwa.
+- **Tafuta** kwa ufunguo au maelezo, na** chujio** kwa kategoria (pamoja na sintetiki** Inahitaji Kuanzisha upya** mtazamo).
+- A** kugeuza** kwa bendera za boolean na a** kunjuzi** kwa bendera za enum (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- A** beji ya chanzo** kwa kila bendera — `DB`, `ENV`, au `DEF` — inayoonyesha mahali ambapo thamani inayofaa ilitoka.
+- A** Weka upya** kitufe (kilichoonyeshwa kwa bendera za `DB` -sourced pekee) ili kuacha ubatilishaji, na a** Weka Upya Vilivyobatili Vyote** kifungo chini.
+- A** Anzisha tena Seva** bendera wakati bendera `requiresRestart` inabadilishwa.
 
 ### REST API
 
-Shughuli zote hupitia route moja:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Kila mbinu inahitaji session iliyothibitishwa ya dashibodi (`401` vinginevyo).
+Shughuli zote hupitia njia moja: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Kila njia inahitaji kipindi cha dashibodi kilichothibitishwa (`401` vinginevyo).
+
+Kuingia kumezimwa (`requireLogin=false`) njia imefunguliwa, isipokuwa bendera zinazolindwa: kila bendera katika kitengo cha Usalama pamoja na `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` na `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` in `protectedFeatureFlags.ts`). `PUT` kwenye mojawapo, na `DELETE` wakati mmoja wao ana ubatilishaji wa DB, bado anahitaji kikao cha dashibodi, ufunguo wa `manage` -scope API, ishara ya kufikia `oma_` yenye upeo wa kuandika au zaidi, au ishara ya CLI au ishara ya huduma ya ndani iliyotumwa kutoka kwenye loopback. Seti hiyo ni pana kuliko kuingia, ambapo njia inakubali kikao tu au kitufe cha `manage` -scope.
 
 #### `GET /api/settings/feature-flags`
 
-Hurejesha kila bendera pamoja na thamani yake inayotumika, chanzo, na muhtasari.
+Hurejesha kila bendera pamoja na thamani yake, chanzo na muhtasari.
 
 ```jsonc
 {
@@ -276,34 +272,30 @@ Hurejesha kila bendera pamoja na thamani yake inayotumika, chanzo, na muhtasari.
 
 #### `PUT /api/settings/feature-flags`
 
-Weka au ondoa override moja. Mwili: `{ key: string; value?: string }`.
-Kuacha `value` huondoa override (na kurejesha env / default).
+Weka au uondoe ubatilishaji mmoja. Mwili: `{ key: string; value?: string }`. Kuacha `value` huondoa ubatili (kurejesha env / chaguo-msingi).
 
 ```bash
-# Weka override ya DB
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Ondoa override (bila "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Jibu hurudia `effectiveValue`/`source` mpya, `previousValue`/
-`previousSource`, na `requiresRestart`. Funguo zisizojulikana na thamani za enum
-zilizo nje ya masafa hukataliwa kwa `400`.
+Jibu ni mwangwi wa `effectiveValue`/`source` mpya , `previousValue`/ `previousSource`, na `requiresRestart`. Vifunguo visivyojulikana na thamani za enum zilizo nje ya masafa zimekataliwa na `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Huondoa **override zote za DB** kwa wakati mmoja, na kurejesha kila bendera kwenye
-thamani yake ya env / default. Hurejesha `{ cleared: <count>, message: "..." }`.
+Inafuta** zote** DB hubatilisha mara moja, na kurejesha kila bendera kwa thamani yake ya env / chaguomsingi. Hurejesha `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Bendera zenye `requiresRestart: true` zitaanza kutumika tu baada ya mchakato kupakiwa upya.
-> Mtiririko wa kuwasha upya wa dashibodi huita `POST /api/restart` na kisha hupiga kura
-> kwa `GET /api/health/ping` hadi seva irudi mtandaoni.
+> Bendera zilizo na `requiresRestart: true` hutumika tu baada ya mchakato wa kupakia upya. Mtiririko wa kuwasha tena dashibodi huita `POST /api/restart` na kisha kupiga kura `GET /api/health/ping` hadi seva ihifadhiwe nakala.
+
+---
 
 ## Njia Mbadala ya Dharura ya Bajeti
 

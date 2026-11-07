@@ -415,11 +415,11 @@ OmniRoute مقامی طور پر چلنے والے AI ٹول پراسیسز کو
 - Connection/model قاعدہ جوڑنے والا: `src/domain/connectionModelRules.ts`
 - ماڈل کی دستیابی کے اسنیپ شاٹس: `src/domain/modelAvailability.ts`
 - فراہم کنندہ کی میعاد ختم ہونے سے باخبر رہنا: `src/domain/providerExpiration.ts`
-- کوٹہ کیش: `src/domain/quotaCache.ts`
+- کوٹہ کیش: `src/domain/quotaCache.ts` فراہم `src/lib/usage/usageReading.ts` کوٹہ ونڈو کو شامل اور ہٹاتے ہیں (OpenAI کچھ منصوبوں کے لیے 5 گھنٹے کی Codex ونڈو کو گرا دیا)، اس لیے فراہم کنندہ کے اڈاپٹر کے مکمل ہونے کی تصدیق کو پڑھنے `quotasComplete` استعمال اکاؤنٹ کا مکمل ونڈو سیٹ ہے: ایک ونڈو جو پہلے معلوم ہوتی ہے لیکن اس سے غیر حاضر ہے، ریٹائرڈ ہے، `quota_snapshots` میں، ری ہائیڈرینڈ ایپ میں ریکارڈ)، مسلسل Codex کوٹہ حالت میں اور Claude کی سیچوریشن بالٹی میں۔ جزوی ثبوت (رسپانس ہیڈرز، باسی کاپیاں) صرف ان کھڑکیوں کو اپ ڈیٹ کرتا ہے جو اس کے پاس ہے۔
 - تنزلی کی حالت: `src/domain/degradation.ts`
 - کنفیگریشن آڈٹ: `src/domain/configAudit.ts`
 - OmniRoute جواب میٹا ڈیٹا بلڈر: `src/domain/omnirouteResponseMeta.ts`
-- تشخیص کا ذیلی نظام: `src/domain/assessment/` — متواتر تشخیص کی نوکریاں
+- تشخیص کا ذیلی نظام: `src/domain/assessment/` — متواتر تشخیصی جابز
 
 ### E. اجازت دینے والی پائپ لائن
 
@@ -428,7 +428,7 @@ OmniRoute مقامی طور پر چلنے والے AI ٹول پراسیسز کو
 - پائپ لائن اندراج: `src/server/authz/pipeline.ts`
 - درجہ بندی کی درخواست کریں: `src/server/authz/classify.ts` — عوامی مطابقت کے راستوں کو انتظامی راستوں سے ممتاز کرتا ہے
 - عوامی راستے کی انوینٹری: `src/shared/constants/publicApiRoutes.ts`
-- پالیسیاں: `src/server/authz/policies/` — کمپوز ایبل پیشن گوئی (`requireApiKey`، `requireManagement`، `requireFreshAuth`، وغیرہ)
+- پالیسیاں: `src/server/authz/policies/` — کمپوز ایبل پیشین گوئیاں (`requireApiKey`، `requireManagement`، `requireFreshAuth`، وغیرہ)
 - ہیڈر کی افادیت: `src/server/authz/headers.ts`
 - دعوی مددگار: `src/server/authz/assertAuth.ts`
 - سیاق و سباق کی درخواست کریں: `src/server/authz/context.ts`
@@ -439,10 +439,10 @@ OmniRoute مقامی طور پر چلنے والے AI ٹول پراسیسز کو
 
 ### F. ورک فلو FSM اور Task-Aware Router
 
-کامبو سلیکشن کے اوپر لیئرڈ ایک محدود ریاستی مشین سے چلنے والا راؤٹر پتہ چلا ورک فلو اسٹیج (منصوبہ بندی، عمل درآمد، جائزہ) اور بیک گراؤنڈ ٹاسک سے تعلق کی بنیاد پر براہ راست ٹریفک کے لیے۔
+کامبو سلیکشن کے اوپر ایک محدود ریاستی مشین سے چلنے والا راؤٹر پتہ چلا ورک فلو اسٹیج (منصوبہ بندی، عمل درآمد، جائزہ) اور بیک گراؤنڈ ٹاسک سے تعلق کی بنیاد پر براہ راست ٹریفک کے لیے لیئرڈ ہے۔
 
 - ورک فلو FSM: `open-sse/services/workflowFSM.ts`
-- ٹاسک سے آگاہ روٹر: `open-sse/services/taskAwareRouter.ts`
+- ٹاسک سے آگاہ راؤٹر: `open-sse/services/taskAwareRouter.ts`
 - بیک گراؤنڈ ٹاسک ڈیٹیکٹر: `open-sse/services/backgroundTaskDetector.ts`
 - ارادے کی درجہ بندی کرنے والا: `open-sse/services/intentClassifier.ts`
 

@@ -261,15 +261,15 @@ doziri oghere site na ozi nkwenye MCP, metadata arịrịọ, ma ọ bụ `OMNIR
 (`src/lib/accessTokens/scopes.ts`) depụtara. Ọkwa a na-emetụta naanị
 asambodo akara ngosi nnweta. Lee [Nkwenye Njikwa](../guides/MANAGEMENT-AUTH.md).
 
-## Ihe Mgbanwe Chọrọ Ntinye
+## Ntụgharị chọrọ nkwenye
 
-`isAuthRequired()` na `src/shared/utils/apiAuth.ts` bụ ihe na-ekpebi ma a ga-achịkwa **ntinye ọ bụla** maka ịrịọ:
+`isAuthRequired()` na `src/shared/utils/apiAuth.ts` na-ekpebi ma** nke ọ bụla** na-amanye auth maka arịrịọ:
 
-- `settings.requireLogin === false` → ntinye akwụsịrị n'ozuzu ya, ma e wezụga ọkwa nchekwa mgbe niile (lee [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) na oku ndị na-enye credential ọ na-anabata, nke chọrọ otu credential ahụ dị ka mgbe ịbanye dị na-arụ ọrụ: inye sync tokens, imepụta CLI access tokens n'ókè ọ bụla, na ịmepụta igodo API nwere ókè `manage`/`admin`, ikenye ókè ahụ n'igodo, ma ọ bụ imegharị ma ọ bụ igosi igodo dị otu a (`requireCredentialForManagementScopedKey()` na `src/lib/api/requireManagementAuth.ts`). Igodo inference naanị na-anọ n'emeghe.
-- Enweghị paswọọdụ edobere **na** enweghị env var `INITIAL_PASSWORD` → ọnọdụ bootstrap: na-ekwe onboarding wizard na ịrịọ loopback, mana ịrịọ netwọk e kpughere ka chọrọ credentials.
-- Njehie DB ọ bụla → na-ada n'ihe mgbochi (secure-by-default).
+- `settings.requireLogin === false` → auth nwere nkwarụ zuru ụwa ọnụ, ma e wezụga maka ọkwa a na-echekwa mgbe niile (lee [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) na oku na-enye nzere ọ na-anabata, nke chọrọ otu nzere dị ka nbanye na: inye sync tokens, mining CLI access tokens na ọ bụla, na ịmepụta igodo API /`admin` nwere oke nke `manage`. imeghari ma ọ bụ ikpughe igodo dị otú ahụ (`requireCredentialForManagementScopedKey()` na `src/lib/api/requireManagementAuth.ts`). Naanị igodo ntinye aka na-emeghe. Ide ọkọlọtọ njirimara echedoro (`REQUIRE_API_KEY`, ọkọlọtọ nchekwa ndị ọzọ, yana ọkọlọtọ SSRF / TLS / MCP-scope / igbe igbe e depụtara na [Flags Feature](../reference/FEATURE_FLAGS.md#rest-api) ) yana ịchekwa ntọala nkpuchi PII (`PUT /api/settings/pii`) na-achọkwa nzere.
+- Ọ nweghị okwuntughe ahaziri** na** no `INITIAL_PASSWORD` env var → bootstrap mode na-enye ohere ọkachamara n'ụgbọ mmiri na arịrịọ loopback, mana arịrịọ netwọk ekpughere ka chọrọ nzere. Ewezuga: ide ọkọlọtọ njirimara echedoro na ịchekwa ntọala nkpuchi PII (`PUT /api/settings/pii`) chọrọ nzere ọbụlagodi na loopback, yabụ loopback n'onwe ya ezughị ebe ahụ.
+- Njehie DB ọ bụla → ada ada mechiri (echekwara-site na ndabara).
 
-Ntinye igodo API nke ahịa na-eji `isRequireApiKeyEnabled()` na `src/shared/utils/featureFlags.ts`, ọ bụghị ịgụ `process.env.REQUIRE_API_KEY` kpọm kpọm. Nke a dị mkpa maka instances e debere: ịgbanwe `REQUIRE_API_KEY` na Dashboard → Feature Flags na-echekwa DB override ma nwee mmetụta ozugbo na `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, na nyocha ntinye client-API ndị ọzọ na-ekekọrịta onye enyemaka a. Ọ bụrụ na enweghị ike ịgụ feature flag store, ntinye client API na-ada n'ihe mgbochi ma chọrọ igodo.
+Ndị mmanye igodo API ndị ahịa na-eji `isRequireApiKeyEnabled()` na `src/shared/utils/featureFlags.ts`, ọ bụghị ịgụ `process.env.REQUIRE_API_KEY` kpọmkwem. Nke a dị mkpa maka oge ebugara: toggling `REQUIRE_API_KEY` na Dashboard → Njirimara ọkọlọtọ na-echekwa DB ngafe wee na-emetụta `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, na ndị ahịa-API auth nlele na-ekekọrịta onye enyemaka a. Ọ bụrụ na enweghị ike ịgụ ụlọ ahịa ọkọlọtọ njirimara, onye ahịa API auth agaghị emechi wee chọọ igodo.
 
 ## Mgbanwe Na-emebi Ndakọrịta — v3.8.0
 

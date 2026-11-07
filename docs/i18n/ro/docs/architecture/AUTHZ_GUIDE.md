@@ -323,15 +323,15 @@ Rămâne dezactivată, cu excepția cazului în care `OMNIROUTE_MCP_ENFORCE_SCOP
 (`src/lib/accessTokens/scopes.ts`). Acest rang se aplică doar credențialului token-ului de acces.
 Vezi [Autentificarea Managementului](../guides/MANAGEMENT-AUTH.md).
 
-## Comutatorul de autentificare obligatorie
+## Autentificare obligatorie Comutare
 
-`isAuthRequired()` din `src/shared/utils/apiAuth.ts` decide dacă se impune **orice** autentificare pentru o cerere:
+`isAuthRequired()` în `src/shared/utils/apiAuth.ts` decide dacă** orice** auth este aplicat pentru o cerere:
 
-- `settings.requireLogin === false` → autentificarea este dezactivată global, cu excepția nivelului protejat permanent (vezi [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) și a apelurilor care emit o credențială pe care o acceptă, acestea necesitând aceeași credențială ca atunci când autentificarea este activă: emiterea tokenurilor de sincronizare, crearea tokenurilor de acces CLI de orice domeniu și crearea unei chei API cu domeniul `manage`/`admin`, acordarea acestui domeniu unei chei, regenerarea sau dezvăluirea unei astfel de chei (`requireCredentialForManagementScopedKey()` din `src/lib/api/requireManagementAuth.ts`). Cheile destinate doar inferenței rămân deschise.
-- Nicio parolă configurată **și** nicio variabilă de mediu `INITIAL_PASSWORD` → modul de bootstrap permite expertul de configurare și cererile de pe loopback, dar cererile din rețea externă încă necesită credențiale.
-- Orice eroare de bază de date → eșec închis (secure-by-default).
+- Autentificarea `settings.requireLogin === false` → este dezactivată la nivel global, cu excepția nivelului întotdeauna protejat (consultați [Nivelurile Route Guard](../security/ROUTE_GUARD_TIERS.md) ) și a apelurilor care eliberează o acreditare pe care o acceptă, care au nevoie de aceeași autentificare ca și la autentificare: emiterea de jetoane de sincronizare, baterea jetoanelor de acces CLI la orice domeniu și crearea unei chei API / cu scopul `manage`, acordarea acelui scope `admin`. cheie, sau regenerarea sau dezvăluirea unei astfel de chei (`requireCredentialForManagementScopedKey()` în `src/lib/api/requireManagementAuth.ts`). Cheile numai pentru inferență rămân deschise. Scrierea unui semnalizator de caracteristică protejată (`REQUIRE_API_KEY`, celelalte steaguri de securitate și steaguri SSRF / TLS / MCP-scope / sandbox listate în [Indicatoare caracteristici](../reference/FEATURE_FLAGS.md#rest-api) ) și salvarea setărilor de mascare PII (`PUT /api/settings/pii`) continuă să aibă nevoie de acreditări.
+- Nicio parolă configurată** şi** nu `INITIAL_PASSWORD` env var → modul bootstrap permite expertul de onboarding și solicitările de loopback, dar solicitările de rețea expuse au nevoie în continuare de acreditări. Excepție: scrierea unui semnalizator de caracteristică protejată și salvarea setărilor de mascare PII (`PUT /api/settings/pii`) au nevoie de o acreditare chiar și de la loopback, deci loopback-ul în sine nu este suficient acolo.
+- Orice eroare DB → eșuează închisă (securizat implicit).
 
-Aplicarea cheii API a clientului folosește `isRequireApiKeyEnabled()` din `src/shared/utils/featureFlags.ts`, nu o citire directă a `process.env.REQUIRE_API_KEY`. Acest lucru contează pentru instanțele implementate: comutarea `REQUIRE_API_KEY` în Dashboard → Feature Flags stochează o suprascriere în baza de date și afectează imediat `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` și celelalte verificări de autentificare a API-ului clientului care partajează acest helper. Dacă depozitul de feature flag-uri nu poate fi citit, autentificarea API-ului clientului eșuează închis și cere o cheie.
+Aplicarea cheii API client folosește `isRequireApiKeyEnabled()` în `src/shared/utils/featureFlags.ts`, nu o citire `process.env.REQUIRE_API_KEY` directă. Acest lucru contează pentru instanțe implementate: comutarea `REQUIRE_API_KEY` în Dashboard → Feature Flags stochează o modificare DB și afectează imediat `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` și alte verificări de autentificare API client care partajează acest ajutor. Dacă magazinul de semnalizare a caracteristicilor nu poate fi citit, clientul API auth nu se închide și necesită o cheie.
 
 ## Modificare incompatibilă — v3.8.0
 

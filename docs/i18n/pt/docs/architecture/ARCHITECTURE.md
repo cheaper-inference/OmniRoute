@@ -414,7 +414,7 @@ O namespace `src/domain/` centraliza as decisões políticas para que os manipul
 - juntador de regras Connection/model : `src/domain/connectionModelRules.ts`
 - Instantâneos de disponibilidade do modelo: `src/domain/modelAvailability.ts`
 - Rastreio de expiração do fornecedor: `src/domain/providerExpiration.ts`
-- Cache de cota: `src/domain/quotaCache.ts`
+- Cache de cota: `src/domain/quotaCache.ts`. Os fornecedores adicionam e removem janelas de quota (OpenAI eliminou a janela Codex de 5 horas para alguns planos), pelo que uma leitura de utilização do adaptador do fornecedor atesta como completo (`quotasComplete`, ver `src/lib/usage/usageReading.ts`) é o conjunto completo de janelas da conta: uma janela conhecida anteriormente, mas ausente dela, é retirada, na cache, no `quota_snapshots` uma reinicialização reidrata (um registo de reforma anexado), no estado de quota Codex persistente e nos intervalos de saturação de Claude. As provas parciais (cabeçalhos de resposta, cópias obsoletas) apenas atualizam as janelas que carregam.
 - Estado de degradação: `src/domain/degradation.ts`
 - Auditoria de configuração: `src/domain/configAudit.ts`
 - Construtor de metadados de resposta OmniRoute : `src/domain/omnirouteResponseMeta.ts`

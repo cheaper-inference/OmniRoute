@@ -227,30 +227,25 @@ aynı etkin politikayı belirler.
 
 ## Bayrakları Değiştirme
 
-### Pano
+### Kontrol Paneli
 
-**Pano → Ayarlar → Özellik Bayrakları**
-(`/dashboard/settings/feature-flags`) bölümüne gidin. Izgara
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) şunları destekler:
+Şuraya git:** Kontrol Paneli → Ayarları → Özellik Bayrakları** (`/dashboard/settings/feature-flags`). Izgara (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) şunları destekler:
 
-- Anahtara veya açıklamaya göre **arama** ve kategoriye göre **filtreleme** (ayrıca sentetik bir
-  **Yeniden Başlatma Gerektirir** görünümü).
-- Boolean bayrakları için bir **aç/kapat düğmesi** ve enum bayrakları için bir **açılır menü**
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Her bayrak için etkin değerin kaynağını gösteren bir kaynak rozeti — `DB`, `ENV` veya `DEF`.
-- (Yalnızca `DB` kaynaklı bayraklarda gösterilen) geçersiz kılmayı kaldıran bir **Sıfırla**
-  düğmesi ve altta bir **Tüm Geçersiz Kılmaları Sıfırla** düğmesi.
-- `requiresRestart` bayrağı değiştirildiğinde bir **Sunucuyu Yeniden Başlat** banner'ı.
+- **Aramak** anahtara veya açıklamaya göre ve** filtre** kategoriye göre (artı sentetik** Yeniden Başlatma Gerektirir** görüş).
+- A** geçiş** boolean bayrakları ve bir** yıkılmak** numaralandırma bayrakları için (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- A** kaynak rozeti** bayrak başına — `DB`, `ENV` veya `DEF` — etkin değerin nereden geldiğini gösterir.
+- A** Sıfırla** geçersiz kılmayı bırakmak için düğme (yalnızca `DB` -sourced bayrakları için gösterilir) ve** Tüm Geçersiz Kılmaları Sıfırla** alttaki düğmeye basın.
+- A** Sunucuyu Yeniden Başlat** `requiresRestart` bayrağı değiştirildiğinde banner.
 
 ### REST API
 
-Tüm işlemler tek bir rota üzerinden gerçekleştirilir:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Her yöntem, kimliği doğrulanmış bir pano oturumu gerektirir (aksi durumda `401`).
+Tüm işlemler tek bir rotadan geçer: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Her yöntem, kimliği doğrulanmış bir kontrol paneli oturumu gerektirir (aksi halde `401` ).
+
+Oturum açma devre dışı bırakıldığında (`requireLogin=false`), korumalı bayraklar hariç rota açıktır: Güvenlik kategorisindeki tüm bayraklar artı `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` ve `SKILLS_SANDBOX_NETWORK_ENABLED` ( `protectedFeatureFlags.ts` `isProtectedFeatureFlag()` ). Bunlardan birinde bir `PUT` ve bunlardan birinde bir DB geçersiz kılma varken bir `DELETE`, yine de bir kontrol paneli oturumuna, bir `manage` -scope API anahtarına, yazma kapsamı veya daha yüksek bir `oma_` erişim belirtecine veya geri döngüden gönderilen CLI belirtecine veya dahili hizmet belirtecine ihtiyaç duyar. Bu set, rotanın yalnızca bir oturumu veya `manage` -scope anahtarını kabul ettiği oturum açma durumunda olduğundan daha geniştir.
 
 #### `GET /api/settings/feature-flags`
 
-Her bayrağı etkin değeri, kaynağı ve bir özetle birlikte döndürür.
+Her bayrağı etkin değeri, kaynağı ve özetiyle birlikte döndürür.
 
 ```jsonc
 {
@@ -268,7 +263,7 @@ Her bayrağı etkin değeri, kaynağı ve bir özetle birlikte döndürür.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... tüm 119 bayrak
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -282,34 +277,30 @@ Her bayrağı etkin değeri, kaynağı ve bir özetle birlikte döndürür.
 
 #### `PUT /api/settings/feature-flags`
 
-Tek bir geçersiz kılmayı ayarlar veya kaldırır. Gövde: `{ key: string; value?: string }`.
-`value` alanının atlanması geçersiz kılmayı kaldırır (env / varsayılan değeri geri yükler).
+Tek bir geçersiz kılmayı ayarlayın veya kaldırın. Gövde: `{ key: string; value?: string }`. `value` atlanması geçersiz kılmayı kaldırır (env/varsayılanı geri yükleme).
 
 ```bash
-# DB geçersiz kılması ayarla
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Geçersiz kılmayı kaldır ("value" yok)
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Yanıt, yeni `effectiveValue`/`source`, `previousValue`/
-`previousSource` ve `requiresRestart` değerlerini içerir. Bilinmeyen anahtarlar ve izin verilen
-aralık dışındaki enum değerleri `400` ile reddedilir.
+Yanıt yeni `effectiveValue`/`source`, `previousValue`/ `previousSource` ve `requiresRestart` yansıtıyor. Bilinmeyen anahtarlar ve aralık dışı numaralandırma değerleri `400` ile reddedilir.
 
 #### `DELETE /api/settings/feature-flags`
 
-Tüm DB geçersiz kılmalarını tek seferde temizleyerek her bayrağı env / varsayılan
-değerine döndürür. `{ cleared: <count>, message: "..." }` döndürür.
+Temizler** Tümü** DB, her bayrağı kendi env / varsayılan değerine geri yükleyerek aynı anda geçersiz kılar. `{ cleared: <count>, message: "..." }` döndürür.
 
 > [!NOTE]
-> `requiresRestart: true` olan bayraklar yalnızca bir işlem yeniden yüklendikten sonra etkili olur.
-> Panonun yeniden başlatma akışı `POST /api/restart` çağrısını yapar ve sunucu yeniden çalışır duruma
-> gelene kadar `GET /api/health/ping` uç noktasını yoklar.
+> `requiresRestart: true` içeren bayraklar yalnızca işlemin yeniden yüklenmesinden sonra etkili olur. Kontrol panelinin yeniden başlatma akışı `POST /api/restart` çağırır ve ardından sunucu yedeklenene kadar `GET /api/health/ping` yoklar.
+
+---
 
 ## Acil Durum Bütçe Yedeği
 

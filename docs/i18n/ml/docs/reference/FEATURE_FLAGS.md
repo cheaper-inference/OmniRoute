@@ -208,40 +208,35 @@ fail closed ആയി പ്രവർത്തിക്കും. ഒരു opt-
 
 ---
 
-## ഫ്ലാഗുകൾ ടോഗിൾ ചെയ്യൽ
+## ഫ്ലാഗുകൾ ടോഗിൾ ചെയ്യുന്നു
 
 ### ഡാഷ്ബോർഡ്
 
-**ഡാഷ്ബോർഡ് → ക്രമീകരണങ്ങൾ → ഫീച്ചർ ഫ്ലാഗുകൾ**
-(`/dashboard/settings/feature-flags`) എന്നതിലേക്ക് നാവിഗേറ്റ് ചെയ്യുക. ഗ്രിഡ്
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-ഇനിപ്പറയുന്നവ പിന്തുണയ്ക്കുന്നു:
+നാവിഗേറ്റ് ചെയ്യുക** ഡാഷ്ബോർഡ് → ക്രമീകരണങ്ങൾ → ഫീച്ചർ ഫ്ലാഗുകൾ** (`/dashboard/settings/feature-flags`). ഗ്രിഡ് (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) പിന്തുണയ്ക്കുന്നു:
 
-- കീ അല്ലെങ്കിൽ വിവരണം ഉപയോഗിച്ചുള്ള **തിരച്ചിൽ**, വിഭാഗം അനുസരിച്ചുള്ള **ഫിൽട്ടർ** (കൂടാതെ സിന്തറ്റിക്
-  **പുനരാരംഭിക്കൽ ആവശ്യമാണ്** കാഴ്ച).
-- ബൂളിയൻ ഫ്ലാഗുകൾക്കായുള്ള **ടോഗിൾ**, enum ഫ്ലാഗുകൾക്കായുള്ള **ഡ്രോപ്പ്ഡൗൺ**
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- ഓരോ ഫ്ലാഗിനുമുള്ള ഒരു **സോഴ്സ് ബാഡ്ജ്** — `DB`, `ENV`, അല്ലെങ്കിൽ `DEF` — ഫലപ്രദമായ മൂല്യം എവിടെ നിന്നാണ് വന്നതെന്ന് കാണിക്കുന്നു.
-- ഓവർറൈഡ് നീക്കം ചെയ്യുന്നതിനുള്ള **റീസെറ്റ്** ബട്ടൺ (`DB`-സോഴ്സ് ചെയ്ത ഫ്ലാഗുകൾക്ക് മാത്രം കാണിക്കും), കൂടാതെ താഴെ ഒരു **എല്ലാ ഓവർറൈഡുകളും റീസെറ്റ് ചെയ്യുക** ബട്ടൺ.
-- `requiresRestart` ഫ്ലാഗ് മാറ്റുമ്പോൾ ഒരു **സെർവർ പുനരാരംഭിക്കുക** ബാനർ.
+- **തിരയുക** കീ അല്ലെങ്കിൽ വിവരണം വഴി, ഒപ്പം** ഫിൽട്ടർ** വിഭാഗം പ്രകാരം (കൂടാതെ ഒരു സിന്തറ്റിക്** പുനരാരംഭിക്കേണ്ടതുണ്ട്** കാഴ്ച).
+- എ** ടോഗിൾ ചെയ്യുക** ബൂളിയൻ പതാകകൾക്കും എ** ഡ്രോപ്പ് ഡൗൺ** enum ഫ്ലാഗുകൾക്കായി (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- എ** ഉറവിട ബാഡ്ജ്** ഓരോ ഫ്ലാഗിനും — `DB`, `ENV`, അല്ലെങ്കിൽ `DEF` — ഫലപ്രദമായ മൂല്യം എവിടെ നിന്നാണ് വന്നതെന്ന് കാണിക്കുന്നു.
+- എ** പുനഃസജ്ജമാക്കുക** അസാധുവാക്കൽ ഡ്രോപ്പ് ചെയ്യുന്നതിനുള്ള ബട്ടൺ ( `DB` -sourced ഫ്ലാഗുകൾക്ക് മാത്രം കാണിച്ചിരിക്കുന്നു), കൂടാതെ a** എല്ലാ ഓവർറൈഡുകളും പുനഃസജ്ജമാക്കുക** ചുവടെയുള്ള ബട്ടൺ.
+- എ** സെർവർ പുനരാരംഭിക്കുക** ഒരു `requiresRestart` ഫ്ലാഗ് മാറ്റുമ്പോൾ ബാനർ.
 
 ### REST API
 
-എല്ലാ പ്രവർത്തനങ്ങളും ഒരൊറ്റ റൂട്ടിലൂടെയാണ് നടക്കുന്നത്:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-ഓരോ രീതിക്കും പ്രാമാണീകരിച്ച ഡാഷ്ബോർഡ് സെഷൻ ആവശ്യമാണ് (`401` അല്ലെങ്കിൽ).
+എല്ലാ പ്രവർത്തനങ്ങളും ഒരൊറ്റ റൂട്ടിലൂടെയാണ് പോകുന്നത്: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). എല്ലാ രീതികൾക്കും ഒരു ആധികാരിക ഡാഷ്ബോർഡ് സെഷൻ ആവശ്യമാണ് (അല്ലെങ്കിൽ `401` ).
+
+ലോഗിൻ പ്രവർത്തനരഹിതമാക്കി (`requireLogin=false`) സംരക്ഷിത ഫ്ലാഗുകൾ ഒഴികെയുള്ള റൂട്ട് തുറന്നിരിക്കുന്നു: സുരക്ഷാ വിഭാഗത്തിലെ എല്ലാ ഫ്ലാഗുകളും കൂടാതെ `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES`, `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` ൽ `protectedFeatureFlags.ts`). അവയിലൊന്നിൽ ഒരു `PUT`, അവയിലൊന്നിന് DB ഓവർറൈഡ് ഉള്ളപ്പോൾ ഒരു `DELETE` എന്നിവയ്ക്ക് ഇപ്പോഴും ഒരു ഡാഷ്ബോർഡ് സെഷൻ, ഒരു `manage` -scope API കീ, റൈറ്റ് സ്കോപ്പോ അതിലും ഉയർന്നതോ ആയ ഒരു `oma_` ആക്സസ് ടോക്കൺ അല്ലെങ്കിൽ ലൂപ്പ്ബാക്കിൽ നിന്ന് അയച്ച CLI ടോക്കൺ അല്ലെങ്കിൽ ഇൻ്റേണൽ-സർവീസ് ടോക്കൺ എന്നിവ ആവശ്യമാണ്. ആ സെറ്റ് ലോഗിൻ ചെയ്യുന്നതിനേക്കാൾ വിശാലമാണ്, അവിടെ റൂട്ട് ഒരു സെഷനോ `manage` -scope കീയോ മാത്രമേ സ്വീകരിക്കൂ.
 
 #### `GET /api/settings/feature-flags`
 
-ഓരോ ഫ്ലാഗും അതിന്റെ ഫലപ്രദമായ മൂല്യം, സോഴ്സ്, ഒരു സംഗ്രഹം എന്നിവയോടെ മടക്കിനൽകുന്നു.
+ഓരോ ഫ്ലാഗും അതിൻ്റെ ഫലപ്രദമായ മൂല്യവും ഉറവിടവും സംഗ്രഹവും നൽകുന്നു.
 
 ```jsonc
 {
   "flags": [
     {
       "key": "REQUIRE_API_KEY",
-      "label": "API കീ ആവശ്യമാണ്",
-      "description": "വരുന്ന എല്ലാ അഭ്യർത്ഥനകൾക്കും ഒരു API കീ ആവശ്യമാണ്",
+      "label": "Require API Key",
+      "description": "Require an API key for all incoming requests",
       "category": "security",
       "type": "boolean",
       "enumValues": null,
@@ -251,7 +246,7 @@ fail closed ആയി പ്രവർത്തിക്കും. ഒരു opt-
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... എല്ലാ 119 ഫ്ലാഗുകളും
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -265,34 +260,30 @@ fail closed ആയി പ്രവർത്തിക്കും. ഒരു opt-
 
 #### `PUT /api/settings/feature-flags`
 
-ഒറ്റ ഓവർറൈഡ് സജ്ജമാക്കുകയോ നീക്കം ചെയ്യുകയോ ചെയ്യുക. ബോഡി: `{ key: string; value?: string }`.
-`value` ഒഴിവാക്കിയാൽ ഓവർറൈഡ് നീക്കം ചെയ്യപ്പെടും (env / default പുനഃസ്ഥാപിക്കുന്നു).
+ഒരൊറ്റ അസാധുവാക്കൽ സജ്ജീകരിക്കുക അല്ലെങ്കിൽ നീക്കം ചെയ്യുക. ശരീരം: `{ key: string; value?: string }`. `value` ഒഴിവാക്കുന്നത് ഓവർറൈഡ് നീക്കം ചെയ്യുന്നു (env / ഡിഫോൾട്ട് പുനഃസ്ഥാപിക്കുന്നു).
 
 ```bash
-# ഒരു DB ഓവർറൈഡ് സജ്ജമാക്കുക
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# ഓവർറൈഡ് നീക്കം ചെയ്യുക ("value" ഇല്ലാതെ)
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-പ്രതികരണത്തിൽ പുതിയ `effectiveValue`/`source`, `previousValue`/
-`previousSource`, `requiresRestart` എന്നിവ പ്രതിഫലിക്കും. അറിയാത്ത കീകളും പരിധിക്ക് പുറത്തുള്ള enum
-മൂല്യങ്ങളും `400` ഉപയോഗിച്ച് നിരസിക്കും.
+പ്രതികരണം പുതിയ `effectiveValue`/`source`, `previousValue`/ `previousSource`, `requiresRestart` എന്നിവയെ പ്രതിധ്വനിപ്പിക്കുന്നു. അജ്ഞാത കീകളും പരിധിക്ക് പുറത്തുള്ള enum മൂല്യങ്ങളും `400` ഉപയോഗിച്ച് നിരസിച്ചു.
 
 #### `DELETE /api/settings/feature-flags`
 
-എല്ലാ DB ഓവർറൈഡുകളും ഒരേസമയം മായ്ച്ച്, ഓരോ ഫ്ലാഗിനെയും അതിന്റെ env / default
-മൂല്യത്തിലേക്ക് പുനഃസ്ഥാപിക്കുന്നു. `{ cleared: <count>, message: "..." }` മടക്കിനൽകുന്നു.
+മായ്ക്കുന്നു** എല്ലാം** DB ഒറ്റയടിക്ക് അസാധുവാക്കുന്നു, എല്ലാ ഫ്ലാഗും അതിൻ്റെ env / ഡിഫോൾട്ട് മൂല്യത്തിലേക്ക് പുനഃസ്ഥാപിക്കുന്നു. `{ cleared: <count>, message: "..." }` നൽകുന്നു.
 
 > [!NOTE]
-> `requiresRestart: true` ഉള്ള ഫ്ലാഗുകൾ ഒരു പ്രോസസ് റീലോഡിന് ശേഷമേ പ്രാബല്യത്തിൽ വരൂ.
-> ഡാഷ്ബോർഡിന്റെ പുനരാരംഭിക്കൽ പ്രവാഹം `POST /api/restart` വിളിക്കുകയും തുടർന്ന് സെർവർ വീണ്ടും പ്രവർത്തനക്ഷമമാകുന്നതുവരെ
-> `GET /api/health/ping` പോൾ ചെയ്യുകയും ചെയ്യുന്നു.
+> `requiresRestart: true` ഉള്ള ഫ്ലാഗുകൾ ഒരു പ്രോസസ്സ് റീലോഡ് ചെയ്തതിന് ശേഷം മാത്രമേ പ്രാബല്യത്തിൽ വരികയുള്ളൂ. ഡാഷ്ബോർഡിൻ്റെ പുനരാരംഭിക്കുന്ന ഫ്ലോ `POST /api/restart` എന്ന് വിളിക്കുന്നു, തുടർന്ന് സെർവർ ബാക്ക് അപ്പ് ആകുന്നത് വരെ `GET /api/health/ping` വോട്ടുചെയ്യുന്നു.
+
+---
 
 ## അടിയന്തര ബജറ്റ് ഫാൾബാക്ക്
 

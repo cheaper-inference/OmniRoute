@@ -217,32 +217,27 @@ administratoriaus ataskaita nustato tą pačią galutinę politiką.
 > tipo vėliavos atmeta visas reikšmes, kurios nepatenka į leidžiamą rinkinį (tikrinama serverio pusėje
 > tiek `setFeatureFlagOverride()`, tiek REST `PUT` apdorojimo programoje).
 
-## Vėliavėlių perjungimas
+## Perjungiamos vėliavėlės
 
-### Skydelis
+### Prietaisų skydelis
 
-Eikite į **Skydelis → Nustatymai → Funkcijų vėliavėlės**
-(`/dashboard/settings/feature-flags`). Tinklelis
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-palaiko:
+Eikite į** Prietaisų skydelis → Nustatymai → Funkcijų vėliavėlės** (`/dashboard/settings/feature-flags`). Tinklelis (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) palaiko:
 
-- **Paiešką** pagal raktą arba aprašą ir **filtravimą** pagal kategoriją (taip pat sintetinį
-  **Reikia paleisti iš naujo** rodinį).
-- Būlio tipo vėliavėlių **perjungiklį** ir enum tipo vėliavėlių **išskleidžiamąjį sąrašą**
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Kiekvienos vėliavėlės **šaltinio ženklelį** — `DB`, `ENV` arba `DEF` — rodantį, iš kur gauta faktinė reikšmė.
-- **Nustatyti iš naujo** mygtuką (rodomas tik `DB` šaltinio vėliavėlėms), skirtą perrašymui pašalinti, ir apačioje esantį mygtuką **Nustatyti iš naujo visus perrašymus**.
-- **Serverio paleidimo iš naujo** reklamjuostę, kai pakeičiama `requiresRestart` vėliavėlė.
+- **Ieškoti** pagal raktą ar aprašymą ir** filtras** pagal kategoriją (plius sintetika** Reikia paleisti iš naujo** vaizdas).
+- A** perjungti** loginėms vėliavoms ir a** išskleidžiamąjį meniu** enum vėliavėlėms (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- A** šaltinio ženklelis** už vėliavėlę — `DB`, `ENV` arba `DEF` — nurodant, iš kur gauta efektyvioji vertė.
+- A** Nustatyti iš naujo** mygtuką (rodomas tik `DB` -sourced vėliavėlėms), kad būtų atšauktas nepaisymas, ir a** Iš naujo nustatyti visus nepaisymus** mygtuką apačioje.
+- A** Iš naujo paleiskite serverį** reklamjuostė, kai pakeičiama `requiresRestart` vėliava.
 
 ### REST API
 
-Visos operacijos vykdomos per vieną maršrutą:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Kiekvienam metodui reikalinga autentifikuota skydelio sesija (`401` kitu atveju).
+Visos operacijos vyksta vienu maršrutu: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Kiekvienam metodui reikalinga autentifikuota prietaisų skydelio sesija (kitu atveju `401` ).
+
+Išjungus prisijungimą (`requireLogin=false`), maršrutas atidarytas, išskyrus apsaugotas vėliavėles: kiekviena saugumo kategorijos vėliavėlė plius `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` ir `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` in `protectedFeatureFlags.ts`). Vieno iš jų `PUT` ir `DELETE`, kai vienas iš jų turi DB nepaisymą, vis tiek reikia prietaisų skydelio seanso, `manage` -scope API rakto, `oma_` prieigos rakto su rašymo apimtimi arba didesne arba CLI prieigos rakto arba vidinės paslaugos prieigos rakto, siunčiamo iš grįžtamojo ryšio. Šis rinkinys yra platesnis nei prisijungus, kai maršrutas priima tik seansą arba `manage` -scope klavišą.
 
 #### `GET /api/settings/feature-flags`
 
-Grąžina kiekvieną vėliavėlę su jos faktine reikšme, šaltiniu ir suvestine.
+Grąžina kiekvieną vėliavėlę su efektyvia verte, šaltiniu ir santrauka.
 
 ```jsonc
 {
@@ -260,7 +255,7 @@ Grąžina kiekvieną vėliavėlę su jos faktine reikšme, šaltiniu ir suvestin
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... visos 119 vėliavėlių
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -274,32 +269,30 @@ Grąžina kiekvieną vėliavėlę su jos faktine reikšme, šaltiniu ir suvestin
 
 #### `PUT /api/settings/feature-flags`
 
-Nustato arba pašalina vieną perrašymą. Užklausa: `{ key: string; value?: string }`.
-Praleidus `value`, perrašymas pašalinamas (atkuriama aplinkos / numatytoji reikšmė).
+Nustatykite arba pašalinkite vieną nepaisymą. Kėbulas: `{ key: string; value?: string }`. Praleidus `value` pašalinamas nepaisymas (atkuriamas env / numatytasis nustatymas).
 
 ```bash
-# Nustatyti DB perrašymą
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Pašalinti perrašymą (be "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Atsakyme pateikiamos naujos `effectiveValue` / `source` reikšmės,
-`previousValue` / `previousSource` reikšmės ir `requiresRestart`. Nežinomi raktai ir už leistino intervalo ribų esančios enum reikšmės atmetamos su `400`.
+Atsakymas kartoja naujus `effectiveValue`/`source`, `previousValue`/ `previousSource` ir `requiresRestart`. Nežinomi raktai ir už diapazono ribų esančios reikšmės atmetami naudojant `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Vienu metu išvalo **visus** DB perrašymus ir grąžina kiekvienai vėliavėlei jos aplinkos / numatytąją reikšmę. Grąžina `{ cleared: <count>, message: "..." }`.
+Išvalo** visi** DB nepaiso iš karto, atkurdamas kiekvieną vėliavėlę į env / numatytąją reikšmę. Grąžina `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Vėliavėlės, kurių `requiresRestart: true`, įsigalioja tik iš naujo įkėlus procesą.
-> Skydelio paleidimo iš naujo eiga iškviečia `POST /api/restart`, tada periodiškai tikrina
-> `GET /api/health/ping`, kol serveris vėl pradeda veikti.
+> Vėliavos su `requiresRestart: true` įsigalioja tik pakartotinai įkėlus procesą. Prietaisų skydelio pakartotinio paleidimo srautas iškviečia `POST /api/restart`, o tada apklausia `GET /api/health/ping` kol bus sukurta atsarginė serverio kopija.
+
+---
 
 ## Avarinis biudžeto atsarginis mechanizmas
 

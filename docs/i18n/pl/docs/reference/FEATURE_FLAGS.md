@@ -228,35 +228,31 @@ cen. Zasady wymuszania i raport administratora rozstrzygają tę samą efektywn�
 
 ### Panel
 
-Przejdź do **Panel → Ustawienia → Flagi funkcji**
-(`/dashboard/settings/feature-flags`). Siatka
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-obsługuje:
+Przejdź do** Pulpit nawigacyjny → Ustawienia → Flagi funkcji** (`/dashboard/settings/feature-flags`). Siatka (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) obsługuje:
 
-- **Wyszukiwanie** według klucza lub opisu oraz **filtrowanie** według kategorii (w tym syntetyczny widok **Wymaga ponownego uruchomienia**).
-- **Przełącznik** dla flag logicznych oraz **lista rozwijana** dla flag typu enum
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Odznakę źródła dla każdej flagi — `DB`, `ENV` lub `DEF` — wskazującą, skąd pochodzi efektywna wartość.
-- Przycisk **Resetuj** (wyświetlany tylko dla flag ze źródłem `DB`) do usuwania nadpisania oraz przycisk **Resetuj wszystkie nadpisania** na dole.
-- Baner **Uruchom ponownie serwer** po zmianie flagi `requiresRestart`.
+- **Szukaj** według klucza lub opisu oraz** filtr** według kategorii (plus plik syntetyczny** Wymaga ponownego uruchomienia** pogląd).
+- A** dźwignia kolankowa** dla flag boolowskich i a** menu rozwijane** dla flag wyliczeniowych (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- A** odznaka źródłowa** per flag — `DB`, `ENV` lub `DEF` — pokazujące skąd pochodzi wartość efektywna.
+- A** Nastawić** przycisk (pokazany tylko dla flag `DB` -sourced ), aby porzucić obejście, oraz a** Zresetuj wszystkie nadpisania** przycisk na dole.
+- A** Uruchom ponownie serwer** banner po zmianie flagi `requiresRestart`.
 
 ### REST API
 
-Wszystkie operacje przechodzą przez pojedynczą trasę:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Każda metoda wymaga uwierzytelnionej sesji panelu (`401` w przeciwnym razie).
+Wszystkie operacje przebiegają jedną trasą: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Każda metoda wymaga uwierzytelnionej sesji pulpitu nawigacyjnego (w przeciwnym razie `401` ).
+
+Przy wyłączonym logowaniu (`requireLogin=false`) trasa jest otwarta, z wyjątkiem chronionych flag: każdej flagi w kategorii Bezpieczeństwo plus `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` i `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` w `protectedFeatureFlags.ts`). `PUT` na jednym z nich i `DELETE`, gdy jeden z nich ma nadpisanie DB, nadal potrzebuje sesji dashboardu, klucza `manage` -scope API, tokena dostępu `oma_` z zakresem zapisu lub wyższym, lub tokena CLI lub tokena usługi wewnętrznej wysłanego z pętli zwrotnej. Zestaw ten jest szerszy niż przy włączonym logowaniu, gdzie trasa akceptuje tylko sesję lub klucz `manage` -scope.
 
 #### `GET /api/settings/feature-flags`
 
-Zwraca każdą flagę wraz z jej efektywną wartością, źródłem i podsumowaniem.
+Zwraca każdą flagę z jej efektywną wartością, źródłem i podsumowaniem.
 
 ```jsonc
 {
   "flags": [
     {
       "key": "REQUIRE_API_KEY",
-      "label": "Wymagaj klucza API",
-      "description": "Wymagaj klucza API dla wszystkich przychodzących żądań",
+      "label": "Require API Key",
+      "description": "Require an API key for all incoming requests",
       "category": "security",
       "type": "boolean",
       "enumValues": null,
@@ -266,7 +262,7 @@ Zwraca każdą flagę wraz z jej efektywną wartością, źródłem i podsumowan
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... wszystkie 119 flag
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -280,33 +276,30 @@ Zwraca każdą flagę wraz z jej efektywną wartością, źródłem i podsumowan
 
 #### `PUT /api/settings/feature-flags`
 
-Ustawia pojedyncze nadpisanie lub je usuwa. Treść żądania: `{ key: string; value?: string }`.
-Pominięcie `value` usuwa nadpisanie (przywracając wartość środowiskową / domyślną).
+Ustaw lub usuń pojedyncze zastąpienie. Korpus: `{ key: string; value?: string }`. Pominięcie `value` usuwa zastąpienie (przywracanie env / default).
 
 ```bash
-# Ustawienie nadpisania w bazie danych
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Usunięcie nadpisania (bez "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Odpowiedź zawiera nową `effectiveValue`/`source`, `previousValue`/
-`previousSource` oraz `requiresRestart`. Nieznane klucze i wartości enum spoza
-dozwolonego zakresu są odrzucane z kodem `400`.
+Odpowiedź odzwierciedla nowe `effectiveValue`/`source`, `previousValue`/ `previousSource` i `requiresRestart`. Nieznane klucze i wartości wyliczeniowe spoza zakresu są odrzucane przez `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Usuwa jednocześnie **wszystkie** nadpisania w bazie danych, przywracając każdej fladze wartość środowiskową / domyślną. Zwraca `{ cleared: <count>, message: "..." }`.
+Czyści** Wszystko** DB nadpisuje natychmiast, przywracając każdą flagę do jej wartości env/domyślnej. Zwraca `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Flagi z wartością `requiresRestart: true` zaczną obowiązywać dopiero po ponownym załadowaniu procesu.
-> Proces ponownego uruchamiania z poziomu panelu wywołuje `POST /api/restart`, a następnie odpytuje
-> `GET /api/health/ping`, aż serwer ponownie zacznie działać.
+> Flagi z `requiresRestart: true` zaczynają obowiązywać dopiero po przeładowaniu procesu. Przepływ ponownego uruchomienia pulpitu nawigacyjnego wywołuje `POST /api/restart`, a następnie odpytuje `GET /api/health/ping` do czasu ponownego uruchomienia serwera.
+
+---
 
 ## Awaryjny mechanizm zastępczy budżetu
 

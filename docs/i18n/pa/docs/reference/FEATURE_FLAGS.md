@@ -223,31 +223,27 @@
 > ਫਲੈਗ ਆਪਣੀ ਮਨਜ਼ੂਰਸ਼ੁਦਾ ਸੈੱਟ ਤੋਂ ਬਾਹਰ ਦੇ ਕਿਸੇ ਵੀ ਮੁੱਲ ਨੂੰ ਅਸਵੀਕਾਰ ਕਰਦੇ ਹਨ (ਸਰਵਰ-ਸਾਈਡ 'ਤੇ
 > `setFeatureFlagOverride()` ਅਤੇ REST `PUT` ਹੈਂਡਲਰ ਦੋਵਾਂ ਵਿੱਚ ਪ੍ਰਮਾਣਿਤ)।
 
-## ਫਲੈਗ ਟੌਗਲ ਕਰਨਾ
+## ਟੌਗਲ ਕਰਨ ਵਾਲੇ ਝੰਡੇ
 
 ### ਡੈਸ਼ਬੋਰਡ
 
-**ਡੈਸ਼ਬੋਰਡ → ਸੈਟਿੰਗਾਂ → ਫੀਚਰ ਫਲੈਗ**  
-(`/dashboard/settings/feature-flags`) 'ਤੇ ਜਾਓ। ਗ੍ਰਿਡ  
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)  
-ਇਹ ਸਹੂਲਤਾਂ ਦਿੰਦਾ ਹੈ:
+'ਤੇ ਨੈਵੀਗੇਟ ਕਰੋ** ਡੈਸ਼ਬੋਰਡ → ਸੈਟਿੰਗਾਂ → ਫੀਚਰ ਫਲੈਗ** (`/dashboard/settings/feature-flags`) ਗਰਿੱਡ (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) ਦਾ ਸਮਰਥਨ ਕਰਦਾ ਹੈ:
 
-- ਕੁੰਜੀ ਜਾਂ ਵੇਰਵੇ ਅਨੁਸਾਰ **ਖੋਜ**, ਅਤੇ ਸ਼੍ਰੇਣੀ ਅਨੁਸਾਰ **ਫਿਲਟਰ** (ਇਸ ਦੇ ਨਾਲ ਇੱਕ ਕ੍ਰਿਤ੍ਰਿਮ **ਰੀਸਟਾਰਟ ਲੋੜੀਂਦਾ ਹੈ** ਦ੍ਰਿਸ਼)।
-- ਬੂਲੀਅਨ ਫਲੈਗਾਂ ਲਈ ਇੱਕ **ਟੌਗਲ** ਅਤੇ enum ਫਲੈਗਾਂ ਲਈ ਇੱਕ **ਡ੍ਰੌਪਡਾਊਨ**  
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`)।
-- ਹਰ ਫਲੈਗ ਲਈ ਇੱਕ **ਸਰੋਤ ਬੈਜ** — `DB`, `ENV`, ਜਾਂ `DEF` — ਜੋ ਦਿਖਾਉਂਦਾ ਹੈ ਕਿ ਪ੍ਰਭਾਵੀ ਮੁੱਲ ਕਿੱਥੋਂ ਆਇਆ ਹੈ।
-- ਇੱਕ **ਰੀਸੈੱਟ** ਬਟਨ (ਸਿਰਫ਼ `DB`-ਸਰੋਤ ਵਾਲੇ ਫਲੈਗਾਂ ਲਈ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ), ਜੋ ਓਵਰਰਾਈਡ ਹਟਾਉਂਦਾ ਹੈ, ਅਤੇ ਹੇਠਾਂ ਇੱਕ **ਸਾਰੇ ਓਵਰਰਾਈਡ ਰੀਸੈੱਟ ਕਰੋ** ਬਟਨ।
-- ਜਦੋਂ `requiresRestart` ਫਲੈਗ ਬਦਲਿਆ ਜਾਂਦਾ ਹੈ ਤਾਂ ਇੱਕ **ਸਰਵਰ ਰੀਸਟਾਰਟ ਕਰੋ** ਬੈਨਰ।
+- **ਖੋਜ** ਕੁੰਜੀ ਜਾਂ ਵਰਣਨ ਦੁਆਰਾ, ਅਤੇ** ਫਿਲਟਰ** ਸ਼੍ਰੇਣੀ ਦੁਆਰਾ (ਨਾਲ ਹੀ ਇੱਕ ਸਿੰਥੈਟਿਕ** ਰੀਸਟਾਰਟ ਦੀ ਲੋੜ ਹੈ** ਦ੍ਰਿਸ਼)।
+- ਏ** ਟੌਗਲ** ਬੂਲੀਅਨ ਫਲੈਗ ਅਤੇ ਏ** ਡਰਾਪ ਡਾਉਨ** enum ਝੰਡੇ (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`) ਲਈ।
+- ਏ** ਸਰੋਤ ਬੈਜ** ਪ੍ਰਤੀ ਫਲੈਗ — `DB`, `ENV`, ਜਾਂ `DEF` — ਦਿਖਾ ਰਿਹਾ ਹੈ ਕਿ ਪ੍ਰਭਾਵਸ਼ਾਲੀ ਮੁੱਲ ਕਿੱਥੋਂ ਆਇਆ ਹੈ।
+- ਏ** ਰੀਸੈਟ ਕਰੋ** ਓਵਰਰਾਈਡ ਛੱਡਣ ਲਈ ਬਟਨ (ਕੇਵਲ `DB` -sourced ਫਲੈਗ ਲਈ ਦਿਖਾਇਆ ਗਿਆ ਹੈ), ਅਤੇ a** ਸਾਰੇ ਓਵਰਰਾਈਡਾਂ ਨੂੰ ਰੀਸੈਟ ਕਰੋ** ਤਲ 'ਤੇ ਬਟਨ.
+- ਏ** ਸਰਵਰ ਰੀਸਟਾਰਟ ਕਰੋ** ਬੈਨਰ ਜਦੋਂ ਇੱਕ `requiresRestart` ਝੰਡਾ ਬਦਲਿਆ ਜਾਂਦਾ ਹੈ।
 
 ### REST API
 
-ਸਾਰੀਆਂ ਕਾਰਵਾਈਆਂ ਇੱਕੋ ਰੂਟ ਰਾਹੀਂ ਹੁੰਦੀਆਂ ਹਨ:  
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts)।  
-ਹਰ ਵਿਧੀ ਲਈ ਪ੍ਰਮਾਣਿਤ ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ ਲਾਜ਼ਮੀ ਹੈ (ਨਹੀਂ ਤਾਂ `401`)।
+ਸਾਰੇ ਓਪਰੇਸ਼ਨ ਇੱਕ ਸਿੰਗਲ ਰੂਟ ਰਾਹੀਂ ਹੁੰਦੇ ਹਨ: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). ਹਰ ਵਿਧੀ ਲਈ ਇੱਕ ਪ੍ਰਮਾਣਿਤ ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ (`401` ਨਹੀਂ ਤਾਂ)।
+
+ਲੌਗਇਨ ਅਯੋਗ (`requireLogin=false`) ਨਾਲ ਰੂਟ ਖੁੱਲ੍ਹਾ ਹੈ, ਸੁਰੱਖਿਅਤ ਫਲੈਗਾਂ ਨੂੰ ਛੱਡ ਕੇ: ਸੁਰੱਖਿਆ ਸ਼੍ਰੇਣੀ ਵਿੱਚ ਹਰ ਫਲੈਗ ਪਲੱਸ `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` ਅਤੇ `SKILLS_SANDBOX_NETWORK_ENABLED` ( `protectedFeatureFlags.ts` ਵਿੱਚ `isProtectedFeatureFlag()` )। ਉਹਨਾਂ ਵਿੱਚੋਂ ਇੱਕ 'ਤੇ ਇੱਕ `PUT`, ਅਤੇ ਇੱਕ `DELETE` ਜਦੋਂ ਕਿ ਉਹਨਾਂ ਵਿੱਚੋਂ ਇੱਕ ਕੋਲ ਇੱਕ DB ਓਵਰਰਾਈਡ ਹੈ, ਫਿਰ ਵੀ ਇੱਕ ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ, ਇੱਕ `manage` -scope API ਕੁੰਜੀ, ਇੱਕ `oma_` ਐਕਸੈਸ ਟੋਕਨ ਲਿਖਣ ਦੇ ਸਕੋਪ ਜਾਂ ਵੱਧ, ਜਾਂ ਲੂਪਬੈਕ ਤੋਂ ਭੇਜੇ ਗਏ CLI ਟੋਕਨ ਜਾਂ ਅੰਦਰੂਨੀ-ਸੇਵਾ ਟੋਕਨ ਦੀ ਲੋੜ ਹੈ। ਉਹ ਸੈੱਟ ਲੌਗਇਨ ਆਨ ਨਾਲੋਂ ਚੌੜਾ ਹੈ, ਜਿੱਥੇ ਰੂਟ ਸਿਰਫ਼ ਇੱਕ ਸੈਸ਼ਨ ਜਾਂ ਇੱਕ `manage` -scope ਕੁੰਜੀ ਨੂੰ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ।
 
 #### `GET /api/settings/feature-flags`
 
-ਹਰ ਫਲੈਗ ਨੂੰ ਉਸਦੇ ਪ੍ਰਭਾਵੀ ਮੁੱਲ, ਸਰੋਤ ਅਤੇ ਸੰਖੇਪ ਦੇ ਨਾਲ ਵਾਪਸ ਕਰਦਾ ਹੈ।
+ਹਰ ਫਲੈਗ ਨੂੰ ਇਸਦੇ ਪ੍ਰਭਾਵੀ ਮੁੱਲ, ਸਰੋਤ ਅਤੇ ਸਾਰਾਂਸ਼ ਨਾਲ ਵਾਪਸ ਕਰਦਾ ਹੈ।
 
 ```jsonc
 {
@@ -279,34 +275,30 @@
 
 #### `PUT /api/settings/feature-flags`
 
-ਇੱਕੋ ਓਵਰਰਾਈਡ ਸੈੱਟ ਜਾਂ ਹਟਾਓ। ਬਾਡੀ: `{ key: string; value?: string }`।  
-`value` ਛੱਡਣ ਨਾਲ ਓਵਰਰਾਈਡ ਹਟ ਜਾਂਦਾ ਹੈ (env / default ਨੂੰ ਮੁੜ ਬਹਾਲ ਕਰਦਾ ਹੈ)।
+ਇੱਕ ਸਿੰਗਲ ਓਵਰਰਾਈਡ ਸੈੱਟ ਕਰੋ ਜਾਂ ਹਟਾਓ। ਸਰੀਰ: `{ key: string; value?: string }`. `value` ਨੂੰ ਛੱਡਣਾ ਓਵਰਰਾਈਡ ਨੂੰ ਹਟਾਉਂਦਾ ਹੈ (env / ਡਿਫੌਲਟ ਨੂੰ ਰੀਸਟੋਰ ਕਰਨਾ)।
 
 ```bash
-# DB ਓਵਰਰਾਈਡ ਸੈੱਟ ਕਰੋ
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# ਓਵਰਰਾਈਡ ਹਟਾਓ ("value" ਤੋਂ ਬਿਨਾਂ)
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-ਜਵਾਬ ਵਿੱਚ ਨਵਾਂ `effectiveValue`/`source`, `previousValue`/  
-`previousSource` ਅਤੇ `requiresRestart` ਸ਼ਾਮਲ ਹੁੰਦੇ ਹਨ। ਅਣਜਾਣ ਕੁੰਜੀਆਂ ਅਤੇ ਸੀਮਾ ਤੋਂ ਬਾਹਰਲੇ enum  
-ਮੁੱਲਾਂ ਨੂੰ `400` ਨਾਲ ਰੱਦ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।
+ਜਵਾਬ ਨਵੇਂ `effectiveValue`/`source`, `previousValue`/ `previousSource`, ਅਤੇ `requiresRestart` ਨੂੰ ਗੂੰਜਦਾ ਹੈ। ਅਣਜਾਣ ਕੁੰਜੀਆਂ ਅਤੇ ਰੇਂਜ ਤੋਂ ਬਾਹਰ ਦੇ enum ਮੁੱਲਾਂ ਨੂੰ `400` ਨਾਲ ਰੱਦ ਕਰ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ।
 
 #### `DELETE /api/settings/feature-flags`
 
-ਸਾਰੇ DB ਓਵਰਰਾਈਡ ਇੱਕੋ ਵਾਰ ਸਾਫ਼ ਕਰਦਾ ਹੈ ਅਤੇ ਹਰ ਫਲੈਗ ਨੂੰ ਉਸਦੇ env / default  
-ਮੁੱਲ 'ਤੇ ਮੁੜ ਬਹਾਲ ਕਰਦਾ ਹੈ। `{ cleared: <count>, message: "..." }` ਵਾਪਸ ਕਰਦਾ ਹੈ।
+ਸਾਫ਼ ਕਰਦਾ ਹੈ** ਸਾਰੇ** DB ਇੱਕ ਵਾਰ 'ਤੇ ਓਵਰਰਾਈਡ ਕਰਦਾ ਹੈ, ਹਰ ਫਲੈਗ ਨੂੰ ਇਸਦੇ env / ਡਿਫਾਲਟ ਮੁੱਲ ਵਿੱਚ ਬਹਾਲ ਕਰਦਾ ਹੈ। `{ cleared: <count>, message: "..." }` ਵਾਪਸ ਕਰਦਾ ਹੈ।
 
 > [!NOTE]
-> `requiresRestart: true` ਵਾਲੇ ਫਲੈਗ ਸਿਰਫ਼ ਪ੍ਰਕਿਰਿਆ ਰੀਲੋਡ ਹੋਣ ਤੋਂ ਬਾਅਦ ਹੀ ਪ੍ਰਭਾਵੀ ਹੁੰਦੇ ਹਨ।  
-> ਡੈਸ਼ਬੋਰਡ ਦਾ ਰੀਸਟਾਰਟ ਫਲੋ `POST /api/restart` ਕਾਲ ਕਰਦਾ ਹੈ ਅਤੇ ਫਿਰ ਸਰਵਰ ਦੇ ਮੁੜ ਚਾਲੂ ਹੋਣ ਤੱਕ  
-> `GET /api/health/ping` ਨੂੰ ਪੋਲ ਕਰਦਾ ਹੈ।
+> `requiresRestart: true` ਨਾਲ ਫਲੈਗ ਸਿਰਫ਼ ਇੱਕ ਪ੍ਰਕਿਰਿਆ ਨੂੰ ਰੀਲੋਡ ਕਰਨ ਤੋਂ ਬਾਅਦ ਹੀ ਪ੍ਰਭਾਵੀ ਹੁੰਦੇ ਹਨ। ਡੈਸ਼ਬੋਰਡ ਦਾ ਰੀਸਟਾਰਟ ਫਲੋ `POST /api/restart` ਕਾਲ ਕਰਦਾ ਹੈ ਅਤੇ ਫਿਰ ਸਰਵਰ ਦੇ ਬੈਕਅੱਪ ਹੋਣ ਤੱਕ `GET /api/health/ping` ਪੋਲ ਕਰਦਾ ਹੈ।
+
+---
 
 ## ਐਮਰਜੈਂਸੀ ਬਜਟ ਫਾਲਬੈਕ
 

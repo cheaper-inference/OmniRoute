@@ -312,15 +312,15 @@ Tā paliek izslēgta, ja vien `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 (`src/lib/accessTokens/scopes.ts`). Šis rangs attiecas tikai uz piekļuves marķiera
 akreditācijas datiem. Skatīt [Pārvaldības autentifikācija](../guides/MANAGEMENT-AUTH.md).
 
-## Nepieciešamās autentifikācijas slēdzis
+## Nepieciešama autentifikācija
 
-`isAuthRequired()` failā `src/shared/utils/apiAuth.ts` nosaka, vai pieprasījumam tiek piemērota **jebkāda** autentifikācija:
+`isAuthRequired()` in `src/shared/utils/apiAuth.ts` izlemj, vai** jebkura** autentifikācija tiek veikta pieprasījumam:
 
-- `settings.requireLogin === false` → autentifikācija ir globāli atspējota, izņemot vienmēr aizsargāto līmeni (skat. [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) un izsaukumus, kas izsniedz pilnvaru, ko tā pieņem. Tiem nepieciešama tā pati pilnvara, kāda ir nepieciešama, ja pieteikšanās ir ieslēgta: sinhronizācijas žetonu izdošana, CLI piekļuves žetonu izdošana jebkurā darbības jomā un API atslēgas izveide ar `manage`/`admin` darbības jomu, šīs darbības jomas piešķiršana atslēgai vai tādas atslēgas regenerēšana vai parādīšana (`requireCredentialForManagementScopedKey()` failā `src/lib/api/requireManagementAuth.ts`). Atslēgas tikai secinājumiem paliek atvērtas.
-- Parole nav konfigurēta **un** nav vides mainīgā `INITIAL_PASSWORD` → bootstrap režīms atļauj iestatīšanas vedni un loopback pieprasījumus, bet ārējie tīkla pieprasījumi joprojām prasa pilnvaras.
-- Jebkura DB kļūda → bloķē piekļuvi (drošs pēc noklusējuma).
+- `settings.requireLogin === false` → autentifikācija ir globāli atspējota, izņemot vienmēr aizsargāto līmeni (skatiet [sadaļu Maršruta apsardzes līmeņi](../security/ROUTE_GUARD_TIERS.md) ) un izsaukumus, kuros tiek izsniegti akreditācijas dati, kurus tā pieņem un kuriem ir nepieciešami tādi paši akreditācijas dati kā pieteikšanās gadījumā: sinhronizācijas pilnvaru izsniegšana, CLI piekļuves pilnvaru kalšana jebkurā tvērumā, API `manage`/`admin` atslēgas piešķiršana. atslēgu vai šādas atslēgas atjaunošanu vai atklāšanu (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`). Atslēgas, kas paredzētas tikai secinājumiem, paliek atvērtas. Akreditācijas dati joprojām ir nepieciešami, rakstot aizsargātā līdzekļa karogu (`REQUIRE_API_KEY`, citus drošības karogus un SSRF / TLS / MCP darbības jomas / smilškastes karogus, kas norādīti sadaļā [Funkcijas karodziņi](../reference/FEATURE_FLAGS.md#rest-api) ) un saglabājot PII maskēšanas iestatījumus (`PUT /api/settings/pii`).
+- Nav konfigurēta parole** un** no `INITIAL_PASSWORD` env var → sāknēšanas režīms ļauj veikt ieslēgšanas vedni un cilpas pieprasījumus, taču atklātajiem tīkla pieprasījumiem joprojām ir nepieciešami akreditācijas dati. Izņēmums: lai rakstītu aizsargātu līdzekļa karogu un saglabātu PII maskēšanas iestatījumus (`PUT /api/settings/pii`), ir nepieciešami akreditācijas dati pat no cilpas, tāpēc ar atpakaļcilpu vien nepietiek.
+- Jebkura DB kļūda → neizdodas aizvērt (drošs pēc noklusējuma).
 
-Klienta API atslēgu piemērošanai izmanto `isRequireApiKeyEnabled()` no `src/shared/utils/featureFlags.ts`, nevis tiešu `process.env.REQUIRE_API_KEY` nolasīšanu. Tas ir svarīgi izvietotām instancēm: `REQUIRE_API_KEY` pārslēgšana Dashboard → Feature Flags saglabā DB pārrakstījumu un tūlīt ietekmē `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` un citas klienta API autentifikācijas pārbaudes, kas izmanto šo palīgfunkciju. Ja funkciju karodziņu krātuvi nevar nolasīt, klienta API autentifikācija bloķē piekļuvi un prasa atslēgu.
+Klienta API atslēgas izpilde `isRequireApiKeyEnabled()` izmanto `src/shared/utils/featureFlags.ts`, nevis tiešu `process.env.REQUIRE_API_KEY` nolasīšanu. Tas ir svarīgi izvietotajiem gadījumiem: pārslēdzot `REQUIRE_API_KEY` informācijas panelī → līdzekļu karodziņi, tiek saglabāts DB ignorēšana un nekavējoties tiek ietekmētas `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` un citas klienta API autentifikācijas pārbaudes, kurām ir kopīgs šis palīgs. Ja līdzekļa karoga krātuvi nevar nolasīt, klienta API autentifikācija neizdodas aizvērt un nepieciešama atslēga.
 
 ## Nesaderīgas izmaiņas — v3.8.0
 

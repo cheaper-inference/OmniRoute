@@ -310,15 +310,15 @@ Ini tetap mati kecuali `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 `read` / `write` / `admin` pada token `oma_live_…`, diberi peringkat oleh `scopeSatisfies`
 (`src/lib/accessTokens/scopes.ts`). Peringkat ini hanya berlaku untuk kredensial token akses. Lihat [Otentikasi Manajemen](../guides/MANAGEMENT-AUTH.md).
 
-## Sakelar Autentikasi Wajib
+## Pengalih Diperlukan Otentikasi
 
-`isAuthRequired()` di `src/shared/utils/apiAuth.ts` memutuskan apakah **autentikasi apa pun** diterapkan untuk sebuah permintaan:
+`isAuthRequired()` di `src/shared/utils/apiAuth.ts` memutuskan apakah** setiap** auth diberlakukan untuk permintaan:
 
-- `settings.requireLogin === false` → autentikasi dinonaktifkan secara global, kecuali untuk tingkat yang selalu dilindungi (lihat [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) dan panggilan yang menyerahkan kredensial yang diterimanya, yang memerlukan kredensial yang sama seperti ketika login aktif: menerbitkan token sinkronisasi, mencetak token akses CLI pada cakupan apa pun, dan membuat kunci API dengan cakupan `manage`/`admin`, memberikan cakupan tersebut ke sebuah kunci, atau meregenerasi atau menampilkan kunci seperti itu (`requireCredentialForManagementScopedKey()` di `src/lib/api/requireManagementAuth.ts`). Kunci khusus inferensi tetap terbuka.
-- Belum ada kata sandi yang dikonfigurasi **dan** tidak ada env var `INITIAL_PASSWORD` → mode bootstrap: wizard onboarding dan permintaan loopback diizinkan, tetapi permintaan jaringan eksternal tetap memerlukan kredensial.
-- Kesalahan DB apa pun → gagal tertutup (aman secara default).
+- `settings.requireLogin === false` → auth dinonaktifkan secara global, kecuali untuk tingkat yang selalu dilindungi (lihat [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) dan panggilan yang membagikan kredensial yang diterimanya, yang memerlukan kredensial yang sama seperti saat login aktif: mengeluarkan token sinkronisasi, mencetak token akses CLI pada cakupan apa pun, dan membuat kunci API dengan cakupan `manage`/`admin`, memberikan cakupan tersebut ke kunci, atau membuat ulang atau mengungkapkan kunci tersebut (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`). Kunci khusus inferensi tetap terbuka. Menulis tanda fitur yang dilindungi (`REQUIRE_API_KEY`, tanda Keamanan lainnya, dan tanda SSRF / TLS / MCP-scope / sandbox yang tercantum dalam [Feature Flags](../reference/FEATURE_FLAGS.md#rest-api) ) dan menyimpan pengaturan penyembunyian PII (`PUT /api/settings/pii`) juga tetap memerlukan kredensial.
+- Tidak ada kata sandi yang dikonfigurasi** Dan** no `INITIAL_PASSWORD` env var → bootstrap mode memungkinkan wizard orientasi dan permintaan loopback, tetapi permintaan jaringan yang terbuka masih memerlukan kredensial. Pengecualian: menulis tanda fitur yang dilindungi dan menyimpan pengaturan penyembunyian PII (`PUT /api/settings/pii`) memerlukan kredensial bahkan dari loopback, jadi loopback saja tidak cukup di sana.
+- Kesalahan DB apa pun → gagal ditutup (aman secara default).
 
-Penegakan kunci API klien menggunakan `isRequireApiKeyEnabled()` di `src/shared/utils/featureFlags.ts`, bukan pembacaan langsung `process.env.REQUIRE_API_KEY`. Ini penting untuk instans yang di-deploy: mengubah `REQUIRE_API_KEY` di Dashboard → Feature Flags menyimpan override DB dan langsung memengaruhi `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, dan pemeriksaan autentikasi API klien lainnya yang memakai helper ini. Jika penyimpanan feature flag tidak dapat dibaca, autentikasi API klien gagal tertutup dan mewajibkan kunci.
+Penegakan kunci API klien menggunakan `isRequireApiKeyEnabled()` di `src/shared/utils/featureFlags.ts`, bukan pembacaan `process.env.REQUIRE_API_KEY` langsung. Hal ini penting untuk instance yang diterapkan: mengaktifkan `REQUIRE_API_KEY` di Dashboard → Feature Flags menyimpan penggantian DB dan langsung memengaruhi `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, dan pemeriksaan autentikasi API klien lainnya yang menggunakan helper ini. Jika penyimpanan tanda fitur tidak dapat dibaca, autentikasi API klien gagal ditutup dan memerlukan kunci.
 
 ## Perubahan yang Tidak Kompatibel — v3.8.0
 

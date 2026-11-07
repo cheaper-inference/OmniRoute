@@ -307,15 +307,15 @@ Ostane izklopljeno, razen če je `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 (`src/lib/accessTokens/scopes.ts`). Ta rang velja samo za poverilnico dostopnega žetona.
 Glejte [Avtentikacija upravljanja](../guides/MANAGEMENT-AUTH.md).
 
-## Preklop zahtevane avtentikacije
+## Preklop zahtevane avtorizacije
 
-`isAuthRequired()` v `src/shared/utils/apiAuth.ts` odloča, ali se za zahtevo sploh uveljavi **katerakoli** avtentikacija:
+`isAuthRequired()` v `src/shared/utils/apiAuth.ts` odloči, ali** katerikoli** avtorizacija je uveljavljena za zahtevo:
 
-- `settings.requireLogin === false` → avtentikacija je globalno onemogočena, razen za vedno zaščiteno raven (glej [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) in klice, ki izdajajo poverilnico, ki jo ta nastavitev sprejme; ti zahtevajo enako poverilnico kot pri vklopljeni prijavi: izdajanje žetonov za sinhronizacijo, ustvarjanje žetonov za dostop CLI katerega koli obsega in ustvarjanje ključa API z obsegom `manage`/`admin`, dodeljevanje tega obsega ključu, ponovno ustvarjanje ali razkrivanje takega ključa (`requireCredentialForManagementScopedKey()` v `src/lib/api/requireManagementAuth.ts`). Ključi, namenjeni samo sklepanju, ostanejo odprti.
-- Geslo ni nastavljeno **in** okoljska spremenljivka `INITIAL_PASSWORD` ni nastavljena → način bootstrap dovoli čarovnika za nastavitev in zahteve z loopbacka, zunanje omrežne zahteve pa še vedno zahtevajo poverilnice.
-- Katera koli napaka baze → zaprto varno (secure-by-default).
+- `settings.requireLogin === false` → auth je globalno onemogočen, razen za vedno zaščiteno raven (glejte [Stopnje varovanja poti](../security/ROUTE_GUARD_TIERS.md) ) in klice, ki oddajo poverilnico, ki jo sprejme, ki potrebujejo isto poverilnico kot pri prijavi: izdajanje žetonov za sinhronizacijo, kovanje žetonov za dostop CLI v katerem koli obsegu in ustvarjanje ključa API z obsegom `manage`/`admin`, dodelitev tega obsega ključu ali regeneracijo ali razkritje takega ključa (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`). Tipke samo za sklepanje ostanejo odprte. Pisanje zastavice zaščitene funkcije (`REQUIRE_API_KEY`, druge varnostne zastavice in zastavice SSRF / TLS / MCP-scope / sandbox zastavice, navedene v [Zastavicah funkcij](../reference/FEATURE_FLAGS.md#rest-api) ) in shranjevanje nastavitev maskiranja PII (`PUT /api/settings/pii`) prav tako še naprej potrebujeta poverilnico.
+- Geslo ni konfigurirano** in** no `INITIAL_PASSWORD` env var → zagonski način omogoča čarovnika za vkrcanje in zahteve za povratno zanko, vendar izpostavljene omrežne zahteve še vedno potrebujejo poverilnice. Izjema: pisanje zastavice zaščitene funkcije in shranjevanje nastavitev maskiranja PII (`PUT /api/settings/pii`) potrebujeta poverilnico tudi pri povratni zanki, zato povratna zanka sama po sebi ni dovolj.
+- Vsaka napaka DB → se ne zapre (privzeto varno).
 
-Uveljavljanje ključa API odjemalca uporablja `isRequireApiKeyEnabled()` v `src/shared/utils/featureFlags.ts`, ne neposrednega branja `process.env.REQUIRE_API_KEY`. To je pomembno za nameščene instance: preklop `REQUIRE_API_KEY` v Dashboard → Feature Flags shrani prepis v bazo in takoj vpliva na `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` in druge preverjanje avtentikacije API-ja odjemalca, ki delijo ta pomočnik. Če shrambe zastavic ni mogoče prebrati, se avtentikacija API-ja odjemalca zapre in zahteva ključ.
+Uveljavljanje ključa API odjemalca uporablja `isRequireApiKeyEnabled()` v `src/shared/utils/featureFlags.ts`, ne neposrednega branja `process.env.REQUIRE_API_KEY`. To je pomembno za nameščene primerke: preklop `REQUIRE_API_KEY` na nadzorni plošči → Feature Flags shrani DB preglasitev in takoj vpliva na `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` in druga preverjanja avtentičnosti API-ja odjemalca, ki imajo skupno to pomoč. Če shrambe zastavic funkcij ni mogoče prebrati, se overitev API odjemalca ne zapre in zahteva ključ.
 
 ## Nezdružljiva sprememba — v3.8.0
 

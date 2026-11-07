@@ -225,34 +225,27 @@ a `fail_closed`. Az érvénytelen enumértékek és az olvashatatlan funkciójel
 
 ---
 
-## Jelzők kapcsolása
+## Zászlók váltása
 
-### Irányítópult
+### Műszerfal
 
-Navigáljon ide: **Irányítópult → Beállítások → Funkciójelzők**
-(`/dashboard/settings/feature-flags`). A rács
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-a következőket támogatja:
+Navigáljon ide** Irányítópult → Beállítások → Funkciójelzők** (`/dashboard/settings/feature-flags`). A rács (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) támogatja:
 
-- **Keresés** kulcs vagy leírás alapján, valamint **szűrés** kategória szerint (továbbá egy szintetikus
-  **Újraindítás szükséges** nézet).
-- Boolean jelzők esetén **kapcsoló**, enum jelzők esetén pedig **legördülő lista**
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Jelzőnként egy forrásjelvény — `DB`, `ENV` vagy `DEF` —, amely megmutatja, honnan származik
-  a tényleges érték.
-- Egy **Visszaállítás** gomb (csak `DB` forrású jelzőknél jelenik meg) a felülírás eltávolításához, valamint
-  egy **Összes felülírás visszaállítása** gomb alul.
-- **Szerver újraindítása** banner, amikor egy `requiresRestart` jelző megváltozik.
+- **Keresés** kulcs vagy leírás alapján, és** szűrő** kategória szerint (plusz egy szintetikus** Újraindítás szükséges** kilátás).
+- A** kapcsolót** logikai zászlókhoz és a** legördülő menüt** enum zászlókhoz (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- A** forrásjelvény** zászlónként — `DB`, `ENV` vagy `DEF` — amely megmutatja, honnan származik az effektív érték.
+- A** Reset** gombot (csak `DB` -sourced jelzőknél látható) a felülírás elvetéséhez, és a** Minden felülírás visszaállítása** gombot alul.
+- A** Indítsa újra a szervert** banner, amikor a `requiresRestart` zászló megváltozik.
 
 ### REST API
 
-Minden művelet egyetlen útvonalon keresztül történik:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Minden metódushoz hitelesített irányítópult-munkamenet szükséges (ellenkező esetben `401`).
+Minden művelet egyetlen útvonalon megy keresztül: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Minden módszer hitelesített irányítópult-munkamenetet igényel (egyébként `401` ).
+
+A bejelentkezés letiltásával (`requireLogin=false`) az útvonal nyitva van, kivéve a védett zászlókat: a Biztonság kategóriában minden jelzőt plusz `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` és `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` in `protectedFeatureFlags.ts`). Az egyiken lévő `PUT`, és a `DELETE`, míg az egyiknek DB felülírása van, továbbra is szüksége van egy irányítópult-munkamenetre, egy `manage` -scope API kulcsra, egy írási hatókörű vagy magasabb `oma_` hozzáférési jogkivonatra, vagy a loopback-ből küldött CLI jogkivonatra vagy belső szolgáltatási tokenre. Ez a készlet szélesebb, mint a bejelentkezésnél, ahol az útvonal csak egy munkamenetet vagy egy `manage` -scope kulcsot fogad el.
 
 #### `GET /api/settings/feature-flags`
 
-Minden jelzőt visszaad a tényleges értékével, forrásával és egy összesítéssel együtt.
+Minden jelzőt visszaad a tényleges értékével, forrásával és összegzésével.
 
 ```jsonc
 {
@@ -270,7 +263,7 @@ Minden jelzőt visszaad a tényleges értékével, forrásával és egy összes�
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... mind a 119 jelző
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -284,34 +277,30 @@ Minden jelzőt visszaad a tényleges értékével, forrásával és egy összes�
 
 #### `PUT /api/settings/feature-flags`
 
-Egyetlen felülírás beállítása vagy eltávolítása. Törzs: `{ key: string; value?: string }`.
-A `value` elhagyása eltávolítja a felülírást (visszaállítva a környezeti / alapértelmezett értéket).
+Egyetlen felülírás beállítása vagy eltávolítása. Test: `{ key: string; value?: string }`. `value` elhagyása eltávolítja a felülírást (az env / alapértelmezett visszaállítása).
 
 ```bash
-# DB-felülírás beállítása
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# A felülírás eltávolítása ("value" nélkül)
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-A válasz visszaadja az új `effectiveValue`/`source`, a `previousValue`/
-`previousSource`, valamint a `requiresRestart` értékét. Az ismeretlen kulcsokat és a tartományon kívüli enum
-értékeket a rendszer `400` hibával elutasítja.
+A válasz az új `effectiveValue`/`source`, `previousValue`/ `previousSource` és `requiresRestart` visszhangozza. Az ismeretlen kulcsokat és a tartományon kívüli enum értékeket a rendszer `400`-val elutasítja.
 
 #### `DELETE /api/settings/feature-flags`
 
-Egyszerre törli az összes DB-felülírást, és minden jelzőt visszaállít a környezeti / alapértelmezett
-értékére. A válasz `{ cleared: <count>, message: "..." }`.
+Törli** minden** DB egyszerre felülírja, és minden jelzőt visszaállít az env / alapértelmezett értékére. `{ cleared: <count>, message: "..." }` adja vissza.
 
 > [!NOTE]
-> A `requiresRestart: true` értékű jelzők csak a folyamat újratöltése után lépnek érvénybe.
-> Az irányítópult újraindítási folyamata meghívja a `POST /api/restart` végpontot, majd lekérdezi a
-> `GET /api/health/ping` végpontot, amíg a szerver újra elérhetővé nem válik.
+> `requiresRestart: true` ellátott jelzők csak a folyamat újratöltése után lépnek érvénybe. Az irányítópult újraindítási folyamata meghívja `POST /api/restart`, majd lekérdezi `GET /api/health/ping`, amíg a kiszolgáló vissza nem áll.
+
+---
 
 ## Vészhelyzeti költségkeret-tartalék
 

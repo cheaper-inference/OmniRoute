@@ -222,32 +222,27 @@ finder frem til den samme effektive politik.
 
 ---
 
-## Skift flag
+## Skiftende flag
 
 ### Dashboard
 
-Gå til **Dashboard → Indstillinger → Funktionsflag**
-(`/dashboard/settings/feature-flags`). Gitteret
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-understøtter:
+Naviger til** Dashboard → Indstillinger → Funktionsflag** (`/dashboard/settings/feature-flags`). Gitteret (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) understøtter:
 
-- **Søgning** efter nøgle eller beskrivelse og **filtrering** efter kategori (samt en syntetisk visning af
-  **Kræver genstart**).
-- En **skifteknap** til booleske flag og en **rullemenu** til enum-flag
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Et **kildebadge** pr. flag — `DB`, `ENV` eller `DEF` — der viser, hvor den effektive værdi kommer fra.
-- En **Nulstil**-knap (vises kun for flag med kilden `DB`) til at fjerne tilsidesættelsen samt en **Nulstil alle tilsidesættelser**-knap nederst.
-- Et **Genstart server**-banner, når et `requiresRestart`-flag ændres.
+- **Søge** ved nøgle eller beskrivelse, og** filter** efter kategori (plus en syntetisk** Kræver genstart** udsigt).
+- EN** skifte** for booleske flag og en** dropdown** for enum flag (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- EN** kildemærke** pr. flag — `DB`, `ENV` eller `DEF` — viser, hvor den effektive værdi kom fra.
+- EN** Nulstil** knap (vises kun for `DB` -sourced -flag) for at droppe tilsidesættelsen, og en** Nulstil alle tilsidesættelser** knappen i bunden.
+- EN** Genstart server** banner, når et `requiresRestart` flag ændres.
 
 ### REST API
 
-Alle handlinger går gennem en enkelt route:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Alle metoder kræver en godkendt dashboardsession (`401` ellers).
+Alle operationer går gennem en enkelt rute: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Hver metode kræver en autentificeret dashboard-session (`401` ellers).
+
+Med login deaktiveret (`requireLogin=false`) er ruten åben, bortset fra de beskyttede flag: hvert flag i sikkerhedskategorien plus `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` og `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` in `protectedFeatureFlags.ts`). En `PUT` på en af dem, og en `DELETE`, mens en af dem har en DB tilsidesættelse, har stadig brug for en dashboard-session, en `manage` -scope API nøgle, et `oma_` -adgangstoken med skriveomfang eller højere, eller CLI -tokenet eller intern-service-token sendt fra loopback. Det sæt er bredere end med login på, hvor ruten kun accepterer en session eller en `manage` -scope nøgle.
 
 #### `GET /api/settings/feature-flags`
 
-Returnerer alle flag med deres effektive værdi, kilde og en oversigt.
+Returnerer hvert flag med dets effektive værdi, kilde og en oversigt.
 
 ```jsonc
 {
@@ -265,7 +260,7 @@ Returnerer alle flag med deres effektive værdi, kilde og en oversigt.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... alle 119 flag
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -279,32 +274,30 @@ Returnerer alle flag med deres effektive værdi, kilde og en oversigt.
 
 #### `PUT /api/settings/feature-flags`
 
-Angiv eller fjern en enkelt tilsidesættelse. Body: `{ key: string; value?: string }`.
-Hvis `value` udelades, fjernes tilsidesættelsen (og miljøvariablen/standardværdien gendannes).
+Indstil eller fjern en enkelt tilsidesættelse. Krop: `{ key: string; value?: string }`. Udeladelse af `value` fjerner tilsidesættelsen (gendannelse af env / standard).
 
 ```bash
-# Angiv en DB-tilsidesættelse
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Fjern tilsidesættelsen (ingen "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Svaret gentager den nye `effectiveValue`/`source`, den
-`previousValue`/`previousSource` og `requiresRestart`. Ukendte nøgler og enumværdier uden for det tilladte område afvises med `400`.
+Svaret afspejler den nye `effectiveValue`/`source`, `previousValue`/ `previousSource` og `requiresRestart`. Ukendte nøgler og enum-værdier uden for området afvises med `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Rydder alle DB-tilsidesættelser på én gang og gendanner alle flag til deres miljøvariabel-/standardværdi. Returnerer `{ cleared: <count>, message: "..." }`.
+Rydder** alle** DB tilsidesætter på én gang og gendanner hvert flag til dets env/standardværdi. Returnerer `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Flag med `requiresRestart: true` træder først i kraft efter en genindlæsning af processen.
-> Dashboardets genstartsflow kalder `POST /api/restart` og foretager derefter forespørgsler til
-> `GET /api/health/ping`, indtil serveren er tilgængelig igen.
+> Flag med `requiresRestart: true` træder først i kraft efter en procesgenindlæsning. Dashboardets genstartsflow kalder `POST /api/restart` og poller derefter `GET /api/health/ping` indtil serveren er tilbage.
+
+---
 
 ## Nødreserve ved opbrugt budget
 

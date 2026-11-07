@@ -373,7 +373,7 @@ Mabuɗin iyawa:
 - **20 dabaru dabaru** (fififi, ma'auni, cika-farko, zagaye-robin, P2C, bazuwar, mafi ƙarancin amfani, ingantaccen farashi, sake saiti-taga, sake saiti-taga, ɗakin kai, ƙididdiga-nauyi, m-bazuwar,** mota** , lkgp, ingantaccen mahallin mahallin, ingantaccen cache-sabuntawa, watsa mahallin mahallin,** hadewa** , bututu) — auto shine ƙarin kanun labarai a cikin v3.8.0; `fusion` (panel fan-out + alkali kira, `open-sse/services/fusion.ts`) sabo ne a cikin v3.8.36.
 - **Maki 16-factor** : ƙididdiga, kiwon lafiya, ƙidayar farashi, rashin jinkiri, dacewa da aiki da wasu goma. Taswirar abubuwan da ke cikin canonical da tsoffin ma'auninsu suna rayuwa a cikin [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — suna sake maimaita shi a nan zai ba shi wuri na biyu don tsayawa.
 - **Ma'aikata na zahiri** yana haɓaka haɗaɗɗun ephemeral lokacin da babu mai daidaitawa mai suna combo da ya wanzu, yana samar da ƴan takara daga ingantattun hanyoyin sadarwa masu aiki.
-- **Prefixes ta atomatik** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — kowanne yana goyan bayan bayanan ma'aunin nauyi.
+- **Prefixes ta atomatik** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — kowanne yana goyan bayan bayanin martabar nauyi.
 - **6 fakitin yanayin** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` da `chaos-mode` — saitattun saitattun ma'aunin nauyi da ake iya kira daga dashboard. (Kada a ruɗe da prefixes `auto/*` da ke sama, waɗanda bambance-bambancen lokacin buƙatun ne.)
 
 Don cikakkun cikakkun bayanai na algorithm (kasuwanci masu mahimmanci, daidaita nauyi), duba [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
@@ -415,7 +415,7 @@ Wurin sunan `src/domain/` yana tsakiyan yanke shawara na siyasa don haka masu ku
 - Connection/model mulki joiner: `src/domain/connectionModelRules.ts`
 - Samfurin samuwan hotuna: `src/domain/modelAvailability.ts`
 - Bibiyar ƙarewar mai bayarwa: `src/domain/providerExpiration.ts`
-- Quota cache: `src/domain/quotaCache.ts`
+- Quota cache: `src/domain/quotaCache.ts`. Masu samarwa suna ƙarawa da cire windows keɓaɓɓu (OpenAI ya watsar da taga Codex na awa 5 don wasu tsare-tsare), don haka amfani da karanta adaftar mai bayarwa ya tabbatar da cikakke (`quotasComplete`, duba `src/lib/usage/usageReading.ts`) cikakken saitin taga asusu: taga da aka sani a baya amma babu shi an yi ritaya, a cikin cache, a cikin `quota_snapshots` a sake kunnawa a cikin rehydrates da nacirewar jita-jita , dagewar da aka samu a cikin jihar ClaudeCodex jikewa buckets. Shaidar juzu'i (masu kan amsa, kwafi mara kyau) kawai ke sabunta tagogin da take ɗauka.
 - Lalacewar yanayi: `src/domain/degradation.ts`
 - Binciken tsari: `src/domain/configAudit.ts`
 - amsa OmniRoute mai ginin metadata: `src/domain/omnirouteResponseMeta.ts`
@@ -433,13 +433,13 @@ Bututun izini yana rarraba kowane buƙatun mai shigowa kuma yana aiki da sarkar 
 - Taimakon tabbatarwa: `src/server/authz/assertAuth.ts`
 - Neman mahallin: `src/server/authz/context.ts`
 
-Hanyoyin gudanarwa da jama'a suna da wuyar iyaka: agent/cooldown APIs da maye gurbi na mai badawa suna buƙatar auth gudanarwa (HTTP 401 idan ya ɓace).
+Hanyoyin gudanarwa da jama'a suna da ƙaƙƙarfan iyaka: agent/cooldown APIs da maye gurbi na masu samarwa suna buƙatar auth gudanarwa (HTTP 401 idan ya ɓace).
 
 Don cikakkun ƙa'idodin rarraba hanya, duba [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
 
 ### F. Gudun aiki FSM da Task-Aware Router
 
-Madaidaicin na'ura mai sarrafa na'ura mai ba da hanya tsakanin hanyoyin sadarwa da aka jera sama da zaɓin haɗakarwa don jagorantar zirga-zirga dangane da matakin gudanawar aiki da aka gano (tsari, aiwatarwa, bita) da alaƙar ɗawainiyar baya.
+Madaidaicin na'ura mai sarrafa na'ura mai ba da hanya tsakanin hanyoyin sadarwa da aka jera sama da zaɓin haɗakarwa don jagorantar zirga-zirga dangane da matakin gudanawar aiki da aka gano (tsari, aiwatarwa, bita) da alaƙar ɗawainiya ta baya.
 
 - FSM aiki: `open-sse/services/workflowFSM.ts`
 - Mai ba da hanya tsakanin hanyoyin sadarwa: `open-sse/services/taskAwareRouter.ts`

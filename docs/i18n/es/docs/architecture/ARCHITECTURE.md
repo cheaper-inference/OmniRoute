@@ -415,7 +415,7 @@ El espacio de nombres `src/domain/` centraliza las decisiones políticas para qu
 - Unión de reglas Connection/model : `src/domain/connectionModelRules.ts`
 - Instantáneas de disponibilidad del modelo: `src/domain/modelAvailability.ts`
 - Seguimiento de vencimiento del proveedor: `src/domain/providerExpiration.ts`
-- Caché de cuota: `src/domain/quotaCache.ts`
+- Caché de cuota: `src/domain/quotaCache.ts`. Los proveedores agregan y eliminan ventanas de cuota (OpenAI eliminó la ventana Codex de 5 horas para algunos planes), por lo que un uso que lee el adaptador del proveedor certifica que está completo (`quotasComplete`, ver `src/lib/usage/usageReading.ts`) es el conjunto de ventanas completo de la cuenta: una ventana conocida anteriormente pero ausente se retira, en el caché, en el `quota_snapshots` se rehidrata un reinicio (un registro de retiro adjunto), en el estado de cuota Codex persistente y en los depósitos de saturación de Claude. La evidencia parcial (encabezados de respuesta, copias obsoletas) solo actualiza las ventanas que contiene.
 - Estado de degradación: `src/domain/degradation.ts`
 - Auditoría de configuración: `src/domain/configAudit.ts`
 - Generador de metadatos de respuesta OmniRoute : `src/domain/omnirouteResponseMeta.ts`

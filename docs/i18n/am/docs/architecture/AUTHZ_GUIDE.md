@@ -302,15 +302,15 @@ subset ነው። `resolveCallerScopeContext()` ከMCP auth info፣ ከrequest me
 (`src/lib/accessTokens/scopes.ts`) ደረጃ የተሰጣቸው። ይህ ደረጃ የሚሠራው ለaccess-token
 credential ብቻ ነው። [የአስተዳደር ማረጋገጫ](../guides/MANAGEMENT-AUTH.md)ን ይመልከቱ።
 
-## የማረጋገጫ-ያስፈልጋል መቀያየሪያ
+## ማረጋገጫ ያስፈልጋል መቀያየር
 
-`src/shared/utils/apiAuth.ts` ውስጥ ያለው `isAuthRequired()` ለጥያቄ **ማንኛውም** ማረጋገጫ መተግበሩን ይወስናል፦
+`isAuthRequired()` በ `src/shared/utils/apiAuth.ts` ይወስናል** ማንኛውም** auth ለጥያቄ ተፈጻሚ ነው፡-
 
-- `settings.requireLogin === false` → ማረጋገጫ በአለም አቀፍ ደረጃ ተሰናክሏል፣ ሁልጊዜ-የተጠበቀው ደረጃ ([የመንገድ ጠባቂ ደረጃዎች](../security/ROUTE_GUARD_TIERS.md)) እና ተቀባይ ምስክርነት የሚሰጡ ጥሪዎች ሲቀሩ — እነዚህ መግቢያ በርቶ እንዳለ ያው ምስክርነት ይፈልጋሉ፦ የማመሳሰያ ቶከኖችን ማውጣት፣ በማንኛውም ወሰን የCLI መዳረሻ ቶከኖች መፍጠር፣ እና `manage`/`admin` ወሰን ያለው የAPI ቁልፍ መፍጠር፣ ያንን ወሰን ለቁልፍ መስጠት፣ ወይም እንዲህ ያለውን ቁልፍ ማደስ ወይም ማሳየት (`src/lib/api/requireManagementAuth.ts` ውስጥ `requireCredentialForManagementScopedKey()`)። የኢንፈረንስ-ብቻ ቁልፎች ክፍት ሆነው ይቀጥላሉ።
-- የይለፍ ቃል ካልተዋቀረ **እና** `INITIAL_PASSWORD` የአካባቢ ተለዋዋጭ ከሌለ → የbootstrap ሁነታ የመጀመሪያ-ጊዜ ዝግጅት አዋቂውንና loopback ጥያቄዎችን ይፈቅዳል፣ ነገር ግን ለአውታረ መረብ የተጋለጡ ጥያቄዎች አሁንም ምስክርነት ያስፈልጋቸዋል።
-- ማንኛውም የDB ስህተት → ዝግ ይሆናል (በነባሪ ደህንነቱ የተጠበቀ)።
+- `settings.requireLogin === false` → auth በአለምአቀፍ ደረጃ የአካል ጉዳተኛ ነው፣ ሁልጊዜ ከሚጠበቀው ደረጃ ( [የመስመሩን ደረጃ](../security/ROUTE_GUARD_TIERS.md) ይመልከቱ) እና የሚቀበላቸው የምስክር ወረቀት ከሚሰጡ ጥሪዎች በስተቀር፣ ከመግባት ጋር አንድ አይነት ምስክርነት የሚያስፈልጋቸው፡ የማመሳሰል ቶከኖችን መስጠት፣ በማንኛውም ወሰን CLI መዳረሻ ማስመሰያዎችን ማውጣት እና API ቁልፍን መፍጠር፣ `manage`/`admin` scope ማድረግ ወይም scope/zq ቁልፍ መፍጠር እንደዚህ አይነት ቁልፍ እንደገና ማመንጨት ወይም መግለጥ (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`). የማጣቀሻ-ብቻ ቁልፎች ክፍት እንደሆኑ ይቆያሉ። የተጠበቀ የባህሪ ባንዲራ (`REQUIRE_API_KEY`፣ ሌሎች የደህንነት ባንዲራዎች፣ እና SSRF / TLS /MCP-scope/ Sandbox ባንዲራዎችን [በባህሪ ባንዲራዎች](../reference/FEATURE_FLAGS.md#rest-api) ) መፃፍ እና የ PII መሸፈኛ መቼቶችን ማስቀመጥ (`PUT /api/settings/pii`) እንዲሁም ምስክርነት እንደሚያስፈልገው ይቀጥላል።
+- ምንም የይለፍ ቃል አልተዋቀረም።** እና** no `INITIAL_PASSWORD` env var → bootstrap ሁነታ የመሳፈሪያ አዋቂውን እና የመልስ ጥያቄዎችን ይፈቅዳል፣ነገር ግን የተጋለጡ የአውታረ መረብ ጥያቄዎች አሁንም ምስክርነቶች ያስፈልጋቸዋል። ልዩ፡ የተጠበቀ የባህሪ ባንዲራ መጻፍ እና የ PII መሸፈኛ ቅንጅቶችን ማስቀመጥ (`PUT /api/settings/pii`) ከ loopback እንኳን ማረጋገጫ ያስፈልገዋል፣ ስለዚህ loopback በራሱ በቂ አይደለም።
+- ማንኛውም DB ስህተት → አልተሳካም ተዘግቷል (ደህንነቱ የተጠበቀ በነባሪ)።
 
-የደንበኛ API ቁልፍ ማስገደድ `src/shared/utils/featureFlags.ts` ውስጥ ያለውን `isRequireApiKeyEnabled()` ይጠቀማል፣ በቀጥታ `process.env.REQUIRE_API_KEY` ን ከማንበብ ይልቅ። ይህ ለተሰማሩ ምሳሌዎች ይጠቅማል፦ `REQUIRE_API_KEY`ን በዳሽቦርድ → Feature Flags ውስጥ መቀያየር DB መሻሪያ ያስቀምጣል እና ይህንን ረዳት የሚጋሩ `/v1/*`፣ `/v1beta/*`፣ `/models`፣ `/responses`፣ `/chat/completions`፣ `/codex/*` እና ሌሎች የደንበኛ-API ማረጋገጫ ፍተሻዎችን ወዲያውኑ ይነካል። የባንዲራ ማከማቻው ማንበብ ካልተቻለ የደንበኛ-API ማረጋገጫ ዝግ ይሆናል እና ቁልፍ ይፈልጋል።
+የደንበኛ API ቁልፍ ማስፈጸሚያ `isRequireApiKeyEnabled()` በ `src/shared/utils/featureFlags.ts` ይጠቀማል እንጂ በቀጥታ `process.env.REQUIRE_API_KEY` ንባብ አይደለም። ይህ ለተሰማሩ ጉዳዮች አስፈላጊ ነው፡ በዳሽቦርድ → ባህሪ ባንዲራዎች `REQUIRE_API_KEY` DB መሻርን ያከማቻል እና ወዲያውኑ `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` እና ሌሎች ይህን ረዳት የሚጋሩ የደንበኛ-ኤፒአይ ማረጋገጫ ፍተሻዎችን ይነካል። የባህሪ ባንዲራ ማከማቻው ማንበብ ካልተቻለ ደንበኛ API auth ተዘግቷል እና ቁልፍ ያስፈልገዋል።
 
 ## ተኳሃኝነትን የሚያፈርስ ለውጥ — v3.8.0
 

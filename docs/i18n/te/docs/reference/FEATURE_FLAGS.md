@@ -218,34 +218,27 @@ boolean ఫ్లాగ్ ప్రభావవంతమైన విలువ 
 
 ---
 
-## ఫ్లాగ్లను టోగుల్ చేయడం
+## ఫ్లాగ్లను టోగుల్ చేస్తోంది
 
 ### డాష్బోర్డ్
 
-**Dashboard → Settings → Feature Flags** కు నావిగేట్ చేయండి
-(`/dashboard/settings/feature-flags`). గ్రిడ్
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-ఇవన్నింటికి మద్దతు ఇస్తుంది:
+నావిగేట్ చేయండి** డాష్బోర్డ్ → సెట్టింగ్లు → ఫీచర్ ఫ్లాగ్లు** (`/dashboard/settings/feature-flags`) గ్రిడ్ (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) మద్దతు ఇస్తుంది:
 
-- కీ లేదా వివరణ ద్వారా **శోధన**, అలాగే వర్గం ద్వారా **ఫిల్టర్** చేయడం (అదనంగా సింథటిక్
-  **పునఃప్రారంభం అవసరం** వీక్షణ).
-- బూలియన్ ఫ్లాగ్ల కోసం **టోగుల్**, enum ఫ్లాగ్ల కోసం **డ్రాప్డౌన్**
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- ప్రతి ఫ్లాగ్కు ఒక **మూల బ్యాడ్జ్** — `DB`, `ENV`, లేదా `DEF` — ప్రభావవంతమైన విలువ
-  ఎక్కడి నుంచి వచ్చిందో చూపిస్తుంది.
-- overrideను తొలగించడానికి ( `DB`-మూలం కలిగిన ఫ్లాగ్లకు మాత్రమే చూపబడే) **Reset**
-  బటన్, అలాగే దిగువన **Reset All Overrides** బటన్.
-- `requiresRestart` ఫ్లాగ్ మార్చబడినప్పుడు **సర్వర్ను పునఃప్రారంభించండి** బ్యానర్.
+- **శోధించండి** కీ లేదా వివరణ ద్వారా, మరియు** వడపోత** వర్గం ద్వారా (ప్లస్ సింథటిక్** పునఃప్రారంభం అవసరం** వీక్షణ).
+- ఎ** టోగుల్** బూలియన్ జెండాల కోసం మరియు a** డ్రాప్డౌన్** enum ఫ్లాగ్ల కోసం (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- ఎ** మూల బ్యాడ్జ్** ప్రతి ఫ్లాగ్ — `DB`, `ENV`, లేదా `DEF` — ప్రభావవంతమైన విలువ ఎక్కడ నుండి వచ్చిందో చూపుతుంది.
+- ఎ** రీసెట్ చేయండి** ఓవర్రైడ్ను వదలడానికి బటన్ ( `DB` -sourced ఫ్లాగ్ల కోసం మాత్రమే చూపబడింది) మరియు a** అన్ని ఓవర్రైడ్లను రీసెట్ చేయండి** దిగువన బటన్.
+- ఎ** సర్వర్ పునఃప్రారంభించండి** `requiresRestart` జెండాను మార్చినప్పుడు బ్యానర్.
 
 ### REST API
 
-అన్ని ఆపరేషన్లు ఒకే route ద్వారా జరుగుతాయి:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-ప్రతి methodకు ప్రామాణీకరించబడిన డాష్బోర్డ్ సెషన్ అవసరం (లేకపోతే `401`).
+అన్ని కార్యకలాపాలు ఒకే మార్గం గుండా వెళతాయి: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). ప్రతి పద్ధతికి ప్రామాణీకరించబడిన డాష్బోర్డ్ సెషన్ అవసరం (`401` లేకపోతే).
+
+లాగిన్ డిసేబుల్తో (`requireLogin=false`) రక్షిత ఫ్లాగ్లు మినహా మార్గం తెరిచి ఉంటుంది: భద్రతా వర్గంలోని ప్రతి ఫ్లాగ్తో పాటు `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` మరియు `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` లో `protectedFeatureFlags.ts`). వాటిలో ఒకదానిపై `PUT`, మరియు వాటిలో ఒకదానిలో DB ఓవర్రైడ్ ఉన్నప్పుడు `DELETE` ఇప్పటికీ డాష్బోర్డ్ సెషన్, `manage` -scope API కీ, రైట్ స్కోప్ లేదా అంతకంటే ఎక్కువ ఉన్న `oma_` యాక్సెస్ టోకెన్ లేదా లూప్బ్యాక్ నుండి పంపబడిన CLI టోకెన్ లేదా అంతర్గత-సేవ టోకెన్ అవసరం. ఆ సెట్ లాగిన్ ఆన్లో కంటే విస్తృతంగా ఉంటుంది, ఇక్కడ మార్గం సెషన్ లేదా `manage` -scope కీని మాత్రమే అంగీకరిస్తుంది.
 
 #### `GET /api/settings/feature-flags`
 
-ప్రతి ఫ్లాగ్కు దాని ప్రభావవంతమైన విలువ, మూలం, అలాగే సారాంశాన్ని అందిస్తుంది.
+ప్రతి ఫ్లాగ్ను దాని ప్రభావవంతమైన విలువ, మూలం మరియు సారాంశంతో అందిస్తుంది.
 
 ```jsonc
 {
@@ -263,7 +256,7 @@ boolean ఫ్లాగ్ ప్రభావవంతమైన విలువ 
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... మొత్తం 119 ఫ్లాగ్లు
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -277,34 +270,30 @@ boolean ఫ్లాగ్ ప్రభావవంతమైన విలువ 
 
 #### `PUT /api/settings/feature-flags`
 
-ఒకే overrideను సెట్ చేయండి లేదా తొలగించండి. Body: `{ key: string; value?: string }`.
-`value`ను వదిలివేస్తే override తొలగించబడుతుంది (env / default పునరుద్ధరించబడుతుంది).
+ఒకే ఓవర్రైడ్ను సెట్ చేయండి లేదా తీసివేయండి. శరీరం: `{ key: string; value?: string }`. `value` ని వదిలివేయడం ఓవర్రైడ్ను తొలగిస్తుంది (env / డిఫాల్ట్ని పునరుద్ధరించడం).
 
 ```bash
-# DB overrideను సెట్ చేయండి
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# overrideను తొలగించండి ("value" లేకుండా)
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-ప్రతిస్పందనలో కొత్త `effectiveValue`/`source`, `previousValue`/
-`previousSource`, అలాగే `requiresRestart` తిరిగి అందించబడతాయి. తెలియని కీలు మరియు పరిధికి వెలుపల ఉన్న enum
-విలువలు `400`తో తిరస్కరించబడతాయి.
+ప్రతిస్పందన కొత్త `effectiveValue`/`source`, `previousValue`/ `previousSource` మరియు `requiresRestart` ప్రతిధ్వనిస్తుంది. తెలియని కీలు మరియు పరిధి వెలుపల ఉన్న enum విలువలు `400` తో తిరస్కరించబడ్డాయి .
 
 #### `DELETE /api/settings/feature-flags`
 
-అన్ని DB overridesను ఒకేసారి క్లియర్ చేసి, ప్రతి ఫ్లాగ్ను దాని env / default
-విలువకు పునరుద్ధరిస్తుంది. `{ cleared: <count>, message: "..." }`ను అందిస్తుంది.
+క్లియర్ చేస్తుంది** అన్ని** DB ఒకేసారి ఓవర్రైడ్ చేస్తుంది, ప్రతి ఫ్లాగ్ను దాని env / డిఫాల్ట్ విలువకు పునరుద్ధరిస్తుంది. `{ cleared: <count>, message: "..." }` ని అందిస్తుంది.
 
 > [!NOTE]
-> `requiresRestart: true` కలిగిన ఫ్లాగ్లు process reload తర్వాత మాత్రమే అమలులోకి వస్తాయి.
-> డాష్బోర్డ్ పునఃప్రారంభ ప్రక్రియ `POST /api/restart`ను కాల్ చేసి, సర్వర్ మళ్లీ అందుబాటులోకి
-> వచ్చే వరకు `GET /api/health/ping`ను పోలింగ్ చేస్తుంది.
+> `requiresRestart: true` తో ఫ్లాగ్లు ప్రక్రియ రీలోడ్ అయిన తర్వాత మాత్రమే ప్రభావం చూపుతాయి. డాష్బోర్డ్ రీస్టార్ట్ ఫ్లో `POST /api/restart` అని పిలుస్తుంది మరియు సర్వర్ బ్యాకప్ అయ్యే వరకు `GET /api/health/ping` పోల్ చేస్తుంది.
+
+---
 
 ## అత్యవసర బడ్జెట్ ఫాల్బ్యాక్
 

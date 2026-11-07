@@ -415,7 +415,7 @@ OmniRoute може да инсталира, надгледа и рутира к�
 - Connection/model правило столар: `src/domain/connectionModelRules.ts`
 - Снимци доступности модела: `src/domain/modelAvailability.ts`
 - Праћење истека провајдера: `src/domain/providerExpiration.ts`
-- Кеш квота: `src/domain/quotaCache.ts`
+- Кеш квота: `src/domain/quotaCache.ts`. Провајдери додају и уклањају прозоре квота (OpenAI је избацио 5-часовни Codex прозор за неке планове), тако да употреба читања адаптера провајдера потврђује да је комплетна (`quotasComplete`, види `src/lib/usage/usageReading.ts`) је цео сет прозора налога: прозор познат раније, али одсутан из њега се повлачи, у кеш меморији, у рехидратесре а рестарт апликацији, рехидратесре пер рестарт Codex `quota_snapshots` стање и у Claude засићеним сегментима. Делимични докази (заглавља одговора, застареле копије) ажурирају само прозоре које носи.
 - Стање деградације: `src/domain/degradation.ts`
 - Ревизија конфигурације: `src/domain/configAudit.ts`
 - OmniRoute одговор за изградњу метаподатака: `src/domain/omnirouteResponseMeta.ts`

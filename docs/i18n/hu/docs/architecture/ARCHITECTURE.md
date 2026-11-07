@@ -414,7 +414,7 @@ A `src/domain/` névtér központosítja a politikai döntéseket, így az útvo
 - Connection/model szabálycsatlakozó: `src/domain/connectionModelRules.ts`
 - Modell elérhetőségi pillanatképek: `src/domain/modelAvailability.ts`
 - Szolgáltató lejáratának követése: `src/domain/providerExpiration.ts`
-- Kvóta gyorsítótár: `src/domain/quotaCache.ts`
+- Kvóta gyorsítótár: `src/domain/quotaCache.ts`. A szolgáltatók kvótaablakokat adnak hozzá és távolítanak el (OpenAI elvetette az 5 órás Codex ablakot egyes terveknél), így a szolgáltató adapterét leolvasó használat teljesnek igazolja (`quotasComplete`, lásd `src/lib/usage/usageReading.ts`) a fiók teljes ablakkészlete: a korábban ismert, de abból hiányzó ablak megszűnik, a gyorsítótárban, a rependedqrekordban, a restartqreffates. megmaradt a Codex kvóta állapota és Claude `quota_snapshots` sávjaiban. A részleges bizonyítékok (válaszfejlécek, elavult másolatok) csak az általuk hordozott ablakokat frissítik.
 - Lebomlási állapot: `src/domain/degradation.ts`
 - Konfiguráció audit: `src/domain/configAudit.ts`
 - OmniRoute válasz metaadat-készítő: `src/domain/omnirouteResponseMeta.ts`

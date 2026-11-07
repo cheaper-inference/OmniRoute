@@ -225,29 +225,25 @@ effektiva policy.
 
 ## Växla flaggor
 
-### Instrumentpanel
+### Instrumentbräda
 
-Navigera till **Instrumentpanel → Inställningar → Funktionsflaggor**
-(`/dashboard/settings/feature-flags`). Rutnätet
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-har stöd för:
+Navigera till** Dashboard → Inställningar → Funktionsflaggor** (`/dashboard/settings/feature-flags`). Rutnätet (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) stöder:
 
-- **Sökning** efter nyckel eller beskrivning samt **filtrering** efter kategori (plus en syntetisk vy för **Kräver omstart**).
-- En **växel** för booleska flaggor och en **rullgardinsmeny** för enum-flaggor
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- En **källbricka** per flagga — `DB`, `ENV` eller `DEF` — som visar var det effektiva värdet kommer från.
-- En **Återställ**-knapp (visas endast för flaggor med källan `DB`) för att ta bort åsidosättningen, samt en knapp för **Återställ alla åsidosättningar** längst ned.
-- En banner för **Starta om servern** när en flagga med `requiresRestart` ändras.
+- **Söka** genom nyckel eller beskrivning, och** filtrera** efter kategori (plus en syntetisk** Kräver omstart** se).
+- A** växla** för booleska flaggor och en** rullgardinsmenyn** för enum flaggor (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- A** källmärke** per flagga — `DB`, `ENV` eller `DEF` — som visar var det effektiva värdet kom ifrån.
+- A** Återställa** knappen (visas endast för `DB` -sourced flaggor) för att släppa åsidosättningen, och en** Återställ alla åsidosättanden** knappen längst ner.
+- A** Starta om servern** banner när en `requiresRestart` flagga ändras.
 
-### REST-API
+### REST API
 
-Alla åtgärder går via en enda route:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Varje metod kräver en autentiserad dashboard-session (`401` annars).
+Alla operationer går genom en enda väg: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Varje metod kräver en autentiserad instrumentpanelsession ( annars `401` ).
+
+Med inloggning inaktiverad (`requireLogin=false`) är rutten öppen, förutom de skyddade flaggorna: varje flagga i säkerhetskategorin plus `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` och `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` in `protectedFeatureFlags.ts`). En `PUT` på en av dem, och en `DELETE` medan en av dem har en DB överstyrning, behöver fortfarande en dashboardsession, en `manage` -scope API nyckel, en `oma_` -åtkomsttoken med skrivomfång eller högre, eller CLI token eller interntjänsttoken som skickas från loopback. Den uppsättningen är bredare än med inloggning, där rutten endast accepterar en session eller en `manage` -scope nyckel.
 
 #### `GET /api/settings/feature-flags`
 
-Returnerar alla flaggor med deras effektiva värde, källa och en sammanfattning.
+Returnerar varje flagga med dess effektiva värde, källa och en sammanfattning.
 
 ```jsonc
 {
@@ -265,7 +261,7 @@ Returnerar alla flaggor med deras effektiva värde, källa och en sammanfattning
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... alla 119 flaggor
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -279,33 +275,30 @@ Returnerar alla flaggor med deras effektiva värde, källa och en sammanfattning
 
 #### `PUT /api/settings/feature-flags`
 
-Ange eller ta bort en enskild åsidosättning. Body: `{ key: string; value?: string }`.
-Om `value` utelämnas tas åsidosättningen bort (och värdet från env / standardvärdet återställs).
+Ställ in eller ta bort en enkel åsidosättning. Kropp: `{ key: string; value?: string }`. Att utelämna `value` tar bort åsidosättningen (återställer env / standard).
 
 ```bash
-# Ange en DB-åsidosättning
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Ta bort åsidosättningen (utan "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Svaret innehåller de nya `effectiveValue`/`source`, `previousValue`/
-`previousSource` samt `requiresRestart`. Okända nycklar och enum-värden utanför
-det tillåtna intervallet avvisas med `400`.
+Svaret ekar den nya `effectiveValue`/`source`, `previousValue`/ `previousSource` och `requiresRestart`. Okända nycklar och enumvärden utanför intervallet avvisas med `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Rensar **alla** DB-åsidosättningar på en gång och återställer varje flagga till dess env- / standardvärde. Returnerar `{ cleared: <count>, message: "..." }`.
+Rensar** alla** DB åsidosätter på en gång och återställer varje flagga till dess env/standardvärde. Returnerar `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Flaggor med `requiresRestart: true` börjar gälla först efter en omladdning av processen.
-> Dashboardens omstartsflöde anropar `POST /api/restart` och frågar sedan regelbundet
-> `GET /api/health/ping` tills servern är igång igen.
+> Flaggor med `requiresRestart: true` träder i kraft först efter en omladdning av processen. Instrumentpanelens omstartsflöde anropar `POST /api/restart` och pollar sedan `GET /api/health/ping` tills servern är tillbaka.
+
+---
 
 ## Reservlösning för nödbudget
 

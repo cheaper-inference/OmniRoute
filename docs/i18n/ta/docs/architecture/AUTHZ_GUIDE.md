@@ -307,15 +307,15 @@ API கீகள் ஒரு `scopes` வரிசையைக் கொண்�
 
 `oma_live_…` டோக்கன்களில் `read` / `write` / `admin`, `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) மூலம் தரவரிசைப்படுத்தப்பட்டுள்ளது. இந்த தரவரிசை அணுகல்-டோக்கன் நற்சான்றிதழுக்கு மட்டுமே பொருந்தும். [மேலாண்மை அங்கீகாரம்](../guides/MANAGEMENT-AUTH.md) ஐப் பார்க்கவும்.
 
-## Auth Required மாற்று (toggle)
+## அங்கீகாரம் தேவை மாற்று
 
-`src/shared/utils/apiAuth.ts`-இல் உள்ள `isAuthRequired()`, ஒரு request-க்கு **ஏதேனும்** auth கட்டாயமா என்பதை முடிவு செய்கிறது:
+என்பதை `src/shared/utils/apiAuth.ts` இல் உள்ள `isAuthRequired()` தீர்மானிக்கிறது** ஏதேனும்** ஒரு கோரிக்கைக்கு அங்கீகாரம் செயல்படுத்தப்படுகிறது:
 
-- `settings.requireLogin === false` → auth உலகளவில் முடக்கப்படும், ஆனால் எப்போதும்-பாதுகாக்கப்பட்ட அடுக்கு ([Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) தவிர, மற்றும் ஏற்கப்படும் credential-ஐ வழங்கும் calls தவிர — அவை login இயக்கத்தில் இருக்கும்போது தேவைப்படும் அதே credential-ஐக் கோரும்: sync tokens வழங்குதல், எந்த scope-இலும் CLI access tokens உருவாக்குதல், மற்றும் `manage`/`admin` scope கொண்ட API key-ஐ உருவாக்குதல், ஒரு key-க்கு அந்த scope-ஐ வழங்குதல், அல்லது அத்தகைய key-ஐ மீண்டும் உருவாக்குதல் அல்லது வெளிப்படுத்துதல் (`src/lib/api/requireManagementAuth.ts`-இல் `requireCredentialForManagementScopedKey()`). Inference-only keys திறந்தே இருக்கும்.
-- கடவுச்சொல் அமைக்கப்படவில்லை **மற்றும்** `INITIAL_PASSWORD` env var இல்லை → bootstrap mode onboarding wizard-ஐயும் loopback requests-ஐயும் அனுமதிக்கும், ஆனால் வெளிப்படும் network requests-க்கு இன்னும் credentials தேவை.
-- ஏதேனும் DB error → fail closed (secure-by-default).
+- `settings.requireLogin === false` → auth உலகளவில் முடக்கப்பட்டுள்ளது, எப்போதும்-பாதுகாக்கப்பட்ட அடுக்கு ( [பாதை காவலர் அடுக்குகளைப்](../security/ROUTE_GUARD_TIERS.md) பார்க்கவும்) மற்றும் அது ஏற்றுக்கொள்ளும் நற்சான்றிதழை வழங்கும் அழைப்புகள் தவிர, உள்நுழைவுடன் அதே நற்சான்றிதழ் தேவை: ஒத்திசைவு டோக்கன்களை வழங்குதல், CLI அணுகல் டோக்கன்களை எந்த ஸ்கோப்பிலும் உருவாக்குதல், API ஸ்கோப்பில் உருவாக்குதல், மற்றும் விசையை உருவாக்குதல் ஒரு விசைக்கு அந்த நோக்கத்தை வழங்குதல், அல்லது அத்தகைய `requireCredentialForManagementScopedKey()` மீண்டும் உருவாக்குதல் அல்லது வெளிப்படுத்துதல் ( `manage` `src/lib/api/requireManagementAuth.ts` `admin` ). அனுமானம் மட்டுமே விசைகள் திறந்திருக்கும். பாதுகாக்கப்பட்ட அம்சக் கொடியை எழுதுதல் (`REQUIRE_API_KEY`, மற்ற பாதுகாப்புக் கொடிகள் மற்றும் SSRF / TLS / MCP- ஸ்கோப் / சாண்ட்பாக்ஸ் கொடிகள் [அம்சக் கொடிகளில்](../reference/FEATURE_FLAGS.md#rest-api) பட்டியலிடப்பட்டுள்ளன ) மற்றும் PII மறைக்கும் அமைப்புகளைச் சேமிப்பதற்கும் (`PUT /api/settings/pii`) நற்சான்றிதழ் தேவைப்படுகிறது.
+- கடவுச்சொல் கட்டமைக்கப்படவில்லை** மற்றும்** `INITIAL_PASSWORD` env var → பூட்ஸ்டார்ப் பயன்முறையானது ஆன்போர்டிங் வழிகாட்டி மற்றும் லூப்பேக் கோரிக்கைகளை அனுமதிக்கிறது, ஆனால் வெளிப்படும் நெட்வொர்க் கோரிக்கைகளுக்கு இன்னும் நற்சான்றிதழ்கள் தேவை. விதிவிலக்கு: பாதுகாக்கப்பட்ட அம்சக் கொடியை எழுதுவதற்கும், PII முகமூடி அமைப்புகளைச் சேமிப்பதற்கும் (`PUT /api/settings/pii`) லூப்பேக்கிலிருந்தும் ஒரு நற்சான்றிதழ் தேவை, எனவே லூப்பேக் தானாகவே போதுமானதாக இல்லை.
+- எந்த DB பிழை → மூடப்படும் (பாதுகாப்பான-இயல்புநிலை).
 
-Client API key enforcement, நேரடியாக `process.env.REQUIRE_API_KEY`-ஐப் படிப்பதற்குப் பதிலாக, `src/shared/utils/featureFlags.ts`-இல் உள்ள `isRequireApiKeyEnabled()`-ஐப் பயன்படுத்துகிறது. இது deployed instances-க்கு முக்கியம்: Dashboard → Feature Flags-இல் `REQUIRE_API_KEY`-ஐ மாற்றினால் DB override சேமிக்கப்பட்டு, `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, மேலும் இந்த helper-ஐப் பகிரும் பிற client-API auth சோதனைகள் உடனடியாகப் பாதிக்கப்படும். Feature flag store படிக்க முடியாவிட்டால், client API auth fail closed ஆகி key-ஐக் கோரும்.
+கிளையண்ட் API விசை அமலாக்கம் `src/shared/utils/featureFlags.ts` இல் `isRequireApiKeyEnabled()` பயன்படுத்துகிறது, நேரடி `process.env.REQUIRE_API_KEY` வாசிப்பு அல்ல. பயன்படுத்தப்பட்ட நிகழ்வுகளுக்கு இது முக்கியமானது: டாஷ்போர்டில் `REQUIRE_API_KEY` மாற்றுவது → அம்சக் கொடிகள் DB மேலெழுதலைச் சேமித்து, உடனடியாக `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, மற்றும் பிற கிளையன்ட்-ஏபிஐ அங்கீகாரச் சரிபார்ப்புகளைப் பகிரும் இந்த உதவிச் சரிபார்ப்பைப் பாதிக்கிறது. அம்சக் கொடி அங்காடியைப் படிக்க முடியாவிட்டால், கிளையன்ட் API அங்கீகாரம் மூடப்படுவதில் தோல்வியடைந்து, விசை தேவைப்படுகிறது.
 
 ## இணக்கமுறிவு மாற்றம் — v3.8.0
 

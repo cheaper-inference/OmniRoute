@@ -217,31 +217,27 @@ ylemmän tason totuusarvoinen käytöstäpoisto valitsee arvon `count_as_zero`; 
 > `Restart`-sarake merkitsee lippuja, joiden arvo on `requiresRestart: true` — arvo
 > tallennetaan välittömästi, mutta se tulee voimaan vasta prosessin uudelleenlatauksen jälkeen. Enum-liput hylkäävät kaikki arvot, jotka eivät kuulu niiden sallittuun joukkoon (arvo vahvistetaan palvelimen puolella sekä kohteessa `setFeatureFlagOverride()` että REST-käsittelijässä `PUT`).
 
-## Lippujen vaihtaminen
+## Lippujen vaihto
 
-### Koontinäyttö
+### Kojelauta
 
-Siirry kohtaan **Koontinäyttö → Asetukset → Ominaisuusliput**
-(`/dashboard/settings/feature-flags`). Ruudukko
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-tukee seuraavia toimintoja:
+Navigoi kohteeseen** Dashboard → Asetukset → Ominaisuusliput** (`/dashboard/settings/feature-flags`). Ruudukko (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) tukee:
 
-- **Haku** avaimen tai kuvauksen perusteella sekä **suodatus** luokan mukaan (lisäksi synteettinen näkymä **Vaatii uudelleenkäynnistyksen**).
-- Totuusarvolippujen **vaihtokytkin** ja enum-lippujen **pudotusvalikko**
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Kunkin lipun **lähdemerkintä** — `DB`, `ENV` tai `DEF` — joka näyttää, mistä voimassa oleva arvo on peräisin.
-- **Palauta**-painike (näytetään vain `DB`-lähteestä peräisin oleville lipuille) ohituksen poistamista varten sekä alareunassa oleva **Palauta kaikki ohitukset** -painike.
-- **Käynnistä palvelin uudelleen** -banneri, kun `requiresRestart`-lippua muutetaan.
+- **Haku** avaimella tai kuvauksella ja** suodattaa** luokittain (plus synteettinen** Vaatii uudelleenkäynnistyksen** näkymä).
+- A** vaihtaa** Boolen lipuille ja a** pudotusvalikosta** enum-lipuille (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- A** lähdemerkki** per lippu — `DB`, `ENV` tai `DEF` — joka osoittaa, mistä tehollinen arvo tuli.
+- A** Nollaa** -painiketta (näkyy vain `DB` -sourced -lippujen kohdalla) ohituksen poistamiseksi, ja a** Nollaa kaikki ohitukset** painiketta alareunassa.
+- A** Käynnistä palvelin uudelleen** banneri, kun `requiresRestart` lippu vaihdetaan.
 
-### REST-rajapinta
+### REST API
 
-Kaikki toiminnot kulkevat yhden reitin kautta:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Jokainen menetelmä edellyttää todennettua koontinäyttöistuntoa (muussa tapauksessa `401`).
+Kaikki toiminnot kulkevat yhden reitin kautta: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Jokainen menetelmä edellyttää todennettua kojelautaistuntoa (muuten `401` ).
+
+Kun sisäänkirjautuminen on estetty (`requireLogin=false`), reitti on auki paitsi suojattuja lippuja: jokainen Suojaus-luokan lippu plus `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` ja `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` in `protectedFeatureFlags.ts`). Yhdellä niistä oleva `PUT` ja `DELETE`, kun toisessa niistä on DB ohitus, tarvitsee silti kojelautaistunnon, `manage` -scope API avaimen, `oma_` käyttöoikeustunnuksen, jolla on kirjoitusalue tai suurempi, tai CLI tunnuksen tai sisäisen palvelun tunnuksen, joka lähetetään silmukasta. Tämä joukko on laajempi kuin sisäänkirjautumisen yhteydessä, jolloin reitti hyväksyy vain istunnon tai `manage` -scope -avaimen.
 
 #### `GET /api/settings/feature-flags`
 
-Palauttaa kaikki liput niiden voimassa olevan arvon, lähteen ja yhteenvedon kanssa.
+Palauttaa jokaisen lipun tehollisen arvon, lähteen ja yhteenvedon kera.
 
 ```jsonc
 {
@@ -259,7 +255,7 @@ Palauttaa kaikki liput niiden voimassa olevan arvon, lähteen ja yhteenvedon kan
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... kaikki 119 lippua
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -273,34 +269,30 @@ Palauttaa kaikki liput niiden voimassa olevan arvon, lähteen ja yhteenvedon kan
 
 #### `PUT /api/settings/feature-flags`
 
-Aseta yksittäinen ohitus tai poista se. Runko: `{ key: string; value?: string }`.
-Jos `value` jätetään pois, ohitus poistetaan (jolloin ympäristömuuttujan / oletusarvon arvo palautetaan).
+Aseta tai poista yksi ohitus. Runko: `{ key: string; value?: string }`. Jos `value` jätetään pois, ohitus poistetaan (palautetaan env / oletus).
 
 ```bash
-# Aseta DB-ohitus
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Poista ohitus (ei "value"-kenttää)
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Vastaus sisältää uuden `effectiveValue`- ja `source`-arvon, `previousValue`-/
-`previousSource`-arvon sekä `requiresRestart`-arvon. Tuntemattomat avaimet ja sallitun
-alueen ulkopuoliset enum-arvot hylätään vastauksella `400`.
+Vastaus toistaa uudet `effectiveValue`/`source`, `previousValue`/ `previousSource` ja `requiresRestart`. Tuntemattomat avaimet ja alueen ulkopuoliset enum-arvot hylätään komennolla `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Poistaa kaikki DB-ohitukset kerralla ja palauttaa jokaisen lipun ympäristömuuttujan /
-oletusarvon mukaiseen arvoon. Palauttaa `{ cleared: <count>, message: "..." }`.
+Tyhjentää** kaikki** DB ohittaa kerralla ja palauttaa jokaisen lipun sen env / oletusarvoon. Palauttaa `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Liput, joiden `requiresRestart: true`, tulevat voimaan vasta prosessin uudelleenlatauksen jälkeen.
-> Koontinäytön uudelleenkäynnistyskulku kutsuu `POST /api/restart`-reittiä ja tekee sen jälkeen kyselyitä
-> `GET /api/health/ping`-reitille, kunnes palvelin on jälleen käytettävissä.
+> `requiresRestart: true` -merkit tulevat voimaan vasta prosessin uudelleenlatauksen jälkeen. Kojelaudan uudelleenkäynnistysvirta kutsuu `POST /api/restart` ja sitten kyselyä `GET /api/health/ping`, kunnes palvelin on varmuuskopioitu.
+
+---
 
 ## Budjetin hätävaravaihtoehto
 

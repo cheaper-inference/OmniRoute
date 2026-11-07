@@ -221,31 +221,27 @@ căutare de tarif eșuată. Aplicarea și raportul administratorului determină 
 
 ---
 
-## Comutarea indicatorilor
+## Comutarea steaguri
 
-### Tablou de bord
+### Bord
 
-Navigați la **Tablou de bord → Setări → Indicatori de funcționalitate**
-(`/dashboard/settings/feature-flags`). Grila
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-acceptă:
+Navigați la** Tabloul de bord → Setări → Caracteristici steaguri** (`/dashboard/settings/feature-flags`). Grila (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) acceptă:
 
-- **Căutarea** după cheie sau descriere și **filtrarea** după categorie (plus o vizualizare sintetică **Necesită repornire**).
-- Un **comutator** pentru indicatorii booleeni și un **meniu derulant** pentru indicatorii enum
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- O insignă de sursă pentru fiecare indicator — `DB`, `ENV` sau `DEF` — care indică de unde provine valoarea efectivă.
-- Un buton **Resetare** (afișat numai pentru indicatorii cu sursa `DB`) pentru eliminarea suprascrierii și un buton **Resetarea tuturor suprascrierilor** în partea de jos.
-- O bandă **Repornire server** atunci când este modificat un indicator `requiresRestart`.
+- **Căutare** prin cheie sau descriere și** filtra** după categorie (plus un sintetic** Necesită repornire** vedere).
+- O** comutați** pentru steaguri booleene și a** scapă jos** pentru steaguri enumerare (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- O** insigna sursă** per flag — `DB`, `ENV` sau `DEF` — arătând de unde provine valoarea efectivă.
+- O** Resetați** butonul (afișat numai pentru steaguri `DB` -sourced ) pentru a renunța la suprascriere și a** Resetați toate suprascrierile** butonul din partea de jos.
+- O** Reporniți serverul** banner atunci când un steag `requiresRestart` este schimbat.
 
-### API REST
+### REST API
 
-Toate operațiunile trec printr-o singură rută:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Fiecare metodă necesită o sesiune autentificată a tabloului de bord (`401` în caz contrar).
+Toate operațiunile trec printr-o singură rută: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Fiecare metodă necesită o sesiune de tablou de bord autentificată (`401` altfel).
+
+Cu autentificarea dezactivată (`requireLogin=false`) ruta este deschisă, cu excepția steagurilor protejate: fiecare steag din categoria Securitate plus `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` și `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` în `protectedFeatureFlags.ts`). Un `PUT` pe unul dintre ele și un `DELETE` în timp ce unul dintre ele are o suprascriere DB, mai are nevoie de o sesiune de tablou de bord, o cheie `manage` -scope API, un jeton de acces `oma_` cu domeniu de scriere sau mai mare sau jetonul CLI sau jetonul de serviciu intern trimis din loopback. Acest set este mai larg decât cu autentificarea activată, unde ruta acceptă doar o sesiune sau o cheie `manage` -scope.
 
 #### `GET /api/settings/feature-flags`
 
-Returnează fiecare indicator împreună cu valoarea efectivă, sursa și un rezumat.
+Returnează fiecare semnalizare cu valoarea efectivă, sursa și un rezumat.
 
 ```jsonc
 {
@@ -277,8 +273,7 @@ Returnează fiecare indicator împreună cu valoarea efectivă, sursa și un rez
 
 #### `PUT /api/settings/feature-flags`
 
-Setează sau elimină o singură suprascriere. Corp: `{ key: string; value?: string }`.
-Omiterea `value` elimină suprascrierea (restabilind valoarea din mediu / implicită).
+Setați sau eliminați o singură modificare. Corp: `{ key: string; value?: string }`. Omiterea `value` elimină suprascrierea (restaurând env / default).
 
 ```bash
 # Set a DB override
@@ -292,18 +287,14 @@ curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Răspunsul repetă noua valoare `effectiveValue`/sursă `source`, valoarea anterioară `previousValue`/
-sursa anterioară `previousSource` și `requiresRestart`. Cheile necunoscute și valorile enum
-în afara intervalului acceptat sunt respinse cu `400`.
+Răspunsul ecou noul `effectiveValue`/`source`, `previousValue`/ `previousSource` și `requiresRestart`. Cheile necunoscute și valorile enumerate în afara intervalului sunt respinse cu `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Șterge toate suprascrierile DB dintr-o dată, restabilind fiecare indicator la valoarea din mediu / implicită. Returnează `{ cleared: <count>, message: "..." }`.
+Curățește** toate** DB suprascrie dintr-o dată, restabilind fiecare steag la valoarea lui env / implicită. Returnează `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Indicatorii cu `requiresRestart: true` intră în vigoare numai după reîncărcarea procesului.
-> Fluxul de repornire al tabloului de bord apelează `POST /api/restart`, apoi interoghează periodic
-> `GET /api/health/ping` până când serverul este din nou disponibil.
+> Indicatoarele cu `requiresRestart: true` intră în vigoare numai după reîncărcarea unui proces. Fluxul de repornire al tabloului de bord apelează `POST /api/restart` și apoi interogează `GET /api/health/ping` până când serverul este backup.
 
 ---
 

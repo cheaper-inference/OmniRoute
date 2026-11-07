@@ -205,34 +205,27 @@ boolean flag တစ်ခု၏ ထိရောက်သောတန်ဖို
 
 ---
 
-## Flag များကို အဖွင့်အပိတ် ပြုလုပ်ခြင်း
+## အလံများပြောင်းခြင်း။
 
-### ဒက်ရှ်ဘုတ်
+### ဒိုင်ခွက်
 
-**Dashboard → Settings → Feature Flags**
-(`/dashboard/settings/feature-flags`) သို့ သွားပါ။ Grid
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-တွင် အောက်ပါလုပ်ဆောင်ချက်များကို ပံ့ပိုးပေးသည်-
+သို့သွားပါ။** ဒက်ရှ်ဘုတ် → ဆက်တင်များ → အင်္ဂါရပ် အလံများ** (`/dashboard/settings/feature-flags`) ။ ဇယားကွက် (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) သည်-
 
-- Key သို့မဟုတ် ဖော်ပြချက်အလိုက် **ရှာဖွေခြင်း** နှင့် အမျိုးအစားအလိုက် **စစ်ထုတ်ခြင်း** (အလိုအလျောက်ဖန်တီးထားသော
-  **Requires Restart** မြင်ကွင်းအပါအဝင်)။
-- Boolean flag များအတွက် **toggle** နှင့် enum flag များအတွက် **dropdown**
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`)။
-- Flag တစ်ခုစီအတွက် ၎င်း၏ အကျိုးသက်ရောက်နေသော တန်ဖိုးသည် မည်သည့်နေရာမှ ရရှိလာသည်ကို ပြသသည့်
-  source badge — `DB`၊ `ENV` သို့မဟုတ် `DEF`။
-- Override ကိုဖယ်ရှားရန် `DB` မှ ရရှိသော flag များတွင်သာ ပြသသည့် **Reset** ခလုတ်နှင့် အောက်ခြေရှိ
-  **Reset All Overrides** ခလုတ်။
-- `requiresRestart` flag တစ်ခု ပြောင်းလဲသည့်အခါ **Restart Server** banner။
+- **ရှာရန်** သော့ သို့မဟုတ် ဖော်ပြချက်အားဖြင့် လည်းကောင်း၊** ဇကာ** အမျိုးအစားအလိုက် (ပေါင်းစပ်ဓာတုပစ္စည်း** ပြန်လည်စတင်ရန် လိုအပ်သည်။** အမြင်)။
+- တစ်** ပြောင်းရန်** boolean အလံများနှင့် a** ကျသည်** enum အလံများ (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`) အတွက်။
+- တစ်** အရင်းအမြစ်တံဆိပ်** — `DB`၊ `ENV`၊ သို့မဟုတ် `DEF` — အလံတစ်ခုလျှင် ထိရောက်သောတန်ဖိုးသည် မည်သည့်နေရာတွင်ရှိသည်ကို ပြသသည်။
+- တစ်** ပြန်လည်သတ်မှတ်ပါ။** ထပ်ရေးချရန် ခလုတ် ( `DB` -sourced အလံများအတွက်သာ ပြထားသည်)၊ နှင့် a** ဖျက်စီးမှုများအားလုံးကို ပြန်လည်သတ်မှတ်ပါ။** အောက်ခြေတွင်ခလုတ်။
+- တစ်** ဆာဗာကို ပြန်လည်စတင်ပါ။** `requiresRestart` အလံကို ပြောင်းသည့်အခါ နဖူးစည်းပုံ။
 
 ### REST API
 
-လုပ်ဆောင်ချက်အားလုံးသည် route တစ်ခုတည်းမှတစ်ဆင့် လုပ်ဆောင်သည်-
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts)။
-Method တိုင်းတွင် အတည်ပြုထားသော dashboard session လိုအပ်သည် (မရှိပါက `401`)။
+လည်ပတ်မှုအားလုံးသည် လမ်းကြောင်းတစ်ခုမှ ဖြတ်သန်းသွားသည်- [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). နည်းလမ်းတိုင်းသည် စစ်မှန်ကြောင်းသက်သေပြထားသော ဒက်ရှ်ဘုတ်ဆက်ရှင် (`401` မဟုတ်လျှင်) လိုအပ်သည်။
+
+လော့ဂ်အင်ပိတ်ထားသည် (`requireLogin=false`) ဖြင့် ကာကွယ်ထားသောအလံများမှလွဲ၍ လမ်းကြောင်းပွင့်သည်- လုံခြုံရေးအမျိုးအစားရှိ အလံတိုင်းနှင့် `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`၊ `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` နှင့် `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` in `protectedFeatureFlags.ts`)။ ၎င်းတို့ထဲမှ တစ်ခုတွင် `PUT` နှင့် `DELETE` တစ်ခုတွင် DB အစားထိုးမှုတစ်ခု ပါရှိနေချိန်တွင်၊ ဒက်ရှ်ဘုတ် စက်ရှင်တစ်ခု၊ `manage` -scope API သော့၊ စာရေးစကေး သို့မဟုတ် ထို့ထက် ပိုမြင့်သော `oma_` ဝင်ရောက်ခွင့် တိုကင်တစ်ခု သို့မဟုတ် CLI တိုကင် သို့မဟုတ် စက်တွင်း-ဝန်ဆောင်မှု တိုကင်ကို လှည့်ပတ်မှ ပေးပို့ရန် လိုအပ်ပါသည်။ လမ်းကြောင်းသည် စက်ရှင် သို့မဟုတ် `manage` -scope ကီးတစ်ခုသာ လက်ခံသည့် လော့ဂ်အင်ဝင်ခြင်းထက် ကျယ်ပြန့်သည်။
 
 #### `GET /api/settings/feature-flags`
 
-Flag တိုင်း၏ အကျိုးသက်ရောက်နေသော တန်ဖိုး၊ source နှင့် အနှစ်ချုပ်ကို ပြန်ပေးသည်။
+အလံတိုင်းကို ၎င်း၏ထိရောက်သောတန်ဖိုး၊ အရင်းအမြစ်နှင့် အနှစ်ချုပ်ဖြင့် ပြန်ပေးသည်။
 
 ```jsonc
 {
@@ -264,34 +257,30 @@ Flag တိုင်း၏ အကျိုးသက်ရောက်နေသ�
 
 #### `PUT /api/settings/feature-flags`
 
-Override တစ်ခုတည်းကို သတ်မှတ်ခြင်း သို့မဟုတ် ဖယ်ရှားခြင်း။ Body: `{ key: string; value?: string }`။
-`value` ကို မထည့်ပါက override ကို ဖယ်ရှားပြီး env / default ကို ပြန်လည်အသုံးပြုသည်။
+တစ်ခုတည်းသော override ကို သတ်မှတ် သို့မဟုတ် ဖယ်ရှားပါ။ ကိုယ်ထည်- `{ key: string; value?: string }` `value` ကို ချန်လှပ်ခြင်းသည် override ကို ဖယ်ရှားသည် (env / default ကို ပြန်လည်ရယူခြင်း)။
 
 ```bash
-# DB override တစ်ခု သတ်မှတ်ရန်
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Override ကို ဖယ်ရှားရန် ("value" မပါ)
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Response တွင် `effectiveValue`/`source` အသစ်၊ `previousValue`/
-`previousSource` နှင့် `requiresRestart` တို့ကို ပြန်လည်ဖော်ပြသည်။ မသိရှိသော key များနှင့် ခွင့်ပြုထားသောအကန့်အသတ်အပြင်ရှိသည့် enum
-တန်ဖိုးများကို `400` ဖြင့် ပယ်ချသည်။
+တုံ့ပြန်မှုသည် `effectiveValue`/`source`၊ `previousValue`/ `previousSource` နှင့် `requiresRestart` အသစ်တို့ကို ပဲ့တင်ထပ်သည်။ အမည်မသိသော့များနှင့် ပြင်ပမှ enum တန်ဖိုးများကို `400` ဖြင့် ပယ်ချပါသည်။
 
 #### `DELETE /api/settings/feature-flags`
 
-DB override အားလုံးကို တစ်ကြိမ်တည်း ဖယ်ရှားပြီး flag တိုင်းကို ၎င်း၏ env / default
-တန်ဖိုးသို့ ပြန်လည်သတ်မှတ်သည်။ `{ cleared: <count>, message: "..." }` ကို ပြန်ပေးသည်။
+ရှင်းလင်းသည်။** အားလုံး** DB သည် အလံတိုင်းကို ၎င်း၏ env / ပုံသေတန်ဖိုးသို့ ပြန်ပေးသည်။ `{ cleared: <count>, message: "..." }` ပြန်ပေးသည်။
 
 > [!NOTE]
-> `requiresRestart: true` ဖြစ်သော flag များသည် process ကို ပြန်လည်ဖွင့်ပြီးနောက်မှသာ အကျိုးသက်ရောက်သည်။
-> Dashboard ၏ restart flow သည် `POST /api/restart` ကို ခေါ်ပြီး server ပြန်လည်အလုပ်လုပ်သည်အထိ
-> `GET /api/health/ping` ကို ထပ်ခါတလဲလဲ စစ်ဆေးသည်။
+> လုပ်ငန်းစဉ်ပြန်လည်စတင်ပြီးနောက်တွင် `requiresRestart: true` ပါသောအလံများသည် အသက်ဝင်ပါသည်။ ဒက်ရှ်ဘုတ်၏ ပြန်လည်စတင်သည့် စီးဆင်းမှုသည် `POST /api/restart` ခေါ်ဆိုပြီး ဆာဗာကို အရန်သိမ်းသည်အထိ `GET /api/health/ping` စစ်တမ်းကောက်ယူသည်။
+
+---
 
 ## အရေးပေါ် ဘတ်ဂျက် အရန်စနစ်
 

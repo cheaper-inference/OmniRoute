@@ -414,7 +414,7 @@ The `src/domain/` namespace centralizes mkpebi amụma ka ndị na-ahụ maka �
 - Connection/model ọchịchị njikọ: `src/domain/connectionModelRules.ts`
 - Ihe onyonyo nnweta ụdị: `src/domain/modelAvailability.ts`
 - Nleba njedebe onye na-eweta: `src/domain/providerExpiration.ts`
-- cache oke: `src/domain/quotaCache.ts`
+- cache oke: `src/domain/quotaCache.ts`. Ndị na-enye ihe na-agbakwụnye ma wepụ windo quota (OpenAI wepụrụ windo Codex nke awa 5 maka ụfọdụ atụmatụ), yabụ ojiji nke na-agụ ihe nkwụnye ihe na-enye ọrụ na-egosi na zuru ezu (`quotasComplete`, lee `src/lib/usage/usageReading.ts`) bụ windo zuru ezu nke akaụntụ ahụ: windo a maara na mbụ ma ọ na-anọghị na ya bụ ezumike nká, na cache, na `quota_snapshots` a malitegharịa rehydrates na ndebanye aha Codex (ngwa ezumike nká) bọket saturation nke Claude. Ihe akaebe na-ezighi ezi (ndị isi nzaghachi, mbipụta ochie) na-emelite naanị windo ọ na-ebu.
 - Ala nbibi: `src/domain/degradation.ts`
 - Nyocha nhazi: `src/domain/configAudit.ts`
 - OmniRoute nzaghachi metadata na-ewu: `src/domain/omnirouteResponseMeta.ts`
@@ -432,7 +432,7 @@ Pipeline ikike na-ahazi arịrịọ ọ bụla na-abata ma tinye n'agbụ amụ
 - Enyemaka nkwuputa: `src/server/authz/assertAuth.ts`
 - Ọnọdụ arịrịọ: `src/server/authz/context.ts`
 
-Ụzọ nchịkwa nke ọha na nke ọha bụ oke siri ike: agent/cooldown APIs na mgbanwe ndị na-eweta ọrụ chọrọ njikwa njikwa (HTTP 401 ma ọ bụrụ na-efu).
+Ụzọ nlekọta ọha na nke ọha bụ oke siri ike: agent/cooldown APIs na mgbanwe ndị na-eweta ọrụ chọrọ njikwa njikwa (HTTP 401 ma ọ bụrụ na-efu).
 
 Maka iwu nhazi ụzọ zuru oke, lee [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
 

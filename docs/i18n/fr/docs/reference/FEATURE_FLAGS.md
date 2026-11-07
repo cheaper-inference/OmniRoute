@@ -219,39 +219,35 @@ et le rapport destiné à l’administrateur déterminent la même politique eff
 > La colonne `Restart` signale les indicateurs avec `requiresRestart: true` — la valeur est
 > enregistrée instantanément, mais ne prend effet qu’après le rechargement du processus. Les indicateurs de type énumération rejettent toute valeur qui ne figure pas dans leur ensemble autorisé (validation côté serveur dans `setFeatureFlagOverride()` et dans le gestionnaire REST `PUT`).
 
-## Activation des indicateurs
+## Basculer les drapeaux
 
 ### Tableau de bord
 
-Accédez à **Tableau de bord → Paramètres → Indicateurs de fonctionnalité**
-(`/dashboard/settings/feature-flags`). La grille
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-prend en charge les fonctionnalités suivantes :
+Accédez à** Paramètres → du tableau de bord Indicateurs de fonctionnalités →** (`/dashboard/settings/feature-flags`). La grille (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) prend en charge :
 
-- **Recherche** par clé ou description, et **filtrage** par catégorie (ainsi qu’une vue synthétique **Redémarrage requis**).
-- Un **interrupteur** pour les indicateurs booléens et une **liste déroulante** pour les indicateurs enum
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Un badge de **source** par indicateur — `DB`, `ENV` ou `DEF` — indiquant l’origine de la valeur effective.
-- Un bouton **Réinitialiser** (affiché uniquement pour les indicateurs provenant de `DB`) pour supprimer la surcharge, ainsi qu’un bouton **Réinitialiser toutes les surcharges** en bas de page.
-- Une bannière **Redémarrer le serveur** lorsqu’un indicateur `requiresRestart` est modifié.
+- **Recherche** par clé ou description, et** filtre** par catégorie (plus un synthétique** Nécessite un redémarrage** voir).
+- UN** basculer** pour les drapeaux booléens et un** dérouler** pour les indicateurs d'énumération (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- UN** insigne source** par indicateur — `DB`, `ENV` ou `DEF` — indiquant d'où vient la valeur effective.
+- UN** Réinitialiser** bouton (affiché uniquement pour les drapeaux `DB` -sourced ) pour supprimer le remplacement, et un** Réinitialiser tous les remplacements** bouton en bas.
+- UN** Redémarrer le serveur** bannière lorsqu'un drapeau `requiresRestart` est modifié.
 
-### API REST
+### REST API
 
-Toutes les opérations passent par une route unique :
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Chaque méthode nécessite une session de tableau de bord authentifiée (`401` sinon).
+Toutes les opérations passent par une seule route : [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Chaque méthode nécessite une session de tableau de bord authentifiée (`401` sinon).
+
+Avec la connexion désactivée (`requireLogin=false`), la route est ouverte, à l'exception des drapeaux protégés : tous les drapeaux de la catégorie Sécurité plus `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` et `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` dans `protectedFeatureFlags.ts`). Un `PUT` sur l'un d'eux, et un `DELETE` alors que l'un d'eux a un remplacement DB, ont toujours besoin d'une session de tableau de bord, d'une clé `manage` -scope API, d'un jeton d'accès `oma_` avec une portée d'écriture ou supérieure, ou du jeton CLI ou du jeton de service interne envoyé depuis le bouclage. Cet ensemble est plus large qu'avec la connexion activée, où la route n'accepte qu'une session ou une clé `manage` -scope.
 
 #### `GET /api/settings/feature-flags`
 
-Renvoie chaque indicateur avec sa valeur effective, sa source et un récapitulatif.
+Renvoie chaque indicateur avec sa valeur effective, sa source et un résumé.
 
 ```jsonc
 {
   "flags": [
     {
       "key": "REQUIRE_API_KEY",
-      "label": "Exiger une clé API",
-      "description": "Exiger une clé API pour toutes les requêtes entrantes",
+      "label": "Require API Key",
+      "description": "Require an API key for all incoming requests",
       "category": "security",
       "type": "boolean",
       "enumValues": null,
@@ -261,7 +257,7 @@ Renvoie chaque indicateur avec sa valeur effective, sa source et un récapitulat
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... les 119 indicateurs
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -275,33 +271,30 @@ Renvoie chaque indicateur avec sa valeur effective, sa source et un récapitulat
 
 #### `PUT /api/settings/feature-flags`
 
-Définit ou supprime une surcharge individuelle. Corps : `{ key: string; value?: string }`.
-Omettre `value` supprime la surcharge (et restaure la valeur de l’environnement ou la valeur par défaut).
+Définir ou supprimer un seul remplacement. Corps : `{ key: string; value?: string }`. L'omission `value` supprime le remplacement (restauration de l'environnement / par défaut).
 
 ```bash
-# Définir une surcharge DB
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Supprimer la surcharge (sans "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-La réponse renvoie la nouvelle `effectiveValue`/`source`, la `previousValue`/
-`previousSource` et `requiresRestart`. Les clés inconnues et les valeurs enum
-hors limites sont rejetées avec `400`.
+La réponse fait écho aux nouveaux `effectiveValue`/`source`, `previousValue`/ `previousSource` et `requiresRestart`. Les clés inconnues et les valeurs d'énumération hors plage sont rejetées avec `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Supprime toutes les surcharges DB en une seule fois, et restaure pour chaque indicateur sa valeur d’environnement ou sa valeur par défaut. Renvoie `{ cleared: <count>, message: "..." }`.
+Efface** tous** DB remplace immédiatement, restaurant chaque indicateur à sa valeur env/par défaut. Renvoie `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Les indicateurs avec `requiresRestart: true` ne prennent effet qu’après le rechargement du processus.
-> Le flux de redémarrage du tableau de bord appelle `POST /api/restart`, puis interroge
-> `GET /api/health/ping` jusqu’à ce que le serveur soit de nouveau opérationnel.
+> Les indicateurs avec `requiresRestart: true` ne prennent effet qu'après le rechargement du processus. Le flux de redémarrage du tableau de bord appelle `POST /api/restart`, puis interroge `GET /api/health/ping` jusqu'à ce que le serveur soit sauvegardé.
+
+---
 
 ## Repli d’urgence en cas d’épuisement du budget
 

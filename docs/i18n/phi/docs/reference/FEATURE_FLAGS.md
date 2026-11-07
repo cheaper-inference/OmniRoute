@@ -223,30 +223,27 @@ epektibong policy ang nalulutas ng enforcement at ng ulat ng administrator.
 
 ---
 
-## Pag-toggle ng mga Flag
+## Toggling Flags
 
 ### Dashboard
 
-Mag-navigate sa **Dashboard → Settings → Feature Flags**
-(`/dashboard/settings/feature-flags`). Sinusuportahan ng grid
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) ang:
+Mag-navigate sa** Dashboard → Mga Setting → Mga Flag ng Tampok** (`/dashboard/settings/feature-flags`). Sinusuportahan ng grid (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) ang:
 
-- **Paghahanap** ayon sa key o paglalarawan, at **pag-filter** ayon sa kategorya (kasama ang synthetic na view na **Requires Restart**).
-- Isang **toggle** para sa mga boolean flag at isang **dropdown** para sa mga enum flag
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Isang **source badge** para sa bawat flag — `DB`, `ENV`, o `DEF` — na nagpapakita kung saan nagmula ang epektibong value.
-- Isang button na **Reset** (ipinapakita lamang para sa mga flag na galing sa `DB`) upang alisin ang override, at isang button na **Reset All Overrides** sa ibaba.
-- Isang banner na **Restart Server** kapag binago ang isang flag na may `requiresRestart`.
+- **Maghanap** sa pamamagitan ng susi o paglalarawan, at** salain** ayon sa kategorya (kasama ang isang synthetic** Nangangailangan ng I-restart** view).
+- A** magpalipat-lipat** para sa mga boolean flag at a** dropdown** para sa mga flag ng enum (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- A** badge ng pinagmulan** bawat flag — `DB`, `ENV`, o `DEF` — na nagpapakita kung saan nanggaling ang epektibong halaga.
+- A** I-reset** button (ipinapakita lamang para sa `DB` -sourced na flag) upang i-drop ang override, at a** I-reset ang Lahat ng Pag-override** button sa ibaba.
+- A** I-restart ang Server** banner kapag binago ang isang `requiresRestart` flag.
 
 ### REST API
 
-Lahat ng operasyon ay dumadaan sa iisang route:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Ang bawat method ay nangangailangan ng authenticated dashboard session (`401` kung wala).
+Ang lahat ng mga operasyon ay dumadaan sa iisang ruta: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Ang bawat pamamaraan ay nangangailangan ng isang napatotohanan na sesyon ng dashboard (`401` kung hindi man).
+
+Kapag hindi pinagana ang pag-log in (`requireLogin=false`) ang ruta ay bukas, maliban sa mga protektadong flag: bawat bandila sa kategoryang Seguridad kasama ang `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` at `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` sa `protectedFeatureFlags.ts`). Ang isang `PUT` sa isa sa mga ito, at isang `DELETE` habang ang isa sa mga ito ay may DB override, kailangan pa rin ng isang dashboard session, isang `manage` -scope API key, isang `oma_` access token na may write scope o mas mataas, o ang CLI token o internal-service token na ipinadala mula sa loopback. Ang hanay na iyon ay mas malawak kaysa sa pag-log in, kung saan ang ruta ay tumatanggap lamang ng isang session o isang `manage` -scope key.
 
 #### `GET /api/settings/feature-flags`
 
-Ibinabalik ang bawat flag kasama ang epektibong value, source, at summary.
+Ibinabalik ang bawat flag kasama ang epektibong halaga, pinagmulan, at isang buod.
 
 ```jsonc
 {
@@ -278,32 +275,30 @@ Ibinabalik ang bawat flag kasama ang epektibong value, source, at summary.
 
 #### `PUT /api/settings/feature-flags`
 
-Magtakda o mag-alis ng isang override. Body: `{ key: string; value?: string }`.
-Kapag hindi isinama ang `value`, aalisin ang override (ibinabalik ang env / default).
+Magtakda o mag-alis ng isang override. Katawan: `{ key: string; value?: string }`. Ang pagtanggal sa `value` ay nag-aalis ng override (nagpapanumbalik ng env / default).
 
 ```bash
-# Magtakda ng DB override
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Alisin ang override (walang "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Ibinabalik sa response ang bagong `effectiveValue`/`source`, ang `previousValue`/
-`previousSource`, at `requiresRestart`. Tinatanggihan ang mga hindi kilalang key at mga enum value na wala sa pinapahintulutang range gamit ang `400`.
+Ang tugon ay umaalingawngaw sa bagong `effectiveValue`/`source`, ang `previousValue`/ `previousSource`, at `requiresRestart`. Ang mga hindi kilalang key at out-of-range na mga halaga ng enum ay tinanggihan ng `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Sabay-sabay na nililinis ang **lahat** ng DB override, at ibinabalik ang bawat flag sa env / default value nito. Ibinabalik ang `{ cleared: <count>, message: "..." }`.
+Nililinis** lahat** sabay-sabay na nag-o-override ang DB, nire-restore ang bawat flag sa env / default na value nito. Ibinabalik ang `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Magkakabisa lamang ang mga flag na may `requiresRestart: true` pagkatapos i-reload ang proseso.
-> Tinatawag ng restart flow ng dashboard ang `POST /api/restart` at pagkatapos ay paulit-ulit na tinatawagan ang
-> `GET /api/health/ping` hanggang sa muling gumana ang server.
+> Ang mga flag na may `requiresRestart: true` ay magkakabisa lamang pagkatapos ng proseso ng pag-reload. Ang restart flow ng dashboard ay tumatawag `POST /api/restart` at pagkatapos ay nag-poll ng `GET /api/health/ping` hanggang sa ma-back up ang server.
+
+---
 
 ## Pang-emergency na Fallback sa Badyet
 

@@ -291,15 +291,15 @@ API కీలు `scopes` శ్రేణిని కలిగి ఉంటా�
 (`src/lib/accessTokens/scopes.ts`) ద్వారా ర్యాంక్ చేయబడతాయి. ఈ ర్యాంక్
 యాక్సెస్-టోకెన్ క్రెడెన్షియల్కు మాత్రమే వర్తిస్తుంది. [మేనేజ్మెంట్ ప్రామాణీకరణ](../guides/MANAGEMENT-AUTH.md) చూడండి.
 
-## Auth Required టోగుల్
+## ప్రమాణీకరణ టోగుల్ అవసరం
 
-`src/shared/utils/apiAuth.ts`లోని `isAuthRequired()` ఒక request కు **ఏదైనా** auth అమలు చేయాలా వద్దా అని నిర్ణయిస్తుంది:
+అని `src/shared/utils/apiAuth.ts` లో`isAuthRequired()` నిర్ణయిస్తుంది** ఏదైనా** అభ్యర్థన కోసం auth అమలు చేయబడుతుంది:
 
-- `settings.requireLogin === false` → auth ప్రపంచవ్యాప్తంగా నిలిపివేయబడుతుంది, కానీ ఎల్లప్పుడూ-రక్షిత శ్రేణి ([Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) మినహా, మరియు అంగీకరించే credential ను జారీ చేసే calls మినహా — login ఆన్‌లో ఉన్నప్పుడు అవసరమయ్యే అదే credential కావాలి: sync tokens జారీ చేయడం, ఏ scope లోనైనా CLI access tokens తయారు చేయడం, మరియు `manage`/`admin` scope ఉన్న API key ను సృష్టించడం, ఒక key కు ఆ scope ఇవ్వడం, లేదా అలాంటి key ను రీజెనరేట్ చేయడం లేదా బహిర్గతం చేయడం (`src/lib/api/requireManagementAuth.ts`లోని `requireCredentialForManagementScopedKey()`). Inference-only keys తెరిచే ఉంటాయి.
-- పాస్‌వర్డ్ కాన్ఫిగర్ కాలేదు **మరియు** `INITIAL_PASSWORD` env var లేదు → bootstrap mode onboarding wizard ను మరియు loopback requests ను అనుమతిస్తుంది, కానీ బహిర్గతమైన network requests కు ఇంకా credentials అవసరం.
-- ఏదైనా DB error → fail closed (secure-by-default).
+- `settings.requireLogin === false` → auth ప్రపంచవ్యాప్తంగా నిలిపివేయబడింది, ఎల్లప్పుడూ-రక్షిత శ్రేణి ( [రూట్ గార్డ్ టైర్లను](../security/ROUTE_GUARD_TIERS.md) చూడండి) మరియు అది అంగీకరించే క్రెడెన్షియల్ను అందజేసే కాల్లు తప్ప, లాగిన్పై ఉన్న అదే క్రెడెన్షియల్ అవసరం: సింక్ టోకెన్లను జారీ చేయడం, `manage` API CLI టోకెన్లను రూపొందించడం, /`admin` స్కోప్తో సృష్టించడం ఒక కీకి ఆ పరిధిని మంజూరు చేయడం లేదా అటువంటి కీని పునరుత్పత్తి చేయడం లేదా బహిర్గతం చేయడం ( `src/lib/api/requireManagementAuth.ts` లో`requireCredentialForManagementScopedKey()` ). అనుమితి-మాత్రమే కీలు తెరిచి ఉంటాయి. రక్షిత ఫీచర్ ఫ్లాగ్ను వ్రాయడం (`REQUIRE_API_KEY`, ఇతర భద్రతా ఫ్లాగ్లు మరియు [ఫీచర్ ఫ్లాగ్లలో](../reference/FEATURE_FLAGS.md#rest-api) జాబితా చేయబడిన SSRF / TLS / MCP-స్కోప్ / శాండ్బాక్స్ ఫ్లాగ్లు) మరియు PII మాస్కింగ్ సెట్టింగ్లను (`PUT /api/settings/pii`) సేవ్ చేయడం కూడా క్రెడెన్షియల్ అవసరం.
+- పాస్వర్డ్ కాన్ఫిగర్ చేయబడలేదు** మరియు** `INITIAL_PASSWORD` env var → బూట్స్ట్రాప్ మోడ్ ఆన్బోర్డింగ్ విజార్డ్ మరియు లూప్బ్యాక్ అభ్యర్థనలను అనుమతిస్తుంది, అయితే బహిర్గతమైన నెట్వర్క్ అభ్యర్థనలకు ఇప్పటికీ ఆధారాలు అవసరం. మినహాయింపు: రక్షిత ఫీచర్ ఫ్లాగ్ను వ్రాయడం మరియు PII మాస్కింగ్ సెట్టింగ్లను సేవ్ చేయడం (`PUT /api/settings/pii`) లూప్బ్యాక్ నుండి కూడా క్రెడెన్షియల్ అవసరం, కాబట్టి అక్కడ లూప్బ్యాక్ సరిపోదు.
+- ఏదైనా DB లోపం → మూసివేయబడితే విఫలమవుతుంది (సెక్యూర్-బై-డిఫాల్ట్).
 
-Client API key అమలు, నేరుగా `process.env.REQUIRE_API_KEY`ని చదవకుండా, `src/shared/utils/featureFlags.ts`లోని `isRequireApiKeyEnabled()`ను ఉపయోగిస్తుంది. ఇది deployed instances కు ముఖ్యం: Dashboard → Feature Flags లో `REQUIRE_API_KEY`ను టోగుల్ చేస్తే DB override నిల్వ అవుతుంది మరియు `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, ఈ helper ను పంచుకునే ఇతర client-API auth తనిఖీలు వెంటనే ప్రభావితమవుతాయి. Feature flag store చదవలేకపోతే, client API auth fail closed అవుతుంది మరియు key ను కోరుతుంది.
+క్లయింట్ API కీ ఎన్ఫోర్స్మెంట్ `src/shared/utils/featureFlags.ts` లో `isRequireApiKeyEnabled()` ఉపయోగిస్తుంది, డైరెక్ట్ `process.env.REQUIRE_API_KEY` రీడ్ కాదు. అమలు చేయబడిన ఉదాహరణలకు ఇది ముఖ్యమైనది: డాష్బోర్డ్ → ఫీచర్ ఫ్లాగ్లలో `REQUIRE_API_KEY` టోగుల్ చేయడం DB ఓవర్రైడ్ను నిల్వ చేస్తుంది మరియు వెంటనే `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, మరియు ఈ సహాయ తనిఖీలను భాగస్వామ్యం చేసే ఇతర క్లయింట్-API ప్రమాణీకరణ తనిఖీలను ప్రభావితం చేస్తుంది. ఫీచర్ ఫ్లాగ్ స్టోర్ని చదవలేకపోతే, క్లయింట్ API auth మూసివేయబడితే విఫలమవుతుంది మరియు కీ అవసరం.
 
 ## బ్రేకింగ్ మార్పు — v3.8.0
 

@@ -303,15 +303,15 @@ Katalogu u regoli ta' tqabbil (string identika, jew scope mogħti li jispiċċa 
 
 `read` / `write` / `admin` fuq tokens `oma_live_…`, ikklassifikati minn `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). Din il-klassifikazzjoni tapplika għall-kredenzjali tal-access token biss. Ara [Awtentikazzjoni tal-Ġestjoni](../guides/MANAGEMENT-AUTH.md).
 
-## Toggle tal-Awtentikazzjoni Meħtieġa
+## Awth Meħtieġa Toggle
 
-`isAuthRequired()` f'`src/shared/utils/apiAuth.ts` hija dik li tiddeċiedi jekk awtentikazzjoni **kwalunkwe** tiġix infurzata għal talba:
+`isAuthRequired()` `src/shared/utils/apiAuth.ts` jiddeċiedi jekk** kwalunkwe** auth hija infurzata għal talba:
 
-- `settings.requireLogin === false` → l-awtentikazzjoni hija diżattivata globalment, ħlief għall-livell dejjem protett (ara [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) u s-sejħiet li jagħtu credential li hija taċċetta, li jeħtieġu l-istess credential bħal meta l-login ikun attivat: il-ħruġ ta' sync tokens, il-minting ta' tokens ta' aċċess CLI fi kwalunkwe skop, u l-ħolqien ta' ċavetta API bl-iskop `manage`/`admin`, l-għoti ta' dak l-iskop lil ċavetta, jew l-iġġenerar mill-ġdid jew l-uri ta' ċavetta bħal din (`requireCredentialForManagementScopedKey()` f'`src/lib/api/requireManagementAuth.ts`). Iċ-ċwievet inference biss jibqgħu miftuħa.
-- Ebda password ma hi kkonfigurata **u** ebda varjabbli tal-ambjent `INITIAL_PASSWORD` → modalità bootstrap: tippermetti l-onboarding wizard u t-talbiet loopback, iżda t-talbiet tan-network esposti xorta jeħtieġu credentials.
-- Kull DB error → jifalli fil-mod sikur (secure-by-default).
+- `settings.requireLogin === false` → auth hija diżattivata globalment, ħlief għall-livell dejjem protett (ara [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) u s-sejħiet li jagħtu kredenzjali li jaċċetta, li jeħtieġu l-istess kredenzjali bħal meta login fuq: ħruġ ta’ tokens ta’ sinkronizzazzjoni, ħolqien ta’ tokens ta’ aċċess CLI fi kwalunkwe ambitu, u ħolqien ta’ ċavetta API /`admin` l-ambitu `manage` ċavetta, jew tirriġenera jew tiżvela tali ċavetta (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`). Iċ-ċwievet għall-inferenza biss jibqgħu miftuħa. Il-kitba ta 'bandiera ta' karatteristika protetta (`REQUIRE_API_KEY`, il-bnadar tas-Sigurtà l-oħra, u l-bnadar SSRF / TLS / MCP-scope / sandbox elenkati fil- [Bnadar tal-Karatteristiċi](../reference/FEATURE_FLAGS.md#rest-api) ) u s-salvataġġ tas-settings tal-masking PII (`PUT /api/settings/pii`) jibqgħu jeħtieġu wkoll kredenzjali.
+- Ebda password kkonfigurata** u** l-ebda mod `INITIAL_PASSWORD` env var → bootstrap jippermetti l-onboarding wizard u talbiet loopback, iżda t-talbiet tan-netwerk esposti għadhom jeħtieġu kredenzjali. Eċċezzjoni: il-kitba ta 'bandiera ta' karatteristika protetta u l-iffrankar tas-settings tal-masking PII (`PUT /api/settings/pii`) jeħtieġu kredenzjali anke minn loopback, għalhekk loopback waħdu mhuwiex biżżejjed hemmhekk.
+- Kwalunkwe żball DB → ma jagħlaq (secure-by-default).
 
-L-infurzar tač-ċavetta tal-API tal-klijent juża `isRequireApiKeyEnabled()` f'`src/shared/utils/featureFlags.ts`, mhux qari dirett ta' `process.env.REQUIRE_API_KEY`. Dan huwa importanti għal istanzi mqiegħda f'produzzjoni: it-tibdil ta' `REQUIRE_API_KEY` fid-Dashboard → Feature Flags jaħżen DB override u immedjatament jaffettwa `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, u l-kontrolli l-oħra tal-awtentikazzjoni tal-client-API li jaqsmu dan l-helper. Jekk il-feature flag store ma jkunx jista' jinqara, l-awtentikazzjoni tal-client API tifalli fil-mod sikur u titlob ċavetta.
+L-infurzar taċ-ċavetta tal-klijent API juża `isRequireApiKeyEnabled()` `src/shared/utils/featureFlags.ts`, mhux qari `process.env.REQUIRE_API_KEY` dirett. Dan huwa importanti għal każijiet skjerati: it-toggling `REQUIRE_API_KEY` f'Dashboard → Feature Flags jaħżen DB override u taffettwa immedjatament `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, u kontrolli oħra ta' awtifikazzjoni tal-klijent-API li jaqsmu dan l-helper. Jekk il-maħżen tal-bandiera tal-karatteristika ma jistax jinqara, il-klijent API auth ma jagħlaqx u jeħtieġ ċavetta.
 
 ## Bidla li Tkisser il-Kompatibbiltà — v3.8.0
 

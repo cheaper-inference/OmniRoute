@@ -223,31 +223,27 @@ fastslår den samme effektive policyen.
 
 ---
 
-## Slå flagg av og på
+## Veksle flagg
 
-### Kontrollpanel
+### Dashbord
 
-Gå til **Dashboard → Innstillinger → Funksjonsflagg**
-(`/dashboard/settings/feature-flags`). Rutenettet
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-støtter:
+Naviger til** Dashboard → Innstillinger → Funksjonsflagg** (`/dashboard/settings/feature-flags`). Rutenettet (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) støtter:
 
-- **Søk** etter nøkkel eller beskrivelse, og **filtrer** etter kategori (samt en syntetisk visning for **Krever omstart**).
-- En **bryter** for boolske flagg og en **rullegardinmeny** for enum-flagg
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Et **kildemerke** per flagg — `DB`, `ENV` eller `DEF` — som viser hvor den effektive verdien kommer fra.
-- En **Tilbakestill**-knapp (vises bare for flagg med kilden `DB`) for å fjerne overstyringen, samt en **Tilbakestill alle overstyringer**-knapp nederst.
-- Et **Start serveren på nytt**-banner når et `requiresRestart`-flagg endres.
+- **Søk** etter nøkkel eller beskrivelse, og** filter** etter kategori (pluss en syntetisk** Krever omstart** utsikt).
+- EN** veksle** for booleske flagg og en** rullegardinmenyen** for enum-flagg (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- EN** kildemerket** per flagg — `DB`, `ENV` eller `DEF` — som viser hvor den effektive verdien kom fra.
+- EN** Tilbakestill** knappen (vises kun for `DB` -sourced -flagg) for å slippe overstyringen, og en** Tilbakestill alle overstyringer** knappen nederst.
+- EN** Start server på nytt** banner når et `requiresRestart` flagg endres.
 
 ### REST API
 
-Alle operasjoner går gjennom én enkelt rute:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Alle metoder krever en autentisert kontrollpanelsesjon (`401` ellers).
+Alle operasjoner går gjennom en enkelt rute: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Hver metode krever en autentisert dashbordøkt ( ellers `401` ).
+
+Med pålogging deaktivert (`requireLogin=false`) er ruten åpen, bortsett fra de beskyttede flaggene: hvert flagg i sikkerhetskategorien pluss `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` og `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` in `protectedFeatureFlags.ts`). En `PUT` på en av dem, og en `DELETE` mens en av dem har en DB overstyring, trenger fortsatt en dashbordøkt, en `manage` -scope API nøkkel, en `oma_` -tilgangstoken med skriveomfang eller høyere, eller CLI tokenet eller interntjenestetoken sendt fra loopback. Dette settet er bredere enn med pålogging, der ruten bare aksepterer en økt eller en `manage` -scope nøkkel.
 
 #### `GET /api/settings/feature-flags`
 
-Returnerer alle flagg med effektiv verdi, kilde og et sammendrag.
+Returnerer hvert flagg med dens effektive verdi, kilde og et sammendrag.
 
 ```jsonc
 {
@@ -265,7 +261,7 @@ Returnerer alle flagg med effektiv verdi, kilde og et sammendrag.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... alle 119 flagg
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -279,33 +275,30 @@ Returnerer alle flagg med effektiv verdi, kilde og et sammendrag.
 
 #### `PUT /api/settings/feature-flags`
 
-Angi eller fjern én enkelt overstyring. Body: `{ key: string; value?: string }`.
-Hvis `value` utelates, fjernes overstyringen (og miljøvariabelen / standardverdien gjenopprettes).
+Angi eller fjern en enkelt overstyring. Kropp: `{ key: string; value?: string }`. Å utelate `value` fjerner overstyringen (gjenoppretter env / standard).
 
 ```bash
-# Angi en DB-overstyring
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Fjern overstyringen (uten "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Responsen gjengir den nye `effectiveValue`/`source`, `previousValue`/
-`previousSource` og `requiresRestart`. Ukjente nøkler og enum-verdier utenfor
-gyldig område avvises med `400`.
+Responsen ekko den nye `effectiveValue`/`source`, `previousValue`/ `previousSource` og `requiresRestart`. Ukjente nøkler og enum-verdier utenfor området avvises med `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Fjerner alle DB-overstyringer samtidig og gjenoppretter alle flagg til miljøvariabel- / standardverdien. Returnerer `{ cleared: <count>, message: "..." }`.
+Rydder** alle** DB overstyrer på en gang, og gjenoppretter hvert flagg til dets env/standardverdi. Returnerer `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Flagg med `requiresRestart: true` trer først i kraft etter at prosessen lastes inn på nytt.
-> Kontrollpanelets omstartsflyt kaller `POST /api/restart` og spør deretter jevnlig
-> `GET /api/health/ping` til serveren er oppe igjen.
+> Flagg med `requiresRestart: true` trer bare i kraft etter en prosess-innlasting. Dashbordets omstartsflyt kaller `POST /api/restart` og poller deretter `GET /api/health/ping` til serveren er tilbake.
+
+---
 
 ## Reserveløsning for nødbudsjett
 

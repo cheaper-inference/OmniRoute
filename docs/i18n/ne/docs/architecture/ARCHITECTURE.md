@@ -399,13 +399,13 @@ OmniRoute ले स्थानीय रूपमा चलिरहेका 
 - मोड्युल रूट: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
 - तातो पुन: लोड: रजिस्ट्रीले कन्फिगरेसन परिवर्तनहरूको लागि हेर्छ र ठाउँमा चेन पुन: निर्माण गर्दछ
 - तार-इन बिन्दुहरू: च्याट ह्यान्डलर प्रविष्टि, छवि उत्पादन ह्यान्डलर, प्रतिक्रिया सेनिटाइजर
-- HTTP अनुबंध: उल्लङ्घनहरू `503` को रूपमा `error.code = "GUARDRAIL_VIOLATION"` सँग
+- HTTP अनुबंध: उल्लङ्घनहरू `error.code = "GUARDRAIL_VIOLATION"` सँग `503` को रूपमा
 
 नियमावली संलेखन र थ्रेसहोल्ड ट्युनिङको लागि, [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) हेर्नुहोस्।
 
 ### D. डोमेन तह
 
-`src/domain/` नेमस्पेसले नीतिगत निर्णयहरूलाई केन्द्रीकृत गर्दछ त्यसैले मार्ग ह्यान्डलरहरूले lockout/budget/fallback तर्क आफैंमा जम्मा गर्नुपर्दैन।
+`src/domain/` नेमस्पेसले नीतिगत निर्णयहरूलाई केन्द्रीकृत गर्दछ त्यसैले मार्ग ह्यान्डलरहरूले lockout/budget/fallback तर्क आफैं जम्मा गर्नुपर्दैन।
 
 - नीति इन्जिन: पूर्व कार्यान्वयन मूल्याङ्कनको लागि `src/domain/policyEngine.ts` — एकल प्रविष्टि बिन्दु (लकआउट → बजेट → फलब्याक अर्डरिङ)
 - लागत नियम: `src/domain/costRules.ts`
@@ -416,7 +416,7 @@ OmniRoute ले स्थानीय रूपमा चलिरहेका 
 - Connection/model नियम जोड्ने: `src/domain/connectionModelRules.ts`
 - मोडेल उपलब्धता स्न्यापशटहरू: `src/domain/modelAvailability.ts`
 - प्रदायकको म्याद सकिने ट्र्याकिङ: `src/domain/providerExpiration.ts`
-- कोटा क्यास: `src/domain/quotaCache.ts`
+- कोटा क्यास: `src/domain/quotaCache.ts`। प्रदायकहरूले कोटा सञ्झ्यालहरू थप्छन् र हटाउँछन् (केही योजनाहरूको लागिOpenAI 5-घण्टा Codex विन्डो छोड्यो), त्यसैले प्रदायकको एडेप्टर पूर्ण रूपमा प्रमाणहरू पढ्ने प्रयोग (`quotasComplete`, `src/lib/usage/usageReading.ts` हेर्नुहोस् ) खाताको पूर्ण विन्डो सेट हो: पहिले थाहा भएको तर त्यहाँबाट अनुपस्थित भएको विन्डोलाई रिटायर गरिएको छ, क्यासमा, rehydraten a rehydrate, `quota_snapshots` मा। रेकर्ड), निरन्तर Codex कोटा अवस्था र Claude को संतृप्ति बकेटहरूमा। आंशिक प्रमाण (प्रतिक्रिया हेडरहरू, बासी प्रतिलिपिहरू) केवल यसले बोक्ने विन्डोहरू अद्यावधिक गर्दछ।
 - पतन अवस्था: `src/domain/degradation.ts`
 - कन्फिगरेसन अडिट: `src/domain/configAudit.ts`
 - OmniRoute प्रतिक्रिया मेटाडाटा बिल्डर: `src/domain/omnirouteResponseMeta.ts`

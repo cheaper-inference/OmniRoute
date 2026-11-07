@@ -295,15 +295,15 @@ API কিগুলো একটি `scopes` অ্যারে বহন কর
 (`src/lib/accessTokens/scopes.ts`) অনুযায়ী র্যাঙ্ক করা। এই র্যাঙ্ক কেবল অ্যাক্সেস-টোকেন
 ক্রেডেনশিয়ালের ক্ষেত্রেই প্রযোজ্য। দেখুন [ব্যবস্থাপনা প্রমাণীকরণ](../guides/MANAGEMENT-AUTH.md)।
 
-## Auth Required টগল
+## প্রমাণীকরণ প্রয়োজনীয় টগল
 
-`src/shared/utils/apiAuth.ts`-এর `isAuthRequired()` সিদ্ধান্ত নেয় কোনো অনুরোধের জন্য **আদৌ** কোনো প্রমাণীকরণ প্রয়োগ হবে কি না:
+`src/shared/utils/apiAuth.ts` তে`isAuthRequired()` সিদ্ধান্ত নেয় কিনা** যেকোনো** একটি অনুরোধের জন্য auth প্রয়োগ করা হয়েছে:
 
-- `settings.requireLogin === false` → প্রমাণীকরণ বিশ্বব্যাপীভাবে নিষ্ক্রিয় হয়, তবে always-protected tier ([Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) এবং যে কলগুলো এমন credential ইস্যু করে যা গ্রহণ করা হয়, সেগুলো বাদে — লগইন সক্রিয় থাকলে যে credential লাগে সেটিই লাগে: sync token ইস্যু, যেকোনো scope-এ CLI access token তৈরি, এবং `manage`/`admin` scope-সহ API key তৈরি, ওই scope কোনো key-কে দেওয়া, বা এমন key পুনরুৎপাদন বা প্রকাশ (`src/lib/api/requireManagementAuth.ts`-এর `requireCredentialForManagementScopedKey()`)। শুধু inference-এর জন্য key খোলা থাকে।
-- কোনো পাসওয়ার্ড কনফিগার না থাকে **এবং** `INITIAL_PASSWORD` env var না থাকে → bootstrap মোড onboarding wizard ও loopback অনুরোধকে অনুমতি দেয়, কিন্তু উন্মুক্ত network অনুরোধগুলোর এখনো credential লাগে।
-- যেকোনো DB ত্রুটি → fail closed (secure-by-default)।
+- `settings.requireLogin === false` → auth বিশ্বব্যাপী অক্ষম, সর্বদা-সুরক্ষিত স্তর ( [রুট গার্ড টিয়ার](../security/ROUTE_GUARD_TIERS.md) দেখুন) এবং কল যা এটি গ্রহণ করে এমন একটি শংসাপত্র প্রদান করে, যার লগইন অনের মতো একই শংসাপত্র প্রয়োজন: সিঙ্ক টোকেন জারি করা, যেকোন স্কোপে CLI অ্যাক্সেস টোকেনগুলি মিন্ট করা, এবং API `manage` সাথে একটি কী তৈরি করা একটি কীকে সেই সুযোগ প্রদান করা, বা এই জাতীয় কী পুনরায় তৈরি করা বা প্রকাশ করা ( `src/lib/api/requireManagementAuth.ts` তে`requireCredentialForManagementScopedKey()` )`admin` শুধুমাত্র অনুমান-কীগুলি খোলা থাকে। একটি সুরক্ষিত বৈশিষ্ট্য পতাকা (`REQUIRE_API_KEY`, অন্যান্য নিরাপত্তা পতাকা এবং SSRF / TLS / MCP-স্কোপ / স্যান্ডবক্স পতাকাগুলি [ফিচার ফ্ল্যাগে](../reference/FEATURE_FLAGS.md#rest-api) তালিকাভুক্ত) লেখা এবং PII মাস্কিং সেটিংস (`PUT /api/settings/pii`) সংরক্ষণ করার জন্যও একটি শংসাপত্রের প্রয়োজন থাকে৷
+- কোন পাসওয়ার্ড কনফিগার করা নেই** এবং** কোন `INITIAL_PASSWORD` env var → বুটস্ট্র্যাপ মোড অনবোর্ডিং উইজার্ড এবং লুপব্যাক অনুরোধগুলিকে অনুমতি দেয়, তবে উন্মুক্ত নেটওয়ার্ক অনুরোধগুলির এখনও শংসাপত্রের প্রয়োজন হয়৷ ব্যতিক্রম: একটি সুরক্ষিত বৈশিষ্ট্য পতাকা লেখা এবং PII মাস্কিং সেটিংস (`PUT /api/settings/pii`) সংরক্ষণ করার জন্য এমনকি লুপব্যাক থেকেও একটি প্রমাণপত্রের প্রয়োজন, তাই সেখানে লুপব্যাক যথেষ্ট নয়।
+- যেকোনো DB ত্রুটি → বন্ধ হয়ে যায় (সুরক্ষিত-বাই-ডিফল্ট)।
 
-Client API key প্রয়োগ `src/shared/utils/featureFlags.ts`-এর `isRequireApiKeyEnabled()` ব্যবহার করে, সরাসরি `process.env.REQUIRE_API_KEY` পড়ে না। এটি deployed instance-এর জন্য গুরুত্বপূর্ণ: Dashboard → Feature Flags-এ `REQUIRE_API_KEY` টগল করলে একটি DB override সংরক্ষিত হয় এবং তাৎক্ষণিকভাবে `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` এবং এই helper ভাগ করা অন্যান্য client-API auth পরীক্ষায় প্রভাব ফেলে। Feature flag store পড়া না গেলে client API auth fail closed হয় এবং একটি key চায়।
+ক্লায়েন্ট API কী এনফোর্সমেন্ট `src/shared/utils/featureFlags.ts` এ `isRequireApiKeyEnabled()` ব্যবহার করে, সরাসরি `process.env.REQUIRE_API_KEY` রিড নয়। এটি স্থাপন করা উদাহরণগুলির জন্য গুরুত্বপূর্ণ: ড্যাশবোর্ডে `REQUIRE_API_KEY` টগল করা → বৈশিষ্ট্য ফ্ল্যাগ একটি DB ওভাররাইড সঞ্চয় করে এবং অবিলম্বে `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` এবং অন্যান্য ক্লায়েন্ট-এপিআই প্রমাণীকরণ চেকগুলিকে প্রভাবিত করে যা এই সাহায্যকারীকে ভাগ করে। ফিচার ফ্ল্যাগ স্টোর পড়া না গেলে, ক্লায়েন্ট API auth বন্ধ হয়ে যায় এবং একটি কী প্রয়োজন।
 
 ## ব্রেকিং পরিবর্তন — v3.8.0
 

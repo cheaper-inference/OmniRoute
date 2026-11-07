@@ -415,7 +415,7 @@ Imenski prostor `src/domain/` centralizira odluke politike tako da rukovaoci rut
 - Connection/model pravilo stolar: `src/domain/connectionModelRules.ts`
 - Snimci dostupnosti modela: `src/domain/modelAvailability.ts`
 - Praćenje isteka provajdera: `src/domain/providerExpiration.ts`
-- Keš kvota: `src/domain/quotaCache.ts`
+- Keš kvota: `src/domain/quotaCache.ts`. Provajderi dodaju i uklanjaju prozore kvota (OpenAI je izbacio 5-satni Codex prozor za neke planove), tako da upotreba čitanja adaptera provajdera potvrđuje da je kompletna (`quotasComplete`, vidi `src/lib/usage/usageReading.ts`) je kompletan set prozora naloga: prozor poznat ranije, ali odsutan iz njega je povučen, u keš memoriji, u `quota_snapshots`, rehydratesre a restart app. Codex kvotno stanje i u Claude-ovim segmentima zasićenja. Djelomični dokazi (zaglavlja odgovora, zastarjele kopije) ažuriraju samo prozore koje nose.
 - Degradacijsko stanje: `src/domain/degradation.ts`
 - Revizija konfiguracije: `src/domain/configAudit.ts`
 - OmniRoute odgovor za izgradnju metapodataka: `src/domain/omnirouteResponseMeta.ts`

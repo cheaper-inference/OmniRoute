@@ -224,29 +224,25 @@
 
 ## Εναλλαγή σημαιών
 
-### Πίνακας ελέγχου
+### Ταμπλό
 
-Μεταβείτε στο **Πίνακας ελέγχου → Ρυθμίσεις → Σημαίες δυνατοτήτων**
-(`/dashboard/settings/feature-flags`). Το πλέγμα
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-υποστηρίζει:
+Πλοηγηθείτε στο** Ρυθμίσεις → ταμπλό → Σημαίες χαρακτηριστικών** (`/dashboard/settings/feature-flags`). Το πλέγμα (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) υποστηρίζει:
 
-- **Αναζήτηση** με βάση το κλειδί ή την περιγραφή και **φιλτράρισμα** ανά κατηγορία (καθώς και μια συνθετική προβολή **Απαιτεί επανεκκίνηση**).
-- Μια **εναλλαγή** για σημαίες τύπου boolean και ένα **πτυσσόμενο μενού** για σημαίες enum
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Μια **ένδειξη προέλευσης** ανά σημαία — `DB`, `ENV` ή `DEF` — που δείχνει από πού προήλθε η ενεργή τιμή.
-- Ένα κουμπί **Επαναφορά** (εμφανίζεται μόνο για σημαίες με προέλευση `DB`) για την κατάργηση της παράκαμψης, καθώς και ένα κουμπί **Επαναφορά όλων των παρακάμψεων** στο κάτω μέρος.
-- Ένα banner **Επανεκκίνηση διακομιστή** όταν αλλάζει μια σημαία `requiresRestart`.
+- **Ερευνα** με κλειδί ή περιγραφή και** φίλτρο** ανά κατηγορία (συν ένα συνθετικό** Απαιτεί επανεκκίνηση** θέα).
+- ΕΝΑ** μπαρέτα** για boolean flags και α** αναπτυσσόμενη λίστα** για enum flags (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- ΕΝΑ** σήμα πηγής** ανά σημαία — `DB`, `ENV` ή `DEF` — που δείχνει από πού προήλθε η πραγματική τιμή.
+- ΕΝΑ** Επαναφορά** κουμπί (εμφανίζεται μόνο για σημαίες `DB` -sourced ) για απόρριψη της παράκαμψης και α** Επαναφορά όλων των παρακάμψεων** κουμπί στο κάτω μέρος.
+- ΕΝΑ** Επανεκκινήστε τον διακομιστή** banner όταν αλλάζει μια σημαία `requiresRestart`.
 
 ### REST API
 
-Όλες οι λειτουργίες πραγματοποιούνται μέσω μίας μόνο διαδρομής:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Κάθε μέθοδος απαιτεί μια πιστοποιημένη συνεδρία του πίνακα ελέγχου (`401` διαφορετικά).
+Όλες οι λειτουργίες περνούν από μία μόνο διαδρομή: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Κάθε μέθοδος απαιτεί μια επαληθευμένη περίοδο λειτουργίας πίνακα εργαλείων (`401` διαφορετικά).
+
+Με απενεργοποιημένη τη σύνδεση (`requireLogin=false`) η διαδρομή είναι ανοιχτή, εκτός από τις προστατευμένες σημαίες: κάθε σημαία στην κατηγορία Ασφάλεια συν `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` και `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` σε `protectedFeatureFlags.ts`). Ένα `PUT` σε ένα από αυτά και ένα `DELETE` ενώ ένα από αυτά έχει παράκαμψη DB, χρειάζεται ακόμα μια περίοδο λειτουργίας πίνακα εργαλείων, ένα κλειδί `manage` -scope API, ένα διακριτικό πρόσβασης `oma_` με εύρος εγγραφής ή υψηλότερο ή το διακριτικό CLI ή το διακριτικό εσωτερικής υπηρεσίας που αποστέλλεται από το loopback. Αυτό το σετ είναι ευρύτερο από ό,τι με τη σύνδεση ενεργοποιημένη, όπου η διαδρομή δέχεται μόνο μια συνεδρία ή ένα κλειδί `manage` -scope.
 
 #### `GET /api/settings/feature-flags`
 
-Επιστρέφει κάθε σημαία μαζί με την ενεργή τιμή, την προέλευση και μια σύνοψη.
+Επιστρέφει κάθε σημαία με την πραγματική αξία, την πηγή και μια περίληψη.
 
 ```jsonc
 {
@@ -264,7 +260,7 @@
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... όλες οι 119 σημαίες
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -278,31 +274,30 @@
 
 #### `PUT /api/settings/feature-flags`
 
-Ορίζει ή καταργεί μία μεμονωμένη παράκαμψη. Σώμα: `{ key: string; value?: string }`.
-Η παράλειψη του `value` καταργεί την παράκαμψη (επαναφέροντας την τιμή env / default).
+Ορισμός ή κατάργηση μιας μεμονωμένης παράκαμψης. Σώμα: `{ key: string; value?: string }`. Η παράλειψη `value` καταργεί την παράκαμψη (επαναφορά env / προεπιλογή).
 
 ```bash
-# Ορισμός παράκαμψης DB
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Κατάργηση της παράκαμψης (χωρίς "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Η απόκριση επαναλαμβάνει τα νέα `effectiveValue`/`source`, τα
-`previousValue`/`previousSource` και το `requiresRestart`. Άγνωστα κλειδιά και τιμές enum εκτός επιτρεπόμενου εύρους απορρίπτονται με `400`.
+Η απόκριση αντηχεί το νέο `effectiveValue`/`source`, το `previousValue`/ `previousSource` και `requiresRestart`. Τα άγνωστα κλειδιά και οι τιμές enum εκτός εύρους απορρίπτονται με `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Καταργεί ταυτόχρονα **όλες** τις παρακάμψεις DB, επαναφέροντας κάθε σημαία στην τιμή env / default. Επιστρέφει `{ cleared: <count>, message: "..." }`.
+Καθαρίζει** όλοι** DB παρακάμπτει αμέσως, επαναφέροντας κάθε σημαία στην τιμή env / προεπιλεγμένης τιμής. Επιστρέφει `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Οι σημαίες με `requiresRestart: true` τίθενται σε ισχύ μόνο μετά την επαναφόρτωση μιας διεργασίας.
-> Η ροή επανεκκίνησης του πίνακα ελέγχου καλεί το `POST /api/restart` και στη συνέχεια εκτελεί polling στο `GET /api/health/ping` έως ότου ο διακομιστής επανέλθει.
+> Οι σημαίες με `requiresRestart: true` ισχύουν μόνο μετά από επαναφόρτωση της διαδικασίας. Η ροή επανεκκίνησης του πίνακα εργαλείων καλεί `POST /api/restart` και, στη συνέχεια, ψηφίζει `GET /api/health/ping` μέχρι να δημιουργηθεί αντίγραφο ασφαλείας του διακομιστή.
+
+---
 
 ## Εφεδρική Λύση Έκτακτης Ανάγκης για τον Προϋπολογισμό
 

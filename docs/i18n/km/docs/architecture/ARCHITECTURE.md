@@ -393,12 +393,12 @@ Cloud Agents គ្របដណ្តប់វេទិកាភ្នាក់�
 
 ### C. Guardrails
 
-ម៉ូឌុល guardrails គឺជាស្រទាប់ឧបករណ៍កណ្តាលដែលអាចផ្ទុកឡើងវិញបានយ៉ាងក្តៅគគុក ដែលត្រួតពិនិត្យសំណើ និងការឆ្លើយតបសម្រាប់ PII ការចាក់បញ្ចូលភ្លាមៗ និងខ្លឹមសារនៃចក្ខុវិស័យដែលមិនមានសុវត្ថិភាព។ ការរំលោភលើសៀគ្វីខ្លីនៃសំណើជាមួយ HTTP** ៥០៣** បូកនឹងកូដកំហុសដែលមានរចនាសម្ព័ន្ធ អនុញ្ញាតឱ្យអ្នកហៅទូរសព្ទខាងក្រោមព្យាយាមម្តងទៀត ឬសាខា។
+ម៉ូឌុល guardrails គឺជាស្រទាប់ឧបករណ៍កណ្តាលដែលអាចផ្ទុកឡើងវិញបានយ៉ាងក្តៅគគុក ដែលត្រួតពិនិត្យសំណើ និងការឆ្លើយតបសម្រាប់ PII ការចាក់បញ្ចូលភ្លាមៗ និងខ្លឹមសារនៃចក្ខុវិស័យដែលមិនមានសុវត្ថិភាព។ ការរំលោភបំពានសៀគ្វីខ្លីនៃសំណើជាមួយ HTTP** ៥០៣** បូកនឹងកូដកំហុសដែលមានរចនាសម្ព័ន្ធ អនុញ្ញាតឱ្យអ្នកហៅទូរសព្ទខាងក្រោមព្យាយាមម្តងទៀត ឬសាខា។
 
 - ឫសម៉ូឌុល៖ `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
 - ផ្ទុកឡើងវិញយ៉ាងក្តៅគគុក៖ នាឡិកាចុះបញ្ជីសម្រាប់ការផ្លាស់ប្តូរការកំណត់ និងបង្កើតខ្សែសង្វាក់ឡើងវិញនៅនឹងកន្លែង
 - ចំណុចភ្ជាប់៖ ធាតុកម្មវិធីគ្រប់គ្រងការជជែក អ្នកគ្រប់គ្រងបង្កើតរូបភាព ទឹកអនាម័យឆ្លើយតប
-- កិច្ចសន្យាHTTP ៖ បំពានលើផ្ទៃដូច `503` ជាមួយ `error.code = "GUARDRAIL_VIOLATION"`
+- កិច្ចសន្យាHTTP ៖ រំលោភលើផ្ទៃដូច `503` ជាមួយ `error.code = "GUARDRAIL_VIOLATION"`
 
 សម្រាប់ការកំណត់ច្បាប់ និងការកំណត់កម្រិត សូមមើល [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) ។
 
@@ -415,7 +415,7 @@ Cloud Agents គ្របដណ្តប់វេទិកាភ្នាក់�
 - Connection/model rule joiner: `src/domain/connectionModelRules.ts`
 - រូបថតបង្ហាញពីភាពអាចរកបាននៃម៉ូដែល៖ `src/domain/modelAvailability.ts`
 - ការតាមដានការផុតកំណត់របស់អ្នកផ្តល់សេវា៖ `src/domain/providerExpiration.ts`
-- ឃ្លាំងសម្ងាត់កូតា៖ `src/domain/quotaCache.ts`
+- Quota cache: `src/domain/quotaCache.ts`. Providers add and remove quota windows (OpenAI dropped the 5-hour Codex window for some plans), so a usage reading the provider's adapter attests as complete (`quotasComplete`, see `src/lib/usage/usageReading.ts`) is the account's full window set: a window known earlier but absent from it is retired, in the cache, in the `quota_snapshots` a restart rehydrates (an appended retirement record), in the persisted Codex quota state and in Claude's saturation buckets. Partial evidence (response headers, stale copies) only updates the windows it carries.
 - ស្ថានភាពរិចរិល៖ `src/domain/degradation.ts`
 - សវនកម្មការកំណត់រចនាសម្ព័ន្ធ៖ `src/domain/configAudit.ts`
 - អ្នកបង្កើតទិន្នន័យមេតាឆ្លើយតប OmniRoute ៖ `src/domain/omnirouteResponseMeta.ts`
@@ -439,7 +439,7 @@ Cloud Agents គ្របដណ្តប់វេទិកាភ្នាក់�
 
 ### F. Workflow FSM និង Task-Aware Router
 
-រ៉ោតទ័រដែលជំរុញដោយម៉ាស៊ីនដែលមានកម្រិតកំណត់នៅខាងលើការជ្រើសរើសបន្សំដើម្បីចរាចរដោយផ្ទាល់ដោយផ្អែកលើដំណាក់កាលនៃដំណើរការការងារដែលបានរកឃើញ (ការធ្វើផែនការ ការប្រតិបត្តិ ការពិនិត្យឡើងវិញ) និងភាពពាក់ព័ន្ធនៃកិច្ចការផ្ទៃខាងក្រោយ។
+រ៉ោតទ័រដែលដឹកនាំដោយម៉ាស៊ីនដែលមានកម្រិតកំណត់ដែលដាក់នៅខាងលើការជ្រើសរើសបន្សំដើម្បីចរាចរដោយផ្ទាល់ដោយផ្អែកលើដំណាក់កាលនៃដំណើរការការងារដែលបានរកឃើញ (ការធ្វើផែនការ ការប្រតិបត្តិ ការពិនិត្យឡើងវិញ) និងភាពពាក់ព័ន្ធនៃកិច្ចការផ្ទៃខាងក្រោយ។
 
 - លំហូរការងារ FSM: `open-sse/services/workflowFSM.ts`
 - រ៉ោតទ័រដែលដឹងអំពីកិច្ចការ៖ `open-sse/services/taskAwareRouter.ts`

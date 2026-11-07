@@ -414,7 +414,7 @@ OmniRoute ਸਥਾਨਕ ਤੌਰ 'ਤੇ ਚੱਲ ਰਹੀਆਂ AI ਟੂ�
 - Connection/model ਨਿਯਮ ਜੋੜਨ ਵਾਲਾ: `src/domain/connectionModelRules.ts`
 - ਮਾਡਲ ਉਪਲਬਧਤਾ ਸਨੈਪਸ਼ਾਟ: `src/domain/modelAvailability.ts`
 - ਪ੍ਰਦਾਤਾ ਦੀ ਮਿਆਦ ਪੁੱਗਣ ਦੀ ਟਰੈਕਿੰਗ: `src/domain/providerExpiration.ts`
-- ਕੋਟਾ ਕੈਸ਼: `src/domain/quotaCache.ts`
+- ਕੋਟਾ ਕੈਸ਼: `src/domain/quotaCache.ts`. ਪ੍ਰਦਾਤਾ ਕੋਟਾ ਵਿੰਡੋਜ਼ ਨੂੰ ਜੋੜਦੇ ਅਤੇ ਹਟਾਉਂਦੇ ਹਨ (OpenAI ਕੁਝ ਯੋਜਨਾਵਾਂ ਲਈ 5-ਘੰਟੇ ਦੀ Codex ਵਿੰਡੋ ਛੱਡ ਦਿੱਤੀ ਹੈ), ਇਸਲਈ ਪ੍ਰਦਾਤਾ ਦੇ ਅਡੈਪਟਰ ਦੇ ਤਸਦੀਕ ਨੂੰ ਸੰਪੂਰਨ (`quotasComplete`, ਵੇਖੋ `src/lib/usage/usageReading.ts`) ਨੂੰ ਪੜ੍ਹਣ ਵਾਲੀ ਵਰਤੋਂ ਖਾਤੇ ਦਾ ਪੂਰਾ ਵਿੰਡੋ ਸੈੱਟ ਹੈ: ਇੱਕ ਵਿੰਡੋ ਜੋ ਪਹਿਲਾਂ ਜਾਣੀ ਜਾਂਦੀ ਹੈ ਪਰ ਇਸ ਤੋਂ ਗੈਰਹਾਜ਼ਰ ਹੈ, ਕੈਸ਼ ਵਿੱਚ, `quota_snapshots` ਵਿੱਚ, ਰੀਹਾਈਡਰੇਟਨ ਐਪ ਵਿੱਚ ਰਿਕਾਰਡ), ਸਥਿਰ Codex ਕੋਟਾ ਸਥਿਤੀ ਵਿੱਚ ਅਤੇ Claude ਦੀ ਸੰਤ੍ਰਿਪਤਾ ਬਾਲਟੀਆਂ ਵਿੱਚ। ਅੰਸ਼ਕ ਸਬੂਤ (ਜਵਾਬ ਸਿਰਲੇਖ, ਪੁਰਾਣੀ ਕਾਪੀਆਂ) ਸਿਰਫ਼ ਉਹਨਾਂ ਵਿੰਡੋਜ਼ ਨੂੰ ਅੱਪਡੇਟ ਕਰਦਾ ਹੈ ਜੋ ਇਹ ਰੱਖਦਾ ਹੈ।
 - ਪਤਨ ਅਵਸਥਾ: `src/domain/degradation.ts`
 - ਸੰਰਚਨਾ ਆਡਿਟ: `src/domain/configAudit.ts`
 - OmniRoute ਜਵਾਬ ਮੈਟਾਡੇਟਾ ਬਿਲਡਰ: `src/domain/omnirouteResponseMeta.ts`

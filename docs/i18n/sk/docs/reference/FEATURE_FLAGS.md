@@ -224,29 +224,23 @@ efektívnu politiku.
 
 ---
 
-## Prepínanie príznakov
+## Prepínanie vlajok
 
-### Informačný panel
+### Dashboard
 
-Prejdite do **Dashboard → Settings → Feature Flags**
-(`/dashboard/settings/feature-flags`). Mriežka
-(`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`)
-podporuje:
+Prejdite na** Ovládací panel → Nastavenia → Príznaky funkcií** (`/dashboard/settings/feature-flags`). Mriežka (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagsGrid.tsx`) podporuje:
 
-- **Vyhľadávanie** podľa kľúča alebo popisu a **filtrovanie** podľa kategórie (vrátane syntetického zobrazenia
-  **Requires Restart**).
-- **Prepínač** pre boolovské príznaky a **rozbaľovací zoznam** pre enumové príznaky
-  (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
-- Odznak zdroja pre každý príznak — `DB`, `ENV` alebo `DEF` — zobrazujúci, odkiaľ pochádza efektívna hodnota.
-- Tlačidlo **Reset** (zobrazené iba pri príznakoch zo zdroja `DB`) na odstránenie prepísania a tlačidlo
-  **Reset All Overrides** v spodnej časti.
-- Banner **Restart Server**, keď sa zmení príznak `requiresRestart`.
+- **Hľadať** kľúčom alebo popisom a** filter** podľa kategórie (plus syntetické** Vyžaduje reštart** pohľad).
+- A** prepnúť** pre booleovské príznaky a a** rozbaľovacia ponuka** pre príznaky enum (`src/app/(dashboard)/dashboard/settings/components/FeatureFlagCard.tsx`).
+- A** zdrojový odznak** za príznak — `DB`, `ENV` alebo `DEF` — zobrazujúci odkiaľ pochádza efektívna hodnota.
+- A** Resetovať** tlačidlo (zobrazuje sa len pri príznakoch `DB` -sourced ) na zrušenie prepísania a a** Obnoviť všetky prepísania** tlačidlo v spodnej časti.
+- A** Reštartujte server** banner pri zmene vlajky `requiresRestart`.
 
 ### REST API
 
-Všetky operácie prechádzajú cez jednu trasu:
-[`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts).
-Každá metóda vyžaduje autentifikovanú reláciu informačného panela (inak `401`).
+Všetky operácie prechádzajú jednou cestou: [`src/app/api/settings/feature-flags/route.ts`](../../src/app/api/settings/feature-flags/route.ts). Každá metóda vyžaduje overenú reláciu dashboardu (v opačnom prípade `401` ).
+
+So zakázaným prihlásením (`requireLogin=false`) je trasa otvorená, okrem chránených príznakov: každý príznak v kategórii Zabezpečenie plus `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`, `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `MITM_DISABLE_TLS_VERIFY`, `OMNIROUTE_MCP_ENFORCE_SCOPES` a `SKILLS_SANDBOX_NETWORK_ENABLED` (`isProtectedFeatureFlag()` v `protectedFeatureFlags.ts`). `PUT` na jednom z nich a `DELETE`, pričom jeden z nich má prepísanie DB, stále potrebuje reláciu dashboardu, kľúč `manage` -scope API, prístupový token `oma_` s rozsahom zápisu alebo vyšším alebo token CLI alebo token internej služby odoslaný zo spätnej slučky. Táto sada je širšia ako pri prihlásení, kde trasa akceptuje iba reláciu alebo kľúč `manage` -scope.
 
 #### `GET /api/settings/feature-flags`
 
@@ -268,7 +262,7 @@ Vráti každý príznak s jeho efektívnou hodnotou, zdrojom a súhrnom.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... všetkých 119 príznakov
+    // ... all 119 flags
   ],
   "summary": {
     "total": 119,
@@ -282,34 +276,30 @@ Vráti každý príznak s jeho efektívnou hodnotou, zdrojom a súhrnom.
 
 #### `PUT /api/settings/feature-flags`
 
-Nastaví alebo odstráni jedno prepísanie. Telo požiadavky: `{ key: string; value?: string }`.
-Vynechaním `value` sa prepísanie odstráni (obnoví sa hodnota z prostredia / predvolená hodnota).
+Nastavte alebo odstráňte jedno prepísanie. Telo: `{ key: string; value?: string }`. Vynechaním `value` sa odstráni prepísanie (obnovenie env / predvolené).
 
 ```bash
-# Nastavenie prepísania v DB
+# Set a DB override
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY","value":"true"}'
 
-# Odstránenie prepísania (bez "value")
+# Remove the override (no "value")
 curl -X PUT http://localhost:20128/api/settings/feature-flags \
   -H "Content-Type: application/json" \
   -d '{"key":"REQUIRE_API_KEY"}'
 ```
 
-Odpoveď zopakuje novú `effectiveValue`/`source`, hodnoty `previousValue`/
-`previousSource` a `requiresRestart`. Neznáme kľúče a enumové hodnoty mimo povoleného rozsahu
-sú odmietnuté s kódom `400`.
+Odpoveď odráža nové `effectiveValue`/`source`, `previousValue`/ `previousSource` a `requiresRestart`. Neznáme kľúče a enum hodnoty mimo rozsahu sú odmietnuté s `400`.
 
 #### `DELETE /api/settings/feature-flags`
 
-Naraz odstráni **všetky** prepísania v DB a obnoví hodnotu každého príznaku z prostredia / predvolenú
-hodnotu. Vráti `{ cleared: <count>, message: "..." }`.
+Čistí sa** všetky** DB prepíše naraz a obnoví každý príznak na jeho env / predvolenú hodnotu. Vráti `{ cleared: <count>, message: "..." }`.
 
 > [!NOTE]
-> Príznaky s hodnotou `requiresRestart: true` sa prejavia až po opätovnom načítaní procesu.
-> Tok reštartu informačného panela zavolá `POST /api/restart` a potom opakovane kontroluje
-> `GET /api/health/ping`, kým server nebude opäť dostupný.
+> Príznaky s `requiresRestart: true` sa prejavia až po opätovnom načítaní procesu. Tok reštartu ovládacieho panela volá `POST /api/restart` a potom sa pýta `GET /api/health/ping`, kým sa server nespustí.
+
+---
 
 ## Núdzový záložný mechanizmus pri vyčerpaní rozpočtu
 
