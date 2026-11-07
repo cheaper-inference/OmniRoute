@@ -11,10 +11,14 @@
  * that stays inside the private network: loopback, a container or service name
  * (BASE_URL=http://omniroute:20128 is the documented Compose setup), or a private
  * address. A plain-http URL to anywhere else would send the caller's Bearer token
- * in cleartext across a network the operator does not control.
+ * in cleartext across a network the operator does not control. Cloud-metadata hosts
+ * are refused even under a private-looking name such as metadata.google.internal.
  */
 
 import { classifyIpScope } from "@/lib/ipUtils";
+import { SHORT_METADATA_HOSTNAMES } from "@/shared/network/localNodeHosts";
+import { isCloudMetadataHost } from "@/shared/network/outboundUrlGuard";
+import { embeddedIpv4Host, ipVersion, normalizeHost } from "@/shared/network/privateHost";
 import { resolveOmniRouteBaseUrl } from "@/shared/utils/resolveOmniRouteBaseUrl";
 
 const PRIVATE_DNS_SUFFIX = /\.(localhost|local|internal)$/;
@@ -27,15 +31,16 @@ export interface A2ACallerContext {
 }
 
 function isPrivateNetworkHost(hostname: string): boolean {
-  const host = hostname
-    .toLowerCase()
-    .replace(/^\[|\]$/g, "")
-    .replace(/\.$/, "");
-  if (host === "0.0.0.0") return true;
-  const scope = classifyIpScope(host);
-  if (scope === "loopback") return true;
-  if (scope === "private") return !LINK_LOCAL_IP.test(host);
-  if (scope === "public") return false;
+  const host = normalizeHost(hostname);
+  if (isCloudMetadataHost(host) || SHORT_METADATA_HOSTNAMES.has(host)) return false;
+  // new URL() spells ::ffff:8.8.8.8 as ::ffff:808:808, which classifyIpScope cannot read.
+  const ip = embeddedIpv4Host(host, true) ?? host;
+  // Only an IP literal gets an IP verdict: classifyIpScope calls 127.evil.example loopback.
+  if (ipVersion(ip) !== 0) {
+    if (ip === "0.0.0.0") return true;
+    const scope = classifyIpScope(ip);
+    return scope === "loopback" || (scope === "private" && !LINK_LOCAL_IP.test(ip));
+  }
   return !host.includes(".") || PRIVATE_DNS_SUFFIX.test(host);
 }
 

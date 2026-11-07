@@ -51,6 +51,46 @@ test("mayForwardSelfLoopCredential: http to a container or private host stays al
   assert.equal(mayForwardSelfLoopCredential("http://user:pass@omniroute:20128"), false);
 });
 
+test("mayForwardSelfLoopCredential: an IPv6 literal is judged by the IPv4 address it maps to", () => {
+  // new URL() rewrites these to hex (::ffff:808:808), which is no dotted address to classify.
+  assert.equal(mayForwardSelfLoopCredential("http://[::ffff:8.8.8.8]:20128"), false);
+  assert.equal(mayForwardSelfLoopCredential("http://[::ffff:808:808]:20128"), false);
+  assert.equal(mayForwardSelfLoopCredential("http://[::ffff:169.254.169.254]/"), false);
+  assert.equal(mayForwardSelfLoopCredential("http://[::ffff:127.0.0.1]:20128"), true);
+  assert.equal(mayForwardSelfLoopCredential("http://[::ffff:10.0.0.5]:20128"), true);
+  assert.equal(mayForwardSelfLoopCredential("http://[64:ff9b::808:808]:20128"), false);
+  assert.equal(mayForwardSelfLoopCredential("http://[::]:20128"), false);
+});
+
+test("mayForwardSelfLoopCredential: a public name that looks like a loopback address is refused", () => {
+  assert.equal(mayForwardSelfLoopCredential("http://127.evil.example:20128"), false);
+  assert.equal(mayForwardSelfLoopCredential("http://127.0.0.1.nip.io:20128"), false);
+  assert.equal(mayForwardSelfLoopCredential("http://127.0.0.2:20128"), true);
+});
+
+test("mayForwardSelfLoopCredential: cloud-metadata names are refused like their addresses", () => {
+  assert.equal(mayForwardSelfLoopCredential("http://metadata.google.internal/"), false);
+  assert.equal(mayForwardSelfLoopCredential("http://metadata.google.internal./"), false);
+  assert.equal(mayForwardSelfLoopCredential("http://metadata/"), false);
+  assert.equal(mayForwardSelfLoopCredential("http://instance-data/"), false);
+  assert.equal(mayForwardSelfLoopCredential("http://[fd00:ec2::254]/"), false);
+});
+
+test("buildSelfLoopHeaders sends no Bearer to a mapped public or metadata address", () => {
+  for (const url of [
+    "http://[::ffff:8.8.8.8]:20128",
+    "http://[::ffff:169.254.169.254]/",
+    "http://127.evil.example:20128",
+    "http://metadata.google.internal/",
+  ]) {
+    assert.throws(
+      () => buildSelfLoopHeaders({ apiKey: "sk-caller" }, url),
+      UnsafeSelfLoopTargetError,
+      url
+    );
+  }
+});
+
 test("buildSelfLoopHeaders attaches Bearer on a private http target and on https", () => {
   for (const url of [
     "http://localhost:20128",
