@@ -1,0 +1,1 @@
+- **fix(combo):** A combo cooldown wait no longer starts when it cannot finish before `comboTimeoutMs`, so a pool with every target walled answers at once with its normal terminal response and Retry-After instead of a silent `Combo global timeout ... (0 attempted)` 504 (#18998 — thanks @jjxyxsjr)
