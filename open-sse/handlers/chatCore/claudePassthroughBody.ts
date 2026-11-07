@@ -93,8 +93,10 @@ export function buildClaudePassthroughBody({
 
   // Legacy models reject role:"system" messages. Supported models accept
   // them behind a beta, and hoisting them breaks the prompt cache prefix.
+  // Only the native `claude` dispatch sends that beta (selectBetaFlags); the
+  // `anthropic` API-key dispatch does not, so it always hoists.
   if (isClaudeCodeSemanticPassthrough) {
-    if (!isFirstPartyAnthropic || !shouldUseMidConversationSystem(translatedBody, effectiveModel)) {
+    if (provider !== "claude" || !shouldUseMidConversationSystem(translatedBody, effectiveModel)) {
       extractSystemRoleMessages(translatedBody);
     } else {
       // The mid-conversation-system path keeps system-role messages inside
@@ -113,7 +115,7 @@ export function buildClaudePassthroughBody({
       ) as typeof translatedBody.messages;
     }
     if (isFirstPartyAnthropic) {
-      ensureCacheControlOnLastUserMessage(translatedBody);
+      ensureCacheControlOnLastUserMessage(translatedBody, { countTools: provider === "anthropic" });
     }
   } else {
     // Same guard as the CC-bridge path: only preserve tool_result blocks
@@ -125,9 +127,6 @@ export function buildClaudePassthroughBody({
     normalizeClaudeUpstreamMessages(translatedBody, {
       preserveToolResultBlocks: targetFormat === FORMATS.CLAUDE,
     });
-    if (provider === "anthropic") {
-      ensureCacheControlOnLastUserMessage(translatedBody);
-    }
   }
 
   log?.debug?.("FORMAT", `claude passthrough (preserveCache=${preserveCacheControl})`);
