@@ -314,15 +314,18 @@ function snapshotHasOpaqueReasoningItem(body: unknown): boolean {
   const record =
     body !== null && typeof body === "object" && !Array.isArray(body) ? (body as JsonRecord) : null;
   if (!record) return false;
-  const outputs: unknown[] = [];
-  if (Array.isArray(record.output)) outputs.push(...record.output);
   const nested =
     record.response !== null &&
     typeof record.response === "object" &&
     !Array.isArray(record.response)
       ? (record.response as JsonRecord)
       : null;
-  if (nested && Array.isArray(nested.output)) outputs.push(...nested.output);
+  // Array literals, not push(...): no-log attempts pass the live body, and a spread
+  // into call arguments overflows the stack past roughly 125k items.
+  const outputs: unknown[] = [
+    ...(Array.isArray(record.output) ? record.output : []),
+    ...(nested && Array.isArray(nested.output) ? nested.output : []),
+  ];
   return outputs.some((item) => {
     const itemRecord =
       item !== null && typeof item === "object" && !Array.isArray(item)
@@ -341,19 +344,47 @@ function snapshotHasOpaqueReasoningItem(body: unknown): boolean {
 function resolveReasoningObservation(
   usageReasoning: number | null,
   responseBody: unknown,
-  streamMeta?: { encryptedSeen?: boolean } | null
+  streamMeta?: {
+    encryptedSeen?: boolean;
+    snapshotSource?: string | null;
+    snapshotChars?: number | null;
+  } | null
 ): { source: string | null; chars: number | null } {
-  if (streamMeta?.encryptedSeen === true || snapshotHasOpaqueReasoningItem(responseBody)) {
+  if (
+    streamMeta?.encryptedSeen === true ||
+    streamMeta?.snapshotSource === "encrypted" ||
+    snapshotHasOpaqueReasoningItem(responseBody)
+  ) {
     return { source: "encrypted", chars: null };
   }
   if (usageReasoning != null && usageReasoning > 0) {
     return { source: "usage", chars: null };
+  }
+  // A no-log request keeps only scalars from its live response, not a cloned body.
+  if (
+    (streamMeta?.snapshotSource === "content" || streamMeta?.snapshotSource === "think") &&
+    typeof streamMeta.snapshotChars === "number" &&
+    streamMeta.snapshotChars > 0
+  ) {
+    return { source: streamMeta.snapshotSource, chars: streamMeta.snapshotChars };
   }
   const observed = getObservedReasoning(extractAssistantMessage(responseBody));
   if (observed.chars > 0) {
     return { source: observed.source, chars: observed.chars };
   }
   return { source: null, chars: null };
+}
+
+/**
+ * Read numerical reasoning observations from the live response before a no-log
+ * attempt drops its payload. Never retain content or encrypted reasoning blobs.
+ */
+export function captureReasoningSnapshotMeta(responseBody: unknown): {
+  snapshotSource: string | null;
+  snapshotChars: number | null;
+} {
+  const { source, chars } = resolveReasoningObservation(null, responseBody);
+  return { snapshotSource: source, snapshotChars: chars };
 }
 
 function hasCallLogsColumn(columnName: string): boolean {
