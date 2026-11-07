@@ -477,10 +477,11 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
     path: "/api/v1/issues/report",
     method: "POST",
     summary: "POST issues › report",
-    description: "",
+    description:
+      "Management-only, like `/api/v1/registered-keys`: a dashboard session, the local CLI token, or an API key with `manage`/`admin` scope. Inference-only API keys get 403.\n",
     tag: "V1 Issues",
     tags: ["V1 Issues"],
-    requiresAuth: false,
+    requiresAuth: true,
     hasRequestBody: false,
   },
   {
