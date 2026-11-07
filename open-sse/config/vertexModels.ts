@@ -16,6 +16,21 @@ const LEGACY_OPENAI_MAAS_PUBLISHERS = [
 
 export type VertexModelTransport = "gemini" | "anthropic" | "mistral" | "openai";
 
+/**
+ * Resolve the endpoint host for a project-scoped Vertex call.
+ *
+ * Multi-region endpoints use the representative-endpoint (`.rep.`) hostname form and MUST be
+ * paired with their own location in the path (`aiplatform.eu.rep.googleapis.com` +
+ * `locations/eu`); the host and location cannot be mixed. All other regions (and the `global`
+ * location) keep the legacy global host, which is what this executor used before the EU routing
+ * fix and is still correct for them. Model discovery uses the same host so an org policy that
+ * pins the regional endpoint (`constraints/gcp.restrictEndpointUsage`) can also sync (#18790).
+ */
+export function getVertexHost(region: string | null | undefined): string {
+  if (region === "eu") return "aiplatform.eu.rep.googleapis.com";
+  return "aiplatform.googleapis.com";
+}
+
 function normalizePublisherModel(publisher: string, model: string): string {
   const normalizedPublisher = publisher.toLowerCase();
   if (NATIVE_PUBLISHERS.has(normalizedPublisher)) return model;

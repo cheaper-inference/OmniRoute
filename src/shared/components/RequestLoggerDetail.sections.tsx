@@ -2,15 +2,11 @@
 
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { JsonView } from "@/shared/components/jsonView";
+import JsonTree from "@/shared/components/JsonTree";
 import { ChatBubble } from "@/app/(dashboard)/dashboard/tools/traffic-inspector/components/chat/ChatBubble";
 import { buildRequestTurns, buildResponseTurns } from "@/mitm/inspector/conversationNormalizer";
 import type { InterceptedRequest, NormalizedTurn } from "@/mitm/inspector/types";
-import { useTheme } from "@/shared/hooks/useTheme";
-import {
-  useTimestampTitles,
-  timestampMarkerCustomizeNode,
-} from "@/shared/hooks/useTimestampTitles";
+import { useTimestampTitles } from "@/shared/hooks/useTimestampTitles";
 import { JsonTreeExpandControls } from "@/shared/components/JsonTreeExpandControls";
 import { useJsonTreeExpandLevel } from "@/store/jsonTreeExpandStore";
 import { cn } from "@/shared/utils/cn";
@@ -59,7 +55,7 @@ export function isBodySizeLimitOmission(value) {
 }
 
 // ─── Payload Code Block ─────────────────────────────────────────────────────
-// Renders parsed payloads as a collapsible JSON tree (react18-json-view) so
+// Renders parsed payloads as a collapsible JSON tree (the kit JsonTree) so
 // deeply nested request/response bodies (tool args, message arrays) can be
 // collapsed instead of scrolled through as one raw text dump. Falls back to
 // the plain <pre> dump for anything that isn't valid JSON (e.g. a captured
@@ -79,7 +75,6 @@ export function PayloadSection({
   defaultOpen = true,
 }) {
   const t = useTranslations("requestLogger.detail");
-  const { isDark } = useTheme();
   const resolvedSectionId = sectionId || title;
   const expandLevel = useJsonTreeExpandLevel(resolvedSectionId);
   const [copied, setCopied] = useState(false);
@@ -153,12 +148,11 @@ export function PayloadSection({
           ref={treeContainerRef}
           className="max-h-150 overflow-auto rounded-xl border border-border bg-surface-2 p-4 font-mono text-xs"
         >
-          <JsonView
-            src={parsedJson}
-            dark={isDark}
-            collapsed={expandLevel}
-            customizeNode={timestampMarkerCustomizeNode}
-            displaySize
+          <JsonTree
+            value={parsedJson}
+            expandDepth={expandLevel}
+            showControls={false}
+            aria-label={title}
           />
         </div>
       )}
