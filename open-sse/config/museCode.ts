@@ -10,9 +10,26 @@
 import { stripTrailingSlashes } from "../utils/urlSanitize.ts";
 
 export const MUSE_CODE_USER_AGENT = "muse-code/1.0.2";
-/** Inference UA used by CLIProxyAPI's MetaExecutor (auth still uses muse-code/1.0.2). */
-export const MUSE_CODE_INFERENCE_USER_AGENT =
-  "muse-build/1.3.0 (interactive; macos-aarch64; build ac7280f2aca67769d1455a8847bb502b617d50f6)";
+/**
+ * The Muse Code client inference identity, as sent by Muse Code 1.4.14-R7309.1 on
+ * /v1/responses (auth still uses muse-code/1.0.2). Subscription keys serve requests from the
+ * Muse Code client; the retired muse-build/1.3.0 fingerprint was refused with
+ * client_attestation_denied. Session headers are added per request by the executor.
+ */
+export const MUSE_CODE_CLIENT_VERSION = "1.4.14";
+export const MUSE_CODE_CLIENT_BUILD = "dec7d7497fecdad135ec5835a8161dbc92e55b58";
+/** `X-Client-Id` of the headless (`muse exec`) surface. */
+export const MUSE_CODE_CLIENT_SURFACE = "tbh:exec";
+
+/** The client User-Agent for this host's OS and architecture, as the real client reports them. */
+export function museCodeClientUserAgent(
+  platform: string = process.platform,
+  arch: string = process.arch
+): string {
+  const os = platform === "darwin" ? "macos" : platform === "win32" ? "windows" : platform;
+  const cpu = arch === "x64" ? "x86_64" : arch === "arm64" ? "aarch64" : arch;
+  return `muse-build/${MUSE_CODE_CLIENT_VERSION} (non-interactive; ${os}-${cpu}; build ${MUSE_CODE_CLIENT_BUILD})`;
+}
 export const MUSE_CODE_AUTH_HOST = "https://auth.meta.com";
 export const MUSE_CODE_DEVICE_CODE_URL = `${MUSE_CODE_AUTH_HOST}/oidc/device/authorization/`;
 export const MUSE_CODE_TOKEN_URL = `${MUSE_CODE_AUTH_HOST}/oidc/device/token/`;
