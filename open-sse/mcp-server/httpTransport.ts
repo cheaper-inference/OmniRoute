@@ -257,14 +257,17 @@ function withSessionHeader(response: Response, sessionId: string): Response {
 /**
  * Count an open SSE stream for a session while its body stays alive. The body
  * is re-served through a pull-based ReadableStream so the counter is released
- * exactly once, on natural end, consumer cancel, or body error.
+ * exactly once, on natural end, consumer cancel, or body error. Idle time then
+ * counts from that moment, not from the request that opened the stream.
  */
-function trackOpenSseStream(sessionId: string, response: Response): Response {
+function trackOpenSseStream(session: StreamableSession, response: Response): Response {
+  const { sessionId } = session;
   noteStreamableOpenStream(sessionId, 1);
   let released = false;
   const release = () => {
     if (released) return;
     released = true;
+    session.lastActivityAt = Date.now();
     noteStreamableOpenStream(sessionId, -1);
   };
   const reader = response.body!.getReader();
@@ -343,7 +346,7 @@ async function handleStreamableRequest(request: Request): Promise<Response> {
       // delivered (an in-flight tool call) or the GET subscription ends, so an
       // open body is transport-level activity for both POST and GET.
       if (response.headers.get("content-type")?.toLowerCase().includes("text/event-stream")) {
-        response = trackOpenSseStream(sessionId, response);
+        response = trackOpenSseStream(session, response);
       }
       if (request.method === "DELETE") {
         closeStreamableSession(sessionId);
@@ -359,6 +362,7 @@ async function handleStreamableRequest(request: Request): Promise<Response> {
         headers: { "Content-Type": "application/json" },
       });
     } finally {
+      session.lastActivityAt = Date.now();
       noteStreamableInflight(sessionId, -1);
     }
   }

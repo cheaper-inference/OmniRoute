@@ -1,7 +1,7 @@
 // Per-session activity for Streamable HTTP sessions, owned by the transport
 // layer in httpTransport.ts. Two counters keep the idle sweep honest:
 //   - inflight:    requests currently being handled (POST/GET/DELETE);
-//   - openStreams: SSE streams (GET) currently open.
+//   - openStreams: SSE response bodies (POST or GET) currently open.
 // The sweep in httpTransport.ts leaves a session open while either counter is
 // above zero, so a long-lived stream or a running tool call is never reaped
 // mid-flight. This lives apart from httpTransport.ts so the module stays

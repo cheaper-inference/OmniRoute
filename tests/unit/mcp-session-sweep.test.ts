@@ -487,10 +487,8 @@ test("an open SSE stream counts as activity and releases when the stream ends", 
     })
   );
   const sessionId = initRes.headers.get("mcp-session-id");
-  if (!sessionId) {
-    mod.shutdownMcpHttp();
-    return;
-  }
+  if (!sessionId) mod.shutdownMcpHttp();
+  assert.ok(sessionId, "initialize must return an mcp-session-id");
   const activity = await import("../../open-sse/mcp-server/sessionActivity.ts");
   const stream = await mod.handleMcpStreamableHTTP(
     new Request("http://localhost/api/mcp/stream", {
@@ -537,10 +535,8 @@ test("starting the SSE singleton does not close streamable sessions", async () =
     })
   );
   const sessionId = initRes.headers.get("mcp-session-id");
-  if (!sessionId) {
-    mod.shutdownMcpHttp();
-    return;
-  }
+  if (!sessionId) mod.shutdownMcpHttp();
+  assert.ok(sessionId, "initialize must return an mcp-session-id");
   const sseRes = await mod.handleMcpSSE(
     new Request("http://localhost/api/mcp/sse", {
       method: "GET",
@@ -667,10 +663,8 @@ test("a running tool call is counted at the transport level, not per tool", asyn
     })
   );
   const sessionId = initRes.headers.get("mcp-session-id");
-  if (!sessionId) {
-    mod.shutdownMcpHttp();
-    return;
-  }
+  if (!sessionId) mod.shutdownMcpHttp();
+  assert.ok(sessionId, "initialize must return an mcp-session-id");
   try {
     assert.deepEqual(activity.streamableActivity(sessionId), { inflight: 0, openStreams: 0 });
     const res = await mod.handleMcpStreamableHTTP(
@@ -729,4 +723,90 @@ test("the sweep asks the transport-level activity before reaping", async () => {
   activity.noteStreamableOpenStream("s-activity", -1);
   assert.deepEqual(activity.streamableActivity("s-activity"), { inflight: 0, openStreams: 0 });
   activity.purgeStreamableActivity("s-activity");
+});
+
+// ── The idle clock restarts when work ends ───────────────────────────────────
+
+const IDLE_CLOCK_INIT_BODY = JSON.stringify({
+  jsonrpc: "2.0",
+  method: "initialize",
+  id: 1,
+  params: {
+    protocolVersion: "2025-03-26",
+    capabilities: {},
+    clientInfo: { name: "test-client", version: "1.0.0" },
+  },
+});
+
+// A fresh module copy, so its sweep runs on the mocked clock and interval.
+async function openSessionOnMockedClock(t: test.TestContext, tag: string) {
+  t.mock.timers.enable({ apis: ["Date", "setInterval"] });
+  const fresh = await import(`../../open-sse/mcp-server/httpTransport.ts?${tag}`);
+  t.after(() => fresh.shutdownMcpHttp());
+  const initRes = await fresh.handleMcpStreamableHTTP(
+    new Request("http://localhost/api/mcp/stream", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json, text/event-stream",
+      },
+      body: IDLE_CLOCK_INIT_BODY,
+    })
+  );
+  const sessionId = initRes.headers.get("mcp-session-id");
+  assert.ok(sessionId, "initialize must return an mcp-session-id");
+  return { fresh, sessionId };
+}
+
+test("a session survives the sweep right after a long stream ends", async (t) => {
+  const { fresh, sessionId } = await openSessionOnMockedClock(t, "idle-clock-stream");
+  const stream = await fresh.handleMcpStreamableHTTP(
+    new Request("http://localhost/api/mcp/stream", {
+      method: "GET",
+      headers: { "mcp-session-id": sessionId, Accept: "text/event-stream" },
+    })
+  );
+  t.mock.timers.tick(6 * 60_000);
+  assert.equal(fresh.getMcpHttpStatus().sessionCount, 1, "open stream holds the session");
+
+  await stream.body?.cancel();
+  t.mock.timers.tick(60_000);
+  assert.equal(fresh.getMcpHttpStatus().sessionCount, 1, "idle time counts from the stream end");
+
+  t.mock.timers.tick(5 * 60_000);
+  assert.equal(fresh.getMcpHttpStatus().sessionCount, 0, "a truly idle session is still reaped");
+});
+
+test("a session survives the sweep right after a long request ends", async (t) => {
+  const { fresh, sessionId } = await openSessionOnMockedClock(t, "idle-clock-request");
+  let finishBody: () => void = () => {};
+  const body = new ReadableStream<Uint8Array>({
+    start(controller) {
+      finishBody = () => {
+        const notification = { jsonrpc: "2.0", method: "notifications/initialized" };
+        controller.enqueue(new TextEncoder().encode(JSON.stringify(notification)));
+        controller.close();
+      };
+    },
+  });
+  const pending = fresh.handleMcpStreamableHTTP(
+    new Request("http://localhost/api/mcp/stream", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json, text/event-stream",
+        "mcp-session-id": sessionId,
+      },
+      body,
+      duplex: "half",
+    } as RequestInit)
+  );
+  t.mock.timers.tick(6 * 60_000);
+  assert.equal(fresh.getMcpHttpStatus().sessionCount, 1, "in-flight request holds the session");
+
+  finishBody();
+  const res = await pending;
+  assert.equal(res.status, 202);
+  t.mock.timers.tick(60_000);
+  assert.equal(fresh.getMcpHttpStatus().sessionCount, 1, "idle time counts from the request end");
 });
