@@ -194,3 +194,39 @@ test("an idle recovery stream releases its probe without inventing a success", a
   assert.notEqual(state.state, "probing");
   assert.equal(state.recoverySuccesses, 0);
 });
+
+test("adaptive health follows each connection's dispatched legacy default model", async () => {
+  const { resolveBareModelToConnectionDefault } =
+    await import("../../open-sse/services/model.ts");
+  const prior = process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY;
+  try {
+    process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY = "true";
+    const tracker = new AntigravityHealthTracker(() => 1000);
+    const connections = [
+      { id: "bad", defaultModel: MODEL },
+      { id: "good", defaultModel: "gemini-3.8-flash-low" },
+    ];
+    timeoutRun(tracker, "bad");
+    const modelFor = (connection: (typeof connections)[number]) =>
+      resolveBareModelToConnectionDefault(
+        "gemini-3.8-flash-low",
+        "gemini-3.8-flash-low",
+        connection.defaultModel
+      ) || "gemini-3.8-flash-low";
+    assert.equal(modelFor(connections[0]), MODEL);
+    assert.equal(modelFor(connections[1]), "gemini-3.8-flash-low");
+    assert.deepEqual(tracker.candidates(connections, modelFor), [connections[1]]);
+    // A qualified model is always dispatched unchanged even under legacy override.
+    assert.equal(
+      resolveBareModelToConnectionDefault(
+        "antigravity/gemini-3.8-flash-low",
+        "gemini-3.8-flash-low",
+        MODEL
+      ),
+      "gemini-3.8-flash-low"
+    );
+  } finally {
+    if (prior === undefined) delete process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY;
+    else process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY = prior;
+  }
+});
