@@ -89,12 +89,23 @@ const RESETS_IN_RE = /resets? in (\d+h)?(\d+m)?(\d+s)?/i;
 const RETRY_IN_SEC_RE = /please retry in (\d+(?:\.\d+)?)\s*s/i;
 const COOLDOWN_NUMERIC_RE = /^\d+(\.\d+)?$/;
 
-export type RetryHintProvenance = "header" | "google_rpc_retry_info" | "body";
+export type RetryHintProvenance = "header" | "google_rpc_retry_info" | "body" | "body_structured";
 
 export function retryHintBypassesMaxCooldownMs(
   provenance: RetryHintProvenance | undefined
 ): boolean {
   return provenance === "header" || provenance === "google_rpc_retry_info";
+}
+
+/** Structured provenances reflect the provider's own reset clock and may shorten an existing model lock (#CO-402). */
+export function isAuthoritativeRetryHintSource(
+  provenance: RetryHintProvenance | undefined
+): boolean {
+  return (
+    provenance === "header" ||
+    provenance === "google_rpc_retry_info" ||
+    provenance === "body_structured"
+  );
 }
 import {
   isSubscriptionQuotaText,
@@ -777,18 +788,31 @@ export function lockModel(
   model: string | null | undefined,
   reason: string,
   cooldownMs: number,
-  metadata: Partial<ModelLockoutEntry> = {}
+  metadata: Partial<ModelLockoutEntry> = {},
+  options: { authoritativeReset?: boolean } = {}
 ): void {
   if (!model) return; // No model → skip model-level locking
   ensureCleanupTimer();
   const key = getModelLockKey(provider, connectionId, model, reason);
   cleanupModelLockKey(key);
   const newUntil = Date.now() + cooldownMs;
-  // Preserve the longer cooldown if an existing lock has more time remaining.
   // Safe without a mutex: no await between get/set, so this runs atomically
   // within Node.js's single-threaded event loop.
   const existing = modelLockouts.get(key);
   if (existing && existing.until > newUntil) {
+    // An authoritative upstream reset (structured body field or header) shortens
+    // a longer guessed lock — the provider's own clock wins (#CO-402).
+    if (options.authoritativeReset === true) {
+      modelLockouts.set(key, {
+        reason,
+        until: newUntil,
+        lockedAt: Date.now(),
+        failureCount: Math.max(metadata.failureCount ?? existing.failureCount, 1),
+        lastFailureAt: metadata.lastFailureAt ?? Date.now(),
+        resetAfterMs: metadata.resetAfterMs ?? existing.resetAfterMs,
+      });
+      return;
+    }
     if (metadata.failureCount && metadata.failureCount > existing.failureCount) {
       existing.failureCount = metadata.failureCount;
       existing.lastFailureAt = metadata.lastFailureAt ?? existing.lastFailureAt;
@@ -855,6 +879,14 @@ export function recordModelLockoutFailure(
      * until-midnight default below, plain exponential backoff).
      */
     exactCooldownIsUpstreamReset?: boolean;
+    /**
+     * A structured body hint (reset_at / retry_after seconds parsed from JSON) is
+     * the provider's own reset clock: a NEW such hint may SHORTEN an existing
+     * model lock instead of only extending it. Header/RetryInfo hints already
+     * carry this via exactCooldownIsUpstreamReset; body hints got it separately
+     * so routerai-style 402s unstick after the provider's reset passes (#CO-402).
+     */
+    authoritativeBodyReset?: boolean;
   } = {}
 ) {
   ensureCleanupTimer();
@@ -913,11 +945,19 @@ export function recordModelLockoutFailure(
   });
 
   const lockFn = scope === "exact" ? lockExactModel : lockModel;
-  lockFn(provider, connectionId, model, reason, cooldownMs, {
-    failureCount,
-    lastFailureAt: now,
-    resetAfterMs,
-  });
+  lockFn(
+    provider,
+    connectionId,
+    model,
+    reason,
+    cooldownMs,
+    {
+      failureCount,
+      lastFailureAt: now,
+      resetAfterMs,
+    },
+    { authoritativeReset: options.authoritativeBodyReset === true }
+  );
 
   return {
     cooldownMs,
@@ -1896,7 +1936,10 @@ export function checkFallbackError(
     if (detailedJsonHint) {
       return {
         retryAfterMs: detailedJsonHint.retryAfterMs,
-        provenance: detailedJsonHint.provenance,
+        provenance:
+          detailedJsonHint.provenance === "body"
+            ? ("body_structured" as const)
+            : detailedJsonHint.provenance,
       };
     }
 
@@ -2159,7 +2202,7 @@ export function checkFallbackError(
     if (shouldUseQuotaSignal && !isCreditsExhausted(errorStr) && !isDailyQuotaExhausted(errorStr)) {
       const subResult = buildSubscriptionQuotaFallback(
         errorStr,
-        () => getUpstreamRetryHint()?.retryAfterMs ?? null,
+        getUpstreamRetryHint,
         parseRetryFromErrorText,
         provider
       );
@@ -2346,7 +2389,7 @@ export function checkFallbackError(
   if (status === HTTP_STATUS.PLAN_LIMIT_EXCEEDED) {
     const subResult = buildSubscriptionQuotaFallback(
       errorStr,
-      () => getUpstreamRetryHint()?.retryAfterMs ?? null,
+      getUpstreamRetryHint,
       parseRetryFromErrorText,
       provider
     );

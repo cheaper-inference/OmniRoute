@@ -62,11 +62,27 @@ export function computeExactModelLockEntry(
   existing: ModelLockoutEntry | undefined,
   reason: string,
   cooldownMs: number,
-  metadata: Partial<ModelLockoutEntry>
+  metadata: Partial<ModelLockoutEntry>,
+  options: { authoritativeReset?: boolean } = {}
 ): ModelLockoutEntry | null {
   const now = Date.now();
   const newUntil = now + cooldownMs;
   if (existing && existing.until > newUntil) {
+    // An authoritative upstream reset (Retry-After header, google.rpc.RetryInfo,
+    // or a structured reset_at/retry_after body field) reflects the provider's own
+    // clock: when the provider reports a SHORTER wait than a lock we guessed, the
+    // provider's word wins and the lock shortens. Prose-derived and synthetic
+    // cooldowns never shorten an existing lock (previous behavior preserved).
+    if (options.authoritativeReset === true) {
+      return {
+        reason,
+        until: newUntil,
+        lockedAt: now,
+        failureCount: Math.max(metadata.failureCount ?? existing.failureCount, 1),
+        lastFailureAt: metadata.lastFailureAt ?? now,
+        resetAfterMs: metadata.resetAfterMs ?? existing.resetAfterMs,
+      };
+    }
     if (!metadata.failureCount || metadata.failureCount <= existing.failureCount) return null;
     return {
       ...existing,
@@ -146,13 +162,20 @@ export function createLockExactModel(
     model: string | null | undefined,
     reason: string,
     cooldownMs: number,
-    metadata: Partial<ModelLockoutEntry> = {}
+    metadata: Partial<ModelLockoutEntry> = {},
+    options: { authoritativeReset?: boolean } = {}
   ): void {
     if (!model) return;
     ensureCleanupTimer();
     const key = buildExactModelLockKey(getCanonicalLockProvider(provider), connectionId, model);
     cleanupModelLockKey(key);
-    const next = computeExactModelLockEntry(modelLockouts.get(key), reason, cooldownMs, metadata);
+    const next = computeExactModelLockEntry(
+      modelLockouts.get(key),
+      reason,
+      cooldownMs,
+      metadata,
+      options
+    );
     if (next) modelLockouts.set(key, next);
   };
 }
