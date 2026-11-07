@@ -49,13 +49,16 @@ test("immutable response clone retains trusted response policies alongside telem
 
 test("account rotation is exposed through bounded routing telemetry headers", async () => {
   const first = await seedConnection("openai", {
+    name: "openai-fallback-primary",
     apiKey: "sk-account-fallback-first",
     priority: 1,
   });
   const second = await seedConnection("openai", {
+    name: "openai-fallback-secondary",
     apiKey: "sk-account-fallback-second",
     priority: 2,
   });
+  assert.notEqual(first.id, second.id, "fixture must create two distinct connections");
 
   const attempts: string[] = [];
   let failedAuthorization: string | null = null;
