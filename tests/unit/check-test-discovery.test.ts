@@ -5,6 +5,7 @@
 import { test } from "node:test";
 import assert from "node:assert";
 import {
+  COLLECTORS,
   globToRegExp,
   findOrphans,
   evaluateAgainstBaseline,
@@ -48,6 +49,22 @@ test("findOrphans: múltiplos collectors — basta UM casar", () => {
   const files = ["tests/unit/autoCombo/scoring.test.ts"];
   const globs = ["tests/unit/*.test.ts", "tests/unit/autoCombo/**/*.test.ts"];
   assert.deepEqual(findOrphans(files, globs), []);
+});
+
+test("domain and executor Node tests each have one collector and are not orphans", () => {
+  const recoveredTests = [
+    "tests/unit/domain/quotaCache.test.ts",
+    "tests/unit/executors/antigravityArgon404.test.ts",
+  ];
+  for (const testFile of recoveredTests) {
+    const owners = COLLECTORS.filter((collector) => globToRegExp(collector.glob).test(testFile));
+    assert.equal(owners.length, 1);
+    assert.equal(owners[0].glob.startsWith("tests/unit/{"), true);
+  }
+  assert.deepEqual(findOrphans(recoveredTests, COLLECTORS), []);
+  assert.deepEqual(findOrphans(["tests/golden-set/compression-quality.test.ts"], COLLECTORS), [
+    "tests/golden-set/compression-quality.test.ts",
+  ]);
 });
 
 test("findOrphans: exclude wins within its collector, but not over another runner", () => {
