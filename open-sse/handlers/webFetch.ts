@@ -4,6 +4,7 @@
  * Handles POST /v1/web/fetch requests.
  * Dispatches to a web-fetch provider executor (Firecrawl, Jina Reader, Tavily, or TinyFish).
  * Also AnySearch extract for free public fetch, and Parallel Extract (markdown only).
+ * Also Keenable fetch (markdown only, keyless by default, optional key).
  *
  * Request format:
  * {
@@ -25,6 +26,7 @@ import { tinyfishFetch } from "../executors/tinyfish-fetch.ts";
 import { nimbleFetch } from "../executors/nimble-fetch.ts";
 import { anysearchFetch } from "../executors/anysearch-fetch.ts";
 import { parallelFetch } from "../executors/parallel-fetch.ts";
+import { keenableFetch } from "../executors/keenable-fetch.ts";
 
 export type WebFetchFormat = "markdown" | "html" | "links" | "screenshot";
 
@@ -38,7 +40,8 @@ export interface WebFetchRequest {
     | "context7"
     | "nimble-search"
     | "anysearch-search"
-    | "parallel-search";
+    | "parallel-search"
+    | "keenable-search";
   format?: WebFetchFormat;
   depth?: 0 | 1 | 2;
   wait_for_selector?: string;
@@ -76,6 +79,7 @@ export const WEB_FETCH_PROVIDERS = Object.freeze([
   "context7",
   "nimble-search",
   "parallel-search",
+  "keenable-search",
 ] as const);
 // Derived from the array — adding a provider to WEB_FETCH_PROVIDERS
 // automatically widens the union; they cannot drift apart.
@@ -99,7 +103,7 @@ export const EXPLICIT_ONLY_WEB_FETCH_PROVIDERS: ReadonlySet<WebFetchProviderId> 
  * Compile-time protection only (see the note above on ReadonlySet).
  */
 export const ANONYMOUS_CAPABLE_WEB_FETCH_PROVIDERS: ReadonlySet<WebFetchProviderId> =
-  new Set<WebFetchProviderId>(["context7"]);
+  new Set<WebFetchProviderId>(["context7", "keenable-search"]);
 
 /**
  * Execute a web fetch request against the specified (or auto-selected) provider.
@@ -172,6 +176,15 @@ export async function handleWebFetch(
       case "parallel-search":
         // Parallel Extract is markdown-only; parallelFetch rejects other formats with 400.
         return await parallelFetch({
+          url: req.url,
+          format,
+          includeMetadata,
+          credentials,
+        });
+
+      case "keenable-search":
+        // Keenable fetch is markdown-only; keenableFetch rejects other formats with 400.
+        return await keenableFetch({
           url: req.url,
           format,
           includeMetadata,

@@ -1,16 +1,16 @@
 ---
 title: "Provider Reference"
 version: 3.8.53
-lastUpdated: 2026-10-29
+lastUpdated: 2026-11-03
 ---
 
 # Provider Reference
 
 > **Auto-generated** from `src/shared/constants/providers.ts` — do not edit by hand.
 > Regenerate with: `npm run gen:provider-reference`
-> **Last generated:** 2026-10-29
+> **Last generated:** 2026-11-03
 
-Total providers: **380**. See category breakdown below.
+Total providers: **381**. See category breakdown below.
 
 ## Categories
 
@@ -402,7 +402,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `vllm` | `vllm` | vLLM | Local, self-hosted | [link](https://github.com/vllm-project/vllm) | API key optional. Configure the local vLLM OpenAI-compatible base URL (default: http://localhost:8000/v1). |
 | `xinference` | `xinference` | XInference | Local, self-hosted | [link](https://inference.readthedocs.io) | API key optional. Configure the local XInference OpenAI-compatible base URL (default: http://localhost:9997/v1). |
 
-## Search Providers (19)
+## Search Providers (20)
 
 | ID | Alias | Name | Tags | Website | Notes |
 |----|-------|------|------|---------|-------|
@@ -412,6 +412,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `exa-search` | `exa-search` | Exa Search | Search | [link](https://exa.ai) | API key from dashboard.exa.ai |
 | `firecrawl` | `fc` | Firecrawl | Search | [link](https://firecrawl.dev) | API key from firecrawl.dev/app/api-keys (or set your self-hosted Firecrawl base URL) |
 | `google-pse-search` | `google-pse` | Google Programmable Search | Search | [link](https://developers.google.com/custom-search/v1/overview) | Requires a Google API key and your Programmable Search Engine ID (cx) |
+| `keenable-search` | `keenable` | Keenable Search | Search | [link](https://keenable.ai) | API key optional (keen_...) - keyless works at 10 req/s and 1000 req/hour per IP; a key from keenable.ai lifts the limits |
 | `kimi-search` | `kimi-search` | Kimi Search | Search | [link](https://platform.kimi.ai/docs/api/tools-search) | Moonshot AI API key (MOONSHOT_API_KEY) from platform.kimi.ai |
 | `linkup-search` | `linkup` | Linkup Search | Search | [link](https://docs.linkup.so) | Bearer API key from the Linkup dashboard |
 | `nimble-search` | `nimble` | Nimble Search | Search | [link](https://docs.nimbleway.com/nimble-sdk/web-tools/search) | Bearer API key from the Nimble dashboard |
@@ -468,7 +469,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 
 - Catalog: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Registry (per-model details): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Executors: [`open-sse/executors/`](../../open-sse/executors/) (158 implementations)
+- Executors: [`open-sse/executors/`](../../open-sse/executors/) (159 implementations)
 - Translators: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## See Also
