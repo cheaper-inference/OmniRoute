@@ -1367,9 +1367,9 @@ Một dịch vụ được duy trì hoạt động trong cả tháng sẽ sử d
 
 ## Các kịch bản triển khai
 
-Để xem hướng dẫn SRE về relay backend (hành vi ts/bifrost/auto, vị trí triển khai 9router so với CLIProxyAPI và chiến lược dự phòng thông lượng cao), hãy xem [Chiến lược Relay Backend](/docs/reference/RELAY_BACKEND_STRATEGY.md).
+Để xem hướng dẫn SRE cho backend relay (hành vi ts/bifrost/auto, vị trí triển khai 9router so với CLIProxyAPI và chiến lược dự phòng khi có lưu lượng cao), hãy xem [Chiến lược Backend Relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).
 
-### Phát triển cục bộ tối thiểu
+### Phát triển cục bộ tối giản
 
 ```bash
 JWT_SECRET=$(openssl rand -base64 48)
@@ -1379,7 +1379,7 @@ PORT=20128
 NODE_ENV=development
 ```
 
-### Docker production
+### Docker trong môi trường production
 
 ```bash
 JWT_SECRET=<generated>
@@ -1398,7 +1398,7 @@ OMNIROUTE_MEMORY_MB=8192
 CORS_ORIGIN=https://your-frontend.example.com
 ```
 
-### Mạng biệt lập / CI
+### Mạng tách biệt / CI
 
 ```bash
 JWT_SECRET=test-jwt-secret-for-ci
@@ -1409,7 +1409,7 @@ OMNIROUTE_DISABLE_BACKGROUND_SERVICES=true
 APP_LOG_TO_FILE=false
 ```
 
-### VPS với reverse proxy (nginx + Cloudflare)
+### VPS với Reverse Proxy (nginx + Cloudflare)
 
 ```bash
 JWT_SECRET=<generated>
@@ -1871,3 +1871,14 @@ Người tiêu dùng SSE tồn tại lâu dài phản chiếu các nhiệm vụ 
 | Biến                           | Mặc định | Tệp nguồn                                    | Sự miêu tả                                                                                                                                                                                                                                  |
 | ------------------------------ | -------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`      | `src/lib/providerModels/modelSyncTimings.ts` | Đặt thành `1` để ghi lại thời gian pha, ID yêu cầu được tạo và kết quả success/error pha trong quá trình đồng bộ hóa mô hình. Bị vô hiệu hóa đối với tất cả các giá trị khác. Nhật ký bỏ qua tải trọng yêu cầu, tài khoản, danh mục và lỗi. |
+
+## Công cụ phân tích phương tiện OpenCode cục bộ
+
+Được sử dụng bởi `scripts/cli/omniroute-media-mcp.mjs`. Thiết lập các biến này trong môi trường của tiến trình công cụ cục bộ.
+
+| Biến                       | Mặc định                                                                            | Mô tả                                                                                                                   |
+| -------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (hoặc `~/.config/opencode/opencode.json`) | Cấu hình OpenCode được công cụ phương tiện và trình cài đặt đọc.                                                        |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                         | Mục nhà cung cấp được công cụ phương tiện đọc từ cấu hình OpenCode.                                                     |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                              | Mô hình được công cụ phương tiện gửi đi. Nhà cung cấp của mô hình này phải hỗ trợ các loại phương tiện được yêu cầu.    |
+| `OMNIROUTE_MEDIA_API_KEY`  | Khóa API của nhà cung cấp được cấu hình hoặc tham chiếu môi trường của khóa đó      | Ghi đè thông tin xác thực tùy chọn. Giữ khóa này trong môi trường của tiến trình cục bộ; không bao giờ commit khóa này. |

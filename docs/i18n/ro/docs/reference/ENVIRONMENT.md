@@ -1367,7 +1367,7 @@ Un serviciu ținut treaz timp de o lună întreagă utilizează aproximativ 744 
 
 ## Scenarii de implementare
 
-Pentru îndrumări SRE privind backendul relay (comportamentul ts/bifrost/auto, amplasarea 9router față de CLIProxyAPI și strategia de fallback pentru debit ridicat), consultați [Strategia backendului relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).
+Pentru îndrumări SRE privind backend-ul de relay (comportamentul ts/bifrost/auto, amplasarea 9router versus CLIProxyAPI și strategia de fallback pentru debit ridicat), consultați [Strategia backend-ului de relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).
 
 ### Dezvoltare locală minimă
 
@@ -1398,7 +1398,7 @@ OMNIROUTE_MEMORY_MB=8192
 CORS_ORIGIN=https://your-frontend.example.com
 ```
 
-### Rețea izolată / CI
+### Mediu izolat / CI
 
 ```bash
 JWT_SECRET=test-jwt-secret-for-ci
@@ -1871,3 +1871,14 @@ Folosit de `open-sse/services/combo.ts` și `src/lib/quota/quotaScheduler.ts` pe
 | Variabilă                      | Implicit | Fișier sursă                                 | Descriere                                                                                                                                                                                                                                                                |
 | ------------------------------ | -------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`      | `src/lib/providerModels/modelSyncTimings.ts` | Setați la `1` pentru a înregistra sincronizarea fazei, o solicitare generată ID și rezultatele fazei success/error în timpul sincronizării modelului. Dezactivat pentru toate celelalte valori. Jurnalele omit cererile, contul, catalogul și sarcinile utile de eroare. |
+
+## Instrument local OpenCode pentru analiza media
+
+Utilizat de `scripts/cli/omniroute-media-mcp.mjs`. Setați aceste variabile în mediul procesului instrumentului local.
+
+| Variabilă                  | Implicit                                                                           | Descriere                                                                                                    |
+| -------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (sau `~/.config/opencode/opencode.json`) | Configurația OpenCode citită de instrumentul media și de programul de instalare.                             |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                        | Intrarea furnizorului citită din configurația OpenCode de către instrumentul media.                          |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                             | Modelul trimis de instrumentul media. Furnizorul acestuia trebuie să accepte tipurile media solicitate.      |
+| `OMNIROUTE_MEDIA_API_KEY`  | Cheia API configurată a furnizorului sau referința sa din mediu                    | Acreditare opțională suprascrisă. Păstrați-o în mediul procesului local; nu o includeți niciodată în commit. |
