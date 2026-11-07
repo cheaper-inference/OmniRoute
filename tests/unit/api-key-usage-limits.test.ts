@@ -116,9 +116,19 @@ test("reported decision cost is billed exactly without token repricing", async (
 });
 
 test("decision pricing marker survives shared cost calculation and exact-cost overrides", async () => {
-  const unknown = await calculateCostDetailed("openai", "gpt-6-luna", { input: 1000 }, { serviceTier: "decision-native" });
+  const unknown = await calculateCostDetailed(
+    "openai",
+    "gpt-6-luna",
+    { input: 1000 },
+    { serviceTier: "decision-native" }
+  );
   assert.equal(unknown.priced, false);
-  const reported = await calculateCostDetailed("openai", "gpt-6-luna", { input: 1000, cost_usd: 0.01 }, { serviceTier: "decision-native" });
+  const reported = await calculateCostDetailed(
+    "openai",
+    "gpt-6-luna",
+    { input: 1000, cost_usd: 0.01 },
+    { serviceTier: "decision-native" }
+  );
   assert.equal(reported.priced, true);
   assert.equal(reported.costUsd, 0.01);
 });
