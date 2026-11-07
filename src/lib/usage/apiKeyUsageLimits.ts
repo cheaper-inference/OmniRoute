@@ -515,6 +515,15 @@ const EMPTY_SPEND: ApiKeyUsdSpend = {
   oldestUsageAtIso: null,
 };
 
+/** Oldest row across the groups the total counts; a group without provider/model is skipped. */
+function getOldestCountedUsageIso(rows: UsageCostRow[]): string | null {
+  const oldestTimes = rows
+    .filter((row) => row.provider && row.model)
+    .map((row) => Date.parse(row.oldestTimestamp ?? ""))
+    .filter(Number.isFinite);
+  return oldestTimes.length > 0 ? new Date(Math.min(...oldestTimes)).toISOString() : null;
+}
+
 async function getApiKeyUsdSpendSince(apiKeyId: string, sinceIso: string): Promise<ApiKeyUsdSpend> {
   if (!apiKeyId) return EMPTY_SPEND;
   const db = getDbInstance();
@@ -545,14 +554,10 @@ async function getApiKeyUsdSpendSince(apiKeyId: string, sinceIso: string): Promi
   let total = 0;
   const unpriced = new Set<string>();
   let hasPricingFailure = false;
-  let oldestUsageMs = Number.POSITIVE_INFINITY;
   for (const row of rows) {
     const provider = typeof row.provider === "string" ? row.provider : "";
     const model = typeof row.model === "string" ? row.model : "";
     if (!provider || !model) continue;
-
-    const rowOldestMs = Date.parse(row.oldestTimestamp ?? "");
-    if (rowOldestMs < oldestUsageMs) oldestUsageMs = rowOldestMs;
 
     // A provider-reported exact cost is the billed amount (credit-metered providers,
     // xAI). Those rows' tokens are excluded above, and they never make the group
@@ -599,7 +604,7 @@ async function getApiKeyUsdSpendSince(apiKeyId: string, sinceIso: string): Promi
     hasUnpricedUsage: unpriced.size > 0,
     unpricedModels: [...unpriced].sort(),
     hasPricingFailure,
-    oldestUsageAtIso: Number.isFinite(oldestUsageMs) ? new Date(oldestUsageMs).toISOString() : null,
+    oldestUsageAtIso: getOldestCountedUsageIso(rows),
   };
 }
 
