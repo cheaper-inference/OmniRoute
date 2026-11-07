@@ -16066,7 +16066,7 @@
     "stateRunning": "Ботът работи.",
     "stateIdle": "Ботът е неактивен.",
     "stateStale": "Състоянието на бота е неизвестно.",
-    "stateBox": "Box: {state}",
+    "stateBox": "Кутия: {state}",
     "sendPlaceholder": "Изпратете съобщение до този бот",
     "sendButton": "Изпращане",
     "sendUnknown": "Не е потвърдено. Не е изпратено повторно.",

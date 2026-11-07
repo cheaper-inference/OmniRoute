@@ -16066,7 +16066,7 @@
     "stateRunning": "Bot işləyir.",
     "stateIdle": "Bot fəaliyyətsizdir.",
     "stateStale": "Bot statusu məlum deyil.",
-    "stateBox": "Box: {state}",
+    "stateBox": "Qutu: {state}",
     "sendPlaceholder": "Bu bota mesaj yazın",
     "sendButton": "Göndər",
     "sendUnknown": "Təsdiqlənmədi. Yenidən göndərilmədi.",

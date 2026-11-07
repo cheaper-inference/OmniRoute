@@ -16066,7 +16066,7 @@
     "stateRunning": "Bots na aiki.",
     "stateIdle": "Bots yana cikin hutu.",
     "stateStale": "An san hali na bots ba.",
-    "stateBox": "Box: {state}",
+    "stateBox": "Bofi: {state}",
     "sendPlaceholder": "Saƙa wannan bofin",
     "sendButton": "Aika",
     "sendUnknown": "Ba a tabbata ba. Ba a sake aiko ba.",
