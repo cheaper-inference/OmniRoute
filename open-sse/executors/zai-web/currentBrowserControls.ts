@@ -17,6 +17,7 @@ const completionSchema = z.object({
   }),
 });
 
+/** Accept only a complete feature payload matching the verified model and effort selection. */
 export function matchesCurrentZaiBrowserRequest(
   body: unknown,
   expected: { model: string; effort: ZaiThinkingConfig["effort"] }
@@ -29,6 +30,7 @@ export function matchesCurrentZaiBrowserRequest(
   );
 }
 
+/** Open the model menu and wait for a layout marker, returning null for the legacy controls. */
 async function openCurrentModelMenu(page: Page): Promise<Locator | null> {
   const later = page.getByRole("button", { name: "Maybe Later", exact: true });
   if (await later.isVisible()) await later.evaluate((element) => (element as HTMLElement).click());
@@ -56,6 +58,7 @@ async function openCurrentModelMenu(page: Page): Promise<Locator | null> {
   return menu;
 }
 
+/** Select and read back the model and effort, bounding attribute reads when controls disappear. */
 async function selectCurrentModelAndEffort(
   page: Page,
   menu: Locator,
@@ -67,9 +70,9 @@ async function selectCurrentModelAndEffort(
     .locator('[aria-label="model-item"]')
     .filter({ hasText: name })
     .filter({ has: page.getByText(name, { exact: true }) });
-  const value = await model.getAttribute("data-value");
+  const value = await model.getAttribute("data-value", { timeout: 5_000 });
   if (!value) throw new Error("Z.ai model-menu item has no model value");
-  if ((await model.getAttribute("data-selected")) !== "true") {
+  if ((await model.getAttribute("data-selected", { timeout: 5_000 })) !== "true") {
     await model.evaluate((element) => (element as HTMLElement).click());
     await page
       .locator('[aria-label="Select a model"]')
@@ -77,12 +80,12 @@ async function selectCurrentModelAndEffort(
       .evaluate((element) => (element as HTMLElement).click());
     await menu.waitFor({ state: "visible", timeout: 5_000 });
   }
-  if ((await model.getAttribute("data-selected")) !== "true") {
+  if ((await model.getAttribute("data-selected", { timeout: 5_000 })) !== "true") {
     throw new Error("Z.ai model-menu selection was not applied");
   }
   const slider = menu.getByRole("slider", { name: "Effort", exact: true });
   const label = { low: "Low", high: "High", max: "Max" }[effort];
-  if ((await slider.getAttribute("aria-valuetext")) !== label) {
+  if ((await slider.getAttribute("aria-valuetext", { timeout: 5_000 })) !== label) {
     await slider.press(effort === "max" ? "End" : "Home");
     if (effort === "high") await slider.press("ArrowRight");
     await page.waitForFunction(
@@ -94,14 +97,18 @@ async function selectCurrentModelAndEffort(
       { timeout: 3_000 }
     );
   }
-  if ((await slider.getAttribute("aria-valuetext")) !== label) {
+  if ((await slider.getAttribute("aria-valuetext", { timeout: 5_000 })) !== label) {
     throw new Error("Z.ai effort selection was not applied");
   }
   await page.keyboard.press("Escape");
   return value;
 }
 
-/** Return false after closing the menu when the original layout owns configuration. */
+/**
+ * Configure the current layout and guard its completion request against mismatched settings.
+ * Return false after closing the menu when the original layout owns configuration.
+ * Unsupported features fail before the guard is installed or a completion is submitted.
+ */
 export async function tryConfigureCurrentZaiBrowserRequest(
   page: Page,
   input: { modelId: string; thinking: ZaiThinkingConfig; vlm: ZaiVlmConfig }

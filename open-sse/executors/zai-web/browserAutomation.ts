@@ -120,6 +120,7 @@ async function configureZaiBrowserEffort(page: Page, config: ZaiThinkingConfig):
   }
 }
 
+/** Configure the detected layout, preserving legacy controls and tagging failures by stage. */
 export async function configureZaiBrowserRequest(
   page: Page,
   input: {
