@@ -254,6 +254,9 @@ for (const endpoint of imageIds) {
           });
       assert.equal(postedUrl, `https://fal.run/${endpoint}`);
       assert.equal(result.success, true, JSON.stringify(result));
+      assert.deepEqual(result.data.data, [
+        { url: "data:image/png;base64,CAkK", revised_prompt: "a blue cube" },
+      ]);
       assert.equal(posted.quality, "max");
       assert.deepEqual(posted.image_size, { width: 1536, height: 1024 });
       assert.equal(posted.enable_thinking, undefined);

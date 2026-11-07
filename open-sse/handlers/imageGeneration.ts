@@ -2400,7 +2400,7 @@ export async function normalizeProviderImagePayload(payload, body, log, defaultF
 }
 
 async function normalizeProviderImageCandidate(candidate, body, defaultFormat) {
-  const wantsBase64 = body?.response_format === "b64_json" || defaultFormat === "b64_json";
+  const wantsBase64 = (body?.response_format ?? defaultFormat) === "b64_json";
   let url = null;
   let b64 = null;
 

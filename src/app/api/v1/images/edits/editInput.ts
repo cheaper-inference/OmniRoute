@@ -36,6 +36,7 @@ async function readMultipartOptions(formData: FormData): Promise<Record<string, 
       if (
         [
           "n",
+          "num_images",
           "seed",
           "sync_mode",
           "enable_thinking",

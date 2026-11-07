@@ -12,6 +12,7 @@ const jobs = await import("../../src/app/api/v1/fal/jobs/[id]/route.ts");
 const models = await import("../../src/app/api/v1/fal/models/route.ts");
 const registration = await import("../../src/app/api/providers/[id]/fal/route.ts");
 const edits = await import("../../src/app/api/v1/images/edits/route.ts");
+const generations = await import("../../src/app/api/v1/images/generations/route.ts");
 const db = await import("../../src/lib/db/fal.ts");
 const providers = await import("../../src/lib/db/providers.ts");
 const keys = await import("../../src/lib/db/apiKeys.ts");
@@ -400,3 +401,131 @@ test("image edit multipart preserves additional fields and ordered references", 
   assert.deepEqual(posted.image_urls, ["data:image/png;base64,AQID", "data:image/png;base64,BAUG"]);
   assert.equal(posted.mask_url, "data:image/png;base64,BwgJ");
 });
+
+function imageEditForm(variant: string, fields: Record<string, string>): FormData {
+  const form = new FormData();
+  form.set("model", `fal-ai/openai/gpt-image-2.5/${variant}/edit`);
+  form.set("prompt", "123");
+  for (const [name, value] of Object.entries(fields)) form.set(name, value);
+  form.append("image", new Blob([new Uint8Array([1, 2, 3])], { type: "image/png" }), "first.png");
+  return form;
+}
+
+async function postImageEditForm(form: FormData) {
+  return edits.POST(
+    new Request("http://localhost/api/v1/images/edits", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key.key}` },
+      body: form,
+    })
+  );
+}
+
+for (const variant of ["flare", "sunburst"]) {
+  test(`image edit multipart ${variant} accepts native numeric fields without fal_input`, async () => {
+    const response = await postImageEditForm(
+      imageEditForm(variant, {
+        response_format: "url",
+        num_images: "2",
+        output_compression: "75",
+        image_size: '{"width":1536,"height":1024}',
+        enable_safety_checker: "false",
+      })
+    );
+    assert.equal(response.status, 200, await response.clone().text());
+    const posted = sent.find(
+      (call) => call.url === `https://fal.run/openai/gpt-image-2.5/${variant}/edit`
+    )!.body!;
+    const payload = await response.json();
+    assert.equal(payload.data[0].url, "data:image/png;base64,CAkK");
+    assert.equal(payload.data[0].b64_json, undefined);
+    assert.equal(posted.num_images, 2);
+    assert.equal(posted.output_compression, 75);
+    assert.equal(posted.prompt, "123", "numeric-looking text must remain text");
+    assert.equal(posted.enable_safety_checker, false);
+    assert.deepEqual(posted.image_size, { width: 1536, height: 1024 });
+    assert.deepEqual(posted.image_urls, ["data:image/png;base64,AQID"]);
+  });
+}
+
+for (const value of [
+  "",
+  " ",
+  "NaN",
+  "Infinity",
+  "1e309",
+  "2x",
+  '"2"',
+  "true",
+  "null",
+  "[]",
+  "[2]",
+  "{}",
+  "0",
+  "11",
+  "1.5",
+]) {
+  test(`image edit multipart rejects invalid num_images ${JSON.stringify(value)} before inference`, async () => {
+    const response = await postImageEditForm(imageEditForm("flare", { num_images: value }));
+    assert.equal(response.status, 400, await response.clone().text());
+    assert.equal(
+      sent.some((call) => call.url.startsWith("https://fal.run/")),
+      false
+    );
+  });
+}
+
+test("image edit multipart preserves typed fal_input overrides and nullable compression", async () => {
+  const response = await postImageEditForm(
+    imageEditForm("flare", {
+      num_images: "2",
+      output_compression: "null",
+      fal_input: JSON.stringify({ num_images: 3, image_urls: ["data:image/png;base64,BAUG"] }),
+    })
+  );
+  assert.equal(response.status, 200, await response.clone().text());
+  const posted = sent.find(
+    (call) => call.url === "https://fal.run/openai/gpt-image-2.5/flare/edit"
+  )!.body!;
+  assert.equal(posted.num_images, 3);
+  assert.equal(posted.output_compression, null);
+  assert.deepEqual(posted.image_urls, ["data:image/png;base64,BAUG"]);
+});
+
+test("image edit multipart does not coerce strings inside fal_input", async () => {
+  const response = await postImageEditForm(
+    imageEditForm("flare", {
+      fal_input: JSON.stringify({ num_images: "2" }),
+    })
+  );
+  assert.equal(response.status, 400, await response.clone().text());
+  assert.equal(
+    sent.some((call) => call.url.startsWith("https://fal.run/")),
+    false
+  );
+});
+
+for (const variant of ["flare", "sunburst"]) {
+  test(`image generation ${variant} route preserves explicit URL response format`, async () => {
+    const response = await generations.POST(
+      new Request("http://localhost/api/v1/images/generations", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${key.key}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: `fal-ai/openai/gpt-image-2.5/${variant}/text-to-image`,
+          prompt: "a blue cube",
+          response_format: "url",
+        }),
+      })
+    );
+    assert.equal(response.status, 200, await response.clone().text());
+    const payload = await response.json();
+    assert.equal(payload.data[0].url, "data:image/png;base64,CAkK");
+    assert.equal(payload.data[0].b64_json, undefined);
+    assert.ok(
+      sent.some(
+        (call) => call.url === `https://fal.run/openai/gpt-image-2.5/${variant}/text-to-image`
+      )
+    );
+  });
+}
