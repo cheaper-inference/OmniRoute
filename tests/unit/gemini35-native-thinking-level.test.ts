@@ -284,6 +284,68 @@ test("operator thinking modes still override a client level", () => {
   });
 });
 
+function reasoningRule(effortMode: string, targetEffort: string, budgetAction: string) {
+  return {
+    _omnirouteReasoningRule: {
+      id: "rule-1",
+      effortMode,
+      targetEffort,
+      budgetAction,
+      budgetTokens: budgetAction === "set" ? 20000 : null,
+    },
+  };
+}
+
+function clientLevelSpellings(thinkingLevel: string): Record<string, unknown>[] {
+  return [
+    { thinkingLevel },
+    { thinking_level: thinkingLevel },
+    { generationConfig: { thinkingConfig: { thinkingLevel } } },
+    { generationConfig: { thinking_config: { thinkingLevel } } },
+  ];
+}
+
+test("a forced reasoning rule beats a client level in every spelling", () => {
+  for (const clientLevel of clientLevelSpellings("high")) {
+    const rule = reasoningRule("force", "low", "preserve");
+    assert.deepEqual(pipelineThinking({ ...rule, ...clientLevel }), {
+      thinkingLevel: "low",
+      includeThoughts: true,
+    });
+  }
+});
+
+test("a rule that sets the budget beats a client level in every spelling", () => {
+  for (const clientLevel of clientLevelSpellings("low")) {
+    const rule = reasoningRule("inherit", "low", "set");
+    assert.deepEqual(pipelineThinking({ ...rule, ...clientLevel }), {
+      thinkingLevel: "high",
+      includeThoughts: true,
+    });
+  }
+});
+
+test("a rule that removes the budget drops a client level in every spelling", () => {
+  for (const clientLevel of clientLevelSpellings("high")) {
+    const rule = reasoningRule("inherit", "high", "remove");
+    assert.deepEqual(pipelineThinking({ ...rule, ...clientLevel }), {
+      thinkingLevel: "minimal",
+      includeThoughts: true,
+    });
+  }
+});
+
+test("a rule that leaves effort and budget alone keeps the client level", () => {
+  for (const clientLevel of clientLevelSpellings("high")) {
+    for (const rule of [
+      reasoningRule("default", "low", "preserve"),
+      reasoningRule("inherit", "high", "preserve"),
+    ]) {
+      assert.equal(pipelineThinking({ ...rule, ...clientLevel }).thinkingLevel, "high");
+    }
+  }
+});
+
 test("models without native levels keep forwarding the level verbatim", () => {
   const forwarded = (level: string) => {
     const converted = openaiToGeminiRequest(

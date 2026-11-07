@@ -404,15 +404,26 @@ export function ensureThinkingConfig(body: unknown) {
   return result;
 }
 
-/** A level the Gemini target accepts stays a level unless the operator's mode overrides it. */
+/**
+ * The operator decides when the thinking mode overrides the client, or when a routing rule
+ * forces the effort or rewrites the budget. The rule runs after this step and does not
+ * clear every level spelling, so a level left in place would outrank it in the translator.
+ */
+function operatorOverridesThinking(body: JsonRecord, cfg: Partial<ThinkingBudgetConfig>): boolean {
+  if (cfg.mode !== ThinkingMode.PASSTHROUGH && cfg.mode !== ThinkingMode.ADAPTIVE) return true;
+  const rule = toRecord(body._omnirouteReasoningRule);
+  return (
+    rule.effortMode === "force" || rule.budgetAction === "set" || rule.budgetAction === "remove"
+  );
+}
+
+/** A level the Gemini target accepts stays a level unless the operator overrides it. */
 function normalizeUnlessNativeGeminiLevel(
   body: JsonRecord,
   cfg: Partial<ThinkingBudgetConfig>,
   model: string | undefined
 ) {
-  const clientControlsThinking =
-    cfg.mode === ThinkingMode.PASSTHROUGH || cfg.mode === ThinkingMode.ADAPTIVE;
-  if (model && clientControlsThinking) {
+  if (model && !operatorOverridesThinking(body, cfg)) {
     if (explicitNativeGeminiLevel(body, nativeGeminiLevels(model))) return body;
   }
   return normalizeThinkingLevel(body);
