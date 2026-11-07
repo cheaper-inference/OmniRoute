@@ -5744,6 +5744,8 @@
     "importFromModels": "/models’dan import qilish",
     "modelsImported": "{count} ta model import qilindi",
     "allModelsAlreadyImported": "Barcha modellar allaqachon import qilingan",
+    "providerPublishesNoModelList": "Bu provayder model roʻyxatini eʼlon qilmaydi — uning ichki katalogi dolzarb",
+    "modelsNoLongerListed": "{count, plural, one {# ta model endi provayder roʻyxatida yoʻq} other {# ta model endi provayder roʻyxatida yoʻq}}",
     "noNewModelsToImport": "Import qilinadigan yangi modellar yo‘q — barcha modellar allaqachon reyestrda yoki maxsus modellar ro‘yxatida mavjud",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Modelni aniqlash muvaffaqiyatsiz bo'ldi {time}",

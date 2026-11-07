@@ -5744,6 +5744,8 @@
     "importFromModels": "Importovať z /models",
     "modelsImported": "Počet importovaných modelov: {count}",
     "allModelsAlreadyImported": "Všetky modely sú už importované",
+    "providerPublishesNoModelList": "Tento poskytovateľ nezverejňuje zoznam modelov — jeho vstavaný katalóg je aktuálny",
+    "modelsNoLongerListed": "{count, plural, one {# model už poskytovateľ neuvádza} few {# modely už poskytovateľ neuvádza} other {# modelov už poskytovateľ neuvádza}}",
     "noNewModelsToImport": "Žiadne nové modely na import — všetky modely sú už v registri alebo v zozname vlastných modelov",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Objavenie modelu zlyhalo {time}",

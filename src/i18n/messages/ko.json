@@ -5744,6 +5744,8 @@
     "importFromModels": "/models에서 가져오기",
     "modelsImported": "모델 {count}개를 가져왔습니다",
     "allModelsAlreadyImported": "모든 모델이 이미 가져왔습니다",
+    "providerPublishesNoModelList": "이 공급자는 모델 목록을 게시하지 않습니다 — 내장 카탈로그가 최신 상태입니다",
+    "modelsNoLongerListed": "{count, plural, one {# model이} other {# models가}} 더 이상 공급자 목록에 없습니다",
     "noNewModelsToImport": "가져올 새 모델 없음 — 모든 모델이 이미 레지스트리 또는 사용자 정의 모델 목록에 있습니다",
     "localCatalogFallbackStatus": "공급자의 모델 목록을 가져오지 못했습니다 — 내장 카탈로그를 표시합니다",
     "discoveryDegradedStatus": "모델 검색 실패 {time}",

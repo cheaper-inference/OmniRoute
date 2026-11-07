@@ -5744,6 +5744,8 @@
     "importFromModels": "/modelsમાંથી આયાત કરો",
     "modelsImported": "{count} મોડલ આયાત કર્યાં",
     "allModelsAlreadyImported": "બધાં મોડલ પહેલેથી આયાત થયેલાં છે",
+    "providerPublishesNoModelList": "આ પ્રદાતા કોઈ મોડલ સૂચિ પ્રકાશિત કરતું નથી — તેની બિલ્ટ-ઇન સૂચિ અદ્યતન છે",
+    "modelsNoLongerListed": "{count, plural, one {# મોડલ હવે પ્રદાતા દ્વારા સૂચિબદ્ધ નથી} other {# મોડલ હવે પ્રદાતા દ્વારા સૂચિબદ્ધ નથી}}",
     "noNewModelsToImport": "આયાત કરવા માટે કોઈ નવાં મોડલ નથી — બધાં મોડલ પહેલેથી રજિસ્ટ્રી અથવા કસ્ટમ મોડલની સૂચિમાં છે",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "મોડલ શોધ નિષ્ફળ થઈ {time}",

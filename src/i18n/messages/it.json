@@ -5821,6 +5821,8 @@
     "importFromModels": "Importa da /modelli",
     "modelsImported": "{count} modelli importati",
     "allModelsAlreadyImported": "Tutti i modelli sono già importati",
+    "providerPublishesNoModelList": "Questo provider non pubblica un elenco di modelli — il suo catalogo integrato è aggiornato",
+    "modelsNoLongerListed": "{count, plural, one {# modello non è più elencato} other {# modelli non sono più elencati}} dal provider",
     "noNewModelsToImport": "Nessun nuovo modello da importare — tutti i modelli sono già nel registro o nell'elenco dei modelli personalizzati",
     "localCatalogFallbackStatus": "Impossibile raggiungere l'elenco dei modelli del fornitore: viene mostrato il catalogo integrato",
     "discoveryDegradedStatus": "Rilevamento del modello non riuscito {time}",

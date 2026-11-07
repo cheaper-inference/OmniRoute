@@ -5744,6 +5744,8 @@
     "importFromModels": "Ṣàgbéwọlé láti /models",
     "modelsImported": "A ti ṣàgbéwọlé àwọn módẹ́lì {count}",
     "allModelsAlreadyImported": "A ti ṣàgbéwọlé gbogbo àwọn módẹ́lì tẹ́lẹ̀",
+    "providerPublishesNoModelList": "Olùpèsè yìí kò ṣe àtẹ̀jáde àkójọ àwọn módẹ́lì — kátálọ́ọ̀gù inú rẹ̀ jẹ́ tuntun",
+    "modelsNoLongerListed": "{count, plural, one {àwòṣe # kò sí nínú àkójọ olùpèsè mọ́} other {àwọn àwòṣe # kò sí nínú àkójọ olùpèsè mọ́}}",
     "noNewModelsToImport": "Kò sí módẹ́lì tuntun láti ṣàgbéwọlé — gbogbo àwọn módẹ́lì ti wà nínú ìforúkọsílẹ̀ tàbí àkójọ àwọn módẹ́lì àdáni",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Ikuna iwara ako {time}",

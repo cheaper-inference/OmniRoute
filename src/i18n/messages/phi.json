@@ -5744,6 +5744,8 @@
     "importFromModels": "Mag-import mula sa /models",
     "modelsImported": "{count} modelo ang na-import",
     "allModelsAlreadyImported": "Lahat ng mga modelo ay nai-import na",
+    "providerPublishesNoModelList": "Walang inilalathalang listahan ng modelo ang provider na ito — napapanahon ang built-in nitong katalogo",
+    "modelsNoLongerListed": "{count, plural, one {# modelo ang hindi na nakalista} other {# modelo ang hindi na nakalista}} ng provider",
     "noNewModelsToImport": "Walang bagong modelo na i-import — lahat ng mga modelo ay nasa registry o custom na listahan na",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Nabigo ang pagtuklas ng modelo {time}",

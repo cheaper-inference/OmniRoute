@@ -5821,6 +5821,8 @@
     "importFromModels": "Importer fra /models",
     "modelsImported": "{count} modeller importeret",
     "allModelsAlreadyImported": "Alle modeller er allerede importeret",
+    "providerPublishesNoModelList": "Denne udbyder offentliggør ingen modelliste — det indbyggede katalog er opdateret",
+    "modelsNoLongerListed": "{count, plural, one {# model er ikke længere opført af udbyderen} other {# modeller er ikke længere opført af udbyderen}}",
     "noNewModelsToImport": "Ingen nye modeller at importere — alle modeller findes allerede i registreret eller brugerdefineret liste",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Modelopdagelse mislykkedes {time}",

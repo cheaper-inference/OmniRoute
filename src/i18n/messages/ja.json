@@ -5744,6 +5744,8 @@
     "importFromModels": "/models からインポート",
     "modelsImported": "{count}件のモデルをインポートしました",
     "allModelsAlreadyImported": "すべてのモデルは既にインポート済みです",
+    "providerPublishesNoModelList": "このプロバイダーはモデル一覧を公開していません — 組み込みカタログは最新です",
+    "modelsNoLongerListed": "{count, plural, other {# 件のモデル}}がプロバイダーの一覧に掲載されなくなりました",
     "noNewModelsToImport": "インポートする新しいモデルはありません — すべてのモデルは既にレジストリまたはカスタムモデルリストにあります",
     "localCatalogFallbackStatus": "プロバイダーのモデル一覧を取得できませんでした — 組み込みカタログを表示しています",
     "discoveryDegradedStatus": "モデル検出に失敗しました {time}",

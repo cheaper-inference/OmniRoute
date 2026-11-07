@@ -5744,6 +5744,8 @@
     "importFromModels": "Ingiza kutoka /models",
     "modelsImported": "Modeli {count} zimeingizwa",
     "allModelsAlreadyImported": "Modeli zote tayari zimeingizwa",
+    "providerPublishesNoModelList": "Mtoa huduma huyu hachapishi orodha ya modeli — katalogi yake ya ndani imesasishwa",
+    "modelsNoLongerListed": "{count, plural, one {modeli # haijaorodheshwa tena} other {modeli # hazijaorodheshwa tena}} na mtoa huduma",
     "noNewModelsToImport": "Hakuna modeli mpya za kuingiza — modeli zote tayari ziko kwenye sajili au orodha ya modeli maalum",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Kugundua mfano kumeshindwa {time}",

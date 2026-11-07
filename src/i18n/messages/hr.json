@@ -5744,6 +5744,8 @@
     "importFromModels": "Uvezi iz /models",
     "modelsImported": "{count} modela uvezeno",
     "allModelsAlreadyImported": "Svi modeli su već uvezeni",
+    "providerPublishesNoModelList": "Ovaj pružatelj ne objavljuje popis modela — njegov ugrađeni katalog je ažuran",
+    "modelsNoLongerListed": "{count, plural, one {# model više nije naveden kod pružatelja} few {# modela više nisu navedena kod pružatelja} other {# modela više nije navedeno kod pružatelja}}",
     "noNewModelsToImport": "Nema novih modela za uvoz — svi modeli su već u registru ili popisu prilagođenih modela",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Otkrivanje modela nije uspjelo {time}",

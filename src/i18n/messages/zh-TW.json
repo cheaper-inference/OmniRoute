@@ -5744,6 +5744,8 @@
     "importFromModels": "從 /models 匯入",
     "modelsImported": "已匯入 {count} 個模型",
     "allModelsAlreadyImported": "所有模型已匯入",
+    "providerPublishesNoModelList": "此提供者不發佈模型清單 — 其內建目錄已為最新",
+    "modelsNoLongerListed": "{count, plural, one {# 個模型已不再由提供者列出} other {# 個模型已不再由提供者列出}}",
     "noNewModelsToImport": "沒有新模型可匯入 — 所有模型已在登錄檔或自定義模型列表中",
     "localCatalogFallbackStatus": "無法取得提供者的模型清單——正在顯示內建目錄",
     "discoveryDegradedStatus": "模型探索失敗 {time}",

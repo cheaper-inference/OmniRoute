@@ -5744,6 +5744,8 @@
     "importFromModels": "Tuo / mallit",
     "modelsImported": "Tuotiin {count} mallia",
     "allModelsAlreadyImported": "Kaikki mallit on jo tuotu",
+    "providerPublishesNoModelList": "Tämä palveluntarjoaja ei julkaise malliluetteloa — sen sisäinen luettelo on ajan tasalla",
+    "modelsNoLongerListed": "{count, plural, one {# malli ei ole enää palveluntarjoajan luettelossa} other {# mallia ei ole enää palveluntarjoajan luettelossa}}",
     "noNewModelsToImport": "Ei uusia malleja tuotavaksi — kaikki mallit ovat jo rekisterissä tai mukautetulla mallilistalla",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Mallin etsintä epäonnistui {time}",

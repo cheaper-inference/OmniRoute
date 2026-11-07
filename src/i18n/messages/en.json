@@ -5821,6 +5821,8 @@
     "importFromModels": "Import from /models",
     "modelsImported": "{count} models imported",
     "allModelsAlreadyImported": "All models already imported",
+    "providerPublishesNoModelList": "This provider publishes no model list — its built-in catalog is current",
+    "modelsNoLongerListed": "{count, plural, one {# model is} other {# models are}} no longer listed by the provider",
     "noNewModelsToImport": "No new models to import — all models are already in the registry or custom models list",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
     "discoveryDegradedStatus": "Model discovery failed {time}",
