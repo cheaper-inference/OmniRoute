@@ -71,7 +71,7 @@ OMNIROUTE ले तपाईंलाई पैसा बचत गर्न �
 
 <div align="center">
 
-|                               |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
+|                               |         v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | ----------------------------- | :----------------------: | :---------: | :-------------------: |
 | 🌐 सेवा प्रदायकहरू            |           352            |   **358**   |          380          |
 | 🧠 अद्वितीय च्याट मोडेल IDहरू |           1320           |  **1374**   |         1491          |
@@ -588,7 +588,7 @@ Radar वैकल्पिक रूपमा सक्रिय गर्न �
 
 </div>
 
-> **v3.8.20 → v3.8.53** का हालैका मुख्य विशेषताहरू। पूर्ण इतिहास [`CHANGELOG.md`](CHANGELOG.md) मा।
+> **v3.8.20 → v3.8.54** का हालैका मुख्य विशेषताहरू। पूर्ण इतिहास [`CHANGELOG.md`](CHANGELOG.md) मा।
 
 - **⚖️ `quota-weighted` राउटिङ** — २०औं कम्बो रणनीतिले सकिएको खाताहरू छोड्छ, बाँकीमा बाँकी कोटा ÷ चलिरहेको लोडको अनुपातमा चयन गर्छ, र पहिलेका संवादहरू पिन राख्छ। → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 हेडलेस मोड** — `omniroute serve --headless` (वा `OMNIROUTE_HEADLESS=1`) ले केवल `/v1/*` प्रोक्सी इन्जिन चलाउँछ, ड्यासबोर्ड र ड्यासबोर्ड-केवल सबसिस्टमहरू बन्द। → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1023,7 +1023,7 @@ omniroute
 ```
 
 > 💡 `npm warn ERESOLVE` वा peer-dep चेतावनीहरू देख्नुभयो? [तिनीहरू हानिकारक छैनन्](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated)।
-> **npm 11 वा पछिल्लो प्रयोग गर्दै हुनुहुन्छ?** npm ले अनुमति नदिइएसम्म package lifecycle स्क्रिप्टहरू ब्लक गर्न सक्छ। OmniRoute को `postinstall` (`node scripts/build/postinstall.mjs`) यसको native runtime फाइलहरू तयार गर्न आवश्यक छ। ग्लोबल रूपमा इन्स्टल गर्दा npm को चेतावनीमा नाम दिइएका प्याकेजहरूलाई अनुमति दिनुहोस्। OmniRoute 3.8.53 ले रिपोर्ट गरेको प्याकेज सेटका लागि:
+> **npm 11 वा पछिल्लो प्रयोग गर्दै हुनुहुन्छ?** npm ले अनुमति नदिइएसम्म package lifecycle स्क्रिप्टहरू ब्लक गर्न सक्छ। OmniRoute को `postinstall` (`node scripts/build/postinstall.mjs`) यसको native runtime फाइलहरू तयार गर्न आवश्यक छ। ग्लोबल रूपमा इन्स्टल गर्दा npm को चेतावनीमा नाम दिइएका प्याकेजहरूलाई अनुमति दिनुहोस्। OmniRoute 3.8.54 ले रिपोर्ट गरेको प्याकेज सेटका लागि:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1303,7 +1303,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ले पनि 
   <tr><td nowrap><b>रनटाइम</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>भाषा</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> <code>src/</code> र <code>open-sse/</code> मा (v2.0 देखि कोरमा शून्य <code>any</code>)</td></tr>
   <tr><td nowrap><b>फ्रेमवर्क</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>डाटाबेस</b></td><td>better-sqlite3 (SQLite, WAL जर्नलिङ) + LowDB (JSON लेगेसी) — 147 डोमेन मोड्युल, 222 माइग्रेसन</td></tr>
+  <tr><td nowrap><b>डाटाबेस</b></td><td>better-sqlite3 (SQLite, WAL जर्नलिङ) + LowDB (JSON लेगेसी) — 147 डोमेन मोड्युल, 223 माइग्रेसन</td></tr>
   <tr><td nowrap><b>मेमोरी</b></td><td>SQLite FTS5 पूर्ण-पाठ + int8-क्वान्टाइज गरिएका भेक्टर एम्बेडिङ, टाइप गरिएको क्षय</td></tr>
   <tr><td nowrap><b>स्किमा</b></td><td>Zod 4 — MCP उपकरण I/O प्रमाणीकरण + API सम्झौता</td></tr>
   <tr><td nowrap><b>प्रोटोकल</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1816,7 +1816,7 @@ MIT इजाजतपत्र - विवरणका लागि [LICENSE](L
 
 **[⬆ माथि फर्कनुहोस्](#-omniroute)** · खुला-स्रोत AI समुदायका लागि ❤️ सहित निर्माण गरिएको।
 
-<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> द्वारा सिर्जित · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT इजाजतपत्र · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> द्वारा सिर्जित · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT इजाजतपत्र · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- समुदायको प्रश्नोत्तरका लागि GitHub Discussions सक्षम गरिएको -->

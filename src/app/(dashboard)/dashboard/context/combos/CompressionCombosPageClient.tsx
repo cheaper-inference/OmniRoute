@@ -357,7 +357,7 @@ function NamedCombosManager() {
                         combo={{ id, config: combo.config }}
                         disabled={!compressionEnabled}
                         title={t("compressionOverride")}
-                        className="ci-select-native--sm w-24 shrink-0 text-xs"
+                        className="w-24 shrink-0 text-xs"
                       />
                     </div>
                   );

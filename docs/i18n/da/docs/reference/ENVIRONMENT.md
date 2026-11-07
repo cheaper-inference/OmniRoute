@@ -1366,9 +1366,9 @@ Render drejer en gratis webservice ned efter cirka 15 minutter uden indgående t
 
 En tjeneste, der holdes vågen i en hel måned, bruger omkring 744 instanstimer, så tjek den i forhold til Renders nuværende frie niveau.
 
-## Implementeringsscenarier
+## Udrulningsscenarier
 
-Se [Relay-backendstrategi](/docs/reference/RELAY_BACKEND_STRATEGY.md) for SRE-vejledning til relay-backend (ts/bifrost/auto-adfærd, placering af 9router kontra CLIProxyAPI samt strategi for fallback ved høj gennemstrømning).
+Se [Relay Backend Strategy](/docs/reference/RELAY_BACKEND_STRATEGY.md) for SRE-vejledning til relay-backend (ts/bifrost/auto-adfærd, placering af 9router kontra CLIProxyAPI samt fallback-strategi ved høj gennemstrømning).
 
 ### Minimal lokal udvikling
 
@@ -1380,7 +1380,7 @@ PORT=20128
 NODE_ENV=development
 ```
 
-### Docker i produktion
+### Docker-produktion
 
 ```bash
 JWT_SECRET=<generated>
@@ -1399,7 +1399,7 @@ OMNIROUTE_MEMORY_MB=8192
 CORS_ORIGIN=https://your-frontend.example.com
 ```
 
-### Isoleret fra netværk / CI
+### Air-gapped / CI
 
 ```bash
 JWT_SECRET=test-jwt-secret-for-ci
@@ -1872,3 +1872,14 @@ Brugt af `open-sse/services/combo.ts` og `src/lib/quota/quotaScheduler.ts` til f
 | Variabel                       | Misligholdelse | Kildefil                                     | Beskrivelse                                                                                                                                                                                                                       |
 | ------------------------------ | -------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`            | `src/lib/providerModels/modelSyncTimings.ts` | Indstil til `1` for at logge fasetiming, en genereret anmodning ID og fase success/error -resultater under modelsynkronisering. Deaktiveret for alle andre værdier. Logfiler udelader anmodning, konto, katalog og fejlnyttelast. |
+
+## Lokalt OpenCode-medieanalyseeværktøj
+
+Anvendes af `scripts/cli/omniroute-media-mcp.mjs`. Angiv disse i miljøet for den lokale værktøjsproces.
+
+| Variabel                   | Standardværdi                                                                        | Beskrivelse                                                                                                         |
+| -------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (eller `~/.config/opencode/opencode.json`) | OpenCode-konfiguration, der læses af medieværktøjet og installationsprogrammet.                                     |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                          | Provider-post, der læses fra OpenCode-konfigurationen af medieværktøjet.                                            |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                               | Model, der sendes af medieværktøjet. Dens provider skal understøtte de ønskede medietyper.                          |
+| `OMNIROUTE_MEDIA_API_KEY`  | Konfigureret provider-API-nøgle eller dens miljøreference                            | Valgfri tilsidesættelse af legitimationsoplysninger. Behold den i miljøet for den lokale proces; commit den aldrig. |

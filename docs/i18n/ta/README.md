@@ -71,7 +71,7 @@ OMNIROUTE உங்கள் பணத்தைச் சேமிக்கவ�
 
 <div align="center">
 
-|                                           |          v3.8.50           | **v3.8.51** |       `v3.8.53+`       |
+|                                           |          v3.8.50           | **v3.8.51** |       `v3.8.54+`       |
 | ----------------------------------------- | :------------------------: | :---------: | :--------------------: |
 | 🌐 வழங்குநர்கள்                           |            352             |   **358**   |          380           |
 | 🧠 தனித்துவமான அரட்டை மாதிரி IDs          |            1320            |  **1374**   |          1491          |
@@ -588,7 +588,7 @@ Radar-ஐப் பயன்படுத்தத் தனியாகச் �
 
 </div>
 
-> **v3.8.20 → v3.8.53** இன் சமீபத்திய முக்கிய அம்சங்கள். முழு வரலாறு [`CHANGELOG.md`](CHANGELOG.md) இல்.
+> **v3.8.20 → v3.8.54** இன் சமீபத்திய முக்கிய அம்சங்கள். முழு வரலாறு [`CHANGELOG.md`](CHANGELOG.md) இல்.
 
 - **⚖️ `quota-weighted` வழிமாற்றம்** — 20வது காம்போ ஸ்டிராடஜி முடிந்த கணக்குகளை தவிர்க்கிறது, பிறகு மீதமுள்ளவற்றில் மீதமுள்ள கோட்டா ÷ நடப்பிலுள்ள சுமை விகிதத்தில் தேர்வு செய்கிறது, ஏற்கனவே உள்ள உரையாடல்கள் நிலைத்திருக்கும். → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 ஹெட்லெஸ் பயன்முறை** — `omniroute serve --headless` (அல்லது `OMNIROUTE_HEADLESS=1`) என்பது `/v1/*` ப்ராக்ஸி என்ஜினை மட்டும் இயக்கும், டாஷ்போர்டும் அதற்கான துணை அமைப்புகளும் அணைக்கப்படும். → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1022,7 +1022,7 @@ omniroute
 ```
 
 > 💡 `npm warn ERESOLVE` அல்லது peer-dep எச்சரிக்கைகளைப் பார்க்கிறீர்களா? [அவை பாதிப்பில்லாதவை](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **npm 11 அல்லது அதற்கு மேல் பயன்படுத்துகிறீர்களா?** அனுமதிக்கப்படாவிட்டால், npm package lifecycle scripts-ஐ தடுக்கக்கூடும். OmniRoute-ன் `postinstall` (`node scripts/build/postinstall.mjs`) அதன் native runtime கோப்புகளைத் தயார் செய்ய அவசியம். Global ஆக நிறுவும்போது npm-ன் எச்சரிக்கையில் பெயரிடப்பட்ட packages-ஐ அனுமதிக்கவும். OmniRoute 3.8.53 அறிவிக்கும் package தொகுப்பிற்கு:
+> **npm 11 அல்லது அதற்கு மேல் பயன்படுத்துகிறீர்களா?** அனுமதிக்கப்படாவிட்டால், npm package lifecycle scripts-ஐ தடுக்கக்கூடும். OmniRoute-ன் `postinstall` (`node scripts/build/postinstall.mjs`) அதன் native runtime கோப்புகளைத் தயார் செய்ய அவசியம். Global ஆக நிறுவும்போது npm-ன் எச்சரிக்கையில் பெயரிடப்பட்ட packages-ஐ அனுமதிக்கவும். OmniRoute 3.8.54 அறிவிக்கும் package தொகுப்பிற்கு:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1302,7 +1302,7 @@ Dashboard இல்லாத headless runtime-க்கு Docker `base` profile
   <tr><td nowrap><b>இயக்கநேரம்</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>மொழி</b></td><td>TypeScript 6.0 — <code>src/</code> மற்றும் <code>open-sse/</code> முழுவதும் <b>100% TypeScript</b> (v2.0 முதல் core-இல் பூஜ்ஜிய <code>any</code>)</td></tr>
   <tr><td nowrap><b>கட்டமைப்பு</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>தரவுத்தளம்</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 டொமைன் தொகுதிகள், 222 இடம்பெயர்வுகள்</td></tr>
+  <tr><td nowrap><b>தரவுத்தளம்</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 டொமைன் தொகுதிகள், 223 இடம்பெயர்வுகள்</td></tr>
   <tr><td nowrap><b>நினைவகம்</b></td><td>SQLite FTS5 முழு-உரை + int8-quantized vector embeddings, வகைமைக்கப்பட்ட சிதைவு</td></tr>
   <tr><td nowrap><b>ஸ்கீமாக்கள்</b></td><td>Zod 4 — MCP tool I/O சரிபார்ப்பு + API ஒப்பந்தங்கள்</td></tr>
   <tr><td nowrap><b>நெறிமுறைகள்</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1815,7 +1815,7 @@ MIT License - விவரங்களுக்கு [LICENSE](LICENSE)-ஐப�
 
 **[⬆ மேலே செல்க](#-omniroute)** · திறந்த மூல AI சமூகத்திற்காக ❤️ உடன் உருவாக்கப்பட்டது.
 
-<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> ஆல் உருவாக்கப்பட்டது · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> ஆல் உருவாக்கப்பட்டது · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- சமூகக் கேள்விகள் மற்றும் பதில்களுக்காக GitHub Discussions இயக்கப்பட்டுள்ளது -->
