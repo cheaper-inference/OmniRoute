@@ -1814,6 +1814,7 @@ async function handleSingleModelChat(
             connectionRestrictionSources: restrictions.sources,
             requireToolCalling: hasQoderCallerTools(body),
             sessionKey: museOwner ? null : occupancySessionKey,
+            originalRequestedModelStr: modelStr,
             preferredConnectionIds: apiKeyInfo?.preferredConnections ?? null,
             reserveOAuthSession: true,
             excludeConnectionIds: Array.from(excluded),
