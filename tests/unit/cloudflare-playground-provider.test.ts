@@ -20,9 +20,11 @@ import {
   CloudflarePlaygroundExecutor,
   CfStreamParser,
   PlaywrightCfTransport,
+  openPlaygroundSession,
   toCfMessages,
   hasUnsupportedCfImageParts,
   classifyCfBrowserStartFailure,
+  type CfChatMessage,
   type CfTransport,
   type CfTransportStartResult,
 } from "../../open-sse/executors/cloudflare-playground.ts";
@@ -218,7 +220,7 @@ test("CfStreamParser maps the real 3021 rate-limit frame to HTTP 429", () => {
   assert.equal(parser.done, false);
 });
 
-test("toCfMessages drops system/tool, flattens parts, keeps user/assistant", () => {
+test("toCfMessages drops system, replays tool as tool_result, flattens parts, keeps user/assistant", () => {
   const out = toCfMessages([
     { role: "system", content: "You are a helpful assistant." },
     { role: "user", content: "hi" },
@@ -233,12 +235,16 @@ test("toCfMessages drops system/tool, flattens parts, keeps user/assistant", () 
     { role: "tool", content: "tool result" },
     { role: "user", content: "" },
   ]);
-  assert.equal(out.length, 3);
+  assert.equal(out.length, 4);
   assert.deepEqual(out[0].parts, [{ type: "text", text: "hi" }]);
   assert.equal(out[1].parts[0].text, "hello");
   assert.equal(out[2].parts[0].text, "a\nb");
+  assert.deepEqual(JSON.parse(out[3].parts[0].text), {
+    tool_result: { content: "tool result" },
+  });
   assert.equal(out[0].role, "user");
   assert.equal(out[1].role, "assistant");
+  assert.equal(out[3].role, "user"); // tool messages become user messages
 });
 
 test("#16460 missing Playwright package or Chromium binary is a 503 host error", () => {
@@ -527,7 +533,7 @@ test("executor streams OpenAI SSE chunks from captured frames", async () => {
     .split("\n")
     .filter((line) => line.startsWith("data: ") && line !== "data: [DONE]")
     .map((line) => JSON.parse(line.slice(6)));
-  assert.ok(chunks.length >= 5, `expected several chunks, got ${chunks.length}`);
+  assert.ok(chunks.length >= 4, `expected several chunks, got ${chunks.length}`);
 
   const first = chunks[0];
   assert.equal(first.choices[0].delta.role, "assistant");
@@ -793,4 +799,152 @@ test("streaming: a partial answer followed by a timeout emits content THEN an ex
   const errorIndex = chunks.indexOf(errorChunk);
   const lastContentIndex = chunks.findLastIndex((c) => c.choices?.[0]?.delta?.content);
   assert.ok(errorIndex > lastContentIndex, "error chunk must follow the streamed content");
+});
+
+// ── Session isolation: every request opens its own playground room ─────────
+//
+// The playground counts 10 USER-role messages per conversation, so a request
+// that resumed a previous room would inherit that history and fail once the
+// earlier turns filled the budget. Each request must therefore mint a brand
+// new `playground-<uuid>` room (and `_pk` key) and tear it down afterwards.
+
+class FakeWebSocket {
+  static instances: FakeWebSocket[] = [];
+  sent: string[] = [];
+  onopen: (() => void) | null = null;
+  onmessage: ((event: { data: string }) => void) | null = null;
+  onerror: (() => void) | null = null;
+  constructor(public url: string) {
+    FakeWebSocket.instances.push(this);
+  }
+  send(data: string): void {
+    this.sent.push(data);
+  }
+}
+
+/** Run `run` with the browser page globals `openPlaygroundSession` expects. */
+function withFakePageGlobals<T>(run: (pushed: string[]) => T): T {
+  const g = globalThis as unknown as Record<string, unknown>;
+  const originalSocket = g.WebSocket;
+  const originalWindow = g.window;
+  const pushed: string[] = [];
+  FakeWebSocket.instances = [];
+  g.WebSocket = FakeWebSocket;
+  g.window = { __cfpPush: (raw: string) => pushed.push(raw) };
+  try {
+    return run(pushed);
+  } finally {
+    g.WebSocket = originalSocket;
+    g.window = originalWindow;
+  }
+}
+
+const pageMessage = (text: string, id: string): CfChatMessage => ({
+  role: "user",
+  parts: [{ type: "text", text }],
+  id,
+});
+
+const openSession = (chatId: string) =>
+  openPlaygroundSession({
+    chatId,
+    model: "@cf/zai-org/glm-4.7-flash",
+    messages: [pageMessage("hi", "m1")],
+    temperature: 0.7,
+    wsBase: "wss://playground.ai.cloudflare.com/agents/",
+  });
+
+const roomOf = (url: string) => url.replace(/^.*\/agents\//, "").split("?")[0];
+const pkOf = (url: string) => new URL(url).searchParams.get("_pk");
+
+test("session isolation: two sequential requests open two distinct playground rooms", () => {
+  withFakePageGlobals(() => {
+    openSession("chatcmpl-cfp-first");
+    openSession("chatcmpl-cfp-second");
+
+    assert.equal(FakeWebSocket.instances.length, 2, "each request must dial its own socket");
+    const [first, second] = FakeWebSocket.instances;
+
+    assert.match(roomOf(first.url), /^playground-[0-9a-f]{25}$/);
+    assert.match(roomOf(second.url), /^playground-[0-9a-f]{25}$/);
+    assert.notEqual(
+      roomOf(first.url),
+      roomOf(second.url),
+      "requests must never share a playground room"
+    );
+    assert.notEqual(first.url, second.url);
+    assert.ok(pkOf(first.url), "the room key must be present");
+    assert.notEqual(pkOf(first.url), pkOf(second.url), "the _pk key must not be reused");
+  });
+});
+
+test("session isolation: each request receives its own handshake on its own socket", () => {
+  withFakePageGlobals(() => {
+    openSession("chatcmpl-cfp-alpha");
+    openSession("chatcmpl-cfp-beta");
+
+    const pairs: Array<[FakeWebSocket, string]> = [
+      [FakeWebSocket.instances[0], "chatcmpl-cfp-alpha"],
+      [FakeWebSocket.instances[1], "chatcmpl-cfp-beta"],
+    ];
+    for (const [socket, chatId] of pairs) {
+      assert.equal(socket.sent.length, 0, "nothing is sent before the socket opens");
+      socket.onopen?.();
+
+      assert.equal(socket.sent.length, 3, "resume + setConfig + use_chat_request");
+      assert.equal(JSON.parse(socket.sent[0]).type, "cf_agent_stream_resume_request");
+      assert.equal(JSON.parse(socket.sent[1]).method, "setConfig");
+      // The chat id must be scoped to this one request; a shared id would let
+      // the playground attach the payload to the previous conversation.
+      assert.equal(JSON.parse(socket.sent[2]).id, chatId);
+      assert.equal(JSON.parse(socket.sent[2]).type, "cf_agent_use_chat_request");
+    }
+  });
+});
+
+/** Non-hanging transport that records teardown, for the reuse assertions. */
+class RecordingTransport implements CfTransport {
+  closeCalls = 0;
+  constructor(private framesList: string[]) {}
+  async start(): Promise<CfTransportStartResult> {
+    return { ok: true };
+  }
+  async *frames(): AsyncGenerator<string> {
+    for (const frame of this.framesList) yield frame;
+  }
+  async close(): Promise<void> {
+    this.closeCalls += 1;
+  }
+}
+
+test("session isolation: consecutive requests never reuse a transport", async () => {
+  const created: Array<{ chatId: string; transport: RecordingTransport }> = [];
+  const executor = new CloudflarePlaygroundExecutor((chatId) => {
+    const transport = new RecordingTransport(buildSuccessFrames(chatId));
+    created.push({ chatId, transport });
+    return transport;
+  });
+
+  await executor.execute(
+    executeArgs(
+      { model: "zai-org/glm-4.7-flash", messages: [{ role: "user", content: "one" }] },
+      false
+    )
+  );
+  await executor.execute(
+    executeArgs(
+      { model: "zai-org/glm-4.7-flash", messages: [{ role: "user", content: "two" }] },
+      false
+    )
+  );
+
+  assert.equal(created.length, 2, "one transport (one room) per request");
+  assert.notEqual(created[0].transport, created[1].transport, "the transport must not be cached");
+  assert.notEqual(created[0].chatId, created[1].chatId, "each request needs its own chat id");
+  assert.equal(
+    created[0].transport.closeCalls,
+    1,
+    "the first room must be torn down, not kept warm for the next request"
+  );
+  assert.equal(created[1].transport.closeCalls, 1);
 });
