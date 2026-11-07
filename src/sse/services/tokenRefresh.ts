@@ -177,6 +177,21 @@ export const formatProviderCredentials = (provider: string, credentials: any) =>
 
 export const getAllAccessTokens = (userInfo: any) => _getAllAccessTokens(userInfo, log);
 
+function applyRefreshedExpiry(updates: Record<string, any>, newCredentials: any) {
+  if (newCredentials.expiresIn) {
+    const expiresAt = new Date(Date.now() + newCredentials.expiresIn * 1000).toISOString();
+    updates.expiresAt = expiresAt;
+    updates.tokenExpiresAt = expiresAt;
+    updates.expiresIn = newCredentials.expiresIn;
+  } else if (newCredentials.expiresAt) {
+    updates.expiresAt = newCredentials.expiresAt;
+    updates.tokenExpiresAt = newCredentials.expiresAt;
+  } else if (newCredentials.accessToken && newCredentials.expiresAt === null) {
+    updates.expiresAt = null;
+    updates.tokenExpiresAt = null;
+  }
+}
+
 // Local-specific: Update credentials in localDb
 export async function updateProviderCredentials(connectionId: string, newCredentials: any) {
   try {
@@ -206,18 +221,7 @@ export async function updateProviderCredentials(connectionId: string, newCredent
     if (newCredentials.refreshToken) {
       updates.refreshToken = newCredentials.refreshToken;
     }
-    if (newCredentials.expiresIn) {
-      const expiresAt = new Date(Date.now() + newCredentials.expiresIn * 1000).toISOString();
-      updates.expiresAt = expiresAt;
-      updates.tokenExpiresAt = expiresAt;
-      updates.expiresIn = newCredentials.expiresIn;
-    } else if (newCredentials.expiresAt) {
-      updates.expiresAt = newCredentials.expiresAt;
-      updates.tokenExpiresAt = newCredentials.expiresAt;
-    } else if (newCredentials.accessToken && newCredentials.expiresAt === null) {
-      updates.expiresAt = null;
-      updates.tokenExpiresAt = null;
-    }
+    applyRefreshedExpiry(updates, newCredentials);
     if (newCredentials.providerSpecificData) {
       updates.providerSpecificData = newCredentials.providerSpecificData;
     }
@@ -261,6 +265,24 @@ export async function updateProviderCredentials(connectionId: string, newCredent
   }
 }
 
+// A usable Muse inference key survives a transient remint failure; a device token does not.
+function keepsMuseKeyAfterRefreshError(provider: string, accessToken: unknown, error: unknown) {
+  return (
+    provider === "muse-code" &&
+    typeof accessToken === "string" &&
+    accessToken.trim() !== "" &&
+    !isMuseDcaToken(accessToken) &&
+    isTransientRefreshError(error)
+  );
+}
+
+function resolveExpiryWithoutAbsolute(newCredentials: any, currentExpiresAt: unknown) {
+  if (newCredentials.expiresIn) {
+    return new Date(Date.now() + newCredentials.expiresIn * 1000).toISOString();
+  }
+  return newCredentials.expiresAt === null ? null : currentExpiresAt;
+}
+
 // Local-specific: Check and refresh token proactively
 export async function checkAndRefreshToken(provider: string, credentials: any) {
   let updatedCredentials = { ...credentials };
@@ -300,16 +322,7 @@ export async function checkAndRefreshToken(provider: string, credentials: any) {
       try {
         newCredentials = await getAccessToken(provider, updatedCredentials, persistCallback);
       } catch (error) {
-        const accessToken = credentials.accessToken;
-        if (
-          provider !== "muse-code" ||
-          typeof accessToken !== "string" ||
-          !accessToken.trim() ||
-          isMuseDcaToken(accessToken) ||
-          !isTransientRefreshError(error)
-        ) {
-          throw error;
-        }
+        if (!keepsMuseKeyAfterRefreshError(provider, credentials.accessToken, error)) throw error;
         return { ...credentials };
       }
 
@@ -326,11 +339,7 @@ export async function checkAndRefreshToken(provider: string, credentials: any) {
           refreshToken: newCredentials.refreshToken || updatedCredentials.refreshToken,
           expiresAt: newCredentials.expiresAt
             ? newCredentials.expiresAt
-            : newCredentials.expiresIn
-              ? new Date(Date.now() + newCredentials.expiresIn * 1000).toISOString()
-              : newCredentials.expiresAt === null
-                ? null
-                : updatedCredentials.expiresAt,
+            : resolveExpiryWithoutAbsolute(newCredentials, updatedCredentials.expiresAt),
         };
       }
     }
