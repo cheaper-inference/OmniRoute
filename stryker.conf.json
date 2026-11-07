@@ -126,6 +126,8 @@
       "tests/unit/provider-breaker-combo-local-refusal.test.ts",
       "tests/unit/provider-breaker-combo-sse-probe.test.ts",
       "tests/unit/provider-breaker-unreached-provider-15588.test.ts",
+      "tests/unit/provider-error-rules-operator.test.ts",
+      "tests/unit/operator-error-rules-cooldown-guard.test.ts",
       "tests/unit/stream-stall-no-account-cooldown.test.ts",
       "tests/unit/claude-passthrough-unsigned-thinking-12917.test.ts",
       "tests/unit/claude-passthrough-manual-thinking-no-final-block.test.ts",
