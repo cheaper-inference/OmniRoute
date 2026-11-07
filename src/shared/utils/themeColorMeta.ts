@@ -27,6 +27,41 @@ export const THEME_COLOR_META_SELECTOR = 'meta[name="theme-color"]';
  */
 export const THEME_COLOR_FALLBACK_ATTRIBUTE = "data-theme-color-fallback";
 
+/*
+ * Repainting before hydration without duplicating the tags (#19066).
+ *
+ * React 19 adopts the server's `<meta>` tags at hydration by their `content` (react-dom's
+ * `getHydratableHoistableCache("meta", "content", …)`, which also compares name / property /
+ * http-equiv / charset but not `media`). When THEME_BOOT_SCRIPT rewrote that `content` (any
+ * stored palette or explicit theme other than the server's Editions default), React no longer
+ * found the tags, left them in the head unowned and appended fresh server copies: 4 tags
+ * instead of 2. So the boot script leaves each server tag's `content` alone and instead:
+ * - parks it: its `media` moves to THEME_COLOR_PARKED_MEDIA_ATTRIBUTE and `media` becomes
+ *   `not all`, so the browser skips it while React still adopts it;
+ * - puts a copy carrying the stored colour right before it (THEME_COLOR_BOOT_ATTRIBUTE), with
+ *   the colour written as `rgb(r g b)`, a string no server tag (hex) can equal, so React never
+ *   adopts the copy in place of a server tag.
+ * After hydration applyThemeColor() unparks the server tags, drops the copies and repaints:
+ * the page keeps exactly the tags the server rendered.
+ */
+
+/** Marks a boot-script copy of a parked server tag; removed by applyThemeColor(). */
+export const THEME_COLOR_BOOT_ATTRIBUTE = "data-theme-color-boot";
+
+/** On a parked server tag: its original `media` ("" for none) while `media` is `not all`. */
+export const THEME_COLOR_PARKED_MEDIA_ATTRIBUTE = "data-theme-color-media";
+
+/** The never-matching media query a parked tag carries until hydration. */
+export const THEME_COLOR_PARKED_MEDIA = "not all";
+
+/** `#rrggbb` → `rgb(r g b)`: the same colour, never string-equal to a server (hex) `content`. */
+export function themeColorBootValue(hex: string): string {
+  const h = hex.replace(/^#/, "");
+  const full = h.length === 3 ? [...h].map((c) => c + c).join("") : h.slice(0, 6);
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16));
+  return `rgb(${r} ${g} ${b})`;
+}
+
 interface ThemeColorInput {
   palette: unknown;
   theme: unknown;
@@ -53,6 +88,7 @@ export function resolveThemeColor({ palette, theme, media, systemDark }: ThemeCo
 export function applyThemeColor(theme: unknown, palette: unknown) {
   if (typeof document === "undefined" || typeof window === "undefined") return;
   const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  unparkServerTags();
   const all = Array.from(document.querySelectorAll<HTMLMetaElement>(THEME_COLOR_META_SELECTOR));
   let metas = all.filter((meta) => !meta.hasAttribute(THEME_COLOR_FALLBACK_ATTRIBUTE));
   if (metas.length > 0) {
@@ -75,5 +111,22 @@ export function applyThemeColor(theme: unknown, palette: unknown) {
       systemDark,
     });
     if (meta.getAttribute("content") !== color) meta.setAttribute("content", color);
+  }
+}
+
+/** Undo the boot script's parking: restore the server tags' `media`, drop the boot copies. */
+function unparkServerTags() {
+  for (const meta of document.querySelectorAll<HTMLMetaElement>(
+    `${THEME_COLOR_META_SELECTOR}[${THEME_COLOR_PARKED_MEDIA_ATTRIBUTE}]`
+  )) {
+    const media = meta.getAttribute(THEME_COLOR_PARKED_MEDIA_ATTRIBUTE);
+    if (media) meta.setAttribute("media", media);
+    else meta.removeAttribute("media");
+    meta.removeAttribute(THEME_COLOR_PARKED_MEDIA_ATTRIBUTE);
+  }
+  for (const meta of document.querySelectorAll(
+    `${THEME_COLOR_META_SELECTOR}[${THEME_COLOR_BOOT_ATTRIBUTE}]`
+  )) {
+    meta.remove();
   }
 }

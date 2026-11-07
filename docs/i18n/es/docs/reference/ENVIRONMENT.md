@@ -1397,7 +1397,7 @@ OMNIROUTE_MEMORY_MB=8192
 CORS_ORIGIN=https://your-frontend.example.com
 ```
 
-### Entorno aislado / CI
+### Entorno aislado de red / CI
 
 ```bash
 JWT_SECRET=test-jwt-secret-for-ci
@@ -1870,3 +1870,14 @@ Utilizado por `open-sse/services/combo.ts` y `src/lib/quota/quotaScheduler.ts` p
 | Variable                       | Por defecto | Archivo fuente                               | Descripción                                                                                                                                                                                                                                                                                 |
 | ------------------------------ | ----------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`         | `src/lib/providerModels/modelSyncTimings.ts` | Establezca en `1` para registrar el tiempo de fase, una solicitud generada ID y los resultados de fase success/error durante la sincronización del modelo. Deshabilitado para todos los demás valores. Los registros omiten las cargas útiles de solicitudes, cuentas, catálogos y errores. |
+
+## Herramienta local de análisis multimedia de OpenCode
+
+Utilizada por `scripts/cli/omniroute-media-mcp.mjs`. Configúralas en el entorno del proceso de la herramienta local.
+
+| Variable                   | Valor predeterminado                                                             | Descripción                                                                                                             |
+| -------------------------- | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (o `~/.config/opencode/opencode.json`) | Configuración de OpenCode leída por la herramienta multimedia y el instalador.                                          |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                      | Entrada del proveedor leída de la configuración de OpenCode por la herramienta multimedia.                              |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                           | Modelo enviado por la herramienta multimedia. Su proveedor debe admitir los tipos de contenido multimedia solicitados.  |
+| `OMNIROUTE_MEDIA_API_KEY`  | Clave de API del proveedor configurado o su referencia de entorno                | Anulación opcional de las credenciales. Mantenla en el entorno del proceso local; nunca la confirmes en el repositorio. |

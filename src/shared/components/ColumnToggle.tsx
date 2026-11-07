@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * ColumnToggle — table column visibility menu over the kit `DropdownMenu` (KEA-7886).
- * Used by RequestLoggerV2, ProxyLogger, etc.
+ * ColumnToggle — table column visibility menu over the kit `DataTableColumnsMenu`.
+ * Used by RequestLoggerV2, ProxyLogger, etc., which keep the visibility and persist it.
  *
  * Usage:
  *   <ColumnToggle
@@ -13,13 +13,7 @@
  */
 
 import { useTranslations } from "next-intl";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@omniroute/ui-kit/dropdown-menu";
-import Button from "./Button";
+import { DataTableColumnsMenu } from "@omniroute/ui-kit/data-table-shell";
 
 interface ColumnToggleProps {
   columns?: { key: string; label: string }[];
@@ -30,32 +24,13 @@ interface ColumnToggleProps {
 export default function ColumnToggle({ columns = [], visible = {}, onToggle }: ColumnToggleProps) {
   const t = useTranslations("common");
   return (
-    // Non-modal like the legacy popover: the table behind stays readable and scrollable.
-    <DropdownMenu modal={false}>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          icon="view_column"
-          aria-label={t("toggleColumns")}
-          title={t("toggleColumns")}
-        >
-          {t("columns")}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        {columns.map((col) => (
-          <DropdownMenuCheckboxItem
-            key={col.key}
-            checked={visible[col.key] ?? true}
-            onCheckedChange={() => onToggle?.(col.key)}
-            // Keep the menu open so several columns can be toggled in a row (legacy behaviour).
-            onSelect={(event) => event.preventDefault()}
-          >
-            {col.label}
-          </DropdownMenuCheckboxItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <DataTableColumnsMenu
+      columns={columns}
+      visible={visible}
+      onVisibilityChange={(key) => onToggle?.(key)}
+      labels={{ trigger: t("columns") }}
+      aria-label={t("toggleColumns")}
+      title={t("toggleColumns")}
+    />
   );
 }
