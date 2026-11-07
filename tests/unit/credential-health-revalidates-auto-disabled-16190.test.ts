@@ -44,7 +44,7 @@ const HOUR_MS = 60 * 60 * 1000;
 const probeCalls = new Map<string, number>();
 const failingNodes = new Set<string>();
 const originalFetch = globalThis.fetch;
-const validationFetch = (async (input: string | URL | Request) => {
+const probeFetch = (async (input: string | URL | Request) => {
   const url =
     typeof input === "string" ? input : input instanceof Request ? input.url : input.toString();
   const match = VALIDATION_PATH.exec(url);
@@ -60,7 +60,7 @@ const validationFetch = (async (input: string | URL | Request) => {
   }
   return new Response("not found", { status: 404 });
 }) as typeof fetch;
-globalThis.fetch = validationFetch;
+globalThis.fetch = probeFetch;
 
 const core = await import("../../src/lib/db/core.ts");
 const providerNodesRoute = await import("../../src/app/api/provider-nodes/route.ts");
@@ -77,7 +77,7 @@ const { maybeAutoDisableBannedAccount } =
 
 // Loading the routes can install the proxy fetch interceptor. Keep every probe
 // on the fixture transport, including the initial fire-and-forget auto-test.
-globalThis.fetch = validationFetch;
+globalThis.fetch = probeFetch;
 
 const OPERATOR_DISABLED_AT_KEY = operatorDisable.OPERATOR_DISABLED_AT_KEY;
 // Not imported from the module on purpose: the marker is persisted JSON, and the
