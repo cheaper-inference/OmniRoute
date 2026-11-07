@@ -226,7 +226,10 @@ export function isIntentionalComboAbort(err) {
  * error path; the stray copy delivered to nobody must not be process-fatal.
  *
  * The "fetch failed" message match is exact on purpose: it is undici's fixed
- * wrapping message, so arbitrary TypeErrors still crash loudly.
+ * wrapping message, so arbitrary TypeErrors still crash loudly. After headers,
+ * undici instead wraps body transport failures as `TypeError: terminated`.
+ * That shape requires a known transport code on the immediate cause; neither
+ * the message alone nor an arbitrary/nested cause proves a network failure.
  *
  * @param {unknown} err
  * @returns {boolean}
@@ -235,6 +238,16 @@ export function isUpstreamNetworkError(err) {
   if (!err || typeof err !== "object") return false;
   const e = /** @type {NodeJS.ErrnoException} */ (err);
   if (e.name === "TypeError" && e.message === "fetch failed") return true;
+  if (e.name === "TypeError" && e.message === "terminated") {
+    const cause = /** @type {{ code?: unknown } | undefined} */ (e.cause);
+    if (
+      !!cause &&
+      typeof cause === "object" &&
+      typeof cause.code === "string" &&
+      ["ECONNRESET", "EPIPE", "UND_ERR_SOCKET", "UND_ERR_BODY_TIMEOUT"].includes(cause.code)
+    )
+      return true;
+  }
   switch (e.code) {
     case "PROXY_UNREACHABLE":
     case "PROXY_REQUEST_FAILED":

@@ -1,0 +1,1 @@
+- **fix(resilience):** Keep escaped `TypeError: terminated` fetch-body failures with recognized transport causes from killing the server, while preserving warning logs and fatal handling of genuine faults ([#19215](https://github.com/cheaper-inference/OmniRoute/pull/19215)) — thanks @insoln
