@@ -20,6 +20,8 @@ mock.method(globalThis, "fetch", async () => {
 });
 
 const { handleComboChat } = await import("../../open-sse/services/combo.ts");
+const { runComboWithNoReplayLatch } =
+  await import("../../open-sse/services/combo/noReplayLatch.ts");
 const { isNoReplayResponse, markNoReplayResponse } =
   await import("../../open-sse/utils/noReplayResponse.ts");
 const { inheritResponsePolicies, markCustomJsonNoReplay } =
@@ -112,6 +114,68 @@ test("control: an unmarked 503 still falls back to the next combo target", async
   assert.ok(calls.filter((model) => model === "business/a").length > 1);
   assert.equal(calls.at(-1), "openai/gpt-4o-mini");
   assert.match(await response.text(), /from the fallback target/);
+});
+
+for (const strategy of ["priority", "round-robin"]) {
+  test(`${strategy}: a no-replay failure ends the combo without the fallback wait`, async () => {
+    const waits: string[] = [];
+    const run = async (marked: boolean) => {
+      waits.length = 0;
+      const options = comboOptions(async (_body, model) => {
+        if (model !== "business/a") return completion("from the fallback target");
+        const failure = completion("", 503);
+        return marked ? markNoReplayResponse(failure) : failure;
+      }, strategy);
+      options.combo.config = { maxRetries: 0, maxSetRetries: 0, fallbackDelayMs: 1 };
+      options.log = {
+        ...log,
+        debug(_tag: string, message: string) {
+          if (message.includes("before fallback to next model")) waits.push(message);
+        },
+      };
+      return handleComboChat(options);
+    };
+
+    assert.equal((await run(false)).status, 200);
+    assert.equal(waits.length, 1, "control: an unmarked 503 waits, then falls back");
+    assert.equal((await run(true)).status, 503);
+    assert.deepEqual(waits, []);
+  });
+}
+
+test("the latch hands the strategy the caller's own abort signal", async () => {
+  const controller = new AbortController();
+  let seen: AbortSignal | null | undefined;
+  await runComboWithNoReplayLatch(
+    { ...comboOptions(async () => completion("x")), signal: controller.signal },
+    async (options) => {
+      seen = options.signal;
+      return completion("x");
+    }
+  );
+  assert.equal(seen, controller.signal);
+});
+
+test("a latched failure cancels a target still in flight", { timeout: 5000 }, async () => {
+  let inFlight: AbortSignal | null | undefined;
+  const target = () => ({ modelAbortSignal: new AbortController().signal });
+  const options = comboOptions(async (_body, model, dispatched) => {
+    if (model === "business/a") return markNoReplayResponse(completion("", 503));
+    inFlight = dispatched?.modelAbortSignal;
+    await new Promise((resolve) => inFlight?.addEventListener("abort", resolve, { once: true }));
+    return completion("late sibling");
+  });
+
+  const response = await runComboWithNoReplayLatch(options, async (latched) => {
+    const sibling = latched.handleSingleModel({}, "openai/gpt-4o-mini", target());
+    const stop = await latched.handleSingleModel({}, "business/a", target());
+    assert.equal(stop.status, 499, "the strategy must stop, not treat this as a target failure");
+    await sibling;
+    return stop;
+  });
+
+  assert.equal(inFlight?.aborted, true);
+  assert.equal(response.status, 503);
 });
 
 test("markCustomJsonNoReplay marks only custom-json connections", () => {

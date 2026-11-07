@@ -39,9 +39,9 @@ export const CUSTOM_JSON_MAX_PATH_LENGTH = 256;
 export const CUSTOM_JSON_BLOCKED_KEYS = ["__proto__", "prototype", "constructor"] as const;
 
 /**
- * Header names the API-key auth header may not use: framing/body headers the executor
- * owns, plus credentials that belong to other auth modes. Hop-by-hop names are rejected
- * separately through the canonical upstream-header denylist.
+ * Header names refused for the custom auth header: the framing and body headers belong
+ * to the executor, and the credential headers belong to other auth modes. Hop-by-hop
+ * names are rejected separately through the canonical upstream-header denylist.
  */
 export const CUSTOM_JSON_BLOCKED_AUTH_HEADERS = [
   "host",
