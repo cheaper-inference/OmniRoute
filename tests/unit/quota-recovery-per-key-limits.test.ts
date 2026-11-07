@@ -166,10 +166,12 @@ test("re-sending the turn of a running or confirmation-required ticket returns t
   assert.deepEqual([resend().id, resend().state], [parked.id, "needs_confirmation"]);
 });
 
-test("the per-key count stays on the due index after planner statistics exist", () => {
-  // Statistics as PRAGMA optimize (sqlitePlannerStats.ts) wrote them for a table where
-  // one key holds 40 active and 1000 completed tickets. With them, a plain or unary-+
-  // count is planned as a table scan that reads `state` past every payload of the key.
+/**
+ * Run `body` with the SQL it prepares recorded, under statistics as PRAGMA optimize
+ * (sqlitePlannerStats.ts) wrote them for a table where one key holds 40 active and 1000
+ * completed tickets. `explain` plans a recorded statement without running it.
+ */
+function withPlannerStats(body: (seen: string[], explain: (sql: string) => string) => void): void {
   const db = core.getDbInstance();
   const seen: string[] = [];
   const prepare = db.prepare.bind(db);
@@ -180,32 +182,66 @@ test("the per-key count stays on the due index after planner statistics exist", 
   db.exec("ANALYZE quota_recovery_tickets");
   db.exec("DELETE FROM sqlite_stat1 WHERE tbl = 'quota_recovery_tickets'");
   db.exec(`INSERT INTO sqlite_stat1 (tbl, idx, stat) VALUES
-    ('quota_recovery_tickets', 'idx_quota_recovery_due', '1440 320 2'),
+    ('quota_recovery_tickets', 'idx_quota_recovery_due', '1440 320 2 2 1'),
     ('quota_recovery_tickets', 'sqlite_autoindex_quota_recovery_tickets_2', '1440 39 1'),
     ('quota_recovery_tickets', 'sqlite_autoindex_quota_recovery_tickets_1', '1440 1')`);
   db.exec("ANALYZE sqlite_schema");
-  try {
-    tickets.enqueueQuotaRecoveryTicket({
-      apiKeyId: "planned-key",
-      turnKey: "planned-turn",
-      endpoint: "responses",
-      requestPayload: "{}",
-      nextAttemptAt: "2026-01-01T00:00:00.000Z",
-      expiresAt: "2026-01-02T00:00:00.000Z",
-      maxActivePerKey: 64,
-    });
-    const count = seen.find((sql) => sql.includes("COUNT(*) AS active"));
-    assert.ok(count, "the capped enqueue runs the per-key count");
-    const plan = (prepare(`EXPLAIN QUERY PLAN ${count}`).all("planned-key") as { detail: string }[])
+  const explain = (sql: string) => {
+    const binds = Array.from(sql.matchAll(/\?/g), () => "2026-01-01T00:00:00.000Z");
+    return (prepare(`EXPLAIN QUERY PLAN ${sql}`).all(...binds) as { detail: string }[])
       .map((row) => row.detail)
       .join(" | ");
-    assert.match(plan, /USING INDEX idx_quota_recovery_due \(state=\?\)/);
+  };
+  try {
+    body(seen, explain);
   } finally {
     db.prepare = prepare;
     db.exec("DELETE FROM sqlite_stat1 WHERE tbl = 'quota_recovery_tickets'");
     db.exec("ANALYZE sqlite_schema");
-    db.prepare("DELETE FROM quota_recovery_tickets WHERE api_key_id = 'planned-key'").run();
   }
+}
+
+test("the per-key count stays on the due index after planner statistics exist", () => {
+  // With these statistics, a plain or unary-+ count is planned as a table scan that
+  // reads `state` past every payload of the key.
+  try {
+    withPlannerStats((seen, explain) => {
+      tickets.enqueueQuotaRecoveryTicket({
+        apiKeyId: "planned-key",
+        turnKey: "planned-turn",
+        endpoint: "responses",
+        requestPayload: "{}",
+        nextAttemptAt: "2026-01-01T00:00:00.000Z",
+        expiresAt: "2026-01-02T00:00:00.000Z",
+        maxActivePerKey: 64,
+      });
+      const count = seen.find((sql) => sql.includes("COUNT(*) AS active"));
+      assert.ok(count, "the capped enqueue runs the per-key count");
+      assert.match(explain(count), /USING COVERING INDEX idx_quota_recovery_due \(state=\?\)/);
+    });
+  } finally {
+    core
+      .getDbInstance()
+      .prepare("DELETE FROM quota_recovery_tickets WHERE api_key_id = 'planned-key'")
+      .run();
+  }
+});
+
+test("ranking a due batch reads the due index alone, never a row's payload", () => {
+  // The ranking has to see every due row. expires_at sits after both ciphertext columns,
+  // so a plan that goes to the table walks the overflow pages of each due payload, about
+  // 1 MiB a row, on every tick. Only the rows that win a slot may be fetched.
+  withPlannerStats((seen, explain) => {
+    tickets.listDueQuotaRecoveryTickets(new Date("2026-01-01T00:00:00.000Z"));
+    const batch = seen.find((sql) => sql.includes("ROW_NUMBER()"));
+    assert.ok(batch, "listing a due batch runs the ranking");
+    const plan = explain(batch);
+    assert.match(
+      plan,
+      /quota_recovery_tickets USING COVERING INDEX idx_quota_recovery_due \(state=\? AND next_attempt_at<\?\)/
+    );
+    assert.match(plan, /SEARCH t USING INTEGER PRIMARY KEY \(rowid=\?\)/);
+  });
 });
 
 test("a due batch rotates across keys instead of draining one key's backlog first", () => {
@@ -366,8 +402,8 @@ test("at the batch limit, tickets tied on rank and due time go in insert order",
 });
 
 test("a tick expires stale tickets before it lists due ones, so they take no batch slot", async () => {
-  // The batch's LIMIT runs before its expiry check. A pending ticket past its expiry
-  // that is due first would take one of the 25 slots and then be dropped.
+  // The tick's own order: the stale ticket leaves `pending` before the batch is listed,
+  // and all 25 valid tickets still run in that tick.
   const now = new Date("2015-01-01T00:05:00.000Z");
   enqueue("tick-stale", "stale", "2015-01-01T00:00:00.000Z", "2015-01-01T00:01:00.000Z");
   // Claims use the wall clock, so these must not expire before the test runs.

@@ -101,8 +101,8 @@ export function enqueueQuotaRecoveryTicket(input: {
       return;
     }
     if (input.maxActivePerKey !== undefined) {
-      // Pinned to idx_quota_recovery_due, which has `state`, so only active rows
-      // are looked up (api_key_id sits before the payload). The (api_key_id,
+      // Pinned to idx_quota_recovery_due, which has `state` and api_key_id, so only
+      // active index entries are read and no table row. The (api_key_id,
       // turn_key) index has no `state`: through it, or through a table scan,
       // the count reads `state`, past both ciphertext columns, from every row
       // the key holds, completed ones included. A unary + is not enough: with
@@ -165,12 +165,12 @@ export function claimQuotaRecoveryTicket(id: string, now = new Date()): QuotaRec
 
 /**
  * Round-robin across keys so one key's backlog cannot fill every slot of a tick.
- * The ranking reads only the due index, rowid and api_key_id. Those sit in front of
- * the encrypted payload (up to about 1 MiB), so no due row's overflow pages are read.
- * Reading expires_at or created_at there would walk every one of them. Ties fall back
- * to rowid (insert order). Expired pending rows are excluded before ranking and the
- * inner LIMIT, so they cannot take slots from still-valid tickets. The outer
- * expires_at check stays as a safety net if a row expires between the two reads.
+ * idx_quota_recovery_due holds every column the ranking reads, so it touches no table
+ * row and no due row's payload (up to about 1 MiB) is read; only the rows that win a
+ * slot are fetched. Any other column there, such as created_at, sits after the payload
+ * and would walk every one of them. Ties fall back to rowid (insert order). Expired
+ * pending rows are excluded before ranking and the LIMIT, so they cannot take slots
+ * from still-valid tickets.
  */
 export function listDueQuotaRecoveryTickets(now = new Date(), limit = 25): QuotaRecoveryTicket[] {
   const iso = now.toISOString();
@@ -185,10 +185,9 @@ export function listDueQuotaRecoveryTickets(now = new Date(), limit = 25): Quota
          ORDER BY key_rank, next_attempt_at, rid LIMIT ?
        ) AS due
        JOIN quota_recovery_tickets AS t ON t.rowid = due.rid
-       WHERE t.expires_at > ?
        ORDER BY due.key_rank, due.next_attempt_at, due.rid`
     )
-    .all(iso, iso, Math.max(1, Math.min(limit, 100)), iso) as TicketRow[];
+    .all(iso, iso, Math.max(1, Math.min(limit, 100))) as TicketRow[];
   return rows.map(toTicket);
 }
 
