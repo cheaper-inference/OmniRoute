@@ -64,7 +64,6 @@ export function holdAntigravityHealthThroughResponse(
         .catch(() => {})
         .finally(releaseReader);
     }, Math.max(1, Math.floor(probeIdleTimeoutMs)));
-    idleTimer.unref?.();
   };
   const body = new ReadableStream<Uint8Array>({
     start(controller) {
