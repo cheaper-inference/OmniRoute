@@ -787,3 +787,23 @@ test("resolveConversationStalledState is false for a clean 'stop' turn no matter
     false
   );
 });
+
+test("pending continuation bridge evicts old full-history entries beyond its size limit", () => {
+  const pipeline = {
+    clientRawRequest: { body: { input: [{ type: "message", role: "user", content: "history" }] } },
+    clientResponse: { output: [{ type: "message", role: "assistant", content: "answer" }] },
+  };
+  for (let i = 0; i < 513; i++) {
+    store.seedPendingContinuationState(`mem-bound-${i}`, "key-bounded", pipeline, false);
+  }
+  assert.equal(store.getPendingContinuationStateCount(), 512);
+  assert.equal(store.resolvePreviousResponseState("mem-bound-0", "key-bounded"), null);
+  assert.deepEqual(store.resolvePreviousResponseState("mem-bound-512", "key-bounded"), {
+    input: [{ type: "message", role: "user", content: "history" }],
+    output: [{ type: "message", role: "assistant", content: "answer" }],
+  });
+  for (let i = 0; i < 513; i++) {
+    store.clearPendingContinuationState(`mem-bound-${i}`);
+  }
+  assert.equal(store.getPendingContinuationStateCount(), 0);
+});

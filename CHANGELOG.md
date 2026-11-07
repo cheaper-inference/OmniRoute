@@ -90,6 +90,10 @@
 - **feat(cli):** run `omniroute serve --tray` as a detached desktop process after server and tray readiness, with graphical login auto-start support.
 - **feat(routing):** add client-, provider-, and model-neutral exclusive managed session connection leases with API-key-bound generation fencing, durable SQLite ownership, explicit allowlist policy, and bounded 429 capacity retry semantics.
 
+## [3.8.54] — TBD
+
+---
+
 ## [3.8.53] — 2026-11-06
 
 _Living section — reconciled 2026-11-06 from all cycle commits (`c754707d0e` → `616801a2b6`, 1,162 non-merge commits). Bullets carry the merged PR and its author; direct pushes are listed with their commit hash. Regenerated at each `/generate-release` phase._
@@ -19421,3 +19425,4 @@ OmniRoute now automatically refreshes model lists for connected providers every 
 ### Added
 
 - Multiple provider integrations and dashboard improvements
+
