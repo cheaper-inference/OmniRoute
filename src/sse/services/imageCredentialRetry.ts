@@ -52,10 +52,37 @@ function connectionIdOf(credentials: any): string | null {
     : null;
 }
 
+function isOutsideImageKeyScope(credentials: any, allowedConnections: string[] | null): boolean {
+  if (!Array.isArray(allowedConnections)) return false;
+  const connectionId = connectionIdOf(credentials);
+  return !connectionId || !allowedConnections.includes(connectionId);
+}
+
 function isCredentialSentinel(credentials: any): boolean {
   // Includes the key-scope sentinel (blockedByKeyPolicy): it carries no secret
   // and must never be dispatched.
   return isCredentialDiagnosticSentinel(credentials);
+}
+
+function finalImageRetryFailure(
+  currentCredentials: any,
+  lastResult: ImageGenerationResult | null
+): ImageGenerationResult {
+  // The selector can deny a scoped key with a sentinel instead of credentials.
+  // Preserve that denial after the fallback loop, even if an earlier account
+  // returned an authentication error.
+  if (currentCredentials?.blockedByKeyPolicy === true) {
+    return {
+      success: false,
+      status: 403,
+      error: "No image-provider connection is allowed for this API key",
+    };
+  }
+  return lastResult || {
+    success: false,
+    status: 401,
+    error: "Authentication failed for all eligible image-provider accounts",
+  };
 }
 
 /**
@@ -117,6 +144,18 @@ export async function executeImageWithCredentialFallback({
   // still need one direct attempt, but there is no account identity to refresh
   // or rotate after a 401.
   if (!credentials) {
+    // A scoped API key cannot fall through to a credential-less dispatch.
+    // Unscoped local/no-auth image providers retain their existing direct attempt.
+    if (Array.isArray(allowedConnections)) {
+      return {
+        credentials,
+        result: {
+          success: false,
+          status: 403,
+          error: "No image-provider connection is allowed for this API key",
+        },
+      };
+    }
     return { credentials, result: await execute(credentials) };
   }
 
@@ -127,6 +166,18 @@ export async function executeImageWithCredentialFallback({
 
   while (currentCredentials && !isCredentialSentinel(currentCredentials)) {
     const connectionId = connectionIdOf(currentCredentials);
+    // Defense in depth: selectors and test hooks must never bypass the caller
+    // API key's connection allowlist, even during image credential rotation.
+    if (isOutsideImageKeyScope(currentCredentials, allowedConnections)) {
+      return {
+        credentials: currentCredentials,
+        result: {
+          success: false,
+          status: 403,
+          error: "Image credential is outside the API key's allowed connections",
+        },
+      };
+    }
     if (connectionId && excludedConnectionIds.has(connectionId)) break;
     if (connectionId) excludedConnectionIds.add(connectionId);
 
@@ -148,6 +199,17 @@ export async function executeImageWithCredentialFallback({
       continue;
     }
 
+    // A refresh must not silently substitute a different or unscoped account.
+    if (isOutsideImageKeyScope(currentCredentials, allowedConnections)) {
+      return {
+        credentials: currentCredentials,
+        result: {
+          success: false,
+          status: 403,
+          error: "Refreshed image credential is outside the API key's allowed connections",
+        },
+      };
+    }
     lastCredentials = currentCredentials;
     lastResult = await execute(currentCredentials);
     const shouldTryAnotherAccount =
@@ -172,10 +234,6 @@ export async function executeImageWithCredentialFallback({
 
   return {
     credentials: lastCredentials,
-    result: lastResult || {
-      success: false,
-      status: 401,
-      error: "Authentication failed for all eligible image-provider accounts",
-    },
+    result: finalImageRetryFailure(currentCredentials, lastResult),
   };
 }
