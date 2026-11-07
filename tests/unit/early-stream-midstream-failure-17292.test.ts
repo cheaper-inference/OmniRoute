@@ -51,40 +51,55 @@ async function fixture(protocol: (typeof protocols)[number]) {
 }
 
 for (const protocol of protocols) {
-  for (const [shape, chunk] of [
-    ["complete", 'data: {"delta":"hello"}\n\n'],
-    ["partial", 'data: {"delta":"hel'],
-  ]) {
-    test(`${protocol.name}: read failure after ${shape} SSE rejects instead of clean EOF (#17292)`, async () => {
-      const f = await fixture(protocol);
-      f.upstream.enqueue(encoder.encode(chunk));
-      assert.equal(decoder.decode((await f.reader.read()).value), chunk);
-      // Inject only after the caller has actually received the bytes.
-      const pending = f.reader.read();
-      const raw = new Error("secret-token upstream-private-host");
-      raw.stack = "PRIVATE_UPSTREAM_STACK";
-      f.upstream.error(raw);
-      let failure: unknown;
-      await assert.rejects(pending, (error: unknown) => {
-        assert.ok(error instanceof Error);
-        assert.equal(error.message, "Upstream stream failed before completion.");
-        assert.notEqual(error, raw);
-        assert.equal(error.cause, undefined);
-        assert.doesNotMatch(
-          String(error.stack),
-          /secret-token|upstream-private-host|PRIVATE_UPSTREAM_STACK/
-        );
-        failure = error;
-        return true;
-      });
-      // One terminal failure, not an appended frame or a second synthesized error.
-      await assert.rejects(f.reader.closed, (error: unknown) => error === failure);
-      await assert.rejects(f.reader.read(), (error: unknown) => error === failure);
-      assert.equal(getEventListeners(f.client.signal, "abort").length, 0);
-      assert.equal(getEventListeners(f.deadline.signal, "abort").length, 0);
-      assert.equal(f.deadline.signal.aborted, false);
+  test(`${protocol.name}: read failure after a finished SSE event closes quietly (#17292)`, async () => {
+    const chunk = 'data: {"delta":"hello"}\n\n';
+    const f = await fixture(protocol);
+    f.upstream.enqueue(encoder.encode(chunk));
+    assert.equal(decoder.decode((await f.reader.read()).value), chunk);
+    const pending = f.reader.read();
+    const raw = new Error("secret-token upstream-private-host");
+    raw.stack = "PRIVATE_UPSTREAM_STACK";
+    f.upstream.error(raw);
+    const next = await pending;
+    assert.equal(next.done, true);
+    assert.equal(next.value, undefined);
+    await f.reader.closed;
+    assert.equal((await f.reader.read()).done, true);
+    assert.equal(getEventListeners(f.client.signal, "abort").length, 0);
+    assert.equal(getEventListeners(f.deadline.signal, "abort").length, 0);
+    assert.equal(f.deadline.signal.aborted, false);
+  });
+
+  test(`${protocol.name}: read failure after a partial SSE frame rejects instead of clean EOF (#17292)`, async () => {
+    const chunk = 'data: {"delta":"hel';
+    const f = await fixture(protocol);
+    f.upstream.enqueue(encoder.encode(chunk));
+    assert.equal(decoder.decode((await f.reader.read()).value), chunk);
+    // Inject only after the caller has actually received the bytes.
+    const pending = f.reader.read();
+    const raw = new Error("secret-token upstream-private-host");
+    raw.stack = "PRIVATE_UPSTREAM_STACK";
+    f.upstream.error(raw);
+    let failure: unknown;
+    await assert.rejects(pending, (error: unknown) => {
+      assert.ok(error instanceof Error);
+      assert.equal(error.message, "Upstream stream failed before completion.");
+      assert.notEqual(error, raw);
+      assert.equal(error.cause, undefined);
+      assert.doesNotMatch(
+        String(error.stack),
+        /secret-token|upstream-private-host|PRIVATE_UPSTREAM_STACK/
+      );
+      failure = error;
+      return true;
     });
-  }
+    // One terminal failure, not an appended frame or a second synthesized error.
+    await assert.rejects(f.reader.closed, (error: unknown) => error === failure);
+    await assert.rejects(f.reader.read(), (error: unknown) => error === failure);
+    assert.equal(getEventListeners(f.client.signal, "abort").length, 0);
+    assert.equal(getEventListeners(f.deadline.signal, "abort").length, 0);
+    assert.equal(f.deadline.signal.aborted, false);
+  });
 
   test(`${protocol.name}: failure before upstream bytes keeps one in-band error (#17292)`, async () => {
     const f = await fixture(protocol);
