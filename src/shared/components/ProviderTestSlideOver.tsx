@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
 
 import Button from "./Button";
 import Icon from "./Icon";
+import { Spinner } from "./Loading";
 import Select from "./Select";
 import {
   LlmChatCard,
@@ -401,8 +402,11 @@ function LogsTab({ providerId }: { providerId: string }) {
 
   if (state.status === "loading") {
     return (
-      <div className="flex-1 min-h-0 flex items-center justify-center text-xs text-text-muted gap-2">
-        <Icon name="progress_activity" size={18} className="animate-spin" />
+      <div
+        role="status"
+        className="flex-1 min-h-0 flex items-center justify-center text-xs text-text-muted gap-2"
+      >
+        <Spinner decorative size="sm" />
         {t("loadingLogs")}
       </div>
     );
