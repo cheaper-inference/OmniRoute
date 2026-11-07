@@ -199,6 +199,11 @@ const EMBEDDED_DEFAULTS = {
   ],
   // Muse Code CLI — Meta public OAuth client id (device grant, no secret).
   muse_id: [94, 93, 93, 88, 68, 93, 64, 77, 80, 31, 71, 65, 90, 85, 93, 85],
+  // Qoder CLI / Device Code Flow — public client id (device grant, PKCE)
+  qoder_id: [
+    10, 85, 86, 90, 19, 11, 16, 70, 72, 72, 70, 16, 81, 65, 93, 7, 27, 18, 28, 14, 9, 8, 94, 95, 9,
+    76, 70, 6, 72, 22, 19, 87, 10, 13, 0, 79,
+  ],
 } as const;
 
 export type EmbeddedDefaultKey = keyof typeof EMBEDDED_DEFAULTS;

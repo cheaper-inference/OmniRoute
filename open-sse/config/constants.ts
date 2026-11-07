@@ -152,8 +152,9 @@ export const OAUTH_ENDPOINTS = {
     auth: "https://api.anthropic.com/v1/oauth/authorize",
   },
   qoder: {
-    token: process.env.QODER_OAUTH_TOKEN_URL || "",
-    auth: process.env.QODER_OAUTH_AUTHORIZE_URL || "",
+    token:
+      process.env.QODER_OAUTH_TOKEN_URL || "https://center.qoder.sh/api/v1/deviceToken/refresh",
+    auth: process.env.QODER_OAUTH_AUTHORIZE_URL || "https://qoder.com/device/selectAccounts",
   },
   github: {
     token: "https://github.com/login/oauth/access_token",

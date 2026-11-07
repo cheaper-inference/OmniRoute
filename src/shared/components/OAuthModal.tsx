@@ -60,6 +60,7 @@ const DEVICE_CODE_PROVIDERS = new Set([
   "grok-cli",
   "muse-code",
   "workbuddy",
+  "qoder",
 ]);
 
 const TOKEN_PASTE_PROVIDERS = new Set(["devin-desktop", "devin-cli", "grok-cli", "claude"]);
