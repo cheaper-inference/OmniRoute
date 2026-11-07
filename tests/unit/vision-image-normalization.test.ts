@@ -139,6 +139,43 @@ test(
 );
 
 test(
+  "EXIF orientation is applied before resizing, so an oversized phone photo keeps its upright view",
+  { skip: sharpMissing },
+  async () => {
+    // Stored 6000×600 with EXIF orientation 6 (rotate 90° CW to display): the
+    // image a viewer sees is a 600×6000 portrait. Re-encoding drops EXIF, so
+    // the rotation must be baked into the pixels or the model sees it sideways.
+    const oriented = sharp as unknown as (opts: SharpCreateOptions) => {
+      jpeg(opts?: { quality?: number }): {
+        withMetadata(o: { orientation: number }): SharpInstance;
+      };
+    };
+    const input = await oriented({
+      create: { width: 6000, height: 600, channels: 3, background: "#556677" },
+    })
+      .jpeg({ quality: 80 })
+      .withMetadata({ orientation: 6 })
+      .toBuffer();
+    const inMeta = (await sharp(input).metadata()) as SharpMeta & { orientation?: number };
+    assert.equal(inMeta.orientation, 6, "fixture carries EXIF orientation 6");
+
+    const out = await normalizeVisionImageBuffer(input);
+    assert.equal(out.changed, true);
+    const meta = (await sharp(out.buffer).metadata()) as SharpMeta & { orientation?: number };
+    assert.ok(
+      (meta.height ?? 0) > (meta.width ?? 0),
+      `upright portrait expected, got ${meta.width}×${meta.height}`
+    );
+    assert.ok((meta.height ?? 0) <= 4096, `long edge ${meta.height} within 4096`);
+    assert.ok((meta.width ?? 0) * (meta.height ?? 0) <= 4_194_304, "pixel budget respected");
+    assert.ok(
+      meta.orientation === undefined || meta.orientation === 1,
+      `no residual rotation tag (got ${meta.orientation})`
+    );
+  }
+);
+
+test(
   "an already-compliant RGB JPEG passes through byte-identical",
   { skip: sharpMissing },
   async () => {

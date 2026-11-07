@@ -7,6 +7,7 @@
  * exotic-encoded images: upstream 400s on image parse and occasional
  * zero-output hangs. Normalization lands every image inside that comfort zone:
  *
+ *   - apply EXIF orientation (re-encoding drops the tag)
  *   - convert to RGB (alpha flattened onto white)
  *   - long edge ≤ 4096 px
  *   - total pixels ≤ 4,194,304 (~4 MP)
@@ -61,8 +62,9 @@ export async function normalizeVisionImageBuffer(
   try {
     const img = sharp(input, { failOn: "error" });
     const meta = await img.metadata();
-    const width = meta.width ?? 0;
-    const height = meta.height ?? 0;
+    // Budgets apply to the image as displayed: use the EXIF-oriented size.
+    const width = meta.autoOrient?.width ?? meta.width ?? 0;
+    const height = meta.autoOrient?.height ?? meta.height ?? 0;
     if (!width || !height) return { buffer: input, mime: null, changed: false };
 
     const format = meta.format ?? "";
@@ -80,7 +82,9 @@ export async function normalizeVisionImageBuffer(
     const targetWidth = Math.max(1, Math.round(width * scale));
     const targetHeight = Math.max(1, Math.round(height * scale));
 
-    let pipeline = img.resize({
+    // Re-encoding drops EXIF, so bake the orientation into the pixels first;
+    // otherwise a rotated phone photo reaches the model sideways.
+    let pipeline = img.autoOrient().resize({
       width: needsResize ? targetWidth : width,
       height: needsResize ? targetHeight : height,
       fit: "inside",
