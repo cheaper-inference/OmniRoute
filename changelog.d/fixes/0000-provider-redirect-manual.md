@@ -1,1 +1,0 @@
-- **fix(sse):** Provider requests that get a redirect now check the SSRF guard on every hop, and the API key is not sent to a different origin.

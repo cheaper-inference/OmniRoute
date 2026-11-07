@@ -1364,9 +1364,9 @@ Gba awọn olumulo laaye lati jabo awọn ọran taara lati Dasibodu naa.
 
 Iṣẹ kan ti o ṣọna fun oṣu kan lo bii awọn wakati apẹẹrẹ 744, nitorinaa ṣayẹwo rẹ lodi si iyọọda ipele ọfẹ lọwọlọwọ ti Render.
 
-## Àwọn Àyíká Ìfàṣẹ̀lẹ̀
+## Àwọn Àpẹẹrẹ Ìgbékalẹ̀
 
-Fún ìtọ́sọ́nà SRE backend relay (ihuwasi ts/bifrost/auto, ibi tí 9router àti CLIProxyAPI yẹ kí wọ́n wà, àti ọgbọ́n fallback fún ìgbésíṣẹ́ gíga), wo [Ọgbọ́n Backend Relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).
+Fún ìtọ́sọ́nà SRE backend relay (ìhùwàsí ts/bifrost/auto, ibi tí 9router àti CLIProxyAPI yẹ kí wọ́n wà, àti ọgbọ́n fallback fún ìgbésókè throughput), wo [Ọgbọ́n Backend Relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).
 
 ### Ìdàgbàsókè Agbègbè Kéré Jù
 
@@ -1378,7 +1378,7 @@ PORT=20128
 NODE_ENV=development
 ```
 
-### Docker fún Ìṣelọpọ
+### Ìṣelọpọ Docker
 
 ```bash
 JWT_SECRET=<generated>
@@ -1870,3 +1870,14 @@ Ti a lo nipasẹ `open-sse/services/combo.ts` ati `src/lib/quota/quotaScheduler.
 | Ayípadà                        | Aiyipada | Faili orisun                                 | Apejuwe                                                                                                                                                                                                                             |
 | ------------------------------ | -------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`      | `src/lib/providerModels/modelSyncTimings.ts` | Ṣeto si `1` lati wọle akoko alakoso, ibeere ti ipilẹṣẹ ID ati awọn abajade success/error alakoso lakoko imuṣiṣẹpọ awoṣe. Alaabo fun gbogbo awọn iye miiran. Awọn akọọlẹ fi ibeere silẹ, akọọlẹ, katalogi ati awọn ẹru isanwo aṣiṣe. |
+
+## Ọ̀rò̩ṣẹ́ ìtúpalẹ̀ media OpenCode fún àdúgbò
+
+`Used by` `scripts/cli/omniroute-media-mcp.mjs`. Ṣètò àwọn wọ̀nyí nínú àyíká iná iṣẹ́ ọ̀rò̩ṣẹ́ àdúgbò.
+
+| Àyípadà                    | Àìpẹ̀yà                                                                              | Àlàyé                                                                                                 |
+| -------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (tàbí `~/.config/opencode/opencode.json`) | Iṣètò OpenCode tí ọ̀rò̩ṣẹ́ media àti ohun èlò fifi sori ẹrọ ń kà.                                        |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                         | Àkọsílẹ̀ olùpèsè tí ọ̀rò̩ṣẹ́ media ń kà láti inú iṣètò OpenCode.                                          |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                              | Àwòṣe tí ọ̀rò̩ṣẹ́ media ń fi ránṣẹ́. Olùpèsè rẹ̀ gbọ́dọ̀ ṣe àtìlẹ́yìn fún àwọn irú media tí a béèrè.          |
+| `OMNIROUTE_MEDIA_API_KEY`  | Bọtìnì API olùpèsè tí a ṣètò tàbí ìtọ́kasí àyíká rẹ̀                                  | Ìyípadà ẹ̀rí ìdánimọ̀ tí ó jẹ́ àṣàyàn. Pa á mọ́ nínú àyíká iná iṣẹ́ àdúgbò; má ṣe fi í sínú commit láéláé. |

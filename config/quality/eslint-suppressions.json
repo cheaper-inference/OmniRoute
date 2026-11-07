@@ -144,11 +144,6 @@
       "count": 2
     }
   },
-  "open-sse/executors/opencode.ts": {
-    "@typescript-eslint/no-explicit-any": {
-      "count": 2
-    }
-  },
   "open-sse/executors/perplexity-web/protocol.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
@@ -1450,11 +1445,6 @@
   },
   "src/lib/usage/apiKeyUsageLimits.ts": {
     "no-restricted-syntax": {
-      "count": 1
-    }
-  },
-  "src/lib/usage/callLogs.ts": {
-    "@typescript-eslint/no-unused-vars": {
       "count": 1
     }
   },
