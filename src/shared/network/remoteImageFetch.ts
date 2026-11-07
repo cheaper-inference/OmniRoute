@@ -196,9 +196,10 @@ async function openRemoteMedia(
   for (let redirectCount = 0; redirectCount <= maxRedirects; redirectCount++) {
     // DNS-rebinding guard: validate every hop's hostname against its resolved
     // IPs before issuing the request (GHSA-cmhj-wh2f-9cgx).
+    // A proxy URL is what sends patched fetch down the proxied route: a context with no usable
+    // host has a source but no URL, and connects directly.
     const proxied =
-      options.pinDirectOnly === true &&
-      resolveProxyForRequest(currentUrl.toString()).source !== "direct";
+      options.pinDirectOnly === true && !!resolveProxyForRequest(currentUrl.toString()).proxyUrl;
     const addresses = await assertHostnameResolvesPublic(currentUrl, guard, lookup, !proxied);
     const fetchImpl =
       injectedFetch ??

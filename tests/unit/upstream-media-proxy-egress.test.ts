@@ -189,6 +189,40 @@ describe("upstream media downloads on a proxied connection", () => {
     }
   });
 
+  test("a proxy context with no host is a direct route, so it keeps the pin", async () => {
+    fakeDns({ "media.empty-context.test": "203.0.113.9" });
+    const forward = globalThis.fetch;
+    let unpinnedFetches = 0;
+    globalThis.fetch = (async () => {
+      unpinnedFetches++;
+      return new Response("unpinned", { status: 200 });
+    }) as typeof fetch;
+    try {
+      // Same shape as the NO_PROXY case: only the pinned connection fails.
+      await assert.rejects(
+        runWithProxyContext({}, () =>
+          downloadUpstreamMedia("https://media.empty-context.test/result.png", {
+            maxBytes: 1024,
+            timeoutMs: 300,
+          })
+        )
+      );
+      assert.equal(unpinnedFetches, 0);
+    } finally {
+      globalThis.fetch = forward;
+    }
+  });
+
+  test("a proxy context with no host refuses a host the local DNS cannot resolve", async () => {
+    fakeDns({ "media.empty-context.test": null });
+    await assert.rejects(
+      runWithProxyContext({}, () =>
+        downloadUpstreamMedia("https://media.empty-context.test/result.png", LIMITS)
+      ),
+      /could not be resolved \(blocked\)/
+    );
+  });
+
   test("the AI Horde R2 download leaves through the proxied fetch", async () => {
     aiHordeImageCatalog.replace([
       { name: "FLUX.1-schnell", count: 3, queued: 0, eta: 1, performance: 1, jobs: 0 },
