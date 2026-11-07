@@ -2,7 +2,10 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import { parseAutoConfig } from "@omniroute/open-sse/services/combo/autoConfig.ts";
-import { DEFAULT_WEIGHTS, normalizeScoringWeights } from "@omniroute/open-sse/services/autoCombo/scoring.ts";
+import {
+  DEFAULT_WEIGHTS,
+  normalizeScoringWeights,
+} from "@omniroute/open-sse/services/autoCombo/scoring.ts";
 import { MODE_PACKS } from "@omniroute/open-sse/services/autoCombo/modePacks.ts";
 
 // Split guard for Block J Task 2: parseAutoConfig was extracted verbatim from
@@ -106,4 +109,32 @@ test("non-finite explorationRate falls back to 0.05", () => {
     []
   );
   assert.equal(cfg.explorationRate, 0.05);
+});
+
+test("decisionModel config is normalized, and absent or non-object blocks are dropped", () => {
+  const cfg = parseAutoConfig(
+    {
+      name: "c",
+      autoConfig: {
+        decisionModel: { baseUrl: " https://decision.invalid ", model: 7, timeoutMs: "900" },
+      },
+    } as never,
+    []
+  );
+  assert.deepEqual(cfg.decisionModelConfig, {
+    apiKey: undefined,
+    baseUrl: "https://decision.invalid",
+    model: undefined,
+    timeoutMs: 900,
+    descriptions: undefined,
+  });
+  assert.equal(
+    parseAutoConfig({ name: "c", config: {} } as never, []).decisionModelConfig,
+    undefined
+  );
+  assert.equal(
+    parseAutoConfig({ name: "c", autoConfig: { decisionModel: "x" } } as never, [])
+      .decisionModelConfig,
+    undefined
+  );
 });

@@ -10,6 +10,7 @@ import { DEFAULT_WEIGHTS } from "@omniroute/open-sse/services/autoCombo/scoring.
 import { buildComplexityRoutingHint } from "@omniroute/open-sse/services/autoCombo/complexityRouter.ts";
 import { setTierConfig } from "@omniroute/open-sse/services/tierResolver.ts";
 import { resetDbInstance } from "@/lib/db/core.ts";
+import { registerStrategy } from "@omniroute/open-sse/services/autoCombo/routerStrategy.ts";
 
 // resolveAutoStrategyOrder loads the LKGP via the DB singleton (dynamic import);
 // release the handle so the node:test runner does not hang on teardown (learning #3).
@@ -60,6 +61,63 @@ const baseDeps = (buildAutoCandidates: never) =>
 
 test("exports resolveAutoStrategyOrder", () => {
   assert.equal(typeof resolveAutoStrategyOrder, "function");
+});
+
+test("resolveAutoStrategyOrder forwards DecisionModel config into explicit router context", async () => {
+  let receivedContext: Record<string, unknown> | undefined;
+  registerStrategy("decision-config-forwarding-regression", {
+    name: "decision-config-forwarding-regression",
+    description: "captures routing context for a forwarding regression",
+    select: (_pool, context) => {
+      receivedContext = context as unknown as Record<string, unknown>;
+      return {
+        provider: "openai",
+        model: "gpt-4o",
+        connectionId: "account-a",
+        strategy: "decision-config-forwarding-regression",
+        reason: "captured",
+        candidatesConsidered: 1,
+        finalScore: 1,
+      };
+    },
+  });
+  const decisionModel = {
+    baseUrl: "https://decision.invalid/proxy",
+    model: "decision-alias",
+    apiKey: "secret-key",
+    timeoutMs: 750,
+    descriptions: { "gpt-4o": "General-purpose model" },
+  };
+  const deps = baseDeps((async () => [
+    {
+      kind: "model",
+      stepId: "s1",
+      executionKey: "openai>gpt-4o@account-a",
+      modelStr: "gpt-4o",
+      provider: "openai",
+      model: "gpt-4o",
+      connectionId: "account-a",
+      quotaRemaining: 100,
+      quotaTotal: 100,
+      circuitBreakerState: "CLOSED",
+      costPer1MTokens: 1,
+      p95LatencyMs: 100,
+      latencyStdDev: 10,
+      errorRate: 0,
+    },
+  ]) as never);
+  deps.orderedTargets = [target("openai", "gpt-4o")];
+  deps.combo.autoConfig = {
+    routerStrategy: "decision-config-forwarding-regression",
+    decisionModel,
+    candidatePool: ["openai"],
+    explorationRate: 0,
+  };
+
+  const result = await resolveAutoStrategyOrder(deps);
+  assert.ok("orderedTargets" in result);
+  assert.equal(result.autoUsedExplicitRouter, true);
+  assert.deepEqual(receivedContext?.decisionModel, decisionModel);
 });
 
 test("no candidates -> keeps default ordering, no explicit router", async () => {

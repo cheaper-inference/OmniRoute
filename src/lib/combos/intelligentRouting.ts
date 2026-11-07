@@ -89,6 +89,8 @@ export const ROUTER_STRATEGY_OPTIONS = [
   { id: "sla-aware", label: "SLA-aware" },
   { id: "lkgp", label: "Last Known Good Provider" },
   { id: "nadir", label: "Nadir (route by prompt complexity)" },
+  { id: "decision-openai", label: "OpenAI-format Decision API" },
+  { id: "decision-systemone", label: "System One Decision API" },
 ] as const;
 
 export const FACTOR_LABELS: Record<keyof IntelligentRoutingWeights, string> = {
