@@ -15,14 +15,19 @@ Thank you for your interest in contributing! This guide covers everything you ne
 - **Node.js** `>=22.22.2 <23`, o `>=24.0.0 <27` (recomendado: 24 LTS)
 - **npm** 10+
 
-> **Usuarios de npm v11+ (Node 24+):** Después de ejecutar `npm install`, verifica que los módulos nativos se hayan instalado:
+> **Windows con Node 24:** usa la versión de parche actual de 24 LTS (al menos 24.20.0).
+> Las versiones anteriores pueden abortar después de pruebas exitosas cuando `--test-force-exit` cierra el
+> proceso. La [corrección de Windows para libuv de Node](https://github.com/nodejs/node/pull/61999) soluciona
+> este bloqueo del tiempo de ejecución; mantén habilitadas las aserciones de prueba y las comprobaciones de salida del ejecutor.
+
+> **Usuarios de npm v11+ (Node 24+):** Después de `npm install`, verifica que se instalaron los módulos nativos:
 > `node -e "require('better-sqlite3')"`. Si falla con `MODULE_NOT_FOUND`,
 > ejecuta `npm approve-scripts better-sqlite3 && npm install`. Consulta
 > [Solución de problemas](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Clonación e instalación
+### Clonar e instalar
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -33,7 +38,7 @@ npm install
 ### Variables de entorno
 
 ```bash
-# Crea tu archivo .env a partir de la plantilla
+# Crea tu .env a partir de la plantilla
 cp .env.example .env
 
 # Genera los secretos necesarios
@@ -43,24 +48,24 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 Variables clave para el desarrollo:
 
-| Variable               | Valor predeterminado de desarrollo | Descripción                                |
-| ---------------------- | ---------------------------------- | ------------------------------------------ |
-| `PORT`                 | `20128`                            | Puerto del servidor                        |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`           | URL base para el frontend                  |
-| `JWT_SECRET`           | (generar como se indica arriba)    | Secreto para la firma de JWT               |
-| `INITIAL_PASSWORD`     | `CHANGEME`                         | Contraseña para el primer inicio de sesión |
-| `APP_LOG_LEVEL`        | `info`                             | Nivel de detalle de los registros          |
+| Variable               | Valor predeterminado de desarrollo | Descripción                  |
+| ---------------------- | ---------------------------------- | ---------------------------- |
+| `PORT`                 | `20128`                            | Puerto del servidor          |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`           | URL base del frontend        |
+| `JWT_SECRET`           | (genera arriba)                    | Secreto de firma de JWT      |
+| `INITIAL_PASSWORD`     | `CHANGEME`                         | Contraseña del primer inicio |
+| `APP_LOG_LEVEL`        | `info`                             | Nivel de detalle de los logs |
 
 ### Configuración del panel
 
-El panel proporciona controles de interfaz para funciones que también pueden configurarse mediante variables de entorno:
+El panel proporciona interruptores de UI para funciones que también pueden configurarse mediante variables de entorno:
 
-| Ubicación de la configuración | Control                         | Descripción                                              |
-| ----------------------------- | ------------------------------- | -------------------------------------------------------- |
-| Configuración → Avanzado      | Modo de depuración              | Habilita los registros de solicitudes de depuración (IU) |
-| Configuración → General       | Visibilidad de la barra lateral | Muestra/oculta secciones de la barra lateral             |
+| Ubicación de la configuración | Interruptor                     | Descripción                                      |
+| ----------------------------- | ------------------------------- | ------------------------------------------------ |
+| Settings → Advanced           | Modo de depuración              | Habilitar logs de solicitudes de depuración (UI) |
+| Settings → General            | Visibilidad de la barra lateral | Mostrar/ocultar secciones de la barra lateral    |
 
-Esta configuración se almacena en la base de datos y se conserva entre reinicios, reemplazando los valores predeterminados de las variables de entorno cuando se establece.
+Esta configuración se almacena en la base de datos y persiste entre reinicios, sustituyendo los valores predeterminados de las variables de entorno cuando se establece.
 
 ### Ejecución local
 
@@ -68,54 +73,54 @@ Esta configuración se almacena en la base de datos y se conserva entre reinicio
 # Modo de desarrollo (recarga en caliente)
 npm run dev
 
-# Compilación para producción
+# Compilación de producción
 npm run build    # next build → .build/next/ y luego assembleStandalone → dist/
 npm run start
 
 # Compilación rápida únicamente del backend/API para cambios de colaboradores
 npm run build:contributor
 
-# Compilación de versión (recompilación limpia + centinela HEAD — necesaria para el despliegue)
-npm run build:release   # rm -rf .build dist && build + escribe dist/BUILD_SHA
+# Compilación de lanzamiento (recompilación limpia + sentinel HEAD — requerida para el despliegue)
+npm run build:release   # rm -rf .build dist y luego build + escribe dist/BUILD_SHA
 
-# Configuración habitual del puerto
+# Configuración de puerto habitual
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-La compilación para colaboradores realiza una validación exclusivamente de compilación: no ensambla la
-distribución independiente ni compila recursos opcionales de empaquetado nativo. Utiliza la compilación normal para producción cuando
-necesites validar el paquete distribuible.
+La compilación para colaboradores realiza una validación únicamente de compilación: no ensambla la
+distribución independiente ni compila recursos opcionales de empaquetado nativo. Usa la compilación de producción
+normal cuando necesites validar el paquete listo para distribuir.
 
-### Estructura de la salida de compilación
+### Diseño de la salida de compilación
 
-| Directorio | Contenido                                                                                 | Rastreado |
-| ---------- | ----------------------------------------------------------------------------------------- | --------- |
-| `src/`     | Código fuente de la aplicación (TypeScript / TSX)                                         | Sí        |
-| `.build/`  | Archivos intermedios — salida de `next build` (ignorada por Git, `distDir = .build/next`) | No        |
-| `dist/`    | Paquete distribuible — ensamblado por `assembleStandalone` (ignorado por Git)             | No        |
+| Directorio | Contenido                                                                             | Seguimiento |
+| ---------- | ------------------------------------------------------------------------------------- | ----------- |
+| `src/`     | Código fuente de la aplicación (TypeScript / TSX)                                     | Sí          |
+| `.build/`  | Intermedios: salida de `next build` (ignorado por git, `distDir = .build/next`)       | No          |
+| `dist/`    | Paquete listo para distribuir: ensamblado por `assembleStandalone` (ignorado por git) | No          |
 
-La canalización de compilación consta de una sola pasada:
+El flujo de compilación es de una sola pasada:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (salida de Next.js)
-  └─ assembleStandalone()                 (copia el paquete independiente + archivos estáticos + públicos + recursos nativos)
+  └─ assembleStandalone()                 (copia standalone + static + public + recursos nativos)
        └─ salida: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` también limpia primero ambos directorios y escribe
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) como centinela de integridad del despliegue.
+`npm run build:release` además limpia ambos directorios primero y escribe
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) como indicador de integridad del despliegue.
 
-`npm run build:contributor` utiliza el perfil de compilación exclusivo del backend. Sustituye temporalmente por stubs
-los archivos de la interfaz del panel durante la compilación, conserva los controladores de rutas de la API y restaura los archivos originales
-después de la compilación. Utiliza `npm run build` para cambios que afecten a la interfaz del panel o para una validación
-completa de la versión; el perfil para colaboradores no sustituye a la compilación de versión.
+`npm run build:contributor` utiliza el perfil de compilación exclusivo del backend. Sustituye temporalmente los
+archivos de la UI del panel mientras compila, conserva los controladores de rutas de la API y restaura los archivos
+originales después de la compilación. Usa `npm run build` para cambios que afecten a la UI del panel o para una
+validación completa del lanzamiento; el perfil para colaboradores no sustituye a la compilación de lanzamiento.
 
-> **Nota sobre el despliegue en VPS:** el directorio remoto de la imagen `/usr/lib/node_modules/omniroute/app/`
+> **Nota sobre el despliegue en VPS:** el directorio de imágenes remoto `/usr/lib/node_modules/omniroute/app/`
 > no cambia. Las herramientas de despliegue sincronizan mediante rsync el contenido de `dist/` en él.
-> Solo se ha movido la ruta de salida de compilación dentro del repositorio (`app/` → `dist/`).
+> Solo cambió la ruta de salida de compilación dentro del repositorio (`app/` → `dist/`).
 
-URL predeterminadas:
+URLs predeterminadas:
 
 - **Panel**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`

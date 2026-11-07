@@ -1,0 +1,1 @@
+- **fix(claude):** apply first-party Anthropic passthrough hygiene and body constraints to `provider === "anthropic"` alongside `provider === "claude"` ([#19245](https://github.com/cheaper-inference/OmniRoute/pull/19245), closes [#19242](https://github.com/cheaper-inference/OmniRoute/issues/19242))

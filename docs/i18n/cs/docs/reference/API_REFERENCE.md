@@ -6,10 +6,12 @@
 
 🌐 **Jazyky:** 🇺🇸 [English](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
 
-Základní reference k API OmniRoute. Pokrývá veřejné rozhraní `/v1` a nejčastěji používané koncové body pro správu; strojově čitelný soubor [`docs/openapi.yaml`](../openapi.yaml) a strom tras v `src/app/api/` jsou vyčerpávajícími zdroji.
+Základní reference pro API OmniRoute. Pokrývá veřejné rozhraní `/v1` a nejčastěji používané koncové body pro správu; strojově čitelný soubor [`docs/openapi.yaml`](../openapi.yaml) a strom tras v `src/app/api/` jsou vyčerpávajícími zdroji.
 
-Přehled zaměřený na protokol kompatibilní s OpenAI a matici schopností poskytovatelů najdete v souboru
+Přehled specializovaný na protokol kompatibilní s OpenAI a matici schopností poskytovatelů najdete v souboru
 [`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md).
+
+Každé nasazení poskytuje vlastní kopii specifikace na adrese `/openapi.yaml`, vygenerovanou během sestavení ze souboru `docs/openapi.yaml`. Obsahuje verzi sestavení a relativní URL serveru (`./`), takže požadavky zůstávají na hostiteli, který dokument poskytl. Nástroj, který importuje stažený soubor, žádného takového hostitele nemá a základní URL je třeba nastavit ručně.
 
 ---
 
@@ -1597,7 +1599,9 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Přepisujte zvukové soubory pomocí libovolného nakonfigurovaného poskytovatele STT. První segment cesty určuje nativního poskytovatele (`openai/…`, `deepgram/…`). Brány, které znovu poskytují model jiného dodavatele, používají kvalifikovaný identifikátor
+Přepisujte zvukové soubory pomocí libovolného nakonfigurovaného poskytovatele STT. První segment cesty
+vybírá nativního poskytovatele (`openai/…`, `deepgram/…`). Brány, které znovu
+zpřístupňují model jiného dodavatele, používají kvalifikované ID
 (`openrouter/deepgram/nova-3`).
 
 **Požadavek:**
@@ -1620,12 +1624,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**Příklady identifikátorů modelů:** `openai/whisper-1` (vyžaduje klíč OpenAI),
+**Příklad ID modelů:** `openai/whisper-1` (vyžaduje klíč OpenAI),
 `openrouter/deepgram/nova-3` (vyžaduje klíč OpenRouter),
-`deepgram/nova-3` (vyžaduje nativní klíč Deepgram). Požadavek na
-`deepgram/nova-3` bez předpony **nepoužívá OpenRouter**.
+`deepgram/nova-3` (vyžaduje nativní klíč Deepgram). Samostatný
+požadavek `deepgram/nova-3` **nepoužívá OpenRouter**.
 
 **Podporované formáty:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** přepis souborů přes WebSocket
+Gemini Live (vyžaduje klíč API Gemini). Nahraný soubor se pomocí `ffmpeg`
+(příkaz musí být v `PATH`, pokud soubor již není ve formátu WAV s 16kHz mono PCM) převede
+na 16kHz mono PCM, odešle do relace a výsledný text se vrátí jako `{ "text": "..." }`. Volitelná pole formuláře
+`language` a `prompt` se předávají dál. Omezení: při nahrání větším než 25 MiB nebo při dekódovaném zvuku delším než 10 minut se vrací
+`413`; převod, který trvá déle než 60 s, se ukončí a vrátí `504`. Klíč API se odesílá
+pouze v hlavičce `x-goog-api-key`, nikdy v URL WebSocketu.
 
 ---
 

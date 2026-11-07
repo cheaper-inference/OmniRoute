@@ -232,7 +232,10 @@ export async function handlePipelineChat({
       return errorResponse(status, `Pipeline step ${i + 1} (${stepModel}) failed`);
     }
     try {
-      const json = await res.clone().json();
+      // Intermediate responses are internal-only. Parse the original stream
+      // directly: cloning tees the body and leaves the other branch unread,
+      // retaining a queued copy of long model output.
+      const json = await res.json();
       prevOutput = extractPanelText(json);
     } catch {
       log.warn("PIPELINE", `Step ${i + 1} (${stepModel}) returned an unparseable body`);

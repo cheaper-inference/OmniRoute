@@ -54,7 +54,7 @@ test("mixed combo (vision head + text-only tail), describe fails", async () => {
     strategy: "priority",
     models: [
       { providerId: "command-code", model: "gpt-5.5", weight: 1 },
-      { providerId: "mistral", model: "mistral-large-latest", weight: 1 },
+      { providerId: "mistral", model: "codestral-latest", weight: 1 },
     ],
   });
   const decision = await getComboVisionBridgeDecision("mixed-18008");
@@ -94,7 +94,7 @@ test("combo dispatch already filters text-only targets for a raw image body (why
     combo: {
       name: "mixed-18008",
       strategy: "priority",
-      models: ["command-code/gpt-5.5", "mistral/mistral-large-latest"],
+      models: ["command-code/gpt-5.5", "mistral/codestral-latest"],
       config: { maxRetries: 0 },
     },
     handleSingleModel: async (_b: unknown, modelStr: string) => {

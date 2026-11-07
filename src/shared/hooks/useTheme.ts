@@ -23,7 +23,7 @@ function getServerSnapshot() {
 }
 
 export function useTheme() {
-  const { theme, setTheme, toggleTheme, initTheme } = useThemeStore();
+  const { theme, setTheme, toggleTheme, initTheme, palette, setPalette } = useThemeStore();
 
   // Use useSyncExternalStore to safely subscribe to system theme
   const systemPrefersDark = useSyncExternalStore(
@@ -55,5 +55,8 @@ export function useTheme() {
     setTheme,
     toggleTheme,
     isDark,
+    /** Colour palette: "editions" (default, the kit's Editions look) or "classic" (lime). */
+    palette,
+    setPalette,
   };
 }
