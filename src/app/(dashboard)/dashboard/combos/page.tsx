@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 
 import {
   useState,
@@ -123,6 +124,12 @@ import {
   normalizeIntelligentRoutingConfig,
 } from "@/lib/combos/intelligentRouting";
 import { getComboStepTarget } from "@/lib/combos/steps";
+import {
+  findComboStepConnectionLabel,
+  formatComboStepAccountLabel,
+  resolveComboStepAccountState,
+  resolveLiveConnectionIds,
+} from "@/lib/combos/stepAccountState";
 import { DEAD_COMBO_CONFIG_KEYS } from "@/lib/combos/deadConfigKeys";
 import { modelFamily } from "@/lib/combos/invariants";
 import { resolveProviderAlias } from "@omniroute/open-sse/services/providerAlias.ts";
@@ -130,6 +137,7 @@ import { resolveServerErrorMessage } from "@/lib/api/serverErrorMessage";
 import { useTranslations } from "next-intl";
 import { cn } from "@/shared/utils/cn";
 import { strategyBadgeClass } from "./strategyPalette";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 
 const ModelSelectModal = dynamic(() => import("@/shared/components/ModelSelectModal"), {
   ssr: false,
@@ -764,6 +772,44 @@ function findBuilderProviderByIdentifier(builderProviders, providerIdentifier) {
   );
 }
 
+/**
+ * Connection ids this provider currently has. Unknown until the builder payload
+ * has loaded; after that, an absent provider means it has no connections left.
+ */
+function listProviderConnectionIds(builderProviders, builderProvider) {
+  return resolveLiveConnectionIds({
+    providersLoaded: Array.isArray(builderProviders) && builderProviders.length > 0,
+    providerConnections: builderProvider?.connections,
+  });
+}
+
+/**
+ * `prefix · <account state>` for a step, or null when the step pins nothing and
+ * its scope is not dead (the caller keeps its own "dynamic account" wording).
+ * Shared by the model and provider-wildcard branches so the two never drift.
+ */
+function formatComboStepWithAccount(
+  prefix,
+  step,
+  { builderProviders, builderProvider, showFullEmails }
+) {
+  const connectionId = step.connectionId || null;
+  const liveConnectionIds = listProviderConnectionIds(builderProviders, builderProvider);
+  const rawConnectionLabel =
+    findComboStepConnectionLabel(builderProvider?.connections, connectionId) || step.label || null;
+  const connectionLabel = rawConnectionLabel
+    ? pickDisplayValue([rawConnectionLabel], showFullEmails, rawConnectionLabel)
+    : null;
+
+  const accountState = resolveComboStepAccountState(step, liveConnectionIds);
+  if (!connectionId && accountState !== "unroutable") return null;
+
+  return `${prefix} · ${formatComboStepAccountLabel(accountState, {
+    connectionId,
+    connectionLabel,
+  })}`;
+}
+
 function deriveCandidatePoolFromModels(models) {
   const providerIds = new Set<string>();
 
@@ -814,22 +860,13 @@ function formatComboEntryDisplay(
       return wildcardLabel;
     }
 
-    const connectionId = normalizedEntry.connectionId || null;
-    const rawConnectionLabel =
-      (connectionId &&
-        builderProvider?.connections?.find((connection) => connection.id === connectionId)
-          ?.label) ||
-      normalizedEntry.label ||
-      null;
-    const connectionLabel = rawConnectionLabel
-      ? pickDisplayValue([rawConnectionLabel], showFullEmails, rawConnectionLabel)
-      : null;
+    const withAccount = formatComboStepWithAccount(wildcardLabel, normalizedEntry, {
+      builderProviders,
+      builderProvider,
+      showFullEmails,
+    });
 
-    if (connectionId) {
-      return `${wildcardLabel} · ${connectionLabel || `acct ${connectionId.slice(0, 8)}`}`;
-    }
-
-    return `${wildcardLabel} · dynamic account`;
+    return withAccount ?? `${wildcardLabel} · dynamic account`;
   }
 
   const parsed = parseQualifiedModel(normalizedEntry.model);
@@ -846,19 +883,16 @@ function formatComboEntryDisplay(
     return `${providerLabel}/${modelLabel}`;
   }
 
-  const connectionId = normalizedEntry.connectionId || null;
-  const rawConnectionLabel =
-    (connectionId &&
-      builderProvider?.connections?.find((connection) => connection.id === connectionId)?.label) ||
-    normalizedEntry.label ||
-    null;
-  const connectionLabel = rawConnectionLabel
-    ? pickDisplayValue([rawConnectionLabel], showFullEmails, rawConnectionLabel)
-    : null;
-
-  if (connectionId) {
-    return `${providerLabel}/${modelLabel} · ${connectionLabel || `acct ${connectionId.slice(0, 8)}`}`;
-  }
+  const withAccount = formatComboStepWithAccount(
+    `${providerLabel}/${modelLabel}`,
+    normalizedEntry,
+    {
+      builderProviders,
+      builderProvider,
+      showFullEmails,
+    }
+  );
+  if (withAccount) return withAccount;
 
   if (normalizedEntry.providerId || builderProvider) {
     return `${providerLabel}/${modelLabel} · dynamic account`;
@@ -883,6 +917,7 @@ function CombosPageContent() {
   const [testingCombo, setTestingCombo] = useState(null);
   const { copied, copy } = useCopyToClipboard();
   const notify = useNotificationStore();
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   const [proxyTargetCombo, setProxyTargetCombo] = useState(null);
   const [proxyConfig, setProxyConfig] = useState(null);
   const { comboProxyAssignedIds, fetchComboProxyAssignments } = useComboProxyAssignments();
@@ -1057,7 +1092,7 @@ function CombosPageContent() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm(t("deleteConfirm"))) return;
+    if (!(await requestConfirm(t("deleteConfirm")))) return;
     try {
       const res = await fetch(`/api/combos/${id}`, { method: "DELETE" });
       if (res.ok) {
@@ -1130,6 +1165,7 @@ function CombosPageContent() {
         setTestingCombo(null);
       },
       notify,
+      requestConfirm,
       t,
     });
 
@@ -1568,6 +1604,7 @@ function CombosPageContent() {
           levelLabel={proxyTargetCombo.name}
         />
       )}
+      {confirmDialog}
     </div>
   );
 }
@@ -2044,7 +2081,7 @@ function ComboCardInner({
               <ComboCompressionModeSelect
                 combo={combo}
                 title={t("compressionOverride")}
-                className="text-xs py-1 px-2 rounded border border-border bg-surface text-text-main focus:border-primary focus:outline-none transition-colors disabled:opacity-50 max-w-[130px] md:max-w-none"
+                className="text-xs max-w-[130px] md:max-w-none"
               />
             )}
             <Link
@@ -2070,11 +2107,7 @@ function ComboCardInner({
               title={t("testCombo")}
               aria-label={t("testCombo")}
             >
-              <Icon
-                name={testing ? "progress_activity" : "play_arrow"}
-                size={16}
-                className={cn(testing && "animate-spin")}
-              />
+              {testing ? <Spinner decorative size="sm" /> : <Icon name="play_arrow" size={16} />}
             </Button>
             <Button
               variant="ghost"
@@ -3761,7 +3794,7 @@ function ComboFormModal({
                 {builderSelectionMode === "step" && (
                   <>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3">
-                      {/* Native-mode Select adapter (`ci-select-native`): long dynamic lists, and
+                      {/* Native-mode Select adapter (kit NativeSelect): long dynamic lists, and
                           the builder e2e specs drive these three with selectOption(). */}
                       <Select
                         label={`1. ${getI18nOrFallback(t, "builderProvider", "Provider")}`}

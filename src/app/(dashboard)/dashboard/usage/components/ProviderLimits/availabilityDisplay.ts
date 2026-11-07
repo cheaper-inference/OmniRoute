@@ -11,6 +11,11 @@ export interface DisplayAccount extends HealthAccount {
   poolId?: string;
 }
 export const DISPLAY_KINDS: DisplayKind[] = ["ok", "cd5", "cdw", "act", "paused", "empty"];
+/** Kinds that mean "quota exhausted, waiting for the window to reopen".
+ *  Single source of truth: compare through this instead of `kind === "cd5"`. */
+export function isCooldownKind(kind: DisplayKind): boolean {
+  return kind === "cd5" || kind === "cdw";
+}
 export const DISPLAY_COLORS: Record<DisplayKind, string> = {
   ok: "var(--color-success)",
   cd5: "var(--color-warning)",
@@ -186,7 +191,7 @@ function displayFill(
   waitDuration: number
 ) {
   if (kind === "ok") return remainingPct;
-  if (kind !== "cd5" && kind !== "cdw") return null;
+  if (!isCooldownKind(kind)) return null;
   return waitMs === null ? 0 : Math.max(0, Math.min(100, (1 - waitMs / waitDuration) * 100));
 }
 function project(account: HealthAccount, now: number, poolId?: string): DisplayAccount {
