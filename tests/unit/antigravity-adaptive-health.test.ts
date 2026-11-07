@@ -178,3 +178,19 @@ test("stream wrapper preserves provider-probe and empty-turn response policies",
   await wrapped.text();
   assert.equal(tracker.snapshot("policy")[0].samples, 1);
 });
+
+test("an idle recovery stream releases its probe without inventing a success", async () => {
+  let now = 1000;
+  const tracker = new AntigravityHealthTracker(() => now);
+  timeoutRun(tracker);
+  now += 30_001;
+  const probe = tracker.begin("a", MODEL);
+  assert.ok(probe?.probe);
+  const upstream = new Response(new ReadableStream<Uint8Array>());
+  const wrapped = holdAntigravityHealthThroughResponse(upstream, probe!, 25);
+  await assert.rejects(wrapped.text(), /recovery probe stream idle timeout/);
+  const state = tracker.snapshot("a")[0];
+  assert.equal(state.inflight, 0);
+  assert.notEqual(state.state, "probing");
+  assert.equal(state.recoverySuccesses, 0);
+});
