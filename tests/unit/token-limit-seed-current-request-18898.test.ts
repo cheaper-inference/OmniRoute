@@ -1,4 +1,4 @@
-import test from "node:test";
+import test, { mock } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
@@ -19,11 +19,20 @@ const flush = async () => {
   for (let i = 0; i < 5; i++) await new Promise((r) => setImmediate(r));
 };
 
+// Daily windows start at 00:00 UTC. A fixed mid-window clock keeps every timestamp below
+// in one window, whatever time the suite runs at.
+const MID_WINDOW = Date.UTC(2026, 5, 15, 12, 0, 0);
+
 test.beforeEach(() => {
+  mock.timers.enable({ apis: ["Date"], now: MID_WINDOW });
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
   counter.clearTokenLimitCache();
+});
+
+test.afterEach(() => {
+  mock.timers.reset();
 });
 
 test.after(() => {
