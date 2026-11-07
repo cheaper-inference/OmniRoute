@@ -48,6 +48,27 @@ export function assignQuotaScrapingProviderData(
   values: QuotaScrapingFieldValues,
   target: Record<string, unknown>
 ) {
+  if (provider === "zed-hosted") {
+    assignZedHostedBillingPortalUrl(values, target);
+    return;
+  }
+  assignConsoleSessionProviderData(provider, values, target);
+}
+
+function assignZedHostedBillingPortalUrl(
+  values: QuotaScrapingFieldValues,
+  target: Record<string, unknown>
+) {
+  // Empty/absent leaves the stored link alone on the edit round-trip.
+  const link = values.billingPortalUrl?.trim();
+  if (link) target.billingPortalUrl = link;
+}
+
+function assignConsoleSessionProviderData(
+  provider: string | undefined,
+  values: QuotaScrapingFieldValues,
+  target: Record<string, unknown>
+) {
   if (provider === "ollama-cloud" && values.ollamaCloudUsageCookie.trim()) {
     target.ollamaCloudUsageCookie = values.ollamaCloudUsageCookie.trim();
   } else if (
@@ -72,8 +93,5 @@ export function assignQuotaScrapingProviderData(
     // Optional access: callers may pass a partial form object without the newer
     // fields (same contract as the qwen branch above).
     target.xiaomiMimoConsoleCookie = values.xiaomiMimoConsoleCookie.trim();
-  } else if (provider === "zed-hosted" && values.billingPortalUrl?.trim()) {
-    // Empty/absent leaves the stored link alone on the edit round-trip.
-    target.billingPortalUrl = values.billingPortalUrl.trim();
   }
 }

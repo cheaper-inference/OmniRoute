@@ -155,18 +155,18 @@ function readCached(key: string | null): unknown {
   return entry.value;
 }
 
-function buildMonthlyQuota(ledger: Record<string, unknown>): UsageQuota | null {
+/** Future periods carry a null balance; the current period is the first block whose balance is a real number. */
+function findCurrentCreditBlock(ledger: Record<string, unknown>): Record<string, unknown> | null {
   const blocks = Array.isArray(ledger.credit_blocks) ? ledger.credit_blocks : [];
-  // Future periods carry a null balance; the current period is the first block
-  // whose balance is a real number.
-  let current: Record<string, unknown> | null = null;
   for (const raw of blocks) {
     const block = toRecord(raw);
-    if (block.balance === null || block.balance === undefined) continue;
-    if (readFiniteNumber(block.balance) === null) continue;
-    current = block;
-    break;
+    if (readFiniteNumber(block.balance) !== null) return block;
   }
+  return null;
+}
+
+function buildMonthlyQuota(ledger: Record<string, unknown>): UsageQuota | null {
+  const current = findCurrentCreditBlock(ledger);
   if (!current) return null;
 
   const rawTotal = readFiniteNumber(current.maximum_initial_balance);
