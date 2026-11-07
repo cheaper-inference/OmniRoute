@@ -44,6 +44,7 @@
       "tests/unit/qoder-model-scoped-throttle.test.ts",
       "tests/unit/vision-bridge-model-lockout-18268.test.ts",
       "tests/unit/antigravity-headers-budget.test.ts",
+      "tests/unit/internal-upstream-start-timeout.test.ts",
       "tests/unit/log-truncation-image-ref.test.ts",
       "tests/unit/provider-safety-refusal-not-a-ban.test.ts",
       "tests/unit/codex-dual-toggle-policy-18330.test.ts",
