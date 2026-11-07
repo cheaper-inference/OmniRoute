@@ -19,6 +19,7 @@ import {
   markLocalModelPolicyResponse,
 } from "@/shared/utils/resolvedModelAccess";
 import {
+  isComboNamedForKey,
   isExplicitlyAllowedComboForKey,
   type ComboTargetKeyPolicyInfo,
 } from "./comboTargetKeyPolicy.ts";
@@ -35,8 +36,9 @@ export function resolveAuthorizationContextModel(
 
 /**
  * An explicitly allowed stored combo authorizes its own target past the
- * allow-list (#14197); blockedModels still applies to it. Any other model a
- * connection/reasoning override swaps in gets the full check.
+ * allow-list (#14197); blockedModels still applies unless the key names the
+ * combo. Any other model a connection/reasoning override swaps in gets the full
+ * check.
  */
 export function comboGrantedTargetSet(
   comboGrantsTargets: boolean | undefined,
@@ -101,7 +103,7 @@ async function blockedModelForms(resolvedModel: string): Promise<string[]> {
   return [...forms];
 }
 
-/** A combo-granted target skips the allow-list, never the key's blockedModels. */
+/** A combo-granted target skips the allow-list; the gate passes the blockedModels that apply. */
 async function grantedTargetPermission(
   blockedModels: string[] | null | undefined,
   resolvedModel: string
@@ -158,8 +160,8 @@ export function comboAuthorizationOptions(
 ): { authorizationContextModel: string; comboGrantsTargets: boolean } {
   return {
     // The preflight admits the originally requested combo or alias. Targets of
-    // a non-granted combo get the full per-target check; granted ones are
-    // still checked against blockedModels.
+    // a non-granted combo get the full per-target check; granted ones are still
+    // checked against blockedModels unless the key names the combo.
     authorizationContextModel: requestedModelStr,
     // #14197: a stored combo named in allowedCombos grants its own targets.
     comboGrantsTargets: isExplicitlyAllowedComboForKey(apiKeyInfo, requestedModelStr),
@@ -183,8 +185,11 @@ async function resolveGateApiKey(request: Request | null | undefined): Promise<s
   }
 }
 
-function blockedModelsOf(apiKeyInfo: unknown): string[] | null {
-  const blocked = (apiKeyInfo as { blockedModels?: unknown } | null | undefined)?.blockedModels;
+/** The blockedModels a granted target answers to: none when the key names the combo. */
+function grantedBlockedModels(apiKeyInfo: unknown, requestedModel: string): string[] | null {
+  const info = apiKeyInfo as ComboTargetKeyPolicyInfo | null | undefined;
+  if (isComboNamedForKey(info, requestedModel)) return null;
+  const blocked: unknown = info?.blockedModels;
   return Array.isArray(blocked) ? blocked.filter((p): p is string => typeof p === "string") : null;
 }
 
@@ -200,16 +205,17 @@ export function createResolvedModelGate(opts: {
 }): (resolvedModels: Iterable<string>) => Promise<Response | null> {
   const hasApiKeyMetadata = Boolean(opts.apiKeyInfo);
   let apiKey: Promise<string | null> | undefined;
+  const requestedModel = resolveAuthorizationContextModel(opts.contextModel, opts.modelStr);
   const base = {
     hasApiKeyMetadata,
-    requestedModel: resolveAuthorizationContextModel(opts.contextModel, opts.modelStr),
+    requestedModel,
     grantedTargets: comboGrantedTargetSet(
       opts.comboGrantsTargets,
       opts.provider,
       opts.model,
       opts.modelStr
     ),
-    blockedModels: blockedModelsOf(opts.apiKeyInfo),
+    blockedModels: grantedBlockedModels(opts.apiKeyInfo, requestedModel),
   };
   return async (resolvedModels) => {
     if (hasApiKeyMetadata) apiKey ??= resolveGateApiKey(opts.request);

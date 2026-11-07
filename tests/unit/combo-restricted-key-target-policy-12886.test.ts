@@ -241,7 +241,7 @@ test("auto/* combo still enforces per-candidate allowedModels even if auto/* is 
   assert.equal(ok, false, "auto combo candidate not in allowedModels must stay blocked per #9057");
 });
 
-test("explicit allowedCombos does not override blockedModels for inner targets", async () => {
+test("a combo named in allowedCombos overrides blockedModels for inner targets", async () => {
   const ok = await comboTargetPassesKeyModelPolicy({
     apiKey: KEY,
     apiKeyInfo: {
@@ -254,7 +254,7 @@ test("explicit allowedCombos does not override blockedModels for inner targets",
     targetModelStr: INNER,
     isModelAllowedForKey: allowListChecker(["gemini/*"]),
   });
-  assert.equal(ok, false, "blockedModels applies to the targets of an explicitly allowed combo");
+  assert.equal(ok, true, "a combo named in allowedCombos must admit its blocked target");
 });
 
 test("combo/* does not override blockedModels for stored combos", async () => {

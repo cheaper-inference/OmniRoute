@@ -1,7 +1,8 @@
 /**
- * R9-8: a stored combo granted through `allowedCombos` (including the default
- * `combo/*`) admits its inner targets past `allowedModels` (#14197), but must
- * not admit an inner target that matches the key's `blockedModels`.
+ * R9-8: a stored combo granted through `allowedCombos` admits its inner targets
+ * past `allowedModels` (#14197). Only a combo named in `allowedCombos` also
+ * overrides `blockedModels`; the default `combo/*` grant must not admit an inner
+ * target that matches the key's `blockedModels`.
  *
  * The handler cases dispatch to a loopback HTTP server through a real
  * OpenAI-compatible provider node; `globalThis.fetch` is not replaced.
@@ -67,6 +68,8 @@ const server = http.createServer((req, res) => {
     }
     upstreamModels.push(model);
     res.setHeader("content-type", "application/json");
+    // No keep-alive: a reused socket the server idles out reads as a 502 and locks the model.
+    res.setHeader("connection", "close");
     res.end(
       JSON.stringify({
         id: "chatcmpl-combo-blocked",
@@ -105,15 +108,25 @@ async function passes(apiKeyInfo: Record<string, unknown>, requested: string, ta
 
 // ── Pre-dispatch target policy ──────────────────────────────────────────────
 
-test("named allowedCombos grant does not admit a blocked inner target", async () => {
+test("named allowedCombos grant overrides blockedModels for its inner targets", async () => {
   const info = {
     modelAccessMode: "restricted",
     allowedModels: [PUBLIC],
     allowedCombos: [COMBO],
     blockedModels: [BLOCKED],
   };
-  assert.equal(await passes(info, COMBO, BLOCKED), false);
+  assert.equal(await passes(info, COMBO, BLOCKED), true);
   assert.equal(await passes(info, COMBO, PUBLIC), true, "unblocked target stays admitted");
+
+  // The `combo/` form of the rule names the combo too.
+  const prefixed = { ...info, allowedCombos: [`combo/${COMBO}`] };
+  assert.equal(await passes(prefixed, COMBO, BLOCKED), true);
+});
+
+test("naming one combo next to combo/* overrides blockedModels for that combo only", async () => {
+  const info = { allowedCombos: ["combo/*", COMBO], blockedModels: [BLOCKED] };
+  assert.equal(await passes(info, COMBO, BLOCKED), true, "named combo");
+  assert.equal(await passes(info, "other-combo", BLOCKED), false, "reached through combo/* only");
 });
 
 test("default combo/* grant does not admit a blocked inner target", async () => {
@@ -126,16 +139,14 @@ test("pre-dispatch policy applies every blockedModels entry to a granted target"
   // The matching entry sits in the middle, so a check of only the first or only the
   // last entry fails here. Media routes rely on this check alone.
   const list = ["other/unused-model", BLOCKED, "other/unused-2"];
-  for (const allowedCombos of [[COMBO], ["combo/*"]]) {
-    const info = { allowedCombos, blockedModels: list };
-    assert.equal(await passes(info, COMBO, BLOCKED), false, `${allowedCombos[0]}: middle entry`);
-    assert.equal(await passes(info, COMBO, PUBLIC), true, `${allowedCombos[0]}: unblocked target`);
-  }
+  const info = { allowedCombos: ["combo/*"], blockedModels: list };
+  assert.equal(await passes(info, COMBO, BLOCKED), false, "middle entry");
+  assert.equal(await passes(info, COMBO, PUBLIC), true, "unblocked target");
   // blockedModels also wins over an exact allowedModels entry for the same target.
   const both = {
     modelAccessMode: "restricted",
     allowedModels: [BLOCKED],
-    allowedCombos: [COMBO],
+    allowedCombos: ["combo/*"],
     blockedModels: [BLOCKED],
   };
   assert.equal(await passes(both, COMBO, BLOCKED), false);
@@ -164,7 +175,7 @@ test("auto/* combos keep per-candidate allowedModels and blockedModels checks", 
 });
 
 test("pre-dispatch policy does not admit a granted target when the blockedModels check throws", async () => {
-  const info = { allowedCombos: [COMBO], blockedModels: [{} as unknown as string] };
+  const info = { allowedCombos: ["combo/*"], blockedModels: [{} as unknown as string] };
   await assert.rejects(() => passes(info, COMBO, BLOCKED));
 });
 
@@ -205,7 +216,7 @@ test("dispatch gate rejects a combo-granted target that matches blockedModels", 
   assert.equal(admitted, null, "an unblocked granted target is still admitted");
 });
 
-test("dispatch gate built for a granted combo carries the key's blockedModels", async () => {
+test("dispatch gate built for a combo/* grant carries the key's blockedModels", async () => {
   const gate = createResolvedModelGate({
     apiKeyInfo: { allowedCombos: ["combo/*"], blockedModels: [BLOCKED] },
     request: null,
@@ -219,9 +230,9 @@ test("dispatch gate built for a granted combo carries the key's blockedModels", 
   assert.ok(rejected);
   assert.equal(rejected.status, 403);
 
-  // A combo named explicitly in allowedCombos gets the same rule at dispatch.
-  const namedGate = createResolvedModelGate({
-    apiKeyInfo: { allowedCombos: [COMBO], blockedModels: [BLOCKED] },
+  // A key that names another combo gets no override for this one.
+  const otherNameGate = createResolvedModelGate({
+    apiKeyInfo: { allowedCombos: ["combo/*", "other-combo"], blockedModels: [BLOCKED] },
     request: null,
     contextModel: COMBO,
     comboGrantsTargets: true,
@@ -229,9 +240,9 @@ test("dispatch gate built for a granted combo carries the key's blockedModels", 
     model: "secret-model",
     modelStr: BLOCKED,
   });
-  const namedRejected = await namedGate([BLOCKED]);
-  assert.ok(namedRejected, "a named grant must not skip blockedModels at dispatch");
-  assert.equal(namedRejected.status, 403);
+  const otherNameRejected = await otherNameGate([BLOCKED]);
+  assert.ok(otherNameRejected, "combo/* must not inherit another combo's named grant");
+  assert.equal(otherNameRejected.status, 403);
 
   // Every entry applies at dispatch, not only the first or the last one.
   const listGate = createResolvedModelGate({
@@ -249,6 +260,24 @@ test("dispatch gate built for a granted combo carries the key's blockedModels", 
   const listRejected = await listGate([BLOCKED]);
   assert.ok(listRejected, "a middle blockedModels entry must reject a granted target");
   assert.equal(listRejected.status, 403);
+});
+
+test("dispatch gate built for a named combo overrides blockedModels on its own target", async () => {
+  for (const allowedCombos of [[COMBO], ["combo/*", COMBO]]) {
+    const namedGate = createResolvedModelGate({
+      apiKeyInfo: { allowedCombos, blockedModels: [BLOCKED] },
+      request: null,
+      contextModel: COMBO,
+      comboGrantsTargets: true,
+      provider: "mock",
+      model: "secret-model",
+      modelStr: BLOCKED,
+    });
+    assert.equal(await namedGate([BLOCKED]), null, `${allowedCombos}: granted target`);
+    // A model an override swaps in is not the combo's target: it keeps the full check.
+    const swapped = await namedGate(["mock/swapped-in-model"]);
+    assert.ok(swapped, `${allowedCombos}: a swapped-in model is not granted`);
+  }
 });
 
 test("dispatch gate fails closed when the blockedModels check throws", async () => {
@@ -373,6 +402,15 @@ function namedGrant(combo: string, blockedModels: string[]) {
   };
 }
 
+function wildcardGrant(blockedModels: string[]) {
+  return {
+    modelAccessMode: "restricted",
+    allowedModels: [PUBLIC],
+    allowedCombos: ["combo/*"],
+    blockedModels,
+  };
+}
+
 test("handleChat: a new key (default combo/*) cannot reach a blocked model through a combo", async () => {
   const key = await seed({ blockedModels: [BLOCKED] });
   const meta = await apiKeysDb.getApiKeyMetadata(key);
@@ -383,16 +421,26 @@ test("handleChat: a new key (default combo/*) cannot reach a blocked model throu
   assert.deepEqual(upstreamModels, [], "the blocked target must not be dispatched");
 });
 
-test("handleChat: a named allowedCombos grant cannot reach a blocked model", async () => {
-  const key = await seed({
-    modelAccessMode: "restricted",
-    allowedModels: [PUBLIC],
-    allowedCombos: [COMBO],
-    blockedModels: [BLOCKED],
-  });
+test("handleChat: a combo/* grant on a restricted key cannot reach a blocked model", async () => {
+  const key = await seed(wildcardGrant([BLOCKED]));
   const status = await chat(key, COMBO);
   assert.equal(status, 503);
   assert.deepEqual(upstreamModels, []);
+});
+
+test("handleChat: a named allowedCombos grant reaches a blocked model of that combo", async () => {
+  const key = await seed(namedGrant(COMBO, [BLOCKED]));
+  const status = await chat(key, COMBO);
+  assert.equal(status, 200);
+  assert.deepEqual(upstreamModels, ["secret-model"]);
+});
+
+test("handleChat: naming one combo does not open blockedModels for the others", async () => {
+  const key = await seed({ allowedCombos: ["combo/*", "mixed-combo"], blockedModels: [BLOCKED] });
+  assert.equal(await chat(key, COMBO), 503, "reached through combo/* only");
+  assert.deepEqual(upstreamModels, []);
+  assert.equal(await chat(key, "mixed-combo"), 200, "named combo");
+  assert.deepEqual(upstreamModels, ["secret-model"], "its first target is dispatched");
 });
 
 test("handleChat: a combo skips its blocked target and falls back to an allowed one", async () => {
@@ -437,24 +485,37 @@ test("handleChat: default combo/* cannot reach a node-id blocked model through a
   assert.deepEqual(upstreamModels, []);
 });
 
-test("handleChat: named grant cannot reach a node-id blocked model through an alias target", async () => {
+test("handleChat: restricted combo/* key cannot reach a node-id blocked model through an alias", async () => {
   // The node-id entry is second, so a check of only the first entry fails here.
-  const key = await seed(namedGrant(ALIAS_COMBO, ["other/unused-model", NODE_ID_BLOCKED]));
+  const key = await seed(wildcardGrant(["other/unused-model", NODE_ID_BLOCKED]));
   assert.equal(await chat(key, ALIAS_COMBO), 403);
   assert.deepEqual(upstreamModels, []);
+});
+
+test("handleChat: named grant reaches a node-id blocked model through an alias target", async () => {
+  const key = await seed(namedGrant(ALIAS_COMBO, ["other/unused-model", NODE_ID_BLOCKED]));
+  assert.equal(await chat(key, ALIAS_COMBO), 200);
+  assert.deepEqual(upstreamModels, ["secret-model"]);
 });
 
 test("handleChat: a node wildcard entry blocks an alias target", async () => {
-  const key = await seed(namedGrant(ALIAS_COMBO, [`${NODE}/*`]));
+  const key = await seed(wildcardGrant([`${NODE}/*`]));
   assert.equal(await chat(key, ALIAS_COMBO), 403);
   assert.deepEqual(upstreamModels, []);
 });
 
-test("/v1/responses and /v1/messages: node-id entry blocks an alias target in a granted combo", async () => {
-  const key = await seed(namedGrant(ALIAS_COMBO, [NODE_ID_BLOCKED]));
+test("/v1/responses and /v1/messages: node-id entry blocks an alias target under combo/*", async () => {
+  const key = await seed(wildcardGrant([NODE_ID_BLOCKED]));
   assert.equal(await responses(key, ALIAS_COMBO), 403, "/v1/responses");
   assert.equal(await messages(key, ALIAS_COMBO), 403, "/v1/messages");
   assert.deepEqual(upstreamModels, []);
+});
+
+test("/v1/responses and /v1/messages: a named grant keeps its override", async () => {
+  const key = await seed(namedGrant(ALIAS_COMBO, [NODE_ID_BLOCKED]));
+  assert.equal(await responses(key, ALIAS_COMBO), 200, "/v1/responses");
+  assert.equal(await messages(key, ALIAS_COMBO), 200, "/v1/messages");
+  assert.deepEqual(upstreamModels, ["secret-model", "secret-model"]);
 });
 
 test("handleChat: a combo falls back past an alias target blocked by node id", async () => {
@@ -487,19 +548,19 @@ test("handleChat: an unrestricted key still reaches an alias target through a co
 test("handleChat: dispatch gate applies a node wildcard entry to a granted target", async () => {
   // The pre-dispatch check sees `mock/secret-model` and does not match `${NODE}/*`;
   // the dispatch gate sees the node-id form and must apply the wildcard.
-  const key = await seed(namedGrant(COMBO, [`${NODE}/*`]));
+  const key = await seed(wildcardGrant([`${NODE}/*`]));
   assert.equal(await chat(key, COMBO), 403);
   assert.deepEqual(upstreamModels, []);
 });
 
 test("handleChat: dispatch gate applies an exact node-id entry to a granted target", async () => {
-  const key = await seed(namedGrant(COMBO, [NODE_ID_BLOCKED]));
+  const key = await seed(wildcardGrant([NODE_ID_BLOCKED]));
   assert.equal(await chat(key, COMBO), 403);
   assert.deepEqual(upstreamModels, []);
 });
 
 test("handleChat: dispatch gate applies a segment glob to an alias target", async () => {
-  const key = await seed(namedGrant(ALIAS_COMBO, ["mock/*secret*"]));
+  const key = await seed(wildcardGrant(["mock/*secret*"]));
   assert.equal(await chat(key, ALIAS_COMBO), 403);
   assert.deepEqual(upstreamModels, []);
 });
@@ -553,7 +614,8 @@ test("dispatch gate checks every provider node that shares the target's prefix",
 test("handleChat: a prefix-form entry blocks a combo target written in node-id form", async () => {
   for (const blockedModels of [[BLOCKED], ["mock/*"]]) {
     const named = await seed(namedGrant(NODE_COMBO, blockedModels));
-    assert.equal(await chat(named, NODE_COMBO), 403, `named grant, ${blockedModels}`);
+    assert.equal(await chat(named, NODE_COMBO), 200, `named grant, ${blockedModels}`);
+    assert.deepEqual(upstreamModels, ["secret-model"]);
     const byDefault = await seed({ blockedModels });
     assert.equal(await chat(byDefault, NODE_COMBO), 403, `combo/*, ${blockedModels}`);
     assert.deepEqual(upstreamModels, []);
