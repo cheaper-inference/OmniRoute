@@ -6,10 +6,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { openMemorySqliteAdapter } from "../_helpers/memorySqliteAdapter.ts";
 
-// The cache-write tier migration was renumbered (213 -> 217 -> 226 -> 227) because 213 belongs to
-// api_key_preferred_connections on the release. Its isSchemaAlreadyApplied guard must follow
-// the file: left on "213" or "226", a DB that already carries the cache-write columns would skip
-// the unrelated api_keys or request_cost_ledger migration.
+// The cache-write tier migration was renumbered (213 -> 217 -> 226 -> 227 -> 228) because 213
+// belongs to api_key_preferred_connections on the release. Its isSchemaAlreadyApplied guard must
+// follow the file: left on "213", "226" or "227", a DB that already carries the cache-write
+// columns would skip the unrelated api_keys, request_cost_ledger or quota_recovery migration.
 const sourceDir = fileURLToPath(new URL("../../../src/lib/db/migrations/", import.meta.url));
 const cacheWriteFile = fs
   .readdirSync(sourceDir)
@@ -17,7 +17,9 @@ const cacheWriteFile = fs
 const migrationsDir = fs.mkdtempSync(path.join(os.tmpdir(), "cache-write-version-"));
 for (const name of [
   "213_api_key_preferred_connections.sql",
+  "217_quota_recovery_tickets.sql",
   "226_request_cost_ledger_read_indexes.sql",
+  "227_quota_recovery_due_cover.sql",
   cacheWriteFile!,
 ]) {
   fs.copyFileSync(path.join(sourceDir, name), path.join(migrationsDir, name));
@@ -35,6 +37,7 @@ test("cache-write tiers migration does not reuse the api_key_preferred_connectio
   assert.ok(cacheWriteFile, "cache-write tiers migration file is present");
   assert.notEqual(cacheWriteFile!.split("_")[0], "213");
   assert.notEqual(cacheWriteFile!.split("_")[0], "226");
+  assert.notEqual(cacheWriteFile!.split("_")[0], "227");
 });
 
 test("existing cache-write columns never skip the migrations that held its old numbers", () => {
@@ -57,6 +60,10 @@ test("existing cache-write columns never skip the migrations that held its old n
       db.prepare("PRAGMA index_list(request_cost_ledger)").all() as Array<{ name: string }>
     ).map((index) => index.name);
     assert.ok(indexes.includes("idx_rcl_request_id"), indexes.join(","));
+    const dueIndexColumns = (
+      db.prepare("PRAGMA index_info(idx_quota_recovery_due)").all() as Array<{ name: string }>
+    ).map((column) => column.name);
+    assert.ok(dueIndexColumns.includes("expires_at"), dueIndexColumns.join(","));
   } finally {
     db.close();
   }
