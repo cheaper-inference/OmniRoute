@@ -1366,7 +1366,7 @@ Služba, ktorá je v pohotovostnom režime celý mesiac, využíva približne 74
 
 ## Scenáre nasadenia
 
-Pokyny SRE pre backend relé (správanie ts/bifrost/auto, umiestnenie 9router oproti CLIProxyAPI a stratégia záložného riešenia s vysokou priepustnosťou) nájdete v časti [Stratégia backendu relé](/docs/reference/RELAY_BACKEND_STRATEGY.md).
+Pokyny SRE pre backend relay (správanie ts/bifrost/auto, umiestnenie 9router vs CLIProxyAPI a stratégia fallbacku s vysokou priepustnosťou) nájdete v dokumente [Stratégia backendu relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).
 
 ### Minimálny lokálny vývoj
 
@@ -1378,7 +1378,7 @@ PORT=20128
 NODE_ENV=development
 ```
 
-### Produkcia v Dockeri
+### Produkčné prostredie Docker
 
 ```bash
 JWT_SECRET=<generated>
@@ -1397,7 +1397,7 @@ OMNIROUTE_MEMORY_MB=8192
 CORS_ORIGIN=https://your-frontend.example.com
 ```
 
-### Izolované od siete / CI
+### Prostredie bez sieťového pripojenia / CI
 
 ```bash
 JWT_SECRET=test-jwt-secret-for-ci
@@ -1870,3 +1870,14 @@ Používajú ho `open-sse/services/combo.ts` a `src/lib/quota/quotaScheduler.ts`
 | Variabilné                     | Predvolené | Zdrojový súbor                               | Popis                                                                                                                                                                                                                                                           |
 | ------------------------------ | ---------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`        | `src/lib/providerModels/modelSyncTimings.ts` | Nastavte na `1`, ak chcete zaznamenávať časovanie fázy, vygenerovanú požiadavku ID a výsledky fázy success/error počas synchronizácie modelu. Zakázané pre všetky ostatné hodnoty. Protokoly vynechávajú užitočné zaťaženie požiadaviek, účtu, katalógu a chýb. |
+
+## Lokálny nástroj OpenCode na analýzu médií
+
+Používa ho `scripts/cli/omniroute-media-mcp.mjs`. Nastavte ich v prostredí lokálneho procesu nástroja.
+
+| Premenná                   | Predvolené nastavenie                                                                | Popis                                                                                                                      |
+| -------------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (alebo `~/.config/opencode/opencode.json`) | Konfigurácia OpenCode, ktorú číta nástroj na prácu s médiami a inštalátor.                                                 |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                          | Položka poskytovateľa načítaná z konfigurácie OpenCode nástrojom na prácu s médiami.                                       |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                               | Model odosielaný nástrojom na prácu s médiami. Jeho poskytovateľ musí podporovať požadované typy médií.                    |
+| `OMNIROUTE_MEDIA_API_KEY`  | Nakonfigurovaný kľúč API poskytovateľa alebo jeho referencia na premennú prostredia  | Voliteľné prepísanie prihlasovacích údajov. Uchovávajte ho v prostredí lokálneho procesu; nikdy ho nezaraďujte do revízie. |

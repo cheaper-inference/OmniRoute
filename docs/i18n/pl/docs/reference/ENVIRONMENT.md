@@ -1369,9 +1369,9 @@ Usługa nieaktywna przez cały miesiąc zużywa około 744 godzin instancji, wi�
 
 ## Scenariusze wdrażania
 
-Wskazówki SRE dotyczące backendu przekaźnika (zachowanie ts/bifrost/auto, rozmieszczenie 9router i CLIProxyAPI oraz strategia awaryjna dla dużej przepustowości) znajdziesz w dokumencie [Strategia backendu przekaźnika](/docs/reference/RELAY_BACKEND_STRATEGY.md).
+Wskazówki SRE dotyczące backendu przekaźnika (zachowanie ts/bifrost/auto, umiejscowienie 9router względem CLIProxyAPI oraz strategia awaryjna dla dużej przepustowości) znajdziesz w dokumencie [Strategia backendu przekaźnika](/docs/reference/RELAY_BACKEND_STRATEGY.md).
 
-### Minimalne środowisko programistyczne lokalne
+### Minimalne lokalne środowisko programistyczne
 
 ```bash
 JWT_SECRET=$(openssl rand -base64 48)
@@ -1381,7 +1381,7 @@ PORT=20128
 NODE_ENV=development
 ```
 
-### Produkcja w Dockerze
+### Docker w środowisku produkcyjnym
 
 ```bash
 JWT_SECRET=<generated>
@@ -1400,7 +1400,7 @@ OMNIROUTE_MEMORY_MB=8192
 CORS_ORIGIN=https://your-frontend.example.com
 ```
 
-### Środowisko odizolowane / CI
+### Środowisko odizolowane od sieci / CI
 
 ```bash
 JWT_SECRET=test-jwt-secret-for-ci
@@ -1873,3 +1873,14 @@ Używane przez `open-sse/services/combo.ts` i `src/lib/quota/quotaScheduler.ts` 
 | Zmienny                        | Domyślny | Plik źródłowy                                | Opis                                                                                                                                                                                                                                |
 | ------------------------------ | -------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`      | `src/lib/providerModels/modelSyncTimings.ts` | Ustaw na `1`, aby rejestrować czas fazy, wygenerowane żądanie ID i wyniki fazy success/error podczas synchronizacji modelu. Wyłączone dla wszystkich innych wartości. Dzienniki pomijają żądania, konta, katalogi i ładunki błędów. |
+
+## Lokalne narzędzie OpenCode do analizy multimediów
+
+Używane przez `scripts/cli/omniroute-media-mcp.mjs`. Ustaw te zmienne w środowisku lokalnego procesu narzędzia.
+
+| Zmienna                    | Wartość domyślna                                                                  | Opis                                                                                                                                     |
+| -------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (or `~/.config/opencode/opencode.json`) | Konfiguracja OpenCode odczytywana przez narzędzie multimedialne i instalator.                                                            |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                       | Wpis dostawcy odczytywany z konfiguracji OpenCode przez narzędzie multimedialne.                                                         |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                            | Model przesyłany przez narzędzie multimedialne. Jego dostawca musi obsługiwać żądane typy multimediów.                                   |
+| `OMNIROUTE_MEDIA_API_KEY`  | Configured provider API key or its environment reference                          | Opcjonalne zastąpienie danych uwierzytelniających. Zachowaj je w środowisku lokalnego procesu; nigdy nie zatwierdzaj ich w repozytorium. |

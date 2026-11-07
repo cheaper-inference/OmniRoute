@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                            |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
+|                            |         v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | -------------------------- | :----------------------: | :---------: | :-------------------: |
 | 🌐 પ્રોવાઇડર્સ             |           352            |   **358**   |          380          |
 | 🧠 અનન્ય ચેટ મોડેલ IDs     |           1320           |  **1374**   |         1491          |
@@ -580,7 +580,7 @@ Radar વૈકલ્પિક છે અને માત્ર GET નો ઉ�
 
 </div>
 
-> **v3.8.20 → v3.8.53** ની તાજેતરની મુખ્ય ઘટનાઓ. સંપૂર્ણ ઇતિહાસ [`CHANGELOG.md`](CHANGELOG.md) માં.
+> **v3.8.20 → v3.8.54** ની તાજેતરની મુખ્ય ઘટનાઓ. સંપૂર્ણ ઇતિહાસ [`CHANGELOG.md`](CHANGELOG.md) માં.
 
 - **⚖️ `quota-weighted` રૂટિંગ** — 20મી કોમ્બો સ્ટ્રેટેજી ખાલી થયેલા એકાઉન્ટ્સને અવગણે છે, પછી બાકીના વચ્ચે બાકી રહેલા ક્વોટા ÷ ઇન-ફ્લાઇટ લોડના પ્રમાણમાં પસંદ કરે છે, અને હાલની વાતચીતને પિન રાખે છે. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 હેડલેસ મોડ** — `omniroute serve --headless` (અથવા `OMNIROUTE_HEADLESS=1`) માત્ર `/v1/*` પ્રોક્સી એન્જિન ચલાવે છે, ડેશબોર્ડ અને ડેશબોર્ડ-માત્ર સબસિસ્ટમ્સ બંધ. → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1014,7 +1014,7 @@ omniroute
 ```
 
 > 💡 `npm warn ERESOLVE` કે peer-dep ચેતવણીઓ દેખાય છે? [તે હાનિરહિત છે](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **npm 11 કે પછીનું વાપરો છો?** npm પેકેજ લાઇફસાઇકલ સ્ક્રિપ્ટ્સને અવરોધી શકે છે સિવાય કે તેમને મંજૂરી આપવામાં આવે. OmniRoute નું `postinstall` (`node scripts/build/postinstall.mjs`) તેની નેટિવ રનટાઇમ ફાઇલો તૈયાર કરવા માટે જરૂરી છે. ગ્લોબલી ઇન્સ્ટોલ કરતી વખતે npm ની ચેતવણીમાં નામ આપેલા પેકેજોને મંજૂરી આપો. OmniRoute 3.8.53 દ્વારા જાણ કરેલા પેકેજ સેટ માટે:
+> **npm 11 કે પછીનું વાપરો છો?** npm પેકેજ લાઇફસાઇકલ સ્ક્રિપ્ટ્સને અવરોધી શકે છે સિવાય કે તેમને મંજૂરી આપવામાં આવે. OmniRoute નું `postinstall` (`node scripts/build/postinstall.mjs`) તેની નેટિવ રનટાઇમ ફાઇલો તૈયાર કરવા માટે જરૂરી છે. ગ્લોબલી ઇન્સ્ટોલ કરતી વખતે npm ની ચેતવણીમાં નામ આપેલા પેકેજોને મંજૂરી આપો. OmniRoute 3.8.54 દ્વારા જાણ કરેલા પેકેજ સેટ માટે:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1294,7 +1294,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 પણ તેન�
   <tr><td nowrap><b>રનટાઇમ</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ભાષા</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> <code>src/</code> અને <code>open-sse/</code>માં (v2.0થી કોરમાં શૂન્ય <code>any</code>)</td></tr>
   <tr><td nowrap><b>ફ્રેમવર્ક</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ડેટાબેઝ</b></td><td>better-sqlite3 (SQLite, WAL જર્નલિંગ) + LowDB (JSON લેગસી) — 147 ડોમેન મોડ્યુલ, 222 માઇગ્રેશન</td></tr>
+  <tr><td nowrap><b>ડેટાબેઝ</b></td><td>better-sqlite3 (SQLite, WAL જર્નલિંગ) + LowDB (JSON લેગસી) — 147 ડોમેન મોડ્યુલ, 223 માઇગ્રેશન</td></tr>
   <tr><td nowrap><b>મેમરી</b></td><td>SQLite FTS5 ફુલ-ટેક્સ્ટ + int8-ક્વાન્ટાઇઝ્ડ વેક્ટર એમ્બેડિંગ્સ, ટાઇપ્ડ ડિકે</td></tr>
   <tr><td nowrap><b>સ્કીમા</b></td><td>Zod 4 — MCP ટૂલ I/O માન્યતા + API કોન્ટ્રાક્ટ્સ</td></tr>
   <tr><td nowrap><b>પ્રોટોકોલ્સ</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1807,7 +1807,7 @@ MIT લાઇસન્સ - વિગતો માટે [લાઇસન્સ]
 
 **[⬆ ટોચ પર પાછા જાઓ](#-omniroute)** · ઓપન-સોર્સ AI સમુદાય માટે ❤️ સાથે બનાવેલ.
 
-<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> દ્વારા બનાવેલ · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT લાઇસન્સ · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> દ્વારા બનાવેલ · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT લાઇસન્સ · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- સમુદાયના પ્રશ્નો અને જવાબો માટે GitHub Discussions સક્ષમ કરેલ છે -->

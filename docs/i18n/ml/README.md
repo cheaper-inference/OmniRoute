@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                  |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
+|                                  |          v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
 | -------------------------------- | :-----------------------: | :---------: | :-------------------: |
 | 🌐 ദാതാക്കൾ                      |            352            |   **358**   |          380          |
 | 🧠 തനതായ ചാറ്റ് മോഡൽ ഐഡികൾ       |           1320            |  **1374**   |         1491          |
@@ -580,7 +580,7 @@ Radar തിരഞ്ഞെടുക്കുന്നവർക്ക് മാ�
 
 </div>
 
-> **v3.8.20 → v3.8.53** ലെ പുതിയ ഹൈലൈറ്റുകൾ. മുഴുവൻ ചരിത്രം [`CHANGELOG.md`](CHANGELOG.md) ൽ.
+> **v3.8.20 → v3.8.54** ലെ പുതിയ ഹൈലൈറ്റുകൾ. മുഴുവൻ ചരിത്രം [`CHANGELOG.md`](CHANGELOG.md) ൽ.
 
 - **⚖️ `quota-weighted` റൂട്ടിംഗ്** — 20-ാമത്തെ കോമ്പോ സ്ട്രാറ്റജി ഉപയോഗിച്ച അക്കൗണ്ടുകൾ ഒഴിവാക്കുന്നു, ശേഷിക്കുന്നവയിൽ ബാക്കി ക്വോട്ടാ ÷ ഇൻ-ഫ്ലൈറ്റ് ലോഡ് അനുപാതത്തിൽ തിരഞ്ഞെടുക്കുന്നു, നിലവിലുള്ള സംഭാഷണങ്ങൾ പിന് ചെയ്യുന്നു. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 ഹെഡ്ലസ് മോഡ്** — `omniroute serve --headless` (അല്ലെങ്കിൽ `OMNIROUTE_HEADLESS=1`) ഉപയോഗിച്ച് ഡാഷ്ബോർഡും ഡാഷ്ബോർഡ്-മാത്രം സബ്സിസ്റ്റങ്ങളും ഓഫ് ചെയ്ത് `/v1/*` പ്രോക്സി എഞ്ചിൻ മാത്രം പ്രവർത്തിപ്പിക്കുന്നു. → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1014,7 +1014,7 @@ omniroute
 ```
 
 > 💡 `npm warn ERESOLVE` അല്ലെങ്കിൽ peer-dep മുന്നറിയിപ്പുകൾ കാണുന്നുണ്ടോ? [അവ നിരുപദ്രവകരമാണ്](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **npm 11 അല്ലെങ്കിൽ അതിനുശേഷമുള്ളത് ഉപയോഗിക്കുന്നുണ്ടോ?** അനുവദിച്ചിട്ടില്ലെങ്കിൽ npm പാക്കേജ് ലൈഫ്സൈക്കിൾ സ്ക്രിപ്റ്റുകൾ തടഞ്ഞേക്കാം. നേറ്റീവ് റൺടൈം ഫയലുകൾ തയ്യാറാക്കാൻ OmniRoute-ന്റെ `postinstall` (`node scripts/build/postinstall.mjs`) ആവശ്യമാണ്. ഗ്ലോബലായി ഇൻസ്റ്റാൾ ചെയ്യുമ്പോൾ npm-ന്റെ മുന്നറിയിപ്പിൽ പേരിട്ടിരിക്കുന്ന പാക്കേജുകൾ അനുവദിക്കുക. OmniRoute 3.8.53 റിപ്പോർട്ട് ചെയ്യുന്ന പാക്കേജ് സെറ്റിനായി:
+> **npm 11 അല്ലെങ്കിൽ അതിനുശേഷമുള്ളത് ഉപയോഗിക്കുന്നുണ്ടോ?** അനുവദിച്ചിട്ടില്ലെങ്കിൽ npm പാക്കേജ് ലൈഫ്സൈക്കിൾ സ്ക്രിപ്റ്റുകൾ തടഞ്ഞേക്കാം. നേറ്റീവ് റൺടൈം ഫയലുകൾ തയ്യാറാക്കാൻ OmniRoute-ന്റെ `postinstall` (`node scripts/build/postinstall.mjs`) ആവശ്യമാണ്. ഗ്ലോബലായി ഇൻസ്റ്റാൾ ചെയ്യുമ്പോൾ npm-ന്റെ മുന്നറിയിപ്പിൽ പേരിട്ടിരിക്കുന്ന പാക്കേജുകൾ അനുവദിക്കുക. OmniRoute 3.8.54 റിപ്പോർട്ട് ചെയ്യുന്ന പാക്കേജ് സെറ്റിനായി:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1294,7 +1294,7 @@ port-ൽ ഒരേ process വഴിയാണ് ലഭ്യമാക്കു�
   <tr><td nowrap><b>റൺടൈം</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ഭാഷ</b></td><td>TypeScript 6.0 — <code>src/</code>, <code>open-sse/</code> എന്നിവയിലുടനീളം <b>100% TypeScript</b> (v2.0 മുതൽ കോറിൽ പൂജ്യം <code>any</code>)</td></tr>
   <tr><td nowrap><b>ഫ്രെയിംവർക്ക്</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ഡാറ്റാബേസ്</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 ഡൊമെയ്ൻ മൊഡ്യൂളുകൾ, 222 മൈഗ്രേഷനുകൾ</td></tr>
+  <tr><td nowrap><b>ഡാറ്റാബേസ്</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 ഡൊമെയ്ൻ മൊഡ്യൂളുകൾ, 223 മൈഗ്രേഷനുകൾ</td></tr>
   <tr><td nowrap><b>മെമ്മറി</b></td><td>SQLite FTS5 പൂർണ്ണ-ടെക്സ്റ്റ് + int8-quantized വെക്റ്റർ എംബെഡ്ഡിംഗുകൾ, ടൈപ്പ് ചെയ്ത ക്ഷയം</td></tr>
   <tr><td nowrap><b>സ്കീമകൾ</b></td><td>Zod 4 — MCP ടൂൾ I/O സാധുതാ പരിശോധന + API കരാറുകൾ</td></tr>
   <tr><td nowrap><b>പ്രോട്ടോക്കോളുകൾ</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1807,7 +1807,7 @@ MIT ലൈസൻസ് - വിശദാംശങ്ങൾക്ക് [LICENSE]
 
 **[⬆ മുകളിലേക്ക് മടങ്ങുക](#-omniroute)** · ഓപ്പൺ സോഴ്സ് AI സമൂഹത്തിനായി ❤️ ഉപയോഗിച്ച് നിർമ്മിച്ചത്.
 
-<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> സൃഷ്ടിച്ചത് · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT ലൈസൻസ് · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub><a href="https://github.com/diegosouzapw">Diego Souza</a> സൃഷ്ടിച്ചത് · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT ലൈസൻസ് · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- സമൂഹത്തിന്റെ ചോദ്യോത്തരങ്ങൾക്കായി GitHub Discussions പ്രവർത്തനക്ഷമമാക്കിയിരിക്കുന്നു -->
