@@ -1,3 +1,4 @@
+import { inheritLocalProcessPressureResponse } from "@omniroute/open-sse/utils/localPressureResponse.ts";
 import { credentialCooldownResponse } from "./credentialCooldownResponse";
 import {
   getModelInfo,
@@ -1191,6 +1192,10 @@ export async function safeLogEvents({
   } catch {}
 }
 
+/**
+ * Returns the response with a session ID header, or unchanged when no session ID is given.
+ * Immutable headers require a wrapper preserving trusted rate-limit and pressure markers.
+ */
 export function withSessionHeader(response: Response, sessionId: string | null): Response {
   if (!response || !sessionId) return response;
 
@@ -1204,10 +1209,17 @@ export function withSessionHeader(response: Response, sessionId: string | null):
       headers: response.headers,
     });
     cloned.headers.set("X-OmniRoute-Session-Id", sessionId);
-    return inheritTrustedLocalRateLimitResponse(response, cloned);
+    return inheritLocalProcessPressureResponse(
+      response,
+      inheritTrustedLocalRateLimitResponse(response, cloned)
+    );
   }
 }
 
+/**
+ * Returns the response with a correlation ID header, or unchanged when no ID is given.
+ * Immutable headers require a wrapper preserving trusted rate-limit and pressure markers.
+ */
 export function withCorrelationId(response: Response, correlationId: string | null): Response {
   if (!response || !correlationId) return response;
 
@@ -1221,7 +1233,10 @@ export function withCorrelationId(response: Response, correlationId: string | nu
       headers: response.headers,
     });
     cloned.headers.set("X-Correlation-Id", correlationId);
-    return inheritTrustedLocalRateLimitResponse(response, cloned);
+    return inheritLocalProcessPressureResponse(
+      response,
+      inheritTrustedLocalRateLimitResponse(response, cloned)
+    );
   }
 }
 
