@@ -7,20 +7,37 @@ const ADAPTA_CLERK_URL = "https://clerk.agent.adapta.one";
 const ADAPTA_STREAM_URL = `${ADAPTA_APP_URL}/api/chat/stream/v1`;
 const ADAPTA_PUBLIC_STREAM_ERROR = `\n\n[Erro: ${sanitizeErrorMessage("Adapta upstream error")}]`;
 
-// Default model ID in Adapta's internal system (corresponds to "ONE" / auto-select)
-const DEFAULT_AI_MODEL_ID = 14;
+// Default model key in Adapta's catalog (auto-select).
+const DEFAULT_MODEL_KEY = "ONE";
 
-// Map from OmniRoute model IDs to Adapta internal model IDs.
-// 14 = "ONE" (auto), values confirmed via chat history inspection.
-// Additional IDs can be added as they are discovered.
-const MODEL_ID_MAP: Record<string, number> = {
-  "adapta-one": 14,
-  "adapta-gpt": 14,
-  "adapta-claude": 14,
-  "adapta-gemini": 14,
-  "adapta-grok": 14,
-  "adapta-deepseek": 14,
-  "adapta-llama": 14,
+// Map from OmniRoute model IDs to Adapta catalog model keys.
+export const MODEL_KEY_MAP: Record<string, string> = {
+  "adapta-one": "ONE",
+  "adapta-gpt-6-luna": "GPT_6_LUNA",
+  "adapta-claude-5-5-haiku": "CLAUDE_5_5_HAIKU",
+  "adapta-claude-5-5-sonnet": "CLAUDE_5_5_SONNET",
+  "adapta-claude-5-sonnet": "CLAUDE_5_SONNET",
+  "adapta-gemini-3-8-flash": "GEMINI_3_8_FLASH",
+  "adapta-gemini-3-7-flash": "GEMINI_3_7_FLASH",
+  "adapta-gemini-3-1-pro-preview": "GEMINI_3_1_PRO_PREVIEW",
+  "adapta-deepseek-v4-1-flash-1017": "DEEPSEEK_V4_1_FLASH_1017",
+  "adapta-deepseek-v4-flash-updated": "DEEPSEEK_V4_FLASH_UPDATED",
+  "adapta-deepseek-v4-pro-0813": "DEEPSEEK_V4_PRO_0813",
+  "adapta-kimi-k2-7-code": "KIMI_K2_7_CODE",
+  "adapta-kimi-k2-6": "KIMI_K2_6",
+  "adapta-minimax-m3": "MINIMAX_M3",
+  "adapta-minimax-m3-1-flash": "MINIMAX_M3_1_FLASH",
+  "adapta-minimax-m2-7-highspeed": "MINIMAX_M2_7_HIGHSPEED",
+  "adapta-minimax-m2-7": "MINIMAX_M2_7",
+  "adapta-qwen-3-8-27b": "QWEN_3_8_27B",
+  "adapta-qwen-3-8-flash": "QWEN_3_8_FLASH",
+  "adapta-qwen-3-7-plus": "QWEN_3_7_PLUS",
+  "adapta-glm-5-3-flash": "GLM_5_3_FLASH",
+  "adapta-glm-5-2": "GLM_5_2",
+  "adapta-grok-43": "GROK_43",
+  "adapta-muse-spark-1-3": "MUSE_SPARK_1_3",
+  "adapta-sonar-pro": "SONAR_PRO",
+  "adapta-nvidia-nemotron-super": "NVIDIA_NEMOTRON_SUPER",
 };
 
 const USER_AGENT =
@@ -190,13 +207,17 @@ interface OpenAIMessage {
 }
 
 interface AdaptaPart {
-  type: "text";
-  text: string;
+  type: "text" | "step-start";
+  text?: string;
+  state?: string;
 }
 
 interface AdaptaMessage {
+  id: string;
   role: string;
   parts: AdaptaPart[];
+  metadata?: Record<string, unknown>;
+  state?: string;
 }
 
 /** Extract plain text from an OpenAI message content (string or content-parts array). */
@@ -212,7 +233,11 @@ function extractText(content: unknown): string {
 }
 
 /** Build the final Adapta messages array, injecting system prompt into first user message. */
-function buildAdaptaMessages(messages: OpenAIMessage[]): AdaptaMessage[] {
+export function buildAdaptaMessages(
+  messages: OpenAIMessage[],
+  modelKey: string,
+  chatId: string
+): AdaptaMessage[] {
   let systemText = "";
   const rest: OpenAIMessage[] = [];
 
@@ -231,16 +256,30 @@ function buildAdaptaMessages(messages: OpenAIMessage[]): AdaptaMessage[] {
   for (const msg of rest) {
     if (msg.role !== "user" && msg.role !== "assistant") continue;
     const text = extractText(msg.content);
-    if (!text.trim()) continue;
+    if (!text.trim() && msg.role !== "assistant") continue;
+
+    const id = crypto.randomUUID();
+
+    if (msg.role === "assistant") {
+      adapted.push({
+        id,
+        role: "assistant",
+        parts: [{ type: "text", text }],
+        metadata: { model: modelKey, chatId, messageId: id, isPaused: false },
+        state: "done",
+      });
+      continue;
+    }
 
     if (!systemInjected && systemText && msg.role === "user") {
       adapted.push({
+        id,
         role: "user",
         parts: [{ type: "text", text: `${systemText}\n\n${text}` }],
       });
       systemInjected = true;
     } else {
-      adapted.push({ role: msg.role, parts: [{ type: "text", text }] });
+      adapted.push({ id, role: "user", parts: [{ type: "text", text }] });
     }
   }
 
@@ -327,7 +366,7 @@ function transformStream(adaptaStream: ReadableStream, model: string): ReadableS
               chunk({ content: ADAPTA_PUBLIC_STREAM_ERROR });
               finalize();
               return;
-            } else if (type === "done" || type === "end") {
+            } else if (type === "done" || type === "end" || type === "finish") {
               finalize();
               return;
             }
@@ -400,8 +439,9 @@ export class AdaptaWebExecutor extends BaseExecutor {
     }
 
     // 2. Build Adapta request body
-    const aiModelId = MODEL_ID_MAP[model] ?? DEFAULT_AI_MODEL_ID;
-    const adaptaMessages = buildAdaptaMessages(effectiveMessages);
+    const modelKey = MODEL_KEY_MAP[model] ?? DEFAULT_MODEL_KEY;
+    const chatId = crypto.randomUUID();
+    const adaptaMessages = buildAdaptaMessages(effectiveMessages, modelKey, chatId);
 
     if (adaptaMessages.length === 0) {
       return {
@@ -413,8 +453,14 @@ export class AdaptaWebExecutor extends BaseExecutor {
     }
 
     const requestPayload = {
+      chatId,
+      id: chatId,
+      isTemporaryChat: false,
+      mandatoryTools: [],
+      skipImagePromptOptimization: true,
+      modelAi: modelKey,
+      trigger: "submit-message",
       messages: adaptaMessages,
-      aiModelId,
     };
 
     const headers: Record<string, string> = {
@@ -428,7 +474,7 @@ export class AdaptaWebExecutor extends BaseExecutor {
 
     log?.info?.(
       "ADAPTA-WEB",
-      `POST ${ADAPTA_STREAM_URL} | model=${model} aiModelId=${aiModelId} msgs=${adaptaMessages.length}`
+      `POST ${ADAPTA_STREAM_URL} | model=${model} modelAi=${modelKey} msgs=${adaptaMessages.length}`
     );
 
     // 3. Fire request
