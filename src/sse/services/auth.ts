@@ -1262,6 +1262,12 @@ export async function getProviderCredentials(
       if (resolvedId === "qoder" && options.requireToolCalling) {
         allConnections = allConnections.filter(qoderSupportsCallerTools);
       }
+      // An ineligible Codex plan cannot make a paid-only model appear rate-limited.
+      if (provider === "codex" && requestedModel) {
+        allConnections = allConnections.filter((connection) =>
+          isCodexPlanEligibleForModel(connection.providerSpecificData, requestedModel)
+        );
+      }
       log.debug("AUTH", `${provider} | all connections (incl inactive): ${allConnections.length}`);
       if (allConnections.length > 0) {
         const earliest = getEarliestRateLimitedUntil(allConnections);
@@ -1509,7 +1515,14 @@ export async function getProviderCredentials(
     });
 
     if (availableConnections.length === 0) {
-      const cooldownStates: CooldownInspectionState[] = connections.map((connection) => {
+      // Only model-eligible accounts may contribute to this model's retry/cooldown hint.
+      const cooldownEligibleConnections =
+        provider === "codex" && requestedModel
+          ? connections.filter((connection) =>
+              isCodexPlanEligibleForModel(connection.providerSpecificData, requestedModel)
+            )
+          : connections;
+      const cooldownStates: CooldownInspectionState[] = cooldownEligibleConnections.map((connection) => {
         const connectionCooldownMs = parseFutureDateMs(connection.rateLimitedUntil);
         const codexScopeCooldownMs =
           provider === "codex"
