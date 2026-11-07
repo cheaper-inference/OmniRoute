@@ -116,6 +116,27 @@ function findModelOverride(overrides: Record<string, number>, key: string): numb
   return winner;
 }
 
+// Isolate override precedence from request-scoped deadline policy. This keeps
+// disabled (0) values meaningful and avoids duplicating fallback checks.
+function configuredPreferredTimeoutMs(
+  provider: string,
+  modelId: string | undefined,
+  settings: PreferredFailoverSettings
+): number {
+  const p = canonicalProvider(provider);
+  const m = canonicalModelKey(p, modelId ?? "");
+  const modelOverride = findModelOverride(settings.modelTimeoutsMs, m);
+  if (modelOverride !== undefined) return modelOverride;
+  const providerOverride = Object.prototype.hasOwnProperty.call(settings.providerTimeoutsMs, p)
+    ? settings.providerTimeoutsMs[p]
+    : p === "antigravity" ? settings.providerTimeoutsMs.agy : undefined;
+  if (providerOverride !== undefined) return providerOverride;
+  // Preserve the existing Antigravity fast-path defaults.
+  if (p !== "antigravity") return settings.defaultTimeoutMs;
+  return /^antigravity\/gemini-3\.8-flash(?:-tiered|-high|-medium|-low)?$/.test(m)
+    ? 12_000 : 5_000;
+}
+
 export function resolvePreferredConnectionUpstreamStartTimeoutMs(
   provider: string,
   credentials: PreferredCredentialState | null | undefined,
@@ -134,21 +155,7 @@ export function resolvePreferredConnectionUpstreamStartTimeoutMs(
     return { timeoutMs: hint, mayRotateOnRequestTimeout: false };
   }
 
-  const p = canonicalProvider(provider);
-  const m = canonicalModelKey(p, modelId ?? "");
-  const modelOverride = findModelOverride(settings.modelTimeoutsMs, m);
-  const providerOverride = Object.prototype.hasOwnProperty.call(settings.providerTimeoutsMs, p)
-    ? settings.providerTimeoutsMs[p]
-    : p === "antigravity" ? settings.providerTimeoutsMs.agy : undefined;
-
-  // Keep the proven Antigravity fast-path defaults; other providers start
-  // conservatively at 20s to avoid penalizing legitimately slow providers.
-  const antigravityDefault = p === "antigravity"
-    ? /^antigravity\/gemini-3\.8-flash(?:-tiered|-high|-medium|-low)?$/.test(m)
-      ? 12_000 : 5_000
-    : settings.defaultTimeoutMs;
-
-  const selected = modelOverride ?? providerOverride ?? antigravityDefault;
+  const selected = configuredPreferredTimeoutMs(provider, modelId, settings);
   const capMs = validTimeout(selected) ? selected : settings.defaultTimeoutMs;
   if (capMs === 0) return { timeoutMs: hint, mayRotateOnRequestTimeout: false };
 
