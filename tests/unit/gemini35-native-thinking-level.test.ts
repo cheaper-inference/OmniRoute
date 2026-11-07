@@ -10,6 +10,7 @@ import { FORMATS } from "../../open-sse/translator/formats.ts";
 import { translateRequest } from "../../open-sse/translator/index.ts";
 import { claudeToGeminiRequest } from "../../open-sse/translator/request/claude-to-gemini.ts";
 import { openaiToGeminiRequest } from "../../open-sse/translator/request/openai-to-gemini.ts";
+import { applyReasoningRuleDirective } from "../../src/lib/reasoningRouting/policy.ts";
 
 const MODEL = "gemini-3.5-flash-lite";
 
@@ -165,6 +166,26 @@ test("Gemini native level preserves summary opt-outs only when they win", () => 
   }
 });
 
+test("an enabled budget beats effort, the same order as the budget path", () => {
+  const enabled = (budget_tokens: number) => ({ thinking: { type: "enabled", budget_tokens } });
+  assert.deepEqual(nativeThinking({ reasoning_effort: "high", ...enabled(512) }), {
+    thinkingLevel: "low",
+    includeThoughts: true,
+  });
+  assert.deepEqual(nativeThinking({ reasoning_effort: "low", ...enabled(20000) }), {
+    thinkingLevel: "high",
+    includeThoughts: true,
+  });
+  assert.deepEqual(nativeThinking({ reasoning_effort: "high", ...enabled(0) }), {
+    thinkingLevel: "minimal",
+    includeThoughts: false,
+  });
+  assert.deepEqual(nativeThinking({ thinkingLevel: "medium", ...enabled(512) }), {
+    thinkingLevel: "medium",
+    includeThoughts: true,
+  });
+});
+
 test("Gemini native thinkingLevel wins over both default and OpenAI effort", () => {
   for (const [levelField, requested, expected] of [
     ["thinkingLevel", "LOW", "low"],
@@ -305,10 +326,20 @@ function clientLevelSpellings(thinkingLevel: string): Record<string, unknown>[] 
   ];
 }
 
+// chatCore applies the directive before translation and keeps it on the body for
+// translateRequest, so a forced rule clears a top-level level before any budget exists.
+function chatCoreThinking(
+  rule: Record<string, unknown>,
+  request: Record<string, unknown>
+): NativeThinkingConfig {
+  const applied = applyReasoningRuleDirective({ ...rule, ...request }) as Record<string, unknown>;
+  return pipelineThinking({ ...applied, ...rule });
+}
+
 test("a forced reasoning rule beats a client level in every spelling", () => {
   for (const clientLevel of clientLevelSpellings("high")) {
     const rule = reasoningRule("force", "low", "preserve");
-    assert.deepEqual(pipelineThinking({ ...rule, ...clientLevel }), {
+    assert.deepEqual(chatCoreThinking(rule, clientLevel), {
       thinkingLevel: "low",
       includeThoughts: true,
     });
@@ -323,6 +354,29 @@ test("a rule that sets the budget beats a client level in every spelling", () =>
       includeThoughts: true,
     });
   }
+});
+
+test("a rule that sets the budget beats client effort in every spelling", () => {
+  const rule = reasoningRule("inherit", "low", "set");
+  for (const clientEffort of [
+    { reasoning_effort: "low" },
+    { reasoning: { effort: "low" } },
+    { reasoning_effort: "none" },
+  ]) {
+    assert.deepEqual(pipelineThinking({ ...rule, ...clientEffort }), {
+      thinkingLevel: "high",
+      includeThoughts: true,
+    });
+  }
+});
+
+test("a rule that sets a zero budget turns thinking off despite client effort", () => {
+  const rule = reasoningRule("inherit", "low", "set");
+  rule._omnirouteReasoningRule.budgetTokens = 0;
+  assert.deepEqual(pipelineThinking({ ...rule, reasoning_effort: "high" }), {
+    thinkingLevel: "minimal",
+    includeThoughts: false,
+  });
 });
 
 test("a rule that removes the budget drops a client level in every spelling", () => {

@@ -193,13 +193,19 @@ function nativeGeminiRequestControls(
   supported: readonly GeminiThinkingLevel[],
   defaultLevel: GeminiThinkingLevel | undefined
 ): NativeGeminiThinking | null {
+  const thinking = toRecord(body.thinking);
+  // Same order as the budget path: an enabled budget beats effort. A routing rule that
+  // sets the budget emits this shape, so client effort cannot override it.
+  const enabledBudget =
+    thinking.type === "enabled" ? nativeGeminiBudget(thinking.budget_tokens, supported) : null;
+  if (enabledBudget) return enabledBudget;
+
   const fromEffort = nativeGeminiEffort(
     body.reasoning_effort ?? toRecord(body.reasoning).effort,
     supported
   );
   if (fromEffort) return fromEffort;
 
-  const thinking = toRecord(body.thinking);
   if (body.thinking === false || thinking.type === "disabled") {
     const thinkingLevel = supported.includes("minimal") ? "minimal" : defaultLevel;
     return thinkingLevel && supported.includes(thinkingLevel)
