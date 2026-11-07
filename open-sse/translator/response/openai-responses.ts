@@ -363,7 +363,9 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
       closeReasoning(state, emit);
     }
     const msgIdx = state.reasoningId ? state.reasoningIndex + 1 : idx;
-    closeMessage(state, emit, msgIdx);
+    // A post-tool-call message lives at its relocated index (msgIndexAlias);
+    // close it there, or later text would append to it across this call.
+    closeMessage(state, emit, state.msgIndexAlias?.[msgIdx] ?? msgIdx);
     for (const tc of delta.tool_calls) {
       emitToolCall(state, emit, tc);
     }

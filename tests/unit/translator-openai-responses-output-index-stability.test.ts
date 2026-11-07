@@ -109,3 +109,37 @@ test("text after a tool call reuses ONE fresh message item for every delta", () 
     `duplicate output_index in done events: ${outputIndexes}`
   );
 });
+
+test("a relocated post-tool message closes before the next tool call opens", () => {
+  const call = (index, id) =>
+    mk({ tool_calls: [{ index, id, type: "function", function: { name: "f", arguments: "{}" } }] });
+  const events = collectEvents([
+    mk({ content: "pre" }),
+    call(0, "call_1"),
+    mk({ content: "abc" }),
+    call(1, "call_2"),
+    mk({ content: "xyz" }),
+    mk({}, "stop", { usage: { prompt_tokens: 1, completion_tokens: 1 } }),
+  ]);
+
+  const seq = events
+    .filter((e) => e.data.item)
+    .map(
+      (e) =>
+        `${e.event.replace("response.output_item.", "")}:${e.data.item.type}@${e.data.output_index}`
+    );
+  const abcDone = events.findIndex(
+    (e) => e.event === "response.output_item.done" && e.data.item?.content?.[0]?.text === "abc"
+  );
+  const call2Added = events.findIndex(
+    (e) => e.event === "response.output_item.added" && e.data.item?.call_id === "call_2"
+  );
+  assert.ok(abcDone !== -1 && call2Added !== -1, seq.join(" | "));
+  assert.ok(abcDone < call2Added, `message stayed open across call_2: ${seq.join(" | ")}`);
+
+  const completed = events.find((e) => e.event === "response.completed");
+  const order = completed.data.response.output.map((o) =>
+    o.type === "message" ? o.content[0].text : o.call_id
+  );
+  assert.deepEqual(order, ["pre", "call_1", "abc", "call_2", "xyz"]);
+});
