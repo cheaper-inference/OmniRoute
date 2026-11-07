@@ -196,13 +196,35 @@ test("fresh factory per request emits complete output equal to direct marking", 
   }
 });
 
-test("fan-out beyond the choice cap keeps output complete", async () => {
-  const output = await runTransform(createCredentialSseTransform({ maxBufferedChoices: 2 }), [
-    `data: {"choices":[{"index":0,"delta":{"content":"a ${OPENAI_KEY}"}},{"index":1,"delta":{"content":"b"}},{"index":2,"delta":{"content":"c"}}]}\n\n`,
-    "data: [DONE]\n\n",
-  ]);
-  assert.ok(!output.includes(OPENAI_KEY));
-  assert.match(output, /\[REDACTED:openai\]/);
+test("fan-out beyond the choice cap fails closed without mixing buffered choices", async () => {
+  const stream = new ReadableStream<Uint8Array>({
+    start(controller) {
+      controller.enqueue(
+        new TextEncoder().encode(sseContent(`safe ${OPENAI_KEY} ${"safe ".repeat(100)}`))
+      );
+      controller.enqueue(new TextEncoder().encode(sseContent("safe ".repeat(100))));
+      controller.enqueue(
+        new TextEncoder().encode(
+          `data: {"choices":[{"index":0,"delta":{"content":"a ${OPENAI_KEY}"}},{"index":1,"delta":{"content":"b"}},{"index":2,"delta":{"content":"c"}}]}\n\n`
+        )
+      );
+      controller.close();
+    },
+  }).pipeThrough(createCredentialSseTransform({ maxBufferedChoices: 2 }));
+  const reader = stream.getReader();
+  const decoder = new TextDecoder();
+  let output = "";
+  await assert.rejects(
+    async () => {
+      for (let chunk = await reader.read(); !chunk.done; chunk = await reader.read()) {
+        output += decoder.decode(chunk.value, { stream: true });
+      }
+    },
+    { name: "Error", message: "[PII] Credential stream choice limit exceeded" }
+  );
+  output += decoder.decode();
+  assert.match(output, /\[REDACTED:openai\]/, "a sanitized frame must arrive before rejection");
+  assert.ok(!output.includes(OPENAI_KEY), "frames emitted before rejection must not leak the key");
 });
 
 test("unclosed key header followed by a long gap never leaks in clear", async () => {
@@ -214,7 +236,7 @@ test("unclosed key header followed by a long gap never leaks in clear", async ()
   ]);
   assert.ok(!output.includes("-----BEGIN"), "unclosed key header must not leak in clear");
   assert.ok(!output.includes(secret.slice(0, 10)));
-  assert.match(output, /\[REDACTED:openai\]/);
+  assert.match(output, /\[REDACTED:private_key\]/);
 });
 
 test("partial-tail probe finds a truncated fixed prefix touching the buffer end", () => {
