@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Mga kagustuhan sa account",
+    "description": "Unahin o itabi bilang reserba ang maraming account para sa routing configuration na ito. Niraranggo ng awtomatikong routing ang mga account sa loob ng bawat tier. Mananatiling normal ang mga account na hindi nakalista. Nalalapat pa rin ang mga pahintulot, limitasyon ng quota, at kasalukuyang mga binding ng turn.",
+    "preferred": "Pangunahin",
+    "normal": "Normal",
+    "reserve": "Reserba",
+    "excluded": "Hindi isasama",
+    "loading": "Nilo-load ang mga account…",
+    "error": "Hindi ma-load ang mga account. Buksan muli ang editor para subukan ulit.",
+    "missing": "Hindi available na account ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Mode ng serbisyo ng Codex para sa API key na ito",
     "description": "Nalalapat sa mga kahilingan sa Codex, kabilang ang mga modelo ng Codex sa loob ng mga combo. Ino-override ng mga sapilitang mode ang client, mga pandaigdigang setting, at mga default ng koneksyon. Hindi magbabago ang ibang provider.",

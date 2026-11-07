@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Fiókbeállítások",
+    "description": "Több fiókot is előnyben részesíthet, vagy tartalékként tarthat ennél a kombinációnál. Az automatikus útválasztás rangsorolja a fiókokat az egyes kategóriákon belül. A listán nem szereplő fiókok normálként működnek. A jogosultságok, a kvótakorlátok és a meglévő körhöz rendelések továbbra is érvényesek.",
+    "preferred": "Előnyben részesített",
+    "normal": "Normál",
+    "reserve": "Tartalék",
+    "excluded": "Kizárt",
+    "loading": "Fiókok betöltése…",
+    "error": "Nem sikerült betölteni a fiókokat. Az újrapróbálkozáshoz nyissa meg újra a szerkesztőt.",
+    "missing": "Nem elérhető fiók ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Codex szolgáltatási mód ehhez az API-kulcshoz",
     "description": "A Codex-kérésekre vonatkozik, beleértve a kombinációkon belüli Codex-modelleket is. A kényszerített módok felülbírálják a kliens, a globális beállítások és a kapcsolat alapértelmezéseit. Más szolgáltatók változatlanok maradnak.",

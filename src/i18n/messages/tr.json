@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Hesap tercihleri",
+    "description": "Bu combo için birden fazla hesabı önce kullanılacak olarak belirleyin veya yedekte tutun. Otomatik yönlendirme, her katmandaki hesapları sıralar. Listelenmeyen hesaplar normaldir. İzinler, kota sınırları ve mevcut tur bağlamaları geçerliliğini korur.",
+    "preferred": "Öncelikli",
+    "normal": "Normal",
+    "reserve": "Yedek",
+    "excluded": "Hariç tutulan",
+    "loading": "Hesaplar yükleniyor…",
+    "error": "Hesaplar yüklenemedi. Yeniden denemek için düzenleyiciyi tekrar açın.",
+    "missing": "Kullanılamayan hesap ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Bu API anahtarı için Codex hizmet modu",
     "description": "Kombinasyonlardaki Codex modelleri dâhil olmak üzere Codex isteklerine uygulanır. Zorunlu modlar; istemci, genel ayarlar ve bağlantı varsayılanlarını geçersiz kılar. Diğer sağlayıcılar değişmeden kalır.",

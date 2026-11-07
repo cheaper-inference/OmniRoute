@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Preferenze degli account",
+    "description": "Imposta più account come preferiti oppure tienili di riserva per questa combinazione. L'instradamento automatico assegna una priorità agli account all'interno di ogni livello. Gli account non elencati restano normali. Le autorizzazioni, i limiti di quota e le associazioni ai turni esistenti continuano ad applicarsi.",
+    "preferred": "Preferito",
+    "normal": "Normale",
+    "reserve": "Di riserva",
+    "excluded": "Escluso",
+    "loading": "Caricamento degli account…",
+    "error": "Impossibile caricare gli account. Riapri l'editor per riprovare.",
+    "missing": "Account non disponibile ({id})"
+  },
   "teamCosts": {
     "title": "Costi del team",
     "subtitle": "Gestisci i budget flessibili condivisi e le stime dei costi del catalogo.",

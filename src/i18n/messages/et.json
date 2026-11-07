@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Konto eelistused",
+    "description": "Eelista selle kombinatsiooni jaoks mitut kontot või hoia neid varuks. Automaatne marsruutimine järjestab kontod igas tasemes. Loetlemata kontod on tavapärased. Endiselt kehtivad õigused, kvoodipiirangud ja olemasolevad vooruseosed.",
+    "preferred": "Eelistatud",
+    "normal": "Tavaline",
+    "reserve": "Varuks",
+    "excluded": "Välistatud",
+    "loading": "Kontode laadimine…",
+    "error": "Kontosid ei saanud laadida. Uuesti proovimiseks avage redaktor uuesti.",
+    "missing": "Konto pole saadaval ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Codexi teenuserežiim selle API-võtme jaoks",
     "description": "Kehtib Codexi päringutele, sealhulgas kombinatsioonides sisalduvatele Codexi mudelitele. Sundrežiimid alistavad kliendi, globaalsed sätted ja ühenduse vaikeseaded. Teiste teenusepakkujate sätted ei muutu.",
