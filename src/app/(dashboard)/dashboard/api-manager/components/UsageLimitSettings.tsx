@@ -9,19 +9,24 @@ export function UsageLimitSettings({
   enabled,
   dailyLimitUsd,
   weeklyLimitUsd,
+  fiveHourLimitUsd,
   onEnabledChange,
   onDailyLimitUsdChange,
   onWeeklyLimitUsdChange,
+  onFiveHourLimitUsdChange,
 }: {
   enabled: boolean;
   dailyLimitUsd: string;
   weeklyLimitUsd: string;
+  /** Rolling 5-hour USD window (spend ages out 5 h after each request). */
+  fiveHourLimitUsd: string;
   /** Kept for callers; the switch state is conveyed by the kit Switch itself. */
   enabledLabel: string;
   disabledLabel: string;
   onEnabledChange: (enabled: boolean) => void;
   onDailyLimitUsdChange: (value: string) => void;
   onWeeklyLimitUsdChange: (value: string) => void;
+  onFiveHourLimitUsdChange: (value: string) => void;
 }) {
   const t = useTranslations("usageLimits");
   return (
@@ -58,6 +63,18 @@ export function UsageLimitSettings({
           onChange={(event) => onWeeklyLimitUsdChange(event.target.value)}
           placeholder="0.00"
         />
+      </div>
+      <div className="mt-2">
+        <Input
+          label={t("fiveHourQuotaUsd")}
+          type="number"
+          min={0}
+          step="0.01"
+          value={fiveHourLimitUsd}
+          onChange={(event) => onFiveHourLimitUsdChange(event.target.value)}
+          placeholder="0.00"
+        />
+        <p className="mt-1 text-[11px] text-text-muted">{t("fiveHourQuotaHint")}</p>
       </div>
       <p className="mt-2 text-[11px] text-text-muted">{t("quotaWindowDescription")}</p>
     </div>

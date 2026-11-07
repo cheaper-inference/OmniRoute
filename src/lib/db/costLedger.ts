@@ -220,6 +220,19 @@ export function sumSearchLedgerSpendSince(apiKeyId: string, sinceIso: string): n
   return getAggRow(row).amountUsd;
 }
 
+/** Oldest search-ledger spend in the window, or null when there is none. */
+export function getOldestSearchLedgerSpendSince(apiKeyId: string, sinceIso: string): string | null {
+  if (!apiKeyId) return null;
+  const row = getDbInstance()
+    .prepare(
+      `SELECT MIN(timestamp) AS oldest
+       FROM request_cost_ledger
+       WHERE api_key_id = ? AND timestamp >= ? AND service_tier = ?`
+    )
+    .get(apiKeyId, sinceIso, SEARCH_LEDGER_SERVICE_TIER) as { oldest?: unknown } | undefined;
+  return typeof row?.oldest === "string" && row.oldest ? row.oldest : null;
+}
+
 /**
  * Return ledger rows for an api key within a window (descending timestamp).
  * Used by tests and future dashboard surfaces. `limit` is clamped to 500.

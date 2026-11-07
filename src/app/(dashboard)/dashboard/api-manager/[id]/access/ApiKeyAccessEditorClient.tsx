@@ -405,6 +405,7 @@ function AccessLimitsPanelPanelContent({ context }: { context: AccessFormContext
       setUsageLimitEnabled={form.setUsageLimitEnabled}
       setDailyUsageLimitUsd={form.setDailyUsageLimitUsd}
       setWeeklyUsageLimitUsd={form.setWeeklyUsageLimitUsd}
+      setFiveHourUsageLimitUsd={form.setFiveHourUsageLimitUsd}
       errors={form.tabErrors.limits}
     />
   );

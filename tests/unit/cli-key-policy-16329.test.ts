@@ -63,6 +63,7 @@ test.beforeEach(async () => {
     usageLimitEnabled: true,
     dailyUsageLimitUsd: 2,
     weeklyUsageLimitUsd: 10,
+    fiveHourUsageLimitUsd: 3,
     noLog: true,
   });
   requests = [];
@@ -92,6 +93,8 @@ test("policy show uses authenticated management route and exposes policy without
   const value = JSON.parse(result.output);
   assert.equal(value.modelAccessMode, "restricted");
   assert.deepEqual(value.allowedModels, ["openai/gpt-4o"]);
+  assert.equal(value.weeklyUsageLimitUsd, 10);
+  assert.equal(value.fiveHourUsageLimitUsd, 3);
   assert.equal("key" in value, false);
   assert.equal("machineId" in value, false);
   assert.equal(result.output.includes(target.key), false);

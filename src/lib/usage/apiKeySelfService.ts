@@ -211,7 +211,7 @@ function normalizePlan(value: unknown): unknown {
 
 function isSupportedProvider(
   provider: string,
-  connection?: { provider?: string; providerSpecificData?: unknown },
+  connection?: { provider?: string; providerSpecificData?: unknown }
 ): boolean {
   return supportsProviderQuota(provider, connection);
 }
