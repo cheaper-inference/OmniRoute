@@ -74,11 +74,6 @@ export function getPiModelsPath(env: NodeJS.ProcessEnv = process.env): string {
   return path.join(getPiAgentDir(env), "models.json");
 }
 
-/** Path to the agent-level settings.json (theme, changelog, …). Read-only here. */
-export function getPiSettingsPath(env: NodeJS.ProcessEnv = process.env): string {
-  return path.join(getPiAgentDir(env), "settings.json");
-}
-
 function getPiHome(env: NodeJS.ProcessEnv = process.env): string {
   // Prefer $HOME (what the API routes and Pi agree on); os.homedir() is the
   // fallback for platforms that leave it unset.
@@ -90,15 +85,6 @@ function expandTilde(value: string, env: NodeJS.ProcessEnv): string {
   if (!value.startsWith("~")) return value;
   const home = typeof env.HOME === "string" && env.HOME.trim() ? env.HOME : os.homedir();
   return path.join(home, value.slice(1));
-}
-
-async function fileExists(filePath: string): Promise<boolean> {
-  try {
-    await fs.access(filePath);
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -370,13 +356,4 @@ export async function removeOmniRoutePiProvider(
   }
 
   return { removed: true, modelsPath };
-}
-
-/** Surface whether the agent dir + models.json exist, for the dashboard summary. */
-export async function getPiconfigPresence(
-  env: NodeJS.ProcessEnv = process.env
-): Promise<{ modelsPath: string; agentDir: string; modelsFileExists: boolean }> {
-  const agentDir = getPiAgentDir(env);
-  const modelsPath = getPiModelsPath(env);
-  return { modelsPath, agentDir, modelsFileExists: await fileExists(modelsPath) };
 }
