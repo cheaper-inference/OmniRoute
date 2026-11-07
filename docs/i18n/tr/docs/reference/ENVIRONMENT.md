@@ -1368,7 +1368,7 @@ Bir ay boyunca açık tutulan bir hizmet yaklaşık 744 bulut sunucusu saati kul
 
 ## Dağıtım Senaryoları
 
-Relay backend SRE yönlendirmesi (ts/bifrost/auto davranışı, 9router ile CLIProxyAPI konumlandırması ve yüksek aktarım hacimli geri dönüş stratejisi) için [Relay Backend Strategy](/docs/reference/RELAY_BACKEND_STRATEGY.md) bölümüne bakın.
+Relay backend SRE yönergeleri (ts/bifrost/auto davranışı, 9router ile CLIProxyAPI yerleşimi ve yüksek aktarım hızı için geri dönüş stratejisi) için bkz. [Relay Backend Strategy](/docs/reference/RELAY_BACKEND_STRATEGY.md).
 
 ### Minimal Yerel Geliştirme
 
@@ -1399,7 +1399,7 @@ OMNIROUTE_MEMORY_MB=8192
 CORS_ORIGIN=https://your-frontend.example.com
 ```
 
-### İnternet Bağlantısından İzole / CI
+### İnternetten İzole / CI
 
 ```bash
 JWT_SECRET=test-jwt-secret-for-ci
@@ -1872,3 +1872,14 @@ OmniConductor hub görevlerini yerel A2A TaskManager (`src/lib/conductor/`) yans
 | Değişken                       | Varsayılan | Kaynak Dosyası                               | Tanım                                                                                                                                                                                                                                         |
 | ------------------------------ | ---------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`        | `src/lib/providerModels/modelSyncTimings.ts` | Model senkronizasyonu sırasında faz zamanlamasını, oluşturulan istek ID ve faz success/error sonuçlarını günlüğe kaydetmek için `1` ayarlayın. Diğer tüm değerler için devre dışı. Günlüklerde istek, hesap, katalog ve hata yükleri atlanır. |
+
+## Yerel OpenCode medya analizi aracı
+
+`scripts/cli/omniroute-media-mcp.mjs` tarafından kullanılır. Bunları yerel araç işleminin ortamında ayarlayın.
+
+| Değişken                   | Varsayılan                                                                          | Açıklama                                                                                                            |
+| -------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (veya `~/.config/opencode/opencode.json`) | Medya aracı ve yükleyici tarafından okunan OpenCode yapılandırması.                                                 |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                         | Medya aracı tarafından OpenCode yapılandırmasından okunan sağlayıcı girdisi.                                        |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                              | Medya aracı tarafından gönderilen model. Sağlayıcısı, istenen medya türlerini desteklemelidir.                      |
+| `OMNIROUTE_MEDIA_API_KEY`  | Yapılandırılmış sağlayıcı API anahtarı veya ortam referansı                         | İsteğe bağlı kimlik bilgisi geçersiz kılma seçeneği. Bunu yerel işlem ortamında tutun; hiçbir zaman işleme almayın. |

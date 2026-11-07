@@ -1367,9 +1367,9 @@ Render idawwar servizz tal-web b'xejn wara madwar 15-il minuta mingħajr traffik
 
 Servizz li jinżamm imqajjem għal xahar sħiħ juża madwar 744 siegħa ta' istanza, għalhekk iċċekkjah mal-allowance kurrenti ta' Render għal livell ħieles.
 
-## Xenarji ta’ Deployment
+## Xenarji tal-Użu
 
-Għal gwida SRE dwar il-backend tar-relay (l-imġiba ta’ ts/bifrost/auto, it-tqegħid ta’ 9router kontra CLIProxyAPI, u l-istrateġija ta’ fallback għal throughput għoli), ara [Strateġija tal-Backend tar-Relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).
+Għal gwida SRE dwar il-backend tar-relay (imġiba ta’ ts/bifrost/auto, tqegħid ta’ 9router kontra CLIProxyAPI, u strateġija ta’ fallback għal traffiku għoli), ara [Strateġija tal-Backend tar-Relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).
 
 ### Żvilupp Lokali Minimu
 
@@ -1873,3 +1873,14 @@ Użat minn `open-sse/services/combo.ts` u `src/lib/quota/quotaScheduler.ts` għa
 | Varjabbli                      | Default | Sors Fajl                                    | Deskrizzjoni                                                                                                                                                                                                                                       |
 | ------------------------------ | ------- | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`     | `src/lib/providerModels/modelSyncTimings.ts` | Issettjat għal `1` biex tilloggja l-ħin tal-fażi, talba ġġenerata ID u riżultati tal-fażi success/error waqt is-sinkronizzazzjoni tal-mudell. Disabled għall-valuri l-oħra kollha. Zkuk iħallu barra rikjesti, kont, katalgu u payloads ta 'żball. |
+
+## Għodda lokali ta' analiżi tal-midja ta' OpenCode
+
+Użata minn `scripts/cli/omniroute-media-mcp.mjs`. Issettja dawn fl-ambjent tal-proċess tal-għodda lokali.
+
+| Varjabbli                  | Default                                                                            | Deskrizzjoni                                                                                                                            |
+| -------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (jew `~/.config/opencode/opencode.json`) | Konfigurazzjoni ta' OpenCode li tinqara mill-għodda tal-midja u mill-installatur.                                                       |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                        | Entrata tal-fornitur li tinqara mill-konfigurazzjoni ta' OpenCode mill-għodda tal-midja.                                                |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                             | Mudell mibgħut mill-għodda tal-midja. Il-fornitur tiegħu għandu jappoġġja t-tipi tal-midja mitluba.                                     |
+| `OMNIROUTE_MEDIA_API_KEY`  | Ċavetta API tal-fornitur ikkonfigurata jew ir-referenza ambjentali tagħha          | Kredenzjali fakultattivi biex jissostitwixxu dawk ikkonfigurati. Żommhom fl-ambjent tal-proċess lokali; qatt ma tagħmel commit tagħhom. |
