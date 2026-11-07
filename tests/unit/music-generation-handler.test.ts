@@ -364,3 +364,78 @@ test("handleMusicGeneration surfaces Gemini Lyria upstream errors without swallo
     globalThis.fetch = originalFetch;
   }
 });
+
+test("handleMusicGeneration aborts the Gemini Lyria call with the client's request", async () => {
+  const originalFetch = globalThis.fetch;
+  const controller = new AbortController();
+  let upstreamSignal;
+
+  globalThis.fetch = async (_url, options = {}) => {
+    upstreamSignal = options.signal;
+    controller.abort();
+    throw Object.assign(new Error("This operation was aborted"), { name: "AbortError" });
+  };
+
+  try {
+    const result = await handleMusicGeneration({
+      body: { model: "gemini/lyria-3-pro-preview", prompt: "x" },
+      credentials: { apiKey: "gemini-key" },
+      log: null,
+      signal: controller.signal,
+    });
+
+    assert.equal(upstreamSignal, controller.signal);
+    assert.equal(result.success, false);
+    assert.equal(result.status, 499);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("handleMusicGeneration rejects a Gemini Lyria call without a key before reaching upstream", async () => {
+  const originalFetch = globalThis.fetch;
+  let upstreamCalls = 0;
+
+  globalThis.fetch = async () => {
+    upstreamCalls += 1;
+    return new Response("{}", { status: 200 });
+  };
+
+  try {
+    const result = await handleMusicGeneration({
+      body: { model: "gemini/lyria-3-pro-preview", prompt: "x" },
+      credentials: {},
+      log: null,
+    });
+
+    assert.equal(result.success, false);
+    assert.equal(result.status, 401);
+    assert.equal(upstreamCalls, 0);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("handleMusicGeneration reports a Gemini Lyria answer without audio as a 502", async () => {
+  const originalFetch = globalThis.fetch;
+
+  globalThis.fetch = async () =>
+    new Response(
+      JSON.stringify({ candidates: [{ content: { parts: [{ text: "<instrumental>" }] } }] }),
+      { status: 200, headers: { "content-type": "application/json" } }
+    );
+
+  try {
+    const result = await handleMusicGeneration({
+      body: { model: "gemini/lyria-3-pro-preview", prompt: "x" },
+      credentials: { apiKey: "gemini-key" },
+      log: null,
+    });
+
+    assert.equal(result.success, false);
+    assert.equal(result.status, 502);
+    assert.match(result.error, /no audio content/);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

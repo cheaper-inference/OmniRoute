@@ -147,9 +147,20 @@ test("music catalog GET lists a discovered music model once when its registry al
     ])
   );
 
-  const ids = await listedIds(musicRoute, "/v1/music/generations");
+  const response = await musicRoute.GET(new Request("http://localhost/v1/music/generations"));
+  const body = (await response.json()) as {
+    data?: Array<{ id: string; supported_endpoints?: string[] }>;
+  };
+  assert.equal(response.status, 200);
+  const models = body.data || [];
+  const ids = models.map((model) => model.id);
 
   assert.equal(ids.filter((id) => id === "gemini/lyria-3-pro-preview").length, 1);
+  // The registry row carries no supported_endpoints, so this proves the synced row survived.
+  assert.deepEqual(
+    models.find((model) => model.id === "gemini/lyria-3-pro-preview")?.supported_endpoints,
+    ["music"]
+  );
   // A registry-only neighbour still lists: it has no discovery snapshot of its own.
   assert.equal(ids.filter((id) => id === "gemini/lyria-3-clip-preview").length, 1);
 });

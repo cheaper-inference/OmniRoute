@@ -46,6 +46,7 @@ interface GeminiMusicArgs {
   body: Record<string, unknown>;
   credentials?: GeminiMusicCredentials | null;
   log?: GeminiMusicLog | null;
+  signal?: AbortSignal | null;
 }
 
 /** Containers the response can come back in, keyed by the inline part's mime type. */
@@ -93,6 +94,7 @@ export async function handleGeminiMusicGeneration({
   body,
   credentials,
   log,
+  signal = null,
 }: GeminiMusicArgs) {
   const startTime = Date.now();
   const apiKey = stringValue(credentials?.apiKey);
@@ -117,6 +119,7 @@ export async function handleGeminiMusicGeneration({
       method: "POST",
       headers,
       body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }] }),
+      ...(signal ? { signal } : {}),
     });
 
     if (!response.ok) {
@@ -168,6 +171,16 @@ export async function handleGeminiMusicGeneration({
       },
     };
   } catch (err) {
+    if (signal?.aborted) {
+      logGeminiMusicCall({
+        status: 499,
+        model: modelLabel,
+        provider,
+        duration: Date.now() - startTime,
+        error: "Request aborted",
+      });
+      return { success: false as const, status: 499, error: "Request aborted" };
+    }
     const message = sanitizeErrorMessage(err) || "Gemini music generation failed";
     log?.error?.("MUSIC", `${modelLabel} gemini-lyria failed: ${message}`);
     logGeminiMusicCall({

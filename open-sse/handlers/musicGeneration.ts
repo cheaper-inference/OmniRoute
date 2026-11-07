@@ -150,6 +150,7 @@ export async function handleMusicGeneration({ body, credentials, log, signal = n
       body,
       credentials,
       log,
+      signal,
     });
   }
 
