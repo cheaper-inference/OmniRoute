@@ -70,6 +70,20 @@ function executionProtocol(response: Response, requestUrl: string): NativeProtoc
   return null;
 }
 
+// Anthropic reasons for "the turn ended on purpose", as opposed to "the turn was
+// cut off". `refusal` belongs here: the model declined to answer and closed the
+// stream itself, so the absence of output is intended rather than truncated. It is
+// not a successful completion, and nothing here hides that -- the response
+// translator turns the reason into `finish_reason: "content_filter"`, which is the
+// signal a caller acts on. Counting it as a failed attempt instead turned a
+// deliberate refusal into a 502, and a caller that retries a 502 retries a refusal
+// forever.
+//
+// `max_tokens` and `model_context_window_exceeded` are deliberately absent. Those
+// mean output was cut short, so the caller is owed a retry or a narrower request;
+// treating them as a normal end would silently hand back a truncated answer.
+const NORMAL_CLAUDE_STOP_REASONS = new Set(["end_turn", "stop_sequence", "refusal"]);
+
 function observeClaudePayload(state: EmptyTurnExecution, data: Record<string, unknown>) {
   if (
     data.type === "content_block_start" ||
@@ -78,7 +92,7 @@ function observeClaudePayload(state: EmptyTurnExecution, data: Record<string, un
     state.openedBlock = true;
   const delta = data.delta as Record<string, unknown> | undefined;
   const reason = data.stop_reason ?? delta?.stop_reason;
-  if (reason === "end_turn" || reason === "stop_sequence") state.normalStop = true;
+  if (NORMAL_CLAUDE_STOP_REASONS.has(reason as string)) state.normalStop = true;
   if (typeof reason === "string") state.terminalStatus = safeStopReason(reason);
   if (data.type === "message_stop" || data.type === "message") {
     state.messageStop = true;
