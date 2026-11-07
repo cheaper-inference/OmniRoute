@@ -26,6 +26,7 @@
 import zlib from "node:zlib";
 import { promisify } from "node:util";
 import { logger } from "../../utils/logger.ts";
+import { captureCurrentProviderBody } from "../../utils/providerRequestLogging.ts";
 import { isUrlHost } from "../../utils/urlHost.ts";
 import { canGuardDirectConnection } from "../dispatchPin.ts";
 
@@ -163,9 +164,12 @@ export async function dispatchWithGzipBody(
   const body = init.body as string;
   const payload = SIGNED_BODY.test(body) ? body : body + lengthPadding();
   const compressed = await gzipAsync(payload, { level: GZIP_LEVEL });
+  const headers = gzipHeaders(init.headers);
+  // The fetch-level request capture cannot read compressed bytes: hand it the JSON directly.
+  await captureCurrentProviderBody(url, Object.fromEntries(new Headers(headers)), body);
   const response = await transport(url, {
     ...init,
-    headers: gzipHeaders(init.headers),
+    headers,
     body: compressed as unknown as BodyInit,
   });
   if (!(await isGzipRejection(response))) return response;

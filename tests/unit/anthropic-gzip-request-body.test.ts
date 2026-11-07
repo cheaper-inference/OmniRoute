@@ -53,7 +53,10 @@ const server = http.createServer((req, res) => {
 });
 await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
 const localUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}/v1/messages`;
-test.after(() => new Promise<void>((resolve) => server.close(() => resolve())));
+test.after(async () => {
+  await new Promise<void>((resolve) => server.close(() => resolve()));
+  fs.rmSync(dataDir, { recursive: true, force: true });
+});
 
 // The real fetch goes to the local server; only the URL the gate inspects is the official host.
 const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
@@ -397,4 +400,89 @@ test("the claude executor sends a gzip body that decodes to the transformed requ
   const decoded = JSON.parse(zlib.gunzipSync(wire!.body).toString("utf8"));
   assert.equal(decoded.model, "claude-haiku-4-5");
   assert.equal(decoded.messages[0].content[0].text, "lorem ipsum ".repeat(1200));
+});
+
+const largeExecutorInput = () => ({
+  model: "claude-haiku-4-5",
+  body: {
+    model: "claude-haiku-4-5",
+    max_tokens: 16,
+    messages: [{ role: "user", content: [{ type: "text", text: "lorem ipsum ".repeat(1200) }] }],
+  },
+  stream: false,
+  credentials: { apiKey: "fixture-api-key" },
+  signal: new AbortController().signal,
+  log: null,
+});
+
+test("the provider request log still gets the JSON of a gzip dispatch", async () => {
+  reset();
+  const { getExecutor } = await import("../../open-sse/executors/index.ts");
+  const { runWithCapture } = await import("../../open-sse/utils/providerRequestLogging.ts");
+  const executor = await getExecutor("anthropic");
+  const captured: Array<{ url: string; body: unknown; headers: Record<string, string> }> = [];
+  const capture = {
+    capture: (request: { url: string; body: unknown; headers: Record<string, string> }) => {
+      captured.push(request);
+    },
+    body: (fallback: unknown) => fallback,
+  };
+  const originalFetch = globalThis.fetch;
+  let encoding: string | null = null;
+  globalThis.fetch = (async (_url: string | URL | Request, init: RequestInit = {}) => {
+    encoding = new Headers(init.headers).get("content-encoding");
+    return new Response(JSON.stringify({ id: "msg_1", type: "message", content: [] }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  }) as typeof fetch;
+  try {
+    await runWithCapture(capture, () => executor.execute(largeExecutorInput()));
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+  assert.equal(encoding, "gzip");
+  assert.equal(captured.length, 1);
+  assert.equal(new URL(captured[0].url).host, "api.anthropic.com");
+  const logged = captured[0].body as { model: string; messages: Array<{ content: unknown[] }> };
+  assert.equal(logged.model, "claude-haiku-4-5");
+  assert.deepEqual(logged.messages[0].content[0], {
+    type: "text",
+    text: "lorem ipsum ".repeat(1200),
+  });
+});
+
+test("a refused gzip send and its identity resend are two observed HTTP attempts", async () => {
+  reset();
+  const { getExecutor } = await import("../../open-sse/executors/index.ts");
+  const { runWithCapture } = await import("../../open-sse/utils/providerRequestLogging.ts");
+  const { HttpAttemptCollector } = await import("../../open-sse/utils/providerHttpAttempts.ts");
+  const executor = await getExecutor("anthropic");
+  const httpAttempts = new HttpAttemptCollector();
+  const capture = { httpAttempts, capture: () => {}, body: (fallback: unknown) => fallback };
+  const originalFetch = globalThis.fetch;
+  const encodings: Array<string | null> = [];
+  globalThis.fetch = (async (_url: string | URL | Request, init: RequestInit = {}) => {
+    encodings.push(new Headers(init.headers).get("content-encoding"));
+    return encodings.length === 1
+      ? new Response("{}", { status: 415 })
+      : new Response(JSON.stringify({ id: "msg_1", type: "message", content: [] }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+  }) as typeof fetch;
+  let status = 0;
+  try {
+    const result = await runWithCapture(capture, () => executor.execute(largeExecutorInput()));
+    status = result.response.status;
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+  assert.equal(status, 200);
+  assert.deepEqual(encodings, ["gzip", null]);
+  const drained = httpAttempts.drain(null, 200);
+  assert.deepEqual(
+    drained?.records.map((record) => record.status),
+    [415, 200]
+  );
 });
