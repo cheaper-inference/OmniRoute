@@ -58,14 +58,17 @@ test("account rotation is exposed through bounded routing telemetry headers", as
   });
 
   const attempts: string[] = [];
+  let failedAuthorization: string | null = null;
   globalThis.fetch = async (input, init) => {
     const request = input instanceof Request ? input : new Request(input, init);
     const authorization = request.headers.get("authorization") || "";
     attempts.push(authorization);
+    failedAuthorization ??= authorization;
 
-    // Account order can vary with runtime selection/affinity; force one real
-    // failed attempt and assert that the subsequent attempt uses a sibling.
-    if (attempts.length === 1) {
+    // An upstream executor can retry the same URL/account on HTTP 429.
+    // Keep that account rate-limited through those transport retries; only a
+    // genuinely different connection is allowed to return a 200.
+    if (authorization === failedAuthorization) {
       return new Response(
         JSON.stringify({
           error: {
@@ -92,9 +95,10 @@ test("account rotation is exposed through bounded routing telemetry headers", as
   );
 
   assert.equal(response.status, 200);
-  assert.equal(attempts.length, 2);
-  assert.notEqual(attempts[0], attempts[1], "fallback must switch connections");
-  const servingConnection = attempts[1].includes("sk-account-fallback-first") ? first : second;
+  assert.ok(attempts.length >= 2, "expected an upstream error before the healthy sibling");
+  assert.equal(new Set(attempts).size, 2, "fallback must use exactly one distinct sibling");
+  assert.notEqual(attempts.at(-1), attempts[0], "fallback must switch connections");
+  const servingConnection = attempts.at(-1)?.includes("sk-account-fallback-first") ? first : second;
   assert.equal(response.headers.get("X-OmniRoute-Selected-Connection-Id"), servingConnection.id);
   assert.equal(response.headers.get("X-OmniRoute-Account-Fallbacks"), "1");
   assert.equal(response.headers.get("X-OmniRoute-Account-Fallback-Reasons"), "http_429");
