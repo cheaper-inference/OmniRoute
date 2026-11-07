@@ -4,6 +4,7 @@
 
 ### ✨ New Features
 
+- **feat(providers):** add JZS Token (`jzstoken`) as an OpenAI-compatible API-key gateway at `https://jzstoken.com/api/v1`, with live key-scoped model discovery and no seeded catalog. A Standard key and a Dedicated key are mutually exclusive: Standard omits `jzs-max-3.0`, and Dedicated lists only that model, so each key is its own connection.
 - **feat(dashboard):** adaptive context-budget dial on the compression settings panel — mode (`off` / `floor` / `replace-autotrigger`) and policy (`reserve-output` / `percentage` / `absolute`) persist via `PUT /api/settings/compression` `contextBudget`. Completes the dashboard half of #7005 (API + DB already shipped in #7183).
 - **feat(sse): STRICT_ZERO_COST** — opt-in, off-by-default `freeAccessPolicy: "strict"` setting
   that hard-verifies every auto-combo candidate against live quota state and per-connection
