@@ -1,0 +1,1 @@
+- **fix(sse):** Gemini/Antigravity tool calls no longer pass a synthetic `reason` argument to the client, so Claude Code stops rejecting its parameter-less tools ([#18269](https://github.com/diegosouzapw/OmniRoute/pull/18269)) — thanks @zeydsama
