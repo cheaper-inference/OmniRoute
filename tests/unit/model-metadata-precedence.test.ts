@@ -49,6 +49,43 @@ test("a custom model that was not discovered is appended", () => {
   assert.deepEqual(merged, [{ id: "a" }, { id: "z", name: "Z" }]);
 });
 
+test("defaulted custom endpoints do not override discovered declared/inferred endpoints", () => {
+  const base = {
+    id: "mistral-embed",
+    name: "mistral-embed-2312",
+    supportedEndpoints: ["embeddings"],
+    endpointCapabilitySource: "inferred",
+    apiFormat: "embeddings",
+    modelType: "embedding",
+  };
+  const custom = {
+    id: "mistral-embed",
+    name: "mistral-embed",
+    source: "imported",
+    supportedEndpoints: ["chat"],
+    endpointCapabilitySource: "defaulted",
+  };
+  const merged = mergeCustomModelMetadata(base, custom);
+  assert.deepEqual(merged.supportedEndpoints, ["embeddings"]);
+  assert.equal(merged.endpointCapabilitySource, "inferred");
+});
+
+test("operator-set endpoints DO override discovered endpoints", () => {
+  const base = {
+    id: "mistral-embed",
+    supportedEndpoints: ["embeddings"],
+    endpointCapabilitySource: "inferred",
+  };
+  const custom = {
+    id: "mistral-embed",
+    supportedEndpoints: ["embeddings", "chat"],
+    endpointCapabilitySource: "operator",
+  };
+  const merged = mergeCustomModelMetadata(base, custom);
+  assert.deepEqual(merged.supportedEndpoints, ["embeddings", "chat"]);
+  assert.equal(merged.endpointCapabilitySource, "operator");
+});
+
 test("with no custom models the base list is returned as a copy", () => {
   const base = [{ id: "a" }, { id: "b" }];
   const merged = mergeModelsWithCustomPrecedence(base, []);

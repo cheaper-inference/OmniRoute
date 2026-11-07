@@ -115,3 +115,36 @@ test("the sync layer does not publish tool_calling from supportsTools", () => {
     tool_calling: false,
   });
 });
+
+test("defaulted custom row does not mask declared/inferred endpoints from synced row", async () => {
+  await seedSynced("mistral", [
+    {
+      id: "mistral-embed-18510",
+      capabilities: { completion_chat: false },
+      supportedEndpoints: ["embeddings"],
+      endpointCapabilitySource: "inferred",
+      apiFormat: "embeddings",
+      modelType: "embedding",
+    },
+  ]);
+
+  // Simulate "Import from /models" or legacy defaulted custom row
+  await modelsDb.addCustomModel(
+    "mistral",
+    "mistral-embed-18510",
+    "mistral-embed-18510",
+    "imported",
+    "chat-completions",
+    ["chat"],
+    undefined,
+    {},
+    undefined,
+    undefined,
+    undefined,
+    { endpointCapabilitySource: "defaulted" }
+  );
+
+  const row = await catalogRow("mistral/mistral-embed-18510");
+  assert.deepEqual(row.supported_endpoints, ["embeddings"]);
+  assert.equal(row.type, "embedding");
+});
