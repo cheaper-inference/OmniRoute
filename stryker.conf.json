@@ -63,7 +63,8 @@
       "tests/unit/anthropic-compatible-prefill.test.ts",
       "tests/unit/anthropic-fallback-policy-16406.test.ts",
       "tests/unit/combo-cooldown-wait-opt-out.test.ts",
-      "tests/unit/combo-authorized-retry-cooldown-18257.test.ts",
+      "tests/unit/shadow-routing-copy-on-dispatch.test.ts",
+      "tests/unit/combo-credential-auth-error-scoping.test.ts",
       "tests/unit/combo-family-selected-connection-16223.test.ts",
       "tests/unit/combo-safety-stop.test.ts",
       "tests/unit/combo-live-connection-id-18374.test.ts",
@@ -194,6 +195,7 @@
       "tests/unit/opencode-400-model-unavailable.test.ts",
       "tests/unit/opencode-endpoint-unavailable.test.ts",
       "tests/unit/quota-window-label.test.ts",
+      "tests/unit/quota-window-retirement.test.ts",
       "tests/unit/quota-availability-family-pools.test.ts",
       "tests/unit/quota-availability-router-filters.test.ts",
       "tests/unit/quota-availability-saved-family.test.ts",
@@ -331,6 +333,7 @@
       "tests/unit/combo-identical-error-streak.test.ts",
       "tests/unit/combo-priority-compat-fallback.test.ts",
       "tests/unit/combo-priority-quota-exhaustion-cutoff-5923.test.ts",
+      "tests/unit/combo-process-pressure-terminal.test.ts",
       "tests/unit/combo-provider-cooldown-sibling.test.ts",
       "tests/unit/combo-provider-cooldown.test.ts",
       "tests/unit/combo-provider-diversity-wiring.test.ts",
@@ -508,6 +511,7 @@
       "tests/unit/providers-route-codex-account-pool.test.ts",
       "tests/unit/proxy-logs-egress-lookup-10880.test.ts",
       "tests/unit/public-client-ids-3493.test.ts",
+      "tests/unit/public-stream-error-codes.test.ts",
       "tests/unit/publicCreds.test.ts",
       "tests/unit/qoder-oauth-config.test.ts",
       "tests/unit/qoder-pat-tools-13697.test.ts",
@@ -742,7 +746,8 @@
       "tests/unit/upstream-http-attempt-rows.test.ts",
       "tests/unit/upstream-http-edge-selection.test.ts",
       "tests/unit/issue-18600-muse-request-dispatch.test.ts",
-      "tests/unit/issue-18600-muse-followup-isolation.test.ts"
+      "tests/unit/issue-18600-muse-followup-isolation.test.ts",
+      "tests/unit/universal-handoff-api-key-scope.test.ts"
     ],
     "nodeArgs": [
       "--import",

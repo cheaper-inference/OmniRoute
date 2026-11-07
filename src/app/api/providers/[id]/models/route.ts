@@ -103,6 +103,7 @@ import {
   getCachedDiscoveredModels,
   isAutoFetchModelsEnabled,
   persistDiscoveredModels,
+  persistNonEmptyDiscoveredModels,
 } from "@/lib/providerModels/modelDiscovery";
 import { buildProviderModelsUrl, getDiscoveryClientVersionOptions } from "./discoveryClientVersion";
 import { getAdobeModels } from "./adobeFireflyDiscovery";
@@ -452,7 +453,11 @@ export async function GET(
       warning?: string,
       extraPayload: Record<string, unknown> = {}
     ) => {
-      const discoveredModels = await persistDiscoveredModels(provider, connectionId, models);
+      const discoveredModels = await persistNonEmptyDiscoveredModels(
+        provider,
+        connectionId,
+        models
+      );
       if (discoveredModels.length > 0) {
         // #6976 — merge curated embedding/rerank specialty entries (e.g.
         // OpenRouter's embeddingRegistry catalog) into the live-discovery
@@ -469,48 +474,24 @@ export async function GET(
         });
       }
 
-      // Empty discovery just cleared THIS connection's synced cache (via
-      // persistDiscoveredModels([])). `providerSyncedModels` was read at the top
-      // of the handler and is now stale, so it must not leak the just-cleared
-      // models back into the response (#3148 made synced authoritative for the
-      // normal path; here we re-read the current state instead). Re-derive the
-      // local catalog from the provider's remaining synced models (union across
-      // its other connections) or the static catalog when none remain.
-      let freshSynced: Awaited<ReturnType<typeof getSyncedAvailableModels>> = [];
-      try {
-        freshSynced = filterModelsForRoute(
-          provider,
-          await getSyncedAvailableModels(provider),
-          chatOnly
-        );
-      } catch {
-        /* DB unavailable — fall through to static catalog */
-      }
-      const freshRegistry = freshSynced.length
-        ? freshSynced.map((model) => toDiscoveryCatalogModel(model))
-        : getModelsByProviderId(provider) || [];
-      const freshSpecialty = freshSynced.length ? [] : getStaticModelsForProvider(provider) || [];
-      const freshLocal = mergeLocalCatalogModels(freshRegistry, freshSpecialty).map((model) =>
-        toDiscoveryCatalogModel(model, freshRegistry.length > 0 ? provider : undefined)
-      );
-      if (freshLocal.length > 0) {
-        return buildResponse({
+      // #19143: the upstream answered but offered no usable model. Nothing was written,
+      // and the degraded answer makes model-sync stop before it imports or cleans up.
+      const failure: DiscoveryFailure = { code: "EMPTY_CATALOG" };
+      return (
+        buildDiscoveryFallbackResponse({
+          cacheWarning: "No remote models discovered, using cached catalog",
+          localWarning: "No remote models discovered, using local catalog",
+          failure,
+        }) ??
+        buildResponse({
           provider,
           connectionId,
-          models: freshLocal,
+          models: [],
           source: "local_catalog",
-          warning: "No remote models discovered — using local catalog",
-          // The upstream answered but offered no usable model.
-          failure: { code: "EMPTY_CATALOG" },
-        });
-      }
-
-      return buildResponse({
-        provider,
-        connectionId,
-        models: [],
-        source: "api",
-      });
+          warning: "No remote models discovered",
+          failure,
+        })
+      );
     };
 
     if (provider === "reka") {
