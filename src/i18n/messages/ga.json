@@ -7039,6 +7039,7 @@
     "fallbackRetryBackendTitle": "Cúltaca ath-iarrachta"
   },
   "settings": {
+    "proxyManagedCoresTab": "Croíthe bainistithe",
     "title": "Socruithe",
     "general": "Ginearálta",
     "security": "Slándáil",
@@ -11585,7 +11586,26 @@
     "entries": "Iontrálacha",
     "viewSwitcherAria": "Amharc taisce"
   },
+  "managedProxy": {
+    "title": "Croíthe seachfhreastalaí bainistithe",
+    "description": "Greamaigh nasc tolláin i réimse óstaigh an tseachfhreastalaí shaincheaptha chun é a shábháil agus a shannadh. Is féidir leat sainmhíniú ar nasc amach i bhformáid dhúchasach JSON a shábháil anseo freisin gan aon sannadh a athrú.",
+    "saveHint": "Le linn sábhála, fíoraítear an croí oifigiúil más gá agus seiceáiltear an chumraíocht dhúchasach roimh ghníomhachtú. Caithfidh na foinsí a bheith criptithe. Ní dhéantar suiteáil le linn réamhamhairc ná uath-thosú, agus ní athraítear an seachfhreastalaí trédhearcach.",
+    "saveActivate": "Sábháil agus gníomhachtaigh",
+    "core": "Croí",
+    "selectCore": "Roghnaigh croí",
+    "name": "Ainm",
+    "source": "Nasc foinse nó nasc amach i bhformáid dhúchasach JSON",
+    "start": "Tosaigh",
+    "stop": "Stop",
+    "loadError": "Ní féidir na croíthe bainistithe a lódáil",
+    "operationError": "Theip ar oibríocht an chroí bhainistithe",
+    "state": "{state, select, not_installed {Gan suiteáil} stopped {Stoptha} starting {Ag tosú} running {Ar siúl} stopping {Ag stopadh} error {Earráid} other {Anaithnid}}"
+  },
   "proxyConfigModal": {
+    "managedCore": "Croí seachfhreastalaí",
+    "managedSelectCore": "Roghnaigh croí",
+    "managedSaveHint": "Le linn sábhála, déantar an croí oifigiúil a íoslódáil agus a fhíorú más gá, seiceáiltear an chumraíocht, agus ansin gníomhachtaítear an seachfhreastalaí seo. Ní shuiteáiltear aon rud agus tú ag clóscríobh.",
+    "errorSelectManagedCore": "Roghnaigh sing-box nó Xray sula sábhálfaidh tú an tollán seo",
     "levelGlobal": "Domhanda",
     "levelProvider": "Soláthraí",
     "levelCombo": "Teaglaim",

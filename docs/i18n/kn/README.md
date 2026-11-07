@@ -729,7 +729,7 @@ omniroute configure codex          # ಇದಕ್ಕೂ: claude opencode qwen ai
 
 <br/>
 
-### 🆓 ಸದಾಕಾಲ ಉಚಿತ — $0, ಯಾವುದೇ ಕಾರ್ಡ್ ಬೇಡರು</analysis code it's weird. Need final typo "ಬೇಡರು" should be "ಬೇಡ". Also must ensure no accidental changes. final answer only. Need resend corrected entire? We need output only translated markdown. We can provide corrected. Ensure "canonical" perhaps untranslated technical. "no card". Do it.
+### 🆓 ಸದಾಕಾಲ ಉಚಿತ — $0, ಯಾವುದೇ ಕಾರ್ಡ್ ಬೇಡರು
 
 <table>
   <tr>

@@ -1,0 +1,1 @@
+- Keep the managed-proxy HTTP regression fixture isolated from the client API auth-touch database, while retaining real authorization and deletion dispatch checks on both supported CI platforms.

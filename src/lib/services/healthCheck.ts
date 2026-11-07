@@ -17,7 +17,8 @@ export class HealthChecker {
   constructor(
     private readonly healthUrl: () => string,
     private readonly intervalMs: number,
-    private readonly onChange: OnHealthChange
+    private readonly onChange: OnHealthChange,
+    private readonly probe?: (signal: AbortSignal) => Promise<boolean>
   ) {}
 
   start(): void {
@@ -50,11 +51,13 @@ export class HealthChecker {
     const timeout = setTimeout(() => controller.abort(), HEALTH_FETCH_TIMEOUT_MS);
 
     try {
-      // Service-health traffic stays on loopback and must bypass the patched
-      // provider egress stack. Refused ports are health state, not proxy noise.
-      const res = await getOriginalFetch()(this.healthUrl(), { signal: controller.signal });
+      // Service-health HTTP traffic bypasses provider egress; native cores use their probe.
+      const healthy = this.probe
+        ? await this.probe(controller.signal)
+        : (await getOriginalFetch()(this.healthUrl(), { signal: controller.signal })).ok;
+      if (!this.active) return;
 
-      if (res.ok) {
+      if (healthy) {
         this.consecutiveFailures = 0;
         this.setHealth("healthy");
       } else {

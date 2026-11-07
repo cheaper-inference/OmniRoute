@@ -7116,6 +7116,7 @@
     "fallbackRetryBackendTitle": "Fallback retry backend"
   },
   "settings": {
+    "proxyManagedCoresTab": "Managed cores",
     "title": "Settings",
     "general": "General",
     "security": "Security",
@@ -11662,7 +11663,26 @@
     "entries": "Entries",
     "viewSwitcherAria": "Cache view"
   },
+  "managedProxy": {
+    "title": "Managed proxy cores",
+    "description": "Paste a tunnel link in the Custom proxy host field to save and assign it. Here you can also save a native outbound JSON definition without changing any assignment.",
+    "saveHint": "Save verifies the official core if needed and checks native configuration before activation. Sources require encryption. No preview installation, autostart or transparent-proxy changes.",
+    "saveActivate": "Save and activate",
+    "core": "Core",
+    "selectCore": "Select a core",
+    "name": "Name",
+    "source": "Source link or native outbound JSON",
+    "start": "Start",
+    "stop": "Stop",
+    "loadError": "Unable to load managed cores",
+    "operationError": "Managed core operation failed",
+    "state": "{state, select, not_installed {Not installed} stopped {Stopped} starting {Starting} running {Running} stopping {Stopping} error {Error} other {Unknown}}"
+  },
   "proxyConfigModal": {
+    "managedCore": "Proxy core",
+    "managedSelectCore": "Select a core",
+    "managedSaveHint": "Save downloads and verifies the official core if needed, checks the configuration, then activates this proxy. Typing does not install anything.",
+    "errorSelectManagedCore": "Select sing-box or Xray before saving this tunnel",
     "levelGlobal": "Global",
     "levelProvider": "Provider",
     "levelCombo": "Combo",

@@ -7116,6 +7116,7 @@
     "fallbackRetryBackendTitle": "الخادم الاحتياطي لإعادة المحاولة"
   },
   "settings": {
+    "proxyManagedCoresTab": "الأنوية المُدارة",
     "title": "الإعدادات",
     "general": "عام",
     "security": "الأمن",
@@ -11662,7 +11663,26 @@
     "entries": "إدخالات",
     "viewSwitcherAria": "عرض ذاكرة التخزين المؤقت"
   },
+  "managedProxy": {
+    "title": "أنوية الوكيل المُدارة",
+    "description": "الصق رابط نفق في حقل المضيف للوكيل المخصص لحفظه وتعيينه. يمكنك هنا أيضًا حفظ تعريف JSON أصلي للاتصال الصادر دون تغيير أي تعيين.",
+    "saveHint": "يتحقق الحفظ من النواة الرسمية عند الحاجة ويفحص الإعداد الأصلي قبل التفعيل. تتطلب المصادر التشفير. لا يحدث تثبيت أثناء المعاينة أو تشغيل تلقائي أو تغيير للوكيل الشفاف.",
+    "saveActivate": "حفظ وتفعيل",
+    "core": "النواة",
+    "selectCore": "اختر نواة",
+    "name": "الاسم",
+    "source": "رابط المصدر أو JSON أصلي للاتصال الصادر",
+    "start": "تشغيل",
+    "stop": "إيقاف",
+    "loadError": "تعذر تحميل الأنوية المُدارة",
+    "operationError": "فشلت عملية النواة المُدارة",
+    "state": "{state, select, not_installed {غير مثبتة} stopped {متوقفة} starting {قيد التشغيل الأولي} running {تعمل} stopping {قيد الإيقاف} error {خطأ} other {غير معروفة}}"
+  },
   "proxyConfigModal": {
+    "managedCore": "نواة الوكيل",
+    "managedSelectCore": "اختر نواة",
+    "managedSaveHint": "يؤدي الحفظ إلى تنزيل النواة الرسمية والتحقق منها عند الحاجة، وفحص الإعداد، ثم تفعيل هذا الوكيل. لا تؤدي الكتابة إلى تثبيت أي شيء.",
+    "errorSelectManagedCore": "اختر sing-box أو Xray قبل حفظ هذا النفق",
     "levelGlobal": "عالمي",
     "levelProvider": "مزود",
     "levelCombo": "كومبو",

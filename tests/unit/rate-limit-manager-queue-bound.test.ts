@@ -19,71 +19,68 @@ describe("queue wait bound - anti-orphan", () => {
     __setProviderDefaultRateLimitsForTests(null);
   });
 
-  it("queue wait bound - timeout before dispatch (<80ms not 200ms)", async () => {
-    // Force a single concurrency slot so the second request queues behind the first.
-    // Using a per-connection override isolates the fixture from other tests.
-    const conn = "queue-bound-conn";
-    rateLimitManager.enableRateLimitProtection(conn);
-    rateLimitManager.refreshConnectionRateLimits(conn, { maxConcurrent: 1 });
+  it(
+    "queue wait bound - timeout before the occupied slot is released",
+    { timeout: 3000 },
+    async () => {
+      const conn = "queue-bound-conn";
+      rateLimitManager.enableRateLimitProtection(conn);
+      rateLimitManager.refreshConnectionRateLimits(conn, { maxConcurrent: 1 });
 
-    // First request occupies the only slot for 200ms.
-    const p1 = rateLimitManager.withRateLimit(
-      "openai",
-      conn,
-      "gpt-4",
-      () => new Promise<string>((resolve) => setTimeout(() => resolve("ok"), 200)),
-      null,
-      1000
-    );
-
-    // Let p1 acquire the slot.
-    await new Promise((r) => setTimeout(r, 15));
-
-    // Second request targets the same limiter (same provider/connection/model)
-    // with a tiny remaining budget (30ms). It should fail with queue timeout
-    // quickly, not wait ~200ms for p1 to finish.
-    let fnCalled = false;
-    const start = Date.now();
-    await assert.rejects(
-      () =>
-        rateLimitManager.withRateLimit(
-          "openai",
-          conn,
-          "gpt-4",
-          () => {
-            fnCalled = true;
-            return Promise.resolve("second");
-          },
-          null,
-          30
-        ),
-      (err: unknown) => {
-        const trusted = getTrustedLocalRateLimitError(err);
-        assert.equal(trusted?.code, LEGACY_RATE_LIMIT_QUEUE_TIMEOUT_CODE);
-        assert.equal(trusted?.status, 503);
-        return true;
+      const started = Promise.withResolvers<void>();
+      const occupied = Promise.withResolvers<string>();
+      const p1 = rateLimitManager.withRateLimit(
+        "openai",
+        conn,
+        "gpt-4",
+        () => {
+          started.resolve();
+          return occupied.promise;
+        },
+        null,
+        1000
+      );
+      let fnCalled = false;
+      try {
+        await started.promise;
+        // Keep the slot occupied until rejection: execution expiration cannot satisfy this check.
+        await assert.rejects(
+          rateLimitManager.withRateLimit(
+            "openai",
+            conn,
+            "gpt-4",
+            () => {
+              fnCalled = true;
+              return Promise.resolve("second");
+            },
+            null,
+            30
+          ),
+          (err: unknown) => {
+            const trusted = getTrustedLocalRateLimitError(err);
+            assert.equal(trusted?.code, LEGACY_RATE_LIMIT_QUEUE_TIMEOUT_CODE);
+            assert.equal(trusted?.status, 503);
+            return true;
+          }
+        );
+        assert.equal(fnCalled, false, "queued function must not run after timeout");
+      } finally {
+        occupied.resolve("ok");
+        await p1;
       }
-    );
-    const elapsed = Date.now() - start;
-    assert.ok(
-      elapsed < 80,
-      `queue timeout should win quickly, elapsed=${elapsed}ms (expected <80ms)`
-    );
-    assert.ok(elapsed >= 15, `should have waited close to budget, elapsed=${elapsed}ms`);
-    assert.equal(fnCalled, false, "queued function must not run after timeout");
 
-    // Drain p1 to let Bottleneck dispatch and then reject the timed-out job.
-    await p1.catch(() => {});
-    // Bottleneck moves the queued job to EXECUTING only after a slot frees,
-    // so wait briefly for the anti-orphan wrappedFn to reject.
-    await new Promise((r) => setTimeout(r, 30));
-
-    const stateAfter = await rateLimitManager.__getLimiterStateForTests("openai", conn, "gpt-4");
-    if (stateAfter) assert.equal(stateAfter.queued, 0, "no orphan QUEUED after queue timeout");
-
-    // Give the orphaned scheduled promise a chance to settle before next test.
-    await new Promise((r) => setTimeout(r, 10));
-  });
+      // Bottleneck removes an abandoned queued job asynchronously after capacity is released.
+      let stateAfter = await rateLimitManager.__getLimiterStateForTests("openai", conn, "gpt-4");
+      const deadline = Date.now() + 1000;
+      while (stateAfter?.queued && Date.now() < deadline) {
+        await new Promise<void>((resolve) => setImmediate(resolve));
+        stateAfter = await rateLimitManager.__getLimiterStateForTests("openai", conn, "gpt-4");
+      }
+      assert.ok(stateAfter, "the fixture limiter must still exist");
+      assert.equal(stateAfter.queued, 0, "no orphan QUEUED after queue timeout");
+      assert.equal(fnCalled, false, "abandoned work must not dispatch after capacity is released");
+    }
+  );
 
   it("remaining budget zero does not schedule work", async () => {
     const conn = "queue-remaining-zero";

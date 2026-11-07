@@ -188,6 +188,13 @@ curl -X DELETE "http://localhost:20128/api/v1/management/proxies?id=proxy-uuid"
 curl -X DELETE "http://localhost:20128/api/v1/management/proxies?id=proxy-uuid&force=1"
 ```
 
+Managed sing-box/Xray entries use the same single-delete URLs and the existing
+`POST /api/settings/proxies/batch-delete` JSON contract. Their removal requires an authenticated
+loopback request, even when dashboard login is disabled. The central pipeline internally rewrites
+local deletion to the guarded services owner; clients do not follow a redirect. Ordinary proxy CRUD
+remains remotely available under its existing authentication policy. Managed removal rebuilds the
+remaining configuration and rolls it back if the registry deletion fails; it never downloads a core.
+
 ### Listing Proxies
 
 ```bash

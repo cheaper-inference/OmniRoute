@@ -1,7 +1,6 @@
 import {
   createProxy,
   createProxyAndAssign,
-  deleteProxyById,
   getProxyById,
   getProxyWhereUsed,
   updateProxy,
@@ -11,6 +10,8 @@ import { createErrorResponse, createErrorResponseFromUnknown } from "@/lib/api/e
 import { createProxyRegistrySchema, updateProxyRegistrySchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { clearDispatcherCache } from "@omniroute/open-sse/utils/proxyDispatcher";
+import { rejectManagedEndpointEdit } from "./managedProxyRegistry";
+export { handleProxyDelete } from "./proxyDeletionHandlers";
 
 async function readJsonBody(request: Request) {
   try {
@@ -101,6 +102,8 @@ export async function handleProxyUpdate(request: Request) {
     const changes = Object.fromEntries(
       Object.entries(rawChanges).filter(([_, v]) => v !== undefined)
     );
+    const managedEditError = await rejectManagedEndpointEdit(id, changes);
+    if (managedEditError) return managedEditError;
     if (assignment) {
       const result = await updateProxyAndAssign(id, changes, assignment);
       if (!result?.proxy) {
@@ -119,30 +122,5 @@ export async function handleProxyUpdate(request: Request) {
     return Response.json(updated);
   } catch (error) {
     return createErrorResponseFromUnknown(error, "Failed to update proxy");
-  }
-}
-
-export async function handleProxyDelete(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
-    const force = searchParams.get("force") === "1";
-
-    if (!id) {
-      return createErrorResponse({
-        status: 400,
-        message: "id is required",
-        type: "invalid_request",
-      });
-    }
-
-    const deleted = await deleteProxyById(id, { force });
-    if (!deleted) {
-      return createErrorResponse({ status: 404, message: "Proxy not found", type: "not_found" });
-    }
-
-    return Response.json({ success: true });
-  } catch (error) {
-    return createErrorResponseFromUnknown(error, "Failed to delete proxy");
   }
 }

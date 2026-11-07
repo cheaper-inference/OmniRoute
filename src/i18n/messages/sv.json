@@ -7039,6 +7039,7 @@
     "fallbackRetryBackendTitle": "Reserverad återförsöksbackend"
   },
   "settings": {
+    "proxyManagedCoresTab": "Hanterade kärnor",
     "title": "Inställningar",
     "general": "Allmänt",
     "security": "Säkerhet",
@@ -11585,7 +11586,26 @@
     "entries": "Poster",
     "viewSwitcherAria": "Cachevy"
   },
+  "managedProxy": {
+    "title": "Hanterade proxykärnor",
+    "description": "Klistra in en tunnellänk i värdfältet för anpassad proxy för att spara och tilldela den. Här kan du också spara en inbyggd JSON-definition för utgående anslutning utan att ändra några tilldelningar.",
+    "saveHint": "När du sparar verifieras den officiella kärnan vid behov och den inbyggda konfigurationen kontrolleras före aktivering. Källor kräver kryptering. Ingen installation vid förhandsgranskning, autostart eller ändring av transparent proxy sker.",
+    "saveActivate": "Spara och aktivera",
+    "core": "Kärna",
+    "selectCore": "Välj en kärna",
+    "name": "Namn",
+    "source": "Källänk eller inbyggd JSON för utgående anslutning",
+    "start": "Starta",
+    "stop": "Stoppa",
+    "loadError": "Kunde inte läsa in hanterade kärnor",
+    "operationError": "Åtgärden för den hanterade kärnan misslyckades",
+    "state": "{state, select, not_installed {Inte installerad} stopped {Stoppad} starting {Startar} running {Körs} stopping {Stoppar} error {Fel} other {Okänd}}"
+  },
   "proxyConfigModal": {
+    "managedCore": "Proxykärna",
+    "managedSelectCore": "Välj en kärna",
+    "managedSaveHint": "När du sparar laddas den officiella kärnan ned och verifieras vid behov, konfigurationen kontrolleras och sedan aktiveras denna proxy. Att skriva installerar ingenting.",
+    "errorSelectManagedCore": "Välj sing-box eller Xray innan du sparar denna tunnel",
     "levelGlobal": "Global",
     "levelProvider": "Leverantör",
     "levelCombo": "Kombination",

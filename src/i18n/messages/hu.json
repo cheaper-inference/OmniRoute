@@ -7039,6 +7039,7 @@
     "fallbackRetryBackendTitle": "Visszaterelési újrapróbálkozás háttérrendszere"
   },
   "settings": {
+    "proxyManagedCoresTab": "Felügyelt magok",
     "title": "Beállítások elemre",
     "general": "tábornok",
     "security": "Biztonság",
@@ -11585,7 +11586,26 @@
     "entries": "Bejegyzések",
     "viewSwitcherAria": "Gyorsítótárnézet"
   },
+  "managedProxy": {
+    "title": "Felügyelt proxymagok",
+    "description": "Illesszen be egy alagúthivatkozást az egyéni proxy gazdagépmezőjébe a mentéséhez és hozzárendeléséhez. Itt natív JSON-formátumú kimenő kapcsolatdefiníciót is menthet a meglévő hozzárendelések módosítása nélkül.",
+    "saveHint": "Mentéskor szükség esetén ellenőrizzük a hivatalos mag hitelességét, aktiválás előtt pedig a natív konfigurációt. A források titkosítást igényelnek. Előnézet közben nincs telepítés, nincs automatikus indítás és nem változik az átlátszó proxy beállítása.",
+    "saveActivate": "Mentés és aktiválás",
+    "core": "Mag",
+    "selectCore": "Válasszon magot",
+    "name": "Név",
+    "source": "Forráshivatkozás vagy natív JSON-formátumú kimenő kapcsolat",
+    "start": "Indítás",
+    "stop": "Leállítás",
+    "loadError": "Nem sikerült betölteni a felügyelt magokat",
+    "operationError": "A felügyelt mag művelete sikertelen",
+    "state": "{state, select, not_installed {Nincs telepítve} stopped {Leállítva} starting {Indítás alatt} running {Fut} stopping {Leállítás alatt} error {Hiba} other {Ismeretlen}}"
+  },
   "proxyConfigModal": {
+    "managedCore": "Proxymag",
+    "managedSelectCore": "Válasszon magot",
+    "managedSaveHint": "Mentéskor szükség esetén letöltjük és ellenőrizzük a hivatalos magot, ellenőrizzük a konfigurációt, majd aktiváljuk ezt a proxyt. A gépelés semmit sem telepít.",
+    "errorSelectManagedCore": "Az alagút mentése előtt válassza ki a sing-box vagy az Xray magot",
     "levelGlobal": "Globális",
     "levelProvider": "Szolgáltató",
     "levelCombo": "Kombináció",

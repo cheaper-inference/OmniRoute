@@ -7039,6 +7039,7 @@
     "fallbackRetryBackendTitle": "Vaihtoehtoinen uudelleenyritysbackendi"
   },
   "settings": {
+    "proxyManagedCoresTab": "Hallinnoidut ytimet",
     "title": "Asetukset",
     "general": "Kenraali",
     "security": "Turvallisuus",
@@ -11585,7 +11586,26 @@
     "entries": "Merkinnät",
     "viewSwitcherAria": "Välimuistinäkymä"
   },
+  "managedProxy": {
+    "title": "Hallinnoidut välityspalvelinytimet",
+    "description": "Liitä tunnelilinkki mukautetun välityspalvelimen isäntäkenttään tallentaaksesi ja määrittääksesi sen käyttöön. Täällä voit myös tallentaa lähtevän yhteyden määrityksen ytimen omassa JSON-muodossa muuttamatta yhtään kohdistusta.",
+    "saveHint": "Tallennettaessa virallinen ydin varmennetaan tarvittaessa ja ytimen omassa muodossa oleva kokoonpano tarkistetaan ennen aktivointia. Lähteet edellyttävät salausta. Esikatselun aikana ei asenneta mitään, automaattista käynnistystä ei tehdä eikä läpinäkyvän välityspalvelimen asetuksia muuteta.",
+    "saveActivate": "Tallenna ja aktivoi",
+    "core": "Ydin",
+    "selectCore": "Valitse ydin",
+    "name": "Nimi",
+    "source": "Lähdelinkki tai lähtevä yhteys ytimen omassa JSON-muodossa",
+    "start": "Käynnistä",
+    "stop": "Pysäytä",
+    "loadError": "Hallinnoituja ytimiä ei voitu ladata",
+    "operationError": "Hallinnoidun ytimen toiminto epäonnistui",
+    "state": "{state, select, not_installed {Ei asennettu} stopped {Pysäytetty} starting {Käynnistyy} running {Käynnissä} stopping {Pysähtyy} error {Virhe} other {Tuntematon}}"
+  },
   "proxyConfigModal": {
+    "managedCore": "Välityspalvelimen ydin",
+    "managedSelectCore": "Valitse ydin",
+    "managedSaveHint": "Tallennettaessa virallinen ydin ladataan ja varmennetaan tarvittaessa, kokoonpano tarkistetaan ja sitten tämä välityspalvelin aktivoidaan. Tekstin kirjoittaminen ei asenna mitään.",
+    "errorSelectManagedCore": "Valitse sing-box tai Xray ennen tämän tunnelin tallentamista",
     "levelGlobal": "Maailmanlaajuinen",
     "levelProvider": "Palveluntarjoaja",
     "levelCombo": "Yhdistelmä",

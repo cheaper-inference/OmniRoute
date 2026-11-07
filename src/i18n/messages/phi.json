@@ -1,4 +1,19 @@
 {
+  "managedProxy": {
+    "title": "Mga pinamamahalaang proxy core",
+    "description": "Mag-paste ng tunnel link sa field ng host ng pasadyang proxy upang i-save at italaga ito. Dito, maaari ka ring mag-save ng depinisyon ng outbound sa native na JSON format nang hindi binabago ang anumang pagtatalaga.",
+    "saveHint": "Kapag nag-save, bineberipika ang opisyal na core kung kinakailangan at sinusuri ang native na configuration bago i-activate. Kailangang naka-encrypt ang mga source. Walang pag-install habang nagpe-preview, awtomatikong pagsisimula, o pagbabago sa transparent proxy.",
+    "saveActivate": "I-save at i-activate",
+    "core": "Core",
+    "selectCore": "Pumili ng core",
+    "name": "Pangalan",
+    "source": "Link ng pinagmulan o outbound JSON sa native na format",
+    "start": "Simulan",
+    "stop": "Ihinto",
+    "loadError": "Hindi ma-load ang mga pinamamahalaang core",
+    "operationError": "Nabigo ang operasyon ng pinamamahalaang core",
+    "state": "{state, select, not_installed {Hindi naka-install} stopped {Nakahinto} starting {Nagsisimula} running {Gumagana} stopping {Humihinto} error {Error} other {Hindi alam}}"
+  },
   "codexKeyServiceMode": {
     "title": "Mode ng serbisyo ng Codex para sa API key na ito",
     "description": "Nalalapat sa mga kahilingan sa Codex, kabilang ang mga modelo ng Codex sa loob ng mga combo. Ino-override ng mga sapilitang mode ang client, mga pandaigdigang setting, at mga default ng koneksyon. Hindi magbabago ang ibang provider.",
@@ -7039,6 +7054,7 @@
     "fallbackRetryBackendTitle": "Fallback na backend ng pag-uulit"
   },
   "settings": {
+    "proxyManagedCoresTab": "Mga pinamamahalaang core",
     "title": "Mga setting",
     "general": "Heneral",
     "security": "Seguridad",
@@ -11586,6 +11602,10 @@
     "viewSwitcherAria": "View ng cache"
   },
   "proxyConfigModal": {
+    "managedCore": "Core ng proxy",
+    "managedSelectCore": "Pumili ng core",
+    "managedSaveHint": "Kapag nag-save, dina-download at bineberipika ang opisyal na core kung kinakailangan, sinusuri ang configuration, at saka ina-activate ang proxy na ito. Walang nai-install sa pagta-type lamang.",
+    "errorSelectManagedCore": "Piliin ang sing-box o Xray bago i-save ang tunnel na ito",
     "levelGlobal": "Pangkalahatan",
     "levelProvider": "Tagapagbigay",
     "levelCombo": "Kombinasyon",

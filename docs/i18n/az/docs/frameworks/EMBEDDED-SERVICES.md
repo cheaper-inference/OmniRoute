@@ -45,18 +45,36 @@ Səkkizinin hamısı eyni nəzarət modelini izləyir:
 - OmniRoute onları `DATA_DIR/services/{name}/` altında quraşdırır ( OmniRoute-nin öz `package.json` indən təcrid olunmuş)
 - OmniRoute onları uşaq prosesləri kimi yaradır və izləyir
 - OmniRoute uşağın mühitinə efemer API açarı yeridir və onu fasiləsiz fırlanır (mümkün olduqda)
-- Bütün idarəetmə marşrutları (`/api/services/*`) var**LOCAL_ONLY** — yalnız geri dönmədən əldə edilə bilər (sərt qayda #17)
+- Bütün idarəetmə marşrutları (`/api/services/*`) var**LOCAL_ONLY** — yalnız geri döngədən əldə edilə bilər (sərt qayda #17)
+
+### İdarə olunan proxy nüvələri
+
+Xüsusi proxy host sahəsi də V2Ray mənbə linkini qəbul edir. seçin** mahnı qutusu** və ya** Xray** açıq şəkildə, sonra Saxla düyməsini basın. Yazmaq heç vaxt nüvəni endirmir və ya işə salmır. Saxla rəsmi buraxılış arxivini yoxlayır, yerli konfiqurasiyanı təsdiqləyir, fərqli localhost SOCKS dinləyicisini işə salır və yalnız bundan sonra proksi reyestr tapşırığını yazır. Uğursuz aktivləşdirmə əvvəlki idarə olunan konfiqurasiya və prosesi bərpa edir. `STORAGE_ENCRYPTION_KEY` tələb olunur; mənbə bağlantıları şifrələnir.
+
+İdarə olunan fayllar `DATA_DIR/services/managed-proxy/` altında yaşayır, TPROXY dən ayrıdır. Seçilmiş nüvəyə 100-ə qədər dinləyiciyə məxsus bir proses var. Heç bir autostart və ya qlobal marşrutlaşdırma defolt dəyişdirilmir. Uğurlu Saxlama yalnız bu idarə olunan nüvənin aktivləşdirilməsini xatırlayır; proqramın işə salınması artıq təsdiqlənmiş ikili sistemdən istifadə edərək aktivləşdirilmiş saxlanmış nüvələri bərpa edir, heç vaxt yükləmə vaxtı yükləməz. Explicit Stop aktivləşdirmə bayrağını təmizləyir. Çatışmayan və ya zədələnmiş binar mənbənin yenidən saxlanmasını tələb edir. Qeydiyyatın silinməsi mənbəni və dinləyicini yerli olaraq silir; adi son nöqtə redaktələri idarə olunan sətirlər üçün rədd edilir, beləliklə, saxlanmış mənbə səssizcə yönləndirilmiş dinləyicisindən kənara çıxa bilməz.
+
+| Mənbə formatı                         | mahnı qutusu                                                                    | Xray                                                                            |
+| ------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| VLESS, VMess, Trojan, Shadowsocks URI | Dəstəklənən dönüşüm                                                             | Dəstəklənən dönüşüm                                                             |
+| Hysteria2/hy2, TUIC, AnyTLS URI       | Dəstəklənən dönüşüm                                                             | rədd edildi; uyğun bir nüvədən istifadə edin                                    |
+| TCP/raw, WebSocket, gRPC, HTTPUpgrade | VLESS/VMess/Trojan üçün dəstəklənir                                             | VLESS/VMess/Trojan üçün dəstəklənir                                             |
+| XHTTP URI nəqliyyat                   | Rədd edildi                                                                     | Dəstəklənən dönüşüm                                                             |
+| Doğma çıxış JSON                      | Seçilmiş nüvənin icazə verilən proxy protocols/options, yerli olaraq yoxlanılır | Seçilmiş nüvənin icazə verilən proxy protocols/options, yerli olaraq yoxlanılır |
+
+Naməlum naqil seçimləri, etibarsız TLS bayraqları, xarici plaginlər, yerli fayl yolu seçimləri və dəstəklənməyən birləşmələr səssizcə atılmaq əvəzinə rədd edilir. Doğma obyektlər bütün əsas konfiqurasiyalar deyil, gedən təriflərdir; control/direct/bypass çıxışları qəbul edilmir. sing-box 1.14-də WireGuard son nöqtələrdən istifadə edir, ona görə də o, yerli çıxış kimi qəbul edilmir. Bu, bütün formatlı çevirici deyil; SSR, köhnə whole-base64 Shadowsocks keçidləri, ixtiyari Clash obyektləri və cədvəldə olmayan nəqliyyat variantları üçün ayrıca dəstəklənən mənbə formatı lazımdır.
+
+`/api/services/managed-proxy` autentifikasiya olunub və yalnız geri dönmə funksiyasıdır: GET redaktə edilmiş metadatanı siyahıya alır, POST `{core,name,sourceLink,id?,assignment?}` saxlayır, PATCH `{core,action:"start"|"stop"}` qəbul edir. Ev sahibinin etibarlı peer-stamp boru xətti mövcud olmalıdır. Doğma əsas diaqnostika yatırılır, çünki onlar etimadnamələri ehtiva edə bilər; həyat dövrü hadisələri, mənbə bağlantıları və ya yuxarı yüklər olmadan mövcud strukturlaşdırılmış proqram fayl qeydindən istifadə edir. Dəstək üçün yalnız təmizlənmiş proqram qeydlərini əlavə edin. Rəsmi versiyalar buraxılış aktivi SHA-256 manifestləri ilə sing-box 1.14.3 və Xray 26.3.27-yə bərkidilir; gələcək yeniləmələr versiyanın və bütün təsdiqlənmiş həzmlərin birlikdə dəyişdirilməsini tələb edir.
 
 ### Əsas qərarlar (dizayn planından)
 
-| Qərar                                    | Dəyər                                                                                    |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------- |
-| 9Router yerli UI-ya idarə panelinə giriş | `/dashboard/providers/services/9router/embed/*`-da əks proxy                             |
-| Quraşdırma mexanizmi                     | `npm install {package}` vasitəsilə `execFile` (qabıq interpolasiyası yoxdur)             |
-| İstehlak rejimi                          | Provayder marşrutlaşdırma mühərrikində `9router/{sub}/{model}` kimi qeydiyyatdan keçib   |
-| API açar idarəetmə                       | OmniRoute istirahətdə (AES-256-GCM) yaradır, şifrələyir və env vasitəsilə inyeksiya edir |
-| İdarə panelinin yeri                     | `/dashboard/providers/services` (üç nişan)                                               |
-| Avtomatik başla                          | Hər xidmətə görə dəyişin, defolt OFF                                                     |
+| Qərar                                    | Dəyər                                                                                      |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------ |
+| 9Router yerli UI-ya idarə panelinə giriş | `/dashboard/providers/services/9router/embed/*`-da əks proxy                               |
+| Quraşdırma mexanizmi                     | `npm install {package}` vasitəsilə `execFile` (qabıq interpolasiyası yoxdur)               |
+| İstehlak rejimi                          | Provayder marşrutlaşdırma mühərrikində `9router/{sub}/{model}` kimi qeydiyyatdan keçmişdir |
+| API açar idarəetmə                       | OmniRoute istirahətdə (AES-256-GCM) yaradır, şifrələyir və env vasitəsilə inyeksiya edir   |
+| İdarə panelinin yeri                     | `/dashboard/providers/services` (üç nişan)                                                 |
+| Avtomatik başla                          | Hər xidmətə görə dəyişin, defolt OFF                                                       |
 
 ---
 

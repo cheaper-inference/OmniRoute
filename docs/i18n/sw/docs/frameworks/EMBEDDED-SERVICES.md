@@ -45,7 +45,25 @@ Wote wanane wanafuata modeli sawa ya usimamizi:
 - OmniRoute huziweka chini ya `DATA_DIR/services/{name}/` (zilizotengwa na OmniRoute mwenyewe `package.json`)
 - OmniRoute huzaa na kuzifuatilia kama mchakato wa mtoto
 - OmniRoute huingiza ufunguo wa API wa muda mfupi kwenye mazingira ya mtoto na kuzungusha bila muda wa kupumzika (inapohitajika)
-- Njia zote za usimamizi (`/api/services/*`) ni**LOCAL_ONLY** — kupatikana tu kutoka kwa loopback (sheria ngumu # 17)
+- Njia zote za usimamizi (`/api/services/*`) ni**LOCAL_ONLY** — kupatikana tu kutoka kwa loopback (kanuni ngumu #17)
+
+### Viini vya seva mbadala vinavyodhibitiwa
+
+Sehemu ya seva pangishi ya seva mbadala Maalum pia inakubali kiungo cha chanzo cha V2Ray. Chagua** kisanduku cha kuimba** au** Xray** kwa uwazi, kisha ubofye Hifadhi. Kuandika kamwe hakupakuliwa au kuanzisha msingi. Hifadhi huthibitisha kumbukumbu rasmi ya toleo, huthibitisha usanidi asilia, huanzisha kisikilizaji mahususi cha mwenyeji wa SOCKS, na kisha kuandika kazi ya kusajili seva mbadala. Uamilisho ulioshindwa hurejesha usanidi na mchakato uliodhibitiwa uliopita. `STORAGE_ENCRYPTION_KEY` inahitajika; viungo vya chanzo vimesimbwa kwa njia fiche.
+
+Faili zinazodhibitiwa zinaishi chini ya `DATA_DIR/services/managed-proxy/`, tofauti na TPROXY. Kuna mchakato mmoja unaomilikiwa kwa kila msingi uliochaguliwa, hadi wasikilizaji 100. Hakuna kuanzisha kiotomatiki au chaguomsingi ya uelekezaji ya kimataifa inayobadilishwa. Imefaulu Kuhifadhi hukumbuka kuwezesha msingi huu unaodhibitiwa pekee; uanzishaji wa programu hurejesha viini vilivyohifadhiwa vilivyowezeshwa kwa kutumia jozi iliyothibitishwa tayari, kamwe upakuaji wa wakati wa kuwasha. Komesha Dhahiri huondoa alama hiyo ya kuwezesha. Nambari inayokosekana au iliyoharibika inahitaji kuhifadhi tena chanzo. Ufutaji wa Usajili huondoa chanzo na msikilizaji ndani ya nchi; mabadiliko ya kawaida ya sehemu ya mwisho yamekataliwa kwa safu mlalo zinazodhibitiwa ili chanzo kilichohifadhiwa kisiondoke kimyakimya kutoka kwa kisikilizaji kilichopitishwa.
+
+| Umbizo la chanzo                      | kisanduku cha kuimba                                                 | Xray                                                                 |
+| ------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| VLESS, VMess, Trojan, Shadowsocks URI | Uongofu unaotumika                                                   | Uongofu unaotumika                                                   |
+| Hysteria2/hy2, TUIC, AnyTLS URI       | Uongofu unaotumika                                                   | Imekataliwa; tumia msingi unaoendana                                 |
+| TCP/raw, WebSocket, gRPC, HTTPUpgrade | Inaungwa mkono kwa VLESS/VMess/Trojan                                | Inaungwa mkono kwa VLESS/VMess/Trojan                                |
+| usafiri wa XHTTP URI                  | Imekataliwa                                                          | Uongofu unaotumika                                                   |
+| JSON za asili zinazotoka nje          | Wakala wa msingi uliochaguliwa protocols/options, umechaguliwa asili | Wakala wa msingi uliochaguliwa protocols/options, umechaguliwa asili |
+
+Chaguo za waya zisizojulikana, bendera za TLS zisizo salama, programu-jalizi za nje, chaguo za njia ya faili za ndani na michanganyiko isiyotumika hukataliwa badala ya kutupwa kimyakimya. Vitu asili ni ufafanuzi wa nje, sio usanidi wa msingi mzima; control/direct/bypass za nje hazikubaliwi. WireGuard kwenye sing-box 1.14 hutumia miisho, kwa hivyo haikubaliwi kama mzaliwa wa nje. Hiki si kigeuzi cha umbizo zote; SSR, legacy whole-base64 Viungo vya Shadowsocks, vitu vya Clash kiholela na vibadala vya usafiri ambavyo havipo kwenye jedwali vinahitaji umbizo la chanzo linalotumika kando.
+
+`/api/services/managed-proxy` imethibitishwa na loopback-pekee: GET huorodhesha metadata iliyorekebishwa, POST huhifadhi `{core,name,sourceLink,id?,assignment?}`, PATCH inakubali `{core,action:"start"|"stop"}`. Ni lazima bomba la muhuri rika la mwenyeji liwepo. Uchunguzi wa kimsingi wa asili hukandamizwa kwa sababu unaweza kuwa na kitambulisho; matukio ya mzunguko wa maisha hutumia kiweka kumbukumbu cha faili cha programu kilichopangwa bila viungo vya chanzo au upakiaji wa juu. Ambatisha kumbukumbu za programu zilizosafishwa pekee kwa usaidizi. Matoleo rasmi yamebandikwa kwenye kisanduku cha kuimba 1.14.3 na Xray 26.3.27 chenye maonyesho ya SHA-256 ya mali ya kutolewa; masasisho yajayo yanahitaji kubadilisha toleo na muhtasari wote uliothibitishwa kwa pamoja.
 
 ### Maamuzi muhimu (kutoka kwa mpango wa muundo)
 
@@ -54,9 +72,9 @@ Wote wanane wanafuata modeli sawa ya usimamizi:
 | Ufikiaji wa dashibodi kwa 9Router asili UI | Reverse proksi kwa `/dashboard/providers/services/9router/embed/*`                 |
 | Utaratibu wa ufungaji                      | `npm install {package}` kupitia `execFile` (hakuna tafsiri ya ganda)               |
 | Hali ya matumizi                           | Mtoa huduma aliyesajiliwa kama `9router/{sub}/{model}` katika injini ya uelekezaji |
-| API usimamizi muhimu                       | OmniRoute hutoa, husimba kwa njia fiche (AES-256-GCM), na kuingiza kupitia env     |
+| API usimamizi muhimu                       | OmniRoute huzalisha, husimba kwa njia fiche (AES-256-GCM), na kuingiza kupitia env |
 | Mahali pa dashibodi                        | `/dashboard/providers/services` (tabo tatu)                                        |
-| Anza kiotomatiki                           | Geuza kwa kila huduma, OFF chaguomsingi                                            |
+| Anza kiotomatiki                           | Geuza kwa kila huduma, chaguo-msingi OFF                                           |
 
 ---
 

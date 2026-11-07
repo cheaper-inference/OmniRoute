@@ -45,7 +45,25 @@ Duk takwas suna bin tsarin kulawa iri ɗaya:
 - OmniRoute tana shigar da su a ƙarƙashin `DATA_DIR/services/{name}/` (wanda aka keɓe daga OmniRoute na `package.json`)
 - OmniRoute ta hayayyafa da kula da su kamar yadda yara suke tafiyar da su
 - OmniRoute tana allurar maɓalli na ephemeral API a cikin muhallin yaron kuma tana juya shi ba tare da raguwa ba (inda ya dace)
-- Duk hanyoyin gudanarwa (`/api/services/*`) sune**LOCAL_ONLY** — ana iya samun damar kawai daga madauki (mai wuyar doka #17)
+- Duk hanyoyin gudanarwa (`/api/services/*`) sune**LOCAL_ONLY** Za a iya samun damar — daga madauki (hard rule #17)
+
+### Sarrafa saƙon wakili
+
+Filin mai masaukin baki na Custom kuma yana karɓar hanyar haɗin tushen V2Ray. Zaɓi** akwatin waka** ko** Xray** a sarari, sannan danna Ajiye. Bugawa baya saukewa ko farawa ainihin. Ajiye yana tabbatar da rumbun adana bayanan hukuma, yana tabbatar da daidaitawar asali, yana fara keɓantaccen mai sauraron localhost SOCKS, sannan kawai ya rubuta aikin rajistar wakili. Kunna da bai yi nasara ba yana dawo da tsari da tsari da aka sarrafa a baya. ana buƙatar `STORAGE_ENCRYPTION_KEY` ; an rufaffen hanyoyin haɗin tushe.
+
+Fayilolin da aka sarrafa suna rayuwa ƙarƙashin `DATA_DIR/services/managed-proxy/`, dabam da TPROXY. Akwai tsari guda ɗaya na kowane zaɓaɓɓen tushe, har zuwa masu sauraro 100. Babu autostart ko tsohowar hanyar sadarwa ta duniya da aka canza. Ajiye mai nasara yana tuna kunnawa don wannan ainihin sarrafawa kawai; fara aikace-aikacen yana dawo da annabawan bayanan da aka kunna ta amfani da binary da aka riga aka tabbatar, ba zazzagewar lokaci-lokaci ba. Tsaya Tsaya Tsaya yana share alamar kunnawa. Bacewar binary ko lalacewa yana buƙatar sake adana tushe. Goge rajista yana cire tushen da mai sauraro a gida; gyare-gyaren ƙarshe na yau da kullun ana ƙi don layukan sarrafawa don haka tushen da aka adana ba zai iya yin shuru daga mai sauraron sa ba.
+
+| Tsarin tushe                          | akwatin waka                                                               | Xray                                                                       |
+| ------------------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| VLESS, VMess, Trojan, Shadowsocks URI | Juyawa mai goyan baya                                                      | Juyawa mai goyan baya                                                      |
+| Hysteria2/hy2, TUIC, AnyTLS URI       | Juyawa mai goyan baya                                                      | An ƙi; yi amfani da jigon jijiya mai jituwa                                |
+| TCP/raw, WebSocket, gRPC, HTTPUpgrade | Taimakawa VLESS/VMess/Trojan                                               | Taimakawa VLESS/VMess/Trojan                                               |
+| XHTTP URI                             | An ƙi                                                                      | Juyawa mai goyan baya                                                      |
+| JSON na asali                         | Zaɓaɓɓen core's an yarda da wakili protocols/options, an duba shi ta asali | Zaɓaɓɓen core's an yarda da wakili protocols/options, an duba shi ta asali |
+
+Zaɓuɓɓukan waya da ba a san su ba, tutocin TLS marasa tsaro, plugins na waje, zaɓuɓɓukan hanyar fayil na gida da haɗin haɗin da ba a goyan baya ana ƙi su maimakon a zubar da shiru. Abubuwan asali ma'anoni ne masu fita waje, ba gabaɗaya ba saituna; ba a karɓar fita waje control/direct/bypass. WireGuard akan akwatin waƙa 1.14 yana amfani da wuraren ƙarewa, don haka ba a yarda da shi azaman mai fita waje ba. Wannan ba duk mai jujjuyawar tsari bane; SSR, Legacy whole-base64 Shadowsocks hanyoyin haɗin gwiwa, Abubuwan Karo na sabani da bambance-bambancen jigilar kaya da ba sa cikin tebur suna buƙatar tsarin tushen tallafi daban.
+
+An inganta `/api/services/managed-proxy` kuma an dawo da baya-kawai: GET ya lissafa metadata da aka canza, POST yana adana `{core,name,sourceLink,id?,assignment?}`, PATCH yana karɓar `{core,action:"start"|"stop"}`. Amintaccen bututun tambarin mai masaukin dole ne ya kasance. An danne ƙwaƙƙwaran bincike na asali saboda suna iya ƙunsar takaddun shaida; Abubuwan abubuwan da suka faru na rayuwa suna amfani da tsarin fayil ɗin aikace-aikacen da ke akwai ba tare da hanyoyin haɗin tushe ko abubuwan biyan kuɗi na sama ba. Haɗa madaidaitan rajistan ayyukan aikace-aikacen don tallafi. An lika sigar hukuma zuwa akwatin waƙa 1.14.3 da Xray 26.3.27 tare da fitowar-kadar SHA-256 ; Sabuntawa na gaba suna buƙatar canza sigar da duk ingantaccen narkar da su tare.
 
 ### Babban yanke shawara (daga tsarin ƙira)
 

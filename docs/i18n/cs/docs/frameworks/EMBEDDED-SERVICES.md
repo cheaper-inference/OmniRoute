@@ -38,7 +38,7 @@ Je zahrnuto osm služeb:
 | **Dario**       | `@askalf/dario`                    |     3456     | Claude-subscription proxy — alternative/failover to CLIProxyAPI pro provoz ve tvaru Claude-Code; vložený klíč se změní `DARIO_ADMIN_TOKEN` hradlující jeho řídicí rovinu `/admin/*` OAuth                                                                                                                                                                  |
 | **open-wa**     | `@open-wa/wa-automate`             |     8323     | WhatsApp Webová automatizace (bezhlavý Chromium přes Puppeteer). Pouze — spravované životním cyklem, nikoli cíl směrování.                                                                                                                                                                                                                                 |
 | **LLMLingua**   | `@atjsh/llmlingua-2`               |    20135     | Pohotovostní kompresní postranní vozík — skutečný model LLMLingua-2 ONNX (port JS/TS algoritmu Microsoft). `open-sse/services/compression/engines/llmlingua/index.ts` do něj odešle `/compress` přes HTTP, a když je postranní vozík vypnutý, vrátí se zpět do backendu pracovního vlákna v procesu. Pouze — řízené životním cyklem, nikoli cíl směrování. |
-| **sing-box**    | binární vydání GitHub (`singbox`)  |    20140     | TPROXY sidecar backing `applyTproxy()`'s transparent-proxy interception (`src/mitm/tproxy/setup.ts`). Instalační program stáhne připnuté vydání ověřené kontrolním součtem. Správa životního cyklu pouze — nikoli cíl směrování (žádné LLM proxying)                                                                                                       |
+| **sing-box**    | binární vydání GitHub (`singbox`)  |    20140     | TPROXY sidecar backing `applyTproxy()`'s transparent-proxy interception (`src/mitm/tproxy/setup.ts`). Instalační program stáhne připnuté vydání ověřené kontrolním součtem. Pouze — spravované životním cyklem, nikoli cíl směrování (žádné LLM proxying)                                                                                                  |
 
 Všech osm se řídí stejným modelem dohledu:
 
@@ -46,6 +46,24 @@ Všech osm se řídí stejným modelem dohledu:
 - OmniRoute je vytváří a monitoruje jako podřízené procesy
 - OmniRoute vloží pomíjivý klíč API do prostředí dítěte a otočí jej bez prostojů (pokud je to možné)
 - Všechny cesty vedení (`/api/services/*`) jsou**LOCAL_ONLY** — přístupné pouze ze zpětné smyčky (tvrdé pravidlo #17)
+
+### Spravovaná proxy jádra
+
+Pole Vlastní hostitel proxy také přijímá zdrojový odkaz V2Ray. Vybrat** sing-box** nebo** Rentgen** explicitně, pak klikněte na Uložit. Psaní nikdy nestáhne ani nespustí jádro. Uložit ověří oficiální archiv vydání, ověří nativní konfiguraci, spustí samostatný posluchač localhost SOCKS a teprve potom zapíše přiřazení registru proxy. Neúspěšná aktivace obnoví předchozí spravovanou konfiguraci a proces. `STORAGE_ENCRYPTION_KEY` je vyžadováno; zdrojové odkazy jsou šifrované.
+
+Spravované soubory žijí pod `DATA_DIR/services/managed-proxy/`, odděleně od TPROXY. Na každé vybrané jádro je jeden vlastněný proces, až 100 posluchačů. Nezmění se žádné automatické spuštění ani výchozí globální směrování. Úspěšné uložení si pamatuje aktivaci pouze pro toto spravované jádro; spuštění aplikace obnoví povolená uložená jádra pomocí již ověřeného binárního souboru, nikdy stahování při spuštění. Explicitní zastavení vymaže tento příznak aktivace. Chybějící nebo poškozený binární soubor vyžaduje opětovné uložení zdroje. Odstranění registru místně odstraní zdroj a posluchače; běžné úpravy koncového bodu jsou u spravovaných řádků odmítnuty, takže uložený zdroj nemůže tiše přejít ze svého směrovaného posluchače.
+
+| Zdrojový formát                       | sing-box                                                             | Rentgen                                                              |
+| ------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| VLESS, VMess, Trojan, Shadowsocks URI | Podporovaná konverze                                                 | Podporovaná konverze                                                 |
+| Hysteria2/hy2, TUIC, AnyTLS URI       | Podporovaná konverze                                                 | Odmítnuto; použít kompatibilní jádro                                 |
+| TCP/raw, WebSocket, gRPC, HTTPUpgrade | Podporováno pro VLESS/VMess/Trojan                                   | Podporováno pro VLESS/VMess/Trojan                                   |
+| XHTTP URI doprava                     | Odmítnuto                                                            | Podporovaná konverze                                                 |
+| Nativní odchozí JSON                  | Vybraná povolená proxy protocols/options jádra, kontrolovaná nativně | Vybraná povolená proxy protocols/options jádra, kontrolovaná nativně |
+
+Neznámé možnosti připojení, nezabezpečené příznaky TLS, externí pluginy, možnosti místní cesty k souboru a nepodporované kombinace jsou spíše odmítnuty, než tiše zahozeny. Nativní objekty jsou odchozí definice, nikoli konfigurace celého jádra; Odchozí control/direct/bypass nejsou akceptovány. WireGuard na sing-boxu 1.14 používá koncové body, takže není akceptován jako nativní odchozí. Toto není převaděč všech formátů; SSR, starší odkazy whole-base64 Shadowsocks, libovolné objekty Clash a varianty transportu, které v tabulce chybí, potřebují samostatně podporovaný zdrojový formát.
+
+`/api/services/managed-proxy` je ověřená a pouze zpětná smyčka: GET uvádí redigovaná metadata, POST ukládá `{core,name,sourceLink,id?,assignment?}`, PATCH přijímá `{core,action:"start"|"stop"}`. Musí být přítomen důvěryhodný kanál peer-stamp hostitele. Diagnostika nativního jádra je potlačena, protože může obsahovat přihlašovací údaje; události životního cyklu používají stávající protokolovač souborů strukturované aplikace bez odkazů na zdroje nebo upstream dat. Pro podporu připojte pouze vyčištěné protokoly aplikací. Oficiální verze jsou připojeny k sing-boxu 1.14.3 a Xray 26.3.27 s manifesty release-asset SHA-256 ; budoucí aktualizace vyžadují změnu verze a všech ověřených výtahů dohromady.
 
 ### Klíčová rozhodnutí (z plánu návrhu)
 
@@ -56,7 +74,7 @@ Všech osm se řídí stejným modelem dohledu:
 | Režim spotřeby                                   | Poskytovatel registrovaný jako `9router/{sub}/{model}` ve směrovacím enginu |
 | správa klíčů API                                 | OmniRoute generuje, šifruje v klidu (AES-256-GCM) a vkládá přes env         |
 | Umístění palubní desky                           | `/dashboard/providers/services` (tři karty)                                 |
-| Auto-start                                       | Přepnout na službu, výchozí OFF                                             |
+| Auto-start                                       | Přepnout podle služby, výchozí OFF                                          |
 
 ---
 

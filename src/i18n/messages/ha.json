@@ -7039,6 +7039,7 @@
     "fallbackRetryBackendTitle": "Baya mara da maganin maimaitawa"
   },
   "settings": {
+    "proxyManagedCoresTab": "Jigogin da ake sarrafawa",
     "title": "Saituna",
     "general": "Na Gabaɗaya",
     "security": "Tsaro",
@@ -11585,7 +11586,26 @@
     "entries": "Shigarwar bayanai",
     "viewSwitcherAria": "Duban ma'ajiyar wucin gadi"
   },
+  "managedProxy": {
+    "title": "Jigogin proksi da ake sarrafawa",
+    "description": "Manna mahaɗin rami a filin mai masaukin proksi na musamman domin adanawa da sanya shi. A nan kuma za ka iya adana ma’anar JSON ta asali ta haɗin fita ba tare da canza wani rabon aiki ba.",
+    "saveHint": "Adanawa tana tabbatar da jigon hukuma idan ana buƙata, sannan tana duba tsarin asali kafin kunnawa. Dole a ɓoye bayanan tushe. Ba a girka komai yayin samfoti, ba a farawa ta atomatik, kuma ba a canza proksi mai wucewa kai tsaye.",
+    "saveActivate": "Adana kuma kunna",
+    "core": "Jigo",
+    "selectCore": "Zaɓi jigo",
+    "name": "Suna",
+    "source": "Mahaɗin tushe ko JSON na asali na haɗin fita",
+    "start": "Fara",
+    "stop": "Dakatar",
+    "loadError": "An kasa loda jigogin da ake sarrafawa",
+    "operationError": "Aikin jigon da ake sarrafawa ya gaza",
+    "state": "{state, select, not_installed {Ba a girka ba} stopped {An dakatar} starting {Ana farawa} running {Yana aiki} stopping {Ana dakatarwa} error {Kuskure} other {Ba a sani ba}}"
+  },
   "proxyConfigModal": {
+    "managedCore": "Jigon proksi",
+    "managedSelectCore": "Zaɓi jigo",
+    "managedSaveHint": "Adanawa tana sauke jigon hukuma tare da tabbatar da shi idan ana buƙata, tana duba tsarin, sannan tana kunna wannan proksi. Rubutu kaɗai ba ya girka komai.",
+    "errorSelectManagedCore": "Zaɓi sing-box ko Xray kafin adana wannan rami",
     "levelGlobal": "Na Gabaɗaya",
     "levelProvider": "Mai samarwa",
     "levelCombo": "Haɗin",

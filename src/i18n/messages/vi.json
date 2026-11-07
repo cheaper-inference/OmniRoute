@@ -7039,6 +7039,7 @@
     "openComboTooltip": "Mở Combo — được dùng bởi {combo}"
   },
   "settings": {
+    "proxyManagedCoresTab": "Lõi được quản lý",
     "title": "Cài đặt",
     "general": "Chung",
     "security": "Bảo mật",
@@ -11585,7 +11586,26 @@
     "entries": "Mục",
     "viewSwitcherAria": "Chế độ xem bộ nhớ đệm"
   },
+  "managedProxy": {
+    "title": "Các lõi proxy được quản lý",
+    "description": "Dán liên kết đường hầm vào trường máy chủ của proxy tùy chỉnh để lưu và gán. Tại đây, bạn cũng có thể lưu định nghĩa JSON đầu ra gốc mà không thay đổi bất kỳ phép gán nào.",
+    "saveHint": "Khi lưu, lõi chính thức được xác minh nếu cần và cấu hình gốc được kiểm tra trước khi kích hoạt. Nguồn phải được mã hóa. Không cài đặt khi xem trước, không tự khởi động hay thay đổi proxy trong suốt.",
+    "saveActivate": "Lưu và kích hoạt",
+    "core": "Lõi",
+    "selectCore": "Chọn một lõi",
+    "name": "Tên",
+    "source": "Liên kết nguồn hoặc JSON đầu ra gốc",
+    "start": "Khởi động",
+    "stop": "Dừng",
+    "loadError": "Không thể tải các lõi được quản lý",
+    "operationError": "Thao tác với lõi được quản lý thất bại",
+    "state": "{state, select, not_installed {Chưa cài đặt} stopped {Đã dừng} starting {Đang khởi động} running {Đang chạy} stopping {Đang dừng} error {Lỗi} other {Không xác định}}"
+  },
   "proxyConfigModal": {
+    "managedCore": "Lõi proxy",
+    "managedSelectCore": "Chọn một lõi",
+    "managedSaveHint": "Khi lưu, lõi chính thức được tải xuống và xác minh nếu cần, cấu hình được kiểm tra rồi proxy này được kích hoạt. Việc nhập không cài đặt bất cứ thứ gì.",
+    "errorSelectManagedCore": "Chọn sing-box hoặc Xray trước khi lưu đường hầm này",
     "levelGlobal": "Toàn cầu",
     "levelProvider": "Nhà cung cấp",
     "levelCombo": "Kết hợp",

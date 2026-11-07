@@ -7039,6 +7039,7 @@
     "fallbackRetryBackendTitle": "Yedekleme yeniden deneme arka ucu"
   },
   "settings": {
+    "proxyManagedCoresTab": "Yönetilen çekirdekler",
     "title": "Ayarlar",
     "general": "Genel",
     "security": "Güvenlik",
@@ -11585,7 +11586,26 @@
     "entries": "Kayıtlar",
     "viewSwitcherAria": "Önbellek görünümü"
   },
+  "managedProxy": {
+    "title": "Yönetilen proxy çekirdekleri",
+    "description": "Kaydetmek ve atamak için tünel bağlantısını özel proxy ana bilgisayar alanına yapıştırın. Burada herhangi bir atamayı değiştirmeden yerel dışa bağlantı JSON tanımını da kaydedebilirsiniz.",
+    "saveHint": "Kaydetme işlemi gerektiğinde resmi çekirdeği doğrular ve etkinleştirmeden önce yerel yapılandırmayı denetler. Kaynaklar şifreleme gerektirir. Önizleme sırasında kurulum, otomatik başlatma veya şeffaf proxy değişikliği yapılmaz.",
+    "saveActivate": "Kaydet ve etkinleştir",
+    "core": "Çekirdek",
+    "selectCore": "Bir çekirdek seçin",
+    "name": "Ad",
+    "source": "Kaynak bağlantısı veya yerel dışa bağlantı JSON tanımı",
+    "start": "Başlat",
+    "stop": "Durdur",
+    "loadError": "Yönetilen çekirdekler yüklenemedi",
+    "operationError": "Yönetilen çekirdek işlemi başarısız oldu",
+    "state": "{state, select, not_installed {Kurulu değil} stopped {Durduruldu} starting {Başlatılıyor} running {Çalışıyor} stopping {Durduruluyor} error {Hata} other {Bilinmiyor}}"
+  },
   "proxyConfigModal": {
+    "managedCore": "Proxy çekirdeği",
+    "managedSelectCore": "Bir çekirdek seçin",
+    "managedSaveHint": "Kaydetme işlemi gerektiğinde resmi çekirdeği indirip doğrular, yapılandırmayı denetler ve ardından bu proxyyi etkinleştirir. Yazmak hiçbir şey kurmaz.",
+    "errorSelectManagedCore": "Bu tüneli kaydetmeden önce sing-box veya Xray seçin",
     "levelGlobal": "Küresel",
     "levelProvider": "sağlayıcı",
     "levelCombo": "Kombinasyon",

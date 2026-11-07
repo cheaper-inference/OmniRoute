@@ -7039,6 +7039,7 @@
     "fallbackRetryBackendTitle": "Backend de nova tentativa de fallback"
   },
   "settings": {
+    "proxyManagedCoresTab": "Núcleos gerenciados",
     "title": "Configurações",
     "general": "Geral",
     "security": "Segurança",
@@ -11585,7 +11586,26 @@
     "entries": "Entradas",
     "viewSwitcherAria": "Visualização do cache"
   },
+  "managedProxy": {
+    "title": "Núcleos de proxy gerenciados",
+    "description": "Cole um link de túnel no campo de host do proxy personalizado para salvá-lo e atribuí-lo. Aqui você também pode salvar uma definição JSON nativa de saída sem alterar nenhuma atribuição.",
+    "saveHint": "Ao salvar, o núcleo oficial é verificado, se necessário, e a configuração nativa é validada antes da ativação. As fontes exigem criptografia. Não há instalação durante a prévia, inicialização automática nem alterações de proxy transparente.",
+    "saveActivate": "Salvar e ativar",
+    "core": "Núcleo",
+    "selectCore": "Selecione um núcleo",
+    "name": "Nome",
+    "source": "Link de origem ou JSON nativo de saída",
+    "start": "Iniciar",
+    "stop": "Parar",
+    "loadError": "Não foi possível carregar os núcleos gerenciados",
+    "operationError": "Falha na operação do núcleo gerenciado",
+    "state": "{state, select, not_installed {Não instalado} stopped {Parado} starting {Iniciando} running {Em execução} stopping {Parando} error {Erro} other {Desconhecido}}"
+  },
   "proxyConfigModal": {
+    "managedCore": "Núcleo do proxy",
+    "managedSelectCore": "Selecione um núcleo",
+    "managedSaveHint": "Ao salvar, o núcleo oficial é baixado e verificado, se necessário, a configuração é validada e o proxy é ativado. Digitar não instala nada.",
+    "errorSelectManagedCore": "Selecione sing-box ou Xray antes de salvar este túnel",
     "levelGlobal": "Globais",
     "levelProvider": "Provedor",
     "levelCombo": "Combinação",

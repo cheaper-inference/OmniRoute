@@ -45,7 +45,25 @@ Alle acht folgen dem gleichen Aufsichtsmodell:
 - OmniRoute installiert sie unter `DATA_DIR/services/{name}/` (isoliert von OmniRoute eigenem `package.json`)
 - OmniRoute erzeugt und überwacht sie als untergeordnete Prozesse
 - OmniRoute fügt einen kurzlebigen API Schlüssel in die Umgebung des Kindes ein und rotiert ihn ohne Ausfallzeit (sofern zutreffend).
-- Alle Verwaltungsrouten (`/api/services/*`) sind**LOCAL_ONLY** — nur über Loopback zugänglich (harte Regel Nr. 17)
+- Alle Verwaltungsrouten (`/api/services/*`) sind**LOCAL_ONLY** — nur über Loopback zugänglich (harte Regel #17)
+
+### Verwaltete Proxy-Kerne
+
+Das Feld „Benutzerdefinierter Proxy-Host“ akzeptiert auch einen V2Ray Quelllink. Wählen** Singbox** oder** Röntgen** explizit aus, und klicken Sie dann auf Speichern. Beim Tippen wird niemals ein Kern heruntergeladen oder gestartet. Save überprüft das offizielle Release-Archiv, validiert die native Konfiguration, startet einen eindeutigen localhost SOCKS Listener und schreibt erst dann die Proxy-Registrierungszuweisung. Bei einer fehlgeschlagenen Aktivierung werden die zuvor verwaltete Konfiguration und der zuvor verwaltete Prozess wiederhergestellt. `STORAGE_ENCRYPTION_KEY` ist erforderlich; Quelllinks sind verschlüsselt.
+
+Verwaltete Dateien befinden sich unter `DATA_DIR/services/managed-proxy/`, getrennt von TPROXY. Es gibt einen eigenen Prozess pro ausgewähltem Kern, bis zu 100 Listener. Es werden keine Autostart- oder globalen Routing-Standardeinstellungen geändert. Bei erfolgreichem Speichern wird die Aktivierung nur für diesen verwalteten Kern gespeichert. Der Anwendungsstart stellt aktivierte gespeicherte Kerne unter Verwendung der bereits überprüften Binärdatei wieder her, niemals ein Download beim Booten. Explicit Stop löscht dieses Aktivierungsflag. Eine fehlende oder beschädigte Binärdatei erfordert das erneute Speichern einer Quelle. Durch das Löschen der Registrierung werden die Quelle und der Listener lokal entfernt. Normale Endpunktänderungen werden für verwaltete Zeilen abgelehnt, sodass die gespeicherte Quelle nicht stillschweigend von ihrem weitergeleiteten Listener abweichen kann.
+
+| Quellformat                             | Singbox                                                                    | Röntgen                                                                    |
+| --------------------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| VLESS, VMess, Trojaner, Shadowsocks URI | Unterstützte Konvertierung                                                 | Unterstützte Konvertierung                                                 |
+| Hysteria2/hy2, TUIC, AnyTLS URI         | Unterstützte Konvertierung                                                 | Abgelehnt; Verwenden Sie einen kompatiblen Kern                            |
+| TCP/raw, WebSocket, gRPC, HTTPUpgrade   | Unterstützt für VLESS/VMess/Trojan                                         | Unterstützt für VLESS/VMess/Trojan                                         |
+| XHTTP URI Transport                     | Abgelehnt                                                                  | Unterstützte Konvertierung                                                 |
+| Native ausgehende JSON                  | Zulässiger Proxy protocols/options des ausgewählten Kerns, nativ überprüft | Zulässiger Proxy protocols/options des ausgewählten Kerns, nativ überprüft |
+
+Unbekannte Wire-Optionen, unsichere TLS Flags, externe Plugins, lokale Dateipfadoptionen und nicht unterstützte Kombinationen werden abgelehnt und nicht stillschweigend verworfen. Native Objekte sind ausgehende Definitionen, keine Whole-Core-Konfigurationen; control/direct/bypass Outbounds werden nicht akzeptiert. WireGuard auf Sing-Box 1.14 verwendet Endpunkte und wird daher nicht als nativer Outbound akzeptiert. Dies ist kein Konverter für alle Formate. SSR, Legacy- whole-base64 Shadowsocks-Links, beliebige Clash-Objekte und Transportvarianten, die in der Tabelle fehlen, benötigen ein separat unterstütztes Quellformat.
+
+`/api/services/managed-proxy` ist authentifiziert und nur Loopback: GET listet redigierte Metadaten auf, POST speichert `{core,name,sourceLink,id?,assignment?}`, PATCH akzeptiert `{core,action:"start"|"stop"}`. Die vertrauenswürdige Peer-Stamp-Pipeline des Hosts muss vorhanden sein. Native Kerndiagnosen werden unterdrückt, da sie Anmeldeinformationen enthalten können. Lebenszyklusereignisse nutzen den vorhandenen strukturierten Anwendungsdatei-Logger ohne Quelllinks oder Upstream-Payloads. Hängen Sie zur Unterstützung nur bereinigte Anwendungsprotokolle an. Offizielle Versionen sind an Sing-Box 1.14.3 und Xray 26.3.27 mit Release-Asset SHA-256 Manifesten angeheftet; Zukünftige Updates erfordern eine Änderung der Version und aller überprüften Digests zusammen.
 
 ### Wichtige Entscheidungen (aus dem Entwurfsplan)
 

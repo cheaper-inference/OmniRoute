@@ -7039,6 +7039,7 @@
     "fallbackRetryBackendTitle": "מנגנון נסיון חוזר לזיהום"
   },
   "settings": {
+    "proxyManagedCoresTab": "ליבות מנוהלות",
     "title": "הגדרות",
     "general": "כללי",
     "security": "אבטחה",
@@ -11585,7 +11586,26 @@
     "entries": "רשומות",
     "viewSwitcherAria": "תצוגת מטמון"
   },
+  "managedProxy": {
+    "title": "ליבות פרוקסי מנוהלות",
+    "description": "יש להדביק קישור למנהרה בשדה המארח של הפרוקסי המותאם אישית כדי לשמור ולשייך אותו. כאן אפשר גם לשמור הגדרת JSON מקורית לחיבור יוצא בלי לשנות שיוך כלשהו.",
+    "saveHint": "השמירה מאמתת את הליבה הרשמית במידת הצורך ובודקת את התצורה המקורית לפני ההפעלה. המקורות דורשים הצפנה. אין התקנה בתצוגה מקדימה, הפעלה אוטומטית או שינויים בפרוקסי שקוף.",
+    "saveActivate": "שמירה והפעלה",
+    "core": "ליבה",
+    "selectCore": "בחירת ליבה",
+    "name": "שם",
+    "source": "קישור למקור או JSON מקורי לחיבור יוצא",
+    "start": "הפעלה",
+    "stop": "עצירה",
+    "loadError": "לא ניתן לטעון ליבות מנוהלות",
+    "operationError": "הפעולה בליבה המנוהלת נכשלה",
+    "state": "{state, select, not_installed {לא מותקנת} stopped {עצורה} starting {בתהליך הפעלה} running {פועלת} stopping {בתהליך עצירה} error {שגיאה} other {לא ידוע}}"
+  },
   "proxyConfigModal": {
+    "managedCore": "ליבת פרוקסי",
+    "managedSelectCore": "בחירת ליבה",
+    "managedSaveHint": "השמירה מורידה ומאמתת את הליבה הרשמית במידת הצורך, בודקת את התצורה ואז מפעילה את הפרוקסי הזה. הקלדה אינה מתקינה דבר.",
+    "errorSelectManagedCore": "יש לבחור sing-box או Xray לפני שמירת המנהרה הזאת",
     "levelGlobal": "גלובלי",
     "levelProvider": "ספק",
     "levelCombo": "קומבו",
