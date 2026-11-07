@@ -57,11 +57,11 @@ per via di un fatto concreto relativo all'implementazione:
 
 Ecco cosa comporta per ogni superficie, anche con `CORS_ALLOW_ALL=true`:
 
-| Superficie                          | Meccanismo di autenticazione | Effetto del CORS wildcard                                                                                                                                                                                                                            |
-| ----------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dashboard / MANAGEMENT `/api/*`     | Sessione tramite cookie      | L'origine viene restituita, ma **senza `Allow-Credentials`** il browser **blocca** la lettura con credenziali. Un sito cross-origin malevolo **non può leggere** le risposte autenticate della dashboard e il cookie di sessione non viene esposto.  |
-| API client `/v1/*`, `/v1beta/*`     | Header bearer / `x-api-key`  | Già permissiva **per progettazione** (`relaxForTokenAuth`): i browser non allegano mai automaticamente `Authorization`/`x-api-key`, quindi la pagina di un attaccante non può fornire la tua chiave. `CORS_ALLOW_ALL` non amplia questa esposizione. |
-| Lettura pubblica (`/api/health`, …) | Nessuno                      | Dati non sensibili; il wildcard è innocuo.                                                                                                                                                                                                           |
+| Superficie                          | Meccanismo di autenticazione | Effetto del CORS wildcard                                                                                                                                                                                                                                                                                                                                                                                                |
+| ----------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Dashboard / MANAGEMENT `/api/*`     | Sessione tramite cookie      | L'origine viene restituita, ma **senza `Allow-Credentials`** il browser **blocca** la lettura con credenziali. Un sito cross-origin malevolo **non può leggere** le risposte autenticate della dashboard e il cookie di sessione non viene esposto.                                                                                                                                                                      |
+| API client `/v1/*`, `/v1beta/*`     | Header bearer / `x-api-key`  | Già permissiva **per progettazione** (`relaxForTokenAuth`): i browser non allegano mai automaticamente `Authorization`/`x-api-key`, quindi la pagina di un attaccante non può fornire la tua chiave. La restituzione dell'origine si applica solo quando la chiave presentata è stata convalidata; le risposte anonime (`REQUIRE_API_KEY=false`) mantengono l'allowlist. `CORS_ALLOW_ALL` non amplia questa esposizione. |
+| Lettura pubblica (`/api/health`, …) | Nessuno                      | Dati non sensibili; il wildcard è innocuo.                                                                                                                                                                                                                                                                                                                                                                               |
 
 Pertanto, l'esposizione **residua** di `CORS_ALLOW_ALL=true` è limitata a: (a)
 **letture** cross-origin senza credenziali di dati già privi di autenticazione e (b)
@@ -126,10 +126,53 @@ runtime in **Dashboard → Security → CORS Allowed Origins** senza riavviare.
   barriera significativa in questo caso: la barriera è la chiave API. Per questo
   motivo, tale superficie è intenzionalmente permissiva, così i client browser ed
   Electron possono leggere le risposte a cui hanno già diritto.
+  La restituzione permissiva dell'origine segue la chiave convalidata, non la semplice
+  presenza dell'header: quando `REQUIRE_API_KEY=false` serve una richiesta in forma
+  anonima, la sua risposta di successo mantiene l'allowlist fail-closed. I rifiuti di
+  autenticazione (401) restano leggibili, così i client possono segnalare una chiave
+  revocata o digitata male (#5242): il 401 emesso dalla pipeline stessa mantiene la
+  restituzione dell'origine, e una route che rifiuta direttamente la chiave dopo che la
+  pipeline l'ha servita come anonima (`/v1/models` e `/v1beta/models` con
+  l'autenticazione di gestione configurata, le route con ambito proprietario
+  `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` e le route dei candidati
+  auto-combo) aggiunge la restituzione dell'origine a quel 401 tramite
+  `credentialRejectionHeaders()`. La restituzione dipende dal fatto che la richiesta
+  contenga un header di credenziali (`Authorization`, `x-api-key`, `x-goog-api-key` o il
+  cookie `auth_token`), non da quale di essi la route abbia verificato, e non è mai
+  accompagnata da `Access-Control-Allow-Credentials`; il corpo è un involucro di errore
+  fisso. Le route di gestione sotto `/api/v1/` protette da `requireManagementAuth()`
+  (`/api/v1/management/*`, `/api/v1/registered-keys`) non aggiungono la restituzione
+  dell'origine: con `REQUIRE_API_KEY=false` i loro 401/403 non sono leggibili
+  cross-origin.
 - **Sessione basata su cookie (la dashboard):** è protetta dall'impostazione
   predefinita fail-closed **e** dall'assenza di `Access-Control-Allow-Credentials`
   nel percorso condiviso. Non includere le origini di gestione/dashboard in alcuna
   configurazione permissiva: devono rimanere rigorosamente fail-closed.
+
+## Handshake WebSocket (`/v1/responses`, `/v1/ws`)
+
+I browser non applicano CORS ai WebSocket, quindi i trasporti WebSocket che restituiscono
+output di inferenza verificano autonomamente l'`Origin` dell'handshake
+(`src/server/origin/wsOrigin.ts`): il WebSocket Responses (`/v1/responses`) e, quando
+OmniRoute viene eseguito tramite `npm start` / `npm run dev`, il bridge `/v1/ws` e
+`/api/v1/ws`, che trasmette `/v1/chat/completions`, `/v1/messages` e `/v1/responses`
+come frame. Il bridge chiede il verdetto a `/api/v1/ws?handshake=1` e rifiuta
+l'upgrade a meno che quella route non abbia eseguito il controllo. Un handshake viene
+accettato quando:
+
+- non ha alcun header `Origin` (Codex CLI, SDK e altri client non browser);
+- l'`Origin` è ammessa dall'allowlist descritta sopra (`CORS_ALLOWED_ORIGINS`,
+  l'impostazione `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- l'`Origin` è una delle origini pubbliche di OmniRoute stesso (l'URL di base pubblico
+  configurato, l'origine inoltrata da un proxy attendibile oppure un host diretto
+  loopback/LAN indicato come indirizzo IP letterale o come `localhost` — gli stessi
+  candidati usati dal controllo sulle modifiche della dashboard); oppure
+- contiene una chiave API valida, come sulla superficie HTTP `/v1/*`.
+
+Qualsiasi altro caso riceve `403 ws_origin_forbidden`. Un cookie di sessione della
+dashboard non esenta un'`Origin` esterna, perché il browser lo allega al socket di
+qualsiasi pagina. `localhost` su un'altra porta non viene considerato same-origin;
+aggiungi tali origini di sviluppo a `CORS_ALLOWED_ORIGINS`.
 
 ## Esempio: reverse proxy davanti a OmniRoute
 
@@ -165,6 +208,7 @@ scheda Sicurezza), non nel proxy.
 | Banner di avviso della dashboard                      | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | Campo CORS Allowed Origins                            | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | CORS per route di Cloud-Agent (l'eccezione)           | `src/lib/cloudAgent/api.ts`                                          |
+| Controllo dell'`Origin` nell'handshake WebSocket      | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Vedi anche
 

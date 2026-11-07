@@ -65,38 +65,38 @@ HAR menyahkod tamat tempoh JWT dan menunjukkan baki jangka hayat token.
 > **Jangan sekali-kali komit eksport HAR sebenar, token akses atau token penyegaran.** Nilai ujian dan
 > dokumentasi mestilah sentiasa menggunakan ruang letak.
 
-## Jangka hayat dan penyegaran token
+## Jangka hayat token dan penyegaran
 
-`access_token` berjangka hayat pendek (biasanya **~75 minit**). Selepas tamat tempoh, penyedia
-melaporkan ralat sambungan dan anda perlu mendapatkan semula bukti kelayakan.
+`access_token` mempunyai jangka hayat yang singkat (biasanya **~75 minit**). Tanpa token
+penyegaran yang boleh digunakan, anda mesti menangkap semula kelayakan selepas tamat tempoh.
 
 ### Penyegaran automatik dengan `refreshToken`
 
-Untuk mengelakkan keperluan mendapatkan semula bukti kelayakan secara manual, anda boleh menyimpan token penyegaran Microsoft dalam
-**Advanced Settings → providerSpecificData** sambungan:
-
-| Medan          | Penerangan                                                                |
-| -------------- | ------------------------------------------------------------------------- |
-| `refreshToken` | Token penyegaran Microsoft OAuth untuk skop `substrate.office.com/sydney` |
-| `tier`         | `individual` (lalai), `edu` atau `enterprise`                             |
+Dalam dialog **Tambah sambungan** atau **Edit sambungan** penyedia Microsoft 365, buka
+**Tetapan Lanjutan → Token penyegaran (pilihan)**. Tampal token penyegaran Microsoft OAuth
+untuk skop `substrate.office.com/sydney` dan simpan. Input tersebut disamarkan dan tidak pernah
+diisi terlebih dahulu dengan token yang disimpan. Semasa mengedit, biarkan kosong untuk
+mengekalkan token sedia ada; tampal token baharu untuk menggantikannya.
 
 Dapatkan token penyegaran daripada aliran kod peranti atau kod kebenaran Microsoft
-yang diskopkan kepada `substrate.office.com/sydney`. Apabila `refreshToken` ditetapkan, OmniRoute
-menyegarkan `access_token` terlebih dahulu sebelum setiap permintaan, jadi anda tidak perlu
-mendapatkannya semula selepas setiap tamat tempoh ~75 minit.
+yang diskopkan kepada `substrate.office.com/sydney`; papan pemuka tidak mendapatkannya untuk anda.
+Dengan token penyegaran yang dikonfigurasikan, OmniRoute menyemak `access_token` sebelum permintaan
+dan menyegarkannya hanya apabila perlu disegarkan. Penyegaran yang berjaya turut menyimpan token
+penyegaran yang diputar, sekali gus mengelakkan penangkapan semula secara manual selagi token
+penyegaran tersebut masih sah.
 
-Jika `refreshToken` tidak ditetapkan, anda perlu mendapatkan semula bukti kelayakan WebSocket secara manual
+Jika `refreshToken` tidak ditetapkan, anda mesti menangkap semula kelayakan WebSocket secara manual
 selepas setiap tamat tempoh.
 
 ### Pemilihan peringkat
 
-| Peringkat    | Alias      | Antara muka              |
+| Peringkat    | Alias      | Permukaan                |
 | ------------ | ---------- | ------------------------ |
-| `individual` | _(lalai)_  | M365 Copilot Pengguna    |
-| `edu`        | `included` | M365 Copilot Pendidikan  |
-| `enterprise` | `work`     | M365 Copilot untuk Kerja |
+| `individual` | _(lalai)_  | Copilot M365 Pengguna    |
+| `edu`        | `included` | Copilot M365 Pendidikan  |
+| `enterprise` | `work`     | Copilot M365 untuk Kerja |
 
-Tetapkan peringkat dalam **Advanced Settings → providerSpecificData → tier**. Peringkat tersebut mempengaruhi
+Tetapkan peringkat dalam **Tetapan Lanjutan → Peringkat Copilot**. Peringkat tersebut mempengaruhi
 penghalaan BizChat dan akses model.
 
 ## Model keselamatan
@@ -110,23 +110,23 @@ penghalaan BizChat dan akses model.
 
 ### Pengesahan gagal serta-merta
 
-- Pastikan anda menyalinnya daripada **URL WebSocket**, bukan daripada permintaan XHR/Fetch. Bukti kelayakan berada dalam parameter pertanyaan `access_token` bagi sambungan WebSocket Chathub — bukan dalam pengepala `Authorization: Bearer`.
-- Pastikan `chathubPath` menyertakan segmen `<oid>@<tenant>` yang lengkap daripada laluan URL.
+- Sahkan bahawa anda menyalin daripada **WebSocket URL**, bukannya daripada permintaan XHR/Fetch. Bukti kelayakan berada dalam parameter pertanyaan `access_token` bagi sambungan WebSocket Chathub — bukannya dalam pengepala `Authorization: Bearer`.
+- Pastikan `chathubPath` merangkumi segmen penuh `<oid>@<tenant>` daripada laluan URL.
 
-### Token tamat tempoh selepas ~75 minit
+### Token tamat tempoh selepas kira-kira 75 minit
 
-Ini adalah keadaan yang dijangka. Tanpa `refreshToken`, token akses mempunyai jangka hayat yang pendek. Anda boleh:
+Ini adalah jangkaan. Tanpa `refreshToken`, token akses mempunyai jangka hayat yang singkat. Pilih salah satu:
 
 - Tangkap semula bukti kelayakan daripada DevTools, atau
-- Konfigurasikan `refreshToken` dalam Tetapan Lanjutan untuk muat semula automatik.
+- Konfigurasikan **Tetapan Lanjutan → Token penyegaran (pilihan)** dalam dialog Tambah atau Edit sambungan untuk penyegaran automatik.
 
-### Uji Sambungan berjaya tetapi sembang mengembalikan 401
+### Ujian Sambungan berjaya tetapi sembang mengembalikan 401
 
 Token mungkin telah tamat tempoh antara pengesahan dengan permintaan pertama. Tangkap semula bukti kelayakan yang baharu.
 
-### Copilot tidak dipaparkan dalam senarai penyedia
+### Copilot tidak muncul dalam senarai penyedia
 
-Pastikan `copilot-m365-web` didayakan dalam **Papan Pemuka → Penyedia**. Penyedia mungkin disembunyikan secara lalai dalam sesetengah peringkat.
+Pastikan `copilot-m365-web` didayakan dalam **Papan Pemuka → Penyedia**. Penyedia ini mungkin disembunyikan secara lalai dalam sesetengah pelan.
 
 ## Rujukan
 
