@@ -207,11 +207,13 @@ describe("shared Modal focus restoration", () => {
       del.click();
     });
     await flush();
-    expect(document.body.querySelectorAll('[role="dialog"]').length).toBe(2);
+    expect(document.body.querySelectorAll('[role="dialog"]').length).toBe(1);
+    expect(document.body.querySelectorAll('[role="alertdialog"]').length).toBe(1);
     act(() => {
       document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
     });
     await flush();
+    expect(document.body.querySelectorAll('[role="alertdialog"]').length).toBe(0);
     expect(document.body.querySelectorAll('[role="dialog"]').length).toBe(1);
     expect(document.activeElement).toBe(del);
   });

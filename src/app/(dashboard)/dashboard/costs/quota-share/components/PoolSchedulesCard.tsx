@@ -197,8 +197,7 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
   }, [rows, poolId, t]);
 
   // Dense inline editor rows: kit controls at a compact height.
-  const inputCls = "h-7 min-h-7 px-1.5 text-[11px]";
-  const selectCls = "ci-select-native--sm h-7 min-h-7 text-[11px]";
+  const inputCls = "h-8 min-h-8 px-1.5 text-xs";
 
   return (
     <div className="mt-2 pt-2 border-t border-border">
@@ -251,7 +250,7 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                         patchRow(index, { mode: e.target.value as DraftSchedule["mode"] })
                       }
                       aria-label={t("schedulesMode")}
-                      selectClassName={selectCls}
+                      nativeSize="xs"
                     >
                       <option value="allow">{t("schedulesModeAllow")}</option>
                       <option value="block">{t("schedulesModeBlock")}</option>
@@ -344,7 +343,7 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                           className="flex flex-wrap items-center gap-1.5 pl-3"
                         >
                           <Select
-                            selectClassName={selectCls}
+                            nativeSize="xs"
                             value={rule.window}
                             onChange={(e) =>
                               patchReserve(index, ruleIndex, {
@@ -418,7 +417,7 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                         inputClassName={`${inputCls} w-24`}
                       />
                       <Select
-                        selectClassName={selectCls}
+                        nativeSize="xs"
                         value={row.budgetUnit ?? ""}
                         disabled={row.budgetValue === undefined}
                         onChange={(e) =>
@@ -437,7 +436,7 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                         ))}
                       </Select>
                       <Select
-                        selectClassName={selectCls}
+                        nativeSize="xs"
                         value={row.budgetWindow}
                         disabled={row.budgetValue === undefined}
                         onChange={(e) =>
