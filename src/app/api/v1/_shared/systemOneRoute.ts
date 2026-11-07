@@ -68,7 +68,8 @@ async function postHandler(request: Request): Promise<Response> {
     return errorResponse(
       HTTP_STATUS.BAD_REQUEST,
       `Unknown decisions model: ${model ?? "(missing)"}. Use "typesafe/<model>", ` +
-        `a bare jev-* alias, or "openrouter/<vendor>/<model>" for OpenRouter-hosted decisions models.`
+        `a bare jev-* alias, "openrouter/<vendor>/<model>" for OpenRouter-hosted decisions models, ` +
+        `or "cloudflare-ai/<jev|clef|clef-flash>" for Cloudflare Workers AI.`
     );
   }
 
