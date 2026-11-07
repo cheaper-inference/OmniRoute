@@ -46,6 +46,10 @@ it("combines providers, deselects individually and resets to all", () => {
 it("restores multiple providers and migrates legacy single-provider preferences", () => {
   expect(parseProviderFilter("codex")).toEqual(["codex"]);
   expect(parseProviderFilter("all")).toEqual([]);
+  expect(parseProviderFilter("openai-compatible-chat-my.node_1")).toEqual([
+    "openai-compatible-chat-my.node_1",
+  ]);
+  expect(parseProviderFilter("not a provider")).toEqual([]);
   expect(parseProviderFilter(JSON.stringify(["codex", "claude", "codex"]))).toEqual([
     "codex",
     "claude",

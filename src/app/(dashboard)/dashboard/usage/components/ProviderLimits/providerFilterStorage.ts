@@ -8,6 +8,6 @@ export function parseProviderFilter(saved: string): string[] {
       ? [...new Set(value)]
       : [];
   } catch {
-    return /^[\w-]+$/.test(saved) ? [saved] : [];
+    return /^[\w.-]+$/.test(saved) ? [saved] : [];
   }
 }

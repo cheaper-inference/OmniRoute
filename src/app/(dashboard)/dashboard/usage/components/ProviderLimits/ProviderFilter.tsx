@@ -1,5 +1,8 @@
 "use client";
 
+import Button from "@/shared/components/Button";
+import Checkbox from "@/shared/components/Checkbox";
+
 type Props = {
   options: string[];
   value: string[];
@@ -30,29 +33,25 @@ export default function ProviderFilter({
         aria-label={ariaLabel}
         className="absolute left-0 z-30 mt-1 max-h-72 w-72 max-w-[80vw] overflow-y-auto overscroll-contain rounded-lg border border-border bg-surface p-2 shadow-lg"
       >
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
+          fullWidth
           onClick={() => onChange([])}
-          className="w-full rounded px-2 py-2 text-left text-sm text-primary hover:bg-bg"
+          className="justify-start"
         >
           {allLabel}
-        </button>
+        </Button>
         {options.map((id) => (
-          <label
+          <Checkbox
             key={id}
-            className="flex cursor-pointer items-center gap-2 rounded px-2 py-2 text-sm text-text-main hover:bg-bg"
-          >
-            <input
-              type="checkbox"
-              checked={value.includes(id)}
-              onChange={(event) =>
-                onChange(
-                  event.target.checked ? [...value, id] : value.filter((item) => item !== id)
-                )
-              }
-            />
-            {labels[id] || id}
-          </label>
+            className="rounded px-2 py-2 text-sm hover:bg-bg"
+            label={labels[id] || id}
+            checked={value.includes(id)}
+            onChange={(event) =>
+              onChange(event.target.checked ? [...value, id] : value.filter((item) => item !== id))
+            }
+          />
         ))}
       </div>
     </details>
