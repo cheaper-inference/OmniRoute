@@ -151,6 +151,9 @@ import {
 import { applyFieldDowngradeRecovery } from "./base/fieldDowngradeRecovery.ts";
 import { applyAdvisorUndecryptableRecovery } from "./base/advisorRecovery.ts";
 import { stripRedactThinkingBetaForVisibleThinking } from "./base/redactThinkingBeta.ts";
+import { ensureStreamReadiness } from "../utils/streamReadiness.ts";
+import { resolveBaseStreamReadiness } from "./baseStreamReadiness.ts";
+import { STREAM_READINESS_TIMEOUT_MS } from "../config/constants.ts";
 
 function parseSerializedBody(bodyString: string): unknown {
   try {
@@ -1842,6 +1845,28 @@ export class BaseExecutor {
           log?.debug?.("RETRY", `${response.status} on ${url}, trying fallback ${urlIndex + 1}`);
           lastStatus = response.status;
           continue;
+        }
+
+        // First-byte readiness gate for stream responses on custom
+        // anthropic-compatible providers. glm/kiro/grok-web/zed executors
+        // already run ensureStreamReadiness(); the base executor serves
+        // custom anthropic-compatible nodes and did not — a silent upstream
+        // left clients with zero bytes until their own patience ran out.
+        if (stream && response.ok) {
+          const gate = resolveBaseStreamReadiness({
+            provider: this.provider,
+            bodyByteLength: bodyString.length,
+            defaultTimeoutMs: STREAM_READINESS_TIMEOUT_MS,
+          });
+          if (gate.enabled) {
+            const readiness = await ensureStreamReadiness(response, {
+              timeoutMs: gate.timeoutMs,
+              provider: this.provider,
+              model,
+              log,
+            });
+            response = readiness.response;
+          }
         }
 
         return {
