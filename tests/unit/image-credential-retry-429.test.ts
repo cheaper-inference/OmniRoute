@@ -334,3 +334,37 @@ test("policy denial after rotating a rejected account takes precedence over prio
   assert.equal(result.status, 403);
   assert.equal(dispatched, 1);
 });
+
+test("a scoped image key cannot dispatch without any credentials", async () => {
+  for (const scope of [[], ["permitted-account"]]) {
+    let executed = false;
+    const { result } = await executeImageWithCredentialFallback({
+      provider: "custom",
+      requestedModel: "image-model",
+      credentials: null,
+      allowedConnections: scope,
+      execute: async (): Promise<MockImageResult> => {
+        executed = true;
+        return { success: true, status: 200 };
+      },
+    });
+    assert.equal(result.status, 403);
+    assert.equal(executed, false);
+  }
+});
+
+test("an unscoped local image provider may still dispatch without credentials", async () => {
+  let executed = false;
+  const { result } = await executeImageWithCredentialFallback({
+    provider: "custom",
+    requestedModel: "image-model",
+    credentials: null,
+    allowedConnections: null,
+    execute: async (): Promise<MockImageResult> => {
+      executed = true;
+      return { success: true, status: 200 };
+    },
+  });
+  assert.equal(result.status, 200);
+  assert.equal(executed, true);
+});
