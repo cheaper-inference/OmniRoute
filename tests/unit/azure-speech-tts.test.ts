@@ -198,6 +198,20 @@ test("Azure Speech keeps the TTS prefix for sovereign-cloud resource endpoints",
   }
 });
 
+test("Azure Speech resolves region-only sovereign connections to their cloud host", () => {
+  const cases = [
+    ["usgovvirginia", "https://usgovvirginia.tts.speech.azure.us/cognitiveservices/voices/list"],
+    ["USGovArizona", "https://usgovarizona.tts.speech.azure.us/cognitiveservices/voices/list"],
+    ["chinaeast2", "https://chinaeast2.tts.speech.azure.cn/cognitiveservices/voices/list"],
+    ["chinanorth3", "https://chinanorth3.tts.speech.azure.cn/cognitiveservices/voices/list"],
+    ["westeurope", "https://westeurope.tts.speech.microsoft.com/cognitiveservices/voices/list"],
+  ];
+
+  for (const [region, expected] of cases) {
+    assert.equal(resolveAzureSpeechVoicesUrl({ providerSpecificData: { region } }), expected);
+  }
+});
+
 test("Azure Speech synthesis uses a bounded abort signal", async () => {
   const originalFetch = globalThis.fetch;
   let capturedSignal: AbortSignal | null | undefined;

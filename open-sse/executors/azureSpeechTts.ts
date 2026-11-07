@@ -66,6 +66,13 @@ function normalizeAzureSpeechBaseUrl(baseUrl: string): string | null {
   }
 }
 
+/** Pick the TTS host root of a region: sovereign clouds do not live on microsoft.com. */
+function azureSpeechRegionHost(region: string): string {
+  if (region.startsWith("usgov")) return "tts.speech.azure.us";
+  if (region.startsWith("china")) return "tts.speech.azure.cn";
+  return "tts.speech.microsoft.com";
+}
+
 /** Resolve the configured Azure Speech connection to a synthesis endpoint. */
 export function resolveAzureSpeechSynthesisUrl(credentials: unknown): string | null {
   const record = credentials && typeof credentials === "object" ? credentials : {};
@@ -81,7 +88,8 @@ export function resolveAzureSpeechSynthesisUrl(credentials: unknown): string | n
 
   const region = "region" in providerSpecificData ? stringValue(providerSpecificData.region) : null;
   if (!region || !/^[a-z0-9-]+$/i.test(region)) return null;
-  return `https://${region.toLowerCase()}.tts.speech.microsoft.com/cognitiveservices/v1`;
+  const normalizedRegion = region.toLowerCase();
+  return `https://${normalizedRegion}.${azureSpeechRegionHost(normalizedRegion)}/cognitiveservices/v1`;
 }
 
 /** Resolve the Azure Speech voices endpoint used for connection validation. */
