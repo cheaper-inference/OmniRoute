@@ -7,19 +7,28 @@ import { fileURLToPath } from "node:url";
 // (and right after a restart) the map went blank even though connections were healthy.
 // These guard the connection-health base layer that keeps "what is connected" visible.
 
-const read = (rel: string) =>
-  readFileSync(fileURLToPath(new URL(rel, import.meta.url)), "utf8");
+const read = (rel: string) => readFileSync(fileURLToPath(new URL(rel, import.meta.url)), "utf8");
 
 const homePageClientSrc = read("../../src/app/(dashboard)/dashboard/HomePageClient.tsx");
 const providerTopologySrc = read("../../src/app/(dashboard)/home/ProviderTopology.tsx");
 const sectionSrc = read("../../src/app/(dashboard)/dashboard/HomeProviderTopologySection.tsx");
 
-test("HomePageClient derives per-provider health from connection testStatus counts", () => {
+test("HomePageClient derives per-provider health from the actual connections", () => {
   assert.match(homePageClientSrc, /healthByProvider/, "must build a per-provider health map");
   assert.match(
     homePageClientSrc,
-    /stat\.connected > 0 \? "active" : stat\.errors > 0 \? "error" : "idle"/,
+    /healthByProvider\.set\(canonical, noAuthHealthy \?\? getProviderHealth\(connections\)\)/,
     "healthy = has a working connection; error = only failing ones; else idle"
+  );
+  assert.match(
+    homePageClientSrc,
+    /providerStats\.forEach\(\(stat\) => noteProviderHealth\(stat\.id\)\)/,
+    "catalog providers must get a health entry"
+  );
+  assert.match(
+    homePageClientSrc,
+    /providerConnections\.forEach\(\(connection\) => noteProviderHealth\(connection\.provider\)\)/,
+    "custom nodes are not in the catalog, so their connections must add the entry"
   );
   assert.match(
     homePageClientSrc,

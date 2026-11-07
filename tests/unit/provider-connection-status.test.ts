@@ -132,13 +132,7 @@ test("provider health: forwards `now` so an expired cooldown is healthy again", 
   };
   assert.equal(getProviderHealth([connection], now), "active");
   assert.equal(
-    getProviderHealth(
-      [
-        { isActive: true, testStatus: "error" },
-        connection,
-      ],
-      now
-    ),
+    getProviderHealth([{ isActive: true, testStatus: "error" }, connection], now),
     "active"
   );
 });
