@@ -17,6 +17,67 @@ const route = await import("../../src/app/api/usage/token-limits/route.ts");
 
 const NOW = Date.UTC(2026, 0, 15, 12, 0, 0);
 
+test("migration 218 preserves counters and reset logs with foreign keys enabled and is repeatable", async () => {
+  const { default: Database } = await import("better-sqlite3");
+  const dir = path.join(process.cwd(), "src/lib/db/migrations");
+  const db = new Database(":memory:");
+  try {
+    db.exec(
+      "CREATE TABLE usage_history (api_key_id TEXT, provider TEXT, model TEXT, timestamp TEXT)"
+    );
+    for (const file of [
+      "073_per_model_token_limits.sql",
+      "196_token_limits_unique_per_window.sql",
+    ]) {
+      db.exec(fs.readFileSync(path.join(dir, file), "utf8"));
+    }
+    db.prepare(
+      `INSERT INTO api_key_token_limits
+      (id, api_key_id, scope_type, scope_value, token_limit, reset_interval, enabled)
+      VALUES ('existing', 'key', 'model', 'gpt-4o', 2000000, 'monthly', 0)`
+    ).run();
+    db.prepare(
+      "INSERT INTO api_key_token_counters (limit_id, window_start, tokens_used) VALUES ('existing', 'w1', 1500000)"
+    ).run();
+    db.prepare(
+      "INSERT INTO api_key_token_limit_reset_logs (limit_id, prev_tokens, window_start) VALUES ('existing', 500, 'w0')"
+    ).run();
+    assert.equal(db.pragma("foreign_keys", { simple: true }), 1);
+    const migrate = db.transaction(() =>
+      db.exec(fs.readFileSync(path.join(dir, "218_token_limits_lifetime_credit.sql"), "utf8"))
+    );
+    migrate();
+    db.prepare(
+      `INSERT INTO api_key_token_limits (id, api_key_id, scope_type, token_limit, reset_interval)
+      VALUES ('fixed', 'key', 'global', 2000000, 'never')`
+    ).run();
+    migrate();
+    assert.deepEqual(db.prepare("SELECT tokens_used FROM api_key_token_counters").all(), [
+      { tokens_used: 1500000 },
+    ]);
+    assert.deepEqual(db.prepare("SELECT prev_tokens FROM api_key_token_limit_reset_logs").all(), [
+      { prev_tokens: 500 },
+    ]);
+    assert.deepEqual(
+      db
+        .prepare("SELECT enabled, reset_interval FROM api_key_token_limits WHERE id = 'existing'")
+        .get(),
+      { enabled: 0, reset_interval: "monthly" }
+    );
+    assert.equal(
+      (
+        db.prepare("SELECT reset_interval FROM api_key_token_limits WHERE id = 'fixed'").get() as {
+          reset_interval: string;
+        }
+      ).reset_interval,
+      "never"
+    );
+    assert.deepEqual(db.pragma("foreign_key_check"), []);
+  } finally {
+    db.close();
+  }
+});
+
 test.beforeEach(() => {
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
