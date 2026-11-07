@@ -1,0 +1,1 @@
+- **fix(i18n):** the provider API region picker shows its translated labels again in Finnish, Korean, Polish, Portuguese, Brazilian Portuguese and Simplified and Traditional Chinese, instead of falling back to English.

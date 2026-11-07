@@ -81,9 +81,9 @@ lastUpdated: 2026-11-03
   (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). An adapter imports the kit
   component by subpath and maps the legacy props onto it — for example `Button variant="primary"` is the
   kit `default` button (`--ci-button-primary-*`: the inverse surface in light, the accent with its
-  `--ci-color-accent-foreground` ink in dark), `danger` is `destructive`, and `warning` is `outline` plus
-  the `.ci-button--warning` extension. The `.ci-button--warning` and `.ci-badge[data-tone]` rules at the
-  end of `globals.css` (`@layer components`) are OmniRoute extensions on top of the kit classes.
+  `--ci-color-accent-foreground` ink in dark), `danger` is `destructive`, and `warning` is the kit `warning`
+  button. `Badge` status variants are kit tones, and `Select` with `<option>` children renders the kit
+  `NativeSelect`.
   `tests/unit/ui/adapters/*.test.tsx` pin each adapter.
 - **Shell.** `src/app/(dashboard)/layout.tsx` renders `DashboardLayout`, which renders
   `src/shared/components/layouts/DashboardShell.tsx`: the kit `SidebarProvider` / `Sidebar` /

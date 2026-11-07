@@ -120,8 +120,8 @@ describe("DistributeProxiesButton", () => {
     // Should show distributing state
     expect(button.textContent).toContain("Distributing...");
     expect(button.disabled).toBe(true);
-    const icon = container.querySelector("svg.oi-icon");
-    expect(icon?.getAttribute("data-icon")).toBe("sync");
+    const spinner = container.querySelector('[data-slot="spinner"]');
+    expect(spinner?.getAttribute("data-size")).toBe("xs");
 
     // Resolve the promise
     await act(async () => {
