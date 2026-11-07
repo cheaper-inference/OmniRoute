@@ -365,7 +365,7 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
     const msgIdx = state.reasoningId ? state.reasoningIndex + 1 : idx;
     // A post-tool-call message lives at its relocated index (msgIndexAlias);
     // close it there, or later text would append to it across this call.
-    closeMessage(state, emit, state.msgIndexAlias?.[msgIdx] ?? msgIdx);
+    closeMessage(state, emit, aliasedMessageIndex(state, msgIdx));
     for (const tc of delta.tool_calls) {
       emitToolCall(state, emit, tc);
     }
@@ -512,7 +512,7 @@ function nextFreeMessageIndex(state, requestedIdx) {
 // later deltas for the SAME logical message reuse it — without the alias every
 // delta re-ran the relocation scan and opened yet another message item.
 function resolveMessageIndex(state, requestedIdx) {
-  let idx = state.msgIndexAlias?.[requestedIdx] ?? requestedIdx;
+  let idx = aliasedMessageIndex(state, requestedIdx);
   if (
     state.msgItemDone[idx] ||
     (!state.msgItemAdded[idx] && state.funcAllocatedOutputIndexes?.[idx])
@@ -521,6 +521,11 @@ function resolveMessageIndex(state, requestedIdx) {
     (state.msgIndexAlias ??= {})[requestedIdx] = idx;
   }
   return idx;
+}
+
+// Where the message requested at `requestedIdx` actually lives (see above).
+function aliasedMessageIndex(state, requestedIdx) {
+  return state.msgIndexAlias?.[requestedIdx] ?? requestedIdx;
 }
 
 function emitTextContent(state, emit, idx, content) {
@@ -700,6 +705,15 @@ function allocateToolOutputIndex(state, tcIdx) {
   return state.funcOutputIndex[tcIdx];
 }
 
+// Reuse the index the call was announced at (allocateToolOutputIndex); the
+// fallback covers states built before any emitToolCall ran.
+function announcedToolOutputIndex(state, tcIdx) {
+  return (
+    state.funcOutputIndex?.[tcIdx] ??
+    toolCallOutputIndexBase(state) + resolveLocalToolCallIndex(state, tcIdx)
+  );
+}
+
 function emitToolCall(state, emit, tc) {
   const tcIdx = tc.index ?? 0;
   const lifecycle = translatorToolCallLifecycle(state);
@@ -767,11 +781,7 @@ function emitToolCall(state, emit, tc) {
 function closeToolCall(state, emit, idx, recordAsCompleted = true) {
   const callId = state.funcCallIds[idx];
   if (callId && !state.funcItemDone[idx]) {
-    // Reuse the index the call was announced at (allocateToolOutputIndex); the
-    // fallback covers states built before any emitToolCall ran.
-    const normalizedIndex =
-      state.funcOutputIndex?.[idx] ??
-      toolCallOutputIndexBase(state) + resolveLocalToolCallIndex(state, idx);
+    const normalizedIndex = announcedToolOutputIndex(state, idx);
     const args = state.funcArgsBuf[idx] || "{}";
     emitToolCallAdded(state, emit, idx, normalizedIndex, true);
     const selection = translatorToolCallLifecycle(state).get(idx)!;
