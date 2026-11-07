@@ -191,7 +191,8 @@ export default Plugin.define({
         return await defaultOmniRouteModelsFetcher(
           resolved.baseURL,
           resolved.apiKey,
-          timeouts.models
+          timeouts.models,
+          resolved.headers
         );
       } catch (err) {
         log.warn(
@@ -218,7 +219,8 @@ export default Plugin.define({
           value: await defaultOmniRouteCombosFetcher(
             resolved.baseURL,
             resolved.managementReadToken ?? resolved.apiKey,
-            timeouts.combos
+            timeouts.combos,
+            resolved.headers
           ),
         };
       } catch (err) {
@@ -240,7 +242,8 @@ export default Plugin.define({
             resolved.baseURL,
             resolved.managementReadToken ?? resolved.apiKey,
             timeouts.models,
-            reportSourceError
+            reportSourceError,
+            resolved.headers
           ),
         };
       } catch (err) {
@@ -262,7 +265,8 @@ export default Plugin.define({
             resolved.baseURL,
             resolved.managementReadToken ?? resolved.apiKey,
             timeouts.enrichment,
-            reportSourceError
+            reportSourceError,
+            resolved.headers
           ),
         };
       } catch (err) {
