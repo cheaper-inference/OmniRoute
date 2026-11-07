@@ -19,7 +19,10 @@ const lossyProfile: DerivedPlan = {
 test("default path replaces a lossy profile with dedup and whitespace folding", () => {
   const plan = applyLossyRequestPolicy(lossyProfile, null);
   assert.equal(plan.mode, "stacked");
-  assert.deepEqual(plan.stackedPipeline, [{ engine: "session-dedup" }, { engine: "lite" }]);
+  assert.deepEqual(plan.stackedPipeline, [
+    { engine: "session-dedup" },
+    { engine: "lite", config: { compressToolResults: false, preserveToolWhitespace: true } },
+  ]);
 });
 
 test("allow-lossy keeps the operator profile for this request", () => {
@@ -39,13 +42,75 @@ test("engine header is the opt-in for that engine", () => {
   assert.equal(plan.mode, "rtk");
 });
 
-test("a safe stacked plan is left as-is", () => {
+const LOSSLESS_LITE = {
+  engine: "lite",
+  config: { compressToolResults: false, preserveToolWhitespace: true },
+};
+
+test("a safe stacked plan keeps its steps but lite stops truncating tool results", () => {
+  const safe: DerivedPlan = {
+    mode: "stacked",
+    source: "default",
+    stackedPipeline: [{ engine: "session-dedup" }, { engine: "lite" }, { engine: "headroom" }],
+  };
+  const plan = applyLossyRequestPolicy(safe, null);
+  assert.deepEqual(plan.stackedPipeline, [
+    { engine: "session-dedup" },
+    LOSSLESS_LITE,
+    { engine: "headroom" },
+  ]);
+});
+
+test("a plan without a lite step is left as-is", () => {
+  const safe: DerivedPlan = {
+    mode: "stacked",
+    source: "default",
+    stackedPipeline: [{ engine: "session-dedup" }],
+  };
+  assert.equal(applyLossyRequestPolicy(safe, null), safe);
+});
+
+test("a safe stacked plan scopes Lite without mutating the stored plan", () => {
   const safe: DerivedPlan = {
     mode: "stacked",
     source: "default",
     stackedPipeline: [{ engine: "lite" }],
   };
-  assert.equal(applyLossyRequestPolicy(safe, null), safe);
+  assert.deepEqual(applyLossyRequestPolicy(safe, null), {
+    ...safe,
+    stackedPipeline: [LOSSLESS_LITE],
+  });
+  assert.deepEqual(safe.stackedPipeline, [{ engine: "lite" }]);
+});
+
+test("lite mode is scoped to a tool-preserving Lite step on the default path", () => {
+  const lite: DerivedPlan = { mode: "lite", source: "default", stackedPipeline: [] };
+  assert.deepEqual(applyLossyRequestPolicy(lite, null), {
+    ...lite,
+    mode: "stacked",
+    stackedPipeline: [LOSSLESS_LITE],
+    // Analytics keeps reporting the configured mode, not the stacked wrapper.
+    reportedMode: "lite",
+  });
+  assert.equal(applyLossyRequestPolicy(lite, "allow-lossy"), lite);
+});
+
+test("only the lite wrapper carries a reportedMode", () => {
+  const stacked: DerivedPlan = {
+    mode: "stacked",
+    source: "default",
+    stackedPipeline: [{ engine: "session-dedup" }],
+  };
+  assert.equal("reportedMode" in applyLossyRequestPolicy(stacked, null), false);
+});
+
+test("allow-lossy keeps lite tool-result truncation as configured", () => {
+  const safe: DerivedPlan = {
+    mode: "stacked",
+    source: "default",
+    stackedPipeline: [{ engine: "lite" }],
+  };
+  assert.equal(applyLossyRequestPolicy(safe, "allow-lossy"), safe);
 });
 
 test("lossy single mode retains the configured safe subset", () => {

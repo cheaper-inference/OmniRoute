@@ -6,42 +6,44 @@
 
 🌐 **ဘာသာစကားများ:** 🇺🇸 [English](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
 
-OmniRoute API အတွက် အဓိက ရည်ညွှန်းစာတမ်း ဖြစ်သည်။ အများပြည်သူအသုံးပြုနိုင်သော `/v1` မျက်နှာပြင်နှင့် အများဆုံးအသုံးပြုသည့် စီမံခန့်ခွဲမှု endpoint များကို ဖော်ပြထားသည်။ စက်ဖြင့်ဖတ်ရှုနိုင်သော [`docs/openapi.yaml`](../openapi.yaml) နှင့် `src/app/api/` အောက်ရှိ route tree တို့သည် အပြည့်အစုံဆုံး အရင်းအမြစ်များ ဖြစ်သည်။
+OmniRoute API အတွက် အဓိကရည်ညွှန်းစာတမ်း ဖြစ်သည်။ အများပြည်သူအသုံးပြုနိုင်သော `/v1` မျက်နှာပြင်နှင့် အသုံးများဆုံး စီမံခန့်ခွဲမှု endpoint များကို ဖော်ပြထားပြီး၊ စက်ဖြင့်ဖတ်ရှုနိုင်သော [`docs/openapi.yaml`](../openapi.yaml) နှင့် `src/app/api/` အောက်ရှိ route tree တို့သည် အပြည့်စုံဆုံး အရင်းအမြစ်များ ဖြစ်သည်။
 
-အာရုံစိုက်ထားသော OpenAI-compatible protocol နှင့် provider capability matrix အတွက်
+OpenAI နှင့် ကိုက်ညီသော protocol နှင့် provider စွမ်းဆောင်ရည် matrix အတွက် သီးသန့်ရည်ရွယ်ထားသော ရည်ညွှန်းချက်ကို ကြည့်ရန်
 [`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md) ကို ကြည့်ပါ။
+
+Deployment တစ်ခုစီသည် build ပြုလုပ်စဉ် `docs/openapi.yaml` မှ ထုတ်လုပ်ထားသော spec မိတ္တူကို `/openapi.yaml` တွင် ကိုယ်ပိုင်ပေးဆောင်သည်။ ၎င်းတွင် build ၏ version နှင့် relative server URL (`./`) ပါဝင်သောကြောင့် request များသည် စာရွက်စာတမ်းကို ပေးဆောင်ခဲ့သော host ပေါ်တွင်သာ ဆက်လက်ရှိနေသည်။ ဒေါင်းလုဒ်လုပ်ထားသောဖိုင်ကို import ပြုလုပ်သည့် tool တွင် ထိုကဲ့သို့သော host မရှိသဖြင့် base URL ကို ကိုယ်တိုင် သတ်မှတ်ပေးရန် လိုအပ်သည်။
 
 ---
 
 ## အကြောင်းအရာများ
 
 - [Chat Completions](#chat-completions)
-- [Exclusive Managed Session Leases](#exclusive-managed-session-leases)
+- [သီးသန့် စီမံထားသော Session Lease များ](#exclusive-managed-session-leases)
 - [Embeddings](#embeddings)
 - [Image Generation](#image-generation)
 - [Document OCR](#document-ocr)
-- [List Models](#list-models)
+- [Model များစာရင်း](#list-models)
 - [Provider Plugin Manifest](#provider-plugin-manifest)
-- [Compatibility Endpoints](#compatibility-endpoints)
+- [လိုက်ဖက်ညီမှု Endpoints များ](#compatibility-endpoints)
 - [Files API](#files-api)
 - [Batches API](#batches-api)
 - [Search API](#search-api)
 - [WebSocket Streaming](#websocket-streaming)
-- [Quotas & Issues Reporting](#quotas--issues-reporting)
+- [Quotas နှင့် Issues Reporting](#quotas--issues-reporting)
 - [Semantic Cache](#semantic-cache)
 - [CLIProxyAPI Management Compatibility](#cliproxyapi-management-compatibility)
-- [Dashboard & Management](#dashboard--management)
+- [Dashboard နှင့် Management](#dashboard--management)
 - [Combo Management](#combo-management)
 - [Webhooks](#webhooks)
-- [Registered Keys (Auto-Management)](#registered-keys-auto-management)
+- [မှတ်ပုံတင်ထားသော Keys (အလိုအလျောက် စီမံခန့်ခွဲမှု)](#registered-keys-auto-management)
 - [Agents Protocol](#agents-protocol)
 - [Management Proxies](#management-proxies)
-- [Resilience (extended)](#resilience-extended)
+- [Resilience (တိုးချဲ့ထားသော)](#resilience-extended)
 - [Skills](#skills)
 - [Memory](#memory)
 - [MCP Server](#mcp-server)
 - [A2A Server](#a2a-server)
-- [Cloud, Evals & Assess](#cloud-evals--assess)
+- [Cloud၊ Evals နှင့် Assess](#cloud-evals--assess)
 - [Request Processing](#request-processing)
 - [Authentication](#authentication)
 
@@ -1552,7 +1554,7 @@ Loopback သီးသန့် စီမံခန့်ခွဲမှု route 
 
 ---
 
-## အသံစာသားအဖြစ်ပြောင်းခြင်း
+## အသံမှ စာသားပြောင်းခြင်း
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1560,9 +1562,12 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-ပြင်ဆင်သတ်မှတ်ထားသော STT ပံ့ပိုးသူမည်သည့်ခုကိုမဆို အသုံးပြု၍ အသံဖိုင်များကို စာသားအဖြစ်ပြောင်းပါ။ လမ်းကြောင်း၏ ပထမအပိုင်းသည် မူရင်းပံ့ပိုးသူကို ရွေးချယ်ပေးသည် (`openai/…`, `deepgram/…`)။ အခြားရောင်းချသူ၏ မော်ဒယ်ကို ပြန်လည်တင်ပို့ပေးသော Gateway များသည် အရည်အချင်းပြည့်မီသော ID (`openrouter/deepgram/nova-3`) ကို အသုံးပြုသည်။
+ပြင်ဆင်သတ်မှတ်ထားသော STT provider တစ်ခုခုကို အသုံးပြု၍ အသံဖိုင်များကို စာသားပြောင်းပါ။ ပထမဆုံး path
+segment သည် native provider (`openai/…`, `deepgram/…`) ကို ရွေးချယ်ပေးသည်။ အခြား vendor ၏ model ကို
+ပြန်လည်ဖြန့်ဝေပေးသော gateway များသည် qualified id
+(`openrouter/deepgram/nova-3`) ကို အသုံးပြုသည်။
 
-**တောင်းဆိုမှု:**
+**တောင်းဆိုချက်:**
 
 ```bash
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
@@ -1571,7 +1576,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -F "model=openai/whisper-1"
 ```
 
-**တုံ့ပြန်မှု:**
+**တုံ့ပြန်ချက်:**
 
 ```json
 {
@@ -1582,14 +1587,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 }
 ```
 
-**မော်ဒယ် ID နမူနာများ:** `openai/whisper-1` (OpenAI key လိုအပ်သည်)၊
+**ဥပမာ model ids:** `openai/whisper-1` (OpenAI key လိုအပ်သည်)၊
 `openrouter/deepgram/nova-3` (OpenRouter key လိုအပ်သည်)၊
-`deepgram/nova-3` (မူရင်း Deepgram key လိုအပ်သည်)။ ရိုးရိုး
-`deepgram/nova-3` တောင်းဆိုမှုသည် OpenRouter ကို **အသုံးမပြုပါ**။
+`deepgram/nova-3` (native Deepgram key လိုအပ်သည်)။ သီးခြား
+`deepgram/nova-3` တောင်းဆိုချက်သည် OpenRouter ကို အသုံးမပြုပါ။
 
-**ပံ့ပိုးထားသော ဖိုင်အမျိုးအစားများ:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`။
+**ပံ့ပိုးထားသော ဖိုင်အမျိုးအစားများ:** `mp3`၊ `wav`၊ `m4a`၊ `flac`၊ `ogg`၊ `webm`။
 
----
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`):** Gemini Live
+WebSocket မှတစ်ဆင့် file-mode transcription ကို လုပ်ဆောင်သည် (Gemini API key လိုအပ်သည်)။ အပ်လုဒ်ကို
+`ffmpeg` ဖြင့် 16 kHz mono PCM သို့ ပြောင်းပြီး (`PATH` တွင် ရှိရမည်၊ သို့မဟုတ် ဖိုင်သည် 16 kHz mono PCM WAV ဖြစ်ပြီးသားဖြစ်ရမည်) session သို့
+streaming ပြုလုပ်ကာ အပြီးသတ်စာသားကို `{ "text": "..." }` အဖြစ် ပြန်ပေးသည်။ ရွေးချယ်နိုင်သော `language` နှင့် `prompt` form fields
+များကို ဆက်လက်ပေးပို့သည်။ ကန့်သတ်ချက်များမှာ 25 MiB ထက်ကြီးသော အပ်လုဒ်များ သို့မဟုတ် decode ပြုလုပ်ပြီးနောက် 10 မိနစ်ထက်ရှည်သော အသံများအတွက်
+`413` ပြန်ပေးသည်။ ပြောင်းလဲမှုလုပ်ဆောင်ချိန် 60 s ထက်ကျော်လွန်ပါက ရပ်တန့်စေပြီး `504` ပြန်ပေးသည်။ API key ကို
+`x-goog-api-key` header တွင်သာ ပေးပို့ပြီး WebSocket URL တွင် မည်သည့်အခါမျှ မထည့်သွင်းပါ။
 
 ## Ollama နှင့် ကိုက်ညီမှု
 

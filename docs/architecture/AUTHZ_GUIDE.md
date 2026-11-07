@@ -121,13 +121,37 @@ supplemented:
   Importing an older backup therefore cannot revive a session that a password
   change or a sign-out already ended.
 
+#### Optional TOTP two-factor login (#16619)
+
+Enrolled from Settings → Security; off until the operator turns it on
+(`src/server/auth/dashboardMfa.ts`).
+
+- **What it covers:** password login (`POST /api/auth/login`, which then needs
+  `POST /api/auth/mfa/verify`) and `omniroute connect` (`POST /api/cli/connect`,
+  which refuses a password-only exchange and takes the code as `totp`).
+- **What it does not cover:** OIDC / SSO sign-in (`/api/auth/oidc/callback`) does
+  not ask for the OmniRoute TOTP. It relies on the identity provider's own second
+  factor, so enforce MFA in the IdP if OIDC is enabled.
+- **Recovery** (lost device, no recovery codes left, or a factor that can no longer
+  be verified, for example after `STORAGE_ENCRYPTION_KEY` changed):
+  1. Restart the server with `OMNIROUTE_DISABLE_MFA=true`.
+  2. On the host itself (loopback peer and loopback `Host`, such as
+     `http://localhost:20128`), sign in with the password. The second factor is
+     skipped for that origin only; every other origin still needs the code.
+  3. In Settings → Security → Disable, enter the password and leave the code
+     blank. `POST /api/auth/mfa/disable` accepts a body without `code` only while
+     the variable is set and the request comes from the host; it still requires
+     the dashboard session and the current password, and is audited as
+     `auth.mfa.disabled` with `secondFactor: "recovery_switch"`.
+  4. Unset `OMNIROUTE_DISABLE_MFA`, restart, and enroll again if needed.
+
 ## Route Classes
 
 `src/server/authz/types.ts` defines three classes; any route that cannot be classified deterministically falls back to `MANAGEMENT`.
 
 | Class        | Description                                                                                                                                          | Auth required                                                           |
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| `PUBLIC`     | Explicitly safe routes — login, logout, status, init, health, onboarding bootstrap.                                                                  | None                                                                    |
+| `PUBLIC`     | Explicitly safe routes — login, logout, status, health, onboarding bootstrap.                                                                        | None                                                                    |
 | `CLIENT_API` | Model-serving endpoints — `/api/v1/*`, `/api/v1beta/*`, plus aliases `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer key when the effective `REQUIRE_API_KEY` feature flag is enabled |
 | `MANAGEMENT` | Dashboard pages, settings, providers, keys, admin and diagnostics endpoints.                                                                         | Dashboard session OR Bearer with `manage` scope                         |
 
@@ -206,7 +230,7 @@ PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
@@ -314,8 +338,11 @@ credential only. See [Management Authentication](../guides/MANAGEMENT-AUTH.md).
   minting CLI access tokens at any scope, and creating an API key with the `manage`/`admin` scope,
   granting that scope to a key, or regenerating or revealing such a key
   (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`).
-  Inference-only keys stay open.
-- No password configured **and** no `INITIAL_PASSWORD` env var → bootstrap mode allows the onboarding wizard and loopback requests, but exposed network requests still need credentials.
+  Inference-only keys stay open. Writing a protected feature flag (`REQUIRE_API_KEY`, the other
+  Security flags, and the SSRF / TLS / MCP-scope / sandbox flags listed in
+  [Feature Flags](../reference/FEATURE_FLAGS.md#rest-api)) and saving the PII masking settings
+  (`PUT /api/settings/pii`) also keep needing a credential.
+- No password configured **and** no `INITIAL_PASSWORD` env var → bootstrap mode allows the onboarding wizard and loopback requests, but exposed network requests still need credentials. Exception: writing a protected feature flag and saving the PII masking settings (`PUT /api/settings/pii`) need a credential even from loopback, so loopback by itself is not enough there.
 - Any DB error → fails closed (secure-by-default).
 
 Client API key enforcement uses `isRequireApiKeyEnabled()` in `src/shared/utils/featureFlags.ts`, not a direct `process.env.REQUIRE_API_KEY` read. This matters for deployed instances: toggling `REQUIRE_API_KEY` in Dashboard → Feature Flags stores a DB override and immediately affects `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, and other client-API auth checks that share this helper. If the feature flag store cannot be read, client API auth fails closed and requires a key.

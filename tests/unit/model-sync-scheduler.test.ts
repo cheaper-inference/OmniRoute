@@ -584,3 +584,21 @@ test("first model-sync cycle waits until after the 30s startup cleanup window", 
   assert.match(source, /MODEL_SYNC_STARTUP_DELAY_MS/);
   assert.doesNotMatch(source, /setTimeout\(\(\) => runSyncCycle\(trustedApiBaseUrl\), 5_000\)/);
 });
+
+test("syncConnectionModels logs removed synced and custom models separately", async (t) => {
+  const { getModelSyncInternalBaseUrl, syncConnectionModels } =
+    await import("../../src/shared/services/modelSyncScheduler.ts");
+  const logged: string[] = [];
+  t.mock.method(console, "log", (line: unknown) => logged.push(String(line)));
+  const answer = (body: Record<string, unknown>) =>
+    t.mock.method(globalThis, "fetch", async () => Response.json(body), { times: 1 });
+
+  answer({ syncedModels: 40, modelChanges: { removed: 110 }, customModelChanges: { removed: 3 } });
+  assert.equal(await syncConnectionModels("conn-1", "demo", getModelSyncInternalBaseUrl()), true);
+
+  answer({ syncedModels: 40, modelChanges: { removed: 0 }, customModelChanges: { removed: 0 } });
+  assert.equal(await syncConnectionModels("conn-2", "demo", getModelSyncInternalBaseUrl()), true);
+
+  assert.equal(logged[0], "[ModelSync] demo (conn-1): ✓ 40 models (removed: 110 synced, 3 custom)");
+  assert.equal(logged[1], "[ModelSync] demo (conn-2): ✓ 40 models");
+});

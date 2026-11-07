@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 
 const { buildClaudePassthroughBody } =
   await import("@omniroute/open-sse/handlers/chatCore/claudePassthroughBody.ts");
-const { isAnthropicThinkingSignatureError } =
+const { isAnthropicThinkingSignatureError, isClaudeCodeSemanticPassthroughRequest } =
   await import("@omniroute/open-sse/handlers/chatCore/passthroughHelpers.ts");
 const { DEFAULT_THINKING_CLAUDE_SIGNATURE } =
   await import("@omniroute/open-sse/config/defaultThinkingSignature.ts");
@@ -57,6 +57,131 @@ test("passthrough: manual thinking is disabled when the unsigned block was dropp
 test("passthrough: adaptive thinking stays on without a block", () => {
   const out = build(bodyWith({ type: "adaptive" }));
   assert.deepEqual(out.thinking, { type: "adaptive" });
+});
+
+function buildFor(
+  body: Record<string, unknown>,
+  provider: string,
+  isClaudeCodeSemanticPassthrough: boolean
+) {
+  return buildClaudePassthroughBody({
+    body,
+    provider,
+    clientHeaders: null,
+    isClaudeCodeSemanticPassthrough,
+    effectiveModel: "claude-opus-4-8",
+    targetFormat: "claude",
+    preserveCacheControl: true,
+    normalizeClaudeUpstreamMessages: () => {},
+    applyReasoningRuleDirective: (b) => b,
+    log: null,
+  }) as {
+    thinking?: unknown;
+    system?: Array<{ text?: string; cache_control?: unknown }>;
+    tools?: Array<{ cache_control?: unknown }>;
+    messages: Array<{
+      role: string;
+      content: Array<{ type: string; cache_control?: unknown }>;
+    }>;
+  };
+}
+
+function countBreakpoints(out: ReturnType<typeof buildFor>) {
+  return [
+    ...(out.tools ?? []),
+    ...(out.system ?? []),
+    ...out.messages.flatMap((message) => message.content),
+  ].filter((block) => block.cache_control).length;
+}
+
+const EPHEMERAL = { type: "ephemeral" };
+
+function agentBodyWithMidConversationSystemTurn() {
+  return {
+    model: "claude-opus-4-8",
+    system: [{ type: "text", text: "You are Claude Code." }],
+    tools: [{ name: "Read", input_schema: { type: "object" } }],
+    messages: [
+      { role: "user", content: [{ type: "text", text: "go" }] },
+      { role: "assistant", content: [{ type: "text", text: "ok" }] },
+      { role: "system", content: [{ type: "text", text: "environment update" }] },
+      { role: "user", content: [{ type: "text", text: "next" }] },
+    ],
+  };
+}
+
+function bodyAtBreakpointLimit() {
+  return {
+    model: "claude-opus-4-8",
+    tools: [{ name: "Read", input_schema: { type: "object" }, cache_control: EPHEMERAL }],
+    system: [{ type: "text", text: "s", cache_control: EPHEMERAL }],
+    messages: [
+      { role: "user", content: [{ type: "text", text: "a", cache_control: EPHEMERAL }] },
+      { role: "assistant", content: [{ type: "text", text: "b" }] },
+      { role: "user", content: [{ type: "text", text: "c", cache_control: EPHEMERAL }] },
+      { role: "assistant", content: [{ type: "text", text: "d" }] },
+      { role: "user", content: [{ type: "text", text: "e" }] },
+    ],
+  };
+}
+
+test("passthrough: anthropic API-key provider gets the same first-party passthrough hygiene as claude", () => {
+  assert.equal(
+    isClaudeCodeSemanticPassthroughRequest({
+      provider: "anthropic",
+      sourceFormat: "claude",
+      targetFormat: "claude",
+      userAgent: "claude-cli/2.1.137",
+    }),
+    true
+  );
+
+  for (const semantic of [false, true]) {
+    const out = buildFor(bodyWith({ type: "enabled", budget_tokens: 4096 }), "anthropic", semantic);
+    assert.deepEqual(
+      out.messages[1].content.map((b) => b.type),
+      ["tool_use"]
+    );
+    assert.equal(out.thinking, undefined);
+  }
+});
+
+test("passthrough: anthropic marks the last user turn on the Claude Code path, as claude does", () => {
+  for (const provider of ["claude", "anthropic"]) {
+    const out = buildFor(bodyWith({ type: "adaptive" }), provider, true);
+    assert.deepEqual(out.messages[2].content[0].cache_control, EPHEMERAL);
+  }
+});
+
+test("passthrough: anthropic adds no breakpoint a non-Claude-Code client did not ask for", () => {
+  const out = buildFor(bodyWith({ type: "adaptive" }), "anthropic", false);
+  assert.equal(countBreakpoints(out), 0);
+});
+
+test("passthrough: a body at the breakpoint limit stays at four on either anthropic path", () => {
+  for (const semantic of [false, true]) {
+    assert.equal(countBreakpoints(buildFor(bodyAtBreakpointLimit(), "anthropic", semantic)), 4);
+  }
+});
+
+test("passthrough: anthropic hoists mid-conversation system turns, it never sends their beta", () => {
+  const out = buildFor(agentBodyWithMidConversationSystemTurn(), "anthropic", true);
+  assert.deepEqual(
+    out.messages.map((message) => message.role),
+    ["user", "assistant", "user"]
+  );
+  assert.deepEqual(
+    out.system?.map((block) => block.text),
+    ["You are Claude Code.", "environment update"]
+  );
+});
+
+test("passthrough: claude keeps mid-conversation system turns behind its own beta", () => {
+  const out = buildFor(agentBodyWithMidConversationSystemTurn(), "claude", true);
+  assert.deepEqual(
+    out.messages.map((message) => message.role),
+    ["user", "assistant", "system", "user"]
+  );
 });
 
 test("signature 400 recovery covers every signature-validating Anthropic upstream", () => {

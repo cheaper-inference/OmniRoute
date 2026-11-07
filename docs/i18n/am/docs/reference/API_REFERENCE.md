@@ -4,12 +4,14 @@
 
 ---
 
-🌐 **ቋንቋዎች:** 🇺🇸 [እንግሊዝኛ](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [ዓረብኛ](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [አዘርባጃንኛ](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [ቡልጋሪያኛ](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [ቤንጋሊኛ](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [ቦስኒያኛ](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [ቼክኛ](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [ዴንማርክኛ](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [ጀርመንኛ](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [ግሪክኛ](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [ስፓኒሽ](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [ኢስቶኒያኛ](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [ፋርስኛ](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [ፊንላንድኛ](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [ፈረንሳይኛ](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [አይሪሽ](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ጉጃራቲ](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [ሃውሳ](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [ዕብራይስጥ](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [ሂንዲ](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [ክሮኤሽያኛ](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [ሀንጋሪኛ](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [አርሜኒያኛ](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [ኢንዶኔዥያኛ](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [ኢግቦ](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [ጣልያንኛ](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [ጃፓንኛ](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ጆርጂያኛ](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ክመር](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ካናዳ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [ኮሪያኛ](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [ሊቱዌንያኛ](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [ላትቪያኛ](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [ማላያላም](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [ማራቲ](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [ማላይኛ](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [ማልታኛ](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [በርማኛ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [ኔፓሊኛ](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [ደች](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [ኖርዌይኛ](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ኦዲያ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ፑንጃቢ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [ፊሊፒኖ](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [ፖላንድኛ](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [ፖርቱጋልኛ (ፖርቱጋል)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [ፖርቱጋልኛ (ብራዚል)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [ሮማኒያኛ](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [ራሺያኛ](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [ሲንሃላ](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [ስሎቫክኛ](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [ስሎቬንኛ](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [ሰርቢያኛ](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [ስዊድንኛ](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [ስዋሂሊ](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [ታሚል](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [ተሉጉ](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ታይኛ](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [ቱርክኛ](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [ዩክሬንኛ](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [ኡርዱ](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [ኡዝቤክኛ](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [ቬትናምኛ](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [ዮሩባ](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [ቻይንኛ (ቀላል ፊደላት)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [ቻይንኛ (ባህላዊ ፊደላት)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
+🌐 **ቋንቋዎች:** 🇺🇸 [English](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
 
-ይህ የOmniRoute API ዋና ማጣቀሻ ነው። የህዝብ `/v1` በይነገጽን እና በብዛት ጥቅም ላይ የሚውሉ የአስተዳደር መጨረሻ ነጥቦችን ይሸፍናል፤ በማሽን ሊነበብ የሚችለው [`docs/openapi.yaml`](../openapi.yaml) እና በ`src/app/api/` ስር ያለው የመንገድ ዛፍ ሙሉ ምንጮች ናቸው።
+ይህ ለ OmniRoute API ዋና ማጣቀሻ ነው። የህዝብ `/v1` በይነገጽን እና በብዛት ጥቅም ላይ የሚውሉ የአስተዳደር መጨረሻ ነጥቦችን ይሸፍናል፤ በማሽን ሊነበብ የሚችለው [`docs/openapi.yaml`](../openapi.yaml) እና በ `src/app/api/` ስር ያለው የመንገድ ዛፍ ሙሉ ምንጮች ናቸው።
 
-በተለይ ለOpenAI-ተኳሃኝ ፕሮቶኮል እና ለአቅራቢዎች የችሎታ ማትሪክስ፣ ይመልከቱ
-[`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md)።
+ለተኮረ OpenAI-compatible ፕሮቶኮል እና የአቅራቢ ችሎታ ማትሪክስ፣
+[`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md) ይመልከቱ።
+
+እያንዳንዱ ማሰማሪያ በግንባታው ወቅት ከ `docs/openapi.yaml` የተፈጠረውን የራሱን የዝርዝር ቅጂ በ `/openapi.yaml` ያቀርባል። ይህ የግንባታውን ስሪት እና አንጻራዊ የአገልጋይ URL (`./`) ይይዛል፤ ስለዚህ ጥያቄዎች ሰነዱን ባቀረበው አስተናጋጅ ላይ እንዲቆዩ ያደርጋል። የወረደውን ፋይል የሚያስገባ መሣሪያ እንዲህ ያለ አስተናጋጅ የለውም፤ ስለዚህ መሠረታዊ URL በእጅ መወሰን ያስፈልገዋል።
 
 ---
 
@@ -1439,7 +1441,7 @@ GET /api/system/version
 
 ---
 
-## የድምጽ ወደ ጽሑፍ መቀየር
+## የድምጽ ጽሑፍ መቀየር
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1447,7 +1449,9 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-ማንኛውንም የተዋቀረ STT አቅራቢ በመጠቀም የድምጽ ፋይሎችን ወደ ጽሑፍ ይቀይሩ። የመንገዱ የመጀመሪያ ክፍል ቤተኛውን አቅራቢ ይመርጣል (`openai/…`, `deepgram/…`)። የሌላ አቅራቢን ሞዴል እንደገና የሚያቀርቡ ጌትዌዮች ብቁ መለያ ይጠቀማሉ
+የተዋቀረ ማንኛውንም STT አቅራቢ በመጠቀም የድምጽ ፋይሎችን ወደ ጽሑፍ ይቀይሩ። የመጀመሪያው የመንገድ
+ክፍል ቤተኛውን አቅራቢ ይመርጣል (`openai/…`, `deepgram/…`)። የሌላ አቅራቢን
+ሞዴል እንደገና የሚያቀርቡ ጌትዌዮች ብቁ መለያ ይጠቀማሉ
 (`openrouter/deepgram/nova-3`)።
 
 **ጥያቄ፦**
@@ -1472,10 +1476,19 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 **የሞዴል መለያዎች ምሳሌዎች፦** `openai/whisper-1` (የOpenAI ቁልፍ ያስፈልገዋል)፣
 `openrouter/deepgram/nova-3` (የOpenRouter ቁልፍ ያስፈልገዋል)፣
-`deepgram/nova-3` (ቤተኛ የDeepgram ቁልፍ ያስፈልገዋል)። ብቻውን የሚላክ
+`deepgram/nova-3` (ቤተኛ የDeepgram ቁልፍ ያስፈልገዋል)። ባዶ
 `deepgram/nova-3` ጥያቄ OpenRouterን **አይጠቀምም**።
 
 **የሚደገፉ ቅርጸቶች፦** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
+
+**Gemini Live (`gemini/gemini-3.5-transcribe-live`)፦** በGemini Live
+WebSocket በኩል በፋይል ሁነታ የሚከናወን የድምጽ ጽሑፍ መቀየር ነው
+(የGemini API ቁልፍ ያስፈልገዋል)። ስቀሉ በ
+`ffmpeg` ወደ 16 kHz ሞኖ PCM ይቀየራል (`PATH` ላይ መኖር አለበት፣ ፋይሉ አስቀድሞ 16 kHz ሞኖ PCM WAV ካልሆነ በስተቀር)፣ ወደ ክፍለ ጊዜው ይላካል እና
+የመጨረሻ ጽሑፉ እንደ `{ "text": "..." }` ይመለሳል። እንደ አማራጭ የሚቀርቡት
+`language` እና `prompt` የቅጽ መስኮች ወደ አገልግሎቱ ይተላለፋሉ። ገደቦች፦ ከ25 MiB በላይ የሆኑ ስቀላዎች ወይም ከ10 ደቂቃ በላይ የሚረዝሙ ከተፈቱ የድምጽ ፋይሎች
+`413` ምላሽ ያገኛሉ፤ ከ60 ሰከንድ በላይ የሚፈጅ ለውጥ ይቋረጣል እና `504` ምላሽ ይሰጣል። የAPI ቁልፉ የሚላከው በ
+`x-goog-api-key` ራስጌ ብቻ ነው፤ በWebSocket URL ውስጥ በፍጹም አይላክም።
 
 ---
 
@@ -1551,7 +1564,7 @@ GET /api/telemetry/summary
 ## በጀት
 
 ```bash
-# የሁሉም API ቁልፎች የበጀት ሁኔታን ያግኙ
+# ለሁሉም API ቁልፎች የበጀት ሁኔታን ያግኙ
 GET /api/usage/budget
 
 # በጀት ያዘጋጁ ወይም ያዘምኑ
@@ -1568,7 +1581,7 @@ Content-Type: application/json
 }
 ```
 
-> **የስኪማ ማስታወሻዎች** (`setBudgetSchema`)፦ `apiKeyId` ግዴታ ነው፤ ከ`dailyLimitUsd`፣ `weeklyLimitUsd` ወይም `monthlyLimitUsd` ቢያንስ አንዱ ከዜሮ በላይ መሆን አለበት። አማራጭ መስኮች፦ `warningThreshold` (0–1)፣ `resetInterval` (`daily` | `weekly` | `monthly`)፣ `resetTime` (`HH:MM`)። የቆየው `{keyId, limit, period}` ቅርጽ `400 Bad Request` ይመልሳል።
+> **የስኪማ ማስታወሻዎች** (`setBudgetSchema`): `apiKeyId` ያስፈልጋል፤ ከ `dailyLimitUsd`፣ `weeklyLimitUsd` ወይም `monthlyLimitUsd` ውስጥ ቢያንስ አንዱ ከዜሮ በላይ መሆን አለበት። አማራጭ መስኮች፦ `warningThreshold` (0–1)፣ `resetInterval` (`daily` | `weekly` | `monthly`)፣ `resetTime` (`HH:MM`)። የቆየው `{keyId, limit, period}` ቅርጽ `400 Bad Request` ይመልሳል።
 
 ## የቶከን ገደቦች
 

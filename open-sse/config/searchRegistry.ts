@@ -10,6 +10,7 @@
  * perplexity-search reuses credentials from the "perplexity" chat provider.
  */
 
+import { parseAndValidateNonMetadataUrl } from "@/shared/network/outboundUrlGuard";
 import { isProviderBlockedByIdOrAlias } from "@/shared/utils/noAuthProviders";
 
 export interface SearchProviderConfig {
@@ -32,6 +33,11 @@ export interface SearchProviderConfig {
    * credentialed provider is available, or when requested explicitly by id.
    */
   fallbackOnly?: boolean;
+  /**
+   * A fallbackOnly provider that becomes an ordinary cost-ranked auto-select candidate once
+   * the operator stores a connection with a real base URL (see isOperatorConfiguredPrimary).
+   */
+  primaryWhenConfigured?: boolean;
   disabled?: boolean;
   /**
    * May a CALLER-supplied `provider_options.baseUrl` redirect this provider?
@@ -302,6 +308,9 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     timeoutMs: 10_000,
     cacheTTLMs: 3 * 60 * 1000,
     fallbackOnly: true,
+    // An operator-configured instance (a stored connection with a real base URL) is a
+    // $0 engine they chose, so it then ranks with the keyed providers by cost.
+    primaryWhenConfigured: true,
     // Keyless and self-hosted by definition: the caller names their own SearXNG
     // instance and no operator credential travels with the request. This is a
     // documented flow (tests/unit/search-route.test.ts). Still block-metadata
@@ -570,6 +579,85 @@ export function isUnconfiguredLoopbackSearchProvider(
   const configured = String(provider.baseUrl || "").replace(/\/+$/, "");
   const catalog = CATALOG_SEARXNG_DEFAULT_URL.replace(/\/+$/, "");
   return configured === catalog;
+}
+
+/**
+ * True when a fallback-only provider becomes an ordinary auto-select candidate: it opts in
+ * with `primaryWhenConfigured` and the operator's stored connection names a real base URL
+ * (not the catalog default). A self-hosted SearXNG configured that way is a $0 engine the
+ * operator chose, so it ranks by cost with the keyed providers instead of only after them.
+ * A base URL the search handler would refuse, or a stored token that would cross the network
+ * over plain http://, is excluded. Without such a connection it stays fallback-only
+ * (#9543, #10976).
+ */
+export function isOperatorConfiguredPrimary(
+  provider: SearchProviderConfig | null | undefined,
+  credentials: unknown
+): boolean {
+  if (!provider?.fallbackOnly || !provider.primaryWhenConfigured) return false;
+  if (!credentials || typeof credentials !== "object") return false;
+  const psd = (credentials as { providerSpecificData?: unknown }).providerSpecificData;
+  const baseUrl =
+    psd && typeof psd === "object" && typeof (psd as Record<string, unknown>).baseUrl === "string"
+      ? String((psd as Record<string, unknown>).baseUrl).trim()
+      : "";
+  if (!baseUrl || isUnconfiguredLoopbackSearchProvider({ ...provider, baseUrl })) return false;
+  if (!isAcceptedBaseUrl(baseUrl)) return false;
+  // Ranking must not widen where a stored token travels in cleartext: a connection that
+  // carries one (sent as `Authorization: Bearer`) over plain http:// to a non-loopback host
+  // is never ranked or used as a failover, and stays a last resort or an explicit choice.
+  // Tokenless http:// (cluster-internal deployments) and loopback http:// never put a secret
+  // on the wire.
+  const c = credentials as { apiKey?: unknown; accessToken?: unknown };
+  const hasToken = Boolean(c.apiKey || c.accessToken);
+  return !(hasToken && isRemoteCleartextUrl(baseUrl));
+}
+
+/**
+ * The check resolveSearchBaseUrl applies. It throws outside any failover, so a URL it refuses
+ * must never become the pick: one bad stored value would fail every auto-selected search.
+ */
+function isAcceptedBaseUrl(raw: string): boolean {
+  try {
+    parseAndValidateNonMetadataUrl(raw);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** http:// to anything but loopback (localhost, 127.0.0.0/8, ::1). Unparsable → treated as remote. */
+function isRemoteCleartextUrl(raw: string): boolean {
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return true;
+  }
+  if (url.protocol !== "http:") return false;
+  const host = url.hostname.replace(/^\[|\]$/g, "").toLowerCase();
+  return !(host === "localhost" || host === "::1" || /^127(?:\.\d{1,3}){3}$/.test(host));
+}
+
+/**
+ * Auto-select candidates for a search type, cheapest first: every non-fallback provider
+ * plus fallback-only providers that may become primary once configured. Callers must
+ * confirm the latter with {@link isOperatorConfiguredPrimary} after resolving credentials.
+ */
+export function autoSearchCandidates(searchType: string): SearchProviderConfig[] {
+  return Object.values(SEARCH_PROVIDERS)
+    .filter(
+      (provider) =>
+        (!provider.fallbackOnly || provider.primaryWhenConfigured === true) &&
+        supportsSearchType(provider, searchType)
+    )
+    .sort((a, b) => a.costPerQuery - b.costPerQuery);
+}
+
+/** Credentials admit this candidate for auto-select (see {@link autoSearchCandidates}). */
+export function admitsAutoCandidate(provider: SearchProviderConfig, credentials: unknown): boolean {
+  if (!credentials) return false;
+  return !provider.fallbackOnly || isOperatorConfiguredPrimary(provider, credentials);
 }
 
 export function getSearchProvider(providerId: string): SearchProviderConfig | null {
