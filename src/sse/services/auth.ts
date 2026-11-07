@@ -167,6 +167,7 @@ import {
   WEB_COOKIE_PROVIDERS,
 } from "@/shared/constants/providers";
 import { isModelExcludedByConnection } from "@/domain/connectionModelRules";
+import { resolveBareModelToConnectionDefault } from "@omniroute/open-sse/services/model.ts";
 import {
   isRequestedModelAdvertised,
   loadAdvertisedModelsForConnections,
@@ -1743,10 +1744,16 @@ export async function getProviderCredentials(
     // key scopes, entitlement, quota and lease rules have determined eligibility.
     // It never introduces a connection that failed an earlier policy gate.
     const healthEnabled = Boolean(requestedModel && isAntigravityAdaptiveHealthEnabled(provider));
+    const healthModelFor = (candidate: ProviderConnectionView): string =>
+      resolveBareModelToConnectionDefault(
+        options.originalRequestedModelStr,
+        requestedModel,
+        candidate.defaultModel
+      ) || requestedModel || "";
     // An existing exclusive lease is already pinned to its connection; health
     // may observe it but must not silently switch it to a different account.
     const healthCandidates = healthEnabled && requestedModel && !leasePolicy.activeLease
-      ? antigravityHealth.candidates(leasePolicy.connections, requestedModel, Boolean(forcedConnectionId))
+      ? antigravityHealth.candidates(leasePolicy.connections, healthModelFor, Boolean(forcedConnectionId))
       : leasePolicy.connections;
     if (healthCandidates.length === 0) {
       return {
@@ -2036,7 +2043,7 @@ export async function getProviderCredentials(
           selectNextLeaseCandidate,
           ...probeStamp,
           antigravityHealthFallback: Boolean(
-            healthEnabled && requestedModel && antigravityHealth.remainingCooldownMs(connection.id, requestedModel) > 0
+            healthEnabled && requestedModel && antigravityHealth.remainingCooldownMs(connection.id, healthModelFor(connection)) > 0
           ),
         });
       }
@@ -2087,7 +2094,7 @@ export async function getProviderCredentials(
       routingLease: reserved.lease,
       requestedModel,
       antigravityHealthFallback: Boolean(
-        healthEnabled && requestedModel && antigravityHealth.remainingCooldownMs(connection.id, requestedModel) > 0
+        healthEnabled && requestedModel && antigravityHealth.remainingCooldownMs(connection.id, healthModelFor(connection)) > 0
       ),
     });
   } finally {
