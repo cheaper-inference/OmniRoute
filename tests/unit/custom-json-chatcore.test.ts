@@ -172,3 +172,35 @@ test("FLUSH_EMPTY_RETRY_ENABLED never replays an empty streamed business reply",
     else process.env.FLUSH_EMPTY_RETRY_ENABLED = previous;
   }
 });
+
+test("a custom JSON node on a ModelScope host never replays a retryable 429", async () => {
+  let upstreamCalls = 0;
+  globalThis.fetch = (async () => {
+    upstreamCalls += 1;
+    return Response.json({ error: { message: "Too many requests" } }, { status: 429 });
+  }) as typeof fetch;
+  const body = { model: "biz/assistant-v1", messages: [{ role: "user", content: "Hello there" }] };
+  const onModelScopeHost = structuredClone(credentials);
+  onModelScopeHost.providerSpecificData.baseUrl =
+    "https://api-inference.modelscope.cn/business/answer";
+  try {
+    const result = (await handleChatCore({
+      body: structuredClone(body),
+      modelInfo: { provider, model: "assistant-v1", extendedContext: false },
+      credentials: onModelScopeHost,
+      log,
+      clientRawRequest: {
+        endpoint: "/v1/chat/completions",
+        body: structuredClone(body),
+        headers: new Headers({ accept: "application/json" }),
+      },
+      connectionId: credentials.connectionId,
+      userAgent: "unit-test",
+    } as Parameters<typeof handleChatCore>[0])) as { response: Response };
+    await result.response.text();
+    assert.equal(result.response.status, 429);
+    assert.equal(upstreamCalls, 1, "a business call must not go through the ModelScope retry");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
