@@ -1,5 +1,6 @@
 import { FORMATS } from "../translator/formats.ts";
 import { sanitizeProviderUsageForRequest, type UsageLike } from "./usageTracking.ts";
+import { mergeCacheCreationFields } from "./cacheWriteUsage.ts";
 
 const COUNTERS = [
   "input_tokens",
@@ -17,6 +18,9 @@ function asRecord(value: unknown): Record<string, unknown> | null {
 /** Native receipt, independent of client translation and payload retention limits. */
 export function createNativeClaudeUsageTracker(body: unknown) {
   const counters: UsageLike = {};
+  // Provider-reported 5m/1h cache-write tiers travel beside the counters so
+  // accounting keeps the same receipt the translate path would have merged.
+  let cacheWrite: Record<string, unknown> = {};
   let observed = false;
   return {
     observe(payload: unknown): void {
@@ -29,6 +33,7 @@ export function createNativeClaudeUsageTracker(body: unknown) {
             : null
       );
       if (!usage || usage.estimated === true) return;
+      cacheWrite = mergeCacheCreationFields(cacheWrite, usage);
       for (const key of COUNTERS) {
         const value = usage[key];
         if (typeof value === "number" && Number.isFinite(value) && value >= 0) {
@@ -48,12 +53,15 @@ export function createNativeClaudeUsageTracker(body: unknown) {
       const cacheCreation = sanitized.cache_creation_input_tokens ?? 0;
       const prompt = (sanitized.input_tokens ?? 0) + cacheRead + cacheCreation;
       const completion = sanitized.output_tokens ?? 0;
+      const { cache_creation, cache_creation_tier_status } = cacheWrite;
       return {
         prompt_tokens: prompt,
         completion_tokens: completion,
         total_tokens: prompt + completion,
         cache_read_input_tokens: cacheRead,
         cache_creation_input_tokens: cacheCreation,
+        ...(cache_creation !== undefined ? { cache_creation } : {}),
+        ...(cache_creation_tier_status !== undefined ? { cache_creation_tier_status } : {}),
         prompt_tokens_details: {
           cached_tokens: cacheRead,
           cache_creation_tokens: cacheCreation,

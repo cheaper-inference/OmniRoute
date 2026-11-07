@@ -3,6 +3,7 @@
  * Handles different provider response formats
  */
 import { carryEstimatedUsageMarker, pickReportedCostUsd } from "../utils/usageTracking.ts";
+import { cacheCreationFields, readCacheWriteUsage } from "../utils/cacheWriteUsage.ts";
 
 /**
  * True for an Anthropic Messages response body (`type: "message"`), whatever provider
@@ -44,15 +45,10 @@ export function extractUsageFromResponse(responseBody, provider) {
     typeof responseBody.usage === "object" &&
     responseBody.usage.prompt_tokens !== undefined
   ) {
-    const cacheCreationTokens =
-      responseBody.usage.cache_creation_input_tokens ??
-      responseBody.usage.prompt_tokens_details?.cache_creation_tokens ??
-      responseBody.usage.input_tokens_details?.cache_creation_tokens ??
-      responseBody.usage.prompt_tokens_details?.cache_write_tokens ??
-      responseBody.usage.input_tokens_details?.cache_write_tokens ??
-      responseBody.usage.cache_write_tokens;
+    const cacheCreationTokens = readCacheWriteUsage(responseBody.usage).total ?? undefined;
     const reportedCostUsd = pickReportedCostUsd(responseBody.usage);
     const openAiUsage = {
+      ...cacheCreationFields(responseBody.usage),
       prompt_tokens: responseBody.usage.prompt_tokens || 0,
       completion_tokens: responseBody.usage.completion_tokens || 0,
       // DeepSeek native API uses flat prompt_cache_hit_tokens (NOT
@@ -110,7 +106,7 @@ export function extractUsageFromResponse(responseBody, provider) {
   ) {
     const inputTokens = responseBody.usage.input_tokens || 0;
     const cacheRead = responseBody.usage.cache_read_input_tokens || 0;
-    const cacheCreation = responseBody.usage.cache_creation_input_tokens || 0;
+    const cacheCreation = readCacheWriteUsage(responseBody.usage).total ?? 0;
 
     // Total prompt tokens = input + cache_read + cache_creation (per Claude API docs)
     const promptTokens = inputTokens + cacheRead + cacheCreation;
@@ -128,6 +124,7 @@ export function extractUsageFromResponse(responseBody, provider) {
       isClaudeProvider || (value !== undefined && value !== null);
 
     return {
+      ...cacheCreationFields(responseBody.usage),
       prompt_tokens: promptTokens,
       completion_tokens: responseBody.usage.output_tokens || 0,
       ...(reportedCache(responseBody.usage.cache_read_input_tokens)
@@ -148,6 +145,7 @@ export function extractUsageFromResponse(responseBody, provider) {
     (responsesUsage.input_tokens !== undefined || responsesUsage.output_tokens !== undefined)
   ) {
     return {
+      ...cacheCreationFields(responsesUsage),
       ...(isReportedAmount(responsesUsage.provider_credits)
         ? { provider_credits: responsesUsage.provider_credits }
         : {}),
@@ -161,11 +159,7 @@ export function extractUsageFromResponse(responseBody, provider) {
         responsesUsage.input_tokens_details?.cached_tokens ??
         responsesUsage.prompt_tokens_details?.cached_tokens ??
         responsesUsage.cache_read_input_tokens,
-      cache_creation_input_tokens:
-        responsesUsage.cache_creation_input_tokens ??
-        responsesUsage.input_tokens_details?.cache_creation_tokens ??
-        responsesUsage.prompt_tokens_details?.cache_creation_tokens ??
-        responsesUsage.cache_write_tokens,
+      cache_creation_input_tokens: readCacheWriteUsage(responsesUsage).total ?? undefined,
       reasoning_tokens:
         responsesUsage.output_tokens_details?.reasoning_tokens ??
         responsesUsage.completion_tokens_details?.reasoning_tokens ??

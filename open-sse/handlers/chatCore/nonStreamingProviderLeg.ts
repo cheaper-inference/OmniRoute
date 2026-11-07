@@ -26,6 +26,7 @@ import { translateNonStreamingClientResponse } from "./nonStreamingClientTransla
 import { parseNonStreamingResponseBody, isJsonRecord } from "./nonStreamingResponseParse.ts";
 import { restoreNonStreamingToolNames } from "./passthroughToolNames.ts";
 import { extractUsageFromResponse } from "../usageExtractor.ts";
+import { cacheCreationFields } from "../../utils/cacheWriteUsage.ts";
 import { sanitizeUsagePayloadForRequest } from "../../utils/usageTracking.ts";
 import { createErrorResult, formatProviderError } from "../../utils/error.ts";
 import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
@@ -162,6 +163,7 @@ function extractUsage(
   const pt = typeof r.prompt_tokens === "number" ? r.prompt_tokens : 0;
   const ct = typeof r.completion_tokens === "number" ? r.completion_tokens : 0;
   return {
+    ...cacheCreationFields(raw),
     prompt_tokens: pt,
     completion_tokens: ct,
     total_tokens: typeof r.total_tokens === "number" ? r.total_tokens : pt + ct,

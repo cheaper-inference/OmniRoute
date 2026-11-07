@@ -41,29 +41,29 @@ Pieprasījums ──▶ chatCore ──▶ usage.record() ──▶ SQLite
 
 ## Kas tiek reģistrēts
 
-Pakalpojums `usage.ts` fiksē **lietojuma notikumu** katram pieprasījumam:
+Pakalpojums `usage.ts` reģistrē **lietojuma notikumu** katram pieprasījumam:
 
-| Lauks              | Tips    | Avots                                                         |
-| ------------------ | ------- | ------------------------------------------------------------- |
-| `id`               | string  | Ierakstīšanas laikā ģenerēts UUID                             |
-| `apiKeyId`         | string  | API atslēga, kas iniciēja pieprasījumu                        |
-| `provider`         | string  | Nodrošinātāja ID (openai, anthropic utt.)                     |
-| `model`            | string  | Modeļa ID (gpt-5, claude-opus-4-6 utt.)                       |
-| `comboId`          | string? | Kombinācijas ID, ja maršrutēts caur kombināciju               |
-| `promptTokens`     | number  | No augšupstraumes atbildes                                    |
-| `completionTokens` | number  | No augšupstraumes atbildes                                    |
-| `cachedTokens`     | number  | Kešatmiņas trāpījuma tokeni (Anthropic uzvedņu kešošana utt.) |
-| `totalTokens`      | number  | uzvedne + pabeigšana                                          |
-| `costUsd`          | number  | Aprēķināts no cenu datiem                                     |
-| `latencyMs`        | number  | Pilns pieprasījuma ilgums                                     |
-| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`    |
-| `errorClass`       | string? | Kļūdas klase, ja statuss != success                           |
-| `timestamp`        | string  | ISO 8601 UTC                                                  |
-| `metadata`         | object  | Pielāgoti spraudņu ievadīti dati                              |
+| Lauks              | Tips    | Avots                                                        |
+| ------------------ | ------- | ------------------------------------------------------------ |
+| `id`               | string  | Reģistrēšanas brīdī ģenerēts UUID                            |
+| `apiKeyId`         | string  | API atslēga, ar kuru tika iniciēts pieprasījums              |
+| `provider`         | string  | Pakalpojuma sniedzēja ID (openai, anthropic utt.)            |
+| `model`            | string  | Modeļa ID (gpt-5, claude-opus-4-6 utt.)                      |
+| `comboId`          | string? | Kombinācijas ID, ja pieprasījums maršrutēts caur kombināciju |
+| `promptTokens`     | number  | No pakalpojuma sniedzēja atbildes                            |
+| `completionTokens` | number  | No pakalpojuma sniedzēja atbildes                            |
+| `cachedTokens`     | number  | Kešatmiņā atrastie tokeni (Anthropic uzvedņu kešošana utt.)  |
+| `totalTokens`      | number  | Uzvedne + atbildes ģenerēšana                                |
+| `costUsd`          | number  | Aprēķināts no cenu datiem                                    |
+| `latencyMs`        | number  | Pilns pieprasījuma izpildes ilgums                           |
+| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`   |
+| `errorClass`       | string? | Kļūdas klase, ja statuss nav success                         |
+| `timestamp`        | string  | ISO 8601 UTC                                                 |
+| `metadata`         | object  | Pielāgoti dati, ko ievietojis spraudnis                      |
 
 ### No kurienes tiek iegūti tokeni
 
-Tokeni tiek izgūti no augšupstraumes nodrošinātāja atbildes **atbildes apstrādātājā**:
+Tokeni tiek iegūti no pakalpojuma sniedzēja atbildes **atbilžu apstrādātājā**:
 
 ```ts
 // No open-sse/handlers/chatCore.ts
@@ -75,15 +75,45 @@ const usage = response.usage || {
 };
 ```
 
-Nodrošinātājiem, kuri neatgriež lietojuma datus (daži tīmekļa sīkfailu nodrošinātāji), OmniRoute **aptuveni novērtē** tokenu skaitu, izmantojot heiristiku `~4 rakstzīmes uz tokenu` (skatiet `open-sse/services/autoCombo/pipelineRouter.ts`).
+Pakalpojumu sniedzējiem, kas neatgriež lietojuma datus (daži sniedzēji, kas izmanto tīmekļa sīkdatnes), OmniRoute **aptuveni aprēķina** tokenu skaitu, izmantojot `~4 chars per token` heiristiku (skatiet `open-sse/services/autoCombo/pipelineRouter.ts`).
 
-### Kešatmiņā saglabātie tokeni
+### Kešotie tokeni
 
 OmniRoute uzskaita `cached_tokens` atsevišķi no `prompt_tokens`, jo:
 
-- Anthropic uzvedņu kešošanai par kešatmiņā saglabātajiem tokeniem piemēro samazinātu tarifu (10% no parastā)
-- Daži nodrošinātāji atgriež `cache_read_input_tokens`, kuriem jāpiemēro atšķirīga cena
+- Anthropic uzvedņu kešošanā kešotajiem tokeniem tiek piemērota samazināta likme (10% no parastās)
+- Daži pakalpojumu sniedzēji atgriež `cache_read_input_tokens`, kuriem jāpiemēro cita cena
 - Analītikā var parādīt **kešatmiņas trāpījumu īpatsvaru** = `cached_tokens / prompt_tokens`
+
+### Kešatmiņas ierakstu līmeņu diagnostika
+
+Analītikas informācijas paneļa uzvedņu kešatmiņas stāvokļa panelī tiek nošķirti pakalpojuma sniedzēja ziņotie
+5 minūšu un 1 stundas kešatmiņas ieraksti. Anthropic lauki
+`usage.cache_creation.ephemeral_5m_input_tokens` un
+`usage.cache_creation.ephemeral_1h_input_tokens` tiek saglabāti gan straumēšanas, gan
+nestraumēšanas lietojuma datu pārveidošanas laikā un glabāti kopā ar izsaukumu žurnāla kopsavilkumiem. Kopējais
+kešatmiņas ierakstu skaits šīm kategorijām netiek pieskaitīts otrreiz.
+
+Izsaukumiem, kuriem ir tikai kopējais ierakstu skaitītājs, tostarp vecākiem ierakstiem, līmenis ir nezināms.
+Ja sadalījums ir daļējs, nepiešķirtā atlikuma līmenis paliek nezināms; nederīgi vai
+pretrunīgi skaitītāji tiek atzīmēti, nevis tiem bez brīdinājuma tiek piešķirts TTL. Pieprasījuma puses
+TTL marķieri nav pierādījums tam, par kuru līmeni ir iekasēta maksa.
+
+Paneļa API ekvivalenta ierakstu izmaksu aplēse aptver tikai ziņotos līmeņus ar zināmu cenu, nevis
+visu pieprasījumu. Claude/Anthropic modeļu vietējo cenu aprēķinā tiek izmantota ievades likme ar koeficientu 1,25
+5 minūšu ierakstiem un divkārša ievades likme 1 stundas ierakstiem. Ja cenu datu nav,
+vērtība nav pieejama, nevis ir nulle. Cenas tiek fiksētas katra jauna izsaukuma reģistrēšanas brīdī;
+vēsturiskajiem ierakstiem cenas netiek pārrēķinātas. Tādēļ abonementu kontiem var būt
+API ekvivalenta aplēse, lai gan attiecīgā summa netiek tērēta naudā un netiek atskaitīta no abonementa
+kvotas. Esošie kvotu, budžeta un precīzu pakalpojuma sniedzēja izmaksu aprēķini paliek nemainīti.
+
+Šī diagnostika izmanto esošo ierobežota apjoma kešatmiņas stāvokļa kopsavilkumu un izsaukumu žurnāla
+glabāšanas politiku. Tā nemaina pieprasījumu TTL noklusējuma vērtības, maršrutēšanu vai kontu atlasi.
+Klienta pieprasītā TTL un faktiskā izejošā TTL fiksēšana brīdī, kad pieprasījums tiek nosūtīts
+pakalpojuma sniedzējam, ir atlikta; šis panelis ziņo par saņemtajos datos norādītajiem līmeņiem, nevis faktisko izejošo TTL.
+
+Realizācija: `src/lib/usage/cacheWriteEstimate.ts`,
+`src/lib/usage/cacheHealth.ts` un `open-sse/utils/cacheWriteUsage.ts`.
 
 ---
 
@@ -122,33 +152,33 @@ Modeļiem, kuriem nav cenu datu, OmniRoute izmaksas **aprēķina aptuveni**, izm
 
 ---
 
-## Apkopošana pēc datumu diapazona
+## Datumu diapazonu apkopošana
 
 Modulis `usageAnalytics.ts` aprēķina informācijas paneļa logrīkus no neapstrādātiem lietojuma datiem. Tas atbalsta 7 laika diapazonus:
 
-| Diapazons | Periods                          | Lietojuma gadījums                        |
-| --------- | -------------------------------- | ----------------------------------------- |
-| `1d`      | Pēdējās 24 stundas               | Izmaksu kāpumu noteikšana pa stundām      |
-| `7d`      | Pēdējās 7 dienas                 | Iknedēļas pārskats                        |
-| `30d`     | Pēdējās 30 dienas                | Ikmēneša norēķini                         |
-| `90d`     | Pēdējās 90 dienas                | Ceturkšņa analīze                         |
-| `ytd`     | Kopš pašreizējā gada 1. janvāra  | Gada budžeta uzraudzība                   |
-| `all`     | Viss periods                     | Kopējā statistika par visu darbības laiku |
-| `custom`  | Lietotāja definēts sākums/beigas | Auditi, vienreizēji vaicājumi             |
+| Diapazons | Periods                          | Lietojums                             |
+| --------- | -------------------------------- | ------------------------------------- |
+| `1d`      | Pēdējās 24 stundas               | Izmaksu lēcienu noteikšana pa stundām |
+| `7d`      | Pēdējās 7 dienas                 | Iknedēļas pārskats                    |
+| `30d`     | Pēdējās 30 dienas                | Ikmēneša norēķini                     |
+| `90d`     | Pēdējās 90 dienas                | Ceturkšņa analīze                     |
+| `ytd`     | Kopš šā gada 1. janvāra          | Gada budžeta uzraudzība               |
+| `all`     | Viss laiks                       | Statistika par visu laiku             |
+| `custom`  | Lietotāja noteikts sākums/beigas | Auditi, vienreizēji vaicājumi         |
 
 ### Aprēķinātie informācijas paneļa logrīki
 
 Jebkuram datumu diapazonam analītikas slānis aprēķina:
 
-| Logrīks                          | Apraksts                                                                                                 |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| **Kopsavilkuma kartītes**        | Kopējais pieprasījumu skaits, kopējās izmaksas, kopējais marķieru skaits, sekmīgo pieprasījumu īpatsvars |
-| **Dienas tendenču diagramma**    | Izmaksas un marķieri dienā, grupēti pēc modeļa                                                           |
-| **Aktivitātes siltumkarte**      | Diennakts stundas × nedēļas dienas režģis, krāsa = pieprasījumu skaits                                   |
-| **Sadalījums pēc modeļa**        | Izmaksu sektoru diagramma pēc modeļa                                                                     |
-| **Sadalījums pēc nodrošinātāja** | Pieprasījumu stabiņu diagramma pēc nodrošinātāja                                                         |
-| **Populārākās API atslēgas**     | Tabula ar 10 atslēgām, kurām ir vislielākās izmaksas                                                     |
-| **Kļūdu analīze**                | Kļūdu īpatsvars laika gaitā, biežākās kļūdu klases                                                       |
+| Logrīks                                   | Apraksts                                                                                               |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| **Kopsavilkuma kartītes**                 | Kopējais pieprasījumu skaits, kopējās izmaksas, kopējais tokenu skaits, sekmīgo pieprasījumu īpatsvars |
+| **Dienas tendenču diagramma**             | Izmaksas + tokeni dienā, sakrauti pa modeļiem                                                          |
+| **Aktivitātes siltumkarte**               | Diennakts stundas × nedēļas dienas režģis, krāsa = pieprasījumu skaits                                 |
+| **Sadalījums pa modeļiem**                | Izmaksu sektoru diagramma pa modeļiem                                                                  |
+| **Sadalījums pa pakalpojumu sniedzējiem** | Pieprasījumu joslu diagramma pa pakalpojumu sniedzējiem                                                |
+| **Galvenās API atslēgas**                 | Tabula ar 10 atslēgām ar lielākajām izmaksām                                                           |
+| **Kļūdu analīze**                         | Kļūdu īpatsvars laika gaitā, biežākās kļūdu klases                                                     |
 
 ### Programmatiska piekļuve
 
@@ -158,7 +188,7 @@ import { computeAnalytics } from "@/lib/usageAnalytics";
 const analytics = await computeAnalytics(
   history,              // lietojuma vēstures ieraksti
   "7d",                 // laika diapazons: "1d" | "7d" | "30d" | "90d" | "ytd" | "all" | "custom"
-  connectionMap,        // nodrošinātāja savienojumu karte (connectionId → konta nosaukums)
+  connectionMap,        // pakalpojumu sniedzēju savienojumu karte (connectionId → konta nosaukums)
   {
     startDate: "2025-01-01",  // neobligāti: diapazonam "custom"
     endDate: "2025-06-01",   // neobligāti: diapazonam "custom"
@@ -170,33 +200,33 @@ console.log(analytics.byModel[0]);           // { model, cost, requests, promptT
 
 ---
 
-## Kvotu piemērošana
+## Kvotu ievērošanas nodrošināšana
 
-Katrai API atslēgai noteiktā kvota tiek piemērota divās vietās:
+Katras API atslēgas kvota tiek kontrolēta divās vietās:
 
-1. **Brīdinājuma ierobežojums** (`quotaWarnAt`): informācijas paneļa brīdinājums, kad lietojums pārsniedz slieksni
-2. **Stingrais ierobežojums** (`quotaLimit`): pieprasījums tiek noraidīts ar HTTP 429, kad ierobežojums ir pārsniegts
+1. **Brīdinājuma ierobežojums** (`quotaWarnAt`): brīdinājums informācijas panelī, kad lietojums pārsniedz slieksni
+2. **Stingrais ierobežojums** (`quotaLimit`): pārsniedzot ierobežojumu, pieprasījums tiek noraidīts ar HTTP 429
 
 ### Konfigurācija
 
 ```ts
 // Katrai API atslēgai
 await updateApiKey(keyId, {
-  quotaWarnAt: 5_00,    // $5.00 — rādīt brīdinājumu
-  quotaLimit: 10_00,    // $10.00 — stingrā apturēšana
+  quotaWarnAt: 5_00,    // $5.00 — parādīt brīdinājumu
+  quotaLimit: 10_00,    // $10.00 — stingri bloķēt
   quotaWindow: "month", // "day" | "week" | "month" | "all"
 });
 ````
 
-### Piemērošanas plūsma
+### Ierobežojumu piemērošanas plūsma
 
 ```
 Pieprasījums ──▶ quotaCheck()
-                   │
-                   ├── Iekļaujas ierobežojumā?  ──▶ atļaut
-                   │
-                   └── Pārsniedz ierobežojumu?  ──▶ 429 Pārāk daudz pieprasījumu
-                                                    ar Retry-After galveni
+              │
+              ├── Ierobežojuma ietvaros?  ──▶ atļaut
+              │
+              └── Ierobežojums pārsniegts?  ──▶ 429 Too Many Requests
+                                   ar Retry-After galveni
 ```
 
 ### Kvotu momentuzņēmumi
@@ -205,24 +235,24 @@ Tabulā `quotaSnapshots` tiek glabāts **vēsturiskais kvotas stāvoklis** tende
 
 | Lauks | Apraksts |
 | ----------- | -------------------------------- | ------ | ------- |
-| `apiKeyId` | Izsekojamā atslēga |
+| `apiKeyId` | Uzraugāmā atslēga |
 | `window` | "day" | "week" | "month" |
-| `used` | Šajā logā izmantotās izmaksas (centos) |
+| `used` | Šajā periodā izmantotās izmaksas (centos) |
 | `limit` | Ierobežojums (centos) |
-| `resetAt` | Laiks, kad logs tiek atiestatīts |
-| `createdAt` | Laiks, kad tika izveidots momentuzņēmums |
+| `resetAt` | Kad periods tiek atiestatīts |
+| `createdAt` | Kad tika izveidots momentuzņēmums |
 
-Momentuzņēmumi tiek izveidoti **katram pieprasījumam**, kura izmaksas ir > 0, un tiek izmantoti, lai:
+Momentuzņēmumi tiek veidoti **katram pieprasījumam**, kura izmaksas ir > 0, un tiek izmantoti, lai:
 
-- Informācijas panelī attēlotu kvotas progresa joslu
-- Rādītu kvotas tendenču diagrammas par 30 dienām
+- Attēlotu kvotas progresa joslu informācijas panelī
+- Parādītu 30 dienu kvotas tendenču diagrammas
 - Aktivizētu brīdinājumus, kad lietojums tuvojas ierobežojumam
 
 ---
 
 ## REST API
 
-### Lietojuma ierakstu uzskaitīšana
+### Lietojuma ierakstu saraksts
 
 ```bash
 GET /api/usage?range=7d&limit=100
@@ -273,12 +303,7 @@ Atbilde:
   },
   "models": [
     { "model": "gpt-5", "cost": 8.5, "requests": 1234, "tokens": 4567890 },
-    {
-      "model": "claude-opus-4-6",
-      "cost": 3.84,
-      "requests": 234,
-      "tokens": 234567
-    }
+    { "model": "claude-opus-4-6", "cost": 3.84, "requests": 234, "tokens": 234567 }
   ],
   "daily": [
     { "date": "2026-06-01", "cost": 1.5, "requests": 800 },
@@ -287,11 +312,11 @@ Atbilde:
 }
 ```
 
-### Lietojuma analītikas vaicāšana
+### Lietojuma analītikas vaicājumi
 
-Lietojuma datiem var piekļūt, izmantojot informācijas paneli vai MCP rīkus, nevis tiešos REST eksportēšanas galapunktus. Pieejamā analītika:
+Lietojuma datiem var piekļūt, izmantojot informācijas paneli vai MCP rīkus, nevis tiešus REST eksporta galapunktus. Pieejamā analītika:
 
-- **`/api/usage/analytics`** — apkopoti lietojuma rādītāji (grupēti pēc modeļa, nodrošinātāja vai atslēgas)
+- **`/api/usage/analytics`** — apkopoti lietojuma rādītāji (grupēti pēc modeļa, pakalpojumu sniedzēja, atslēgas)
 - **`/api/usage/quota`** — katras API atslēgas pašreizējais kvotas statuss
 - **`/api/usage/history`** — pieprasījumu vēstures žurnāli
 
@@ -303,7 +328,7 @@ Divi MCP rīki nodrošina aģentiem piekļuvi lietojuma datiem (skatiet `open-ss
 
 | Rīks                    | Apraksts                                                     |
 | ----------------------- | ------------------------------------------------------------ |
-| `omniroute_cost_report` | Ģenerē izmaksu pārskatu katrai atslēgai par norādīto periodu |
+| `omniroute_cost_report` | Ģenerē izmaksu pārskatu par noteiktu periodu katrai atslēgai |
 | `omniroute_check_quota` | Atgriež API atslēgas pašreizējo kvotas statusu               |
 
 Aģenta izsaukuma piemērs:
@@ -317,11 +342,11 @@ Aģenta izsaukuma piemērs:
 
 ---
 
-## Datu glabāšana un tīrīšana
+## Glabāšana un tīrīšana
 
-Lietojuma datu apjoms pieaug par ~1–10 KB uz katru pieprasījumu. Lielā mērogā tas var būt ievērojams apjoms.
+Lietojuma datu apjoms pieaug par ~1-10KB ar katru pieprasījumu. Lielā mērogā tas var būt ievērojams.
 
-### Datu glabāšanas iestatījumi
+### Glabāšanas iestatījumi
 
 Lietojuma vēstures glabāšanu konfigurē lietotāja saskarnes datubāzes iestatījumos vai izmantojot `/api/settings/database`.
 
@@ -329,55 +354,55 @@ Pēc noklusējuma lietojuma vēsture tiek glabāta **90 dienas**.
 
 ### Tīrīšana
 
-Vecos ierakstus tīra `src/lib/db/cleanup.ts`:
+Vecos ierakstus iztīra `src/lib/db/cleanup.ts`:
 
 - To aktivizē fona cron process
-- No `usage_history` dzēš ierakstus, kas ir vecāki par konfigurēto `usageHistory` glabāšanas periodu
+- Dzēš no `usage_history` ierakstus, kas ir vecāki par konfigurētajā `usageHistory` glabāšanas iestatījumā norādīto periodu
 
-### Krātuves apjoma novērtējums
+### Krātuves apjoma aprēķins
 
-| Pieprasījumu biežums | Krātuve 30 dienām | Krātuve 90 dienām |
-| -------------------- | ----------------- | ----------------- |
-| 100 piepr./dienā     | ~3 MB             | ~9 MB             |
-| 1,000 piepr./dienā   | ~30 MB            | ~90 MB            |
-| 10,000 piepr./dienā  | ~300 MB           | ~900 MB           |
-| 100,000 piepr./dienā | ~3 GB             | ~9 GB             |
+| Pieprasījumu biežums | Glabāšana 30 dienas | Glabāšana 90 dienas |
+| -------------------- | ------------------- | ------------------- |
+| 100 piepr./dienā     | ~3MB                | ~9MB                |
+| 1,000 piepr./dienā   | ~30MB               | ~90MB               |
+| 10,000 piepr./dienā  | ~300MB              | ~900MB              |
+| 100,000 piepr./dienā | ~3GB                | ~9GB                |
 
-Ļoti lielas datplūsmas gadījumā apsveriet iespēju:
+Ja pieprasījumu apjoms ir ļoti liels, apsveriet iespēju:
 
 - Samazināt glabāšanas periodu datubāzes iestatījumos
-- Neapstrādāto ierakstu vietā izmantot `aggregated_metrics` (tikai analītikai)
+- Izmantot `aggregated_metrics` neapstrādātu ierakstu vietā (tikai analītikai)
 
 ---
 
 ## Izmaksu optimizācijas padomi
 
-### 1. Izmantojiet piemērotu modeli
+### 1. Izmantojiet piemērotāko modeli
 
 ```bash
 # Ātra atbilde — izmantojiet lētu un ātru modeli
 curl -d '{"model":"auto/fast","messages":[...]}'
 
-# Sarežģīts uzdevums — izmantojiet kvalitatīvu modeli
+# Sarežģīts uzdevums — izvēlieties kvalitāti
 curl -d '{"model":"auto/smart","messages":[...]}'
 ```
 
 ### 2. Iespējojiet kešošanu
 
-Anthropic uzvedņu kešošana ļauj ietaupīt **90% atkārtota konteksta gadījumā**:
+Anthropic uzvedņu kešošana ietaupa **90% atkārtota konteksta izmaksu**:
 
 ```ts
-// Kešošana notiek automātiski — vienkārši iekļaujiet to pašu lielo sistēmas uzvedni
+// Kešošana notiek automātiski — vienkārši iekļaujiet to pašu apjomīgo sistēmas uzvedni
 const response = await openai.chat({
   model: "claude-sonnet-4-5",
-  system: longSystemPrompt, // Tiks automātiski ievietota kešatmiņā
+  system: longSystemPrompt, // Tiks automātiski kešota
   messages: [{ role: "user", content: "..." }],
 });
 ```
 
 ### 3. Izmantojiet saspiešanu
 
-RTK + Caveman saspiešana ļauj ietaupīt **15–95% sesijās, kurās intensīvi tiek izmantoti rīki**:
+RTK + Caveman saspiešana ietaupa **15-95% izmaksu sesijās ar intensīvu rīku izmantošanu**:
 
 ```ts
 const config = {
@@ -398,7 +423,7 @@ await updateApiKey(keyId, { quotaLimit: 10_00 }); // Ierobežojums: $10 mēnesī
 
 ### 5. Pārbaudiet lielākos patērētājus
 
-Izmantojiet informācijas paneli vai **`/api/usage/analytics`**, lai grupētu datus pēc API atslēgas un kārtotu pēc izmaksām:
+Izmantojiet informācijas paneli vai **`/api/usage/analytics`**, lai grupētu pēc API atslēgas un kārtotu pēc izmaksām:
 
 ```bash
 GET /api/usage/analytics?groupBy=apiKey
@@ -408,23 +433,23 @@ GET /api/usage/analytics?groupBy=apiKey
 
 ## Problēmu novēršana
 
-### "Izmaksas ir lielākas, nekā paredzēts"
+### "Izmaksas ir lielākas, nekā gaidīts"
 
 1. Pārbaudiet **`/api/usage/analytics?groupBy=model`** — atrodiet dārgo modeli
-2. Pārbaudiet **`/api/usage/analytics?groupBy=apiKey`** — atrodiet lielāko patērētāju
-3. Pārbaudiet, vai cenu dati ir atjaunināti: `POST /api/pricing/sync`
+2. Pārbaudiet **`/api/usage/analytics?groupBy=apiKey`** — atrodiet lielo patērētāju
+3. Pārliecinieties, ka cenu dati ir aktuāli: `POST /api/pricing/sync`
 
 ### "Trūkst ierakstu"
 
-- Pārbaudiet datubāzes glabāšanas iestatījumus sadaļā Informācijas panelis → Datubāze → Tīrīšana — vecos ierakstus dzēš periodiskais tīrīšanas uzdevums (`src/lib/db/cleanup.ts`)
-- Pārbaudiet, vai failā `src/lib/db/usage*.ts` nav kļūdu — datubāzes rakstīšanas kļūmes tiek reģistrētas žurnālā, bet netiek parādītas
-- Pārbaudiet, vai pieprasījums tiešām sasniedza `chatCore` — pārbaudiet kombinēto maršrutēšanu
+- Pārbaudiet datubāzes datu glabāšanas iestatījumus sadaļā Informācijas panelis → Datubāze → Tīrīšana — vecos ierakstus dzēš periodiskais tīrīšanas uzdevums (`src/lib/db/cleanup.ts`)
+- Pārbaudiet kļūdas failos `src/lib/db/usage*.ts` — datubāzes rakstīšanas kļūmes tiek reģistrētas žurnālā, bet netiek parādītas
+- Pārliecinieties, ka pieprasījums tiešām sasniedza `chatCore` — pārbaudiet kombināciju maršrutēšanu
 
 ### "Kvota netiek piemērota"
 
 - Pārbaudiet atslēgas `quotaLimit` iestatījumu
-- Pārbaudiet, vai `quotaWindow` ir iestatīts pareizi
-- Meklējiet `quotaSnapshots` ierakstus — tie jāizveido katram pieprasījumam
+- Pārliecinieties, ka `quotaWindow` ir iestatīts pareizi
+- Meklējiet `quotaSnapshots` ierakstus — tiem jābūt izveidotiem katram pieprasījumam
 
 ---
 
@@ -432,6 +457,6 @@ GET /api/usage/analytics?groupBy=apiKey
 
 - [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — Lietojuma tabulu shēma
 - [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — cenu sinhronizācijas vides mainīgie
-- [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — kā `auto/fast` un `auto/cheap` samazina izmaksas
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — pilna `/api/usage/*` atsauce
+- [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — Kā `auto/fast`, `auto/cheap` samazina izmaksas
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — Pilna `/api/usage/*` uzziņa
 - Avots: `open-sse/services/usage.ts`, `src/lib/usageAnalytics.ts`, `src/lib/db/usage*.ts`

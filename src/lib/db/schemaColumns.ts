@@ -208,6 +208,16 @@ export function ensureCallLogsColumns(db: SqliteDatabase) {
       db.exec("ALTER TABLE call_logs ADD COLUMN tokens_reasoning INTEGER DEFAULT NULL");
       console.log("[DB] Added call_logs.tokens_reasoning column");
     }
+    // Nullable diagnostic columns: never backfill legacy tier or financial records.
+    for (const [column, type] of [
+      ["tokens_cache_creation_5m", "REAL"],
+      ["tokens_cache_creation_1h", "REAL"],
+      ["cache_creation_tier_status", "TEXT"],
+      ["cache_write_cost_usd", "REAL"],
+      ["cache_write_priced_tokens", "REAL"],
+    ]) {
+      if (!columnNames.has(column)) db.exec(`ALTER TABLE call_logs ADD COLUMN ${column} ${type}`);
+    }
     if (!columnNames.has("cache_source")) {
       db.exec("ALTER TABLE call_logs ADD COLUMN cache_source TEXT DEFAULT 'upstream'");
       console.log("[DB] Added call_logs.cache_source column");

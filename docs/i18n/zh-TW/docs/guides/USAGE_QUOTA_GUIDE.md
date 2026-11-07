@@ -40,29 +40,29 @@
 
 ## 記錄的內容
 
-`usage.ts` 服務會為每個請求擷取一個**使用量事件**：
+`usage.ts` 服務會為每個請求擷取一筆**用量事件**：
 
-| 欄位               | 類型    | 來源                                                       |
-| ------------------ | ------- | ---------------------------------------------------------- |
-| `id`               | string  | 記錄時產生的 UUID                                          |
-| `apiKeyId`         | string  | 發起請求的 API 金鑰                                        |
-| `provider`         | string  | 提供者 ID（openai、anthropic 等）                          |
-| `model`            | string  | 模型 ID（gpt-5、claude-opus-4-6 等）                       |
-| `comboId`          | string? | 若透過組合進行路由，則為組合 ID                            |
-| `promptTokens`     | number  | 來自上游回應                                               |
-| `completionTokens` | number  | 來自上游回應                                               |
-| `cachedTokens`     | number  | 快取命中的權杖（Anthropic 提示詞快取等）                   |
-| `totalTokens`      | number  | 提示詞 + 補全                                              |
-| `costUsd`          | number  | 根據定價資料計算                                           |
-| `latencyMs`        | number  | 端對端請求持續時間                                         |
-| `status`           | enum    | `success`、`error`、`rate_limited`、`timeout`、`cancelled` |
-| `errorClass`       | string? | 若 status != success，則為錯誤類別                         |
-| `timestamp`        | string  | ISO 8601 UTC                                               |
-| `metadata`         | object  | 外掛程式注入的自訂資料                                     |
+| 欄位               | 類型  | 來源                                                       |
+| ------------------ | ----- | ---------------------------------------------------------- |
+| `id`               | 字串  | 記錄時產生的 UUID                                          |
+| `apiKeyId`         | 字串  | 發起請求的 API 金鑰                                        |
+| `provider`         | 字串  | 提供者 ID（openai、anthropic 等）                          |
+| `model`            | 字串  | 模型 ID（gpt-5、claude-opus-4-6 等）                       |
+| `comboId`          | 字串? | 若透過組合路由，則為該組合的 ID                            |
+| `promptTokens`     | 數字  | 來自上游回應                                               |
+| `completionTokens` | 數字  | 來自上游回應                                               |
+| `cachedTokens`     | 數字  | 快取命中的 token 數（Anthropic 提示快取等）                |
+| `totalTokens`      | 數字  | 提示 + 生成內容                                            |
+| `costUsd`          | 數字  | 根據定價資料計算                                           |
+| `latencyMs`        | 數字  | 端對端請求耗時                                             |
+| `status`           | 列舉  | `success`、`error`、`rate_limited`、`timeout`、`cancelled` |
+| `errorClass`       | 字串? | 狀態不為成功時的錯誤類別                                   |
+| `timestamp`        | 字串  | ISO 8601 UTC                                               |
+| `metadata`         | 物件  | 外掛程式注入的自訂資料                                     |
 
-### 權杖的來源
+### Token 的來源
 
-權杖是在**回應處理常式**中，從上游提供者的回應擷取：
+Token 數會在**回應處理常式**中從上游提供者的回應擷取：
 
 ```ts
 // 來自 open-sse/handlers/chatCore.ts
@@ -74,15 +74,45 @@ const usage = response.usage || {
 };
 ```
 
-對於未傳回使用量的提供者（例如某些使用 Web Cookie 的提供者），OmniRoute 會使用 `每個權杖約 4 個字元` 的啟發式方法**估算**權杖數量（請參閱 `open-sse/services/autoCombo/pipelineRouter.ts`）。
+對於不回傳用量的提供者（部分使用網頁 Cookie 的提供者），OmniRoute 會使用 `~4 chars per token` 的啟發式規則來**估算** token 數（請參閱 `open-sse/services/autoCombo/pipelineRouter.ts`）。
 
-### 快取權杖
+### 快取 Token
 
-OmniRoute 會分別追蹤 `cached_tokens` 與 `prompt_tokens`，原因如下：
+OmniRoute 會將 `cached_tokens` 與 `prompt_tokens` 分開追蹤，原因如下：
 
-- Anthropic 提示詞快取會對快取權杖收取較低的費率（一般費率的 10%）
-- 某些提供者會傳回 `cache_read_input_tokens`，這些權杖應採用不同的計價方式
-- 分析資料可以顯示**快取命中率** = `cached_tokens / prompt_tokens`
+- Anthropic 提示快取會對快取 token 收取較低費率（一般費率的 10%）
+- 部分提供者會回傳 `cache_read_input_tokens`，應以不同費率計價
+- 分析功能可顯示**快取命中率** = `cached_tokens / prompt_tokens`
+
+### 快取寫入層級診斷
+
+分析儀表板的提示快取健康狀態面板會區分提供者回報的
+5 分鐘與 1 小時快取寫入。Anthropic 的
+`usage.cache_creation.ephemeral_5m_input_tokens` 與
+`usage.cache_creation.ephemeral_1h_input_tokens` 會在串流與
+非串流用量轉換過程中保留，並與呼叫記錄摘要一同儲存。合計的
+快取寫入總量不會再次加入這些分類。
+
+只有合計寫入計數的呼叫（包括較舊的記錄），其層級會標示為未知。
+若只有部分明細，未歸類的餘額會保持未知；無效或
+互相衝突的計數會被標記，而不會直接指派 TTL。請求端的
+TTL 標記不能作為計費層級的依據。
+
+此面板的 API 等值寫入估算僅涵蓋已回報且有定價的層級，而非
+整個請求。對於原生 Claude/Anthropic 模型定價，5 分鐘寫入使用
+輸入費率的 1.25 倍，1 小時寫入則使用輸入費率的兩倍。缺少
+定價時會顯示為無法取得，而非零。每次記錄新呼叫時都會擷取價格；
+歷史記錄不會重新計價。因此，訂閱帳戶可能會有
+API 等值估算，但不會因此產生相同金額的現金支出或消耗相應的訂閱
+配額。現有的配額、預算及提供者精確成本計算均維持不變。
+
+這些診斷使用現有且有範圍限制的快取健康狀態摘要與呼叫記錄
+保留機制，不會變更請求 TTL 預設值、路由或帳戶選擇。
+在向提供者傳送請求的邊界擷取用戶端要求的 TTL 與實際送出 TTL
+的功能暫緩實作；此面板回報的是回執中的層級，而非實際送出的 TTL。
+
+實作：`src/lib/usage/cacheWriteEstimate.ts`、
+`src/lib/usage/cacheHealth.ts` 及 `open-sse/utils/cacheWriteUsage.ts`。
 
 ---
 
@@ -123,33 +153,33 @@ curl -X POST http://localhost:20128/api/pricing/sync
 
 ## 日期範圍彙總
 
-`usageAnalytics.ts` 模組會根據原始用量資料計算儀表板小工具。它支援 7 種時間範圍：
+`usageAnalytics.ts` 模組會根據原始用量資料計算儀表板小工具的資料。支援 7 種時間範圍：
 
-| 範圍     | 時間區間                   | 使用情境           |
-| -------- | -------------------------- | ------------------ |
-| `1d`     | 過去 24 小時               | 偵測每小時成本突增 |
-| `7d`     | 過去 7 天                  | 每週檢視           |
-| `30d`    | 過去 30 天                 | 每月計費           |
-| `90d`    | 過去 90 天                 | 每季分析           |
-| `ytd`    | 自當年度 1 月 1 日起       | 追蹤年度預算       |
-| `all`    | 所有時間                   | 全期統計資料       |
-| `custom` | 使用者定義的開始／結束日期 | 稽核、臨時查詢     |
+| 範圍     | 時間區間           | 使用情境           |
+| -------- | ------------------ | ------------------ |
+| `1d`     | 過去 24 小時       | 偵測每小時費用突增 |
+| `7d`     | 過去 7 天          | 每週檢視           |
+| `30d`    | 過去 30 天         | 每月帳務           |
+| `90d`    | 過去 90 天         | 每季分析           |
+| `ytd`    | 自今年 1 月 1 日起 | 年度預算追蹤       |
+| `all`    | 所有時間           | 累計統計資料       |
+| `custom` | 使用者自訂起訖時間 | 稽核、臨時查詢     |
 
-### 計算的儀表板小工具
+### 計算的儀表板小工具資料
 
-對於任何日期範圍，分析層都會計算：
+針對任意日期範圍，分析層會計算：
 
-| 小工具            | 說明                                 |
-| ----------------- | ------------------------------------ |
-| **摘要卡片**      | 請求總數、總成本、權杖總數、成功率   |
-| **每日趨勢圖**    | 每日成本與權杖數量，依模型堆疊顯示   |
-| **活動熱圖**      | 時段 × 星期幾的網格，顏色 = 請求數量 |
-| **模型明細**      | 各模型成本的圓餅圖                   |
-| **提供者明細**    | 各提供者請求數量的長條圖             |
-| **熱門 API 金鑰** | 依成本排序的前 10 個金鑰表格         |
-| **錯誤分析**      | 隨時間變化的錯誤率、最常見的錯誤類別 |
+| 小工具           | 說明                                     |
+| ---------------- | ---------------------------------------- |
+| **摘要卡片**     | 請求總數、總費用、Token 總數、成功率     |
+| **每日趨勢圖**   | 每日費用與 Token 數，依模型堆疊顯示      |
+| **活動熱圖**     | 每日小時 × 每週星期的網格，顏色 = 請求數 |
+| **模型明細**     | 依模型呈現費用的圓餅圖                   |
+| **提供者明細**   | 依提供者呈現請求數的長條圖               |
+| **API 金鑰排行** | 依費用排序的前 10 個金鑰表格             |
+| **錯誤分析**     | 錯誤率隨時間的變化、主要錯誤類別         |
 
-### 程式化存取
+### 透過程式存取
 
 ````ts
 import { computeAnalytics } from "@/lib/usageAnalytics";
@@ -157,10 +187,10 @@ import { computeAnalytics } from "@/lib/usageAnalytics";
 const analytics = await computeAnalytics(
   history,              // 用量歷史記錄
   "7d",                 // 時間範圍："1d" | "7d" | "30d" | "90d" | "ytd" | "all" | "custom"
-  connectionMap,        // 提供者連線對應表（connectionId → 帳戶名稱）
+  connectionMap,        // 提供者連線對照表 (connectionId → 帳戶名稱)
   {
-    startDate: "2025-01-01",  // 選用：用於 "custom" 範圍
-    endDate: "2025-06-01",   // 選用：用於 "custom" 範圍
+    startDate: "2025-01-01",  // 選填：用於 "custom" 範圍
+    endDate: "2025-06-01",   // 選填：用於 "custom" 範圍
   }
 );
 
@@ -171,15 +201,15 @@ console.log(analytics.byModel[0]);           // { model, cost, requests, promptT
 
 ## 配額強制執行
 
-每個 API 金鑰的配額會在兩個位置強制執行：
+每個 API 金鑰的配額會在兩個地方強制執行：
 
-1. **軟性限制** (`quotaWarnAt`)：當使用量超過閾值時，在儀表板顯示警告
+1. **軟性限制** (`quotaWarnAt`)：用量超過門檻時，在儀表板顯示警告
 2. **硬性限制** (`quotaLimit`)：超過限制時，以 HTTP 429 拒絕請求
 
 ### 設定
 
 ```ts
-// 每個 API 金鑰
+// 個別 API 金鑰
 await updateApiKey(keyId, {
   quotaWarnAt: 5_00,    // $5.00 — 顯示警告
   quotaLimit: 10_00,    // $10.00 — 強制停止
@@ -195,7 +225,7 @@ await updateApiKey(keyId, {
               ├── 未超過限制？  ──▶ 允許
               │
               └── 超過限制？  ──▶ 429 Too Many Requests
-                                   並附上 Retry-After 標頭
+                                   附帶 Retry-After 標頭
 ```
 
 ### 配額快照
@@ -204,24 +234,24 @@ await updateApiKey(keyId, {
 
 | 欄位 | 說明 |
 | ----------- | -------------------------------- | ------ | ------- |
-| `apiKeyId` | 正在追蹤的金鑰 |
+| `apiKeyId` | 追蹤中的金鑰 |
 | `window` | "day" | "week" | "month" |
-| `used` | 此視窗中已使用的成本（美分） |
-| `limit` | 限制（美分） |
-| `resetAt` | 視窗重設時間 |
-| `createdAt` | 快照建立時間 |
+| `used` | 此時間區間內已使用的費用（美分） |
+| `limit` | 限額（美分） |
+| `resetAt` | 時間區間重設的時間 |
+| `createdAt` | 擷取快照的時間 |
 
-每個成本 > 0 的請求都會建立快照，並用於：
+**每次請求**產生的費用 > 0 時，都會擷取快照，並用於：
 
 - 在儀表板中呈現配額進度列
 - 顯示 30 天配額趨勢圖
-- 當使用量接近限制時觸發警示
+- 在用量接近限額時觸發警示
 
 ---
 
 ## REST API
 
-### 列出使用量記錄
+### 列出用量記錄
 
 ```bash
 GET /api/usage?range=7d&limit=100
@@ -272,12 +302,7 @@ GET /api/usage/analytics?range=7d&groupBy=model
   },
   "models": [
     { "model": "gpt-5", "cost": 8.5, "requests": 1234, "tokens": 4567890 },
-    {
-      "model": "claude-opus-4-6",
-      "cost": 3.84,
-      "requests": 234,
-      "tokens": 234567
-    }
+    { "model": "claude-opus-4-6", "cost": 3.84, "requests": 234, "tokens": 234567 }
   ],
   "daily": [
     { "date": "2026-06-01", "cost": 1.5, "requests": 800 },
@@ -286,24 +311,24 @@ GET /api/usage/analytics?range=7d&groupBy=model
 }
 ```
 
-### 查詢使用量分析
+### 查詢用量分析
 
-使用量資料透過儀表板或 MCP 工具存取，而非直接透過 REST 匯出端點。可用的分析包括：
+用量資料透過儀表板或 MCP 工具存取，而非直接透過 REST 匯出端點。可用的分析功能：
 
-- **`/api/usage/analytics`** — 彙總的使用量指標（依模型、提供者、金鑰分組）
-- **`/api/usage/quota`** — 每個 API 金鑰目前的配額狀態
-- **`/api/usage/history`** — 請求歷史記錄
+- **`/api/usage/analytics`** — 彙總用量指標（依模型、提供者、金鑰分組）
+- **`/api/usage/quota`** — 各 API 金鑰的目前配額狀態
+- **`/api/usage/history`** — 請求歷程記錄
 
 ---
 
 ## MCP 工具
 
-有兩個 MCP 工具會向代理程式提供使用量資料（請參閱 `open-sse/mcp-server/tools/`）：
+兩個 MCP 工具可向代理程式提供用量資料（請參閱 `open-sse/mcp-server/tools/`）：
 
-| 工具                    | 說明                             |
-| ----------------------- | -------------------------------- |
-| `omniroute_cost_report` | 產生指定期間內每個金鑰的成本報告 |
-| `omniroute_check_quota` | 傳回 API 金鑰目前的配額狀態      |
+| 工具                    | 說明                           |
+| ----------------------- | ------------------------------ |
+| `omniroute_cost_report` | 產生指定期間內各金鑰的費用報告 |
+| `omniroute_check_quota` | 傳回 API 金鑰的目前配額狀態    |
 
 代理程式呼叫範例：
 
@@ -318,40 +343,40 @@ GET /api/usage/analytics?range=7d&groupBy=model
 
 ## 保留與清理
 
-每個請求的使用量資料約增長 1-10KB。在大規模使用下，這可能相當可觀。
+每個請求會增加約 1-10KB 的用量資料。在大規模使用時，資料量可能相當可觀。
 
 ### 保留設定
 
-使用量歷程的保留期限可透過 UI 中的「資料庫設定」或 `/api/settings/database` 進行設定。
+用量歷程記錄的保留期限可透過使用者介面中的資料庫設定，或透過 `/api/settings/database` 進行設定。
 
-預設情況下，使用量歷程會保留 **90 天**。
+預設情況下，用量歷程記錄會保留 **90 天**。
 
 ### 清理
 
 舊記錄由 `src/lib/db/cleanup.ts` 清理：
 
 - 由背景 cron 程序觸發
-- 刪除 `usage_history` 中早於已設定 `usageHistory` 保留期限的記錄
+- 刪除 `usage_history` 中超過所設定 `usageHistory` 保留期限的記錄
 
 ### 儲存空間估算
 
-| 請求速率          | 30 天儲存空間 | 90 天儲存空間 |
-| ----------------- | ------------- | ------------- |
-| 100 次請求/天     | ~3MB          | ~9MB          |
-| 1,000 次請求/天   | ~30MB         | ~90MB         |
-| 10,000 次請求/天  | ~300MB        | ~900MB        |
-| 100,000 次請求/天 | ~3GB          | ~9GB          |
+| 請求頻率            | 30 天儲存空間 | 90 天儲存空間 |
+| ------------------- | ------------- | ------------- |
+| 每天 100 個請求     | ~3MB          | ~9MB          |
+| 每天 1,000 個請求   | ~30MB         | ~90MB         |
+| 每天 10,000 個請求  | ~300MB        | ~900MB        |
+| 每天 100,000 個請求 | ~3GB          | ~9GB          |
 
-對於流量非常高的情況，請考慮：
+流量極高時，請考慮：
 
-- 透過「資料庫設定」縮短保留期限
-- 使用 `aggregated_metrics` 取代原始記錄（僅供分析使用）
+- 透過資料庫設定縮短保留期限
+- 使用 `aggregated_metrics` 取代原始記錄（僅適用於分析）
 
 ---
 
 ## 成本最佳化技巧
 
-### 1. 使用正確的模型
+### 1. 使用合適的模型
 
 ```bash
 # 快速回答 — 使用便宜且快速的模型
@@ -363,7 +388,7 @@ curl -d '{"model":"auto/smart","messages":[...]}'
 
 ### 2. 啟用快取
 
-Anthropic 提示詞快取可在重複的上下文上節省 **90% 的成本**：
+Anthropic 提示詞快取可節省**重複上下文 90% 的成本**：
 
 ```ts
 // 快取會自動進行 — 只需包含相同的大型系統提示詞
@@ -376,7 +401,7 @@ const response = await openai.chat({
 
 ### 3. 使用壓縮
 
-RTK + Caveman 壓縮可在大量使用工具的工作階段中節省 **15-95% 的成本**：
+RTK + Caveman 壓縮可在**大量使用工具的工作階段中節省 15-95% 的成本**：
 
 ```ts
 const config = {
@@ -387,15 +412,15 @@ const config = {
 };
 ```
 
-### 4. 設定每個金鑰的配額
+### 4. 為每個金鑰設定配額
 
-請務必設定 `quotaLimit`，以防止成本失控：
+務必設定 `quotaLimit`，以防止成本失控：
 
 ```ts
 await updateApiKey(keyId, { quotaLimit: 10_00 }); // 每月上限 $10
 ```
 
-### 5. 稽核主要使用者
+### 5. 稽核用量最高的使用者
 
 使用儀表板或 **`/api/usage/analytics`**，依 API 金鑰分組並按成本排序：
 
@@ -409,19 +434,19 @@ GET /api/usage/analytics?groupBy=apiKey
 
 ### 「成本高於預期」
 
-1. 檢查 **`/api/usage/analytics?groupBy=model`** — 找出昂貴的模型
-2. 檢查 **`/api/usage/analytics?groupBy=apiKey`** — 找出高用量使用者
+1. 檢查 **`/api/usage/analytics?groupBy=model`** — 找出成本高昂的模型
+2. 檢查 **`/api/usage/analytics?groupBy=apiKey`** — 找出用量較大的使用者
 3. 確認定價資料為最新版本：`POST /api/pricing/sync`
 
 ### 「記錄遺失」
 
-- 檢查「儀表板 → 資料庫 → 清理」下的資料庫保留設定 — 舊記錄會由定期清理工作刪除（`src/lib/db/cleanup.ts`）
-- 檢查 `src/lib/db/usage*.ts` 中是否有錯誤 — 資料庫寫入失敗會被記錄，但不會顯示給使用者
+- 檢查儀表板 → 資料庫 → 清理中的資料庫保留設定 — 定期清理工作會刪除舊記錄（`src/lib/db/cleanup.ts`）
+- 檢查 `src/lib/db/usage*.ts` 中是否有錯誤 — 資料庫寫入失敗會記錄在日誌中，但不會顯示出來
 - 確認請求確實到達 `chatCore` — 檢查組合路由
 
 ### 「配額未生效」
 
-- 檢查金鑰的 `quotaLimit` 設定
+- 檢查該金鑰的 `quotaLimit` 設定
 - 確認 `quotaWindow` 設定正確
 - 尋找 `quotaSnapshots` 記錄 — 每次請求都應建立這些記錄
 
@@ -429,8 +454,8 @@ GET /api/usage/analytics?groupBy=apiKey
 
 ## 另請參閱
 
-- [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — 使用量資料表的結構描述
+- [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — 用量資料表的結構描述
 - [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — 定價同步環境變數
 - [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — `auto/fast`、`auto/cheap` 如何降低成本
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — 完整的 `/api/usage/*` 參考資料
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — 完整的 `/api/usage/*` 參考文件
 - 原始碼：`open-sse/services/usage.ts`、`src/lib/usageAnalytics.ts`、`src/lib/db/usage*.ts`

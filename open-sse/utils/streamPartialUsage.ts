@@ -17,6 +17,7 @@ import {
   hasValidUsage,
   normalizeUsage,
 } from "./usageTracking.ts";
+import { cacheCreationFields } from "./cacheWriteUsage.ts";
 
 export type PartialStreamUsage = {
   prompt_tokens: number;
@@ -138,6 +139,7 @@ export function resolvePartialStreamUsage({
   if (prompt === 0 && completion === 0) return null;
 
   const usage: PartialStreamUsage = {
+    ...cacheCreationFields(normalized),
     prompt_tokens: prompt,
     completion_tokens: completion,
     total_tokens: prompt + completion,
