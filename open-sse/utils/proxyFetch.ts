@@ -16,6 +16,11 @@ import {
   proxyConfigToUrl,
   proxyUrlForLogs,
 } from "./proxyDispatcher.ts";
+import {
+  getGuardedDispatcher,
+  isConnectGuardRefusal,
+  type ConnectGuardMode,
+} from "./connectGuardDispatcher.ts";
 import { maybeReapDispatcherPool } from "./proxyDispatcherReap.ts";
 import tlsClient, { type TlsFetchOptions, guardTlsFirstByte } from "./tlsClient.ts";
 import { withUpstreamStatusCapture } from "./upstreamStatusCapture.ts";
@@ -316,7 +321,11 @@ export function queueWaitMsFromDispatch(
   return Math.max(0, Math.round(upstreamDispatchedAt - startTime));
 }
 
-type FetchWithDispatcherOptions = RequestInit & { dispatcher?: unknown };
+type FetchWithDispatcherOptions = RequestInit & {
+  dispatcher?: unknown;
+  /** Direct route only: validate the addresses of the lookup the connection itself makes. */
+  connectGuard?: ConnectGuardMode;
+};
 type FetchWithDispatcher = (
   input: RequestInfo | URL,
   init?: FetchWithDispatcherOptions
@@ -820,6 +829,11 @@ async function patchedFetchUnrecorded(
   options: FetchWithDispatcherOptions = {},
   deps: ProxyFetchDeps = {}
 ) {
+  const connectGuard = options?.connectGuard;
+  if (connectGuard) {
+    options = { ...options };
+    delete options.connectGuard;
+  }
   // Drop invisible characters (ZWSP, BOM, stray controls) a pasted key can carry;
   // undici would otherwise reject every request. Clean headers keep the same object.
   const cleanHeaders = options?.headers ? sanitizeHeaderValues(options.headers) : undefined;
@@ -952,12 +966,15 @@ async function patchedFetchUnrecorded(
           input,
           {
             ...directOptions,
-            // A stale pooled socket must not cost a paid image its only attempt.
-            dispatcher: dedicatedCodexImageRequest
-              ? getDedicatedCodexImageDispatcher(codexImageTimeoutMs)
-              : attempt === 0
-                ? getDefaultDispatcher(hostnameForDispatcher)
-                : getRetryDispatcher(hostnameForDispatcher),
+            // A stale pooled socket must not cost a paid image its only attempt; a guarded request
+            // keeps its guard, because only that dispatcher re-checks the host at connect time.
+            dispatcher: connectGuard
+              ? getGuardedDispatcher(connectGuard)
+              : dedicatedCodexImageRequest
+                ? getDedicatedCodexImageDispatcher(codexImageTimeoutMs)
+                : attempt === 0
+                  ? getDefaultDispatcher(hostnameForDispatcher)
+                  : getRetryDispatcher(hostnameForDispatcher),
           },
           _undiciDirect,
           dedicatedCodexImageRequest
@@ -966,6 +983,7 @@ async function patchedFetchUnrecorded(
         );
       } catch (dispatcherError) {
         if (isCallerAbort(dispatcherError, directOptions.signal)) throw dispatcherError;
+        if (isConnectGuardRefusal(dispatcherError)) throw dispatcherError;
         if (isDirectResponseStartTimeout(dispatcherError)) {
           if (attempt === 0 && maxAttempts > 1 && canReplayResponseStartTimeout) {
             console.warn(
@@ -1029,6 +1047,10 @@ async function patchedFetchUnrecorded(
             }
             throw tagProxyUnreachable(dispatcherError);
           }
+
+          // A proxy fallback or native fetch would resolve the name with no guard, so a guarded
+          // request ends here.
+          if (connectGuard) throw dispatcherError;
 
           // Exhausted attempts: try proxy fallback before native fetch.
           if (
