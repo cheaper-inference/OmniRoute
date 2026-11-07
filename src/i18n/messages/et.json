@@ -923,6 +923,8 @@
     "batchListTitle": "Paketid",
     "batchListCount": "{count} paketti",
     "batchListRemovingCompleted": "Eemaldamine…",
+    "batchListRemoveCompletedPartial": "Eemaldati suur hulk pakette. Ülejäänute kustutamiseks klõpsake uuesti.",
+    "batchListRemoveCompletedFailed": "Pakettide eemaldamisel ilmnes viga.",
     "batchListRemoveCompleted": "Eemalda lõpetatud",
     "batchListTableStatus": "Olek",
     "batchListTableId": "ID",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "Värskendamine…",
     "batchListRefresh": "Värskenda",
     "uploadFileModalRemove": "Eemalda",
+    "fileInputChoose": "Vali fail",
+    "fileInputChooseMultiple": "Vali failid",
+    "fileInputEmpty": "Faili pole valitud",
+    "fileInputSelectedCount": "{count, plural, one {# fail valitud} other {# faili valitud}}",
+    "fileDropLabel": "Lohista fail siia või vali fail",
+    "fileDropLabelMultiple": "Lohista failid siia või vali failid",
     "uploadFileModalUploading": "Üleslaadimine…",
     "wizardInputReading": "Faili lugemine…",
     "wizardInputReady": "Valmis",
@@ -1035,7 +1043,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "Saada OpenCode Zen/Go päringutes OpenCode v2 CLI-kliendi sõrmejälg: opencode/latest/<2.x>/cli User-Agent ja x-opencode-client cli ning tasuta paketi päringutes v2 seansipäised, v2 CLI read/shell-tööriistaskeemid ja mitte tool_choice \"none\". Vaikimisi välja lülitatud: iga OpenCode'i päringu praegune identiteet, päised ja keha jäävad muutmata.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Kui automaatse kombinatsiooni kandidaatide kogum on juba enne tööriistakutse eelfiltri käivitamist tühi (kõik sihtmärgid jäetakse ooteaegade, lukustuste või ammendumise tõttu vahele), tagasta pärandkäitumise 400 „No target supports tool calling“ capability_mismatch asemel 503 no_eligible_targets. Vaikimisi välja lülitatud: tühja kogumi korral säilib pärandkäitumise 400.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Jõusta usaldusväärsed mudeli lõpp-punktide sildid (teenusepakkuja kataloogis deklareeritud, erimudeli ID põhjal tuletatud või operaatori määratud): lükka HTTP 400 vastusega enne edastamist tagasi päring, mis saadeti lõpp-punktile, mida mudel ei teeninda, teedel /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations ja /v1/audio/*; peida mudelid, mille sildistatud lõpp-punktidel puudub OmniRoute'i adapter, teelt /v1/models; ning vasta selliste mudelite juhtpaneeli mudelitestile koodiga 422. Vaikimisi väljas: lõpp-punktide sildid jäävad informatiivseks ja päringud edastatakse täpselt nagu varem.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "Tavalistes anthropic-ühilduvates vaheserverites hoitakse vestluse keskel olevaid süsteemisõnumeid sõnumiloendis, selle asemel et teisaldada need ülataseme süsteemiviipa, nii et vahemällu salvestatud viiba prefiks püsib voorude lõikes muutumatuna. Kehtib ainult siis, kui klient ise saatis beetalipu mid-conversation-system-2026-04-07. Vaikimisi välja lülitatud: iga süsteemisõnum teisaldatakse süsteemiviipa täpselt nagu varem, sest ilma selle beetafunktsioonita vaheserverid lükkavad sõnumiloendis olevad süsteemisõnumid tagasi.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Kasuta models.dev-i avaldatud arutluspingutuse tasemeid, kui neid pole määratud ei operaatori alistusega ega teenusepakkujate registris, säilitades ainult teadaolevad pingutustasemed, ning käsitle tühja deklareeritud tasemete loendit kui „tasemed puuduvad“. Vaikimisi välja lülitatud: mudelikataloog ja tuvastatud pingutustasemed jäävad täpselt endiseks.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "Võimaldab auto/* päringutel koostada kandidaatide kogumi lahendatud mudelivõimekuste (nägemine, arutlemine, mõtlemine) ja täheldatud kvaliteediskooridega, mis loetakse ühe hulgilugemisega. Vaikimisi väljas: kandidaatide kaalud päringu ajal jäävad täpselt samaks nagu varem. Sees: need signaalid lähevad hetktõmmise kaaludesse, nii et kandidaatide kaalud ja valik võivad muutuda.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Luba mandaatide seisundi kontrollil uuesti testida ühendusi, mille lüüs ise välja lülitas (iga ühendust kõige rohkem kord 6 tunni jooksul, 5 ühendust kontrolli kohta), ja lülitada ühendus uuesti sisse, kui kordustest õnnestub. Vaikimisi väljas: sellised ühendused jäävad väljalülitatuks, kuni operaator sekkub. Operaatori poolt keelatud ja jäädavalt blokeeritud ühendusi ei testita kunagi uuesti.",
@@ -1939,7 +1946,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# päring} other {# päringut}}, {keys, plural, one {# piiratud võti} other {# piiratud võtit}}",
     "unpricedUsageMore": "…ja veel {count}",
     "unpricedUsageConfigure": "Määra hinnad",
-    "unpricedUsageDismiss": "Sulge"
+    "unpricedUsageDismiss": "Sulge",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analüütika",
@@ -6264,6 +6280,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Jäta ajutine ooteaeg vahele, et see ühendus jääks kasutatavaks ka pärast taastatavaid vigu (lõppolekud, nagu blokeeritud või aegunud, kehtivad endiselt).",
     "disableCoolingLabel": "Keela selle ühenduse ooteaeg",
+    "keepMidConversationSystemDescription": "Jätke vestluse keskel saadetud süsteemisõnumid sõnumiloendisse selle asemel, et teisaldada need kõrgeima taseme süsteemiviipale, nii et viipade vahemälu liigub pidevalt üle pöörde. Luba ainult siis, kui see ülesvoolu aktsepteerib sõnumite sees rolli \"süsteem\" (muidu vastab 400).",
+    "keepMidConversationSystemLabel": "Hoidke vestluse keskel olevad süsteemisõnumid paigas",
+    "requireUserLastMessageDescription": "Ülesvoolude puhul, mis keelduvad assistendi eeltäitmisest: enne saatmist langetage abimehe pöörded (tööriista_kasutamata). Mudel võib taastada oma eelmise vastuse.",
+    "requireUserLastMessageLabel": "Nõua, et vestlus lõppeks kasutaja sõnumiga",
     "bulkPasteAdded": "{count, plural, one {Lisati 1 võti} other {Lisati # võtit}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplikaat jäeti vahele} other {# duplikaati jäeti vahele}}",
     "bulkPasteHint": "Kleepige igale reale üks API-võti. Tühje ridu eiratakse ja duplikaatvõtmed jäetakse vahele.",
@@ -6363,6 +6383,9 @@
     "localProviders": "Kohalikud pakkujad",
     "maxConcurrentWholeNumberError": "Maksimaalse samaaegsuse täisarvuviga",
     "m365TierLabel": "Copiloti tasand",
+    "m365RefreshTokenLabel": "Värskenda tunnus (valikuline)",
+    "m365RefreshTokenHint": "Kasutatakse Microsoft 365 juurdepääsuloa automaatseks värskendamiseks.",
+    "m365RefreshTokenEditHint": "Olemasoleva märgi säilitamiseks jätke tühjaks. Selle asendamiseks kleepige uus märk.",
     "m365TierHint": "Valige, millist Microsoft 365 Copiloti liidest see ühendus kasutab. Individuaalne valik kasutab vaikimisi tarbijatele mõeldud BizChati; Hariduse ja Ettevõtte (töö) valikud kasutavad vastava rentniku liideseid.",
     "m365TierIndividualOption": "Individuaalne (vaikimisi)",
     "m365TierEduOption": "Haridus",
@@ -7097,6 +7120,7 @@
     "proxySubTabsAria": "Puhverserveri jaotised",
     "requestBodyLimitTitle": "Päringu keha mahupiirang",
     "requestBodyLimitDescription": "Maksimaalne API päringuandmete maht, mis võetakse vastu enne päringu keha sõelumist. Spetsiaalsetel üleslaadimismarsruutidel säilib vähemalt nende sisseehitatud 100 MB piirang.",
+    "requestBodyLimitChatHint": "Chat Completions ja Responses võtavad vastu kuni 50 MB, kuni salvestad siin piirangu. Salvestatud piirang kehtib ka neile, olenemata sellest, kas see on väiksem või suurem.",
     "requestBodyLimitInputLabel": "Päringu keha mahupiirang MB-des",
     "requestBodyLimitEmptyError": "Sisestage piirang MB-des",
     "requestBodyLimitWholeNumberError": "Kasutage täisarvu",
@@ -12282,7 +12306,9 @@
       "failedTitle": "Kõik {count} katset ebaõnnestusid",
       "failed": "ebaõnnestunud",
       "pinnedTitle": "Mudel valiti kontekstivahemälu seansi kinnistamise abil",
-      "pinned": "seansile kinnistatud"
+      "pinned": "seansile kinnistatud",
+      "recoveredAttemptsTitle": "Päring taastus {count} katsega",
+      "latestOutcomeFailed": "Viimase päringu tulemus ebaõnnestus"
     },
     "attempts": "katsed",
     "detail": {
@@ -12384,13 +12410,20 @@
       "continuesFromParent": "jätkub ülemüksusest",
       "continuesFrom": "Jätkub üksusest {id}",
       "viewConversation": "Kuva vestlus",
-      "openConversation": "Ava vestlus {id}"
+      "openConversation": "Ava vestlus {id}",
+      "omittedHttpAttempts": "{count} HTTP saatmist ei säilitatud",
+      "noHttpResponse": "HTTP vastust ei täheldatud",
+      "transportError": "Transpordiviga"
     },
     "tableLabel": "Päringulogid",
     "throughputPostFirstToken": "Pärast esimest tokenit",
     "throughputEndToEnd": "Otsast lõpuni",
     "throughputRate": "{value} tokenit/sek",
-    "throughputExplanation": "Mõlemad kiirused kasutavad suuremat väljundi- ja arutlustokenite arvu. Esimese tokeni järgne kiirus jätab kehtiva TTFT välja; vastasel juhul kasutab see kogu kestust. Otsast-lõpuni kiirus kasutab alati kogu kestust. Puhverdatud vastusel võib olla kõrge puhanguline tarnimiskiirus, ilma et mudeli genereerimine oleks kiirem."
+    "throughputExplanation": "Mõlemad kiirused kasutavad suuremat väljundi- ja arutlustokenite arvu. Esimese tokeni järgne kiirus jätab kehtiva TTFT välja; vastasel juhul kasutab see kogu kestust. Otsast-lõpuni kiirus kasutab alati kogu kestust. Puhverdatud vastusel võib olla kõrge puhanguline tarnimiskiirus, ilma et mudeli genereerimine oleks kiirem.",
+    "omittedHttpAttempts": "{count} HTTP saatmist ei säilitatud",
+    "upstreamStatus": "Ülesvoolu server {status}",
+    "noHttpResponse": "HTTP vastust ei täheldatud",
+    "transportError": "Transpordiviga"
   },
   "proxyLogger": {
     "filterAll": "Kõik",
@@ -14157,6 +14190,14 @@
         "label": "Jagatud väljundiaadressiga kogumi järjekord",
         "description": "Teenusepakkujate puhul, kelle kvooti arvestatakse väljundiaadressi põhiselt, paigutatakse hiljuti tagasilükatud liikme täheldatud väljundiaadressi jagav kogumiliige vahetult tervete liikmete järele. Mõjutab ainult järjekorda, ei välistata kunagi. Vajab parameetrit PROXY_SKIP_RECENTLY_FAILED, mis tekitab loetava tagasilükkamissignaali. Vaikimisi väljas: valikujärjekord on täpselt tavapärane rotatsioon."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Mudeli ulatusega kvootidest keeldumised",
+        "description": "Rakendage opencode kvoot 429 ainult sellele mudelile, mis seda tabas, nii et sama väljapääs jätkab teiste mudelite teenindamist ja tühjendage see ainult siis, kui see mudel õnnestub. Tarbijad, kellel pole mudelit (basseini pööramine, parkimine ja taasesitus, administraatori nähtavus, valija päästik, tervisekontroll), näevad seda endiselt. Vajab PROXY_SKIP_RECENTLY_FAILED, mis tekitab keeldumise. Vaikimisi väljas: ühe mudeli kvoot 429 jätab iga mudeli väljapääsu kõrvale."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Puhverserveri toomine: range POST kordus",
+        "description": "Mitte-idempotentse päringu (POST, PUT, PATCH, DELETE) korral saatke pärast transporditõrget (värske pesa, puhverserveri varud, algne varu) uuesti ainult siis, kui viga tõestab, et midagi ei saadetud: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH või ühenduse ajalõpp. Pistikupesa viga pärast kirjutamist võib tähendada, et ülesvoolu aktsepteeris päringu, nii et uuesti saatmine võib genereerida ja selle kaks korda arveldada. Vaikimisi väljas: taasesitav keha saadetakse kord uuesti mis tahes transpordivea korral, mis taastab ka aegunud ühendatud sokli."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotatsiooni omistamise logimine",
         "description": "Opencode'i rotatsioon salvestab, milline konto päringut teenindas või vahele jäeti (ainult maskeeritud ID-d, mitte kunagi täielikud konto ID-d) ning seob proksilogi kirjed vastava päringuga, võimaldades operaatoril eristada vahelejäänud kontosid kasutamata kontodest. Vaikimisi väljas: täiendavaid logiridu ega lisaveergusid ei kirjutata."
@@ -14208,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 kogumi uuestivalimine",
         "description": "OpenCode'i mitme konto rotatsiooni puhul, kui saadi 429 väljundpõhiselt piiratud teenusepakkujalt ilma proksita kontol ümbritsevas kogumikontekstis, küsi ühenduste kogumilt järgmise katse jaoks teist liiget, selle asemel et proovida uuesti sama väljuvat aadressi. Järjestab, ei välista kunagi: ammendunud kogum säilitab praeguse käitumise. Vaikimisi väljas: iga 429 roteerub järgmisele kontole täpselt nagu varem."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode vabatasemeline väljapääsusond",
+        "description": "Kui OpenCode täitja puhul vastatakse puhverserveri päringule 403 või 451 FreeTierError ja vaadeldavate tööriistade korduskatse ebaõnnestus või ei rakendunud, saatke päring üks kord teise puhverserveri kaudu (teine konto puhverserver või muu kogumi liige, mitte kunagi otseühendus). Ainult siis, kui see sond vastab 200, jäetakse esimene väljapääs puhverserveri keeldumise mällu kõrvale ja sondi vastus teenindatakse; kui mõlemad keelduvad, tagastatakse algne keeldumine ja midagi ei salvestata. Sama keeldumise tekst katab lipuga märgitud väljumise IP ja tagasilükatud taotluse kuju, nii et sond eristab neid tõendite abil. Vaikimisi väljas: keeldumine tagastatakse muutmata kujul."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2 kliendi sõrmejälg",
@@ -14388,6 +14433,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Kombo: peatu sisupoliitika keeldumisel",
         "description": "Kui kombo sihtmärk vastab täpse sisupoliitika keeldumisega (kood või tüüp cyber_policy / content_policy_violation), peata kombo ja tagasta see keeldumine isegi siis, kui ülejäänud sihtmärgid on erinevad mudelid, selle asemel et liikuda järgmise sihtmärgi juurde. Vaikimisi väljas: keeldumine ei vii kunagi kontot jahtumisperioodile ega rakenda teenusepakkuja kaitselülitit ning kombo liigub oma järgmise sihtmärgi juurde täpselt nagu varem."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Vastused: hoida elus ainult transpordi ajal",
+        "description": "Saatke vastused ellujäämiseks tühja reana response.in_progress sündmuse asemel, nii et sünteetiline hetktõmmis ei saa kunagi asendada tegelikku vastust ametlikus SDK. Tühi rida ei edasta SSE sündmust, seega ei lähtestata kliendi valvekoera, mis lähtestab ainult sündmuste korral, pika vaikse faasi ajal. Vaikimisi väljas: taimerid saadavad spetsifikatsiooniga kehtiva response.in_progress sündmuse."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Jahtumisaja korduskatse: jäta 403/410 keeldumised vahele",

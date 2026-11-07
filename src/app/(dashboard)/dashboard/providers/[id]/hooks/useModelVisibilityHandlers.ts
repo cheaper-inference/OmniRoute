@@ -55,6 +55,8 @@ export interface UseModelVisibilityHandlersParams {
   fetchProviderModelMeta: () => Promise<void>;
   fetchAliases: () => Promise<void>;
   notify: NotifyStore;
+  /** Kit confirmation dialog (`useConfirmDialog().requestConfirm`); resolves true on confirm. */
+  requestConfirm: (message: string) => Promise<boolean>;
   t: ProviderMessageTranslator;
   formatProviderModelsErrorResponse?: typeof formatProviderModelsErrorResponse;
   /** The current selected connection (may be null). */
@@ -104,6 +106,7 @@ export function useModelVisibilityHandlers({
   fetchProviderModelMeta,
   fetchAliases,
   notify,
+  requestConfirm,
   t,
   selectedConnection,
   providerNode,
@@ -262,7 +265,7 @@ export function useModelVisibilityHandlers({
 
   const handleClearAllModels = async () => {
     if (clearingModels) return;
-    if (!confirm(t("clearAllModelsConfirm"))) return;
+    if (!(await requestConfirm(t("clearAllModelsConfirm")))) return;
     setClearingModels(true);
     try {
       const targetProviders = Array.from(
