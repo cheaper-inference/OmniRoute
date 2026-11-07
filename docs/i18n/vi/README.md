@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                             |            v3.8.50             | **v3.8.51** |      `v3.8.53+`       |
+|                             |            v3.8.50             | **v3.8.51** |      `v3.8.54+`       |
 | --------------------------- | :----------------------------: | :---------: | :-------------------: |
 | 🌐 Nhà cung cấp             |              352               |   **358**   |          380          |
 | 🧠 ID mô hình chat duy nhất |              1320              |  **1374**   |         1491          |
@@ -580,7 +580,7 @@ Radar hoạt động theo cơ chế chọn tham gia và chỉ sử dụng GET. �
 
 </div>
 
-> Những điểm nổi bật gần đây từ **v3.8.20 → v3.8.53**. Xem toàn bộ lịch sử trong [`CHANGELOG.md`](CHANGELOG.md).
+> Những điểm nổi bật gần đây từ **v3.8.20 → v3.8.54**. Xem toàn bộ lịch sử trong [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ Định tuyến `quota-weighted`** — chiến lược kết hợp thứ 20 sẽ bỏ qua các tài khoản đã hết hạn mức, sau đó chọn trong số các tài khoản còn lại theo tỷ lệ hạn mức còn lại ÷ tải đang xử lý, đồng thời giữ cố định các cuộc hội thoại hiện có. → [Tự động kết hợp](docs/routing/AUTO-COMBO.md)
 - **🧰 Chế độ không giao diện** — `omniroute serve --headless` (hoặc `OMNIROUTE_HEADLESS=1`) chỉ chạy bộ máy proxy `/v1/*`, đồng thời tắt dashboard và các hệ thống chỉ dành cho dashboard. → [Chế độ không giao diện](docs/guides/HEADLESS.md)
@@ -1015,7 +1015,7 @@ omniroute
 ```
 
 > 💡 Thấy `npm warn ERESOLVE` hoặc cảnh báo peer-dep? [Chúng vô hại](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Dùng npm 11 trở lên?** npm có thể chặn các lifecycle script của package trừ khi chúng được cho phép. `postinstall` của OmniRoute (`node scripts/build/postinstall.mjs`) là bắt buộc để chuẩn bị các file runtime gốc của nó. Hãy cho phép các package được nêu trong cảnh báo của npm khi cài đặt toàn cục. Với tập package được báo cáo bởi OmniRoute 3.8.53:
+> **Dùng npm 11 trở lên?** npm có thể chặn các lifecycle script của package trừ khi chúng được cho phép. `postinstall` của OmniRoute (`node scripts/build/postinstall.mjs`) là bắt buộc để chuẩn bị các file runtime gốc của nó. Hãy cho phép các package được nêu trong cảnh báo của npm khi cài đặt toàn cục. Với tập package được báo cáo bởi OmniRoute 3.8.54:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1292,7 +1292,7 @@ Số liệu chuẩn vào 2026-10-18: **1.976 video duy nhất** · **20.220.289 
   <tr><td nowrap><b>Môi trường chạy</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Ngôn ngữ</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> trên <code>src/</code> và <code>open-sse/</code> (không có <code>any</code> trong lõi kể từ v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Cơ sở dữ liệu</b></td><td>better-sqlite3 (SQLite, ghi nhật ký WAL) + LowDB (JSON kế thừa) — 147 mô-đun miền, 222 migration</td></tr>
+  <tr><td nowrap><b>Cơ sở dữ liệu</b></td><td>better-sqlite3 (SQLite, ghi nhật ký WAL) + LowDB (JSON kế thừa) — 147 mô-đun miền, 223 migration</td></tr>
   <tr><td nowrap><b>Bộ nhớ</b></td><td>Tìm kiếm toàn văn SQLite FTS5 + các vector embedding được lượng tử hóa int8, suy giảm có kiểu</td></tr>
   <tr><td nowrap><b>Lược đồ</b></td><td>Zod 4 — xác thực I/O công cụ MCP + hợp đồng API</td></tr>
   <tr><td nowrap><b>Giao thức</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1805,7 +1805,7 @@ Giấy phép MIT - xem [LICENSE](LICENSE) để biết chi tiết.
 
 **[⬆ Quay lại đầu trang](#-omniroute)** · Được xây dựng bằng ❤️ dành cho cộng đồng AI mã nguồn mở.
 
-<sub>Được tạo bởi <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Giấy phép MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Được tạo bởi <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · Giấy phép MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions đã được bật để cộng đồng hỏi đáp -->
