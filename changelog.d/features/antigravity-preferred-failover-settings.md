@@ -1,1 +1,0 @@
-- **feat(settings):** Configure opt-in Antigravity preferred-account failover and its 5s/12s response-start defaults from Settings → Resilience without restarting the server.

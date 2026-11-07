@@ -87,7 +87,7 @@ export const DEFAULT_REQUEST_QUEUE_MAX_DEPTH = (() => {
 })();
 
 export const DEFAULT_RESILIENCE_SETTINGS: ResilienceSettings = {
-  antigravityPreferredFailover: readPreferredFailoverSettings(),
+  preferredAccountFailover: readPreferredFailoverSettings(),
   requestQueue: {
     autoEnableApiKeyProviders: true,
     requestsPerMinute: DEFAULT_API_LIMITS.requestsPerMinute,
@@ -334,7 +334,7 @@ function buildLegacyFallback(settings: JsonRecord): ResilienceSettings {
     streamRecovery: streamRecoveryDefaults,
     providerQuotaOverrides: DEFAULT_RESILIENCE_SETTINGS.providerQuotaOverrides,
     credentialHealthCheck: DEFAULT_RESILIENCE_SETTINGS.credentialHealthCheck,
-    antigravityPreferredFailover: DEFAULT_RESILIENCE_SETTINGS.antigravityPreferredFailover,
+    preferredAccountFailover: DEFAULT_RESILIENCE_SETTINGS.preferredAccountFailover,
   };
 }
 
@@ -373,8 +373,8 @@ export function resolveResilienceSettings(
   const fallback = buildLegacyFallback(record);
 
   const resolved: ResilienceSettings = {
-    antigravityPreferredFailover: normalizePreferredFailoverSettings(
-      current.antigravityPreferredFailover, fallback.antigravityPreferredFailover
+    preferredAccountFailover: normalizePreferredFailoverSettings(
+      current.preferredAccountFailover, fallback.preferredAccountFailover
     ),
     requestQueue: normalizeRequestQueueSettings(current.requestQueue, fallback.requestQueue),
     connectionCooldown: {
@@ -449,8 +449,8 @@ export function mergeResilienceSettings(
   updates: ResilienceSettingsPatch
 ): ResilienceSettings {
   return {
-    antigravityPreferredFailover: normalizePreferredFailoverSettings(
-      updates.antigravityPreferredFailover, current.antigravityPreferredFailover
+    preferredAccountFailover: normalizePreferredFailoverSettings(
+      updates.preferredAccountFailover, current.preferredAccountFailover
     ),
     requestQueue: normalizeRequestQueueSettings(updates.requestQueue, current.requestQueue),
     connectionCooldown: {

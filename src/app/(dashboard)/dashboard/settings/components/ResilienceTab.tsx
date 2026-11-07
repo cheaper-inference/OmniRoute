@@ -11,8 +11,8 @@ import ModelLockoutCard from "./ModelLockoutCard";
 import TokenRefreshBreakerCard, { type TokenRefreshBreakerValue } from "./TokenRefreshBreakerCard";
 import { NumberField, BooleanField } from "./ResilienceFields";
 import { throwIfResilienceSaveFailed } from "./resilienceSaveError";
-import AntigravityPreferredFailoverCard from "./AntigravityPreferredFailoverCard";
-import type { AntigravityPreferredFailoverSettings } from "@/lib/resilience/settings/types";
+import PreferredAccountFailoverCard from "./PreferredAccountFailoverCard";
+import type { PreferredAccountFailoverSettings } from "@/lib/resilience/settings/types";
 
 type RequestQueueSettings = {
   autoEnableApiKeyProviders: boolean;
@@ -67,7 +67,7 @@ export type ProviderCooldownSettings = {
 };
 
 type ResilienceResponse = {
-  antigravityPreferredFailover?: AntigravityPreferredFailoverSettings;
+  preferredAccountFailover?: PreferredAccountFailoverSettings;
   requestQueue: RequestQueueSettings;
   connectionCooldown: {
     oauth: ConnectionCooldownProfileSettings;
@@ -87,7 +87,7 @@ type ResilienceResponse = {
 
 function toResilienceResponse(json: ResilienceResponse): ResilienceResponse {
   return {
-    antigravityPreferredFailover: json.antigravityPreferredFailover,
+    preferredAccountFailover: json.preferredAccountFailover,
     requestQueue: json.requestQueue,
     connectionCooldown: json.connectionCooldown,
     providerBreaker: json.providerBreaker,
@@ -1218,12 +1218,12 @@ export default function ResilienceTab() {
   return (
     <div className="space-y-6">
       <AutoDisableCard />
-      {data.antigravityPreferredFailover && (
-        <AntigravityPreferredFailoverCard
-          value={data.antigravityPreferredFailover}
-          saving={savingSection === "antigravityPreferredFailover"}
-          onSave={(antigravityPreferredFailover) =>
-            savePatch("antigravityPreferredFailover", { antigravityPreferredFailover })
+      {data.preferredAccountFailover && (
+        <PreferredAccountFailoverCard
+          value={data.preferredAccountFailover}
+          saving={savingSection === "preferredAccountFailover"}
+          onSave={(preferredAccountFailover) =>
+            savePatch("preferredAccountFailover", { preferredAccountFailover })
           }
         />
       )}

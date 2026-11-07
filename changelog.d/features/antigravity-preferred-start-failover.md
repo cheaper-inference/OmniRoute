@@ -1,1 +1,0 @@
-- **feat(antigravity):** Opt in to a 5s preferred-account response-start cap (12s for Gemini 3.8) with one eligible sibling hop and no shared-account cooldown. Explicit pins and stricter trusted deadlines remain unchanged.

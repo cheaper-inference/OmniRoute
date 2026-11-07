@@ -145,7 +145,7 @@ export async function GET() {
 
     return NextResponse.json({
       requestQueue: resilience.requestQueue,
-      antigravityPreferredFailover: resilience.antigravityPreferredFailover,
+      preferredAccountFailover: resilience.preferredAccountFailover,
       connectionCooldown: resilience.connectionCooldown,
       providerBreaker: resilience.providerBreaker,
       tokenRefreshBreaker: resilience.tokenRefreshBreaker,
@@ -211,10 +211,10 @@ export async function PATCH(request) {
       resilienceSettings: storedResilience,
     });
     const mergedFull = mergeResilienceSettings(sparseBase, {
-      ...(body.antigravityPreferredFailover
+      ...(body.preferredAccountFailover
         ? {
-            antigravityPreferredFailover:
-              body.antigravityPreferredFailover as ResilienceSettingsPatch["antigravityPreferredFailover"],
+            preferredAccountFailover:
+              body.preferredAccountFailover as ResilienceSettingsPatch["preferredAccountFailover"],
           }
         : {}),
       ...(body.requestQueue
@@ -319,7 +319,7 @@ export async function PATCH(request) {
     return NextResponse.json({
       ok: true,
       requestQueue: nextResilience.requestQueue,
-      antigravityPreferredFailover: nextResilience.antigravityPreferredFailover,
+      preferredAccountFailover: nextResilience.preferredAccountFailover,
       connectionCooldown: nextResilience.connectionCooldown,
       providerBreaker: nextResilience.providerBreaker,
       tokenRefreshBreaker: nextResilience.tokenRefreshBreaker,

@@ -1728,11 +1728,9 @@ async function handleSingleModelChat(
     runtimeOptions.cachedSettings ?? (await getCachedSettings().catch(() => ({})));
   const baseRetrySettings = resolveCooldownAwareRetrySettings(cachedRuntimeSettings);
   // The read cache invalidates on settings writes (up to its 5s TTL).
-  // No restart is needed for newly dispatched Antigravity requests.
+  // No restart is needed for newly dispatched chat requests.
   const preferredFailoverSettings =
-    provider === "antigravity" || provider === "agy"
-      ? resolveResilienceSettings(cachedRuntimeSettings).antigravityPreferredFailover
-      : undefined;
+    resolveResilienceSettings(cachedRuntimeSettings).preferredAccountFailover;
   const retrySettings = disableCooldownAwareRetry(
     baseRetrySettings,
     provider === "claude-web" ||
@@ -2169,11 +2167,7 @@ async function handleSingleModelChat(
         effectiveModel,
         preferredFailoverUsed || hasForcedConnection || runtimeOptions.managedLease ||
           museOwner || isCombo
-          ? {
-              enabled: false,
-              preferredTimeoutMs: preferredFailoverSettings?.preferredTimeoutMs ?? 5_000,
-              gemini38PreferredTimeoutMs: preferredFailoverSettings?.gemini38PreferredTimeoutMs ?? 12_000,
-            }
+          ? { ...preferredFailoverSettings, enabled: false }
           : preferredFailoverSettings
       );
       // 4. Execute chat via core after breaker gate checks (with optional TLS tracking)
@@ -2320,7 +2314,7 @@ async function handleSingleModelChat(
             result.response, credentials.connectionId
           );
           excludedConnectionIds.add(credentials.connectionId);
-          log.info("AUTH", "Preferred Antigravity account timed out; trying one sibling");
+          log.info("AUTH", "Preferred account response-start timed out; trying one eligible sibling");
           continue;
         }
         return withSelectedConnectionHeader(result.response, credentials.connectionId);
