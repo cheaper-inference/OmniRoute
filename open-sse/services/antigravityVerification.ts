@@ -20,9 +20,10 @@ const GOOGLE_ACCOUNTS_HOST = "accounts.google.com";
 const GOOGLE_FORMS_HOST = "forms.gle";
 const GOOGLE_DOCS_HOST = "docs.google.com";
 const VERIFICATION_WORDING = /validation|verif|appeal|tos_violation|violation of terms/i;
-// Bounded quantifier keeps the scan linear on untrusted upstream text.
+// Bounded quantifier keeps the scan linear on untrusted upstream text. A backslash ends the
+// link unless it escapes a slash, so raw text like `...x=1\"` does not leak into the URL.
 const FREE_TEXT_URL =
-  /https:(?:\\\/\\\/|\/\/)(?:accounts\.google\.com|forms\.gle|docs\.google\.com(?:\/|\\\/)forms(?:\/|\\\/))[^\s"'<>]{1,2048}/i;
+  /https:(?:\\\/\\\/|\/\/)(?:accounts\.google\.com|forms\.gle|docs\.google\.com(?:\/|\\\/)forms)(?:\/|\\\/)(?:[^\s"'\\<>]|\\\/){1,2048}/i;
 
 function asRecord(value: unknown): JsonRecord | null {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : null;
@@ -114,6 +115,8 @@ export function extractVerificationUrl(payload: unknown): string | null {
   return null;
 }
 
+// Unlike FREE_TEXT_URL this keeps going past a backslash: a raw JSON body may hold the
+// continuation token behind a `\u0026`, and masking too much is the safe side for a log.
 const ANY_ACCOUNTS_OR_APPEAL_URL =
   /https:(?:\\\/\\\/|\/\/)(?:accounts\.google\.com|forms\.gle|docs\.google\.com(?:\/|\\\/)forms(?:\/|\\\/))[^\s"'<>]{1,2048}/gi;
 

@@ -163,3 +163,34 @@ test("isGoogleVerificationUrl and extractVerificationUrl accept uppercase and es
     '{"error":{"message":"Verify your account at https:\\/\\/forms.gle\\/abc to continue"}}';
   assert.equal(extractVerificationUrl(escapedBody), "https://forms.gle/abc");
 });
+
+test("extractVerificationUrl stops raw-text links at a backslash that is not an escaped slash", () => {
+  assert.equal(
+    extractVerificationUrl('verify at https://accounts.google.com/c?x=1\\" then'),
+    "https://accounts.google.com/c?x=1"
+  );
+  assert.equal(
+    extractVerificationUrl("verify at https://accounts.google.com/c?x=1\\u0026y=2"),
+    "https://accounts.google.com/c?x=1"
+  );
+  assert.equal(
+    extractVerificationUrl("verify at https:\\/\\/forms.gle\\/abc\\/def\\n next"),
+    "https://forms.gle/abc/def"
+  );
+});
+
+test("extractVerificationUrl skips a lookalike host to reach the real link", () => {
+  assert.equal(
+    extractVerificationUrl(
+      "verify at https://accounts.google.com.evil.com/x or https://accounts.google.com/real"
+    ),
+    "https://accounts.google.com/real"
+  );
+});
+
+test("redactVerificationUrls keeps masking past a JSON unicode escape in a raw body", () => {
+  assert.equal(
+    redactVerificationUrls('{"url":"https://accounts.google.com/c?x=1\\u0026token=secret"}'),
+    '{"url":"[verification-url]"}'
+  );
+});
