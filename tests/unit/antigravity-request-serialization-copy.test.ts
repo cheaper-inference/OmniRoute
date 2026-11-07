@@ -35,7 +35,9 @@ test("Antigravity serialization copies only mutable root fields, not large histo
   assert.equal("_omnirouteRoutingMarker" in copied, false);
   assert.equal(body._omnirouteRoutingMarker, true);
   assert.strictEqual(body.contents, history);
-  assert.ok(Array.isArray((JSON.parse(fingerprinted.bodyString) as Record<string, unknown>).contents));
+  assert.ok(
+    Array.isArray((JSON.parse(fingerprinted.bodyString) as Record<string, unknown>).contents)
+  );
 });
 
 test("Antigravity plain and CLI-compatible JSON match the former deep-clone path", () => {
