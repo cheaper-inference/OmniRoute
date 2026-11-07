@@ -28,6 +28,7 @@ function failureCode(error: M365TurnError | M365ExecutorError): string {
       : "m365_model_not_licensed";
   if (error.code === "M365_THROTTLED") return "m365_throttled";
   if (error.code === "M365_OUT_OF_CREDITS") return "priority_access_exhausted";
+  if (error.code === "M365_REASONING_TURNS_EXHAUSTED") return "reasoning_turns_exhausted";
   // The shared local label for an explicit provider safety stop (providerSafety.ts): routing
   // and account health then treat it as terminal and request-scoped, never as a failover.
   if (error.code === "M365_DISENGAGED") return "provider_safety_rejection";

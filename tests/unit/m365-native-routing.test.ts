@@ -243,6 +243,23 @@ for (const code of [
     }
   });
 }
+// The cap walls the Think deeper models, not the account: Quick tones keep serving, so the
+// refusal must not take the whole connection out of rotation.
+test("a reasoning-turn cap is model-scoped and keeps Retry-After", () => {
+  const verdict = fallback.checkFallbackError(
+    429,
+    body("reasoning_turns_exhausted"),
+    0,
+    model,
+    provider,
+    new Headers({ "Retry-After": "3600" })
+  );
+  assert.equal(verdict.ruleScope, "model");
+  assert.ok(
+    verdict.cooldownMs >= 3599000 && verdict.cooldownMs <= 3600000,
+    String(verdict.cooldownMs)
+  );
+});
 test("native selected credentials serialize an account, permit peers, and abort queued admission", async () => {
   const first = await connection();
   await db.updateProviderConnection(first.id, {

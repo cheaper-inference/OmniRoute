@@ -392,6 +392,27 @@ for (const [now, window, reset] of [
   });
 }
 
+// Consumer-reported 2026-11-07: a per-account cap on "Think deeper" turns ends the turn as
+// OutOfCredits with this errorCode. Its own class, so it is not read as a model's priority access.
+test("the reasoning-turn cap is its own refusal, with no invented reset", async () => {
+  const { promise, socket } = ready();
+  socket.frame({
+    type: 2,
+    item: {
+      result: { value: "OutOfCredits", errorCode: "ReasoningTurnExhausted", message: "PRIVATE" },
+    },
+  });
+  await assert.rejects(promise, (error: unknown) => {
+    assert.ok(error instanceof M365TurnError);
+    assert.equal(error.code, "M365_REASONING_TURNS_EXHAUSTED");
+    assert.equal(error.status, 429);
+    assert.equal(error.retryAfterSeconds, undefined);
+    assert.doesNotMatch(JSON.stringify(error) + error.message, /PRIVATE/);
+    return true;
+  });
+  socket.closed();
+});
+
 test("unrecognized credits refusal has no invented reset and metadata is per turn", async () => {
   for (const message of [
     "PRIVATE week Monday access_token=secret",

@@ -207,6 +207,26 @@ for (const stream of [false, true]) {
     });
   }
 }
+test("native reasoning-turn cap is 429 reasoning_turns_exhausted with its own message", async () => {
+  await scenario(
+    [
+      {
+        type: 2,
+        item: { result: { value: "OutOfCredits", errorCode: "ReasoningTurnExhausted" } },
+      },
+    ],
+    async () => {
+      const result = await new CopilotM365WebExecutor().execute(input(false));
+      assert.equal(result.response.status, 429);
+      const body = await result.response.json();
+      assert.equal(body.error.type, "rate_limit_error");
+      assert.equal(body.error.code, "reasoning_turns_exhausted");
+      assert.match(body.error.message, /reasoning \(Think deeper\) turns/);
+      assert.doesNotMatch(body.error.message, /priority access/i);
+      assert.ok(Number(result.response.headers.get("Retry-After")) > 0);
+    }
+  );
+});
 test("native profile wins tier-derived defaults, memory disabled, conversation header matches", async () => {
   await scenario([update("ok")], async () => {
     const request = input();

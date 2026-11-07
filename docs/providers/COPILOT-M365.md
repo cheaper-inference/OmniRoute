@@ -172,6 +172,10 @@ standalone IDs follow the public [protocol catalog](https://github.com/cramt/m36
   `m365_account_not_licensed`.
 - A per-user throttle returns **429** `m365_throttled` and cools down the connection.
   Priority-access exhaustion returns **429** `priority_access_exhausted` and is model-scoped.
+  A result of `OutOfCredits` with `errorCode: "ReasoningTurnExhausted"` returns **429**
+  `reasoning_turns_exhausted` instead, also model-scoped, with no reset time claimed. It was
+  reported on one work tenant to cap the "Think deeper" tones while the Quick tones kept
+  serving; that scope is a consumer observation, not something this repository has reproduced.
   Supplied retry hints are preserved; a missing reset is not advertised as a known reset time.
 - A Copilot safety refusal (`Disengaged`) returns **400** `provider_safety_rejection`, the
   shared provider safety-stop label. It never counts against the connection's health, client

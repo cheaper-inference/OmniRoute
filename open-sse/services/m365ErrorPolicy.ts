@@ -44,7 +44,9 @@ export function getM365FailureScope(
   )
     return "model";
   if (status === 429) {
-    if (codes.includes("priority_access_exhausted")) return "model";
+    // Both are per-model walls: a refused model leaves Quick tones, and the account, in rotation.
+    if (codes.includes("priority_access_exhausted") || codes.includes("reasoning_turns_exhausted"))
+      return "model";
     // Per-user throttling (including an unclassified native 429) is account-wide.
     return "connection";
   }

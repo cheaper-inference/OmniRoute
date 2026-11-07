@@ -39,6 +39,11 @@ const ERRORS = {
   M365_RESPONSE_TOO_LARGE: [502, "Microsoft 365 Copilot response exceeded the size limit."],
   M365_THROTTLED: [429, "Microsoft 365 Copilot request throttled."],
   M365_OUT_OF_CREDITS: [429, "Microsoft 365 Copilot credits exhausted."],
+  // A per-account cap on reasoning ("Think deeper") turns; the Quick tones keep serving.
+  M365_REASONING_TURNS_EXHAUSTED: [
+    429,
+    "Microsoft 365 Copilot reasoning (Think deeper) turns are used up. Quick-response models may still work.",
+  ],
   M365_FORBIDDEN: [403, "Microsoft 365 Copilot access denied."],
   // Copilot refused the WebSocket upgrade itself: the sign-in is expired or revoked.
   M365_UNAUTHORIZED: [401, "Microsoft 365 Copilot rejected the sign-in. Sign in again."],
@@ -168,6 +173,10 @@ function finalResultError(
         retryAfterSeconds: retrySeconds(result.retryAfter),
       });
     case "OutOfCredits":
+      // Reported live on a work tenant (2026-11-07): the code, not the text, tells the cap apart
+      // from a model's priority access. No reset is claimed: none was observed.
+      if (result.errorCode === "ReasoningTurnExhausted")
+        return new M365TurnError("M365_REASONING_TURNS_EXHAUSTED", { quotaResetSource: "unknown" });
       return new M365TurnError("M365_OUT_OF_CREDITS", creditMetadata(result));
     case "ForbiddenRequest":
     case "InvalidCopilotLicense":
