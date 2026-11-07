@@ -121,7 +121,18 @@ const SCAN_GAP = "\n[GAP]\n";
 const PII_PATTERNS = [
   {
     name: "email",
-    pattern: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
+    // The same matches as `\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b`, in linear
+    // time. That form tried every word boundary inside a run like "ab-ab-ab-..." and
+    // scanned to the end of the run each time, so an 80 KB message blocked the event
+    // loop for about 4 s. A match now starts only where the old one could:
+    //  - at the first word character of a run of local-part characters, or
+    //  - right after a letter, on one of [.%+-]: where the old pattern resumed after a
+    //    match that ended inside such a run ("a@b.co-x@c.dd"). Only this case is
+    //    bounded, at 65 characters: the separator plus the RFC 5321 local-part limit
+    //    of 64. A longer glued address now matches in part or not at all, and an
+    //    address glued on after it can match from inside its domain.
+    pattern:
+      /(?:\b(?<=(?:^|[^A-Za-z0-9._%+-])[.%+-]*)[A-Za-z0-9._%+-]+|(?<=[A-Za-z])(?=[.%+-])[A-Za-z0-9._%+-]{1,65})@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
     replacement: "[EMAIL_REDACTED]",
   },
   {

@@ -923,6 +923,8 @@
     "batchListTitle": "Serije",
     "batchListCount": "{count} serija",
     "batchListRemovingCompleted": "Uklanjanje…",
+    "batchListRemoveCompletedPartial": "Uklonjen je velik broj serija. Kliknite ponovno kako biste uklonili ostatak.",
+    "batchListRemoveCompletedFailed": "Došlo je do pogreške prilikom uklanjanja serija.",
     "batchListRemoveCompleted": "Ukloni završene",
     "batchListTableStatus": "Status",
     "batchListTableId": "ID",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "Osvježavanje…",
     "batchListRefresh": "Osvježi",
     "uploadFileModalRemove": "Ukloni",
+    "fileInputChoose": "Odaberite datoteku",
+    "fileInputChooseMultiple": "Odaberite datoteke",
+    "fileInputEmpty": "Nije odabrana nijedna datoteka",
+    "fileInputSelectedCount": "{count, plural, one {Odabrana je # datoteka} few {Odabrane su # datoteke} other {Odabrano je # datoteka}}",
+    "fileDropLabel": "Ispustite datoteku ovdje ili je odaberite",
+    "fileDropLabelMultiple": "Ispustite datoteke ovdje ili ih odaberite",
     "uploadFileModalUploading": "Prijenos…",
     "wizardInputReading": "Čitanje datoteke…",
     "wizardInputReady": "Spremno",
@@ -1035,7 +1043,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "Šalji otisak CLI klijenta OpenCode v2 u zahtjevima za OpenCode Zen/Go: User-Agent opencode/latest/<2.x>/cli i x-opencode-client cli, a u zahtjevima besplatne razine zaglavlja sesije v2, sheme alata read/shell za CLI v2 i bez tool_choice \"none\". Prema zadanim postavkama isključeno: svaki zahtjev za OpenCode zadržava trenutačni identitet, zaglavlja i tijelo bez promjena.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Kada je skup kandidata automatske kombinacije već prazan prije pokretanja predfiltra za pozivanje alata (svaki je cilj preskočen zbog razdoblja čekanja, blokada ili iscrpljenosti), vrati 503 no_eligible_targets umjesto zastarjele pogreške 400 „Nijedan cilj ne podržava pozivanje alata” capability_mismatch. Prema zadanim je postavkama isključeno: prazan skup zadržava zastarjelu pogrešku 400.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Nametnite pouzdane oznake krajnjih točaka modela (koje je deklarirao katalog pružatelja usluge, koje su izvedene iz ID-a specijaliziranog modela ili koje je postavio operator): odbijte zahtjev poslan krajnjoj točki koju model ne podržava uz HTTP 400 prije prosljeđivanja na /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations i /v1/audio/*; sakrijte modele čije označene krajnje točke nemaju OmniRoute adapter iz /v1/models; te odgovorite na test modela na nadzornoj ploči statusom 422 za takve modele. Prema zadanim postavkama isključeno: oznake krajnjih točaka ostaju informativne, a zahtjevi se prosljeđuju kao i prije.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "Na običnim anthropic-compatible relejima zadržite sistemske unose usred razgovora na popisu poruka umjesto da ih premještate u sistemski prompt najviše razine kako bi predmemorirani prefiks prompta ostao stabilan između unosa. Primjenjuje se samo kada je sam klijent poslao beta-verziju mid-conversation-system-2026-04-07. Zadano je isključeno: svaki se sistemski unos premješta u sistemski prompt točno kao i prije jer releji bez te beta-verzije odbijaju sistemske unose na popisu poruka.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Upotrijebi razine intenziteta zaključivanja koje objavljuje models.dev kada ih ne navodi ni nadjačavanje operatora ni registar pružatelja usluga, zadržavajući samo poznate razine intenziteta, a prazan popis navedenih razina tretiraj kao „bez razina”. Prema zadanim postavkama isključeno: katalog modela i razriješene razine intenziteta ostaju potpuno isti kao i prije.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "Omogućuje zahtjevima auto/* da izgrade skup kandidata s razriješenim mogućnostima modela (vid, rasuđivanje, razmišljanje) i uočenim ocjenama kvalitete, učitanima u jednom skupnom čitanju. Isključeno prema zadanim postavkama: težine kandidata u trenutku zahtjeva ostaju točno kao prije. Uključeno: ti signali ulaze u težine snimke, pa se težine kandidata i odabir mogu promijeniti.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Dopustite provjeri valjanosti vjerodajnica da ponovno testira veze koje je pristupnik sam isključio (svaku najviše jednom svakih 6 sati, 5 po provjeri) te ponovno uključi vezu kada uspješno prođe ponovno testiranje. Prema zadanim postavkama isključeno: takve veze ostaju isključene dok operater ne poduzme radnju. Veze koje je operater isključio i trajno zabranjene veze nikada se ponovno ne testiraju.",
@@ -1939,7 +1946,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# zahtjev} other {# zahtjeva}}, {keys, plural, one {# ograničeni ključ} other {# ograničenih ključeva}}",
     "unpricedUsageMore": "…i još {count}",
     "unpricedUsageConfigure": "Konfiguriraj cijene",
-    "unpricedUsageDismiss": "Zatvori"
+    "unpricedUsageDismiss": "Zatvori",
+    "systemMetricsTitle": "System metrics",
+    "systemMetricsActive": "Monitoring active",
+    "systemMetricsLoading": "Loading...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Memory",
+    "systemMetricsHost": "VPS / Host",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (process)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / Heap)"
   },
   "analytics": {
     "title": "Analitika",
@@ -6264,6 +6280,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Preskoči privremeno razdoblje mirovanja kako bi ova veza ostala dostupna čak i nakon pogrešaka od kojih se moguće oporaviti (terminalna stanja poput zabrane ili isteka i dalje se primjenjuju).",
     "disableCoolingLabel": "Onemogući razdoblje mirovanja za ovu vezu",
+    "keepMidConversationSystemDescription": "Ostavite sistemske poruke poslane usred razgovora unutar popisa poruka umjesto da ih premjestite u prompt sustava najviše razine, tako da predmemorija prompta neprestano pogađa. Omogući samo ako ovaj uzvodni sustav prihvaća ulogu \"sustav\" unutar poruka (inače odgovara 400).",
+    "keepMidConversationSystemLabel": "Držite poruke sustava usred razgovora na mjestu",
+    "requireUserLastMessageDescription": "Za uzvodne izvore koji odbijaju pretpopunjavanje pomoćnika: ispustite pomoćne okrete na kraju (bez tool_use) prije slanja. Model može regenerirati svoj prethodni odgovor.",
+    "requireUserLastMessageLabel": "Zahtijevajte da razgovor završi korisničkom porukom",
     "bulkPasteAdded": "{count, plural, one {dodan 1 ključ} few {dodana # ključa} other {dodano # ključeva}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {preskočen 1 duplikat} few {preskočena # duplikata} other {preskočeno # duplikata}}",
     "bulkPasteHint": "Zalijepite jedan API ključ po retku. Prazni reci se ignoriraju, a duplikati se preskaču.",
@@ -6363,6 +6383,9 @@
     "localProviders": "Lokalni davatelji",
     "maxConcurrentWholeNumberError": "Pogreška: maksimalni broj istodobnih zahtjeva mora biti cijeli broj",
     "m365TierLabel": "Razina za Copilot",
+    "m365RefreshTokenLabel": "Osvježi token (neobavezno)",
+    "m365RefreshTokenHint": "Koristi se za automatsko osvježavanje Microsoft 365 pristupnog tokena.",
+    "m365RefreshTokenEditHint": "Ostavite prazno kako biste zadržali postojeći token. Zalijepite novi token da biste ga zamijenili.",
     "m365TierHint": "Odaberite koje sučelje za Microsoft 365 Copilot koristi ova veza. Individual je zadani BizChat za potrošače; Education i Enterprise (Work) koriste sučelja svojih klijenata.",
     "m365TierIndividualOption": "Individual (zadano)",
     "m365TierEduOption": "Obrazovanje",
@@ -7097,6 +7120,7 @@
     "proxySubTabsAria": "Odjeljci proxyja",
     "requestBodyLimitTitle": "Ograničenje tijela zahtjeva",
     "requestBodyLimitDescription": "Maksimalna veličina korisnog tereta API-ja prihvaćena prije raščlanjivanja tijela zahtjeva. Namjenske rute za prijenos zadržavaju barem ugrađeno ograničenje od 100 MB.",
+    "requestBodyLimitChatHint": "Chat Completions i Responses prihvaćaju do 50 MB dok ovdje ne spremite ograničenje. Spremljeno ograničenje vrijedi i za njih, bilo da je niže ili više.",
     "requestBodyLimitInputLabel": "Ograničenje tijela zahtjeva u MB",
     "requestBodyLimitEmptyError": "Unesite ograničenje u MB",
     "requestBodyLimitWholeNumberError": "Koristite cijeli broj",
@@ -12282,7 +12306,9 @@
       "failedTitle": "Nijedan od {count} pokušaja nije uspio",
       "failed": "neuspješno",
       "pinnedTitle": "Model odabran putem prikvačivanja sesije predmemorije konteksta",
-      "pinned": "prikvačeno"
+      "pinned": "prikvačeno",
+      "recoveredAttemptsTitle": "Zahtjev je oporavljen nakon {count} pokušaja",
+      "latestOutcomeFailed": "Ishod posljednjeg zahtjeva nije uspješan"
     },
     "attempts": "pokušaji",
     "detail": {
@@ -12384,13 +12410,20 @@
       "continuesFromParent": "nastavlja se od nadređenog",
       "continuesFrom": "Nastavlja se od {id}",
       "viewConversation": "prikaži razgovor",
-      "openConversation": "Otvori razgovor {id}"
+      "openConversation": "Otvori razgovor {id}",
+      "omittedHttpAttempts": "{count} HTTP slanja nije sačuvano",
+      "noHttpResponse": "HTTP odgovor nije zabilježen",
+      "transportError": "Pogreška prijenosa"
     },
     "tableLabel": "Zapisi zahtjeva",
     "throughputPostFirstToken": "Nakon prvog tokena",
     "throughputEndToEnd": "Od početka do kraja",
     "throughputRate": "{value} tokena/s",
-    "throughputExplanation": "Obje brzine koriste veći od brojeva izlaznih tokena i tokena zaključivanja. Nakon prvog tokena isključuje valjani TTFT; inače koristi puno trajanje. Od početka do kraja uvijek koristi puno trajanje. Odgovor iz međuspremnika može imati visoku brzinu isporuke u rafalima, a da model ne generira brže."
+    "throughputExplanation": "Obje brzine koriste veći od brojeva izlaznih tokena i tokena zaključivanja. Nakon prvog tokena isključuje valjani TTFT; inače koristi puno trajanje. Od početka do kraja uvijek koristi puno trajanje. Odgovor iz međuspremnika može imati visoku brzinu isporuke u rafalima, a da model ne generira brže.",
+    "omittedHttpAttempts": "{count} HTTP slanja nije sačuvano",
+    "upstreamStatus": "Nadređeni poslužitelj {status}",
+    "noHttpResponse": "HTTP odgovor nije zabilježen",
+    "transportError": "Pogreška prijenosa"
   },
   "proxyLogger": {
     "filterAll": "Sve",
@@ -14157,6 +14190,14 @@
         "label": "Poredak dijeljenog egress skupa",
         "description": "Za pružatelje usluga čija je kvota grupirana prema egress adresi, rangira člana skupa koji dijeli zabilježenu egress adresu nedavno odbijenog člana neposredno ispod zdravih članova. Samo redoslijed, nikada se ne isključuje. Zahtijeva PROXY_SKIP_RECENTLY_FAILED, koji proizvodi signal odbijanja koji ova opcija čita. Isključeno prema zadanim postavkama: redoslijed odabira točno odgovara običnoj rotaciji."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Odbijanje kvota prema modelu",
+        "description": "Primijenite opencode kvotu 429 samo na model koji ju je pogodio, tako da isti izlaz nastavlja posluživati druge modele i očistite je samo kada taj model uspije. Potrošači koji nemaju model (rotacija skupa, parkiranje i ponavljanje, vidljivost administratora, okidač selektora, pregled zdravlja) i dalje ga vide. Potreban je PROXY_SKIP_RECENTLY_FAILED, koji proizvodi odbijanje. Isključeno prema zadanim postavkama: kvota jednog modela 429 izdvaja izlaz za svaki model."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Proxy dohvaćanje: striktno POST ponavljanje",
+        "description": "Za neidempotentni zahtjev (POST, PUT, PATCH, DELETE), ponovno pošaljite nakon pogreške u prijenosu (svježa utičnica, zamjena proxyja, izvorna zamjena) samo kada pogreška dokaže da ništa nije poslano: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH ili istek vremena za povezivanje. Pogreška utičnice nakon pisanja može značiti da je uzvodno prihvatilo zahtjev, pa bi ponovno slanje moglo generirati i naplatiti ga dvaput. Isključeno prema zadanim postavkama: tijelo koje se može ponovno reproducirati ponovno se šalje jednom za bilo koju pogrešku u prijenosu, što također oporavlja ustajali skupljeni socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Bilježenje atribucije rotacije",
         "description": "Rotacija alata opencode bilježi koji je račun poslužio zahtjev ili bio preskočen (samo maskirani ID-jevi, nikada puni ID-jevi računa) i povezuje unose proxy dnevnika s njihovim zahtjevom, kako bi operater mogao razlikovati preskočene račune od nekorištenih. Isključeno prema zadanim postavkama: nema dodatnih redaka u dnevniku, nema dodatnih zapisanih stupaca."
@@ -14208,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 ponovni odabir iz bazena",
         "description": "Za OpenCode rotaciju s više računa, nakon statusa 429 od pružatelja s grupiranjem po izlazu na računu bez proxyja u kontekstu ambijentalnog bazena, traži drugog člana iz bazena veza za sljedeći pokušaj umjesto ponavljanja s istom izlaznom adresom. Određuje redoslijed, nikada ne isključuje: iscrpljeni bazen zadržava trenutno ponašanje. Zadano isključeno: svaki 429 rotira na sljedeći račun točno kao i prije."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier izlazna sonda",
+        "description": "Za OpenCode izvršitelja, kada se na proxy zahtjev odgovori 403 ili 451 FreeTierError, a ponovni pokušaj promatranih alata nije uspio ili se nije primijenio, pošalji zahtjev jednom putem drugog proxyja (drugog proxy računa ili drugog člana skupa, nikad izravne veze). Tek kada ta sonda odgovori 200, prvi izlaz se stavlja na stranu u memoriju odbijanja proxyja i odgovor na probu se poslužuje; kada oboje odbiju, originalno odbijanje se vraća i ništa se ne bilježi. Isti tekst odbijanja pokriva označeni izlazni IP i oblik odbijenog zahtjeva, tako da ih sonda razlikuje pomoću dokaza. Isključeno prema zadanim postavkama: odbijanje se vraća nepromijenjeno."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Otisak klijenta OpenCode v2",
@@ -14388,6 +14433,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Zaustavljanje pri odbijanju zbog pravila o sadržaju",
         "description": "Kada combo cilj odgovori točnim odbijanjem zbog pravila o sadržaju (kod ili tip cyber_policy / content_policy_violation), zaustavite combo i vratite to odbijanje čak i kada su preostali ciljevi različiti modeli, umjesto prelaska na sljedeći cilj. Zadano isključeno: odbijanje nikada ne stavlja račun na hlađenje niti aktivira prekidač pružatelja, a combo prelazi na svoj sljedeći cilj točno kao i prije."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Odgovori: keepalive samo preko transporta",
+        "description": "Pošaljite Responses keepalive kao prazan redak umjesto response.in_progress događaja, tako da sintetička snimka nikada ne može zamijeniti pravi odgovor u službenom SDK. Prazna linija ne šalje SSE događaj, tako da se nadzorni pas klijenta koji se resetira samo na događaje ne bi resetirao tijekom duge tihe faze. Isključeno prema zadanim postavkama: mjerači vremena šalju specifikacijski važeći response.in_progress događaj."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Ponovni pokušaj pri hlađenju: Preskoči odbijanja 403/410",

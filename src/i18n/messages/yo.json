@@ -923,6 +923,8 @@
     "batchListTitle": "Àwọn ìdìpọ̀",
     "batchListCount": "Àwọn ìdìpọ̀ {count}",
     "batchListRemovingCompleted": "Ń yọ kúrò…",
+    "batchListRemoveCompletedPartial": "A ti yọ ọ̀pọ̀lọpọ̀ àwọn ìpele kúrò. Tẹ̀ lẹ́ẹ̀kan sí i láti pa ìyókù rẹ́.",
+    "batchListRemoveCompletedFailed": "Àṣìṣe kan ṣẹlẹ̀ nígbà tí a ń yọ àwọn ìpele kúrò.",
     "batchListRemoveCompleted": "Yọ àwọn tó ti parí kúrò",
     "batchListTableStatus": "Ìpò",
     "batchListTableId": "ID",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "Ń sọ dọ̀tun…",
     "batchListRefresh": "Sọ dọ̀tun",
     "uploadFileModalRemove": "Yọ kúrò",
+    "fileInputChoose": "Yan fáìlì",
+    "fileInputChooseMultiple": "Yan àwọn fáìlì",
+    "fileInputEmpty": "Kò sí fáìlì tí a yàn",
+    "fileInputSelectedCount": "{count, plural, one {# fáìlì ni a yàn} other {# fáìlì ni a yàn}}",
+    "fileDropLabel": "Ju fáìlì kan síbí tàbí yan ọ̀kan",
+    "fileDropLabelMultiple": "Ju àwọn fáìlì síbí tàbí yan àwọn fáìlì",
     "uploadFileModalUploading": "Ń ṣàgbérù…",
     "wizardInputReading": "Ń ka fáìlì…",
     "wizardInputReady": "Ti ṣetán",
@@ -1035,7 +1043,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "Fi ìtẹ̀wọ́-ìka oníbàárà OpenCode v2 CLI ránṣẹ́ lórí àwọn ìbéèrè OpenCode Zen/Go: opencode/latest/<2.x>/cli User-Agent àti x-opencode-client cli; àti lórí àwọn ìbéèrè ipele ọ̀fẹ́, àwọn àkọlé ìgbà v2, àwọn ètò irinṣẹ́ kíkà/shell v2 CLI, láìsí tool_choice \"none\". Ó wà ní pípa ní àìyípadà: gbogbo ìbéèrè OpenCode máa ń pa ìdánimọ̀, àwọn àkọlé àti ara rẹ̀ lọ́wọ́lọ́wọ́ mọ́ láìyípadà.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Nígbà tí àkójọpọ̀ àwọn olùdíje ti àkópọ̀ aládàáṣe bá ti ṣófo kí àlẹ́mọ́-àkọ́kọ́ fún ìpè irinṣẹ́ tó ṣiṣẹ́ (gbogbo ibi-àfojúsùn ni a fo nítorí àwọn àkókò ìsinmi, ìdènà tàbí ìtáná tán), dáhùn pẹ̀lú 503 no_eligible_targets dípò 400 àtijọ́, \"Kò sí ibi-àfojúsùn tó ṣe àtìlẹ́yìn fún ìpè irinṣẹ́\" capability_mismatch. Ó wà ní pípa ní àìròtẹ́lẹ̀: àkójọpọ̀ tó ṣófo yóò máa lo 400 àtijọ́.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Fipá mú lílo àwọn àmì ojú-ọ̀nà ìpẹ̀kun àwòṣe tí a fọkàn tán (èyí tí àkójọ olupèsè kéde, tí a yọ láti inú ID àwòṣe àkànṣe, tàbí tí olùṣàkóso ṣètò): kọ ìbéèrè tí a fi ránṣẹ́ sí ojú-ọ̀nà ìpẹ̀kun tí àwòṣe náà kò ṣiṣẹ́ lórí pẹ̀lú HTTP 400 kí a tó pín in lórí /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations àti /v1/audio/*; fi àwọn àwòṣe tí àwọn ojú-ọ̀nà ìpẹ̀kun tí a fi àmì sí wọn kò ní ohun ìbámu OmniRoute pamọ́ kúrò ní /v1/models; kí o sì dá ìdánwò àwòṣe pánẹ́ẹ̀lì padà pẹ̀lú 422 fún irú àwọn àwòṣe bẹ́ẹ̀. Ó wà ní pípa ní àìyẹsẹ̀: àwọn àmì ojú-ọ̀nà ìpẹ̀kun yóò jẹ́ ti ìfitonilétí nìkan, a ó sì pín àwọn ìbéèrè gẹ́gẹ́ bí ti tẹ́lẹ̀.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "Lórí àwọn relay anthropic-compatible lásán, jẹ́ kí àwọn ìyípadà system àárín ìjíròrò wà nínú àkójọ ìfiránṣẹ́ dípò kí a gbé wọn lọ sínú system prompt ìpele-ókè, kí prefix prompt tí a fi pamọ́ sínú cache lè dúró ṣinṣin láàárín àwọn ìyípadà. Èyí kan nígbà tí client fúnra rẹ̀ bá fi beta mid-conversation-system-2026-04-07 ránṣẹ́ nìkan. Ó wà ní pípa ní àkọ́kọ́: gbogbo ìyípadà system ni a máa ń gbé lọ sínú system prompt gẹ́gẹ́ bí ti tẹ́lẹ̀ gan-an, nítorí àwọn relay tí kò ní beta yẹn máa ń kọ àwọn ìyípadà system nínú àkójọ ìfiránṣẹ́.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Lo àwọn ìpele ìsapá ìrònú tí models.dev ṣe àtẹ̀jáde nígbà tí àtúnṣe olùdarí àti ìforúkọsílẹ̀ olùpèsè kò bá sọ èyíkéyìí, kí o sì fi àwọn ipele ìsapá tí a mọ̀ nìkan sílẹ̀, kí o sì ka àtòjọ ìpele tí a sọ tí ó ṣófo sí \"kò sí ìpele\". Ó wà ní pípa ní àìṣe-déédé: àkójọ awoṣe àti àwọn ìpele ìsapá tí a ti pinnu dúró gẹ́gẹ́ bí wọ́n ti wà tẹ́lẹ̀ gan-an.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "Ó jẹ́ kí àwọn ìbéèrè auto/* kọ́ àkójọ àwọn olùdíje pẹ̀lú àwọn agbára àwòṣe tí a ti yanjú (ìríran, ìrònújinlẹ̀, ìrònú) àti àwọn máàkì dídára tí a ṣàkíyèsí, tí a kà ní ìkàwé ńlá kan ṣoṣo. Ó wà ní pípa ní àìyípadà: ìwọ̀n àwọn olùdíje ní àkókò ìbéèrè dúró gẹ́lẹ́ bí ó ti wà tẹ́lẹ̀. Nígbà tí ó bá wà ní títàn: àwọn àmì wọ̀nyẹn máa ń wọ inú ìwọ̀n àwòrán ìṣẹ́jú, nítorí náà ìwọ̀n àwọn olùdíje àti yíyàn lè yípadà.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Jẹ́ kí àyẹ̀wò ìlera ìwé-ẹ̀rí tún dán àwọn àsopọ̀ tí gateway pa fúnra rẹ̀ wò (ó pọ̀jù lẹ́ẹ̀kan ní gbogbo wákàtí 6 fún ọ̀kọ̀ọ̀kan, márùn-ún fún àyẹ̀wò kọ̀ọ̀kan), kí ó sì tún ọ̀kan tan nígbà tí àyẹ̀wò rẹ̀ bá ṣàṣeyọrí. Ó wà ní pípa láti ìbẹ̀rẹ̀: irú àwọn àsopọ̀ bẹ́ẹ̀ máa dúró ní pípa títí tí olùṣiṣẹ́ yóò fi gbé ìgbésẹ̀. A kì í tún àwọn àsopọ̀ tí olùṣiṣẹ́ pa tàbí tí a fòfin dè pátápátá dán wò láéláé.",
@@ -1939,7 +1946,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# ìbéèrè} other {# ìbéèrè}}, {keys, plural, one {# bọtini tí ó ní ìdínà} other {# bọtini tí ó ní ìdínà}}",
     "unpricedUsageMore": "… àti {count} míì",
     "unpricedUsageConfigure": "Ṣètò ìye",
-    "unpricedUsageDismiss": "Fagilé"
+    "unpricedUsageDismiss": "Fagilé",
+    "systemMetricsTitle": "Àwọn ìwọ̀n ètò",
+    "systemMetricsActive": "Àbojútó ń ṣiṣẹ́",
+    "systemMetricsLoading": "Ń kojọpọ̀...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Ìrántí",
+    "systemMetricsHost": "VPS / Agbàlejò",
+    "systemMetricsCpuCount": "{count} vCPU • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (ìṣiṣẹ́)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS Ìrántí / Òkìtì)"
   },
   "analytics": {
     "title": "Ìtúpalẹ̀",
@@ -6264,6 +6280,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Fò àkókò ìsinmi fún ìgbà díẹ̀ náà kọjá, kí ìsopọ̀ yìí lè ṣì yẹ fún lílo lẹ́yìn àwọn àṣìṣe tí a lè ṣàtúnṣe (àwọn ipò ìparí bíi banned/expired ṣì kan án).",
     "disableCoolingLabel": "Pa àkókò ìsinmi fún ìsopọ̀ yìí",
+    "keepMidConversationSystemDescription": "Fi awọn ifiranṣẹ eto silẹ ti a firanṣẹ ni aarin-ibaraẹnisọrọ inu atokọ ifiranṣẹ dipo gbigbe wọn sinu itọsi eto ipele-oke, nitorinaa kaṣe iyara n tẹsiwaju lilu kọja awọn iyipada. Mu ṣiṣẹ nikan ti oke yii ba gba ipa “eto” inu awọn ifiranṣẹ (bibẹẹkọ o dahun 400).",
+    "keepMidConversationSystemLabel": "Jeki aarin-ibaraẹnisọrọ eto awọn ifiranṣẹ ni ibi",
+    "requireUserLastMessageDescription": "Fun awọn ṣiṣan oke ti o kọ ifilọ oluranlọwọ: ju awọn oluranlọwọ itọpa silẹ (ko si irinṣẹ_use) ṣaaju fifiranṣẹ. Awoṣe naa le ṣe atunṣe idahun iṣaaju rẹ.",
+    "requireUserLastMessageLabel": "Beere ibaraẹnisọrọ lati pari pẹlu ifiranṣẹ olumulo kan",
     "bulkPasteAdded": "{count, plural, one {A ṣàfikún kọ́kọ́rọ́ 1} other {A ṣàfikún àwọn kọ́kọ́rọ́ #}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {A fò ó kọjá ẹ̀dà àdáwòkọ 1} other {A fò ó kọjá àwọn ẹ̀dà àdáwòkọ #}}",
     "bulkPasteHint": "Lẹ kọ́kọ́rọ́ API kan sí ìlà kọ̀ọ̀kan. A ó fo àwọn ìlà òfo kọjá, a ó sì fo àwọn kọ́kọ́rọ́ àdáwòkọ kọjá.",
@@ -6363,6 +6383,9 @@
     "localProviders": "Àwọn Olùpèsè Agbègbè",
     "maxConcurrentWholeNumberError": "Àṣìṣe Nọ́ńbà Odidi fún Iye Ìṣiṣẹ́ Lẹ́ẹ̀kan Náà Tó Pọ̀ Jù",
     "m365TierLabel": "Ìpele Copilot",
+    "m365RefreshTokenLabel": "Tuntun àmi (aṣayan)",
+    "m365RefreshTokenHint": "Ti a lo lati sọ ami iraye si Microsoft 365 ni adaṣe laifọwọyi.",
+    "m365RefreshTokenEditHint": "Fi silẹ ni ofifo lati tọju ami ti o wa tẹlẹ. Lẹẹmọ ami tuntun kan lati rọpo rẹ.",
     "m365TierHint": "Yan ojú-iṣẹ́ Microsoft 365 Copilot tí àsopọ̀ yìí máa lò. Ẹnìkọ̀ọ̀kan ni BizChat fún olùmúlò tó jẹ́ aṣàyàn àkọ́kọ́; Ẹ̀kọ́ àti Ilé-iṣẹ́ (iṣẹ́) máa ń yàn láti lo àwọn ojú-iṣẹ́ tenant wọn.",
     "m365TierIndividualOption": "Ẹnìkọ̀ọ̀kan (aṣàyàn àkọ́kọ́)",
     "m365TierEduOption": "Ẹ̀kọ́",
@@ -7097,6 +7120,7 @@
     "proxySubTabsAria": "Àwọn abala Proxy",
     "requestBodyLimitTitle": "Ààlà Ara Ìbéèrè",
     "requestBodyLimitDescription": "Ìwọ̀n ẹrù API tó pọ̀ jù tí a lè gba kí a tó ṣe ìtúpalẹ̀ ara ìbéèrè. Àwọn ipa ọ̀nà ìṣàgbéwọlé fáìlì pàtó yóò ṣì ní ó kéré tán ààlà 100 MB tí a kọ sínú wọn.",
+    "requestBodyLimitChatHint": "Chat Completions àti Responses gba tó 50 MB títí tí o fi pamọ́ ààlà síbí. Ààlà tí a pamọ́ náà tún kan wọn, yálà ó kéré tàbí ó ga ju bẹ́ẹ̀ lọ.",
     "requestBodyLimitInputLabel": "Ààlà ara ìbéèrè ní MB",
     "requestBodyLimitEmptyError": "Tẹ ààlà kan ní MB",
     "requestBodyLimitWholeNumberError": "Lo odidi nọ́mbà",
@@ -12282,7 +12306,9 @@
       "failedTitle": "Gbogbo ìgbìyànjú {count} ló kùnà",
       "failed": "kùnà",
       "pinnedTitle": "A yan módẹ́lì nípasẹ̀ dídì session context-cache mọ́ ọn",
-      "pinned": "ti dì mọ́ ọn"
+      "pinned": "ti dì mọ́ ọn",
+      "recoveredAttemptsTitle": "Ìbéèrè náà padà bọ̀ sípò lẹ́yìn ìgbìyànjú {count}",
+      "latestOutcomeFailed": "Àbájáde ìbéèrè tó ṣẹ̀ṣẹ̀ dé kùnà"
     },
     "attempts": "àwọn ìgbìyànjú",
     "detail": {
@@ -12384,13 +12410,20 @@
       "continuesFromParent": "ń tẹ̀síwájú láti ìbéèrè òbí",
       "continuesFrom": "Tẹ̀síwájú láti {id}",
       "viewConversation": "wo ìjíròrò",
-      "openConversation": "Ṣí ìjíròrò {id}"
+      "openConversation": "Ṣí ìjíròrò {id}",
+      "omittedHttpAttempts": "A kò fi ìfiránṣẹ́ HTTP {count} pamọ́",
+      "noHttpResponse": "A kò ṣàkíyèsí ìdáhùn HTTP kankan",
+      "transportError": "Àṣìṣe ìgbéjáde"
     },
     "tableLabel": "Àwọn àkọọlẹ̀ ìbéèrè",
     "throughputPostFirstToken": "Lẹ́yìn àkọ́kọ́ tọ́kẹ̀nì",
     "throughputEndToEnd": "Láti ìbẹ̀rẹ̀ dé ìparí",
     "throughputRate": "{value} tọ́kẹ̀nì/sẹ́kọ̀ndì",
-    "throughputExplanation": "Àwọn ìwọ̀n méjèèjì ń lo èyí tó tóbi jù nínú iye tọ́kẹ̀nì ìjáde àti ìrònú. Lẹ́yìn àkọ́kọ́ tọ́kẹ̀nì kò ní TTFT tó wúlò; bí bẹ́ẹ̀ kọ́, ó ń lo gbogbo àkókò. Láti ìbẹ̀rẹ̀ dé ìparí ń lo gbogbo àkókò nígbà gbogbo. Ìdáhùn tí a kó jọ lè ní ìwọ̀n ìfijíṣẹ́ gíga láìsí ìpilẹ̀ṣẹ̀ àwòkọ́ tó yára jù."
+    "throughputExplanation": "Àwọn ìwọ̀n méjèèjì ń lo èyí tó tóbi jù nínú iye tọ́kẹ̀nì ìjáde àti ìrònú. Lẹ́yìn àkọ́kọ́ tọ́kẹ̀nì kò ní TTFT tó wúlò; bí bẹ́ẹ̀ kọ́, ó ń lo gbogbo àkókò. Láti ìbẹ̀rẹ̀ dé ìparí ń lo gbogbo àkókò nígbà gbogbo. Ìdáhùn tí a kó jọ lè ní ìwọ̀n ìfijíṣẹ́ gíga láìsí ìpilẹ̀ṣẹ̀ àwòkọ́ tó yára jù.",
+    "omittedHttpAttempts": "A kò fi ìfiránṣẹ́ HTTP {count} pamọ́",
+    "upstreamStatus": "Olùpèsè òkè {status}",
+    "noHttpResponse": "A kò ṣàkíyèsí ìdáhùn HTTP kankan",
+    "transportError": "Àṣìṣe ìgbéjáde"
   },
   "proxyLogger": {
     "filterAll": "Gbogbo rẹ̀",
@@ -14157,6 +14190,14 @@
         "label": "Àyà ìṣàwísí Pool Egress Tí Wọ́n Kọ́pa Rárá",
         "description": "Fún àwọn ìṣàyàn tí oṣùwọ̀n wọn jẹ́ àyà tí a túmọ̀ pẹ̀lú àdírẹ́sì egress, sọ ìṣàwísí olóòrì pool tí ó gbé àdírẹ́sì egress tí a rí jọwọ́ tí olóòrì tí ó dàbá ìyọ̀ jọ. Àyà ìṣàwísí nìkan, kì í ṣe àyà tí a fí iṣàwísí. Ó nílò PROXY_SKIP_RECENTLY_FAILED, èyí tí ó ṣe àkọsílẹ̀ ìṣàwísí rẹ̀. Kò ṣiṣẹ́ ní ìbẹ̀rẹ̀: àyà ìṣàwísí jẹ́ àyà ìṣàwísí tó pẹ́ tó àwọn ẹlẹ́ṣẹ́́."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Awoṣe-dopin awọn ijusile ipin",
+        "description": "Waye ipin opencode 429 nikan si awoṣe ti o lu, nitorinaa egress kanna n tẹsiwaju lati sin awọn awoṣe miiran, ki o sọ di mimọ nikan nigbati awoṣe yẹn ba ṣaṣeyọri. Awọn onibara ti ko ni awoṣe (yiyi adagun-odo, o duro si ibikan ati tun ṣe, hihan abojuto, okunfa yiyan, gbigba ilera) tun rii. Nilo PROXY_SKIP_RECENTLY_FAILED, eyi ti o gbejade kiko. Paa nipasẹ aiyipada: ipin awoṣe kan 429 ṣeto egress si apakan fun gbogbo awoṣe."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Aṣoju bu: tun POST ti o muna",
+        "description": "Fun ibeere ti kii ṣe-idempotent (POST, PUT, PATCH, DELETE), firanṣẹ lẹhin aṣiṣe gbigbe kan ( iho tuntun, ipadabọ aṣoju, ipadabọ abinibi ) nikan nigbati aṣiṣe naa fihan pe ko si ohun ti a firanṣẹ: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH tabi akoko ipari asopọ. Aṣiṣe iho lẹhin kikọ le tunmọ si oke ti gba ibeere naa, nitorinaa resend le ṣe ina ati gba owo lẹẹmeji. Paa nipasẹ aiyipada: ara ti o le ṣe atunṣe jẹ ibinu ni ẹẹkan lori eyikeyi aṣiṣe irinna, eyiti o tun gba iho idalẹnu ti o ti duro."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Àkọsílẹ̀ Ìṣẹ̀lẹ̀ Ìṣàwísí",
         "description": "Ìṣàwísí Opencode kọ àwọn akọsilẹ tí ó fìdí rẹ̀ múlẹ̀ pé akọsilẹ kan ni ó kó ìṣàwísí tàbí tí a fí ìṣàwísí (àwọn akọsilẹ tí a fí àwoṣe nìkan, kì í ṣe àwọn akọsilẹ̀ tó ní gbogbo àwọn akọsilẹ̀) àti ó gbe àwọn àkọsilẹ̀ ẹlẹ́ṣẹ́́ mọ́ àwọn ìbéèrè wọn, nígbà tí a lè sọ àwọn akọsilẹ̀ tí a fí ìṣàwísí àti àwọn tí a kò ṣàkójọpadà. Kò ṣiṣẹ́ ní ìbẹ̀rẹ̀: kò sí àwọn àkọsílẹ̀ àdárà, kò sí àwọn àdákọ àdárà tí a kọ."
@@ -14208,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 Ìṣẹ̀ Padà Àfihàn Ọ̀nà",
         "description": "Fún ìyípadà àwọn akọ́ka OpenCode púpọ̀, lẹ́yìn 429 láti ẹlṣíṣẹ tí ó ní àwọn apá egress kan, lórí akọ́ka tí kò ní ọ̀nà ìṣàn, lábẹ́ àyíká ọ̀nà ìṣàn kọ́ọ̀kọ́, béèrè ọ̀nà ìṣàn fún ẹgbẹ́ kejì fún ìṣẹ́ kẹyìn, dípò tí a bá ṣe ìṣẹ́ padà lórí àdírẹ́ egress kan náà. Ó ń tọ́ka, kò ní àfihàn: ọ̀nà ìṣàn tí ó ìwọ̀n kún ń gbe ipin ìṣẹ̀ t’ì yà lójú jẹ́. Kò tí í ṣiṣẹ́ ní ìbẹ̀rẹ̀: 429 kọ̀ọ̀kọ́ ń yí padà sí akọ́ka kejì gẹ́gẹ́ bí i t’ì yà lójú."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress Probe",
+        "description": "Fun olupilẹṣẹ OpenCode, nigbati ibeere aṣoju kan ba dahun 403 tabi 451 FreeTierError ati awọn irinṣẹ-ṣayẹwo kuna kuna tabi ko lo, firanṣẹ ibeere naa ni ẹẹkan nipasẹ aṣoju oriṣiriṣi (aṣoju akọọlẹ miiran tabi ọmọ ẹgbẹ adagun omi miiran, rara asopọ taara). Nikan nigbati iwadii yẹn ba dahun 200 ni egress akọkọ ti a ṣeto si apakan ni iranti ijusile aṣoju ati idahun ti iwadii yoo ṣiṣẹ; nigbati mejeji kọ, awọn atilẹba kþ ti wa ni pada ati ohunkohun ti wa ni gba silẹ. Ọrọ ikọsilẹ kanna ni wiwa egress IP ti asia ati apẹrẹ ibeere ti o kọ, nitorinaa iwadii sọ fun wọn lọtọ nipasẹ ẹri. Paa nipa aiyipada: ijusile naa pada ko yipada."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Fingerprint onimọrọ OpenCode v2",
@@ -14388,6 +14433,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Duro ni Idilọwọ Aṣa Iṣẹ-ṣiṣe",
         "description": "When a combo target answers with an exact content-policy refusal (code or type cyber_policy / content_policy_violation), stop the combo and return that refusal even when the remaining targets are different models, instead of advancing to the next target. Off by default: the refusal never cools the account or trips the provider breaker, and the combo advances to its next target exactly as before."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Awọn idahun: keepalive lori gbigbe nikan",
+        "description": "Firanṣẹ Awọn idahun olutọju bi laini òfo dipo iṣẹlẹ response.in_progress kan, nitorinaa aworan sintetiki ko le rọpo esi gidi rara ni SDK osise. Laini òfo ko firanṣẹ iṣẹlẹ SSE, nitorinaa oluṣọ alabara ti o tunto lori awọn iṣẹlẹ nikan kii yoo ṣe atunto lakoko ipele ipalọlọ gigun. Paa nipasẹ aiyipada: awọn aago fi iṣẹlẹ response.in_progress ti o wulo ni pato ranṣẹ."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Ìdíwàpadà Ìdíwàpadà: Yẹra 403/410 Ìṣàkóso",

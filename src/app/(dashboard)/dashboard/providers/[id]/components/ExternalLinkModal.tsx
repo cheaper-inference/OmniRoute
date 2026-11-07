@@ -1,6 +1,6 @@
 "use client";
 
-import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 
 import { Modal, Button } from "@/shared/components";
 import { useTranslations } from "next-intl";
@@ -69,8 +69,8 @@ export default function ExternalLinkModal({
                 {copied === "extlink" ? tc("copied") : tc("copy")}
               </Button>
             </div>
-            <p className="flex items-center gap-2 text-xs text-text-muted">
-              <Icon name="sync" size={16} className="animate-spin" />
+            <p role="status" className="flex items-center gap-2 text-xs text-text-muted">
+              <Spinner decorative size="sm" />
               {text(
                 "codexExternalLinkWaiting",
                 "Waiting for browser authentication. This window refreshes automatically."

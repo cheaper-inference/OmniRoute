@@ -923,6 +923,8 @@
     "batchListTitle": "Ogbe",
     "batchListCount": "Ogbe {count}",
     "batchListRemovingCompleted": "Na-ewepụ…",
+    "batchListRemoveCompletedPartial": "E wepụrụ ọtụtụ batches. Pịa ọzọ ka ihichapụ ndị fọdụrụ.",
+    "batchListRemoveCompletedFailed": "Njehie mere mgbe a na-ewepụ batches.",
     "batchListRemoveCompleted": "Wepụ ndị emechara",
     "batchListTableStatus": "Ọnọdụ",
     "batchListTableId": "ID",
@@ -961,6 +963,12 @@
     "batchListRefreshing": "Na-eme ka ọ dị ọhụrụ…",
     "batchListRefresh": "Mee ka ọ dị ọhụrụ",
     "uploadFileModalRemove": "Wepụ",
+    "fileInputChoose": "Họrọ faịlụ",
+    "fileInputChooseMultiple": "Họrọ faịlụ",
+    "fileInputEmpty": "Ọ dịghị faịlụ ahọpụtara",
+    "fileInputSelectedCount": "{count, plural, one {# faịlụ ahọpụtara} other {# faịlụ ahọpụtara}}",
+    "fileDropLabel": "Dobe faịlụ ebe a ma ọ bụ họrọ otu",
+    "fileDropLabelMultiple": "Dobe faịlụ ebe a ma ọ bụ họrọ faịlụ",
     "uploadFileModalUploading": "Na-ebugo…",
     "wizardInputReading": "Na-agụ faịlụ…",
     "wizardInputReady": "Njikere",
@@ -1035,7 +1043,6 @@
   "featureFlagOpencodeV2ClientFingerprintEnabledDescription": "Ziga njirimara onye ahịa OpenCode v2 CLI na arịrịọ OpenCode Zen/Go: opencode/latest/<2.x>/cli User-Agent na x-opencode-client cli, ma na arịrịọ ọkwa efu, ziga nkụnye isi nnọkọ v2, atụmatụ ngwaọrụ read/shell nke v2 CLI, ma etinyekwala tool_choice \"none\". Agbanyụrụ ya na ndabara: arịrịọ OpenCode ọ bụla na-edobe njirimara, nkụnye isi na body dị ugbu a na-enweghị mgbanwe.",
   "featureFlagComboEmptyPoolNoEligibleTargetsEnabledDescription": "Mgbe nchịkọta ndị a ga-ahọrọ nke auto combo tọgbọrịrị tupu pre-filter nke ịkpọ ngwá ọrụ amalite (a mafere target niile n'ihi cooldowns, lockouts ma ọ bụ exhaustion), zaghachi 503 no_eligible_targets kama 400 ochie \"Ọ dịghị target na-akwado ịkpọ ngwá ọrụ\" capability_mismatch. Agbanyụghị ya na ndabara: nchịkọta tọgbọ chakoo ga-anọgide na-eji 400 ochie.",
   "featureFlagModelEndpointCapabilityGateEnabledDescription": "Manye mkpado endpoint ụdịdị a tụkwasịrị obi (nke katalọgụ provider kwupụtara, nke e si na ID ụdịdị ọpụrụiche chọpụta, ma ọ bụ nke operator debere): jụ arịrịọ ezitere na endpoint nke ụdịdị ahụ anaghị akwado site na HTTP 400 tupu iziga ya na /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations na /v1/audio/*; zoo ụdịdị ndị endpoint ha nwere mkpado enweghị adapter OmniRoute na /v1/models; ma jiri 422 zaa ule ụdịdị dashboard maka ụdịdị ndị dị otu a. A gbanyụrụ ya na ndabara: mkpado endpoint ga-anọgide bụrụ naanị ozi, a ga-ezigakwa arịrịọ dịka ọ dị na mbụ.",
-  "featureFlagAnthropicCompatibleMidConversationSystemDescription": "Na relays nkịtị dakọtara na Anthropic, debe ntụgharị system ndị dị n’etiti mkparịta ụka n’ime ndepụta ozi kama ibuga ha na system prompt nke ọkwa kachasị elu, ka prefix nke prompt echekwara na cache wee nọgide otu ihe n’ofe ntụgharị. Nke a na-emetụta naanị mgbe client n’onwe ya zitere beta mid-conversation-system-2026-04-07. A gbanyụrụ ya na ndabara: a na-ebuga ntụgharị system ọ bụla n’ime system prompt kpọmkwem dịka ọ dị na mbụ, n’ihi na relays na-enweghị beta ahụ na-ajụ ntụgharị system dị na ndepụta ozi.",
   "featureFlagModelsDevEffortTiersEnabledDescription": "Jiri ọkwa mgbalị ntụgharị uche ndị models.dev na-ebipụta mgbe ma ntọala onye njikwa nke karịrị ndị ọzọ ma ndekọ onye na-eweta ọrụ ekwughị nke ọ bụla, na-edobe naanị ọkwa mgbalị ndị a maara, ma were ndepụta ọkwa ekwuputara nke tọgbọ chakoo dị ka \"enweghị ọkwa\". Agbanyụrụ ya na ndabara: katalọgụ ụdị na ọkwa mgbalị edoziri na-anọgide kpọmkwem dịka ha dịbu.",
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "Na-ekwe ka arịrịọ auto/* wuo ọdọ ndị a na-atụle site na ikike ụdị ndị edoziri (ọhụhụ, ntụgharị uche, iche echiche) na akara ogo a hụrụ, a gụrụ n'otu ọgụgụ nnukwu. Agbanyụrụ na ndabara: ibu ndị a na-atụle n'oge arịrịọ ka dị kpọmkwem ka ọ dị na mbụ. Agbanyere: akara ndị ahụ na-abanye n'ibu foto oge ahụ, ya mere ibu ndị a na-atụle na nhọrọ nwere ike ịgbanwe.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Kwe ka nyocha ahụike nzere nwalee njikọ ndị ọnụ ụzọ ahụ gbanyụrụ n'onwe ya ọzọ (nke ọ bụla, ọ kachasị otu ugboro n'ime awa 6 ọ bụla; njikọ 5 n'otu nyocha) ma gbanye otu n'ime ha ọzọ mgbe ule ya gara nke ọma. A na-agbanyụ nke a na ndabara: njikọ ndị dị otu ahụ ga-anọgide na-agbanyụ ruo mgbe onye na-ahụ maka sistemụ mere ihe. A naghị anwale ọzọ njikọ ndị onye na-ahụ maka sistemụ gbanyụrụ ma ọ bụ ndị amachibidoro kpamkpam.",
@@ -1939,7 +1946,16 @@
     "unpricedUsageModelStats": "{requests, plural, one {# arịrịọ} other {# arịrịọ}}, {keys, plural, one {# igodo nwere oke} other {# igodo nwere oke}}",
     "unpricedUsageMore": "…na {count} ọzọ",
     "unpricedUsageConfigure": "Tọọ ọnụahịa",
-    "unpricedUsageDismiss": "Mechie"
+    "unpricedUsageDismiss": "Mechie",
+    "systemMetricsTitle": "Usoro metrik",
+    "systemMetricsActive": "nlekota oru",
+    "systemMetricsLoading": "Na-ebu...",
+    "systemMetricsCpu": "CPU",
+    "systemMetricsMemory": "Ebe nchekwa",
+    "systemMetricsHost": "VPS / onye ọbịa",
+    "systemMetricsCpuCount": "{count} vCPUs • {platform}",
+    "systemMetricsProcessCpu": "OmniRoute (usoro)",
+    "systemMetricsProcessMemory": "OmniRoute (RSS / ikpo)"
   },
   "analytics": {
     "title": "Nnyocha Data",
@@ -6264,6 +6280,10 @@
     "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Mafee oge nkwụsị nwa oge ka njikọ a nọgide bụrụ nke a pụrụ iji ọbụna mgbe njehie ndị a pụrụ idozi mere (ọnọdụ njedebe dịka amachibidoro/agwụla ka na-emetụta ya).",
     "disableCoolingLabel": "Gbanyụọ oge nkwụsị maka njikọ a",
+    "keepMidConversationSystemDescription": "Hapụ ozi sistemụ ezigara mkparịta ụka etiti n'ime ndepụta ozi kama ịkwaga ha n'ime sistemụ ọkwa dị elu, yabụ cache ozugbo na-aga n'ihu na-akụgharị n'ofe ntụgharị. Kwado naanị ma ọ bụrụ na mgbago elu a na-anabata ọrụ \"sistemu\" n'ime ozi (ma ọ bụghị ya ọ na-aza 400).",
+    "keepMidConversationSystemLabel": "Debe ozi sistemụ mkparịta ụka n'etiti ebe",
+    "requireUserLastMessageDescription": "Maka elu mmiri na-ajụ prefill inyeaka: dobe trailing assistant turns (enweghị tool_use) tupu izipu. Ụdị ahụ nwere ike megharịa azịza ya gara aga.",
+    "requireUserLastMessageLabel": "Chọrọ ka mkparịta ụka kwụsị na ozi onye ọrụ",
     "bulkPasteAdded": "{count, plural, one {Agbakwunyere igodo 1} other {Agbakwunyere igodo #}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Amafere oyiri 1} other {Amafere oyiri #}}",
     "bulkPasteHint": "Tapawa otu igodo API n'ahịrị ọ bụla. A na-eleghara ahịrị efu anya ma na-amafe igodo ndị bụ oyiri.",
@@ -6363,6 +6383,9 @@
     "localProviders": "Ndị na-eweta mpaghara",
     "maxConcurrentWholeNumberError": "Njehie: ọnụ ọgụgụ kacha elu nke ọrụ n'otu oge ga-abụrịrị ọnụọgụ zuru ezu",
     "m365TierLabel": "Ọkwa Copilot",
+    "m365RefreshTokenLabel": "Token nweta ume ọhụrụ (nhọrọ)",
+    "m365RefreshTokenHint": "A na-eji nweta ume Microsoft 365 nweta token na-akpaghị aka.",
+    "m365RefreshTokenEditHint": "Hapụ oghere ka idowe akara dị adị. Tapawa akara ọhụrụ iji dochie ya.",
     "m365TierHint": "Họrọ akụkụ Microsoft 365 Copilot njikọ a ga-eji. Individual bụ BizChat ndabara maka ndị ahịa; Education na Enterprise (ọrụ) na-enye ohere iji akụkụ tenant ha.",
     "m365TierIndividualOption": "Individual (ndabara)",
     "m365TierEduOption": "Agụmakwụkwọ",
@@ -7097,6 +7120,7 @@
     "proxySubTabsAria": "Nkebi Ihe Nnọchiteanya",
     "requestBodyLimitTitle": "Oke Ahụ Arịrịọ",
     "requestBodyLimitDescription": "Oke kachasị nke ibu data API a na-anabata tupu a hazie ahụ arịrịọ. Ụzọ e wepụtara maka mbulite na-edobe opekata mpe oke 100 MB arụnyere n'ime ha.",
+    "requestBodyLimitChatHint": "Chat Completions na Responses na-anabata ihe ruru 50 MB ruo mgbe ị chekwara oke ebe a. Oke echekwara na-emetụtakwa ha, ma ọ dị ala ma ọ bụ karịa.",
     "requestBodyLimitInputLabel": "Oke ahụ arịrịọ na MB",
     "requestBodyLimitEmptyError": "Tinye oke na MB",
     "requestBodyLimitWholeNumberError": "Jiri ọnụọgụ zuru ezu",
@@ -12282,7 +12306,9 @@
       "failedTitle": "Nnwale {count} niile dara",
       "failed": "dara",
       "pinnedTitle": "Ahọpụtara ụdị site na ịkpọgide nnọkọ context-cache",
-      "pinned": "akpọgidere"
+      "pinned": "akpọgidere",
+      "recoveredAttemptsTitle": "Arịrịọ ahụ gbakere mgbe mbọ {count} gasịrị",
+      "latestOutcomeFailed": "Nsonaazụ arịrịọ ikpeazụ dara"
     },
     "attempts": "nnwale",
     "detail": {
@@ -12384,13 +12410,20 @@
       "continuesFromParent": "na-aga n'ihu site na nke nne na nna",
       "continuesFrom": "Na-aga n'ihu site na {id}",
       "viewConversation": "lee mkparịta ụka",
-      "openConversation": "Mepee mkparịta ụka {id}"
+      "openConversation": "Mepee mkparịta ụka {id}",
+      "omittedHttpAttempts": "Edebeghị izipu HTTP {count}",
+      "noHttpResponse": "Ahụghị nzaghachi HTTP ọ bụla",
+      "transportError": "Njehie mbufe"
     },
     "tableLabel": "Ndekọ arịrịọ",
     "throughputPostFirstToken": "Mgbe token mbụ gasịrị",
     "throughputEndToEnd": "Site ná mmalite ruo ná ngwụcha",
     "throughputRate": "{value} token kwa sekọnd",
-    "throughputExplanation": "Ọnụego abụọ a na-eji nke ka ukwuu n'ime ọnụ ọgụgụ token mmepụta na token ntụgharị uche. Mgbe token mbụ gasịrị anaghị agụnye TTFT ziri ezi; ma ọ bụghị ya, ọ na-eji oge zuru ezu. Site ná mmalite ruo ná ngwụcha na-eji oge zuru ezu mgbe niile. Nzaghachi echekwara nwere ike inwe ọnụego nnyefe dị elu n'otu ntabi na-enweghị mmepụta model ọsọ ọsọ."
+    "throughputExplanation": "Ọnụego abụọ a na-eji nke ka ukwuu n'ime ọnụ ọgụgụ token mmepụta na token ntụgharị uche. Mgbe token mbụ gasịrị anaghị agụnye TTFT ziri ezi; ma ọ bụghị ya, ọ na-eji oge zuru ezu. Site ná mmalite ruo ná ngwụcha na-eji oge zuru ezu mgbe niile. Nzaghachi echekwara nwere ike inwe ọnụego nnyefe dị elu n'otu ntabi na-enweghị mmepụta model ọsọ ọsọ.",
+    "omittedHttpAttempts": "Edebeghị izipu HTTP {count}",
+    "upstreamStatus": "Sava dị n'elu {status}",
+    "noHttpResponse": "Ahụghị nzaghachi HTTP ọ bụla",
+    "transportError": "Njehie mbufe"
   },
   "proxyLogger": {
     "filterAll": "Ha niile",
@@ -14157,6 +14190,14 @@
         "label": "Usoro Òtù Egress E Kekọrịtara",
         "description": "Maka ndị na-eweta ọrụ ndị e ji adreesị egress kee quota ha, dozie onye òtù na-ekekọrịta adreesị egress a hụrụ nke onye a jụrụ n'oge na-adịbeghị anya n'okpuru ndị òtù ahụ dị mma. Naanị n'usoro, ọ dịghị mgbe a na-ewepụ ya. Chọrọ PROXY_SKIP_RECENTLY_FAILED, nke na-ewepụta akara ọjụjụ ọ na-agụ. Agbanyụrụ na ndabara: usoro nhọrọ bụ kpọmkwem ntụgharị nkịtị."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Ọjụjụ oke nke ihe nlere anya",
+        "description": "Tinye opencode quota 429 naanị na ihe nlereanya kụrụ ya, yabụ otu egress ahụ na-aga n'ihu na-ejere ụdị ndị ọzọ ozi, wee kpochapụ ya naanị mgbe ihe nlereanya ahụ ga-aga nke ọma. Ndị na-eri ihe na-enweghị ihe nlereanya (ntụgharị ọdọ mmiri, ogige ntụrụndụ na ịmegharị, visibiliti admin, selector trigger, health sweep) ka na-ahụ ya. Achọrọ PROXY_SKIP_RECENTLY_FAILED, nke na-emepụta ọjụjụ ahụ. Gbanyụọ na ndabara: otu nha ụdị 429 na-ewepụta ọpụpụ maka ụdị ọ bụla."
+      },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "Nweta proxy: ikwugharị POST siri ike",
+        "description": "Maka arịrịọ na-abụghị nkeidempotent (POST, PUT, PATCH, DELETE), zipu mgbe njehie njem (ọhụrụ socket, proxy fallback, nwa amaala ọdịda) naanị mgbe njehie ahụ gosipụtara na ọ dịghị ihe ezigara: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH ma ọ bụ oge njikọ. Njehie sọket ka edechara nwere ike ịpụta na elu na-anabata arịrịọ ahụ, yabụ nzigharị nwere ike iwepụta ma kwụọ ya ugboro abụọ. Gbanyụọ na ndabara: ahụ a na-emegharịgharị na-ewe iwe otu ugboro na mperi njem ọ bụla, nke na-eweghachikwa oghere agbakọchara."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Ndekọ Njirimara Ntụgharị",
         "description": "Ntụgharị opencode na-edekọ akaụntụ jere ozi ma ọ bụ nke a mafere (naanị ID ndị e kpuchiri ekpuchi, ọ dịghị mgbe a na-ede ID akaụntụ zuru ezu) ma na-ejikọ ndekọ proxy log na arịrịọ ha, ka onye nlekọta wee nwee ike ịmata ọdịiche dị n'etiti akaụntụ ndị a mafere na ndị a na-ejighị mee ihe. Agbanyụrụ na ndabara: ọ dịghị ahịrị ndekọ ọzọ ma ọ bụ kọlụm ọzọ a na-ede."
@@ -14208,6 +14249,10 @@
       "OPENCODE_POOL_RESELECT": {
         "label": "Nhọrọ Ọzọ nke Pool OpenCode 429",
         "description": "Maka ntụgharị ọtụtụ akaụntụ OpenCode, mgbe 429 sitere na onye na-eweta ya nwere egress-bucketed na akaụntụ na-enweghị proxy n'okpuru ọnọdụ ambient pool, rịọ connection pool maka onye òtù ọzọ maka mbọ na-esote kama ịnwale otu adreesị egress ahụ ọzọ. Na-ahazi, ọ naghị ewepụ: pool agwụchara na-ejigide omume dị ugbu a. Gbanyụrụ na ndabere: 429 ọ bụla na-atụgharị gaa na akaụntụ na-esote kpọmkwem dịka ọ dị na mbụ."
+      },
+      "OPENCODE_FREE_TIER_EGRESS_PROBE": {
+        "label": "OpenCode Free-Tier Egress",
+        "description": "Maka onye na-eme OpenCode, mgbe azara arịrịọ proxied 403 ma ọ bụ 451 FreeTierError na ngwaọrụ achọpụtara megharịa ma ọ bụ etinyeghị ya, ziga arịrịọ ahụ otu ugboro site na proxy dị iche (proxy akaụntụ ọzọ ma ọ bụ onye otu ọdọ mmiri, ọ nweghị njikọ kpọmkwem). Naanị mgbe nyocha ahụ zara 200 bụ nke mbụ egress ewepụtara na ebe nchekwa ọjụjụ proxy na nzaghachi nyocha na-eje ozi; mgbe ha abụọ jụrụ, a na-eweghachi ọjụjụ mbụ ma ọ nweghị ihe edekọ. Otu ederede ọjụjụ ahụ na-ekpuchi egress IP ọkọlọtọ na ọdịdị arịrịọ jụrụ, yabụ nyocha ahụ na-eji ihe akaebe na-ekewapụ ha. Gbanyụọ na ndabara: eweghachite ọjụjụ ahụ agbanweghị."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Akara Mkpịsị Aka Onye Ahịa OpenCode v2",
@@ -14388,6 +14433,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Kwụsị n'Ajụjụ Content-Policy",
         "description": "Mgbe ebumnuche combo zaghachiri site n'ajụjụ doro anya nke content-policy (koodu ma ọ bụ ụdị cyber_policy / content_policy_violation), kwụsị combo ahụ ma weghachi ajụjụ ahụ ọbụlagodi mgbe ebumnuche ndị fọdụrụ bụ ụdị dị iche iche, kama ịga n'ihu na ebumnuche na-esonụ. Agbanyụrụ na ndabara: ajụjụ ahụ anaghị eme ka akaụntụ dajụọ ma ọ bụ kpalite provider breaker, combo na-agakwa n'ihu na ebumnuche ya na-esonụ kpọmkwem dịka ọ dị na mbụ."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "Azịza: idobe ndụ naanị n'ụgbọ njem",
+        "description": "Zipu nzaghachi na-echekwa ndụ dị ka ahịrị oghere kama ịme ihe omume response.in_progress, yabụ foto sịntetịt enweghị ike dochie ezigbo nzaghachi na SDK gọọmentị. Ahịrị oghere adịghị eziga mmemme SSE, yabụ na onye na-ahụ maka ndị ahịa na-emegharị naanị na mmemme agaghị emegharị ya n'oge ogologo oge ịgbachi nkịtị. Gbanyụọ na ndabara: ndị ngụ oge na-eziga mmemme response.in_progress kwesịrị ekwesị."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Nnwagharị Cooldown: Mafere Ọjụjụ 403/410",
