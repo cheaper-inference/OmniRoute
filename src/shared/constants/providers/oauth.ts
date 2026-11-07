@@ -61,6 +61,20 @@ export const OAUTH_PROVIDERS = {
     authHint:
       "Sign in with your browser, or paste your ~/.grok/auth.json (or the JWT access token) from the Grok Build CLI; refresh_token is rotated automatically either way. Imagine image/video and TTS/STT reuse this login where your account is entitled.",
   },
+  "grok-bot": {
+    id: "grok-bot",
+    serviceKinds: ["llm"],
+    alias: "gb",
+    name: "Grok Bot",
+    icon: "smart_toy",
+    color: "#111827",
+    textIcon: "GB",
+    website: "https://cursor.com",
+    subscriptionRisk: true,
+    riskNoticeVariant: "oauth",
+    authHint:
+      "Use a Grok Bot OAuth token from the Cursor desktop login. This is separate from Grok Build CLI credentials.",
+  },
   qoder: {
     id: "qoder",
     serviceKinds: ["llm"],

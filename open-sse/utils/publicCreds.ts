@@ -162,6 +162,13 @@ const EMBEDDED_DEFAULTS = {
   ],
   // GitHub Copilot CLI — github oauth app id (public, device flow)
   github_copilot_id: [38, 27, 95, 71, 16, 90, 69, 67, 4, 29, 72, 22, 90, 91, 12, 0, 75, 19, 8, 87],
+  // Cursor desktop 3.27.22 — public OAuth client identity, not a user token.
+  // Verified in the official Linux package linked from https://cursor.com/download:
+  // resources/app/molten/dist/engine/engine.cjs, refreshCursorSession clientId.
+  cursor_id: [
+    36, 15, 52, 60, 32, 91, 68, 23, 60, 26, 39, 67, 24, 62, 58, 7, 93, 37, 100, 37, 90, 39, 94, 31,
+    35, 44, 54, 46, 98, 51, 24, 32,
+  ],
   // Grok Build CLI (xAI) — public oauth client id (import-token flow)
   grok_id: [
     13, 92, 15, 89, 66, 91, 76, 70, 72, 29, 71, 70, 3, 65, 93, 84, 72, 23, 28, 87, 92, 88, 15, 95,

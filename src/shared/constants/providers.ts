@@ -282,6 +282,9 @@ const EXPLICIT_OPTIONAL_APIKEY_PROVIDER_IDS = new Set([
   // auth is a durable Clerk credential stored in providerSpecificData, from which
   // the executor mints a short-lived session token per connect.
   "uc",
+  // Grok Bot: auth is an OAuth credential pair in providerSpecificData. The
+  // connection-creation form must not demand a generic API key.
+  "grok-bot",
 ]);
 
 export function providerAllowsOptionalApiKey(providerId: unknown): boolean {

@@ -30,6 +30,7 @@ export const HIDEABLE_SIDEBAR_ITEM_IDS = [
   "cli-agents",
   "acp-agents",
   "cloud-agents",
+  "grok-bot",
   "conductor",
   "orchestration",
   "agent-bridge",

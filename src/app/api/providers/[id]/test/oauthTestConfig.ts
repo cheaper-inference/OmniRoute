@@ -335,6 +335,10 @@ export const OAUTH_TEST_CONFIG: Record<string, OAuthTestConfigEntry> = {
     checkExpiry: true,
     refreshable: true,
   },
+  "grok-bot": {
+    checkExpiry: true,
+    refreshable: true,
+  },
   "ghe-copilot": {
     // GHE Copilot: probe the enterprise user-info endpoint derived from gheUrl
     // (stored in providerSpecificData).

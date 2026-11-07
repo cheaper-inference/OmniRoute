@@ -97,6 +97,12 @@ function isStreamEarlyEofFailure(
   return /stream ended before producing a non-ping sse event/i.test(errorText);
 }
 
+// A grok-bot turn that went idle before the answer is one unfinished request,
+// not a dead connection. The same account answered the next request.
+function isUnfinishedTurnFailure(status: number, errorText: string): boolean {
+  return status === 502 && /incomplete_turn|idle without explicit completion/i.test(errorText);
+}
+
 /** #12441 — quota/credits bodies must not take the 401/403 auth-skip path. */
 export function isQuotaOrCreditsError(
   errorText: string,
@@ -649,6 +655,7 @@ function markConnectionLevelExhaustion(
     // #14313: the synthetic early-EOF 502 is the same shape - the connection answered and
     // opened the stream, only this MODEL's backend failed before emitting an event.
     isStreamEarlyEofFailure(result.status, errorText, structuredError) ||
+    isUnfinishedTurnFailure(result.status, errorText) ||
     // Per-model-quota providers (gemini, github, passthrough, compatible) multiplex models
     // behind one connection. A model-level 500 (e.g. Gemini "Internal error encountered")
     // must NOT exhaust the connection — other models on the same connection may still succeed.

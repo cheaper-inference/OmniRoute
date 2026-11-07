@@ -355,6 +355,11 @@
       "configSource": "glmt",
       "provider": "glmt"
     },
+    "grok-bot": {
+      "className": "GrokBotExecutor",
+      "configSource": "grok-bot",
+      "provider": "grok-bot"
+    },
     "grok-cli": {
       "className": "GrokCliExecutor",
       "configSource": "grok-cli",
@@ -701,6 +706,6 @@
       "provider": "zai-web"
     }
   },
-  "keyCount": 140,
+  "keyCount": 141,
   "sharedInstances": []
 }
