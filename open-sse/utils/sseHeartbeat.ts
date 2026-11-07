@@ -6,6 +6,7 @@
  * - [2026-07-28] [Cursor Grok 4.5] - Brand-neutral default OpenAI keepalive id/model
  */
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import { FORMATS } from "../translator/formats.ts";
 import {
   buildResponsesInProgressPayload,
   createResponsesInProgressTracker,
@@ -46,6 +47,13 @@ export const HEARTBEAT_SHAPES = {
   ANTHROPIC_PING: "anthropic-ping",
   OPENAI_CHUNK: "openai-chunk",
   OPENAI_RESPONSES_IN_PROGRESS: "openai-responses-in-progress",
+  /**
+   * Payload-free keepalive: a bare blank line. Spec-conforming SSE parsers treat
+   * it as an empty event boundary and skip it, so it is safe for native client
+   * envelopes (Gemini `candidates`, CLOVA, Antigravity) whose strict parsers
+   * would choke on a foreign `data:` chunk or a `:` comment line.
+   */
+  TRANSPORT_BLANK: "transport-blank",
 } as const;
 
 export type HeartbeatShape = (typeof HEARTBEAT_SHAPES)[keyof typeof HEARTBEAT_SHAPES];
@@ -56,14 +64,32 @@ export function shapeForClientFormat(
   clientResponseFormat: string | undefined | null
 ): HeartbeatShape {
   switch (clientResponseFormat) {
-    case "claude":
+    case FORMATS.CLAUDE:
       return HEARTBEAT_SHAPES.ANTHROPIC_PING;
-    case "openai":
+    case FORMATS.OPENAI:
       return HEARTBEAT_SHAPES.OPENAI_CHUNK;
-    case "openai-responses":
+    case FORMATS.OPENAI_RESPONSES:
+    case FORMATS.OPENAI_RESPONSE:
       return HEARTBEAT_SHAPES.OPENAI_RESPONSES_IN_PROGRESS;
+    case FORMATS.GEMINI:
+    case FORMATS.ANTIGRAVITY:
+    case FORMATS.CLOVA:
+    case FORMATS.KIRO:
+      // Native client envelopes with their own strict chunk parser: an injected
+      // [OI] chunk (or a `:` comment) is a protocol error there, so emit the
+      // payload-free blank-line keepalive instead of no keepalive at all (#10524).
+      return HEARTBEAT_SHAPES.TRANSPORT_BLANK;
     default:
-      return HEARTBEAT_SHAPES.COMMENT;
+      // Unmapped/unknown client formats are overwhelmingly [OI]-Chat-compatible
+      // (custom gateways, executors that don't declare a format). The old
+      // COMMENT default produced a no-op heartbeat whenever
+      // OMNIROUTE_SSE_COMMENTS was unset (#10524 default), so those streams had
+      // NO keepalive at all — clients with an idle watchdog aborted healthy
+      // streams during long upstream silences. Emit a real `data:` Chat
+      // Completions chunk instead: it is parseable by every [OI]-compatible
+      // client (same shape as the early-keepalive OPENAI_KEEPALIVE_FRAME) and
+      // keeps the stream alive without the strict-client comment risk.
+      return HEARTBEAT_SHAPES.OPENAI_CHUNK;
   }
 }
 
@@ -87,6 +113,10 @@ function buildHeartbeatPayload(
       };
       return `data: ${JSON.stringify(payload)}\n\n`;
     }
+    case HEARTBEAT_SHAPES.TRANSPORT_BLANK:
+      // Empty event boundary: bytes on the wire (idle watchdogs reset) with no
+      // payload any SSE parser can trip over.
+      return "\n\n";
     case HEARTBEAT_SHAPES.COMMENT:
     default:
       return `: keepalive ${new Date().toISOString()}\n\n`;
@@ -180,6 +210,10 @@ export function createSseHeartbeatTransform({
 
   return new TransformStream<Uint8Array, Uint8Array>({
     start(controller) {
+      // Abort stops the timer IMMEDIATELY via the listener below; the
+      // aborted-check inside the callback is only a belt-and-suspenders for a
+      // signal that aborts between the listener registration and the same-tick
+      // callback, and for signals attached after interval creation.
       intervalId = globalThis.setInterval(() => {
         if (signal?.aborted) {
           stop();
@@ -210,6 +244,12 @@ export function createSseHeartbeatTransform({
         intervalId.unref?.();
       }
 
+      if (signal?.aborted) {
+        // Signal already aborted before registration: clear synchronously now
+        // instead of leaving the timer armed until its next tick.
+        stop();
+        return;
+      }
       signal?.addEventListener("abort", stop, { once: true });
     },
 
@@ -220,10 +260,12 @@ export function createSseHeartbeatTransform({
     },
 
     flush() {
+      signal?.removeEventListener("abort", stop);
       stop();
     },
 
     cancel() {
+      signal?.removeEventListener("abort", stop);
       stop();
     },
   });

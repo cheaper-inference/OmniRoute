@@ -70,15 +70,63 @@ function sseResponse(bodyText: string): Response {
 
 // #2544: a handler that resolves quickly must be returned verbatim — same object,
 // status, and headers — so the common (fast) path has zero behavior change.
+// SSE bodies are wrapped (mid-stream failure terminal frame, Fix SSE-drop) but
+// headers/status/statusText are preserved and healthy streams stay
+// byte-identical; non-SSE responses keep object identity.
 test("fast handler is returned verbatim with headers preserved (#2544)", async () => {
+  const original = new Response("plain json", {
+    status: 200,
+    headers: { "Content-Type": "application/json", "x-omniroute-provider": "openai" },
+  });
+  const result = await withEarlyStreamKeepalive(Promise.resolve(original), { thresholdMs: 1000 });
+
+  assert.equal(result, original, "fast path should return the same Response object for non-SSE");
+  assert.equal(result.headers.get("x-omniroute-provider"), "openai");
+});
+
+test("fast SSE handler preserves status/headers; healthy body stays byte-identical (#2544)", async () => {
   const original = new Response("data: hi\n\n", {
     status: 200,
     headers: { "Content-Type": "text/event-stream", "x-omniroute-provider": "openai" },
   });
   const result = await withEarlyStreamKeepalive(Promise.resolve(original), { thresholdMs: 1000 });
 
-  assert.equal(result, original, "fast path should return the same Response object");
+  assert.equal(result.status, 200);
   assert.equal(result.headers.get("x-omniroute-provider"), "openai");
+  assert.equal(await result.text(), "data: hi\n\n", "healthy SSE body must stay byte-identical");
+});
+
+// #18948: the fast path now wraps SSE bodies to append a terminal error frame on
+// a mid-stream drop. The wrap decodes and re-chunks, so pin that (a) the emitted
+// bytes are still identical when frames are split across upstream chunks and
+// (b) the Response metadata the constructor cannot take (`url`, `redirected`)
+// survives, since downstream telemetry reads it.
+test("fast SSE wrapper re-frames split chunks identically and keeps url/redirected (#18948)", async () => {
+  const encoder = new TextEncoder();
+  const body = new ReadableStream<Uint8Array>({
+    start(controller) {
+      for (const chunk of ["data: a\n", "\ndata: b\n\n", "event: ping\ndata: {}\n\n"]) {
+        controller.enqueue(encoder.encode(chunk));
+      }
+      controller.close();
+    },
+  });
+  const original = new Response(body, {
+    status: 200,
+    headers: { "Content-Type": "text/event-stream" },
+  });
+  Object.defineProperty(original, "url", { value: "https://upstream.example/v1/messages" });
+  Object.defineProperty(original, "redirected", { value: false });
+
+  const result = await withEarlyStreamKeepalive(Promise.resolve(original), { thresholdMs: 1000 });
+
+  assert.equal(result.url, "https://upstream.example/v1/messages");
+  assert.equal(result.redirected, false);
+  assert.equal(
+    await result.text(),
+    "data: a\n\ndata: b\n\nevent: ping\ndata: {}\n\n",
+    "frame boundaries must move, not the bytes"
+  );
 });
 
 // #2544: when the handler is slow to produce its first byte (slow upstream / reasoning

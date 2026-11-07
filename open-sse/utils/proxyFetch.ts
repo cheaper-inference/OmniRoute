@@ -151,6 +151,88 @@ function tagProxyUnreachable<T>(err: T): T {
   return err;
 }
 
+/**
+ * Transport-level failure codes/messages that qualify for the retry-once-on-
+ * fresh-socket recovery in the direct and relay egress paths.
+ *
+ * Two tiers (CodeRabbit review 18948):
+ * - Legacy codes (`fetch failed`, ECONNREFUSED, EAI_AGAIN, ENOTFOUND,
+ *   ETIMEDOUT, UND_ERR_*) keep the pre-existing unconditional behavior — these
+ *   fire before/at connection establishment, when no upstream side effect can
+ *   have started.
+ * - ECONNRESET/EPIPE are the codes most likely to fire AFTER the upstream
+ *   accepted the request, so replaying a non-idempotent POST could repeat the
+ *   upstream side effect. They are only retryable when
+ *   `isAmbiguousFailureReplaySafe` confirms a body-less idempotent method
+ *   (GET/HEAD/OPTIONS, RFC 9110 §9.2.2) — the same predicate the strict
+ *   post-replay policy already uses.
+ */
+export function isTransportRetryableError(msg: string, errCode: unknown): boolean {
+  const tokenMatch = PRE_SEND_TRANSPORT_TOKENS.some((token) => msg.includes(token));
+  return tokenMatch || isCodeRetryable(errCode, msg);
+}
+
+/** Codes that fire before the upstream could have started any side effect. */
+const PRE_SEND_TRANSPORT_CODES: Record<string, true> = {
+  ECONNREFUSED: true,
+  EAI_AGAIN: true,
+  ENOTFOUND: true,
+  ETIMEDOUT: true,
+};
+
+/** Message tokens for the same pre-send failures (`fetch failed` is undici's wrapper). */
+const PRE_SEND_TRANSPORT_TOKENS = [
+  "fetch failed",
+  "ECONNREFUSED",
+  "EAI_AGAIN",
+  "ENOTFOUND",
+  "ETIMEDOUT",
+  "UND_ERR",
+] as const;
+
+/** Mid-connection resets — retryable only for idempotent methods (see above). */
+const MID_CONNECTION_RESET_CODES: Record<string, true> = { ECONNRESET: true, EPIPE: true };
+
+function isCodeRetryable(errCode: unknown, msg: string): boolean {
+  if (typeof errCode === "string") {
+    if (PRE_SEND_TRANSPORT_CODES[errCode] || errCode.startsWith("UND_ERR")) return true;
+  }
+  return isMidConnectionResetCode(msg, errCode);
+}
+
+/** Read `.code` off an unknown thrown value without fabricating a shape. */
+function errorCodeOf(err: unknown): unknown {
+  if (err && typeof err === "object" && "code" in err) return err.code;
+  return undefined;
+}
+
+/**
+ * Whether `code` is a mid-connection reset that may only be retried for
+ * idempotent methods (see isTransportRetryableError's two-tier doc). Returns
+ * false for every other code — those keep the legacy unconditional retry.
+ */
+function isMidConnectionResetCode(msg: string, errCode: unknown): boolean {
+  if (typeof errCode === "string" && MID_CONNECTION_RESET_CODES[errCode]) return true;
+  return Object.keys(MID_CONNECTION_RESET_CODES).some((code) => msg.includes(code));
+}
+
+/**
+ * Whether a transport failure may be retried on a fresh socket. Pre-send codes
+ * (ECONNREFUSED, ENOTFOUND, ...) always qualify; ECONNRESET/EPIPE can fire after
+ * the upstream accepted the request, so they qualify only when replaying the same
+ * request is provably side-effect-free (body-less GET/HEAD/OPTIONS).
+ */
+function isRetryableTransportFailure(
+  input: RequestInfo | URL,
+  options: FetchWithDispatcherOptions,
+  msg: string,
+  errCode: unknown
+): boolean {
+  if (!isTransportRetryableError(msg, errCode)) return false;
+  if (!isMidConnectionResetCode(msg, errCode)) return true;
+  return isAmbiguousFailureReplaySafe(input, options);
+}
+
 /** Per-request TLS identity and success telemetry. */
 type TlsFingerprintStore = {
   used: boolean;
@@ -964,24 +1046,14 @@ async function patchedFetchUnrecorded(
           );
           throw dispatcherError;
         }
-        // Read before tagging: the tag overwrites the transport code the policy reads.
+        // Read before tagging: the tag overwrites the transport code the retry
+        // policy and the ECONNRESET/EPIPE idempotency gate both classify on.
+        const errCode = errorCodeOf(dispatcherError);
         const canResend = canResendAfterTransportError(input, options, dispatcherError);
         // Retry/fallback only for connection errors, never HTTP errors.
         tagProxyUnreachable(dispatcherError);
-        const errCode = (dispatcherError as { code?: unknown })?.code;
-        if (
-          msg.includes("fetch failed") ||
-          errCode === "ECONNREFUSED" ||
-          msg.includes("ECONNREFUSED") ||
-          errCode === "EAI_AGAIN" ||
-          msg.includes("EAI_AGAIN") ||
-          errCode === "ENOTFOUND" ||
-          msg.includes("ENOTFOUND") ||
-          errCode === "ETIMEDOUT" ||
-          msg.includes("ETIMEDOUT") ||
-          (typeof errCode === "string" && errCode.startsWith("UND_ERR")) ||
-          msg.includes("UND_ERR")
-        ) {
+        const retryable = isRetryableTransportFailure(input, options, msg, errCode);
+        if (retryable) {
           if (attempt === 0 && canResend) {
             // Retry after a short fixed backoff on a fresh socket.
             lastDispatcherError = dispatcherError;
@@ -1148,13 +1220,8 @@ async function patchedFetchUnrecorded(
         }
         if (isCallerAbort(relayError, options?.signal)) throw relayError;
         const msg = relayError instanceof Error ? relayError.message : String(relayError);
-        const errCode = (relayError as { code?: unknown })?.code;
-        const isTransportFailure =
-          msg.includes("fetch failed") ||
-          errCode === "ECONNREFUSED" ||
-          msg.includes("ECONNREFUSED") ||
-          (typeof errCode === "string" && errCode.startsWith("UND_ERR")) ||
-          msg.includes("UND_ERR");
+        const errCode = errorCodeOf(relayError);
+        const isTransportFailure = isRetryableTransportFailure(input, options, msg, errCode);
         if (
           attempt === 0 &&
           maxRelayAttempts > 1 &&
@@ -1246,7 +1313,7 @@ async function patchedFetchUnrecorded(
     } catch (error) {
       if (isCallerAbort(error, getEffectiveSignal(input, options))) throw error;
       const msg = error instanceof Error ? error.message : String(error);
-      const errCode = (error as { code?: unknown })?.code;
+      const errCode = errorCodeOf(error);
       const isTransportFailure =
         msg.includes("fetch failed") ||
         errCode === "ECONNREFUSED" ||

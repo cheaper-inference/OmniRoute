@@ -76,7 +76,9 @@ test("shapeForClientFormat maps known client formats", () => {
     shapeForClientFormat("openai-responses"),
     HEARTBEAT_SHAPES.OPENAI_RESPONSES_IN_PROGRESS
   );
-  assert.equal(shapeForClientFormat(undefined), HEARTBEAT_SHAPES.COMMENT);
+  // #18948: an unmapped format must not fall back to the no-op COMMENT
+  // heartbeat — it gets a parseable [OI]-chunk keepalive instead.
+  assert.equal(shapeForClientFormat(undefined), HEARTBEAT_SHAPES.OPENAI_CHUNK);
 });
 
 test("comment opt-out suppresses only COMMENT heartbeats, not data-event heartbeats", async () => {

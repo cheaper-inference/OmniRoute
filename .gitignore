@@ -86,6 +86,7 @@ gitleaks-local.json
 
 # typescript
 *.tsbuildinfo
+.tsbuildinfo-typecheck-*
 next-env.d.ts
 
 # data and logs

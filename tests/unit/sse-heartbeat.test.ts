@@ -251,13 +251,23 @@ test("shapeForClientFormat maps formats correctly", () => {
   assert.equal(shapeForClientFormat("claude"), "anthropic-ping");
   assert.equal(shapeForClientFormat("openai"), "openai-chunk");
   assert.equal(shapeForClientFormat("openai-responses"), "openai-responses-in-progress");
-  assert.equal(shapeForClientFormat("gemini"), "comment");
-  assert.equal(shapeForClientFormat(undefined), "comment");
-  assert.equal(shapeForClientFormat(null), "comment");
+  // #18948: native non-[OI] envelopes get a payload-free blank-line keepalive —
+  // an injected [OI] chunk or `:` comment is a protocol error for those clients.
+  assert.equal(shapeForClientFormat("gemini"), "transport-blank");
+  // Unknown formats are treated as [OI]-compatible: a parseable chunk, not the
+  // no-op COMMENT default that left those streams with no keepalive at all.
+  assert.equal(shapeForClientFormat(undefined), "openai-chunk");
+  assert.equal(shapeForClientFormat(null), "openai-chunk");
 });
 
 test("no shape collides with stream.ts event: keepalive strip regex", async () => {
-  const shapes = ["comment", "anthropic-ping", "openai-chunk", "openai-responses-in-progress"];
+  const shapes = [
+    "comment",
+    "anthropic-ping",
+    "openai-chunk",
+    "openai-responses-in-progress",
+    "transport-blank",
+  ];
   for (const shape of shapes) {
     await withSseCommentsOn(() =>
       withFakeIntervals(async (intervals) => {
