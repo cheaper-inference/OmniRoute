@@ -259,8 +259,14 @@ export async function syncConnectionModels(
       return false;
     }
     const data = await res.json();
+    const removedSynced = Number(data.modelChanges?.removed) || 0;
+    const removedCustom = Number(data.customModelChanges?.removed) || 0;
+    const removed =
+      removedSynced || removedCustom
+        ? ` (removed: ${removedSynced} synced, ${removedCustom} custom)`
+        : "";
     console.log(
-      `[ModelSync] ${provider} (${connectionId.slice(0, 8)}): ✓ ${data.syncedModels || 0} models`
+      `[ModelSync] ${provider} (${connectionId.slice(0, 8)}): ✓ ${data.syncedModels || 0} models${removed}`
     );
     return true;
   } catch (err) {

@@ -29,6 +29,7 @@ import { AdaptaTutorialModal } from "./AdaptaTutorialModal";
 import { ImportCodexAuthModal, ApplyCodexAuthModal } from "./modals/ImportCodexAuthModal";
 import { ImportClaudeAuthModal, ApplyClaudeAuthModal } from "./modals/ImportClaudeAuthModal";
 import ImportGrokCliAuthModal from "./modals/ImportGrokCliAuthModal";
+import { ImportAgyAuthModal } from "./modals/ImportAgyAuthModal";
 import { type ConnectionRowConnection } from "./ConnectionRow";
 import { type BatchTestResults } from "../hooks/useProviderConnections";
 import { type ConnectionDeleteConfirmState } from "../hooks/useConnectionDeleteConfirm";
@@ -132,6 +133,9 @@ interface ProviderModalsPanelProps {
   handleApplyClaudeAuthLocal: (id: string) => Promise<void>;
   importClaudeModalOpen: boolean;
   setImportClaudeModalOpen: (open: boolean) => void;
+  // Antigravity auth
+  importAgyModalOpen?: boolean;
+  setImportAgyModalOpen?: (open: boolean) => void;
   // Grok Build auth
   importGrokCliModalOpen: boolean;
   setImportGrokCliModalOpen: (open: boolean) => void;
@@ -219,6 +223,8 @@ export default function ProviderModalsPanel({
   handleApplyClaudeAuthLocal,
   importClaudeModalOpen,
   setImportClaudeModalOpen,
+  importAgyModalOpen,
+  setImportAgyModalOpen,
   importGrokCliModalOpen,
   setImportGrokCliModalOpen,
   batchTestResults,
@@ -431,6 +437,16 @@ export default function ProviderModalsPanel({
           onClose={() => setImportGrokCliModalOpen(false)}
           onSuccess={() => {
             setImportGrokCliModalOpen(false);
+            void fetchConnections();
+          }}
+        />
+      )}
+      {providerId === "agy" && importAgyModalOpen && (
+        <ImportAgyAuthModal
+          key="import-agy-modal"
+          onClose={() => setImportAgyModalOpen?.(false)}
+          onSuccess={() => {
+            setImportAgyModalOpen?.(false);
             void fetchConnections();
           }}
         />
