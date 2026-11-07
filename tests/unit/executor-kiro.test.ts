@@ -745,3 +745,65 @@ test("Kiro preserves required write arguments across string fragments and bills 
   assert.equal(usage.provider_credits, 0.25);
   assert.equal(usage.cost_in_usd_ticks, 50_000_000);
 });
+
+function reassembleToolArguments(chunks) {
+  const perIndex = new Map();
+  for (const chunk of chunks) {
+    for (const call of chunk.choices?.[0]?.delta?.tool_calls ?? []) {
+      perIndex.set(call.index, (perIndex.get(call.index) ?? "") + (call.function?.arguments ?? ""));
+    }
+  }
+  return perIndex;
+}
+
+test("Kiro streams {} arguments for a tool call that carries no input (#18718)", async () => {
+  const executor = new KiroExecutor();
+  const response = buildEventStreamResponse([
+    buildEventFrame("toolUseEvent", { toolUseId: "tool_status", name: "get_status" }),
+    buildEventFrame("toolUseEvent", { toolUseId: "tool_empty", name: "list_items", input: "" }),
+    buildEventFrame("toolUseEvent", {
+      toolUseId: "tool_read",
+      name: "read_file",
+      input: { path: "/tmp/a" },
+    }),
+    buildEventFrame("messageStopEvent", {}),
+  ]);
+
+  const chunks = parseSSEJsonChunks(
+    await executor.transformEventStreamToSSE(response, "kiro-model").text()
+  );
+  const args = reassembleToolArguments(chunks);
+
+  assert.equal(args.get(0), "{}");
+  assert.equal(args.get(1), "{}");
+  assert.deepEqual(JSON.parse(args.get(2)), { path: "/tmp/a" });
+
+  // The fill lands before the finish chunk, not after it.
+  const finishAt = chunks.findIndex((chunk) => chunk.choices?.[0]?.finish_reason);
+  const lastArgsAt = chunks.findLastIndex((chunk) => chunk.choices?.[0]?.delta?.tool_calls);
+  assert.equal(chunks[finishAt].choices[0].finish_reason, "tool_calls");
+  assert.ok(lastArgsAt < finishAt);
+});
+
+test("Kiro does not append {} to tool_call wrapper arguments", async () => {
+  const executor = new KiroExecutor();
+  const response = buildEventStreamResponse([
+    buildEventFrame("toolUseEvent", {
+      toolUseId: "wrapper_ok",
+      name: "tool_call",
+      input: { name: "mcp_search", arguments: { query: "router" } },
+    }),
+    buildEventFrame("messageStopEvent", {}),
+  ]);
+
+  const chunks = parseSSEJsonChunks(
+    await executor.transformEventStreamToSSE(response, "kiro-model").text()
+  );
+  const args = reassembleToolArguments(chunks);
+
+  assert.equal(args.size, 1);
+  assert.deepEqual(JSON.parse(args.get(0)), {
+    name: "mcp_search",
+    arguments: { query: "router" },
+  });
+});

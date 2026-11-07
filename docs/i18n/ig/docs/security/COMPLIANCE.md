@@ -11,55 +11,73 @@ OmniRoute na-edekọ omume nchịkwa, ihe omume nyocha njirimara, mgbanwe n’us
 
 Mmejuputa ya dị na `src/lib/compliance/index.ts` (T-43 — "Njikwa Nrubeisi") na `src/lib/compliance/providerAudit.ts`. Ide ndekọ nyocha anaghị atụpụ njehie ma ọlị: mgbe ọdịda ọ bụla mere, a na-eleghara oku ahụ anya na nzuzo ka ndekọ nyocha ghara imebi usoro arịrịọ bụ isi.
 
-## Ihe Ndị A Na-edekọ
+## Ihe A Na-edekọ
 
 ### Ihe omume nyocha nchịkwa (`audit_log`)
 
-Oku ọ bụla na `logAuditEvent({ action, actor, target, details, ... })` na-emepụta otu ahịrị. Eriri omume na-agbaso ụkpụrụ `domain.verb` (ma ọ bụ `domain.verb.outcome`). Ụdị omume ndị a kwadoro na koodu gụnyere:
+Oku ọ bụla a na-akpọ `logAuditEvent({ action, actor, target, details, ... })` na-emepụta
+otu ahịrị. Eriri omume na-agbaso ụkpụrụ `domain.verb` (ma ọ bụ `domain.verb.outcome`).
+Ụdị omume akwadoro n'ime osisi koodu gụnyere:
 
-| Omume                                | Isi iyi                                 |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Action                               | Source                                   |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Ndenye ọ bụla na-ejide `action`, `actor` (ndabara ya bụ `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id`, na `timestamp`. A na-ezo igodo ndị nwere ozi nzuzo (`apiKey`, `accessToken`, `refreshToken`, `password`, ihe ọ bụla dabara na `*token`/`*secret`/`*apikey`, wdg.) n’ọkwa niile site n’iji `"[redacted]"` dochie ha tupu e dee ahịrị ahụ.
+Ndenye ọ bụla na-edekọ `action`, `actor` (ndabara ya bụ `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id`, na `timestamp`. A na-ewepụ ozi nzuzo ugboro ugboro tupu e dee ahịrị ahụ,
+gụnyere igodo ndị dị ka (`apiKey`, `accessToken`,
+`refreshToken`, `password`, ihe ọ bụla dabara na `*token`/`*secret`/`*apikey`,
+wdg.), ma jiri `"[redacted]"` dochie ha.
 
-### Oku ngwaọrụ MCP (`mcp_tool_audit`)
+Ahịrị `api_key.auth.touch` na-edekọ metadata igodo API na ọgụgụ nchọpụta gara nke ọma
+(GET/HEAD) ndị na-eruteghị n'akwụkwọ ndekọ arịrịọ: igodo nke ejiri, mgbe e jiri ya,
+na ụzọ ahaziri ahazi, a na-achịkọta ha ma kpachie ọnụ ọgụgụ ha na ahịrị 1,000. A na-amapụ
+igodo nwere `noLog` na igodo gburugburu ebe obibi. A na-agbakwunye adreesị IP na
+user-agent nke onye kpọrọ oku naanị mgbe ọkọlọtọ atụmatụ `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED`
+gbanyere (ọ na-apụ apụ na ndabara).
 
-Oku ngwaọrụ MCP ọ bụla na-ede otu ahịrị site na `open-sse/mcp-server/audit.ts`. Nhazi (sitere na `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+### Oku ngwa MCP (`mcp_tool_audit`)
 
-| Kọlụm            | Nkọwa                                      |
+Oku ngwa MCP ọ bụla na-ede otu ahịrị site na
+`open-sse/mcp-server/audit.ts`. Atụmatụ (sị na
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+
+| Column           | Notes                                      |
 | ---------------- | ------------------------------------------ |
-| `id`             | na-abawanye n’onwe ya                      |
-| `tool_name`      | njirimara ngwaọrụ MCP                      |
+| `id`             | autoincrement                              |
+| `tool_name`      | Ihe nchọpụta ngwa MCP                      |
 | `input_hash`     | sha256 nke ntinye (anaghị echekwa payload) |
-| `output_summary` | nchịkọta dị mkpụmkpụ e belatara            |
-| `duration_ms`    | oge gafere n’ezie                          |
+| `output_summary` | nchịkọta dị mkpirikpi, e belatara ya       |
+| `duration_ms`    | oge n'ezie gafere                          |
 | `api_key_id`     | onye kpọrọ oku (nwere ike ịbụ null)        |
 | `success`        | `1` / `0`                                  |
-| `error_code`     | koodu njehie ikpeazụ mgbe ọdịda mere       |
-| `created_at`     | akara oge ISO                              |
+| `error_code`     | koodu njehie ikpeazụ mgbe ọdịda            |
+| `created_at`     | timestamp ISO                              |
 
-### Ndekọ arịrịọ / ojiji
+### Akwụkwọ ndekọ arịrịọ / ojiji
 
-Ndị a bụ telemetry arụmọrụ (ọ bụghị kpọmkwem nyocha nchịkwa), mana ha na-eji otu usoro njide data ahụ:
+Ndị a bụ telemetry ọrụ (ọ bụghị nyocha nchịkwa kpọmkwem), mana ha na-eji otu
+usoro idobe ma hichapụ ndekọ:
 
-- `usage_history` — nchịkọta ojiji maka arịrịọ ọ bụla
-- `call_logs` — ndekọ zuru ezu maka arịrịọ ọ bụla (n’okpuru oke ọnụ ọgụgụ ahịrị, lee n’okpuru)
-- `proxy_logs` — ndekọ okporo ụzọ proxy (n’okpuru oke ọnụ ọgụgụ ahịrị)
-- `request_detail_logs` — ndekọ nkọwa arịrịọ nke usoro ochie (a ka na-ehichapụ ndị ochie ma ọ bụrụ na ọ dị)
+- `usage_history` — nchịkọta ojiji kwa arịrịọ
+- `call_logs` — ndekọ zuru ezu kwa arịrịọ (n'okpuru oke ahịrị, lee n'okpuru)
+- `proxy_logs` — ndekọ okporo ụzọ proxy (n'okpuru oke ahịrị)
+- `request_detail_logs` — ndekọ arịrịọ zuru ezu nke ochie (a ka na-ehichapụ ya ma ọ bụrụ na ọ dị)
 
 ## Atụmatụ Nchekwa
 

@@ -8,78 +8,79 @@
 
 _Pēdējoreiz atjaunināts: 2026-06-28_
 
-## Kopsavilkums
+## Kopsavilkums vadībai
 
-OmniRoute ir vietējā AI maršrutēšanas vārteja un informācijas panelis, kas izveidots uz Next.js. Tas nodrošina vienu ar OpenAI saderīgu galapunktu (`/v1/*`) un maršrutē trafiku starp vairākiem augšupējiem pakalpojumu sniedzējiem, izmantojot tulkošanu, atkāpšanos, marķiera atsvaidzināšanu un lietojuma izsekošanu.
+OmniRoute ir lokāls AI maršrutēšanas vārtejas un informācijas paneļa risinājums, kas izveidots uz Next.js.
+Tas nodrošina vienu ar OpenAI saderīgu galapunktu (`/v1/*`) un maršrutē datplūsmu starp vairākiem augšupējiem pakalpojumu sniedzējiem, nodrošinot tulkošanu, atkāpšanās mehānismu, marķieru atsvaidzināšanu un lietojuma uzskaiti.
 
 Galvenās iespējas:
 
-- Ar OpenAI saderīga API virsma priekš CLI/tools (377 nodrošinātāji, 156 izpildītāja moduļi)
-- Request/response tulkojums starp pakalpojumu sniedzēju formātiem
-- Modeļa kombinācijas atkāpšanās (vairāku modeļu secība)
-- Strukturētas kombinētās darbības (`provider + model + connection`) ar izpildlaika secību pēc `compositeTiers`
-- Atkāpšanās konta līmenī (vairāki konti vienam pakalpojumu sniedzējam)
-- Kvotas pirmspārbaudes un kvotas P2C konta atlase galvenajā tērzēšanas ceļā
-- OAuth + API atslēgas nodrošinātāja savienojuma pārvaldība (27 OAuth nodrošinātāja moduļi)
-- Iegulšana, izmantojot `/v1/embeddings` (18 pakalpojumu sniedzēji)
-- Attēlu ģenerēšana, izmantojot `/v1/images/generations` (10 + nodrošinātāji, 20 + modeļi)
+- Ar OpenAI saderīga API virsma CLI/rīkiem (380 pakalpojumu sniedzēji, 159 izpildītāju moduļi)
+- Pieprasījumu/atbilžu tulkošana starp pakalpojumu sniedzēju formātiem
+- Modeļu kombināciju atkāpšanās mehānisms (vairāku modeļu secība)
+- Strukturēti kombināciju soļi (`provider + model + connection`) ar izpildes laikā veiktu secību, izmantojot `compositeTiers`
+- Konta līmeņa atkāpšanās mehānisms (vairāki konti katram pakalpojumu sniedzējam)
+- Kvotu priekšpārbaude un kvotu apzināta P2C konta atlase galvenajā tērzēšanas ceļā
+- OAuth un API atslēgu pakalpojumu sniedzēju savienojumu pārvaldība (27 OAuth pakalpojumu sniedzēju moduļi)
+- Iegulumu ģenerēšana, izmantojot `/v1/embeddings` (18 pakalpojumu sniedzēji)
+- Attēlu ģenerēšana, izmantojot `/v1/images/generations` (vairāk nekā 10 pakalpojumu sniedzēji, vairāk nekā 20 modeļi)
 - Audio transkripcija, izmantojot `/v1/audio/transcriptions` (18 pakalpojumu sniedzēji)
-- Teksta pārvēršana runā, izmantojot `/v1/audio/speech` (24 iebūvēti pakalpojumu sniedzēji)
+- Teksta pārveidošana runā, izmantojot `/v1/audio/speech` (24 iebūvētie pakalpojumu sniedzēji)
 - Video ģenerēšana, izmantojot `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Mūzikas ģenerēšana, izmantojot `/v1/music/generations` (ComfyUI)
 - Meklēšana tīmeklī, izmantojot `/v1/search` (20 pakalpojumu sniedzēji)
-- Moderēšana, izmantojot `/v1/moderations`
+- Moderācijas, izmantojot `/v1/moderations`
 - Pārkārtošana, izmantojot `/v1/rerank`
-- Padomājiet par tagu parsēšanu (`<think>...</think>`) argumentācijas modeļiem
-- Atbildes dezinfekcija stingrai OpenAI SDK saderībai
-- Lomas normalizēšana (izstrādātāja → sistēma, sistēmas → lietotājs) vairāku pakalpojumu sniedzēju saderībai
+- Think tagu parsēšana (`<think>...</think>`) spriešanas modeļiem
+- Atbilžu sanitizācija stingrai saderībai ar OpenAI SDK
+- Lomu normalizēšana (developer→system, system→user) saderībai starp pakalpojumu sniedzējiem
 - Strukturētās izvades konvertēšana (json_schema → Gemini responseSchema)
-- Vietējā noturība pakalpojumu sniedzējiem, atslēgas, aizstājvārdi, kombinācijas, iestatījumi, cenas (122 DB moduļi)
-- Usage/cost izsekošana un pieprasījumu reģistrēšana
-- Izvēles mākoņa sinhronizācija multi-device/state sinhronizācijai
-- IP allowlist/blocklist API piekļuves kontrolei
-- Domājoša budžeta vadība (passthrough/auto/custom/adaptive)
-- Globālās sistēmas tūlītēja injekcija
-- Sesijas izsekošana un pirkstu nospiedumu noņemšana
-- Uzlabots tarifu ierobežojums katram kontam ar pakalpojumu sniedzēja profiliem
-- Strāvas slēdža modelis nodrošinātāja noturībai
-- Ganāmpulka aizsardzība pret pērkonu ar mutex bloķēšanu
-- Uz parakstu balstīta pieprasījuma dedublikācijas kešatmiņa
-- Domēna slānis: izmaksu noteikumi, rezerves politika, bloķēšanas politika
-- Konteksta relejs: sesijas nodošanas kopsavilkumi konta rotācijas nepārtrauktībai
-- Domēna stāvokļa noturība (SQLite ierakstīšanas kešatmiņa atkāpšanās gadījumiem, budžetiem, bloķēšanām, slēdžiem)
-- Politikas dzinējs centralizētai pieprasījumu novērtēšanai (lockout → budget → rezerves)
-- Pieprasīt telemetriju ar p50/p95/p99 latentuma apkopošanu
-- Kombinētā mērķa telemetrija un vēsturiskā kombinētā mērķa veselība, izmantojot `combo_execution_key` / `combo_step_id`
-- Korelācija ID (X-Request-Id) pilnīgai izsekošanai
-- Atbilstības audita reģistrēšana ar atteikšanos no katras API atslēgas
-- Eval ietvars LLM kvalitātes nodrošināšanai
-- Veselības informācijas panelis ar reāllaika nodrošinātāja ķēdes pārtraucēja statusu
-- MCP serveris (110 rīki) ar 3 transportiem (stdio/SSE/Streamable HTTP)
-- A2A serveris (JSON-RPC 2.0 + SSE) ar prasmēm un uzdevumu dzīves ciklu
-- Atmiņas sistēma (izvilkšana, injekcija, izguve, apkopošana)
+- Lokāla pakalpojumu sniedzēju, atslēgu, aizstājvārdu, kombināciju, iestatījumu un cenu saglabāšana (122 DB moduļi)
+- Lietojuma un izmaksu uzskaite, kā arī pieprasījumu reģistrēšana
+- Neobligāta mākoņa sinhronizācija vairāku ierīču/stāvokļa sinhronizācijai
+- IP atļaušanas/aizliegšanas saraksts API piekļuves kontrolei
+- Domāšanas budžeta pārvaldība (caurplūde/automātiski/pielāgots/adaptīvs)
+- Globāla sistēmas uzvednes ievietošana
+- Sesiju izsekošana un pirkstu nospiedumu veidošana
+- Uzlabota ātruma ierobežošana katram kontam ar pakalpojumu sniedzējam specifiskiem profiliem
+- Automātiskā slēdža (circuit breaker) modelis pakalpojumu sniedzēju noturībai
+- Aizsardzība pret vienlaicīgu pieprasījumu pieplūdumu, izmantojot mutex bloķēšanu
+- Uz parakstu balstīta pieprasījumu deduplikācijas kešatmiņa
+- Domēna slānis: izmaksu noteikumi, atkāpšanās politika, bloķēšanas politika
+- Context Relay: sesiju nodošanas kopsavilkumi kontu rotācijas nepārtrauktībai
+- Domēna stāvokļa saglabāšana (SQLite write-through kešatmiņa atkāpšanās mehānismiem, budžetiem, bloķēšanām un automātiskajiem slēdžiem)
+- Politiku dzinis centralizētai pieprasījumu izvērtēšanai (bloķēšana → budžets → atkāpšanās)
+- Pieprasījumu telemetrija ar p50/p95/p99 latentuma apkopošanu
+- Kombināciju mērķu telemetrija un vēsturiskā kombināciju mērķu veselība, izmantojot `combo_execution_key` / `combo_step_id`
+- Korelācijas ID (X-Request-Id) pilna cikla izsekošanai
+- Atbilstības audita reģistrēšana ar iespēju atteikties katrai API atslēgai
+- Izvērtēšanas ietvars LLM kvalitātes nodrošināšanai
+- Veselības informācijas panelis ar pakalpojumu sniedzēju automātisko slēdžu statusu reāllaikā
+- MCP Server (110 rīki) ar 3 transportiem (stdio/SSE/Streamable HTTP)
+- A2A Server (JSON-RPC 2.0 + SSE) ar prasmēm un uzdevumu dzīves ciklu
+- Atmiņas sistēma (izvilkšana, ievietošana, izgūšana, apkopošana)
 - Prasmju sistēma (reģistrs, izpildītājs, smilškaste, iebūvētās prasmes)
 - MITM starpniekserveris ar sertifikātu pārvaldību un DNS apstrādi
-- Ātra injekcijas aizsarga starpprogrammatūra
-- Ātra saspiešanas konveijers ar Caveman, RTK, stacked konveijeriem, saspiešanas kombinācijām, valodu pakotnēm un analīzi
+- Starpprogrammatūra aizsardzībai pret uzvedņu ievadīšanu
+- Uzvedņu saspiešanas konveijers ar Caveman, RTK, sakārtotiem konveijeriem, saspiešanas kombinācijām, valodu pakotnēm un analītiku
 - ACP (Agent Communication Protocol) reģistrs
-- Moduļu OAuth nodrošinātāji (22 atsevišķi moduļi zem `src/lib/oauth/providers/`)
-- Uninstall/full-uninstall skripti
-- OAuth vides remonta darbība
+- Modulāri OAuth pakalpojumu sniedzēji (22 atsevišķi moduļi mapē `src/lib/oauth/providers/`)
+- Atinstalēšanas/pilnīgas atinstalēšanas skripti
+- OAuth vides labošanas darbība
 - WebSocket tilts ar OpenAI saderīgiem WS klientiem (`/v1/ws`)
-- Sinhronizācijas pilnvaru pārvaldība (issue/revoke, ETag versijas konfigurācijas komplekta lejupielāde)
-- GLM Thinking (`glmt`) pirmās klases nodrošinātāja iepriekšiestatījums
-- Hibrīda pilnvaru skaitīšana (pakalpojumu sniedzēja puses `/messages/count_tokens` ar aprēķinu atkāpšanos)
-- Modeļa aizstājvārda automātiskā iesēšana (30 + starpniekservera dialektu normalizēšana startēšanas laikā)
-- Droša izejošā ielāde ar SSRF aizsargu, privātu URL bloķēšanu un konfigurējamu atkārtotu mēģinājumu
-- Atkārtoti tērzēšanas mēģinājumi ar atdzišanu, izmantojot konfigurējamus `requestRetry` un `maxRetryIntervalSec`
+- Sinhronizācijas marķieru pārvaldība (izsniegšana/anulēšana, konfigurācijas pakotnes lejupielāde ar ETag versiju)
+- GLM Thinking (`glmt`) pirmās klases pakalpojumu sniedzēja priekšiestatījums
+- Hibrīda marķieru skaitīšana (pakalpojumu sniedzēja `/messages/count_tokens` ar atkāpšanos uz aplēsēm)
+- Automātiska modeļu aizstājvārdu sākotnējā aizpildīšana (vairāk nekā 30 starpniekserveru dialektu normalizācijas startēšanas laikā)
+- Droša izejošā izgūšana ar SSRF aizsardzību, privātu URL bloķēšanu un konfigurējamu atkārtotu mēģināšanu
+- Tērzēšanas atkārtoti mēģinājumi, kas ņem vērā atdzišanas periodu, ar konfigurējamiem `requestRetry` un `maxRetryIntervalSec`
 - Izpildlaika vides validācija ar Zod startēšanas laikā
-- Atbilstības audits v2 ar lappušu noteikšanu, pakalpojumu sniedzēja CRUD notikumiem un SSRF bloķētu validācijas reģistrēšanu
+- Atbilstības audita v2 ar lappušu dalīšanu, pakalpojumu sniedzēju CRUD notikumiem un SSRF bloķētas validācijas reģistrēšanu
 
 Primārais izpildlaika modelis:
 
-- Next.js lietotņu maršruti zem `src/app/api/*` ievieš gan informācijas paneli APIs, gan saderības APIs
-- Koplietots SSE/routing kodols pakalpojumā `src/sse/*` + `open-sse/*` nodrošina nodrošinātāja izpildi, tulkošanu, straumēšanu, atkāpšanos un lietošanu
+- Next.js lietotņu maršruti mapē `src/app/api/*` īsteno gan informācijas paneļa API, gan saderības API
+- Koplietots SSE/maršrutēšanas kodols mapēs `src/sse/*` + `open-sse/*` apstrādā pakalpojumu sniedzēju izpildi, tulkošanu, straumēšanu, atkāpšanās mehānismu un lietojumu
 
 ## Atsauces diagrammas
 
