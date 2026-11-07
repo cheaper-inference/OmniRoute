@@ -3,6 +3,18 @@
  * Pure data literal; re-exported by the providers.ts barrel. No behavior change.
  */
 export const SEARCH_PROVIDERS = {
+  "keenable-search": {
+    id: "keenable-search",
+    alias: "keenable",
+    name: "Keenable Search",
+    icon: "travel_explore",
+    color: "#3B82F6",
+    textIcon: "KE",
+    website: "https://keenable.ai",
+    hasFree: true,
+    authHint: "No API key required for the keyless public search endpoint",
+    serviceKinds: ["webSearch"],
+  },
   "perplexity-search": {
     id: "perplexity-search",
     serviceKinds: ["webSearch"],

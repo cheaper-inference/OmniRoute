@@ -52,8 +52,9 @@ test("v1 search GET lists all search providers", async () => {
 
   assert.equal(response.status, 200);
   assert.equal(body.object, "list");
-  assert.equal(body.data.length, 22);
+  assert.equal(body.data.length, 23);
   assert.deepEqual(ids, [
+    "keenable-search",
     "serper-search",
     "brave-search",
     "perplexity-search",
@@ -425,13 +426,54 @@ test("v1 search POST preserves stored SearXNG baseUrl for authless providers", a
   }
 });
 
-test("v1 search POST falls back to duckduckgo-free when no provider is configured (#11097)", async () => {
-  // Contract changed by PR #11097 ("fix(search): fall back to duckduckgo-free when
-  // no search provider is configured"): zero-credential /v1/search no longer returns
-  // 400 — it promotes the fallback-only duckduckgo-free provider so out-of-the-box
-  // search works. This test pins the NEW contract.
+test("v1 search POST selects keyless Keenable by default and returns results", async () => {
   const originalFetch = globalThis.fetch;
   let capturedUrl = "";
+  let capturedHeaders: Record<string, string> = {};
+  globalThis.fetch = async (url, init) => {
+    capturedUrl = String(url);
+    capturedHeaders = (init?.headers || {}) as Record<string, string>;
+    return new Response(
+      JSON.stringify({
+        query: "open source protocol",
+        results: [
+          {
+            title: "MCP",
+            url: "https://modelcontextprotocol.io",
+            snippet: "Official protocol",
+          },
+        ],
+      }),
+      { status: 200, headers: { "content-type": "application/json" } }
+    );
+  };
+  try {
+    const response = await searchRoute.POST(
+      new Request("http://localhost/api/v1/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: "open source protocol", search_type: "web" }),
+      })
+    );
+    const body = (await response.json()) as {
+      provider: string;
+      results: Array<{ title: string }>;
+    };
+    assert.equal(response.status, 200, JSON.stringify(body));
+    assert.equal(capturedUrl, "https://api.keenable.ai/v1/search/public");
+    assert.equal(capturedHeaders["X-Keenable-Title"], "OmniRoute");
+    assert.equal(body.provider, "keenable-search");
+    assert.equal(body.results[0].title, "MCP");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("v1 search POST uses Keenable first and falls back to DuckDuckGo when it fails", async () => {
+  // Keyless Keenable is the default; last-resort DuckDuckGo stays available if
+  // its public endpoint returns a retriable failure.
+  const originalFetch = globalThis.fetch;
+  const capturedUrls: string[] = [];
 
   // DuckDuckGo lite HTML shape: result link + snippet cell (see
   // open-sse/services/freeWebSearch.ts parseDuckDuckGoLite).
@@ -441,7 +483,10 @@ test("v1 search POST falls back to duckduckgo-free when no provider is configure
   </body></html>`;
 
   globalThis.fetch = async (url) => {
-    capturedUrl = String(url);
+    capturedUrls.push(String(url));
+    if (String(url) === "https://api.keenable.ai/v1/search/public") {
+      return new Response("temporary upstream failure", { status: 503 });
+    }
     return new Response(liteHtml, { status: 200, headers: { "content-type": "text/html" } });
   };
 
@@ -458,16 +503,70 @@ test("v1 search POST falls back to duckduckgo-free when no provider is configure
     );
     const body = (await response.json()) as any;
 
-    assert.equal(response.status, 200);
-    assert.equal(
-      capturedUrl,
+    assert.equal(response.status, 200, JSON.stringify({ capturedUrls, body }));
+    assert.deepEqual(capturedUrls, [
+      "https://api.keenable.ai/v1/search/public",
       "https://lite.duckduckgo.com/lite/",
-      "the fallback must call the DuckDuckGo lite endpoint"
-    );
+    ]);
     assert.equal(body.provider, "duckduckgo-free");
     assert.equal(body.results[0].title, "Auto-selected DuckDuckGo result");
     assert.equal(body.results[0].url, "https://example.com/auto-result");
   } finally {
     globalThis.fetch = originalFetch;
+  }
+});
+
+
+test("failover alternate selection skips operators-blocked providers", async () => {
+  const settingsDb = await import("../../src/lib/db/settings.ts");
+  await providersDb.createProviderConnection({
+    provider: "tavily-search",
+    authType: "apikey",
+    name: "tavily-keys",
+    apiKey: "tavily-key",
+    isActive: true,
+    testStatus: "active",
+    providerSpecificData: {},
+  });
+  await providersDb.createProviderConnection({
+    provider: "brave-search",
+    authType: "apikey",
+    name: "brave-keys",
+    apiKey: "brave-key",
+    isActive: true,
+    testStatus: "active",
+    providerSpecificData: {},
+  });
+  await settingsDb.updateSettings({ blockedProviders: ["tavily-search"] });
+
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (input) => {
+    const url = String(input);
+    // Primary default (Keenable) fails retriable so the failover alternate runs.
+    if (url.includes("keenable")) return new Response("keenable down", { status: 502 });
+    if (url.includes("tavily")) return new Response("tavily down", { status: 500 });
+    return new Response(
+      JSON.stringify({
+        web: { results: [{ title: "Brave hit", url: "https://example.com/brave" }] },
+        results: [{ title: "Brave hit", url: "https://example.com/brave" }],
+      }),
+      { status: 200, headers: { "content-type": "application/json" } }
+    );
+  };
+  try {
+    const response = await searchRoute.POST(
+      new Request("http://localhost/api/v1/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: "blocked failover probe", max_results: 5, search_type: "web" }),
+      })
+    );
+    const data = (await response.json()) as any;
+    assert.equal(response.status, 200);
+    assert.notEqual(data.provider, "tavily-search", "a blocked provider must never serve the query");
+    assert.equal(data.provider, "brave-search");
+  } finally {
+    globalThis.fetch = originalFetch;
+    await settingsDb.updateSettings({ blockedProviders: [] });
   }
 });

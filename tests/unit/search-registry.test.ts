@@ -20,6 +20,7 @@ const { computeCacheKey, getOrCoalesce, getCacheStats, SEARCH_CACHE_DEFAULT_TTL_
 // ─── Registry Tests ──────────────────────────────────────────
 
 test("SEARCH_PROVIDERS has all registered providers", () => {
+  assert.ok(SEARCH_PROVIDERS["keenable-search"], "keenable should exist");
   assert.ok(SEARCH_PROVIDERS["serper-search"], "serper should exist");
   assert.ok(SEARCH_PROVIDERS["brave-search"], "brave should exist");
   assert.ok(SEARCH_PROVIDERS["perplexity-search"], "perplexity-search should exist");
@@ -43,7 +44,7 @@ test("SEARCH_PROVIDERS has all registered providers", () => {
   // #11140: context7 provides library-docs search
   assert.ok(SEARCH_PROVIDERS["context7"], "context7 should exist");
   assert.ok(SEARCH_PROVIDERS["parallel-search"], "parallel-search should exist");
-  assert.equal(Object.keys(SEARCH_PROVIDERS).length, 22);
+  assert.equal(Object.keys(SEARCH_PROVIDERS).length, 23);
 });
 
 test("duckduckgo-free config is a no-key, fallback-only provider", () => {
@@ -177,7 +178,7 @@ test("zai-search config is correct", () => {
 
 test("getAllSearchProviders returns flat list", () => {
   const all = getAllSearchProviders();
-  assert.equal(all.length, 22);
+  assert.equal(all.length, 23);
   assert.ok(all.some((p) => p.id === "parallel-search"));
   assert.ok(all.some((p) => p.id === "duckduckgo-free"));
   assert.ok(all.some((p) => p.id === "jina-search"));
@@ -215,10 +216,10 @@ test("selectProvider with unknown provider returns null", () => {
   assert.equal(selectProvider("unknown"), null);
 });
 
-test("selectProvider without argument returns cheapest provider", () => {
+test("selectProvider without argument returns default Keenable provider", () => {
   const config = selectProvider();
   assert.ok(config);
-  assert.notEqual(config.id, "searxng-search");
+  assert.equal(config.id, "keenable-search");
 });
 
 test("selectProvider auto-selection never returns a fallbackOnly provider", () => {

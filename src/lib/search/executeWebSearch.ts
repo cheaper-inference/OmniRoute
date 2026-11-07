@@ -134,6 +134,9 @@ export async function executeWebSearch(
   if (input.provider === "anysearch" || input.provider === "anysearch_search") {
     input.provider = "anysearch-search";
   }
+  if (input.provider === "keenable" || input.provider === "keenable_search") {
+    input.provider = "keenable-search";
+  }
   if (input.provider === "x-search" || input.provider === "xquik-search") input.search_type = "x";
   const searchType = input.search_type || "web";
 
