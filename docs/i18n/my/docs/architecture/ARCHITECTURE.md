@@ -8,78 +8,79 @@
 
 _နောက်ဆုံးအပ်ဒိတ်လုပ်ထားသည့်ရက်: 2026-06-28_
 
-## စီမံကိန်း၏အဓိကအချက်အလက်များ
+## အုပ်ချုပ်ရေးအကျဉ်းချုပ်
 
-OmniRoute သည် Next.js ပေါ်တွင် တည်ဆောက်ထားသော ဒေသဆိုင်ရာ AI လမ်းကြောင်းနှင့် ဒက်ရှ်ဘုတ်တစ်ခုဖြစ်သည်။ ၎င်းသည် OpenAI-သဟဇာတရှိသော အဆုံးမှတ် (`/v1/*`) တစ်ခုတည်းကို ပံ့ပိုးပေးပြီး ဘာသာပြန်ခြင်း၊ တုံ့ပြန်ခြင်း၊ တိုကင်အသစ်ပြန်လည်ဆန်းသစ်ခြင်းနှင့် အသုံးပြုမှုခြေရာခံခြင်းတို့ဖြင့် ရေစီးကြောင်းဝန်ဆောင်မှုပေးသူအများအပြားကို လမ်းကြောင်းပေးသည်။
+OmniRoute သည် Next.js ပေါ်တွင် တည်ဆောက်ထားသော local AI routing gateway နှင့် dashboard ဖြစ်သည်။
+၎င်းသည် OpenAI-compatible endpoint တစ်ခု (`/v1/*`) ကို ပံ့ပိုးပေးပြီး translation၊ fallback၊ token refresh နှင့် အသုံးပြုမှုခြေရာခံခြင်းတို့ဖြင့် upstream provider အများအပြားအကြား traffic ကို လမ်းကြောင်းခွဲပေးသည်။
 
-ပင်မစွမ်းရည်များ-
+အဓိကလုပ်ဆောင်နိုင်စွမ်းများ -
 
-- CLI/tools အတွက် OpenAI-သဟဇာတဖြစ်သော API မျက်နှာပြင် (377 ဝန်ဆောင်မှုပေးသူ၊ 156 executor modules)
-- ပံ့ပိုးသူဖော်မတ်များမှတဆင့်Request/response ဘာသာပြန်ဆိုချက်
-- မော်ဒယ်ပေါင်းစည်းမှု နောက်ပြန်ဆုတ်ခြင်း (မော်ဒယ်လ်အစုံ)
-- `compositeTiers` ဖြင့် runtime အစီအစဉ်ဖြင့် ဖွဲ့စည်းထားသော ပေါင်းစပ်အဆင့်များ (`provider + model + connection`)
-- အကောင့်အဆင့် လှည့်ပြန်ခြင်း (ပံ့ပိုးသူ တစ်ဦးလျှင် အကောင့်များစွာ)
-- ပင်မချတ်လမ်းကြောင်းရှိ Quota preflight နှင့် quota-aware P2C အကောင့်ရွေးချယ်ခြင်း။
-- OAuth + API-သော့ပံ့ပိုးပေးသူချိတ်ဆက်မှုစီမံခန့်ခွဲမှု (27 OAuth ပံ့ပိုးပေးသူ modules)
-- `/v1/embeddings` (ဝန်ဆောင်မှုပေးသူ 18 ခု) မှတစ်ဆင့် မျိုးဆက်ကို မြှုပ်နှံထားသည်
-- `/v1/images/generations` မှတစ်ဆင့် ပုံထုတ်လုပ်ခြင်း (10 + ပံ့ပိုးပေးသူများ၊ 20 + မော်ဒယ်များ)
-- `/v1/audio/transcriptions` (ဝန်ဆောင်မှုပေးသူ 18 ဦး) မှတစ်ဆင့် အသံမှတ်တမ်းယူခြင်း
-- `/v1/audio/speech` (24 built-in ပံ့ပိုးပေးသူများ) မှတဆင့် စာသားမှစကားပြောခြင်း
-- `/v1/videos/generations` မှတဆင့်ဗီဒီယိုမျိုးဆက် (ComfyUI + SD WebUI)
-- `/v1/music/generations` (ComfyUI) မှတဆင့်ဂီတမျိုးဆက်
-- `/v1/search` (ပံ့ပိုးပေးသူ 20) မှတစ်ဆင့် ဝဘ်ရှာဖွေမှု
-- `/v1/moderations` မှတစ်ဆင့် ထိန်းညှိမှုများ
-- `/v1/rerank` မှတစ်ဆင့် အဆင့်သတ်မှတ်ခြင်း
-- ကျိုးကြောင်းဆင်ခြင်ခြင်းပုံစံများအတွက် tag parsing (`<think>...</think>`) ကိုစဉ်းစားပါ။
-- တင်းကျပ်သော OpenAI SDK လိုက်ဖက်ညီမှုအတွက် တုံ့ပြန်မှုသန့်ရှင်းရေး
-- ဝန်ဆောင်မှုပေးသူအချင်းချင်း လိုက်ဖက်ညီမှုအတွက် အခန်းကဏ္ဍပုံမှန်ဖြစ်စေခြင်း (ဆော့ဖ်ဝဲအင်ဂျင်နီယာ→ စနစ်၊ စနစ်→ အသုံးပြုသူ)
-- ဖွဲ့စည်းတည်ဆောက်ထားသော အထွက်နှုန်းပြောင်းလဲခြင်း (json_schema → Gemini responseSchema)
-- ဝန်ဆောင်မှုပေးသူများ၊ သော့များ၊ နာမည်တူများ၊ ပေါင်းစပ်မှုများ၊ ဆက်တင်များ၊ ဈေးနှုန်းများ (122 DB modules)
-- Usage/cost ခြေရာခံခြင်းနှင့် သစ်ခုတ်ခြင်းတောင်းဆိုခြင်း။
-- multi-device/state ထပ်တူပြုခြင်းအတွက် ရွေးချယ်နိုင်သော cloud ထပ်တူပြုခြင်း။
-- API ဝင်ရောက်ထိန်းချုပ်မှုအတွက်IP allowlist/blocklist
-- တွေးခေါ်ဘတ်ဂျက်စီမံခန့်ခွဲမှု (passthrough/auto/custom/adaptive)
-- ကမ္ဘာလုံးဆိုင်ရာစနစ်မျာ ထိုးဆေး
-- ဆက်ရှင်ခြေရာခံခြင်းနှင့် လက်ဗွေနှိပ်ခြင်း။
-- ဝန်ဆောင်မှုပေးသူ သီးသန့်ပရိုဖိုင်များဖြင့် အကောင့်တစ်ခုချင်းတိုးနှုန်း ကန့်သတ်ချက်
-- ပံ့ပိုးပေးသူ ခံနိုင်ရည်ရှိမှုအတွက် circuit breaker ပုံစံ
-- mutex လော့ခ်ချခြင်းဖြင့် မိုးခြိမ်းသံဆန့်ကျင်သော နွားများကို အကာအကွယ်ပေးသည်။
-- လက်မှတ်အခြေခံ တောင်းဆိုချက် ထုတ်ယူမှု ကက်ရှ်
-- ဒိုမိန်းအလွှာ- ကုန်ကျစရိတ်စည်းမျဉ်းများ၊ နောက်ပြန်ဆွဲမူဝါဒ၊ လော့ခ်ချမှုမူဝါဒ
-- Context Relay- အကောင့်လည်ပတ်မှုအဆက်မပြတ်အတွက် ဆက်ရှင်လက်လွှဲမှု အနှစ်ချုပ်
-- Domain state မြဲမြံမှု (နောက်ပြန်ဆုတ်မှုများအတွက်SQLite ကက်ရှ်မှတဆင့် စာရေးခြင်း၊ ဘတ်ဂျက်များ၊ လော့ခ်ချမှုများ၊ circuit breakers)
-- ဗဟိုမှတောင်းဆိုမှုအကဲဖြတ်ခြင်းအတွက် မူဝါဒအင်ဂျင် ( → ဘတ်ဂျက် → ဆုတ်ယုတ်မှု)
-- p50/p95/p99 latency စုစည်းမှုဖြင့် telemetry ကိုတောင်းဆိုပါ။
-- ပေါင်းစပ်ပစ်မှတ် telemetry နှင့် `combo_execution_key` / `combo_step_id` မှတဆင့် သမိုင်းဝင် ပေါင်းစပ်ပစ်မှတ် ကျန်းမာရေး
-- အဆုံးမှအဆုံး ခြေရာခံခြင်းအတွက် ဆက်စပ် ID (X-Request-Id)
-- API သော့တစ်ခုလျှင် ဖယ်ထုတ်ခြင်းဖြင့် လိုက်နာမှု စာရင်းစစ်မှတ်တမ်း
-- LLM အရည်အသွေးအာမခံမှုအတွက် Eval မူဘောင်
-- အချိန်နှင့်တစ်ပြေးညီ ပံ့ပိုးပေးသူ circuit breaker အနေအထားပါရှိသော ကျန်းမာရေး ဒက်ရှ်ဘုတ်
-- ပို့ဆောင်မှု 3 ခု (stdio/SSE/Streamable HTTP) ပါသောMCP ဆာဗာ (ကိရိယာ 110)
-- ကျွမ်းကျင်မှုနှင့် အလုပ်သက်တမ်းစက်ဝန်းပါရှိသောA2A ဆာဗာ (JSON-RPC 2.0 + SSE)
-- မှတ်ဉာဏ်စနစ် (ထုတ်ယူခြင်း၊ ဆေးထိုးခြင်း၊ ပြန်လည်ထုတ်ယူခြင်း၊ အကျဉ်းချုပ်)
-- ကျွမ်းကျင်မှုစနစ် (registry၊ executor၊ sandbox၊ built-in ကျွမ်းကျင်မှုများ)
-- လက်မှတ်စီမံခန့်ခွဲမှုနှင့် DNS ကိုင်တွယ်မှုနှင့်အတူMITM proxy
-- Injection guard Middleware ကို အချက်ပြပါ။
-- Caveman၊ RTK၊ စုထားသောပိုက်လိုင်းများ၊ compression combos၊ language packs နှင့် ခွဲခြမ်းစိတ်ဖြာချက်များဖြင့် အချက်ပြခြင်း
-- ACP (Agent Communication Protocol) မှတ်ပုံတင်ခြင်း
-- Modular OAuth ပံ့ပိုးပေးသူများ ( `src/lib/oauth/providers/` အောက်တွင် တစ်ဦးချင်းစီ module 22 ခု)
-- Uninstall/full-uninstall ဇာတ်ညွှန်းများ
-- OAuth ပတ်ဝန်းကျင် ပြုပြင်ခြင်း လုပ်ဆောင်ချက်
-- OpenAI-သဟဇာတ WS clients (`/v1/ws`) အတွက်WebSocket တံတား
-- စင့်ခ်လုပ်ရန် တိုကင်စီမံခန့်ခွဲမှု (issue/revoke၊ ETag-ဗားရှင်းဖြင့် ပြုပြင်ထားသော အစုအဝေးကို ဒေါင်းလုဒ်လုပ်ခြင်း)
-- GLM Thinking (`glmt`) ပထမတန်းစားပံ့ပိုးပေးသူ ကြိုတင်သတ်မှတ်မှု
-- စပ်ဟပ်တိုကင်ရေတွက်ခြင်း (ခန့်မှန်းခြေပြန်ပြောင်းနှင့်အတူ ပံ့ပိုးသူဘက်မှ `/messages/count_tokens` )
-- မော်ဒယ်အမည်များ အလိုအလျောက်မျိုးစေ့ချခြင်း (စတင်ချိန်တွင် 30 + အပြန်အလှန် ပရောက်စီ ဒေသိယစကား ပုံမှန်ပြုလုပ်ခြင်း)
-- SSRF အစောင့်၊ သီးသန့် URL ပိတ်ဆို့ခြင်း၊ နှင့် ပြင်ဆင်သတ်မှတ်နိုင်သော ထပ်စမ်းခြင်းတို့ဖြင့် ဘေးကင်းသော အပြင်သို့ ထုတ်ယူပါ။
-- Cooldown-aware chat သည် configureable `requestRetry` နှင့် `maxRetryIntervalSec` ဖြင့် ပြန်ကြိုးစားသည်။
-- စတင်ချိန်တွင် Zod ဖြင့် runtime ပတ်ဝန်းကျင် validation
-- pagination၊ ပံ့ပိုးပေးသူ CRUD ဖြစ်ရပ်များနှင့် SSRF-ပိတ်ဆို့ထားသော တရားဝင်အထောက်အထားမှတ်တမ်းနှင့်အတူ လိုက်နာမှုစာရင်းစစ် v2
+- CLI/tools များအတွက် OpenAI-compatible API surface (provider 380 ခု၊ executor module 159 ခု)
+- Provider format များအကြား request/response translation
+- Model combo fallback (model အများအပြားပါဝင်သော sequence)
+- Structured combo steps (`provider + model + connection`) နှင့် `compositeTiers` အားဖြင့် runtime ordering
+- Account-level fallback (provider တစ်ခုလျှင် account အများအပြား)
+- Main chat path တွင် quota preflight နှင့် quota-aware P2C account selection
+- OAuth + API-key provider connection စီမံခန့်ခွဲမှု (OAuth provider module 27 ခု)
+- `/v1/embeddings` မှတစ်ဆင့် embedding ထုတ်လုပ်ခြင်း (provider 18 ခု)
+- `/v1/images/generations` မှတစ်ဆင့် ပုံထုတ်လုပ်ခြင်း (provider 10+ ခု၊ model 20+ ခု)
+- `/v1/audio/transcriptions` မှတစ်ဆင့် အသံမှတ်တမ်းပြန်ရေးခြင်း (provider 18 ခု)
+- `/v1/audio/speech` မှတစ်ဆင့် text-to-speech (built-in provider 24 ခု)
+- `/v1/videos/generations` မှတစ်ဆင့် video ထုတ်လုပ်ခြင်း (ComfyUI + SD WebUI)
+- `/v1/music/generations` မှတစ်ဆင့် music ထုတ်လုပ်ခြင်း (ComfyUI)
+- `/v1/search` မှတစ်ဆင့် web search (provider 20 ခု)
+- `/v1/moderations` မှတစ်ဆင့် moderation များ
+- `/v1/rerank` မှတစ်ဆင့် reranking
+- Reasoning model များအတွက် think tag parsing (`<think>...</think>`)
+- Strict OpenAI SDK compatibility အတွက် response sanitization
+- Cross-provider compatibility အတွက် role normalization (developer→system၊ system→user)
+- Structured output conversion (json_schema → Gemini responseSchema)
+- Provider များ၊ key များ၊ alias များ၊ combo များ၊ setting များနှင့် pricing များအတွက် local persistence (DB module 122 ခု)
+- Usage/cost tracking နှင့် request logging
+- Multi-device/state sync အတွက် ရွေးချယ်အသုံးပြုနိုင်သော cloud sync
+- API access control အတွက် IP allowlist/blocklist
+- Thinking budget စီမံခန့်ခွဲမှု (passthrough/auto/custom/adaptive)
+- Global system prompt injection
+- Session tracking နှင့် fingerprinting
+- Provider-specific profile များဖြင့် account တစ်ခုချင်းစီအလိုက် enhanced rate limiting
+- Provider resilience အတွက် circuit breaker pattern
+- Mutex locking ဖြင့် anti-thundering herd ကာကွယ်မှု
+- Signature-based request deduplication cache
+- Domain layer: cost rules၊ fallback policy၊ lockout policy
+- Context Relay: account rotation ဆက်လက်လုပ်ဆောင်နိုင်ရန် session handoff summaries
+- Domain state persistence (fallback များ၊ budget များ၊ lockout များနှင့် circuit breaker များအတွက် SQLite write-through cache)
+- ဗဟိုပြု request evaluation အတွက် policy engine (lockout → budget → fallback)
+- p50/p95/p99 latency aggregation ပါဝင်သော request telemetry
+- `combo_execution_key` / `combo_step_id` မှတစ်ဆင့် combo target telemetry နှင့် ယခင် combo target health
+- End-to-end tracing အတွက် Correlation ID (X-Request-Id)
+- API key တစ်ခုချင်းစီအလိုက် opt-out ပြုလုပ်နိုင်သော compliance audit logging
+- LLM quality assurance အတွက် eval framework
+- Real-time provider circuit breaker status ပါဝင်သော health dashboard
+- MCP Server (tool 110 ခု) နှင့် transport 3 မျိုး (stdio/SSE/Streamable HTTP)
+- Skills နှင့် task lifecycle ပါဝင်သော A2A Server (JSON-RPC 2.0 + SSE)
+- Memory system (extraction၊ injection၊ retrieval၊ summarization)
+- Skills system (registry၊ executor၊ sandbox၊ built-in skills)
+- Certificate management နှင့် DNS handling ပါဝင်သော MITM proxy
+- Prompt injection guard middleware
+- Caveman၊ RTK၊ stacked pipelines၊ compression combos၊ language packs နှင့် analytics ပါဝင်သော prompt compression pipeline
+- ACP (Agent Communication Protocol) registry
+- Modular OAuth provider များ (`src/lib/oauth/providers/` အောက်ရှိ individual module 22 ခု)
+- Uninstall/full-uninstall script များ
+- OAuth environment repair action
+- OpenAI-compatible WS client များအတွက် WebSocket bridge (`/v1/ws`)
+- Sync token စီမံခန့်ခွဲမှု (issue/revoke၊ ETag-versioned config bundle download)
+- GLM Thinking (`glmt`) first-class provider preset
+- Hybrid token counting (provider-side `/messages/count_tokens` နှင့် estimation fallback)
+- Model alias auto-seeding (startup အချိန်တွင် cross-proxy dialect normalization 30+ ခု)
+- SSRF guard၊ private URL blocking နှင့် configurable retry ပါဝင်သော safe outbound fetch
+- Configurable `requestRetry` နှင့် `maxRetryIntervalSec` ပါဝင်သော cooldown-aware chat retries
+- Startup တွင် Zod ဖြင့် runtime environment validation
+- Pagination၊ provider CRUD event များနှင့် SSRF-blocked validation logging ပါဝင်သော compliance audit v2
 
-အဓိက runtime မော်ဒယ်-
+အဓိက runtime model -
 
-- `src/app/api/*` အောက်တွင်Next.js အက်ပ်လမ်းကြောင်းများကို ဒက်ရှ်ဘုတ် APIs နှင့် လိုက်ဖက်ညီသော APIs နှစ်ခုလုံးကို အကောင်အထည်ဖော်ပါ။
-- `src/sse/*` + `open-sse/*` ရှိ မျှဝေထားသော SSE/routing core သည် ဝန်ဆောင်မှုပေးသူကို စီမံဆောင်ရွက်ခြင်း၊ ဘာသာပြန်ဆိုခြင်း၊ တိုက်ရိုက်လွှင့်ခြင်း၊ လှည့်စားခြင်းနှင့် အသုံးပြုခြင်းကို ဆောင်ရွက်ပေးသည်
+- `src/app/api/*` အောက်ရှိ Next.js app routes များသည် dashboard API များနှင့် compatibility API များကို နှစ်မျိုးလုံး အကောင်အထည်ဖော်ပေးသည်
+- `src/sse/*` + `open-sse/*` ရှိ shared SSE/routing core သည် provider execution၊ translation၊ streaming၊ fallback နှင့် usage တို့ကို ကိုင်တွယ်ပေးသည်
 
 ## ကိုးကားပုံကြမ်းများ
 
