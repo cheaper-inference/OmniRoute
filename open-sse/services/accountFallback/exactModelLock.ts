@@ -20,7 +20,7 @@ import { resolveAntigravityModelId } from "../../config/antigravityModelAliases.
  * cooldown on one tier then covers its siblings too, the same collapse the account lease makes
  * in `canonicalizeAntigravityExactModel`.
  */
-function canonicalizeExactModel(provider: string, model: string): string {
+export function canonicalizeExactModel(provider: string, model: string): string {
   const normalized = model.trim().toLowerCase();
   if (provider === "antigravity" || provider === "agy" || provider === "ag") {
     const bareModel = normalized.replace(/^(?:antigravity|ag|agy)\//, "");

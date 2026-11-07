@@ -10,6 +10,7 @@ import {
   lockExactModel,
   recordModelLockoutFailure,
 } from "../../open-sse/services/accountFallback.ts";
+import { clearModelUnavailability } from "../../src/domain/modelAvailability.ts";
 
 test.afterEach(() => clearAllModelLockouts());
 
@@ -67,6 +68,30 @@ test("an exact lockout follows the model across its Antigravity display and wire
     assert.equal(isModelLocked("antigravity", "account-1", display), true, upstream);
     assert.equal(clearModelLock("antigravity", "account-1", display), true, upstream);
   }
+});
+
+test("unblocking a model by any Antigravity id clears its exact lockout", () => {
+  for (const [locked, requested] of [
+    ["gemini-3.8-flash", "gemini-3.8-flash"],
+    ["gemini-3.8-flash", "gemini-3.8-flash-high"],
+    ["gemini-3.8-flash-high", "gemini-3.8-flash"],
+    ["gemini-3.8-flash", "agy/gemini-3.8-flash"],
+    ["gemini-3.1-pro-high", "gemini-3.1-pro-high"],
+  ]) {
+    lockExactModel("antigravity", "account-1", locked, "server_error", 60_000);
+    lockExactModel("antigravity", "account-2", locked, "server_error", 60_000);
+
+    assert.equal(clearModelUnavailability("antigravity", requested), true, requested);
+    assert.equal(isModelLocked("antigravity", "account-1", locked), false, requested);
+    assert.equal(isModelLocked("antigravity", "account-2", locked), false, requested);
+  }
+});
+
+test("unblocking one Antigravity model leaves a different tier locked", () => {
+  lockExactModel("antigravity", "account-1", "gemini-3.8-flash-low", "server_error", 60_000);
+
+  assert.equal(clearModelUnavailability("antigravity", "gemini-3.8-flash"), false);
+  assert.equal(isModelLocked("antigravity", "account-1", "gemini-3.8-flash-low"), true);
 });
 
 test("repeated failures escalate one cooldown across Antigravity aliases", () => {
