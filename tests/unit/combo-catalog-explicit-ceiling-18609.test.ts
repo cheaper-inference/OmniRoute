@@ -6,8 +6,8 @@ import path from "node:path";
 
 // #18609 characterization: an operator-set combo `context_length` is a ceiling for the
 // advertised `max_input_tokens`, never a raise above a member's own confirmed cap. A
-// member that only resolves to its provider's registry default (codex 400K) still bounds
-// the combo; an exact per-model capability override on that member is honoured.
+// member without catalog limit evidence must not inherit the registry's 400K default.
+// Exact per-model capability overrides on that member remain authoritative.
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-18609-combo-ceiling-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.API_KEY_SECRET ||= "combo-ceiling-18609-secret";
@@ -72,7 +72,7 @@ test.before(async () => {
       "claude/claude-opus-4-7",
       "glm/glm-5.2",
       "codex/gpt-6.1-sol-xhigh",
-      "codex/gpt-6.1-terra-xhigh",
+      "codex/gpt-6.1-uncataloged-xhigh",
     ],
   });
 });
@@ -82,12 +82,12 @@ test.after(() => {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
-test("#18609: fixture matches the issue (sol 872K in catalog, terra uncataloged, codex default 400K)", () => {
+test("#18609: fixture matches the issue (sol 872K in catalog, synced-only model uncataloged, codex default 400K)", () => {
   assert.equal(GPT_5_6_CODEX_CAPABILITIES.maxInputTokens, 872000);
   assert.equal(REGISTRY.codex?.defaultContextLength, 400000);
   const ids = new Set((REGISTRY.codex?.models ?? []).map((m: { id: string }) => m.id));
   assert.ok(ids.has("gpt-6.1-sol-xhigh"), "sol-xhigh is a confirmed catalog member");
-  assert.equal(ids.has("gpt-6.1-terra-xhigh"), false, "terra-xhigh has no catalog entry");
+  assert.equal(ids.has("gpt-6.1-uncataloged-xhigh"), false, "test model has no catalog entry");
 });
 
 test("#18609: explicit 1M context_length is a ceiling; an uncataloged member with no limit evidence is dropped from min() (combo bounded by sol 872K)", async () => {
@@ -96,7 +96,7 @@ test("#18609: explicit 1M context_length is a ceiling; an uncataloged member wit
   assert.equal(
     combo.max_input_tokens,
     872000,
-    "sol-xhigh's confirmed 872K catalog cap bounds the combo; terra (no evidence) must not pull min() to the 400K codex default"
+    "sol-xhigh's confirmed 872K catalog cap bounds the combo; uncataloged model (no evidence) must not pull min() to the 400K codex default"
   );
 });
 
@@ -104,10 +104,10 @@ test("#18609: the same combo once the codex connection has a synced model list (
   const codex = (await providersDb.getProviderConnections()).find((c) => c.provider === "codex");
   assert.ok(codex, "codex connection exists");
   const codexId = codex.id as string;
-  // The OAuth /codex/models sync lists the model but carries no limits — like the reporter's terra row.
+  // The OAuth /codex/models sync lists the model but carries no limits — like the reporter's previously uncataloged row.
   await modelsDb.replaceSyncedAvailableModelsForConnection("codex", codexId, [
     { id: "gpt-6.1-sol-xhigh", name: "GPT 6.1 Sol (xHigh)", source: "imported" },
-    { id: "gpt-6.1-terra-xhigh", name: "GPT 6.1 Terra (xHigh)", source: "imported" },
+    { id: "gpt-6.1-uncataloged-xhigh", name: "Synced-only uncataloged model", source: "imported" },
   ]);
   try {
     const combo = await fetchCombo("combo-18609");
@@ -128,7 +128,7 @@ test("#18609: an operator CONTEXT_LENGTH_<PROVIDER> cap is limit evidence for a 
   const codexId = codex.id as string;
   await modelsDb.replaceSyncedAvailableModelsForConnection("codex", codexId, [
     { id: "gpt-6.1-sol-xhigh", name: "GPT 6.1 Sol (xHigh)", source: "imported" },
-    { id: "gpt-6.1-terra-xhigh", name: "GPT 6.1 Terra (xHigh)", source: "imported" },
+    { id: "gpt-6.1-uncataloged-xhigh", name: "Synced-only uncataloged model", source: "imported" },
   ]);
   const previous = process.env.CONTEXT_LENGTH_CODEX;
   process.env.CONTEXT_LENGTH_CODEX = "500000";
@@ -147,7 +147,7 @@ test("#18609: an operator CONTEXT_LENGTH_<PROVIDER> cap is limit evidence for a 
 });
 
 test("#18609: an exact override on the uncataloged member lifts the combo only to the next confirmed cap (sol 872K)", async () => {
-  setOverrides("gpt-6.1-terra-xhigh");
+  setOverrides("gpt-6.1-uncataloged-xhigh");
   try {
     const combo = await fetchCombo("combo-18609");
     assert.equal(combo.context_length, 1000000);
@@ -157,17 +157,17 @@ test("#18609: an exact override on the uncataloged member lifts the combo only t
       "sol-xhigh's confirmed 872K catalog cap must still bound the combo; the explicit 1M does not raise it"
     );
   } finally {
-    clearOverrides("gpt-6.1-terra-xhigh");
+    clearOverrides("gpt-6.1-uncataloged-xhigh");
   }
 });
 
 test("#18609: overriding both codex members to 1M advertises 1M (the reporter's deployed workaround)", async () => {
-  for (const model of ["gpt-6.1-terra-xhigh", "gpt-6.1-sol-xhigh"]) setOverrides(model);
+  for (const model of ["gpt-6.1-uncataloged-xhigh", "gpt-6.1-sol-xhigh"]) setOverrides(model);
   try {
     const combo = await fetchCombo("combo-18609");
     assert.equal(combo.context_length, 1000000);
     assert.equal(combo.max_input_tokens, 1000000);
   } finally {
-    for (const model of ["gpt-6.1-terra-xhigh", "gpt-6.1-sol-xhigh"]) clearOverrides(model);
+    for (const model of ["gpt-6.1-uncataloged-xhigh", "gpt-6.1-sol-xhigh"]) clearOverrides(model);
   }
 });
