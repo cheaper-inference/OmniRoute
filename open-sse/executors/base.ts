@@ -890,7 +890,7 @@ export class BaseExecutor {
     let reasoningEffortClamped = false; // reasoning_effort 4xx clamp-and-retry below.
     let maxTokensCeilingRecovered = false; // max_tokens ceiling 400 clamp-and-retry below.
     let advisorResultsReplaced = false;
-    const applyCopilotIdentityFallback = createCopilotIdentityFallback(this.provider, log);
+    const copilotIdentity = createCopilotIdentityFallback(this.provider, log);
 
     for (let urlIndex = 0; urlIndex < fallbackCount; urlIndex++) {
       const requestCredentials = withForcedResponsesUpstream(
@@ -1559,6 +1559,7 @@ export class BaseExecutor {
             });
           }
         }
+        copilotIdentity.pin(finalHeaders);
         const fetchOptions: RequestInit = {
           method: "POST",
           headers: finalHeaders,
@@ -1589,13 +1590,14 @@ export class BaseExecutor {
           correctFromRateLimitHeaders(openrouterFreeWindowAccountKey, response.headers);
         }
 
-        ({ response, finalHeaders } = await applyCopilotIdentityFallback({
+        ({ response, finalHeaders } = await copilotIdentity.apply({
           response,
           url,
           fetchOptions,
           clientHeaders,
           fetchWithStartTimeout,
         }));
+        fetchOptions.headers = finalHeaders; // later recoveries reuse fetchOptions
 
         // Context Editing 400-fallback for Claude-compatible relays.
         if (
