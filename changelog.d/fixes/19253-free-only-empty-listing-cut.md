@@ -1,0 +1,1 @@
+- **fix(providers):** a free-only connection whose provider lists no free model no longer keeps the paid models a refresh cached as callable; the sync now stores the empty free set it already reported (#19253)
