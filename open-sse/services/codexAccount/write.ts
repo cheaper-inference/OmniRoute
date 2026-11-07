@@ -16,13 +16,15 @@ export async function persistCodexChildCooldown(params: {
   connectionId: string;
   model: string;
   rateLimitedUntil: string;
+  source?: "fallback" | "quota_preflight";
 }): Promise<PersistCodexChildCooldownResult | null> {
   if (params.model.trim().length === 0) return null;
   const scope = getCodexModelScope(params.model);
   const providerSpecificData = await updateCodexScopeCooldown(
     params.connectionId,
     scope,
-    params.rateLimitedUntil
+    params.rateLimitedUntil,
+    params.source
   );
   return providerSpecificData ? { scope, providerSpecificData } : null;
 }
