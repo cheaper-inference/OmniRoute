@@ -235,7 +235,16 @@ function useRedeemCodexResetCredit(state: ResetCreditRequestState) {
         }));
         state.setResetCreditPicker(null);
         resetIdempotencyKey(state.idempotencyKeysRef, picker.connectionId, selectionToken);
-        notify.success(state.tr("resetCreditRedeemed", "Reset redeemed"));
+        if (data.outcome === "alreadyRedeemed") {
+          notify.info(
+            state.tr(
+              "resetCreditAlreadyRedeemed",
+              "This credit was already redeemed. No new reset was applied."
+            )
+          );
+        } else {
+          notify.success(state.tr("resetCreditRedeemed", "Reset redeemed"));
+        }
       } catch (error) {
         const message = getRequestErrorMessage(
           error,

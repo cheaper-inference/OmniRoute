@@ -24,6 +24,7 @@ import { getCodexEffectiveServiceTier } from "@/lib/providers/codexFastTier";
 import { normalizeCodexLimitPolicy, providerText } from "../providerPageHelpers";
 import { getCodexPlanLabel } from "../codexPlanLabel";
 import CodexAccountDetails from "./CodexAccountDetails";
+import CodexOperationalRow from "./CodexOperationalRow";
 import ConnectionQuotaPanel from "./ConnectionQuotaPanel";
 import ConnectionIdChip from "./ConnectionIdChip";
 import {
@@ -87,7 +88,19 @@ function CooldownTimer({ until }: CooldownTimerProps) {
 // ConnectionRow
 // ---------------------------------------------------------------------------
 
-export default function ConnectionRow({
+export default function ConnectionRow(props: ConnectionRowProps) {
+  if (props.isCodex) {
+    return (
+      <CodexOperationalRow {...props}>
+        <ConnectionRowContent {...props} detailsOnly />
+      </CodexOperationalRow>
+    );
+  }
+  return <ConnectionRowContent {...props} />;
+}
+
+function ConnectionRowContent({
+  detailsOnly = false,
   connection,
   isOAuth,
   isClaude,
@@ -140,7 +153,7 @@ export default function ConnectionRow({
   quotaCache,
   quotaRefreshing,
   onRefreshQuota,
-}: ConnectionRowProps) {
+}: ConnectionRowProps & { detailsOnly?: boolean }) {
   const t = useTranslations("providers");
   const locale = useLocale();
   const emailsVisible = useEmailPrivacyStore((s) => s.emailsVisible);
@@ -323,6 +336,23 @@ export default function ConnectionRow({
         .filter(Boolean)
         .join(" — ")
     : "";
+
+  const supplementalQuotaCache =
+    detailsOnly && quotaCache
+      ? {
+          ...quotaCache,
+          quotas: Object.fromEntries(
+            Object.entries(quotaCache.quotas ?? {}).filter(
+              ([key]) => key !== "session" && key !== "weekly"
+            )
+          ),
+        }
+      : quotaCache;
+  const hasSupplementalQuota =
+    Object.keys(supplementalQuotaCache?.quotas ?? {}).length > 0 ||
+    Object.keys(supplementalQuotaCache?.modelQuotas ?? {}).length > 0 ||
+    Boolean(supplementalQuotaCache?.message) ||
+    (supplementalQuotaCache?.bankedResetCredits ?? 0) > 0;
 
   return (
     <div
@@ -723,183 +753,185 @@ export default function ConnectionRow({
           </div>
         </div>
       </div>
-      <div className="basis-full min-w-0 xl:basis-auto">
-        <div className="flex w-full flex-wrap items-center justify-between gap-0.5 sm:gap-1 xl:justify-end [&>button]:grow-0">
-          <ConnectionTestButton
-            connectionId={connection.id}
-            disabled={connection.isActive === false}
-          />
-          <Button
-            size="sm"
-            variant="ghost"
-            icon="refresh"
-            loading={isRetesting}
-            disabled={connection.isActive === false}
-            onClick={onRetest}
-            className="!size-7 !p-0 sm:!w-auto sm:!px-2 text-xs"
-            aria-label={t("retest")}
-            title={t("retestAuthentication")}
-          >
-            <span className="hidden sm:inline">{t("retest")}</span>
-          </Button>
-          {/* T12: Manual token refresh for OAuth accounts */}
-          {onRefreshToken && (
-            <Button
-              size="sm"
-              variant="ghost"
-              icon="token"
-              loading={isRefreshing}
-              disabled={connection.isActive === false || isRefreshing}
-              onClick={onRefreshToken}
-              className="!size-7 !p-0 sm:!w-auto sm:!px-2 text-xs text-warning hover:text-warning"
-              aria-label={t("tokenShort")}
-              title={t("refreshOauthTokenTitle")}
-            >
-              <span className="hidden sm:inline">{t("tokenShort")}</span>
-            </Button>
-          )}
-          {isCodex && isOAuth && connection.provider === "codex" && (
-            <CodexPingNowButton
+      {!detailsOnly && (
+        <div className="basis-full min-w-0 xl:basis-auto">
+          <div className="flex w-full flex-wrap items-center justify-between gap-0.5 sm:gap-1 xl:justify-end [&>button]:grow-0">
+            <ConnectionTestButton
               connectionId={connection.id}
               disabled={connection.isActive === false}
             />
-          )}
-          {isCodex && onApplyCodexAuthLocal && (
             <Button
               size="sm"
               variant="ghost"
-              icon="download_done"
-              loading={isApplyingCodexAuthLocal}
-              disabled={isApplyingCodexAuthLocal}
-              onClick={onApplyCodexAuthLocal}
-              className="!size-7 !p-0 sm:!w-auto sm:!px-2 text-xs text-success hover:text-success"
-              aria-label={applyCodexAuthLabel}
-              title={applyCodexAuthLabel}
+              icon="refresh"
+              loading={isRetesting}
+              disabled={connection.isActive === false}
+              onClick={onRetest}
+              className="!size-7 !p-0 sm:!w-auto sm:!px-2 text-xs"
+              aria-label={t("retest")}
+              title={t("retestAuthentication")}
             >
-              <span className="hidden sm:inline">{applyCodexAuthLabel}</span>
+              <span className="hidden sm:inline">{t("retest")}</span>
             </Button>
-          )}
-          {isCodex && onExportCodexAuthFile && (
-            <Button
+            {/* T12: Manual token refresh for OAuth accounts */}
+            {onRefreshToken && (
+              <Button
+                size="sm"
+                variant="ghost"
+                icon="token"
+                loading={isRefreshing}
+                disabled={connection.isActive === false || isRefreshing}
+                onClick={onRefreshToken}
+                className="!size-7 !p-0 sm:!w-auto sm:!px-2 text-xs text-warning hover:text-warning"
+                aria-label={t("tokenShort")}
+                title={t("refreshOauthTokenTitle")}
+              >
+                <span className="hidden sm:inline">{t("tokenShort")}</span>
+              </Button>
+            )}
+            {isCodex && isOAuth && connection.provider === "codex" && (
+              <CodexPingNowButton
+                connectionId={connection.id}
+                disabled={connection.isActive === false}
+              />
+            )}
+            {isCodex && onApplyCodexAuthLocal && (
+              <Button
+                size="sm"
+                variant="ghost"
+                icon="download_done"
+                loading={isApplyingCodexAuthLocal}
+                disabled={isApplyingCodexAuthLocal}
+                onClick={onApplyCodexAuthLocal}
+                className="!size-7 !p-0 sm:!w-auto sm:!px-2 text-xs text-success hover:text-success"
+                aria-label={applyCodexAuthLabel}
+                title={applyCodexAuthLabel}
+              >
+                <span className="hidden sm:inline">{applyCodexAuthLabel}</span>
+              </Button>
+            )}
+            {isCodex && onExportCodexAuthFile && (
+              <Button
+                size="sm"
+                variant="ghost"
+                icon="download"
+                loading={isExportingCodexAuthFile}
+                disabled={isExportingCodexAuthFile}
+                onClick={onExportCodexAuthFile}
+                className="!size-7 !p-0 sm:!w-auto sm:!px-2 text-xs text-info hover:text-info"
+                aria-label={exportCodexAuthLabel}
+                title={exportCodexAuthLabel}
+              >
+                <span className="hidden sm:inline">{exportCodexAuthLabel}</span>
+              </Button>
+            )}
+            {isClaude && onApplyClaudeAuthLocal && (
+              <Button
+                size="sm"
+                variant="ghost"
+                icon="install_desktop"
+                loading={isApplyingClaudeAuthLocal}
+                disabled={isApplyingClaudeAuthLocal}
+                onClick={onApplyClaudeAuthLocal}
+                className="!size-7 !p-0 sm:!w-auto sm:!px-2 text-xs text-success hover:text-success"
+                aria-label={applyClaudeAuthLabel}
+                title={applyClaudeAuthLabel}
+              >
+                <span className="hidden sm:inline">{applyClaudeAuthLabel}</span>
+              </Button>
+            )}
+            {isClaude && onExportClaudeAuthFile && (
+              <Button
+                size="sm"
+                variant="ghost"
+                icon="download"
+                loading={isExportingClaudeAuthFile}
+                disabled={isExportingClaudeAuthFile}
+                onClick={onExportClaudeAuthFile}
+                className="!size-7 !p-0 sm:!w-auto sm:!px-2 text-xs text-info hover:text-info"
+                aria-label={exportClaudeAuthLabel}
+                title={exportClaudeAuthLabel}
+              >
+                <span className="hidden sm:inline">{exportClaudeAuthLabel}</span>
+              </Button>
+            )}
+            <Toggle
               size="sm"
-              variant="ghost"
-              icon="download"
-              loading={isExportingCodexAuthFile}
-              disabled={isExportingCodexAuthFile}
-              onClick={onExportCodexAuthFile}
-              className="!size-7 !p-0 sm:!w-auto sm:!px-2 text-xs text-info hover:text-info"
-              aria-label={exportCodexAuthLabel}
-              title={exportCodexAuthLabel}
-            >
-              <span className="hidden sm:inline">{exportCodexAuthLabel}</span>
-            </Button>
-          )}
-          {isClaude && onApplyClaudeAuthLocal && (
-            <Button
-              size="sm"
-              variant="ghost"
-              icon="install_desktop"
-              loading={isApplyingClaudeAuthLocal}
-              disabled={isApplyingClaudeAuthLocal}
-              onClick={onApplyClaudeAuthLocal}
-              className="!size-7 !p-0 sm:!w-auto sm:!px-2 text-xs text-success hover:text-success"
-              aria-label={applyClaudeAuthLabel}
-              title={applyClaudeAuthLabel}
-            >
-              <span className="hidden sm:inline">{applyClaudeAuthLabel}</span>
-            </Button>
-          )}
-          {isClaude && onExportClaudeAuthFile && (
-            <Button
-              size="sm"
-              variant="ghost"
-              icon="download"
-              loading={isExportingClaudeAuthFile}
-              disabled={isExportingClaudeAuthFile}
-              onClick={onExportClaudeAuthFile}
-              className="!size-7 !p-0 sm:!w-auto sm:!px-2 text-xs text-info hover:text-info"
-              aria-label={exportClaudeAuthLabel}
-              title={exportClaudeAuthLabel}
-            >
-              <span className="hidden sm:inline">{exportClaudeAuthLabel}</span>
-            </Button>
-          )}
-          <Toggle
-            size="sm"
-            checked={connection.isActive ?? true}
-            onChange={onToggleActive}
-            title={(connection.isActive ?? true) ? t("disableConnection") : t("enableConnection")}
-          />
-          <div className="contents">
-            {onReauth && (
+              checked={connection.isActive ?? true}
+              onChange={onToggleActive}
+              title={(connection.isActive ?? true) ? t("disableConnection") : t("enableConnection")}
+            />
+            <div className="contents">
+              {onReauth && (
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  icon="passkey"
+                  onClick={onReauth}
+                  className="size-7 min-h-7 rounded hover:bg-warning/10 text-warning"
+                  title={t("reauthenticateConnection")}
+                  aria-label={t("reauthenticateConnection")}
+                />
+              )}
+              {verificationUrl && (
+                <a
+                  href={verificationUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={buttonVariants({
+                    variant: "ghost",
+                    size: "icon-sm",
+                    className: "size-7 min-h-7 rounded hover:bg-warning/10 text-warning",
+                  })}
+                  title={t("verifyAccountHint")}
+                  aria-label={t("verifyAccount")}
+                  data-testid="connection-verify-account"
+                >
+                  <Icon name="verified_user" size={18} />
+                </a>
+              )}
               <Button
                 variant="ghost"
                 size="icon-sm"
-                icon="passkey"
-                onClick={onReauth}
-                className="size-7 min-h-7 rounded hover:bg-warning/10 text-warning"
-                title={t("reauthenticateConnection")}
-                aria-label={t("reauthenticateConnection")}
+                icon="edit"
+                onClick={onEdit}
+                className="size-7 min-h-7 rounded hover:bg-bg-subtle text-text-muted hover:text-primary"
+                title={t("edit")}
+                aria-label={t("edit")}
               />
-            )}
-            {verificationUrl && (
-              <a
-                href={verificationUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={buttonVariants({
-                  variant: "ghost",
-                  size: "icon-sm",
-                  className: "size-7 min-h-7 rounded hover:bg-warning/10 text-warning",
-                })}
-                title={t("verifyAccountHint")}
-                aria-label={t("verifyAccount")}
-                data-testid="connection-verify-account"
-              >
-                <Icon name="verified_user" size={18} />
-              </a>
-            )}
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              icon="edit"
-              onClick={onEdit}
-              className="size-7 min-h-7 rounded hover:bg-bg-subtle text-text-muted hover:text-primary"
-              title={t("edit")}
-              aria-label={t("edit")}
-            />
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              icon="vpn_lock"
-              onClick={onProxy}
-              className="size-7 min-h-7 rounded hover:bg-bg-subtle text-text-muted hover:text-primary"
-              title={t("proxyConfig")}
-              aria-label={t("proxyConfig")}
-            />
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              icon="delete"
-              onClick={onDelete}
-              className="size-7 min-h-7 rounded hover:bg-error/10 text-error"
-              title={t("delete")}
-              aria-label={t("delete")}
-            />
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                icon="vpn_lock"
+                onClick={onProxy}
+                className="size-7 min-h-7 rounded hover:bg-bg-subtle text-text-muted hover:text-primary"
+                title={t("proxyConfig")}
+                aria-label={t("proxyConfig")}
+              />
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                icon="delete"
+                onClick={onDelete}
+                className="size-7 min-h-7 rounded hover:bg-error/10 text-error"
+                title={t("delete")}
+                aria-label={t("delete")}
+              />
+            </div>
           </div>
         </div>
-      </div>
+      )}
       {isCodex && connection.codexAccountPool ? (
         <div className="basis-full min-w-0">
-          <CodexAccountDetails pool={connection.codexAccountPool} />
+          <CodexAccountDetails pool={connection.codexAccountPool} hideQuota={detailsOnly} />
         </div>
       ) : null}
-      {quotaPanelSupported ? (
+      {quotaPanelSupported && (!detailsOnly || hasSupplementalQuota) ? (
         <div className="basis-full min-w-0">
           <ConnectionQuotaPanel
             providerId={String(connection.provider || "")}
             connection={connection}
-            cache={quotaCache}
+            cache={supplementalQuotaCache}
             refreshing={quotaRefreshing}
             onRefresh={onRefreshQuota}
           />

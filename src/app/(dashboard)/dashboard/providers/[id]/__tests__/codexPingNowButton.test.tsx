@@ -32,6 +32,11 @@ function render(props: ConnectionRowProps) {
   document.body.appendChild(el);
   const root = createRoot(el);
   act(() => root.render(<ConnectionRow {...props} />));
+  if (props.isCodex) {
+    const actions = el.querySelector<HTMLButtonElement>('button[aria-haspopup="dialog"]');
+    expect(actions).not.toBeNull();
+    act(() => actions?.click());
+  }
   roots.push({ root, el });
 }
 
