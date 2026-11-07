@@ -20,6 +20,7 @@ import { stripObfuscationZeroWidth } from "../utils/zeroWidth.ts";
 import { normalizeArrayContentChunk } from "../utils/arrayContentDelta.ts";
 import { assignAliasCacheWrite } from "../utils/pickCacheCreationTokens.ts";
 import { findBalancedJsonEnd } from "./responseSanitizer/balancedJson.ts";
+import { copyUrlCitationAnnotations } from "./responseSanitizer/urlCitations.ts";
 import { normalizeResponsesContextUsage } from "../utils/normalizeResponsesContextUsage.ts";
 export {
   extractThinkingFromContent,
@@ -421,6 +422,7 @@ function sanitizeMessage(msg: unknown, options: ParseOptions = {}): unknown {
   Object.assign(sanitized, sanitizeMessageContent(msgRecord, options));
 
   copyOpenAICompatibleReasoningFields(msgRecord, sanitized);
+  copyUrlCitationAnnotations(msgRecord, sanitized);
   applyTextualToolCallSanitization(sanitized, msgRecord);
 
   if (msgRecord.tool_calls) {
@@ -1148,6 +1150,8 @@ export function sanitizeStreamingChunk(parsed: unknown): unknown {
             delta.function_call = stripZeroWidthFunctionArguments(deltaRecord.function_call);
           // Generated-image deltas (gemini-to-openai inlineData) must survive the allow-list.
           if (Array.isArray(deltaRecord.images)) delta.images = deltaRecord.images;
+          // So must the sources a web-grounded answer cites.
+          copyUrlCitationAnnotations(deltaRecord, delta);
           c.delta = delta;
         } else {
           c.delta = choiceRecord.delta;
