@@ -267,6 +267,40 @@ interface ApplyOptions {
   modelName?: string;
 }
 
+/** The provider's models list after an Apply, per the merge rules below. */
+function mergePiModels(
+  existingEntry: ProviderEntry,
+  options: ApplyOptions
+): ProviderEntry["models"] {
+  // readPiModelsJson already validated the file: every model is an object with a
+  // non-empty string id. Still filter defensively — a hand-edit can race us.
+  const previous = (Array.isArray(existingEntry.models) ? existingEntry.models : []).filter(
+    (m): m is Record<string, unknown> =>
+      isPlainObject(m) && typeof m.id === "string" && Boolean(m.id)
+  );
+  const prev = previous.find((m) => m.id === options.model) ?? {};
+  const prevName = typeof prev.name === "string" && prev.name ? prev.name : undefined;
+  // Pi reads `model.baseUrl ?? provider.baseUrl` (same for `api`), so leaving these
+  // on the applied entry would send it past the OmniRoute endpoint Apply just wrote.
+  const { baseUrl: _baseUrl, api: _api, ...prevKept } = prev;
+  return [
+    {
+      // Keep hand-set contextWindow/maxTokens and any other key on the entry.
+      ...prevKept,
+      id: options.model,
+      // The dashboard card has no name field and the route used to pass
+      // `modelName: model`, so a name equal to the id means "unset" — keep a
+      // label the user set by hand in models.json instead.
+      name:
+        options.modelName && options.modelName !== options.model
+          ? options.modelName
+          : (prevName ?? options.model),
+    },
+    // Models the user added by hand survive an Apply of a different model.
+    ...previous.filter((m) => m.id !== options.model),
+  ];
+}
+
 /**
  * Merge the OmniRoute provider into models.json.
  *
@@ -274,6 +308,8 @@ interface ApplyOptions {
  * - Preserves every other provider and every unrelated root key.
  * - Overwrites only our own entry (identified by the ownership marker or an
  *   existing `omniroute` key pointing at this OmniRoute instance).
+ * - Merges into the existing `models` list instead of replacing it, so an
+ *   Apply keeps hand-set model names, caps and extra models.
  *
  * Returns the written path.
  */
@@ -290,18 +326,14 @@ export async function applyOmniRoutePiProvider(
     ...((config?.providers as Record<string, ProviderEntry> | undefined) ?? {}),
   };
 
+  const existingEntry = providers[OMNIROUTE_PROVIDER_KEY] ?? {};
   providers[OMNIROUTE_PROVIDER_KEY] = {
-    ...(providers[OMNIROUTE_PROVIDER_KEY] ?? {}),
+    ...existingEntry,
     baseUrl: normalizePiBaseUrl(options.baseUrl),
     api: OMNIROUTE_PROVIDER_API,
     apiKey: options.apiKey,
     [OMNIROUTE_PROVIDER_MARKER]: true,
-    models: [
-      {
-        id: options.model,
-        ...(options.modelName ? { name: options.modelName } : {}),
-      },
-    ],
+    models: mergePiModels(existingEntry, options),
   };
 
   const nextConfig: ModelsJson = {

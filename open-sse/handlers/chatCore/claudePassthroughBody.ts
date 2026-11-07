@@ -71,10 +71,11 @@ export function buildClaudePassthroughBody({
   );
   translatedBody._disableToolPrefix = true;
 
-  // Sanitize historical thinking-block signatures for Anthropic-native Claude OAuth.
+  const isFirstPartyAnthropic = provider === "claude" || provider === "anthropic";
+  // Sanitize historical thinking-block signatures for first-party Anthropic (OAuth + API key).
   // Only Anthropic's first-party API validates these signatures (token-bound); third-party
   // Claude-shape providers do not. See redactPassthroughThinkingSignatures + issue #2454.
-  if (provider === "claude") {
+  if (isFirstPartyAnthropic) {
     // Also drops foreign server_tool_use ids (z.ai `call_…`) that fail ^srvtoolu_ (9router#3685).
     translatedBody.messages = sanitizeAnthropicPassthroughHistory(
       translatedBody.messages
@@ -92,6 +93,8 @@ export function buildClaudePassthroughBody({
 
   // Legacy models reject role:"system" messages. Supported models accept
   // them behind a beta, and hoisting them breaks the prompt cache prefix.
+  // Only the native `claude` dispatch sends that beta (selectBetaFlags); the
+  // `anthropic` API-key dispatch does not, so it always hoists.
   if (isClaudeCodeSemanticPassthrough) {
     if (provider !== "claude" || !shouldUseMidConversationSystem(translatedBody, effectiveModel)) {
       extractSystemRoleMessages(translatedBody);
@@ -111,8 +114,8 @@ export function buildClaudePassthroughBody({
         translatedBody.messages as ClaudeMessage[]
       ) as typeof translatedBody.messages;
     }
-    if (provider === "claude") {
-      ensureCacheControlOnLastUserMessage(translatedBody);
+    if (isFirstPartyAnthropic) {
+      ensureCacheControlOnLastUserMessage(translatedBody, { countTools: provider === "anthropic" });
     }
   } else {
     // Same guard as the CC-bridge path: only preserve tool_result blocks
