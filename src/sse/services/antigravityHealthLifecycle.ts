@@ -20,6 +20,24 @@ export function bindAntigravityHealthAttempt(
 /** Count a successful stream only when it completes, never at HTTP 200 headers. */
 export const ANTIGRAVITY_PROBE_STREAM_IDLE_TIMEOUT_MS = 300_000;
 
+// A probe times out only while its stream is silent, not after a fixed total
+// duration. Keep the timer/cancellation handling outside the stream wrapper.
+function scheduleHealthProbeIdle(
+  timeoutMs: number,
+  reader: ReadableStreamDefaultReader<Uint8Array>,
+  controller: () => ReadableStreamDefaultController<Uint8Array> | null,
+  onExpired: () => void,
+  releaseReader: () => void
+): ReturnType<typeof setTimeout> {
+  return setTimeout(() => {
+    onExpired();
+    controller()?.error(new Error("Antigravity recovery probe stream idle timeout"));
+    void reader.cancel("Antigravity recovery probe stream idle timeout")
+      .catch(() => {})
+      .finally(releaseReader);
+  }, Math.max(1, Math.floor(timeoutMs)));
+}
+
 export function holdAntigravityHealthThroughResponse(
   response: Response,
   attempt: AntigravityHealthAttempt,
@@ -54,16 +72,8 @@ export function holdAntigravityHealthThroughResponse(
     if (!attempt.probe || settled || !Number.isFinite(probeIdleTimeoutMs) ||
         probeIdleTimeoutMs <= 0) return;
     clearIdle();
-    // Only the silence window is bounded: an active stream can run much longer.
-    idleTimer = setTimeout(() => {
-      expired = true;
-      finish("ignored");
-      streamController?.error(new Error("Antigravity recovery probe stream idle timeout"));
-      // Stop the abandoned upstream read too, without waiting to release health state.
-      void reader.cancel("Antigravity recovery probe stream idle timeout")
-        .catch(() => {})
-        .finally(releaseReader);
-    }, Math.max(1, Math.floor(probeIdleTimeoutMs)));
+    idleTimer = scheduleHealthProbeIdle(probeIdleTimeoutMs, reader, () => streamController,
+      () => { expired = true; finish("ignored"); }, releaseReader);
   };
   const body = new ReadableStream<Uint8Array>({
     start(controller) {
