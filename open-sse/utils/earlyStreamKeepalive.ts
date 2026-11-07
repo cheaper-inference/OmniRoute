@@ -728,20 +728,22 @@ export async function withEarlyStreamKeepalive(
               }
             } catch {
               if (aborted) return;
-              if (bytesForwarded === 0) {
+              if (bytesForwarded === 0 || endedOnEventBoundary()) {
+                // Nothing forwarded yet, or the last forwarded bytes finished an
+                // SSE event: append one generic terminal error event and close
+                // cleanly. controller.error() here is what Claude Code reports as
+                // "The response stream was malformed" after it has already shown
+                // the text (#18773), and a quiet close would pass a failed turn
+                // off as complete.
                 controller.enqueue(errorFrame);
                 recordClientBytes(errorFrame);
-              } else if (!endedOnEventBoundary()) {
+              } else {
                 // The client already holds a cut frame. Reject the transport so
                 // that half line is not a clean EOF, and do not append another
                 // frame or the upstream's own message.
                 streamErrored = true;
                 controller.error(new Error("Upstream stream failed before completion."));
               }
-              // A complete event was already delivered. Close quietly in the
-              // finally block. controller.error() here is what Claude Code
-              // reports as "The response stream was malformed" after it has
-              // already shown the text (#17292 follow-up).
             }
           } else {
             // Non-SSE response (e.g. a JSON error) reached us after we already
