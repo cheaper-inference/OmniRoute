@@ -308,7 +308,10 @@ import type {
   CompressionPipelineStep,
   CompressionResult,
 } from "../services/compression/types.ts";
-import type { CachingDetectionContext } from "../services/compression/cachingAware.ts";
+import {
+  mustKeepOpenCodeHistoryVerbatim,
+  type CachingDetectionContext,
+} from "../services/compression/cachingAware.ts";
 import { runLiveZoneCompression } from "./chatCore/liveZoneCompression.ts";
 import { prepareWebSearchFallbackBody } from "../services/webSearchFallback.ts";
 import { prepareWebFetchFallbackBody } from "../services/webFetchInterception.ts";
@@ -1249,6 +1252,9 @@ async function handleChatCoreInner({
   // reactive and last-resort compaction passes. Otherwise an operator selecting
   // "off" still has large histories rewritten by trim_tools/purify_history.
   let reactiveContextCompactionEnabled = false;
+  // Keep automatic-prefix-cached OpenCode history intact during the proactive pass.
+  // Last-resort compaction at the concrete context ceiling remains enabled.
+  let protectOpenCodePrefix = false;
   // Native Codex history stays out of reactive/last-resort compaction unless the default-off
   // NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED flag opts in (#16632; fails closed).
   const skipNativeCodexReactiveCompaction = shouldSkipNativeCodexReactiveCompaction(
@@ -1648,6 +1654,9 @@ async function handleChatCoreInner({
           connectionCacheOverride,
         };
         const compressionConfig = resolveCacheAwareConfig(config, compressionInputBody, cacheCtx);
+        // #18787: keep the upstream cacheable prefix untouched until a stable
+        // live-zone baseline exists; subsequent requests can still compress new tool outputs.
+        protectOpenCodePrefix = mustKeepOpenCodeHistoryVerbatim(compressionInputBody, cacheCtx);
         const compressionPrincipalId = apiKeyInfo?.id ? String(apiKeyInfo.id) : undefined;
         const compressionOptions = {
           model: effectiveModel,
@@ -1694,14 +1703,31 @@ async function handleChatCoreInner({
             targetFormat === FORMATS.OPENAI_RESPONSES) &&
           !(sourceFormat === FORMATS.CLAUDE && targetFormat === FORMATS.CLAUDE)
         ) {
-          runPostTranslationCompression = (input) =>
+          const compressTranslated = (input: Record<string, unknown>) =>
             applyCompressionAsync(input, mode, {
               ...compressionOptions,
               compressionStage: "post-translation" as const,
             });
+          // #18787: post-translation engines also need a separate frozen prefix.
+          // Keep their cache key distinct from the pre-translation live-zone entry.
+          runPostTranslationCompression = protectOpenCodePrefix
+            ? (input) =>
+                runLiveZoneCompression({
+                  compressionInputBody: input,
+                  clientHeaders: clientRawRequest?.headers,
+                  provider,
+                  getCurrentConnectionId,
+                  compressionPrincipalId,
+                  mode: `${mode}:post-translation`,
+                  effectiveModel,
+                  compressionConfig,
+                  preserveRawPrefixOnMiss: true,
+                  runCompression: compressTranslated,
+                })
+            : compressTranslated;
         }
         let result: CompressionResult;
-        if (compressionConfig.liveZone?.enabled === true) {
+        if (compressionConfig.liveZone?.enabled === true || protectOpenCodePrefix) {
           // Live-zone lane extracted to chatCore/liveZoneCompression.ts (chatCore slice 2).
           result = await runLiveZoneCompression({
             compressionInputBody,
@@ -1712,6 +1738,7 @@ async function handleChatCoreInner({
             mode,
             effectiveModel,
             compressionConfig,
+            preserveRawPrefixOnMiss: protectOpenCodePrefix,
             runCompression,
           });
         } else {
@@ -1934,6 +1961,7 @@ async function handleChatCoreInner({
     if (
       reactiveContextCompactionEnabled &&
       !skipNativeCodexReactiveCompaction &&
+      !protectOpenCodePrefix &&
       estimatedTokens > threshold
     ) {
       log?.info?.(
@@ -2540,11 +2568,21 @@ async function handleChatCoreInner({
 
   const dedupRequestBody = { ...translatedBody, model: `${provider}/${model}`, stream };
   const dedupEnabled = shouldDeduplicate(dedupRequestBody);
-  // Namespaced by the calling API key: dedup hands the SAME response object to
-  // every joiner, so a shared hash across keys is a cross-principal response
-  // leak (GHSA-6c7w-56xp-wpc6).
+  // Namespaced by the calling API key AND the selected provider connection: dedup
+  // hands the SAME response object to every joiner, so a shared hash across keys
+  // is a cross-principal response leak (GHSA-6c7w-56xp-wpc6), and a shared hash
+  // across connections serves the request from an account the caller did not
+  // select — a pin on another account would silently be ignored while its
+  // response header still named the pinned one. Keyless installs keep dedup
+  // within a connection: identical requests that select the same connection
+  // still join. The hash is computed once, before dispatch; rotation inside the
+  // pipeline is handled by `allowDedup` (first attempt only), not here.
   const dedupHash = dedupEnabled
-    ? computeRequestHash(dedupRequestBody, apiKeyInfo?.id, trustedEffortContext)
+    ? computeRequestHash(
+        dedupRequestBody,
+        `${apiKeyInfo?.id ?? ""}:${getCurrentConnectionId() ?? ""}`,
+        trustedEffortContext
+      )
     : null;
 
   const toolDisclosure = resolveToolDisclosureConfig(settings);
@@ -3194,6 +3232,7 @@ async function handleChatCoreInner({
       credentials,
       effectiveModel,
       executeRefreshCredentials,
+      forcedConnectionId,
       executor,
       getCurrentConnectionId,
       getExecutionCredentials,
@@ -3261,6 +3300,7 @@ async function handleChatCoreInner({
       apiKeyInfo,
       allowedConnections,
       appendRequestLog,
+      forcedConnectionId,
       applyProviderFailureClassification,
       assertManagedLeaseFence,
       attachCompressionUsageReceiptAfterAnalytics,

@@ -1366,7 +1366,7 @@ Storitev, ki je ves mesec budna, porabi približno 744 instančnih ur, zato jo p
 
 ## Scenariji uvajanja
 
-Za navodila SRE za zaledje releja (vedenje ts/bifrost/auto, umestitev 9router v primerjavi s CLIProxyAPI in strategijo povrnitve pri visoki prepustnosti) glejte [Strategija zaledja releja](/docs/reference/RELAY_BACKEND_STRATEGY.md).
+Za navodila SRE za zaledni sistem posrednika (vedenje ts/bifrost/auto, namestitev 9router v primerjavi s CLIProxyAPI in strategija povrnitve pri visoki prepustnosti) glejte [Strategija zalednega sistema posrednika](/docs/reference/RELAY_BACKEND_STRATEGY.md).
 
 ### Minimalni lokalni razvoj
 
@@ -1397,7 +1397,7 @@ OMNIROUTE_MEMORY_MB=8192
 CORS_ORIGIN=https://your-frontend.example.com
 ```
 
-### Ločeno omrežje / CI
+### Okolje brez omrežne povezave / CI
 
 ```bash
 JWT_SECRET=test-jwt-secret-for-ci
@@ -1870,3 +1870,14 @@ Uporabljata ga `open-sse/services/combo.ts` in `src/lib/quota/quotaScheduler.ts`
 | Spremenljivka                  | Privzeto | Izvorna datoteka                             | Opis                                                                                                                                                                                                                                            |
 | ------------------------------ | -------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`      | `src/lib/providerModels/modelSyncTimings.ts` | Nastavite na `1`, če želite zabeležiti čas faze, ustvarjeno zahtevo ID in rezultate faze success/error med sinhronizacijo modela. Onemogočeno za vse druge vrednosti. Dnevniki ne vsebujejo podatkov o zahtevah, računih, katalogih in napakah. |
+
+## Lokalno orodje OpenCode za analizo predstavnosti
+
+Uporablja ga `scripts/cli/omniroute-media-mcp.mjs`. Te vrednosti nastavite v okolju lokalnega procesa orodja.
+
+| Spremenljivka              | Privzeta vrednost                                                                  | Opis                                                                                                        |
+| -------------------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (ali `~/.config/opencode/opencode.json`) | Konfiguracija OpenCode, ki jo prebereta orodje za predstavnost in namestitveni program.                     |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                        | Vnos ponudnika, ki ga orodje za predstavnost prebere iz konfiguracije OpenCode.                             |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                             | Model, ki ga pošlje orodje za predstavnost. Njegov ponudnik mora podpirati zahtevane vrste predstavnosti.   |
+| `OMNIROUTE_MEDIA_API_KEY`  | Konfiguriran ključ API ponudnika ali njegov sklic na okolje                        | Izbirna zamenjava poverilnice. Hranite jo v okolju lokalnega procesa; nikoli je ne vključite v repozitorij. |
