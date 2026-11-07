@@ -94,6 +94,42 @@ export function parseKnipMetrics(knipJson) {
 }
 
 /**
+ * Read knip's JSON report out of its stdout, or null when there is none.
+ *
+ * Plugins share stdout with the reporter: knip 6.44 loads the fumadocs-mdx config, which logs
+ * `[MDX] generated files in …` before the report, so all of stdout is no longer one JSON value.
+ * The reporter writes a single line, so fall back to the last line that holds a report. Only a
+ * line with an `issues` array counts: parseKnipMetrics reads anything else as zero, and a stray
+ * JSON log line must not pass as a repo with no dead code.
+ *
+ * Exported for unit testing.
+ *
+ * @param {unknown} stdout - whatever knip wrote to stdout
+ * @returns {{issues?: unknown[]} | null}
+ */
+export function parseKnipReport(stdout) {
+  const text = typeof stdout === "string" ? stdout.trim() : "";
+  if (!text) return null;
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    // Not a lone JSON value: look for the report among the lines below.
+  }
+
+  for (const line of text.split("\n").reverse()) {
+    if (!line.trimStart().startsWith("{")) continue;
+    try {
+      const candidate = JSON.parse(line);
+      if (Array.isArray(candidate.issues)) return candidate;
+    } catch {
+      // A log line that merely starts with a brace.
+    }
+  }
+  return null;
+}
+
+/**
  * Exit taxonomy of this gate (G-07, #15159).
  *
  * Before this was documented, every failure path collapsed to exit 2, so a
@@ -193,8 +229,6 @@ export function resolveKnipBin(opts = {}) {
  * @returns {{kind: "ok"|"infra"|"unparseable", exitCode: number, reason: string}}
  */
 export function classifyKnipFailure(execError, stdout) {
-  const text = typeof stdout === "string" ? stdout.trim() : "";
-
   // No error at all: knip ran and succeeded.
   if (!execError) {
     return { kind: "ok", exitCode: DEAD_CODE_EXIT.OK, reason: "knip completed" };
@@ -202,17 +236,12 @@ export function classifyKnipFailure(execError, stdout) {
 
   // An error, but it still produced parseable JSON — a legitimate non-zero exit
   // reporting findings. This is a successful measurement, not a failure.
-  if (text) {
-    try {
-      JSON.parse(text);
-      return {
-        kind: "ok",
-        exitCode: DEAD_CODE_EXIT.OK,
-        reason: `knip reported findings (exit ${execError.status ?? "non-zero"})`,
-      };
-    } catch {
-      // fall through to the unparseable classification below
-    }
+  if (parseKnipReport(stdout) !== null) {
+    return {
+      kind: "ok",
+      exitCode: DEAD_CODE_EXIT.OK,
+      reason: `knip reported findings (exit ${execError.status ?? "non-zero"})`,
+    };
   }
 
   // No usable output. Distinguish "the tool never ran" from "the tool ran but
@@ -314,13 +343,13 @@ function runKnip(cwd = ROOT) {
     process.exit(outcome.exitCode);
   }
 
-  let knipJson;
-  try {
-    knipJson = JSON.parse(String(stdout));
-  } catch (parseErr) {
-    // Unreachable via classifyKnipFailure (it already JSON-parsed), kept as a
-    // defensive guard so a future change cannot turn this into exit 2.
-    process.stderr.write(`[dead-code] ERRO ao parsear JSON do knip: ${parseErr.message}\n`);
+  // Reached with a clean knip exit too: classifyKnipFailure only parses after an error.
+  const knipJson = parseKnipReport(stdout);
+  if (knipJson === null) {
+    process.stderr.write(
+      `[dead-code] ERRO: stdout do knip sem relatório JSON (primeiros 500 chars): ` +
+        `${String(stdout).slice(0, 500)}\n`
+    );
     process.exit(DEAD_CODE_EXIT.CONFIG);
   }
 
