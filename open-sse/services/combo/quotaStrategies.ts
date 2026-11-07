@@ -910,6 +910,35 @@ function scoreQuotaWeightedWithCredits(
   };
 }
 
+/**
+ * The live snapshot outranks the freshly-scored fetch on two counts: a 402
+ * recorded against this connection zeroes it, and an observation older than the
+ * staleness bound is not confident enough to sit in the A pool. The balance
+ * comes from a cached fetch, so a later upstream refusal outranks it too.
+ */
+function overlayQuotaSnapshot<
+  T extends {
+    target: { connectionId?: string | null; modelStr: string };
+    remainingPercent: number;
+    paidCreditsBacked?: boolean;
+  },
+>(scored: T[]): (T & { stale: boolean })[] {
+  const now = Date.now();
+  return scored.map((entry) => {
+    const connectionId = entry.target.connectionId ?? "";
+    const marked = connectionId
+      ? getQuotaWeightedRemainingPercent(connectionId, entry.target.modelStr)
+      : null;
+    const fetchedAt = connectionId ? getQuotaSnapshotFetchedAt(connectionId) : null;
+    return {
+      ...entry,
+      remainingPercent: marked === 0 ? 0 : entry.remainingPercent,
+      paidCreditsBacked: entry.paidCreditsBacked === true && !isQuotaRefusalMarked(connectionId),
+      stale: fetchedAt !== null && now - fetchedAt > QUOTA_WEIGHTED_MAX_SNAPSHOT_AGE_MS,
+    };
+  });
+}
+
 export async function orderTargetsByQuotaWeighted(
   targets: ResolvedComboTarget[],
   comboName: string,
@@ -953,24 +982,7 @@ export async function orderTargetsByQuotaWeighted(
       scoreQuotaWeightedWithCredits(quota, target, connection, config, scoring, scoreNow),
   });
 
-  // The live snapshot outranks the freshly-scored fetch on two counts: a 402
-  // recorded against this connection zeroes it, and an observation older than
-  // the staleness bound is not confident enough to sit in the A pool.
-  const now = Date.now();
-  const withSnapshot = scoredTargets.map((entry) => {
-    const connectionId = entry.target.connectionId ?? "";
-    const marked = connectionId
-      ? getQuotaWeightedRemainingPercent(connectionId, entry.target.modelStr)
-      : null;
-    const fetchedAt = connectionId ? getQuotaSnapshotFetchedAt(connectionId) : null;
-    return {
-      ...entry,
-      remainingPercent: marked === 0 ? 0 : entry.remainingPercent,
-      // The balance comes from a cached fetch; a later upstream refusal outranks it.
-      paidCreditsBacked: entry.paidCreditsBacked === true && !isQuotaRefusalMarked(connectionId),
-      stale: fetchedAt !== null && now - fetchedAt > QUOTA_WEIGHTED_MAX_SNAPSHOT_AGE_MS,
-    };
-  });
+  const withSnapshot = overlayQuotaSnapshot(scoredTargets);
 
   // A used-up subscription window drops a target only when nothing can absorb
   // the request. Codex accounts with paid credits still serve it, and the
