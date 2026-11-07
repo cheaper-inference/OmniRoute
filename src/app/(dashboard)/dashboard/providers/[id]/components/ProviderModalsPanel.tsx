@@ -441,7 +441,7 @@ export default function ProviderModalsPanel({
           }}
         />
       )}
-      {(providerId === "antigravity" || providerId === "agy") && importAgyModalOpen && (
+      {providerId === "agy" && importAgyModalOpen && (
         <ImportAgyAuthModal
           key="import-agy-modal"
           onClose={() => setImportAgyModalOpen?.(false)}

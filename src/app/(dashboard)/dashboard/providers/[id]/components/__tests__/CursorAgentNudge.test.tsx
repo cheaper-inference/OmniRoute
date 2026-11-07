@@ -29,7 +29,7 @@
 // otherwise terminate a block comment early.)
 import React from "react";
 import { act } from "react";
-import { createRoot, hydrateRoot, type Root } from "react-dom/client";
+import { createRoot, hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import CursorAgentNudge from "../CursorAgentNudge";
@@ -39,7 +39,7 @@ const STORAGE_KEY = "omniroute.cursorAgentNudgeDismissed";
 vi.mock("next-intl", () => ({ useTranslations: () => (k: string) => k }));
 
 function mockFetch(cursorAgentAvailable: boolean | null) {
-  return vi.fn(async (_url: string) => {
+  return vi.fn(async (url: string) => {
     if (cursorAgentAvailable === null) {
       return { ok: false, json: async () => ({}) } as Response;
     }
@@ -53,13 +53,10 @@ async function flushEffects() {
   });
 }
 
-const mountedRoots: (Root | ReturnType<typeof hydrateRoot>)[] = [];
-
 function renderNudge(): HTMLDivElement {
   const container = document.createElement("div");
   document.body.appendChild(container);
   const root = createRoot(container);
-  mountedRoots.push(root);
   act(() => {
     root.render(<CursorAgentNudge />);
   });
@@ -74,14 +71,7 @@ describe("CursorAgentNudge", () => {
     localStorage.removeItem(STORAGE_KEY);
   });
 
-  afterEach(async () => {
-    await flushEffects();
-    while (mountedRoots.length > 0) {
-      const r = mountedRoots.pop();
-      act(() => {
-        r?.unmount();
-      });
-    }
+  afterEach(() => {
     document.body.innerHTML = "";
     localStorage.removeItem(STORAGE_KEY);
     vi.unstubAllGlobals();
@@ -194,10 +184,8 @@ describe("CursorAgentNudge", () => {
 
     try {
       act(() => {
-        const root = hydrateRoot(container, <CursorAgentNudge />);
-        mountedRoots.push(root);
+        hydrateRoot(container, <CursorAgentNudge />);
       });
-      await flushEffects();
     } finally {
       console.error = originalConsoleError;
     }

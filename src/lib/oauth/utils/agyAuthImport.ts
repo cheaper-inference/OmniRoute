@@ -300,28 +300,47 @@ type DetectedAgyToken = { raw: unknown; source: string };
 
 const AGY_TOKEN_FILE_NAME = "antigravity-oauth-token";
 
-/** Read and parse a JSON token file; null when it is missing or not valid JSON. */
+function noLocalLoginError(): AgyAuthFileError {
+  return new AgyAuthFileError(
+    "No local Antigravity CLI login found. Run agy, sign in with Google, then try again.",
+    404,
+    "no_local_login"
+  );
+}
+
+/**
+ * Read and parse a JSON token file. Null only when the file does not exist: a token file
+ * that is present but unreadable stops detection, so a corrupt login is reported instead
+ * of being skipped in favour of a different stored account.
+ */
 async function readJsonFile(filePath: string): Promise<unknown> {
   try {
     return JSON.parse(await fs.readFile(filePath, "utf8"));
-  } catch {
-    return null;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException)?.code === "ENOENT") return null;
+    throw new AgyAuthFileError("Could not read the local agy token file", 500, "read_failed");
   }
 }
 
-async function detectFromFirstReadable(candidates: string[]): Promise<DetectedAgyToken | null> {
+/** `source` is a fixed label: it lands in the audit log, which must not carry home paths. */
+async function detectFromFirstReadable(
+  candidates: string[],
+  source: string
+): Promise<DetectedAgyToken | null> {
   for (const candidate of candidates) {
     const raw = await readJsonFile(candidate);
-    if (raw !== null) return { raw, source: candidate };
+    if (raw !== null) return { raw, source };
   }
   return null;
 }
 
+/** An explicit AGY_TOKEN_FILE is authoritative: it never falls through to another login. */
 async function detectFromEnvOverride(): Promise<DetectedAgyToken | null> {
   const override = process.env.AGY_TOKEN_FILE?.trim();
   if (!override) return null;
   const raw = await readJsonFile(override);
-  return raw === null ? null : { raw, source: "env:AGY_TOKEN_FILE" };
+  if (raw === null) throw noLocalLoginError();
+  return { raw, source: "env:AGY_TOKEN_FILE" };
 }
 
 /** Linux Secret Service keyring entry, accepted only when it carries a refresh token. */
@@ -355,12 +374,12 @@ async function detectFromAgentControlProfiles(home: string): Promise<DetectedAgy
     .map((ent) =>
       path.join(profilesDir, ent.name, ".gemini", "antigravity-cli", AGY_TOKEN_FILE_NAME)
     );
-  return detectFromFirstReadable(candidates);
+  return detectFromFirstReadable(candidates, "agentcontrol-profile");
 }
 
 /**
  * Detect locally stored Antigravity credentials, in order:
- * 1. AGY_TOKEN_FILE environment variable override
+ * 1. AGY_TOKEN_FILE environment variable override (authoritative when set)
  * 2. Linux Secret Service keyring (secret-tool), only when it carries a refresh token
  * 3. Default CLI token files (~/.gemini/antigravity-cli/antigravity-oauth-token)
  * 4. Multi-profile token files (~/.config/agentcontrol/profiles/...)
@@ -374,16 +393,15 @@ export async function detectLocalAgyTokenRaw(): Promise<DetectedAgyToken> {
   const detected =
     (await detectFromEnvOverride()) ??
     (await detectFromSecretService()) ??
-    (await detectFromFirstReadable([
-      path.join(home, ".gemini", "antigravity-cli", AGY_TOKEN_FILE_NAME),
-      path.join(home, ".gemini", "antigravity", AGY_TOKEN_FILE_NAME),
-    ])) ??
+    (await detectFromFirstReadable(
+      [
+        path.join(home, ".gemini", "antigravity-cli", AGY_TOKEN_FILE_NAME),
+        path.join(home, ".gemini", "antigravity", AGY_TOKEN_FILE_NAME),
+      ],
+      "cli-token-file"
+    )) ??
     (await detectFromAgentControlProfiles(home));
   if (detected) return detected;
 
-  throw new AgyAuthFileError(
-    "No local Antigravity CLI login found. Run agy, sign in with Google, then try again.",
-    404,
-    "no_local_login"
-  );
+  throw noLocalLoginError();
 }

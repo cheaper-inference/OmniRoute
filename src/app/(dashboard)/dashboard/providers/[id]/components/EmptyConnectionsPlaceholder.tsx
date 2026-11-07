@@ -128,13 +128,15 @@ export default function EmptyConnectionsPlaceholder({
                   Import auth
                 </Button>
               )}
-              {(providerId === "antigravity" || providerId === "agy") && onOpenImportAgy && (
+              {providerId === "agy" && onOpenImportAgy && (
                 <Button
                   variant="secondary"
                   icon="upload_file"
                   onClick={() => gateConnectionFlow(onOpenImportAgy)}
                 >
-                  Import auth
+                  {typeof t.has === "function" && t.has("importAgyAuth")
+                    ? t("importAgyAuth")
+                    : "Import auth"}
                 </Button>
               )}
             </>

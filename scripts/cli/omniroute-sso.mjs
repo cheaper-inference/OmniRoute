@@ -17,10 +17,10 @@
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { createServer } from "node:http";
 import { spawn } from "node:child_process";
-import { pathToFileURL } from "node:url";
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
+import { pathToFileURL } from "node:url";
 
 const DEFAULT_AUTHORITY = "https://login.microsoftonline.com";
 

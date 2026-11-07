@@ -399,7 +399,7 @@ export default function ConnectionsHeaderToolbar({
                     {providerText(t, "importGrokAuth", "Import auth")}
                   </Button>
                 )}
-                {(providerId === "antigravity" || providerId === "agy") && onOpenImportAgy && (
+                {providerId === "agy" && onOpenImportAgy && (
                   <Button
                     size="sm"
                     variant="secondary"

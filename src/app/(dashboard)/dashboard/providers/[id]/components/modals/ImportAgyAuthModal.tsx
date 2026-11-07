@@ -107,11 +107,14 @@ function useSingleImport(onSuccess: () => void) {
   const [json, setJson] = useState<unknown>(null);
   const [pasteText, setPasteText] = useState("");
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  // null until the user edits the field: the token's own email follows the preview, so
+  // replacing the token can never send the previous account's address as an override.
+  const [emailOverride, setEmailOverride] = useState<string | null>(null);
   const [overwrite, setOverwrite] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [detectedEmail, setDetectedEmail] = useState<string | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
+  const email = emailOverride ?? detectedEmail ?? "";
 
   const preview = (value: unknown) => {
     setDetectedEmail(null);
@@ -123,7 +126,6 @@ function useSingleImport(onSuccess: () => void) {
     }
     setParseError(null);
     setDetectedEmail(result.email);
-    if (result.email && !email) setEmail(result.email);
     setJson(value);
   };
 
@@ -132,6 +134,7 @@ function useSingleImport(onSuccess: () => void) {
       preview(JSON.parse(text));
     } catch {
       setJson(null);
+      setDetectedEmail(null);
       setParseError(failureMessage);
     }
   };
@@ -177,22 +180,27 @@ function useSingleImport(onSuccess: () => void) {
   };
 
   return {
-    ...{ json, pasteText, name, setName, email, setEmail, overwrite, setOverwrite },
+    ...{ json, pasteText, name, setName, email, setEmailOverride, overwrite, setOverwrite },
     ...{ submitting, detectedEmail, parseError, onFile, onPaste, submit },
   };
 }
 
-function toBulkEntry(json: unknown, fallbackName: string): AgyBulkEntry {
-  const { email } = previewAgyJson(json);
-  return { name: email || fallbackName, json, parseError: null, email };
+function toBulkEntry(json: unknown, fallbackName: string, invalidToken: string): AgyBulkEntry {
+  const { valid, email } = previewAgyJson(json);
+  return { name: email || fallbackName, json, parseError: valid ? null : invalidToken, email };
 }
 
-async function readBulkFile(file: File, invalidLabel: string): Promise<AgyBulkEntry> {
+async function readBulkFile(
+  file: File,
+  labels: { invalidJson: string; invalidToken: string }
+): Promise<AgyBulkEntry> {
+  let json: unknown;
   try {
-    return toBulkEntry(JSON.parse(await file.text()), file.name.replace(/\.json$/, ""));
+    json = JSON.parse(await file.text());
   } catch {
-    return { name: file.name, json: null, parseError: invalidLabel, email: null };
+    return { name: file.name, json: null, parseError: labels.invalidJson, email: null };
   }
+  return toBulkEntry(json, file.name.replace(/\.json$/, ""), labels.invalidToken);
 }
 
 function useBulkStaging() {
@@ -203,9 +211,11 @@ function useBulkStaging() {
   const onFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
-    const staged = await Promise.all(
-      files.map((file) => readBulkFile(file, t("agyImportInvalidJson")))
-    );
+    const labels = {
+      invalidJson: t("agyImportInvalidJson"),
+      invalidToken: t("agyImportInvalidToken"),
+    };
+    const staged = await Promise.all(files.map((file) => readBulkFile(file, labels)));
     setEntries((prev) => [...prev, ...staged]);
   };
 
@@ -220,7 +230,9 @@ function useBulkStaging() {
       const parsed: unknown = JSON.parse(trimmed);
       const items = Array.isArray(parsed) ? parsed : [parsed];
       setEntries(
-        items.map((item, i) => toBulkEntry(item, t("agyImportAccountN", { index: i + 1 })))
+        items.map((item, i) =>
+          toBulkEntry(item, t("agyImportAccountN", { index: i + 1 }), t("agyImportInvalidToken"))
+        )
       );
     } catch {
       setEntries([]);
@@ -254,7 +266,7 @@ function useBulkImport(onSuccess: () => void) {
         entries: valid.map((e) => ({
           name: e.name,
           email: e.email || undefined,
-          source: { kind: "json", json: e.json },
+          json: e.json,
         })),
         overwriteExisting: overwrite,
       });
@@ -262,11 +274,19 @@ function useBulkImport(onSuccess: () => void) {
         notify.error(errorText(data, t("agyImportBulkFailed")));
         return;
       }
-      const imported = Number(data.imported ?? 0);
-      setResult({ success: imported, failed: Number(data.failed ?? 0), total: valid.length });
+      const imported = Number(data.success ?? 0);
+      const failed = Number(data.failed ?? 0);
+      const summary = { success: imported, failed, total: valid.length };
+      setResult(summary);
       if (Array.isArray(data.errors)) setErrors(data.errors as AgyBulkError[]);
-      notify.success(t("agyImportBulkSuccess", { count: imported }));
-      if (imported > 0) onSuccess();
+      if (imported === 0) {
+        // Nothing changed: stay open so the per-entry errors in the result panel are readable.
+        notify.error(t("agyImportBulkFailed"));
+        return;
+      }
+      if (failed > 0) notify.warning(t("agyImportResultsSummary", summary));
+      else notify.success(t("agyImportBulkSuccess", { count: imported }));
+      onSuccess();
     } catch {
       notify.error(t("agyImportBulkRunFailed"));
     } finally {
@@ -417,7 +437,7 @@ function SingleTab({ onClose, onSuccess }: ImportAgyAuthModalProps) {
           type="email"
           label={t("agyImportEmailLabel")}
           value={single.email}
-          onChange={(e) => single.setEmail(e.target.value)}
+          onChange={(e) => single.setEmailOverride(e.target.value)}
           placeholder="name@example.com"
         />
       </div>

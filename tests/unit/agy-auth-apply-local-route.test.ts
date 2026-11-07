@@ -2,8 +2,9 @@
  * POST /api/providers/agy-auth/apply-local — local Antigravity CLI login import.
  *
  * Proves that with no local login anywhere (isolated HOME, no AGY_TOKEN_FILE) the
- * route answers 404 `no_local_login` instead of a 500, and that an explicit
- * AGY_TOKEN_FILE that does not exist falls through to the same 404.
+ * route answers 404 `no_local_login` instead of a 500, that an explicit AGY_TOKEN_FILE
+ * that does not exist answers the same 404, and that a corrupt one answers 500
+ * `read_failed` with a fixed message.
  */
 
 import test from "node:test";
@@ -16,7 +17,14 @@ const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-agy-apply
 process.env.DATA_DIR = TEST_DATA_DIR;
 
 const ISOLATED_HOME = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-agy-apply-local-home-"));
-const ENV_KEYS = ["HOME", "USERPROFILE", "XDG_CONFIG_HOME", "APPDATA", "AGY_TOKEN_FILE"] as const;
+const ENV_KEYS = [
+  "HOME",
+  "USERPROFILE",
+  "XDG_CONFIG_HOME",
+  "APPDATA",
+  "AGY_TOKEN_FILE",
+  "DBUS_SESSION_BUS_ADDRESS",
+] as const;
 const savedEnv = Object.fromEntries(ENV_KEYS.map((k) => [k, process.env[k]]));
 
 const core = await import("../../src/lib/db/core.ts");
@@ -38,6 +46,9 @@ test.before(async () => {
   process.env.XDG_CONFIG_HOME = path.join(ISOLATED_HOME, ".config");
   process.env.APPDATA = path.join(ISOLATED_HOME, "AppData", "Roaming");
   delete process.env.AGY_TOKEN_FILE;
+  // HOME does not isolate the Secret Service: without this a developer's real keyring
+  // entry would turn the 404 assertions below into a live import.
+  process.env.DBUS_SESSION_BUS_ADDRESS = "disabled-in-test";
 });
 
 test.after(() => {
@@ -65,6 +76,21 @@ test("apply-local returns 404 when AGY_TOKEN_FILE points at a missing file", asy
     assert.equal(res.status, 404);
     const data = await res.json();
     assert.equal(data.code, "no_local_login");
+  } finally {
+    delete process.env.AGY_TOKEN_FILE;
+  }
+});
+
+test("apply-local returns 500 read_failed when AGY_TOKEN_FILE is corrupt", async () => {
+  const corrupt = path.join(ISOLATED_HOME, "corrupt.json");
+  fs.writeFileSync(corrupt, "{not json");
+  process.env.AGY_TOKEN_FILE = corrupt;
+  try {
+    const res = await POST(makeRequest({ overwriteExisting: false }));
+    assert.equal(res.status, 500);
+    const data = await res.json();
+    assert.equal(data.code, "read_failed");
+    assert.equal(data.error, "Could not read the local agy token file");
   } finally {
     delete process.env.AGY_TOKEN_FILE;
   }

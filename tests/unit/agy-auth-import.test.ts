@@ -158,10 +158,118 @@ test("detectLocalAgyTokenRaw reads the default CLI token file under HOME", async
       JSON.stringify({ token: { access_token: ACCESS, refresh_token: REFRESH } })
     );
     const detected = await detectLocalAgyTokenRaw();
-    assert.equal(detected.source, file);
+    assert.equal(detected.source, "cli-token-file");
     assert.equal(parseAndValidateAgyToken(detected.raw).refreshToken, REFRESH);
   });
 });
+
+test("detectLocalAgyTokenRaw reads an AgentControl profile token and keeps the path out of the source", async () => {
+  const fs = await import("fs/promises");
+  const path = await import("path");
+  await withIsolatedHome(async (home) => {
+    const dir = path.join(
+      home,
+      ".config",
+      "agentcontrol",
+      "profiles",
+      "work",
+      ".gemini",
+      "antigravity-cli"
+    );
+    await fs.mkdir(dir, { recursive: true });
+    await fs.writeFile(
+      path.join(dir, "antigravity-oauth-token"),
+      JSON.stringify({ token: { access_token: ACCESS, refresh_token: REFRESH } })
+    );
+    const detected = await detectLocalAgyTokenRaw();
+    assert.equal(detected.source, "agentcontrol-profile");
+    assert.equal(parseAndValidateAgyToken(detected.raw).refreshToken, REFRESH);
+  });
+});
+
+test("an unreadable AGY_TOKEN_FILE never falls through to another stored account", async () => {
+  const fs = await import("fs/promises");
+  const path = await import("path");
+  await withIsolatedHome(async (home) => {
+    const dir = path.join(home, ".gemini", "antigravity-cli");
+    await fs.mkdir(dir, { recursive: true });
+    await fs.writeFile(
+      path.join(dir, "antigravity-oauth-token"),
+      JSON.stringify({ token: { access_token: ACCESS, refresh_token: REFRESH } })
+    );
+
+    process.env.AGY_TOKEN_FILE = path.join(home, "missing.json");
+    await assert.rejects(detectLocalAgyTokenRaw(), (error: unknown) => {
+      assert.ok(error instanceof AgyAuthFileError);
+      assert.equal(error.status, 404);
+      assert.equal(error.code, "no_local_login");
+      return true;
+    });
+
+    const corrupt = path.join(home, "corrupt.json");
+    await fs.writeFile(corrupt, "{not json");
+    process.env.AGY_TOKEN_FILE = corrupt;
+    await assert.rejects(detectLocalAgyTokenRaw(), (error: unknown) => {
+      assert.ok(error instanceof AgyAuthFileError);
+      assert.equal(error.status, 500);
+      assert.equal(error.code, "read_failed");
+      return true;
+    });
+  });
+});
+
+test("a malformed default token file reports read_failed, not a missing login", async () => {
+  const fs = await import("fs/promises");
+  const path = await import("path");
+  await withIsolatedHome(async (home) => {
+    const dir = path.join(home, ".gemini", "antigravity-cli");
+    await fs.mkdir(dir, { recursive: true });
+    await fs.writeFile(path.join(dir, "antigravity-oauth-token"), "{not json");
+    await assert.rejects(detectLocalAgyTokenRaw(), (error: unknown) => {
+      assert.ok(error instanceof AgyAuthFileError);
+      assert.equal(error.status, 500);
+      assert.equal(error.code, "read_failed");
+      return true;
+    });
+  });
+});
+
+test(
+  "detectLocalAgyTokenRaw accepts a keyring entry only when it carries a refresh token",
+  { skip: process.platform !== "linux" },
+  async () => {
+    const fs = await import("fs/promises");
+    const path = await import("path");
+    await withIsolatedHome(async (home) => {
+      const bin = path.join(home, "bin");
+      await fs.mkdir(bin);
+      const secret = path.join(home, "secret.json");
+      const script = path.join(bin, "secret-tool");
+      await fs.writeFile(script, `#!/bin/sh\nexec cat "${secret}"\n`);
+      await fs.chmod(script, 0o755);
+      const savedPath = process.env.PATH;
+      process.env.PATH = `${bin}${path.delimiter}${savedPath}`;
+      try {
+        await fs.writeFile(
+          secret,
+          JSON.stringify({ token: { access_token: ACCESS, refresh_token: REFRESH } })
+        );
+        const detected = await detectLocalAgyTokenRaw();
+        assert.equal(detected.source, "secret-service");
+        assert.equal(parseAndValidateAgyToken(detected.raw).refreshToken, REFRESH);
+
+        await fs.writeFile(secret, JSON.stringify({ token: { access_token: ACCESS } }));
+        await assert.rejects(detectLocalAgyTokenRaw(), (error: unknown) => {
+          assert.ok(error instanceof AgyAuthFileError);
+          assert.equal(error.code, "no_local_login");
+          return true;
+        });
+      } finally {
+        process.env.PATH = savedPath;
+      }
+    });
+  }
+);
 
 test("detectLocalAgyTokenRaw never turns an IDE state.vscdb apiKey into a refresh token", async () => {
   const fs = await import("fs/promises");
