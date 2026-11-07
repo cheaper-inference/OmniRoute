@@ -1361,7 +1361,7 @@ Usluga koja se održava budnom cijeli mjesec koristi oko 744 instance sata, pa p
 
 ## Scenariji implementacije
 
-Za SRE smjernice za relay backend (ponašanje ts/bifrost/auto, smještaj 9routera u odnosu na CLIProxyAPI i strategiju rezervnog rješenja za veliki protok), pogledajte [Strategija relay backenda](/docs/reference/RELAY_BACKEND_STRATEGY.md).
+Za SRE smjernice za relay backend (ponašanje ts/bifrost/auto, postavljanje 9routera u odnosu na CLIProxyAPI i strategiju rezervnog rješenja za veliki protok), pogledajte [Strategija relay backenda](/docs/reference/RELAY_BACKEND_STRATEGY.md).
 
 ### Minimalni lokalni razvoj
 
@@ -1373,7 +1373,7 @@ PORT=20128
 NODE_ENV=development
 ```
 
-### Docker produkcija
+### Produkcija u Dockeru
 
 ```bash
 JWT_SECRET=<generated>
@@ -1392,7 +1392,7 @@ OMNIROUTE_MEMORY_MB=8192
 CORS_ORIGIN=https://your-frontend.example.com
 ```
 
-### Izolovano od mreže / CI
+### Izolovano okruženje / CI
 
 ```bash
 JWT_SECRET=test-jwt-secret-for-ci
@@ -1403,7 +1403,7 @@ OMNIROUTE_DISABLE_BACKGROUND_SERVICES=true
 APP_LOG_TO_FILE=false
 ```
 
-### VPS s obrnutim proxyjem (nginx + Cloudflare)
+### VPS s reverznim proxyjem (nginx + Cloudflare)
 
 ```bash
 JWT_SECRET=<generated>
@@ -1865,3 +1865,14 @@ Koriste ga `open-sse/services/combo.ts` i `src/lib/quota/quotaScheduler.ts` za p
 | Varijabilna                    | Default | Izvorni fajl                                 | Opis                                                                                                                                                                                                                                       |
 | ------------------------------ | ------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`     | `src/lib/providerModels/modelSyncTimings.ts` | Postavite na `1` za evidentiranje faznog vremena, generiranog zahtjeva ID i faze success/error ishoda tokom sinhronizacije modela. Onemogućeno za sve ostale vrijednosti. Dnevnici izostavljaju unos zahtjeva, računa, kataloga i grešaka. |
+
+## Lokalni OpenCode alat za analizu medija
+
+Koristi ga `scripts/cli/omniroute-media-mcp.mjs`. Postavite ove varijable u okruženju lokalnog procesa alata.
+
+| Varijabla                  | Zadano                                                                             | Opis                                                                                                                  |
+| -------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (ili `~/.config/opencode/opencode.json`) | OpenCode konfiguracija koju čitaju alat za medije i instalacijski program.                                            |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                        | Stavka dobavljača koju alat za medije čita iz OpenCode konfiguracije.                                                 |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                             | Model koji alat za medije šalje. Njegov dobavljač mora podržavati zatražene vrste medija.                             |
+| `OMNIROUTE_MEDIA_API_KEY`  | Konfigurirani API ključ dobavljača ili njegova referenca na okruženje              | Neobavezna zamjena vjerodajnice. Zadržite je u okruženju lokalnog procesa; nikada je nemojte uključiti u repozitorij. |

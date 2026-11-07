@@ -1366,7 +1366,7 @@ Render na-atụgharị ọrụ webụ n'efu ka ihe dị ka nkeji iri na ise gach
 
 ## Ọnọdụ Ntinyeọrụ
 
-Maka ntụziaka SRE backend relay (omume ts/bifrost/auto, ebe a ga-etinye 9router na CLIProxyAPI, na atụmatụ fallback maka nnukwu throughput), lee [Atụmatụ Backend Relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).
+Maka nduzi SRE nke relay backend (omume ts/bifrost/auto, ebe 9router na CLIProxyAPI kwesịrị ịdị, yana atụmatụ fallback maka nnukwu throughput), lee [Atụmatụ Relay Backend](/docs/reference/RELAY_BACKEND_STRATEGY.md).
 
 ### Mmepe Obodo Dị Mfe
 
@@ -1397,7 +1397,7 @@ OMNIROUTE_MEMORY_MB=8192
 CORS_ORIGIN=https://your-frontend.example.com
 ```
 
-### Enweghị Njikọ na Mpụga / CI
+### Air-Gapped / CI
 
 ```bash
 JWT_SECRET=test-jwt-secret-for-ci
@@ -1870,3 +1870,14 @@ Ndị `open-sse/services/combo.ts` na `src/lib/quota/quotaScheduler.ts` na-eji m
 | Na-agbanwe agbanwe             | Ọdabara | Isi mmalite faịlụ                            | Nkọwa                                                                                                                                                                                                         |
 | ------------------------------ | ------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0`     | `src/lib/providerModels/modelSyncTimings.ts` | Tọọ `1` ka ịdebanye oge oge, arịrịọ ID ewepụtara na nsonaazụ success/error nke oge n'oge mmekọrịta ụdị. Agbanyụrụ maka ụkpụrụ ndị ọzọ niile. Ndekọ na-ahapụ arịrịọ, akaụntụ, katalọgụ na ibu akwụ ụgwọ mperi. |
+
+## Ngwa OpenCode nyocha mgbasa ozi nke mpaghara
+
+` scripts/cli/omniroute-media-mcp.mjs` na-eji ya. Tọọ ndị a na gburugburu usoro ngwa mpaghara.
+
+| Mgbanwe                    | Ndabara                                                                                | Nkọwa                                                                                     |
+| -------------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `OMNIROUTE_MEDIA_CONFIG`   | `$XDG_CONFIG_HOME/opencode/opencode.json` (ma ọ bụ `~/.config/opencode/opencode.json`) | Nhazi OpenCode nke ngwa mgbasa ozi na onye nrụnye na-agụ.                                 |
+| `OMNIROUTE_MEDIA_PROVIDER` | `omniroute`                                                                            | Ntinye onye na-enye ọrụ nke ngwa mgbasa ozi na-agụ site na nhazi OpenCode.                |
+| `OMNIROUTE_MEDIA_MODEL`    | `auto`                                                                                 | Model nke ngwa mgbasa ozi na-enyefe. Onye na-enye ọrụ ya ga-akwado ụdị mgbasa ozi achọrọ. |
+| `OMNIROUTE_MEDIA_API_KEY`  | Igodo API onye na-enye ọrụ ahaziri ma ọ bụ ntụaka gburugburu ya                        | Ndochi nzere nhọrọ. Debe ya na gburugburu usoro ngwa mpaghara; etinyela ya na commit.     |
