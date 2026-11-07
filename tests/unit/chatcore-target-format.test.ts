@@ -110,6 +110,95 @@ test("AgentRouter explicit connection protocol overrides the inferred inbound pr
   assert.equal(r.targetFormat, FORMATS.CLAUDE);
 });
 
+for (const resolvedModel of ["gpt-6-astra", "gpt-6.1-sol", "gpt-5.6-sol"]) {
+  test(`#17997 AgentRouter ${resolvedModel} automatic input defaults to Responses`, () => {
+    for (const sourceFormat of [
+      FORMATS.OPENAI,
+      FORMATS.CLAUDE,
+      undefined,
+      FORMATS.OPENAI_RESPONSES,
+    ]) {
+      for (const providerSpecificData of [undefined, null, {}, { targetFormat: "" }]) {
+        const result = resolveChatCoreTargetFormat({
+          provider: "agentrouter",
+          resolvedModel,
+          apiFormat: undefined,
+          sourceFormat,
+          customModelTargetFormat: undefined,
+          providerSpecificData,
+        });
+        assert.equal(result.alias, "agentrouter");
+        assert.equal(result.targetFormat, FORMATS.OPENAI_RESPONSES);
+      }
+    }
+  });
+
+  test(`#17997 AgentRouter ${resolvedModel} explicit formats beat automatic Responses`, () => {
+    for (const targetFormat of [FORMATS.OPENAI, FORMATS.CLAUDE, FORMATS.OPENAI_RESPONSES]) {
+      const result = resolveChatCoreTargetFormat({
+        provider: "agentrouter",
+        resolvedModel,
+        apiFormat: undefined,
+        sourceFormat: FORMATS.OPENAI_RESPONSES,
+        customModelTargetFormat: undefined,
+        providerSpecificData: { targetFormat },
+      });
+      assert.equal(result.targetFormat, targetFormat);
+    }
+  });
+
+  test(`#17997 AgentRouter ${resolvedModel} custom-model format beats automatic Responses`, () => {
+    const result = resolveChatCoreTargetFormat({
+      provider: "agentrouter",
+      resolvedModel,
+      apiFormat: "responses",
+      sourceFormat: FORMATS.OPENAI,
+      customModelTargetFormat: FORMATS.CLAUDE,
+      providerSpecificData: {},
+    });
+    assert.equal(result.targetFormat, FORMATS.CLAUDE);
+  });
+}
+
+test("#17997 automatic Responses does not change unrelated models or providers", () => {
+  for (const { provider, resolvedModel, sourceFormat, targetFormat } of [
+    {
+      provider: "agentrouter",
+      resolvedModel: "claude-opus-4-8",
+      sourceFormat: FORMATS.CLAUDE,
+      targetFormat: FORMATS.CLAUDE,
+    },
+    {
+      provider: "agentrouter",
+      resolvedModel: "unknown-gpt-model",
+      sourceFormat: FORMATS.OPENAI,
+      targetFormat: FORMATS.OPENAI,
+    },
+    {
+      provider: "agentrouter",
+      resolvedModel: "gpt-6-astra-preview",
+      sourceFormat: FORMATS.OPENAI,
+      targetFormat: FORMATS.OPENAI,
+    },
+    {
+      provider: "openai-compatible-chat-example",
+      resolvedModel: "gpt-6-astra",
+      sourceFormat: FORMATS.OPENAI,
+      targetFormat: FORMATS.OPENAI,
+    },
+  ]) {
+    const result = resolveChatCoreTargetFormat({
+      provider,
+      resolvedModel,
+      apiFormat: undefined,
+      sourceFormat,
+      customModelTargetFormat: undefined,
+      providerSpecificData: {},
+    });
+    assert.equal(result.targetFormat, targetFormat);
+  }
+});
+
 test("#8994: customModelTargetFormat takes precedence over apiFormat='responses'", () => {
   // When a Vertex Claude model has customModelTargetFormat="claude" and the
   // handler also receives apiFormat="responses", the model-level override

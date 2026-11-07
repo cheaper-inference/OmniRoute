@@ -10,76 +10,77 @@ _අවසන් වරට යාවත්කාලීන කළේ: 2026-06-28_
 
 ## විධායක සාරාංශය
 
-OmniRoute යනු Next.js මත ගොඩනගා ඇති දේශීය AI මාර්ගගත ද්වාර සහ උපකරණ පුවරුවකි. එය තනි OpenAI-අනුකූල අන්ත ලක්ෂ්‍යයක් (`/v1/*`) සපයන අතර පරිවර්තනය, පසුබැසීම, ටෝකන නැවුම් කිරීම සහ භාවිත ලුහුබැඳීම සමඟින් බහු උඩුගං සැපයුම්කරුවන් හරහා ගමනාගමනය සිදු කරයි.
+OmniRoute යනු Next.js මත ගොඩනගන ලද දේශීය AI routing gateway සහ dashboard එකකි.
+එය තනි OpenAI-compatible endpoint එකක් (`/v1/*`) සපයන අතර, translation, fallback, token refresh සහ usage tracking සමඟ traffic upstream providers කිහිපයක් හරහා යොමු කරයි.
 
-මූලික හැකියාවන්:
+ප්රධාන හැකියාවන්:
 
-- CLI/tools සඳහා OpenAI-අනුකූල API මතුපිට (සපයන්නන් 377, විධායක මොඩියුල 156)
-- සපයන්නන්ගේ ආකෘති හරහාRequest/response පරිවර්තනය
-- Model Combo Falback (බහු මාදිලි අනුපිළිවෙල)
-- `compositeTiers` මඟින් ධාවන කාල අනුපිළිවෙල සමඟ ව්‍යුහගත සංයුක්ත පියවර (`provider + model + connection`).
-- ගිණුම් මට්ටමේ පසුබැසීම (සපයන්නෙකුට බහු ගිණුම්)
-- ප්‍රධාන කතාබස් මාර්ගයේ කෝටා පෙර පියාසර කිරීම සහ කෝටා-දැනුවත් P2C ගිණුම් තේරීම
-- OAuth + API-ප්‍රධාන සැපයුම්කරු සම්බන්ධතා කළමනාකරණය ( OAuth සපයන්නාගේ මොඩියුල 27)
-- `/v1/embeddings` හරහා උත්පාදනය කාවැද්දීම (සපයන්නන් 18)
-- `/v1/images/generations` හරහා රූප උත්පාදනය (10 + සපයන්නන්, 20 + මාදිලි)
-- `/v1/audio/transcriptions` හරහා ශ්‍රව්‍ය පිටපත් කිරීම (සපයන්නන් 18)
-- `/v1/audio/speech` හරහා පෙළ සිට කථනය (24 බිල්ට් සපයන්නන්)
-- `/v1/videos/generations` හරහා වීඩියෝ උත්පාදනය (ComfyUI + SD WebUI)
-- `/v1/music/generations` (ComfyUI) හරහා සංගීත උත්පාදනය
-- `/v1/search` හරහා වෙබ් සෙවීම (සපයන්නන් 20)
-- `/v1/moderations` හරහා නවීකරණය
-- `/v1/rerank` හරහා නැවත ශ්‍රේණිගත කිරීම
-- තර්ක කිරීමේ ආකෘති සඳහා ටැග් විග්‍රහ කිරීම (`<think>...</think>`) සිතන්න
-- දැඩි OpenAI SDK අනුකූලතාව සඳහා ප්‍රතිචාර සනීපාරක්ෂකකරණය
-- හරස් සපයන්නාගේ ගැළපුම සඳහා භූමිකාව සාමාන්‍යකරණය (සංවර්ධක → පද්ධතිය, පද්ධති→ පරිශීලක)
-- ව්‍යුහගත ප්‍රතිදාන පරිවර්තනය (json_schema → Gemini responseSchema)
-- සපයන්නන්, යතුරු, අන්වර්ථ, සංයෝජන, සැකසීම්, මිලකරණය ( DB මොඩියුල 122) සඳහා දේශීය අඛණ්ඩ පැවැත්ම
-- Usage/cost ලුහුබැඳීම සහ ලොග් කිරීම ඉල්ලීම
-- multi-device/state සමමුහුර්ත කිරීම සඳහා විකල්ප වලාකුළු සමමුහුර්තකරණය
-- API ප්රවේශ පාලනය සඳහාIP allowlist/blocklist
-- චින්තන අයවැය කළමනාකරණය (passthrough/auto/custom/adaptive)
-- ගෝලීය පද්ධති ක්ෂණික එන්නත් කිරීම
-- සැසි ලුහුබැඳීම සහ ඇඟිලි සලකුණු
-- සැපයුම්කරු-විශේෂිත පැතිකඩ සමඟ එක් ගිණුමකට වැඩි දියුණු කළ අනුපාතය සීමා කිරීම
-- සැපයුම්කරුගේ ඔරොත්තු දීමේ හැකියාව සඳහා පරිපථ කඩන රටාව
-- මුටෙක්ස් අගුලු දැමීම සමඟින් ගිගුරුම් විරෝධී රංචු ආරක්ෂාව
-- අත්සන මත පදනම් වූ ඉල්ලීම් අඩු කිරීමේ හැඹිලිය
-- වසම් ස්තරය: පිරිවැය රීති, පසුබැසීමේ ප්‍රතිපත්තිය, අගුලු දැමීමේ ප්‍රතිපත්තිය
-- සන්දර්භය රිලේ: ගිණුම් භ්‍රමණ අඛණ්ඩතාව සඳහා සැසි භාර දීමේ සාරාංශ
-- වසම් රාජ්‍ය ස්ථීරභාවය ( වැටීම්, අයවැය, අගුලු දැමීම්, පරිපථ කඩනයන් සඳහාSQLite ලිවීම-හරහා හැඹිලිය)
-- මධ්‍යගත ඉල්ලීම් ඇගයීම සඳහා ප්‍රතිපත්ති එන්ජිම (lockout → අයවැය → පසුබැසීම)
-- p50/p95/p99 ප්‍රමාදය එකතු කිරීම සමඟින් ටෙලිමෙට්‍රි ඉල්ලන්න
-- Combo target telemetry සහ historical combo target health `combo_execution_key` / `combo_step_id` හරහා
-- සහසම්බන්ධය ID (X-Request-Id) අන්තයේ සිට අවසානය දක්වා සොයා ගැනීම සඳහා
-- API යතුරකින් ඉවත් වීම සමග අනුකූලතා විගණන ලොග් වීම
-- LLM තත්ත්ව සහතිකය සඳහා Eval රාමුව
-- තත්‍ය කාලීන සැපයුම්කරු පරිපථ කඩන තත්ත්වය සහිත සෞඛ්‍ය උපකරණ පුවරුව
-- MCP සේවාදායකය (මෙවලම් 110) ප්‍රවාහන 3ක් (stdio/SSE/Streamable HTTP)
-- A2A සේවාදායකය (JSON-RPC 2.0 + SSE) කුසලතා සහ කාර්ය ජීවන චක්‍රය සමඟ
-- මතක පද්ධතිය (නිස්සාරණය, එන්නත් කිරීම, ලබා ගැනීම, සාරාංශ කිරීම)
-- නිපුණතා පද්ධතිය (රෙජිස්ට්‍රි, ක්‍රියාත්මක කරන්නා, වැලිපිල්ල, ගොඩනඟන ලද කුසලතා)
-- සහතික කළමනාකරණය සහ DNS හැසිරවීම සමඟ MITM proxy
-- ඉක්මන් එන්නත් ආරක්ෂක මිඩ්ල්වෙයාර්
-- Caveman, RTK, ස්ටැක් කරන ලද නල මාර්ග, සම්පීඩන සංයෝජන, භාෂා ඇසුරුම් සහ විශ්ලේෂණ සමඟ ඉක්මන් සම්පීඩන නල මාර්ගය
-- ACP (නියෝජිත සන්නිවේදන ප්‍රොටෝකෝලය) රෙජිස්ට්‍රිය
-- මොඩියුලර් OAuth සපයන්නන් ( `src/lib/oauth/providers/` යටතේ තනි මොඩියුල 22)
-- Uninstall/full-uninstall ස්ක්‍රිප්ට්
-- OAuth පරිසරය අලුත්වැඩියා කිරීමේ ක්‍රියාව
-- OpenAI-අනුකූල WS සේවාදායකයන් සඳහාWebSocket පාලම (`/v1/ws`)
-- සමමුහුර්ත ටෝකන් කළමනාකරණය (issue/revoke, ETag-අනුවාද සහිත වින්‍යාස මිටි බාගැනීම)
-- GLM චින්තනය (`glmt`) පළමු පන්තියේ සැපයුම්කරු පෙරසැකසුම
-- දෙමුහුන් ටෝකන් ගණන් කිරීම (ඇස්තමේන්තු පසුබැසීම සමඟ සැපයුම්කරුගේ පැත්තේ `/messages/count_tokens` )
-- මාදිලිය අන්වර්ථය ස්වයං-බීජ කිරීම (ආරම්භයේදී 30 + හරස් ප්‍රොක්සි උපභාෂා සාමාන්‍යකරණය)
-- SSRF ආරක්ෂකය, පුද්ගලික URL අවහිර කිරීම සහ වින්‍යාසගත කළ හැකි නැවත උත්සාහ කිරීම සමඟ ආරක්ෂිත පිටතට ගෙන ඒම
-- වින්‍යාසගත කළ හැකි `requestRetry` සහ `maxRetryIntervalSec` සමඟ Cooldown-aware chat නැවත උත්සාහ කරයි
-- ආරම්භයේදී Zod සමඟ ධාවන කාල පරිසරය වලංගු කිරීම
-- පිටුකරණය, සැපයුම්කරු CRUD සිදුවීම් සහ SSRF-අවහිර කළ වලංගුකරණ ලොග් කිරීම සමඟ අනුකූලතා විගණනය v2
+- CLI/tools සඳහා OpenAI-compatible API surface එක (providers 380ක්, executor modules 159ක්)
+- Provider formats අතර request/response translation
+- Model combo fallback (multi-model sequence)
+- Structured combo steps (`provider + model + connection`) සහ `compositeTiers` මගින් runtime ordering
+- Account-level fallback (provider එකකට accounts කිහිපයක්)
+- ප්රධාන chat path තුළ quota preflight සහ quota-aware P2C account selection
+- OAuth + API-key provider connection management (OAuth provider modules 27ක්)
+- `/v1/embeddings` හරහා embedding generation (providers 18ක්)
+- `/v1/images/generations` හරහා image generation (providers 10+ක්, models 20+ක්)
+- `/v1/audio/transcriptions` හරහා audio transcription (providers 18ක්)
+- `/v1/audio/speech` හරහා text-to-speech (built-in providers 24ක්)
+- `/v1/videos/generations` හරහා video generation (ComfyUI + SD WebUI)
+- `/v1/music/generations` හරහා music generation (ComfyUI)
+- `/v1/search` හරහා web search (providers 20ක්)
+- `/v1/moderations` හරහා moderations
+- `/v1/rerank` හරහා reranking
+- Reasoning models සඳහා think tag parsing (`<think>...</think>`)
+- Strict OpenAI SDK compatibility සඳහා response sanitization
+- Cross-provider compatibility සඳහා role normalization (developer→system, system→user)
+- Structured output conversion (json_schema → Gemini responseSchema)
+- Providers, keys, aliases, combos, settings, pricing සඳහා local persistence (DB modules 122ක්)
+- Usage/cost tracking සහ request logging
+- Multi-device/state sync සඳහා විකල්ප cloud sync
+- API access control සඳහා IP allowlist/blocklist
+- Thinking budget management (passthrough/auto/custom/adaptive)
+- Global system prompt injection
+- Session tracking සහ fingerprinting
+- Provider-specific profiles සමඟ එක් එක් account සඳහා enhanced rate limiting
+- Provider resilience සඳහා circuit breaker pattern
+- Mutex locking සමඟ anti-thundering herd protection
+- Signature-based request deduplication cache
+- Domain layer: cost rules, fallback policy, lockout policy
+- Context Relay: account rotation continuity සඳහා session handoff summaries
+- Domain state persistence (fallbacks, budgets, lockouts, circuit breakers සඳහා SQLite write-through cache)
+- මධ්යගත request evaluation සඳහා policy engine (lockout → budget → fallback)
+- p50/p95/p99 latency aggregation සමඟ request telemetry
+- `combo_execution_key` / `combo_step_id` හරහා combo target telemetry සහ historical combo target health
+- End-to-end tracing සඳහා Correlation ID (X-Request-Id)
+- එක් එක් API key සඳහා opt-out හැකියාව සහිත compliance audit logging
+- LLM quality assurance සඳහා eval framework
+- Real-time provider circuit breaker status සහිත health dashboard
+- MCP Server (tools 110ක්), transports 3ක් සමඟ (stdio/SSE/Streamable HTTP)
+- Skills සහ task lifecycle සහිත A2A Server (JSON-RPC 2.0 + SSE)
+- Memory system (extraction, injection, retrieval, summarization)
+- Skills system (registry, executor, sandbox, built-in skills)
+- Certificate management සහ DNS handling සහිත MITM proxy
+- Prompt injection guard middleware
+- Caveman, RTK, stacked pipelines, compression combos, language packs සහ analytics සහිත prompt compression pipeline
+- ACP (Agent Communication Protocol) registry
+- Modular OAuth providers (`src/lib/oauth/providers/` යටතේ individual modules 22ක්)
+- Uninstall/full-uninstall scripts
+- OAuth environment repair action
+- OpenAI-compatible WS clients සඳහා WebSocket bridge (`/v1/ws`)
+- Sync token management (issue/revoke, ETag-versioned config bundle download)
+- First-class provider preset එකක් ලෙස GLM Thinking (`glmt`)
+- Hybrid token counting (estimation fallback සමඟ provider-side `/messages/count_tokens`)
+- Model alias auto-seeding (startup අවස්ථාවේ cross-proxy dialect normalizations 30+ක්)
+- SSRF guard, private URL blocking සහ configurable retry සහිත safe outbound fetch
+- Configurable `requestRetry` සහ `maxRetryIntervalSec` සමඟ cooldown-aware chat retries
+- Startup අවස්ථාවේ Zod සමඟ runtime environment validation
+- Pagination, provider CRUD events සහ SSRF-blocked validation logging සහිත compliance audit v2
 
-ප්‍රාථමික ධාවන කාල ආකෘතිය:
+ප්රධාන runtime model එක:
 
-- `src/app/api/*` යටතේNext.js යෙදුම් මාර්ග උපකරණ පුවරුව APIs සහ ගැළපුම APIs යන දෙකම ක්‍රියාත්මක කරයි
-- `src/sse/*` + `open-sse/*` හි හවුල් SSE/routing හරයක් සැපයුම්කරු ක්‍රියාත්මක කිරීම, පරිවර්තනය, ප්‍රවාහය, පසුබැසීම සහ භාවිතය හසුරුවයි
+- `src/app/api/*` යටතේ ඇති Next.js app routes මඟින් dashboard APIs සහ compatibility APIs දෙකම ක්රියාත්මක කරයි
+- `src/sse/*` + `open-sse/*` තුළ ඇති shared SSE/routing core එක provider execution, translation, streaming, fallback සහ usage හසුරුවයි
 
 ## යොමු රූප සටහන්
 

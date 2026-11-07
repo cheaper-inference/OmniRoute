@@ -3,7 +3,9 @@
 import { getDbInstance } from "../core";
 import {
   MODEL_COMPAT_PROTOCOL_KEYS,
+  isThinkingReplayMode,
   type ModelCompatProtocolKey,
+  type ThinkingReplayMode,
 } from "@/shared/constants/modelCompat";
 import { isForbiddenUpstreamHeaderName } from "@/shared/constants/upstreamHeaders";
 import { isHiddenForModality } from "@/shared/utils/modelVisibility";
@@ -130,7 +132,7 @@ export type ModelCompatOverride = {
   supportsVision?: boolean;
   /** Thinking-replay contract for this node's upstream — "redacted" | "text" | "none"
    *  (see open-sse/translator/helpers/thinkingReplayMode.ts). */
-  thinkingReplay?: string | null;
+  thinkingReplay?: ThinkingReplayMode;
 };
 
 /** Nested provider → model map of explicit model-compat vision overrides. */
@@ -286,7 +288,7 @@ export type ModelCompatPatch = {
   apiFormat?: string | null;
   targetFormat?: string | null;
   supportsVision?: boolean | null;
-  thinkingReplay?: string | null;
+  thinkingReplay?: ThinkingReplayMode | null;
 };
 
 export function compatByProtocolHasEntries(map: CompatByProtocolMap | undefined): boolean {
@@ -309,10 +311,7 @@ export function mergeModelCompatOverride(
   if ("thinkingReplay" in patch) {
     if (patch.thinkingReplay === null) {
       delete next.thinkingReplay; // unset: revert to default prefix-assumed behavior
-    } else if (
-      typeof patch.thinkingReplay === "string" &&
-      ["redacted", "text", "none"].includes(patch.thinkingReplay)
-    ) {
+    } else if (isThinkingReplayMode(patch.thinkingReplay)) {
       next.thinkingReplay = patch.thinkingReplay;
     }
   }

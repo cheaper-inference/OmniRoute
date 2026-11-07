@@ -10,6 +10,24 @@
  */
 
 import type { ModelLockoutEntry, ModelFailureState } from "../accountFallback.ts";
+import { resolveAntigravityModelId } from "../../config/antigravityModelAliases.ts";
+
+/**
+ * Antigravity serves one model under several ids, so a lock written under one must be seen
+ * under the others. This runs without the account catalog, so it can only apply the static
+ * alias table: `gemini-3.7-flash-{high,medium,low}` share one key even on an account whose
+ * catalog lists them as separate wire models (`cleanModelName` sends those verbatim). An exact
+ * cooldown on one tier then covers its siblings too, the same collapse the account lease makes
+ * in `canonicalizeAntigravityExactModel`.
+ */
+export function canonicalizeExactModel(provider: string, model: string): string {
+  const normalized = model.trim().toLowerCase();
+  if (provider === "antigravity" || provider === "agy" || provider === "ag") {
+    const bareModel = normalized.replace(/^(?:antigravity|ag|agy)\//, "");
+    return resolveAntigravityModelId(bareModel).trim().toLowerCase();
+  }
+  return normalized;
+}
 
 /** Build the "exact" scoped lockout key — a distinct namespace from the quota-family key. */
 export function buildExactModelLockKey(
@@ -17,7 +35,7 @@ export function buildExactModelLockKey(
   connectionId: string,
   model: string
 ): string {
-  return `${canonicalProvider}:${connectionId}:exact:${model.trim().toLowerCase()}`;
+  return `${canonicalProvider}:${connectionId}:exact:${canonicalizeExactModel(canonicalProvider, model)}`;
 }
 
 /** Dedupe the 3 lockout key shapes callers must check: quota-family, #8050 not_found, exact. */
