@@ -369,13 +369,16 @@ export function resolveResilienceSettings(
   if (cached) return cached;
 
   const current = asRecord(record.resilienceSettings);
+  const legacyAntigravitySettings = asRecord(current.antigravity);
   const fallback = buildLegacyFallback(record);
 
   const resolved: ResilienceSettings = {
     antigravityAdaptiveHealth: {
       enabled: typeof asRecord(current.antigravityAdaptiveHealth).enabled === "boolean"
         ? asRecord(current.antigravityAdaptiveHealth).enabled as boolean
-        : fallback.antigravityAdaptiveHealth.enabled,
+        : typeof legacyAntigravitySettings.adaptiveHealthEnabled === "boolean"
+          ? legacyAntigravitySettings.adaptiveHealthEnabled as boolean
+          : fallback.antigravityAdaptiveHealth.enabled,
     },
     requestQueue: normalizeRequestQueueSettings(current.requestQueue, fallback.requestQueue),
     connectionCooldown: {

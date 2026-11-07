@@ -23,6 +23,16 @@ test("adaptive health can be overridden without changing other resilience settin
   );
 });
 
+test("legacy fork Antigravity setting is honored until an explicit new override", () => {
+  const legacy = { resilienceSettings: { antigravity: { adaptiveHealthEnabled: true } } };
+  assert.equal(resolveResilienceSettings(legacy).antigravityAdaptiveHealth.enabled, true);
+  const explicit = { resilienceSettings: {
+    antigravity: { adaptiveHealthEnabled: true },
+    antigravityAdaptiveHealth: { enabled: false },
+  } };
+  assert.equal(resolveResilienceSettings(explicit).antigravityAdaptiveHealth.enabled, false);
+});
+
 test("PATCH accepts only a boolean adaptive health switch", () => {
   assert.equal(updateResilienceSchema.safeParse({
     antigravityAdaptiveHealth: { enabled: true },
