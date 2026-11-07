@@ -144,6 +144,18 @@ export async function executeImageWithCredentialFallback({
   // still need one direct attempt, but there is no account identity to refresh
   // or rotate after a 401.
   if (!credentials) {
+    // A scoped API key cannot fall through to a credential-less dispatch.
+    // Unscoped local/no-auth image providers retain their existing direct attempt.
+    if (Array.isArray(allowedConnections)) {
+      return {
+        credentials,
+        result: {
+          success: false,
+          status: 403,
+          error: "No image-provider connection is allowed for this API key",
+        },
+      };
+    }
     return { credentials, result: await execute(credentials) };
   }
 
