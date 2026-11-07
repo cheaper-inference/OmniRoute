@@ -9,7 +9,6 @@ export const mistralProvider: RegistryEntry = {
   authType: "apikey",
   authHeader: "bearer",
   toolNameMaxLength: 64,
-  unsupportedParams: ["parallel_tool_calls"],
   defaultContextLength: 262144,
   models: [
     {

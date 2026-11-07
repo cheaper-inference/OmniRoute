@@ -350,6 +350,22 @@ function stripEffortValue(b: Record<string, unknown>, c: EffortCarriers): Record
 }
 
 /**
+ * True for Mistral models that take no `reasoning_effort`: the Devstral family, and models
+ * Mistral's own catalog lists without `supportsReasoning`. Reads that catalog directly because
+ * `getProviderModel()` falls through to other providers' entries and fuzzy matches, which would
+ * judge an uncatalogued reasoning model such as `mistral-small-2603` by an unrelated entry.
+ * Uncatalogued ids keep the field, so a new upstream model is not silently downgraded.
+ */
+function mistralRejectsReasoningEffort(model: string): boolean {
+  if (MISTRAL_NO_REASONING_EFFORT_PATTERN.test(model)) return true;
+  const modelId = model.startsWith("mistral/") ? model.slice("mistral/".length) : model;
+  const catalogued = getProviderModels("mistral").find(
+    (entry) => entry.id === modelId || entry.aliases?.includes(modelId)
+  );
+  return catalogued !== undefined && catalogued.supportsReasoning !== true;
+}
+
+/**
  * Normalizes, caps, or strips `reasoning_effort` across carriers (`reasoning_effort`,
  * `reasoningEffort`, `reasoning.effort`, `output_config.effort`) according to the
  * resolved upstream provider and model capabilities.
@@ -412,11 +428,8 @@ export function sanitizeReasoningEffortForProvider(
 
   const githubOptIn =
     provider === "github" && GITHUB_REASONING_EFFORT_OPT_IN_PATTERN.test(modelStr);
-  const mistralModel = provider === "mistral" ? getProviderModel(provider, modelStr) : undefined;
   const rejecting =
-    (provider === "mistral" &&
-      (MISTRAL_NO_REASONING_EFFORT_PATTERN.test(modelStr) ||
-        (mistralModel !== undefined && mistralModel.supportsReasoning !== true))) ||
+    (provider === "mistral" && mistralRejectsReasoningEffort(modelStr)) ||
     (provider === "github" && !githubOptIn && GITHUB_NO_REASONING_EFFORT_PATTERN.test(modelStr));
   if (rejecting) {
     log?.info?.(

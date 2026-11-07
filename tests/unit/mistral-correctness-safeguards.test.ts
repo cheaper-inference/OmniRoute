@@ -1,9 +1,9 @@
 /**
  * Unit test suite validating Mistral correctness safeguards:
- * - toolNameMaxLength of 64 and unsupportedParams on mistralProvider
+ * - toolNameMaxLength of 64 on mistralProvider
  * - DefaultExecutor tool name length truncation and character aliasing
- * - stripUnsupportedParams dropping parallel_tool_calls for Mistral
- * - Dynamic reasoning_effort sanitization based on registry model capabilities
+ * - parallel_tool_calls reaching Mistral, which documents it as a request parameter
+ * - Dynamic reasoning_effort sanitization based on Mistral's own model catalog
  * - Dynamic supportsTools extraction from capabilities.function_calling in modelDiscovery
  * - Dynamic provider listing in handleModeration error responses
  */
@@ -12,16 +12,15 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import { mistralProvider } from "@omniroute/open-sse/config/providers/registry/mistral/index.ts";
+import { getUnsupportedParams } from "@omniroute/open-sse/config/providerRegistry.ts";
 import DefaultExecutor from "@omniroute/open-sse/executors/default.ts";
 import { stripUnsupportedParams } from "@omniroute/open-sse/translator/paramSupport.ts";
 import { sanitizeReasoningEffortForProvider } from "@omniroute/open-sse/executors/base/reasoningEffort.ts";
 import { normalizeDiscoveredModels } from "@/lib/providerModels/modelDiscovery";
 import { handleModeration } from "@omniroute/open-sse/handlers/moderations.ts";
 
-test("mistralProvider declares toolNameMaxLength of 64 and unsupportedParams for parallel_tool_calls", () => {
+test("mistralProvider declares toolNameMaxLength of 64", () => {
   assert.equal(mistralProvider.toolNameMaxLength, 64);
-  assert.ok(Array.isArray(mistralProvider.unsupportedParams));
-  assert.ok(mistralProvider.unsupportedParams?.includes("parallel_tool_calls"));
 });
 
 test("DefaultExecutor applies toolNameMaxLength and character sanitization for Mistral", () => {
@@ -69,23 +68,21 @@ test("DefaultExecutor applies toolNameMaxLength and character sanitization for M
   assert.equal(toolNameMap.get(tools[1].function.name), longName);
 });
 
-test("stripUnsupportedParams strips parallel_tool_calls for mistral, preserves for openai", () => {
-  const mistralBody = {
-    model: "mistral-large-latest",
-    parallel_tool_calls: true,
-    temperature: 0.7,
-  };
-  stripUnsupportedParams("mistral", "mistral-large-latest", mistralBody);
-  assert.equal(mistralBody.parallel_tool_calls, undefined);
-  assert.equal(mistralBody.temperature, 0.7);
+// Mistral documents parallel_tool_calls on chat completions: `false` "forces the model to use
+// single tool calling", so dropping it silently changes what the client asked for.
+test("parallel_tool_calls reaches Mistral on both strip paths", () => {
+  assert.ok(
+    !getUnsupportedParams("mistral", "mistral-large-latest").includes("parallel_tool_calls")
+  );
 
-  const openaiBody = {
-    model: "gpt-4o",
-    parallel_tool_calls: true,
+  const body = {
+    model: "mistral-large-latest",
+    parallel_tool_calls: false,
     temperature: 0.7,
   };
-  stripUnsupportedParams("openai", "gpt-4o", openaiBody);
-  assert.equal(openaiBody.parallel_tool_calls, true);
+  stripUnsupportedParams("mistral", "mistral-large-latest", body);
+  assert.equal(body.parallel_tool_calls, false);
+  assert.equal(body.temperature, 0.7);
 });
 
 test("sanitizeReasoningEffortForProvider dynamically strips reasoning_effort for non-reasoning Mistral models", () => {
@@ -132,6 +129,29 @@ test("sanitizeReasoningEffortForProvider dynamically strips reasoning_effort for
   };
   const sanitizedOpenai = sanitizeReasoningEffortForProvider(openaiBody, "openai", "o3-mini");
   assert.equal(sanitizedOpenai.reasoning_effort, "high");
+});
+
+// getProviderModel() falls through to other providers' entries and to fuzzy matches, so an id
+// outside Mistral's catalog would be judged by a model that is not the one being called.
+test("sanitizeReasoningEffortForProvider keeps reasoning_effort for ids outside Mistral's catalog", () => {
+  for (const model of ["mistral-small-2603", "mistral-medium-latest", "zai-glm-5-3"]) {
+    const sanitized = sanitizeReasoningEffortForProvider(
+      { model, reasoning_effort: "high" },
+      "mistral",
+      model
+    );
+    assert.equal(sanitized.reasoning_effort, "high", model);
+  }
+});
+
+test("sanitizeReasoningEffortForProvider resolves a provider-prefixed Mistral catalog id", () => {
+  const model = "mistral/mistral-large-latest";
+  const sanitized = sanitizeReasoningEffortForProvider(
+    { model, reasoning_effort: "high" },
+    "mistral",
+    model
+  );
+  assert.equal(sanitized.reasoning_effort, undefined);
 });
 
 test("normalizeDiscoveredModels dynamically extracts supportsTools for Mistral from capabilities.function_calling", () => {
