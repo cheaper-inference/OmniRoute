@@ -125,7 +125,7 @@ async function clickDelete() {
     btn.click();
   });
   const answer = [
-    ...document.body.querySelectorAll<HTMLButtonElement>('[role="dialog"] button'),
+    ...document.body.querySelectorAll<HTMLButtonElement>('[role="alertdialog"] button'),
   ].find((b) => b.textContent?.trim() === confirmAnswer);
   if (!answer) throw new Error("confirm dialog not rendered");
   await act(async () => {

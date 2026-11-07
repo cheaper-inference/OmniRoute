@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                            |           v3.8.50           | **v3.8.51** |       `v3.8.53+`       |
+|                                            |           v3.8.50           | **v3.8.51** |       `v3.8.54+`       |
 | ------------------------------------------ | :-------------------------: | :---------: | :--------------------: |
 | 🌐 Πάροχοι                                 |             352             |   **358**   |          380           |
 | 🧠 Μοναδικά ID μοντέλων συνομιλίας         |            1320             |  **1374**   |          1491          |
@@ -589,7 +589,7 @@ Pix copia-e-cola:
 
 </div>
 
-> Πρόσφατα σημαντικά σημεία από **v3.8.20 → v3.8.53**. Πλήρες ιστορικό στο [`CHANGELOG.md`](CHANGELOG.md).
+> Πρόσφατα σημαντικά σημεία από **v3.8.20 → v3.8.54**. Πλήρες ιστορικό στο [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ Δρομολόγηση `quota-weighted`** — η 20ή στρατηγική συνδυασμού παραλείπει εξαντλημένους λογαριασμούς και στη συνέχεια επιλέγει ανάμεσα στους υπόλοιπους ανάλογα με το υπόλοιπο quota ÷ το φορτίο σε εξέλιξη, διατηρώντας τις υπάρχουσες συνομιλίες καρφιτσωμένες. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Λειτουργία χωρίς διεπαφή (Headless mode)** — `omniroute serve --headless` (ή `OMNIROUTE_HEADLESS=1`) εκτελεί μόνο τη μηχανή proxy `/v1/*`, με τον πίνακα ελέγχου και τα υποσυστήματα μόνο για dashboard απενεργοποιημένα. → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1024,7 +1024,7 @@ omniroute
 ```
 
 > 💡 Βλέπεις `npm warn ERESOLVE` ή peer-dep warnings; [Είναι ακίνδυνα](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Χρησιμοποιείς npm 11 ή νεότερο;** Το npm μπορεί να μπλοκάρει τα lifecycle scripts των πακέτων εκτός αν επιτραπούν. Το `postinstall` του OmniRoute (`node scripts/build/postinstall.mjs`) απαιτείται για την προετοιμασία των native runtime αρχείων του. Επίτρεψε τα πακέτα που αναφέρονται στην προειδοποίηση του npm κατά την global εγκατάσταση. Για το σύνολο πακέτων που αναφέρει το OmniRoute 3.8.53:
+> **Χρησιμοποιείς npm 11 ή νεότερο;** Το npm μπορεί να μπλοκάρει τα lifecycle scripts των πακέτων εκτός αν επιτραπούν. Το `postinstall` του OmniRoute (`node scripts/build/postinstall.mjs`) απαιτείται για την προετοιμασία των native runtime αρχείων του. Επίτρεψε τα πακέτα που αναφέρονται στην προειδοποίηση του npm κατά την global εγκατάσταση. Για το σύνολο πακέτων που αναφέρει το OmniRoute 3.8.54:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1304,7 +1304,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 επίσης τη
   <tr><td nowrap><b>Περιβάλλον εκτέλεσης</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Γλώσσα</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> σε <code>src/</code> και <code>open-sse/</code> (μηδέν <code>any</code> στον πυρήνα από την έκδοση v2.0)</td></tr>
   <tr><td nowrap><b>Πλαίσιο</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Βάση δεδομένων</b></td><td>better-sqlite3 (SQLite, καταγραφή WAL) + LowDB (JSON παλαιού τύπου) — 147 λειτουργικές μονάδες, 222 μεταναστεύσεις</td></tr>
+  <tr><td nowrap><b>Βάση δεδομένων</b></td><td>better-sqlite3 (SQLite, καταγραφή WAL) + LowDB (JSON παλαιού τύπου) — 147 λειτουργικές μονάδες, 223 μεταναστεύσεις</td></tr>
   <tr><td nowrap><b>Μνήμη</b></td><td>Πλήρες κείμενο SQLite FTS5 + διανυσματικές ενσωματώσεις κβαντισμένες σε int8, τυποποιημένη φθορά</td></tr>
   <tr><td nowrap><b>Σχήματα</b></td><td>Zod 4 — επικύρωση I/O εργαλείων MCP + συμβάσεις API</td></tr>
   <tr><td nowrap><b>Πρωτόκολλα</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1817,7 +1817,7 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 **[⬆ Επιστροφή στην κορυφή](#-omniroute)** · Δημιουργήθηκε με ❤️ για την κοινότητα AI ανοιχτού κώδικα.
 
-<sub>Δημιουργήθηκε από τον <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Άδεια MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Δημιουργήθηκε από τον <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · Άδεια MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Ενεργοποιήθηκαν οι συζητήσεις του GitHub για ερωτήσεις και απαντήσεις της κοινότητας -->
