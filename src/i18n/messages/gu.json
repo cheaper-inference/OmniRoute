@@ -6967,6 +6967,15 @@
     "codexPoolUsed": "વપરાયેલ",
     "codexPoolUntil": "{value} સુધી",
     "quotaNoData": "હજુ સુધી વપરાશનો ડેટા નથી",
+    "quotaRefreshCurrent": "વર્તમાન ક્વોટા તાજો કરો",
+    "quotaRefreshCurrentHint": "રીસેટ ક્રેડિટ ખર્ચ્યા વિના આ ખાતાનો વર્તમાન ક્વોટા તપાસે છે.",
+    "quotaRefreshing": "ક્વોટા તપાસી રહ્યું છે…",
+    "quotaRefreshFresh": "ક્વોટા તપાસાઈ ગયો. ખાતું ઉપલબ્ધ છે કે નહીં તે સર્વર નક્કી કરે છે.",
+    "quotaRefreshFailed": "ક્વોટાની તપાસ નિષ્ફળ ગઈ. અગાઉનો ડેટા બદલાયો નથી.",
+    "quotaRefreshStale": "સર્વરે ક્વોટાનો જૂનો ડેટા પરત કર્યો. આ નવી તપાસનું પરિણામ નથી.",
+    "quotaRefreshPartial": "ક્વોટાના ડેટાનો માત્ર એક ભાગ ઉપલબ્ધ છે.",
+    "quotaWindowUnavailable": "{window}નો ક્વોટા ઉપલબ્ધ નથી",
+    "quotaConnectionRefreshFailed": "ક્વોટાની તપાસ પૂરી થઈ, પરંતુ ખાતાઓની યાદી તાજી કરી શકાઈ નહીં.",
     "quotaRefresh": "વપરાશ રિફ્રેશ કરો",
     "quotaCredits": "{count} ક્રેડિટ",
     "quotaUnlimited": "અમર્યાદિત",
@@ -9258,7 +9267,12 @@
       "statsTitle": "પુનઃપ્રારંભ પછીની શોધો",
       "statsEmpty": "હજી કોઈ શોધ નથી.",
       "statsRequest": "વિનંતીઓ"
-    }
+    },
+    "modalityBridgeVideoDrilldownEnabled": "વિડિયોમાંથી મેળવેલી ફ્રેમ્સ જાળવી રાખો",
+    "modalityBridgeVideoDrilldownEnabledDesc": "પ્રમાણિત વિનંતીમાં drilldown: true પણ સેટ કરેલું હોય ત્યારે જ કામચલાઉ JPEG જાળવણીની મંજૂરી આપો. મૂળ વિડિયો ક્યારેય જાળવવામાં આવતા નથી.",
+    "modalityBridgeVideoDrilldownRemoteEnabled": "પ્રમાણિત ફ્રેમ ડ્રિલ-ડાઉનની મંજૂરી આપો",
+    "modalityBridgeVideoDrilldownRemoteEnabledDesc": "API કીઓને ફક્ત તેમના પોતાના અપારદર્શક હેન્ડલ્સ વાંચવા અને કાઢી નાખવાની મંજૂરી આપો. અનામી અથવા અન્ય કી દ્વારા ઍક્સેસની મંજૂરી નથી.",
+    "modalityBridgeVideoDrilldownUsage": "જાળવેલા JPEG / બાઇટ્સ"
   },
   "contextRtk": {
     "title": "RTK એન્જિન",
@@ -15196,6 +15210,63 @@
       "save": "નિયમો સાચવો",
       "saved": "કૂલડાઉન નિયમો સાચવ્યા",
       "saveFailed": "કૂલડાઉન નિયમો સાચવી શકાયા નથી"
+    },
+    "errorRules": {
+      "title": "ભૂલ કૂલડાઉનના નિયમો",
+      "subtitle": "પ્રદાતાની ભૂલોને HTTP સ્થિતિ, ભૂલના લખાણ અથવા બંનેથી ઓળખો, અને શું અને કેટલો સમય થોભાવવું તે પસંદ કરો. આ નિયમો બિલ્ટ-ઇન નિયમો પહેલાં ચાલે છે.",
+      "rulesHeading": "નિયમો",
+      "rulesEmpty": "હજી કોઈ નિયમ નથી.",
+      "addRule": "નિયમ ઉમેરો",
+      "provider": "પ્રદાતા",
+      "providerPlaceholder": "દા.ત. openai",
+      "status": "HTTP સ્થિતિ",
+      "statusPlaceholder": "કોઈપણ",
+      "match": "ભૂલના લખાણમાં સમાવે છે",
+      "matchPlaceholder": "કોઈપણ લખાણ",
+      "matchHint": "પ્રથમ મેળ ખાતો નિયમ લાગુ થાય છે. ભૂલનું લખાણ સાદું લખાણ છે, નાના-મોટા અક્ષરનો ભેદ રાખતું નથી, તે રેગ્યુલર એક્સપ્રેશન નથી. ખાલી ફીલ્ડ બધા સાથે મેળ ખાય છે.",
+      "scope": "થોભાવો",
+      "scopes": {
+        "connection": "આ કનેક્શન",
+        "model": "ફક્ત આ મૉડલ",
+        "provider": "સંપૂર્ણ પ્રદાતા"
+      },
+      "reason": "કારણ",
+      "reasonAuto": "સ્વચાલિત",
+      "reasons": {
+        "quota_exhausted": "ક્વોટા સમાપ્ત",
+        "rate_limit_exceeded": "દર મર્યાદા ઓળંગાઈ",
+        "auth_error": "પ્રમાણીકરણ ભૂલ",
+        "model_capacity": "મૉડલની ક્ષમતા પૂર્ણ",
+        "server_error": "સર્વર ભૂલ",
+        "unknown": "અન્ય"
+      },
+      "duration": "સમયગાળો",
+      "durations": {
+        "auto": "ડિફૉલ્ટ",
+        "30m": "30 મિનિટ",
+        "1h": "1 કલાક",
+        "5h": "5 કલાક",
+        "24h": "24 કલાક",
+        "custom": "કસ્ટમ"
+      },
+      "customMinutes": "મિનિટ (1 થી 43200)",
+      "remove": "દૂર કરો",
+      "defaultsHeading": "મેળ ન ખાતી નિષ્ફળતાઓ માટે ડિફૉલ્ટ",
+      "defaultsHint": "વૈકલ્પિક, દરેક પ્રદાતા માટે. ફક્ત ત્યારે જ લાગુ થાય છે જ્યારે કોઈ નિયમ 402, 403, 408, 429 અથવા 5xx ભૂલ સાથે મેળ ન ખાય. 400 જેવી વિનંતી ભૂલો ક્યારેય પ્રભાવિત થતી નથી.",
+      "defaultsEmpty": "કોઈ ડિફૉલ્ટ સેટ નથી. મેળ ન ખાતી ભૂલો બિલ્ટ-ઇન વર્તન જાળવે છે.",
+      "addDefault": "ડિફૉલ્ટ ઉમેરો",
+      "errors": {
+        "provider": "પ્રદાતા દાખલ કરો.",
+        "condition": "HTTP સ્થિતિ, ભૂલનું લખાણ અથવા બંને સેટ કરો.",
+        "status": "100 થી 599 વચ્ચેની સ્થિતિ વાપરો.",
+        "duration": "1 થી 43200 મિનિટ દાખલ કરો.",
+        "duplicateDefault": "આ પ્રદાતાનો ડિફૉલ્ટ પહેલેથી છે.",
+        "tooMany": "વધુમાં વધુ 50 નિયમો."
+      },
+      "save": "ભૂલના નિયમો સાચવો",
+      "saved": "ભૂલના નિયમો સાચવ્યા",
+      "saveFailed": "ભૂલના નિયમો સાચવી શકાયા નહીં",
+      "loadFailed": "ભૂલના નિયમો લોડ કરી શકાયા નહીં"
     },
     "list": {
       "title": "રાઉટિંગની બહારના કનેક્શન્સ",
