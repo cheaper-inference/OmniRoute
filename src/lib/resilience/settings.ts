@@ -84,6 +84,9 @@ export const DEFAULT_REQUEST_QUEUE_MAX_DEPTH = (() => {
 })();
 
 export const DEFAULT_RESILIENCE_SETTINGS: ResilienceSettings = {
+  antigravityAdaptiveHealth: {
+    enabled: process.env.OMNIROUTE_ANTIGRAVITY_ADAPTIVE_HEALTH_ENABLED === "true",
+  },
   requestQueue: {
     autoEnableApiKeyProviders: true,
     requestsPerMinute: DEFAULT_API_LIMITS.requestsPerMinute,
@@ -330,6 +333,7 @@ function buildLegacyFallback(settings: JsonRecord): ResilienceSettings {
     streamRecovery: streamRecoveryDefaults,
     providerQuotaOverrides: DEFAULT_RESILIENCE_SETTINGS.providerQuotaOverrides,
     credentialHealthCheck: DEFAULT_RESILIENCE_SETTINGS.credentialHealthCheck,
+    antigravityAdaptiveHealth: DEFAULT_RESILIENCE_SETTINGS.antigravityAdaptiveHealth,
   };
 }
 
@@ -368,6 +372,11 @@ export function resolveResilienceSettings(
   const fallback = buildLegacyFallback(record);
 
   const resolved: ResilienceSettings = {
+    antigravityAdaptiveHealth: {
+      enabled: typeof asRecord(current.antigravityAdaptiveHealth).enabled === "boolean"
+        ? asRecord(current.antigravityAdaptiveHealth).enabled as boolean
+        : fallback.antigravityAdaptiveHealth.enabled,
+    },
     requestQueue: normalizeRequestQueueSettings(current.requestQueue, fallback.requestQueue),
     connectionCooldown: {
       oauth: normalizeConnectionCooldownProfile(
@@ -441,6 +450,11 @@ export function mergeResilienceSettings(
   updates: ResilienceSettingsPatch
 ): ResilienceSettings {
   return {
+    antigravityAdaptiveHealth: {
+      enabled: typeof updates.antigravityAdaptiveHealth?.enabled === "boolean"
+        ? updates.antigravityAdaptiveHealth.enabled
+        : current.antigravityAdaptiveHealth.enabled,
+    },
     requestQueue: normalizeRequestQueueSettings(updates.requestQueue, current.requestQueue),
     connectionCooldown: {
       oauth: normalizeConnectionCooldownProfile(

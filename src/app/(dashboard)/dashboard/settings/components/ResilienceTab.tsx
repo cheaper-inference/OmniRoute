@@ -11,6 +11,9 @@ import ModelLockoutCard from "./ModelLockoutCard";
 import TokenRefreshBreakerCard, { type TokenRefreshBreakerValue } from "./TokenRefreshBreakerCard";
 import { NumberField, BooleanField } from "./ResilienceFields";
 import { throwIfResilienceSaveFailed } from "./resilienceSaveError";
+import AntigravityAdaptiveHealthCard, {
+  type AntigravityAdaptiveHealthValue,
+} from "./AntigravityAdaptiveHealthCard";
 
 type RequestQueueSettings = {
   autoEnableApiKeyProviders: boolean;
@@ -65,6 +68,7 @@ export type ProviderCooldownSettings = {
 };
 
 type ResilienceResponse = {
+  antigravityAdaptiveHealth?: AntigravityAdaptiveHealthValue;
   requestQueue: RequestQueueSettings;
   connectionCooldown: {
     oauth: ConnectionCooldownProfileSettings;
@@ -84,6 +88,7 @@ type ResilienceResponse = {
 
 function toResilienceResponse(json: ResilienceResponse): ResilienceResponse {
   return {
+    antigravityAdaptiveHealth: json.antigravityAdaptiveHealth,
     requestQueue: json.requestQueue,
     connectionCooldown: json.connectionCooldown,
     providerBreaker: json.providerBreaker,
@@ -1214,6 +1219,15 @@ export default function ResilienceTab() {
   return (
     <div className="space-y-6">
       <AutoDisableCard />
+      {data.antigravityAdaptiveHealth && (
+        <AntigravityAdaptiveHealthCard
+          value={data.antigravityAdaptiveHealth}
+          saving={savingSection === "antigravityAdaptiveHealth"}
+          onSave={(antigravityAdaptiveHealth) =>
+            savePatch("antigravityAdaptiveHealth", { antigravityAdaptiveHealth })
+          }
+        />
+      )}
 
       <RequestQueueCard
         value={data.requestQueue}

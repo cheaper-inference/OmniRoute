@@ -1743,7 +1743,13 @@ export async function getProviderCredentials(
     // Account/model health is an advisory filter applied after the existing
     // key scopes, entitlement, quota and lease rules have determined eligibility.
     // It never introduces a connection that failed an earlier policy gate.
-    const healthEnabled = Boolean(requestedModel && isAntigravityAdaptiveHealthEnabled(provider));
+    const healthEnabled = Boolean(
+      requestedModel &&
+      isAntigravityAdaptiveHealthEnabled(
+        provider,
+        resolveResilienceSettings(settings).antigravityAdaptiveHealth.enabled
+      )
+    );
     const healthModelFor = (candidate: ProviderConnectionView): string =>
       resolveBareModelToConnectionDefault(
         options.originalRequestedModelStr,

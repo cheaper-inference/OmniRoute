@@ -89,6 +89,7 @@ import {
 } from "@/lib/db/sessionAccountAffinity";
 import { dispatchChatWithAffinityEviction } from "./chatDispatch";
 import { antigravityHealth, isAntigravityAdaptiveHealthEnabled } from "@omniroute/open-sse/services/antigravityHealth.ts";
+import { resolveResilienceSettings } from "@/lib/resilience/settings";
 import {
   bindAntigravityHealthAttempt,
   holdAntigravityHealthThroughResponse,
@@ -1721,9 +1722,11 @@ async function handleSingleModelChat(
   });
 
   const userAgent = request?.headers?.get("user-agent") || "";
-  const baseRetrySettings = resolveCooldownAwareRetrySettings(
-    runtimeOptions.cachedSettings ?? (await getCachedSettings().catch(() => ({})))
-  );
+  const cachedRuntimeSettings =
+    runtimeOptions.cachedSettings ?? (await getCachedSettings().catch(() => ({})));
+  const baseRetrySettings = resolveCooldownAwareRetrySettings(cachedRuntimeSettings);
+  const antigravityAdaptiveHealthEnabled =
+    resolveResilienceSettings(cachedRuntimeSettings).antigravityAdaptiveHealth.enabled;
   const retrySettings = disableCooldownAwareRetry(
     baseRetrySettings,
     provider === "claude-web" ||
@@ -2148,7 +2151,9 @@ async function handleSingleModelChat(
         reselectPoolMember?: () => Promise<unknown>;
       } = { proxy: null };
       const proxyStartTime = Date.now();
-      const healthTicket = isAntigravityAdaptiveHealthEnabled(provider) && credentials.connectionId
+      const healthTicket = isAntigravityAdaptiveHealthEnabled(
+        provider, antigravityAdaptiveHealthEnabled
+      ) && credentials.connectionId
         ? antigravityHealth.begin(
             credentials.connectionId,
             effectiveModel,

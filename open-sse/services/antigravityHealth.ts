@@ -196,8 +196,12 @@ export class AntigravityHealthTracker {
 }
 
 /** Opt-in until adaptive account/model quarantine has been validated on a production canary. */
-export function isAntigravityAdaptiveHealthEnabled(provider: string): boolean {
-  return (provider === "antigravity" || provider === "agy") &&
+export function isAntigravityAdaptiveHealthEnabled(
+  provider: string,
+  configuredEnabled?: boolean
+): boolean {
+  if (provider !== "antigravity" && provider !== "agy") return false;
+  return configuredEnabled ??
     process.env.OMNIROUTE_ANTIGRAVITY_ADAPTIVE_HEALTH_ENABLED === "true";
 }
 
