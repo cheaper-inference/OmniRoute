@@ -5,8 +5,6 @@ import os from "node:os";
 import path from "node:path";
 import { z } from "zod";
 import { classifyField } from "../../src/lib/sseTextTransform.ts";
-import { createCredentialSseTransform } from "../../src/lib/streamingCredentialTransform.ts";
-import { createPiiSseTransform } from "../../src/lib/streamingPiiTransform.ts";
 
 const originalEnv = {
   DATA_DIR: process.env.DATA_DIR,
@@ -17,6 +15,12 @@ const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-test-issue-19185
 process.env.DATA_DIR = tmpDir;
 process.env.PII_RESPONSE_SANITIZATION = "true";
 process.env.PII_RESPONSE_SANITIZATION_MODE = "redact";
+
+// Static imports are hoisted and src/lib/db/core.ts reads DATA_DIR at load, so the transforms
+// load only now: an ambient DB override could otherwise switch redaction off under this test.
+const { createCredentialSseTransform } =
+  await import("../../src/lib/streamingCredentialTransform.ts");
+const { createPiiSseTransform } = await import("../../src/lib/streamingPiiTransform.ts");
 
 const opaque = "orsr1_" + "X".repeat(400);
 const encryptedDetail = {
@@ -117,6 +121,53 @@ for (const mode of ["credential", "pii-redact", "both"]) {
     }
   }
 }
+
+test("#19185: PII redaction stays active beside encrypted metadata", async () => {
+  const events = await runStream(
+    [createPiiSseTransform()],
+    [
+      `data: ${JSON.stringify({
+        choices: [{ index: 0, delta: { reasoning_details: [encryptedDetail] } }],
+      })}\n\n`,
+      'data: {"choices":[{"index":0,"delta":{"content":"Mail alice@example.com now."}}]}\n\n',
+      'data: {"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}\n\n',
+      "data: [DONE]\n\n",
+    ]
+  );
+  const deltas = events.flatMap((event) => event.choices.map((choice) => choice.delta));
+  assert.equal(deltas.map((delta) => delta.content ?? "").join(""), "Mail [EMAIL_REDACTED] now.");
+  assert.deepEqual(
+    deltas.flatMap((delta) => delta.reasoning_details ?? []),
+    [encryptedDetail]
+  );
+});
+
+test("#19185: a secret split around encrypted metadata is still masked", async () => {
+  const secret = `sk-${"A".repeat(48)}`;
+  const contentChunk = (content: string) =>
+    `data: ${JSON.stringify({ choices: [{ index: 0, delta: { content } }] })}\n\n`;
+  const events = await runStream(
+    [createCredentialSseTransform()],
+    [
+      contentChunk(`key ${secret.slice(0, 20)}`),
+      `data: ${JSON.stringify({
+        choices: [{ index: 0, delta: { reasoning_details: [encryptedDetail] } }],
+      })}\n\n`,
+      contentChunk(`${secret.slice(20)} end`),
+      'data: {"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}\n\n',
+      "data: [DONE]\n\n",
+    ]
+  );
+  const deltas = events.flatMap((event) => event.choices.map((choice) => choice.delta));
+  const content = deltas.map((delta) => delta.content ?? "").join("");
+  assert.ok(!content.includes(secret.slice(0, 20)), "secret head must not reach the client");
+  assert.ok(!content.includes(secret.slice(20)), "secret tail must not reach the client");
+  assert.match(content, /^key .+ end$/);
+  assert.deepEqual(
+    deltas.flatMap((delta) => delta.reasoning_details ?? []),
+    [encryptedDetail]
+  );
+});
 
 test.after(async () => {
   const { resetDbInstance } = await import("../../src/lib/db/core.ts");
